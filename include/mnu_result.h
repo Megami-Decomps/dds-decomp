@@ -60,15 +60,11 @@ typedef struct BrsFadeAnimation {
     u32 opacity;
     u8 pad20[8];
 #else
+    u8 pad00[0x10];
     s8 backgroundState;
-    u8 pad01[7];
+    u8 pad11[7];
     u32 backgroundOpacity;
-    u8 pad0C[8];
-    s8 state;
-    u8 pad15[7];
-    u32 opacity;
-    s32 x;
-    s32 y;
+    u8 pad1C[0xC];
 #endif
 } BrsFadeAnimation;
 
@@ -195,9 +191,9 @@ typedef struct BrsSkillPackageWork {
     u32 opacity;
     s8 resultPhase; /* 0xAEB8: 1 -> 2 once the result counters finish (func_0029DB58) */
     s8 unkAEB9;     /* 0xAEB9: set when the confirm input lands at full opacity */
-    u8 padAEBA[0x66];
+    u8 padAEBA[0x56];
     BrsFadeAnimation fadeAnimation[5];
-    u8 padAFE8[0x78];
+    u8 padAFD8[0x88];
     BrsProgressAnimation levelAnimation[5];
     u8 padB268[0x138];
     BrsProgressAnimation profileAnimation[5];
@@ -241,17 +237,11 @@ typedef char BrsSkillPackageWork_staffSlots_offset_check[
     ((u32)&((BrsSkillPackageWork *)0)->staffSlots == 0x51C) ? 1 : -1];
 typedef char BrsProgressAnimation_size_must_be_0x68[(sizeof(BrsProgressAnimation) == 0x68) ? 1 : -1];
 typedef char BrsSkillPackageWork_fadeAnimation_offset_check[
-    ((u32)&((BrsSkillPackageWork *)0)->fadeAnimation == 0xAF20) ? 1 : -1];
+    ((u32)&((BrsSkillPackageWork *)0)->fadeAnimation == 0xAF10) ? 1 : -1];
 typedef char BrsFadeAnimation_backgroundOpacity_offset_check[
-    ((u32)&((BrsFadeAnimation *)0)->backgroundOpacity == 0x08) ? 1 : -1];
-typedef char BrsFadeAnimation_state_offset_check[
-    ((u32)&((BrsFadeAnimation *)0)->state == 0x14) ? 1 : -1];
-typedef char BrsFadeAnimation_opacity_offset_check[
-    ((u32)&((BrsFadeAnimation *)0)->opacity == 0x1C) ? 1 : -1];
-typedef char BrsFadeAnimation_x_offset_check[
-    ((u32)&((BrsFadeAnimation *)0)->x == 0x20) ? 1 : -1];
-typedef char BrsFadeAnimation_y_offset_check[
-    ((u32)&((BrsFadeAnimation *)0)->y == 0x24) ? 1 : -1];
+    ((u32)&((BrsFadeAnimation *)0)->backgroundOpacity == 0x18) ? 1 : -1];
+typedef char BrsFadeAnimation_backgroundState_offset_check[
+    ((u32)&((BrsFadeAnimation *)0)->backgroundState == 0x10) ? 1 : -1];
 typedef char BrsSkillPackageWork_levelAnimation_offset_check[
     ((u32)&((BrsSkillPackageWork *)0)->levelAnimation == 0xB060) ? 1 : -1];
 typedef char BrsProgressAnimation_drawPhase_offset_check[

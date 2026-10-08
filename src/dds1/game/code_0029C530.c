@@ -2,6 +2,7 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "sdf_dev_state.h"
 #include "bill_object_api.h"
 #include "sdf_chip.h"
 #include "eff_ref_obj.h"
@@ -9173,7 +9174,7 @@ u32 fileLoadEffectSlotHelp(void) {
     FileJob *entry;
     EffFileResourceRecord *resource;
     u8 *buffer;
-    u32 command;
+    DevState *command;
     u32 totalLength;
     u32 dataLength;
     u32 allocation;

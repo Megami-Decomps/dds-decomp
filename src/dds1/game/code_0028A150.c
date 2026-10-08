@@ -1,10 +1,13 @@
 #include "common.h"
+#include "mc_poll.h"
+#include "mc_path_api.h"
 #include "bill_object_api.h"
 #include "eff_resource_slots.h"
 #include "sdf_resource.h"
 #include "sdf_chip.h"
 #include "eff_curve.h"
 #include "file.h"
+#include "sdf_dev_state.h"
 #include "file_slot.h"
 #include "dat_state.h"
 #include "pcp_vu0.h"
@@ -81,7 +84,7 @@ extern void effMiscQuatMultiplyVU(void);
 
 
 
-extern void *fileStartMemoryCardDetection(void);
+extern s32 fileStartMemoryCardDetection(void);
 extern s32 mnuSelectFileBranch(void);
 
 
@@ -110,11 +113,11 @@ extern FileSlotPreview D_003DC800[];
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_003BC880;
 
-extern void *fileReadSlotPreviewBegin(void);
-extern void *fileAdvanceSlotScan(void);
+extern s32 fileReadSlotPreviewBegin(void);
+extern s32 fileAdvanceSlotScan(void);
 extern void fileReqSetSelectedSlot(u32 ctx, s32 arg);
 
-extern void *(*fileMenuStateHandler)(s32);
+extern s32 (*fileMenuStateHandler)();
 extern s32 D_003BC814;
 extern s32 fileIsRequestReadyInCurrentMode(u32, void *);
 extern u32 fileGetResourceHandle(u32);
@@ -138,12 +141,7 @@ extern void *fileDuplicateJob(void *);
 struct SdfMemBlock;
 
 
-typedef struct DevState DevState;
-extern DevState *sdfDevCreateCommandState(s32);
 
-extern u32 sdfDevQueueControlAndWait(DevState *);
-extern void sdfDevQueueReadAndWait(DevState *, void *, s32);
-extern void sdfDevWaitThenReleaseCommandState(DevState *);
 
 extern u32 effModelUpdateControlFlags;
 
@@ -165,9 +163,9 @@ extern void *fileWaitContinuation;
 
 extern s32 fileWaitTicksRemaining;
 
-extern void *fileUpdateWait(void);
+extern s32 fileUpdateWait(void);
 
-extern void *fileSlotStatusPoll(void);
+extern s32 fileSlotStatusPoll(void);
 
 extern FileRecordType D_0037E550[];
 
@@ -193,42 +191,36 @@ extern u32 *D_003BD934;
 
 extern u32 D_003BC824;
 
-extern void *fileBeginRequest(const char *, u32 *, u32 *, void *, u32 *);
+extern s32 fileBeginRequest(const char *, u32 *, u32 *, void *, u32 *);
 
-extern void mcOpenFilePath(u32, const char *, s32);
+extern s32 fileWriteWaitOpen(void);
 
-extern void mcDeleteFilePath(u32 port, u32 pathAddress);
+extern s32 mcHandleLoadResult(void);
 
-extern void *fileWriteWaitOpen(void);
+extern s32 fileBeginLabeledSlotWrite(void);
 
-extern void *mcHandleLoadResult(void);
-
-extern void *fileBeginLabeledSlotWrite(void);
-
-extern void *fileBuildMainBlobAfterDelete(void);
+extern s32 fileBuildMainBlobAfterDelete(void);
 
 extern s32 fileSaveFileDescriptor;
 
 extern u32 fileSaveReadBufferResource;
 
-extern s32 mcPollCompletionStatus(void);
 
 extern void mcCloseOpenFile(s32);
 
-extern void *fileStoreSlotHeader(void);
-
-extern s32 mcPollWithExtendedErrors(void);
-
-extern void *fileCreateMainBegin(void);
+extern s32 fileStoreSlotHeader(void);
 
 
-extern void *fileBeginSlotResetPrompt(void);
+extern s32 fileCreateMainBegin(void);
 
-extern void *mcPrepareDirectory(void);
 
-extern void *fileSlotSelectPollClear(void);
+extern s32 fileBeginSlotResetPrompt(void);
 
-extern void *fileBeginDirectoryScan(void);
+extern s32 mcPrepareDirectory(void);
+
+extern s32 fileSlotSelectPollClear(void);
+
+extern s32 fileBeginDirectoryScan(void);
 
 typedef struct LoadMirror {
     u32 current;
@@ -334,7 +326,7 @@ extern void dds3DispatchIndexedCallback(void *callback);
 
 extern void func_002966D8(s32 object);
 
-extern void *fileResetSelection(void);
+extern s32 fileResetSelection(void);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 
 extern s32 D_003BC818;
@@ -342,13 +334,13 @@ extern s32 D_003BC820;
 extern void fileSetMenuValueAndInitializeFlags(u32 value);
 extern void fileLoadSetMode(s8 mode);
 
-extern void *fileBeginSlotReset(void);
+extern s32 fileBeginSlotReset(void);
 
 extern s32 fileSlotSelectPoll(void);
 
-extern void fileOnAllWritten(void);
+extern s32 fileOnAllWritten(void);
 
-extern void mcdFinishFileDetection(void);
+extern s32 mcdFinishFileDetection(void);
 
 extern s32 fileSlotSelectionPollCount;
 
@@ -360,7 +352,7 @@ extern void fileReqBegin(s32 request);
 
 extern s32 func_0028B508(void);
 
-extern void *fileRestartSlotSelection(void);
+extern s32 fileRestartSlotSelection(void);
 
 extern s32 fileBeginSlotPromptFive(void);
 
@@ -374,11 +366,11 @@ extern void fileReqClearSlotFlags(s32, s32);
 
 extern void fileReqMarkSlotMetadataDirty(s32);
 
-extern void *fileBeginDetectionRequest(u32 callback);
+extern s32 fileBeginDetectionRequest(u32 callback);
 
-extern void *fileScanSlotStates(void);
+extern s32 fileScanSlotStates(void);
 
-extern void *filePollSlotRequestAndResumeFlow(void);
+extern s32 filePollSlotRequestAndResumeFlow(void);
 
 extern s32 fileReqGetSize(s32 request);
 
@@ -388,7 +380,7 @@ extern void func_001005B8(void);
 
 extern void func_00289D50(u32 handle);
 
-extern void *mcHandleDetectionResult(void);
+extern s32 mcHandleDetectionResult(void);
 
 extern void fileQueueInitTransform(void *queue);
 
@@ -413,35 +405,29 @@ extern s32 fileSlotScanIndex;
 
 extern char D_003B2658[];
 
-extern void *fileBeginWait(void *callback);
+extern s32 fileBeginWait(void *callback);
 
 extern void mcFormatSaveFilename(void *dst, s32 number);
 
-extern void mcChangeCurrentDirectory(u32 request, void *data);
+extern s32 fileScanSlotIconSysBegin(void);
 
-extern void *fileScanSlotIconSysBegin(void);
-
-extern s32 mcPollSyncResult(void);
-
-extern void mcReadDirectoryEntries(u32 request, const char *path, void *data, s32 option);
 
 extern char D_003B2678[];
 
 extern u8 D_003DC780[];
 
-extern void *mcHandleSlotWriteResult(void);
+extern s32 mcHandleSlotWriteResult(void);
 
-extern void *fileBeginSlotMetadataRefresh(void);
+extern s32 fileBeginSlotMetadataRefresh(void);
 
-extern void *fileBeginSlotOpen(void);
+extern s32 fileBeginSlotOpen(void);
 
-extern s32 mcPollNonnegativeResult(void *request);
 
-extern void *fileScanSlotStatesAdvance(void);
+extern s32 fileScanSlotStatesAdvance(void);
 
-extern void *mcHandleDirectoryWriteResult(void);
+extern s32 mcHandleDirectoryWriteResult(void);
 
-extern void *fileScanSlotIconSysAltBegin(void);
+extern s32 fileScanSlotIconSysAltBegin(void);
 
 extern u32 fileReqGetSlotFlags(s32 request, s32 slot);
 
@@ -451,23 +437,22 @@ extern u32 D_003BC834;
 
 extern s32 fileBeginPromptDialog(void *start, void *finish, s32 mode);
 
-extern void *filePollSlotDetectionAndBranch(void);
-extern void *fileLoadMainBlobBegin(void);
-extern void *mcHandleSetupResult(void);
+extern s32 filePollSlotDetectionAndBranch(void);
+extern s32 fileLoadMainBlobBegin(void);
+extern s32 mcHandleSetupResult(void);
 
-extern void *filePrepareMainBlobWrite(void);
+extern s32 filePrepareMainBlobWrite(void);
 
-extern void *mcChooseLoadPath(void);
+extern s32 mcChooseLoadPath(void);
 
-extern void fileAbortSlotScanOnInput(void);
+extern s32 fileAbortSlotScanOnInput(void);
 
-extern void *mcDispatchReadCallback(void);
+extern s32 mcDispatchReadCallback(void);
 
-extern void *mcHandleSearchResult(void);
+extern s32 mcHandleSearchResult(void);
 
-extern s32 mcPollNormalizedCommandStatus(void);
 
-extern void *fileBuildMainBlobAndWrite(void);
+extern s32 fileBuildMainBlobAndWrite(void);
 
 extern u8 fileReqIsSlotMetadataDirty(s32 request);
 
@@ -538,9 +523,8 @@ typedef struct LoadObj {
     u16 unk4A;
 } LoadObj;
 
-extern void *mcdHandleSaveSetupDone(void);
+extern s32 mcdHandleSaveSetupDone(void);
 
-extern s32 mcPollZeroCommandResult(void);
 
 extern void func_00292720(void *);
 
@@ -961,7 +945,7 @@ void fileClearAllSlotFlags(void) {
     fileReqClearSlotFlags(fileMemoryCardRequestContext, 9);
 }
 
-void *fileBeginSlotOpen(void) {
+s32 fileBeginSlotOpen(void) {
     char path[0x50];
     u32 ctx;
     s32 slot;
@@ -980,47 +964,46 @@ void *fileBeginSlotOpen(void) {
     memcpy(&path[len + 2], &path[1], len);
     path[len * 2 + 2] = 0;
     mcOpenFilePath(ctx, path, 1);
-    return fileReadSlotPreviewBegin;
+    return (s32)fileReadSlotPreviewBegin;
 }
 
-extern s32 mcPollCommandStatusWithResult(s32 *);
 extern void mcReadOpenFile(s32, u32, s32);
-extern void *fileReadSlotPreviewWait(void);
-void *fileReadSlotPreviewBegin(void) {
-    s32 status = mcPollCommandStatusWithResult(&fileSaveFileDescriptor);
+extern s32 fileReadSlotPreviewWait(void);
+s32 fileReadSlotPreviewBegin(void) {
+    McPollResult status = mcPollCommandStatusWithResult(&fileSaveFileDescriptor);
 
-    if (status == 0) {
-        return NULL;
+    if (status == MC_POLL_PENDING) {
+        return 0;
     }
-    if (status == 1) {
+    if (status == MC_POLL_SUCCESS) {
         fileSaveReadBufferResource = (u32)sdfAllocGeneralBlock(0x30);
         fileSaveReadBuffer = sdfResourceRetainAddress((struct SdfMemBlock *)(fileSaveReadBufferResource));
         mcReadOpenFile(fileSaveFileDescriptor, fileSaveReadBuffer, 0x30);
-        return fileReadSlotPreviewWait;
+        return (s32)fileReadSlotPreviewWait;
     }
     return fileBeginSlotMetadataRefresh();
 }
 
-void *fileReadSlotPreviewWait(void) {
-    s32 status = mcPollCompletionStatus();
-    if (status == 0) {
-        return NULL;
+s32 fileReadSlotPreviewWait(void) {
+    McPollResult status = mcPollCompletionStatus();
+    if (status == MC_POLL_PENDING) {
+        return 0;
     }
-    if (status == 1) {
+    if (status == MC_POLL_SUCCESS) {
         mcCloseOpenFile(fileSaveFileDescriptor);
-        return fileStoreSlotHeader;
+        return (s32)fileStoreSlotHeader;
     }
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
     return fileBeginSlotMetadataRefresh();
 }
 
-void *fileStoreSlotHeader(void) {
-    s32 status = mcPollZeroCommandResult();
+s32 fileStoreSlotHeader(void) {
+    McPollResult status = mcPollZeroCommandResult();
 
-    if (status == 0) {
-        return NULL;
+    if (status == MC_POLL_PENDING) {
+        return 0;
     }
-    if (status == 1) {
+    if (status == MC_POLL_SUCCESS) {
         memcpy(&D_003DC800[fileSlotScanIndex], (void *)fileSaveReadBuffer, 0x30);
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
         return fileAdvanceSlotScan();
@@ -1029,50 +1012,50 @@ void *fileStoreSlotHeader(void) {
     return fileBeginSlotMetadataRefresh();
 }
 
-void *fileBeginWait(void *callback) {
+s32 fileBeginWait(void *callback) {
     kwlnFadeInStart(0, 0, 0, 15);
     fileWaitContinuation = callback;
     fileWaitTicksRemaining = 20;
-    return fileUpdateWait;
+    return (s32)fileUpdateWait;
 }
 
-void *fileBeginSlotReset(void) {
+s32 fileBeginSlotReset(void) {
     D_003BC848 = 0;
     fileSetMenuFlowState(0);
     D_003BC854 = 0;
     D_003BC834 = 4;
     D_003BC810 = 0;
-    return (void *)fileBeginPromptDialog(&fileResetSelection, &fileBeginSlotResetPrompt, 0);
+    return fileBeginPromptDialog(&fileResetSelection, &fileBeginSlotResetPrompt, 0);
 }
 
-void *fileBeginDirectoryScan(void) {
+s32 fileBeginDirectoryScan(void) {
     fileSetMenuFlowState(0);
     D_003BC854 = 0;
     D_003BC834 = 9;
-    return (void *)fileBeginPromptDialog(&mcPrepareDirectory, &fileScanSlotStates, 1);
+    return fileBeginPromptDialog(&mcPrepareDirectory, &fileScanSlotStates, 1);
 }
 
-void *fileBeginSlotResetPrompt(void) {
+s32 fileBeginSlotResetPrompt(void) {
     fileSetMenuFlowState(0);
     D_003BC854 = 0;
     D_003BC834 = 8;
     D_003BC810 = 0;
-    return (void *)fileBeginPromptDialog(&func_0028B508, &fileBeginSlotReset, 1);
+    return fileBeginPromptDialog(&func_0028B508, &fileBeginSlotReset, 1);
 }
 
-void *fileReturnToSlotSelection(void) {
+s32 fileReturnToSlotSelection(void) {
     fileSetMenuFlowState(0);
     D_003BC810 = 0;
-    return fileSlotSelectPoll;
+    return (s32)fileSlotSelectPoll;
 }
 
-void *fileRestartSlotSelection(void) {
+s32 fileRestartSlotSelection(void) {
     fileReqBegin(0);
     fileSlotSelectionPollCount = 30;
     D_003BC804 = 1;
     fileSetMenuFlowState(1);
     D_003BC810 = 1;
-    return fileSlotSelectPollClear;
+    return (s32)fileSlotSelectPollClear;
 }
 
 s32 fileBeginSlotPromptFive(void) {
@@ -1089,16 +1072,16 @@ s32 fileBeginSlotPromptSix(void) {
     return fileBeginPromptDialog(&func_0028B508, &fileRestartSlotSelection, 1);
 }
 
-void *fileBeginSlotMetadataRefresh(void) {
+s32 fileBeginSlotMetadataRefresh(void) {
     fileClearAllSlotFlags();
     fileSetMenuFlowState(0);
     D_003BC854 = 1;
     D_003BC858 = 0;
     fileReqBegin(fileMemoryCardRequestContext);
-    return filePollSlotDetectionAndBranch;
+    return (s32)filePollSlotDetectionAndBranch;
 }
 
-void *fileResetSelection(void) {
+s32 fileResetSelection(void) {
     fileClearAllSlotFlags();
     D_003DC7C0[0] = 0;
     D_003DC7C0[1] = 0;
@@ -1115,17 +1098,17 @@ void *fileResetSelection(void) {
     D_003BC804 = 1;
     fileSetMenuFlowState(1);
     D_003BC810 = 1;
-    return fileSlotStatusPoll;
+    return (s32)fileSlotStatusPoll;
 }
 
-u32 fileAbortSlotFlow(void) {
+s32 fileAbortSlotFlow(void) {
     fileSetMenuFlowState(0);
     D_003BC810 = 0;
     D_003BC80C = 0;
     return 0xffffffff;
 }
 
-u32 mcdEnterDefaultFileFlow(void) {
+s32 mcdEnterDefaultFileFlow(void) {
     u32 mode[4];
 
     mode[0] = 0;
@@ -1145,18 +1128,18 @@ s32 mcdEnterSelectedFileFlow(void) {
     return 0;
 }
 
-void fileRestartSlotScan(void) {
+s32 fileRestartSlotScan(void) {
     fileClearAllSlotFlags();
     fileSetMenuFlowState(1);
     D_003BC854 = 0;
     D_003BC810 = 0;
-    fileResetSelection();
+    return fileResetSelection();
 }
 
 extern s32 D_003BC82C;
-extern void *fileSlotBrowserUpdate(void);
+extern s32 fileSlotBrowserUpdate(void);
 
-void *fileScanSlotStates(void) {
+s32 fileScanSlotStates(void) {
     s32 i;
 
     D_003BC82C = 0;
@@ -1178,52 +1161,52 @@ void *fileScanSlotStates(void) {
         }
     }
     fileReqBegin(fileMemoryCardRequestContext);
-    return fileSlotBrowserUpdate;
+    return (s32)fileSlotBrowserUpdate;
 }
 
-void *fileResolveAbortSlotFlow(void) {
+s32 fileResolveAbortSlotFlow(void) {
     if (D_003BC848 == 1 && kwlnTaskGetTaskByName(D_003B2658) == NULL) {
-        return (void *)mcdEnterSelectedFileFlow();
+        return mcdEnterSelectedFileFlow();
     }
     fileSetMenuFlowState(0);
     return fileBeginWait(&fileAbortSlotFlow);
 }
 
-void fileLoadIconFileAndResetSelection(void) {
+s32 fileLoadIconFileAndResetSelection(void) {
     D_003BD910 = 0;
     fileSaveIconRequest = fileQueueDefaultCallbackRequest(D_003B2668);
-    fileResetSelection();
+    return fileResetSelection();
 }
 
-void fileResetSlotSelection(void) {
-    fileResetSelection();
+s32 fileResetSlotSelection(void) {
+    return fileResetSelection();
 }
 
-void fileLoadIconFileAndBeginSlotReset(void) {
+s32 fileLoadIconFileAndBeginSlotReset(void) {
     D_003BD910 = 0;
     fileSaveIconRequest = fileQueueDefaultCallbackRequest(D_003B2668);
-    fileBeginSlotReset();
+    return fileBeginSlotReset();
 }
 
-void fileResetSlotPollState(void) {
+s32 fileResetSlotPollState(void) {
     fileReqBegin(0);
     D_003BC804 = 1;
     fileSlotSelectionPollCount = 0;
     fileSetMenuFlowState(0);
     D_003BC810 = 0;
-    fileReturnToSlotSelection();
+    return fileReturnToSlotSelection();
 }
 
-void *fileSlotStatusPoll(void) {
+s32 fileSlotStatusPoll(void) {
     s32 status;
 
     if (fileReqPoll() == 0) {
-        return NULL;
+        return 0;
     }
     if (fileSlotSelectionPollCount > 0) {
         fileSlotSelectionPollCount--;
         fileReqBegin(fileMemoryCardRequestContext);
-        return NULL;
+        return 0;
     }
     status = fileReqGetStatus(fileMemoryCardRequestContext);
     switch (status) {
@@ -1235,22 +1218,22 @@ void *fileSlotStatusPoll(void) {
             fileSetMenuFlowState(0);
             D_003BC854 = 0;
             D_003BC834 = 2;
-            return (void *)fileBeginPromptDialog(fileStartMemoryCardDetection, mnuSelectFileBranch, 1);
+            return fileBeginPromptDialog(fileStartMemoryCardDetection, mnuSelectFileBranch, 1);
         }
         fileSetMenuFlowState(0);
         D_003BC854 = 7;
         D_003BC858 = 0;
         fileReqBegin(fileMemoryCardRequestContext);
-        return filePollSlotDetectionAndBranch;
+        return (s32)filePollSlotDetectionAndBranch;
     case 3:
         fileClearAllSlotFlags();
         fileSetMenuFlowState(0);
         D_003BC854 = 2;
         D_003BC858 = 0;
         fileReqBegin(fileMemoryCardRequestContext);
-        return filePollSlotDetectionAndBranch;
+        return (s32)filePollSlotDetectionAndBranch;
     default:
-        return NULL;
+        return 0;
     case 1:
         return mcResetSlotMetadata();
     }
@@ -1302,36 +1285,36 @@ s32 fileSlotSelectPoll(void) {
     }
 }
 
-extern void *mcClearSlotMetadata(void);
+extern s32 mcClearSlotMetadata(void);
 
-void *fileSlotSelectPollClear(void) {
+s32 fileSlotSelectPollClear(void) {
     if (fileReqPoll() == 0) {
-        return NULL;
+        return 0;
     }
     if (fileSlotSelectionPollCount > 0) {
         fileSlotSelectionPollCount--;
         fileReqBegin(fileMemoryCardRequestContext);
-        return NULL;
+        return 0;
     }
     switch (fileReqGetStatus(fileMemoryCardRequestContext)) {
     case 0:
     case 3:
-        return (void *)fileBeginSlotPromptFive();
+        return fileBeginSlotPromptFive();
     case 2:
-        return (void *)func_0028B508();
+        return func_0028B508();
     case 1:
         if (fileIsCardSpaceAboveMinimum() != 0) {
-            return (void *)func_0028B508();
+            return func_0028B508();
         }
         return mcClearSlotMetadata();
     default:
-        return NULL;
+        return 0;
     }
 }
 
 extern s8 D_00324510[];
 
-void *filePollSlotDetectionAndBranch(void) {
+s32 filePollSlotDetectionAndBranch(void) {
     s32 reqStatus;
 
     D_003BC810 = 0;
@@ -1379,7 +1362,7 @@ void *filePollSlotDetectionAndBranch(void) {
                 fileClearAllSlotFlags();
                 D_003BC854 = 0;
                 D_003BC834 = 2;
-                return (void *)fileBeginPromptDialog(&fileStartMemoryCardDetection, &mnuSelectFileBranch, 1);
+                return fileBeginPromptDialog(&fileStartMemoryCardDetection, &mnuSelectFileBranch, 1);
             }
             if (D_003BC854 != 7) {
                 fileClearAllSlotFlags();
@@ -1398,10 +1381,10 @@ void *filePollSlotDetectionAndBranch(void) {
             break;
         }
     }
-    return NULL;
+    return 0;
 }
 
-void *filePollSlotScanOrReset(void) {
+s32 filePollSlotScanOrReset(void) {
     if (D_003BC858 == 0) {
         if (fileIsLoadedAndConditionTrue(D_00324510[0x21] < 0) ||
             fileIsLoadedAndConditionTrue(D_00324510[0x23] < 0)) {
@@ -1421,38 +1404,39 @@ void *filePollSlotScanOrReset(void) {
         }
         fileReqBegin(fileMemoryCardRequestContext);
     }
-    return NULL;
+    return 0;
 }
 
-void fileAbortSlotScanOnInput(void) {
+s32 fileAbortSlotScanOnInput(void) {
     if (fileIsLoadedAndConditionTrue(D_00324510[0x21] < 0) ||
         fileIsLoadedAndConditionTrue(D_00324510[0x23] < 0)) {
         sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         D_003BC854 = 0;
         D_003BC810 = 0;
-        fileResetSelection();
+        return fileResetSelection();
     }
+    return 0;
 }
 
-void *fileUpdateWait(void) {
+s32 fileUpdateWait(void) {
     s32 remaining = fileWaitTicksRemaining - 1;
     fileWaitTicksRemaining = remaining;
     if (remaining <= 0) {
         if (D_003BD904 == -1) {
-            return (void *)-1;
+            return -1;
         }
-        return ((void *(*)(void))fileWaitContinuation)();
+        return ((s32 (*)())fileWaitContinuation)();
     }
-    return NULL;
+    return 0;
 }
 
-void *fileSetMenuCallbackAndClearResult(u32 callback) {
+s32 fileSetMenuCallbackAndClearResult(u32 callback) {
     D_003BD904 = callback;
     D_003BC858 = 0;
-    return mcdFinishFileDetection;
+    return (s32)mcdFinishFileDetection;
 }
 
-void mcdFinishFileDetection(void) {
+s32 mcdFinishFileDetection(void) {
     if (fileIsLoadedAndConditionTrue(D_00324510[0x21] < 0) ||
         fileIsLoadedAndConditionTrue(D_00324510[0x23] < 0)) {
         fileSetMenuFlowState(0);
@@ -1460,21 +1444,21 @@ void mcdFinishFileDetection(void) {
         D_003BC810 = 0;
         func_002E96D8(0x310000);
         if (D_003BD904 == -1) {
-            fileBeginWait((void *)-1);
-            return;
+            return fileBeginWait((void *)-1);
         }
-        ((void (*)(void))D_003BD904)();
+        return ((s32 (*)())D_003BD904)();
     }
+    return 0;
 }
 
-void *fileBeginDetectionRequest(u32 callback) {
+s32 fileBeginDetectionRequest(u32 callback) {
     D_003BD904 = callback;
     D_003BC858 = 0;
     fileReqBegin(fileMemoryCardRequestContext);
-    return filePollSlotRequestAndResumeFlow;
+    return (s32)filePollSlotRequestAndResumeFlow;
 }
 
-void *filePollSlotRequestAndResumeFlow(void) {
+s32 filePollSlotRequestAndResumeFlow(void) {
     s32 fileStatus;
 
     if (D_003BC858 == 0) {
@@ -1492,7 +1476,7 @@ void *filePollSlotRequestAndResumeFlow(void) {
             if (D_003BD904 == -1) {
                 return fileBeginWait((void *)-1);
             }
-            return ((void *(*)(void))D_003BD904)();
+            return ((s32 (*)())D_003BD904)();
         }
         fileStatus = fileReqGetStatus(fileMemoryCardRequestContext);
         switch (fileStatus) {
@@ -1514,7 +1498,7 @@ void *filePollSlotRequestAndResumeFlow(void) {
                 fileSetMenuFlowState(0);
                 D_003BC854 = 0;
                 D_003BC834 = 2;
-                return (void *)fileBeginPromptDialog(&fileStartMemoryCardDetection, &mnuSelectFileBranch, 1);
+                return fileBeginPromptDialog(&fileStartMemoryCardDetection, &mnuSelectFileBranch, 1);
             }
             if (D_003BC854 != 7) {
                 fileClearAllSlotFlags();
@@ -1535,54 +1519,54 @@ void *filePollSlotRequestAndResumeFlow(void) {
             break;
         }
     }
-    return NULL;
+    return 0;
 }
 
-void *fileBeginReadSlotIcon(void) {
+s32 fileBeginReadSlotIcon(void) {
     u8 buf[0x50];
 
     buf[0] = 0x2F;
     mcFormatSaveFilename(&buf[1], fileSlotScanIndex);
-    mcChangeCurrentDirectory(fileMemoryCardRequestContext, buf);
-    return fileScanSlotIconSysBegin;
+    mcChangeCurrentDirectory(fileMemoryCardRequestContext, (const char *)buf);
+    return (s32)fileScanSlotIconSysBegin;
 }
 
-void *fileScanSlotIconSysBegin(void) {
-    s32 t = mcPollSyncResult();
+s32 fileScanSlotIconSysBegin(void) {
+    McPollResult t = mcPollSyncResult();
 
-    if (t == 0) {
-        return NULL;
+    if (t == MC_POLL_PENDING) {
+        return 0;
     }
-    if (t == 1) {
+    if (t == MC_POLL_SUCCESS) {
         fileReqSetSlotFlags(fileMemoryCardRequestContext, fileSlotScanIndex, 2);
         mcReadDirectoryEntries(fileMemoryCardRequestContext, D_003B2678, D_003DC780, 1);
-        return mcHandleSlotWriteResult;
+        return (s32)mcHandleSlotWriteResult;
     }
-    if (t == -1) {
+    if (t == MC_POLL_ERROR) {
         return fileBeginSlotMetadataRefresh();
     }
     return fileBeginSlotOpen();
 }
 
-void *mcHandleSlotWriteResult(void) {
+s32 mcHandleSlotWriteResult(void) {
     s32 value;
-    s32 status = mcPollNonnegativeResult(&value);
-    if (status == 0) {
-        return NULL;
+    McPollResult status = mcPollNonnegativeResult(&value);
+    if (status == MC_POLL_PENDING) {
+        return 0;
     }
-    if (status == 1) {
+    if (status == MC_POLL_SUCCESS) {
         if (value == 1) {
             fileReqSetSlotFlags(fileMemoryCardRequestContext, fileSlotScanIndex, 9);
         }
         return fileBeginSlotOpen();
     }
-    if (status == -1) {
+    if (status == MC_POLL_ERROR) {
         return fileBeginSlotMetadataRefresh();
     }
     return fileBeginSlotOpen();
 }
 
-void *fileAdvanceSlotScan(void) {
+s32 fileAdvanceSlotScan(void) {
     fileSlotScanIndex++;
     if (fileSlotScanIndex == 10) {
         fileReqClearSlotMetadataDirty(fileMemoryCardRequestContext);
@@ -1595,7 +1579,7 @@ void *fileAdvanceSlotScan(void) {
                 D_003BC854 = 7;
                 D_003BC858 = 0;
                 fileReqBegin(fileMemoryCardRequestContext);
-                return filePollSlotDetectionAndBranch;
+                return (s32)filePollSlotDetectionAndBranch;
             }
             if (fileIsCardSpaceAboveMinimum() == 0) {
                 fileSetMenuFlowState(0);
@@ -1603,7 +1587,7 @@ void *fileAdvanceSlotScan(void) {
                 D_003BC854 = 5;
                 D_003BC858 = 0;
                 fileReqBegin(fileMemoryCardRequestContext);
-                return filePollSlotDetectionAndBranch;
+                return (s32)filePollSlotDetectionAndBranch;
             }
         }
         fileSetMenuFlowState(0);
@@ -1612,7 +1596,7 @@ void *fileAdvanceSlotScan(void) {
     return fileBeginReadSlotIcon();
 }
 
-void *mcResetSlotMetadata(void) {
+s32 mcResetSlotMetadata(void) {
     s32 index;
     if (fileReqIsSlotMetadataDirty(fileMemoryCardRequestContext) != 0) {
         fileSetMenuFlowState(1);
@@ -1631,57 +1615,57 @@ void *mcResetSlotMetadata(void) {
     }
 }
 
-void *fileBeginSaveSlotIconScan(void) {
+s32 fileBeginSaveSlotIconScan(void) {
     u8 buf[0x50];
 
     buf[0] = 0x2F;
     mcFormatSaveFilename(&buf[1], fileSlotScanIndex);
-    mcChangeCurrentDirectory(fileMemoryCardRequestContext, buf);
-    return fileScanSlotIconSysAltBegin;
+    mcChangeCurrentDirectory(fileMemoryCardRequestContext, (const char *)buf);
+    return (s32)fileScanSlotIconSysAltBegin;
 }
 
-void *fileScanSlotIconSysAltBegin(void) {
-    s32 t = mcPollSyncResult();
+s32 fileScanSlotIconSysAltBegin(void) {
+    McPollResult t = mcPollSyncResult();
 
-    if (t == 0) {
-        return NULL;
+    if (t == MC_POLL_PENDING) {
+        return 0;
     }
-    if (t == 1) {
+    if (t == MC_POLL_SUCCESS) {
         fileReqSetSlotFlags(fileMemoryCardRequestContext, fileSlotScanIndex, 2);
         mcReadDirectoryEntries(fileMemoryCardRequestContext, D_003B2678, D_003DC780, 1);
-        return mcHandleDirectoryWriteResult;
+        return (s32)mcHandleDirectoryWriteResult;
     }
-    if (t == -1) {
+    if (t == MC_POLL_ERROR) {
         fileSetMenuFlowState(0);
         D_003BC810 = 0;
         D_003BC854 = 0;
-        return (void *)fileBeginSlotPromptFive();
+        return fileBeginSlotPromptFive();
     }
     return fileScanSlotStatesAdvance();
 }
 
-void *mcHandleDirectoryWriteResult(void) {
+s32 mcHandleDirectoryWriteResult(void) {
     s32 value;
-    s32 status = mcPollNonnegativeResult(&value);
-    if (status == 0) {
-        return NULL;
+    McPollResult status = mcPollNonnegativeResult(&value);
+    if (status == MC_POLL_PENDING) {
+        return 0;
     }
-    if (status == 1) {
+    if (status == MC_POLL_SUCCESS) {
         if (value == 1) {
             fileReqSetSlotFlags(fileMemoryCardRequestContext, fileSlotScanIndex, 9);
         }
         return fileScanSlotStatesAdvance();
     }
-    if (status == -1) {
+    if (status == MC_POLL_ERROR) {
         fileSetMenuFlowState(0);
         D_003BC810 = 0;
         D_003BC854 = 0;
-        return (void *)fileBeginSlotPromptFive();
+        return fileBeginSlotPromptFive();
     }
     return fileScanSlotStatesAdvance();
 }
 
-void *fileScanSlotStatesAdvance(void) {
+s32 fileScanSlotStatesAdvance(void) {
     s32 slot = fileSlotScanIndex;
     s32 buttons = fileReqGetSlotFlags(fileMemoryCardRequestContext, slot);
 
@@ -1692,7 +1676,7 @@ void *fileScanSlotStatesAdvance(void) {
                 fileSetMenuFlowState(0);
                 D_003BC810 = 0;
                 D_003BC854 = 0;
-                return (void *)func_0028B508();
+                return func_0028B508();
             }
         }
     }
@@ -1701,12 +1685,12 @@ void *fileScanSlotStatesAdvance(void) {
         fileSetMenuFlowState(0);
         D_003BC810 = 0;
         D_003BC854 = 0;
-        return (void *)fileBeginSlotPromptSix();
+        return fileBeginSlotPromptSix();
     }
     return fileBeginSaveSlotIconScan();
 }
 
-void *mcClearSlotMetadata(void) {
+s32 mcClearSlotMetadata(void) {
     s32 index = 0;
     u32 *saved;
     fileSetMenuFlowState(1);
@@ -1722,7 +1706,7 @@ void *mcClearSlotMetadata(void) {
     return fileBeginSaveSlotIconScan();
 }
 
-void *mcPrepareDirectory(void) {
+s32 mcPrepareDirectory(void) {
     u8 name[0x50];
     u32 entry = fileMemoryCardRequestContext;
     s32 slot = fileReqGetSelectedSlot(entry);
@@ -1734,86 +1718,86 @@ void *mcPrepareDirectory(void) {
     }
     name[0] = '/';
     mcFormatSaveFilename(name + 1, slot);
-    mcMakeDirectory(entry, name);
-    return mcHandleSearchResult;
+    mcMakeDirectory(entry, (const char *)name);
+    return (s32)mcHandleSearchResult;
 }
 
-void *fileCreateMainBegin(void) {
+s32 fileCreateMainBegin(void) {
     u8 buf[0x50];
     u32 entry = fileMemoryCardRequestContext;
     s32 v = fileReqGetSelectedSlot(entry);
 
     buf[0] = 0x2F;
     mcFormatSaveFilename(&buf[1], v);
-    mcChangeCurrentDirectory(entry, buf);
-    return filePrepareMainBlobWrite;
+    mcChangeCurrentDirectory(entry, (const char *)buf);
+    return (s32)filePrepareMainBlobWrite;
 }
 
-void *mcHandleSearchResult(void) {
-    s32 status = mcPollWithExtendedErrors();
-    if (status == 0) {
-        return NULL;
+s32 mcHandleSearchResult(void) {
+    McPollResult status = mcPollWithExtendedErrors();
+    if (status == MC_POLL_PENDING) {
+        return 0;
     }
-    if (status == 1) {
+    if (status == MC_POLL_SUCCESS) {
         fileReqSetSlotFlags(fileMemoryCardRequestContext, D_003BC844, 2);
         return fileCreateMainBegin();
     }
     fileSetMenuFlowState(0);
     D_003BC854 = 4;
-    return fileAbortSlotScanOnInput;
+    return (s32)fileAbortSlotScanOnInput;
 }
 
-void *filePrepareMainBlobWrite(void) {
-    s32 t = mcPollSyncResult();
+s32 filePrepareMainBlobWrite(void) {
+    McPollResult t = mcPollSyncResult();
 
-    if (t == 0) {
-        return NULL;
+    if (t == MC_POLL_PENDING) {
+        return 0;
     }
-    if (t == 1) {
+    if (t == MC_POLL_SUCCESS) {
         return mcChooseLoadPath();
     }
-    if (t == -1) {
+    if (t == MC_POLL_ERROR) {
         fileSetMenuFlowState(0);
         D_003BC854 = 4;
-        return fileAbortSlotScanOnInput;
+        return (s32)fileAbortSlotScanOnInput;
     }
-    return NULL;
+    return 0;
 }
 
-void *fileBuildMainBlobAfterDelete(void) {
-    s32 t = mcPollNormalizedCommandStatus();
+s32 fileBuildMainBlobAfterDelete(void) {
+    McPollResult t = mcPollNormalizedCommandStatus();
 
-    if (t == 0) {
-        return NULL;
+    if (t == MC_POLL_PENDING) {
+        return 0;
     }
-    if (t == 1) {
+    if (t == MC_POLL_SUCCESS) {
         return fileBuildMainBlobAndWrite();
     }
-    if (t == -1) {
+    if (t == MC_POLL_ERROR) {
         fileSetMenuFlowState(0);
         D_003BC854 = 4;
-        return fileAbortSlotScanOnInput;
+        return (s32)fileAbortSlotScanOnInput;
     }
-    return NULL;
+    return 0;
 }
 
-void fileOnAllWritten(void) {
+s32 fileOnAllWritten(void) {
     fileReqSetSlotFlags(fileMemoryCardRequestContext, D_003BC844, 1);
     fileReqSetSlotFlags(fileMemoryCardRequestContext, D_003BC844, 8);
     fileSetMenuFlowState(4);
-    fileBeginDetectionRequest((u32)fileScanSlotStates);
+    return fileBeginDetectionRequest((u32)fileScanSlotStates);
 }
 
-void *fileWriteIconSysComplete(void) {
+s32 fileWriteIconSysComplete(void) {
     fileDestroyMenuTask();
-    return fileOnAllWritten;
+    return (s32)fileOnAllWritten;
 }
 
 extern u8 D_0037D0C0[];
 extern u32 D_003BC890;
 extern u32 D_003BC894;
 
-void *fileBeginLabeledSlotWrite(void) {
+s32 fileBeginLabeledSlotWrite(void) {
     s32 slot = D_003BC844 + 1;
     u8 tens = 0x4F + slot / 10;
     u8 ones = 0x4F + slot % 10;
@@ -1825,12 +1809,12 @@ void *fileBeginLabeledSlotWrite(void) {
     return fileBeginRequest(D_003B2678, &D_003BC890, &D_003BC894, fileWriteIconSysComplete, 0);
 }
 
-void *fileRequestBaseIcon(void) {
+s32 fileRequestBaseIcon(void) {
     return fileBeginRequest(D_003B2688, &D_003BD914, &D_003BD918,
                           fileBeginLabeledSlotWrite, &fileSaveIconRequest);
 }
 
-void *fileBuildMainBlobAndWrite(void) {
+s32 fileBuildMainBlobAndWrite(void) {
     char filename[0x50];
     s32 slot = fileReqGetSelectedSlot(fileMemoryCardRequestContext);
 
@@ -2145,112 +2129,112 @@ void *fileBuildMainBlobAndWrite(void) {
     return fileBeginRequest(filename, &D_003BD8F4, &D_003BD8F8, fileBeginLabeledSlotWrite, NULL);
 }
 
-void *mcChooseLoadPath(void) {
+s32 mcChooseLoadPath(void) {
     u32 entry = fileMemoryCardRequestContext;
     s32 slot = fileReqGetSelectedSlot(entry);
     u32 flags = fileReqGetSlotFlags(entry, slot);
     if (!(flags & 8)) {
         return fileBuildMainBlobAndWrite();
     }
-    mcDeleteFilePath(entry, (u32)D_003B2678);
-    return fileBuildMainBlobAfterDelete;
+    mcDeleteFilePath(entry, D_003B2678);
+    return (s32)fileBuildMainBlobAfterDelete;
 }
 
-void *fileBeginRequest(const char *name, u32 *first, u32 *second, void *callback, u32 *status) {
+s32 fileBeginRequest(const char *name, u32 *first, u32 *second, void *callback, u32 *status) {
     D_003BD928 = first;
     D_003BD92C = second;
     D_003BD930 = callback;
     D_003BD934 = status;
     mcOpenFilePath(fileMemoryCardRequestContext, name, 0x203);
-    return fileWriteWaitOpen;
+    return (s32)fileWriteWaitOpen;
 }
 
 extern void mcBeginWrite(s32 request, u32 first, u32 second);
-extern void *fileFinishRequest(void);
+extern s32 fileFinishRequest(void);
 
-void *fileWriteWaitOpen(void) {
-    s32 status = mcPollCommandStatusWithResult(&fileSaveFileDescriptor);
+s32 fileWriteWaitOpen(void) {
+    McPollResult status = mcPollCommandStatusWithResult(&fileSaveFileDescriptor);
 
-    if (status == 0) {
-        return NULL;
+    if (status == MC_POLL_PENDING) {
+        return 0;
     }
-    if (status == 1) {
+    if (status == MC_POLL_SUCCESS) {
         if (D_003BD934 != NULL && *D_003BD934 != 0) {
-            return fileFinishRequest;
+            return (s32)fileFinishRequest;
         }
         mcBeginWrite(fileSaveFileDescriptor, *D_003BD928, *D_003BD92C);
-        return mcHandleLoadResult;
+        return (s32)mcHandleLoadResult;
     }
-    if (status == -1) {
+    if (status == MC_POLL_ERROR) {
         fileSetMenuFlowState(0);
         D_003BC854 = 4;
-        return fileAbortSlotScanOnInput;
+        return (s32)fileAbortSlotScanOnInput;
     }
-    return NULL;
+    return 0;
 }
 
 
-void *mcHandleLoadResult(void) {
-    s32 status = mcPollWriteCompletion();
-    if (status == 0) {
-        return NULL;
+s32 mcHandleLoadResult(void) {
+    McPollResult status = mcPollWriteCompletion();
+    if (status == MC_POLL_PENDING) {
+        return 0;
     }
-    if (status == 1) {
+    if (status == MC_POLL_SUCCESS) {
         mcCloseOpenFile(fileSaveFileDescriptor);
-        return mcDispatchReadCallback;
+        return (s32)mcDispatchReadCallback;
     }
-    if (status == -1) {
+    if (status == MC_POLL_ERROR) {
         fileSetMenuFlowState(0);
         D_003BC854 = 4;
-        return fileAbortSlotScanOnInput;
+        return (s32)fileAbortSlotScanOnInput;
     }
-    return NULL;
+    return 0;
 }
 
-void *mcDispatchReadCallback(void) {
-    s32 status = mcPollZeroCommandResult();
-    if (status == 0) {
-        return NULL;
+s32 mcDispatchReadCallback(void) {
+    McPollResult status = mcPollZeroCommandResult();
+    if (status == MC_POLL_PENDING) {
+        return 0;
     }
-    if (status == 1) {
-        return ((void *(*)(void))D_003BD930)();
+    if (status == MC_POLL_SUCCESS) {
+        return ((s32 (*)())D_003BD930)();
     }
-    if (status == -1) {
+    if (status == MC_POLL_ERROR) {
         fileSetMenuFlowState(0);
         D_003BC854 = 4;
-        return fileAbortSlotScanOnInput;
+        return (s32)fileAbortSlotScanOnInput;
     }
-    return NULL;
+    return 0;
 }
 
-void *fileFinishRequest(void) {
+s32 fileFinishRequest(void) {
     if (fileSaveIconRequest != 0) {
-        return NULL;
+        return 0;
     }
     mcBeginWrite(fileSaveFileDescriptor, *D_003BD928, *D_003BD92C);
-    return mcHandleLoadResult;
+    return (s32)mcHandleLoadResult;
 }
 
-void *mcHandleDetectionResult(void) {
-    s32 status = mcPollStrictSuccess();
-    if (status == 0) {
-        return NULL;
+s32 mcHandleDetectionResult(void) {
+    McPollResult status = mcPollStrictSuccess();
+    if (status == MC_POLL_PENDING) {
+        return 0;
     }
     func_001005B0();
     if (status < 0) {
         fileSetMenuFlowState(0);
         D_003BC854 = 6;
-        return fileAbortSlotScanOnInput;
+        return (s32)fileAbortSlotScanOnInput;
     }
     fileSetMenuFlowState(6);
     return fileBeginDetectionRequest((u32)fileRestartSlotScan);
 }
 
-void *fileStartMemoryCardDetection(void) {
+s32 fileStartMemoryCardDetection(void) {
     fileSetMenuFlowState(5);
     func_001005B8();
     func_00289D50(fileMemoryCardRequestContext);
-    return mcHandleDetectionResult;
+    return (s32)mcHandleDetectionResult;
 }
 
 s32 mnuSelectFileBranch(void) {
@@ -2262,7 +2246,7 @@ s32 mnuSelectFileBranch(void) {
     return fileBeginPromptDialog(fileAbortSlotFlow, fileResetSelection, 1);
 }
 
-void *fileBeginSlotCreate(void) {
+s32 fileBeginSlotCreate(void) {
     char path[0x50];
     u32 ctx = fileMemoryCardRequestContext;
     s32 slot = fileReqGetSelectedSlot(ctx);
@@ -2281,41 +2265,41 @@ void *fileBeginSlotCreate(void) {
     memcpy(&path[len + 2], &path[1], len);
     path[len * 2 + 2] = 0;
     mcOpenFilePath(ctx, path, 1);
-    return fileLoadMainBlobBegin;
+    return (s32)fileLoadMainBlobBegin;
 }
 
-void *fileLoadMainBlobBegin(void) {
-    s32 status = mcPollCommandStatusWithResult(&fileSaveFileDescriptor);
+s32 fileLoadMainBlobBegin(void) {
+    McPollResult status = mcPollCommandStatusWithResult(&fileSaveFileDescriptor);
     u32 size;
 
-    if (status == 0) {
-        return NULL;
+    if (status == MC_POLL_PENDING) {
+        return 0;
     }
     size = fileMainBlobSize();
     fileSaveReadBufferResource = (u32)sdfAllocGeneralBlock(size);
     fileSaveReadBuffer = sdfResourceRetainAddress((struct SdfMemBlock *)(fileSaveReadBufferResource));
-    if (status == 1) {
+    if (status == MC_POLL_SUCCESS) {
         mcReadOpenFile(fileSaveFileDescriptor, fileSaveReadBuffer, size);
-        return mcHandleSetupResult;
+        return (s32)mcHandleSetupResult;
     }
     fileSetMenuFlowState(0);
     D_003BC854 = 3;
-    return fileAbortSlotScanOnInput;
+    return (s32)fileAbortSlotScanOnInput;
 }
 
-void *mcHandleSetupResult(void) {
-    s32 status = mcPollCompletionStatus();
-    if (status == 0) {
-        return NULL;
+s32 mcHandleSetupResult(void) {
+    McPollResult status = mcPollCompletionStatus();
+    if (status == MC_POLL_PENDING) {
+        return 0;
     }
-    if (status == 1) {
+    if (status == MC_POLL_SUCCESS) {
         mcCloseOpenFile(fileSaveFileDescriptor);
-        return mcdHandleSaveSetupDone;
+        return (s32)mcdHandleSaveSetupDone;
     }
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
     fileSetMenuFlowState(0);
     D_003BC854 = 3;
-    return fileAbortSlotScanOnInput;
+    return (s32)fileAbortSlotScanOnInput;
 }
 
 extern s8 D_003BC7ED;
@@ -2323,12 +2307,12 @@ extern s32 fileLoadStateChanged(void);
 extern void fileCacheSlotFlagsFromState(void);
 extern void fileRestoreSlotFlagsToState(void);
 
-void *mcdHandleSaveSetupDone(void) {
-    s32 status = mcPollZeroCommandResult();
-    if (status == 0) {
-        return NULL;
+s32 mcdHandleSaveSetupDone(void) {
+    McPollResult status = mcPollZeroCommandResult();
+    if (status == MC_POLL_PENDING) {
+        return 0;
     }
-    if (status == 1) {
+    if (status == MC_POLL_SUCCESS) {
         fileReloadSaveBuffer();
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
         D_003BC7ED = 1;
@@ -2344,10 +2328,10 @@ void *mcdHandleSaveSetupDone(void) {
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
     fileSetMenuFlowState(0);
     D_003BC854 = 3;
-    return fileAbortSlotScanOnInput;
+    return (s32)fileAbortSlotScanOnInput;
 }
 
-void *fileSlotBrowserUpdate(void) {
+s32 fileSlotBrowserUpdate(void) {
     s32 oldSelection = D_003BC844;
     s32 offset;
     s32 selection;
@@ -2417,7 +2401,7 @@ void *fileSlotBrowserUpdate(void) {
 
         if (action == 0) {
             fileReqBegin(fileMemoryCardRequestContext);
-            return NULL;
+            return 0;
         }
         if (action == 1) {
 
@@ -2430,11 +2414,11 @@ void *fileSlotBrowserUpdate(void) {
             if (D_003BC824 != 0) {
                 D_003BC820 = action;
                 D_003BC834 = action;
-                return (void *)fileBeginPromptDialog(fileBeginDirectoryScan, fileScanSlotStates, 1);
+                return fileBeginPromptDialog(fileBeginDirectoryScan, fileScanSlotStates, 1);
             }
             D_003BC820 = action;
             D_003BC834 = action;
-            return (void *)fileBeginPromptDialog(mcPrepareDirectory, fileScanSlotStates, 1);
+            return fileBeginPromptDialog(mcPrepareDirectory, fileScanSlotStates, 1);
         }
 
         action = flags & 0xA;
@@ -2453,7 +2437,7 @@ void *fileSlotBrowserUpdate(void) {
         D_003BC854 = 5;
         D_003BC858 = 0;
         fileReqBegin(fileMemoryCardRequestContext);
-        return filePollSlotScanOrReset;
+        return (s32)filePollSlotScanOrReset;
     }
 
             fileReqSetSelectedSlot(fileMemoryCardRequestContext, D_003BC844);
@@ -2461,7 +2445,7 @@ void *fileSlotBrowserUpdate(void) {
             if ((flags & 1) != 0) {
                 sndSetSequenceVolumePan(8, 0x7F, 0x3F);
                 D_003BC834 = 3;
-                return (void *)fileBeginPromptDialog(fileBeginSlotCreate, fileScanSlotStates, 1);
+                return fileBeginPromptDialog(fileBeginSlotCreate, fileScanSlotStates, 1);
             }
             sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
             return fileScanSlotStates();
@@ -2477,7 +2461,7 @@ void *fileSlotBrowserUpdate(void) {
         }
     }
 
-    return NULL;
+    return 0;
 }
 
 INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B2658);
@@ -2715,30 +2699,30 @@ s32 fileDrawSlotListAndPreview(s32 work) {
 }
 
 
-void *fileRunMenuState(s32 arg) {
-    void *next;
+s32 fileRunMenuState(KwlnTask *task) {
+    s32 next;
     u32 job;
-    void *(*cur)(s32);
+    s32 (*cur)();
     D_003BC814++;
-    fileDrawMenuFrame(arg);
-    next = fileMenuStateHandler(arg);
-    if (next == (void *)-1) {
+    fileDrawMenuFrame((s32)task);
+    next = fileMenuStateHandler(task);
+    if (next == -1) {
         return next;
     }
     job = fileSaveIconRequest;
     cur = fileMenuStateHandler;
-    if (next != NULL) {
-        cur = next;
+    if (next != 0) {
+        cur = (s32 (*)())next;
     }
     fileMenuStateHandler = cur;
-    if (job != 0 && fileIsRequestReadyInCurrentMode(job, next) != 0) {
+    if (job != 0 && fileIsRequestReadyInCurrentMode(job, (void *)next) != 0) {
         fileSaveIconRequest = 0;
         D_003BD910 = fileGetResourceHandle(job);
         D_003BD914 = fileGetLoadedDataAddress(job);
         D_003BD918 = fileGetResourceSize(job);
         filePollEntryCleanup(job);
     }
-    return NULL;
+    return 0;
 }
 
 s32 fileDrawMenuFrame(s32 work) {
@@ -2856,7 +2840,7 @@ extern void *D_003BD908;
 extern void *D_003BD90C;
 extern s32 D_003BC830;
 extern s32 D_003BC838;
-extern void func_0028F630(void);
+extern s32 func_0028F630(void);
 s32 fileBeginPromptDialog(void *start, void *finish, s32 mode) {
     D_003BD908 = start;
     D_003BD90C = finish;
@@ -4116,7 +4100,7 @@ void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, s32 state, u16 optio
     s32 handle;
     s32 address;
 
-    command = sdfDevCreateCommandState(state);
+    command = sdfDevCreateCommandState((const char *)state);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
         handle = (u32)sdfAllocGeneralBlock(size);
@@ -4151,7 +4135,7 @@ void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, s32 state, u16 sel
     s32 handle;
     s32 address;
 
-    command = sdfDevCreateCommandState(state);
+    command = sdfDevCreateCommandState((const char *)state);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
         handle = (u32)sdfAllocGeneralBlock(size);
@@ -4215,7 +4199,7 @@ void *fileJobCreateFromCommandState(entry)
     s32 address;
     void *job;
 
-    command = sdfDevCreateCommandState(entry);
+    command = sdfDevCreateCommandState((const char *)entry);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
         handle = (u32)sdfAllocGeneralBlock(size);
@@ -5196,12 +5180,12 @@ f32 effSampleScalarCurve(const EffScalarCurve *curve, s32 frame, s32 duration) {
     }
     durationFloat = duration;
     switch (curve->mode) {
-    case 0:
+    case EFF_SCALAR_CURVE_MODE_ENDPOINTS:
         factor = (f32)frame / durationFloat;
         from = curve->initialValue;
         to = curve->finalValue;
         break;
-    case 1:
+    case EFF_SCALAR_CURVE_MODE_ONE_INTERMEDIATE_KEY:
         firstFrame = (s32)(curve->firstFraction * durationFloat);
         if (frame < firstFrame) {
             factor = (f32)frame / firstFrame;
@@ -5214,7 +5198,7 @@ f32 effSampleScalarCurve(const EffScalarCurve *curve, s32 frame, s32 duration) {
             to = curve->finalValue;
         }
         break;
-    case 2:
+    case EFF_SCALAR_CURVE_MODE_TWO_INTERMEDIATE_KEYS:
         firstFrame = (s32)(curve->firstFraction * durationFloat);
         if (frame < firstFrame) {
             factor = (f32)frame / firstFrame;

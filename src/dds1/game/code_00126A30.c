@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_dev_state.h"
 #include "sdf_resource.h"
 #include "fld_waypoint.h"
 #include "fld_inf.h"
@@ -3581,9 +3582,6 @@ typedef struct FldSkyGradientRecord {
     s32 colors[8][9];
 } FldSkyGradientRecord;
 extern FldSkyGradientRecord *D_003BAD74;
-extern u32 sdfDevCreateCommandState(const char *);
-extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
-extern void sdfDevWaitThenReleaseCommandState(u32);
 
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0048);
 
@@ -3595,7 +3593,7 @@ INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A00A8);
 
 void fldLoadBattleSkyAndFilter(void) {
     s32 i;
-    u32 command;
+    DevState *command;
 
     if (fldSkyLightSetBuffer == 0) {
         fldSkyLightSetBuffer = (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock(0xE000));
@@ -3612,12 +3610,12 @@ void fldLoadBattleSkyAndFilter(void) {
         for (i = 0; i < FIELD_CAMERA_SETTING_COUNT; i++) {
             fldCameraSettings[i] = D_003306D0;
         }
-        fldCameraColorParameters->color.mode = 0;
-        fldCameraColorParameters->color.colorB = fldCameraColorParameters->color.colorA = 0x80808080;
+        fldCameraColorParameters->color.segmentMode = SDF_COLOR_TRACK_MODE_ENDPOINTS;
+        fldCameraColorParameters->color.finalColor = fldCameraColorParameters->color.initialColor = 0x80808080;
         fldCameraColorParameters->alpha.alpha = 0x40;
         fldCameraColorParameters->alpha.surfaceIndex = 2;
-        fldCameraColorParameters->alpha.fadeIn = 0.0f;
-        fldCameraColorParameters->alpha.fadeOut = 1.0f;
+        fldCameraColorParameters->alpha.fadeInFraction = 0.0f;
+        fldCameraColorParameters->alpha.fadeOutFraction = 1.0f;
         fldCameraColorParameters->maxFrames = 0;
         fldCameraColorParameters->count = 0xFF;
         fldCameraColorParameters->speed = 20.0f;
@@ -3637,7 +3635,7 @@ extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddres
 void fldLoadSkyResource(s32 area) {
     char path[64];
     char directory[32];
-    u32 command;
+    DevState *command;
 
     fldSkyDrawState = 0x80;
     if (area < 200) {
@@ -4174,7 +4172,7 @@ void fldActivateCameraColorSetting(s32 enable) {
         fldCameraColorEffect = 0;
         color = &setting->color;
         if (color->enabled != 0) {
-            fldCameraColorParameters->color.colorB = fldCameraColorParameters->color.colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
+            fldCameraColorParameters->color.finalColor = fldCameraColorParameters->color.initialColor = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
             fldCameraColorParameters->alpha.alpha = color->vectorY;
             switch (color->mode) {
             case 0:
@@ -4262,7 +4260,7 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
     FldColorParams *color = &setting->color;
 
     if (color->enabled != 0) {
-        fldCameraColorParameters->color.colorB = fldCameraColorParameters->color.colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
+        fldCameraColorParameters->color.finalColor = fldCameraColorParameters->color.initialColor = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
         fldCameraColorParameters->alpha.alpha = color->vectorY;
         switch (color->mode) {
         case 0:
@@ -5178,22 +5176,16 @@ s32 fldGetActorSlotAttribute(s32 actorId, s32 attribute) {
 }
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
-extern u32 sdfDevCreateCommandState(const char *);
-extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
-extern void sdfDevWaitThenReleaseCommandState(u32);
 
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
-extern u32 sdfDevCreateCommandState(const char *);
-extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
-extern void sdfDevWaitThenReleaseCommandState(u32);
 
 extern char D_003A01F8[]; /* "%sF%03d.INF": one string split at +8 from the separately included D_003A0200 */
 void fldLoadInfoTable(s32 field) {
     char path[64];
     char directory[32];
-    u32 command;
+    DevState *command;
     if (field < 200) {
         fldFormatAreaDirectory(directory, field, 1);
         func_003014F0(path, D_003A01F8, directory, field);
@@ -5779,7 +5771,7 @@ void fldResetActorSlots(void) {
 void fldLoadActorWaypointTable(s32 field) {
     char path[64];
     char directory[32];
-    u32 command;
+    DevState *command;
     if (field >= 100) {
         memset(&fldActorWaypointRows, 0, 0x6CA0);
     } else {
