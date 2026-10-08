@@ -4330,6 +4330,7 @@
 0x002A9820	movAreTitleEffectsReady	inferred	Checks that all 2, 16, 5 and 2 movie title effect handle slots are populated.
 0x002A9A40	mnuReleaseTitleEffectResourceGroups	inferred	Destroys title effect sprites, fixed resource groups, additional groups, and final group. [names_reviewed19.tsv]
 0x002A9BC8	mnuDrawCampGridResourceSlot	inferred	Draws resolved grid slot selected from record resource fields. [names_reviewed21.tsv]
+0x002A9BF8	mnuCreateStaffResourceListWindow	inferred	Constructs a staff MenuWindowContainer, filters its entry table through optional model-flag IDs, and appends the surviving entries.
 0x002A9E00	mnuStaffInitResourceLists	inferred	DDS2-only symbol; game/code_0029BC58 uses mnu for the already-described staffInitResourceLists behavior.
 0x002A9F08	mnuReleaseStaffSpriteAndResourceHandles	inferred	Destroys staff sprite windows and releases their held resource lists. [names_reviewed11.tsv]
 0x002A9F78	mnuBuildListSlotTableA	inferred	fills the 0x2A0-entry u16 slot table at work+0xAA60 and writes list slot+1 per D_003E6500 entry [names_M51_FieldMenu.tsv]
