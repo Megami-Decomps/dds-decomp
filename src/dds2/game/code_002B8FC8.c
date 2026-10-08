@@ -1043,7 +1043,7 @@ void mnuReleaseWindowTextures(MenuIconSprites *menu) {
 void func_002B9A38(void) {
 }
 
-void func_002B9A40(s32 x, s32 y, s32 depth, u32 opacity, MenuList *list,
+void mnuDrawListScrollbar(s32 x, s32 y, s32 depth, u32 opacity, MenuList *list,
                    MenuIconSprites *resource, s32 drawArg) {
     s32 top;
     s32 trackExtent;
@@ -1084,7 +1084,7 @@ void func_002B9A40(s32 x, s32 y, s32 depth, u32 opacity, MenuList *list,
 }
 
 void mnuDrawWindowResourceSpriteRows(s32 x, s32 y, u32 flags, MenuWindowContainer *window, u32 option) {
-    func_002B9A40(x - 0xf0, y - 8, flags, window->fadeScale,
+    mnuDrawListScrollbar(x - 0xf0, y - 8, flags, window->fadeScale,
                   window->list, window->resource, option);
 }
 
