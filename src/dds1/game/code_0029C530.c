@@ -4573,7 +4573,7 @@ EffectStripNode *effCreateStripNode(u32 percent) {
     node->opacity = 1.0f;
     node->active = 0;
     node->transform = effCreateTrackSetWithSharedReferences(percent * 4, 2, 0);
-    node->resource = (u32)effCreateBillboardSharingIndexedResource(0);
+    node->resource = effCreateBillboardSharingIndexedResource(0);
     node->count = 1;
     return node;
 }
@@ -4599,9 +4599,8 @@ EffectStripNode *effFileResourceReferenceReplace(FileJob *work) {
 }
 
 void effReleaseModelResources(EffectStripNode *work) {
-    void *resource = (void *)work->resource;
-    if (resource != NULL) {
-        billDispatchByKind(resource);
+    if (work->resource != NULL) {
+        billDispatchByKind(work->resource);
     }
     if (work->transform != 0) {
         effReleaseResourceRefs(work->transform);
