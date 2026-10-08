@@ -40,8 +40,8 @@ source organization are still being recovered.
 | `dds1` | Digital Devil Saga (USA) | `SLUS_209.74` | `6d18898e2724bf1d145392766e8ba1e678487419` |
 | `dds2` | Digital Devil Saga 2 (USA) | `SLUS_211.52` | `9be91ee1b4a535a4cb6ec89237b5a6ba41be2add` |
 
-The badges track matching game/engine code bytes and function counts for each
-game. SDK/runtime code and VU1 microcode are outside those totals.
+The badges track production-exact, source-owned game/engine code bytes and
+function counts for each game. Assembly fallbacks receive zero source credit. SDK/runtime code and VU1 microcode are outside those totals.
 [Reading progress](docs/progress.md) explains the measurements and comparison
 limits.
 
