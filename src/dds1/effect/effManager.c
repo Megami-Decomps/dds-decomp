@@ -1,8 +1,10 @@
 #include "common.h"
+#include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "eff.h"
 #include "eff_node_descriptor.h"
+
 
 void effManagerInitializeSubsystems(void) {
     func_001536A0();
@@ -14,7 +16,7 @@ INCLUDE_ASM(const s32, "effect/effManager", func_0014F860);
 
 u32 effManagerUpdateAndDispatch(void) {
     func_0015B420();
-    func_0015D0C0();
+    parDrawPendingCellSystems();
     billFlushPendingChildPackets();
     billFlushPendingRenderPairs();
     func_001602F8();

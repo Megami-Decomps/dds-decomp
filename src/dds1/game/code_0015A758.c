@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
 #include "par_kind_api.h"
@@ -155,7 +156,6 @@ extern ParDrawState parDrawControl;
 
 extern u16 parGetRestartFlag(ParObj *obj);
 
-extern void parCellInit();
 
 
 extern void parUpdateCellVertexPair(ParSystem *, s32, const u128 *);
@@ -1428,8 +1428,8 @@ void parRiseFallSymmetricCellAlpha(ParSystem *system, u32 centerWord, u32 middle
     }
 }
 
-void func_0015D078(s32 recordAddress, u16 value) {
-    *(u16 *)(recordAddress + 2) = value;
+void parSetCellDrawBucket(ParSystem *system, u16 value) {
+    system->bucket = value;
 }
 
 void parDispatchSub(void *work, s32 sub, void *a2, void *a3) {
@@ -1448,7 +1448,7 @@ extern ParDrawCmd D_00325248;
 extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
 
 /* Batch pending cell systems by topology, then submit the five draw buckets. */
-void func_0015D0C0(void) {
+void parDrawPendingCellSystems(void) {
     s32 lists[5];
     s32 *slot;
     s32 list;
