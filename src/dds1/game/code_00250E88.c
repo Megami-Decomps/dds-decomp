@@ -122,7 +122,7 @@ extern const s32 D_003AF840[];
 extern const s32 D_003AF850[];
 extern void *memcpy(void *, const void *, u32);
 extern u32 mnuGetSelectedNodeValue(void);
-extern s32 fldGetSceneMetadataNode(void);
+extern MnuMantraGridEntry *fldGetSceneMetadataNode(void);
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern s32 dspStartEntry(s32);
 extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, s32, s32);
@@ -276,8 +276,8 @@ extern void func_002CC0D0(SdfGrid *grid);
 void func_00253558(s32 context) {
     SdfGrid *grid = ((MenuSceneWork *)context)->gridHandle;
     SdfGridCell *cursor = grid->cursor;
-    s32 selected = cursor->value;
-    u16 entryId = *(u16 *)(selected + 0xC);
+    MnuMantraGridEntry *selected = (MnuMantraGridEntry *)(u32)cursor->value;
+    u16 entryId = selected->sceneId;
     MenuGridCoordinate *entries = (MenuGridCoordinate *)grid->userData;
     s16 x = entries[entryId].x;
     s16 y = entries[entryId].y;
@@ -295,13 +295,13 @@ void func_00253558(s32 context) {
 }
 
 /* Return the selected entry address through the scene-work/grid/slot chain, or zero when scene work is absent. */
-s32 fldGetSceneMetadataNode(void) {
-    s32 sceneAddress = sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
+MnuMantraGridEntry *fldGetSceneMetadataNode(void) {
+    MenuSceneWork *scene = (MenuSceneWork *)(u32)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
 
-    if (sceneAddress == 0) {
+    if (scene == NULL) {
         return 0;
     }
-    return *(s32 *)(*(s32 *)(*(s32 *)(sceneAddress + 0x484) + 8) + 4);
+    return (MnuMantraGridEntry *)(u32)scene->gridHandle->cursor->value;
 }
 
 extern s32 dspCloseChannel(void);
@@ -310,17 +310,12 @@ extern void mnuSetupStaffMenuProfilePage(DatPartyRecord *, void *);
 extern u32 mnuGetSelectedNodeValue(void);
 extern void *memcpy(void *, const void *, u32);
 
-typedef struct SceneEntryNode {
-    u8 pad00[0x0C];
-    u16 entryIndex;
-} SceneEntryNode;
-
 s32 func_00253640(void) {
-    SceneEntryNode *node = (SceneEntryNode *)fldGetSceneMetadataNode();
+    MnuMantraGridEntry *entry = fldGetSceneMetadataNode();
     MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
     scene->state = 0;
-    scene->pendingProfileId = node->entryIndex;
+    scene->pendingProfileId = entry->sceneId;
     dspCloseChannel();
     evtCreateMessageWindowIfMissing(scene->messageWindowResource);
     memcpy((u32 *)((u8 *)scene + 0x28), (u32 *)*(u32 *)mnuGetSelectedNodeValue(), 0x1A4);
@@ -373,7 +368,7 @@ extern void itfDspSignalE(void);
 extern s64 evtGetMessageWindowControlState(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
 s32 func_00253830(void) {
-    MnuMantraGridEntry *entry = (MnuMantraGridEntry *)fldGetSceneMetadataNode();
+    MnuMantraGridEntry *entry = fldGetSceneMetadataNode();
     MnuProfileProgress *selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
     MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
@@ -517,41 +512,20 @@ s32 mnuUpdateMantraSceneDisplay(void) {
     return 0;
 }
 
-typedef struct SceneMetadataNode {
-    u8 pad00[0xC];
-    u16 entryIndex; /* 0x0C */
-} SceneMetadataNode;
-
-typedef struct {
-    u8 pad00[4];
-    SceneMetadataNode *node; /* 0x04 */
-} SceneMetadataSlot;
-
-typedef struct {
-    u8 pad00[8];
-    SceneMetadataSlot *slot; /* 0x08 */
-} SceneMetadataGrid;
-
-typedef struct {
-    u8 pad00[0x484];
-    SceneMetadataGrid *grid; /* 0x484 */
-    u8 pad488[0x114];
-    u16 entryX; /* 0x59C */
-    u16 entryY; /* 0x59E */
-} SceneMetadataContext;
-
 /* Copy the active scene entry coordinates selected by the grid metadata. */
-void fldUpdateSceneEntryMetadata(s32 sceneAddress) {
-    SceneMetadataNode *selectedNode = ((SceneMetadataContext *)sceneAddress)->grid->slot->node;
-    u16 entryIndex = selectedNode->entryIndex;
-    ((SceneMetadataContext *)sceneAddress)->entryX = D_0036BE38[entryIndex].entryX;
-    entryIndex = selectedNode->entryIndex;
-    ((SceneMetadataContext *)sceneAddress)->entryY = D_0036BE38[entryIndex].entryY;
+void fldUpdateSceneEntryMetadata(MenuSceneWork *scene) {
+    MnuMantraGridEntry *selectedEntry =
+        (MnuMantraGridEntry *)(u32)scene->gridHandle->cursor->value;
+    u16 entryIndex = selectedEntry->sceneId;
+
+    scene->entryPosition.x = D_0036BE38[entryIndex].entryX;
+    entryIndex = selectedEntry->sceneId;
+    scene->entryPosition.y = D_0036BE38[entryIndex].entryY;
 }
 
 /* Refresh the active scene-work entry coordinates and return zero. */
 s32 fldResetSceneState(void) {
-    fldUpdateSceneEntryMetadata(sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1));
+    fldUpdateSceneEntryMetadata((MenuSceneWork *)(u32)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1));
     return 0;
 }
 

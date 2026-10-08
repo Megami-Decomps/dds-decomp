@@ -23,6 +23,7 @@ extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern void uiDrawActiveSurfaceRegion(s32);
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
+extern void mnuAdvanceWrappingFrame(s32 *);
 
 /* Draw the two mantra-entry passes, then restore the surface's GS state. */
 void mnuDrawMantraPulseGridPasses(MenuSceneWork *work, s32 surface) {
