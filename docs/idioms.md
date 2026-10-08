@@ -4003,8 +4003,8 @@ The DDS1 twin `func_001150F0` uses the same
 `EffectEventVectorParameters` shape and `D_0039F7D0` initializer. That
 initial copy retains the last three parameters and color while the two
 SDK vector copies replace only the first 32 bytes. The native mixer
-dependency is the `SoundMixer *` returned by `func_00190100`, whose
-matched implementation calls `sndMixerClone`.
+dependency is the `SoundMixer *` returned by `effEventCloneSoundMixer`, whose
+implementation calls `sndMixerClone`.
 
 ## Panel resources and typed pair updates
 
@@ -4238,4 +4238,62 @@ icon state at `+0x4C` gates a separate packed-color word at `+0x54`.
 Those fields complete `BrsProgressAnimation` without changing its size or
 either game's work layout. A purported second bank at `0xB080` would
 instead begin at this row's existing `applied` member (`+0x20`).
+
+## Camera instruction streams are pointer banks
+
+DDS1 `001E9DE0` and DDS2 `001FA480` receive a command, a camera pose,
+and a read-only `BtlCameraTimedInstruction *`. The third input is not
+an integer mode: retail reads kind at +0, a signed parameter at +4,
+start/duration at +8/+0xC, and advances the stream by 0x10.
+The corresponding eight bank arrays in each game's camera unit hold
+instruction pointers. Their existing owners are declared before first use,
+so all nine DDS1 and fifteen DDS2 C calls pass pointers directly.
+No serialized data, instruction body, compiler flags, or variable declaration
+order changes are required for this contract. Both interpreter bodies remain ASM.
+
+## DDS1 motion-SE loader state has a canonical owner
+
+The singleton `BtlState` owns the motion-SE `SoundSlotOwner *` list at
+`+0x23C` and the two frame words at `+0x264` and `+0x268`. These replace
+padding, preserving the complete `0xE10` layout. DDS2 already owns the
+corresponding list at `+0x260` and frame words at `+0x288` and `+0x28C`.
+The constructor-backed `SoundSlotOwner` in `snd_slot.h` owns the separate
+29-entry request and resource-handle arrays; a new updater must not borrow
+the competing local `BtlActorWork` view.
+
+Keep the frame storage unsigned, as existing polling comparisons do.
+The native updater explicitly classifies each word as signed before
+incrementing it, with `-1` disabling that clock. Read track-loading flags
+again after the status provider: it can clear the loading bit before the
+caller decides whether a bank is still pending.
+
+The field-only completion preserves every one of the 31 `btl_state.h`
+source includers in both games. It does not claim a matching updater body.
+
+
+## Defeat-camera forwarding interfaces
+
+DDS2 `001F3228` and `001F34C8` take the command and a camera slot,
+as shown by the native `001EAE88` calls and the already matched DDS1
+`001E5460`/`001E5700` counterparts. The second wrapper forwards both
+inputs; the first publishes defeat state through the command and does
+not use its camera slot. Preserve that uniform two-input interface
+instead of integer-address formals and one-input forwarding.
+
+## Stored file-request words cross real pointer interfaces
+
+`fileManager.c` supplies three distinct, finite interfaces:
+`fileIsRequestReadyInCurrentMode(FileRequest *)`,
+`fileGetResourceHandle(FileWork *)` returning `u32`, and
+`filePollEntryCleanup(FileCleanup *)` returning `s32`.
+The battle units `001C8890`/`001DD390` now declare these opaque provider
+tags before first use, instead of relying on implicit declarations or
+`s32 (s32)` prototypes.
+
+Existing task and motion-SE records still store request addresses as words.
+Convert once at each provider boundary to the corresponding opaque pointer;
+do not introduce another structural view or change the stored-word layout.
+The resource-handle result remains its genuine `u32` API representation.
+Both complete consumer units remain byte exact, with providers and `file.h`
+unchanged. This contract closure does not enable either motion-SE updater.
 

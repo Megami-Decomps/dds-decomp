@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "eff_resource_slots.h"
 #include "mnu.h"
 #include "sdf_resource.h"
 #include "mnu_staff.h"
@@ -85,11 +86,8 @@ typedef char MenuSlotState_gradient_check[((u32)&((MenuSlotState *)0)->gradientF
 typedef char MenuSlotState_reduced_check[((u32)&((MenuSlotState *)0)->reducedMode == 0x3F4) ? 1 : -1];
 
 extern void func_002665E8(MenuSlotState *);
-extern u32 effLoadIndexedResource(s32, s32, s32);
-extern void effResolveAndReleaseResource(u32 *);
 /* Historical callers intentionally omit the second reset argument. */
 extern void effReleaseSlotTextureReferencesAndResetWork();
-extern EffectSlotSet *effCreateResourceSlotSet(u32 *, u32, u32);
 extern void func_00266460(u32, MenuEffectResources *);
 extern u32 effConfigureWithDefaultSetting(u32, u32, u32, u32, u32, u32);
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
@@ -238,14 +236,14 @@ void func_002665E8(MenuSlotState *scene) {
     scene->reducedMode = func_002665C8(scene);
     if (scene->reducedMode == 0) {
         for (i = 0; i < 3; i++) {
-            scene->resourceBank[i] = (EffectSlotSet *)effLoadIndexedResource(
-                (s32)D_00424E48, (s32)D_003CE7A8[i], 1);
-            effResolveAndReleaseResource(&scene->resourceBank[i]->sourceAllocation);
+            scene->resourceBank[i] = effLoadIndexedResource(
+                (const char *)D_00424E48, D_003CE7A8[i], 1);
+            effResolveAndReleaseResource(scene->resourceBank[i]);
         }
-        scene->resourceBank[3] = (EffectSlotSet *)effLoadIndexedResource(
-            (s32)D_00424E48,
-            (s32)D_003CE7C0[mnuFirstPresentMainCharacterIndex()], 1);
-        effResolveAndReleaseResource(&scene->resourceBank[3]->sourceAllocation);
+        scene->resourceBank[3] = effLoadIndexedResource(
+            (const char *)D_00424E48,
+            D_003CE7C0[mnuFirstPresentMainCharacterIndex()], 1);
+        effResolveAndReleaseResource(scene->resourceBank[3]);
         mnuInitScrollingStripState(&scene->panels[0], 0,
             scene->resourceBank[0], 0x46, 0x43);
         func_0026BE28(&scene->panels[0], 1, 0x10, 0x20);
@@ -256,9 +254,9 @@ void func_002665E8(MenuSlotState *scene) {
         func_00266460((u32)scene->resourceBank[2], &scene->campEffect.resources);
     } else {
         for (i = 0; i < 2; i++) {
-            scene->resourceBank[i] = (EffectSlotSet *)effLoadIndexedResource(
-                (s32)D_00424E48, (s32)D_003CE7B8[i], 1);
-            effResolveAndReleaseResource(&scene->resourceBank[i]->sourceAllocation);
+            scene->resourceBank[i] = effLoadIndexedResource(
+                (const char *)D_00424E48, D_003CE7B8[i], 1);
+            effResolveAndReleaseResource(scene->resourceBank[i]);
         }
         mnuInitScrollingStripState(&scene->panels[0], 1,
             scene->resourceBank[0], 0x46, 0x43);
@@ -268,8 +266,7 @@ void func_002665E8(MenuSlotState *scene) {
         func_0026BE28(&scene->panels[1], 0, 0x10, 0x20);
         func_0026BEB0(&scene->panels[1], 0x1470, 0xCB8, 0);
     }
-    scene->alternateBatch = effCreateResourceSlotSet(
-        &scene->resourceBank[0]->sourceAllocation, 7, 1);
+    scene->alternateBatch = effCreateResourceSlotSet(scene->resourceBank[0], 7, 1);
 }
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00266808);
@@ -278,14 +275,14 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00266808);
 void mnuReleaseResourceGroup(s32 address) {
     MenuSlotState *group = (MenuSlotState *)address;
     if (group->reducedMode == 0) {
-        effResolveAndReleaseResource(&group->resourceBank[0]->sourceAllocation);
-        effResolveAndReleaseResource(&group->resourceBank[1]->sourceAllocation);
-        effResolveAndReleaseResource(&group->resourceBank[2]->sourceAllocation);
-        effResolveAndReleaseResource(&group->resourceBank[3]->sourceAllocation);
+        effResolveAndReleaseResource(group->resourceBank[0]);
+        effResolveAndReleaseResource(group->resourceBank[1]);
+        effResolveAndReleaseResource(group->resourceBank[2]);
+        effResolveAndReleaseResource(group->resourceBank[3]);
         return;
     }
-    effResolveAndReleaseResource(&group->resourceBank[0]->sourceAllocation);
-    effResolveAndReleaseResource(&group->resourceBank[1]->sourceAllocation);
+    effResolveAndReleaseResource(group->resourceBank[0]);
+    effResolveAndReleaseResource(group->resourceBank[1]);
 }
 
 /* Release/reset the mode-dependent texture sets, preserving the first short-arity call. */

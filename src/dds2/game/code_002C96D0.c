@@ -1,5 +1,6 @@
 #include "common.h"
 #include "bill_object_api.h"
+#include "eff_resource_slots.h"
 #include "sdf_resource.h"
 #include "sdf_chip.h"
 #include "eff_curve.h"
@@ -91,7 +92,6 @@ typedef struct EffectSurfaceNode {
 
 extern u32 effRetainResource(u32);
 extern void billSetBillboardMode(u32, s16);
-extern u32 billCreateIndexed(u32, u32);
 extern u32 fileSaveReadBuffer;
 extern u32 fileAllocateGridRecordSlots(u16, u32, void *);
 typedef struct MdlFlagPair {
@@ -105,7 +105,6 @@ extern void mdlFlagSet(s32);
 extern void mdlFlagClear(s32);
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
 extern s32 mnuDestroyListState();
-extern s32 effDestroyResourceSlotSet();
 #include "kwln.h"
 #include "fpu.h"
 struct MenuListNode;
@@ -5622,7 +5621,7 @@ void fileLoadObjectOpenDevice(EffectSurfaceNode *node, u32 resourceId) {
     if (resource != 0) {
         billDispatchByKind((void *)resource);
     }
-    resource = billCreateIndexed(0, resourceId);
+    resource = (u32)billCreateIndexed(0, resourceId);
     node->resource = (void *)resource;
     if (node->active != 0) {
         billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
@@ -5634,7 +5633,7 @@ void fileLoadObjectOpenAndStartDevice(EffectSurfaceNode *node, u32 resourceId) {
     if (resource != 0) {
         billDispatchByKind((void *)resource);
     }
-    resource = billCreateIndexed(1, resourceId);
+    resource = (u32)billCreateIndexed(1, resourceId);
     node->resource = (void *)resource;
     billMarkKindOneFlag((struct BillObj *)(resource));
     if (node->active != 0) {

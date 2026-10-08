@@ -652,8 +652,6 @@ extern s32 D_003BC0C8[];
 extern void func_001F3E48(s32);
 extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 
-extern void func_001FA480(BtlLinkedCommand *, BtlCamState *, s32);
-
 extern void func_001FBAC0(BtlLinkedCommand *, BtlCamState *);
 
 extern s32 func_001FB908(BtlLinkedCommand *, BtlCamState *, s8, s8);
