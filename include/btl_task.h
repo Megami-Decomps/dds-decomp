@@ -26,7 +26,11 @@ typedef struct SceneAiWork {
     s32 entry;              /* 0x08 */
     BtlIndexList *listA;     /* 0x0C */
     BtlIndexList *listB;     /* 0x10 */
-    s32 source;             /* 0x14 */
+#ifdef VERSION_DDS1
+    struct BtlTask *source; /* 0x14: nullable command actor retained by the task. */
+#else
+    struct ActionStateLink *source; /* 0x14: nullable command actor retained by the task. */
+#endif
     /* The selection helper indexes a 3-by-3 target-mask table with this cursor. */
     u16 cursorRow;          /* 0x18 */
     u16 cursorColumn;       /* 0x1A */

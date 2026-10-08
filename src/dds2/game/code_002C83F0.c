@@ -1,23 +1,10 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "file.h"
+#include "file_slot_flags.h"
+#include "file_request_entry.h"
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
-
-/* File request entry: D_003DC698 table, 0x64 bytes per entry. */
-typedef struct FileReqEntry {
-    u32 unk0;      /* 0x00 */
-    u32 unk4;      /* 0x04 */
-    u32 sizeKiB;   /* 0x08: converted to bytes by fileReqGetSize */
-    u32 unkC;      /* 0x0C */
-    u8 unk10;      /* 0x10 */
-    u8 status;     /* 0x11: inspected by memory-card file request polling */
-    u8 slotMetadataDirty; /* 0x12: checked before rebuilding slot metadata */
-    s8 selectedSlot; /* 0x13: used to select a memory-card save directory */
-    u32 slotFlags[20]; /* 0x14: save-slot flag words, aliased by D_003DC6AC */
-} FileReqEntry;
-
-extern FileReqEntry fileRequestEntries[];
 
 extern s32 D_00437CC0;
 extern s32 D_00439000;
@@ -75,9 +62,6 @@ s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
 s32 fileManUpdate(void);
-
-/* Flag words of the entry table: entry arg0 occupies 0x19 words. */
-extern u32 fileRequestSlotFlags[];
 
 extern s32 sdfDevQueueControlRequest(DevState *);
 extern s32 sdfDevQueueActiveOperation(DevState *);

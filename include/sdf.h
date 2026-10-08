@@ -153,13 +153,13 @@ typedef struct SdfStreamFrameNode {
     u8 playbackMode;
     u8 pad17;
     u8 bufferIndex;
-    u8 pad19;
+    u8 transferPacketIndex;
     u8 unk1A;
     u8 pad1B;
     s32 bufferSize;
-    u32 buffers[2];
-    s32 textureResources[2];
-    u8 pad30[4];
+    void *frameBuffers[2];
+    void *transferPacketBuffers[2];
+    u32 transferPacketBytes;
     s32 resourceWord;
     SdfTexResource *textureHead;
     u16 width;
@@ -167,12 +167,12 @@ typedef struct SdfStreamFrameNode {
     u32 cycleLength;
     u32 tickCount;
     s32 unk48; /* Movie progress reader; no producer has been located. */
-    u32 unk4C;
+    void *inputDmaChain;
     u8 headerReady;
     u8 done;
     u8 filledSlots;
     u8 firstSlot;
-    u32 scratchBuffer;
+    u8 *scratchBuffer;
     u8 pad58[4];
     s32 (*read)(struct SdfStreamFrameNode *, u32, s32, void *, s32);
     u32 source;
@@ -186,6 +186,18 @@ typedef char SdfStreamFrameNode_size_must_be_0x8C[
     (sizeof(SdfStreamFrameNode) == 0x8C) ? 1 : -1];
 typedef char SdfStreamFrameNode_dma_offset_must_be_0x68[
     ((u32)&((SdfStreamFrameNode *)0)->dma == 0x68) ? 1 : -1];
+typedef char SdfStreamFrameNode_frameBuffers_offset_must_be_0x20[
+    ((u32)&((SdfStreamFrameNode *)0)->frameBuffers == 0x20) ? 1 : -1];
+typedef char SdfStreamFrameNode_transferPacketBuffers_offset_must_be_0x28[
+    ((u32)&((SdfStreamFrameNode *)0)->transferPacketBuffers == 0x28) ? 1 : -1];
+typedef char SdfStreamFrameNode_transferPacketBytes_offset_must_be_0x30[
+    ((u32)&((SdfStreamFrameNode *)0)->transferPacketBytes == 0x30) ? 1 : -1];
+typedef char SdfStreamFrameNode_transferPacketIndex_offset_must_be_0x19[
+    ((u32)&((SdfStreamFrameNode *)0)->transferPacketIndex == 0x19) ? 1 : -1];
+typedef char SdfStreamFrameNode_inputDmaChain_offset_must_be_0x4C[
+    ((u32)&((SdfStreamFrameNode *)0)->inputDmaChain == 0x4C) ? 1 : -1];
+typedef char SdfStreamFrameNode_scratchBuffer_offset_must_be_0x54[
+    ((u32)&((SdfStreamFrameNode *)0)->scratchBuffer == 0x54) ? 1 : -1];
 
 typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, u32, s32, void *, s32);
 

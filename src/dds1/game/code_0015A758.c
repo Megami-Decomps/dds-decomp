@@ -211,7 +211,7 @@ void parObjSetMode(ParObj *object, s32 mode) {
     object->restartFlag = 1;
 }
 
-s32 parObjGetMode(ParObj *object) {
+u8 parObjGetMode(ParObj *object) {
     switch (object->dispatchIndex) {
     case 1:
     case 5:
@@ -309,7 +309,7 @@ void func_0015A9A0(ParObj *effect) {
             record = effect->buffer->records;
             spinDirection = 1.0f;
             for (recordIndex = 0; recordIndex < particleCount; recordIndex++, record++) {
-                if (record->unk20 >= 0) {
+                if (record->age >= 0) {
                     record->scale += scaleStep;
                     record->spin += spinStep * spinDirection;
                 }
@@ -330,12 +330,12 @@ void func_0015A9A0(ParObj *effect) {
     if (particleCount > 0) {
         step = particleCount;
         do {
-            s32 age = record->unk20;
+            s32 age = record->age;
 
             if (age < lifetime && age >= 0) {
                 PCP_COPY_VECTOR(billboard, record->position);
                 billboard->rotationAngle = record->spin;
-                billboard->childParam = record->unk24;
+                billboard->childParam = record->color;
                 billboard->childScaleX = billboard->childScaleY = record->scale;
                 record->scale += scaleStep;
                 if (record->scale < 0) {
@@ -382,7 +382,9 @@ void parChangeInstanceMode(ParObj *work, u8 mode) {
     parObjSetMode(work, mode);
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015ADB0);
+u8 func_0015ADB0(ParObj *work) {
+    return parObjGetMode(work);
+}
 
 /* Kinds 2-4 keep the scale at +8 of their own record; copy it into the
  * shared vector and store the (vf10 - vf11) difference. */

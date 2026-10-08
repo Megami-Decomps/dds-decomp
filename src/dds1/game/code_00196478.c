@@ -3,6 +3,7 @@
 #include "kwln_task_state.h"
 #include "sdf_resource.h"
 #include "itf.h"
+#include "itf_mem_node.h"
 #include "sdf.h"
 #include "itf_panel_draw.h"
 
@@ -81,12 +82,6 @@ extern u32 D_003BD818;
 void frFontEnsureSlotLoaded(s32 id, const char *path);
 extern u16 itfGlyphDecodeTable[];
 extern u32 strlen(const char *str);
-
-/* 8-byte node header; payload follows (itfDequeueMemNode/itfEnqueueMemNode). */
-typedef struct MemNode {
-    u32 slotIndex;         /* 0x0: zero identifies the ring's sentinel */
-    struct MemNode *next;  /* 0x4 */
-} MemNode;
 
 /* Allocation handle precedes the first queue node by four bytes. */
 typedef struct MemRingHeader {
@@ -237,25 +232,25 @@ advanceLine:
         mnuSetTitleVoicePrefixIndex(itfReadEncodedTextLead(stream));
         mnuPlayTitleVoiceFile((char *)itfReadEncodedCode(stream));
         break;
-    case 0xF214:
-        if (stream->glyphChain->unk34 != 0) {
-            stream->glyphChain->unk38 = 1;
+    case ITF_GLYPH_CONTROL_WAIT_FRAMES:
+        if (stream->glyphChain->pendingLipsStopCode != 0) {
+            stream->glyphChain->skipLipsStopWait = 1;
         }
-        stream->glyphChain->unk30 = code;
-        stream->glyphChain->unk3C = itfReadEncodedCode(stream);
+        stream->glyphChain->timedControlCode = code;
+        stream->glyphChain->remainingWaitFrames = itfReadEncodedCode(stream);
         break;
-    case 0xF215:
-        if (stream->glyphChain->unk34 != 0) {
-            stream->glyphChain->unk38 = 1;
+    case ITF_GLYPH_CONTROL_WAIT_FRAME_OR_SOUND:
+        if (stream->glyphChain->pendingLipsStopCode != 0) {
+            stream->glyphChain->skipLipsStopWait = 1;
         }
-        stream->glyphChain->unk30 = code;
-        stream->glyphChain->unk3C = itfReadEncodedCode(stream);
-        if (stream->glyphChain->unk3C != 0xFFFF) {
+        stream->glyphChain->timedControlCode = code;
+        stream->glyphChain->remainingWaitFrames = itfReadEncodedCode(stream);
+        if (stream->glyphChain->remainingWaitFrames != ITF_GLYPH_WAIT_FOR_SOUND_SENTINEL) {
             s32 frame = mnuGetTitleEffectFrameCounter();
-            stream->glyphChain->unk3C -= frame;
+            stream->glyphChain->remainingWaitFrames -= frame;
         }
-        if (stream->glyphChain->unk3C < 0) {
-            stream->glyphChain->unk3C = 0;
+        if (stream->glyphChain->remainingWaitFrames < 0) {
+            stream->glyphChain->remainingWaitFrames = 0;
         }
         break;
     case 0xF416:
@@ -263,8 +258,8 @@ advanceLine:
         D_003BB170 = itfReadEncodedTextLead(stream);
         D_003BB15C |= 8;
         break;
-    case 0xF117:
-        stream->glyphChain->unk34 = code;
+    case ITF_GLYPH_CONTROL_STOP_LIPS:
+        stream->glyphChain->pendingLipsStopCode = code;
         break;
     case 0xF20A:
     case 0xF20B:
@@ -874,7 +869,7 @@ s32 func_00198088(u8 *dst, s32 option, u32 block, MemOut *segments) {
 
 /* Build count usable nodes plus index-zero sentinel, retaining each payload gap.
  * The allocation handle is stored four bytes before the returned ring base. */
-u32 itfCreateMemNodeRing(s32 payloadBytes, s32 count) {
+MemNode *itfCreateMemNodeRing(s32 payloadBytes, s32 count) {
     SdfMemBlock *buffer;
     u8 *list;
     MemNode *cursor;
@@ -895,7 +890,7 @@ u32 itfCreateMemNodeRing(s32 payloadBytes, s32 count) {
     }
     cursor->slotIndex = count;
     cursor->next = (MemNode *)list;
-    return (u32)list;
+    return (MemNode *)list;
 }
 
 /* Remove the next free node, or return NULL at the index-zero sentinel. */
@@ -926,8 +921,8 @@ s32 itfEnqueueMemNode(void *payload, MemNode *queue) {
 }
 
 /* Release the handle preceding the original ring base, not an acquired payload. */
-u32 itfReleaseMemNodeBuffer(u8 *ringBase) {
-    sdfReleaseResourceAllocation(((MemRingHeader *)(ringBase - ITF_ALLOCATION_HANDLE_BYTES))->allocation);
+u32 itfReleaseMemNodeBuffer(MemNode *ringBase) {
+    sdfReleaseResourceAllocation(((MemRingHeader *)((u8 *)ringBase - ITF_ALLOCATION_HANDLE_BYTES))->allocation);
     return 1;
 }
 
@@ -1549,4 +1544,3 @@ INCLUDE_SDATA(const s32, "game/code_00196478", itfFontTestScriptTask);
 INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB198);
 
 INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB1A0);
-

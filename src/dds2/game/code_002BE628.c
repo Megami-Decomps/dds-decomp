@@ -1,5 +1,6 @@
 #include "mnu_input.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_records.h"
 #include "fpu.h"
 #include "common.h"
 #include "sdf_dev_state.h"
@@ -22,7 +23,7 @@
 /* DDS2's panel item is wider than the DDS1 variant, with five points at +0x74. */
 struct MenuPanelItem {
     u8 pad00[0x10];
-    u32 value10;
+    s32 value10; /* Pixel span used by signed stat scaling. */
     s32 value14;
     s32 value18;
     u32 option;
@@ -109,7 +110,6 @@ extern s32 func_002C6CE8(void);
 
 extern void mnuReleaseResourceList(struct MenuIconState *list);
 
-extern u32 effCreateStatusBatch(u32);
 
 
 
@@ -230,7 +230,6 @@ extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
 extern void evtCreateWorldObjectForKey(s32, s32);
 extern void itfGridSetQuantizedBounds(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern u32 effDestroyResourceSlotSet(EffectSlotSet *);
-extern u32 effConfigureWithDefaultSetting(u32, u32, u32, u32, u32, u32);
 extern s32 D_00437CB8;
 extern s32 D_00437CBC;
 extern SdfPoolNode D_00380708;
@@ -933,16 +932,16 @@ void mnuDrawRepeatedPanelSprites(s32 x, s32 y, s32 depth, s32 fade, s32 count, E
 
 /* Set both effect positions; only the first Y comes from the active menu entry. */
 void mnuSetPairedEffectPositions(MenuPageBar *pair) {
-    MenuEffectNode *first = pair->effects[0];
-    MenuEffectNode *second = pair->effects[1];
-    MenuEffectPosition *firstPosition = first->position;
-    MenuEffectPosition *secondPosition = second->position;
-    s32 *coordinates = firstPosition->coordinates;
+    EffMappedResource *first = pair->effects[0];
+    EffMappedResource *second = pair->effects[1];
+    EffMappedRecord *firstRecord = first->records;
+    EffMappedRecord *secondRecord = second->records;
+    s32 *coordinates = (s32 *)firstRecord[0].status;
 
     coordinates[0] = 10;
     coordinates[1] = pair->positionY;
     coordinates[2] = 10;
-    coordinates = secondPosition->coordinates;
+    coordinates = (s32 *)secondRecord[0].status;
     coordinates[1] = 5;
     coordinates[0] = 10;
     coordinates[2] = 10;
@@ -976,7 +975,8 @@ void mnuCyclePairedEffectSetting(MenuPageBar *pair) {
     if (settings != 0) {
         setting = settings[(s8)pair->settingIndex];
     }
-    effConfigureWithDefaultSetting((u32)pair->textures[3], 0, (s32)pair->effects[0], 0, setting, 0);
+    effConfigureWithDefaultSetting(pair->textures[3], 0,
+                                   pair->effects[0], 0, setting, 0);
     pair->settingIndex += 1;
     if ((s8)pair->settingIndex >= 4) {
         pair->settingIndex = 0;
@@ -986,12 +986,12 @@ void mnuCyclePairedEffectSetting(MenuPageBar *pair) {
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1E48);
 
 void mnuCreatePairedEffects(MenuPageBar *pair) {
-    u32 effectHandle;
+    struct EffMappedResource *effectHandle;
 
     effectHandle = effCreateStatusBatch(3);
-    pair->effects[0] = (MenuEffectNode *)effectHandle;
+    pair->effects[0] = effectHandle;
     effectHandle = effCreateStatusBatch(3);
-    pair->effects[1] = (MenuEffectNode *)effectHandle;
+    pair->effects[1] = effectHandle;
 }
 
 /* The public word-pointer boundary refers to the same complete panel owner. */
@@ -1000,7 +1000,7 @@ void mnuReleasePairedEffectBatches(s32 *objectWords) {
     u32 effectIndex;
 
     for (effectIndex = 0; effectIndex < 2; effectIndex++) {
-        effDestroyPackedBatch((s32)pair->effects[effectIndex]);
+        effDestroyPackedBatch(pair->effects[effectIndex]);
     }
 }
 

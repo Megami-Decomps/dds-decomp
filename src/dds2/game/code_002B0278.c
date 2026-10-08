@@ -1,4 +1,5 @@
 #include "sdf_chip.h"
+#include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "mnu_input.h"
 #include "kwln.h"
@@ -90,8 +91,6 @@ extern char D_00437BF8[];
 extern s32 dspStartEntry(s32 entry);
 extern s32 D_00435E5C;
 
-extern void itfDrawGridWithResolvedSlot();
-
 extern void mnuClearListFlagsOneAndTwo();
 
 extern void mnuReleaseResourceList(MenuIconState *list);
@@ -164,11 +163,9 @@ extern char *D_003E7818[];
 extern char *D_003E7820[];
 
 
-extern u32 effLoadMappedResource(char *, char *);
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
-extern void effRequestMappedResource(char *, char *, u32 *);
 
 extern void mnuFreeWindowSprites();
 
@@ -1578,14 +1575,14 @@ void func_002B4298(s32 x, s32 y, s32 depth, MenuList *list,
         if (selected != 0) {
             s32 edgeY = y - 8;
             itfDrawGridWithResolvedSlot(x + 0x2A0, y, depth, 1,
-                (u32)context->labelHandle, 0x23, texture);
+                (EffectSlotSet *)(u32)context->labelHandle, 0x23, texture);
             itfDrawGridWithResolvedSlot(x - 0x30, edgeY, depth, 1,
-                (u32)context->resourceHandle, 0x1F, texture);
+                (EffectSlotSet *)(u32)context->resourceHandle, 0x1F, texture);
             itfDrawGridWithResolvedSlot(x + 0xB10, edgeY, depth, 1,
-                (u32)context->resourceHandle, 0x1F, texture);
+                (EffectSlotSet *)(u32)context->resourceHandle, 0x1F, texture);
         } else {
             itfDrawGridWithResolvedSlot(x + 0x60, y, depth, 1,
-                (u32)context->labelHandle, 0x1D, texture);
+                (EffectSlotSet *)(u32)context->labelHandle, 0x1D, texture);
         }
         return;
     }
@@ -2058,7 +2055,7 @@ void ptySkillMenuCopyPageState(s32 context) {
 
     slot = windows + index;
     window = *slot;
-    itfDrawGridWithResolvedSlot(0xED0, 0x2E0, 0, 1, ((MenuContext *)context)->labelHandle, 0x24, 0x53);
+    itfDrawGridWithResolvedSlot(0xED0, 0x2E0, 0, 1, (EffectSlotSet *)(u32)((MenuContext *)context)->labelHandle, 0x24, 0x53);
     mnuSetPanelState((struct MenuPanelState *)party[8], index);
     func_002C0958(0xED0, 0x328, 0, party[8], 0x53);
     if (window->list->cursor->index == 0) {
@@ -2409,7 +2406,7 @@ void func_002B6898(u16 affinity, s32 resource, s32 labels) {
                 if (requirement > 0) {
                     s32 range = mnuLookupRangeEntry((u16)requirement);
                     itfDrawGridWithResolvedSlot(x + iconOffset.x, y + iconOffset.y,
-                                               0, 1, labels, range + 1, 0x53);
+                                               0, 1, (EffectSlotSet *)(u32)labels, range + 1, 0x53);
                     glyph = itfCreateConvertedTextGlyph(x + textOffset.x, y + textOffset.y,
                                                        0, 0xA09DC380,
                                                        D_00435E64[requirement], 0);
@@ -2420,13 +2417,13 @@ void func_002B6898(u16 affinity, s32 resource, s32 labels) {
                                                    0, 0xA09DC380,
                                                    D_00435E68[requirement], 0);
                 itfDrawGridWithResolvedSlot(x + iconOffset.x, y + iconOffset.y,
-                                           0, 1, resource, 0xA, 0x53);
+                                           0, 1, (EffectSlotSet *)(u32)resource, 0xA, 0x53);
             }
         } else {
             glyph = itfCreateConvertedTextGlyph(x + textOffset.x, y + textOffset.y,
                                                0, 0xA09DC380, (const u8 *)D_003E77C8[kind], 0);
             itfDrawGridWithResolvedSlot(x + iconOffset.x, y + iconOffset.y,
-                                       0, 1, resource, 0xA, 0x53);
+                                       0, 1, (EffectSlotSet *)(u32)resource, 0xA, 0x53);
         }
         if (glyph != 0) {
             func_0019D550(glyph, 1, 0x53);
@@ -2648,14 +2645,15 @@ void mnuOrEntryFlags(u32 flags, u32 *entryFlags) {
 void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 INCLUDE_ASM(const s32, "game/code_002B0278", mnuCopyCampEffectRowData);
 
-void mnuSetCampEffectResourceHandles(u32 first, u32 second, MenuEffectResources *resources) {
-    resources->packet.sheets[0] = first;
-    resources->animationHandle = second;
+void mnuSetCampEffectResourceHandles(u32 sheet, struct EffMappedResource *animation,
+                                    MenuEffectResources *resources) {
+    resources->packet.sheets[0] = sheet;
+    resources->animationHandle = animation;
 }
 
 
 void mnuBindCampEffectAnimation(MenuEffectResources *resources) {
-    effConfigureIndexedSlotResource(resources->packet.sheets[0],
+    effConfigureIndexedSlotResource((struct EffectSlotSet *)resources->packet.sheets[0],
                    resources->packet.items[4],
                    resources->animationHandle, 0, 4);
 }
@@ -2702,7 +2700,7 @@ void mnuRequestEffectResources(MenuEffectResources *resources) {
     mnuInitializeMapPacket(0, D_003E7828, 0xb, &resources->packet);
     mnuCopyCampEffectRowData(&D_003E7858, resources);
     effRequestResourceByMode("/camp/spr/n_min/", D_003E7818[0], 0, &resources->packet.sheets[0]);
-    effRequestMappedResource("/camp/mot/", D_003E7820[0], &resources->animationHandle);
+    effRequestMappedResource("/camp/mot/", D_003E7820[0], (u32 *)&resources->animationHandle);
 }
 
 u32 mnuBindCampEffectWhenLoaded(MenuEffectResources *resources) {
@@ -2760,7 +2758,7 @@ void mnuDrawAndAdvanceCampSparks(MenuCampEffect *fx, s32 arg) {
     s32 i;
     for (i = 0; i < 0x10; i++) {
         if (fx->direction[i] > 0) {
-            itfDrawGridWithResolvedSlot(fx->velocity[i][0], fx->velocity[i][1], 0, 0, fx->resources.packet.sheets[0], fx->resources.packet.items[6], arg);
+            itfDrawGridWithResolvedSlot(fx->velocity[i][0], fx->velocity[i][1], 0, 0, (EffectSlotSet *)(u32)fx->resources.packet.sheets[0], fx->resources.packet.items[6], arg);
             if (fx->direction[i] == 1) {
                 fx->velocity[i][0] += fx->life[i];
                 if (fx->velocity[i][0] > 0x2000) {
@@ -2818,7 +2816,7 @@ void mnuDrawBadgeFade(MenuCampEffect *set, s32 arg) {
         MNU_ADVANCE_FADE(set->fade, 0x10, 0x100);
     }
     if (!(set->resources.packet.type & 2)) {
-        itfDrawGridWithResolvedSlot(layout.place[1].x, layout.place[1].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[layout.place[1].slot], arg);
+        itfDrawGridWithResolvedSlot(layout.place[1].x, layout.place[1].y, 0, 0, (EffectSlotSet *)(u32)set->resources.packet.sheets[0], set->resources.packet.items[layout.place[1].slot], arg);
     }
 }
 
@@ -2834,11 +2832,11 @@ void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 arg) {
     sdfSubmitGsTestOneRegisterPacket(0x30000, arg);
     uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x80808080, arg);
     for (i = 0; i < 1; i++) {
-        itfDrawGridWithResolvedSlot(blank[i].x, blank[i].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[blank[i].slot], arg);
+        itfDrawGridWithResolvedSlot(blank[i].x, blank[i].y, 0, 0, (EffectSlotSet *)(u32)set->resources.packet.sheets[0], set->resources.packet.items[blank[i].slot], arg);
     }
     if (!(set->resources.packet.type & 2)) {
         for (i = 0; i < 2; i++) {
-            itfDrawGridWithResolvedSlot(layout.place[i].x, layout.place[i].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[layout.place[i].slot], arg);
+            itfDrawGridWithResolvedSlot(layout.place[i].x, layout.place[i].y, 0, 0, (EffectSlotSet *)(u32)set->resources.packet.sheets[0], set->resources.packet.items[layout.place[i].slot], arg);
         }
     }
     if (!(set->resources.packet.type & 4)) {

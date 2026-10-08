@@ -3,6 +3,7 @@
 #include "eff.h"
 #include "eff_resource_records.h"
 #include "itf_grid_text.h"
+#include "itf_draw_grid.h"
 #include "sdf.h"
 
 extern void *effGetSlotWorkOrOverride(EffectSlotSet *, s32);
@@ -41,9 +42,9 @@ extern void sdfInitPacketList(SdfListHead *);
 extern void sdfAppendPacket(SdfListHead *, u32);
 
 /* Resolve the indexed render entry before applying position, depth, and draw flags. */
-void itfDrawGridWithResolvedSlot(s32 offsetX, s32 offsetY, s32 z, s32 drawFlags, s32 object, s32 index, s32 surfaceIndex) {
-    void *renderEntry = effGetSlotWorkOrOverride((EffectSlotSet *)object, index);
-    func_002BF400(offsetX, offsetY, z, drawFlags, (EffectSlotSet *)object, index, (BdWork *)renderEntry,
+void itfDrawGridWithResolvedSlot(s32 offsetX, s32 offsetY, s32 z, s32 drawFlags, EffectSlotSet *object, s32 index, s32 surfaceIndex) {
+    void *renderEntry = effGetSlotWorkOrOverride(object, index);
+    func_002BF400(offsetX, offsetY, z, drawFlags, object, index, (BdWork *)renderEntry,
                   surfaceIndex);
 }
 

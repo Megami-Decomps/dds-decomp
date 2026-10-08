@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_resource.h"
+#include "mnu_flag_snapshot.h"
 #include "dds3_path.h"
 #include "eff_transform.h"
 #include "pcp_vu0.h"
@@ -255,13 +256,12 @@ extern s8 D_003BA9F9;
 extern u32 D_003C2E30[3];
 extern u32 D_0032A200[3];
 extern u8 D_003C2E40[41];
-extern s32 D_003BD790;
+extern SdfMemBlock *D_003BD790;
 extern SdfMemBlock *D_003BD794;
 extern SdfMemBlock *D_003BD798;
 extern SdfMemBlock *D_003BD79C;
 extern u32 D_003BD7A0;
 extern s32 mdlFlagTest(s32 flag);
-extern s32 mnuCreateFlagEntries(void);
 extern void ptySaveActiveUnitsToStock(void);
 extern void mnuCollectFlagArray(u8 *flags);
 

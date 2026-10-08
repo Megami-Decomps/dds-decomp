@@ -151,6 +151,16 @@ s64 f(s32 cb) { return mnuRequest(func_00101958(), 2, cb); }
 that genuinely recurs. Wrapping a one-off call in an inline just to get
 `jal` is a codegen lever, not source.
 
+## Narrow return types and `jal` tails
+
+A function whose recovered return type is narrow can return a narrow callee's
+result with `jal; epilogue` instead of a sibling `j`. DDS1 `func_0015AD48`
+(`u16` over `parGetRestartFlag`) and `func_0015ADB0` (`u8` over `parObjGetMode`)
+both match this way. The same call with an `s32` return, with or without a
+named local, tail-calls. Use the recovered type from the retail body:
+`parObjGetMode` returns the `u8` fields `mode150`/`mode151`, or 0. This is not a
+wider or invented return, which the `btlGetTaskState6` note above rules out.
+
 ## Lexical nested helpers and the static chain
 
 GNU C nested functions use `$v0` as a hidden static-chain register on EE. A
@@ -4439,4 +4449,120 @@ copies the actor's `BtlUnit.orientation` at +0x70, not its world rotation
 at +0x40. Its destination is a generic 16-byte SDK vector buffer.
 Use the primary actor directly at every caller; the former byte-owner
 and destination-quad casts do not represent separate objects.
+
+
+## DDS2 overlay particles complete the existing runtime owner
+
+DDS2 `0022D040` allocates 0x20-byte particles: a three-float direction,
+rotation angle/speed, displacement/speed, and alpha/age/delay bytes.
+The renderer at `0022D8A8` reads the same floating motion fields.
+`BattleRuntimeState +18..34` therefore owns the row dimensions,
+integer parameters and floating animation bounds; its `ownedData`
+points to these particles, not a second runtime layout.
+
+The constructor's unexplained third allocation-call register is not an
+allocator argument: the existing one-input provider does not consume it.
+Leave the constructor parked rather than inventing a prototype or dummy.
+
+## Viewer range setters operate on the primary timeline runtime
+
+`evtViewerSetMinimumFromCurrent` / `evtViewerSetMaximumFromCurrent`
+(DDS1 `0022C3C8` / `0022C3E8`, DDS2 `00246D40` / `00246D60`)
+update `EvtRuntime.headerFirst`, `frameRange.word` and `curFrame`.
+The retired `EvtRange` was a padded projection of that same allocation.
+The whole range word, rather than only its serialized low halfword, is used.
+
+Option confirmation (`00230660` / `0024B268`) clears the real word at
+`+2288` for type-12 keys and owns a frame-count dialog base at
+DDS1 `+248C` / DDS2 `+24B4`. These complete the existing padding
+without changing either runtime's size or inventing a second layout.
+
+## DDS1 profile progress finishes five distinct animation fields
+
+The profile callback at `00268AB8` indexes the existing 0x68-byte
+`BrsProgressAnimation` bank at work `+1220`. It reads the signed progress
+at row `+30` and opacity at `+1C`; completion writes frame `+44 = 0`,
+icon opacity `+48 = 0x80`, icon state `+4C = 1`, and flags `+60/+61 = 1`.
+These fields complete the primary DDS1 owner without moving either bank,
+changing its extent, or applying the different DDS2 counter origin.
+The unexplained `+61` flag remains neutrally named.
+
+This is an owner completion, not a callback match: the released correct
+callback draft still differs in frame/register/control-flow lifetime and
+remains assembly. All 17 actual `mnu_result.h` clients gate 596 match,
+0 differ with no context, rodata or undefined-symbol rows after resplit.
+
+
+## EffectObj and EffWorldNode merger is parked on the kind alias contract
+
+The constructor allocates the same 0x44-byte object described by both
+owners: identity at +04, kind-7 payload at +18 and `ObjectTransform` at +1C.
+Retail writes the kind word at +0C (DDS1 0010F418 / DDS2 0010F640), but
+effect providers read its high byte at +0F (001158B8 / 00115B20).
+
+A real word/byte union makes both effect units exact, but regresses both
+constructors by 12/54 words. Retail reads the operations-table slot before
+initialization (DDS1 0010F45C..0010F464, before SW at 0010F468); the union
+prevents gcc from hoisting that read. Explicitly reading it first leaves
+four instruction differences; an unsigned 24/8-bit field view still leaves
+the original twelve. The operations tables live in `.data`, so qualifying
+their externs `const` is not an acceptable fix.
+
+Keeping the original word field and using `kindTag >> 24` emits LBU but
+reorders four stores in `effObjBindValidatedOwner` (+3C/+44/+4C/+54).
+The merger and union therefore remain private, and existing matching C
+is retained. No alias cast, dummy qualifier, or store-order search is used.
+
+## DDS2 stat gauge span is signed; pulse division is still unresolved
+
+The unit-private `MenuPanelItem.value10` at +10 is a signed pixel span.
+`func_002C2AE8` combines it with signed stat differences and uses retail
+`mult` followed by signed `div` at 2C2B3C/2C2B50, 2C2CEC/2C2D0C and
+2C2DB0/2C2DD0. Keep that primary field `s32`, not an unsigned owner plus
+a renderer-only signed view. Its existing word store and all 175 matched
+functions in `code_002BE628` are unchanged.
+
+The renderer is not thereby matched. Its pulse still has real hardware
+division by constant 64, while ordinary C cancels `phase * 256 / 64`
+during the first compiler pass. Division by 170 remains hardware division.
+The released complete owner-based attempt already checked signed math;
+there is no evidence for a dynamic divisor, fake qualifier or flag change.
+A real original inline may explain the late constant, but no such helper
+has been identified, so the body stays assembly.
+
+## DDS2 local-map loader retains a real subrecord and forwards task work
+
+`func_0030AC10` retains `LmapTaskState + 0x78` throughout the loader switch:
+file request at +00, PAC request at +04, signed phase/index at +08/+0A,
+and an unknown word at +0C. Keep this as the primary `LmapLoadState`, with
+the shared `FilePacRequest` owning the PAC queue rather than another view.
+
+`func_0030A8A8` forwards `kwlnTaskGetUserValue` in `$4` through the matched
+`func_0030ABF0` wrapper to the loader. Both receive `LmapTaskState *`;
+the wrapper compares the loader's actual `s32` result directly. The former
+void/no-argument declarations and `s64` comparison local were unnecessary.
+This contract correction does not match the loader body: its honest park
+still differs in phase-request flow and register/scheduling details.
+
+## Camp stock-window setup receives its actual menu owner
+
+DDS2 `00261B98` operates on `MenuTerminalContext`; its caller at
+`00262E98` transports the task's word-valued user data into that
+pointer interface. Keep the conversion at this real task boundary,
+not a wrong integer prototype on the setup method.
+
+The existing eight-byte `ShopItemPriceRecord` owns a flags byte at
+zero (native `00261C6C` masks its low two bits) and price at four.
+Completing its padding removes the need for another item-record view.
+The body remains parked: `+154..15C` still has a three-store schedule
+rotation, which does not justify store-order search.
+
+## Object-base render setup uses the complete model owner
+
+DDS1 `func_00112100` follows `ObjBase.resourceHandle` to `MdlCtx.inner`
+and temporarily changes `SdfModel.flags` at +19. The existing complete
+owners replace the two render-only prefix views without changing code.
+`mdlProcessContextNodesAndTransforms` receives the actual `s32` SDK
+update argument; the surface-table pointer crosses that address-word
+boundary explicitly, rather than through a false pointer prototype.
 

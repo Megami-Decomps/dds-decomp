@@ -1,5 +1,7 @@
 #include "mnu_input.h"
+#include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_records.h"
 #include "common.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -9,8 +11,6 @@
 #include "mnu_staff.h"
 #include "mnu_scroll_panel.h"
 #include "kwln_task_lifecycle.h"
-
-extern void itfDrawGridWithResolvedSlot(u32, u32, u32, u32, u32, u32, u32);
 
 extern u32 mnuMovieShutdownCounter;
 
@@ -399,10 +399,6 @@ void mnuReleaseStaffCategoryTextureHandles(s32 category, u8 *menuBytes) {
     }
 }
 
-typedef struct { u8 pad0[0x20]; s32 *data; } MotSub;
-
-typedef struct { u8 pad0[8]; MotSub *sub; } MotRes;
-
 /* Camp work's drawing parameters; the intervening regions belong to the
  * resource lists and party-panel state initialized elsewhere in this unit. */
 typedef struct CampVisualWork {
@@ -412,9 +408,9 @@ typedef struct CampVisualWork {
     s32 drawContext;        /* 0x0060 */
     s32 titleContext;       /* 0x0064 */
     u8 pad68[0x98];
-    u32 motionResource;     /* 0x0100 */
+    EffMappedResource *motionResource; /* 0x0100 */
     u8 pad104[0xC];
-    MotRes *motion[2];      /* 0x0110 and 0x0114 */
+    EffMappedResource *motion[2]; /* 0x0110 and 0x0114 */
     MenuScrollPanel *modelHandle; /* 0x0118: retained scroll-panel allocation */
     u8 pad11C[0x16C];
     s32 backgroundOpacity;  /* 0x0288 */
@@ -447,27 +443,35 @@ extern u32 D_003E6970[];
 /* Load the mapped motion resource and initialize both status batches' words.
  * Batch categories and the initial 0xF word remain opaque. */
 void movLoadTitleEffects(u8 *menuBytes) {
+    CampVisualWork *work = (CampVisualWork *)menuBytes;
+    EffMappedResource *batch;
+    EffMappedRecord *records;
     s32 *statusWords;
 
-    ((CampVisualWork *)menuBytes)->motionResource = effLoadMappedResource("/camp/mot/", D_003E6970[0]);
-    ((CampVisualWork *)menuBytes)->motion[0] = effCreateStatusBatch(6);
-    statusWords = ((CampVisualWork *)menuBytes)->motion[0]->sub->data;
+    work->motionResource = effLoadMappedResource("/camp/mot/", D_003E6970[0]);
+    batch = effCreateStatusBatch(6);
+    records = batch->records;
+    work->motion[0] = batch;
+    statusWords = (s32 *)records[0].status;
     statusWords[0] = 0xF;
     statusWords[1] = 0;
     statusWords[2] = 0;
     statusWords[3] = 0;
     statusWords[4] = 0;
-    ((CampVisualWork *)menuBytes)->motion[1] = effCreateStatusBatch(1);
-    statusWords = ((CampVisualWork *)menuBytes)->motion[1]->sub->data;
+    batch = effCreateStatusBatch(1);
+    records = batch->records;
+    work->motion[1] = batch;
+    statusWords = (s32 *)records[0].status;
     statusWords[0] = 0xF;
     statusWords[1] = 0;
 }
 
 /* Destroy the mapped motion resource followed by both status batches. */
 void movReleaseTitleEffects(u32 *resourceSlots) {
-    u32 *batchCursor = resourceSlots + 0x110 / 4;
+    CampVisualWork *work = (CampVisualWork *)resourceSlots;
+    EffMappedResource **batchCursor = work->motion;
     u32 batchIndex;
-    effDestroyPackedBatch(resourceSlots[0x100 / 4]);
+    effDestroyPackedBatch(work->motionResource);
     for (batchIndex = 0; batchIndex < MNU_STAFF_STATUS_BATCH_COUNT; batchIndex++) {
         effDestroyPackedBatch(*batchCursor++);
     }
@@ -593,7 +597,7 @@ typedef struct StaffResourceHeader {
 
 void mnuDrawCampGridResourceSlot(s32 drawWork, u32 y, u32 z, s32 record, u32 unused,
                    u32 layer) {
-    itfDrawGridWithResolvedSlot(drawWork + 0x60, y, z, 1, *(u32 *)(*(s32 *)(record + 0x30) + 100), 10,
+    itfDrawGridWithResolvedSlot(drawWork + 0x60, y, z, 1, (struct EffectSlotSet *)(u32)*(u32 *)(*(s32 *)(record + 0x30) + 100), 10,
                   layer);
 }
 
@@ -1018,13 +1022,13 @@ void mnuDrawStaffGridLabelsForKind(s32 kind, u32 slot) {
         if (rows[kind].x[i] != 0) {
             if (rows[kind].gridIds[i] == 0x1F) {
                 itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, (y - 2) << 3, 0, 1,
-                                           slot, 0x1F, 0x53);
+                                           (struct EffectSlotSet *)(u32)slot, 0x1F, 0x53);
             } else if (rows[kind].gridIds[i] == 8) {
                 itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, (y + 2) << 3, 0, 1,
-                                           slot, 8, 0x53);
+                                           (struct EffectSlotSet *)(u32)slot, 8, 0x53);
             } else {
                 itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, y << 3, 0, 1,
-                                           slot, rows[kind].gridIds[i], 0x53);
+                                           (struct EffectSlotSet *)(u32)slot, rows[kind].gridIds[i], 0x53);
             }
         }
     }
@@ -1079,7 +1083,7 @@ void func_002AA9D8(s32 kind, u32 labelIndex, u32 textTable, u32 context,
     }
     for (i = 0; i < 4; i++) {
         itfDrawGridWithResolvedSlot(pieces[i].x, pieces[i].y + 0x918, 0,
-                                   drawOption, menu->titleContext, pieces[i].gridId, layer);
+                                   drawOption, (struct EffectSlotSet *)(u32)menu->titleContext, pieces[i].gridId, layer);
     }
     if (textTable != 0) {
         if (conditionTable != 0 && ((s32 *)conditionTable)[labelIndex] != 0) {

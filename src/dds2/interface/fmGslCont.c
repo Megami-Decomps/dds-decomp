@@ -7,8 +7,8 @@ s32 fmGslReleaseActiveResourceBuffers(void) {
     if (frFontResourceList.head == 0) {
         return 0;
     }
-    sdfReleaseResourceAllocation(frFontResourceList.firstAllocation);
-    sdfReleaseResourceAllocation(frFontResourceList.secondAllocation);
+    sdfReleaseResourceAllocation(frFontResourceList.nodeAllocation);
+    sdfReleaseResourceAllocation(frFontResourceList.recordStorageAllocation);
     frFontResourceList.head = 0;
     return 1;
 }
@@ -17,7 +17,7 @@ s32 fmGslReleaseActiveResourceBuffers(void) {
 FntNode *frFontDetachFirstResourceNode(void) {
     FntNode *node = frFontResourceList.head->next;
 
-    if (node->unk0 == NULL) {
+    if (node->nodeIndex == 0) {
         return NULL;
     }
     node->prev->next = node->next;

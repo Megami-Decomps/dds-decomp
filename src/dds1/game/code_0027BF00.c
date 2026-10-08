@@ -1,5 +1,7 @@
 #include "sdf_chip.h"
+#include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_records.h"
 #include "mnu_input.h"
 #include "mnu.h"
 #include "sdf_resource.h"
@@ -85,24 +87,6 @@ extern void func_00300508(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, Me
 
 extern void mnuSelectPage(MenuPageWindow *window, s32 selected);
 
-typedef struct ScrollParams {
-    s32 a;
-    s32 b;
-    s32 c;
-} ScrollParams;
-
-typedef struct ScrollInner {
-    u8 unk0[0x20];
-    ScrollParams *params;
-} ScrollInner;
-
-typedef struct ScrollHandle {
-    u8 unk0[8];
-    ScrollInner *inner;
-} ScrollHandle;
-
-extern ScrollHandle *effCreateStatusBatch(s32);
-
 extern void func_0027FCA0(s32, s32, s32);
 
 
@@ -130,7 +114,6 @@ void mnuClearListFlagsOneAndTwo(u32 *flags);
 
 MenuList *mnuCreateListState(s32 id, s32 visibleCount, s32 rowSpacing);
 
-u32 mnuDestroyListState(MenuList *list);
 
 MenuListNode *mnuListAdvanceCursor(MenuList *list, s32 noScroll, s32 keepFade);
 
@@ -185,7 +168,7 @@ void mnuDrawFourEntries(s32 x, s32 y, s32 depth, MenuList *list, MenuListNode *n
         s32 index = selected * MNU_ENTRY_SPRITE_COUNT + spriteIndex;
         u32 sprite = node->sprites[index].sprite;
         if (sprite != 0) {
-            itfDrawGridWithResolvedSlot(x, y, depth, 0, sprite, node->sprites[index].effect, drawArg);
+            itfDrawGridWithResolvedSlot(x, y, depth, 0, (EffectSlotSet *)(u32)sprite, node->sprites[index].effect, drawArg);
         }
         spriteIndex++;
     } while (spriteIndex < MNU_ENTRY_SPRITE_COUNT);
@@ -467,18 +450,18 @@ INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027CF28);
 extern void func_0027CF28(struct MenuWindowSpriteGroup *, u32, u32, u32, u32);
 
 typedef struct MenuWindowSpriteGroup {
-    s32 resourceHandle;
+    struct SdfMemBlock *allocation;
     u8 pad4[8];
-    s32 sprites[7];
+    struct EffectSlotSet *sprites[7];
 } MenuWindowSpriteGroup;
 
 /* Allocate/clear the native seven-sprite resource group before its initializer runs. */
 MenuWindowSpriteGroup *mnuCreateWindowState(u32 source, u32 mode, u32 variant, u32 option) {
-    s32 allocationHandle = (u32)sdfAllocGeneralBlock(sizeof(MenuWindowSpriteGroup));
-    MenuWindowSpriteGroup *group = (MenuWindowSpriteGroup *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(MenuWindowSpriteGroup));
+    MenuWindowSpriteGroup *group = (MenuWindowSpriteGroup *)sdfResourceRetainAddress(allocation);
 
     memset(group, 0, sizeof(MenuWindowSpriteGroup));
-    group->resourceHandle = allocationHandle;
+    group->allocation = allocation;
     func_0027CF28(group, source, mode, variant, option);
     return group;
 }
@@ -487,18 +470,18 @@ MenuWindowSpriteGroup *mnuCreateWindowState(u32 source, u32 mode, u32 variant, u
 void mnuReleaseWindowTextures(MenuWindowSpriteGroup *group) {
     u32 spriteIndex;
     for (spriteIndex = 0; spriteIndex < MNU_WINDOW_RESOURCE_SPRITES; spriteIndex++) {
-        effDestroyResourceSlotSet((struct EffectSlotSet *)group->sprites[spriteIndex]);
+        effDestroyResourceSlotSet(group->sprites[spriteIndex]);
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(group->resourceHandle));
+    sdfReleaseResourceAllocation(group->allocation);
 }
 
 void mnuConfigureWindowSpriteSlots(MenuWindowSpriteGroup *group, u32 target) {
-    effConfigureWithDefaultSetting(group->sprites[1], 0, target, 0, 0x14, 0xc);
-    effConfigureWithDefaultSetting(group->sprites[2], 0, target, 1, 10, 0xc);
-    effConfigureWithDefaultSetting(group->sprites[3], 0, target, 2, 0, 0xc);
-    effConfigureWithDefaultSetting(group->sprites[4], 0, target, 2, 0, 0xc);
-    effConfigureWithDefaultSetting(group->sprites[5], 0, target, 1, 10, 0xc);
-    effConfigureWithDefaultSetting(group->sprites[6], 0, target, 0, 0x14, 0xc);
+    effConfigureWithDefaultSetting(group->sprites[1], 0, (struct EffMappedResource *)target, 0, 0x14, 0xc);
+    effConfigureWithDefaultSetting(group->sprites[2], 0, (struct EffMappedResource *)target, 1, 10, 0xc);
+    effConfigureWithDefaultSetting(group->sprites[3], 0, (struct EffMappedResource *)target, 2, 0, 0xc);
+    effConfigureWithDefaultSetting(group->sprites[4], 0, (struct EffMappedResource *)target, 2, 0, 0xc);
+    effConfigureWithDefaultSetting(group->sprites[5], 0, (struct EffMappedResource *)target, 1, 10, 0xc);
+    effConfigureWithDefaultSetting(group->sprites[6], 0, (struct EffMappedResource *)target, 0, 0x14, 0xc);
 }
 
 /* Always draw slot zero; masks one/two select the two three-slot banks.
@@ -515,12 +498,12 @@ void mnuDrawWindowSprites(s32 x, s32 y, s32 z, s32 mask, MenuWindowSpriteGroup *
         itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[5], 0, param);
         itfDrawGridWithResolvedSlot(x, y, z, 0, group->sprites[6], 0, param);
     }
-    itfGridLookupValueOrDefault(group->sprites[1], 0);
-    itfGridLookupValueOrDefault(group->sprites[2], 0);
-    itfGridLookupValueOrDefault(group->sprites[3], 0);
-    itfGridLookupValueOrDefault(group->sprites[4], 0);
-    itfGridLookupValueOrDefault(group->sprites[5], 0);
-    itfGridLookupValueOrDefault(group->sprites[6], 0);
+    itfGridLookupValueOrDefault((s32)(u32)group->sprites[1], 0);
+    itfGridLookupValueOrDefault((s32)(u32)group->sprites[2], 0);
+    itfGridLookupValueOrDefault((s32)(u32)group->sprites[3], 0);
+    itfGridLookupValueOrDefault((s32)(u32)group->sprites[4], 0);
+    itfGridLookupValueOrDefault((s32)(u32)group->sprites[5], 0);
+    itfGridLookupValueOrDefault((s32)(u32)group->sprites[6], 0);
 }
 
 typedef struct MenuPanelSlotIndices {
@@ -528,9 +511,6 @@ typedef struct MenuPanelSlotIndices {
 } MenuPanelSlotIndices;
 
 extern MenuPanelSlotIndices D_003B2368;
-extern void effConfigureWithDefaultSetting(s32, s32, s32, s32, s32, s32);
-extern void effConfigureIndexedSlotMaterial(s32, s32, s32, s32, s32, s32, s32);
-
 /* Panel kind chooses the native sprite-slot layout. */
 MenuPanelHandles *mnuCreatePanelSpriteHandles(u32 panelKind, s32 resource, s32 target) {
     MenuPanelSlotIndices indices = D_003B2368;
@@ -544,8 +524,8 @@ MenuPanelHandles *mnuCreatePanelSpriteHandles(u32 panelKind, s32 resource, s32 t
         for (i = 0; i < panel->count; i++) {
             panel->handles[i] = (EffectSlotSet *)effCreateResourceSlotSet((EffectSlotSet *)resource, indices.slots[i], 1);
         }
-        effConfigureWithDefaultSetting((s32)panel->handles[4], 0, target, 0, 0, 12);
-        effConfigureWithDefaultSetting((s32)panel->handles[5], 0, target, 0, 0, 12);
+        effConfigureWithDefaultSetting(panel->handles[4], 0, (struct EffMappedResource *)(u32)target, 0, 0, 12);
+        effConfigureWithDefaultSetting(panel->handles[5], 0, (struct EffMappedResource *)(u32)target, 0, 0, 12);
         break;
     case MNU_PANEL_KIND_FOUR_OFFSET_ICONS:
         panel->count = 4;
@@ -553,18 +533,18 @@ MenuPanelHandles *mnuCreatePanelSpriteHandles(u32 panelKind, s32 resource, s32 t
         panel->handles[1] = (EffectSlotSet *)effCreateResourceSlotSet((EffectSlotSet *)resource, 23, 1);
         panel->handles[2] = (EffectSlotSet *)effCreateResourceSlotSet((EffectSlotSet *)resource, 22, 1);
         panel->handles[3] = (EffectSlotSet *)effCreateResourceSlotSet((EffectSlotSet *)resource, 22, 1);
-        effConfigureIndexedSlotMaterial((s32)panel->handles[0], 0, target, 1, 10, 10, 12);
-        effConfigureIndexedSlotMaterial((s32)panel->handles[1], 0, target, 1, 0, 10, 12);
-        effConfigureIndexedSlotMaterial((s32)panel->handles[2], 0, target, 1, 0, 10, 12);
-        effConfigureIndexedSlotMaterial((s32)panel->handles[3], 0, target, 1, 10, 10, 12);
+        effConfigureIndexedSlotMaterial(panel->handles[0], 0, (struct EffMappedResource *)(u32)target, 1, 10, 10, 12);
+        effConfigureIndexedSlotMaterial(panel->handles[1], 0, (struct EffMappedResource *)(u32)target, 1, 0, 10, 12);
+        effConfigureIndexedSlotMaterial(panel->handles[2], 0, (struct EffMappedResource *)(u32)target, 1, 0, 10, 12);
+        effConfigureIndexedSlotMaterial(panel->handles[3], 0, (struct EffMappedResource *)(u32)target, 1, 10, 10, 12);
         break;
     case MNU_PANEL_KIND_FIXED_ICON_PAIRS:
         panel->count = 4;
         for (i = 0; i < panel->count; i++) {
             panel->handles[i] = (EffectSlotSet *)effCreateResourceSlotSet((EffectSlotSet *)resource, indices.slots[i + 2], 1);
         }
-        effConfigureWithDefaultSetting((s32)panel->handles[2], 0, target, 0, 0, 12);
-        effConfigureWithDefaultSetting((s32)panel->handles[3], 0, target, 0, 0, 12);
+        effConfigureWithDefaultSetting(panel->handles[2], 0, (struct EffMappedResource *)(u32)target, 0, 0, 12);
+        effConfigureWithDefaultSetting(panel->handles[3], 0, (struct EffMappedResource *)(u32)target, 0, 0, 12);
         break;
     }
     return panel;
@@ -936,23 +916,23 @@ void mnuUpdateFade(s32 *list) {
 }
 
 void mnuInitScrollHandles(MenuScrollPanel *menu) {
-    ScrollHandle *handle;
+    EffMappedResource *handle;
 
     handle = effCreateStatusBatch(1);
     menu->handles[0] = handle;
-    handle->inner->params->a = 10;
-    handle->inner->params->b = 0;
+    ((s32 *)handle->records[0].status)[0] = 10;
+    ((s32 *)handle->records[0].status)[1] = 0;
 
     handle = effCreateStatusBatch(3);
     menu->handles[1] = handle;
-    handle->inner->params->a = 8;
-    handle->inner->params->b = 4;
-    handle->inner->params->c = 8;
+    ((s32 *)handle->records[0].status)[0] = 8;
+    ((s32 *)handle->records[0].status)[1] = 4;
+    ((s32 *)handle->records[0].status)[2] = 8;
 
     handle = effCreateStatusBatch(1);
     menu->handles[2] = handle;
-    handle->inner->params->a = 10;
-    handle->inner->params->b = 0;
+    ((s32 *)handle->records[0].status)[0] = 10;
+    ((s32 *)handle->records[0].status)[1] = 0;
 }
 
 void mnuReleaseScrollPanelAnimations(MenuScrollPanel *list) {
@@ -1010,7 +990,9 @@ void mnuActivatePendingPanelResource(MenuScrollPanel *menu) {
     } while (--remaining >= 0);
     if (menu->active[0].sprite != 0) {
         itfSetGridEntryQuantizedAndRefresh(menu->active[0].sprite, menu->active[0].effect, 0, 0, 0x400, 0);
-        effConfigureWithDefaultSetting(menu->active[0].sprite, menu->active[0].effect, menu->handles[2],
+        effConfigureWithDefaultSetting((struct EffectSlotSet *)(u32)menu->active[0].sprite,
+                                          menu->active[0].effect,
+                                          menu->handles[2],
                                           0, 10, 2);
     }
 }
@@ -1022,9 +1004,10 @@ void mnuActivatePanelAndConfigureGridResources(MenuScrollPanel *menu, s32 x, s32
     menu->pending[1].sprite = x;
     menu->pending[1].effect = color;
     itfSetGridEntryQuantizedAndRefresh(x, y, 0, 0, -0x400, 0);
-    effConfigureIndexedSlotResource(x, y, menu->handles[0], 0, 3);
+    effConfigureIndexedSlotResource((struct EffectSlotSet *)(u32)x, y, menu->handles[0], 0, 3);
     itfSetGridEntryQuantizedAndRefresh(x, color, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting(x, color, menu->handles[1], 0, 10, 0);
+    effConfigureWithDefaultSetting((struct EffectSlotSet *)(u32)x, color,
+                                   menu->handles[1], 0, 10, 0);
 }
 
 u8 mnuHasScrollPanelOverlay(MenuScrollPanel *panel) {
@@ -1035,7 +1018,7 @@ void mnuDrawPanelGridAndSubmitSurface(u8 *panel, s32 y, s32 unknown,
                    u32 *sprite, s32 flag) {
     uiDrawActiveSurfaceRegion(flag);
     itfDrawGridWithResolvedSlot((s32)(panel + 0x10), y + 0xf8, 0xffffff, 1,
-                   sprite[6], sprite[7], flag);
+                   (EffectSlotSet *)(u32)sprite[6], sprite[7], flag);
     sdfDispatchSurfaceWithPreparedTexturePacket(flag);
 }
 

@@ -1,5 +1,6 @@
 #include "bill_object_api.h"
 #include "common.h"
+#include "btl_effect_position.h"
 #include "sdf.h"
 #include "eff_blur.h"
 #include "eff.h"
@@ -19,7 +20,6 @@ extern void effThunderUpdateChainSegments(EffThunderGroup *group);
 extern void effThunderGroupRelease(EffThunderGroup *group);
 extern void effSetResourceBlendColor(s32 handle, u32 color);
 extern u32 func_0016F018(u32 address);
-extern void btlSetActorEffectParameterOrMuzzlePosition(u32 unit, s32 arg1);
 
 void effFreePairedResources(PairedEffectResources *pair) {
     extern void sdfReleaseChipBlock(void *work);
@@ -54,7 +54,7 @@ void effUpdatePairedResources(PairedEffectResources *work) {
             blendColor = effBlendColor(work->colorWithAlpha & 0xFFFFFF, work->colorWithAlpha, t);
             resourceIndex = 0;
             do {
-                btlSetActorEffectParameterOrMuzzlePosition(actor, 0xB);
+                btlSetActorEffectParameterOrMuzzlePosition((struct BtlUnit *)actor, 0xB);
                 VU0_STORE_VF(vf10, actorPosition);
                 record = (BlurVectorRecord *)func_0016F018((u32)work->resource[resourceIndex]);
                 VU0_LOAD_VF(vf10, actorPosition);

@@ -40,12 +40,6 @@ typedef struct ParColorRamp {
     u32 fadeOut;       /* 0x40 */
 } ParColorRamp;
 
-/* Record contents depend on the emitter; radial records are ParBurstPacket. */
-typedef struct {
-    u32 allocation;
-    void *records;
-} ParBuffer; /* 0x08 */
-
 /* Common emitter header. Radial-only fields belong to ParBurstEmitter's tail. */
 typedef struct ParObj {
     f32 origin[4];                /* 0x00 */
@@ -68,7 +62,7 @@ typedef struct ParObj {
     f32 matrix[16];               /* 0xB0 */
     u8 padF0[4];
     BillObj *billboard;           /* 0xF4 */
-    ParBuffer *buffer;            /* 0xF8 */
+    EffectBufferTail *buffer;     /* 0xF8 */
     u32 pendingRestartSteps;      /* 0xFC: count, not a pointer */
     f32 sourceMatrix[16];         /* 0x100 */
     u16 dispatchIndex;            /* 0x140: object dispatch, distinct from kind */
@@ -145,7 +139,7 @@ extern u8 effEmitterDelayRandomState[];
    lifetimeFrames. RNG calls and the pre-transform length measurement stay in
    their original order. */
 void parInitializeRadialParticle(ParBurstEmitter *effect, u32 particleIndex) {
-    ParBurstPacket *packet = effect->head.buffer->records;
+    ParBurstPacket *packet = (ParBurstPacket *)effect->head.buffer->records;
     f32 direction[4];
     f32 initialRadius;
     f32 jitterFactor;
@@ -414,11 +408,11 @@ void parUpdateAndDrawObject(ParObj *effect) {
     if (particleCount > 0) {
         step = particleCount;
         do {
-            s32 age = record->unk20;
+            s32 age = record->age;
 
             if (age < lifetime && age >= 0) {
                 PCP_COPY_VECTOR(billboard, record->position);
-                billboard->childParam = record->unk24;
+                billboard->childParam = record->color;
                 billInvokeCallback(billboard);
             }
             step--;

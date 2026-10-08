@@ -75,12 +75,21 @@ typedef struct FrFontGlyph {
     struct FrFontGlyph *previous;
     struct FrFontGlyph *next;
     struct FrFontGlyph *chainHead;
-    u32 unk30;
-    u32 unk34;
-    u32 unk38;
-    s32 unk3C;
-    s32 unk40;
+    u32 timedControlCode; /* F214/F215 terminal timing control. */
+    u32 pendingLipsStopCode; /* F117 until evtLipsStopFunction runs. */
+    u32 skipLipsStopWait; /* Set when a timing control follows F117. */
+    s32 remainingWaitFrames; /* F215 uses 0xFFFF for title-sound completion. */
+    s32 contextModeEnabled;
 } FrFontGlyph;
+
+/* Encoded message controls consumed by the glyph timing/lipsync state. */
+typedef enum ItfGlyphControlCode {
+    ITF_GLYPH_CONTROL_WAIT_FRAMES = 0xF214,
+    ITF_GLYPH_CONTROL_WAIT_FRAME_OR_SOUND = 0xF215,
+    ITF_GLYPH_CONTROL_STOP_LIPS = 0xF117,
+} ItfGlyphControlCode;
+
+#define ITF_GLYPH_WAIT_FOR_SOUND_SENTINEL 0xFFFF
 
 /* Encoded text cursor and pending glyph updates; distinct from a glyph (0x20). */
 typedef struct FrFontCtx {

@@ -6,10 +6,10 @@
 #include "sdf_stream_read.h"
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
+#include "mdl_object_stream.h"
 
 #define SDF_RELOC_HEADER_BYTES 0x20
 #define SDF_STREAM_NODE_BYTES 0x8C
-#define SDF_STREAM_FRAME_HEADER_BYTES 0x10
 #define SDF_STREAM_SCRATCH_BYTES 0x10100
 #define SDF_STREAM_PREFIX_BYTES 0x100
 #define SDF_STREAM_SLOT_BYTES 0x2000
@@ -91,23 +91,6 @@ typedef struct MidiChannel {
     u32 earlierEntries[2];
     u32 entries[8];
 } MidiChannel;
-typedef struct MidiPlaybackState {
-    u8 pad00[0x13];
-    u8 completed;
-    u8 pad14;
-    u8 looping;
-    u8 pad16[3];
-    u8 bufferIndex;
-    u8 pending;
-    u8 pad1B[0xD];
-    u32 buffers[2];
-    u32 bufferSize;
-    u8 pad34[0xC];
-    s32 limit;
-    u8 pad44[4];
-    s32 processed;
-} MidiPlaybackState;
-
 extern s32 func_00312C08(void);
 extern void func_002EC230(s32);
 extern s32 func_002EC060(void *);
@@ -124,13 +107,6 @@ u32 sndSendCommandPacket(u32 command, u32 value, void *data, u32 size);
 
 u32 func_002E87A8(u32 command, u32 value, void *data, u32 size);
 
-
-typedef struct SoundFormat {
-    u8 hasAudio;
-    u8 stereo;
-    u8 loopMode;
-    u8 playbackMode;
-} SoundFormat;
 
 extern SdfStreamFrameNode *sdfSoundNodeHead;
 extern SdfStreamFrameNode *D_003BDAA8;
@@ -160,13 +136,6 @@ extern SdfStreamFrameNode *sdfStreamNodeListTail;
 extern void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet);
 
 extern void sdfBuildStreamFrameTransferPackets(SdfStreamFrameNode *node);
-
-typedef struct SdfStreamParams {
-    u8 mode;
-    u8 param1;
-    u8 param2;
-    u8 param3;
-} SdfStreamParams;
 
 extern u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 
@@ -1015,8 +984,8 @@ void sdfAllocateStreamFrameBuffers(SdfStreamFrameNode *node) {
     size = node->width * node->height;
     size *= bytesPerPixel;
     node->bufferSize = size;
-    node->buffers[0] = sdfAllocateBlockBySizeThreshold(size);
-    node->buffers[1] = sdfAllocateBlockBySizeThreshold(size);
+    node->frameBuffers[0] = sdfAllocateBlockBySizeThreshold(size);
+    node->frameBuffers[1] = sdfAllocateBlockBySizeThreshold(size);
 }
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB578);
 
@@ -1035,23 +1004,15 @@ void sdfSoundInitNodeFromFormat(SdfStreamFrameNode *node, SoundFormat *format) {
     node->loopMode = format->loopMode;
     node->playbackMode = format->playbackMode;
 }
-/* Native 0x10 serialized header: dimensions and the DMA-cycle limit. */
-typedef struct SdfStreamHeader {
-    u8 pad00[8];
-    u16 width;
-    u16 height;
-    u32 cycleLength;
-} SdfStreamHeader;
-
 /* Decode the frame header, allocate its buffers, then queue the bytes after that header. */
 void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 sourceAddress, s32 sourceSize) {
     s32 interruptsEnabled;
     u8 *frameBytes = (u8 *)sourceAddress;
 
     sdfSoundInitNodeFromFormat(node, format);
-    node->width = ((SdfStreamHeader *)frameBytes)->width;
-    node->cycleLength = ((SdfStreamHeader *)frameBytes)->cycleLength;
-    node->height = ((SdfStreamHeader *)frameBytes)->height;
+    node->width = ((SdfStreamFrameHeader *)frameBytes)->width;
+    node->cycleLength = ((SdfStreamFrameHeader *)frameBytes)->cycleLength;
+    node->height = ((SdfStreamFrameHeader *)frameBytes)->height;
     sdfAllocateStreamFrameBuffers(node);
     func_002EB578(node, frameBytes + SDF_STREAM_FRAME_HEADER_BYTES, sourceSize - SDF_STREAM_FRAME_HEADER_BYTES);
     interruptsEnabled = func_00312C08();
@@ -1068,7 +1029,7 @@ void sdfSoundInitFormattedNode(SdfStreamFrameNode *node, SoundFormat *format, Sd
     node->read = readSource;
     node->source = source;
     node->active = 1;
-    node->scratchBuffer = sdfAllocateBlockBySizeThreshold(SDF_STREAM_SCRATCH_BYTES) + SDF_STREAM_PREFIX_BYTES;
+    node->scratchBuffer = (u8 *)sdfAllocateBlockBySizeThreshold(SDF_STREAM_SCRATCH_BYTES) + SDF_STREAM_PREFIX_BYTES;
 }
 
 extern SdfTexResource *sdfTexAllocateHeadForDimensions(s32, s32, s32, s32, s32);
@@ -1077,7 +1038,7 @@ extern SdfTexResource *sdfTexAllocateHeadForDimensions(s32, s32, s32, s32, s32);
  * only when larger than one GS page; smaller dimensions remain unchanged.
  */
 void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
-    SdfStreamHeader header;
+    SdfStreamFrameHeader header;
     s32 readStatus;
     s32 interruptsEnabled;
 
@@ -1129,7 +1090,7 @@ extern void sdfFreeMemoryFromEitherHeap(void *);
 extern void sdfTexQueueResourceRelease(s32);
 extern void sdfTexQueuePendingWork(SdfTexResource *texture);
 
-void func_002EBB60(SdfStreamFrameNode *node) {
+void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
     s32 interruptsEnabled;
     s32 wasActive;
     u32 dmaEnable;
@@ -1153,13 +1114,13 @@ void func_002EBB60(SdfStreamFrameNode *node) {
     if (interruptsEnabled != 0) {
         EIntr();
     }
-    sdfFreeMemoryFromEitherHeap((void *)node->unk4C);
-    sdfFreeMemoryFromEitherHeap((void *)node->buffers[0]);
-    sdfFreeMemoryFromEitherHeap((void *)node->buffers[1]);
-    sdfTexQueueResourceRelease(node->textureResources[0]);
-    sdfTexQueueResourceRelease(node->textureResources[1]);
+    sdfFreeMemoryFromEitherHeap(node->inputDmaChain);
+    sdfFreeMemoryFromEitherHeap(node->frameBuffers[0]);
+    sdfFreeMemoryFromEitherHeap(node->frameBuffers[1]);
+    sdfTexQueueResourceRelease((s32)node->transferPacketBuffers[0]);
+    sdfTexQueueResourceRelease((s32)node->transferPacketBuffers[1]);
     if (node->scratchBuffer != 0) {
-        sdfFreeMemoryFromEitherHeap((void *)(node->scratchBuffer - 0x100));
+        sdfFreeMemoryFromEitherHeap(node->scratchBuffer - 0x100);
     }
     if (node->textureHead != 0) {
         sdfTexQueuePendingWork(node->textureHead);
@@ -1187,7 +1148,7 @@ void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
         do {
             writeSlot = feed->firstSlot;
             endOfStream = 0;
-            destinationAddress = feed->scratchBuffer;
+            destinationAddress = (u32)feed->scratchBuffer;
             writeSlot += filledSlots;
             if (writeSlot >= SDF_STREAM_RING_SLOTS) {
                 writeSlot -= SDF_STREAM_RING_SLOTS;
@@ -1214,7 +1175,7 @@ void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
                 filledSlots++;
             }
             if (writeSlot == SDF_STREAM_MAX_FILLED) {
-                memcpy((void *)(((feed->scratchBuffer - SDF_STREAM_PREFIX_BYTES) & SDF_EE_PHYSICAL_MASK) | SDF_EE_UNCACHED_BASE), (void *)(destinationAddress + SDF_STREAM_TRAILER_START), SDF_STREAM_PREFIX_BYTES);
+                memcpy((void *)(((u32)(feed->scratchBuffer - SDF_STREAM_PREFIX_BYTES) & SDF_EE_PHYSICAL_MASK) | SDF_EE_UNCACHED_BASE), (void *)(destinationAddress + SDF_STREAM_TRAILER_START), SDF_STREAM_PREFIX_BYTES);
             }
             feed->filledSlots = filledSlots;
             if (feed->done != 0) {
@@ -1228,7 +1189,7 @@ void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
 void sdfSoundStartIpuInputDma(SdfStreamFrameNode *stream) {
     if (stream->active == 0) {
         D_003BDAA8 = stream;
-        *(vu32 *)SDF_IPU_INPUT_DMA_TAG_ADDRESS = stream->unk4C & SDF_EE_PHYSICAL_MASK;
+        *(vu32 *)SDF_IPU_INPUT_DMA_TAG_ADDRESS = (u32)stream->inputDmaChain & SDF_EE_PHYSICAL_MASK;
         *(vu32 *)SDF_IPU_INPUT_DMA_QWC = 0;
         *(vu32 *)SDF_IPU_INPUT_DMA_CTRL = SDF_IPU_DMA_CHAIN_START;
     } else {
@@ -1238,7 +1199,7 @@ void sdfSoundStartIpuInputDma(SdfStreamFrameNode *stream) {
         }
         D_003BDAA8 = stream;
         stream->pad64 = 1;
-        *(vu32 *)SDF_IPU_INPUT_DMA_ADDRESS = (stream->scratchBuffer +
+        *(vu32 *)SDF_IPU_INPUT_DMA_ADDRESS = ((u32)stream->scratchBuffer +
             (stream->firstSlot << SDF_STREAM_SLOT_SHIFT)) & SDF_EE_PHYSICAL_MASK;
         *(vu32 *)SDF_IPU_INPUT_DMA_QWC = SDF_STREAM_SLOT_BYTES / SDF_STREAM_QWORD_BYTES;
         *(vu32 *)SDF_IPU_INPUT_DMA_CTRL = SDF_IPU_DMA_NORMAL_START;
@@ -1252,7 +1213,7 @@ void sdfSoundQueueIpuBuffer(SdfStreamFrameNode *stream) {
     vu32 *dmaQwords = (vu32 *)SDF_IPU_OUTPUT_DMA_QWC;
     vu32 *dmaControl = (vu32 *)SDF_IPU_OUTPUT_DMA_CTRL;
     u8 bufferIndex = stream->bufferIndex;
-    *dmaAddress = stream->buffers[bufferIndex] & SDF_EE_PHYSICAL_MASK;
+    *dmaAddress = (u32)stream->frameBuffers[bufferIndex] & SDF_EE_PHYSICAL_MASK;
     *dmaQwords = stream->bufferSize / SDF_STREAM_QWORD_BYTES;
     *dmaControl = SDF_IPU_DMA_START;
     stream->bufferIndex = bufferIndex ^ 1;
@@ -1394,18 +1355,18 @@ u32 sndGetSelectedChannelEntry(MidiChannel *channel) {
 }
 
 /* Consume a pending buffer when present, but always advance processed; loop only on exact equality. */
-void sdfAdvanceBufferedPlayback(MidiPlaybackState *state) {
+void sdfAdvanceBufferedPlayback(SdfStreamFrameNode *node) {
     s32 interruptsEnabled = func_00312C08();
-    s32 pendingBuffers = state->pending;
+    s32 pendingBuffers = node->unk1A;
     s32 remainingBuffers = pendingBuffers - 1;
     if (pendingBuffers > 0) {
-        state->pending = remainingBuffers;
-        state->bufferIndex ^= 1;
-        state->completed++;
+        node->unk1A = remainingBuffers;
+        node->transferPacketIndex ^= 1;
+        node->unk13++;
     }
-    state->processed++;
-    if (state->processed == state->limit && state->looping != 0) {
-        state->processed = 0;
+    node->unk48++;
+    if (node->unk48 == node->cycleLength && node->loopMode != 0) {
+        node->unk48 = 0;
     }
     if (interruptsEnabled != 0) {
         EIntr();
@@ -1414,18 +1375,17 @@ void sdfAdvanceBufferedPlayback(MidiPlaybackState *state) {
 }
 
 /* Return zero only when nothing is pending; otherwise call the zero-buffer handler if needed, queue and advance. */
-s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
+s32 sdfSubmitBufferedPlayback(SdfStreamFrameNode *node) {
     u32 *selectedBuffer;
-    if (state->pending == 0) {
+    if (node->unk1A == 0) {
         return 0;
     }
-    /* Equivalent to &state->buffers[state->bufferIndex]; index-first arithmetic matches retail. */
-    selectedBuffer = (u32 *)(state->bufferIndex * 4 + (s32)state + 0x28);
+    selectedBuffer = (u32 *)(node->transferPacketIndex * 4 + (s32)node + 0x28);
     if (*selectedBuffer == 0) {
-        sdfBuildStreamFrameTransferPackets((SdfStreamFrameNode *)state);
+        sdfBuildStreamFrameTransferPackets(node);
     }
-    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, (void *)(*selectedBuffer + state->bufferSize - SDF_STREAM_QWORD_BYTES));
-    sdfAdvanceBufferedPlayback(state);
+    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, (void *)(*selectedBuffer + node->transferPacketBytes - SDF_STREAM_QWORD_BYTES));
+    sdfAdvanceBufferedPlayback(node);
     return 1;
 }
 extern u32 D_003BD614;
@@ -1448,7 +1408,7 @@ void func_002EC5E0(s32 cadence) {
         /* The playback provider views the same 0x8C stream allocation. */
         switch (node->firstStop) {
         case 1:
-            sdfSubmitBufferedPlayback((MidiPlaybackState *)node);
+            sdfSubmitBufferedPlayback(node);
             node->firstStop = 2;
             node->pad17 = node->playbackMode;
             break;
@@ -1456,7 +1416,7 @@ void func_002EC5E0(s32 cadence) {
             if (D_003BD614 != 1) {
                 elapsed += node->playbackMode;
                 if (elapsed >= cadence) {
-                    if (sdfSubmitBufferedPlayback((MidiPlaybackState *)node) != 0) {
+                    if (sdfSubmitBufferedPlayback(node) != 0) {
                         elapsed -= cadence;
                     }
                 }
@@ -1482,20 +1442,20 @@ void func_002EC5E0(s32 cadence) {
     func_002EC230(0);
 }
 
-void sdfSoundInitAndAppendNode(SdfStreamFrameNode *node, s32 format, s32 source, s32 sourceSize, s32 value) {
+void sdfSoundInitAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, s32 source, s32 sourceSize, s32 value) {
     sdfStreamOpen(node, format, source, sourceSize);
     node->resourceWord = value;
     sdfSoundAppendNode(node);
 }
 
-void sdfStreamCreateWithParams(s32 node, SdfStreamParams *params, s32 sourceData, s32 sourceSize, u8 *source) {
+void sdfStreamCreateWithParams(SdfStreamFrameNode *node, SdfStreamParams *params, s32 sourceData, s32 sourceSize, SdfTex *source) {
     SdfStreamParams local = *params;
-    switch (source[0x1A]) {
+    switch (source->pixelFormat) {
     case 0:
-        local.mode = 0;
+        local.hasAudio = 0;
         break;
     case 2:
-        local.mode = 1;
+        local.hasAudio = 1;
         break;
     }
     sdfSoundInitAndAppendNode(node, &local, sourceData, sourceSize, sdfTexGetPrimaryResourceWord(source));

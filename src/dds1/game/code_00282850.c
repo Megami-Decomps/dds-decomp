@@ -1,5 +1,7 @@
 #include "mnu_input.h"
+#include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_records.h"
 #include "common.h"
 #include "sdf_dev_state.h"
 #include "dds3obj.h"
@@ -130,7 +132,6 @@ extern void func_002878D8(s32 arg0);
 
 extern s32 D_003BC7B4;
 
-extern u32 effCreateStatusBatch(u32);
 
 extern s32 mnuLookupRangeEntry(u16);
 
@@ -573,16 +574,16 @@ void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface) {
 
 /* Set both effect positions; only the first Y comes from the active menu entry. */
 void mnuSetPairedEffectPositions(MenuEffectPair *pair) {
-    MenuEffectNode *first = pair->effects[0];
-    MenuEffectNode *second = pair->effects[1];
-    MenuEffectPosition *firstPosition = first->position;
-    MenuEffectPosition *secondPosition = second->position;
-    s32 *coordinates = firstPosition->coordinates;
+    EffMappedResource *first = pair->effects[0];
+    EffMappedResource *second = pair->effects[1];
+    EffMappedRecord *firstRecord = first->records;
+    EffMappedRecord *secondRecord = second->records;
+    s32 *coordinates = (s32 *)firstRecord[0].status;
 
     coordinates[0] = 10;
     coordinates[1] = pair->positionY;
     coordinates[2] = 10;
-    coordinates = secondPosition->coordinates;
+    coordinates = (s32 *)secondRecord[0].status;
     coordinates[1] = 5;
     coordinates[0] = 10;
     coordinates[2] = 10;
@@ -639,7 +640,8 @@ void mnuCyclePairedEffectSetting(MenuEffectPair *pair) {
     if (settings != 0) {
         setting = settings[(s8)pair->settingIndex];
     }
-    effConfigureWithDefaultSetting((s32)pair->leftGrid, 0, (s32)pair->effects[0], 0, setting, 0);
+    effConfigureWithDefaultSetting(pair->leftGrid, 0,
+                                   pair->effects[0], 0, setting, 0);
     pair->settingIndex += 1;
     if ((s8)pair->settingIndex >= 4) {
         pair->settingIndex = 0;
@@ -648,7 +650,6 @@ void mnuCyclePairedEffectSetting(MenuEffectPair *pair) {
 
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
 extern void effInitializeSlotWork(s32, s32);
-extern u32 effConfigureIndexedSlotResource(s32, s32, s32, s32, u32);
 
 /* Draw the paired effect at its current rate and initialize its alternate on demand. */
 void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,
@@ -675,8 +676,8 @@ void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,
         itfGridLookupValueOrDefault(owner->leftGrid, 0);
         if (owner->leftGrid->workEntries[0].states[0].source == NULL) {
             effInitializeSlotWork((s32)owner->rightGrid, 0);
-            effConfigureIndexedSlotResource((s32)owner->rightGrid, 0,
-                                            (s32)owner->effects[1], 0, 0);
+            effConfigureIndexedSlotResource(owner->rightGrid, 0,
+                                            owner->effects[1], 0, 0);
             owner->updateState = 1;
         }
         break;
@@ -693,8 +694,8 @@ void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,
         itfGridLookupValueOrDefault(owner->rightGrid, 0);
         if (owner->rightGrid->workEntries[0].states[0].source == NULL) {
             effInitializeSlotWork((s32)owner->leftGrid, 0);
-            effConfigureIndexedSlotResource((s32)owner->leftGrid, 0,
-                                            (s32)owner->effects[0], 0, 0);
+            effConfigureIndexedSlotResource(owner->leftGrid, 0,
+                                            owner->effects[0], 0, 0);
             owner->updateState = 0;
         }
         break;
@@ -703,19 +704,21 @@ void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,
 }
 
 void mnuCreatePairedEffects(MenuEffectPair *pair) {
-    u32 effectHandle;
+    struct EffMappedResource *effectHandle;
 
     effectHandle = effCreateStatusBatch(3);
-    pair->effects[0] = (MenuEffectNode *)effectHandle;
+    pair->effects[0] = effectHandle;
     effectHandle = effCreateStatusBatch(3);
-    pair->effects[1] = (MenuEffectNode *)effectHandle;
+    pair->effects[1] = effectHandle;
 }
 
 /* Release the two effect-batch handles in the native object-word layout. */
 void mnuReleasePairedEffectBatches(s32 *objectWords) {
+    MenuEffectPair *pair = (MenuEffectPair *)objectWords;
+    struct EffMappedResource **effectCursor = pair->effects;
     u32 effectIndex;
     for (effectIndex = 0; effectIndex < 2; effectIndex++) {
-        effDestroyPackedBatch(objectWords[effectIndex + 16]);
+        effDestroyPackedBatch(*effectCursor++);
     }
 }
 
@@ -928,7 +931,6 @@ void mnuCacheProfilePanelGridPositions(MenuProfilePanel *panel, u32 grid, u32 fi
     itfGridStorePosition(&panel->completed, grid, completedIndex);
 }
 
-extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern void uiDrawTexturedSurfaceAtFarDepth(s32);
 extern void func_002C1548(s32, s32);
 extern void uiDrawSurfaceAtNearDepth(u32);
@@ -959,7 +961,7 @@ void func_00285208(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surface) {
     func_002BF4E0(x, y, z, opacity, 0, (s32)slots, index, surface);
     if (index != panel->background.index) {
         uiDrawTexturedSurfaceAtFarDepth(surface);
-        itfDrawGridWithResolvedSlot(x, y, z, 0x21, (s32)slots, index, surface);
+        itfDrawGridWithResolvedSlot(x, y, z, 0x21, slots, index, surface);
         func_002C1548(0, surface);
         slots = panel->background.set;
         index = panel->background.index;

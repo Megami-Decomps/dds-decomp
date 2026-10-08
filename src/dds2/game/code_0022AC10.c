@@ -109,6 +109,19 @@ extern s32 btlMatchActorEntryCode(void *, s32);
 
 extern s8 D_00453068[];
 
+/* Native 32-byte overlay particle, initialized at0022D040 and rendered at0022D8A8. */
+typedef struct BtlFadeParticle {
+    f32 direction[3];
+    f32 rotationAngle;
+    f32 rotationSpeed;
+    f32 displacement;
+    f32 displacementSpeed;
+    u8 alpha;
+    u8 age;
+    u8 delay;
+    u8 pad1F;
+} BtlFadeParticle;
+
 typedef struct BattleRuntimeState {
     s32 counter; /* Active encounter updates since initialization. */
     u16 state;
@@ -119,8 +132,15 @@ typedef struct BattleRuntimeState {
     u32 options;
     u32 color10;
     u32 color14;
-    u8 unk_18[0x20];
-    void *ownedData;
+    s32 particlesPerRow;
+    s32 particleRowCount;
+    s32 unk20;
+    s32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    BtlFadeParticle *ownedData;
     void *resource;
     void *handle;
 } BattleRuntimeState;

@@ -1,6 +1,8 @@
 #include "mnu_input.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_records.h"
 #include "common.h"
+#include "itf_draw_grid.h"
 #include "mnu_staff.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -71,8 +73,6 @@ extern const s32 D_0037C388[];
 
 extern const char D_003B2058[16];
 extern char *D_0037C380[];
-extern u32 effLoadMappedResource(char *base, char *name);
-extern u32 *effCreateStatusBatch(u32 kind);
 
 typedef struct ResourceRef8 {
     s32 index;
@@ -226,51 +226,40 @@ void mnuSetStaffDisplayMode(s32 nextCategory, StaffMenuWork *menu) {
     }
 }
 
-typedef struct StaffStatusBatch {
-    u32 references;
-    u32 allocation;
-    u32 payload;
-} StaffStatusBatch;
-
-typedef struct StaffStatusBatchPayload {
-    u8 pad00[0x20];
-    u32 *values;
-} StaffStatusBatchPayload;
-
 /* Load both mapped images and initialize the two status batches' word arrays.
  * Batch categories and the initial 0xF word remain opaque. */
 void func_00271368(void *menuData) {
     StaffMenuWork *menu = (StaffMenuWork *)menuData;
-    StaffStatusBatch *batch;
-    StaffStatusBatchPayload *batchPayload;
+    EffMappedResource *batch;
+    EffMappedRecord *record;
     u32 *statusWords;
-    u32 primaryResource;
+    EffMappedResource *primaryResource;
 
     primaryResource = effLoadMappedResource(D_003B2058, D_0037C380[0]);
     menu->primaryImage = primaryResource;
     menu->secondaryImage = effLoadMappedResource(D_003B2058, D_0037C380[1]);
 
-    batch = (StaffStatusBatch *)effCreateStatusBatch(6);
-    batchPayload = (StaffStatusBatchPayload *)batch->payload;
-    menu->extraImages[0] = (u32)batch;
-    statusWords = batchPayload->values;
+    batch = effCreateStatusBatch(6);
+    record = batch->records;
+    menu->extraImages[0] = batch;
+    statusWords = (u32 *)record->status;
     statusWords[0] = 0xF;
     statusWords[1] = 0;
     statusWords[2] = 0;
     statusWords[3] = 0;
     statusWords[4] = 0;
 
-    batch = (StaffStatusBatch *)effCreateStatusBatch(1);
-    batchPayload = (StaffStatusBatchPayload *)batch->payload;
-    menu->extraImages[1] = (u32)batch;
-    statusWords = batchPayload->values;
+    batch = effCreateStatusBatch(1);
+    record = batch->records;
+    menu->extraImages[1] = batch;
+    statusWords = (u32 *)record->status;
     statusWords[0] = 0xF;
     statusWords[1] = 0;
 }
 
 /* Destroy the mapped images followed by both status batches. */
 void mnuReleaseStaffSpriteHandles(StaffMenuWork *menu) {
-    u32 *batchCursor = menu->extraImages;
+    EffMappedResource **batchCursor = menu->extraImages;
     u32 batchIndex = 0;
     effDestroyPackedBatch(menu->primaryImage);
     effDestroyPackedBatch(menu->secondaryImage);
@@ -472,7 +461,7 @@ MenuWindowContainer *func_00271B50(void *const *entries, s32 count, s32 width,
 }
 
 void mnuCreateStaffPanelSet(StaffMenuWork *menu) {
-    menu->resourceList = mnuCreatePanelSpriteHandles(0, menu->staffSlots.baseResources[3], menu->secondaryImage);
+    menu->resourceList = mnuCreatePanelSpriteHandles(0, menu->staffSlots.baseResources[3], (s32)menu->secondaryImage);
     menu->images[0] = (u32)func_00271B50(D_0037B950, 8, 0x300, menu, D_0037C388);
     mnuForwardDupArg(menu->images[0], menu->staffSlots.baseResources[5], 0, 0, 0);
     menu->images[1] = (u32)func_00271B50(D_0037B970, 3, 0x2C0, menu, 0);
@@ -644,7 +633,6 @@ u8 mnuIsFadeIdle(void) {
     return fadeActive == 0;
 }
 
-extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_003014F0(char *, const char *, s32);
 extern s32 func_00197A98(s32, s32, s32, u32, u32, s32);
 typedef struct FrFontGlyph FrFontGlyph;
@@ -658,8 +646,8 @@ void mnuDrawStaffCampSlotsAndCurrency(s32 unused0, s32 unused1, s32 z, s32 first
     char text[0x10];
     s32 glyph;
 
-    itfDrawGridWithResolvedSlot(0x150, 0xD08, 0, 1, firstSlot, 0, drawFlags);
-    itfDrawGridWithResolvedSlot(0x2B0, 0xCE8, 0, 1, secondSlot, 3, drawFlags);
+    itfDrawGridWithResolvedSlot(0x150, 0xD08, 0, 1, (EffectSlotSet *)(u32)firstSlot, 0, drawFlags);
+    itfDrawGridWithResolvedSlot(0x2B0, 0xCE8, 0, 1, (EffectSlotSet *)(u32)secondSlot, 3, drawFlags);
     func_003014F0(text, D_003BC6C0, datGameState->header.currency);
     glyph = func_00197A98(0x4B0, 0xCD8, z, 0x80808080, (u32)text, 0);
     func_001958A0((FrFontGlyph *)glyph, 1, drawFlags);
@@ -695,7 +683,7 @@ void mnuDrawStaffGridLabelsForKind(s32 kind, s32 slot) {
     for (i = 0; i < rows[kind].count; i++) {
         if (rows[kind].x[i] != 0) {
             itfDrawGridWithResolvedSlot(rows[kind].x[i], 0xCF0, 0, 1,
-                                       slot, rows[kind].gridIds[i], 0x53);
+                                       (EffectSlotSet *)(u32)slot, rows[kind].gridIds[i], 0x53);
         }
     }
 }
@@ -710,12 +698,12 @@ void func_00272518(s32 kind, s32 labelIndex, s32 textTable, s32 context,
     StaffMenuWork *menu = (StaffMenuWork *)context;
     s32 glyph;
     if (kind == 0) {
-        itfDrawGridWithResolvedSlot(0x1C0, 0xA20, 0, drawOption, menu->staffSlots.baseResources[5], 0x1E, layer);
+        itfDrawGridWithResolvedSlot(0x1C0, 0xA20, 0, drawOption, (EffectSlotSet *)(u32)menu->staffSlots.baseResources[5], 0x1E, layer);
     } else {
-        itfDrawGridWithResolvedSlot(0x1C0, 0xA20, 0, drawOption, menu->staffSlots.baseResources[5], 0x2E, layer);
+        itfDrawGridWithResolvedSlot(0x1C0, 0xA20, 0, drawOption, (EffectSlotSet *)(u32)menu->staffSlots.baseResources[5], 0x2E, layer);
     }
-    itfDrawGridWithResolvedSlot(0x150, 0x9C0, 0, drawOption, menu->staffSlots.baseResources[5], 0, layer);
-    itfDrawGridWithResolvedSlot(0x280, 0x9A0, 0, drawOption, menu->staffSlots.baseResources[1], 2, layer);
+    itfDrawGridWithResolvedSlot(0x150, 0x9C0, 0, drawOption, (EffectSlotSet *)(u32)menu->staffSlots.baseResources[5], 0, layer);
+    itfDrawGridWithResolvedSlot(0x280, 0x9A0, 0, drawOption, (EffectSlotSet *)(u32)menu->staffSlots.baseResources[1], 2, layer);
     if (textTable != 0) {
         glyph = itfDrawBankTextWithLayoutFlags(0x2C0, 0xA70, 0, labelIndex, textTable, textOption);
         frFontSetChildColors((TextStyleNode *)glyph, 0xA09DC366);
@@ -738,9 +726,9 @@ void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task) {
     func_0027E8D8(-0x10, -8, 0, (s32)menu->scrollPanel, 0x53);
     mnuDrawPanelListDefault(0, 0, 0, (MenuPageWindow *)((u8 *)menu + 0x15C), 0x53);
     if (kind == 0) {
-        itfDrawGridWithResolvedSlot(0x1AB0, 0x70, 0, 1, menu->staffSlots.baseResources[1], 6, 0x53);
-        itfDrawGridWithResolvedSlot(0x17A0, 0x78, 0, 1, menu->staffSlots.baseResources[0], 0xF, 0x53);
-        itfDrawGridWithResolvedSlot(0x1E40, 0x78, 0, 1, menu->staffSlots.baseResources[0], 0x10, 0x53);
+        itfDrawGridWithResolvedSlot(0x1AB0, 0x70, 0, 1, (EffectSlotSet *)(u32)menu->staffSlots.baseResources[1], 6, 0x53);
+        itfDrawGridWithResolvedSlot(0x17A0, 0x78, 0, 1, (EffectSlotSet *)(u32)menu->staffSlots.baseResources[0], 0xF, 0x53);
+        itfDrawGridWithResolvedSlot(0x1E40, 0x78, 0, 1, (EffectSlotSet *)(u32)menu->staffSlots.baseResources[0], 0x10, 0x53);
     }
 }
 
