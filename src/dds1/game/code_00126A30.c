@@ -2661,7 +2661,7 @@ void fldUpdateCameraMoveOscillation(void) {
             phase -= 11.0f;
         }
         D_003BAD20 = phase;
-        effObjSetNodeFlags(camera->inner, 1);
+        effObjSetNodeFlags(camera->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
     }
 }
 

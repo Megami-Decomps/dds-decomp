@@ -5,6 +5,12 @@
 
 enum { EFF_WORLD_KIND_COUNT = 18 };
 
+enum {
+    OBJECT_TRANSFORM_FLAG_UPDATE_PENDING = 1,
+    OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID = 2,
+    OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION = 8
+};
+
 typedef struct EffWorldNode EffWorldNode;
 
 /* Separate 0xD0-byte allocation: DDS1 effObjInnerCreate (0010F570).

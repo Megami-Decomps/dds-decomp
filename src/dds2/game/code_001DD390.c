@@ -4675,8 +4675,8 @@ void btlApplyUnitEffectScale(BtlUnit *unit) {
         VU0_SET_ONES_XYZ(vf10);
         VU0_SCALAR_OP(unit->unk50, "vmulx.xyzw vf10, vf10, vf2x");
         inner = ((EffWorldNode *)unit->effectObject)->inner;
-        inner->flags |= 1;
-        inner->flags &= ~2;
+        inner->flags |= OBJECT_TRANSFORM_FLAG_UPDATE_PENDING;
+        inner->flags &= ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
         VU0_STORE_VF(vf10, inner->scale);
         mdlStoreTertiaryVectorVU(unit->ext->owner);
         mdlSetAmountOnAllContextResources(unit->ext->owner, unit->unk50);
