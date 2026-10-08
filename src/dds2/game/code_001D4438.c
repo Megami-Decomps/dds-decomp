@@ -448,7 +448,7 @@ typedef struct BtlDeferredStats {
     s32 secondary;     /* 0x24 */
 } BtlDeferredStats;
 
-extern BtlRuntimeTask *btlCreateHookedUnitSoundTask();
+extern BtlRuntimeTask *btlCreateHookedUnitSoundTask(BtlUnit *, s32);
 
 extern u32 D_00436AD4;
 
@@ -798,7 +798,7 @@ extern void sndFreeResourceNode(SoundResourceNode *);
 extern void sndFreeListNode(ActiveSoundNode *);
 extern s32 btlIsUnitInActiveList(u8 *);
 extern void btlResetActiveUnitList(void);
-extern s32 btlCountTasksByKind(s32);
+extern s32 btlCountTasksByKind(u16);
 
 /* Returns nonzero when the scene is idle: frees every actor's unreferenced
  * resource node, then the caller's list node, and requires no waiting actor
@@ -960,7 +960,7 @@ void func_001D4C98(void) {
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern u64 btlStartTask(void *);
 extern s32 sndHasActiveActor(void);
-extern s64 btlAdvanceRuntimeSequenceCounter(void);
+extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
@@ -2027,6 +2027,13 @@ INCLUDE_ASM(const s32, "game/code_001D4438", func_001DC2D8);
 
 void func_001DC538(void) {
 }
+
+extern s32 btlSumOtherTargetHitAmounts(u8 *);
+extern s32 btlComputeStatusPenaltyFifth(BtlUnit *);
+extern s32 btlIsUnitDefeatTriggeredByValueDelta(u8 *, s32);
+extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
+extern BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *, u32, u32, u32, f32);
+extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 
 INCLUDE_ASM(const s32, "game/code_001D4438", func_001DC540);
 
