@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bill_object_api.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "sdf_gs_packet.h"
@@ -398,9 +399,9 @@ s32 billGetKindOneFlags(s32 billboard) {
     return 0;
 }
 
-void billMarkKindOneFlag(s32 billboard) {
-    if (((BillObj *)billboard)->kind == 1) {
-        ((BillObj *)billboard)->modeFlags |= 0x1000000;
+void billMarkKindOneFlag(BillObj *billboard) {
+    if (billboard->kind == 1) {
+        billboard->modeFlags |= 0x1000000;
     }
 }
 
