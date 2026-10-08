@@ -1403,8 +1403,8 @@ void mnuReleasePartyPanelSpriteTextures(s32 window) {
 }
 
 /* Copy eight resource handles into the window's primary handle bank. */
-void mnuCopyPrimaryWindowHandles(MenuPageWindow *window, u32 *source) {
-    u32 value;
+void mnuCopyPrimaryWindowHandles(MenuPageWindow *window, struct EffectSlotSet **source) {
+    struct EffectSlotSet *value;
     s32 *destination;
     u32 index;
 
@@ -1414,14 +1414,14 @@ void mnuCopyPrimaryWindowHandles(MenuPageWindow *window, u32 *source) {
         value = *source;
         source = source + 1;
         index = index + 1;
-        *destination = value;
+        *destination = (s32)value;
         destination = destination + 1;
     } while (index < 8);
 }
 
 /* Copy eight resource handles into the window's secondary handle bank. */
-void mnuCopySecondaryWindowHandles(MenuPageWindow *window, u32 *source) {
-    u32 value;
+void mnuCopySecondaryWindowHandles(MenuPageWindow *window, struct EffectSlotSet **source) {
+    struct EffectSlotSet *value;
     s32 *destination;
     u32 index;
 
@@ -1431,18 +1431,18 @@ void mnuCopySecondaryWindowHandles(MenuPageWindow *window, u32 *source) {
         value = *source;
         source = source + 1;
         index = index + 1;
-        *destination = value;
+        *destination = (s32)value;
         destination = destination + 1;
     } while (index < 8);
 }
 
 extern void effResolveAndReleaseResource(u32 *);
 
-void mnuRegisterResourceHandles(MenuPageWindow *destination, s32 *source) {
+void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSet **source) {
     u32 i;
     for (i = 0; i < 5; i++) {
         effResolveAndReleaseResource((u32 *)source[i]);
-        destination->handlesC[i] = source[i];
+        destination->handlesC[i] = (s32)source[i];
     }
 }
 
@@ -1545,42 +1545,39 @@ void mnuClearPageSelection(MenuPageWindow *window) {
 INCLUDE_ASM(const s32, "game/code_0027BF00", mnuInitPageWindow);
 
 
-void mnuReleaseHandles(s32 obj) {
-    MenuPageSlot *page = (MenuPageSlot *)obj;
-    s32 *handle = page->icon;
+void mnuReleaseHandles(MenuPageSlot *page) {
+    struct EffectSlotSet **handle = page->icon;
     u32 i;
 
     for (i = 0; i < 3; i++, handle++) {
         if (*handle != 0) {
-            effDestroyResourceSlotSet(*handle);
+            effDestroyResourceSlotSet((u32)*handle);
         }
     }
     if (page->frame[0] != 0) {
-        effDestroyResourceSlotSet(page->frame[0]);
+        effDestroyResourceSlotSet((u32)page->frame[0]);
     }
     if (page->frame[1] != 0) {
-        effDestroyResourceSlotSet(page->frame[1]);
+        effDestroyResourceSlotSet((u32)page->frame[1]);
     }
     if (page->frame[2] != 0) {
-        effDestroyResourceSlotSet(page->frame[2]);
+        effDestroyResourceSlotSet((u32)page->frame[2]);
     }
     if (page->frame[3] != 0) {
-        effDestroyResourceSlotSet(page->frame[3]);
+        effDestroyResourceSlotSet((u32)page->frame[3]);
     }
     if (page->frame[4] != 0) {
-        effDestroyResourceSlotSet(page->frame[4]);
+        effDestroyResourceSlotSet((u32)page->frame[4]);
     }
     if (page->frame[5] != 0) {
-        effDestroyResourceSlotSet(page->frame[5]);
+        effDestroyResourceSlotSet((u32)page->frame[5]);
     }
 }
-
-extern void mnuReleaseHandles(s32);
 
 void mnuShutdownContext(s32 context) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        mnuReleaseHandles((s32)&((MenuPageWindow *)context)->slots[i]);
+        mnuReleaseHandles(&((MenuPageWindow *)context)->slots[i]);
     }
     mnuReleasePartyPanelSpriteTextures(context);
     mnuDestroyWindowOwnedLists(context);
@@ -1977,12 +1974,12 @@ void mnuDrawPartyPanelResourceIcons(s32 x, s32 y, s32 z, MenuPageSlot *panel, s3
         func_002BF4E0(x, y, z, 0x100, 1, panel->icon[0], 0, param);
         x += pos[0];
         y += pos[1];
-        func_002BF4E0(x, y, z, 0x100, 1, (s32)panel->leftHandle, 0, param);
+        func_002BF4E0(x, y, z, 0x100, 1, panel->leftHandle, 0, param);
         if (panel->rightHandle == 0) {
-            func_002BF4E0(x + 0x360, y + 0x68, z, 0x100, 1, (s32)panel->centerHandle, 0, param);
+            func_002BF4E0(x + 0x360, y + 0x68, z, 0x100, 1, panel->centerHandle, 0, param);
         } else {
-            func_002BF4E0(x + 0x360, y + 0x68, z, 0x100, 1, (s32)panel->centerHandle, 0, param);
-            func_002BF4E0(x + 0x790, y + 0x70, z, 0x100, 1, (s32)panel->rightHandle, 0, param);
+            func_002BF4E0(x + 0x360, y + 0x68, z, 0x100, 1, panel->centerHandle, 0, param);
+            func_002BF4E0(x + 0x790, y + 0x70, z, 0x100, 1, panel->rightHandle, 0, param);
         }
     }
 }

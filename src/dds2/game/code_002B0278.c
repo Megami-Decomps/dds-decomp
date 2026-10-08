@@ -346,9 +346,9 @@ typedef struct SkillMenuRuntime {
 
 extern MenuListNode *sdfAllocAndClearQuadwords(s32);
 
-extern void ptyRecomputeMaxHpMp();
+extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
 
-extern void scrClearSecondaryScriptFlag();
+extern void scrClearSecondaryScriptFlag(DatPartyRecord *unit, u16 flagId);
 
 extern s32 func_0019D550(FrFontGlyph *, s8, u32);
 
@@ -1844,10 +1844,10 @@ void mnuAddPartySkillIfMissing(DatPartyRecord *partyEntry, s32 skillId, s32 skil
     }
 }
 
-/* Clear one skill slot, retaining the native short-arity maxima recomputation. */
+/* Clear one skill slot and recompute the owning party record's maxima. */
 void mnuClearPartySkillSlot(DatPartyRecord *partyEntry, s32 skillSlot) {
     partyEntry->effectData[skillSlot] = 0;
-    ptyRecomputeMaxHpMp();
+    ptyRecomputeMaxHpMp(partyEntry);
 }
 
 /* Open the selected skill's popup or cancel, then process list navigation.
@@ -3670,12 +3670,12 @@ void mnuReleasePartyPanelSpriteTextures(u8 *menu);
 
 
 /* Copy eight resource handles into the window's primary handle bank. */
-void mnuCopyPrimaryWindowHandles(MenuPageWindow *menu, u32 *source);
+void mnuCopyPrimaryWindowHandles(MenuPageWindow *menu, struct EffectSlotSet **source);
 
 /* Copy eight resource handles into the window's secondary handle bank. */
-void mnuCopySecondaryWindowHandles(MenuPageWindow *menu, u32 *source);
+void mnuCopySecondaryWindowHandles(MenuPageWindow *menu, struct EffectSlotSet **source);
 
-void mnuRegisterResourceHandles(MenuPageWindow *destination, u32 *source);
+void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSet **source);
 
 
 
