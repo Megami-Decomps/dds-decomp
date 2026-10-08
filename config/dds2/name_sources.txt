@@ -1181,6 +1181,7 @@
 0x0016D9D8	effThunderUpdateFragments	inferred	updates fragment countdowns, geometry, fade/restart state, colors and submits cells
 0x0016DD20	effThunderReleaseDualFragmentWork	inferred	queued
 0x0016DD88	effThunderSetDualFragmentColor	inferred	confidence=high; matched-C; src/dds2/effect/effPCPThunder.c:599:func_0016DD88; Stores the packed color in the dual-fragment thunder work callback family.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x0016DE30	effThunderBuildCoreAndEdgeFragmentStrips	inferred	builds synchronized core and outer-edge strips in the primary and secondary particle systems
 0x0016E468	effThunderUpdateDualFragments	inferred	confidence=high; matched-C; src/dds2/effect/effPCPThunder.c:541:func_0016E468; Runs fragment delay/activity/fade/reset transitions and writes identical multiplied colors into both particle systems before queueing their cells.; source=names_P5.tsv:11 [names_qp11.tsv]
 0x0016E5B8	effThunderCellCreate	inferred	0x48 head copy, kind-2 system, cells randomized [names_M61_EffVu.tsv]
 0x0016E748	effThunderReleaseCellWork	inferred	queued
