@@ -214,12 +214,8 @@ extern s32 btlGetResourcePathVariant(s32);
 
 extern s32 func_003014F0(char *, const char *, ...);
 
-extern u32 func_00296F58(const void *, const void *, s32, s32);
 
 extern void func_00187C08(void *);
-
-extern f32 func_00297270(EffScalarCurve *, s32, s32);
-
 
 extern f32 mnuMeasureProjectedPerpendicularDistance(f32);
 
@@ -712,7 +708,7 @@ typedef struct EffFadeConfig {
     u8 pad58[8];
     EffScalarTrack rateA;   /* 0x60 */
     EffScalarTrack rateB;   /* 0x8C */
-    s32 progress;         /* 0xB8 */
+    s32 duration;         /* 0xB8 */
     u8 padBC[4];
     EffSolidRectParams out; /* 0xC0 */
 } EffFadeConfig;
@@ -726,18 +722,18 @@ typedef struct EffRateConfig {
     u8 pad58[8];
     EffScalarTrack rateA;   /* 0x60 */
     EffScalarTrack rateB;   /* 0x8C */
-    s32 progress;         /* 0xB8 */
+    s32 duration;         /* 0xB8 */
     u8 fixedMode;         /* 0xBC */
     u8 padBD[3];
     EffBlurQuad out;       /* 0xC0 */
 } EffRateConfig;
 
-/* Draw a fade rectangle when progress is zero or reaches the signed frame limit.
- * Blend its packed color and use percent-scaled curves for the output rates. */
+/* Draw through the configured duration; zero duration uses frame zero.
+ * Blend the packed color and use percent-scaled curves for the output rates. */
 void effUpdateFadeBlendA(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
-    s32 progress = config->progress;
-    s32 limit = 0;
+    s32 duration = config->duration;
+    s32 frame = 0;
     EffBlurQuad *out = &config->out;
     s32 color1[4];
     s32 color2[4];
@@ -746,10 +742,10 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     u32 unit;
     u32 second;
 
-    if (progress != 0) {
-        limit = work->frame;
+    if (duration != 0) {
+        frame = work->frame;
     }
-    if (progress < limit) {
+    if (duration < frame) {
         return;
     }
     out->x = 0;
@@ -758,7 +754,7 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     out->top = 0;
     out->right = 0x200;
     out->bottom = 0x1C0;
-    second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
+    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -769,8 +765,8 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->color = blended[0];
-    out->displacement = func_00297270(&config->blendB, limit, progress) * 0.01f + 1.0f;
-    out->angle = func_00297270(&config->rateA.curve, limit, progress) * 0.01f;
+    out->displacement = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f + 1.0f;
+    out->angle = effSampleScalarCurve(&config->rateA.curve, frame, duration) * 0.01f;
     out->blendControl = work->mode;
     effDrawBlurRectangle(out);
 }
@@ -788,8 +784,8 @@ void effReleaseFadeBlendWork(u32 resourceHandle) {
 void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
     EffBlurTemplate *out = (EffBlurTemplate *)work->handle;
-    s32 progress = config->progress;
-    s32 limit = 0;
+    s32 duration = config->duration;
+    s32 frame = 0;
     f32 rate;
     f32 pos[4];
     s32 color1[4];
@@ -799,13 +795,13 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     u32 unit;
     u32 second;
 
-    if (progress != 0) {
-        limit = work->frame;
+    if (duration != 0) {
+        frame = work->frame;
     }
-    if (progress < limit) {
+    if (duration < frame) {
         return;
     }
-    rate = func_00297270(&config->rateB.curve, limit, progress);
+    rate = effSampleScalarCurve(&config->rateB.curve, frame, duration);
     if (config->fixedMode != 0) {
         out->body.source.x = 0;
         out->body.source.y = 0;
@@ -828,7 +824,7 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
         out->body.source.x = px;
         out->body.source.y = py << 1;
     }
-    second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
+    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -839,8 +835,8 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->body.source.color = blended[0];
-    out->body.source.displacement = func_00297270(&config->blendB, limit, progress) * 0.01f + 1.0f;
-    out->body.source.angle = func_00297270(&config->rateA.curve, limit, progress) * 0.01f;
+    out->body.source.displacement = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f + 1.0f;
+    out->body.source.angle = effSampleScalarCurve(&config->rateA.curve, frame, duration) * 0.01f;
     out->body.source.blendControl = work->mode;
     effDrawBlurFixedPointRectangle(out);
 }
@@ -869,8 +865,8 @@ void effReleaseFixedSlotBlurWork(EffBlurScatterWork *handle) {
 void effUpdateFadeMapA(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
     EffBlurScatterWork *out = (EffBlurScatterWork *)work->handle;
-    s32 progress = config->progress;
-    s32 limit = 0;
+    s32 duration = config->duration;
+    s32 frame = 0;
     f32 rate;
     f32 pos[4];
     s32 color1[4];
@@ -880,13 +876,13 @@ void effUpdateFadeMapA(EffKindWork *work) {
     u32 unit;
     u32 second;
 
-    if (progress != 0) {
-        limit = work->frame;
+    if (duration != 0) {
+        frame = work->frame;
     }
-    if (progress < limit) {
+    if (duration < frame) {
         return;
     }
-    rate = func_00297270(&config->rateB.curve, limit, progress);
+    rate = effSampleScalarCurve(&config->rateB.curve, frame, duration);
     if (config->fixedMode != 0) {
         out->params.positionSpread = (s32)rate;
         out->params.x = 0;
@@ -905,7 +901,7 @@ void effUpdateFadeMapA(EffKindWork *work) {
         out->params.x = (s32)pos[0] - 0x800;
         out->params.y = ((s32)pos[1] - 0x800) << 1;
     }
-    second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
+    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -916,8 +912,8 @@ void effUpdateFadeMapA(EffKindWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->params.color = blended[0];
-    out->params.uvDisplacementAmplitude = func_00297270(&config->blendB, limit, progress) * 0.01f;
-    out->params.uvDisplacementAngleDegrees = func_00297270(&config->rateA.curve, limit, progress) * 0.01f;
+    out->params.uvDisplacementAmplitude = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f;
+    out->params.uvDisplacementAngleDegrees = effSampleScalarCurve(&config->rateA.curve, frame, duration) * 0.01f;
     out->params.blendControl = work->mode;
     effBlurStepScatterSlotsAndDraw(out);
 }
@@ -942,12 +938,12 @@ void effReleaseVariableSlotBlurWork(EffBlurScaleWork *work) {
 }
 
 /* Draw the same pixel-unit fade into the wider renderer output record.
- * The native work header and progress gate remain shared with the other kind callbacks. */
+ * The native work header and duration gate remain shared with the other kind callbacks. */
 void effUpdateFadeMapB(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
     EffBlurScaleWork *out = (EffBlurScaleWork *)work->handle;
-    s32 progress = config->progress;
-    s32 limit = 0;
+    s32 duration = config->duration;
+    s32 frame = 0;
     f32 rate;
     f32 pos[4];
     s32 color1[4];
@@ -957,13 +953,13 @@ void effUpdateFadeMapB(EffKindWork *work) {
     u32 unit;
     u32 second;
 
-    if (progress != 0) {
-        limit = work->frame;
+    if (duration != 0) {
+        frame = work->frame;
     }
-    if (progress < limit) {
+    if (duration < frame) {
         return;
     }
-    rate = func_00297270(&config->rateB.curve, limit, progress);
+    rate = effSampleScalarCurve(&config->rateB.curve, frame, duration);
     if (config->fixedMode != 0) {
         out->params.size = (s32)rate;
         out->params.x = 0;
@@ -982,7 +978,7 @@ void effUpdateFadeMapB(EffKindWork *work) {
         out->params.x = (s32)pos[0] - 0x800;
         out->params.y = ((s32)pos[1] - 0x800) << 1;
     }
-    second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
+    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -993,8 +989,8 @@ void effUpdateFadeMapB(EffKindWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->params.color = blended[0];
-    out->params.angleStep = func_00297270(&config->blendB, limit, progress) * 0.01f;
-    out->params.uvDisplacementAngleDegrees = func_00297270(&config->rateA.curve, limit, progress) * 0.01f;
+    out->params.angleStep = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f;
+    out->params.uvDisplacementAngleDegrees = effSampleScalarCurve(&config->rateA.curve, frame, duration) * 0.01f;
     out->params.blendControl = work->mode;
     effBlurStepScaleSlotsAndDraw(out);
 }
@@ -1014,8 +1010,8 @@ void effReplaceKindLinkedTarget(EffKindWork *work, u32 target) {
  * The generic kind work supplies its packed color, mode and frame limit. */
 void effUpdateFadeBlendB(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
-    s32 progress = config->progress;
-    s32 limit = 0;
+    s32 duration = config->duration;
+    s32 frame = 0;
     EffBlurQuad *out = &config->out;
     s32 color1[4];
     s32 color2[4];
@@ -1024,10 +1020,10 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     u32 unit;
     u32 second;
 
-    if (progress != 0) {
-        limit = work->frame;
+    if (duration != 0) {
+        frame = work->frame;
     }
-    if (progress < limit) {
+    if (duration < frame) {
         return;
     }
     out->x = 0;
@@ -1036,7 +1032,7 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     out->top = 0;
     out->right = 0x200;
     out->bottom = 0x1C0;
-    second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
+    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -1047,8 +1043,8 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->color = blended[0];
-    out->displacement = func_00297270(&config->blendB, limit, progress) + 1.0f;
-    out->angle = func_00297270(&config->rateA.curve, limit, progress);
+    out->displacement = effSampleScalarCurve(&config->blendB, frame, duration) + 1.0f;
+    out->angle = effSampleScalarCurve(&config->rateA.curve, frame, duration);
     out->blendControl = work->mode;
     effBlurDrawFramebufferQuad(out);
 }
@@ -1057,8 +1053,8 @@ void effUpdateFadeBlendB(EffKindWork *work) {
  * Its output uses fixed rectangle bounds and the kind work's packed color and mode. */
 void effUpdateFadeBlendC(EffKindWork *work) {
     EffFadeConfig *config = work->payload;
-    s32 progress = config->progress;
-    s32 limit = 0;
+    s32 duration = config->duration;
+    s32 frame = 0;
     EffSolidRectParams *out = &config->out;
     s32 color1[4];
     s32 color2[4];
@@ -1067,17 +1063,17 @@ void effUpdateFadeBlendC(EffKindWork *work) {
     u32 unit;
     u32 second;
 
-    if (progress != 0) {
-        limit = work->frame;
+    if (duration != 0) {
+        frame = work->frame;
     }
-    if (progress < limit) {
+    if (duration < frame) {
         return;
     }
     out->left = 0;
     out->top = 0;
     out->right = 0x200;
     out->bottom = 0x1C0;
-    second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
+    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -1539,7 +1535,7 @@ void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_00296F58(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -1619,7 +1615,7 @@ void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_00296F58(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -1699,7 +1695,7 @@ void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_00296F58(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -1837,7 +1833,7 @@ void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_00296F58(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -1963,7 +1959,7 @@ void billUpdateEmitterDrawColorAndTransform(u8 *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_00296F58(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = ((BillCellDrawWork *)work)->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -2092,7 +2088,7 @@ void billUpdateStripDrawColorAndTransform(u8 *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_00296F58(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = ((BillCellDrawWork *)work)->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -2173,7 +2169,7 @@ void billUpdateTrailDrawColorAndTransform(u8 *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_00296F58(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = ((BillCellDrawWork *)work)->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -2299,7 +2295,7 @@ void billUpdateQuadDrawColorAndTransform(u8 *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_00296F58(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = ((BillCellDrawWork *)work)->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -2870,7 +2866,7 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_00296F58(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -3060,7 +3056,7 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_00296F58(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -3157,7 +3153,7 @@ void billDrawCellBlendB(EffClassWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_00296F58(&config->colorTrack, &config->alphaTrack, limit, progress);
+    second = effSampleColorAlphaTracks(&config->colorTrack, &config->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->color;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -4200,7 +4196,7 @@ void effUpdateRadialClassInstances(EffClassWork *work) {
     }
     count = config->point.timed.count;
     radius = config->radius;
-    second = func_00296F58(&config->point.timed.colorTrack, &config->point.timed.alphaTrack, frame, progress);
+    second = effSampleColorAlphaTracks(&config->point.timed.colorTrack, &config->point.timed.alphaTrack, frame, progress);
     color1[0] = work->color;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -4787,7 +4783,7 @@ void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_00296F58(&config->common.header.timed.colorTrack, &config->common.header.timed.alphaTrack, limit, progress);
+    second = effSampleColorAlphaTracks(&config->common.header.timed.colorTrack, &config->common.header.timed.alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = ((BillCellDrawWork *)work)->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -4955,7 +4951,7 @@ void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_00296F58(&config->common.header.timed.colorTrack, &config->common.header.timed.alphaTrack, limit, progress);
+    second = effSampleColorAlphaTracks(&config->common.header.timed.colorTrack, &config->common.header.timed.alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -5124,7 +5120,7 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_00296F58(&config->common.header.timed.colorTrack, &config->common.header.timed.alphaTrack, limit, progress);
+    second = effSampleColorAlphaTracks(&config->common.header.timed.colorTrack, &config->common.header.timed.alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = ((BillCellDrawWork *)work)->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -5454,7 +5450,7 @@ void func_002AF370(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_00296F58(&((EffBillFlameConfig *)config)->header.timed.colorTrack, &((EffBillFlameConfig *)config)->header.timed.alphaTrack, limit, progress);
+    second = effSampleColorAlphaTracks(&((EffBillFlameConfig *)config)->header.timed.colorTrack, &((EffBillFlameConfig *)config)->header.timed.alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -5691,7 +5687,7 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_00296F58(&((EffBillQuantizedConfig *)config)->colorTrack, &((EffBillQuantizedConfig *)config)->alphaTrack, limit, progress);
+    second = effSampleColorAlphaTracks(&((EffBillQuantizedConfig *)config)->colorTrack, &((EffBillQuantizedConfig *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -5704,7 +5700,7 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     ((EffMeshOutput *)out)->color = blended[0];
     ((EffMeshOutput *)out)->textureId = ((EffBillQuantizedConfig *)config)->alphaTrack.surfaceIndex;
     ((EffMeshOutput *)out)->mode = ((EffBillQuantizedConfig *)config)->meshMode;
-    scale = func_00297270(&((EffBillQuantizedConfig *)config)->scaleCurve, limit, progress) * work->scale;
+    scale = effSampleScalarCurve(&((EffBillQuantizedConfig *)config)->scaleCurve, limit, progress) * work->scale;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -7172,16 +7168,52 @@ void func_002B4790(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B4798);
-
 /* Alternate particle handles share a header but occupy distinct slots. */
 typedef struct EffParticleShared {
-    u8 pad00[8];
+    u32 color;
+    u32 option;
     u32 state;
     u8 pad0C[0x98];
     BillObj *billHandle;  // 0xA4: retained billboard cloned from the source resource.
     struct EffExpandedList *reference; // 0xA8
 } EffParticleShared;
+
+u8 *func_002B4798(FileJobPayload *source) {
+    EffParticleShared *work = sdfAllocSizeClassBlock(sizeof(EffParticleShared));
+    void *buffer;
+
+    memset(work, 0, sizeof(EffParticleShared));
+    work->color = 0x80808080;
+    work->billHandle = NULL;
+    work->reference = NULL;
+    if (source == NULL) {
+        return (u8 *)work;
+    }
+    work->option = source->option;
+    buffer = fileResolvePrimaryBuffer(source);
+    memcpy(work->pad0C, buffer, sizeof(work->pad0C));
+    buffer = fileResolveSecondaryBuffer(source);
+    if (buffer != NULL) {
+        switch (source->primary.selector) {
+        case 1:
+            work->billHandle = billCreateIndexed(0, (u32)buffer);
+            break;
+        case 2:
+            work->billHandle = billCreateIndexed(1, (u32)buffer);
+            break;
+        case 4:
+            work->billHandle = effCreateBillboardSharingIndexedResource(*(s32 *)buffer);
+            break;
+        case 7:
+            work->reference = func_0029C230((u32)buffer);
+            break;
+        }
+        if (work->billHandle != NULL) {
+            billMarkKindOneFlag(work->billHandle);
+        }
+    }
+    return (u8 *)work;
+}
 
 void effReleaseParticleResources(u8 *work) {
     BillObj *particle = ((EffParticleShared *)work)->billHandle;

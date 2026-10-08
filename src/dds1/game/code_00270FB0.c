@@ -9,6 +9,7 @@
 #include "eff.h"
 #include "mnu_shop.h"
 #include "mnu_camp_work.h"
+#include "mnu_list.h"
 #include "kwln_task_lifecycle.h"
 
 extern void mnuDestroyWindowContainer(u32);
@@ -59,14 +60,14 @@ extern s8 mnuCampTaskState;
 
 extern s32 D_003BC614;
 
-extern u8 D_0037B950[];
+extern void *const D_0037B950[];
 
-extern u8 D_0037B970[];
+extern void *const D_0037B970[];
 
-extern u8 D_0037B980[];
+extern void *const D_0037B980[];
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
-extern u8 D_0037C388[];
+extern const s32 D_0037C388[];
 
 extern const char D_003B2058[16];
 extern char *D_0037C380[];
@@ -382,15 +383,101 @@ void func_00271B40(void) {
 void func_00271B48(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00270FB0", func_00271B50);
+extern s32 mdlFlagTest(s32);
+extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s32, s32);
+extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
+
+/* Filter staff entries, size the window and preserve each entry's original ordinal. */
+MenuWindowContainer *func_00271B50(void *const *entries, s32 count, s32 width,
+                                     StaffMenuWork *work, const s32 *flagIds) {
+    MenuWindowContainer *window;
+    s32 visibleCount = 0;
+    s32 index;
+    s32 style;
+    void *const *entryCursor;
+    u32 entryOffset;
+
+    if (flagIds != NULL) {
+        index = 0;
+        if (count > 0) {
+            const s32 *flagCursor = flagIds;
+            do {
+                s32 flag = *flagCursor;
+                if (flag == 0 || mdlFlagTest(flag) != 0) {
+                    visibleCount++;
+                }
+                index++;
+                flagCursor++;
+            } while (index < count);
+        }
+    } else {
+        visibleCount = count;
+    }
+
+    window = mnuCreateWindowContainer(0, width, 0x10, visibleCount, 0x15);
+
+    switch (visibleCount) {
+    case 2:
+        style = 0x26;
+        break;
+    case 3:
+        style = 0x28;
+        break;
+    case 4:
+        style = 0x2A;
+        break;
+    case 5:
+        style = 0x2C;
+        break;
+    default:
+        window->unk10 = 0xA8;
+        style = 0xE;
+        break;
+    }
+    mnuInitializeWindowEntryPlacement(0, window, work->staffSlots.baseResources[5], 0xA, style);
+
+    index = 0;
+    if (count > 0) {
+        /* Flags and entry handles use parallel word offsets. */
+        entryCursor = entries;
+        entryOffset = 0;
+        do {
+            struct MenuListNode *node = NULL;
+
+            if (flagIds != NULL) {
+                s32 flag = *(const s32 *)(entryOffset + (u32)flagIds);
+                if (flag != 0) {
+                    if (mdlFlagTest(flag) != 0) {
+                        node = mnuAppendWindowListNode(window, *entryCursor);
+                    }
+                } else {
+                    node = mnuAppendWindowListNode(window,
+                        *(void *const *)(entryOffset + (u32)entries));
+                }
+            } else {
+                node = mnuAppendWindowListNode(window, *entryCursor);
+            }
+            if (node != NULL) {
+                node->sortKeyPrimary = index;
+            }
+            index++;
+            entryCursor++;
+            entryOffset += sizeof(*entries);
+        } while (index < count);
+    }
+
+    mnuSetWindowPanelBounds(window, work->resourceList,
+                            0x30, 0x530, 0xA0, 0x8D0);
+    return window;
+}
 
 void mnuCreateStaffPanelSet(StaffMenuWork *menu) {
     menu->resourceList = mnuCreatePanelSpriteHandles(0, menu->staffSlots.baseResources[3], menu->secondaryImage);
-    menu->images[0] = func_00271B50(D_0037B950, 8, 0x300, menu, D_0037C388);
+    menu->images[0] = (u32)func_00271B50(D_0037B950, 8, 0x300, menu, D_0037C388);
     mnuForwardDupArg(menu->images[0], menu->staffSlots.baseResources[5], 0, 0, 0);
-    menu->images[1] = func_00271B50(D_0037B970, 3, 0x2C0, menu, 0);
+    menu->images[1] = (u32)func_00271B50(D_0037B970, 3, 0x2C0, menu, 0);
     mnuSetWindowFadeScale(menu->images[1], 0x100);
-    menu->images[2] = func_00271B50(D_0037B980, 2, 0x200, menu, 0);
+    menu->images[2] = (u32)func_00271B50(D_0037B980, 2, 0x200, menu, 0);
     mnuSetWindowFadeScale(menu->images[2], 0x100);
 }
 
