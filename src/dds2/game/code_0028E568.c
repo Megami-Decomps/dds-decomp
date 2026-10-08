@@ -75,7 +75,7 @@ extern const char D_004273C0[];
 extern const char D_004273E0[];
 extern const char D_004273F0[];
 
-extern s32 mnuGetNodeValueByIndex(struct MnuStatusResource *, s32);
+extern DatPartyRecord *mnuGetNodeValueByIndex(struct MnuStatusResource *, s32);
 
 extern s32 ptyAnyActivePartyMemberAtProfileCap(u16, u16);
 
@@ -225,7 +225,7 @@ s32 mnuSelectPreferredMantraNode(MenuSearchObject *object, MenuSearchState *stat
     for (i = 0, slot = work->slots; i < 5; i++, slot++) {
         if (slot->nodeId != 0) {
             record = (MantraNodePos *)mnuGetMantraNodePositionRecord(slot->nodeId);
-            value = (DatPartyRecord *)mnuGetNodeValueByIndex((struct MnuStatusResource *)object, i);
+            value = mnuGetNodeValueByIndex((struct MnuStatusResource *)object, i);
             if (ptyAnyActivePartyMemberAtProfileCap(record->id, value->unitId) == 0) {
                 for (j = 0; j < 6; j++) {
                     entry = record->entries[j];
