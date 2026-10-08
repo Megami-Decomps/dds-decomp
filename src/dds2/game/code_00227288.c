@@ -1,3 +1,4 @@
+#include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_effect_position.h"
 #include "btl_task_condition.h"
@@ -13,7 +14,6 @@
 
 extern void btlInterpolateVectorStep();
 
-extern void btlCopyMotionTransform();
 
 extern void func_001E88A8();
 
@@ -626,7 +626,7 @@ s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
     if (command->state != 0x1E || command->motionProgress != 0) {
         return 1;
     }
-    btlCopyMotionTransform(&command->frontCamera, command);
+    btlCopyMotionTransform(&command->frontCamera, &command->camera);
     command->motionParameter = 10.0f;
     command->motionProgress = 1;
     command->state = 0;

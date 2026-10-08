@@ -2,6 +2,7 @@
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
+#include "eff_resource_list.h"
 #include "common.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -331,23 +332,24 @@ INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A940);
 
 INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A950);
 
-u8 *mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount, u8 *menuBytes) {
+struct EffectSlotSet **mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount,
+                                                 u8 *menuBytes) {
     switch (category) {
     case 1:
         *outEntryCount = 1;
-        return menuBytes + 0xC8;
+        return (struct EffectSlotSet **)(menuBytes + 0xC8);
     case 2:
         *outEntryCount = 1;
-        return menuBytes + 0xC4;
+        return (struct EffectSlotSet **)(menuBytes + 0xC4);
     case 3:
         *outEntryCount = 2;
-        return menuBytes + 0x68;
+        return (struct EffectSlotSet **)(menuBytes + 0x68);
     case MNU_STAFF_PARTY_CATEGORY:
         *outEntryCount = 9;
-        return menuBytes + 0xCC;
+        return (struct EffectSlotSet **)(menuBytes + 0xCC);
     case 5:
         *outEntryCount = 1;
-        return menuBytes + 0xF0;
+        return (struct EffectSlotSet **)(menuBytes + 0xF0);
     default:
         *outEntryCount = 0;
         return 0;
@@ -356,17 +358,18 @@ u8 *mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount, u8 *menuBytes) 
 
 /* Resolve entry zero and the active party's adjusted one-based model indices.
  * The supplied count and work are unused; model indices are not range-clamped. */
-void movReleaseActivePartyCategoryModels(s32 modelListAddress, s32 unusedCount, u8 *unusedWork) {
+void movReleaseActivePartyCategoryModels(struct EffectSlotSet **modelHandles, s32 unusedCount,
+                                         u8 *unusedWork) {
     s32 partyIndex;
 
-    effResolveAndReleaseResource((struct EffectSlotSet *)*(u32 *)modelListAddress);
+    effResolveAndReleaseResource(modelHandles[0]);
     for (partyIndex = 0; partyIndex < MNU_STAFF_PARTY_COUNT; partyIndex++) {
         DatPartyRecord *partyRecord = &datGameState->party[partyIndex];
 
         if ((partyRecord->flags & MNU_STAFF_PARTY_PRESENT_BIT) != 0) {
             s32 modelIndex = partyRecord->unitId + D_00437B73;
 
-            effResolveAndReleaseResource((struct EffectSlotSet *)*(u32 *)(modelListAddress + modelIndex * 4 - 4));
+            effResolveAndReleaseResource((modelHandles + modelIndex)[-1]);
         }
     }
 }
@@ -374,11 +377,12 @@ void movReleaseActivePartyCategoryModels(s32 modelListAddress, s32 unusedCount, 
 /* Resolve all category entries, except party models selected by active records. */
 void movReleaseCategoryModels(s32 category, u8 *menuBytes) {
     s32 entryCount;
-    s32 *modelHandles = (s32 *)mnuGetStaffCategoryEntries(category, &entryCount, menuBytes);
+    struct EffectSlotSet **modelHandles =
+        mnuGetStaffCategoryEntries(category, &entryCount, menuBytes);
     if (category != MNU_STAFF_PARTY_CATEGORY) {
         s32 resourceIndex;
         for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++) {
-            effResolveAndReleaseResource((struct EffectSlotSet *)modelHandles[resourceIndex]);
+            effResolveAndReleaseResource(modelHandles[resourceIndex]);
         }
     } else {
         movReleaseActivePartyCategoryModels(modelHandles, entryCount, menuBytes);
@@ -389,12 +393,13 @@ void movReleaseCategoryModels(s32 category, u8 *menuBytes) {
 void mnuReleaseStaffCategoryTextureHandles(s32 category, u8 *menuBytes) {
     s32 entryCount;
     s32 resourceIndex = 0;
-    u8 *entryBytes = mnuGetStaffCategoryEntries(category, &entryCount, menuBytes);
+    struct EffectSlotSet **entries =
+        mnuGetStaffCategoryEntries(category, &entryCount, menuBytes);
 
     if (entryCount > 0) {
-        u32 *handleCursor = (u32 *)entryBytes;
+        struct EffectSlotSet **handleCursor = entries;
         do {
-            effReleaseTextureHandlesAndResetSlots((struct EffectSlotSet *)*handleCursor++);
+            effReleaseTextureHandlesAndResetSlots(*handleCursor++);
         } while (++resourceIndex < entryCount);
     }
 }
@@ -402,9 +407,9 @@ void mnuReleaseStaffCategoryTextureHandles(s32 category, u8 *menuBytes) {
 /* Camp work's drawing parameters; the intervening regions belong to the
  * resource lists and party-panel state initialized elsewhere in this unit. */
 typedef struct CampVisualWork {
-    u32 allocationHandle;  /* 0x0000 */
+    struct SdfMemBlock *allocationHandle;  /* 0x0000 */
     u8 pad04[0x58];
-    u32 menuResource;      /* 0x005C */
+    struct EffectList *menuResource;      /* 0x005C */
     s32 drawContext;        /* 0x0060 */
     s32 titleContext;       /* 0x0064 */
     u8 pad68[0x98];
@@ -799,22 +804,22 @@ void mnuBuildSkillSlotTable(ListSlotWork *work) {
 /* Allocate and clear menu work, select its image-table owner word from the
  * previous sample, then initialize the owned UI and resource state. */
 u8 *mnuCreateStaffMenuWork(void) {
-    s32 allocation;
+    struct SdfMemBlock *allocation;
     u8 *menuBytes;
     u8 *effectBytes;
 
-    allocation = (u32)sdfAllocGeneralBlock(MNU_STAFF_WORK_BYTES);
-    menuBytes = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
+    allocation = sdfAllocGeneralBlock(MNU_STAFF_WORK_BYTES);
+    menuBytes = (u8 *)sdfResourceRetainAddress(allocation);
     memset(menuBytes, 0, MNU_STAFF_WORK_BYTES);
     ((CampVisualWork *)menuBytes)->allocationHandle = allocation;
     effectBytes = menuBytes + 0x11C;
     mnuClearPanelTransitionState((MenuPopupState *)(menuBytes + 8));
     if (dds3AdminReadPreviousSignedSample() != 0) {
         ((CampVisualWork *)menuBytes)->menuResource =
-            (u32)mnuAllocateValueRecord(1);
+            mnuAllocateValueRecord(1);
     } else {
         ((CampVisualWork *)menuBytes)->menuResource =
-            (u32)mnuAllocateValueRecord(0);
+            mnuAllocateValueRecord(0);
     }
     mnuInitPartyPanelSlots(&((MenuStaffContext *)menuBytes)->partyPanel);
     mnuLoadEffectResources(effectBytes);
@@ -845,8 +850,8 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     mnuDestroyEffectResources(menuBytes + 0x11c);
     mnuReleaseTitleEffectResourceGroups(menuBytes);
     movReleaseTitleEffects(menuBytes);
-    func_00303D58(((CampVisualWork *)menuBytes)->menuResource);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((CampVisualWork *)menuBytes)->allocationHandle));
+    effDestroyEffectList(((CampVisualWork *)menuBytes)->menuResource);
+    sdfReleaseResourceAllocation(((CampVisualWork *)menuBytes)->allocationHandle);
     mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
     func_003425D8();
 }

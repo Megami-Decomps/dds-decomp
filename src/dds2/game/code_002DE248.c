@@ -1,3 +1,4 @@
+#include "btl_motion_transform.h"
 #include "eff_bill.h"
 #include "itf_draw_grid.h"
 #include "eff_class_work_api.h"
@@ -25,6 +26,7 @@
 #include "evt_unit.h"
 #include "mdl.h"
 #include "eff.h"
+#include "eff_resource_list.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "eff_record_bucket.h"
@@ -7427,7 +7429,6 @@ void effUpdateSlotTimerPair(u8 *work) {
 
 extern f32 D_00437E90;
 
-extern void func_001E95C8(s32, f32);
 
 void effApplyKeyframeAngle(u8 *work) {
     s32 owner = btlGetRuntime();
@@ -7444,7 +7445,7 @@ void effApplyKeyframeAngle(u8 *work) {
         }
         ratio = (f32)frame / (f32)total;
         value = ((keys[2] - keys[1]) * ratio + keys[1]) * 0.017453293f;
-        func_001E95C8(owner + 0x70, value);
+        btlSetMotionTransformFieldOfView(&((BtlState *)owner)->cameraCommand.camera, value);
         D_00437E90 = value;
     }
 }
@@ -10893,7 +10894,7 @@ EffectList *mnuAllocateValueRecord(u32 mode) {
     return list;
 }
 
-void func_00303D58(EffectList *list) {
+void effDestroyEffectList(EffectList *list) {
     sdfReleaseChipBlock(list);
 }
 
@@ -11020,7 +11021,6 @@ extern char D_004387E8[];
 #define EFF_BATCH_HEADER_BYTES 0xC
 #define EFF_SLOT_WORK_BYTES 0xA0
 #define EFF_PHASE_FULL 0x10000
-#define EFF_PHASE_START_ZERO_BIT 1
 #define EFF_PAYLOAD_RECORD_BYTES 0x6C
 #define EFF_RESOURCE_TABLE_ENTRY_BYTES 8
 
@@ -11327,7 +11327,7 @@ typedef struct EffPackedResourceEntry {
 
 
 u32 effReleaseSlotWorkAllocation(s32 owner) {
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffectSlotSet *)owner)->workAllocation));
+    sdfReleaseResourceAllocation(((EffectSlotSet *)owner)->workAllocation);
     return 1;
 }
 
@@ -11344,11 +11344,11 @@ void *effGetSlotWorkOrOverride(EffectSlotSet *owner, s32 slotIndex) {
     return (void *)entryAddress;
 }
 
-/* Start at zero when bit zero is set, otherwise at the full 16.16 endpoint.
+/* Start at zero when moving forward, otherwise at the full 16.16 endpoint.
  * The return value remains the original flag mask or full endpoint.
  */
 u32 effInitializeSlotPhase(EffTimedState *state) {
-    u32 value = state->flags & EFF_PHASE_START_ZERO_BIT;
+    u32 value = state->flags & EFF_TIMED_STATE_DIRECTION_FORWARD;
     if (value != 0) {
         state->value = 0;
     } else {
@@ -11427,19 +11427,19 @@ u8 *effResolveResourceSlots(EffectSlotSet *set, u8 *resourceBytes, s32 clearAllS
 
 void effResolveAndReleaseResource(EffectSlotSet *owner) {
     if (owner->sourceAllocation != 0) {
-        u32 resource = owner->sourceAllocation;
-        u32 mapped = sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
+        struct SdfMemBlock *resource = owner->sourceAllocation;
+        u8 *mapped = (u8 *)sdfResourceRetainAddress(resource);
         effResolveResourceSlots(owner, mapped, 0, -1);
-        sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)owner->sourceAllocation);
+        sdfDecrementAllocationReferenceCount(owner->sourceAllocation);
     }
 }
 
 void effResolveAndReleaseSelectedResource(EffectSlotSet *owner, s32 mapping) {
     if (owner->sourceAllocation != 0) {
-        u32 resource = owner->sourceAllocation;
-        u32 mapped = sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
+        struct SdfMemBlock *resource = owner->sourceAllocation;
+        u8 *mapped = (u8 *)sdfResourceRetainAddress(resource);
         effResolveResourceSlots(owner, mapped, 0, mapping);
-        sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)owner->sourceAllocation);
+        sdfDecrementAllocationReferenceCount(owner->sourceAllocation);
     }
 }
 
@@ -11506,22 +11506,22 @@ EffectSlotSet *func_00305148(u32 allocationHandle, u32 keepAllocation) {
     set = (EffectSlotSet *)sdfAllocSizeClassBlock(0x30);
     memset(set, 0, 0x30);
     set->unk04 = 0;
-    set->sourceAllocation = keepAllocation != 0 ? allocationHandle : 0;
+    set->sourceAllocation = keepAllocation != 0 ? (struct SdfMemBlock *)allocationHandle : 0;
     resource = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
     set->textureCount = *(u16 *)(resource + 0x14);
-    set->textureAllocation = (u32)sdfAllocGeneralBlock(
+    set->textureAllocation = sdfAllocGeneralBlock(
         set->textureCount * 4);
-    set->handles = (void **)sdfResourceRetainAddress((struct SdfMemBlock *)(set->textureAllocation));
+    set->handles = (void **)sdfResourceRetainAddress(set->textureAllocation);
     memset(set->handles, 0, set->textureCount * 4);
     entries = effResolveResourceSlots(set, resource,
         keepAllocation, -1);
 
     set->count = *(u16 *)(resource + 0x16);
     set->descriptionAllocation =
-        (u32)sdfAllocGeneralBlock(set->count * 0x80);
-    set->descriptions = (EffectSlotDescription *)sdfResourceRetainAddress((struct SdfMemBlock *)(set->descriptionAllocation));
-    set->workAllocation = (u32)sdfAllocGeneralBlock(set->count * 0xA0);
-    set->workEntries = (BdWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(set->workAllocation));
+        sdfAllocGeneralBlock(set->count * 0x80);
+    set->descriptions = (EffectSlotDescription *)sdfResourceRetainAddress(set->descriptionAllocation);
+    set->workAllocation = sdfAllocGeneralBlock(set->count * 0xA0);
+    set->workEntries = (BdWork *)sdfResourceRetainAddress(set->workAllocation);
     for (index = 0; index < set->count; index++) {
         sourceOffset = *(u32 *)(entries + 4);
         memcpy(&set->descriptions[index],
@@ -11545,10 +11545,10 @@ EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 cou
     effect->sourceAllocation = 0;
     effect->textureAllocation = 0;
     effect->count = count;
-    effect->descriptionAllocation = (u32)sdfAllocGeneralBlock(count * 0x80);
-    effect->descriptions = (EffectSlotDescription *)sdfResourceRetainAddress((struct SdfMemBlock *)(effect->descriptionAllocation));
-    effect->workAllocation = (u32)sdfAllocGeneralBlock(effect->count * 0xA0);
-    effect->workEntries = (BdWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(effect->workAllocation));
+    effect->descriptionAllocation = sdfAllocGeneralBlock(count * 0x80);
+    effect->descriptions = (EffectSlotDescription *)sdfResourceRetainAddress(effect->descriptionAllocation);
+    effect->workAllocation = sdfAllocGeneralBlock(effect->count * 0xA0);
+    effect->workEntries = (BdWork *)sdfResourceRetainAddress(effect->workAllocation);
     if (effect->count != 0) {
         do {
             memcpy(&effect->descriptions[index], &source->descriptions[slot], 0x80);
@@ -11561,13 +11561,13 @@ EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 cou
 
 u32 effDestroyResourceSlotSet(EffectSlotSet *set) {
     if (set->sourceAllocation != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(set->sourceAllocation));
+        sdfReleaseResourceAllocation(set->sourceAllocation);
     }
     if (set->unk04 == 0) {
         effReleaseTextureHandlesAndResetSlots(set);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(set->textureAllocation));
+        sdfReleaseResourceAllocation(set->textureAllocation);
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(set->descriptionAllocation));
+    sdfReleaseResourceAllocation(set->descriptionAllocation);
     effReleaseSlotWorkAllocation((s32)set);
     sdfReleaseChipBlock(set);
     return 1;
@@ -11576,7 +11576,7 @@ u32 effDestroyResourceSlotSet(EffectSlotSet *set) {
 u32 effSetSlotResourceAndFlags(EffTimedState *effect, u32 resource, u32 flags) {
     effect->flags = flags;
     effect->source = (u8 *)resource;
-    if ((flags & 2) != 0) {
+    if ((flags & EFF_TIMED_STATE_INITIALIZE_PHASE_ON_BIND) != 0) {
         effInitializeSlotPhase(effect);
     }
     effect->delay = effect->delay + 1;
@@ -11599,9 +11599,9 @@ s32 effClampSlotPhaseAtEnd(u32 effect, u32 slot, EffTimedState *state) {
     if (0x10000 < state->value) {
         u32 flags = state->flags;
         state->value = 0x10000;
-        if (flags & 4) {
-            if (flags & 8) {
-                state->flags = flags & ~1;
+        if (flags & EFF_TIMED_STATE_RESTART_AT_ENDPOINT) {
+            if (flags & EFF_TIMED_STATE_PING_PONG) {
+                state->flags = flags & ~EFF_TIMED_STATE_DIRECTION_FORWARD;
             } else {
                 effInitializeSlotWork(effect, slot);
             }
@@ -11615,9 +11615,9 @@ s32 effClampSlotPhaseAtStart(u32 effect, u32 slot, EffTimedState *state) {
     if (state->value < 0) {
         u32 flags = state->flags;
         state->value = 0;
-        if (flags & 4) {
-            if (flags & 8) {
-                state->flags = flags | 1;
+        if (flags & EFF_TIMED_STATE_RESTART_AT_ENDPOINT) {
+            if (flags & EFF_TIMED_STATE_PING_PONG) {
+                state->flags = flags | EFF_TIMED_STATE_DIRECTION_FORWARD;
             } else {
                 effInitializeSlotWork(effect, slot);
             }
@@ -11652,7 +11652,7 @@ EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entry
                 state->delay -= 1;
             }
             if (step >= 0) {
-                if (state->flags & 1) {
+                if (state->flags & EFF_TIMED_STATE_DIRECTION_FORWARD) {
                     if (state->value != 0x10000) {
                         state->value += step;
                         idle = 0;

@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "btl_effect_position.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
@@ -4654,7 +4655,6 @@ extern SdfGraphObj D_003980E0;
 extern SdfPoolNode *D_00359D20[];
 extern SdfPoolNode *D_00359D30[];
 extern s32 sdfAllocPacketAligned(s32 size);
-extern u32 sdfAllocatePacketList(s32);
 extern void sdfCreateResourcePacket(u32, SdfTexResource *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void sdfCreateDescriptorPacket(u32, SdfTexResource *, s32, s32, s32, s32, s32, s32);
 
@@ -4671,7 +4671,7 @@ void func_001D6FB0(BtlUnit *unit) {
         return;
     }
     unit->mirror->unk32C = sdfAllocPacketAligned(0x70000);
-    packet = sdfAllocatePacketList(0);
+    packet = (u32)sdfAllocatePacketList(0);
     sdfCreateResourcePacket(packet, D_003980E0.buffers[2], 0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0, 0, 0);
     D_00359D20[0]->append((SdfListHead *)D_00359D20[0], (SdfListHead *)packet);
     info = unit->ext->owner;
@@ -4687,7 +4687,7 @@ void func_001D6FB0(BtlUnit *unit) {
         dds3SetObjectFlags(unit->mirror->effectObject, 1);
         return;
     }
-    packet = sdfAllocatePacketList(0);
+    packet = (u32)sdfAllocatePacketList(0);
     sdfCreateDescriptorPacket(packet, D_003980E0.buffers[2], 0, 0, 0x200, 0xE0, unit->mirror->unk32C, 0);
     D_00359D30[0]->append((SdfListHead *)D_00359D30[0], (SdfListHead *)packet);
     func_001D6A80(unit->mirror, info, (SdfModel *)unit->mirror->transparencyModel, D_00359D30, unit->mirror->overlayColor);
@@ -6564,8 +6564,8 @@ s32 btlStepPoseBlendHalf(BtlLinkedCommand *command) {
     if (command->state == 0) {
         command->progress = 0.0f;
         btlScalarRangeInitQuadratic(&command->quadraticRange, (f32)(command->durationFrames * 2));
-        btlCopyMotionTransform((u8 *)&command->camera,
-                               (u8 *)&command->frontCamera);
+        btlCopyMotionTransform(&command->camera,
+                               &command->frontCamera);
         return 0;
     }
     blend = btlScalarRangeStepQuadratic(&command->quadraticRange, 1.0f);
@@ -6581,7 +6581,6 @@ s32 btlStepPoseBlendHalf(BtlLinkedCommand *command) {
     return 0;
 }
 
-extern void btlCopyMotionTransform(u8 *, u8 *);
 
 extern void func_001DB370(BtlCamState *, BtlCamState *, BtlCamState *, f32);
 
@@ -6591,7 +6590,7 @@ s32 btlStepPoseBlend(BtlLinkedCommand *command) {
     f32 value;
     if (command->state == 0) {
         btlScalarRangeSetStartClearEnd(motion, command->motionParameter);
-        btlCopyMotionTransform((u8 *)&command->camera, (u8 *)from);
+        btlCopyMotionTransform(&command->camera, from);
     }
     value = btlScalarRangeStepExponential(motion);
     func_001DB370(&command->camera, from,
@@ -6605,8 +6604,8 @@ s32 btlStepPoseBlendFrame(BtlLinkedCommand *command) {
     if (command->state == 0) {
         command->progressBits = 0;
         btlScalarRangeInitQuadratic(&command->quadraticRange, (f32)command->durationFrames);
-        btlCopyMotionTransform((u8 *)&command->camera,
-                               (u8 *)&command->frontCamera);
+        btlCopyMotionTransform(&command->camera,
+                               &command->frontCamera);
         return 0;
     }
     value = btlScalarRangeStepQuadratic(&command->quadraticRange, 1.0f);
@@ -6623,8 +6622,8 @@ s32 btlStepPoseBlendRatio(BtlLinkedCommand *command) {
                       &command->backCamera, ratio);
         return 0;
     }
-    btlCopyMotionTransform((u8 *)&command->camera,
-                           (u8 *)&command->backCamera);
+    btlCopyMotionTransform(&command->camera,
+                           &command->backCamera);
     return 0;
 }
 
@@ -6900,15 +6899,15 @@ void btlClearPendingSoundList(void) {
     work->battleFlags &= ~0x10;
 }
 
-void btlCopyMotionTransform(u8 *dst, u8 *src) {
-    PCP_COPY_VECTOR(dst, src);
-    PCP_COPY_VECTOR(dst + 0x10, src + 0x10);
-    *(f32 *)(dst + 0x20) = *(f32 *)(src + 0x20);
-    *(f32 *)(dst + 0x24) = *(f32 *)(src + 0x24);
+void btlCopyMotionTransform(BtlCamState *dst, BtlCamState *src) {
+    PCP_COPY_VECTOR(dst->position, src->position);
+    PCP_COPY_VECTOR(dst->direction, src->direction);
+    dst->distance = src->distance;
+    dst->fov = src->fov;
 }
 
-void func_001DC2A0(s32 arg0, f32 arg1) {
-    *(f32 *)(arg0 + 0x24) = arg1;
+void btlSetMotionTransformFieldOfView(BtlCamState *object, f32 fovRadians) {
+    object->fov = fovRadians;
 }
 
 extern void effMiscQuaternionToMatrixVU(void);
@@ -7756,7 +7755,7 @@ void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
         }
     }
     if (action->actionKind == action->status || action->actionKind == 0xA || (action->flags & 0x40000)) {
-        btlCopyMotionTransform((u8 *)&action->frontCamera, (u8 *)&action->camera);
+        btlCopyMotionTransform(&action->frontCamera, &action->camera);
         func_001E3E58(action, (u8 *)&action->backCamera, action->task->unit, 0);
         action->motionParameter = 7.0f;
         action->flags = (action->flags | 0x1041) & 0xFFFBFFFF;
@@ -7941,7 +7940,7 @@ BtlCamState *pose;
 BtlCamState *out;
 {
     func_001DEFE0(command, pose, 20.0f);
-    btlCopyMotionTransform((u8 *)out, (u8 *)pose);
+    btlCopyMotionTransform(out, pose);
     if (pose->direction[0] > 0.0f) {
         func_002DD688(-(20.0f * 0.017453293f));
     } else {
@@ -8190,8 +8189,8 @@ void btlRefreshActionPoseBlendSnapshot(BtlLinkedCommand *action) {
     BtlCamState *saved;
     if (!(action->flags & 1) && action->motionProgress == 0) {
         saved = &action->backCamera;
-        btlCopyMotionTransform((u8 *)&action->frontCamera, (u8 *)&action->camera);
-        btlCopyMotionTransform((u8 *)saved, (u8 *)&action->camera);
+        btlCopyMotionTransform(&action->frontCamera, &action->camera);
+        btlCopyMotionTransform(saved, &action->camera);
         action->backCamera.distance += 125.0f;
         action->flags = (action->flags & ~0x14) | 0x41;
         action->state = 0;
@@ -8218,7 +8217,7 @@ void func_001DFE28(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
         count = btlGetIndexListCount(action->targetList);
         if (btlHasSingleLinkedResource(action) == 0) {
             func_001DEFE0(action, from, 17.5f);
-            btlCopyMotionTransform((u8 *)to, (u8 *)from);
+            btlCopyMotionTransform(to, from);
             btlInterpolateVectorStep(from->position);
             VU0_STORE_VF(vf10, targetPosition);
             if (func_001D6428(unit, 1) == 0) {
@@ -8256,7 +8255,7 @@ void func_001DFE28(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
             target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
             func_001E1288(action, from, 2);
             halfFov = to->fov * 0.5f * 1.3333333f;
-            btlCopyMotionTransform((u8 *)to, (u8 *)from);
+            btlCopyMotionTransform(to, from);
             minimumDistance = target->reach * target->scale / func_002FA148(halfFov);
             to->distance *= 0.6f;
             if (to->distance < minimumDistance) {
@@ -8298,7 +8297,7 @@ void btlSetupCameraPoseAimUnit(BtlLinkedCommand *action, BtlCamState *from, BtlC
     VU0_NEGATE_XYZ(vf10);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, &from->direction);
-    btlCopyMotionTransform((u8 *)to, (u8 *)from);
+    btlCopyMotionTransform(to, from);
     to->distance += 550.0f;
     action->flags = (action->flags & ~0x14) | 0x41;
     action->motionParameter = 25.0f;
@@ -8588,8 +8587,8 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
         if (idle == 0 && eligible == 0) {
             return;
         }
-        btlCopyMotionTransform((u8 *)&action->frontCamera, (u8 *)&action->camera);
-        btlCopyMotionTransform((u8 *)out, (u8 *)&action->camera);
+        btlCopyMotionTransform(&action->frontCamera, &action->camera);
+        btlCopyMotionTransform(out, &action->camera);
         action->backCamera.distance += idle != 0 ? 500.0f : 300.0f;
         action->flags = (action->flags & ~0x14) | 0x41;
         action->motionProgress = 1;
@@ -8656,7 +8655,7 @@ void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *command, Btl
         }
     }
     func_001DF358(command, out);
-    btlCopyMotionTransform((u8 *)pose, (u8 *)out);
+    btlCopyMotionTransform(pose, out);
     span = func_001F66D8(0x200, 0, 0) * 0.5f;
     pose->position[0] -= span;
     out->position[0] += span;
@@ -8732,7 +8731,7 @@ void func_001E4720(BtlCamState *source, BtlCamState *from,
     VU0_STORE_VF(vf10, from->direction);
     from->distance = length + selected->cameraRadius * selected->scale * 3.5f /
                               func_002FA148(fov * 0.5f);
-    btlCopyMotionTransform((u8 *)to, (u8 *)from);
+    btlCopyMotionTransform(to, from);
     func_002DD688(-(45.0f * 0.017453293f));
     VU0_LOAD_VF(vf10, to->direction);
     VU0_ROTATE_VEC(vf10, vf10);
@@ -12595,7 +12594,115 @@ s32 func_001F4D50(f32 *center) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001F5028);
+extern f32 D_0035F9C0[4];
+extern f32 D_0035F9D0[4];
+extern f32 func_002F9CD0(f32);
+
+s32 func_001F5028(s32 filter) {
+    f32 position[4];
+    f32 rotation[4];
+    BtlUnit *actors[16];
+    BtlState *battle;
+    BtlUnit *unit;
+    u32 count = 0;
+    u32 i;
+    f32 totalWidth = 0;
+    f32 radius;
+    f32 minSpacing;
+    f32 maxSpacing;
+    f32 spacing;
+    f32 spacingAngle;
+    f32 angle;
+    f32 totalArcAngle;
+    f32 halfAngle;
+    f32 width;
+    f32 distance;
+    f32 direction;
+    s32 isParty;
+
+    battle = (BtlState *)btlGetRuntime();
+    for (unit = battle->units; unit != 0; unit = unit->next) {
+        s32 flags = unit->flags;
+        if ((flags & filter) && (flags & 1)) {
+            f32 halfWidth = unit->unkBC * unit->scale;
+            actors[count++] = unit;
+            totalWidth += halfWidth + halfWidth;
+        }
+    }
+    if (count == 0) {
+        return 0;
+    }
+    if (battle->cameraActorHighWater < count) {
+        battle->cameraActorHighWater = count;
+    }
+    isParty = filter & 0x200;
+    if (isParty) {
+        maxSpacing = 75.0f;
+        minSpacing = 75.0f;
+        radius = -800.0f;
+        PCP_COPY_VECTOR(rotation, D_0035F9C0);
+    } else {
+        radius = 1000.0f;
+        maxSpacing = 100.0f;
+        minSpacing = 50.0f;
+        PCP_COPY_VECTOR(rotation, D_0035F9D0);
+    }
+    if (count >= 2) {
+        spacing = 1200.0f;
+        if (spacing < totalWidth) {
+            spacing = minSpacing;
+        } else {
+            spacing -= totalWidth;
+            spacing /= count - 1;
+            if (spacing < minSpacing) {
+                spacing = minSpacing;
+            } else if (spacing > maxSpacing) {
+                spacing = maxSpacing;
+            }
+        }
+    } else {
+        spacing = 0;
+    }
+    spacingAngle = func_002F9CD0(spacing / radius);
+    totalArcAngle = -spacingAngle;
+    for (i = 0; i < count; i++) {
+        unit = actors[i];
+        distance = unit->unkBC * unit->scale;
+        halfAngle = func_002F9CD0(distance / radius);
+        totalArcAngle += halfAngle + halfAngle;
+        totalArcAngle += spacingAngle;
+    }
+    width = totalWidth;
+    if (width < 400.0f) {
+        width = 400.0f;
+    } else if (width > 500.0f) {
+        width = 500.0f;
+    }
+    angle = -totalArcAngle * 0.5f;
+    distance = radius - width * 0.5f;
+    direction = 1.0f;
+    if (!isParty) {
+        direction = -1.0f;
+    }
+    for (i = count - 1; i != (u32)-1; i--) {
+        unit = actors[i];
+        halfAngle = func_002F9CD0(unit->unkBC * unit->scale / radius);
+        angle += halfAngle;
+        position[0] = sdfSinPoly(angle) * radius;
+        position[1] = 0.0f;
+        position[2] = (distance - sdfEvaluateCosineViaSinePhaseShift(angle) * radius) * direction;
+        PCP_COPY_VECTOR(unit->position, position);
+        btlSetUnitPosition((u8 *)unit, position);
+        PCP_COPY_VECTOR(unit->rotation, rotation);
+        angle += halfAngle;
+        btlSetUnitRotation((u8 *)unit, rotation);
+        angle += spacingAngle;
+    }
+    if (battle->postPlacementCallback != 0) {
+        battle->postPlacementCallback();
+    }
+    return 1;
+}
 
 extern s32 func_001F4D50(f32 *);
 

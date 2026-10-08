@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "btl_effect_position.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
@@ -2934,7 +2935,6 @@ extern SdfGraphObj D_0040B290;
 extern SdfPoolNode *D_003B6BE0[];
 extern SdfPoolNode *D_003B6BF0[];
 extern s32 sdfAllocPacketAligned(s32);
-extern s32 sdfAllocatePacketList(s32 (*)(s32));
 extern void sdfCreateResourcePacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 extern void sdfCreateDescriptorPacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 
@@ -2949,7 +2949,7 @@ void func_001E3E20(BtlUnit *unit) {
         return;
     }
     unit->mirror->unk34C = sdfAllocPacketAligned(0x70000);
-    packet = sdfAllocatePacketList(0);
+    packet = (s32)(u32)sdfAllocatePacketList(0);
     sdfCreateResourcePacket((SdfListHead *)packet, (s32)D_0040B290.buffers[2], 0, 0, 0x200, 0xE0, unit->mirror->unk34C, 0, 0, 0);
     D_003B6BE0[0]->append((SdfListHead *)D_003B6BE0[0], (SdfListHead *)packet);
     info = unit->ext->owner;
@@ -2965,7 +2965,7 @@ void func_001E3E20(BtlUnit *unit) {
         dds3SetObjectFlags(unit->mirror->effectObject, 1);
         return;
     }
-    packet = sdfAllocatePacketList(0);
+    packet = (s32)(u32)sdfAllocatePacketList(0);
     sdfCreateDescriptorPacket((SdfListHead *)packet, (s32)D_0040B290.buffers[2], 0, 0, 0x200, 0xE0, unit->mirror->unk34C, 0);
     D_003B6BF0[0]->append((SdfListHead *)D_003B6BF0[0], (SdfListHead *)packet);
     func_001E38F0(unit->mirror, info, (SdfModel *)unit->mirror->unk344, D_003B6BF0, unit->mirror->overlayColor);
@@ -5303,8 +5303,8 @@ void btlCopyMotionTransform(BtlCamState *dst, BtlCamState *src) {
     dst->fov = src->fov;
 }
 
-void func_001E95C8(s32 transform, f32 value) {
-    ((BtlCamState *)transform)->fov = value;
+void btlSetMotionTransformFieldOfView(BtlCamState *object, f32 fovRadians) {
+    object->fov = fovRadians;
 }
 
 void btlInitMotionTransformFromVectors(BtlCamState *object, f32 *origin, f32 *direction) {
@@ -6727,7 +6727,7 @@ void func_001ED6C8(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
         count = btlGetIndexListCount(action->targetList);
         if (btlHasSingleLinkedResource(action) == 0) {
             func_001EC868(action, from, 17.5f);
-            btlCopyMotionTransform((u8 *)to, (u8 *)from);
+            btlCopyMotionTransform(to, from);
             btlInterpolateVectorStep(from->position);
             VU0_STORE_VF(vf10, targetPosition);
             if (func_001E3230(unit, 1) == 0) {
@@ -6765,7 +6765,7 @@ void func_001ED6C8(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
             target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
             func_001EEB78(action, from, 2);
             halfFov = to->fov * 0.5f * 1.3333333f;
-            btlCopyMotionTransform((u8 *)to, (u8 *)from);
+            btlCopyMotionTransform(to, from);
             minimumDistance = target->reach * target->scale / func_00353228(halfFov);
             to->distance *= 0.6f;
             if (to->distance < minimumDistance) {
@@ -11700,7 +11700,115 @@ s32 func_002059F0(f32 *center) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_00205CC8);
+extern f32 D_003BE080[4];
+extern f32 D_003BE090[4];
+extern f32 func_00352DB0(f32);
+
+s32 func_00205CC8(s32 filter) {
+    f32 position[4];
+    f32 rotation[4];
+    BtlUnit *actors[16];
+    BtlState *battle;
+    BtlUnit *unit;
+    u32 count = 0;
+    u32 i;
+    f32 totalWidth = 0;
+    f32 radius;
+    f32 minSpacing;
+    f32 maxSpacing;
+    f32 spacing;
+    f32 spacingAngle;
+    f32 angle;
+    f32 totalArcAngle;
+    f32 halfAngle;
+    f32 width;
+    f32 distance;
+    f32 direction;
+    s32 isParty;
+
+    battle = (BtlState *)btlGetRuntime();
+    for (unit = battle->units; unit != 0; unit = unit->nextActor) {
+        s32 flags = unit->flags;
+        if ((flags & filter) && (flags & 1)) {
+            f32 halfWidth = unit->unkBC * unit->scale;
+            actors[count++] = unit;
+            totalWidth += halfWidth + halfWidth;
+        }
+    }
+    if (count == 0) {
+        return 0;
+    }
+    if (battle->cameraActorHighWater < count) {
+        battle->cameraActorHighWater = count;
+    }
+    isParty = filter & 0x200;
+    if (isParty) {
+        maxSpacing = 75.0f;
+        minSpacing = 75.0f;
+        radius = -800.0f;
+        PCP_COPY_VECTOR(rotation, D_003BE080);
+    } else {
+        radius = 1000.0f;
+        maxSpacing = 100.0f;
+        minSpacing = 50.0f;
+        PCP_COPY_VECTOR(rotation, D_003BE090);
+    }
+    if (count >= 2) {
+        spacing = 1200.0f;
+        if (spacing < totalWidth) {
+            spacing = minSpacing;
+        } else {
+            spacing -= totalWidth;
+            spacing /= count - 1;
+            if (spacing < minSpacing) {
+                spacing = minSpacing;
+            } else if (spacing > maxSpacing) {
+                spacing = maxSpacing;
+            }
+        }
+    } else {
+        spacing = 0;
+    }
+    spacingAngle = func_00352DB0(spacing / radius);
+    totalArcAngle = -spacingAngle;
+    for (i = 0; i < count; i++) {
+        unit = actors[i];
+        distance = unit->unkBC * unit->scale;
+        halfAngle = func_00352DB0(distance / radius);
+        totalArcAngle += halfAngle + halfAngle;
+        totalArcAngle += spacingAngle;
+    }
+    width = totalWidth;
+    if (width < 400.0f) {
+        width = 400.0f;
+    } else if (width > 500.0f) {
+        width = 500.0f;
+    }
+    angle = -totalArcAngle * 0.5f;
+    distance = radius - width * 0.5f;
+    direction = 1.0f;
+    if (!isParty) {
+        direction = -1.0f;
+    }
+    for (i = count - 1; i != (u32)-1; i--) {
+        unit = actors[i];
+        halfAngle = func_00352DB0(unit->unkBC * unit->scale / radius);
+        angle += halfAngle;
+        position[0] = sdfSinPoly(angle) * radius;
+        position[1] = 0.0f;
+        position[2] = (distance - sdfEvaluateCosineViaSinePhaseShift(angle) * radius) * direction;
+        PCP_COPY_VECTOR(unit->position, position);
+        btlSetUnitPosition(unit, position);
+        PCP_COPY_VECTOR(unit->rotation, rotation);
+        angle += halfAngle;
+        btlSetUnitRotation(unit, (s128 *)rotation);
+        angle += spacingAngle;
+    }
+    if (battle->postPlacementCallback != 0) {
+        battle->postPlacementCallback();
+    }
+    return 1;
+}
 
 void btlRepositionPartyAroundBattleCenter(void) {
     s128 v;
