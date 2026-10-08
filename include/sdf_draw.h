@@ -20,8 +20,10 @@ typedef char SdfLightingPacketStorage_alignment_must_be_1[
     (__alignof__(SdfLightingPacketStorage) == 1) ? 1 : -1];
 
 /* Buffered SDK storage: live entries are distinct from allocated capacity. */
+struct SdfMemBlock;
+
 typedef struct DevRequest {
-    s32 handle;
+    struct SdfMemBlock *backingAllocation;
     s16 usedCount;
     u16 capacity;
     s16 stride;
