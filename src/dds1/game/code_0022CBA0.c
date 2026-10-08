@@ -162,7 +162,6 @@ extern EffBlurScaleParams *effEventGetScaleBlurSetupParams(void);
 extern EffResourceRectParams *effEventGetResourceTemplateSetupParams(void);
 extern void *memcpy(void *destination, const void *source, u32 size);
 
-extern void effDrawBlurRectangle(EffScreenDrawParams *);
 extern void effEnableTexturedBlur(void);
 extern void effDisableTexturedBlur(void);
 extern void effEnableTexturedSquare(void);
@@ -179,7 +178,7 @@ extern void func_00243A18();
 
 void func_0022CD30(EvtRuntime *viewer) {
     if (viewer->blurRectangleEnabled != 0) {
-        effDrawBlurRectangle(effGetLoadDescA());
+        effDrawBlurRectangle(&effGetLoadDescA()->source);
     }
     if (viewer->texturedBlurEnabled != 0) {
         effEnableTexturedBlur();

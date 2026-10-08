@@ -2476,8 +2476,6 @@ void effPcpReleaseLongFadeTimerWork(EffPCPFadeTimerLong *work) {
 }
 
 
-extern void effDrawBlurRectangle(u32 *color);
-
 /* Same timeline as effPcpFadeTimerUpdate on the longer work layout. */
 void effPcpFadeTimerLongUpdate(EffPCPFadeTimerLong *work) {
     s32 frame = work->frame;
@@ -2505,7 +2503,7 @@ void effPcpFadeTimerLongUpdate(EffPCPFadeTimerLong *work) {
         t = 1.0f;
     }
     work->params.source.color = effMultiplyPackedColors(effBlendColor(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
-    effDrawBlurRectangle(&work->params.source.color);
+    effDrawBlurRectangle(&work->params.source);
     work->frame++;
 }
 

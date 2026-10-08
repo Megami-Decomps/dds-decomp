@@ -116,11 +116,7 @@ extern s8 effTexturedBlurEnabled;
 
 extern s8 effRectangleBlurEnabled;
 
-extern void effDrawBlurRectangle(EffScreenDrawParams *arg);
-
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
-
-extern void effBlurDrawFramebufferQuad(EffScreenDrawParams *arg);
 
 extern void func_0018F840(EffSolidRectParams *arg);
 
@@ -756,7 +752,7 @@ void effInitWorks(void) {
 /* Dispatch enabled draw families independently, in their native order. */
 void effDispatchActive(void) {
     if (effRectangleBlurEnabled) {
-        effDrawBlurRectangle(&effBlurRectangleParameters);
+        effDrawBlurRectangle(&effBlurRectangleParameters.source);
     }
     if (effTexturedBlurEnabled) {
         effDrawBlurPixelRectWithResource(effBlurPixelWork);
@@ -768,7 +764,7 @@ void effDispatchActive(void) {
         effBlurStepScaleSlotsAndDraw(effStaggeredBlurWork);
     }
     if (D_00436463) {
-        effBlurDrawFramebufferQuad(&D_003B2238);
+        effBlurDrawFramebufferQuad(&D_003B2238.source);
     }
     if (effColorRectangleEnabled) {
         func_0018F840(&effColorRectangleParameters);
