@@ -458,7 +458,6 @@ s32 mnuStepStaffCampPageControl(s32 callback);
 
 
 
-extern void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
@@ -1796,25 +1795,13 @@ u8 mnuHasActivePanelResource(MenuScrollPanel *resources) {
 
 INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BB510);
 
-/* Three resource-slot handles at +0xE4/+0xE8/+0xEC. */
-typedef struct MenuSlotEffectHandles {
-    u8 pad00[0xE4];
-    u32 handles[3];
-} MenuSlotEffectHandles;
-
-void mnuLoadPanelSectionResources(MenuSlotEffectHandles *slot,
+void mnuLoadPanelSectionResources(MenuPageSlot *slot,
                                   EffectSlotSet *model, u32 firstValue,
-                                  u32 secondValue, s32 thirdValue
-                                    ) {
-    u32 handle;
-
-    handle = (u32)effCreateResourceSlotSet(model, firstValue, 1);
-    slot->handles[0] = handle;
-    handle = (u32)effCreateResourceSlotSet(model, secondValue, 1);
-    slot->handles[1] = handle;
+                                  u32 secondValue, s32 thirdValue) {
+    slot->panelResourceHandles[0] = effCreateResourceSlotSet(model, firstValue, 1);
+    slot->panelResourceHandles[1] = effCreateResourceSlotSet(model, secondValue, 1);
     if (-1 < thirdValue) {
-        handle = (u32)effCreateResourceSlotSet(model, thirdValue, 1);
-        slot->handles[2] = handle;
+        slot->panelResourceHandles[2] = effCreateResourceSlotSet(model, thirdValue, 1);
     }
 }
 
@@ -2000,11 +1987,16 @@ void mnuDrawIconRow(s32 unusedA, s32 unusedB, s32 depth, s32 skip, MenuSprites *
     }
 }
 
-void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6) {
+void mnuSetWindowResource(s32 index, MenuPageWindow *menu,
+                          EffectSlotSet *mainResource,
+                          EffectSlotSet *itemResource,
+                          EffectSlotSet *iconResource,
+                          EffectSlotSet *cursorResource,
+                          EffectSlotSet *alternateResource) {
     mnuSelectPage(menu, index);
     menu->slots[index].windowSprites = mnuCreatePageSpriteSet(
-        0, (EffectSlotSet *)a2, (EffectSlotSet *)a3, (EffectSlotSet *)a4,
-        (EffectSlotSet *)a5, (EffectSlotSet *)a6);
+        0, mainResource, itemResource, iconResource, cursorResource,
+        alternateResource);
     menu->flags |= MNU_PAGE_WINDOW_SPRITE_MODE;
 }
 

@@ -644,6 +644,8 @@
 0x001286C0	fldSetPendingSceneAction	inferred	Stores the supplied scene action for later execution. [names_reviewed5.tsv]
 0x001286C8	fldRunPendingSceneAction	inferred	Invokes the stored scene action when nonzero and resets it afterwards. [names_reviewed5.tsv]
 0x001286F8	fldConsumeNextSceneRequest	inferred	Copies pending scene identifiers to outputs with the world base applied and clears both source slots. [names_reviewed5.tsv]
+0x001287B8	fldResolveWorldObjectByResourceId	inferred	Resolves a resource ID through its named kind-6 world objects, or lazily creates and caches dummy matter for resources without a name-entry list; returns NULL when unresolved.
+0x001288C8	fldResolveWorldObjectByResourceEntryName	inferred	Matches the supplied string against resource name entries, then resolves a kind-11 world object using the enclosing resource name; returns NULL when unresolved.
 0x001295E0	fldSpawnActionObjects	inferred	Spawns count action objects from 12-byte entries; first handle goes to D_00389770[0]
 0x00129B40	fldLoadSceneRequestFiles	inferred	DDS2 twin of DDS1 0x00127588 [names_M72_FieldLarge.tsv]
 0x00129CC0	fldProcessFieldRequest	inferred	Uses request words to invoke the field setup routine and creates the player for non-special scene states; DDS1 twin 00127708.
@@ -1709,10 +1711,12 @@
 0x0018A8E8	effPcpDriftCreateFromTable	inferred	fetches three effect parameter blocks to construct the drift work [names_reviewed5.tsv]
 0x0018A950	effPcpClonePairedDriftEvents	inferred	readability/matching review (QP16)
 0x0018AC20	effPcpRandomizeSlot	inferred	Computes evenly spaced phase and randomized speed and signed spin for one particle slot.
+0x0018AD50	effPcpUpdatePairedDriftEvents	inferred	updates paired drift entries, their fragment geometry and fading, both endpoint events, and repeat-frame state
 0x0018B118	effPcpCopyRandomizedVector	inferred	Copies the particle effect vector in the randomized-slot group. [names_reviewed21.tsv]
 0x0018B350	effPcpSlotEffectCreateFromTable	inferred	extracts two parameter blocks before creating randomized-slot effect work [names_reviewed5.tsv]
 0x0018B398	effPcpCloneSpawnRangeEvents	inferred	readability/matching review (QP16)
 0x0018B628	effPcpRandomizeSpawnSlot	inferred	dds1 func_001839D0 twin [names_reviewed2.tsv]
+0x0018B778	effPcpUpdateSpawnRangeEvents	inferred	updates radial event positions, damping, fade, and per-entry frame state
 0x0018B9F8	effPcpCopySpawnRangeVector	inferred	Copies a vector of the randomized spawn-range effect group. [names_reviewed21.tsv]
 0x0018BA08	effPcpSpawnRangeSetScale	inferred	Stores scale on randomized spawning range work. [names_reviewed6.tsv]
 0x0018BA10	effPcpSetSpawnRangeColor	inferred	src/dds2/effect/effPCPMisc.c:func_0018BA10; Writes the spawn-range slot work color parameter; registered in the same color callback slot as named effect color setters. Registration: asm/dds2/data/data.data.s:64099: table record 0x003B0DE0, color slot. [names_qp9.tsv]
