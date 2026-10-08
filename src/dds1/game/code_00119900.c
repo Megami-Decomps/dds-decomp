@@ -1155,11 +1155,11 @@ void func_0011C3C0(void) {
     scrSetFloatReturnValue(datBattleParameters->maxMpGrowth[((DatPartyRecord *)D_003C2E78[0])->level - 1]);
 }
 
-extern s32 datComputeSkillBoostedMaxHp(s32);
+extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
 
 /* Push the coarse HP-percentage table value; only exactly 100 percent uses index zero. */
 void evtSelectStatGrade(void) {
-    s32 maximumHp = datComputeSkillBoostedMaxHp(((EvtScriptContext *)D_003C2E70)->second);
+    s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->second);
     s32 currentHp = ((DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->second)->hp;
     s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
     s32 gradeIndex = 0;
@@ -1221,7 +1221,7 @@ void evtPushRosterBaseValue(void) {
 
 /* Push the finer HP-percentage table value; only exactly 100 percent uses index zero. */
 void evtSelectFineStatGrade(void) {
-    s32 maximumHp = datComputeSkillBoostedMaxHp(((EvtScriptContext *)D_003C2E70)->second);
+    s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->second);
     s32 currentHp = ((DatPartyRecord *)((EvtScriptContext *)D_003C2E70)->second)->hp;
     s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
     s32 gradeIndex = 0;
