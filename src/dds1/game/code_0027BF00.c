@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "mnu.h"
 #include "sdf_resource.h"
 #include "mnu_list.h"
@@ -147,8 +148,8 @@ MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade);
 u32 mnuTestListFlagTwo(u32 *flags);
 
 /* Return the stored row step times the visible row count, in native units. */
-s32 mnuGetListViewportHeight(s32 list) {
-    return ((MenuList *)list)->rowStep * ((MenuList *)list)->visibleCount;
+s32 mnuGetListViewportHeight(MenuList *list) {
+    return list->rowStep * list->visibleCount;
 }
 
 /* Cancel the pending animation on every node in this list. */
@@ -1677,8 +1678,6 @@ void mnuClearListFlags(s32 which, MenuPageWindow *menu) {
         menu->flags &= ~0x20;
     }
 }
-
-extern u32 mnuMapPadMaskToFlags(u32);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 

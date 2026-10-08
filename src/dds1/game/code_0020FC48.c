@@ -2,6 +2,7 @@
 #include "common.h"
 #include "snd_slot.h"
 #include "sdf_resource.h"
+#include "eff_ref_obj.h"
 #include "file_pac.h"
 #include "dat_state.h"
 #include "btl_state.h"
@@ -84,12 +85,6 @@ extern void btlBossDebugPrintf(const char *format, ...);
 
 extern s8 D_003D7588[];
 
-/* Wind texture clone kept by the overlay; +8 is its 256-entry palette. */
-typedef struct BtlWindTexture {
-    u8 pad00[8];
-    s32 *palette;
-} BtlWindTexture;
-
 typedef struct BattleRuntimeState {
     s32 counter;
     u16 state;
@@ -110,7 +105,7 @@ typedef struct BattleRuntimeState {
     s32 cellHeight;
     void *ownedData;
     u8 unk_3C[4];
-    BtlWindTexture *resource;
+    RefObj *resource;
     void *request;
     void *handle;
 } BattleRuntimeState;
@@ -139,7 +134,6 @@ extern s32 btlLowestSetPairIndex(u32);
 
 extern u64 btlStartTask(void *);
 
-extern void effReleaseSharedReference(void *);
 
 extern void kwlnTextureClearReferenceFlag(void);
 
@@ -1258,7 +1252,6 @@ void btlBuildOverlayQuadPacket(s32 packet, s32 first, s32 second, s32 color) {
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_00211D40);
 
 extern u32 effGetWindTextureHandle(void);
-extern void *func_0029BD90(void *);
 extern void func_002D4C80(const void *, void *, s32);
 extern void func_002D4CC8(const void *, void *, s32);
 extern void sdfAppendDmaTagToList(s32, void *);
@@ -1273,8 +1266,8 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
     u32 tint;
 
     if (btlRuntimeState.resource == NULL) {
-        btlRuntimeState.resource = func_0029BD90((void *)effGetWindTextureHandle());
-        btlCopyPaletteLowByteToAlpha(btlRuntimeState.resource->palette);
+        btlRuntimeState.resource = effCreateSharedTextureReference((struct SdfTextureFileHeader *)effGetWindTextureHandle());
+        btlCopyPaletteLowByteToAlpha((s32 *)btlRuntimeState.resource->palette);
     }
     tag = sdfAllocPacketAligned(0x40);
     func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, tag, 1);
@@ -1466,7 +1459,7 @@ void btlClearOverlayBuffers(void) {
 }
 
 void btlReleaseRuntimeResource(void) {
-    void *resource = btlRuntimeState.resource;
+    RefObj *resource = btlRuntimeState.resource;
     if (resource != 0) {
         effReleaseSharedReference(resource);
         btlRuntimeState.resource = 0;
