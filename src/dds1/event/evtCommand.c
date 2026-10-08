@@ -176,7 +176,30 @@ extern EffWorldNode *dds3CreateCameraObject(s32 world, void *pos, void *rot);
 
 extern void effObjSetInnerFloat(EffWorldNode *obj, f32 value);
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_002260C0);
+/* Copy two source points into the primary effect object. */
+s32 func_002260C0(void) {
+    struct EffectObj *primary;
+    struct EffectObj *point0;
+    struct EffectObj *point1;
+
+    primary = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    if (primary == NULL) {
+        evtPrintDeveloperConsoleMessage("EFFMG1_POS mg1 ID error!\n");
+        return 1;
+    }
+
+    point0 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(1));
+    point1 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(2));
+    if (point0 == NULL || point1 == NULL) {
+        evtPrintDeveloperConsoleMessage("EFFMG1_POS point ID not found!\n");
+        return 1;
+    }
+    if (effObjCopyMagatuhiSourceParameters(primary, point0, point1, NULL, NULL) == 0) {
+        evtPrintDeveloperConsoleMessage("EFFMG1_POS set error!\n");
+        return 1;
+    }
+    return 1;
+}
 
 extern char D_003AC700[];
 
