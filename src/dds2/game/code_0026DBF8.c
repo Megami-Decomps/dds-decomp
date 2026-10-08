@@ -1,4 +1,5 @@
 #include "prf_requirement.h"
+#include "eff_resource_slots.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "pcp_vu0.h"
@@ -357,7 +358,6 @@ extern void func_00274A70();
 extern u32 mnuInitMantraUnitPanelDraw();
 extern void mnuReleaseMantraUnitPanelDraw();
 void mnuStorePanelEntry(u32, u32);
-void effDestroyResourceSlotSet(u32);
 struct SdfMemBlock;
 
 s32 mnuGetActiveMantraModelFlagState(void) {

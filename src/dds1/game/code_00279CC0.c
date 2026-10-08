@@ -1,4 +1,5 @@
 #include "sdf_chip.h"
+#include "eff_resource_slots.h"
 #include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
