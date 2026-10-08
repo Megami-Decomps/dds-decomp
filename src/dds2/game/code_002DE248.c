@@ -327,9 +327,6 @@ extern u8 D_003E9110[];
 
 extern void func_002DB2C0(s32, void *);
 
-extern s32 billGetFirstEntryFramePeriod(u32);
-
-
 extern f32 effComputeProjectedOffsetAngle(void *, void *);
 
 extern f32 func_0015A150(void *, void *);
@@ -1560,7 +1557,7 @@ typedef struct EffBillboardWork {
     f32 heightScale; /* 0x2C */
     f32 widthScale;  /* 0x30 */
     u8 unk34[0x30];  /* Remaining copied configuration, not alignment padding. */
-    u32 billboard;   /* 0x64 */
+    BillObj *billboard; /* 0x64: owned billboard handle. */
 } EffBillboardWork;
 
 u8 *effCreateBillboardWork(u8 *source) {
@@ -1582,7 +1579,7 @@ u8 *effCreateBillboardWork(u8 *source) {
 }
 
 void effBillboardWorkRelease(u32 work) {
-    s32 billboard;
+    BillObj *billboard;
 
     billboard = ((EffBillboardWork *)work)->billboard;
     if (billboard != 0) {
@@ -1599,13 +1596,12 @@ u8 *effDuplicateBillState(const u8 *source) {
 }
 
 void effReplaceBillboardClone(s32 dst, s32 src) {
-    u32 billboard;
+    BillObj *billboard;
 
     if (((EffBillboardWork *)dst)->billboard != 0) {
         billDispatchByKind(((EffBillboardWork *)dst)->billboard);
     }
-    billboard = (u32)billCloneObjectRetainingSharedData(
-        (struct BillObj *)((EffBillboardWork *)src)->billboard);
+    billboard = billCloneObjectRetainingSharedData(((EffBillboardWork *)src)->billboard);
     ((EffBillboardWork *)dst)->billboard = billboard;
 }
 
@@ -1634,10 +1630,10 @@ void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
             len = 0.3f;
         }
         len *= work->scale;
-        billSetChildScaleComponents((struct BillObj *)work->billboard, len * work->widthScale, work->heightScale * work->scale);
-        billSetLengthExtent(work->billboard, angle);
-        effCopyVector(work->billboard, work);
-        billInvokeCallback(work->billboard);
+        billSetChildScaleComponents(work->billboard, len * work->widthScale, work->heightScale * work->scale);
+        billSetLengthExtent((u32)work->billboard, angle);
+        effCopyVector((u32)work->billboard, work);
+        billInvokeCallback((u32)work->billboard);
         work->frame++;
     }
 }

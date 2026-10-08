@@ -23,6 +23,7 @@ void billSetChildScaleComponents(struct BillObj *billboard, f32 x, f32 y);
 void billSetAnimationEntry(struct BillObj *billboard, s32 entryIndex);
 void billSetAnimationFrameForImmediateAdvance(struct BillObj *billboard, u32 frame);
 void billSetAnimationFrameWithOneTickHold(struct BillObj *billboard, u32 frame);
+s32 billGetFirstEntryFramePeriod(struct BillObj *billboard);
 void billReleaseSharedEntryBlock(struct BillData *data);
 void effReleaseSharedTextureRecord(struct BillChildPayload *child);
 struct BillChildPayload *billStepAnimationEntryAndUpdateChild(
