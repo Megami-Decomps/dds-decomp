@@ -5424,7 +5424,6 @@ void camAimRotation(CamAim *obj, void *dst)
     VU0_STORE_VF(vf10, dst);
 }
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
 
 EffectSurfaceNode *fileCreateSurfaceLoaderState(s32 capacity) {

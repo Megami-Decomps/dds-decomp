@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "kwln.h"
 #include "sdf_primitive.h"
 #include "pcp_vu0.h"

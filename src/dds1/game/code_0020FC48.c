@@ -1,5 +1,6 @@
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "snd_slot.h"
 #include "sdf_resource.h"
 #include "eff_ref_obj.h"
@@ -954,7 +955,6 @@ typedef struct BattleModelEntry {
     struct BattleModelEntry *next;
 } BattleModelEntry;
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
 /* Allocate a cache entry with one reference and insert it at the list head. */
 BattleModelEntry *btlCreateModelEntry(void) {
@@ -981,7 +981,6 @@ extern char D_003A68F8[];
 extern void func_00288788(void *);
 
 
-extern void sdfReleaseChipBlock(void *);
 
 /* Only the final reference releases resources and unlinks the cache entry. */
 void btlReleaseModelEntry(BattleModelEntry *cacheEntry) {

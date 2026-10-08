@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf_draw.h"
 #include "sdf_sif_command.h"
@@ -891,7 +892,6 @@ extern s32 func_00369B70();
 
 extern s32 func_00369DF8(s32);
 
-extern void sdfReleaseChipBlock(void *);
 
 s32 sdfPathExists(char *path) {
     char *resolved = func_0033E818(path);
@@ -991,7 +991,6 @@ void sdfDevEnqueueStateAndWakeWorker(DevState *state) {
     }
 }
 extern void EIntr(void);
-extern void sdfReleaseChipBlock(void *ptr);
 extern DevState *D_00438B14;
 extern DevState *D_00438B18;
 extern s16 D_00438B10;

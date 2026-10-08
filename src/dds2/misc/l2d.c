@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf.h"
 
 /* Rectangle in object space: origin, extent, depth and 15-bit colour. */
@@ -32,7 +33,6 @@ void l2dDrawColoredRect(L2dRect *rect)
     D_003805A8.append((SdfListHead *)&D_003805A8, list);
 }
 
-extern void *sdfAllocAndClearQuadwords(s32 size);
 extern void dds3RegisterOwnedIntrusiveNode(void *node, void *owner);
 extern s32 D_00435EB0;
 

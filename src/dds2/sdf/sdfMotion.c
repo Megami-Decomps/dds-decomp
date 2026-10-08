@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "sdf.h"
@@ -214,7 +215,6 @@ void sdfSetMotionPointerPair(Pair *binding, void *source, void *dispatch) {
 }
 
 
-void *sdfAllocAndClearQuadwords(s32 size);
 s32 sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
 
 Motion *func_003340E0(SdfModel *model, MotionTable *table) {
@@ -245,7 +245,6 @@ Motion *func_003340E0(SdfModel *model, MotionTable *table) {
 }
 
 void sdfDestroyDevRequest(void *a0);
-void sdfReleaseChipBlock(void *a0);
 
 
 /* Unlinks the node from its owner's list, notifies each request callback, then frees the request and the node. */

@@ -1,5 +1,6 @@
 #include "eff_bill.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
 #include "dds3_path.h"
@@ -166,7 +167,6 @@ extern u32 billCloneObjectRetainingSharedData(u32);
 
 extern void *fileResolvePrimaryBuffer();
 extern void *sdfAllocSizeClassBlock(s32);
-extern void sdfReleaseChipBlock(void *);
 
 extern u32 *fileResolveSecondaryBuffer(void *);
 
@@ -521,7 +521,6 @@ extern void effInitModelVUState(MdlCtx *);
 
 extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 
-extern void *sdfAllocAndClearQuadwords(u32);
 
 extern char D_003B2AA0[];
 
@@ -552,7 +551,7 @@ void effCreateSmallHeaderFromFile(void *work) {
 
 void effReleaseFadeHeaderAllocation(u32 allocation) {
     kwlnCancelConfiguredFadeFrames();
-    sdfReleaseChipBlock(allocation);
+    sdfReleaseChipBlock((void *)allocation);
 }
 
 void effCloneSmallHeaderFromWork(s32 work) {
@@ -686,7 +685,7 @@ void effCreateSelectionHeaderFromFile(void *work) {
 
 void effReleaseSelectionHeaderAllocation(u32 allocation) {
     evtDestroySelectionState();
-    sdfReleaseChipBlock(allocation);
+    sdfReleaseChipBlock((void *)allocation);
 }
 
 void effCloneSelectionHeaderFromWork(s32 work) {
@@ -1419,7 +1418,7 @@ void effBillboardWorkRelease(u32 work) {
     if (billboard != 0) {
         billDispatchByKind(billboard);
     }
-    sdfReleaseChipBlock(work);
+    sdfReleaseChipBlock((void *)work);
 }
 
 u8 *effDuplicateBillState(const u8 *source) {
@@ -2925,7 +2924,7 @@ u32 *effSegmentPointerSet(u8 *work) {
 
 void effReleaseRingResourceHandle(u32 handle) {
     effAssetQueueRelease(*(u32 *)handle);
-    sdfReleaseChipBlock(handle);
+    sdfReleaseChipBlock((void *)handle);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A4478);
@@ -3215,7 +3214,7 @@ EffRingResource *effCreateRingHandle(EffRadialRingParams *work) {
 
 void effReleaseRingHandle(EffRingResource *handle) {
     effAssetQueueRelease((u32)handle->pointSet);
-    sdfReleaseChipBlock((u32)handle);
+    sdfReleaseChipBlock(handle);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A4ED0);

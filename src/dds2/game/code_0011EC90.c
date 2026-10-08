@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "dat_state.h"
 
 extern u32 mtrHasEnoughOwnedMantras(void);
@@ -24,7 +25,6 @@ extern void *func_0019CE78(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 
 extern void frFontSetContextPair(void *ctx, u32 arg1, u32 arg2);
 
-extern void *sdfAllocAndClearQuadwords(s32 size);
 
 typedef struct Dds3Node Dds3Node;
 
@@ -199,8 +199,8 @@ void itfConfigureOwnedGlyphChainFlag(Dds3Node *node, u8 flag) {
     frFontSetChainFlag(node->glyph, flag);
 }
 
-void frFontReleaseOwnerStorage(void) {
-    sdfReleaseChipBlock();
+void frFontReleaseOwnerStorage(void *memory) {
+    sdfReleaseChipBlock(memory);
 }
 
 Dds3NodeVTable dds3FontNodeVTable __attribute__((section(".sdata"))) = {
