@@ -176,7 +176,7 @@ typedef struct ParBlock {
     s32 handle;      /* 0x14 */
 } ParBlock;
 
-extern void *sdfCreateAssetWithDrawEntries(void);
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 extern void func_003332D0(s32, f32);
 
@@ -642,8 +642,8 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
         cell->vertices = (u8 *)system->colors + i * perCell * 4;
         parCellInit(system, i);
     }
-    system->object = sdfCreateAssetWithDrawEntries();
-    func_003332D0(system->object, 1.0f);
+    system->asset = sdfCreateAssetWithDrawEntries();
+    func_003332D0((s32)system->asset, 1.0f);
     system->kind = kind;
     system->cellCount = count;
     system->bucket = 2;
@@ -656,7 +656,7 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
 }
 
 void parReleaseCellSystem(ParSystem *system) {
-    sdfQueueAssetRelease(system->object);
+    sdfQueueAssetRelease((s32)system->asset);
     sdfReleaseResourceAllocation(system->allocation);
 }
 
@@ -1503,7 +1503,7 @@ void func_00164CB0(void) {
             sdfConsAppendClearPacket(*slot, NULL);
             list = *slot;
         }
-        sdfConsAppendAssetPacket(list, (void *)system->object, NULL);
+        sdfConsAppendAssetPacket(list, (void *)system->asset, NULL);
         count = system->cellCount;
         if (system->kind == 0) {
             parDrawControl.indices = D_003AAC90;
@@ -1644,7 +1644,7 @@ ParBlock *parAllocateDrawBlock(s32 count) {
     block->colors = (u32 *)vertices;
     block->handle = handle;
     block->positions = (u128 *)base;
-    block->object = sdfCreateAssetWithDrawEntries();
+    block->object = (s32)sdfCreateAssetWithDrawEntries();
     func_003332D0(block->object, 1.0f);
     return block;
 }

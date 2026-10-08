@@ -850,7 +850,7 @@ typedef struct ParSystem {
     ParCell *cells;      /* 0x14 */
     void *vertices;      /* 0x18 */
     void *colors;        /* 0x1C */
-    s32 object;          /* 0x20 */
+    struct SdfAsset *asset; /* 0x20: submitted draw asset */
     struct ParSystem *next; /* 0x24: pending cell-system list */
     s32 unk28;           /* 0x28 */
 } ParSystem;

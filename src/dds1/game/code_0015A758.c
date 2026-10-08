@@ -6,6 +6,8 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
+extern void sdfQueueAssetRelease(SdfAsset *asset);
+
 typedef struct ParListNode ParListNode;
 
 extern ParSystem *D_003BB014;
@@ -155,7 +157,7 @@ extern void parCellInit();
 extern void parUpdateCellVertexPair(ParSystem *, s32, const u128 *);
 extern void parUpdateCellVertexTriangle(ParSystem *, s32, const u128 *);
 
-extern s32 sdfCreateAssetWithDrawEntries();
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 extern void func_002DA420(s32, f32);
 
@@ -559,7 +561,7 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B258);
 
 void parReleaseAssetRecord(ParReleaseRecord *record) {
     record->released = 1;
-    sdfQueueAssetRelease(record->asset);
+    sdfQueueAssetRelease((SdfAsset *)record->asset);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(record->allocation));
 }
 
@@ -625,8 +627,8 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
         cell->vertices = (u8 *)system->colors + i * perCell * 4;
         parCellInit(system, i);
     }
-    system->object = sdfCreateAssetWithDrawEntries();
-    func_002DA420(system->object, 1.0f);
+    system->asset = sdfCreateAssetWithDrawEntries();
+    func_002DA420((s32)system->asset, 1.0f);
     system->kind = kind;
     system->cellCount = count;
     system->bucket = 2;
@@ -639,7 +641,7 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
 }
 
 void parReleaseCellSystem(ParSystem *system) {
-    sdfQueueAssetRelease(system->object);
+    sdfQueueAssetRelease(system->asset);
     sdfReleaseResourceAllocation(system->allocation);
 }
 
@@ -1472,7 +1474,7 @@ void func_0015D0C0(void) {
             sdfConsAppendClearPacket(*slot, NULL);
             list = *slot;
         }
-        sdfConsAppendAssetPacket(list, (void *)system->object, NULL);
+        sdfConsAppendAssetPacket(list, (void *)system->asset, NULL);
         count = system->cellCount;
         if (system->kind == 0) {
             parDrawControl.indices = D_0034E360;
@@ -1622,13 +1624,13 @@ ParBlock *parAllocateDrawBlock(s32 count) {
     block->colors = (u32 *)vertices;
     block->handle = handle;
     block->positions = (u128 *)base;
-    block->object = sdfCreateAssetWithDrawEntries();
+    block->object = (s32)sdfCreateAssetWithDrawEntries();
     func_002DA420(block->object, 1.0f);
     return block;
 }
 
 void parReleaseDrawBlock(ParBlock *block) {
-    sdfQueueAssetRelease(block->object);
+    sdfQueueAssetRelease((SdfAsset *)block->object);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(block->handle));
 }
 
