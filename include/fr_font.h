@@ -134,6 +134,18 @@ typedef struct FrFontSpritePacket {
 extern FrFontSystem frFontWork;
 extern FntList frFontResourceList;
 
+/* Decode encoded text into glyph nodes, optionally extending an existing chain. */
+#ifdef VERSION_DDS1
+struct FrFontGlyph *func_001951C8(const char *text, s8 fontIndex,
+    s8 firstOption, s8 secondOption, struct FrFontGlyph *existingGlyph);
+#endif
+#ifdef VERSION_DDS2
+struct FrFontGlyph *func_0019CE78(const char *text, s8 fontIndex,
+    s8 firstOption, s8 secondOption, struct FrFontGlyph *existingGlyph);
+#endif
+struct FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex,
+    s8 firstOption, s8 secondOption, struct FrFontGlyph *previousGlyph);
+
 /* Link a glyph chain into the current draw-buffer slot. */
 s32 frFontQueueGlyphForCurrentDrawBuffer(struct FrFontGlyph *glyph);
 

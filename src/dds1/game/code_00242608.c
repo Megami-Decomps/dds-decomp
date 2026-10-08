@@ -698,13 +698,12 @@ void func_00243A18(EvtRuntime *scene) {
 }
 
 extern s32 D_00368BD8[];
-extern s32 func_001951C8(s32 *resources, s32, s32, s32, s32);
 extern void frFontSetContextPair(s32 resource, s32 width, s32 height);
 
 void mnuCampInitFontResource(EvtRuntime *scene) {
     s32 fontHandle;
     scene->glyph = 0;
-    fontHandle = func_001951C8(D_00368BD8, 0, 0, 0, 0);
+    fontHandle = (s32)(u32)func_001951C8((const char *)D_00368BD8, 0, 0, 0, 0);
     scene->glyph = fontHandle;
     frFontSetContextPair(fontHandle, CAMP_FONT_CONTEXT_WIDTH, CAMP_FONT_CONTEXT_HEIGHT);
 }
