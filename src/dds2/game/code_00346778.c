@@ -7,6 +7,8 @@
 #include "sdf_movie_state.h"
 #include "sdf_dev_state.h"
 
+typedef struct SoundFormat SoundFormat;
+
 enum {
     PAC_HEADER_BYTES = 0x10,
     PAC_EXTENSION_BYTES_MASK = 0xF0,
@@ -54,7 +56,7 @@ extern DevState *sdfDevCreateCallbackState(const char *path, void *callback, s32
 extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
 extern char *func_0035D5B0(const char *text, s32 delimiter);
 extern s32 func_0035CB10(const char *text, const char *suffix);
-extern void sdfSoundInitFormattedAndAppendNode(u8 *state, s32 format,
+extern void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format,
                                                 SdfStreamRead read, u32 source, s32 resource);
 extern s32 sdfMovieHandleLinearDeviceEvent(void *, s32, s32, s32, s32);
 extern s32 sdfMovieHandlePacDeviceEvent(void *, s32, s32, s32, s32);
@@ -109,7 +111,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
         owner->state = SDF_MOVIE_STATE_INITIAL;
         owner->deviceState = sdfDevCreateCallbackState(name,
                                                         (void *)sdfMovieHandleLinearDeviceEvent, (s32)owner);
-        sdfSoundInitFormattedAndAppendNode((u8 *)&owner->soundNode, (s32)soundFormat,
+        sdfSoundInitFormattedAndAppendNode(&owner->soundNode, (SoundFormat *)soundFormat,
                                             sdfMovieLinearStreamReadCallback, (u32)owner, descriptor->source);
         return;
     }
@@ -134,7 +136,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
                                                     (void *)sdfMovieHandlePacDeviceEvent, (s32)owner);
     owner->pacEnabled = 1;
     owner->packetLimit = 0x7F;
-    sdfSoundInitFormattedAndAppendNode((u8 *)&owner->soundNode, (s32)soundFormat,
+    sdfSoundInitFormattedAndAppendNode(&owner->soundNode, (SoundFormat *)soundFormat,
                                         sdfMoviePacStreamReadCallback, (u32)owner, descriptor->source);
 }
 
