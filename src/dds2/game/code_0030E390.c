@@ -13,7 +13,6 @@ extern u32 D_0045C7A0[];
 
 extern u32 D_0045C7B0[];
 
-void sdfQueueNonzeroResourceId(s32 sprite);
 
 typedef struct MapResource {
     u32 image;
@@ -274,7 +273,7 @@ MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
 
 void func_0030EF18(MapRequestState *state) {
     if (state != NULL) {
-        sdfQueueNonzeroResourceId(state->handle);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)state->handle);
     }
 }
 
@@ -312,7 +311,7 @@ s32 fldLoadMapResource(const char *name, MapResource *record) {
     record->handle = handle;
     record->image = (u32)sdfTexAcquireResourceTexture((void *)descriptor);
     if (record->handle != 0) {
-        sdfQueueNonzeroResourceId((void *)record->handle);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)record->handle);
         record->handle = 0;
         record->descriptor = 0;
     }

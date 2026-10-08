@@ -6,6 +6,7 @@
 #include "mnu_list.h"
 #include "eff.h"
 #include "dat_state.h"
+#include "kwln_task_lifecycle.h"
 
 #define MNU_PARTY_SLOT_COUNT 5
 #define MNU_PARTY_RECORD_BYTES 0x1C4
@@ -178,7 +179,6 @@ extern void mnuTerminalSetTrack(s8, s8);
 
 extern void *mnuWalkNodeList(s32, struct MenuList *);
 
-extern void kwlnTaskDestroyWithHierarchyByName(const char *, s32);
 
 extern const char D_00424F00[];
 

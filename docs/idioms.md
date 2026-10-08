@@ -3772,3 +3772,16 @@ the same address; opacity likewise belongs to the strip owner rather than
 a separate `ValPtr34` prefix. Provider-word APIs retain their existing
 contracts in this owner-only cutover.
 
+
+## Shared motion-SE cache owner
+
+DDS1 `001F3E70` and DDS2 `00204B00` allocate the same `0x108`-byte
+`SoundSlotOwner`: flags and category/id, the `0xF4`-byte loading work at
+`+0x0C`, then previous/next links at `+0x100`/`+0x104`. The work owns the
+retain count, pending packed-track key and slot, 29 file-request words,
+and 29 resource-handle words. Both sound engines and the battle-model
+cache consumers now use `snd_slot.h`, rather than separate flattened
+declarations of the same runtime object. The release boundary takes that
+owner pointer; the final retain-count transition releases both arrays
+before unlinking and freeing the owner.
+

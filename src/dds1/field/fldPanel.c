@@ -1,10 +1,10 @@
 #include "common.h"
 
 #include "kwln.h"
+#include "kwln_task_lifecycle.h"
 extern u32 fldInputPanelTaskHandle;
 extern void sdfReleaseChipBlock(void *);
 
-extern s32 kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
 
@@ -24,7 +24,7 @@ void fldCreateInputPanelTask(void) {
 
 void fldDestroyPanelTaskIfPresent(void) {
     if (fldInputPanelTaskHandle != 0) {
-        kwlnTaskDestroyWithHierarchy(fldInputPanelTaskHandle, 1);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)fldInputPanelTaskHandle, 1);
     }
 }
 

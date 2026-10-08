@@ -3542,7 +3542,6 @@ s32 func_0027AFE0(s32 x, s32 y, s32 z, s32 alpha, MantraPanelPool *unused, Mantr
     return 0;
 }
 
-
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425A98);
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425AB8);

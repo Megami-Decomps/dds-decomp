@@ -1,5 +1,6 @@
 #include "pcp_vu0.h"
 #include "common.h"
+#include "snd_slot.h"
 #include "sdf_resource.h"
 #include "file_pac.h"
 #include "dat_state.h"
@@ -945,18 +946,6 @@ s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *list, s32 row) {
 
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_002111A0);
 
-/* 0x108-byte sound cache owner, with 29 file/handle slots; not a battler. */
-typedef struct SoundSlotOwner {
-    u32 flags;
-    s32 category;
-    s32 id;
-    s32 refCount;
-    s32 load[2];
-    s32 slot[0x1D];
-    s32 handle[0x1D];
-    struct SoundSlotOwner *prev;
-    struct SoundSlotOwner *next;
-} SoundSlotOwner;
 
 /* 0x20-byte model cache entry owns a file/PAC request and a sound-cache reference. */
 typedef struct BattleModelEntry {
@@ -997,7 +986,6 @@ extern char D_003A68F8[];
 
 extern void func_00288788(void *);
 
-extern void sndReleaseSlotOwner(void *);
 
 extern void sdfReleaseChipBlock(void *);
 
@@ -1517,7 +1505,6 @@ extern void sdfCreateDescriptorPacket(SdfListHead *list, s32 descriptorAddress,
                                       s32 arg2, s32 arg3, s32 arg4, s32 arg5,
                                       s32 imageAddress, s32 (*allocatePacket)(s32));
 
-extern void sdfQueueNonzeroResourceId(void *);
 
 
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
@@ -1526,7 +1513,7 @@ void btlSubmitFrameAndQueueRuntimeHandle(void) {
     sdfCreateDescriptorPacket(packetList, (s32)kwlnHeldTextureReference->primaryResource,
                               0, 0, 0x200, 0xe0, (s32)runtime->request, 0);
     D_00325708.append((SdfListHead *)&D_00325708, packetList);
-    sdfQueueNonzeroResourceId(runtime->handle);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)runtime->handle);
     runtime->handle = 0;
     runtime->request = 0;
     runtime->options |= 1;
@@ -1637,7 +1624,7 @@ void btlClearRuntimeState(void) {
 void btlResetAsyncState(void) {
     void *handle = btlRuntimeState.handle;
     if (handle != 0) {
-        sdfQueueNonzeroResourceId(handle);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)handle);
         btlRuntimeState.handle = 0;
         btlRuntimeState.request = 0;
     }
@@ -2405,7 +2392,7 @@ void btlDestroyGroupNode(BattleGroupNode *groupNode) {
     }
     if (ownsResources != 0) {
         sdfResourceListRelease(groupNode->resourceList, 1);
-        sdfQueueNonzeroResourceId((void *)groupNode->requestHandle);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)groupNode->requestHandle);
         for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
             if (groupNode->slots[slotIndex].resourceHandle != 0) {
                 sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(groupNode->slots[slotIndex].resourceHandle));

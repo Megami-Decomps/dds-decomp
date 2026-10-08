@@ -1,11 +1,12 @@
 #include "common.h"
 #include "kwln.h"
+#include "sdf_resource.h"
 #include "sdf.h"
 #include "itf_grid_text.h"
 #include "sdf_sif_command.h"
+#include "kwln_task_lifecycle.h"
 
 extern void fldShutdownLmapResources(void);
-extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
 extern char fldLocalMapTaskName[]; /* "LmapMain" */
 
@@ -37,7 +38,6 @@ extern void fldReleaseCameraColorEffect(void);
 extern void func_002CF430(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
 extern void dspCloseChannel(void);
-extern void sdfQueueNonzeroResourceId(s32);
 extern void evtDestroySecondaryWorldNode(void);
 extern SdfMemBlock *D_003BD254;
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void *, void *, void *);
@@ -439,7 +439,7 @@ void fldShutdownLmapResources(void) {
     func_002CF430();
     evtSetSolarOverlayFullyTransparent();
     dspCloseChannel();
-    sdfQueueNonzeroResourceId((s32)D_003BD254);
+    sdfQueueGeneralAllocationRelease(D_003BD254);
     evtDestroySecondaryWorldNode();
 }
 
@@ -736,4 +736,3 @@ INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD258);
 INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD25C);
 
 INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD260);
-

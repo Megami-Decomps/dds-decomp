@@ -10,6 +10,7 @@
 #include "dat_state.h"
 #include "eff.h"
 #include "kwln.h"
+#include "kwln_task_lifecycle.h"
 
 extern u8 D_00324510[2][2][16];
 extern u8 D_003BA878[2][2];
@@ -145,7 +146,6 @@ extern s32 D_0033EB78[];
 
 extern void func_002E96D8(s32 arg0);
 
-extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
 extern s32 dds3GetWorldObject(void);
 
@@ -240,7 +240,6 @@ extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update
 
 extern u8 D_003BAE78[];
 
-extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
 typedef struct {
     s32 flags;
@@ -388,7 +387,7 @@ void fldEnsureTask(void) {
 
 void fldDestroyTask(void) {
     if (fldFieldTaskHandle != 0) {
-        kwlnTaskDestroyWithHierarchy(fldFieldTaskHandle, 1);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)fldFieldTaskHandle, 1);
     }
 }
 
@@ -928,7 +927,7 @@ void fldInitSceneMapLabels(void) {
 
 void fldReleaseSceneRecordChunk(void) {
     if (fldSceneRecordResource != 0) {
-        sdfQueueNonzeroResourceId(fldSceneRecordResource);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldSceneRecordResource);
     }
     fldSceneRecordResource = 0;
     fldSceneRecords = 0;
@@ -1918,7 +1917,7 @@ void fldReleaseTextureSlots(void) {
         if (fldEffectTextureNodes[i] != 0) {
             effDestroyNode(fldEffectTextureNodes[i]);
             fldEffectTextureNodes[i] = 0;
-            sdfQueueNonzeroResourceId(fldEffectTextureLoadHandles[i]);
+            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldEffectTextureLoadHandles[i]);
             fldEffectTextureLoadHandles[i] = 0;
             fldEffectTextureData[i] = 0;
         }
@@ -2831,7 +2830,7 @@ void fldLoadWeatherEffects(void) {
 
     handle = (s32)sdfReadNamedResource(s_fieldWeatherLimitPath, (u32 *)&resourceAddress, 0);
     fldWeatherLimitTexture = sdfTexAcquireResourceTexture((void *)resourceAddress);
-    sdfQueueNonzeroResourceId(handle);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)handle);
     fldDamEffectResource = (u32)sdfReadNamedResource("/fld/f/bin/FH_DAM_2.EPL", &fldDamEffectData, 0);
     fldDamEffectNode = func_0014FE28(fldDamEffectData);
     fldDamEffectPositioned = 0;
@@ -2848,13 +2847,13 @@ void fldReleaseWeatherEffects(void) {
     effDestroyNode(fldDamEffectNode);
     fldDamEffectNode = 0;
     fldDamEffectPositioned = 0;
-    sdfQueueNonzeroResourceId(fldDamEffectResource);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldDamEffectResource);
     fldDamEffectResource = 0;
     fldDamEffectData = 0;
     effDestroyNode(fldYukEffectNode);
     fldYukEffectNode = 0;
     fldYukEffectPositioned = 0;
-    sdfQueueNonzeroResourceId(fldYukEffectResource);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldYukEffectResource);
     fldYukEffectResource = 0;
     fldYukEffectData = 0;
 }

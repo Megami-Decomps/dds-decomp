@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 
 #include "sdf.h"
+#include "sdf_pending.h"
 
 /* GS pixel-storage modes, using the same private names as sdfTex.c. */
 enum {
@@ -68,9 +69,8 @@ extern void (*D_004389E8)(void *);
 
 extern SdfTex *sdfResourceListHead;
 
-extern u8 sdfTextureUpdateQueue;
+extern SdfPendingRequest sdfTextureUpdateQueue;
 
-void sdfPendingQueuePush(void *request, s32 value);
 
 
 extern SdfTexResource *sdfTextureBlockListHead;
@@ -81,9 +81,8 @@ void *sdfAllocSizeClassBlock(s32 size);
 extern void (*D_004389F4)(s32 size, s32 allocationMode);
 extern s32 func_0036DE70(void);
 
-s32 sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *block);
+void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *block);
 
-void sdfInitializeSynchronizedRequest(void *request, void (*onComplete)(void *));
 
 extern SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 allocationMode);
 
@@ -533,26 +532,27 @@ void func_0032A9D8(void) {
 
 
 /* Mark a range free and coalesce its neighbors while interrupts are masked. */
-s32 sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock) {
+void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock) {
     s32 restoreInterrupts;
     SdfTexResource *nextBlock;
 
-    if (textureBlock != NULL) {
-        restoreInterrupts = func_0036DE70();
-        textureBlock->allocationMode = 0;
-        sdfCoalesceUnusedTextureBlocks(textureBlock);
-        nextBlock = textureBlock->next;
-        if (nextBlock != NULL && nextBlock->allocationMode == 0) {
-            sdfCoalesceUnusedTextureBlocks(nextBlock);
-        }
-        if (restoreInterrupts != 0) {
-            EIntr();
-        }
+    if (textureBlock == NULL) {
+        return;
+    }
+    restoreInterrupts = func_0036DE70();
+    textureBlock->allocationMode = 0;
+    sdfCoalesceUnusedTextureBlocks(textureBlock);
+    nextBlock = textureBlock->next;
+    if (nextBlock != NULL && nextBlock->allocationMode == 0) {
+        sdfCoalesceUnusedTextureBlocks(nextBlock);
+    }
+    if (restoreInterrupts != 0) {
+        EIntr();
     }
 }
 
 void sdfTexQueuePendingWork(SdfTexResource *texture) {
-    sdfPendingQueuePush(&sdfTextureUpdateQueue, (s32)texture);
+    sdfPendingQueuePush(&sdfTextureUpdateQueue, (u32)texture);
 }
 
 void sdfTexInitializeLists(void) {
