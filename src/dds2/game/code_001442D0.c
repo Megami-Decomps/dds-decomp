@@ -3289,7 +3289,7 @@ s32 func_0014F980(s32 index, s32 reserved) {
         effObjSetInnerFirstVec((EffWorldNode *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].pos);
         effObjSetInnerSecondVec((EffWorldNode *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].vel);
         model = (MdlCtx *)dds3GetObjectBaseResourceHandle((void *)fldSparkObjectEntries[slot].objectHandle);
-        model->flags &= ~1;
+        model->flags &= ~MDL_SKIP_TRANSFORMS;
         fldSparkSlots[index].objectSlot = slot;
         fldSparkObjectEntries[slot].unk4 = index;
         return 1;

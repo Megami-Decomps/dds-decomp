@@ -3679,7 +3679,7 @@ void btlFlagUnitDefeatCandidate(BtlUnit *unit) {
         if (!(unit->flags & 0x8000000)) {
             unit->flags |= 8;
             if (unit->flags & 2) {
-                unit->ext->owner->flags &= ~1;
+                unit->ext->owner->flags &= ~MDL_SKIP_TRANSFORMS;
             }
         }
     }
@@ -3700,7 +3700,7 @@ void btlClearUnitDefeatCandidate(BtlUnit *object) {
     object->flags = masked;
     if ((flags & 2) != 0) {
         MdlCtx *resource = object->ext->owner;
-        resource->flags |= 1;
+        resource->flags |= MDL_SKIP_TRANSFORMS;
     }
 }
 
@@ -3718,7 +3718,7 @@ u32 btlIsUnitInfoFlagOneEligible(BtlUnit *unit) {
         return 0;
     }
     modelFlags = unit->ext->owner->flags;
-    return modelFlags & 1;
+    return modelFlags & MDL_SKIP_TRANSFORMS;
 }
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3AD0);
@@ -4383,7 +4383,7 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
     u16 savedFlags;
     s32 i;
 
-    if (model->flags & 1) {
+    if (model->flags & MDL_SKIP_TRANSFORMS) {
         return;
     }
     mdlBroadcastMasked(model, frame);
@@ -4401,10 +4401,10 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
         surfaces[i]->append((SdfListHead *)surfaces[i], list);
     }
     savedFlags = model->inner->unk1A;
-    model->flags |= 2;
+    model->flags |= MDL_SKIP_ANCHORS;
     model->inner->unk1A = 0x2000;
     mdlProcessContextNodesAndTransforms(model, (s32)surfaces);
-    model->flags &= ~2;
+    model->flags &= ~MDL_SKIP_ANCHORS;
     model->inner->unk1A = savedFlags;
     for (i = 0; i != 4; i++) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
@@ -5482,7 +5482,7 @@ u32 btlUpdateSelectedUnitEffect(UnitEffectTaskArgs *arguments) {
             effBattleUpdateSelectedValue(arguments->effect, 0xE);
             unit->flags &= ~8;
             if (unit->flags & 2) {
-                unit->ext->owner->flags |= 1;
+                unit->ext->owner->flags |= MDL_SKIP_TRANSFORMS;
             }
         }
         arguments->counter = arguments->counter + 1;

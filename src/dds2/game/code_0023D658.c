@@ -1159,7 +1159,7 @@ u32 evtUnitClearFlagBit(void) {
     id = scrReadIntParameter(0);
     unit = evtGetWorldUnitNestedValue(id);
     if (unit != NULL) {
-        unit->owner->flags &= ~1;
+        unit->owner->flags &= ~MDL_SKIP_TRANSFORMS;
     }
     return 1;
 }
@@ -1171,7 +1171,7 @@ u32 evtUnitSetFlagBit(void) {
     id = scrReadIntParameter(0);
     unit = evtGetWorldUnitNestedValue(id);
     if (unit != NULL) {
-        unit->owner->flags |= 1;
+        unit->owner->flags |= MDL_SKIP_TRANSFORMS;
     }
     return 1;
 }
