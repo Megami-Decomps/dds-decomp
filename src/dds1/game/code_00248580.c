@@ -354,7 +354,7 @@ void mnuBuildTerminalNodeList(MenuTerminalWork *host) {
 
 /* Destroy the progress-list allocation retained by the terminal work. */
 void mnuReleaseProgressWorkList(MenuTerminalWork *work) {
-    mnuDestroyListState((u32)work->list);
+    mnuDestroyListState((struct MenuList *)work->list);
 }
 
 /* Release the selected recovery panel, then pass its owning list to the follow-up. */
@@ -568,8 +568,6 @@ void mnuTerminalBuildMenus(MenuTerminalWork *host) {
     mnuHighlightProgressNodeByMode(host);
 }
 
-extern void mnuDestroyListState(u32);
-
 extern void mnuReleaseStaffImageHandles(u32 *);
 
 /* Release command/progress lists, child percentage panels and staff image handles.
@@ -578,12 +576,12 @@ void mnuReleaseWorkResources(u8 *work) {
     u32 i;
 
     for (i = 0; i < 1; i++) {
-        mnuDestroyListState(*(u32 *)(work + 0x70 + i * 4));
+        mnuDestroyListState((struct MenuList *)*(u32 *)(work + 0x70 + i * 4));
     }
     mnuDestroyThresholdNodePanels((s32)work);
     mnuReleaseStaffImageHandles(((MenuTerminalWork *)work)->imageHandles);
     mnuReleaseProgressWorkList((s32)work);
-    mnuDestroyListState((u32)((MenuTerminalWork *)work)->owner);
+    mnuDestroyListState((struct MenuList *)((MenuTerminalWork *)work)->owner);
 }
 
 extern void kwlnFadeOutStart(s8, s8, s8, s32);

@@ -130,7 +130,6 @@ void mnuClearListFlagsOneAndTwo(u32 *flags);
 
 MenuList *mnuCreateListState(s32 id, s32 visibleCount, s32 rowSpacing);
 
-u32 mnuDestroyListState(MenuList *list);
 
 MenuListNode *mnuListAdvanceCursor(MenuList *list, s32 noScroll, s32 keepFade);
 

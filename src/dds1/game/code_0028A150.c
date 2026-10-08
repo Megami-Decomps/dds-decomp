@@ -3183,7 +3183,7 @@ void fileConfigTaskDestroy(void) {
             sdfReleaseChipBlock(node->resource);
             node = node->next;
         }
-        mnuDestroyListState(((FileConfigTask *)fileConfigTaskWork)->frame);
+        mnuDestroyListState((struct MenuList *)(u32)((FileConfigTask *)fileConfigTaskWork)->frame);
         ((FileConfigTask *)fileConfigTaskWork)->frame = 0;
         for (i = 0; i < 4; i++) {
             if (((FileConfigTask *)fileConfigTaskWork)->slots[i] != 0) {

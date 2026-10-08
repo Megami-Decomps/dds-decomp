@@ -106,7 +106,6 @@ extern s32 mdlFlagTest(s32);
 extern void mdlFlagSet(s32);
 extern void mdlFlagClear(s32);
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
-extern s32 mnuDestroyListState();
 #include "kwln.h"
 #include "fpu.h"
 struct MenuListNode;
@@ -3649,7 +3648,7 @@ void fileConfigTaskDestroy(void) {
             sdfReleaseChipBlock(node->resource);
             node = node->next;
         }
-        mnuDestroyListState(((FileConfigTask *)fileConfigTaskWork)->frame);
+        mnuDestroyListState((struct MenuList *)(u32)((FileConfigTask *)fileConfigTaskWork)->frame);
         ((FileConfigTask *)fileConfigTaskWork)->frame = 0;
         for (i = 0; i < 5; i++) {
             if (((FileConfigTask *)fileConfigTaskWork)->slots[i] != 0) {
