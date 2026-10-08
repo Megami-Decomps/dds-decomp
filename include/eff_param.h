@@ -31,9 +31,11 @@ void effParamWorkCallback0(EffParamWork *work, void *source);
 void effParamWorkCallback1(EffParamWork *work, f32 scale);
 void effParamWorkCallback2(EffParamWork *work, void *matrix);
 void effParamWorkCallback3(EffParamWork *work, u32 value);
+void effParamWorkCallback4(EffParamWork *work, void *matrix);
 void effParamWorkExCallback0(EffParamWorkEx *work, void *source);
 void effParamWorkExCallback1(EffParamWorkEx *work, f32 scale);
 void effParamWorkExCallback2(EffParamWorkEx *work, void *matrix);
+void effParamWorkExCallback3(EffParamWorkEx *work, void *matrix);
 /* The extended value adapter uses slot 3 despite its historical suffix 4. */
 void effParamWorkExCallback4(EffParamWorkEx *work, u32 value);
 void effDispatchParameterDataAndFreeWork(EffParamWork *work);
