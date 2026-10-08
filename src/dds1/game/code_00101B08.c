@@ -3,12 +3,11 @@
 #include "dds3Admin.h"
 #include "sdf_linked_packet.h"
 #include "kwln.h"
+#include "kwln_task_flags.h"
 #include "sdf.h"
 
 struct EffWorldNode;
 extern struct EffWorldNode *dds3ActiveWorld;
-
-extern void func_00101060(s32, KwlnTask *, u32, s32);
 
 /* Detach a task from its parent's child list. Detached tasks are left untouched;
  * an attached task must already occur in that parent's sibling chain.
@@ -35,12 +34,12 @@ void kwlnUnlinkListNode(KwlnTask *task) {
 
 /* Set mask bits on the object selection described by object and scope. */
 void dds3SetScopedObjectFlags(KwlnTask *object, u32 mask, s32 scope) {
-    func_00101060(1, object, mask, scope);
+    kwlnTaskUpdateFlagsScoped(1, object, mask, scope);
 }
 
 /* Clear the same scoped object mask bits without changing the selection. */
 void dds3ClearScopedObjectFlags(KwlnTask *object, u32 mask, s32 scope) {
-    func_00101060(0, object, mask, scope);
+    kwlnTaskUpdateFlagsScoped(0, object, mask, scope);
 }
 
 typedef struct SdfThreadNode SdfThreadNode;
