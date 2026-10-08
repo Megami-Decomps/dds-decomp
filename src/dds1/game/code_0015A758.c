@@ -211,7 +211,7 @@ void parObjSetMode(ParObj *object, s32 mode) {
     object->restartFlag = 1;
 }
 
-s32 parObjGetMode(ParObj *object) {
+u8 parObjGetMode(ParObj *object) {
     switch (object->dispatchIndex) {
     case 1:
     case 5:
@@ -382,7 +382,9 @@ void parChangeInstanceMode(ParObj *work, u8 mode) {
     parObjSetMode(work, mode);
 }
 
-INCLUDE_ASM(const s32, "game/code_0015A758", func_0015ADB0);
+u8 func_0015ADB0(ParObj *work) {
+    return parObjGetMode(work);
+}
 
 /* Kinds 2-4 keep the scale at +8 of their own record; copy it into the
  * shared vector and store the (vf10 - vf11) difference. */
