@@ -439,7 +439,7 @@ extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 typedef struct FrFontGlyph FrFontGlyph;
 extern s32 func_0035C860(char *, const char *, ...);
 extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
-extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 u32 mnuGetPanelRatioColor(s32, s32, s32);
 void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
 
@@ -503,7 +503,7 @@ void func_002BFEA0(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     func_0035C860(text, D_00437C68, level);
     glyph = func_0019F5E8(labelX + 0x140, labelY - 8,
                                        z, textColor, text, 0);
-    func_0019D550(glyph, 1, surface);
+    frFontDrawGlyphChain(glyph, 1, surface);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
     if (panel->frame[7] == NULL) {
         func_00306CD0(x + framePositions[0], y + framePositions[1], z,
@@ -1059,7 +1059,7 @@ typedef struct FrFontGlyph FrFontGlyph;
 extern char D_00437C88[];
 extern s32 func_0035C860(char *, const char *, ...);
 extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
-extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C22D0);
 
 extern void func_002C22D0(s32, s32, s32, u32, u32, s32, s32, MenuPageBar *, u32);
@@ -1246,7 +1246,7 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
     func_0035C860(text, D_00437C88, value);
     glyph = func_0019F5E8(x + 0x2D0, y, depth, color, text, 0);
     frFontSetChainFlag(glyph, fontFlags);
-    func_0019D550(glyph, 1, flags);
+    frFontDrawGlyphChain(glyph, 1, flags);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
     item->phase += 24;
     if (item->phase > 512) {

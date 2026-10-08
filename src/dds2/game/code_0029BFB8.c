@@ -4,8 +4,8 @@
 #include "mnu_result.h"
 struct EffectSlotSet;
 extern void func_00306C28(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
-extern void frFontSetChainFlag();
-extern s32 func_0019D550();
+extern void frFontSetChainFlag(struct FrFontGlyph *, u8);
+extern s32 frFontDrawGlyphChain();
 
 
 
@@ -133,8 +133,8 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSum
     packed = (alpha & 0xFF) | 0xA09DC300;
     func_0035C860(name, D_004379C8, res->totalExp);
     sprite = func_0019F6C8(x, y, z, packed, name, 0);
-    frFontSetChainFlag(sprite, 3);
-    func_0019D550(sprite, 1, arg5);
+    frFontSetChainFlag((struct FrFontGlyph *)(u32)sprite, 3);
+    frFontDrawGlyphChain(sprite, 1, arg5);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)sprite);
     color[0] = alpha;
     color[1] = alpha;
@@ -155,8 +155,8 @@ void func_0029CB70(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, 
         packed = (alpha & 0xFF) | 0xA09DC300;
         func_0035C860(name, D_004379C8, res->macca);
         sprite = func_0019F6C8(x, y, z, packed, name, 0);
-        frFontSetChainFlag(sprite, 3);
-        func_0019D550(sprite, 1, arg5);
+        frFontSetChainFlag((struct FrFontGlyph *)(u32)sprite, 3);
+        frFontDrawGlyphChain(sprite, 1, arg5);
         frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)sprite);
         color[0] = alpha;
         color[1] = alpha;

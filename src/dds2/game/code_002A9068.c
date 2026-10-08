@@ -21,7 +21,7 @@ extern s32 kwlnFadeIsActive(void);
 
 
 typedef struct FrFontGlyph FrFontGlyph;
-extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern char mnuCampInputTaskName[]; /* "camp" */
 
 extern char mnuCampDrawTaskName[]; /* "camp_draw" */
@@ -966,7 +966,7 @@ void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, s3
     /* Keep the RGB channels fixed while the opacity byte fades from 0x80 to zero. */
     object = func_0019F798((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
                            uiBlendColors(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);
-    func_0019D550((FrFontGlyph *)object, 1, layer);
+    frFontDrawGlyphChain((FrFontGlyph *)object, 1, layer);
     frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)object);
     offset = visual->titleSlide;
     magnitude = offset;
@@ -1002,7 +1002,7 @@ extern u8 *D_003E5710[];
 void mnuCreateStaffImageSprite(s32 imageIndex) {
     FrFontGlyph *sprite = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x340, 0x148, 0, 0xa09dc35a,
                                       D_003E5710[imageIndex], 0);
-    func_0019D550(sprite, 1, 0x54);
+    frFontDrawGlyphChain(sprite, 1, 0x54);
     frFontQueueGlyphForCurrentDrawBuffer(sprite);
 }
 
@@ -1039,8 +1039,7 @@ void mnuDrawStaffGridLabelsForKind(s32 kind, u32 slot) {
 }
 
 
-typedef struct TextStyleNode TextStyleNode;
-extern void frFontSetChildColors(TextStyleNode *, u32);
+extern void frFontSetChildColors(struct FrFontGlyph *, u32);
 extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
 
 typedef struct StaffFramePiece {
@@ -1095,8 +1094,8 @@ void func_002AA9D8(s32 kind, u32 labelIndex, u32 textTable, u32 context,
         }
         glyph = itfDrawBankTextWithLayoutFlags(textPosition[0], textPosition[1] + 0x918,
                                              0, labelIndex, textTable, textOption);
-        frFontSetChildColors((TextStyleNode *)glyph, 0xA09DC35A);
-        func_0019D550((FrFontGlyph *)glyph, 1, layer);
+        frFontSetChildColors((struct FrFontGlyph *)(u32)glyph, 0xA09DC35A);
+        frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, layer);
         frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
     }
 }

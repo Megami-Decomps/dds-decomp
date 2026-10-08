@@ -17,7 +17,7 @@ typedef struct EffectObjectData {
     f32 angle;
     f32 limitMin2C;
     f32 limitMax30;
-    u32 word34;
+    f32 word34; /* 0x34: entry-blend yaw, loaded directly into the float argument. */
     f32 limitMin38;
     f32 limitMax3C;
 } EffectObjectData;

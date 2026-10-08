@@ -366,8 +366,11 @@ void brsBuildUnitProgressRow(BrsProgressRow *state, DatPartyRecord *entry) {
         prfGetCapValue(ptyGetCurrentProfileId(entry) & 0xFFFF));
 }
 
+struct FrFontGlyph;
+extern void frFontSetGlyphChainDimensions(struct FrFontGlyph *, s32, s32);
+
 void mnuSetFontChainDimensionsAndMeasure(u32 fontContext) {
-    frFontSetGlyphChainDimensions(fontContext, 0xc, 0x10);
+    frFontSetGlyphChainDimensions((struct FrFontGlyph *)(u32)fontContext, 0xc, 0x10);
     frFontSetFlagAndMeasureGlyphs(fontContext, 0xfffffffffffffffc);
 }
 

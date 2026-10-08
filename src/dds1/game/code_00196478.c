@@ -71,7 +71,6 @@ extern u8 frFontClearFlagBits(u8 value);
 
 extern u8 D_00357980[];
 extern u8 D_00357988[];
-extern void frFontSetChainFlag(FrFontGlyph *glyph, u8 value);
 
 extern s32 frFontDefaultGlyphCellSize;
 
