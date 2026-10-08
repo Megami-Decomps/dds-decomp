@@ -26,4 +26,14 @@ typedef char FileReqEntrySlotFlagsOffsetCheck[
 extern FileReqEntry fileRequestEntries[];
 extern u32 fileRequestSlotFlags[];
 
+void fileReqBegin(s32 request);
+s32 fileReqPoll(void);
+u8 fileReqGetStatus(s32 request);
+s32 fileReqGetSize(s32 request);
+u8 fileReqIsSlotMetadataDirty(s32 request);
+void fileReqClearSlotMetadataDirty(s32 request);
+void fileReqMarkSlotMetadataDirty(s32 request);
+s8 fileReqGetSelectedSlot(s32 request);
+void fileReqSetSelectedSlot(s32 request, s32 selectedSlot);
+
 #endif
