@@ -6,6 +6,7 @@
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "evt_task.h"
+#include "evt_event_pack.h"
 #include "scr.h"
 #include "evt_solar.h"
 
@@ -120,8 +121,6 @@ u32 fldGetPlayerSceneState(void);
 
 EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *unit);
 
-
-s32 evtGetTaskValueWord(s32 id);
 
 extern void func_00101A80(KwlnTask *parent, KwlnTask *child);
 
@@ -907,7 +906,7 @@ s32 evtCommandWaitForCampTask(void) {
         func_00101A80(commandWork->task, mnuCampCreateTask(taskId));
         return 0;
     }
-    if (evtGetTaskValueWord(taskId) == EVT_CAMP_TASK_READY_VALUE) {
+    if (evtGetEventPackLoadedState(taskId) == EVT_CAMP_TASK_READY_VALUE) {
         message = D_003AC968;
         evtPrintDeveloperConsoleMessage(message, taskId);
         sdfPrintFormattedDevMessage(message, taskId);
@@ -938,7 +937,7 @@ s32 evtCommandTestCampTaskReady(void) {
     s32 taskId = scrReadIntParameter(0);
     s32 isReady;
 
-    if (scrGetCurrentContext() != 0 && evtFindTaskById(taskId) != 0 && evtGetTaskValueWord(taskId) == EVT_CAMP_TASK_READY_VALUE) {
+    if (scrGetCurrentContext() != 0 && evtFindTaskById(taskId) != 0 && evtGetEventPackLoadedState(taskId) == EVT_CAMP_TASK_READY_VALUE) {
         evtPrintDeveloperConsoleMessage(D_003AC968, taskId);
         isReady = 1;
     } else {

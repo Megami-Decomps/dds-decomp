@@ -19,12 +19,12 @@ extern char D_003AFD80[];
 extern MovieMenuState *mnuMovieMenuState;
 
 KwlnTask *func_0026B050(s32 mode) {
-    s32 allocation;
+    struct SdfMemBlock *allocation;
 
     kwlnFadeBackgroundStartOut(0);
     mnuStopMovieDrawTask();
-    allocation = (u32)sdfAllocGeneralBlock(0x40);
-    mnuMovieMenuState = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
+    allocation = sdfAllocGeneralBlock(0x40);
+    mnuMovieMenuState = (void *)sdfResourceRetainAddress(allocation);
     memset(mnuMovieMenuState, 0, 0x40);
     mnuMovieMenuState->allocation = allocation;
     mnuRecreateMenuSelectionList();
