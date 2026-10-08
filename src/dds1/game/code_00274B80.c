@@ -1058,7 +1058,31 @@ void mnuDrawStaffPanelGridBackdrop(s32 flag, StaffSlots *slots) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00276F70);
+typedef struct StaffPanelIconIndices {
+    s32 indices[10];
+} StaffPanelIconIndices;
+
+/* The backing table has eleven positions; this panel uses the first ten. */
+typedef struct StaffPanelIconPositions {
+    s32 positions[11][2];
+} StaffPanelIconPositions;
+
+extern const StaffPanelIconIndices D_003B21E0;
+extern const StaffPanelIconPositions D_003B2208;
+
+void func_00276F70(MenuPageWindow *window, StaffSlots *slots) {
+    MenuPageSlot *page = &window->slots[window->lists[0]->cursor->index];
+    EffectSlotSet *resource = slots->pairResources[0];
+    StaffPanelIconIndices indices = D_003B21E0;
+    StaffPanelIconPositions positions = D_003B2208;
+    u32 opacity = page->windowSprites->profileFade;
+    u32 i;
+
+    for (i = 0; i < 10; i++) {
+        func_002BF4E0(positions.positions[i][0], positions.positions[i][1],
+                     0, opacity, 1, resource, indices.indices[i], 0x53);
+    }
+}
 
 extern void frFontAddSharedGlyphFlags(s32);
 extern u8 frFontClearFlagBits(u8);
@@ -1670,6 +1694,8 @@ void ptySkillMenuHandleSlotReorder(KwlnTask *callback) {
         mnuPlayInputSound(0, inputFlags, (s32)window->list);
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B21E0);
 
 INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2208);
 
