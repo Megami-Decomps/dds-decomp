@@ -79,7 +79,6 @@ extern void effMiscQuaternionToMatrixVU(void);
 
 extern s32 billGetFirstEntryFramePeriod(u32);
 
-extern void billSetEntryFrameMode1(u32, s32);
 
 extern f32 effComputeProjectedOffsetAngle(u8 *, void *);
 
@@ -1441,7 +1440,7 @@ void effReplaceBillboardClone(s32 dst, s32 src) {
 }
 
 void effBillboardEntryFrameReset(s32 work) {
-    billSetEntryFrameMode1(((EffBillboardWork *)work)->billboard, 0);
+    billSetAnimationFrameWithOneTickHold(((EffBillboardWork *)work)->billboard, 0);
     ((EffBillboardWork *)work)->frame = 0;
 }
 
@@ -1459,7 +1458,7 @@ void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
     limit = billGetFirstEntryFramePeriod(work->billboard);
     frame = work->frame;
     if (frame < limit) {
-        billSetEntryFrameMode1(work->billboard, frame);
+        billSetAnimationFrameWithOneTickHold(work->billboard, frame);
         VU0_LOAD_VF(vf10, work->rotation);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, D_003B2B10);

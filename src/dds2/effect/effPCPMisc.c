@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff_blur.h"
@@ -1289,7 +1290,6 @@ EffPCPChargeWork *effCopyChargeResources(EffPCPChargeWork *source) {
 
 extern u16 D_003B1640[8];
 extern f32 D_003B1650[8];
-extern void billSetEntryFrameMode0(BillObj *effect, u32 startFrame);
 
 /* vu0 routine: capture staggered model points, then draw their growing history. */
 void func_001803E8(EffPCPChargeWork *work) {
@@ -1347,7 +1347,7 @@ void func_001803E8(EffPCPChargeWork *work) {
                 billSetChildScaleComponents(bill, size, size);
                 effCopyVector(bill, work->samplePositions[i][point]);
                 billInvokeCallback(bill);
-                billSetEntryFrameMode0(bill, work->animationFrames[i][point]);
+                billSetAnimationFrameForImmediateAdvance(bill, work->animationFrames[i][point]);
                 work->animationFrames[i][point]++;
             }
         }

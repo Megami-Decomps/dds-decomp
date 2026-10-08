@@ -329,8 +329,8 @@ s32 billGetLinkedChildValue(s32 billboard) {
     return 0;
 }
 
-/* Start every entry's animation at the requested frame, with mode zero. */
-void billSetEntryFrameMode0(BillObj *effect, u32 startFrame) {
+/* Select the frame and make the next animation update advance immediately. */
+void billSetAnimationFrameForImmediateAdvance(BillObj *effect, u32 startFrame) {
     if (effect->kind == 1) {
         s32 entryCount = effect->entryCount;
 
@@ -350,8 +350,8 @@ void billSetEntryFrameMode0(BillObj *effect, u32 startFrame) {
     }
 }
 
-/* Start every entry's animation at the requested frame, with mode one. */
-void billSetEntryFrameMode1(BillObj *effect, u32 startFrame) {
+/* Select the frame and hold it for one animation update before advancing. */
+void billSetAnimationFrameWithOneTickHold(BillObj *effect, u32 startFrame) {
     if (effect->kind == 1) {
         s32 entryCount = effect->entryCount;
 
