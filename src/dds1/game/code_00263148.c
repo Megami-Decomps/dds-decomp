@@ -1,3 +1,4 @@
+#include "fr_font.h"
 #include "kwln.h"
 #include "mnu_result.h"
 
@@ -334,8 +335,6 @@ extern void func_002BF4E0(s32, s32, s32, s32, s32, u32, s32, s32);
 extern u32 uiBlendColors(u32, u32, s32);
 extern u32 func_001979C8(s32, s32, s32, u32, char *, s32);
 extern void func_001958A0(u32, s32, s32);
-extern void frFontQueueGlyphInSelectedSlot(u32);
-
 void func_00263A00(BrsSkillPackageWork *scene) {
     char text[16];
     DatPartyRecord *item = scene->selectedRewardRow->unit;
@@ -359,7 +358,7 @@ void func_00263A00(BrsSkillPackageWork *scene) {
     func_003014F0(text, D_003BC550, delta);
     glyph = func_001979C8(x, 0x408, 0, color, text, 0);
     func_001958A0(glyph, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)glyph);
 
     if (item->unitId == 1) {
         if (scene->iconFade < 0x100) {

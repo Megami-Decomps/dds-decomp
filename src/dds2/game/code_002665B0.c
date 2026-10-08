@@ -1,3 +1,4 @@
+#include "fr_font.h"
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
@@ -293,7 +294,6 @@ typedef struct FrFontGlyph FrFontGlyph;
 extern u32 func_0019F6C8(s32, s32, s32, u32, char *, s32);
 extern void frFontSetChainFlag(FrFontGlyph *, u8);
 extern s32 func_0019D550(FrFontGlyph *, s8, u32);
-extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern u32 mnuGetPanelRatioColor(s32, s32, s32);
 extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
 extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);

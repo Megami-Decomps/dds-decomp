@@ -3,6 +3,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "common.h"
+#include "fr_font.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
@@ -19,8 +20,6 @@ extern s32 kwlnFadeIsActive(void);
 
 typedef struct FrFontGlyph FrFontGlyph;
 extern s32 func_0019D550(FrFontGlyph *, s8, u32);
-extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
-
 extern char mnuCampInputTaskName[]; /* "camp" */
 
 extern char mnuCampDrawTaskName[]; /* "camp_draw" */
