@@ -321,115 +321,115 @@ void effTrackPolyAppendPointPair(EffTrackPolyData *data, u128 *src) {
 /* Resample the newest history span at a fixed interval, smoothing established
  * tracks with Catmull-Rom interpolation and linearly extending short tracks. */
 void effTrackPolyResampleHistory(EffTrackPolyData *data, u128 *src) {
-    f32 points0[4][4];
-    f32 points1[4][4];
-    f32 base0[4];
-    f32 base1[4];
-    f32 delta0[4];
-    f32 delta1[4];
-    f32 out0[4];
-    f32 out1[4];
+    f32 firstHistory[4][4];
+    f32 secondHistory[4][4];
+    f32 firstBasePoint[4];
+    f32 secondBasePoint[4];
+    f32 firstPointDelta[4];
+    f32 secondPointDelta[4];
+    f32 firstSample[4];
+    f32 secondSample[4];
     s32 activePointCount = data->activePointCount;
-    s32 step = data->step;
-    f32 interval;
-    f32 t;
-    s32 i;
-    u128 *dst1;
+    s32 sampleCount = data->step;
+    f32 sampleWeightStep;
+    f32 sampleWeight;
+    s32 sampleIndex;
+    u128 *secondSampleOutput;
 
     if (activePointCount == 0) {
         effTrackPolyAppendPointPair(data, src);
         return;
     }
 
-    if (activePointCount >= step * 6) {
-        s32 position = data->position;
-        u128 *dstBase;
-        u128 *dst;
+    if (activePointCount >= sampleCount * 6) {
+        s32 savedRingPosition = data->position;
+        u128 *firstSampleOutputBase;
+        u128 *firstSampleOutput;
 
-        effTrackPolyCopyHistoryPointPair(data, (u128 *)points0[0], (u128 *)points1[0], 3);
-        effTrackPolyCopyHistoryPointPair(data, (u128 *)points0[1], (u128 *)points1[1], 2);
-        effTrackPolyCopyHistoryPointPair(data, (u128 *)points0[2], (u128 *)points1[2], 1);
-        PCP_COPY_VECTOR(points0[3], src);
-        PCP_COPY_VECTOR(points1[3], src + 1);
-        t = 0.0f;
-        interval = 1.0f / (f32)step;
+        effTrackPolyCopyHistoryPointPair(data, (u128 *)firstHistory[0], (u128 *)secondHistory[0], 3);
+        effTrackPolyCopyHistoryPointPair(data, (u128 *)firstHistory[1], (u128 *)secondHistory[1], 2);
+        effTrackPolyCopyHistoryPointPair(data, (u128 *)firstHistory[2], (u128 *)secondHistory[2], 1);
+        PCP_COPY_VECTOR(firstHistory[3], src);
+        PCP_COPY_VECTOR(secondHistory[3], src + 1);
+        sampleWeight = 0.0f;
+        sampleWeightStep = 1.0f / (f32)sampleCount;
         effTrackPolyAdvancePosition(data, 2);
-        if (step > 0) {
-            dst = (u128 *)out0;
-            dst1 = (u128 *)out1;
-            dstBase = dst;
-            i = step;
+        if (sampleCount > 0) {
+            firstSampleOutput = (u128 *)firstSample;
+            secondSampleOutput = (u128 *)secondSample;
+            firstSampleOutputBase = firstSampleOutput;
+            sampleIndex = sampleCount;
             do {
-                t += interval;
-                effTrackPolyInterpolateCatmullRomPoint(points0, t);
-                VU0_STORE_VF_UNCLOBBERED(vf10, dst);
-                effTrackPolyInterpolateCatmullRomPoint(points1, t);
-                VU0_STORE_VF_UNCLOBBERED(vf10, dst1);
-                dst = dstBase;
-                i--;
-                effTrackPolyAppendPointPair(data, dst);
-            } while (i != 0);
+                sampleWeight += sampleWeightStep;
+                effTrackPolyInterpolateCatmullRomPoint(firstHistory, sampleWeight);
+                VU0_STORE_VF_UNCLOBBERED(vf10, firstSampleOutput);
+                effTrackPolyInterpolateCatmullRomPoint(secondHistory, sampleWeight);
+                VU0_STORE_VF_UNCLOBBERED(vf10, secondSampleOutput);
+                firstSampleOutput = firstSampleOutputBase;
+                sampleIndex--;
+                effTrackPolyAppendPointPair(data, firstSampleOutput);
+            } while (sampleIndex != 0);
         }
         data->activePointCount = activePointCount;
-        data->position = position;
+        data->position = savedRingPosition;
     }
 
-    if (activePointCount >= step * 4) {
-        u128 *dstBase;
-        u128 *dst;
+    if (activePointCount >= sampleCount * 4) {
+        u128 *firstSampleOutputBase;
+        u128 *firstSampleOutput;
 
-        effTrackPolyCopyHistoryPointPair(data, (u128 *)points0[0], (u128 *)points1[0], 2);
-        effTrackPolyCopyHistoryPointPair(data, (u128 *)points0[1], (u128 *)points1[1], 1);
-        PCP_COPY_VECTOR(points0[2], src);
-        PCP_COPY_VECTOR(points1[2], src + 1);
-        PCP_COPY_VECTOR(points0[3], src);
-        PCP_COPY_VECTOR(points1[3], src + 1);
-        t = 0.0f;
-        interval = 1.0f / (f32)step;
-        i = 0;
-        if (step > 0) {
-            dst = (u128 *)out0;
-            dst1 = (u128 *)out1;
-            dstBase = dst;
+        effTrackPolyCopyHistoryPointPair(data, (u128 *)firstHistory[0], (u128 *)secondHistory[0], 2);
+        effTrackPolyCopyHistoryPointPair(data, (u128 *)firstHistory[1], (u128 *)secondHistory[1], 1);
+        PCP_COPY_VECTOR(firstHistory[2], src);
+        PCP_COPY_VECTOR(secondHistory[2], src + 1);
+        PCP_COPY_VECTOR(firstHistory[3], src);
+        PCP_COPY_VECTOR(secondHistory[3], src + 1);
+        sampleWeight = 0.0f;
+        sampleWeightStep = 1.0f / (f32)sampleCount;
+        sampleIndex = 0;
+        if (sampleCount > 0) {
+            firstSampleOutput = (u128 *)firstSample;
+            secondSampleOutput = (u128 *)secondSample;
+            firstSampleOutputBase = firstSampleOutput;
             do {
-                t += interval;
-                effTrackPolyInterpolateCatmullRomPoint(points0, t);
-                VU0_STORE_VF_UNCLOBBERED(vf10, dst);
-                effTrackPolyInterpolateCatmullRomPoint(points1, t);
-                VU0_STORE_VF_UNCLOBBERED(vf10, dst1);
-                dst = dstBase;
-                effTrackPolyAppendPointPair(data, dst);
-                i++;
-            } while (i < step);
+                sampleWeight += sampleWeightStep;
+                effTrackPolyInterpolateCatmullRomPoint(firstHistory, sampleWeight);
+                VU0_STORE_VF_UNCLOBBERED(vf10, firstSampleOutput);
+                effTrackPolyInterpolateCatmullRomPoint(secondHistory, sampleWeight);
+                VU0_STORE_VF_UNCLOBBERED(vf10, secondSampleOutput);
+                firstSampleOutput = firstSampleOutputBase;
+                effTrackPolyAppendPointPair(data, firstSampleOutput);
+                sampleIndex++;
+            } while (sampleIndex < sampleCount);
         }
     } else {
-        u128 *linearDst;
+        u128 *firstSampleOutput;
 
-        effTrackPolyCopyHistoryPointPair(data, (u128 *)base0, (u128 *)base1, 1);
+        effTrackPolyCopyHistoryPointPair(data, (u128 *)firstBasePoint, (u128 *)secondBasePoint, 1);
         VU0_LOAD_VF(vf10, src);
-        VU0_LOAD_VF(vf11, base0);
+        VU0_LOAD_VF(vf11, firstBasePoint);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, delta0);
+        VU0_STORE_VF(vf10, firstPointDelta);
         VU0_LOAD_VF(vf10, src + 1);
-        VU0_LOAD_VF(vf11, base1);
+        VU0_LOAD_VF(vf11, secondBasePoint);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, delta1);
-        t = 0.0f;
-        interval = 1.0f / (f32)step;
-        if (step > 0) {
-            i = step;
-            linearDst = (u128 *)out0;
+        VU0_STORE_VF(vf10, secondPointDelta);
+        sampleWeight = 0.0f;
+        sampleWeightStep = 1.0f / (f32)sampleCount;
+        if (sampleCount > 0) {
+            sampleIndex = sampleCount;
+            firstSampleOutput = (u128 *)firstSample;
             do {
-                t += interval;
-                i--;
-                out0[0] = base0[0] + delta0[0] * t;
-                out0[1] = base0[1] + delta0[1] * t;
-                out0[2] = base0[2] + delta0[2] * t;
-                out1[0] = base1[0] + delta1[0] * t;
-                out1[1] = base1[1] + delta1[1] * t;
-                out1[2] = base1[2] + delta1[2] * t;
-                effTrackPolyAppendPointPair(data, linearDst);
-            } while (i != 0);
+                sampleWeight += sampleWeightStep;
+                sampleIndex--;
+                firstSample[0] = firstBasePoint[0] + firstPointDelta[0] * sampleWeight;
+                firstSample[1] = firstBasePoint[1] + firstPointDelta[1] * sampleWeight;
+                firstSample[2] = firstBasePoint[2] + firstPointDelta[2] * sampleWeight;
+                secondSample[0] = secondBasePoint[0] + secondPointDelta[0] * sampleWeight;
+                secondSample[1] = secondBasePoint[1] + secondPointDelta[1] * sampleWeight;
+                secondSample[2] = secondBasePoint[2] + secondPointDelta[2] * sampleWeight;
+                effTrackPolyAppendPointPair(data, firstSampleOutput);
+            } while (sampleIndex != 0);
         }
     }
 }
@@ -449,50 +449,50 @@ extern s32 func_0015FE20(EffTrackPolyDraw *);
  * two additional vertices overlapping the next strip (18 inputs total). */
 void effTrackPolyDrawStrips(EffTrackPolyData *data) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    s32 start[4];
-    s32 len[2];
+    s32 runStart[4];
+    s32 runPointCount[2];
     EffTrackPolyDraw *draw;
-    s32 i;
-    s32 remaining;
-    s32 wrapped;
-    s32 recent;
+    s32 runIndex;
+    s32 pointsRemaining;
+    s32 wrappedStartOffset;
+    s32 activePointCount;
     SdfListHead *list2;
     u64 *packet;
 
     sdfInitPacketList(list);
     sdfConsAppendClearPacket((s32)list, 0);
     sdfConsAppendAssetPacket((s32)list, data->nodeHandle, 0);
-    recent = data->activePointCount;
-    start[0] = data->position - recent;
-    if (start[0] < 2) {
-        wrapped = start[0] - 2;
-        start[1] = 0;
-        start[0] = wrapped + data->count;
-        len[0] = -wrapped;
-        len[1] = recent - len[0] + 2;
+    activePointCount = data->activePointCount;
+    runStart[0] = data->position - activePointCount;
+    if (runStart[0] < 2) {
+        wrappedStartOffset = runStart[0] - 2;
+        runStart[1] = 0;
+        runStart[0] = wrappedStartOffset + data->count;
+        runPointCount[0] = -wrappedStartOffset;
+        runPointCount[1] = activePointCount - runPointCount[0] + 2;
     } else {
-        len[0] = recent;
-        len[1] = 0;
+        runPointCount[0] = activePointCount;
+        runPointCount[1] = 0;
     }
     D_003D6640.colors = data->colors;
-    for (i = 0; i < 2; i++) {
+    for (runIndex = 0; runIndex < 2; runIndex++) {
         draw = &D_003D6640;
-        draw->points = &data->points[start[i]];
+        draw->points = &data->points[runStart[runIndex]];
         draw->color = data->color;
         draw->width = 0x10;
         draw->height = 0x12;
-        remaining = len[i];
-        while (remaining >= 0x12) {
-            remaining -= 0x10;
+        pointsRemaining = runPointCount[runIndex];
+        while (pointsRemaining >= 0x12) {
+            pointsRemaining -= 0x10;
             sdfAppendPacket(list, func_0015FE20(&D_003D6640));
             D_003D6640.points += 0x10;
             D_003D6640.colors += 0x10;
         }
-        if (remaining >= 4) {
-            draw->height = remaining;
-            draw->width = remaining - 2;
+        if (pointsRemaining >= 4) {
+            draw->height = pointsRemaining;
+            draw->width = pointsRemaining - 2;
             sdfAppendPacket(list, func_0015FE20(draw));
-            draw->colors += remaining;
+            draw->colors += pointsRemaining;
         }
     }
     if (data->kind < 4) {
