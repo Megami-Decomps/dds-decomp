@@ -3176,6 +3176,20 @@ Those helpers use `effect->selection.unit`. Mode 786 instead owns the
 linked-effect payload and uses `effect->linked.actor`; neither helper
 needs a mode-blind reinterpretation of the runtime payload.
 
+## Referenced sound effects share the field-selector interface
+
+`eff_field_color.h` preserves the selector provider's four argument types.
+DDS2 `effBTLFieldColorTestFlags` returns `u8`, matching its provider; it is
+not an integer-return adapter. Both field-selector providers and their
+actor-effect users include this interface.
+
+DDS2 `00201C98` uses `SoundEffectReferenceArgs` and the primary actor's
+`effectLink` fields. Its two retained owner words also serve as selector
+keys, as documented by `ActorEffectOwner`; no additional actor prefix
+view is needed. The sound duration can be forced to 35 frames by the
+actor's packed effect state, then updates the effect and task limits.
+
+
 
 ## Font root, retained UVs and original prototype scope
 
@@ -3262,6 +3276,11 @@ getters begin at `+4`, so no dual-use union is warranted.
 Use the block's `headers` and `actors` members, including the selected
 actor's motion, rather than separate interior-address aliases or a
 second word-array view of the copied allocation.
+
+`fldApplySceneRoomSelection` takes the same `FldActorEntry *` in both
+games: its signed-byte reads are `selectedRoom` at `+0x53` and `rowIndex`
+at `+0x45`. DDS1 stores these into the primary `FldAreaWork` fields at
+`+0x88` and `+0x58`, not into a separate word-array view.
 
 ## Result fade rows and profile icons
 
