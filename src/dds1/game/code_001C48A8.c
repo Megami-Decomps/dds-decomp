@@ -280,7 +280,25 @@ s32 fldSceneStateRestoreDisplay(u8 *scene) {
     return 0;
 }
 
+extern u64 btlAdvanceRuntimeSequenceCounter(void);
+extern struct SoundTask *btlCreateCommandSoundUpdateTask(void);
+extern u8 *btlCreateSecondaryCommandSoundTask(void);
+extern void *btlCreateCommandSoundTask(s32, s32);
+extern u8 *btlCreateModelLoadPollTask(u8 *, u32, u32, s8);
+extern void *btlCreateActorTransparencyTask(BtlUnit *);
+extern void *btlCreateUnitBaseLightTask(BtlUnit *);
+extern u8 *btlCreateUnitFadeInTask(u8 *, u32, u32);
+extern u8 *func_001D9038(u8 *, u32);
+extern BtlRuntimeTask *sndCreateActorEffectTask(struct SoundResourceNode *, BtlUnit *, u32);
+extern void *btlCreateImmediateCompletionTask(void);
+extern u8 *btlCreateGunLoadPollTask(u8 *);
+extern struct SoundTask *sndCreateEarringTask(void);
+extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
+extern s32 btlIsActorModeActionCodeAllowed(BtlUnit *);
+extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
+
 INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C50C0);
+
 
 extern s32 func_00213B90(void);
 
@@ -356,9 +374,6 @@ extern s32 btlHasScriptResource(void);
 extern void btlStartPrimaryScriptTask(void);
 extern void btlStartSecondaryScriptTask(void);
 extern void btlStartSkillEventTask(s32);
-extern struct SoundTask *btlCreateCommandSoundUpdateTask(void);
-extern u8 *btlCreateSecondaryCommandSoundTask(void);
-extern void *btlCreateCommandSoundTask(s32, s32);
 extern void evtBeginSolarOverlayFadeOut(s32);
 extern s32 fldGetActiveSceneGroupValue(void);
 extern u32 kwlnDrawControlFlags;
