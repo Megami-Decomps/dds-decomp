@@ -3150,6 +3150,27 @@ but callers retain the full eight-byte value: `0021C1FC` stores it with
 `sd` into the runtime task's `ownerId`. Extern declarations follow the
 provider rather than narrowing or adapting this opaque handle.
 
+## Retained actor task constructors use real pointers
+
+`btl_unit_tasks.h` is the shared constructor interface: `btlCreateUnit`
+returns `BtlUnit *`, and model-load, base-light, position and rotation
+constructors return `BtlRuntimeTask *`. Their actor operands are pointers,
+not serialized integer helper arguments. DDS2's rotation constructor has
+an additional byte-sized mode argument; DDS1's constructor has three
+arguments.
+
+DDS1 `001D7B60` and `001D7CF8` build the existing position/rotation
+argument packets through their `from`, `to`, `rate`, `t`, `count` and
+`unit` fields. The scheduler's retained actor identity is the native
+eight-byte `ownerId` at `+0x40`.
+
+DDS2's dispatcher at `00229728`, mode 779, installs the hero-load and
+subtask hooks and allocates a zeroed twelve-byte actor-selection payload.
+Those helpers use `effect->selection.unit`. Mode 786 instead owns the
+linked-effect payload and uses `effect->linked.actor`; neither helper
+needs a mode-blind reinterpretation of the runtime payload.
+
+
 ## Font root, retained UVs and original prototype scope
 
 `frFontWork` has one `FrFontSystem` owner in both games: nine resource
@@ -3157,6 +3178,8 @@ entries, cache/pool controls, the atlas at `+0x160`, six image-buffer words
 at `+0x178`, and two glyph queues at `+0x194`. The retained resource header
 owns the dimensions and glyph-count bound; DDS2 places its lookup offset
 eight bytes later than DDS1.
+The six image-buffer words are unsigned: the font sprite renderer loads its
+selected CLUT buffer with `lwu` before shifting it into the 64-bit TEX0 word.
 
 `FrFontGlyph` genuinely gives its `+0x1C` and `+0x20` pointer words two
 roles. A parent stores its first/last child, while a drawable item stores

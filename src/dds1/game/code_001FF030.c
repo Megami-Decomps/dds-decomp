@@ -8,6 +8,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "btl_action.h"
+#include "btl_unit_tasks.h"
 #include "dat_state.h"
 #include "dat_command.h"
 
@@ -3510,17 +3511,18 @@ extern u64 btlAdvanceRuntimeSequenceCounter(void);
  * until that task handle is gone.
  */
 u64 btlCreateSpecialUnitAndLoadModel(u64 prerequisiteHandle) {
-    u8 **slot = (u8 **)((BtlState *)btlGetRuntime())->effect;
-    u8 *model = *slot;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit **slot = (BtlUnit **)battle->effect;
+    BtlUnit *model = *slot;
     BtlRuntimeTask *entry;
     if (model != 0) {
         return btlAdvanceRuntimeSequenceCounter();
     }
-    model = (u8 *)btlCreateUnit();
+    model = btlCreateUnit();
     *slot = model;
-    func_001A1990(&((BtlUnit *)model)->partyRecord, 0x10a);
+    func_001A1990(&model->partyRecord, 0x10a);
     func_00207E68();
-    entry = (BtlRuntimeTask *)btlCreateModelLoadPollTask(*slot, 1, 0x10a, 0);
+    entry = btlCreateModelLoadPollTask(*slot, 1, 0x10a, 0);
     if (prerequisiteHandle != 0) {
         entry->startCondition.value.handle = prerequisiteHandle;
         entry->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
@@ -3889,16 +3891,17 @@ void *btlFindActiveMember(s32 group, s32 type) {
  * consumes a fresh sequence ID rather than returning an existing task handle.
  */
 u64 btlEnsureEffectUnitModelLoadTask(u64 prerequisiteHandle) {
-    u8 **slot = (u8 **)((BtlState *)btlGetRuntime())->effect;
-    u8 *model = *slot;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit **slot = (BtlUnit **)battle->effect;
+    BtlUnit *model = *slot;
     BtlRuntimeTask *entry;
     if (model != 0) {
         return btlAdvanceRuntimeSequenceCounter();
     }
-    model = (u8 *)btlCreateUnit();
+    model = btlCreateUnit();
     *slot = model;
-    func_001A1990(&((BtlUnit *)model)->partyRecord, 0x10e);
-    entry = (BtlRuntimeTask *)btlCreateModelLoadPollTask(*slot, 1, 0x10e, 0);
+    func_001A1990(&model->partyRecord, 0x10e);
+    entry = btlCreateModelLoadPollTask(*slot, 1, 0x10e, 0);
     if (prerequisiteHandle != 0) {
         entry->startCondition.value.handle = prerequisiteHandle;
         entry->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;

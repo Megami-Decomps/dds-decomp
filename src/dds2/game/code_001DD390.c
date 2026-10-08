@@ -8,6 +8,7 @@
 #include "file.h"
 #include "sdf.h"
 #include "btl_action.h"
+#include "btl_unit_tasks.h"
 #include "dds3obj.h"
 #include "evt_unit.h"
 #include "eff_transform.h"
@@ -3391,7 +3392,6 @@ void btlBeginModelChange(u32 argumentsAddress) {
 }
 
 extern void func_001E1B80(BtlUnit *, BtlUnit *);
-extern BtlUnit *btlCreateUnit(void);
 extern void btlDestroyUnit(BtlUnit *);
 
 /* Complete model loading, cross-fade the retained actor, and release it. */
