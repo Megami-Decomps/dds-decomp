@@ -200,7 +200,8 @@ extern s32 btlCreateResourceDescriptor(s32);
 
 extern void btlSetResourceNameHeaderPair(s32, s32, s32);
 
-extern s32 *sdfCreateAssetWithDrawEntries(void);
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
+extern void sdfQueueAssetRelease(SdfAsset *asset);
 
 extern void func_002DA420(void *, f32);
 
@@ -2661,7 +2662,7 @@ void effReleaseResourceRefs(u8 *work) {
             effReleaseSharedReference(ref);
         }
     }
-    sdfQueueAssetRelease((u32)refs->handle);
+    sdfQueueAssetRelease(refs->handle);
     sdfReleaseResourceAllocation(refs->allocation);
 }
 
@@ -3352,7 +3353,7 @@ u8 *effCreatePointSet4(u32 count) {
 
 /* Queue the draw asset for release and return the backing allocation. */
 void effAssetQueueRelease(s32 work) {
-    sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
+    sdfQueueAssetRelease(((EffPointSet *)work)->handle);
     sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
 }
 
@@ -3836,7 +3837,7 @@ u32 effCreateSurfaceGridNode(u32 count, u32 columns) {
     node->allocation = base;
     node->tail = data;
     node->field_14 = 0;
-    node->handle = sdfCreateAssetWithDrawEntries();
+    node->handle = (s32 *)sdfCreateAssetWithDrawEntries();
     func_002DA420(node->handle, 1.0f);
     memset(&D_003DCA40, 0, sizeof(EffPacketParams));
     D_003DCA40.primitive = 0x4000;
@@ -3905,7 +3906,7 @@ void effFillSurfaceGridColorGradient(u32 nodeAddr, u32 *colors) {
 }
 
 void effReleaseSurfaceGridBuffers(s32 work) {
-    sdfQueueAssetRelease((u32)((EffSurfaceGridNode *)work)->handle);
+    sdfQueueAssetRelease((SdfAsset *)((EffSurfaceGridNode *)work)->handle);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)((EffSurfaceGridNode *)work)->allocation));
 }
 
@@ -4523,7 +4524,7 @@ EffPointSet *effCreatePointSet5(s32 count) {
 
 /* Queue the draw asset for release and return the backing allocation. */
 void effReleasePointSetAsset(s32 work) {
-    sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
+    sdfQueueAssetRelease(((EffPointSet *)work)->handle);
     sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
 }
 
@@ -5340,7 +5341,7 @@ u8 *effCreateRibbonWork(u32 count, u32 repeat) {
     for (i = 0; i < count; i++) {
         ((u32 *)p)[i] = 0x80808080;
     }
-    work->handle = sdfCreateAssetWithDrawEntries();
+    work->handle = (s32 *)sdfCreateAssetWithDrawEntries();
     func_002DA420(work->handle, 1.0f);
     memset(&D_003DCB00, 0, sizeof(EffPacketParams));
     D_003DCB00.primitive = 0x4000;
@@ -5378,7 +5379,7 @@ void effSharedAssetReferenceRelease(s32 work) {
     else {
         effReleaseSharedReference(((EffRibbonWork *)work)->resource);
     }
-    sdfQueueAssetRelease(((EffRibbonWork *)work)->handle);
+    sdfQueueAssetRelease((SdfAsset *)((EffRibbonWork *)work)->handle);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(((EffRibbonWork *)work)->allocation));
 }
 
@@ -5923,7 +5924,7 @@ u32 repeat;
     for (i = 0; i < count; i++) {
         ((u32 *)p)[i] = 0x80808080;
     }
-    work->handle = sdfCreateAssetWithDrawEntries();
+    work->handle = (s32 *)sdfCreateAssetWithDrawEntries();
     func_002DA420(work->handle, 1.0f);
     memset(&D_003DCB30, 0, sizeof(EffPacketParams));
     D_003DCB30.primitive = 0x4000;
@@ -5939,7 +5940,7 @@ u32 effCreateTexturedStripWithSharedTexture(u32 count, u32 repeat) {
 
 void effReleaseScalyStripResources(s32 work) {
     effReleaseScalyTextureReference(effSharedScalyStripResource);
-    sdfQueueAssetRelease(((EffStripWork *)work)->handle);
+    sdfQueueAssetRelease((SdfAsset *)((EffStripWork *)work)->handle);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(((EffStripWork *)work)->allocation));
 }
 
@@ -6265,7 +6266,7 @@ EffPointSet *effCreatePointSet3(s32 count) {
 
 /* Queue the draw asset for release and return the backing allocation. */
 void effReleaseModelPointSetAsset(s32 work) {
-    sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
+    sdfQueueAssetRelease(((EffPointSet *)work)->handle);
     sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
 }
 
