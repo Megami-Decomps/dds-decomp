@@ -20,13 +20,13 @@ extern void mnuResetTitleStreamLocked(void);
 extern void mdlFlagSet(u16);
 
 typedef struct MantraPanelPool MantraPanelPool;
-extern void mnuQueueNextUnitPanelSelection(u32);
-extern void mnuAdvanceMantraUnitPanelListState(u32);
-extern u32 mnuQueueUnitPanelSelection(u32, s8);
+extern void mnuQueueNextUnitPanelSelection(struct MantraDrawPool *pool);
+extern void mnuAdvanceMantraUnitPanelListState(struct MantraDrawPool *pool);
+extern u32 mnuQueueUnitPanelSelection(struct MantraDrawPool *pool, s8);
 extern void mnuTransitionActivePanelAnimations(MantraPanelPool *, s32);
-extern void mnuSpawnMantraShortLoopIconAtPosition(u32, u32, u32);
-extern void mnuSpawnMantraIconAtPosition(u32, u32, u32);
-extern void mnuSetMantraFadeState(s32, u16, u16);
+extern void mnuSpawnMantraShortLoopIconAtPosition(u32, u32, struct MantraDrawPool *pool);
+extern void mnuSpawnMantraIconAtPosition(u32, u32, struct MantraDrawPool *pool);
+extern void mnuSetMantraFadeState(struct MantraDrawPool *pool, u16, u16);
 extern void func_0028F8A8(u8 *);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
@@ -101,14 +101,14 @@ static inline void mnuRefreshNodeTransitionIcons(MnuStatusResource *object, Mant
 
     mnuSpawnMantraShortLoopIconAtPosition((s32)((f32)position->x / 10.0f * 40.0f),
                                         (s32)((f32)position->y / 10.0f * 39.0f),
-                                        (u32)object->menu.selectionController);
+                                        object->menu.selectionController);
     position = (MantraNodePos *)work->defaultSelector;
     mnuSpawnMantraIconAtPosition((s32)((f32)position->x / 10.0f * 40.0f),
                                 (s32)((f32)position->y / 10.0f * 39.0f),
-                                (u32)object->menu.selectionController);
+                                object->menu.selectionController);
     if ((work->drawFlags >> 17) & 1) {
-        mnuSetMantraFadeState((u32)object->menu.selectionController, 5, 0);
-        mnuSetMantraFadeState((u32)object->menu.selectionController, 6, 5);
+        mnuSetMantraFadeState(object->menu.selectionController, 5, 0);
+        mnuSetMantraFadeState(object->menu.selectionController, 6, 5);
     }
     func_0028F8A8((u8 *)object);
 }
@@ -118,7 +118,7 @@ void func_002891C0(MnuStatusResource *object) {
     DatPartyRecord *value;
 
     evtPrintDeveloperConsoleMessage("UnitIndex:%d\n", object->list->cursor->index);
-    mnuAdvanceMantraUnitPanelListState((u32)object->menu.selectionController);
+    mnuAdvanceMantraUnitPanelListState(object->menu.selectionController);
     mnuRetreatNodeCursorAndClearListFlags(object);
     value = mnuGetSelectedNodeValue(object);
     work->defaultSelector = mnuFindNodePosition(object->list->cursor->unk70);
@@ -132,7 +132,7 @@ void func_002893A0(MnuStatusResource *object) {
     MantraMenuWork *work = &object->menu;
     DatPartyRecord *value;
 
-    mnuQueueNextUnitPanelSelection((u32)object->menu.selectionController);
+    mnuQueueNextUnitPanelSelection(object->menu.selectionController);
     mnuAdvanceNodeCursorAndClearListFlags(object);
     value = mnuGetSelectedNodeValue(object);
     work->defaultSelector = mnuFindNodePosition(object->list->cursor->unk70);
@@ -144,7 +144,7 @@ void func_002893A0(MnuStatusResource *object) {
 void func_00289550(MnuStatusResource *object, s8 target) {
     MantraMenuWork *work = &object->menu;
 
-    if (mnuQueueUnitPanelSelection((u32)object->menu.selectionController, target) != 0) {
+    if (mnuQueueUnitPanelSelection(object->menu.selectionController, target) != 0) {
         mnuMoveNodeCursorToTargetIndex(object, target);
         work->defaultSelector = mnuFindNodePosition(object->list->cursor->unk70);
         mnuTransitionActivePanelAnimations((MantraPanelPool *)work->resource, 0);
@@ -167,10 +167,10 @@ void func_00289710(MnuStatusResource *object) {
     u32 selectedIndex;
     s32 i;
 
-    extern void mnuSpawnMantraVariantIconAtPosition(u32, u32, u32);
-    extern void mnuSpawnMantraShortLoopVariantIconAtPosition(u32, u32, u32);
+    extern void mnuSpawnMantraVariantIconAtPosition(u32, u32, struct MantraDrawPool *pool);
+    extern void mnuSpawnMantraShortLoopVariantIconAtPosition(u32, u32, struct MantraDrawPool *pool);
 
-    mnuAdvanceMantraUnitPanelListState((u32)object->menu.selectionController);
+    mnuAdvanceMantraUnitPanelListState(object->menu.selectionController);
     mnuRetreatNodeCursorAndClearListFlags(object);
     selectedValue = mnuGetSelectedNodeValue(object);
     selectedIndex = func_002890A8(object);
@@ -197,7 +197,7 @@ void func_00289710(MnuStatusResource *object) {
         mnuSpawnMantraVariantIconAtPosition(
             (s32)((f32)(position->x * 20) / 10.0f),
             (s32)((f32)(position->y * 20) / 10.0f),
-            (u32)object->menu.selectionController);
+            object->menu.selectionController);
     }
 
     {
@@ -207,7 +207,7 @@ void func_00289710(MnuStatusResource *object) {
         mnuSpawnMantraShortLoopVariantIconAtPosition(
             (s32)((f32)(position->x * 20) / 10.0f),
             (s32)((f32)(position->y * 20) / 10.0f),
-            (u32)object->menu.selectionController);
+            object->menu.selectionController);
         func_0028F8A8((u8 *)object);
     }
 }
@@ -224,10 +224,10 @@ void func_00289928(MnuStatusResource *object) {
     u32 selectedIndex;
     s32 i;
 
-    extern void mnuSpawnMantraVariantIconAtPosition(u32, u32, u32);
-    extern void mnuSpawnMantraShortLoopVariantIconAtPosition(u32, u32, u32);
+    extern void mnuSpawnMantraVariantIconAtPosition(u32, u32, struct MantraDrawPool *pool);
+    extern void mnuSpawnMantraShortLoopVariantIconAtPosition(u32, u32, struct MantraDrawPool *pool);
 
-    mnuQueueNextUnitPanelSelection((u32)object->menu.selectionController);
+    mnuQueueNextUnitPanelSelection(object->menu.selectionController);
     mnuAdvanceNodeCursorAndClearListFlags(object);
     selectedValue = mnuGetSelectedNodeValue(object);
     selectedIndex = func_002890A8(object);
@@ -254,7 +254,7 @@ void func_00289928(MnuStatusResource *object) {
         mnuSpawnMantraVariantIconAtPosition(
             (s32)((f32)(position->x * 20) / 10.0f),
             (s32)((f32)(position->y * 20) / 10.0f),
-            (u32)object->menu.selectionController);
+            object->menu.selectionController);
     }
 
     {
@@ -264,7 +264,7 @@ void func_00289928(MnuStatusResource *object) {
         mnuSpawnMantraShortLoopVariantIconAtPosition(
             (s32)((f32)(position->x * 20) / 10.0f),
             (s32)((f32)(position->y * 20) / 10.0f),
-            (u32)object->menu.selectionController);
+            object->menu.selectionController);
         func_0028F8A8((u8 *)object);
     }
 }
@@ -463,7 +463,7 @@ s32 func_0028B318(MnuStatusResource *object) {
             mnuSpawnMantraIconAtPosition(
                 (s32)((f32)position->x / 10.0f * 40.0f),
                 (s32)((f32)position->y / 10.0f * 39.0f),
-                (u32)object->menu.selectionController);
+                object->menu.selectionController);
         }
     }
     if (work->navigationState == 0) {
@@ -488,7 +488,7 @@ s32 func_0028B318(MnuStatusResource *object) {
                 result = 2;
                 sound = 2;
                 if (work->drawBits.showOverlay != 0) {
-                    mnuSetMantraFadeState((u32)object->menu.selectionController, 5, 0);
+                    mnuSetMantraFadeState(object->menu.selectionController, 5, 0);
                 }
                 break;
             default:
