@@ -3062,6 +3062,12 @@ draw helpers carry glyph pointers, not integer handles or controller views.
 The colored-text resource itself is one serialized `FrFontTextBank`; its
 getter returns the bank's address, which the layout helpers consume directly.
 
+DDS1 `0019EE58` borrows the same embedded sound selection and fade owners
+as the matched DDS2 `001A6E88` renderer. Its two-point `DrawVertex` bounds
+and four-word `DrawColorRec` values use the existing packet interfaces.
+DDS1's textured row ends at `y + 0x88`, but its outline ends at
+`y + 0x78`; unlike DDS2, those corners do not share a cached bottom.
+
 ## Solar overlay state and kernel value boundary
 
 DDS1 `00228A00` and DDS2 `002436A8` allocate `0x104` bytes: a sprite
@@ -3384,9 +3390,72 @@ Its fallback wrappers pass `27.5f`; the tilt wrappers pass `20.0f` and
 operate on the pose's direction vector. Their callers pass the actual
 embedded camera members, not integer handles or alternate effect views.
 
+The category predicates also receive the linked command, not a `BtlUnit`:
+their first load is command `actionCode` at `+0x114` in DDS1 or `+0x134`
+in DDS2. The flag-0x100, type-two and flag-0x40 providers are
+`001DD198`/`001EA620`, `001DD1C8`/`001EA650` and
+`001DD348`/`001EA800`; the two byte-result comparisons at
+`001DD488`/`001EA940` and `001DD498`/`001EAA08` use the same owner.
+Keep these pointer contracts at every call, without integer transports.
+
 DDS2 `btlUpdateActionPoseForLinkedTarget` deliberately leaves the target
 unit in `$a2`: native `001EBD6C` loads it there before the tail call at
 `001EBD88`. The fallback `001ECBF8` only consumes `$a0/$a1`, forwarding
 those two pointers to the camera core with `27.5f`. Keep an unprototyped
 declaration ahead of that genuine three-argument legacy caller and the
 typed two-parameter definition afterwards; do not invent a third formal.
+
+The three default blend handlers (`001DB358/360/368` in DDS1 and
+`001E8568/70/78` in DDS2) retain an unused `BtlLinkedCommand *` formal.
+Each has one retail caller: the call delay slots at
+`001DBF60/001DBF9C/001DBFCC` and `001E9228/001E9264/001E9294`
+pass the state-owned command at `state + 0x70`. Their native bodies
+simply return one; the unused context is part of the common handler
+contract, not an omitted argument or an invented body.
+
+## Local-map request rings
+
+Both request-ring constructors allocate a 0x44-byte prefix followed by
+0x20-byte nodes. `MapRequestState` owns the handle, three node cursors,
+halfword counters, and callback; `MapRequestRing` supplies the allocation
+layout. Share these owners from `fld_lmap_task.h` rather than redefining
+the DDS2 queue as an integer array beside its node view.
+
+The progress callback receives the node's three payload words, the state
+pointer, the node pointer, and an `f32` progress value. Native callbacks
+and the indirect call agree on all six arguments. Creation returns the
+state pointer, release uses its handle, and interval/producer calls keep
+the state pointer end-to-end.
+
+## Viewer paired-file export
+
+DDS1 `0023E7F8` saves the PM2 and PM3 files with separate 64-byte path
+buffers. PFS debug mode passes open flags `0x602` and mode `0666`;
+the PC path uses the same flags without the optional mode argument.
+Both descriptors are checked before the common headers are emitted.
+The native pre-save walk follows every group `next` link without any
+per-group operation; do not add a synthetic counter or discard that walk.
+
+The runtime's keyboard name at `+0x22D4` and entry-list cursors at
+`+0x22F4/+0x22F8` overlap the command's 20-byte event name at `+0x22E8`.
+Model these mode-specific uses with an embedded union and migrate the
+keyboard/list consumers to its members, not a cast-based second view.
+The PM2 section switch physically places section 24's type-27 writer
+before section 21's metadata writer in retail (`0023EC08`/`0023EC20`).
+PM3 still scans all 26 section numbers but writes only section 4.
+
+## Actor effect world-node ownership
+
+DDS2 `BtlUnit.effectObject` at `+0x33C`, like DDS1's member at `+0x31C`,
+is an `EffWorldNode *`. The actor-model creator returns that node; effect
+origin consumers pass it to the SDK vector helpers, and the scale updater
+uses its `inner` transform. Keep it pointer-typed through construction,
+removal, flag operations and vector calls, without integer transports.
+DDS2's actual flag providers take `(void *, u32)`; the node-removal
+provider takes `EffWorldNode *`.
+
+The existing `btlUnitStatusPair` inline is separate inherited type debt:
+it casts the address of the scalar `flags` member to `BtlUnitFlagPair *`.
+Do not extend that second view. Any new whole-pair consumer must instead
+use a genuinely embedded union with every scalar consumer migrated, or
+remain parked until that primary-owner closure is possible.
