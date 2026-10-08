@@ -1202,6 +1202,8 @@
 0x0016D258	effThunderShiftOriginByVectorDelta	inferred	Stores new source vector and adds its delta to the existing origin vector. [names_reviewed6.tsv]
 0x0016D288	effThunderSetFragmentColor	inferred	queued
 0x0016D290	effThunderGetFragmentParameters	inferred	Returns the borrowed leading fragment parameters from the owned thunder fragment work
+0x0016D298	effThunderApplyFragmentDecreasingAlphaRamp	inferred	Forwards the fragment system and three packed colors to the symmetric cell alpha ramp provider.
+0x0016D2C0	effThunderApplyFragmentIncreasingAlphaRamp	inferred	Forwards the fragment system and three packed colors to the symmetric cell alpha ramp provider.
 0x0016D2E8	effThunderApplyFragmentColorBands	inferred	confidence=high; matched-C; src/dds2/effect/effPCPThunder.c:542:func_0016D2E8; Applies the three stored fragment color parameters to the particle system using its symmetric five-vertex color layout.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x0016D3B0	effThunderBuildFragmentStrip	inferred	builds a fragment's one-system strip by writing paired five-vector rows into its cell history
 0x0016D9D8	effThunderUpdateFragments	inferred	updates fragment countdowns, geometry, fade/restart state, colors and submits cells

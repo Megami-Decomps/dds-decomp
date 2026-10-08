@@ -1044,13 +1044,13 @@ EffThunderFragmentParams *effThunderGetFragmentParameters(EffThunderFragmentWork
     return &work->head;
 }
 
-/* Forward the system and its opaque fragment configuration through the native call. */
-void func_0016D298(EffThunderFragmentWork *work) {
+/* Apply decreasing alpha along each fragment cell using the retained color words. */
+void effThunderApplyFragmentDecreasingAlphaRamp(EffThunderFragmentWork *work) {
     parDecreaseSymmetricCellAlpha(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
 }
 
-/* Alternate native operation on the same system and opaque fragment configuration. */
-void func_0016D2C0(EffThunderFragmentWork *work) {
+/* Apply increasing alpha along each fragment cell using the retained color words. */
+void effThunderApplyFragmentIncreasingAlphaRamp(EffThunderFragmentWork *work) {
     parIncreaseSymmetricCellAlpha(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
 }
 
@@ -1926,13 +1926,13 @@ EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src) {
     memset(group->handles, 0, sizeof(group->handles));
     group->head = *src;
     group->handles[0] = effThunderFragCreate(&group->head.params);
-    func_0016D2C0(group->handles[0]);
+    effThunderApplyFragmentIncreasingAlphaRamp(group->handles[0]);
     for (i = 1; i < src->count - 2; i++) {
         group->handles[i] = effThunderFragCreate(&group->head.params);
         effThunderApplyFragmentColorBands(group->handles[i]);
     }
     group->handles[i] = effThunderFragCreate(&group->head.params);
-    func_0016D298(group->handles[i]);
+    effThunderApplyFragmentDecreasingAlphaRamp(group->handles[i]);
     group->color = 0x80808080;
     return group;
 }
