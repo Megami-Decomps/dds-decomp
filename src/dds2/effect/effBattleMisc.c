@@ -51,7 +51,7 @@ void effBattleMiscCallByOwnerA(u32 unused, void *arg) {
     effBattleComputeTargetPosition(effBTLFieldColorGetOverrideSelector(), arg);
 }
 
-void func_00169740(u32 unused, void *arg) {
+void effBattleMiscCallByFinalSelector(u32 unused, void *arg) {
     effBattleComputeTargetPosition(effBTLFieldColorGetFinalSelector(), arg);
 }
 
@@ -147,7 +147,7 @@ void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *param) {
     }
 }
 
-void func_00169A78(u32 flags, EffectVectorRequest *param) {
+void effBattleMiscQueryMaskedTargetPosition(u32 flags, EffectVectorRequest *param) {
     f32 out[4];
     f32 dir[4];
     f32 pos[4];
@@ -222,18 +222,18 @@ void func_00169A78(u32 flags, EffectVectorRequest *param) {
     VU0_LOAD_VF(vf10, out);
 }
 
-void func_00169C58(u32 unused, EffectVectorRequest *value) {
+void effBattleMiscQueryOriginalTargetPosition(u32 unused, EffectVectorRequest *value) {
     BtlUnit *ctx = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
 
     (void)unused;
-    func_00169A78(ctx->flags & 0xE00, value);
+    effBattleMiscQueryMaskedTargetPosition(ctx->flags & 0xE00, value);
 }
 
-void func_00169C88(u32 unused, EffectVectorRequest *value) {
+void effBattleMiscQueryVariantTargetPosition(u32 unused, EffectVectorRequest *value) {
     BtlUnit *ctx = (BtlUnit *)effBTLFieldColorGetVariantSelector();
 
     (void)unused;
-    func_00169A78(ctx->flags & 0xE00, value);
+    effBattleMiscQueryMaskedTargetPosition(ctx->flags & 0xE00, value);
 }
 
 

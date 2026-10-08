@@ -748,7 +748,6 @@ u32 *mnuAllocateEmptyResourceListState(void) {
 }
 
 extern void sdfReleaseChipBlock(void *);
-extern void mnuDestroyListState(void *);
 extern void mnuReleaseMenuVisualWorkResources(s32);
 
 typedef struct MenuCleanupNode {
@@ -776,7 +775,7 @@ void mnuReleaseResourceTaskData(s32 unused, s32 *taskData) {
         nodeCursor = nodeCursor->next;
     }
     sdfReleaseChipBlock(listOwner->resource);
-    mnuDestroyListState(listOwner);
+    mnuDestroyListState((struct MenuList *)listOwner);
     mnuReleaseMenuVisualWorkResources(*(s32 *)(sceneMetadata + 0x24));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(taskData[0]));
 }
