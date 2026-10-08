@@ -1180,8 +1180,8 @@ void mnuReleasePartyPanelTextures(MenuPageWindow *window) {
     } while (index < 5);
 }
 
-void mnuResetPartyPanelFade(s32 menu, s32 index, s32 unused, s32 retainScale) {
-    MenuPageSlot *page = &((MenuPageWindow *)menu)->slots[index];
+void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, s32 unused, s32 retainScale) {
+    MenuPageSlot *page = &window->slots[index];
 
     page->hp.fadeOut = 0;
     page->mp.fadeOut = 0;
