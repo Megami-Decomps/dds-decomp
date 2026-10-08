@@ -876,7 +876,33 @@ INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6D68);
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6F88);
 
 extern void func_002A7260(MnuTitlePaletteTransition *transition, s32 randomize);
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A7260);
+struct EffRandState;
+extern u32 effMiscRand(struct EffRandState *);
+
+void func_002A7260(MnuTitlePaletteTransition *transition, s32 randomize) {
+    s32 skip = randomize != 0;
+    u32 count;
+    s32 i;
+    u32 first;
+    u32 second;
+    s32 tmp;
+
+    if (randomize == 0) {
+        for (i = 0; i < 4U; i++) {
+            transition->spriteIndices[i] = i;
+        }
+    }
+    count = 4 - skip;
+    i = 19;
+    while (i >= 0) {
+        i--;
+        first = effMiscRand(0) % count;
+        second = effMiscRand(0) % count;
+        tmp = transition->spriteIndices[first + skip];
+        transition->spriteIndices[first + skip] = transition->spriteIndices[second + skip];
+        transition->spriteIndices[second + skip] = tmp;
+    }
+}
 
 void mnuTitleSetPaletteTransition(MnuTitlePaletteTransition *state, s32 mode) {
     switch (mode) {
@@ -942,8 +968,6 @@ void mnuFadeSetStateB(StaffScrollTransition *state, u32 mode) {
 extern void uiDrawTexturedSurfaceAtFarDepth(u32);
 extern void uiDrawSurfaceAtNearDepth(u32);
 extern void func_00308F78(s32, u32);
-struct EffRandState;
-extern u32 effMiscRand(struct EffRandState *);
 void func_002A75A8(StaffScrollTransition *state) {
     EffectSlotSet *sprites = (EffectSlotSet *)mnuMovieWork->sprite;
     s32 fade = state->opacity / 2;
