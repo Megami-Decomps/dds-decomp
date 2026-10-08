@@ -365,9 +365,6 @@ extern void func_0026C900(void);
 
 extern void *memset(void *, s32, u32);
 
-MenuIconSprites *mnuCreateWindowSpriteResources(u32 width, u32 height, u32 value,
-                    u32 resourceHandle, s32 *indices, u32 unused);
-
 typedef struct MenuListDefaults {
     s32 indices[3];
 } MenuListDefaults;
@@ -3377,13 +3374,6 @@ void func_002B9820(MenuWindowContainer *menu);
 
 
 void mnuInitIconSprites(MenuIconSprites *obj, s32 w, s32 h, u32 value, s32 res, s32 *idx, s32 unused);
-
-/* Create an owned three-sprite bundle using the caller's slot-index array. */
-MenuIconSprites *mnuCreateWindowSpriteResources(u32 width, u32 height, u32 value,
-                    u32 resourceHandle, s32 *indices, u32 unused);
-
-/* Destroy every native sprite slot, then release the bundle's allocation handle. */
-void mnuReleaseWindowTextures(MenuIconSprites *menu);
 
 void func_002B9A38(void);
 

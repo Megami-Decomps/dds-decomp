@@ -346,9 +346,6 @@ extern void func_0026C900(void);
 
 extern void *memset(void *, s32, u32);
 
-MenuIconSprites *mnuCreateWindowSpriteResources(u32 width, u32 height, u32 value,
-                    u32 resourceHandle, s32 *indices, u32 unused);
-
 typedef struct MenuListDefaults {
     s32 indices[3];
 } MenuListDefaults;
@@ -917,12 +914,9 @@ MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height,
 
 /* Destroy the owned list and optional sprite resources before freeing the window. */
 void mnuDestroyWindowContainer(MenuWindowContainer *menu) {
-    s32 resource;
-
     mnuDestroyListState(menu->list);
-    resource = (s32)menu->resource;
-    if (resource != 0) {
-        mnuReleaseWindowTextures(resource);
+    if (menu->resource != NULL) {
+        mnuReleaseWindowTextures(menu->resource);
     }
     sdfReleaseChipBlock(menu);
 }
