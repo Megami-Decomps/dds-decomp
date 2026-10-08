@@ -23,10 +23,6 @@ extern void sdfDestroyCallbackWork();
 extern s32 kwlnTaskGetTaskByName(u32);
 
 
-extern SdfTaskEntry *func_00312A48(SdfTaskItemDesc *);
-
-
-
 extern s32 kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
 extern void sdfGridReleaseAllCells(SdfGrid *);
@@ -98,20 +94,23 @@ void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 mode) {
         return;
     }
     switch (mode) {
-    case 3:
-        item->flags = (*(u16 *)&item->flags & ~1) | 0x10002;
+    case SDF_TASK_ITEM_MODE_CALLBACK_ONLY:
+        item->flags = (*(u16 *)&item->flags & ~SDF_TASK_ENTRY_UPDATE_ENABLED) |
+                      SDF_TASK_ENTRY_ACTIVE | SDF_TASK_ENTRY_CALLBACK_ENABLED;
         break;
-    case 4:
-        item->flags = (*(u16 *)&item->flags & ~2) | 0x10001;
+    case SDF_TASK_ITEM_MODE_UPDATE_ONLY:
+        item->flags = (*(u16 *)&item->flags & ~SDF_TASK_ENTRY_CALLBACK_ENABLED) |
+                      SDF_TASK_ENTRY_ACTIVE | SDF_TASK_ENTRY_UPDATE_ENABLED;
         break;
-    case 2:
-        item->flags = *(u16 *)&item->flags | 0x20000;
+    case SDF_TASK_ITEM_MODE_SUSPENDED:
+        item->flags = *(u16 *)&item->flags | SDF_TASK_ENTRY_SUSPENDED;
         break;
-    case 1:
-        item->flags = *(u16 *)&item->flags | 0x100000;
+    case SDF_TASK_ITEM_MODE_PENDING_ACTIVATION:
+        item->flags = *(u16 *)&item->flags | SDF_TASK_ENTRY_PENDING_ACTIVATION;
         break;
-    case 0:
-        item->flags = *(u16 *)&item->flags | 0x10003;
+    case SDF_TASK_ITEM_MODE_ENABLE_UPDATE_AND_CALLBACK:
+        item->flags = *(u16 *)&item->flags | SDF_TASK_ENTRY_ACTIVE |
+                      SDF_TASK_ENTRY_UPDATE_ENABLED | SDF_TASK_ENTRY_CALLBACK_ENABLED;
         break;
     }
 }
@@ -141,11 +140,12 @@ void sdfDestroyTaskResourceWork(TaskWork *work) {
     }
 }
 
-SdfTaskEntry *func_00312A48(SdfTaskItemDesc *item) {
+SdfTaskEntry *sdfCreateTaskEntry(SdfTaskItemDesc *item) {
     SdfTaskEntry *work = sdfAllocSizeClassBlock(0x1C);
 
     memset(work, 0, 0x1C);
-    work->flags = 0x100007;
+    work->flags = SDF_TASK_ENTRY_UPDATE_ENABLED | SDF_TASK_ENTRY_CALLBACK_ENABLED |
+                  SDF_TASK_ENTRY_INITIALIZE_ONCE | SDF_TASK_ENTRY_PENDING_ACTIVATION;
     work->key = item->key;
     if (item->init == NULL) {
         work->init = func_00313BA0;
@@ -198,25 +198,25 @@ s32 sdfTaskWorkStepEntry(TaskWork *work) {
     entry = (SdfTaskEntry *)node->value;
     flags = entry->flags;
     work->currentNode = node->next;
-    switch (flags & 0xFFFF0000) {
-    case 0x10000:
-        if (flags & 4) {
+    switch (flags & SDF_TASK_ENTRY_STATE_MASK) {
+    case SDF_TASK_ENTRY_ACTIVE:
+        if (flags & SDF_TASK_ENTRY_INITIALIZE_ONCE) {
             entry->initResult = entry->init();
-            flags = entry->flags &= ~4;
+            flags = entry->flags &= ~SDF_TASK_ENTRY_INITIALIZE_ONCE;
         }
-        if (flags & 0x8000) {
+        if (flags & SDF_TASK_ENTRY_REMOVE_PENDING) {
             sdfRemoveTaskItem(work, entry->key);
             return 1;
         }
-        if (flags & 1) {
+        if (flags & SDF_TASK_ENTRY_UPDATE_ENABLED) {
             if (entry->update(entry->key, entry->initResult) == -1) {
-                entry->flags |= 0x8000;
+                entry->flags |= SDF_TASK_ENTRY_REMOVE_PENDING;
             }
         }
         break;
-    case 0x20000:
+    case SDF_TASK_ENTRY_SUSPENDED:
         break;
-    case 0x100000:
+    case SDF_TASK_ENTRY_PENDING_ACTIVATION:
         /* DDS2 leaves pending-mode activation to the callback pass. */
         break;
     }
@@ -236,17 +236,17 @@ s32 sdfTaskWorkStep(TaskWork *work) {
     entry = (SdfTaskEntry *)node->value;
     flags = entry->flags;
     work->currentNode = node->next;
-    switch (flags & 0xFFFF0000) {
-    case 0x10000:
-        if (flags & 2) {
+    switch (flags & SDF_TASK_ENTRY_STATE_MASK) {
+    case SDF_TASK_ENTRY_ACTIVE:
+        if (flags & SDF_TASK_ENTRY_CALLBACK_ENABLED) {
             entry->callback(entry->key, entry->initResult);
         }
         break;
-    case 0x20000:
+    case SDF_TASK_ENTRY_SUSPENDED:
         break;
-    case 0x100000:
+    case SDF_TASK_ENTRY_PENDING_ACTIVATION:
         /* Activate the pending mode here; this visit does not invoke the callback. */
-        entry->flags = (flags & 0xFFEFFFFF) | 0x10000;
+        entry->flags = (flags & ~SDF_TASK_ENTRY_PENDING_ACTIVATION) | SDF_TASK_ENTRY_ACTIVE;
         break;
     }
     return 1;

@@ -208,7 +208,8 @@ s32 func_00287670(s32 mode) {
     case 2:
         sdfAttachTaskItem((struct TaskWork *)mnuMantraSelectionResource,
                           &D_003CFCE8);
-        sdfSetTaskItemMode((TaskWork *)mnuMantraSelectionResource, mode, 2);
+        sdfSetTaskItemMode((TaskWork *)mnuMantraSelectionResource, mode,
+                           SDF_TASK_ITEM_MODE_SUSPENDED);
         /* fall through */
     case 3:
         break;
@@ -254,7 +255,7 @@ extern void mnuTickPanelSoundEntries(void);
 extern s32 func_0028A1D0(MnuStatusResource *);
 
 /* Tick panel sounds and process the selection result. Case 2 intentionally falls through to case 3;
- * case 4 requests task-item mode (1,1) and returns -1, while other results return zero. */
+ * case 4 queues item 1 for activation and returns -1, while other results return zero. */
 s32 func_00287848(s32 key) {
     mnuTickPanelSoundEntries();
     switch (func_0028A1D0((MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1))) {
@@ -262,11 +263,13 @@ s32 func_00287848(s32 key) {
         break;
     case 2:
         sdfAttachTaskItem((TaskWork *)mnuMantraSelectionResource, &D_003CFCFC);
-        sdfSetTaskItemMode((TaskWork *)mnuMantraSelectionResource, key, 2);
+        sdfSetTaskItemMode((TaskWork *)mnuMantraSelectionResource, key,
+                           SDF_TASK_ITEM_MODE_SUSPENDED);
     case 3:
         break;
     case 4:
-        sdfSetTaskItemMode((TaskWork *)mnuMantraSelectionResource, 1, 1);
+        sdfSetTaskItemMode((TaskWork *)mnuMantraSelectionResource, 1,
+                           SDF_TASK_ITEM_MODE_PENDING_ACTIVATION);
         return -1;
     }
     return 0;
@@ -516,7 +519,8 @@ s32 func_00287C20(void) {
         }
         mnuKeepMantraBackgroundMaskVisible(work->menu.selectionController);
         func_0028D070(work);
-        sdfSetTaskItemMode((struct TaskWork *)mnuMantraSelectionResource, 2, 1);
+        sdfSetTaskItemMode((struct TaskWork *)mnuMantraSelectionResource, 2,
+                           SDF_TASK_ITEM_MODE_PENDING_ACTIVATION);
         return -1;
     default:
         break;
