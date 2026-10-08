@@ -1045,7 +1045,7 @@ void sdfCameraBuildProjection(SdfCamera *camera) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00336B48", func_0033A7E8);
+INCLUDE_ASM(const s32, "game/code_00336B48", sdfBuildLightingPacket);
 
 typedef struct SdfProjParams {
     f32 rangeMin;

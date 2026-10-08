@@ -75,7 +75,7 @@ extern s32 sdfGetLodChunkValue();
 extern EvtUnitVectorSlot evtUnitVectorSlots[10];
 
 
-extern void func_0033A7E8(void *, SdfLightSources, f32 *);
+extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 typedef struct {
     u8 pad00[0x10];     /* 0x00 */
@@ -475,7 +475,7 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
             color[i] = 1.0f;
         }
     }
-    func_0033A7E8(unit->endpointWork, desc, color);
+    sdfBuildLightingPacket(unit->endpointWork, desc, color);
     unit->value = (u32)unit->endpointWork;
 }
 
