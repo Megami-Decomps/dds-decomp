@@ -11583,8 +11583,9 @@ u32 effSetSlotResourceAndFlags(EffTimedState *effect, u32 resource, u32 flags) {
     return 1;
 }
 
-u32 effSetSlotIndexedResource(u32 effect, s32 owner, s32 index, u32 flags) {
-    effSetSlotResourceAndFlags((EffTimedState *)effect, (u32)&((EffMappedResource *)owner)->records[index], flags);
+u32 effSetSlotIndexedResource(EffTimedState *target, EffMappedResource *resources, s32 index,
+                              u32 flags) {
+    effSetSlotResourceAndFlags(target, (u32)&resources->records[index], flags);
     return 1;
 }
 
