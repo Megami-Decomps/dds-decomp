@@ -214,7 +214,34 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item) {
     node->boundsAddress = item->boundsAddress;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D86E0);
+void func_002D86E0(SdfDrawNode *node, SdfItem *item) {
+    s32 pass;
+    s32 slot;
+    u32 *cursor;
+    u32 commandAddress;
+
+    sdfDrawNodeSetFromItem(node, item);
+    switch (item->commandSetupMode) {
+    case 0:
+        for (pass = 0; pass != 2; pass++) {
+            for (slot = 0; slot != 3; slot++) {
+                func_002D83F8(node, (u32 *)item->commandData.inlineCommandAddresses[slot],
+                              slot, 0, pass);
+            }
+        }
+        break;
+    case 1:
+        if (item->commandData.commandList.commandAddresses != NULL) {
+            for (pass = 0; pass != 2; pass++) {
+                cursor = item->commandData.commandList.commandAddresses;
+                while ((commandAddress = *cursor++) != 0) {
+                    func_002D83F8(node, (u32 *)commandAddress, 0, 1, pass);
+                }
+            }
+        }
+        break;
+    }
+}
 
 /* Reset a draw node's command lists and initialize both buffered passes. */
 void sdfModelResetAndInitNodes(SdfDrawNode *node, u32 *commandList, s32 packetSelector) {
