@@ -33,21 +33,21 @@ extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 /* Work block at object+0x240; the node IDs fill the eight slots before
    the selected index and count. */
 
-u32 mnuGetSelectedNodeValue(MnuStatusResource *object) {
-    return object->list->cursor->unk70;
+DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *object) {
+    return object->list->cursor->partyRecord;
 }
 
-s32 mnuGetNodeValueByIndex(MnuStatusResource *object, s32 index) {
+DatPartyRecord *mnuGetNodeValueByIndex(MnuStatusResource *object, s32 index) {
     struct MenuListNode *node = object->list->first;
     s32 current = 0;
     while (node != 0) {
         if (current == index) {
-            return node->unk70;
+            return node->partyRecord;
         }
         node = node->next;
         current++;
     }
-    return 0;
+    return NULL;
 }
 
 u32 func_002890A8(MnuStatusResource *object) {
@@ -90,13 +90,13 @@ s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *object, s8 target) {
 }
 
 /* Script entry IDs are signed 16-bit indices into the position table. */
-static inline MantraNodePos *mnuFindNodePosition(u32 value) {
-    s16 id = scrGetSelectedScriptEntryId((DatPartyRecord *)value);
+static inline MantraNodePos *mnuFindNodePosition(DatPartyRecord *value) {
+    s16 id = scrGetSelectedScriptEntryId(value);
     return (MantraNodePos *)mnuGetMantraNodePositionRecord(id);
 }
 
 /* Both icon variants use the same node-to-screen coordinate conversion. */
-static inline void mnuRefreshNodeTransitionIcons(MnuStatusResource *object, MantraMenuWork *work, u32 value) {
+static inline void mnuRefreshNodeTransitionIcons(MnuStatusResource *object, MantraMenuWork *work, DatPartyRecord *value) {
     MantraNodePos *position = mnuFindNodePosition(value);
 
     mnuSpawnMantraShortLoopIconAtPosition((s32)((f32)position->x / 10.0f * 40.0f),
@@ -115,7 +115,7 @@ static inline void mnuRefreshNodeTransitionIcons(MnuStatusResource *object, Mant
 
 void func_002891C0(MnuStatusResource *object) {
     MantraMenuWork *work = &object->menu;
-    u32 value;
+    DatPartyRecord *value;
 
     evtPrintDeveloperConsoleMessage("UnitIndex:%d\n", object->list->cursor->index);
     mnuAdvanceMantraUnitPanelListState(object->menu.selectionController);
@@ -130,7 +130,7 @@ void func_002891C0(MnuStatusResource *object) {
 
 void func_002893A0(MnuStatusResource *object) {
     MantraMenuWork *work = &object->menu;
-    u32 value;
+    DatPartyRecord *value;
 
     mnuQueueNextUnitPanelSelection(object->menu.selectionController);
     mnuAdvanceNodeCursorAndClearListFlags(object);
@@ -163,7 +163,7 @@ void func_00289710(MnuStatusResource *object) {
     MantraNodePos *neighbor;
     MantraNodePos **neighbors;
     u16 *flags;
-    u32 selectedValue;
+    DatPartyRecord *selectedValue;
     u32 selectedIndex;
     s32 i;
 
@@ -201,7 +201,7 @@ void func_00289710(MnuStatusResource *object) {
     }
 
     {
-        s16 id = scrGetSelectedScriptEntryId((DatPartyRecord *)selectedValue);
+        s16 id = scrGetSelectedScriptEntryId(selectedValue);
 
         position = (MantraNodePos *)mnuGetMantraNodePositionRecord(id);
         mnuSpawnMantraShortLoopVariantIconAtPosition(
@@ -220,7 +220,7 @@ void func_00289928(MnuStatusResource *object) {
     MantraNodePos *neighbor;
     MantraNodePos **neighbors;
     u16 *flags;
-    u32 selectedValue;
+    DatPartyRecord *selectedValue;
     u32 selectedIndex;
     s32 i;
 
@@ -258,7 +258,7 @@ void func_00289928(MnuStatusResource *object) {
     }
 
     {
-        s16 id = scrGetSelectedScriptEntryId((DatPartyRecord *)selectedValue);
+        s16 id = scrGetSelectedScriptEntryId(selectedValue);
 
         position = (MantraNodePos *)mnuGetMantraNodePositionRecord(id);
         mnuSpawnMantraShortLoopVariantIconAtPosition(

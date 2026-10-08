@@ -331,7 +331,7 @@ typedef struct DspUnitName {
 extern DspUnitName *D_00435E48;
 extern DspMantraName *D_00435E50;
 extern s8 D_0037F510[];
-extern u32 mnuGetSelectedNodeValue(MnuStatusResource *);
+extern DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *);
 extern u16 mnuGetSelectedPanelValue(MnuStatusResource *);
 extern MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *);
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
@@ -375,7 +375,7 @@ s32 func_00287C20(void) {
     mnuTickPanelSoundEntries();
     work = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
     equip = &work->menu.equip;
-    selectedRecord = (DatPartyRecord *)mnuGetSelectedNodeValue(work);
+    selectedRecord = mnuGetSelectedNodeValue(work);
     defaultSelector = mnuGetDefaultPanelSelector(work);
     selectedEntryId = defaultSelector->selector.fields.index;
     selectedPanelFlags = mnuGetSelectedPanelValue(work);
