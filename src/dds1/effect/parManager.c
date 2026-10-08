@@ -50,7 +50,9 @@ typedef struct ParObj {
     u8 pad18[8];
     s32 particleCount;            /* 0x20 */
     s32 lifetimeFrames;           /* 0x24 */
-    u8 pad28[8];
+    s32 billboardCloneMarker;     /* 0x28: PAR_BILLBOARD_CLONE_FROM_RESOURCE */
+    s16 billboardMode;            /* 0x2C */
+    u8 pad2E[2];
     ParKindState kindState;       /* 0x30 */
     ParColorRamp colorRamp;       /* 0x48 */
     u8 pad8C[8];
