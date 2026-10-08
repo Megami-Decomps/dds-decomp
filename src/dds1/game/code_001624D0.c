@@ -51,7 +51,7 @@ extern u8 D_00353860[];
 
 extern u8 D_00353870[];
 
-extern u8 D_00325828[];
+extern struct SdfPoolNode *D_00325828[4];
 
 extern u16 D_003BB044;
 
@@ -62,7 +62,7 @@ extern void sdfReleaseChipBlock(void *p);
 extern void mdlBroadcastMasked(MdlCtx *, u32);
 
 
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 
 extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
@@ -388,7 +388,7 @@ void *effParamCreateInitWork(void *package) {
 
 /* Run the context/node update with this game's fixed global argument. */
 void effParamInitFromGlobal(void *work) {
-    mdlProcessContextNodesAndTransforms(work, (s32)D_00325828);
+    mdlProcessContextNodesAndTransforms(work, D_00325828);
 }
 
 void func_00162DE0(void *work) {

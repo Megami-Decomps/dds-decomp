@@ -374,8 +374,9 @@ void func_00263A00(BrsSkillPackageWork *scene) {
 
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern void func_00263A00(BrsSkillPackageWork *);
-extern s8 evtStageTestUpdate(s32);
-extern u8 D_00325788[];
+struct SdfPoolNode;
+extern s8 evtStageTestUpdate(struct SdfPoolNode **);
+extern struct SdfPoolNode *D_00325788[13][4];
 
 void func_00263B78(BrsSkillPackageWork *scene, s32 copyOptions) {
     DatPartyRecord *item = scene->selectedRewardRow->unit;
@@ -396,7 +397,7 @@ void func_00263B78(BrsSkillPackageWork *scene, s32 copyOptions) {
     mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, item, scene->panelHandle, 0x53);
     mnuDrawPartyInfoSprites(0, 0, 0, item, scene->spriteHandle, 0x53);
     func_00263A00(scene);
-    evtStageTestUpdate((s32)D_00325788);
+    evtStageTestUpdate(D_00325788[0]);
 }
 
 
