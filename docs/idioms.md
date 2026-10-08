@@ -3907,3 +3907,28 @@ runtime words are not copied. A `const void *` source and fixed-size
 `memcpy` express this byte-copy contract without inventing another struct
 view of those primary owners; the provider remains text-exact.
 
+## Battle query sibling-call option boundary
+
+DDS1 `001FF0C8..00202178` contains 80 functions, seven native
+`jal`-plus-epilogue tails and no function-directed `j`. The preceding
+`btlRunWeightedAiAction` uses a sibling call; the next function,
+`btlUnitBlocksElementQueryForGroup`, requires default flags in its matched C.
+As with DDS2 `00211360..00214948`, this supports a separate
+`-fno-optimize-sibling-calls` translation unit, not wider fabricated returns.
+The larger no-`j` run ending at `00205EE0` is refuted by that default-option
+function. The six short wrappers can retain the same natural `s32` contracts
+as their matched DDS2 twins. Native constant ownership places the read-only
+boundary at `003A5AD0`; all literal floats and small data remain in the
+default-option successor. This is an evidence-inferred option boundary, not
+an independently recovered Nocturne `__FILE__` boundary.
+
+
+## Sound-selector manager update
+
+DDS2 `001A76C8` traverses the existing `ItfMesGlobals.pool.activeHead` list,
+passes each node's stored state address to the true `void (ItfMesState *)`
+panel updater, then increments the manager's `unk8` counter. A nonzero result
+from the zero-argument `001200E0` gate skips both operations. The natural
+early return matches all 112 native bytes; the older gated-block candidate
+had eight differing words. No alternate list owner or callback signature is
+needed.
