@@ -189,11 +189,6 @@ typedef struct BattleController {
     s32 (*commandRangeOverride)(UiObject *, s32);
 } BattleController;
 
-typedef struct BattleEffect {
-    u32 flags;
-    u8 pad_004[0xA0];
-    u32 resourceHandles[3];
-} BattleEffect;
 
 extern s32 D_003B4F70[];
 
@@ -296,73 +291,19 @@ extern void itfSendTablePacket(SdfListHead *list, s32 context, s32 mode);
 
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 
-typedef struct UiPanelPlacement {
-    UiSprite *frame;
-    UiSprite *sprite;
-    UiSprite *overlay;
-    s32 bounds[4]; /* x, y, right, bottom */
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s32 fadeLimit;
-} UiPanelPlacement;
-typedef struct UiTexRef { u8 pad0[4]; s32 unk4; s32 unk8; s32 unkC; } UiTexRef;
-typedef struct UiPos { s32 x; s32 y; s32 unk8; UiTexRef *chain; } UiPos;
-typedef struct UiPanelOrigin { s32 x; s32 y; UiTexRef *tex; } UiPanelOrigin;
-typedef struct SndSeqSelect {
-    u8 pad0[8];
-    s32 seq;
-    u8 padC[6];
-    s16 current;
-    s16 saved;
-    s16 count;
-    u8 pad18[0xA];
-    s16 entryCount;
-} SndSeqSelect;
-typedef struct UiPanel {
-    u32 flags;
-    u8 pad4[8];
-    s32 unkC;
-    s16 index;
-    s16 state;
-    UiPanelOrigin origin;
-    s32 pad20;
-    UiPos pos;
-    u8 pad34[0xC];
-    SndSeqSelect selection;
-    u8 pad64[0x40];
-    UiPanelPlacement place;
-    u8 padD0[0x100];
-    BtlFade fade;
-} UiPanel;
 extern s32 func_0019DBA8();
 extern UiSprite *func_001A1858(s32, u32);
 extern void itfSetPanelLayoutAndNotify();
 extern void itfPanelUpdateValuesAndNotify();
 
-typedef struct UiCursor {
-    s32 x;
-    s32 y;
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    u8 unk14;
-    s8 unk15;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-} UiCursor;
 
 extern void itfAdvancePanelLayoutAndNotify(UiSprite *sprite, s32 a, s32 b, s32 c, s32 d, s32 e);
-extern void itfMesOffsetNodeChain(UiTexRef *node, s32 dx, s32 dy);
+extern void itfMesOffsetNodeChain(FrFontGlyph *node, s32 dx, s32 dy);
 
 
 extern void itfMesSetRowItemFlag();
 extern void sndSetSequenceVolumePan();
-extern void sndStepSequenceIndex(SndSeqSelect *sel, s32 dir);
+extern void sndStepSequenceIndex(ItfMesBlk40 *sel, s32 dir);
 typedef struct SndPad {
     u8 pad00[0x21];
     s8 confirm;
@@ -382,9 +323,9 @@ typedef struct SndPad {
 } SndPad;
 extern SndPad D_0037F510;
 extern s32 func_001A6AB8();
-extern void itfResetBattleFadeState(s32, s32);
+extern void itfResetBattleFadeState(BtlFade *, s32);
 
-typedef struct UiOwnerRef { u8 pad0[0xC]; struct UiPanel *owner; } UiOwnerRef;
+typedef struct UiOwnerRef { u8 pad0[0xC]; ItfMesState *owner; } UiOwnerRef;
 extern SdfPoolNode kwlnDrawSurfaces[];
 extern UiOwnerRef *D_003B4778[];
 extern void itfBuildAndSubmitPanelPacket(UiSprite *sprite, SdfPoolNode *surface);
@@ -396,37 +337,37 @@ extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
 extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 
 /* Enable context rendering for every font object in the linked chain. */
-void frFontEnableNodeContextModes(s32 fontObject) {
-    for (; fontObject != 0; fontObject = *(s32 *)(fontObject + 0x24)) {
+void frFontEnableNodeContextModes(FrFontGlyph *fontObject) {
+    for (; fontObject != NULL; fontObject = fontObject->previous) {
         frFontEnableContextMode(fontObject);
     }
 }
 
-void itfMesInitializePanelPlacementSprite(UiPanel *panel) {
-    UiPos *pos = &panel->pos;
-    UiPanelPlacement *place = &panel->place;
+void itfMesInitializePanelPlacementSprite(ItfMesState *panel) {
+    ItfMesEntryBlock *pos = &panel->entryBlock;
+    ItfMesBlkA4 *place = &panel->blkA4;
     s32 top;
     if (place->sprite == 0) {
         place->sprite = func_001A1858(6, (u32)itfMesWork.windowTexture);
         if (place->frame != 0) {
-            place->sprite->unk20 = panel->origin.tex->unk4 + func_0019DBA8(0, panel->origin.tex);
+            place->sprite->unk20 = panel->blk14.glyphChain->x + func_0019DBA8(0, panel->blk14.glyphChain);
         }
     }
     top = pos->y + place->bounds[1];
-    itfSetPanelLayoutAndNotify(place->sprite, pos->x + place->bounds[0], top, pos->x + place->bounds[2], pos->y + place->bounds[3], panel->unkC);
+    itfSetPanelLayoutAndNotify(place->sprite, pos->x + place->bounds[0], top, pos->x + place->bounds[2], pos->y + place->bounds[3], panel->renderValue);
     place->sprite->screenY = top;
     itfPanelUpdateValuesAndNotify(place->sprite, place->unk1C, place->unk20, place->unk24, 0);
     panel->flags = (panel->flags & ~0x300) | 0x100;
 }
 
-void itfMesCreatePanelOriginFrameWhenVisible(UiPanel *panel) {
-    UiPanelOrigin *origin = &panel->origin;
-    UiPanelPlacement *place = &panel->place;
-    if (origin->tex != 0 && !(panel->flags & 0x10000)) {
-        if (place->frame == 0) {
-            s32 width = origin->tex->unkC * 16;
+void itfMesCreatePanelOriginFrameWhenVisible(ItfMesState *panel) {
+    ItfMesBlk14 *origin = &panel->blk14;
+    ItfMesBlkA4 *place = &panel->blkA4;
+    if (origin->glyphChain != NULL && !(panel->flags & 0x10000)) {
+        if (place->frame == NULL) {
+            s32 width = origin->glyphChain->advance * 16;
             place->frame = func_001A1858(7, (u32)itfMesWork.windowTexture);
-            itfSetPanelLayoutAndNotify(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0x110, panel->unkC);
+            itfSetPanelLayoutAndNotify(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0x110, panel->renderValue);
             itfPanelUpdateValuesAndNotify(place->frame, 0x7F, 0x7F, 0x7F, 0);
         }
         panel->flags = (panel->flags & ~0x3000) | 0x1000;
@@ -435,55 +376,55 @@ void itfMesCreatePanelOriginFrameWhenVisible(UiPanel *panel) {
     }
 }
 
-void itfResetCursorPositionAndState(u32 *arg0, s32 arg1) {
-    if (arg1 != 0) {
-        *arg0 = 0x280;
-        arg0[1] = 0xa10;
+void itfResetCursorPositionAndState(ItfMesBlk14 *cursor, s32 resetPosition) {
+    if (resetPosition != 0) {
+        cursor->x = 0x280;
+        cursor->y = 0xa10;
     }
-    arg0[2] = 0;
-    *(u16 *)(arg0 + 3) = 0xffff;
+    cursor->glyphChain = NULL;
+    cursor->selectedIndex = 0xffff;
 }
 
-void itfMesResetCursorState(UiCursor *cur, s32 resetPos) {
+void itfMesResetCursorState(ItfMesEntryBlock *cur, s32 resetPos) {
     if (resetPos != 0) {
         cur->x = 0x4B0;
         cur->y = 0xAF8;
     }
-    cur->unkC = 0;
-    cur->unk10 = 0;
+    cur->glyphChain = NULL;
+    cur->textState = 0;
     cur->unk11 = 0;
     cur->unk16 = 0;
-    cur->unk18 = 0;
-    cur->unk1A = 0;
-    cur->unk12 = 0;
-    cur->unk13 = 0;
-    cur->unk14 = 0;
-    cur->unk15 = -0x80;
-    cur->unk8 = 0;
+    cur->itemIndex = 0;
+    cur->tableCount = 0;
+    cur->color[0] = 0;
+    cur->color[1] = 0;
+    cur->color[2] = 0;
+    cur->color[3] = 0x80;
+    cur->table = NULL;
 }
 
-void itfInitializeCursorResetState(s32 object) {
-    *(u32 *)(object + 0) = 0x560;
-    *(u32 *)(object + 4) = 0xC88;
-    *(s32 *)(object + 8) = 0;
-    *(s32 *)(object + 0xC) = 0;
-    *(s16 *)(object + 0x10) = 0;
-    *(s16 *)(object + 0x12) = -1;
-    *(s16 *)(object + 0x14) = -1;
-    *(s16 *)(object + 0x16) = 0;
-    *(s32 *)(object + 0x18) = 0;
-    *(s32 *)(object + 0x1C) = 0;
-    *(s16 *)(object + 0x20) = 0;
-    *(s16 *)(object + 0x22) = 0;
+void itfInitializeCursorResetState(ItfMesBlk40 *cursor) {
+    cursor->x = 0x560;
+    cursor->y = 0xC88;
+    cursor->glyphChain = NULL;
+    cursor->panelValue = 0;
+    cursor->unk10 = 0;
+    cursor->selectedIndex = -1;
+    cursor->savedIndex = -1;
+    cursor->rowCount = 0;
+    cursor->unk18 = 0;
+    cursor->unk1C = 0;
+    cursor->unk20 = 0;
+    cursor->optionCount = 0;
 }
 
-extern void func_001A6078();
+extern void func_001A6078(ItfMesBlkA4 *, s32, s32);
 
-void itfResetWindowResourceBlock(s32 *object) {
-    object[0] = 0;
-    object[1] = 0;
-    object[2] = 0;
-    func_001A6078(object, 0, 0);
+void itfResetWindowResourceBlock(ItfMesBlkA4 *block) {
+    block->frame = NULL;
+    block->sprite = NULL;
+    block->overlay = NULL;
+    func_001A6078(block, 0, 0);
 }
 
 /* Paired arrays: a nonzero slot marker owns the handle at the same index. */
@@ -493,11 +434,11 @@ typedef struct UiResourceSlots {
 } UiResourceSlots;
 
 /* Clear 32 words, from the end back toward the beginning of the buffer. */
-void itfClearDrawStateWords(UiResourceSlots *slots) {
+void itfClearDrawStateWords(ItfMesTextSlots *slots) {
     s32 remaining;
     u32 *word;
 
-    word = (u32 *)&slots->markers[31];
+    word = &slots->addresses[31];
     remaining = 0x1f;
     do {
         remaining = remaining - 1;
@@ -506,35 +447,35 @@ void itfClearDrawStateWords(UiResourceSlots *slots) {
     } while (-1 < remaining);
 }
 
-void itfResetBattleFadeState(s32 arg0, s32 arg1) {
-    if (arg1 == 0) {
-        *(u8 *)arg0 = 0;
+void itfResetBattleFadeState(BtlFade *fade, s32 preserveKind) {
+    if (preserveKind == 0) {
+        fade->kind = 0;
     }
-    *(u16 *)(arg0 + 2) = 0;
-    *(u16 *)(arg0 + 6) = 0;
-    *(u16 *)(arg0 + 4) = 0x40;
-    *(u32 *)(arg0 + 8) = 0;
+    fade->phase = 0;
+    fade->timer = 0;
+    fade->alpha = 0x40;
+    fade->unk08 = 0;
 }
 
-void btlSetFadePhaseAlphaTimer(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
-    *(s16 *)(arg0 + 2) = arg1;
-    *(s16 *)(arg0 + 4) = arg2;
-    *(s16 *)(arg0 + 6) = arg3;
+void btlSetFadePhaseAlphaTimer(BtlFade *fade, s16 phase, s16 alpha, s16 timer) {
+    fade->phase = phase;
+    fade->alpha = alpha;
+    fade->timer = timer;
 }
 
-void btlReleaseEffectResourceHandles(BattleEffect *effect) {
-    u32 *handles = effect->resourceHandles;
-    if (handles[0] != 0) {
-        itfPanelReleasePrimitiveResources(handles[0]);
-        handles[0] = 0;
+void btlReleaseEffectResourceHandles(ItfMesState *effect) {
+    ItfMesBlkA4 *place = &effect->blkA4;
+    if (place->frame != NULL) {
+        itfPanelReleasePrimitiveResources(place->frame);
+        place->frame = NULL;
     }
-    if (handles[1] != 0) {
-        itfPanelReleasePrimitiveResources(handles[1]);
-        handles[1] = 0;
+    if (place->sprite != NULL) {
+        itfPanelReleasePrimitiveResources(place->sprite);
+        place->sprite = NULL;
     }
-    if (handles[2] != 0) {
-        itfPanelReleasePrimitiveResources(handles[2]);
-        handles[2] = 0;
+    if (place->overlay != NULL) {
+        itfPanelReleasePrimitiveResources(place->overlay);
+        place->overlay = NULL;
     }
     effect->flags &= ~0xF00;
 }
@@ -573,55 +514,54 @@ u16 *txtFormatNumberU16(s32 value, u16 *out) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6078);
 
-void itfMesUpdatePanelFades(UiPanel *panel);
-void btlUpdateFadeIndicator(UiPanel *panel);
+void itfMesUpdatePanelFades(ItfMesState *panel);
+void btlUpdateFadeIndicator(ItfMesState *panel);
 
-void itfUpdateBattleDisplayAndFadeIndicator(UiPanel *panel) {
+void itfUpdateBattleDisplayAndFadeIndicator(ItfMesState *panel) {
     itfMesUpdatePanelFades(panel);
     func_001A6350(panel);
     func_001A6528(panel);
     btlUpdateFadeIndicator(panel);
 }
 
-void itfMesUpdatePanelFades(UiPanel *panel) {
-    UiPanelPlacement *place = &panel->place;
-    s32 *sprite;
+void itfMesUpdatePanelFades(ItfMesState *panel) {
+    ItfMesBlkA4 *place = &panel->blkA4;
+    UiSprite *sprite;
     s32 transition;
 
-    /* The panel fade word is at +0x38 in each sprite record. */
-    sprite = (s32 *)place->sprite;
+    sprite = place->sprite;
     transition = panel->flags & 0x300;
     switch (transition) {
     case 0x100:
-        sprite[14] += 24;
-        if (sprite[14] >= place->fadeLimit || panel->state == 3) {
-            sprite[14] = place->fadeLimit;
+        sprite->unk38 += 24;
+        if (sprite->unk38 >= place->fadeLimit || panel->unk12 == 3) {
+            sprite->unk38 = place->fadeLimit;
             panel->flags = (panel->flags & ~0x307) | 0x203;
         }
         break;
     case 0x300:
-        sprite[14] -= 8;
-        if (sprite[14] <= 0 || panel->state == 3) {
-            sprite[14] = 0;
+        sprite->unk38 -= 8;
+        if (sprite->unk38 <= 0 || panel->unk12 == 3) {
+            sprite->unk38 = 0;
             panel->flags &= ~0x300;
         }
         break;
     }
 
-    sprite = (s32 *)place->frame;
+    sprite = place->frame;
     transition = panel->flags & 0x3000;
     switch (transition) {
     case 0x1000:
-        sprite[14] += 32;
-        if (sprite[14] >= 200) {
-            sprite[14] = 200;
+        sprite->unk38 += 32;
+        if (sprite->unk38 >= 200) {
+            sprite->unk38 = 200;
             panel->flags = (panel->flags & ~0x3000) | 0x2000;
         }
         break;
     case 0x3000:
-        sprite[14] -= 32;
-        if (sprite[14] <= 0) {
-            sprite[14] = 0;
+        sprite->unk38 -= 32;
+        if (sprite->unk38 <= 0) {
+            sprite->unk38 = 0;
             panel->flags &= ~0x3000;
             itfPanelReleasePrimitiveResources(sprite);
             place->frame = NULL;
@@ -629,20 +569,20 @@ void itfMesUpdatePanelFades(UiPanel *panel) {
         break;
     }
 
-    sprite = (s32 *)place->overlay;
+    sprite = place->overlay;
     transition = panel->flags & 0xC00;
     switch (transition) {
     case 0x400:
-        sprite[14] += 24;
-        if (sprite[14] >= place->fadeLimit) {
-            sprite[14] = place->fadeLimit;
+        sprite->unk38 += 24;
+        if (sprite->unk38 >= place->fadeLimit) {
+            sprite->unk38 = place->fadeLimit;
             panel->flags = (panel->flags & ~0xC07) | 0x803;
         }
         break;
     case 0xC00:
-        sprite[14] -= 8;
-        if (sprite[14] <= 0) {
-            sprite[14] = 0;
+        sprite->unk38 -= 8;
+        if (sprite->unk38 <= 0) {
+            sprite->unk38 = 0;
             panel->flags &= ~0xC00;
             itfPanelReleasePrimitiveResources(sprite);
             place->overlay = NULL;
@@ -655,54 +595,54 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6350);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6528);
 
-void itfMesShiftPanelVertically(UiPanel *panel, s32 dy) {
-    UiPanelOrigin *origin = &panel->origin;
-    UiPos *pos = &panel->pos;
-    UiPanelPlacement *place = &panel->place;
+void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy) {
+    ItfMesBlk14 *origin = &panel->blk14;
+    ItfMesEntryBlock *pos = &panel->entryBlock;
+    ItfMesBlkA4 *place = &panel->blkA4;
     pos->y += dy;
-    itfMesOffsetNodeChain(pos->chain, 0, dy);
+    itfMesOffsetNodeChain(pos->glyphChain, 0, dy);
     if (place->sprite != 0) {
         itfAdvancePanelLayoutAndNotify(place->sprite, 0, dy, 0, 0, 0);
     }
     if (place->frame != 0) {
         itfAdvancePanelLayoutAndNotify(place->frame, 0, dy, 0, dy, 0);
     }
-    if (origin->tex != 0) {
+    if (origin->glyphChain != NULL) {
         origin->y += dy;
-        itfMesOffsetNodeChain(origin->tex, 0, dy);
+        itfMesOffsetNodeChain(origin->glyphChain, 0, dy);
     }
 }
 
-s32 sndSeqSelectPoll(s32 obj) {
-    SndSeqSelect *sel = (SndSeqSelect *)(obj + 0x40);
+s32 sndSeqSelectPoll(ItfMesState *panel) {
+    ItfMesBlk40 *sel = &panel->blk40;
     s32 dir = 0;
     s32 index;
     if (D_0037F510.prev & 2) {
-        if (sel->current != 0) {
+        if (sel->selectedIndex != 0) {
             dir = -1;
         } else if (D_0037F510.prev < 0) {
             dir = -1;
         }
     } else if (D_0037F510.next & 2) {
-        if (sel->current != sel->count - 1 || D_0037F510.next < 0) {
+        if (sel->selectedIndex != sel->rowCount - 1 || D_0037F510.next < 0) {
             dir = 1;
         }
     }
     if (dir != 0) {
         sndStepSequenceIndex(sel, dir);
-        itfResetBattleFadeState(obj + 0x1D0, 1);
+        itfResetBattleFadeState(&panel->fade, 1);
     }
     if (D_0037F510.confirm < 0) {
         sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         return 1;
     }
-    if (sel->entryCount > 0 && (index = func_001A6AB8(sel)) >= 0) {
+    if (sel->optionCount > 0 && (index = func_001A6AB8(sel)) >= 0) {
         sndSetSequenceVolumePan(8, 0x7F, 0x3F);
-        if (index != sel->current) {
-            itfMesSetRowItemFlag(sel->seq, sel->current, sel->count, 0);
-            itfMesSetRowItemFlag(sel->seq, index, sel->count, 1);
-            sel->current = index;
-            sel->saved = index;
+        if (index != sel->selectedIndex) {
+            itfMesSetRowItemFlag(sel->glyphChain, sel->selectedIndex, sel->rowCount, 0);
+            itfMesSetRowItemFlag(sel->glyphChain, index, sel->rowCount, 1);
+            sel->selectedIndex = index;
+            sel->savedIndex = index;
         }
         return 1;
     }
@@ -710,30 +650,30 @@ s32 sndSeqSelectPoll(s32 obj) {
 }
 
 
-void sndStepSequenceIndex(SndSeqSelect *sel, s32 dir) {
-    s32 index = sel->current;
-    itfMesSetRowItemFlag(sel->seq, index, sel->count, 0);
+void sndStepSequenceIndex(ItfMesBlk40 *sel, s32 dir) {
+    s32 index = sel->selectedIndex;
+    itfMesSetRowItemFlag(sel->glyphChain, index, sel->rowCount, 0);
     if (dir < 0) {
         index--;
         if (index < 0) {
-            index = sel->count - 1;
+            index = sel->rowCount - 1;
         }
     } else {
         index++;
-        if (index >= sel->count) {
+        if (index >= sel->rowCount) {
             index = 0;
         }
     }
-    itfMesSetRowItemFlag(sel->seq, index, sel->count, 1);
-    sel->current = index;
-    sel->saved = index;
+    itfMesSetRowItemFlag(sel->glyphChain, index, sel->rowCount, 1);
+    sel->selectedIndex = index;
+    sel->savedIndex = index;
     sndSetSequenceVolumePan(1, 0x7F, 0x3F);
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6AB8);
 
 
-void btlUpdateFadeIndicator(UiPanel *panel) {
+void btlUpdateFadeIndicator(ItfMesState *panel) {
     BtlFade *fade = &panel->fade;
     s32 minimumAlpha;
     if (fade->kind != 0) {
@@ -761,25 +701,23 @@ void btlUpdateFadeIndicator(UiPanel *panel) {
     }
 }
 
-extern void itfMesRenderActivePanelSprites(UiPanel *);
-extern s32 frFontDrawGlyphInDefaultMode(s32);
-extern s32 frFontDrawGlyphWithSharedFlags(s32, s32);
-extern void itfDrawSoundSelectorFadeLayers(UiPanel *);
-extern void func_001A7120(UiPanel *);
-extern void func_001A6E88(UiPanel *);
+extern void itfMesRenderActivePanelSprites(ItfMesState *);
+extern void itfDrawSoundSelectorFadeLayers(ItfMesState *);
+extern void func_001A7120(ItfMesState *);
+extern void func_001A6E88(ItfMesState *);
 
-void itfUpdateSoundSelectorPanel(UiPanel *panel) {
+void itfUpdateSoundSelectorPanel(ItfMesState *panel) {
     u32 flags = panel->flags;
-    SndSeqSelect *selection;
-    s32 glyph;
+    ItfMesBlk40 *selection;
+    FrFontGlyph *glyph;
 
     itfMesWork.flags &= ~2;
     itfMesRenderActivePanelSprites(panel);
-    glyph = (s32)panel->origin.tex;
+    glyph = panel->blk14.glyphChain;
     if (!(flags & 0x10000) && glyph != 0) {
         frFontDrawGlyphInDefaultMode(glyph);
     }
-    glyph = (s32)panel->pos.chain;
+    glyph = panel->entryBlock.glyphChain;
     if (!(flags & 0x20000) && (flags & 7) >= 3) {
         if (frFontDrawGlyphInDefaultMode(glyph) > 0) {
             if ((panel->flags & 7) != 4) {
@@ -788,17 +726,17 @@ void itfUpdateSoundSelectorPanel(UiPanel *panel) {
             }
         }
     }
-    glyph = panel->selection.seq;
+    glyph = panel->blk40.glyphChain;
     if (!(flags & 0x40000)) {
         flags &= 0x38;
         if (flags >= 0x18 && frFontDrawGlyphWithSharedFlags(glyph, 1) > 0) {
             if (flags == 0x18) {
-                selection = &panel->selection;
-                if (selection->current == -1) {
-                    selection->current = 0;
-                    selection->saved = 0;
+                selection = &panel->blk40;
+                if (selection->selectedIndex == -1) {
+                    selection->selectedIndex = 0;
+                    selection->savedIndex = 0;
                 }
-                itfMesSetRowItemFlag(selection->seq, selection->current, selection->count, 1);
+                itfMesSetRowItemFlag(selection->glyphChain, selection->selectedIndex, selection->rowCount, 1);
                 panel->flags = (panel->flags & ~0x38) | 0x20;
                 panel->fade.kind = 2;
             }
@@ -808,7 +746,7 @@ void itfUpdateSoundSelectorPanel(UiPanel *panel) {
         itfDrawSoundSelectorFadeLayers(panel);
     }
     if (panel->fade.kind & 2) {
-        if (panel->state == 3) {
+        if (panel->unk12 == 3) {
             func_001A7120(panel);
         } else {
             func_001A6E88(panel);
@@ -816,19 +754,19 @@ void itfUpdateSoundSelectorPanel(UiPanel *panel) {
     }
 }
 
-void itfMesRenderActivePanelSprites(UiPanel *panel) {
-    UiPanelPlacement *place;
+void itfMesRenderActivePanelSprites(ItfMesState *panel) {
+    ItfMesBlkA4 *place;
     if (panel->flags & 0x80000) {
         return;
     }
-    place = &panel->place;
+    place = &panel->blkA4;
     if ((panel->flags & 0x300) >= 0x100) {
-        if (panel->state != 3) {
-            itfBuildAndSubmitPanelPacket(place->sprite, &kwlnDrawSurfaces[panel->index]);
+        if (panel->unk12 != 3) {
+            itfBuildAndSubmitPanelPacket(place->sprite, &kwlnDrawSurfaces[panel->unk10]);
         }
         itfMesWork.flags |= 2;
         if (place->overlay != 0) {
-            itfBuildAndSubmitPanelPacket(place->overlay, &kwlnDrawSurfaces[panel->index]);
+            itfBuildAndSubmitPanelPacket(place->overlay, &kwlnDrawSurfaces[panel->unk10]);
         }
     }
     if (D_003B4778[0] != 0 && D_003B4778[0]->owner == panel && place != 0) {
@@ -845,7 +783,7 @@ extern u8 D_003B49E8[];
 extern s32 D_003B4A08[];
 
 /* Draw the sound selector frame, its fade layer and the expanding timer outline. */
-void itfDrawSoundSelectorFadeLayers(UiPanel *object) {
+void itfDrawSoundSelectorFadeLayers(ItfMesState *object) {
     s32 bounds[4];
     BtlFade *fade = &object->fade;
     s32 packet;
@@ -859,10 +797,10 @@ void itfDrawSoundSelectorFadeLayers(UiPanel *object) {
     packet = sdfAllocPacketAligned(0x20);
     sdfInitPacketList((SdfListHead *)packet);
     D_003B4A08[3] = 0xFF;
-    itfQueueTextureBoundQuadPacket(bounds, D_003B49F8, D_003B4A08, object->unkC,
+    itfQueueTextureBoundQuadPacket(bounds, D_003B49F8, D_003B4A08, object->renderValue,
                                   itfMesWork.windowTexture, 0, (SdfListHead *)packet);
     D_003B4A08[3] = fade->alpha;
-    itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->unkC,
+    itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->renderValue,
                                   itfMesWork.windowTexture, 0, (SdfListHead *)packet);
     if (fade->timer > 0) {
         expansion = 0x80 - fade->timer;
@@ -872,11 +810,11 @@ void itfDrawSoundSelectorFadeLayers(UiPanel *object) {
         bounds[3] += expansion;
         D_003B4A08[3] = fade->timer;
         itfSendTablePacket((SdfListHead *)packet, 1, 0);
-        itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->unkC,
+        itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->renderValue,
                                       itfMesWork.windowTexture, 0, (SdfListHead *)packet);
         itfSendTablePacket((SdfListHead *)packet, 0, 0);
     }
-    surface = &kwlnDrawSurfaces[object->index];
+    surface = &kwlnDrawSurfaces[object->unk10];
     surface->append((SdfListHead *)surface, (SdfListHead *)packet);
 }
 
@@ -885,7 +823,7 @@ void itfDrawSoundSelectorFadeLayers(UiPanel *object) {
 s32 sndVisitQueuedResources(void) {
     ItfMesPoolNode *node;
     for (node = itfMesWork.pool.activeHead; node != 0; node = node->next) {
-        itfUpdateBattleDisplayAndFadeIndicator((UiPanel *)node->stateAddress);
+        itfUpdateBattleDisplayAndFadeIndicator((ItfMesState *)node->stateAddress);
     }
     return 0;
 }
@@ -925,7 +863,7 @@ void func_001A7798(UiSprite *sprite) {
     D_00380708.append((SdfListHead *)&D_00380708, (SdfListHead *)packet);
 }
 
-void itfAdjustPanelBoundsWithPad(UiPanelPlacement *object, s32 mode) {
+void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *object, s32 mode) {
     UiSprite *sprite = object->sprite;
     s32 *bounds;
     s32 dx;
@@ -1024,7 +962,7 @@ ItfMesPoolNode *func_001A7A98(ItfMesPoolNode *node) {
         if (node == NULL) {
             node = itfMesWork.pool.activeTail;
         }
-        if (((UiPanel *)node->stateAddress)->place.sprite != NULL) {
+        if (((ItfMesState *)node->stateAddress)->blkA4.sprite != NULL) {
             break;
         }
         index++;
@@ -1433,19 +1371,6 @@ void btlDestroyDrawTaskAtPriorityWhenPresent(void) {
     }
 }
 
-typedef struct ItfMesTable ItfMesTable;
-
-typedef struct ItfMesEntry {
-    u32 itemList;
-    ItfMesTable *table;
-} ItfMesEntry;
-
-typedef struct ItfMesSub {
-    u8 unk00[0x18];
-    u32 entryCount;
-    u8 unk1C[4];
-    ItfMesEntry entries[1];
-} ItfMesSub;
 
 typedef struct BattleInitState {
     u8 pad000[0x214];

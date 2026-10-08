@@ -6,14 +6,14 @@
 
 extern void sdfReleaseResourceAllocation(void *resource);
 
-/* Release the secondary resource only for nonzero recordCount, then the
- * primary resource. NULL is ignored; no direct primitive release or slot-word clearing occurs. */
-void itfPanelReleasePrimitiveResources(EffPrim *primitive) {
-    if (primitive != NULL) {
-        if (primitive->recordCount != 0) {
-            sdfReleaseResourceAllocation(primitive->secondaryResource);
+/* A sprite with a retained payload owns a secondary allocation. Release that
+ * before its primary allocation; NULL is a no-op. */
+void itfPanelReleasePrimitiveResources(UiSprite *sprite) {
+    if (sprite != NULL) {
+        if (sprite->payload != NULL) {
+            sdfReleaseResourceAllocation(sprite->payloadAllocation);
         }
-        sdfReleaseResourceAllocation(primitive->primaryResource);
+        sdfReleaseResourceAllocation(sprite->allocation);
     }
 }
 

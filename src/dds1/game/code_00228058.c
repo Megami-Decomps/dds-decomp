@@ -3,22 +3,17 @@
 #include "scr.h"
 #include "kwln.h"
 #include "evt_world.h"
+#include "evt_solar.h"
 
 
-/* The first word is the solarnoise.spr handle; the work allocation is 0x104 bytes. */
-typedef struct SolarOverlayWork {
-    u32 noiseSprite;
-    u8 pad04[0x100];
-} SolarOverlayWork;
 
-extern s32 kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
+extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *task, s32 delayTicks);
 
 void *sdfAllocSizeClassBlock(s32 size);
+void sdfReleaseChipBlock(void *memory);
 
-void evtInitializeVisualData(s32 arg0);
-void evtLoadSolarNoiseSprite(u32 *sprite);
 
-void kwlnTaskSetUserValue(s32 arg0, void *arg1);
+void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 
 void func_00101A80(KwlnTask *parent, KwlnTask *child);
 
@@ -29,10 +24,8 @@ void scrSetIntegerReturnValue(s32 value);
 
 extern char D_003ACAE0[];
 
-u32 evtUpdateSolarOverlayFade(s32 task);
 extern s32 fileMenuTaskExists(void);
 extern s32 func_0011E278(void);
-extern void evtAdvanceSolarOverlayFadeAndDraw(s32 a0, s32 a1, s32 a2, s32 a3, u32 overlay, s32 a5);
 extern void fldSelectDisplayBuffer(u32 row);
 extern void func_00129900(s32 arg);
 extern void fldSubmitFrameQuad(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7);
@@ -43,13 +36,12 @@ s32 evtIsBgmLoaded(s32 id);
 
 void evtBeginSolarOverlayFadeIn(s32 arg0);
 
-extern u32 evtSolarOverlayTask;
 
 extern char D_003BBDC8[];
 
-extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
-u32 kwlnTaskGetUserValue(s32 task);
+u32 kwlnTaskGetUserValue(KwlnTask *task);
 
 extern f32 evtSolarOverlayAlpha; /* solar overlay alpha, interpolated toward 0 or 1 */
 
@@ -312,7 +304,7 @@ s32 evtGetMirroredSolarPhase(void) {
     return phase;
 }
 
-u8 evtGetSolarPhase(void) {
+s32 evtGetSolarPhase(void) {
     return datGameState->world.phase;
 }
 
@@ -348,9 +340,9 @@ void evtDisableSolarOverlayAlpha(void) {
     datGameState->world.flags = datGameState->world.flags & ~SOLAR_ALPHA_ENABLED_FLAG;
 }
 
-u32 evtUpdateSolarOverlayFade(s32 task) {
+s32 evtUpdateSolarOverlayFade(KwlnTask *task) {
     DatWorldState *state;
-    u32 overlay;
+    SolarOverlayWork *overlay;
     f32 alpha;
     f32 f;
 
@@ -358,7 +350,7 @@ u32 evtUpdateSolarOverlayFade(s32 task) {
     if ((fileMenuTaskExists() != 0) || (func_0011E278() != 0)) {
         return 0;
     }
-    overlay = kwlnTaskGetUserValue(task);
+    overlay = (SolarOverlayWork *)kwlnTaskGetUserValue(task);
     state = &datGameState->world;
     alpha = evtSolarOverlayAlpha;
     if ((state->flags & 2) != 0) {
@@ -423,21 +415,21 @@ void func_00228930(f32 delta) {
     }
 }
 
-void *evtCreateSolarOverlayWork(s32 owner) {
+s32 evtCreateSolarOverlayWork(KwlnTask *owner) {
     SolarOverlayWork *overlay;
 
     overlay = sdfAllocSizeClassBlock(0x104);
-    evtInitializeVisualData((s32)overlay);
+    evtInitializeVisualData(overlay);
     evtLoadSolarNoiseSprite(&overlay->noiseSprite);
-    kwlnTaskSetUserValue(owner, overlay);
-    return (void *)evtUpdateSolarOverlayFade;
+    kwlnTaskSetUserValue(owner, (u32)overlay);
+    return (s32)evtUpdateSolarOverlayFade;
 }
 
-void evtFreeSolarOverlayWork(s32 task) {
-    u32 overlay;
+void evtFreeSolarOverlayWork(KwlnTask *task) {
+    SolarOverlayWork *overlay;
 
-    overlay = kwlnTaskGetUserValue(task);
-    evtReleaseSolarNoiseSprite(overlay);
+    overlay = (SolarOverlayWork *)kwlnTaskGetUserValue(task);
+    evtReleaseSolarNoiseSprite(&overlay->noiseSprite);
     sdfReleaseChipBlock(overlay);
     evtSolarOverlayTask = 0;
 }
@@ -447,7 +439,7 @@ void evtStartSolarOverlay(void) {
     if (evtSolarOverlayTask != 0) {
         return;
     }
-    evtSolarOverlayTask = kwlnTaskCreate((s32)D_003BBDC8, 0x2b0b, 1, 1, (s32)evtCreateSolarOverlayWork, (s32)evtFreeSolarOverlayWork, 0);
+    evtSolarOverlayTask = kwlnTaskCreate(D_003BBDC8, 0x2b0b, 1, 1, evtCreateSolarOverlayWork, evtFreeSolarOverlayWork, 0);
     evtEnableSolarPhaseAdvance();
     evtSetSolarOverlayFullyTransparent();
     evtSetSolarPhase(0);

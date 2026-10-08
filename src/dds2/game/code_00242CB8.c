@@ -3,6 +3,7 @@
 #include "scr.h"
 #include "kwln.h"
 #include "evt_world.h"
+#include "evt_solar.h"
 
 extern s32 kwlnTaskIsRegistered(KwlnTask *);
 extern void evtSetContextFlag(KwlnTask *);
@@ -20,13 +21,12 @@ extern u32 kwlnDrawControlFlags;
 
 extern s32 scrGetCommandTimer(void);
 
-extern u32 evtSolarOverlayTask;
 
-u32 kwlnTaskGetUserValue(s32 task);
+u32 kwlnTaskGetUserValue(KwlnTask *task);
 
 extern char D_00437208[];
 
-extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 void func_00101968(KwlnTask *parent, KwlnTask *child);
 
@@ -38,19 +38,17 @@ void scrSetIntegerReturnValue(s32 value);
 extern char D_00422050[];
 
 void *sdfAllocSizeClassBlock(s32 size);
+void sdfReleaseChipBlock(void *memory);
 
-void evtInitializeVisualData(s32 arg0);
 
-void kwlnTaskSetUserValue(s32 arg0, void *arg1);
+void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 
-u32 evtUpdateSolarOverlayFade(s32 task);
 
 void evtBeginSolarOverlayFadeIn(s32 arg0);
 
-extern s32 kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
+extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *task, s32 delayTicks);
 extern s32 fileMenuTaskExists(void);
 extern u32 func_001200E0(void);
-extern void evtAdvanceSolarOverlayFadeAndDraw(s32 a0, s32 a1, s32 a2, s32 a3, u32 overlay, s32 a5);
 void func_0035B6E0(const char *fmt, ...);
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern char D_00422030[];
@@ -312,7 +310,7 @@ s32 evtGetMirroredSolarPhase(void) {
     return phase;
 }
 
-u8 evtGetSolarPhase(void) {
+s32 evtGetSolarPhase(void) {
     return datGameState->world.phase;
 }
 
@@ -348,9 +346,9 @@ void evtDisableSolarOverlayAlpha(void) {
     datGameState->world.flags = datGameState->world.flags & 0xfd;
 }
 
-u32 evtUpdateSolarOverlayFade(s32 task) {
+s32 evtUpdateSolarOverlayFade(KwlnTask *task) {
     DatWorldState *state;
-    u32 overlay;
+    SolarOverlayWork *overlay;
     f32 alpha;
     f32 f;
 
@@ -358,7 +356,7 @@ u32 evtUpdateSolarOverlayFade(s32 task) {
     if ((fileMenuTaskExists() != 0) || (func_001200E0() != 0)) {
         return 0;
     }
-    overlay = kwlnTaskGetUserValue(task);
+    overlay = (SolarOverlayWork *)kwlnTaskGetUserValue(task);
     state = &datGameState->world;
     alpha = evtSolarOverlayAlpha;
     if ((state->flags & 2) != 0) {
@@ -434,27 +432,22 @@ void func_00243568(f32 delta) {
 }
 
 
-/* The first word holds the solar-noise sprite; total work size is 0x104. */
-typedef struct {
-    u32 noiseSprite;
-    u8 pad04[0x100];
-} SolarOverlayWork;
 
-void *evtCreateSolarOverlayWork(s32 task) {
+s32 evtCreateSolarOverlayWork(KwlnTask *task) {
     SolarOverlayWork *overlay;
 
     overlay = sdfAllocSizeClassBlock(0x104);
-    evtInitializeVisualData((s32)overlay);
+    evtInitializeVisualData(overlay);
     evtLoadSolarNoiseSprite(&overlay->noiseSprite);
-    kwlnTaskSetUserValue(task, overlay);
-    return (void *)evtUpdateSolarOverlayFade;
+    kwlnTaskSetUserValue(task, (u32)overlay);
+    return (s32)evtUpdateSolarOverlayFade;
 }
 
-void evtFreeSolarOverlayWork(s32 task) {
-    u32 overlay;
+void evtFreeSolarOverlayWork(KwlnTask *task) {
+    SolarOverlayWork *overlay;
 
-    overlay = kwlnTaskGetUserValue(task);
-    evtReleaseSolarNoiseSprite(overlay);
+    overlay = (SolarOverlayWork *)kwlnTaskGetUserValue(task);
+    evtReleaseSolarNoiseSprite(&overlay->noiseSprite);
     sdfReleaseChipBlock(overlay);
     evtSolarOverlayTask = 0;
 }
@@ -464,7 +457,7 @@ void evtEnsureSolarOverlayTaskAndResetPhase(void) {
     if (evtSolarOverlayTask != 0) {
         return;
     }
-    evtSolarOverlayTask = kwlnTaskCreate((s32)D_00437208, 0x2B0B, 1, 1, (s32)evtCreateSolarOverlayWork, (s32)evtFreeSolarOverlayWork, 0);
+    evtSolarOverlayTask = kwlnTaskCreate(D_00437208, 0x2B0B, 1, 1, evtCreateSolarOverlayWork, evtFreeSolarOverlayWork, 0);
     evtEnableSolarPhaseAdvance();
     evtSetSolarOverlayFullyTransparent();
     evtSetSolarPhase(0);

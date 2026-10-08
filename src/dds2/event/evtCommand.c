@@ -6,6 +6,7 @@
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "scr.h"
+#include "evt_solar.h"
 
 /* Fixed dispatch payload sizes and the native six-kind world-object scan. */
 enum {
@@ -92,9 +93,7 @@ void evtDispatchSupportedNodeOnClear(void *unit, s32 flag);
 
 void effObjSetFlags(void *unit, s32 flag);
 
-s32 evtGetMirroredSolarPhase(void);
 
-s32 evtGetSolarPhase(void);
 
 void evtPolygonMovieClearFlagBits(s32 movieId, u32 bits);
 
