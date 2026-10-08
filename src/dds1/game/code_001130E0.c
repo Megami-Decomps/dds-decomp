@@ -5,6 +5,7 @@
 #include "eff_object.h"
 #include "evt_unit.h"
 #include "eff.h"
+#include "eff_event.h"
 #include "btl_sound.h"
 
 extern void dds3ReleaseObjectBaseResources(EffWorldNode *object);
@@ -794,10 +795,8 @@ void dds3RefreshStoredVec3(EffWorldNode *object) {
     destination->offset[2] = source->position[2];
 }
 
-struct EffEventWork;
 extern void effDestroyNode(struct EffNode *);
 extern void billDispatchByKind(BillObj *);
-extern void effEventReleaseNode(struct EffEventWork *);
 extern void func_00190118(SoundMixer *);
 
 /* Release each dependency according to the active state, clearing ownership

@@ -7,6 +7,7 @@
 #include "mdl.h"
 #include "sdf_draw.h"
 #include "eff_object.h"
+#include "eff_event.h"
 #include "scr.h"
 
 extern u32 evtWindowMotionUnit;
@@ -185,7 +186,6 @@ extern void evtUnitPrepareVerticalMoveSteps(EvtUnit *unit);
 
 extern f32 evtComputeClampedModelScale(s32);
 
-extern void effEventSetScale(void *, f32);
 
 /* Start a bounded vector transition; detach any previous secondary-world source. */
 void evtBeginVectorTransition(EvtUnit *work, s128 *vector, s32 frames) {

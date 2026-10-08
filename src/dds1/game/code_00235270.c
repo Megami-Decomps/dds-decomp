@@ -4,6 +4,7 @@
 
 #include "evt_world.h"
 #include "eff_object.h"
+#include "eff_event.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "mdl.h"
@@ -36,7 +37,6 @@ extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, void *, void *, u32
 extern void *memset(void *, s32, u32);
 extern void effObjSetFlags(void *object, s32 flags);
 extern void *func_00115298(void *obj, void *vecA, void *vecB);
-extern void effEventSetScale(void *target, f32 scale);
 extern void fldSetSwayMode(s32 mode);
 extern void fldSetSkyDrawState(s32 value);
 extern void func_00132B80(s32 value);

@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff.h"
+#include "eff_event.h"
 #include "eff_pcp_flash.h"
 #include "pcp_vu0.h"
 
@@ -2328,7 +2329,6 @@ typedef struct EffGroup {
 extern SoundMixer *func_00190100(SoundMixer *);
 extern EffFragmentResources *effCreateFragmentResources(s32, s32);
 extern void effInitializeFragmentHistoryColors(EffFragmentResources *, u32 *);
-extern void *effEventCreate(SoundMixer *, u16, EffPCPEventPlace *);
 
 EffGroup *func_00167BF8(src, eventParams)
 EffGroup *src;
@@ -2461,7 +2461,6 @@ EffGroup *func_00167EC0(EffGroup *src) {
 
 
 extern void effReleaseEffectResources(EffFragmentResources *work);
-extern void effEventReleaseNode(void *node);
 extern void func_00190118(u32 handle);
 
 /* Release every slot's effect resources and event node, then the optional handle and the group allocation. */
