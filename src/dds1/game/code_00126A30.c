@@ -2453,7 +2453,65 @@ void fldDrawFilledDisc(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012C428);
+void func_0012C428(s32 a1, s32 a2) {
+    SdfListHead *list = (SdfListHead *)sdfAllocatePacketList(NULL);
+    SdfDmaNode *reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
+    u64 *texturePacket;
+    u64 *blendPacket;
+    s32 handle;
+    FldSpriteVertex *vertex;
+    s32 quarter;
+    SdfPoolNode *descriptor;
+
+    sdfAppendDmaPrimary((s32)list,
+        (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), reference);
+    texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
+    texturePacket[0] = 3;
+    texturePacket[1] = 0x5000000310000000ULL;
+    texturePacket[2] = 0x1000000000008002ULL;
+    texturePacket[3] = 0xE;
+    texturePacket[4] = 0x8000000080ULL;
+    texturePacket[5] = 0x3B;
+    texturePacket[6] = 0;
+    texturePacket[7] = 0x3F;
+    sdfAppendPacket(list, (u32)texturePacket);
+    blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
+    blendPacket[0] = 3;
+    blendPacket[1] = 0x5000000310000000ULL;
+    blendPacket[2] = 0x1000000000008002ULL;
+    blendPacket[3] = 0xE;
+    blendPacket[4] = 0x31001;
+    blendPacket[5] = 0x47;
+    blendPacket[6] = 0x48;
+    blendPacket[7] = 0x42;
+    sdfAppendPacket(list, (u32)blendPacket);
+    handle = (s32)sdfConsAllocateColumnPacket(1);
+    vertex = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(handle);
+    vertex->r = 0x80;
+    vertex->g = 0x80;
+    vertex->b = 0x80;
+    vertex->a = a1;
+    quarter = a2;
+    if (a2 < 0) {
+        quarter = a2 + 3;
+    }
+    quarter >>= 2;
+    vertex->corner[0].u = 0;
+    vertex->corner[0].v = 0;
+    vertex->corner[0].x = 0x6FF7 - a2;
+    vertex->corner[0].y = 0x78FB - quarter;
+    vertex->corner[0].mask = 0x3FFF;
+    vertex->corner[0].flag = 0;
+    vertex->corner[1].u = 0x2000;
+    vertex->corner[1].v = 0xE00;
+    vertex->corner[1].x = a2 + quarter + 0x9009;
+    vertex->corner[1].y = quarter + 0x8705;
+    vertex->corner[1].mask = 0x3FFF;
+    vertex->corner[1].flag = 0;
+    sdfAppendPacket(list, handle);
+    descriptor = &kwlnDrawSurfaces[fldDisplayRow];
+    descriptor->append((SdfListHead *)descriptor, list);
+}
 
 s32 fldGetEncounterRuntimeResult(void) {
     s32 state = fldEncounterRuntimeState;

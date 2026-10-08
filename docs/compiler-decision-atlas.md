@@ -147,6 +147,23 @@ The transferable source shapes discovered so far are catalogued in
 [Matching C idioms](idioms.md). Treat their stated preconditions as part of the
 idiom: a shape that worked for one mechanism is not a generic permutation rule.
 
+## Trace destination identity before blaming allocation
+
+A final floating-register difference can originate before the allocator. In the
+[exact timed-camera case](compiler-trace-camera-case.md), `expand_binop` swapped
+a multiplication's operands because its destination was the same RTL object as
+operand 1. Merely changing the written operand order did not address that input.
+The source's dimensionless progress and physical-distance result were genuinely
+distinct values; representing that boundary removed the swap, while their
+nonoverlapping later lifetimes still allowed the allocator to share a register.
+
+Likewise, a surviving preference is not its origin. The same case captured the
+real argument copy, preference expansion/pruning and allocation attempt that
+explained the selected floating register. Trace the defining/using data flow
+and predict one meaningful source change. Do not manufacture copies, uses or
+lifetimes to request a desired register. Ordinary-versus-observed artifact
+parity qualifies the observation; whole-unit matching qualifies the source.
+
 ## Evidence standard for new mechanisms
 
 A reusable compiler claim should include:
