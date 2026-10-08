@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "sdf_resource.h"
 #include "sdf_model.h"
@@ -3302,7 +3303,7 @@ s32 btlEvalTaskCondition(TaskCondition *condition, s32 value) {
     case BTL_TASK_CONDITION_HANDLE_RUNNING_OR_ABSENT:
         task = (SoundTask *)btlFindTaskByHandle(condition->value.handle);
         if (task != 0) {
-            if (task->state == 2) {
+            if (task->state == BTL_TASK_PHASE_RUNNING) {
                 result = 1;
             }
         } else {
@@ -3322,7 +3323,7 @@ s32 btlEvalTaskCondition(TaskCondition *condition, s32 value) {
     case BTL_TASK_CONDITION_OWNER_RUNNING_OR_ABSENT:
         task = (SoundTask *)btlFindTaskByOwner(condition->value.owner);
         if (task != 0) {
-            if (task->state == 2) {
+            if (task->state == BTL_TASK_PHASE_RUNNING) {
                 result = 1;
             }
         } else {
@@ -3363,7 +3364,7 @@ void *btlAllocTask(s32 size) {
         task->prev = 0;
     }
     context->taskTail = task;
-    task->flags |= 1;
+    task->flags |= BTL_TASK_FLAG_REGISTERED;
     return task;
 }
 
@@ -3404,11 +3405,11 @@ u64 btlStartTask(void *taskObject) {
     u64 value = btlAdvanceRuntimeSequenceCounter();
     SoundTask *task = taskObject;
     void (*callback)(u32) = task->onStart;
-    task->flags |= 8;
+    task->flags |= BTL_TASK_FLAG_STARTED;
     task->handle = value;
     task->pollCount = 0;
     task->runCount = 0;
-    task->state = 0;
+    task->state = BTL_TASK_PHASE_WAITING;
     task->deferNext = 0;
     task->deferPrev = 0;
     if (callback != 0) {
@@ -3428,38 +3429,38 @@ void btlRunTask(s32 taskAddress) {
     SoundTask *task = (SoundTask *)taskAddress;
     u32 counter;
 
-    if (!(task->flags & 8)) {
+    if (!(task->flags & BTL_TASK_FLAG_STARTED)) {
         return;
     }
-    if (task->flags & 4) {
+    if (task->flags & BTL_TASK_FLAG_RELEASE_REQUESTED) {
         btlFreeTask(taskAddress);
         return;
     }
     counter = task->pollCount;
     task->pollCount = counter + 1;
     switch (task->state) {
-    case 0:
+    case BTL_TASK_PHASE_WAITING:
         if (btlEvalTaskCondition(&task->startCondition, counter) == 0) {
             break;
         }
-        task->state = 1;
-    case 1:
+        task->state = BTL_TASK_PHASE_START_DELAY;
+    case BTL_TASK_PHASE_START_DELAY:
         if (task->startDelay <= 0) {
-            task->state = 2;
+            task->state = BTL_TASK_PHASE_RUNNING;
         } else {
             task->startDelay = task->startDelay - 1;
             break;
         }
-    case 2:
+    case BTL_TASK_PHASE_RUNNING:
         if (btlEvalTaskCondition(&task->endCondition, task->runCount) != 0) {
-            task->state = 3;
+            task->state = BTL_TASK_PHASE_END_DELAY;
         } else if (task->callback.run(task->args) != 0) {
-            task->state = 3;
+            task->state = BTL_TASK_PHASE_END_DELAY;
         } else {
             task->runCount = task->runCount + 1;
             break;
         }
-    case 3:
+    case BTL_TASK_PHASE_END_DELAY:
         if (task->endDelay <= 0) {
             btlFreeTask(taskAddress);
         } else {
@@ -3475,7 +3476,7 @@ void btlSweepFinishedTasks(void) {
     SoundTask *next;
     while (task != 0) {
         next = task->next;
-        if (!(task->flags & 2)) {
+        if (!(task->flags & BTL_TASK_FLAG_DEFERRED)) {
             btlRunTask((s32)task);
         } else {
             task->deferNext = 0;
