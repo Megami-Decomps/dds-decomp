@@ -3258,32 +3258,32 @@ EffPCPBlockSetWork *effPcpBuildBlockSet(args)
 
 /* Duplicate the block-set handles and allocate its three optional instance lists. */
 void effPcpDuplicateBlockSetHandles(EffPCPBlockSetWork *work, EffPCPBlockSetWork *src) {
-    EffPCPBlockModel *model;
-    u32 i;
-    u32 j;
-    u32 n;
+    EffPCPBlockModel *headModel;
+    u32 handleIndex;
+    u32 groupIndex;
+    u32 groupHandleCount;
 
     work->headHandle = effParamWorkDuplicate(src->headHandle);
-    for (i = 0; i < ARRAY_COUNT(work->handleA); i++) {
-        work->handleA[i] = effParamWorkDuplicate(src->handleA[i]);
+    for (handleIndex = 0; handleIndex < ARRAY_COUNT(work->handleA); handleIndex++) {
+        work->handleA[handleIndex] = effParamWorkDuplicate(src->handleA[handleIndex]);
     }
-    model = effParamWorkGetData(work->headHandle);
-    work->count = model->info->unk2E;
-    for (j = 0; j < ARRAY_COUNT(work->list); j++) {
-        if (work->params.groupSize[j] > 0) {
-            n = work->count * work->params.groupSize[j];
-            work->alloc[j] = (u32)sdfAllocGeneralBlock(n * 4);
-            work->list[j] = (void *)sdfResourceRetainAddress((void *)work->alloc[j]);
-            work->list[j][0] = effParamWorkDuplicate(src->list[j][0]);
-            for (i = 1; i < n; i++) {
-                work->list[j][i] = 0;
+    headModel = effParamWorkGetData(work->headHandle);
+    work->count = headModel->info->unk2E;
+    for (groupIndex = 0; groupIndex < ARRAY_COUNT(work->list); groupIndex++) {
+        if (work->params.groupSize[groupIndex] > 0) {
+            groupHandleCount = work->count * work->params.groupSize[groupIndex];
+            work->alloc[groupIndex] = (u32)sdfAllocGeneralBlock(groupHandleCount * 4);
+            work->list[groupIndex] = (void *)sdfResourceRetainAddress((void *)work->alloc[groupIndex]);
+            work->list[groupIndex][0] = effParamWorkDuplicate(src->list[groupIndex][0]);
+            for (handleIndex = 1; handleIndex < groupHandleCount; handleIndex++) {
+                work->list[groupIndex][handleIndex] = 0;
             }
         } else {
-            work->alloc[j] = 0;
+            work->alloc[groupIndex] = 0;
         }
     }
-    for (i = 0; i < ARRAY_COUNT(work->handleB); i++) {
-        work->handleB[i] = effParamWorkDuplicate(src->handleB[i]);
+    for (handleIndex = 0; handleIndex < ARRAY_COUNT(work->handleB); handleIndex++) {
+        work->handleB[handleIndex] = effParamWorkDuplicate(src->handleB[handleIndex]);
     }
     work->tailHandle = effParamWorkDuplicate(src->tailHandle);
 }
