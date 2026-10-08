@@ -127,7 +127,7 @@ extern u32 mnuGetSelectedNodeValue(void);
 extern MnuMantraGridEntry *fldGetSceneMetadataNode(void);
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern s32 dspStartEntry(s32);
-extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, s32, s32);
+extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, u32, u32);
 
 /* Display the selected mantra and move the scene grid to its filled cell. */
 s32 mnuDisplayNextPendingMantra(s32 context) {
@@ -294,8 +294,8 @@ void mnuReinitializeSceneGrid(s32 sceneAddress) {
 
 extern void func_002CBB48(SdfGrid *grid);
 extern void func_00253208(s32 context, s32 sceneId, s32 *x, s32 *y);
-extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, s32 x, s32 y);
-extern void func_002CC0D0(SdfGrid *grid);
+extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, u32 x, u32 y);
+extern SdfGridCell *func_002CC0D0(SdfGrid *grid);
 
 
 void func_00253558(s32 context) {
