@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "eff.h"
 
@@ -26,7 +27,6 @@ extern f32 D_003B1530[4];
 
 
 extern void parReleaseCellSystem(u32);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 extern void func_0017ED50(void *, void *);
 
 void effPCPNeedleFree(EffPCPNeedleWork *work) {

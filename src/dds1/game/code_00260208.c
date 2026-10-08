@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "mnu_result.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
@@ -644,7 +645,6 @@ BrsSkillPackageWork *brsCreateTaskContext(void) {
 
 extern void func_002BC618(s32);
 extern void dspCloseChannel(void);
-extern void sdfReleaseResourceAllocation(s32);
 
 void brsStaffTaskDestroy(s32 arg0) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
@@ -658,7 +658,7 @@ void brsStaffTaskDestroy(s32 arg0) {
     }
     func_002BC618(context->fadeTarget);
     dspCloseChannel();
-    sdfReleaseResourceAllocation(context->handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(context->handle));
     brsTaskState = 2;
 }
 

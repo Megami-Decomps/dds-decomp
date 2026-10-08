@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf_model.h"
 #include "btl.h"
 #include "btl_command.h"
@@ -930,7 +931,7 @@ void btlInitBattleIndexWork(BattleIndexWork *work) {
 /* Release each owned buffer once. The cached group address is deliberately not cleared. */
 void btlReleaseObjectBuffers(BattleIndexWork *object) {
     if (object->allocationHandle != 0) {
-        sdfReleaseResourceAllocation(object->allocationHandle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(object->allocationHandle));
         object->allocationHandle = 0;
     }
     if (object->indices != 0) {
@@ -4621,7 +4622,6 @@ void btlReleaseUnitResources(BtlUnit *unit) {
     }
 }
 
-extern void sdfReleaseResourceAllocation(u32);
 
 void btlDestroyUnit(BtlUnit *unit) {
     btlBossDebugPrintf("btl:unit delete[%p]\n", unit);
@@ -4634,7 +4634,7 @@ void btlDestroyUnit(BtlUnit *unit) {
     } else {
         ((BtlState *)btlGetRuntime())->units = unit->nextActor;
     }
-    sdfReleaseResourceAllocation(unit->handle35C);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(unit->handle35C));
 }
 
 void btlDestroyAllUnits(void) {
@@ -9243,7 +9243,7 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
     btlBossDebugPrintf("btl:effect load end[%s]\n", args->name);
     resource = fileGetResourceHandle(args->loadHandle);
     effect->resourceHandle = sndMixerClone(sdfResourceRetainAddress(resource));
-    sdfReleaseResourceAllocation(resource);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
     filePollEntryCleanup(args->loadHandle);
     effect->flags = (effect->flags & ~1) | 2;
     return 0;
@@ -10154,7 +10154,7 @@ u32 sndPollMotSeFileAndSpu(FileLoadArgs *request) {
         }
     } else if (sndFindPackedTrackLoadStatus(node->position) != 0) {
         btlBossDebugPrintf("btl:sound SPU load end[%X]\n", (u16)(node->position >> 16));
-        sdfReleaseResourceAllocation(request->resourceHandle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(request->resourceHandle));
         filePollEntryCleanup((s32)request->loadHandle);
         node->flags = (node->flags & ~8) | 0x10;
         return 1;
@@ -10420,7 +10420,6 @@ SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id) {
 
 extern s32 filePollEntryCleanup(s32);
 
-extern void sdfReleaseResourceAllocation(u32);
 
 /* The last reference cleans queued files and resource handles, then unlinks/frees. */
 void sndReleaseSlotOwner(SoundSlotOwner *owner) {
@@ -10431,7 +10430,7 @@ void sndReleaseSlotOwner(SoundSlotOwner *owner) {
                 filePollEntryCleanup(owner->work.fileRequests[i]);
             }
             if (owner->work.resourceHandles[i] != 0) {
-                sdfReleaseResourceAllocation(owner->work.resourceHandles[i]);
+                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(owner->work.resourceHandles[i]));
             }
         }
         if (owner->next != 0) {
@@ -10682,7 +10681,7 @@ s32 sndPollAtrac3SELoadTask(BtlAt3LoadArgs *args) {
         size = fileGetResourceSize(args->loadHandle);
         filePollEntryCleanup(args->loadHandle);
         func_002A27A8(data, size, D_003E0F60[args->index].volume);
-        sdfReleaseResourceAllocation(resource);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
         btlBossDebugPrintf("btl:atrac3 SE load end\n");
         return 1;
     }
@@ -10765,7 +10764,7 @@ s32 sndDeadAtracPlaybackTask(u32 *args) {
 void sndFinishEarringPlaybackTask(s32 *taskArgs) {
     u8 *work = (u8 *)btlGetRuntime();
     if (taskArgs[2] != 0) {
-        sdfReleaseResourceAllocation(taskArgs[2]);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(taskArgs[2]));
     }
     ((BtlState *)work)->earringPlaybackCount += 0xFFFF;
 }

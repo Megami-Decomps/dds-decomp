@@ -1,4 +1,5 @@
 #include "evt_viewer.h"
+#include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
@@ -1082,7 +1083,6 @@ ShopScene *mnuShopCreateScene(void) {
 extern s32 kwlnTaskGetUserValue();
 extern void dspCloseChannel();
 extern void evtReleaseResourcePairHandle();
-extern void sdfReleaseResourceAllocation();
 
 void mnuShopDestroyScene(s32 arg) {
     ShopScene *scene = (ShopScene *)kwlnTaskGetUserValue();
@@ -1094,7 +1094,7 @@ void mnuShopDestroyScene(s32 arg) {
         mnuDrainPanelTransitions(&scene->transitionWork, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle(scene->resourcePair);
-        sdfReleaseResourceAllocation(scene->resourceHandle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(scene->resourceHandle));
         D_003BC39C = 2;
     }
 }

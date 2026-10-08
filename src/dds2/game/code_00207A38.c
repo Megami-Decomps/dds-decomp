@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "btl_state.h"
 #include "btl_action.h"
 #include "ee_mmi.h"
@@ -247,7 +248,6 @@ extern u8 D_00436C58[];
 
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
-extern void sdfReleaseResourceAllocation(s32);
 
 void btlReplaceResourceHandle(BtlResourceDescriptor *, s32);
 
@@ -3011,7 +3011,7 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *descriptor, s32 name
     }
     allocationHandle = sdfReadNamedResource((const char *)(u32)nameAddress, &loadedResource, 0);
     btlReplaceResourceHandle(descriptor, loadedResource);
-    sdfReleaseResourceAllocation(allocationHandle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocationHandle));
 }
 
 /* Acquire a texture from the supplied resource, releasing an owned old handle. */

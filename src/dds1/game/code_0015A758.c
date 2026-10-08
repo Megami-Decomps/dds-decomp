@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "par_draw.h"
 #include "eff.h"
 
@@ -574,7 +575,7 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B258);
 void parReleaseAssetRecord(ParReleaseRecord *record) {
     record->released = 1;
     sdfQueueAssetRelease(record->asset);
-    sdfReleaseResourceAllocation(record->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(record->allocation));
 }
 
 void parPrependRecordListNode(ParListNode *node) {
@@ -654,7 +655,7 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
 
 void parReleaseCellSystem(ParSystem *system) {
     sdfQueueAssetRelease(system->object);
-    sdfReleaseResourceAllocation(system->handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(system->handle));
 }
 
 void parCellInit(ParSystem *system, s32 index) {
@@ -1643,7 +1644,7 @@ ParBlock *parAllocateDrawBlock(s32 count) {
 
 void parReleaseDrawBlock(ParBlock *block) {
     sdfQueueAssetRelease(block->object);
-    sdfReleaseResourceAllocation(block->handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(block->handle));
 }
 
 

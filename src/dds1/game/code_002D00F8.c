@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf.h"
 
 #define SDF_CHIP_BLOCK_SHIFT 12
@@ -123,7 +124,6 @@ extern void *func_002FF538(u32 size);
 extern void *sdfAllocSizeClassBlock(u32 size);
 extern s32 D_003BD2DC;
 extern u8 D_003BD9C8[4];
-extern void sdfReleaseResourceAllocation();
 extern void sdfInitializeSynchronizedRequest();
 
 /* Align the usable span to 128 bytes and link one free block between sentinels. */

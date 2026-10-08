@@ -1,5 +1,6 @@
 #include "kwln.h"
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "mdl.h"
@@ -784,7 +785,7 @@ void mdlObjDestroy(MdlObj *obj) {
     if (obj->initialized != 0) {
         func_00344A08(obj->data);
     }
-    sdfReleaseResourceAllocation(obj->handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(obj->handle));
     sdfReleaseChipBlock(obj);
 }
 
@@ -2674,7 +2675,7 @@ void mdlLoadViewerPresentationConfig(void) {
         }
         lineOffset = nextLineOffset;
     }
-    sdfReleaseResourceAllocation(resourceHandle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resourceHandle));
 }
 
 const char D_00421488[] = "bg-color=%06x\neye-position=%f,%f,%f\ntarget-position=%f,%f,%f\nfovy=%f\nfog=%d,%f,%d,%f,%06x\n";

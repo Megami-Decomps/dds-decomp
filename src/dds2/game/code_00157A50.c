@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff.h"
 
 struct SdfTex;
@@ -105,7 +106,6 @@ extern EffBillResourceArchive *fileQueuePlainDispatchRequest(const char *path);
 extern void func_002C81D0(EffBillResourceArchive *archive);
 extern void func_002C7CE8(EffBillResourceArchive *archive);
 extern u32 sdfMemoryGetBlockAddress(MemBlock *block);
-extern void sdfReleaseResourceAllocation(MemBlock *block);
 extern BillObj *billCreateIndexed(s32 kind, u32 data);
 extern void func_0035B6E0(const char *format, ...);
 
@@ -138,7 +138,7 @@ void effInitializeBillResourceOwners(void) {
             payload = (BillChildPayload *)billboard->entryList;
             payload->halfWidth = payload->halfWidth * *scale;
             payload->halfHeight = payload->halfHeight * *scale;
-            sdfReleaseResourceAllocation(node->blockHandle);
+            sdfReleaseResourceAllocation((struct SdfMemBlock *)(node->blockHandle));
             node = node->next;
         } while (node != NULL);
     }
@@ -174,7 +174,7 @@ void effReleaseSharedTextureRecord(TexRecord *entry) {
     entry->refCount--;
     if (entry->refCount == 0) {
         sdfTexReleaseReferenceViaHandler((struct SdfTex *)entry->texture);
-        sdfReleaseResourceAllocation(entry->allocation);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(entry->allocation));
     }
 }
 

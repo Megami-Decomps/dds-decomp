@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "dds3obj.h"
 #include "pcp_vu0.h"
 
@@ -7,7 +8,6 @@ extern u32 dds3WorldCounter;
 extern void dds3BuildVuTransformFromComponents(void *, void *, void *);
 extern void dds3DestroyWorldNode(EffWorldNode *node);
 extern void dds3DestroyWorldIndexNode(NodeB *node);
-extern void sdfReleaseResourceAllocation(void *resource);
 extern void sdfReleaseChipBlock(void *block);
 
 /* Load the cached VU matrix, or rebuild and cache it when flags bit 1 is clear. */
