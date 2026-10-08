@@ -463,19 +463,24 @@ typedef struct MenuPageSlot {
     s32 kind;
     u32 flags;
     u8 pad08[8];
-    s32 icon[3];
+    struct EffectSlotSet *icon[3];
     u8 pad1C[0x4C];
     s32 scaleA;
     s32 offsetA;
     u8 pad70[0x4C];
     s32 scaleB;
     s32 offsetB;
-    s32 frame[6];
+    struct EffectSlotSet *frame[6];
     struct MenuPageResources *resources;
     struct MenuSprites *windowSprites;
     MenuIconBundle *iconBundle;
     u8 padE8[0x4C];
 } MenuPageSlot;
+typedef char MenuPageSlot_size_check_dds1[(sizeof(MenuPageSlot) == 0x134) ? 1 : -1];
+typedef char MenuPageSlot_icon_check_dds1[
+    ((u32)&((MenuPageSlot *)0)->icon == 0x10) ? 1 : -1];
+typedef char MenuPageSlot_frame_check_dds1[
+    ((u32)&((MenuPageSlot *)0)->frame == 0xC4) ? 1 : -1];
 #endif
 
 typedef struct MenuPageWindow {
