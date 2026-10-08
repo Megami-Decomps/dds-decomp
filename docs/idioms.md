@@ -4084,3 +4084,13 @@ Those live register values do not establish a three-argument call.
 The caller unit declares the actual `void (void)` contract; its remaining
 field-store scheduling differences are independent of this repair.
 
+## Event-viewer selected-label primary owners
+
+Both 228-byte `evtDrawSelectedEntryLabel` providers receive an
+`EvtRuntimeGroup *` and the owning `EvtRuntime *`. The signed word at
+group +8 is `entryHeader.word`; the name address is the corresponding
+`runtime->entryName[index]` row, not a second padded view or raw runtime
+offset. These typed accesses preserve both providers and both complete
+121-function units exactly. The initial list argument remains the
+existing callback word API, with conversions only at the packet boundary.
+
