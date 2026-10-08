@@ -1,5 +1,6 @@
 #include "common.h"
 #include "bill_object_api.h"
+#include "eff_resource_slots.h"
 #include "sdf_resource.h"
 #include "sdf_chip.h"
 #include "eff_curve.h"
@@ -3205,7 +3206,7 @@ void fileConfigTaskDestroy(void) {
         ((FileConfigTask *)fileConfigTaskWork)->frame = 0;
         for (i = 0; i < 4; i++) {
             if (((FileConfigTask *)fileConfigTaskWork)->slots[i] != 0) {
-                effDestroyResourceSlotSet(((FileConfigTask *)fileConfigTaskWork)->slots[i]);
+                effDestroyResourceSlotSet((struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[i]);
                 ((FileConfigTask *)fileConfigTaskWork)->slots[i] = 0;
             }
         }

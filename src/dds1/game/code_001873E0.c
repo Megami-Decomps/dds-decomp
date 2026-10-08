@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "eff_blur.h"
+#include "eff_event_draw.h"
 
 
 
@@ -23,18 +24,6 @@ typedef struct EffBlurDrawData {
 
 extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
-
-typedef struct {
-    u32 color;
-    s32 blendControl;
-    s32 left;
-    s32 top;
-    s32 right;
-    s32 bottom;
-} EffSolidRectParams;
-
-
-
 
 extern u32 effGetResourceFirstWord(s32 index);
 

@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "eff_resource_slots.h"
 #include "common.h"
 #include "mnu_staff.h"
 #include "sdf_resource.h"
@@ -168,14 +169,14 @@ extern s32 effDestroyPackedBatch(s32);
 
 /* Release both visual resources in order; the work object itself is retained. */
 void mnuReleaseVisualResources(MenuTerminalWork *work) {
-    effResolveAndReleaseResource(work->batch);
-    effResolveAndReleaseResource(work->secondResource);
+    effResolveAndReleaseResource((struct EffectSlotSet *)work->batch);
+    effResolveAndReleaseResource((struct EffectSlotSet *)work->secondResource);
 }
 
 /* Release/reset the two resources' texture slots without freeing the work object. */
 void mnuReleaseBothVisualResourceTextures(MenuTerminalWork *work) {
-    effReleaseTextureHandlesAndResetSlots(work->batch);
-    effReleaseTextureHandlesAndResetSlots(work->secondResource);
+    effReleaseTextureHandlesAndResetSlots((struct EffectSlotSet *)work->batch);
+    effReleaseTextureHandlesAndResetSlots((struct EffectSlotSet *)work->secondResource);
 }
 
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);

@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "eff_resource_slots.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "kwln.h"
@@ -863,24 +864,21 @@ void mnuApplyFlagEntries(s32 snapshotHandle) {
 
 extern char D_003AF590[];
 extern s32 D_0036AC78[];
-extern u32 effLoadIndexedResource(char *, s32, s32);
-extern void effResolveAndReleaseResource(u32);
-extern u32 effCreateResourceSlotSet(u32, s32, s32);
 
 /* Keep the two loaded handles and their derived slot set in the menu work array. */
 void mnuLoadResourceHandles(u32 *menuWork) {
     s32 resourceIndex;
 
     for (resourceIndex = 0; resourceIndex < 2; resourceIndex++) {
-        u32 resourceHandle = effLoadIndexedResource(D_003AF590, D_0036AC78[resourceIndex], 1);
+        struct EffectSlotSet *resourceHandle = effLoadIndexedResource(
+            D_003AF590, (const char *)D_0036AC78[resourceIndex], 1);
 
-        menuWork[0x19 + resourceIndex] = resourceHandle;
+        menuWork[0x19 + resourceIndex] = (u32)resourceHandle;
         effResolveAndReleaseResource(resourceHandle);
     }
-    menuWork[0x1B] = effCreateResourceSlotSet(menuWork[0x19], 7, 1);
+    menuWork[0x1B] = (u32)effCreateResourceSlotSet((struct EffectSlotSet *)menuWork[0x19], 7, 1);
 }
 
-extern void effDestroyResourceSlotSet(u32);
 extern void mnuReleaseEffectResource(MenuResourceWork *);
 
 /* Destroy the stored slot sets, then release and clear any optional effect handle. */
@@ -888,9 +886,9 @@ void mnuReleaseResourceHandles(u32 *menuWork) {
     s32 resourceIndex;
 
     for (resourceIndex = 0; resourceIndex < 2; resourceIndex++) {
-        effDestroyResourceSlotSet(menuWork[0x19 + resourceIndex]);
+        effDestroyResourceSlotSet((struct EffectSlotSet *)menuWork[0x19 + resourceIndex]);
     }
-    effDestroyResourceSlotSet(menuWork[0x1B]);
+    effDestroyResourceSlotSet((struct EffectSlotSet *)menuWork[0x1B]);
     if (menuWork[0x56] != 0) {
         mnuReleaseEffectResource((MenuResourceWork *)menuWork[0x56]);
         menuWork[0x56] = 0;

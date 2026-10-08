@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_resource_slots.h"
 #include "sdf_resource.h"
 #include "kwln.h"
 #include "sdf.h"
@@ -9,8 +10,6 @@
 
 extern KwlnTask *kwlnTaskCreate();
 extern void sdfCancelAndReleasePacWork(void *);
-extern u32 effLoadIndexedResource(const char *, const char *, s32);
-extern u32 effDestroyResourceSlotSet(u32);
 
 /* Title menu's selected page, sequence timers and draw-task state. */
 typedef struct MenuTitleState {
@@ -1089,7 +1088,7 @@ void mnuFinishStaffMovieAndFreeState(void) {
 }
 
 void mnuReleaseMovieResourceAfterPendingWork(void) {
-    effDestroyResourceSlotSet(mnuMovieWork->sprite);
+    effDestroyResourceSlotSet((struct EffectSlotSet *)mnuMovieWork->sprite);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     func_003458E8(0);

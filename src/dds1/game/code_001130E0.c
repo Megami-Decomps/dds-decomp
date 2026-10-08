@@ -6,6 +6,7 @@
 #include "evt_unit.h"
 #include "eff.h"
 #include "eff_event.h"
+#include "eff_event_sound.h"
 #include "btl_sound.h"
 
 extern void dds3ReleaseObjectBaseResources(EffWorldNode *object);
@@ -797,7 +798,6 @@ void dds3RefreshStoredVec3(EffWorldNode *object) {
 
 extern void effDestroyNode(struct EffNode *);
 extern void billDispatchByKind(BillObj *);
-extern void func_00190118(SoundMixer *);
 
 /* Release each dependency according to the active state, clearing ownership
  * before releasing the next dependency. State 4 only borrows its handle. */
@@ -829,7 +829,7 @@ void effObjReleaseStateDependencies(EffectDependencyState *state) {
             data->node = NULL;
         }
         if (data->handle != NULL) {
-            func_00190118(data->handle);
+            effEventReleaseSoundMixerVoices(data->handle);
             data->handle = NULL;
         }
         if (data->vector != NULL) {

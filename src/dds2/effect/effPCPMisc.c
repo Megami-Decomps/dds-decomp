@@ -4,6 +4,7 @@
 #include "eff_blur.h"
 #include "eff.h"
 #include "eff_event.h"
+#include "eff_event_sound.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
@@ -684,7 +685,6 @@ typedef struct EffPCPSpinWork {
 
 
 
-extern void func_00197D50();
 
 
 extern void effThunderReleaseFragmentWork(void *work);
@@ -5249,7 +5249,6 @@ typedef struct EffPCPEventPlace {
     u32 color;
 } EffPCPEventPlace;
 
-extern SoundMixer *func_00197D38(SoundMixer *params);
 
 /* Serialized drift ranges followed by the retained event array. */
 typedef struct EffPCPDriftEventParams {
@@ -5301,7 +5300,7 @@ EffPCPDriftEventWork *effPcpEntryWorkBCreate(EffPCPDriftEventParams *src, void *
     work->unk10C = 1;
     work->entries = entry;
     work->scale = 1.0f;
-    work->owner = func_00197D38(params);
+    work->owner = effEventCloneSoundMixer(params);
     place.pos[0] = 0;
     place.pos[1] = 0;
     place.pos[2] = 0;
@@ -5391,7 +5390,7 @@ void effPcpEventGroupRelease(EffPCPDriftEventWork *work) {
         } while (i < count);
     }
     if (work->owner->active == 0) {
-        func_00197D50(work->owner);
+        effEventReleaseSoundMixerVoices(work->owner);
     }
     sdfReleaseResourceAllocation(work->handle);
 }
@@ -5542,8 +5541,8 @@ EffPCPPairedEventWork *effPcpCreateDelayedDriftEntries(EffPCPPairedEventParams *
         work->params.delaySpread = 1;
     }
     work->unk98 = 1;
-    work->ownerA = func_00197D38(paramsA);
-    work->ownerB = func_00197D38(paramsB);
+    work->ownerA = effEventCloneSoundMixer(paramsA);
+    work->ownerB = effEventCloneSoundMixer(paramsB);
     place.pos[0] = 0;
     place.pos[1] = 0;
     place.pos[2] = 0;
@@ -5633,10 +5632,10 @@ void effPcpPairedEventGroupRelease(EffPCPPairedEventWork *work) {
         } while (i < count);
     }
     if (work->ownerA->active == 0) {
-        func_00197D50(work->ownerA);
+        effEventReleaseSoundMixerVoices(work->ownerA);
     }
     if (work->ownerB->active == 0) {
-        func_00197D50(work->ownerB);
+        effEventReleaseSoundMixerVoices(work->ownerB);
     }
     sdfReleaseResourceAllocation(work->handle);
 }
@@ -5833,7 +5832,7 @@ void *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *src, void *params)
     work->unk9C = 1;
     work->entries = entry;
     work->scale = 1.0f;
-    work->owner = func_00197D38(params);
+    work->owner = effEventCloneSoundMixer(params);
     place.pos[0] = 0;
     place.pos[1] = 0;
     place.pos[2] = 0;
@@ -5924,7 +5923,7 @@ void effPcpEventBatchRelease(EffPCPSpawnRangeWork *work) {
         } while (i < count);
     }
     if (work->owner->active == 0) {
-        func_00197D50(work->owner);
+        effEventReleaseSoundMixerVoices(work->owner);
     }
     sdfReleaseResourceAllocation(work->handle);
 }
@@ -6116,7 +6115,6 @@ void effPcpEventWorkInitEntries(EffPCPMapEventWork *work) {
 }
 
 
-extern SoundMixer *func_00197D38(SoundMixer *params);
 
 /* Allocate an event work: copy the parameter head, clear the links, then create the resource and owner from the optional parameters. */
 void *effPcpEventWorkCreate(EffPCPEventParamHead *head, void *resourceParams, void *ownerParams) {
@@ -6133,7 +6131,7 @@ void *effPcpEventWorkCreate(EffPCPEventParamHead *head, void *resourceParams, vo
         work->modelResource = effParamWorkCreate(3, resourceParams);
     }
     if (ownerParams != 0) {
-        work->owner = func_00197D38(ownerParams);
+        work->owner = effEventCloneSoundMixer(ownerParams);
     }
     if (work->owner != 0) {
         effPcpEventWorkInitEntries(work);
@@ -6183,7 +6181,7 @@ void effDestroyParticleEvents(EffPCPMapEventWork *work) {
         } while (i < count);
     }
     if (work->owner->active == 0) {
-        func_00197D50(work->owner);
+        effEventReleaseSoundMixerVoices(work->owner);
     }
     sdfReleaseResourceAllocation(work->entriesHandle);
     sdfReleaseChipBlock(work);
