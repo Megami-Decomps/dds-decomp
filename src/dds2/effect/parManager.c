@@ -386,7 +386,7 @@ void parDispatchByKind(ParObj *obj) {
 }
 
 /* Draw live particles after applying the requested number of emitter updates. */
-void func_00161FE8(ParObj *effect) {
+void parUpdateAndDrawObject(ParObj *effect) {
     EffectBufferRecord *record;
     BillObj *billboard;
     u32 step;
