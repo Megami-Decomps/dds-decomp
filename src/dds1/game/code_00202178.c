@@ -148,7 +148,7 @@ extern void func_001A30F8(s32, BtlIndexList *, s32, s32, s32);
 
 extern s32 btlUnitBlocksElementQueryForGroup(BtlUnit *, s32, u32);
 
-extern s32 btlWouldUiValueFallBelowQuarter(s32, s32);
+extern s32 btlWouldUiValueFallBelowQuarter(BtlUnit *, s32);
 
 extern s32 btlUnitBlocksElementQuery(BtlUnit *, s32, s32);
 
@@ -948,7 +948,7 @@ s32 btlClassifyLinkedSkillRequest(s32 unused, s32 unit, s32 index) {
         return result;
     }
     if (datCommandRecords[index].effectType == 2) {
-        if (btlWouldUiValueFallBelowQuarter(unit, 0) != 0 && mdlFlagTest(0x802) != 0) {
+        if (btlWouldUiValueFallBelowQuarter((BtlUnit *)unit, 0) != 0 && mdlFlagTest(0x802) != 0) {
             return 1;
         }
         return 4;

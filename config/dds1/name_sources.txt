@@ -1441,6 +1441,8 @@
 0x00162BA0	effParamWorkCallback3	inferred	null-guarded dispatch of work data through the D_0035372C slot
 0x00162BE0	effParamWorkCallback4	inferred	null-guarded dispatch of work data through the D_00353730 slot
 0x00162C20	effParamWorkCallback5	inferred	null-guarded dispatch of work data through the D_00353734 slot
+0x00162C60	effParamCreateChildBillboard	inferred	Kind-zero compact parameter factory forwards resource data to billCreateIndexed; its provider creates a child billboard.
+0x00162C80	effParamCreateAnimatedBillboard	inferred	Kind-one compact parameter factory forwards serialized animation resource data to billCreateIndexed; its provider builds an animated billboard.
 0x00162CA0	effParamDispatchFloat	inferred	forwards one float argument twice to func_00152000 (vfpu f12/f13 pair)
 0x00162CB8	effParamInitWork	inferred	loads three vector constants to vf10 for model setup calls, sets grey 0x80808080, resets optional block word to 1.0f, clears flag bit0
 0x00162D60	effParamCreateInitWork	inferred	calls the 5-arg model setup, builds work, runs effParamInitWork, bumps the D_003BB044 counter
@@ -4799,6 +4801,7 @@
 0x0027B368	mnuDestroyListState	inferred	Repeatedly removes list nodes, frees list and returns completion; twin 0x002B81C8. [names_R_FuncNames5.tsv]
 0x0027B440	mnuListAppendNode	inferred	Allocates 0x74-byte list node, links at tail, bumps count and refreshes scroll flags.
 0x0027B540	mnuInsertListNodeRelativeToAnchor	inferred	inserts an opaque list value before or after an anchor and updates cursor/window state
+0x0027B888	mnuRemoveListCursorNode	inferred	Removes and frees MenuList.cursor, repairs linked-node indexes and list cursor/head/last/count state, updates scroll flags, and returns the resulting cursor; paired DDS2 native provider has the same role.
 0x0027BA00	mnuSetGridSpriteSlot	inferred	stores sprite/effect into 4-wide slot grid and calls func_002BF9E0
 0x0027BA48	mnuWalkNodeList	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027BB28	mnuSelectLastListNode	inferred	DDS2 func_002B8988 twin; seeks final list node [names_R_FuncNames.tsv]

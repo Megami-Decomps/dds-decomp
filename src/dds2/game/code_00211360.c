@@ -193,7 +193,7 @@ extern s8 D_00419C30[];
 
 extern s8 D_00419C58[];
 
-extern s32 btlWouldUiValueFallBelowQuarter(s32, s32);
+extern s32 btlWouldUiValueFallBelowQuarter(BtlUnit *, s32);
 
 extern u8 sdfPfsDebugMode;
 
@@ -1222,7 +1222,7 @@ s32 btlCanQueryElementAgainstEnemies(s32 unused, s32 action) {
 }
 
 s32 btlCheckActorEligibilityWithDebug(s32 actor) {
-    if (btlWouldUiValueFallBelowQuarter(actor, 0) != 0) {
+    if (btlWouldUiValueFallBelowQuarter((BtlUnit *)actor, 0) != 0) {
         if (sdfPfsDebugMode == 0) {
             btlBossDebugPrintf(D_00419C30);
         }
