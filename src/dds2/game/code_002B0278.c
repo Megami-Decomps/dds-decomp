@@ -904,7 +904,7 @@ void mnuUpdateStaffFade(s32 opening, PartyMenuData *menuWork) {
 
 
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
-extern void mnuSetGroupProperties(MenuProfilePanel *, u32, u32, u32, u32);
+extern void mnuSetGroupProperties(MenuProfilePanel *, EffectSlotSet *, EffectSlotSet *, s32, s32);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void func_002C16F0(s32, s32, s32, DatPartyRecord *, s32, s32, s32);
@@ -1109,8 +1109,8 @@ s32 mnuCreatePanels(KwlnTask *callback) {
         (struct EffectSlotSet *)menuContext->displayHandle);
     profile = mnuCreateProfilePanel(data);
     menuContext->profilePanel = profile;
-    mnuSetGroupProperties(profile, menuContext->displayHandle,
-                          menuContext->alternateResource, 1, 2);
+    mnuSetGroupProperties(profile, (EffectSlotSet *)menuContext->displayHandle,
+                          (EffectSlotSet *)menuContext->alternateResource, 1, 2);
     party->iconPanel = mnuCreatePanelIconState(4, menuContext->displayHandle, menuContext->skillPanelResource);
     if (mnuClassifyQuarterHalfPercent(data->hp, data->maxHp) < 2) {
         party->motionSelection = -1;
