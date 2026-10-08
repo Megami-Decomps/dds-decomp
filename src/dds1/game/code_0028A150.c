@@ -73,7 +73,6 @@ extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
 extern s32 dds3GetWorldObject();
 extern void dds3SetWorldObjectDataValue();
 extern void fileWaitReady();
-extern void sdfReleaseMemorySlot();
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
@@ -2785,7 +2784,7 @@ void fileReleaseMenuResources(void) {
             filePollEntryCleanup(fileSaveIconRequest);
             fileSaveIconRequest = 0;
         }
-        sdfReleaseMemorySlot(&D_003BD910);
+        sdfReleaseMemorySlot((s32 *)&D_003BD910);
         kwlnTaskDestroyWithHierarchyByName(D_003B26C8, 1);
         func_001005B0();
     }

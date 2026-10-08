@@ -741,7 +741,6 @@ extern s32 D_003BDA20;
 extern void *sceDmaGetChan(s32);
 extern void sceDmaSendN(void *, void *, s32);
 extern s32 sceDmaSync(void *, s32, s32);
-extern void sdfReleaseMemorySlot(void *);
 
 /* Upload the VIF0 program synchronously, then replace the ring workspace. */
 void sdfConsUploadDmaProgram(s32 workspaceBytes) {
