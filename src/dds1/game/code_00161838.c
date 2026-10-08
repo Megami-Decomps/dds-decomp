@@ -98,8 +98,8 @@ f32 effBTLFieldColorGetActorScale(BtlUnit *unit) {
     return radius;
 }
 
-void func_00161A88(BtlUnit *unit) {
-    effBTLFieldColorGetActorScale(unit);
+f32 func_00161A88(BtlUnit *unit) {
+    return effBTLFieldColorGetActorScale(unit);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00161838", effFieldColorOriginalSelector);
