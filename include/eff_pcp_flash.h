@@ -92,6 +92,85 @@ typedef struct PcpFlashFadingOrbitParams {
     u32 unk4C;
 } PcpFlashFadingOrbitParams;
 
+typedef struct PcpFlashRotatingQuadParams {
+    f32 origin[3];
+    u8 pad0C[4];
+    s32 particleCount;
+    u8 restartRandomly;
+    u8 pad15[3];
+    s32 lifetime;
+    s32 scaleRampTime;
+    u32 randomRange;
+    u8 pad24[4];
+    s32 fadeInTime;
+    s32 fadeOutTime;
+    u32 colorA;
+    u32 colorB;
+    f32 upSpan;
+    f32 acrossSpan;
+    f32 maxScale;
+    f32 angularStepRange;
+    u32 unk48;
+} PcpFlashRotatingQuadParams;
+
+typedef struct PcpFlashRadialTriangleParams {
+    f32 origin[3];
+    u8 pad0C[4];
+    s32 particleCount;
+    u8 restartRandomly;
+    u8 pad15[3];
+    s32 lifetime;
+    s32 fadeInTime;
+    s32 fadeOutTime;
+    u32 colorA;
+    u32 colorB;
+    f32 initialRadius;
+    f32 initialRadialSpeed;
+    f32 radialDamping;
+    u32 unk38;
+} PcpFlashRadialTriangleParams;
+
+typedef struct PcpFlashRadialStripParams {
+    f32 origin[3];
+    u8 pad0C[4];
+    s32 particleCount;
+    u8 restartRandomly;
+    u8 pad15[3];
+    s32 lifetime;
+    u32 randomRange;
+    s32 fadeInTime;
+    s32 fadeOutTime;
+    u32 colorA;
+    u32 colorB;
+    f32 unk30;
+    f32 unk34;
+    f32 maxScale;
+    f32 unk3C;
+    f32 initialRadius;
+    f32 initialRadialSpeed;
+    f32 radialDamping;
+    u32 unk4C;
+    u8 pad50[0x80];
+} PcpFlashRadialStripParams;
+
+typedef struct PcpFlashOffsetRadialParams {
+    f32 origin[3];
+    u8 pad0C[4];
+    s32 particleCount;
+    u8 restartRandomly;
+    u8 pad15[3];
+    s32 lifetime;
+    s32 fadeInTime;
+    s32 fadeOutTime;
+    u32 colorA;
+    u32 colorB;
+    f32 initialRadius;
+    f32 initialRadialSpeed;
+    f32 radialDamping;
+    f32 originOffset;
+    u32 unk3C;
+} PcpFlashOffsetRadialParams;
+
 /* The factory copies this 0x30-byte parameter prefix into its larger work
  * allocation before appending particle and resource state. */
 typedef struct PcpFlashTrianglePulseParams {
@@ -118,6 +197,14 @@ typedef char PcpFlashOrbitArcParamsSizeCheck[
     sizeof(PcpFlashOrbitArcParams) == 0x58 ? 1 : -1];
 typedef char PcpFlashFadingOrbitParamsSizeCheck[
     sizeof(PcpFlashFadingOrbitParams) == 0x50 ? 1 : -1];
+typedef char PcpFlashRotatingQuadParamsSizeCheck[
+    sizeof(PcpFlashRotatingQuadParams) == 0x4C ? 1 : -1];
+typedef char PcpFlashRadialTriangleParamsSizeCheck[
+    sizeof(PcpFlashRadialTriangleParams) == 0x3C ? 1 : -1];
+typedef char PcpFlashRadialStripParamsSizeCheck[
+    sizeof(PcpFlashRadialStripParams) == 0xD0 ? 1 : -1];
+typedef char PcpFlashOffsetRadialParamsSizeCheck[
+    sizeof(PcpFlashOffsetRadialParams) == 0x40 ? 1 : -1];
 typedef char PcpFlashTrianglePulseParamsSizeCheck[
     sizeof(PcpFlashTrianglePulseParams) == 0x30 ? 1 : -1];
 typedef char PcpFlashTrianglePulseParamsCountOffsetCheck[
