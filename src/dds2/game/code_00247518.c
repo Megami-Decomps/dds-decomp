@@ -125,8 +125,8 @@ struct PolyMovieObject;
 extern s8 D_003C953A[];
 extern void evtReorderListNodes(EvtRuntimeGroup *track);
 
-extern void func_0025E460(u16 *from, u16 *to, u8 *out, f32 ratio);
 typedef struct CampDisplayDefaults CampDisplayDefaults;
+extern void func_0025E460(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
 extern void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display);
 
 /* Interpolates parameter keys at the viewer's current frame, accounting for
@@ -145,7 +145,7 @@ void evtViewerApplyInterpolatedNodeKey(EvtRuntime *viewer, EvtRuntimeGroup *node
                 ratio = elapsed / span;
             }
         }
-        func_0025E460(from, to, out, ratio);
+        func_0025E460((EvtRuntimeChild *)from, (EvtRuntimeChild *)to, (CampDisplayDefaults *)out, ratio);
         *(s32 *)(out + 4) -= 35;
         mnuDrawCampScaledTexture((SdfTex *)node->entryValue, (CampDisplayDefaults *)out);
     }
