@@ -313,7 +313,7 @@ void billSetVariantValue(BillObj *effect, s32 value) {
         effect->child->signedVariant = variantValue;
         break;
     case 1:
-        effect->pair.unk8 = variantValue;
+        effect->pair.cameraFacingMode = variantValue;
         break;
     }
 }
@@ -323,7 +323,7 @@ u16 billGetVariantValue(BillObj *effect) {
     case 0:
         return effect->child->variant;
     case 1:
-        return effect->pair.unk8;
+        return effect->pair.cameraFacingMode;
     default:
         return 0;
     }
