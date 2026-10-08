@@ -636,8 +636,8 @@ void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *set) {
     effInitializeAllSlotWork(set);
 }
 
-u8 effHasFirstTextureHandle(s32 set) {
-    return **(s32 **)(set + 0x24) != 0;
+u8 effHasFirstTextureHandle(EffectSlotSet *set) {
+    return set->textureReferences[0] != NULL;
 }
 
 /* Allocate and clear count 0x6C-byte records; retain the existing allocation/count/address header order. */
