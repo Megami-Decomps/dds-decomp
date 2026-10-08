@@ -4062,44 +4062,44 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415638);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2630);
 
-s32 btlSelectedEntryHitsElement(s32 arg0, UiObject *unit, s32 arg2) {
-    u32 kind;
-    s32 mask;
-    u32 power;
+s32 btlSelectedEntryHitsElement(s32 unitAddress, UiObject *unit, s32 selectorIndex) {
+    u32 indexedSelectorValue;
+    s32 selectionMask;
+    u32 maskTableIndex;
     if (unit->selectedEntryIndex <= 0) {
         return 0;
     }
     btlGetRuntime();
-    kind = btlGetActorIndexedSignedValue(arg0, arg2);
-    mask = btlEncodeActorIndexAsSelectionMask(kind);
-    power = datCommandRecords[unit->selectedEntryIndex].unk2E;
-    if (power == 0) {
+    indexedSelectorValue = btlGetActorIndexedSignedValue(unitAddress, selectorIndex);
+    selectionMask = btlEncodeActorIndexAsSelectionMask(indexedSelectorValue);
+    maskTableIndex = datCommandRecords[unit->selectedEntryIndex].unk2E;
+    if (maskTableIndex == 0) {
         return 0;
     }
-    if (kind >= 0x10 && (kind < 0x12 || kind == -1)) {
+    if (indexedSelectorValue >= 0x10 && (indexedSelectorValue < 0x12 || indexedSelectorValue == -1)) {
         return 0;
     }
-    if (power >= 0x21) {
+    if (maskTableIndex >= 0x21) {
         return 0;
     }
-    return (D_003B4F78[power * 3] & mask) != 0;
+    return (D_003B4F78[maskTableIndex * 3] & selectionMask) != 0;
 }
 
-s32 btlGetActionRecordLookupValue(s32 arg0) {
-    u16 temp_v0;
+s32 btlGetActionRecordLookupValue(s32 actionRecordIndex) {
+    u16 lookupTableIndex;
 
-    temp_v0 = datCommandRecords[arg0].unk2E;
-    return D_003B4F70[temp_v0 * 3];
+    lookupTableIndex = datCommandRecords[actionRecordIndex].unk2E;
+    return D_003B4F70[lookupTableIndex * 3];
 }
 
-s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 arg) {
-    s32 index = unit->selectedEntryIndex;
-    u16 kind;
-    if (index == -1) {
+s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex) {
+    s32 selectedEntryIndex = unit->selectedEntryIndex;
+    u16 maskTableIndex;
+    if (selectedEntryIndex == -1) {
         return 0;
     }
-    kind = datCommandRecords[index].unk2E;
-    return (D_003B4F78[kind * 3] & btlEncodeActorIndexAsSelectionMask(arg)) != 0;
+    maskTableIndex = datCommandRecords[selectedEntryIndex].unk2E;
+    return (D_003B4F78[maskTableIndex * 3] & btlEncodeActorIndexAsSelectionMask(actorIndex)) != 0;
 }
 
 s32 fldGetSelectedUnitStat(UiObject *unit) {
