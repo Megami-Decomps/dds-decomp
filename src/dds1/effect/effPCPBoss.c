@@ -135,7 +135,6 @@ typedef struct {
 
 extern void *effParamWorkGetData(EffParamWork *handle);
 extern void mdlAddEntryPlain(void *work, s32 arg1, s32 arg2);
-extern void func_0015D078(u32 system, u32 value);
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
 extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
@@ -180,7 +179,7 @@ void effBossInitializeModelGroups(EffBossWork *work)
     work->cellCount = model->first->frameCount;
     work->groupCount = sdfCountMapPositionRecords(model->inner);
     work->system = (u32)parAllocateCellSystem(work->groupCount, work->cellCount, 1, PAR_CELL_TOPOLOGY_TRIANGLE);
-    func_0015D078(work->system, work->head.systemParam);
+    parSetCellDrawBucket((ParSystem *)work->system, work->head.systemParam);
     work->groupsHandle = NULL;
     if (work->head.hasCells) {
         work->groupsHandle = sdfAllocGeneralBlock(work->groupCount * sizeof(EffBossGroup)
