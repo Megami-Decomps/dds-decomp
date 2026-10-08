@@ -20,8 +20,10 @@ typedef char SdfLightingPacketStorage_alignment_must_be_1[
     (__alignof__(SdfLightingPacketStorage) == 1) ? 1 : -1];
 
 /* Buffered SDK storage: live entries are distinct from allocated capacity. */
+struct SdfMemBlock;
+
 typedef struct DevRequest {
-    s32 handle;
+    struct SdfMemBlock *backingAllocation;
     s16 usedCount;
     u16 capacity;
     s16 stride;
@@ -33,17 +35,20 @@ typedef char DevRequest_size_must_be_0x10[(sizeof(DevRequest) == 0x10) ? 1 : -1]
 
 DevRequest *sdfDevCreateBufferedRequest(s32 count, s32 stride, s32 growStep);
 
-/* Allocated command-list node; resourceHandle owns its optional backing block. */
+/* Command-list node: allocation owns the node and trailing command data.
+ * A null descriptor identifies a separately chip-allocated node. */
 typedef struct SdfCommandNode {
     struct SdfCommandNode *next;
     u8 kind;
     s8 packetSelector;
     s16 quadwordCount;
     u32 unk08;
-    s32 resourceHandle;
+    struct SdfMemBlock *allocation;
 } SdfCommandNode;
 
 typedef char SdfCommandNode_size_must_be_0x10[(sizeof(SdfCommandNode) == 0x10) ? 1 : -1];
+typedef char SdfCommandNode_allocation_offset_must_be_C[
+    ((u32)&((SdfCommandNode *)0)->allocation == 0x0C) ? 1 : -1];
 
 struct SdfModel;
 struct Motion;

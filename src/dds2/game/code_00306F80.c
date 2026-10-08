@@ -1,4 +1,5 @@
 #include "sdf_resource.h"
+#include "eff_resource_records.h"
 #include "itf.h"
 #include "fpu.h"
 #include "itf_grid_text.h"

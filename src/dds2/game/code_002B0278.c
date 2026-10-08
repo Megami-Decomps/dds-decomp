@@ -608,9 +608,9 @@ s32 mnuIsFinalItemIndex(s32 index, s32 item) {
 extern void func_002B0D90(s32, s32, s32, MenuList *, MenuListNode *, s32);
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B0D90);
 
-extern void func_002B0FA0(MenuContext *);
+extern void mnuCreatePartySelectionWindow(MenuContext *);
 extern char D_00437BE8[];
-void func_002B0FA0(MenuContext *context) {
+void mnuCreatePartySelectionWindow(MenuContext *context) {
     PartyMenuData *party = (PartyMenuData *)context->party;
     MenuWindowContainer *window;
     s32 i;
@@ -763,7 +763,7 @@ void mnuRefreshPartyPanelSlots(s32 context) {
 struct MenuSlotEffectHandles;
 extern void mnuLoadPanelSectionResources(struct MenuSlotEffectHandles *slot, u32 model,
                                          u32 firstValue, u32 secondValue, s32 thirdValue);
-s32 func_002B18E8(KwlnTask *task) {
+s32 mnuInitializePartySelectionState(KwlnTask *task) {
     s32 contextAddress = (s32)kwlnTaskGetUserValue(task);
     MenuContext *context = (MenuContext *)contextAddress;
     s32 allocation = (u32)sdfAllocGeneralBlock(sizeof(PartyMenuData));
@@ -775,7 +775,7 @@ s32 func_002B18E8(KwlnTask *task) {
     memset(menuWork, 0, sizeof(*menuWork));
     menuWork->allocation = allocation;
     func_002B0D50((u32)contextAddress);
-    func_002B0FA0(context);
+    mnuCreatePartySelectionWindow(context);
 
     mnuLoadPanelSectionResources(
         (struct MenuSlotEffectHandles *)&context->partyWindow.slots[0],

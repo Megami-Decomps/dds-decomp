@@ -126,24 +126,6 @@ EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyParams *src);
 void effTrackPolyRelease(EffTrackPolyWork *work);
 void effTrackPolyUpdate(EffTrackPolyWork *work);
 
-/* Each mapped record owns status storage expanded while its resource is loaded. */
-typedef struct EffMappedRecord {
-    u8 pad00[0x14];
-    u32 category;
-    u32 statusBytes;
-    u8 pad1C[4];
-    u8 *status;
-} EffMappedRecord;
-
-typedef struct EffMappedResource {
-    s32 count;
-    u32 allocation;
-    EffMappedRecord *records;
-} EffMappedResource;
-
-typedef char EffMappedRecord_size_must_be_0x24[(sizeof(EffMappedRecord) == 0x24) ? 1 : -1];
-typedef char EffMappedResource_size_must_be_0x0C[(sizeof(EffMappedResource) == 0x0C) ? 1 : -1];
-
 void effCopyVectorToNodeInstance(struct EffNode *node, const void *vector);
 void effApplyNodeTransformMatrix(struct EffNode *node, const void *matrix);
 
@@ -315,13 +297,6 @@ typedef struct EffArrHdr {
     u32 unk4;   /* Slot count. */
     void *allocation; /* Allocation handle. */
 } EffArrHdr;
-
-/* Header for count 0x6C-byte records; allocation is retained as a resource handle. */
-typedef struct EffPayload {
-    u32 allocation;
-    u32 count;
-    u8 *records;
-} EffPayload;
 
 /* Two-child draw descriptor at +0x34 in animation-list objects; child allocations end before it. */
 typedef struct BillRenderPair {

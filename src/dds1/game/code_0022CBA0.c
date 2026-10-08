@@ -1591,7 +1591,7 @@ void *evtViewerAdvanceUpdate(KwlnTask *task) {
     }
 }
 
-void *evtViewerStartUpdate(KwlnTask *task) {
+s32 evtViewerStartUpdate(KwlnTask *task) {
     EvtRuntime *viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
     PolyMovieWork *context;
     u16 eventId;
@@ -1609,7 +1609,7 @@ void *evtViewerStartUpdate(KwlnTask *task) {
     viewer->unk2238 = 0;
     viewer->flags |= 8;
     kwlnDrawControlFlags |= 0x2000000;
-    return evtViewerAdvanceUpdate;
+    return (s32)(u32)evtViewerAdvanceUpdate;
 }
 
 extern f32 D_00324590[];

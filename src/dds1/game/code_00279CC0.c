@@ -5,6 +5,7 @@
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
 #include "eff.h"
+#include "eff_resource_records.h"
 #include "itf.h"
 
 extern EffPayload *effCreatePayload(u32);

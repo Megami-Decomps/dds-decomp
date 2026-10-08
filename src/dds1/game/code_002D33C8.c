@@ -1736,8 +1736,8 @@ void sdfFreeNodeLists(SdfDrawNode *root) {
         SdfCommandNode *node = *listCursor;
         while (node != NULL) {
             SdfCommandNode *next = node->next;
-            if (node->resourceHandle != 0) {
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->resourceHandle));
+            if (node->allocation != NULL) {
+                sdfReleaseResourceAllocation(node->allocation);
             } else {
                 sdfReleaseChipBlock(node);
             }

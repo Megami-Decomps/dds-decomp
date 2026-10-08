@@ -1185,8 +1185,11 @@
 0x0016FAD0	effApplyParamBlockPair	inferred	Obtains blocks zero and one from the effect parameter table and passes the pair to the handler.
 0x0016FD90	effReleaseGroupSlotsAndResources	inferred	Walks group slots releasing resource arrays and effect nodes before group cleanup. [names_reviewed21.tsv]
 0x00171580	effCopyResourceGroupVector	inferred	high confidence; src/dds2/game/code_0016EDD0.c func_00171580: Copies one 16-byte vector in the effect resource-group unit. [names_reviewed25.tsv]
+0x00171598	effCreateFragmentResources	inferred	Paired DDS1 factory allocates and initializes EffFragmentResources history buffers and SDF draw descriptors; constructors retain its result in slot->resources.
 0x00171798	effReleaseEffectResources	inferred	Releases the work's resource handle and frees its separately owned allocation.
 0x001717C8	effInitializeColorState	inferred	Sets the effect state to mode three, initializes its packed color to 0x80808080, and clears the additional word at offset 0xC.
+0x001717E8	effInitializeFragmentHistoryColors	inferred	Paired DDS1 helper maps four supplied gradient colors into the fragment history's three per-point color lanes with a rising alpha ramp.
+0x001719D0	effAppendFragmentHistoryPoints	inferred	Paired DDS1 helper appends one three-vector ribbon sample to the fragment point ring and updates its wrapped write position and active count.
 0x00171A68	effThunderDrawHistoryAndEndCap	inferred	L13
 0x00171CE0	effFlashRecordCreate	inferred	readability/matching review (QP16)
 0x00171E00	effFlashTrianglePulseSpawnFromTable	inferred	Takes parameter block zero from the supplied table for the triangular flash initializer. [names_reviewed5.tsv]
@@ -4390,6 +4393,7 @@
 0x002B0B90	mnuPartySlotConfirmClearUpdate	inferred	After popup completion clears selected party values, starts display entry and rebuilds slot panels. [names_reviewed5.tsv]
 0x002B0CB0	mnuAdvancePartyClearPopup	inferred	medium confidence; src/dds2/game/code_002B0278.c func_002B0CB0: Prepares the page and runs popup advance mode for the sequence following party-slot clear confirmation. [names_reviewed25.tsv]
 0x002B0D00	mnuFinishPartyClearPopup	inferred	medium confidence; src/dds2/game/code_002B0278.c func_002B0D00: Performs shared menu cleanup and runs popup completion mode for the sequence following party-slot clear confirmation. [names_reviewed25.tsv]
+0x002B0FA0	mnuCreatePartySelectionWindow	inferred	Creates the party-selection window and occupied-member list, then retains the primary window
 0x002B1150	mnuDestroyPartySelectionWindow	inferred	Destroys party selection window stored in menu work; twin 0x00274EE0. [names_R_FuncNames5.tsv]
 0x002B1178	mnuCopyPartyEntries	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002B12B0	mnuAssignSelectedPartyEntry	inferred	U1
@@ -4397,6 +4401,7 @@
 0x002B1780	mnuCountActiveSlots	inferred	DDS1 has the same unprefixed symbol; game/code_002B0278 uses mnu for the already-described menuCountActiveSlots behavior.
 0x002B17C0	mnuClearPartySelectionAndActivateSlots	inferred	Copies party entries, zeros backup, marks five panels and clears linked list node flags. [names_reviewed5.tsv]
 0x002B18A0	mnuRefreshPartyPanelSlots	inferred	Releases panel sprite resources then initializes slot data and refreshes panel slots. [names_reviewed5.tsv]
+0x002B18E8	mnuInitializePartySelectionState	inferred	Task initializer allocating party-selection work and setting up windows, panel snapshots and fades
 0x002B1B90	mnuReleasePartySelectionResources	inferred	Releases selected party window and party handle after refreshing panel slots. [names_reviewed5.tsv]
 0x002B1BF0	mnuPreparePartyPanelTransition	inferred	Sets popup state, swaps panel textures and sets party transition field. [names_reviewed5.tsv]
 0x002B2698	mnuOpenStaffPartySelectionPanel	inferred	Creates a staff image, configures party-selection markers and enters the panel handler. [names_reviewed15.tsv]
@@ -4840,7 +4845,7 @@
 0x002D1300	mnuCreateConfigTasks	inferred	DDS1 has the same unprefixed symbol; game/code_002C9660 uses mnu for the already-described configTasksCreate behavior.
 0x002D13F0	fileConsumeConfigTaskReady	inferred	returns one while config task state=1, clears final state=2 [names_R_FuncNames2.tsv]
 0x002D1428	fileGetConfigTaskSlot	inferred	returns one of four slots from config task or zero [names_R_FuncNames2.tsv]
-0x002D1910	fileGetConfigTaskFailure	inferred	reports -1 when config task result negative, else 0 [names_R_FuncNames2.tsv]
+0x002D1910	fileUpdateConfigOwnerTask	inferred	Returns the signed task-update control word: zero keeps this owner callback installed; -1 requests active-task destruction when the config result is negative.
 0x002D2C50	effLoadCommonTexturesAndResetRenderFlags	inferred	Loads the flash, wind and scaly effect textures then clears render flags. [names_reviewed15.tsv]
 0x002D2CA8	fileResetRenderFlags	inferred	Zeroes the same render flag word used by fileSetRenderFlag. [names_reviewed5.tsv]
 0x002D2CB0	effGetPacketSubmissionSurface	inferred	returns the indexed SdfPoolNode used by native effect packet submission callers

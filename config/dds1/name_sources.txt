@@ -1491,6 +1491,9 @@
 0x00167A78	effThunderUpdateChainSegments	inferred	confidence=high; matched-C; src/dds1/game/code_00167178.c:88:func_00167A78; Propagates adjacent parent point pairs into each thunder child segment, seeds later child fragment histories from the preceding segment, multiplies parent/child colors, advances the child counter and queues its particle system.; source=names_P5.tsv:14 [names_qp11.tsv]
 0x00167E78	effApplyParamBlockPair	inferred	Obtains blocks zero and one from effect parameter table and passes the pair to effect handler.
 0x00168138	effReleaseGroupSlotsAndResources	inferred	Walks group slots releasing resource arrays and effect nodes before group cleanup. [names_reviewed21.tsv]
+0x00169940	effCreateFragmentResources	inferred	Allocates and initializes EffFragmentResources with history buffers and SDF draw descriptors; constructors store its result in slot->resources.
+0x00169B90	effInitializeFragmentHistoryColors	inferred	Maps four supplied gradient colors into the owned fragment history's three per-point color lanes with a rising alpha ramp.
+0x00169D78	effAppendFragmentHistoryPoints	inferred	Copies one three-vector ribbon sample into the fragment point ring, advances and wraps its write position, and grows the active point count to the ring limit.
 0x00169E10	effThunderDrawHistoryAndEndCap	inferred	L13
 0x0016A088	effFlashRecordCreate	inferred	readability/matching review (QP16)
 0x0016A1A8	effFlashTrianglePulseSpawnFromTable	inferred	Takes parameter block zero from the supplied table for the triangular flash initializer. [names_reviewed5.tsv]
@@ -4672,11 +4675,13 @@
 0x00274978	mnuDrawStaffPartyValuePage	inferred	U1
 0x00274B30	mnuExitStaffValuePage	inferred	R_Names31 B91
 0x00274BA8	mnuIsFinalItemIndex	inferred	Tests whether an item index has reached the last index given the count at offset 0x20.
+0x00274D48	mnuCreatePartySelectionWindow	inferred	Creates the party-selection window and occupied-member list, then retains the primary window
 0x00274EE0	mnuDestroyPartySelectionWindow	inferred	Destroys party selection window stored in menu work; twin 0x002B1150. [names_R_FuncNames5.tsv]
 0x00274F00	mnuCopyPartyEntries	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x00275328	mnuRestorePartyEntriesAndRefresh	inferred	Closes flagged current party entries, restores five backed-up entries and refreshes party panels.
 0x002754E0	mnuClearPartySelectionAndActivateSlots	inferred	Copies current party entries, clears selection and backup, then enables and refreshes menu slots.
 0x002755A0	mnuRefreshPartyPanelSlots	inferred	Refreshes the party panel state, slot configuration and resource handles in sequence.
+0x002755E0	mnuInitializePartySelectionState	inferred	Task initializer allocating party-selection work and setting up windows, panel snapshots and fades
 0x00275880	mnuShopReleaseResources	inferred	mnu menu, title, shop, or movie UI in game/code_00274B80.c
 0x002758D8	mnuPreparePartyPanelTransition	inferred	Restores the saved party entries, raises a popup and updates the linked display. [names_reviewed13.tsv]
 0x00275F48	mnuUpdateStaffFade	inferred	Advances two staff fade channels in opposite orders for opening versus closing and clamps their bounds.
@@ -5174,6 +5179,7 @@
 0x002913B8	fileConsumeConfigTaskReady	inferred	DDS2 002D13F0 twin; returns one while config task state=1, clears final state=2 [names_R_FuncNames2.tsv]
 0x002913F0	fileGetConfigTaskSlot	inferred	DDS2 002D1428 candidate twin (tentative score 1.000); returns one of four slots from config task or zero [names_R_FuncNames2.tsv]
 0x00291880	fileStartQueuedLoad	inferred	file file requests and records in game/code_0028A0E0.c
+0x002918D8	fileUpdateConfigOwnerTask	inferred	Returns the signed task-update control word: zero keeps this owner callback installed; -1 requests active-task destruction when the config result is negative.
 0x00292BA8	fileManagerResetSubsystems	inferred	resets five manager globals and four subsystems
 0x00292C18	fileSetRenderFlag	inferred	legacy SetRenderFlag: file/memory-card manager in game/code_0028A0E0
 0x00292C28	fileClearRenderFlag	inferred	legacy ClearRenderFlag: file/memory-card manager in game/code_0028A0E0
