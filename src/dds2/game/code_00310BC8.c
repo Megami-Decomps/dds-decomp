@@ -497,10 +497,10 @@ void func_00311F20(s32 *points, u32 tail, u32 *colors, s32 count,
     surface->append((SdfListHead *)surface, list);
 }
 
-/* Return a callback-list header address, retaining its allocation handle and teardown userData. */
+/* Return a callback-list header with its allocation descriptor and teardown userData. */
 SdfList *sdfCreateTaskHeader(void *userData) {
-    s32 allocation = (u32)sdfAllocGeneralBlock(sizeof(SdfList));
-    SdfList *obj = (SdfList *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)allocation);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(SdfList));
+    SdfList *obj = (SdfList *)sdfMemoryGetBlockAddress(allocation);
 
     memset(obj, 0, sizeof(SdfList));
     obj->allocation = allocation;
@@ -514,7 +514,7 @@ void sdfDestroyTaskWork(SdfList *owner) {
     if (owner != NULL) {
         sdfClearTaskList(owner);
         owner->onDestroy(-1, owner->userData);
-        sdfReleaseResourceAllocation((SdfMemBlock *)owner->allocation);
+        sdfReleaseResourceAllocation(owner->allocation);
     }
 }
 
