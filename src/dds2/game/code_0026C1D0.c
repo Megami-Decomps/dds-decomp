@@ -758,7 +758,60 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D590);
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D710);
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D7E8);
+extern s32 func_0026DB48(u32 context, u8 entry);
+extern s32 func_0026DB90(u32 context);
+
+/* Return true when all six neighbor conditions are satisfied across active party members. */
+s32 func_0026D7E8(u16 entry) {
+    EvtMantraNodePositionRecord *record;
+    s8 satisfiedNeighbors;
+    s32 partyIndex;
+
+    if (func_0028F128(entry, 0) != 0) {
+        return 1;
+    }
+    record = (EvtMantraNodePositionRecord *)mnuGetMantraNodePositionRecord((s16)entry);
+    if (record == NULL) {
+        return 0;
+    }
+
+    satisfiedNeighbors = 0;
+    for (partyIndex = 0; partyIndex < EVT_PARTY_SLOT_COUNT; partyIndex++) {
+        s32 slot;
+
+        if ((u16)(datGameState->party[partyIndex].flags & 1) != 0) {
+            DatPartyRecord *party = &datGameState->party[partyIndex];
+            for (slot = 0; slot < 6; slot++) {
+                EvtMantraNodePositionRecord **neighborSlot = &record->neighbors[slot];
+                EvtMantraNodePositionRecord *neighbor = *neighborSlot;
+
+                if (neighbor != NULL) {
+                    if ((neighbor->packedHeader & 0xF) == 1) {
+                        if (func_0026DB90((u32)party) != 0) {
+                            if (func_0026DB48((u32)party, (u8)(*neighborSlot)->id) != 0) {
+                                satisfiedNeighbors |= 1 << slot;
+                            }
+                        } else {
+                            u32 cap = ptyGetProfileRecordCap((u16)(*neighborSlot)->id);
+
+                            if (cap == ptyGetProfileRecordValue(party, (u16)(*neighborSlot)->id)) {
+                                satisfiedNeighbors |= 1 << slot;
+                            }
+                        }
+                    } else {
+                        satisfiedNeighbors |= 1 << slot;
+                    }
+                } else {
+                    satisfiedNeighbors |= 1 << slot;
+                }
+            }
+            if (satisfiedNeighbors == 0x3F) {
+                return 1;
+            }
+        }
+    }
+    return satisfiedNeighbors == 0x3F;
+}
 
 /* The sixth work stores the combined availability state for the five profiles. */
 void func_0026D988(EvtMantraWork **selectionWorks) {
