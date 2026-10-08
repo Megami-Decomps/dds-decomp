@@ -1099,7 +1099,8 @@ MenuPageResources *mnuCreatePartyPageSpriteBundle(s32 mainResource, s32 secondar
 }
 
 /* Keep the original word walk: structured indexing exceeds the retail body. */
-void mnuDestroyResources(s32 *object) {
+void mnuDestroyResources(MenuPageResources *resources) {
+    s32 *object = (s32 *)resources;
     u32 i;
     for (i = 0; i < 2; i++) {
         effDestroyResourceSlotSet(object[i + 3]);
@@ -1109,7 +1110,7 @@ void mnuDestroyResources(s32 *object) {
     }
     effDestroyResourceSlotSet(object[12]);
     effDestroyResourceSlotSet(object[11]);
-    sdfReleaseChipBlock(object);
+    sdfReleaseChipBlock(resources);
 }
 
 INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027ECD8);
@@ -1129,7 +1130,7 @@ void mnuReleaseSlotResources(MenuPageWindow *context) {
     for (i = 0; i < 5; i++) {
         s32 node = context->records->slots[i].unk8;
         if (node >= 0 && context->slots[i].resources != 0) {
-            mnuDestroyResources((s32 *)context->slots[i].resources);
+            mnuDestroyResources(context->slots[i].resources);
             context->slots[i].resources = 0;
         }
     }
