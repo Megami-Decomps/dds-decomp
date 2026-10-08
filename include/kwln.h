@@ -27,4 +27,6 @@ struct KwlnTask {
     KwlnTask *next;          /* 0x4C */
 };
 
+u32 kwlnTaskGetUserValue(KwlnTask *task);
+
 #endif /* KWLN_H */

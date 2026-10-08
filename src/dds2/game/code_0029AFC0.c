@@ -1,7 +1,7 @@
+#include "kwln.h"
 #include "mnu.h"
 #include "mnu_result.h"
 
-extern u32 kwlnTaskGetUserValue();
 
 extern void func_0026C900(void);
 
@@ -55,7 +55,7 @@ extern s32 mnuMapPadMaskToFlags(s32);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char D_003D6490[];
 
-s32 mnuHandleStatPointAssignment(void *request) {
+s32 mnuHandleStatPointAssignment(KwlnTask *request) {
     BrsSkillPackageWork *work;
     DatPartyRecord *entry;
     s32 inputFlags;
@@ -63,7 +63,7 @@ s32 mnuHandleStatPointAssignment(void *request) {
     s32 changed = 0;
     s32 result;
 
-    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
     inputFlags = mnuMapPadMaskToFlags(0xF3);
     entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
@@ -131,25 +131,25 @@ s32 mnuHandleStatPointAssignment(void *request) {
     return 0;
 }
 
-s32 mnuDrawItemPanelDuringRequest(s32 request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+s32 mnuDrawItemPanelDuringRequest(KwlnTask *request) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
     func_0029AA48(context);
     func_0029AC20(context, 1);
     return menuSetHandler(context, 1, (void *)request);
 }
 
-s32 func_0029B378(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_0029B378(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
 
     func_0026C900();
     return menuSetHandler((void *)context, 2, (void *)request);
 }
 
-u32 mnuResetGroupSelectionAndStartMessage(void) {
+u32 mnuResetGroupSelectionAndStartMessage(KwlnTask *task) {
     BrsSkillPackageWork *context;
 
-    context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+    context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     mnuSetPanelGroupSelection(context->panelHandle, -1);
     dspStartEntry(0x17);
     evtSetMessageWindowOptionWhenOpen(0);
@@ -166,12 +166,12 @@ extern s32 btlAddBaseStats(s32 *, DatPartyRecord *);
 extern void mnuBindPresentMenuEntry(void *, s32 *);
 extern char D_003D64AC[];
 
-s32 mnuCommitAssignedStatPoints(void *request) {
+s32 mnuCommitAssignedStatPoints(KwlnTask *request) {
     BrsSkillPackageWork *work;
     DatPartyRecord *entry;
     s32 result;
 
-    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
     entry = work->selectedRewardRow->unit;
     evtStageTestUpdateCamera();
     result = func_002C4038(&work->transition, &work->transition.state, 0, request);
@@ -199,28 +199,28 @@ s32 mnuCommitAssignedStatPoints(void *request) {
     return 0;
 }
 
-s32 func_0029B600(s32 request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+s32 func_0029B600(KwlnTask *request) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
     func_0029AA48(context);
     func_0029AC20(context, 1);
     return menuSetHandler(context, 1, (void *)request);
 }
 
-s32 func_0029B658(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_0029B658(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
 
     func_0026C900();
     return menuSetHandler((void *)context, 2, (void *)request);
 }
 
-s32 mnuShowProgressLevelChangePopup(void) {
+s32 mnuShowProgressLevelChangePopup(KwlnTask *task) {
     char text[0x20];
     BrsSkillPackageWork *context;
     DatPartyRecord *item;
     s32 gain;
 
-    context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+    context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     item = context->selectedRewardRow->unit;
     gain = context->selectedRewardRow->values.amount;
     context->crossedSteps = brsGetLevelStepCrossedBy(item->level - gain, gain);
@@ -241,8 +241,8 @@ u32 func_0029B778(void) {
 }
 
 /* On an idle panel, apply the extra fallback only when the auxiliary check also fails. */
-s32 mnuRunPanelWithIdleFallback(void *request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+s32 mnuRunPanelWithIdleFallback(KwlnTask *request) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
     s32 *panelState = &context->transition.state;
     s32 result;
 
@@ -257,16 +257,16 @@ s32 mnuRunPanelWithIdleFallback(void *request) {
     return result;
 }
 
-s32 mnuRunItemPanelWithInactiveBackdrop(s32 request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+s32 mnuRunItemPanelWithInactiveBackdrop(KwlnTask *request) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
     func_0029AA48(context);
     func_0029AC20(context, 0);
     return menuSetHandler(context, 1, (void *)request);
 }
 
-s32 func_0029B868(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_0029B868(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
 
     func_0026C900();
     return menuSetHandler((void *)context, 2, (void *)request);
@@ -296,8 +296,8 @@ s32 mnuChooseWeightedItem(s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B950);
 
-u32 func_0029BB28(void) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+u32 func_0029BB28(KwlnTask *task) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     DatPartyRecord *item = context->selectedRewardRow->unit;
     s32 mode;
 

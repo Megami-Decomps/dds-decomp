@@ -316,8 +316,8 @@ extern u32 D_003308B0[];
 extern u32 fileRequestIsReady(u32 arg0);
 extern void *memset(void *s, s32 c, u32 n);
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern void kwlnTaskSetUserValue(u32 arg0, void *arg1);
-extern s32 fldDrawPendingTitleBannerWhenIdle(u32 task);
+extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
+extern s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task);
 extern s32 kwlnTaskIsRegistered(u32 arg0);
 extern s32 func_00213B50(void);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
@@ -345,7 +345,6 @@ extern s32 D_003BAE30;
 extern s32 D_003BAE1C;
 extern s32 fldTaskSlotCount;
 extern s16 D_003C9510[];
-extern void *sdfAllocGeneralBlock(s32 size);
 extern u32 D_003BAE4C;
 extern s32 D_003BAE50;
 extern EffWorldNode *dds3FindObjectChainNodeByName();
@@ -459,7 +458,7 @@ extern void *dds3FindWorldObjectNodeByKey(void *, u32, s32);
 extern void dds3SetSlotByKind(void *, void *);
 extern void func_00111F40(void *);
 extern void fldSetRecordValueById(s32, s32);
-extern void *dds3FindIndexedObjectChainNodeByName(void *, s32, const u8 *);
+extern EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *, s32, const u8 *);
 extern void dds3RegisterObjectInHandlerIndex(void *);
 
 void fldCreateResourceScriptObjects(void) {
@@ -3331,7 +3330,7 @@ void fldLoadBattleSkyAndFilter(void) {
         D_003BAD74 = (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock(0x12400));
     }
     if (fldCameraSettings == 0) {
-        fldCameraSettings = sdfResourceRetainAddress(sdfAllocGeneralBlock(
+        fldCameraSettings = (FldCameraSetting *)sdfResourceRetainAddress(sdfAllocGeneralBlock(
             sizeof(FldCameraSetting) * FIELD_CAMERA_SETTING_COUNT));
         for (i = 0; i < FIELD_CAMERA_SETTING_COUNT; i++) {
             fldCameraSettings[i] = D_003306D0;
@@ -4011,15 +4010,16 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
 /* Keep both the resource handles and retained addresses: callers use the
  * retained storage, whereas the handles are needed at release time. */
 void fldAllocateRecordStorage(void) {
-    u8 *storage = sdfAllocGeneralBlock(FIELD_VALUE_RECORD_STORAGE_SIZE);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(FIELD_VALUE_RECORD_STORAGE_SIZE);
+    void *storage;
 
-    fldValueRecordResource = (u32)storage;
-    storage = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(storage));
+    fldValueRecordResource = (u32)allocation;
+    storage = (void *)sdfResourceRetainAddress(allocation);
     fldValueRecords = (u32)storage;
     memset(storage, 0, FIELD_VALUE_RECORD_STORAGE_SIZE);
-    storage = sdfAllocGeneralBlock(FIELD_AUX_RECORD_STORAGE_SIZE);
-    fldAuxRecordResource = (u32)storage;
-    storage = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(storage));
+    allocation = sdfAllocGeneralBlock(FIELD_AUX_RECORD_STORAGE_SIZE);
+    fldAuxRecordResource = (u32)allocation;
+    storage = (void *)sdfResourceRetainAddress(allocation);
     fldAuxRecordBuffer = (u32)storage;
     memset(storage, 0, FIELD_AUX_RECORD_STORAGE_SIZE);
 }
@@ -5508,7 +5508,416 @@ void fldCopyActorWaypointTable(const void *source) {
     memcpy(&fldActorWaypointRows, source, 0x6CA0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013FEC0);
+extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
+
+void func_0013FEC0(void) {
+    f32 rotation[4];
+    f32 angle;
+    EffWorldNode *world;
+    s32 firstDirection = 0;
+    s32 secondDirection = 0;
+    s32 actorIndex;
+    s32 slotIndex;
+    s32 primaryMotion;
+    FldActorEntry *actor;
+    FldActorRow *row;
+    EffWorldNode *node;
+
+    memset(rotation, 0, sizeof(rotation));
+    rotation[3] = 1.0f;
+    world = (EffWorldNode *)dds3GetWorldSecondaryObject();
+    for (actorIndex = 0; actorIndex < FIELD_ACTOR_SLOT_COUNT; actorIndex++) {
+        actor = &fldActorWaypointRows.actors[actorIndex];
+        row = &fldActorSlots[actorIndex];
+        if (actor->kind == 2) {
+            if (actor->floor == D_0032E3C4[0] + 1) {
+                for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+                    if (D_003307B0[slotIndex]->name != NULL &&
+                        strcmp(D_003307B0[slotIndex]->name, actor->name) == 0) {
+                        FldFileResource *resource = D_003307B0[slotIndex];
+                        f32 *transform = resource->transform;
+                        row->actorId = resource->id;
+                        rotation[0] = transform[4];
+                        rotation[1] = transform[5];
+                        rotation[2] = transform[6];
+                        rotation[3] = transform[7];
+                        VU0_LOAD_VF(vf10, rotation);
+                        angle = effMiscComputeQuaternionRotatedReferenceAngle() * 180.0f / 3.14f;
+                        while (angle < 0.0f) {
+                            angle += 360.0f;
+                        }
+                        while (angle > 360.0f) {
+                            angle -= 360.0f;
+                        }
+                        row->firstValues[0] = angle;
+                    }
+                }
+                row->kind = 0;
+                row->firstFrame = 0;
+                row->secondFrame = 0;
+                row->firstValues[1] = 0.0f;
+                row->firstValues[2] = 0.0f;
+                row->secondValues[0] = 0.0f;
+                row->secondValues[1] = 0.0f;
+                row->secondValues[2] = 0.0f;
+            }
+        } else if (actor->kind == 1) {
+            if (actor->floor != D_0032E3C4[0] + 1) {
+                continue;
+            }
+            row->firstKey = -1;
+            if (actor->motion != 0) {
+                node = dds3FindIndexedObjectChainNodeByName(world, 6, (const u8 *)actor->motionName);
+                if (node != NULL) {
+                    row->firstKey = node->key;
+                    for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+                        if (D_003307B0[slotIndex]->name != NULL &&
+                            strcmp(D_003307B0[slotIndex]->name, actor->name) == 0) {
+                            FldFileResource *resource = D_003307B0[slotIndex];
+                            f32 *transform = resource->transform;
+                            row->actorId = resource->id;
+                            rotation[0] = transform[4];
+                            rotation[1] = transform[5];
+                            rotation[2] = transform[6];
+                            rotation[3] = transform[7];
+                            VU0_LOAD_VF(vf10, rotation);
+                            angle = effMiscComputeQuaternionRotatedReferenceAngle() * 180.0f / 3.14f;
+                            while (angle < 0.0f) {
+                                angle += 360.0f;
+                            }
+                            while (angle > 360.0f) {
+                                angle -= 360.0f;
+                            }
+                            if (45.0f <= angle && angle <= 135.0f) {
+                                firstDirection = 1;
+                            } else if (135.0f <= angle && angle <= 225.0f) {
+                                firstDirection = 0;
+                            } else if (225.0f <= angle && angle <= 315.0f) {
+                                firstDirection = 3;
+                            } else {
+                                firstDirection = 2;
+                            }
+                        }
+                    }
+                }
+            }
+            row->secondKey = -1;
+            if (actor->secondaryMotion != 0) {
+                node = dds3FindIndexedObjectChainNodeByName(world, 6, (const u8 *)actor->otherName);
+                if (node != NULL) {
+                    row->secondKey = node->key;
+                    for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
+                        if (D_003307B0[slotIndex]->name != NULL &&
+                            strcmp(D_003307B0[slotIndex]->name, actor->name) == 0) {
+                            FldFileResource *resource = D_003307B0[slotIndex];
+                            f32 *transform = resource->transform;
+                            row->actorId = resource->id;
+                            rotation[0] = transform[4];
+                            rotation[1] = transform[5];
+                            rotation[2] = transform[6];
+                            rotation[3] = transform[7];
+                            VU0_LOAD_VF(vf10, rotation);
+                            angle = effMiscComputeQuaternionRotatedReferenceAngle() * 180.0f / 3.14f;
+                            while (angle < 0.0f) {
+                                angle += 360.0f;
+                            }
+                            while (angle > 360.0f) {
+                                angle -= 360.0f;
+                            }
+                            if (45.0f <= angle && angle <= 135.0f) {
+                                secondDirection = 1;
+                            } else if (135.0f <= angle && angle <= 225.0f) {
+                                secondDirection = 0;
+                            } else if (225.0f <= angle && angle <= 315.0f) {
+                                secondDirection = 3;
+                            } else {
+                                secondDirection = 2;
+                            }
+                        }
+                    }
+                }
+            }
+            row->transitionKey = -1;
+            if ((actor->flags54 & 2) == 0 && actor->taskName[0] != '\0') {
+                node = dds3FindIndexedObjectChainNodeByName(world, 6, (const u8 *)actor->taskName);
+                if (node != NULL) {
+                    row->transitionKey = node->key;
+                }
+            }
+            primaryMotion = actor->motion;
+            row->kind = 1;
+            row->unk10 = actor->secondaryMotion;
+            row->unk08 = primaryMotion;
+            row->firstFrame = 0;
+            row->secondFrame = 0;
+            row->transitionFrame = 0;
+            row->firstValues[0] = 0.0f;
+            row->firstValues[1] = 0.0f;
+            row->firstValues[2] = 0.0f;
+            row->secondValues[0] = 0.0f;
+            row->secondValues[1] = 0.0f;
+            row->secondValues[2] = 0.0f;
+            if (row->firstKey != (u32)-1) {
+                switch (primaryMotion) {
+                case 1:
+                    switch (firstDirection) {
+                    case 0:
+                        row->firstStep[0] = -7.50f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 0.00f;
+                        break;
+                    case 1:
+                        row->firstStep[0] = 0.00f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 7.50f;
+                        break;
+                    case 2:
+                        row->firstStep[0] = 7.50f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 0.00f;
+                        break;
+                    case 3:
+                        row->firstStep[0] = 0.00f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = -7.50f;
+                        break;
+                    }
+                    break;
+                case 2:
+                    switch (firstDirection) {
+                    case 0:
+                        row->firstStep[0] = 7.50f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 0.00f;
+                        break;
+                    case 1:
+                        row->firstStep[0] = 0.00f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = -7.50f;
+                        break;
+                    case 2:
+                        row->firstStep[0] = -7.50f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 0.00f;
+                        break;
+                    case 3:
+                        row->firstStep[0] = 0.00f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 7.50f;
+                        break;
+                    }
+                    break;
+                case 3:
+                    row->firstStep[0] = 0.00f;
+                    row->firstStep[1] = -7.50f;
+                    row->firstStep[2] = 0.00f;
+                    break;
+                case 4:
+                    row->firstStep[0] = 0.00f;
+                    row->firstStep[1] = 7.50f;
+                    row->firstStep[2] = 0.00f;
+                    break;
+                case 5:
+                    switch (firstDirection) {
+                    case 0:
+                        row->firstStep[0] = -3.75f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 0.00f;
+                        break;
+                    case 1:
+                        row->firstStep[0] = 0.00f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 3.75f;
+                        break;
+                    case 2:
+                        row->firstStep[0] = 3.75f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 0.00f;
+                        break;
+                    case 3:
+                        row->firstStep[0] = 0.00f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = -3.75f;
+                        break;
+                    }
+                    break;
+                case 6:
+                    switch (firstDirection) {
+                    case 0:
+                        row->firstStep[0] = 3.75f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 0.00f;
+                        break;
+                    case 1:
+                        row->firstStep[0] = 0.00f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = -3.75f;
+                        break;
+                    case 2:
+                        row->firstStep[0] = -3.75f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 0.00f;
+                        break;
+                    case 3:
+                        row->firstStep[0] = 0.00f;
+                        row->firstStep[1] = 0.00f;
+                        row->firstStep[2] = 3.75f;
+                        break;
+                    }
+                    break;
+                case 7:
+                    row->firstStep[0] = 0.00f;
+                    row->firstStep[1] = -3.75f;
+                    row->firstStep[2] = 0.00f;
+                    break;
+                case 8:
+                    row->firstStep[0] = 0.00f;
+                    row->firstStep[1] = 3.75f;
+                    row->firstStep[2] = 0.00f;
+                    break;
+                default:
+                    row->firstStep[0] = 0.0f;
+                    row->firstStep[1] = 0.0f;
+                    row->firstStep[2] = 0.0f;
+                    break;
+                }
+            } else {
+                row->firstStep[0] = 0.0f;
+                row->firstStep[1] = 0.0f;
+                row->firstStep[2] = 0.0f;
+            }
+            if (row->secondKey != (u32)-1) {
+                switch (row->unk10) {
+                case 1:
+                    switch (secondDirection) {
+                    case 0:
+                        row->secondStep[0] = -7.50f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 0.00f;
+                        break;
+                    case 1:
+                        row->secondStep[0] = 0.00f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 7.50f;
+                        break;
+                    case 2:
+                        row->secondStep[0] = 7.50f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 0.00f;
+                        break;
+                    case 3:
+                        row->secondStep[0] = 0.00f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = -7.50f;
+                        break;
+                    }
+                    break;
+                case 2:
+                    switch (secondDirection) {
+                    case 0:
+                        row->secondStep[0] = 7.50f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 0.00f;
+                        break;
+                    case 1:
+                        row->secondStep[0] = 0.00f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = -7.50f;
+                        break;
+                    case 2:
+                        row->secondStep[0] = -7.50f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 0.00f;
+                        break;
+                    case 3:
+                        row->secondStep[0] = 0.00f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 7.50f;
+                        break;
+                    }
+                    break;
+                case 3:
+                    row->secondStep[0] = 0.00f;
+                    row->secondStep[1] = -7.50f;
+                    row->secondStep[2] = 0.00f;
+                    break;
+                case 4:
+                    row->secondStep[0] = 0.00f;
+                    row->secondStep[1] = 7.50f;
+                    row->secondStep[2] = 0.00f;
+                    break;
+                case 5:
+                    switch (secondDirection) {
+                    case 0:
+                        row->secondStep[0] = -3.75f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 0.00f;
+                        break;
+                    case 1:
+                        row->secondStep[0] = 0.00f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 3.75f;
+                        break;
+                    case 2:
+                        row->secondStep[0] = 3.75f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 0.00f;
+                        break;
+                    case 3:
+                        row->secondStep[0] = 0.00f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = -3.75f;
+                        break;
+                    }
+                    break;
+                case 6:
+                    switch (secondDirection) {
+                    case 0:
+                        row->secondStep[0] = 3.75f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 0.00f;
+                        break;
+                    case 1:
+                        row->secondStep[0] = 0.00f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = -3.75f;
+                        break;
+                    case 2:
+                        row->secondStep[0] = -3.75f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 0.00f;
+                        break;
+                    case 3:
+                        row->secondStep[0] = 0.00f;
+                        row->secondStep[1] = 0.00f;
+                        row->secondStep[2] = 3.75f;
+                        break;
+                    }
+                    break;
+                case 7:
+                    row->secondStep[0] = 0.00f;
+                    row->secondStep[1] = -3.75f;
+                    row->secondStep[2] = 0.00f;
+                    break;
+                case 8:
+                    row->secondStep[0] = 0.00f;
+                    row->secondStep[1] = 3.75f;
+                    row->secondStep[2] = 0.00f;
+                    break;
+                default:
+                    row->secondStep[0] = 0.0f;
+                    row->secondStep[1] = 0.0f;
+                    row->secondStep[2] = 0.0f;
+                    break;
+                }
+            } else {
+                row->secondStep[0] = 0.0f;
+                row->secondStep[1] = 0.0f;
+                row->secondStep[2] = 0.0f;
+            }
+        }
+    }
+}
 
 void fldReleaseActorTasksById(s32 id) {
     s32 i;
@@ -5634,13 +6043,12 @@ void func_00140F68(void) {
 extern s32 fldGetCampSceneControlMode(void), fldGetSceneReadyOrPendingState(void), fileMenuTaskExists(void);
 extern s32 fldHasKiretaLabelProcess(void), fldHasHirakenaiLabelProcess(void), fldHasBadkaifukuLabelProcess(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
-extern u16 *kwlnTaskGetUserValue(u32);
 extern s32 func_00195CD8(void *, s32, s32);
 extern void fldDrawGaugeBar(s32);
 extern void fldDrawTitleBanner(s32, s32);
 extern u8 D_0033E900[];
 
-s32 fldDrawPendingTitleBannerWhenIdle(u32 task) {
+s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task) {
     u16 *ticket;
     u8 *label;
     s32 width;
@@ -5667,7 +6075,7 @@ s32 fldDrawPendingTitleBannerWhenIdle(u32 task) {
     if (fldIsEventPhaseAtLeastTwo() != 0) {
         return 0;
     }
-    ticket = kwlnTaskGetUserValue(task);
+    ticket = (u16 *)kwlnTaskGetUserValue(task);
     if (ticket[2] != 0) {
         label = D_0033E900 + ticket[1] * 32;
         width = func_00195CD8(label, 1, 0x13);
@@ -5681,14 +6089,14 @@ s32 fldDrawPendingTitleBannerWhenIdle(u32 task) {
     return 0;
 }
 
-void * fldInitializeTitleBannerTask(u32 task) {
+void * fldInitializeTitleBannerTask(KwlnTask *task) {
     u16 *ticket = sdfAllocSizeClassBlock(8);
 
     ticket[1] = 1;
     ticket[0] = 0;
     ticket[2] = 0;
     ticket[3] = 0;
-    kwlnTaskSetUserValue(task, ticket);
+    kwlnTaskSetUserValue(task, (u32)ticket);
     return (void *)fldDrawPendingTitleBannerWhenIdle;
 }
 
@@ -5965,4 +6373,3 @@ INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE68);
 INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE6C);
 
 INCLUDE_SDATA(const s32, "game/code_00126A30", fldFieldTaskHandle);
-

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
 #include "mnu.h"
@@ -41,7 +42,6 @@ extern s32 mnuMovieShutdownCounter;
 
 extern char mnuMovieViewerTaskName[];
 
-extern s32 kwlnTaskGetUserValue();
 
 extern u32 D_003DC5C8[];
 
@@ -404,7 +404,6 @@ void mnuReleaseStaffSpriteAndResourceHandles(StaffMenuWork *menu) {
     mnuReleaseResourceList(menu->resourceList);
 }
 
-extern u32 sdfAllocGeneralBlock(s32);
 extern void *memset(void *, s32, u32);
 extern s8 dds3AdminReadPreviousSignedSample(void);
 extern EffectList *mnuAllocateValueRecord(u32);
@@ -420,7 +419,7 @@ extern void func_002E9708(void);
 /* Allocate and clear menu work, select its request-list mode from the
  * previous sample, then initialize the owned UI and resource state. */
 StaffMenuWork *mnuCreateStaffCampWork(void) {
-    u32 allocation = sdfAllocGeneralBlock(sizeof(StaffMenuWork));
+    u32 allocation = (u32)sdfAllocGeneralBlock(sizeof(StaffMenuWork));
     StaffMenuWork *menu = (StaffMenuWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
 
     memset(menu, 0, sizeof(*menu));
@@ -442,14 +441,13 @@ StaffMenuWork *mnuCreateStaffCampWork(void) {
     return menu;
 }
 
-extern s32 kwlnTaskGetUserValue();
 
 extern s8 mnuCampTaskState;
 
 
 /* Ignore null task userdata; otherwise drain transitions and release owned
  * resources in shutdown order before marking camp cleanup complete. */
-void mnuDestroyStaffMenuTask(u32 task) {
+void mnuDestroyStaffMenuTask(KwlnTask *task) {
     StaffMenuWork *menu = (StaffMenuWork *)kwlnTaskGetUserValue(task);
     if (menu == NULL) {
         return;
@@ -468,10 +466,10 @@ void mnuDestroyStaffMenuTask(u32 task) {
     func_002E9730();
 }
 
-u32 func_00271FC8(void) {
+u32 func_00271FC8(KwlnTask *task) {
     s32 context;
 
-    context = kwlnTaskGetUserValue();
+    context = kwlnTaskGetUserValue(task);
     mnuDrawAndStepGradientFade(context + 0x914, 0x53);
     return 0;
 }
@@ -644,7 +642,7 @@ void func_00272668(s32 kind, s32 labelIndex, s32 textTable, s32 context, s32 dra
     func_00272518(kind, labelIndex, textTable, context, drawOption, 0, layer);
 }
 
-void mnuDrawStaffCampScreen(s32 kind, s32 task) {
+void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task) {
     StaffMenuWork *menu = (StaffMenuWork *)kwlnTaskGetUserValue(task);
 
     mnuDrawBackdrop((MenuAssets *)menu->background, 0x20);

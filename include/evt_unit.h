@@ -2,6 +2,7 @@
 #define EVT_UNIT_H
 
 #include "common.h"
+#include "kwln.h"
 #include "eff_transform.h"
 
 struct MdlCtx;
@@ -253,7 +254,7 @@ typedef struct EvtPackLoadState {
     s32 effect75;                 /* 0x44 */
 } EvtPackLoadState;
 
-s32 evtTickPackLoad(void);
-void evtReleaseEventPackResources(void);
+s32 evtTickPackLoad(KwlnTask *task);
+void evtReleaseEventPackResources(KwlnTask *task);
 
 #endif /* EVT_UNIT_H */

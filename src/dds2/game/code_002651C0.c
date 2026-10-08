@@ -1,10 +1,10 @@
+#include "kwln.h"
 #include "mnu.h"
 #include "dat_state.h"
 #include "mnu_list.h"
 
 extern s32 mdlFlagTest(u32);
 
-extern u32 kwlnTaskGetUserValue();
 
 extern void func_0026C900(void);
 
@@ -85,8 +85,8 @@ u32 func_002652D8(void) {
 }
 
 /* Poll the event window; when it closes, install the default window if needed. */
-s32 evtMenuPollWindow(s32 callback) {
-    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue();
+s32 evtMenuPollWindow(KwlnTask *callback) {
+    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(callback);
     s32 *window = &context->popupState;
     s32 state = func_002C4038(&context->transitionWork, window, 0, (void *)callback);
     if (state == 0) {
@@ -100,23 +100,23 @@ s32 evtMenuPollWindow(s32 callback) {
     return state;
 }
 
-s32 func_00265360(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_00265360(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     func_0025FD78((MenuTerminalContext *)context);
     func_00297970(context);
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
 
-s32 evtFinishPopupAfterMenuConfiguration(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 evtFinishPopupAfterMenuConfiguration(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     func_0026C7F8(1, 0);
     return evtMenuSetHandler((void *)context, 2, (void *)callback);
 }
 
 /* Hand out the captured slot's reward: an item (named in the window) or a currency amount. */
-s32 func_00265408(void) {
+s32 func_00265408(KwlnTask *task) {
     char text[0x40];
-    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue();
+    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     s32 slotIndex = func_00265038();
     s32 choice;
     s32 rewardValue;
@@ -140,8 +140,8 @@ s32 func_00265408(void) {
 }
 
 /* Walk the list until its selected id is found, then persist the slot choice. */
-s32 evtMenuPersistSelectedSlot(void) {
-    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue();
+s32 evtMenuPersistSelectedSlot(KwlnTask *task) {
+    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     s32 selectedId = context->ownedWindows[0]->list->cursor->camp.value;
     struct MenuListNode *node;
     MenuTerminalWindowState *record;
@@ -161,22 +161,22 @@ s32 evtMenuPersistSelectedSlot(void) {
 
 INCLUDE_ASM(const s32, "game/code_002651C0", func_002655C0);
 
-s32 func_002657F8(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_002657F8(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     func_0025FD78((MenuTerminalContext *)context);
     func_00297970(context);
     return evtMenuSetHandler((void *)context, 1, (void *)callback);
 }
 
-s32 func_00265850(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_00265850(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     func_0026C900();
     return evtMenuSetHandler((void *)context, 2, (void *)callback);
 }
 
 /* Fade out according to the event mode, with a separate flag-dependent case 2. */
-s32 evtStartFadeByState(void) {
-    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue();
+s32 evtStartFadeByState(KwlnTask *task) {
+    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
     mnuShopLoadMessageResource(context);
     switch (context->type) {
     case 2:

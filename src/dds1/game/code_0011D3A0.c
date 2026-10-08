@@ -1,6 +1,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_resource.h"
 #include "field_stage.h"
 #include "eff_blur.h"
 #include "fpu.h"
@@ -243,7 +244,6 @@ void fldClearSceneControlFlags(u32 arg0);
 extern u32 D_003BAB64;
 extern u32 D_003BAB60;
 extern u32 D_003BAB5C;
-extern u32 sdfAllocGeneralBlock(u32);
 extern void *sdfMemoryGetBlockAddress(u32);
 extern void mdlLoadViewerPackage(s32, s32, s32, void *, u32);
 void fldLoadPlayerModel(void);
@@ -1774,7 +1774,7 @@ void fldPrepareResourceBuffer(void) {
     void *buffer;
     fldLoadPlayerModel();
     D_003BAB60 = D_003BAB64;
-    D_003BAB58 = sdfAllocGeneralBlock(D_003BAB64);
+    D_003BAB58 = (u32)sdfAllocGeneralBlock(D_003BAB64);
     source = sdfMemoryGetBlockAddress(fldPlayerModelResource);
     buffer = sdfMemoryGetBlockAddress(D_003BAB58);
     memcpy(buffer, source, D_003BAB60);

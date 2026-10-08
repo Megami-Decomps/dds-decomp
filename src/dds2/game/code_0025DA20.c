@@ -50,11 +50,10 @@
 #define CAMP_HEAP_STATS_WORD_COUNT 8
 
 extern void func_00101968(KwlnTask *, KwlnTask *);
-extern s32 mnuPreparePopupAndDispatchSelection(s32);
-extern s32 mnuAdvanceCampPopup(s32);
-extern s32 mnuFinishCampPopup(s32);
+extern s32 mnuPreparePopupAndDispatchSelection(KwlnTask *task);
+extern s32 mnuAdvanceCampPopup(KwlnTask *task);
+extern s32 mnuFinishCampPopup(KwlnTask *task);
 
-extern s32 sdfAllocGeneralBlock(s32);
 extern void mnuInitializeShopStatusBatches(MenuTerminalContext *);
 extern void func_002945B8(MenuTerminalContext *);
 extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
@@ -120,7 +119,6 @@ extern char D_00424BD0[]; /* "camp_update" */
 extern s8 mnuPanelTaskCompletionState;
 
 
-extern u32 kwlnTaskGetUserValue();
 
 extern void mnuShopReleaseWindowSprites();
 
@@ -748,7 +746,6 @@ void mnuAdvanceShopMenuState(EvtRuntime *scene) {
 
 extern SdfPoolNode D_00380708;
 extern u8 D_00380860[];
-extern void *sdfAllocGeneralBlockHigh(s32 size);
 extern s32 sdfAllocatePacketList(s32 (*alloc)(s32));
 extern void sdfClearLinkedPacketList(SdfLinkedPacketList *list);
 extern void sdfAppendPacketChainNode(SdfPacketChain *head, SdfLinkedPacketList *node);
@@ -1333,7 +1330,7 @@ MenuTerminalContext *mnuTerminalCreateContext(void) {
     s32 handle;
     MenuTerminalContext *obj;
 
-    handle = sdfAllocGeneralBlock(0x38C);
+    handle = (u32)sdfAllocGeneralBlock(0x38C);
     obj = (MenuTerminalContext *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     memset(obj, 0, 0x38C);
     obj->resourceHandle = handle;
@@ -1350,8 +1347,8 @@ MenuTerminalContext *mnuTerminalCreateContext(void) {
     return obj;
 }
 
-void mnuTerminalReleaseContextAndResources(s32 arg) {
-    MenuTerminalContext *scene = (MenuTerminalContext *)kwlnTaskGetUserValue();
+void mnuTerminalReleaseContextAndResources(KwlnTask *arg) {
+    MenuTerminalContext *scene = (MenuTerminalContext *)kwlnTaskGetUserValue(arg);
 
     if (scene != 0) {
         mnuShopReleaseWindowSprites(0, scene);
@@ -1365,8 +1362,8 @@ void mnuTerminalReleaseContextAndResources(s32 arg) {
     }
 }
 
-s32 mnuTerminalSyncMessageWindowControl(void) {
-    MenuGradientFade *state = &((MenuTerminalContext *)kwlnTaskGetUserValue())->gradientFade;
+s32 mnuTerminalSyncMessageWindowControl(KwlnTask *task) {
+    MenuGradientFade *state = &((MenuTerminalContext *)kwlnTaskGetUserValue(task))->gradientFade;
     mnuDrawAndStepGradientFade(state, 0x53);
     if (evtGetMessageWindowControlState() != 0) {
         func_002C1B68(&state->active, 1);
@@ -1426,18 +1423,18 @@ static inline s32 campSetHandler(MenuTerminalContext *context, s32 mode, void *c
     return func_002C4038(&context->transitionWork, &context->popupState, mode, callback);
 }
 
-s32 mnuPreparePopupAndDispatchSelection(s32 callback) {
-    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue();
+s32 mnuPreparePopupAndDispatchSelection(KwlnTask *callback) {
+    MenuTerminalContext *context = (MenuTerminalContext *)kwlnTaskGetUserValue(callback);
     mnuSetPopupEntry(&context->popupState, D_003CE658);
     return campSetHandler(context, 0, (void *)callback);
 }
 
-s32 mnuAdvanceCampPopup(s32 callback) {
-    return campSetHandler((MenuTerminalContext *)kwlnTaskGetUserValue(), 1, (void *)callback);
+s32 mnuAdvanceCampPopup(KwlnTask *callback) {
+    return campSetHandler((MenuTerminalContext *)kwlnTaskGetUserValue(callback), 1, (void *)callback);
 }
 
-s32 mnuFinishCampPopup(s32 callback) {
-    return campSetHandler((MenuTerminalContext *)kwlnTaskGetUserValue(), 2, (void *)callback);
+s32 mnuFinishCampPopup(KwlnTask *callback) {
+    return campSetHandler((MenuTerminalContext *)kwlnTaskGetUserValue(callback), 2, (void *)callback);
 }
 
 typedef struct ShopSourcePriceEntry {

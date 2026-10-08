@@ -1,3 +1,4 @@
+#include "kwln.h"
 #include "mnu.h"
 #include "sdf_resource.h"
 #include "mnu_staff.h"
@@ -7,7 +8,6 @@
 #include "mnu_scroll_panel.h"
 
 
-extern u32 kwlnTaskGetUserValue();
 
 
 
@@ -390,9 +390,9 @@ void func_002ACB18(u32 arg0) {
 void func_002ACB38(s32 object) {
 }
 
-u32 mnuInitializeWindowOwnerResourceSet(void) {
-    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
-    s32 handle = sdfAllocGeneralBlock(0x54);
+u32 mnuInitializeWindowOwnerResourceSet(KwlnTask *task) {
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
+    s32 handle = (u32)sdfAllocGeneralBlock(0x54);
     MenuStaffChoices *resource = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
 
     context->menu = resource;
@@ -409,8 +409,8 @@ u32 mnuInitializeWindowOwnerResourceSet(void) {
 
 /* Close the staff selection state: drop the owner's window containers, run
  * the owner's teardown hook, then close the party's resource menu. */
-s32 mnuDestroyWindowOwnerResourceSet(void) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuDestroyWindowOwnerResourceSet(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     MenuStaffContext *owner = (MenuStaffContext *)context;
     MenuStaffChoices *party = (MenuStaffChoices *)owner->menu;
 
@@ -439,7 +439,7 @@ extern char D_003E7434[];
 extern char D_003E74DC[];
 
 /* Handle staff-item popup selection and idle-window navigation. */
-s32 mnuHandleStaffPopupSelection(void *callback) {
+s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
     MenuStaffContext *context;
     MenuStaffChoices *resources;
     MenuWindowContainer *window;
@@ -448,7 +448,7 @@ s32 mnuHandleStaffPopupSelection(void *callback) {
     u32 input;
     s32 result;
 
-    context = (MenuStaffContext *)kwlnTaskGetUserValue();
+    context = (MenuStaffContext *)kwlnTaskGetUserValue(callback);
     popup = &context->popupState;
     resources = (MenuStaffChoices *)context->menu;
     input = mnuMapPadMaskToFlags(0x33);
@@ -508,8 +508,8 @@ extern void func_002AAC98(s32, s32, s32, s32, s32, s32);
 extern void func_002AA7A0(s32, s32);
 extern u8 D_003E7050[];
 
-s32 func_002ACE58(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_002ACE58(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     func_002AAE80(callback);
     mnuCreateStaffImageSprite(4);
     func_002AAC98(0,
@@ -520,8 +520,8 @@ s32 func_002ACE58(s32 callback) {
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
-s32 mnuFinishStaffReturnPopup(s32 callback) {
-    return menuSetHandler((void *)kwlnTaskGetUserValue(), 2, (void *)callback);
+s32 mnuFinishStaffReturnPopup(KwlnTask *callback) {
+    return menuSetHandler((void *)kwlnTaskGetUserValue(callback), 2, (void *)callback);
 }
 
 extern s32 evtGetIndexedEventRecordId(s32);
@@ -563,23 +563,23 @@ void mnuApplyResourceSelection(s32 index, MenuStaffContext *context) {
     func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 1);
 }
 
-u32 func_002AD0A8(void) {
+u32 func_002AD0A8(KwlnTask *task) {
     s32 context;
 
-    context = kwlnTaskGetUserValue();
+    context = kwlnTaskGetUserValue(task);
     mnuBeginWindowFadeTransition(((MenuStaffChoices *)((MenuStaffContext *)context)->menu)->windows[0], &((MenuStaffContext *)context)->fade);
     return 1;
 }
 
-u32 func_002AD0E8(void) {
+u32 func_002AD0E8(KwlnTask *task) {
     s32 context;
 
-    context = kwlnTaskGetUserValue();
+    context = kwlnTaskGetUserValue(task);
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     return 1;
 }
 
-s32 func_002AD118(void *callback) {
+s32 func_002AD118(KwlnTask *callback) {
     MenuStaffContext *context;
     MenuStaffChoices *resources;
     MenuWindowContainer *window;
@@ -590,7 +590,7 @@ s32 func_002AD118(void *callback) {
     u32 input;
     s32 result;
 
-    context = (MenuStaffContext *)kwlnTaskGetUserValue();
+    context = (MenuStaffContext *)kwlnTaskGetUserValue(callback);
     resources = (MenuStaffChoices *)context->menu;
     popup = &context->popupState;
     input = mnuMapPadMaskToFlags(0xC33);

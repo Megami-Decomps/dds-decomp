@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 
 #include "fpu.h"
@@ -7,7 +8,6 @@
 
 extern s8 D_0037F510[];
 
-extern s32 sdfAllocGeneralBlock(s32);
 
 extern void *sdfMemoryGetBlockAddress(u32);
 
@@ -49,7 +49,6 @@ extern void *func_00312A48(SdfTaskItemDesc *);
 
 extern s32 kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
-extern void sdfGridReleaseAllCells();
 
 extern f32 func_003532B8(f32);
 
@@ -89,30 +88,6 @@ extern f32 sdfQuatDot(f32 *, f32 *);
 
 extern f32 func_00353140(f32);
 
-typedef struct SdfGridCell {
-    u32 index;
-    u32 value;
-} SdfGridCell;
-
-typedef struct SdfGrid {
-    u32 allocation;        /* 0x00 */
-    SdfGridCell *cells;    /* 0x04 */
-    SdfGridCell *cursor;   /* 0x08 */
-    SdfGridCell *viewportOrigin; /* 0x0C */
-    u32 cellCount;         /* 0x10 */
-    u32 width;             /* 0x14 */
-    void (*drawCell)(s32, s32, s32, struct SdfGrid *, SdfGridCell *, s32); /* 0x18 */
-    void (*releaseCell)(u32, u32); /* 0x1C */
-    void (*onDestroy)(s32, u32); /* 0x20 */
-    u16 cellWidth;         /* 0x24 */
-    u16 cellHeight;        /* 0x26 */
-    u16 visibleColumns;    /* 0x28 */
-    u16 visibleRows;       /* 0x2A */
-    u16 columnMargin;      /* 0x2C */
-    u16 rowMargin;         /* 0x2E */
-    u32 userData;          /* 0x30 */
-} SdfGrid;
-
 extern void sdfConvertQuaternionRotationMatrix(f32 *, f32 *);
 extern void sdfTransformDirectionByMatrix(f32 *, f32 *);
 extern void func_0030F8D0(f32 *);
@@ -127,22 +102,21 @@ extern void func_00313BA8(s32, s32);
 extern s32 func_00313BA0(void);
 extern s32 func_00313BB0(s32, s32);
 
-extern s32 sdfAllocGeneralBlock(s32);
 extern u32 strlen(const char *);
 extern s32 func_0035C860(char *buffer, const char *fmt, ...);
 extern char D_004388D8[];
 extern char D_004388E0[];
 extern void sdfCallbackWorkOnRemove();
 
-extern s32 sdfTaskWorkRunAllEntries(void);
-extern s32 sdfTaskWorkRunAll(void);
+extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
+extern s32 sdfTaskWorkRunAll(KwlnTask *task);
 extern void kwlnTaskCreate();
 extern TaskWork *sdfCreateNamedTaskWork(char *, SdfListCallback, void *);
 
-extern void sdfReleaseCurrentTaskOwnedResources(void);
-extern s32 sdfTaskWorkRunAllEntries(void);
-extern s32 sdfTaskWorkRunAll(void);
-extern void sdfReleaseCurrentTaskOwnedResources(void);
+extern void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task);
+extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
+extern s32 sdfTaskWorkRunAll(KwlnTask *task);
+extern void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task);
 extern void kwlnTaskCreate();
 
 extern void func_00312E20(void);
@@ -561,7 +535,7 @@ void func_00311F20(s32 *points, u32 tail, u32 *colors, s32 count,
 
 /* Return a callback-list header address, retaining its allocation handle and teardown userData. */
 SdfList *sdfCreateTaskHeader(void *userData) {
-    s32 allocation = sdfAllocGeneralBlock(sizeof(SdfList));
+    s32 allocation = (u32)sdfAllocGeneralBlock(sizeof(SdfList));
     SdfList *obj = sdfMemoryGetBlockAddress(allocation);
 
     memset(obj, 0, sizeof(SdfList));

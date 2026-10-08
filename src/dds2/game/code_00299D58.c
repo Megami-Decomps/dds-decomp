@@ -1,3 +1,4 @@
+#include "kwln.h"
 #include "mnu.h"
 #include "mnu_result.h"
 extern s32 mdlFlagTest(u32 flagId);
@@ -14,7 +15,6 @@ extern u32 func_0029D790(DatPartyRecord *, PrfSkillList *);
 
 extern void func_0026C900(void);
 
-extern u32 kwlnTaskGetUserValue();
 
 extern s32 mnuMapPadMaskToFlags(s32);
 
@@ -57,13 +57,13 @@ extern s32 brsPollResultCounterCompletion(void);
 extern u8 D_0037F530[];
 extern u8 D_003D643C[];
 
-s32 brsMessageInputStep(void *input) {
+s32 brsMessageInputStep(KwlnTask *input) {
     BrsSkillPackageWork *context;
     s32 *window;
     s32 buttons;
     s32 result;
 
-    context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+    context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(input);
     window = &context->transition.state;
     buttons = mnuMapPadMaskToFlags(0x33);
     if (brsTaskIsUiUpdateAllowed((s32)context) == 0) {
@@ -84,8 +84,8 @@ s32 brsMessageInputStep(void *input) {
     return 0;
 }
 
-s32 mnuStaffRunPanel1(s32 input) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+s32 mnuStaffRunPanel1(KwlnTask *input) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(input);
 
     if (brsTaskIsUiUpdateAllowed((s32)context) != 0) {
         mnuTitleRenderFadeAndPanels(context);
@@ -93,8 +93,8 @@ s32 mnuStaffRunPanel1(s32 input) {
     }
 }
 
-s32 mnuStaffRunPanel2(s32 input) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+s32 mnuStaffRunPanel2(KwlnTask *input) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(input);
 
     if (brsTaskIsUiUpdateAllowed((s32)context) != 0) {
         brsDecaySharedAnimCounter(context);
@@ -110,20 +110,20 @@ u32 func_00299EF8(void) {
     return 1;
 }
 
-s32 mnuStaffRunPanel0(s32 input) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffRunPanel0(KwlnTask *input) {
+    s32 context = kwlnTaskGetUserValue(input);
     mnuMapPadMaskToFlags(0x33);
     return menuSetHandler((void *)context, 0, (void *)input);
 }
 
-s32 mnuRefreshAndDispatchCurrentPanel(s32 input) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+s32 mnuRefreshAndDispatchCurrentPanel(KwlnTask *input) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(input);
     mnuTitleRenderFadeAndPanels(context);
     return menuSetHandler(context, 1, (void *)input);
 }
 
-s32 func_00299FA0(s32 input) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_00299FA0(KwlnTask *input) {
+    s32 context = kwlnTaskGetUserValue(input);
     return menuSetHandler((void *)context, 2, (void *)input);
 }
 
@@ -322,23 +322,23 @@ s32 mnuDispatchProfileSelectionScene(void *task) {
 }
 
 
-s32 func_0029A588(s32 request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+s32 func_0029A588(KwlnTask *request) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
     mnuTitleRenderFadeAndPanels(context);
     return menuSetHandler(context, 1, (void *)request);
 }
 
-s32 func_0029A5D8(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_0029A5D8(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
 
     func_0026C900();
     return menuSetHandler((void *)context, 2, (void *)request);
 }
 
 /* Clear the scene's two selection-processing markers; return 1. */
-s32 mnuResetItemSelectionMarkers(void) {
-    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+s32 mnuResetItemSelectionMarkers(KwlnTask *task) {
+    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     scene->selectedRow = 0;
     scene->resetStateB = 0;
     return 1;
@@ -436,9 +436,9 @@ extern char D_003D6474[];
 extern char D_003D64AC[];
 
 /* Advance the selected party member, apply its gains, and choose the next popup. */
-s32 func_0029A898(void *request) {
+s32 func_0029A898(KwlnTask *request) {
     s32 result;
-    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+    BrsSkillPackageWork *scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
     s32 *dispatchStatus;
     s32 *slots;
     DatPartyRecord *item;

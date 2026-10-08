@@ -1,24 +1,7 @@
 #include "common.h"
 #include "mnu_profile_progress.h"
+#include "mnu_mantra_grid.h"
 #include "mnu_scene_work.h"
-
-typedef struct MantraPulseEntryRecord {
-    u8 pad00[0xC];
-    u16 positionKind;
-} MantraPulseEntryRecord;
-
-typedef struct MantraPulseEntry {
-    s32 unk_0;
-    MantraPulseEntryRecord *active;
-} MantraPulseEntry;
-
-typedef struct MantraPulseGrid {
-    u8 pad00[4];
-    MantraPulseEntry *entries;
-    u8 pad08[0xC];
-    s32 stride;
-    void (*drawEntry)(s32, s32, s32, struct MantraPulseGrid *, MantraPulseEntry *, s32);
-} MantraPulseGrid;
 
 extern void itfDspDrawStrip(s32, s32, s32, s32, s32);
 extern void mnuDrawSelectedMantraEntry(MenuSceneWork *, s32, s32);
@@ -35,7 +18,7 @@ INCLUDE_ASM(const s32, "game/code_00257200", func_00257270);
 
 typedef struct MantraPulseDisplayWork {
     u8 pad00[0x484];
-    MantraPulseGrid *grid;
+    SdfGrid *grid;
     u8 pad488[8];
     s32 frame;
     u8 pad494[0x10C];
@@ -54,8 +37,9 @@ extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 
 /* Draw the two mantra-entry passes, then restore the surface's GS state. */
 void mnuDrawMantraPulseGridPasses(MantraPulseDisplayWork *work, s32 surface) {
-    MantraPulseGrid *grid;
-    MantraPulseEntry *entry;
+    SdfGrid *grid;
+    SdfGridCell *cell;
+    MnuMantraGridEntry *entry;
     s32 row;
     s32 col;
     s32 x;
@@ -69,12 +53,13 @@ void mnuDrawMantraPulseGridPasses(MantraPulseDisplayWork *work, s32 surface) {
     sdfSubmitGsTestOneRegisterPacket(0x3000DL, surface);
     uiDrawActiveSurfaceRegion(surface);
     for (row = 0; row < 0x11; row++) {
-        entry = grid->entries + row * grid->stride;
+        cell = grid->cells + row * grid->width;
         for (col = 0; col < 15; col++) {
-            if (entry[col].active != NULL) {
-                grid->drawEntry(x + D_0036B7F0[entry[col].active->positionKind][2],
-                                y + D_0036B7F0[entry[col].active->positionKind][3],
-                                0, grid, &entry[col], surface);
+            if (cell[col].value != 0) {
+                entry = (MnuMantraGridEntry *)(u32)cell[col].value;
+                grid->drawCell(x + D_0036B7F0[entry->sceneId][2],
+                               y + D_0036B7F0[entry->sceneId][3],
+                               0, grid, &cell[col], surface);
             }
         }
     }
@@ -85,12 +70,13 @@ void mnuDrawMantraPulseGridPasses(MantraPulseDisplayWork *work, s32 surface) {
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
     sdfSubmitGsTestOneRegisterPacket(0x50000, surface);
     for (row = 0; row < 0x11; row++) {
-        entry = grid->entries + row * grid->stride;
+        cell = grid->cells + row * grid->width;
         for (col = 0; col < 15; col++) {
-            if (entry[col].active != NULL) {
-                grid->drawEntry(x + D_0036B7F0[entry[col].active->positionKind][2],
-                                y + D_0036B7F0[entry[col].active->positionKind][3],
-                                1, grid, &entry[col], surface);
+            if (cell[col].value != 0) {
+                entry = (MnuMantraGridEntry *)(u32)cell[col].value;
+                grid->drawCell(x + D_0036B7F0[entry->sceneId][2],
+                               y + D_0036B7F0[entry->sceneId][3],
+                               1, grid, &cell[col], surface);
             }
         }
     }
@@ -101,20 +87,20 @@ void mnuDrawMantraPulseGridPasses(MantraPulseDisplayWork *work, s32 surface) {
 }
 
 extern void *func_002CB3B8(s32, s32);
-extern void func_002593E0(s32, MantraPulseGrid *, MantraPulseEntry *);
+extern void func_002593E0(MnuProfileProgress *, SdfGrid *, SdfGridCell *);
 extern s32 mnuSceneResourceContext;
 
-void mnuAdvanceMantraPulseGridEntries(s32 argument, MantraPulseGrid *grid) {
-    MantraPulseEntry *entry;
+void mnuAdvanceMantraPulseGridEntries(MnuProfileProgress *selection, SdfGrid *grid) {
+    SdfGridCell *cell;
     s32 row;
     s32 col;
 
     func_002CB3B8(mnuSceneResourceContext, 1);
     for (row = 0; row < 0x11; row++) {
-        entry = grid->entries + row * grid->stride;
+        cell = grid->cells + row * grid->width;
         for (col = 0; col < 15; col++) {
-            if (entry[col].active != 0) {
-                func_002593E0(argument, grid, &entry[col]);
+            if (cell[col].value != 0) {
+                func_002593E0(selection, grid, &cell[col]);
             }
         }
     }
@@ -123,9 +109,9 @@ void mnuAdvanceMantraPulseGridEntries(s32 argument, MantraPulseGrid *grid) {
 
 extern void *func_002CB3B8(s32, s32);
 extern void func_0024EDC0(s32, s32, s32, s32, s32, s32, f32, f32, s32);
-extern void func_00259498(s32, s32, s32, s32, MnuProfileProgress *, MantraPulseGrid *, MantraPulseEntry *, s32);
-extern void func_00259890(s32, s32, s32, s32, MnuProfileProgress *, MantraPulseGrid *, f32, f32, MantraPulseEntry *, s32);
-extern void func_00259B40(s32, s32, s32, s32, MnuProfileProgress *, MantraPulseGrid *, f32, f32, MantraPulseEntry *, s32);
+extern void func_00259498(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, SdfGridCell *, s32);
+extern void func_00259890(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, f32, f32, SdfGridCell *, s32);
+extern void func_00259B40(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, f32, f32, SdfGridCell *, s32);
 extern void func_00257ED0(s32, s32, s32, s32, MantraPulseDisplayWork *, s32);
 extern void func_00258B90(s32, s32, s32, s32, void *, s32);
 extern s32 mnuSceneResourceContext;
@@ -133,10 +119,10 @@ extern s32 mnuSceneResourceContext;
 /* Draw the mantra pulse band and both entry passes at unit scale, placing the
  * selected entry with its offsets from the display table. */
 void func_00257718(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
-                   MnuProfileProgress *selection, MantraPulseGrid *grid,
+                   MnuProfileProgress *selection, SdfGrid *grid,
                    s32 arg6) {
     MantraPulseDisplayWork *display;
-    MantraPulseEntry *entry;
+    SdfGridCell *cell;
     s32 row;
     s32 n;
 
@@ -145,13 +131,13 @@ void func_00257718(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
         func_0024EDC0(arg0, arg1, arg2, arg3, row + 0x1F, 0x20, 1.0f, 1.0f, arg6);
     }
     for (row = 0; row < 0x11; row++) {
-        entry = grid->entries + row * grid->stride;
+        cell = grid->cells + row * grid->width;
         n = 0xE;
         do {
-            if (entry->active != 0) {
-                func_00259498(arg0, arg1, arg2, arg3, selection, grid, entry, arg6);
+            if (cell->value != 0) {
+                func_00259498(arg0, arg1, arg2, arg3, selection, grid, cell, arg6);
             }
-            entry++;
+            cell++;
             n--;
         } while (n >= 0);
     }
@@ -164,13 +150,13 @@ void func_00257718(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
                   arg1 + D_0036B7F0[selection->profileId][3],
                   arg2, arg3, (u8 *)display + 0x488, arg6);
     for (row = 0; row < 0x11; row++) {
-        entry = grid->entries + row * grid->stride;
+        cell = grid->cells + row * grid->width;
         n = 0xE;
         do {
-            if (entry->active != 0) {
-                func_00259B40(arg0, arg1, arg2, arg3, selection, grid, 1.0f, 1.0f, entry, arg6);
+            if (cell->value != 0) {
+                func_00259B40(arg0, arg1, arg2, arg3, selection, grid, 1.0f, 1.0f, cell, arg6);
             }
-            entry++;
+            cell++;
             n--;
         } while (n >= 0);
     }
@@ -181,10 +167,10 @@ void func_00257718(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
  * neutral name, as a C89 programmer with all declarations at the top would
  * write. That reuse is what retail's bytes require. */
 void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
-                   MnuProfileProgress *selection, MantraPulseGrid *grid, s32 arg6,
+                   MnuProfileProgress *selection, SdfGrid *grid, s32 arg6,
                    f32 scaleX, f32 scaleY) {
     MantraPulseDisplayWork *display;
-    MantraPulseEntry *entry;
+    SdfGridCell *cell;
     s32 row;
     s32 n;
 
@@ -193,13 +179,13 @@ void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
         func_0024EDC0(arg0, arg1, arg2, arg3, row + 0x1F, 0x20, scaleX, scaleY, arg6);
     }
     for (row = 0; row < 0x11; row++) {
-        entry = grid->entries + row * grid->stride;
+        cell = grid->cells + row * grid->width;
         n = 0xE;
         do {
-            if (entry->active != 0) {
-                func_00259890(arg0, arg1, arg2, arg3, selection, grid, scaleX, scaleY, entry, arg6);
+            if (cell->value != 0) {
+                func_00259890(arg0, arg1, arg2, arg3, selection, grid, scaleX, scaleY, cell, arg6);
             }
-            entry++;
+            cell++;
             n--;
         } while (n >= 0);
     }
@@ -208,20 +194,20 @@ void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
         func_0024EDC0(arg0, arg1, arg2, arg3, row, 0x20, scaleX, scaleY, arg6);
     }
     for (row = 0; row < 0x11; row++) {
-        entry = grid->entries + row * grid->stride;
+        cell = grid->cells + row * grid->width;
         n = 0xE;
         do {
-            if (entry->active != 0) {
-                func_00259B40(arg0, arg1, arg2, arg3, selection, grid, scaleX, scaleY, entry, arg6);
+            if (cell->value != 0) {
+                func_00259B40(arg0, arg1, arg2, arg3, selection, grid, scaleX, scaleY, cell, arg6);
             }
-            entry++;
+            cell++;
             n--;
         } while (n >= 0);
     }
 }
 
-void func_00257BD8(MantraPulseDisplayWork *work, s32 argument) {
-    mnuAdvanceMantraPulseGridEntries(argument, work->grid);
+void func_00257BD8(MantraPulseDisplayWork *work, MnuProfileProgress *selection) {
+    mnuAdvanceMantraPulseGridEntries(selection, work->grid);
     mnuAdvanceWrappingFrame(&work->frame);
 }
 
@@ -275,4 +261,3 @@ void mnuAdvanceWrappingFrame(s32 *frame) {
 INCLUDE_ASM(const s32, "game/code_00257200", func_00257ED0);
 
 INCLUDE_RODATA(const s32, "game/code_00257200", D_003AF950);
-

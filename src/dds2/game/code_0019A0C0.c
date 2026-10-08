@@ -67,7 +67,6 @@ typedef struct EffVert {
 extern void func_0019AB08(EffVert *arg0, EffPrim *arg1, s32 arg2, f32 arg3);
 
 typedef struct SdfMemBlock SdfMemBlock;
-extern SdfMemBlock *sdfAllocGeneralBlock(s32 arg0);
 
 
 extern void effSampleChannelBezier(EffVert *arg0, EffChan *arg1, s32 arg2, f32 arg3);

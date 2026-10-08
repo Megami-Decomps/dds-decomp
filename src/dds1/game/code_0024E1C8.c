@@ -4,6 +4,7 @@
 #include "mnu_list.h"
 #include "mnu_profile_progress.h"
 #include "prf_requirement.h"
+#include "sdf_grid.h"
 
 #define MNU_MANTRA_RESOURCE_SLOT_COUNT 14
 #define MNU_MANTRA_SOURCE_ACTIVE_BIT 0x20
@@ -62,7 +63,6 @@ extern void mnuDestroyMantraDrawPool(void *);
 extern void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *);
 extern s32 dspCloseChannel(void);
 extern void sdfQueueNonzeroResourceId(s32);
-extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfMemoryGetBlockAddress(s32);
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void mnuMarkTitleStreamResetPending(void);
@@ -552,7 +552,7 @@ void mnuReleaseResourceSlots(MnuResourceTaskWork *unusedWork) {
 
 /* Allocate and clear resource-task work, load both message resources and prepare the mantra visuals. */
 MnuResourceTaskWork *func_0024F608(void) {
-    s32 allocationHandle = sdfAllocGeneralBlock(sizeof(MnuResourceTaskWork));
+    s32 allocationHandle = (u32)sdfAllocGeneralBlock(sizeof(MnuResourceTaskWork));
     MnuResourceTaskWork *resourceWork = sdfMemoryGetBlockAddress(allocationHandle);
 
     memset(resourceWork, 0, sizeof(MnuResourceTaskWork));
@@ -734,7 +734,7 @@ void mnuResetResourceAnimation(void) {
 
 /* Allocate the four-word list task work, construct its party list and clear both remaining words. */
 u32 *mnuAllocateEmptyResourceListState(void) {
-    s32 allocationHandle = sdfAllocGeneralBlock(MNU_RESOURCE_LIST_WORK_BYTES);
+    s32 allocationHandle = (u32)sdfAllocGeneralBlock(MNU_RESOURCE_LIST_WORK_BYTES);
     u32 *taskWords = sdfMemoryGetBlockAddress(allocationHandle);
 
     memset(taskWords, 0, MNU_RESOURCE_LIST_WORK_BYTES);
@@ -989,27 +989,21 @@ s32 func_002508D8(u16 profileId) {
     return 0;
 }
 
-typedef struct MnuSceneGridWork {
-    u8 pad00[0x18];
-    void (*callback)(void);
-    void (*freeTaskData)(s32, void *);
-} MnuSceneGridWork;
-
 typedef struct MnuSceneContext {
     u8 pad00[0x484];
-    MnuSceneGridWork *grid;
+    SdfGrid *grid;
     u8 pad488[0x11C];
     u16 cursorX;
     u16 cursorY;
 } MnuSceneContext;
 
-extern MnuSceneGridWork *func_002CB9C0(s32, s32, s32, s32, s32, s32, void *, s32);
-extern void sdfSetShortPairValues(MnuSceneGridWork *, s32, s32);
-extern void mnuFreeTaskData(s32, void *);
-extern void mnuDrawMantraEntryStatus(void);
-extern void func_002CC0D0(MnuSceneGridWork *);
+extern SdfGrid *func_002CB9C0(s32, s32, s32, s32, s32, s32, void *, s32);
+extern void sdfSetShortPairValues(SdfGrid *, s32, s32);
+extern void mnuFreeTaskData(u32, u32);
+extern void mnuDrawMantraEntryStatus(s32, s32, s32, SdfGrid *, SdfGridCell *, s32);
+extern void func_002CC0D0(SdfGrid *);
 extern void func_00253208(s32, s32, s32 *, s32 *);
-extern void *sdfGridSelectFilledCell(MnuSceneGridWork *, s32, s32);
+extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, s32, s32);
 extern void func_002512F0(s32, s32);
 
 /* Construct the selection grid and callbacks, select its initial coordinates, then reset cached cursor coordinates. */
@@ -1022,8 +1016,8 @@ void mnuInitializeMantraSelectionGrid(s32 sceneAddress) {
     sceneWork->grid = func_002CB9C0(0xF, 0x11, 0x40, 0x43, 4, 4,
                                 (u8 *)sceneWork + 4, 0);
     sdfSetShortPairValues(sceneWork->grid, 1, 1);
-    sceneWork->grid->freeTaskData = mnuFreeTaskData;
-    sceneWork->grid->callback = mnuDrawMantraEntryStatus;
+    sceneWork->grid->releaseCell = mnuFreeTaskData;
+    sceneWork->grid->drawCell = mnuDrawMantraEntryStatus;
     resourceTaskAddress = func_002CB3B8(mnuSceneResourceContext, 0);
     fieldAddress = *(s32 *)(*(s32 *)(resourceTaskAddress + 0xC) + 0x1C);
     func_00253208(sceneAddress, *(s32 *)(fieldAddress + 0x70),

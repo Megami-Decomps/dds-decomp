@@ -76,9 +76,7 @@ void *memset(void *dst, s32 val, u32 len);
 
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 
-s32 sdfAllocGeneralBlock(s32 arg0);
 
-s32 sdfAllocGeneralBlockHigh(s32 size);
 
 s32 sdfTryAllocGeneralBlock(s32 size);
 
@@ -198,7 +196,7 @@ s32 func_002C8638(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
                 break;
             }
         } else {
-            allocationHandle = sdfAllocGeneralBlockHigh(byteCount);
+            allocationHandle = (u32)sdfAllocGeneralBlockHigh(byteCount);
             job->allocationHandle = allocationHandle;
         }
         {

@@ -308,7 +308,7 @@ extern u16 mdlGetContextResourceId(MdlCtx *);
 extern f32 func_00208000(s32, f32 *, f32 *);
 extern s32 func_001E3230(BtlUnit *, s32);
 
-extern s32 func_0035C860();
+extern s32 func_0035C860(char *, const char *, ...);
 
 extern char D_004192E8[]; /* "MDD_%03X.ADB" */
 
@@ -922,16 +922,15 @@ void btlResetIndexWork(BattleIndexWork *work) {
 }
 
 
-extern u32 sdfAllocGeneralBlock(s32);
 
 
 /* Allocate the index list and retained groups, then initialize their headers. */
 void btlInitBattleIndexWork(BattleIndexWork *work) {
-    u32 handle;
+    struct SdfMemBlock *allocation;
     work->indices = btlAllocateIndexList(13);
-    handle = sdfAllocGeneralBlock(0x48EC);
-    work->groups = (BtlOperandGroup *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
-    work->allocationHandle = handle;
+    allocation = sdfAllocGeneralBlock(0x48EC);
+    work->groups = (BtlOperandGroup *)sdfResourceRetainAddress(allocation);
+    work->allocationHandle = (u32)allocation;
     work->ownerId = 0;
     btlResetIndexWork(work);
 }
@@ -4536,11 +4535,11 @@ extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern void *memset(void *, s32, u32);
 
 BtlUnit *btlCreateUnit(void) {
-    u32 handle = sdfAllocGeneralBlock(0x368);
-    BtlUnit *unit = (BtlUnit *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x368);
+    BtlUnit *unit = (BtlUnit *)sdfResourceRetainAddress(allocation);
     BtlState *work;
     memset(unit, 0, 0x368);
-    unit->handle35C = handle;
+    unit->handle35C = (u32)allocation;
     unit->owner = btlAdvanceRuntimeSequenceCounter();
     unit->flags = 0;
     unit->stateFlags = 0;
@@ -9711,7 +9710,22 @@ BtlRuntimeTask *sndCreateClearBattleFlagTask(void) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_00202EA8);
+extern const char D_00436AE0[];
+const char D_00418E28[16] __attribute__((aligned(8))) = "%s%03X.BED";
+const char D_00418E38[32] __attribute__((aligned(8))) = "/efftool/bed/BTL_TEST.BED";
+
+s32 func_00202EA8(s32 index, char *output) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    if ((state->battleFlags & 0x10000000) == 0) {
+        u16 assetId = ((BtlActionAnimationRecord *)datActionAnimationRecords)[index].displayCode;
+        if (assetId == 0) return 0;
+        func_0035C860(output, D_00418E28, D_00436AE0, assetId);
+    } else {
+        func_0035C860(output, D_00418E38);
+    }
+    return 1;
+}
+
 
 s32 sndSetEffectNodeParameter(SoundResourceNode *effect, u16 option) {
     return sndReadSelectedMixerBankValue(effect->resourceHandle, option);

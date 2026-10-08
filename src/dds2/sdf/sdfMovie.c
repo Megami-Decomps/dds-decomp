@@ -42,7 +42,6 @@ s32 sdfDevQueueRead(DevState *state, void *data, s32 size);
 s32 sdfDevQueueControlRequest(DevState *state);
 s32 sdfDevQueueActiveOperation(DevState *state);
 s32 sdfDevQueueReleaseState(DevState *state);
-s32 sdfAllocGeneralBlock(s32 size);
 s32 WaitSema(s32 semaphore);
 s32 SignalSema(s32 semaphore);
 void *memcpy(void *destination, const void *source, u32 size);

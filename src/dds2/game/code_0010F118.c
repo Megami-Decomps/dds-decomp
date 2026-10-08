@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "pcp_vu0.h"
 #include "eff_transform.h"
 #include "dds3obj.h"
@@ -63,7 +64,6 @@ u32 dds3DrawObjectFlagDiagnostic(void *object, s32 x, s32 y, void *list) {
 
 
 extern void *dds3GetWorldObject(void);
-extern void *kwlnTaskGetUserValue();
 extern s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *node);
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList();

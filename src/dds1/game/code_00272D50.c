@@ -1,3 +1,4 @@
+#include "kwln.h"
 #include "mnu.h"
 #include "sdf_resource.h"
 #include "mnu_list.h"
@@ -7,9 +8,7 @@
 
 extern s32 mnuUseStaffItem(s32, s32);
 
-extern u32 kwlnTaskGetUserValue();
 
-extern s32 sdfAllocGeneralBlock(s32);
 extern void *memset(void *, s32, u32);
 typedef struct StaffDisplayContext StaffDisplayContext;
 extern void func_00272D50(StaffDisplayContext *);
@@ -214,13 +213,13 @@ void func_00273390(u32 context) {
 void func_002733B0() {
 }
 
-s32 mnuInitializeStaffDisplayResources(void) {
+s32 mnuInitializeStaffDisplayResources(KwlnTask *task) {
     StaffDisplayContext *context;
     StaffWindowResources *resources;
     s32 handle;
 
-    context = (StaffDisplayContext *)kwlnTaskGetUserValue();
-    handle = sdfAllocGeneralBlock(0x2C);
+    context = (StaffDisplayContext *)kwlnTaskGetUserValue(task);
+    handle = (u32)sdfAllocGeneralBlock(0x2C);
     resources = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     context->resources = resources;
     memset(resources, 0, 0x2C);
@@ -234,8 +233,8 @@ s32 mnuInitializeStaffDisplayResources(void) {
     return 1;
 }
 
-s32 mnuStaffFreeDisplayResources(void) {
-    StaffDisplayContext *context = (StaffDisplayContext *)kwlnTaskGetUserValue();
+s32 mnuStaffFreeDisplayResources(KwlnTask *task) {
+    StaffDisplayContext *context = (StaffDisplayContext *)kwlnTaskGetUserValue(task);
     StaffWindowResources *resources = context->resources;
     mnuReleaseStaffPrimaryWindows(context);
     func_002733B0(context);
@@ -257,7 +256,7 @@ extern char D_0037CA00[];
 extern char D_0037C990[];
 
 /* Handle staff-item selection and window navigation while the popup is idle. */
-s32 func_002734C0(s32 callback) {
+s32 func_002734C0(KwlnTask *callback) {
     StaffDisplayContext *context;
     StaffWindowResources *resources;
     MenuWindowContainer *window;
@@ -266,7 +265,7 @@ s32 func_002734C0(s32 callback) {
     u32 input;
     s32 result;
 
-    context = (StaffDisplayContext *)kwlnTaskGetUserValue();
+    context = (StaffDisplayContext *)kwlnTaskGetUserValue(callback);
     popup = &context->popupState;
     resources = context->resources;
     input = mnuMapPadMaskToFlags(0x33);
@@ -324,8 +323,8 @@ extern void func_002723B0(s32, s32);
 extern u8 D_0037C860[];
 extern s32 D_003BAA9C;
 
-s32 mnuStaffDrawImagePanelA(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffDrawImagePanelA(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     func_00272778(callback);
     mnuCreateStaffImageSprite(4);
     func_00272668(1, ((StaffDisplayContext *)context)->activeWindow->list->cursor->index, (s32)D_0037C860, context, 1, 0x53);
@@ -334,8 +333,8 @@ s32 mnuStaffDrawImagePanelA(s32 callback) {
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
-s32 mnuStaffRunPanel2b(void *request) {
-    s32 state = kwlnTaskGetUserValue();
+s32 mnuStaffRunPanel2b(KwlnTask *request) {
+    s32 state = kwlnTaskGetUserValue(request);
 
     return menuRunPanel((void *)state, 2, request);
 }
@@ -393,7 +392,7 @@ extern char D_0037CA1C[];
 extern char D_0037C9AC[];
 
 /* Use an eligible staff item and update its selection window while messages are idle. */
-s32 func_002738A0(s32 task) {
+s32 func_002738A0(KwlnTask *task) {
     StaffDisplayContext *context;
     StaffWindowResources *resources;
     MenuWindowContainer *window;

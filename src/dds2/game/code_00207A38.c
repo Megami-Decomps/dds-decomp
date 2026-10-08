@@ -2520,7 +2520,6 @@ u32 btlScriptReturnOneBasedAiBucket(void) {
 }
 
 extern s32 scrCreateTaskForProcessId(s32, s32, s32);
-extern u32 kwlnTaskGetUserValue(KwlnTask *task);
 extern void func_00101968(s32, s32);
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 

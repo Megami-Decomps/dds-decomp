@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
 
@@ -14,7 +15,6 @@ extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 
 extern f32 fldVectorLength(f32 *);
 
-extern s32 sdfAllocGeneralBlock(s32);
 
 extern void *sdfMemoryGetBlockAddress(u32);
 

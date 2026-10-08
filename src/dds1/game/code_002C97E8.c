@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 
 #include "fpu.h"
@@ -51,6 +52,7 @@ extern f32 sdfQuatDot(f32 *, f32 *);
 extern f32 func_002FA060(f32);
 
 extern s32 kwlnTaskGetTaskByName(u32);
+extern void sdfGridReleaseAllCells(SdfGrid *);
 
 
 typedef struct SdfTaskItemDesc {
@@ -77,7 +79,6 @@ extern void *func_002CB5F0(SdfTaskItemDesc *);
 
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
-extern s32 sdfAllocGeneralBlock(s32);
 
 extern void *sdfMemoryGetBlockAddress(u32);
 
@@ -499,7 +500,7 @@ void func_002CAAC8(s32 *points, u32 tail, u32 *colors, s32 count,
 
 /* Return a callback-list header address, retaining its allocation handle and teardown userData. */
 SdfList *sdfCreateTaskHeader(void *userData) {
-    s32 allocation = sdfAllocGeneralBlock(sizeof(SdfList));
+    s32 allocation = (u32)sdfAllocGeneralBlock(sizeof(SdfList));
     SdfList *obj = sdfMemoryGetBlockAddress(allocation);
 
     memset(obj, 0, sizeof(SdfList));
@@ -741,9 +742,9 @@ typedef struct TaskWork {
     SdfListNode *currentNode; /* Next node to visit; reset to the list head at pass end. */
 } TaskWork;
 
-extern s32 sdfTaskWorkRunAllEntries(void);
-extern s32 sdfTaskWorkRunAll(void);
-extern void sdfReleaseCurrentTaskOwnedResources(void);
+extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
+extern s32 sdfTaskWorkRunAll(KwlnTask *task);
+extern void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task);
 extern void kwlnTaskCreate();
 extern TaskWork *sdfCreateNamedTaskWork(char *, SdfListCallback, void *);
 
@@ -836,7 +837,7 @@ extern void sdfCallbackWorkOnRemove();
 
 /* Create a task resource work block with the name copied to two formatted buffers. */
 TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, void *userData) {
-    s32 allocation = sdfAllocGeneralBlock(0x14);
+    s32 allocation = (u32)sdfAllocGeneralBlock(0x14);
     TaskWork *work = sdfMemoryGetBlockAddress(allocation);
 
     memset(work, 0, 0x14);
@@ -905,7 +906,6 @@ void sdfCallbackWorkOnRemove(u32 unused, SdfTaskEntry *work) {
 }
 
 
-extern void *kwlnTaskGetUserValue(void);
 
 /* Visit one entry: initialize, remove if pending, otherwise update.
  * An update result of -1 queues removal for its next visit. Returns 0 at pass end. */
@@ -974,8 +974,8 @@ s32 sdfTaskWorkStep(TaskWork *work) {
     return 1;
 }
 
-s32 sdfTaskWorkRunAllEntries(void) {
-    TaskWork *work = kwlnTaskGetUserValue();
+s32 sdfTaskWorkRunAllEntries(KwlnTask *task) {
+    TaskWork *work = (TaskWork *)kwlnTaskGetUserValue(task);
 
     if (work->currentNode == NULL) {
         return -1;
@@ -985,8 +985,8 @@ s32 sdfTaskWorkRunAllEntries(void) {
     return 0;
 }
 
-s32 sdfTaskWorkRunAll(void) {
-    TaskWork *work = kwlnTaskGetUserValue();
+s32 sdfTaskWorkRunAll(KwlnTask *task) {
+    TaskWork *work = (TaskWork *)kwlnTaskGetUserValue(task);
 
     if (work->currentNode == NULL) {
         return -1;
@@ -996,8 +996,8 @@ s32 sdfTaskWorkRunAll(void) {
     return 0;
 }
 
-void sdfReleaseCurrentTaskOwnedResources(void) {
-    sdfDestroyTaskResourceWork(kwlnTaskGetUserValue());
+void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task) {
+    sdfDestroyTaskResourceWork((void *)kwlnTaskGetUserValue(task));
 }
 
 void func_002CB9B8(void) {
@@ -1015,14 +1015,14 @@ void sdfSetShortPairValues(SdfGrid *grid, s32 columnMargin, s32 rowMargin) {
 /* Release cells, invoke onDestroy(0, userData), then release the grid header allocation. */
 void sdfDestroyGridWork(SdfGrid *work) {
     if (work != NULL) {
-        sdfGridReleaseAllCells();
+        sdfGridReleaseAllCells(work);
         work->onDestroy(0, work->userData);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->allocation));
+        sdfReleaseResourceAllocation(work->allocation);
     }
 }
 
-void func_002CBB48(void) {
-    sdfGridReleaseAllCells();
+void func_002CBB48(SdfGrid *grid) {
+    sdfGridReleaseAllCells(grid);
 }
 
 

@@ -1,3 +1,4 @@
+#include "kwln.h"
 #include "mnu_list.h"
 #include "sdf_resource.h"
 #include "mnu_staff.h"
@@ -269,7 +270,6 @@ typedef struct MenuContext {
     s32 resourceList;      /* 0xAA5C */
 } MenuContext;
 
-extern s32 kwlnTaskGetUserValue();
 
 extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
 
@@ -337,7 +337,6 @@ extern void frFontQueueGlyphInSelectedSlot(s32);
 
 extern void func_0035B7F8(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
-extern s32 sdfAllocGeneralBlock(s32);
 
 
 extern void func_0026C900(void);
@@ -1040,7 +1039,7 @@ void mnuInitIconSprites(MenuIconSprites *obj, s32 w, s32 h, u32 value, s32 res, 
 /* Create an owned three-sprite bundle using the caller's slot-index array. */
 MenuIconSprites *mnuCreateWindowSpriteResources(u32 width, u32 height, u32 value,
                     u32 resourceHandle, s32 *indices, u32 unused) {
-    u32 allocationHandle = sdfAllocGeneralBlock(0x18);
+    u32 allocationHandle = (u32)sdfAllocGeneralBlock(0x18);
     MenuIconSprites *bundle = (MenuIconSprites *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
     memset(bundle, 0, 0x18);
     bundle->handle = allocationHandle;
@@ -1533,7 +1532,7 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
         mnuComparePrimaryKeyAscending, mnuCompareSecondaryKeyAscending, mnuCompareTertiaryKeyAscending
     };
     s32 nodeCount = 0;
-    s32 allocationHandle = sdfAllocGeneralBlock(menu->count * MNU_LIST_POINTER_BYTES);
+    s32 allocationHandle = (u32)sdfAllocGeneralBlock(menu->count * MNU_LIST_POINTER_BYTES);
     MenuListNode **items = (MenuListNode **)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
     MenuListNode **writeCursor = items;
     MenuListNode *node;

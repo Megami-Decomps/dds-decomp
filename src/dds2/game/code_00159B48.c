@@ -195,7 +195,6 @@ extern EffectConfig D_003AA884[];
 
 s32 billCreateIndexed(s32 kind, s32 index);
 
-s32 sdfAllocGeneralBlock(s32 size);
 
 
 void effInitExpandRingPacketSchedule(EffTemplatePacketList *effect);
@@ -847,7 +846,7 @@ void func_0015B290(void) {
 /* Allocate records followed by their owner tail; clear only two native state words per record. */
 EffectBufferTail *effAllocateBuffer(s32 recordCount) {
     s32 recordBytes = recordCount * sizeof(EffectBufferRecord);
-    s32 allocationHandle = sdfAllocGeneralBlock(recordBytes + sizeof(EffectBufferTail));
+    s32 allocationHandle = (u32)sdfAllocGeneralBlock(recordBytes + sizeof(EffectBufferTail));
     EffectBufferRecord *recordCursor = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
     EffectBufferTail *bufferTail = (EffectBufferTail *)((u8 *)recordCursor + recordBytes);
 
@@ -2902,7 +2901,7 @@ void *effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
     memset(clone, 0, 0x200);
     memcpy(clone, source, source->templateSize);
     memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->templateSize, tailBytes);
-    auxAllocationHandle = sdfAllocGeneralBlock(clone->packetCount * 0x10);
+    auxAllocationHandle = (u32)sdfAllocGeneralBlock(clone->packetCount * 0x10);
     clone->auxiliaryAllocation = auxAllocationHandle;
     clone->auxiliaryData = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(auxAllocationHandle));
     func_0015B330((s32)clone);
@@ -3124,7 +3123,7 @@ s32 effCloneTemplateWithPacketDescriptors(EffTemplatePacketList *source) {
         }
         listBytes = count * 12;
         ((EffTemplatePacketList *)copy)->recordsPerPacket = perRecord;
-        ((EffTemplatePacketList *)copy)->listAllocation = sdfAllocGeneralBlock(listBytes + perRecord * count * 16);
+        ((EffTemplatePacketList *)copy)->listAllocation = (u32)sdfAllocGeneralBlock(listBytes + perRecord * count * 16);
         addr = (s32 *)sdfResourceRetainAddress((struct SdfMemBlock *)(((EffTemplatePacketList *)copy)->listAllocation));
         i = 0;
         base = (s32)addr;

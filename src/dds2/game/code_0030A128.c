@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf.h"
 #include "itf_grid_text.h"
 #include "fld_lmap_task.h"
@@ -40,7 +41,6 @@ extern LmapNode *fldLmapAdvanceWindowStart(LmapList *);
 extern u32 itfGetGridListLinkFlags(LmapList *);
 extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
-extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern u32 sdfMemoryGetBlockAddress(SdfMemBlock *block);
 extern s32 fldLocalMapTrackSlotFromMode(s32);
 extern void func_0030A8A8(void);

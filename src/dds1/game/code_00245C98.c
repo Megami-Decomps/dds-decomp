@@ -49,7 +49,6 @@ extern s32 kwlnFadeIsActive(void);
 extern s32 evtGetMessageWindowControlState(void);
 
 
-extern u32 kwlnTaskGetUserValue();
 extern void func_0025E308(s32, s32, s32, ShopScene *, s32, s32);
 extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
@@ -98,8 +97,8 @@ extern void func_002444D0(ShopScene *);
 extern s16 mnuShopHasPendingFlag(ShopScene *);
 
 /* Prepare the active menu state and copy the selection into its window. */
-s32 evtInitializeActiveMenuState(void) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtInitializeActiveMenuState(KwlnTask *task) {
+    s32 stateAddress = kwlnTaskGetUserValue(task);
     MnuShopListContext *windowData;
     s16 pendingSelection;
 
@@ -118,8 +117,8 @@ s32 evtInitializeActiveMenuState(void) {
 }
 
 /* Advance command phase when the current menu state is phase one. */
-s32 evtAdvancePhaseOne(void) {
-    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue();
+s32 evtAdvancePhaseOne(KwlnTask *task) {
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
 
     if (state->action == 1) {
         mnuSetCommandPhase(state, 4);
@@ -129,15 +128,15 @@ s32 evtAdvancePhaseOne(void) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00245DE0);
 
-s32 evtPrimeDispatchStart(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtPrimeDispatchStart(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
     func_00260670(stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 evtSetupDispatchSync(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtSetupDispatchSync(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
     func_0024DD78();
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -150,8 +149,8 @@ void evtInstallStateTableB(ShopScene *state) {
     }
 }
 
-s32 func_00246160(void) {
-    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue();
+s32 func_00246160(KwlnTask *task) {
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
 
     if (state->action == 1) {
         func_002453C8(state);
@@ -160,8 +159,8 @@ s32 func_00246160(void) {
 }
 
 /* Map actions five and seven to their menu phases, then reset substate. */
-s32 evtSelectStateAction(void) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtSelectStateAction(KwlnTask *task) {
+    s32 stateAddress = kwlnTaskGetUserValue(task);
     s32 action = ((ShopScene *)stateAddress)->action;
 
     if (action == 5) {
@@ -180,15 +179,15 @@ s32 evtSelectStateAction(void) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00246220);
 
-s32 evtStageDispatchStart(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtStageDispatchStart(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
     func_00260AB0(stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 evtSetupDispatchSyncB(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtSetupDispatchSyncB(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
     func_0024DD78();
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -201,8 +200,8 @@ void evtInstallStateTableC(ShopScene *state) {
     }
 }
 
-s32 func_00246538(void) {
-    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue();
+s32 func_00246538(KwlnTask *task) {
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
 
     if (state->action == 1) {
         func_002457E8(state);
@@ -210,8 +209,8 @@ s32 func_00246538(void) {
     return 1;
 }
 
-s32 evtSelectStateActionB(void) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtSelectStateActionB(KwlnTask *task) {
+    s32 stateAddress = kwlnTaskGetUserValue(task);
     s32 action = ((ShopScene *)stateAddress)->action;
 
     if (action == 5) {
@@ -230,15 +229,15 @@ s32 evtSelectStateActionB(void) {
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_002465F8);
 
-s32 evtStageDispatchStartB(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtStageDispatchStartB(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
     func_00260AB0(stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 evtSetupDispatchSyncC(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtSetupDispatchSyncC(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
     func_0024DD78();
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -251,8 +250,8 @@ void evtInstallStateTableD(ShopScene *state) {
     }
 }
 
-s32 evtEnableStateFlag(void) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtEnableStateFlag(KwlnTask *task) {
+    s32 stateAddress = kwlnTaskGetUserValue(task);
 
     if ((((ShopScene *)stateAddress)->action == 1) && (func_00245A40(stateAddress) == 0)) {
         ((ShopScene *)stateAddress)->menuMode = 2;
@@ -260,8 +259,8 @@ s32 evtEnableStateFlag(void) {
     return 1;
 }
 
-s32 evtSelectStateActionC(void) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtSelectStateActionC(KwlnTask *task) {
+    s32 stateAddress = kwlnTaskGetUserValue(task);
     s32 action = ((ShopScene *)stateAddress)->action;
 
     if (action == 5) {
@@ -340,32 +339,32 @@ s32 func_002469F0(KwlnTask *task) {
     return dispatchResult;
 }
 
-s32 evtStageDispatchStartC(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtStageDispatchStartC(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
     func_00260AB0(stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 evtSetupDispatchSyncD(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtSetupDispatchSyncD(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
     func_0024DD78();
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-u32 evtResetStateProgressTimer(void) {
+u32 evtResetStateProgressTimer(KwlnTask *task) {
     s32 stateAddress;
 
-    stateAddress = kwlnTaskGetUserValue();
+    stateAddress = kwlnTaskGetUserValue(task);
     ((ShopScene *)stateAddress)->progressTicks = 0;
     mnuSelectLastListNode(((ShopScene *)stateAddress)->sprite->list);
     return 1;
 }
 
 /* Keep the dispatch query alive for 20 idle ticks before restarting its table. */
-s32 evtQueryStateProgress(void *callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtQueryStateProgress(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     s32 dispatchResult = menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_POLL, callbackContext);
 
     if (dispatchResult == 0) {
@@ -383,30 +382,30 @@ s32 evtQueryStateProgress(void *callbackContext) {
     return dispatchResult;
 }
 
-s32 evtFetchDispatchStart(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtFetchDispatchStart(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
     func_0025E108(stateAddress, ((ShopScene *)stateAddress)->progressTicks);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 evtSetupDispatchSyncE(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtSetupDispatchSyncE(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
     func_0024DD78();
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
 
-s32 evtApplyBaseRateProgressStep(void) {
-    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue();
+s32 evtApplyBaseRateProgressStep(KwlnTask *task) {
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
 
     state->counter = 1;
     mnuCampClampSceneCounter(-1, state);
     return 1;
 }
 
-s32 evtAdvanceStateStage(void) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtAdvanceStateStage(KwlnTask *task) {
+    s32 stateAddress = kwlnTaskGetUserValue(task);
 
     if (((ShopScene *)stateAddress)->action == 0xA) {
         struct MenuList *linkedTask;
@@ -425,8 +424,8 @@ extern void func_00260590(struct MenuList *, u32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u8 D_0036AB10[];
 
-s32 evtPollQuantitySelection(void *callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     s32 *dispatchSlot = &((ShopScene *)stateAddress)->dispatchState;
     s32 previousQuantity = ((ShopScene *)stateAddress)->counter;
     s32 input = mnuMapPadMaskToFlags(0xF000F3);
@@ -493,15 +492,15 @@ s32 evtPollQuantitySelection(void *callbackContext) {
     return 0;
 }
 
-s32 evtAlignDispatchStart(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtAlignDispatchStart(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
     func_00261760((ShopScene *)stateAddress);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 evtSetupDispatchSyncF(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtSetupDispatchSyncF(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
     func_0024DD78();
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -602,8 +601,8 @@ s32 func_00247728(KwlnTask *task) {
     return func_00285670(&state->transitionWork, &state->dispatchState, 1, task);
 }
 
-s32 evtSetupDispatchSyncG(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtSetupDispatchSyncG(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
     func_0024DD78();
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -611,8 +610,8 @@ s32 evtSetupDispatchSyncG(s32 callbackContext) {
 
 extern void dspStartEntry();
 
-s32 evtPlayDispatchModeCue(void) {
-    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue();
+s32 evtPlayDispatchModeCue(KwlnTask *task) {
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
     dspSetActive(1);
     switch (state->menuMode) {
     case 1:
@@ -630,8 +629,8 @@ extern u8 D_0036AA68[];
 
 extern void mnuSetCommandPhase(ShopScene *, u32);
 
-s32 evtApplyDispatchModeState(void) {
-    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue();
+s32 evtApplyDispatchModeState(KwlnTask *task) {
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
     switch (state->menuMode) {
     case 1:
         mnuSetCommandPhase(state, 6);
@@ -647,12 +646,12 @@ s32 evtApplyDispatchModeState(void) {
 }
 
 /* After idle dispatch, resume the state table at its saved position. */
-s32 evtSetPopupEntryWhenMessageWindowIdle(void *callbackContext) {
+s32 evtSetPopupEntryWhenMessageWindowIdle(KwlnTask *callbackContext) {
     s32 stateAddress;
     s32 result;
     s32 *dispatchSlot;
 
-    stateAddress = kwlnTaskGetUserValue();
+    stateAddress = kwlnTaskGetUserValue(callbackContext);
     dispatchSlot = &((ShopScene *)stateAddress)->dispatchState;
     result = menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_POLL, callbackContext);
     if (result == 0) {
@@ -671,8 +670,8 @@ extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, struct MenuList *, s
 extern void mnuDrawIconFixedEntryWithBadge(s32, s32, s32, s32, s32, s32);
 extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
 
-s32 func_00247A78(s32 callbackContext) {
-    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue();
+s32 func_00247A78(KwlnTask *callbackContext) {
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(callbackContext);
 
     switch (state->menuMode) {
     case 1:
@@ -705,8 +704,8 @@ s32 func_00247A78(s32 callbackContext) {
     return func_00285670(&state->transitionWork, &state->dispatchState, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 evtSetupDispatchSyncH(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtSetupDispatchSyncH(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
     func_0024DD78();
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -729,8 +728,8 @@ INCLUDE_RODATA(const s32, "game/code_00245C98", D_003AF528);
 
 INCLUDE_ASM(const s32, "game/code_00245C98", func_00247D58);
 
-s32 evtRefreshDispatchStart(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtRefreshDispatchStart(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
     s32 progressTicks = ((ShopScene *)stateAddress)->progressTicks;
 
     if (progressTicks != 0) {
@@ -739,8 +738,8 @@ s32 evtRefreshDispatchStart(s32 callbackContext) {
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
-s32 evtSetupDispatchSyncI(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtSetupDispatchSyncI(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
     func_0024DD78();
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
@@ -762,15 +761,15 @@ u32 evtStartFadeOut(void) {
 INCLUDE_ASM(const s32, "game/code_00245C98", func_002481A0);
 
 /* Select the primary entry action with opaque callback data, not a callback address. */
-s32 evtDispatchStart(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtDispatchStart(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
 /* Select the secondary entry action with the same opaque callback context. */
-s32 evtDispatchSync(s32 callbackContext) {
-    s32 stateAddress = kwlnTaskGetUserValue();
+s32 evtDispatchSync(KwlnTask *callbackContext) {
+    s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_SECONDARY, (void *)callbackContext);
 }
@@ -805,7 +804,6 @@ typedef struct FlagEntry {
 extern void mdlFlagSet(s32);
 
 extern s32 mdlFlagTest(s32);
-extern s32 sdfAllocGeneralBlock(s32);
 
 typedef struct FlagPair {
     s32 first;
@@ -823,7 +821,7 @@ extern FlagPair mnuPartyFlagEventEntries[];
 
 /* Snapshot four primary flag pairs and sixteen extra pairs for restoration. */
 s32 mnuCreateFlagEntries(void) {
-    s32 snapshotHandle = sdfAllocGeneralBlock(MNU_FLAG_SNAPSHOT_BYTES);
+    s32 snapshotHandle = (u32)sdfAllocGeneralBlock(MNU_FLAG_SNAPSHOT_BYTES);
     FlagEntry *snapshot = (FlagEntry *)sdfResourceRetainAddress((struct SdfMemBlock *)(snapshotHandle));
     u32 pairIndex;
 

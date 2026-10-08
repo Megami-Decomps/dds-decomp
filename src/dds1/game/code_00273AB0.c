@@ -16,7 +16,6 @@
 extern void func_0024DD78(void);
 extern s32 evtGetMessageWindowControlState(void);
 
-extern u32 kwlnTaskGetUserValue();
 
 extern void func_00272778(s32);
 extern void mnuCreateStaffImageSprite(s32);
@@ -111,8 +110,8 @@ extern void mnuResetListNodeFadeCounters(s32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuClearListFlagsOneAndTwo();
 
-s32 mnuStaffImageEnterA(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffImageEnterA(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
 
     func_00272778(task);
@@ -158,8 +157,8 @@ u32 func_00273C48(void) {
 }
 
 /* Once the popup is idle, confirmation captures the page-selection cursor index. */
-s32 mnuPollStaffValueSelectionConfirmation(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuPollStaffValueSelectionConfirmation(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = mnuMapPadMaskToFlags(3);
@@ -184,8 +183,8 @@ s32 mnuPollStaffValueSelectionConfirmation(s32 task) {
     return 0;
 }
 
-s32 mnuPrepareStaffImageAndSelectionLabel(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuPrepareStaffImageAndSelectionLabel(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     func_00272778(task);
     mnuCreateStaffImageSprite(7);
     func_00272668(1, ((StaffImageContext *)context)->activeWindow->list->cursor->index, (s32)D_0037C860, context, 1, 0x53);
@@ -195,8 +194,8 @@ s32 mnuPrepareStaffImageAndSelectionLabel(s32 task) {
 }
 
 /* Run the label-image state's teardown phase and return its scheduler word. */
-s32 mnuExitStaffImageAndSelectionLabel(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuExitStaffImageAndSelectionLabel(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     return menuRunPanel((void *)context, 2, (void *)task);
 }
 
@@ -235,8 +234,8 @@ s32 mnuHandleSecondaryStaffObjectInput(s32 task) {
     return 0;
 }
 
-s32 mnuStaffImageEnterD(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffImageEnterD(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
 
     func_00272778(task);
@@ -253,8 +252,8 @@ s32 mnuStaffImageEnterD(s32 task) {
 }
 
 /* Run the secondary-image state's teardown phase and return its scheduler word. */
-s32 mnuStaffImageExitD(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffImageExitD(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     return menuRunPanel((void *)context, 2, (void *)task);
 }
 
@@ -313,8 +312,8 @@ s32 func_00274050(KwlnTask *task) {
     return 0;
 }
 
-s32 mnuStaffImageEnterB(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffImageEnterB(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
 
     func_00272778(task);
@@ -331,14 +330,14 @@ s32 mnuStaffImageEnterB(s32 task) {
 }
 
 /* Run the alternate primary-image state's teardown phase and return its scheduler word. */
-s32 mnuStaffImageExitB(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffImageExitB(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     return menuRunPanel((void *)context, 2, (void *)task);
 }
 
 /* Build the staff value page for the current page-selection cursor. */
-s32 mnuInitializeStaffValuePage(s32 unused) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuInitializeStaffValuePage(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
     s32 index = ((StaffImageContext *)context)->pageWindow.lists[0]->cursor->index;
 
@@ -362,8 +361,8 @@ s32 mnuInitializeStaffValuePage(s32 unused) {
     return 1;
 }
 
-s32 mnuReleaseStaffValuePageResources(s32 unused) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuReleaseStaffValuePageResources(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
     mnuReleaseStaffExtraWindow(context);
     func_00276720(context + 0x15C, 0, 0, 0);
@@ -431,8 +430,8 @@ void mnuSwapEquippedBullet(s32 scene, DatPartyRecord *unit, s32 itemId) {
 
 /* Change pages only once per input sample, then restore the saved node and
  * row count on the new page. Returns one when the page changed, zero otherwise. */
-s32 mnuHandleStaffValuePageInput(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuHandleStaffValuePageInput(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
     s32 pageChanged = 0;
     u32 buttons = mnuMapPadMaskToFlags(0x300);
@@ -477,8 +476,8 @@ s32 mnuHandleStaffValuePageInput(s32 task) {
     return 1;
 }
 
-s32 func_00274768(s32 task) {
-    StaffImageContext *context = (StaffImageContext *)kwlnTaskGetUserValue();
+s32 func_00274768(KwlnTask *task) {
+    StaffImageContext *context = (StaffImageContext *)kwlnTaskGetUserValue(task);
     StaffImageChoices *menu = context->menu;
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     DatPartyRecord *party = &datGameState->party[context->pageWindow.lists[0]->cursor->index];
@@ -546,8 +545,8 @@ s32 func_00274768(s32 task) {
 }
 
 /* Draw the selected party member's value page and advance its primary dispatch. */
-s32 mnuDrawStaffPartyValuePage(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
     s32 index = ((StaffImageContext *)context)->pageWindow.lists[0]->cursor->index;
     s32 partyEntry = (s32)&datGameState->party[index];
@@ -585,8 +584,8 @@ s32 mnuDrawStaffPartyValuePage(s32 task) {
 }
 
 /* Request message-window mode one before the value-page teardown phase. */
-s32 mnuExitStaffValuePage(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuExitStaffValuePage(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
     func_0024DD78();
     return menuRunPanel((void *)context, 2, (void *)task);

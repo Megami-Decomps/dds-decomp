@@ -1,5 +1,6 @@
 #include "eff.h"
 #include "common.h"
+#include "sdf_resource.h"
 
 
 extern f32 func_00353228(f32);
@@ -38,7 +39,6 @@ typedef struct ModelInstanceWork {
     u32 unkC;
 } ModelInstanceWork;
 
-extern u32 sdfAllocGeneralBlock(s32);
 extern void *sdfMemoryGetBlockAddress(u32);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
@@ -117,7 +117,7 @@ ModelInstanceWork *itfCreateModelInstanceWork(s32 listCount, s32 *instanceCounts
 
     for (i = 0; i < listCount; i++) allocationSize += instanceCounts[i] * sizeof(ModelInstance);
     evtPrintDeveloperConsoleMessage("SpriteWork Object Size %d\n", allocationSize);
-    handle = sdfAllocGeneralBlock(allocationSize);
+    handle = (u32)sdfAllocGeneralBlock(allocationSize);
     work = sdfMemoryGetBlockAddress(handle);
     memset(work, 0, allocationSize);
     work->handle = handle;

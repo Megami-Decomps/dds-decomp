@@ -1157,7 +1157,6 @@ void sdfResetFlagListEntries(SdfFlagListWork *work) {
     memset(work->colors, 0, entryCount << SDF_FLAG_LIST_VALUE_SHIFT);
 }
 
-extern s32 sdfAllocGeneralBlock(s32);
 
 SdfFlagListWork *func_00316528(const SdfFlagListParams *source) {
     u32 count;
@@ -1168,7 +1167,7 @@ SdfFlagListWork *func_00316528(const SdfFlagListParams *source) {
 
     count = source->count;
     arrayBytes = count * (sizeof(f32[2][4]) + sizeof(u32[2]) + sizeof(SdfFlagListMark));
-    resource = sdfAllocGeneralBlock(arrayBytes + sizeof(SdfFlagListWork));
+    resource = (u32)sdfAllocGeneralBlock(arrayBytes + sizeof(SdfFlagListWork));
     buffer = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
     work = (SdfFlagListWork *)(buffer + arrayBytes);
     work->vertices = (f32 (*)[4])buffer;
@@ -1364,7 +1363,7 @@ void func_00316C88(SdfFlagListWork *work) {
     }
     count = work->params.count;
     sourceVertices = work->vertices;
-    vertexAllocation = sdfAllocGeneralBlock(count * SDF_FLAG_LIST_ENTRY_VERTEX_BYTES);
+    vertexAllocation = (u32)sdfAllocGeneralBlock(count * SDF_FLAG_LIST_ENTRY_VERTEX_BYTES);
     count *= SDF_FLAG_LIST_VERTICES_PER_ENTRY;
     copiedVertices = sdfMemoryGetBlockAddress(vertexAllocation);
     for (vertexIndex = 0; vertexIndex < count; vertexIndex++) {

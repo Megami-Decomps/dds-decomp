@@ -9,10 +9,8 @@
 
 extern SdfTex *itfLoadTextureFromAsset(const char *);
 
-extern u32 kwlnTaskGetUserValue(KwlnTask *);
 
 extern void *sdfAllocSizeClassBlock(s32);
-extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 
 extern char D_003BBF78[];
 

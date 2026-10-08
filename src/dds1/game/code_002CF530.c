@@ -12,7 +12,6 @@ extern void sdfReleaseCurrentResourceHandle(void *);
 extern void (*sdfTickCallback)(void);
 
 
-extern void *sdfAllocGeneralBlock(void);
 
 extern void *sdfAllocSizeClassBlock();
 
@@ -32,7 +31,7 @@ extern s32 RemoveSbusIntcHandler(s32);
 
 void *sdfAllocateBlockBySizeThreshold(s32 size) {
     if (size >= 0x401) {
-        return (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock());
+        return (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock(size));
     }
     return sdfAllocSizeClassBlock(size);
 }
