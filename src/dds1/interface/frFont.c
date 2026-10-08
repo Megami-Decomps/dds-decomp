@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font_measure.h"
 #include "itf.h"
 #include "itf_mem_node.h"
 
@@ -14,9 +15,6 @@ extern u8 D_003BB180[];
 
 
 extern s32 frFontDefaultGlyphCellSize;
-
-
-extern u32 frFontMeasureGlyphChain(FrFontGlyph *parentGlyph);
 
 
 void frFontCreateContext();
