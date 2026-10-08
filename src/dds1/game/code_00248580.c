@@ -1091,7 +1091,26 @@ void fldSaveSceneOptionsAndClearFlags(DatPartyRecord *option) {
     option->status = retainedStatus;
 }
 
-INCLUDE_ASM(const s32, "game/code_00248580", func_0024A2D8);
+extern s32 func_0025C0D8(void *, s32, s32);
+
+s32 func_0024A2D8(s32 state) {
+    MenuTerminalWork *work = (MenuTerminalWork *)state;
+    s32 result = D_003BC3E1;
+
+    if (result != 0) {
+        result = work->reduced < 3;
+        if (result && work->reduced > 0) {
+            result = work->effectHandle;
+            if (result != 0) {
+                result = mnuHasEffectResourceHandle((MenuResourceWork *)work->effectHandle);
+                if (result != 0) {
+                    result = func_0025C0D8((void *)work->effectHandle, 0x80, 0x53);
+                }
+            }
+        }
+    }
+    return result;
+}
 
 extern s32 D_003AF688[3][2];
 extern void func_002BF4E0(s32, s32, s32, s32, s32, void *, s32, s32);
@@ -1624,8 +1643,6 @@ void mnuApplyFadeTrackMode(s32 mode, MenuFadeHost *host) {
 
 
 extern void evtFinishMessageWindowAndNotify(void);
-
-extern void func_0024A2D8(s32);
 
 extern void func_0024DD78(void);
 
