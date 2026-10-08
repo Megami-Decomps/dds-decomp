@@ -7,6 +7,7 @@
 #include "sdf_movie_state.h"
 
 typedef struct DevState DevState;
+typedef struct SoundFormat SoundFormat;
 
 enum {
     PAC_HEADER_BYTES = 0x10,
@@ -55,12 +56,12 @@ extern void *sdfDevCreateCallbackState(s32 path, void *callback, s32 context);
 extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
 extern char *func_00302240(const char *text, s32 delimiter);
 extern s32 func_003017A0(const char *text, const char *suffix);
-extern void sdfSoundInitFormattedAndAppendNode(void *node, u8 *format,
-                                                void *callback, void *owner, s32 source);
+extern void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format,
+                                                SdfStreamRead read, u32 source, s32 resource);
 extern s32 func_002ED008(void *, s32, s32, s32, s32);
 extern s32 func_002ED230(void *, s32, s32, s32, s32);
-extern s32 func_002ED5C0(void *, void *, s32, u8 *, s32);
-extern s32 func_002ED760(void *, void *, s32, u8 *, s32);
+extern s32 func_002ED5C0(SdfStreamFrameNode *, u32, s32, void *, s32);
+extern s32 func_002ED760(SdfStreamFrameNode *, u32, s32, void *, s32);
 extern s32 D_003BD618;
 extern s32 D_003BDABC;
 extern u8 D_003BD638[];
@@ -109,8 +110,8 @@ void func_002ED8D0(MovObj *owner, SdfMovieDescriptor *descriptor, const char *na
         owner->state = SDF_MOVIE_STATE_INITIAL;
         owner->deviceState = sdfDevCreateCallbackState((s32)name,
                                                         (void *)func_002ED008, (s32)owner);
-        sdfSoundInitFormattedAndAppendNode(&owner->soundNode, soundFormat,
-                                            (void *)func_002ED5C0, owner, descriptor->source);
+        sdfSoundInitFormattedAndAppendNode(&owner->soundNode, (SoundFormat *)soundFormat,
+                                            func_002ED5C0, (u32)owner, descriptor->source);
         return;
     }
 
@@ -136,8 +137,8 @@ void func_002ED8D0(MovObj *owner, SdfMovieDescriptor *descriptor, const char *na
                                                     (void *)func_002ED230, (s32)owner);
     owner->pacEnabled = 1;
     owner->packetLimit = 0x7F;
-    sdfSoundInitFormattedAndAppendNode(&owner->soundNode, soundFormat,
-                                        (void *)func_002ED760, owner, descriptor->source);
+    sdfSoundInitFormattedAndAppendNode(&owner->soundNode, (SoundFormat *)soundFormat,
+                                        func_002ED760, (u32)owner, descriptor->source);
 }
 
 extern s32 sdfDevQueueActiveOperation(void *);
@@ -301,4 +302,3 @@ void sdfDecodePacNodeAndAdvanceTail(PacState *state) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_002ED8D0", D_003BD638);
-
