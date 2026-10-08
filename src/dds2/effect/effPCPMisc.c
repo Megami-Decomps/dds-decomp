@@ -5904,7 +5904,7 @@ void effPcpRandomizeSpawnSlot(EffPCPSpawnRangeWork *work, s32 index) {
 
 
 /* vu0 routine: move delayed radial events, apply damping, then fade and draw. */
-void func_0018B778(EffPCPSpawnRangeWork *work) {
+void effPcpUpdateSpawnRangeEvents(EffPCPSpawnRangeWork *work) {
     EffPCPEventPlace place;
     f32 origin[4] __attribute__((aligned(16)));
     u32 count = work->params.count;
