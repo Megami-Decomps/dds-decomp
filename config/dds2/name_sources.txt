@@ -1881,6 +1881,8 @@
 0x00197C08	effEventAdvanceScaleBlurSetup	inferred	readability/matching review (QP16)
 0x00197CC0	effEventGetScaleBlurSetupParams	inferred	readability/matching review (QP16)
 0x00197CD0	effEventSetScaleBlurParameters	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:719:func_00197CD0; Copies the complete EffBlurScaleParams into the event scale-blur parameter block supplied to its channel initializer.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x00197D38	effEventCloneSoundMixer	inferred	Returns the SoundMixer clone produced by sndMixerClone; callers retain the returned owner.
+0x00197D50	effEventReleaseSoundMixerVoices	inferred	Forwards the retained SoundMixer to sndReleaseAllVoices; it does not free the mixer.
 0x00197D68	effEventCreate	inferred	readability/matching review (QP16)
 0x00197E40	effEventReleaseNode	inferred	Releases the event node's resource and frees the node.
 0x00197ED8	effEventCopySerializedRecord	inferred	readability/matching review (QP16)

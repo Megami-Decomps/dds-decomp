@@ -5,6 +5,7 @@
 #include "dds3obj.h"
 #include "eff.h"
 #include "eff_event.h"
+#include "eff_event_sound.h"
 #include "sdf_draw.h"
 #include "btl_sound.h"
 
@@ -395,7 +396,6 @@ typedef struct EffectEventVectorParameters {
 } EffectEventVectorParameters;
 
 extern const EffectEventVectorParameters D_00412950;
-extern SoundMixer *func_00197D38(SoundMixer *source);
 
 EffectObj *func_00115358(source, firstVector, secondVector)
     SoundMixer *source;
@@ -415,7 +415,7 @@ EffectObj *func_00115358(source, firstVector, secondVector)
     }
     PCP_COPY_VECTOR(parameters.firstVector, firstVector);
     PCP_COPY_VECTOR(parameters.secondVector, secondVector);
-    mixer = func_00197D38(source);
+    mixer = effEventCloneSoundMixer(source);
     data = obj->data;
     data->state = EFF_OBJ_STATE_EVENT_NODE;
     data->handle = mixer;
