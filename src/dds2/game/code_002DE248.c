@@ -11405,14 +11405,14 @@ u8 *effResolveResourceSlots(EffectSlotSet *set, u8 *resourceBytes, s32 clearAllS
             entryBytes += EFF_RESOURCE_TABLE_ENTRY_BYTES;
             if (clearAllSlots == 0) {
                 if (selectedSlot == -1 || selectedSlot == slotIndex) {
-                    if (set->handles[slotIndex] == 0) {
-                        set->handles[slotIndex] = sdfTexAcquireResourceTexture(resourceData);
+                    if (set->textureReferences[slotIndex] == 0) {
+                        set->textureReferences[slotIndex] = sdfTexAcquireResourceTexture(resourceData);
                     }
                 } else {
-                    set->handles[slotIndex] = 0;
+                    set->textureReferences[slotIndex] = 0;
                 }
             } else {
-                set->handles[slotIndex] = 0;
+                set->textureReferences[slotIndex] = 0;
             }
             slotIndex++;
         } while (slotIndex < set->textureCount);
@@ -11446,12 +11446,12 @@ void effReleaseSlotTextureReferencesAndResetWork(u8 *owner, s32 preserve) {
     u32 *resources;
 
     if (count != 0) {
-        resources = (u32 *)((EffectSlotSet *)owner)->handles;
+        resources = (u32 *)((EffectSlotSet *)owner)->textureReferences;
         do {
             if (resources[i] != 0) {
                 u32 *current;
                 sdfTexReleaseReference((SdfTex *)resources[i]);
-                current = (u32 *)((EffectSlotSet *)owner)->handles;
+                current = (u32 *)((EffectSlotSet *)owner)->textureReferences;
                 count = ((EffectSlotSet *)owner)->textureCount;
                 resources = current;
                 current[i] = 0;
@@ -11469,7 +11469,7 @@ void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *owner) {
 }
 
 u8 effHasFirstTextureHandle(s32 owner) {
-    return *(s32 *)((EffectSlotSet *)owner)->handles != 0;
+    return *(s32 *)((EffectSlotSet *)owner)->textureReferences != 0;
 }
 
 /* Allocate and clear count 0x6C-byte records; retain the existing allocation/count/address header order. */
@@ -11506,8 +11506,8 @@ EffectSlotSet *func_00305148(u32 allocationHandle, u32 keepAllocation) {
     set->textureCount = *(u16 *)(resource + 0x14);
     set->textureAllocation = sdfAllocGeneralBlock(
         set->textureCount * 4);
-    set->handles = (void **)sdfResourceRetainAddress(set->textureAllocation);
-    memset(set->handles, 0, set->textureCount * 4);
+    set->textureReferences = (SdfTex **)sdfResourceRetainAddress(set->textureAllocation);
+    memset(set->textureReferences, 0, set->textureCount * 4);
     entries = effResolveResourceSlots(set, resource,
         keepAllocation, -1);
 
@@ -11533,9 +11533,9 @@ EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 cou
     effect->unk04 = 1;
     {
         u32 mode = source->textureCount;
-        void **handles = source->handles;
+        SdfTex **textureReferences = source->textureReferences;
         effect->textureCount = mode;
-        effect->handles = handles;
+        effect->textureReferences = textureReferences;
     }
     effect->sourceAllocation = 0;
     effect->textureAllocation = 0;
