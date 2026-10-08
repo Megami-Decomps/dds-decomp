@@ -13,6 +13,7 @@
 #include "eff.h"
 #include "kwln.h"
 #include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
 
 extern u8 D_00324510[2][2][16];
 extern u8 D_003BA878[2][2];
@@ -1991,7 +1992,6 @@ void fldUpdateMenuResourceEffects(void) {
 
 extern void *fileQueuePlainDispatchRequest(const char *);
 
-extern void func_00288C50(void *);
 
 extern void func_00288788(void *);
 
@@ -2036,7 +2036,7 @@ void fldParseMixLb(void) {
 
     index = 0;
     lb = fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
-    func_00288C50(lb);
+    func_00288C50((struct FileRequest *)lb);
     for (node = lb->nodes; node != NULL; node = node->next, index++) {
         switch (index) {
         case 0:
