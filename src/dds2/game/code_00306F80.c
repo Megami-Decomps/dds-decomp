@@ -6,6 +6,7 @@
 #include "sdf.h"
 #include "mnu.h"
 #include "itf_draw_grid.h"
+#include "eff_resource_slots.h"
 
 extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
 
@@ -88,7 +89,7 @@ void func_00307018(EffectSlotSet *owner, s32 index) {
             }
             base->slotOffset = 0;
         }
-        func_00304B18(owner, index + base->slotOffset, previous);
+        effInitializeSlotWorkFromDescription(owner, index + base->slotOffset, previous);
         next = (BdWork *)effGetSlotWorkOrOverride(owner, index + base->slotOffset);
         next->states[0].flags = previous->states[0].flags;
         next->states[0].source = previous->states[0].source;
@@ -112,8 +113,6 @@ s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key) {
     return result;
 }
 
-extern void func_00304B18(void *, s32, void *);
-
 /* Store grid bounds in the renderer's fixed-point coordinate units. */
 void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
     EffectSlotDescription *entry = &object->descriptions[index];
@@ -123,7 +122,7 @@ void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *object, s32 index, s32 x,
     entry->yOffset = y >> 3;
     entry->width = width >> 4;
     entry->height = height >> 3;
-    func_00304B18(object, index, record);
+    effInitializeSlotWorkFromDescription(object, index, record);
 }
 
 /* Copy the quantized bounds into the corresponding render entry as four words. */
