@@ -207,7 +207,7 @@ u32 func_00159BB0(void) {
 }
 
 SdfTex *effGetBillResourceTexture(s32 index) {
-    return (SdfTex *)((BillObj *)effBillResourceOwners[index])->child->value;
+    return ((BillObj *)effBillResourceOwners[index])->child->texture;
 }
 
 void effCopyVector(dst, src)
@@ -266,7 +266,7 @@ void billSetAllChildVariants(BillObj *effect, s16 variant) {
 
 s32 billGetChildValue(BillObj *effect) {
     if (effect->kind == 0) {
-        return effect->child->value;
+        return (s32)effect->child->texture;
     }
     return 0;
 }
