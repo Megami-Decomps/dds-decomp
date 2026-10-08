@@ -781,7 +781,7 @@ typedef struct MenuIconSprites {
 } MenuIconSprites;
 
 MenuIconSprites *mnuCreateWindowSpriteResources(u32 width, u32 height, u32 value,
-                    u32 resourceHandle, s32 *indices, u32 unused);
+                    struct EffectSlotSet *resourceHandle, s32 *indices, u32 unused);
 void mnuReleaseWindowTextures(MenuIconSprites *menu);
 
 typedef struct MenuFadeFields {

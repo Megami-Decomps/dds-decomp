@@ -7,6 +7,7 @@
 struct EffNode;
 
 struct EffRequest;
+struct SdfMemBlock;
 
 /* Packed position/basis query; the final word is a signed extent override. */
 typedef struct EffectVectorRequest {
@@ -56,7 +57,7 @@ typedef struct EffMagatuhiValueWork {
     u16 *validCounts;
     f32 (*angleRows)[4];
     SdfTex *texture;
-    void *allocationHandle;
+    struct SdfMemBlock *allocationHandle;
 } EffMagatuhiValueWork;
 
 /* Seven copied words; the parent appends its independently allocated history. */
@@ -204,28 +205,25 @@ typedef struct EffCntRec {
     u32 unk4;        /* +0x04: id released with its owner */
 } EffCntRec;
 
-/* Effect primitive work: owned buffers, channel-B cursor and random records (0x170).
- * Shared by DDS1/2 effect and panel units. */
-typedef struct EffPrim {
-    void *primaryResource; /* +0x00: resource released by effFreeBuffers */
-    void *secondaryResource; /* +0x04: resource released by effFreeBuffers */
-    u32 recordCount;       /* +0x08: number of keyframe records */
-    u16 unkC;              /* +0x0C: flag set during creation */
-    u8 unkE[2];
-    s32 unk10;
-    void *unk14;           /* +0x14: optional buffer */
-    void *unk18;
-    void *unk1C;
-    u32 cursorIndex;       /* +0x20: channel-B record index */
-    f32 cursorPosition;    /* +0x24: channel-B interpolation position */
-    f32 cursorStep;        /* +0x28: channel-B position increment */
-    u8 unk2C[0x18];
-    u32 randomCount;       /* +0x44: number of random records */
-    u32 randomModulus;     /* +0x48: modulus for each random slot */
-    u8 unk4C[0x11C];
-    EffCntRec *counterRecords; /* +0x168 */
-    s32 *slotLookup;       /* +0x16C: slot lookup base */
-} EffPrim;
+/* Complete 0x2C-byte primitive-curve owner allocated by effCreatePrimitiveCurve.
+ * Keys are borrowed XYZ samples; the three polynomial coefficient banks share
+ * the optional backing allocation. */
+typedef struct EffPrimitiveCurve {
+    struct SdfMemBlock *allocation;            /* 0x00: curve owner storage */
+    struct SdfMemBlock *coefficientAllocation; /* 0x04: cubic coefficient storage */
+    u32 recordCount;                          /* 0x08: number of XYZ keys */
+    u16 interpolationMode;                    /* 0x0C: zero cubic, nonzero linear */
+    u8 pad0E[2];
+    f32 *keys;                                /* 0x10: interleaved XYZ values */
+    f32 *cubicCoefficients;                   /* 0x14: null for linear interpolation */
+    f32 *quadraticCoefficients;               /* 0x18 */
+    f32 *linearCoefficients;                  /* 0x1C */
+    u32 cursorIndex;                          /* 0x20 */
+    f32 cursorPosition;                       /* 0x24: position within the segment */
+    f32 cursorStep;                           /* 0x28 */
+} EffPrimitiveCurve;
+
+typedef char EffPrimitiveCurveSizeCheck[sizeof(EffPrimitiveCurve) == 0x2C ? 1 : -1];
 
 /* Type-indexed effect work and texture handle (0x40); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct EffWork {
@@ -286,9 +284,9 @@ typedef struct EffMsg {
 
 /* Effect slot array owner and allocation handle (0xC); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct EffArrHdr {
-    void *slots; /* Slot array base, read by effMathGetSlotAt. */
+    void *slots; /* Slot-array base; effMath and effEvent use different slot types. */
     u32 unk4;   /* Slot count. */
-    void *allocation; /* Allocation handle. */
+    struct SdfMemBlock *allocation; /* Retained allocation descriptor. */
 } EffArrHdr;
 
 /* Two-child draw descriptor at +0x34 in animation-list objects; child allocations end before it. */
@@ -819,15 +817,15 @@ typedef struct EffectSlotDescription {
 
 /* Native 0x30-byte resource-slot owner: source descriptors and live work arrays. */
 typedef struct EffectSlotSet {
-    u32 sourceAllocation;
+    struct SdfMemBlock *sourceAllocation;
     u32 unk04;
     u32 count;
-    u32 descriptionAllocation;
+    struct SdfMemBlock *descriptionAllocation;
     EffectSlotDescription *descriptions;
-    u32 workAllocation;
+    struct SdfMemBlock *workAllocation;
     BdWork *workEntries;
     u32 textureCount;
-    u32 textureAllocation;
+    struct SdfMemBlock *textureAllocation;
     void **handles;
     s32 defaultValue;
     u8 pad2C[4];

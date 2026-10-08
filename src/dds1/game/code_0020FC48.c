@@ -1,5 +1,6 @@
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
 #include "sdf_resource.h"
@@ -1489,8 +1490,6 @@ void btlReleaseRuntimeResource(void) {
 }
 
 
-
-extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));
 
 extern void *sdfAllocPacketAligned(s32);
 

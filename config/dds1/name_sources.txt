@@ -2344,11 +2344,15 @@
 0x00192CC8	effCreatePrimitiveCurve	inferred	Fam_Mid3
 0x00192DE0	effFreeBuffers	inferred	frees +0x4 buffer if +0x14 word set, then frees +0x0
 0x00192E30	effAdvancePrimCursor	inferred	steps channel-B idx/pos via helper, wraps at 1.0, resets at count
+0x00192ED0	effSamplePrimitiveCurveVertex	inferred	Evaluates packed XYZ primitive-curve coefficients or adjacent linear keys into the output vertex; cubic interpolation also writes homogeneous W=1.
 0x00193000	effSamplePrimitiveCurve	inferred	confidence=high; matched-C; src/dds1/game/code_00192488.c:337:func_00193000; Evaluates precomputed cubic xyz coefficients in Horner order or interpolates neighboring linear xyz keys by mode; leaves the sampled input vector in vf10. Linear-path W behavior is left unchanged.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00193130	effResetPrimitiveRecordCursor	inferred	confidence=high; matched-C; src/dds1/game/code_00192488.c:364:func_00193130; requires-symbol-registration; Resets the primitive curve cursor index and interpolation position.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x00193140	effSetPrimitiveRecordCursorStep	inferred	confidence=high; matched-C; src/dds1/game/code_00192488.c:369:func_00193140; requires-symbol-registration; Sets the primitive curve cursor increment.; source=reviewed-prior-QP15 [names_qp15.tsv]
-0x00193148	effBuildAndDispatch	inferred	allocs/inits work buffer via func_001931E0 then runs func_001934E8/001935B8 by flag
+0x00193148	effBuildAndDispatch	inferred	Allocates temporary coordinate-major tangents, selects standard or equal-component-flattening coefficient construction, then releases the temporary allocation.
+0x001931E0	effBuildPrimitiveCurveTangents	inferred	Reads borrowed interleaved XYZ keys and solves one cubic tangent system per coordinate into three coordinate-major float arrays.
 0x00193368	effSolveCubicTangents	inferred	U2
+0x001934E8	effBuildPrimitiveCurveCoefficients	inferred	Builds cubic, quadratic and linear Hermite power-basis XYZ coefficient banks from interleaved keys and coordinate-major tangents.
+0x001935B8	effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents	inferred	Builds the same Hermite coefficient banks but zeroes all three coefficients for each component whose adjacent endpoint values are exactly equal.
 0x001936A8	effCreateChannel	inferred	allocates and inits 0x18 channel object, NULL when count < 4
 0x00193720	effReleaseInterpolationChannel	inferred	src/dds1/game/code_00192488.c func_00193720: If channel pointer exists, releases allocation handle stored in its first word. [names_reviewed24.tsv]
 0x00193740	effAdvanceChanCursor	inferred	steps channel-A idx/pos (+3) via helper, wraps at 1.0, resets at count
@@ -2954,6 +2958,7 @@
 0x001DBCB0	btlCreateFloatTask29	inferred	task type 0x29 with 16 float args
 0x001DBE20	btlScheduleContextReset	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001DC270	btlCopyMotionTransform	inferred	copies both vectors and two scalar values of a motion transform [names_R_FuncNames8.tsv]
+0x001DC2A0	btlSetMotionTransformFieldOfView	inferred	Stores radians at camera pose field-of-view offset 0x24; keyframe caller converts degrees to radians.
 0x001DC2A8	btlInitMotionTransformFromVectors	inferred	uses origin and quaternion to initialize transform vectors and angle [names_R_FuncNames8.tsv]
 0x001DC338	btlInitMotionTransformFromComponents	inferred	packs position and quaternion then initializes transform with degree angle [names_R_FuncNames8.tsv]
 0x001DC470	btlGetActiveUnitId	inferred	DDS2 001E9798 twin; returns BtlWork.activeUnitId [names_R_FuncNames2.tsv]
@@ -4682,7 +4687,8 @@
 0x00271648	mnuReleaseStaffResourceGroups	inferred	Releases the staff image handles and its three indexed groups of resource handles.
 0x002716E8	mnuStaffSlotsAllFilled	inferred	true when all four StaffSlots arrays hold non-zero entries
 0x00271948	mnuReleaseStaffResourceSlotGroups	inferred	Releases several staff resource-slot groups plus their shared resource group. [names_reviewed13.tsv]
-0x00271D30	mnuCreateStaffPanelSet	inferred	builds three windows with func_00271B50
+0x00271B50	mnuCreateFilteredStaffEntryWindow	inferred	Filters staff entries by required model flags, sizes the staff window from the visible count, and records each source ordinal on appended nodes.
+0x00271D30	mnuCreateStaffPanelSet	inferred	builds three windows with mnuCreateFilteredStaffEntryWindow
 0x00271DF8	mnuReleaseStaffSpriteAndResourceHandles	inferred	Destroys staff sprite windows and releases their held resource lists. [names_reviewed11.tsv]
 0x00271E58	mnuCreateStaffCampWork	inferred	confidence=high; matched-C; src/dds1/game/code_00270FB0.c:358:func_00271E58; M143; source=names_M143.tsv:18; review=Allocates and clears staff work; initializes value record, party panel, background, message window and timer. [names_qp11.tsv]
 0x00271F18	mnuDestroyStaffMenuTask	inferred	Frees the staff menu task's images, assets, context and resources and marks the camp state complete.
@@ -4852,6 +4858,7 @@
 0x0027C770	mnuRetreatWindowListSelection	inferred	Adapts window container to its list and retreats selection by default direction. [names_reviewed18.tsv]
 0x0027CCD0	mnuDrawWindowSelectionPanel	inferred	Draws visible panel at scrolled row and advances window transition. [names_reviewed5.tsv]
 0x0027CDD0	mnuDrawWindowContainer	inferred	Draws icon rows, selected panel and window frame then advances fade state. [names_reviewed5.tsv]
+0x0027CF28	mnuInitializeWindowSpriteGroup	inferred	Initializes all seven sprite slots, sets their grid entries, and refreshes paired corner colors for the window sprite group.
 0x0027D148	mnuCreateWindowState	inferred	Allocates 0x28-byte object, zeroes it, stores handle and initializes with four args.
 0x0027D1E8	mnuReleaseWindowTextures	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027D248	mnuConfigureWindowSpriteSlots	inferred	Applies configuration for six of the seven MenuWindowSpriteGroup sprite slots.
@@ -5762,6 +5769,7 @@
 0x002BC510	effResetFileResourceManager	inferred	Zeros manager counters and handles and sets its initial file-resource state. [names_reviewed5.tsv]
 0x002BC538	effClassifyResourceMask	inferred	Maps a recognized single-bit resource mask to its category index. [names_reviewed5.tsv]
 0x002BC5C0	mnuAllocateValueRecord	inferred	Creates zeroed menu work carrying initial value; callers create progress-host and staff-menu work. [names_reviewed5.tsv]
+0x002BC618	effDestroyEffectList	inferred	frees the allocated EffectList header with sdfReleaseChipBlock; entry nodes are managed separately
 0x002BC630	mnuGetValueRecordOwner	inferred	Returns the initial owner/value stored in the first word of this menu record. [names_reviewed5.tsv]
 0x002BC638	effAppendListEntry	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002BC6F0	effRemoveListEntry	inferred	eff effect resources and animation in game/code_0029A840.c
@@ -6678,6 +6686,7 @@
 0x002EB490	sdfSoundAppendNode	inferred	appends a node to the D_003BDA98 intrusive list
 0x002EB4D0	sdfSoundRemoveNode	inferred	unlinks a node from the D_003BDA98 intrusive list
 0x002EB510	sdfAllocateStreamFrameBuffers	inferred	Allocates two width-by-height frame buffers with two or four bytes per pixel depending on the node flag.
+0x002EB578	sdfBuildStreamInputDmaChain	inferred	Consumes the bytes after the parsed frame header, builds max-0xFFF00-byte input DMA chain tags, and stores their chain under the SdfStreamFrameNode owner for sdfSoundStartIpuInputDma.
 0x002EB650	sdfBuildStreamFrameTransferPackets	inferred	builds and stores both transfer packet buffers for a full SdfStreamFrameNode before submission
 0x002EB8C0	sdfSoundInitNodeFromFormat	inferred	memset node, translate hasAudio/stereo into twoChannel 0/1/2
 0x002EB9C8	sdfSoundInitFormattedNode	inferred	Initializes a sound node using format and callback values and allocates its sample buffer.
@@ -6687,10 +6696,15 @@
 0x002EBEB8	sdfSoundStartIpuInputDma	inferred	Fam_Mid3
 0x002EBF88	sdfSoundQueueIpuBuffer	inferred	Writes the selected buffer address size and start command to IPU MMIO registers
 0x002EBFF0	sdfSoundSyncIpu	inferred	writes IPU command MMIO then synchronizes sceIpuSync
+0x002EC060	sdfStartStreamNodeIpuTransfer	inferred	Native setup consumes the stream node, installs it as the active IPU transfer, and starts input DMA.
+0x002EC230	sdfDispatchNextStreamNode	inferred	Scans queued stream nodes, selects an eligible node, unlinks it, and starts its IPU transfer.
 0x002EC2F0	sdfIpuDmaCompletionWorker	inferred	confidence=high; src/dds1/game/code_002E9708.c:func_002EC2F0; Waits for IPU worker wakeups, stops DMA, updates completion/loop state, requeues unfinished work with interrupt protection, and resumes processing. [names_qp9.tsv]
+0x002EC3C0	sdfWakeIpuCompletionWorker	inferred	Type-3 handler wakes the IPU completion worker and reenables interrupts.
+0x002EC3F0	sdfCompleteIpuInputFeedDma	inferred	Type-4 handler consumes the input-DMA callback node, advances/refills feed slots, and restarts input DMA.
 0x002EC488	sdfMidiPreviousEntry	inferred	reads the prior entry slot while channel enabled
 0x002EC4B0	sndGetSelectedChannelEntry	inferred	snd sound tasks and playback in game/code_002E9708.c
 0x002EC4D8	sdfAdvanceBufferedPlayback	inferred	Consumes a pending buffer, flips its buffer index and advances the looping playback counter.
+0x002EC5E0	sdfAdvanceStreamPlayback	inferred	Called by the movie scheduler with a cadence; retries deferred input DMA, submits buffered frames on phase transitions, advances playback cadence, and refills active feeds.
 0x002EC748	sdfSoundInitAndAppendNode	inferred	Initializes a sound node, stores the caller value, and appends it to the active-node list.
 0x002EC818	sdfSoundInitFormattedAndAppendNode	inferred	Initializes a formatted sound node, stores the caller value, and appends it to the active-node list.
 0x002EC900	sdfSoundShutdownIpuStreamHandlers	inferred	confidence=high; matched-C; src/dds1/game/code_002E9708.c:1192:func_002EC900; requires-symbol-registration; Removes the registered IPU DMA handlers, clears their handles and disables the completion sources.; source=reviewed-prior-QP15 [names_qp15.tsv]

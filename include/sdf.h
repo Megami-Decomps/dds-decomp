@@ -135,6 +135,20 @@ typedef struct IpuDmaState {
 typedef char IpuDmaState_size_must_be_0x24[
     (sizeof(IpuDmaState) == 0x24) ? 1 : -1];
 
+/* Values observed in the stream playback worker and cadence updater. */
+typedef enum SdfStreamPlaybackPhase {
+    SDF_STREAM_PLAYBACK_INITIAL = 0,
+    SDF_STREAM_PLAYBACK_FIRST_COMPLETION = 1,
+    SDF_STREAM_PLAYBACK_CADENCED = 2
+} SdfStreamPlaybackPhase;
+
+/* audioMode stores these decoded sound modes in a byte; keep the field byte-sized. */
+typedef enum SdfStreamAudioMode {
+    SDF_STREAM_AUDIO_DISABLED = 0,
+    SDF_STREAM_AUDIO_MONO = 1,
+    SDF_STREAM_AUDIO_STEREO = 2
+} SdfStreamAudioMode;
+
 /* One 0x8C allocation owns the stream/sound links and IPU transfer state. */
 typedef struct SdfStreamFrameNode {
     struct SdfStreamFrameNode *streamPrev;
@@ -144,14 +158,14 @@ typedef struct SdfStreamFrameNode {
     u8 queued;
     u8 unk0E;
     u8 drained;
-    u8 firstStop;
+    u8 playbackPhase;
     u8 unk11;
-    u8 pad12;
+    u8 inputDmaStartPending;
     u8 unk13;
     u8 audioMode;
     u8 loopMode;
     u8 playbackMode;
-    u8 pad17;
+    u8 playbackCadenceRemainder;
     u8 bufferIndex;
     u8 transferPacketIndex;
     u8 unk1A;
@@ -176,7 +190,7 @@ typedef struct SdfStreamFrameNode {
     u8 pad58[4];
     s32 (*read)(struct SdfStreamFrameNode *, u32, s32, void *, s32);
     u32 source;
-    u8 pad64;
+    u8 inputFeedDmaInFlight;
     u8 unk65;
     u8 pad66[2];
     IpuDmaState dma;
@@ -186,6 +200,14 @@ typedef char SdfStreamFrameNode_size_must_be_0x8C[
     (sizeof(SdfStreamFrameNode) == 0x8C) ? 1 : -1];
 typedef char SdfStreamFrameNode_dma_offset_must_be_0x68[
     ((u32)&((SdfStreamFrameNode *)0)->dma == 0x68) ? 1 : -1];
+typedef char SdfStreamFrameNode_playbackPhase_offset_must_be_0x10[
+    ((u32)&((SdfStreamFrameNode *)0)->playbackPhase == 0x10) ? 1 : -1];
+typedef char SdfStreamFrameNode_inputDmaStartPending_offset_must_be_0x12[
+    ((u32)&((SdfStreamFrameNode *)0)->inputDmaStartPending == 0x12) ? 1 : -1];
+typedef char SdfStreamFrameNode_playbackCadenceRemainder_offset_must_be_0x17[
+    ((u32)&((SdfStreamFrameNode *)0)->playbackCadenceRemainder == 0x17) ? 1 : -1];
+typedef char SdfStreamFrameNode_inputFeedDmaInFlight_offset_must_be_0x64[
+    ((u32)&((SdfStreamFrameNode *)0)->inputFeedDmaInFlight == 0x64) ? 1 : -1];
 typedef char SdfStreamFrameNode_frameBuffers_offset_must_be_0x20[
     ((u32)&((SdfStreamFrameNode *)0)->frameBuffers == 0x20) ? 1 : -1];
 typedef char SdfStreamFrameNode_transferPacketBuffers_offset_must_be_0x28[
@@ -200,6 +222,9 @@ typedef char SdfStreamFrameNode_scratchBuffer_offset_must_be_0x54[
     ((u32)&((SdfStreamFrameNode *)0)->scratchBuffer == 0x54) ? 1 : -1];
 
 typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, u32, s32, void *, s32);
+
+void sdfBuildStreamInputDmaChain(SdfStreamFrameNode *, u8 *, s32);
+void sdfAdvanceStreamPlayback(s32 cadence);
 
 typedef struct SdfMovieDescriptor {
     u16 unk00;
