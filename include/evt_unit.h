@@ -19,6 +19,9 @@ typedef enum EvtUnitMotionState {
 /* Bits consumed by the event unit's motion, value and visual transitions. */
 enum EvtUnitFlags {
     EVT_UNIT_FLAG_PATH_REVERSE = 0x4,
+    EVT_UNIT_FLAG_USE_UNIT_FIRST_COLOR = 0x100,
+    EVT_UNIT_FLAG_USE_UNIT_SECOND_COLOR = 0x200,
+    EVT_UNIT_FLAG_USE_UNIT_COLOR_CHANNELS = 0x300,
     EVT_UNIT_FLAG_RGB_TRANSITION = 0x8000,
     EVT_UNIT_FLAG_ALPHA_TRANSITION = 0x10000,
     EVT_UNIT_FLAG_VALUE_CHANGED = 0x20000,
