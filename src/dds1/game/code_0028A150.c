@@ -11,6 +11,7 @@
 #include "mnu_list.h"
 #include "kwln_task_lifecycle.h"
 #include "eff_expanded_list.h"
+typedef struct MenuResourceWork MenuResourceWork;
 struct SdfTex;
 struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
@@ -3181,7 +3182,7 @@ typedef struct FileConfigTask {
     u32 effect;     /* 0x38: effect resource requested for the save scene */
 } FileConfigTask;
 
-extern void mnuReleaseEffectResource(u32);
+extern void mnuReleaseEffectResource(MenuResourceWork *);
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
 
 void fileConfigTaskDestroy(void) {
@@ -3193,7 +3194,7 @@ void fileConfigTaskDestroy(void) {
         fileSavedSlotFlags = datGameState->world.slotFlags;
         if (*(u32 *)(fileConfigTaskWork + 4) == 1) {
             dds3AdminSubmitModeRequest(2, &request, 4, 0);
-            mnuReleaseEffectResource(((FileConfigTask *)fileConfigTaskWork)->effect);
+            mnuReleaseEffectResource((MenuResourceWork *)((FileConfigTask *)fileConfigTaskWork)->effect);
             mnuAdvanceTitleStateUnderSemaphore();
         }
         node = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->head;
