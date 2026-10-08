@@ -3365,7 +3365,8 @@ void func_002B9808(MenuWindowContainer *menu);
 void func_002B9820(MenuWindowContainer *menu);
 
 
-void mnuInitIconSprites(MenuIconSprites *obj, s32 w, s32 h, u32 value, s32 res, s32 *idx, s32 unused);
+void mnuInitIconSprites(MenuIconSprites *obj, s32 w, s32 h, u32 value,
+                        struct EffectSlotSet *resource, s32 *idx, s32 unused);
 
 void func_002B9A38(void);
 
