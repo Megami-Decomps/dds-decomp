@@ -4,6 +4,7 @@
 #include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff.h"
+#include "eff_math.h"
 #include "eff_channel.h"
 #include "eff_event.h"
 #include "pcp_vu0.h"
@@ -1513,7 +1514,6 @@ void effEventInstallBillParticleSet(void) {
     effEventBillSetCreate(D_003B2D20);
 }
 
-extern void *effAllocSlotArray(u32);
 extern void *effParamWorkCreate(u16, void *);
 extern void *effParamWorkDuplicate(void *);
 
