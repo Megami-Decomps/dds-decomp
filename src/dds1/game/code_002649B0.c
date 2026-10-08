@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font_measure.h"
 #include "kwln.h"
 #include "eff.h"
 #include "mnu_result.h"
@@ -114,7 +115,6 @@ extern char D_003BC560[];
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern s32 func_003014F0(char *, const char *, ...);
 extern FrFontGlyph *func_001979C8(s32, s32, s32, s32, char *, FrFontGlyph *);
-extern u32 frFontMeasureLines(FrFontGlyph *);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern char D_003BC568[];
 

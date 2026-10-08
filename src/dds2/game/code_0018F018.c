@@ -62,7 +62,7 @@ typedef struct {
 extern SdfPoolNode D_003803E8;
 extern SdfPoolNode D_003803C8;
 extern BlurFramePacketRecord kwlnFrameDrawPacketRecords[];
-extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfAllocPacketAligned(s32);
 extern u32 kwlnGetDrawBufferIndex(void);
 
 extern u32 func_001200E0(void);
@@ -90,7 +90,7 @@ void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
     u32 alpha;
 
     if (func_001200E0() == 0) {
-        list = sdfAllocPacketAligned(0x20);
+        list = (void *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         effAppendBlurRenderState(list, work->params.blendControl, work->sourceHandle);
         slot = work->slots;
@@ -208,11 +208,11 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
     void *drawPacket;
 
     if (func_001200E0() == 0) {
-        list = sdfAllocPacketAligned(0x20);
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
-        tag = sdfAllocPacketAligned(0x20);
+        tag = (void *)sdfAllocPacketAligned(0x20);
         sdfAppendDmaPrimary(list, kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, tag);
-        samplingPacket = sdfAllocPacketAligned(0x30);
+        samplingPacket = (u64 *)sdfAllocPacketAligned(0x30);
         samplingPacket[0] = 2;
         samplingPacket[1] = 0x5000000210000000ULL;
         samplingPacket[2] = 0x1000000000008001ULL;
@@ -220,7 +220,7 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
         samplingPacket[4] = 0x61;
         samplingPacket[5] = 0x14;
         sdfAppendPacket(list, samplingPacket);
-        textureAlphaPacket = sdfAllocPacketAligned(0x40);
+        textureAlphaPacket = (u64 *)sdfAllocPacketAligned(0x40);
         textureAlphaPacket[0] = 3;
         textureAlphaPacket[1] = 0x5000000310000000ULL;
         textureAlphaPacket[2] = 0x1000000000008002ULL;
@@ -230,7 +230,7 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
         textureAlphaPacket[6] = 0;
         textureAlphaPacket[7] = 0x3F;
         sdfAppendPacket(list, textureAlphaPacket);
-        blendPacket = sdfAllocPacketAligned(0x40);
+        blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
         blendPacket[0] = 3;
         blendPacket[1] = 0x5000000310000000ULL;
         blendPacket[2] = 0x1000000000008002ULL;
@@ -240,7 +240,7 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
         blendPacket[6] = source->blendControl;
         blendPacket[7] = 0x42;
         sdfAppendPacket(list, blendPacket);
-        clampPacket = sdfAllocPacketAligned(0x30);
+        clampPacket = (u64 *)sdfAllocPacketAligned(0x30);
         clampPacket[0] = 2;
         clampPacket[1] = 0x5000000210000000ULL;
         clampPacket[2] = 0x1000000000008001ULL;
@@ -271,9 +271,9 @@ void func_0018F840(EffSolidRectParams *source) {
     s32 x[4];
     s32 y[4];
 
-    list = sdfAllocPacketAligned(0x20);
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    blendPacket = sdfAllocPacketAligned(0x40);
+    blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
     blendPacket[0] = 3;
     blendPacket[1] = 0x5000000310000000ULL;
     blendPacket[2] = 0x1000000000008002ULL;
