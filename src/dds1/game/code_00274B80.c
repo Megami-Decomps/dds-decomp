@@ -1184,26 +1184,6 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00277848);
 
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2208);
-
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2260);
-
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2270);
-
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2280);
-
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2290);
-
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22A0);
-
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22B0);
-
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22C0);
-
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22D0);
-
-INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22E0);
-
 /* The camp initializer allocates and clears this complete 0x38-byte child.
  * Skill pages own four category windows and a separate selected-slot window. */
 typedef struct SkillMenuRuntime {
@@ -1690,6 +1670,26 @@ void ptySkillMenuHandleSlotReorder(KwlnTask *callback) {
         mnuPlayInputSound(0, inputFlags, (s32)window->list);
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2208);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2260);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2270);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2280);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2290);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22A0);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22B0);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22C0);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22D0);
+
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22E0);
 
 INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22F0);
 
