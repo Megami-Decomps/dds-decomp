@@ -1266,7 +1266,7 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags)
     s32 top = y - 0x10;
     FrFontGlyph *handle;
     frFontAddSharedGlyphFlags(1);
-    handle = frFontAppendGlyphFromData((void *)model, 0, 0, 0, 0);
+    handle = frFontAppendTextToGlyphChain((const char *)(u32)model, 0, 0, 0, 0);
     frFontSetContextPair(handle, x, top);
     frFontStoreShiftedContextValue(handle, width << 4);
     frFontSetChildColors(handle, color);

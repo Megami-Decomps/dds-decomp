@@ -274,8 +274,6 @@ extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
 
 extern u32 D_003BD8F0;
 
-extern u32 func_001951C8(u32, u32, u32, u32, u32);
-
 extern s32 D_003BC7FC;
 
 extern s8 fileMenuTaskAlive;
@@ -612,7 +610,7 @@ void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, u32 font) {
     frFontAddSharedGlyphFlags(1);
-    D_003BD8F0 = func_001951C8(font, 0, 0, 0, 0);
+    D_003BD8F0 = (u32)func_001951C8((const char *)(u32)font, 0, 0, 0, 0);
     frFontClearFlagBits(1);
     frFontSetFlagAndMeasureGlyphs(D_003BD8F0, 1);
     frFontSetContextPair(D_003BD8F0, x << 4, y << 3);

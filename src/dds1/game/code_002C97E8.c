@@ -19,8 +19,6 @@ extern u32 frFontMeasureGlyphChain(FrFontGlyph *);
 
 extern s32 func_001958A0(FrFontGlyph *, s8, u32);
 
-extern FrFontGlyph *func_001951C8(void *, s8, s8, s8, FrFontGlyph *);
-
 extern void frFontSetChainFlag(FrFontGlyph *, u8);
 
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
