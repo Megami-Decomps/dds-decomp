@@ -3708,3 +3708,54 @@ start/active/destroy cases. Their traversal uses `listNext`, not hierarchy
 `next`. The DDS3 set/clear entry points preserve the task pointer and signed
 scope contract directly.
 
+
+## Forwarded linked-action camera state
+
+DDS1 `001EEAE0` receives a `BtlLinkedCommand *` and a `BtlCamState *`.
+The second argument is only forwarded to the two camera constructors; its
+caller passes `&action->camera`, not a second command owner. The routine reads
+the party ID through the command's task and primary unit owner. Its body remains
+assembly because the honest C still differs in switch layout and sibling-call
+selection; the truthful caller contract does not depend on that body landing.
+
+
+## Selected camera-preset motion parameters
+
+DDS2 `001F35C8` copies two 48-byte `BattlePairCameraPreset` records, then
+composes their quaternions with the linked unit's rotation through the
+existing VU macros. The native sequence reads the selected record's motion
+parameter before committing the count reset and camera flags; a named
+`motionParameter` local expresses that real read without duplicate work.
+Its single forwarding caller receives a `BtlLinkedCommand *` and passes
+the embedded front/back `BtlCamState` objects.
+
+The initializer owns the 96-byte preset table formerly `D_004183D8`.
+The retail split includes eight additional zero alignment bytes before the
+following jump table. The instruction body is exact; the normal full-unit
+gate and linked retail checksum determine the data layout, not added dummy
+fields or artificial padding in the camera record.
+
+
+## Battle lift/settle task workspace
+
+DDS1 `001D9C28` and DDS2 `001E6BF8` share the 16-byte task arguments:
+unit, tick, amount, and velocity. The frame displacement uses the old amount;
+the next amount receives a separately calculated delta, while velocity is
+updated independently. DDS2 uses `unitLiftPredicate` at `+0x6B4` and the
+existing motion selector at `+0x5D4`. The matched DDS1 body is an exact source
+donor after these owner and provider substitutions. The falling velocity
+literal is `-0.17999998f`, not the adjacent float represented by `-0.18f`.
+
+
+## Lens-flare copied parameters and vector work
+
+DDS1 `0029C620` and DDS2 `002DE338` allocate a `0x58`-byte work object and
+copy the `0x40`-byte parameter record into its `+0x18` member. The draw
+callbacks (`0029C748` / `002DE460`) use the existing `SdfColorTrack` and
+`SdfAlphaTrack`, load strength at work `+0x4C` as a float, compare the frame
+and limit as signed words, and load the flare-set index at `+0x54` with
+`LBU`. `EffLensFlareParams` and `EffFadeVectorWork` own these fields in the
+narrow billboard header; the file wrapper forwards its work argument and
+returns the created object. The vector operations retain the existing SDK
+VU macros, with no new inline assembly.
+
