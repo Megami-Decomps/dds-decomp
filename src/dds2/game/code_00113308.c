@@ -284,8 +284,8 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
         }
     }
     model = (void *)data->modelHolder->resourceHandle;
-    if (model != NULL && effObjTestNodeFlags(obj->inner, 1) == 1) {
-        effObjClearNodeFlags(obj->inner, 1);
+    if (model != NULL && effObjTestNodeFlags(obj->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) == 1) {
+        effObjClearNodeFlags(obj->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
         if (data->transitionWork != 0) {
             if (data->transitionWork->motionState == EVT_UNIT_MOTION_STATE_IDLE ||
                 data->transitionWork->motionState == EVT_UNIT_MOTION_STATE_VECTOR) {
@@ -321,7 +321,7 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
             effMiscQuatMultiplyVU();
         }
         mdlUpdateContextRotationBasisFromQuaternion(model);
-        if (effObjTestNodeFlags(obj->inner, 8)) {
+        if (effObjTestNodeFlags(obj->inner, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION)) {
             VU0_LOAD_VF(vf10, &obj->inner->smoothedPosition[0]);
             VU0_SET_W_ONE(vf10);
         } else {
@@ -393,7 +393,7 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
         vec[1] = pickMode == 1 ? target->unkD4 : obj->inner->position[1];
         func_001200E8(level, vec[0], vec[1], vec[2], obj->inner->radius);
     } else {
-        if (effObjTestNodeFlags(obj->inner, 8)) {
+        if (effObjTestNodeFlags(obj->inner, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION)) {
             vec[0] = obj->inner->smoothedPosition[0];
             vec[1] = obj->inner->smoothedPosition[1];
             vec[2] = obj->inner->smoothedPosition[2];
@@ -740,7 +740,7 @@ s32 func_00114150(EffWorldNode *object) {
 
     model = (SdfModel *)dds3GetObjectBaseResourceHandle(object);
     if (model != NULL) {
-        effObjClearNodeFlags(object->inner, 1);
+        effObjClearNodeFlags(object->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
         effObjFetchInnerSecondVecNorm(object);
         VU0_STORE_VF(vf10, model->unk60);
         dds3LoadOrBuildObjectMatrix(object);

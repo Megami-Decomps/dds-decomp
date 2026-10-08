@@ -1,7 +1,6 @@
 #include "common.h"
 #include "eff_event.h"
 
-#define DDS3_EVENT_VECTOR_BACKUP_FLAG_SELECTOR 1
 
 void effObjFreeInner(EffWorldNode *object);
 void dds3DestroyObjectBase(ObjBase *resource);
@@ -25,8 +24,8 @@ s32 dds3BackupEventNodeVectorsIfFlagged(EffWorldNode *eventObject) {
     ObjectTransform *eventNode;
 
     eventNode = eventObject->inner;
-    if (effObjTestNodeFlags(eventNode, DDS3_EVENT_VECTOR_BACKUP_FLAG_SELECTOR) == 1) {
-        effObjClearNodeFlags(eventNode, DDS3_EVENT_VECTOR_BACKUP_FLAG_SELECTOR);
+    if (effObjTestNodeFlags(eventNode, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) == 1) {
+        effObjClearNodeFlags(eventNode, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
         effObjInnerVecBackup(eventNode);
     }
     return 1;

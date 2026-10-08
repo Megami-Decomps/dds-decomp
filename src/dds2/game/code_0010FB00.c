@@ -16,10 +16,10 @@ void dds3LoadOrBuildObjectMatrix(EffWorldNode *object) {
     ObjectTransform *transform = object->inner;
     u32 flags = transform->flags;
 
-    if (flags & 2) {
+    if (flags & OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID) {
         VU0_LOAD_MATRIX(transform->matrix);
     } else {
-        transform->flags = flags | 2;
+        transform->flags = flags | OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
         dds3BuildVuTransformFromComponents(&transform->scale, &transform->rotation, &transform->position);
         VU0_STORE_MATRIX(transform->matrix);
     }

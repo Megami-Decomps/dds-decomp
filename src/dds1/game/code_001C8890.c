@@ -3659,7 +3659,8 @@ void func_001D4E98(BtlUnit *unit, u32 kind, u32 id) {
         unit->ext->flags |= 0x200000;
         VU0_SET_ONES_XYZ(vf10);
         VU0_SCALAR_OP(unit->effectScale, "vmulx.xyzw vf10, vf10, vf2x");
-        unit->effectObject->inner->flags = (unit->effectObject->inner->flags | 1) & ~2;
+        unit->effectObject->inner->flags = (unit->effectObject->inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
+            ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
         VU0_STORE_VF(vf10, unit->effectObject->inner->scale);
         mdlStoreTertiaryVectorVU(model);
         if (unit->effectScale != 1.0f) {

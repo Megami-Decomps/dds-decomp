@@ -3741,7 +3741,8 @@ void func_00208A50(void) {
     VU0_SET_ONES_XYZ(vf10);
     VU0_SCALAR_OP(currentScale, "vmulx.xyzw vf10, vf10, vf2x");
     inner = selected->effectObject->inner;
-    inner->flags = (inner->flags | 1) & ~2;
+    inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
+        ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     VU0_STORE_VF(vf10, inner->scale);
     mdlStoreTertiaryVectorVU(selected->ext->owner);
 
