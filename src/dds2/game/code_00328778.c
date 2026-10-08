@@ -1,7 +1,7 @@
 #include "common.h"
 #include "sdf.h"
 
-extern s32 sdfCreateThread(s32 entry, s32 stack, s32 stackSize, s32 priority);
+extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
 extern void _StartThread(s32, s32);
@@ -100,7 +100,7 @@ void func_00328858(u32 heapSize, u32 initialHeapSize, u32 resourceAddress) {
 
 /* Register the thread under the list semaphore before starting it. */
 void sdfStartTrackedThread(SdfThreadNode *node, s32 entry, s32 stack, s64 stackSize, s32 priority, s32 arg) {
-    node->threadId = sdfCreateThread(entry, stack, stackSize, priority);
+    node->threadId = sdfCreateThread((void *)(u32)entry, (void *)(u32)stack, (s32)stackSize, priority);
     WaitSema(sdfTrackedThreadSemaphore);
     node->next = sdfTrackedThreadHead;
     sdfTrackedThreadHead = node;
