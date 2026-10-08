@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "par_draw.h"
 #include "par_kind_api.h"
+#include "bill_object_api.h"
 
 #include "ee_mmi.h"
 
@@ -265,7 +266,6 @@ void effParReleaseNodeResource(ParTable *table) {
 
 INCLUDE_ASM(const s32, "effect/parManager", parPrependHistorySample);
 
-extern void billSetChildScaleComponents(BillObj *billboard, f32 scaleX, f32 scaleY);
 extern void billInvokeCallback(BillObj *billboard);
 
 void parPopulateSlotFromHistory(ParTable *table, s32 slotIndex, const f32 *origin, u32 color,

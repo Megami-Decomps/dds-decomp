@@ -222,7 +222,7 @@ extern ParDispatch parKindConstructorEntries[];
 
 
 
-extern void billSetChildScaleComponents(BillObj *, f32, f32);
+
 
 extern void billSetBillboardMode(BillObj *, s32);
 

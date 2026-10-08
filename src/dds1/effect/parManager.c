@@ -6,6 +6,7 @@
 #include "eff.h"
 #include "par_table.h"
 #include "pcp_vu0.h"
+#include "bill_object_api.h"
 
 struct ParSystem;
 struct EffTrackPolyList;
@@ -265,7 +266,6 @@ void effParReleaseNodeResource(ParTable *table) {
 
 INCLUDE_ASM(const s32, "effect/parManager", parPrependHistorySample);
 
-extern void billSetChildScaleComponents(BillObj *billboard, f32 scaleX, f32 scaleY);
 extern void billInvokeCallback(BillObj *billboard);
 
 void parPopulateSlotFromHistory(ParTable *table, s32 slotIndex, const f32 *origin, u32 color,
