@@ -93,7 +93,7 @@ typedef struct {
     EffArrHdr *mathResource;    /* 0x180 */
     u8 pad184[8];
     EffMagatuhiOwner *managedResource; /* 0x18C */
-    void *allocationHandle; /* 0x190 opaque handle, not the particle address */
+    SdfMemBlock *allocationHandle; /* 0x190 backing allocation, not the particle address */
 } EffMagatuhiWideFirst;
 
 /* Bezier parameter head: particle count and delay spread at their native offsets. */
@@ -116,7 +116,7 @@ typedef struct {
     s32 *delays;           /* 0x180 */
     EffArrHdr *mathResource;    /* 0x184 */
     EffMagatuhiOwner *managedResource; /* 0x188 */
-    void *allocationHandle; /* 0x18C opaque handle, not the work address */
+    SdfMemBlock *allocationHandle; /* 0x18C backing allocation, not the work address */
 } EffMagatuhiWideSecond;
 
 /* Float source block read by effMagatuhiCopyFloatBlock. */
@@ -284,14 +284,14 @@ extern u8 D_0034DF38[];
 EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
     u32 count = src->particleCount;
     u32 size = count * sizeof(EffMagatuhiDriftParticle);
-    u32 handle = (u32)sdfAllocGeneralBlock(size + sizeof(EffMagatuhiWideFirst));
-    EffMagatuhiDriftParticle *particle = (EffMagatuhiDriftParticle *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(size + sizeof(EffMagatuhiWideFirst));
+    EffMagatuhiDriftParticle *particle = (EffMagatuhiDriftParticle *)sdfResourceRetainAddress(allocation);
     EffMagatuhiWideFirst *work = (EffMagatuhiWideFirst *)((u8 *)particle + size);
     s32 spread;
     u32 i;
 
     work->head = *src;
-    work->allocationHandle = (void *)handle;
+    work->allocationHandle = allocation;
     work->particles = particle;
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
@@ -494,14 +494,14 @@ void effMagatuhiCopyFloatBlock(EffMagatuhiCallback *work, EffMagatuhiFloatParams
 /* Clone history parameters; signed delays follow the returned work block. */
 EffMagatuhiWideSecond *effMagatuhiCreateBezierHistoryWork(EffMagatuhiHeadSecond *src) {
     u32 count = src->particleCount;
-    u32 handle = (u32)sdfAllocGeneralBlock(count * EFF_MAGATUHI_DELAY_WORD_BYTES + sizeof(EffMagatuhiWideSecond));
-    EffMagatuhiWideSecond *work = (EffMagatuhiWideSecond *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(count * EFF_MAGATUHI_DELAY_WORD_BYTES + sizeof(EffMagatuhiWideSecond));
+    EffMagatuhiWideSecond *work = (EffMagatuhiWideSecond *)sdfResourceRetainAddress(allocation);
     s32 *delays = (s32 *)(work + 1);
     s32 spread;
     u32 i;
 
     work->head = *src;
-    work->allocationHandle = (void *)handle;
+    work->allocationHandle = allocation;
     work->delays = delays;
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
@@ -776,14 +776,14 @@ typedef struct {
     EffMagatuhiRingParticle *particles;
     EffMagatuhiOwner *managedResource;
     u32 tintColor;
-    void *allocationHandle;
+    SdfMemBlock *allocationHandle;
 } EffMagatuhiRingWork;
 
 /* Clone ring parameters; the returned work precedes its individual slots. */
 EffMagatuhiRingWork *effMagatuhiCreateRingWork(EffMagatuhiRingParams *src) {
     u32 count = src->particleCount;
-    u32 handle = (u32)sdfAllocGeneralBlock(count * sizeof(EffMagatuhiRingParticle) + sizeof(EffMagatuhiRingWork));
-    EffMagatuhiRingWork *work = (EffMagatuhiRingWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(count * sizeof(EffMagatuhiRingParticle) + sizeof(EffMagatuhiRingWork));
+    EffMagatuhiRingWork *work = (EffMagatuhiRingWork *)sdfResourceRetainAddress(allocation);
     EffMagatuhiRingParticle *particle = (EffMagatuhiRingParticle *)(work + 1);
     s32 spread;
     u32 i;
@@ -791,7 +791,7 @@ EffMagatuhiRingWork *effMagatuhiCreateRingWork(EffMagatuhiRingParams *src) {
     work->head = *src;
     work->particles = particle;
     work->tintColor = EFF_MAGATUHI_NEUTRAL_COLOR;
-    work->allocationHandle = (void *)handle;
+    work->allocationHandle = allocation;
     EE_MMI_UNIT_MATRIX(work->matrix);
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
@@ -1025,14 +1025,14 @@ typedef struct {
     EffMagatuhiOrbitParticle *particles;
     EffMagatuhiOwner *managedResource;
     u32 tintColor;
-    void *allocationHandle;
+    SdfMemBlock *allocationHandle;
 } EffMagatuhiOrbitWork;
 
 /* Clone orbit parameters; the returned work precedes its individual slots. */
 EffMagatuhiOrbitWork *effMagatuhiCreateOrbitWork(EffMagatuhiOrbitParams *src) {
     u32 count = src->particleCount;
-    u32 handle = (u32)sdfAllocGeneralBlock(count * sizeof(EffMagatuhiOrbitParticle) + sizeof(EffMagatuhiOrbitWork));
-    EffMagatuhiOrbitWork *work = (EffMagatuhiOrbitWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(count * sizeof(EffMagatuhiOrbitParticle) + sizeof(EffMagatuhiOrbitWork));
+    EffMagatuhiOrbitWork *work = (EffMagatuhiOrbitWork *)sdfResourceRetainAddress(allocation);
     EffMagatuhiOrbitParticle *particle = (EffMagatuhiOrbitParticle *)(work + 1);
     s32 spread;
     u32 i;
@@ -1040,7 +1040,7 @@ EffMagatuhiOrbitWork *effMagatuhiCreateOrbitWork(EffMagatuhiOrbitParams *src) {
     work->head = *src;
     work->particles = particle;
     work->tintColor = EFF_MAGATUHI_NEUTRAL_COLOR;
-    work->allocationHandle = (void *)handle;
+    work->allocationHandle = allocation;
     EE_MMI_UNIT_MATRIX(work->matrix);
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
@@ -1248,15 +1248,15 @@ typedef struct {
     EffMagatuhiDriftParticle *particles;
     u32 tintColor;
     EffMagatuhiOwner *managedResource;
-    void *allocationHandle;
+    SdfMemBlock *allocationHandle;
 } EffMagatuhiDriftWork;
 
 /* Clone drift parameters; return the work after its 0x30-byte state array. */
 EffMagatuhiDriftWork *effMagatuhiCreateDriftWork(EffMagatuhiDriftParams *src) {
     u32 count = src->particleCount;
     u32 size = count * sizeof(EffMagatuhiDriftParticle);
-    u32 handle = (u32)sdfAllocGeneralBlock(size + sizeof(EffMagatuhiDriftWork));
-    EffMagatuhiDriftParticle *particle = (EffMagatuhiDriftParticle *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(size + sizeof(EffMagatuhiDriftWork));
+    EffMagatuhiDriftParticle *particle = (EffMagatuhiDriftParticle *)sdfResourceRetainAddress(allocation);
     EffMagatuhiDriftWork *work = (EffMagatuhiDriftWork *)((u8 *)particle + size);
     s32 spread;
     u32 i;
@@ -1264,7 +1264,7 @@ EffMagatuhiDriftWork *effMagatuhiCreateDriftWork(EffMagatuhiDriftParams *src) {
     work->head = *src;
     work->particles = particle;
     work->tintColor = EFF_MAGATUHI_NEUTRAL_COLOR;
-    work->allocationHandle = (void *)handle;
+    work->allocationHandle = allocation;
     EE_MMI_UNIT_MATRIX(work->matrix);
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
