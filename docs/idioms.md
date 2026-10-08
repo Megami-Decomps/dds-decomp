@@ -3066,3 +3066,18 @@ update result. The work pointer crosses the genuine `u32` user-value
 API once on set/get, and a returned next-update address crosses the
 same encoded-word scheduler boundary.
 
+## Battle mode payloads and actor contracts
+
+DDS2 battle work `+0x718` owns a mode-specific allocation, not always a
+linked actor state. The allocator at `00229728` uses 12 bytes for mode
+779, eight for 782, four for 785, 24 for 786, and two for 787. Its mode
+795 branch allocates only one byte for the statistic selector.
+`BattleEffectPayload` keeps the observed payloads distinct; only the
+mode-786 linked state treats its first two words as actor pointers.
+
+The linked state's `+8` word is read by `btlGetEffectValue`, while boss
+routing at `0021C17C` and `0021AC5C` reads signed bytes at `+8` and `+A`.
+These are genuine word/byte representations of the same storage.
+Both games' `btlGetEffectActor` returns `BtlUnit *`, and the actor
+predicate and target comparisons use that pointer contract directly.
+
