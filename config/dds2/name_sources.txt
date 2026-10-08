@@ -1202,6 +1202,8 @@
 0x0016D258	effThunderShiftOriginByVectorDelta	inferred	Stores new source vector and adds its delta to the existing origin vector. [names_reviewed6.tsv]
 0x0016D288	effThunderSetFragmentColor	inferred	queued
 0x0016D290	effThunderGetFragmentParameters	inferred	Returns the borrowed leading fragment parameters from the owned thunder fragment work
+0x0016D298	effThunderApplyFragmentDecreasingAlphaRamp	inferred	Forwards the fragment system and three packed colors to the symmetric cell alpha ramp provider.
+0x0016D2C0	effThunderApplyFragmentIncreasingAlphaRamp	inferred	Forwards the fragment system and three packed colors to the symmetric cell alpha ramp provider.
 0x0016D2E8	effThunderApplyFragmentColorBands	inferred	confidence=high; matched-C; src/dds2/effect/effPCPThunder.c:542:func_0016D2E8; Applies the three stored fragment color parameters to the particle system using its symmetric five-vertex color layout.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x0016D3B0	effThunderBuildFragmentStrip	inferred	builds a fragment's one-system strip by writing paired five-vector rows into its cell history
 0x0016D9D8	effThunderUpdateFragments	inferred	updates fragment countdowns, geometry, fade/restart state, colors and submits cells
@@ -1994,6 +1996,8 @@
 0x0019E0A0	frFontCheckPendingGlyphState	inferred	checks glyph pending state and clears flag when children vanish [names_reviewed5.tsv]
 0x0019E110	frFontAdvanceContextCursor	inferred	increments context cursor by font advance factor and sets flags [names_reviewed5.tsv]
 0x0019E138	itfReadEncodedTextLead	inferred	Reads the encoded first byte from the current text-stream offset and advances the position by two, mirroring DDS1.
+0x0019E1B8	itfProcessEncodedTextControl	inferred	Combine the already consumed control lead with its next byte, apply context/voice/wait/stop controls and advance the encoded-text cursor; return whether stream processing stops.
+0x0019E5D8	itfBuildGlyphChainFromEncodedStream	inferred	Consume encoded bytes from the context cursor, dispatch controls and line advances, append glyphs with the current font/options, apply pending updates and return the glyph chain.
 0x0019E7C8	itfDrawDefaultColorText	inferred	Draws encoded text using the fixed default color channels. [names_reviewed8.tsv]
 0x0019E800	itfDrawCustomColorText	inferred	Draws encoded text using caller-supplied color channels. [names_reviewed8.tsv]
 0x0019E848	itfDrawEncodedTextStream	inferred	Builds text stream with position, four channels, byte text and optional substitution, then dispatches renderer. [names_reviewed19.tsv]
