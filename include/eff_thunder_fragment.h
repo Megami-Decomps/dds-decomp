@@ -7,5 +7,7 @@ typedef struct EffThunderFragmentWork EffThunderFragmentWork;
 
 EffThunderFragmentWork *effThunderFragCreate(EffThunderFragmentParams *parameters);
 void effThunderReleaseFragmentWork(EffThunderFragmentWork *work);
+void effThunderSetFragmentColor(EffThunderFragmentWork *work, u32 color);
+void effThunderUpdateFragments(EffThunderFragmentWork *work);
 
 #endif
