@@ -198,7 +198,7 @@ FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph) {
 
 /* Link without repositioning into the draw-buffer-indexed queue; return 0.
  * The low-byte buffer index is used directly, without a two-slot bounds check. */
-s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *glyph) {
+s32 frFontQueueGlyphForCurrentDrawBuffer(FrFontGlyph *glyph) {
     FrFontGlyph **queueSlot = &frFontWork.glyphSlots[kwlnGetDrawBufferIndex() & 0xFF];
 
     *queueSlot = frFontLinkGlyph(*queueSlot, glyph, 0);
@@ -770,7 +770,7 @@ s32 func_0019D550(FrFontGlyph *glyph, s8 mode, u32 flags) {
 
 /* Release queue slot 1 when the draw-buffer index's low byte is zero, otherwise
  * slot 0; return 0. This is buffer selection, not a current-font selection. */
-s32 frFontAdvanceSelectedGlyphSlot(void) {
+s32 frFontReleaseOppositeDrawBufferGlyphs(void) {
     s32 queueIndex = (kwlnGetDrawBufferIndex() & FR_FONT_BYTE_MASK) == 0;
 
     frFontWork.glyphSlots[queueIndex] = frFontReleaseGlyphChain(frFontWork.glyphSlots[queueIndex]);

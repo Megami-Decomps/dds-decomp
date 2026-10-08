@@ -649,7 +649,7 @@ void func_002C9818(s32 x, s32 y, u32 colors, const u8 *text) {
     u32 handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     D_00439004 = handle;
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)D_00439004);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_00439004);
 }
 
 void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
@@ -657,7 +657,7 @@ void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     D_00439008 = handle;
     frFontSetChainFlag(handle, 3);
     frFontDrawGlyphWithSharedFlags(D_00439008, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)D_00439008);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_00439008);
 }
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
@@ -668,7 +668,7 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
     frFontSetContextPair(D_0043900C, x << 4, y << 3);
     frFontSetChildColors(D_0043900C, colors);
     func_0019D550(D_0043900C, 0, 0x56);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)D_0043900C);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_0043900C);
     frFontSetSharedRenderFlags(0x54);
 }
 
@@ -677,7 +677,7 @@ void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
 
     handle = func_0019F5E8(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
 }
 
 /* Animate the save-window highlight's alpha with a sinusoidal phase. */

@@ -347,14 +347,14 @@ void sdfFontRegisterShort(s32 x, s32 y, u32 colors, const u8 *text) {
 
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
 
 u32 frFontMeasureAndQueueGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, s32 option) {
     FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, depth, colors, text, 0);
     u32 result = frFontMeasureGlyphChain(handle);
     func_0019D550(handle, 1, option);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 
@@ -371,7 +371,7 @@ u32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 depth, u32 colors, s8 
         result = frFontMeasureGlyphChain(handle);
     }
     func_0019D550(handle, 1, option);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 
@@ -386,7 +386,7 @@ u32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, c
         result = frFontMeasureGlyphChain(handle);
     }
     func_0019D550(handle, 1, option);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 
@@ -401,7 +401,7 @@ u32 frFontDrawTextVariantAAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char 
         result = frFontMeasureGlyphChain(handle);
     }
     func_0019D550(handle, 1, option);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 
@@ -416,7 +416,7 @@ u32 frFontDrawTextVariantBAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char 
         result = frFontMeasureGlyphChain(handle);
     }
     func_0019D550(handle, 1, option);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 
@@ -432,7 +432,7 @@ u32 frFontQueueTintedGlyphChainAndMeasure(s32 x, s32 y, s32 depth, u32 colors, u
         result = frFontMeasureGlyphChain(handle);
     }
     func_0019D550(handle, 1, option);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 

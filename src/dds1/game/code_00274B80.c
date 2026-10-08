@@ -595,7 +595,7 @@ void func_00275B40(EffectSlotSet **sets, MenuEffectPair *hpBar, MenuEffectPair *
                 0x640, 0xBE8, 0, color, name, 0);
             func_00196088(0xD20, 0xBE8, glyph);
             func_001958A0(glyph, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot(glyph);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
         }
     } else {
         glyph = itfCreateConvertedTextGlyph(
@@ -603,7 +603,7 @@ void func_00275B40(EffectSlotSet **sets, MenuEffectPair *hpBar, MenuEffectPair *
         glyph = itfCreateConvertedTextGlyph(
             0xB50, 0xBF0, 0, color, (const u8 *)D_003BC6F8, glyph);
         func_001958A0(glyph, 1, 0x53);
-        frFontQueueGlyphInSelectedSlot(glyph);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
     if (marker) {
         func_002BF4E0(0x970, 0x8B0, 0, opacity, 1, sets[0], 0x1C, 0x53);
@@ -1038,7 +1038,7 @@ void mnuDrawSlotIcons(s32 x, MenuPageWindow *page) {
         handle = itfDrawUnderscoreTextSegment(0x190, y, 0, 0xa09dc359, (const u8 *)(D_003BAA7C + slot->unitId * 45), i);
         if (handle != 0) {
             func_001958A0(handle, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot(handle);
+            frFontQueueGlyphForCurrentDrawBuffer(handle);
         }
     }
     itfSetTextDrawLimit(-1);
@@ -1097,7 +1097,7 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param
     frFontSetChildColors(item, color);
     frFontClearFlagBits(1);
     func_001958A0(item, 1, param);
-    frFontQueueGlyphInSelectedSlot(item);
+    frFontQueueGlyphForCurrentDrawBuffer(item);
 }
 
 void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, MenuPageWindow *page, MenuPanelGroup *packedGroup, MenuSpriteState *spriteState, s32 obj, s32 spriteFlags) {
@@ -1238,7 +1238,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     x += 0x140;
     frFontSetChainFlag(glyph, chainFlag);
     func_001958A0(glyph, 1, texture);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
     switch (mnuGetRangeEntryKind(rangeId)) {
     case 1:
     default:

@@ -1951,7 +1951,7 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
         glyph = func_001978E8(x + 0xF70, y + 0x348, z, color, D_003BC738, glyph);
     }
     func_001958A0(glyph, 1, param);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
     if (page->fadeOut == 0) {
         if (page->drawAlpha < 256) {
             page->drawAlpha += 16;
@@ -1998,7 +1998,7 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 p
     width = frFontMeasureGlyphChain(glyph) + 8;
     frFontSetContextPair(glyph, x - (width * 0x10 >> 1) + 0x5F0, y);
     func_001958A0(glyph, 1, param);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, MenuPageSlot *unusedSlot,
@@ -2019,7 +2019,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
         glyph = itfCreateConvertedTextGlyph(0, 0, depth, color, outValue, 0);
         func_00196088(0x1710, 0x5F0, glyph);
         func_001958A0(glyph, 1, param);
-        frFontQueueGlyphInSelectedSlot(glyph);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
 
@@ -2045,7 +2045,7 @@ void func_002812E8(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
             glyph = func_001978E8(x + 0xDF0,
                 0x160, depth, color, text, 0);
             func_001958A0(glyph, 1, surface);
-            frFontQueueGlyphInSelectedSlot(glyph);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
         }
     }
     if (slot->windowSprites != NULL) {
