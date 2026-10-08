@@ -1128,7 +1128,7 @@ void evtViewerCleanupMessageWindow(EvtRuntime *viewer) {
     windowContext = viewer->windowContext;
     itfMesResetWindow(windowContext->handle);
     viewer->windowActive = 0;
-    viewer->pad23C4 = 0;
+    viewer->windowShadeFade = 0;
 }
 
 void evtViewerMarkWindowActive(EvtRuntime *viewer) {
