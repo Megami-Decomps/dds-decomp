@@ -52,7 +52,7 @@ typedef struct MenuList MenuList;
 extern void func_0027CA90();
 
 
-extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
+extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
 
 extern void func_0027D850(s32, s32, s32, s32, MenuPanelHandles *, s32, s32);
 
@@ -258,16 +258,16 @@ void mnuConfigureWindowSpriteAndGrid(MenuWindowContainer *window, s32 x, s32 y, 
                    u32 effect, u32 color) {
     window->x = x;
     window->y = y;
-    itfSetGridEntryQuantizedAndRefresh(x, y, -0x70, -0x68, -0x70, -0x68);
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)x, y, -0x70, -0x68, -0x70, -0x68);
     window->sprite = sprite;
     window->effect = effect;
     if (sprite != 0) {
-        itfSetGridEntryQuantizedAndRefresh(sprite, effect, 0x60, -0xd0, 0, 0);
+        itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)sprite, effect, 0x60, -0xd0, 0, 0);
     }
     window->overlaySprite = sprite;
     window->overlayColor = color;
     if (sprite != 0) {
-        itfSetGridEntryQuantizedAndRefresh(sprite, color, 0x60, -0xd0, 0, 0);
+        itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)sprite, color, 0x60, -0xd0, 0, 0);
     }
 }
 
@@ -989,7 +989,7 @@ void mnuActivatePendingPanelResource(MenuScrollPanel *menu) {
         dest += 2;
     } while (--remaining >= 0);
     if (menu->active[0].sprite != 0) {
-        itfSetGridEntryQuantizedAndRefresh(menu->active[0].sprite, menu->active[0].effect, 0, 0, 0x400, 0);
+        itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)menu->active[0].sprite, menu->active[0].effect, 0, 0, 0x400, 0);
         effConfigureWithDefaultSetting((struct EffectSlotSet *)(u32)menu->active[0].sprite,
                                           menu->active[0].effect,
                                           menu->handles[2],
@@ -1003,9 +1003,9 @@ void mnuActivatePanelAndConfigureGridResources(MenuScrollPanel *menu, s32 x, s32
     menu->pending[0].effect = y;
     menu->pending[1].sprite = x;
     menu->pending[1].effect = color;
-    itfSetGridEntryQuantizedAndRefresh(x, y, 0, 0, -0x400, 0);
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)x, y, 0, 0, -0x400, 0);
     effConfigureIndexedSlotResource((struct EffectSlotSet *)(u32)x, y, menu->handles[0], 0, 3);
-    itfSetGridEntryQuantizedAndRefresh(x, color, 0, 0, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)x, color, 0, 0, 0, 0);
     effConfigureWithDefaultSetting((struct EffectSlotSet *)(u32)x, color,
                                    menu->handles[1], 0, 10, 0);
 }
@@ -1177,27 +1177,27 @@ MenuSprites *func_0027F230(s32 value, s32 mainResource, s32 secondaryResource) {
     memset(page, 0, 0x50);
     page->unkC = value;
     page->firstSprite = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 6, 1);
-    itfSetGridEntryQuantizedAndRefresh((s32)page->firstSprite, 0, 0xE60, 0x430, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(page->firstSprite, 0, 0xE60, 0x430, 0, 0);
     page->sprites[0] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 8, 1);
-    itfSetGridEntryQuantizedAndRefresh((s32)page->sprites[0], 0, 0xF50, 0x648, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(page->sprites[0], 0, 0xF50, 0x648, 0, 0);
     page->sprites[1] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0x3B, 1);
-    itfSetGridEntryQuantizedAndRefresh((s32)page->sprites[1], 0, 0x1C20, 0x6D0, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(page->sprites[1], 0, 0x1C20, 0x6D0, 0, 0);
     page->sprites[2] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 9, 1);
-    itfSetGridEntryQuantizedAndRefresh((s32)page->sprites[2], 0, 0x1120, 0x708, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(page->sprites[2], 0, 0x1120, 0x708, 0, 0);
     page->sprites[3] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0xA, 1);
-    itfSetGridEntryQuantizedAndRefresh((s32)page->sprites[3], 0, 0x1BB0, 0x708, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(page->sprites[3], 0, 0x1BB0, 0x708, 0, 0);
     page->sprites[4] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0xD, 1);
-    itfSetGridEntryQuantizedAndRefresh((s32)page->sprites[4], 0, 0x1450, 0x640, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(page->sprites[4], 0, 0x1450, 0x640, 0, 0);
     page->sprites[5] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0xB, 1);
-    itfSetGridEntryQuantizedAndRefresh((s32)page->sprites[5], 0, 0x1540, 0x5E0, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(page->sprites[5], 0, 0x1540, 0x5E0, 0, 0);
     page->sprites[6] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0xC, 1);
-    itfSetGridEntryQuantizedAndRefresh((s32)page->sprites[6], 0, 0x1980, 0x660, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(page->sprites[6], 0, 0x1980, 0x660, 0, 0);
     page->primarySprite = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0x3C, 1);
-    itfSetGridEntryQuantizedAndRefresh((s32)page->primarySprite, 0, 0x110, 0x280, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(page->primarySprite, 0, 0x110, 0x280, 0, 0);
     page->overlaySprites[0] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0x35, 1);
-    itfSetGridEntryQuantizedAndRefresh((s32)page->overlaySprites[0], 0, 0x8E0, 0x288, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(page->overlaySprites[0], 0, 0x8E0, 0x288, 0, 0);
     page->overlaySprites[1] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0x36, 1);
-    itfSetGridEntryQuantizedAndRefresh((s32)page->overlaySprites[1], 0, 0xEE0, 0x288, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(page->overlaySprites[1], 0, 0xEE0, 0x288, 0, 0);
     mnuSetPageParams(page, 0);
     return page;
 }
@@ -1264,16 +1264,16 @@ MenuIconBundle *mnuCreateFadeSpriteResourceSet(u32 resource) {
     memset(item, 0, 0x24);
     sprite = effCreateResourceSlotSet((EffectSlotSet *)resource, 0x1F, 1);
     item->sprite[0] = sprite;
-    itfSetGridEntryQuantizedAndRefresh((s32)sprite, 0, 0, 0x40, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(sprite, 0, 0, 0x40, 0, 0);
     sprite = effCreateResourceSlotSet((EffectSlotSet *)resource, 0x1E, 1);
     item->sprite[1] = sprite;
-    itfSetGridEntryQuantizedAndRefresh((s32)sprite, 0, 0x5E0, -0x20, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(sprite, 0, 0x5E0, -0x20, 0, 0);
     sprite = effCreateResourceSlotSet((EffectSlotSet *)resource, 7, 1);
     item->sprite[2] = sprite;
-    itfSetGridEntryQuantizedAndRefresh((s32)sprite, 0, 0x5E0, -0x18, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(sprite, 0, 0x5E0, -0x18, 0, 0);
     sprite = effCreateResourceSlotSet((EffectSlotSet *)resource, 0x1D, 1);
     item->sprite[3] = sprite;
-    itfSetGridEntryQuantizedAndRefresh((s32)sprite, 0, 0xB40, 0x40, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(sprite, 0, 0xB40, 0x40, 0, 0);
     return item;
 }
 
