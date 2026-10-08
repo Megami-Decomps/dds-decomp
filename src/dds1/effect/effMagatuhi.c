@@ -277,7 +277,6 @@ typedef struct {
 } EffMagatuhiRingParticle;
 
 
-extern u32 sdfAllocGeneralBlock(s32 size);
 extern void *effAllocSlotArray(s32 count);
 extern u32 effMiscRand(void *state);
 extern u8 D_0034DF38[];
@@ -287,7 +286,7 @@ extern u8 D_0034DF38[];
 EffMagatuhiWideFirst *effMagatuhiCreateFirst(EffMagatuhiHeadFirst *src) {
     u32 count = src->particleCount;
     u32 size = count * sizeof(EffMagatuhiDriftParticle);
-    u32 handle = sdfAllocGeneralBlock(size + sizeof(EffMagatuhiWideFirst));
+    u32 handle = (u32)sdfAllocGeneralBlock(size + sizeof(EffMagatuhiWideFirst));
     EffMagatuhiDriftParticle *particle = (EffMagatuhiDriftParticle *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     EffMagatuhiWideFirst *work = (EffMagatuhiWideFirst *)((u8 *)particle + size);
     s32 spread;
@@ -502,7 +501,7 @@ void effMagatuhiCopyFloatBlock(EffMagatuhiCallback *work, EffMagatuhiFloatParams
 /* Clone history parameters; signed delays follow the returned work block. */
 EffMagatuhiWideSecond *effMagatuhiCreateBezierHistoryWork(EffMagatuhiHeadSecond *src) {
     u32 count = src->particleCount;
-    u32 handle = sdfAllocGeneralBlock(count * EFF_MAGATUHI_DELAY_WORD_BYTES + sizeof(EffMagatuhiWideSecond));
+    u32 handle = (u32)sdfAllocGeneralBlock(count * EFF_MAGATUHI_DELAY_WORD_BYTES + sizeof(EffMagatuhiWideSecond));
     EffMagatuhiWideSecond *work = (EffMagatuhiWideSecond *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     s32 *delays = (s32 *)(work + 1);
     s32 spread;
@@ -790,7 +789,7 @@ typedef struct {
 /* Clone ring parameters; the returned work precedes its individual slots. */
 EffMagatuhiRingWork *effMagatuhiCreateRingWork(EffMagatuhiRingParams *src) {
     u32 count = src->particleCount;
-    u32 handle = sdfAllocGeneralBlock(count * sizeof(EffMagatuhiRingParticle) + sizeof(EffMagatuhiRingWork));
+    u32 handle = (u32)sdfAllocGeneralBlock(count * sizeof(EffMagatuhiRingParticle) + sizeof(EffMagatuhiRingWork));
     EffMagatuhiRingWork *work = (EffMagatuhiRingWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     EffMagatuhiRingParticle *particle = (EffMagatuhiRingParticle *)(work + 1);
     s32 spread;
@@ -1039,7 +1038,7 @@ typedef struct {
 /* Clone orbit parameters; the returned work precedes its individual slots. */
 EffMagatuhiOrbitWork *effMagatuhiCreateOrbitWork(EffMagatuhiOrbitParams *src) {
     u32 count = src->particleCount;
-    u32 handle = sdfAllocGeneralBlock(count * sizeof(EffMagatuhiOrbitParticle) + sizeof(EffMagatuhiOrbitWork));
+    u32 handle = (u32)sdfAllocGeneralBlock(count * sizeof(EffMagatuhiOrbitParticle) + sizeof(EffMagatuhiOrbitWork));
     EffMagatuhiOrbitWork *work = (EffMagatuhiOrbitWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     EffMagatuhiOrbitParticle *particle = (EffMagatuhiOrbitParticle *)(work + 1);
     s32 spread;
@@ -1263,7 +1262,7 @@ typedef struct {
 EffMagatuhiDriftWork *effMagatuhiCreateDriftWork(EffMagatuhiDriftParams *src) {
     u32 count = src->particleCount;
     u32 size = count * sizeof(EffMagatuhiDriftParticle);
-    u32 handle = sdfAllocGeneralBlock(size + sizeof(EffMagatuhiDriftWork));
+    u32 handle = (u32)sdfAllocGeneralBlock(size + sizeof(EffMagatuhiDriftWork));
     EffMagatuhiDriftParticle *particle = (EffMagatuhiDriftParticle *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     EffMagatuhiDriftWork *work = (EffMagatuhiDriftWork *)((u8 *)particle + size);
     s32 spread;

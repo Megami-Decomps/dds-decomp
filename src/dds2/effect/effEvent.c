@@ -156,7 +156,6 @@ extern void func_0018F840(EffSolidRectParams *arg);
 
 extern void effResourceRectDrawPixels(EffResourceRectWork *arg);
 
-extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 
 /* Allocate contiguous slots followed by their count and allocation handle. */
 EffArrHdr *effCreateSlotArray(u32 count) {

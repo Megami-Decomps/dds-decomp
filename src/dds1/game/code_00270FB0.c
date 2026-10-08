@@ -404,7 +404,6 @@ void mnuReleaseStaffSpriteAndResourceHandles(StaffMenuWork *menu) {
     mnuReleaseResourceList(menu->resourceList);
 }
 
-extern u32 sdfAllocGeneralBlock(s32);
 extern void *memset(void *, s32, u32);
 extern s8 dds3AdminReadPreviousSignedSample(void);
 extern EffectList *mnuAllocateValueRecord(u32);
@@ -420,7 +419,7 @@ extern void func_002E9708(void);
 /* Allocate and clear menu work, select its request-list mode from the
  * previous sample, then initialize the owned UI and resource state. */
 StaffMenuWork *mnuCreateStaffCampWork(void) {
-    u32 allocation = sdfAllocGeneralBlock(sizeof(StaffMenuWork));
+    u32 allocation = (u32)sdfAllocGeneralBlock(sizeof(StaffMenuWork));
     StaffMenuWork *menu = (StaffMenuWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
 
     memset(menu, 0, sizeof(*menu));

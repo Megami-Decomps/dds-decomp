@@ -338,7 +338,6 @@ typedef struct {
 
 extern void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index);
 
-extern void *sdfAllocGeneralBlock(s32 size);
 
 
 extern void effPcpViewAlignedRingSetPosition();

@@ -234,7 +234,6 @@ void effScatterStoreSourceTransformMatrix(PcpScatterDraw *object, void *src) {
     VU0_STORE_MATRIX(object->matrix);
 }
 
-extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 extern u32 parAllocateCellSystem(u32, s32, s32, s32);
 extern void parDispatchSub(u32, s32, s32, s32);
 extern void func_00164C68(u32, u16);

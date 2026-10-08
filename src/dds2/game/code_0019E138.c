@@ -928,7 +928,6 @@ s32 func_001A00B8(u8 *dst, s32 option, u32 block, MemOut *segments) {
     return produced;
 }
 
-extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 extern void *memcpy(void *, const void *, u32);
 
 /* Build count usable nodes plus index-zero sentinel, retaining each payload gap.

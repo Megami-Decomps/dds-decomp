@@ -122,7 +122,6 @@ extern void sdfUnfreezeFloatCounter(PolyMovieClip *clip);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *memset(void *dst, s32 value, u32 size);
 extern void *memcpy(void *dst, const void *src, u32 size);
-extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern s32 itfMesCreateWindow(u8 *arg);
 extern void itfMesDestroyWindowIfPresent(s32 handle);
 extern void fileWaitIdle(void);

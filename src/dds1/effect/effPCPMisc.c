@@ -224,7 +224,6 @@ extern u32 effCloneResourceTemplate(void *params);
 extern void *effCloneBlurTemplate(void *params);
 extern void *effPcpTripleHandleCreate(void *block0, void **blocks);
 
-extern void *sdfAllocGeneralBlock(s32 size);
 extern void *effCreateThunderCellSystemWork(void *params);
 extern void effThunderReleaseVectorWork(struct EffThunderVectorWork *work);
 extern u32 effParamCreateFromTable(void *data, s32 index);

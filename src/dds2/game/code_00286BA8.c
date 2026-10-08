@@ -95,7 +95,6 @@ void func_00286E20(void) {
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraSetBitAll()]*****************\n");
 }
 
-extern u32 sdfAllocGeneralBlock(s32 size);
 extern u32 sdfMemoryGetBlockAddress(void *block);
 extern MenuProgressHost *mnuCreateProgressHost(void);
 extern void mnuInitPanelSoundEntries(void);
@@ -112,11 +111,11 @@ extern void mtrInitUnitSelectionWork(MnuStatusResource *);
 /* Allocate and clear status work, retain its allocation handle and create the progress host.
  * Print the native load banner and initialize panel sound entries before returning the work pointer. */
 MnuStatusResource *func_00286E98(void) {
-    u32 allocationHandle = sdfAllocGeneralBlock(MTR_STATUS_RESOURCE_BYTES);
-    MnuStatusResource *resourceWork = (MnuStatusResource *)sdfMemoryGetBlockAddress(allocationHandle);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(MTR_STATUS_RESOURCE_BYTES);
+    MnuStatusResource *resourceWork = (MnuStatusResource *)sdfMemoryGetBlockAddress(allocation);
 
     memset(resourceWork, 0, MTR_STATUS_RESOURCE_BYTES);
-    resourceWork->allocationHandle = allocationHandle;
+    resourceWork->allocationHandle = (u32)allocation;
     resourceWork->progressHost = mnuCreateProgressHost();
     evtPrintDeveloperConsoleMessage("trmLoadStartStatusResource()!!!! \n");
     evtPrintDeveloperConsoleMessage("mtrInit\n");

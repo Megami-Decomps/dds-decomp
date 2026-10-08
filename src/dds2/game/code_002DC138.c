@@ -118,7 +118,6 @@ extern u16 mdlGetContextResourceGroup(MdlCtx *);
 extern u16 mdlGetContextResourceId(MdlCtx *);
 
 /* VU0 model helpers consume vf10 directly, as in the DDS1 counterpart. */
-extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 
 
 /* Initialize the VU transforms and the first node's float slot, if present. */

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "fld_lmap_task.h"
@@ -42,7 +43,6 @@ extern s32 D_004390A8;
 
 
 
-extern s32 sdfAllocGeneralBlock(s32);
 
 extern void *sdfMemoryGetBlockAddress(u32);
 
@@ -244,7 +244,7 @@ void fldDrawSelectedMapMarker(void) {
 /* Build a ring of `count` request nodes (0x20 bytes each) behind a 0x44-byte queue header. */
 MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     s32 size = count * 0x20 + 0x44;
-    u32 allocation = sdfAllocGeneralBlock(size);
+    u32 allocation = (u32)sdfAllocGeneralBlock(size);
     MapRequestRing *block = (MapRequestRing *)sdfMemoryGetBlockAddress(allocation);
     MapRequestState *ring = &block->header;
     MapRequestNode *node;

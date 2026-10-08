@@ -158,7 +158,6 @@ extern u8 *D_003BC958;
 
 extern void sdfTexReleaseReference(SdfTex *texture);
 
-extern void *sdfAllocGeneralBlock(u32);
 
 extern u32 D_003BC960[2];
 
@@ -459,7 +458,7 @@ u32 effLoadMappedStatusRecords(u8 *source, EffMappedHeader *headerOut) {
 
     memcpy(&header, source, sizeof(header));
     source += sizeof(header);
-    allocation = sdfAllocGeneralBlock(header.count * EFF_STATUS_RECORD_BYTES);
+    allocation = (u32)sdfAllocGeneralBlock(header.count * EFF_STATUS_RECORD_BYTES);
     records = (EffMappedRecord *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
     for (; recordIndex < header.count; recordIndex++) {
         EffMappedRecord *record = &records[recordIndex];

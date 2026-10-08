@@ -805,7 +805,6 @@ typedef struct FlagEntry {
 extern void mdlFlagSet(s32);
 
 extern s32 mdlFlagTest(s32);
-extern s32 sdfAllocGeneralBlock(s32);
 
 typedef struct FlagPair {
     s32 first;
@@ -823,7 +822,7 @@ extern FlagPair mnuPartyFlagEventEntries[];
 
 /* Snapshot four primary flag pairs and sixteen extra pairs for restoration. */
 s32 mnuCreateFlagEntries(void) {
-    s32 snapshotHandle = sdfAllocGeneralBlock(MNU_FLAG_SNAPSHOT_BYTES);
+    s32 snapshotHandle = (u32)sdfAllocGeneralBlock(MNU_FLAG_SNAPSHOT_BYTES);
     FlagEntry *snapshot = (FlagEntry *)sdfResourceRetainAddress((struct SdfMemBlock *)(snapshotHandle));
     u32 pairIndex;
 

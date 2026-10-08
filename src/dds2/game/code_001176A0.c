@@ -20,7 +20,6 @@ extern void func_00117A80(void);
 extern void sdfDecrementAllocationReferenceCount(u32 allocation);
 extern struct EffWorldNode *dds3AppendWorldObjectNode();
 
-extern void *sdfAllocGeneralBlock(s32 size);
 
 
 extern s32 kwlnTaskCreate(char *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
