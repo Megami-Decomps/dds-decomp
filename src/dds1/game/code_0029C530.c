@@ -1160,12 +1160,15 @@ void effUpdateFadeBlendC(EffKindWork *work) {
     func_00187C08(out);
 }
 
-void effCreateFadeColorWorkFromOutput(s32 work) {
-    effCloneResourceTemplate(work + 0xc0);
+extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
+extern void effReleaseResourceTemplate(EffResourceRectWork *work);
+
+u32 effCreateFadeColorWorkFromOutput(void *work) {
+    return (u32)effCloneResourceTemplate((EffResourceRectParams *)((u8 *)work + 0xc0));
 }
 
-void effReleaseFadeColorWork(void) {
-    func_00188050();
+void effReleaseFadeColorWork(u32 resourceHandle) {
+    effReleaseResourceTemplate((EffResourceRectWork *)resourceHandle);
 }
 
 /* This projected fade also consumes EffKindWork: position, handle and payload. */
