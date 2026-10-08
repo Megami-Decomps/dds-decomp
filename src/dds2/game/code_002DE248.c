@@ -11021,7 +11021,6 @@ extern char D_004387E8[];
 #define EFF_BATCH_HEADER_BYTES 0xC
 #define EFF_SLOT_WORK_BYTES 0xA0
 #define EFF_PHASE_FULL 0x10000
-#define EFF_PHASE_START_ZERO_BIT 1
 #define EFF_PAYLOAD_RECORD_BYTES 0x6C
 #define EFF_RESOURCE_TABLE_ENTRY_BYTES 8
 
@@ -11345,11 +11344,11 @@ void *effGetSlotWorkOrOverride(EffectSlotSet *owner, s32 slotIndex) {
     return (void *)entryAddress;
 }
 
-/* Start at zero when bit zero is set, otherwise at the full 16.16 endpoint.
+/* Start at zero when moving forward, otherwise at the full 16.16 endpoint.
  * The return value remains the original flag mask or full endpoint.
  */
 u32 effInitializeSlotPhase(EffTimedState *state) {
-    u32 value = state->flags & EFF_PHASE_START_ZERO_BIT;
+    u32 value = state->flags & EFF_TIMED_STATE_DIRECTION_FORWARD;
     if (value != 0) {
         state->value = 0;
     } else {
@@ -11577,7 +11576,7 @@ u32 effDestroyResourceSlotSet(EffectSlotSet *set) {
 u32 effSetSlotResourceAndFlags(EffTimedState *effect, u32 resource, u32 flags) {
     effect->flags = flags;
     effect->source = (u8 *)resource;
-    if ((flags & 2) != 0) {
+    if ((flags & EFF_TIMED_STATE_INITIALIZE_PHASE_ON_BIND) != 0) {
         effInitializeSlotPhase(effect);
     }
     effect->delay = effect->delay + 1;
@@ -11600,9 +11599,9 @@ s32 effClampSlotPhaseAtEnd(u32 effect, u32 slot, EffTimedState *state) {
     if (0x10000 < state->value) {
         u32 flags = state->flags;
         state->value = 0x10000;
-        if (flags & 4) {
-            if (flags & 8) {
-                state->flags = flags & ~1;
+        if (flags & EFF_TIMED_STATE_RESTART_AT_ENDPOINT) {
+            if (flags & EFF_TIMED_STATE_PING_PONG) {
+                state->flags = flags & ~EFF_TIMED_STATE_DIRECTION_FORWARD;
             } else {
                 effInitializeSlotWork(effect, slot);
             }
@@ -11616,9 +11615,9 @@ s32 effClampSlotPhaseAtStart(u32 effect, u32 slot, EffTimedState *state) {
     if (state->value < 0) {
         u32 flags = state->flags;
         state->value = 0;
-        if (flags & 4) {
-            if (flags & 8) {
-                state->flags = flags | 1;
+        if (flags & EFF_TIMED_STATE_RESTART_AT_ENDPOINT) {
+            if (flags & EFF_TIMED_STATE_PING_PONG) {
+                state->flags = flags | EFF_TIMED_STATE_DIRECTION_FORWARD;
             } else {
                 effInitializeSlotWork(effect, slot);
             }
@@ -11653,7 +11652,7 @@ EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entry
                 state->delay -= 1;
             }
             if (step >= 0) {
-                if (state->flags & 1) {
+                if (state->flags & EFF_TIMED_STATE_DIRECTION_FORWARD) {
                     if (state->value != 0x10000) {
                         state->value += step;
                         idle = 0;
