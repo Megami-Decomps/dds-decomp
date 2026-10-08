@@ -80,7 +80,7 @@ typedef struct SdfCdClock {
 extern s32 func_002F4460(SdfCdClock *);
 extern s32 sdfBcdStrToInt(s32);
 extern u8 D_003BD480;
-extern ClockTime D_003BD488;
+ClockTime D_003BD488 = {0};
 
 s32 func_002E8548(ClockTime *now) {
     SdfCdClock clock;
@@ -145,8 +145,4 @@ void sdfServiceUnblockedWorkerThread(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_002E8398", func_002E8700);
-
-INCLUDE_SDATA(const s32, "game/code_002E8398", D_003BD488);
-
-INCLUDE_SDATA(const s32, "game/code_002E8398", D_003BD489);
 
