@@ -847,7 +847,8 @@ EffExpandedList *effReferenceObjectRetain(EffExpandedList *obj) {
     return obj;
 }
 
-/* One animation track: segments of `length` frames each (plus one), looping if flags & 1. */
+/* One animation track: segments contribute their length plus a boundary frame;
+ * the loop flag wraps the frame by the total track length. */
 void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
     u32 count = set->count;
     u32 local = 0;
@@ -859,7 +860,7 @@ void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
     if (count == 1) {
         segment = 0;
     } else {
-        if (set->flags & 1) {
+        if (set->flags & EFF_ANIM_SET_LOOP) {
             local = frame % set->length;
         } else if (frame >= set->length) {
             segment = count - 1;
@@ -884,7 +885,7 @@ void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
     {
         f32 scaleY = 2.0f;
 
-        if (!(set->flags & 4)) {
+        if (!(set->flags & EFF_ANIM_SET_DOUBLE_Y_SCALE)) {
             scaleY = 1.0f;
         }
         out->segment = segment;

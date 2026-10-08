@@ -786,7 +786,7 @@ void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
     if (count == 1) {
         segment = 0;
     } else {
-        if (set->flags & 1) {
+        if (set->flags & EFF_ANIM_SET_LOOP) {
             local = frame % set->length;
         } else if (frame >= set->length) {
             segment = count - 1;
@@ -811,7 +811,7 @@ void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
     {
         f32 scaleY = 2.0f;
 
-        if (!(set->flags & 4)) {
+        if (!(set->flags & EFF_ANIM_SET_DOUBLE_Y_SCALE)) {
             scaleY = 1.0f;
         }
         out->segment = segment;
