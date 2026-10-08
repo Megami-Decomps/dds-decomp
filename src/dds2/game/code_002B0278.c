@@ -214,9 +214,6 @@ extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
 extern MenuIconBundle *mnuCreateIconBundle(u32);
 
-extern MenuIconState *func_002B9FF8();
-
-
 extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
 
 extern void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *);
@@ -1122,7 +1119,7 @@ s32 mnuCreatePanels(KwlnTask *callback) {
     menuContext->profilePanel = profile;
     mnuSetGroupProperties(profile, menuContext->displayHandle,
                           menuContext->alternateResource, 1, 2);
-    party->iconPanel = func_002B9FF8(4, menuContext->displayHandle, menuContext->skillPanelResource);
+    party->iconPanel = mnuCreatePanelIconState(4, menuContext->displayHandle, menuContext->skillPanelResource);
     if (mnuClassifyQuarterHalfPercent(data->hp, data->maxHp) < 2) {
         party->motionSelection = -1;
     } else {

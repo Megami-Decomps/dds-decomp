@@ -216,7 +216,6 @@ extern void func_002B2408();
 
 extern MenuIconBundle *mnuCreateIconBundle(u32);
 
-extern MenuIconState *func_002B9FF8();
 extern s32 effConfigureIndexedSlotMaterial(u8 *, u32, u8 *, u32, u32, u32, u32);
 
 
@@ -1209,7 +1208,7 @@ INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AEE8);
 
 INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AF00);
 
-MenuIconState *func_002B9FF8(u32 mode, s32 resource, s32 material) {
+MenuIconState *mnuCreatePanelIconState(u32 mode, s32 resource, s32 material) {
     s32 keys[6] = { 0x20, 0x22, 0x1F, 0x21, 0x22, 0x1F };
     MenuIconState *panel;
     s32 index;
