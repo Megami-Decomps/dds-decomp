@@ -624,8 +624,6 @@ typedef struct {
     u32 handle;
 } ParamThunderWork;
 
-extern void parRiseFallSymmetricCellAlpha(void *system, u32 arg1, u32 arg2, u32 arg3);
-
 /* Allocate the copied head and its trailing cells as one block, then create
  * the cell system with native arguments groupDivisor=0 and kind=4.
  * Only three words per cell are zeroed here; vector/range storage is untouched. */
