@@ -106,7 +106,7 @@ extern void func_002AAE80();
 
 extern void mnuReleasePartyIconBundles();
 
-extern void mnuClearEntries();
+extern void mnuClearEntries(MenuPageWindow *);
 
 extern FrFontGlyph *itfDrawUnderscoreTextSegment(s32, s32, s32, u32, const u8 *, s32);
 extern FrFontGlyph *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
@@ -173,7 +173,7 @@ extern u32 effLoadIndexedResource(char *, char *, s32);
 
 extern u32 effLoadMappedResource(char *, char *);
 
-extern void effRequestResourceByMode(char *, char *, s32, u32 *);
+extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
 extern void effRequestMappedResource(char *, char *, u32 *);
 
@@ -932,9 +932,9 @@ void mnuUpdateStaffFade(s32 opening, PartyMenuData *menuWork) {
 
 
 extern s32 mnuGetSelectionFromFlags(s32);
-extern u32 *mnuCreateProfilePanel(DatPartyRecord *selectionState);
+extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void mnuSetGroupProperties(u32 *, u32, u32, u32, u32);
-extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, u32 *, s32);
+extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
 extern void mnuFreeProfilePanelWork(void *);
 
 extern void func_002B2408(MenuContext *);
@@ -1104,7 +1104,7 @@ s32 mnuStepStaffCampPageControl(s32 callback) {
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2C88);
 
-extern void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
+extern void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 extern void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
@@ -1118,9 +1118,9 @@ s32 mnuCreatePanels(s32 callback) {
     DatPartyRecord *data = &datGameState->party[index];
     MenuPageWindow *window = &((MenuContext *)context)->partyWindow;
     StaffMenuRuntime *party = (StaffMenuRuntime *)menuContext->party;
-    u32 *profile;
+    MenuProfilePanel *profile;
 
-    mnuSetWindowResource(index, (u32 *)window, menuContext->displayHandle,
+    mnuSetWindowResource(index, window, menuContext->displayHandle,
                          (s32)menuContext->displayResource,
                          menuContext->alternateResource, 0, 0);
     mnuAttachPartyIconBundle(index, window, (u32)menuContext->displayResource);
@@ -1134,8 +1134,8 @@ s32 mnuCreatePanels(s32 callback) {
         (struct EffectSlotSet *)menuContext->alternateResource,
         (struct EffectSlotSet *)menuContext->displayHandle);
     profile = mnuCreateProfilePanel(data);
-    menuContext->resourceList = profile;
-    mnuSetGroupProperties(profile, menuContext->displayHandle,
+    menuContext->resourceList = (u32 *)profile;
+    mnuSetGroupProperties((u32 *)profile, menuContext->displayHandle,
                           menuContext->alternateResource, 1, 2);
     party->iconPanel = func_002B9FF8(4, menuContext->displayHandle, menuContext->skillPanelResource);
     if (mnuClassifyQuarterHalfPercent(data->hp, data->maxHp) < 2) {
@@ -1157,7 +1157,7 @@ s32 mnuDestroyPanels(s32 callback) {
     window = context + 0x284;
     func_002B2C88(window, 0, menu->staffView, menu->staffMode);
     evtStageTestStop();
-    mnuClearEntries(window);
+    mnuClearEntries((MenuPageWindow *)window);
     mnuReleasePartyIconBundles(window);
     if (((MenuContext *)context)->panelGroup != 0) {
         mnuDestroyPanelGroup(((MenuContext *)context)->panelGroup);
@@ -1310,10 +1310,11 @@ void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, MenuPanelGro
     mnuDrawSlotIcons(0x14a, id);
 }
 
-void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSpriteState *spriteState, u32 resource,
+void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSpriteState *spriteState,
+                                    MenuProfilePanel *resource,
                                     u32 unused4, u32 spriteFlags) {
     func_002C16F0(0, 0, 0, entry, entry->profileId, (s32)spriteState, spriteFlags);
-    mnuDrawAndAdvanceProfilePanel(0xe80, 0x5b8, 0, (u32 *)resource, spriteFlags);
+    mnuDrawAndAdvanceProfilePanel(0xe80, 0x5b8, 0, resource, spriteFlags);
 }
 
 void mnuDrawIconPanelFullFade(u32 x, u32 y, u32 depth, MenuIconState *panel, s32 drawArg);
@@ -1343,7 +1344,7 @@ s32 func_002B3788(s32 callback) {
         func_002AA7A0(5, context->displayHandle);
     } else {
         mnuDrawProfilePanelAndSprite(partyEntry, (u32)&context->partyWindow,
-                                     context->panelEffects, (u32)context->resourceList,
+                                     context->panelEffects, (MenuProfilePanel *)context->resourceList,
                                      (u32)&context->displayHandle, 0x53);
         if (menuWork->staffView == 0) {
             func_002AA7A0(6, context->displayHandle);
@@ -2217,7 +2218,7 @@ u32 ptySkillMenuClosePartyPage(u32 callback) {
     mnuBeginWindowFadeTransition(((MenuContext *)context)->imageHandle, &((MenuContext *)context)->transition);
     mnuDestroySelectedPartyWindow(callback);
     mnuDestroySkillMenuWindows(context);
-    mnuClearPageSelectionHandles(context + 0x284);
+    mnuClearPageSelectionHandles(&((MenuContext *)context)->partyWindow);
     return 1;
 }
 
@@ -2484,7 +2485,7 @@ u32 mnuResetSelection(u32 callback) {
     context = kwlnTaskGetUserValue(callback);
     state = (SkillMenuRuntime *)((MenuContext *)context)->party;
     func_002B6D78(callback);
-    mnuFlagActiveWindows(context + 0x284);
+    mnuFlagActiveWindows(&((MenuContext *)context)->partyWindow);
     state->unk2C = 0;
     mnuBeginWindowFadeTransition(state->selectedWindow, &((MenuContext *)context)->transition);
     return 1;
@@ -2494,7 +2495,7 @@ u32 mnuCloseSkillSelection(u32 callback) {
     s32 context = kwlnTaskGetUserValue();
     mnuBeginWindowFadeTransition(((MenuContext *)context)->imageHandle, &((MenuContext *)context)->transition);
     mnuDestroySkillSelectionWindow(callback);
-    mnuClearPartyPanelActiveFlags(context + 0x284);
+    mnuClearPartyPanelActiveFlags(&((MenuContext *)context)->partyWindow);
     mnuCloseItemSelectionState(callback);
     return 1;
 }
@@ -3639,11 +3640,11 @@ void mnuDrawIconRow(s32 unusedA, s32 unusedB, s32 depth, s32 skip, MenuSprites *
 extern void *func_002BBA38();
 
 
-void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
+void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 
-void mnuSetIndexedWindowPageSpriteFlags(s32 index, u8 *menu, u32 first, u32 second);
+void mnuSetIndexedWindowPageSpriteFlags(s32 index, MenuPageWindow *menu, u32 first, u32 second);
 
-void mnuClearEntries(u8 *menu);
+void mnuClearEntries(MenuPageWindow *menu);
 
 extern void itfSetGridEntryQuantizedAndRefresh();
 
@@ -3738,9 +3739,9 @@ void mnuSelectPage(MenuPageWindow *window, s32 selected);
 
 void mnuClearPageSelectionHandles(MenuPageWindow *window);
 
-void mnuFlagActiveWindows(u8 *menu);
+void mnuFlagActiveWindows(MenuPageWindow *window);
 
-void mnuClearPartyPanelActiveFlags(s32 menu);
+void mnuClearPartyPanelActiveFlags(MenuPageWindow *window);
 
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437BE0);
 

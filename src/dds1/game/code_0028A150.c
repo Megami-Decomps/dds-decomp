@@ -344,7 +344,7 @@ extern LoadCtx374A0 fileLoadMenuState;
 /* Far scalar: incomplete array forces non-small-data addressing. */
 extern s32 D_0037D4D0[];
 
-extern u32 D_0037E130[];
+extern SdfPoolNode *effPacketSubmissionSurfaces[6];
 
 extern char D_003B2668[];
 
@@ -3781,8 +3781,8 @@ void fileResetRenderFlags(void) {
     effModelUpdateControlFlags = 0;
 }
 
-SdfPoolNode *func_00292C48(s32 index) {
-    return (SdfPoolNode *)D_0037E130[index];
+SdfPoolNode *effGetPacketSubmissionSurface(s32 index) {
+    return effPacketSubmissionSurfaces[index];
 }
 
 extern u8 sdfViewMatrix[];
