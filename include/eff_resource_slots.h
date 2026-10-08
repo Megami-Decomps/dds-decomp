@@ -55,6 +55,7 @@ void effAttachSlotWorkOwner(struct EffectSlotSet *owner, s32 slotIndex,
 void effResetSlotWork(struct EffectSlotSet *owner, u32 slotIndex);
 void effResolveAndReleaseResource(struct EffectSlotSet *owner);
 void effResolveAndReleaseSelectedResource(struct EffectSlotSet *owner, s32 slot);
+void effInitializeSlotWork(struct EffectSlotSet *owner, s32 slotIndex);
 void effReleaseTextureHandlesAndResetSlots(struct EffectSlotSet *owner);
 u8 effHasFirstTextureHandle(struct EffectSlotSet *owner);
 u32 effDestroyResourceSlotSet(struct EffectSlotSet *owner);
