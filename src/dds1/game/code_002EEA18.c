@@ -4,6 +4,7 @@
 #include "sdf_draw.h"
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
+#include "sce_io.h"
 
 enum {
     SDF_TMX_MAGIC = 0x30584D54,
@@ -586,16 +587,6 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
     return D_003FF480;
 }
 
-typedef struct SceIoStat {
-    u32 mode;
-    u32 attributes;
-    u32 size;
-    u8 creationTime[8];
-    u8 accessTime[8];
-    u8 modificationTime[8];
-    u32 highSize;
-    u32 privateData[6];
-} SceIoStat;
 
 extern s32 sdfCreateSemaphore(s32, s32, s32);
 extern s32 GetThreadId(void);

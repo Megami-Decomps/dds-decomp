@@ -265,8 +265,6 @@ typedef struct {
 } EffPCPCompactWork;
 
 
-extern EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *params);
-extern void effBlurReleaseSecondResource(EffBlurScaleWork *work);
 extern void effBlurSecondInitSlots(EffBlurScaleWork *work);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
 
@@ -2734,8 +2732,6 @@ void effPcpReleaseLongFadeTimerWork(EffPCPFadeTimerLong *work) {
 }
 
 
-extern void effDrawBlurRectangle(u32 *color);
-
 /* Same timeline as effPcpFadeTimerUpdate on the longer work layout. */
 void effPcpFadeTimerLongUpdate(EffPCPFadeTimerLong *work) {
     s32 frame = work->frame;
@@ -2763,7 +2759,7 @@ void effPcpFadeTimerLongUpdate(EffPCPFadeTimerLong *work) {
         t = 1.0f;
     }
     work->params.source.color = effMultiplyPackedColors(effBlendColor(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
-    effDrawBlurRectangle(&work->params.source.color);
+    effDrawBlurRectangle(&work->params.source);
     work->frame++;
 }
 
@@ -6276,3 +6272,4 @@ INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_00436438);
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_0043643C);
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_0043643D);
+

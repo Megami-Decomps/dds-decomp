@@ -311,10 +311,7 @@ struct BillChildPayload;
 struct BillOut;
 
 typedef struct BillObj {
-    f32 unk0;
-    f32 unk4;
-    f32 unk08;
-    f32 unk0C;
+    f32 position[4]; /* 0x00: copied as a four-component position by both render paths. */
     f32 childScaleX;  /* 0x10: set by billSetChildScaleComponents */
     f32 childScaleY;  /* 0x14 */
     f32 unk18;
