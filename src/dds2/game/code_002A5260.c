@@ -1174,7 +1174,7 @@ extern char D_0042A338[]; /* "mnuMovieDraw" */
 
 void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *descriptor) {
     if (mnuMovieDrawTask == 0) {
-        func_00346778(&mnuMovieDrawContext, descriptor, fileName);
+        sdfMovieInitializeStreamWork(&mnuMovieDrawContext, descriptor, fileName);
         mnuMovieDrawTask = kwlnTaskCreate(D_0042A338, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
     }
 }
@@ -1230,7 +1230,7 @@ s32 func_002A7DB0(void) {
     }
     if (sdfSoundGetCommandStatus() == 0) {
         movie = &mnuMovieDrawContext;
-        func_00346778(movie, &D_00457DB0, D_00457DC8);
+        sdfMovieInitializeStreamWork(movie, &D_00457DB0, D_00457DC8);
         movie->soundNode.textureHead = D_00437AD8;
         movie->soundNode.width = D_00437ADC;
         movie->soundNode.height = D_00437AE0;
@@ -1265,7 +1265,7 @@ KwlnTask *mnuRequestMoviePlayback(const char *file, const SdfMovieDescriptor *pa
         return kwlnTaskCreate(D_0042A3B0, 0x2AFB, 0, 0, func_002A7DB0, 0, 0);
     } else {
         D_00437AD4 = 0;
-        func_00346778(&mnuMovieDrawContext, &D_00457DB0, file);
+        sdfMovieInitializeStreamWork(&mnuMovieDrawContext, &D_00457DB0, file);
         mnuMovieDrawTask = kwlnTaskCreate(D_0042A338, 0x2AFB, 1, 1, mnuMovieDraw, 0, 0);
     }
     return mnuMovieDrawTask;

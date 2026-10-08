@@ -229,8 +229,7 @@ typedef struct MovObj {
 typedef char MovObj_size_must_be_0xB0[
     (sizeof(MovObj) == 0xB0) ? 1 : -1];
 
-void func_002ED8D0(MovObj *, SdfMovieDescriptor *, const char *);
-void func_00346778(MovObj *, SdfMovieDescriptor *, const char *);
+void sdfMovieInitializeStreamWork(MovObj *, SdfMovieDescriptor *, const char *);
 
 /* Graph target: two color buffers followed by the auxiliary/depth buffer (0x14). */
 typedef struct SdfGraphObj {
