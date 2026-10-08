@@ -1087,7 +1087,6 @@ extern const CampEffectRows D_00424AC0;
 extern const char D_00424AE0[];
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
-extern void mnuSetCampEffectResourceHandles(u32, u32, MenuEffectResources *);
 extern void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 extern void mnuOrEntryFlags(u32, u32 *);
 
@@ -1102,14 +1101,14 @@ void func_0025F8B8(u32 object, MenuEffectResources *resources) {
     mappedResource = effCreateMappedResource(dataAddress);
     sdfReleaseResourceAllocation(allocation);
     mnuInitializeMapPacket(2, mapArguments.values, 11, &resources->packet);
-    mnuSetCampEffectResourceHandles(object, (u32)mappedResource, resources);
+    mnuSetCampEffectResourceHandles(object, mappedResource, resources);
     mnuCopyCampEffectRowData(&rows, resources);
     mnuOrEntryFlags(7, &resources->packet.type);
 }
 
 
 void mnuShopDestroyNestedEffectBatch(MenuEffectResources *resources) {
-    effDestroyPackedBatch(resources->animationHandle);
+    effDestroyPackedBatch((s32)resources->animationHandle);
 }
 
 extern s32 mnuFirstPresentMainCharacterIndex(void);

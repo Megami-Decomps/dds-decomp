@@ -669,7 +669,6 @@ void mnuOrEntryFlags(u32 flags, u32 *entryFlags);
 
 void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 
-void mnuSetCampEffectResourceHandles(u32 first, u32 second, MenuEffectResources *);
 
 
 void mnuBindCampEffectAnimation(MenuEffectResources *);

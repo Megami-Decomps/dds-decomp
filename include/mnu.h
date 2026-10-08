@@ -84,9 +84,15 @@ typedef struct MapPacket {
 
 typedef struct MenuEffectResources {
     MapPacket packet;
-    u32 animationHandle;
+    struct EffMappedResource *animationHandle;
     CampEffectRows rows;
 } MenuEffectResources;
+
+#ifdef VERSION_DDS2
+void mnuSetCampEffectResourceHandles(u32 sheet,
+                                    struct EffMappedResource *animation,
+                                    MenuEffectResources *resources);
+#endif
 
 /* DDS2 result/camp backdrop: resources, sixteen sparks and the badge fade. */
 typedef struct MenuCampEffect {
