@@ -197,7 +197,6 @@ s32 billCreateIndexed(s32 kind, s32 index);
 
 s32 sdfAllocGeneralBlock(s32 size);
 
-EffectBufferRecord *sdfResourceRetainAddress(s32 allocation);
 
 void effInitExpandRingPacketSchedule(EffTemplatePacketList *effect);
 
@@ -849,7 +848,7 @@ void func_0015B290(void) {
 EffectBufferTail *effAllocateBuffer(s32 recordCount) {
     s32 recordBytes = recordCount * sizeof(EffectBufferRecord);
     s32 allocationHandle = sdfAllocGeneralBlock(recordBytes + sizeof(EffectBufferTail));
-    EffectBufferRecord *recordCursor = sdfResourceRetainAddress(allocationHandle);
+    EffectBufferRecord *recordCursor = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
     EffectBufferTail *bufferTail = (EffectBufferTail *)((u8 *)recordCursor + recordBytes);
 
     bufferTail->allocation = allocationHandle;
@@ -2905,7 +2904,7 @@ void *effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
     memcpy((u8 *)clone + EFF_TEMPLATE_TAIL_OFFSET, (u8 *)source + source->templateSize, tailBytes);
     auxAllocationHandle = sdfAllocGeneralBlock(clone->packetCount * 0x10);
     clone->auxiliaryAllocation = auxAllocationHandle;
-    clone->auxiliaryData = sdfResourceRetainAddress(auxAllocationHandle);
+    clone->auxiliaryData = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(auxAllocationHandle));
     func_0015B330((s32)clone);
     effResetDiscAuxPacketAges(clone);
     return clone;
@@ -3126,7 +3125,7 @@ s32 effCloneTemplateWithPacketDescriptors(EffTemplatePacketList *source) {
         listBytes = count * 12;
         ((EffTemplatePacketList *)copy)->recordsPerPacket = perRecord;
         ((EffTemplatePacketList *)copy)->listAllocation = sdfAllocGeneralBlock(listBytes + perRecord * count * 16);
-        addr = (s32 *)sdfResourceRetainAddress(((EffTemplatePacketList *)copy)->listAllocation);
+        addr = (s32 *)sdfResourceRetainAddress((struct SdfMemBlock *)(((EffTemplatePacketList *)copy)->listAllocation));
         i = 0;
         base = (s32)addr;
         ((EffTemplatePacketList *)copy)->recordList = base;

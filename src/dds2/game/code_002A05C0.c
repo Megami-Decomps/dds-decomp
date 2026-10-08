@@ -937,7 +937,6 @@ void func_002A2AA0(void) {
 
 extern void kwlnFadeBackgroundStartOut(s32);
 extern void mnuStopTitleMovieDraw(void);
-extern void *sdfResourceRetainAddress(MemBlock *);
 extern void *memset(void *, s32, u32);
 extern void mnuRecreateMenuSelectionList(void);
 extern void mnuSelectMenuListCursorByAdvance(s32);
@@ -950,7 +949,7 @@ KwlnTask *mnuCreateTitleMenuTask(s32 mode) {
     kwlnFadeBackgroundStartOut(0);
     mnuStopTitleMovieDraw();
     allocation = sdfAllocGeneralBlock(sizeof(MovieMenuState));
-    mnuMovieMenuState = sdfResourceRetainAddress(allocation);
+    mnuMovieMenuState = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
     memset(mnuMovieMenuState, 0, sizeof(MovieMenuState));
     mnuMovieMenuState->allocation = allocation;
     mnuRecreateMenuSelectionList();

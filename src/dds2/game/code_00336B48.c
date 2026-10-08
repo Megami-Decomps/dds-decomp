@@ -204,7 +204,6 @@ extern void sdfReleaseMemorySlot(void *);
 
 extern s32 sdfAllocGeneralBlock(s32);
 
-extern s32 sdfResourceRetainAddress(s32);
 
 /* Texture draw packet: three resource-derived values alternate with their
  * GS register addresses after the GIF tag and payload header. */
@@ -857,7 +856,7 @@ void sdfConsUploadDmaProgram(s32 workspaceBytes) {
     sceDmaSync(dmaChannel, 0, 0);
     sdfReleaseMemorySlot(&D_00438A40);
     D_00438A40 = sdfAllocGeneralBlock(workspaceBytes);
-    D_00439180 = sdfResourceRetainAddress(D_00438A40);
+    D_00439180 = sdfResourceRetainAddress((struct SdfMemBlock *)(D_00438A40));
 }
 
 /* Fixed allocation size; the texture is deliberately unused. */
@@ -1970,7 +1969,7 @@ ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 columns, s32 rows) {
     node->textAttribute = 0;
     bufferHandle = sdfAllocGeneralBlock((columns * rows) * SDF_CONSOLE_CELL_BYTES);
     node->bufferHandle = bufferHandle;
-    node->cells = (u8 *)sdfResourceRetainAddress(bufferHandle);
+    node->cells = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(bufferHandle));
     sdfDevConsNodeClear(node);
     sdfDevConsListInsert(node);
     return node;

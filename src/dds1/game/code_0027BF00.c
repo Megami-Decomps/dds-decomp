@@ -477,7 +477,6 @@ INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027CF28);
 
 extern s32 sdfAllocGeneralBlock(s32);
 
-extern s32 *sdfResourceRetainAddress(s32);
 
 extern void func_0027CF28(struct MenuWindowSpriteGroup *, u32, u32, u32, u32);
 
@@ -490,7 +489,7 @@ typedef struct MenuWindowSpriteGroup {
 /* Allocate/clear the native seven-sprite resource group before its initializer runs. */
 MenuWindowSpriteGroup *mnuCreateWindowState(u32 source, u32 mode, u32 variant, u32 option) {
     s32 allocationHandle = sdfAllocGeneralBlock(sizeof(MenuWindowSpriteGroup));
-    MenuWindowSpriteGroup *group = (MenuWindowSpriteGroup *)sdfResourceRetainAddress(allocationHandle);
+    MenuWindowSpriteGroup *group = (MenuWindowSpriteGroup *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
 
     memset(group, 0, sizeof(MenuWindowSpriteGroup));
     group->resourceHandle = allocationHandle;
@@ -846,7 +845,7 @@ void mnuSortItems(s32 menu, s32 keyIndex, s32 ascending) {
     };
     s32 nodeCount = 0;
     s32 allocationHandle = sdfAllocGeneralBlock(((MenuList *)menu)->count * MNU_LIST_POINTER_BYTES);
-    MenuListNode **items = (MenuListNode **)sdfResourceRetainAddress(allocationHandle);
+    MenuListNode **items = (MenuListNode **)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
     MenuListNode **writeCursor = items;
     MenuListNode *node;
 

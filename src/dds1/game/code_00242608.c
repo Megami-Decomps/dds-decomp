@@ -48,7 +48,6 @@
 
 
 extern s32 sdfAllocGeneralBlock(s32);
-extern u8 *sdfResourceRetainAddress(s32);
 extern void evtLoadResourcePair(const char *, u8 *);
 extern s32 evtCreateMessageWindowIfMissing(s32);
 extern s32 func_00244848();
@@ -676,7 +675,7 @@ void func_00243BF0(EvtRuntime *scene) {
     if (scene->pendingResource == 0) {
         handle = (s32)sdfAllocGeneralBlockHigh(0x70000);
         scene->pendingResource = handle;
-        scene->pendingWork = (s32)sdfResourceRetainAddress(handle);
+        scene->pendingWork = (s32)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     }
     memset((void *)scene->pendingWork, 0x40, 0x70000);
     surface = sdfAllocatePacketList(0);
@@ -1066,7 +1065,7 @@ ShopScene *mnuShopCreateScene(void) {
     ShopScene *obj;
 
     handle = sdfAllocGeneralBlock(0xB4);
-    obj = (ShopScene *)sdfResourceRetainAddress(handle);
+    obj = (ShopScene *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     memset(obj, 0, 0xB4);
     obj->resourceHandle = handle;
     mnuClearPanelTransitionState(&obj->transitionWork);

@@ -710,7 +710,7 @@ u8 *mnuCreateStaffMenuWork(void) {
     u8 *effectBytes;
 
     allocation = sdfAllocGeneralBlock(MNU_STAFF_WORK_BYTES);
-    menuBytes = (u8 *)sdfResourceRetainAddress(allocation);
+    menuBytes = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
     memset(menuBytes, 0, MNU_STAFF_WORK_BYTES);
     ((CampVisualWork *)menuBytes)->allocationHandle = allocation;
     effectBytes = menuBytes + 0x11C;

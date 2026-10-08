@@ -594,7 +594,6 @@ void brsTaskLatchPendingRows(BrsSkillPackageWork *task) {
 }
 
 extern s32 sdfAllocGeneralBlock(s32);
-extern void *sdfResourceRetainAddress(s32);
 extern struct EffectList *mnuAllocateValueRecord(u32);
 extern void evtCreateMessageWindowIfMissing(void *);
 extern void evtSetMessageWindowPageValue(s32);
@@ -616,7 +615,7 @@ BrsSkillPackageWork *brsCreateTaskContext(void) {
     BrsSkillPackageWork *work;
 
     handle = sdfAllocGeneralBlock(sizeof(BrsSkillPackageWork));
-    work = sdfResourceRetainAddress(handle);
+    work = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     memset(work, 0, sizeof(BrsSkillPackageWork));
     work->handle = handle;
     mnuClearPanelTransitionState(&work->transition.data);

@@ -226,7 +226,6 @@ struct FileCleanup;
 extern s32 fileIsRequestReadyInCurrentMode(struct FileRequest *);
 extern u32 fileGetResourceHandle(struct FileWork *);
 extern s32 filePollEntryCleanup(struct FileCleanup *);
-extern u32 sdfResourceRetainAddress(struct SdfResource *);
 extern char D_003BC378[];
 
 /* Retain a ready pack and select its first entry-point record.
@@ -241,8 +240,7 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
             state->resourceHandle = fileGetResourceHandle((struct FileWork *)state->fileHandle);
             filePollEntryCleanup((struct FileCleanup *)state->fileHandle);
             state->fileHandle = 0;
-            header = (EvtPackHeader *)sdfResourceRetainAddress(
-                (struct SdfResource *)state->resourceHandle);
+            header = (EvtPackHeader *)sdfResourceRetainAddress((struct SdfMemBlock *)state->resourceHandle);
             state->data = (u8 *)header;
             state->header = header;
             state->entries = header->entries;

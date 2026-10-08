@@ -22,7 +22,6 @@ extern struct EffWorldNode *dds3AppendWorldObjectNode();
 
 extern void *sdfAllocGeneralBlock(s32 size);
 
-extern void *sdfResourceRetainAddress(void *resource);
 
 extern s32 kwlnTaskCreate(char *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
 
@@ -211,7 +210,7 @@ void evtLoadValueSecondaryVectorIntoVu(EffWorldNode *node) {
 /* Allocate the runtime state block, zero it and register the "GBWK" tick task. */
 void sdfCreateRuntimeTask(void) {
     void *mem = sdfAllocGeneralBlock(0x1E840);
-    DatGameState *state = sdfResourceRetainAddress(mem);
+    DatGameState *state = (void *)sdfResourceRetainAddress(mem);
 
     memset(state, 0, 0x1E840);
     state->header.backingAllocation = (s32)mem;

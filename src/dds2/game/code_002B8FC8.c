@@ -338,7 +338,6 @@ extern void func_0035B7F8(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, Me
 
 extern s32 sdfAllocGeneralBlock(s32);
 
-extern s32 *sdfResourceRetainAddress(s32);
 
 extern void func_0026C900(void);
 
@@ -1041,7 +1040,7 @@ void mnuInitIconSprites(MenuIconSprites *obj, s32 w, s32 h, u32 value, s32 res, 
 MenuIconSprites *mnuCreateWindowSpriteResources(u32 width, u32 height, u32 value,
                     u32 resourceHandle, s32 *indices, u32 unused) {
     u32 allocationHandle = sdfAllocGeneralBlock(0x18);
-    MenuIconSprites *bundle = (MenuIconSprites *)sdfResourceRetainAddress(allocationHandle);
+    MenuIconSprites *bundle = (MenuIconSprites *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
     memset(bundle, 0, 0x18);
     bundle->handle = allocationHandle;
     mnuInitIconSprites(bundle, width, height, value, resourceHandle, indices, unused);
@@ -1534,7 +1533,7 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
     };
     s32 nodeCount = 0;
     s32 allocationHandle = sdfAllocGeneralBlock(menu->count * MNU_LIST_POINTER_BYTES);
-    MenuListNode **items = (MenuListNode **)sdfResourceRetainAddress(allocationHandle);
+    MenuListNode **items = (MenuListNode **)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
     MenuListNode **writeCursor = items;
     MenuListNode *node;
 
