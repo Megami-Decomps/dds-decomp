@@ -134,7 +134,8 @@ typedef struct BtlState {
     s32 scriptArg; /* 0x220 */
     BtlTask *tasks; /* 0x224 */
     BtlUnit *units; /* 0x228 */
-    u8 pad22C[0x14];
+    u8 pad22C[0x10];
+    struct SoundSlotOwner *soundSlotOwners; /* 0x23C: shared category/id motion-SE banks. */
     struct BattleModelEntry *modelEntries; /* 0x240 */
     u16 cameraPresetMode; /* 0x244: selects the marked actor's camera preset. */
     u16 cameraActorHighWater; /* 0x246: largest actor count arranged for a side. */
@@ -150,7 +151,9 @@ typedef struct BtlState {
     u16 unk25A;
     u16 phase; /* 0x25C */
     u8 requestMode; /* 0x25E: script sets this to 4 with requestArgument */
-    u8 pad25F[0xD];
+    u8 pad25F[5];
+    u32 motionSeLoadFrame; /* 0x264: disabled at -1; native updater tests the signed word. */
+    u32 skillSeLoadFrame; /* 0x268: same signed disabled sentinel. */
     u16 unk26C;
     u16 unk26E;
     s32 encounterPack; /* 0x270: ENC PACK test selection (func_00215FF8) */
@@ -268,6 +271,9 @@ typedef char BtlSceneLightDds1Offset6[((unsigned int)&((BtlState *)0)->listener 
 typedef char BtlFieldF1Offset[((unsigned int)&((BtlState *)0)->fieldF1ResourceId == 0x290) ? 1 : -1];
 typedef char BtlFieldF2Offset[((unsigned int)&((BtlState *)0)->fieldF2ResourceId == 0x294) ? 1 : -1];
 typedef char BtlFieldTBOffset[((unsigned int)&((BtlState *)0)->fieldTBResourceId == 0x298) ? 1 : -1];
+typedef char BtlMotionSeOwnersOffset[((unsigned int)&((BtlState *)0)->soundSlotOwners == 0x23C) ? 1 : -1];
+typedef char BtlMotionSeLoadFrameOffset[((unsigned int)&((BtlState *)0)->motionSeLoadFrame == 0x264) ? 1 : -1];
+typedef char BtlSkillSeLoadFrameOffset[((unsigned int)&((BtlState *)0)->skillSeLoadFrame == 0x268) ? 1 : -1];
 typedef char BtlCommandSoundDelayOffset[((unsigned int)&((BtlState *)0)->commandSoundDelay == 0x624) ? 1 : -1];
 typedef char BtlPreActionHookOffset[((unsigned int)&((BtlState *)0)->preActionHook == 0x648) ? 1 : -1];
 typedef char BtlPostTargetHookOffset[((unsigned int)&((BtlState *)0)->postTargetHook == 0x64C) ? 1 : -1];
