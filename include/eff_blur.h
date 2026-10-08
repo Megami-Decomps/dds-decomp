@@ -106,8 +106,8 @@ typedef char EffBlurScaleAllocationOffsetCheck[((u32)&((EffBlurScaleWork *)0)->a
 typedef char EffBlurScaleSlotsOffsetCheck[((u32)&((EffBlurScaleWork *)0)->slots == 0x34) ? 1 : -1];
 
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
-EffBlurScatterWork *func_00186F90(void *params);
-EffBlurScatterWork *func_0018EBC8(void *params);
+EffBlurScatterWork *func_00186F90(EffBlurScatterParams *params);
+EffBlurScatterWork *func_0018EBC8(EffBlurScatterParams *params);
 void effBlurReleaseFirstResource(EffBlurScatterWork *work);
 void func_00187098(EffBlurScatterWork *work);
 void func_0018ECD0(EffBlurScatterWork *work);

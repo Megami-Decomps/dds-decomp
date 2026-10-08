@@ -934,7 +934,7 @@ void effUpdateTarget(EffKindWork *work, u32 target) {
 }
 
 u32 effCreateFixedSlotBlurWorkFromFadeOutput(void *source) {
-    return (u32)func_00186F90((u8 *)source + 0xC0);
+    return (u32)func_00186F90((EffBlurScatterParams *)((u8 *)source + 0xC0));
 }
 
 void effReleaseFixedSlotBlurWork(void *handle) {

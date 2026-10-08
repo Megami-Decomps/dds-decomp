@@ -1087,7 +1087,7 @@ void effSetFadeMapParameter(EffKindWork *work, u32 value) {
 }
 
 u32 effCreateFixedSlotBlurWorkFromFadeOutput(void *source) {
-    return (u32)func_0018EBC8((u8 *)source + 0xC0);
+    return (u32)func_0018EBC8((EffBlurScatterParams *)((u8 *)source + 0xC0));
 }
 
 void effReleaseFixedSlotBlurWork(s32 handle) {
