@@ -39,9 +39,9 @@ s32 sdfTexGetPaletteByteSize(s32 textureFormat, s32 paletteFormat, s32 paletteCo
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", func_002D2A58);
 
-/* Copy the texture's backing image without changing the resource metadata. */
+/* Copy retained palette bytes without changing the texture resource metadata. */
 void *sdfTexCopyImageData(SdfTex *texture, void *source) {
-    return memcpy(texture->data, source, texture->dataSize);
+    return memcpy(texture->paletteData, source, texture->paletteDataSize);
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfTex", sdfTexCreateWithAllocatedResources);
@@ -67,7 +67,7 @@ void sdfTexRelease(SdfTex *texture) {
     } else {
         sdfResourceListHead = prev;
     }
-    sdfFreeMemoryFromEitherHeap(texture->data);
+    sdfFreeMemoryFromEitherHeap(texture->paletteData);
     sdfFreeMemoryFromEitherHeap(texture->intensityMap);
     sdfReleaseChipBlock(texture->reference);
     sdfReleaseChipBlock(texture);
@@ -222,7 +222,7 @@ SdfTex *sdfTexAcquireAlternateResourceTexture(void *resourceAddress) {
     return sdfTexCreateFromFileHeader(resourceAddress, 1);
 }
 
-/* Build one intensity byte for every source pixel. */
+/* Build weighted-RGB intensity bytes from retained palette color data. */
 void sdfTexBuildIntensityMap(SdfTex *texture) {
     s32 stride;
     s32 count;
@@ -235,17 +235,17 @@ void sdfTexBuildIntensityMap(SdfTex *texture) {
 
     if (texture->clutFormat == 0) {
         stride = 4;
-        count = (u32)texture->dataSize >> 2;
+        count = (u32)texture->paletteDataSize >> 2;
     } else {
         stride = 2;
-        count = (u32)texture->dataSize >> 1;
+        count = (u32)texture->paletteDataSize >> 1;
     }
     output = texture->intensityMap;
     if (output == NULL) {
         output = sdfAllocateBlockBySizeThreshold(count);
         texture->intensityMap = output;
     }
-    source = texture->data;
+    source = texture->paletteData;
     do {
         if (stride == 4) {
             color = *(u32 *)source;
