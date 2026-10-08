@@ -280,12 +280,11 @@ s32 mnuCreateDualPercentPanel(DatPartyRecord *unit, s32 workAddress) {
     return panel;
 }
 
-/* Release both texture sets and the backing allocation for a nonzero panel pair.
- * Retain the legacy zero-argument first texture-release call. */
+/* Release both texture sets and the backing allocation for a nonzero panel pair. */
 void mnuReleaseDualPercentPanel(s32 panel) {
     if (panel != 0) {
-        mnuReleaseSpriteTextures();
-        mnuReleaseSpriteTextures((s32)panel + MNU_PERCENT_PANEL_BYTES);
+        mnuReleaseSpriteTextures((s32 *)panel);
+        mnuReleaseSpriteTextures((s32 *)((s32)panel + MNU_PERCENT_PANEL_BYTES));
         sdfReleaseChipBlock(panel);
         return;
     }
@@ -637,7 +636,6 @@ extern void mnuInitPartyPanelSlots(PartyPanel *);
 extern void mnuAppendCampSpriteRequests(struct EffectList *, StaffSlots *);
 extern void mnuReleaseStaffMenuTextureHandles(u32 *);
 extern void mnuReleaseStaffResourceGroups(StaffSlots *);
-extern void mnuShutdownContext(MenuPageWindow *);
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 

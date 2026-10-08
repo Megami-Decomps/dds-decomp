@@ -14,7 +14,8 @@ typedef struct SdfVec4 {
 extern f32 sdfVec3Normalize(f32 *);
 
 
-extern u64 sdfAllocateBlockBySizeThreshold(u64);
+extern void *sdfAllocateBlockBySizeThreshold(s32 stackBytes);
+extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 
 extern void *func_0035A828(u32);
 
@@ -729,11 +730,11 @@ s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", sdfCreateThread);
 
-void sdfCreateThreadWithAllocatedWorkspace(u64 destination, u64 source, u64 option) {
-    u64 handle;
+s32 sdfCreateThreadWithAllocatedWorkspace(void *entryAddress, s32 stackBytes, s32 priority) {
+    void *workspace;
 
-    handle = sdfAllocateBlockBySizeThreshold(source);
-    sdfCreateThread(destination, handle, source, option);
+    workspace = sdfAllocateBlockBySizeThreshold(stackBytes);
+    return sdfCreateThread(entryAddress, workspace, stackBytes, priority);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389BC);

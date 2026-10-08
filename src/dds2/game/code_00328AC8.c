@@ -63,7 +63,7 @@ void sdfWakeQueuedThreadWaiters(void) {
 
 extern void func_00366A78(void);
 extern s32 sdfCreateSemaphore(s32, s32, s32);
-extern s32 sdfCreateThread(void (*)(void), void *, s32, s32);
+extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 extern char D_0045E8A0[];
 extern s32 _StartThread(s32, s32);
 
@@ -75,7 +75,7 @@ s32 sdfStartQueuedThreadWakeWorker(void) {
     sdfThreadWakeTick = 0;
     sdfTrackedThreadHead = NULL;
     sdfTrackedThreadSemaphore = sdfCreateSemaphore(1, 1, 0);
-    threadId = sdfCreateThread(sdfWakeQueuedThreadWaiters, D_0045E8A0, SDF_WAKE_WORKER_STACK_BYTES, SDF_WAKE_WORKER_PRIORITY);
+    threadId = sdfCreateThread((void *)sdfWakeQueuedThreadWaiters, D_0045E8A0, SDF_WAKE_WORKER_STACK_BYTES, SDF_WAKE_WORKER_PRIORITY);
     sdfThreadWakeWorkerId = threadId;
     return _StartThread(threadId, 0);
 }

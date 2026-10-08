@@ -382,7 +382,7 @@ extern s8 D_003BD3C8;
 extern char D_003BD3D0[];
 extern s32 func_002F4FD8(SifClient *, s32, s32, void *, s32, void *, s32, void (*)(void *), void *);
 extern s32 func_0030C8E0(const char *, ...);
-extern s32 sdfCreateThreadWithAllocatedWorkspace();
+extern s32 sdfCreateThreadWithAllocatedWorkspace(void *entryAddress, s32 stackBytes, s32 priority);
 extern s32 func_002CF930(void);
 extern s32 sdfGetElapsedTimerTicks(s32);
 extern s32 sceSifMBindRpc(void *, s32, s32);
@@ -392,7 +392,7 @@ extern s32 _StartThread(s32, s32);
 void sdfStartDevRpcServerAndBindClient(void) {
     s32 waitStart;
 
-    _StartThread(sdfCreateThreadWithAllocatedWorkspace(sdfDevStartRpcServer, SDF_DEV_RPC_THREAD_STACK_BYTES, SDF_DEV_RPC_THREAD_PRIORITY), 0);
+    _StartThread(sdfCreateThreadWithAllocatedWorkspace((void *)sdfDevStartRpcServer, SDF_DEV_RPC_THREAD_STACK_BYTES, SDF_DEV_RPC_THREAD_PRIORITY), 0);
     while (sceSifMBindRpc(&D_003F9B50, SDF_DEV_RPC_CLIENT_ID, 0) >= 0) {
         if (D_003F9B50.server != NULL) {
             D_003BD3C8 = 1;
@@ -1682,7 +1682,7 @@ void sdfEnsureDeviceWorkerThreadStarted(s32 index) {
             entry = sdfDevWorkerThread;
         }
         sdfDeviceWorkerPriority = 0x48;
-        thread = sdfCreateThreadWithAllocatedWorkspace(entry, 0x4000, 0x48);
+        thread = sdfCreateThreadWithAllocatedWorkspace((void *)entry, 0x4000, 0x48);
         worker->threadId = thread;
         _StartThread(thread, (s32)worker);
     }
@@ -1711,7 +1711,7 @@ extern char D_003988D0[];
 extern char D_003FA800[];
 extern char D_003BD470[];
 extern void sdfLoadDevModule(void);
-extern s32 sdfCreateThread(void (*)(s32), void *, s32, s32);
+extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 typedef void (*SdfPowerOffCallback)(void *);
 extern SdfPowerOffCallback func_002F33C8(SdfPowerOffCallback, void *);
 extern s32 func_0030E620(void);
@@ -1743,7 +1743,7 @@ void func_002E7228(char *path) {
         return;
     }
     semaphore = sdfCreateSemaphore(0, 1, 0);
-    thread = sdfCreateThread(sdfPowerOffLoop, D_003FA800, 0x800, 1);
+    thread = sdfCreateThread((void *)sdfPowerOffLoop, D_003FA800, 0x800, 1);
     _StartThread(thread, semaphore);
     func_002F33C8(sdfPowerOffInterruptCallback, (void *)semaphore);
     func_0030E620();
