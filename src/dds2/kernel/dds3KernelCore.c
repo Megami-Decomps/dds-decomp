@@ -45,7 +45,7 @@ extern u8 D_00411048[];
 
 extern u8 D_00411078[];
 
-extern void func_00100C28(void);
+extern void kwlnTaskRunScheduledUpdates(void);
 
 
 
@@ -87,9 +87,9 @@ extern u8 D_00435C30[2][2][2];
 extern u8 D_00435C38[2][2];
 extern u8 D_00435C40[2][2][2];
 extern u8 D_00435C48[2][2];
-extern s32 D_00435BF4;
+extern KwlnTask *kwlnExecutingTask;
 
-s32 func_00100A28(KwlnTask *task) {
+s32 kwlnTaskStep(KwlnTask *task) {
     s32 port;
     s32 i;
     s32 nextUpdate;
@@ -97,7 +97,7 @@ s32 func_00100A28(KwlnTask *task) {
     if (task->flags & 0x20) {
         return 1;
     }
-    D_00435BF4 = (s32)task;
+    kwlnExecutingTask = task;
 
     if (task->flags & 0x10) {
         for (port = 0; port < 2; port++) {
@@ -132,16 +132,16 @@ s32 func_00100A28(KwlnTask *task) {
         }
         if (nextUpdate == -1 && (task->flags & KWLN_TASK_STATE_MASK) == KWLN_TASK_ACTIVE) {
             kwlnTaskRequestDestroy(task);
-            D_00435BF4 = 0;
+            kwlnExecutingTask = 0;
             return 0;
         }
     }
     task->timer++;
-    D_00435BF4 = 0;
+    kwlnExecutingTask = 0;
     return 1;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100C28);
+INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskRunScheduledUpdates);
 
 void kwlnTaskFinalizeDestroy(KwlnTask* task)
 {
@@ -344,7 +344,7 @@ void kwlnVisitTaskForestRoots(void)
 s32 kwlnTaskTickScheduler(void)
 {
     kwlnTaskAdvanceStartDelays();
-    func_00100C28();
+    kwlnTaskRunScheduledUpdates();
     kwlnTaskAdvanceDestroyDelays();
     return 1;
 }
@@ -591,7 +591,7 @@ INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_00411048);
 
 INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_00411078);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_00435BF4);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", kwlnExecutingTask);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_00435BF8);
 
