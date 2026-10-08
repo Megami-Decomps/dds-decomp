@@ -10,7 +10,7 @@ void dds3SamplePathKeyframeInterval(u32 *index, f32 *fraction, Dds3PathKeyframes
 
 void effMiscQuaternionNlerpVU(f32 blendAmount);
 void *memset(void *s, s32 c, u32 n);
-void effFreeBuffers(struct EffPrim *primitive);
+void effFreeBuffers(struct EffPrimitiveCurve *primitive);
 
 void dds3FreePathObject(Dds3PathCurveWork *path) {
     effFreeBuffers(path->primitiveCurve);

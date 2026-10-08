@@ -4683,7 +4683,8 @@
 0x00271648	mnuReleaseStaffResourceGroups	inferred	Releases the staff image handles and its three indexed groups of resource handles.
 0x002716E8	mnuStaffSlotsAllFilled	inferred	true when all four StaffSlots arrays hold non-zero entries
 0x00271948	mnuReleaseStaffResourceSlotGroups	inferred	Releases several staff resource-slot groups plus their shared resource group. [names_reviewed13.tsv]
-0x00271D30	mnuCreateStaffPanelSet	inferred	builds three windows with func_00271B50
+0x00271B50	mnuCreateFilteredStaffEntryWindow	inferred	Filters staff entries by required model flags, sizes the staff window from the visible count, and records each source ordinal on appended nodes.
+0x00271D30	mnuCreateStaffPanelSet	inferred	builds three windows with mnuCreateFilteredStaffEntryWindow
 0x00271DF8	mnuReleaseStaffSpriteAndResourceHandles	inferred	Destroys staff sprite windows and releases their held resource lists. [names_reviewed11.tsv]
 0x00271E58	mnuCreateStaffCampWork	inferred	confidence=high; matched-C; src/dds1/game/code_00270FB0.c:358:func_00271E58; M143; source=names_M143.tsv:18; review=Allocates and clears staff work; initializes value record, party panel, background, message window and timer. [names_qp11.tsv]
 0x00271F18	mnuDestroyStaffMenuTask	inferred	Frees the staff menu task's images, assets, context and resources and marks the camp state complete.
@@ -5763,6 +5764,7 @@
 0x002BC510	effResetFileResourceManager	inferred	Zeros manager counters and handles and sets its initial file-resource state. [names_reviewed5.tsv]
 0x002BC538	effClassifyResourceMask	inferred	Maps a recognized single-bit resource mask to its category index. [names_reviewed5.tsv]
 0x002BC5C0	mnuAllocateValueRecord	inferred	Creates zeroed menu work carrying initial value; callers create progress-host and staff-menu work. [names_reviewed5.tsv]
+0x002BC618	effDestroyEffectList	inferred	frees the allocated EffectList header with sdfReleaseChipBlock; entry nodes are managed separately
 0x002BC630	mnuGetValueRecordOwner	inferred	Returns the initial owner/value stored in the first word of this menu record. [names_reviewed5.tsv]
 0x002BC638	effAppendListEntry	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002BC6F0	effRemoveListEntry	inferred	eff effect resources and animation in game/code_0029A840.c
