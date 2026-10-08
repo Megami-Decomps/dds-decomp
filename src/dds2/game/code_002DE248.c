@@ -11206,8 +11206,8 @@ INCLUDE_ASM(const s32, "game/code_002DE248", effConvertParamValue);
 
 
 /* Sum the status-storage byte requirements for the selected record category. */
-u32 effSumRecordStatuses(u8 *recordBytes) {
-    EffRecordBucket *group = &D_00400508[((EffMappedRecord *)recordBytes)->category];
+u32 effSumRecordStatuses(const EffMappedRecord *record) {
+    EffRecordBucket *group = &D_00400508[record->category];
     u32 statusBytes = 0;
     u32 recordIndex;
 
@@ -11244,7 +11244,7 @@ struct SdfMemBlock *effLoadMappedStatusRecords(u8 *source, EffMappedHeader *head
 
         memcpy(record, source, EFF_PACKED_STATUS_HEADER_BYTES);
         source += EFF_PACKED_STATUS_HEADER_BYTES;
-        statusBytes = effSumRecordStatuses((u8 *)records);
+        statusBytes = effSumRecordStatuses(records);
         if (statusBytes < record->statusBytes) {
             statusBytes = record->statusBytes;
         }
@@ -11289,7 +11289,7 @@ EffMappedResource *effCreateStatusBatch(u32 category) {
     {
         EffMappedRecord *record = batch->records;
         record->category = category;
-        statusBytes = effSumRecordStatuses((u8 *)record);
+        statusBytes = effSumRecordStatuses(record);
     }
     statuses = (u8 *)sdfAllocSizeClassBlock(statusBytes);
     batch->records->status = statuses;
