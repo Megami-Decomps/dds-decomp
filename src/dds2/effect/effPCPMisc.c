@@ -3351,22 +3351,22 @@ void effPcpTripleHandleCreateFromTable(void *data) {
 
 EffPCPTripleWork *effPcpTripleHandleDuplicate(EffPCPTripleWork *src) {
     EffPCPTripleWork *work;
-    u32 *from;
-    u32 *to;
-    u32 i;
+    u32 *sourceHandleCursor;
+    u32 *destinationHandleCursor;
+    u32 slotIndex;
 
     work = sdfAllocSizeClassBlock(0xAC);
     work->head = src->head;
     work->frame = 0;
     work->color = 0x80808080;
-    from = (src->handles + 14);
-    to = (work->handles + 14);
-    for (i = 0; i < 7; i++) {
-        to[-14] = effCloneSourceWithTypeHandler(from[-14]);
-        to[-7] = effCloneSourceWithTypeHandler(from[-7]);
-        to[0] = effCloneSourceWithTypeHandler(from[0]);
-        from++;
-        to++;
+    sourceHandleCursor = (src->handles + 14);
+    destinationHandleCursor = (work->handles + 14);
+    for (slotIndex = 0; slotIndex < 7; slotIndex++) {
+        destinationHandleCursor[-14] = effCloneSourceWithTypeHandler(sourceHandleCursor[-14]);
+        destinationHandleCursor[-7] = effCloneSourceWithTypeHandler(sourceHandleCursor[-7]);
+        destinationHandleCursor[0] = effCloneSourceWithTypeHandler(sourceHandleCursor[0]);
+        sourceHandleCursor++;
+        destinationHandleCursor++;
     }
     return work;
 }
