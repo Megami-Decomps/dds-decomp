@@ -7,6 +7,7 @@
 #include "fld_waypoint.h"
 #include "fld_inf.h"
 #include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
 extern FldInfTable D_00332E30;
 #include "sdf_primitive.h"
 #include "evt_unit.h"
@@ -266,7 +267,7 @@ extern u32 D_003306B0[];
 extern f32 D_003306C0[];
 extern f32 D_00330670[];
 extern u32 D_003308B0[];
-extern u32 fileRequestIsReady(u32 arg0);
+
 extern void *memset(void *s, s32 c, u32 n);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task);
@@ -922,7 +923,7 @@ u32 fldPollAreaResourceLoad(void) {
 
     if (sceneState != 0) {
         if (sceneState == 1) {
-            if (fileRequestIsReady(fldAreaLoadRequest) != 0) {
+            if (fileRequestIsReady((struct FileRequest *)fldAreaLoadRequest) != 0) {
                 fldAreaState.resourceFlag = 0;
                 D_003BA734 = 0;
             }
@@ -937,7 +938,7 @@ u32 fldGetResourceReadyFlag(void) {
 
 u8 fldIsAreaResourceReady(void) {
     if (fldAreaLoadRequest != 0) {
-        if (fileRequestIsReady(fldAreaLoadRequest) != 0) {
+        if (fileRequestIsReady((struct FileRequest *)fldAreaLoadRequest) != 0) {
             return 1;
         }
     }
@@ -948,7 +949,7 @@ s32 fldIsAreaFloorResourceReady(s32 area, s32 room) {
     if (fldAreaState.resourceArea != area || fldAreaState.resourceFloor != room) {
         return 0;
     }
-    if (fldAreaLoadRequest != 0 && fileRequestIsReady(fldAreaLoadRequest) != 0) {
+    if (fldAreaLoadRequest != 0 && fileRequestIsReady((struct FileRequest *)fldAreaLoadRequest) != 0) {
         return 1;
     }
     return fldAreaState.resourceFlag != 0;
@@ -1067,7 +1068,7 @@ u8 fldHasAreaResourceNameChanged(void) {
     return strcmp(D_003C9200, buf) != 0;
 }
 
-extern void func_00288C50(u32);
+
 extern void fldSetNpcPalette();
 extern void fldUploadSkyBuffer();
 extern void fldCopyActorWaypointTable();
@@ -1097,7 +1098,7 @@ void fldLoadAreaPackedResources(void) {
         fldFormatAreaResourceName(name);
         strcpy(D_003C9200, name);
         fldAreaPackedArchive = fileQueuePlainDispatchRequest(name);
-        func_00288C50(fldAreaPackedArchive);
+        func_00288C50((struct FileRequest *)fldAreaPackedArchive);
         for (entry = ((FldPackedArchive *)fldAreaPackedArchive)->entries; entry != NULL;
              entry = entry->next) {
             switch (entry->kind) {

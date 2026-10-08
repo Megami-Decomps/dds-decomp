@@ -10,6 +10,7 @@
 #include "evt_task.h"
 #include "eff_transform.h"
 #include "mdl.h"
+#include "file_request_api.h"
 
 extern EffWorldNode *dds3GetWorldObject(void);
 extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *, s32, s32);
@@ -228,7 +229,7 @@ void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
 struct FileRequest;
 struct FileWork;
 struct FileCleanup;
-extern s32 fileIsRequestReadyInCurrentMode(struct FileRequest *);
+
 extern u32 fileGetResourceHandle(struct FileWork *);
 extern s32 filePollEntryCleanup(struct FileCleanup *);
 extern char D_004377E8[];

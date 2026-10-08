@@ -25,6 +25,7 @@
 #include "eff_object.h"
 #include "mdl.h"
 #include "sdf.h"
+#include "file_request_api.h"
 
 extern s32 mdlGetNodeField2C(MdlCtx *, s32);
 extern void effObjSetOpacityPassEnabled(u32 enabled);
@@ -38,7 +39,7 @@ extern void effObjSetOpacityPassEnabled(u32 enabled);
 
 struct FileWork;
 struct FileCleanup;
-extern s32 fileIsRequestReadyInCurrentMode(struct FileRequest *request);
+
 extern u32 fileGetResourceHandle(struct FileWork *work);
 extern s32 filePollEntryCleanup(struct FileCleanup *entry);
 
@@ -9291,7 +9292,7 @@ u32 btlPollFieldArchiveLoad(args)
         args->fieldF2 = NULL;
         args->fieldTB = NULL;
     } else {
-        if (args->request != NULL && fileRequestIsReady(args->request)) {
+        if (args->request != NULL && fileRequestIsReady((struct FileRequest *)args->request)) {
             BtlFieldArchiveRequest *request = args->request;
             node = request->resources;
             i = 0;
@@ -10594,7 +10595,7 @@ void sndLoadSysEffLb(void) {
     s32 node;
     u32 i;
 
-    func_002C81D0(archive);
+    func_002C81D0((struct FileRequest *)archive);
     btlBossDebugPrintf("btl:[%s]\n", path);
     node = *(s32 *)(archive + 0x60);
     i = 0;

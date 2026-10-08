@@ -237,7 +237,10 @@ typedef struct {
     s32 startExtent;
     s32 endExtent;
     f32 unk34;
-    u32 resource;
+    union {
+        EffResourceRectWork *rectangle;
+        EffBlurTemplate *blur;
+    } resource;
 } EffPCPCompactFadeWork;
 
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
@@ -2413,7 +2416,7 @@ EffPCPCompactFadeWork *effPcpCompactEffectCreate(EffPCPCompactRectParams *params
     EffPCPCompactFadeWork *work;
 
     work = sdfAllocSizeClassBlock(0x3C);
-    work->resource = (u32)effCloneResourceTemplate((EffResourceRectParams *)&params->res);
+    work->resource.rectangle = effCloneResourceTemplate((EffResourceRectParams *)&params->res);
     work->frame = 0;
     work->color = 0x80808080;
     work->flags = params->timeline.flags;
@@ -2442,12 +2445,12 @@ void effPcpCompactRespawn(EffPCPCompactFadeWork *work) {
     params.timeline.fadeOut = work->fadeOut;
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
-    memcpy(&params.res, &((EffResourceRectWork *)work->resource)->params, sizeof(params.res));
+    memcpy(&params.res, &work->resource.rectangle->params, sizeof(params.res));
     effPcpCompactEffectCreate(&params);
 }
 
 void effPcpCompactEffectRelease(EffPCPCompactFadeWork *work) {
-    effReleaseResourceTemplate((EffResourceRectWork *)work->resource);
+    effReleaseResourceTemplate(work->resource.rectangle);
     sdfReleaseChipBlock(work);
 }
 
@@ -2467,7 +2470,7 @@ void effPcpCompactEffectUpdate(EffPCPCompactFadeWork *work) {
     f32 projected[4];
     s32 frame = work->frame;
     s32 duration = work->duration;
-    EffResourceRectWork *rect = (EffResourceRectWork *)work->resource;
+    EffResourceRectWork *rect = work->resource.rectangle;
     s32 fadeIn;
     s32 fadeOut;
     f32 opacity;
@@ -2519,7 +2522,7 @@ EffPCPCompactFadeWork *effPcpCompactLongCreate(EffPCPCompactTexturedBlurParams *
     EffPCPCompactFadeWork *work;
 
     work = sdfAllocSizeClassBlock(0x3C);
-    work->resource = (u32)effCloneBlurTemplate(&params->res);
+    work->resource.blur = effCloneBlurTemplate(&params->res);
     work->frame = 0;
     work->color = 0x80808080;
     work->flags = params->timeline.flags;
@@ -2548,12 +2551,12 @@ void effPcpCompactLongRespawn(EffPCPCompactFadeWork *work) {
     params.timeline.fadeOut = work->fadeOut;
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
-    params.res = ((EffBlurTemplate *)work->resource)->body;
+    params.res = work->resource.blur->body;
     effPcpCompactLongCreate(&params);
 }
 
 void effPcpCompactLongRelease(EffPCPCompactFadeWork *work) {
-    effReleaseBlurTemplate((EffBlurTemplate *)work->resource);
+    effReleaseBlurTemplate(work->resource.blur);
     sdfReleaseChipBlock(work);
 }
 
@@ -2562,7 +2565,7 @@ void effPcpCompactLongUpdate(EffPCPCompactFadeWork *work) {
     f32 projected[4];
     s32 frame = work->frame;
     s32 duration = work->duration;
-    EffBlurTemplate *rect = (EffBlurTemplate *)work->resource;
+    EffBlurTemplate *rect = work->resource.blur;
     s32 fadeIn;
     s32 fadeOut;
     f32 opacity;

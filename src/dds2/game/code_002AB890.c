@@ -289,7 +289,7 @@ s32 mnuUpdateStaffEntrySelectionFlags(s32 previousIndex, s32 selectedIndex, Menu
 extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern void itfGridCopyEntryQuad(s32, s32);
 
-void func_002AC750(s32 x, s32 y, s32 depth, struct MenuList *list,
+void mnuDrawOwnedCatalogListNode(s32 x, s32 y, s32 depth, struct MenuList *list,
                    struct MenuListNode *node, s32 drawArg) {
     MenuStaffContext *owner = (MenuStaffContext *)list->context;
     s32 listScale = list->scale;
@@ -345,7 +345,7 @@ void mnuCreateOwnedCatalogItemWindow(MenuStaffContext *owner) {
     mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
     mnuSetWindowEntryParameters(0, window, (u32)owner->spriteArg0, 0xC, 7);
     window->list->context = owner;
-    window->list->drawCallback = func_002AC750;
+    window->list->drawCallback = mnuDrawOwnedCatalogListNode;
     node = mnuAppendWindowListNode(window, D_00437BC8);
     node->sortKeyPrimary = 0;
     node->sortKeySecondary = 0;
@@ -398,7 +398,7 @@ u32 mnuInitializeWindowOwnerResourceSet(KwlnTask *task) {
     resource->allocation = allocation;
     func_002ACB18((u32)context);
     func_002AB8F0(context);
-    mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->unk118,
+    mnuConfigurePanelResource(context->scrollPanel,
                               (s32)context->spriteArg2, 0, 0);
     mnuBeginWindowFadeTransition(context->activeWindow, &context->fade);
     mnuSeekListNode(0, context->activeWindow->list);
@@ -476,7 +476,7 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
         }
         if (input & 2) {
             mnuSetPopupEntryFlagged(popup, D_003E7418);
-            mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->unk118,
+            mnuConfigurePanelResource(context->scrollPanel,
                                       (s32)context->group, 0, 1);
             mnuBeginWindowFadeTransition(context->skillWindow, &context->fade);
         }

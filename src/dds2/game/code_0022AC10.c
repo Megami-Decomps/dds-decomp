@@ -22,6 +22,7 @@
 #include "scr.h"
 #include "dat_state.h"
 #include "dat_command.h"
+#include "file_request_api.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 #define BTL_LIST_FLAG_MASK 0x7FFF
@@ -283,7 +284,6 @@ typedef struct BattleListEntry {
 
 extern s32 mdlRequestAsset(s32, s32, s32);
 
-extern s32 fileRequestIsReady(void *);
 
 extern void sdfBuildPacketE(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -324,7 +324,7 @@ extern char D_0041B7D0[];
 extern void frFontDrawGlyphChain(void *, s32, s32);
 extern void func_0020D1C0(u8 *, u8 *, s32, s32, u32, u32);
 
-extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfAllocPacketAligned(s32);
 
 extern void sdfInitPacketList(void *);
 
@@ -1301,7 +1301,7 @@ s8 btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
     if (cacheEntry->packRequest == 0) {
         return 1;
     }
-    requestReady = fileRequestIsReady(cacheEntry->packRequest);
+    requestReady = fileRequestIsReady((struct FileRequest *)cacheEntry->packRequest);
     return requestReady;
 }
 
@@ -1985,7 +1985,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *r
     u32 selectedIndex;
     s32 rowY;
     func_0020D1C0(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, mode, ((MenuList *)selectionState)->rows * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET, 0x80806020, 0x30000000);
-    indexPackets = sdfAllocPacketAligned(0x20);
+    indexPackets = (void *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(indexPackets);
     firstIndex = ((MenuList *)selectionState)->top;
     visibleRowCount = ((MenuList *)selectionState)->rows;

@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "fr_font_context.h"
 #include "kwln.h"
 #include "sdf_packet_list.h"
 #include "eff_resource_slots.h"
@@ -698,14 +699,13 @@ void func_00243A18(EvtRuntime *scene) {
 }
 
 extern s32 D_00368BD8[];
-extern void frFontSetContextPair(s32 resource, s32 width, s32 height);
-
 void mnuCampInitFontResource(EvtRuntime *scene) {
     s32 fontHandle;
     scene->glyph = 0;
     fontHandle = (s32)(u32)func_001951C8((const char *)D_00368BD8, 0, 0, 0, 0);
     scene->glyph = fontHandle;
-    frFontSetContextPair(fontHandle, CAMP_FONT_CONTEXT_WIDTH, CAMP_FONT_CONTEXT_HEIGHT);
+    frFontSetContextPair((struct FrFontGlyph *)(u32)fontHandle,
+        CAMP_FONT_CONTEXT_WIDTH, CAMP_FONT_CONTEXT_HEIGHT);
 }
 
 void mnuCampLinkFontGlyph(EvtRuntime *scene) {
