@@ -297,7 +297,190 @@ extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern s32 btlIsActorModeActionCodeAllowed(BtlUnit *);
 extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", func_001C50C0);
+void func_001C50C0(s32 sceneAddress) {
+    BtlUnit *unit;
+    BtlUnit *tail;
+    BtlRuntimeTask *task;
+    BtlRuntimeTask *load;
+    BtlRuntimeTask *light;
+    BtlRuntimeTask *lastFade = NULL;
+    u64 chain;
+    u64 firstPrimary;
+    s32 kind;
+    s32 delay;
+    s32 havePrimary;
+    BtlState *scene = (BtlState *)sceneAddress;
+
+    chain = btlAdvanceRuntimeSequenceCounter();
+    firstPrimary = btlAdvanceRuntimeSequenceCounter();
+    btlStartTask(btlCreateCommandSoundUpdateTask());
+    btlStartTask(btlCreateSecondaryCommandSoundTask());
+    btlStartTask(btlCreateCommandSoundTask(0, 2));
+    if (scene->callback5C8 != NULL) {
+        chain = scene->callback5C8(0);
+    }
+    tail = NULL;
+    for (unit = scene->units; unit != NULL; unit = unit->next) {
+        if ((btlUnitStatusPair(unit) & 0x403) == 0x401) {
+            kind = scene->callback5CC != NULL ? scene->callback5CC(unit) : unit->displaySpecies;
+            load = (BtlRuntimeTask *)btlCreateModelLoadPollTask((u8 *)unit, unit->unkDC, kind, 0);
+            load->startCondition.kind = 4;
+            load->startDelay = 1;
+            load->startCondition.value.handle = chain;
+            btlStartTask(load);
+            if (!(scene->commandRestrictFlags & 0xC) && btlIsActorModeActionCodeAllowed(unit)) {
+                task = btlCreateActorTransparencyTask(unit);
+                task->startCondition.kind = 4;
+                task->startDelay = 1;
+                task->startCondition.value.handle = load->handle;
+                btlStartTask(task);
+            }
+            light = btlCreateUnitBaseLightTask(unit);
+            light->startCondition.kind = 4;
+            light->startCondition.value.handle = load->handle;
+            light->ownerId = 0x8000000000000003ULL;
+            btlStartTask(light);
+            chain = light->handle;
+        }
+        tail = unit;
+    }
+    delay = 1;
+    for (unit = tail; unit != NULL; unit = unit->previousActor) {
+        if ((btlUnitStatusPair(unit) & 0x403) == 0x401) {
+            if (!(unit->stateFlags & 0x800) && !(scene->commandRestrictFlags & 8)) {
+                if (!(scene->commandRestrictFlags & 4) && btlIsActorModeActionCodeAllowed(unit)) {
+                    lastFade = (BtlRuntimeTask *)func_001D9038((u8 *)unit, 8);
+                } else {
+                    lastFade = (BtlRuntimeTask *)btlCreateUnitFadeInTask((u8 *)unit, 4, 6);
+                }
+                lastFade->startCondition.kind = 4;
+                lastFade->startCondition.value.handle = chain;
+                lastFade->startDelay = delay;
+                lastFade->ownerId = 0x8000000000000003ULL;
+                btlStartTask(lastFade);
+                if (scene->commandRestrictFlags & 4) {
+                    task = sndCreateActorEffectTask(scene->resources[46], unit, 0x10);
+                    task->startCondition.kind = 4;
+                    task->startCondition.value.handle = chain;
+                    task->startDelay = delay;
+                    task->ownerId = 0x8000000000000003ULL;
+                    btlStartTask(task);
+                }
+                if (!(scene->commandRestrictFlags & 4)) {
+                    delay += 8;
+                } else {
+                    delay += 10;
+                }
+            } else {
+                lastFade = (BtlRuntimeTask *)func_001D9038((u8 *)unit, 0);
+                lastFade->startCondition.kind = 4;
+                lastFade->startCondition.value.handle = chain;
+                lastFade->startDelay = delay;
+                lastFade->ownerId = 0x8000000000000003ULL;
+                btlStartTask(lastFade);
+            }
+        }
+    }
+    if (scene->callback5D4 != NULL) {
+        scene->callback5D4(chain);
+    }
+    havePrimary = 0;
+    for (unit = tail; unit != NULL; unit = unit->previousActor) {
+        if ((btlUnitStatusPair(unit) & 0x203) == 0x201) {
+            if (unit->flags & 0x1000) {
+                load = (BtlRuntimeTask *)btlCreateModelLoadPollTask((u8 *)unit, unit->unkDC, unit->displaySpecies, 0);
+            } else {
+                load = (BtlRuntimeTask *)btlCreateModelLoadPollTask((u8 *)unit, unit->modelId, unit->modelVariant, 0);
+            }
+            load->startCondition.kind = 4;
+            load->startDelay = 1;
+            load->startCondition.value.handle = chain;
+            btlStartTask(load);
+            light = btlCreateUnitBaseLightTask(unit);
+            light->startCondition.kind = 4;
+            light->startCondition.value.handle = load->handle;
+            light->ownerId = 0x8000000000000003ULL;
+            btlStartTask(light);
+            chain = light->handle;
+            if (!havePrimary) {
+                firstPrimary = chain;
+                havePrimary = 1;
+            }
+            if (!(unit->stateFlags & 0x800) && !(scene->commandRestrictFlags & 8)) {
+                lastFade = (BtlRuntimeTask *)btlCreateUnitFadeInTask((u8 *)unit, 4, 6);
+                lastFade->startCondition.kind = 4;
+                lastFade->startDelay = 1;
+                lastFade->startCondition.value.handle = light->handle;
+                lastFade->ownerId = 0x8000000000000003ULL;
+                btlStartTask(lastFade);
+                if ((scene->commandRestrictFlags & 2) && !btlCheckSpecialAbility(&unit->partyRecord, 0x259)) {
+                    task = sndCreateActorEffectTask(scene->resources[46], unit, 0x10);
+                    task->startCondition.kind = 4;
+                    task->startDelay = 1;
+                    task->startCondition.value.handle = light->handle;
+                    btlStartTask(task);
+                }
+            } else {
+                lastFade = (BtlRuntimeTask *)func_001D9038((u8 *)unit, 0);
+                lastFade->startCondition.kind = 4;
+                lastFade->startDelay = 1;
+                lastFade->startCondition.value.handle = light->handle;
+                lastFade->ownerId = 0x8000000000000003ULL;
+                btlStartTask(lastFade);
+            }
+        }
+    }
+    for (unit = tail; unit != NULL; unit = unit->previousActor) {
+        if ((btlUnitStatusPair(unit) & 0x203) == 0x201) {
+            task = (BtlRuntimeTask *)btlCreateGunLoadPollTask((u8 *)unit);
+            task->startCondition.kind = 4;
+            task->startCondition.value.handle = chain;
+            btlStartTask(task);
+        }
+    }
+    if (havePrimary) {
+        task = (BtlRuntimeTask *)sndCreateEarringTask();
+        task->startCondition.kind = 4;
+        task->startCondition.value.handle = firstPrimary;
+        task->ownerId = 0x8000000000000003ULL;
+        btlStartTask(task);
+    }
+    switch (scene->unk24A) {
+        case 1:
+            task = btlCreateEffObjB(NULL, 0xD);
+            task->startCondition.kind = 4;
+            task->startCondition.value.handle = chain;
+            task->ownerId = 0x8000000000000003ULL;
+            btlStartTask(task);
+            break;
+        case 2:
+            task = btlCreateEffObjB(NULL, 0xAB);
+            task->startCondition.kind = 4;
+            task->startCondition.value.handle = chain;
+            task->ownerId = 0x8000000000000003ULL;
+            btlStartTask(task);
+            break;
+    }
+    if (scene->battleFlags & 0x4000) {
+        task = btlCreateEffObjB(NULL, 0x88);
+        task->startCondition.kind = 4;
+        task->startCondition.value.handle = chain;
+        task->ownerId = 0x8000000000000003ULL;
+        btlStartTask(task);
+    }
+    if (lastFade != NULL) {
+        task = btlCreateImmediateCompletionTask();
+        task->startCondition.kind = 4;
+        task->startDelay = 6;
+        task->startCondition.value.handle = lastFade->handle;
+        task->ownerId = 0x8000000000000003ULL;
+        btlStartTask(task);
+    }
+    task = btlCreateSoundUpdateTask(12);
+    task->startCondition.kind = 7;
+    task->startCondition.value.owner = 0x8000000000000003ULL;
+    btlStartTask(task);
+}
 
 
 extern s32 func_00213B90(void);
