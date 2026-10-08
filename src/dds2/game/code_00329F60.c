@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_resource.h"
+#include "sdf_chip.h"
 
 #include "sdf.h"
 #include "sdf_pending.h"
@@ -50,10 +51,7 @@ typedef struct SdfTexPacketTail {
 } SdfTexPacketTail;
 
 
-extern void sdfReleaseChipBlock();
 s32 sdfCoalesceUnusedTextureBlocks(SdfTexResource *block);
-
-extern s32 sdfChipIsInRange();
 extern u8 D_004389E0;
 
 extern u8 *D_004389E4;
@@ -533,7 +531,7 @@ s32 sdfCoalesceUnusedTextureBlocks(SdfTexResource *block) {
             } else {
                 sdfTextureBlockListHead = block;
             }
-            sdfReleaseChipBlock(previousBlock, block, previousBlock);
+            sdfReleaseChipBlock(previousBlock);
             return 1;
         }
     }
