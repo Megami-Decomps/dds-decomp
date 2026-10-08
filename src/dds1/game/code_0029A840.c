@@ -55,7 +55,7 @@ extern u32 D_003BC954;
 typedef struct EffModelOwner {
     f32 scale;
     MdlCtx *model;
-    void *ownedBuffer;
+    SdfLightingPacketStorage *ownedBuffer;
     u32 flags;
 } EffModelOwner;
 
@@ -171,7 +171,7 @@ void effDestroyModelContext(MdlCtx *model) {
 
 EffModelOwner *effCreateModelOwner(u8 *source) {
     EffModelOwner *owner = sdfAllocAndClearQuadwords(0x10);
-    owner->ownedBuffer = sdfAllocAndClearQuadwords(0xE0);
+    owner->ownedBuffer = sdfAllocAndClearQuadwords(sizeof(*owner->ownedBuffer));
     if (source != NULL) {
         void *data;
         *(u32 *)owner = *(u32 *)fileResolvePrimaryBuffer(source);
@@ -187,7 +187,7 @@ EffModelOwner *effCreateModelOwner(u8 *source) {
 }
 
 void effDestroyModelOwner(EffModelOwner *owner) {
-    void *buffer = owner->ownedBuffer;
+    SdfLightingPacketStorage *buffer = owner->ownedBuffer;
     if (buffer != NULL) {
         sdfReleaseChipBlock(buffer);
     }

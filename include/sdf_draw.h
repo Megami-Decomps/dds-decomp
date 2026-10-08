@@ -9,6 +9,16 @@ typedef f32 (*SdfLightSources[3])[4];
 
 typedef char SdfLightSources_size_must_be_0xC[(sizeof(SdfLightSources) == 0xC) ? 1 : -1];
 
+/* Opaque storage for the complete 0xE0 lighting packet built by the renderer. */
+typedef struct SdfLightingPacketStorage {
+    u8 bytes[0xE0];
+} SdfLightingPacketStorage;
+
+typedef char SdfLightingPacketStorage_size_must_be_0xE0[
+    (sizeof(SdfLightingPacketStorage) == 0xE0) ? 1 : -1];
+typedef char SdfLightingPacketStorage_alignment_must_be_1[
+    (__alignof__(SdfLightingPacketStorage) == 1) ? 1 : -1];
+
 /* Buffered SDK storage: live entries are distinct from allocated capacity. */
 typedef struct DevRequest {
     s32 handle;

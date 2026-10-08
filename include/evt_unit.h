@@ -6,6 +6,7 @@
 
 struct MdlCtx;
 struct SdfTex;
+struct SdfLightingPacketStorage;
 
 /* Values stored in EvtUnit.motionState; the field remains a signed halfword. */
 typedef enum EvtUnitMotionState {
@@ -105,7 +106,7 @@ typedef struct EvtUnit {
         u8 pad64[4];
         u32 color64;                /* Destination packed RGB/alpha word */
     };
-    void *endpointWork;            /* 0x68: owned 0xE0 endpoint-work allocation */
+    struct SdfLightingPacketStorage *endpointWork; /* 0x68: owned lighting packet storage */
     u32 value;                     /* 0x6C */
     f32 targetVector[4];           /* 0x70 */
     EffWorldNode *effObj;          /* 0x80: kind-5 world node owning this motion work. */
