@@ -62,19 +62,19 @@ typedef struct DspUnitName {
 
 extern DspUnitName *D_003BAA70;
 extern DspUnitName *D_003BAA8C;
-extern void evtCopyEntryStringToActiveWindow(s32, s32);
+extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
-extern s32 func_002CD240(u16, s32 *);
+extern s32 func_002CD240(u16, u8 **);
 
 void prfCapPresentMessages(BrsSkillPackageWork *scene) {
-    s32 message;
+    u8 *message;
     DatPartyRecord *item = scene->selectedRewardRow->unit;
     s32 profileId = ptyGetCurrentProfileId(item);
     u16 skillId;
 
     if (scene->selectionApplied != 0) {
         evtCopyEntryStringToActiveWindow(
-            0, (s32)D_003BAA70[item->unitId].encodedText);
+            0, D_003BAA70[item->unitId].encodedText);
         func_002CD240(profileId & 0xFFFF, &message);
         evtCopyEntryStringToActiveWindow(1, message);
         dspSetActive(1);
@@ -83,9 +83,9 @@ void prfCapPresentMessages(BrsSkillPackageWork *scene) {
     } else if (scene->pendingSkillCount > 0) {
         skillId = scene->skillList.skills[scene->pendingSkillIndex];
         evtCopyEntryStringToActiveWindow(
-            0, (s32)D_003BAA70[item->unitId].encodedText);
+            0, D_003BAA70[item->unitId].encodedText);
         evtCopyEntryStringToActiveWindow(
-            1, (s32)D_003BAA8C[skillId].encodedText);
+            1, D_003BAA8C[skillId].encodedText);
         dspSetActive(1);
         dspStartEntry(0);
         scene->pendingSkillIndex++;
@@ -214,7 +214,7 @@ void func_00263640(BrsSkillPackageWork *scene) {
     }
 
     evtCopyEntryStringToActiveWindow(0,
-                                     (s32)D_003BAA70[item->unitId].encodedText);
+                                     D_003BAA70[item->unitId].encodedText);
     dspSetActive(1);
     if (scene->extentExhausted == 0) {
         dspStartEntry(0x14);
@@ -247,9 +247,9 @@ void func_00263728(BrsSkillPackageWork *scene) {
         scene->extentExhausted = 0;
     }
     if (item->unitId == 1) {
-        evtCopyEntryStringToActiveWindow(0, (s32)D_003BAA70[item->unitId].encodedText);
+        evtCopyEntryStringToActiveWindow(0, D_003BAA70[item->unitId].encodedText);
         func_003014F0(text, D_003BC550, available);
-        evtCopyEntryStringToActiveWindow(1, (s32)text);
+        evtCopyEntryStringToActiveWindow(1, text);
         dspSetActive(1);
         if (scene->extentExhausted == 0) {
             dspStartEntry(0x12);
