@@ -13,7 +13,7 @@ extern void mnuDisableMantraBackground(u32);
 extern void mnuEnableMantraBackground(u32);
 extern void mnuToggleMantraTitleVariant(u32);
 extern void mnuBeginMantraUnitPanelExit(u32);
-extern u32 mnuRegisterMantraUnitPanelDraw(u32, u32);
+extern struct MantraDrawItem *mnuRegisterMantraUnitPanelDraw(u32, u32);
 extern DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *);
 extern s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *, s8);
 extern void func_0028D070(MnuStatusResource *, s32, s32);
@@ -671,7 +671,7 @@ extern void mnuShowMantraTitle(u32);
 extern void mnuSetMantraBackgroundVariant(u32, s8);
 extern void mnuBeginMantraBackgroundMaskFadeOut(u32);
 extern void mnuBeginMantraBackgroundMaskFadeIn(u32);
-extern u32 mnuRegisterMantraIconListCDraw(u32, u32);
+extern struct MantraDrawItem *mnuRegisterMantraIconListCDraw(u32, u32);
 extern void mnuBeginMantraIconListExit(u32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 

@@ -60,7 +60,7 @@ void mnuFreeMantraSparkleEmitter(u32 sprite);
 void mnuReleaseMantraPanelBurstPool(u32 *obj);
 u32 mnuAllocateMantraBackgroundBurstPool(void);
 extern void mnuDrawCellScaledGrid();
-extern u32 mnuRegisterMantraDrawItem(u32, u32, s32 (*)(), void (*)(), u32 (*)(), void (*)(), s16, s16, u32);
+extern struct MantraDrawItem *mnuRegisterMantraDrawItem(u32, u32, s32 (*)(), void (*)(), u32 (*)(), void (*)(), s16, s16, u32);
 extern s32 mnuUpdateMantraFadeA();
 extern u32 mnuDrawMantraIconList(u32, u32);
 typedef struct MantraNodePos {
@@ -992,7 +992,7 @@ MantraDrawItem *mnuFindFreeMantraDrawItem(u32 address) {
 }
 
 /* Claim an inactive slot; null update/draw callbacks use the zero-return stub. */
-u32 mnuRegisterMantraDrawItem(u32 pool, u32 kind, s32 (*update)(), void (*draw)(), u32 (*create)(), void (*release)(), s16 startDelay, s16 endDelay, u32 createArg) {
+MantraDrawItem *mnuRegisterMantraDrawItem(u32 pool, u32 kind, s32 (*update)(), void (*draw)(), u32 (*create)(), void (*release)(), s16 startDelay, s16 endDelay, u32 createArg) {
     MantraDrawItem *item = mnuFindFreeMantraDrawItem(pool);
 
     memset(item, 0, MNU_MANTRA_DRAW_ITEM_BYTES);
@@ -1020,7 +1020,7 @@ u32 mnuRegisterMantraDrawItem(u32 pool, u32 kind, s32 (*update)(), void (*draw)(
     } else {
         item->flags = (item->flags & MNU_MANTRA_DRAW_STATE_CLEAR_MASK) | (MNU_MANTRA_DRAW_STATE_RUNNING << MNU_MANTRA_DRAW_STATE_SHIFT);
     }
-    return (u32)item;
+    return item;
 }
 
 MantraDrawItem *mnuFindMantraDrawItemByKind(u32 address, u32 kind) {
@@ -1103,7 +1103,7 @@ void mnuUpdateMantraDrawPool(u8 *pool) {
     }
 }
 
-u32 mnuRegisterMantraBackgroundDraw(u32 pool) {
+MantraDrawItem *mnuRegisterMantraBackgroundDraw(u32 pool) {
     return mnuRegisterMantraDrawItem(pool, 0, mnuUpdateMantraBackgroundFade, func_00270848,
                          mnuInitMantraBackgroundDraw, mnuReleaseMantraBackgroundDraw, 0, 0, 0);
 }
@@ -1309,7 +1309,7 @@ void func_00270568(MantraDrawItem *item) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00270848);
 
-u32 mnuRegisterMantraBackgroundMaskDraw(u32 pool) {
+MantraDrawItem *mnuRegisterMantraBackgroundMaskDraw(u32 pool) {
     return mnuRegisterMantraDrawItem(pool, 4, mnuUpdateMantraBackgroundMaskFade, mnuDrawMantraBackgroundMaskPulse,
                          mnuInitMantraBackgroundMaskDraw, mnuReleaseMantraBackgroundMaskDraw, 0, 0, 0);
 }
@@ -1406,11 +1406,11 @@ s32 mnuDrawMantraBackgroundMaskPulse(s32 unused, s32 item) {
     return 0;
 }
 
-u32 mnuCreateMantraFadeDrawItem(u32 list, u32 tag, u32 category) {
-    MantraDrawItem *item = (MantraDrawItem *)mnuRegisterMantraDrawItem(list, 1, mnuUpdateMantraLimitLineFade, func_00271510,
+MantraDrawItem *mnuCreateMantraFadeDrawItem(u32 list, u32 tag, u32 category) {
+    MantraDrawItem *item = mnuRegisterMantraDrawItem(list, 1, mnuUpdateMantraLimitLineFade, func_00271510,
                                                                     func_002712E0, mnuReleaseMantraFadeDrawData, 0, 0, tag);
     item->bits.category = category;
-    return (u32)item;
+    return item;
 }
 
 void mnuBeginMantraLimitLineFadeOut(u32 pool) {
@@ -1832,7 +1832,7 @@ s32 func_00271510(s32 unused, MantraDrawItem *item) {
     return 0;
 }
 
-u32 mnuRegisterMantraTitleDraw(u32 pool) {
+MantraDrawItem *mnuRegisterMantraTitleDraw(u32 pool) {
     return mnuRegisterMantraDrawItem(pool, 6, mnuUpdateMantraTitleBlinkFade, func_00272F08,
                          mnuInitMantraTitleDraw, mnuReleaseMantraTitleDraw, 0, 0, 0);
 }
@@ -1957,7 +1957,7 @@ s32 mnuUpdateMantraTitleBlinkFade(s32 unused, s32 item) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00272F08);
 
-u32 mnuRegisterMantraInfoDraw(u32 pool) {
+MantraDrawItem *mnuRegisterMantraInfoDraw(u32 pool) {
     return mnuRegisterMantraDrawItem(pool, 7, mnuUpdateMantraInfoPulseFade, func_00273828,
                          mnuInitMantraInfoDraw, mnuReleaseMantraInfoDraw, 10, 0, 0);
 }
@@ -2084,7 +2084,7 @@ s32 mnuUpdateMantraInfoPulseFade(s32 unused, s32 item) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00273828);
 
-u32 mnuRegisterMantraGaugeDraw(u32 pool) {
+MantraDrawItem *mnuRegisterMantraGaugeDraw(u32 pool) {
     return mnuRegisterMantraDrawItem(pool, 8, mnuUpdateMantraGaugeFade, mnuDrawMantraGauge,
                          mnuInitMantraGaugeData, mnuReleaseMantraGaugeData, 0, 0, 0);
 }
@@ -2297,7 +2297,7 @@ typedef struct MantraLampState {
     /* 0x3C */ u32 bits;
 } MantraLampState;
 
-u32 mnuRegisterMantraUnitPanelDraw(u32 pool, u32 resource) {
+MantraDrawItem *mnuRegisterMantraUnitPanelDraw(u32 pool, u32 resource) {
     return mnuRegisterMantraDrawItem(pool, 9, mnuUpdateMantraUnitPanelFade, func_00274A70,
                          mnuInitMantraUnitPanelDraw, mnuReleaseMantraUnitPanelDraw, 10, 0, resource);
 }
@@ -2438,7 +2438,7 @@ s32 mnuUpdateMantraUnitPanelFade(s32 unused, s32 item) {
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00274A70);
 
-u32 mnuRegisterMantraTypeOnePanelDraw(u32 pool) {
+MantraDrawItem *mnuRegisterMantraTypeOnePanelDraw(u32 pool) {
     return mnuRegisterMantraDrawItem(pool, 10, mnuUpdateMantraRecordPanelFade, func_00274FF8,
                          mnuCreateTypeOneRecord, mnuReleaseMantraRecordPanelData, 0, 0, 0);
 }
@@ -2889,7 +2889,7 @@ INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00275CE8);
 
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00277F38);
 
-u32 mnuRegisterMantraIconListADraw(u32 pool, u32 resource) {
+MantraDrawItem *mnuRegisterMantraIconListADraw(u32 pool, u32 resource) {
     return mnuRegisterMantraDrawItem(pool, 2, mnuUpdateMantraFadeA, mnuDrawMantraIconList,
                          mnuCreateMantraIconListA, mnuReleaseMantraFadeData, 0, 0, resource);
 }
@@ -3086,7 +3086,7 @@ u32 mnuCreateMantraIconListB(s32 unused, u8 *menu) {
     return data;
 }
 
-u32 mnuRegisterMantraIconListBDraw(u32 pool, u32 resource) {
+MantraDrawItem *mnuRegisterMantraIconListBDraw(u32 pool, u32 resource) {
     return mnuRegisterMantraDrawItem(pool, 3, mnuUpdateMantraFadeA, mnuDrawMantraIconList,
                          mnuCreateMantraIconListB, mnuReleaseMantraFadeData, 0, 0, resource);
 }
@@ -3109,7 +3109,7 @@ u32 mnuCreateMantraIconListC(s32 unused, u8 *menu) {
     return data;
 }
 
-u32 mnuRegisterMantraIconListCDraw(u32 pool, u32 resource) {
+MantraDrawItem *mnuRegisterMantraIconListCDraw(u32 pool, u32 resource) {
     return mnuRegisterMantraDrawItem(pool, 3, mnuUpdateMantraFadeA, mnuDrawMantraIconList,
                          mnuCreateMantraIconListC, mnuReleaseMantraFadeData, 0, 0, resource);
 }
