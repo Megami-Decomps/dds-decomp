@@ -1647,7 +1647,7 @@ void mnuSelectPage(MenuPageWindow *window, s32 selected) {
         effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)window->handlesC[i]);
     }
 
-    selection = mnuGetSelectionFromFlags((s32)&datGameState->party[
+    selection = mnuGetSelectionFromFlags(&datGameState->party[
         window->records->slots[selected].index]);
     for (i = 0; i < 5; i++) {
         if (i == selection) {
