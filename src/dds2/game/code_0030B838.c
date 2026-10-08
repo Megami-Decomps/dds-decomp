@@ -446,8 +446,6 @@ extern u8 D_0037F510[2][2][16];
 extern s32 D_00438894;
 extern s8 D_004388D0;
 struct MenuListNode;
-extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
-extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
 extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void sdfCounterSetMode(s32);
@@ -462,7 +460,7 @@ s32 func_0030C690(void) {
 
     if ((s8)D_0037F510[1][0][6] < 0 || (D_0037F510[1][0][6] & 2)) {
         previousIndex = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
-        if (mnuRetreatListCursorDefault((u32)sdfActiveCounterRuntime) != NULL) {
+        if (mnuRetreatListCursorDefault((struct MenuList *)sdfActiveCounterRuntime) != NULL) {
             index = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
             sdfCounterSetMode(previousIndex);
             sdfCounterStartTimerPositionTransition(0,
@@ -474,7 +472,7 @@ s32 func_0030C690(void) {
     }
     if ((s8)D_0037F510[1][0][7] < 0 || (D_0037F510[1][0][7] & 2)) {
         previousIndex = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
-        if (mnuAdvanceListCursorDefault((u32)sdfActiveCounterRuntime) != NULL) {
+        if (mnuAdvanceListCursorDefault((struct MenuList *)sdfActiveCounterRuntime) != NULL) {
             index = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->index;
             sdfCounterSetMode(previousIndex);
             sdfCounterStartTimerPositionTransition(0,

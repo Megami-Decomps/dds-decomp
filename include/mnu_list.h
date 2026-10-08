@@ -104,9 +104,7 @@ struct MenuListNode *mnuInsertWindowListNodeRelativeToAnchor(struct MenuWindowCo
                                                              const void *value, s32 mode,
                                                              u32 options);
 
-#ifdef VERSION_DDS1
 struct MenuListNode *mnuAdvanceListCursorDefault(struct MenuList *list);
 struct MenuListNode *mnuRetreatListCursorDefault(struct MenuList *list);
-#endif
 
 #endif

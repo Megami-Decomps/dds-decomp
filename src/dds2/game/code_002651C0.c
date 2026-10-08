@@ -22,7 +22,6 @@ extern s32 evtGetCapturedWindowPanelValue();
 extern void mnuShopReleaseWindowSprites(s32, MenuTerminalContext *);
 extern void func_00260020();
 extern s32 mnuCampHasEligibleOwnedItems();
-extern void mnuAdvanceListCursorDefault();
 extern void mnuShopLoadMessageResource(MenuTerminalContext *);
 extern s32 mnuFirstPresentMainCharacterIndex();
 extern void evtCreateEventScriptProcess();

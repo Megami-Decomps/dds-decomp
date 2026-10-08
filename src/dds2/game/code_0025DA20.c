@@ -1862,7 +1862,6 @@ s32 mnuCampAdvanceCounter(s32 delta, MenuTerminalContext *scene) {
 
 extern u8 *D_00435E5C;
 extern u8 D_003C9BC4[];
-extern s32 mnuAdvanceListCursorDefault();
 extern void mnuSelectFirstListNode();
 extern void func_002B9808();
 extern s32 func_002958B0();

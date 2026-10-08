@@ -1754,8 +1754,6 @@ u32 func_00269C48(void) {
 extern s32 func_002685F0(s32 action, s32 context);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
-extern MenuListNode *mnuRetreatListCursorDefault(u32 list);
-extern MenuListNode *mnuAdvanceListCursorDefault(u32 list);
 extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
 extern s32 D_003CE7D0[];
 extern char D_003CE848[];
@@ -1817,10 +1815,10 @@ s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
             mnuClearListFlagsOneAndTwo((u32 *)context->visualState);
         }
         if (buttons & 0x10) {
-            mnuRetreatListCursorDefault((u32)context->visualState);
+            mnuRetreatListCursorDefault((struct MenuList *)context->visualState);
         }
         if (buttons & 0x20) {
-            mnuAdvanceListCursorDefault((u32)context->visualState);
+            mnuAdvanceListCursorDefault((struct MenuList *)context->visualState);
         }
         mnuPlayInputSound(0, buttons, (u32 *)context->visualState);
     }
@@ -1976,10 +1974,10 @@ s32 func_0026A2E0(KwlnTask *request) {
             mnuClearListFlagsOneAndTwo((u32 *)context->menuOwner);
         }
         if (buttons & 0x10) {
-            mnuRetreatListCursorDefault((u32)context->menuOwner);
+            mnuRetreatListCursorDefault((struct MenuList *)context->menuOwner);
         }
         if (buttons & 0x20) {
-            mnuAdvanceListCursorDefault((u32)context->menuOwner);
+            mnuAdvanceListCursorDefault((struct MenuList *)context->menuOwner);
         }
         mnuPlayInputSound(0, buttons, (u32 *)context->menuOwner);
     }
@@ -2064,10 +2062,10 @@ s32 func_0026A598(KwlnTask *task) {
             mnuClearListFlagsOneAndTwo(&host->progressList->stateFlags);
         }
         if (buttons & 0x10) {
-            mnuRetreatListCursorDefault((u32)host->progressList);
+            mnuRetreatListCursorDefault(host->progressList);
         }
         if (buttons & 0x20) {
-            mnuAdvanceListCursorDefault((u32)host->progressList);
+            mnuAdvanceListCursorDefault(host->progressList);
         }
         mnuPlayInputSound(0, buttons, &host->progressList->stateFlags);
     }

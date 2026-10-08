@@ -7,6 +7,7 @@
 #include "file.h"
 #include "file_slot.h"
 #include "dat_state.h"
+#include "mnu_list.h"
 #include "pcp_vu0.h"
 #include "kwln_task_lifecycle.h"
 #include "eff_expanded_list.h"
@@ -106,8 +107,6 @@ extern s32 mnuDestroyListState();
 #include "kwln.h"
 #include "fpu.h"
 struct MenuListNode;
-extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
-extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
 
@@ -3803,14 +3802,14 @@ s32 func_002D1450(void) {
 
     oldIndex = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index;
     if ((u8)D_0037F510[0x26] & 2) {
-        if (mnuRetreatListCursorDefault(((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
+        if (mnuRetreatListCursorDefault((struct MenuList *)(u32)((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
             sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             ((FileConfigTask *)fileConfigTaskWork)->transitionTicks = 8;
             ((FileConfigTask *)fileConfigTaskWork)->previousIndex = oldIndex;
         }
     }
     if ((u8)D_0037F510[0x27] & 2) {
-        if (mnuAdvanceListCursorDefault(((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
+        if (mnuAdvanceListCursorDefault((struct MenuList *)(u32)((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
             sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             ((FileConfigTask *)fileConfigTaskWork)->previousIndex = oldIndex;
             ((FileConfigTask *)fileConfigTaskWork)->transitionTicks = 8;
