@@ -148,16 +148,16 @@ void func_0025BF18(s32 x, s32 y, s32 depth, s32 alpha,
     }
 }
 
-typedef struct {
+typedef struct MenuResourceWork {
     u8 pad00[0x6C];
     u32 resourceHandle; /* 0x6C */
 } MenuResourceWork;
 
-u32 mnuRequestEffectResource(u32 ctx, u32 config) {
+MenuResourceWork *mnuRequestEffectResource(const char *ctx, const char *config) {
     MenuResourceWork *work = (MenuResourceWork *)sdfAllocSizeClassBlock(0x70);
     memset(work, 0, 0x70);
     effRequestResourceByMode(ctx, config, 0, (u32)&work->resourceHandle);
-    return (u32)work;
+    return work;
 }
 
 u8 mnuHasEffectResourceHandle(MenuResourceWork *work) {
