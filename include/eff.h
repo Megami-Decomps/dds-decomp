@@ -287,9 +287,9 @@ typedef struct EffMsg {
 
 /* Effect slot array owner and allocation handle (0xC); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct EffArrHdr {
-    void *slots; /* Slot array base, read by effMathGetSlotAt. */
+    void *slots; /* Slot-array base; effMath and effEvent use different slot types. */
     u32 unk4;   /* Slot count. */
-    void *allocation; /* Allocation handle. */
+    struct SdfMemBlock *allocation; /* Retained allocation descriptor. */
 } EffArrHdr;
 
 /* Two-child draw descriptor at +0x34 in animation-list objects; child allocations end before it. */
