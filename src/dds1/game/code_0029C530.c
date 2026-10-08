@@ -5970,7 +5970,7 @@ extern EffPointSet *effCreatePointSet3(s32 count);
 extern void mdlAddEntryPlain(MdlCtx *model, s32 first, s32 second);
 
 /* Build the point and reference sets for each model map-position record. */
-EffSpanTable *func_002B12D8(EffSpanConfig *config, MdlCtx *model) {
+EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
     u32 total = model->first->frameCount;
     u32 count = sdfCountMapPositionRecords(model->inner);
     u32 spans;
