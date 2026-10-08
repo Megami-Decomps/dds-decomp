@@ -219,7 +219,7 @@ extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
 extern void func_002B2408();
 
-extern u32 mnuCreateIconBundle(u32);
+extern MenuIconBundle *mnuCreateIconBundle(u32);
 
 extern MenuIconState *func_002B9FF8();
 extern s32 effConfigureIndexedSlotMaterial(u8 *, u32, u8 *, u32, u32, u32, u32);
@@ -2065,7 +2065,7 @@ typedef struct MenuIconLayout {
 
 extern MenuIconLayout D_0042AFD8;
 
-u32 mnuCreateIconBundle(u32 resource) {
+MenuIconBundle *mnuCreateIconBundle(u32 resource) {
     MenuIconLayout layout = D_0042AFD8;
     MenuIconBundle *set = (MenuIconBundle *)sdfAllocSizeClassBlock(0x20);
     u32 i;
@@ -2075,7 +2075,7 @@ u32 mnuCreateIconBundle(u32 resource) {
         set->sprite[i] = sprite;
         itfSetGridEntryQuantizedAndRefresh(sprite, 0, layout.entry[i].x - 0xc80, layout.entry[i].y - 0x20, 0, 0);
     }
-    return (u32)set;
+    return set;
 }
 
 void mnuReleaseIconBundleAndSprites(MenuIconBundle *menu) {
@@ -2110,21 +2110,21 @@ void mnuDrawFadeIcons(s32 x, s32 y, s32 depth, s32 unused, MenuIconBundle *obj, 
 
 
 void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource) {
-    u32 bundle;
+    MenuIconBundle *bundle;
 
     bundle = mnuCreateIconBundle(resource);
     ((MenuPageWindow *)menu)->slots[index].iconBundle = bundle;
 }
 
 void mnuReleasePartyIconBundles(u8 *menu) {
-    u32 *bundle = &((MenuPageWindow *)menu)->slots[0].iconBundle;
+    MenuIconBundle **bundle = &((MenuPageWindow *)menu)->slots[0].iconBundle;
     u32 i = 0;
     do {
-        u32 resource = *bundle;
+        MenuIconBundle *resource = *bundle;
         i++;
-        if (resource != 0) {
-            mnuReleaseIconBundleAndSprites((MenuIconBundle *)resource);
-            *bundle = 0;
+        if (resource != NULL) {
+            mnuReleaseIconBundleAndSprites(resource);
+            *bundle = NULL;
         }
         bundle += sizeof(MenuPageSlot) / sizeof(*bundle);
     } while (i < 5);

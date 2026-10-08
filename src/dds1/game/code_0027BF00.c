@@ -115,7 +115,7 @@ extern void sdfReleaseChipBlock(void *);
 
 extern MenuPanelHandles *mnuCreatePanelSpriteHandles(u32, s32, s32);
 
-extern u32 mnuCreateFadeSpriteResourceSet(u32);
+extern MenuIconBundle *mnuCreateFadeSpriteResourceSet(u32);
 
 extern s32 sdfAllocSizeClassBlock(u32);
 
@@ -1314,7 +1314,7 @@ void mnuClearEntries(s32 *menu) {
     *menu &= ~0x100;
 }
 
-u32 mnuCreateFadeSpriteResourceSet(u32 resource) {
+MenuIconBundle *mnuCreateFadeSpriteResourceSet(u32 resource) {
     MenuIconBundle *item = (MenuIconBundle *)sdfAllocSizeClassBlock(0x24);
     s32 sprite;
 
@@ -1331,7 +1331,7 @@ u32 mnuCreateFadeSpriteResourceSet(u32 resource) {
     sprite = effCreateResourceSlotSet((u32 *)resource, 0x1D, 1);
     item->sprite[3] = sprite;
     itfSetGridEntryQuantizedAndRefresh(sprite, 0, 0xB40, 0x40, 0, 0);
-    return (u32)item;
+    return item;
 }
 
 void mnuReleaseFourResourceList(MenuIconBundle *list) {
@@ -1379,7 +1379,7 @@ void mnuDrawAndUpdateFadingSprites(s32 x, s32 y, s32 z, s32 unused, MenuIconBund
 
 
 void mnuAttachPartyIconBundle(s32 index, s32 window, u32 resource) {
-    u32 sprites;
+    MenuIconBundle *sprites;
 
     sprites = mnuCreateFadeSpriteResourceSet(resource);
     ((MenuPageWindow *)window)->slots[index].iconBundle = sprites;
@@ -1388,9 +1388,9 @@ void mnuAttachPartyIconBundle(s32 index, s32 window, u32 resource) {
 void mnuReleasePartyIconBundles(s32 window) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        if (((MenuPageWindow *)window)->slots[i].iconBundle != 0) {
-            mnuReleaseFourResourceList((MenuIconBundle *)((MenuPageWindow *)window)->slots[i].iconBundle);
-            ((MenuPageWindow *)window)->slots[i].iconBundle = 0;
+        if (((MenuPageWindow *)window)->slots[i].iconBundle != NULL) {
+            mnuReleaseFourResourceList(((MenuPageWindow *)window)->slots[i].iconBundle);
+            ((MenuPageWindow *)window)->slots[i].iconBundle = NULL;
         }
     }
 }
@@ -1927,11 +1927,11 @@ void func_002812E8(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
     s32 remainingExp;
     struct FrFontGlyph *glyph;
 
-    if (slot->iconBundle != 0) {
+    if (slot->iconBundle != NULL) {
         mnuDrawAndUpdateFadingSprites(x, y, depth, slot->kind,
-            (MenuIconBundle *)slot->iconBundle, surface);
+            slot->iconBundle, surface);
         color = uiBlendColors(0xFFF06480, 0xFFF06400,
-            ((MenuIconBundle *)slot->iconBundle)->fade);
+            slot->iconBundle->fade);
         remainingExp = ptyComputeTotalExp(unit, 1) - unit->totalExp;
         if (remainingExp != 0) {
             func_003014F0(text, D_003BC740, remainingExp);

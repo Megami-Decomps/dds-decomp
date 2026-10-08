@@ -216,7 +216,7 @@ extern void func_002AA7A0();
 extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
 
-extern u32 mnuCreateIconBundle(u32);
+extern MenuIconBundle *mnuCreateIconBundle(u32);
 
 extern MenuIconState *func_002B9FF8();
 
@@ -3650,7 +3650,7 @@ typedef struct MenuIconLayout {
 
 extern MenuIconLayout D_0042AFD8;
 
-u32 mnuCreateIconBundle(u32 resource);
+MenuIconBundle *mnuCreateIconBundle(u32 resource);
 
 void mnuReleaseIconBundleAndSprites(MenuIconBundle *menu);
 
