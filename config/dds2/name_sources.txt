@@ -4885,6 +4885,8 @@
 0x002D0358	fileFourWayDialogPoll	inferred	state function returned by fileBeginFourWayDialog; dispatches ready/completed/cancelled callbacks on pad edges [names_M75_Large2.tsv]
 0x002D0470	fileBeginFourWayDialog	inferred	caches ready/completed/cancelled callbacks and dialog state [names_R_FuncNames2.tsv]
 0x002D0678	fileBeginFadeAndConfirmSound	inferred	starts fade-in and sounds 0x310000 before next dialog step [names_R_FuncNames2.tsv]
+0x002D06B0	fileSelectLoadWithoutHardInit	inferred	clears the load work hard-initialization choice before confirming the load
+0x002D06D0	fileSelectLoadWithHardInit	inferred	sets the load work hard-initialization choice before confirming the load
 0x002D06F0	fileBeginLoadBranchDialog	inferred	Opens a four-way file-menu dialog whose choices set one of two load branch flags. [names_reviewed15.tsv]
 0x002D0730	fileStartLoadDetectionAfterBranchDialog	inferred	Updates file-menu state and starts detection audio before the load branch dialog. [names_reviewed15.tsv]
 0x002D0770	fileRestartSelectionFlow	inferred	Resets file-menu flow state and returns the slot-selection reset callback. [names_reviewed15.tsv]
