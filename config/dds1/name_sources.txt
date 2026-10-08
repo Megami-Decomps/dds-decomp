@@ -1487,6 +1487,7 @@
 0x00166100	effThunderShiftEndpointsWithAnchor	inferred	Moves an effect origin by the same delta as its replacement anchor vector. [names_reviewed14.tsv]
 0x00166130	effThunderSetDualFragmentColor	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:600:func_00166130; Stores the packed color in the dual-fragment thunder work callback family.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00166138	effThunderRandomizeFrag2	inferred	byte-identical twin of effThunderRandomizeFrag for the second thunder effect
+0x001661D8	effThunderBuildCoreAndEdgeFragmentStrips	inferred	builds synchronized core and outer-edge strips in the primary and secondary particle systems
 0x00166810	effThunderUpdateDualFragments	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:542:func_00166810; Runs fragment delay/activity/fade/reset transitions and writes identical multiplied colors into both particle systems before queueing their cells.; source=names_P5.tsv:11 [names_qp11.tsv]
 0x00166960	effThunderCellCreate	inferred	0x48 head copy, kind-2 system, cells randomized [names_M61_EffVu.tsv]
 0x00166AF0	effThunderReleaseCellWork	inferred	queued

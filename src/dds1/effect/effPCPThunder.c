@@ -1437,7 +1437,7 @@ extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 /* Build synchronized kind-0 core and kind-1 outer strips. Each step emits
  * two rows of two core vertices and three outer vertices from the same path.
  */
-void func_001661D8(EffThunderFragmentWork *work, s32 index) {
+void effThunderBuildCoreAndEdgeFragmentStrips(EffThunderFragmentWork *work, s32 index) {
     f32 width[4] __attribute__((aligned(16)));
     f32 outerWidth[4] __attribute__((aligned(16)));
     f32 negativeOuterWidth[4] __attribute__((aligned(16)));
@@ -1638,7 +1638,7 @@ void func_001661D8(EffThunderFragmentWork *work, s32 index) {
 }
 
 
-extern void func_001661D8(EffThunderFragmentWork *, s32);
+extern void effThunderBuildCoreAndEdgeFragmentStrips(EffThunderFragmentWork *, s32);
 
 /* One countdown/fade/restart state drives both systems; write the same tinted color to each.
    Secondary initialization/submission precedes primary; submission also occurs for count <= 0. */
@@ -1657,7 +1657,7 @@ void effThunderUpdateDualFragments(EffThunderFragmentWork *work) {
         do {
             if (fragment->delayFrames == 0) {
                 if (fragment->activeFrames != 0) {
-                    func_001661D8(work, index);
+                    effThunderBuildCoreAndEdgeFragmentStrips(work, index);
                     fragment->activeFrames--;
                 } else if (fragment->color & EFF_THUNDER_ALPHA_MASK) {
                     fragment->color -= EFF_THUNDER_ALPHA_FADE_STEP;
