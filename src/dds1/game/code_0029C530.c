@@ -3584,7 +3584,7 @@ void func_002A5DE0(EffectSurfaceNode *dst, u8 *work) {
         billMarkKindOneFlag(dst->resource);
         if (dst->record != 0) {
             FileSlotTable *record = (FileSlotTable *)dst->record;
-            billSetBillboardMode((u32)dst->resource, (s16)((FileKeyBlock *)record->data0)->alphaTrack.surfaceIndex);
+            billSetBillboardMode(dst->resource, (s16)((FileKeyBlock *)record->data0)->alphaTrack.surfaceIndex);
         }
         break;
     case 5: {
@@ -3667,7 +3667,7 @@ void effSetSurfaceRetainedResource(EffectSurfaceNode *node, u32 resourceId) {
     resource = effCreateBillboardSharingIndexedResource(resourceId);
     node->resource = resource;
     if (node->record != 0) {
-        billSetBillboardMode((u32)resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->record)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->record)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -3680,7 +3680,7 @@ void effReplaceSurfacePrimaryBillboard(EffectSurfaceNode *node, u32 resourceId) 
     resource = billCreateIndexed(0, resourceId);
     node->resource = resource;
     if (node->record != 0) {
-        billSetBillboardMode((u32)resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->record)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->record)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -3693,7 +3693,7 @@ void effReplaceSurfaceFlaggedBillboard(EffectSurfaceNode *node, u32 resourceId) 
     node->resource = resource;
     billMarkKindOneFlag(resource);
     if (node->record != 0) {
-        billSetBillboardMode((u32)node->resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->record)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode(node->resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->record)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -3975,7 +3975,6 @@ EffQuadWork *effCloneRenderResourceWork(const EffQuadWork *source) {
 }
 
 
-extern void billSetBillboardMode(u32, s16);
 
 void effDuplicateRenderResourceOwner(EffQuadWork *work, const EffQuadWork *source) {
     u32 resource;
@@ -3987,7 +3986,7 @@ void effDuplicateRenderResourceOwner(EffQuadWork *work, const EffQuadWork *sourc
         resource = (u32)billCloneObjectRetainingSharedData((struct BillObj *)source->billHandle);
         work->billHandle = resource;
         billMarkKindOneFlag((struct BillObj *)(resource));
-        billSetBillboardMode(work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
+        billSetBillboardMode((struct BillObj *)work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
         return;
     }
     if (work->reference != NULL) {
