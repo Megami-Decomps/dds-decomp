@@ -823,18 +823,18 @@ INCLUDE_RODATA(const s32, "game/code_0027BF00", D_003B2380);
 
 INCLUDE_RODATA(const s32, "game/code_0027BF00", D_003B23A0);
 
-void mnuSortItems(s32 menu, s32 keyIndex, s32 ascending) {
+void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
     s32 (*comparators[MNU_SORT_COMPARATOR_COUNT])(MenuListNode **, MenuListNode **) = {
         mnuComparePrimaryKeyDescending, mnuCompareSecondaryKeyDescending, mnuCompareTertiaryKeyDescending,
         mnuComparePrimaryKeyAscending, mnuCompareSecondaryKeyAscending, mnuCompareTertiaryKeyAscending
     };
     s32 nodeCount = 0;
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(((MenuList *)menu)->count * MNU_LIST_POINTER_BYTES);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(menu->count * MNU_LIST_POINTER_BYTES);
     MenuListNode **items = (MenuListNode **)sdfResourceRetainAddress(allocation);
     MenuListNode **writeCursor = items;
     MenuListNode *node;
 
-    for (node = ((MenuList *)menu)->first; node != NULL; node = node->next) {
+    for (node = menu->first; node != NULL; node = node->next) {
         *writeCursor++ = node;
         nodeCount++;
     }
@@ -845,7 +845,7 @@ void mnuSortItems(s32 menu, s32 keyIndex, s32 ascending) {
     mnuLinkItemList(items, nodeCount);
     mnuRebuildListFirstFromCursor(menu);
     mnuRebuildListLastFromCursor(menu);
-    mnuResetNodeLinks((s32 *)menu, 0);
+    mnuResetNodeLinks(menu, 0);
     sdfReleaseResourceAllocation(allocation);
 }
 

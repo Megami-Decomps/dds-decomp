@@ -6,6 +6,7 @@
 #include "sdf_stream_read.h"
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
+#include "mdl_object_stream.h"
 
 extern s32 D_00439214;
 extern s32 iWakeupThread(s32 threadId);
@@ -1021,45 +1022,39 @@ INCLUDE_ASM(const s32, "game/code_003425B0", func_00344420);
 INCLUDE_ASM(const s32, "game/code_003425B0", sdfBuildStreamFrameTransferPackets);
 
 /* The four bytes used to initialize the stream node; matches the DDS1 format. */
-typedef struct SoundFormat {
-    u8 hasAudio;
-    u8 stereo;
-    u8 loopMode;
-    u8 playbackMode;
-} SoundFormat;
-
 extern void *memset(void *, s32, u32);
 
 /* Clear the node, map the format's two selector bytes to mode 0/1/2, and copy loop/playback modes. */
-void sdfSoundInitNodeFromFormat(u8 *nodeBytes, u8 *formatBytes) {
-    memset(nodeBytes, 0, SDF_STREAM_NODE_BYTES);
-    if (((SoundFormat *)formatBytes)->hasAudio == 0) {
-        ((SdfStreamFrameNode *)nodeBytes)->audioMode = 0;
+void sdfSoundInitNodeFromFormat(SdfStreamFrameNode *node, SoundFormat *format) {
+    memset(node, 0, SDF_STREAM_NODE_BYTES);
+    if (format->hasAudio == 0) {
+        node->audioMode = 0;
     } else {
-        if (((SoundFormat *)formatBytes)->stereo == 0) {
-            ((SdfStreamFrameNode *)nodeBytes)->audioMode = 1;
+        if (format->stereo == 0) {
+            node->audioMode = 1;
         } else {
-            ((SdfStreamFrameNode *)nodeBytes)->audioMode = 2;
+            node->audioMode = 2;
         }
     }
-    ((SdfStreamFrameNode *)nodeBytes)->loopMode = ((SoundFormat *)formatBytes)->loopMode;
-    ((SdfStreamFrameNode *)nodeBytes)->playbackMode = ((SoundFormat *)formatBytes)->playbackMode;
+    node->loopMode = format->loopMode;
+    node->playbackMode = format->playbackMode;
 }
 
 
 extern void func_00344420(SdfStreamFrameNode *node, u8 *data, s32 size);
 
 /* Decode the frame header, allocate its buffers, then queue the bytes after that header. */
-void sdfStreamOpen(u8 *nodeBytes, s32 format, u8 *frameBytes, s32 sourceSize) {
+void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 sourceAddress, s32 sourceSize) {
     s32 interruptsEnabled;
-    sdfSoundInitNodeFromFormat(nodeBytes, format);
-    ((SdfStreamFrameNode *)nodeBytes)->width = ((SdfStreamHeader *)frameBytes)->width;
-    ((SdfStreamFrameNode *)nodeBytes)->cycleLength = ((SdfStreamHeader *)frameBytes)->cycleLength;
-    ((SdfStreamFrameNode *)nodeBytes)->height = ((SdfStreamHeader *)frameBytes)->height;
-    sdfAllocateStreamFrameBuffers(nodeBytes);
-    func_00344420((SdfStreamFrameNode *)nodeBytes, frameBytes + SDF_STREAM_FRAME_HEADER_BYTES, sourceSize - SDF_STREAM_FRAME_HEADER_BYTES);
+    u8 *frameBytes = (u8 *)sourceAddress;
+    sdfSoundInitNodeFromFormat(node, format);
+    node->width = ((SdfStreamHeader *)frameBytes)->width;
+    node->cycleLength = ((SdfStreamHeader *)frameBytes)->cycleLength;
+    node->height = ((SdfStreamHeader *)frameBytes)->height;
+    sdfAllocateStreamFrameBuffers(node);
+    func_00344420(node, frameBytes + SDF_STREAM_FRAME_HEADER_BYTES, sourceSize - SDF_STREAM_FRAME_HEADER_BYTES);
     interruptsEnabled = func_0036DE70();
-    sdfStreamNodeAppend((SdfStreamFrameNode *)nodeBytes, 0);
+    sdfStreamNodeAppend(node, 0);
     if (interruptsEnabled != 0) {
         EIntr();
     }
@@ -1067,15 +1062,13 @@ void sdfStreamOpen(u8 *nodeBytes, s32 format, u8 *frameBytes, s32 sourceSize) {
 }
 
 extern void *sdfAllocateBlockBySizeThreshold(s32);
-extern void sdfSoundInitNodeFromFormat();
-
 /* Store the callback/source token and allocate an eight-slot feed ring plus its leading mirror bytes. */
-void sdfSoundInitFormattedNode(u8 *nodeBytes, s32 format, SdfStreamRead readSource, u32 source) {
-    sdfSoundInitNodeFromFormat(nodeBytes, format);
-    ((SdfStreamFrameNode *)nodeBytes)->read = readSource;
-    ((SdfStreamFrameNode *)nodeBytes)->source = source;
-    ((SdfStreamFrameNode *)nodeBytes)->active = 1;
-    ((SdfStreamFrameNode *)nodeBytes)->scratchBuffer = sdfAllocateBlockBySizeThreshold(SDF_STREAM_SCRATCH_BYTES) + SDF_STREAM_PREFIX_BYTES;
+void sdfSoundInitFormattedNode(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead readSource, u32 source) {
+    sdfSoundInitNodeFromFormat(node, format);
+    node->read = readSource;
+    node->source = source;
+    node->active = 1;
+    node->scratchBuffer = sdfAllocateBlockBySizeThreshold(SDF_STREAM_SCRATCH_BYTES) + SDF_STREAM_PREFIX_BYTES;
 }
 
 extern SdfTexResource *sdfTexAllocateHeadForDimensions(s32, s32, s32, s32, s32);
@@ -1492,38 +1485,31 @@ void func_00345488(s32 cadence) {
     func_003450D8(0);
 }
 
-void sdfSoundInitAndAppendNode(u8 *state, s32 format, s32 source, s32 size, s32 resource) {
-    sdfStreamOpen(state, format, source, size);
-    ((SdfStreamFrameNode *)state)->resourceWord = resource;
-    sdfSoundAppendNode((SdfStreamFrameNode *)state);
+void sdfSoundInitAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, s32 source, s32 size, s32 resource) {
+    sdfStreamOpen(node, format, source, size);
+    node->resourceWord = resource;
+    sdfSoundAppendNode(node);
 }
-
-typedef struct SdfStreamParams {
-    u8 mode;
-    u8 param1;
-    u8 param2;
-    u8 param3;
-} SdfStreamParams;
 
 extern u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 
-void sdfStreamCreateWithParams(s32 state, SdfStreamParams *params, s32 source, s32 size, u8 *resource) {
+void sdfStreamCreateWithParams(SdfStreamFrameNode *node, SdfStreamParams *params, s32 source, s32 size, SdfTex *resource) {
     SdfStreamParams local = *params;
-    switch (resource[0x1A]) {
+    switch (resource->pixelFormat) {
     case 0:
-        local.mode = 0;
+        local.hasAudio = 0;
         break;
     case 2:
-        local.mode = 1;
+        local.hasAudio = 1;
         break;
     }
-    sdfSoundInitAndAppendNode(state, &local, source, size, sdfTexGetPrimaryResourceWord(resource));
+    sdfSoundInitAndAppendNode(node, &local, source, size, sdfTexGetPrimaryResourceWord(resource));
 }
 
-void sdfSoundInitFormattedAndAppendNode(u8 *state, s32 format, SdfStreamRead read, u32 source, s32 resource) {
-    sdfSoundInitFormattedNode(state, format, read, source);
-    ((SdfStreamFrameNode *)state)->resourceWord = resource;
-    sdfSoundAppendNode((SdfStreamFrameNode *)state);
+void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead read, u32 source, s32 resource) {
+    sdfSoundInitFormattedNode(node, format, read, source);
+    node->resourceWord = resource;
+    sdfSoundAppendNode(node);
 }
 
 extern s32 D_004391FC;

@@ -166,7 +166,91 @@ void dds3ReleaseObjectBaseResources(EffWorldNode *object) {
     }
 }
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111BD8);
+extern const char D_00329B08[5][10];
+extern const char D_00329B40[9][8];
+extern const char D_00329B88[17][20];
+extern const char D_00329CE0[18][20];
+extern const char D_00329E48[17][20];
+extern const char D_00329FA0[17][20];
+extern const char D_003BA9C8[];
+extern const char *func_002D9C28(SdfModel *model, s32 nameId);
+extern s32 strcmp(const char *left, const char *right);
+extern s32 sdfNamedChunkFindId(SdfModel *model, const char *name);
+
+const char D_0039F640[16] = "player_a";
+
+void func_00111BD8(ObjBase *base, MdlCtx *model) {
+    const char *modelName;
+    SdfModel *inner;
+    s32 family;
+    s32 index;
+    s32 chunkId;
+    s32 subtype;
+    s32 *slot;
+    const char (*boneNameRow)[20];
+
+    modelName = func_002D9C28(model->inner, 0);
+    for (family = 0; family < 5; family++) {
+        if (strcmp(modelName, D_00329B08[family]) == 0) {
+            for (index = 0; index < 17; index++) {
+                inner = model->inner;
+                chunkId = sdfNamedChunkFindId(inner, D_00329B88[index]);
+                if (chunkId > 0) {
+                    base->resourceSlotCount = 17;
+                    base->resourceSlots[index] = chunkId;
+                    base->unkAC = family;
+                }
+            }
+            return;
+        }
+    }
+
+    for (family = 0; family < 9; family++) {
+        if (strcmp(modelName, D_00329B40[family]) == 0) {
+            subtype = family + 0x1000;
+            for (index = 0; index < 18; index++) {
+                inner = model->inner;
+                chunkId = sdfNamedChunkFindId(inner, D_00329CE0[index]);
+                if (chunkId > 0) {
+                    base->resourceSlotCount = 18;
+                    base->resourceSlots[index] = chunkId;
+                    base->unkAC = subtype;
+                }
+            }
+            return;
+        }
+    }
+
+    if (strcmp(modelName, D_0039F640) == 0) {
+        for (index = 0; index < 17; index++) {
+            inner = model->inner;
+            chunkId = sdfNamedChunkFindId(inner, D_00329E48[index]);
+            if (chunkId > 0) {
+                base->resourceSlotCount = 17;
+                base->resourceSlots[index] = chunkId;
+                base->unkAC = 0x2000;
+            }
+        }
+        return;
+    }
+
+    if (strcmp(modelName, D_003BA9C8) == 0) {
+        s32 count = ARRAY_COUNT(D_00329FA0);
+        s32 category = 0x3000;
+        slot = base->resourceSlots;
+        boneNameRow = D_00329FA0;
+        for (index = count - 1; index >= 0; index--, slot++, boneNameRow++) {
+            inner = model->inner;
+            chunkId = sdfNamedChunkFindId(inner, *boneNameRow);
+            if (chunkId > 0) {
+                base->resourceSlotCount = count;
+                *slot = chunkId;
+                base->unkAC = category;
+            }
+        }
+    }
+}
+
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00111E30);
 
