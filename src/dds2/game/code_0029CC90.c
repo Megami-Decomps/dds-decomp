@@ -14,7 +14,7 @@ extern s32 scrSetFlag(DatPartyRecord *, u16);
 extern void scrSetSecondaryScriptFlag(DatPartyRecord *, u16);
 extern s32 ptyCalcLevelUps(DatPartyRecord *);
 extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
-extern s32 ptyHasSkill(DatPartyRecord *, u16);
+extern s32 ptyHasSkill(DatPartyRecord *, s32);
 
 
 
