@@ -32,7 +32,7 @@ extern s32 fldLoadMapResource(const char *, MapResource *);
 
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_00108FA0(s32, s32, s32, s32, s32, s32, s32, s32,
-                         u32, u32, u32, u32, u32);
+                         u32, u32, u32, u32, struct SdfTex *);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void fldProjectPointToGridCell(s32 *, s32 *, f32, f32, f32);
 
@@ -308,15 +308,15 @@ static inline void fldDrawLocalMapFrame(f32 slide, f32 alpha1, f32 alpha2, f32 a
     func_00108FA0((s32)(slide * 427.0f + rects[1][0] * (1.0f - slide)), rects[1][1], rects[1][2], rects[1][3],
                   rects[1][4], rects[1][5], rects[1][6], rects[1][7], ((s32)(alpha1 * 128.0f) << 24) | 0x808080,
                   ((s32)(alpha1 * 128.0f) << 24) | 0x808080, ((s32)(alpha1 * 128.0f) << 24) | 0x808080,
-                  ((s32)(alpha1 * 128.0f) << 24) | 0x808080, fldLocalMapTextureResource.image);
+                  ((s32)(alpha1 * 128.0f) << 24) | 0x808080, (struct SdfTex *)fldLocalMapTextureResource.image);
     func_00108FA0(rects[2][0], rects[2][1], rects[2][2], rects[2][3], rects[2][4], rects[2][5], rects[2][6],
                   rects[2][7], ((s32)(alpha2 * 128.0f) << 24) | 0x808080, ((s32)(alpha2 * 128.0f) << 24) | 0x808080,
                   ((s32)(alpha2 * 128.0f) << 24) | 0x808080, ((s32)(alpha2 * 128.0f) << 24) | 0x808080,
-                  fldLocalMapTextureResource.image);
+                  (struct SdfTex *)fldLocalMapTextureResource.image);
     func_00108FA0((s32)(slide * 353.0f + rects[3][0] * (1.0f - slide)), rects[3][1], rects[3][2], rects[3][3],
                   rects[3][4], rects[3][5], rects[3][6], rects[3][7], ((s32)(alpha3 * 128.0f) << 24) | 0x808080,
                   ((s32)(alpha3 * 128.0f) << 24) | 0x808080, ((s32)(alpha3 * 128.0f) << 24) | 0x808080,
-                  ((s32)(alpha3 * 128.0f) << 24) | 0x808080, fldLocalMapTextureResource.image);
+                  ((s32)(alpha3 * 128.0f) << 24) | 0x808080, (struct SdfTex *)fldLocalMapTextureResource.image);
     evtSubmitPrimaryAlphaBlendMode(0);
 }
 
@@ -407,7 +407,24 @@ void fldDrawLocalMapTransition(s32 opening) {
 
 INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C6948);
 
-INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C6EC8);
+extern void evtSetDrawSurfaceIndex(u32);
+
+/* Draw the map texture with its native asymmetric scaled extents. */
+void func_002C6EC8(s32 x, s32 y, s8 grey, s8 alpha, struct SdfTex *texture, f32 scale) {
+    u32 color;
+    f32 left, top, width, height;
+
+    evtSetDrawSurfaceIndex(0x54);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    left = (f32)x - scale * 154.0f;
+    top = (f32)y - scale * 102.0f;
+    width = scale * 309.0f;
+    height = scale * 205.0f;
+    color = ((u8)grey | ((u32)alpha << 24)) |
+            (((u8)grey << 16) | ((u8)grey << 8));
+    func_00108FA0((s32)left, (s32)top, (s32)width, (s32)height,
+                  0, 0, 0x100, 0xC0, color, color, color, color, texture);
+}
 
 
 extern void fldDrawMapRequestHalo(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
@@ -436,7 +453,7 @@ void fldDrawScaledAuxMapTexture(s32 x, s32 y, u32 colour, f32 scale) {
     func_00108FA0((s32)(x - scale * 16.0f), (s32)(y - scale * 12.0f),
                   (s32)(scale * 32.0f), (s32)(scale * 24.0f),
                   0, 0, 32, 32, colour, colour, colour, colour,
-                  fldLocalMapAuxTextureResource.image);
+                  (struct SdfTex *)fldLocalMapAuxTextureResource.image);
 }
 
 /* Four corners use the same grey pulse colour. */
@@ -464,7 +481,7 @@ void fldDrawMapRequestHalo(s32 x, s32 y, s32 z, MapRequestState *state, MapReque
                   (s32)(scale * 32.0f), (s32)(scale * 32.0f), 0, 0, 32, 32,
                   MAP_GREY_COLOR(progress * 24.0f), MAP_GREY_COLOR(progress * 24.0f),
                   MAP_GREY_COLOR(progress * 24.0f), MAP_GREY_COLOR(progress * 24.0f),
-                  fldLocalMapAuxTextureResource.image);
+                  (struct SdfTex *)fldLocalMapAuxTextureResource.image);
 }
 
 
@@ -491,7 +508,7 @@ void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *state, MapRequ
                   (s32)(scale * 32.0f), (s32)(scale * 24.0f), 0, 0, 32, 32,
                   MAP_GREY_COLOR(progress * 64.0f), MAP_GREY_COLOR(progress * 64.0f),
                   MAP_GREY_COLOR(progress * 64.0f), MAP_GREY_COLOR(progress * 64.0f),
-                  fldLocalMapAuxTextureResource.image);
+                  (struct SdfTex *)fldLocalMapAuxTextureResource.image);
     evtSubmitPrimaryAlphaBlendMode(0);
 }
 
