@@ -1,5 +1,6 @@
 #include "bill_object_api.h"
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "eff.h"
 #include "eff_blur.h"
 #include "sdf_chip.h"
@@ -7,7 +8,6 @@
 extern void sdfInitPacketList(SdfListHead *list);
 extern void sdfAppendPacket(SdfListHead *list, u32 packetAddress);
 extern s32 sdfAllocPacketAligned(s32 size);
-extern s32 sdfConsCreateDrawPacket(SdfListHead *list, SdfTex *texture, s32 context);
 extern void *effCreateSizedDrawPacket(s32 height, s32 flags);
 struct EffectDispatchState;
 extern s32 billGetWorkTransformMatrix(struct EffectDispatchState *effect);

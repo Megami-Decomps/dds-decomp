@@ -1,5 +1,6 @@
 #include "bill_object_api.h"
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "btl_effect_position.h"
 #include "sdf.h"
 #include "eff_blur.h"
@@ -317,7 +318,6 @@ void effDrawBlurRectangle(EffBlurQuad *source)
 }
 
 extern void func_0032DB30(s32 source, u32 packet, s32 variant);
-extern s32 sdfConsCreateDrawPacket(SdfListHead *list, SdfTex *texture, s32 context);
 
 void effAppendBlurRenderState(void *list, s32 blendControl, u32 resource)
 {

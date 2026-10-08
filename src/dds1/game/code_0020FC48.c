@@ -1,5 +1,6 @@
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
@@ -1185,7 +1186,6 @@ void btlCopyPaletteLowByteToAlpha(s32 *colors) {
 }
 
 extern SdfTex *kwlnHeldTextureReference;
-extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern void sdfQueueTexturedQuad(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
                                  s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 
