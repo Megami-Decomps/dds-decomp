@@ -234,11 +234,6 @@ extern void mnuSeekListNode(s32, s32);
 
 
 
-typedef struct PartySkillSlots {
-    u8 pad00[0x22];
-    u16 code[8];
-} PartySkillSlots;
-
 typedef struct MenuItemCount {
     u8 pad00[0x20];
     s32 count; /* 0x20 */
@@ -1462,25 +1457,26 @@ u32 mnuResetStaffSelectionFlags(void) {
     return 1;
 }
 
-extern void ptyRecomputeMaxHpMp();
-extern void scrClearSecondaryScriptFlag();
+extern s32 ptyHasSkill(DatPartyRecord *unit, s32 skillId);
+extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
+extern void scrClearSecondaryScriptFlag(DatPartyRecord *unit, u16 flagId);
 
 /* Narrow the ID to its native 16-bit skill code before duplicate detection.
  * Insert only missing skills, then recompute maxima and clear the script flag. */
-void mnuAddPartySkillIfMissing(s32 partyEntry, s32 skillId, s32 skillSlot) {
+void mnuAddPartySkillIfMissing(DatPartyRecord *partyEntry, s32 skillId, s32 skillSlot) {
     u16 skillCode = skillId;
 
     if (ptyHasSkill(partyEntry, skillCode) == 0) {
-        ((PartySkillSlots *)partyEntry)->code[skillSlot] = skillCode;
+        partyEntry->effectData[skillSlot] = skillCode;
         ptyRecomputeMaxHpMp(partyEntry);
         scrClearSecondaryScriptFlag(partyEntry, skillCode);
     }
 }
 
-/* Clear one skill slot, retaining the native short-arity maxima recomputation. */
-void mnuClearPartySkillSlot(s32 partyEntry, s32 skillSlot) {
-    ((PartySkillSlots *)partyEntry)->code[skillSlot] = 0;
-    ptyRecomputeMaxHpMp();
+/* Clear one skill slot and recompute the owning party record's maxima. */
+void mnuClearPartySkillSlot(DatPartyRecord *partyEntry, s32 skillSlot) {
+    partyEntry->effectData[skillSlot] = 0;
+    ptyRecomputeMaxHpMp(partyEntry);
 }
 
 /* Open the selected skill's popup or cancel, then process list navigation.
