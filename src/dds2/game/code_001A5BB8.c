@@ -2107,9 +2107,9 @@ s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *targets) {
         }
         if (datCommandRecords[index].targetType == 0 &&
             datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_FLAG_MASK &&
-            datCommandRecords[index].attribute.parts.flagMask != 0) {
+            datCommandRecords[index].attribute.parts.valueMask != 0) {
             for (i = 0; i < count; i++) {
-                if ((datCommandRecords[index].attribute.parts.flagMask &
+                if ((datCommandRecords[index].attribute.parts.valueMask &
                      ((BtlUnit *)btlGetIndexListEntry(targets, i))->partyRecord.status) != 0) {
                     return i;
                 }

@@ -508,7 +508,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
     s32 hit;
     u16 flag;
 
-    mask = datCommandRecords[index].attribute.parts.flagMask;
+    mask = datCommandRecords[index].attribute.parts.valueMask;
     if (datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK) {
         count = 0;
         for (bit = 0; bit < 16; bit++) {

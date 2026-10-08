@@ -4628,7 +4628,7 @@
 0x002C49F0	mnuPlayInputSoundKind	inferred	DDS1 func_00285F00 twin; button sound with an extra kind argument (6, 1, 0x15 or 0 for the confirm group)
 0x002C4B40	mnuPlayDefaultInputSounds	inferred	confidence=high; matched-C; src/dds2/game/code_002BE628.c:1355:func_002C4B40; Dispatches button-mask sounds using the default sound kind; directional bits fall through to sequence zero.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x002C4CA8	mnuLookupPartyTableValue	inferred	DDS1 has the same unprefixed symbol; game/code_002BE628 uses mnu for the already-described lookupPartyTableValue behavior.
-0x002C4D78	mnuGetSecondaryValueIfKind2	inferred	Reads RangeEntry.secondaryValue only when secondaryKind equals 2; first-game twin 00286288.
+0x002C4D78	mnuGetCommandFlagMask	inferred	Returns the command attribute mask only when kind 2 selects flag-mask semantics; its consumer tests the returned 0x4000 flag.
 0x002C4DB0	mnuGetRangeEntryKind	inferred	Returns the range entry kind byte for the indexed range slot.
 0x002C4E58	mnuGetRangeEntryFlatValue	inferred	value + addition when the range entry kind is 1 (unlike mnuGetAdjustedEntryValue it does not scale by the party level)
 0x002C4EB8	mnuCanAffordEntryCost	inferred	Compares cost from range table with primary or secondary count by entry kind. [names_reviewed5.tsv]
