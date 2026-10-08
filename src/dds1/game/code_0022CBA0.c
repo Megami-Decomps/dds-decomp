@@ -15,13 +15,13 @@
 #include "eff_object.h"
 #include "mdl.h"
 #include "evt_polygon_movie.h"
+#include "kwln_task_lifecycle.h"
 
 struct EvtRuntime;
 struct EvtRuntime;
 struct EvtRuntime;
 
 extern char evtViewerTaskName[]; /* "EventViewer" */
-extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 s32 evtViewerHasUpdateFlag(struct EvtRuntime *viewer);
 s32 evtViewerUpdateFrame(KwlnTask *task);
 void fldInitializeCameraColorResource(void);
@@ -1621,7 +1621,6 @@ extern void kwlnCancelConfiguredFadeFrames();
 extern void mnuStopMovieDrawTask();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
-extern void sdfQueueNonzeroResourceId();
 extern void kwlnTextureReleaseHeldReference();
 extern void evtEventViewerReleaseGroups();
 extern void evtEventViewerShutdown();
@@ -1647,7 +1646,7 @@ void evtViewerReleaseResources(EvtRuntime *viewer) {
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     if (viewer->pendingResource != 0) {
-        sdfQueueNonzeroResourceId(viewer->pendingResource);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)viewer->pendingResource);
         viewer->pendingResource = 0;
         viewer->pendingWork = 0;
     }

@@ -12,6 +12,7 @@
 #include "kwln.h"
 #include "dat_state.h"
 #include "dat_command.h"
+#include "kwln_task_lifecycle.h"
 
 extern SceneSlotFadeWork *D_003BD83C;
 extern ActorSlotOrder *D_003BD840[2];
@@ -172,7 +173,6 @@ extern const char *btlAnalyzPanelTaskNameRef;
 extern const char *btlMahenPanelTaskNameRef;
 
 
-extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *, s32);
 extern void func_00101A80(KwlnTask *, KwlnTask *);
 
 extern s32 btlGetTrackedTaskHandle(s32);
@@ -787,16 +787,16 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
 }
 
 s32 btlAllActiveUnitsReady(void) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x228);
-    for (; node != 0; node = *(s32 *)(node + 0x344)) {
-        u32 flags = *(u32 *)(node + 0x110);
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
+    for (; actor != NULL; actor = actor->next) {
+        u32 flags = actor->flags;
         if ((flags & 1) != 0) {
             if ((flags & 0x400) != 0) {
                 if ((flags & 0xC0) != 0) {
                     return 0;
                 }
                 if ((flags & 0x20) != 0) {
-                    if ((*(u32 *)(node + 0x114) & 1) == 0) {
+                    if ((actor->stateFlags & 1) == 0) {
                         return 0;
                     }
                 }
@@ -1471,7 +1471,7 @@ s32 btlComputeStatusPenaltyFifth(BtlUnit *object) {
 
 s32 btlRollFearChance(s32 unused, u8 *actor, u32 flags, u32 options) {
     s32 ratio;
-    if ((*(u32 *)(btlGetRuntime() + 0x1FC) & 0x80) != 0) return 0;
+    if ((((BtlState *)btlGetRuntime())->unk_1FC & 0x80) != 0) return 0;
     if ((((BtlUnit *)actor)->stateFlags & 8) != 0) return 0;
     if ((flags & 1) == 0) return 0;
     if ((((BtlUnit *)actor)->partyRecord.status & 1) != 0) return 0;
@@ -1978,7 +1978,7 @@ s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta) {
     if (btlGetEntryFlagsUnlessDisabled(&actor->partyRecord) & 4) return 0;
     if (btlHasEnemyRecordDefeatExemptionFlag(actor)) return 0;
     if ((actor->partyRecord.status & 0x7FFF) == 0x4000) return 1;
-    if ((*(u32 *)(btlGetRuntime() + 0x1F4) & 0x80) == 0) return 0;
+    if ((((BtlState *)btlGetRuntime())->battleFlags & 0x80) == 0) return 0;
     return actor->partyRecord.hp + delta < 1;
 }
 
@@ -2436,16 +2436,16 @@ s32 btlGetCommandResultKindFromFlags(u32 flags, u32 secondary) {
 }
 
 s32 btlAverageMaximumValueForMask(u32 mask, s8 allowDisabled) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x228);
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
     s32 sum = 0;
     s32 count = 0;
-    for (; node != 0; node = *(s32 *)(node + 0x344)) {
-        u32 flags = *(u32 *)(node + 0x110);
+    for (; actor != NULL; actor = actor->next) {
+        u32 flags = actor->flags;
         if ((flags & 1) != 0) {
             if (allowDisabled == 0 || (flags & 0x20) == 0) {
-                if ((*(u16 *)(node + 0x120) & mask) != 0) {
+                if ((actor->partyRecord.flags & mask) != 0) {
                     count++;
-                    sum += *(u16 *)(node + 0x128);
+                    sum += actor->partyRecord.maxHp;
                 }
             }
         }
@@ -2463,16 +2463,16 @@ void btlAverageAllMaximumForMask(u32 arg0) {
 }
 
 s32 btlAverageCurrentValueForMask(u32 mask, s8 allowDisabled) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x228);
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
     s32 sum = 0;
     s32 count = 0;
-    for (; node != 0; node = *(s32 *)(node + 0x344)) {
-        u32 flags = *(u32 *)(node + 0x110);
+    for (; actor != NULL; actor = actor->next) {
+        u32 flags = actor->flags;
         if ((flags & 1) != 0) {
             if (allowDisabled == 0 || (flags & 0x20) == 0) {
-                if ((*(u16 *)(node + 0x120) & mask) != 0) {
+                if ((actor->partyRecord.flags & mask) != 0) {
                     count++;
-                    sum += *(u16 *)(node + 0x126);
+                    sum += actor->partyRecord.hp;
                 }
             }
         }
@@ -2490,16 +2490,16 @@ void btlAverageAllCurrentForMask(u32 arg0) {
 }
 
 s32 btlAverageMaskedActorStat(u32 mask, s8 allowDisabled) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x228);
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
     s32 sum = 0;
     s32 count = 0;
-    for (; node != 0; node = *(s32 *)(node + 0x344)) {
-        u32 flags = *(u32 *)(node + 0x110);
+    for (; actor != NULL; actor = actor->next) {
+        u32 flags = actor->flags;
         if ((flags & 1) != 0) {
             if (allowDisabled == 0 || (flags & 0x20) == 0) {
-                if ((*(u16 *)(node + 0x120) & mask) != 0) {
+                if ((actor->partyRecord.flags & mask) != 0) {
                     count++;
-                    sum += *(u16 *)(node + 0x134);
+                    sum += actor->partyRecord.level;
                 }
             }
         }
@@ -2519,13 +2519,13 @@ void func_001A94A0(u32 arg0) {
 s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 allowDisabled) {
     s32 sum = 0;
     s32 count = 0;
-    s32 node = *(s32 *)(btlGetRuntime() + 0x228);
-    for (; node != 0; node = *(s32 *)(node + 0x344)) {
-        u32 flags = *(u32 *)(node + 0x110);
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
+    for (; actor != NULL; actor = actor->next) {
+        u32 flags = actor->flags;
         if ((flags & 1) != 0) {
             if (allowDisabled == 0 || (flags & 0x20) == 0) {
-                if ((*(u16 *)(node + 0x120) & mask) != 0) {
-                    s32 value = datGetStatWithStatusOverride((DatPartyRecord *)(node + 0x120), attribute);
+                if ((actor->partyRecord.flags & mask) != 0) {
+                    s32 value = datGetStatWithStatusOverride(&actor->partyRecord, attribute);
                     count++;
                     sum += value;
                 }
@@ -2555,13 +2555,13 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1D28);
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A99B0);
 
 void btlClearUnitStatusMask(void) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x228);
-    for (; node != 0; node = *(s32 *)(node + 0x344)) {
-        u32 flags = *(u32 *)(node + 0x110);
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
+    for (; actor != NULL; actor = actor->next) {
+        u32 flags = actor->flags;
         if ((flags & 1) != 0) {
             if ((flags & 0x200) != 0) {
-                *(u32 *)(node + 0x110) = flags & ~0x1000;
-                *(u16 *)(node + 0x120) &= ~0x1000;
+                actor->flags = flags & ~0x1000;
+                actor->partyRecord.flags &= ~0x1000;
             }
         }
     }

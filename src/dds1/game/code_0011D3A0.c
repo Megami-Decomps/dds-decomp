@@ -10,6 +10,7 @@
 #include "evt_world.h"
 #include "dds3obj.h"
 #include "dat_state.h"
+#include "kwln_task_lifecycle.h"
 
 /* Signed selectors read signed storage; all writes retain the selected width. */
 enum {
@@ -173,7 +174,6 @@ extern u32 fldGetSceneReadyFlag(void);
 extern struct ScrData *scrFindNamedProcessNode(char *arg0);
 extern void sdfStoreMessageWordsAndNotifyConsumer(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 extern u32 fldPlayerObject;
 extern u32 fldPlayerModelResource;
 extern u32 D_0032E498[];
@@ -193,7 +193,6 @@ extern s8 dds3AdminGetRequestedMode(void);
 extern s32 dds3AdminReadPreviousUnsignedSample(void);
 extern void func_0013F100(s32, u32);
 extern u32 D_0032E4EC[];
-extern void sdfQueueNonzeroResourceId(u32 arg0);
 extern s32 D_003BABEC;
 typedef struct FieldActivationRecord {
     s32 kind;
@@ -1430,10 +1429,10 @@ f32 fldSnapAngleToCardinalDirection(f32 angle) {
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001228D8);
 
-extern f32 func_001228D8();
+extern f32 func_001228D8(f32, f32, f32, f32);
 
-f32 fldGetNormalizedComplementaryAngle(void) {
-    s32 angle = (s32)(360.0f - func_001228D8() + 90.0f);
+f32 fldGetNormalizedComplementaryAngle(f32 ax, f32 ay, f32 bx, f32 by) {
+    s32 angle = (s32)(360.0f - func_001228D8(ax, ay, bx, by) + 90.0f);
     return (f32)(angle % 360);
 }
 
@@ -1760,7 +1759,7 @@ void fldLoadPlayerModel(void) {
 
 void fldUnloadPlayerModel(void) {
     if (fldPlayerModelResource != 0) {
-        sdfQueueNonzeroResourceId(fldPlayerModelResource);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldPlayerModelResource);
         fldPlayerModelResource = 0;
         D_0032E4EC[0] = 0;
     }
@@ -1779,13 +1778,13 @@ void fldPrepareResourceBuffer(void) {
     memcpy(buffer, source, D_003BAB60);
     D_003BAB5C = (u32)buffer;
     mdlLoadViewerPackage(2, 0, 0x101, buffer, D_003BAB60);
-    sdfQueueNonzeroResourceId(D_003BAB58);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003BAB58);
     D_003BAB58 = 0;
 }
 
 void fldReleaseResources(void) {
     if (D_003BAB58 != 0) {
-        sdfQueueNonzeroResourceId(D_003BAB58);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003BAB58);
         D_003BAB58 = 0;
     }
     if (D_0032E3D0[0] == 0 && D_003BABE8 == 0) {

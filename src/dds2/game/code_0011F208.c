@@ -11,6 +11,7 @@
 #include "dds3obj.h"
 #include "kwln.h"
 #include "dat_state.h"
+#include "kwln_task_lifecycle.h"
 
 /* Signed selectors read signed storage; all writes retain the selected width. */
 enum {
@@ -142,7 +143,6 @@ extern u32 fldPlayerModelResource;
 
 extern u32 D_003898B8[];
 
-extern void sdfQueueNonzeroResourceId(u32 arg0);
 
 extern u32 fldPlayerObject;
 
@@ -271,7 +271,6 @@ extern char D_00412B90[];
 
 extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay, TaskUpdate update, TaskDestroy destroy, u32 userValue);
 
-extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
 extern s32 D_00435EE0;
 
@@ -2037,7 +2036,7 @@ void func_001258B8(void) {
 
 void fldUnloadPlayerModel(void) {
     if (fldPlayerModelResource != 0) {
-        sdfQueueNonzeroResourceId(fldPlayerModelResource);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldPlayerModelResource);
         fldPlayerModelResource = 0;
         D_003898B8[0] = 0;
     }
@@ -2056,13 +2055,13 @@ void fldPrepareResourceBuffer(void) {
     memcpy(buffer, source, D_00435F40);
     D_00435F3C = (u32)buffer;
     mdlLoadViewerPackage(2, 0, 0x101, buffer, D_00435F40);
-    sdfQueueNonzeroResourceId(D_00435F38);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_00435F38);
     D_00435F38 = 0;
 }
 
 void fldReleaseResources(void) {
     if (D_00435F38 != 0) {
-        sdfQueueNonzeroResourceId(D_00435F38);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_00435F38);
         D_00435F38 = 0;
     }
     if (D_00389790[0] == 0 && D_00435F78 == 0) {

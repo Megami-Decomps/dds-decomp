@@ -5,6 +5,7 @@
 #include "pcp_vu0.h"
 #include "sdf_linked_packet.h"
 #include "sdf_draw.h"
+#include "kwln_task_lifecycle.h"
 
 typedef struct KwlnResourceNode {
     s32 unk0;
@@ -74,7 +75,6 @@ extern void func_001044E8(void);
 
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
 
-extern void kwlnTaskDestroyWithHierarchy(void *, s32);
 
 
 extern s32 D_00435BA4;

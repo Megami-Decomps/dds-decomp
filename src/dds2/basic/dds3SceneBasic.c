@@ -3,6 +3,7 @@
 #include "dds3obj.h"
 #include "evt_world.h"
 #include "kwln.h"
+#include "kwln_task_lifecycle.h"
 
 struct SdfMemBlock;
 
@@ -10,7 +11,6 @@ extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddres
 extern s32 bfFindScriptIndexByName(void *, const char *);
 extern s32 scrCreateTaskForProcessId(s32, s32, s32);
 extern void evtReleaseSceneResource(EffWorldNode *worldNode);
-extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *task, s32 delayTicks);
 
 /* Release field resources before clearing the scene object's state word.
  * The scene resource handle/address are released separately. */

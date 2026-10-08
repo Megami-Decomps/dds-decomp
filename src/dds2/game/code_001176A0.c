@@ -7,6 +7,7 @@
 #include "btl_action.h"
 #include "dat_state.h"
 #include "dat_command.h"
+#include "kwln_task_lifecycle.h"
 
 extern void *D_00435E80;
 
@@ -15,7 +16,6 @@ extern u32 scrGetWorkTaskHandle(void);
 extern void dds3WorkInit(void *header);
 extern s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
 extern char sdfRuntimeTaskName[]; /* "GBWK" */
-extern void kwlnTaskDestroyWithHierarchyByName(char *name, s32 flag);
 extern void func_00117A80(void);
 extern struct EffWorldNode *dds3AppendWorldObjectNode();
 

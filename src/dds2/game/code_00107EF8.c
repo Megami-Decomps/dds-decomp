@@ -7,6 +7,7 @@
 #include "sdf_resource.h"
 #include "sdf_sif_command.h"
 #include "scr.h"
+#include "kwln_task_lifecycle.h"
 
 enum {
     EVT_PACKET_LIST_BYTES = 0x20,
@@ -86,7 +87,6 @@ extern void *sdfCreateAssetWithDrawEntries(void);
 
 extern void *D_00438DB0;
 
-extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
 extern char D_00411370[];
 
@@ -231,7 +231,6 @@ extern void dds3AdminSetControlFlag(void);
 
 extern void func_001A9F30(s32 arg0, s32 arg1, s32 arg2);
 
-extern void kwlnTaskDestroyWithHierarchy(void *, s32);
 
 extern void func_0010AEC0(void);
 

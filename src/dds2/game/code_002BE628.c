@@ -12,6 +12,7 @@
 #include "mdl.h"
 #include "eff.h"
 #include "dat_state.h"
+#include "kwln_task_lifecycle.h"
 
 extern void itfGridStorePosition(MenuGridSlot *, EffectSlotSet *, s32);
 

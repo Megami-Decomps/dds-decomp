@@ -2,6 +2,7 @@
 
 #include "kwln.h"
 #include "kwln_task_state.h"
+#include "kwln_task_lifecycle.h"
 
 extern void *sdfAllocSizeClassBlock(s32);
 
@@ -47,7 +48,6 @@ extern u8 D_00411078[];
 extern void func_00100C28(void);
 
 
-extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 delayTicks);
 
 extern void kwlnUnlinkListNode(KwlnTask* task);
 

@@ -5,6 +5,7 @@
 #include "itf_grid_text.h"
 #include "fld_lmap_task.h"
 #include "sdf_sif_command.h"
+#include "kwln_task_lifecycle.h"
 
 extern s32 func_0030AC10(void);
 
@@ -30,7 +31,6 @@ extern char fldLocalMapTaskName[]; /* "LmapMain" */
 
 extern void fldShutdownLmapResources(void);
 
-extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
 typedef GridTextListItem LmapNode;
 typedef GridTextWidget LmapList;
@@ -53,7 +53,6 @@ extern void fldReleaseCameraColorEffect(void);
 extern void func_00316E70(void);
 extern void evtSetSolarOverlayFullyTransparent(void);
 extern s32 dspCloseChannel(void);
-extern void sdfQueueNonzeroResourceId(s32);
 extern void evtDestroySecondaryWorldNode(void);
 extern SdfMemBlock *D_004388A4;
 extern s32 sdfCounterGetDisplayWordPointer(void);
@@ -408,7 +407,7 @@ void fldShutdownLmapResources(void) {
     func_00316E70();
     evtSetSolarOverlayFullyTransparent();
     dspCloseChannel();
-    sdfQueueNonzeroResourceId((s32)D_004388A4);
+    sdfQueueGeneralAllocationRelease(D_004388A4);
     evtDestroySecondaryWorldNode();
 }
 

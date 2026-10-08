@@ -1,9 +1,11 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_movie.h"
 #include "sdf.h"
 #include "itf.h"
+#include "kwln_task_lifecycle.h"
 
 extern u8 D_0037B8BC[];
 
@@ -112,7 +114,7 @@ void mnuFinishStaffMovieAndFreeState(void) {
     do {
         pendingWork = sdfCheckPendingWorkWithInterrupts();
     } while (pendingWork != 0);
-    sdfQueueNonzeroResourceId(mnuMovieWork->allocation);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)mnuMovieWork->allocation);
     mnuMovieWork = NULL;
 }
 
@@ -205,7 +207,7 @@ void mnuStopMovieDrawTask(void) {
         return;
     }
     sdfCancelAndReleasePacWork(&mnuMovieDrawContext);
-    kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
+    kwlnTaskDestroyWithHierarchy((KwlnTask *)mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }
 

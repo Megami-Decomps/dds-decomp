@@ -13,7 +13,6 @@ typedef struct {
     ModelRangeData *rangeData;
 } ModelRangeObj;
 
-extern void sdfQueueNonzeroResourceId(s32 resourceId);
 extern void sdfReleaseChipBlock(void *block);
 
 /* Queue the backing allocation, if present, then free the range-data block.
@@ -28,7 +27,7 @@ void dds3ReleaseModelRangeData(ModelRangeObj *object) {
     resourceAddress = rangeData->resourceAddress;
     if (resourceAddress != 0) {
         allocation = sdfFindGeneralBlockByAddress((void *)resourceAddress);
-        sdfQueueNonzeroResourceId((s32)allocation);
+        sdfQueueGeneralAllocationRelease(allocation);
     }
     sdfReleaseChipBlock(rangeData);
 }

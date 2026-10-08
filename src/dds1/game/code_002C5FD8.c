@@ -60,7 +60,6 @@ extern u32 D_003DFED0[];
 
 extern u32 D_003DFEE0[];
 
-s32 sdfQueueNonzeroResourceId(u32 sprite);
 
 typedef struct {
     u32 *word;         /* 0x00 */
@@ -594,7 +593,7 @@ MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 arg) {
 
 void func_002C7B38(MapRequestState *state) {
     if (state != NULL) {
-        sdfQueueNonzeroResourceId(state->handle);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)state->handle);
     }
 }
 
@@ -633,7 +632,7 @@ s32 fldLoadMapResource(const char *name, MapResource *record) {
     record->handle = handle;
     record->image = (u32)sdfTexAcquireResourceTexture((void *)descriptor);
     if (record->handle != 0) {
-        sdfQueueNonzeroResourceId((void *)record->handle);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)record->handle);
         record->handle = 0;
         record->descriptor = 0;
     }

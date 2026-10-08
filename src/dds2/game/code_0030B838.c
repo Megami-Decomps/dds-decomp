@@ -538,15 +538,15 @@ s32 sdfCounterGetDisplayValue(void) {
     return ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->display->value;
 }
 
-s16 sdfGetCounterChannelValueAtIndex(s32 remaining) {
-    SdfCounterChannel *task = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->first;
-    if (remaining > 0) {
+s16 sdfGetCounterChannelValueAtIndex(s32 channelIndex) {
+    SdfCounterChannel *channelCursor = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->first;
+    if (channelIndex > 0) {
         do {
-            remaining--;
-            task = task->next;
-        } while (remaining != 0);
+            channelIndex--;
+            channelCursor = channelCursor->next;
+        } while (channelIndex != 0);
     }
-    return task->display->value;
+    return channelCursor->display->value;
 }
 
 float sdfCounterGetScaledValue(void) {
@@ -558,28 +558,28 @@ float sdfCounterGetScaledValue(void) {
 
 /* Draw the counter's three label plates and submit the frame gradient. */
 void func_0030CA38(s32 x, s32 y, s32 arg2, SdfCounterRuntime *rt, s32 arg4) {
-    SdfCounterChannel *channel;
+    SdfCounterChannel *channelCursor;
     f32 fade;
-    s32 i;
+    s32 plateIndex;
     s32 drawX;
     s32 drawY;
 
     fade = (f32)rt->timer->value / 10.0f;
-    channel = rt->channel;
-    if (channel->prev != NULL) {
-        channel = channel->prev;
+    channelCursor = rt->channel;
+    if (channelCursor->prev != NULL) {
+        channelCursor = channelCursor->prev;
     } else {
-        channel = rt->last;
+        channelCursor = rt->last;
     }
     drawY = y - 11;
     drawX = x - 240;
-    for (i = 2; i != -1; i--) {
-        rt->draw(drawX, drawY, arg2, rt, channel, arg4);
+    for (plateIndex = 2; plateIndex != -1; plateIndex--) {
+        rt->draw(drawX, drawY, arg2, rt, channelCursor, arg4);
         drawX += 160;
-        if (channel->next != NULL) {
-            channel = channel->next;
+        if (channelCursor->next != NULL) {
+            channelCursor = channelCursor->next;
         } else {
-            channel = rt->first;
+            channelCursor = rt->first;
         }
     }
     evtSubmitDefaultDepthGradientRect(0, 384, 512, 32,

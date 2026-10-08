@@ -7,6 +7,7 @@
 #include "kwln.h"
 #include "fpu.h"
 #include "mnu_list.h"
+#include "kwln_task_lifecycle.h"
 struct SdfTex;
 struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
@@ -271,7 +272,6 @@ extern char fileConfigLoadTaskName[]; /* "config_draw" */
 
 extern char fileConfigOwnerTaskName[]; /* "config_update" */
 
-extern void kwlnTaskDestroyWithHierarchyByName(const char *name, s32 hierarchy);
 
 extern void func_003003F0(void *arg);
 
@@ -634,7 +634,7 @@ extern s8 fileConfigTaskState;
 
 void fileDestroyMenuTask(void) {
     if (D_003BC7F0 != 0) {
-        kwlnTaskDestroyWithHierarchy(D_003BC7F0, 1);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)D_003BC7F0, 1);
         D_003BC7F0 = 0;
         fileMenuTaskAlive = 0;
     }
