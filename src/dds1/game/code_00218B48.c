@@ -1,5 +1,6 @@
 #include "kwln.h"
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "bill_object_api.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
@@ -1986,7 +1987,6 @@ extern char D_003ABDA8[];
 
 extern char D_003BBC88[];
 
-extern void sdfConsCreateDrawPacket(s32, SdfTex *, s32);
 
 extern void sdfAppendTexturedLinePacket(s32, u32, s32, s32, s32, s32, s32,
                                         s32, s32, s32, s32, s32, s32);
@@ -2015,7 +2015,7 @@ void mdlDrawViewerTexturePreview(void) {
         height = node->textures[index]->height;
         sdfAppendPacket((SdfListHead *)(packetList), (u32)(sdfCreateFormattedSifCommand(0x7780, 0x7A20,
             0xFF0080, 0, D_003BBC88, width, height)));
-        sdfConsCreateDrawPacket(packetList, node->textures[index], 0);
+        sdfConsCreateDrawPacket((SdfListHead *)packetList, node->textures[index], 0);
         displayWidth = width << 4;
         displayHeight = height << 3;
         if (width < height) {
