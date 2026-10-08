@@ -595,7 +595,6 @@ s32 mnuGetMantraPanelPositionRecord(s32 index) {
     return ((EvtLoadedRecord *)mnuMantraPanelPositionTable)->recordsAddress + ((index << 0x10) >> 0xb);
 }
 
-extern void *sdfMemoryGetBlockAddress(u32);
 extern void func_0026D168(void *, s32, s32);
 typedef struct EvtMantraWork {
     u32 allocation;
@@ -607,7 +606,7 @@ typedef struct EvtMantraWork {
  * The existing initializer is called only for nonzero initialValue. */
 EvtMantraWork *evtAllocateMantraSelectionWork(s32 initialValue, s32 mode) {
     u32 allocation = (u32)sdfAllocGeneralBlock(MNU_MANTRA_SELECTION_WORK_BYTES);
-    EvtMantraWork *work = sdfMemoryGetBlockAddress(allocation);
+    EvtMantraWork *work = (EvtMantraWork *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)allocation);
 
     memset(work, 0, MNU_MANTRA_SELECTION_WORK_BYTES);
     work->allocation = allocation;

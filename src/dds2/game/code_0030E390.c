@@ -44,7 +44,6 @@ extern s32 D_004390A8;
 
 
 
-extern void *sdfMemoryGetBlockAddress(u32);
 
 extern void *memset(void *, s32, u32);
 
@@ -245,7 +244,7 @@ void fldDrawSelectedMapMarker(void) {
 MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     s32 size = count * 0x20 + 0x44;
     u32 allocation = (u32)sdfAllocGeneralBlock(size);
-    MapRequestRing *block = (MapRequestRing *)sdfMemoryGetBlockAddress(allocation);
+    MapRequestRing *block = (MapRequestRing *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)allocation);
     MapRequestState *ring = &block->header;
     MapRequestNode *node;
     MapRequestNode *next;

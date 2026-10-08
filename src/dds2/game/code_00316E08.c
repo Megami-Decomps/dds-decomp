@@ -76,7 +76,6 @@ extern u32 mnuResumeEffectQueueFrameAdvance(void);
 extern void func_00317AD0(MnuShootingWork *handle);
 
 
-extern u32 sdfMemoryGetBlockAddress(SdfMemBlock *block);
 extern void func_0031D928(struct WideSlotPool *);
 extern void func_0031DF48(struct CompactSlotPool *);
 extern void dds3ReleaseSoundSlotPool(void);

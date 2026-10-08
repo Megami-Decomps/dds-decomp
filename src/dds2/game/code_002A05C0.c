@@ -105,7 +105,6 @@ extern s32 WaitSema(u32);
 
 extern s32 SignalSema(u32);
 
-extern u32 sdfMemoryGetBlockAddress(struct SdfMemBlock *block);
 extern s32 sceSifInitIopHeap(void);
 extern s32 sceSifAllocIopHeap(s32 size);
 extern void Exit(s32 status);
