@@ -1,5 +1,6 @@
 #include "sdf_chip.h"
 #include "file.h"
+#include "sdf_pac_state.h"
 #include "sdf_dev_state.h"
 
 /* Intrusive list node threaded through +0x4. */
@@ -53,7 +54,6 @@ typedef struct FileCleanup {
 
 extern s32 btlDestroyStageTask(void *);
 extern void func_0035B6E0(const char *fmt, ...);
-extern void sdfPacInitializeDispatchPacket(void *, void *);
 extern void func_00346AE8(void *);
 #define FILE_REQUEST_KIND_CALLBACK 0
 #define FILE_REQUEST_KIND_PAC 1
@@ -179,11 +179,11 @@ void fileUnlinkNode(FileWork *list, FileNode *node) {
  * completion context as kind one, returning the allocated work. No failure guard. */
 void *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue, s32 onComplete, s32 userData) {
     u8 *requestWork;
-    u8 *dispatchPacket;
+    PacState *dispatchPacket;
 
     func_0035B6E0("pac load %s\n", requestName);
     requestWork = sdfAllocAndClearQuadwords(FILE_PAC_REQUEST_BYTES);
-    dispatchPacket = requestWork + FILE_PAC_PACKET_OFFSET;
+    dispatchPacket = (PacState *)(requestWork + FILE_PAC_PACKET_OFFSET);
     sdfPacInitializeDispatchPacket(dispatchPacket, dispatchValue);
     if (flags != 0) {
         func_00346AE8(dispatchPacket);
