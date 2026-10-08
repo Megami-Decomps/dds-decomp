@@ -329,7 +329,6 @@ extern void func_002DB2C0(s32, void *);
 
 extern s32 billGetFirstEntryFramePeriod(u32);
 
-extern void billSetEntryFrameMode1(u32, s32);
 
 extern f32 effComputeProjectedOffsetAngle(void *, void *);
 
@@ -1622,7 +1621,7 @@ void effReplaceBillboardClone(s32 dst, s32 src) {
 }
 
 void effBillboardEntryFrameReset(s32 work) {
-    billSetEntryFrameMode1(((EffBillboardWork *)work)->billboard, 0);
+    billSetAnimationFrameWithOneTickHold(((EffBillboardWork *)work)->billboard, 0);
     ((EffBillboardWork *)work)->frame = 0;
 }
 
@@ -1634,7 +1633,7 @@ void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
     f32 len;
 
     if (work->frame < billGetFirstEntryFramePeriod(work->billboard)) {
-        billSetEntryFrameMode1(work->billboard, work->frame);
+        billSetAnimationFrameWithOneTickHold(work->billboard, work->frame);
         VU0_LOAD_VF(vf10, work->rotation);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, D_0042BC10);

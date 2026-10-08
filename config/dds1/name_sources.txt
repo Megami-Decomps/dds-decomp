@@ -1199,8 +1199,8 @@
 0x00152198	billSetVariantValue	inferred	Writes the chosen variant's halfword value to its variant-specific storage.
 0x001521D0	billGetVariantValue	inferred	Reads the halfword value from storage selected by the billboard object's kind.
 0x00152260	billGetLinkedChildValue	inferred	Follows kind-one child target link and returns its value [names_reviewed6.tsv]
-0x00152288	billSetEntryFrameMode0	inferred	For each kind-one billboard entry sets mode zero and wraps frame by its data period.
-0x001522E8	billSetEntryFrameMode1	inferred	Twin of mode-zero setter; sets mode one and wraps frame by data period.
+0x00152288	billSetAnimationFrameForImmediateAdvance	inferred	Sets each entry to the requested frame with zero hold count, so the next animation update advances immediately.
+0x001522E8	billSetAnimationFrameWithOneTickHold	inferred	Sets each entry to the requested frame with a one-update countdown before the next frame advance.
 0x00152370	billGetKindOneParameter	inferred	Returns kind-one billboard parameter halfword [names_reviewed6.tsv]
 0x00152390	billGetKindOneFlags	inferred	Returns flag word only for kind-one billboards [names_reviewed6.tsv]
 0x001523B0	billMarkKindOneFlag	inferred	Sets flag bit on kind-one billboard [names_reviewed6.tsv]
@@ -5397,7 +5397,7 @@
 0x0029E4C0	effBillboardWorkRelease	inferred	paired effect body: calls billDispatchByKind [names_R_FuncNames7.tsv]
 0x0029E4F8	effDuplicateBillState	inferred	eff effect resources and animation in game/code_0029A840.c
 0x0029E5B0	effReplaceBillboardClone	inferred	Destroys destination billboard if present and clones the source billboard into its slot. [names_reviewed5.tsv]
-0x0029E600	effBillboardEntryFrameReset	inferred	paired effect body: calls billSetEntryFrameMode1 [names_R_FuncNames7.tsv]
+0x0029E600	effBillboardEntryFrameReset	inferred	paired effect body: calls billSetAnimationFrameWithOneTickHold [names_R_FuncNames7.tsv]
 0x0029E630	effUpdateScaledBillboardFrame	inferred	High: while the frame is live, computes projected scale and length, applies size and position, invokes the billboard callback, and advances the frame. [names_qp9.tsv]
 0x0029E728	effCopyBillboardPosition	inferred	Copies a source vector into the billboard work position. [names_reviewed5.tsv]
 0x0029E738	effCopyBillboardOrientation	inferred	Copies a source vector into the following billboard orientation vector. [names_reviewed5.tsv]
