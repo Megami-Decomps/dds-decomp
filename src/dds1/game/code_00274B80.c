@@ -284,7 +284,7 @@ extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u3
 extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s32, s32);
 extern void func_00274BC0(s32, s32, s32, struct MenuList *, struct MenuListNode *);
 extern char D_003BC6E8[];
-void func_00274D48(CampMenuContext *context) {
+void mnuCreatePartySelectionWindow(CampMenuContext *context) {
     PartyMenuData *party = (PartyMenuData *)context->menu;
     MenuWindowContainer *window;
     s32 i;
@@ -484,7 +484,7 @@ s32 func_002755E0(KwlnTask *task) {
     menu->allocation = (s32)allocation;
 
     func_00274B80((u32)context);
-    func_00274D48(context);
+    mnuCreatePartySelectionWindow(context);
     mnuLoadPanelSectionResources(&context->partyWindow.slots[0],
                                 context->panelResource, 0x11, 0x21, -1);
     mnuLoadPanelSectionResources(&context->partyWindow.slots[1],
