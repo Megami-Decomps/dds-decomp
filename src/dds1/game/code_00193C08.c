@@ -102,7 +102,7 @@ void func_00193FD0(s32 x, s32 y, s32 depth, FrFontGlyph *glyph,
     func_00193D70(x + glyph->x, y + glyph->y,
                  glyph->childCountOrCellDimensions.cellDimensions.cellWidth,
                  glyph->childCountOrCellDimensions.cellDimensions.cellHeight >> FR_FONT_GLYPH_HEIGHT_SHIFT,
-                 glyph->u14.b[0], glyph->u10.word, depth, 1,
+                 glyph->renderValueOrSetupOrShade.setupBytes.firstOption, glyph->parentDimensionsOrRenderWord.renderWord, depth, 1,
                  &glyph->link1C.cachedItem->list->uv, &frFontWork.atlas, drawFlags);
 }
 

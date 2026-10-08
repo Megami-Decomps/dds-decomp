@@ -1310,7 +1310,7 @@ FrFontGlyph *itfMesBuildNodeRows(u32 *items, s32 itemCount, u32 mask, s32 x, s32
 
             glyphChain = itfDrawCustomColorText(x, y, 0, 0, 0, ITF_MES_DEFAULT_COLOR_VALUE, (u8 *)*items, glyphChain);
             mask >>= 1;
-            rowHeightUnits = glyphChain->u10.half[1];
+            rowHeightUnits = glyphChain->parentDimensionsOrRenderWord.parentDimensions.cellHeight;
             y += rowHeightUnits << ITF_MES_TEXT_Y_SHIFT;
         }
     }
@@ -1382,15 +1382,15 @@ void itfMesCopyGlyphShade(FrFontGlyph *glyph, ItfMesEntryBlock *entryBlock) {
     u8 encodedIntensity = glyph->u0.b.b0;
 
     entryBlock->color[3] = encodedIntensity >> 1;
-    entryBlock->color[0] = shade->u14.b[1];
-    entryBlock->color[1] = shade->u14.b[0];
-    entryBlock->color[2] = shade->u14.b[2];
+    entryBlock->color[0] = shade->renderValueOrSetupOrShade.shadeColor.red;
+    entryBlock->color[1] = shade->renderValueOrSetupOrShade.shadeColor.green;
+    entryBlock->color[2] = shade->renderValueOrSetupOrShade.shadeColor.blue;
 }
 
 /* Inclusive step count from the y delta in eighths and the first row's height.
  * Both pointers and a nonzero first-row height are required. */
 s32 itfMesCountSpanSteps(FrFontGlyph *last, FrFontGlyph *first) {
-    s16 rowHeightUnits = first->u10.half[1];
+    s16 rowHeightUnits = first->parentDimensionsOrRenderWord.parentDimensions.cellHeight;
 
     return ((first->y - last->y) >> ITF_MES_TEXT_Y_SHIFT) / rowHeightUnits + 1;
 }
@@ -1410,7 +1410,7 @@ void itfMesOffsetNodeChain(FrFontGlyph *node, s32 dx, s32 dy) {
 /* Assign the render value across the complete chain; a NULL chain is a no-op. */
 void itfMesSetNodeChainRenderValue(FrFontGlyph *node, s32 renderValue) {
     while (node != NULL) {
-        node->u14.w = renderValue;
+        node->renderValueOrSetupOrShade.renderValue = renderValue;
         node = node->previous;
     }
 }
@@ -1438,7 +1438,7 @@ void itfMesSetRowItemFlag(FrFontGlyph *node, s32 first, s32 last, s32 requestedF
     flagValue = requestedFlags;
     do {
         for (child = node->link1C.firstChild; child != NULL; child = child->next) {
-            child->u14.b[0] = flagValue;
+            child->renderValueOrSetupOrShade.setupBytes.firstOption = flagValue;
         }
         node = node->previous;
     } while (node != NULL && rowY == node->y);
@@ -1450,7 +1450,7 @@ void itfMesSetChildChainFlags(FrFontGlyph *node, u8 flagValue) {
 
     for (; node != NULL; node = node->previous) {
         for (child = node->link1C.firstChild; child != NULL; child = child->next) {
-            child->u14.b[0] = flagValue;
+            child->renderValueOrSetupOrShade.setupBytes.firstOption = flagValue;
         }
     }
 }
@@ -1462,7 +1462,7 @@ void itfMesRecolorNodeChildren(FrFontGlyph *node, u32 color) {
 
     for (; node != NULL; node = node->previous) {
         for (child = node->link1C.firstChild; child != NULL; child = child->next) {
-            child->u10.word = child->u10.word & ITF_MES_COLOR_BYTE_CLEAR_MASK | color;
+            child->parentDimensionsOrRenderWord.renderWord = child->parentDimensionsOrRenderWord.renderWord & ITF_MES_COLOR_BYTE_CLEAR_MASK | color;
         }
     }
 }
@@ -1507,7 +1507,7 @@ s32 itfMesNthClearBit(s32 clearBitsToSkip, u32 mask) {
  * NULL chain is allowed, but every visited node must have a first child. */
 void itfMesEnableUnflaggedNodeContexts(FrFontGlyph *node) {
     for (; node != NULL; node = node->previous) {
-        if (node->link1C.firstChild->u14.b[2] == 0) {
+        if (node->link1C.firstChild->renderValueOrSetupOrShade.setupBytes.secondOption == 0) {
             frFontEnableContextMode(node);
         }
     }
