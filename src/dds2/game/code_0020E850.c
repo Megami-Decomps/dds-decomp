@@ -904,7 +904,7 @@ extern BtlUnit *btlFindUnitByModeClear(s32 id);
 extern BtlUnit *btlFindUnitByModeFlagged(s32 id);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *actor, s32 arg);
 extern u64 btlStartTask(void *);
-extern s64 btlAdvanceRuntimeSequenceCounter();
+extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
 s32 btlCmdSpawnEffectTaskForSelectedUnit(void) {
     s32 mode;
