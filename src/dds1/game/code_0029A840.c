@@ -5,6 +5,7 @@
 #include "pcp_vu0.h"
 #include "mdl.h"
 #include "sdf.h"
+#include "sdf_texture_file.h"
 #include "sdf_chunk.h"
 
 extern u32 sdfResourceRetainAddress(u32);
@@ -88,26 +89,6 @@ typedef struct RefObj {
     u32 allocationHandle;     // 0x1C: handle released with the final reference
 } RefObj; // 0x20
 
-typedef struct SdfTextureFileHeader {
-    u8 unk00;
-    u8 flags;
-    u8 pad02[0xE];
-    u8 unk10;
-    u8 unk11;
-    s16 width;
-    s16 height;
-    u8 pixelFormat;
-    u8 clutFormat;
-    u16 lodParameters;
-    u8 unk1A;
-    u8 clampMode;
-    s32 resourceKey;
-    s32 unk20;
-    u8 pad24[0x1C];
-} SdfTextureFileHeader;
-
-typedef char SdfTextureFileHeader_size_must_be_0x40[
-    (sizeof(SdfTextureFileHeader) == 0x40) ? 1 : -1];
 typedef char RefObj_size_must_be_0x20[(sizeof(RefObj) == 0x20) ? 1 : -1];
 
 extern RefObj *func_0029BD90(SdfTextureFileHeader *);
