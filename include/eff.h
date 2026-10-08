@@ -364,7 +364,7 @@ typedef struct BillRecord {
     u16 u1;
     u16 v1;
     s16 childIndex;
-    s16 value;
+    s16 frameDelay; /* 0x12: signed countdown loaded when selecting a frame */
     f32 scale;
 } BillRecord;
 

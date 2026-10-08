@@ -540,7 +540,7 @@ BillChildPayload *billStepAnimationEntryAndUpdateChild(BillObj *obj, BillOut *ou
                 out->frameIndex = 0;
             }
         }
-        out->framesRemaining = out->record[out->frameIndex].value;
+        out->framesRemaining = out->record[out->frameIndex].frameDelay;
     } else {
         out->framesRemaining--;
     }
@@ -617,7 +617,7 @@ void billResolveEntry(BillData *table, s32 index, BillOut *out) {
     out->entry = entry;
     base = base + offset;
     out->frameIndex = 0;
-    framesRemaining = ((BillRecord *)base)->value;
+    framesRemaining = ((BillRecord *)base)->frameDelay;
     out->record = (BillRecord *)base;
     out->framesRemaining = (s32)framesRemaining;
 }
