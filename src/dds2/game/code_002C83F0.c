@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "file.h"
 #include "sdf_dev_event.h"
+#include "sdf_dev_state.h"
 
 /* File request entry: D_003DC698 table, 0x64 bytes per entry. */
 typedef struct FileReqEntry {
@@ -56,18 +57,10 @@ typedef struct FileTransferJob {
 } FileTransferJob;
 
 /* The open device state retains the resolved path at +0x10. */
-typedef struct DevStatePathView {
-    u8 pad00[0x10];
-    char *path;
-} DevStatePathView;
-
 s32 WaitSema(s32 sema);
 
 s32 SignalSema(s32 sema);
 
-void sdfDevQueueRead(void *deviceRequest, u32 transferAddress, u32 byteCount);
-
-void sdfDevQueueWrite(void *deviceRequest, u32 transferAddress, u32 byteCount);
 
 extern char D_00437CC8[];
 
@@ -86,16 +79,15 @@ s32 fileManUpdate(void);
 /* Flag words of the entry table: entry arg0 occupies 0x19 words. */
 extern u32 fileRequestSlotFlags[];
 
-extern s32 sdfDevQueueControlRequest(void *);
-extern s32 sdfDevQueueActiveOperation(void *);
-extern s32 sdfDevQueueReleaseState(void *);
+extern s32 sdfDevQueueControlRequest(DevState *);
+extern s32 sdfDevQueueActiveOperation(DevState *);
 extern void fileQueuePendingRequestInFreeSlot(FileTransferJob *);
 extern void filePrependNode(void *, void *);
 extern void fileUnlinkNode(void *, void *);
 extern void func_002C8AC0(void);
-extern void *sdfDevCreateCallbackState(s32 path,
+extern DevState *sdfDevCreateCallbackState(const char *path,
                         s32 (*callback)(void *, s32, s32, s32, FileTransferJob *), FileTransferJob *job);
-extern void *sdfDevCreateModeState(s32 path,
+extern DevState *sdfDevCreateModeState(const char *path,
                         s32 (*callback)(void *, s32, s32, s32, FileTransferJob *), FileTransferJob *job,
                         s32 options);
 extern s32 sdfPrintFormattedDevMessage(const char *fmt, ...);
@@ -166,7 +158,8 @@ void fileStartChunkedReadWhenReady(FileTransferJob *job) {
     }
     job->state = FILE_JOB_TRANSFERRING;
     SignalSema(fileManagerWork.sema);
-    sdfDevQueueRead(job->deviceRequest, job->transferAddress, job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
+    sdfDevQueueRead(job->deviceRequest, (void *)job->transferAddress,
+                    job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
 }
 
 /* Drive allocation, chunked reads, close, and completion-list handoff. */
@@ -264,7 +257,8 @@ void fileStartChunkedWriteWhenReady(FileTransferJob *job) {
     }
     job->state = FILE_JOB_TRANSFERRING;
     SignalSema(fileManagerWork.sema);
-    sdfDevQueueWrite(job->deviceRequest, job->transferAddress, job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
+    sdfDevQueueWrite(job->deviceRequest, (void *)job->transferAddress,
+                     job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
 }
 
 /* Advance a chunked write, then close and queue its completion callback. */
@@ -346,13 +340,13 @@ void func_002C8AC0(void) {
             job->state = 1;
             locked = 0;
             SignalSema(work->sema);
-            job->deviceRequest = sdfDevCreateCallbackState((s32)job->name, func_002C8638, job);
+            job->deviceRequest = sdfDevCreateCallbackState(job->name, func_002C8638, job);
             break;
         case 7:
             job->allocationHandle = (s32)sdfTryAllocGeneralBlock(job->totalBytes);
             if (job->allocationHandle == 0) {
                 sdfPrintFormattedDevMessage("alloc retry for %s\n",
-                                            ((DevStatePathView *)job->deviceRequest)->path);
+                                            ((DevState *)job->deviceRequest)->resolvedPath);
                 job->retryCount--;
             } else {
                 u32 address = sdfResourceRetainAddress((struct SdfMemBlock *)(u32)(job->allocationHandle));
@@ -371,7 +365,7 @@ void func_002C8AC0(void) {
             job->state = 1;
             locked = 0;
             SignalSema(work->sema);
-            job->deviceRequest = sdfDevCreateCallbackState((s32)job->name, func_002C83F0, job);
+            job->deviceRequest = sdfDevCreateCallbackState(job->name, func_002C83F0, job);
             break;
         case FILE_JOB_READY:
             locked = 0;
@@ -385,7 +379,7 @@ void func_002C8AC0(void) {
             job->state = 1;
             locked = 0;
             SignalSema(work->sema);
-            job->deviceRequest = sdfDevCreateModeState((s32)job->name, func_002C8900, job, 0x180);
+            job->deviceRequest = sdfDevCreateModeState(job->name, func_002C8900, job, 0x180);
         }
         break;
     }
