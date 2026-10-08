@@ -202,7 +202,7 @@ extern char D_00413F20[];
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
 
-extern s32 sdfReadNamedResource(char *resource, void *info, s32 options);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern SdfTex *D_0044F7F0[];
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
@@ -1184,7 +1184,7 @@ void func_00145698(void) {
 
     fldFormatAreaDirectory(directory, fldAreaState[4], 1);
     func_0035C860(path, (const char *)D_00413700, directory, fldAreaState[4]);
-    fldSceneRecordResource = sdfReadNamedResource(path, &resourceHandle, 0);
+    fldSceneRecordResource = (s32)(u32)sdfReadNamedResource(path, &resourceHandle, 0);
     transferStart = resourceHandle + 8;
     fldRelocatePackedTransferChunk(resourceHandle, transferStart);
     header = func_00129D60(transferStart);
@@ -2142,7 +2142,7 @@ typedef struct FieldResourceIds {
 
 void fldLoadResourceByIndex(s32 index) {
     FieldResourceIds ids = *(FieldResourceIds *)D_00436330;
-    fldIndexedResourceHandle = sdfReadNamedResource(ids.entries[index], &fldIndexedResourceData, 0);
+    fldIndexedResourceHandle = (u32)sdfReadNamedResource((const char *)(u32)ids.entries[index], &fldIndexedResourceData, 0);
     fldIndexedResourceEffect = effCreateNodeFromDescriptor(fldIndexedResourceData);
 }
 
@@ -3143,10 +3143,10 @@ void fldLoadWeatherEffects(void) {
     handle = sdfReadNamedResource("/fld/f/bin/d2_hunt3.tmx", &data, 0);
     D_004363B4 = sdfTexAcquireResourceTexture((void *)data);
     sdfQueueNonzeroResourceId(handle);
-    D_00436380 = sdfReadNamedResource("/fld/f/bin/FH_DAM_2.EPL", &D_00436384, 0);
+    D_00436380 = (u32)sdfReadNamedResource("/fld/f/bin/FH_DAM_2.EPL", &D_00436384, 0);
     fldDamEffectNode = func_001579C8(D_00436384);
     fldDamEffectPositioned = 0;
-    D_00436390 = sdfReadNamedResource("/fld/f/bin/YUK_2.EPL", &D_00436394, 0);
+    D_00436390 = (u32)sdfReadNamedResource("/fld/f/bin/YUK_2.EPL", &D_00436394, 0);
     fldYukEffectNode = func_001579C8(D_00436394);
     fldYukEffectPositioned = 0;
 }
@@ -3585,7 +3585,7 @@ void func_001514F8(void) {
 
     fldFormatAreaDirectory(directory, fldAreaState[4], fldAreaState[5] + 1);
     func_0035C860(path, D_00413F20, directory, fldAreaState[4], fldAreaState[5] + 1);
-    D_004363C4 = sdfReadNamedResource(path, &resource, 0);
+    D_004363C4 = (s32)(u32)sdfReadNamedResource(path, &resource, 0);
     base = (u32)resource;
     first = base + resource->firstOffset;
     second = base + resource->secondOffset;

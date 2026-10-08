@@ -18,7 +18,7 @@ extern LevelStep brsLevelStepThresholds[];
 extern s32 ptyCalcLevelUps(DatPartyRecord *);
 extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
 extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
-extern s32 ptyHasSkill(DatPartyRecord *, u16);
+extern s32 ptyHasSkill(DatPartyRecord *, s32);
 
 
 extern struct { s32 v[6]; } D_0036D4B0;

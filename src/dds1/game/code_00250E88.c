@@ -259,7 +259,7 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_00253018);
 extern s32 prfReqCheckWithFallback(ScrVmOperand *, u16);
 extern void *sdfAllocSizeClassBlock(s32);
 extern u16 prfGetParamWord7b6(u16);
-extern u32 prfGetParamWord7b5(u16);
+extern u8 prfGetParamWord7b5(u16);
 extern void prfBuildRawSkillList(u16, void *);
 extern u32 prfGetCapValue(u16);
 extern s32 ptyTestProfileFlag1(DatPartyRecord *, u16);

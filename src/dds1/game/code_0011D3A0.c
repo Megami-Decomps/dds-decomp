@@ -1725,7 +1725,7 @@ u32 fldGetSceneStatusCode(void) {
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001233D0);
 
 void fldUnloadPlayerModel(void);
-extern u32 sdfReadNamedResource(const char *, u32 *, u32 *);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 /* Load the coordinate/field-selected player variant only when it changes or its
  * resource is absent; the cached variant is part of native area work. */
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FBC0);
@@ -1746,13 +1746,13 @@ void fldLoadPlayerModel(void) {
         }
         switch (model) {
         case 0:
-            fldPlayerModelResource = sdfReadNamedResource("/model/field/player_a.PB", &D_003BAB5C, &D_003BAB64);
+            fldPlayerModelResource = (u32)sdfReadNamedResource("/model/field/player_a.PB", &D_003BAB5C, &D_003BAB64);
             break;
         case 1:
-            fldPlayerModelResource = sdfReadNamedResource("/model/field/player_b.PB", &D_003BAB5C, &D_003BAB64);
+            fldPlayerModelResource = (u32)sdfReadNamedResource("/model/field/player_b.PB", &D_003BAB5C, &D_003BAB64);
             break;
         default:
-            fldPlayerModelResource = sdfReadNamedResource("/model/field/player_l.PB", &D_003BAB5C, &D_003BAB64);
+            fldPlayerModelResource = (u32)sdfReadNamedResource("/model/field/player_l.PB", &D_003BAB5C, &D_003BAB64);
             break;
         }
         fldAreaState.playerModelVariant = model;

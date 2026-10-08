@@ -497,3 +497,17 @@ Run the focused patch tests with:
 ```sh
 python3 tools/test_ee_as_relax.py
 ```
+
+## Live compiler decisions: the camera case
+
+The [timed-camera case study](compiler-trace-camera-case.md) connects two
+truthful source changes to observed EE GCC decisions: a real call-argument
+copy supplies a surviving allocation preference, and a distinct scaled-distance
+result prevents an earlier destination-driven operand swap. The observational
+runs reproduced their corresponding ordinary compiler artifacts byte for byte.
+
+Keep that trace parity separate from matching qualification. The preserved
+case matched 577 functions; its current-source transfer matched 581, with the
+published prerequisite and body receipts linked in the case study. Its existing
+VU-store idiom also required an independent memory-effect audit. Neither live
+tracing nor a desired register assignment justifies weakening an asm contract.

@@ -5284,7 +5284,7 @@ extern u8 D_00436800;
 
 extern u8 btlResourceBlockLoaded;
 
-extern s32 sdfReadNamedResource(const char *, void *, s32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415B80);
 
@@ -5320,9 +5320,9 @@ void btlPanelResourcesLoad(void) {
         block->resA = 0;
         block->resB = 0;
         block->unk1C = 0;
-        btlResourceBlock->nameA = sdfReadNamedResource("/battle/panel/batle_01.spr", params, 0);
-        btlResourceBlock->nameB = sdfReadNamedResource("/battle/panel/batle_02.spr", params, 0);
-        btlResourceBlock->nameC = sdfReadNamedResource("/battle/panel/battle_03.spr", params, 0);
+        btlResourceBlock->nameA = (s32)(u32)sdfReadNamedResource("/battle/panel/batle_01.spr", params, 0);
+        btlResourceBlock->nameB = (s32)(u32)sdfReadNamedResource("/battle/panel/batle_02.spr", params, 0);
+        btlResourceBlock->nameC = (s32)(u32)sdfReadNamedResource("/battle/panel/battle_03.spr", params, 0);
         btlResourceBlockLoaded = 0;
     }
     D_00436800 = 1;
