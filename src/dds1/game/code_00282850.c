@@ -1459,12 +1459,12 @@ u8 mnuGetRangeEntryKind(u32 commandId) {
 }
 
 /* HP-kind values use max HP as a percentage basis; other kinds retain the stored value. */
-u16 mnuGetAdjustedEntryValue(s32 commandId, s32 actorAddress) {
+u16 mnuGetAdjustedEntryValue(s32 commandId, DatPartyRecord *actor) {
     DatCommandRecord *command = (DatCommandRecord *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
     u16 entryValue = command->costPercentage;
     u16 flatAddition = command->costBase;
     if (mnuGetRangeEntryKind(commandId & MNU_COMMAND_ID_MASK) == DAT_COMMAND_COST_MODE_HP) {
-        entryValue = flatAddition + ((DatPartyRecord *)actorAddress)->maxHp * entryValue / MNU_PERCENT_SCALE;
+        entryValue = flatAddition + actor->maxHp * entryValue / MNU_PERCENT_SCALE;
     }
     return entryValue;
 }

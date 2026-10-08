@@ -25,7 +25,7 @@ extern void mnuInitPartyPanelSlots(PartyPanel *);
 
 extern u32 uiBlendColors(u32, u32, u32);
 extern s32 mnuLookupRangeEntry(u16);
-extern u16 mnuGetAdjustedEntryValue(s32, s32);
+extern u16 mnuGetAdjustedEntryValue(s32, DatPartyRecord *);
 extern u16 mnuGetAdjustedPartyRangeValue(s32);
 extern u8 mnuGetRangeEntryKind(u32);
 extern s32 func_003014F0(char *, const char *, ...);
@@ -1207,7 +1207,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
         return;
     }
     if (actor != 0) {
-        value = mnuGetAdjustedEntryValue(rangeId, actor);
+        value = mnuGetAdjustedEntryValue(rangeId, (DatPartyRecord *)actor);
     } else {
         value = mnuGetAdjustedPartyRangeValue(rangeId);
     }
