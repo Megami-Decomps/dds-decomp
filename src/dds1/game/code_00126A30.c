@@ -243,7 +243,7 @@ extern s32 sdfAllocPacketAligned(s32);
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 
 extern s32 fldBackgroundBuffer;
-extern s32 sdfAllocateBlockBySizeThreshold(u32);
+extern void *sdfAllocateBlockBySizeThreshold(s32);
 
 extern u32 fldDisplayRow;
 
@@ -2146,7 +2146,7 @@ void fldDrawStretchableFrame(s32 x, s32 y, s32 width, s32 height) {
 
 void fldAllocateBackgroundBuffer(void) {
     if (fldBackgroundBuffer == 0) {
-        fldBackgroundBuffer = sdfAllocateBlockBySizeThreshold(0x70000);
+        fldBackgroundBuffer = (s32)(u32)sdfAllocateBlockBySizeThreshold(0x70000);
     }
 }
 
