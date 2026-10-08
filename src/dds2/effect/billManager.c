@@ -526,13 +526,13 @@ BillChildPayload *billStepAnimationEntryAndUpdateChild(BillObj *obj, BillOut *ou
     s32 index;
     u32 color;
 
-    if (entry->flags & 0x10000000) {
+    if (entry->flags & BILL_ANIMATION_FLAG_PLURAL_ENTRIES) {
         return NULL;
     }
     if (out->framesRemaining <= 0) {
         out->frameIndex++;
         if ((u32)out->frameIndex >= entry->frameCount) {
-            if (entry->flags & 0x10) {
+            if (entry->flags & BILL_ANIMATION_FLAG_STOP_AT_END) {
                 obj->animationActive = 0;
                 out->frameIndex = entry->frameCount - 1;
             } else {
@@ -545,16 +545,16 @@ BillChildPayload *billStepAnimationEntryAndUpdateChild(BillObj *obj, BillOut *ou
     }
     index = out->frameIndex;
     record = out->record + index;
-    if (entry->flags & 1) {
+    if (entry->flags & BILL_ANIMATION_FLAG_FRAME_COLORS) {
         color = ((u32 *)(data->base + entry->colorOffset))[index];
     } else {
         color = 0x80808080;
     }
     obj->childParam = color;
     child = data->children[record->childIndex];
-    if (entry->flags & 2) {
+    if (entry->flags & BILL_ANIMATION_FLAG_PACKET_LIST_2) {
         obj->requestedPacketListIndex = 2;
-    } else if (entry->flags & 4) {
+    } else if (entry->flags & BILL_ANIMATION_FLAG_PACKET_LIST_3) {
         obj->requestedPacketListIndex = 3;
     } else {
         obj->requestedPacketListIndex = 1;
@@ -632,7 +632,7 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
         obj->animationActive = 0;
         return;
     }
-    if (entry->flags & 0x10000000) {
+    if (entry->flags & BILL_ANIMATION_FLAG_PLURAL_ENTRIES) {
         BillPluralRecord *records;
         u32 i = 0;
 
@@ -693,7 +693,7 @@ BillData *billCreateAnimationDataFromResource(void *resource) {
     entryCount = ((s32 *)data->base)[1];
     for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++) {
         BillAnimationEntry *entry = &data->entries[resourceIndex];
-        if (entry->flags & 0x10000000) {
+        if (entry->flags & BILL_ANIMATION_FLAG_PLURAL_ENTRIES) {
             data->entryCount = entry->frameCount;
             func_0035B6E0("billAnim no[%d][%d]...PLURAL\n", resourceIndex, data->entryCount);
         } else {
