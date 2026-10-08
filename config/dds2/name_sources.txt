@@ -1033,6 +1033,7 @@
 0x001612D8	parInitColorRamp	inferred	Initializes color-ramp data; DDS1 twin. [names_qp9.tsv]
 0x001618C8	effParReleaseNodeResource	inferred	releases particle node resource [names_reviewed5.tsv]
 0x00161958	parPopulateSlotFromHistory	inferred	copies ring-history points into the selected particle slot with origin, color, and scale
+0x00161A10	parDrawHistorySlots	inferred	submits each particle slot history as progressively fading billboard points
 0x00161EE8	effParModulateColors	inferred	multiplies particle RGBA channels using VU [names_reviewed5.tsv]
 0x00162248	parScaleAndRestartKind	inferred	src/dds2/effect/parManager.c func_00162248: Calls factor dispatch, scales kinds 2 through 4 and arms particle restart. Twin of DDS1 func_0015A658. [names_reviewed24.tsv]
 0x001622D0	parGetRestartFlag	inferred	Returns the particle state word at offset 0x142 set to one by parRestartKind.
