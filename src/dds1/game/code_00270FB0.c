@@ -484,7 +484,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     mnuDrainPanelTransitions(&menu->panel, task);
     mnuReleaseStaffSpriteAndResourceHandles(menu);
     mnuDestroyScrollPanel(menu->scrollPanel);
-    mnuShutdownContext(menu->background + 0x20);
+    mnuShutdownContext((MenuPageWindow *)(menu->background + 0x20));
     dspCloseChannel();
     mnuReleaseAssets(menu->background);
     mnuReleaseStaffResourceSlotGroups(menu);

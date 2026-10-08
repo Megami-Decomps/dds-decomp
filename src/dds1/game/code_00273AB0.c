@@ -99,7 +99,6 @@ extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern void func_00276720();
 extern void mnuReleaseStaffExtraWindow();
-extern void mnuReleasePageHandlesAndClearSelection();
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 extern void mnuReleaseStaffMenuTextureHandles();
@@ -368,7 +367,7 @@ s32 mnuReleaseStaffValuePageResources(s32 unused) {
 
     mnuReleaseStaffExtraWindow(context);
     func_00276720(context + 0x15C, 0, 0, 0);
-    mnuReleasePageHandlesAndClearSelection(context + 0x15C);
+    mnuReleasePageHandlesAndClearSelection((MenuPageWindow *)(context + 0x15C));
     mnuClearEntries(&((StaffImageContext *)context)->pageWindow);
     mnuReleasePartyIconBundles(&((StaffImageContext *)context)->pageWindow);
     if (((StaffImageContext *)context)->panelHandle != 0) {
