@@ -2954,6 +2954,7 @@
 0x001DBCB0	btlCreateFloatTask29	inferred	task type 0x29 with 16 float args
 0x001DBE20	btlScheduleContextReset	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001DC270	btlCopyMotionTransform	inferred	copies both vectors and two scalar values of a motion transform [names_R_FuncNames8.tsv]
+0x001DC2A0	btlSetMotionTransformFieldOfView	inferred	Stores radians at camera pose field-of-view offset 0x24; keyframe caller converts degrees to radians.
 0x001DC2A8	btlInitMotionTransformFromVectors	inferred	uses origin and quaternion to initialize transform vectors and angle [names_R_FuncNames8.tsv]
 0x001DC338	btlInitMotionTransformFromComponents	inferred	packs position and quaternion then initializes transform with degree angle [names_R_FuncNames8.tsv]
 0x001DC470	btlGetActiveUnitId	inferred	DDS2 001E9798 twin; returns BtlWork.activeUnitId [names_R_FuncNames2.tsv]

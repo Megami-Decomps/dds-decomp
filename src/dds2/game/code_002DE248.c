@@ -1,3 +1,4 @@
+#include "btl_motion_transform.h"
 #include "eff_bill.h"
 #include "itf_draw_grid.h"
 #include "eff_class_work_api.h"
@@ -7427,7 +7428,6 @@ void effUpdateSlotTimerPair(u8 *work) {
 
 extern f32 D_00437E90;
 
-extern void func_001E95C8(s32, f32);
 
 void effApplyKeyframeAngle(u8 *work) {
     s32 owner = btlGetRuntime();
@@ -7444,7 +7444,7 @@ void effApplyKeyframeAngle(u8 *work) {
         }
         ratio = (f32)frame / (f32)total;
         value = ((keys[2] - keys[1]) * ratio + keys[1]) * 0.017453293f;
-        func_001E95C8(owner + 0x70, value);
+        btlSetMotionTransformFieldOfView(&((BtlState *)owner)->cameraCommand.camera, value);
         D_00437E90 = value;
     }
 }

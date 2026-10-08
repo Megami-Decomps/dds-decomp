@@ -2595,6 +2595,7 @@
 0x001E90C0	btlRunCameraMotionResetTask	inferred	Battle task callback resets active context camera motion and returns task-complete status. [names_reviewed18.tsv]
 0x001E9548	btlClearPendingSoundList	inferred	Frees context list at +0x1A8 and clears status bit 0x10 at +0x218
 0x001E9598	btlCopyMotionTransform	inferred	copies both vectors and two scalar values of a motion transform [names_R_FuncNames8.tsv]
+0x001E95C8	btlSetMotionTransformFieldOfView	inferred	Stores radians at camera pose field-of-view offset 0x24; keyframe caller converts degrees to radians.
 0x001E95D0	btlInitMotionTransformFromVectors	inferred	uses origin and quaternion to initialize transform vectors and angle [names_R_FuncNames8.tsv]
 0x001E9660	btlInitMotionTransformFromComponents	inferred	packs position and quaternion then initializes transform with degree angle [names_R_FuncNames8.tsv]
 0x001E96C8	btlSetEffectCameraKeys	inferred	two func_001E9660 calls (origin+dir+scale) on effect+0x30 and +0xC0, stores f154 and flags |= 0x41 [names_M74_BattleLarge.tsv]
