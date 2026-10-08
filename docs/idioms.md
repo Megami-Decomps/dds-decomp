@@ -4031,3 +4031,46 @@ bottom-tested loop. The model builder and reset provider consume a
 `u32 *` serialized command-list stream, with the draw-node owner typed
 end-to-end. These owner/API changes preserve every affected function.
 
+## Hit and enemy-capacity override contracts
+
+DDS2's battle root contains a signed hit-result override at +5D0 and a
+floating hit-chance scale callback at +704. The calls at 001B1848 and
+001B1B18 receive source actor, target actor and command; 001B1B20 consumes
+the latter result directly from f0. The +70C single-target override receives
+an `ActionStateLink *` at 0021552C and a nonzero result handles selection.
+These are separate primary-owner members, not another padded battle view.
+
+Both games' 0x28-byte scene records use +22 for the active-enemy limit
+(zero means five, values six or greater disallow spawning) and +23 for the
+cumulative spawn limit (zero means unlimited). DDS2 001B325C forwards the
+actor, typed scene record and unsigned limit to the battle root's +6D4
+override. The DDS1 twin 001A8CE0 confirms the same serialized scene bytes.
+
+## Viewer motion-frame captures
+
+DDS1 `0022EB10` shares its four-channel motion/key algorithm with matched
+DDS2 `002496B0`, but lacks DDS2's duration and blend-lead adjustments.
+The cache guard precedes reading the key's loop parameters. In DDS1's
+nonlooping branch, `relativeFrame` captures the requested frame minus the
+key frame before querying the model's frame count; the unclamped branch
+still rereads the key frame after that query. Both reads follow retail,
+without extra owner views or scheduling-only temporaries.
+
+## Actor-formation high-water and completion callback
+
+DDS1 `001F5028` and DDS2 `00205CC8` retain the largest arranged actor count
+as a halfword at battle-root +246/+26A. Their stack scratch is sixteen
+actor pointers; the count store is not a reason to invent a capacity check
+or alter that footprint. Formation geometry reads the unit's mirrored
+extent at +BC, separately from camera reach at +B4.
+
+After both position and rotation passes, the arrangers call the battle
+root's +5B8/+5EC completion hook without arguments and ignore any result.
+Each game's scene initializer installs six providers; the twelve existing
+provider contracts are `void (void)` (DDS2 `002218C8` remains ASM and reads
+no input registers). This is `postPlacementCallback` on the primary owner.
+The special DDS1 actor action clears that callback, rather than storing
+an unrelated integer. Both arranger bodies remain ASM: the natural typed
+twins have matching sizes/control flow but unresolved floating-register
+homes, recorded in their disabled candidates.
+
