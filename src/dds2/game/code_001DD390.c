@@ -6295,7 +6295,7 @@ void func_001EC2A0(void) {
 void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action) {
     BtlState *work = (BtlState *)btlGetRuntime();
     if (action->link->unit->flags & 0x400) {
-        if (work->unk660 != 0) {
+        if (work->cameraPoseBlendHook != 0) {
             s32 hasFlag200 = 0;
             s32 hasFlag400 = 0;
             u32 i;
@@ -6309,7 +6309,7 @@ void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action) {
                     hasFlag400 = 1;
                 }
             }
-            if (work->unk660((BtlUnit *)action, hasFlag200, hasFlag400) != 0) {
+            if (work->cameraPoseBlendHook(action, hasFlag200, hasFlag400) != 0) {
                 action->flags |= 0x10000;
                 return;
             }
@@ -7478,7 +7478,8 @@ void func_001F34E0(BtlLinkedCommand *action, BtlCamState *out) {
     btlBuildHeightClampedApproachCamera(action, out);
 }
 
-void btlChooseActionPoseBlendFromActorCount(BtlLinkedCommand *action) {
+void btlChooseActionPoseBlendFromActorCount(BtlLinkedCommand *action,
+                                          BtlCamState *unusedFront, BtlCamState *unusedBack) {
     BtlState *work = (BtlState *)btlGetRuntime();
     u32 count;
     u32 mask;
