@@ -550,7 +550,7 @@ BillChildPayload *billStepAnimationEntryAndUpdateChild(BillObj *obj, BillOut *ou
     } else {
         obj->requestedPacketListIndex = 1;
     }
-    obj->rotationAngle = record->scale;
+    obj->rotationAngle = record->rotationAngle;
     child->uv.components[0] = record->u0;
     child->uv.components[1] = record->v0;
     child->uv.components[2] = record->u1;
