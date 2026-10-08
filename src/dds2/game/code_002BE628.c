@@ -2372,7 +2372,7 @@ s32 mnuTryUseFieldSkill(PartyPanel *partyPanel, MenuPageWindow *page, DatPartyRe
             mnuConsumeEntryCost(id & 0xFFFF, target);
             mnuInitPartyPanelSlots(partyPanel);
             mnuReleaseAndRefreshWindowSlots(page);
-            func_002BCAB0(page);
+            mnuRefreshPartyPanelBars(page);
         }
         return 2;
     }

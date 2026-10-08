@@ -2280,7 +2280,7 @@ void mnuReleaseAndRefreshWindowSlots(MenuPageWindow *menu) {
     mnuRefreshWindowSlots(menu, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BCAB0);
+INCLUDE_ASM(const s32, "game/code_002B8FC8", mnuRefreshPartyPanelBars);
 
 extern char D_00437C30[];
 

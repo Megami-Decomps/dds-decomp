@@ -540,7 +540,7 @@ s32 mnuUseStaffItem(s32 itemId, MenuStaffContext *context) {
     ptyAdjustItemQuantity(itemId, -1);
     mnuInitPartyPanelSlots(&context->partyPanel);
     mnuReleaseAndRefreshWindowSlots(partyPanel);
-    func_002BCAB0(partyPanel);
+    mnuRefreshPartyPanelBars(partyPanel);
     return 1;
 }
 
