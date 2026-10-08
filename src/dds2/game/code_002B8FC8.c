@@ -1,4 +1,5 @@
 #include "sdf_chip.h"
+#include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "mnu_input.h"
 #include "kwln.h"
@@ -85,8 +86,6 @@ extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
 
 extern s32 dspStartEntry(s32 entry);
 extern s32 D_00435E5C;
-
-extern void itfDrawGridWithResolvedSlot();
 
 extern void mnuClearListFlagsOneAndTwo();
 
@@ -212,7 +211,6 @@ extern void func_002B2408();
 
 extern MenuIconBundle *mnuCreateIconBundle(u32);
 
-extern s32 effConfigureIndexedSlotMaterial(u8 *, u32, u8 *, u32, u32, u32, u32);
 
 
 extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
@@ -835,7 +833,7 @@ void mnuDrawFourEntries(s32 x, s32 y, s32 depth, MenuList *list, MenuListNode *n
         s32 index = selected * MNU_ENTRY_SPRITE_COUNT + spriteIndex;
         u32 sprite = node->sprites[index].sprite;
         if (sprite != 0) {
-            itfDrawGridWithResolvedSlot(x, y, depth, 0, sprite, node->sprites[index].effect, drawArg);
+            itfDrawGridWithResolvedSlot(x, y, depth, 0, (EffectSlotSet *)(u32)sprite, node->sprites[index].effect, drawArg);
         }
         spriteIndex++;
     } while (spriteIndex < MNU_ENTRY_SPRITE_COUNT);
@@ -1232,8 +1230,8 @@ MenuIconState *mnuCreatePanelIconState(u32 mode, s32 resource, s32 material) {
         panel->sprite[3] = effCreateResourceSlotSet((EffectSlotSet *)resource, 0x0D, 1);
         panel->sprite[4] = effCreateResourceSlotSet((EffectSlotSet *)resource, 0x0E, 1);
         panel->sprite[5] = effCreateResourceSlotSet((EffectSlotSet *)resource, 0x0E, 1);
-        effConfigureIndexedSlotMaterial((u8 *)panel->sprite[2], 0, (u8 *)material, 1, 0, 0, 0x0C);
-        effConfigureIndexedSlotMaterial((u8 *)panel->sprite[4], 0, (u8 *)material, 1, 0, 0, 0x0C);
+        effConfigureIndexedSlotMaterial(panel->sprite[2], 0, (struct EffMappedResource *)material, 1, 0, 0, 0x0C);
+        effConfigureIndexedSlotMaterial(panel->sprite[4], 0, (struct EffMappedResource *)material, 1, 0, 0, 0x0C);
         break;
     case 5:
         panel->count = 2;
@@ -1737,23 +1735,22 @@ typedef struct ScrollHandle {
     ScrollInner *inner;
 } ScrollHandle;
 
-extern ScrollHandle *effCreateStatusBatch(s32);
 
 void mnuInitScrollHandles(MenuScrollPanel *menu) {
     ScrollHandle *handle;
 
-    handle = effCreateStatusBatch(1);
+    handle = (ScrollHandle *)effCreateStatusBatch(1);
     menu->handles[0] = handle;
     handle->inner->params->a = 10;
     handle->inner->params->b = 0;
 
-    handle = effCreateStatusBatch(3);
+    handle = (ScrollHandle *)effCreateStatusBatch(3);
     menu->handles[1] = handle;
     handle->inner->params->a = 8;
     handle->inner->params->b = 4;
     handle->inner->params->c = 8;
 
-    handle = effCreateStatusBatch(1);
+    handle = (ScrollHandle *)effCreateStatusBatch(1);
     menu->handles[2] = handle;
     handle->inner->params->a = 10;
     handle->inner->params->b = 0;
@@ -1798,8 +1795,8 @@ void mnuActivatePendingPanelResource(MenuScrollPanel *context) {
     context->active.index = context->pending.index;
     context->pending.set = 0;
     if (pendingHandle != 0) {
-        effConfigureWithDefaultSetting((u32)pendingHandle, context->pending.index,
-                                       context->handles[2], 0, 10, 2);
+        effConfigureWithDefaultSetting(pendingHandle, context->pending.index,
+                                       (struct EffMappedResource *)(u32)context->handles[2], 0, 10, 2);
         return;
     }
 }

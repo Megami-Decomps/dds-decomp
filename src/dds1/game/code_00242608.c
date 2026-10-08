@@ -84,7 +84,6 @@ extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
 extern s32 mnuShopRestoreMiddleVector;
 extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
-extern u8 *effCreateStatusBatch(s32 kind);
 extern s32 effDestroyPackedBatch(s32);
 extern s32 D_0036AA60[];
 
