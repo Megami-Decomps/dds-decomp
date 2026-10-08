@@ -621,7 +621,59 @@ void mnuReleaseResourceList(MenuPanelHandles *panel) {
     sdfReleaseChipBlock(panel);
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027D850);
+/* Draw and fade the six resources that make up the selected panel. */
+void func_0027D850(s32 x, s32 originY, s32 depth, s32 fade,
+                   MenuPanelHandles *panel, s32 selectionMode, s32 drawArg) {
+    EffectSlotSet *firstHandle = panel->handles[0];
+    BdWork *firstWork = firstHandle->workEntries;
+    s32 sourceWidth = firstWork->sourceWidth;
+    s32 baseWidth = (s32)((u32)sourceWidth << 4);
+    s32 transitionValue = panel->transition;
+    s32 widthAdjustment = 0;
+    s32 rowX;
+    s32 y;
+
+    if (transitionValue > 0x100) {
+        transitionValue = 0x200 - transitionValue;
+
+        if (fade >= 0x100) {
+            fade = transitionValue;
+            widthAdjustment = ((0x100 - fade) / 0x100 + 0x40) << 4;
+            firstWork->geometry.bounds[2] = baseWidth + widthAdjustment;
+            panel->handles[1]->workEntries->geometry.bounds[2] = baseWidth + widthAdjustment;
+        }
+    } else {
+        widthAdjustment = -((0x100 - transitionValue) * 2);
+        firstWork->geometry.bounds[2] = baseWidth + widthAdjustment;
+        panel->handles[1]->workEntries->geometry.bounds[2] = baseWidth + widthAdjustment;
+    }
+
+    y = originY;
+
+    func_002BF4E0(x + panel->left - widthAdjustment, y, depth, fade, 1,
+                  panel->handles[0], 0, drawArg);
+    func_002BF4E0(x + panel->top, y, depth, fade, 1,
+                  panel->handles[1], 0, drawArg);
+
+    rowX = x + panel->right;
+    y += 0x18;
+    if (selectionMode == 0 && fade < 0x80) {
+        fade = 0x80;
+    }
+
+    func_002BF4E0(rowX, y, depth, fade, 1,
+                  panel->handles[2], 0, drawArg);
+    func_002BF4E0(rowX, y, depth, fade, 1,
+                  panel->handles[4], 0, drawArg);
+    rowX = x + panel->bottom;
+    func_002BF4E0(rowX, y, depth, fade, 1,
+                  panel->handles[3], 0, drawArg);
+    func_002BF4E0(rowX, y, depth, fade, 1,
+                  panel->handles[5], 0, drawArg);
+
+    panel->handles[0]->workEntries->geometry.bounds[2] = baseWidth;
+    panel->handles[1]->workEntries->geometry.bounds[2] = baseWidth;
+}
 
 /* Draw the four row icons at their table-owned offsets. */
 void mnuDrawFourPanelIconsAtOffsets(s32 x, s32 y, s32 depth, s32 alpha, MenuPanelHandles *panel, s32 drawArg) {
