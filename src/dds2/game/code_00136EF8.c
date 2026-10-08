@@ -1239,7 +1239,16 @@ void fldCopyInfoTable(FldInfTable *src) {
     D_0038E2D0 = *src;
 }
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140238);
+void func_00140238(void) {
+    s32 slot = D_004361CC;
+    char *actor;
+
+    D_004361D0 = 1;
+    actor = (char *)fldFindActorEntryByName(D_0038BC50[slot]->name);
+    if (scrFindNamedProcessNode(actor) == NULL) {
+        D_0038BD50[slot] = evtStartSceneResourceTask(dds3GetWorldObject(), actor);
+    }
+}
 
 /* Resolve a named actor in the current area to its template; the selected
  * template kind is also recorded for the caller in D_004361FC. */
