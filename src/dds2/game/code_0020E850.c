@@ -37,13 +37,13 @@ extern void sdfReleaseChipBlock(s32);
 
 extern void func_002152D8(s32, s32);
 
-extern void func_00215C70(s32, s32);
+extern s32 func_00215C70(s32, s32);
 
 extern void btlSelectLowestHealthRateTarget(s32, s32);
 
 extern void btlSelectLowestRankTarget(s32, s32);
 
-extern void func_00216888(s32, s32);
+extern s32 func_00216888(s32, s32);
 
 extern void func_00216D30();
 
@@ -1184,7 +1184,7 @@ void btlCmdSimpleD(s32 context, s32 value) {
     btlSelectTargetsWithoutActionMask(context, value);
 }
 
-extern void func_002162C0(s32, s32);
+extern s32 func_002162C0(s32, s32);
 
 void btlCmdSimpleE(s32 context, s32 value) {
     func_002162C0(context, value);

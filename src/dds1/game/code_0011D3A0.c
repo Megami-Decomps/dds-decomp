@@ -168,7 +168,7 @@ extern void fldClearCameraMoveMode(void);
 extern void fldSetCameraMoveMode(s32);
 extern void func_0013E5A8(u32 arg0);
 extern u32 fldGetSceneReadyFlag(void);
-extern s32 scrFindNamedProcessNode(const char *arg0);
+extern struct ScrData *scrFindNamedProcessNode(char *arg0);
 extern void sdfStoreMessageWordsAndNotifyConsumer(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);

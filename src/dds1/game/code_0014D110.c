@@ -1,4 +1,6 @@
 #include "common.h"
+extern const char *fldGetTaskRecordValue(u32 task);
+extern void func_0013DF60(const char *name);
 #include "sdf.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -1204,7 +1206,7 @@ u32 fldCmdTestTaskRoomObjectActive(void) {
 }
 
 u32 fldCmdSetCurrentTaskScene(void) {
-    s32 scene;
+    const char *scene;
 
     if (fldIsSceneStateEight()) {
         func_0013DF60(0);

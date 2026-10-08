@@ -1,4 +1,5 @@
 #include "common.h"
+extern void func_00140BC8(const char *name);
 #include "pcp_vu0.h"
 #include "fpu.h"
 #include "dds3obj.h"
@@ -204,9 +205,9 @@ extern void fldPlayArchiveSound(s32 param0, s32 param1);
 
 extern void fldStartTitle(s32 param0, s32 param1, s32 param2);
 
-extern s32 fldGetTaskRecordValue(u32 key);
+extern const char *fldGetTaskRecordValue(u32 key);
 
-extern void func_00140A58(void *entry);
+extern void func_00140A58(const char *entry);
 
 
 typedef struct FldSceneParamRow {
@@ -1449,7 +1450,7 @@ u32 fldCmdTestTaskRoomObjectActive(void) {
 }
 
 u32 fldCmdSetCurrentTaskScene(void) {
-    s32 scene;
+    const char *scene;
 
     if (fldIsSceneStateEight()) {
         func_00140BC8(0);
@@ -1659,7 +1660,7 @@ s32 fldCmdSetDefaultEncounterId(void) {
 
 s32 fldCmdApplyTaskRecordEntry(void) {
     ScrData *work = scrGetCurrentContext();
-    void *entry = fldGetTaskRecordValue((u32)work->task);
+    const char *entry = fldGetTaskRecordValue((u32)work->task);
 
     if (entry != NULL) {
         func_00140A58(entry);

@@ -9,6 +9,7 @@ extern void memset();
 #include "pcp_vu0.h"
 #include "itf.h"
 #include "dat_state.h"
+#include "mnu_mantra.h"
 
 extern void mdlFlagSet(s32);
 
@@ -172,12 +173,6 @@ extern u32 scrGetEntryRequirementFlags(u16);
 extern u8 D_0045C828[];
 
 
-typedef struct MantraNodePos {
-    u32 header;
-    s16 x;
-    s16 y;
-    struct MantraNodePos *adjacent[6];
-} MantraNodePos;
 
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 
@@ -937,12 +932,12 @@ s32 func_00315950(s32 id, DatPartyRecord *context, s32 mode) {
         return 0;
     }
     if (mode == 0x40) {
-        adjacent = record->adjacent;
+        adjacent = record->neighbors;
         i = 0;
         do {
             if (*adjacent != NULL &&
-                func_00314990(context, (*adjacent)->header >> 16) == 0 &&
-                ((*adjacent)->header & 0xF) != 2) {
+                func_00314990(context, (*adjacent)->selector.packed >> 16) == 0 &&
+                ((*adjacent)->selector.packed & 0xF) != 2) {
                 result = 0;
             }
             i++;
@@ -950,12 +945,12 @@ s32 func_00315950(s32 id, DatPartyRecord *context, s32 mode) {
         } while (i < 6);
         return result;
     }
-    adjacent = record->adjacent;
+    adjacent = record->neighbors;
     i = 0;
     do {
         if (*adjacent != NULL &&
-            func_00314990(context, (*adjacent)->header >> 16) != 0 &&
-            ((*adjacent)->header & 0x100) == 0) {
+            func_00314990(context, (*adjacent)->selector.packed >> 16) != 0 &&
+            ((*adjacent)->selector.packed & 0x100) == 0) {
             return 1;
         }
         i++;
@@ -971,7 +966,7 @@ s32 mnuIsResourceCategoryAvailable(s32 id) {
     if (info == 0) {
         return 0;
     }
-    return D_0045C828[(s32)(info->header << 24) >> 28] != 0;
+    return D_0045C828[(s32)(info->selector.packed << 24) >> 28] != 0;
 }
 
 s32 func_00315C40(u32 index) {
