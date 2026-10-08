@@ -158,7 +158,7 @@ extern s32 effSharedRibbonReferenceCount;
 
 extern u32 D_003BC990;
 
-extern u32 func_0029C230(u32);
+extern struct EffExpandedList *func_0029C230(u32);
 
 extern u32 effFlashTextureHandles;
 
@@ -540,10 +540,6 @@ extern void fileQueueDestroy(u32);
 void effDestroyModelContext(MdlCtx *model);
 
 MdlCtx *effLoadViewerModelWithVUState(void *first, u32 second);
-
-RefObj *effReferenceObjectRetain(RefObj *obj);
-
-void effReleaseReferenceHolder(u8 *holder);
 
 void effReleaseSharedReference(RefObj *obj);
 
@@ -3482,7 +3478,7 @@ typedef struct EffectSurfaceNode {
     void *resource;
     u32 *jobs;          // 0x38
     u32 jobBuffer;      // 0x3C
-    RefObj *resourceHolder; // 0x40, released separately from the grid record
+    struct EffExpandedList *resourceHolder; // 0x40, released separately from the grid record
     u32 record;         // 0x44: fileAllocateGridRecordSlots result
     u16 count;          // 0x48: initialized to 1; remaining role unknown
 } EffectSurfaceNode;
@@ -3649,7 +3645,7 @@ void func_002A5DE0(EffectSurfaceNode *dst, u8 *work) {
     }
     case 7:
         if (dst->resourceHolder != 0) {
-            effReleaseReferenceHolder((u8 *)dst->resourceHolder);
+            effReleaseReferenceHolder(dst->resourceHolder);
         }
         dst->resourceHolder = effReferenceObjectRetain(src->resourceHolder);
         break;
@@ -3760,7 +3756,7 @@ void effRebuildSurfaceJobs(EffectSurfaceNode *node, void *source) {
 }
 
 void effReplaceSurfaceResourceHolder(s32 node, u32 resource) {
-    u32 holder;
+    struct EffExpandedList *holder;
 
     if (((EffectSurfaceNode *)node)->resourceHolder != 0) {
         effReleaseReferenceHolder(((EffectSurfaceNode *)node)->resourceHolder);
@@ -7275,7 +7271,7 @@ typedef struct EffParticleShared {
     u32 state;
     u8 pad0C[0x98];
     u32 billHandle;       // 0xA4
-    RefObj *reference;    // 0xA8
+    struct EffExpandedList *reference; // 0xA8
 } EffParticleShared;
 
 void effReleaseParticleResources(u8 *work) {
