@@ -939,7 +939,8 @@ void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32
 void mnuCreateListWithDefaults(MenuWindowContainer *menu, u32 first, u32 second, u32 third, u32 fourth) {
     MenuListDefaults defaults = D_0042AF00;
     menu->resource =
-        mnuCreateWindowSpriteResources(first, second, third, fourth, defaults.indices, 3);
+        mnuCreateWindowSpriteResources(first, second, third, (EffectSlotSet *)fourth,
+                                       defaults.indices, 3);
 }
 
 /* Clear only the window's panel-transition bit. */
@@ -998,11 +999,12 @@ void func_002B9820(MenuWindowContainer *menu) {
 }
 
 
-void mnuInitIconSprites(MenuIconSprites *obj, s32 w, s32 h, u32 value, s32 res, s32 *idx, s32 unused) {
+void mnuInitIconSprites(MenuIconSprites *obj, s32 w, s32 h, u32 value,
+                        EffectSlotSet *resource, s32 *idx, s32 unused) {
     obj->value = value;
-    obj->sprite[0] = effCreateResourceSlotSet((EffectSlotSet *)res, idx[0], 1);
-    obj->sprite[1] = effCreateResourceSlotSet((EffectSlotSet *)res, idx[1], 1);
-    obj->sprite[2] = effCreateResourceSlotSet((EffectSlotSet *)res, idx[2], 1);
+    obj->sprite[0] = effCreateResourceSlotSet(resource, idx[0], 1);
+    obj->sprite[1] = effCreateResourceSlotSet(resource, idx[1], 1);
+    obj->sprite[2] = effCreateResourceSlotSet(resource, idx[2], 1);
     itfSetGridEntryQuantizedAndRefresh(obj->sprite[0], 0, w, h, w, h);
     itfSetGridEntryQuantizedAndRefresh(obj->sprite[1], 0, w, h, w, h);
     itfSetGridEntryQuantizedAndRefresh(obj->sprite[2], 0, w, h, w, h);
@@ -1010,7 +1012,7 @@ void mnuInitIconSprites(MenuIconSprites *obj, s32 w, s32 h, u32 value, s32 res, 
 
 /* Create an owned three-sprite bundle using the caller's slot-index array. */
 MenuIconSprites *mnuCreateWindowSpriteResources(u32 width, u32 height, u32 value,
-                    u32 resourceHandle, s32 *indices, u32 unused) {
+                    EffectSlotSet *resourceHandle, s32 *indices, u32 unused) {
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x18);
     MenuIconSprites *bundle = (void *)sdfResourceRetainAddress(allocation);
     memset(bundle, 0, 0x18);
@@ -1800,16 +1802,18 @@ typedef struct MenuSlotEffectHandles {
     u32 handles[3];
 } MenuSlotEffectHandles;
 
-void mnuLoadPanelSectionResources(MenuSlotEffectHandles *slot, u32 model, u32 firstValue, u32 secondValue, s32 thirdValue
+void mnuLoadPanelSectionResources(MenuSlotEffectHandles *slot,
+                                  EffectSlotSet *model, u32 firstValue,
+                                  u32 secondValue, s32 thirdValue
                                     ) {
     u32 handle;
 
-    handle = (u32)effCreateResourceSlotSet((EffectSlotSet *)model, firstValue, 1);
+    handle = (u32)effCreateResourceSlotSet(model, firstValue, 1);
     slot->handles[0] = handle;
-    handle = (u32)effCreateResourceSlotSet((EffectSlotSet *)model, secondValue, 1);
+    handle = (u32)effCreateResourceSlotSet(model, secondValue, 1);
     slot->handles[1] = handle;
     if (-1 < thirdValue) {
-        handle = (u32)effCreateResourceSlotSet((EffectSlotSet *)model, thirdValue, 1);
+        handle = (u32)effCreateResourceSlotSet(model, thirdValue, 1);
         slot->handles[2] = handle;
     }
 }
