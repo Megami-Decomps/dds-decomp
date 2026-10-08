@@ -200,9 +200,9 @@ void billSetChildParameter(BillObj *effect, u32 value) {
     effect->childParam = value;
 }
 
-void effCopyPosition(BillObj *effect, const void *position) {
+void billSetChildTextureQuad(BillObj *effect, const BillTextureQuad *textureQuad) {
     if (effect->kind == 0) {
-        memcpy((void *)((s32)effect->child + 0xc), position, 16);
+        memcpy(&effect->child->uv, textureQuad, sizeof(*textureQuad));
     }
 }
 
