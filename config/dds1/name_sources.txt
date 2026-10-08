@@ -2306,6 +2306,7 @@
 0x00192488	effChanWorkCreate	inferred	Creates and initializes channel work. [names_qp9.tsv]
 0x00192638	effDestroyChannelWork	inferred	confidence=high; matched-C; src/dds1/game/code_00192488.c:126:func_00192638; Releases the channel owner and work allocation.; twin=0x0019A270, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x001926A8	effJitterChannelControlPoints	inferred	confidence=high; matched-C; src/dds1/game/code_00192488.c:156:func_001926A8; Builds camera-perpendicular normals from adjacent path control points, applies independent configured random jitter to all four points and initializes per-slot interpolation state.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x001929A0	effUpdateChannelWork	inferred	Updates each registered channel record: advances delay, initializes jitter, samples the channel curve, dispatches color/position values, and recycles enabled records; paired DDS2 0x0019A5D8, both lifecycle tables register this callback after the parameter initializer.
 0x00192BA0	effCopyVertRows	inferred	copies 4 xyz float rows plus 4 scalars between buffers, stride 0x10/4
 0x00192C00	effFillRandRecords	inferred	fills counter records with rand modulus plus scaled keyframes
 0x00192CC8	effCreatePrimitiveCurve	inferred	Fam_Mid3

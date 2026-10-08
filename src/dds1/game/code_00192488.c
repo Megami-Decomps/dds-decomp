@@ -242,7 +242,7 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
 
 /* Step active records, update their packed color/position callbacks, and optionally recycle.
  * The slot-zero lookup precedes the empty-count check; retain the time snapshot and later stored increments. */
-void func_001929A0(EffChanWork *work) {
+void effUpdateChannelWork(EffChanWork *work) {
     EffChanRecord *recordCursor = work->records;
     void *bezierSlots = work->slots;
     u32 recordCount = work->head.count;
