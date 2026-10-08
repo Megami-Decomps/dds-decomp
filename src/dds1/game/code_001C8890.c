@@ -355,7 +355,7 @@ extern s32 func_00214868(void);
 
 u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
 
-extern s32 datEnemyRecords;
+extern DatEnemyRecord *datEnemyRecords;
 
 extern void func_001DEFE0(s32, s32, f32);
 
@@ -2977,7 +2977,7 @@ u32 btlRefreshEligibleActors(void) {
             if (flags & 1) {
                 if ((flags & 0xE0) == 0 &&
                     (u16)(*(u16 *)(actor + 0x124) - 1) < 0x17F) {
-                    u32 entry = *(u32 *)(datEnemyRecords + *(u16 *)(actor + 0x124) * 76);
+                    u32 entry = datEnemyRecords[*(u16 *)(actor + 0x124)].flags;
                     if ((entry & 0x40) == 0) {
                         if ((entry & 0x400) == 0) {
                             if ((*(u32 *)(actor + 0x114) & 8) == 0) {
@@ -7375,7 +7375,7 @@ s32 btlHasFirstLinkedCategoryFlag1000(u8 *node) {
     if ((*(u32 *)(actor + 0x110) & 0x400) == 0) return 0;
     id = *(u32 *)(actor + 0xC8);
     if (id >= 0x180) return 0;
-    if (*(u32 *)(datEnemyRecords + id * 76) & 0x1000) return 1;
+    if (datEnemyRecords[id].flags & 0x1000) return 1;
     return 0;
 }
 

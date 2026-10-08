@@ -163,13 +163,7 @@ s32 datGetStatWithStatusOverride(DatPartyRecord *unit, s32 statIndex) {
 }
 
 
-typedef struct DatPartyMember {
-    u8 unk0[0x18];
-    u16 skills[DAT_TABLE_SKILL_COUNT]; /* 0x18 */
-    u8 unk28[0x24];
-} DatPartyMember; /* 0x4C */
-
-extern DatPartyMember *datEnemyRecords;
+extern DatEnemyRecord *datEnemyRecords;
 
 /* Search 24 inline skill IDs or eight IDs in the selected external record.
  * Return on the first match; no record-index or pointer validation here. */

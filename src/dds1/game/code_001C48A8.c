@@ -124,7 +124,7 @@ extern void func_00215FE0(s32);
 
 u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
 
-extern s32 datEnemyRecords;
+extern DatEnemyRecord *datEnemyRecords;
 
 extern s32 btlGetRuntime(void);
 
@@ -1415,9 +1415,7 @@ void btlBindActorTaskAndSelectActionNumber(s32 taskAddress, s32 actorAddress) {
     *(s32 *)(taskAddress + 0x18) = actorAddress;
     if ((flags & FLD_SCENE_ACTOR_SECONDARY_BIT) != 0 &&
         *(u16 *)(actorAddress + 0x124) <= 0x17F) {
-        *(u16 *)(taskAddress + 4) =
-                  (u16)*(u8 *)(((u32)*(u16 *)(actorAddress + 0x124) * 0x14 -
-                                                      (u32)*(u16 *)(actorAddress + 0x124)) * 4 + datEnemyRecords + 0x15);
+        *(u16 *)(taskAddress + 4) = datEnemyRecords[*(u16 *)(actorAddress + 0x124)].unk15;
     }
     flags = *(u32 *)(taskAddress + FLD_SCENE_TASK_FLAGS_OFFSET);
     *(u32 *)(taskAddress + FLD_SCENE_TASK_FLAGS_OFFSET) = flags | FLD_SCENE_TASK_BOUND_BIT;

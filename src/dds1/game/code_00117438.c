@@ -13,7 +13,6 @@ extern void dds3WorkInit(void *header);
 
 extern void *D_003BAAAC;
 
-extern s32 datEnemyRecords;
 typedef struct EvtScaledValue {
     u32 unk0;
     u32 flags;
@@ -50,13 +49,7 @@ typedef struct SdfPartyUnit {
     u16 mpBonus;        /* 0x1E */
 } SdfPartyUnit;
 
-typedef struct SdfEnemyVitals {
-    u32 flags;          /* 0x00 */
-    u8 pad04[4];
-    u16 maxHp;          /* 0x08 */
-    u8 pad0A[2];
-    u16 maxMp;          /* 0x0C */
-} SdfEnemyVitals;
+extern DatEnemyRecord *datEnemyRecords;
 
 extern u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed);
 extern char sdfRuntimeTaskName[];
@@ -408,7 +401,7 @@ s32 ptyComputeMaxHp(DatPartyRecord *unit) {
     s32 result;
 
     if ((unit->flags & SDF_UNIT_ENEMY) != 0) {
-        return ((SdfEnemyVitals *)(datEnemyRecords + unit->unitId * 76))->maxHp;
+        return datEnemyRecords[unit->unitId].maxHp;
     }
     result = evtRunContext(1, (s32)unit, 0, 0, 0);
     if ((unit->flags & SDF_UNIT_ENEMY) == 0) {
@@ -425,7 +418,7 @@ s32 ptyComputeMaxMp(DatPartyRecord *unit) {
     s32 result;
 
     if ((unit->flags & SDF_UNIT_ENEMY) != 0) {
-        return ((SdfEnemyVitals *)(datEnemyRecords + unit->unitId * 76))->maxMp;
+        return datEnemyRecords[unit->unitId].maxMp;
     }
     result = evtRunContext(2, (s32)unit, 0, 0, 0);
     if ((unit->flags & SDF_UNIT_ENEMY) == 0) {
@@ -562,7 +555,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
         } else if (!(*(u16 *)queryArg & 4)) {
             mask &= 0xFFFE;
         } else if ((actor->flags & SDF_UNIT_ENEMY) == 0 ||
-                   (((SdfEnemyVitals *)(datEnemyRecords + actor->unitId * 76))->flags & 0x440) != 0) {
+                   ((datEnemyRecords[actor->unitId].flags & 0x440) != 0)) {
             mask &= 0xFFFE;
         }
     }

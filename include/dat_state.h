@@ -253,7 +253,11 @@ typedef struct DatEnemyRecord {
     u16 maxHp;            /* 0x08 */
     u16 mp;               /* 0x0A */
     u16 maxMp;            /* 0x0C */
+#ifdef VERSION_DDS1
+    s16 affinityTableIndex; /* 0x0E: signed affinity-bank row in DDS1. */
+#else
     u8 pad0E[2];
+#endif
     u8 baseStats[5];      /* 0x10 */
     u8 unk15;            /* Copied to the command actor's actionNumber on model change. */
     u8 pad16[2];

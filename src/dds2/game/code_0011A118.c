@@ -47,7 +47,7 @@ extern DatPartyRecord *dds3FindEntry();
 
 extern ScrData *evtWorkScriptTask;
 
-extern s32 datEnemyRecords;
+extern DatEnemyRecord *datEnemyRecords;
 
 typedef struct TableEntry32 {
     u16 value; /* 0x0: copied to active roster entry */
@@ -71,14 +71,6 @@ typedef struct EventRosterStat {
     f32 multiplier;       /* 0x04 */
     u8 pad08[0x0C];
 } EventRosterStat; /* stride 0x14 */
-
-typedef struct EventRosterRecord {
-    u32 flags;              /* 0x00: battle availability flags */
-    u8 flaggedValue;        /* 0x04 */
-    u8 pad05[0x23];
-    s32 panelValue;       /* 0x28 */
-    u8 pad2C[0x20];
-} EventRosterRecord; /* stride 0x4C */
 
 typedef struct EventIndexRecord {
     u8 pad00[2];
@@ -241,7 +233,7 @@ u8 evtGetFlaggedRosterValue(DatPartyRecord *entry) {
     if ((entry->flags & 0x20) == 0) {
         return 0;
     }
-    return ((EventRosterRecord *)datEnemyRecords)[entry->unitId].flaggedValue;
+    return *((u8 *)&datEnemyRecords[entry->unitId] + 4);
 }
 
 s32 dds3FindEntryIndex(rosterIndex)
@@ -526,7 +518,7 @@ s32 datCalculateCommandBaseValue(DatPartyRecord *entry, s32 value) {
         break;
     case DAT_COMMAND_COST_MODE_MP:
         if ((entry->flags & 0x20) &&
-            (((EventRosterRecord *)datEnemyRecords)[entry->unitId].flags & 0x10)) {
+            (datEnemyRecords[entry->unitId].flags & 0x10)) {
             return 0;
         }
         value = commands[commandId].costPercentage;
@@ -1634,7 +1626,7 @@ s32 evtPushRosterOrGlobalCounterValue(void) {
         result = datGameState->header.currency;
     } else {
         s32 index = entry->unitId;
-        result = ((EventRosterRecord *)datEnemyRecords)[index].panelValue;
+        result = *(s32 *)((u8 *)&datEnemyRecords[index] + 0x28);
     }
     scrSetIntegerReturnValue(result);
     return 1;

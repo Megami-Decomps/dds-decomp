@@ -49,7 +49,7 @@ extern s32 btlHasRegisteredGuidePanelTask(void);
 
 extern void btlBossDebugPrintf(const char *, ...);
 
-extern s32 datEnemyRecords;
+extern DatEnemyRecord *datEnemyRecords;
 
 extern void func_001C7DB8(s32, s32);
 
@@ -1561,8 +1561,7 @@ void btlBindActorTaskAndSelectActionNumber(s32 taskAddress, s32 actorAddress) {
     if ((flags & FLD_SCENE_ACTOR_SECONDARY_BIT) != 0 &&
         ((BtlUnit *)actorAddress)->partyRecord.unitId <= 0x17F) {
         ((ActionStateLink *)taskAddress)->actionNumber =
-                  (u16)*(u8 *)(((u32)((BtlUnit *)actorAddress)->partyRecord.unitId * 0x14 -
-                                                      (u32)((BtlUnit *)actorAddress)->partyRecord.unitId) * 4 + datEnemyRecords + 0x15);
+            datEnemyRecords[((BtlUnit *)actorAddress)->partyRecord.unitId].unk15;
     }
     flags = ((ActionStateLink *)taskAddress)->pendingFlags;
     ((ActionStateLink *)taskAddress)->pendingFlags = flags | FLD_SCENE_TASK_BOUND_BIT;

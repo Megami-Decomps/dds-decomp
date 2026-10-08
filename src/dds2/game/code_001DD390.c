@@ -103,11 +103,6 @@ typedef struct BtlActionTableEntry {
     u8 pad1E[2];
 } BtlActionTableEntry;
 
-typedef struct BtlResourceTableEntry {
-    u32 flags;
-    u8 pad04[72];
-} BtlResourceTableEntry;
-
 typedef struct BtlStateHandler {
     void (*start)(void *);
     void (*update)(void *);
@@ -1365,7 +1360,7 @@ BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *actor, s32 amount) {
     return task;
 }
 
-extern s32 datEnemyRecords;
+extern DatEnemyRecord *datEnemyRecords;
 
 u32 btlRefreshEligibleActors(void) {
     BtlState *work = (BtlState *)btlGetRuntime();
@@ -1375,7 +1370,7 @@ u32 btlRefreshEligibleActors(void) {
         if (flags & 0x400) {
             if (flags & 1) {
                 if ((flags & 0xE0) == 0 && (u16)(unit->partyRecord.unitId - 1) < 0x17F) {
-                    u32 entry = ((BtlResourceTableEntry *)datEnemyRecords)[unit->partyRecord.unitId].flags;
+                    u32 entry = datEnemyRecords[unit->partyRecord.unitId].flags;
                     if ((entry & 0x40) == 0) {
                         if ((entry & 0x400) == 0) {
                             if ((unit->stateFlags & 8) == 0) {
@@ -5880,7 +5875,7 @@ s32 btlHasFirstLinkedCategoryFlag1000(s32 actor) {
     if (category >= 0x180) {
         return 0;
     }
-    return btlHasFlag(((BtlResourceTableEntry *)datEnemyRecords)[category].flags, 0x1000);
+    return btlHasFlag(datEnemyRecords[category].flags, 0x1000);
 }
 
 u8 func_001EA940(s32 action) {
