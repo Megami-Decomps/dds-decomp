@@ -132,9 +132,9 @@ extern void frFontClearFlagBits();
 
 extern char D_003E7588[];
 
-extern char D_00380788[];
+extern struct SdfPoolNode *D_00380788[13][4];
 
-extern void evtStageTestUpdate();
+extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 
 extern char D_003E7790[];
 

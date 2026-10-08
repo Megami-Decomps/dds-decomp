@@ -122,7 +122,7 @@ extern void evtStageTestQueueMotionSegment(u32, f32, f32);
 extern void evtStageTestCreateModelEffect(s32);
 extern void evtStageTestUpdateCamera(void);
 extern void btlUpdateJobPositionFromModel(s32);
-extern void mdlProcessContextNodesAndTransforms(s32, s32);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 extern u32 ptyGetSkillNibbleState(DatPartyRecord *, u16);
 
 extern void evtStageTestStop(void);
@@ -147,9 +147,9 @@ extern s8 D_003E792A[];
 
 
 
-extern void mdlAddEntryFlaggedEx(s32, s32, s32, f32, f32);
+extern void mdlAddEntryFlaggedEx(MdlCtx *, s32, s32, f32, f32);
 
-extern void mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
+extern void mdlAddEntryPlainEx(MdlCtx *, s32, s32, f32, f32);
 
 extern void evtStageTestAdvanceMotionQueue(void);
 
@@ -207,7 +207,7 @@ typedef struct StageTestQueue {
 typedef struct StageTestState {
     s32 mode;                /* 0x00 */
     s32 assetRequest;        /* 0x04: result of mdlRequestAsset */
-    s32 model;               /* 0x08 */
+    MdlCtx *model;            /* 0x08 */
     s8 flag;                 /* 0x0C */
     StageTestEntry *entries; /* 0x10 */
     StageTestQueue queue;    /* 0x14: flags followed by the two selection slots */
@@ -2457,7 +2457,7 @@ void evtStageTestSetModelScalingEnabled(s32 enabled) {
     }
 }
 
-u32 evtStageTestGetActiveModel(void) {
+MdlCtx *evtStageTestGetActiveModel(void) {
     return evtStageTestState.model;
 }
 
@@ -2473,8 +2473,8 @@ void evtStageTestSetEntryIndex(s32 encodedIndex, s32 motionIndex) {
     if (motionIndex < 0) {
         motionIndex = 0;
     }
-    if (evtStageTestState.model != 0 && motionIndex >= mdlGetNodeRefHalf((MdlCtx *)evtStageTestState.model, 0)) {
-        motionIndex = mdlGetNodeRefHalf((MdlCtx *)evtStageTestState.model, 0) - 1;
+    if (evtStageTestState.model != 0 && motionIndex >= mdlGetNodeRefHalf(evtStageTestState.model, 0)) {
+        motionIndex = mdlGetNodeRefHalf(evtStageTestState.model, 0) - 1;
     }
     evtStageTestState.entries[entryIndex].motionIndex = motionIndex;
     func_002C6E20(-1);
@@ -2725,10 +2725,10 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6E20);
 
 
 extern s32 D_00435DF0;
-extern void mdlStoreTertiaryVectorVU(s32);
+extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 /* Store uniform model scale through vf10 and return it; useTable selects the model-record factor. */
-f32 mnuSetModelScaleVector(s32 model, s32 useTable) {
+f32 mnuSetModelScaleVector(MdlCtx *model, s32 useTable) {
     f32 scale = 1.0f;
     f32 scaleVector[4];
 
@@ -2766,11 +2766,11 @@ void mnuResetWorkPair(void) {
     ((MenuWorkPosition *)D_003E7940)->z = 0;
 }
 
-extern void mdlStorePrimaryVectorVU(s32);
+extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
 /* Apply the active entry's model position and scale-dependent view depth.
  * Retain the post-call entry rereads and subtraction-based scaling expressions. */
-void mnuApplyModelCamera(s32 model) {
+void mnuApplyModelCamera(MdlCtx *model) {
     f32 position[4];
     StageTestEntry *stageEntry;
     f32 scale;
@@ -2797,7 +2797,7 @@ void mnuApplyModelCamera(s32 model) {
 }
 
 /* Convert the active entry's degree angles to radians and update the model rotation basis. */
-void evtStageTestApplyEntryRotation(s32 model) {
+void evtStageTestApplyEntryRotation(MdlCtx *model) {
     StageTestEntry *stageEntry = (StageTestEntry *)(evtStageTestState.queue.slot[0].entryIndex * EVT_STAGE_ENTRY_BYTES + (s32)evtStageTestState.entries);
 
     func_00340DC8(stageEntry->rotation[0] * 3.14159265f / 180.0f, stageEntry->rotation[1] * 3.14159265f / 180.0f,
@@ -2837,7 +2837,7 @@ void evtStageTestUpdateCamera(void)
     sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
 }
 
-s8 evtStageTestUpdate(s32 frame) {
+s8 evtStageTestUpdate(struct SdfPoolNode **surfaces) {
     s8 result = func_002C6CE8();
 
     if (result == 1) {
@@ -2858,7 +2858,7 @@ s8 evtStageTestUpdate(s32 frame) {
                 if (evtStageTestState.effect != 0) {
                     btlUpdateJobPositionFromModel(evtStageTestState.effect);
                 }
-                mdlProcessContextNodesAndTransforms(evtStageTestState.model, frame);
+                mdlProcessContextNodesAndTransforms(evtStageTestState.model, surfaces);
                 evtStageTestAdvanceMotionQueue();
             }
         }
@@ -2947,20 +2947,20 @@ s32 evtStageTestHasPendingMotion(void) {
 void evtStageTestAdvanceMotionQueue(void) {
     StageTestSlot *activeSlot = evtStageTestState.queue.slot;
     s32 motionIndex;
-    s32 model;
+    MdlCtx *model;
 
     if (activeSlot->state != EVT_STAGE_MOTION_IDLE && activeSlot->state != EVT_STAGE_MOTION_FALLBACK_STARTED && (model = evtStageTestGetActiveModel()) != 0) {
         if (activeSlot->state == EVT_STAGE_MOTION_QUEUED) {
             motionIndex = activeSlot->motionIndex;
 
-            if (motionIndex < mdlGetNodeRefHalf((MdlCtx *)model, 0)) {
+            if (motionIndex < mdlGetNodeRefHalf(model, 0)) {
                 mdlAddEntryPlainEx(model, 0, motionIndex, (s32)activeSlot->blendLeadFrames, (s32)activeSlot->blendDurationFrames);
                 activeSlot->state = EVT_STAGE_MOTION_PLAYING;
             }
-        } else if (!(activeSlot->flags & EVT_STAGE_MOTION_SUPPRESS_FALLBACK) && (*(u8 *)(*(s32 *)(model + 0x1C) + 0x30) == 5 || activeSlot->state == EVT_STAGE_MOTION_FORCE_FALLBACK)) {
+        } else if (!(activeSlot->flags & EVT_STAGE_MOTION_SUPPRESS_FALLBACK) && (model->first->state == 5 || activeSlot->state == EVT_STAGE_MOTION_FORCE_FALLBACK)) {
             motionIndex = evtStageTestState.entries[activeSlot->entryIndex].motionIndex;
 
-            if (motionIndex < mdlGetNodeRefHalf((MdlCtx *)model, 0)) {
+            if (motionIndex < mdlGetNodeRefHalf(model, 0)) {
                 mdlAddEntryFlaggedEx(model, 0, motionIndex, (s32)activeSlot->blendLeadFrames, (s32)activeSlot->blendDurationFrames);
                 activeSlot->state = EVT_STAGE_MOTION_FALLBACK_STARTED;
             }

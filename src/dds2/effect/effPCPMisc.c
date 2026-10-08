@@ -246,6 +246,7 @@ typedef struct {
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
 extern void effReleaseResourceTemplate(EffResourceRectWork *work);
 
+/* Scatter and scale callbacks share this work; their factory selects the resource view. */
 typedef struct {
     f32 position[4];
     u8 flags;
@@ -258,7 +259,10 @@ typedef struct {
     s32 startExtent;
     s32 endExtent;
     s32 frame;
-    void *resource;
+    union {
+        EffBlurScatterWork *scatter;
+        EffBlurScaleWork *scale;
+    } resource;
 } EffPCPCompactWork;
 
 
@@ -626,13 +630,13 @@ typedef struct EffPCPSprayWork {
     EffParamWork *handle[10];   /* 0x70 */
 } EffPCPSprayWork; /* 0x98 */
 
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *obj, s32 state);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 
 extern void mdlStorePrimaryVectorVU(void *obj);
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 
-extern u8 D_00380828[];
+extern struct SdfPoolNode *D_00380828[4];
 
 extern void mdlBroadcastMasked(void *obj, u32 mask);
 
@@ -839,12 +843,12 @@ void effTwinEffectUpdate(EffPCPTwinWork *work) {
         effParamWorkCallback1(work->pair[i][0], work->scale * 1.5f);
         effParamWorkCallback1(work->pair[i][1], 1.75f);
         mdlBroadcastMasked(obj[1], work->color);
-        mdlProcessContextNodesAndTransforms(obj[0], (s32)D_00380828);
+        mdlProcessContextNodesAndTransforms(obj[0], D_00380828);
         sdfLoadMapRecordPositionVector(obj[0]->inner, 1);
         posp = &pos;
         VU0_STORE_VF_UNCLOBBERED(vf10, posp);
         mdlStorePrimaryVectorVU(obj[1]);
-        mdlProcessContextNodesAndTransforms(obj[1], (s32)D_00380828);
+        mdlProcessContextNodesAndTransforms(obj[1], D_00380828);
         if (work->frame > 0x18) {
             effParamWorkCallback0(work->shared[i], posp);
             effParamWorkInvokeCallback(work->shared[i]);
@@ -958,10 +962,10 @@ void effPcpStaggerUpdate(EffPCPStaggered *work) {
             effParamWorkCallback1(work->handle[i * 2], work->scale * 1.5f);
             effParamWorkCallback1(work->handle[i * 2 + 1], 1.5f);
             mdlBroadcastMasked(obj[1], work->color);
-            mdlProcessContextNodesAndTransforms(obj[0], (s32)D_00380828);
+            mdlProcessContextNodesAndTransforms(obj[0], D_00380828);
             sdfLoadMapRecordPositionVector(obj[0]->inner, 1);
             mdlStorePrimaryVectorVU(obj[1]);
-            mdlProcessContextNodesAndTransforms(obj[1], (s32)D_00380828);
+            mdlProcessContextNodesAndTransforms(obj[1], D_00380828);
         }
     }
 }
@@ -1078,7 +1082,7 @@ void effCrossEffectUpdate(EffPCPCrossWork *work) {
     VU0_LOAD_VF(vf10, work);
     mdlStorePrimaryVectorVU(anchor);
     effParamWorkCallback1(work->base, work->scale);
-    mdlProcessContextNodesAndTransforms(anchor, (s32)D_00380828);
+    mdlProcessContextNodesAndTransforms(anchor, D_00380828);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             if (work->state[i][j] != 0) {
@@ -1089,7 +1093,7 @@ void effCrossEffectUpdate(EffPCPCrossWork *work) {
             mdlBroadcastMasked(obj, work->color);
             sdfLoadMapRecordPositionVector(anchor->inner, i * 4 + j + 1);
             mdlStorePrimaryVectorVU(obj);
-            mdlProcessContextNodesAndTransforms(obj, (s32)D_00380828);
+            mdlProcessContextNodesAndTransforms(obj, D_00380828);
         }
     }
 }
@@ -1188,11 +1192,11 @@ void effPcpDelayedPairsUpdate(EffPCPDelayedPairs *work) {
                         VU0_LOAD_VF_MEMORY(vf10, work);
             mdlStorePrimaryVectorVU(obj[0]);
             mdlBroadcastMasked(obj[1], work->color);
-            mdlProcessContextNodesAndTransforms(obj[0], (s32)D_00380828);
+            mdlProcessContextNodesAndTransforms(obj[0], D_00380828);
             sdfLoadMapRecordPositionVector(obj[0]->inner, 1);
                         VU0_STORE_VF_UNCLOBBERED(vf10, &vec);
             mdlStorePrimaryVectorVU(obj[1]);
-            mdlProcessContextNodesAndTransforms(obj[1], (s32)D_00380828);
+            mdlProcessContextNodesAndTransforms(obj[1], D_00380828);
         }
     }
 }
@@ -1279,7 +1283,7 @@ void effPcpChargeUpdateAndDrawHistory(EffPCPChargeWork *work) {
     scale = work->scale * 1.5f;
     effParamWorkCallback1(work->secondaryHandle, scale);
     effParamWorkCallback0(work->secondaryHandle, work->vectorWords);
-    mdlProcessContextNodesAndTransforms(model, (s32)D_00380828);
+    mdlProcessContextNodesAndTransforms(model, D_00380828);
     captureRow = work->historyCount;
     if (captureRow < 25) {
         for (point = 0; point < 7; point++) {
@@ -1374,7 +1378,7 @@ void effPcpSpawnOnce(EffPCPSpawnOnceWork *work) {
         VU0_LOAD_VF_MEMORY(vf10, work);
     mdlStorePrimaryVectorVU(obj);
     effParamWorkCallback3(work->secondaryHandle, work->color);
-    mdlProcessContextNodesAndTransforms(obj, (s32)D_00380828);
+    mdlProcessContextNodesAndTransforms(obj, D_00380828);
     sdfLoadMapRecordPositionVector(obj->inner, 1);
         VU0_STORE_VF_TO_MEMORY(vf10, vec);
     effParamWorkCallback0(work->secondaryHandle, &vec);
@@ -2746,7 +2750,7 @@ EffPCPCompactWork *effPcpCreateCompactWorkFromParams(EffPCPCompactScatterParams 
     EffPCPCompactWork *work;
 
     work = sdfAllocSizeClassBlock(0x38);
-    work->resource = effBlurCreateScatterWork(&params->res);
+    work->resource.scatter = effBlurCreateScatterWork(&params->res);
     work->flags = params->timeline.flags;
     work->duration = params->timeline.duration;
     work->fadeIn = params->timeline.fadeIn;
@@ -2776,17 +2780,18 @@ void effPcpChargeRespawn(EffPCPCompactWork *work) {
     params.timeline.fadeOut = work->fadeOut;
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
-    params.res = *(EffBlurScatterParams *)work->resource;
+    params.res = work->resource.scatter->params;
     effPcpCreateCompactWorkFromParams(&params);
 }
 
 void effPcpReleaseCompactBlurWork(EffPCPCompactWork *work) {
-    effBlurReleaseFirstResource((EffBlurScatterWork *)work->resource);
+    effBlurReleaseFirstResource(work->resource.scatter);
     sdfReleaseChipBlock(work);
 }
 
 /* vu0 routine: grow the scatter region and project its optional world center. */
 void func_00183BE8(EffPCPCompactWork *work) {
+    EffBlurScatterWork *resource;
     f32 projected[4] __attribute__((aligned(16)));
     s32 frame = work->frame;
     s32 duration = work->duration;
@@ -2804,17 +2809,19 @@ void func_00183BE8(EffPCPCompactWork *work) {
     displacement = (f32)(work->endExtent - work->startExtent) *
                    (f32)frame / (f32)duration;
     displacement = (s32)displacement;
-    ((EffBlurScatterWork *)work->resource)->params.positionSpread =
+    resource = work->resource.scatter;
+    resource->params.positionSpread =
         (f32)work->startExtent + displacement;
     if (work->flags == 0) {
         VU0_LOAD_VF(vf10, work->position);
         sdfProjectVuVectorToScreen();
         VU0_STORE_VF(vf10, projected);
-        ((EffBlurScatterWork *)work->resource)->params.x = (s32)projected[0] - 2048;
-        ((EffBlurScatterWork *)work->resource)->params.y = (u32)((s32)projected[1] - 2048) << 1;
+        resource = work->resource.scatter;
+        resource->params.x = (s32)projected[0] - 2048;
+        resource->params.y = (u32)((s32)projected[1] - 2048) << 1;
     } else {
-        ((EffBlurScatterWork *)work->resource)->params.x = 0;
-        ((EffBlurScatterWork *)work->resource)->params.y = 0;
+        resource->params.x = 0;
+        resource->params.y = 0;
     }
     if (frame < fadeIn && fadeIn != 0) {
         opacity = (f32)frame / (f32)fadeIn;
@@ -2824,9 +2831,11 @@ void func_00183BE8(EffPCPCompactWork *work) {
         opacity = 1.0f;
     }
     color = work->color;
-    ((EffBlurScatterWork *)work->resource)->params.color = effMultiplyPackedColors(
+    color = effMultiplyPackedColors(
         effBlendColor(color & 0xFFFFFF, color, opacity), work->baseColor);
-    effBlurStepScatterSlotsAndDraw((EffBlurScatterWork *)work->resource);
+    resource = work->resource.scatter;
+    resource->params.color = color;
+    effBlurStepScatterSlotsAndDraw(resource);
     work->frame++;
 }
 
@@ -2842,7 +2851,7 @@ EffPCPCompactWork *effPcpCreateCompactResourceWork(EffPCPCompactScaleParams *par
     EffPCPCompactWork *work;
 
     work = sdfAllocSizeClassBlock(0x38);
-    work->resource = effCloneBlurWorkWithSlots(&params->res);
+    work->resource.scale = effCloneBlurWorkWithSlots(&params->res);
     work->flags = params->timeline.flags;
     work->duration = params->timeline.duration;
     work->fadeIn = params->timeline.fadeIn;
@@ -2871,17 +2880,18 @@ void effPcpChargeLongRespawn(EffPCPCompactWork *work) {
     params.timeline.fadeOut = work->fadeOut;
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
-    params.res = *(EffBlurScaleParams *)work->resource;
+    params.res = work->resource.scale->params;
     effPcpCreateCompactResourceWork(&params);
 }
 
 void effPcpReleaseSecondaryBlurWork(EffPCPCompactWork *work) {
-    effBlurReleaseSecondResource((EffBlurScaleWork *)work->resource);
+    effBlurReleaseSecondResource(work->resource.scale);
     sdfReleaseChipBlock(work);
 }
 
 /* vu0 routine: grow the scale slots and restart looping world-space bursts. */
 void func_00183F58(EffPCPCompactWork *work) {
+    EffBlurScaleWork *resource;
     f32 projected[4] __attribute__((aligned(16)));
     s32 frame = work->frame;
     s32 duration = work->duration;
@@ -2898,24 +2908,26 @@ void func_00183F58(EffPCPCompactWork *work) {
         }
         work->frame = 0;
         frame = 0;
-        effBlurSecondInitSlots((EffBlurScaleWork *)work->resource);
+        effBlurSecondInitSlots(work->resource.scale);
     }
     fadeIn = work->fadeIn;
     fadeOut = work->fadeOut;
     displacement = (f32)(work->endExtent - work->startExtent) *
                    (f32)frame / (f32)duration;
     displacement = (s32)displacement;
-    ((EffBlurScaleWork *)work->resource)->params.size =
+    resource = work->resource.scale;
+    resource->params.size =
         (f32)work->startExtent + displacement;
     if (flags == 0 || flags == 2) {
         VU0_LOAD_VF(vf10, work->position);
         sdfProjectVuVectorToScreen();
         VU0_STORE_VF(vf10, projected);
-        ((EffBlurScaleWork *)work->resource)->params.x = (s32)projected[0] - 2048;
-        ((EffBlurScaleWork *)work->resource)->params.y = (u32)((s32)projected[1] - 2048) << 1;
+        resource = work->resource.scale;
+        resource->params.x = (s32)projected[0] - 2048;
+        resource->params.y = (u32)((s32)projected[1] - 2048) << 1;
     } else {
-        ((EffBlurScaleWork *)work->resource)->params.x = 0;
-        ((EffBlurScaleWork *)work->resource)->params.y = 0;
+        resource->params.x = 0;
+        resource->params.y = 0;
     }
     if (frame < fadeIn && fadeIn != 0) {
         opacity = (f32)frame / (f32)fadeIn;
@@ -2925,9 +2937,11 @@ void func_00183F58(EffPCPCompactWork *work) {
         opacity = 1.0f;
     }
     color = work->color;
-    ((EffBlurScaleWork *)work->resource)->params.color = effMultiplyPackedColors(
+    color = effMultiplyPackedColors(
         effBlendColor(color & 0xFFFFFF, color, opacity), work->baseColor);
-    effBlurStepScaleSlotsAndDraw((EffBlurScaleWork *)work->resource);
+    resource = work->resource.scale;
+    resource->params.color = color;
+    effBlurStepScaleSlotsAndDraw(resource);
     work->frame++;
 }
 
@@ -5109,7 +5123,7 @@ extern void effMiscQuatMultiplyVU(void);
 extern void mdlUpdateContextRotationBasisFromQuaternion(void *work);
 extern void mdlStoreTertiaryVectorVU(void *work);
 extern void sdfModelUpdateCurrentFrameTransforms(void *model);
-extern void func_003320E8(void *table, void *model);
+extern void func_003320E8(struct SdfPoolNode **, SdfModel *);
 extern s32 sdfMotionUpdate(void *motion);
 
 /* Per-frame update: for each of `count` slots, spawn its model on its start frame, orient/scale it, refresh its children and capture the node vectors. */
@@ -6164,7 +6178,7 @@ void effPcpUpdateMapMotionEvents(EffPCPMapEventWork *work) {
         mdlStorePrimaryVectorVU(model);
         VU0_LOAD_VF(vf10, scale);
         mdlStoreTertiaryVectorVU(model);
-        mdlProcessContextNodesAndTransforms(model, (s32)D_00380828);
+        mdlProcessContextNodesAndTransforms(model, D_00380828);
         count = work->count;
         fadeIn = work->params.fadeIn;
         fadeOut = work->params.fadeOut;
