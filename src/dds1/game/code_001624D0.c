@@ -32,8 +32,8 @@ typedef struct EffDispatchEntry {
     void (*setScale)(void *, f32);    /* 0x14 */
     void (*callback2)(void *, void *);       /* 0x18 */
     void (*callback3)(void *, u32);       /* 0x1C */
-    void *(*callback4)(void *);       /* 0x20 */
-    void *(*callback5)(void *);       /* 0x24 */
+    void (*callback4)(void *, void *);       /* 0x20 */
+    void (*callback5)(void *, f32);       /* 0x24 */
 } EffDispatchEntry; /* 0x28 */
 
 
@@ -329,26 +329,26 @@ void effParamWorkCallback3(EffParamWork *work, u32 value) {
     }
 }
 
-void effParamWorkCallback4(EffParamWork *work) {
+void effParamWorkCallback4(EffParamWork *work, void *matrix) {
     if (effParamWorkFactories[work->kind].callback4 != NULL) {
-        effParamWorkFactories[work->kind].callback4(work->payload);
+        effParamWorkFactories[work->kind].callback4(work->payload, matrix);
     }
 }
 
-void effParamWorkCallback5(EffParamWork *work) {
+void effParamWorkCallback5(EffParamWork *work, f32 sizeInput) {
     if (effParamWorkFactories[work->kind].callback5 != NULL) {
-        effParamWorkFactories[work->kind].callback5(work->payload);
+        effParamWorkFactories[work->kind].callback5(work->payload, sizeInput);
     }
 }
 
-/* Select billboard kind zero; the index is passed through without validation. */
-void func_00162C60(u32 index) {
-    billCreateIndexed(0, index);
+/* Create a child billboard from its resource data. */
+BillObj *effParamCreateChildBillboard(void *resourceData) {
+    return billCreateIndexed(0, (u32)resourceData);
 }
 
-/* Select billboard kind one; the index is passed through without validation. */
-void func_00162C80(u32 index) {
-    billCreateIndexed(1, index);
+/* Create an animated billboard from its serialized resource data. */
+BillObj *effParamCreateAnimatedBillboard(void *resourceData) {
+    return billCreateIndexed(1, (u32)resourceData);
 }
 
 /* Use the same floating value for both billboard child-scale components. */
@@ -508,9 +508,9 @@ void effParamWorkExCallback2(EffParamWorkEx *work, void *matrix) {
     }
 }
 
-void effParamWorkExCallback3(EffParamWorkEx *work) {
+void effParamWorkExCallback3(EffParamWorkEx *work, void *matrix) {
     if (effParameterWorkOperations[work->kind].callback4 != NULL) {
-        effParameterWorkOperations[work->kind].callback4(work->payload);
+        effParameterWorkOperations[work->kind].callback4(work->payload, matrix);
     }
 }
 
@@ -520,9 +520,9 @@ void effParamWorkExCallback4(EffParamWorkEx *work, u32 value) {
     }
 }
 
-void effParamWorkExCallback5(EffParamWorkEx *work) {
+void effParamWorkExCallback5(EffParamWorkEx *work, f32 sizeInput) {
     if (effParameterWorkOperations[work->kind].callback5 != NULL) {
-        effParameterWorkOperations[work->kind].callback5(work->payload);
+        effParameterWorkOperations[work->kind].callback5(work->payload, sizeInput);
     }
 }
 
