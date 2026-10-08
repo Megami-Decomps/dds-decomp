@@ -540,8 +540,9 @@ void mnuReleaseMantraNodePositionTable(void) {
 
 /* Return a 32-byte record address for a signed halfword index; callers sign-extend the index at the call
  * (func_0028DC08 +0x34), and this body re-extends it (sll/sra 16). */
-s32 mnuGetMantraNodePositionRecord(s16 index) {
-    return mnuMantraNodePositionTable->recordsAddress + index * 32;
+struct MantraNodePos;
+struct MantraNodePos *mnuGetMantraNodePositionRecord(s16 index) {
+    return (struct MantraNodePos *)(mnuMantraNodePositionTable->recordsAddress + index * 32);
 }
 
 /* Find the first position matching two signed-halfword, staggered-grid keys.
