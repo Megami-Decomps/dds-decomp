@@ -664,8 +664,6 @@ INCLUDE_ASM(const s32, "game/code_002B0278", mnuCopyPartyEntries);
 /* Move a current party entry into the selected backup slot and refresh its panel. */
 extern void *memcpy(void *, const void *, u32);
 extern void func_002C4328(u8 *, s32, u32, PartyPanel *);
-extern void mnuRefreshWindowSlots(MenuPageWindow *, s32);
-
 void mnuAssignSelectedPartyEntry(s32 entryIndex, s32 mode, s32 skipRefresh, MenuContext *context) {
     PartyMenuData *menuWork = (PartyMenuData *)context->party;
     s32 activeCount = context->partyPanel.unk0;
@@ -690,7 +688,8 @@ void mnuAssignSelectedPartyEntry(s32 entryIndex, s32 mode, s32 skipRefresh, Menu
     context->partyPanel.unk0 = activeCount;
     context->partyPanel.unk4 = lastSlot;
     if (skipRefresh == 0) {
-        mnuRefreshWindowSlots(&context->partyWindow, 1);
+        mnuRefreshWindowSlots(&context->partyWindow,
+                              MNU_WINDOW_SLOT_REFRESH_PRESERVE_HANDLES);
     }
     for (i = context->partyPanel.unk0; i < MNU_STAFF_PARTY_SLOT_COUNT; i++) {
         context->partyWindow.slots[i].flags |= 0x40;
