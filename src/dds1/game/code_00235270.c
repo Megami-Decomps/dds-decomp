@@ -20,7 +20,6 @@ extern s32 func_00237428();
 
 extern void func_0023D5B0(s32 output, void *data, s32 size);
 
-extern void *kwlnTaskGetUserValue();
 extern s32 effEventAdvanceSolidRectangleSetup(void);
 extern s32 sndFindPackedTrackLoadStatus(s32 sequence);
 extern void sndEnsureMidiBankResident(s32 sequence);
@@ -2213,7 +2212,7 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023BC30);
 INCLUDE_ASM(const s32, "game/code_00235270", func_0023BE40);
 
 extern s32 effEventAdvanceResourceTemplateSetup();
-extern s32 kwlnTaskGetTimer(s32 task);
+extern u32 kwlnTaskGetTimer(KwlnTask *task);
 typedef struct EvtSelectionCache {
     u8 pad00[0x24];
     s32 selectedEntry; /* 0x24 */
@@ -2224,8 +2223,8 @@ extern s32 evtActiveEntryFlags;
 
 /* Cache nonzero entry selections, publishing first-tick flags only at timer zero.
  * A zero setup status clears runtime control and returns -1. */
-s32 evtSynchronizeSelectedEntry(s32 task) {
-    EvtRuntime *runtime = kwlnTaskGetUserValue();
+s32 evtSynchronizeSelectedEntry(KwlnTask *task) {
+    EvtRuntime *runtime = (EvtRuntime *)kwlnTaskGetUserValue(task);
     if (effEventAdvanceResourceTemplateSetup() == 0) {
         runtime->controlState = 0;
         return -1;
@@ -2247,10 +2246,10 @@ s32 evtSynchronizeSelectedEntry(s32 task) {
 }
 
 /* Poll solid-rectangle setup; zero status clears runtime control and returns -1. */
-s32 evtPollRuntimeControlReady(void) {
+s32 evtPollRuntimeControlReady(KwlnTask *task) {
     EvtRuntime *runtime;
 
-    runtime = kwlnTaskGetUserValue();
+    runtime = (EvtRuntime *)kwlnTaskGetUserValue(task);
     if (effEventAdvanceSolidRectangleSetup() == 0) {
         runtime->controlState = 0;
         return -1;
@@ -3905,7 +3904,7 @@ s32 evtGetTaskValueWord(u32 taskId) {
 
     task = evtFindTaskById(taskId);
     if (task != 0) {
-        s32 *words = kwlnTaskGetUserValue(task);
+        s32 *words = (s32 *)kwlnTaskGetUserValue((KwlnTask *)task);
         return words[1];
     } else {
         return -1;
@@ -3917,7 +3916,7 @@ void *evtGetTaskData(u32 taskId) {
 
     task = evtFindTaskById(taskId);
     if (task != 0) {
-        return kwlnTaskGetUserValue(task);
+        return (void *)kwlnTaskGetUserValue((KwlnTask *)task);
     }
     return (void *)task;
 }
@@ -3930,7 +3929,7 @@ void *evtFindTaskResourceEntryByKey(u32 taskId, s32 key) {
 
     task = evtFindTaskById(taskId);
     if (task != 0) {
-        data = kwlnTaskGetUserValue(task);
+        data = (EvtPackLoadState *)kwlnTaskGetUserValue((KwlnTask *)task);
         if (data->loaded != 2) {
             return 0;
         }

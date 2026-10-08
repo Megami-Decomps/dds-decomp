@@ -1,7 +1,7 @@
 #include "common.h"
+#include "kwln.h"
 #include "mnu_result.h"
 
-extern u32 kwlnTaskGetUserValue();
 
 
 extern s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *);
@@ -98,8 +98,8 @@ void func_0029AC20(BrsSkillPackageWork *context, s32 copyOptions) {
     evtStageTestUpdate((s32)D_00380788);
 }
 
-s32 mnuAdvanceSkillPackageToItemPanel(s32 request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+s32 mnuAdvanceSkillPackageToItemPanel(KwlnTask *request) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
         return 0;
@@ -109,8 +109,8 @@ s32 mnuAdvanceSkillPackageToItemPanel(s32 request) {
     return menuSetHandler(context, 1, (void *)request);
 }
 
-s32 mnuAdvanceSkillPanelToNextMenu(s32 request) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+s32 mnuAdvanceSkillPanelToNextMenu(KwlnTask *request) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(request);
 
     if (brsAdvanceSkillPackagePanel(context) != 0) {
         return 0;
@@ -120,7 +120,7 @@ s32 mnuAdvanceSkillPanelToNextMenu(s32 request) {
 }
 
 /* The five signed config bytes reserve space before the selected entry width. */
-u32 mnuResetSelectionWidthsFromConfig(void) {
+u32 mnuResetSelectionWidthsFromConfig(KwlnTask *task) {
     s8 widthByte;
     BrsSkillPackageWork *context;
     s32 *widthSlot;
@@ -129,7 +129,7 @@ u32 mnuResetSelectionWidthsFromConfig(void) {
     s32 selectionWidth;
     s32 reservedWidth;
 
-    context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+    context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     reservedWidth = 0;
     remaining = DAT_BASE_STAT_COUNT - 1;
     selectionWidth = context->selectedRewardRow->values.amount * 3;

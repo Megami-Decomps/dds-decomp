@@ -1,3 +1,4 @@
+#include "kwln.h"
 #include "mnu_list.h"
 #include "sdf_resource.h"
 #include "mnu_staff.h"
@@ -269,7 +270,6 @@ typedef struct MenuContext {
     s32 resourceList;      /* 0xAA5C */
 } MenuContext;
 
-extern s32 kwlnTaskGetUserValue();
 
 extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
 

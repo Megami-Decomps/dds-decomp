@@ -2986,7 +2986,6 @@ extern const char D_004371A8[];
 extern const char D_004371B0[];
 extern const char D_004371B8[];
 extern SdfPoolNode D_00380708;
-extern u32 kwlnTaskGetUserValue(KwlnTask *);
 extern void fldStepValueByPad(f32 *, u8 *, f32, f32, f32, f32);
 
 s32 func_00239C08(KwlnTask *task) {

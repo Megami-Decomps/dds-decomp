@@ -1,8 +1,8 @@
 #include "common.h"
+#include "kwln.h"
 #include "scr.h"
 #include "dat_state.h"
 
-extern u32 kwlnTaskGetUserValue(KwlnTask *task);
 extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 
 

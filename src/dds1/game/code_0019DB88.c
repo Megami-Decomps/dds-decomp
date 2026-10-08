@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 #include "itf.h"
 #include "pcp_vu0.h"
@@ -74,7 +75,6 @@ extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 
 extern s8 D_00324530[];
 
-extern u32 kwlnTaskGetUserValue(s64);
 
 extern const char *D_00358308[];
 

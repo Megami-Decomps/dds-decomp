@@ -316,8 +316,8 @@ extern u32 D_003308B0[];
 extern u32 fileRequestIsReady(u32 arg0);
 extern void *memset(void *s, s32 c, u32 n);
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern void kwlnTaskSetUserValue(u32 arg0, void *arg1);
-extern s32 fldDrawPendingTitleBannerWhenIdle(u32 task);
+extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
+extern s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task);
 extern s32 kwlnTaskIsRegistered(u32 arg0);
 extern s32 func_00213B50(void);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
@@ -5634,13 +5634,12 @@ void func_00140F68(void) {
 extern s32 fldGetCampSceneControlMode(void), fldGetSceneReadyOrPendingState(void), fileMenuTaskExists(void);
 extern s32 fldHasKiretaLabelProcess(void), fldHasHirakenaiLabelProcess(void), fldHasBadkaifukuLabelProcess(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
-extern u16 *kwlnTaskGetUserValue(u32);
 extern s32 func_00195CD8(void *, s32, s32);
 extern void fldDrawGaugeBar(s32);
 extern void fldDrawTitleBanner(s32, s32);
 extern u8 D_0033E900[];
 
-s32 fldDrawPendingTitleBannerWhenIdle(u32 task) {
+s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task) {
     u16 *ticket;
     u8 *label;
     s32 width;
@@ -5667,7 +5666,7 @@ s32 fldDrawPendingTitleBannerWhenIdle(u32 task) {
     if (fldIsEventPhaseAtLeastTwo() != 0) {
         return 0;
     }
-    ticket = kwlnTaskGetUserValue(task);
+    ticket = (u16 *)kwlnTaskGetUserValue(task);
     if (ticket[2] != 0) {
         label = D_0033E900 + ticket[1] * 32;
         width = func_00195CD8(label, 1, 0x13);
@@ -5681,14 +5680,14 @@ s32 fldDrawPendingTitleBannerWhenIdle(u32 task) {
     return 0;
 }
 
-void * fldInitializeTitleBannerTask(u32 task) {
+void * fldInitializeTitleBannerTask(KwlnTask *task) {
     u16 *ticket = sdfAllocSizeClassBlock(8);
 
     ticket[1] = 1;
     ticket[0] = 0;
     ticket[2] = 0;
     ticket[3] = 0;
-    kwlnTaskSetUserValue(task, ticket);
+    kwlnTaskSetUserValue(task, (u32)ticket);
     return (void *)fldDrawPendingTitleBannerWhenIdle;
 }
 

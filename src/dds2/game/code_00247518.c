@@ -61,7 +61,6 @@ void func_00249088(s32 arg0, void *arg1);
 void evtViewerPushCommandHistory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
 /* Task user values are words; viewer callbacks decode the stored address. */
-extern u32 kwlnTaskGetUserValue();
 
 s32 evtViewerUpdateFrame(KwlnTask *task);
 
@@ -69,7 +68,7 @@ void func_00101968(s32 arg0, s32 arg1);
 
 s32 evtCreateFrameVariableTask(void);
 
-void *evtViewerScheduleFrameVariableTask(s32 arg0);
+void *evtViewerScheduleFrameVariableTask(KwlnTask *task);
 
 extern u32 mnuCampGetPrimaryOption(void *scene);
 extern const char *D_003C91C0[];
@@ -1774,10 +1773,10 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
 }
 
 /* Update the active viewer, then switch to its frame-variable task. */
-void *evtViewerScheduleFrameVariableTask(s32 task) {
+void *evtViewerScheduleFrameVariableTask(KwlnTask *task) {
     void *viewer;
 
-    viewer = (void *)kwlnTaskGetUserValue();
+    viewer = (void *)kwlnTaskGetUserValue(task);
     func_00249088(((EvtRuntime *)viewer)->curFrame, viewer);
     func_00101968(task, evtCreateFrameVariableTask());
     kwlnDrawControlFlags |= 0x2000000;
@@ -1785,10 +1784,10 @@ void *evtViewerScheduleFrameVariableTask(s32 task) {
 }
 
 /* Initialize the active viewer and schedule its next update callback. */
-void *evtViewerInitializeUpdateSequence(void) {
+void *evtViewerInitializeUpdateSequence(KwlnTask *task) {
     struct EvtRuntime *viewer;
 
-    viewer = (struct EvtRuntime *)kwlnTaskGetUserValue();
+    viewer = (struct EvtRuntime *)kwlnTaskGetUserValue(task);
     fldInitializeCameraColorResource();
     evtEventViewerReset(viewer);
     kwlnDrawControlFlags |= 0x2000000;
@@ -1805,8 +1804,8 @@ s32 func_0024D760(PolyMovieWork *ctx) {
 }
 
 /* Advance the viewer update: tick the timed action or hand over to the next task. */
-void *evtViewerAdvanceUpdate(void) {
-    EvtRuntime *viewer = (EvtRuntime *)kwlnTaskGetUserValue();
+void *evtViewerAdvanceUpdate(KwlnTask *task) {
+    EvtRuntime *viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
     PolyMovieWork *window;
     s32 windowFlags;
 
@@ -1837,8 +1836,8 @@ void *evtViewerAdvanceUpdate(void) {
     }
 }
 
-void *evtViewerStartUpdate(void) {
-    EvtRuntime *viewer = (EvtRuntime *)kwlnTaskGetUserValue();
+void *evtViewerStartUpdate(KwlnTask *task) {
+    EvtRuntime *viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
     PolyMovieWork *context;
     u16 eventId;
     u16 sceneId;
@@ -1923,17 +1922,17 @@ void evtViewerRelease(viewer)
     kwlnDrawControlFlags |= 0x2000000;
 }
 
-void func_0024DAA0(void) {
+void func_0024DAA0(KwlnTask *task) {
     EvtRuntime *viewer;
 
-    viewer = (EvtRuntime *)kwlnTaskGetUserValue();
+    viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
     evtViewerRelease(viewer);
 }
 
-void func_0024DAC0(void) {
+void func_0024DAC0(KwlnTask *task) {
     EvtRuntime *viewer;
 
-    viewer = (EvtRuntime *)kwlnTaskGetUserValue();
+    viewer = (EvtRuntime *)kwlnTaskGetUserValue(task);
     evtViewerRelease(viewer);
 }
 

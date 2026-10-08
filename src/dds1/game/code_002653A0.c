@@ -290,7 +290,6 @@ void brsBuildActiveUnitProgressRows(BrsActiveProgressList *output) {
 extern char D_003AFBA0[];
 extern u8 D_00324510[2][2][16];
 extern KwlnTask *kwlnTaskGetTaskByName(const char *);
-extern u32 kwlnTaskGetUserValue(KwlnTask *);
 extern void func_002665E0(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void func_00266668(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void func_00266B10(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);

@@ -8,7 +8,6 @@
 #include "kwln.h"
 #include "eff.h"
 #include "itf.h"
-extern u32 kwlnTaskGetUserValue();
 extern void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *);
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
@@ -265,7 +264,6 @@ extern void evtStageTestInit(s32);
 
 extern s32 func_002877A8(void);
 
-extern u32 kwlnTaskGetUserValue();
 
 
 extern s32 D_003BAA7C;
@@ -520,8 +518,8 @@ s32 func_002755E0(KwlnTask *task) {
     return 1;
 }
 
-s32 mnuShopReleaseResources(void) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuShopReleaseResources(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     PartyMenuData *menu = (PartyMenuData *)((CampMenuContext *)context)->menu;
     mnuRefreshPartyPanelSlots(context);
     mnuDestroyPartySelectionWindow(context);
@@ -754,8 +752,8 @@ void func_00276018(s32 contextAddress) {
     mnuFreeProfilePanelWork(profilePanel);
 }
 
-s32 mnuDrawPartySelectionPanelAndStep(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuDrawPartySelectionPanelAndStep(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     PartyMenuData *menu = (PartyMenuData *)((CampMenuContext *)context)->menu;
 
     func_00272778(callback);
@@ -766,8 +764,8 @@ s32 mnuDrawPartySelectionPanelAndStep(s32 callback) {
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
-s32 mnuStepPartySelectionControl(s32 callback) {
-    return menuRunPanel((void *)kwlnTaskGetUserValue(), 2, (void *)callback);
+s32 mnuStepPartySelectionControl(KwlnTask *callback) {
+    return menuRunPanel((void *)kwlnTaskGetUserValue(callback), 2, (void *)callback);
 }
 
 u8 mnuIsStateNotOne(void) {
@@ -802,8 +800,8 @@ void mnuReleaseStaffMenuTextureHandles(s32 *menuWork) {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00276368);
 
-s32 mnuStaffCloseSelectionState(void) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffCloseSelectionState(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     void *menu = ((CampMenuContext *)context)->menu;
     mnuResetWorkFloats();
     mnuReleaseMenuWindowHandles(context);
@@ -815,22 +813,22 @@ void func_00276478(u32 context) {
     func_00276368(context, 1);
 }
 
-void func_00276490(void) {
-    mnuStaffCloseSelectionState();
+void func_00276490(KwlnTask *task) {
+    mnuStaffCloseSelectionState(task);
 }
 
 void func_002764A8(u32 context) {
     func_00276368(context, 0);
 }
 
-void func_002764C0(void) {
-    mnuStaffCloseSelectionState();
+void func_002764C0(KwlnTask *task) {
+    mnuStaffCloseSelectionState(task);
 }
 
 /* Update the popup first; accept confirm/cancel only while its state is zero.
  * Return a nonzero popup-update word unchanged, or zero after handling input. */
-s32 mnuStaffPopupUpdate(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffPopupUpdate(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     u8 *menuWork = (u8 *)((CampMenuContext *)context)->menu;
     s32 *popupState = (s32 *)(context + 0x54);
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_POPUP_INPUT_MASK);
@@ -862,14 +860,14 @@ s32 mnuStaffPopupUpdate(s32 callback) {
 
 extern u8 D_0037C3A8[];
 extern s32 effHasFirstTextureHandle(s32);
-extern void mnuDrawStaffCampScreen();
+extern void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task);
 extern void mnuCreateStaffImageSprite();
 extern void func_002723B0();
 extern void func_00272668();
 extern void mnuDrawWindowContainer();
 
-s32 mnuDrawStaffCampPageWithImage(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuDrawStaffCampPageWithImage(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     CampMenuContext *work = (CampMenuContext *)context;
     StaffMenuWork *menu = (StaffMenuWork *)work->menu;
 
@@ -893,8 +891,8 @@ s32 mnuDrawStaffCampPageWithImage(s32 callback) {
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
-s32 mnuStepStaffCampPageControl(s32 callback) {
-    return menuRunPanel((void *)kwlnTaskGetUserValue(), 2, (void *)callback);
+s32 mnuStepStaffCampPageControl(KwlnTask *callback) {
+    return menuRunPanel((void *)kwlnTaskGetUserValue(callback), 2, (void *)callback);
 }
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00276720);
@@ -944,8 +942,8 @@ extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void mnuReleaseResourceList(MenuPanelHandles *);
 
 /* Tear down the staff panel and all four optional scene-side resources. */
-s32 mnuStaffReleasePanelScene(s32 unused) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffReleasePanelScene(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     MenuPageWindow *entryList = &((CampMenuContext *)context)->partyWindow;
     CampMenuContext *work = (CampMenuContext *)context;
@@ -984,8 +982,8 @@ void mnuResetSelectedPanelOpacity(s32 context) {
 
 /* Switch the party page, rebuilding its panels; previous takes priority.
  * The opaque request argument is forwarded unchanged. Return one if switched. */
-s32 mnuStaffSwitchPartyPage(s32 requestArgument) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffSwitchPartyPage(KwlnTask *requestArgument) {
+    s32 context = kwlnTaskGetUserValue(requestArgument);
     StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     s32 pageChanged = 0;
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_PAGE_INPUT_MASK);
@@ -1018,8 +1016,8 @@ extern u8 D_0037CA94[];
 
 /* Update popup state before page navigation, view toggles, and exit requests.
  * stateWord holds the update result first, then the stored popup state. */
-s32 mnuStaffBrowsePartyUpdate(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     s32 *popupState;
     u32 inputFlags;
@@ -1169,8 +1167,8 @@ void mnuIdleVoiceTimer(MenuIdleVoiceState *voiceTimer) {
     }
 }
 
-s32 mnuStaffIdlePartyUpdate(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffIdlePartyUpdate(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
 
     if (menu->staffMode == 0) {
@@ -1249,8 +1247,8 @@ INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B22D0);
 
 INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuBuildEquippedSlots);
 
-u32 mnuDestroySelectedPartyWindow() {
-    s32 context = kwlnTaskGetUserValue();
+u32 mnuDestroySelectedPartyWindow(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     mnuDestroyWindowContainer(menu->selectedList);
     menu->selectedList = 0;
@@ -1259,8 +1257,8 @@ u32 mnuDestroySelectedPartyWindow() {
 
 /* Seek the first node with a nonzero sort key and no unavailable flag.
  * Leave the cursor unchanged if no such node exists. */
-void mnuSeekFirstAvailableStaffListNode(void) {
-    StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)kwlnTaskGetUserValue())->menu;
+void mnuSeekFirstAvailableStaffListNode(KwlnTask *task) {
+    StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)kwlnTaskGetUserValue(task))->menu;
     MenuSelectionNode *listNode = ((MenuSelectionState *)menuWork->selectedList)->list->first;
 
     while (listNode != NULL) {
@@ -1275,7 +1273,7 @@ void mnuSeekFirstAvailableStaffListNode(void) {
     }
 }
 
-u32 ptySkillMenuRebuildAfterMutation(s32 actor, s32 contextArg) {
+u32 ptySkillMenuRebuildAfterMutation(s32 actor, KwlnTask *contextArg) {
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)kwlnTaskGetUserValue(contextArg))->menu;
     s32 selected = *((MenuSelectionState *)menu->selectedList)->list->selectedSlot;
     s32 state;
@@ -1359,8 +1357,8 @@ void mnuDestroySkillMenuWindows(s32 context) {
     }
 }
 
-s32 mnuCampMenuInit(void) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuCampMenuInit(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     s32 handle = (u32)sdfAllocGeneralBlock(0x38);
     s32 *menu = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     CampMenuContext *work = (CampMenuContext *)context;
@@ -1388,8 +1386,8 @@ s32 mnuCampMenuInit(void) {
     return 1;
 }
 
-s32 mnuCloseItemSelectionState(s32 contextArg) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuCloseItemSelectionState(KwlnTask *contextArg) {
+    s32 context = kwlnTaskGetUserValue(contextArg);
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
 
     if (menu->selectedList != 0) {
@@ -1402,8 +1400,8 @@ s32 mnuCloseItemSelectionState(s32 contextArg) {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuShellUpdate);
 
-s32 mnuCampMenuDrawSlotLabel(s32 param) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuCampMenuDrawSlotLabel(KwlnTask *param) {
+    s32 context = kwlnTaskGetUserValue(param);
     s32 *slot;
 
     func_00272778(param);
@@ -1424,23 +1422,23 @@ s32 mnuCampMenuDrawSlotLabel(s32 param) {
     return menuRunPanel((void *)context, 1, (void *)param);
 }
 
-s32 mnuStepSkillSlotControl(s32 callback) {
-    return menuRunPanel((void *)kwlnTaskGetUserValue(), 2, (void *)callback);
+s32 mnuStepSkillSlotControl(KwlnTask *callback) {
+    return menuRunPanel((void *)kwlnTaskGetUserValue(callback), 2, (void *)callback);
 }
 
-void mnuClearSelectedListNodeId() {
-    s32 context = kwlnTaskGetUserValue();
+void mnuClearSelectedListNodeId(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     ((StaffMenuWork *)((CampMenuContext *)context)->menu)->selectionId = 0xffffffff;
 }
 
-u32 mnuHasSelectedListNodeId(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+u32 mnuHasSelectedListNodeId(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     return ~((StaffMenuWork *)((CampMenuContext *)context)->menu)->selectionId >> 0x1f;
 }
 
 /* Set the selected flag only on nodes whose index matches the saved selection. */
-void mnuHighlightSelectedListNode() {
-    StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)kwlnTaskGetUserValue())->menu;
+void mnuHighlightSelectedListNode(KwlnTask *task) {
+    StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)kwlnTaskGetUserValue(task))->menu;
     MenuSelectionNode *listNode = ((MenuSelectionState *)menuWork->selectedList)->list->first;
 
     for (; listNode != 0; listNode = listNode->next) {
@@ -1454,8 +1452,8 @@ void mnuHighlightSelectedListNode() {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00278C90);
 
-u32 mnuResetStaffSelectionFlags(void) {
-    s32 context = kwlnTaskGetUserValue();
+u32 mnuResetStaffSelectionFlags(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     ((StaffMenuWork *)((CampMenuContext *)context)->menu)->selectionFlags = 0;
     return 1;
 }
@@ -1484,8 +1482,8 @@ void mnuClearPartySkillSlot(DatPartyRecord *partyEntry, s32 skillSlot) {
 
 /* Open the selected skill's popup or cancel, then process list navigation.
  * Native list reads precede the late window guard; preserve that ordering. */
-void mnuCampMenuHandleInput(void) {
-    s32 context = kwlnTaskGetUserValue();
+void mnuCampMenuHandleInput(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     StaffMenuWork *menuWork = ((CampMenuContext *)context)->menu;
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_SKILL_INPUT_MASK);
     s32 window = menuWork->selectedList;
@@ -1537,8 +1535,8 @@ void mnuSwapPartySkillSlots(s32 entry, s32 firstSlot, s32 secondSlot) {
 extern u8 D_0037CC90[];
 /* First confirm stores a slot; a different second slot swaps and rebuilds.
  * Cancel clears the saved slot, opening the exit popup only if none was saved. */
-void ptySkillMenuHandleSlotReorder(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+void ptySkillMenuHandleSlotReorder(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     StaffMenuWork *menuWork = (StaffMenuWork *)((CampMenuContext *)context)->menu;
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_REORDER_INPUT_MASK);
     MenuSelectionState *window = (MenuSelectionState *)menuWork->selectedList;

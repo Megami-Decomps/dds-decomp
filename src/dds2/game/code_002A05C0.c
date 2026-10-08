@@ -4,6 +4,7 @@
 #include "mnu.h"
 #include "file.h"
 
+extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 
 #define BRS_RESULT_COUNTER_PAIR_COUNT 5
 #define BRS_RESULT_SETTLED_POLL_LIMIT 6
@@ -75,7 +76,6 @@ typedef struct MovieMenuState {
 
 extern MovieMenuState *mnuMovieMenuState;
 
-extern u32 kwlnTaskGetUserValue();
 
 extern s32 mnuTitleSoundTask;
 
@@ -268,16 +268,16 @@ typedef struct TitleEffectState {
     s32 frameCounter;
 } TitleEffectState;
 
-u32 mnuIncrementTitleEffectFrameCounter(void) {
+u32 mnuIncrementTitleEffectFrameCounter(KwlnTask *task) {
     TitleEffectState *effectState;
 
-    effectState = (TitleEffectState *)kwlnTaskGetUserValue();
+    effectState = (TitleEffectState *)kwlnTaskGetUserValue(task);
     effectState->frameCounter = effectState->frameCounter + 1;
     return 0;
 }
 
-void mnuDestroyTitleEffectTask(void) {
-    sdfReleaseChipBlock(kwlnTaskGetUserValue());
+void mnuDestroyTitleEffectTask(KwlnTask *task) {
+    sdfReleaseChipBlock((void *)kwlnTaskGetUserValue(task));
     mnuTitleSoundTask = 0;
 }
 
@@ -289,13 +289,13 @@ void mnuCreateTitleEffectTask(void) {
     u32 effectTask = kwlnTaskCreate(D_00437A10, 0x5214, 1, 1,
                               mnuIncrementTitleEffectFrameCounter, mnuDestroyTitleEffectTask, 0);
     mnuTitleSoundTask = effectTask;
-    kwlnTaskSetUserValue(effectTask, effectState);
+    kwlnTaskSetUserValue((KwlnTask *)effectTask, (u32)effectState);
     effectState->soundNameIndex = 0;
     effectState->frameCounter = 0;
 }
 
 void mnuResetTitleEffectState(s32 command) {
-    TitleEffectState *effectState = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
+    TitleEffectState *effectState = (TitleEffectState *)kwlnTaskGetUserValue((KwlnTask *)mnuTitleSoundTask);
     if (sdfSoundIsCommandBusy() != 0) {
         sdfSoundStopNamedPlayback();
     }
@@ -304,7 +304,7 @@ void mnuResetTitleEffectState(s32 command) {
 }
 
 void mnuSetTitleVoicePrefixIndex(s32 prefixIndex) {
-    ((TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask))->soundNameIndex = prefixIndex;
+    ((TitleEffectState *)kwlnTaskGetUserValue((KwlnTask *)mnuTitleSoundTask))->soundNameIndex = prefixIndex;
 }
 
 extern char D_00428610[];
@@ -317,7 +317,7 @@ extern char D_003E09F0[];
  * retain that signature rather than treating it as a filename string. */
 void mnuPlayTitleVoiceFile(char *voiceArgument) {
     char voicePath[MNU_TITLE_VOICE_PATH_BYTES];
-    TitleEffectState *effectState = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
+    TitleEffectState *effectState = (TitleEffectState *)kwlnTaskGetUserValue((KwlnTask *)mnuTitleSoundTask);
     if (sdfSoundIsCommandBusy() != 0) {
         func_0035B6E0(D_00428610);
         sdfSoundStopNamedPlayback();
@@ -339,7 +339,7 @@ void func_002A1338(void) {
 }
 
 s32 mnuGetTitleEffectFrameCounter(void) {
-    return ((TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask))->frameCounter;
+    return ((TitleEffectState *)kwlnTaskGetUserValue((KwlnTask *)mnuTitleSoundTask))->frameCounter;
 }
 
 u32 sndOpStartTrackFromScript(void) {

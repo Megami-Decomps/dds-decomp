@@ -16,7 +16,6 @@
 #include "mdl.h"
 #include "evt_polygon_movie.h"
 
-extern u32 kwlnTaskGetUserValue(KwlnTask *task);
 struct EvtRuntime;
 struct EvtRuntime;
 struct EvtRuntime;

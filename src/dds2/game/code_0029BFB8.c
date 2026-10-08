@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "mnu_result.h"
 struct EffectSlotSet;
 extern void func_00306C28(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
@@ -7,13 +8,12 @@ extern s32 frFontQueueGlyphInSelectedSlot();
 extern s32 func_0019D550();
 
 
-extern u32 kwlnTaskGetUserValue();
 
 
 INCLUDE_ASM(const s32, "game/code_0029BFB8", func_0029BFB8);
 
-s32 itfRunPanelMode1(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 itfRunPanelMode1(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
     func_0029AA48(panel);
@@ -21,8 +21,8 @@ s32 itfRunPanelMode1(s32 request) {
     return func_002C4038(&panel->transition, &panel->transition.state, 1, (void *)request);
 }
 
-s32 itfRunPanelMode2(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 itfRunPanelMode2(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
     func_0026C8E8(0);

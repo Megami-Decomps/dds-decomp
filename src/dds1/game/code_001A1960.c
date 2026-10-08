@@ -168,7 +168,6 @@ extern const char *D_003BB3C4;
 
 extern const char *btlAnalyzPanelTaskNameRef;
 
-extern u32 kwlnTaskGetUserValue(KwlnTask *);
 
 extern const char *btlMahenPanelTaskNameRef;
 
@@ -4120,7 +4119,7 @@ u32 btlSetSlotLowByteClamped(EffectSlotSet *owner, s32 group, s32 slot, s32 delt
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B09A8);
 
 void btlReleaseMessageWindowTask(KwlnTask *task) {
-    BtlGuidePanelWork *work = kwlnTaskGetUserValue(task);
+    BtlGuidePanelWork *work = (BtlGuidePanelWork *)kwlnTaskGetUserValue(task);
     itfMesCleanupWindow(work->windowIndex, 0);
     sdfReleaseChipBlock(work);
     btlSetTrackedTaskHandle(9, 0);
@@ -4333,7 +4332,7 @@ void btlReleaseRegisteredChildTaskWork(KwlnTask *arg0) {
     u32 temp_v0;
 
     temp_v0 = kwlnTaskGetUserValue(arg0);
-    sdfReleaseChipBlock(temp_v0);
+    sdfReleaseChipBlock((void *)temp_v0);
     btlSetTrackedTaskHandle(7, 0);
 }
 
@@ -4535,7 +4534,7 @@ void btlReleaseCmsleffPanelWork(KwlnTask *arg0) {
     u32 temp_v0;
 
     temp_v0 = kwlnTaskGetUserValue(arg0);
-    sdfReleaseChipBlock(temp_v0);
+    sdfReleaseChipBlock((void *)temp_v0);
     btlSetTrackedTaskHandle(5, 0);
 }
 
@@ -4683,7 +4682,7 @@ void btlUpdatePanelTransitionGradients(BtlPanelTransitionWork *work) {
 
 void btlFreeRegisteredTaskData(KwlnTask *task) {
     btlGetRuntime();
-    sdfReleaseChipBlock(kwlnTaskGetUserValue(task));
+    sdfReleaseChipBlock((void *)kwlnTaskGetUserValue(task));
     btlSetTrackedTaskHandle(1, 0);
 }
 
@@ -4872,7 +4871,7 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001B55A8);
 
 void btlFinishTrackedBattleTaskAndCloseWindow(KwlnTask *task) {
     s32 context = btlGetRuntime();
-    sdfReleaseChipBlock(kwlnTaskGetUserValue(task));
+    sdfReleaseChipBlock((void *)kwlnTaskGetUserValue(task));
     btlSetTrackedTaskHandle(12, 0);
     *(u32 *)(context + 0x1F4) |= 0x100000;
     evtFinishMessageWindowAndNotify();
@@ -4896,7 +4895,7 @@ s32 btlDestroyTaskD(void) {
 
 void btlReleaseWindowTask(KwlnTask *task) {
     BattleController *battle = (BattleController *)btlGetRuntime();
-    sdfReleaseChipBlock(kwlnTaskGetUserValue(task));
+    sdfReleaseChipBlock((void *)kwlnTaskGetUserValue(task));
     btlSetTrackedTaskHandle(13, 0);
     battle->flags |= 0x100000;
     btlTrackedTaskHandles->status.bytes.blocked = 0;
@@ -6048,7 +6047,7 @@ void fldClearBattleSceneObject(KwlnTask *arg0) {
     BattleController *battle;
 
     temp_v0 = kwlnTaskGetUserValue(arg0);
-    sdfReleaseChipBlock(temp_v0);
+    sdfReleaseChipBlock((void *)temp_v0);
     battle = (BattleController *)btlGetRuntime();
     battle->sceneObjectTask = 0;
     btlReleaseBattleScratchBlocks();
