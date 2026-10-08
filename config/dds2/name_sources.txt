@@ -1957,10 +1957,14 @@
 0x0019C490	frFontAdvanceOrRetainFadingGlyph	inferred	retains glyph while fade advances otherwise advances chain [names_reviewed5.tsv]
 0x0019C4D0	frFontReleaseGlyphChain	inferred	confidence=high; matched-C; src/dds2/interface/frFont.c:232:func_0019C4D0; Peer-matched C proposal; M141; source=names_pending_main.tsv:144 [names_qp12_apply.tsv]
 0x0019C5B0	frFontQueueGlyphForCurrentDrawBuffer	inferred	Links a glyph chain into the current draw-buffer slot using the selector low byte directly; returns signed zero. The runtime alternates selectors 0/1.
+0x0019C608	frFontGetCachedItemCount	inferred	Loads the retained font-cache record count at FrFontSystem+0x144.
+0x0019C618	frFontGetChildGlyphCount	inferred	Loads the live pooled child-glyph count at FrFontSystem+0x148.
+0x0019C628	frFontGetParentGlyphCount	inferred	Loads the live pooled parent-glyph count at FrFontSystem+0x14C.
 0x0019C850	frFontAppendGlyphReference	inferred	readability/matching review (QP16)
 0x0019C980	frFontAppendClonedGlyph	inferred	Clones a glyph; if cloning succeeds, links it after the destination. [names_reviewed6.tsv]
 0x0019C9D0	frFontCreateAtlasItem	inferred	readability/matching review (QP16)
 0x0019CB30	frFontRetainOrCreateCachedItem	inferred	src/dds2/interface/frFont.c func_0019CB30: Retains cached item or clones font resource, creates item and caches it by slot and ID. Twin of DDS1 func_00194E80. [names_reviewed24.tsv]
+0x0019CCC0	frFontCreateGlyphFromCode	inferred	Dequeues a child glyph, maps its encoded 16-bit code into a cached item, initializes metrics and returns the glyph pointer.
 0x0019CE10	frFontAppendTextToGlyphChain	inferred	Decodes an encoded text string into a glyph chain and optionally attaches it after the supplied prior glyph.
 0x0019D010	frFontSetContextEncodedByte	inferred	doubles low byte and clamps to sentinel in context [names_reviewed5.tsv]
 0x0019D038	frFontEnableContextMode	inferred	Sets the font context's mode at offset 0x40 and configures it with argument 0x80.
