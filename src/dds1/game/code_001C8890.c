@@ -366,7 +366,10 @@ u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern void func_001DEFE0(s32, s32, f32);
+extern void func_001DEFE0(BtlLinkedCommand *, BtlCamState *, f32);
+extern void func_001DF358(BtlLinkedCommand *, BtlCamState *);
+extern void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlResetUnitEffectVector(BtlLinkedCommand *, BtlCamState *);
 
 extern void func_001B83D8(BtlTask *, s8, s8);
 
@@ -7590,8 +7593,8 @@ void func_001DD4A8(void) {
 void func_001DD4B0(void) {
 }
 
-extern void btlPrepareActionCameraPoseWithActorClearance(void *unit, f32 *pose, u8 *out);
-extern void func_001E4708(void *unit, f32 *pose, u8 *out);
+extern void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_001E4708(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern void func_001E4720(BtlCamState *, BtlCamState *, BtlCamState *);
 
 /* Choose the action's camera pose from active ally and enemy height maxima. */
@@ -7625,23 +7628,23 @@ void btlChooseCameraPoseByActorHeights(BtlLinkedCommand *action) {
             if (enemyHeight <= 500.0f) {
                 func_001E4720(&action->camera, &action->frontCamera, &action->backCamera);
             } else {
-                btlPrepareActionCameraPoseWithActorClearance(action, (f32 *)&action->frontCamera, (u8 *)&action->backCamera);
+                btlPrepareActionCameraPoseWithActorClearance(action, &action->frontCamera, &action->backCamera);
             }
             break;
         case 2:
-            btlPrepareActionCameraPoseWithActorClearance(action, (f32 *)&action->frontCamera, (u8 *)&action->backCamera);
+            btlPrepareActionCameraPoseWithActorClearance(action, &action->frontCamera, &action->backCamera);
             break;
         case 3:
-            func_001E4708(action, (f32 *)&action->frontCamera, (u8 *)&action->backCamera);
+            func_001E4708(action, &action->frontCamera, &action->backCamera);
             break;
         }
     } else {
         switch (effMiscRandMod(0, 2)) {
         case 0:
-            btlPrepareActionCameraPoseWithActorClearance(action, (f32 *)&action->frontCamera, (u8 *)&action->backCamera);
+            btlPrepareActionCameraPoseWithActorClearance(action, &action->frontCamera, &action->backCamera);
             break;
         case 1:
-            func_001E4708(action, (f32 *)&action->frontCamera, (u8 *)&action->backCamera);
+            func_001E4708(action, &action->frontCamera, &action->backCamera);
             break;
         }
     }
@@ -7652,8 +7655,8 @@ void btlChooseCameraPoseByActorHeights(BtlLinkedCommand *action) {
 void func_001DD678(void) {
 }
 
-void func_001DD680(u32 arg0) {
-    func_001DF358(arg0, arg0);
+void func_001DD680(BtlLinkedCommand *command) {
+    func_001DF358(command, &command->camera);
 }
 
 void func_001DD698(void) {
@@ -7693,8 +7696,7 @@ void btlInitializeLinkedActionCamera(BtlLinkedCommand *action) {
             action->stepKind = 10;
             btlSetupActionCameraPair(action);
         } else {
-            btlPrepareUnitPoseWithTiltRotation(action, (f32 *)&action->frontCamera,
-                                              (u8 *)&action->backCamera);
+            btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
             btlAimLinkedUnitAtMuzzle((u8 *)action);
             action->motionParameter = 200.0f;
             action->flags |= 0x41;
@@ -7797,7 +7799,6 @@ void btlAdvanceTargetCursorUnlessHookHandles(u8 *actor) {
 
 extern void func_001E3E58(BtlLinkedCommand *, u8 *, BtlUnit *, s32);
 
-extern void btlPrepareUnitPoseWithTiltRotation();
 
 void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
     BtlUnit *target;
@@ -7805,7 +7806,7 @@ void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
     if (((BtlState *)btlGetRuntime())->unk_1FC & 1) {
         target = action->task->unit;
         if (target->flags & 0x400) {
-            func_001DF358((s32)action, (s32)action);
+            func_001DF358(action, &action->camera);
             return;
         }
     }
@@ -7881,7 +7882,7 @@ void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action) {
                 return;
             }
         }
-        btlPrepareUnitPoseWithTiltRotation(action, (f32 *)&action->frontCamera, (u8 *)&action->backCamera);
+        btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
         action->motionParameter = 200.0f;
         action->flags |= 0x10041;
     } else {
@@ -7950,7 +7951,7 @@ void btlUpdateLinkedActionEffectVectorByTarget(BtlLinkedCommand *action) {
         return;
     }
     if (action->actionKind != 0x10) {
-        btlResetUnitEffectVector((s32)&action->camera, (s32)&action->camera);
+        btlResetUnitEffectVector(action, &action->camera);
         return;
     }
 }
@@ -7988,27 +7989,27 @@ s32 func_001DEFA0(s32 actor) {
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DEFE0);
 
-void func_001DF358(s32 arg0, s32 arg1) {
-    func_001DEFE0(arg0, arg1, 27.5f);
+void func_001DF358(BtlLinkedCommand *command, BtlCamState *pose) {
+    func_001DEFE0(command, pose, 27.5f);
 }
 
 extern void func_002DD688(f32 angle);
 
-void btlPrepareUnitPoseWithTiltRotation(unit, pose, out)
-void *unit;
-f32 *pose;
-u8 *out;
+void btlPrepareUnitPoseWithTiltRotation(command, pose, out)
+BtlLinkedCommand *command;
+BtlCamState *pose;
+BtlCamState *out;
 {
-    func_001DEFE0((s32)unit, (s32)pose, 20.0f);
-    btlCopyMotionTransform(out, (u8 *)pose);
-    if (pose[4] > 0.0f) {
+    func_001DEFE0(command, pose, 20.0f);
+    btlCopyMotionTransform((u8 *)out, (u8 *)pose);
+    if (pose->direction[0] > 0.0f) {
         func_002DD688(-(20.0f * 0.017453293f));
     } else {
         func_002DD688(20.0f * 0.017453293f);
     }
-    VU0_STORE_VF(vf10, pose + 4);
+    VU0_STORE_VF(vf10, pose->direction);
     VU0_ROTATE_VEC(vf10, vf10);
-    VU0_STORE_VF(vf10, out + 0x10);
+    VU0_STORE_VF(vf10, out->direction);
 }
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001DF410);
 
@@ -8189,7 +8190,7 @@ void func_001DFE28(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
         btlFlagAllUnitsDefeatCandidate();
         count = btlGetIndexListCount(action->targetList);
         if (btlHasSingleLinkedResource((s32)action) == 0) {
-            func_001DEFE0((s32)action, (s32)from, 17.5f);
+            func_001DEFE0(action, from, 17.5f);
             btlCopyMotionTransform((u8 *)to, (u8 *)from);
             btlInterpolateVectorStep(from->position);
             VU0_STORE_VF(vf10, targetPosition);
@@ -8291,10 +8292,8 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001E16C0);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E1CF8);
 
-extern void btlPrepareUnitPoseWithTiltRotation();
 
-void btlActionAimUserAtTargets(u8 *action, f32 *pose, u8 *out) {
-    BtlLinkedCommand *command = (BtlLinkedCommand *)action;
+void btlActionAimUserAtTargets(BtlLinkedCommand *command, BtlCamState *pose, BtlCamState *out) {
     s128 vec[3];
     BtlUnit *unit = command->task->unit;
     u32 mask = 0;
@@ -8501,7 +8500,7 @@ void btlSetupActionCameraPair(BtlLinkedCommand *command) {
     if (!(user->flags & target->flags & 0x600)) {
         btlFlagAllUnitsDefeatCandidate();
     } else {
-        func_001DF358((s32)command, (s32)command);
+        func_001DF358(command, &command->camera);
         return;
     }
     func_001E1CF8(command, (f32 *)&command->frontCamera);
@@ -8615,9 +8614,8 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001E3E58);
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E4180);
 
 /* vu0 routine: measure camera clearance from the actor's adjusted muzzle position. */
-void btlPrepareActionCameraPoseWithActorClearance(void *unit, f32 *pose, u8 *out) {
+void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *command, BtlCamState *pose, BtlCamState *out) {
     BtlUnit *actor = ((BtlActorWork *)btlGetRuntime())->actorList;
-    f32 *target = (f32 *)out;
     f32 span;
     f32 distance;
 
@@ -8630,28 +8628,27 @@ void btlPrepareActionCameraPoseWithActorClearance(void *unit, f32 *pose, u8 *out
             break;
         }
     }
-    func_001DF358((s32)unit, (s32)out);
-    btlCopyMotionTransform((u8 *)pose, out);
+    func_001DF358(command, out);
+    btlCopyMotionTransform((u8 *)pose, (u8 *)out);
     span = func_001F66D8(0x200, 0, 0) * 0.5f;
-    pose[0] -= span;
-    target[0] += span;
-    target[8] *= 0.8f;
+    pose->position[0] -= span;
+    out->position[0] += span;
+    out->distance *= 0.8f;
     btlUnitGetMuzzlePosVU(actor);
     VU0_SET_VF10_COMPONENT(y, -btlUnitGetTopY(actor));
     VU0_LOAD_VF(vf11, out);
     VU0_SUB(vf10, vf10, vf11);
     VU0_LENGTH_VF10(distance);
     distance += (actor->cameraRadius * actor->scale * 2.0f) /
-                func_002FA148(target[9] * 0.5f);
-    if (target[8] < distance) {
-        target[8] = distance;
+                func_002FA148(out->fov * 0.5f);
+    if (out->distance < distance) {
+        out->distance = distance;
     }
 }
 
-extern void btlPrepareUnitPoseWithTiltRotation();
 
-void func_001E4708(void *unit, f32 *pose, u8 *out) {
-    btlPrepareUnitPoseWithTiltRotation(unit, pose, out);
+void func_001E4708(BtlLinkedCommand *command, BtlCamState *pose, BtlCamState *out) {
+    btlPrepareUnitPoseWithTiltRotation(command, pose, out);
 }
 
 /* vu0 routine: frame the leftmost marked unit in two camera poses. */
@@ -8753,8 +8750,8 @@ void btlBuildGroupFramingCameraPose(BtlCamState *source, BtlCamState *out) {
     func_001DB698(out);
 }
 
-void btlResetUnitEffectVector(s32 arg0, s32 arg1) {
-    func_001DEFE0(arg0, arg1, 0.0f);
+void btlResetUnitEffectVector(BtlLinkedCommand *command, BtlCamState *pose) {
+    func_001DEFE0(command, pose, 0.0f);
 }
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E4AC0);
@@ -8844,15 +8841,15 @@ void func_001E5718(BtlLinkedCommand *action, BtlCamState *out) {
     btlBuildHeightClampedApproachCamera(action, out);
 }
 
-extern void func_001E0718(u8 *action, u8 *pose, u8 *out);
+extern void func_001E0718(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-void btlChooseActionPoseBlendFromActorCount(u8 *action) {
+void btlChooseActionPoseBlendFromActorCount(BtlLinkedCommand *action) {
     BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
     u32 count;
     u32 mask;
     BtlUnit *unit;
 
-    mask = ((BtlUnit *)btlGetIndexListEntry(*(struct BtlIndexList **)(action + 0x118), 0))->flags & 0x600;
+    mask = ((BtlUnit *)btlGetIndexListEntry(action->targetList, 0))->flags & 0x600;
     count = 0;
     for (unit = work->actorList; unit != 0; unit = unit->next) {
         if (unit->flags & 1) {
@@ -8862,14 +8859,12 @@ void btlChooseActionPoseBlendFromActorCount(u8 *action) {
         }
     }
     if (count >= 2) {
-        func_001E0718(action, (u8 *)&((BtlLinkedCommand *)action)->frontCamera,
-                     (u8 *)&((BtlLinkedCommand *)action)->backCamera);
+        func_001E0718(action, &action->frontCamera, &action->backCamera);
         return;
     }
-    btlPrepareUnitPoseWithTiltRotation(action, (f32 *)&((BtlLinkedCommand *)action)->frontCamera,
-                                     (u8 *)&((BtlLinkedCommand *)action)->backCamera);
-    *(f32 *)(action + 0x130) = 200.0f;
-    *(u32 *)(action + 0xF0) |= 0x41;
+    btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
+    action->motionParameter = 200.0f;
+    action->flags |= 0x41;
 }
 void func_001E57F8(void) {
 }

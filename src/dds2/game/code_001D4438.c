@@ -274,7 +274,7 @@ extern void dds3ClearObjectFlags(s32, s32);
 extern u8 D_00380788[];
 extern u8 D_003B6BD0[];
 
-extern void func_001EC868(void *, f32 *, f32);
+extern void func_001EC868(BtlLinkedCommand *, BtlCamState *, f32);
 
 typedef struct BtlUnit BtlUnit;
 

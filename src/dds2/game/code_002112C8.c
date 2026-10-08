@@ -3665,7 +3665,7 @@ extern s32 btlHasMarkedEntry14();
 
 extern void btlClearRuntimeFlag2000(void);
 
-extern void func_001EC868(s32, s32, f32);
+extern void func_001EC868(BtlLinkedCommand *, BtlCamState *, f32);
 
 s32 btlAdvanceTimedActionState(BtlLinkedCommand *command) {
     if (command->actionCode != 0x10c) {
@@ -3674,7 +3674,7 @@ s32 btlAdvanceTimedActionState(BtlLinkedCommand *command) {
     if (btlHasMarkedEntry14((s32)command, 0x10c) != 0) {
         if (command->motionProgress >= 0x12) {
             btlClearRuntimeFlag2000();
-            func_001EC868((s32)command, (s32)command, 0.0f);
+            func_001EC868(command, &command->camera, 0.0f);
         }
         command->motionProgress++;
     }
@@ -4418,17 +4418,17 @@ void btlSetCameraPresetForBossUnitMode(BtlEffect *fx) {
     }
 }
 
-s32 btlInitializeEffectVectors(BtlEffect *fx) {
-    f32 *vec = fx->vec30;
-    fx->vec10[0] = 1.0f;
-    func_001EC868(fx, vec, 25.0f);
-    btlCopyMotionTransform(fx->vecC0, vec);
+s32 btlInitializeEffectVectors(BtlLinkedCommand *command) {
+    BtlCamState *pose = &command->frontCamera;
+    command->camera.direction[0] = 1.0f;
+    func_001EC868(command, pose, 25.0f);
+    btlCopyMotionTransform(&command->backCamera, pose->position);
     func_00336538(-0.87266463f);
-        VU0_STORE_VF(vf10, fx->vec40);
+        VU0_STORE_VF(vf10, pose->direction);
         VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF(vf10, fx->vecD0);
-    fx->unk154 = 125.0f;
-    fx->flags |= 0x841;
+        VU0_STORE_VF(vf10, command->backCamera.direction);
+    command->motionParameter = 125.0f;
+    command->flags |= 0x841;
     return 1;
 }
 
@@ -4514,7 +4514,7 @@ s32 func_0021C818(BtlLinkedCommand *command, s8 side, s8 targetSide) {
         return 0;
     }
     if (side != 1 || targetSide == side) {
-        func_001EC868((s32)command, (s32)&command->frontCamera, 25.0f);
+        func_001EC868(command, &command->frontCamera, 25.0f);
         btlCopyMotionTransform(&command->backCamera, command->frontCamera.position);
         if (command->frontCamera.direction[0] > 0.0f) {
             func_00336538(-0.87266463f);
@@ -4825,7 +4825,7 @@ extern u32 btlIsMarkedActionSceneStateActive(void);
 
 
 
-extern void func_001ECBF8();
+extern void func_001ECBF8(BtlLinkedCommand *, BtlCamState *);
 
 
 
@@ -5649,20 +5649,20 @@ u32 btlStartMarkedActionRuntimeUpdate(ActionUnit *unit) {
     }
     return 0;
 }
-u32 btlTickAction6B(u32 unit) {
-    if (((ActionUnit *)unit)->action != 0x6b) {
+u32 btlTickAction6B(BtlLinkedCommand *unit) {
+    if (unit->actionCode != 0x6b) {
         return 0;
     }
     /* The callee takes no arguments (see code_001DACF8.c), so retail
      * leaves $a0 holding the compared constant across these calls. */
-    if (((ActionUnit *)unit)->actionTimer >= 0) {
-        if (((ActionUnit *)unit)->actionTimer >= 0xF) {
+    if (unit->motionProgress >= 0) {
+        if (unit->motionProgress >= 0xF) {
             btlClearRuntimeFlag2000();
-            func_001ECBF8(unit, unit);
+            func_001ECBF8(unit, &unit->camera);
         } else {
             btlSetRuntimeFlag2000();
         }
-        ++((ActionUnit *)unit)->actionTimer;
+        ++unit->motionProgress;
     } else {
         btlSetRuntimeFlag2000();
     }
@@ -5677,15 +5677,15 @@ u32 btlResetDelayedActionTimer(ActionUnit *unit) {
     return 0;
 }
 
-u32 btlTickDelayedMarkedAction(ActionUnit *unit) {
-    if (unit->action != 0x6c) {
+u32 btlTickDelayedMarkedAction(BtlLinkedCommand *unit) {
+    if (unit->actionCode != 0x6c) {
         return 0;
     }
-    if (btlHasMarkedEntry14((u32)unit) && unit->actionTimer == 0x25) {
+    if (btlHasMarkedEntry14((u32)unit) && unit->motionProgress == 0x25) {
         btlClearRuntimeFlag2000();
-        func_001EC868((u32)unit, (u32)unit, 0.0f);
+        func_001EC868(unit, &unit->camera, 0.0f);
     }
-    ++unit->actionTimer;
+    ++unit->motionProgress;
     return 1;
 }
 void btlResetActionScale(void) {

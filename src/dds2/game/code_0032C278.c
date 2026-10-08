@@ -944,18 +944,6 @@ void sdfBuildSceneDrawHeader(SdfPacket *packet, s32 frameAddress, s32 width, s32
     sdfBuildFrameDepthScissorPacket(packet + 1, frameAddress, width, height, frameFormat, depthAddress, depthFormat, 0, gsContext);
 }
 
-/* Native VRAM range returned by sdfAllocImageBuffer; offsets match its owner unit. */
-typedef struct SdfTexHead {
-    struct SdfTexHead *next;
-    struct SdfTexHead *prev;
-    s32 allocationMode;
-    u32 address; /* 0x0C: VRAM offset in 32-bit words */
-    s32 size;
-    s16 width;
-    s16 height;
-    s32 format;
-} SdfTexHead;
-
 typedef struct SdfSceneDrawPacket {
     SdfPacket header;    /* 0x00 */
     u64 draw[8];         /* 0x20 */

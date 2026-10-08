@@ -95,7 +95,7 @@ extern s32 D_0032E400[];
 extern void fldClearCameraObjectHighlightFlag(void);
 extern s32 func_0012FC20(void);
 extern void func_0012F578(void);
-extern void func_0012EEA0(s16, s16);
+extern void func_0012EEA0(s32, s32);
 extern void func_0012FF48(void);
 extern void func_0012EA50(s32, s32, f32);
 extern s32 *fldGetPlayerSceneStateAddress();
@@ -139,9 +139,12 @@ typedef struct FldAreaWork {
     u8 pad70[0x14];
     s32 positionPending;
     s32 unk88;
-    u8 pad8C[0x78];
+    s32 unk8C;
+    u8 pad90[0x74];
     s16 unk104;
-    u8 pad106[0x24];
+    u8 pad106[0x12];
+    s32 unk118;
+    u8 pad11C[0x0E];
     s16 colorEffectSuppressed;
     u8 pad12C[0x14];
     f32 x;
@@ -2864,7 +2867,143 @@ void func_0012EA50(s32 modelMotion, s32 motion, f32 blendFrames) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012EEA0);
+struct EffRandState;
+extern u32 effMiscRand(struct EffRandState *state);
+extern void fldSetSequenceVolume(s32 category, s32 volume);
+extern void fldQueuePrimaryEffectPosition(f32 x, f32 y, f32 z);
+extern void fldQueueSecondaryEffectPosition(f32 x, f32 y, f32 z);
+extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
+extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
+extern s32 D_003BAD44;
+
+/* Dispatch camera-model frame crossings to sequence sounds and queued effects. */
+void func_0012EEA0(s32 motion, s32 selector) {
+    union {
+        u128 q;
+        f32 f[4];
+    } position;
+    MdlCtx *cameraModel;
+    f32 previousFrame;
+    f32 currentFrame;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 distance;
+    s32 sequenceCategory;
+    s32 volume;
+
+    memset(&position, 0, sizeof(position));
+    position.f[3] = 1.0f;
+
+    cameraModel = (MdlCtx *)fldCameraModelObject;
+    previousFrame = ((FldAreaWork *)fldAreaState)->unk16C;
+    currentFrame = cameraModel->first->currentFrame;
+    ((FldAreaWork *)fldAreaState)->unk16C = currentFrame;
+
+    if (((FldAreaWork *)fldAreaState)->unk8C == 0) {
+        switch (((FldAreaWork *)fldAreaState)->unk88) {
+        case 1: sequenceCategory = 0x14; break;
+        case 2: sequenceCategory = 0x18; break;
+        case 3: sequenceCategory = 0x1C; break;
+        default: sequenceCategory = 0x10; break;
+        }
+    } else {
+        switch (((FldAreaWork *)fldAreaState)->unk8C - 1) {
+        case 1: sequenceCategory = 0x14; break;
+        case 2: sequenceCategory = 0x18; break;
+        case 3: sequenceCategory = 0x1C; break;
+        default: sequenceCategory = 0x10; break;
+        }
+    }
+
+    if (((FldAreaWork *)fldAreaState)->mode == 1) {
+        dx = fldLookAtFarPoint[0] - fldLookAtNearPoint[0];
+        dy = fldLookAtFarPoint[1] - fldLookAtNearPoint[1];
+        dz = fldLookAtFarPoint[2] - fldLookAtNearPoint[2];
+        distance = fsqrtf(dx * dx + dy * dy + dz * dz) - 500.0f;
+        if (distance > 7000.0f) distance = 7000.0f;
+        if (distance < 0.0f) distance = 0.0f;
+        volume = ((7000 - (s32)distance) * 127) / 7000;
+        if (volume >= 128) volume = 127;
+        if (volume < 0) volume = 0;
+    } else {
+        volume = 127;
+        volume -= (effMiscRand(NULL) >> 2) & 0x3F;
+        if (volume >= 128) volume = 127;
+        if (volume < 0) volume = 0;
+    }
+
+    if (((FldAreaWork *)fldAreaState)->unk118 == 1) {
+        sequenceCategory = (D_003BAD44 % 2) + 0x19;
+        if (selector != 1) return;
+        if ((previousFrame < 7.0f && currentFrame >= 7.0f) ||
+            (previousFrame < 17.0f && currentFrame >= 17.0f)) {
+            sndSetSequenceVolumePan(0x670000 + sequenceCategory, 0x7F, 0x3F);
+            D_003BAD44 += (effMiscRand(NULL) >> 4 & 1) + 1;
+        }
+        return;
+    }
+
+    if (motion != 0 && motion != 2 && motion != 3 && selector == 2) {
+        fldSetSequenceVolume(sequenceCategory + 3, volume);
+        fldQueueSecondaryEffectPosition(((FldAreaWork *)fldAreaState)->x,
+                                        ((FldAreaWork *)fldAreaState)->y - 5.0f,
+                                        ((FldAreaWork *)fldAreaState)->z);
+        return;
+    }
+    sequenceCategory += D_003BAD44 % 3;
+
+    if (selector == 1) {
+        if (previousFrame < 8.0f && currentFrame >= 8.0f) {
+            fldSetSequenceVolume(sequenceCategory, volume);
+            D_003BAD44 += (effMiscRand(NULL) >> 4 & 1) + 1;
+            if (sdfLoadMapRecordPositionVector(((MdlCtx *)fldCameraModelObject)->inner, 0xCA) == 0) return;
+            VU0_STORE_VF(vf10, &position);
+            fldQueueSecondaryEffectPosition(position.f[0], ((FldAreaWork *)fldAreaState)->y - 5.0f, position.f[2]);
+            return;
+        }
+        if (previousFrame < 18.0f && currentFrame >= 18.0f) {
+            fldSetSequenceVolume(sequenceCategory, volume);
+            D_003BAD44 += (effMiscRand(NULL) >> 4 & 1) + 1;
+            if (sdfLoadMapRecordPositionVector(((MdlCtx *)fldCameraModelObject)->inner, 0xC9) == 0) return;
+            VU0_STORE_VF(vf10, &position);
+            fldQueuePrimaryEffectPosition(position.f[0], ((FldAreaWork *)fldAreaState)->y - 5.0f, position.f[2]);
+            return;
+        }
+    } else if (selector == 0x17) {
+        if (previousFrame < 88.0f && currentFrame >= 88.0f) {
+            fldSetSequenceVolume(sequenceCategory, volume);
+            D_003BAD44 += (effMiscRand(NULL) >> 4 & 1) + 1;
+            if (sdfLoadMapRecordPositionVector(((MdlCtx *)fldCameraModelObject)->inner, 0xCA) == 0) return;
+            VU0_STORE_VF(vf10, &position);
+            fldQueueSecondaryEffectPosition(position.f[0], ((FldAreaWork *)fldAreaState)->y - 5.0f, position.f[2]);
+            return;
+        }
+        if (previousFrame < 18.0f && currentFrame >= 18.0f) {
+            fldSetSequenceVolume(sequenceCategory, volume);
+            D_003BAD44 += (effMiscRand(NULL) >> 4 & 1) + 1;
+            if (sdfLoadMapRecordPositionVector(((MdlCtx *)fldCameraModelObject)->inner, 0xC9) == 0) return;
+            VU0_STORE_VF(vf10, &position);
+            fldQueuePrimaryEffectPosition(position.f[0], ((FldAreaWork *)fldAreaState)->y - 5.0f, position.f[2]);
+            return;
+        }
+        if (previousFrame < 42.0f && currentFrame >= 42.0f) {
+            fldSetSequenceVolume(sequenceCategory, volume);
+            D_003BAD44 += (effMiscRand(NULL) >> 4 & 1) + 1;
+            if (sdfLoadMapRecordPositionVector(((MdlCtx *)fldCameraModelObject)->inner, 0xCA) == 0) return;
+            VU0_STORE_VF(vf10, &position);
+            fldQueueSecondaryEffectPosition(position.f[0], ((FldAreaWork *)fldAreaState)->y - 5.0f, position.f[2]);
+            return;
+        }
+        if (previousFrame < 63.0f && currentFrame >= 63.0f) {
+            fldSetSequenceVolume(sequenceCategory, volume);
+            D_003BAD44 += (effMiscRand(NULL) >> 4 & 1) + 1;
+            if (sdfLoadMapRecordPositionVector(((MdlCtx *)fldCameraModelObject)->inner, 0xC9) == 0) return;
+            VU0_STORE_VF(vf10, &position);
+            fldQueuePrimaryEffectPosition(position.f[0], ((FldAreaWork *)fldAreaState)->y - 5.0f, position.f[2]);
+        }
+    }
+}
 
 extern s32 D_003BAB50;
 extern void func_00136DA0(f32 *);
