@@ -7,7 +7,7 @@
 #include "sdf_sif_command.h"
 #include "kwln_task_lifecycle.h"
 
-extern s32 func_0030AC10(void);
+extern s32 func_0030AC10(LmapTaskState *);
 
 extern void func_00134A18(void);
 extern void func_00137888(void);
@@ -411,11 +411,8 @@ void fldShutdownLmapResources(void) {
     evtDestroySecondaryWorldNode();
 }
 
-u8 func_0030ABF0(void) {
-    s64 status;
-
-    status = func_0030AC10();
-    return status != 0;
+u8 func_0030ABF0(LmapTaskState *task) {
+    return func_0030AC10(task) != 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_0030A128", func_0030AC10);
