@@ -6,6 +6,8 @@
 
 struct MenuList;
 struct EffectSlotSet;
+struct EffMappedResource;
+struct SdfMemBlock;
 
 /* Shop stock by progress row: unlock flag, row price percent, then 32 stock entries. */
 typedef struct ShopRankPriceEntry {
@@ -128,18 +130,18 @@ typedef struct MnuShopListContext {
 
 /* DDS1 mnuShopCreateScene allocates and clears this complete 0xB4-byte owner. */
 typedef struct ShopScene {
-    s32 resourceHandle;
+    struct SdfMemBlock *resourceHandle;
     u8 pad04[4];
     MenuPopupState transitionWork;
     s32 dispatchState;
     s32 stateTable;
     u8 resourcePair[4];
     s32 pairedHandle;
-    u32 spriteResource;
+    struct EffectSlotSet *spriteResource;
     s32 batchState;
     MenuWindowContainer *sprite;
     MenuWindowContainer *window;
-    void *batches[2];
+    struct EffMappedResource *batches[2];
     s32 initialSelection;
     s32 counter;
     s32 menuMode;
@@ -158,6 +160,8 @@ typedef struct ShopScene {
     s8 pulseFrame;
     s8 atLimit;
 } ShopScene;
+
+s32 mnuShopHasPendingFlag(ShopScene *unused);
 
 typedef char MnuShopListContext_size_must_be_0x10[(sizeof(MnuShopListContext) == 0x10) ? 1 : -1];
 

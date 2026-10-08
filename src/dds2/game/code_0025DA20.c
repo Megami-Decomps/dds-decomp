@@ -172,9 +172,9 @@ extern u8 D_003CDA88[];
 
 extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, u64, u64, u64, u64);
 
-extern void frFontSetChildColors(s32, u32);
+extern void frFontSetChildColors(struct FrFontGlyph *, u32);
 
-extern s32 func_0019D550(s32, s32, u32);
+extern s32 frFontDrawGlyphChain(s32, s32, u32);
 
 extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
@@ -1426,11 +1426,11 @@ void mnuCampClearListedItemCounts(void) {
 }
 
 MenuTerminalContext *mnuTerminalCreateContext(void) {
-    s32 handle;
+    struct SdfMemBlock *handle;
     MenuTerminalContext *obj;
 
-    handle = (u32)sdfAllocGeneralBlock(0x38C);
-    obj = (MenuTerminalContext *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    handle = sdfAllocGeneralBlock(0x38C);
+    obj = (MenuTerminalContext *)sdfResourceRetainAddress(handle);
     memset(obj, 0, 0x38C);
     obj->resourceHandle = handle;
     mnuClearPanelTransitionState(&obj->transitionWork);
@@ -1456,7 +1456,7 @@ void mnuTerminalReleaseContextAndResources(KwlnTask *arg) {
         mnuDrainPanelTransitions(&scene->transitionWork, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle(scene->messageResources);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(scene->resourceHandle));
+        sdfReleaseResourceAllocation(scene->resourceHandle);
         mnuPanelTaskCompletionState = 2;
     }
 }
@@ -2106,8 +2106,8 @@ void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2
 
     if (enabled != 0) {
         handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)fontValue, enabled, fontArg);
-        frFontSetChildColors(handle, 0x80808040);
-        func_0019D550(handle, 0, flags);
+        frFontSetChildColors((struct FrFontGlyph *)(u32)handle, 0x80808040);
+        frFontDrawGlyphChain(handle, 0, flags);
         frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
     }
 }

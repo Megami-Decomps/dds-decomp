@@ -76,7 +76,7 @@ extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, 
 
 extern void func_00196088(s32, s32, FrFontGlyph *);
 
-extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 typedef struct MenuListNode MenuListNode;
 
 extern void func_00300508(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
@@ -1950,7 +1950,7 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
         glyph = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);
         glyph = func_001978E8(x + 0xF70, y + 0x348, z, color, D_003BC738, glyph);
     }
-    func_001958A0(glyph, 1, param);
+    frFontDrawGlyphChain(glyph, 1, param);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
     if (page->fadeOut == 0) {
         if (page->drawAlpha < 256) {
@@ -1995,7 +1995,7 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 p
     frFontSetChildColors(glyph, color);
     width = frFontMeasureGlyphChain(glyph) + 8;
     frFontSetContextPair(glyph, x - (width * 0x10 >> 1) + 0x5F0, y);
-    func_001958A0(glyph, 1, param);
+    frFontDrawGlyphChain(glyph, 1, param);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
@@ -2016,7 +2016,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
         }
         glyph = itfCreateConvertedTextGlyph(0, 0, depth, color, outValue, 0);
         func_00196088(0x1710, 0x5F0, glyph);
-        func_001958A0(glyph, 1, param);
+        frFontDrawGlyphChain(glyph, 1, param);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
@@ -2042,7 +2042,7 @@ void func_002812E8(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
             func_003014F0(text, D_003BC740, remainingExp);
             glyph = func_001978E8(x + 0xDF0,
                 0x160, depth, color, text, 0);
-            func_001958A0(glyph, 1, surface);
+            frFontDrawGlyphChain(glyph, 1, surface);
             frFontQueueGlyphForCurrentDrawBuffer(glyph);
         }
     }
