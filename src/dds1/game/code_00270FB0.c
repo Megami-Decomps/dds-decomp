@@ -166,7 +166,7 @@ extern void movReleaseActivePartyCategoryModels(u32 *, s32, StaffMenuWork *);
 void movReleaseActivePartyCategoryModels(u32 *modelHandles, s32 unusedCount, StaffMenuWork *unusedWork) {
     s32 partyIndex;
 
-        effResolveAndReleaseResource((struct EffectSlotSet *)modelHandles[0]);
+    effResolveAndReleaseResource((struct EffectSlotSet *)modelHandles[0]);
     for (partyIndex = 0; partyIndex < MNU_STAFF_PARTY_COUNT; partyIndex++) {
         DatPartyRecord *partyRecord = &datGameState->party[partyIndex];
 

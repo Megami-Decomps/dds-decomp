@@ -11031,7 +11031,7 @@ EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, s32 ke
 /* Publish the instance, release its source allocation, then clean up the completed file job. */
 void effCompleteTransientResourceJob(void *job, u32 *outInstance) {
     u32 allocation;
-    u32 instance;
+    EffectSlotSet *instance;
 
     allocation = fileGetResourceHandle(job);
     instance = func_00305148(allocation, EFF_RESOURCE_TRANSIENT);
