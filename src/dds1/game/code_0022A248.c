@@ -5,6 +5,7 @@
 #include "evt_solar.h"
 #include "eff.h"
 #include "eff_blur.h"
+#include "eff_event_draw.h"
 #include "kwln_task_lifecycle.h"
 
 #define SOLAR_FADE_DRAW_ENABLED 1
@@ -356,26 +357,14 @@ typedef struct EvtViewerDrawPayload {
     u8 unknown14[0xC];
 } EvtViewerDrawPayload;
 
-typedef struct EffScreenDrawParams {
-    EffBlurQuad source;
-    u8 pad28[8];
-} EffScreenDrawParams;
-typedef struct EffSolidRectParams {
-    u32 color;
-    s32 blendControl;
-    s32 left, top, right, bottom;
-} EffSolidRectParams;
 extern void *sdfAllocSizeClassBlock(s32);
 extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
 extern void func_00242C30(EvtRuntime *, EvtRuntimeGroup *, s32, f32 (*)[4], f32 *, f32 *);
 extern void func_00242E70(EvtRuntime *, EvtRuntimeGroup *, s32, CampDisplayDefaults *);
 extern void func_00242F78(EvtRuntime *, EvtRuntimeGroup *, CampListLayout *);
-extern EffScreenDrawParams *effGetLoadDescA(void);
 extern EffBlurTemplate *effGetCh71Work(void);
 extern EffBlurScatterWork *effGetCh72Work(void);
 extern EffBlurScaleWork *effGetCh76Work(void);
-extern EffScreenDrawParams *effGetCh73Params(void);
-extern EffSolidRectParams *effGetCh74Params(void);
 extern EffResourceRectWork *effGetCh75Work(void);
 extern EvtViewerDrawVector kwlnDrawVector;
 
