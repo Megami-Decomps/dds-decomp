@@ -55,7 +55,6 @@ extern DatEnemyRecord *datEnemyRecords;
 extern u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed);
 extern char sdfRuntimeTaskName[];
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 mode);
-extern s32 sdfDecrementAllocationReferenceCount(s32 allocation);
 void func_00117808(void);
 s32 sdfBumpTickCounters(void);
 void evtResetWorldAndProfileRuntime(void);
@@ -212,7 +211,7 @@ void sdfDestroyRuntimeTask(void) {
     kwlnTaskDestroyWithHierarchyByName(sdfRuntimeTaskName, 0);
     func_00117808();
     handle = datGameState->header.backingAllocation;
-    sdfDecrementAllocationReferenceCount(handle);
+    sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)(u32)handle);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
     datGameState = 0;
 }
