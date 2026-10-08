@@ -1891,7 +1891,6 @@ void sdfDestroyDevRequest(DevRequest *request) {
     sdfReleaseChipBlock(request);
 }
 
-extern void sdfDecrementAllocationReferenceCount(s32 handle);
 extern void func_00329600(s32 handle, s32 size);
 void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
 
@@ -1901,7 +1900,7 @@ void sdfDevBufferedRequestGrow(DevRequest *request) {
         sdfDevResizeBufferedRequest(request, request->growStep);
         return;
     }
-    sdfDecrementAllocationReferenceCount(request->handle);
+    sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)request->handle);
     request->capacity = request->capacity + request->growStep;
     func_00329600(request->handle, (s16)request->capacity * request->stride);
     request->buffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(request->handle));
@@ -1922,7 +1921,7 @@ void sdfDevResizeBufferedRequest(DevRequest *request, s32 elementCount) {
         request->capacity = 0;
         request->buffer = 0;
     } else {
-        sdfDecrementAllocationReferenceCount(request->handle);
+        sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)request->handle);
         request->capacity = elementCount;
         func_00329600(request->handle, request->stride * elementCount);
         request->buffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(request->handle));

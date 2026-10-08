@@ -99,10 +99,10 @@ u32 sdfResourceRetainAddress(SdfMemBlock *allocation) {
 }
 
 /* This path reads the same reference-count storage unsigned and never decrements zero. */
-void sdfDecrementAllocationReferenceCount(u8 *allocation) {
-    u16 referenceCount = *(u16 *)(allocation + 0xE);
+void sdfDecrementAllocationReferenceCount(SdfMemBlock *allocation) {
+    u16 referenceCount = (u16)allocation->referenceCount;
     if (referenceCount != 0) {
-        *(u16 *)(allocation + 0xE) = referenceCount - 1;
+        allocation->referenceCount = (s16)(referenceCount - 1);
     }
 }
 

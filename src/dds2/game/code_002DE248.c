@@ -11467,7 +11467,7 @@ void effResolveAndReleaseResource(u32 *owner) {
         u32 resource = owner[0];
         u32 mapped = sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
         effResolveResourceSlots(owner, mapped, 0, -1);
-        sdfDecrementAllocationReferenceCount(owner[0]);
+        sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)owner[0]);
     }
 }
 
@@ -11476,7 +11476,7 @@ void effResolveAndReleaseSelectedResource(u32 *owner, s32 mapping) {
         u32 resource = owner[0];
         u32 mapped = sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
         effResolveResourceSlots(owner, mapped, 0, mapping);
-        sdfDecrementAllocationReferenceCount(owner[0]);
+        sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)owner[0]);
     }
 }
 
