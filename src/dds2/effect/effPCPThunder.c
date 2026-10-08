@@ -1042,9 +1042,9 @@ void effThunderSetFragmentColor(EffThunderFragmentWork *work, u32 color) {
     work->color = color;
 }
 
-/* Preserve the caller's word unchanged; its wider callback role is unknown. */
-u32 func_0016D290(u32 value) {
-    return value;
+/* Borrow the leading parameters without transferring work ownership. */
+EffThunderFragmentParams *effThunderGetFragmentParameters(EffThunderFragmentWork *work) {
+    return &work->head;
 }
 
 /* Forward the system and its opaque fragment configuration through the native call. */
