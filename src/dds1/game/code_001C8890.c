@@ -25,6 +25,12 @@
 #include "file.h"
 #include "dat_command.h"
 
+struct FileWork;
+struct FileCleanup;
+extern s32 fileIsRequestReadyInCurrentMode(struct FileRequest *request);
+extern u32 fileGetResourceHandle(struct FileWork *work);
+extern s32 filePollEntryCleanup(struct FileCleanup *entry);
+
 extern s32 func_003014F0(char *dst, const char *format, ...);
 
 extern s32 fileTestSavedSlotFlags(u32);
@@ -104,11 +110,20 @@ typedef struct BtlCameraCursor {
 
 extern BtlCameraCursor D_0035F100;
 
-extern s32 D_0035D9F0[];
+/* Serialized camera instructions advance by 0x10 in 001E9DE0. */
+typedef struct BtlCameraTimedInstruction {
+    s32 kind;
+    s16 parameterIndex;
+    u8 pad06[2];
+    f32 startFrame;
+    f32 duration;
+} BtlCameraTimedInstruction;
 
-extern s32 D_0035DA08[];
+extern const BtlCameraTimedInstruction *D_0035D9F0[];
 
-extern void func_001E9DE0(BtlLinkedCommand *, BtlCamState *, s32);
+extern const BtlCameraTimedInstruction *D_0035DA08[];
+
+extern void func_001E9DE0(BtlLinkedCommand *, BtlCamState *, const BtlCameraTimedInstruction *);
 
 extern void func_001EB368(BtlLinkedCommand *, BtlCamState *);
 extern void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *, BtlCamState *);
@@ -6004,12 +6019,12 @@ u32 btlPollGunLoad(u32 *arg) {
     if (args->handle == 0) {
         return 1;
     }
-    if (fileIsRequestReadyInCurrentMode(args->handle) == 0) {
+    if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->handle) == 0) {
         return 0;
     }
     btlBossDebugPrintf("btl:gun & finish load end[%p]\n", args->handle);
-    unit->gunResource = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle(args->handle)));
-    filePollEntryCleanup(args->handle);
+    unit->gunResource = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileWork *)args->handle)));
+    filePollEntryCleanup((struct FileCleanup *)args->handle);
     unit->gunResourceFlags = (unit->gunResourceFlags & ~4) | 8;
     return 1;
 }
@@ -8902,8 +8917,8 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4468);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E5800);
 
-extern s32 D_0035DA28[];
-extern s32 D_0035DAD0[];
+extern const BtlCameraTimedInstruction *D_0035DA28[];
+extern const BtlCameraTimedInstruction *D_0035DAD0[];
 
 void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *action, BtlCamState *state) {
     if (!(action->task->unit->flags & 0x400)) {
@@ -8948,7 +8963,7 @@ void func_001E6180(BtlLinkedCommand *action) {
     }
 }
 
-extern s32 D_0035DA40[];
+extern const BtlCameraTimedInstruction *D_0035DA40[];
 
 void func_001E6260(BtlLinkedCommand *action, BtlCamState *state) {
     if (!(action->task->unit->flags & 0x400)) {
@@ -9131,15 +9146,6 @@ s32 func_001EB1B0(BtlLinkedCommand *action, BtlCamState *pose, s8 bypassUpper, s
 }
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001EB368);
-
-/* Serialized camera instructions advance by 0x10 in 001E9DE0. */
-typedef struct BtlCameraTimedInstruction {
-    s32 kind;
-    s16 parameterIndex;
-    u8 pad06[2];
-    f32 startFrame;
-    f32 duration;
-} BtlCameraTimedInstruction;
 
 /* Camera parameter banks are indexed with a native 0x80-byte stride. */
 typedef struct BtlCameraParameterRecord {
@@ -9441,7 +9447,7 @@ u32 btlCountUnitsByFlags(u32 mask) {
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001EEAE0);
 
-extern s32 D_0035DAE0[];
+extern const BtlCameraTimedInstruction *D_0035DAE0[];
 
 void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *action, BtlCamState *state) {
     BtlCameraCursor *cursor = &D_0035F100;
@@ -9463,8 +9469,8 @@ void btlClearCommandCursorAndRunAction(BtlLinkedCommand *actor) {
     btlFlagUserAndTargetDefeat(actor, actor);
 }
 
-extern s32 D_0035DAF0[];
-extern s32 D_0035DAF8[];
+extern const BtlCameraTimedInstruction *D_0035DAF0[];
+extern const BtlCameraTimedInstruction *D_0035DAF8[];
 
 void btlAdvanceCommandCursorOrAction(BtlLinkedCommand *action, BtlCamState *state) {
     if (CURSOR->unk_00 == 1) {
@@ -10210,10 +10216,10 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
         btlBossDebugPrintf(D_003A4BE8, path);
     } else {
         if (args->frontHandle != 0) {
-            if (fileIsRequestReadyInCurrentMode(args->frontHandle) != 0) {
+            if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->frontHandle) != 0) {
                 work->primaryBuffer =
-                    (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle(args->frontHandle)));
-                filePollEntryCleanup(args->frontHandle);
+                    (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileWork *)args->frontHandle)));
+                filePollEntryCleanup((struct FileCleanup *)args->frontHandle);
                 args->frontHandle = 0;
                 btlBossDebugPrintf(D_003A4BF8);
             } else {
@@ -10221,10 +10227,10 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
             }
         }
         if (args->sideHandle != 0) {
-            if (fileIsRequestReadyInCurrentMode(args->sideHandle) != 0) {
+            if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->sideHandle) != 0) {
                 work->secondaryBuffer =
-                    (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle(args->sideHandle)));
-                filePollEntryCleanup(args->sideHandle);
+                    (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle((struct FileWork *)args->sideHandle)));
+                filePollEntryCleanup((struct FileCleanup *)args->sideHandle);
                 args->sideHandle = 0;
                 btlBossDebugPrintf(D_003A4C10);
             } else {
@@ -10778,15 +10784,15 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
     if (effect->flags & 2) {
         return 1;
     }
-    if (!fileIsRequestReadyInCurrentMode(args->loadHandle)) {
+    if (!fileIsRequestReadyInCurrentMode((struct FileRequest *)args->loadHandle)) {
         return 0;
     }
     btlBossDebugPrintf(D_003A4C88, args->name);
-    resource = fileGetResourceHandle(args->loadHandle);
+    resource = fileGetResourceHandle((struct FileWork *)args->loadHandle);
     effect->resourceHandle =
         sndMixerClone((void *)sdfResourceRetainAddress((struct SdfMemBlock *)(resource)));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
-    filePollEntryCleanup(args->loadHandle);
+    filePollEntryCleanup((struct FileCleanup *)args->loadHandle);
     effect->flags = (effect->flags & ~1) | 2;
     return 0;
 }
@@ -11730,11 +11736,11 @@ u32 sndPollMotSeFileAndSpu(SoundFileRequest *request) {
         return 0;
     }
     if ((node->flags & 2) == 0) {
-        if (fileIsRequestReadyInCurrentMode(request->handle)) {
+        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)request->handle)) {
             s32 size;
             s32 data;
             btlBossDebugPrintf(D_003A50F0, request->name);
-            request->resourceHandle = fileGetResourceHandle(request->handle);
+            request->resourceHandle = fileGetResourceHandle((struct FileWork *)request->handle);
             size = fileGetResourceSize(request->handle);
             data = sdfResourceRetainAddress((struct SdfMemBlock *)(request->resourceHandle));
             if (sndFindPackedTrackLoadStatus(node->position) == 0) {
@@ -11748,7 +11754,7 @@ u32 sndPollMotSeFileAndSpu(SoundFileRequest *request) {
     } else if (sndFindPackedTrackLoadStatus(node->position) != 0) {
         btlBossDebugPrintf(D_003A5138, (u16)(node->position >> 16));
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(request->resourceHandle));
-        filePollEntryCleanup(request->handle);
+        filePollEntryCleanup((struct FileCleanup *)request->handle);
         node->flags = (node->flags & ~8) | 0x10;
         return 1;
     }
@@ -12012,7 +12018,7 @@ void sndReleaseSlotOwner(SoundSlotOwner *node) {
         u32 *requests = (u32 *)node->work.fileRequests;
         for (; i < 0x1D; i++, requests++, resources++) {
             if (*requests != 0) {
-                filePollEntryCleanup(*requests);
+                filePollEntryCleanup((struct FileCleanup *)*requests);
             }
             if (*resources != 0) {
                 sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*resources));
@@ -12270,14 +12276,14 @@ s32 sndPollAtrac3SELoadTask(BattleVoiceLoad *args) {
         func_003014F0(path, D_003A5328, D_00377650[args->index].fileName);
         args->request = fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A5340, path);
-    } else if (fileIsRequestReadyInCurrentMode(args->request) != 0) {
+    } else if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->request) != 0) {
         if (mnuGetSoundBufferStateLocked() != 0) {
             mnuReleaseSoundBufferLocked();
         }
-        resource = fileGetResourceHandle(args->request);
+        resource = fileGetResourceHandle((struct FileWork *)args->request);
         data = (u32)sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
         size = fileGetResourceSize(args->request);
-        filePollEntryCleanup(args->request);
+        filePollEntryCleanup((struct FileCleanup *)args->request);
         func_0026ABA8(data, size, D_00377650[args->index].volume);
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
         btlBossDebugPrintf(D_003A5358);
@@ -12352,12 +12358,12 @@ u32 sndUpdateEarringDeadPlayback(u32 *args) {
         return 1;
     }
     if (args[2] == 0) {
-        if (fileIsRequestReadyInCurrentMode(args[1]) != 0) {
-            resource = fileGetResourceHandle(args[1]);
+        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args[1]) != 0) {
+            resource = fileGetResourceHandle((struct FileWork *)args[1]);
             args[2] = resource;
             data = sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
             size = fileGetResourceSize(args[1]);
-            filePollEntryCleanup(args[1]);
+            filePollEntryCleanup((struct FileCleanup *)args[1]);
             func_0026ABA8(data, size, 2);
             mnuPrintTitleDebugBanner();
             func_003003F0(D_003A5390);
