@@ -7632,14 +7632,14 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
             mainUnit->resourceIndex == 0x12E && (mainUnit->flags & 2)) {
             func_001E3108(mainUnit, position);
             position[1] += 1000000.0f;
-            effObjSetInnerFirstVec((EffWorldNode *)mainUnit->effectObject,
+            effObjSetInnerFirstVec(mainUnit->effectObject,
                 (u128 *)position);
         }
         if ((twin->flags & 0xE0) && !(mainUnit->flags & 0xE0) &&
             twin->resourceIndex == 0x12F && (twin->flags & 2)) {
             func_001E3108(twin, position);
             position[1] += 1000000.0f;
-            effObjSetInnerFirstVec((EffWorldNode *)twin->effectObject,
+            effObjSetInnerFirstVec(twin->effectObject,
                 (u128 *)position);
         }
     } else {

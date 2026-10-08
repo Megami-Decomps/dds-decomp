@@ -225,7 +225,7 @@ typedef struct BtlUnit {
     void *gunResource;
     BtlEffectLinkState effectLink; /* 0x330: same flags/reference pair as DDS1 +0x310. */
     u8 pad338[4];
-    s32 effectObject; /* 0x33C: effect whose first inner vector becomes the origin */
+    struct EffWorldNode *effectObject; /* 0x33C: effect whose first inner vector becomes the origin */
     struct EvtUnit *ext; /* 0x340: the event manager's complete 0x1D0-byte work. */
     s32 unk344; /* Alternate SDF model used by the transparency path. */
     struct BtlUnit *mirror; /* 0x348: created and destroyed by the model-change task. */
