@@ -715,7 +715,7 @@ void mnuResetProgressModeFromOwner(u8 *work) {
 }
 
 /* Allocate/zero the progress host, retain its allocation, and begin resource setup. */
-s32 mnuCreateProgressHost(void) {
+MenuProgressHost *mnuCreateProgressHost(void) {
     s32 heap = sdfAllocGeneralBlock(MNU_MENU_HOST_BYTES);
     MenuProgressHost *host = (MenuProgressHost *)sdfResourceRetainAddress(heap);
     memset((void *)host, 0, MNU_MENU_HOST_BYTES);
@@ -724,15 +724,15 @@ s32 mnuCreateProgressHost(void) {
     mnuInitPartyPanelSlots(&host->partyPanel);
     mnuAppendCampSpriteRequests(host->titleEffectHandle, (s32)host + 8);
     host->loadState = 1;
-    return (s32)host;
+    return host;
 }
 
 /* Release staff/title texture work before the value record and allocation. */
-void mnuReleaseStaffAndTitleVisualResources(u32 *hostWords) {
-    mnuReleaseStaffMenuTextureHandles(hostWords + 2);
-    mnuReleaseTitleEffectSprites(hostWords + 2);
-    func_00303D58(hostWords[1]);
-    sdfReleaseResourceAllocation(*hostWords);
+void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *host) {
+    mnuReleaseStaffMenuTextureHandles((s32)&host->staffSlots);
+    mnuReleaseTitleEffectSprites(&host->staffSlots);
+    func_00303D58(host->titleEffectHandle);
+    sdfReleaseResourceAllocation(host->heapHandle);
 }
 
 /* Return one while initialization is pending (including state zero), zero when ready.
