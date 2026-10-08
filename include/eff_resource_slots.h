@@ -7,6 +7,7 @@ struct EffectSlotSet;
 struct BdWork;
 struct SdfMemBlock;
 struct EffMappedResource;
+struct EffMappedRecord;
 struct EffTimedState;
 
 /* EffTimedState.flags bits used by phase initialization and endpoint handling. */
@@ -24,6 +25,8 @@ enum EffTimedStateFlag {
 u32 effSetSlotIndexedResource(struct EffTimedState *target,
                               struct EffMappedResource *resources, s32 item,
                               u32 flags);
+u32 effSetSlotResourceAndFlags(struct EffTimedState *target,
+                               struct EffMappedRecord *resource, u32 flags);
 
 struct EffMappedResource *effCreateStatusBatch(u32 category);
 #ifdef VERSION_DDS2

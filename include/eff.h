@@ -5,6 +5,7 @@
 #include "sdf.h"
 
 struct EffNode;
+struct EffMappedRecord;
 
 struct EffRequest;
 struct SdfMemBlock;
@@ -752,7 +753,7 @@ typedef struct EffTimedState {
         s32 delayMax;
         u32 materialValue;
     };
-    u8 *source;
+    struct EffMappedRecord *source;
 } EffTimedState;
 
 /* Draw geometry is copied together; grid easing walks the bound coordinates. */
