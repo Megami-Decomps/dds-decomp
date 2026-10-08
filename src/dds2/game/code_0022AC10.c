@@ -1368,7 +1368,28 @@ s32 btlReleaseEntryIfReady(s32 kind, s32 id) {
     return entry;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022CD60);
+extern void func_0022CBA0(s32, s32);
+
+s32 func_0022CD60(s32 kind, s32 id) {
+    s32 entry;
+
+    if (mdlRequestAsset(kind, id, 0) != 0 && mdlRequestAsset(kind, id, 0) != -1 &&
+        sndFindListNodeForChannel(kind, id) != 0) {
+        return 1;
+    }
+    entry = btlFindModelEntry(kind, id);
+    if (entry != 0) {
+        if (btlIsModelPackEntryReady((BattleModelEntry *)entry) != 0) {
+            if (((BattleModelEntry *)entry)->state == 0) {
+                func_0022CBA0(kind, id);
+            }
+            return 1;
+        }
+    } else {
+        btlLoadModelPack(kind, id);
+    }
+    return 0;
+}
 
 extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern void sdfQueueTexturedQuad(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,

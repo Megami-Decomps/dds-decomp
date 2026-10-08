@@ -6,6 +6,52 @@ struct MnuShootingWork;
 struct MnuModelNode;
 struct ModelInstance;
 
+/* Eight-byte initial parameters copied together into the named state record. */
+typedef struct MenuInitialTag {
+    u8 reserved;
+    u8 flags;
+    s16 group;
+    s16 duration;
+    s16 index;
+} MenuInitialTag;
+
+/* Named-record constructors allocate and clear exactly 0x22 bytes. */
+typedef struct MenuStateRecord {
+    union {
+        u16 word;
+        struct {
+            u16 completed : 1;
+            u16 valueGated : 1;
+            u16 hasRange : 1;
+            u16 waitPending : 1;
+            u16 unk4 : 1;
+            u16 direction : 4;
+            u16 unk9 : 7;
+        } bits;
+    } flags;
+    u8 pad02[2];
+    u16 waitCount;
+    s16 elapsedCount;
+    s16 value;
+    MenuInitialTag tag; /* 0x0A: copied as one eight-byte group. */
+    u8 pad12[2];
+    s16 waitLimit;
+    s16 limit;
+    s16 unk18;
+    u8 pad1A[2];
+    s16 offsetX;
+    s16 offsetY;
+    s16 effect;
+} MenuStateRecord;
+
+typedef char MenuStateRecordLayoutAssert[
+    (sizeof(MenuInitialTag) == 8 && sizeof(MenuStateRecord) == 0x22 &&
+     (unsigned long)&((MenuStateRecord *)0)->tag == 0x0A &&
+     (unsigned long)&((MenuStateRecord *)0)->unk18 == 0x18 &&
+     (unsigned long)&((MenuStateRecord *)0)->effect == 0x20) ? 1 : -1];
+
+MenuStateRecord *mnuCreateNamedRecord(const void *tagData);
+
 typedef union MenuWorkControl {
     u32 word;
     u8 bytes[4];

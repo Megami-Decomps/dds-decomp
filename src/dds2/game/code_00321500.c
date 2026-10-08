@@ -47,7 +47,7 @@ extern u8 D_0045C880[];
 extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 
 extern void mnuFreeOptionalBlock(u32);
-extern u32 func_0035A828(s32 bytes);
+extern void *func_0035A828(u32 bytes);
 extern u8 *mnuGetResourceProgressStepState(void);
 extern u32 mnuGetActiveEffectWorkEntry(void);
 
@@ -89,13 +89,6 @@ typedef struct MenuRegistryRecord {
 } MenuRegistryRecord;
 
 
-typedef struct MenuInitialTag {
-    u8 reserved;
-    u8 flags;
-    u16 group;
-    u16 kind;
-    u16 index;
-} MenuInitialTag;
 
 typedef struct MenuLengthData {
     u8 pad0[4];
@@ -124,29 +117,6 @@ struct MenuRegistryTable {
 void func_003214D0(u32, s32);
 s32 dds3MeasureRecordBlock(s32 *entries, s32 count);
 
-typedef struct MenuStateRecord {
-    union {
-        u16 word;
-        struct {
-            u16 completed : 1;
-        } bits;
-    } flags;
-    u8 pad02[2];
-    u16 waitCount; /* 0x04 */
-    s16 elapsedCount; /* 0x06: advances toward duration, then resets */
-    s16 value;     /* 0x08 */
-    u8 pad0A;
-    u8 mode;       /* 0x0B */
-    u8 pad0C[2];
-    s16 duration;  /* 0x0E */
-    u8 pad10[4];
-    s16 waitLimit; /* 0x14 */
-    s16 limit;     /* 0x16 */
-    u8 pad18[4];
-    s16 offsetX;   /* 0x1C: optional spawn offset */
-    s16 offsetY;   /* 0x1E */
-    s16 effect;    /* 0x20: positive values select an animated effect */
-} MenuStateRecord; /* Native named-record allocation is 0x22 bytes. */
 
 s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record);
 extern MenuRuntimeRecord *func_00321A30(MenuStateRecord *record,
@@ -180,7 +150,7 @@ void func_003216A8(MnuCallbackList *list, MenuRuntimeList *runtimeList,
                 record->flags.word &= 0xFFFE;
                 /* The native dispatcher retains separate kind paths even
                  * though both currently invoke the same spawn provider. */
-                if ((record->mode & 0xF) >= 2) {
+                if ((record->tag.flags & 0xF) >= 2) {
                     func_00321A30(record, runtimeList, x, y, angle);
                 } else {
                     func_00321A30(record, runtimeList, x, y, angle);
@@ -200,7 +170,7 @@ void func_00321798(MnuCallbackList *list, MenuRuntimeList *runtimeList,
         do {
             record = (MenuStateRecord *)node->value;
             if (mnuAdvanceTimedStateRecord(record) != 0 && enabled != 0) {
-                u32 kind = record->mode & 0xF;
+                u32 kind = record->tag.flags & 0xF;
                 if ((kindMask >> kind) & 1) {
                     record->flags.word &= 0xFFFE;
                     /* Retain the two native kind paths, as in the unfiltered
@@ -218,14 +188,14 @@ void func_00321798(MnuCallbackList *list, MenuRuntimeList *runtimeList,
 }
 
 /* Allocate a zeroed 0x22-byte record with an eight-byte tag at offset 0xA. */
-u8 *mnuCreateNamedRecord(u8 *tagData) {
-    u8 *record;
+MenuStateRecord *mnuCreateNamedRecord(const void *tagData) {
+    MenuStateRecord *record;
     if (tagData == 0) {
         return 0;
     }
-    record = (u8 *)func_0035A828(0x22);
-    memset(record, 0, 0x22);
-    memcpy(record + 0xa, tagData, 8);
+    record = func_0035A828(sizeof(*record));
+    memset(record, 0, sizeof(*record));
+    memcpy(&record->tag, tagData, sizeof(record->tag));
     return record;
 }
 
@@ -253,7 +223,7 @@ s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record) {
         record->flags.word &= ~MNU_STATE_WAIT_PENDING;
         record->value = 0;
     }
-    if (++record->elapsedCount >= record->duration) {
+    if (++record->elapsedCount >= record->tag.duration) {
         record->elapsedCount = 0;
         if (!(record->flags.word & MNU_STATE_VALUE_GATED) || record->limit > record->value) {
             record->flags.word |= MNU_STATE_COMPLETED;
@@ -997,12 +967,12 @@ void mnuInitializeEffectContext(MenuWorkEntry *context) {
     /* Retail only initializes bytes 1 through 7 of this tag. */
     initialTag.flags = 0;
     initialTag.group = 0;
-    initialTag.kind = 2;
+    initialTag.duration = 2;
     initialTag.index = 0;
     memset(context, 0, 0x48);
     context->callback = mnuCreateReleaseCallbackNode();
     func_00320CE0((MnuCallbackList *)context->callback, 0,
-                   (u32)mnuCreateNamedRecord((u8 *)&initialTag));
+                   (u32)mnuCreateNamedRecord(&initialTag));
 }
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00324B28);
