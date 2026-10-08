@@ -270,14 +270,14 @@ MnuMantraGridEntry *func_002530D8(s32 unused, u16 profileId, MnuProfileProgress 
     if (prfReq54Evaluate(0, (ScrVmOperand *)selection->partyRecord, entry->sceneId) != 0 ||
         entry->sceneId == 0x4E) {
         if (prfReq54Evaluate(1, (ScrVmOperand *)selection->partyRecord, entry->sceneId) != 0) {
-            entry->state = 1;
+            entry->state = MNU_MANTRA_GRID_ENTRY_SECOND_CHECK_OR_PROFILE_FLAG;
         } else if (entry->profileFlag != 0) {
-            entry->state = 1;
+            entry->state = MNU_MANTRA_GRID_ENTRY_SECOND_CHECK_OR_PROFILE_FLAG;
         } else {
-            entry->state = 2;
+            entry->state = MNU_MANTRA_GRID_ENTRY_FIRST_CHECK_OR_SPECIAL_PROFILE;
         }
     } else {
-        entry->state = 3;
+        entry->state = MNU_MANTRA_GRID_ENTRY_FIRST_PATH_REJECTED;
     }
     entry->value = ptyGetProfileRecordValue(selection->partyRecord, entry->sceneId);
     return entry;
@@ -412,7 +412,7 @@ s32 func_00253830(void) {
                        ptyGetProfileRecordValue(selection->partyRecord, entry->sceneId)) {
                 scene->state = 7;
                 scene->pendingProfileId = 0;
-            } else if (entry->state != 1) {
+            } else if (entry->state != MNU_MANTRA_GRID_ENTRY_SECOND_CHECK_OR_PROFILE_FLAG) {
                 if (func_002508D8(entry->sceneId) == 0) {
                     scene->state = 6;
                 } else {
