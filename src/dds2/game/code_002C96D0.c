@@ -33,6 +33,18 @@ typedef struct FileRecordHeader {
     u32 progressWords[3];
 } FileRecordHeader;
 
+typedef struct MenuWork {
+    FileRecordHeader header;
+    s8 unk30;
+    s8 unk31;
+    u16 unk32;
+    u16 startBranchFlag; /* 0x34: selects one of two initial menu flows */
+    u16 unk36;
+    u16 unk38;
+    u16 unk3A;
+    struct SdfMemBlock *unk3C;
+} MenuWork;
+
 typedef struct FileScrollArrowState {
     s32 angle;
     s32 upAlpha;
@@ -115,7 +127,7 @@ extern void sdfDevQueueReadAndWait(DevState *, void *, s32);
 extern void sdfDevWaitThenReleaseCommandState(DevState *);
 
 
-extern s32 fileLoadSelectionWork;
+extern MenuWork *fileLoadSelectionWork;
 
 extern u32 fileWaitTicksRemaining;
 
@@ -2206,7 +2218,7 @@ void *mcdAdvanceToLoadSelection(void) {
 extern s32 D_00437D00;
 extern void fileLoadSetMode(s8);
 extern void fileSetMenuValueAndInitializeFlags(u32);
-extern void fileCopyRecordHeader(FileRecordHeader *, const FileRecordHeader *);
+extern void fileCopyRecordHeader(FileRecordHeader *, const void *);
 
 void *func_002CCAD0(void) {
     s32 oldSelection = D_00437D2C;
@@ -2330,8 +2342,8 @@ void *func_002CCAD0(void) {
                 if (mcdOriginalTitleFileMode == 0) {
                     return (void *)fileBeginPromptDialog(fileBeginSlotCreate, fileScanSlotStates, 1);
                 }
-                fileCopyRecordHeader((FileRecordHeader *)fileLoadSelectionWork,
-                    (const FileRecordHeader *)(&D_004580C0[D_00437D2C]));
+                fileCopyRecordHeader(&fileLoadSelectionWork->header,
+                    &D_004580C0[D_00437D2C]);
                 return (void *)fileBeginPromptDialog(mcdAdvanceToLoadSelection, fileScanSlotStates, 1);
             }
             sndSetSequenceVolumePan(0xA, 0x7F, 0x3F);
@@ -3235,25 +3247,14 @@ void *fileBeginFadeAndConfirmSound(void) {
     return func_002D0498;
 }
 
-typedef struct MenuWork {
-    FileRecordHeader header;
-    u8 unk30;
-    u8 unk31;
-    u16 unk32;
-    u16 startBranchFlag; /* 0x34: selects one of two initial menu flows */
-    u16 unk36;
-    u16 unk38;
-    u16 unk3A;
-    u32 unk3C;
-} MenuWork;
 
 void func_002D06B0(void) {
-    ((MenuWork *)fileLoadSelectionWork)->unk31 = 0;
+    fileLoadSelectionWork->unk31 = 0;
     fileBeginFadeAndConfirmSound();
 }
 
 void func_002D06D0(void) {
-    ((MenuWork *)fileLoadSelectionWork)->unk31 = 1;
+    fileLoadSelectionWork->unk31 = 1;
     fileBeginFadeAndConfirmSound();
 }
 
@@ -3267,7 +3268,7 @@ void *fileStartLoadDetectionAfterBranchDialog(void) {
     D_00437D18 = -1;
     D_00437D1C = 0;
     fileSetMenuFlowState(0x18);
-    ((MenuWork *)fileLoadSelectionWork)->unk30 = 1;
+    fileLoadSelectionWork->unk30 = 1;
     return fileCreateDetectionAudioCallback((u32)fileBeginLoadBranchDialog);
 }
 
@@ -3299,8 +3300,8 @@ typedef struct FileFlowEntry {
 extern FileFlowEntry D_003E7FC8[];
 
 void *fileNextMenuFlowState(void) {
-    while (((MenuWork *)fileLoadSelectionWork)->unk36 < 4) {
-        MenuWork *work = (MenuWork *)fileLoadSelectionWork;
+    while (fileLoadSelectionWork->unk36 < 4) {
+        MenuWork *work = fileLoadSelectionWork;
         u32 index = work->unk36;
 
         work->unk36 = index + 1;
@@ -3334,18 +3335,18 @@ void *fileFadeBeforeResettingRequest(void) {
 void fileBeginLoadOrAbortDialog(void) {
     fileSetMenuFlowState(0);
     D_00437D1C = 10;
-    ((MenuWork *)fileLoadSelectionWork)->unk30 = 0;
+    fileLoadSelectionWork->unk30 = 0;
     fileBeginFourWayDialog((u32)fileRestartSelectionFlow, (u32)fileBeginFadeAndConfirmSound, (u32)fileFadeBeforeResettingRequest, 0);
 }
 
 s32 mcdContinueLoadSelection(void) {
     u32 state = fileGetLoadSelectionState();
-    u32 block;
+    MenuWork *block;
     s32 next = (s32)fileMenuWorkStart;
     if (state != 0) {
         if (state == 2) {
             block = fileLoadSelectionWork;
-            ((MenuWork *)block)->unk36 = 0;
+            block->unk36 = 0;
             fileApplyMenuFlagsToModel(block);
             sndSetSequenceVolumePan(8, 0x7f, 0x3f);
             next = (s32)fileNextMenuFlowState;
@@ -3367,32 +3368,32 @@ void *fileMenuWorkStart(void) {
     if (kwlnFadeIsActive()) {
         kwlnFadeStartIn(0x10);
     }
-    if (((MenuWork *)fileLoadSelectionWork)->startBranchFlag == 0) {
+    if (fileLoadSelectionWork->startBranchFlag == 0) {
         return fileBeginLoadOrAbortDialog;
     }
-    ((MenuWork *)fileLoadSelectionWork)->unk30 = 1;
+    fileLoadSelectionWork->unk30 = 1;
     return fileBeginLoadBranchDialog();
 }
 
 
 void fileMenuWorkCreate(u32 startBranchFlag) {
-    u32 buffer = (u32)sdfAllocGeneralBlock(0x40);
+    struct SdfMemBlock *buffer = sdfAllocGeneralBlock(0x40);
     MenuWork *work;
 
-    fileLoadSelectionWork = sdfResourceRetainAddress((struct SdfMemBlock *)(buffer));
-    memset((void *)fileLoadSelectionWork, 0, 0x40);
-    work = (MenuWork *)fileLoadSelectionWork;
+    fileLoadSelectionWork = (MenuWork *)sdfResourceRetainAddress(buffer);
+    memset(fileLoadSelectionWork, 0, 0x40);
+    work = fileLoadSelectionWork;
     work->unk30 = 0;
     work->unk3C = buffer;
     work->startBranchFlag = startBranchFlag;
     work->unk38 = 0;
-    ((MenuWork *)fileLoadSelectionWork)->unk31 = 0;
+    fileLoadSelectionWork->unk31 = 0;
 }
 
 void fileReleaseMenuFlowResource(void) {
     if (fileLoadSelectionWork != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)((MenuWork *)fileLoadSelectionWork)->unk3C);
-        fileLoadSelectionWork = 0;
+        sdfQueueGeneralAllocationRelease(fileLoadSelectionWork->unk3C);
+        fileLoadSelectionWork = NULL;
     }
 }
 
@@ -3426,8 +3427,8 @@ void fileCopySaveHeaderNumbers(FileRecordHeader *source) {
     state->header.unk2C = source->progressWords[2];
 }
 
-void fileCopyRecordHeader(FileRecordHeader *destination, const FileRecordHeader *source) {
-    *destination = *source;
+void fileCopyRecordHeader(FileRecordHeader *destination, const void *source) {
+    memcpy(destination, source, sizeof(*destination));
 }
 
 void fileApplyMenuFlagsToModel(MenuWork *work) {

@@ -3882,3 +3882,28 @@ owns this byte; it is not padding or a second descriptor view. The
 nullable companion units already belong to `BattleIndexWork`, and their
 effect flags belong to the primary `BtlUnit.effectLink`.
 
+
+## Panel options and the controller button bank
+
+`ItfMesBlk40.options` contains four-byte `ItfMesOption` records with signed
+`id` and `value` halfwords. DDS2 `001A6AB8` loads both with `lh`, indexes the
+signed-byte controller bank at `D_0037F510 + 0x20`, and uses `value` to count
+clear bits in `panelValue`. Its caller passes the existing panel selection
+record, not a raw byte buffer. The unit's `SndPad` primary now documents that
+indexed bank and its named controls as two arms of the same union; the named
+offsets and the complete `0x40`-byte layout are unchanged. The callback remains
+assembly: the honest typed iterator still differs in six prefix instructions.
+
+
+## Save-flow allocation and serialized header copy
+
+DDS2's `fileLoadSelectionWork` owns the existing `0x40`-byte `MenuWork`.
+Retail `002D0498` reads both decision bytes at `+0x30/+0x31` with `lb`;
+the final word retains the `SdfMemBlock *` allocation descriptor, not the
+buffer address. The resource getter's `u32` address is converted once at
+that API boundary. `fileCopyRecordHeader` copies the first `0x30` serialized
+bytes from either directory metadata or `DatStateHeader`, whose additional
+runtime words are not copied. A `const void *` source and fixed-size
+`memcpy` express this byte-copy contract without inventing another struct
+view of those primary owners; the provider remains text-exact.
+
