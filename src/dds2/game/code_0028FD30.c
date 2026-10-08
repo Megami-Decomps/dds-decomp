@@ -1,6 +1,25 @@
+#include "mnu_mantra.h"
 #include "common.h"
 #include "mnu.h"
 #include "mnu_list.h"
+
+extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
+extern s32 evtGetMessageWindowControlState(void);
+extern void evtFinishMessageWindowAndNotify(void);
+extern s32 dspStartEntry(s32);
+extern void dspCloseChannel(void);
+extern void mnuDisableMantraBackground(u32);
+extern void mnuEnableMantraBackground(u32);
+extern void mnuToggleMantraTitleVariant(u32);
+extern void mnuBeginMantraUnitPanelExit(u32);
+extern u32 mnuRegisterMantraUnitPanelDraw(u32, u32);
+extern u32 mnuGetSelectedNodeValue(MnuStatusResource *);
+extern s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *, s8);
+extern void func_0028D070(MnuStatusResource *, s32, s32);
+extern void func_00291590(MnuStatusResource *, s16, s32, s8, s8, s32);
+extern void func_002932B0(MnuStatusResource *);
+extern void func_00294060(MnuStatusResource *);
+
 
 typedef struct MenuPanelTransition {
     u16 frame;
@@ -54,30 +73,16 @@ extern MantraPanelAnimation *mnuSpawnPanelSlotB(MantraPanelPool *, s32, s8, s16,
 
 extern MantraPanelAnimation *mnuFindPanelSlotById(MantraPanelPool *, s32, s8);
 
-typedef struct MenuContainer MenuContainer;
-extern u32 func_002890A8(MenuContainer *);
+
+extern u32 func_002890A8(MnuStatusResource *);
 
 
 
-typedef struct MenuPanelSlot {
-    u8 pad00[8];
-    u16 *values;
-} MenuPanelSlot;
+
 
 /* The selector also carries word-wide flags in its packed representation. */
-typedef union MenuPanelSelector {
-    u32 packed;
-    struct {
-        u16 flags;
-        s16 index;
-    } fields;
-} MenuPanelSelector;
-typedef struct MantraNodePos {
-    MenuPanelSelector selector;
-    s16 x;
-    s16 y;
-    struct MantraNodePos *neighbors[6];
-} MantraNodePos;
+
+
 
 typedef struct MenuPanelEntry {
     s32 soundHandle;
@@ -91,62 +96,11 @@ typedef struct MenuPanelEntryPool {
 } MenuPanelEntryPool;
 
 /* The eight-byte acquisition record uses its low byte as the mantra id. */
-typedef struct MenuMantraRecord {
-    union {
-        u16 flags;
-        struct {
-            u8 mantraId;
-            u8 flagsHigh;
-        };
-    };
-    u8 pad02[2];
-    s8 element;
-    u8 pad05[3];
-} MenuMantraRecord;
 
-typedef struct MenuPanelState {
-    u8 pad00[6];
-    s8 tutorialTimer;
-    u8 tutorialState;
-    u8 pad08[0x54C];
-    u32 drawFlags;
-    s16 messageWidth;
-    s16 messageHeight;
-    u8 pad55C[4];
-    MantraNodePos *defaultSelector;
-    MantraNodePos *alternateSelector;
-    u8 pad568[4];
-    MenuPanelSlot *slots[18];
-    u32 collectedValues[8];
-    s32 savedSelection;
-    s32 collectedCount;
-    MantraNodePos *tutorialCurrentNode;
-    s8 selectionIndex;
-    u8 pad5E1[3];
-    MenuMantraRecord records[112];
-    u8 pad964[0x40];
-    s32 navigationState;
-    u8 pad9A8[4];
-    MantraPanelPool *resource;
-    union {
-        u32 flags;
-        u8 flagBytes[4];
-    };
-    u8 unk9B4;
-    u8 unk9B5;
-    u16 unk9B6;
-    u8 pad9B8[8];
-    s32 selectionController;
-} MenuPanelState;
 
-typedef struct MenuPanelObject {
-    u8 pad00[4];
-    struct MenuList *list;
-    u8 pad08[0x3C];
-    void *messageWindow;
-    u8 pad48[0x1F8];
-    MenuPanelState state;
-} MenuPanelObject;
+
+
+
 extern void func_00291338(void);
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427560);
@@ -159,8 +113,8 @@ INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004275B0);
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004275E8);
 
-s32 func_00290240(MenuPanelObject *object, s8 direction) {
-    MantraNodePos *position = object->state.defaultSelector;
+s32 func_00290240(MnuStatusResource *object, s8 direction) {
+    MantraNodePos *position = object->menu.defaultSelector;
     s32 grid[2];
     s32 neighbor;
 
@@ -183,7 +137,7 @@ s32 func_00290240(MenuPanelObject *object, s8 direction) {
 }
 
 
-s32 func_00290328(MenuPanelObject *object, MantraNodePos *list, s8 position) {
+s32 func_00290328(MnuStatusResource *object, MantraNodePos *list, s8 position) {
     u16 selected;
     MantraNodePos *entry;
     u16 value;
@@ -192,13 +146,13 @@ s32 func_00290328(MenuPanelObject *object, MantraNodePos *list, s8 position) {
     if (list == NULL || position == -1) {
         return -1;
     }
-    selected = func_002890A8((MenuContainer *)object);
+    selected = func_002890A8((MnuStatusResource *)object);
     entry = list->neighbors[position];
     result = 0;
     if (entry == NULL) {
         result = 1;
     } else {
-        value = object->state.slots[selected]->values[entry->selector.fields.index];
+        value = object->menu.slots[selected]->flags[entry->selector.fields.index];
         if ((value & 15) == 3) {
             result = 2;
         } else if ((entry->selector.packed & 0x100) != 0 && ((value >> 8) & 8) != 0) {
@@ -217,16 +171,16 @@ s32 func_00290328(MenuPanelObject *object, MantraNodePos *list, s8 position) {
 }
 
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
-extern s32 func_00290240(MenuPanelObject *, s8);
-extern MantraNodePos *mnuResolveSpecialMantraNeighbor(MenuPanelObject *, u16, s8);
+extern s32 func_00290240(MnuStatusResource *, s8);
+extern MantraNodePos *mnuResolveSpecialMantraNeighbor(MnuStatusResource *, u16, s8);
 typedef struct MantraNeighborIds {
     u16 id;
     u16 neighbors[6];
 } MantraNeighborIds;
 extern MantraNeighborIds D_003D0130[50];
 
-s32 mnuNavigateMantraSelector(MenuPanelObject *object, s8 flags) {
-    MenuPanelState *state = &object->state;
+s32 mnuNavigateMantraSelector(MnuStatusResource *object, s8 flags) {
+    MantraMenuWork *state = &object->menu;
     MantraNodePos *node;
     MantraNodePos *neighbor;
     s32 selected;
@@ -236,7 +190,7 @@ s32 mnuNavigateMantraSelector(MenuPanelObject *object, s8 flags) {
     u16 i;
     u16 id;
 
-    selected = (u16)func_002890A8((MenuContainer *)object);
+    selected = (u16)func_002890A8((MnuStatusResource *)object);
     if (state->navigationState == 0 || state->navigationState == 7) {
         node = state->defaultSelector;
         position = func_00290240(object, flags);
@@ -258,7 +212,7 @@ s32 mnuNavigateMantraSelector(MenuPanelObject *object, s8 flags) {
                                 id = D_003D0130[i].neighbors[position];
                                 if (id != 0) {
                                     neighbor = mnuGetMantraNodePositionRecord(id);
-                                    if ((state->slots[selected]->values[neighbor->selector.fields.index] & 15) != 3) {
+                                    if ((state->slots[selected]->flags[neighbor->selector.fields.index] & 15) != 3) {
                                         state->defaultSelector = neighbor;
                                         if (state->navigationState == 0) {
                                             state->navigationState = 4;
@@ -323,7 +277,7 @@ extern const u16 D_004276A0[3][5];
 
 INCLUDE_SDATA(const s32, "game/code_0028FD30", D_00437940);
 
-MantraNodePos *mnuResolveSpecialMantraNeighbor(MenuPanelObject *object, u16 id, s8 direction) {
+MantraNodePos *mnuResolveSpecialMantraNeighbor(MnuStatusResource *object, u16 id, s8 direction) {
     s32 i;
     s8 activeFlags = 0;
     u16 bridgeIds[4] = {0x61, 0x62, 0x63, 0x64};
@@ -402,8 +356,8 @@ MantraNodePos *mnuResolveSpecialMantraNeighbor(MenuPanelObject *object, u16 id, 
     return NULL;
 }
 
-u32 mnuGetDefaultPanelSelector(MenuPanelObject *object) {
-    return (u32)object->state.defaultSelector;
+u32 mnuGetDefaultPanelSelector(MnuStatusResource *object) {
+    return (u32)object->menu.defaultSelector;
 }
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290A78);
@@ -411,34 +365,34 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290A78);
 extern void func_0026D168(void *, s32, s32);
 extern void *evtAllocateMantraSelectionWork(s32, s32);
 
-s32 mnuUpdateSelectedPanelSlot(MenuPanelObject *object) {
+s32 mnuUpdateSelectedPanelSlot(MnuStatusResource *object) {
     s32 index;
     s32 source;
 
-    index = func_002890A8((MenuContainer *)object);
+    index = func_002890A8((MnuStatusResource *)object);
     source = object->list->cursor->unk70;
-    if (object->state.slots[index] != 0) {
-        func_0026D168(object->state.slots[index], source, 0);
+    if (object->menu.slots[index] != 0) {
+        func_0026D168(object->menu.slots[index], source, 0);
     } else {
-        object->state.slots[index] = evtAllocateMantraSelectionWork(source, 0);
+        object->menu.slots[index] = evtAllocateMantraSelectionWork(source, 0);
     }
     return 1;
 }
 
-u16 mnuGetSelectedPanelValue(MenuPanelObject *object) {
+u16 mnuGetSelectedPanelValue(MnuStatusResource *object) {
     s32 values;
 
-    values = (s32)object->state.slots[object->list->cursor->index]->values;
-    if (object->state.alternateSelector != 0) {
-        return *(u16 *)(object->state.alternateSelector->selector.fields.index * 2 + values);
+    values = (s32)object->menu.slots[object->list->cursor->index]->flags;
+    if (object->menu.alternateSelector != 0) {
+        return *(u16 *)(object->menu.alternateSelector->selector.fields.index * 2 + values);
     }
-    return *(u16 *)(object->state.defaultSelector->selector.fields.index * 2 + values);
+    return *(u16 *)(object->menu.defaultSelector->selector.fields.index * 2 + values);
 }
 
-u16 mnuGetPanelValueAt(MenuPanelObject *object, s32 index) {
+u16 mnuGetPanelValueAt(MnuStatusResource *object, s32 index) {
     return *(u16 *)
                     (((index << 0x10) >> 0xf) +
-                    (s32)object->state.slots[object->list->cursor->index]->values);
+                    (s32)object->menu.slots[object->list->cursor->index]->flags);
 }
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290C20);
@@ -530,13 +484,13 @@ INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004276A0);
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_004276C0);
 
-void mnuStoreMantraPanelFlagsToScript(MenuPanelObject *object) {
+void mnuStoreMantraPanelFlagsToScript(MnuStatusResource *object) {
     struct MenuListNode *node = object->list->first;
     s32 slotIndex = 0;
 
     for (; node != NULL; node = node->next) {
         u32 context = node->unk70;
-        u16 *values = object->state.slots[slotIndex]->values;
+        u16 *values = object->menu.slots[slotIndex]->flags;
         s32 i;
 
         for (i = 0; i < 0xB0; i++) {
@@ -549,13 +503,13 @@ void mnuStoreMantraPanelFlagsToScript(MenuPanelObject *object) {
 extern u32 scrGetEntryLowFlags(s32 arg0, u16 index);
 
 /* Read each list node's 0xB0 script entry flags into its panel slot and log the slot number. */
-void mnuLoadMantraPanelFlagsFromScript(MenuPanelObject *object) {
+void mnuLoadMantraPanelFlagsFromScript(MnuStatusResource *object) {
     struct MenuListNode *node = object->list->first;
     s32 slotIndex = 0;
 
     for (; node != NULL; node = node->next) {
         s32 context = node->unk70;
-        u16 *values = object->state.slots[slotIndex]->values;
+        u16 *values = object->menu.slots[slotIndex]->flags;
         s32 i;
 
         for (i = 0; i < 0xB0; i++) {
@@ -565,13 +519,13 @@ void mnuLoadMantraPanelFlagsFromScript(MenuPanelObject *object) {
     }
 }
 
-extern s32 scrGetSelectedScriptEntryId(s32 arg0);
+extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 extern u32 ptyGetProfileRecordCap(u16 scriptId);
 extern u32 ptyGetProfileRecordValue(u32 work, u16 scriptId);
 
-s32 mnuValidateProfileEntry(MenuPanelSlot *slot, s32 arg1) {
-    u16 target = scrGetSelectedScriptEntryId(arg1) & 0xFFFF;
-    u16 *dst = slot->values;
+s32 mnuValidateProfileEntry(MantraFlagResource *slot, s32 arg1) {
+    u16 target = scrGetSelectedScriptEntryId((DatPartyRecord *)arg1) & 0xFFFF;
+    u16 *dst = slot->flags;
     s32 i;
 
     for (i = 0; i < 0xB0; i++) {
@@ -608,9 +562,9 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291400);
 extern MenuPanelPositionRecord *func_00291400(s32 selector, u16 id);
 
 
-void mnuActivatePanelSelection(MenuPanelObject *object, s8 selection) {
-    MenuPanelState *state = &object->state;
-    if (mnuQueueUnitPanelSelection(object->state.selectionController, selection) != 0) {
+void mnuActivatePanelSelection(MnuStatusResource *object, s8 selection) {
+    MantraMenuWork *state = &object->menu;
+    if (mnuQueueUnitPanelSelection(object->menu.selectionController, selection) != 0) {
         u32 flags;
         u32 option;
         mnuMoveNodeCursorToTargetIndex(object, selection);
@@ -622,9 +576,9 @@ void mnuActivatePanelSelection(MenuPanelObject *object, s8 selection) {
     }
 }
 
-void mnuSetPanelSelection(MenuPanelObject *object, s8 selection) {
-    MenuPanelState *state = &object->state;
-    if (mnuQueueUnitPanelSelection(object->state.selectionController, selection) != 0) {
+void mnuSetPanelSelection(MnuStatusResource *object, s8 selection) {
+    MantraMenuWork *state = &object->menu;
+    if (mnuQueueUnitPanelSelection(object->menu.selectionController, selection) != 0) {
         mnuMoveNodeCursorToTargetIndex(object, selection);
         state->flags = (state->flags & 0xf0ffffff)
             | ((selection & 0xf) << 24);
@@ -635,8 +589,8 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291590);
 
 extern MantraNodePos *mnuGetMantraPanelPositionRecord(s16);
 
-void func_002917C0(MenuPanelObject *object, s32 selector, u16 id) {
-    MenuPanelState *state = &object->state;
+void func_002917C0(MnuStatusResource *object, s32 selector, u16 id) {
+    MantraMenuWork *state = &object->menu;
     MantraNodePos *position;
     MantraNodePos **neighbor;
     MenuPanelPositionRecord *record;
@@ -645,7 +599,7 @@ void func_002917C0(MenuPanelObject *object, s32 selector, u16 id) {
     u32 changed = 1;
     s32 i;
 
-    resource = object->state.resource;
+    resource = object->menu.resource;
     position = mnuGetMantraPanelPositionRecord(id);
     record = func_00291400(selector, id);
     animation = mnuFindPanelSlotById(resource, id, 1);
@@ -675,8 +629,8 @@ void func_002917C0(MenuPanelObject *object, s32 selector, u16 id) {
             }
         }
     }
-    func_00278FA8(object->state.selectionController);
-    func_00279148(object->state.selectionController);
+    func_00278FA8(object->menu.selectionController);
+    func_00279148(object->menu.selectionController);
     if (changed & 1) {
         mnuStorePanelEntry(0x20004, 5);
     }
@@ -691,8 +645,8 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291A20);
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291C68);
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291DD0);
 
-void itfClearSelectionFlags(MenuPanelObject *object) {
-    MenuPanelState *state = &object->state;
+void itfClearSelectionFlags(MnuStatusResource *object) {
+    MantraMenuWork *state = &object->menu;
     state->flags &= 0xff0000ff;
 }
 
@@ -706,9 +660,9 @@ extern void func_00278EE0(u32);
 extern void func_00279080(u32);
 extern void func_002790B8(u32);
 extern void func_002790F0(s32, s32, u32);
-extern void func_00291C68(MenuPanelObject *, s32, u16);
-extern void func_00291A20(MenuPanelObject *, s32, u16, s32);
-extern void func_00291DD0(MenuPanelObject *, s32);
+extern void func_00291C68(MnuStatusResource *, s32, u16);
+extern void func_00291A20(MnuStatusResource *, s32, u16, s32);
+extern void func_00291DD0(MnuStatusResource *, s32);
 extern void mnuHideMantraInfo(u32);
 extern void mnuShowMantraInfo(u32);
 extern void mnuHideMantraTitle(u32);
@@ -725,8 +679,8 @@ INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427720);
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427740);
 
 s32 func_00292478(void *context, s32 panelId, s32 action) {
-    MenuPanelObject *object = context;
-    MenuPanelState *state = &object->state;
+    MnuStatusResource *object = context;
+    MantraMenuWork *state = &object->menu;
     MantraNodePos *position;
     u16 id = panelId;
     u32 flags;
@@ -737,26 +691,26 @@ s32 func_00292478(void *context, s32 panelId, s32 action) {
         mnuSpawnMantraShortLoopIconAtPosition(
             (s32)((f32)state->defaultSelector->x / 10.0f * 40.0f),
             (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f),
-            object->state.selectionController);
+            object->menu.selectionController);
         mnuSpawnMantraIconAtPosition(
             (s32)((f32)state->defaultSelector->x / 10.0f * 40.0f),
             (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f),
-            object->state.selectionController);
+            object->menu.selectionController);
         return 0;
     case 1:
         position = mnuGetMantraPanelPositionRecord((s16)id);
-        func_00278F60(object->state.selectionController);
+        func_00278F60(object->menu.selectionController);
         func_002790F0((s32)((f32)position->x / 10.0f * 40.0f),
                      (s32)((f32)position->y / 10.0f * 39.0f),
-                     object->state.selectionController);
+                     object->menu.selectionController);
         return 0;
     case 2:
-        func_00278EA8(object->state.selectionController);
-        func_00279080(object->state.selectionController);
+        func_00278EA8(object->menu.selectionController);
+        func_00279080(object->menu.selectionController);
         return 0;
     case 3:
-        func_00278EE0(object->state.selectionController);
-        func_002790B8(object->state.selectionController);
+        func_00278EE0(object->menu.selectionController);
+        func_002790B8(object->menu.selectionController);
         return 0;
     case 4:
         func_002917C0(object, state->flagBytes[3] & 15, id);
@@ -778,56 +732,56 @@ s32 func_00292478(void *context, s32 panelId, s32 action) {
                      (flags >> 28) & 1, 0);
         return 0;
     case 9:
-        mnuHideMantraInfo(object->state.selectionController);
-        mnuHideMantraTitle(object->state.selectionController);
-        mnuSetMantraBackgroundVariant(object->state.selectionController, 3);
-        mnuBeginMantraBackgroundMaskFadeOut(object->state.selectionController);
-        func_00278EE0(object->state.selectionController);
-        func_002790B8(object->state.selectionController);
+        mnuHideMantraInfo(object->menu.selectionController);
+        mnuHideMantraTitle(object->menu.selectionController);
+        mnuSetMantraBackgroundVariant(object->menu.selectionController, 3);
+        mnuBeginMantraBackgroundMaskFadeOut(object->menu.selectionController);
+        func_00278EE0(object->menu.selectionController);
+        func_002790B8(object->menu.selectionController);
         mnuTransitionActivePanelAnimations(state->resource, 1);
         {
             u32 drawFlags = state->drawFlags;
-            u32 controller = object->state.selectionController;
+            u32 controller = object->menu.selectionController;
 
             state->drawFlags = (drawFlags & ~1) | ((drawFlags & 1) ^ 1);
             mnuRegisterMantraIconListCDraw(controller, (u32)object);
         }
-        object->state.unk9B5 = 1;
-        object->state.unk9B6 = 0;
+        object->menu.unk9B5 = 1;
+        object->menu.unk9B6 = 0;
         break;
     case 10:
-        mnuShowMantraInfo(object->state.selectionController);
-        mnuShowMantraTitle(object->state.selectionController);
-        mnuSetMantraBackgroundVariant(object->state.selectionController, 0);
-        mnuBeginMantraBackgroundMaskFadeIn(object->state.selectionController);
-        func_00278EA8(object->state.selectionController);
-        func_00279080(object->state.selectionController);
+        mnuShowMantraInfo(object->menu.selectionController);
+        mnuShowMantraTitle(object->menu.selectionController);
+        mnuSetMantraBackgroundVariant(object->menu.selectionController, 0);
+        mnuBeginMantraBackgroundMaskFadeIn(object->menu.selectionController);
+        func_00278EA8(object->menu.selectionController);
+        func_00279080(object->menu.selectionController);
         flags = state->flags;
         func_00291590(object, 5, 1, (flags >> 24) & 15,
                      (flags >> 28) & 1, 0);
         {
             u32 drawFlags = state->drawFlags;
-            u32 controller = object->state.selectionController;
+            u32 controller = object->menu.selectionController;
 
             state->drawFlags = (drawFlags & ~1) | ((drawFlags & 1) ^ 1);
             mnuBeginMantraIconListExit(controller);
         }
-        object->state.unk9B5 = 2;
-        object->state.unk9B6 = 0;
+        object->menu.unk9B5 = 2;
+        object->menu.unk9B6 = 0;
         break;
     case 11:
         position = mnuGetMantraPanelPositionRecord((s16)id);
         mnuSpawnMantraVariantIconAtPosition(
             (s32)((f32)(position->x * 20) / 10.0f),
             (s32)((f32)(position->y * 20) / 10.0f),
-            object->state.selectionController);
+            object->menu.selectionController);
         return 0;
     case 12:
         position = mnuGetMantraPanelPositionRecord((s16)id);
         mnuSpawnMantraShortLoopVariantIconAtPosition(
             (s32)((f32)(position->x * 20) / 10.0f),
             (s32)((f32)(position->y * 20) / 10.0f),
-            object->state.selectionController);
+            object->menu.selectionController);
         return 0;
     case 13:
         mnuSetPanelSelection(object, state->flagBytes[3] & 15);
@@ -845,12 +799,12 @@ play_selection_sound:
     return 0;
 }
 
-void func_00292998(MenuPanelObject *object) {
+void func_00292998(MnuStatusResource *object) {
     MantraPanelPool *resource;
     MenuPanelPositionRecord *record;
     MantraPanelAnimation *animation;
 
-    resource = object->state.resource;
+    resource = object->menu.resource;
     mnuGetMantraPanelPositionRecord(0);
     record = func_00291400(0, 8);
     animation = mnuFindPanelSlotById(resource, 8, 0);
@@ -867,47 +821,47 @@ extern void mnuSpawnMantraIconAtPosition(s32, s32, u32);
 extern void func_00278EA8(u32);
 extern void func_00279080(u32);
 
-void func_00292A60(MenuPanelObject *object) {
-    MenuPanelState *state = &object->state;
+void func_00292A60(MnuStatusResource *object) {
+    MantraMenuWork *state = &object->menu;
 
     state->defaultSelector = mnuGetMantraPanelPositionRecord(8);
     mnuSpawnMantraShortLoopIconAtPosition((s32)((f32)state->defaultSelector->x / 10.0f * 40.0f),
-        (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f), object->state.selectionController);
+        (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f), object->menu.selectionController);
     mnuSpawnMantraIconAtPosition((s32)((f32)state->defaultSelector->x / 10.0f * 40.0f),
-        (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f), object->state.selectionController);
-    func_00278EA8(object->state.selectionController);
-    func_00279080(object->state.selectionController);
+        (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f), object->menu.selectionController);
+    func_00278EA8(object->menu.selectionController);
+    func_00279080(object->menu.selectionController);
     state->flags &= ~0x20000000;
 }
 
-void func_00292B90(MenuPanelObject *object) {
+void func_00292B90(MnuStatusResource *object) {
     func_002917C0(object, 0, 8);
 }
 
 
 extern void func_00278F60(u32);
 extern void func_002790F0(s32, s32, u32);
-void itfPositionMantraSelectionController(MenuPanelObject *object) {
+void itfPositionMantraSelectionController(MnuStatusResource *object) {
     MantraNodePos *record;
 
     record = mnuGetMantraPanelPositionRecord(8);
-    func_00278F60(object->state.selectionController);
-    func_002790F0((s32)((f32)record->x / 10.0f * 40.0f), (s32)((f32)record->y / 10.0f * 39.0f), object->state.selectionController);
+    func_00278F60(object->menu.selectionController);
+    func_002790F0((s32)((f32)record->x / 10.0f * 40.0f), (s32)((f32)record->y / 10.0f * 39.0f), object->menu.selectionController);
 }
 
-extern void itfInstallDefaultMantraSelector(MenuPanelObject *);
+extern void itfInstallDefaultMantraSelector(MnuStatusResource *);
 
-void itfInstallDefaultMantraSelector(MenuPanelObject *object) {
+void itfInstallDefaultMantraSelector(MnuStatusResource *object) {
     MantraNodePos *record;
-    MenuPanelState *state = &object->state;
+    MantraMenuWork *state = &object->menu;
 
     record = mnuGetMantraPanelPositionRecord(0x71);
     state->defaultSelector = record;
     mnuSpawnMantraIconAtPosition((s32)((f32)record->x / 10.0f * 40.0f),
-        (s32)((f32)record->y / 10.0f * 39.0f), object->state.selectionController);
+        (s32)((f32)record->y / 10.0f * 39.0f), object->menu.selectionController);
 }
 
-s32 func_00292CF0(MenuPanelObject *object) {
+s32 func_00292CF0(MnuStatusResource *object) {
     MenuPanelTransition steps[23] = {
         {0, 22, 0, 0},
         {30, 22, 0, 4},
@@ -933,7 +887,7 @@ s32 func_00292CF0(MenuPanelObject *object) {
         {800, 113, 2, 1},
         {800, 0, 2, 15},
     };
-    MenuPanelState *state = &object->state;
+    MantraMenuWork *state = &object->menu;
     u32 i;
 
     for (i = 0; i < 23; i++) {
@@ -950,14 +904,14 @@ s32 func_00292CF0(MenuPanelObject *object) {
 
 
 
-s32 func_00292EA8(MenuPanelObject *object) {
+s32 func_00292EA8(MnuStatusResource *object) {
     MenuPanelTransition steps[6] = {
         {0, 0, 0, 6}, {0, 0x16, 0, 0},
         {30, 0x16, 0, 9}, {30, 0x16, 0, 11},
         {30, 0x16, 0, 12}, {60, 0x16, 0, 15}
     };
     MenuPanelTransition *step = steps;
-    MenuPanelState *state = &object->state;
+    MantraMenuWork *state = &object->menu;
     u32 i;
 
     for (i = 0; i < 6; i++, step++) {
@@ -972,7 +926,7 @@ s32 func_00292EA8(MenuPanelObject *object) {
     return 0;
 }
 
-s32 func_00292FF0(MenuPanelObject *object) {
+s32 func_00292FF0(MnuStatusResource *object) {
     MenuPanelTransition steps[7] = {
         {0, 0, 1, 13}, {0, 15, 1, 12},
         {30, 0, 2, 13}, {30, 0x71, 2, 12},
@@ -980,7 +934,7 @@ s32 func_00292FF0(MenuPanelObject *object) {
         {100, 0x16, 0, 15}
     };
     MenuPanelTransition *step = steps;
-    MenuPanelState *state = &object->state;
+    MantraMenuWork *state = &object->menu;
     u32 i;
 
     for (i = 0; i < 7; i++, step++) {
@@ -995,7 +949,7 @@ s32 func_00292FF0(MenuPanelObject *object) {
     return 0;
 }
 
-s32 func_00293148(MenuPanelObject *object) {
+s32 func_00293148(MnuStatusResource *object) {
     MenuPanelTransition steps[8] = {
         {0, 0, 0, 10}, {30, 1, 0, 0},
         {60, 1, 0, 4}, {150, 1, 0, 1},
@@ -1003,7 +957,7 @@ s32 func_00293148(MenuPanelObject *object) {
         {280, 1, 0, 2}, {280, 0, 0, 15}
     };
     MenuPanelTransition *step = steps;
-    MenuPanelState *state = &object->state;
+    MantraMenuWork *state = &object->menu;
     u32 i;
 
     for (i = 0; i < 8; i++, step++) {
@@ -1020,12 +974,12 @@ s32 func_00293148(MenuPanelObject *object) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_002932B0);
 
-void mnuCollectPanelNodeValues(MenuPanelObject *object) {
+void mnuCollectPanelNodeValues(MnuStatusResource *object) {
     struct MenuListNode *node = object->list->first;
     s32 count = 0;
-    MenuPanelState *state = &object->state;
+    MantraMenuWork *state = &object->menu;
     if (node != 0) {
-        u32 *slot = object->state.collectedValues;
+        u32 *slot = object->menu.collectedValues;
         do {
             u32 value = node->unk70;
             count++;
@@ -1034,14 +988,14 @@ void mnuCollectPanelNodeValues(MenuPanelObject *object) {
         } while (node != 0);
     }
     state->collectedCount = count;
-    state->savedSelection = object->state.selectionIndex;
+    state->savedSelection = object->menu.selectionIndex;
 }
 
-void func_002933A8(MenuPanelObject *object) {
-    object->state.flagBytes[0] = 3;
-    object->state.unk9B5 = 0;
-    object->state.unk9B6 = 0;
-    object->state.flags = (object->state.flags & 0xF0FFFFFF) | 0x20000000;
+void func_002933A8(MnuStatusResource *object) {
+    object->menu.flagBytes[0] = 3;
+    object->menu.unk9B5 = 0;
+    object->menu.unk9B6 = 0;
+    object->menu.flags = (object->menu.flags & 0xF0FFFFFF) | 0x20000000;
     func_00291338();
 }
 
@@ -1051,8 +1005,8 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_002933F0);
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00293DB0);
 
-s32 func_00293FD0(MenuPanelObject *object, u16 id) {
-    MenuPanelState *state = &object->state;
+s32 func_00293FD0(MnuStatusResource *object, u16 id) {
+    MantraMenuWork *state = &object->menu;
     const MenuPanelPositionRecord *record;
     s32 selector;
     s32 result = -1;
