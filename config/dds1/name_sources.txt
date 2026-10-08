@@ -1174,6 +1174,7 @@
 0x001511C0	billAllocChild	inferred	allocates 0x34 child, links func_00150148 result when arg given
 0x00151260	billAllocList	inferred	allocates entry-list object from data, wires +0x30/+0x60/+0x50
 0x001512E8	billCloneList	inferred	clones entry-list object sharing child, bumps child count
+0x00151398	billStepAnimationEntryAndUpdateChild	inferred	Advances one animation entry timer, updates the selected frame, and copies its color, UVs, dimensions, and placement into the referenced child payload; plural entries are handled by the caller.
 0x00151568	effBillModulateColors	inferred	multiplies RGBA channels using VU and repacks result [names_reviewed5.tsv]
 0x001518A0	billResolveEntry	inferred	Resolves a billboard table entry's offset against its base and copies its 0x12 halfword into the output.
 0x001518D8	billSetAnimationEntry	inferred	LeverAudit

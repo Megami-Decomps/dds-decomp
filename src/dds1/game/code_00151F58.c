@@ -129,8 +129,6 @@ s32 sdfAllocPacketAligned(s32 size);
 
 void sdfInitPacketList(s32 packet);
 
-BillChildPayload *func_00151398(BillObj *obj, BillOut *entries);
-
 typedef struct EffGeneratedTextureDescriptor EffGeneratedTextureDescriptor;
 void effDrawGeneratedTextureQuad(SdfListHead *packet, EffGeneratedTextureDescriptor *source);
 
@@ -530,15 +528,15 @@ void effReadBillboardModeValues(EffUnitObject *instance, s32 *modeValues) {
 
         if (modeFlags & 0x40) {
             modeValues[0] = 2;
-            modeValues[2] = (s32)func_00151398(billboard, billboard->resolvedEntries);
-            modeValues[1] = (s32)func_00151398(billboard, billboard->resolvedEntries + 1);
+            modeValues[2] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries);
+            modeValues[1] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries + 1);
         } else if (modeFlags & 0x80) {
             modeValues[0] = 3;
-            modeValues[2] = (s32)func_00151398(billboard, billboard->resolvedEntries);
-            modeValues[1] = (s32)func_00151398(billboard, billboard->resolvedEntries + 1);
+            modeValues[2] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries);
+            modeValues[1] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries + 1);
         } else {
             modeValues[0] = 0;
-            modeValues[1] = (s32)func_00151398(billboard, billboard->resolvedEntries);
+            modeValues[1] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries);
         }
     }
 }

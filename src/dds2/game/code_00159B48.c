@@ -518,8 +518,6 @@ void effVuCopyMatrix(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }
 
-BillChildPayload *func_00158F88(BillObj *obj, BillOut *entries);
-
 /* Kind 1 writes mode plus one/two entry values; untouched output words retain their contents. */
 void effReadBillboardModeValues(EffInstance *instance, s32 *modeValues) {
     BillObj *billboard = instance->billboard;
@@ -529,15 +527,15 @@ void effReadBillboardModeValues(EffInstance *instance, s32 *modeValues) {
 
         if (modeFlags & 0x40) {
             modeValues[0] = 2;
-            modeValues[2] = (s32)func_00158F88(billboard, billboard->resolvedEntries);
-            modeValues[1] = (s32)func_00158F88(billboard, billboard->resolvedEntries + 1);
+            modeValues[2] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries);
+            modeValues[1] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries + 1);
         } else if (modeFlags & 0x80) {
             modeValues[0] = 3;
-            modeValues[2] = (s32)func_00158F88(billboard, billboard->resolvedEntries);
-            modeValues[1] = (s32)func_00158F88(billboard, billboard->resolvedEntries + 1);
+            modeValues[2] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries);
+            modeValues[1] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries + 1);
         } else {
             modeValues[0] = 0;
-            modeValues[1] = (s32)func_00158F88(billboard, billboard->resolvedEntries);
+            modeValues[1] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries);
         }
     }
 }
