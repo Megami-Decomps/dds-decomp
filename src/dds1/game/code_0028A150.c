@@ -478,7 +478,6 @@ extern void billDispatchByKind(void *handle);
 
 
 
-extern void billSetBillboardMode(void *handle, s16 index);
 
 extern void *fileAllocateGridRecordSlots(u16 type, u32 count, void *src);
 
