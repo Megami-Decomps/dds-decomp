@@ -9,6 +9,7 @@
 #include "file.h"
 #include "sdf_dev_state.h"
 #include "file_slot.h"
+#include "file_save_record.h"
 #include "dat_state.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
@@ -92,23 +93,7 @@ extern s32 mnuSelectFileBranch(void);
 
 
 
-/* Compact metadata copied from the beginning of each save blob. */
-typedef struct FileSlotPreview {
-    char signature[3];
-    s8 version;
-    s8 mapGroup;
-    s8 mapIndex;
-    u8 pad06[2];
-    s32 playTicks;
-    s16 status;
-    s16 newCycle;
-    s8 party[8];
-    s8 levels[8];
-    u32 money;
-    u32 modelFlags[3];
-} FileSlotPreview;
-
-extern FileSlotPreview D_003DC800[];
+extern FileSavePreviewRecord D_003DC800[];
 
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_003BC880;
@@ -2118,9 +2103,9 @@ s32 fileBuildMainBlobAndWrite(void) {
     memcpy(D_003DC800[slot].party, datGameState->header.partyIds, 8);
     memcpy(D_003DC800[slot].levels, datGameState->header.partyLevels, 8);
     D_003DC800[slot].money = datGameState->header.unk20;
-    D_003DC800[slot].modelFlags[0] = datGameState->header.unk24;
-    D_003DC800[slot].modelFlags[1] = datGameState->header.unk28;
-    D_003DC800[slot].modelFlags[2] = datGameState->header.unk2C;
+    D_003DC800[slot].stateWords[0] = datGameState->header.unk24;
+    D_003DC800[slot].stateWords[1] = datGameState->header.unk28;
+    D_003DC800[slot].stateWords[2] = datGameState->header.unk2C;
     D_003BD8F4 = (u32)datGameState;
     D_003BD8F8 = 0x33600;
     if (D_003BC820 == 0 || D_003BC820 == 2) {
@@ -2493,7 +2478,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
     s32 hours;
     s32 minutes;
     s32 seconds;
-    FileSlotPreview *preview;
+    FileSavePreviewRecord *preview;
     f32 targetY;
     f32 delta;
     f32 wave;
