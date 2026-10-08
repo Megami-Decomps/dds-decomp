@@ -1,5 +1,9 @@
 #include "common.h"
 #include "sdf.h"
+#include "ee_mmi.h"
+
+extern s32 D_003BD9D8;
+extern s32 iWakeupThread(s32 threadId);
 
 #define SDF_GRAPH_AUXILIARY_BUFFER 2
 #define SDF_GRAPH_CPU_ADDRESS_MASK 0x0FFFFFFF
@@ -70,7 +74,13 @@ void sdfGraphSelectDisplayBuffer(s32 bufferIndex) {
 INCLUDE_ASM(const s32, "sdf/sdfGraph", func_002D1020);
 
 
-INCLUDE_ASM(const s32, "sdf/sdfGraph", func_002D1080);
+s32 func_002D1080(s32 channel) {
+    if (channel == 1) {
+        iWakeupThread(D_003BD9D8);
+    }
+    EE_ENABLE_INTERRUPTS_SYNC();
+    return 0;
+}
 
 INCLUDE_SDATA(const s32, "sdf/sdfGraph", D_003BD2E8);
 
