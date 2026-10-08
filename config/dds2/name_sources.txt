@@ -1322,6 +1322,7 @@
 0x001784E0	effSetRecordPoolDrawMode	inferred	confidence=high; matched-C; src/dds2/game/code_00176E28.c:673:func_001784E0; Sets the record-pool submission mode used to choose the draw sink or alternate blend packet path.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001784E8	effSetRecordPoolColor	inferred	confidence=high; matched-C; src/dds2/game/code_00176E28.c:678:func_001784E8; Sets the packed color supplied to the record-pool packet builder.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001784F0	effSetRecordPoolScale	inferred	confidence=high; matched-C; src/dds2/game/code_00176E28.c:682:func_001784F0; Sets the uniform scale used by the scaled record-pool transform.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x001784F8	effScatterCreateRadialWork	inferred	allocates and initializes radial work with particles, a child pool, and optional duplicate group work
 0x001787E0	effScatterCreateFromParameterTriplet	inferred	Extracts three packed parameter blocks and creates scatter work from them. [names_reviewed6.tsv]
 0x001789C0	effPcpScatterInitRadialParticle	inferred	readability/matching review (QP16)
 0x00179168	effScatterCopyRadialVector	inferred	queued
