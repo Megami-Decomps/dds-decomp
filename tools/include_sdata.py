@@ -35,6 +35,12 @@ DATA_DEF = re.compile(
 BLOCK = re.compile(r"((?:^\.align \d+\n)*)^(?:nonmatching (\w+)[^\n]*\n\n?)?^dlabel (\w+)\n(.*?)^enddlabel \3\n", re.M | re.S)
 ADDR = re.compile(r"/\* [0-9A-F]+ ([0-9A-F]{8})")
 ROW = re.compile(r"^(\w+) = 0x([0-9A-Fa-f]+);", re.M)
+STORE_REF = re.compile(
+    r"^\s*(?:/\*[^\n]*\*/\s*)?"
+    r"(?:sb|sh|sw|sd|sq|swl|swr|sdl|sdr|swc1|sdc1|swc2|sdc2|sqc2)\s+"
+    r"[^\n]*?%(?:lo|gp_rel)\((\w+)\)",
+    re.M,
+)
 
 
 def function_text(text, start):
@@ -88,8 +94,11 @@ def place(version):
                 anchors.append((addr, m.start(), n))
         full = ROOT / "asm" / version / f"{unit}.s"
         refs = {}
+        written_symbols = set()
         if full.exists():
-            for f in re.finditer(r"^glabel (\w+)\n(.*?)^endlabel \1", full.read_text(), re.M | re.S):
+            native_text = full.read_text()
+            written_symbols = set(STORE_REF.findall(native_text))
+            for f in re.finditer(r"^glabel (\w+)\n(.*?)^endlabel \1", native_text, re.M | re.S):
                 refs[f.group(1)] = set(re.findall(r"%(?:lo|gp_rel)\((\w+)\)", f.group(2)))
         asm_funcs = set(re.findall(r'^INCLUDE_ASM\([^\n]*\b(\w+)\);', text, re.M))
         still_asm = set().union(*(refs.get(f, set()) for f in asm_funcs)) if asm_funcs else set()
@@ -97,7 +106,15 @@ def place(version):
         for m in DEF.finditer(text):
             code = function_text(text, m.start())
             for sym in refs.get(m.group(1), ()):
-                if sym in mine and sym not in still_asm and not re.search(rf"\b{sym}\b", code):
+                # An indexed C store can use the containing array's name instead
+                # of a native label for its last byte. Written storage is not a
+                # compiler literal; its initialized bytes must remain included.
+                if (
+                    sym in mine
+                    and sym not in still_asm
+                    and sym not in written_symbols
+                    and not re.search(rf"\b{sym}\b", code)
+                ):
                     anchors.append((addr_of[sym], m.start(), sym))
         compiled = {s for _, _, s in anchors}
         order = sorted([(a, None, s) for a, s in syms if s not in compiled] + anchors, key=lambda x: x[0])
