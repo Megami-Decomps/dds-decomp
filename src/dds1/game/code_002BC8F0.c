@@ -527,7 +527,7 @@ u32 effDestroyPackedBatch(EffMappedResource *batch) {
 }
 
 u32 effReleaseSlotWorkAllocation(s32 work) {
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffectSlotSet *)work)->workAllocation));
+    sdfReleaseResourceAllocation(((EffectSlotSet *)work)->workAllocation);
     return 1;
 }
 
@@ -617,17 +617,17 @@ u32 effResolveResourceSlots(EffectSlotSet *set, u8 *resourceBytes, s32 clearAllS
 
 void effResolveAndReleaseResource(EffectSlotSet *owner) {
     if (owner->sourceAllocation != 0) {
-        u32 data = sdfResourceRetainAddress((struct SdfMemBlock *)(u32)owner->sourceAllocation);
+        u8 *data = (u8 *)sdfResourceRetainAddress(owner->sourceAllocation);
         effResolveResourceSlots(owner, data, 0, -1);
-        sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)(u32)owner->sourceAllocation);
+        sdfDecrementAllocationReferenceCount(owner->sourceAllocation);
     }
 }
 
 void effResolveAndReleaseSelectedResource(EffectSlotSet *owner, s32 slot) {
     if (owner->sourceAllocation != 0) {
-        u32 data = sdfResourceRetainAddress((struct SdfMemBlock *)(u32)owner->sourceAllocation);
+        u8 *data = (u8 *)sdfResourceRetainAddress(owner->sourceAllocation);
         effResolveResourceSlots(owner, data, 0, slot);
-        sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)(u32)owner->sourceAllocation);
+        sdfDecrementAllocationReferenceCount(owner->sourceAllocation);
     }
 }
 
@@ -679,22 +679,22 @@ EffectSlotSet *func_002BD9C0(u32 allocationHandle, u32 keepAllocation) {
     set = sdfAllocSizeClassBlock(0x30);
     memset(set, 0, 0x30);
     set->unk04 = 0;
-    set->sourceAllocation = keepAllocation != 0 ? allocationHandle : 0;
+    set->sourceAllocation = keepAllocation != 0 ? (struct SdfMemBlock *)allocationHandle : 0;
     resource = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
     set->textureCount = *(u16 *)(resource + 0x14);
     set->textureAllocation =
-        (u32)sdfAllocGeneralBlock(set->textureCount * 4);
-    set->handles = (void **)sdfResourceRetainAddress((struct SdfMemBlock *)(set->textureAllocation));
+        sdfAllocGeneralBlock(set->textureCount * 4);
+    set->handles = (void **)sdfResourceRetainAddress(set->textureAllocation);
     memset(set->handles, 0, set->textureCount * 4);
     entries = (u32 *)effResolveResourceSlots(set, resource,
         keepAllocation, -1);
 
     set->count = *(u16 *)(resource + 0x16);
     set->descriptionAllocation =
-        (u32)sdfAllocGeneralBlock(set->count * 0x80);
-    set->descriptions = (EffectSlotDescription *)sdfResourceRetainAddress((struct SdfMemBlock *)(set->descriptionAllocation));
-    set->workAllocation = (u32)sdfAllocGeneralBlock(set->count * 0xA0);
-    set->workEntries = (BdWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(set->workAllocation));
+        sdfAllocGeneralBlock(set->count * 0x80);
+    set->descriptions = (EffectSlotDescription *)sdfResourceRetainAddress(set->descriptionAllocation);
+    set->workAllocation = sdfAllocGeneralBlock(set->count * 0xA0);
+    set->workEntries = (BdWork *)sdfResourceRetainAddress(set->workAllocation);
     for (index = 0; index < set->count; index++) {
         sourceOffset = entries[1];
         memcpy(&set->descriptions[index],
@@ -720,10 +720,10 @@ EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 cou
     effect->sourceAllocation = 0;
     effect->textureAllocation = 0;
     effect->count = count;
-    effect->descriptionAllocation = (u32)sdfAllocGeneralBlock(count * 0x80);
-    effect->descriptions = (EffectSlotDescription *)sdfResourceRetainAddress((struct SdfMemBlock *)(effect->descriptionAllocation));
-    effect->workAllocation = (u32)sdfAllocGeneralBlock(effect->count * 0xA0);
-    effect->workEntries = (BdWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(effect->workAllocation));
+    effect->descriptionAllocation = sdfAllocGeneralBlock(count * 0x80);
+    effect->descriptions = (EffectSlotDescription *)sdfResourceRetainAddress(effect->descriptionAllocation);
+    effect->workAllocation = sdfAllocGeneralBlock(effect->count * 0xA0);
+    effect->workEntries = (BdWork *)sdfResourceRetainAddress(effect->workAllocation);
     if (effect->count != 0) {
         do {
             memcpy(&effect->descriptions[index], &source->descriptions[slot], 0x80);
@@ -736,13 +736,13 @@ EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 cou
 
 u32 effDestroyResourceSlotSet(EffectSlotSet *set) {
     if (set->sourceAllocation != 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(set->sourceAllocation));
+        sdfReleaseResourceAllocation(set->sourceAllocation);
     }
     if (set->unk04 == 0) {
         effReleaseTextureHandlesAndResetSlots(set);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(set->textureAllocation));
+        sdfReleaseResourceAllocation(set->textureAllocation);
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(set->descriptionAllocation));
+    sdfReleaseResourceAllocation(set->descriptionAllocation);
     effReleaseSlotWorkAllocation((u32)set);
     sdfReleaseChipBlock(set);
     return 1;
@@ -760,8 +760,9 @@ u32 effSetSlotResourceAndFlags(EffTimedState *record, u32 entry, u32 flags) {
     return 1;
 }
 
-u32 effSetSlotIndexedResource(u32 record, s32 data, s32 item, u32 flags) {
-    effSetSlotResourceAndFlags((EffTimedState *)record, (u32)&((EffMappedResource *)data)->records[item], flags);
+u32 effSetSlotIndexedResource(EffTimedState *target, EffMappedResource *resources, s32 item,
+                              u32 flags) {
+    effSetSlotResourceAndFlags(target, (u32)&resources->records[item], flags);
     return 1;
 }
 

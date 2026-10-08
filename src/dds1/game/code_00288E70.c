@@ -445,7 +445,7 @@ s8 fileReqGetSelectedSlot(s32 request) {
     return fileRequestEntries[request].selectedSlot;
 }
 
-void fileReqSetSelectedSlot(s32 request, s8 selectedSlot) {
+void fileReqSetSelectedSlot(s32 request, s32 selectedSlot) {
     fileRequestEntries[request].selectedSlot = selectedSlot;
 }
 

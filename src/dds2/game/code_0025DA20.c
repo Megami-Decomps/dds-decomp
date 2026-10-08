@@ -193,7 +193,6 @@ extern s32 D_003C9988[4];
 extern s32 D_003C9998[4];
 extern s32 D_003C99A8[4];
 extern SdfPoolNode kwlnDrawSurfaces[];
-extern s32 effDestroyPackedBatch(s32);
 
 
 extern ShopRankPriceRow D_003CBB70[];
@@ -1076,7 +1075,7 @@ s32 mnuShopReleaseSceneObjects(MenuTerminalContext *scene) {
     s32 destroyResult;
     u32 batchIndex;
     for (batchIndex = 0; batchIndex < CAMP_STATUS_BATCH_COUNT; batchIndex++) {
-        destroyResult = effDestroyPackedBatch((s32)*batchCursor++);
+        destroyResult = effDestroyPackedBatch(*batchCursor++);
     }
     return destroyResult;
 }
@@ -1108,7 +1107,7 @@ void func_0025F8B8(u32 object, MenuEffectResources *resources) {
 
 
 void mnuShopDestroyNestedEffectBatch(MenuEffectResources *resources) {
-    effDestroyPackedBatch((s32)resources->animationHandle);
+    effDestroyPackedBatch(resources->animationHandle);
 }
 
 extern s32 mnuFirstPresentMainCharacterIndex(void);
