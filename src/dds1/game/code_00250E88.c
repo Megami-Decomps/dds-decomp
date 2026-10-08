@@ -15,16 +15,11 @@
 
 extern void func_002512F0(s32, s32);
 
-extern void mnuReleaseListNodes(s32);
-
 extern void mnuInitializeMantraSelectionGrid(s32);
 
 extern void mnuCopySceneCoordinates(s32);
 
 extern void sdfDestroyGridWork(SdfGrid *);
-
-extern void mnuReleaseDisplayListNodes(s32);
-
 
 extern void mnuResetWorkFloats(void);
 
@@ -188,7 +183,8 @@ s32 mnuCreateSceneWork(void) {
 void mnuReleaseSceneContext(s32 unused, s32 sceneAddress) {
     sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
     sdfDestroyGridWork(((MenuSceneWork *)sceneAddress)->gridHandle);
-    mnuReleaseDisplayListNodes(sceneAddress + 0x584);
+    mnuReleaseDisplayListNodes(
+        &((MenuSceneWork *)(u32)sceneAddress)->displayList584);
     sdfReleaseResourceAllocation(((MenuSceneWork *)sceneAddress)->allocation);
     mnuResetWorkFloats();
 }
@@ -564,7 +560,8 @@ void mnuCopySceneCoordinatesAndReleaseNodeList(void) {
     s32 sceneAddress = sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
     func_002512F0(sceneAddress, 1);
     mnuCopySceneCoordinates(sceneAddress);
-    mnuReleaseListNodes(sceneAddress + 0x590);
+    mnuReleaseListNodes(
+        &((MenuSceneWork *)(u32)sceneAddress)->displayList590);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC420);

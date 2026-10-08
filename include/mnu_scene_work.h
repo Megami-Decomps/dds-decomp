@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "sdf_grid.h"
+#include "mnu_scene_list.h"
 
 typedef struct MenuScenePoint {
     s16 x;
@@ -20,7 +21,11 @@ typedef struct MenuSceneWork {
     s32 coordinateA; /* 0x540 */
     s32 coordinateB; /* 0x544 */
     u32 unk548; /* 0x548 */
-    u8 pad54C[0x50];
+    u8 pad54C[4];
+    s32 transitionState; /* 0x550 */
+    u8 pad554[0x30];
+    MnuSceneListHead displayList584; /* 0x584 */
+    MnuSceneListHead displayList590; /* 0x590 */
     MenuScenePoint entryPosition; /* 0x59C */
     MenuScenePoint cursorPosition; /* 0x5A0 */
     s16 scrollX; /* 0x5A4 */
@@ -35,6 +40,9 @@ typedef char MenuSceneWorkLayoutAssert[
     (sizeof(MenuSceneWork) == 0x5B0 &&
      (u32)&((MenuSceneWork *)0)->gridHandle == 0x484 &&
      (u32)&((MenuSceneWork *)0)->unk548 == 0x548 &&
+     (u32)&((MenuSceneWork *)0)->transitionState == 0x550 &&
+     (u32)&((MenuSceneWork *)0)->displayList584 == 0x584 &&
+     (u32)&((MenuSceneWork *)0)->displayList590 == 0x590 &&
      (u32)&((MenuSceneWork *)0)->boundsFlags == 0x5AC)
         ? 1 : -1];
 
