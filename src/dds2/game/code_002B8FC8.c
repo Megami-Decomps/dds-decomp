@@ -813,20 +813,20 @@ void mnuResetListNodeFadeCounters(MenuList *list) {
 }
 
 /* Subtract the fade step only when positive, then clamp any negative result to zero. */
-void mnuDecreaseListNodeFadeCounters(u8 *menu) {
-    u8 *node = (u8 *)((MenuList *)menu)->first;
+void mnuDecreaseListNodeFadeCounters(MenuList *list) {
+    MenuListNode *node = list->first;
     if (node != NULL) {
         do {
-            s32 timer = ((MenuListNode *)node)->animationTimer;
+            s32 timer = node->animationTimer;
             s32 reduced = timer - MNU_NODE_FADE_STEP;
             if (timer > 0) {
-                ((MenuListNode *)node)->animationTimer = reduced;
+                node->animationTimer = reduced;
                 timer = reduced;
             }
             if (timer < 0) {
-                ((MenuListNode *)node)->animationTimer = 0;
+                node->animationTimer = 0;
             }
-            node = (u8 *)((MenuListNode *)node)->next;
+            node = node->next;
         } while (node != NULL);
     }
 }
