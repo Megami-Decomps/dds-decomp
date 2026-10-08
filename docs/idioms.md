@@ -3480,6 +3480,16 @@ Do not extend that second view. Any new whole-pair consumer must instead
 use a genuinely embedded union with every scalar consumer migrated, or
 remain parked until that primary-owner closure is possible.
 
+## System-effect flags and reference count
+
+DDS1 `001F1110` loads the complete `BtlUnit.effectLink` pair at `+0x310`
+with `LD` (`001F1194`), then tests its low flag bits. Other effect callbacks
+access the same pair with `SH` flags and `SW` reference counts. Use the
+existing embedded `BtlEffectLinkState.packed` member; do not widen the
+scalar flags or introduce a second actor view. This genuine owner is
+distinct from the inherited `btlUnitStatusPair` cast debt above.
+
+
 ## GS graphics transfer-worker control
 
 DDS2 `0032A230` uses the separate control bytes `D_00438A1C` and
