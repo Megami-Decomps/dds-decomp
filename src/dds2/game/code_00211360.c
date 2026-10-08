@@ -65,7 +65,7 @@ extern s32 func_001ABB10(void);
 
 extern s8 btlHistoryCounter;
 
-extern void func_00211EA8();
+extern s32 func_00211EA8();
 
 extern s32 btlActorEntryIsExpired();
 

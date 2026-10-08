@@ -321,8 +321,10 @@ typedef struct SdfListNode {
     void *value;
 } SdfListNode;
 
+struct SdfMemBlock;
+
 typedef struct SdfList {
-    u32 allocation;
+    struct SdfMemBlock *allocation;
     u32 count;
     SdfListNode *head;
     SdfListNode *tail;
