@@ -2,9 +2,9 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "file_pac.h"
+#include "sdf_movie_stream.h"
 
 typedef struct DevState DevState;
-typedef struct MemBlock MemBlock;
 
 enum {
     PAC_HEADER_BYTES = 0x10,
@@ -49,39 +49,6 @@ typedef struct PacBuf {
 extern u8 sdfPacDispatchPacket[];
 
 
-/* The two stream variants have distinct native allocations: 0x14 and 0x78. */
-typedef struct MovLinearStream {
-    MemBlock *allocation;
-    u8 *bufferStart;
-    u8 *readCursor;
-    u8 *writeCursor;
-    s32 bufferedBytes;
-} MovLinearStream;
-
-/* The first 0x40 bytes receive the movie-PAC file header. This is not
- * the generic PAC decoder state used below. */
-typedef struct MovPacStream {
-    u8 pad00[0x18];
-    s32 packetBytes;
-    s32 blockBytes;
-    u8 scratchBuffer[0x20];
-    MemBlock *payloadAllocation;
-    u8 *blockMask;
-    s32 blockIndex;
-    MemBlock *allocation;
-    void *pendingCursor;
-    u8 *pacBuffer;
-    s32 pacReadOffset;
-    s32 pacBufferedBytes;
-    u8 *ringBuffer;
-    s32 ringOffset;
-    s32 ringLength;
-    s32 unk6C;
-    s32 scratchSize;
-    u8 *scratch;
-} MovPacStream;
-
-
 extern void *sdfAllocAndClearQuadwords(s32 size);
 extern void *sdfDevCreateCallbackState(s32 path, void *callback, s32 context);
 extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
@@ -101,7 +68,7 @@ extern u8 D_00438D28[];
 void func_00346778(MovObj *owner, SdfMovieDescriptor *descriptor, const char *name) {
     u8 soundFormat[4];
     void *work;
-    void *allocation;
+    struct SdfMemBlock *allocation;
     u8 *resource;
     MovLinearStream *stream;
     MovPacStream *pacWork;
@@ -193,11 +160,11 @@ void sdfCancelAndReleasePacWork(MovObj *job) {
         }
         ownedBuffers = job->stream;
         if (job->isPac == 0) {
-            sdfReleaseResourceAllocation((struct SdfMemBlock *)(((MovLinearStream *)ownedBuffers)->allocation));
+            sdfReleaseResourceAllocation(((MovLinearStream *)ownedBuffers)->allocation);
             sdfReleaseChipBlock(ownedBuffers);
         } else {
-            sdfReleaseResourceAllocation((struct SdfMemBlock *)(((MovPacStream *)ownedBuffers)->payloadAllocation));
-            sdfReleaseResourceAllocation((struct SdfMemBlock *)(((MovPacStream *)ownedBuffers)->allocation));
+            sdfReleaseResourceAllocation(((MovPacStream *)ownedBuffers)->payloadAllocation);
+            sdfReleaseResourceAllocation(((MovPacStream *)ownedBuffers)->allocation);
             sdfReleaseChipBlock(ownedBuffers);
         }
         func_00344A08(&job->soundNode);
