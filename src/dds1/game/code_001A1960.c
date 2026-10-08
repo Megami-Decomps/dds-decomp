@@ -1460,14 +1460,14 @@ s32 btlTestActorStatusPredicate(BtlUnit *object) {
     return (object->partyRecord.status & 0x806) != 0;
 }
 
-s32 btlComputeStatusPenaltyFifth(s32 object) {
+s32 btlComputeStatusPenaltyFifth(BtlUnit *object) {
     s32 result = 0;
-    u16 category = ((BtlUnit *)object)->partyRecord.status & 0x7FFF;
+    u16 category = object->partyRecord.status & 0x7FFF;
     switch (category) {
     case 0x80:
     case 0x400:
     case 0x2000:
-        result = -((BtlUnit *)object)->partyRecord.maxHp / 5;
+        result = -object->partyRecord.maxHp / 5;
         break;
     }
     return result;
