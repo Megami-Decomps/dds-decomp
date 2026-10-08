@@ -90,7 +90,7 @@ extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern MantraNodePos *mnuGetMantraPanelPositionRecord(s16);
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 extern u32 mnuGetSelectedNodeValue(u8 *);
-extern u32 mnuAllocateMantraIconPool(u32);
+extern struct MantraIconPool *mnuAllocateMantraIconPool(u32);
 extern u32 mnuCreateMantraIconListA();
 extern u32 mnuCreateMantraIconListB();
 extern u32 mnuCreateMantraIconListC();
@@ -2384,15 +2384,16 @@ MantraIconEntry *mnuSpawnMantraIcon(s32 x, s32 y, MantraIconPool *pool, u32 mode
     return 0;
 }
 
-u32 mnuAllocateMantraIconPool(u32 count) {
-    u32 size = count * 12 + 0x14;
-    u32 handle = (u32)sdfAllocGeneralBlock((s32)size);
-    u32 block = sdfMemoryGetBlockAddress((struct SdfMemBlock *)handle);
-    memset((void *)block, 0, size);
-    *(u32 *)block = handle;
-    ((MantraIconPool *)block)->count = count;
-    ((MantraIconPool *)block)->entries = (MantraIconEntry *)(block + 0x14);
-    return block;
+MantraIconPool *mnuAllocateMantraIconPool(u32 count) {
+    u32 size = count * sizeof(MantraIconEntry) + sizeof(MantraIconPool);
+    struct SdfMemBlock *handle = sdfAllocGeneralBlock((s32)size);
+    MantraIconPool *pool = (MantraIconPool *)sdfMemoryGetBlockAddress(handle);
+
+    memset(pool, 0, size);
+    pool->unk0 = (u32)handle;
+    pool->count = count;
+    pool->entries = (MantraIconEntry *)(pool + 1);
+    return pool;
 }
 
 void mnuReleaseMantraIconSprite(u32 *sprite) {
@@ -2759,7 +2760,7 @@ u32 mnuCreateMantraIconListA(s32 unused, u8 *menu) {
     MantraNodePos *second;
 
     memset((void *)data, 0, 0x10);
-    ((MantraFadeData *)data)->iconPool = (MantraIconPool *)mnuAllocateMantraIconPool(0xA);
+    ((MantraFadeData *)data)->iconPool = mnuAllocateMantraIconPool(0xA);
     ((MantraFadeData *)data)->state = 1;
     slot = &((MantraMenu *)menu)->work;
     first = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId((DatPartyRecord *)mnuGetSelectedNodeValue(menu)));
@@ -2830,7 +2831,7 @@ u32 mnuCreateMantraIconListB(s32 unused, u8 *menu) {
     MantraNodePos *second;
 
     memset((void *)data, 0, 0x10);
-    ((MantraFadeData *)data)->iconPool = (MantraIconPool *)mnuAllocateMantraIconPool(0xA);
+    ((MantraFadeData *)data)->iconPool = mnuAllocateMantraIconPool(0xA);
     ((MantraFadeData *)data)->state = 1;
     slot = &((MantraMenu *)menu)->work;
     first = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId((DatPartyRecord *)mnuGetSelectedNodeValue(menu)));
@@ -2854,7 +2855,7 @@ u32 mnuCreateMantraIconListC(s32 unused, u8 *menu) {
     MantraNodePos *second;
 
     memset((void *)data, 0, 0x10);
-    ((MantraFadeData *)data)->iconPool = (MantraIconPool *)mnuAllocateMantraIconPool(0xA);
+    ((MantraFadeData *)data)->iconPool = mnuAllocateMantraIconPool(0xA);
     ((MantraFadeData *)data)->state = 1;
     first = mnuGetMantraPanelPositionRecord(((MantraMenu *)menu)->work.selectedNode->panelIndex);
     mnuSpawnMantraIcon(first->x * 20 / 10.0f, first->y * 20 / 10.0f, ((MantraFadeData *)data)->iconPool, 0x60);
