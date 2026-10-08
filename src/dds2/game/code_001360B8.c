@@ -327,7 +327,7 @@ void fldActivateCameraColorSetting(s32 enable) {
         fldCameraColorEffect = 0;
         color = &setting->color;
         if (color->enabled != 0) {
-            fldCameraColorParameters->color.colorB = fldCameraColorParameters->color.colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
+            fldCameraColorParameters->color.finalColor = fldCameraColorParameters->color.initialColor = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
             fldCameraColorParameters->alpha.alpha = color->vectorY;
             switch (color->mode) {
             case 0:

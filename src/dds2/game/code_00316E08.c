@@ -107,7 +107,7 @@ extern char D_0042D4D0[];
 void func_00316FA8(MnuShootingWork *work);
 
 void itfSetPackedRgbAlpha(SdfFlagListWork *entry, u32 color) {
-    entry->params.color.colorA = color & 0xFFFFFF;
+    entry->params.color.initialColor = color & 0xFFFFFF;
     entry->params.alpha.alpha = color >> 24;
 }
 
@@ -120,7 +120,7 @@ void func_00316E30(SdfFlagListWork *entry, u32 value) {
 }
 
 void itfCopyColorFields(SdfFlagListWork *dst, const SdfFlagListParams *src) {
-    dst->params.color.colorA = src->color.colorA;
+    dst->params.color.initialColor = src->color.initialColor;
     dst->params.speed = src->speed;
     dst->params.alpha.alpha = src->alpha.alpha;
     dst->params.alpha.surfaceIndex = src->alpha.surfaceIndex;
