@@ -611,7 +611,6 @@ typedef struct MenuPanelWindow {
     s32 field94;
 } MenuPanelWindow;
 
-extern void mnuSetPanelState();
 extern void func_002C0958();
 
 void ptySkillMenuCopyPageState(s32 context);

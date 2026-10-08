@@ -245,7 +245,7 @@ extern MenuPanelPositionTable2 D_003B23A0;
 
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
-s32 mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s32 rowSpacing) {
+MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s32 rowSpacing) {
     MenuWindowContainer *window = (MenuWindowContainer *)sdfAllocAndClearQuadwords(MNU_WINDOW_CONTAINER_BYTES);
     MenuList *list;
     window->width = width;
@@ -254,7 +254,7 @@ s32 mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s3
     list = mnuCreateListState(id, visibleCount, rowSpacing);
     window->fade = 0;
     window->list = list;
-    return (s32)window;
+    return window;
 }
 
 /* Destroy the owned list and optional sprite resources before freeing the window. */
