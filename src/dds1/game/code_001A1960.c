@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font_measure.h"
 #include "fr_font.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
@@ -3834,7 +3835,6 @@ typedef struct BtlPanelTransitionWork {
 
 extern s32 btlUpdateSkillNamePanelTask(KwlnTask *);
 extern void btlFreeRegisteredTaskData(KwlnTask *);
-extern u32 frFontMeasureLines(u32);
 s32 func_001AD970(const u8 *text) {
     BattleController *battle = (BattleController *)btlGetRuntime();
     KwlnTask *task = (KwlnTask *)btlGetTrackedTaskHandle(1);
@@ -3860,7 +3860,7 @@ s32 func_001AD970(const u8 *text) {
     work->fadeLevels[2] = work->fadeLevels[0] = 0x40;
     work->fadeLevels[3] = work->fadeLevels[1] = 0x10;
     glyph = itfCreateConvertedTextGlyph(0x1000, 0x200, 0xFF0000, 0x80808080, text, 0);
-    work->width = frFontMeasureLines(glyph);
+    work->width = frFontMeasureLines((struct FrFontGlyph *)glyph);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
     work->initial[0].x = work->width - work->width / 2 + 0x105;
     work->initial[0].y = 0x40;

@@ -324,7 +324,7 @@ extern char D_0041B7D0[];
 extern void frFontDrawGlyphChain(void *, s32, s32);
 extern void func_0020D1C0(u8 *, u8 *, s32, s32, u32, u32);
 
-extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfAllocPacketAligned(s32);
 
 extern void sdfInitPacketList(void *);
 
@@ -1985,7 +1985,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *r
     u32 selectedIndex;
     s32 rowY;
     func_0020D1C0(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, mode, ((MenuList *)selectionState)->rows * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET, 0x80806020, 0x30000000);
-    indexPackets = sdfAllocPacketAligned(0x20);
+    indexPackets = (void *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(indexPackets);
     firstIndex = ((MenuList *)selectionState)->top;
     visibleRowCount = ((MenuList *)selectionState)->rows;

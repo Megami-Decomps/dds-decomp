@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font_measure.h"
 #include "sdf_quaternion.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -15,8 +16,6 @@ extern s8 D_00324510[];
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 
 extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
-extern u32 frFontMeasureGlyphChain(FrFontGlyph *);
-
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);

@@ -129,7 +129,7 @@ void effDrawTextureSlot(s32 x, s32 y, s32 z, s32 color, u32 flags,
     s32 colors[4];
     EffectSlotDescription *description = &set->descriptions[slotIndex];
     BdWork *work;
-    u32 texture = (u32)set->handles[description->textureIndex];
+    u32 texture = (u32)set->textureReferences[description->textureIndex];
     s32 flip;
     s32 kind;
     s32 mode;

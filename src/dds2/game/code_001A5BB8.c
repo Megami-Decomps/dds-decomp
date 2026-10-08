@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "fr_font_measure.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
 #include "kwln.h"
@@ -525,6 +526,8 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6078);
 void itfMesUpdatePanelFades(ItfMesState *panel);
 void btlUpdateFadeIndicator(ItfMesState *panel);
 
+void func_001A6528(ItfMesState *panel);
+
 void itfUpdateBattleDisplayAndFadeIndicator(ItfMesState *panel) {
     itfMesUpdatePanelFades(panel);
     func_001A6350(panel);
@@ -601,7 +604,78 @@ void itfMesUpdatePanelFades(ItfMesState *panel) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6350);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6528);
+extern void itfMesSetChildChainFlags(FrFontGlyph *glyph, u8 flagValue);
+extern s32 itfMesNthClearBit(s32 clearBitsToSkip, u32 mask);
+extern s32 sndSeqSelectPoll(ItfMesState *panel);
+extern void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy);
+
+void func_001A6528(ItfMesState *panel) {
+    ItfMesBlk40 *selection = &panel->blk40;
+    ItfMesEntryBlock *entry = &panel->entryBlock;
+    u32 flags = panel->flags;
+    s32 top;
+    s32 bottom;
+    s32 entryY;
+
+    switch (selection->unk10) {
+    case 1:
+        if (panel->unk12 == 3) {
+            selection->unk10 = 2;
+            panel->flags = (flags & ~0x38) | 0x18;
+            break;
+        }
+        entryY = entry->y;
+        bottom = entryY + entry->unk16 * (25 << 3);
+        top = selection->y - ((selection->rowCount * 25 - 25) << 3);
+        if (entryY == 0xAF8 && panel->blkA4.sprite != NULL) {
+            panel->blkA4.sprite->scrollSpan = ((bottom - top) / 64) * 64 + 64;
+        }
+        if (entry->glyphChain != NULL && top < bottom) {
+            itfMesShiftPanelVertically(panel, -64);
+            return;
+        }
+        if ((flags & 0xC00) != 0x400) {
+            if (entry->glyphChain != NULL) {
+                itfMesSetChildChainFlags(entry->glyphChain, 3);
+            }
+            selection->unk10 = 2;
+            panel->flags = (panel->flags & ~0x38) | 0x18;
+        }
+        break;
+    case 2:
+        if ((flags & 0x38) == 0x20 && sndSeqSelectPoll(panel) == 1) {
+            selection->glyphChain = itfMesTrimGlyphChainToRow(selection->glyphChain,
+                selection->selectedIndex, selection->rowCount);
+            if ((flags & 0xC00) == 0x800) {
+                panel->flags |= 0xC00;
+            }
+            selection->selectedIndex = itfMesNthClearBit(selection->selectedIndex, selection->panelValue);
+            selection->optionCount = 0;
+            btlSetFadePhaseAlphaTimer(&panel->fade, 1, 0x7F, 0);
+            panel->flags = (panel->flags & ~0x38) | 0x28;
+            selection->unk20 = 0x80;
+            selection->unk10 = 3;
+        }
+        break;
+    case 3:
+        selection->unk20 -= 16;
+        if (selection->unk20 <= 0) {
+            selection->unk20 = 0;
+            selection->unk10 = 4;
+            itfResetBattleFadeState(&panel->fade, 0);
+        }
+        itfMesRecolorNodeChildren(selection->glyphChain, selection->unk20);
+        return;
+    case 4:
+        if (entry->glyphChain != NULL && entry->y < 0xAF8) {
+            itfMesShiftPanelVertically(panel, 64);
+            return;
+        }
+        selection->unk10 = -1;
+        break;
+    }
+}
+
 
 void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy) {
     ItfMesBlk14 *origin = &panel->blk14;
@@ -6088,7 +6162,6 @@ extern void func_00101968(KwlnTask *, KwlnTask *);
 extern s32 btlUpdateSkillNamePanelTask(KwlnTask *);
 extern void btlFreeRegisteredTaskData(KwlnTask *);
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-extern u32 frFontMeasureLines(struct FrFontGlyph *);
 typedef struct BtlPanelTransitionWork {
     KwlnTask *task;
     const u8 *text;

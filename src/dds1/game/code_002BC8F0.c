@@ -598,14 +598,14 @@ u32 effResolveResourceSlots(EffectSlotSet *set, u8 *resourceBytes, s32 clearAllS
             entryBytes += EFF_RESOURCE_TABLE_ENTRY_BYTES;
             if (clearAllSlots == 0) {
                 if (selectedSlot == -1 || selectedSlot == (s32)slotIndex) {
-                    if (set->handles[slotIndex] == 0) {
-                        set->handles[slotIndex] = sdfTexAcquireResourceTexture(resourceData);
+                    if (set->textureReferences[slotIndex] == 0) {
+                        set->textureReferences[slotIndex] = sdfTexAcquireResourceTexture(resourceData);
                     }
                 } else {
-                    set->handles[slotIndex] = 0;
+                    set->textureReferences[slotIndex] = 0;
                 }
             } else {
-                set->handles[slotIndex] = 0;
+                set->textureReferences[slotIndex] = 0;
             }
             slotIndex++;
         } while (slotIndex < set->textureCount);
@@ -633,9 +633,9 @@ void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *set) {
     u32 i;
 
     for (i = 0; i < set->textureCount; i++) {
-        if (set->handles[i] != 0) {
-            sdfTexReleaseReference(set->handles[i]);
-            set->handles[i] = 0;
+        if (set->textureReferences[i] != 0) {
+            sdfTexReleaseReference(set->textureReferences[i]);
+            set->textureReferences[i] = 0;
         }
     }
     effInitializeAllSlotWork((s32)set);
@@ -682,8 +682,8 @@ EffectSlotSet *func_002BD9C0(u32 allocationHandle, u32 keepAllocation) {
     set->textureCount = *(u16 *)(resource + 0x14);
     set->textureAllocation =
         sdfAllocGeneralBlock(set->textureCount * 4);
-    set->handles = (void **)sdfResourceRetainAddress(set->textureAllocation);
-    memset(set->handles, 0, set->textureCount * 4);
+    set->textureReferences = (SdfTex **)sdfResourceRetainAddress(set->textureAllocation);
+    memset(set->textureReferences, 0, set->textureCount * 4);
     entries = (u32 *)effResolveResourceSlots(set, resource,
         keepAllocation, -1);
 
@@ -711,9 +711,9 @@ EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 cou
     effect->unk04 = 1;
     {
         u32 mode = source->textureCount;
-        void **handles = source->handles;
+        SdfTex **textureReferences = source->textureReferences;
         effect->textureCount = mode;
-        effect->handles = handles;
+        effect->textureReferences = textureReferences;
     }
     effect->sourceAllocation = 0;
     effect->textureAllocation = 0;

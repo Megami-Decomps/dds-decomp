@@ -92,6 +92,7 @@ typedef struct {
     EffBlurScaleParams res;
 } EffPCPCompactScaleParams;
 
+/* Scatter and scale callbacks share this work; their factory selects the resource view. */
 typedef struct {
     f32 position[4];
     u8 flags;
@@ -104,7 +105,10 @@ typedef struct {
     s32 startExtent;
     s32 endExtent;
     s32 frame;
-    void *resource;
+    union {
+        EffBlurScatterWork *scatter;
+        EffBlurScaleWork *scale;
+    } resource;
 } EffPCPCompactWork;
 
 /* The two compact fade variants share their 0x3C work; only the SDK
@@ -122,7 +126,10 @@ typedef struct {
     s32 startExtent;
     s32 endExtent;
     f32 unk34;
-    u32 resource;
+    union {
+        EffResourceRectWork *rectangle;
+        EffBlurTemplate *blur;
+    } resource;
 } EffPCPCompactFadeWork;
 
 /* Large charge-style effect work (allocation 0x1354). The vector at 0xAF0
@@ -2116,7 +2123,7 @@ EffPCPCompactFadeWork *effPcpCompactEffectCreate(EffPCPCompactRectParams *params
     EffPCPCompactFadeWork *work;
 
     work = sdfAllocSizeClassBlock(0x3C);
-    work->resource = (u32)effCloneResourceTemplate((EffResourceRectParams *)&params->res);
+    work->resource.rectangle = effCloneResourceTemplate((EffResourceRectParams *)&params->res);
     work->frame = 0;
     work->color = 0x80808080;
     work->flags = params->timeline.flags;
@@ -2148,12 +2155,12 @@ void effPcpCompactRespawn(EffPCPCompactFadeWork *work) {
     params.timeline.fadeOut = work->fadeOut;
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
-    memcpy(&params.res, &((EffResourceRectWork *)work->resource)->params, sizeof(params.res));
+    memcpy(&params.res, &work->resource.rectangle->params, sizeof(params.res));
     effPcpCompactEffectCreate(&params);
 }
 
 void effPcpCompactEffectRelease(EffPCPCompactFadeWork *work) {
-    effReleaseResourceTemplate((EffResourceRectWork *)work->resource);
+    effReleaseResourceTemplate(work->resource.rectangle);
     sdfReleaseChipBlock(work);
 }
 
@@ -2172,7 +2179,7 @@ void effPcpCompactEffectUpdate(EffPCPCompactFadeWork *work) {
     f32 projected[4];
     s32 frame = work->frame;
     s32 duration = work->duration;
-    EffResourceRectWork *rect = (EffResourceRectWork *)work->resource;
+    EffResourceRectWork *rect = work->resource.rectangle;
     s32 fadeIn;
     s32 fadeOut;
     f32 opacity;
@@ -2224,7 +2231,7 @@ EffPCPCompactFadeWork *effPcpCompactLongCreate(EffPCPCompactTexturedBlurParams *
     EffPCPCompactFadeWork *work;
 
     work = sdfAllocSizeClassBlock(0x3C);
-    work->resource = (u32)effCloneBlurTemplate(&params->res);
+    work->resource.blur = effCloneBlurTemplate(&params->res);
     work->frame = 0;
     work->color = 0x80808080;
     work->flags = params->timeline.flags;
@@ -2254,12 +2261,12 @@ void effPcpCompactLongRespawn(EffPCPCompactFadeWork *work) {
     params.timeline.fadeOut = work->fadeOut;
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
-    params.res = ((EffBlurTemplate *)work->resource)->body;
+    params.res = work->resource.blur->body;
     effPcpCompactLongCreate(&params);
 }
 
 void effPcpCompactLongRelease(EffPCPCompactFadeWork *work) {
-    effReleaseBlurTemplate((EffBlurTemplate *)work->resource);
+    effReleaseBlurTemplate(work->resource.blur);
     sdfReleaseChipBlock(work);
 }
 
@@ -2269,7 +2276,7 @@ void effPcpCompactLongUpdate(EffPCPCompactFadeWork *work) {
     f32 projected[4];
     s32 frame = work->frame;
     s32 duration = work->duration;
-    EffBlurTemplate *rect = (EffBlurTemplate *)work->resource;
+    EffBlurTemplate *rect = work->resource.blur;
     s32 fadeIn;
     s32 fadeOut;
     f32 opacity;
@@ -2485,7 +2492,7 @@ EffPCPCompactWork *effPcpCreateCompactWorkFromParams(EffPCPCompactScatterParams 
     EffPCPCompactWork *work;
 
     work = sdfAllocSizeClassBlock(0x38);
-    work->resource = effBlurCreateScatterWork(&params->res);
+    work->resource.scatter = effBlurCreateScatterWork(&params->res);
     work->flags = params->timeline.flags;
     work->duration = params->timeline.duration;
     work->fadeIn = params->timeline.fadeIn;
@@ -2515,17 +2522,18 @@ void effPcpChargeRespawn(EffPCPCompactWork *work) {
     params.timeline.fadeOut = work->fadeOut;
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
-    params.res = *(EffBlurScatterParams *)work->resource;
+    params.res = work->resource.scatter->params;
     effPcpCreateCompactWorkFromParams(&params);
 }
 
 void effPcpReleaseCompactBlurWork(EffPCPCompactWork *work) {
-    effBlurReleaseFirstResource((EffBlurScatterWork *)work->resource);
+    effBlurReleaseFirstResource(work->resource.scatter);
     sdfReleaseChipBlock(work);
 }
 
 /* vu0 routine: grow the scatter region and project its optional world center. */
 void func_0017BF90(EffPCPCompactWork *work) {
+    EffBlurScatterWork *resource;
     f32 projected[4] __attribute__((aligned(16)));
     s32 frame = work->frame;
     s32 duration = work->duration;
@@ -2543,17 +2551,19 @@ void func_0017BF90(EffPCPCompactWork *work) {
     displacement = (f32)(work->endExtent - work->startExtent) *
                    (f32)frame / (f32)duration;
     displacement = (s32)displacement;
-    ((EffBlurScatterWork *)work->resource)->params.positionSpread =
+    resource = work->resource.scatter;
+    resource->params.positionSpread =
         (f32)work->startExtent + displacement;
     if (work->flags == 0) {
         VU0_LOAD_VF(vf10, work->position);
         sdfProjectVuVectorToScreen();
         VU0_STORE_VF(vf10, projected);
-        ((EffBlurScatterWork *)work->resource)->params.x = (s32)projected[0] - 2048;
-        ((EffBlurScatterWork *)work->resource)->params.y = (u32)((s32)projected[1] - 2048) << 1;
+        resource = work->resource.scatter;
+        resource->params.x = (s32)projected[0] - 2048;
+        resource->params.y = (u32)((s32)projected[1] - 2048) << 1;
     } else {
-        ((EffBlurScatterWork *)work->resource)->params.x = 0;
-        ((EffBlurScatterWork *)work->resource)->params.y = 0;
+        resource->params.x = 0;
+        resource->params.y = 0;
     }
     if (frame < fadeIn && fadeIn != 0) {
         opacity = (f32)frame / (f32)fadeIn;
@@ -2563,9 +2573,11 @@ void func_0017BF90(EffPCPCompactWork *work) {
         opacity = 1.0f;
     }
     color = work->color;
-    ((EffBlurScatterWork *)work->resource)->params.color = effMultiplyPackedColors(
+    color = effMultiplyPackedColors(
         effBlendColor(color & 0xFFFFFF, color, opacity), work->baseColor);
-    effBlurStepScatterSlotsAndDraw((EffBlurScatterWork *)work->resource);
+    resource = work->resource.scatter;
+    resource->params.color = color;
+    effBlurStepScatterSlotsAndDraw(resource);
     work->frame++;
 }
 
@@ -2581,7 +2593,7 @@ EffPCPCompactWork *effPcpCreateCompactResourceWork(EffPCPCompactScaleParams *par
     EffPCPCompactWork *work;
 
     work = sdfAllocSizeClassBlock(0x38);
-    work->resource = effCloneBlurWorkWithSlots(&params->res);
+    work->resource.scale = effCloneBlurWorkWithSlots(&params->res);
     work->flags = params->timeline.flags;
     work->duration = params->timeline.duration;
     work->fadeIn = params->timeline.fadeIn;
@@ -2611,17 +2623,18 @@ void effPcpChargeLongRespawn(EffPCPCompactWork *work) {
     params.timeline.fadeOut = work->fadeOut;
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
-    params.res = *(EffBlurScaleParams *)work->resource;
+    params.res = work->resource.scale->params;
     effPcpCreateCompactResourceWork(&params);
 }
 
 void effPcpReleaseSecondaryBlurWork(EffPCPCompactWork *work) {
-    effBlurReleaseSecondResource((EffBlurScaleWork *)work->resource);
+    effBlurReleaseSecondResource(work->resource.scale);
     sdfReleaseChipBlock(work);
 }
 
 /* vu0 routine: grow the scale slots and restart looping world-space bursts. */
 void func_0017C300(EffPCPCompactWork *work) {
+    EffBlurScaleWork *resource;
     f32 projected[4] __attribute__((aligned(16)));
     s32 frame = work->frame;
     s32 duration = work->duration;
@@ -2638,24 +2651,26 @@ void func_0017C300(EffPCPCompactWork *work) {
         }
         work->frame = 0;
         frame = 0;
-        effBlurSecondInitSlots((EffBlurScaleWork *)work->resource);
+        effBlurSecondInitSlots(work->resource.scale);
     }
     fadeIn = work->fadeIn;
     fadeOut = work->fadeOut;
     displacement = (f32)(work->endExtent - work->startExtent) *
                    (f32)frame / (f32)duration;
     displacement = (s32)displacement;
-    ((EffBlurScaleWork *)work->resource)->params.size =
+    resource = work->resource.scale;
+    resource->params.size =
         (f32)work->startExtent + displacement;
     if (flags == 0 || flags == 2) {
         VU0_LOAD_VF(vf10, work->position);
         sdfProjectVuVectorToScreen();
         VU0_STORE_VF(vf10, projected);
-        ((EffBlurScaleWork *)work->resource)->params.x = (s32)projected[0] - 2048;
-        ((EffBlurScaleWork *)work->resource)->params.y = (u32)((s32)projected[1] - 2048) << 1;
+        resource = work->resource.scale;
+        resource->params.x = (s32)projected[0] - 2048;
+        resource->params.y = (u32)((s32)projected[1] - 2048) << 1;
     } else {
-        ((EffBlurScaleWork *)work->resource)->params.x = 0;
-        ((EffBlurScaleWork *)work->resource)->params.y = 0;
+        resource->params.x = 0;
+        resource->params.y = 0;
     }
     if (frame < fadeIn && fadeIn != 0) {
         opacity = (f32)frame / (f32)fadeIn;
@@ -2665,9 +2680,11 @@ void func_0017C300(EffPCPCompactWork *work) {
         opacity = 1.0f;
     }
     color = work->color;
-    ((EffBlurScaleWork *)work->resource)->params.color = effMultiplyPackedColors(
+    color = effMultiplyPackedColors(
         effBlendColor(color & 0xFFFFFF, color, opacity), work->baseColor);
-    effBlurStepScaleSlotsAndDraw((EffBlurScaleWork *)work->resource);
+    resource = work->resource.scale;
+    resource->params.color = color;
+    effBlurStepScaleSlotsAndDraw(resource);
     work->frame++;
 }
 

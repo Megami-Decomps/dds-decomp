@@ -1120,8 +1120,9 @@ void mnuDrawProfilePanelAndSprite(s32 obj, s32 unused1, s32 spriteGroup, s32 dra
 
 extern void mnuDrawIconPanelFullFade(s32, s32, s32, MenuPanelHandles *, s32);
 extern void mnuUpdateWindowPanelHandleStates(MenuPanelHandles *);
-extern s8 evtStageTestUpdate(s32);
-extern u8 D_00325788[];
+struct SdfPoolNode;
+extern s8 evtStageTestUpdate(struct SdfPoolNode **);
+extern struct SdfPoolNode *D_00325788[13][4];
 
 s32 func_00277390(KwlnTask *task) {
     CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(task);
@@ -1161,7 +1162,7 @@ s32 func_00277390(KwlnTask *task) {
         mnuDrawIconPanelFullFade(0, 0, 0, menu->resourceList, 0x53);
         mnuUpdateWindowPanelHandleStates(menu->resourceList);
     }
-    evtStageTestUpdate((s32)D_00325788);
+    evtStageTestUpdate(D_00325788[0]);
     return menuRunPanel((void *)context, 1, (void *)task);
 }
 

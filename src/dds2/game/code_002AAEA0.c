@@ -35,7 +35,7 @@ typedef struct CampVisualWork {
     u8 padF4[0x10];
     MenuWindowContainer *skillFlagRoot; /* 0x104 */
     u8 pad108[0x10];
-    MenuScrollPanel *modelHandle; /* 0x118: retained scroll-panel allocation */
+    MenuScrollPanel *scrollPanel; /* 0x118: retained scroll-panel allocation */
     u8 pad11C[0xB0B4];
     u32 titleFadingOut;    /* 0xB1D0 */
     u32 titleOpacity;      /* 0xB1D4 */
@@ -128,7 +128,7 @@ u32 mnuOpenCampConfigPanelTasks(KwlnTask *task) {
 
     context = kwlnTaskGetUserValue(task);
     mnuSwitchCampVisualCategory(5, context);
-    mnuConfigurePanelResource(((CampVisualWork *)context)->modelHandle, ((CampVisualWork *)context)->panelResource, 0, 0);
+    mnuConfigurePanelResource(((CampVisualWork *)context)->scrollPanel, ((CampVisualWork *)context)->panelResource, 0, 0);
     mnuCreateConfigTasks(0);
     return 1;
 }
@@ -138,7 +138,7 @@ u32 mnuConfigureCampDrawContextPanel(KwlnTask *task) {
     s32 context;
 
     context = kwlnTaskGetUserValue(task);
-    mnuConfigurePanelResource(((CampVisualWork *)context)->modelHandle, ((CampVisualWork *)context)->drawContext, 0, 1);
+    mnuConfigurePanelResource(((CampVisualWork *)context)->scrollPanel, ((CampVisualWork *)context)->drawContext, 0, 1);
     return 1;
 }
 
@@ -161,7 +161,7 @@ s32 mnuDrawStaffImageScreen(KwlnTask *callback) {
 
     context = kwlnTaskGetUserValue(callback);
     mnuDrawCampIconBackdrop(context + 0x11C, 0x20);
-    func_002BB510(-0x10, -8, 0, ((CampVisualWork *)context)->modelHandle, 0x54);
+    func_002BB510(-0x10, -8, 0, ((CampVisualWork *)context)->scrollPanel, 0x54);
     mnuCreateStaffImageSprite(0x18);
     mnuDrawStaffGridLabelsForKind(2, (struct EffectSlotSet *)(u32)(((CampVisualWork *)context)->drawContext));
     return menuSetHandler((void *)context, 1, (void *)callback);

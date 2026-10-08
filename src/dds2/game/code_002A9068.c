@@ -417,7 +417,7 @@ typedef struct CampVisualWork {
     EffMappedResource *motionResource; /* 0x0100 */
     u8 pad104[0xC];
     EffMappedResource *motion[2]; /* 0x0110 and 0x0114 */
-    MenuScrollPanel *modelHandle; /* 0x0118: retained scroll-panel allocation */
+    MenuScrollPanel *scrollPanel; /* 0x0118: retained scroll-panel allocation */
     u8 pad11C[0x16C];
     s32 backgroundOpacity;  /* 0x0288 */
     u8 pad28C[0xA7C0];
@@ -843,7 +843,7 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     }
     mnuDrainPanelTransitions((MenuPopupState *)(menuBytes + 8), task);
     mnuReleaseStaffSpriteAndResourceHandles(menuBytes);
-    mnuDestroyScrollPanel(((CampVisualWork *)menuBytes)->modelHandle);
+    mnuDestroyScrollPanel(((CampVisualWork *)menuBytes)->scrollPanel);
     mnuShutdownContext((MenuPageWindow *)(menuBytes + 0x284));
     dspCloseChannel();
     mnuDestroyEffectResources(menuBytes + 0x11c);
@@ -1155,7 +1155,7 @@ void mnuDrawCampIconBackdropByKind(s32 kind, KwlnTask *task) {
         break;
     }
     if (mnuInitializeCampMenuWhenResourcesReady(task) != 0) {
-        func_002BB510(-0x10, -8, 0, visual->modelHandle, 0x53);
+        func_002BB510(-0x10, -8, 0, visual->scrollPanel, 0x53);
         mnuDrawPanelListDefault(0, 0, 0, (MenuPageWindow *)(work + 0x284), 0x53);
         mnuDrawCampTitleCurrencyAndFade(0, 0, 0, visual->titleContext, work, 0x53);
     }

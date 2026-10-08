@@ -1,11 +1,10 @@
 #include "common.h"
+#include "fr_font_measure.h"
 #include "itf.h"
 #include "itf_mem_node.h"
 
 
 extern s32 mnuQueryTitleSoundBusy(void);
-
-extern u32 frFontMeasureGlyphChain(FrFontGlyph *parentGlyph);
 
 extern u32 frFontSharedRenderFlags;
 
@@ -1032,10 +1031,10 @@ void frFontCreateContext(ctx)
     FrFontCtx *ctx;
 
 {
-    FrFontGlyph *childGlyph = frFontAppendTextToGlyphChain((const char *)&D_00436578, 0, ctx->channel1, ctx->channel2, ctx->glyphChain);
+    FrFontGlyph *childGlyph = frFontAppendTextToGlyphChain((const char *)&D_00436578, 0, ctx->firstOption, ctx->secondOption, ctx->glyphChain);
 
     ctx->glyphChain = childGlyph;
-    frFontSetContextEncodedByte(childGlyph, ctx->channel3);
+    frFontSetContextEncodedByte(childGlyph, ctx->contextEncodedByte);
     ctx->pendingCreate = 0;
 }
 
