@@ -124,33 +124,29 @@ f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *user) {
     return 0.0f;
 }
 
-typedef struct SdfCounter {
-    s32 direction;   /* 0x00: 0 counts up, 1 counts down */
-    u32 flags;       /* 0x04: 8 = frozen, 0x20 = wrap */
-    f32 limit;       /* 0x08 */
-    f32 value;       /* 0x0C */
-} SdfCounter;
+#define SDF_FLOAT_COUNTER_FROZEN_FLAG 0x00000008
+#define SDF_FLOAT_COUNTER_WRAP_FLAG 0x00000020
 
 /* Step the counter by one; returns 0 when it ran out and does not wrap. */
-s32 sdfStepWrappingFloatCounter(SdfCounter *counter) {
+s32 sdfStepWrappingFloatCounter(Dds3PathCurveWork *path) {
     s32 result = 1;
 
-    if (counter->flags & 8) {
+    if (path->flags & SDF_FLOAT_COUNTER_FROZEN_FLAG) {
         return 1;
     }
-    if (counter->direction == 0) {
-        if (counter->limit > counter->value) {
-            counter->value = counter->value + 1.0f;
-        } else if (counter->flags & 0x20) {
-            counter->value = 0.0f;
+    if (path->direction == 0) {
+        if (path->duration > path->time) {
+            path->time = path->time + 1.0f;
+        } else if (path->flags & SDF_FLOAT_COUNTER_WRAP_FLAG) {
+            path->time = 0.0f;
         } else {
             result = 0;
         }
-    } else if (counter->direction == 1) {
-        if (counter->value > 0.0f) {
-            counter->value = counter->value - 1.0f;
-        } else if (counter->flags & 0x20) {
-            counter->value = counter->limit;
+    } else if (path->direction == 1) {
+        if (path->time > 0.0f) {
+            path->time = path->time - 1.0f;
+        } else if (path->flags & SDF_FLOAT_COUNTER_WRAP_FLAG) {
+            path->time = path->duration;
         } else {
             result = 0;
         }
@@ -175,27 +171,27 @@ float evtGetValueScaleFactor(EvtScaledValue *value) {
 }
 
 void sdfFreezeFloatCounter(EvtScaledValue *value) {
-    value->flags = value->flags | 8;
+    value->flags = value->flags | SDF_FLOAT_COUNTER_FROZEN_FLAG;
 }
 
 void sdfUnfreezeFloatCounter(EvtScaledValue *value) {
-    value->flags = value->flags & 0xfffffff7;
+    value->flags = value->flags & ~SDF_FLOAT_COUNTER_FROZEN_FLAG;
 }
 
 void sdfEnableFloatCounterWrap(EvtScaledValue *value) {
-    value->flags = value->flags | 0x20;
+    value->flags = value->flags | SDF_FLOAT_COUNTER_WRAP_FLAG;
 }
 
 void sdfDisableFloatCounterWrap(EvtScaledValue *value) {
-    value->flags = value->flags & 0xffffffdf;
+    value->flags = value->flags & ~SDF_FLOAT_COUNTER_WRAP_FLAG;
 }
 
-EffWorldNode *evtSpawnActionObj11(s32 a, s32 b, s32 c) {
+EffWorldNode *evtSpawnActionObj11(s32 key, void *data, s32 value) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(0x11);
 
-    obj->data = b;
-    obj->key = a;
-    obj->value = c;
+    obj->data = data;
+    obj->key = key;
+    obj->value = value;
     return obj;
 }
 
@@ -409,21 +405,21 @@ void sdfResetChannels(void) {
 }
 
 /* Enemy vitals use their base record; party vitals use level growth and bonuses. */
-s32 ptyComputeMaxHp(s32 unit) {
+s32 ptyComputeMaxHp(DatPartyRecord *unit) {
     s32 level;
     s32 stat;
     s32 result;
 
-    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) != 0) {
+    if ((unit->flags & SDF_UNIT_ENEMY) != 0) {
         return ((SdfEnemyVitals *)(datEnemyRecords +
-                ((SdfPartyUnit *)unit)->unitId * 76))->maxHp;
+                unit->unitId * 76))->maxHp;
     }
-    level = ((SdfPartyUnit *)unit)->level;
+    level = unit->level;
     stat = datGetStatWithStatusOverride((struct DatUnitStatus *)unit, 1);
     result = level * 4.0f +
              stat * datBattleParameters->maxHpGrowth[level - 1] + 10.0f;
-    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) == 0) {
-        result += ((SdfPartyUnit *)unit)->hpBonus;
+    if ((unit->flags & SDF_UNIT_ENEMY) == 0) {
+        result += unit->hpBonus;
         if (result >= 1000) {
             result = 999;
         }
@@ -431,21 +427,21 @@ s32 ptyComputeMaxHp(s32 unit) {
     return result;
 }
 
-s32 ptyComputeMaxMp(s32 unit) {
+s32 ptyComputeMaxMp(DatPartyRecord *unit) {
     s32 level;
     s32 stat;
     s32 result;
 
-    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) != 0) {
+    if ((unit->flags & SDF_UNIT_ENEMY) != 0) {
         return ((SdfEnemyVitals *)(datEnemyRecords +
-                ((SdfPartyUnit *)unit)->unitId * 76))->maxMp;
+                unit->unitId * 76))->maxMp;
     }
-    level = ((SdfPartyUnit *)unit)->level;
+    level = unit->level;
     stat = datGetStatWithStatusOverride((struct DatUnitStatus *)unit, 2);
     result = level * 4.0f +
              stat * datBattleParameters->maxMpGrowth[level - 1] + 8.0f;
-    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) == 0) {
-        result += ((SdfPartyUnit *)unit)->mpBonus;
+    if ((unit->flags & SDF_UNIT_ENEMY) == 0) {
+        result += unit->mpBonus;
         if (result >= 1000) {
             result = 999;
         }

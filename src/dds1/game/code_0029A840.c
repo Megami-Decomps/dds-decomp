@@ -143,7 +143,7 @@ void effInitModelVUState(MdlCtx *model) {
         mdlAddEntryPlain(model, 0, 0);
         model->first->frameStep = 1.0f;
     }
-    model->flags &= ~1;
+    model->flags &= ~MDL_SKIP_TRANSFORMS;
 }
 
 extern u16 D_003BC944;

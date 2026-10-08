@@ -1321,14 +1321,6 @@ void *btlGetIndexedUiResource(s32 arg0) {
     return D_00358450[*(u16 *)(arg0 + 0x124)];
 }
 
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A18F8);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1908);
-
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1918);
-
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A5690);
-
 /* Three 0x38-byte saved records; the snapshot writer clears all 0xA8 bytes. */
 typedef struct BtlActorStateSnapshot {
     BtlUnitEntrySlot entrySlots[7];
@@ -1341,6 +1333,34 @@ typedef struct BtlActorStateSnapshot {
 
 extern BtlActorStateSnapshot D_003D73F0[3];
 extern s32 func_003003F0(const char *, ...);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A18F8);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1908);
+
+INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1918);
+
+void func_001A5690(void) {
+    s32 count = 0;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
+
+    memset(D_003D73F0, 0, sizeof(D_003D73F0));
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x200) {
+                D_003D73F0[count].flags = unit->flags;
+                D_003D73F0[count].unitId = unit->partyRecord.unitId;
+                memcpy(D_003D73F0[count].entrySlots, unit->entrySlots,
+                       sizeof(D_003D73F0[count].entrySlots));
+                D_003D73F0[count].status = unit->partyRecord.status & 0xEFF9;
+                count++;
+                func_003003F0("btl:state push[%d:%X]\n", count,
+                              unit->partyRecord.unitId);
+            }
+        }
+    }
+}
 
 void func_001A57A0(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();

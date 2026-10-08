@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_path.h"
 #include "evt_unit.h"
 #include "eff_transform.h"
 #include "mdl.h"
@@ -10,7 +11,7 @@
 extern f32 *D_0037F770[];
 extern u8 kwlnDefaultColorVector[];
 
-extern void sdfStepWrappingFloatCounter(s32 path);
+extern s32 sdfStepWrappingFloatCounter(Dds3PathCurveWork *path);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfReleaseChipBlock(void *block);
 extern void dds3InterpolatePathVectorVU(s32 path);
@@ -1023,7 +1024,7 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
 s32 evtUnitApplyPathVectors(EvtUnit *unit) {
     f32 v[4];
 
-    sdfStepWrappingFloatCounter(unit->pathHandle);
+    sdfStepWrappingFloatCounter((Dds3PathCurveWork *)unit->pathHandle);
     dds3InterpolatePathVectorVU(unit->pathHandle);
     VU0_STORE_VF($vf10, v);
     effObjSetInnerFirstVec(unit->effObj, v);

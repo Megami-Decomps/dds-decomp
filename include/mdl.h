@@ -6,6 +6,11 @@
 
 typedef struct MdlCtx MdlCtx;
 
+/* Model-context update gates; these do not share the inner SdfModel flag byte. */
+#define MDL_SKIP_TRANSFORMS 1
+#define MDL_SKIP_ANCHORS 2
+#define MDL_REQUIRE_ANCHOR_ENABLE 4
+
 struct MdlPartEntry;
 struct EffTrackPolyWork;
 

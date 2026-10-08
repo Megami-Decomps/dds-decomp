@@ -202,16 +202,16 @@ void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, s32 arg) {
         }
         slot++;
     }
-    if (ctx->flags & 1) {
+    if (ctx->flags & MDL_SKIP_TRANSFORMS) {
         return;
     }
     inner = ctx->inner;
     sdfModelUpdateCurrentFrameTransforms(inner);
     func_003320E8(arg, inner);
-    if (ctx->flags & 2) {
+    if (ctx->flags & MDL_SKIP_ANCHORS) {
         return;
     }
-    if (ctx->flags & 4) {
+    if (ctx->flags & MDL_REQUIRE_ANCHOR_ENABLE) {
         if ((inner->flags & 0x10) == 0) {
             return;
         }
@@ -233,9 +233,6 @@ extern void sdfRotateVuMatrixAboutY(f32 angle);
 #define MDL_NO_BLEND_ENTRY (-1)
 #define MDL_RADIANS_PER_DEGREE 0.017453293f
 #define MDL_FULL_BLEND_PITCH 25.0f
-#define MDL_SKIP_TRANSFORMS 1
-#define MDL_SKIP_ANCHORS 2
-#define MDL_REQUIRE_ANCHOR_ENABLE 4
 #define MDL_ANCHOR_ENABLE_BIT 0x10
 #define MDL_ENTRY_ENABLED 1
 #define MDL_PRIMARY_MOTION_SLOT 0
@@ -656,7 +653,7 @@ void mdlReleaseInnerResourceHandle(MdlCtx *ctx, s32 value, f32 scalar) {
 }
 
 /* Copy a resource path's basename without its extension into destination. */
-void func_00232F78(s32 selectionListIndex, s32 selectionIndex, char *destination, s32 capacity) {
+void mdlCopyResourceBasename(s32 selectionListIndex, s32 selectionIndex, char *destination, s32 capacity) {
     MdlResourceSelection *selection;
     MdlResourcePath *pathEntry;
     const char *path;

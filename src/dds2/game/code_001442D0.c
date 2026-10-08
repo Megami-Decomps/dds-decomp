@@ -35,6 +35,17 @@ extern void func_00153068(void);
 extern s32 func_001515E0(f32 x, f32 z, s16 *gridX, s16 *gridY);
 
 
+extern s32 D_003899E0[];
+extern f32 sdfViewEyeVector[4];
+extern f32 sdfViewTargetVector[4];
+extern u8 D_00435C48[2][2];
+extern f32 sdfViewUpVector[4];
+extern u32 fldGetSceneReadyFlag(void);
+extern void kwlnFadeStartOut(s32);
+extern void kwlnFadeStartIn(s32);
+extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
+extern void sndSetSequenceVolumePan(s32, s32, s32);
+
 typedef struct EffNode EffNode;
 typedef struct EffNodeDescriptor EffNodeDescriptor;
 
@@ -63,7 +74,9 @@ typedef struct FldAreaWork {
     s32 area; /* 0x10 */
     s32 room; /* 0x14: the room argument of fldSetSceneLocation. */
     s32 unk18;
-    u8 pad1C[0x14];
+    u8 pad1C[8];
+    s32 titleFade;       /* 0x24: enables the field-input transition fade. */
+    u8 pad28[8];
     f32 focusPos[3];      /* 0x30 */
     u8 unk3C[0x14];
     s32 focusActive;      /* 0x50 */
@@ -360,7 +373,7 @@ extern char D_00413C80[]; /* "fldTitleMini" */
 
 extern void effUpdateNode(u32 arg0);
 
-extern void ddsReleaseUnitObject(s32 arg0);
+extern void ddsReleaseUnitObject(EffWorldNode *node);
 
 typedef struct {
     s32 objectHandle;
@@ -560,6 +573,27 @@ extern int strcmp(const char *, const char *);
 
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
+extern u8 fldGetCampSceneControlMode(void);
+extern u8 fldGetSceneReadyOrPendingState(void);
+extern s32 fileMenuTaskExists(void);
+extern u8 fldHasKiretaLabelProcess(void);
+extern u8 fldHasHirakenaiLabelProcess(void);
+extern u8 fldHasBadkaifukuLabelProcess(void);
+extern s32 fldIsEventPhaseAtLeastTwo(void);
+extern u32 fldInputPanelTaskHandle;
+extern void fldUpdateCameraHeadingFromXY(void);
+extern void kwlnFadeStartIn(s32 duration);
+extern u32 D_00389988[];
+extern u8 D_0037F510[2][2][16];
+extern s32 D_004361D0;
+
+typedef struct FldTitleBannerMenu {
+    u16 position;
+    u16 choice;
+    u16 pending;
+    u16 reserved;
+} FldTitleBannerMenu; /* 8-byte allocation from fldInitializeTitleBannerTask. */
+
 typedef struct {
     u8 pad0[0xC];
     s32 *drawNodeHandle;
@@ -579,13 +613,54 @@ extern void sdfModelUpdateCurrentFrameTransforms();
 
 extern void func_003320E8();
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001442D0);
+s32 func_001442D0(void) {
+    FldTitleBannerMenu *menu;
+    FldAreaWork *area;
 
-extern u8 fldGetCampSceneControlMode(void);
+    if (fldGetCampSceneControlMode() != 0) {
+        return 0;
+    }
+    if (fldGetSceneReadyOrPendingState() != 0) {
+        return 0;
+    }
+    if (D_00389988[0] != 0) {
+        return 0;
+    }
+    if (fileMenuTaskExists() != 0) {
+        return 0;
+    }
+    if (fldHasKiretaLabelProcess() != 0) {
+        return 0;
+    }
+    if (fldHasHirakenaiLabelProcess() != 0) {
+        return 0;
+    }
+    if (fldHasBadkaifukuLabelProcess() != 0) {
+        return 0;
+    }
+    if (fldIsEventPhaseAtLeastTwo() != 0) {
+        return 0;
+    }
 
-extern u8 fldGetSceneReadyOrPendingState(void);
-
-extern s32 fileMenuTaskExists(void);
+    menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue(fldInputPanelTaskHandle);
+    if (menu->pending == 0) {
+        return -1;
+    }
+    if (FLD_WORK->titleFade != 0 ||
+        D_004361D0 == 1 || (s8)D_0037F510[1][0][1] < 0) {
+        if ((s8)D_0037F510[1][0][1] < 0) {
+            fldUpdateCameraHeadingFromXY();
+        }
+        area = (FldAreaWork *)fldAreaState;
+        menu->pending = 0;
+        if (area->titleFade != 0) {
+            kwlnFadeStartIn(8);
+            area->titleFade = 0;
+        }
+        return 1;
+    }
+    return 0;
+}
 
 extern s32 D_00435EE0;
 
@@ -1555,13 +1630,170 @@ u32 fldGetSceneReadyFlag(void) {
     return fldSceneReady;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014A258);
-
-/* Re-centers the scene camera on the current scene's entry point. */
+/* Handle automap input, clamp the grid position, and refresh its camera. */
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413788);
 
-INCLUDE_RODATA(const s32, "game/code_001442D0", D_004137B8);
+void func_0014A258(void) {
+    f32 focus[4];
+    f32 eye[4];
+    f32 up[4] = {0.0f, 0.0f, -1.0f, 1.0f};
+    f32 minX, maxZ, maxX, minZ;
+    s32 closeRequested = 0;
 
+    if (fldGetSceneReadyFlag() == 0) {
+        return;
+    }
+    if (D_003899E0[0] != 0) {
+        if ((s8)D_0037F510[1][0][2] != 0) {
+            closeRequested = 1;
+        }
+    } else if ((s8)D_0037F510[1][0][2] < 0) {
+        closeRequested = 1;
+    }
+
+    /* A close request does not advance the input-delay counter. */
+    if (closeRequested == 0) {
+        D_00436260++;
+    }
+    if (closeRequested != 0 ||
+        ((s8)D_0037F510[1][0][3] < 0 && D_00436268 == 0)) {
+        fldEnterSceneCamera();
+        kwlnFadeStartOut(0);
+        kwlnFadeStartIn(8);
+        return;
+    }
+    if ((s8)D_0037F510[1][0][3] < 0) {
+        sndSetSequenceVolumePan(10, 127, 63);
+        D_00436250 = D_00436258;
+        D_00436254 = D_0043625C;
+        D_0043624C = D_00436264;
+        D_00436268 = 0;
+    }
+
+    if (D_00436260 >= 11) {
+        if ((s8)D_00435C48[0][1] != 0) {
+            if (D_00435C48[0][1] & 2) {
+                if ((s8)D_0037F510[1][0][5] != 0 &&
+                    (s8)D_0037F510[1][0][7] != 0) {
+                    D_00436268 = 1;
+                    D_00436250 += 600;
+                    D_00436254 -= 600;
+                } else if ((s8)D_0037F510[1][0][5] != 0 &&
+                           (s8)D_0037F510[1][0][6] != 0) {
+                    D_00436268 = 1;
+                    D_00436250 += 600;
+                    D_00436254 += 600;
+                } else if ((s8)D_0037F510[1][0][4] != 0 &&
+                           (s8)D_0037F510[1][0][7] != 0) {
+                    D_00436268 = 1;
+                    D_00436250 -= 600;
+                    D_00436254 -= 600;
+                } else if ((s8)D_0037F510[1][0][4] != 0 &&
+                           (s8)D_0037F510[1][0][6] != 0) {
+                    D_00436268 = 1;
+                    D_00436250 -= 600;
+                    D_00436254 += 600;
+                } else if ((s8)D_0037F510[1][0][5] != 0) {
+                    D_00436268 = 1;
+                    D_00436250 += 600;
+                } else if ((s8)D_0037F510[1][0][4] != 0) {
+                    D_00436268 = 1;
+                    D_00436250 -= 600;
+                } else if ((s8)D_0037F510[1][0][7] != 0) {
+                    D_00436268 = 1;
+                    D_00436254 -= 600;
+                } else if ((s8)D_0037F510[1][0][6] != 0) {
+                    D_00436268 = 1;
+                    D_00436254 += 600;
+                }
+            }
+        } else {
+            /* A held diagonal consumes the direction choice even when its
+             * Z-repeat bit is absent; do not fall back to a cardinal step. */
+            if ((s8)D_0037F510[1][0][5] != 0 &&
+                (s8)D_0037F510[1][0][7] != 0) {
+                if (D_0037F510[1][0][7] & 2) {
+                    D_00436268 = 1;
+                    D_00436250 += 600;
+                    D_00436254 -= 600;
+                }
+            } else if ((s8)D_0037F510[1][0][5] != 0 &&
+                       (s8)D_0037F510[1][0][6] != 0) {
+                if (D_0037F510[1][0][6] & 2) {
+                    D_00436268 = 1;
+                    D_00436250 += 600;
+                    D_00436254 += 600;
+                }
+            } else if ((s8)D_0037F510[1][0][4] != 0 &&
+                       (s8)D_0037F510[1][0][7] != 0) {
+                if (D_0037F510[1][0][7] & 2) {
+                    D_00436268 = 1;
+                    D_00436250 -= 600;
+                    D_00436254 -= 600;
+                }
+            } else if ((s8)D_0037F510[1][0][4] != 0 &&
+                       (s8)D_0037F510[1][0][6] != 0) {
+                if (D_0037F510[1][0][6] & 2) {
+                    D_00436268 = 1;
+                    D_00436250 -= 600;
+                    D_00436254 += 600;
+                }
+            } else if (D_0037F510[1][0][5] & 2) {
+                D_00436268 = 1;
+                D_00436250 += 600;
+            } else if (D_0037F510[1][0][4] & 2) {
+                D_00436268 = 1;
+                D_00436250 -= 600;
+            } else if (D_0037F510[1][0][7] & 2) {
+                D_00436268 = 1;
+                D_00436254 -= 600;
+            } else if (D_0037F510[1][0][6] & 2) {
+                D_00436268 = 1;
+                D_00436254 += 600;
+            }
+        }
+    }
+
+    fldGetVisibleSceneBounds(&minX, &maxZ, &maxX, &minZ);
+    /* Quantize the two X endpoints, then the two Z endpoints. */
+    minX = (s32)((minX - 600.0f) / 600.0f) * 600;
+    maxX = (s32)((maxX + 600.0f) / 600.0f) * 600;
+    maxZ = (s32)((maxZ - 600.0f) / 600.0f) * 600;
+    minZ = (s32)((minZ + 600.0f) / 600.0f) * 600;
+
+    if ((f32)D_00436250 < minX) {
+        D_00436250 = (s32)minX;
+    }
+    if (maxX < (f32)D_00436250) {
+        D_00436250 = (s32)maxX;
+    }
+    if ((f32)D_00436254 < minZ) {
+        D_00436254 = (s32)minZ;
+    }
+    if (maxZ < (f32)D_00436254) {
+        D_00436254 = (s32)maxZ;
+    }
+
+    focus[0] = D_00436250;
+    focus[1] = 0.0f;
+    focus[2] = D_00436254;
+    eye[0] = D_00436250;
+    eye[1] = -24000.0f;
+    eye[2] = D_00436254;
+    PCP_COPY_VECTOR(&D_0037FA30, eye);
+    PCP_COPY_VECTOR(&D_0037FA20, focus);
+    PCP_COPY_VECTOR(&D_0037FA40, up);
+    D_0037FB30.unk0 = 255.0f;
+    D_0037FB30.unk8 = 1000.0f;
+    D_0037FB30.unk4 = 255.0f;
+    D_0037FB30.unkC = 20000.0f;
+    D_0037FB30.unk10 = 0x808080;
+    PCP_COPY_VECTOR(sdfViewTargetVector, eye);
+    PCP_COPY_VECTOR(sdfViewEyeVector, focus);
+    PCP_COPY_VECTOR(sdfViewUpVector, up);
+}
+
+/* Re-centers the scene camera on the current scene's entry point. */
 void fldCenterCameraOnEntry(void) {
     FldAreaWork *cam = (FldAreaWork *)fldAreaState;
     f32 focus[4];
@@ -2985,7 +3217,7 @@ void fldClearObjectEntryHandles(void) {
 
         i--;
         if (objectHandle != 0) {
-            ddsReleaseUnitObject(objectHandle);
+            ddsReleaseUnitObject((EffWorldNode *)objectHandle);
             entry->objectHandle = 0;
         }
         entry++;
@@ -3057,7 +3289,7 @@ s32 func_0014F980(s32 index, s32 reserved) {
         effObjSetInnerFirstVec((EffWorldNode *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].pos);
         effObjSetInnerSecondVec((EffWorldNode *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].vel);
         model = (MdlCtx *)dds3GetObjectBaseResourceHandle((void *)fldSparkObjectEntries[slot].objectHandle);
-        model->flags &= ~1;
+        model->flags &= ~MDL_SKIP_TRANSFORMS;
         fldSparkSlots[index].objectSlot = slot;
         fldSparkObjectEntries[slot].unk4 = index;
         return 1;
@@ -3120,7 +3352,6 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00150138);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00150800);
 
-extern s32 D_003899E0[];
 
 extern void func_00125B10(void);
 
@@ -3167,7 +3398,6 @@ void func_001512D8(void) {
     D_00451B98[0] = -1;
 }
 
-extern s32 D_003899E0[];
 
 extern void fldReleaseCameraModel(s32);
 
@@ -3585,8 +3815,6 @@ void func_001523D0(void) {
     }
 }
 
-extern f32 sdfViewEyeVector[4];
-extern f32 sdfViewTargetVector[4];
 
 void func_001523F0(void) {
     FieldTargetGuideState *state = &fldTargetGuideState;
