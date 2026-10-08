@@ -518,7 +518,7 @@ extern EffKindDesc D_0037E770[];
 
 extern EffKindDesc D_0037E7E8[];
 
-extern u32 sdfTexAcquireResourceTexture(void *);
+extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 extern u32 effGetResourceFirstWord(u32);
 
@@ -1253,7 +1253,7 @@ EffKindWork *effCreateKindWorkFromFile(FileJob *work) {
             effect->sourceKind = kind;
             switch (kind) {
             case 1:
-                effect->target = sdfTexAcquireResourceTexture(secondary);
+                effect->target = (u32)sdfTexAcquireResourceTexture(secondary);
                 break;
             case 4:
                 effect->target = effGetResourceFirstWord(secondary[0]);
@@ -1347,7 +1347,7 @@ EffKindWork *effCreateKindWorkFromFileB(FileJob *work) {
             effect->sourceKind = kind;
             switch (kind) {
             case 1:
-                effect->target = sdfTexAcquireResourceTexture(secondary);
+                effect->target = (u32)sdfTexAcquireResourceTexture(secondary);
                 break;
             case 4:
                 effect->target = effGetResourceFirstWord(secondary[0]);

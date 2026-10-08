@@ -25,7 +25,7 @@ extern u32 fldReleaseMapResource(s32 *);
 
 extern u32 sdfReadNamedResource(const char *, void *, s32);
 
-extern u32 sdfTexAcquireResourceTexture(u32);
+extern struct SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 struct SdfRing;
 
@@ -353,7 +353,7 @@ s32 fldLoadMapResource(const char *name, MapResource *record) {
     u32 handle = sdfReadNamedResource(name, &record->descriptor, 0);
     u32 descriptor = record->descriptor;
     record->handle = handle;
-    record->image = sdfTexAcquireResourceTexture(descriptor);
+    record->image = (u32)sdfTexAcquireResourceTexture((void *)descriptor);
     if (record->handle != 0) {
         sdfQueueNonzeroResourceId((void *)record->handle);
         record->handle = 0;
