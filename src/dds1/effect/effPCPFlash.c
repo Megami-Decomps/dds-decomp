@@ -578,7 +578,7 @@ extern void *memcpy(void *dst, const void *src, u32 n);
 extern u32 effMiscRand(void *state);
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 
-PcpFlashStreakWork *effFlashRotatingStreakCreate(PcpFlashStreakWork *src) {
+PcpFlashStreakWork *effFlashRotatingStreakCreate(PcpFlashStreakParams *src) {
     SdfMemBlock *handle = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpFlashRotatingParticle) + sizeof(PcpFlashStreakWork));
     PcpFlashStreakWork *work = (PcpFlashStreakWork *)sdfResourceRetainAddress(handle);
     EffRecordPool *record;
@@ -609,9 +609,9 @@ void effFlashRotatingStreakSpawnFromTable(void *data)
     effFlashRotatingStreakCreate(effParamTableGetBlock(data, 0));
 }
 
-void func_0016A878(PcpFlashStreakWork *src)
+PcpFlashStreakWork *func_0016A878(PcpFlashStreakParams *src)
 {
-    effFlashRotatingStreakCreate(src);
+    return effFlashRotatingStreakCreate(src);
 }
 
 void effFlashRotatingStreakDestroy(PcpFlashStreakWork *work)
