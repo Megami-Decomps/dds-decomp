@@ -8,6 +8,7 @@
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
 #include "evt_unit.h"
+#include "evt_event_pack.h"
 #include "dat_state.h"
 #include "fld.h"
 #include "evt_solar.h"
@@ -1476,4 +1477,3 @@ INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC39C);
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A0);
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A8);
-
