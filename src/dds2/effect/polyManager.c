@@ -163,7 +163,7 @@ void func_00165600(PolyNode *node) {
     if (node->entryCount != 0) {
         cells = system->cells;
         do {
-            cells[i].unk0C = 0;
+            cells[i].historyAdvanceCountdown = 0;
             cells[i].vertexCount = 0;
             cells[i].color = 0x00808080;
             *ages = age;

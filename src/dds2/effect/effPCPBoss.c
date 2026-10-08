@@ -180,7 +180,7 @@ void effBossInitializeModelGroups(EffBossWork *work)
     mdlAddEntryPlain(model, 0, 0);
     work->cellCount = model->first->frameCount;
     work->groupCount = sdfCountMapPositionRecords(model->inner);
-    work->system = parAllocateCellSystem(work->groupCount, work->cellCount, 1, 1);
+    work->system = parAllocateCellSystem(work->groupCount, work->cellCount, 1, PAR_CELL_TOPOLOGY_TRIANGLE);
     func_00164C68(work->system, work->head.systemParam);
     work->groupsHandle = NULL;
     if (work->head.hasCells) {

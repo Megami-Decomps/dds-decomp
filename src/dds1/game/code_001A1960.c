@@ -2656,7 +2656,71 @@ void btlRestoreUnitMinimumValueAndClearStatus(s32 object, s32 status) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001AA8B0);
+s32 func_001AA8B0(BtlTask *action) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlOperandGroup *group;
+    BtlUnit *unit;
+    u32 count;
+    u32 i;
+    u32 targetSideA;
+    u32 targetSideB;
+    u32 activeSideA;
+    u32 activeSideB;
+
+    if ((action->flags & 0x40) != 0) {
+        return 0;
+    }
+    if (battle->requestArgument != 0) {
+        return 0;
+    }
+    if ((battle->commandRestrictFlags & 1) != 0) {
+        return 0;
+    }
+
+    targetSideA = 0;
+    targetSideB = 0;
+    count = btlGetIndexListCount(action->indexWork.indices);
+    group = action->indexWork.groups;
+    for (i = 0; i < count; i++, group++) {
+        if (group->inactive != 0) {
+            BtlUnit *target;
+            if (group->reflected != 0) {
+                target = action->unit;
+            } else {
+                target = btlGetIndexListEntry(action->indexWork.indices, i);
+            }
+            if ((target->flags & 0x200) != 0) {
+                targetSideA++;
+            } else if ((target->flags & 0x400) != 0) {
+                targetSideB++;
+            }
+        }
+    }
+
+    activeSideA = 0;
+    activeSideB = 0;
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
+        s32 flags = unit->flags;
+        if ((flags & 1) == 0) {
+            continue;
+        }
+        if ((flags & 0xE0) != 0) {
+            continue;
+        }
+        if ((flags & 0x200) != 0) {
+            activeSideA++;
+        } else if ((flags & 0x400) != 0) {
+            activeSideB++;
+        }
+    }
+    if (targetSideA >= activeSideA) {
+        return 0;
+    }
+    if (targetSideB < activeSideB) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 btlIsBattleRecordEligible(u8 *actor, u8 *target, s32 recordIndex, s32 speciesIndex) {
     s32 (*callback)(u8 *, u8 *, s32) =
