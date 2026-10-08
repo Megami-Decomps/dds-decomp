@@ -5565,6 +5565,7 @@
 0x002B1170	effLoadScalyTexture	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B11A0	effGetScalyTextureHandle	inferred	Returns the handle populated when loading the scaly texture file. [names_reviewed5.tsv]
 0x002B11A8	effSeedParticleSpanParameters	inferred	Seeds each span record with randomized scale and range parameters and clears flags. [names_reviewed5.tsv]
+0x002B12D8	effCreateParticleSpanTable	inferred	Allocates per-map-position point sets, span entries and optional shared-reference track sets from the model frame count; native algorithm agrees with the verified DDS2 counterpart.
 0x002B14E8	effReleaseParticleList	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B2088	effCreateModelResourceFromFile	inferred	Resolves primary and secondary file buffers and creates model resource for requested kind. [names_reviewed5.tsv]
 0x002B20D0	effDestroyModelResource	inferred	Releases the kind-specific child resource, releases its model, then frees the effect object.
