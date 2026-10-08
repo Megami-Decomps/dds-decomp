@@ -2,6 +2,8 @@
 #include "itf.h"
 
 
+extern s32 mnuQueryTitleSoundBusy(void);
+
 extern u32 frFontMeasureGlyphChain(FrFontGlyph *parentGlyph);
 
 extern u32 frFontSharedRenderFlags;
