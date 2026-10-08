@@ -191,7 +191,80 @@ DdsNestedHeader *sdfCloneNestedResourceRecord(u32 *owner, MnuCallbackList **list
 
 INCLUDE_ASM(const s32, "game/code_00324DF8", func_003251C0);
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", func_00325398);
+/* Pack both callback lists into separate header and eight-byte payload regions. */
+DdsNestedGroup *func_00325398(u32 *owner, MnuCallbackList **firstList,
+                             MnuCallbackList **secondList) {
+    u32 firstBytes = 0;
+    u32 secondBytes;
+    u32 totalBytes;
+    SdfListNode *node;
+    DdsCountedPayload *source;
+    DdsCountedPayload *destination;
+    DdsNestedGroup *group;
+    u8 *payload;
+
+    node = (*firstList)->head;
+    while (node != NULL) {
+        source = node->value;
+        firstBytes += source->count * 8 + sizeof(*source);
+        node = node->next;
+    }
+    secondBytes = 0;
+    node = (*secondList)->head;
+    while (node != NULL) {
+        source = node->value;
+        secondBytes += source->count * 8 + sizeof(*source);
+        node = node->next;
+    }
+    totalBytes = firstBytes + secondBytes + sizeof(*group);
+    group = func_00324F50(owner, totalBytes);
+    memset(group, 0, totalBytes);
+    group->firstCount = (*firstList)->count;
+    group->secondCount = (*secondList)->count;
+    group->first = (DdsCountedPayload *)(group + 1);
+    group->second = (DdsCountedPayload *)((u8 *)group->first + firstBytes);
+
+    destination = group->first;
+    node = (*firstList)->head;
+    while (node != NULL) {
+        source = node->value;
+        memcpy(destination, source, sizeof(*source));
+        node = node->next;
+        destination++;
+    }
+    payload = (u8 *)destination;
+    destination = group->first;
+    node = (*firstList)->head;
+    while (node != NULL) {
+        source = node->value;
+        memcpy(payload, source->data, source->count * 8);
+        destination->data = payload;
+        payload += source->count * 8;
+        destination++;
+        node = node->next;
+    }
+
+    destination = group->second;
+    node = (*secondList)->head;
+    while (node != NULL) {
+        source = node->value;
+        memcpy(destination, source, sizeof(*source));
+        node = node->next;
+        destination++;
+    }
+    payload = (u8 *)destination;
+    destination = group->second;
+    node = (*secondList)->head;
+    while (node != NULL) {
+        source = node->value;
+        memcpy(payload, source->data, source->count * 8);
+        destination->data = payload;
+        payload += source->count * 8;
+        destination++;
+        node = node->next;
+    }
+    return group;
+}
 
 typedef struct SdfFilterRecord {
     u8 enabled;
