@@ -15,13 +15,6 @@ void effReleaseBlurTemplate(EffBlurTemplate *owner) {
     sdfReleaseChipBlock(owner);
 }
 
-/* Standalone rectangle input, not either particle-array work (0x30). */
-typedef struct {
-    s32 extent;
-    EffBlurQuad quad;
-    u32 sourceHandle;
-} EffBlurRect;
-
 extern u32 func_001200E0(void);
 
 /* Update pixel-coordinate edges and draw only when the eligibility check allows. */
@@ -41,19 +34,19 @@ void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
 }
 
 /* Fixed-point input keeps the SDK's vertical halving before drawing. */
-void effDrawBlurFixedPointRectangle(EffBlurRect *rect) {
+void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner) {
     s32 x, y, w;
 
     if (func_001200E0() == 0) {
-        x = rect->quad.x + 0x1000;
-        y = (rect->quad.y + 0xE00) >> 1;
-        w = rect->extent;
-        rect->quad.left = x - w;
-        rect->quad.right = x + w;
+        x = owner->body.source.x + 0x1000;
+        y = (owner->body.source.y + 0xE00) >> 1;
+        w = owner->body.extent;
+        owner->body.source.left = x - w;
+        owner->body.source.right = x + w;
         w >>= 1;
-        rect->quad.top = y - w;
-        rect->quad.bottom = y + w;
-        effDrawBlurSource(&rect->quad, rect->sourceHandle, 1);
+        owner->body.source.top = y - w;
+        owner->body.source.bottom = y + w;
+        effDrawBlurSource(&owner->body.source, owner->resourceWord, 1);
     }
 }
 
