@@ -928,11 +928,11 @@ void sdfMotionBlendFiveFloatKeys(SdfMotionOutput *output, f32 t1, f32 t2) {
 }
 
 /* Save the current primary text scalars for the blend callback. */
-void sdfMotionCapturePrimaryTextParams(DstBlk *a0) {
-    Blk *p;
+void sdfMotionCapturePrimaryTextParams(DstBlk *binding) {
+    Blk *textParams;
 
-    p = sdfEnsurePrimaryTextSubParam(a0->sub);
-    a0->capturedParams = *p;
+    textParams = sdfEnsurePrimaryTextSubParam(binding->sub);
+    binding->capturedParams = *textParams;
 }
 
 void *sdfMotionCreateSecondaryTextBinding(void *source, s32 unused, s32 options) {
@@ -964,11 +964,11 @@ void sdfMotionBlendSecondaryTextKeys(SdfMotionOutput *output, f32 t1, f32 t2) {
 }
 
 /* Save the current secondary text scalars for the blend callback. */
-void sdfMotionCaptureSecondaryTextParams(DstBlk *a0) {
-    Blk *p;
+void sdfMotionCaptureSecondaryTextParams(DstBlk *binding) {
+    Blk *textParams;
 
-    p = sdfEnsureSecondaryTextSubParam(a0->sub);
-    a0->capturedParams = *p;
+    textParams = sdfEnsureSecondaryTextSubParam(binding->sub);
+    binding->capturedParams = *textParams;
 }
 
 void *func_00335BE0(void *source, s32 unused, s32 options) {
