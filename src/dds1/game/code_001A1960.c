@@ -1311,8 +1311,9 @@ s32 sndGetResourceForIndex(s32 index) {
     return (s32)D_00358408[resource];
 }
 
-void *btlGetIndexedUiResource(s32 arg0) {
-    return D_00358450[*(u16 *)(arg0 + 0x124)];
+/* The label resource index is the copied party record's unit ID. */
+void *btlGetIndexedUiResource(BtlUnit *unit) {
+    return D_00358450[unit->partyRecord.unitId];
 }
 
 /* Three 0x38-byte saved records; the snapshot writer clears all 0xA8 bytes. */
