@@ -385,7 +385,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         unit->color5C = unit->color54;
         if (unit->colorFramesRemaining == 0) {
             if (originalFlags & 0x1000) {
-                flags = unit->flags = originalFlags & ~0x300;
+                flags = unit->flags = originalFlags & ~EVT_UNIT_FLAG_USE_UNIT_COLOR_CHANNELS;
             }
             unit->flags = flags & ~0x1800;
         } else {
@@ -394,7 +394,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
     } else {
         u32 firstPacked;
         u32 secondPacked;
-        if (!(originalFlags & 0x100)) {
+        if (!(originalFlags & EVT_UNIT_FLAG_USE_UNIT_FIRST_COLOR)) {
             if (ownVector) {
                 VU0_LOAD_VF(vf10, target);
             } else {
@@ -404,7 +404,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
             defaultFirst[0] = firstPacked;
             unit->color0C = defaultFirst[0];
         }
-        if (!(originalFlags & 0x200)) {
+        if (!(originalFlags & EVT_UNIT_FLAG_USE_UNIT_SECOND_COLOR)) {
             if (ownVector) {
                 VU0_LOAD_VF(vf10, target->secondColor);
             } else {
@@ -518,7 +518,7 @@ void evtLoadUnitFirstColorVectorVU(EvtUnit *unit) {
             ownVector = 1;
         }
     }
-    if (unit->flags & 0x100) {
+    if (unit->flags & EVT_UNIT_FLAG_USE_UNIT_FIRST_COLOR) {
         scale = 0.0078125f;
         color = unit->color;
         EE_MMI_RGBA_UNPACK(&color, scale);
@@ -542,7 +542,7 @@ void evtLoadUnitSecondColorVectorVU(EvtUnit *unit) {
             ownVector = 1;
         }
     }
-    if (unit->flags & 0x200) {
+    if (unit->flags & EVT_UNIT_FLAG_USE_UNIT_SECOND_COLOR) {
         scale = 0.0078125f;
         color = unit->color50;
         EE_MMI_RGBA_UNPACK(&color, scale);
@@ -746,7 +746,7 @@ u8 evtTestUnitStatusFlags(EvtUnit *unit) {
 }
 
 void evtSetUnitStatusFlags(EvtUnit *unit) {
-    unit->flags = unit->flags | 0x300;
+    unit->flags = unit->flags | EVT_UNIT_FLAG_USE_UNIT_COLOR_CHANNELS;
 }
 
 void evtConfigureUnitTransition(EvtUnit *unit, s32 arg) {
