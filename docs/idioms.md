@@ -3271,10 +3271,13 @@ work without changing the allocation or introducing another panel view.
 
 The corner-frame task passes the battle state's embedded camera command at
 `+0x70`, not a separate scene object. Its expansion reads
-`BtlLinkedCommand.panelScale` at command `+0x138` in DDS1 and `+0x15C` in
-DDS2. Completing this tail consumes eight bytes of the enclosing state's
-opaque gap; every later state offset is unchanged. These are the only
-by-value command embeddings, and neither command has a `sizeof` consumer.
+`BtlLinkedCommand.exponentialRange.end` at command `+0x138` in DDS1
+and `+0x15C` in DDS2. This is the exponential updater's progress, not
+a separate panel scalar. The eight-byte exponential work is followed by
+the twenty-byte quadratic accumulator at `+0x13C` / `+0x160`. The latter
+consumes the remaining twenty bytes of the enclosing state's opaque gap;
+every later state offset is unchanged. These are the only by-value
+command embeddings, and neither command has a `sizeof` consumer.
 
 The existing unit-local `BattlePanelEdgeWork` owns both signed phase bytes
 at `+0x30/+0x31`, the frame timer at `+0x34`, the anchor vector at `+0x40`,
@@ -3413,6 +3416,16 @@ pass the state-owned command at `state + 0x70`. Their native bodies
 simply return one; the unused context is part of the common handler
 contract, not an omitted argument or an invented body.
 
+Both quadratic range providers receive a `BtlScalarRange *` and an `f32`
+time step. DDS2's half-blend helper computes the range address at
+`001E8670` in the initial-state branch's delay slot; that same `$a0`
+reaches the quadratic step call at `001E86B0` on the other branch.
+Do not keep the former one-float declaration that matched accidentally
+because this native range address was already present. The four blend
+helpers receive the command and pass its actual embedded interpolation
+work. DDS1's `+0x128` progress word has the same bits-zero initialization
+and float-interpolation use as DDS2's documented `+0x14C` union.
+
 ## Local-map request rings
 
 Both request-ring constructors allocate a 0x44-byte prefix followed by
@@ -3459,3 +3472,26 @@ it casts the address of the scalar `flags` member to `BtlUnitFlagPair *`.
 Do not extend that second view. Any new whole-pair consumer must instead
 use a genuinely embedded union with every scalar consumer migrated, or
 remain parked until that primary-owner closure is possible.
+
+## GS graphics transfer-worker control
+
+DDS2 `0032A230` uses the separate control bytes `D_00438A1C` and
+`D_00438A1D`, not `sdfBusyBufferIndex` or the `sdfTextureUpdateQueue`
+object. The transfer drain rechecks `D_00438A1C` after `SleepThread`;
+`sdfWaitSlotReady` polls volatile `D_00438A1D`. Keep both control bytes
+volatile, clear the active byte before testing the reset byte, and retain
+the existing volatile GS image-upload semaphore contract.
+
+The worker acknowledges both graph requests before calling their handlers.
+Its reset path snapshots DMAC `D_ENABLER` before writing `D_ENABLEW` and
+stopping VIF1, then restores that enable state. Reading the enable register
+after those writes is a different hardware protocol.
+
+## Inclusive lowest-HP target selection
+
+DDS2 `btlSelectLowestHealthElementBlockTarget` uses `sltu best,current`
+at `00215E38` and skips the update when that comparison succeeds.
+The condition is therefore `current <= best`, not a strict comparison:
+an equally healthy later eligible unit replaces the earlier candidate.
+Keep the unsigned 32-bit bound and the 16-bit current HP; exchanging the
+operands of the equivalent inclusive comparison does not change tie-breaking.
