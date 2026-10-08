@@ -2074,6 +2074,7 @@
 0x00183740	effPcpCloneSpawnRangeEvents	inferred	readability/matching review (QP16)
 0x00183950	effPcpEventBatchRelease	inferred	releases a batch of event objects then stops the associated owner and frees its handle
 0x001839D0	effPcpRandomizeSpawnSlot	inferred	randomises one 0x20-byte spawn slot inside the work ranges (sibling of effPcpRandomizeSlot) [names_reviewed2.tsv]
+0x00183B20	effPcpUpdateSpawnRangeEvents	inferred	updates radial event positions, damping, fade, and per-entry frame state
 0x00183DA0	effPcpCopySpawnRangeVector	inferred	Copies a vector of the randomized spawn-range effect group. [names_reviewed21.tsv]
 0x00183DB0	effPcpSpawnRangeSetScale	inferred	Stores scale on randomized spawning range work. [names_reviewed6.tsv]
 0x00183DB8	effPcpSetSpawnRangeColor	inferred	src/dds1/effect/effPCPMisc.c:func_00183DB8; Writes the spawn-range slot work color parameter; registered in the same color callback slot as named effect color setters. Registration: asm/dds1/data/data.data.s:65569: table record 0x003544B0, color slot. [names_qp9.tsv]
