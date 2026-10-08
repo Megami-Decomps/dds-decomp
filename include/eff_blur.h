@@ -42,9 +42,9 @@ typedef struct EffBlurScatterParams {
     s32 delaySpread;
     f32 angleStep;
     u32 color;
-    s32 unk10;
-    f32 unk14;
-    f32 unk18;
+    s32 blendControl;
+    f32 uvDisplacementAngleDegrees;
+    f32 uvDisplacementAmplitude;
     s32 x;
     s32 y;
     s32 positionSpread;
@@ -77,9 +77,9 @@ typedef struct EffBlurScaleParams {
     f32 phaseStep;
     f32 spacing;
     u32 color;
-    s32 unk10; /* Copied to the slot quad blend control. */
-    f32 unk14; /* Copied to the slot quad angle. */
-    f32 unk18; /* Displacement amplitude used by the native update. */
+    s32 blendControl; /* Copied to the slot quad blend control. */
+    f32 uvDisplacementAngleDegrees; /* Copied to the slot quad angle. */
+    f32 uvDisplacementAmplitude; /* Displacement amplitude used by the native update. */
     f32 angleStep;
     s32 x;
     s32 y;

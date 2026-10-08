@@ -2497,9 +2497,9 @@ s32 fldProcSequence(void) {
             blur.delaySpread = 15;
             blur.angleStep = 0.1999999881f;
             blur.color = 0x3C989884;
-            blur.unk10 = 0x44;
-            blur.unk14 = 0.005f;
-            blur.unk18 = 0.13f;
+            blur.blendControl = 0x44;
+            blur.uvDisplacementAngleDegrees = 0.005f;
+            blur.uvDisplacementAmplitude = 0.13f;
             blur.x = 0;
             blur.y = 0;
             blur.positionSpread = 0x100;
@@ -2510,9 +2510,9 @@ s32 fldProcSequence(void) {
             blur.delaySpread = 15;
             blur.angleStep = 0.221999988f;
             blur.color = 0x28848484;
-            blur.unk10 = 0x44;
-            blur.unk14 = 0.005f;
-            blur.unk18 = 0.13f;
+            blur.blendControl = 0x44;
+            blur.uvDisplacementAngleDegrees = 0.005f;
+            blur.uvDisplacementAmplitude = 0.13f;
             blur.x = 0;
             blur.y = 0;
             blur.positionSpread = 0x100;
