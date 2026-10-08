@@ -723,7 +723,20 @@ extern void itfMesDestroyWindow(s32 window);
 
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F6A0);
+extern u32 func_0011E278(void);
+
+s32 func_0019F6A0(KwlnTask *task) {
+    ItfMesPoolNode *node;
+
+    if (func_0011E278() != 0) {
+        return 0;
+    }
+    for (node = itfMesWork.pool.activeHead; node != NULL; node = node->next) {
+        itfUpdateSoundSelectorPanel((ItfMesState *)node->stateAddress);
+    }
+    itfMesWork.unk8++;
+    return 0;
+}
 
 void sndFlushMessageQueue(void) {
     ItfMesPoolNode *node = itfMesWork.pool.activeHead;
