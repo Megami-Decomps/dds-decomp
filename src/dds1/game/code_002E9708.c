@@ -153,7 +153,7 @@ extern SdfStreamFrameNode *sdfStreamNodeListTail;
 
 extern void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet);
 
-extern void func_002EB650();
+extern void sdfBuildStreamFrameTransferPackets(SdfStreamFrameNode *node);
 
 typedef struct SdfStreamParams {
     u8 mode;
@@ -1045,7 +1045,7 @@ void sdfAllocateStreamFrameBuffers(SdfStreamFrameNode *node) {
 }
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB578);
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB650);
+INCLUDE_ASM(const s32, "game/code_002E9708", sdfBuildStreamFrameTransferPackets);
 
 /* Clear the node, map the format's two selector bytes to mode 0/1/2, and copy loop/playback modes. */
 void sdfSoundInitNodeFromFormat(SdfStreamFrameNode *node, SoundFormat *format) {
@@ -1422,7 +1422,7 @@ s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
     /* Equivalent to &state->buffers[state->bufferIndex]; index-first arithmetic matches retail. */
     selectedBuffer = (u32 *)(state->bufferIndex * 4 + (s32)state + 0x28);
     if (*selectedBuffer == 0) {
-        func_002EB650();
+        sdfBuildStreamFrameTransferPackets((SdfStreamFrameNode *)state);
     }
     sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, (void *)(*selectedBuffer + state->bufferSize - SDF_STREAM_QWORD_BYTES));
     sdfAdvanceBufferedPlayback(state);
