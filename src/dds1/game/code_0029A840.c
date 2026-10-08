@@ -8,6 +8,7 @@
 #include "sdf.h"
 #include "sdf_texture_file.h"
 #include "sdf_chunk.h"
+#include "eff_expanded_list.h"
 
 
 
@@ -15,7 +16,7 @@ extern s32 btlGetRuntime(void);
 
 extern u32 effCloneSharedReferenceWithValue(u32, u32);
 
-extern u32 func_0029C230(u32);
+extern struct EffExpandedList *func_0029C230(u32);
 
 extern void *fileResolvePrimaryBuffer();
 
@@ -788,15 +789,15 @@ s32 effCountExpandedEntries(void *work) {
 
 INCLUDE_ASM(const s32, "game/code_0029A840", func_0029C230);
 
-void effReleaseReferenceHolder(u8 *holder) {
+void effReleaseReferenceHolder(EffExpandedList *holder) {
     u32 i;
-    if (--((EffExpandedList *)holder)->refCount != 0) {
+    if (--holder->refCount != 0) {
         return;
     }
-    for (i = 0; i < ((EffExpandedList *)holder)->count; i++) {
-        effReleaseSharedReference(((EffExpandedList *)holder)->handles[i]);
+    for (i = 0; i < holder->count; i++) {
+        effReleaseSharedReference(holder->handles[i]);
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffExpandedList *)holder)->buffer));
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)holder->buffer);
 }
 
 EffExpandedList *effReferenceObjectRetain(EffExpandedList *obj) {

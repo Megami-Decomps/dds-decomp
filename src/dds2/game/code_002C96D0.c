@@ -6,6 +6,7 @@
 #include "dat_state.h"
 #include "pcp_vu0.h"
 #include "kwln_task_lifecycle.h"
+#include "eff_expanded_list.h"
 struct EffectSlotSet;
 extern void func_00306CD0(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
 
@@ -69,7 +70,7 @@ typedef struct EffectSurfaceNode {
     u32 jobHandle;
     void **queues;
     u32 queueHandle;
-    void *referenceHolder;
+    struct EffExpandedList *referenceHolder;
     u32 active;
     u16 unk50;
 } EffectSurfaceNode;
@@ -79,7 +80,6 @@ extern void billSetBillboardMode(u32, s16);
 extern u32 billCreateIndexed(u32, u32);
 extern void billMarkKindOneFlag(u32);
 extern u32 billCloneObjectRetainingSharedData(u32);
-extern u32 effReferenceObjectRetain(u32);
 extern u32 fileSaveReadBuffer;
 extern u32 fileAllocateGridRecordSlots(u16, u32, void *);
 typedef struct MdlFlagPair {
@@ -190,7 +190,7 @@ extern s32 fileConfigTaskWork;
 
 extern u32 effModelUpdateControlFlags;
 
-extern u32 func_002DDF48(u32);
+extern struct EffExpandedList *func_002DDF48(u32);
 
 extern s8 fileMenuTaskAlive;
 extern s32 mcdOriginalTitleFileMode;
@@ -5440,7 +5440,7 @@ void fileDestroyEffectSurfaceAndChildren(EffectSurfaceNode *node) {
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->queueHandle));
     }
     if (node->referenceHolder != NULL) {
-        effReleaseReferenceHolder((s32)node->referenceHolder);
+        effReleaseReferenceHolder(node->referenceHolder);
     }
     if (node->active != 0) {
         fileReleaseGridRecordHandle((FileSlotTable *)node->active);
@@ -5523,9 +5523,9 @@ void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *
         break;
     case 7:
         if (dst->referenceHolder != NULL) {
-            effReleaseReferenceHolder((s32)dst->referenceHolder);
+            effReleaseReferenceHolder(dst->referenceHolder);
         }
-        dst->referenceHolder = (void *)effReferenceObjectRetain((u32)src->referenceHolder);
+        dst->referenceHolder = effReferenceObjectRetain(src->referenceHolder);
         break;
     }
     dst->kind = src->kind;
@@ -5624,13 +5624,10 @@ void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job) {
 }
 
 void fileReplaceReferenceHolder(EffectSurfaceNode *obj, u32 resource) {
-    u32 holder;
-
     if (obj->referenceHolder != NULL) {
-        effReleaseReferenceHolder((s32)obj->referenceHolder);
+        effReleaseReferenceHolder(obj->referenceHolder);
     }
-    holder = func_002DDF48(resource);
-    obj->referenceHolder = (void *)holder;
+    obj->referenceHolder = func_002DDF48(resource);
 }
 
 void fileClearLoadObjectReferences(EffectSurfaceNode *obj) {
