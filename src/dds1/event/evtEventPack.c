@@ -4,6 +4,7 @@
 #include "evt_unit.h"
 #include "file.h"
 #include "evt_motion_se.h"
+#include "evt_task.h"
 #include "eff_transform.h"
 #include "mdl.h"
 
@@ -184,12 +185,12 @@ void evtFreeEventPackState(KwlnTask *task)
 
 extern void func_003014F0(char *, const char *, ...);
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern void kwlnTaskCreate(const char *, s32, s32, s32, s32 (*)(), void (*)(), void *);
+extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 /* Preserve the complete native format record, including its trailing zeros. */
 const char D_003AF260[0x10] __attribute__((aligned(8))) = "mse_%d_%d";
 
 /* Allocate a three-word task parameter block and format its "mse_..." name. */
-void evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
+KwlnTask *evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     char taskName[0x20];
     EvtMotionSeTaskParams *params;
 
@@ -199,7 +200,7 @@ void evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     params->modelKey = modelKey;
     params->eventTaskId = eventTaskId;
     params->resourceId = resourceId;
-    kwlnTaskCreate(taskName, 0x3EC, 0, 0, evtUpdateMotionSeTask, evtFreeEventPackState, params);
+    return kwlnTaskCreate(taskName, 0x3EC, 0, 0, evtUpdateMotionSeTask, evtFreeEventPackState, (u32)params);
 }
 
 const char D_003AF270[0x20] __attribute__((aligned(8))) = "/event/e%03d/e%03d/scr/e%03d.be";

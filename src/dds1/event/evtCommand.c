@@ -5,6 +5,7 @@
 #include "eff_object.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
+#include "evt_task.h"
 #include "scr.h"
 #include "evt_solar.h"
 
@@ -122,9 +123,9 @@ u32 fldGetPlayerSceneState(void);
 EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *unit);
 
 
-s32 evtFindTaskById(s32 id);
-
 s32 evtGetTaskValueWord(s32 id);
+
+extern void func_00101A80(KwlnTask *parent, KwlnTask *child);
 
 extern char D_003AC968[]; /* "BE ok! (%d)\n" */
 
@@ -905,7 +906,7 @@ s32 evtCommandWaitForCampTask(void) {
         message = D_003AC958;
         evtPrintDeveloperConsoleMessage(message, taskId);
         sdfPrintFormattedDevMessage(message, taskId);
-        func_00101A80((s32)commandWork->task, mnuCampCreateTask(taskId));
+        func_00101A80(commandWork->task, mnuCampCreateTask(taskId));
         return 0;
     }
     if (evtGetTaskValueWord(taskId) == EVT_CAMP_TASK_READY_VALUE) {
@@ -930,7 +931,7 @@ s32 evtCommandStartCampTaskIfAbsent(void) {
         return 1;
     }
     evtPrintDeveloperConsoleMessage(D_003AC978, taskId);
-    func_00101A80((s32)commandWork->task, mnuCampCreateTask(taskId));
+    func_00101A80(commandWork->task, mnuCampCreateTask(taskId));
     return 1;
 }
 
@@ -983,7 +984,7 @@ s32 evtCommandStartPolygonMovie(void) {
     sceneId = scrReadIntParameter(1);
     movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
     evtPrintDeveloperConsoleMessage(D_003AC9E0, scrReadIntParameter(0), scrReadIntParameter(1));
-    func_00101A80((s32)commandWork->task, movieTask);
+    func_00101A80(commandWork->task, (KwlnTask *)(u32)movieTask);
     evtPolygonMovieSetFlagBits(movieTask, 1);
     scrSetIntegerReturnValue(movieTask);
     return 1;
@@ -1018,7 +1019,7 @@ s32 evtCommandCreatePolygonMovie(void) {
     eventId = scrReadIntParameter(0);
     sceneId = scrReadIntParameter(1);
     movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
-    func_00101A80((s32)commandWork->task, movieTask);
+    func_00101A80(commandWork->task, (KwlnTask *)(u32)movieTask);
     scrSetIntegerReturnValue(movieTask);
     return 1;
 }

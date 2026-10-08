@@ -10,6 +10,7 @@
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "kwln.h"
+#include "evt_task.h"
 #include "evt_unit.h"
 #include "evt_polygon_movie.h"
 #include "fld.h"
@@ -3980,35 +3981,35 @@ void evtFormatTaskName(s32 id, char *buffer) {
     func_0035C860(buffer, D_004377D0, id);
 }
 
-s32 evtFindTaskById(u32 taskId) {
+KwlnTask *evtFindTaskById(u32 taskId) {
     u8 taskName[32];
 
     evtFormatTaskName(taskId, taskName);
-    return (s32)kwlnTaskGetTaskByName((const char *)taskName);
+    return kwlnTaskGetTaskByName((const char *)taskName);
 }
 
 /* The script-visible second payload word has a task-kind-specific meaning. */
 s32 evtGetTaskValueWord(u32 taskId) {
-    s32 task = evtFindTaskById(taskId);
+    KwlnTask *task = evtFindTaskById(taskId);
     s32 *words;
     if (task == 0) {
         return -1;
     }
-    words = (s32 *)kwlnTaskGetUserValue((KwlnTask *)task);
+    words = (s32 *)kwlnTaskGetUserValue(task);
     return words[1];
 }
 
 void *evtGetTaskData(u32 taskId) {
-    s32 task = evtFindTaskById(taskId);
+    KwlnTask *task = evtFindTaskById(taskId);
     if (task != 0) {
-        return (void *)kwlnTaskGetUserValue((KwlnTask *)task);
+        return (void *)kwlnTaskGetUserValue(task);
     }
     return (void *)task;
 }
 
 
 void *evtFindTaskResourceEntryByKey(u32 id, s32 key) {
-    s32 task;
+    KwlnTask *task;
     EvtPackLoadState *data;
     s32 i;
 
@@ -4016,7 +4017,7 @@ void *evtFindTaskResourceEntryByKey(u32 id, s32 key) {
     if (task == 0) {
         return 0;
     }
-    data = (EvtPackLoadState *)kwlnTaskGetUserValue((KwlnTask *)task);
+    data = (EvtPackLoadState *)kwlnTaskGetUserValue(task);
     if (data->loaded != 2) {
         return 0;
     }

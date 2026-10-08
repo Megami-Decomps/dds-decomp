@@ -5,6 +5,7 @@
 #include "eff_object.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
+#include "evt_task.h"
 #include "scr.h"
 #include "evt_solar.h"
 
@@ -106,11 +107,9 @@ extern void func_00340DC8(f32, f32, f32);
 extern void effMiscQuatMultiplyVU(void);
 
 
-s32 evtFindTaskById(s32 id);
-
 s32 evtGetTaskValueWord(s32 id);
 
-extern s32 mnuCampCreateTask(s32 id);
+extern void func_00101968(KwlnTask *parent, KwlnTask *child);
 
 extern char D_00421ED8[]; /* "BE ok! (%d)\n" */
 
@@ -874,7 +873,7 @@ s32 evtCommandWaitForCampTask(void) {
         message = "load BE (%d)..\n";
         evtPrintDeveloperConsoleMessage(message, taskId);
         sdfPrintFormattedDevMessage(message, taskId);
-        func_00101968((s32)commandWork->task, mnuCampCreateTask(taskId));
+        func_00101968(commandWork->task, mnuCampCreateTask(taskId));
         return 0;
     }
     if (evtGetTaskValueWord(taskId) == EVT_CAMP_TASK_READY_VALUE) {
@@ -901,7 +900,7 @@ s32 evtCommandStartCampTaskIfAbsent(void) {
         return 1;
     }
     evtPrintDeveloperConsoleMessage("read BE (%d)..\n", taskId);
-    func_00101968((s32)commandWork->task, mnuCampCreateTask(taskId));
+    func_00101968(commandWork->task, mnuCampCreateTask(taskId));
     return 1;
 }
 
@@ -919,8 +918,6 @@ s32 evtCommandTestCampTaskReady(void) {
     scrSetIntegerReturnValue(isReady);
     return 1;
 }
-
-extern void mnuCampDestroyTaskById(s32 id);
 
 /* Destroy the requested camp task; missing context or task is a completed no-op. */
 s32 evtCommandDestroyCampTask(void) {
@@ -958,7 +955,7 @@ s32 evtCommandStartPolygonMovie(void) {
     sceneId = scrReadIntParameter(1);
     movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
     evtPrintDeveloperConsoleMessage("load PMV (%03d_%03d)..\n", scrReadIntParameter(0), scrReadIntParameter(1));
-    func_00101968((s32)commandWork->task, movieTask);
+    func_00101968(commandWork->task, (KwlnTask *)(u32)movieTask);
     evtPolygonMovieSetFlagBits(movieTask, 1);
     scrSetIntegerReturnValue(movieTask);
     return 1;
@@ -993,7 +990,7 @@ s32 evtCommandCreatePolygonMovie(void) {
     eventId = scrReadIntParameter(0);
     sceneId = scrReadIntParameter(1);
     movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
-    func_00101968((s32)commandWork->task, movieTask);
+    func_00101968(commandWork->task, (KwlnTask *)(u32)movieTask);
     scrSetIntegerReturnValue(movieTask);
     return 1;
 }
