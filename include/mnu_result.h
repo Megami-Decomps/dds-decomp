@@ -73,14 +73,24 @@ typedef struct BrsProgressAnimation {
 #ifdef VERSION_DDS1
     u8 pad00[0x14];
     s8 state;
-    u8 pad15[0x17];
+    u8 pad15[7];
+    u32 alpha;
+    u8 pad20[0xC];
     s16 level;
-    u8 pad2E[6];
+    u8 pad2E[2];
+    s32 currentProgress;
     s32 remaining;
     s32 applied;
     s32 frames;
     s8 unk40;
-    u8 pad41[0x27];
+    u8 pad41[3];
+    s32 iconFrame;
+    u32 iconOpacity;
+    s8 iconState;
+    u8 pad4D[0x13];
+    s8 progressInitialized;
+    s8 unk61;
+    u8 pad62[6];
 #else
     s8 drawPhase;
     u8 pad01[7];
@@ -230,6 +240,20 @@ typedef char BrsSkillPackageWork_levelAnimation_offset_check[
     ((u32)&((BrsSkillPackageWork *)0)->levelAnimation == 0xEE0) ? 1 : -1];
 typedef char BrsSkillPackageWork_profileAnimation_offset_check[
     ((u32)&((BrsSkillPackageWork *)0)->profileAnimation == 0x1220) ? 1 : -1];
+typedef char BrsProgressAnimation_alpha_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->alpha == 0x1C) ? 1 : -1];
+typedef char BrsProgressAnimation_currentProgress_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->currentProgress == 0x30) ? 1 : -1];
+typedef char BrsProgressAnimation_iconFrame_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->iconFrame == 0x44) ? 1 : -1];
+typedef char BrsProgressAnimation_iconOpacity_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->iconOpacity == 0x48) ? 1 : -1];
+typedef char BrsProgressAnimation_iconState_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->iconState == 0x4C) ? 1 : -1];
+typedef char BrsProgressAnimation_progressInitialized_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->progressInitialized == 0x60) ? 1 : -1];
+typedef char BrsProgressAnimation_unk61_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->unk61 == 0x61) ? 1 : -1];
 #else
 typedef char BrsRewardSummary_size_must_be_0x30[(sizeof(BrsRewardSummary) == 0x30) ? 1 : -1];
 typedef char BrsSkillPackageWork_size_must_be_0xB704[(sizeof(BrsSkillPackageWork) == 0xB704) ? 1 : -1];
