@@ -1062,9 +1062,11 @@ u32 mnuGetActiveEffectWorkEntry(void) {
     return mnuActiveEffectEntry;
 }
 
+s32 func_003242D0(MenuWorkEntry *entry, u32 mode);
+
 void mnuInitializeActiveEffectWorkEntry(u32 entry) {
     memset((void *)entry, 0, 0x48);
-    func_003242D0(entry, 0);
+    func_003242D0((MenuWorkEntry *)entry, 0);
     ((MenuWorkEntry *)entry)->flags |= 0x4010;
     ((MenuWorkEntry *)entry)->tag = 0x1000000;
     ((MenuWorkEntry *)entry)->remaining = 1;
@@ -1072,7 +1074,181 @@ void mnuInitializeActiveEffectWorkEntry(u32 entry) {
     mnuActiveEffectEntry = entry;
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_003242D0);
+s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
+    MenuStateRecord savedRecord;
+    MenuInitialTag tag;
+    MenuStateRecord *record;
+    MnuCallbackList *oldList;
+    SdfListNode *node;
+    u32 currentMode;
+    s32 haveSavedRecord = 0;
+
+    if (mode != 0) {
+        entry->flagsBits.mode = (mode - 1) & 0xF;
+    } else if (entry->flagsBits.mode == 4) {
+        return 0;
+    }
+
+    oldList = (MnuCallbackList *)entry->callback;
+    if (oldList != NULL) {
+        for (node = oldList->head; node != NULL; node = node->next) {
+            record = (MenuStateRecord *)node->value;
+            if (record->tag.flags == 0x44) {
+                memcpy(&savedRecord, record, sizeof(savedRecord));
+                haveSavedRecord = 1;
+                break;
+            }
+        }
+        dds3DestroyCallbackNodeAfterLastNotification(oldList);
+    }
+
+    entry->callback = mnuCreateReleaseCallbackNode();
+
+    tag.flags = 0x44;
+    tag.group = -80;
+    tag.duration = 60;
+    tag.index = 5;
+    record = mnuCreateNamedRecord(&tag);
+    if (haveSavedRecord) {
+        memcpy(record, &savedRecord, sizeof(*record));
+    } else {
+        record->flags.bits.completed = 1;
+        record->flags.bits.hasRange = 1;
+        record->flags.bits.direction = 1;
+        record->unk18 = 20;
+        record->offsetX = -20;
+        record->offsetY = -20;
+    }
+    func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+
+    currentMode = entry->flagsBits.mode;
+    if (currentMode < 5) {
+        switch (currentMode) {
+        case 0:
+            tag.flags = 0x40;
+            tag.group = -90;
+            tag.duration = 5;
+            tag.index = 20;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetY = 15;
+            record->offsetX = 0;
+            record->flags.bits.hasRange = 1;
+            record->flags.bits.direction = 2;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            entry->flagsBits.mode++;
+            break;
+        case 1:
+            tag.flags = 0x40;
+            tag.group = -90;
+            tag.duration = 5;
+            tag.index = 20;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetX = 20;
+            record->offsetY = 5;
+            record->flags.bits.hasRange = 1;
+            record->flags.bits.direction = 3;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+
+            tag.flags = 0x40;
+            tag.group = -90;
+            tag.duration = 5;
+            tag.index = 20;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetX = -20;
+            record->offsetY = 5;
+            record->flags.bits.direction = 4;
+            record->flags.bits.hasRange = 1;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            entry->flagsBits.mode++;
+            break;
+        case 2:
+            tag.flags = 0x40;
+            tag.group = -90;
+            tag.duration = 5;
+            tag.index = 20;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetY = 15;
+            record->offsetX = 0;
+            record->flags.bits.hasRange = 1;
+            record->flags.bits.direction = 2;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+
+            tag.flags = 0x45;
+            tag.group = -90;
+            tag.duration = 10;
+            tag.index = 40;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetX = 30;
+            record->offsetY = 5;
+            record->flags.bits.hasRange = 1;
+            record->flags.bits.direction = 3;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+
+            tag.flags = 0x45;
+            tag.group = -90;
+            tag.duration = 10;
+            tag.index = 40;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetX = -30;
+            record->offsetY = 5;
+            record->flags.bits.hasRange = 1;
+            record->flags.bits.direction = 4;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            entry->flagsBits.mode++;
+            break;
+        case 3:
+            tag.flags = 0x40;
+            tag.group = -90;
+            tag.duration = 5;
+            tag.index = 30;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetX = 20;
+            record->offsetY = 5;
+            record->flags.bits.hasRange = 1;
+            record->flags.bits.direction = 3;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+
+            tag.flags = 0x40;
+            tag.group = -90;
+            tag.duration = 5;
+            tag.index = 30;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetX = -20;
+            record->offsetY = 5;
+            record->flags.bits.direction = 4;
+            record->flags.bits.hasRange = 1;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+
+            tag.flags = 0x45;
+            tag.group = -90;
+            tag.duration = 7;
+            tag.index = 20;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetX = 40;
+            record->offsetY = 5;
+            record->flags.bits.hasRange = 1;
+            record->flags.bits.direction = 3;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+
+            tag.flags = 0x45;
+            tag.group = -90;
+            tag.duration = 7;
+            tag.index = 20;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetX = -40;
+            record->offsetY = 5;
+            record->flags.bits.hasRange = 1;
+            record->flags.bits.direction = 4;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            entry->flagsBits.mode++;
+            break;
+        case 4:
+        default:
+            break;
+        }
+    }
+    return 1;
+}
 
 extern f32 sdfVec3Normalize(f32 *vector);
 extern void sdfVectorScale(f32 factor, f32 *vector);
@@ -1180,7 +1356,62 @@ void mnuInitializeEffectContext(MenuWorkEntry *context) {
                    (u32)mnuCreateNamedRecord(&initialTag));
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00324B28);
+/* Update the active-effect entrance animation once per frame. */
+s32 func_00324B28(MenuWorkEntry *entry) {
+    extern s32 D_004389B4;
+    extern s32 D_004389B8;
+    s32 phase = D_004389B4;
+    s32 mode;
+    s32 result = 0;
+    MenuWorkFlags flags;
+    f32 positionY;
+
+    switch (phase) {
+    case 0:
+        flags.word = entry->flags;
+        entry->x0 = -200.0f;
+        D_004389B4 = 2;
+        mode = flags.bits.mode;
+        if (flags.bits.finished) {
+            if (mode >= 2) {
+                mode--;
+                func_003242D0(entry, mode);
+            }
+        }
+        entry->flags = ((mode & 0xF) << 15) | 0x4001;
+        D_004389B8 = 0;
+        break;
+    case 2:
+        if (++D_004389B8 >= 31) {
+            D_004389B4 = 3;
+            entry->x0 = 120.0f;
+            positionY = 400.0f;
+            entry->y0 = positionY;
+            D_004389B8 = 0;
+        }
+        break;
+    case 3:
+        positionY = entry->y0;
+        positionY -= 2.0f;
+        if (++D_004389B8 >= 31) {
+            phase = 1;
+        }
+        D_004389B4 = phase;
+        entry->y0 = positionY;
+        break;
+    case 1: {
+        u32 completionFlags = entry->flags;
+        D_004389B4 = 0;
+        entry->inputCountdown = 100;
+        entry->flags = completionFlags & ~0x4000u;
+        result = 1;
+        break;
+    }
+    default:
+        break;
+    }
+    return result;
+}
 
 
 MenuWorkEntry *mnuCreateAnimatedEffect(u32 context, f32 x, f32 y, f32 progress) {
