@@ -682,10 +682,10 @@ void parUpdateCellVertexPair(ParSystem *system, s32 index, const u128 *vertices)
     PCP_COPY_VECTOR(vertex + 1, vertices + 1);
 }
 
-void parTranslateCellVertices(ParSystem *system, s32 index, void *delta) {
+void parTranslateCellVertices(ParSystem *system, s32 index, const u128 *delta) {
     ParCell *cell = system->cells + index;
     s32 count = system->vertexWordCount;
-    u8 *vertex = *(u8 **)cell;
+    u128 *vertex = cell->history;
     s32 i;
     VU0_LOAD_VF_MEMORY(vf11, delta);
     if (count > 0) {
@@ -695,7 +695,7 @@ void parTranslateCellVertices(ParSystem *system, s32 index, void *delta) {
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF(vf10, vertex);
             i--;
-            vertex += 0x10;
+            vertex++;
         } while (i != 0);
     }
 }
