@@ -640,16 +640,6 @@ extern u32 effCreateTrackSetWithSharedReferences(u32, u16, u32);
 
 extern u32 effRetainResource(u32);
 
-typedef struct EffectStripNode {
-    u32 percent;
-    u32 color;
-    f32 opacity;
-    u8 pad_0C[0x20];
-    u32 transform;
-    u32 resource;
-    u32 active;
-    u16 count;
-} EffectStripNode;
 
 typedef struct EffectNodeHeader {
     u8 *entries;
@@ -4972,84 +4962,85 @@ EffectStripNode *effCreateStripNodeFromGrid(u8 *source) {
     return effCreateStripNode(effSlotCount(source, 100));
 }
 
-u8 *effFileResourceReferenceReplace(u8 *work) {
-    u8 *primary = fileResolvePrimaryBuffer();
-    u8 *source = primary + 0x20;
-    u8 *node = (u8 *)effCreateStripNodeFromGrid(source);
+extern void effReplaceFileResourceRef(EffectStripNode *, u32, void *);
 
-    memcpy(node + 0xC, primary, 0x20);
-    effReplaceFileResourceRef((s32)node, ((FileJob *)work)->option, (s32)source);
+EffectStripNode *effFileResourceReferenceReplace(FileJob *work) {
+    u8 *primary = fileResolvePrimaryBuffer(work);
+    u8 *source = primary + 0x20;
+    EffectStripNode *node = effCreateStripNodeFromGrid(source);
+
+    memcpy(node->copiedHeader, primary, sizeof(node->copiedHeader));
+    effReplaceFileResourceRef(node, work->option, source);
     return node;
 }
 
-void effReleaseModelResources(u32 *p) {
-    if (p[0x30 / 4] != 0) {
-        billDispatchByKind(p[0x30 / 4]);
+void effReleaseModelResources(EffectStripNode *p) {
+    if (p->resource != 0) {
+        billDispatchByKind(p->resource);
     }
-    if (p[0x2C / 4] != 0) {
-        effReleaseResourceRefs(p[0x2C / 4]);
+    if (p->transform != 0) {
+        effReleaseResourceRefs(p->transform);
     }
-    if (p[0x34 / 4] != 0) {
-        fileReleaseGridRecordHandle(p[0x34 / 4]);
+    if (p->active != 0) {
+        fileReleaseGridRecordHandle(p->active);
     }
     sdfReleaseChipBlock(p);
 }
 
-u8 *effCloneStripResourceFromOwner(u8 *work) {
-    u8 *source = (u8 *)((FileSlotTable *)((EffClassWork *)work)->payload)->data1;
-    u8 *node = (u8 *)effCreateStripNodeFromGrid(source);
+EffectStripNode *effCloneStripResourceFromOwner(EffectStripNode *work) {
+    u8 *source = ((FileSlotTable *)work->active)->data1;
+    EffectStripNode *node = effCreateStripNodeFromGrid(source);
 
-    memcpy(node + 0xC, source, 0x20);
-    effReplaceFileResourceRef((s32)node, ((FileSlotTable *)((EffClassWork *)work)->payload)->type, (s32)source);
+    memcpy(node->copiedHeader, source, sizeof(node->copiedHeader));
+    effReplaceFileResourceRef(node, ((FileSlotTable *)work->active)->type, source);
     return node;
 }
 
-void effReplaceFileResourceRef(s32 obj, s32 id, s32 arg) {
-    u32 *p = (u32 *)obj;
-    if (p[0x34 / 4] != 0) {
-        fileReleaseGridRecordHandle(p[0x34 / 4]);
+void effReplaceFileResourceRef(EffectStripNode *obj, u32 id, void *arg) {
+    if (obj->active != 0) {
+        fileReleaseGridRecordHandle(obj->active);
     }
-    p[0x34 / 4] = fileAllocateGridRecordSlots(id & 0xffff, p[0], arg);
+    obj->active = fileAllocateGridRecordSlots((u16)id, obj->percent, arg);
 }
 
-void effClearStripRecordReferences(s32 node) {
-    if (((EffectStripNode *)node)->active != 0) {
-        fileClearRecordReferences(((EffectStripNode *)node)->active);
+void effClearStripRecordReferences(EffectStripNode *node) {
+    if (node->active != 0) {
+        fileClearRecordReferences(node->active);
         return;
     }
 }
 
-void effAcquireStripRecord(s32 node) {
+void effAcquireStripRecord(EffectStripNode *node) {
     if (effModelUpdateControlFlags & 2) {
         return;
     }
-    if (((EffectStripNode *)node)->active != 0) {
-        fileAcquireRecord(((EffectStripNode *)node)->active);
+    if (node->active != 0) {
+        fileAcquireRecord(node->active);
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002EE670);
 
-void func_002EED48(u32 node) {
+void func_002EED48(EffectStripNode *node) {
     effAcquireStripRecord(node);
     func_002EE670(node);
 }
 
-void effSetStripRecordVector(s32 node) {
-    mnuRecordSetVector(((EffectStripNode *)node)->active);
+void effSetStripRecordVector(EffectStripNode *node) {
+    mnuRecordSetVector(node->active);
 }
 
-void effSetStripRecordSecondaryVector(s32 node) {
-    fileSetRecordSecondVector(((EffectStripNode *)node)->active);
+void effSetStripRecordSecondaryVector(EffectStripNode *node) {
+    fileSetRecordSecondVector(node->active);
 }
 
-void effSetStripRecordColor(s32 node, u32 color) {
-    ((EffectStripNode *)node)->color = color;
+void effSetStripRecordColor(EffectStripNode *node, u32 color) {
+    node->color = color;
 }
 
-void func_002EEDA8(u8 *p, f32 value) {
-    ((EffectStripNode *)p)->opacity = value;
-    dds3DispatchIndexedCallback(((EffectStripNode *)p)->active, value);
+void func_002EEDA8(EffectStripNode *p, f32 value) {
+    p->opacity = value;
+    dds3DispatchIndexedCallback(p->active, value);
 }
 
 typedef struct EffRibbonWork {
