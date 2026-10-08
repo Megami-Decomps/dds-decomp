@@ -318,7 +318,8 @@ typedef struct SndPad {
     s8 next;
     u8 pad28[9];
     s8 unk31;
-    u8 pad32[2];
+    s8 unk32;
+    s8 cancel;
     s8 coarseDown;
     s8 coarseUp;
     s8 unk36;
@@ -326,6 +327,7 @@ typedef struct SndPad {
     s8 fineDown;
     u8 pad39;
     s8 fineUp;
+    u8 pad3B[5];
 } SndPad;
 extern SndPad D_0037F510;
 extern s32 func_001A6AB8();
@@ -1256,7 +1258,171 @@ s32 itfStepFloatWithPad(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f3
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A8BD0);
+typedef struct ItfBlurPanelWork {
+    s16 editing;
+    s16 selection;
+    u32 blink;
+    u8 pad08[8];
+} ItfBlurPanelWork;
+extern ItfBlurPanelWork D_00452E80;
+extern const char *D_003B4D38[6];
+extern u8 kwlnDrawOverlayEnabled;
+extern s16 kwlnDrawOverlayAlpha;
+extern s16 kwlnDrawOverlayScale;
+extern s32 D_00435CE0[2];
+extern char D_00436660[];
+extern char D_00436668[];
+extern char D_00436670[];
+extern char D_00436678[];
+extern char D_00436680[];
+extern char D_00436688[];
+extern SdfPoolNode kwlnPositionedTextSurface;
+extern s32 sdfCreateResetPacketList(void);
+extern void sdfAppendPacket(SdfListHead *, u32);
+
+/* Draw the blur settings and handle selection, editing and cancellation. */
+s32 func_001A8BD0(void) {
+    SifCommand packet;
+    s32 list;
+    s32 row;
+    s32 y;
+    s16 previous;
+    s32 highlight;
+
+    list = sdfCreateResetPacketList();
+    sdfAppendPacket((SdfListHead *)list,
+        (u32)func_0011F250(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
+    sdfPktInit(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
+    sdfAppendPacket((SdfListHead *)list, (u32)sdfFormatSifPacket(&packet,
+        "BLUR:        %s", kwlnDrawOverlayEnabled ? D_00436660 : D_00436668));
+
+    y = 0x7A20;
+    if (D_00452E80.editing == 0) {
+        sdfPktInit(&packet, 0x82C0, D_00452E80.selection * 0x60 + 0x7A20, 0xFF0000, 0);
+        D_00452E80.blink++;
+        if (D_00452E80.blink < 32 || (D_00452E80.blink & 31) < 18) {
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfFormatSifPacket(&packet, D_00436670));
+        }
+    }
+
+    for (row = 0; row != 3; row++) {
+        sdfPktInit(&packet, 0x82C0, y, 0xFF0000, 0);
+        sdfAppendPacket((SdfListHead *)list,
+            (u32)sdfFormatSifPacket(&packet, D_00436678, D_003B4D38[row]));
+        highlight = 0;
+        if (D_00452E80.editing != 0 && row == D_00452E80.selection) {
+            highlight = 6;
+        }
+        sdfPktInit(&packet, 0x8800, y, 0xFF0000, highlight);
+        switch (row) {
+        case 0:
+            sdfAppendPacket((SdfListHead *)list,
+                (u32)sdfFormatSifPacket(&packet, D_00436680, kwlnDrawOverlayAlpha));
+            break;
+        case 1:
+            sdfAppendPacket((SdfListHead *)list,
+                (u32)sdfFormatSifPacket(&packet, D_00436680, kwlnDrawOverlayScale));
+            break;
+        case 2:
+            sdfAppendPacket((SdfListHead *)list,
+                (u32)sdfFormatSifPacket(&packet, D_00436688, D_00435CE0[0], D_00435CE0[1]));
+            break;
+        }
+        y += 0x60;
+    }
+    sdfAppendPacket((SdfListHead *)list,
+        (u32)func_0011F250((D_00435CE0[0] * 16) + 0x7FC0, (D_00435CE0[1] * 8) + 0x7FE0,
+            0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
+
+    if ((s8)D_0037F510.unk32 < 0) {
+        kwlnDrawOverlayEnabled ^= 1;
+    }
+    if (D_00452E80.editing == 0) {
+        previous = D_00452E80.selection;
+        if ((u8)D_0037F510.unk36 & 2) {
+            D_00452E80.selection--;
+            if (D_00452E80.selection < 0) {
+                D_00452E80.selection = 2;
+            }
+        }
+        if ((u8)D_0037F510.unk37 & 2) {
+            D_00452E80.selection++;
+            if (D_00452E80.selection >= 3) {
+                D_00452E80.selection = 0;
+            }
+        }
+        if (previous != D_00452E80.selection) {
+            D_00452E80.blink = 0;
+        }
+        if (D_0037F510.unk31 < 0) {
+            D_00452E80.editing ^= 1;
+            D_00452E80.blink = 0;
+        }
+        if ((u8)D_0037F510.cancel & 2) {
+            return -1;
+        }
+    } else {
+        if (D_00452E80.selection == 2) {
+            if (D_0037F510.unk36 != 0) {
+                D_00435CE0[1] -= 16;
+                if (D_00435CE0[1] < -224) {
+                    D_00435CE0[1] = -224;
+                }
+            }
+            if (D_0037F510.unk37 != 0) {
+                D_00435CE0[1] += 16;
+                if (D_00435CE0[1] > 224) {
+                    D_00435CE0[1] = 224;
+                }
+            }
+            if (D_0037F510.coarseDown != 0) {
+                D_00435CE0[0] -= 16;
+                if (D_00435CE0[0] < -256) {
+                    D_00435CE0[0] = -256;
+                }
+            }
+            if (D_0037F510.coarseUp != 0) {
+                D_00435CE0[0] += 16;
+                if (D_00435CE0[0] > 256) {
+                    D_00435CE0[0] = 256;
+                }
+            }
+        } else if (D_00452E80.selection == 0) {
+            if ((u8)D_0037F510.coarseDown & 2) {
+                kwlnDrawOverlayAlpha -= 10;
+                if (kwlnDrawOverlayAlpha < 0) {
+                    kwlnDrawOverlayAlpha = 0;
+                }
+            }
+            if ((u8)D_0037F510.coarseUp & 2) {
+                kwlnDrawOverlayAlpha += 10;
+                if (kwlnDrawOverlayAlpha > 255) {
+                    kwlnDrawOverlayAlpha = 255;
+                }
+            }
+        } else {
+            if ((u8)D_0037F510.coarseDown & 2) {
+                kwlnDrawOverlayScale -= 10;
+                if (kwlnDrawOverlayScale < -255) {
+                    kwlnDrawOverlayScale = -255;
+                }
+            }
+            if ((u8)D_0037F510.coarseUp & 2) {
+                kwlnDrawOverlayScale += 10;
+                if (kwlnDrawOverlayScale > 255) {
+                    kwlnDrawOverlayScale = 255;
+                }
+            }
+        }
+        if (D_0037F510.cancel < 0) {
+            D_00452E80.editing ^= 1;
+            D_00452E80.blink = 0;
+        }
+    }
+    return 0;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A9130);
 
@@ -1391,7 +1557,7 @@ extern s32 btlSweepFloorModelLists(void);
 
 extern s32 btlUpdateActorModelColorAndLinks(void);
 
-extern s32 func_0022AC10(void);
+extern void func_0022AC10(void);
 
 extern s32 func_0020D110(void);
 

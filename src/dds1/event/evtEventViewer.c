@@ -1,33 +1,13 @@
 #include "common.h"
+#include "evt_viewer.h"
 #include "dds3obj.h"
 #include "evt_world.h"
 
 /* Node queued on an entry, linked through +0x30/+0x34, owning a buffer. */
-typedef struct EvtEvNode {
-    u8 pad00[8];
-    s8 slot;                  /* 0x08: signed world-object slot, negative when unused */
-    u8 pad09[0x23];
-    void *buf;                 /* 0x2C */
-    struct EvtEvNode *next;    /* 0x30 */
-    struct EvtEvNode *prev;    /* 0x34 */
-} EvtEvNode;
+
 
 /* Event-viewer entry: doubly linked through next/prev, keyed by id. */
-typedef struct EvtEvEntry {
-    s32 id;                    /* 0x0 */
-    u8 pad4[4];                /* 0x4 */
-    s32 unk8;                  /* 0x8 */
-    s32 unkC;                  /* 0xC */
-    u8 pad10[0x14];            /* 0x10 */
-    struct SdfTex *tex;        /* 0x24 */
-    u8 pad28[0x28];            /* 0x28 */
-    s32 nodeCount;             /* 0x50 */
-    EvtEvNode *firstNode;      /* 0x54 */
-    EvtEvNode *lastNode;       /* 0x58 */
-    u8 pad5C[0x20];            /* 0x5C */
-    struct EvtEvEntry *next;   /* 0x7c */
-    struct EvtEvEntry *prev;   /* 0x80 */
-} EvtEvEntry;
+
 
 /* Table of 0x20-byte (group, type) records at +0x34, counted at +0x38. */
 typedef struct EvtGroupRec {
@@ -37,38 +17,10 @@ typedef struct EvtGroupRec {
     u8 pad10[0x10];
 } EvtGroupRec;
 
-typedef struct EvtGroupTable {
-    u8 pad00[0x34];
-    EvtGroupRec *recs;         /* 0x34 */
-    s32 count;                 /* 0x38 */
-} EvtGroupTable;
+
 
 /* Event viewer: name table at 0x20, entry list at 0x2030. */
-typedef struct EvtViewer {
-    s32 unk00;           /* 0x0 */
-    u32 flags;           /* 0x4 */
-    EvtGroupTable *groupTable; /* 0x8 */
-    s32 unk0C;           /* 0xC */
-    u8 pad10[4];
-    s32 unk14;           /* 0x14 */
-    s32 frame;          /* 0x18: end frame for movie preview */
-    u8 pad1C[4];
-    s32 nameCount;       /* 0x20 */
-    char names[256][32]; /* 0x24: fixed-width names */
-    u8 pad2024[0xC];
-    s32 entryCount;      /* 0x2030 */
-    EvtEvEntry *head;    /* 0x2034 */
-    EvtEvEntry *tail;    /* 0x2038 */
-    void *slots[0x7F];   /* 0x203c */
-    s32 unk2238;         /* 0x2238 */
-    u8 pad223C[0xC4];
-    s32 queuedA;         /* 0x2300 */
-    s32 queuedB;         /* 0x2304 */
-    EvtEvEntry *queue;   /* 0x2308 */
-    u8 pad230C[0x104];
-    s32 unk2410;         /* 0x2410 */
-    u8 pad2414[0x7C];
-} EvtViewer;
+
 
 /* Min/max tracker fed from a live value. */
 typedef struct EvtRange {
@@ -79,7 +31,7 @@ typedef struct EvtRange {
 } EvtRange;
 
 
-void evtUnlinkListNode(EvtEvEntry *entry, EvtEvNode *node);
+void evtUnlinkListNode(EvtRuntimeGroup *entry, EvtRuntimeChild *node);
 void sdfReleaseChipBlock(void *ptr);
 void sdfTexReleaseReference(struct SdfTex *tex);
 s32 sdfCheckPendingWorkWithInterrupts();
@@ -89,13 +41,13 @@ void effInitCh71Id(void);
 void effInitCh72Id(void);
 void effInitCh76Id(void);
 void effInitCh75Id(void);
-void evtPolygonMovieFreeWork(EvtGroupTable *table);
+void evtPolygonMovieFreeWork(PolyMovieWork *table);
 void btlRemoveCurrentGroupedEntity(s32 group, s32 type);
 void kwlnPadResetMotorLevelsAndOutput(void);
-EvtEvNode *evtEventViewerGetPendingNode(EvtViewer *viewer);
-void func_0022BF00(EvtViewer *viewer);
-void evtEventViewerFreeSlot(s32 index, EvtViewer *viewer);
-void evtEventViewerFreeBuffer(EvtEvNode *node);
+EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *viewer);
+void func_0022BF00(EvtRuntime *viewer);
+void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer);
+void evtEventViewerFreeBuffer(EvtRuntimeChild *node);
 void dds3RemoveWorldObjectNode(struct EffWorldNode *ptr);
 void *sdfAllocSizeClassBlock(s32 size);
 void *memset(void *dst, s32 value, u32 size);
@@ -110,51 +62,51 @@ void func_0022BE28(void)
 }
 
 /* Return the pending node at position (count A + count B) in the queue entry, or NULL. */
-EvtEvNode *evtEventViewerGetPendingNode(EvtViewer *viewer)
+EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *viewer)
 {
-    EvtEvEntry *queue;
-    EvtEvNode *node;
+    EvtRuntimeGroup *queue;
+    EvtRuntimeChild *node;
     s32 i;
 
-    queue = viewer->queue;
+    queue = viewer->frameGroup;
     if (queue == NULL) {
         return NULL;
     }
-    node = queue->firstNode;
-    for (i = 0; i < viewer->queuedB + viewer->queuedA && node != NULL; i++) {
+    node = queue->children;
+    for (i = 0; i < viewer->frameCursor + viewer->frameFirst && node != NULL; i++) {
         node = node->next;
     }
     return node;
 }
 
 /* Release a queued node from its entry, freeing its buffer unless the entry id is 0x12. */
-void evtEventViewerReleaseNode(EvtEvEntry *entry, EvtEvNode *node)
+void evtEventViewerReleaseNode(EvtRuntimeGroup *entry, EvtRuntimeChild *node)
 {
     evtUnlinkListNode(entry, node);
-    if (node->buf != NULL) {
-        if (entry->id != 0x12) {
-            sdfReleaseChipBlock(node->buf);
+    if (node->payload != NULL) {
+        if (entry->type != 0x12) {
+            sdfReleaseChipBlock(node->payload);
         }
-        node->buf = NULL;
+        node->payload = NULL;
     }
     sdfReleaseChipBlock(node);
 }
 
 /* Release the pending node and consume its position in the viewer queue. */
-void func_0022BF00(EvtViewer *viewer)
+void func_0022BF00(EvtRuntime *viewer)
 {
-    EvtEvEntry *entry;
-    EvtEvNode *node;
+    EvtRuntimeGroup *entry;
+    EvtRuntimeChild *node;
 
-    entry = viewer->queue;
+    entry = viewer->frameGroup;
     node = evtEventViewerGetPendingNode(viewer);
-    switch (entry->id) {
+    switch (entry->type) {
     case 3:
     case 20:
     case 21:
     case 26:
-        if (node->slot >= 0) {
-            evtEventViewerFreeSlot(node->slot, viewer);
+        if (node->p08.sb[0] >= 0) {
+            evtEventViewerFreeSlot(node->p08.sb[0], viewer);
         }
         break;
     case 18:
@@ -162,29 +114,29 @@ void func_0022BF00(EvtViewer *viewer)
         break;
     }
     evtEventViewerReleaseNode(entry, node);
-    if (viewer->queuedB == 0) {
-        if (viewer->queuedA > 0) {
-            viewer->queuedA--;
+    if (viewer->frameCursor == 0) {
+        if (viewer->frameFirst > 0) {
+            viewer->frameFirst--;
         }
     } else {
-        if (viewer->queuedA > 0) {
-            viewer->queuedA--;
+        if (viewer->frameFirst > 0) {
+            viewer->frameFirst--;
         } else {
-            viewer->queuedB--;
+            viewer->frameCursor--;
         }
     }
 }
 
 /* Release a supplied queued node, with the same resource and counter handling. */
-void func_0022BFD8(EvtViewer *viewer, EvtEvEntry *entry, EvtEvNode *node)
+void func_0022BFD8(EvtRuntime *viewer, EvtRuntimeGroup *entry, EvtRuntimeChild *node)
 {
-    switch (entry->id) {
+    switch (entry->type) {
     case 3:
     case 20:
     case 21:
     case 26:
-        if (node->slot >= 0) {
-            evtEventViewerFreeSlot(node->slot, viewer);
+        if (node->p08.sb[0] >= 0) {
+            evtEventViewerFreeSlot(node->p08.sb[0], viewer);
         }
         break;
     case 18:
@@ -192,21 +144,21 @@ void func_0022BFD8(EvtViewer *viewer, EvtEvEntry *entry, EvtEvNode *node)
         break;
     }
     evtEventViewerReleaseNode(entry, node);
-    if (viewer->queuedB == 0) {
-        if (viewer->queuedA > 0) {
-            viewer->queuedA--;
+    if (viewer->frameCursor == 0) {
+        if (viewer->frameFirst > 0) {
+            viewer->frameFirst--;
         }
     } else {
-        if (viewer->queuedA > 0) {
-            viewer->queuedA--;
+        if (viewer->frameFirst > 0) {
+            viewer->frameFirst--;
         } else {
-            viewer->queuedB--;
+            viewer->frameCursor--;
         }
     }
 }
 
 /* Consume queued viewer events until the pending check reports none. */
-void evtEventViewerProcessPending(EvtViewer *viewer)
+void evtEventViewerProcessPending(EvtRuntime *viewer)
 {
     while (evtEventViewerGetPendingNode(viewer) != 0) {
         func_0022BF00(viewer);
@@ -214,21 +166,21 @@ void evtEventViewerProcessPending(EvtViewer *viewer)
 }
 
 /* Insert an entry into the viewer's list, ordered by id. */
-void evtEventViewerInsertEntry(EvtEvEntry *entry, EvtViewer *viewer)
+void evtEventViewerInsertEntry(EvtRuntimeGroup *entry, EvtRuntime *viewer)
 {
-    EvtEvEntry *node;
+    EvtRuntimeGroup *node;
 
-    node = viewer->head;
+    node = viewer->groups;
     if (node == NULL) {
-        viewer->head = entry;
-        viewer->tail = entry;
+        viewer->groups = entry;
+        viewer->lastGroup = entry;
         entry->next = NULL;
         entry->prev = NULL;
     } else {
         while (node != NULL) {
-            if (entry->id < node->id) {
+            if (entry->type < node->type) {
                 if (node->prev == NULL) {
-                    viewer->head = entry;
+                    viewer->groups = entry;
                     node->prev = entry;
                     entry->next = node;
                     entry->prev = NULL;
@@ -243,24 +195,24 @@ void evtEventViewerInsertEntry(EvtEvEntry *entry, EvtViewer *viewer)
             node = node->next;
         }
         if (node == NULL) {
-            viewer->tail->next = entry;
-            entry->prev = viewer->tail;
+            viewer->lastGroup->next = entry;
+            entry->prev = viewer->lastGroup;
             entry->next = NULL;
-            viewer->tail = entry;
+            viewer->lastGroup = entry;
         }
     }
     viewer->entryCount++;
 }
 
-void evtEventViewerUnlinkEntry(EvtEvEntry *entry, EvtViewer *viewer)
+void evtEventViewerUnlinkEntry(EvtRuntimeGroup *entry, EvtRuntime *viewer)
 {
     if (entry->prev == NULL) {
-        viewer->head = entry->next;
+        viewer->groups = entry->next;
     } else {
         entry->prev->next = entry->next;
     }
     if (entry->next == NULL) {
-        viewer->tail = entry->prev;
+        viewer->lastGroup = entry->prev;
     } else {
         entry->next->prev = entry->prev;
     }
@@ -270,31 +222,31 @@ void evtEventViewerUnlinkEntry(EvtEvEntry *entry, EvtViewer *viewer)
 }
 
 /* Allocate a zeroed 0x84-byte entry for an id and queue it in the viewer. */
-EvtEvEntry *evtEventViewerCreateEntry(s32 id, EvtViewer *viewer)
+EvtRuntimeGroup *evtEventViewerCreateEntry(s32 id, EvtRuntime *viewer)
 {
-    EvtEvEntry *entry;
+    EvtRuntimeGroup *entry;
 
     entry = sdfAllocSizeClassBlock(0x84);
     if (entry == NULL) {
         return NULL;
     }
     memset(entry, 0, 0x84);
-    entry->id = id;
-    entry->unk8 = -1;
-    entry->unkC = -1;
+    entry->type = id;
+    entry->entryHeader.word = -1;
+    entry->argument0C = -1;
     evtEventViewerInsertEntry(entry, viewer);
     return entry;
 }
 
-s32 evtEventViewerCountEntriesById(s32 id, EvtViewer *viewer)
+s32 evtEventViewerCountEntriesById(s32 id, EvtRuntime *viewer)
 {
-    EvtEvEntry *entry;
+    EvtRuntimeGroup *entry;
     s32 count;
 
     count = 0;
-    entry = viewer->head;
+    entry = viewer->groups;
     while (entry != NULL) {
-        if (entry->id == id) {
+        if (entry->type == id) {
             count = count + 1;
         }
         entry = entry->next;
@@ -302,13 +254,13 @@ s32 evtEventViewerCountEntriesById(s32 id, EvtViewer *viewer)
     return count;
 }
 
-s32 evtEventViewerCountEntries(EvtViewer *viewer)
+s32 evtEventViewerCountEntries(EvtRuntime *viewer)
 {
-    EvtEvEntry *entry;
+    EvtRuntimeGroup *entry;
     s32 count;
 
     count = 0;
-    entry = viewer->head;
+    entry = viewer->groups;
     while (entry != NULL) {
         count = count + 1;
         entry = entry->next;
@@ -317,38 +269,38 @@ s32 evtEventViewerCountEntries(EvtViewer *viewer)
 }
 
 /* Sum nodeCount over entries: mode 2 skips ids 5/0x13, mode 3 takes only those. */
-s32 evtEventViewerSumNodeCounts(s32 mode, EvtViewer *viewer)
+s32 evtEventViewerSumNodeCounts(s32 mode, EvtRuntime *viewer)
 {
-    EvtEvEntry *entry;
+    EvtRuntimeGroup *entry;
     s32 total;
 
     total = 0;
-    for (entry = viewer->head; entry != NULL; entry = entry->next) {
+    for (entry = viewer->groups; entry != NULL; entry = entry->next) {
         if (mode == 2) {
-            if (entry->id == 5 || entry->id == 0x13) {
+            if (entry->type == 5 || entry->type == 0x13) {
                 continue;
             }
         } else if (mode == 3) {
-            if (entry->id != 5 && entry->id != 0x13) {
+            if (entry->type != 5 && entry->type != 0x13) {
                 continue;
             }
         } else {
             continue;
         }
-        total += entry->nodeCount;
+        total += entry->childCount;
     }
     return total;
 }
 
 /* Destroy an entry: free its nodes, drop a type-0x18 texture, unlink it, free it. */
-void evtEventViewerDestroyEntry(EvtEvEntry *entry, EvtViewer *viewer)
+void evtEventViewerDestroyEntry(EvtRuntimeGroup *entry, EvtRuntime *viewer)
 {
-    while (entry->firstNode != NULL) {
-        evtEventViewerReleaseNode(entry, entry->firstNode);
+    while (entry->children != NULL) {
+        evtEventViewerReleaseNode(entry, entry->children);
     }
-    if (entry->id == 0x18) {
-        sdfTexReleaseReference(entry->tex);
-        entry->tex = 0;
+    if (entry->type == 0x18) {
+        sdfTexReleaseReference(entry->texture);
+        entry->texture = 0;
         while (sdfCheckPendingWorkWithInterrupts() != 0) {
         }
     }
@@ -379,73 +331,73 @@ void evtViewerSetMaximumFromCurrent(EvtRange *range)
 }
 
 /* Reset the viewer (0x2490 bytes) but keep its first and 0x2410 fields. */
-void evtEventViewerReset(EvtViewer *viewer)
+void evtEventViewerReset(EvtRuntime *viewer)
 {
-    s32 keepA;
+    SdfMemBlock *keepA;
     s32 keepB;
 
-    keepA = viewer->unk00;
-    keepB = viewer->unk2410;
+    keepA = viewer->resourceHandle;
+    keepB = viewer->glyph;
     memset(viewer, 0, 0x2490);
-    viewer->unk00 = keepA;
-    viewer->unk2410 = keepB;
+    viewer->resourceHandle = keepA;
+    viewer->glyph = keepB;
     viewer->flags |= 1;
-    viewer->unk0C = 0x21C;
-    viewer->unk14 = 0x21B;
+    viewer->headerThird = 0x21C;
+    viewer->frameRange.word = 0x21B;
     viewer->unk2238 = 1;
 }
 
 /* Shut the viewer down: reset effect channels, destroy entries, release the handle. */
-void evtEventViewerShutdown(EvtViewer *viewer)
+void evtEventViewerShutdown(EvtRuntime *viewer)
 {
     effInitCh71Id();
     effInitCh72Id();
     effInitCh76Id();
     effInitCh75Id();
-    while (viewer->head != NULL) {
-        evtEventViewerDestroyEntry(viewer->head, viewer);
+    while (viewer->groups != NULL) {
+        evtEventViewerDestroyEntry(viewer->groups, viewer);
     }
-    if (viewer->groupTable != 0) {
-        evtPolygonMovieFreeWork(viewer->groupTable);
-        viewer->groupTable = 0;
+    if (viewer->windowContext != 0) {
+        evtPolygonMovieFreeWork(viewer->windowContext);
+        viewer->windowContext = 0;
     }
     kwlnPadResetMotorLevelsAndOutput();
 }
 
 /* Destroy every grouped entity listed in the viewer's table. */
-void evtEventViewerReleaseGroups(EvtViewer *viewer)
+void evtEventViewerReleaseGroups(EvtRuntime *viewer)
 {
     s32 i;
 
-    if (viewer->groupTable != NULL) {
-        for (i = 0; i < viewer->groupTable->count; i++) {
-            btlRemoveCurrentGroupedEntity(viewer->groupTable->recs[i].group, viewer->groupTable->recs[i].type);
+    if (viewer->windowContext != NULL) {
+        for (i = 0; i < (s32)viewer->windowContext->unk_38; i++) {
+            btlRemoveCurrentGroupedEntity(((EvtGroupRec *)viewer->windowContext->mainEntry3Data)[i].group, ((EvtGroupRec *)viewer->windowContext->mainEntry3Data)[i].type);
         }
     }
 }
 
 /* Search the fixed-width (0x20-byte) event-name records. */
-s32 evtEventViewerFindNameIndex(const char *name, EvtViewer *viewer)
+s32 evtEventViewerFindNameIndex(const char *name, EvtRuntime *viewer)
 {
     const char *nameEntry;
     s32 index;
 
     index = 0;
-    if (0 < viewer->nameCount) {
-        nameEntry = viewer->names[0];
+    if (0 < viewer->entryTotal) {
+        nameEntry = viewer->entryName[0];
         do {
             if (strcmp(name, nameEntry) == 0) {
                 return index;
             }
             index = index + 1;
             nameEntry = nameEntry + 0x20;
-        } while (index < viewer->nameCount);
+        } while (index < viewer->entryTotal);
     }
     return -1;
 }
 
 /* Return the index of a name in the table, appending it when missing. */
-s32 evtEventViewerAddName(const char *name, EvtViewer *viewer)
+s32 evtEventViewerAddName(const char *name, EvtRuntime *viewer)
 {
     s32 found;
     s32 index;
@@ -454,22 +406,22 @@ s32 evtEventViewerAddName(const char *name, EvtViewer *viewer)
     if (found >= 0) {
         return found;
     }
-    index = viewer->nameCount;
-    strcpy(viewer->names[index], name);
-    viewer->nameCount++;
+    index = viewer->entryTotal;
+    strcpy(viewer->entryName[index], name);
+    viewer->entryTotal++;
     return index;
 }
 
 struct EffectObj;
 
 /* Look up a named kind-7 effect object by index. */
-struct EffectObj *evtEventViewerGetNameObject(s32 index, EvtViewer *viewer)
+struct EffectObj *evtEventViewerGetNameObject(s32 index, EvtRuntime *viewer)
 {
     if (index < 0) {
         return NULL;
     }
     return (struct EffectObj *)dds3FindIndexedObjectChainNodeByName(
-        (EffWorldNode *)dds3GetWorldObject(), 7, (const u8 *)viewer->names[index]);
+        (EffWorldNode *)dds3GetWorldObject(), 7, (const u8 *)viewer->entryName[index]);
 }
 
 struct PolyMovieObject;
@@ -480,7 +432,7 @@ extern s32 evtStageRelinkOwnedNodeResource(void *, void *);
 extern s32 evtPolygonMovieScaleByProgress(struct PolyMovieObject *, s32, s32, s32);
 
 /* Billboard entries and polygon movies use distinct owner attachment paths. */
-void evtViewerBindNamedOwner(s32 obj, s32 value, s32 type, u32 word, EvtViewer *viewer) {
+void evtViewerBindNamedOwner(s32 obj, s32 value, s32 type, u32 word, EvtRuntime *viewer) {
     ObjData *owner;
     struct PolyMovieObject *movie;
     s32 frame;
@@ -488,13 +440,13 @@ void evtViewerBindNamedOwner(s32 obj, s32 value, s32 type, u32 word, EvtViewer *
     if (obj == 0) {
         return;
     }
-    frame = viewer->frame;
+    frame = viewer->curFrame;
     if (value < 0) {
         return;
     }
     owner = (ObjData *)dds3FindObjectChainNodeByName(
         (EffWorldNode *)dds3GetWorldObject(),
-        (const u8 *)viewer->names[value]);
+        (const u8 *)viewer->entryName[value]);
     if (owner == NULL) {
         return;
     }
@@ -562,7 +514,7 @@ extern s32 effObjCopyMagatuhiSourceParameters(struct EffectObj *obj, struct Effe
                                                struct EffectObj *fourth);
 
 /* Create the viewer object for a command in the first free slot; returns the slot, or -1 when full. */
-s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *params, EvtViewer *viewer) {
+s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *params, EvtRuntime *viewer) {
     f32 vec0[4];
     f32 vec1[4];
     s32 handle = 0;
@@ -575,7 +527,7 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *
     memset(vec1, 0, 0x10);
     vec1[3] = 1.0f;
     for (slot = 0; slot < 0x7F; slot++) {
-        if (viewer->slots[slot] == NULL) {
+        if (viewer->objects[slot] == NULL) {
             break;
         }
     }
@@ -619,14 +571,14 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtViewCmd *cmd, EvtViewParams *
         }
         break;
     }
-    viewer->slots[slot] = (void *)handle;
+    viewer->objects[slot] = (void *)handle;
     if (handle != 0) {
         effObjSetFlags(handle, 1);
     }
     return slot;
 }
 
-void evtEventViewerFreeSlot(s32 index, EvtViewer *viewer)
+void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer)
 {
     void **slot;
 
@@ -639,7 +591,7 @@ void evtEventViewerFreeSlot(s32 index, EvtViewer *viewer)
 
 /* Create an event-viewer effect at the origin and attach its active event node. */
 void *func_0022CA88(void *resource, u32 entryId, s32 value, s32 type, u32 word,
-                    EvtViewer *viewer) {
+                    EvtRuntime *viewer) {
     f32 position[4];
     f32 scale[4];
     void *effect;
@@ -654,12 +606,12 @@ void *func_0022CA88(void *resource, u32 entryId, s32 value, s32 type, u32 word,
     return effect;
 }
 
-void evtEventViewerFreeBuffer(EvtEvNode *work)
+void evtEventViewerFreeBuffer(EvtRuntimeChild *work)
 {
-    if (work->buf != NULL) {
-        dds3RemoveWorldObjectNode(work->buf);
+    if (work->payload != NULL) {
+        dds3RemoveWorldObjectNode(work->payload);
     }
-    work->buf = NULL;
+    work->payload = NULL;
 }
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_003ACFE8);

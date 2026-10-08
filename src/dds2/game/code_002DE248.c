@@ -4706,7 +4706,7 @@ void effAdvanceClassResourceFrame(work)
 s32 *work;
 {
     if ((effModelUpdateControlFlags & 2) == 0) {
-        D_003E9D00[work[0x2C / 4]].update();
+        D_003E9D00[work[0x2C / 4]].update(work);
         work[0x28 / 4]++;
     }
 }

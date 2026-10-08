@@ -6604,6 +6604,7 @@
 0x002EB490	sdfSoundAppendNode	inferred	appends a node to the D_003BDA98 intrusive list
 0x002EB4D0	sdfSoundRemoveNode	inferred	unlinks a node from the D_003BDA98 intrusive list
 0x002EB510	sdfAllocateStreamFrameBuffers	inferred	Allocates two width-by-height frame buffers with two or four bytes per pixel depending on the node flag.
+0x002EB650	sdfBuildStreamFrameTransferPackets	inferred	builds and stores both transfer packet buffers for a full SdfStreamFrameNode before submission
 0x002EB8C0	sdfSoundInitNodeFromFormat	inferred	memset node, translate hasAudio/stereo into twoChannel 0/1/2
 0x002EB9C8	sdfSoundInitFormattedNode	inferred	Initializes a sound node using format and callback values and allocates its sample buffer.
 0x002EBA28	sdfStreamInitializeFromHeader	inferred	confidence=high; matched-C; src/dds1/game/code_002E9708.c:843:func_002EBA28; Peer-matched C proposal: P7; Waits for a complete streamed frame header, captures dimensions and format metadata, creates a texture when absent, allocates frame buffers and links the stream node.; source=names_pending_main.tsv:143 [names_qp13.tsv]

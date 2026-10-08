@@ -98,7 +98,7 @@ extern struct MenuListNode *func_002B86E8(struct MenuList *);
 
 extern void func_002AAE80();
 
-extern void mnuReleasePartyIconBundles();
+extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 
 extern void mnuClearEntries(MenuPageWindow *);
 
@@ -219,7 +219,7 @@ extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
 extern void func_002B2408();
 
-extern u32 mnuCreateIconBundle(u32);
+extern MenuIconBundle *mnuCreateIconBundle(u32);
 
 extern MenuIconState *func_002B9FF8();
 extern s32 effConfigureIndexedSlotMaterial(u8 *, u32, u8 *, u32, u32, u32, u32);
@@ -327,9 +327,9 @@ typedef struct MenuVoiceState {
 } MenuVoiceState;
 
 
-extern void ptyRecomputeMaxHpMp();
+extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
 
-extern void scrClearSecondaryScriptFlag();
+extern void scrClearSecondaryScriptFlag(DatPartyRecord *unit, u16 flagId);
 
 extern void func_0019D550(s32, s32, s32);
 
@@ -481,7 +481,7 @@ s32 mnuStepStaffCampPageControl(s32 callback);
 
 
 extern void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
-extern void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource);
+extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
@@ -2065,7 +2065,7 @@ typedef struct MenuIconLayout {
 
 extern MenuIconLayout D_0042AFD8;
 
-u32 mnuCreateIconBundle(u32 resource) {
+MenuIconBundle *mnuCreateIconBundle(u32 resource) {
     MenuIconLayout layout = D_0042AFD8;
     MenuIconBundle *set = (MenuIconBundle *)sdfAllocSizeClassBlock(0x20);
     u32 i;
@@ -2075,7 +2075,7 @@ u32 mnuCreateIconBundle(u32 resource) {
         set->sprite[i] = sprite;
         itfSetGridEntryQuantizedAndRefresh(sprite, 0, layout.entry[i].x - 0xc80, layout.entry[i].y - 0x20, 0, 0);
     }
-    return (u32)set;
+    return set;
 }
 
 void mnuReleaseIconBundleAndSprites(MenuIconBundle *menu) {
@@ -2109,22 +2109,22 @@ void mnuDrawFadeIcons(s32 x, s32 y, s32 depth, s32 unused, MenuIconBundle *obj, 
 }
 
 
-void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource) {
-    u32 bundle;
+void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource) {
+    MenuIconBundle *bundle;
 
     bundle = mnuCreateIconBundle(resource);
-    ((MenuPageWindow *)menu)->slots[index].iconBundle = bundle;
+    menu->slots[index].iconBundle = bundle;
 }
 
-void mnuReleasePartyIconBundles(u8 *menu) {
-    u32 *bundle = &((MenuPageWindow *)menu)->slots[0].iconBundle;
+void mnuReleasePartyIconBundles(MenuPageWindow *menu) {
+    MenuIconBundle **bundle = &menu->slots[0].iconBundle;
     u32 i = 0;
     do {
-        u32 resource = *bundle;
+        MenuIconBundle *resource = *bundle;
         i++;
-        if (resource != 0) {
-            mnuReleaseIconBundleAndSprites((MenuIconBundle *)resource);
-            *bundle = 0;
+        if (resource != NULL) {
+            mnuReleaseIconBundleAndSprites(resource);
+            *bundle = NULL;
         }
         bundle += sizeof(MenuPageSlot) / sizeof(*bundle);
     } while (i < 5);
@@ -2152,8 +2152,8 @@ void mnuReleasePartyPanelSpriteTextures(u8 *menu) {
 
 
 /* Copy eight resource handles into the window's primary handle bank. */
-void mnuCopyPrimaryWindowHandles(MenuPageWindow *menu, u32 *source) {
-    u32 value;
+void mnuCopyPrimaryWindowHandles(MenuPageWindow *menu, struct EffectSlotSet **source) {
+    struct EffectSlotSet *value;
     EffectSlotSet **destination;
     u32 index;
 
@@ -2163,14 +2163,14 @@ void mnuCopyPrimaryWindowHandles(MenuPageWindow *menu, u32 *source) {
         value = *source;
         source = source + 1;
         index = index + 1;
-        *destination = (EffectSlotSet *)value;
+        *destination = value;
         destination = destination + 1;
     } while (index < 8);
 }
 
 /* Copy eight resource handles into the window's secondary handle bank. */
-void mnuCopySecondaryWindowHandles(MenuPageWindow *menu, u32 *source) {
-    u32 value;
+void mnuCopySecondaryWindowHandles(MenuPageWindow *menu, struct EffectSlotSet **source) {
+    struct EffectSlotSet *value;
     EffectSlotSet **destination;
     u32 index;
 
@@ -2180,16 +2180,16 @@ void mnuCopySecondaryWindowHandles(MenuPageWindow *menu, u32 *source) {
         value = *source;
         source = source + 1;
         index = index + 1;
-        *destination = (EffectSlotSet *)value;
+        *destination = value;
         destination = destination + 1;
     } while (index < 8);
 }
 
-void mnuRegisterResourceHandles(MenuPageWindow *destination, u32 *source) {
+void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSet **source) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        effResolveAndReleaseResource((u32 *)(source[i]));
-        destination->handlesC[i] = (EffectSlotSet *)source[i];
+        effResolveAndReleaseResource((u32 *)source[i]);
+        destination->handlesC[i] = source[i];
     }
 }
 

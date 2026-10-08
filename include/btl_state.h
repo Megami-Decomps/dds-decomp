@@ -153,7 +153,10 @@ typedef struct BtlState {
     s32 nextAdjustmentEntryIndex; /* 0x284: entry retained for a follow-up encounter. */
     u16 encounterParamA; /* 0x288: scene record +0x1C, else the test-menu default */
     u16 encounterParamB; /* 0x28A: scene record +0x1E, else the test-menu default */
-    u8 pad28C[0x10];
+    u8 pad28C[4];
+    s32 fieldF1ResourceId; /* 0x290: retained field archive resource identifiers. */
+    s32 fieldF2ResourceId; /* 0x294 */
+    s32 fieldTBResourceId; /* 0x298 */
     struct KwlnTask *scriptOwner; /* 0x29C: parent task; script tasks use its priority minus one */
     s32 scriptTask; /* 0x2A0: scheduler task handle, not another list pointer */
     s32 boundTask; /* 0x2A4: actor-slot binding task */
@@ -248,6 +251,9 @@ typedef char BtlSceneLightDds1Offset3[((unsigned int)&((BtlState *)0)->lightDire
 typedef char BtlSceneLightDds1Offset4[((unsigned int)&((BtlState *)0)->lightColor == 0x50) ? 1 : -1];
 typedef char BtlSceneLightDds1Offset5[((unsigned int)&((BtlState *)0)->ambientColor == 0x60) ? 1 : -1];
 typedef char BtlSceneLightDds1Offset6[((unsigned int)&((BtlState *)0)->listener == 0x204) ? 1 : -1];
+typedef char BtlFieldF1Offset[((unsigned int)&((BtlState *)0)->fieldF1ResourceId == 0x290) ? 1 : -1];
+typedef char BtlFieldF2Offset[((unsigned int)&((BtlState *)0)->fieldF2ResourceId == 0x294) ? 1 : -1];
+typedef char BtlFieldTBOffset[((unsigned int)&((BtlState *)0)->fieldTBResourceId == 0x298) ? 1 : -1];
 typedef char BtlSceneLightDds1Extent[(sizeof(BtlState) == 0xE10) ? 1 : -1];
 typedef char BtlSceneLightDds1Alignment[(__alignof__(BtlState) == 4) ? 1 : -1];
 #endif /* VERSION_DDS1 */

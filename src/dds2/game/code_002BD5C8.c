@@ -195,13 +195,13 @@ void func_002BE080(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
     frFontQueueGlyphInSelectedSlot((FrFontGlyph *)item);
 }
 
-extern s32 func_00314C10(DatPartyRecord *);
+extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern s32 scrGetIndexedRecordAddress(s32, s32 *);
 
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, s32 unused,
                                       s32 partyIndex, s32 param) {
     s32 outValue;
-    s32 cost = func_00314C10(&datGameState->party[partyIndex]);
+    s32 cost = ptyGetCurrentProfileId(&datGameState->party[partyIndex]);
     s32 code;
     s32 texture;
     s32 item;
@@ -232,11 +232,11 @@ void func_002BE240(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
     s32 remainingExp;
     FrFontGlyph *glyph;
 
-    if (slot->iconBundle != 0) {
+    if (slot->iconBundle != NULL) {
         mnuDrawFadeIcons(x, y, depth, slot->kind,
-            (MenuIconBundle *)slot->iconBundle, surface);
+            slot->iconBundle, surface);
         color = uiBlendColors(0xA09DC380, 0xA09DC300,
-            ((MenuIconBundle *)slot->iconBundle)->fade);
+            slot->iconBundle->fade);
         remainingExp = ptyComputeTotalExp(unit, 1) - unit->totalExp;
         if (remainingExp != 0) {
             func_0035C860(text, D_00437C48, remainingExp);

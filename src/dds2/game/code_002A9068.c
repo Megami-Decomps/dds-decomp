@@ -43,7 +43,7 @@ extern void kwlnFadeOutStart(s8, s8, s8, s32);
 
 extern s32 dds3AdminReadPreviousSignedSample(void);
 
-extern s32 mnuAllocateValueRecord(s32);
+extern struct EffectList *mnuAllocateValueRecord(u32);
 
 
 extern void mnuLoadEffectResources(u8 *);
@@ -494,13 +494,13 @@ void mnuAppendCampSpriteRequests(u32 *resourceList, StaffSlots *resourceSlots) {
     mnuSnapshotCampTextureHandles(resourceSlots->baseResources);
     tableColumn = mnuGetValueRecordOwner(resourceList) == 1;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, D_0042A950, D_003E6858[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, &resourceSlots->mainResources[resourceIndex]);
+        effAppendListEntry(resourceList, D_0042A950, D_003E6858[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32 *)&resourceSlots->mainResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_EXTRA_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, D_0042A950, D_003E68D8[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, &resourceSlots->extraResources[resourceIndex]);
+        effAppendListEntry(resourceList, D_0042A950, D_003E68D8[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32 *)&resourceSlots->extraResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_PAIR_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, "/camp/spr/n_sta/", D_003E6900[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, &resourceSlots->pairResources[resourceIndex]);
+        effAppendListEntry(resourceList, "/camp/spr/n_sta/", D_003E6900[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32 *)&resourceSlots->pairResources[resourceIndex]);
     }
 }
 
@@ -508,29 +508,29 @@ void mnuAppendCampSpriteRequests(u32 *resourceList, StaffSlots *resourceSlots) {
  * Each countdown decreases while its handle cursor advances forward. */
 void mnuReleaseTitleEffectSprites(StaffSlots *resourceSlots) {
     s32 resourceCountdown;
-    u32 *mainCursor;
-    u32 *extraCursor;
-    u32 *pairCursor;
+    struct EffectSlotSet **mainCursor;
+    struct EffectSlotSet **extraCursor;
+    struct EffectSlotSet **pairCursor;
 
     mnuReleaseCampTextureHandlesAndClearOutput(resourceSlots->baseResources);
     mainCursor = resourceSlots->mainResources;
     for (resourceCountdown = MNU_STAFF_MAIN_RESOURCE_COUNT - 1; resourceCountdown >= 0; resourceCountdown--) {
-        effDestroyResourceSlotSet(*mainCursor++);
+        effDestroyResourceSlotSet((u32)*mainCursor++);
     }
     extraCursor = resourceSlots->extraResources;
     for (resourceCountdown = MNU_STAFF_EXTRA_RESOURCE_COUNT - 1; resourceCountdown >= 0; resourceCountdown--) {
-        effDestroyResourceSlotSet(*extraCursor++);
+        effDestroyResourceSlotSet((u32)*extraCursor++);
     }
     pairCursor = resourceSlots->pairResources;
     for (resourceCountdown = MNU_STAFF_PAIR_RESOURCE_COUNT - 1; resourceCountdown >= 0; resourceCountdown--) {
-        effDestroyResourceSlotSet(*pairCursor++);
+        effDestroyResourceSlotSet((u32)*pairCursor++);
     }
 }
 
 /* Poll the supplied resource list, then require nonzero handles in every group. */
 s32 movAreTitleEffectsReady(s32 resourceListAddress, StaffSlots *resourceSlots) {
-    u32 *resourceSlot;
-    u32 *pairSlot;
+    struct EffectSlotSet **resourceSlot;
+    struct EffectSlotSet **pairSlot;
     s32 resourceIndex;
     effPollResourceList(resourceListAddress);
     resourceIndex = 0;
@@ -716,9 +716,11 @@ u8 *mnuCreateStaffMenuWork(void) {
     effectBytes = menuBytes + 0x11C;
     mnuClearPanelTransitionState((MenuPopupState *)(menuBytes + 8));
     if (dds3AdminReadPreviousSignedSample() != 0) {
-        ((CampVisualWork *)menuBytes)->menuResource = mnuAllocateValueRecord(1);
+        ((CampVisualWork *)menuBytes)->menuResource =
+            (u32)mnuAllocateValueRecord(1);
     } else {
-        ((CampVisualWork *)menuBytes)->menuResource = mnuAllocateValueRecord(0);
+        ((CampVisualWork *)menuBytes)->menuResource =
+            (u32)mnuAllocateValueRecord(0);
     }
     mnuInitPartyPanelSlots(&((MenuStaffContext *)menuBytes)->partyPanel);
     mnuLoadEffectResources(effectBytes);

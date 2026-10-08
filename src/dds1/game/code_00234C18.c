@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_viewer.h"
 #include "kwln.h"
 #include "sdf.h"
 #include "evt_world.h"
@@ -53,7 +54,7 @@ extern s32 sdfPathExists(char *path);
 extern s32 kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 extern void evtViewerStartUpdate(void);
 extern void func_00232D28(void);
-extern void func_00232D48(void *viewer);
+extern void func_00232D48(EvtRuntime *viewer);
 extern char D_003ADDB0[]; /* "(ZikkiPlayMode)EventViewer" */
 
 /* Create the event viewer task `taskId` for event `event`/scene `id` and request its movie files. */
@@ -62,15 +63,15 @@ s32 evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
     char path1[0x40];
     char path2[0x40];
     SdfMemBlock *viewerHandle;
-    u32 *viewer;
+    EvtRuntime *viewer;
     PolyMovieWork *work;
     s32 task;
 
     D_003BA8EC = 0x80000000;
     viewerHandle = sdfAllocGeneralBlock(0x2490);
-    viewer = (u32 *)sdfResourceRetainAddress(viewerHandle);
+    viewer = (EvtRuntime *)sdfResourceRetainAddress(viewerHandle);
     memset(viewer, 0, 0x2490);
-    *viewer = (u32)viewerHandle;
+    viewer->resourceHandle = viewerHandle;
     evtFormatPolygonMoviePaths(event, id, path0, path1, path2);
     work = evtPolygonMovieAllocWork();
     work->eventId = event;
@@ -87,7 +88,7 @@ s32 evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
         work->tertiaryResource.address = 0;
     }
     task = kwlnTaskCreate(D_003ADDB0, taskId, 1, 1, evtViewerStartUpdate, func_00232D28, viewer);
-    viewer[2] = (u32)work;
+    viewer->windowContext = work;
     work->unk108 = task;
     func_00232D48(viewer);
     return task;

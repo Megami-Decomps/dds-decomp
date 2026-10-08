@@ -77,7 +77,7 @@ extern struct SdfTaskItemDesc D_003CFCD4;
 extern void sdfAttachTaskItem(struct TaskWork *, struct SdfTaskItemDesc *);
 extern void sdfSetTaskItemMode(void *, s32, u32);
 extern void mnuReleaseFirstMantraSpriteSlots(void);
-extern void mnuReleaseStaffAndTitleVisualResources(u32 *);
+extern void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void sdfReleaseResourceAllocation(u32);
 extern void mnuReleasePanelEntryPool(void);
@@ -97,7 +97,7 @@ void func_00286E20(void) {
 
 extern u32 sdfAllocGeneralBlock(s32 size);
 extern u32 sdfMemoryGetBlockAddress(void *block);
-extern s32 mnuCreateProgressHost(void);
+extern MenuProgressHost *mnuCreateProgressHost(void);
 extern void mnuInitPanelSoundEntries(void);
 
 extern s32 func_00288748(MnuStatusResource *);
@@ -117,7 +117,7 @@ MnuStatusResource *func_00286E98(void) {
 
     memset(resourceWork, 0, MTR_STATUS_RESOURCE_BYTES);
     resourceWork->allocationHandle = allocationHandle;
-    resourceWork->progressHost = (MenuProgressHost *)mnuCreateProgressHost();
+    resourceWork->progressHost = mnuCreateProgressHost();
     evtPrintDeveloperConsoleMessage("trmLoadStartStatusResource()!!!! \n");
     evtPrintDeveloperConsoleMessage("mtrInit\n");
     mnuInitPanelSoundEntries();
@@ -132,7 +132,7 @@ void func_00286F18(s32 unused, MnuStatusResource *resourceWork) {
         sdfQueueNonzeroResourceId(resourceWork->resourceIdA);
         sdfQueueNonzeroResourceId(resourceWork->resourceIdB);
         mnuReleaseFirstMantraSpriteSlots();
-        mnuReleaseStaffAndTitleVisualResources((u32 *)resourceWork->progressHost);
+        mnuReleaseStaffAndTitleVisualResources(resourceWork->progressHost);
         evtPrintDeveloperConsoleMessage("trmDestroyStatusResource()!!!! \n");
         sdfReleaseResourceAllocation(resourceWork->allocationHandle);
         mnuReleasePanelEntryPool();
@@ -290,7 +290,7 @@ u64 func_00287900(void) {
 
 extern u32 mnuGetDefaultPanelSelector(MnuStatusResource *);
 extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
-extern void func_00267B40(s32, MenuProgressHost *);
+extern void func_00267B40(DatPartyRecord *, MenuProgressHost *);
 extern void mnuEnsureProfilePanelEffect(DatPartyRecord *, MenuProgressHost *);
 extern char D_00426208[];
 extern char D_00426218[];
@@ -310,7 +310,7 @@ s32 mtrMantraEquipInit(void) {
     memcpy(snapshot, work->list->cursor->items, sizeof(*snapshot));
     work->snapshot.profileId = selector[2];
     evtPrintDeveloperConsoleMessage(D_00426208, work->snapshot.maxHp, work->snapshot.maxMp);
-    func_00267B40((s32)snapshot, work->progressHost);
+    func_00267B40(snapshot, work->progressHost);
     mnuEnsureProfilePanelEffect(snapshot, work->progressHost);
     mnuInitPartyPanelSlots(&work->progressHost->partyPanel);
     func_002BCAB0(&work->progressHost->partyWindow);
@@ -546,7 +546,7 @@ s32 func_00287C20(void) {
 extern void func_0026C900(void);
 extern void mnuUpdateMantraDrawPool(u32 pool);
 extern void mnuDrawMantraSprite(s32, s32, s32, s32, s32, s32, s32);
-extern s32 mnuDrawLoadedProgressPanels(s32, MenuProgressHost *, s32);
+extern s32 mnuDrawLoadedProgressPanels(DatPartyRecord *, MenuProgressHost *, s32);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16, u32);
 extern void mnuDrawCurrentProfilePanel(s32, s32, s32, MenuProgressHost *, s32);
 extern s8 evtStageTestUpdate(s32);
@@ -569,7 +569,7 @@ s32 func_00288158(void) {
     value = (s32)(ratio * 128.0f);
     mnuDrawMantraSprite(0, 0, 0, value, 0x68, 0, 0x4A);
     mnuDrawMantraSprite(0, 0, 0, value, 0x69, 0, 0x4A);
-    if (mnuDrawLoadedProgressPanels((s32)&work->snapshot, work->progressHost, 0x53) != 0) {
+    if (mnuDrawLoadedProgressPanels(&work->snapshot, work->progressHost, 0x53) != 0) {
         if (!work->flags.profileReady) {
             evtStageTestSelectEntryWithoutInitialValue(work->snapshot.unitId, 0);
         }

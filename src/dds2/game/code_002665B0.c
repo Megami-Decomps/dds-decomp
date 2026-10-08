@@ -163,7 +163,7 @@ extern s32 sdfAllocGeneralBlock(s32);
 
 extern s32 sdfResourceRetainAddress(s32);
 
-extern s32 mnuAllocateValueRecord(s32);
+extern EffectList *mnuAllocateValueRecord(u32);
 
 
 extern void mnuAppendCampSpriteRequests(s32, s32);
@@ -174,7 +174,7 @@ extern void mnuSetGroupProperties(MenuProfilePanel *, u32, u32, u32, u32);
 
 extern void mnuDrawListPanels(s32, s32, s32, s32, s32, s32);
 
-extern void func_002C16F0(s32, s32, s32, s32, s32, s32, s32);
+extern void func_002C16F0(s32, s32, s32, DatPartyRecord *, s32, s32, s32);
 
 extern void mnuTerminalSetTrack(s8, s8);
 
@@ -715,7 +715,7 @@ void mnuResetProgressModeFromOwner(u8 *work) {
 }
 
 /* Allocate/zero the progress host, retain its allocation, and begin resource setup. */
-s32 mnuCreateProgressHost(void) {
+MenuProgressHost *mnuCreateProgressHost(void) {
     s32 heap = sdfAllocGeneralBlock(MNU_MENU_HOST_BYTES);
     MenuProgressHost *host = (MenuProgressHost *)sdfResourceRetainAddress(heap);
     memset((void *)host, 0, MNU_MENU_HOST_BYTES);
@@ -724,15 +724,15 @@ s32 mnuCreateProgressHost(void) {
     mnuInitPartyPanelSlots(&host->partyPanel);
     mnuAppendCampSpriteRequests(host->titleEffectHandle, (s32)host + 8);
     host->loadState = 1;
-    return (s32)host;
+    return host;
 }
 
 /* Release staff/title texture work before the value record and allocation. */
-void mnuReleaseStaffAndTitleVisualResources(u32 *hostWords) {
-    mnuReleaseStaffMenuTextureHandles(hostWords + 2);
-    mnuReleaseTitleEffectSprites(hostWords + 2);
-    func_00303D58(hostWords[1]);
-    sdfReleaseResourceAllocation(*hostWords);
+void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *host) {
+    mnuReleaseStaffMenuTextureHandles((s32)&host->staffSlots);
+    mnuReleaseTitleEffectSprites(&host->staffSlots);
+    func_00303D58(host->titleEffectHandle);
+    sdfReleaseResourceAllocation(host->heapHandle);
 }
 
 /* Return one while initialization is pending (including state zero), zero when ready.
@@ -762,7 +762,7 @@ void mnuEnsureProfilePanelEffect(DatPartyRecord *selectionState, MenuProgressHos
     if (host->currentEffect == 0) {
         MenuProfilePanel *effect = mnuCreateProfilePanel(selectionState);
         host->currentEffect = effect;
-        mnuSetGroupProperties(effect, host->staffSlots.baseResources[0], host->staffSlots.pairResources[1], 1, 2);
+        mnuSetGroupProperties(effect, host->staffSlots.baseResources[0], (u32)host->staffSlots.pairResources[1], 1, 2);
     }
 }
 
@@ -778,13 +778,13 @@ void mnuDrawCurrentProfilePanel(s32 x, s32 y, s32 mode, MenuProgressHost *host, 
 }
 
 /* Draw loaded progress panels only in state two; preserve the accumulated draw flags. */
-s32 mnuDrawLoadedProgressPanels(s32 resource, MenuProgressHost *host, s32 mode) {
+s32 mnuDrawLoadedProgressPanels(DatPartyRecord *resource, MenuProgressHost *host, s32 mode) {
     if (host->loadState != 2) {
         return 0;
     }
     host->partyWindow.flags |= 0x280;
-    mnuDrawListPanels(0, 0, 0, *(u8 *)(resource + 0x55), (s32)&host->partyWindow, mode);
-    func_002C16F0(0, 0, 0, resource, *(u8 *)(resource + 0x55),
+    mnuDrawListPanels(0, 0, 0, resource->profileId, (s32)&host->partyWindow, mode);
+    func_002C16F0(0, 0, 0, resource, resource->profileId,
                    (s32)host->effectResource, mode);
     return 1;
 }
