@@ -52,6 +52,11 @@ def function_text(text, start):
     return text[start:]
 
 
+def write_text_if_changed(path, text):
+    if not path.exists() or path.read_text() != text:
+        path.write_text(text)
+
+
 def place(version):
     names = {n: int(a, 16) for n, a in ROW.findall((ROOT / "config" / version / "symbol_addrs.txt").read_text())}
     added = 0
@@ -60,14 +65,14 @@ def place(version):
         data = ROOT / "asm" / version / "data" / f"{unit}.sdata.s"
         text = LINE.sub("", c.read_text())
         if not data.exists():
-            c.write_text(text)
+            write_text_if_changed(c, text)
             continue
         out_dir = ROOT / "asm" / version / "nonmatchings" / unit
         out_dir.mkdir(parents=True, exist_ok=True)
         syms = []
         blocks = list(BLOCK.finditer(data.read_text()))
         if not blocks:
-            c.write_text(text)
+            write_text_if_changed(c, text)
             continue
         # An .align raises the whole section's alignment, so no symbol may ask for
         # more than the unit's own start address has.
@@ -82,7 +87,7 @@ def place(version):
             if m.group(1):
                 k = min(k, int(re.findall(r"\d+", m.group(1))[-1]))
             align = f".align {min(k, cap)}\n"
-            (out_dir / f"{sym}.s").write_text(f".section .sdata\n\n{align}nonmatching {sym}\n\ndlabel {sym}\n{m.group(4)}enddlabel {sym}\n")
+            write_text_if_changed(out_dir / f"{sym}.s", f".section .sdata\n\n{align}nonmatching {sym}\n\ndlabel {sym}\n{m.group(4)}enddlabel {sym}\n")
             syms.append((addr, sym))
         mine = {s for _, s in syms}
         # What the C emits itself: defined variables, and literals its functions write.
@@ -130,7 +135,7 @@ def place(version):
             added += 1
         # One blank line before each included item, however often this reruns.
         text = re.sub(r"\n{3,}(?=INCLUDE_(?:RODATA|SDATA)\()", "\n\n", text)
-        c.write_text(text)
+        write_text_if_changed(c, text)
     print(f"{version}: {added} INCLUDE_SDATA lines")
 
 
