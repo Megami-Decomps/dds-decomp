@@ -1,11 +1,11 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 /* Polled in a spin-wait below; its writer is outside this C unit. */
 extern volatile u8 D_00438A1D;
 extern void sdfSleepThreadCount(s32);
 extern s32 sdfDoubleBufferAllocation;
-extern s32 sdfReleaseResourceAllocation(s32);
 extern s32 sdfAllocGeneralBlock(s32);
 extern s32 sdfResourceRetainAddress(s32);
 #include "sdf.h"
@@ -531,7 +531,7 @@ void sdfResizeDoubleBuffer(s32 bufferBytes) {
     s32 allocationAddress;
 
     if (sdfDoubleBufferAllocation != 0) {
-        sdfReleaseResourceAllocation(sdfDoubleBufferAllocation);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(sdfDoubleBufferAllocation));
         sdfDoubleBufferAllocation = 0;
     }
     bufferBytes = (bufferBytes + SDF_PACKET_BUFFER_ALIGNMENT_MASK) & ~SDF_PACKET_BUFFER_ALIGNMENT_MASK;
@@ -1788,7 +1788,7 @@ void sdfFreeNodeLists(SdfDrawNode *root) {
         while (node != NULL) {
             SdfCommandNode *next = node->next;
             if (node->resourceHandle != 0) {
-                sdfReleaseResourceAllocation(node->resourceHandle);
+                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->resourceHandle));
             } else {
                 sdfReleaseChipBlock(node);
             }

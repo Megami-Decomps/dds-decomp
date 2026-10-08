@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff.h"
 #include "eff_channel.h"
 #include "pcp_vu0.h"
@@ -78,7 +79,6 @@ extern u8 frFontResourceList[];
 /* Word at D_003D68C0+0x18 (list header defined in game/code_00193C08). */
 extern s32 D_00452378[];
 
-extern void sdfReleaseResourceAllocation(void *arg0);
 
 extern void func_0019AE18(void *arg0, s32 arg1, u32 arg2);
 

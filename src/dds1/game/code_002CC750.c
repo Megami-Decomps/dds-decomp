@@ -1,5 +1,6 @@
 #include "dsp_name.h"
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
@@ -1041,7 +1042,7 @@ SdfFlagListWork *sdfInitializeFlagListFromResource(void *file) {
 }
 
 void sdfReleaseFlagListResource(SdfFlagListWork *work) {
-    sdfReleaseResourceAllocation(work->resource);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->resource));
 }
 
 extern f32 sdfViewTargetVector[4];
@@ -1231,7 +1232,7 @@ void func_002CF248(SdfFlagListWork *work) {
     sdfAppendPacket(packetList, (u32)func_002EF2B0(copiedVertices, work->colors, work->params.count * SDF_FLAG_LIST_VERTICES_PER_ENTRY, 0x40));
     surface = D_00398098[work->params.alpha.surfaceIndex];
     surface->append((SdfListHead *)surface, packetList);
-    sdfReleaseResourceAllocation(vertexAllocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(vertexAllocation));
 }
 
 /* Read the camera color effect's stored float. */

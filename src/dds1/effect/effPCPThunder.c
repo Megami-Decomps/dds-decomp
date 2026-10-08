@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff.h"
 #include "pcp_vu0.h"
@@ -11,7 +12,6 @@ extern void parReleaseCellSystem(u32 handle);
 extern void parFillSymmetricCellColors(u32 param0, u32 param1, void *cells, u32 param3);
 extern void parDecreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
 extern void parIncreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 extern u32 effMiscRand(void *state);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_0034DF38[];

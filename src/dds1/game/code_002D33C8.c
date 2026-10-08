@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
@@ -485,7 +486,6 @@ u64 sdfCheckPendingWorkWithInterrupts(void) {
 }
 
 extern s32 sdfDoubleBufferAllocation;
-extern void sdfReleaseResourceAllocation(s32);
 extern s32 sdfAllocGeneralBlock(s32);
 extern s32 sdfResourceRetainAddress(s32);
 
@@ -493,7 +493,7 @@ extern s32 sdfResourceRetainAddress(s32);
 void sdfResizeDoubleBuffer(s32 bufferBytes) {
     s32 allocationAddress;
     if (sdfDoubleBufferAllocation != 0) {
-        sdfReleaseResourceAllocation(sdfDoubleBufferAllocation);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(sdfDoubleBufferAllocation));
         sdfDoubleBufferAllocation = 0;
     }
     bufferBytes = (bufferBytes + SDF_PACKET_BUFFER_ALIGNMENT_MASK) & ~SDF_PACKET_BUFFER_ALIGNMENT_MASK;
@@ -1757,7 +1757,6 @@ void *sdfEnsureFreeRootWorkspace(SdfDrawNode *root) {
     return workspace;
 }
 
-extern void sdfReleaseResourceAllocation(s32 allocation);
 extern void sdfReleaseChipBlock(void *allocation);
 
 /* Release allocations in both free-node lists; the stored head pointers are not cleared. */
@@ -1770,7 +1769,7 @@ void sdfFreeNodeLists(SdfDrawNode *root) {
         while (node != NULL) {
             SdfCommandNode *next = node->next;
             if (node->resourceHandle != 0) {
-                sdfReleaseResourceAllocation(node->resourceHandle);
+                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->resourceHandle));
             } else {
                 sdfReleaseChipBlock(node);
             }

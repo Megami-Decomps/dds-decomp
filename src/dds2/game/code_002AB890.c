@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "sdf_resource.h"
 #include "mnu_staff.h"
 #include "mnu_list.h"
 #include "dat_state.h"
@@ -7,7 +8,6 @@
 
 extern u32 kwlnTaskGetUserValue();
 
-extern void sdfReleaseResourceAllocation(s32);
 
 
 extern void func_002AAE80(s32);
@@ -414,7 +414,7 @@ s32 mnuDestroyWindowOwnerResourceSet(void) {
 
     mnuDestroyResourceOwnerWindowContainers(owner);
     func_002ACB38(context);
-    sdfReleaseResourceAllocation(party->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(party->allocation));
     return 1;
 }
 

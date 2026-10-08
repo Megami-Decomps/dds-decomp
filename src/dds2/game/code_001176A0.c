@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "dds3_path.h"
 #include "eff_transform.h"
 #include "sdf.h"
@@ -17,7 +18,6 @@ extern char sdfRuntimeTaskName[]; /* "GBWK" */
 extern void kwlnTaskDestroyWithHierarchyByName(char *name, s32 flag);
 extern void func_00117A80(void);
 extern void sdfDecrementAllocationReferenceCount(u32 allocation);
-extern s32 sdfReleaseResourceAllocation(u32 allocation);
 extern struct EffWorldNode *dds3AppendWorldObjectNode();
 
 extern void *sdfAllocGeneralBlock(s32 size);
@@ -229,7 +229,7 @@ void sdfDestroyRuntimeTask(void) {
     func_00117A80();
     allocation = datGameState->header.backingAllocation;
     sdfDecrementAllocationReferenceCount(allocation);
-    sdfReleaseResourceAllocation(allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     datGameState = 0;
 }
 

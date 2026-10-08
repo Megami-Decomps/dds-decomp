@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_movie.h"
 #include "eff.h"
@@ -136,7 +137,7 @@ void mnuReleaseMovieResourceGroup(MovieResourceGroup *resources) {
             sdfDestroyTaskWork(resources->tasks[i]);
         }
     }
-    sdfReleaseResourceAllocation(resources->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resources->allocation));
 }
 
 

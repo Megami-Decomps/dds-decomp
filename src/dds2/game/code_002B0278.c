@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "sdf_resource.h"
 #include "mnu_staff.h"
 #include "mnu_list.h"
 #include "eff.h"
@@ -813,7 +814,7 @@ u32 mnuReleasePartySelectionResources(void) {
     mnuRefreshPartyPanelSlots(context);
     mnuDestroyPartySelectionWindow(context);
     func_002B0D70(context);
-    sdfReleaseResourceAllocation(selection->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(selection->allocation));
     return 1;
 }
 
@@ -1020,7 +1021,7 @@ s32 mnuStaffCloseSelectionState(void) {
 
     mnuResetWorkFloats();
     mnuReleaseMenuWindowHandles(context);
-    sdfReleaseResourceAllocation((s32)menuWork->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((s32)menuWork->allocation));
     return 1;
 }
 
@@ -1759,7 +1760,7 @@ s32 mnuCloseItemSelectionState(s32 selection) {
         mnuDestroySelectedPartyWindow(selection);
     }
     func_002B4290(context);
-    sdfReleaseResourceAllocation(menu[0]);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(menu[0]));
     return 1;
 }
 

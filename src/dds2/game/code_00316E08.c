@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "mnu_work.h"
 #include "sdf.h"
 #include "mdl.h"
@@ -34,7 +35,6 @@ typedef struct MnuPackageEntry {
 
 extern MenuWorkEntry D_0040ABF8;
 extern void mnuDeactivateWorkEntry(MenuWorkEntry *);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 extern void mnuDestroyAllModelNodeContexts(MnuNodeList *);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
 extern void func_0031CAE8(f32 *, s32, s32);

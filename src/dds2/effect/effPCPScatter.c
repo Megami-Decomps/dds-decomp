@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -373,7 +374,6 @@ extern void effPcpScatterSharePoolResource(PcpScatterPool *dst, PcpScatterPool *
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 
 extern u32 sdfResourceRetainAddress(SdfMemBlock *block);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *block);
 
 extern void *memset(void *dst, s32 value, u32 size);
 

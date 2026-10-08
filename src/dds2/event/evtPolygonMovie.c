@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "fld.h"
@@ -127,7 +128,6 @@ extern s32 itfMesCreateWindow(u8 *arg);
 extern void itfMesDestroyWindowIfPresent(s32 handle);
 extern void fileWaitIdle(void);
 extern s32 filePollEntryCleanup(void *arg);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *arg);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
 extern void func_0035B6E0(const char *fmt, ...);

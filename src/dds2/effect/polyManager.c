@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -152,7 +153,6 @@ typedef struct {
 
 void parReleaseCellSystem(PolyStrip *strip);
 void parPrependCellNode(PolyStrip *strip);
-void sdfReleaseResourceAllocation(struct SdfMemBlock *allocation);
 void sdfReleaseChipBlock(void *arg);
 void polyUpdateBasicRingCells(PolyNode *obj);
 void func_00165860(PolyNode *node, s32 index);
