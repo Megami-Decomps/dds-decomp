@@ -292,7 +292,7 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
                 flag = 1;
             }
         }
-        VU0_LOAD_VF(vf10, &((f32 *)obj->inner)[0x18]);
+        VU0_LOAD_VF(vf10, &obj->inner->scale[0]);
         if (data->transitionWork != 0 && flag != 0) {
             VU0_MOVE_VF(vf11, vf10);
             VU0_MOVE_VF(vf10, vf0);
@@ -303,7 +303,7 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
             VU0_ADD(vf10, vf10, vf11);
         }
         mdlStoreTertiaryVectorVU(model);
-        VU0_LOAD_VF(vf10, &((f32 *)obj->inner)[0x14]);
+        VU0_LOAD_VF(vf10, &obj->inner->rotation[0]);
         effMiscNormalizeVU();
         if (data->transitionWork != 0 && flag != 0) {
             VU0_MOVE_VF(vf11, vf10);
@@ -317,10 +317,10 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
         }
         mdlUpdateContextRotationBasisFromQuaternion(model);
         if (effObjTestNodeFlags(obj->inner, 8)) {
-            VU0_LOAD_VF(vf10, &((f32 *)obj->inner)[0x1C]);
+            VU0_LOAD_VF(vf10, &obj->inner->smoothedPosition[0]);
             VU0_SET_W_ONE(vf10);
         } else {
-            VU0_LOAD_VF(vf10, &((f32 *)obj->inner)[0x10]);
+            VU0_LOAD_VF(vf10, &obj->inner->position[0]);
             VU0_SET_W_ONE(vf10);
         }
         mdlStorePrimaryVectorVU(model);
@@ -385,22 +385,22 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
     pickMode = dds3TestObjectFlags(obj, 0x8000) != 0;
     if (sdfLoadMapRecordPositionVector((SdfTextParam *)target->owner->inner, 0)) {
         VU0_STORE_VF(vf10, vec);
-        vec[1] = pickMode == 1 ? target->unkD4 : ((f32 *)obj->inner)[0x11];
-        func_0011E280(level, vec[0], vec[1], vec[2], ((f32 *)obj->inner)[0x31]);
+        vec[1] = pickMode == 1 ? target->unkD4 : obj->inner->position[1];
+        func_0011E280(level, vec[0], vec[1], vec[2], obj->inner->radius);
     } else {
         if (effObjTestNodeFlags(obj->inner, 8)) {
-            vec[0] = ((f32 *)obj->inner)[0x1C];
-            vec[1] = ((f32 *)obj->inner)[0x1D];
-            vec[2] = ((f32 *)obj->inner)[0x1E];
+            vec[0] = obj->inner->smoothedPosition[0];
+            vec[1] = obj->inner->smoothedPosition[1];
+            vec[2] = obj->inner->smoothedPosition[2];
         } else {
-            vec[0] = ((f32 *)obj->inner)[0x10];
-            vec[1] = ((f32 *)obj->inner)[0x11];
-            vec[2] = ((f32 *)obj->inner)[0x12];
+            vec[0] = obj->inner->position[0];
+            vec[1] = obj->inner->position[1];
+            vec[2] = obj->inner->position[2];
         }
         if (pickMode == 1) {
             vec[1] = target->unkD4;
         }
-        func_0011E280(level, vec[0], vec[1], vec[2], ((f32 *)obj->inner)[0x31]);
+        func_0011E280(level, vec[0], vec[1], vec[2], obj->inner->radius);
     }
     return 1;
 }
@@ -785,12 +785,12 @@ s32 effObjSubmitTransformOpacityPasses(EffWorldNode *object) {
 
 /* Refresh the object's stored xyz from the source vector. */
 void dds3RefreshStoredVec3(EffWorldNode *object) {
-    f32 *source = (f32 *)object->inner;
+    ObjectTransform *source = object->inner;
     EffectTransformData *destination = object->data;
 
-    destination->offset[0] = source[0x10];
-    destination->offset[1] = source[0x11];
-    destination->offset[2] = source[0x12];
+    destination->offset[0] = source->position[0];
+    destination->offset[1] = source->position[1];
+    destination->offset[2] = source->position[2];
 }
 
 struct EffEventWork;
