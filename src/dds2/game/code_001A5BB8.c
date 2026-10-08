@@ -5591,14 +5591,16 @@ typedef struct BtlWorkRes {
     EffectSlotSet *resC;
 } BtlWorkRes;
 
-extern EffectSlotSet *func_00305148();
 
 void btlLoadResourceBlock(void) {
     BtlWorkRes *work = (BtlWorkRes *)btlGetRuntime();
     if (btlResourceBlockLoaded == 0) {
-        btlResourceBlock->resA = func_00305148(btlResourceBlock->nameA, 0);
-        btlResourceBlock->resB = func_00305148(btlResourceBlock->nameB, 0);
-        btlResourceBlock->resC = func_00305148(btlResourceBlock->nameC, 0);
+        btlResourceBlock->resA = effCreateResourceSlotSetFromAllocation(
+            (struct SdfMemBlock *)(u32)btlResourceBlock->nameA, 0);
+        btlResourceBlock->resB = effCreateResourceSlotSetFromAllocation(
+            (struct SdfMemBlock *)(u32)btlResourceBlock->nameB, 0);
+        btlResourceBlock->resC = effCreateResourceSlotSetFromAllocation(
+            (struct SdfMemBlock *)(u32)btlResourceBlock->nameC, 0);
         work->resA = btlResourceBlock->resA;
         work->resB = btlResourceBlock->resB;
         btlResourceBlockLoaded = 1;
