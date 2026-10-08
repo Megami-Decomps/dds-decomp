@@ -425,20 +425,20 @@ u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *entry, MnuProfileProgress *targ
     u32 cap;
 
     if (entry->sceneId == target->profileId) {
-        flags |= 1;
+        flags |= MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH;
     }
     cap = prfGetCapValue(entry->sceneId);
     if (cap == ptyGetProfileRecordValue(target->partyRecord, entry->sceneId)) {
-        flags |= 2;
+        flags |= MNU_MANTRA_DISPLAY_FLAG_AT_CAP;
     }
     if (entry->state == 1) {
-        flags |= 4;
+        flags |= MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_1;
     } else if (entry->state == 2) {
-        flags |= 8;
+        flags |= MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_2;
     } else if ((func_00250758(entry->sceneId) & 2) != 0) {
-        flags |= 0x20;
+        flags |= MNU_MANTRA_DISPLAY_FLAG_REQUIREMENT_PAIR_SET_FALLBACK;
     } else {
-        flags |= 0x10;
+        flags |= MNU_MANTRA_DISPLAY_FLAG_REQUIREMENT_PAIR_CLEAR_FALLBACK;
     }
     return flags;
 }
@@ -616,11 +616,11 @@ void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *obj, s32 scale, s32
 
     if (entry != NULL) {
         flags = mnuGetMantraDisplayFlags(entry, target);
-        if (flags & 1) {
+        if (flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) {
             kind = 9;
-        } else if (flags & 2) {
+        } else if (flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP) {
             kind = 8;
-        } else if (flags & 4) {
+        } else if (flags & MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_1) {
             kind = 6;
         } else {
             kind = 7;
