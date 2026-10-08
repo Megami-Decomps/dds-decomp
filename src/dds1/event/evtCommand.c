@@ -33,6 +33,9 @@ void *evtFindWorldObjectByIdAndKind(s32 type, s32 id);
 
 struct EffectObj;
 s32 effObjBindValidatedOwner(struct EffectObj *obj, struct EffectObj *owner);
+s32 effObjCopyMagatuhiSourceParameters(struct EffectObj *obj, struct EffectObj *first,
+                                     struct EffectObj *second, struct EffectObj *third,
+                                     struct EffectObj *fourth);
 s32 effObjBindOwnerBillEntry(struct EffectObj *obj, struct EffectObj *owner, s32 entryId);
 
 void evtDispatchSupportedNodeOnClear(void *unit, s32 flag);
@@ -187,7 +190,35 @@ extern char D_003AC9E0[];
 
 extern char D_003AC958[];
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00226180);
+/* Apply four effect parameters after resolving every input object. */
+s32 func_00226180(void) {
+    struct EffectObj *primary;
+    struct EffectObj *point0;
+    struct EffectObj *point1;
+    struct EffectObj *point2;
+    struct EffectObj *point3;
+
+    primary = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    if (primary == NULL) {
+        evtPrintDeveloperConsoleMessage("EFFMG2_POS mg2 ID error!\n");
+        return 1;
+    }
+
+    point0 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(1));
+    point1 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(2));
+    point2 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(3));
+    point3 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(4));
+
+    if (point0 == NULL || point1 == NULL || point2 == NULL || point3 == NULL) {
+        evtPrintDeveloperConsoleMessage("EFFMG2_POS point ID not found!\n");
+        return 1;
+    }
+    if (effObjCopyMagatuhiSourceParameters(primary, point0, point1, point2, point3) == 0) {
+        evtPrintDeveloperConsoleMessage("EFFMG2_POS set error!\n");
+        return 1;
+    }
+    return 1;
+}
 
 s32 evtCommandEnablePathUnit(void)
 {
