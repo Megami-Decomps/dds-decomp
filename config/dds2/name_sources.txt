@@ -2242,6 +2242,8 @@
 0x001B7208	btlInitializeActionRecordWithScale	inferred	Initializes an action record with owner arguments, scale and a derived slot value. [names_reviewed17.tsv]
 0x001B7238	btlPanelResourcesLoad	inferred	loads /battle/panel/batle_01.spr, batle_02.spr, battle_03.spr into the block at D_00436804; DDS1 twin func_001AC628
 0x001B73E8	btlResetSceneSlotFades	inferred	Near95b
+0x001B75F8	btlInitializeActorSlotOrder	inferred	copies selected fixed order into actor slot bank
+0x001B76F0	btlCountSceneSlots	inferred	returns occupied scene slot count while refreshing fade-kind cache
 0x001B7900	btlClearSharedBattleStateWords	inferred	Clears the consecutive state words in the shared battle work region. [names_reviewed17.tsv]
 0x001B7BF0	btlCreateMahenPanelTask	inferred	LeverAudit
 0x001B7DC0	btlIsNamedBattleTaskRegistered	inferred	Requires the indexed battle task to be registered and its named task to exist. [names_reviewed17.tsv]
@@ -2890,7 +2892,7 @@
 0x0020C3C0	btlCmdRememberLowerElementBlock	inferred	medium confidence; src/dds2/game/code_00207A38.c func_0020C3C0: Action type 71 tests whether any eligible group-0x200 unit blocks the selected element query; records choice. [names_reviewed25.tsv]
 0x0020C450	btlCmdReportPartyEmptyMp	inferred	R_Names31 B93
 0x0020C4A0	btlCommandReportLinkedActionScene	inferred	confidence=high; src/dds2/game/code_00207A38.c:func_0020C4A0; Writes the linked-action-scene active predicate to the script integer return channel. [names_qp9.tsv]
-0x0020C4E0	btlScriptReturnBattleValue	inferred	Twin of dds1 0x001FA4B0; Returns result of the battle value accessor to script VM. [names_R_FuncNames3.tsv]
+0x0020C4E0	btlScriptReturnSceneSlotCount	inferred	writes occupied scene slot count to script integer return
 0x0020C508	btlScriptReturnWorkParameter	inferred	Twin of dds1 0x001FA4D8; Returns a battle-work parameter to script VM: DDS1 +0x250 and DDS2 +0x274. [names_R_FuncNames3.tsv]
 0x0020C530	btlCmdReturnActorActionTime	inferred	confidence=high; matched-C; src/dds2/game/code_00207A38.c:2043:func_0020C530; Reads the command actor u16 actionTime member and writes it into the script integer return slot.; source=revalidated-unapplied-names_R_Names31.tsv:23 [names_qp12_apply.tsv]
 0x0020C570	btlScriptReturnEffectActive	inferred	Twin of dds1 0x001FA580; Returns btlGetEffectActive result to script VM. [names_R_FuncNames3.tsv]
