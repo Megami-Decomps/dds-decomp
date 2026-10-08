@@ -463,7 +463,8 @@ s32 func_00253830(void) {
     case 10:
         if (scene->stageFinished != 0 && evtGetMessageWindowControlState() == 0) {
             evtFinishMessageWindowAndNotify();
-            sdfSetTaskItemMode((TaskWork *)mnuSceneResourceContext, 1, 1);
+            sdfSetTaskItemMode((TaskWork *)mnuSceneResourceContext, 1,
+                               SDF_TASK_ITEM_MODE_PENDING_ACTIVATION);
             return -1;
         }
         break;
