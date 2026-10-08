@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "sdf_primitive.h"
 #include "sdf.h"
+#include "sdf_draw.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -117,7 +118,7 @@ extern SdfTex *D_003BD380;
 extern SdfTex *D_003BD390;
 extern SdfTex *sdfTexAcquireResourceTexture(void *);
 extern SdfTex *sdfTexAcquireAlternateResourceTexture(void *);
-extern void *sdfEnsureFreeRootWorkspace(void *object);
+extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *object);
 extern void *sdfAllocPacketAligned(s32);
 extern void sdfAppendPacket(SdfListHead *, u32);
 extern void func_002DE010(void *, u32, void *, u32, u32, f32, f32, f32);
@@ -697,27 +698,15 @@ INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E06F0);
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E0820);
 
-typedef struct VuObjectContext {
-    u8 pad00[0x0C];
-    u32 *objects; /* 0x0C: indexed object handles */
-} VuObjectContext;
-
-typedef struct VuObjectRefCommand {
-    u8 pad00[0x16];
-    u16 flags; /* 0x16 */
-    u16 count; /* 0x18 */
-    u16 objectIndices[1]; /* 0x1A */
-} VuObjectRefCommand;
-
-void sdfProcessReferencedObjects(VuObjectContext **context, VuObjectRefCommand *source) {
-    u32 *objects = (*context)->objects;
+void sdfProcessReferencedObjects(SdfModel *model, SdfObjectRefCommand *source) {
+    SdfDrawNode **objects = model->list->buffer;
     u16 *indices = &source->count;
     if ((source->flags & 0x800) != 0) {
         s32 count = *indices;
         if (count != 0) {
             indices++;
             do {
-                sdfEnsureFreeRootWorkspace((void *)objects[*indices++]);
+                sdfEnsureFreeRootWorkspace(objects[*indices++]);
             } while (--count != 0);
         }
     }

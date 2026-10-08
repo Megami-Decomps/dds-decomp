@@ -1113,7 +1113,7 @@ s32 mnuCreatePanels(KwlnTask *callback) {
                          menuContext->alternateResource, 0, 0);
     mnuAttachPartyIconBundle(index, window, (u32)menuContext->displayResource);
     menuContext->panelGroup = mnuCreatePanelGroup(menuContext->resourceHandle,
-                                                   (s32)menuContext->displayResource, 0);
+                                                   menuContext->displayResource, 0);
     menuContext->panelRequest = mnuCreateSpriteState((struct EffectSlotSet *)menuContext->resourceHandle,
                                                     (struct EffectSlotSet *)menuContext->displayResource,
                                                     (struct EffectSlotSet *)menuContext->displayHandle);

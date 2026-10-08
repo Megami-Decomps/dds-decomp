@@ -179,3 +179,4 @@ void mnuQueueRightAlignedFormattedInfoText(s32 x, s32 y, s32 z, s32 w, const Brs
 INCLUDE_SDATA(const s32, "game/code_002649B0", D_003BC560);
 
 INCLUDE_SDATA(const s32, "game/code_002649B0", D_003BC568);
+
