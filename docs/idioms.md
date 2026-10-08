@@ -4463,3 +4463,32 @@ points to these particles, not a second runtime layout.
 The constructor's unexplained third allocation-call register is not an
 allocator argument: the existing one-input provider does not consume it.
 Leave the constructor parked rather than inventing a prototype or dummy.
+
+## Viewer range setters operate on the primary timeline runtime
+
+`evtViewerSetMinimumFromCurrent` / `evtViewerSetMaximumFromCurrent`
+(DDS1 `0022C3C8` / `0022C3E8`, DDS2 `00246D40` / `00246D60`)
+update `EvtRuntime.headerFirst`, `frameRange.word` and `curFrame`.
+The retired `EvtRange` was a padded projection of that same allocation.
+The whole range word, rather than only its serialized low halfword, is used.
+
+Option confirmation (`00230660` / `0024B268`) clears the real word at
+`+2288` for type-12 keys and owns a frame-count dialog base at
+DDS1 `+248C` / DDS2 `+24B4`. These complete the existing padding
+without changing either runtime's size or inventing a second layout.
+
+## DDS1 profile progress finishes five distinct animation fields
+
+The profile callback at `00268AB8` indexes the existing 0x68-byte
+`BrsProgressAnimation` bank at work `+1220`. It reads the signed progress
+at row `+30` and opacity at `+1C`; completion writes frame `+44 = 0`,
+icon opacity `+48 = 0x80`, icon state `+4C = 1`, and flags `+60/+61 = 1`.
+These fields complete the primary DDS1 owner without moving either bank,
+changing its extent, or applying the different DDS2 counter origin.
+The unexplained `+61` flag remains neutrally named.
+
+This is an owner completion, not a callback match: the released correct
+callback draft still differs in frame/register/control-flow lifetime and
+remains assembly. All 17 actual `mnu_result.h` clients gate 596 match,
+0 differ with no context, rodata or undefined-symbol rows after resplit.
+
