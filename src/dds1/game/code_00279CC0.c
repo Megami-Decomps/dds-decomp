@@ -1,6 +1,7 @@
 #include "mnu.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
+#include "mnu_scroll_panel.h"
 #include "dat_state.h"
 #include "eff.h"
 #include "itf.h"
@@ -280,7 +281,9 @@ s32 mnuUpdateSkillListInput(s32 callback) {
         mnuPlayInputSound(0, buttons, &((MenuWindowContainer *)list[8 + menu[11]])->list->stateFlags);
         if (buttons & 2) {
             mnuSetPopupEntryFlagged(popup, D_0037CC20);
-            mnuActivatePanelAndConfigureGridResources(*(u32 **)(context + 0x138), *(s32 *)(context + 0x6C), 0, 1);
+            mnuActivatePanelAndConfigureGridResources(
+                (MenuScrollPanel *)*(u32 *)(context + 0x138),
+                *(s32 *)(context + 0x6C), 0, 1);
         }
         return 0;
     }

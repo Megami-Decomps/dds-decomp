@@ -5,6 +5,7 @@
 #include "dat_state.h"
 #include "eff.h"
 #include "mnu_shop.h"
+#include "mnu_scroll_panel.h"
 
 struct StaffMenuRuntime;
 
@@ -1723,19 +1724,6 @@ typedef struct ScrollHandle {
     ScrollInner *inner;
 } ScrollHandle;
 
-/* Three animation handles at the tail of the 0x48-byte scroll panel. */
-typedef struct MenuScrollPanel {
-    u8 pad00[4];
-    u32 color; /* 0x04: panel resource color */
-    u32 firstSprite;
-    u32 secondSprite;
-    u8 pad10[4];
-    MenuGridSlot positions[3]; /* 0x14 */
-    MenuGridSlot active;       /* 0x2C */
-    MenuGridSlot pending;      /* 0x34 */
-    ScrollHandle *handles[3];
-} MenuScrollPanel;
-
 extern ScrollHandle *effCreateStatusBatch(s32);
 
 void mnuInitScrollHandles(MenuScrollPanel *menu) {
@@ -1784,7 +1772,7 @@ MenuScrollPanel *mnuCreateScrollPanel(u32 owner) {
 }
 
 void mnuDestroyScrollPanel(MenuScrollPanel *menu) {
-    mnuReleaseScrollPanelAnimations();
+    mnuReleaseScrollPanelAnimations(menu);
     sdfReleaseChipBlock(menu);
 }
 

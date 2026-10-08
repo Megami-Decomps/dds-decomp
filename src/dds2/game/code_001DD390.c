@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "sdf_resource.h"
 #include "sdf_model.h"
@@ -1583,7 +1584,7 @@ s32 btlEvalTaskCondition(BtlTaskCondition *condition, s32 value) {
     case BTL_TASK_CONDITION_HANDLE_RUNNING_OR_ABSENT:
         task = btlFindTaskByHandle(condition->value.handle);
         if (task != 0) {
-            if (task->state == 2) {
+            if (task->state == BTL_TASK_PHASE_RUNNING) {
                 result = 1;
             }
         } else {
@@ -1603,7 +1604,7 @@ s32 btlEvalTaskCondition(BtlTaskCondition *condition, s32 value) {
     case BTL_TASK_CONDITION_OWNER_RUNNING_OR_ABSENT:
         task = btlFindTaskByOwner(condition->value.owner);
         if (task != 0) {
-            if (task->state == 2) {
+            if (task->state == BTL_TASK_PHASE_RUNNING) {
                 result = 1;
             }
         } else {
@@ -1643,7 +1644,7 @@ BtlRuntimeTask *btlAllocTask(s32 size) {
         task->prev = 0;
     }
     work->taskTail = task;
-    task->flags |= 1;
+    task->flags |= BTL_TASK_FLAG_REGISTERED;
     return task;
 }
 
@@ -1680,10 +1681,10 @@ u64 btlStartTask(taskObject)
 {
     BtlRuntimeTask *task = taskObject;
     task->handle = btlAdvanceRuntimeSequenceCounter();
-    task->flags |= 8;
+    task->flags |= BTL_TASK_FLAG_STARTED;
     task->pollCount = 0;
     task->runCount = 0;
-    task->state = 0;
+    task->state = BTL_TASK_PHASE_WAITING;
     task->deferNext = 0;
     task->deferPrev = 0;
     if (task->onStart != 0) {
@@ -1701,38 +1702,38 @@ void btlResetDeferredTaskQueue(void) {
  * Fallthrough is intentional: zero delays permit all phases in one poll. */
 void btlRunTask(BtlRuntimeTask *task) {
     u32 counter;
-    if (!(task->flags & 8)) {
+    if (!(task->flags & BTL_TASK_FLAG_STARTED)) {
         return;
     }
-    if (task->flags & 4) {
+    if (task->flags & BTL_TASK_FLAG_RELEASE_REQUESTED) {
         btlFreeTask(task);
         return;
     }
     counter = task->pollCount;
     task->pollCount = counter + 1;
     switch (task->state) {
-    case 0:
+    case BTL_TASK_PHASE_WAITING:
         if (btlEvalTaskCondition(&task->startCondition, counter) == 0) {
             break;
         }
-        task->state = 1;
-    case 1:
+        task->state = BTL_TASK_PHASE_START_DELAY;
+    case BTL_TASK_PHASE_START_DELAY:
         if (task->startDelay <= 0) {
-            task->state = 2;
+            task->state = BTL_TASK_PHASE_RUNNING;
         } else {
             task->startDelay = task->startDelay - 1;
             break;
         }
-    case 2:
+    case BTL_TASK_PHASE_RUNNING:
         if (btlEvalTaskCondition(&task->endCondition, task->runCount) != 0) {
-            task->state = 3;
+            task->state = BTL_TASK_PHASE_END_DELAY;
         } else if (task->callback(task->args) != 0) {
-            task->state = 3;
+            task->state = BTL_TASK_PHASE_END_DELAY;
         } else {
             task->runCount = task->runCount + 1;
             break;
         }
-    case 3:
+    case BTL_TASK_PHASE_END_DELAY:
         if (task->endDelay <= 0) {
             btlFreeTask(task);
         } else {
@@ -1748,7 +1749,7 @@ void btlSweepFinishedTasks(void) {
     BtlRuntimeTask *next;
     for (task = ((BtlState *)btlGetRuntime())->taskHead; task != 0; task = next) {
         next = task->next;
-        if (!(task->flags & 2)) {
+        if (!(task->flags & BTL_TASK_FLAG_DEFERRED)) {
             btlRunTask(task);
         } else {
             task->deferNext = 0;

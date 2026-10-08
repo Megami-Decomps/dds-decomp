@@ -3,6 +3,7 @@
 #include "dat_state.h"
 #include "mnu.h"
 #include "mnu_staff.h"
+#include "mnu_scroll_panel.h"
 
 extern void itfDrawGridWithResolvedSlot(u32, u32, u32, u32, u32, u32, u32);
 
@@ -413,7 +414,7 @@ typedef struct CampVisualWork {
     u32 motionResource;     /* 0x0100 */
     u8 pad104[0xC];
     MotRes *motion[2];      /* 0x0110 and 0x0114 */
-    u32 modelHandle;        /* 0x0118 */
+    MenuScrollPanel *modelHandle; /* 0x0118: retained scroll-panel allocation */
     u8 pad11C[0x16C];
     s32 backgroundOpacity;  /* 0x0288 */
     u8 pad28C[0xA7C0];
