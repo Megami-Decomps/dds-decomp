@@ -4,6 +4,7 @@
 #include "mnu_staff.h"
 #include "dat_state.h"
 #include "dsp_name.h"
+#include "sdf_task_work.h"
 
 #define MTR_RECORD_COUNT 32
 #define MTR_STATUS_RESOURCE_BYTES 0xC08
@@ -48,9 +49,7 @@ extern void func_00289BA0(struct MnuStatusResource *);
 extern s32 func_00288920(struct MnuStatusResource *);
 extern s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *, s8);
 
-struct TaskWork;
-extern s32 func_00312810(struct TaskWork *, s32);
-extern void sdfDestroyTaskWorkerTasks(struct TaskWork *);
+extern s32 func_00312810(TaskWork *, s32);
 
 extern u32 mnuMantraSelectionResource;
 extern void mnuReleaseMantraPanelPositionTable(void);
@@ -73,10 +72,7 @@ extern void mnuReleaseMantraMenuDrawResources(MnuStatusResource *);
 
 extern s32 dspCloseChannel(void);
 extern void sdfQueueNonzeroResourceId(u32);
-struct SdfTaskItemDesc;
-extern struct SdfTaskItemDesc D_003CFCD4;
-extern void sdfAttachTaskItem(struct TaskWork *, struct SdfTaskItemDesc *);
-extern void sdfSetTaskItemMode(void *, s32, u32);
+extern SdfTaskItemDesc D_003CFCD4;
 extern void mnuReleaseFirstMantraSpriteSlots(void);
 extern void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
@@ -101,7 +97,7 @@ extern void mnuInitPanelSoundEntries(void);
 extern s32 func_00288748(MnuStatusResource *);
 extern s32 mnuPollTitleEffectsReady(MenuProgressHost *);
 extern void mnuRebuildProfilePanelFromRenderSnapshot(MnuStatusResource *);
-extern struct SdfTaskItemDesc D_003CFCE8;
+extern SdfTaskItemDesc D_003CFCE8;
 
 extern s32 func_00287078(MtrResourceLoadState *, u16);
 
@@ -142,7 +138,7 @@ void func_00286F18(s32 unused, MnuStatusResource *resourceWork) {
  * invalidate or destroy the same resource group. */
 void mnuCreateResourceTask(void) {
     MnuStatusResource *resourceWork = func_00286E98();
-    mnuMantraSelectionResource = sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, D_003CFCC0, func_00286F18, resourceWork);
+    mnuMantraSelectionResource = (u32)sdfCreateTaskWorker(mnuResourceTaskName, 0x402, 0x2B12, (SdfTaskItemDesc *)D_003CFCC0, func_00286F18, resourceWork);
 }
 
 /* Return whether the named resource task exists; invalidate the cached handle when it does not. */
@@ -156,7 +152,7 @@ s32 mnuCheckResourceTask(void) {
 
 /* Destroy the cached resource-task group and clear its handle. */
 void mnuStopResourceTask(void) {
-    sdfDestroyTaskWorkerTasks((struct TaskWork *)mnuMantraSelectionResource);
+    sdfDestroyTaskWorkerTasks((TaskWork *)mnuMantraSelectionResource);
     mnuMantraSelectionResource = 0;
 }
 
@@ -212,7 +208,7 @@ s32 func_00287670(s32 mode) {
     case 2:
         sdfAttachTaskItem((struct TaskWork *)mnuMantraSelectionResource,
                           &D_003CFCE8);
-        sdfSetTaskItemMode((void *)mnuMantraSelectionResource, mode, 2);
+        sdfSetTaskItemMode((TaskWork *)mnuMantraSelectionResource, mode, 2);
         /* fall through */
     case 3:
         break;
@@ -253,10 +249,9 @@ void mtrMantraSelectRelease(void) {
     evtPrintDeveloperConsoleMessage("mtrMantraSelectRelease\n");
 }
 
-extern struct SdfTaskItemDesc D_003CFCFC;
+extern SdfTaskItemDesc D_003CFCFC;
 extern void mnuTickPanelSoundEntries(void);
 extern s32 func_0028A1D0(MnuStatusResource *);
-extern void sdfSetTaskItemMode(void *, s32, u32);
 
 /* Tick panel sounds and process the selection result. Case 2 intentionally falls through to case 3;
  * case 4 requests task-item mode (1,1) and returns -1, while other results return zero. */
@@ -266,12 +261,12 @@ s32 func_00287848(s32 key) {
     case 1:
         break;
     case 2:
-        sdfAttachTaskItem((struct TaskWork *)mnuMantraSelectionResource, &D_003CFCFC);
-        sdfSetTaskItemMode((void *)mnuMantraSelectionResource, key, 2);
+        sdfAttachTaskItem((TaskWork *)mnuMantraSelectionResource, &D_003CFCFC);
+        sdfSetTaskItemMode((TaskWork *)mnuMantraSelectionResource, key, 2);
     case 3:
         break;
     case 4:
-        sdfSetTaskItemMode((void *)mnuMantraSelectionResource, 1, 1);
+        sdfSetTaskItemMode((TaskWork *)mnuMantraSelectionResource, 1, 1);
         return -1;
     }
     return 0;
@@ -356,7 +351,6 @@ extern void mnuToggleMantraTypeOnePanelMode(u32);
 extern void mnuSetMantraBackgroundVariant(u32, s8);
 extern void mnuShowMantraLimitLine(u32);
 extern void mnuKeepMantraBackgroundMaskVisible(u32);
-extern void sdfSetTaskItemMode(void *, s32, u32);
 /* The native call forwards only the work pointer; later callers pass all three provider inputs. */
 extern void func_0028D070();
 
