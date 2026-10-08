@@ -42,7 +42,6 @@ extern void *effParamTableGetBlock(void *data, s32 index);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern u32 effParamWorkDuplicate(u32 param);
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
-extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
 extern void sdfReleaseChipBlock(void *ptr);
 
 extern void effReleaseScatterObject(u32 res);

@@ -215,7 +215,6 @@ extern char D_004150B0[]; /* "btl:hunt ep=%d[id=%X]\n" */
 
 extern void btlBossDebugPrintf(const char *, ...);
 extern SdfMemBlock *sdfAllocGeneralBlock(s32);
-extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 
 extern s8 effSharedRandomState[];
 
@@ -7238,7 +7237,7 @@ void func_001C1A68(BtlState *battle, BattleActorPanelWork *work) {
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1F10);
 
 void btlReleaseStwrPanelResource(KwlnTask *task) {
-    sdfReleaseResourceAllocation(*(SdfMemBlock **)kwlnTaskGetUserValue(task));
+    sdfReleaseResourceAllocation(*(struct SdfMemBlock **)kwlnTaskGetUserValue(task));
     btlSetTrackedTaskHandle(3, 0);
 }
 
@@ -7286,7 +7285,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C2EA8);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C3168);
 
 void btlReleaseTrackedTaskResource(void) {
-    sdfReleaseResourceAllocation(*(SdfMemBlock **)(kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC)) + 0x1200));
+    sdfReleaseResourceAllocation(*(struct SdfMemBlock **)(kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC)) + 0x1200));
     btlSetTrackedTaskHandle(8, 0);
 }
 

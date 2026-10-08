@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "kwln.h"
 #include "fld_inf.h"
 #include "sdf_primitive.h"
@@ -224,7 +225,6 @@ extern s32 func_0035C860(char *, const char *, ...);
 
 extern void *sdfAllocGeneralBlock(s32 size);
 
-extern void *sdfResourceRetainAddress(void *p);
 
 extern u32 fldCachedRoomResourceData, D_00435FF4, D_00435FF8, D_00435FFC;
 
@@ -864,7 +864,7 @@ void *fldLoadCachedRoomResourceIfLocationMatches(void **destination, s32 area, s
     if (state->area == area) {
         if (state->room == room) {
             void *buffer = sdfAllocGeneralBlock(fldCachedRoomResourceSize);
-            void *data = sdfResourceRetainAddress(buffer);
+            void *data = (void *)sdfResourceRetainAddress(buffer);
             *destination = data;
             memcpy(data, (void *)fldCachedRoomResourceData, fldCachedRoomResourceSize);
             return buffer;
@@ -879,7 +879,7 @@ void *func_0012A270(void **destination, s32 area, s32 room) {
     if (state->area == area) {
         if (state->room == room) {
             void *buffer = sdfAllocGeneralBlock(D_00436004);
-            void *data = sdfResourceRetainAddress(buffer);
+            void *data = (void *)sdfResourceRetainAddress(buffer);
             *destination = data;
             memcpy(data, (void *)D_00435FF4, D_00436004);
             return buffer;
@@ -894,7 +894,7 @@ void *func_0012A2E8(void **destination, s32 area, s32 room) {
     if (state->area == area) {
         if (state->room == room) {
             void *buffer = sdfAllocGeneralBlock(D_00436008);
-            void *data = sdfResourceRetainAddress(buffer);
+            void *data = (void *)sdfResourceRetainAddress(buffer);
             *destination = data;
             memcpy(data, (void *)D_00435FF8, D_00436008);
             return buffer;
@@ -909,7 +909,7 @@ void *func_0012A360(void **destination, s32 area, s32 room) {
     if (state->area == area) {
         if (state->room == room) {
             void *buffer = sdfAllocGeneralBlock(D_0043600C);
-            void *data = sdfResourceRetainAddress(buffer);
+            void *data = (void *)sdfResourceRetainAddress(buffer);
             *destination = data;
             memcpy(data, (void *)D_00435FFC, D_0043600C);
             return buffer;
@@ -3465,13 +3465,13 @@ void fldLoadBattleSkyAndFilter(void) {
     u32 command;
 
     if (fldSkyLightSetBuffer == 0) {
-        fldSkyLightSetBuffer = sdfResourceRetainAddress(sdfAllocGeneralBlock(0xE000));
+        fldSkyLightSetBuffer = (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock(0xE000));
     }
     if (D_004360F0 == 0) {
-        D_004360F0 = sdfResourceRetainAddress(sdfAllocGeneralBlock(0xE000));
+        D_004360F0 = (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock(0xE000));
     }
     if (D_00436104 == 0) {
-        D_00436104 = sdfResourceRetainAddress(sdfAllocGeneralBlock(0x12400));
+        D_00436104 = (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock(0x12400));
     }
     if (fldCameraSettings == 0) {
         fldCameraSettings = sdfResourceRetainAddress(sdfAllocGeneralBlock(

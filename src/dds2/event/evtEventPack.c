@@ -231,7 +231,6 @@ struct FileCleanup;
 extern s32 fileIsRequestReadyInCurrentMode(struct FileRequest *);
 extern u32 fileGetResourceHandle(struct FileWork *);
 extern s32 filePollEntryCleanup(struct FileCleanup *);
-extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 extern char D_004377E8[];
 
 /* Retain a ready pack and select its first entry-point record.

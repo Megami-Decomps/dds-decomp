@@ -754,7 +754,6 @@ extern void sceDmaSendN(void *, void *, s32);
 extern s32 sceDmaSync(void *, s32, s32);
 extern void sdfReleaseMemorySlot(void *);
 extern s32 sdfAllocGeneralBlock(s32);
-extern s32 sdfResourceRetainAddress(s32);
 
 /* Upload the VIF0 program synchronously, then replace the ring workspace. */
 void sdfConsUploadDmaProgram(s32 workspaceBytes) {
@@ -764,7 +763,7 @@ void sdfConsUploadDmaProgram(s32 workspaceBytes) {
     sceDmaSync(dmaChannel, 0, 0);
     sdfReleaseMemorySlot(&D_003BD350);
     D_003BD350 = sdfAllocGeneralBlock(workspaceBytes);
-    D_003BDA20 = sdfResourceRetainAddress(D_003BD350);
+    D_003BDA20 = sdfResourceRetainAddress((struct SdfMemBlock *)(D_003BD350));
 }
 
 /* Fixed allocation size; the texture is deliberately unused. */
@@ -1954,7 +1953,7 @@ ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 columns, s32 rows) {
     node->textAttribute = 0;
     bufferHandle = sdfAllocGeneralBlock((columns * rows) * SDF_CONSOLE_CELL_BYTES);
     node->bufferHandle = bufferHandle;
-    node->cells = (u8 *)sdfResourceRetainAddress(bufferHandle);
+    node->cells = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(bufferHandle));
     sdfDevConsNodeClear(node);
     sdfDevConsListInsert(node);
     return node;

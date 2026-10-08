@@ -373,7 +373,6 @@ extern void effPcpScatterSharePoolResource(PcpScatterPool *dst, PcpScatterPool *
 
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 
-extern u32 sdfResourceRetainAddress(SdfMemBlock *block);
 
 extern void *memset(void *dst, s32 value, u32 size);
 

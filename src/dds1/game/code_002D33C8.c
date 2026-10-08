@@ -487,7 +487,6 @@ u64 sdfCheckPendingWorkWithInterrupts(void) {
 
 extern s32 sdfDoubleBufferAllocation;
 extern s32 sdfAllocGeneralBlock(s32);
-extern s32 sdfResourceRetainAddress(s32);
 
 /* Replace both packet buffers with one allocation, rounding each half to 128 bytes. */
 void sdfResizeDoubleBuffer(s32 bufferBytes) {
@@ -499,7 +498,7 @@ void sdfResizeDoubleBuffer(s32 bufferBytes) {
     bufferBytes = (bufferBytes + SDF_PACKET_BUFFER_ALIGNMENT_MASK) & ~SDF_PACKET_BUFFER_ALIGNMENT_MASK;
     sdfPacketBufferSize = bufferBytes;
     sdfDoubleBufferAllocation = sdfAllocGeneralBlock(bufferBytes * SDF_PACKET_BUFFER_COUNT);
-    allocationAddress = sdfResourceRetainAddress(sdfDoubleBufferAllocation);
+    allocationAddress = sdfResourceRetainAddress((struct SdfMemBlock *)(sdfDoubleBufferAllocation));
     sdfPacketBuffers[0] = allocationAddress;
     sdfPacketBuffers[1] = allocationAddress + bufferBytes;
 }

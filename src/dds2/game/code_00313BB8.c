@@ -1158,7 +1158,6 @@ void sdfResetFlagListEntries(SdfFlagListWork *work) {
 }
 
 extern s32 sdfAllocGeneralBlock(s32);
-extern u32 sdfResourceRetainAddress(u32);
 
 SdfFlagListWork *func_00316528(const SdfFlagListParams *source) {
     u32 count;
@@ -1170,7 +1169,7 @@ SdfFlagListWork *func_00316528(const SdfFlagListParams *source) {
     count = source->count;
     arrayBytes = count * (sizeof(f32[2][4]) + sizeof(u32[2]) + sizeof(SdfFlagListMark));
     resource = sdfAllocGeneralBlock(arrayBytes + sizeof(SdfFlagListWork));
-    buffer = (u8 *)sdfResourceRetainAddress(resource);
+    buffer = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
     work = (SdfFlagListWork *)(buffer + arrayBytes);
     work->vertices = (f32 (*)[4])buffer;
     buffer += count * sizeof(f32[2][4]);

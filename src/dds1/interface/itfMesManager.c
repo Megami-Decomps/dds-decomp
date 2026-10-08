@@ -133,7 +133,6 @@ extern void func_0019F6A0(void);
 extern struct ItfMesPoolNode *itfAcquirePoolNode();
 
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
-extern u32 sdfResourceRetainAddress(SdfMemBlock *block);
 extern u32 strlen(const char *text);
 extern void *memset(void *destination, s32 value, u32 size);
 extern void *memcpy(void *destination, const void *source, u32 size);
@@ -405,7 +404,7 @@ s32 itfMesCreateWindow(ItfMesSub *sub) {
 
     handle = (u32)sdfAllocGeneralBlock(0x1E0);
     node->resourceHandle = handle;
-    mes = (ItfMesState *)sdfResourceRetainAddress((SdfMemBlock *)handle);
+    mes = (ItfMesState *)sdfResourceRetainAddress((struct SdfMemBlock *)handle);
     node->stateAddress = (s32)mes;
     mes->sub = NULL;
     itfMesSetSubResource(window, sub);
@@ -1121,7 +1120,7 @@ void itfMesDestroyWindow(s32 window) {
         btlReleaseEffectResourceHandles(mes);
         itfReleaseUiResourceSlotHandles(&mes->textSlots);
         mes->flags = 0;
-        sdfReleaseResourceAllocation((SdfMemBlock *)windowRecord->handle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)windowRecord->handle);
         windowRecord->mes = NULL;
         itfReleasePoolNode(windowRecord, (u8 *)D_003D6EC0 - 0x10);
         ((ItfMesGlobals *)((u8 *)D_003D6EC0 - 0x20))->activeWindowCount -= 1;

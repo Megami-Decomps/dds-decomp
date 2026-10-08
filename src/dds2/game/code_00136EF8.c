@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "fld_waypoint.h"
 #include "fld_inf.h"
 extern FldInfTable D_0038E2D0;
@@ -65,7 +66,6 @@ extern void *memset(void *s, s32 c, u32 n);
 
 extern void *sdfAllocGeneralBlock(s32 size);
 
-extern void *sdfResourceRetainAddress(void *p);
 
 extern u32 D_0038BD50[];
 
@@ -391,12 +391,12 @@ void fldAllocateRecordStorage(void) {
     u8 *storage = sdfAllocGeneralBlock(FIELD_VALUE_RECORD_STORAGE_SIZE);
 
     fldValueRecordResource = (u32)storage;
-    storage = sdfResourceRetainAddress(storage);
+    storage = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(storage));
     fldValueRecords = (u32)storage;
     memset(storage, 0, FIELD_VALUE_RECORD_STORAGE_SIZE);
     storage = sdfAllocGeneralBlock(FIELD_AUX_RECORD_STORAGE_SIZE);
     fldAuxRecordResource = (u32)storage;
-    storage = sdfResourceRetainAddress(storage);
+    storage = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(storage));
     fldAuxRecordBuffer = (u32)storage;
     memset(storage, 0, FIELD_AUX_RECORD_STORAGE_SIZE);
 }
