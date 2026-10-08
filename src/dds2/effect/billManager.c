@@ -11,7 +11,7 @@ extern void func_00158430(BillObj *, BillRenderPair *);
 
 extern BillObj *billCreateIndexed(s32 index, u32 data);
 
-extern u64 sdfReadNamedResource(u64, u32 *, u64);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 void *sdfAllocSizeClassBlock(s32 size);
 
@@ -776,13 +776,13 @@ BillObj *billCreateIndexed(s32 index, u32 data) {
     return newobj;
 }
 
-u64 billCreateFromResource(u32 owner, u64 resource) {
-    u64 allocation;
+BillObj *billCreateFromResource(s32 kind, const char *path) {
+    struct SdfMemBlock *allocation;
     BillObj *billboard;
     u32 header[4];
 
-    allocation = sdfReadNamedResource(resource, header, 0);
-    billboard = billCreateIndexed(owner, header[0]);
+    allocation = sdfReadNamedResource(path, header, 0);
+    billboard = billCreateIndexed(kind, header[0]);
     sdfReleaseResourceAllocation(allocation);
     return billboard;
 }

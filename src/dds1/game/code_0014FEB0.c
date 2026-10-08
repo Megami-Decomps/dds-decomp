@@ -20,7 +20,7 @@ extern EffectHandler D_0034DE40[];
 extern void *sdfAllocSizeClassBlock(s32);
 extern s32 D_003BD7F4;
 extern BillObj *effBillResourceOwners[];
-extern BillObj *billCreateFromResource(s32 kind, s32 resource);
+extern BillObj *billCreateFromResource(s32 kind, const char *path);
 extern void billDispatchByKind(BillObj *billboard);
 
 typedef struct EffBillResourceInit {
@@ -91,7 +91,8 @@ void effInitializeBillResourceOwners(void) {
     D_003BD7F4 = 0;
     i = 0;
     do {
-        billboard = billCreateFromResource(effBillResourceInitTable[i].kind, effBillResourceInitTable[i].resource);
+        billboard = billCreateFromResource(effBillResourceInitTable[i].kind,
+                                           (const char *)(u32)effBillResourceInitTable[i].resource);
         effBillResourceOwners[i] = billboard;
         payload = (BillChildPayload *)billboard->entryList;
         payload->halfWidth *= effBillResourceInitTable[i].scale;

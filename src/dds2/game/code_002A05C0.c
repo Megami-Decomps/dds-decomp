@@ -557,16 +557,18 @@ void mnuWriteTitleStreamStatusLocked(u32 *statusValues) {
 
 /* Copy into the state array's installed buffer, count complete compressed
  * frames using its frame-byte divisor, then release the loaded resource. */
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
+
 void mnuLoadTitleStreamFrameData(char *filePath, u32 *streamState) {
     void *fileData;
     s32 frameCount;
-    u32 resourceHandle = sdfReadNamedResource(filePath, &fileData, 0);
+    struct SdfMemBlock *resourceHandle = sdfReadNamedResource(filePath, (u32 *)&fileData, 0);
     s32 fileBytes = sdfMemoryGetBlockSize(resourceHandle);
     memcpy((void *)streamState[MNU_STREAM_DATA_ADDRESS_INDEX], fileData, fileBytes);
     frameCount = fileBytes / (s32)streamState[MNU_STREAM_FRAME_BYTES_INDEX];
     streamState[1] = 0;
     streamState[MNU_STREAM_FRAME_COUNT_INDEX] = frameCount;
-    sdfQueueNonzeroResourceId(resourceHandle);
+    sdfQueueNonzeroResourceId((s32)(u32)resourceHandle);
 }
 
 void mnuStoreTaskResult(char *audioPath) {

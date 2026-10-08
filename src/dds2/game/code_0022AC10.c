@@ -465,7 +465,7 @@ extern char D_0041B6C8[]; /* "btl:event[%s]\n" */
 extern char D_0041B6D8[]; /* "btl:event BE load[e%03d]\n" */
 extern char D_0041B6F8[]; /* "btl:event SMG free[%X]\n" */
 extern char D_0041B710[]; /* "btl:BSE free\n" */
-extern void *sdfReadNamedResource(const char *, void *, s32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern s32 mnuCampCreateTask(s32);
 extern void func_00101968(s32, s32);
 extern s32 sndFindPackedTrackLoadStatus(s32);

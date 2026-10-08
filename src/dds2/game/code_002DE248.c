@@ -552,7 +552,7 @@ extern u32 effCurrentRenderPacket;
 
 extern u32 D_00437E6C;
 
-extern u32 sdfReadNamedResource(const char *, u32 *, s32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 
 extern u8 *effAllocateTexturedStripWork();
@@ -2933,8 +2933,8 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002E5E88);
 extern u32 D_00437E48[2];
 
 void effLoadFlashTextures(void) {
-    D_00437E48[0] = sdfReadNamedResource("/effect/flash00.tmx", &effFlashTextureHandles, 0);
-    D_00437E48[1] = sdfReadNamedResource("/effect/flash01.tmx", &effFlashTextureHandles + 1, 0);
+    D_00437E48[0] = (u32)sdfReadNamedResource("/effect/flash00.tmx", &effFlashTextureHandles, 0);
+    D_00437E48[1] = (u32)sdfReadNamedResource("/effect/flash01.tmx", &effFlashTextureHandles + 1, 0);
 }
 
 u32 effGetFlashTextureHandle(s32 index) {
@@ -5619,7 +5619,7 @@ u8 *effCloneRibbonWithSharedResource(u32 *source) {
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F1888);
 
 void effLoadWindTexture(void) {
-    D_00437E6C = sdfReadNamedResource("/effect/wind00.tmx", &effWindTextureHandle, 0);
+    D_00437E6C = (u32)sdfReadNamedResource("/effect/wind00.tmx", &effWindTextureHandle, 0);
 }
 
 u32 effGetWindTextureHandle(void) {
@@ -6159,7 +6159,7 @@ void effAllocateStripFromWorkAndRetainTexture(u8 *work) {
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F3F70);
 
 void effLoadScalyTexture(void) {
-    D_00437E7C = sdfReadNamedResource("/effect/scaly00.tmx", &effScalyTextureHandle, 0);
+    D_00437E7C = (u32)sdfReadNamedResource("/effect/scaly00.tmx", &effScalyTextureHandle, 0);
 }
 
 u32 effGetScalyTextureHandle(void) {
