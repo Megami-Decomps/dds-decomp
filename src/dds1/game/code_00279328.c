@@ -293,16 +293,16 @@ s32 ptySkillMenuDispatchConfirmRequest(s32 selection) {
     return menuRunPanel((void *)context, 2, (void *)selection);
 }
 
-extern void mnuSelectPage(void *, u32);
+extern void mnuSelectPage(MenuPageWindow *, s32);
 extern void ptySkillMenuBuildEquippedSlots(s32, s32);
 extern void ptySkillMenuInitPages(void *);
 
 s32 ptySkillMenuOpenPartyPage(s32 menu) {
     u8 *ctx = (u8 *)kwlnTaskGetUserValue();
-    u32 *panel = (u32 *)(ctx + 0x15C);
+    MenuPageWindow *panel = (MenuPageWindow *)(ctx + 0x15C);
 
     mnuSelectPage(panel, ((SkillMenuContext *)ctx)->selection->cursor->index);
-    *panel |= 0x400;
+    panel->flags |= 0x400;
     ptySkillMenuBuildEquippedSlots(0, menu);
     ptySkillMenuInitPages(ctx);
     return 1;
