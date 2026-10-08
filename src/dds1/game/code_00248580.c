@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_staff.h"
 #include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_list.h"
@@ -632,7 +633,6 @@ extern void *memset(void *, s32, u32);
 
 extern struct EffectList *mnuAllocateValueRecord(u32);
 extern void func_002BC618(struct EffectList *);
-extern void mnuInitPartyPanelSlots(PartyPanel *);
 extern void mnuAppendCampSpriteRequests(struct EffectList *, StaffSlots *);
 extern void mnuReleaseStaffMenuTextureHandles(u32 *);
 extern void mnuReleaseStaffResourceGroups(StaffSlots *);
@@ -641,11 +641,11 @@ extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 
 /* Allocate/zero the visual host, retain its allocation, and begin resource setup. */
 MenuProgressHost *mnuCreateWorkBlock(void) {
-    s32 handle = (u32)sdfAllocGeneralBlock(MNU_MENU_HOST_BYTES);
-    MenuProgressHost *work = (MenuProgressHost *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(MNU_MENU_HOST_BYTES);
+    MenuProgressHost *work = (MenuProgressHost *)sdfResourceRetainAddress(allocation);
 
     memset(work, 0, MNU_MENU_HOST_BYTES);
-    work->heapHandle = handle;
+    work->allocation = allocation;
     work->titleEffectHandle = mnuAllocateValueRecord(1);
     mnuInitPartyPanelSlots(&work->partyPanel);
     mnuAppendCampSpriteRequests(work->titleEffectHandle, &work->staffSlots);
@@ -659,7 +659,7 @@ void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *work) {
     mnuReleaseStaffMenuTextureHandles(work->staffSlots.baseResources);
     mnuReleaseStaffResourceGroups(&work->staffSlots);
     func_002BC618(work->titleEffectHandle);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->heapHandle));
+    sdfReleaseResourceAllocation(work->allocation);
 }
 
 extern s32 mnuStaffSlotsAllFilled(struct EffectList *, StaffSlots *);

@@ -44,6 +44,8 @@
 0x00104068	kwlnPadStartMotor	inferred	confidence=high; matched-C; src/dds1/game/code_00102ED8.c:362:func_00104068; Peer-matched C proposal; M141; source=names_pending_main.tsv:134 [names_qp12_apply.tsv]
 0x00104130	kwlnPadResetMotorLevelsAndOutput	inferred	Zeroes both pad motor levels and queued outputs and clears the motor command pair. [names_reviewed11.tsv]
 0x00104268	kwlnInitMagicState	inferred	passes a kernel state address and fixed magic constant to func_002E8430
+0x00104290	kwlnDebugGraphUpdate	inferred	DebugTimeGrph update callback; native body returns signed zero scheduler control and ignores the incoming task argument.
+0x001045F8	kwlnDebugGraphTaskDestroy	inferred	No-op destroy callback registered for the DebugTimeGrph task.
 0x00104600	kwlnDebugGraphSetEnabled	inferred	creates or destroys the DebugTimeGrph task by mode
 0x00104678	kwlnDrawImageOutline	inferred	M141; sources=names_pending_main.tsv; twin=0x00104568, input-family pairing. [names_qp10.tsv]
 0x00104798	kwlnTextureDrawPageCounter	inferred	formats TEX VIEWER page counter and submits rendered text
@@ -4099,7 +4101,8 @@
 0x00241AE8	evtStartBgmBySoundIdAndFade	inferred	Accepts a bounded BGM ID, encodes its fade and submits the resulting sound command. [names_reviewed21.tsv]
 0x00241B30	evtFormatTaskName	inferred	formats event task name via 003014F0 with e%03d_p format
 0x00241B58	evtFindTaskById	inferred	formats e%03d_p name from id then kwlnTaskGetTaskByName, returns handle or 0
-0x00241BB8	evtGetTaskData	inferred	finds task by id then returns its data pointer via 00101A70, or 0
+0x00241B80	evtGetEventPackLoadedState	inferred	Returns EvtPackLoadState.loaded for a numeric event task ID, or -1 when absent; camp readiness and battle event-sequence callers compare it with the completed value 2.
+0x00241BB8	evtGetEventPackLoadState	inferred	Returns the EvtPackLoadState stored in the event task userValue, or NULL when that task ID is absent; the camp creator, callbacks and pack consumers use this same 0x48-byte owner.
 0x00241BF0	evtFindTaskResourceEntryByKey	inferred	Finds task of resource kind and resolves entry by key into base-plus-offset address. [names_reviewed7.tsv]
 0x00241CA0	evtRefreshTaskEffectTexture	inferred	Releases the task's previous effect texture, resolves the keyed resource, updates effect channel 72, and retains the replacement at task-data +0x38. The former name described rebuilding that field via 0x00241BF0/0x002D3288 and freeing its old handle.
 0x00241D28	evtSpawnResourceObject	inferred	looks up the task resource, creates an effect object (flags 1) and scales it by slot scale ratio D_003BAA20[index]/D_003BAA10 [names_M95_Event.tsv]
@@ -7019,6 +7022,7 @@
 0x003BD610	sdfGsMemoryTypeFormat	inferred	confidence=high; data D_003BD610; matched-C-users=2; src/dds1/game/code_002E9708.c:484:sdfDumpGsMemoryForward; src/dds1/game/code_002E9708.c:510:sdfDumpGsMemoryBackward; Unknown GS memory block kinds are formatted with this fallback format string; data-twin=D_00438D00, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_002E9708.sdata.s:416.; seed-placeholder=D_003BD610; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x003BD690	kwlnPadMotorLevels	inferred	confidence=high; data D_003BD690; matched-C-users=2; src/dds1/game/code_00102ED8.c:209:kwlnPadStepLargeMotorLevel; src/dds1/game/code_00102ED8.c:231:kwlnPadResetMotorLevelsAndOutput; Motor level bytes are stepped toward the large-motor target and reset by pad motor cleanup; data-twin=D_00438D90, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/sbss.sbss.s:14.; seed-placeholder=D_003BD690; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x003BD699	kwlnLargeMotorTarget	inferred	confidence=high; src/dds1/game/code_00102ED8.c:kwlnPadStepLargeMotorLevel; Target actuator level approached in steps of at most 0x20. [names_qp9.tsv]
+0x003BD6A8	kwlnDebugGraphTask	inferred	The task handle created for DebugTimeGrph and passed to hierarchy destruction.
 0x003BD6C0	kwlnFadeCounter	inferred	high confidence; src/dds1/game/code_00102ED8.c kwlnFadeUpdate(): D_003BD6C0 -= 1; Current fade counter, stepped up or down before alpha is computed. [names_reviewed26.tsv]
 0x003BD6C2	kwlnFadeDuration	inferred	high confidence; src/dds1/game/code_00102ED8.c kwlnFadeUpdate(): D_003BA920.a = (D_003BD6C0 << 7) / D_003BD6C2; Fade duration used as the alpha interpolation denominator and terminal counter value. [names_reviewed26.tsv]
 0x003BD6C4	kwlnBackgroundFadeCounter	inferred	high confidence; src/dds1/game/code_00102ED8.c kwlnFadeBackgroundStartIn(): D_003BD6C4 = 0; Background fade counter starts at zero for the increasing fade and at duration for the opposite fade. [names_reviewed26.tsv]
