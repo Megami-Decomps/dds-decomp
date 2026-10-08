@@ -202,7 +202,7 @@ extern s32 effHasFirstTextureHandle();
 
 extern void effReleaseTextureHandlesAndResetSlots();
 
-extern void mnuSelectPage();
+extern void mnuSelectPage(MenuPageWindow *, s32);
 
 extern void func_002AAC98();
 
@@ -3735,7 +3735,6 @@ void mnuRefreshPageHandles(MenuPageWindow *window);
 
 
 
-void mnuSelectPage(MenuPageWindow *window, s32 selected);
 
 void mnuClearPageSelectionHandles(MenuPageWindow *window);
 

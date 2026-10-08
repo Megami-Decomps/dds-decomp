@@ -76,7 +76,7 @@ extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern s32 mnuSeekListNode(s32, struct MenuList *);
 extern void mnuResetListNodeFadeCounters(struct MenuList *);
 extern void sndSetSequenceVolumePan();
-extern void mnuSelectPage(u32 *, s32);
+extern void mnuSelectPage(MenuPageWindow *, s32);
 extern void mnuCreateStaffBulletItemWindow(MenuStaffContext *);
 extern void mnuCreateOrderedStaffItemWindow(void *);
 extern void mnuCreateOwnedCatalogItemWindow(void *);
@@ -430,7 +430,7 @@ s32 mnuStaffImageExitB(s32 task) {
 s32 mnuInitializeSelectedStaffPage(s32 unused) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
-    u32 *window = &context->partyWindow.flags;
+    MenuPageWindow *window = &context->partyWindow;
     s32 index = context->partyWindow.lists[0]->cursor->index;
 
     mnuSelectPage(window, index);
@@ -687,7 +687,7 @@ s32 func_002AEA58(s32 task) {
 
 s32 mnuInitializeStaffPageWithSlotAsset(s32 unused) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
-    u32 *window = &context->partyWindow.flags;
+    MenuPageWindow *window = &context->partyWindow;
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     s32 index = context->partyWindow.lists[0]->cursor->index;
     MenuPageSlot *slot = &context->partyWindow.slots[index];
@@ -975,7 +975,7 @@ s32 mnuExitStaffValuePage(s32 task) {
 
 s32 mnuInitializeStaffValuePage(s32 unused) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
-    u32 *window = &context->partyWindow.flags;
+    MenuPageWindow *window = &context->partyWindow;
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     s32 index = context->partyWindow.lists[0]->cursor->index;
     MenuPageSlot *slot = &context->partyWindow.slots[index];
