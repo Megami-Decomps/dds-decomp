@@ -5578,6 +5578,7 @@
 0x00314A08	prfAreAllRequiredProfileFlagsSet	inferred	Rejects any required profile flag not present in the active profile bitset. [names_reviewed13.tsv]
 0x00314B78	scrGetSelectedScriptEntryId	inferred	Reads the current script ID from the active script flag work. [names_reviewed13.tsv]
 0x00314B80	ptyGetProfileRecordPointer	inferred	Indexes the selected profile record within the current operand group. [names_reviewed13.tsv]
+0x00314C10	ptyGetCurrentProfileId	inferred	Returns DatPartyRecord.profileId at offset 0x55; DDS2 loads it unsigned, preserving its title-specific byte signedness.
 0x00314C18	scrSelectScriptEntryAndInitialize	inferred	Stores a script entry identifier then initializes that entry in the context. [names_reviewed13.tsv]
 0x00314C68	scrClearPackedScriptFlags	inferred	Clears the packed script flag words owned by the current flag work area. [names_reviewed13.tsv]
 0x00314CE8	scrRemoveAvailableSkillFlagAndSlot	inferred	Clears a skill flag and removes its slot when the skill nibble is active. [names_reviewed13.tsv]

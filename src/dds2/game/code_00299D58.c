@@ -172,13 +172,13 @@ typedef struct DspUnitName {
 extern DspUnitName *D_00435E48;
 extern DspUnitName *D_00435E64;
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
-extern s32 func_00314C10(DatPartyRecord *);
+extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern s32 scrGetIndexedRecordAddress(u16, s32 *);
 
 void prfCapPresentMessages(BrsSkillPackageWork *scene) {
     s32 message;
     DatPartyRecord *item = scene->selectedRewardRow->unit;
-    s32 profileId = func_00314C10(item);
+    s32 profileId = ptyGetCurrentProfileId(item);
     u16 skillId;
 
     if (scene->selectionApplied != 0) {
