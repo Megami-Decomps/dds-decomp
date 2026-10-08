@@ -1253,7 +1253,7 @@ void mnuStopMovieDrawTask(void) {
         return;
     }
     sdfCancelAndReleasePacWork(&mnuMovieDrawContext);
-    kwlnTaskDestroyWithHierarchy((KwlnTask *)mnuMovieDrawTask, 0);
+    kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }
 

@@ -40,7 +40,6 @@ extern char D_003BC658[];
 
 extern char D_003BC660[];
 
-extern u32 mnuMovieDrawTask;
 
 extern s32 mnuMovieShutdownCounter;
 
