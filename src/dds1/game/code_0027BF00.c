@@ -107,8 +107,6 @@ extern void func_0027FCA0(s32, s32, s32);
 
 extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
 
-extern void mnuReleaseSpriteTextures(s32);
-
 extern void sdfReleaseChipBlock(void *);
 
 extern MenuPanelHandles *mnuCreatePanelSpriteHandles(u32, s32, s32);
@@ -1404,8 +1402,8 @@ INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027FAA8);
 void mnuReleasePartyPanelSpriteTextures(s32 window) {
     u32 i;
     for (i = 0; i < 5; i++, window += 0x134) {
-        mnuReleaseSpriteTextures(window + 0x94);
-        mnuReleaseSpriteTextures(window + 0xe8);
+        mnuReleaseSpriteTextures((s32 *)(window + 0x94));
+        mnuReleaseSpriteTextures((s32 *)(window + 0xe8));
     }
 }
 
