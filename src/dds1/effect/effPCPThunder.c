@@ -1330,7 +1330,7 @@ void func_00165758(EffThunderFragmentWork *work, s32 index) {
 /* Update each fragment through delay, active geometry and alpha fade. The
  * optional frame limit stops new restarts; active geometry and fades continue.
  */
-void func_00165D80(EffThunderFragmentWork *work) {
+void effThunderUpdateFragments(EffThunderFragmentWork *work) {
     s32 i = 0;
     ParSystem *system = work->system;
     s32 count = work->head.fragmentCount;

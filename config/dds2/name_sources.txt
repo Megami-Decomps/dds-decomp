@@ -1177,6 +1177,7 @@
 0x0016D258	effThunderShiftOriginByVectorDelta	inferred	Stores new source vector and adds its delta to the existing origin vector. [names_reviewed6.tsv]
 0x0016D288	effThunderSetFragmentColor	inferred	queued
 0x0016D2E8	effThunderApplyFragmentColorBands	inferred	confidence=high; matched-C; src/dds2/effect/effPCPThunder.c:542:func_0016D2E8; Applies the three stored fragment color parameters to the particle system using its symmetric five-vertex color layout.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x0016D9D8	effThunderUpdateFragments	inferred	updates fragment countdowns, geometry, fade/restart state, colors and submits cells
 0x0016DD20	effThunderReleaseDualFragmentWork	inferred	queued
 0x0016DD88	effThunderSetDualFragmentColor	inferred	confidence=high; matched-C; src/dds2/effect/effPCPThunder.c:599:func_0016DD88; Stores the packed color in the dual-fragment thunder work callback family.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x0016E468	effThunderUpdateDualFragments	inferred	confidence=high; matched-C; src/dds2/effect/effPCPThunder.c:541:func_0016E468; Runs fragment delay/activity/fade/reset transitions and writes identical multiplied colors into both particle systems before queueing their cells.; source=names_P5.tsv:11 [names_qp11.tsv]
