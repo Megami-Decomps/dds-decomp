@@ -6,7 +6,6 @@
 
 extern s8 D_0037F510[];
 
-extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 
 extern u32 sdfMemoryGetBlockAddress(SdfMemBlock *);
 

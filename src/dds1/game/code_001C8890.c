@@ -342,7 +342,6 @@ extern s32 func_001F5028(s32 arg0);
 
 extern s8 effSharedRandomState[];
 
-extern s32 sdfAllocGeneralBlock(s32);
 
 
 extern void sndResetTransition(void);
@@ -373,7 +372,6 @@ extern void func_001B83D8(BtlTask *, s8, s8);
 
 extern void sndSetStationedSeVolume(u32);
 
-extern s32 sdfAllocGeneralBlock(s32);
 
 
 extern void btlResetTitleStreamOnBattleFlag(void);
@@ -2555,12 +2553,12 @@ void btlResetIndexWork(BattleIndexWork *work) {
 
 /* Allocate the index list and retained groups, then initialize their headers. */
 void btlInitBattleIndexWork(BattleIndexWork *object) {
-    u32 handle;
+    struct SdfMemBlock *allocation;
     u32 value;
     object->indices = btlAllocateIndexList(13);
-    handle = sdfAllocGeneralBlock(0x836C);
-    value = sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
-    object->allocationHandle = handle;
+    allocation = sdfAllocGeneralBlock(0x836C);
+    value = sdfResourceRetainAddress(allocation);
+    object->allocationHandle = (u32)allocation;
     object->groups = (BtlOperandGroup *)value;
     object->ownerId = 0;
     btlResetIndexWork(object);
@@ -6218,11 +6216,11 @@ void btlResetUnitLinks(BtlUnit *actor) {
 }
 
 BtlUnit *btlCreateUnit(void) {
-    u32 handle = sdfAllocGeneralBlock(0x348);
-    BtlUnit *unit = (BtlUnit *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x348);
+    BtlUnit *unit = (BtlUnit *)sdfResourceRetainAddress(allocation);
     BtlActorWork *work;
     memset(unit, 0, 0x348);
-    unit->handle = handle;
+    unit->handle = (u32)allocation;
     unit->identity = btlAdvanceRuntimeSequenceCounter();
     unit->flags = 0;
     unit->stateFlags = 0;

@@ -356,7 +356,6 @@ extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 
 extern void func_0035B7F8(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
-extern s32 sdfAllocGeneralBlock(s32);
 
 
 extern void func_0026C900(void);
@@ -767,7 +766,7 @@ extern void mnuLoadPanelSectionResources(struct MenuSlotEffectHandles *slot, u32
 s32 func_002B18E8(void) {
     s32 contextAddress = (s32)kwlnTaskGetUserValue();
     MenuContext *context = (MenuContext *)contextAddress;
-    s32 allocation = sdfAllocGeneralBlock(sizeof(PartyMenuData));
+    s32 allocation = (u32)sdfAllocGeneralBlock(sizeof(PartyMenuData));
     PartyMenuData *menuWork =
         (PartyMenuData *)sdfResourceRetainAddress((struct SdfMemBlock *)allocation);
     s32 slotIndex;
@@ -996,7 +995,7 @@ void mnuReleaseStaffMenuTextureHandles(s32 menuWork) {
 
 u32 mnuCreateSelectState(u32 unused, s32 flag) {
     s32 context = kwlnTaskGetUserValue();
-    u32 handle = sdfAllocGeneralBlock(0x30);
+    u32 handle = (u32)sdfAllocGeneralBlock(0x30);
     StaffMenuRuntime *state = (StaffMenuRuntime *)sdfResourceRetainAddress((struct SdfMemBlock *)handle);
     *(StaffMenuRuntime **)(context + 0xaa48) = state;
     memset(state, 0, 0x30);
@@ -1735,7 +1734,7 @@ void mnuDestroySkillMenuWindows(s32 context) {
 
 u32 mnuCreateItemState(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    u32 handle = sdfAllocGeneralBlock(0x3c);
+    u32 handle = (u32)sdfAllocGeneralBlock(0x3c);
     u32 *state = (u32 *)sdfResourceRetainAddress((struct SdfMemBlock *)handle);
     *(u32 **)(context + 0xaa48) = state;
     memset(state, 0, 0x3c);

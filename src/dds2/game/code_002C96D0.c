@@ -104,7 +104,6 @@ extern void kwlnFadeInStart(s8, s8, s8, s32);
 extern void *fileDuplicateJob(void *);
 
 struct SdfMemBlock;
-extern struct SdfMemBlock *sdfAllocGeneralBlock(s32);
 
 
 typedef struct DevState DevState;
@@ -1074,7 +1073,7 @@ void *fileReadSlotPreviewBegin(void) {
         return NULL;
     }
     if (status == 1) {
-        fileSaveReadBufferResource = sdfAllocGeneralBlock(0x30);
+        fileSaveReadBufferResource = (u32)sdfAllocGeneralBlock(0x30);
         fileSaveReadBuffer = sdfResourceRetainAddress((struct SdfMemBlock *)(fileSaveReadBufferResource));
         mcReadOpenFile(fileSaveFileDescriptor, fileSaveReadBuffer, 0x30);
         return fileReadSlotPreviewWait;
@@ -2141,7 +2140,7 @@ void *fileLoadMainBlobBegin(void) {
         return NULL;
     }
     size = fileMainBlobSize();
-    fileSaveReadBufferResource = sdfAllocGeneralBlock(size);
+    fileSaveReadBufferResource = (u32)sdfAllocGeneralBlock(size);
     fileSaveReadBuffer = sdfResourceRetainAddress((struct SdfMemBlock *)(fileSaveReadBufferResource));
     if (status == 1) {
         mcReadOpenFile(fileSaveFileDescriptor, fileSaveReadBuffer, size);
@@ -3379,7 +3378,7 @@ void *fileMenuWorkStart(void) {
 
 
 void fileMenuWorkCreate(u32 startBranchFlag) {
-    u32 buffer = sdfAllocGeneralBlock(0x40);
+    u32 buffer = (u32)sdfAllocGeneralBlock(0x40);
     MenuWork *work;
 
     fileLoadSelectionWork = sdfResourceRetainAddress((struct SdfMemBlock *)(buffer));
@@ -4544,7 +4543,7 @@ void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, s32 commandId, u16 o
     command = sdfDevCreateCommandState(commandId);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
-        handle = sdfAllocGeneralBlock(size);
+        handle = (u32)sdfAllocGeneralBlock(size);
         address = sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
         sdfDevQueueReadAndWait(command, (void *)address, size);
         sdfDevWaitThenReleaseCommandState(command);
@@ -4579,7 +4578,7 @@ void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, s32 commandId, u16
     command = sdfDevCreateCommandState(commandId);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
-        handle = sdfAllocGeneralBlock(size);
+        handle = (u32)sdfAllocGeneralBlock(size);
         address = sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
         sdfDevQueueReadAndWait(command, (void *)address, size);
         sdfDevWaitThenReleaseCommandState(command);
@@ -4634,7 +4633,7 @@ void *fileJobCreateFromCommandState(entry)
     command = sdfDevCreateCommandState(entry);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
-        handle = sdfAllocGeneralBlock(size);
+        handle = (u32)sdfAllocGeneralBlock(size);
         address = sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
         sdfDevQueueReadAndWait(command, (void *)address, size);
         sdfDevWaitThenReleaseCommandState(command);
@@ -5495,7 +5494,7 @@ void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *
         if (size == 0) {
             return;
         }
-        dst->jobHandle = sdfAllocGeneralBlock(size);
+        dst->jobHandle = (u32)sdfAllocGeneralBlock(size);
         dst->jobs = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(dst->jobHandle));
         for (i = 0; i < count; i++) {
             dst->jobs[i] = fileJobCreateChild(src->jobs[0]);
@@ -5518,7 +5517,7 @@ void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *
         if (size == 0) {
             return;
         }
-        dst->queueHandle = sdfAllocGeneralBlock(size);
+        dst->queueHandle = (u32)sdfAllocGeneralBlock(size);
         dst->queues = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(dst->queueHandle));
         for (i = 0; i < count; i++) {
             dst->queues[i] = fileQueueClone(src->queues[0]);
@@ -5593,7 +5592,7 @@ void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJobPayload *job) 
     }
     size = count * 4;
     if (size != 0) {
-        node->jobHandle = sdfAllocGeneralBlock(size);
+        node->jobHandle = (u32)sdfAllocGeneralBlock(size);
         node->jobs = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(node->jobHandle));
         node->jobs[0] = fileJobCreateFromJob(job);
         for (i = 1; i < count; i++) {
@@ -5617,7 +5616,7 @@ void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job) {
     }
     size = count * 4;
     if (size != 0) {
-        node->queueHandle = sdfAllocGeneralBlock(size);
+        node->queueHandle = (u32)sdfAllocGeneralBlock(size);
         node->queues = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(node->queueHandle));
         node->queues[0] = fileCloneQueueEntries((FileQueue *)job);
         for (i = 1; i < count; i++) {
@@ -7570,7 +7569,7 @@ u32 fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
     size = slotBytes + headerSize;
     size += D_003E95C0[type].slotBytes * count;
     size += dataBytes * 2;
-    handle = sdfAllocGeneralBlock(size);
+    handle = (u32)sdfAllocGeneralBlock(size);
     rec = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     body = (u8 *)rec + headerSize;
     rec->type = type;

@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "sdf_resource.h"
 #include "dat_state.h"
 #include "mnu_scene.h"
 #include "mnu_profile_progress.h"
@@ -7,7 +8,6 @@
 extern void sdfReleaseChipBlock(void *);
 /* Retail retains a jal and epilogue; default TU -O2 changes the shape. */
 
-extern s32 sdfAllocGeneralBlock(s32);
 
 extern void *sdfMemoryGetBlockAddress(s32);
 
@@ -447,7 +447,7 @@ typedef struct {
 } MovieSpriteResource;
 
 void *mnuCreateSpriteResource(s32 owner, u8 sprite, u8 variant) {
-    s32 allocation = sdfAllocGeneralBlock(0x48);
+    s32 allocation = (u32)sdfAllocGeneralBlock(0x48);
     MovieSpriteResource *resource = sdfMemoryGetBlockAddress(allocation);
     memset(resource, 0, 0x48);
     resource->allocation = allocation;

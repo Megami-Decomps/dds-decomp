@@ -38,7 +38,6 @@ typedef struct {
 } EffResourceRenderState;
 
 extern EffResourceRenderState D_003D65E0;
-extern u32 sdfAllocGeneralBlock(u32 size);
 extern u32 sdfCreateAssetWithDrawEntries(void);
 extern void func_002DA420(u32 resource, f32 scale);
 extern void *memset(void *, s32, u32);
@@ -61,7 +60,7 @@ void effSetResourceNormalStream(EffResourceWork *work, f32 (*normals)[4]) {
 /* Allocate the resource group and initialize its matrix, scale and entry colors. */
 EffResourceWork *effCreateResourceEntryWork(u32 count)
 {
-    u32 allocation = sdfAllocGeneralBlock(count * sizeof(EffResourceEntry) + sizeof(EffResourceWork));
+    u32 allocation = (u32)sdfAllocGeneralBlock(count * sizeof(EffResourceEntry) + sizeof(EffResourceWork));
     EffResourceWork *work = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
     EffResourceEntry *entry;
     u32 i;
@@ -182,7 +181,7 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
     }
     angle = 0.0f;
     recordCount = count * 3;
-    allocation = sdfAllocGeneralBlock(recordCount * 0x24);
+    allocation = (u32)sdfAllocGeneralBlock(recordCount * 0x24);
     work->resource68 = allocation;
     positions = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
     unitVectors = positions + recordCount;
