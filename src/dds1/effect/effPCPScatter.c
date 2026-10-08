@@ -3,6 +3,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "eff_scatter_draw.h"
 
 #define EFF_SCATTER_NEUTRAL_COLOR 0x80808080
 #define EFF_SCATTER_RGB_MASK 0xFFFFFF
@@ -43,7 +44,6 @@ extern void *sdfAllocSizeClassBlock(s32 size);
 extern u32 effParamWorkDuplicate(u32 param);
 extern void sdfReleaseChipBlock(void *ptr);
 
-extern void effReleaseScatterObject(u32 res);
 extern void sdfQueueAssetRelease(u32 res);
 extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
@@ -61,7 +61,6 @@ typedef struct PcpScatterInstanceC PcpScatterInstanceC;
 typedef struct PcpScatterPlainInstance PcpScatterPlainInstance;
 
 /* Constructors also serve the legacy parameter-table dispatch surface. */
-extern PcpScatterRadialWork *func_001708A0();
 extern PcpScatterSpinWork *effScatterCreateSpinWork();
 extern PcpScatterRibbonWork *effScatterCreateRibbonWork();
 extern PcpScatterInstanceB *effScatterCreateDampedRing();
@@ -121,6 +120,9 @@ typedef struct {
     s32 duplicateStartAge;
     u32 particlesPerGroup;
 } PcpScatterRadialParams;
+
+extern PcpScatterRadialWork *effScatterCreateRadialWork(
+    const PcpScatterRadialParams *params, u32 resource, void *particleParams);
 
 typedef struct {
     s32 age;
@@ -247,26 +249,6 @@ extern PcpScatterInstance *effPcpScatterCreateParticleInstance();
 extern void effShareScatterResource(u32 param0, u32 param1);
 
 typedef struct PcpScatterParticle PcpScatterParticle;
-typedef struct PcpScatterDraw PcpScatterDraw;
-
-/* The allocator creates one 0x80-byte drawable plus separate vector, UV and
- * color arrays. Geometry and the per-particle fade pass share this owner. */
-struct PcpScatterDraw {
-    f32 origin[4];
-    f32 matrix[16];
-    u32 unk50;
-    u32 color;
-    u32 particleCount;
-    s32 vectorsPerParticle; /* Two coordinate vectors form one vertex pair. */
-    f32 scale;
-    f32 *points;
-    f32 *uv;
-    u32 *vertexColors;
-    u32 *colors;
-    u32 asset;
-    SdfMemBlock *allocation;
-    PcpScatterRes *sharedResource;
-}; /* 0x80 */
 
 /* The B constructor copies this 0x13C-byte block to instance +0x40;
    ring setup and the fading update read fields from that same copy. */
@@ -375,7 +357,10 @@ extern PcpScatterRes *effPcpScatterResCreate(u32 resId);
 /* Create radial work from the parameter, texture-resource and child-work blocks. */
 void effScatterCreateFromParameterTriplet(void *parameterTable)
 {
-    func_001708A0(effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_CHILD_BLOCK));
+    effScatterCreateRadialWork(
+        effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK),
+        (u32)effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK),
+        effParamTableGetBlock(parameterTable, EFF_SCATTER_CHILD_BLOCK));
 }
 
 /* Return a radial clone sharing the texture owner; every group clones source group zero.
@@ -389,7 +374,7 @@ PcpScatterRadialWork *effPcpScatterSharedDuplicate(source)
     u32 *handles;
     u32 i;
 
-    work = func_001708A0(&source->params, 0, 0);
+    work = effScatterCreateRadialWork(&source->params, 0, 0);
     effPcpScatterSharePoolResource(work->childWork, source->childWork);
     if (work->params.duplicateParticles != 0) {
         work->duplicateGroupCount = work->params.particleCount / work->params.particlesPerGroup;
@@ -1385,7 +1370,9 @@ struct PcpScatterInstance {
     SdfMemBlock *allocationHandle;
 };
 
-extern void *func_00175B50();
+/* The allocator stores 2 * segmentsPerParticle + 2 vectors for each particle. */
+extern PcpScatterDraw *effScatterCreateDrawObject(
+    u32 particleCount, u32 segmentsPerParticle);
 extern void effCreateScatterResource(void *object, u32 resource);
 
 extern void *memcpy(void *, const void *, u32);
@@ -1413,7 +1400,7 @@ PcpScatterInstance *effPcpScatterCreateParticleInstance(src, resource)
     inst->allocationHandle = allocation;
     inst->particles = particle;
     VU0_COPY_MATRIX(inst->matrix, src->matrix);
-    object = func_00175B50(src->particleCount, src->unk60);
+    object = effScatterCreateDrawObject(src->particleCount, src->unk60);
     drawWord = src->unk50;
     inst->scatterObject = (u32)object;
     object->unk50 = drawWord;
@@ -1450,7 +1437,7 @@ PcpScatterInstance *effScatterCloneWithSharedObject(PcpScatterInstance *work) {
 /* Release the drawable before its owning SDF allocation descriptor. */
 void effScatterReleaseObjectAndBuffer(PcpScatterInstance *work)
 {
-    effReleaseScatterObject(work->scatterObject);
+    effReleaseScatterObject((PcpScatterDraw *)work->scatterObject);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
@@ -1687,7 +1674,7 @@ PcpScatterInstanceB *effScatterCreateDampedRing(src, resource)
     inst->particles = particle;
     inst->age = 0;
     VU0_COPY_MATRIX(inst->matrix, src->matrix);
-    object = func_00175B50(src->particleCount, src->unk60);
+    object = effScatterCreateDrawObject(src->particleCount, src->unk60);
     drawWord = src->unk50;
     inst->scatterObject = (u32)object;
     object->unk50 = drawWord;
@@ -1727,7 +1714,7 @@ PcpScatterInstanceB *effScatterCloneWithSharedResource(PcpScatterInstanceB *work
 /* Release the radius-damped drawable before its owning allocation node. */
 void effScatterReleaseInstanceResources(PcpScatterInstanceB *work)
 {
-    effReleaseScatterObject(work->scatterObject);
+    effReleaseScatterObject((PcpScatterDraw *)work->scatterObject);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
@@ -1977,7 +1964,7 @@ PcpScatterInstanceC *effScatterCreateTwoColorRing(src, resource)
     inst->particles = particle;
     inst->age = 0;
     VU0_COPY_MATRIX(inst->matrix, src->matrix);
-    object = func_00175B50(src->particleCount, src->unk60);
+    object = effScatterCreateDrawObject(src->particleCount, src->unk60);
     drawWord = src->unk50;
     inst->scatterObject = (u32)object;
     object->unk50 = drawWord;
@@ -2017,7 +2004,7 @@ PcpScatterInstanceC *effCreateScatterChildSharingParentResource(PcpScatterInstan
 /* Release the two-color drawable before its owning allocation node. */
 void effReleaseScatterObjectAndOwnedBuffer(PcpScatterInstanceC *work)
 {
-    effReleaseScatterObject(work->scatterObject);
+    effReleaseScatterObject((PcpScatterDraw *)work->scatterObject);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
@@ -2325,7 +2312,7 @@ PcpScatterPlainInstance *effPcpScatterCreatePlainInstance(src, resource)
     inst->allocationHandle = allocation;
     inst->particles = particle;
     EE_MMI_UNIT_MATRIX(inst->matrix);
-    object = func_00175B50(src->particleCount, src->unk20);
+    object = effScatterCreateDrawObject(src->particleCount, src->unk20);
     drawWord = src->unk10;
     inst->scatterObject = (u32)object;
     object->unk50 = drawWord;
@@ -2363,7 +2350,7 @@ PcpScatterPlainInstance *effCloneScatterWithSharedResource(PcpScatterPlainInstan
 /* Release the flat-ring drawable before its owning allocation node. */
 void effReleaseScatterWorkResources(PcpScatterPlainInstance *work)
 {
-    effReleaseScatterObject(work->scatterObject);
+    effReleaseScatterObject((PcpScatterDraw *)work->scatterObject);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
