@@ -731,7 +731,7 @@ extern s32 D_003BAA8C;
 extern s32 D_003BAA90;
 extern char D_00347C68[][0x20];
 extern char D_003482A8[][0x20];
-extern char *D_0032ACA8[];
+extern s32 D_0032ACA8[128];
 extern char D_003BB1F0[];
 extern void func_003014F0(char *dst, const char *format, ...);
 extern void itfConvertText(char *dst, const char *src);
