@@ -3978,7 +3978,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
     unit->motionRate = rate;
     unit->unkEC = index;
     unit->effectState = mode;
-    rate = rate * (30.0f / *(s8 *)(context + 0x490));
+    rate = rate * (30.0f / ((BtlState *)context)->timingRate);
     rate *= *(f32 *)(context + 0x494);
     evtPrepareUnitMotionState(unit->ext, index, start, end, mode);
     model = unit->ext->owner;
@@ -4078,7 +4078,7 @@ void btlRefreshUnitMotionSelection(u8 *unit) {
         }
     }
     *(f32 *)(unit + 0x104) = rate;
-    speed = rate * (30.0f / *(s8 *)(context + 0x490));
+    speed = rate * (30.0f / ((BtlState *)context)->timingRate);
     speed *= *(f32 *)(context + 0x494);
     *(s32 *)(unit + 0xFC) = index;
     evtUnitSetStoredParameter(*(struct EvtUnit **)(unit + 0x320), index);
@@ -4173,7 +4173,7 @@ void btlApplyUnitModelScaledValue(BtlUnit *object) {
     object->updateFlags &= ~1;
     volume = object->motionRate;
     object->ext->owner->first->frameStep =
-        volume * (30.0f / (f32)*(s8 *)(context + 0x490));
+        volume * (30.0f / (f32)((BtlState *)context)->timingRate);
 }
 
 void btlResetUnitModelProgress(BtlUnit *object) {

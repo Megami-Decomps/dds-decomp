@@ -1845,27 +1845,13 @@ void btlDrawUnitAffinityDebug(BtlUnit *unit, s32 x, s32 y) {
     }
 }
 
-typedef struct PadButtons {
-    s8 unk_0;
-    s8 stick;
-    s8 b2;
-    s8 b3;
-    u8 b4, b5, b6, b7;
-} PadButtons;
-
-extern PadButtons sdfPadButtonStates[];
-
-typedef struct MenuList {
-    u32 count;
-    u32 cursor;
-    u32 top;
-    u32 rows;
-} MenuList;
+/* Two logical pads, each with sixteen held/trigger/new-press state bytes. */
+extern u8 sdfPadButtonStates[0x20];
 
 /* Apply up/down/page-down/page-up precedence, including endpoint wrapping.
- * Returns 1 only for a negative stick byte when no direction branch ran. */
-s32 mnuListMoveCursor(MenuList *menuList) {
-    if (sdfPadButtonStates->b6 & MNU_LIST_INPUT_FLAG) {
+ * Returns 1 only for button 1's new-press bit when no direction branch ran. */
+s32 mnuListMoveCursor(BtlDebugMenuCursor *menuList) {
+    if (sdfPadButtonStates[6] & MNU_LIST_INPUT_FLAG) {
         if (menuList->cursor != 0) {
             menuList->cursor--;
             if (menuList->cursor == menuList->top && menuList->cursor != 0) {
@@ -1875,7 +1861,7 @@ s32 mnuListMoveCursor(MenuList *menuList) {
             menuList->cursor = menuList->count - 1;
             menuList->top = menuList->count - menuList->rows;
         }
-    } else if (sdfPadButtonStates->b7 & MNU_LIST_INPUT_FLAG) {
+    } else if (sdfPadButtonStates[7] & MNU_LIST_INPUT_FLAG) {
         if (menuList->cursor >= menuList->count - 1) {
             menuList->cursor = 0;
             menuList->top = 0;
@@ -1885,7 +1871,7 @@ s32 mnuListMoveCursor(MenuList *menuList) {
                 menuList->top++;
             }
         }
-    } else if (sdfPadButtonStates->b5 & MNU_LIST_INPUT_FLAG) {
+    } else if (sdfPadButtonStates[5] & MNU_LIST_INPUT_FLAG) {
         if (menuList->top + menuList->rows * 2 < menuList->count) {
             menuList->top += menuList->rows;
             menuList->cursor += menuList->rows;
@@ -1893,7 +1879,7 @@ s32 mnuListMoveCursor(MenuList *menuList) {
             menuList->cursor = menuList->count - 1;
             menuList->top = menuList->count - menuList->rows;
         }
-    } else if (sdfPadButtonStates->b4 & MNU_LIST_INPUT_FLAG) {
+    } else if (sdfPadButtonStates[4] & MNU_LIST_INPUT_FLAG) {
         if (menuList->top >= menuList->rows) {
             menuList->top -= menuList->rows;
             menuList->cursor -= menuList->rows;
@@ -1901,7 +1887,7 @@ s32 mnuListMoveCursor(MenuList *menuList) {
             menuList->cursor = 0;
             menuList->top = 0;
         }
-    } else if (sdfPadButtonStates->stick < 0) {
+    } else if ((s8)sdfPadButtonStates[1] < 0) {
         return 1;
     }
     return 0;
@@ -1920,27 +1906,20 @@ s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
     return frFontQueueGlyphInSelectedSlot(textGlyph);
 }
 
-typedef struct BtlMenuSelection {
-    u8 pad00[4];
-    u32 selected; /* 0x04 */
-    u32 first;    /* 0x08 */
-    s32 count;    /* 0x0C */
-} BtlMenuSelection;
-
 /* Draw the visible text interval, highlighting the selected absolute index.
  * Keep pointer-typed coordinates and the legacy s32 fallthrough unchanged. */
-s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 unusedMode, u8 *selectionState, s32 *rowTexts) {
+s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 unusedMode, BtlDebugMenuCursor *selectionState, s32 *rowTexts) {
     u32 firstIndex;
     u32 visibleRowCount;
     u32 itemIndex;
     u32 endIndex;
     u32 selectedIndex;
     s32 rowY;
-    firstIndex = ((BtlMenuSelection *)selectionState)->first;
-    visibleRowCount = ((BtlMenuSelection *)selectionState)->count;
+    firstIndex = selectionState->top;
+    visibleRowCount = selectionState->rows;
     endIndex = firstIndex + visibleRowCount;
     itemIndex = firstIndex;
-    selectedIndex = ((BtlMenuSelection *)selectionState)->selected;
+    selectedIndex = selectionState->cursor;
     rowY = (s32)y;
     for (; itemIndex < endIndex; itemIndex++) {
         void *textGlyph = func_00197748((s32)x << 4, rowY << 3, MNU_LIST_TEXT_DEPTH, itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR, rowTexts[itemIndex], 0);
@@ -1953,8 +1932,8 @@ s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 unusedMode, u8 *selectionState, 
 extern void func_001FB140(u8 *, u8 *, s32, s32, u32, u32);
 
 /* Size the frame from the visible rows, then forward the row-draw result. */
-s32 mnuDrawMenuFrameSizedToRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *rowTexts) {
-    s32 frameHeight = ((BtlMenuSelection *)selectionState)->count * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET;
+s32 mnuDrawMenuFrameSizedToRows(u8 *x, u8 *y, s32 mode, BtlDebugMenuCursor *selectionState, s32 *rowTexts) {
+    s32 frameHeight = selectionState->rows * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET;
     func_001FB140(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, mode, frameHeight, 0x80806020, 0x30000000);
     return btlDrawSelectableListRows(x, y, mode, selectionState, rowTexts);
 }
@@ -1969,7 +1948,7 @@ extern SdfPoolNode kwlnPositionedTextSurface;
 
 /* Submit formatted indices in one packet list, then draw the text column.
  * Preserve the separate fixed-point and pixel-coordinate arithmetic. */
-s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *rowTexts) {
+s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, BtlDebugMenuCursor *selectionState, s32 *rowTexts) {
     void *indexPackets;
     u32 firstIndex;
     u32 visibleRowCount;
@@ -1977,14 +1956,14 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *r
     u32 endIndex;
     u32 selectedIndex;
     s32 rowY;
-    func_001FB140(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, mode, ((BtlMenuSelection *)selectionState)->count * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET, 0x80806020, 0x30000000);
+    func_001FB140(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, mode, selectionState->rows * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET, 0x80806020, 0x30000000);
     indexPackets = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(indexPackets);
-    firstIndex = ((BtlMenuSelection *)selectionState)->first;
-    visibleRowCount = ((BtlMenuSelection *)selectionState)->count;
+    firstIndex = selectionState->top;
+    visibleRowCount = selectionState->rows;
     endIndex = firstIndex + visibleRowCount;
     itemIndex = firstIndex;
-    selectedIndex = ((BtlMenuSelection *)selectionState)->selected;
+    selectedIndex = selectionState->cursor;
     if (itemIndex < endIndex) {
         rowY = (s32)y * 8 + 0x7900;
         for (; itemIndex < endIndex; itemIndex++) {
@@ -2009,18 +1988,18 @@ extern s32 D_003BAA84;
 void btlInitDrawTables(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     u32 i;
-    state->unk_708 = 0;
-    state->unk_6A8 = 7;
-    state->unk_6B4 = 7;
-    state->unk_6C4 = 0xF;
-    state->unk_6D8 = 0x1D;
-    state->unk_6E4 = 0xF;
-    state->unk_6E8 = 0x20;
-    state->unk_6F4 = 0xF;
+    state->debugSelectedUnit = NULL;
+    state->debugActionMenu.count = 7;
+    state->debugActionMenu.rows = 7;
+    state->debugModelMenu.rows = 0xF;
+    state->debugMotionMenu.count = 0x1D;
+    state->debugMotionMenu.rows = 0xF;
+    state->debugGunMenu.count = 0x20;
+    state->debugGunMenu.rows = 0xF;
     if (state->unk_E0C == 0) {
-        state->unk_6B8 = 0x180;
+        state->debugModelMenu.count = 0x180;
     } else {
-        state->unk_6B8 = 0x20;
+        state->debugModelMenu.count = 0x20;
     }
     for (i = 0; i < 0x20; i++) {
         state->table0[i] = D_003BAA70 + i * 0x11;
