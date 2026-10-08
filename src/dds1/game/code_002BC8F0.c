@@ -6,6 +6,8 @@
 #include "eff_owner_records.h"
 #include "sdf.h"
 
+extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
+
 extern void effResetSlotWork(u32, u32);
 
 extern u32 effCreateMappedResource(u32);
@@ -607,7 +609,7 @@ u32 effResolveResourceSlots(EffectSlotSet *set, u8 *resourceBytes, s32 clearAllS
             if (clearAllSlots == 0) {
                 if (selectedSlot == -1 || selectedSlot == (s32)slotIndex) {
                     if (set->handles[slotIndex] == 0) {
-                        set->handles[slotIndex] = (void *)sdfTexAcquireResourceTexture(resourceData);
+                        set->handles[slotIndex] = sdfTexAcquireResourceTexture(resourceData);
                     }
                 } else {
                     set->handles[slotIndex] = 0;
@@ -620,8 +622,6 @@ u32 effResolveResourceSlots(EffectSlotSet *set, u8 *resourceBytes, s32 clearAllS
     }
     return (u32)entryBytes;
 }
-
-extern u32 sdfTexAcquireResourceTexture(s32 *);
 
 void effResolveAndReleaseResource(u32 *handle) {
     if (*handle != 0) {

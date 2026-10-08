@@ -1547,7 +1547,7 @@ void effSetAlternateKindScale(EffKindWork *object, f32 scale) {
     object->scale = scale;
 }
 
-extern s32 sdfTexAcquireResourceTexture(s32 *);
+extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 extern s32 effGetResourceFirstWord(s32);
 
@@ -1563,7 +1563,7 @@ s32 *effCreateResourceHolderFromSelectedKind(s32 *source, u16 kind) {
     object[1] = 1;
     switch (kind) {
     case 1:
-        object[2] = sdfTexAcquireResourceTexture(source);
+        object[2] = (s32)sdfTexAcquireResourceTexture(source);
         break;
     case 4:
         object[2] = effGetResourceFirstWord(*source);
@@ -11312,7 +11312,7 @@ u8 *effResolveResourceSlots(EffectSlotSet *set, u8 *resourceBytes, s32 clearAllS
             if (clearAllSlots == 0) {
                 if (selectedSlot == -1 || selectedSlot == slotIndex) {
                     if (set->handles[slotIndex] == 0) {
-                        set->handles[slotIndex] = (void *)sdfTexAcquireResourceTexture(resourceData);
+                        set->handles[slotIndex] = sdfTexAcquireResourceTexture(resourceData);
                     }
                 } else {
                     set->handles[slotIndex] = 0;

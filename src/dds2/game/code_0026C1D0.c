@@ -1,6 +1,8 @@
 #include "evt_world.h"
 #include "dat_state.h"
 
+typedef struct SdfTex SdfTex;
+
 #define EVT_ACTIVE_ENTRY_LIMIT 0x100
 #define EVT_DISPLAY_VALUE_COUNT 0x10
 #define EVT_LAST_DISPLAY_VALUE 0xF
@@ -439,7 +441,7 @@ s32 evtOpReadDisplayValue(void) {
     return 1;
 }
 
-extern s32 sdfTexAcquireResourceTexture(u32);
+extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 /* Acquire the loaded data's texture reference, then release its temporary resource.
  * DDS2 passes the size-output address as an integer, unlike DDS1's pointer slot. */
 s32 evtLoadTextureFromResourcePath(u32 path) {
@@ -448,7 +450,7 @@ s32 evtLoadTextureFromResourcePath(u32 path) {
     s32 texture;
 
     allocation = sdfReadNamedResource(path, &info[0], (u32)&info[1]);
-    texture = sdfTexAcquireResourceTexture(info[0]);
+    texture = (s32)sdfTexAcquireResourceTexture((void *)info[0]);
     sdfReleaseResourceAllocation(allocation);
     return texture;
 }
