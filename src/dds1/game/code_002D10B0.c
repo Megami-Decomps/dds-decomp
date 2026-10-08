@@ -188,7 +188,66 @@ void sdfSetBufferSlot(s32 updateSingleSlot, s32 bufferIndex, s32 slotIndex) {
     sdfBusyBufferIndex = SDF_NO_BUSY_BUFFER;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1380);
+extern s8 D_003BD9DC;
+extern s8 D_003BD9DD;
+extern volatile s32 sdfGsImageUploadSemaphore;
+extern volatile u8 D_003BD32D;
+extern volatile u8 D_003BD32C;
+extern u16 D_003BD32E;
+extern s32 sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
+extern s32 func_0030B638(s32);
+extern s32 GetThreadId(void);
+extern s32 CancelWakeupThread(s32);
+extern s32 SleepThread(void);
+extern s32 WaitSema(s32);
+extern s32 SignalSema(s32);
+extern u32 func_002CF930(void);
+extern u32 sdfGetElapsedTimerTicks(u32);
+extern void sdfGraphRecreateBuffers(SdfGraphObj *);
+extern void func_002D1020(void);
+extern void func_002D5018(void);
+extern s32 func_002D1080(s32);
+extern void sceGsResetPath(void);
+
+void func_002D1380(void) {
+    u32 startTicks;
+
+    D_003BD2F1 = 0;
+    sdfAddHandler(1, 1, func_002D1080, -1, 0);
+    func_0030B638(1);
+    for (;;) {
+        CancelWakeupThread(GetThreadId());
+        D_003BD2F1 = 1;
+        SleepThread();
+        startTicks = func_002CF930();
+        WaitSema(sdfGsImageUploadSemaphore);
+        if (D_003BD9DC != 0) {
+            D_003BD9DC = 0;
+            sdfGraphRecreateBuffers(&D_003980E0);
+        }
+        if (D_003BD9DD != 0) {
+            D_003BD9DD = 0;
+            func_002D1020();
+        }
+        D_003BD32D = 1;
+        func_002D5018();
+        D_003BD32D = 0;
+        if (D_003BD32C != 0) {
+            /* Preserve the controller enable state while stopping VIF1. */
+            u32 enabledChannels = *(volatile u32 *)0x1000F520;
+            *(volatile u32 *)0x1000F590 = 0x10000;
+            *(volatile u32 *)0x10009000 = 0;
+            *(volatile u32 *)0x1000F590 = enabledChannels;
+            sceGsResetPath();
+            *(volatile u64 *)0x12001040 = 0;
+            D_003BD32C = 1;
+        } else {
+            sdfCaptureDeferredGsImage();
+        }
+        SignalSema(sdfGsImageUploadSemaphore);
+        D_003BD32E = sdfGetElapsedTimerTicks(startTicks);
+    }
+}
 
 extern u8 D_003BD2E1;
 extern s32 D_003BD9D8;
@@ -197,7 +256,6 @@ extern volatile u8 sdfPacketSlotIndex;
 extern void sdfSleepThreadCount(s32);
 extern void sdfDevSignalPendingSemaphore(void);
 extern s32 WakeupThread(s32);
-extern s32 WaitSema(s32);
 extern void sdfGraphSelectDisplayBuffer(s32);
 
 /* GS CSR bit 13 supplies the double-buffer field selector. */
@@ -608,13 +666,11 @@ void sdfResetSemaphoreState(SdfSemaObj *semaphore) {
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2140);
 
-extern s32 GetThreadId(void);
 extern s32 func_002D2140(s32 threadId);
 extern s32 func_0030A740(s32 channel, s32 (*handler)(s32), s32 arg, s32 threadId);
 extern void *sceDmaGetChan(s32 channel);
 extern void FlushCache(s32 mode);
 extern void sceDmaSend(void *channel, void *packet);
-extern void SleepThread(void);
 extern s32 RemoveDmacHandler(s32 channel, s32 handlerId);
 extern u8 D_00398100[];
 
