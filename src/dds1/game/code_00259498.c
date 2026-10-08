@@ -63,7 +63,7 @@ void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
         drawY = y + D_0036B7F0[scene->sceneId][3];
         flags = mnuGetMantraDisplayFlags(scene, profileOwner);
 
-        if (flags & 1) {
+        if (flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) {
             uiDrawUniformColorRect(drawX << 4, drawY << 3, 0, 0x300, 0x180,
                                    (s32)((f32)((alpha * 5) << 4) * 0.0078125f) |
                                        0x60501000,
@@ -155,26 +155,26 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
     mnuDrawScaledVariantSprite(x, y, depth, alpha, scene->sceneId, 0x20,
                                1.0f, 1.0f, context);
     flags = mnuGetMantraDisplayFlags(scene, selection);
-    if (flags & 1) {
+    if (flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) {
         color = (s32)((f32)((alpha * 5) << 4) * 0.0078125f) | 0x60501000;
         uiDrawUniformColorRect((x - 4) << 4, (y - 4) << 3, 0, 0x1C0, 0xE0,
                                color, context);
     }
-    if (flags & 2) {
+    if (flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP) {
         color = (s32)((f32)((alpha * 15) << 4) * 0.0078125f) | 0x80802000;
         frFontMeasureAndQueueGlyph(x + 4, y, depth, color,
                                    (const u8 *)D_003BC458, context);
         frFontMeasureAndQueueGlyph(x, y, depth, color,
                                    (const u8 *)D_003BC488, context);
-    } else if (flags & 4) {
+    } else if (flags & MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_1) {
         frFontMeasureAndQueueGlyph(x, y, depth,
             (s32)((f32)((alpha * 15) << 4) * 0.0078125f) | 0x10808000,
             (const u8 *)D_003BC488, context);
-    } else if (flags & 8) {
+    } else if (flags & MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_2) {
         frFontMeasureAndQueueGlyph(x + 4, y, depth,
             (s32)((f32)((alpha * 15) << 4) * 0.0078125f) | 0x40404000,
             (const u8 *)D_003BC488, context);
-    } else if (flags & 0x20) {
+    } else if (flags & MNU_MANTRA_DISPLAY_FLAG_REQUIREMENT_PAIR_SET_FALLBACK) {
         frFontMeasureAndQueueGlyph(x, y, depth,
             (s32)((f32)(alpha << 7) * 0.0078125f) | 0x40404000,
             (const u8 *)D_003BC490, context);
