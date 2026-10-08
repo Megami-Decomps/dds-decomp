@@ -1946,9 +1946,9 @@ s32 btlGetEnemyMoney(u8 *acquirer, u8 *enemy) {
 extern f32 func_001A7C20(u8 *, u8 *, s32);
 
 /* Hunt EP uses its own table quantity and the ratio calculator's mode 0. */
-s32 btlCalculateHuntEpReward(u8 *arg0, u8 *arg1) {
-    DatEnemyRecord *entry = &datEnemyRecords[((BtlUnit *)arg1)->partyRecord.unitId];
-    f32 ratio = func_001A7C20(arg0, arg1, 0);
+s32 btlCalculateHuntEpReward(u8 *acquirer, u8 *enemy) {
+    DatEnemyRecord *entry = &datEnemyRecords[((BtlUnit *)enemy)->partyRecord.unitId];
+    f32 ratio = func_001A7C20(acquirer, enemy, 0);
     u32 ep = (u32)((f32)entry->huntExperience * ratio);
     if (entry->flags & 0x2000) {
         ep *= 100;
