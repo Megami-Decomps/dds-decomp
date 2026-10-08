@@ -63,7 +63,8 @@ typedef struct MenuSearchObject {
     u8 paddingC04[4];
 } MenuSearchObject; /* Full 0xC08-byte status-resource allocation. */
 
-extern s32 mnuGetMantraNodePositionRecord(s16);
+struct MantraNodePos;
+extern struct MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern s32 mnuGetActiveMantraModelFlagState(void);
 
 extern const MantraProfileRequirement D_003D0078[16];
