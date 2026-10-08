@@ -49,9 +49,9 @@ void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
 
     {
         u32 flags;
-        s32 display;
+        MenuSceneWork *display;
 
-        display = (s32)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
+        display = (MenuSceneWork *)(u32)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
         scene = (MnuMantraGridEntry *)(u32)entry->value;
         pulse = 0.0f;
         scene->frame++;
@@ -70,7 +70,7 @@ void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
                                    context);
         }
         {
-            s32 displayFlags = ((u8 *)display)[0x5AC];
+            s32 displayFlags = display->boundsFlags;
 
             if (displayFlags & 1) {
                 func_0024EC08(x, y, depth, alpha, scene->sceneId, 0x20,
