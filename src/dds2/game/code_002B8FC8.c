@@ -98,7 +98,7 @@ extern struct MenuListNode *func_002B86E8(struct MenuList *);
 
 extern void func_002AAE80();
 
-extern void mnuReleasePartyIconBundles();
+extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 
 extern void mnuClearEntries(MenuPageWindow *);
 
@@ -481,7 +481,7 @@ s32 mnuStepStaffCampPageControl(s32 callback);
 
 
 extern void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
-extern void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource);
+extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
@@ -2109,15 +2109,15 @@ void mnuDrawFadeIcons(s32 x, s32 y, s32 depth, s32 unused, MenuIconBundle *obj, 
 }
 
 
-void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource) {
+void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource) {
     MenuIconBundle *bundle;
 
     bundle = mnuCreateIconBundle(resource);
-    ((MenuPageWindow *)menu)->slots[index].iconBundle = bundle;
+    menu->slots[index].iconBundle = bundle;
 }
 
-void mnuReleasePartyIconBundles(u8 *menu) {
-    MenuIconBundle **bundle = &((MenuPageWindow *)menu)->slots[0].iconBundle;
+void mnuReleasePartyIconBundles(MenuPageWindow *menu) {
+    MenuIconBundle **bundle = &menu->slots[0].iconBundle;
     u32 i = 0;
     do {
         MenuIconBundle *resource = *bundle;

@@ -1295,15 +1295,15 @@ void mnuDrawIconSpriteGroup(s32 unusedX, s32 unusedY, s32 depth, s32 skip, MenuS
     }
 }
 
-void mnuSetWindowResource(s32 index, s32 window, s32 resource, s32 option) {
-    mnuSelectPage((MenuPageWindow *)window, index);
-    ((MenuPageWindow *)window)->slots[index].windowSprites = func_0027F230(0, resource, option);
-    *(u32 *)window |= 0x100;
+void mnuSetWindowResource(s32 index, MenuPageWindow *window, s32 resource, s32 option) {
+    mnuSelectPage(window, index);
+    window->slots[index].windowSprites = func_0027F230(0, resource, option);
+    window->flags |= 0x100;
 }
 
-void mnuClearEntries(s32 *menu) {
+void mnuClearEntries(MenuPageWindow *menu) {
     u32 i;
-    s32 *entry = menu + 0x56;
+    s32 *entry = (s32 *)menu + 0x56;
     mnuReleasePageHandlesAndClearSelection();
     for (i = 0; i < 5; i++, entry += 0x4D) {
         if (*entry != 0) {
@@ -1311,7 +1311,7 @@ void mnuClearEntries(s32 *menu) {
             *entry = 0;
         }
     }
-    *menu &= ~0x100;
+    menu->flags &= ~0x100;
 }
 
 MenuIconBundle *mnuCreateFadeSpriteResourceSet(u32 resource) {
@@ -1378,19 +1378,19 @@ void mnuDrawAndUpdateFadingSprites(s32 x, s32 y, s32 z, s32 unused, MenuIconBund
 }
 
 
-void mnuAttachPartyIconBundle(s32 index, s32 window, u32 resource) {
+void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window, u32 resource) {
     MenuIconBundle *sprites;
 
     sprites = mnuCreateFadeSpriteResourceSet(resource);
-    ((MenuPageWindow *)window)->slots[index].iconBundle = sprites;
+    window->slots[index].iconBundle = sprites;
 }
 
-void mnuReleasePartyIconBundles(s32 window) {
+void mnuReleasePartyIconBundles(MenuPageWindow *window) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        if (((MenuPageWindow *)window)->slots[i].iconBundle != NULL) {
-            mnuReleaseFourResourceList(((MenuPageWindow *)window)->slots[i].iconBundle);
-            ((MenuPageWindow *)window)->slots[i].iconBundle = NULL;
+        if (window->slots[i].iconBundle != NULL) {
+            mnuReleaseFourResourceList(window->slots[i].iconBundle);
+            window->slots[i].iconBundle = NULL;
         }
     }
 }
