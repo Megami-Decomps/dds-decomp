@@ -913,15 +913,17 @@ void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 value, s32 option) {
     panel->option = option;
 }
 
+extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
+
 /* Create a profile panel from the selection state's current profile ID and record. */
 MenuProfilePanel *mnuCreateProfilePanel(s32 selectionState) {
     MenuProfilePanel *panel = (MenuProfilePanel *)sdfAllocSizeClassBlock(sizeof(MenuProfilePanel));
     s32 profileId;
-    u32 profileRecordAddress;
+    DatProfileRecord *profileRecord;
     memset(panel, 0, sizeof(MenuProfilePanel));
     profileId = scrGetSelectedOperandIndex(selectionState);
-    profileRecordAddress = ptyGetCurrentProfileRecord(selectionState);
-    mnuSetProfilePanelValues(panel, prfGetCapValue((u16)profileId), *(u32 *)profileRecordAddress);
+    profileRecord = ptyGetCurrentProfileRecord((DatPartyRecord *)selectionState);
+    mnuSetProfilePanelValues(panel, prfGetCapValue((u16)profileId), profileRecord->value);
     panel->opacity = 0x100;
     return panel;
 }
