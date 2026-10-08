@@ -493,7 +493,7 @@ typedef struct {
 
 struct FileQueue;
 extern void *sdfAllocSizeClassBlock(s32);
-extern u32 sdfCountMapPositionRecords(void *);
+extern u32 sdfCountMapPositionRecords(SdfModel *model);
 extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *);
 extern struct FileQueue *fileQueueClone(struct FileQueue *);
 

@@ -23,10 +23,10 @@ typedef struct EvtLipsLink {
     EvtLipsMh *mh;      /* 0x0C */
 } EvtLipsLink;
 
-extern u32 sdfGetUniqueChunkValue();
+extern u32 sdfGetUniqueChunkValue(SdfModel *model);
 
 
-extern s32 sdfGetLodChunkValue();
+extern u32 sdfGetLodChunkValue(SdfModel *model);
 
 
 extern EvtUnitVectorSlot evtUnitVectorSlots[10];
@@ -638,7 +638,7 @@ u32 evtOpModelLodChg(void) {
         func_0035B6E0("warning!! MODEL_LOD_CHG(int,int) root pointer null\n");
         return 1;
     }
-    max = sdfGetLodChunkValue(model);
+    max = (s32)sdfGetLodChunkValue(model);
     if (max < lod) {
         func_0035B6E0("warning!! MODEL_LOD_CHG(int,int) lodno over!! max=%d setval=%d\n", max, lod);
         return 1;

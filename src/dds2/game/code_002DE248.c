@@ -7594,6 +7594,8 @@ void effDestroyMaterialAndModelEffectWork(EffModelBindings *work) {
     sdfReleaseChipBlock(work);
 }
 
+extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
+
 /* vu0 routine: orient along target minus model origin, save distance, and advance the resource. */
 void effOrientClassResourceAlongTargetOffset(u8 *work) {
     u8 *object = ((EffActiveResource *)work)->payload;
@@ -7609,7 +7611,7 @@ void effOrientClassResourceAlongTargetOffset(u8 *work) {
         VU0_LOAD_VF(vf10, work);
     }
     VU0_STORE_VF_UNCLOBBERED(vf10, target);
-    sdfLoadMapRecordLookAtBasis((s32)handle->model->inner, 0);
+    sdfLoadMapRecordLookAtBasis(handle->model->inner, 0);
     VU0_STORE_VF_UNCLOBBERED(vf31, origin);
     effCopyClassResourcePosition((s128 *)handle->material, (s128 *)target);
     state = ((EffClassWork *)handle->material)->payload;
@@ -8334,7 +8336,7 @@ void effSetActiveSlotOpacity(s32 *work, f32 opacity) {
 }
 
 
-extern void *sdfChunkFindRecordById(void *, s32);
+extern void *sdfChunkFindRecordById(SdfModel *, s32);
 extern void mdlSetResourceAmount(MdlCtx *, MdlResourceItem *, f32);
 extern void mdlSetAllResourceFrames(MdlCtx *, u32);
 

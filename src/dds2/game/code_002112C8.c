@@ -344,7 +344,7 @@ extern s32 func_001B2F50(void *, s32);
 
 extern s8 D_00438F84;
 
-extern s32 sdfNamedChunkFindId(void *, const char *);
+extern s32 sdfNamedChunkFindId(SdfModel *, const char *);
 
 extern void btlFadeAndTintNamedChunkTree(SdfDrawNode *, s32);
 

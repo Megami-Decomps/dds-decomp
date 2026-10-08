@@ -61,7 +61,7 @@ extern f32 D_003BD358, D_003BD35C;
 extern void *dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *, s32, EffWorldNode *);
 extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *, u32, s32);
-extern s32 sdfLoadMapRecordPositionVector(void *, s32);
+extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 extern void func_00107DE8(void);
 extern void effMiscQuaternionNlerpVU(f32);

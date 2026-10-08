@@ -146,9 +146,9 @@ extern void sdfBuildPrimaryAlphaSubtractiveDmaPacket(void *);
 void *sdfChunkFindById(SdfChunk *chunk, s32 chunkId);
 void *sdfAllocSizeClassBlock(s32 size);
 void *sdfAllocAndClearQuadwords(s32 size);
-void *sdfChunkFindRecordById(SdfTextParam *, s32);
-void sdfSetLookAtBasisFromRecord(SdfTextParam *param, SdfMapPositionRecord *record);
-void sdfVuTransformMapRecordPosition(SdfTextParam *param, SdfMapPositionRecord *record);
+void *sdfChunkFindRecordById(SdfModel *, s32);
+void sdfSetLookAtBasisFromRecord(SdfModel *model, SdfMapPositionRecord *record);
+void sdfVuTransformMapRecordPosition(SdfModel *model, SdfMapPositionRecord *record);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
 void sdfPendingQueuePush(void *arg0, s32 arg1);
 void sdfResourceListReleaseAssets(DevRequest *list);
@@ -248,13 +248,13 @@ void *sdfChunkFindById(SdfChunk *chunk, s32 chunkId) {
     return NULL;
 }
 
-void *sdfChunkFindByTag(SdfTextParam *param, s32 tag) {
-    return sdfChunkFindById(param->chunkTable, tag);
+void *sdfChunkFindByTag(SdfModel *model, s32 tag) {
+    return sdfChunkFindById((SdfChunk *)model->chunkTable, tag);
 }
 
 /* Names are followed by a four-byte-aligned ID word; missing chunks/names return -1. */
-s32 sdfNamedChunkFindId(SdfTextParam *param, const char *name) {
-    SdfChunk *namesChunk = sdfChunkFindByTag(param, SDF_CHUNK_NAMED_IDS);
+s32 sdfNamedChunkFindId(SdfModel *model, const char *name) {
+    SdfChunk *namesChunk = sdfChunkFindByTag(model, SDF_CHUNK_NAMED_IDS);
     u8 *entryName;
     u8 *chunkEnd;
     u32 nameLength;
@@ -277,8 +277,8 @@ s32 sdfNamedChunkFindId(SdfTextParam *param, const char *name) {
 
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002D9C28);
 
-u32 sdfCountMapPositionRecords(SdfTextParam *param) {
-    SdfChunk *chunk = sdfChunkFindByTag(param, SDF_CHUNK_MAP_POSITIONS);
+u32 sdfCountMapPositionRecords(SdfModel *model) {
+    SdfChunk *chunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
     if (chunk != NULL) {
         return (chunk->size - 0x10) >> 6;
     }
@@ -287,8 +287,8 @@ u32 sdfCountMapPositionRecords(SdfTextParam *param) {
 
 /* vu0 routine: build basis rows in vf28-vf31 from the map record, then
  * postmultiply using its draw-node matrix. */
-void sdfSetLookAtBasisFromRecord(SdfTextParam *param, SdfMapPositionRecord *record) {
-    u8 *matrix = sdfModelFindDrawNode(param, record->nodeId);
+void sdfSetLookAtBasisFromRecord(SdfModel *model, SdfMapPositionRecord *record) {
+    u8 *matrix = sdfModelFindDrawNode(model, record->nodeId);
     u8 *vector;
 
     vector = (u8 *)&record->up;
@@ -309,8 +309,8 @@ void sdfSetLookAtBasisFromRecord(SdfTextParam *param, SdfMapPositionRecord *reco
 
 /* vu0 routine: transform the map-record position by its draw-node matrix;
  * the transformed position is left in vf10. */
-void sdfVuTransformMapRecordPosition(SdfTextParam *param, SdfMapPositionRecord *record) {
-    u8 *matrix = sdfModelFindDrawNode(param, record->nodeId) + 0xC0;
+void sdfVuTransformMapRecordPosition(SdfModel *model, SdfMapPositionRecord *record) {
+    u8 *matrix = sdfModelFindDrawNode(model, record->nodeId) + 0xC0;
 
     VU0_LOAD_MATRIX(matrix);
     VU0_LOAD_VF(vf10, &record->position);
@@ -318,8 +318,8 @@ void sdfVuTransformMapRecordPosition(SdfTextParam *param, SdfMapPositionRecord *
 }
 
 /* Search the fixed-size map-position records within the chunk's declared byte extent. */
-void *sdfChunkFindRecordById(SdfTextParam *param, s32 recordId) {
-    SdfChunk *positionsChunk = sdfChunkFindByTag(param, SDF_CHUNK_MAP_POSITIONS);
+void *sdfChunkFindRecordById(SdfModel *model, s32 recordId) {
+    SdfChunk *positionsChunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
     SdfMapPositionChunk *positions;
     SdfMapPositionRecord *record;
     u8 *chunkEnd;
@@ -338,34 +338,34 @@ void *sdfChunkFindRecordById(SdfTextParam *param, s32 recordId) {
     return NULL;
 }
 
-s32 sdfLoadMapRecordLookAtBasis(SdfTextParam *param, s32 id) {
-    void *resource = sdfChunkFindRecordById(param, id);
+s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id) {
+    void *resource = sdfChunkFindRecordById(model, id);
     if (resource != NULL) {
-        sdfSetLookAtBasisFromRecord(param, resource);
+        sdfSetLookAtBasisFromRecord(model, resource);
         return 1;
     }
     return 0;
 }
 
-s32 sdfLoadMapRecordPositionVector(SdfTextParam *param, s32 id) {
-    void *resource = sdfChunkFindRecordById(param, id);
+s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id) {
+    void *resource = sdfChunkFindRecordById(model, id);
     if (resource != NULL) {
-        sdfVuTransformMapRecordPosition(param, resource);
+        sdfVuTransformMapRecordPosition(model, resource);
         return 1;
     }
     return 0;
 }
 
-u32 sdfGetUniqueChunkValue(SdfTextParam *param) {
-    SdfChunk *chunk = sdfChunkFindByTag(param, SDF_CHUNK_UNIQUE_VALUE);
+u32 sdfGetUniqueChunkValue(SdfModel *model) {
+    SdfChunk *chunk = sdfChunkFindByTag(model, SDF_CHUNK_UNIQUE_VALUE);
     if (chunk != NULL) {
         return chunk->firstValue;
     }
     return 0;
 }
 
-u32 sdfGetLodChunkValue(SdfTextParam *param) {
-    SdfChunk *chunk = sdfChunkFindByTag(param, SDF_CHUNK_LOD_VALUE);
+u32 sdfGetLodChunkValue(SdfModel *model) {
+    SdfChunk *chunk = sdfChunkFindByTag(model, SDF_CHUNK_LOD_VALUE);
     if (chunk != NULL) {
         return chunk->firstValue;
     }
