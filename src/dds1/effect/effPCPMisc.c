@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff.h"
@@ -3328,7 +3329,7 @@ void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work) {
                         effDispatchParameterDataAndFreeWork(work->list[i][j]);
                     }
                 }
-                sdfReleaseResourceAllocation(work->alloc[i]);
+                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->alloc[i]));
             }
         }
         for (j = 0; j < 5; j++) {

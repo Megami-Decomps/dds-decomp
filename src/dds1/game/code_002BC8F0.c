@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "eff.h"
@@ -222,7 +223,7 @@ u32 effLoadIndexedResource(const char *base, const char *name, u32 keepAllocatio
     allocation = sdfReadNamedResource(path, &sourceAddress, 0);
     instance = func_002BD9C0(allocation, keepAllocation);
     if (keepAllocation == EFF_RESOURCE_TRANSIENT) {
-        sdfReleaseResourceAllocation(allocation);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     }
     return instance;
 }
@@ -235,7 +236,7 @@ void effCompleteTransientResourceJob(u64 job, u32 *outInstance) {
     allocation = fileGetResourceHandle();
     instance = func_002BD9C0(allocation, EFF_RESOURCE_TRANSIENT);
     *outInstance = instance;
-    sdfReleaseResourceAllocation(allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     filePollEntryCleanup(job);
 }
 
@@ -277,7 +278,7 @@ u32 effLoadMappedResource(const char *base, const char *name) {
     func_003014F0(path, D_003BD198, base, name);
     allocation = sdfReadNamedResource(path, &sourceAddress, 0);
     mappedResource = effCreateMappedResource(sourceAddress);
-    sdfReleaseResourceAllocation(allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     return mappedResource;
 }
 
@@ -291,7 +292,7 @@ void effCompleteMappedResourceJob(u64 job, u32 *outMappedResource) {
     sourceAddress = sdfResourceRetainAddress(allocation);
     mappedResource = effCreateMappedResource(sourceAddress);
     *outMappedResource = mappedResource;
-    sdfReleaseResourceAllocation(allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     filePollEntryCleanup(job);
 }
 
@@ -529,13 +530,13 @@ u32 effDestroyPackedBatch(EffMappedResource *batch) {
     for (recordIndex = 0; recordIndex < batch->count; recordIndex++) {
         sdfReleaseChipBlock(batch->records[recordIndex].status);
     }
-    sdfReleaseResourceAllocation(batch->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(batch->allocation));
     sdfReleaseChipBlock(batch);
     return 1;
 }
 
 u32 effReleaseSlotWorkAllocation(s32 work) {
-    sdfReleaseResourceAllocation(((EffectSlotSet *)work)->workAllocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffectSlotSet *)work)->workAllocation));
     return 1;
 }
 
@@ -672,7 +673,7 @@ EffPayload *effCreatePayload(u32 recordCount) {
 
 /* Release the record allocation before freeing its small header. */
 u32 effDestroyPayload(EffPayload *payload) {
-    sdfReleaseResourceAllocation(payload->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(payload->allocation));
     sdfReleaseChipBlock(payload);
     return 1;
 }
@@ -748,13 +749,13 @@ u32 effDestroyResourceSlotSet(u32 work) {
 
     set = (EffectSlotSet *)work;
     if (set->sourceAllocation != 0) {
-        sdfReleaseResourceAllocation(set->sourceAllocation);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(set->sourceAllocation));
     }
     if (set->unk04 == 0) {
         effReleaseTextureHandlesAndResetSlots(set);
-        sdfReleaseResourceAllocation(set->textureAllocation);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(set->textureAllocation));
     }
-    sdfReleaseResourceAllocation(set->descriptionAllocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(set->descriptionAllocation));
     effReleaseSlotWorkAllocation(work);
     sdfReleaseChipBlock(work);
     return 1;

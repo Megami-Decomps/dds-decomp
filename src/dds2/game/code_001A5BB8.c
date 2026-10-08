@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
@@ -215,7 +216,6 @@ extern char D_004150B0[]; /* "btl:hunt ep=%d[id=%X]\n" */
 extern void btlBossDebugPrintf(const char *, ...);
 extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 extern u32 sdfResourceRetainAddress(SdfMemBlock *);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 
 extern s8 effSharedRandomState[];
 

@@ -1,10 +1,10 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "itf.h"
 #include "sdf.h"
 
 #define ITF_PANEL_PACKET_LIST_BYTES 0x20
 
-extern void sdfReleaseResourceAllocation(void *resource);
 
 /* A sprite with a retained payload owns a secondary allocation. Release that
  * before its primary allocation; NULL is a no-op. */

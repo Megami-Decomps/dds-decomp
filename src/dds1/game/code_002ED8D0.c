@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf.h"
 #include "file_pac.h"
 
@@ -175,7 +176,6 @@ void func_002ED8D0(MovObj *owner, SdfMovieDescriptor *descriptor, const char *na
 
 extern s32 sdfDevQueueActiveOperation(void *);
 extern void sdfCreateSemaphoreFromOptions(void);
-extern void sdfReleaseResourceAllocation(void *);
 extern void sdfReleaseChipBlock(void *);
 extern void func_002EBB60(void *);
 extern void func_002E98F0(void);
@@ -196,11 +196,11 @@ void sdfCancelAndReleasePacWork(MovObj *job) {
         }
         ownedBuffers = job->stream;
         if (job->isPac == 0) {
-            sdfReleaseResourceAllocation(((MovLinearStream *)ownedBuffers)->allocation);
+            sdfReleaseResourceAllocation((struct SdfMemBlock *)(((MovLinearStream *)ownedBuffers)->allocation));
             sdfReleaseChipBlock(ownedBuffers);
         } else {
-            sdfReleaseResourceAllocation(((MovPacStream *)ownedBuffers)->payloadAllocation);
-            sdfReleaseResourceAllocation(((MovPacStream *)ownedBuffers)->allocation);
+            sdfReleaseResourceAllocation((struct SdfMemBlock *)(((MovPacStream *)ownedBuffers)->payloadAllocation));
+            sdfReleaseResourceAllocation((struct SdfMemBlock *)(((MovPacStream *)ownedBuffers)->allocation));
             sdfReleaseChipBlock(ownedBuffers);
         }
         func_002EBB60(&job->soundNode);

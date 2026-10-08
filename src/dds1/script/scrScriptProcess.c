@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "scr.h"
 #include "sdf.h"
 extern ScrProcGlobals *datGameState;
@@ -87,7 +88,6 @@ ScrData *scrCreateProcessAtFirstProcedure(void *header, ScrSection *procedureSec
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern void sdfReleaseChipBlock(void *);
 extern void itfMesDestroyWindowIfPresent(s32);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 extern void evtUnlinkWorkNode(ScrData *process);
 
 /* Log the process name, release its VM buffers and resource, then unlink and free it. */

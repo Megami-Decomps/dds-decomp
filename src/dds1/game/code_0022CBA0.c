@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "evt_viewer.h"
 #include "kwln.h"
 #include "sdf.h"
@@ -1625,7 +1626,6 @@ extern void sdfQueueNonzeroResourceId();
 extern void kwlnTextureReleaseHeldReference();
 extern void evtEventViewerReleaseGroups();
 extern void evtEventViewerShutdown();
-extern void sdfReleaseResourceAllocation(SdfMemBlock *handle);
 extern void fldReleaseCameraColorEffect();
 extern void kwlnFadeSetMode();
 void evtViewerCleanupMessageWindow(EvtRuntime *viewer);

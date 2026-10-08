@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff_dependency.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
@@ -58,7 +59,6 @@ extern const f32 D_0039F800[10];
 extern const f32 D_0039F828[20];
 extern void *sdfAllocSizeClassBlock(s32 size);
 EffectDependencyState *effObjGetReadyData(EffectObj *obj);
-void *sdfReleaseResourceAllocation(void *arg);
 struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern void *func_0014FE28(void);

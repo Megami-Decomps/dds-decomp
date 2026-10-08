@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff_anim.h"
 #include "file.h"
 #include "ee_mmi.h"
@@ -742,7 +743,7 @@ void effReleaseSharedReference(RefObj *obj) {
     }
     obj->refCount--;
     if (obj->refCount == 0) {
-        sdfReleaseResourceAllocation(obj->allocationHandle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(obj->allocationHandle));
     }
 }
 
@@ -797,7 +798,7 @@ void effReleaseReferenceHolder(u8 *holder) {
     for (i = 0; i < ((EffExpandedList *)holder)->count; i++) {
         effReleaseSharedReference(((EffExpandedList *)holder)->handles[i]);
     }
-    sdfReleaseResourceAllocation(((EffExpandedList *)holder)->buffer);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffExpandedList *)holder)->buffer));
 }
 
 EffExpandedList *effReferenceObjectRetain(EffExpandedList *obj) {

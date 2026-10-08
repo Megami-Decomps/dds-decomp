@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "par_draw.h"
 
 #include "ee_mmi.h"
@@ -124,7 +125,6 @@ extern void (*D_003AAC20[])();
 
 extern ParDispatch parKindConstructorEntries[];
 
-extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 
 /* Release the radial emitter's extra allocation, shared resources, and block. */
 void parReleaseObject(ParBurstEmitter *obj) {

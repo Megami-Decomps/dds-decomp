@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff.h"
 #include "mnu_list.h"
 #include "mnu_profile_progress.h"
@@ -61,7 +62,6 @@ extern void mnuDestroyMantraDrawPool(void *);
 extern void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *);
 extern s32 dspCloseChannel(void);
 extern void sdfQueueNonzeroResourceId(s32);
-extern void sdfReleaseResourceAllocation(s32);
 extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfMemoryGetBlockAddress(s32);
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
@@ -587,7 +587,7 @@ void func_0024F6F0(s32 unused, MnuResourceTaskWork *resourceWork) {
     dspCloseChannel();
     sdfQueueNonzeroResourceId(resourceWork->messageResource1);
     sdfQueueNonzeroResourceId(resourceWork->messageResource2);
-    sdfReleaseResourceAllocation(resourceWork->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resourceWork->allocation));
 }
 
 /* The task handle is shared by the existence probe and explicit stop;
@@ -776,7 +776,7 @@ void mnuReleaseResourceTaskData(s32 unused, s32 *taskData) {
     sdfReleaseChipBlock(listOwner->resource);
     mnuDestroyListState(listOwner);
     mnuReleaseMenuVisualWorkResources(*(s32 *)(sceneMetadata + 0x24));
-    sdfReleaseResourceAllocation(taskData[0]);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(taskData[0]));
 }
 
 INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF758);

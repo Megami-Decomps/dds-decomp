@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf_primitive.h"
 #include "sdf.h"
 #include "sdf_projection.h"
@@ -1919,7 +1920,7 @@ void sdfDevConsListRemove(ConsNode *node) {
 /* Unlink the console, release its cell-buffer handle, then free the node. */
 void sdfDevConsNodeDestroy(ConsNode *node) {
     sdfDevConsListRemove(node);
-    sdfReleaseResourceAllocation(node->bufferHandle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->bufferHandle));
     sdfReleaseChipBlock(node);
 }
 

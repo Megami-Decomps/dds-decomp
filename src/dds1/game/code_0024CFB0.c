@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "sdf_resource.h"
 #include "kwln.h"
 #include "dat_state.h"
 #include "evt_world.h"
@@ -466,7 +467,7 @@ void evtLoadResourcePair(u32 resourceId, u32 *record) {
 
 /* Release the handle without clearing either word of the caller's record. */
 void evtReleaseResourcePairHandle(u32 *record) {
-    sdfReleaseResourceAllocation(*record);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*record));
 }
 
 /* Create the singleton message window only when its handle is negative.
@@ -703,7 +704,7 @@ u32 evtLoadTextureFromResourcePath(u32 path) {
     u32 allocation = (u32)sdfReadNamedResource((const char *)(u32)path, info, &info[1]);
     u32 texture = (u32)sdfTexAcquireResourceTexture((void *)info[0]);
 
-    sdfReleaseResourceAllocation(allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     return texture;
 }
 
