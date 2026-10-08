@@ -40,7 +40,7 @@ MenuWindowContainer *func_002A9BF8(void *labels, s32 count, s32 width,
 void mnuSetWindowContainerState(MenuWindowContainer *window, u32 state);
 void mnuDestroyWindowContainer(MenuWindowContainer *window);
 void mnuDestroyPanelState(struct MenuPanelState *panel);
-s32 mnuConsumeEntryCost(s32 commandId, u8 *entryBytes);
+s32 mnuConsumeEntryCost(s32 commandId, struct DatPartyRecord *entry);
 #endif
 
 #endif
