@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_resource_slots.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "mnu_work.h"
@@ -86,7 +87,6 @@ extern void mnuUpdateHighScoreFlag(MnuShootingWork *);
 /* Retail passes the task work to this otherwise empty legacy callback. */
 extern void func_0031AF60();
 extern void itfClearTintAndWorkBuffers(u8 *);
-extern u32 effDestroyResourceSlotSet(u32);
 extern u32 D_00435CBC;
 extern void *dds3GetWorldSecondaryObject(void);
 struct EffWorldNode;
@@ -264,7 +264,7 @@ void mnuDestroyShootingWork(MnuShootingWork *work) {
     itfClearTintAndWorkBuffers((u8 *)work);
     for (i = 6; i >= 0; i--, slot++) {
         if (*slot != 0) {
-            effDestroyResourceSlotSet(*slot);
+            effDestroyResourceSlotSet((struct EffectSlotSet *)*slot);
             *slot = 0;
         }
     }

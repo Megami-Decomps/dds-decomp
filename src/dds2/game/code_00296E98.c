@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_resource_slots.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "mnu_result.h"
@@ -523,7 +524,6 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     mnuForwardTableByte(work->primaryRewards.rows[work->selectedRow].unit->unitId);
 }
 
-extern void effDestroyResourceSlotSet(s32);
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 extern void mnuDestroyEffectResources(MenuEffectResources *);
@@ -534,7 +534,7 @@ extern void mnuResetWorkFloats(void);
 void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
     MenuPageWindow *panelContext = &ctx->partyWindow;
 
-    effDestroyResourceSlotSet(ctx->unitHandle);
+    effDestroyResourceSlotSet((struct EffectSlotSet *)ctx->unitHandle);
     mnuClearEntries(panelContext);
     mnuReleasePartyIconBundles(panelContext);
     mnuShutdownContext(panelContext);
@@ -679,7 +679,6 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     return work;
 }
 
-extern void effDestroyResourceSlotSet(s32);
 extern s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *);
 extern void brsCloseSkillPackagePanel(BrsSkillPackageWork *);
 extern void func_00303D58(s32);
@@ -690,7 +689,7 @@ void brsStaffTaskDestroy(KwlnTask *taskArg) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(taskArg);
 
     if (context->teardownHandle != 0) {
-        effDestroyResourceSlotSet(context->teardownHandle);
+        effDestroyResourceSlotSet((struct EffectSlotSet *)context->teardownHandle);
     }
     mnuDrainPanelTransitions(&context->transition.data, taskArg);
     if (brsAdvanceSkillPackagePanel(context) == 0) {

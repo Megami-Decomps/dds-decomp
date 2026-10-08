@@ -214,7 +214,7 @@ extern DspUnitName *D_003BAA70;
 extern DspMantraName *D_003BAA78;
 extern MnuMantraGridEntry *fldGetSceneMetadataNode(void);
 extern void evtCopyEntryStringToActiveWindow(s32, void *);
-extern s32 mnuGetMantraSourceValue(s32);
+extern s32 mnuGetMantraSourceValue(u16);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void dspStartEntry(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
@@ -431,9 +431,9 @@ u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *entry, MnuProfileProgress *targ
     if (cap == ptyGetProfileRecordValue(target->partyRecord, entry->sceneId)) {
         flags |= MNU_MANTRA_DISPLAY_FLAG_AT_CAP;
     }
-    if (entry->state == 1) {
+    if (entry->state == MNU_MANTRA_GRID_ENTRY_SECOND_CHECK_OR_PROFILE_FLAG) {
         flags |= MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_1;
-    } else if (entry->state == 2) {
+    } else if (entry->state == MNU_MANTRA_GRID_ENTRY_FIRST_CHECK_OR_SPECIAL_PROFILE) {
         flags |= MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_2;
     } else if ((func_00250758(entry->sceneId) & 2) != 0) {
         flags |= MNU_MANTRA_DISPLAY_FLAG_REQUIREMENT_PAIR_SET_FALLBACK;
