@@ -545,11 +545,11 @@ void effObjSetActiveId(EffWorldNode *object, s32 activeId) {
     ((EffectTransformData *)object->data)->activeId = activeId;
 }
 
-void effObjSetRoomNumber(EffWorldNode *object, u32 value) {
-    ((EffectTransformData *)object->data)->flags = value;
+void effObjSetRoomNumber(EffWorldNode *object, u32 roomNumber) {
+    ((EffectTransformData *)object->data)->roomNumber = roomNumber;
 }
 
-u32 func_00114008(u32 id) {
+u32 effObjGetRoomNumberById(u32 id) {
     EffWorldNode *world;
     EffWorldNode *node;
     EffectTransformData *data;
@@ -557,7 +557,7 @@ u32 func_00114008(u32 id) {
     world = dds3GetWorldSecondaryObject();
     node = dds3FindWorldObjectNodeByKey(world, id, 6);
     data = (EffectTransformData *)node->data;
-    return data->flags;
+    return data->roomNumber;
 }
 
 /* Payload word 8 is interpreted by object kind, not always as a pointer. */
@@ -587,7 +587,7 @@ s32 effObjInitializeTransformData(EffWorldNode *object) {
     memset(work, 0, sizeof(EffectTransformData));
     data = object->data;
     data->resourceState = dds3CreateSlotResourceState(object);
-    data->flags = 0;
+    data->roomNumber = 0;
     data->opacityMode = EFFECT_OPACITY_MODE_INITIAL;
     data->activeId = -1;
     data->offset[0] = 0.0f;

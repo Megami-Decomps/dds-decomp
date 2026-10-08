@@ -366,7 +366,8 @@
 0x00113CD0	evtEndObjectValueTransition	inferred	Ends the object value transition and clears its active identifier. [names_reviewed8.tsv]
 0x00113F00	effObjGetDataHandle	inferred	confidence=high; matched-C; src/dds2/game/code_00113308.c:396:func_00113F00; Returns the handle word in the effect object data record, not the world-object pointer or transition-work pointer.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00113FE8	effObjSetActiveId	inferred	Sets the active resource ID on a kind-6 world node at EffectTransformData.activeId (+0x0C); fldCreateResourceScriptObjects supplies IDs 2-7.
-0x00113FF8	effObjSetRoomNumber	inferred	caller stores fldParseRoomNumberFromName(resource->name) in EffectObjectData.word04
+0x00113FF8	effObjSetRoomNumber	inferred	Stores the parsed room number in the kind-6 EffectTransformData.roomNumber field.
+0x00114008	effObjGetRoomNumberById	inferred	Looks up a kind-6 world node by key and returns its roomNumber payload word.
 0x00114048	dds3SetObjectPayloadWord8	inferred	Writes the opaque word at node payload +0x08; kind-6 field callers use mode values while kind-5 payloads retain transition work there.
 0x00114058	dds3GetObjectPayloadWord8	inferred	Reads the opaque word at node payload +0x08; native helper accesses no other payload fields and field callers compare mode values.
 0x00114068	effObjSetOpacityPassEnabled	inferred	Callers gate effObjSubmitTransformOpacityPasses; setter stores the pass-enabled word.
