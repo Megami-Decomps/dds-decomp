@@ -528,7 +528,7 @@ extern s32 mdlGetContextResourceGroup(s32);
 
 extern s32 mdlGetContextResourceId(s32);
 
-extern f32 func_00208000(s32, s32, s32);
+extern f32 func_00208000(s32, f32 *, f32 *);
 
 extern void func_0035C860();
 

@@ -3343,3 +3343,18 @@ increments it; `btlGetEventEffectValue` and the special-enemy phase gate
 read the same halfword. The union preserves the existing actor/timing
 layout without treating every mode's payload as an actor.
 
+## Resource-backed task names and script lookup
+
+The field task registries contain `FldFileResource *` entries in both games:
+their ID, name, transform and payload are at `+0`, `+8`, `+0x10` and
+`+0x20`. `fldGetTaskRecordValue` forwards the name pointer, not an integer
+attribute; actor lookup and script commands pass it to name-based consumers.
+Use the primary record's members rather than word indexing beside that owner.
+
+The enabled `scrScriptProcess.c` definitions return `ScrData *` from
+`scrFindNamedProcessNode(char *)`, while `dds3SceneBasic.c` defines
+`evtDestroyNamedTask(void *, const char *)`. Their field callers must keep
+these pointer contracts. Clients that only compare the lookup result with
+NULL can use the canonical incomplete `struct ScrData *` tag without adding
+a second script-data definition or importing the complete script header.
+

@@ -2947,7 +2947,7 @@ typedef struct EffPCPAimBattle {
     u32 flags;             /* 0x110 */
 } EffPCPAimBattle;
 
-extern f32 func_001F66D8(u32 mask, f32 *maxTop, f32 *minTop);
+extern f32 func_001F66D8(s32 mask, f32 *maxTop, f32 *minTop);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern f32 sdfAtan2(f32 y, f32 x);
 extern void effSetNodeParameterValue(struct EffNode *node, u32 value);
