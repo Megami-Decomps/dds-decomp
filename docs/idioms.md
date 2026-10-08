@@ -4074,3 +4074,13 @@ an unrelated integer. Both arranger bodies remain ASM: the natural typed
 twins have matching sizes/control flow but unresolved floating-register
 homes, recorded in their disabled candidates.
 
+## Field-reset call arity
+
+DDS1 `func_00131580` is a zero-argument reset: its matched definition
+clears `D_0032E538[0]` and does not consume incoming argument registers.
+The area initializer `00120EC8` still has `$4 = 0x10`, `$5 = D_0032E570`
+and `$6 = 1` before that call because it used them for earlier stores.
+Those live register values do not establish a three-argument call.
+The caller unit declares the actual `void (void)` contract; its remaining
+field-store scheduling differences are independent of this repair.
+
