@@ -23,9 +23,6 @@ extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(u32 unit);
 extern void sdfVuBuildLookAtBasis(void *origin, void *direction, void *up);
 extern void sdfInvertRigidVuTransform(void);
-extern void effParamWorkCallback0(EffParamWork *handle, void *vec);
-extern void effParamWorkCallback2(EffParamWork *handle, void *matrix);
-extern void effParamWorkCallback3(EffParamWork *handle, u32 value);
 extern u8 D_003556C0[];
 
 /* Boss effect work: two parameter-set handles released on free. */

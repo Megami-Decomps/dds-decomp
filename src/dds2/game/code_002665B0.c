@@ -141,7 +141,6 @@ extern s32 fldGetModeFrameRecordIndex(s32);
 
 extern s32 kwlnFadeIsActive(void);
 
-extern struct MenuListNode *func_002B86E8(struct MenuList *);
 
 extern void mnuDrawTerminalBackdrop(s32);
 
@@ -452,7 +451,7 @@ void mnuReleaseProgressWorkList(MenuSlotState *host) {
 /* Release the selected recovery panel, then pass its owning list to the follow-up. */
 void mnuReleaseSelectedProgressPanel(MenuSlotState *host) {
     mnuReleaseDualPercentPanel(host->progressList->cursor->childPanel);
-    func_002B86E8(host->progressList);
+    mnuRemoveListCursorNode(host->progressList);
 }
 
 extern void func_00267238();
