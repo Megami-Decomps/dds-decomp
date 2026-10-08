@@ -3276,7 +3276,7 @@ void btlFadeAndTintNamedChunkTree(SdfDrawNode *node, s32 color)
     }
 }
 
-extern s32 sdfNamedChunkFindId(void *, void *);
+extern s32 sdfNamedChunkFindId(SdfModel *, const char *);
 
 s32 btlDispatchNamedChunkNode(void *query) {
     u8 *effect = (u8 *)((BtlState *)btlGetRuntime())->effect;

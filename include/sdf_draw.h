@@ -105,7 +105,7 @@ typedef struct SdfModel {
     u32 unk84;
     f32 unk88;
     f32 unk8C;
-    u32 unk90;
+    u32 chunkTable;
     u32 unk94;
     u8 lodIndex; /* Native model-viewer and MODEL_LOD_CHG setters use byte 0x98. */
     u8 pad99[3];

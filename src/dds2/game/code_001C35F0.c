@@ -270,7 +270,7 @@ typedef struct BattlePanelColors {
 
 extern const BattlePanelColors D_004168D8;
 extern BtlResBlock *btlResourceBlock;
-extern void func_00306C28(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_00306C28(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
 
 void func_001C6320(BtlUnit *unit, BattleStatPulse *pulse, s32 x, s32 y, s16 alpha, s32 unused, s32 stat) {
     BattlePanelColors colors = D_004168D8;
@@ -322,8 +322,8 @@ void func_001C6320(BtlUnit *unit, BattleStatPulse *pulse, s32 x, s32 y, s16 alph
     }
     if (!(unit->flags & 0x20) && value != 0.0f && !(unit->partyRecord.status & 0x4800)) {
         func_00306C28((x + xOffset + pulse->progress) << 4,
-                     (y + yOffset + pulse->yOffset) << 3, 0, (s32)colors.values,
-                     0, (s32)btlResourceBlock->resA, sprite, 0x53);
+                     (y + yOffset + pulse->yOffset) << 3, 0, colors.values,
+                     0, btlResourceBlock->resA, sprite, 0x53);
     }
 }
 

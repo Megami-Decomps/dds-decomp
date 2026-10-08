@@ -4,10 +4,11 @@
 #include "btl_task_args.h"
 #include "pcp_vu0.h"
 
+struct SdfModel;
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 extern void effObjFetchInnerFirstVec(s32);
-extern s32 sdfLoadMapRecordPositionVector(s32, s32);
+extern s32 sdfLoadMapRecordPositionVector(struct SdfModel *, s32);
 extern void func_0011E280(s32, f32, f32, f32, f32);
 
 extern s32 btlGetRuntime();

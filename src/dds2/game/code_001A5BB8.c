@@ -5878,6 +5878,11 @@ void itfMesCloseAllWindows(KwlnTask *handle) {
     btlSetTrackedTaskHandle(0xA, 0);
 }
 
+extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
+extern const u32 D_00415DF0[4];
+extern const s32 D_00415E00[2][3], D_00415E18[2][3], D_00415E30[2][3], D_00415F08[2][3];
+extern const s32 D_00415E48[16][3];
+
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415D58);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415D88);
@@ -5888,7 +5893,69 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415DC8);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415DF0);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8E68);
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415E00);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415E18);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415E30);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415E48);
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415F08);
+
+void func_001B8E68(s32 section, s32 delta) {
+    /* Rows contain pixel X, pixel Y and sprite slot; section 3 is the sixteen-row grid. */
+    u32 colors[4];
+    s32 primary[2][3];
+    s32 secondary[2][3];
+    s32 lower[2][3];
+    s32 grid[16][3];
+    s32 footer[2][3];
+    s32 (*selectedRows)[3];
+    s32 count;
+    s32 i, j;
+
+    memcpy(colors, D_00415DF0, sizeof(colors));
+    memcpy(primary, D_00415E00, sizeof(primary));
+    memcpy(secondary, D_00415E18, sizeof(secondary));
+    memcpy(lower, D_00415E30, sizeof(lower));
+    memcpy(grid, D_00415E48, sizeof(grid));
+    memcpy(footer, D_00415F08, sizeof(footer));
+
+    switch (section) {
+    case 0:
+        selectedRows = primary;
+        count = 2;
+        break;
+    case 1:
+        selectedRows = secondary;
+        count = 2;
+        break;
+    case 2:
+        selectedRows = lower;
+        count = 2;
+        break;
+    case 3:
+        selectedRows = grid;
+        count = 16;
+        break;
+    case 4:
+    default:
+        selectedRows = footer;
+        count = 2;
+        break;
+    }
+    for (i = 0; i < count; i++) {
+        s32 (*strip)[3] = &selectedRows[i];
+        for (j = 0; j < 4; j++) {
+            colors[j] = btlSetSlotLowByteClamped(btlResourceBlock->resA,
+                                               (*strip)[2], j, delta);
+        }
+        func_00306C28((*strip)[0] << 4, (*strip)[1] << 3, 0, colors, 0,
+                     btlResourceBlock->resA, (*strip)[2], 0x53);
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B9158);
 
@@ -6089,6 +6156,22 @@ s32 btlCountEligibleLinkedActors(BtlState *battle) {
 
 extern const char *D_004367DC;
 
+typedef struct BattleRegisteredPanelWork {
+    s32 state;
+    s32 mode;
+    s32 variant;
+    s32 x;
+    s32 y;
+    s32 spriteAlpha;
+    s32 overlayAlpha;
+    s32 backdropAlpha;
+} BattleRegisteredPanelWork;
+
+typedef char BattleRegisteredPanelWork_size_check[
+    sizeof(BattleRegisteredPanelWork) == 0x20 ? 1 : -1];
+typedef char BattleRegisteredPanelWork_backdrop_offset_check[
+    (u32)&((BattleRegisteredPanelWork *)0)->backdropAlpha == 0x1C ? 1 : -1];
+
 extern s32 func_001BBA80(KwlnTask *task);
 
 extern void btlReleaseRegisteredChildTaskWork(KwlnTask *task);
@@ -6097,19 +6180,133 @@ extern void *sdfAllocAndClearQuadwords(s32);
 
 void btlStartRegisteredChildTask(void) {
     BattleController *work = (BattleController *)btlGetRuntime();
-    KwlnTask *task = kwlnTaskCreate(D_004367DC, 0x2B0E, 1, 1, func_001BBA80, btlReleaseRegisteredChildTaskWork, (u32)sdfAllocAndClearQuadwords(0x20));
+    KwlnTask *task = kwlnTaskCreate(D_004367DC, 0x2B0E, 1, 1, func_001BBA80, btlReleaseRegisteredChildTaskWork, (u32)sdfAllocAndClearQuadwords(sizeof(BattleRegisteredPanelWork)));
     func_00101968(work->drawTask, task);
     btlSetTrackedTaskHandle(7, (s32)task);
 }
 
-void func_001BBA60(s32 arg0) {
-    *(u32 *)(arg0 + 4) = 1;
-    *(u32 *)(arg0 + 12) = 0x80;
-    *(u32 *)(arg0 + 16) = 0;
-    *(u32 *)(arg0 + 0) = 0;
+void func_001BBA60(BattleRegisteredPanelWork *work) {
+    work->mode = 1;
+    work->x = 0x80;
+    work->y = 0;
+    work->state = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BBA80);
+extern const u32 D_004163A0[4];
+
+s32 func_001BBA80(KwlnTask *task) {
+    u32 colors[4];
+    BattleRegisteredPanelWork *work;
+    s32 sprite;
+    s32 i;
+
+    memcpy(colors, D_004163A0, sizeof(colors));
+    if ((((BtlState *)btlGetRuntime())->battleFlags & 0x200) == 0 &&
+        (btlTrackedTaskHandles->status.flags & 0x100) == 0) {
+        return 0;
+    }
+    if (btlResourceBlock->resC == NULL) {
+        return 0;
+    }
+    work = (BattleRegisteredPanelWork *)kwlnTaskGetUserValue(task);
+    switch (work->mode) {
+    case 1:
+        work->spriteAlpha += 32;
+        work->spriteAlpha = work->spriteAlpha <= 0 ? 0 :
+            work->spriteAlpha >= 128 ? 128 : work->spriteAlpha;
+        if (work->spriteAlpha >= 128) {
+            work->mode++;
+        }
+        work->x -= 16;
+        work->x = work->x <= 0 ? 0 : work->x >= 128 ? 128 : work->x;
+        if (work->x <= 16) {
+            work->backdropAlpha += 32;
+            work->backdropAlpha = work->backdropAlpha <= 0 ? 0 :
+                work->backdropAlpha >= 128 ? 128 : work->backdropAlpha;
+        }
+        break;
+    case 2:
+        work->x -= 16;
+        work->x = work->x <= 0 ? 0 : work->x >= 128 ? 128 : work->x;
+        if (work->x <= 16) {
+            work->backdropAlpha += 32;
+            work->backdropAlpha = work->backdropAlpha <= 0 ? 0 :
+                work->backdropAlpha >= 128 ? 128 : work->backdropAlpha;
+            work->overlayAlpha -= 8;
+            work->overlayAlpha = work->overlayAlpha <= 64 ? 64 :
+                work->overlayAlpha >= 255 ? 255 : work->overlayAlpha;
+        }
+        break;
+    case 3:
+        work->spriteAlpha -= 32;
+        work->spriteAlpha = work->spriteAlpha <= 0 ? 0 :
+            work->spriteAlpha >= 128 ? 128 : work->spriteAlpha;
+        work->backdropAlpha -= 32;
+        work->backdropAlpha = work->backdropAlpha <= 0 ? 0 :
+            work->backdropAlpha >= 128 ? 128 : work->backdropAlpha;
+        work->overlayAlpha -= 32;
+        work->overlayAlpha = work->overlayAlpha <= 0 ? 0 :
+            work->overlayAlpha >= 255 ? 255 : work->overlayAlpha;
+        break;
+    case 4:
+        work->x -= 16;
+        work->x = work->x <= 0 ? 0 : work->x >= 128 ? 128 : work->x;
+        if (work->x <= 16) {
+            work->backdropAlpha += 32;
+            work->backdropAlpha = work->backdropAlpha <= 0 ? 0 :
+                work->backdropAlpha >= 128 ? 128 : work->backdropAlpha;
+        }
+        work->spriteAlpha -= 8;
+        work->spriteAlpha = work->spriteAlpha <= 128 ? 128 :
+            work->spriteAlpha >= 255 ? 255 : work->spriteAlpha;
+        work->overlayAlpha -= 8;
+        work->overlayAlpha = work->overlayAlpha <= 64 ? 64 :
+            work->overlayAlpha >= 255 ? 255 : work->overlayAlpha;
+        if (work->spriteAlpha <= 128) {
+            work->mode = 2;
+        }
+        break;
+    }
+    if (work->mode < 5) {
+        if (work->mode > 0) {
+            sprite = work->variant == 0 ? 0x27 : 0x26;
+            for (i = 0; i < 4; i++) {
+                colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x29, i, work->backdropAlpha);
+            }
+            func_00306C28(0x19C0, -0x50, 0, colors, 0, btlResourceBlock->resC, 0x29, 0x53);
+            for (i = 0; i < 4; i++) {
+                colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x28, i, work->backdropAlpha);
+            }
+            func_00306C28(0x1AD0, 0x190, 0, colors, 0, btlResourceBlock->resC, 0x28, 0x53);
+            if (sprite == 0x26) {
+                for (i = 0; i < 4; i++) {
+                    colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x28, i, work->backdropAlpha);
+                }
+                func_00306C28(0x1AD0, 0x190, 0, colors, 0, btlResourceBlock->resC, 0x3A, 0x53);
+                for (i = 0; i < 4; i++) {
+                    colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x3D, i, work->backdropAlpha);
+                }
+                btlResourceBlock->resC->workEntries[0x3D].geometry.angleDegrees = 90.0f;
+                func_00306C28(0x1CB0, 0x70, 0, colors, 0, btlResourceBlock->resC, 0x3D, 0x53);
+                btlResourceBlock->resC->workEntries[0x3D].geometry.angleDegrees = 0.0f;
+            }
+            for (i = 0; i < 4; i++) {
+                colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, sprite, i, work->spriteAlpha);
+            }
+            func_00306C28((work->x + 0x1BB) << 4, (work->y + 0x36) << 3,
+                         0, colors, 0, btlResourceBlock->resC, sprite, 0x53);
+            if (work->mode == 4 || sprite == 0x26) {
+                for (i = 0; i < 4; i++) {
+                    colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, sprite, i, work->overlayAlpha);
+                }
+                func_00306C28((work->x + 0x1BB) << 4, (work->y + 0x36) << 3,
+                             0, colors, 0, btlResourceBlock->resC, 0x3B, 0x53);
+            }
+        }
+    }
+    return 0;
+}
+
 
 void btlReleaseRegisteredChildTaskWork(KwlnTask *task) {
     sdfReleaseChipBlock(kwlnTaskGetUserValue(task));

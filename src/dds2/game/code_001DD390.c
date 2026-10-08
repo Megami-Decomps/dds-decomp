@@ -2549,8 +2549,7 @@ void btlGetUnitWorldPos(BtlUnit *unit, f32 *dst) {
     VU0_STORE_VF(vf10, dst);
 }
 
-typedef struct SdfTextParam SdfTextParam;
-extern s32 sdfLoadMapRecordPositionVector(SdfTextParam *, s32);
+extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 extern void mdlLoadSecondaryVectorVU(MdlCtx *);
 extern void mdlStorePrimaryVectorVU(MdlCtx *);
@@ -2569,7 +2568,7 @@ s8 btlSetActorEffectParameter(BtlUnit *unit, s32 mode) {
         mode = hook(unit, mode);
     }
     btlRefreshUnitFxVectors(unit);
-    return sdfLoadMapRecordPositionVector((SdfTextParam *)unit->ext->owner->inner, mode);
+    return sdfLoadMapRecordPositionVector(unit->ext->owner->inner, mode);
 }
 
 void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode) {
@@ -2599,7 +2598,7 @@ s32 func_001E3230(BtlUnit *unit, s32 value) {
     mdlLoadSecondaryVectorVU(unit->ext->owner);
     VU0_STORE_VF_UNCLOBBERED(vf10, secondaryVector);
     btlRefreshUnitFxVectors(unit);
-    result = sdfLoadMapRecordPositionVector((SdfTextParam *)unit->ext->owner->inner, value);
+    result = sdfLoadMapRecordPositionVector(unit->ext->owner->inner, value);
     VU0_STORE_VF_UNCLOBBERED(vf10, currentVector);
     VU0_LOAD_VF(vf10, primaryVector);
     mdlStorePrimaryVectorVU(unit->ext->owner);
@@ -2610,7 +2609,7 @@ s32 func_001E3230(BtlUnit *unit, s32 value) {
     return result;
 }
 
-extern s32 sdfLoadMapRecordLookAtBasis(SdfTextParam *, s32);
+extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *, s32);
 
 s8 btlSetActorAlternateEffectParameter(unit, mode)
     BtlUnit *unit;
@@ -2625,7 +2624,7 @@ s8 btlSetActorAlternateEffectParameter(unit, mode)
         mode = hook(unit, mode);
     }
     btlRefreshUnitFxVectors(unit);
-    return sdfLoadMapRecordLookAtBasis((SdfTextParam *)unit->ext->owner->inner, mode);
+    return sdfLoadMapRecordLookAtBasis(unit->ext->owner->inner, mode);
 }
 
 void btlSetAlternateEffectParameterOrMuzzlePosition(void) {
@@ -9520,7 +9519,7 @@ extern void fileQueueUpdate(s32);
 
 void btlUpdateJobPositionFromModel(s32 *args) {
     f32 pos[4];
-    if (sdfLoadMapRecordPositionVector((SdfTextParam *)((MdlCtx *)args[1])->inner, 1) == 0) {
+    if (sdfLoadMapRecordPositionVector(((MdlCtx *)args[1])->inner, 1) == 0) {
         mdlLoadPrimaryVectorVU((MdlCtx *)args[1]);
         VU0_STORE_VF(vf10, pos);
         pos[1] -= 150.0f;
