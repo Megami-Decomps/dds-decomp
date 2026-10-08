@@ -36,7 +36,7 @@ extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern void func_002BF4E0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, u32);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern s32 func_002CD240(u16, const char **);
-extern void func_002845F8(s32, s32, s32, u32, u16, s32, MenuEffectPair *, u32);
+extern void func_002845F8(s32, s32, s32, u32, s32, s32, MenuEffectPair *, u32);
 extern void mnuDrawCenteredLabel(s32, s32, s32, s32, s32, s32);
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern void func_00196088(s32, s32, FrFontGlyph *);
@@ -489,8 +489,7 @@ void mnuRefreshPartyPanelSlots(s32 context) {
 }
 
 extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
-struct MenuPanelResources;
-extern void mnuLoadPanelSectionResources(struct MenuPanelResources *, u32, u32,
+extern void mnuLoadPanelSectionResources(MenuPageSlot *, u32, u32,
                                          u32, s32);
 
 s32 func_002755E0(KwlnTask *task) {
@@ -505,11 +504,11 @@ s32 func_002755E0(KwlnTask *task) {
 
     func_00274B80((u32)context);
     func_00274D48(context);
-    mnuLoadPanelSectionResources((struct MenuPanelResources *)&context->partyWindow.slots[0],
+    mnuLoadPanelSectionResources(&context->partyWindow.slots[0],
                                 context->panelResource, 0x11, 0x21, -1);
-    mnuLoadPanelSectionResources((struct MenuPanelResources *)&context->partyWindow.slots[1],
+    mnuLoadPanelSectionResources(&context->partyWindow.slots[1],
                                 context->panelResource, 0x11, 0x22, 0x23);
-    mnuLoadPanelSectionResources((struct MenuPanelResources *)&context->partyWindow.slots[2],
+    mnuLoadPanelSectionResources(&context->partyWindow.slots[2],
                                 context->panelResource, 0x11, 0x22, 0x24);
 
     mnuClearPartySelectionAndActivateSlots((s32)context);

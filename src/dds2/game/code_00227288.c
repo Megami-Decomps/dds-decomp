@@ -207,7 +207,7 @@ void func_00227820(void) {
         if ((selected->flags & 2) == 0) {
             return;
         }
-        effObjFetchInnerFirstVec((EffWorldNode *)selected->effectObject);
+        effObjFetchInnerFirstVec(selected->effectObject);
         VU0_STORE_VF(vf10, (u128 *)vector);
         if (!(vector[1] > -125.0f)) {
             return;
@@ -222,7 +222,7 @@ void func_00227820(void) {
             effect->linked.height = limit;
         }
         vector[1] = effect->linked.height;
-        effObjSetInnerFirstVec((EffWorldNode *)actor->effectObject, (u128 *)vector);
+        effObjSetInnerFirstVec(actor->effectObject, (u128 *)vector);
         return;
     }
 
@@ -243,7 +243,7 @@ void func_00227820(void) {
                 if (flags & 1) {
                     if (flags & 0x200) {
                         if (flags & 2) {
-                            effObjFetchInnerFirstVec((EffWorldNode *)unit->effectObject);
+                            effObjFetchInnerFirstVec(unit->effectObject);
                             VU0_STORE_VF(vf10, (u128 *)vector);
                             if (!(vector[1] > ceiling)) {
                                 if (vector[1] < lowerLimit) {
@@ -255,10 +255,10 @@ void func_00227820(void) {
                                         effect->linked.height = zero;
                                     }
                                     vector[1] = effect->linked.height;
-                                    effObjSetInnerFirstVec((EffWorldNode *)unit->effectObject, (u128 *)vector);
+                                    effObjSetInnerFirstVec(unit->effectObject, (u128 *)vector);
                                 } else {
                                     vector[1] = zero;
-                                    effObjSetInnerFirstVec((EffWorldNode *)unit->effectObject, (u128 *)vector);
+                                    effObjSetInnerFirstVec(unit->effectObject, (u128 *)vector);
                                 }
                             }
                         }

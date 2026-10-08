@@ -1910,7 +1910,7 @@ s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
             BtlUnit *unit = btlGetIndexListEntry(list, i);
             if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == 1) {
                 u16 current = btlReadCurrentUnitHp(&unit->partyRecord);
-                if (best >= current && current != 0) {
+                if (current <= best && current != 0) {
                     best = current;
                     found++;
                     bestIndex = i;
@@ -7632,14 +7632,14 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
             mainUnit->resourceIndex == 0x12E && (mainUnit->flags & 2)) {
             func_001E3108(mainUnit, position);
             position[1] += 1000000.0f;
-            effObjSetInnerFirstVec((EffWorldNode *)mainUnit->effectObject,
+            effObjSetInnerFirstVec(mainUnit->effectObject,
                 (u128 *)position);
         }
         if ((twin->flags & 0xE0) && !(mainUnit->flags & 0xE0) &&
             twin->resourceIndex == 0x12F && (twin->flags & 2)) {
             func_001E3108(twin, position);
             position[1] += 1000000.0f;
-            effObjSetInnerFirstVec((EffWorldNode *)twin->effectObject,
+            effObjSetInnerFirstVec(twin->effectObject,
                 (u128 *)position);
         }
     } else {

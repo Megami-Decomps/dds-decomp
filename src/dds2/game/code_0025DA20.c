@@ -147,7 +147,7 @@ extern s32 evtGetMessageWindowControlState(void);
 
 extern u8 D_003CD8D0[];
 
-extern s32 effMiscRand(s32);
+extern u32 effMiscRand(void *);
 
 extern u8 D_003CDA8C[];
 
@@ -1607,7 +1607,70 @@ s32 mnuCampFindFreeCompactEntryIndex(s32 unused, s32 row) {
     return 7;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00260DF0);
+/* A wide reward record carries its weight, kind, item ID and optional variant. */
+typedef struct CampWideRewardEntry {
+    u8 weight;
+    u8 kind;
+    u8 reserved02[2];
+    s32 id;
+    u16 variant;
+    u8 reserved0A[2];
+} CampWideRewardEntry;
+
+typedef char CampWideRewardEntry_size_check[
+    sizeof(CampWideRewardEntry) == 0xC ? 1 : -1];
+
+extern s32 mtrMantraFindIndex(s32);
+
+s32 func_00260DF0(s32 row) {
+    s32 column = 0;
+    s32 eligibleCount = 0;
+    s32 count = mnuCampFindFreeWideEntryIndex(row);
+    s32 cumulative = 0;
+    s32 totalWeight = 0;
+    s32 indices[count];
+    s32 roll;
+
+    if (count > 0) {
+        s32 *output = indices;
+        for (; column < count; column++) {
+            CampWideRewardEntry *entry = (CampWideRewardEntry *)(
+                D_003CDA88 + column * sizeof(CampWideRewardEntry) + row * 0xC0);
+            s32 id = entry->id;
+            s32 allowed = 1;
+
+            if (entry->kind == 0) {
+                if (mdlFlagTest(0x901) == 0) {
+                    if (func_002C54B0(id) != 0) {
+                        allowed = 0;
+                    }
+                }
+                if (mdlFlagTest(0x990) == 0) {
+                    if (mtrMantraFindIndex(id) != 0) {
+                        allowed = 0;
+                    }
+                }
+            }
+            if (allowed != 0) {
+                *output++ = column;
+                eligibleCount++;
+                totalWeight += entry->weight;
+            }
+        }
+    }
+    roll = effMiscRand(NULL) % (totalWeight + 1);
+    for (column = 0; column < eligibleCount; column++) {
+        s32 selected = indices[column];
+        cumulative += D_003CDA88[selected * 0xC + row * 0xC0];
+        if (cumulative >= roll) {
+            return selected;
+        }
+    }
+    if (eligibleCount == 0) {
+        return 0;
+    }
+    return indices[eligibleCount - 1];
+}
 
 extern u8 D_003CDA89[];
 

@@ -153,7 +153,7 @@ typedef struct ItfMesBlk14 {
 
 typedef struct ItfMesEntryBlock {
     u32 x;
-    u32 y;
+    s32 y;
     ItfMesTable *table;
     FrFontGlyph *glyphChain;
     s8 textState;
@@ -169,7 +169,7 @@ typedef struct ItfMesBlk40 {
     u32 y;
     FrFontGlyph *glyphChain;
     u32 panelValue;
-    u16 unk10;
+    s16 unk10;
     s16 selectedIndex;
     s16 savedIndex;
     s16 rowCount;
