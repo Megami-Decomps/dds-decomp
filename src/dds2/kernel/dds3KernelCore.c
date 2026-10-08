@@ -46,7 +46,6 @@ extern u8 D_00411078[];
 
 extern void func_00100C28(void);
 
-extern s32 kwlnTaskIsRegistered(KwlnTask* target);
 
 extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 delayTicks);
 
@@ -54,7 +53,6 @@ extern void kwlnUnlinkListNode(KwlnTask* task);
 
 extern void sdfReleaseChipBlock(void* ptr);
 
-extern KwlnTask* kwlnTaskGetTaskByName(const char* name);
 
 void kwlnTaskActivate(KwlnTask* task)
 {

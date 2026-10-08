@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
 
@@ -243,9 +244,9 @@ void mnuCreateMovieViewerTask(void) {
 }
 
 void mnuDestroyMovieViewerTask(void) {
-    s32 task = kwlnTaskGetTaskByName(mnuMovieViewerTaskName);
-    if (task != 0) {
-        kwlnTaskDestroyWithHierarchy(task, 0);
+    KwlnTask *task = kwlnTaskGetTaskByName(mnuMovieViewerTaskName);
+    if (task != NULL) {
+        kwlnTaskDestroyWithHierarchy((s32)task, 0);
         mnuMovieList.task = 0;
         mnuStopMovieDrawTask();
     }

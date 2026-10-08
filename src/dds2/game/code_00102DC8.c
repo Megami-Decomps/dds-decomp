@@ -132,7 +132,6 @@ extern u8 kwlnLargeMotorTarget;
 
 extern u8 kwlnPadMotorLevels[2];
 
-extern void *kwlnTaskGetTaskByName(const char *);
 extern void *sdfAllocSizeClassBlock(s32);
 extern void *dds3AdminPollModeCompletion(void *task);
 extern void dds3AdminReleaseTaskWork(void);

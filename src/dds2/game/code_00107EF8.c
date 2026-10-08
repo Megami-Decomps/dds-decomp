@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_primitive.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -92,7 +93,6 @@ extern char D_00411370[];
 extern void fldStartSequenceRecord(void);
 
 
-extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 
 extern KwlnTask *func_00101820(u32 prio);
 

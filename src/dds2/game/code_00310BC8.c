@@ -30,7 +30,6 @@ extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern s32 func_0019D550(FrFontGlyph *, s8, u32);
 extern void frFontSetChainFlag(FrFontGlyph *, u8);
 
-extern s32 kwlnTaskGetTaskByName(u32);
 
 
 /* Task item descriptor (0x14): key plus optional handlers, defaults filled in by func_00312A48. */
@@ -785,18 +784,18 @@ void sdfDestroyTaskWorkerTasks(TaskWork *work) {
 
 u8 sdfIsPrimaryTaskRegistered(TaskWork *work) {
     u8 exists;
-    s64 task;
+    KwlnTask *task;
 
     exists = 0;
     if (work != NULL) {
-        task = kwlnTaskGetTaskByName((u32)work->primaryTaskName);
+        task = kwlnTaskGetTaskByName(work->primaryTaskName);
         exists = task != 0;
     }
     return exists;
 }
 
-s32 kwlnTaskExists(u32 name) {
-    return kwlnTaskGetTaskByName(name) != 0;
+s32 kwlnTaskExists(const char *name) {
+    return kwlnTaskGetTaskByName(name) != NULL;
 }
 
 void sdfAttachTaskItem(TaskWork *work, SdfTaskItemDesc *item) {

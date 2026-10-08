@@ -19,7 +19,6 @@ extern void sdfReleaseChipBlock();
 extern void sdfDestroyCallbackWork();
 
 
-extern s32 kwlnTaskGetTaskByName(u32);
 
 
 /* Task item descriptor (0x14): key plus optional handlers, defaults filled in by func_00312A48. */

@@ -51,7 +51,6 @@ extern f32 sdfQuatDot(f32 *, f32 *);
 
 extern f32 func_002FA060(f32);
 
-extern s32 kwlnTaskGetTaskByName(u32);
 extern void sdfGridReleaseAllCells(SdfGrid *);
 
 
@@ -766,18 +765,18 @@ void sdfDestroyTaskWorkerTasks(TaskWork *work) {
 
 u8 sdfIsPrimaryTaskRegistered(TaskWork *work) {
     u8 exists;
-    s64 task;
+    KwlnTask *task;
 
     exists = 0;
     if (work != NULL) {
-        task = kwlnTaskGetTaskByName((u32)work->primaryTaskName);
+        task = kwlnTaskGetTaskByName(work->primaryTaskName);
         exists = task != 0;
     }
     return exists;
 }
 
-s32 kwlnTaskExists(u32 name) {
-    return kwlnTaskGetTaskByName(name) != 0;
+s32 kwlnTaskExists(const char *name) {
+    return kwlnTaskGetTaskByName(name) != NULL;
 }
 
 void sdfAttachTaskItem(TaskWork *work, SdfTaskItemDesc *item) {

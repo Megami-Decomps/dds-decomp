@@ -73,7 +73,6 @@ extern ScrData *scrFindNamedProcessNode(char *name);
 
 extern void evtDestroyNamedTask(void *unusedContext, const char *taskName);
 
-extern s32 kwlnTaskIsRegistered(u32 task);
 
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
@@ -966,7 +965,7 @@ s32 fldDestroyFlaggedNamedTask(char *flag, u32 slot) {
 u32 fldDestroyTaskSlot(u32 index) {
     u32 *taskSlot = &D_0038BD50[index];
 
-    if (kwlnTaskIsRegistered(*taskSlot) != 0) {
+    if (kwlnTaskIsRegistered((KwlnTask *)*taskSlot) != 0) {
         kwlnTaskDestroyWithHierarchy(*taskSlot, 0);
     }
     *taskSlot = 0;
@@ -1017,7 +1016,7 @@ void fldClearInactiveTaskSlots(void) {
     if (count > 0) {
         u32 *taskSlot = D_0038BD50;
         do {
-            if (kwlnTaskIsRegistered(*taskSlot) == 0) {
+            if (kwlnTaskIsRegistered((KwlnTask *)*taskSlot) == 0) {
                 *taskSlot = 0;
             }
             slotIndex++;

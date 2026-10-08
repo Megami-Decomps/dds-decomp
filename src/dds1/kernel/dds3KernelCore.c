@@ -22,11 +22,9 @@ extern void kwlnTaskAdvanceDestroyDelays(void);
 
 extern void func_00101368(KwlnTask* task, s32 arg1);
 
-extern KwlnTask* kwlnTaskGetTaskByName(const char* name);
 
 extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 delayTicks);
 
-extern s32 kwlnTaskIsRegistered(KwlnTask* target);
 
 extern void kwlnUnlinkListNode(KwlnTask* task);
 

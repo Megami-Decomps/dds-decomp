@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "pcp_vu0.h"
 #include "scr.h"
 
@@ -226,7 +227,7 @@ s32 scrCommandDestroyRegisteredTask(void)
 {
     s32 p0;
     p0 = scrReadIntParameter(0);
-    if (kwlnTaskIsRegistered(p0) == 0)
+    if (kwlnTaskIsRegistered((KwlnTask *)p0) == 0)
     {
         return 1;
     }
@@ -236,12 +237,12 @@ s32 scrCommandDestroyRegisteredTask(void)
 
 s32 scrCommandWaitForTaskRemoval(void)
 {
-    return kwlnTaskIsRegistered(scrReadIntParameter(0)) == 0;
+    return kwlnTaskIsRegistered((KwlnTask *)scrReadIntParameter(0)) == 0;
 }
 
 s32 scrCommandStoreTaskPresence(void)
 {
-    if (kwlnTaskIsRegistered(scrReadIntParameter(0)) != 0)
+    if (kwlnTaskIsRegistered((KwlnTask *)scrReadIntParameter(0)) != 0)
     {
         scrSetIntegerReturnValue(1);
     }
