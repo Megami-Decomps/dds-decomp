@@ -8,6 +8,7 @@
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "bill_object_api.h"
 
 struct EffThunderVectorWork;
 
@@ -357,7 +358,6 @@ extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern void effCopyVector(void *dst, void *src);
 extern void billInvokeCallback(BillObj *effect);
-extern void billSetChildScaleComponents(BillObj *effect, f32 sx, f32 sy);
 extern void billSetChildParameter(BillObj *effect, u32 color);
 extern u32 effMultiplyPackedColors(u32 flags, u32 color);
 
@@ -5124,7 +5124,6 @@ void effPcpSetSprayScale(EffPCPPulseWork *work, f32 val) {
 }
 
 extern void effEventCopyFileRecordHeader(void *dst, const void *src);
-extern void func_00190328(struct EffEventWork *event);
 
 /* Placement block handed to every spawned event entry. */
 typedef struct EffPCPEventPlace {
@@ -5359,7 +5358,7 @@ void effPcpUpdateDriftEventRing(EffPCPDriftEventWork *work) {
                 }
                 place.color = effBlendColor(color & 0xFFFFFF, color, t);
                 effEventCopyFileRecordHeader(entry->event, &place);
-                func_00190328(entry->event);
+                effEventUpdateEffectParameters(entry->event);
                 frame = entry->frame;
             }
             entry->frame = frame + 1;
@@ -5650,10 +5649,10 @@ void func_001830F8(EffPCPPairedEventWork *work) {
                 place.color = fadedColor;
                 PCP_COPY_VECTOR(place.pos, fragment->end);
                 effEventCopyFileRecordHeader(entry->eventA, &place);
-                func_00190328(entry->eventA);
+                effEventUpdateEffectParameters(entry->eventA);
                 PCP_COPY_VECTOR(place.pos, fragment->start);
                 effEventCopyFileRecordHeader(entry->eventB, &place);
-                func_00190328(entry->eventB);
+                effEventUpdateEffectParameters(entry->eventB);
                 frame = entry->frame;
             }
             if (repeat != 0 && frame >= duration) {
@@ -5902,7 +5901,7 @@ void func_00183B20(EffPCPSpawnRangeWork *work) {
                 }
                 place.color = effBlendColor(color & 0xFFFFFF, color, fade);
                 effEventCopyFileRecordHeader(entry->event, &place);
-                func_00190328(entry->event);
+                effEventUpdateEffectParameters(entry->event);
                 frame = entry->frame;
             }
             entry->frame = frame + 1;
@@ -6160,7 +6159,7 @@ void effPcpUpdateMapMotionEvents(EffPCPMapEventWork *work) {
                         place.pos[1] = position[1];
                         place.pos[2] = position[2];
                         effEventCopyFileRecordHeader(entry->event, &place);
-                        func_00190328(entry->event);
+                        effEventUpdateEffectParameters(entry->event);
                         entry->age++;
                     }
                 }

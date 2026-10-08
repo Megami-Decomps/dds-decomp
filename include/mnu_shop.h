@@ -37,6 +37,9 @@ struct MenuIconState {
     s32 fade;
 };
 
+/* Mode 5 callers pass only kind and resource; native mode 4 consumes material. */
+struct MenuIconState *mnuCreatePanelIconState();
+
 typedef struct MenuWindowContainer {
     s32 id;                /* 0x00 */
     u32 flags;             /* 0x04 */

@@ -1871,6 +1871,7 @@
 0x00197788	effEventAdvanceScatterBlurSetup	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:717:func_00197788; Initializes the scatter-blur channel using its getter and optional source-to-destination copy, invokes both callback stages, and resets readiness for a negative shared marker.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00197840	effEventGetScatterBlurSetupParams	inferred	readability/matching review (QP16)
 0x00197850	effEventSetScatterBlurParameters	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:587:func_00197850; Copies the complete EffBlurScatterParams into the event scatter-blur parameter block supplied to its channel initializer.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x001978B8	effEventAdvanceScreenDrawSetup	inferred	Reads the screen-draw setup record, performs its optional copy and callback, runs the setup helpers while ready, then applies the shared reset control.
 0x001979E0	effEventAdvanceSolidRectangleSetup	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:783:func_001979E0; Advances the setup state paired with the solid-rectangle descriptor, running getter/copy once, callback stages while ready, and marker-driven readiness reset.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00197A98	effEventGetSolidRectangleSetupParams	inferred	readability/matching review (QP16)
 0x00197AA8	effEventSetSolidRectangleParameters	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:809:func_00197AA8; Copies the event-channel solid-rectangle parameter record: color, blend control, and four bounds.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
@@ -1885,9 +1886,11 @@
 0x00197ED8	effEventCopySerializedRecord	inferred	readability/matching review (QP16)
 0x00197F40	effEventSetScale	inferred	readability/matching review (QP16)
 0x00197F58	effEventSetState	inferred	Writes the supplied value to the event node's state word.
+0x00197F60	effEventUpdateEffectParameters	inferred	confidence=high; paired native bodies; updates active effect rows from event position/orientation, dispatches position/matrix/color values and advances the effect cursor; paired DDS1 0x00190328.
 0x00198278	effEventLightCreate	inferred	0x3C holder: handle, owner event, 0x30 init block, active flag [names_M61_EffVu.tsv]
 0x00198340	effEventLightDestroy	inferred	confidence=high; matched-C; src/dds2/effect/effEvent.c:829:func_00198340; Releases light owner, conditionally releases cloned handle and frees light work.; twin=0x00190708, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00198380	effEventLightClone	inferred	clone: new owner event from src handle + init block copy [names_M61_EffVu.tsv]
+0x00198448	effEventLightUpdateEffectParameters	inferred	For an EffEventLight holder, forwards the retained event owner to effEventUpdateEffectParameters.
 0x00198460	effEventLightSetPosition	inferred	pos from vec, y lowered by rangeFar/2, copies init block to owner [names_M61_EffVu.tsv]
 0x001984D8	effEventLoadSelectedAimPositionVu	inferred	confidence=high; src/dds2/effect/effEvent.c:func_001984D8; Selects height/range offsets or camera-relative aiming, computes an output position and leaves it in VU registers. [names_qp9.tsv]
 0x00198710	effEventBillSetCreate	inferred	0x7C head copy, clamps counters, shares dbball01/02 billboards, zero delays [names_M61_EffVu.tsv]
@@ -1903,6 +1906,7 @@
 0x0019A0C0	effChanWorkCreate	inferred	Creates and initializes channel work; DDS1 twin. [names_qp9.tsv]
 0x0019A270	effDestroyChannelWork	inferred	confidence=high; matched-C; src/dds2/game/code_0019A0C0.c:137:func_0019A270; Releases the channel owner and work allocation.; twin=0x00192638, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x0019A2E0	effJitterChannelControlPoints	inferred	confidence=high; matched-C; src/dds2/game/code_0019A0C0.c:167:func_0019A2E0; Builds camera-perpendicular normals from adjacent path control points, applies independent configured random jitter to all four points and initializes per-slot interpolation state.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x0019A5D8	effUpdateChannelWork	inferred	Updates each registered channel record: advances delay, initializes jitter, samples the channel curve, dispatches color/position values, and recycles enabled records; paired DDS1 0x001929A0, both lifecycle tables register this callback after the parameter initializer.
 0x0019A900	effCreatePrimitiveCurve	inferred	Fam_Mid3
 0x0019AC38	effSamplePrimitiveCurve	inferred	confidence=high; matched-C; src/dds2/game/code_0019A0C0.c:349:func_0019AC38; Semantic cubic/linear curve counterpart: evaluates precomputed xyz coefficients in Horner order or neighboring linear keys, and loads vf10; linear-path W behavior remains as retail.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x0019AD68	effResetPrimitiveRecordCursor	inferred	high confidence; src/dds2/game/code_0019A0C0.c func_0019AD68: Resets the primitive record cursor index and fractional position. [names_reviewed25.tsv]
@@ -4551,6 +4555,7 @@
 0x002B9CF8	mnuDrawWindowDecorations	inferred	U0
 0x002B9DD8	mnuDrawWindowSelectionPanel	inferred	Draws visible panel at scrolled row and advances window transition. [names_reviewed5.tsv]
 0x002B9EA0	mnuDrawWindowContainer	inferred	Draws icon rows, selected panel and window frame then advances fade state. [names_reviewed5.tsv]
+0x002B9FF8	mnuCreatePanelIconState	inferred	allocates a MenuIconState and selects its sprite handles by panel kind
 0x002BA268	mnuClearEntryFlags	inferred	Clears bit 0 from each present panel slot flags and reinitializes its work; callers use it after advancing or retreating list selection. DDS1 equivalent: mnuClearEntryFlags at 0x0027D740.
 0x002BA378	mnuDrawIconPanelFade	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002BA518	mnuDrawIconRow6	inferred	wrong or missing short module prefix [names_audit.tsv]
@@ -4581,6 +4586,7 @@
 0x002BB8D8	mnuReleasePartyPanelTextures	inferred	Releases three texture slots for each party panel and clears panel flags. [names_reviewed5.tsv]
 0x002BB998	mnuResetPartyPanelFade	inferred	Clears both party-panel fades and optionally restores their scales to full. [names_reviewed5.tsv]
 0x002BB9D0	mnuSetPageParams	inferred	DDS1 has the same unprefixed symbol; game/code_002B0278 uses mnu for the already-described menuSetPageParams behavior.
+0x002BBA38	mnuCreatePageSpriteSet	inferred	allocates a MenuSprites owner and fills its icon, item, and cursor EffectSlotSet arrays
 0x002BBE78	mnuFreeIconSprites	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002BBF38	mnuDrawIconRow	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002BBFC8	mnuSetWindowResource	inferred	wrong or missing short module prefix [names_audit.tsv]

@@ -1,9 +1,11 @@
 #include "common.h"
+#include "eff_event_setup.h"
 #include "sdf_resource.h"
 
 extern s8 D_0043643D;
 
 #include "eff.h"
+#include "eff_math.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "fpu.h"
@@ -671,11 +673,11 @@ f32 effPointToLineDistance(f32 *direction, f32 *origin, f32 *point) {
 
 /* Allocate/retain slot storage and return its header after the slots, not the slot base.
    Only the two native slot defaults are initialized; count/allocation validity is unchecked. */
-void *effAllocSlotArray(s32 count) {
+EffArrHdr *effAllocSlotArray(s32 count) {
     void *allocation = sdfAllocGeneralBlock(count * EFF_SLOT_BYTES + EFF_SLOT_HEADER_BYTES);
     void *retainedAddress = (void *)sdfResourceRetainAddress(allocation);
     u32 slotIndex = 0;
-    EffSlot38 *slot = retainedAddress;
+    EffCubicBezierSlot *slot = retainedAddress;
     u8 *headerAddress = (u8 *)(slot + count);
 
     ((EffArrHdr *)headerAddress)->allocation = allocation;
@@ -684,12 +686,12 @@ void *effAllocSlotArray(s32 count) {
     if (count != 0) {
         do {
             slotIndex++;
-            slot->unk30 = 0;
-            slot->unk34 = 0.05f;
+            slot->t = 0;
+            slot->step = 0.05f;
             slot++;
         } while (slotIndex < count);
     }
-    return headerAddress;
+    return (EffArrHdr *)headerAddress;
 }
 
 INCLUDE_RODATA(const s32, "game/code_00194700", D_004146A8);

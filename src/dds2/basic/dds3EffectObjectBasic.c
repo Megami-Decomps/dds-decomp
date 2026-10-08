@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "eff_dependency.h"
 #include "pcp_vu0.h"
@@ -36,7 +37,6 @@ extern BillObj *billCreateFromResource(s32 kind, const char *path);
 
 extern u64 billCreateIndexed(u64, u64);
 
-extern u64 billCloneObjectRetainingSharedData(u32);
 
 extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
 
@@ -92,7 +92,6 @@ struct EffNode;
 extern u8 dds3TestObjectFlags(u32 unused, u32 flags);
 extern void effUpdateNode(struct EffNode *node);
 extern void billInvokeCallback(struct BillObj *bill);
-extern void func_00197F60(void *node);
 
 s32 func_00114BF0(EffectObj *obj) {
     EffectDependencyState *data;
@@ -122,7 +121,7 @@ s32 func_00114BF0(EffectObj *obj) {
         break;
     case 5:
         if (data->node != NULL) {
-            func_00197F60(data->node);
+            effEventUpdateEffectParameters(data->node);
         }
         break;
     }
@@ -200,9 +199,9 @@ EffectObj *effObjCreateKindTwo(bill, vec, extra)
 
 /* Clone the shared bill and forward both vector addresses; retain the wide DDS2 ABI. */
 void effObjSpawnSharedBillClone(EffectObj *obj, u64 firstVectorAddress, u64 secondVectorAddress) {
-    u64 bill;
+    struct BillObj *bill;
 
-    bill = billCloneObjectRetainingSharedData((u32)obj->data->handle);
+    bill = billCloneObjectRetainingSharedData((struct BillObj *)obj->data->handle);
     effObjCreateKindTwo(bill, firstVectorAddress, secondVectorAddress);
 }
 /* Create a kind-one indexed bill; the native constructor result is discarded. */
@@ -265,9 +264,9 @@ EffectObj *effObjCreateBillNode(bill, firstVector, secondVectorAddress)
 
 /* Clone the shared bill for the state-three constructor; ignore its return value. */
 void effObjSpawnSharedBillNodeClone(EffectObj *obj, u64 firstVectorAddress, u64 secondVectorAddress) {
-    u64 bill;
+    struct BillObj *bill;
 
-    bill = billCloneObjectRetainingSharedData((u32)obj->data->handle);
+    bill = billCloneObjectRetainingSharedData((struct BillObj *)obj->data->handle);
     effObjCreateBillNode(bill, firstVectorAddress, secondVectorAddress);
 }
 

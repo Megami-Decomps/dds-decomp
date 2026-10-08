@@ -7,7 +7,7 @@ struct MantraDrawPool;
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
-extern void mnuArmMantraLimitLineFlags(u32, u32);
+extern void mnuArmMantraLimitLineFlags(struct MantraDrawPool *pool, u32);
 
 typedef struct MenuSearchState {
     u8 requestedId;
@@ -320,7 +320,7 @@ void mnuSelectMantraLimitLine(MenuSearchObject *object, u16 id) {
     evtPrintDeveloperConsoleMessage(
         "-----------------------LimitLineSetting!!!!!!!!![%x]\n", flags);
     if (flags != 0) {
-        mnuArmMantraLimitLineFlags((u32)object->work.drawPool, flags);
+        mnuArmMantraLimitLineFlags(object->work.drawPool, flags);
     }
 }
 
@@ -328,9 +328,9 @@ void mnuSelectMantraLimitLine(MenuSearchObject *object, u16 id) {
 
 extern u32 func_002890A8(struct MnuStatusResource *);
 
-extern void mnuQueueMantraLimitLineFlags(s32 pool, u32 flags);
+extern void mnuQueueMantraLimitLineFlags(struct MantraDrawPool *pool, u32 flags);
 
-extern void mnuSetMantraBackgroundSelection(u32 pool, u32 value);
+extern void mnuSetMantraBackgroundSelection(struct MantraDrawPool *pool, u32 value);
 
 void func_0028F8A8(u8 *object) {
     u16 limitIds[18] = {
@@ -352,8 +352,8 @@ void func_0028F8A8(u8 *object) {
         }
     }
 
-    mnuQueueMantraLimitLineFlags((u32)menu->work.drawPool, flags);
-    mnuSetMantraBackgroundSelection((u32)menu->work.drawPool, flags);
+    mnuQueueMantraLimitLineFlags(menu->work.drawPool, flags);
+    mnuSetMantraBackgroundSelection(menu->work.drawPool, flags);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0028E568", D_004274B0);

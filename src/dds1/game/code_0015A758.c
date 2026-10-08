@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bill_object_api.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
@@ -31,7 +32,7 @@ typedef struct ParObj {
     u8 pad18[8];
     s32 particleCount; /* 0x20 */
     s32 lifetimeFrames; /* 0x24 */
-    s32 unk28;          /* 0x28 */
+    s32 billboardCloneMarker; /* 0x28: PAR_BILLBOARD_CLONE_FROM_RESOURCE */
     s16 billboardMode;  /* 0x2C */
     u8 pad2E[2];
     ParKindState kindState; /* 0x30 */
@@ -44,7 +45,7 @@ typedef struct ParObj {
     u32 unkA4;         /* 0xA4 */
     u8 padA8[0x48];    /* 0xA8 */
     u32 valueF0;       /* 0xF0 settable param */
-    s32 billId;         /* 0xF4 */
+    BillObj *billboard;         /* 0xF4 */
     EffectBufferTail *buffer;       /* 0xF8 */
     u32 pendingRestartSteps;       /* 0xFC */
     u8 pad100[0x40];   /* 0x100 */
@@ -107,13 +108,13 @@ extern s32 func_0015FE20(ParDrawState *);
 
 extern ParDispatch parKindConstructorEntries[];
 
-extern s32 billCloneObjectRetainingSharedData(s32);
 
-extern void billSetChildScaleComponents(s32, f32, f32);
 
-extern void billSetBillboardMode(s32, s16);
 
-extern void billMarkKindOneFlag(s32);
+
+extern void billSetBillboardMode(BillObj *, s32);
+
+
 
 extern ParDispatch D_0034E258[];
 
@@ -158,7 +159,6 @@ extern u16 parGetRestartFlag(ParObj *obj);
 
 
 
-extern void parUpdateCellVertexPair(ParSystem *, s32, const u128 *);
 extern void parUpdateCellVertexTriangle(ParSystem *, s32, const u128 *);
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
@@ -244,16 +244,16 @@ extern BillObj *billCreateIndexed(s32, u32);
 
 ParObj *parCreateResourceKindObject(s32 kind, ParKindResource *resource) {
     ParObj *object = (ParObj *)((u8 *)resource + resource->offset + 0x10);
-    s32 billboard;
+    BillObj *billboard;
 
     if (resource->type != 3 || resource->offset != 0) {
-        object->unk28 = -1;
+        object->billboardCloneMarker = PAR_BILLBOARD_CLONE_FROM_RESOURCE;
         object = parKindConstructorEntries[kind].func(object);
-        billboard = (s32)billCreateIndexed(resource->type, (u32)(resource + 1));
+        billboard = billCreateIndexed(resource->type, (u32)(resource + 1));
         billSetChildScaleComponents(billboard, object->scaleX, object->scaleY);
         billSetBillboardMode(billboard, object->billboardMode);
         billMarkKindOneFlag(billboard);
-        object->billId = billboard;
+        object->billboard = billboard;
     } else {
         object = parKindConstructorEntries[kind].func(object);
     }
@@ -264,12 +264,12 @@ ParObj *parCreateResourceKindObject(s32 kind, ParKindResource *resource) {
 ParObj *parInstantiateKind(ParObj *source) {
     ParObj *particle = parKindConstructorEntries[source->dispatchIndex].func();
     particle->dispatchIndex = source->dispatchIndex;
-    if (source->unk28 == -1) {
-        s32 billboard = billCloneObjectRetainingSharedData(source->billId);
+    if (source->billboardCloneMarker == PAR_BILLBOARD_CLONE_FROM_RESOURCE) {
+        BillObj *billboard = billCloneObjectRetainingSharedData(source->billboard);
         billSetChildScaleComponents(billboard, particle->scaleX, particle->scaleY);
         billSetBillboardMode(billboard, particle->billboardMode);
         billMarkKindOneFlag(billboard);
-        particle->billId = billboard;
+        particle->billboard = billboard;
     }
     return particle;
 }
@@ -323,7 +323,7 @@ void func_0015A9A0(ParObj *effect) {
     }
     /* Capture the draw owners before deriving this frame's scale/spin steps. */
     record = effect->buffer->records;
-    billboard = (BillObj *)effect->billId;
+    billboard = effect->billboard;
     particleCount = effect->particleCount;
     scaleStep = (effect->scale8C - effect->scaleX) / effect->lifetimeFrames;
     lifetime = effect->lifetimeFrames;
@@ -464,7 +464,6 @@ void parDispatchKindInit(ParKindState *work, s32 index) {
 
 extern void effBillSetEntryValue(s32, s32, u32);
 
-extern void parFadeAlphaCell(s32, s32);
 
 void parUpdateBillboardCrossStrip(s32 particle, s32 index, u32 color) {
     u128 axis[2];
@@ -485,7 +484,7 @@ void parUpdateBillboardCrossStrip(s32 particle, s32 index, u32 color) {
     VU0_SUB(vf11, vf11, vf10);
     VU0_STORE_VF(vf11, &axis[1]);
     parUpdateCellVertexPair((ParSystem *)particle, index, axis);
-    parFadeAlphaCell(particle, index);
+    parFadeAlphaCell((ParSystem *)particle, index);
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
@@ -682,10 +681,10 @@ void parUpdateCellVertexPair(ParSystem *system, s32 index, const u128 *vertices)
     PCP_COPY_VECTOR(vertex + 1, vertices + 1);
 }
 
-void parTranslateCellVertices(ParSystem *system, s32 index, void *delta) {
+void parTranslateCellVertices(ParSystem *system, s32 index, const u128 *delta) {
     ParCell *cell = system->cells + index;
     s32 count = system->vertexWordCount;
-    u8 *vertex = *(u8 **)cell;
+    u128 *vertex = cell->history;
     s32 i;
     VU0_LOAD_VF_MEMORY(vf11, delta);
     if (count > 0) {
@@ -695,7 +694,7 @@ void parTranslateCellVertices(ParSystem *system, s32 index, void *delta) {
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF(vf10, vertex);
             i--;
-            vertex += 0x10;
+            vertex++;
         } while (i != 0);
     }
 }
@@ -726,10 +725,10 @@ void parUpdateCellVertexTriangle(ParSystem *system, s32 index, const u128 *verti
     PCP_COPY_VECTOR(vertex + 2, vertices + 2);
 }
 
-void parTranslateCellTriangleVertices(ParSystem *system, s32 index, void *delta) {
+void parTranslateCellTriangleVertices(ParSystem *system, s32 index, const u128 *delta) {
     ParCell *cell = system->cells + index;
     s32 count = cell->vertexCount / 3;
-    u8 *vertex = (u8 *)cell->history;
+    u128 *vertex = cell->history;
     s32 i;
     VU0_LOAD_VF(vf11, delta);
     if (count > 0) {
@@ -738,20 +737,19 @@ void parTranslateCellTriangleVertices(ParSystem *system, s32 index, void *delta)
             VU0_LOAD_VF(vf10, vertex);
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF(vf10, vertex);
-            VU0_LOAD_VF(vf10, vertex + 0x10);
+            VU0_LOAD_VF(vf10, vertex + 1);
             VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, vertex + 0x10);
-            VU0_LOAD_VF(vf10, vertex + 0x20);
+            VU0_STORE_VF(vf10, vertex + 1);
+            VU0_LOAD_VF(vf10, vertex + 2);
             VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, vertex + 0x20);
+            VU0_STORE_VF(vf10, vertex + 2);
             i--;
-            vertex += 0x30;
+            vertex += 3;
         } while (i != 0);
     }
 }
 
-void parFadeAlphaCell(s32 particle, s32 index) {
-    ParSystem *system = (ParSystem *)particle;
+void parFadeAlphaCell(ParSystem *system, s32 index) {
     u32 count = system->cells[index].vertexCount >> 1;
     u32 *vertex = system->cells[index].colors;
     u32 word = vertex[0];
