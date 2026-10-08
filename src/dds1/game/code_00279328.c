@@ -16,7 +16,6 @@ extern void ptySkillMenuCopyPageState(s32);
 extern void mnuDrawStaffCampScreen(s32, s32);
 extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 extern void func_00272668(s32, s32, s32, s32, s32, s32);
-extern u32 mnuHasSelectedListNodeId(s32);
 extern s32 D_003BAA98;
 extern void func_00280048(s32);
 extern u32 mnuMapPadMaskToFlags(u32);

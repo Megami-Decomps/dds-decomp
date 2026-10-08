@@ -570,7 +570,6 @@ s32 mnuStepSkillSlotControl(s32 callback);
 
 void mnuClearSelectedListNodeId();
 
-u32 mnuHasSelectedListNodeId(s32 callback);
 
 /* Set the selected flag only on nodes whose index matches the saved selection. */
 void mnuHighlightSelectedListNode();
