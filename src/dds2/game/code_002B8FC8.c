@@ -5,6 +5,8 @@
 #include "eff.h"
 #include "mnu_shop.h"
 
+struct StaffMenuRuntime;
+
 extern void itfGridStorePosition(MenuGridSlot *, EffectSlotSet *, s32);
 
 #define MNU_ENTRY_SPRITE_COUNT 4
@@ -212,7 +214,7 @@ extern void mnuCreateStaffImageSprite();
 extern void func_002AA7A0();
 
 
-extern void mnuIdleVoiceTimer();
+extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
 extern void func_002B2408();
 
@@ -514,7 +516,7 @@ void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSprite
 
 
 
-void mnuIdleVoiceTimer(s32 object);
+void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
 s32 mnuStaffIdlePartyUpdate(s32 callback);
 
