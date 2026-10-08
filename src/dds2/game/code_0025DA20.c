@@ -477,7 +477,36 @@ void mnuCampInitializeDisplayDefaults(CampDisplayDefaults *display) {
     display->unk1C = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E288);
+void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 value, EvtRuntimeChild **out1, EvtRuntimeChild **out2);
+void func_0025E460(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
+
+/* Use defaults before the first key; otherwise blend the bounding keys. */
+void func_0025E288(EvtRuntime *viewer, EvtRuntimeGroup *track, s32 value, CampDisplayDefaults *display) {
+    EvtRuntimeChild *lo;
+    EvtRuntimeChild *hi;
+    s32 startFrame;
+    s32 endFrame;
+    f32 ratio;
+
+    mnuFindCampKeyTrackNeighbors(track, value, &lo, &hi);
+    if (lo != 0) {
+        startFrame = lo->frame;
+    } else {
+        mnuCampInitializeDisplayDefaults(display);
+        return;
+    }
+    if (hi != 0) {
+        endFrame = hi->frame;
+    } else {
+        endFrame = lo->frame;
+    }
+    if (endFrame != startFrame) {
+        ratio = (f32)(value - startFrame) / (f32)(endFrame - startFrame);
+    } else {
+        ratio = 0.0f;
+    }
+    func_0025E460(lo, hi, display, ratio);
+}
 
 typedef struct CampListLayout {
     s32 width0;
