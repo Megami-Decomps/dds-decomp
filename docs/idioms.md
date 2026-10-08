@@ -4678,3 +4678,30 @@ map-bank entries 3 through 7, not a second layout. XYZ remains three
 coordinates followed immediately by saved XYZ history. Compile-time size
 and offset checks preserve both games' actual complete owner extents.
 
+## The kind-5 entry-blend yaw is a float payload field
+
+DDS1 `001122F0` loads `EffectObjectData +34` with `lwc1` directly
+into the yaw argument of `mdlBlendEntryPitchYawAndUpdate`.
+The primary `word34` field is therefore `f32`, not an integer word
+requiring a reinterpretation view. Its six existing initialization stores
+remain `= 0`; both complete initialization units retain their native bytes.
+
+## Actor-camera dispatch receives the actual camera payload
+
+DDS1 `001E3E58` and its matching DDS2 counterpart `001F17C8`
+receive a `BtlCamState *` as their second argument. In the canonical
+`BtlLinkedCommand`, the primary `camera` starts at +0, `frontCamera`
+at +30, and `backCamera` at +C0. Passing the command base therefore
+means `&action->camera`, not `&action->frontCamera`; the alternate
+caller passes `&action->backCamera`. Neither path needs a byte-pointer
+cast or an address-shaped second view.
+
+## DDS2 progress rows retain a signed ramp counter
+
+`002A0278` accesses the canonical 0x68-byte `BrsProgressAnimation`
+with signed `lw`/`sw` at +28 and `lb` at +2C. The `frames` counter
+increments and clamps to 0..120 before forming `150 - frames`.
+A nonzero `skipRamp` bypasses that ramp and uses the fixed fast
+step of 10000. These fields occupy the original padding; the
+level/profile bank origins, other fields, and DDS1 layout are unchanged.
+
