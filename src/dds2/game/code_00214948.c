@@ -6157,7 +6157,49 @@ extern void btlBindEffectUnitAndClearStateFlags(BtlUnit *);
 
 INCLUDE_ASM(const s32, "game/code_00214948", btlBindEffectUnitAndClearStateFlags);
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00226AB0);
+extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
+extern void effMiscQuatMultiplyVU(void);
+extern const s32 D_0041B4D0[];
+
+void func_00226AB0(BtlUnit *source) {
+    BattleEffectPayload *effect = ((BattleActionContext *)btlGetRuntime())->effect;
+    BtlUnit *unit = effect->linked.actor;
+    f32 position[4];
+    f32 rotation[4] __attribute__((aligned(16)));
+
+    if (unit == 0) {
+        return;
+    }
+
+    unit->stateFlags &= ~0x80;
+    unit->stateFlags &= ~0x100;
+    btlSetUnitPosition(unit, unit->position);
+    btlSetUnitRotation(effect->linked.actor, (s128 *)effect->linked.actor->rotation);
+    unit = effect->linked.actor;
+
+    if (unit->flags & 2) {
+        f32 translatedX;
+        f32 translatedZ;
+        f32 height;
+
+        PCP_COPY_VECTOR(position, source->position);
+        translatedX = position[0] + 420.0f;
+        translatedZ = position[2] + -50.0f;
+        position[0] = translatedX;
+        height = effect->linked.height;
+        position[2] = translatedZ;
+        position[1] = height;
+        effObjSetInnerFirstVec(unit->effectObject, (u128 *)position);
+
+        VU0_LOAD_VF(vf10, source->rotation);
+        VU0_LOAD_VF(vf11, D_0041B4D0);
+        effMiscQuatMultiplyVU();
+        VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+        effObjSetInnerSecondVec(effect->linked.actor->effectObject, (u128 *)rotation);
+    }
+
+    effect->linked.actor->stateFlags |= 0x180;
+}
 
 void btlBeginEffectActorFadeOut(void) {
     BattleEffectPayload *effect = ((BattleActionContext *)btlGetRuntime())->effect;
