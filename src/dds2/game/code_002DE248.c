@@ -377,7 +377,6 @@ extern u8 D_004386E0[];
 
 extern u8 D_004386E8[];
 
-extern u32 effCreateMappedResource(u32);
 
 
 struct FileWork;
@@ -11076,12 +11075,12 @@ void effRequestResourceByMode(const char *prefix, const char *name, s32 mode, u3
 }
 
 /* Build mapped records from the retained source address, then release the original file allocation. */
-u32 effLoadMappedResource(s32 category, s32 index) {
+EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
     char path[EFF_RESOURCE_PATH_BYTES];
     u32 sourceAddress;
     u32 allocation;
-    u32 mappedResource;
-    func_0035C860(path, D_004387E8, category, index);
+    EffMappedResource *mappedResource;
+    func_0035C860(path, D_004387E8, base, name);
     allocation = sdfReadNamedResource(path, &sourceAddress, 0);
     mappedResource = effCreateMappedResource(sourceAddress);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
@@ -11092,20 +11091,20 @@ u32 effLoadMappedResource(s32 category, s32 index) {
 void effCompleteMappedResourceJob(void *job, u32 *outMappedResource) {
     u32 allocation;
     u32 sourceAddress;
-    u32 mappedResource;
+    EffMappedResource *mappedResource;
 
     allocation = fileGetResourceHandle(job);
     sourceAddress = sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
     mappedResource = effCreateMappedResource(sourceAddress);
-    *outMappedResource = mappedResource;
+    *outMappedResource = (u32)mappedResource;
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     filePollEntryCleanup(job);
 }
 
 /* Initialize the output to zero and schedule mapped-record completion. */
-void effRequestMappedResource(s32 category, s32 index, u32 *outMappedResource) {
+void effRequestMappedResource(const char *base, const char *name, u32 *outMappedResource) {
     char path[EFF_RESOURCE_PATH_BYTES];
-    func_0035C860(path, D_004387E8, category, index);
+    func_0035C860(path, D_004387E8, base, name);
     *outMappedResource = 0;
     fileCreateCallbackRequest(path, 0, (s32)effCompleteMappedResourceJob, (s32)outMappedResource);
 }
@@ -11268,14 +11267,14 @@ struct SdfMemBlock *effLoadMappedStatusRecords(u8 *source, EffMappedHeader *head
 
 
 /* Build the live batch header from the serialized count and owned record array. */
-u32 effCreateMappedResource(u32 sourceAddress) {
+EffMappedResource *effCreateMappedResource(u32 sourceAddress) {
     EffMappedResource *mappedResource = (EffMappedResource *)sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
     EffMappedHeader header;
 
     mappedResource->allocation = effLoadMappedStatusRecords((u8 *)sourceAddress, &header);
     mappedResource->records = (EffMappedRecord *)sdfResourceRetainAddress(mappedResource->allocation);
     mappedResource->count = header.count;
-    return (u32)mappedResource;
+    return mappedResource;
 }
 
 /* Build one zeroed status record and allocate the category's required status storage. */
@@ -11713,30 +11712,32 @@ s32 effConfigureSlotResource(u8 *effect, u32 slot, u32 resource, u32 flags) {
     return 1;
 }
 
-s32 effConfigureIndexedSlotResource(u8 *effect, u32 slot, u8 *resources, u32 index, u32 flags) {
-    BdWork *entry = &((EffectSlotSet *)effect)->workEntries[slot];
-    u32 resource = (u32)&((EffMappedResource *)resources)->records[index];
+s32 effConfigureIndexedSlotResource(EffectSlotSet *effect, u32 slot,
+                                    EffMappedResource *resources, u32 index, u32 flags) {
+    BdWork *entry = &effect->workEntries[slot];
+    u32 resource = (u32)&resources->records[index];
     effSetSlotResourceAndFlags(&entry->states[0], resource, flags);
-    effUpdateTimedStates((EffectSlotSet *)effect, slot, entry);
+    effUpdateTimedStates(effect, slot, entry);
     return 1;
 }
 
 s32 effConfigureIndexedSlotMaterial(EffectSlotSet *effect, u32 slot,
                   EffMappedResource *resources, u32 index,
-                  u32 flags, u32 option, u32 color) {
+                  u32 materialFlags, u32 materialValue, u32 stateFlags) {
     BdWork *entry = &effect->workEntries[slot];
     u32 resource = (u32)&resources->records[index];
-    effSetSlotResourceAndFlags(&entry->states[0], resource, color);
+    effSetSlotResourceAndFlags(&entry->states[0], resource, stateFlags);
     effUpdateTimedStates(effect, slot, entry);
-    entry->states[0].materialFlags = flags;
-    entry->states[0].materialValue = option;
+    entry->states[0].materialFlags = materialFlags;
+    entry->states[0].materialValue = materialValue;
     return 1;
 }
 
 u32 effConfigureWithDefaultSetting(EffectSlotSet *effect, u32 slot,
                                    EffMappedResource *resources, u32 item,
-                                   u32 flags, u32 color) {
-    effConfigureIndexedSlotMaterial(effect, slot, resources, item, flags, 0, color);
+                                   u32 materialFlags, u32 stateFlags) {
+    effConfigureIndexedSlotMaterial(effect, slot, resources, item,
+                                    materialFlags, 0, stateFlags);
     return 1;
 }
 

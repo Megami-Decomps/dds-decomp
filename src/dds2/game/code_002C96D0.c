@@ -7,6 +7,7 @@
 #include "sdf_chip.h"
 #include "eff_curve.h"
 #include "file.h"
+#include "file_slot_flags.h"
 #include "sdf_dev_state.h"
 #include "file_slot.h"
 #include "file_save_record.h"
@@ -375,8 +376,6 @@ extern void fileReqSetSelectedSlot(u32 ctx, s32 slot);
 
 extern s32 fileBeginSlotOpen(void);
 
-extern u32 fileReqGetSlotFlags(s32 context, s32 slot);
-
 extern s32 fileSlotSelectPollClear(void);
 
 extern s32 fileRestartSlotSelection(void);
@@ -390,8 +389,6 @@ extern u32 D_00458080[];
 extern void *fileWaitContinuation;
 
 extern s32 fileUpdateWait(void);
-
-extern void fileReqSetSlotFlags(s32 context, s32 slot, s32 flags);
 
 extern s32 mcHandleSlotWriteResult(void);
 
@@ -539,8 +536,6 @@ extern s32 fileAbortSlotScanOnInput(void);
 extern char D_0042B6B8[];
 
 extern u8 D_00458040[];
-
-extern void fileReqClearSlotFlags(s32, s32);
 
 extern u8 fileReqIsSlotMetadataDirty(s32 context);
 
@@ -1039,7 +1034,7 @@ s32 fileBeginSlotOpen(void) {
     fileReqSetSelectedSlot(fileMemoryCardRequestContext, fileSlotScanIndex);
     ctx = fileMemoryCardRequestContext;
     slot = fileReqGetSelectedSlot(ctx);
-    if ((fileReqGetSlotFlags(ctx, slot) & 1) == 0) {
+    if ((fileReqGetSlotFlags(ctx, slot) & FILE_REQ_SLOT_CAN_READ_SAVE) == 0) {
         return func_002CBA90();
     }
     path[0] = 0x2F;
@@ -1176,16 +1171,16 @@ s32 fileBeginSlotMetadataRefresh(void) {
 
 s32 fileResetSelection(void) {
     fileClearAllSlotFlags();
-    D_00458080[0] = 0;
-    D_00458080[1] = 0;
-    D_00458080[2] = 0;
-    D_00458080[3] = 0;
-    D_00458080[4] = 0;
-    D_00458080[5] = 0;
-    D_00458080[6] = 0;
-    D_00458080[7] = 0;
-    D_00458080[8] = 0;
-    D_00458080[9] = 0;
+    D_00458080[0] = FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE;
+    D_00458080[1] = FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE;
+    D_00458080[2] = FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE;
+    D_00458080[3] = FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE;
+    D_00458080[4] = FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE;
+    D_00458080[5] = FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE;
+    D_00458080[6] = FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE;
+    D_00458080[7] = FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE;
+    D_00458080[8] = FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE;
+    D_00458080[9] = FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE;
     fileReqBegin(0);
     fileSlotSelectionPollCount = 15;
     D_00437CEC = 1;
@@ -1246,16 +1241,16 @@ s32 fileScanSlotStates(void) {
     for (i = 0; i < 10; i++) {
         u32 buttons = fileReqGetSlotFlags(fileMemoryCardRequestContext, i);
 
-        D_00458080[i] = 0;
-        if (buttons & 1) {
-            if (buttons & 2) {
-                if (buttons & 8) {
-                    D_00458080[i] = 1;
+        D_00458080[i] = FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE;
+        if (buttons & FILE_REQ_SLOT_CAN_READ_SAVE) {
+            if (buttons & FILE_REQ_SLOT_DIRECTORY_READY) {
+                if (buttons & FILE_REQ_SLOT_DELETE_BEFORE_WRITE) {
+                    D_00458080[i] = FILE_SLOT_DISPLAY_SAVE_PRESENT;
                 }
             }
-        } else if (buttons & 2) {
-            if (!(buttons & 8)) {
-                D_00458080[i] = 2;
+        } else if (buttons & FILE_REQ_SLOT_DIRECTORY_READY) {
+            if (!(buttons & FILE_REQ_SLOT_DELETE_BEFORE_WRITE)) {
+                D_00458080[i] = FILE_SLOT_DISPLAY_DIRECTORY_WITHOUT_SAVE;
             }
         }
     }
@@ -1347,9 +1342,9 @@ s32 fileCountSelectableFiles(void) {
     s32 index;
     for (index = 0; index < 10; index++) {
         u32 flags = fileReqGetSlotFlags(fileMemoryCardRequestContext, index);
-        if (flags & 1) {
-            if (flags & 2) {
-                if (flags & 8) {
+        if (flags & FILE_REQ_SLOT_CAN_READ_SAVE) {
+            if (flags & FILE_REQ_SLOT_DIRECTORY_READY) {
+                if (flags & FILE_REQ_SLOT_DELETE_BEFORE_WRITE) {
                     count++;
                 }
             }
@@ -1648,7 +1643,7 @@ s32 fileScanSlotIconSysBegin(void) {
         return 0;
     }
     if (t == MC_POLL_SUCCESS) {
-        fileReqSetSlotFlags(fileMemoryCardRequestContext, fileSlotScanIndex, 2);
+        fileReqSetSlotFlags(fileMemoryCardRequestContext, fileSlotScanIndex, FILE_REQ_SLOT_DIRECTORY_READY);
         mcReadDirectoryEntries(fileMemoryCardRequestContext, D_0042B6B8, D_00458040, 1);
         return (s32)mcHandleSlotWriteResult;
     }
@@ -1666,7 +1661,8 @@ s32 mcHandleSlotWriteResult(void) {
     }
     if (status == MC_POLL_SUCCESS) {
         if (value == 1) {
-            fileReqSetSlotFlags(fileMemoryCardRequestContext, fileSlotScanIndex, 9);
+            fileReqSetSlotFlags(fileMemoryCardRequestContext, fileSlotScanIndex,
+                                FILE_REQ_SLOT_CAN_READ_SAVE | FILE_REQ_SLOT_DELETE_BEFORE_WRITE);
         }
         return fileBeginSlotOpen();
     }
@@ -1685,7 +1681,7 @@ s32 mcResetSlotMetadata(void) {
         fileSlotScanIndex = 0;
         index = 0;
         do {
-            D_00458080[index] = 0;
+            D_00458080[index] = FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE;
             fileReqClearSlotFlags(fileMemoryCardRequestContext, index);
             index++;
         } while (index < 10);
@@ -1713,7 +1709,7 @@ s32 fileScanSlotIconSysAltBegin(void) {
         return 0;
     }
     if (t == MC_POLL_SUCCESS) {
-        fileReqSetSlotFlags(fileMemoryCardRequestContext, fileSlotScanIndex, 2);
+        fileReqSetSlotFlags(fileMemoryCardRequestContext, fileSlotScanIndex, FILE_REQ_SLOT_DIRECTORY_READY);
         mcReadDirectoryEntries(fileMemoryCardRequestContext, D_0042B6B8, D_00458040, 1);
         return (s32)mcHandleDirectoryWriteResult;
     }
@@ -1734,7 +1730,8 @@ s32 mcHandleDirectoryWriteResult(void) {
     }
     if (status == MC_POLL_SUCCESS) {
         if (value == 1) {
-            fileReqSetSlotFlags(fileMemoryCardRequestContext, fileSlotScanIndex, 9);
+            fileReqSetSlotFlags(fileMemoryCardRequestContext, fileSlotScanIndex,
+                                FILE_REQ_SLOT_CAN_READ_SAVE | FILE_REQ_SLOT_DELETE_BEFORE_WRITE);
         }
         return fileScanSlotStatesAdvance();
     }
@@ -1752,9 +1749,9 @@ s32 fileScanSlotStatesAdvance(void) {
     s32 buttons = fileReqGetSlotFlags(fileMemoryCardRequestContext, slot);
 
     slot++;
-    if (buttons & 1) {
-        if (buttons & 2) {
-            if (buttons & 8) {
+    if (buttons & FILE_REQ_SLOT_CAN_READ_SAVE) {
+        if (buttons & FILE_REQ_SLOT_DIRECTORY_READY) {
+            if (buttons & FILE_REQ_SLOT_DELETE_BEFORE_WRITE) {
                 fileSetMenuFlowState(0);
                 D_00437CF8 = 0;
                 D_00437D3C = 0;
@@ -1781,7 +1778,7 @@ s32 mcClearSlotMetadata(void) {
     fileReqMarkSlotMetadataDirty(fileMemoryCardRequestContext);
     saved = D_00458080;
     do {
-        *saved++ = 0;
+        *saved++ = FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE;
         fileReqClearSlotFlags(fileMemoryCardRequestContext, index);
         index++;
     } while (index < 10);
@@ -1795,7 +1792,7 @@ s32 mcPrepareDirectory(void) {
     fileReqGetSlotFlags(entry, slot);
     fileSetMenuFlowState(2);
     fileReqMarkSlotMetadataDirty(entry);
-    if (fileReqGetSlotFlags(entry, slot) & 2) {
+    if (fileReqGetSlotFlags(entry, slot) & FILE_REQ_SLOT_DIRECTORY_READY) {
         return fileCreateMainBegin();
     }
     name[0] = '/';
@@ -1821,7 +1818,7 @@ s32 mcHandleSearchResult(void) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
-        fileReqSetSlotFlags(fileMemoryCardRequestContext, D_00437D2C, 2);
+        fileReqSetSlotFlags(fileMemoryCardRequestContext, D_00437D2C, FILE_REQ_SLOT_DIRECTORY_READY);
         return fileCreateMainBegin();
     }
     fileSetMenuFlowState(0);
@@ -1864,8 +1861,8 @@ s32 fileBuildMainBlobAfterDelete(void) {
 }
 
 s32 fileOnAllWritten(void) {
-    fileReqSetSlotFlags(fileMemoryCardRequestContext, D_00437D2C, 1);
-    fileReqSetSlotFlags(fileMemoryCardRequestContext, D_00437D2C, 8);
+    fileReqSetSlotFlags(fileMemoryCardRequestContext, D_00437D2C, FILE_REQ_SLOT_CAN_READ_SAVE);
+    fileReqSetSlotFlags(fileMemoryCardRequestContext, D_00437D2C, FILE_REQ_SLOT_DELETE_BEFORE_WRITE);
     fileSetMenuFlowState(4);
     return fileBeginDetectionRequest((u32)fileScanSlotStates);
 }
@@ -1967,7 +1964,7 @@ s32 mcChooseLoadPath(void) {
     u32 entry = fileMemoryCardRequestContext;
     s32 slot = fileReqGetSelectedSlot(entry);
     u32 flags = fileReqGetSlotFlags(entry, slot);
-    if (!(flags & 8)) {
+    if (!(flags & FILE_REQ_SLOT_DELETE_BEFORE_WRITE)) {
         /* Build the main blob from the current global state. */
         return fileBuildMainBlobAndWrite();
     }
@@ -2102,7 +2099,7 @@ s32 fileBeginSlotCreate(void) {
     u32 len;
 
     fileSetMenuFlowState(3);
-    if ((attr & 1) == 0) {
+    if ((attr & FILE_REQ_SLOT_CAN_READ_SAVE) == 0) {
         return fileScanSlotStates();
     }
     fileReqGetSlotCode();
@@ -2271,7 +2268,8 @@ s32 func_002CCAD0(void) {
             if (D_00437D30 == 0) {
                 fileReqSetSelectedSlot(fileMemoryCardRequestContext, D_00437D2C);
                 flags = fileReqGetSlotFlags(fileMemoryCardRequestContext, D_00437D2C);
-                if ((flags & 0xB) == 0xB) {
+                if ((flags & FILE_REQ_SLOT_SELECTABLE_SAVE_MASK) ==
+                    FILE_REQ_SLOT_SELECTABLE_SAVE_MASK) {
                     sndSetSequenceVolumePan(8, 0x7F, 0x3F);
                     if (D_00437D0C != 0) {
                         D_00437D08 = action;
@@ -2282,8 +2280,8 @@ s32 func_002CCAD0(void) {
                     D_00437D1C = action;
                     return fileBeginPromptDialog(mcPrepareDirectory, fileScanSlotStates, 1);
                 }
-                slotState = flags & 0xA;
-                if (slotState == 2) {
+                slotState = flags & FILE_REQ_SLOT_DIRECTORY_DELETE_MASK;
+                if (slotState == FILE_REQ_SLOT_DIRECTORY_READY) {
                     sndSetSequenceVolumePan(8, 0x7F, 0x3F);
                     D_00437D08 = slotState;
                     return mcPrepareDirectory();
@@ -2301,7 +2299,7 @@ s32 func_002CCAD0(void) {
             }
             fileReqSetSelectedSlot(fileMemoryCardRequestContext, D_00437D2C);
             flags = fileReqGetSlotFlags(fileMemoryCardRequestContext, D_00437D2C);
-            if ((flags & 1) != 0) {
+            if ((flags & FILE_REQ_SLOT_CAN_READ_SAVE) != 0) {
                 sndSetSequenceVolumePan(8, 0x7F, 0x3F);
                 if (mcdOriginalTitleFileMode != 0 &&
                     D_004580C0[D_00437D2C].status == 0) {
@@ -2456,9 +2454,9 @@ s32 func_002CD028(s32 work) {
         }
         baseColor = (alpha << 24) | 0x808080;
         func_00108EC0(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, baseColor, baseColor, baseColor, baseColor, D_00437D5C);
-        if (D_00458080[slot] == 0) {
+        if (D_00458080[slot] == FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE) {
             func_00108EC0(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, D_00437D64);
-        } else if (D_00458080[slot] == 2) {
+        } else if (D_00458080[slot] == FILE_SLOT_DISPLAY_DIRECTORY_WITHOUT_SAVE) {
             func_00108EC0(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, D_00437D6C);
         } else if (D_004580C0[slot].status > 0) {
             func_00108EC0(0x22, y + 0x27, 0x78, 0x40, 1, 0, 0x78, 0x40, baseColor, baseColor, baseColor, baseColor, D_00437D68);
@@ -2480,7 +2478,7 @@ s32 func_002CD028(s32 work) {
                     }
                 }
             }
-            if (D_00458080[slot] != 1) {
+            if (D_00458080[slot] != FILE_SLOT_DISPLAY_SAVE_PRESENT) {
                 if (D_00437D2C == slot) {
                     u32 highlightColor = ((D_003E8008[0] + 0x80) << 24) | 0x808080;
                     func_00108EC0(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, D_00437D60);

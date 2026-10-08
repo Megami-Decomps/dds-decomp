@@ -2453,7 +2453,59 @@ s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *targets) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC648);
+s32 func_001AC648(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *eligible[16];
+    BtlUnit *unit;
+    BtlUnit *selected;
+    BtlUnit **read;
+    s32 count;
+    s32 remaining;
+    s32 lowestId;
+
+    unit = battle->units;
+    count = 0;
+    if (unit != NULL) {
+        do {
+            s32 flags = unit->flags;
+            if ((flags & 0x200) == 0) {
+                goto next_actor;
+            }
+            if ((flags & 1) != 0) {
+                goto next_actor;
+            }
+            eligible[count] = unit;
+            unit->flags = flags & ~0x100;
+            count++;
+next_actor:
+            unit = unit->nextActor;
+        } while (unit != NULL);
+    }
+    if (count == 0) {
+        return 0;
+    }
+    if (battle->unk268 == 3 && count == 2) {
+        eligible[0]->flags |= 0x100;
+        eligible[1]->flags |= 0x100;
+    } else {
+        lowestId = 4;
+        unit = NULL;
+        if (count > 0) {
+            remaining = count;
+            read = eligible;
+            do {
+                BtlUnit *candidate = *read++;
+                s32 lookupId = candidate->lookupId;
+                if (lookupId < lowestId) {
+                    unit = candidate;
+                    lowestId = lookupId;
+                }
+            } while (--remaining != 0);
+        }
+        unit->flags |= 0x100;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC750);
 
@@ -5677,7 +5729,7 @@ s32 btlSetTaskPhase2(void) {
 
 extern void btlUpdateActorSlotPresentationState(BtlUnit *, s8, s8);
 
-void func_001B7B20(BtlUnit *unit, s8 side) {
+void btlHighlightActorStatPanel(BtlUnit *unit, s8 side) {
     KwlnTask *task;
     BattleActorPanelWork *work;
     u32 index;
@@ -5782,14 +5834,14 @@ u32 btlIsNamedBattleTaskRegistered(void) {
     return 0;
 }
 
-void func_001B7E08(void) {
-    u8 *puVar1;
-    KwlnTask *temp_v0;
+void btlRequestMahenPanelClose(void) {
+    MesWindowSet *work;
+    KwlnTask *task;
 
-    temp_v0 = kwlnTaskGetTaskByName(btlMahenPanelTaskNameRef);
-    if (temp_v0 != 0) {
-        puVar1 = (u8 *)kwlnTaskGetUserValue(temp_v0);
-        *puVar1 = 2;
+    task = kwlnTaskGetTaskByName(btlMahenPanelTaskNameRef);
+    if (task != 0) {
+        work = (MesWindowSet *)kwlnTaskGetUserValue(task);
+        work->state = 2;
     }
 }
 
@@ -5872,14 +5924,14 @@ s32 btlGetRegisteredTaskValueOrDefault(void) {
     return *(s8 *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(btlAnalyzPanelTaskNameRef));
 }
 
-u32 func_001B8038(void) {
-    u8 *puVar1;
-    KwlnTask *temp_v0;
+u32 btlRequestAnalysisPanelClose(void) {
+    BtlAnalysisPanelWork *work;
+    KwlnTask *task;
 
-    temp_v0 = kwlnTaskGetTaskByName(btlAnalyzPanelTaskNameRef);
-    if (temp_v0 != 0) {
-        puVar1 = (u8 *)kwlnTaskGetUserValue(temp_v0);
-        *puVar1 = 2;
+    task = kwlnTaskGetTaskByName(btlAnalyzPanelTaskNameRef);
+    if (task != 0) {
+        work = (BtlAnalysisPanelWork *)kwlnTaskGetUserValue(task);
+        work->state = 2;
     }
     return 1;
 }
