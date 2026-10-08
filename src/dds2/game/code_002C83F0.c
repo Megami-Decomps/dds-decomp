@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "file.h"
+#include "sdf_dev_event.h"
 
 /* File request entry: D_003DC698 table, 0x64 bytes per entry. */
 typedef struct FileReqEntry {
@@ -104,18 +105,18 @@ s32 func_002C83F0(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
     s32 saved;
 
     switch (event) {
-    case 2:
+    case SDF_DEV_EVENT_OPENED:
         job->deviceRequest = deviceRequest;
         job->state = 2;
         sdfDevQueueControlRequest(deviceRequest);
         break;
-    case 4:
+    case SDF_DEV_EVENT_SIZE_REPLY:
         job->transferBytes = byteCount;
         job->state = FILE_JOB_READY;
         job->totalBytes = byteCount;
         fileQueuePendingRequestInFreeSlot(job);
         break;
-    case 5:
+    case SDF_DEV_EVENT_READ_REPLY:
         WaitSema(work->sema);
         if (job->stateRequired != 0) {
             job->state = 5;
@@ -145,7 +146,7 @@ s32 func_002C83F0(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
         func_002C8AC0();
         D_00437CC0 = saved;
         break;
-    case 7:
+    case SDF_DEV_EVENT_CLOSED:
         WaitSema(work->sema);
         fileUnlinkNode(work, job);
         SignalSema(work->sema);
@@ -174,12 +175,12 @@ s32 func_002C8638(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
     s32 saved;
 
     switch (event) {
-    case 2:
+    case SDF_DEV_EVENT_OPENED:
         job->deviceRequest = deviceRequest;
         job->state = event;
         sdfDevQueueControlRequest(deviceRequest);
         break;
-    case 4: {
+    case SDF_DEV_EVENT_SIZE_REPLY: {
         struct SdfMemBlock *allocationHandle;
 
         job->transferBytes = byteCount;
@@ -206,7 +207,7 @@ s32 func_002C8638(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
         fileStartChunkedReadWhenReady(job);
         break;
     }
-    case 5:
+    case SDF_DEV_EVENT_READ_REPLY:
         WaitSema(work->sema);
         job->transferBytes -= byteCount;
         if (job->transferBytes == 0) {
@@ -234,7 +235,7 @@ s32 func_002C8638(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
             fileStartChunkedReadWhenReady(job);
         }
         break;
-    case 7:
+    case SDF_DEV_EVENT_CLOSED:
         sdfDevQueueReleaseState(deviceRequest);
         job->deviceRequest = NULL;
         job->state = 6;
@@ -272,11 +273,11 @@ s32 func_002C8900(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
     s32 saved;
 
     switch (event) {
-    case 2:
+    case SDF_DEV_EVENT_OPENED:
         job->state = FILE_JOB_READY;
         fileStartChunkedWriteWhenReady(job);
         break;
-    case 6:
+    case SDF_DEV_EVENT_WRITE_REPLY:
         WaitSema(work->sema);
         job->transferAddress += byteCount;
         job->transferBytes -= byteCount;
@@ -304,7 +305,7 @@ s32 func_002C8900(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
             fileStartChunkedWriteWhenReady(job);
         }
         break;
-    case 7:
+    case SDF_DEV_EVENT_CLOSED:
         sdfDevQueueReleaseState(deviceRequest);
         job->deviceRequest = NULL;
         job->state = 6;

@@ -4,6 +4,7 @@
 #include "sdf_draw.h"
 #include "ee_mmi.h"
 #include "sdf_stream_read.h"
+#include "sdf_dev_event.h"
 
 extern s32 D_00439214;
 extern s32 iWakeupThread(s32 threadId);
@@ -255,14 +256,14 @@ extern s32 SignalSema(s32);
 /* Event 5 invalidates the EE cache before waking the waiting sound thread. */
 s32 sdfSoundHandleRpcEvent(s32 unused, u32 event) {
     switch (event) {
-    case 5:
+    case SDF_DEV_EVENT_READ_REPLY:
         FlushCache(0);
-    case 4:
+    case SDF_DEV_EVENT_SIZE_REPLY:
         SignalSema(sdfSoundRpcSemaphore);
         break;
-    case 0:
-    case 2:
-    case 7:
+    case SDF_DEV_EVENT_INACTIVE:
+    case SDF_DEV_EVENT_OPENED:
+    case SDF_DEV_EVENT_CLOSED:
         SignalSema(sdfSoundRpcSemaphore);
         break;
     }

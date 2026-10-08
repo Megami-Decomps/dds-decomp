@@ -4,6 +4,7 @@
 #include "sdf_movie_stream.h"
 #include "sdf_movie_state.h"
 #include "sdf_stream_read.h"
+#include "sdf_dev_event.h"
 
 typedef struct DevState DevState;
 
@@ -73,20 +74,20 @@ s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *
 
     switch (movie->state) {
     case SDF_MOVIE_STATE_INITIAL:
-        if (operation == 2) {
+        if (operation == SDF_DEV_EVENT_OPENED) {
             movie->state = SDF_MOVIE_STATE_CONTROL_REQUEST;
             sdfDevQueueControlRequest(deviceState);
         }
         break;
     case SDF_MOVIE_STATE_CONTROL_REQUEST:
-        if (operation == 4) {
+        if (operation == SDF_DEV_EVENT_SIZE_REPLY) {
             movie->totalBytes = bytesRead;
             movie->remainingBytes = bytesRead;
             func_002ECF70(movie);
         }
         break;
     case SDF_MOVIE_STATE_DATA_READ:
-        if (operation == 5) {
+        if (operation == SDF_DEV_EVENT_READ_REPLY) {
             restoreInterrupts = func_00312C08();
             stream->bufferedBytes += bytesRead;
             movie->remainingBytes -= bytesRead;
@@ -102,7 +103,7 @@ s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *
         }
         break;
     case SDF_MOVIE_STATE_STOP_REQUESTED:
-        if (operation == 7) {
+        if (operation == SDF_DEV_EVENT_CLOSED) {
             movie->deviceState = NULL;
             movie->state = SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK;
             sdfDevQueueReleaseState(deviceState);
