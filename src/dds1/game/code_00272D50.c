@@ -54,7 +54,9 @@ struct StaffDisplayContext {
     s32 unk138; /* 0x138 */
     u8 pad13C[0x69C];
     struct MenuList *selectionList; /* 0x7D8 */
-    u8 pad7DC[0x130];
+    u8 pad7DC[0x10];
+    PartyPanel partyPanel; /* 0x7EC: five party display rows */
+    u8 pad8F8[0x14];
     StaffWindowResources *resources; /* 0x90C */
     s32 displayMode; /* 0x910 */
     MenuGradientFade gradient; /* 0x914 */
@@ -362,7 +364,7 @@ s32 mnuUseStaffItem(s32 itemId, s32 context) {
         }
     }
     ptyAdjustItemQuantity(itemId, -1);
-    mnuInitPartyPanelSlots((PartyPanel *)(context + 0x7EC));
+    mnuInitPartyPanelSlots(&((StaffDisplayContext *)context)->partyPanel);
     mnuUpdateHandleStates((MenuPageWindow *)partyPanel);
     func_00280048(partyPanel);
     return 1;

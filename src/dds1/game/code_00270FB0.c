@@ -432,7 +432,7 @@ StaffMenuWork *mnuCreateStaffCampWork(void) {
     } else {
         menu->resourceQueue = mnuAllocateValueRecord(0);
     }
-    mnuInitPartyPanelSlots((PartyPanel *)menu->partyPanel);
+    mnuInitPartyPanelSlots(&menu->partyPanel);
     func_0027AD80(menu->background);
     evtCreateMessageWindowIfMissing((s32)D_0037B9E0);
     func_00271368(menu);

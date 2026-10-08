@@ -29,7 +29,8 @@ typedef struct StaffMenuWork {
     u32 extraImages[2];
     MenuScrollPanel *scrollPanel;
     u8 background[0x6B0];
-    u8 partyPanel[0x124];
+    PartyPanel partyPanel; /* 0x7EC: initialized by mnuInitPartyPanelSlots */
+    u8 pad8F8[0x18];
     s32 displayMode;
     u8 timer[0x10];
 } StaffMenuWork;
