@@ -264,7 +264,7 @@ typedef struct MenuContext {
     u8 padAA40[8];
     s32 party;             /* 0xAA48 */
     u8 padAA4C[0x10];
-    u32 *resourceList;     /* 0xAA5C */
+    MenuProfilePanel *profilePanel; /* 0xAA5C: retained profile-panel allocation */
     u16 slotOfA[0x2A0]; /* 0xAA60 */
     u16 slotOfB[0x40]; /* 0xAFA0 */
     u16 skillSlots[0x75]; /* 0xB020 */
@@ -756,7 +756,7 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
 
 /* Release panel textures before reinitializing slots and updating handle state. */
 void mnuRefreshPartyPanelSlots(s32 context) {
-    mnuReleasePartyPanelTextures(context + MNU_STAFF_PARTY_PANEL_BASE);
+    mnuReleasePartyPanelTextures((MenuPageWindow *)(context + MNU_STAFF_PARTY_PANEL_BASE));
     mnuInitPartyPanelSlots(&((MenuContext *)context)->partyPanel);
     func_002BCA98(&((MenuContext *)context)->partyWindow);
 }
@@ -930,7 +930,7 @@ void mnuUpdateStaffFade(s32 opening, PartyMenuData *menuWork) {
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void mnuSetGroupProperties(MenuProfilePanel *, u32, u32, u32, u32);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
-extern void mnuFreeProfilePanelWork(void *);
+extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void func_002C16F0(s32, s32, s32, DatPartyRecord *, s32, s32, s32);
 
 extern void func_002B2408(MenuContext *);
@@ -1130,7 +1130,7 @@ s32 mnuCreatePanels(s32 callback) {
         (struct EffectSlotSet *)menuContext->alternateResource,
         (struct EffectSlotSet *)menuContext->displayHandle);
     profile = mnuCreateProfilePanel(data);
-    menuContext->resourceList = (u32 *)profile;
+    menuContext->profilePanel = profile;
     mnuSetGroupProperties(profile, menuContext->displayHandle,
                           menuContext->alternateResource, 1, 2);
     party->iconPanel = func_002B9FF8(4, menuContext->displayHandle, menuContext->skillPanelResource);
@@ -1166,9 +1166,9 @@ s32 mnuDestroyPanels(s32 callback) {
         mnuFreeSimpleSpriteWork(((MenuContext *)context)->panelEffects);
         ((MenuContext *)context)->panelEffects = 0;
     }
-    if (((MenuContext *)context)->resourceList != 0) {
-        mnuFreeProfilePanelWork(((MenuContext *)context)->resourceList);
-        ((MenuContext *)context)->resourceList = 0;
+    if (((MenuContext *)context)->profilePanel != 0) {
+        mnuFreeProfilePanelWork(((MenuContext *)context)->profilePanel);
+        ((MenuContext *)context)->profilePanel = 0;
     }
     mnuReleaseResourceList(menu->iconPanel);
     return 1;
@@ -1339,7 +1339,7 @@ s32 func_002B3788(s32 callback) {
         func_002AA7A0(5, context->displayHandle);
     } else {
         mnuDrawProfilePanelAndSprite(partyEntry, (u32)&context->partyWindow,
-                                     context->panelEffects, (MenuProfilePanel *)context->resourceList,
+                                     context->panelEffects, context->profilePanel,
                                      (u32)&context->displayHandle, 0x53);
         if (menuWork->staffView == 0) {
             func_002AA7A0(6, context->displayHandle);
@@ -3602,10 +3602,9 @@ typedef struct MenuSlotEffectHandles {
 void mnuLoadPanelSectionResources(MenuSlotEffectHandles *slot, u32 model, u32 firstValue, u32 secondValue, s32 thirdValue
                                     );
 
-void mnuReleasePartyPanelTextures(s32 menu);
 
 
-void mnuResetPartyPanelFade(u8 *menu, s32 index, u32 unused, u32 preserve);
+void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused, u32 preserve);
 
 void func_002BB9C8(MenuSprites *page, u32 flags);
 
@@ -3719,9 +3718,6 @@ void mnuRefreshPageHandles(MenuPageWindow *window);
 
 void mnuClearPageSelectionHandles(MenuPageWindow *window);
 
-void mnuFlagActiveWindows(MenuPageWindow *window);
-
-void mnuClearPartyPanelActiveFlags(MenuPageWindow *window);
 
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437BE0);
 

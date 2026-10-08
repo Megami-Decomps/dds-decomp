@@ -20,7 +20,6 @@ extern s32 mnuIsEntryCostUnaffordable(u16, struct DatPartyRecord *);
 extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
 extern s32 mnuConsumeEntryCost(s32, struct DatPartyRecord *);
 extern void mnuInitPartyPanelSlots(s32);
-extern void mnuUpdateHandleStates(s32);
 extern void func_00280048(s32);
 extern u32 mnuMapPadMaskToFlags(u32);
 extern s32 mnuGetAbilityTargetCategory(u16);
@@ -211,7 +210,7 @@ s32 ptySkillMenuUseSelectedInField(id, context)
     if (ptySkillApplyFieldUseEffect(window, id, slotA, slotB) != 0) {
         mnuConsumeEntryCost(id, (struct DatPartyRecord *)slotA);
         mnuInitPartyPanelSlots(context + 0x7EC);
-        mnuUpdateHandleStates(window);
+        mnuUpdateHandleStates((MenuPageWindow *)window);
         func_00280048(window);
         return 1;
     }

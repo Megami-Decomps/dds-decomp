@@ -1147,7 +1147,8 @@ void mnuLoadPanelSectionResources(MenuPageSlot *panel, u32 resource, u32 left, u
     }
 }
 
-void mnuReleasePartyPanelTextures(s32 menu) {
+void mnuReleasePartyPanelTextures(MenuPageWindow *window) {
+    s32 menu = (s32)window;
     u32 flags;
     s32 *resource;
     u32 *pageFlags;
@@ -1180,8 +1181,8 @@ void mnuReleasePartyPanelTextures(s32 menu) {
     } while (index < 5);
 }
 
-void mnuResetPartyPanelFade(s32 menu, s32 index, s32 unused, s32 retainScale) {
-    MenuPageSlot *page = &((MenuPageWindow *)menu)->slots[index];
+void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, s32 unused, s32 retainScale) {
+    MenuPageSlot *page = &window->slots[index];
 
     page->hp.fadeOut = 0;
     page->mp.fadeOut = 0;
@@ -1647,26 +1648,21 @@ void mnuReleasePageHandlesAndClearSelection(MenuPageWindow *window) {
     mnuClearPageSelection(window);
 }
 
-void mnuFlagActiveWindows(u8 *menu) {
-    u8 *kind = menu + 8;
-    u8 *flags = menu + 12;
+void mnuFlagActiveWindows(MenuPageWindow *window) {
     u32 i = 0;
-    s32 activeKind = 2;
-    s32 offset = 0x70;
     do {
-        if (*(s32 *)(kind + offset) == activeKind) {
-            *(u32 *)(flags + offset) |= 1;
+        if (window->slots[i].kind == 2) {
+            window->slots[i].flags |= 1;
         }
         i++;
-        offset += 0x134;
     } while (i < 5);
 }
 
-void mnuClearPartyPanelActiveFlags(s32 menu) {
+void mnuClearPartyPanelActiveFlags(MenuPageWindow *window) {
     u32 *flags;
     u32 index;
 
-    flags = (u32 *)(menu + 0x7c);
+    flags = &window->slots[0].flags;
     index = 0;
     do {
         index = index + 1;
