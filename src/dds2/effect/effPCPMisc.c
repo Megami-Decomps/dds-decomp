@@ -5231,13 +5231,13 @@ typedef struct EffPCPDriftEventWork {
     u8 pad10D[3];
     f32 scale;
     u32 color;
-    void *handle;
+    struct SdfMemBlock *handle;
 } EffPCPDriftEventWork;
 
 /* Clone the source header (a longer one with 0x18-byte entries), then give every entry one event and a random negative start delay. */
 EffPCPDriftEventWork *effPcpEntryWorkBCreate(EffPCPDriftEventParams *src, void *params) {
     u32 count = src->count;
-    void *handle = sdfAllocGeneralBlock(count * 24 + 0x11C);
+    struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 24 + 0x11C);
     EffPCPDriftEventWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
     EffPCPDriftEvent *entry;
@@ -5288,7 +5288,7 @@ void func_00189FF0(void *data) {
 
 EffPCPDriftEventWork *effPcpCloneDriftEventWork(EffPCPDriftEventWork *src) {
     u32 count = src->params.count;
-    void *handle = sdfAllocGeneralBlock(count * 24 + 0x11C);
+    struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 24 + 0x11C);
     EffPCPDriftEventWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
     EffPCPDriftEvent *entry;
@@ -5470,13 +5470,13 @@ typedef struct EffPCPPairedEventWork {
     u8 unk98;
     u8 pad99[3];
     u32 color;
-    void *handle;
+    struct SdfMemBlock *handle;
 } EffPCPPairedEventWork;
 
 /* Clone the source effect header, then give every entry two events (placed at the unit scale) and a random negative start frame. */
 EffPCPPairedEventWork *effPcpCreateDelayedDriftEntries(EffPCPPairedEventParams *src, void *paramsA, void *paramsB) {
     u32 count = src->count;
-    void *handle = sdfAllocGeneralBlock(count * 32 + 0xA4);
+    struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 32 + 0xA4);
     EffPCPPairedEventWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
     EffPCPPairedEvent *entry;
@@ -5530,7 +5530,7 @@ void effPcpDriftCreateFromTable(void *data) {
 
 EffPCPPairedEventWork *effPcpClonePairedDriftEvents(EffPCPPairedEventWork *src) {
     u32 count = src->params.count;
-    void *handle = sdfAllocGeneralBlock(count * 32 + 0xA4);
+    struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 32 + 0xA4);
     EffPCPPairedEventWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
     EffPCPPairedEvent *entry;
@@ -5763,13 +5763,13 @@ typedef struct EffPCPSpawnRangeWork {
     u8 pad9D[3];
     f32 scale;
     u32 color;
-    void *handle;
+    struct SdfMemBlock *handle;
 } EffPCPSpawnRangeWork;
 
 /* Clone the source header, then give every entry one event (placed at the unit scale) and a random negative start frame. */
 void *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *src, void *params) {
     u32 count = src->count;
-    void *handle = sdfAllocGeneralBlock(count * 32 + 0xAC);
+    struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 32 + 0xAC);
     EffPCPSpawnRangeWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
     EffPCPSpawnRangeEvent *entry;
@@ -5820,7 +5820,7 @@ void effPcpSlotEffectCreateFromTable(void *data) {
 
 EffPCPSpawnRangeWork *effPcpCloneSpawnRangeEvents(EffPCPSpawnRangeWork *src) {
     u32 count = src->params.count;
-    void *handle = sdfAllocGeneralBlock(count * 32 + 0xAC);
+    struct SdfMemBlock *handle = sdfAllocGeneralBlock(count * 32 + 0xAC);
     EffPCPSpawnRangeWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
     EffPCPSpawnRangeEvent *entry;
