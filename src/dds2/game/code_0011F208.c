@@ -349,7 +349,22 @@ extern u8 D_003807F8[];
 
 extern void sdfStoreMessageWordsAndNotifyConsumer(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 
-/* Native field-area work prefix, shared with the camera/motion unit.
+/* Named-resource records retained by the field loader and texture cleanup. */
+typedef struct FldResourceBlock {
+    s32 unk0;
+    s32 block;
+} FldResourceBlock;
+
+typedef struct FldTextureResource {
+    s32 unk0;
+    s32 block;
+    struct SdfTex *texture;
+} FldTextureResource;
+
+typedef char FldResourceBlock_size_check[(sizeof(FldResourceBlock) == 8) ? 1 : -1];
+typedef char FldTextureResource_size_check[(sizeof(FldTextureResource) == 0xC) ? 1 : -1];
+
+/* Complete field-area work, shared with the camera/motion and resource units.
  * Position is XYZ followed immediately by saved XYZ history, not a Vec4.
  * DDS2 inserts twelve bytes before the model variant and position/history tail. */
 typedef struct FldAreaWork {
@@ -429,7 +444,16 @@ typedef struct FldAreaWork {
     f32 facingPointZ;
     u32 angleState;
     f32 overrideAngle;
+    FldResourceBlock mapResources[8]; /* 0x1A8: autmap_1,2,3,5,6,7,8,9. */
+    FldTextureResource fieldTextures[4]; /* 0x1E8: d2_fild1..4.tmx. */
 } FldAreaWork;
+
+typedef char FldAreaWork_size_check[(sizeof(FldAreaWork) == 0x218) ? 1 : -1];
+typedef char FldAreaWork_mapResources_offset_check[
+    ((u32)&((FldAreaWork *)0)->mapResources == 0x1A8) ? 1 : -1];
+typedef char FldAreaWork_fieldTextures_offset_check[
+    ((u32)&((FldAreaWork *)0)->fieldTextures == 0x1E8) ? 1 : -1];
+
 extern FldAreaWork fldAreaState;
 
 typedef struct FldEncEntry {
