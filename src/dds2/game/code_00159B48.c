@@ -11,7 +11,6 @@ extern void func_003332A0(void *, u32);
 
 extern void *sdfCreateAssetWithDrawEntries();
 extern void func_003332D0(void *, f32);
-extern void billSetAnimationEntry();
 extern s32 effEmitterDelayRandomState[];
 extern void effMiscSeedRandomFromClock();
 #include "eff.h"
@@ -304,7 +303,7 @@ u16 billGetVariantValue(BillObj *effect) {
 
 /* Replace the selected list entry only when its index changes. */
 void billSetKind1Entry(BillObj *effect, u32 entryIndex) {
-    if (effect->kind == 1 && effect->unk58 != entryIndex) {
+    if (effect->kind == 1 && effect->animationEntryIndex != entryIndex) {
         billSetAnimationEntry(effect, entryIndex);
     }
 }
@@ -312,7 +311,7 @@ void billSetKind1Entry(BillObj *effect, u32 entryIndex) {
 /* Read the selected entry for list billboards; other kinds have none. */
 s32 billGetKindOneEntry(BillObj *effect) {
     if (effect->kind == 1) {
-        return effect->unk58;
+        return effect->animationEntryIndex;
     }
     return 0;
 }
@@ -383,7 +382,7 @@ s32 billGetFirstEntryFramePeriod(BillObj *effect) {
 
 u16 billGetKindOneParameter(BillObj *effect) {
     if (effect->kind == 1) {
-        return effect->unk50;
+        return effect->animationActive;
     }
     return 0;
 }
@@ -519,8 +518,6 @@ void effVuCopyMatrix(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }
 
-BillChildPayload *func_00158F88(BillObj *obj, BillOut *entries);
-
 /* Kind 1 writes mode plus one/two entry values; untouched output words retain their contents. */
 void effReadBillboardModeValues(EffInstance *instance, s32 *modeValues) {
     BillObj *billboard = instance->billboard;
@@ -530,15 +527,15 @@ void effReadBillboardModeValues(EffInstance *instance, s32 *modeValues) {
 
         if (modeFlags & 0x40) {
             modeValues[0] = 2;
-            modeValues[2] = (s32)func_00158F88(billboard, billboard->resolvedEntries);
-            modeValues[1] = (s32)func_00158F88(billboard, billboard->resolvedEntries + 1);
+            modeValues[2] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries);
+            modeValues[1] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries + 1);
         } else if (modeFlags & 0x80) {
             modeValues[0] = 3;
-            modeValues[2] = (s32)func_00158F88(billboard, billboard->resolvedEntries);
-            modeValues[1] = (s32)func_00158F88(billboard, billboard->resolvedEntries + 1);
+            modeValues[2] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries);
+            modeValues[1] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries + 1);
         } else {
             modeValues[0] = 0;
-            modeValues[1] = (s32)func_00158F88(billboard, billboard->resolvedEntries);
+            modeValues[1] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries);
         }
     }
 }
