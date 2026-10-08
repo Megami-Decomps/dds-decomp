@@ -670,42 +670,42 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
 extern s32 func_0035B6E0(const char *format, ...);
 
 void *func_00159678(void *resource) {
-    u8 *source = resource;
-    s32 *header = resource;
-    s32 *childOffsets = (s32 *)(source + header[0]);
-    s32 childCount = *childOffsets++;
+    u8 *sourceBytes = resource;
+    s32 *resourceHeader = resource;
+    s32 *childOffsetCursor = (s32 *)(sourceBytes + resourceHeader[0]);
+    s32 childCount = *childOffsetCursor++;
     SdfMemBlock *allocation;
     BillData *data;
-    u8 *base;
-    s32 count;
-    s32 i;
+    u8 *copiedBase;
+    s32 entryCount;
+    s32 resourceIndex;
 
-    allocation = sdfAllocGeneralBlock(header[0] + childCount * 0x50 + sizeof(*data));
+    allocation = sdfAllocGeneralBlock(resourceHeader[0] + childCount * 0x50 + sizeof(*data));
     data = (BillData *)sdfResourceRetainAddress(allocation);
-    base = (u8 *)(data + 1);
+    copiedBase = (u8 *)(data + 1);
     data->allocation = allocation;
-    memcpy(base, source, header[0]);
-    data->base = base;
+    memcpy(copiedBase, sourceBytes, resourceHeader[0]);
+    data->base = copiedBase;
     data->childCount = childCount;
-    data->entries = (BillAnimationEntry *)(base + 8);
-    data->children = (BillChildPayload **)(base + *(s32 *)base + 8);
-    for (i = 0; i < childCount; i++) {
-        data->children[i] = func_00157D38(source + *childOffsets++);
+    data->entries = (BillAnimationEntry *)(copiedBase + 8);
+    data->children = (BillChildPayload **)(copiedBase + *(s32 *)copiedBase + 8);
+    for (resourceIndex = 0; resourceIndex < childCount; resourceIndex++) {
+        data->children[resourceIndex] = func_00157D38(sourceBytes + *childOffsetCursor++);
     }
     data->entryCount = data->listRefCount = 1;
-    count = ((s32 *)data->base)[1];
-    for (i = 0; i < count; i++) {
-        BillAnimationEntry *entry = &data->entries[i];
+    entryCount = ((s32 *)data->base)[1];
+    for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++) {
+        BillAnimationEntry *entry = &data->entries[resourceIndex];
         if (entry->flags & 0x10000000) {
             data->entryCount = entry->frameCount;
-            func_0035B6E0("billAnim no[%d][%d]...PLURAL\n", i, data->entryCount);
+            func_0035B6E0("billAnim no[%d][%d]...PLURAL\n", resourceIndex, data->entryCount);
         } else {
             if (entry->unk8 & 0x40) {
                 data->entryCount = 2;
-                func_0035B6E0("billAnim no[%d][%d]...MTEX\n", i, 2);
+                func_0035B6E0("billAnim no[%d][%d]...MTEX\n", resourceIndex, 2);
             } else if (entry->unk8 & 0x80) {
                 data->entryCount = 2;
-                func_0035B6E0("billAnim no[%d][%d]...AMTEX\n", i, 2);
+                func_0035B6E0("billAnim no[%d][%d]...AMTEX\n", resourceIndex, 2);
             }
         }
     }

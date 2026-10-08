@@ -25,17 +25,17 @@ void func_001891A8(EffMagatuhiOwner *resource) {
     func_001893D8(resource->valueWork);
 }
 
-void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 index) {
-    f32 *angles;
+void effResetMagatuhiValueSlot(EffMagatuhiValueWork *work, s32 slotIndex) {
+    f32 *angleRow;
 
-    work->writeIndices[index] = 0;
-    work->validCounts[index] = 0;
-    work->slotColors[index] = 0x80808080;
-    angles = work->angleRows[index];
-    angles[0] = 6.2831853f;
-    angles[1] = 0.0f;
-    angles[2] = 3.1415926f;
-    angles[3] = 0.0f;
+    work->writeIndices[slotIndex] = 0;
+    work->validCounts[slotIndex] = 0;
+    work->slotColors[slotIndex] = 0x80808080;
+    angleRow = work->angleRows[slotIndex];
+    angleRow[0] = 6.2831853f;
+    angleRow[1] = 0.0f;
+    angleRow[2] = 3.1415926f;
+    angleRow[3] = 0.0f;
 }
 
 EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 param08, s32 param, f32 param0C) {

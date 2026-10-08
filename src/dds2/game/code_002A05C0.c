@@ -3,6 +3,7 @@
 #include "kwln.h"
 #include "mnu.h"
 #include "file.h"
+#include "kwln_task_lifecycle.h"
 
 #define BRS_RESULT_COUNTER_PAIR_COUNT 5
 #define BRS_RESULT_SETTLED_POLL_LIMIT 6
@@ -563,7 +564,7 @@ void mnuLoadTitleStreamFrameData(char *filePath, u32 *streamState) {
     frameCount = fileBytes / (s32)streamState[MNU_STREAM_FRAME_BYTES_INDEX];
     streamState[1] = 0;
     streamState[MNU_STREAM_FRAME_COUNT_INDEX] = frameCount;
-    sdfQueueNonzeroResourceId((s32)(u32)resourceHandle);
+    sdfQueueGeneralAllocationRelease(resourceHandle);
 }
 
 void mnuStoreTaskResult(char *audioPath) {
@@ -598,7 +599,7 @@ s32 mnuCompleteTitleStreamFileLoad(u32 *destinationState) {
         memcpy((void *)destinationState[MNU_STREAM_DATA_ADDRESS_INDEX], (void *)fileDataAddress, fileBytes);
         destinationState[MNU_STREAM_FRAME_COUNT_INDEX] = fileBytes / (s32)destinationState[MNU_STREAM_FRAME_BYTES_INDEX];
         destinationState[1] = 0;
-        sdfQueueNonzeroResourceId(resourceHandle);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)resourceHandle);
         func_003504A8(D_00454D58);
         mnuTitleStreamStatus[MNU_STREAM_LOAD_STATE_INDEX] = MNU_STREAM_LOAD_COPIED;
         ready = 1;
@@ -731,12 +732,11 @@ void mnuCommitTitleStreamReadyState(void) {
 
 extern u8 D_00455DB0[];
 
-extern void sdfQueueNonzeroResourceId(u32 arg0);
 
 /* Reset load/data slots only when an allocation is present; otherwise do nothing. */
 void mnuResetTitleStream(void) {
     if (mnuTitleStreamStatus[MNU_STREAM_ALLOCATION_INDEX] != 0) {
-        sdfQueueNonzeroResourceId(mnuTitleStreamStatus[MNU_STREAM_ALLOCATION_INDEX]);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)mnuTitleStreamStatus[MNU_STREAM_ALLOCATION_INDEX]);
         mnuTitleStreamStatus[MNU_STREAM_LOAD_STATE_INDEX] = MNU_STREAM_LOAD_IDLE;
         mnuTitleStreamStatus[MNU_STREAM_ALLOCATION_INDEX] = 0;
         mnuTitleStreamStatus[MNU_STREAM_DATA_ADDRESS_INDEX] = 0;
@@ -907,7 +907,7 @@ void mnuReleaseSoundBuffer(void) {
     if (allocationHandle == 0) {
         return;
     }
-    sdfQueueNonzeroResourceId(allocationHandle);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)allocationHandle);
     streamState[MNU_STREAM_ALLOCATION_INDEX] = 0;
 }
 

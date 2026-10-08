@@ -226,15 +226,15 @@ void sndAllocateAlignedIopBuffers(s32 *requestedSizes, s32 bufferCount) {
     } while (bufferIndex != bufferCount);
 }
 
-void func_00341AD8(s32 arg0, s32 arg1, s32 *sizes, s32 count) {
+void func_00341AD8(s32 unused, s32 header, s32 *bufferSizes, s32 bufferCount) {
     D_004391E0 = 1;
     func_00341878();
     sceSifInitIopHeap();
     func_003415A8();
     sndMidiTrackState.unk008 = sndReserveIopWorkMemory(0x4000);
     sndMidiTrackState.unk00C = 0x4000;
-    sndInitializeChannelAndTrackState(arg0, arg1);
-    sndAllocateAlignedIopBuffers(sizes, count);
+    sndInitializeChannelAndTrackState(unused, header);
+    sndAllocateAlignedIopBuffers(bufferSizes, bufferCount);
     D_004391EC = sndReserveIopWorkMemory(0x8D0);
     sndMidiTrackState.unk1F8 = (u32)&sndMidiTrackState;
     sndMidiTrackState.unk1FC = 0x8D0;

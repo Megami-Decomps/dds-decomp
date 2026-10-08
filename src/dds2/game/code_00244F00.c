@@ -1,6 +1,7 @@
 #include "common.h"
 #include "evt_viewer.h"
 #include "evt_solar.h"
+#include "kwln_task_lifecycle.h"
 
 #define SOLAR_FADE_DRAW_ENABLED 1
 #define SOLAR_FADE_IN 2
@@ -20,7 +21,6 @@ extern char D_004221D8[]; /* "EventTest" */
 
 extern char D_004221E8[]; /* "PolygonMovie" */
 
-void kwlnTaskDestroyWithHierarchyByName(void *name, s32 flag);
 
 void evtDestroySecondaryWorldNode(void);
 

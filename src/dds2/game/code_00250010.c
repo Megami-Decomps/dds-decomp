@@ -1,6 +1,6 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "evt_viewer.h"
-extern s32 kwlnTaskDestroyWithHierarchy(struct KwlnTask *task, s32 delayTicks);
 
 #include "evt_world.h"
 #include "eff_object.h"
@@ -13,6 +13,7 @@ extern s32 kwlnTaskDestroyWithHierarchy(struct KwlnTask *task, s32 delayTicks);
 #include "evt_unit.h"
 #include "evt_polygon_movie.h"
 #include "fld.h"
+#include "kwln_task_lifecycle.h"
 
 extern u32 evtSkyOverlayEnabled;
 
@@ -3814,7 +3815,6 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_0025A280);
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *runtime);
 extern void mnuStopMovieDrawTask(void);
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
-extern void sdfQueueNonzeroResourceId(s32 resource);
 extern void kwlnTextureReleaseHeldReference(void);
 extern u32 kwlnDrawControlFlags;
 extern void evtFormatPolygonMoviePaths(u16 a, u16 b, char *path0, char *path1, char *path2);
@@ -3838,7 +3838,7 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     if (runtime->pendingResource != 0) {
-        sdfQueueNonzeroResourceId(runtime->pendingResource);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)runtime->pendingResource);
         runtime->pendingResource = 0;
         runtime->pendingWork = 0;
     }

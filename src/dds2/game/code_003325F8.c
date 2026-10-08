@@ -2,6 +2,7 @@
 #include "pcp_vu0.h"
 
 #include "sdf.h"
+#include "sdf_pending.h"
 #include "sdf_draw.h"
 #include "sdf_chunk.h"
 
@@ -100,11 +101,10 @@ extern f32 D_00438A48;
 
 extern f32 D_00438A4C;
 
-extern u8 sdfResourceReleaseQueue;
+extern SdfPendingRequest sdfResourceReleaseQueue;
 
-extern u8 sdfAssetReleaseQueue;
+extern SdfPendingRequest sdfAssetReleaseQueue;
 
-void sdfInitializeSynchronizedRequest(void *request, void (*callback)(void));
 
 void sdfResourceListReleaseAssets(DevRequest *);
 
@@ -112,7 +112,6 @@ extern SdfSubParam *sdfSubParamCreate(void);
 
 void *sdfAllocSizeClassBlock(s32 size);
 
-void sdfPendingQueuePush(void *queue, s32 assetId);
 
 void sdfDestroyDevRequest(DevRequest *);
 

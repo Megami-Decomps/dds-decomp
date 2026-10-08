@@ -32,8 +32,6 @@ void *sdfAllocateBlockBySizeThreshold(s32 size) {
 extern s32 sdfChipIsInRange(void *);
 extern void sdfReleaseChipBlock(void *);
 extern void sdfReleaseCurrentResourceHandle(void *);
-extern void sdfQueuePendingChipValue(void *);
-extern void sdfQueueNonzeroResourceId(s32);
 
 void sdfFreeMemoryFromEitherHeap(void *data) {
     if (data != NULL) {
@@ -48,10 +46,10 @@ void sdfFreeMemoryFromEitherHeap(void *data) {
 void sdfReleaseChipOrRetainedResource(void *data) {
     if (data != NULL) {
         if (sdfChipIsInRange(data)) {
-            sdfQueuePendingChipValue(data);
+            sdfQueuePendingChipRelease(data);
             return;
         }
-        sdfQueueNonzeroResourceId((s32)sdfFindGeneralBlockByAddress(data));
+        sdfQueueGeneralAllocationRelease(sdfFindGeneralBlockByAddress(data));
     }
 }
 

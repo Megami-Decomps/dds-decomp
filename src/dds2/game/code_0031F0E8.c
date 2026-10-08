@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_callback_list.h"
 
 typedef struct DdsSpriteFileHeader {
     u32 version;
@@ -24,7 +25,7 @@ extern u32 *func_00325790(const void *, s32);
 
 extern void (*sdfTickCallback)(void);
 
-extern void dds3DestroyCallbackNodeAfterLastNotification(u32);
+extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 typedef struct SdkFileStream SdkFileStream;
 extern void *func_0035A828(u32 bytes);
 extern void func_0035A880(void *memory);
@@ -137,13 +138,6 @@ typedef struct DdsNestedRecord {
     char *name;
 } DdsNestedRecord;
 
-typedef struct DdsCallbackNode {
-    u8 pad00[0xC];
-    u32 userData; /* 0x0C */
-    s32 onFirst; /* 0x10 */
-    s32 onLast; /* 0x14 */
-} DdsCallbackNode;
-
 typedef struct DdsCallbackCollection {
     u8 pad00[4];
     u32 callbacks[3]; /* 0x04, 0x08, 0x0C */
@@ -195,7 +189,7 @@ DdsAllocBlock *dds3AllocateAndAttachPackedValueBuffer(s32 object) {
     DdsAllocBlock *record;
 
     record = dds3AllocateEmptyPackedValueBuffer();
-    func_00320CE0(*(u32 *)(object + 4), 0, record);
+    func_00320CE0((MnuCallbackList *)*(u32 *)(object + 4), 0, (u32)record);
     return record;
 }
 
@@ -206,9 +200,10 @@ u32 dds3GetCurrentPackedValueBuffer(s32 object) {
 INCLUDE_ASM(const s32, "game/code_0031F0E8", func_0031F280);
 
 void dds3ReleaseCallbackCollectionAndNodes(u32 node) {
-    dds3DestroyCallbackNodeAfterLastNotification(((DdsCallbackCollection *)node)->callbacks[0]);
-    dds3DestroyCallbackNodeAfterLastNotification(((DdsCallbackCollection *)node)->callbacks[1]);
-    dds3DestroyCallbackNodeAfterLastNotification(((DdsCallbackCollection *)node)->callbacks[2]);
+    DdsCallbackCollection *collection = (DdsCallbackCollection *)node;
+    dds3DestroyCallbackNodeAfterLastNotification((MnuCallbackList *)collection->callbacks[0]);
+    dds3DestroyCallbackNodeAfterLastNotification((MnuCallbackList *)collection->callbacks[1]);
+    dds3DestroyCallbackNodeAfterLastNotification((MnuCallbackList *)collection->callbacks[2]);
     func_0035A880((void *)node);
 }
 
@@ -263,14 +258,14 @@ void dds3RegisterNamedPackedOffset(DdsPackedObject *object, const char *name) {
     }
     record = (DdsNamedRecord *)func_0031F168();
     func_0035C860(record->name, D_00438960, name);
-    func_00320CE0(object->namedReferences, 0, record);
+    func_00320CE0((MnuCallbackList *)object->namedReferences, 0, (u32)record);
     record->value = object->maxPackedOffset;
 }
 
 void dds3RecordNamedReference(u32 context, const char *name) {
     u32 record = func_0031F168();
     strncpy((char *)((DdsNamedRecord *)record)->name, name, DDS_NAMED_RECORD_NAME_BYTES);
-    func_00320CE0(((DdsPackedObject *)context)->pendingReferences, 0, record);
+    func_00320CE0((MnuCallbackList *)((DdsPackedObject *)context)->pendingReferences, 0, (u32)record);
     ((DdsNamedRecord *)record)->value = ((DdsPackedObject *)context)->maxPackedOffset;
     dds3WritePackedValue(context, -1, 4);
 }
@@ -293,12 +288,13 @@ u32 dds3FindNamedRecord(u32 context, const char *name) {
 u32 dds3ResolvePackedOffset(u32 *object, u32 packedOffset) {
     u32 segmentIndex = packedOffset >> 16;
     u32 offset = packedOffset - (segmentIndex << 16);
-    u32 segment;
+    SdfListNode *segment;
     if (packedOffset > ((DdsPackedObject *)object)->maxPackedOffset) {
         return 0;
     }
-    segment = mnuFindResourceNodeById(((DdsPackedObject *)object)->segments, segmentIndex);
-    return *(u32 *)(*(u32 *)(segment + 0x10) + 4) + offset;
+    segment = mnuFindResourceNodeById(
+        (MnuCallbackList *)((DdsPackedObject *)object)->segments, segmentIndex);
+    return *(u32 *)((u32)segment->value + 4) + offset;
 }
 
 /* Replace recorded pointer slots with their matching named addresses. */
@@ -821,60 +817,40 @@ void *func_00320AE8(const char *directory, const char *name, u32 *countOut) {
     return NULL;
 }
 
-u32 mnuCreateCallbackNode(u32 userData) {
-    u32 *node = (u32 *)func_0035A828(0x18);
+MnuCallbackList *mnuCreateCallbackNode(u32 userData) {
+    MnuCallbackList *node = (MnuCallbackList *)func_0035A828(0x18);
     memset(node, 0, 0x18);
-    ((DdsCallbackNode *)node)->userData = userData;
-    ((DdsCallbackNode *)node)->onFirst = (u32)func_003211F0;
-    ((DdsCallbackNode *)node)->onLast = (u32)func_003211F0;
-    return (u32)node;
+    node->userData = userData;
+    node->onRemove = func_003211F0;
+    node->onDestroy = func_003211F0;
+    return node;
 }
 
-void dds3DestroyCallbackNodeAfterLastNotification(u32 node) {
+void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *node) {
     if (node != 0) {
-        void (*callback)(s32, u32);
         mnuClearResourceList(node);
-        callback = (void (*)(s32, u32))((DdsCallbackNode *)node)->onLast;
-        callback(-1, ((DdsCallbackNode *)node)->userData);
+        node->onDestroy(-1, node->userData);
         func_0035A880(node);
     }
 }
 
 
-void dds3SetCallbackNodeLastListener(s32 callbackNode, s32 callbackAddress) {
-    if (callbackAddress != 0) {
-        ((DdsCallbackNode *)callbackNode)->onLast = (s32)callbackAddress;
+void dds3SetCallbackNodeLastListener(MnuCallbackList *callbackNode, void (*callback)()) {
+    if (callback != 0) {
+        callbackNode->onDestroy = callback;
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320CE0);
+INCLUDE_ASM(SdfListNode *, "game/code_0031F0E8", func_00320CE0);
 
-INCLUDE_ASM(const s32, "game/code_0031F0E8", func_00320D80);
+INCLUDE_ASM(SdfListNode *, "game/code_0031F0E8", func_00320D80);
 
-void dds3SetCallbackNodeFirstListener(s32 callbackNode, s32 callbackAddress) {
-    if (callbackAddress != 0) {
-        ((DdsCallbackNode *)callbackNode)->onFirst = (s32)callbackAddress;
+void dds3SetCallbackNodeFirstListener(MnuCallbackList *callbackNode, void (*callback)()) {
+    if (callback != 0) {
+        callbackNode->onRemove = callback;
     }
 }
-
-typedef struct SdfListNode {
-    u32 index;                  /* 0x00 */
-    s32 key;                    /* 0x04 */
-    struct SdfListNode *next;   /* 0x08 */
-    struct SdfListNode *prev;   /* 0x0C */
-    void *value;                /* 0x10 */
-} SdfListNode;
-
-typedef struct SdfList {
-    u32 count;                     /* 0x00 */
-    SdfListNode *head;             /* 0x04 */
-    SdfListNode *tail;             /* 0x08 */
-    u32 pad0C;
-    void (*onRemove)(u32, void *); /* 0x10 */
-} SdfList;
-
-
-SdfListNode *dds3DetachIndexedListNodeAndRenumber(SdfList *list, SdfListNode *node) {
+SdfListNode *dds3DetachIndexedListNodeAndRenumber(MnuCallbackList *list, SdfListNode *node) {
     SdfListNode *it;
 
     if (node == NULL) {
@@ -904,13 +880,14 @@ SdfListNode *dds3DetachIndexedListNodeAndRenumber(SdfList *list, SdfListNode *no
     return node->prev;
 }
 
-u32 dds3RemoveListNodeAndNotify(u32 list, u32 node) {
-    u32 remaining;
-    if (node == 0) {
-        return 0;
+SdfListNode *dds3RemoveListNodeAndNotify(MnuCallbackList *list, SdfListNode *node) {
+    SdfListNode *remaining;
+
+    if (node == NULL) {
+        return NULL;
     }
     remaining = dds3DetachIndexedListNodeAndRenumber(list, node);
-    (*(void (**)(u32, u32))(list + 0x10))(*(u32 *)node, *(u32 *)(node + 0x10));
-    func_0035A880((void *)node);
+    list->onRemove(node->index, (u32)node->value);
+    func_0035A880(node);
     return remaining;
 }

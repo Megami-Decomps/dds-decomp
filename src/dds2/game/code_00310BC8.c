@@ -6,6 +6,7 @@
 #include "sdf.h"
 #include "sdf_task_work.h"
 #include "itf.h"
+#include "kwln_task_lifecycle.h"
 
 extern s8 D_0037F510[];
 
@@ -33,11 +34,7 @@ extern void frFontSetChainFlag(FrFontGlyph *, u8);
 
 
 
-extern SdfTaskEntry *func_00312A48(SdfTaskItemDesc *);
 
-
-
-extern s32 kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
 
 extern f32 func_003532B8(f32);
@@ -769,7 +766,7 @@ s32 kwlnTaskExists(const char *name) {
 }
 
 void sdfAttachTaskItem(TaskWork *work, SdfTaskItemDesc *item) {
-    SdfListNode *node = sdfListAppend(work->list, item->key, func_00312A48(item));
+    SdfListNode *node = sdfListAppend(work->list, item->key, sdfCreateTaskEntry(item));
     if (work->currentNode == NULL) {
         work->currentNode = node;
     }

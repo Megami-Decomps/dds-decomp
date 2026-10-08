@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "sdf_pending.h"
 
 #define SDF_HEAP_BLOCK_FREE 0
 #define SDF_HEAP_BLOCK_USED 1
@@ -15,9 +16,8 @@ extern void sdfReleaseChipBlock(void *block);
 extern s32 func_00312C08(void);
 extern void EIntr(void);
 
-extern u8 D_003BD9C8;
+extern SdfPendingRequest D_003BD9C8;
 
-void sdfPendingQueuePush(void *arg0, s32 arg1);
 
 INCLUDE_ASM(const s32, "game/code_002D0750", func_002D0750);
 
@@ -75,11 +75,9 @@ void sdfReleaseMemorySlot(s32 *handleSlot) {
 }
 
 /* Zero is a sentinel and is never submitted to the pending queue. */
-void sdfQueueNonzeroResourceId(s32 resourceId) {
-    s32 id = resourceId;
-
-    if (id != 0) {
-        sdfPendingQueuePush(&D_003BD9C8, id);
+void sdfQueueGeneralAllocationRelease(struct SdfMemBlock *allocation) {
+    if (allocation != NULL) {
+        sdfPendingQueuePush(&D_003BD9C8, (u32)allocation);
     }
 }
 

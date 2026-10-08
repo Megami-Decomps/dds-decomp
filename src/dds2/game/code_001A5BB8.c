@@ -17,6 +17,7 @@
 #include "mnu_result.h"
 #include "dat_command.h"
 #include "sdf_sif_command.h"
+#include "kwln_task_lifecycle.h"
 
 typedef struct BattlePanelEdgeWork {
     u8 pad00[0x30];
@@ -84,7 +85,6 @@ extern const char *btlMahenPanelTaskNameRef;
 
 
 
-extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *task, s32 delay);
 extern void func_00101968(KwlnTask *parent, KwlnTask *child);
 
 extern const char *btlAnalyzPanelTaskNameRef;
@@ -5898,7 +5898,6 @@ u32 btlHasRegisteredSkillNamePanelTask(void) {
     return 0;
 }
 
-extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *, s32);
 extern void func_00101968(KwlnTask *, KwlnTask *);
 extern s32 btlUpdateSkillNamePanelTask(KwlnTask *);
 extern void btlFreeRegisteredTaskData(KwlnTask *);
