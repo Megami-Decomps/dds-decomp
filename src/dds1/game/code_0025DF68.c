@@ -209,7 +209,6 @@ INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025ECD0);
 
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
-extern void frFontSetChainFlag(FrFontGlyph *, u8);
 extern char D_003BC500[];
 
 /* Draw the row label, and draw its numeric value when the list enables it. */
