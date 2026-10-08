@@ -738,51 +738,43 @@ void effFadeFrameAdvance(s32 *counter) {
     *counter = frame + 1;
 }
 
-/* 0x18-byte effect header followed by a copied 0x40-byte fade payload. */
-typedef struct EffFadeVectorWork {
-    u8 vector[0x10];
-    u32 frame;
-    u32 color;
-    u8 source[0x40];
-} EffFadeVectorWork;
-
-u8 *effCreateFadeVectorWork(source)
-const u8 *source;
+EffFadeVectorWork *effCreateFadeVectorWork(source)
+const EffLensFlareParams *source;
 {
-    u8 *effect = (u8 *)sdfAllocSizeClassBlock(0x58);
-    memset(effect, 0, 0x58);
-    VU0_STORE_VF(vf0, effect);
-    memcpy(effect + 0x18, source, 0x40);
+    EffFadeVectorWork *effect = sdfAllocSizeClassBlock(sizeof(EffFadeVectorWork));
+    memset(effect, 0, sizeof(EffFadeVectorWork));
+    VU0_STORE_VF(vf0, effect->vector);
+    memcpy(&effect->source, source, sizeof(effect->source));
     return effect;
 }
 
-void effCreateFadeVectorFromFile(void) {
-    u64 resource;
+EffFadeVectorWork *effCreateFadeVectorFromFile(void *work) {
+    const EffLensFlareParams *resource;
 
-    resource = fileResolvePrimaryBuffer();
-    effCreateFadeVectorWork(resource);
+    resource = fileResolvePrimaryBuffer(work);
+    return effCreateFadeVectorWork(resource);
 }
 
-void effFreeFadeVectorWork(void) {
-    sdfReleaseChipBlock();
+void effFreeFadeVectorWork(EffFadeVectorWork *work) {
+    sdfReleaseChipBlock(work);
 }
 
-void effCloneFadeVectorWork(s32 work) {
-    effCreateFadeVectorWork(((EffFadeVectorWork *)work)->source);
+void effCloneFadeVectorWork(EffFadeVectorWork *work) {
+    effCreateFadeVectorWork(&work->source);
 }
 
-void effResetFadeVectorFrame(s32 work) {
-    ((EffFadeVectorWork *)work)->frame = 0;
+void effResetFadeVectorFrame(EffFadeVectorWork *work) {
+    work->frame = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002DE460);
 
-void effCopyFadeWorkVector(s128 *dst, s128 *src) {
+void effCopyFadeWorkVector(f32 *dst, const f32 *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void effSetFadeVectorColor(s32 work, u32 value) {
-    ((EffFadeVectorWork *)work)->color = value;
+void effSetFadeVectorColor(EffFadeVectorWork *work, u32 value) {
+    work->color = value;
 }
 
 
@@ -11833,18 +11825,18 @@ extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern void effSelectPresetByKind(u32, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 
-void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 z, s32 width, s32 height,
-                   const EffSpriteUV *uvRect, const EffSpriteColor *color, u32 flip,
+void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
+                   const EffSpriteUV *uvRect, const EffSpriteColor *color, u32 flipFlags,
                    u32 blendKind, s32 mode, SdfTex *texture, s32 surfaceId) {
-    u32 uv[4];
+    u32 textureCoordinates[4];
     void *packet;
-    SdfListHead *list;
-    u64 *dst;
-    s32 x0;
-    s32 y0;
-    s32 x1;
-    s32 y1;
-    s32 temp;
+    SdfListHead *packetList;
+    u64 *packetWords;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+    s32 savedCoordinate;
 
     if (mode == 0) {
         sdfTexSetPrimaryBufferModeBits(texture, 0, 1);
@@ -11854,46 +11846,46 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 z, s32 width, s32 height,
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, 1));
     sdfConsInitPacketHeader(packet, 0x156, 5, 0x43431, 1);
     /* The SDK size helper also skips the packet's two header quadwords. */
-    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
-    x0 = x + 0x7000;
-    y0 = y + 0x7900;
-    uv[0] = uvRect->u0 * 16;
-    uv[2] = uvRect->u1 * 16;
-    uv[1] = uvRect->v0 * 16;
-    uv[3] = uvRect->v1 * 16;
-    x1 = x0 + width;
-    y1 = y0 + height;
-    if (flip & 1) {
-        temp = x0;
-        x0 = x1;
-        x1 = temp;
+    packetWords = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
+    left = x + 0x7000;
+    top = y + 0x7900;
+    textureCoordinates[0] = uvRect->u0 * 16;
+    textureCoordinates[2] = uvRect->u1 * 16;
+    textureCoordinates[1] = uvRect->v0 * 16;
+    textureCoordinates[3] = uvRect->v1 * 16;
+    right = left + width;
+    bottom = top + height;
+    if (flipFlags & 1) {
+        savedCoordinate = left;
+        left = right;
+        right = savedCoordinate;
     }
-    if (flip & 2) {
-        temp = y0;
-        y0 = y1;
-        y1 = temp;
+    if (flipFlags & 2) {
+        savedCoordinate = top;
+        top = bottom;
+        bottom = savedCoordinate;
     }
     if (color == NULL) {
-        dst[0] = ((u64)0x80 << 32) | 0x80;
-        dst[1] = ((u64)0x80 << 32) | 0x80;
+        packetWords[0] = ((u64)0x80 << 32) | 0x80;
+        packetWords[1] = ((u64)0x80 << 32) | 0x80;
     } else {
         u32 rgba = color->rgba;
 
-        dst[0] = color->channels.red | ((u64)color->channels.green << 32);
-        dst[1] = ((rgba >> 8) & 0xFF) | ((u64)(rgba & 0xFF) << 32);
+        packetWords[0] = color->channels.red | ((u64)color->channels.green << 32);
+        packetWords[1] = ((rgba >> 8) & 0xFF) | ((u64)(rgba & 0xFF) << 32);
     }
-    dst[2] = uv[0] | ((u64)uv[1] << 32);
-    dst[4] = (u64)(u32)x0 | ((u64)y0 << 32);
-    dst[6] = uv[2] | ((u64)uv[3] << 32);
-    dst[8] = (u64)(u32)x1 | ((u64)y1 << 32);
-    dst[5] = z;
-    dst[9] = z;
+    packetWords[2] = textureCoordinates[0] | ((u64)textureCoordinates[1] << 32);
+    packetWords[4] = (u64)(u32)left | ((u64)top << 32);
+    packetWords[6] = textureCoordinates[2] | ((u64)textureCoordinates[3] << 32);
+    packetWords[8] = (u64)(u32)right | ((u64)bottom << 32);
+    packetWords[5] = depth;
+    packetWords[9] = depth;
     effSelectPresetByKind(blendKind, surfaceId);
-    list = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList(list);
-    sdfConsCreateDrawPacket(list, texture, 0);
-    sdfAppendPacket(list, packet);
-    effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], list);
+    packetList = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packetList);
+    sdfConsCreateDrawPacket(packetList, texture, 0);
+    sdfAppendPacket(packetList, packet);
+    effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
 }
 

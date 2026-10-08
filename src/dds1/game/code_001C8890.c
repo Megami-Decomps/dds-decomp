@@ -2417,12 +2417,12 @@ u32 btlClassifyActionOperand(u8 *actor, u8 *argument) {
     }
 }
 
-s32 btlClassifyActionResult(u8 *arg0, u32 arg1, s32 arg2, u32 arg3, s32 arg4, u8 arg5, s32 arg6) {
-    s32 code;
+s32 btlClassifyActionResult(BtlUnit *actor, u32 arg1, s32 arg2, u32 arg3, s32 arg4, u8 arg5, s32 commandIndex) {
+    s32 resultCode;
 
-    btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)arg0)->partyRecord);
-    if (arg6 >= 0) {
-        switch ((u32)datCommandRecords[arg6].unk30) {
+    btlGetEntryFlagsUnlessDisabled(&actor->partyRecord);
+    if (commandIndex >= 0) {
+        switch ((u32)datCommandRecords[commandIndex].unk30) {
         case 1:
         case 2:
         case 9:
@@ -2430,26 +2430,26 @@ s32 btlClassifyActionResult(u8 *arg0, u32 arg1, s32 arg2, u32 arg3, s32 arg4, u8
             return -1;
         }
     }
-    if ((datCommandRecords[arg6].attribute.bits & 0x400000FF) == 0x40000002) {
+    if ((datCommandRecords[commandIndex].attribute.bits & 0x400000FF) == 0x40000002) {
         return -1;
     }
     if (arg1 & 0x50004) {
         return -1;
     }
     if (arg3 & 0xE0001) {
-        code = -1;
-    } else if ((*(u32 *)(arg0 + 0x110) & 0x200) != 0 && arg2 == 2 && arg4 == 1 && arg5 == 0) {
-        code = 0x12;
+        resultCode = -1;
+    } else if ((actor->flags & 0x200) != 0 && arg2 == 2 && arg4 == 1 && arg5 == 0) {
+        resultCode = 0x12;
     } else {
-        code = 1;
+        resultCode = 1;
     }
-    if (arg5 != 0 && (*(u64 *)(arg0 + 0x110) & 0x4000000200) == 0x200) {
-        code = 0xB;
+    if (arg5 != 0 && (btlUnitStatusPair(actor) & 0x4000000200) == 0x200) {
+        resultCode = 0xB;
     }
     if ((arg1 & 0x20001) == 0) {
-        code = -1;
+        resultCode = -1;
     }
-    return code;
+    return resultCode;
 }
 
 
@@ -7593,7 +7593,7 @@ void func_001DD698(void) {
 
 extern void btlFlagUserAndTargetDefeat(BtlLinkedCommand *, BtlLinkedCommand *);
 extern void btlInitTargetCursorAndFacing(BtlLinkedCommand *, BtlCamState *);
-extern void func_001EEAE0(BtlLinkedCommand *, BtlLinkedCommand *);
+extern void func_001EEAE0(BtlLinkedCommand *, BtlCamState *);
 extern void func_001E2FF8(BtlLinkedCommand *);
 extern void btlSetupActionCameraPair(BtlLinkedCommand *);
 
@@ -7616,7 +7616,7 @@ void btlInitializeLinkedActionCamera(BtlLinkedCommand *action) {
             }
         } else {
             action->stepKind = 11;
-            func_001EEAE0(action, action);
+            func_001EEAE0(action, &action->camera);
         }
     } else {
         if (btlMatchLinkedActorFlags((s32)action)) {

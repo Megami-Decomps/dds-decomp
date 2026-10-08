@@ -1834,7 +1834,92 @@ void func_001DACE0(ActionStateLink *task) {
     task->unit->flags |= 0x4000;
 }
 
-INCLUDE_ASM(const s32, "game/code_001D4438", func_001DACF8);
+extern BtlRuntimeTask *btlCreateControlObject(void);
+extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
+extern void func_001AA898(DatPartyRecord *record, s32 index);
+extern DatEnemyRecord *datEnemyRecords;
+
+void func_001DACF8(ActionStateLink *action) {
+    BtlState *state;
+    BtlUnit *unit;
+    DatPartyRecord *party;
+    BtlRuntimeTask *sound;
+    BtlRuntimeTask *change;
+    BtlRuntimeTask *spawned;
+    s32 delay;
+    u16 flags;
+
+    if (btlCountTasksByKind(0x1A) != 0 ||
+        btlCountTasksByKind(0x18) != 0 ||
+        btlCountTasksByKind(0x23) != 0) {
+        return;
+    }
+    state = (BtlState *)btlGetRuntime();
+    unit = action->unit;
+    delay = func_001E2E58(unit, 0x10) + 15;
+    sound = btlCreateHookedUnitSoundTask(unit, 0x10);
+    btlStartTask(sound);
+    spawned = btlCreateCommandSoundUpdateTask();
+    spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    spawned->flags |= 2;
+    spawned->startCondition.value.handle = sound->handle;
+    btlStartTask(spawned);
+    spawned = btlCreateSecondaryCommandSoundTask();
+    spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    spawned->startCondition.value.handle = sound->handle;
+    btlStartTask(spawned);
+    spawned = btlAllocateIndexedUnitEffectTask((u8 *)unit, 0x10,
+        btlGetSlotRateKind((u8 *)unit, 0x10), 1.0f);
+    spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    spawned->flags |= 2;
+    spawned->startCondition.value.handle = sound->handle;
+    btlStartTask(spawned);
+    spawned = btlCreateControlObject();
+    spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    spawned->flags |= 2;
+    spawned->startCondition.value.handle = sound->handle;
+    btlStartTask(spawned);
+    spawned = btlCreateCommandSoundTask((s32)action, 0x12);
+    spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    spawned->flags |= 2;
+    spawned->startCondition.value.handle = sound->handle;
+    btlStartTask(spawned);
+    spawned = btlCreateEffObjA(unit, action->indexWork.phase);
+    spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    spawned->startCondition.value.handle = sound->handle;
+    btlStartTask(spawned);
+    spawned = fldCreateSceneGroupAction(action, 0x64, 1);
+    spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    spawned->startCondition.value.handle = sound->handle;
+    spawned->ownerId = unit->owner;
+    btlStartTask(spawned);
+    change = btlCreateModelChangeTask(unit, 1, action->indexWork.unk18, delay, 0x12, 1);
+    change->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    change->startCondition.value.handle = sound->handle;
+    btlStartTask(change);
+    btlStartTask(sndCreateEffectSourceTask(state->resources[45], unit, change->handle));
+    spawned = sndCreateEffectSourceTask(state->resources[46], unit, change->handle);
+    spawned->startDelay = delay;
+    btlStartTask(spawned);
+    btlStartTask(sndCreateStationedSeTask(0x1000F));
+    flags = unit->partyRecord.flags;
+    party = &unit->partyRecord;
+    func_001AA898(party, action->indexWork.unk18);
+    party->flags = flags;
+    if ((unit->flags & 0x400) && unit->partyRecord.unitId < 0x180) {
+        action->actionNumber = datEnemyRecords[unit->partyRecord.unitId].unk15;
+    }
+    spawned = btlCreateControlObject();
+    spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
+    spawned->startDelay = delay;
+    spawned->startCondition.value.handle = sound->handle;
+    btlStartTask(spawned);
+    if (state->modelChangeSoundHook != NULL) {
+        state->modelChangeSoundHook(action, sound->handle, delay);
+    }
+    btlDispatchStateHandler(action, 0x1B);
+}
+
 
 void func_001DB048(void) {
 }
@@ -2026,7 +2111,6 @@ extern s32 btlComputeStatusPenaltyFifth(BtlUnit *);
 extern s32 btlIsUnitDefeatTriggeredByValueDelta(u8 *, s32);
 extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
 extern BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *, u32, u32, u32, f32);
-extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 
 void func_001DC540(void *data) {
     BtlOperandEntry spec;

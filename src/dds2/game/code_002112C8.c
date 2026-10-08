@@ -15,7 +15,7 @@
 
 #define BTL_AI_SLOT_COUNT 5
 
-extern void func_00211EA8();
+extern s32 func_00211EA8();
 
 extern u32 btlPickWeightedAiSlot();
 
