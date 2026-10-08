@@ -144,7 +144,6 @@ extern void func_002C1B68(u32 *, u32);
 
 extern s32 movAreTitleEffectsReady(s32, s32);
 
-extern void mnuReleaseStaffMenuResources(s32);
 
 
 
@@ -709,7 +708,7 @@ MenuProgressHost *mnuCreateProgressHost(void) {
 
 /* Release staff/title texture work before the value record and allocation. */
 void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *host) {
-    mnuReleaseStaffMenuTextureHandles((s32)&host->staffSlots);
+    mnuReleaseStaffMenuTextureHandles(&host->staffSlots);
     mnuReleaseTitleEffectSprites(&host->staffSlots);
     effDestroyEffectList(host->titleEffectHandle);
     sdfReleaseResourceAllocation(host->allocation);
@@ -728,7 +727,7 @@ s32 mnuPollTitleEffectsReady(MenuProgressHost *host) {
     if (movAreTitleEffectsReady(host->titleEffectHandle, (s32)host + 8) == 0) {
         return 1;
     }
-    mnuReleaseStaffMenuResources((s32)host + 8);
+    mnuReleaseStaffMenuResources(&host->staffSlots);
     host->loadState = 2;
     return 0;
 }

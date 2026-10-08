@@ -613,7 +613,6 @@ extern void *memset(void *, s32, u32);
 
 extern struct EffectList *mnuAllocateValueRecord(u32);
 extern void mnuAppendCampSpriteRequests(struct EffectList *, StaffSlots *);
-extern void mnuReleaseStaffMenuTextureHandles(u32 *);
 extern void mnuReleaseStaffResourceGroups(StaffSlots *);
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
@@ -635,7 +634,7 @@ MenuProgressHost *mnuCreateWorkBlock(void) {
 /* Release staff window/texture/resource work before the value record and allocation. */
 void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *work) {
     mnuShutdownContext(&work->partyWindow);
-    mnuReleaseStaffMenuTextureHandles(work->staffSlots.baseResources);
+    mnuReleaseStaffMenuTextureHandles(&work->staffSlots);
     mnuReleaseStaffResourceGroups(&work->staffSlots);
     effDestroyEffectList(work->titleEffectHandle);
     sdfReleaseResourceAllocation(work->allocation);
@@ -643,7 +642,6 @@ void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *work) {
 
 extern s32 mnuStaffSlotsAllFilled(struct EffectList *, StaffSlots *);
 
-extern void mnuReleaseStaffMenuResources(s32 *);
 
 extern void mnuInitializeStaffPageWindows(MenuPageWindow *, StaffSlots *, u32, PartyPanel *);
 
@@ -663,7 +661,7 @@ s32 mnuTickInitState(MenuProgressHost *work) {
     if (mnuStaffSlotsAllFilled(work->titleEffectHandle, group) == 0) {
         return 1;
     }
-    mnuReleaseStaffMenuResources(group->baseResources);
+    mnuReleaseStaffMenuResources(group);
     mnuInitializeStaffPageWindows(&work->partyWindow, group, 0, &work->partyPanel);
     work->loadState = 2;
     return 0;

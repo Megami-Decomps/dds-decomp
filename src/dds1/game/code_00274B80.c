@@ -740,18 +740,22 @@ void mnuReleaseMenuWindowHandles() {
 }
 
 /* Release both staff resource slots; their menu indices differ between games. */
-void mnuReleaseStaffMenuResources(s32 *menuWork) {
+void mnuReleaseStaffMenuResources(void *resourceBase) {
+    struct EffectSlotSet **pairResources = (struct EffectSlotSet **)(
+        (u8 *)resourceBase + sizeof(((StaffSlots *)0)->baseResources));
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < 2; resourceIndex++) {
-        effResolveAndReleaseResource(menuWork[7 + resourceIndex]);
+        effResolveAndReleaseResource(pairResources[resourceIndex]);
     }
 }
 
 /* Reset texture handles for the same two resource slots. */
-void mnuReleaseStaffMenuTextureHandles(s32 *menuWork) {
+void mnuReleaseStaffMenuTextureHandles(void *resourceBase) {
+    struct EffectSlotSet **pairResources = (struct EffectSlotSet **)(
+        (u8 *)resourceBase + sizeof(((StaffSlots *)0)->baseResources));
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < 2; resourceIndex++) {
-        effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)menuWork[7 + resourceIndex]);
+        effReleaseTextureHandlesAndResetSlots(pairResources[resourceIndex]);
     }
 }
 

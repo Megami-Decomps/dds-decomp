@@ -459,7 +459,6 @@ void brsApplyRewardBundle(BrsSkillPackageWork *partyWork, BrsRewardSummary *batc
     brsApplyPartyRewards(partyWork, rewardState);
 }
 
-extern void mnuReleaseStaffMenuResources(s32 *);
 extern void mnuInitializeStaffPageWindows(MenuPageWindow *, StaffSlots *, u32, PartyPanel *);
 extern void evtStageTestInit(s32);
 extern void mnuForwardTableByte(s32);
@@ -470,7 +469,7 @@ extern void mnuReleaseStaffResourceGroups(StaffSlots *);
 /* Create the group and sprite backing the skill-package panel for the
  * selected reward row, then forward its unit's ID to the menu. */
 void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
-    u32 *group = (u32 *)work->staffSlots.baseResources;
+    StaffSlots *group = &work->staffSlots;
     MenuPanelGroup *panel;
 
     mnuReleaseStaffMenuResources(group);
@@ -496,7 +495,7 @@ void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
     mnuDestroyPanelGroup(ctx->panelHandle);
     mnuFreeSpriteStateWork(ctx->spriteHandle);
     mnuReleaseAssets(&ctx->assets);
-    mnuReleaseStaffMenuTextureHandles(ctx->staffSlots.baseResources);
+    mnuReleaseStaffMenuTextureHandles(&ctx->staffSlots);
     mnuReleaseStaffResourceGroups(&ctx->staffSlots);
     mnuResetWorkFloats();
 }

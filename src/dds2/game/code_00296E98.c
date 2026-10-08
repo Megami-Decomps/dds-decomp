@@ -499,7 +499,6 @@ void brsApplyRewardBundle(BrsSkillPackageWork *partyWork, BrsRewardSummary *batc
     func_00299018(partyWork, rewardState);
 }
 
-extern void mnuReleaseStaffMenuResources(s32);
 extern void evtStageTestInit(s32);
 
 
@@ -509,10 +508,10 @@ extern void mnuForwardTableByte(s32);
 /* Build the selected reward row's skill-package group and sprite, then
  * forward the selected unit ID to the menu. */
 void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
-    u32 *group = (u32 *)work->staffSlots.baseResources;
+    StaffSlots *group = &work->staffSlots;
     MenuPanelGroup *panel;
 
-    mnuReleaseStaffMenuResources((s32)group);
+    mnuReleaseStaffMenuResources(group);
     mnuInitializeCampPanelResources(&work->partyWindow, &work->staffSlots, 0, &work->partyPanel);
     panel = mnuCreatePanelGroup((s32)work->staffSlots.baseResources[1], work->staffSlots.pairResources[0], 0);
     work->panelHandle = panel;
@@ -528,7 +527,6 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 extern void mnuDestroyEffectResources(MenuEffectResources *);
-extern void mnuReleaseStaffMenuTextureHandles();
 extern void mnuReleaseTitleEffectSprites(StaffSlots *);
 extern void mnuResetWorkFloats(void);
 
@@ -542,7 +540,7 @@ void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
     mnuDestroyPanelGroup(ctx->panelHandle);
     mnuFreeSpriteStateWork(ctx->spriteHandle);
     mnuDestroyEffectResources(&ctx->campEffect.resources);
-    mnuReleaseStaffMenuTextureHandles((s32)&ctx->staffSlots);
+    mnuReleaseStaffMenuTextureHandles(&ctx->staffSlots);
     mnuReleaseTitleEffectSprites(&ctx->staffSlots);
     mnuResetWorkFloats();
 }
