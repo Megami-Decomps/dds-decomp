@@ -793,6 +793,8 @@ typedef char MenuProgressHost_size_must_be_0x82C[(sizeof(MenuProgressHost) == 0x
 
 #ifndef VERSION_DDS2
 /* DDS1 staff movie task work allocated by mnuMovieCreateTask (0x20 bytes). */
+struct SdfMemBlock;
+
 typedef struct MnuStaffMovieWork {
     u32 allocation;      /* 0x00 */
     u32 spriteSet;       /* 0x04: resource passed to mnuDrawIconAlphaSprite */
@@ -807,7 +809,7 @@ typedef char MnuStaffMovieWork_size_must_be_0x20[(sizeof(MnuStaffMovieWork) == 0
 
 /* DDS1 title-movie menu allocation (0x40 bytes). */
 typedef struct MovieMenuState {
-    s32 allocation;      /* 0x00 */
+    struct SdfMemBlock *allocation; /* 0x00: retained general-heap owner */
     u8 pad04[0x0C];
     s32 state;           /* 0x10 */
     s32 cursor;          /* 0x14 */
