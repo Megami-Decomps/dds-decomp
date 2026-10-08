@@ -2436,16 +2436,16 @@ s32 btlGetCommandResultKindFromFlags(u32 flags, u32 secondary) {
 }
 
 s32 btlAverageMaximumValueForMask(u32 mask, s8 allowDisabled) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x228);
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
     s32 sum = 0;
     s32 count = 0;
-    for (; node != 0; node = *(s32 *)(node + 0x344)) {
-        u32 flags = *(u32 *)(node + 0x110);
+    for (; actor != NULL; actor = actor->next) {
+        u32 flags = actor->flags;
         if ((flags & 1) != 0) {
             if (allowDisabled == 0 || (flags & 0x20) == 0) {
-                if ((*(u16 *)(node + 0x120) & mask) != 0) {
+                if ((actor->partyRecord.flags & mask) != 0) {
                     count++;
-                    sum += *(u16 *)(node + 0x128);
+                    sum += actor->partyRecord.maxHp;
                 }
             }
         }
@@ -2463,16 +2463,16 @@ void btlAverageAllMaximumForMask(u32 arg0) {
 }
 
 s32 btlAverageCurrentValueForMask(u32 mask, s8 allowDisabled) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x228);
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
     s32 sum = 0;
     s32 count = 0;
-    for (; node != 0; node = *(s32 *)(node + 0x344)) {
-        u32 flags = *(u32 *)(node + 0x110);
+    for (; actor != NULL; actor = actor->next) {
+        u32 flags = actor->flags;
         if ((flags & 1) != 0) {
             if (allowDisabled == 0 || (flags & 0x20) == 0) {
-                if ((*(u16 *)(node + 0x120) & mask) != 0) {
+                if ((actor->partyRecord.flags & mask) != 0) {
                     count++;
-                    sum += *(u16 *)(node + 0x126);
+                    sum += actor->partyRecord.hp;
                 }
             }
         }
@@ -2490,16 +2490,16 @@ void btlAverageAllCurrentForMask(u32 arg0) {
 }
 
 s32 btlAverageMaskedActorStat(u32 mask, s8 allowDisabled) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x228);
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
     s32 sum = 0;
     s32 count = 0;
-    for (; node != 0; node = *(s32 *)(node + 0x344)) {
-        u32 flags = *(u32 *)(node + 0x110);
+    for (; actor != NULL; actor = actor->next) {
+        u32 flags = actor->flags;
         if ((flags & 1) != 0) {
             if (allowDisabled == 0 || (flags & 0x20) == 0) {
-                if ((*(u16 *)(node + 0x120) & mask) != 0) {
+                if ((actor->partyRecord.flags & mask) != 0) {
                     count++;
-                    sum += *(u16 *)(node + 0x134);
+                    sum += actor->partyRecord.level;
                 }
             }
         }
