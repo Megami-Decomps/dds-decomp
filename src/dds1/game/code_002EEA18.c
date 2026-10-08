@@ -5,6 +5,8 @@
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
 #include "sce_io.h"
+#include "sdf_dev_state.h"
+#include "sdf_dev_event.h"
 
 enum {
     SDF_TMX_MAGIC = 0x30584D54,
@@ -419,28 +421,6 @@ void sdfInitializeTmxImageHeader(SdfTextureFileHeader *header, s32 width, s32 he
     header->unk00 = 2;
 }
 
-/* Device state returned by sdfDevCreateCallbackState; layout shared with the device manager. */
-typedef struct DevState {
-    struct DevState *next;
-    struct DevState *previous;
-    struct DevState *workerNext;
-    struct DevState *workerPrev;
-    void *resource;
-    u8 workerIndex;
-    u8 operation;
-    s8 state;
-    u8 pad17;
-    s32 operationArg;
-    s32 requestExtra;
-    void *requestData;
-    s32 options;
-    s32 resourceId;
-    s32 result;
-    u8 pad30[8];
-    s32 (*callback)(struct DevState *, s32, s32, s32, s32);
-    s32 callbackContext;
-} DevState;
-
 /* Command 34 carries a buffer address and byte count after an opaque first word. */
 typedef struct SdfStreamReadRequest {
     u8 pad00[4];
@@ -459,11 +439,8 @@ typedef struct SdfStreamCfg {
 
 extern SdfStreamCfg D_003FF340;
 extern u8 D_003FF4C0[];
-extern void sdfDevQueueRead();
 extern s32 D_003FF480[];
-extern DevState *sdfDevCreateCallbackState(s32, s32 (*)(DevState *, s32, s32, s32, s32), s32);
-extern s32 sdfDevReactivate(DevState *);
-extern s32 sdfDevQueueReleaseState(DevState *);
+extern DevState *sdfDevCreateCallbackState(const char *, s32 (*)(DevState *, s32, s32, s32, s32), s32);
 extern s32 sdfDevQueueControlRequest();
 extern s32 sdfDevQueueActiveOperation();
 extern s32 WaitSema(s32);
@@ -493,11 +470,11 @@ s32 func_002EF408(DevState *deviceState, s32 command, s32 sourceAddress,
     s32 timer;
 
     switch (command) {
-    case 4:
+    case SDF_DEV_EVENT_SIZE_REPLY:
         stream->readResult = byteCount;
         SignalSema(stream->semaphore);
         break;
-    case 5: {
+    case SDF_DEV_EVENT_READ_REPLY: {
         struct {
             s32 source;
             s32 destination;
@@ -529,11 +506,11 @@ s32 func_002EF408(DevState *deviceState, s32 command, s32 sourceAddress,
         }
         break;
     }
-    case 2:
-    case 7:
+    case SDF_DEV_EVENT_OPENED:
+    case SDF_DEV_EVENT_CLOSED:
         SignalSema(stream->semaphore);
         break;
-    case 0:
+    case SDF_DEV_EVENT_INACTIVE:
         SignalSema(stream->semaphore);
         break;
     }
@@ -548,7 +525,7 @@ s32 *sdfStreamDispatchSynchronousCommand(u32 command, s32 request) {
     DevState *deviceState;
     switch (command) {
     case SDF_STREAM_COMMAND_CREATE_STATE:
-        state->deviceState = sdfDevCreateCallbackState(request, func_002EF408, 0);
+        state->deviceState = sdfDevCreateCallbackState((const char *)request, func_002EF408, 0);
         if (state->deviceState != 0) {
             WaitSema(state->semaphore);
             deviceState = state->deviceState;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_dev_state.h"
 #include "sdf_resource.h"
 #include "kwln.h"
 #include "fld_inf.h"
@@ -3726,9 +3727,6 @@ extern SdfFlagListParams fldCameraColorParameters[];
 extern FldCameraSetting *fldCameraSettings;
 extern FldCameraSetting D_0038BB70;
 extern void *D_004360F0;
-extern u32 sdfDevCreateCommandState(const char *);
-extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
-extern void sdfDevWaitThenReleaseCommandState(u32);
 
 INCLUDE_RODATA(const s32, "game/code_00128FE8", D_00413280);
 
@@ -3740,7 +3738,7 @@ INCLUDE_RODATA(const s32, "game/code_00128FE8", D_004132E0);
 
 void fldLoadBattleSkyAndFilter(void) {
     s32 i;
-    u32 command;
+    DevState *command;
 
     if (fldSkyLightSetBuffer == 0) {
         fldSkyLightSetBuffer = (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock(0xE000));
@@ -3757,12 +3755,12 @@ void fldLoadBattleSkyAndFilter(void) {
         for (i = 0; i < FIELD_CAMERA_SETTING_COUNT; i++) {
             fldCameraSettings[i] = D_0038BB70;
         }
-        fldCameraColorParameters->color.mode = 0;
-        fldCameraColorParameters->color.colorB = fldCameraColorParameters->color.colorA = 0x80808080;
+        fldCameraColorParameters->color.segmentMode = SDF_COLOR_TRACK_MODE_ENDPOINTS;
+        fldCameraColorParameters->color.finalColor = fldCameraColorParameters->color.initialColor = 0x80808080;
         fldCameraColorParameters->alpha.alpha = 0x40;
         fldCameraColorParameters->alpha.surfaceIndex = 2;
-        fldCameraColorParameters->alpha.fadeIn = 0.0f;
-        fldCameraColorParameters->alpha.fadeOut = 1.0f;
+        fldCameraColorParameters->alpha.fadeInFraction = 0.0f;
+        fldCameraColorParameters->alpha.fadeOutFraction = 1.0f;
         fldCameraColorParameters->maxFrames = 0;
         fldCameraColorParameters->count = 0xFF;
         fldCameraColorParameters->speed = 20.0f;
@@ -3785,7 +3783,7 @@ extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddres
 void fldLoadSkyResource(s32 area) {
     char path[64];
     char directory[32];
-    u32 command;
+    DevState *command;
 
     fldSkyDrawState = 0x80;
     if (area < 200) {

@@ -6,6 +6,7 @@
 0x00100D40	kwlnTaskRunScheduledUpdates	inferred	Merges scheduled queues by priority and invokes the per-task step
 0x00100E68	kwlnTaskFinalizeDestroy	inferred	Recursively destroys children, invokes destroy callback, detaches and frees task.
 0x00100FC8	kwlnTaskUpdateFlagsRecursive	inferred	confidence=high; matched-C; src/dds1/kernel/dds3KernelCore.c:161:func_00100FC8; Sets or clears only task flag bits admitted by mask 0x0FFFFFF0, then applies the same operation recursively to each child and descendant.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x00101060	kwlnTaskUpdateFlagsScoped	inferred	native selection 0 target, 1 other queued tasks, 2 subtree, 3 all queued tasks; updates flag bits 4..27
 0x001012B0	kwlnTraverseDiagnosticTaskQueue	inferred	confidence=high; matched-C; src/dds1/kernel/dds3KernelCore.c:195:func_001012B0; Traverses listNext to the end of the supplied task queue; the queue-diagnostic caller supplies all three scheduler heads. The label argument is unused and this body does not print.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x001012E8	kwlnPrintTaskQueueDiagnostics	inferred	confidence=high; src/dds1/kernel/dds3KernelCore.c:func_001012E8; Prints delayed-start, middle, and delayed-destroy task lists and queue counters. [names_qp9.tsv]
 0x00101440	kwlnVisitTaskForestRoots	inferred	confidence=high; matched-C; src/dds1/kernel/dds3KernelCore.c:222:func_00101440; Initializes the task-name scratch buffer, visits only parentless tasks in all three scheduler lists and dispatches the root handler with its second argument zero.; source=fresh-R_Names31-today [names_qp11.tsv]
@@ -1469,6 +1470,7 @@
 0x00163290	effParamCreateFromTable	inferred	reads kind id and data block from a packed row, then creates the work
 0x001632E0	effCreateThunderCellSystemWork	inferred	confidence=high; src/dds1/game/code_001624D0.c:func_001632E0; Copies thunder parameters into retained work, allocates its cell system, initializes every cell and sets default color. [names_qp9.tsv]
 0x001634A0	effPCPThunderCreate	inferred	spawn wrapper: param-set block 0 + init func_001632E0
+0x001634C0	effThunderCloneCellSystemWork	inferred	Duplicate callback recreates the vector cell-system work from its retained parameter prefix.
 0x001634D8	effThunderReleaseVectorWork	inferred	queued
 0x00163518	effThunderSetVectorTint	inferred	queued
 0x00163520	effThunderScaleVectorDimensions	inferred	queued
