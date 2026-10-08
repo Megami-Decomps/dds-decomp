@@ -8,7 +8,7 @@ extern f32 *D_00324770[];
 extern u8 kwlnDefaultColorVector[];
 
 struct EvtUnit;
-extern void evtSetUnitValueTransition(struct EvtUnit *unit, s32 value, s32 duration);
+extern void evtSetUnitValueTransition(struct EvtUnit *unit, EffWorldNode *target, s32 duration);
 extern void evtEndUnitValueTransition(struct EvtUnit *unit, s32 duration);
 extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
 
@@ -74,7 +74,7 @@ void dds3ClearUnitObjectLowFlags(EffWorldNode *object) {
 void evtSetUnitValueTransitionForObject(void *value, EffWorldNode *object, s32 duration) {
     EffectObjectData *data = object->data;
 
-    evtSetUnitValueTransition((struct EvtUnit *)data->transitionWork, (s32)value, duration);
+    evtSetUnitValueTransition(data->transitionWork, value, duration);
 }
 
 void evtEndUnitValueTransitionForObject(EffWorldNode *object, s32 duration) {

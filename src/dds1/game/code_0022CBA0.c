@@ -443,7 +443,7 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022D528);
 
 extern EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *, s32, const u8 *);
 extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *);
-extern void evtSetUnitValueTransition(EvtUnit *, s32, s32);
+extern void evtSetUnitValueTransition(EvtUnit *, EffWorldNode *, s32);
 extern void evtEndUnitValueTransition(EvtUnit *, s32);
 
 /* At time, selects each named unit's latest kind-9 transition key and starts,
@@ -487,7 +487,7 @@ void func_0022E098(s32 time, EventViewerState *viewer) {
                 if (selected != NULL) {
                     if (selected->enabled != 0) {
                         if (unit->currentTransitionValue != selectedValue || !(unit->flags & 0x40000)) {
-                            evtSetUnitValueTransition(unit, selectedValue, selected->duration);
+                            evtSetUnitValueTransition(unit, (EffWorldNode *)selectedValue, selected->duration);
                         }
                     } else {
                         if (unit->flags & 0x40000) {
