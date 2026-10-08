@@ -11,6 +11,9 @@
 #define MNU_WINDOW_SLOT_REFRESH_PRESERVE_HANDLES 1
 #endif
 
+/* Set the window/list opacity scale without clamping. */
+void mnuSetWindowFadeScale(struct MenuWindowContainer *window, u32 fadeScale);
+
 struct DatPartyRecord;
 /* Field-use skills operate on the selected party records and their page. */
 s32 ptySkillApplyFieldUseEffect(MenuPageWindow *page, u16 ability,
@@ -61,7 +64,6 @@ s32 func_002C6008(PartyPanel *party, MenuPageWindow *page,
 MenuWindowContainer *mnuCreateStaffResourceListWindow(
     void *const *entries, s32 entryCount, s32 width, s32 rowHeight,
     u8 *work, const s32 *requiredFlags);
-void mnuSetWindowContainerState(MenuWindowContainer *window, u32 state);
 void mnuDestroyWindowContainer(MenuWindowContainer *window);
 void mnuDestroyPanelState(struct MenuPanelState *panel);
 s32 mnuConsumeEntryCost(s32 commandId, struct DatPartyRecord *entry);

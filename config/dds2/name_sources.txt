@@ -4531,7 +4531,7 @@
 0x002B9010	mnuDecreaseListNodeFadeCounters	inferred	decreases positive fade counters by up to 16 [names_R_FuncNames.tsv]
 0x002B9138	mnuBlendListNodeColorByFlags	inferred	Selects node text color from its status flags and blends it with the previous color by fade counter. [names_reviewed15.tsv]
 0x002B9520	mnuDestroyWindowContainer	inferred	frees list, optional resource, container [names_R_FuncNames.tsv]
-0x002B9568	mnuSetWindowContainerState	inferred	writes state field at +0x94 [names_R_FuncNames.tsv]
+0x002B9568	mnuSetWindowFadeScale	inferred	Stores the window opacity scale used by list, decoration and resource drawing and fade transitions
 0x002B9570	mnuSetWindowContainerLayout	inferred	stores window layout arguments [names_R_FuncNames.tsv]
 0x002B95A0	mnuInitializeBasicWindowLayout	inferred	Initializes window container layout with caller pair and zero for all other layout fields. [names_reviewed18.tsv]
 0x002B95D0	mnuSetWindowEntryParameters	inferred	Copies four provided values into a window entry without proving the fields are sprites. [names_reviewed18.tsv]
