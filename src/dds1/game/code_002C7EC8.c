@@ -18,7 +18,6 @@ extern float fldVectorLength(float *vector);
 extern float func_002FA1C0(float);
 
 
-extern void *sdfMemoryGetBlockAddress(u32 handle);
 
 void sdfCounterDrawGlyphAtGridCell(s32 gridX, s32 gridY, u32 style, const u8 *text) {
     u32 glyph;

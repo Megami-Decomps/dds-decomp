@@ -167,13 +167,12 @@ s32 mnuDisplayNextPendingMantra(s32 context) {
 }
 
 
-extern s32 sdfMemoryGetBlockAddress(s32);
 extern void *memset(void *, s32, u32);
 
 /* Allocate and clear scene work before registering its grid and coordinates. */
 s32 mnuCreateSceneWork(void) {
     s32 allocationHandle = (u32)sdfAllocGeneralBlock(MNU_SCENE_WORK_SIZE);
-    u8 *sceneWork = (u8 *)sdfMemoryGetBlockAddress(allocationHandle);
+    u8 *sceneWork = (u8 *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)allocationHandle);
 
     memset(sceneWork, 0, MNU_SCENE_WORK_SIZE);
     ((MenuSceneWork *)sceneWork)->allocationHandle = allocationHandle;

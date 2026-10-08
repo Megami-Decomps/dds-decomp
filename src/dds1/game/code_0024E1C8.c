@@ -63,7 +63,6 @@ extern void mnuDestroyMantraDrawPool(void *);
 extern void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *);
 extern s32 dspCloseChannel(void);
 extern void sdfQueueNonzeroResourceId(s32);
-extern void *sdfMemoryGetBlockAddress(s32);
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void mnuMarkTitleStreamResetPending(void);
 extern void mnuResetTitleStreamLocked(void);
@@ -553,7 +552,7 @@ void mnuReleaseResourceSlots(MnuResourceTaskWork *unusedWork) {
 /* Allocate and clear resource-task work, load both message resources and prepare the mantra visuals. */
 MnuResourceTaskWork *func_0024F608(void) {
     s32 allocationHandle = (u32)sdfAllocGeneralBlock(sizeof(MnuResourceTaskWork));
-    MnuResourceTaskWork *resourceWork = sdfMemoryGetBlockAddress(allocationHandle);
+    MnuResourceTaskWork *resourceWork = (MnuResourceTaskWork *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)allocationHandle);
 
     memset(resourceWork, 0, sizeof(MnuResourceTaskWork));
     resourceWork->allocation = allocationHandle;
@@ -735,7 +734,7 @@ void mnuResetResourceAnimation(void) {
 /* Allocate the four-word list task work, construct its party list and clear both remaining words. */
 u32 *mnuAllocateEmptyResourceListState(void) {
     s32 allocationHandle = (u32)sdfAllocGeneralBlock(MNU_RESOURCE_LIST_WORK_BYTES);
-    u32 *taskWords = sdfMemoryGetBlockAddress(allocationHandle);
+    u32 *taskWords = (u32 *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)allocationHandle);
 
     memset(taskWords, 0, MNU_RESOURCE_LIST_WORK_BYTES);
     taskWords[0] = allocationHandle;
