@@ -1,5 +1,6 @@
 #include "bill_object_api.h"
 #include "common.h"
+#include "eff_param.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "btl_sound.h"
@@ -1533,8 +1534,6 @@ void effEventInstallBillParticleSet(void) {
     effEventBillSetCreate(D_003563F0);
 }
 
-extern void *effParamWorkCreate(u16, void *);
-extern void *effParamWorkDuplicate(void *);
 
 EffChanWork *effEventCreateChannelFromParams(const EffChanHead *source, u16 kind, void *params) {
     const EffChanHead *head = source;
@@ -1542,7 +1541,7 @@ EffChanWork *effEventCreateChannelFromParams(const EffChanHead *source, u16 kind
     SdfMemBlock *allocation = sdfAllocGeneralBlock(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
     EffChanWork *work = (EffChanWork *)sdfResourceRetainAddress(allocation);
     EffChanRecord *record = (EffChanRecord *)(work + 1);
-    void *parameterTemplate;
+    EffParamWork *parameterTemplate;
     s32 delayModulus;
     u32 recordIndex;
 
