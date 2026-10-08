@@ -769,7 +769,7 @@ struct EffectList;
 
 /* The allocated progress display owns its request list and staff sprite banks. */
 typedef struct MenuProgressHost {
-    s32 heapHandle;
+    struct SdfMemBlock *allocation; /* Retained descriptor for this entire host. */
     struct EffectList *titleEffectHandle;
     StaffSlots staffSlots;
     s32 loadState;
