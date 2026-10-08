@@ -1348,6 +1348,7 @@
 0x0015DDC8	polyStripPushPairsApart	inferred	for each point pair of the strip entry: normalises the pair delta, scales by the node's D0 scale and adds it to both points [names_M71_ItfBlur.tsv]
 0x0015DE88	polyBlendTimedTintColor	inferred	confidence=high; matched-C; src/dds1/effect/polyManager.c:202:func_0015DE88; Interpolates packed tint endpoints with elapsed/duration factor and packs RGBA output.; twin=0x00165A78, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x0015E0D0	polyReleaseBandNodeResources	inferred	Releases polygon node and allocation handles owned by band node. [names_reviewed6.tsv]
+0x0015E100	polyInitializeBandRecordAges	inferred	initializes each poly-band record to the staggered inactive age before the first update
 0x0015E148	polyRingRandomizeRecord	inferred	M141; sources=names_pending_main.tsv; twin=0x00165D38, input-family pairing. [names_qp10.tsv]
 0x0015E238	polyBandLayoutRing	inferred	VU0 macro rewrite; name from behaviour [names_M58_VuSweep.tsv]
 0x0015E3D8	polyStripBuildScaledRing	inferred	same ring as func_0015E238 but with per-record width, a lifted y offset through the matrix and one point pair per step [names_M71_ItfBlur.tsv]
@@ -1699,6 +1700,7 @@
 0x00175B28	effScatterCopyFlatInstanceMatrix	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x0017D780, input-family pairing. [names_qp10.tsv]
 0x00175B50	effScatterCreateDrawObject	inferred	allocates a drawable owner with geometry arrays and an SDF asset for scatter effects
 0x00175D88	effReleaseScatterObject	inferred	Releases the optional scatter resource and two owned handles before freeing the object.
+0x00175DD0	effScatterDrawObject	inferred	builds scatter geometry packets and submits them to the selected render surface
 0x00176020	effCreateScatterResource	inferred	Creates a scatter resource and stores its handle at offset 0x7C.
 0x00176050	effShareScatterResource	inferred	Increments a source object's scatter resource reference and stores the resulting handle.
 0x00176080	effGetScatterWideBlock	inferred	Computes base at offset 0x64 plus index times object stride times 16.
