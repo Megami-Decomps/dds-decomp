@@ -272,7 +272,7 @@ typedef struct MenuListNode MenuListNode;
 /* One allocated party-selection work area: original/current/backup entries,
  * saved panel payloads, and fade state all belong to this same allocation. */
 typedef struct PartyMenuData {
-    s32 allocation;
+    struct SdfMemBlock *allocation;
     u8 pad04[4];
     MenuWindowContainer *primaryWindow; /* 0x08 */
     DatPartyRecord original[5];         /* 0x0C */

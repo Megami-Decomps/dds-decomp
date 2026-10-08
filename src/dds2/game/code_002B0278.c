@@ -280,7 +280,7 @@ typedef struct MenuListNode MenuListNode;
 /* One allocated party-selection work area: original/current/backup entries,
  * saved panel payloads, and fade state all belong to this same allocation. */
 typedef struct PartyMenuData {
-    s32 allocation;
+    struct SdfMemBlock *allocation;
     u8 pad04[4];
     MenuWindowContainer *primaryWindow; /* 0x08 */
     DatPartyRecord original[5];         /* 0x0C */
@@ -749,9 +749,9 @@ extern void mnuLoadPanelSectionResources(struct MenuSlotEffectHandles *slot, u32
 s32 mnuInitializePartySelectionState(KwlnTask *task) {
     s32 contextAddress = (s32)kwlnTaskGetUserValue(task);
     MenuContext *context = (MenuContext *)contextAddress;
-    s32 allocation = (u32)sdfAllocGeneralBlock(sizeof(PartyMenuData));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(PartyMenuData));
     PartyMenuData *menuWork =
-        (PartyMenuData *)sdfResourceRetainAddress((struct SdfMemBlock *)allocation);
+        (PartyMenuData *)sdfResourceRetainAddress(allocation);
     s32 slotIndex;
 
     context->party = (s32)menuWork;
@@ -793,7 +793,7 @@ u32 mnuReleasePartySelectionResources(KwlnTask *task) {
     mnuRefreshPartyPanelSlots(context);
     mnuDestroyPartySelectionWindow(context);
     func_002B0D70(context);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(selection->allocation));
+    sdfReleaseResourceAllocation(selection->allocation);
     return 1;
 }
 
