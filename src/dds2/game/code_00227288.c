@@ -50,13 +50,13 @@ extern s32 btlHasEffectActor(void);
 
 extern s32 btlHasEffectActor(void);
 
-extern s64 btlStartTask(void *);
+extern u64 btlStartTask(void *);
 
-extern s32 btlCreateCommandSoundUpdateTask();
+extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 
 extern s32 btlCreateSecondaryCommandSoundTask();
 
-extern s32 btlCreateCommandSoundTask();
+extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
 
 extern s32 btlCreateEffObjB();
 
@@ -73,6 +73,16 @@ extern u32 effMiscRandMod(void *state, u32 modulus);
 extern void btlSetEffectCameraKeys(s32 command, f32, f32, f32, f32, f32, f32, f32, f32,
     f32, f32, f32, f32, f32, f32, f32, f32);
 
+
+extern u64 btlAdvanceRuntimeSequenceCounter(void);
+extern u32 btlCreateScriptResourceTask(BtlUnit *unit, u32 group);
+extern BtlRuntimeTask *sndCreateStationedSeTask(u32 value);
+extern BtlRuntimeTask *sndCreateCustomTask(s32 value, s32 option);
+extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit);
+extern BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *unit, u32 index, u32 value, s8 mode);
+extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32 value);
+extern BtlRuntimeTask *btlCreateFadeInTask(u32 value);
+extern s32 fldGetSceneGroupEntry(s32 entryIndex);
 
 void func_00227288(void) {
     btlUpdateLinkedEffectUnitTransforms();
@@ -415,7 +425,139 @@ s32 btlSetLinkFlagOn(BtlUnit *requestedUnit) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", func_002286D8);
+void func_002286D8(ActionStateLink *action) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BattleLinkedEffectState *effect = battle->effect;
+    BtlUnit *unit;
+    BtlRuntimeTask *task;
+    u64 soundSequence;
+    u64 refreshSequence;
+    u64 modelSequence;
+    u64 scriptSequence;
+
+    effect->active = 0;
+    soundSequence = btlAdvanceRuntimeSequenceCounter();
+    refreshSequence = btlAdvanceRuntimeSequenceCounter();
+    modelSequence = btlAdvanceRuntimeSequenceCounter();
+    scriptSequence = btlAdvanceRuntimeSequenceCounter();
+
+    for (unit = battle->units; unit != 0; unit = unit->nextActor) {
+        s32 flags = unit->flags;
+        s32 unitId;
+
+        if ((flags & 1) == 0) {
+            continue;
+        }
+        if ((flags & 0x400) == 0) {
+            continue;
+        }
+        unitId = unit->partyRecord.unitId;
+        if (unitId >= 0x130) {
+            continue;
+        }
+        if (unitId < 0x12E) {
+            continue;
+        }
+        if (unit->resourceIndex != 0x119) {
+            continue;
+        }
+
+        if ((flags & 0xE0) == 0) {
+            if (unitId != 0x12F) {
+                u32 scriptTask = btlCreateScriptResourceTask(unit, 0x50);
+                ((BtlRuntimeTask *)scriptTask)->ownerId = scriptSequence;
+                btlStartTask((void *)scriptTask);
+                task = sndCreateStationedSeTask(battle->sequenceHandle);
+                task->ownerId = soundSequence;
+                btlStartTask(task);
+            } else {
+                u32 scriptTask = btlCreateScriptResourceTask(unit, 0x51);
+                ((BtlRuntimeTask *)scriptTask)->ownerId = scriptSequence;
+                btlStartTask((void *)scriptTask);
+                task = sndCreateStationedSeTask(battle->sequenceHandle + 1);
+                task->ownerId = soundSequence;
+                btlStartTask(task);
+            }
+
+            task = sndCreateCustomTask((s32)0x80FFFFFF, 0xC);
+            task->startCondition.kind = 8;
+            task->startCondition.value.handle = scriptSequence;
+            if (unit->partyRecord.unitId == 0x12F) {
+                task->startDelay = 0x6C;
+            } else {
+                task->startDelay = 0x4E;
+            }
+            task->endDelay = 0xC;
+            task->ownerId = soundSequence;
+            btlStartTask(task);
+        } else {
+            if (unitId == 0x12E) {
+                effect->timer |= 4;
+            } else {
+                effect->timer |= 2;
+            }
+        }
+
+        {
+            BtlRuntimeTask *refreshTask = btlScheduleRefreshTask(unit);
+            refreshTask->startCondition.kind = 7;
+            refreshTask->startCondition.value.handle = scriptSequence;
+            refreshTask->ownerId = refreshSequence;
+            btlStartTask(refreshTask);
+        }
+
+        if ((unit->flags & 0xE0) == 0) {
+            BtlRuntimeTask *modelTask = btlCreateModelLoadPollTask(unit, unit->resourceKind,
+                unit->partyRecord.unitId, 1);
+            modelTask->startCondition.kind = 7;
+            modelTask->startCondition.value.handle = refreshSequence;
+            modelTask->ownerId = modelSequence;
+            btlStartTask(modelTask);
+        }
+    }
+
+    {
+        ActionStateLink *sceneAction;
+
+        task = btlCreateSoundUpdateTask(0);
+        task->startCondition.kind = 7;
+        task->startCondition.value.handle = modelSequence;
+        task->startDelay = 2;
+        task->ownerId = action->unit->owner;
+        btlStartTask(task);
+
+        task = btlCreateCommandSoundUpdateTask();
+        task->startCondition.kind = 7;
+        task->startCondition.value.handle = modelSequence;
+        task->ownerId = action->unit->owner;
+        btlStartTask(task);
+
+        sceneAction = (ActionStateLink *)fldGetSceneGroupEntry(0);
+        if (sceneAction != 0 && (sceneAction->pendingFlags & 8) != 0 &&
+            (sceneAction->unit->flags & 0x200) != 0) {
+            task = btlCreateCommandSoundTask((s32)sceneAction, 9);
+            task->startCondition.kind = 7;
+            task->startCondition.value.handle = modelSequence;
+            task->ownerId = action->unit->owner;
+            btlStartTask(task);
+        } else {
+            task = btlCreateCommandSoundTask(0, 3);
+            task->startCondition.kind = 7;
+            task->startCondition.value.handle = modelSequence;
+            task->ownerId = action->unit->owner;
+            btlStartTask(task);
+        }
+
+        task = btlCreateFadeInTask(0x10);
+        task->startCondition.kind = 7;
+        task->startCondition.value.handle = modelSequence;
+        task->endDelay = 0x1F;
+        task->ownerId = action->unit->owner;
+        btlStartTask(task);
+    }
+}
+
+
 
 s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit) {
     BtlState *battle = (BtlState *)btlGetRuntime();
