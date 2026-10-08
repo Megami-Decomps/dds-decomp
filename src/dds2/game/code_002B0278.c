@@ -3332,9 +3332,6 @@ void mnuCallInitWide(s32 x, s32 y, s32 depth, s32 menu, s32 drawArg);
 
 /* Destroy the owned list and optional sprite resources before freeing the window. */
 
-void mnuSetWindowOverlaySprite(MenuWindowContainer *menu, u32 layout);
-
-
 
 
 
