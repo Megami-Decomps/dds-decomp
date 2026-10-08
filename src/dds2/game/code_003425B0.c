@@ -1419,7 +1419,7 @@ void sdfAdvanceBufferedPlayback(MidiPlaybackState *state) {
     func_003450D8(0);
 }
 
-extern void sdfTexEnqueuePacketWithSemaphore(s32, s32);
+extern void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet);
 extern void func_003444F8();
 
 /* Return zero only when nothing is pending; otherwise call the zero-buffer handler if needed, queue and advance. */
@@ -1433,7 +1433,7 @@ s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
     if (*selectedBuffer == 0) {
         func_003444F8();
     }
-    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, *selectedBuffer + state->bufferSize - SDF_STREAM_QWORD_BYTES);
+    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, (void *)(*selectedBuffer + state->bufferSize - SDF_STREAM_QWORD_BYTES));
     sdfAdvanceBufferedPlayback(state);
     return 1;
 }
@@ -1505,7 +1505,7 @@ typedef struct SdfStreamParams {
     u8 param3;
 } SdfStreamParams;
 
-extern s32 sdfTexGetPrimaryResourceWord();
+extern u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 
 void sdfStreamCreateWithParams(s32 state, SdfStreamParams *params, s32 source, s32 size, u8 *resource) {
     SdfStreamParams local = *params;

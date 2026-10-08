@@ -2,6 +2,7 @@
 #include "eff_curve.h"
 #include "file.h"
 #include "file_slot.h"
+#include "dat_state.h"
 #include "pcp_vu0.h"
 struct EffectSlotSet;
 extern void func_00306CD0(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
@@ -26,9 +27,7 @@ typedef struct FileRecordHeader {
     s8 party[8];
     s8 levels[8];
     u32 money;
-    u32 header24;
-    u32 header28;
-    u32 header2C;
+    u32 progressWords[3];
 } FileRecordHeader;
 
 typedef struct FileScrollArrowState {
@@ -184,7 +183,6 @@ extern u32 fileSelectionPending;
 
 extern u32 D_00437D04;
 
-extern s32 datGameState;
 
 extern u32 fileSavedSlotFlags;
 
@@ -471,15 +469,6 @@ extern FileJobPayload *fileCreateJob(u16 type);
 extern void fileJobFreePrimaryBuffer(FileJobPayload *job);
 extern void fileJobFreeSecondaryBuffer(FileJobPayload *job);
 
-/* Only fields needed by the save copy are exposed; the remaining state is opaque. */
-typedef struct FileSaveState {
-    FileRecordHeader header; /* 0x00 */
-    u8 pad30[0xA24];
-    u32 slotFlags;      /* 0xA54 */
-    u8 padA58[0x1DBF8];
-    u32 savedMoney;     /* 0x1E650 */
-} FileSaveState;
-
 typedef struct FileQueue {
     f32 offset[4];
     f32 axis[4];
@@ -573,7 +562,7 @@ extern s32 D_00437D2C;
 
 extern void *fileBuildMainBlobAfterDelete(void);
 
-extern void *func_002CC210();
+extern void *fileBuildMainBlobAndWrite(void);
 
 extern void mcDeleteFilePath(void);
 
@@ -669,10 +658,10 @@ u32 fileMainBlobSize(void) {
 }
 
 void fileReloadSaveBuffer(void) {
-    s32 saved = *(s32 *)(datGameState + 0x30);
+    s32 saved = datGameState->header.backingAllocation;
     s32 size = FILE_MAIN_BLOB_SIZE;
-    memcpy((void *)datGameState, (void *)fileSaveReadBuffer, size);
-    *(s32 *)(datGameState + 0x30) = saved;
+    memcpy(datGameState, (void *)fileSaveReadBuffer, size);
+    datGameState->header.backingAllocation = saved;
 }
 
 u8 fileIsLoadedAndConditionTrue(s32 condition) {
@@ -1880,7 +1869,7 @@ void *fileBuildMainBlobAfterDelete(void) {
         return NULL;
     }
     if (t == 1) {
-        return func_002CC210();
+        return fileBuildMainBlobAndWrite();
     }
     if (t == -1) {
         fileSetMenuFlowState(0);
@@ -1931,14 +1920,72 @@ s32 fileRequestBaseIcon(void) {
     return fileBeginRequest("base.ico", &D_00439034, &D_00439038, fileBeginLabeledSlotWrite, &fileSaveIconRequest);
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002CC210);
+extern DatGameState *D_00439010;
+extern u32 D_00439014;
+
+void *fileBuildMainBlobAndWrite(void) {
+    char filename[0x50];
+    FileRecordHeader *header;
+    s32 slot = fileReqGetSelectedSlot(fileMemoryCardRequestContext);
+
+    mcdFormatSaveSlotName(filename, slot);
+    datGameState->header.magic[0] = 'V';
+    datGameState->header.magic[1] = 'E';
+    datGameState->header.magic[2] = 'R';
+    datGameState->header.version = 3;
+    datGameState->header.mapGroup = datGameState->vr.previewX;
+    datGameState->header.mapIndex = datGameState->vr.previewY;
+    datGameState->header.playTicks = datGameState->header.secondTick;
+    datGameState->header.partyIds[0] = datGameState->party[0].unitId;
+    datGameState->header.partyIds[1] = datGameState->party[1].unitId;
+    datGameState->header.partyIds[2] = datGameState->party[2].unitId;
+    datGameState->header.partyIds[3] = datGameState->party[3].unitId;
+    datGameState->header.partyIds[4] = datGameState->party[4].unitId;
+    datGameState->header.partyIds[5] = 0;
+    datGameState->header.partyIds[6] = 0;
+    datGameState->header.partyIds[7] = 0;
+    datGameState->header.partyLevels[0] = datGameState->party[0].level;
+    datGameState->header.partyLevels[1] = datGameState->party[1].level;
+    datGameState->header.partyLevels[2] = datGameState->party[2].level;
+    datGameState->header.partyLevels[3] = datGameState->party[3].level;
+    datGameState->header.partyLevels[4] = datGameState->party[4].level;
+    datGameState->header.partyLevels[5] = 0;
+    datGameState->header.partyLevels[6] = 0;
+    datGameState->header.partyLevels[7] = 0;
+
+    header = (FileRecordHeader *)datGameState;
+    D_004580C0[slot].signature[0] = header->signature[0];
+    D_004580C0[slot].signature[1] = header->signature[1];
+    D_004580C0[slot].signature[2] = header->signature[2];
+    D_004580C0[slot].version = header->version;
+    D_004580C0[slot].mapGroup = header->mapGroup;
+    D_004580C0[slot].mapIndex = header->mapIndex;
+    D_004580C0[slot].playTicks = header->playTicks;
+    D_004580C0[slot].status = header->status;
+    D_004580C0[slot].newCycle = header->newCycle;
+    memcpy(D_004580C0[slot].party, header->party, 8);
+    memcpy(D_004580C0[slot].levels, header->levels, 8);
+    D_004580C0[slot].money = header->money;
+    D_004580C0[slot].progressWords[0] = header->progressWords[0];
+    D_004580C0[slot].progressWords[1] = header->progressWords[1];
+    D_004580C0[slot].progressWords[2] = header->progressWords[2];
+    D_00439010 = datGameState;
+    D_00439014 = sizeof(DatGameState);
+    if (D_00437D08 == 0 || D_00437D08 == 2) {
+        return (void *)fileBeginRequest(filename, &D_00439010, &D_00439014,
+                                       fileRequestBaseIcon, NULL);
+    }
+    return (void *)fileBeginRequest(filename, &D_00439010, &D_00439014,
+                                   fileBeginLabeledSlotWrite, NULL);
+}
 
 void *mcChooseLoadPath(void) {
     u32 entry = fileMemoryCardRequestContext;
     s32 slot = fileReqGetSelectedSlot(entry);
     u32 flags = fileReqGetSlotFlags(entry, slot);
     if (!(flags & 8)) {
-        return func_002CC210(entry, D_0042B6B8);
+        /* Preserve the legacy context/path dispatch to this global-state endpoint. */
+        return ((void *(*)())fileBuildMainBlobAndWrite)(entry, D_0042B6B8);
     }
     mcDeleteFilePath();
     return fileBuildMainBlobAfterDelete;
@@ -2551,7 +2598,7 @@ s32 func_002CD028(s32 work) {
                         }
                     }
                 }
-                if (D_004580C0[slot].header2C & 0x80000000) {
+                if (D_004580C0[slot].progressWords[2] & 0x80000000) {
                     u32 badgeColor = (alpha << 24) | 0x808080;
                     func_00108EC0(0x1B, y + 0x4C, 0x57, 0x23, 2, 0x5D, 0x57, 0x23, badgeColor, badgeColor, badgeColor, badgeColor, D_00437D70);
                 }
@@ -2771,8 +2818,9 @@ void func_002CE208(s32 mode) {
         mcdOriginalTitleFileMode = 0;
         D_00437D0C = 1;
         mdlFlagSet(0xBA0);
-        ((FileSaveState *)datGameState)->header.status = (u16)((FileSaveState *)datGameState)->header.status + 1;
-        ((FileSaveState *)datGameState)->header.newCycle = 1;
+        datGameState->header.unk0C =
+            (u16)datGameState->header.unk0C + 1;
+        datGameState->header.transition = 1;
         fileMenuStateHandler = (void *)fileLoadIconFileAndBeginSlotReset;
     } else {
         D_00437D0C = 0;
@@ -2924,17 +2972,11 @@ u32 fileGetLoadSelectionState(void) {
     return D_00437D04;
 }
 
-typedef struct FilePreviewWork {
-    u8 pad0[0x110F0];
-    s16 previewX;
-    s16 previewY;
-} FilePreviewWork;
-
 void fileSetPreviewLocation(s16 x, s16 y) {
-    FilePreviewWork *work = (FilePreviewWork *)datGameState;
+    DatGameState *state = datGameState;
 
-    work->previewX = x;
-    work->previewY = y;
+    state->vr.previewX = x;
+    state->vr.previewY = y;
 }
 
 void fileSetMenuValueAndInitializeFlags(u32 value) {
@@ -3367,9 +3409,9 @@ void func_002D0AB8(void) {
 extern char D_0042B938[];
 
 void fileSaveAndDisplayCurrentMoney(void) {
-    FileSaveState *state = (FileSaveState *)datGameState;
-    u32 money = state->header.money;
-    state->savedMoney = money;
+    DatGameState *state = datGameState;
+    u32 money = state->header.unk20;
+    state->savedCurrency = money;
     func_0035B6E0(D_0042B938, money);
 }
 
@@ -3380,13 +3422,12 @@ INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B938);
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D0B08);
 
 void fileCopySaveHeaderNumbers(FileRecordHeader *source) {
-    s32 state;
+    DatGameState *state = datGameState;
 
-    state = datGameState;
-    ((FileSaveState *)datGameState)->header.money = source->money;
-    ((FileSaveState *)state)->header.header24 = source->header24;
-    ((FileSaveState *)state)->header.header28 = source->header28;
-    ((FileSaveState *)state)->header.header2C = source->header2C;
+    state->header.unk20 = source->money;
+    state->header.unk24 = source->progressWords[0];
+    state->header.unk28 = source->progressWords[1];
+    state->header.unk2C = source->progressWords[2];
 }
 
 void fileCopyRecordHeader(FileRecordHeader *destination, const FileRecordHeader *source) {
@@ -3425,11 +3466,11 @@ s32 fileLoadStateChanged(void) {
 
 void fileCacheSlotFlagsFromState(void) {
     fileSlotFlagMirror.current = fileSlotFlagMirror.previous =
-        ((FileSaveState *)datGameState)->slotFlags;
+        datGameState->world.slotFlags;
 }
 
 void fileRestoreSlotFlagsToState(void) {
-    ((FileSaveState *)datGameState)->slotFlags = fileSavedSlotFlags;
+    datGameState->world.slotFlags = fileSavedSlotFlags;
 }
 
 extern void kwlnPadStartMotor(s32, u8, s32);
@@ -3505,7 +3546,7 @@ s32 fileTestSlotFlagsBit(kind, flags)
 }
 
 s32 fileTestSavedSlotFlags(u32 kind) {
-    return fileTestSlotFlagsBit(kind, (s32 *)(datGameState + 0xA54));
+    return fileTestSlotFlagsBit(kind, (s32 *)&datGameState->world.slotFlags);
 }
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D1058);
@@ -3554,7 +3595,7 @@ void fileConfigTaskDestroy(void) {
     s32 i;
 
     if (fileConfigTaskWork != 0) {
-        fileSavedSlotFlags = ((FileSaveState *)datGameState)->slotFlags;
+        fileSavedSlotFlags = datGameState->world.slotFlags;
         if (*(u32 *)(fileConfigTaskWork + 4) == 1) {
             dds3AdminSubmitModeRequest(2, &request, 4, 0);
             mnuAdvanceTitleStateUnderSemaphore();
@@ -3716,15 +3757,15 @@ s32 func_002D1450(void) {
     }
     index = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index;
     if (index < 4) {
-        if (D_0037F510[0x24] < 0 && fileTestSlotFlagsBit(index, (s32 *)(datGameState + 0xA54)) == 0) {
-            fileToggleSlotFlagsBit(((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index, (s32 *)(datGameState + 0xA54));
+        if (D_0037F510[0x24] < 0 && fileTestSlotFlagsBit(index, (s32 *)&datGameState->world.slotFlags) == 0) {
+            fileToggleSlotFlagsBit(((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index, (s32 *)&datGameState->world.slotFlags);
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
             cursor = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor;
             cursor->resource->ticks = 8;
         }
         if (D_0037F510[0x25] < 0) {
-            if (fileTestSlotFlagsBit(((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index, (s32 *)(datGameState + 0xA54)) != 0) {
-                fileToggleSlotFlagsBit(((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index, (s32 *)(datGameState + 0xA54));
+            if (fileTestSlotFlagsBit(((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index, (s32 *)&datGameState->world.slotFlags) != 0) {
+                fileToggleSlotFlagsBit(((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index, (s32 *)&datGameState->world.slotFlags);
                 sndSetSequenceVolumePan(8, 0x7F, 0x3F);
                 cursor = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor;
                 cursor->resource->ticks = 8;
@@ -3958,7 +3999,7 @@ void func_002D1930(s32 x, s32 y, s32 depth, FileConfigList *list,
         }
     }
     if (index < 3) {
-        if (fileTestSlotFlagsBit(index, datGameState + 0xA54) != 0) {
+        if (fileTestSlotFlagsBit(index, (s32 *)&datGameState->world.slotFlags) != 0) {
             func_00306CD0(D_003E9028[10][FILE_CONFIG_X] << 4, (D_003E9028[10][FILE_CONFIG_Y] + index * 35 - 30) << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
                          (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[10][FILE_CONFIG_SET]],
@@ -4002,7 +4043,7 @@ void func_002D1930(s32 x, s32 y, s32 depth, FileConfigList *list,
             }
         }
     } else if (index == 3) {
-        if (fileTestSlotFlagsBit(3, datGameState + 0xA54) != 0) {
+        if (fileTestSlotFlagsBit(3, (s32 *)&datGameState->world.slotFlags) != 0) {
             func_00306CD0(D_003E9028[12][FILE_CONFIG_X] << 4, (D_003E9028[12][FILE_CONFIG_Y] - 30) << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
                          (struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[D_003E9028[12][FILE_CONFIG_SET]],
@@ -4123,8 +4164,8 @@ void fileResetRenderFlags(void) {
     effModelUpdateControlFlags = 0;
 }
 
-u32 func_002D2CB0(s32 index) {
-    return D_003E9150[index];
+SdfPoolNode *func_002D2CB0(s32 index) {
+    return (SdfPoolNode *)D_003E9150[index];
 }
 
 void mnuProjectViewPoint(void) {

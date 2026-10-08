@@ -290,7 +290,7 @@ u64 func_00287900(void) {
 extern u32 mnuGetDefaultPanelSelector(MnuStatusResource *);
 extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
 extern void func_00267B40(s32, MenuProgressHost *);
-extern void mnuEnsureProfilePanelEffect(s32, MenuProgressHost *);
+extern void mnuEnsureProfilePanelEffect(DatPartyRecord *, MenuProgressHost *);
 extern char D_00426208[];
 extern char D_00426218[];
 
@@ -310,7 +310,7 @@ s32 mtrMantraEquipInit(void) {
     work->snapshot.profileId = selector[2];
     evtPrintDeveloperConsoleMessage(D_00426208, work->snapshot.maxHp, work->snapshot.maxMp);
     func_00267B40((s32)snapshot, work->progressHost);
-    mnuEnsureProfilePanelEffect((s32)snapshot, work->progressHost);
+    mnuEnsureProfilePanelEffect(snapshot, work->progressHost);
     mnuInitPartyPanelSlots(&work->progressHost->partyPanel);
     func_002BCAB0(&work->progressHost->partyWindow);
     work->flags.fadeProgress = 0;

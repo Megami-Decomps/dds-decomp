@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_profile_progress.h"
 
 typedef struct MantraPulseEntryRecord {
     u8 pad00[0xC];
@@ -17,11 +18,6 @@ typedef struct MantraPulseGrid {
     s32 stride;
     void (*drawEntry)(s32, s32, s32, struct MantraPulseGrid *, MantraPulseEntry *, s32);
 } MantraPulseGrid;
-
-typedef struct DspProfileSelection {
-    u32 unit;
-    s32 profileId;
-} DspProfileSelection;
 
 extern void itfDspDrawStrip(s32, s32, s32, s32, s32);
 extern void mnuDrawSelectedMantraEntry();
@@ -126,9 +122,9 @@ void mnuAdvanceMantraPulseGridEntries(s32 argument, MantraPulseGrid *grid) {
 
 extern void *func_002CB3B8(s32, s32);
 extern void func_0024EDC0(s32, s32, s32, s32, s32, s32, f32, f32, s32);
-extern void func_00259498(s32, s32, s32, s32, DspProfileSelection *, MantraPulseGrid *, MantraPulseEntry *, s32);
-extern void func_00259890(s32, s32, s32, s32, DspProfileSelection *, MantraPulseGrid *, f32, f32, MantraPulseEntry *, s32);
-extern void func_00259B40(s32, s32, s32, s32, DspProfileSelection *, MantraPulseGrid *, f32, f32, MantraPulseEntry *, s32);
+extern void func_00259498(s32, s32, s32, s32, MnuProfileProgress *, MantraPulseGrid *, MantraPulseEntry *, s32);
+extern void func_00259890(s32, s32, s32, s32, MnuProfileProgress *, MantraPulseGrid *, f32, f32, MantraPulseEntry *, s32);
+extern void func_00259B40(s32, s32, s32, s32, MnuProfileProgress *, MantraPulseGrid *, f32, f32, MantraPulseEntry *, s32);
 extern void func_00257ED0(s32, s32, s32, s32, MantraPulseDisplayWork *, s32);
 extern void func_00258B90(s32, s32, s32, s32, void *, s32);
 extern s32 mnuSceneResourceContext;
@@ -136,7 +132,7 @@ extern s32 mnuSceneResourceContext;
 /* Draw the mantra pulse band and both entry passes at unit scale, placing the
  * selected entry with its offsets from the display table. */
 void func_00257718(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
-                   DspProfileSelection *selection, MantraPulseGrid *grid,
+                   MnuProfileProgress *selection, MantraPulseGrid *grid,
                    s32 arg6) {
     MantraPulseDisplayWork *display;
     MantraPulseEntry *entry;
@@ -184,7 +180,7 @@ void func_00257718(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
  * neutral name, as a C89 programmer with all declarations at the top would
  * write. That reuse is what retail's bytes require. */
 void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
-                   DspProfileSelection *selection, MantraPulseGrid *grid, s32 arg6,
+                   MnuProfileProgress *selection, MantraPulseGrid *grid, s32 arg6,
                    f32 scaleX, f32 scaleY) {
     MantraPulseDisplayWork *display;
     MantraPulseEntry *entry;

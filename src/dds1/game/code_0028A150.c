@@ -3781,8 +3781,8 @@ void fileResetRenderFlags(void) {
     effModelUpdateControlFlags = 0;
 }
 
-u32 func_00292C48(s32 index) {
-    return D_0037E130[index];
+SdfPoolNode *func_00292C48(s32 index) {
+    return (SdfPoolNode *)D_0037E130[index];
 }
 
 extern u8 sdfViewMatrix[];

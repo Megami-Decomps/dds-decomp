@@ -12,7 +12,7 @@ extern void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *);
 extern void mnuStoreScrollPanelSelectionAndGridPosition(struct MenuScrollPanel *, u32, u32, u32);
 extern void mnuSetWindowResource(s32, s32, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, s32, u32);
-extern MenuProfilePanel *mnuCreateProfilePanel(s32);
+extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32, u32);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
@@ -751,7 +751,7 @@ void func_00276018(s32 contextAddress) {
                   record, marker,
                   (u32)menu->fadeA, (u32)menu->fadeB, found);
 
-    profilePanel = mnuCreateProfilePanel((s32)record);
+    profilePanel = mnuCreateProfilePanel(record);
     profilePanel->phase = menu->profilePanelPhase;
     profilePanel->opacity = (u32)menu->fadeA;
     mnuCacheProfilePanelGridPositions(profilePanel, (u32)sets[0],
@@ -927,7 +927,7 @@ s32 func_00276898(KwlnTask *task) {
                                             (EffectSlotSet *)context->displayVariant,
                                             (EffectSlotSet *)context->unk60,
                                             (EffectSlotSet *)context->staffVariant);
-    profilePanel = mnuCreateProfilePanel((s32)record);
+    profilePanel = mnuCreateProfilePanel(record);
     context->extraResource = profilePanel;
     mnuCacheProfilePanelGridPositions(profilePanel, context->staffParam, 5, 0xE, 0xF);
     menu->resourceList = mnuCreatePanelSpriteHandles(1, context->displayVariant, context->unk120);

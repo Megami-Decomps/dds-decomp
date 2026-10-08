@@ -472,11 +472,12 @@ s32 mnuReleaseSelectedStaffPageResources(s32 unused) {
     return 1;
 }
 
-void mnuPrepareStaffSelectionChangeDialog(s32 context, DatPartyRecord *entry, s32 target) {
-    u8 *menu = ((MenuStaffContext *)context)->menu;
+void mnuPrepareStaffSelectionChangeDialog(MenuStaffContext *context,
+                                           DatPartyRecord *entry, s32 target) {
+    MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     s32 current = mnuGetPartyEntryMenuValue(entry);
 
-    func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 1);
+    func_002C1B68(&context->unkAA50, 1);
     if (current != target) {
         evtCopyEntryStringToActiveWindow(0, D_00435E48 + entry->unitId * 0x11);
         evtCopyEntryStringToActiveWindow(1, D_00435E5C + current * 0x19);
@@ -486,13 +487,13 @@ void mnuPrepareStaffSelectionChangeDialog(s32 context, DatPartyRecord *entry, s3
             ptyAdjustItemQuantity(current, 1);
         }
         ptyAdjustItemQuantity(target, -1);
-        ((MenuStaffChoices *)menu)->previous = current;
-        ((MenuStaffChoices *)menu)->requested = target;
+        menu->previous = current;
+        menu->requested = target;
     } else {
         evtCopyEntryStringToActiveWindow(0, D_00435E5C + current * 0x19);
         dspStartEntry(1);
-        ((MenuStaffChoices *)menu)->previous = 0;
-        ((MenuStaffChoices *)menu)->requested = 0;
+        menu->previous = 0;
+        menu->requested = 0;
     }
 }
 
@@ -593,8 +594,7 @@ s32 func_002AE580(KwlnTask *task) {
                 if (menu->windows[2]->list->count != 0) {
                     u32 itemId = menu->windows[2]->list->cursor->sortKeySecondary;
 
-                    mnuPrepareStaffSelectionChangeDialog(
-                        (s32)context, party, itemId);
+                    mnuPrepareStaffSelectionChangeDialog(context, party, itemId);
                     mnuSetPartyEntryMenuValue(party, itemId);
                     countWindow = menu->windows[2];
                     /* Snapshot input before publishing the remaining item count. */
@@ -735,17 +735,18 @@ s32 mnuReleaseStaffSelectionPageResources(s32 unused) {
     return 1;
 }
 
-void mnuStaffEntrySwapLabels(s32 context, DatPartyRecord *entry, s32 target) {
-    u8 *menu = ((MenuStaffContext *)context)->menu;
+void mnuStaffEntrySwapLabels(MenuStaffContext *context,
+                             DatPartyRecord *entry, s32 target) {
+    MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     s32 current = mnuGetPartyEntryCurrentId(entry);
 
-    func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 1);
+    func_002C1B68(&context->unkAA50, 1);
     if (target == 0) {
         evtCopyEntryStringToActiveWindow(0, D_00435E48 + entry->unitId * 0x11);
         evtCopyEntryStringToActiveWindow(1, D_00435E5C + current * 0x19);
         dspStartEntry(6);
-        ((MenuStaffChoices *)menu)->alternatePrevious = current;
-        ((MenuStaffChoices *)menu)->alternateRequested = 0;
+        menu->alternatePrevious = current;
+        menu->alternateRequested = 0;
     } else if (current != target) {
         if (current != 0) {
             evtCopyEntryStringToActiveWindow(0, D_00435E48 + entry->unitId * 0x11);
@@ -757,13 +758,13 @@ void mnuStaffEntrySwapLabels(s32 context, DatPartyRecord *entry, s32 target) {
             evtCopyEntryStringToActiveWindow(1, D_00435E5C + target * 0x19);
             dspStartEntry(4);
         }
-        ((MenuStaffChoices *)menu)->alternatePrevious = current;
-        ((MenuStaffChoices *)menu)->alternateRequested = target;
+        menu->alternatePrevious = current;
+        menu->alternateRequested = target;
     } else {
         evtCopyEntryStringToActiveWindow(0, D_00435E5C + current * 0x19);
         dspStartEntry(5);
-        ((MenuStaffChoices *)menu)->alternatePrevious = 0;
-        ((MenuStaffChoices *)menu)->alternateRequested = 0;
+        menu->alternatePrevious = 0;
+        menu->alternateRequested = 0;
     }
 }
 
@@ -873,7 +874,7 @@ s32 func_002AF020(KwlnTask *task) {
                     }
 
                     if (eligible != 0) {
-                        mnuStaffEntrySwapLabels((s32)context, party, selectionId);
+                        mnuStaffEntrySwapLabels(context, party, selectionId);
                         mnuSetPartyEntryCurrentId(party, (u32)selectionId);
                         menu->windows[3]->list->cursor->sortKeyPrimary = datGameState->inventory.counts[selectionId];
                         mnuInitPartyPanelSlots(&context->partyPanel);
@@ -1025,13 +1026,15 @@ s32 mnuReleaseStaffValuePageResources(s32 unused) {
     return 1;
 }
 
-void mnuPrepareStaffValueChangeDialog(s32 context, DatPartyRecord *entry, s32 unused, s32 flag) {
+void mnuPrepareStaffValueChangeDialog(MenuStaffContext *context,
+                                      DatPartyRecord *entry, s32 unused,
+                                      s32 flag) {
     char valueText[16];
-    MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
+    MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     s32 current;
     s32 base;
 
-    func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 1);
+    func_002C1B68(&context->unkAA50, 1);
     current = mnuGetPartyEntryCurrentId(entry);
     evtCopyEntryStringToActiveWindow(0, D_00435E5C + current * 0x19);
     evtCopyEntryStringToActiveWindow(1, D_003E7400[menu->thirdListIndex]);
