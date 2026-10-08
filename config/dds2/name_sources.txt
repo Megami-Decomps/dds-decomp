@@ -917,6 +917,7 @@
 0x00158E00	billReleaseChild	inferred	Releases the billboard's child at offset 0x30 when present, then frees the billboard.
 0x00158E38	billProcessChild	inferred	Passes the billboard and its child at offset 0x30 to its processing routine.
 0x00158F58	billReleaseList	inferred	Releases a billboard list's shared data and then frees the list object.
+0x00158F88	billStepAnimationEntryAndUpdateChild	inferred	Advances one animation entry timer, updates the selected frame, and copies its color, UVs, dimensions, and placement into the referenced child payload; plural entries are handled by the caller.
 0x00159158	effBillModulateColors	inferred	multiplies RGBA channels using VU and repacks result [names_reviewed5.tsv]
 0x001594C8	billSetAnimationEntry	inferred	LeverAudit
 0x00159678	billCreateAnimationDataFromResource	inferred	Copies serialized animation data, resolves child payloads and initializes the BillData consumed by billAllocList; DDS1 counterpart.
