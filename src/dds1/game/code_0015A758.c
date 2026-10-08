@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
+#include "par_kind_api.h"
 #include "par_draw_block.h"
 #include "eff.h"
 
@@ -163,11 +164,7 @@ extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 extern void func_002DA420(s32, f32);
 
-typedef struct ParScaleObj {
-    u16 kind;
-    u8 pad2[6];
-    f32 scale; /* 0x8 */
-} ParScaleObj;
+
 
 extern f32 D_003D6490[];
 
@@ -391,7 +388,7 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015ADB0);
 
 /* Kinds 2-4 keep the scale at +8 of their own record; copy it into the
  * shared vector and store the (vf10 - vf11) difference. */
-void parUpdateSharedScaleAndDelta(ParScaleObj *obj) {
+void parUpdateSharedScaleAndDelta(ParKindState *obj) {
     f32 scale;
 
     switch (obj->kind) {
@@ -399,15 +396,15 @@ void parUpdateSharedScaleAndDelta(ParScaleObj *obj) {
     case 1:
         return;
     case 2:
-        scale = obj->scale;
+        scale = obj->value.scale;
         D_003D64A0[0] = D_003D64A0[1] = D_003D64A0[2] = scale;
         break;
     case 3:
-        scale = obj->scale;
+        scale = obj->value.scale;
         D_003D64A0[0] = D_003D64A0[1] = D_003D64A0[2] = scale;
         break;
     case 4:
-        scale = obj->scale;
+        scale = obj->value.scale;
         D_003D64A0[0] = D_003D64A0[1] = D_003D64A0[2] = scale;
         break;
     default:
@@ -419,7 +416,7 @@ void parUpdateSharedScaleAndDelta(ParScaleObj *obj) {
     VU0_STORE_VF($vf10, D_003D6490);
 }
 
-extern void func_00159CF0(s32);
+extern void func_00159CF0(struct ParTable *table, s32 index, u32 color, f32 speed);
 
 extern void parUpdateBillboardCrossStrip(s32, s32, u32);
 
@@ -427,10 +424,10 @@ extern void parUpdateBillboardCrossTriangle(s32, s32, u32);
 
 extern void parUpdateTrackPolygonCrossAxes(s32, s32, u32);
 
-void parDispatchKindUpdate(ParKindState *work, s32 index, u32 color) {
+void parDispatchKindUpdate(ParKindState *work, s32 index, u32 color, f32 speed) {
     switch ((u16)work->kind) {
     case 1:
-        func_00159CF0((s32)work->value.table);
+        func_00159CF0(work->value.table, index, color, speed);
         return;
     case 2:
         parUpdateBillboardCrossStrip((s32)work->primaryDrawSystem, index, color);
