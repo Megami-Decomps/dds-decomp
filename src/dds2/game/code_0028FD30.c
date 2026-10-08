@@ -32,8 +32,6 @@ typedef struct MenuPanelTransition {
 extern s32 func_00292478(void *, s32, s32);
 
 
-extern u32 *mnuPanelSoundEntryPool;
-
 typedef struct MantraPanelPool MantraPanelPool;
 typedef struct MantraBurstPool MantraBurstPool;
 typedef struct MantraSparkleEmitter MantraSparkleEmitter;
@@ -93,10 +91,12 @@ typedef struct MenuPanelEntry {
 } MenuPanelEntry;
 
 typedef struct MenuPanelEntryPool {
-    u32 allocation;
+    struct SdfMemBlock *allocation;
     MenuPanelEntry *entries;
     s32 count;
 } MenuPanelEntryPool;
+
+extern MenuPanelEntryPool *mnuPanelSoundEntryPool;
 
 /* The eight-byte acquisition record uses its low byte as the mantra id. */
 
@@ -1389,33 +1389,34 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00294060);
 extern void *memset(void *, s32, u32);
 /* Allocate twenty countdown entries for sounds attached to this panel. */
 void mnuInitPanelSoundEntries(void) {
-    s32 handle;
+    struct SdfMemBlock *allocation;
     MenuPanelEntryPool *pool;
 
     if (mnuPanelSoundEntryPool == 0) {
-        handle = (u32)sdfAllocGeneralBlock(0xAC);
-        mnuPanelSoundEntryPool = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)handle);
+        allocation = sdfAllocGeneralBlock(0xAC);
+        mnuPanelSoundEntryPool =
+            (MenuPanelEntryPool *)(u32)sdfMemoryGetBlockAddress(allocation);
         memset(mnuPanelSoundEntryPool, 0, 0xAC);
-        pool = (MenuPanelEntryPool *)mnuPanelSoundEntryPool;
+        pool = mnuPanelSoundEntryPool;
         pool->entries = (MenuPanelEntry *)(pool + 1);
         pool->count = 0x14;
-        pool->allocation = handle;
+        pool->allocation = allocation;
     }
 }
 
 void mnuReleasePanelEntryPool(void) {
-    if (mnuPanelSoundEntryPool != (u32 *)0x0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((MenuPanelEntryPool *)mnuPanelSoundEntryPool)->allocation));
+    if (mnuPanelSoundEntryPool != 0) {
+        sdfReleaseResourceAllocation(mnuPanelSoundEntryPool->allocation);
     }
-    mnuPanelSoundEntryPool = (u32 *)0x0;
+    mnuPanelSoundEntryPool = 0;
 }
 
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 void mnuTickPanelSoundEntries(void) {
     s32 i;
-    MenuPanelEntry *entry = ((MenuPanelEntryPool *)mnuPanelSoundEntryPool)->entries;
+    MenuPanelEntry *entry = mnuPanelSoundEntryPool->entries;
 
-    for (i = 0; i < ((MenuPanelEntryPool *)mnuPanelSoundEntryPool)->count; i++, entry++) {
+    for (i = 0; i < mnuPanelSoundEntryPool->count; i++, entry++) {
         if (entry->soundHandle != 0) {
             if (entry->framesRemaining == 0) {
                 sndSetSequenceVolumePan(entry->soundHandle, 0x7F, 0x3F);
@@ -1429,7 +1430,7 @@ void mnuTickPanelSoundEntries(void) {
 }
 
 MenuPanelEntry *mnuFindFreePanelEntry(void) {
-    MenuPanelEntryPool *pool = (MenuPanelEntryPool *)mnuPanelSoundEntryPool;
+    MenuPanelEntryPool *pool = mnuPanelSoundEntryPool;
     s32 count = pool->count;
     MenuPanelEntry *entry = pool->entries;
     s32 index;
