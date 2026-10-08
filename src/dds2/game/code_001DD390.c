@@ -11700,7 +11700,115 @@ s32 func_002059F0(f32 *center) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_00205CC8);
+extern f32 D_003BE080[4];
+extern f32 D_003BE090[4];
+extern f32 func_00352DB0(f32);
+
+s32 func_00205CC8(s32 filter) {
+    f32 position[4];
+    f32 rotation[4];
+    BtlUnit *actors[16];
+    BtlState *battle;
+    BtlUnit *unit;
+    u32 count = 0;
+    u32 i;
+    f32 totalWidth = 0;
+    f32 radius;
+    f32 minSpacing;
+    f32 maxSpacing;
+    f32 spacing;
+    f32 spacingAngle;
+    f32 angle;
+    f32 totalArcAngle;
+    f32 halfAngle;
+    f32 width;
+    f32 distance;
+    f32 direction;
+    s32 isParty;
+
+    battle = (BtlState *)btlGetRuntime();
+    for (unit = battle->units; unit != 0; unit = unit->nextActor) {
+        s32 flags = unit->flags;
+        if ((flags & filter) && (flags & 1)) {
+            f32 halfWidth = unit->unkBC * unit->scale;
+            actors[count++] = unit;
+            totalWidth += halfWidth + halfWidth;
+        }
+    }
+    if (count == 0) {
+        return 0;
+    }
+    if (battle->cameraActorHighWater < count) {
+        battle->cameraActorHighWater = count;
+    }
+    isParty = filter & 0x200;
+    if (isParty) {
+        maxSpacing = 75.0f;
+        minSpacing = 75.0f;
+        radius = -800.0f;
+        PCP_COPY_VECTOR(rotation, D_003BE080);
+    } else {
+        radius = 1000.0f;
+        maxSpacing = 100.0f;
+        minSpacing = 50.0f;
+        PCP_COPY_VECTOR(rotation, D_003BE090);
+    }
+    if (count >= 2) {
+        spacing = 1200.0f;
+        if (spacing < totalWidth) {
+            spacing = minSpacing;
+        } else {
+            spacing -= totalWidth;
+            spacing /= count - 1;
+            if (spacing < minSpacing) {
+                spacing = minSpacing;
+            } else if (spacing > maxSpacing) {
+                spacing = maxSpacing;
+            }
+        }
+    } else {
+        spacing = 0;
+    }
+    spacingAngle = func_00352DB0(spacing / radius);
+    totalArcAngle = -spacingAngle;
+    for (i = 0; i < count; i++) {
+        unit = actors[i];
+        distance = unit->unkBC * unit->scale;
+        halfAngle = func_00352DB0(distance / radius);
+        totalArcAngle += halfAngle + halfAngle;
+        totalArcAngle += spacingAngle;
+    }
+    width = totalWidth;
+    if (width < 400.0f) {
+        width = 400.0f;
+    } else if (width > 500.0f) {
+        width = 500.0f;
+    }
+    angle = -totalArcAngle * 0.5f;
+    distance = radius - width * 0.5f;
+    direction = 1.0f;
+    if (!isParty) {
+        direction = -1.0f;
+    }
+    for (i = count - 1; i != (u32)-1; i--) {
+        unit = actors[i];
+        halfAngle = func_00352DB0(unit->unkBC * unit->scale / radius);
+        angle += halfAngle;
+        position[0] = sdfSinPoly(angle) * radius;
+        position[1] = 0.0f;
+        position[2] = (distance - sdfEvaluateCosineViaSinePhaseShift(angle) * radius) * direction;
+        PCP_COPY_VECTOR(unit->position, position);
+        btlSetUnitPosition(unit, position);
+        PCP_COPY_VECTOR(unit->rotation, rotation);
+        angle += halfAngle;
+        btlSetUnitRotation(unit, (s128 *)rotation);
+        angle += spacingAngle;
+    }
+    if (battle->postPlacementCallback != 0) {
+        battle->postPlacementCallback();
+    }
+    return 1;
+}
 
 void btlRepositionPartyAroundBattleCenter(void) {
     s128 v;
