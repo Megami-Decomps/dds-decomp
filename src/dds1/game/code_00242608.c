@@ -991,7 +991,7 @@ INCLUDE_ASM(const s32, "game/code_00242608", mnuReleaseShopSceneSpriteResources)
 
 extern u8 *datItemSkillRecords;
 
-s32 mnuShopHasPendingFlag(void) {
+s32 mnuShopHasPendingFlag(ShopScene *unused) {
     u8 *flags = datGameState->inventory.counts;
     u8 *entry = datItemSkillRecords;
     s32 found = 0;
