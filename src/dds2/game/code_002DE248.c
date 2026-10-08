@@ -849,8 +849,6 @@ void effSelectionFrameAdvance(s32 *counter) {
     *counter = frame + 1;
 }
 
-extern f32 func_002D7770(EffScalarCurve *, s32, s32);
-
 extern f32 mnuMeasureProjectedPerpendicularDistance(f32);
 
 extern void effDrawBlurRectangle(void *);
@@ -981,8 +979,8 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->color = blended[0];
-    out->rateA = func_002D7770(&config->blendB, limit, progress) * 0.01f + 1.0f;
-    out->rateB = func_002D7770(&config->rateA.curve, limit, progress) * 0.01f;
+    out->rateA = effSampleScalarCurve(&config->blendB, limit, progress) * 0.01f + 1.0f;
+    out->rateB = effSampleScalarCurve(&config->rateA.curve, limit, progress) * 0.01f;
     out->param = work->mode;
     effDrawBlurRectangle(out);
 }
@@ -1017,7 +1015,7 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     if (progress < limit) {
         return;
     }
-    rate = func_002D7770(&config->rateB.curve, limit, progress);
+    rate = effSampleScalarCurve(&config->rateB.curve, limit, progress);
     if (config->fixedMode != 0) {
         out->body.source.x = 0;
         out->body.source.y = 0;
@@ -1051,8 +1049,8 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->body.source.color = blended[0];
-    out->body.source.displacement = func_002D7770(&config->blendB, limit, progress) * 0.01f + 1.0f;
-    out->body.source.angle = func_002D7770(&config->rateA.curve, limit, progress) * 0.01f;
+    out->body.source.displacement = effSampleScalarCurve(&config->blendB, limit, progress) * 0.01f + 1.0f;
+    out->body.source.angle = effSampleScalarCurve(&config->rateA.curve, limit, progress) * 0.01f;
     out->body.source.blendControl = work->mode;
     effDrawBlurFixedPointRectangle(out);
 }
@@ -1091,7 +1089,7 @@ void effUpdateFadeMapA(EffKindWork *work) {
     if (progress < limit) {
         return;
     }
-    rate = func_002D7770(&config->rateB.curve, limit, progress);
+    rate = effSampleScalarCurve(&config->rateB.curve, limit, progress);
     if (config->fixedMode != 0) {
         out->mode = (s32)rate;
         out->posX = 0;
@@ -1121,8 +1119,8 @@ void effUpdateFadeMapA(EffKindWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->color = blended[0];
-    out->rateA = func_002D7770(&config->blendB, limit, progress) * 0.01f;
-    out->rateB = func_002D7770(&config->rateA.curve, limit, progress) * 0.01f;
+    out->rateA = effSampleScalarCurve(&config->blendB, limit, progress) * 0.01f;
+    out->rateB = effSampleScalarCurve(&config->rateA.curve, limit, progress) * 0.01f;
     out->param = work->mode;
     effBlurStepScatterSlotsAndDraw((EffBlurScatterWork *)out);
 }
@@ -1161,7 +1159,7 @@ void effUpdateFadeMapB(EffKindWork *work) {
     if (progress < limit) {
         return;
     }
-    rate = func_002D7770(&config->rateB.curve, limit, progress);
+    rate = effSampleScalarCurve(&config->rateB.curve, limit, progress);
     if (config->fixedMode != 0) {
         out->mode = (s32)rate;
         out->posX = 0;
@@ -1191,8 +1189,8 @@ void effUpdateFadeMapB(EffKindWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->color = blended[0];
-    out->rateA = func_002D7770(&config->blendB, limit, progress) * 0.01f;
-    out->rateB = func_002D7770(&config->rateA.curve, limit, progress) * 0.01f;
+    out->rateA = effSampleScalarCurve(&config->blendB, limit, progress) * 0.01f;
+    out->rateB = effSampleScalarCurve(&config->rateA.curve, limit, progress) * 0.01f;
     out->param = work->mode;
     effBlurStepScaleSlotsAndDraw(out);
 }
@@ -1238,8 +1236,8 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->color = blended[0];
-    out->rateA = func_002D7770(&config->blendB, limit, progress) + 1.0f;
-    out->rateB = func_002D7770(&config->rateA.curve, limit, progress);
+    out->rateA = effSampleScalarCurve(&config->blendB, limit, progress) + 1.0f;
+    out->rateB = effSampleScalarCurve(&config->rateA.curve, limit, progress);
     out->param = work->mode;
     effBlurDrawFramebufferQuad(out);
 }
@@ -6053,7 +6051,7 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     ((EffMeshOutput *)out)->color = blended[0];
     ((EffMeshOutput *)out)->textureId = ((EffBillQuantizedConfig *)config)->alphaTrack.surfaceIndex;
     ((EffMeshOutput *)out)->mode = ((EffBillQuantizedConfig *)config)->meshMode;
-    scale = func_002D7770(&((EffBillQuantizedConfig *)config)->scaleCurve, limit, progress) * work->scale;
+    scale = effSampleScalarCurve(&((EffBillQuantizedConfig *)config)->scaleCurve, limit, progress) * work->scale;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);

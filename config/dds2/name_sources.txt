@@ -4941,6 +4941,7 @@
 0x002D73D8	fileCopyLoadObjectRecordVector	inferred	calls func_002DC0F0 on load object record [names_R_FuncNames2.tsv]
 0x002D73F0	fileSetRecordWordFour	inferred	writes passed u32 to record offset +4 [names_R_FuncNames2.tsv]
 0x002D73F8	fileSetLoadObjectScale	inferred	Updates the loader object's scale and notifies its record work.
+0x002D7770	effSampleScalarCurve	inferred	DDS2 twin of DDS1 curve sampler; samples an EffScalarCurve at the supplied frame over its signed duration.
 0x002D78E8	fileSampleKeyTracks	inferred	dds1 twin func_002973E8 (mode 2 heading is 0 when the projected points coincide) [names_M65_VuFollowup.tsv]
 0x002D7A58	fileInvalidateSlotGroup	inferred	unified with DDS1 twin (was fileResetSlotGroupStates)
 0x002D7AC8	fileCopyAndInvalidateSlotGroup	inferred	twin of DDS1 name (QP5 conflict)
