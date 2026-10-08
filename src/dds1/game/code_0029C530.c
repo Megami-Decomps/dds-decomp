@@ -1544,11 +1544,11 @@ typedef struct EffFrameAsset {
 void effClearBillFrames(u8 *work) {
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *config = ((EffClassWork *)work)->payload;
-    u8 *asset = ((EffFrameState *)state)->asset;
+    EffTrackSet *asset = ((EffBillFrameState *)state)->asset;
     s32 remaining = ((EffBillTimedHeader *)config)->count;
-    u8 *entry = ((EffFrameState *)state)->entries;
+    u8 *entry = ((EffBillFrameState *)state)->entries;
 
-    memset(((EffFrameAsset *)asset)->frameStorage, 0, ((EffFrameAsset *)asset)->frameCount * 0x10);
+    memset(asset->buffer, 0, asset->rows * 0x10);
     if (remaining > 0) {
         s32 i;
         for (i = remaining; i != 0; --i) {
@@ -1567,16 +1567,16 @@ u8 *effCreateBillFrameNode(EffBillFrameConfig *config, u32 resource) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
-    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(count, 0, resource);
+    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(count, 0, resource);
     return node;
 }
 
 /* Release the frame node's shared tracks and backing allocation. */
 void effReleaseBillFrameNode(s32 work) {
-    effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)work)->allocation);
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_0029E898);
@@ -1658,11 +1658,11 @@ void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
 void billResetCellIndices(u8 *work) {
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *config = ((EffClassWork *)work)->payload;
-    u8 *asset = ((EffFrameState *)state)->asset;
+    EffTrackSet *asset = ((EffBillFrameState *)state)->asset;
     s32 remaining = ((EffBillTimedHeader *)config)->count;
-    u8 *entry = ((EffFrameState *)state)->entries;
+    u8 *entry = ((EffBillFrameState *)state)->entries;
 
-    memset(((EffFrameAsset *)asset)->frameStorage, 0, ((EffFrameAsset *)asset)->frameCount * 0x10);
+    memset(asset->buffer, 0, asset->rows * 0x10);
     if (remaining > 0) {
         s32 i;
         for (i = remaining; i != 0; --i) {
@@ -1680,15 +1680,15 @@ u8 *billCreateCellNode(EffBillCellConfig *config, u32 resource) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
-    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(count, 1, resource);
+    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(count, 1, resource);
     return node;
 }
 
 void billReleaseCellNode(s32 work) {
-    effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)work)->allocation);
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_0029F168);
@@ -1738,11 +1738,11 @@ void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
 void billResetParticleIndices(u8 *work) {
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *config = ((EffClassWork *)work)->payload;
-    u8 *asset = ((EffFrameState *)state)->asset;
+    EffTrackSet *asset = ((EffBillFrameState *)state)->asset;
     s32 remaining = ((EffBillTimedHeader *)config)->count;
-    u8 *entry = ((EffFrameState *)state)->entries;
+    u8 *entry = ((EffBillFrameState *)state)->entries;
 
-    memset(((EffFrameAsset *)asset)->frameStorage, 0, ((EffFrameAsset *)asset)->frameCount * 0x10);
+    memset(asset->buffer, 0, asset->rows * 0x10);
     if (remaining > 0) {
         s32 i;
         for (i = remaining; i != 0; --i) {
@@ -1760,15 +1760,15 @@ u8 *billCreateParticleNode(EffBillParticleConfig *config, u32 resource) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
-    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(count, 1, resource);
+    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(count, 1, resource);
     return node;
 }
 
 void billReleaseParticleNode(s32 work) {
-    effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)work)->allocation);
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_0029FB48);
@@ -1818,11 +1818,11 @@ void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
 void effClearAnimatedFrames(u8 *work) {
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *config = ((EffClassWork *)work)->payload;
-    u8 *asset = ((EffFrameState *)state)->asset;
+    EffTrackSet *asset = ((EffBillFrameState *)state)->asset;
     s32 remaining = ((EffBillTimedHeader *)config)->count;
-    u8 *entry = ((EffFrameState *)state)->entries;
+    u8 *entry = ((EffBillFrameState *)state)->entries;
 
-    memset(((EffFrameAsset *)asset)->frameStorage, 0, ((EffFrameAsset *)asset)->frameCount * 0x10);
+    memset(asset->buffer, 0, asset->rows * 0x10);
     if (remaining > 0) {
         s32 i;
         for (i = remaining; i != 0; --i) {
@@ -1854,7 +1854,7 @@ void effInitializeAlternatingTransformRows(u8 *node, u8 *config) {
     if (count == 0) {
         return;
     }
-    transform = ((EffFrameAsset *)((EffFrameState *)node)->asset)->transformRows;
+    transform = (f32 *)((EffBillFrameState *)node)->asset->columns;
     index = 0;
     for (; index < count; index++, transform += 8) {
         if (index & 1) {
@@ -1880,7 +1880,7 @@ void effInitializeAlternatingTransformRows(u8 *node, u8 *config) {
 
 u8 *billCreateAnimatedTransform(EffBillAnimatedFrameConfig *config, u32 resource) {
     u8 *node = billAllocateAnimatedTransformEntries(config);
-    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 3, resource);
+    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 3, resource);
     effInitializeAlternatingTransformRows(node, config);
     return node;
 }
@@ -1899,14 +1899,14 @@ u8 *billCloneAnimatedTransform(u8 *work) {
     u8 *config = ((EffClassWork *)work)->payload;
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *node = billAllocateAnimatedTransformEntries(config);
-    ((EffFrameState *)node)->asset = (u8 *)effDuplicateResourceRefs((u32)((EffFrameState *)state)->asset);
+    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)state)->asset);
     effInitializeAlternatingTransformRows(node, config);
     return node;
 }
 
 void billReleaseAlternatingTransformNode(s32 work) {
-    effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)work)->allocation);
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A0638);
@@ -1956,11 +1956,11 @@ void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
 void billResetEmitterIndices(u8 *work) {
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *config = ((EffClassWork *)work)->payload;
-    u8 *asset = ((EffFrameState *)state)->asset;
+    EffTrackSet *asset = ((EffBillFrameState *)state)->asset;
     s32 remaining = ((EffBillTimedHeader *)config)->count;
-    u8 *entry = ((EffFrameState *)state)->entries;
+    u8 *entry = ((EffBillFrameState *)state)->entries;
 
-    memset(((EffFrameAsset *)asset)->frameStorage, 0, ((EffFrameAsset *)asset)->frameCount * 0x10);
+    memset(asset->buffer, 0, asset->rows * 0x10);
     if (remaining > 0) {
         s32 i;
         for (i = remaining; i != 0; --i) {
@@ -1977,7 +1977,7 @@ u8 *billAllocEmitterNode(u8 *config) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
     return node;
 }
@@ -1990,7 +1990,7 @@ void billInitializeEmitterRows(u8 *node, u8 *config) {
     if (count == 0) {
         return;
     }
-    transform = ((EffFrameAsset *)((EffFrameState *)node)->asset)->transformRows;
+    transform = (f32 *)((EffBillFrameState *)node)->asset->columns;
     index = 0;
     for (; index < count; index++, transform += 8) {
         if (index & 1) {
@@ -2016,7 +2016,7 @@ void billInitializeEmitterRows(u8 *node, u8 *config) {
 
 u8 *billCreateEmitterTransform(EffBillEmitterFrameConfig *config, u32 resource) {
     u8 *node = billAllocEmitterNode(config);
-    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 4, resource);
+    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 4, resource);
     billInitializeEmitterRows(node, config);
     return node;
 }
@@ -2025,14 +2025,14 @@ u8 *billCloneEmitterTransform(u8 *work) {
     u8 *config = ((EffClassWork *)work)->payload;
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *node = billAllocEmitterNode(config);
-    ((EffFrameState *)node)->asset = (u8 *)effDuplicateResourceRefs((u32)((EffFrameState *)state)->asset);
+    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)state)->asset);
     billInitializeEmitterRows(node, config);
     return node;
 }
 
 void billReleaseEmitterNode(s32 work) {
-    effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)work)->allocation);
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A0FA0);
@@ -2082,11 +2082,11 @@ void billUpdateEmitterDrawColorAndTransform(u8 *work) {
 void effClearStripFrames(u8 *work) {
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *config = ((EffClassWork *)work)->payload;
-    u8 *asset = ((EffFrameState *)state)->asset;
+    EffTrackSet *asset = ((EffBillFrameState *)state)->asset;
     s32 remaining = ((EffBillTimedHeader *)config)->count;
-    u8 *entry = ((EffFrameState *)state)->entries;
+    u8 *entry = ((EffBillFrameState *)state)->entries;
 
-    memset(((EffFrameAsset *)asset)->frameStorage, 0, ((EffFrameAsset *)asset)->frameCount * 0x10);
+    memset(asset->buffer, 0, asset->rows * 0x10);
     if (remaining > 0) {
         s32 i;
         for (i = remaining; i != 0; --i) {
@@ -2103,7 +2103,7 @@ u8 *billAllocStripNode(u8 *config) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
     return node;
 }
@@ -2116,7 +2116,7 @@ void billInitializeStripRows(u8 *node, u8 *config) {
     if (count == 0) {
         return;
     }
-    transform = ((EffFrameAsset *)((EffFrameState *)node)->asset)->transformRows;
+    transform = (f32 *)((EffBillFrameState *)node)->asset->columns;
     index = 0;
     for (; index < count; index++, transform += 8) {
         if (index & 1) {
@@ -2145,7 +2145,7 @@ extern u8 *billAllocStripNode(u8 *);
 u8 *billCreateStripTransform(EffBillStripFrameConfig *config, u32 resource) {
     u8 *node = billAllocStripNode(config);
 
-    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 3, resource);
+    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 3, resource);
     billInitializeStripRows(node, config);
     return node;
 }
@@ -2154,14 +2154,14 @@ u8 *billCloneStripTransform(u8 *work) {
     u8 *config = ((EffClassWork *)work)->payload;
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *node = billAllocStripNode(config);
-    ((EffFrameState *)node)->asset = (u8 *)effDuplicateResourceRefs((u32)((EffFrameState *)state)->asset);
+    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)state)->asset);
     billInitializeStripRows(node, config);
     return node;
 }
 
 void billReleaseStripNode(s32 work) {
-    effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)work)->allocation);
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A1948);
@@ -2211,11 +2211,11 @@ void billUpdateStripDrawColorAndTransform(u8 *work) {
 void billResetTrailIndices(u8 *work) {
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *config = ((EffClassWork *)work)->payload;
-    u8 *asset = ((EffFrameState *)state)->asset;
+    EffTrackSet *asset = ((EffBillFrameState *)state)->asset;
     s32 remaining = ((EffBillTimedHeader *)config)->count;
-    u8 *entry = ((EffFrameState *)state)->entries;
+    u8 *entry = ((EffBillFrameState *)state)->entries;
 
-    memset(((EffFrameAsset *)asset)->frameStorage, 0, ((EffFrameAsset *)asset)->frameCount * 0x10);
+    memset(asset->buffer, 0, asset->rows * 0x10);
     if (remaining > 0) {
         s32 i;
         for (i = remaining; i != 0; --i) {
@@ -2236,13 +2236,13 @@ u8 *billCreateTrailNode(EffBillTrailFrameConfig *config, u32 resource) {
     cursor += headerSize;
     *(u8 **)(header + 8) = base;
     *(u8 **)header = cursor;
-    ((EffFrameState *)header)->asset = (u8 *)effCreateTrackSetWithSharedReferences(frameCount, 0, resource);
+    ((EffBillFrameState *)header)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(frameCount, 0, resource);
     return header;
 }
 
 void billReleaseTrailNode(s32 work) {
-    effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)work)->allocation);
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A22B8);
@@ -2292,11 +2292,11 @@ void billUpdateTrailDrawColorAndTransform(u8 *work) {
 void billResetQuadIndices(u8 *work) {
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *config = ((EffClassWork *)work)->payload;
-    u8 *asset = ((EffFrameState *)state)->asset;
+    EffTrackSet *asset = ((EffBillFrameState *)state)->asset;
     s32 remaining = ((EffBillTimedHeader *)config)->count;
-    u8 *entry = ((EffFrameState *)state)->entries;
+    u8 *entry = ((EffBillFrameState *)state)->entries;
 
-    memset(((EffFrameAsset *)asset)->frameStorage, 0, ((EffFrameAsset *)asset)->frameCount * 0x10);
+    memset(asset->buffer, 0, asset->rows * 0x10);
     if (remaining > 0) {
         s32 i;
         for (i = remaining; i != 0; --i) {
@@ -2313,7 +2313,7 @@ u8 *billAllocQuadNode(u8 *config) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->allocation = (u32)base;
     *(u8 **)node = body;
     return node;
 }
@@ -2326,7 +2326,7 @@ void billInitializeQuadRows(u8 *node, u8 *config) {
     if (count == 0) {
         return;
     }
-    transform = ((EffFrameAsset *)((EffFrameState *)node)->asset)->transformRows;
+    transform = (f32 *)((EffBillFrameState *)node)->asset->columns;
     index = 0;
     for (; index < count; index++, transform += 8) {
         if (index & 1) {
@@ -2352,7 +2352,7 @@ void billInitializeQuadRows(u8 *node, u8 *config) {
 
 u8 *billCreateQuadTransform(EffBillQuadFrameConfig *config, u32 resource) {
     u8 *node = billAllocQuadNode(config);
-    ((EffFrameState *)node)->asset = (u8 *)effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 4, resource);
+    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 4, resource);
     billInitializeQuadRows(node, config);
     return node;
 }
@@ -2361,14 +2361,14 @@ u8 *billCloneQuadTransform(u8 *work) {
     u8 *config = ((EffClassWork *)work)->payload;
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *node = billAllocQuadNode(config);
-    ((EffFrameState *)node)->asset = (u8 *)effDuplicateResourceRefs((u32)((EffFrameState *)state)->asset);
+    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)state)->asset);
     billInitializeQuadRows(node, config);
     return node;
 }
 
 void billReleaseQuadNode(s32 work) {
-    effReleaseResourceRefs(((EffFrameState *)work)->asset);
-    sdfReleaseResourceAllocation(((EffFrameState *)work)->allocation);
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A2E18);
@@ -2575,23 +2575,6 @@ void effSetActiveInstanceColor(EffClassWork *work, u32 color) {
 void effSetActiveInstanceMatrixComponent(EffClassWork *work, float value) {
     work->scale = value;
 }
-
-typedef struct EffTrackSet {
-    u32 type;      // 0x00
-    u32 color;     // 0x04
-    s32 rows;      // 0x08
-    u16 kind;      // 0x0C
-    u8 pad_0E[2];
-    s32 count;     // 0x10
-    u8 flag;       // 0x14
-    u8 pad_15[3];
-    void *shared;    // 0x18: optional retained reference
-    u8 *buffer;    // 0x1C
-    u8 *columns;   // 0x20
-    u8 *tail;      // 0x24
-    s32 *handle;   // 0x28
-    u8 *allocation; // 0x2C
-} EffTrackSet;
 
 INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2B10);
 
