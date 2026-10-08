@@ -1,9 +1,9 @@
 #include "common.h"
+#include "kwln.h"
 #include "dat_state.h"
 #include "scr.h"
 
 
-extern u32 kwlnTaskGetUserValue(KwlnTask *task);
 extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 
 void scrSetCurrentActor(KwlnTask *task, void *actor) {

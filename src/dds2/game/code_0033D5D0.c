@@ -151,7 +151,6 @@ extern void *sdfAllocSizeClassBlock(s32 size);
 extern u32 strlen(const char *s);
 extern f32 sdfNormalizedAsinSamples[];
 
-extern s32 sdfAllocGeneralBlock(s32 size);
 
 
 extern s32 GetThreadId(void);
@@ -1877,7 +1876,7 @@ DevRequest *sdfDevCreateBufferedRequest(s32 elementCount, s32 elementStride, s32
     request->capacity = elementCount;
     request->stride = elementStride;
     if (elementCount != 0) {
-        request->handle = sdfAllocGeneralBlock(elementStride * elementCount);
+        request->handle = (u32)sdfAllocGeneralBlock(elementStride * elementCount);
         request->buffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(request->handle));
     } else {
         request->handle = 0;
@@ -1913,7 +1912,7 @@ void sdfDevResizeBufferedRequest(DevRequest *request, s32 elementCount) {
     if (request->handle == 0) {
         if (elementCount > 0) {
             request->capacity = elementCount;
-            request->handle = sdfAllocGeneralBlock(request->stride * elementCount);
+            request->handle = (u32)sdfAllocGeneralBlock(request->stride * elementCount);
             request->buffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(request->handle));
         }
     } else if (elementCount <= 0) {

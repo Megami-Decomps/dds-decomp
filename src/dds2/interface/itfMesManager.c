@@ -105,7 +105,6 @@ extern void func_001A76C8(void);
 
 extern struct ItfMesPoolNode *itfAcquirePoolNode();
 
-extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 extern u32 strlen(const char *);
 extern void *memset(void *, s32, u32);
 extern void *memcpy(void *, const void *, u32);

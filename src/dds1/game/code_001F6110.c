@@ -2181,7 +2181,6 @@ u32 btlCmdClearSpecialEnemyFlags(void) {
 }
 
 extern s32 D_003BAAA8;
-extern u32 kwlnTaskGetUserValue(KwlnTask *task);
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 
 void btlBindActorSlot(BtlActor *actor, s32 taskArg) {

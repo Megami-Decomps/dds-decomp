@@ -63,7 +63,6 @@ extern s32 D_003D68D8[];
 /* List header defined in game/code_00193C08 (unsized: keeps absolute access). */
 extern u8 frFontResourceList[];
 typedef struct SdfMemBlock SdfMemBlock;
-extern SdfMemBlock *sdfAllocGeneralBlock(s32 arg0);
 extern void func_00192ED0(EffVert *arg0, EffPrim *arg1, s32 arg2, f32 arg3);
 extern void effSampleChannelBezier(EffVert *arg0, EffChan *arg1, s32 arg2, f32 arg3);
 extern u32 effMiscRand(void *state);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
 #include "mnu.h"
@@ -11,7 +12,6 @@ extern u32 mnuMovieShutdownCounter;
 
 extern s32 kwlnFadeIsActive(void);
 
-extern u32 kwlnTaskGetUserValue();
 
 typedef struct FrFontGlyph FrFontGlyph;
 extern s32 func_0019D550(FrFontGlyph *, s8, u32);
@@ -710,7 +710,7 @@ u8 *mnuCreateStaffMenuWork(void) {
     u8 *menuBytes;
     u8 *effectBytes;
 
-    allocation = sdfAllocGeneralBlock(MNU_STAFF_WORK_BYTES);
+    allocation = (u32)sdfAllocGeneralBlock(MNU_STAFF_WORK_BYTES);
     menuBytes = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
     memset(menuBytes, 0, MNU_STAFF_WORK_BYTES);
     ((CampVisualWork *)menuBytes)->allocationHandle = allocation;
@@ -739,7 +739,7 @@ u8 *mnuCreateStaffMenuWork(void) {
 
 /* Ignore null task userdata; otherwise drain transitions and release owned
  * resources in shutdown order before marking camp cleanup complete. */
-void mnuDestroyStaffMenuTask(u32 task) {
+void mnuDestroyStaffMenuTask(KwlnTask *task) {
     u8 *menuBytes = (u8 *)kwlnTaskGetUserValue(task);
     if (menuBytes == NULL) {
         return;
@@ -758,10 +758,10 @@ void mnuDestroyStaffMenuTask(u32 task) {
     func_003425D8();
 }
 
-u32 func_002AA278(void) {
+u32 func_002AA278(KwlnTask *task) {
     s32 work;
 
-    work = kwlnTaskGetUserValue();
+    work = kwlnTaskGetUserValue(task);
     mnuDrawAndStepGradientFade(work + 0xaa50, 0x53);
     return 0;
 }
@@ -1032,7 +1032,7 @@ typedef struct CampDrawContext {
 
 /* Draw one camp-menu frame for task: kind 2 animates the highlight, kind 1
  * displays the background, and all other kinds reset the highlight alpha. */
-void mnuDrawCampIconBackdropByKind(s32 kind, s32 task) {
+void mnuDrawCampIconBackdropByKind(s32 kind, KwlnTask *task) {
     u8 *work = (u8 *)kwlnTaskGetUserValue(task);
     CampVisualWork *visual = (CampVisualWork *)work;
     s32 ctx;

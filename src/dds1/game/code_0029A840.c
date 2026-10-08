@@ -10,7 +10,6 @@
 #include "sdf_chunk.h"
 
 
-extern void *sdfAllocGeneralBlock(u32);
 
 extern s32 btlGetRuntime(void);
 

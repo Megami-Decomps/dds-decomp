@@ -1,3 +1,4 @@
+#include "kwln.h"
 #include "evt_viewer.h"
 #include "sdf_resource.h"
 #include "mnu.h"
@@ -47,7 +48,6 @@
 #define CAMP_HEAP_STATS_WORD_COUNT 8
 
 
-extern s32 sdfAllocGeneralBlock(s32);
 extern void evtLoadResourcePair(const char *, u8 *);
 extern s32 evtCreateMessageWindowIfMissing(s32);
 extern s32 func_00244848();
@@ -66,7 +66,6 @@ extern s32 kwlnTaskFindByPriority(u32);
 extern s64 evtFindTaskById(void);
 
 
-extern s32 kwlnTaskGetUserValue();
 
 extern char D_003BC3A0[]; /* "camp" */
 
@@ -661,7 +660,6 @@ void mnuAdvanceShopMenuState(EvtRuntime *scene) {
 
 extern SdfPoolNode D_00325708;
 extern u8 D_00325860[];
-extern void *sdfAllocGeneralBlockHigh(s32 size);
 extern s32 sdfAllocatePacketList(s32 (*alloc)(s32));
 extern void sdfClearLinkedPacketList(SdfLinkedPacketList *list);
 extern void sdfAppendPacketChainNode(SdfPacketChain *head, SdfLinkedPacketList *node);
@@ -1064,7 +1062,7 @@ ShopScene *mnuShopCreateScene(void) {
     s32 handle;
     ShopScene *obj;
 
-    handle = sdfAllocGeneralBlock(0xB4);
+    handle = (u32)sdfAllocGeneralBlock(0xB4);
     obj = (ShopScene *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     memset(obj, 0, 0xB4);
     obj->resourceHandle = handle;
@@ -1079,12 +1077,11 @@ ShopScene *mnuShopCreateScene(void) {
     return obj;
 }
 
-extern s32 kwlnTaskGetUserValue();
 extern void dspCloseChannel();
 extern void evtReleaseResourcePairHandle();
 
-void mnuShopDestroyScene(s32 arg) {
-    ShopScene *scene = (ShopScene *)kwlnTaskGetUserValue();
+void mnuShopDestroyScene(KwlnTask *arg) {
+    ShopScene *scene = (ShopScene *)kwlnTaskGetUserValue(arg);
 
     if (scene != NULL) {
         mnuShopReleaseSprites(scene);
@@ -1098,9 +1095,9 @@ void mnuShopDestroyScene(s32 arg) {
     }
 }
 
-extern s32 mnuCampRunPanel0(void *request);
-extern s32 mnuCampRunPanel1(void *request);
-extern s32 mnuCampRunPanel2(void *request);
+extern s32 mnuCampRunPanel0(KwlnTask *request);
+extern s32 mnuCampRunPanel1(KwlnTask *request);
+extern s32 mnuCampRunPanel2(KwlnTask *request);
 
 /* Create the camp context and its three scheduler tasks (main, draw, update).
  * Optionally seed the initial selection from the caller. */
@@ -1142,21 +1139,21 @@ s32 mnuPollTaskState(void) {
 extern void mnuSetPopupEntry(s32 *, void *);
 extern u8 D_0036AB48[];
 
-s32 mnuCampRunPanel0(void *request) {
-    s32 state = kwlnTaskGetUserValue();
+s32 mnuCampRunPanel0(KwlnTask *request) {
+    s32 state = kwlnTaskGetUserValue(request);
     s32 *panel = (s32 *)(state + 0x54);
     mnuSetPopupEntry(panel, D_0036AB48);
     return menuRunPanel((void *)state, 0, request);
 }
 
 
-s32 mnuCampRunPanel1(void *request) {
-    s32 state = kwlnTaskGetUserValue();
+s32 mnuCampRunPanel1(KwlnTask *request) {
+    s32 state = kwlnTaskGetUserValue(request);
     return menuRunPanel((void *)state, 1, request);
 }
 
-s32 mnuCampRunPanel2(void *request) {
-    s32 state = kwlnTaskGetUserValue();
+s32 mnuCampRunPanel2(KwlnTask *request) {
+    s32 state = kwlnTaskGetUserValue(request);
     return menuRunPanel((void *)state, 2, request);
 }
 

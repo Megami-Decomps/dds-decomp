@@ -41,7 +41,6 @@ extern char D_003BBDC8[];
 
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
-u32 kwlnTaskGetUserValue(KwlnTask *task);
 
 extern f32 evtSolarOverlayAlpha; /* solar overlay alpha, interpolated toward 0 or 1 */
 

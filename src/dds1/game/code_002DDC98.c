@@ -753,7 +753,6 @@ extern void *sceDmaGetChan(s32);
 extern void sceDmaSendN(void *, void *, s32);
 extern s32 sceDmaSync(void *, s32, s32);
 extern void sdfReleaseMemorySlot(void *);
-extern s32 sdfAllocGeneralBlock(s32);
 
 /* Upload the VIF0 program synchronously, then replace the ring workspace. */
 void sdfConsUploadDmaProgram(s32 workspaceBytes) {
@@ -762,7 +761,7 @@ void sdfConsUploadDmaProgram(s32 workspaceBytes) {
     sceDmaSendN(dmaChannel, D_003200A0, (D_00320630 - D_003200A0) >> SDF_DMA_QWORD_SHIFT);
     sceDmaSync(dmaChannel, 0, 0);
     sdfReleaseMemorySlot(&D_003BD350);
-    D_003BD350 = sdfAllocGeneralBlock(workspaceBytes);
+    D_003BD350 = (u32)sdfAllocGeneralBlock(workspaceBytes);
     D_003BDA20 = sdfResourceRetainAddress((struct SdfMemBlock *)(D_003BD350));
 }
 
@@ -1951,7 +1950,7 @@ ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 columns, s32 rows) {
     node->unk17 = 8;
     node->controlByte = 0;
     node->textAttribute = 0;
-    bufferHandle = sdfAllocGeneralBlock((columns * rows) * SDF_CONSOLE_CELL_BYTES);
+    bufferHandle = (u32)sdfAllocGeneralBlock((columns * rows) * SDF_CONSOLE_CELL_BYTES);
     node->bufferHandle = bufferHandle;
     node->cells = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(bufferHandle));
     sdfDevConsNodeClear(node);

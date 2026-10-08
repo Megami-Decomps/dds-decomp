@@ -47,7 +47,6 @@ typedef struct {
 
 extern EvtTblEntry D_003C9730[];
 
-extern void *kwlnTaskGetUserValue();
 
 extern s32 effEventAdvanceSolidRectangleSetup(void);
 
@@ -2287,7 +2286,7 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00256CF0);
 
 extern s32 effEventAdvanceResourceTemplateSetup();
 
-extern u32 kwlnTaskGetTimer(s32 task);
+extern u32 kwlnTaskGetTimer(KwlnTask *task);
 
 typedef struct EvtSelectionCache {
     u8 pad00[0x24];
@@ -2300,7 +2299,7 @@ extern s32 evtActiveEntryFlags;
 
 /* Cache nonzero entry selections, publishing first-tick flags only at timer zero.
  * A zero setup status clears runtime control and returns -1. */
-s32 evtSynchronizeSelectedEntry(s32 task) {
+s32 evtSynchronizeSelectedEntry(KwlnTask *task) {
     EvtRuntime *runtime = (EvtRuntime *)kwlnTaskGetUserValue(task);
 
     if (effEventAdvanceResourceTemplateSetup() == 0) {
@@ -2326,12 +2325,10 @@ s32 evtSynchronizeSelectedEntry(s32 task) {
 }
 
 /* Poll solid-rectangle setup; zero status clears runtime control and returns -1. */
-s32 evtPollRuntimeControlReady(void) {
-    void *runtime;
-
-    runtime = kwlnTaskGetUserValue();
+s32 evtPollRuntimeControlReady(KwlnTask *task) {
+    EvtRuntime *runtime = (EvtRuntime *)kwlnTaskGetUserValue(task);
     if (effEventAdvanceSolidRectangleSetup() == 0) {
-        ((EvtRuntime *)runtime)->controlState = 0;
+        runtime->controlState = 0;
         return -1;
     }
     return 0;
@@ -3999,14 +3996,14 @@ s32 evtGetTaskValueWord(u32 taskId) {
     if (task == 0) {
         return -1;
     }
-    words = kwlnTaskGetUserValue(task);
+    words = (s32 *)kwlnTaskGetUserValue((KwlnTask *)task);
     return words[1];
 }
 
 void *evtGetTaskData(u32 taskId) {
     s32 task = evtFindTaskById(taskId);
     if (task != 0) {
-        return kwlnTaskGetUserValue(task);
+        return (void *)kwlnTaskGetUserValue((KwlnTask *)task);
     }
     return (void *)task;
 }
@@ -4021,7 +4018,7 @@ void *evtFindTaskResourceEntryByKey(u32 id, s32 key) {
     if (task == 0) {
         return 0;
     }
-    data = kwlnTaskGetUserValue(task);
+    data = (EvtPackLoadState *)kwlnTaskGetUserValue((KwlnTask *)task);
     if (data->loaded != 2) {
         return 0;
     }

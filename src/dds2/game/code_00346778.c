@@ -83,7 +83,6 @@ typedef struct MovPacStream {
 
 
 extern void *sdfAllocAndClearQuadwords(s32 size);
-extern void *sdfAllocGeneralBlock(s32 size);
 extern void *sdfDevCreateCallbackState(s32 path, void *callback, s32 context);
 extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
 extern s32 func_0035D5B0(const char *text, s32 delimiter);

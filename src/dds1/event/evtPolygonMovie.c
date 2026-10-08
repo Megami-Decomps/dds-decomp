@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -98,7 +99,6 @@ typedef struct EvtBlendG {
 } EvtBlendG;
 
 
-s32 kwlnTaskGetUserValue(void);
 u32 evtPolygonMovieBlendColor(s32 enable, f32 t, u32 a, u32 b);
 
 /* "PMD2" resource: a 0x20-byte header followed by 16-byte entries whose
@@ -113,7 +113,6 @@ extern void sdfUnfreezeFloatCounter(PolyMovieClip *clip);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *memset(void *dst, s32 value, u32 size);
 extern void *memcpy(void *dst, const void *src, u32 size);
-extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 
 extern f32 D_00368540[4];
 extern f32 D_00368550[4];
@@ -134,12 +133,12 @@ extern void mnuStopTitleVoicePlayback(void);
 extern void func_003003F0(const char *fmt, ...);
 extern void sdfReleaseChipBlock(void *ptr);
 
-s32 evtPolygonMovieTestFlag(void)
+s32 evtPolygonMovieTestFlag(KwlnTask *task)
 {
     EvtGlobal *state;
     s32 set;
 
-    state = (EvtGlobal *)kwlnTaskGetUserValue();
+    state = (EvtGlobal *)kwlnTaskGetUserValue(task);
     set = 0;
     if (state->movieFlags & 8) {
         set = 1;
@@ -491,19 +490,19 @@ void evtPolygonMovieSetObjectMode(PolyMovieObject *obj, u32 mode, s32 setFlags, 
 }
 
 /* Apply a caller-provided mask to the event state's flag word. */
-void evtPolygonMovieSetFlagBits(s32 unused, u32 bits)
+void evtPolygonMovieSetFlagBits(KwlnTask *task, u32 bits)
 {
     EvtGlobal *state;
 
-    state = (EvtGlobal *)kwlnTaskGetUserValue();
+    state = (EvtGlobal *)kwlnTaskGetUserValue(task);
     *state->flags = *state->flags | bits;
 }
 
-void evtPolygonMovieClearFlagBits(s32 unused, u32 bits)
+void evtPolygonMovieClearFlagBits(KwlnTask *task, u32 bits)
 {
     EvtGlobal *state;
 
-    state = (EvtGlobal *)kwlnTaskGetUserValue();
+    state = (EvtGlobal *)kwlnTaskGetUserValue(task);
     *state->flags = *state->flags & ~bits;
 }
 

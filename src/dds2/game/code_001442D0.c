@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 #include "sdf_model.h"
 #include "sdf.h"
@@ -257,7 +258,6 @@ extern u32 D_0043623C;
 
 extern u32 fldFieldTaskHandle;
 
-extern void *kwlnTaskGetUserValue();
 
 extern u32 fldCurrentBgmHandle;
 
@@ -314,7 +314,7 @@ extern s32 fldGetCurrentSceneSelectionResource(void);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
-extern void kwlnTaskSetUserValue(s32 arg0, void *arg1);
+extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 
 extern s32 fldFieldTaskUpdate(void);
 
@@ -642,7 +642,7 @@ s32 func_001442D0(void) {
         return 0;
     }
 
-    menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue(fldInputPanelTaskHandle);
+    menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue((KwlnTask *)fldInputPanelTaskHandle);
     if (menu->pending == 0) {
         return -1;
     }
@@ -690,7 +690,7 @@ s32 fldFieldTaskUpdate(void) {
     return 0;
 }
 
-void *fldFieldTaskCreate(s32 task) {
+void *fldFieldTaskCreate(KwlnTask *task) {
     s32 *work;
 
     work = sdfAllocSizeClassBlock(0x10);
@@ -698,14 +698,14 @@ void *fldFieldTaskCreate(s32 task) {
     work[1] = 0;
     work[2] = 0;
     work[3] = 0;
-    kwlnTaskSetUserValue(task, work);
+    kwlnTaskSetUserValue(task, (u32)work);
     return fldFieldTaskUpdate;
 }
 
-void fldFieldTaskDestroy(void) {
-    u64 work;
+void fldFieldTaskDestroy(KwlnTask *task) {
+    void *work;
 
-    work = kwlnTaskGetUserValue();
+    work = (void *)kwlnTaskGetUserValue(task);
     sdfReleaseChipBlock(work);
     fldFieldTaskHandle = 0;
 }

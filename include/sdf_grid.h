@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+struct SdfMemBlock;
+
 typedef struct SdfGridCell {
     u32 index;
     u32 value;
@@ -10,7 +12,7 @@ typedef struct SdfGridCell {
 
 /* Grid header allocated immediately before its variable-size cell array. */
 typedef struct SdfGrid {
-    u32 allocation;
+    struct SdfMemBlock *allocation;
     SdfGridCell *cells;
     SdfGridCell *cursor;
     SdfGridCell *viewportOrigin;
@@ -30,6 +32,7 @@ typedef struct SdfGrid {
 
 typedef char SdfGridLayoutAssert[
     (sizeof(SdfGridCell) == 8 && sizeof(SdfGrid) == 0x34 &&
+     (u32)&((SdfGrid *)0)->allocation == 0 &&
      (u32)&((SdfGrid *)0)->cursor == 8 &&
      (u32)&((SdfGrid *)0)->drawCell == 0x18 &&
      (u32)&((SdfGrid *)0)->userData == 0x30)

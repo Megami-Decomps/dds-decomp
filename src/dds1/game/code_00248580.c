@@ -625,7 +625,6 @@ void mnuResetProgressModeFromOwner(u8 *work) {
     ((MenuTerminalWork *)work)->initState = *(s32 *)(*(u8 **)(owner + 0x1C) + 0x60);
 }
 
-extern s32 sdfAllocGeneralBlock(s32);
 
 
 extern void *memset(void *, s32, u32);
@@ -641,7 +640,7 @@ extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 
 /* Allocate/zero the visual host, retain its allocation, and begin resource setup. */
 MenuProgressHost *mnuCreateWorkBlock(void) {
-    s32 handle = sdfAllocGeneralBlock(MNU_MENU_HOST_BYTES);
+    s32 handle = (u32)sdfAllocGeneralBlock(MNU_MENU_HOST_BYTES);
     MenuProgressHost *work = (MenuProgressHost *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
 
     memset(work, 0, MNU_MENU_HOST_BYTES);
@@ -749,7 +748,7 @@ extern s32 evtIsActiveFlagSet(s32);
 
 /* Wait for the terminal effect or world-menu transition to finish. */
 s32 func_00249A60(s8 closing) {
-    MenuTerminalWork *work = (MenuTerminalWork *)kwlnTaskGetUserValue(D_003BC3E4);
+    MenuTerminalWork *work = (MenuTerminalWork *)kwlnTaskGetUserValue((KwlnTask *)D_003BC3E4);
 
     if (closing == 1) {
         if (work->mode == 0) {
@@ -897,7 +896,7 @@ u8 *mnuTerminalCreateScene(reduced, slot)
     u8 *obj;
     u32 i;
 
-    handle = sdfAllocGeneralBlock(MNU_TERMINAL_SCENE_BYTES);
+    handle = (u32)sdfAllocGeneralBlock(MNU_TERMINAL_SCENE_BYTES);
     obj = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     memset(obj, 0, MNU_TERMINAL_SCENE_BYTES);
     ((MenuTerminalWork *)obj)->allocation = handle;
@@ -918,7 +917,6 @@ u8 *mnuTerminalCreateScene(reduced, slot)
     return obj;
 }
 
-extern s32 kwlnTaskGetUserValue();
 extern void mnuReleaseResourceHandles(u32 *work);
 extern void dspCloseChannel(void);
 extern void evtReleaseResourcePairHandle(u32 *record);
@@ -930,8 +928,8 @@ extern s8 mnuTerminalTaskState;
 
 /* Release the terminal task's resources/effects, then hand its mode/slot to the field.
  * Native final work-field reads remain after allocation release and outside the NULL guard. */
-void mnuReleaseTerminalWorkAndResumeField(s32 arg) {
-    MenuTerminalWork *work = (MenuTerminalWork *)kwlnTaskGetUserValue();
+void mnuReleaseTerminalWorkAndResumeField(KwlnTask *arg) {
+    MenuTerminalWork *work = (MenuTerminalWork *)kwlnTaskGetUserValue(arg);
 
     if (work != NULL) {
         mnuReleaseWorkResources((u8 *)work);
@@ -970,11 +968,11 @@ extern s32 D_003BC3E4;
 
 extern u32 effConfigureWithDefaultSetting(u32, u32, u32, u32, u32, u32);
 
-extern s32 kwlnTaskCreate(const char *, s32, s32, s32, s32 (*)(s32), void (*)(s32), void *);
-extern s32 mnuPrepareTerminalPopupAndDispatch(s32);
-extern s32 func_0024A138(s32);
-extern s32 func_0024A170(s32);
-extern void mnuReleaseTerminalWorkAndResumeField(s32);
+extern s32 kwlnTaskCreate(const char *, s32, s32, s32, s32 (*)(KwlnTask *), void (*)(KwlnTask *), void *);
+extern s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *task);
+extern s32 func_0024A138(KwlnTask *task);
+extern s32 func_0024A170(KwlnTask *task);
+extern void mnuReleaseTerminalWorkAndResumeField(KwlnTask *task);
 
 /* Create the terminal update/draw/exit tasks sharing one scene.
  * Preserve the legacy no-argument scene constructor call. */
@@ -1017,8 +1015,8 @@ extern char D_0036ADF4[];
 extern void mnuSetPopupEntry(s32 *, char *);
 
 /* Seed the task's popup slot before running panel mode zero with the supplied request. */
-s32 mnuPrepareTerminalPopupAndDispatch(s32 value) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *value) {
+    s32 context = kwlnTaskGetUserValue(value);
     s32 *state = (s32 *)(context + 0x54);
 
     mnuSetPopupEntry(state, D_0036ADF4);
@@ -1026,15 +1024,15 @@ s32 mnuPrepareTerminalPopupAndDispatch(s32 value) {
 }
 
 /* Dispatch current task work through panel mode one; distinct callback role unknown. */
-s32 func_0024A138(s32 value) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_0024A138(KwlnTask *value) {
+    s32 context = kwlnTaskGetUserValue(value);
 
     return menuRunPanel((void *)context, 1, (void *)value);
 }
 
 /* Dispatch current task work through panel mode two; distinct callback role unknown. */
-s32 func_0024A170(s32 value) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_0024A170(KwlnTask *value) {
+    s32 context = kwlnTaskGetUserValue(value);
 
     return menuRunPanel((void *)context, 2, (void *)value);
 }
@@ -1700,8 +1698,8 @@ extern u8 D_0036AD68[];
 extern u8 D_0036ADA0[];
 
 /* Event-B panel input: confirm opens the popup for the selected entry's action, cancel opens the back popup, left/right step the list. */
-s32 evtBHandleSelectionPanelInput(void *input) {
-    EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue();
+s32 evtBHandleSelectionPanelInput(KwlnTask *input) {
+    EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue(input);
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 *state = &context->dispatchState;
     s32 kind = context->visualList->cursor->index;
@@ -1764,8 +1762,8 @@ s32 evtBHandleSelectionPanelInput(void *input) {
 }
 
 
-s32 evtDispatchSelectionAfterFieldFrameGate(void *request) {
-    s32 state = kwlnTaskGetUserValue();
+s32 evtDispatchSelectionAfterFieldFrameGate(KwlnTask *request) {
+    s32 state = kwlnTaskGetUserValue(request);
 
     func_0024A2D8(state);
     func_0024A340(0, state);
@@ -1778,15 +1776,15 @@ s32 evtDispatchSelectionAfterFieldFrameGate(void *request) {
     return menuRunPanel((void *)state, 1, request);
 }
 
-s32 evtBSetupDispatchSync(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 evtBSetupDispatchSync(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
 
     func_0024DD78();
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
-s32 evtBClearAndReset(void) {
-    s32 context = kwlnTaskGetUserValue();
+s32 evtBClearAndReset(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
     evtRememberDispatchCallback(0, context);
     ((EvtBContext *)context)->visualList->scale = 0;
@@ -1797,8 +1795,8 @@ s32 evtBClearAndReset(void) {
 
 extern void func_0024AB70(u32, s32);
 
-u32 evtBeginSelectionExitFade(void) {
-    s32 context = kwlnTaskGetUserValue();
+u32 evtBeginSelectionExitFade(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
     func_0024AB70(1, context);
     evtRememberDispatchCallback((s32)func_0024ACD8, context);
@@ -1814,8 +1812,8 @@ extern s32 fileMenuTaskExists(void);
 extern void fileSetPreviewLocation();
 extern void fileEnterMcPackScene(s32);
 
-s32 func_0024B868(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_0024B868(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
     s32 *dispatch = (s32 *)(context + 0x54);
     s32 result = menuRunPanel((void *)context, 0, (void *)request);
 
@@ -1841,14 +1839,14 @@ s32 func_0024B868(s32 request) {
     return 0;
 }
 
-s32 evtBDispatchStart(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 evtBDispatchStart(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
 
     return menuRunPanel((void *)context, 1, (void *)request);
 }
 
-s32 evtBSetupDispatchSyncB(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 evtBSetupDispatchSyncB(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
 
     func_0024DD78();
     return menuRunPanel((void *)context, 2, (void *)request);
@@ -1860,8 +1858,8 @@ extern void func_0024A728(u32, s32);
 extern void func_0024AE18(s32, s32);
 
 
-u32 evtInitializeSelectionListWhenReady(void) {
-    s32 context = kwlnTaskGetUserValue();
+u32 evtInitializeSelectionListWhenReady(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
     if (((EvtBContext *)context)->transitionPending == 0) {
         mnuSelectFirstListNode(((EvtBContext *)context)->selectionList);
@@ -1878,8 +1876,8 @@ u32 evtInitializeSelectionListWhenReady(void) {
 }
 
 
-u32 evtFinishPendingSelectionTransition(void) {
-    s32 context = kwlnTaskGetUserValue();
+u32 evtFinishPendingSelectionTransition(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
     if (((EvtBContext *)context)->transitionPending != 0) {
         func_0024A728(3, context);
@@ -1893,8 +1891,8 @@ u32 evtFinishPendingSelectionTransition(void) {
     return 1;
 }
 
-s32 func_0024BB00(void *input) {
-    EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue();
+s32 func_0024BB00(KwlnTask *input) {
+    EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue(input);
     s32 *state = &context->dispatchState;
     u32 buttons = mnuMapPadMaskToFlags(0x33);
     s32 result;
@@ -1928,8 +1926,8 @@ s32 func_0024BB00(void *input) {
     return 0;
 }
 
-s32 func_0024BC18(s32 item) {
-    s32 state = kwlnTaskGetUserValue();
+s32 func_0024BC18(KwlnTask *item) {
+    s32 state = kwlnTaskGetUserValue(item);
     func_0024A2D8(state);
     func_0024A340(0, state);
     mnuDispatchTransitionHostCallbacks(state);
@@ -1938,8 +1936,8 @@ s32 func_0024BC18(s32 item) {
     return menuRunPanel((void *)state, 1, (void *)item);
 }
 
-s32 evtBSetupDispatchSyncC(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 evtBSetupDispatchSyncC(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
 
     func_0024DD78();
     return menuRunPanel((void *)context, 2, (void *)request);
@@ -1947,8 +1945,8 @@ s32 evtBSetupDispatchSyncC(s32 request) {
 
 extern void func_0024B168(s32, MenuTerminalWork *);
 
-u32 evtEnterThresholdSelectionList(void) {
-    s32 context = kwlnTaskGetUserValue();
+u32 evtEnterThresholdSelectionList(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
     mnuRefreshThresholdNodeFlags(((EvtBContext *)context)->thresholdList);
     mnuSelectFirstListNode(((EvtBContext *)context)->thresholdList);
@@ -1961,8 +1959,8 @@ u32 evtEnterThresholdSelectionList(void) {
 
 extern void mnuHighlightProgressNodeByMode(s32);
 
-u32 evtBEnterStateA(void) {
-    s32 context = kwlnTaskGetUserValue();
+u32 evtBEnterStateA(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
     mnuTerminalSelectSlot(3, 0, context);
     mnuApplyGridPanelHostSetting(4, context);
@@ -2043,8 +2041,8 @@ void mnuDrawTerminalAmountText(s32 fading, s32 context) {
 
 extern void mnuDrawTerminalAmountText(s32, s32);
 
-s32 mnuInitializeSelectionDispatchWhenModeUnset(s32 item) {
-    s32 state = kwlnTaskGetUserValue();
+s32 mnuInitializeSelectionDispatchWhenModeUnset(KwlnTask *item) {
+    s32 state = kwlnTaskGetUserValue(item);
     func_0024A2D8(state);
     func_0024A340(0, state);
     mnuDispatchTransitionHostCallbacks(state);
@@ -2056,25 +2054,25 @@ s32 mnuInitializeSelectionDispatchWhenModeUnset(s32 item) {
     return menuRunPanel((void *)state, 1, (void *)item);
 }
 
-s32 evtBSetupDispatchSyncD(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 evtBSetupDispatchSyncD(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
 
     func_0024DD78();
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
-u32 evtSelectFinalVisualNode(void) {
+u32 evtSelectFinalVisualNode(KwlnTask *task) {
     s32 context;
 
-    context = kwlnTaskGetUserValue();
+    context = kwlnTaskGetUserValue(task);
     mnuSelectLastListNode(((EvtBContext *)context)->visualList);
     return 1;
 }
 
 /* Terminal panel poll: once the message window is idle and the field frames are drained, open the follow-up popup. */
 extern u8 D_0036AE2C[];
-s32 evtOpenTerminalFollowupPopupWhenIdle(s32 request) {
-    s32 state = kwlnTaskGetUserValue();
+s32 evtOpenTerminalFollowupPopupWhenIdle(KwlnTask *request) {
+    s32 state = kwlnTaskGetUserValue(request);
     s32 *panel = (s32 *)(state + 0x54);
     s32 result = menuRunPanel((void *)state, 0, (void *)request);
     if (result != 0) {
@@ -2094,16 +2092,16 @@ s32 evtOpenTerminalFollowupPopupWhenIdle(s32 request) {
 
 INCLUDE_ASM(const s32, "game/code_00248580", func_0024C1B8);
 
-s32 evtBSetupDispatchSyncE(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 evtBSetupDispatchSyncE(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
 
     func_0024DD78();
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 
-u32 evtBReleaseImagesAndQueueMenuTransition(void) {
-    s32 context = kwlnTaskGetUserValue();
+u32 evtBReleaseImagesAndQueueMenuTransition(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
     mnuReleaseStaffImageHandles(((MenuTerminalWork *)context)->imageHandles);
     func_0024A728(2, context);
@@ -2118,8 +2116,8 @@ u32 evtBReleaseImagesAndQueueMenuTransition(void) {
     return 1;
 }
 
-s32 mnuOpenTerminalSelectionMessageWindow(void) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuOpenTerminalSelectionMessageWindow(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
     mnuResolveStaffImageHandles(((MenuTerminalWork *)context)->imageHandles);
     func_0024A728(1, context);
@@ -2135,7 +2133,7 @@ s32 mnuOpenTerminalSelectionMessageWindow(void) {
 }
 
 /* Sequence resource teardown, reload and fade before returning to the terminal menu. */
-s32 func_0024C3F8(s32 request) {
+s32 func_0024C3F8(KwlnTask *request) {
     MenuTerminalWork *work = (MenuTerminalWork *)kwlnTaskGetUserValue(request);
     s32 result = menuRunPanel(work, 0, (void *)request);
 
@@ -2178,8 +2176,8 @@ s32 func_0024C3F8(s32 request) {
 }
 
 /* While the panel fade is nonzero, choose its transition direction from the selection chain, then run the panel. */
-s32 evtBPollSelectionChainPanel(s32 item) {
-    s32 state = kwlnTaskGetUserValue();
+s32 evtBPollSelectionChainPanel(KwlnTask *item) {
+    s32 state = kwlnTaskGetUserValue(item);
 
     func_0024A2D8(state);
     if (fldClassifyRemainingFrames((MenuTerminalWork *)state) != 0) {
@@ -2197,8 +2195,8 @@ s32 evtBPollSelectionChainPanel(s32 item) {
     return menuRunPanel((void *)state, 1, (void *)item);
 }
 
-s32 evtBDispatchSync(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 evtBDispatchSync(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
 
     return menuRunPanel((void *)context, 2, (void *)request);
 }
@@ -2210,8 +2208,8 @@ extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 /* Bind the selected text row to message slot zero, then start the entry prompt. */
-u32 evtPrepareSelectedMenuEntry(void) {
-    s32 state = kwlnTaskGetUserValue();
+u32 evtPrepareSelectedMenuEntry(KwlnTask *task) {
+    s32 state = kwlnTaskGetUserValue(task);
     struct MenuList *owner = ((EvtBContext *)state)->selectionList;
     u32 *selectionIndex = &owner->cursor->sortKeyPrimary;
 
@@ -2233,12 +2231,12 @@ u32 func_0024C6F8(void) {
 extern s32 evtGetCapturedWindowPanelValue(void);
 extern u8 D_0036ADD8[];
 
-s32 evtBChooseSelectionCompletionPopup(void *input) {
+s32 evtBChooseSelectionCompletionPopup(KwlnTask *input) {
     EvtBContext *context;
     s32 *state;
     s32 result;
 
-    context = (EvtBContext *)kwlnTaskGetUserValue();
+    context = (EvtBContext *)kwlnTaskGetUserValue(input);
     state = &context->dispatchState;
     result = menuRunPanel(context, 0, input);
     if (result == 0) {
@@ -2261,8 +2259,8 @@ s32 evtBChooseSelectionCompletionPopup(void *input) {
     return result;
 }
 
-s32 func_0024C7E8(s32 item) {
-    s32 state = kwlnTaskGetUserValue();
+s32 func_0024C7E8(KwlnTask *item) {
+    s32 state = kwlnTaskGetUserValue(item);
     func_0024A2D8(state);
     func_0024A340(0, state);
     mnuDispatchTransitionHostCallbacks(state);
@@ -2271,16 +2269,16 @@ s32 func_0024C7E8(s32 item) {
     return menuRunPanel((void *)state, 1, (void *)item);
 }
 
-s32 evtBSetupDispatchSyncF(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 evtBSetupDispatchSyncF(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
 
     func_0024DD78();
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 
-u32 evtBCheckPanelMode(void) {
-    s32 context = kwlnTaskGetUserValue();
+u32 evtBCheckPanelMode(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
     dspSetActive(1);
     switch (((EvtBContext *)context)->panelMode) {
@@ -2294,12 +2292,12 @@ u32 evtBCheckPanelMode(void) {
     return 1;
 }
 
-s32 evtBContinueDispatchOrRestoreTable(void *input) {
+s32 evtBContinueDispatchOrRestoreTable(KwlnTask *input) {
     s32 context;
     s32 dispatchResult;
     s32 *dispatchState;
 
-    context = kwlnTaskGetUserValue();
+    context = kwlnTaskGetUserValue(input);
     dispatchState = &((EvtBContext *)context)->dispatchState;
     dispatchResult = menuRunPanel((void *)context, 0, input);
     if (dispatchResult == 0) {
@@ -2311,8 +2309,8 @@ s32 evtBContinueDispatchOrRestoreTable(void *input) {
     return dispatchResult;
 }
 
-s32 mnuPrepareDispatchStateAndBindHandler(s32 item) {
-    s32 state = kwlnTaskGetUserValue();
+s32 mnuPrepareDispatchStateAndBindHandler(KwlnTask *item) {
+    s32 state = kwlnTaskGetUserValue(item);
     func_0024A2D8(state);
     func_0024A340(0, state);
     mnuDispatchTransitionHostCallbacks(state);
@@ -2321,16 +2319,16 @@ s32 mnuPrepareDispatchStateAndBindHandler(s32 item) {
     return menuRunPanel((void *)state, 1, (void *)item);
 }
 
-s32 evtBSetupDispatchSyncG(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 evtBSetupDispatchSyncG(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
 
     func_0024DD78();
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
 
-u32 evtExitSelectionMenuAndSendSoundCommand(void) {
-    s32 context = kwlnTaskGetUserValue();
+u32 evtExitSelectionMenuAndSendSoundCommand(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
     func_0024A728(2, context);
     if (((EvtBContext *)context)->transitionStage >= 2) {
@@ -2348,8 +2346,8 @@ u32 evtExitSelectionMenuAndSendSoundCommand(void) {
 }
 
 
-u32 evtBRebuildTerminalMenuAndResetDispatch(void) {
-    s32 context = kwlnTaskGetUserValue();
+u32 evtBRebuildTerminalMenuAndResetDispatch(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
     mnuReleaseWorkResources(context);
     mnuTerminalBuildMenus(context);
@@ -2363,8 +2361,8 @@ u32 evtBRebuildTerminalMenuAndResetDispatch(void) {
 }
 
 
-s32 func_0024CB80(void *input) {
-    EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue();
+s32 func_0024CB80(KwlnTask *input) {
+    EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue(input);
     s32 *state = &context->dispatchState;
     s32 result;
 
@@ -2406,8 +2404,8 @@ s32 func_0024CB80(void *input) {
 }
 
 
-s32 evtBDispatchSyncD2(s32 item) {
-    s32 state = kwlnTaskGetUserValue();
+s32 evtBDispatchSyncD2(KwlnTask *item) {
+    s32 state = kwlnTaskGetUserValue(item);
 
     func_0024A2D8(state);
     if (func_0024A6E8(state) == 0) {
@@ -2423,8 +2421,8 @@ s32 evtBDispatchSyncD2(s32 item) {
     return menuRunPanel((void *)state, 1, (void *)item);
 }
 
-s32 evtBDispatchSyncB(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 evtBDispatchSyncB(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
 
     return menuRunPanel((void *)context, 2, (void *)request);
 }
@@ -2432,8 +2430,8 @@ s32 evtBDispatchSyncB(s32 request) {
 extern char D_003AF590[];
 extern char D_003AF620[];
 
-u32 evtBEndDispatchAndReloadEffectResource(void) {
-    EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue();
+u32 evtBEndDispatchAndReloadEffectResource(KwlnTask *task) {
+    EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue(task);
 
     mnuFadeOrPlayCloseSfx(0, (s32)context);
     evtClearActiveFlag(0);
@@ -2451,8 +2449,8 @@ u32 func_0024CE20(void) {
 extern const char D_003AF710[];
 extern u8 D_0036AE10[];
 
-s32 func_0024CE28(void *input) {
-    EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue();
+s32 func_0024CE28(KwlnTask *input) {
+    EvtBContext *context = (EvtBContext *)kwlnTaskGetUserValue(input);
     s32 *state = &context->dispatchState;
     s32 canOpen = 0;
     s32 result = menuRunPanel(context, 0, input);
@@ -2484,15 +2482,15 @@ s32 func_0024CE28(void *input) {
     return result;
 }
 
-s32 evtBLateDispatchStart(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 evtBLateDispatchStart(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
 
     func_0024A2D8(context);
     return menuRunPanel((void *)context, 1, (void *)request);
 }
 
-s32 evtBDispatchSyncC(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 evtBDispatchSyncC(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
 
     return menuRunPanel((void *)context, 2, (void *)request);
 }

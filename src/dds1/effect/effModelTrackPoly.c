@@ -103,7 +103,6 @@ typedef struct EffTrackPolyList {
     SdfMemBlock *handle;               /* 0x08 */
 } EffTrackPolyList;
 
-extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern void sdfQueueAssetRelease(SdfAsset *asset);
 
 /* Clone count tracks from one parameter block, each with its own data. */

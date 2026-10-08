@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 #include "fld_waypoint.h"
 #include "fld_inf.h"
@@ -64,7 +65,6 @@ extern void sdfQueueNonzeroResourceId(u32 resource);
 
 extern void *memset(void *s, s32 c, u32 n);
 
-extern void *sdfAllocGeneralBlock(s32 size);
 
 
 extern u32 D_0038BD50[];
@@ -113,7 +113,6 @@ extern s32 fldHasKiretaLabelProcess(void);
 extern s32 fldHasHirakenaiLabelProcess(void);
 extern s32 fldHasBadkaifukuLabelProcess(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
-extern u32 kwlnTaskGetUserValue(void *);
 extern void func_0012DDC0(s32, s32, u32, const u8 *);
 
 extern s16 D_00444C68[];
@@ -388,15 +387,16 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
 /* Keep both the resource handles and retained addresses: callers use the
  * retained storage, whereas the handles are needed at release time. */
 void fldAllocateRecordStorage(void) {
-    u8 *storage = sdfAllocGeneralBlock(FIELD_VALUE_RECORD_STORAGE_SIZE);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(FIELD_VALUE_RECORD_STORAGE_SIZE);
+    void *storage;
 
-    fldValueRecordResource = (u32)storage;
-    storage = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(storage));
+    fldValueRecordResource = (u32)allocation;
+    storage = (void *)sdfResourceRetainAddress(allocation);
     fldValueRecords = (u32)storage;
     memset(storage, 0, FIELD_VALUE_RECORD_STORAGE_SIZE);
-    storage = sdfAllocGeneralBlock(FIELD_AUX_RECORD_STORAGE_SIZE);
-    fldAuxRecordResource = (u32)storage;
-    storage = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(storage));
+    allocation = sdfAllocGeneralBlock(FIELD_AUX_RECORD_STORAGE_SIZE);
+    fldAuxRecordResource = (u32)allocation;
+    storage = (void *)sdfResourceRetainAddress(allocation);
     fldAuxRecordBuffer = (u32)storage;
     memset(storage, 0, FIELD_AUX_RECORD_STORAGE_SIZE);
 }
@@ -1985,15 +1985,15 @@ s32 func_00144028(void *task) {
 }
 
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern void kwlnTaskSetUserValue(s32, void *);
+extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 
-void *fldInitializeTitleBannerTask(s32 task) {
+void *fldInitializeTitleBannerTask(KwlnTask *task) {
     s16 *node = sdfAllocSizeClassBlock(8);
     node[1] = 1;
     node[0] = 0;
     node[2] = 0;
     node[3] = 0;
-    kwlnTaskSetUserValue(task, node);
+    kwlnTaskSetUserValue(task, (u32)node);
     return func_00144028;
 }
 

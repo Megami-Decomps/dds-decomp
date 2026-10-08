@@ -1,12 +1,13 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 
 #include "fpu.h"
 #include "sdf.h"
+#include "sdf_grid.h"
 
 extern s8 D_0037F510[];
 
-extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 
 extern u32 sdfMemoryGetBlockAddress(SdfMemBlock *);
 
@@ -37,7 +38,7 @@ extern void *func_00312A48(SdfTaskItemDesc *);
 
 extern s32 kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
-extern void sdfGridReleaseAllCells();
+extern void sdfGridReleaseAllCells(SdfGrid *);
 
 extern f32 func_003532B8(f32);
 
@@ -79,30 +80,6 @@ extern f32 sdfQuatDot(f32 *, f32 *);
 
 extern f32 func_00353140(f32);
 
-typedef struct SdfGridCell {
-    u32 index;
-    u32 value;
-} SdfGridCell;
-
-typedef struct SdfGrid {
-    SdfMemBlock *allocation; /* 0x00 */
-    SdfGridCell *cells;    /* 0x04 */
-    SdfGridCell *cursor;   /* 0x08 */
-    SdfGridCell *viewportOrigin; /* 0x0C */
-    u32 cellCount;         /* 0x10 */
-    u32 width;             /* 0x14 */
-    void (*drawCell)(s32, s32, s32, struct SdfGrid *, SdfGridCell *, s32); /* 0x18 */
-    void (*releaseCell)(u32, u32); /* 0x1C */
-    void (*onDestroy)(s32, u32); /* 0x20 */
-    u16 cellWidth;         /* 0x24 */
-    u16 cellHeight;        /* 0x26 */
-    u16 visibleColumns;    /* 0x28 */
-    u16 visibleRows;       /* 0x2A */
-    u16 columnMargin;      /* 0x2C */
-    u16 rowMargin;         /* 0x2E */
-    u32 userData;          /* 0x30 */
-} SdfGrid;
-
 extern void sdfConvertQuaternionRotationMatrix(f32 *, f32 *);
 extern void sdfTransformDirectionByMatrix(f32 *, f32 *);
 extern void func_0030F8D0(f32 *);
@@ -135,15 +112,15 @@ extern char D_004388D8[];
 extern char D_004388E0[];
 extern void sdfCallbackWorkOnRemove();
 
-extern s32 sdfTaskWorkRunAllEntries(void);
-extern s32 sdfTaskWorkRunAll(void);
+extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
+extern s32 sdfTaskWorkRunAll(KwlnTask *task);
 extern void kwlnTaskCreate();
 extern TaskWork *sdfCreateNamedTaskWork(char *, SdfListCallback, void *);
 
-extern void sdfReleaseCurrentTaskOwnedResources(void);
-extern s32 sdfTaskWorkRunAllEntries(void);
-extern s32 sdfTaskWorkRunAll(void);
-extern void sdfReleaseCurrentTaskOwnedResources(void);
+extern void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task);
+extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
+extern s32 sdfTaskWorkRunAll(KwlnTask *task);
+extern void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task);
 extern void kwlnTaskCreate();
 
 extern void func_00312E20(void);
@@ -239,7 +216,6 @@ void sdfCallbackWorkOnRemove(u32 unused, SdfTaskEntry *entry) {
     sdfDestroyCallbackWork(entry);
 }
 
-extern void *kwlnTaskGetUserValue(void);
 
 /* Visit one entry: initialize, remove if pending, otherwise update.
  * An update result of -1 queues removal for its next visit. Returns 0 at pass end. */
@@ -309,8 +285,8 @@ s32 sdfTaskWorkStep(TaskWork *work) {
     return 1;
 }
 
-s32 sdfTaskWorkRunAllEntries(void) {
-    TaskWork *work = kwlnTaskGetUserValue();
+s32 sdfTaskWorkRunAllEntries(KwlnTask *task) {
+    TaskWork *work = (TaskWork *)kwlnTaskGetUserValue(task);
 
     if (work->currentNode == NULL) {
         return -1;
@@ -320,8 +296,8 @@ s32 sdfTaskWorkRunAllEntries(void) {
     return 0;
 }
 
-s32 sdfTaskWorkRunAll(void) {
-    TaskWork *work = kwlnTaskGetUserValue();
+s32 sdfTaskWorkRunAll(KwlnTask *task) {
+    TaskWork *work = (TaskWork *)kwlnTaskGetUserValue(task);
 
     if (work->currentNode == NULL) {
         return -1;
@@ -331,8 +307,8 @@ s32 sdfTaskWorkRunAll(void) {
     return 0;
 }
 
-void sdfReleaseCurrentTaskOwnedResources(void) {
-    sdfDestroyTaskResourceWork(kwlnTaskGetUserValue());
+void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task) {
+    sdfDestroyTaskResourceWork((void *)kwlnTaskGetUserValue(task));
 }
 
 void func_00312E20(void) {
@@ -349,14 +325,14 @@ void sdfSetShortPairValues(SdfGrid *grid, s32 columnMargin, s32 rowMargin) {
 /* Release cells, invoke onDestroy(0, userData), then release the grid header allocation. */
 void sdfDestroyGridWork(SdfGrid *owner) {
     if (owner != NULL) {
-        sdfGridReleaseAllCells();
+        sdfGridReleaseAllCells(owner);
         owner->onDestroy(0, owner->userData);
         sdfReleaseResourceAllocation(owner->allocation);
     }
 }
 
-void func_00312FB0(void) {
-    sdfGridReleaseAllCells();
+void func_00312FB0(SdfGrid *grid) {
+    sdfGridReleaseAllCells(grid);
 }
 
 SdfGridCell *sdfGridGetCell(SdfGrid *grid, s32 column, s32 row) {

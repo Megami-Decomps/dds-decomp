@@ -148,7 +148,6 @@ u32 func_00163540(u32 value) {
     return value;
 }
 
-extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void func_0015D078(void *system, u32 value);
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);

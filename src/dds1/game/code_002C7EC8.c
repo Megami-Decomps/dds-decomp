@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
 
@@ -16,7 +17,6 @@ extern float fldVectorLength(float *vector);
 
 extern float func_002FA1C0(float);
 
-extern u32 sdfAllocGeneralBlock(s32 size);
 
 extern void *sdfMemoryGetBlockAddress(u32 handle);
 

@@ -4,6 +4,7 @@
 #include "mnu.h"
 #include "file.h"
 
+extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 
 #define BRS_RESULT_COUNTER_PAIR_COUNT 5
 #define BRS_RESULT_SETTLED_POLL_LIMIT 6
@@ -55,7 +56,7 @@ extern s32 mnuPollTitleStreamStateLocked(void);
 extern u32 D_00437A2C;
 
 typedef struct MovieMenuState {
-    struct MemBlock *allocation;
+    struct SdfMemBlock *allocation;
     u8 pad04[0x0C];
     s32 state;
     s32 cursor;
@@ -75,7 +76,6 @@ typedef struct MovieMenuState {
 
 extern MovieMenuState *mnuMovieMenuState;
 
-extern u32 kwlnTaskGetUserValue();
 
 extern s32 mnuTitleSoundTask;
 
@@ -105,9 +105,7 @@ extern s32 WaitSema(u32);
 
 extern s32 SignalSema(u32);
 
-typedef struct MemBlock MemBlock;
-extern MemBlock *sdfAllocGeneralBlock(s32 size);
-extern u32 sdfMemoryGetBlockAddress(MemBlock *block);
+extern u32 sdfMemoryGetBlockAddress(struct SdfMemBlock *block);
 extern s32 sceSifInitIopHeap(void);
 extern s32 sceSifAllocIopHeap(s32 size);
 extern void Exit(s32 status);
@@ -270,16 +268,16 @@ typedef struct TitleEffectState {
     s32 frameCounter;
 } TitleEffectState;
 
-u32 mnuIncrementTitleEffectFrameCounter(void) {
+u32 mnuIncrementTitleEffectFrameCounter(KwlnTask *task) {
     TitleEffectState *effectState;
 
-    effectState = (TitleEffectState *)kwlnTaskGetUserValue();
+    effectState = (TitleEffectState *)kwlnTaskGetUserValue(task);
     effectState->frameCounter = effectState->frameCounter + 1;
     return 0;
 }
 
-void mnuDestroyTitleEffectTask(void) {
-    sdfReleaseChipBlock(kwlnTaskGetUserValue());
+void mnuDestroyTitleEffectTask(KwlnTask *task) {
+    sdfReleaseChipBlock((void *)kwlnTaskGetUserValue(task));
     mnuTitleSoundTask = 0;
 }
 
@@ -291,13 +289,13 @@ void mnuCreateTitleEffectTask(void) {
     u32 effectTask = kwlnTaskCreate(D_00437A10, 0x5214, 1, 1,
                               mnuIncrementTitleEffectFrameCounter, mnuDestroyTitleEffectTask, 0);
     mnuTitleSoundTask = effectTask;
-    kwlnTaskSetUserValue(effectTask, effectState);
+    kwlnTaskSetUserValue((KwlnTask *)effectTask, (u32)effectState);
     effectState->soundNameIndex = 0;
     effectState->frameCounter = 0;
 }
 
 void mnuResetTitleEffectState(s32 command) {
-    TitleEffectState *effectState = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
+    TitleEffectState *effectState = (TitleEffectState *)kwlnTaskGetUserValue((KwlnTask *)mnuTitleSoundTask);
     if (sdfSoundIsCommandBusy() != 0) {
         sdfSoundStopNamedPlayback();
     }
@@ -306,7 +304,7 @@ void mnuResetTitleEffectState(s32 command) {
 }
 
 void mnuSetTitleVoicePrefixIndex(s32 prefixIndex) {
-    ((TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask))->soundNameIndex = prefixIndex;
+    ((TitleEffectState *)kwlnTaskGetUserValue((KwlnTask *)mnuTitleSoundTask))->soundNameIndex = prefixIndex;
 }
 
 extern char D_00428610[];
@@ -319,7 +317,7 @@ extern char D_003E09F0[];
  * retain that signature rather than treating it as a filename string. */
 void mnuPlayTitleVoiceFile(char *voiceArgument) {
     char voicePath[MNU_TITLE_VOICE_PATH_BYTES];
-    TitleEffectState *effectState = (TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask);
+    TitleEffectState *effectState = (TitleEffectState *)kwlnTaskGetUserValue((KwlnTask *)mnuTitleSoundTask);
     if (sdfSoundIsCommandBusy() != 0) {
         func_0035B6E0(D_00428610);
         sdfSoundStopNamedPlayback();
@@ -341,7 +339,7 @@ void func_002A1338(void) {
 }
 
 s32 mnuGetTitleEffectFrameCounter(void) {
-    return ((TitleEffectState *)kwlnTaskGetUserValue(mnuTitleSoundTask))->frameCounter;
+    return ((TitleEffectState *)kwlnTaskGetUserValue((KwlnTask *)mnuTitleSoundTask))->frameCounter;
 }
 
 u32 sndOpStartTrackFromScript(void) {
@@ -583,7 +581,6 @@ extern s32 fileGetResourceHandle(u32);
 extern u32 fileGetLoadedDataAddress(u32);
 extern s32 fileGetResourceSize(u32);
 extern void filePollEntryCleanup(u32);
-extern MemBlock *sdfAllocGeneralBlockHigh(s32);
 extern void func_003504A8(u32 *);
 
 /* Allocate in global status, but use the supplied state's copy destination
@@ -596,7 +593,7 @@ s32 mnuCompleteTitleStreamFileLoad(u32 *destinationState) {
         s32 resourceHandle = fileGetResourceHandle(D_00438FEC);
         u32 fileDataAddress = fileGetLoadedDataAddress(D_00438FEC);
         s32 fileBytes = fileGetResourceSize(D_00438FEC);
-        MemBlock *allocation;
+        struct SdfMemBlock *allocation;
 
         filePollEntryCleanup(D_00438FEC);
         allocation = sdfAllocGeneralBlockHigh(fileBytes);
@@ -765,7 +762,7 @@ INCLUDE_RODATA(const s32, "game/code_002A05C0", D_00428650);
 void mnuInitializeTitleSoundBuffer(void) {
     u32 *streamState = mnuTitleSoundBufferState;
     u32 *decoder = D_00455D98;
-    MemBlock *allocation;
+    struct SdfMemBlock *allocation;
     s32 bufferAddress;
 
     WaitSema(mnuTitleStreamSemaphore);
@@ -788,7 +785,7 @@ extern char D_00428650[];
 
 /* Each format reserves 600 compressed frames before loading its named stream. */
 void func_002A2628(s32 soundEntryIndex) {
-    MemBlock *allocation = NULL;
+    struct SdfMemBlock *allocation = NULL;
     s32 bufferAddress;
     char soundPath[MNU_TITLE_SOUND_PATH_BYTES];
 
@@ -832,7 +829,7 @@ void func_002A2628(s32 soundEntryIndex) {
  * format while holding the shared sound-buffer semaphore. The native code
  * has no default-format guard or buffer-capacity check. */
 void func_002A27A8(void *compressedData, s32 dataBytes, s32 format) {
-    MemBlock *allocation = NULL;
+    struct SdfMemBlock *allocation = NULL;
     s32 bufferAddress;
     s32 frameCount;
 
@@ -944,7 +941,7 @@ extern s32 func_002A30C0(KwlnTask *);
 extern u32 D_00435CBC;
 
 KwlnTask *mnuCreateTitleMenuTask(s32 mode) {
-    MemBlock *allocation;
+    struct SdfMemBlock *allocation;
 
     kwlnFadeBackgroundStartOut(0);
     mnuStopTitleMovieDraw();

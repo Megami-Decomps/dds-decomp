@@ -207,7 +207,6 @@ extern s32 sceDmaSync(void *, s32, s32);
 
 extern void sdfReleaseMemorySlot(void *);
 
-extern s32 sdfAllocGeneralBlock(s32);
 
 
 /* Texture draw packet: three resource-derived values alternate with their
@@ -860,7 +859,7 @@ void sdfConsUploadDmaProgram(s32 workspaceBytes) {
     sceDmaSendN(dmaChannel, D_0037B080, (D_0037B610 - D_0037B080) >> SDF_DMA_QWORD_SHIFT);
     sceDmaSync(dmaChannel, 0, 0);
     sdfReleaseMemorySlot(&D_00438A40);
-    D_00438A40 = sdfAllocGeneralBlock(workspaceBytes);
+    D_00438A40 = (u32)sdfAllocGeneralBlock(workspaceBytes);
     D_00439180 = sdfResourceRetainAddress((struct SdfMemBlock *)(D_00438A40));
 }
 
@@ -1972,7 +1971,7 @@ ConsNode *sdfDevConsNodeCreate(u32 first, u32 second, s32 columns, s32 rows) {
     node->unk17 = 8;
     node->controlByte = 0;
     node->textAttribute = 0;
-    bufferHandle = sdfAllocGeneralBlock((columns * rows) * SDF_CONSOLE_CELL_BYTES);
+    bufferHandle = (u32)sdfAllocGeneralBlock((columns * rows) * SDF_CONSOLE_CELL_BYTES);
     node->bufferHandle = bufferHandle;
     node->cells = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(bufferHandle));
     sdfDevConsNodeClear(node);

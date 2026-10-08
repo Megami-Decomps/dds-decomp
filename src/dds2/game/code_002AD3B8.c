@@ -15,7 +15,6 @@
 #define MNU_STAFF_INPUT_PREVIOUS_PAGE 0x100
 #define MNU_STAFF_INPUT_NEXT_PAGE 0x200
 
-extern u32 kwlnTaskGetUserValue();
 
 extern void func_0026C900(void);
 extern void func_002AAE80(s32);
@@ -94,8 +93,8 @@ typedef struct MenuListNode MenuListNode;
 typedef struct MenuList MenuList;
 
 /* Prepare the primary staff object, then enter the image state. */
-s32 mnuStaffImageEnterA(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffImageEnterA(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     MenuWindowContainer *object;
 
@@ -116,8 +115,8 @@ s32 mnuStaffImageEnterA(s32 task) {
 }
 
 /* Request value one from the message-window worker, then run the teardown phase. */
-s32 mnuStaffImageExitA(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffImageExitA(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
     func_0026C900();
     return menuSetHandler((void *)context, 2, (void *)task);
@@ -132,8 +131,8 @@ u32 func_002AD510(void) {
 }
 
 /* Once the popup is idle, confirmation captures the page-selection cursor index. */
-s32 mnuStaffImageInputA(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffImageInputA(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = mnuMapPadMaskToFlags(3);
@@ -157,8 +156,8 @@ s32 mnuStaffImageInputA(s32 task) {
 }
 
 /* Set up a staff image and its associated menu resources before entering the state. */
-s32 mnuPrepareStaffImageAndSelectionLabel(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuPrepareStaffImageAndSelectionLabel(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     func_002AAE80(task);
     mnuCreateStaffImageSprite(7);
     func_002AAC98(0,
@@ -170,8 +169,8 @@ s32 mnuPrepareStaffImageAndSelectionLabel(s32 task) {
 }
 
 /* Run the label-image state's teardown phase and return its scheduler word. */
-s32 mnuExitStaffImageAndSelectionLabel(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuExitStaffImageAndSelectionLabel(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     return menuSetHandler((void *)context, 2, (void *)task);
 }
 
@@ -183,8 +182,8 @@ u32 func_002AD700(void) {
     return 1;
 }
 
-s32 mnuPollStaffSlotSelectionConfirmation(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuPollStaffSlotSelectionConfirmation(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = mnuMapPadMaskToFlags(3);
@@ -208,8 +207,8 @@ s32 mnuPollStaffSlotSelectionConfirmation(s32 task) {
 }
 
 /* The three staff image states share the same setup, but select different images. */
-s32 func_002AD808(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_002AD808(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     func_002AAE80(task);
     mnuCreateStaffImageSprite(9);
     func_002AAC98(0,
@@ -221,8 +220,8 @@ s32 func_002AD808(s32 task) {
 }
 
 /* Run this image variant's teardown phase and return its scheduler word. */
-s32 func_002AD8B0(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_002AD8B0(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     return menuSetHandler((void *)context, 2, (void *)task);
 }
 
@@ -234,8 +233,8 @@ u32 func_002AD8F0(void) {
     return 1;
 }
 
-s32 mnuPollStaffValueSelectionConfirmation(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuPollStaffValueSelectionConfirmation(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = mnuMapPadMaskToFlags(3);
@@ -258,8 +257,8 @@ s32 mnuPollStaffValueSelectionConfirmation(s32 task) {
     return 0;
 }
 
-s32 func_002AD9F8(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_002AD9F8(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     func_002AAE80(task);
     mnuCreateStaffImageSprite(11);
     func_002AAC98(0,
@@ -271,30 +270,30 @@ s32 func_002AD9F8(s32 task) {
 }
 
 /* Run this image variant's teardown phase and return its scheduler word. */
-s32 func_002ADAA0(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_002ADAA0(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     return menuSetHandler((void *)context, 2, (void *)task);
 }
 
-u32 mnuRefreshSecondaryStaffObject(void) {
+u32 mnuRefreshSecondaryStaffObject(KwlnTask *task) {
     s32 context;
 
-    context = kwlnTaskGetUserValue();
+    context = kwlnTaskGetUserValue(task);
     mnuBeginWindowFadeTransition(((MenuStaffChoices *)((MenuStaffContext *)context)->menu)->windows[1], &((MenuStaffContext *)context)->fade);
     return 1;
 }
 
-u32 mnuRefreshActiveStaffWindow(void) {
+u32 mnuRefreshActiveStaffWindow(KwlnTask *task) {
     s32 context;
 
-    context = kwlnTaskGetUserValue();
+    context = kwlnTaskGetUserValue(task);
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     return 1;
 }
 
 /* Handle input on the secondary object; its window supplies the sound flags. */
-s32 mnuHandleSecondaryStaffObjectInput(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuHandleSecondaryStaffObjectInput(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 *popup = (s32 *)(context + 0x54);
     u32 buttons = mnuMapPadMaskToFlags(0xc33);
@@ -329,8 +328,8 @@ s32 mnuHandleSecondaryStaffObjectInput(s32 task) {
     return 0;
 }
 
-s32 mnuStaffImageEnterD(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffImageEnterD(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     MenuWindowContainer *object;
 
@@ -349,17 +348,17 @@ s32 mnuStaffImageEnterD(s32 task) {
 }
 
 /* Run the secondary-image state's teardown phase and return its scheduler word. */
-s32 mnuStaffImageExitD(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffImageExitD(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     return menuSetHandler((void *)context, 2, (void *)task);
 }
 
 extern char D_003E7450[];
 
-s32 func_002ADDA0(s32 task) {
+s32 func_002ADDA0(KwlnTask *task) {
     s32 item = 0;
     s32 itemExhausted = 0;
-    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = context->menu;
     s32 *popup = &context->popupState;
     u32 buttons = mnuMapPadMaskToFlags(3);
@@ -401,8 +400,8 @@ s32 func_002ADDA0(s32 task) {
 }
 
 
-s32 mnuStaffImageEnterB(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffImageEnterB(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     MenuWindowContainer *object;
 
@@ -422,13 +421,13 @@ s32 mnuStaffImageEnterB(s32 task) {
 }
 
 /* Run the alternate primary-image state's teardown phase and return its scheduler word. */
-s32 mnuStaffImageExitB(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffImageExitB(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     return menuSetHandler((void *)context, 2, (void *)task);
 }
 
-s32 mnuInitializeSelectedStaffPage(s32 unused) {
-    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
+s32 mnuInitializeSelectedStaffPage(KwlnTask *task) {
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     MenuPageWindow *window = &context->partyWindow;
     s32 index = context->partyWindow.lists[0]->cursor->index;
@@ -451,8 +450,8 @@ s32 mnuInitializeSelectedStaffPage(s32 unused) {
 }
 
 /* Release the current entry list, its panel group and its auxiliary resource. */
-s32 mnuReleaseSelectedStaffPageResources(s32 unused) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuReleaseSelectedStaffPageResources(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     MenuPageWindow *entryList = &((MenuStaffContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     func_002ABEB0(context);
@@ -498,8 +497,8 @@ void mnuPrepareStaffSelectionChangeDialog(MenuStaffContext *context,
 }
 
 /* Switch pages and replay the first list's saved cursor steps. */
-s32 mnuStaffListInput(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuStaffListInput(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 pageChanged = 0;
     u32 buttons = mnuMapPadMaskToFlags(0x300);
@@ -546,7 +545,6 @@ s32 mnuStaffListInput(s32 task) {
 
 /* Handle staff-item selection, confirmation and popup input. */
 s32 func_002AE580(KwlnTask *task) {
-    extern u32 kwlnTaskGetUserValue(KwlnTask *);
     extern void mnuHandlePanelListPageJumpInput(u32, u32);
     extern s32 func_002ABED8(s32, s32, MenuStaffContext *);
     extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *, u32);
@@ -641,8 +639,8 @@ void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
 }
 
 /* Draw the selected party member's value page and advance its dispatch. */
-s32 mnuDrawStaffPartyValuePage(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = ((MenuStaffContext *)context)->menu;
     s32 index = ((MenuStaffContext *)context)->partyWindow.lists[0]->cursor->index;
     DatPartyRecord *partyEntry = &datGameState->party[index];
@@ -678,15 +676,15 @@ s32 mnuDrawStaffPartyValuePage(s32 task) {
 }
 
 /* Request value one from the message-window worker before the teardown phase. */
-s32 func_002AEA58(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_002AEA58(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
     func_0026C900();
     return menuSetHandler((void *)context, 2, (void *)task);
 }
 
-s32 mnuInitializeStaffPageWithSlotAsset(s32 unused) {
-    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
+s32 mnuInitializeStaffPageWithSlotAsset(KwlnTask *task) {
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
     MenuPageWindow *window = &context->partyWindow;
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     s32 index = context->partyWindow.lists[0]->cursor->index;
@@ -714,8 +712,8 @@ s32 mnuInitializeStaffPageWithSlotAsset(s32 unused) {
 }
 
 /* Variant cleanup for the adjacent menu state; keep the same release ordering. */
-s32 mnuReleaseStaffSelectionPageResources(s32 unused) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuReleaseStaffSelectionPageResources(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     MenuPageWindow *entryList = &((MenuStaffContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     func_002AC660(context);
@@ -770,8 +768,8 @@ void mnuStaffEntrySwapLabels(MenuStaffContext *context,
 
 /* Preserve the second list's position while switching its selected page.
  * Previous-page input wins when both page-direction flags are present. */
-s32 mnuHandleStaffSelectionListNavigation(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuHandleStaffSelectionListNavigation(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 pageChanged = 0;
     u32 buttons = mnuMapPadMaskToFlags(0x300);
@@ -817,7 +815,6 @@ s32 mnuHandleStaffSelectionListNavigation(s32 task) {
 }
 
 s32 func_002AF020(KwlnTask *task) {
-    extern u32 kwlnTaskGetUserValue(KwlnTask *);
     extern void mnuHandlePanelListPageJumpInput(u32, u32);
 
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
@@ -910,7 +907,6 @@ s32 func_002AF020(KwlnTask *task) {
 INCLUDE_ASM(const s32, "game/code_002AD3B8", func_002AF2E0);
 
 s32 func_002AF5E0(KwlnTask *task) {
-    extern u32 kwlnTaskGetUserValue(KwlnTask *);
     extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
     extern void func_002BDAA8(s32, s32, s32, s32, s32, s32);
     extern s32 func_002AF2E0(s32, s32, s32, MenuStaffContext *);
@@ -966,15 +962,15 @@ s32 func_002AF5E0(KwlnTask *task) {
 }
 
 /* Request value one from the message-window worker before the value-page teardown. */
-s32 mnuExitStaffValuePage(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuExitStaffValuePage(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
 
     func_0026C900();
     return menuSetHandler((void *)context, 2, (void *)task);
 }
 
-s32 mnuInitializeStaffValuePage(s32 unused) {
-    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
+s32 mnuInitializeStaffValuePage(KwlnTask *task) {
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
     MenuPageWindow *window = &context->partyWindow;
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     s32 index = context->partyWindow.lists[0]->cursor->index;
@@ -1005,8 +1001,8 @@ s32 mnuInitializeStaffValuePage(s32 unused) {
 }
 
 /* Third menu-state cleanup uses the matching state-specific pre-release. */
-s32 mnuReleaseStaffValuePageResources(s32 unused) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuReleaseStaffValuePageResources(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     MenuPageWindow *entryList = &((MenuStaffContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     func_002ACA98(context);
@@ -1052,8 +1048,8 @@ void mnuPrepareStaffValueChangeDialog(MenuStaffContext *context,
 
 /* Preserve the third list's position while switching its selected page.
  * Returns one after rebuilding the page, zero when neither direction wins. */
-s32 mnuHandleStaffValuePageInput(s32 task) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuHandleStaffValuePageInput(KwlnTask *task) {
+    s32 context = kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     s32 pageChanged = 0;
     u32 buttons = mnuMapPadMaskToFlags(0x300);
@@ -1124,8 +1120,8 @@ extern char D_003E74A4[];
 extern char D_003E754C[];
 extern char D_003E7568[];
 
-s32 func_002AFE18(s32 task) {
-    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
+s32 func_002AFE18(KwlnTask *task) {
+    MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = context->menu;
     MenuWindowContainer *window;
     DatPartyRecord *party;

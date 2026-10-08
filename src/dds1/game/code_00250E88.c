@@ -20,7 +20,7 @@ extern void mnuInitializeMantraSelectionGrid(s32);
 
 extern void mnuCopySceneCoordinates(s32);
 
-extern void sdfDestroyGridWork(s32);
+extern void sdfDestroyGridWork(SdfGrid *);
 
 extern void mnuReleaseDisplayListNodes(s32);
 
@@ -107,10 +107,10 @@ void func_00251260(MenuSceneWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_002512F0);
 
-/* Release nonnull chip-allocated task data; the scheduler argument is unused. */
-void mnuFreeTaskData(s32 unused, void *taskData) {
-    if (taskData != NULL) {
-        sdfReleaseChipBlock(taskData);
+/* Release a nonnull grid-cell payload; the cell index is unused. */
+void mnuFreeTaskData(u32 unused, u32 taskData) {
+    if (taskData != 0) {
+        sdfReleaseChipBlock((void *)taskData);
     }
 }
 
@@ -130,7 +130,7 @@ extern u32 mnuGetSelectedNodeValue(void);
 extern s32 fldGetSceneMetadataNode(void);
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern s32 dspStartEntry(s32);
-extern void *sdfGridSelectFilledCell(SdfGrid *, s32, s32);
+extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, s32, s32);
 
 /* Display the selected mantra and move the scene grid to its filled cell. */
 s32 mnuDisplayNextPendingMantra(s32 context) {
@@ -167,13 +167,12 @@ s32 mnuDisplayNextPendingMantra(s32 context) {
 }
 
 
-extern s32 sdfAllocGeneralBlock(s32);
 extern s32 sdfMemoryGetBlockAddress(s32);
 extern void *memset(void *, s32, u32);
 
 /* Allocate and clear scene work before registering its grid and coordinates. */
 s32 mnuCreateSceneWork(void) {
-    s32 allocationHandle = sdfAllocGeneralBlock(MNU_SCENE_WORK_SIZE);
+    s32 allocationHandle = (u32)sdfAllocGeneralBlock(MNU_SCENE_WORK_SIZE);
     u8 *sceneWork = (u8 *)sdfMemoryGetBlockAddress(allocationHandle);
 
     memset(sceneWork, 0, MNU_SCENE_WORK_SIZE);
@@ -189,7 +188,7 @@ s32 mnuCreateSceneWork(void) {
 /* Retain the native metadata lookup, then release grid/list/allocation resources and reset projection state. */
 void mnuReleaseSceneContext(s32 unused, s32 sceneAddress) {
     func_002CB3B8(mnuSceneResourceContext, -1);
-    sdfDestroyGridWork((s32)((MenuSceneWork *)sceneAddress)->gridHandle);
+    sdfDestroyGridWork(((MenuSceneWork *)sceneAddress)->gridHandle);
     mnuReleaseDisplayListNodes(sceneAddress + 0x584);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((MenuSceneWork *)sceneAddress)->allocationHandle));
     mnuResetWorkFloats();
@@ -268,14 +267,14 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_00253208);
 
 /* Recreate the scene's selection grid and copy its resulting coordinates. */
 void mnuReinitializeSceneGrid(s32 sceneAddress) {
-    sdfDestroyGridWork((s32)((MenuSceneWork *)sceneAddress)->gridHandle);
+    sdfDestroyGridWork(((MenuSceneWork *)sceneAddress)->gridHandle);
     mnuInitializeMantraSelectionGrid(sceneAddress);
     mnuCopySceneCoordinates(sceneAddress);
 }
 
 extern void func_002CBB48(SdfGrid *grid);
 extern void func_00253208(s32 context, s32 sceneId, s32 *x, s32 *y);
-extern void *sdfGridSelectFilledCell(SdfGrid *grid, s32 x, s32 y);
+extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, s32 x, s32 y);
 extern void func_002CC0D0(SdfGrid *grid);
 
 

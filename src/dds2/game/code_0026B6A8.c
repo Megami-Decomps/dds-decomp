@@ -1,10 +1,10 @@
+#include "kwln.h"
 #include "dsp_name.h"
 #include "mnu.h"
 #include "dat_state.h"
 #include "eff.h"
 #include "eff_transform.h"
 
-extern u32 kwlnTaskGetUserValue();
 extern void *dds3GetWorldSecondaryObject(void);
 extern EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 index, const u8 *name);
 
@@ -95,8 +95,8 @@ s32 dspStartFlagEvent(s32 context) {
 }
 
 
-s32 mnuPrepareTerminalPanelState(void) {
-    s32 *state = (s32 *)kwlnTaskGetUserValue();
+s32 mnuPrepareTerminalPanelState(KwlnTask *task) {
+    s32 *state = (s32 *)kwlnTaskGetUserValue(task);
 
     mnuTerminalSelectResourceBank(state);
     mnuApplyFadeTrackMode(0, state);
@@ -107,8 +107,8 @@ u32 func_0026B930(void) {
     return 1;
 }
 
-s32 dspUpdateFlagEvent(s32 request) {
-    s32 state = kwlnTaskGetUserValue();
+s32 dspUpdateFlagEvent(KwlnTask *request) {
+    s32 state = kwlnTaskGetUserValue(request);
     s32 *panel = (s32 *)(state + 0x54);
     s32 result = func_002C4038((u8 *)state + 8, panel, 0, (void *)request);
     if (result != 0) {
@@ -124,24 +124,24 @@ s32 dspUpdateFlagEvent(s32 request) {
     return 0;
 }
 
-s32 mnuDispatchTerminalPanel(s32 request) {
-    s32 state = kwlnTaskGetUserValue();
+s32 mnuDispatchTerminalPanel(KwlnTask *request) {
+    s32 state = kwlnTaskGetUserValue(request);
 
     mnuDrawTerminalBackdrop(state);
     return menuSetHandler((void *)state, 1, (void *)request);
 }
 
-s32 mnuDispatchTerminalPanelExit(s32 request) {
-    s32 state = kwlnTaskGetUserValue();
+s32 mnuDispatchTerminalPanelExit(KwlnTask *request) {
+    s32 state = kwlnTaskGetUserValue(request);
 
     func_0026C900();
     return menuSetHandler((void *)state, 2, (void *)request);
 }
 
-u32 mnuStartTaskFadeIn(void) {
+u32 mnuStartTaskFadeIn(KwlnTask *task) {
     s32 state;
 
-    state = kwlnTaskGetUserValue();
+    state = kwlnTaskGetUserValue(task);
     /* Both arms are identical in retail; kept as written. */
     if (*(s32 *)(state + 0xe4) == 0) {
         kwlnFadeInStart(0, 0, 0, 0xf);
@@ -152,8 +152,8 @@ u32 mnuStartTaskFadeIn(void) {
     return 1;
 }
 
-s32 mnuStartTerminalPanelFadeOut(void) {
-    s32 state = kwlnTaskGetUserValue();
+s32 mnuStartTerminalPanelFadeOut(KwlnTask *task) {
+    s32 state = kwlnTaskGetUserValue(task);
 
     mnuApplyFadeTrackMode(1, state);
     kwlnFadeOutStart(0, 0, 0, 0);
@@ -165,8 +165,8 @@ extern s32 kwlnFadeIsActive(void);
 extern char D_003CE998[];
 
 /* When the current panel is idle and no fade is running, start its queued step. */
-s32 func_0026BAF8(void *request) {
-    s32 state = kwlnTaskGetUserValue();
+s32 func_0026BAF8(KwlnTask *request) {
+    s32 state = kwlnTaskGetUserValue(request);
     s32 *panelState = (s32 *)(state + 0x54);
     s32 result = func_002C4038((u8 *)state + 8, panelState, 0, request);
     if (result == 0) {
@@ -178,29 +178,29 @@ s32 func_0026BAF8(void *request) {
     return result;
 }
 
-s32 func_0026BB78(s32 request) {
-    s32 state = kwlnTaskGetUserValue();
+s32 func_0026BB78(KwlnTask *request) {
+    s32 state = kwlnTaskGetUserValue(request);
 
     mnuDrawTerminalBackdrop(state);
     return menuSetHandler((void *)state, 1, (void *)request);
 }
 
-s32 func_0026BBC8(s32 request) {
-    s32 state = kwlnTaskGetUserValue();
+s32 func_0026BBC8(KwlnTask *request) {
+    s32 state = kwlnTaskGetUserValue(request);
 
     return menuSetHandler((void *)state, 2, (void *)request);
 }
 
-u32 mnuClearTerminalPanelSelection(void) {
+u32 mnuClearTerminalPanelSelection(KwlnTask *task) {
     s32 state;
 
-    state = kwlnTaskGetUserValue();
+    state = kwlnTaskGetUserValue(task);
     *(u32 *)(state + 0x98) = 0;
     return 1;
 }
 
-s32 mnuRebuildTerminalMenuResources(void) {
-    s32 *state = (s32 *)kwlnTaskGetUserValue();
+s32 mnuRebuildTerminalMenuResources(KwlnTask *task) {
+    s32 *state = (s32 *)kwlnTaskGetUserValue(task);
 
     mnuReleaseWorkResources(state);
     mnuTerminalBuildMenus(state);

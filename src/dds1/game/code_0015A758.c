@@ -625,7 +625,7 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
     }
     total = count * perCell;
     cellsSize = (total + count) * 0x14;
-    handle = sdfAllocGeneralBlock(cellsSize + 0x2C);
+    handle = (u32)sdfAllocGeneralBlock(cellsSize + 0x2C);
     base = sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     system = (ParSystem *)(base + cellsSize);
     memset(system, 0, 0x2C);
@@ -1628,7 +1628,7 @@ typedef struct ParBlock {
 ParBlock *parAllocateDrawBlock(s32 count) {
     s32 points = count * 3;
     s32 colorBytes = points * 4;
-    s32 handle = sdfAllocGeneralBlock((colorBytes + points) * 4 + 0x18);
+    s32 handle = (u32)sdfAllocGeneralBlock((colorBytes + points) * 4 + 0x18);
     s32 base = sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     u8 *vertices = (u8 *)base + points * 16;
     ParBlock *block = (ParBlock *)(vertices + colorBytes);

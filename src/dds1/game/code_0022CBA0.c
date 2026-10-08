@@ -16,7 +16,6 @@
 #include "mdl.h"
 #include "evt_polygon_movie.h"
 
-extern u32 kwlnTaskGetUserValue(KwlnTask *task);
 struct EvtRuntime;
 struct EvtRuntime;
 struct EvtRuntime;
@@ -1692,7 +1691,6 @@ void func_00232D48(EvtRuntime *viewer) {
 }
 
 extern u32 D_003BA8EC;
-extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern void *memset(void *dst, s32 value, u32 size);
 extern void *kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 extern s32 evtCreateSkyTask(void);
