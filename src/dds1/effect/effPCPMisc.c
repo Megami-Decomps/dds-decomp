@@ -220,7 +220,8 @@ extern EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *params);
 extern void effBlurReleaseSecondResource(EffBlurScaleWork *work);
 extern void effBlurSecondInitSlots(EffBlurScaleWork *work);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
-extern u32 effCloneResourceTemplate(void *params);
+extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
+extern void effReleaseResourceTemplate(EffResourceRectWork *work);
 extern void *effCloneBlurTemplate(void *params);
 extern void *effPcpTripleHandleCreate(void *block0, void **blocks);
 
@@ -2168,7 +2169,7 @@ EffPCPCompactFadeWork *effPcpCompactEffectCreate(EffPCPCompactRectParams *params
     EffPCPCompactFadeWork *work;
 
     work = sdfAllocSizeClassBlock(0x3C);
-    work->resource = effCloneResourceTemplate(&params->res);
+    work->resource = (u32)effCloneResourceTemplate((EffResourceRectParams *)&params->res);
     work->frame = 0;
     work->color = 0x80808080;
     work->flags = params->timeline.flags;
@@ -2200,25 +2201,17 @@ void effPcpCompactRespawn(EffPCPCompactFadeWork *work) {
     params.timeline.fadeOut = work->fadeOut;
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
-    params.res = *(EffPCPRectParams *)work->resource;
+    memcpy(&params.res, &((EffResourceRectWork *)work->resource)->params, sizeof(params.res));
     effPcpCompactEffectCreate(&params);
 }
 
 void effPcpCompactEffectRelease(EffPCPCompactFadeWork *work) {
-    func_00188050(work->resource);
+    effReleaseResourceTemplate((EffResourceRectWork *)work->resource);
     sdfReleaseChipBlock(work);
 }
 
-typedef struct EffPCPLerpObj {
-    s32 size;
-    s32 x;
-    s32 y;
-    u32 color;
-} EffPCPLerpObj;
-
-
 extern void sdfProjectVuVectorToScreen();
-extern void effResourceRectDrawPixels(EffPCPLerpObj *obj);
+extern void effResourceRectDrawPixels(EffResourceRectWork *work);
 /* Both compact fade renderers interpolate their extent with integer truncation. */
 static inline s32 effPcpInterpolateCompactExtent(s32 from, s32 to,
     s32 frame, s32 duration) {
@@ -2232,7 +2225,7 @@ void effPcpCompactEffectUpdate(EffPCPCompactFadeWork *work) {
     f32 projected[4];
     s32 frame = work->frame;
     s32 duration = work->duration;
-    EffPCPLerpObj *rect = (EffPCPLerpObj *)work->resource;
+    EffResourceRectWork *rect = (EffResourceRectWork *)work->resource;
     s32 fadeIn;
     s32 fadeOut;
     f32 opacity;
@@ -2245,13 +2238,13 @@ void effPcpCompactEffectUpdate(EffPCPCompactFadeWork *work) {
             VU0_LOAD_VF(vf10, work->position);
             sdfProjectVuVectorToScreen();
             VU0_STORE_VF(vf10, projected);
-            rect->x = (s32)projected[0] - 2048;
-            rect->y = ((s32)projected[1] - 2048) << 1;
+            rect->params.centerX = (s32)projected[0] - 2048;
+            rect->params.centerY = ((s32)projected[1] - 2048) << 1;
         } else {
-            rect->x = 0;
-            rect->y = 0;
+            rect->params.centerX = 0;
+            rect->params.centerY = 0;
         }
-        rect->size = effPcpInterpolateCompactExtent(
+        rect->params.extent = effPcpInterpolateCompactExtent(
             work->startExtent, work->endExtent, frame, duration);
         if (frame < fadeIn && fadeIn != 0) {
             opacity = (f32)frame / (f32)fadeIn;
@@ -2261,7 +2254,7 @@ void effPcpCompactEffectUpdate(EffPCPCompactFadeWork *work) {
             opacity = 1.0f;
         }
         color = work->color;
-        rect->color = effMultiplyPackedColors(
+        *(u32 *)rect->params.draw.color = effMultiplyPackedColors(
             effBlendColor(color & 0xFFFFFF, color, opacity), work->baseColor);
         effResourceRectDrawPixels(rect);
         work->frame++;
