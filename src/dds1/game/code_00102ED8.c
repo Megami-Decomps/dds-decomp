@@ -89,9 +89,11 @@ extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 extern s32 effMiscRandMod(s32, s32);
 extern void kwlnPadStartMotor(u32, u8, s32);
-extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
-extern void func_00104290(void);
-extern void *D_003BD6A8;
+typedef s32 (*KwlnTaskUpdateCallback)();
+typedef void (*KwlnTaskDestroyCallback)();
+extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, KwlnTaskUpdateCallback, KwlnTaskDestroyCallback, u32);
+extern s32 kwlnDebugGraphUpdate(void);
+extern KwlnTask *kwlnDebugGraphTask;
 extern s32 kwlnTextureCountIncompleteResources(void);
 extern s32 func_003014F0();
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
@@ -134,8 +136,8 @@ typedef struct KwlnDebugWork {
 } KwlnDebugWork;
 
 extern char dds3AdminTaskName[];
-extern void *dds3AdminPollModeCompletion(void *task);
-extern void dds3AdminReleaseTaskWork(void);
+extern s32 dds3AdminPollModeCompletion(KwlnTask *task);
+extern void dds3AdminReleaseTaskWork(KwlnTask *task);
 extern void *sdfAllocSizeClassBlock(s32);
 
 void kwlnDebugTaskCreate(void) {
@@ -155,7 +157,7 @@ void kwlnDebugTaskCreate(void) {
         }
         work->unk1C = 0;
         work->unk20 = 0;
-        kwlnTaskCreate(dds3AdminTaskName, 2, 0, 1, dds3AdminPollModeCompletion, dds3AdminReleaseTaskWork, work);
+        kwlnTaskCreate(dds3AdminTaskName, 2, 0, 1, dds3AdminPollModeCompletion, dds3AdminReleaseTaskWork, (u32)work);
     }
 }
 
@@ -465,17 +467,17 @@ void kwlnInitMagicState(void) {
     effMiscSeedRandom(effSharedRandomState, KWLN_SHARED_RANDOM_SEED);
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104290);
+INCLUDE_ASM(const s32, "game/code_00102ED8", kwlnDebugGraphUpdate);
 
-void func_001045F8(void) {
+void kwlnDebugGraphTaskDestroy(void) {
 }
 
 /* Only mode 1 creates and mode 0 destroys the timing graph; other modes do nothing. */
 void kwlnDebugGraphSetEnabled(s8 mode) {
     if (mode == 1) {
-        D_003BD6A8 = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, func_00104290, func_001045F8, NULL);
+        kwlnDebugGraphTask = kwlnTaskCreate("DebugTimeGrph", 0x2710, 1, 1, kwlnDebugGraphUpdate, kwlnDebugGraphTaskDestroy, NULL);
     } else if (mode == 0) {
-        kwlnTaskDestroyWithHierarchy(D_003BD6A8, 0);
+        kwlnTaskDestroyWithHierarchy(kwlnDebugGraphTask, 0);
     }
 }
 
