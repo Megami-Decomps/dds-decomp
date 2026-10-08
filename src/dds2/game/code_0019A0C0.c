@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_param.h"
 #include "sdf_resource.h"
 #include "eff.h"
 #include "eff_math.h"
@@ -77,7 +78,6 @@ extern void func_0019AE18(void *arg0, s32 arg1, u32 arg2);
 extern void func_0019B120(EffPrim *arg0, f32 *arg1);
 
 extern void func_0019B1F0(EffPrim *arg0, void *arg1);
-extern void effDispatchParameterDataAndFreeWork(void *handle);
 
 typedef struct EffChanSourceOwner {
     u8 pad00[4];
@@ -89,9 +89,7 @@ typedef struct EffChanSource {
     EffChanSourceOwner *owner; /* 0x168 */
 } EffChanSource;
 
-extern void *effParamWorkDuplicate(void *param);
 extern void effParamWorkCallback0(void *param, void *value);
-extern void effParamWorkInvokeCallback(void *param);
 
 /* Clone channel work, allocate slots and duplicate a parameter template per record.
  * The record count is captured before allocation; a nonpositive delay modulus becomes one. */
@@ -100,7 +98,7 @@ EffChanWork *effChanWorkCreate(EffChanSource *source) {
     SdfMemBlock *allocationHandle = sdfAllocGeneralBlock(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
     EffChanWork *work = (EffChanWork *)sdfResourceRetainAddress(allocationHandle);
     EffChanRecord *recordCursor = (EffChanRecord *)(work + 1);
-    void *parameterTemplate;
+    EffParamWork *parameterTemplate;
     s32 delayModulus;
     u32 recordIndex;
 

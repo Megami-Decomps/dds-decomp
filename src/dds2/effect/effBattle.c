@@ -2,6 +2,7 @@
 #include "btl_sound.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "eff_param.h"
 
 enum {
     EFF_BATTLE_COPY_TRIGGER_FRAME = 0,
@@ -11,16 +12,11 @@ enum {
 
 
 
-typedef struct EffParamWork EffParamWork;
 extern char D_00414478[];
-extern void effDispatchParameterDataAndFreeWork(EffParamWork *);
 extern void func_0035B6E0(const char *fmt, ...);
 extern void sdfReleaseChipBlock(void *);
 extern f32 D_003AF1A0[4];
 extern f32 D_003AF190[4];
-
-extern EffParamWork *effParamWorkCreate(u16 kind, void *data);
-extern EffParamWork *effParamWorkDuplicate(EffParamWork *work);
 
 
 typedef struct EffBattleEntry {
