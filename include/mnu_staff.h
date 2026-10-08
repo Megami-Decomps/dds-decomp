@@ -13,6 +13,9 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *page, u16 ability,
 void mnuInitPartyPanelSlots(PartyPanel *party);
 
 void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *page);
+struct KwlnTask;
+/* Test whether the skill menu retains a selected list-node ID. */
+u32 mnuHasSelectedListNodeId(struct KwlnTask *callback);
 #ifdef VERSION_DDS1
 void mnuClearListFlags(s32 which, MenuPageWindow *page);
 #endif
