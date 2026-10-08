@@ -58,7 +58,10 @@ extern s32 btlGetRuntime(void);
 
 extern s32 btlIsSelectedActorStatusAndRecordClear();
 
-extern s32 func_00212CB8(u32, u32, u32);
+extern s32 func_00212CB8(BtlUnit *, s32, s8);
+
+struct UiObject;
+extern s32 btlMatchActorEntryCode(struct UiObject *, s32);
 
 extern u8 btlHasAvailableOption(u32);
 
@@ -754,7 +757,55 @@ s32 btlMatchesActorEntryCodeCondition(actorAddress, conditionIndex)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00211360", func_00212CB8);
+/* Test an entry-code endpoint; kinds 11/12 scan even/odd conditions. */
+s32 func_00212CB8(BtlUnit *unit, s32 conditionIndex, s8 inverse) {
+    s32 index;
+    s16 result;
+
+    if (conditionIndex == 11) {
+        for (index = 0; index < BTL_ENTRY_CODE_SCAN_COUNT; index += 2) {
+            result = btlMatchActorEntryCode((struct UiObject *)unit, D_003BF660[index]);
+            if (inverse == 0) {
+                if (result == 1) {
+                    return 1;
+                }
+            } else if (result == 2) {
+                return 1;
+            }
+        }
+    } else if (conditionIndex == 12) {
+        for (index = 1; index < BTL_ENTRY_CODE_SCAN_COUNT; index += 2) {
+            result = btlMatchActorEntryCode((struct UiObject *)unit, D_003BF660[index]);
+            if (inverse == 0) {
+                if (result == 2) {
+                    return 1;
+                }
+            } else if (result == 1) {
+                return 1;
+            }
+        }
+    } else {
+        result = btlMatchActorEntryCode((struct UiObject *)unit, D_003BF660[conditionIndex]);
+        if ((conditionIndex & 1) == 0 || conditionIndex == 13) {
+            if (inverse == 0) {
+                if (result == 1) {
+                    return 1;
+                }
+            } else if (result == 2) {
+                return 1;
+            }
+        } else {
+            if (inverse == 0) {
+                if (result == 2) {
+                    return 1;
+                }
+            } else if (result == 1) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 extern const s32 btlRequiredActionCategories[10];
 
@@ -799,7 +850,7 @@ s32 btlAnyEnemyMeetsEntryCodeCondition(s32 unused, s32 conditionIndex) {
 u8 btlCheckUnitActionModeZero(u32 unitAddress, u32 actionQuery) {
     s64 queryResult;
 
-    queryResult = func_00212CB8(unitAddress, actionQuery, 0);
+    queryResult = func_00212CB8((BtlUnit *)unitAddress, (s32)actionQuery, 0);
     return queryResult != 0;
 }
 
@@ -807,7 +858,7 @@ u8 btlCheckUnitActionModeZero(u32 unitAddress, u32 actionQuery) {
 u8 btlCheckUnitActionModeOne(u32 unitAddress, u32 actionQuery) {
     s64 queryResult;
 
-    queryResult = func_00212CB8(unitAddress, actionQuery, 1);
+    queryResult = func_00212CB8((BtlUnit *)unitAddress, (s32)actionQuery, 1);
     return queryResult != 0;
 }
 
@@ -816,7 +867,7 @@ s32 btlAnyPartyPassesEntryCheck(s32 unused, s32 actionQuery) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
     for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
         if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS &&
-            func_00212CB8((s32)unitCursor, actionQuery, 0)) {
+            func_00212CB8(unitCursor, actionQuery, 0)) {
             return 1;
         }
     }
@@ -828,7 +879,7 @@ s32 btlAnyPartyPassesInverseEntryCheck(s32 unused, s32 actionQuery) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
     for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
         if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS &&
-            func_00212CB8((s32)unitCursor, actionQuery, 1)) {
+            func_00212CB8(unitCursor, actionQuery, 1)) {
             return 1;
         }
     }
@@ -840,7 +891,7 @@ s32 btlAnyEnemyPassesEntryCheck(s32 unused, s32 actionQuery) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
     for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
         if ((*(u64 *)&unitCursor->flags & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS &&
-            func_00212CB8((s32)unitCursor, actionQuery, 0)) {
+            func_00212CB8(unitCursor, actionQuery, 0)) {
             return 1;
         }
     }
@@ -852,7 +903,7 @@ s32 btlAnyEnemyPassesInverseEntryCheck(s32 unused, s32 actionQuery) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
     for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
         if ((*(u64 *)&unitCursor->flags & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS &&
-            func_00212CB8((s32)unitCursor, actionQuery, 1)) {
+            func_00212CB8(unitCursor, actionQuery, 1)) {
             return 1;
         }
     }
@@ -864,7 +915,7 @@ s32 btlAnyPartyFailsEntryCheck(s32 unused, s32 actionQuery) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
     for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
         if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS &&
-            func_00212CB8((s32)unitCursor, actionQuery, 0) == 0) {
+            func_00212CB8(unitCursor, actionQuery, 0) == 0) {
             return 1;
         }
     }
@@ -876,7 +927,7 @@ s32 btlAnyEnemyFailsEntryCheck(s32 unused, s32 actionQuery) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
     for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
         if ((*(u64 *)&unitCursor->flags & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS &&
-            func_00212CB8((s32)unitCursor, actionQuery, 0) == 0) {
+            func_00212CB8(unitCursor, actionQuery, 0) == 0) {
             return 1;
         }
     }
