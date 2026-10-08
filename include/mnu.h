@@ -105,6 +105,8 @@ typedef struct MenuAssets {
 
 typedef char MenuAssets_size_must_be_0x20[(sizeof(MenuAssets) == 0x20) ? 1 : -1];
 
+struct EffectSlotSet;
+
 /* Native staff sprite banks; DDS2 retains only two base resources. */
 typedef struct StaffSlots {
 #ifdef VERSION_DDS2
@@ -112,9 +114,9 @@ typedef struct StaffSlots {
 #else
     u32 baseResources[7];
 #endif
-    u32 pairResources[2];
-    u32 mainResources[16];
-    u32 extraResources[5];
+    struct EffectSlotSet *pairResources[2];
+    struct EffectSlotSet *mainResources[16];
+    struct EffectSlotSet *extraResources[5];
 } StaffSlots;
 
 #ifdef VERSION_DDS2
@@ -154,8 +156,6 @@ typedef struct BrsProgressRow {
 } BrsProgressRow;
 
 typedef char BrsProgressRow_size_must_be_0x2C[(sizeof(BrsProgressRow) == 0x2C) ? 1 : -1];
-
-struct EffectSlotSet;
 
 /* DDS1 allocates 0x50 bytes; DDS2's expanded sprite banks and byte flags use 0x78. */
 typedef struct MenuSprites {
@@ -542,12 +542,13 @@ typedef char MenuPageWindow_alternateSlot_offset_check[
 
 void func_002BCD90(MenuPageWindow *, PartyPanel *, struct EffectSlotSet *,
                    s32, struct EffectSlotSet *, s32, struct EffectSlotSet *, s32);
-void mnuCopyPrimaryWindowHandles(MenuPageWindow *, u32 *);
-void mnuCopySecondaryWindowHandles(MenuPageWindow *, u32 *);
-void mnuRegisterResourceHandles(MenuPageWindow *, u32 *);
 void mnuSetPanelSlotValues(MenuPageWindow *, struct EffectSlotSet *);
 void mnuInitializeCampPanelResources(MenuPageWindow *, StaffSlots *, u32, PartyPanel *);
 #endif
+
+void mnuCopyPrimaryWindowHandles(MenuPageWindow *, struct EffectSlotSet **);
+void mnuCopySecondaryWindowHandles(MenuPageWindow *, struct EffectSlotSet **);
+void mnuRegisterResourceHandles(MenuPageWindow *, struct EffectSlotSet **);
 
 typedef struct MenuGradientFade {
     u32 active;

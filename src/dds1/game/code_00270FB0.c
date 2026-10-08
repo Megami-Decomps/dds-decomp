@@ -168,7 +168,7 @@ u32 *mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount, StaffMenuWork 
         return menu->categoryPair;
     case 3:
         *outEntryCount = 2;
-        return menu->staffSlots.pairResources;
+        return (u32 *)menu->staffSlots.pairResources;
     case MNU_STAFF_PARTY_CATEGORY:
         *outEntryCount = 9;
         return menu->partyModels;
@@ -304,9 +304,11 @@ void mnuReleaseStaffSpriteHandles(StaffMenuWork *menu) {
     } while (batchIndex < MNU_STAFF_STATUS_BATCH_COUNT);
 }
 
-void mnuInitializeStaffPageWindows(u32 container, StaffSlots *resources, u32 unused, u32 mode) {
-    mnuInitPageWindow(container, mode, resources->baseResources[3], 7, resources->baseResources[4], 0, resources->baseResources[0], 0x11);
-    func_0027FAA8(container, resources->baseResources[0]);
+void mnuInitializeStaffPageWindows(MenuPageWindow *container, StaffSlots *resources,
+                                   u32 unused, PartyPanel *partyPanel) {
+    mnuInitPageWindow((u32)container, (u32)partyPanel, resources->baseResources[3], 7,
+                      resources->baseResources[4], 0, resources->baseResources[0], 0x11);
+    func_0027FAA8((u32)container, resources->baseResources[0]);
     mnuCopyPrimaryWindowHandles(container, resources->mainResources);
     mnuCopySecondaryWindowHandles(container, resources->mainResources + 8);
     mnuRegisterResourceHandles(container, resources->extraResources);
@@ -340,13 +342,13 @@ void mnuReleaseStaffResourceGroups(StaffSlots *resources) {
 
     mnuReleaseStaffImageHandles(resources->baseResources);
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
-        effDestroyResourceSlotSet(resources->mainResources[resourceIndex]);
+        effDestroyResourceSlotSet((u32)resources->mainResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_EXTRA_RESOURCE_COUNT; resourceIndex++) {
-        effDestroyResourceSlotSet(resources->extraResources[resourceIndex]);
+        effDestroyResourceSlotSet((u32)resources->extraResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_PAIR_RESOURCE_COUNT; resourceIndex++) {
-        effDestroyResourceSlotSet(resources->pairResources[resourceIndex]);
+        effDestroyResourceSlotSet((u32)resources->pairResources[resourceIndex]);
     }
 }
 

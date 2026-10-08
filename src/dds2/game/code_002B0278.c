@@ -3670,12 +3670,12 @@ void mnuReleasePartyPanelSpriteTextures(u8 *menu);
 
 
 /* Copy eight resource handles into the window's primary handle bank. */
-void mnuCopyPrimaryWindowHandles(MenuPageWindow *menu, u32 *source);
+void mnuCopyPrimaryWindowHandles(MenuPageWindow *menu, struct EffectSlotSet **source);
 
 /* Copy eight resource handles into the window's secondary handle bank. */
-void mnuCopySecondaryWindowHandles(MenuPageWindow *menu, u32 *source);
+void mnuCopySecondaryWindowHandles(MenuPageWindow *menu, struct EffectSlotSet **source);
 
-void mnuRegisterResourceHandles(MenuPageWindow *destination, u32 *source);
+void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSet **source);
 
 
 

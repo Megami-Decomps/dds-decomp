@@ -456,7 +456,7 @@ void brsApplyRewardBundle(BrsSkillPackageWork *partyWork, BrsRewardSummary *batc
 }
 
 extern void mnuReleaseStaffMenuResources(s32 *);
-extern void mnuInitializeStaffPageWindows(s32, StaffSlots *, s32, s32);
+extern void mnuInitializeStaffPageWindows(MenuPageWindow *, StaffSlots *, u32, PartyPanel *);
 extern void evtStageTestInit(s32);
 extern void mnuForwardTableByte(s32);
 extern void mnuReleaseStaffResourceGroups(StaffSlots *);
@@ -470,14 +470,14 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     MenuPanelGroup *panel;
 
     mnuReleaseStaffMenuResources(group);
-    mnuInitializeStaffPageWindows((s32)&work->partyWindow, &work->staffSlots, 0, (s32)&work->partyPanel);
-    panel = mnuCreatePanelGroup(work->staffSlots.pairResources[0]);
+    mnuInitializeStaffPageWindows(&work->partyWindow, &work->staffSlots, 0, &work->partyPanel);
+    panel = mnuCreatePanelGroup((s32)work->staffSlots.pairResources[0]);
     work->panelHandle = panel;
     mnuUpdateFiveListEntries(panel, work->unitHandle);
     work->spriteHandle =
         mnuCreateSpriteState((struct EffectSlotSet *)work->staffSlots.baseResources[5],
                              (struct EffectSlotSet *)work->staffSlots.baseResources[2],
-                             (struct EffectSlotSet *)work->staffSlots.pairResources[0]);
+                             work->staffSlots.pairResources[0]);
     evtStageTestInit(0);
     mnuForwardTableByte(work->primaryRewards.rows[work->selectedRow].unit->unitId);
 }
@@ -838,10 +838,10 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
         mnuReleasePartyIconBundles(window);
         mnuSelectPage(window, page);
         mnuResetPartyPanelFade((s32)window, page, 0, 0);
-        mnuSetWindowResource(page, window, work->staffSlots.pairResources[0],
-                             work->staffSlots.pairResources[1]);
+        mnuSetWindowResource(page, window, (s32)work->staffSlots.pairResources[0],
+                             (s32)work->staffSlots.pairResources[1]);
         mnuSetPageParams(work->partyWindow.slots[page].windowSprites, 2);
-        mnuAttachPartyIconBundle(page, window, work->staffSlots.pairResources[0]);
+        mnuAttachPartyIconBundle(page, window, (u32)work->staffSlots.pairResources[0]);
 
         work->partyWindow.slots[page].iconBundle->fade = 0x100;
         window->flags |= 0x400;

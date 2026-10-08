@@ -699,17 +699,17 @@ void mnuSetupStaffMenuProfilePage(DatPartyRecord *source, MenuProgressHost *work
 
     mnuSeekListNode(mnuFindMatchingPartyEntryIndex(source), work->partyWindow.lists[0]);
     index = work->partyWindow.lists[0]->cursor->index;
-    mnuSetWindowResource(index, window, work->staffSlots.pairResources[0], work->staffSlots.pairResources[1]);
-    mnuAttachPartyIconBundle(index, window, work->staffSlots.pairResources[0]);
-    work->panelGroup = mnuCreatePanelGroup(work->staffSlots.pairResources[0]);
+    mnuSetWindowResource(index, window, (s32)work->staffSlots.pairResources[0], (s32)work->staffSlots.pairResources[1]);
+    mnuAttachPartyIconBundle(index, window, (u32)work->staffSlots.pairResources[0]);
+    work->panelGroup = mnuCreatePanelGroup((s32)work->staffSlots.pairResources[0]);
     work->effectResource = mnuAllocateSimpleSprite(
         (struct EffectSlotSet *)work->staffSlots.baseResources[5],
         (struct EffectSlotSet *)work->staffSlots.baseResources[2],
         (struct EffectSlotSet *)work->staffSlots.baseResources[3],
         (struct EffectSlotSet *)work->staffSlots.baseResources[0],
-        (struct EffectSlotSet *)work->staffSlots.pairResources[0]);
+        work->staffSlots.pairResources[0]);
     work->currentEffect = mnuCreateProfilePanel(source);
-    mnuCacheProfilePanelGridPositions(work->currentEffect, work->staffSlots.pairResources[1], 5, 14, 15);
+    mnuCacheProfilePanelGridPositions(work->currentEffect, (u32)work->staffSlots.pairResources[1], 5, 14, 15);
     func_00276720(window, 1, 1, 1);
 }
 

@@ -1094,12 +1094,12 @@ void mnuDrawStaffPanelGridBackdrop(s32 flag, StaffSlots *slots) {
     s32 y;
 
     for (y = 0x360; y < 0xE40; y += 0x38) {
-        itfDrawGridWithResolvedSlot(0xE80, y, 0, 1, slots->pairResources[1], 2, 0x53);
+        itfDrawGridWithResolvedSlot(0xE80, y, 0, 1, (u32)slots->pairResources[1], 2, 0x53);
     }
-    itfDrawGridWithResolvedSlot(0x10F0, 0x358, 0, 1, slots->pairResources[1], 4, 0x53);
-    itfDrawGridWithResolvedSlot(0x1050, 0x500, 0, 1, slots->pairResources[1], 3, 0x53);
+    itfDrawGridWithResolvedSlot(0x10F0, 0x358, 0, 1, (u32)slots->pairResources[1], 4, 0x53);
+    itfDrawGridWithResolvedSlot(0x1050, 0x500, 0, 1, (u32)slots->pairResources[1], 3, 0x53);
     if (flag == 0) {
-        itfDrawGridWithResolvedSlot(-0x140, -0xA0, 0, 1, slots->pairResources[1], 7, 0x53);
+        itfDrawGridWithResolvedSlot(-0x140, -0xA0, 0, 1, (u32)slots->pairResources[1], 7, 0x53);
     }
 }
 
