@@ -1,4 +1,5 @@
 #include "ee_mmi.h"
+#include "kwln.h"
 #include "pcp_vu0.h"
 #include "common.h"
 #include "sdf_resource.h"
@@ -225,7 +226,6 @@ extern FieldStageCoordinate D_0032DDB0[];
 extern u8 D_0033F068[];
 extern u8 D_00342868[];
 extern u32 dds3AdvanceWorldCounter(void);
-extern void *kwlnTaskGetTaskByName(const char *);
 extern void dds3WorkClear(void);
 extern char D_0039FBC0[]; /* "fldProcSequence" */
 struct EffWorldNode;

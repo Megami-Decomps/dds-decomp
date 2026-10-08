@@ -350,7 +350,6 @@ extern char D_003B2668[];
 extern char D_003B26C8[];
 
 
-extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 
 
 extern void dds3DispatchIndexedCallback(void *callback);

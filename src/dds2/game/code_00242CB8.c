@@ -5,7 +5,6 @@
 #include "evt_world.h"
 #include "evt_solar.h"
 
-extern s32 kwlnTaskIsRegistered(KwlnTask *);
 extern void evtSetContextFlag(KwlnTask *);
 extern void evtClearContextFlag(KwlnTask *);
 extern void fldSetFadeTarget(s32, s32, s32);

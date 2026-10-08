@@ -317,7 +317,6 @@ extern u32 fileRequestIsReady(u32 arg0);
 extern void *memset(void *s, s32 c, u32 n);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task);
-extern s32 kwlnTaskIsRegistered(u32 arg0);
 extern s32 func_00213B50(void);
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 extern s32 fldValueRecordCount;
@@ -3486,7 +3485,6 @@ void fldBeginSelectedValueTransition(u32 value) {
 }
 
 extern char D_003A0138[];
-extern KwlnTask *kwlnTaskGetTaskByName(const char *);
 extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *object);
 extern void evtSetUnitStatusFlags(EvtUnit *unit);
 extern void evtInitializeUnitColorTransition(EvtUnit *unit, s32 index, u32 colorA, u32 colorB);
@@ -4643,7 +4641,7 @@ s32 fldDestroyFlaggedNamedTask(char *flag, u32 slot) {
 u32 fldDestroyTaskSlot(u32 slot) {
     u32 *task = &D_003308B0[slot];
 
-    if (kwlnTaskIsRegistered(*task) != 0) {
+    if (kwlnTaskIsRegistered((KwlnTask *)*task) != 0) {
         kwlnTaskDestroyWithHierarchy(*task, 0);
     }
     *task = 0;
@@ -4690,7 +4688,7 @@ void fldClearInactiveTaskSlots(void) {
     if (count > 0) {
         u32 *taskSlot = D_003308B0;
         do {
-            if (kwlnTaskIsRegistered(*taskSlot) == 0) {
+            if (kwlnTaskIsRegistered((KwlnTask *)*taskSlot) == 0) {
                 *taskSlot = 0;
             }
             slotIndex++;
@@ -6370,3 +6368,4 @@ INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE68);
 INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE6C);
 
 INCLUDE_SDATA(const s32, "game/code_00126A30", fldFieldTaskHandle);
+

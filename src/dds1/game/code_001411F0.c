@@ -235,7 +235,6 @@ typedef struct {
 
 extern FldTbl50 D_003D46C0[];
 
-extern s32 kwlnTaskGetTaskByName(void *name);
 
 extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
 

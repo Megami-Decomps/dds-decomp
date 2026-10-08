@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 #include "mnu_work.h"
 #include "sdf.h"
@@ -102,7 +103,6 @@ MnuShootingWork *mdlAllocateViewerPackageWork(void);
 
 extern char D_0042D4D0[];
 
-extern s32 kwlnTaskGetTaskByName(const char *arg0);
 
 void func_00316FA8(MnuShootingWork *work);
 

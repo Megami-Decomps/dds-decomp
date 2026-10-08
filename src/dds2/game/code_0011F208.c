@@ -189,7 +189,6 @@ extern u8 D_003A25A8[];
 
 extern s16 D_00387D70[];
 
-extern void *kwlnTaskGetTaskByName(const char *);
 
 extern void dds3WorkClear(void);
 

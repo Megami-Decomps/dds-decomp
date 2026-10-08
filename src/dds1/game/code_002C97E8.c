@@ -5,6 +5,7 @@
 #include "fpu.h"
 #include "sdf.h"
 #include "sdf_grid.h"
+#include "sdf_task_work.h"
 #include "itf.h"
 
 extern s8 D_00324510[];
@@ -51,31 +52,10 @@ extern f32 sdfQuatDot(f32 *, f32 *);
 
 extern f32 func_002FA060(f32);
 
-extern s32 kwlnTaskGetTaskByName(u32);
 extern void sdfGridReleaseAllCells(SdfGrid *);
 
 
-typedef struct SdfTaskItemDesc {
-    s32 key;                         /* 0x00 */
-    s32 (*init)(void);               /* 0x04 */
-    void (*destroy)(s32, s32);       /* 0x08 */
-    s32 (*update)(s32, s32);         /* 0x0C */
-    void (*callback)(s32, s32);      /* 0x10 */
-} SdfTaskItemDesc;
-
-/* Low flag bits: 0 update, 1 callback, 2 initialize once, 15 pending removal.
- * The high word selects active, suspended, or pending-activation dispatch modes. */
-typedef struct SdfTaskEntry {
-    u32 flags;                       /* 0x00 */
-    s32 key;                         /* 0x04 */
-    s32 (*init)(void);               /* 0x08 */
-    void (*destroy)(s32, s32);       /* 0x0C */
-    s32 (*update)(s32, s32);         /* 0x10 */
-    void (*callback)(s32, s32);      /* 0x14 */
-    s32 initResult;                  /* 0x18 */
-} SdfTaskEntry;                       /* 0x1C */
-
-extern void *func_002CB5F0(SdfTaskItemDesc *);
+extern SdfTaskEntry *func_002CB5F0(SdfTaskItemDesc *);
 
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
@@ -733,19 +713,10 @@ u32 sdfReadPadDirectionMask(void) {
     return flags;
 }
 
-typedef struct TaskWork {
-    u32 allocation;
-    char *primaryTaskName;
-    char *secondaryTaskName;
-    SdfList *list;
-    SdfListNode *currentNode; /* Next node to visit; reset to the list head at pass end. */
-} TaskWork;
-
 extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
 extern s32 sdfTaskWorkRunAll(KwlnTask *task);
 extern void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task);
 extern void kwlnTaskCreate();
-extern TaskWork *sdfCreateNamedTaskWork(char *, SdfListCallback, void *);
 
 TaskWork *sdfCreateTaskWorker(char *name, s32 first, s32 second, SdfTaskItemDesc *item, SdfListCallback destroyCallback, void *userData) {
     TaskWork *work;
@@ -766,18 +737,18 @@ void sdfDestroyTaskWorkerTasks(TaskWork *work) {
 
 u8 sdfIsPrimaryTaskRegistered(TaskWork *work) {
     u8 exists;
-    s64 task;
+    KwlnTask *task;
 
     exists = 0;
     if (work != NULL) {
-        task = kwlnTaskGetTaskByName((u32)work->primaryTaskName);
+        task = kwlnTaskGetTaskByName(work->primaryTaskName);
         exists = task != 0;
     }
     return exists;
 }
 
-s32 kwlnTaskExists(u32 name) {
-    return kwlnTaskGetTaskByName(name) != 0;
+s32 kwlnTaskExists(const char *name) {
+    return kwlnTaskGetTaskByName(name) != NULL;
 }
 
 void sdfAttachTaskItem(TaskWork *work, SdfTaskItemDesc *item) {
@@ -794,12 +765,12 @@ void sdfRemoveTaskItem(TaskWork *work, s32 key) {
     }
 }
 
-u32 *sdfFindTaskItemValueByKey(TaskWork *work, s32 key) {
+SdfTaskEntry *sdfFindTaskItemValueByKey(TaskWork *work, s32 key) {
     SdfListNode *item;
 
     item = sdfFindTaskListNodeByKey(work->list, key);
     if (item != NULL) {
-        return (u32 *)item->value;
+        return (SdfTaskEntry *)item->value;
     }
     return NULL;
 }
@@ -808,25 +779,25 @@ INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB3B8);
 
 
 void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 mode) {
-    u32 *item = sdfFindTaskItemValueByKey(work, key);
+    SdfTaskEntry *item = sdfFindTaskItemValueByKey(work, key);
     if (item == NULL) {
         return;
     }
     switch (mode) {
     case 3:
-        *item = (*(u16 *)item & ~1) | 0x10002;
+        item->flags = (*(u16 *)&item->flags & ~1) | 0x10002;
         break;
     case 4:
-        *item = (*(u16 *)item & ~2) | 0x10001;
+        item->flags = (*(u16 *)&item->flags & ~2) | 0x10001;
         break;
     case 2:
-        *item = *(u16 *)item | 0x20000;
+        item->flags = *(u16 *)&item->flags | 0x20000;
         break;
     case 1:
-        *item = *(u16 *)item | 0x100000;
+        item->flags = *(u16 *)&item->flags | 0x100000;
         break;
     case 0:
-        *item = *(u16 *)item | 0x10003;
+        item->flags = *(u16 *)&item->flags | 0x10003;
         break;
     }
 }
@@ -836,8 +807,8 @@ extern void sdfCallbackWorkOnRemove();
 
 /* Create a task resource work block with the name copied to two formatted buffers. */
 TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, void *userData) {
-    s32 allocation = (u32)sdfAllocGeneralBlock(0x14);
-    TaskWork *work = (TaskWork *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)allocation);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x14);
+    TaskWork *work = (TaskWork *)sdfMemoryGetBlockAddress(allocation);
 
     memset(work, 0, 0x14);
     work->allocation = allocation;
@@ -857,11 +828,11 @@ void sdfDestroyTaskResourceWork(TaskWork *work) {
         sdfDestroyTaskWork(work->list);
         sdfReleaseChipBlock(work->primaryTaskName);
         sdfReleaseChipBlock(work->secondaryTaskName);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->allocation));
+        sdfReleaseResourceAllocation(work->allocation);
     }
 }
 
-void *func_002CB5F0(SdfTaskItemDesc *item) {
+SdfTaskEntry *func_002CB5F0(SdfTaskItemDesc *item) {
     SdfTaskEntry *work = sdfAllocSizeClassBlock(0x1C);
 
     memset(work, 0, 0x1C);
@@ -996,7 +967,7 @@ s32 sdfTaskWorkRunAll(KwlnTask *task) {
 }
 
 void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task) {
-    sdfDestroyTaskResourceWork((void *)kwlnTaskGetUserValue(task));
+    sdfDestroyTaskResourceWork((TaskWork *)kwlnTaskGetUserValue(task));
 }
 
 void func_002CB9B8(void) {

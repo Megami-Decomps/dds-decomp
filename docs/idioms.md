@@ -3418,6 +3418,23 @@ Transitively typed cursor callers pass `&command->camera`; the linked-unit
 initializer retains the actual state-owned command at `state + 0x70`,
 not an integer address or a second command view.
 
+The corresponding DDS2 constructors `001F5868` and `001F5320` retain the
+same distinct `s16` and `s32` coordinate contracts. The single-resource,
+effect-trigger and motion-reset helpers likewise take the command owner.
+DDS1 `001D2A10` stores the full action-classification result at index-work
+`+0x24`; that scalar is `BattleIndexWork.slot`, read through its task owner
+by the trigger helper. The side-indexed status-table API is unchanged.
+DDS2's reset-cursor caller `001B9A10` leaves its status-test link in `$a2`,
+but `001FFF68` overwrites `$a2` before use: the initializer consumes only
+the command and its camera, not a third actor argument.
+
+DDS1's small camera callbacks `001E5460` and `001E5700` retain the
+command/camera signature even though they do not consume the camera:
+`001DD890` explicitly sets `$a1` in the calls at `001DDAEC/001DDACC`.
+The blend selector `001E5730` similarly retains both pose arguments;
+`001DDC38/001DDC40` explicitly supplies the front and back cameras.
+These are unused formals in the real callback family, not integer adapters.
+
 DDS2 `btlUpdateActionPoseForLinkedTarget` deliberately leaves the target
 unit in `$a2`: native `001EBD6C` loads it there before the tail call at
 `001EBD88`. The fallback `001ECBF8` only consumes `$a0/$a1`, forwarding
@@ -3614,9 +3631,9 @@ candidate still swaps the two argument-setup instructions at `+0x80/+0x84`.
 ## Callback-list allocation descriptors
 
 `SdfList.allocation` is a `SdfMemBlock *`, not a numeric list index or the
-represented data address. The general-heap descriptor definition precedes
-`SdfList` so the canonical field uses the same owner as heap allocation and
-release. Its layout remains a `0x1C`-byte callback-list header.
+represented data address. A forward declaration keeps that canonical pointer
+owner available without relocating the full general-heap descriptor definition.
+Its layout remains a `0x1C`-byte callback-list header.
 
 Both `sdfCreateTaskHeader` providers retain the descriptor, convert the getter's
 real `u32` represented address once to the list pointer, and release the retained
@@ -3673,6 +3690,11 @@ cell remains eight bytes; the DDS2 units no longer declare separate grid views.
 The DDS1/DDS2 motion drivers call it with the unit and zero in states 1 and 4;
 a return value of one completes the motion. The vector-transition providers
 retain that same callback, and normal motion setup clears it.
+
+The stored motion index at `+0xBC` and the frame fields at `+0xCA..+0xCE`
+are signed halfwords. The driver compares `motionEndFrame` against the model's
+current frame, saturates the moving/idle counters at 32767, and clears the
+moving counter after six idle frames.
 
 
 ## Scoped kernel task flags

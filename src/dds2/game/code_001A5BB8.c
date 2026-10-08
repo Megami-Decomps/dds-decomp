@@ -82,9 +82,7 @@ extern BattleCmdPanel *btlCommandPanelWork;
 
 extern const char *btlMahenPanelTaskNameRef;
 
-extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 
-extern s32 kwlnTaskIsRegistered(KwlnTask *task);
 
 extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *task, s32 delay);
 extern void func_00101968(KwlnTask *parent, KwlnTask *child);
@@ -1488,16 +1486,13 @@ u64 btlAdvanceRuntimeSequenceCounter(void) {
     return value;
 }
 
+/* Clear the battle model flags; the exclusive upper limit differs by title. */
 void btlClearModelFlagRange(void) {
-    s32 temp_v0;
-    s32 temp_v1;
+    s32 flagIndex;
 
-    temp_v1 = 0xbe0;
-    do {
-        temp_v0 = temp_v1 + 1;
-        mdlFlagClear(temp_v1);
-        temp_v1 = temp_v0;
-    } while (temp_v0 < 0xc00);
+    for (flagIndex = 0xBE0; flagIndex < 0xC00; flagIndex++) {
+        mdlFlagClear(flagIndex);
+    }
 }
 
 extern s32 btlUpdateFadeColor(void);
@@ -3961,9 +3956,9 @@ s32 btlGetEnemyMoney(u8 *acquirer, u8 *enemy) {
 }
 
 /* Hunt EP uses its own table quantity and the ratio calculator's mode 0. */
-s32 btlCalculateHuntEpReward(u8 *arg0, u8 *arg1) {
-    DatEnemyRecord *entry = &datEnemyRecords[((UiObject *)arg1)->index];
-    f32 ratio = func_001B20C8(arg0, arg1, 0);
+s32 btlCalculateHuntEpReward(u8 *acquirer, u8 *enemy) {
+    DatEnemyRecord *entry = &datEnemyRecords[((UiObject *)enemy)->index];
+    f32 ratio = func_001B20C8(acquirer, enemy, 0);
     u32 ep = (u32)((f32)entry->huntExperience * ratio);
     if (entry->flags & 0x2000) {
         ep *= 100;
@@ -4067,44 +4062,44 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415638);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2630);
 
-s32 btlSelectedEntryHitsElement(s32 arg0, UiObject *unit, s32 arg2) {
-    u32 kind;
-    s32 mask;
-    u32 power;
+s32 btlSelectedEntryHitsElement(s32 unitAddress, UiObject *unit, s32 selectorIndex) {
+    u32 indexedSelectorValue;
+    s32 selectionMask;
+    u32 maskTableIndex;
     if (unit->selectedEntryIndex <= 0) {
         return 0;
     }
     btlGetRuntime();
-    kind = btlGetActorIndexedSignedValue(arg0, arg2);
-    mask = btlEncodeActorIndexAsSelectionMask(kind);
-    power = datCommandRecords[unit->selectedEntryIndex].unk2E;
-    if (power == 0) {
+    indexedSelectorValue = btlGetActorIndexedSignedValue(unitAddress, selectorIndex);
+    selectionMask = btlEncodeActorIndexAsSelectionMask(indexedSelectorValue);
+    maskTableIndex = datCommandRecords[unit->selectedEntryIndex].unk2E;
+    if (maskTableIndex == 0) {
         return 0;
     }
-    if (kind >= 0x10 && (kind < 0x12 || kind == -1)) {
+    if (indexedSelectorValue >= 0x10 && (indexedSelectorValue < 0x12 || indexedSelectorValue == -1)) {
         return 0;
     }
-    if (power >= 0x21) {
+    if (maskTableIndex >= 0x21) {
         return 0;
     }
-    return (D_003B4F78[power * 3] & mask) != 0;
+    return (D_003B4F78[maskTableIndex * 3] & selectionMask) != 0;
 }
 
-s32 btlGetActionRecordLookupValue(s32 arg0) {
-    u16 temp_v0;
+s32 btlGetActionRecordLookupValue(s32 actionRecordIndex) {
+    u16 lookupTableIndex;
 
-    temp_v0 = datCommandRecords[arg0].unk2E;
-    return D_003B4F70[temp_v0 * 3];
+    lookupTableIndex = datCommandRecords[actionRecordIndex].unk2E;
+    return D_003B4F70[lookupTableIndex * 3];
 }
 
-s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 arg) {
-    s32 index = unit->selectedEntryIndex;
-    u16 kind;
-    if (index == -1) {
+s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex) {
+    s32 selectedEntryIndex = unit->selectedEntryIndex;
+    u16 maskTableIndex;
+    if (selectedEntryIndex == -1) {
         return 0;
     }
-    kind = datCommandRecords[index].unk2E;
-    return (D_003B4F78[kind * 3] & btlEncodeActorIndexAsSelectionMask(arg)) != 0;
+    maskTableIndex = datCommandRecords[selectedEntryIndex].unk2E;
+    return (D_003B4F78[maskTableIndex * 3] & btlEncodeActorIndexAsSelectionMask(actorIndex)) != 0;
 }
 
 s32 fldGetSelectedUnitStat(UiObject *unit) {
@@ -6148,18 +6143,18 @@ void func_001B8E68(s32 section, s32 delta) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B9158);
 
-extern void btlInitCursorAndApplyAction(s32, s32, s32);
+extern s32 btlInitCursorAndApplyAction(BtlLinkedCommand *, BtlCamState *);
 
 void btlReleaseTaskAndRefreshCursorIfFlagged(KwlnTask *handle) {
-    u8 *work = (u8 *)btlGetRuntime();
-    u8 *actor;
+    BtlState *work = (BtlState *)btlGetRuntime();
+    ActionStateLink *actor;
     sdfReleaseChipBlock((void *)kwlnTaskGetUserValue(handle));
     btlSetTrackedTaskHandle(0xB, 0);
-    actor = *(u8 **)(work + 0x184);
-    if (*(u16 *)(*(u8 **)(actor + 0x18) + 0x12E) & 0x80) {
-        btlInitCursorAndApplyAction((s32)work + 0x70, (s32)work + 0x70, (s32)actor);
+    actor = work->cameraCommand.link;
+    if (actor->unit->partyRecord.status & 0x80) {
+        btlInitCursorAndApplyAction(&work->cameraCommand, &work->cameraCommand.camera);
     }
-    *(u32 *)(work + 0x218) |= 0x100000;
+    work->battleFlags |= 0x100000;
 }
 
 /* Advance one corner toward the panel boundary before moving to the next edge. */

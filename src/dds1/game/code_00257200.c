@@ -261,3 +261,4 @@ void mnuAdvanceWrappingFrame(s32 *frame) {
 INCLUDE_ASM(const s32, "game/code_00257200", func_00257ED0);
 
 INCLUDE_RODATA(const s32, "game/code_00257200", D_003AF950);
+
