@@ -172,8 +172,8 @@ s32 mnuCreateSceneWork(void) {
     memset(sceneWork, 0, MNU_SCENE_WORK_SIZE);
     ((MenuSceneWork *)sceneWork)->allocation = allocation;
     mnuInitializeMantraSelectionGrid((s32)sceneWork);
-    ((MenuSceneWork *)sceneWork)->coordinateA = 0;
-    ((MenuSceneWork *)sceneWork)->coordinateB = 0;
+    ((MenuSceneWork *)sceneWork)->scenePhase = 0;
+    ((MenuSceneWork *)sceneWork)->phaseFrame = 0;
     ((MenuSceneMetadata *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY))->displayedCurrency = datGameState->header.currency;
     mnuCopySceneCoordinates((s32)sceneWork);
     return (s32)sceneWork;
@@ -184,7 +184,7 @@ void mnuReleaseSceneContext(s32 unused, s32 sceneAddress) {
     sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
     sdfDestroyGridWork(((MenuSceneWork *)sceneAddress)->gridHandle);
     mnuReleaseDisplayListNodes(
-        &((MenuSceneWork *)(u32)sceneAddress)->displayList584);
+        &((MenuSceneWork *)(u32)sceneAddress)->sceneTransitionList);
     sdfReleaseResourceAllocation(((MenuSceneWork *)sceneAddress)->allocation);
     mnuResetWorkFloats();
 }
@@ -561,7 +561,7 @@ void mnuCopySceneCoordinatesAndReleaseNodeList(void) {
     func_002512F0(sceneAddress, 1);
     mnuCopySceneCoordinates(sceneAddress);
     mnuReleaseListNodes(
-        &((MenuSceneWork *)(u32)sceneAddress)->displayList590);
+        &((MenuSceneWork *)(u32)sceneAddress)->costTransitionList);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC420);
