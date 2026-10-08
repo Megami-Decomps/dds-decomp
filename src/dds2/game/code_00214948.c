@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_task_condition.h"
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "btl_command.h"
@@ -7,15 +8,14 @@
 #include "btl_action.h"
 #include "btl_unit_tasks.h"
 #include "btl_state.h"
+#include "btl_model_record.h"
 #include "eff_transform.h"
 #include "dat_state.h"
 #include "dat_command.h"
 #include "evt_unit.h"
 #include "mdl.h"
 
-#define BTL_TASK_CONDITION_HANDLE_GONE 4
 
-#define BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE 5
 
 typedef struct ActionUnit {
     u8 pad0[8];
@@ -1249,7 +1249,7 @@ void func_00217EB8(ActionStateLink *action) {
                     task->startDelay = 0xE;
                     btlStartTask(task);
                     sound = sndCreateStationedSeTask(scene->soundSequence);
-                    sound->startCondition.kind = BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE;
+                    sound->startCondition.kind = BTL_TASK_CONDITION_HANDLE_RUNNING_OR_ABSENT;
                     sound->startCondition.value.handle = task->handle;
                     btlStartTask(sound);
                     action->flags &= ~8;
@@ -1869,7 +1869,7 @@ void btlStartActionRecordSoundTask(ActionStateLink *record, u64 prerequisiteHand
             if (unit->partyRecord.unitId == 0x108) {
                 task = (u8 *)sndCreateStationedSeTask(((BattleWork *)btlGetRuntime())->soundTaskBase + 6);
                 ((BtlRuntimeTask *)task)->startCondition.value.handle = prerequisiteHandle;
-                ((BtlRuntimeTask *)task)->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+                ((BtlRuntimeTask *)task)->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 ((BtlRuntimeTask *)task)->startDelay = delayBase + 0x28;
                 btlStartTask(task);
             }
@@ -2077,7 +2077,7 @@ void func_002195E0(ActionStateLink *record) {
     follow->startDelay = 0xE;
     btlStartTask(follow);
     follow = btlCreateImmediateCompletionTask();
-    follow->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+    follow->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     follow->startCondition.value.handle = task->handle;
     follow->ownerId = record->unit->owner;
     btlStartTask(follow);
@@ -2755,13 +2755,6 @@ s32 btlMotionOffsetForActor(s32 actor, s32 base) {
     return base;
 }
 
-/* Side-indexed status tables use a 0x270 stride in their native accessor. */
-typedef struct BtlActorStatusRecord {
-    u8 pad00[0xFC];
-    f32 unkFC; /* Scale used by the default-motion case below. */
-    u8 pad100[0x170];
-} BtlActorStatusRecord;
-
 extern void btlSetUnitRotation(BtlUnit *, s128 *);
 
 extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
@@ -2806,7 +2799,7 @@ void func_0021B368(void) {
                             table = (BtlActorStatusRecord *)
                                 btlGetSideIndexedActorStatusTable(unit->resourceKind,
                                                                  unit->resourceIndex);
-                            btlApplyUnitMotionSelection(unit, 0xA, 1, table->unkFC);
+                            btlApplyUnitMotionSelection(unit, 0xA, 1, table->motions[10].alphaFrameScale);
                             break;
                         }
                     }
@@ -2863,7 +2856,7 @@ s64 btlEnsureHeroUnitTask(u64 prerequisiteHandle) {
     task = btlCreateModelLoadPollTask(*slot, 1, 0x110, 0);
     if (prerequisiteHandle != 0) {
         task->startCondition.value.handle = prerequisiteHandle;
-        task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+        task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     }
     btlStartTask(task);
     return task->handle;
@@ -2941,7 +2934,7 @@ u64 btlStartSubtaskWithInput(u64 prerequisiteHandle) {
     BtlRuntimeTask *task = func_001E5FF8(battle->effect->selection.unit, 0xC);
     if (prerequisiteHandle != 0) {
         task->startCondition.value.handle = prerequisiteHandle;
-        task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+        task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     }
     task->ownerId = 0x8000000000000003;
     btlStartTask(task);
@@ -4086,7 +4079,7 @@ void btlQueueSelectedActorResourceAndSound(ActionUnit *unit) {
         task->startDelay = 0xE;
         btlStartTask(task);
         sound = sndCreateStationedSeTask(scene->soundSequence + ((*slot)->mode == 0x10E ? 3 : 2));
-        sound->startCondition.kind = BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE;
+        sound->startCondition.kind = BTL_TASK_CONDITION_HANDLE_RUNNING_OR_ABSENT;
         sound->startCondition.value.handle = task->handle;
         btlStartTask(sound);
         *slot = 0;
@@ -4305,27 +4298,27 @@ u64 btlCreateLinkedActorTransformTasks(u64 prerequisiteHandle) {
     load = btlCreateModelLoadPollTask(effect->actor, 1, 0x10B, 0);
     if (prerequisiteHandle != 0) {
         load->startCondition.value.handle = prerequisiteHandle;
-        load->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+        load->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     }
     btlStartTask(load);
     owner = 0x8000000000000003ULL;
     light = btlCreateUnitBaseLightTask(effect->actor);
-    light->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+    light->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     light->startCondition.value.handle = load->handle;
     light->ownerId = owner;
     btlStartTask(light);
     fade = func_001E5FF8(effect->actor, 0);
-    fade->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+    fade->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     fade->startCondition.value.handle = light->handle;
     fade->ownerId = owner;
     btlStartTask(fade);
     task = btlCreateUnitRotationInterpolationTask(effect->actor, D_003BF920, 1, 1.0f);
-    task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+    task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     task->startCondition.value.handle = fade->handle;
     task->ownerId = owner;
     btlStartTask(task);
     task = btlCreateUnitPositionLerpTowardTargetTask(effect->actor, D_003BF910, 1.0f);
-    task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+    task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     task->startCondition.value.handle = fade->handle;
     task->ownerId = owner;
     btlStartTask(task);
@@ -5020,12 +5013,12 @@ void btlSpawnBrahmaActionEffectTasks(ActionUnit *unit, u32 action, u32 unused, u
             break;
         }
         task = btlCreateEffObjB(unit->parentUnit, kind);
-        ((BtlRuntimeTask *)task)->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+        ((BtlRuntimeTask *)task)->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         ((BtlRuntimeTask *)task)->startCondition.value.handle = prerequisiteHandle;
         ((BtlRuntimeTask *)task)->ownerId = btlAdvanceRuntimeSequenceCounter();
         btlStartTask(task);
         task = btlCreateEffObjD(unit->parentUnit, 0x19F);
-        ((BtlRuntimeTask *)task)->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+        ((BtlRuntimeTask *)task)->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         ((BtlRuntimeTask *)task)->startCondition.value.handle = prerequisiteHandle;
         value = btlAdvanceRuntimeSequenceCounter();
         ((BtlRuntimeTask *)task)->startDelay = 0x26;

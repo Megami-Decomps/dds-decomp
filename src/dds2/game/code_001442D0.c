@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf_model.h"
 #include "sdf.h"
 #include "sdf_projection.h"
@@ -282,7 +283,6 @@ extern s32 D_00436358;
 
 extern s32 D_00436360;
 
-extern void sdfReleaseResourceAllocation(s32);
 
 extern s32 fldTitleTaskUpdate();
 
@@ -2954,12 +2954,12 @@ void fldStartTitle(s32 field, s32 arg1, s32 arg2) {
     }
     handle = sdfReadNamedResource(path, &resourceAddress, 0);
     D_00436368 = sdfTexAcquireResourceTexture((void *)resourceAddress);
-    sdfReleaseResourceAllocation(handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
     if (field == 0xC) {
         func_0035C860(path, "/fld/f/pnl/df_b.tmx");
         handle = sdfReadNamedResource(path, &resourceAddress, 0);
         D_0043636C = sdfTexAcquireResourceTexture((void *)resourceAddress);
-        sdfReleaseResourceAllocation(handle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
     }
     if (fldTitleIsActive() == 0) {
         kwlnTaskCreate(fldTitleTaskName, 0x2B0A, 0, 1, fldTitleTaskUpdate, fldReleaseTitleTextures, 0);
@@ -2993,7 +2993,6 @@ extern s32 func_0014EDB8(void);
 
 extern void fldReleaseTitleMiniTexture(void);
 
-extern void sdfReleaseResourceAllocation(s32);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413C80);
 
@@ -3117,7 +3116,7 @@ void fldStartMiniTitleForUnlock(s32 id) {
     func_0035C860(path, "/fld/f/pnl/ds_%03d.tmx", id);
     handle = sdfReadNamedResource(path, &data, 0);
     D_0043637C = sdfTexAcquireResourceTexture((void *)data);
-    sdfReleaseResourceAllocation(handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
     if (fldTitleIsActive() == 0) {
         kwlnTaskCreate(D_00413C80, 0x2B0A, 0, 1, func_0014EDB8, fldReleaseTitleMiniTexture, 0);
     }

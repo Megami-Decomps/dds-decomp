@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "file.h"
@@ -977,7 +978,6 @@ extern void mnuReleaseMenuResourceSlots(void);
 
 extern void mnuDestroyMovieMenuSelectionList(void);
 
-extern void sdfReleaseResourceAllocation(u32);
 
 extern u32 D_00435BB0;
 
@@ -987,7 +987,7 @@ void mnuReleaseTitleMenuAssetsAndMarkClosed(void) {
     mnuReleaseMenuResourceSlots();
     mnuReleaseSpriteHandle();
     mnuDestroyMovieMenuSelectionList();
-    sdfReleaseResourceAllocation((u32)mnuMovieMenuState->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)mnuMovieMenuState->allocation));
     mnuMovieMenuState = 0;
     D_00435BB0 = 1;
 }

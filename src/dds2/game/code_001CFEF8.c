@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_task_condition.h"
 #include "pcp_vu0.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
@@ -338,19 +339,19 @@ void func_001D08A8(BtlState *scene) {
         if ((btlUnitStatusPair(unit) & 0x403) == 0x401) {
             kind = scene->selectEntryModelVariant != NULL ? scene->selectEntryModelVariant(unit) : unit->combatantKind;
             load = btlCreateModelLoadPollTask(unit, unit->unkDC, kind, 0);
-            load->startCondition.kind = 4;
+            load->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             load->startDelay = 1;
             load->startCondition.value.handle = chain;
             btlStartTask(load);
             if (!(scene->commandRestrictFlags & 0xC) && btlIsActorModeActionCodeAllowed(unit)) {
                 task = btlCreateActorTransparencyTask(unit);
-                task->startCondition.kind = 4;
+                task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 task->startDelay = 1;
                 task->startCondition.value.handle = load->handle;
                 btlStartTask(task);
             }
             light = btlCreateUnitBaseLightTask(unit);
-            light->startCondition.kind = 4;
+            light->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             light->startCondition.value.handle = load->handle;
             light->ownerId = 0x8000000000000003ULL;
             btlStartTask(light);
@@ -367,14 +368,14 @@ void func_001D08A8(BtlState *scene) {
                 } else {
                     lastFade = btlCreateUnitFadeInTask(unit, 4, 6);
                 }
-                lastFade->startCondition.kind = 4;
+                lastFade->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 lastFade->startCondition.value.handle = chain;
                 lastFade->startDelay = delay;
                 lastFade->ownerId = 0x8000000000000003ULL;
                 btlStartTask(lastFade);
                 if (scene->commandRestrictFlags & 4) {
                     task = sndCreateActorEffectTask(scene->resources[46], unit, 0x10);
-                    task->startCondition.kind = 4;
+                    task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                     task->startCondition.value.handle = chain;
                     task->startDelay = delay;
                     task->ownerId = 0x8000000000000003ULL;
@@ -387,7 +388,7 @@ void func_001D08A8(BtlState *scene) {
                 }
             } else {
                 lastFade = func_001E5FF8(unit, 0);
-                lastFade->startCondition.kind = 4;
+                lastFade->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 lastFade->startCondition.value.handle = chain;
                 lastFade->startDelay = delay;
                 lastFade->ownerId = 0x8000000000000003ULL;
@@ -400,7 +401,7 @@ void func_001D08A8(BtlState *scene) {
     }
     if (scene->commandRestrictFlags & 0x100000) {
         task = btlCreateImmediateCompletionTask();
-        task->startCondition.kind = 4;
+        task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         task->startCondition.value.handle = chain;
         task->ownerId = 0x8000000000000004ULL;
         btlStartTask(task);
@@ -413,12 +414,12 @@ void func_001D08A8(BtlState *scene) {
             } else {
                 load = btlCreateModelLoadPollTask(unit, unit->modelId, unit->modelVariant, 0);
             }
-            load->startCondition.kind = 4;
+            load->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             load->startDelay = 1;
             load->startCondition.value.handle = chain;
             btlStartTask(load);
             light = btlCreateUnitBaseLightTask(unit);
-            light->startCondition.kind = 4;
+            light->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             light->startCondition.value.handle = load->handle;
             light->ownerId = 0x8000000000000003ULL;
             btlStartTask(light);
@@ -429,21 +430,21 @@ void func_001D08A8(BtlState *scene) {
             }
             if (!(unit->stateFlags & 0x800) && !(scene->commandRestrictFlags & 8)) {
                 lastFade = btlCreateUnitFadeInTask(unit, 4, 6);
-                lastFade->startCondition.kind = 4;
+                lastFade->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 lastFade->startDelay = 1;
                 lastFade->startCondition.value.handle = light->handle;
                 lastFade->ownerId = 0x8000000000000003ULL;
                 btlStartTask(lastFade);
                 if ((scene->commandRestrictFlags & 2) && !btlHasSpecialAbilityOrModelFlag(&unit->partyRecord)) {
                     task = sndCreateActorEffectTask(scene->resources[46], unit, 0x10);
-                    task->startCondition.kind = 4;
+                    task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                     task->startDelay = 1;
                     task->startCondition.value.handle = light->handle;
                     btlStartTask(task);
                 }
             } else {
                 lastFade = func_001E5FF8(unit, 0);
-                lastFade->startCondition.kind = 4;
+                lastFade->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 lastFade->startDelay = 1;
                 lastFade->startCondition.value.handle = light->handle;
                 lastFade->ownerId = 0x8000000000000003ULL;
@@ -454,14 +455,14 @@ void func_001D08A8(BtlState *scene) {
     for (unit = tail; unit != NULL; unit = unit->previousActor) {
         if ((btlUnitStatusPair(unit) & 0x203) == 0x201) {
             task = btlCreateGunLoadPollTask(unit);
-            task->startCondition.kind = 4;
+            task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             task->startCondition.value.handle = chain;
             btlStartTask(task);
         }
     }
     if (havePrimary) {
         task = sndCreateEarringTask();
-        task->startCondition.kind = 4;
+        task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         task->startCondition.value.handle = firstPrimary;
         task->ownerId = 0x8000000000000003ULL;
         btlStartTask(task);
@@ -469,21 +470,21 @@ void func_001D08A8(BtlState *scene) {
     switch (scene->encounterKind) {
         case 1:
             task = btlCreateEffObjB(NULL, 0xD);
-            task->startCondition.kind = 4;
+            task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             task->startCondition.value.handle = chain;
             task->ownerId = 0x8000000000000003ULL;
             btlStartTask(task);
             break;
         case 2:
             task = btlCreateEffObjB(NULL, 0xAB);
-            task->startCondition.kind = 4;
+            task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             task->startCondition.value.handle = chain;
             task->ownerId = 0x8000000000000003ULL;
             btlStartTask(task);
             break;
         case 3:
             task = btlCreateEffObjB(NULL, 0xDD);
-            task->startCondition.kind = 4;
+            task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             task->startCondition.value.handle = chain;
             task->ownerId = 0x8000000000000003ULL;
             btlStartTask(task);
@@ -491,14 +492,14 @@ void func_001D08A8(BtlState *scene) {
     }
     if (scene->battleFlags & 0x4000) {
         task = btlCreateEffObjB(NULL, 0x88);
-        task->startCondition.kind = 4;
+        task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         task->startCondition.value.handle = chain;
         task->ownerId = 0x8000000000000003ULL;
         btlStartTask(task);
     }
     if (lastFade != NULL) {
         task = btlCreateImmediateCompletionTask();
-        task->startCondition.kind = 4;
+        task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         task->startDelay = 6;
         task->startCondition.value.handle = lastFade->handle;
         task->ownerId = 0x8000000000000003ULL;
@@ -506,7 +507,7 @@ void func_001D08A8(BtlState *scene) {
     }
     if (!(scene->commandRestrictFlags & 0x40000)) {
         task = btlCreateSoundUpdateTask(12);
-        task->startCondition.kind = 7;
+        task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
         task->startCondition.value.owner = 0x8000000000000003ULL;
         btlStartTask(task);
     }
@@ -1468,9 +1469,9 @@ BtlRuntimeTask *fldCreateSceneGroupAction(ActionStateLink *actorTask, u32 counte
     u8 counterModeByte = counterMode;
     BtlRuntimeTask *actionTask = btlAllocTask(FLD_SCENE_COUNTER_REQUEST_BYTES);
     BtlSceneCounterArgs *requestData;
-    actionTask->startCondition.kind = 1;
+    actionTask->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     actionTask->taskId = FLD_SCENE_COUNTER_ACTION_ID;
-    actionTask->endCondition.kind = 0;
+    actionTask->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     if (actorTask != 0) {
         actionTask->ownerId = actorTask->unit->owner;
     }
@@ -1508,9 +1509,9 @@ s32 fldActivateRequestedSceneActor(BtlSceneInsertArgs *request) {
 BtlRuntimeTask *fldCreateSceneActorAction(ActionStateLink *actorTask, u32 slotCount) {
     BtlRuntimeTask *actionTask = btlAllocTask(FLD_SCENE_INSERT_REQUEST_BYTES);
     BtlSceneInsertArgs *requestData;
-    actionTask->startCondition.kind = 1;
+    actionTask->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     actionTask->taskId = FLD_SCENE_INSERT_ACTION_ID;
-    actionTask->endCondition.kind = 0;
+    actionTask->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     if (actorTask != 0) {
         actionTask->ownerId = actorTask->unit->owner;
     }
@@ -1531,10 +1532,10 @@ s32 fldApplySceneSlotSwapRequest(u32 *request) {
 /* Allocate a one-word counter-spend/swap request, without an actor-owner link. */
 u8 *fldCreateActorAction(s32 counterAmount) {
     BtlRuntimeTask *actionTask = btlAllocTask(FLD_SCENE_SWAP_REQUEST_BYTES);
-    actionTask->startCondition.kind = 1;
+    actionTask->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     actionTask->taskId = FLD_SCENE_SWAP_ACTION_ID;
     actionTask->callback = fldApplySceneSlotSwapRequest;
-    actionTask->endCondition.kind = 0;
+    actionTask->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     actionTask->onStart = 0;
     *(u32 *)btlGetTaskArguments(actionTask) = counterAmount;
     return (u8 *)actionTask;

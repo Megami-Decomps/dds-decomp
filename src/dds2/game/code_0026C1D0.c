@@ -1,4 +1,5 @@
 #include "evt_world.h"
+#include "sdf_resource.h"
 #include "dat_state.h"
 
 extern s32 scrTestEntryFlag(DatPartyRecord *context, u16 entryId, u32 bit);
@@ -51,7 +52,6 @@ extern s8 dspWindowStateGate;
 
 extern u32 evtDisplayValues[];
 
-void sdfReleaseResourceAllocation(u32 sprite);
 
 
 
@@ -201,7 +201,7 @@ void evtLoadResourcePair(u32 resourceId, EvtResourcePair *record) {
 
 /* Release the handle without clearing either word of the caller's record. */
 void evtReleaseResourcePairHandle(EvtResourcePair *record) {
-    sdfReleaseResourceAllocation(record->handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(record->handle));
 }
 
 struct ItfMesSub;
@@ -453,7 +453,7 @@ s32 evtLoadTextureFromResourcePath(u32 path) {
 
     allocation = sdfReadNamedResource((const char *)(u32)path, &info[0], (u32 *)&info[1]);
     texture = (s32)sdfTexAcquireResourceTexture((void *)info[0]);
-    sdfReleaseResourceAllocation(allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     return texture;
 }
 
@@ -534,7 +534,7 @@ void mnuLoadMantraNodePositionTable(u32 resourceId) {
 
 /* Release the retained node-position handle and clear the global table address. */
 void mnuReleaseMantraNodePositionTable(void) {
-    sdfReleaseResourceAllocation(mnuMantraNodePositionTable->handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(mnuMantraNodePositionTable->handle));
     mnuMantraNodePositionTable = 0;
 }
 
@@ -585,7 +585,7 @@ void mnuLoadMantraPanelPositionTable(u32 resourceId) {
 
 /* Release the retained panel-position handle and clear the global table address. */
 void mnuReleaseMantraPanelPositionTable(void) {
-    sdfReleaseResourceAllocation(((EvtLoadedRecord *)mnuMantraPanelPositionTable)->handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EvtLoadedRecord *)mnuMantraPanelPositionTable)->handle));
     mnuMantraPanelPositionTable = 0;
 }
 
@@ -621,7 +621,7 @@ EvtMantraWork *evtAllocateMantraSelectionWork(s32 initialValue, s32 mode) {
 
 s32 evtReleaseMantraSelectionWork(EvtMantraWork *work) {
     if (work != NULL) {
-        sdfReleaseResourceAllocation(work->allocation);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->allocation));
     }
 }
 

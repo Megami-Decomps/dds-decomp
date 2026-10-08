@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_draw.h"
 
@@ -309,7 +310,6 @@ extern s32 sdfDevQueueActiveOperation(DevState *);
 extern s32 sdfDevQueueReleaseState(DevState *);
 extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 extern u32 sdfResourceRetainAddress(SdfMemBlock *);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 extern void func_003417E0(s32, void *, s32);
 
 u32 *func_00342848(u32 command, SdfSoundRpcRequest *request) {

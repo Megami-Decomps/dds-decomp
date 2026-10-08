@@ -1,5 +1,6 @@
 #include "mnu_mantra.h"
 #include "common.h"
+#include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_list.h"
 
@@ -1375,7 +1376,7 @@ void mnuInitPanelSoundEntries(void) {
 
 void mnuReleasePanelEntryPool(void) {
     if (mnuPanelSoundEntryPool != (u32 *)0x0) {
-        sdfReleaseResourceAllocation(((MenuPanelEntryPool *)mnuPanelSoundEntryPool)->allocation);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((MenuPanelEntryPool *)mnuPanelSoundEntryPool)->allocation));
     }
     mnuPanelSoundEntryPool = (u32 *)0x0;
 }

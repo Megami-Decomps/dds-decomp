@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_task_condition.h"
 #include "eff_transform.h"
 #include "btl_state.h"
 #include "btl_command.h"
@@ -29,8 +30,6 @@
 #define BTL_LOW_HP_PERCENT_LIMIT 0x1E
 #define BTL_LOW_HP_BUCKET_LIMIT 0x1E
 #define BTL_LOW_HP_ENEMY_COUNT_LIMIT 2
-#define BTL_TASK_CONDITION_HANDLE_GONE 4
-#define BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE 5
 
 extern BtlUnit *btlGetEffectActor(void);
 
@@ -3527,7 +3526,7 @@ u64 btlCreateSpecialUnitAndLoadModel(u64 prerequisiteHandle) {
     entry = btlCreateModelLoadPollTask(*slot, 1, 0x10a, 0);
     if (prerequisiteHandle != 0) {
         entry->startCondition.value.handle = prerequisiteHandle;
-        entry->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+        entry->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     }
     btlStartTask(entry);
     return entry->handle;
@@ -3555,7 +3554,7 @@ u64 btlStartSubtaskWithInput(u64 prerequisiteHandle) {
     BtlRuntimeTask *task = (BtlRuntimeTask *)func_001D9038(*(void **)subtaskSlot, 12);
     if (prerequisiteHandle != 0) {
         task->startCondition.value.handle = prerequisiteHandle;
-        task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+        task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     }
     task->ownerId = 0x8000000000000003ULL;
     btlStartTask(task);
@@ -3895,7 +3894,7 @@ u64 btlEnsureEffectUnitModelLoadTask(u64 prerequisiteHandle) {
     entry = btlCreateModelLoadPollTask(*slot, 1, 0x10e, 0);
     if (prerequisiteHandle != 0) {
         entry->startCondition.value.handle = prerequisiteHandle;
-        entry->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+        entry->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
     }
     btlStartTask(entry);
     return entry->handle;

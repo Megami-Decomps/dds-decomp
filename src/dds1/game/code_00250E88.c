@@ -1,7 +1,9 @@
 #include "dsp_name.h"
+#include "sdf_resource.h"
 #include "mnu.h"
 #include "dat_state.h"
 #include "mnu_profile_progress.h"
+#include "mnu_mantra_grid.h"
 
 #define MNU_SCENE_WORK_SIZE 0x5B0
 #define MNU_SCENE_SHADE_FRAME_LIMIT 10
@@ -21,7 +23,6 @@ extern void sdfDestroyGridWork(s32);
 
 extern void mnuReleaseDisplayListNodes(s32);
 
-extern void sdfReleaseResourceAllocation(s32);
 
 extern void mnuResetWorkFloats(void);
 
@@ -81,18 +82,6 @@ typedef struct MenuGrid {
     MenuGridCoordinate *entries;
 } MenuGrid;
 
-typedef struct MenuSceneEntry {
-    s32 initialValue;      /* 0x00 */
-    s32 value;             /* 0x04 */
-    s32 cap;               /* 0x08 */
-    u16 sceneId;           /* 0x0C */
-    u16 param7b6;          /* 0x0E */
-    u32 param7b5;          /* 0x10 */
-    s32 state;             /* 0x14 */
-    u8 rawSkillList[0x3C]; /* 0x18 */
-    s8 profileFlag;
-} MenuSceneEntry;
-
 extern void sdfReleaseChipBlock(void *);
 
 void func_00250E88(s32 *xCoordinate, s32 *yCoordinate, u16 index,
@@ -128,7 +117,7 @@ void func_00250E88(s32 *xCoordinate, s32 *yCoordinate, u16 index,
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00250F60);
 
 void func_00251260(MenuSceneWork *work) {
-    MenuSceneEntry *entry = (MenuSceneEntry *)work->gridHandle->cursor->value;
+    MnuMantraGridEntry *entry = (MnuMantraGridEntry *)work->gridHandle->cursor->value;
     s32 maximumX = 0x307;
     u8 flags = work->boundsFlags;
     s32 position[2];
@@ -232,7 +221,7 @@ void mnuReleaseSceneContext(s32 unused, s32 sceneAddress) {
     func_002CB3B8(mnuSceneResourceContext, -1);
     sdfDestroyGridWork((s32)((MenuSceneWork *)sceneAddress)->gridHandle);
     mnuReleaseDisplayListNodes(sceneAddress + 0x584);
-    sdfReleaseResourceAllocation(((MenuSceneWork *)sceneAddress)->allocationHandle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((MenuSceneWork *)sceneAddress)->allocationHandle));
     mnuResetWorkFloats();
 }
 
@@ -258,9 +247,9 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_00253018);
 
 extern s32 prfReqCheckWithFallback(ScrVmOperand *, u16);
 extern void *sdfAllocSizeClassBlock(s32);
-extern u16 prfGetParamWord7b6(u16);
+extern u16 prfGetRequiredProfileLevel(u16);
 extern u8 prfGetParamWord7b5(u16);
-extern void prfBuildRawSkillList(u16, void *);
+extern s32 prfBuildRawSkillList(u16, PrfSkillList *);
 extern u32 prfGetCapValue(u16);
 extern s32 ptyTestProfileFlag1(DatPartyRecord *, u16);
 extern s32 prfReq54Evaluate(s32, ScrVmOperand *, u16);
@@ -270,8 +259,8 @@ extern s32 mdlFlagTest(s32);
 /* Build the 0x58-byte list entry for one profile, or NULL when it is not available (profile 0x4E is still
  * listed once flag 0x908 is set). The entry's state is 1 when requirement 1 passes or the profile flag is set,
  * 2 when only requirement 0 passes, and 3 otherwise. The scheduler argument is unused. */
-MenuSceneEntry *func_002530D8(s32 unused, u16 profileId, MnuProfileProgress *selection) {
-    MenuSceneEntry *entry;
+MnuMantraGridEntry *func_002530D8(s32 unused, u16 profileId, MnuProfileProgress *selection) {
+    MnuMantraGridEntry *entry;
 
     if (prfReqCheckWithFallback((ScrVmOperand *)selection->partyRecord, profileId) == 0) {
         if (profileId != 0x4E || mdlFlagTest(0x908) == 0) {
@@ -279,14 +268,14 @@ MenuSceneEntry *func_002530D8(s32 unused, u16 profileId, MnuProfileProgress *sel
         }
     }
 
-    entry = sdfAllocSizeClassBlock(sizeof(MenuSceneEntry));
-    memset(entry, 0, sizeof(MenuSceneEntry));
+    entry = sdfAllocSizeClassBlock(sizeof(MnuMantraGridEntry));
+    memset(entry, 0, sizeof(MnuMantraGridEntry));
     entry->sceneId = profileId;
-    entry->param7b6 = prfGetParamWord7b6(entry->sceneId);
-    entry->param7b5 = prfGetParamWord7b5(entry->sceneId);
-    prfBuildRawSkillList(entry->sceneId, entry->rawSkillList);
+    entry->requiredLevel = prfGetRequiredProfileLevel(entry->sceneId);
+    entry->value05 = prfGetParamWord7b5(entry->sceneId);
+    prfBuildRawSkillList(entry->sceneId, &entry->skills);
     entry->cap = prfGetCapValue(entry->sceneId);
-    entry->initialValue = 0x3C;
+    entry->frame = 0x3C;
     entry->profileFlag = ptyTestProfileFlag1(selection->partyRecord, entry->sceneId);
 
     if (prfReq54Evaluate(0, (ScrVmOperand *)selection->partyRecord, entry->sceneId) != 0 ||
@@ -422,7 +411,7 @@ extern s8 evtGetCapturedWindowPanelValue(void);
 extern void sdfSetTaskItemMode(void *, s32, u32);
 
 s32 func_00253830(void) {
-    MenuSceneEntry *entry = (MenuSceneEntry *)fldGetSceneMetadataNode();
+    MnuMantraGridEntry *entry = (MnuMantraGridEntry *)fldGetSceneMetadataNode();
     MnuProfileProgress *selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
     MenuSceneMetadata *scene = (MenuSceneMetadata *)func_002CB3B8(mnuSceneResourceContext, -1);
 
