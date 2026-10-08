@@ -4,6 +4,8 @@
 #include "common.h"
 #include "sdf.h"
 
+struct KwlnTask;
+
 /* PMD2 records and the complete 0x11C-byte owner cleared by both games'
  * evtPolygonMovieAllocWork. Movie parsing, asynchronous resource loading,
  * viewer dialogs and message-window lifetime all use this single object. */
@@ -90,7 +92,7 @@ typedef struct PolyMovieWork {
     u8 *subEntry25Data;   /* 0xFC */
     u32 unk_100;       /* 0x100 */
     s32 handle;        /* 0x104 */
-    u32 unk108;        /* 0x108: scheduler result word stored by both constructors */
+    struct KwlnTask *task; /* 0x108: scheduler task created for this viewer */
     s32 eventId;       /* 0x10C */
     s32 sceneId;       /* 0x110 */
     u32 unk_114;       /* 0x114 */
@@ -99,10 +101,13 @@ typedef struct PolyMovieWork {
 
 typedef char PolyMovieWork_size_must_be_0x11C[(sizeof(PolyMovieWork) == 0x11C) ? 1 : -1];
 typedef char PolyMovieWork_handle_at_0x104[((u32)&((PolyMovieWork *)0)->handle == 0x104) ? 1 : -1];
+typedef char PolyMovieWork_task_at_0x108[((u32)&((PolyMovieWork *)0)->task == 0x108) ? 1 : -1];
 typedef char PolyMovieWork_eventId_at_0x10C[((u32)&((PolyMovieWork *)0)->eventId == 0x10C) ? 1 : -1];
 
 PolyMovieWork *evtPolygonMovieAllocWork(void);
 PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *, PmdHeader *, PmdHeader *, PmdHeader *);
+void evtPolygonMovieSetFlagBits(struct KwlnTask *task, u32 bits);
+void evtPolygonMovieClearFlagBits(struct KwlnTask *task, u32 bits);
 
 #ifdef VERSION_DDS1
 PolyMovieWork *func_00234DA8(s32 eventId, s32 sceneId, s32 mode);
