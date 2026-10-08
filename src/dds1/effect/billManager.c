@@ -14,7 +14,6 @@ struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 
 void sdfReleaseChipBlock(void *arg);
 void effReleaseSharedTextureRecord(void *arg);
 void billAppendChildQuad(BillObj *obj, BillChildPayload *child);
-void billReleaseSharedEntryBlock(void *arg);
 void *func_00150148(void *arg);
 BillData *billCreateAnimationDataFromResource(void *arg);
 
@@ -705,8 +704,7 @@ BillData *billCreateAnimationDataFromResource(void *resource) {
 
 
 /* Drop one reference; the last one releases every entry and the block itself. */
-void billReleaseSharedEntryBlock(void *arg) {
-    BillData *block = arg;
+void billReleaseSharedEntryBlock(BillData *block) {
     s32 i;
 
     block->listRefCount--;
