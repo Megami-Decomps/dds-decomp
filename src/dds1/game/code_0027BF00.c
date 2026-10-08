@@ -450,7 +450,7 @@ typedef struct MenuWindowSpriteGroup {
 
 extern u8 D_0037CD28[];
 
-void func_0027CF28(MenuWindowSpriteGroup *group, u32 source, u32 mode, u32 variant, u32 option) {
+void mnuInitializeWindowSpriteGroup(MenuWindowSpriteGroup *group, u32 source, u32 mode, u32 variant, u32 option) {
     s32 resourcePair;
 
     group->variant = variant;
@@ -492,7 +492,7 @@ void func_0027CF28(MenuWindowSpriteGroup *group, u32 source, u32 mode, u32 varia
     } while (resourcePair < 3);
 }
 
-extern void func_0027CF28(struct MenuWindowSpriteGroup *, u32, u32, u32, u32);
+extern void mnuInitializeWindowSpriteGroup(struct MenuWindowSpriteGroup *, u32, u32, u32, u32);
 
 /* Allocate/clear the native seven-sprite resource group before its initializer runs. */
 MenuWindowSpriteGroup *mnuCreateWindowState(u32 source, u32 mode, u32 variant, u32 option) {
@@ -501,7 +501,7 @@ MenuWindowSpriteGroup *mnuCreateWindowState(u32 source, u32 mode, u32 variant, u
 
     memset(group, 0, sizeof(MenuWindowSpriteGroup));
     group->allocation = allocation;
-    func_0027CF28(group, source, mode, variant, option);
+    mnuInitializeWindowSpriteGroup(group, source, mode, variant, option);
     return group;
 }
 
