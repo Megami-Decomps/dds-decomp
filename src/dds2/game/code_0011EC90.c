@@ -11,11 +11,11 @@ extern s32 scrReadIntParameter(s32 idx);
 
 extern s32 dds3FindEntryIndex(s32 rosterIndex);
 
-extern s32 scrSetFlag(u8 *work, u16 index);
+extern s32 scrSetFlag(DatPartyRecord *work, u16 index);
 
-extern void scrClearAllSecondaryScriptFlags(u8 *work);
+extern void scrClearAllSecondaryScriptFlags(DatPartyRecord *work);
 
-extern void scrSetSecondaryScriptFlag(u8 *work, u16 index);
+extern void scrSetSecondaryScriptFlag(DatPartyRecord *work, u16 index);
 
 
 extern s32 scrSetIntegerReturnValue(s32 arg0);
@@ -82,7 +82,7 @@ s32 scrCmdSetEntryFlagsInBothStores(void) {
     s32 result = 0;
 
     if (index >= 0) {
-        void *entry = &datGameState->party[index];
+        DatPartyRecord *entry = &datGameState->party[index];
 
         scrSetFlag(entry, b);
         scrClearAllSecondaryScriptFlags(entry);
