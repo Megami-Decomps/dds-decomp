@@ -86,7 +86,7 @@ extern f32 sdfAtan2(f32, f32);
 #define EFFECT_HEADING_DEGREES_PER_RADIAN_APPROX 57.32484055f
 #define EFFECT_HEADING_RADIANS_TO_DEGREES 57.29577637f
 
-void func_001131E0(EffWorldNode *obj, const f32 *targetPosition) {
+void effObjStepFollowAngleTowardPosition(EffWorldNode *obj, const f32 *targetPosition) {
     EffectObjectData *data = obj->data;
     f32 position[4];
     f32 currentAngle = data->angle;
@@ -134,7 +134,7 @@ void func_001131E0(EffWorldNode *obj, const f32 *targetPosition) {
 
 extern void dds3ClearObjectFlags(void *, s32);
 
-void func_00113338(EffWorldNode *object) {
+void effObjStepFollowAngleTowardZero(EffWorldNode *object) {
     EffectObjectData *data = object->data;
     f32 angle;
     f32 value;
@@ -256,8 +256,8 @@ extern void effMiscAxisAngleToQuaternionVU(f32);
 extern void effMiscQuatMultiplyVU(void);
 extern void effObjInnerVecBackup(ObjectTransform *);
 extern void func_00113AF0(EffWorldNode *);
-extern void func_00113338(EffWorldNode *);
-extern void func_001131E0(EffWorldNode *, const f32 *);
+extern void effObjStepFollowAngleTowardZero(EffWorldNode *);
+extern void effObjStepFollowAngleTowardPosition(EffWorldNode *, const f32 *);
 extern void *func_00117650(EffWorldNode *node);
 
 /* Per-frame refresh of a model effect object: rebuild the child transform from the follow record (a tilt that wobbles with its angle), then run the timed callbacks. */
@@ -331,9 +331,9 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
     }
     if (dds3TestObjectFlags(obj, 0x2000)) {
         if (data->pendingTargetKey != 0) {
-            func_001131E0(obj, func_00117650(dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), data->pendingTargetKey, 0x11)));
+            effObjStepFollowAngleTowardPosition(obj, func_00117650(dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), data->pendingTargetKey, 0x11)));
         } else {
-            func_00113338(obj);
+            effObjStepFollowAngleTowardZero(obj);
         }
     }
     return 1;
