@@ -11,6 +11,7 @@ extern void func_002DA3C0(void *, u32);
 extern void func_002DA3F0(void *, u32);
 #include "eff.h"
 #include "par_table.h"
+#include "par_kind_api.h"
 
 #define BILL_ENTRY_BYTES 0x14
 #define BILL_FRAME_MODE_BITS 6
@@ -20,15 +21,6 @@ extern void func_002DA3F0(void *, u32);
 #define EFF_PACKET_LIST_BYTES 0x20
 #define EFF_TEMPLATE_TAIL_OFFSET 0x150
 #define EFF_PACKET_INITIAL_TAG 0xF0000001
-
-typedef struct EffEmitterSub {
-    u16 kind;
-    u8 pad02[6];
-    ParTable *nodeResource; /* Kind 1: particle-node table. */
-    u32 unk0C;
-    s32 primaryCellSystem;  /* Kind 2: cell system. */
-    s32 secondaryResource;  /* Kind 3: cell system; kind 4: tracked model work. */
-} EffEmitterSub;
 
 /* Header shared by the effect emitters that spawn a ring or spray of packets:
  * an origin, a sub-effect, a fade descriptor, jitter ranges and the packet
@@ -40,7 +32,7 @@ typedef struct EffEmitterHead {
     s32 packetCount;       /* 0x20 */
     s32 frameCount;        /* 0x24 */
     u8 pad28[8];
-    EffEmitterSub sub;     /* 0x30 */
+    ParKindState sub;      /* 0x30: kind-tagged shared drawing owner */
     u8 fade[0x4C];         /* 0x48 */
     f32 speedJitter;       /* 0x94 */
     f32 spinJitter;        /* 0x98 */
@@ -877,16 +869,16 @@ void effDestroyResources(effect)
     EffEmitterHead *owner = (EffEmitterHead *)effect;
     switch (owner->sub.kind) {
     case 1:
-        effParReleaseNodeResource(owner->sub.nodeResource);
+        effParReleaseNodeResource(owner->sub.value.table);
         break;
     case 2:
-        parReleaseCellSystem(owner->sub.primaryCellSystem);
+        parReleaseCellSystem((s32)owner->sub.primaryDrawSystem);
         break;
     case 3:
-        parReleaseCellSystem(owner->sub.secondaryResource);
+        parReleaseCellSystem((s32)owner->sub.secondaryDraw.system);
         break;
     case 4:
-        effTrackPolyDestroyModelWorkList(owner->sub.secondaryResource);
+        effTrackPolyDestroyModelWorkList((s32)owner->sub.secondaryDraw.modelList);
         break;
     }
     billDispatchByKind(owner->billboard);
@@ -976,7 +968,6 @@ typedef struct EffRingEmitter {
 extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-void parDispatchKindInit(void *work, s32 index);
 
 /* Seed one ring packet's phase, radius and vertical motion, then its subeffect. */
 void effEmitterRingSpawn(EffRingEmitter *effect, u32 packetIndex) {
@@ -1021,10 +1012,8 @@ void effEmitterRingSpawn(EffRingEmitter *effect, u32 packetIndex) {
     parDispatchKindInit(&effect->head.sub, packetIndex);
 }
 
-extern void parUpdateSharedScaleAndDelta(void *sub);
 extern u32 func_00159AB8(void *fade, u32 color, s32 age);
 extern u32 effParModulateColors(u32 color, u32 mask);
-void parDispatchKindUpdate(void *work, s32 index, u32 color, f32 speed);
 
 /* Advance ring motion and ages; repeat by tagging packets for the next update.
  * completedCount counts expired nonrepeating packets in this update only. */
@@ -2428,7 +2417,7 @@ void func_001575D0(EffTemplatePacketList *effect) {
     f32 radius;
     f32 velocityScale;
 
-    parUpdateSharedScaleAndDelta(&effect->kind);
+    parUpdateSharedScaleAndDelta((ParKindState *)&effect->kind);
     lifetimeFrames = (s32)effect->packetTag;
     targetRadius = effect->targetRadius;
     radiusStep = (targetRadius - effect->recordScale) / lifetimeFrames;
@@ -2521,7 +2510,7 @@ void func_001575D0(EffTemplatePacketList *effect) {
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, previousPosition);
                 VU0_LOAD_VF(vf10, packet->pos);
-                parDispatchKindUpdate(&effect->kind, index, packet->color, packet->speed);
+                parDispatchKindUpdate((ParKindState *)&effect->kind, index, packet->color, packet->speed);
             }
         }
         age++;
@@ -2529,7 +2518,7 @@ void func_001575D0(EffTemplatePacketList *effect) {
             if (repeatEnabled) {
                 age = EFF_PACKET_INITIAL_TAG;
             } else {
-                parDispatchKindInit(&effect->kind, index);
+                parDispatchKindInit((ParKindState *)&effect->kind, index);
                 completedCount++;
                 if (completedCount >= packetCount) {
                     effect->active = 0;
