@@ -2218,7 +2218,7 @@ u32 ptySkillMenuClosePartyPage(u32 callback) {
     mnuBeginWindowFadeTransition(((MenuContext *)context)->imageHandle, &((MenuContext *)context)->transition);
     mnuDestroySelectedPartyWindow(callback);
     mnuDestroySkillMenuWindows(context);
-    mnuClearPageSelectionHandles(context + 0x284);
+    mnuClearPageSelectionHandles(&((MenuContext *)context)->partyWindow);
     return 1;
 }
 
@@ -2485,7 +2485,7 @@ u32 mnuResetSelection(u32 callback) {
     context = kwlnTaskGetUserValue(callback);
     state = (SkillMenuRuntime *)((MenuContext *)context)->party;
     func_002B6D78(callback);
-    mnuFlagActiveWindows(context + 0x284);
+    mnuFlagActiveWindows(&((MenuContext *)context)->partyWindow);
     state->unk2C = 0;
     mnuBeginWindowFadeTransition(state->selectedWindow, &((MenuContext *)context)->transition);
     return 1;
@@ -2495,7 +2495,7 @@ u32 mnuCloseSkillSelection(u32 callback) {
     s32 context = kwlnTaskGetUserValue();
     mnuBeginWindowFadeTransition(((MenuContext *)context)->imageHandle, &((MenuContext *)context)->transition);
     mnuDestroySkillSelectionWindow(callback);
-    mnuClearPartyPanelActiveFlags(context + 0x284);
+    mnuClearPartyPanelActiveFlags(&((MenuContext *)context)->partyWindow);
     mnuCloseItemSelectionState(callback);
     return 1;
 }
@@ -3739,9 +3739,9 @@ void mnuSelectPage(MenuPageWindow *window, s32 selected);
 
 void mnuClearPageSelectionHandles(MenuPageWindow *window);
 
-void mnuFlagActiveWindows(u8 *menu);
+void mnuFlagActiveWindows(MenuPageWindow *window);
 
-void mnuClearPartyPanelActiveFlags(s32 menu);
+void mnuClearPartyPanelActiveFlags(MenuPageWindow *window);
 
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437BE0);
 

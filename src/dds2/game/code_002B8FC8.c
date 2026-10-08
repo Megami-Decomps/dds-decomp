@@ -8,6 +8,7 @@
 struct StaffMenuRuntime;
 
 extern void itfGridStorePosition(MenuGridSlot *, EffectSlotSet *, s32);
+extern void mnuClearPageSelectionHandles(MenuPageWindow *);
 
 #define MNU_ENTRY_SPRITE_COUNT 4
 #define MNU_ENTRY_COLOR_COUNT 4
@@ -2000,7 +2001,7 @@ void mnuSetIndexedWindowPageSpriteFlags(s32 index, u8 *menu, u32 first, u32 seco
 void mnuClearEntries(u8 *menu) {
     MenuSprites **entry = &((MenuPageWindow *)menu)->slots[0].windowSprites;
     u32 i = 0;
-    mnuClearPageSelectionHandles(menu);
+    mnuClearPageSelectionHandles((MenuPageWindow *)menu);
     do {
         if (*entry != NULL) {
             mnuFreeIconSprites(*entry);
@@ -2424,7 +2425,8 @@ void mnuClearPageSelectionHandles(MenuPageWindow *window) {
     mnuClearPageSelection(window);
 }
 
-void mnuFlagActiveWindows(u8 *menu) {
+void mnuFlagActiveWindows(MenuPageWindow *window) {
+    u8 *menu = (u8 *)window;
     u8 *kind = menu + 8;
     u8 *flags = menu + 0xc;
     u32 i;
@@ -2436,11 +2438,11 @@ void mnuFlagActiveWindows(u8 *menu) {
     }
 }
 
-void mnuClearPartyPanelActiveFlags(s32 menu) {
+void mnuClearPartyPanelActiveFlags(MenuPageWindow *window) {
     u32 *flags;
     u32 index;
 
-    flags = (u32 *)(menu + 0x7c);
+    flags = (u32 *)((u8 *)window + 0x7c);
     index = 0;
     do {
         index = index + 1;
