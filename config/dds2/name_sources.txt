@@ -1072,6 +1072,8 @@
 0x001648C0	parDecreaseSymmetricCellAlpha	inferred	U0
 0x001649E0	parIncreaseSymmetricCellAlpha	inferred	U0
 0x00164AE8	parRiseFallSymmetricCellAlpha	inferred	U0
+0x00164C68	parSetCellDrawBucket	inferred	stores the u16 draw bucket in the ParSystem header at offset 0x02
+0x00164CB0	parDrawPendingCellSystems	inferred	drains the pending ParSystem list, batches cells by bucket and topology, and submits their packets
 0x00165300	parAllocateDrawBlock	inferred	Allocates particle draw block with vertex colors and model object. [names_reviewed8.tsv]
 0x001653A8	parReleaseDrawBlock	inferred	Releases draw block model object and allocation handle. [names_reviewed8.tsv]
 0x001653D8	parSubmitCellDrawPackets	inferred	Builds cell draw packet batches and submits via emitter finish callback. [names_reviewed8.tsv]
@@ -4595,6 +4597,8 @@
 0x002BC5D0	mnuCopyPrimaryWindowHandles	inferred	High: copies eight source words into the window handle bank at +0x24; mnuInitializeCampPanelResources supplies resources+4. Same role as DDS1 func_0027FBE0. [names_qp9.tsv]
 0x002BC600	mnuCopySecondaryWindowHandles	inferred	High: copies eight source words into the window handle bank at +0x44; mnuInitializeCampPanelResources supplies resources+0xC. Same role as DDS1 func_0027FC10. [names_qp9.tsv]
 0x002BC9A8	mnuRefreshWindowSlots	inferred	wrong or missing short module prefix [names_audit.tsv]
+0x002BCA98	mnuReleaseAndRefreshWindowSlots	inferred	Releases previously loaded window resource slots, then refreshes each party row through the panel update helper.
+0x002BCAB0	mnuRefreshPartyPanelBars	inferred	Recomputes both quantized bar spans for each active party row and updates their paired effect-grid bounds.
 0x002BCBD8	mnuInitScrollLists	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002BCCB0	mnuDestroyWindowOwnedLists	inferred	Destroys both list states owned by a menu window. [names_reviewed12.tsv]
 0x002BCCF0	mnuRebuildScrollLists	inferred	Destroys both scroll lists then initializes them from new counts. [names_reviewed5.tsv]

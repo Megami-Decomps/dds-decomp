@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "eff.h"
@@ -18,19 +19,16 @@ extern u32 effBlendColor(u32 colorA, u32 colorB, f32 blend);
 extern void parUpdateCellVertexPair(u32 system, s32 index, f32 vertices[2][4]);
 extern void parFadeAlphaCell(u32 system, s32 index);
 extern void effBillSetEntryValue(u32 system, s32 index, u32 value);
-extern void parCellInit(u32 system, s32 index);
-extern void parPrependCellNode(u32 system);
 
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 extern f32 D_00354C00[4];
 
-extern void parReleaseCellSystem(u32 handle);
 extern void func_001770F8(void *dst, void *src);
 
 
 void effPCPNeedleFree(EffPCPNeedleWork *work) {
-    parReleaseCellSystem(work->system);
+    parReleaseCellSystem((ParSystem *)work->system);
     effReleaseAttachedResources(work->resource);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
@@ -206,14 +204,14 @@ void func_00176428(EffPCPNeedleWork *work) {
             } else {
                 effSetResourceEntryValue(work->resource, i, 0);
                 effBillSetEntryValue(work->system, i, 0);
-                parCellInit(work->system, i);
+                parCellInit((ParSystem *)work->system, i);
             }
             slot->age++;
             i++;
             slot++;
         } while (i < count);
     }
-    parPrependCellNode(work->system);
+    parPrependCellNode((ParSystem *)work->system);
     effDrawInstancedResourceTrianglesVU(work->resource);
 }
 

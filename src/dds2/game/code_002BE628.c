@@ -2371,8 +2371,8 @@ s32 mnuTryUseFieldSkill(PartyPanel *partyPanel, MenuPageWindow *page, DatPartyRe
             ptySkillApplyFieldUseEffect(page, id & 0xFFFF, target, entry);
             mnuConsumeEntryCost(id & 0xFFFF, target);
             mnuInitPartyPanelSlots(partyPanel);
-            func_002BCA98(page);
-            func_002BCAB0(page);
+            mnuReleaseAndRefreshWindowSlots(page);
+            mnuRefreshPartyPanelBars(page);
         }
         return 2;
     }

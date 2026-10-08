@@ -483,7 +483,7 @@ void mnuInitializeCampPanelResources(MenuPageWindow *container, StaffSlots *reso
     mnuCopyPrimaryWindowHandles(container, resources->mainResources);
     mnuCopySecondaryWindowHandles(container, resources->mainResources + 8);
     mnuRegisterResourceHandles(container, resources->extraResources);
-    func_002BCA98(container);
+    mnuReleaseAndRefreshWindowSlots(container);
     mnuSetPanelSlotValues(container, (struct EffectSlotSet *)resources->baseResources[1]);
 }
 
