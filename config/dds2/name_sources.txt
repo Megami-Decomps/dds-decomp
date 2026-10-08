@@ -5576,6 +5576,7 @@
 0x003126D0	sdfDestroyTaskWorkerTasks	inferred	Byte-identical dds1 twin 0x002CB278; Destroys both tasks named by the task-work object's primary and secondary task names. [names_conflicts.tsv]
 0x00312710	sdfIsPrimaryTaskRegistered	inferred	Byte-identical DDS1 counterpart: Returns whether a task with the task-work object's primary task name exists.
 0x003127E8	sdfFindTaskItemValueByKey	inferred	Byte-identical DDS1 counterpart: Returns the matching task-list item's stored value or zero if the key is absent.
+0x00312810	sdfGetTaskValueByKey	inferred	key -1 returns retained task-list userData address word; other keys return signed entry initResult or zero
 0x00312850	sdfSetTaskItemMode	inferred	Twin of DDS1 0x002CB3F8; mode 0 enables active/update/callback, 1 queues activation, 2 suspends, 3 selects callback only, and 4 selects update only.
 0x00312A00	sdfDestroyTaskResourceWork	inferred	Byte-identical dds1 twin 0x002CB5A8; Destroys nested task work, frees two buffers, and releases its allocation. [names_conflicts.tsv]
 0x00312A48	sdfCreateTaskEntry	inferred	confidence=high; matched-C; Allocates and initializes the complete task entry from its descriptor, including default callbacks; twin=0x002CB5F0.

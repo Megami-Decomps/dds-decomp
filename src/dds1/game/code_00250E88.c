@@ -28,7 +28,6 @@ extern void mnuReleaseDisplayListNodes(s32);
 
 extern void mnuResetWorkFloats(void);
 
-extern s32 func_002CB3B8(u32, u32);
 
 extern u32 mnuSceneResourceContext;
 
@@ -180,14 +179,14 @@ s32 mnuCreateSceneWork(void) {
     mnuInitializeMantraSelectionGrid((s32)sceneWork);
     ((MenuSceneWork *)sceneWork)->coordinateA = 0;
     ((MenuSceneWork *)sceneWork)->coordinateB = 0;
-    ((MenuSceneMetadata *)func_002CB3B8(mnuSceneResourceContext, -1))->displayedCurrency = datGameState->header.currency;
+    ((MenuSceneMetadata *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY))->displayedCurrency = datGameState->header.currency;
     mnuCopySceneCoordinates((s32)sceneWork);
     return (s32)sceneWork;
 }
 
 /* Retain the native metadata lookup, then release grid/list/allocation resources and reset projection state. */
 void mnuReleaseSceneContext(s32 unused, s32 sceneAddress) {
-    func_002CB3B8(mnuSceneResourceContext, -1);
+    sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
     sdfDestroyGridWork(((MenuSceneWork *)sceneAddress)->gridHandle);
     mnuReleaseDisplayListNodes(sceneAddress + 0x584);
     sdfReleaseResourceAllocation(((MenuSceneWork *)sceneAddress)->allocation);
@@ -290,7 +289,7 @@ void func_00253558(s32 context) {
     s32 field;
 
     func_002CBB48(grid);
-    scene = func_002CB3B8(mnuSceneResourceContext, 0);
+    scene = sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 0);
     field = *(s32 *)(*(s32 *)(scene + 0xC) + 0x1C);
     func_00253208(context, *(s32 *)(field + 0x70), NULL, NULL);
     if (sdfGridSelectFilledCell(
@@ -301,7 +300,7 @@ void func_00253558(s32 context) {
 
 /* Return the selected entry address through the scene-work/grid/slot chain, or zero when scene work is absent. */
 s32 fldGetSceneMetadataNode(void) {
-    s32 sceneAddress = func_002CB3B8(mnuSceneResourceContext, 1);
+    s32 sceneAddress = sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
 
     if (sceneAddress == 0) {
         return 0;
@@ -322,7 +321,7 @@ typedef struct SceneEntryNode {
 
 s32 func_00253640(void) {
     SceneEntryNode *node = (SceneEntryNode *)fldGetSceneMetadataNode();
-    MenuSceneMetadata *scene = (MenuSceneMetadata *)func_002CB3B8(mnuSceneResourceContext, -1);
+    MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
     scene->state = 0;
     scene->pendingProfileId = node->entryIndex;
@@ -343,7 +342,7 @@ extern void evtFinishMessageWindowAndNotify(void);
 extern void mnuReleaseMenuVisualWorkResources(s32);
 
 void func_00253778(void) {
-    MenuSceneMetadata *scene = (MenuSceneMetadata *)func_002CB3B8(mnuSceneResourceContext, -1);
+    MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
     scene->messageShadeFrames = 0;
     if (scene->pendingProfileId != 0) {
@@ -355,7 +354,7 @@ void func_00253778(void) {
         selection->value = ptyGetProfileRecordValue(selection->partyRecord, (u16)selection->profileId);
         selection->cap = prfGetCapValue((u16)selection->profileId);
 
-        work = (MenuSceneWork *)func_002CB3B8(mnuSceneResourceContext, 1);
+        work = (MenuSceneWork *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
         mnuReinitializeSceneGrid((s32)work);
         func_00258AF0(work->gridRefreshControl, 1);
     }
@@ -380,7 +379,7 @@ extern s8 evtGetCapturedWindowPanelValue(void);
 s32 func_00253830(void) {
     MnuMantraGridEntry *entry = (MnuMantraGridEntry *)fldGetSceneMetadataNode();
     MnuProfileProgress *selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
-    MenuSceneMetadata *scene = (MenuSceneMetadata *)func_002CB3B8(mnuSceneResourceContext, -1);
+    MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
     switch (scene->state) {
     case 0:
@@ -489,7 +488,7 @@ extern void uiDrawGradientColorRect(s32, s32, s32, s32, s32, u32 *, s32);
 /* Update attached visuals and stage completion, then ramp the message-window shade over ten frames.
  * Only the final two rectangle colors receive alpha; preserve both native selection lookups and the zero return. */
 s32 mnuUpdateMantraSceneDisplay(void) {
-    MenuSceneMetadata *sceneMetadata = (MenuSceneMetadata *)func_002CB3B8(mnuSceneResourceContext, -1);
+    MenuSceneMetadata *sceneMetadata = (MenuSceneMetadata *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
     u32 shadeColors[4];
 
     mnuGetSelectedNodeValue();
@@ -556,13 +555,13 @@ void fldUpdateSceneEntryMetadata(s32 sceneAddress) {
 
 /* Refresh the active scene-work entry coordinates and return zero. */
 s32 fldResetSceneState(void) {
-    fldUpdateSceneEntryMetadata(func_002CB3B8(mnuSceneResourceContext, 1));
+    fldUpdateSceneEntryMetadata(sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1));
     return 0;
 }
 
 /* Update and copy scene coordinates before releasing its node list; retain the native call order. */
 void mnuCopySceneCoordinatesAndReleaseNodeList(void) {
-    s32 sceneAddress = func_002CB3B8(mnuSceneResourceContext, 1);
+    s32 sceneAddress = sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
     func_002512F0(sceneAddress, 1);
     mnuCopySceneCoordinates(sceneAddress);
     mnuReleaseListNodes(sceneAddress + 0x590);
