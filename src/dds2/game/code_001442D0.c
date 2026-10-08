@@ -1225,7 +1225,7 @@ void fldInitSceneMapLabels(void) {
 
 void fldReleaseSceneRecordChunk(void) {
     if (fldSceneRecordResource != 0) {
-        sdfQueueNonzeroResourceId(fldSceneRecordResource);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldSceneRecordResource);
     }
     fldSceneRecordResource = 0;
     fldSceneRecords = 0;
@@ -2203,7 +2203,7 @@ void fldReleaseTextureSlots(void) {
         if (fldEffectTextureNodes[i] != 0) {
             effDestroyNode(fldEffectTextureNodes[i]);
             fldEffectTextureNodes[i] = 0;
-            sdfQueueNonzeroResourceId(fldEffectTextureLoadHandles[i]);
+            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldEffectTextureLoadHandles[i]);
             fldEffectTextureLoadHandles[i] = 0;
             fldEffectTextureData[i] = 0;
         }
@@ -2256,7 +2256,7 @@ void fldReleaseIndexedResourceEffect(void) {
     if (fldIndexedResourceEffect != 0) {
         effDestroyNode(fldIndexedResourceEffect);
         fldIndexedResourceEffect = 0;
-        sdfQueueNonzeroResourceId(fldIndexedResourceHandle);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldIndexedResourceHandle);
         fldIndexedResourceHandle = 0;
         fldIndexedResourceData = 0;
     }
@@ -3239,13 +3239,13 @@ void fldLoadWeatherEffects(void) {
 
     handle = sdfReadNamedResource("/fld/f/bin/d2_hunt1.tmx", &data, 0);
     D_004363AC = sdfTexAcquireResourceTexture((void *)data);
-    sdfQueueNonzeroResourceId(handle);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)handle);
     handle = sdfReadNamedResource("/fld/f/bin/d2_hunt2.tmx", &data, 0);
     D_004363B0 = sdfTexAcquireResourceTexture((void *)data);
-    sdfQueueNonzeroResourceId(handle);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)handle);
     handle = sdfReadNamedResource("/fld/f/bin/d2_hunt3.tmx", &data, 0);
     D_004363B4 = sdfTexAcquireResourceTexture((void *)data);
-    sdfQueueNonzeroResourceId(handle);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)handle);
     D_00436380 = (u32)sdfReadNamedResource("/fld/f/bin/FH_DAM_2.EPL", &D_00436384, 0);
     fldDamEffectNode = func_001579C8(D_00436384);
     fldDamEffectPositioned = 0;
@@ -3270,13 +3270,13 @@ void fldReleaseWeatherEffects(void) {
     effDestroyNode(fldDamEffectNode);
     fldDamEffectNode = 0;
     fldDamEffectPositioned = 0;
-    sdfQueueNonzeroResourceId(D_00436380);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_00436380);
     D_00436380 = 0;
     D_00436384 = 0;
     effDestroyNode(fldYukEffectNode);
     fldYukEffectNode = 0;
     fldYukEffectPositioned = 0;
-    sdfQueueNonzeroResourceId(D_00436390);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_00436390);
     D_00436390 = 0;
     D_00436394 = 0;
 }
@@ -3702,7 +3702,7 @@ void func_001514F8(void) {
 
 void fldReleaseTargetGuideResource(void) {
     if (D_004363C4 != 0) {
-        sdfQueueNonzeroResourceId(D_004363C4);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_004363C4);
         D_004363C4 = 0;
         D_004363C8 = 0;
         D_004363CC = 0;

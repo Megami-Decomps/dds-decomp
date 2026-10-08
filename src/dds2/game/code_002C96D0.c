@@ -3392,7 +3392,7 @@ void fileMenuWorkCreate(u32 startBranchFlag) {
 
 void fileReleaseMenuFlowResource(void) {
     if (fileLoadSelectionWork != 0) {
-        sdfQueueNonzeroResourceId(((MenuWork *)fileLoadSelectionWork)->unk3C);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)((MenuWork *)fileLoadSelectionWork)->unk3C);
         fileLoadSelectionWork = 0;
     }
 }

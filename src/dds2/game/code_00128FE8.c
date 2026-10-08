@@ -121,7 +121,6 @@ extern u32 fldAreaPackedArchive;
 
 extern u8 D_00436020[];
 
-extern void sdfQueueNonzeroResourceId(u32 handle);
 
 extern void func_002C7CE8(u32 handle);
 
@@ -806,7 +805,7 @@ void fldFreeDisplayObjects(void) {
 
         if (node != 0) {
             do {
-                sdfQueueNonzeroResourceId(node->displayObject);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)node->displayObject);
                 node = node->next;
             } while (node != 0);
         }
@@ -990,19 +989,19 @@ void fldLoadAreaPackedResources(void) {
             switch (entry->kind) {
             case 1:
                 fldCopyInfoTable((FldInfTable *)entry->payload);
-                sdfQueueNonzeroResourceId(entry->blockHandle);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)entry->blockHandle);
                 break;
             case 2:
                 fldSetNpcPalette(entry->payload);
-                sdfQueueNonzeroResourceId(entry->blockHandle);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)entry->blockHandle);
                 break;
             case 3:
                 fldUploadSkyBuffer(entry->payload);
-                sdfQueueNonzeroResourceId(entry->blockHandle);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)entry->blockHandle);
                 break;
             case 4:
                 fldCopyActorWaypointTable(entry->payload);
-                sdfQueueNonzeroResourceId(entry->blockHandle);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)entry->blockHandle);
                 break;
             case 5:
                 fldAreaCachedResource = (u32)sdfAllocGeneralBlock(
@@ -1010,7 +1009,7 @@ void fldLoadAreaPackedResources(void) {
                 memcpy((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)fldAreaCachedResource),
                        (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)entry->blockHandle),
                        sdfMemoryGetBlockSize((struct SdfMemBlock *)(u32)entry->blockHandle));
-                sdfQueueNonzeroResourceId(entry->blockHandle);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)entry->blockHandle);
                 break;
             case 6:
                 fldSetSceneRecordChunk(entry->payload, entry->blockHandle);
@@ -1025,7 +1024,7 @@ void fldReleaseAreaResourceCache(void) {
     u32 cachedResource = fldAreaCachedResource;
 
     if (cachedResource != 0) {
-        sdfQueueNonzeroResourceId(cachedResource);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)cachedResource);
         fldAreaCachedResource = 0;
     }
     cachedResource = fldAreaPackedArchive;
@@ -1148,7 +1147,7 @@ void fldReleaseFieldResources(void) {
     D_00435FA4 = 0;
     for (i = 0; i < 4; i++) {
         if (D_00444930[i] != 0) {
-            sdfQueueNonzeroResourceId(D_00444930[i]);
+            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_00444930[i]);
             D_00444930[i] = 0;
             D_00444940[i] = 0;
         }
@@ -1173,19 +1172,19 @@ void fldReleaseFieldResources(void) {
     D_00435FA0 = 0;
     D_00435FDC = 0;
     if (D_00435FE0 != 0) {
-        sdfQueueNonzeroResourceId(D_00435FE0);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_00435FE0);
         D_00435FE0 = 0;
     }
     if (D_00435FE4 != 0) {
-        sdfQueueNonzeroResourceId(D_00435FE4);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_00435FE4);
         D_00435FE4 = 0;
     }
     if (D_00435FE8 != 0) {
-        sdfQueueNonzeroResourceId(D_00435FE8);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_00435FE8);
         D_00435FE8 = 0;
     }
     if (D_00435FEC != 0) {
-        sdfQueueNonzeroResourceId(D_00435FEC);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_00435FEC);
         D_00435FEC = 0;
     }
     if (fldAreaState[4] < 0xC8 && fldAreaState[7] != fldAreaState[4]) {
@@ -1197,7 +1196,7 @@ void fldReleaseFieldResources(void) {
         if (node != 0) {
             do {
                 if (i > 0) {
-                    sdfQueueNonzeroResourceId(node->displayObject);
+                    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)node->displayObject);
                 }
                 node = node->next;
                 i++;
@@ -3535,7 +3534,7 @@ void fldReleaseSkyResources(void) {
         fldRainTextureReference = 0;
     }
     if (fldRainTextureResource != 0) {
-        sdfQueueNonzeroResourceId(fldRainTextureResource);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldRainTextureResource);
         fldRainTextureResource = 0;
     }
     if (fldCameraColorEffect != 0) {
