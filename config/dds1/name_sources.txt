@@ -4096,7 +4096,8 @@
 0x00241AE8	evtStartBgmBySoundIdAndFade	inferred	Accepts a bounded BGM ID, encodes its fade and submits the resulting sound command. [names_reviewed21.tsv]
 0x00241B30	evtFormatTaskName	inferred	formats event task name via 003014F0 with e%03d_p format
 0x00241B58	evtFindTaskById	inferred	formats e%03d_p name from id then kwlnTaskGetTaskByName, returns handle or 0
-0x00241BB8	evtGetTaskData	inferred	finds task by id then returns its data pointer via 00101A70, or 0
+0x00241B80	evtGetEventPackLoadedState	inferred	Returns EvtPackLoadState.loaded for a numeric event task ID, or -1 when absent; camp readiness and battle event-sequence callers compare it with the completed value 2.
+0x00241BB8	evtGetEventPackLoadState	inferred	Returns the EvtPackLoadState stored in the event task userValue, or NULL when that task ID is absent; the camp creator, callbacks and pack consumers use this same 0x48-byte owner.
 0x00241BF0	evtFindTaskResourceEntryByKey	inferred	Finds task of resource kind and resolves entry by key into base-plus-offset address. [names_reviewed7.tsv]
 0x00241CA0	evtRefreshTaskEffectTexture	inferred	Releases the task's previous effect texture, resolves the keyed resource, updates effect channel 72, and retains the replacement at task-data +0x38. The former name described rebuilding that field via 0x00241BF0/0x002D3288 and freeing its old handle.
 0x00241D28	evtSpawnResourceObject	inferred	looks up the task resource, creates an effect object (flags 1) and scales it by slot scale ratio D_003BAA20[index]/D_003BAA10 [names_M95_Event.tsv]

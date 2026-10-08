@@ -3,6 +3,7 @@
 #include "scr.h"
 #include "kwln.h"
 #include "evt_world.h"
+#include "evt_event_pack.h"
 #include "evt_solar.h"
 #include "kwln_task_lifecycle.h"
 
@@ -52,7 +53,6 @@ s32 scrReadIntParameter(s32 idx);
 INCLUDE_ASM(const s32, "game/code_00228058", func_00228058);
 
 extern char D_003ACA78[];
-extern void *evtFindTaskResourceEntryByKey(u32, s32);
 extern KwlnTask *evtCreateTaskWithValue(s32, struct SdfTex *);
 extern KwlnTask *evtCreateTask(s32, const char *);
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
