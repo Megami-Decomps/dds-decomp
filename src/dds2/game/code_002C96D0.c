@@ -2724,7 +2724,6 @@ extern void func_001004A0(void);
 extern void *fileQueuePlainDispatchRequest(const char *);
 extern void func_002C81D0(u32);
 extern void func_002C7CE8(void *);
-extern u32 sdfMemoryGetBlockAddress(struct SdfMemBlock *);
 extern struct SdfTex *sdfTexAcquireResourceTexture(void *);
 extern struct SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 extern void *sdfAllocateBlockBySizeThreshold(s32);

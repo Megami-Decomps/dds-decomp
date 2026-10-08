@@ -9,7 +9,6 @@
 extern s8 D_0037F510[];
 
 
-extern void *sdfMemoryGetBlockAddress(u32);
 
 extern void func_00313BA8(s32, s32);
 
@@ -536,7 +535,7 @@ void func_00311F20(s32 *points, u32 tail, u32 *colors, s32 count,
 /* Return a callback-list header address, retaining its allocation handle and teardown userData. */
 SdfList *sdfCreateTaskHeader(void *userData) {
     s32 allocation = (u32)sdfAllocGeneralBlock(sizeof(SdfList));
-    SdfList *obj = sdfMemoryGetBlockAddress(allocation);
+    SdfList *obj = (SdfList *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)allocation);
 
     memset(obj, 0, sizeof(SdfList));
     obj->allocation = allocation;

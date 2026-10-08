@@ -112,7 +112,6 @@ void mnuDeactivateModelNode(s32 nodeAddress);
 
 extern MdlCtx *func_00232198(s32 resourceGroup, s32 resourceId);
 extern void mdlAddEntryFlaggedEx(MdlCtx *model, s32 searchId, s32 motionIndex, f32 blendLeadFrames, f32 blendDurationFrames);
-extern u32 *sdfMemoryGetBlockAddress(u32 handle);
 extern void mdlDestroyContext(MdlCtx *);
 
 extern u8 D_0040ABD0[];
@@ -145,7 +144,7 @@ void dds3InitSoundSlotPool(void) {
         dds3ReleaseSoundSlotPool();
     }
     handle = (u32)sdfAllocGeneralBlock(0x32c);
-    dds3SoundSlotPool = sdfMemoryGetBlockAddress(handle);
+    dds3SoundSlotPool = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)handle);
     memset(dds3SoundSlotPool, 0, 0x32c);
     pool = (SoundSlotPool *)dds3SoundSlotPool;
     pool->handle = handle;
@@ -268,7 +267,7 @@ MnuEffectWork *mnuCreateEffectWork(s32 listCount, s32 *recordCounts) {
     for (i = 0; i < listCount; i++) allocationSize += recordCounts[i] * 32;
     evtPrintDeveloperConsoleMessage("EffectWork Object Size %d\n", allocationSize);
     handle = (u32)sdfAllocGeneralBlock(allocationSize);
-    work = (MnuEffectWork *)sdfMemoryGetBlockAddress(handle);
+    work = (MnuEffectWork *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)handle);
     memset(work, 0, allocationSize);
     work->handle = handle;
     work->count = listCount;
@@ -549,7 +548,7 @@ MnuSectionModelWork *func_0031BFE0(s32 listCount, s32 *nodeCounts) {
     for (i = 0; i < listCount; i++) allocationSize += nodeCounts[i] * sizeof(MnuModelNode);
     evtPrintDeveloperConsoleMessage(D_0042DAE8, allocationSize);
     handle = (u32)sdfAllocGeneralBlock(allocationSize);
-    work = (MnuSectionModelWork *)sdfMemoryGetBlockAddress(handle);
+    work = (MnuSectionModelWork *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)handle);
     memset(work, 0, allocationSize);
     work->allocation = (struct SdfMemBlock *)handle;
     work->count = listCount;

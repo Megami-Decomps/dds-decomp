@@ -13,7 +13,6 @@ void itfDeactivateModelInstance(ModelInstance *item);
 void itfDrawModelInstanceImage(ModelInstance *item);
 extern s32 itfDrawUniformlyScaledIndexedImage(s32, s32, s32, s32, s32, s32, s32, f32);
 
-extern void *sdfMemoryGetBlockAddress(u32);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
 INCLUDE_ASM(const s32, "game/code_0031C940", func_0031C940);
@@ -92,7 +91,7 @@ ModelInstanceWork *itfCreateModelInstanceWork(s32 listCount, s32 *instanceCounts
     for (i = 0; i < listCount; i++) allocationSize += instanceCounts[i] * sizeof(ModelInstance);
     evtPrintDeveloperConsoleMessage("SpriteWork Object Size %d\n", allocationSize);
     handle = (u32)sdfAllocGeneralBlock(allocationSize);
-    work = sdfMemoryGetBlockAddress(handle);
+    work = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)handle);
     memset(work, 0, allocationSize);
     work->handle = handle;
     work->count = listCount;

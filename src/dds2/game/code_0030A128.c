@@ -41,7 +41,6 @@ extern LmapNode *fldLmapAdvanceWindowStart(LmapList *);
 extern u32 itfGetGridListLinkFlags(LmapList *);
 extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 extern LmapNode *fldLmapExpandWindowBackward(LmapList *);
-extern u32 sdfMemoryGetBlockAddress(SdfMemBlock *block);
 extern s32 fldLocalMapTrackSlotFromMode(s32);
 extern void func_0030A8A8(void);
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void *, void *, void *);

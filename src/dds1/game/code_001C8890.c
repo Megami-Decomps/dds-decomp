@@ -12164,8 +12164,8 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
                 mnuResetSoundBufferLocked();
                 mnuReleaseSoundBufferLocked();
             }
-            data = sdfMemoryGetBlockAddress(soundWork->resourceHandles[args->slot]);
-            size = sdfMemoryGetBlockSize(soundWork->resourceHandles[args->slot]);
+            data = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)soundWork->resourceHandles[args->slot]);
+            size = sdfMemoryGetBlockSize((struct SdfMemBlock *)(u32)soundWork->resourceHandles[args->slot]);
             func_0026ABA8(data, size, 2);
             func_003003F0("%%%%%%%%%%%%%%%% EARRING : %d\n", args->slot);
             mnuPrintTitleDebugBanner();

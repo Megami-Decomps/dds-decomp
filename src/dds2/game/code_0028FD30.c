@@ -1355,7 +1355,6 @@ s32 func_00293FD0(MnuStatusResource *object, u16 id) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00294060);
 
-extern void *sdfMemoryGetBlockAddress(s32);
 extern void *memset(void *, s32, u32);
 /* Allocate twenty countdown entries for sounds attached to this panel. */
 void mnuInitPanelSoundEntries(void) {
@@ -1364,7 +1363,7 @@ void mnuInitPanelSoundEntries(void) {
 
     if (mnuPanelSoundEntryPool == 0) {
         handle = (u32)sdfAllocGeneralBlock(0xAC);
-        mnuPanelSoundEntryPool = sdfMemoryGetBlockAddress(handle);
+        mnuPanelSoundEntryPool = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)handle);
         memset(mnuPanelSoundEntryPool, 0, 0xAC);
         pool = (MenuPanelEntryPool *)mnuPanelSoundEntryPool;
         pool->entries = (MenuPanelEntry *)(pool + 1);
