@@ -39,6 +39,7 @@ struct MenuIconState {
 
 /* Mode 5 callers pass only kind and resource; native mode 4 consumes material. */
 struct MenuIconState *mnuCreatePanelIconState();
+void mnuReleaseResourceList(struct MenuIconState *list);
 
 typedef struct MenuWindowContainer {
     s32 id;                /* 0x00 */

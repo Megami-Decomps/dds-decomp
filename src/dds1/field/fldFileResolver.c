@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fld_resource_resolver.h"
 #include "fld.h"
 
 
@@ -31,7 +32,7 @@ struct EffWorldNode *fldCreateDummyMatter(void) {
     return matter;
 }
 
-void *func_00126200(u32 id) {
+void *fldResolveWorldObjectByResourceId(u32 id) {
     u32 i = 0;
     void *world = dds3GetWorldSecondaryObject();
     FldFileResource *resource = D_003BD7B8;
@@ -61,7 +62,7 @@ void *func_00126200(u32 id) {
     return NULL;
 }
 
-void *func_00126310(const char *name) {
+void *fldResolveWorldObjectByResourceEntryName(const char *name) {
     u32 i = 0;
     void *world = dds3GetWorldSecondaryObject();
     FldFileResource *resource = D_003BD7B8;

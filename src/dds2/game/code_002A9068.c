@@ -9,6 +9,7 @@
 #include "sdf_resource.h"
 #include "dat_state.h"
 #include "mnu.h"
+#include "mnu_shop.h"
 #include "mnu_list.h"
 #include "mnu_staff.h"
 #include "mnu_scroll_panel.h"
@@ -594,7 +595,7 @@ typedef struct StaffResourceHeader {
     u8 pad00[0x64];
     s32 resourceSource;         /* 0x064 */
     u8 pad68[0x8C];
-    u32 baseHandles[3];        /* 0x0F4 */
+    struct MenuIconState *baseHandles[3]; /* 0x0F4 */
     s32 resourceOptions;        /* 0x100 */
     MenuWindowContainer *resourceLists[3];      /* 0x104 */
 } StaffResourceHeader;
@@ -712,9 +713,9 @@ void mnuStaffInitResourceLists(u8 *work) {
     MenuFadeFields *ctx = &((MenuStaffContext *)work)->fade;
     MenuWindowContainer *list;
 
-    ((StaffResourceHeader *)work)->baseHandles[0] = (u32)mnuCreatePanelIconState(0, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
-    ((StaffResourceHeader *)work)->baseHandles[1] = (u32)mnuCreatePanelIconState(1, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
-    ((StaffResourceHeader *)work)->baseHandles[2] = (u32)mnuCreatePanelIconState(3, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
+    ((StaffResourceHeader *)work)->baseHandles[0] = mnuCreatePanelIconState(0, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
+    ((StaffResourceHeader *)work)->baseHandles[1] = mnuCreatePanelIconState(1, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
+    ((StaffResourceHeader *)work)->baseHandles[2] = mnuCreatePanelIconState(3, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
     ((StaffResourceHeader *)work)->resourceLists[0] = mnuCreateStaffResourceListWindow(D_003E56D0, 8, 0x1C0, 0x10, work, D_003E6978);
     list = mnuCreateStaffResourceListWindow(D_003E56F0, 5, 0x1C0, 0x10, work, D_003E6998);
     ((StaffResourceHeader *)work)->resourceLists[1] = list;
@@ -726,8 +727,6 @@ void mnuStaffInitResourceLists(u8 *work) {
     mnuBeginWindowFadeTransition(((StaffResourceHeader *)work)->resourceLists[0], ctx);
 }
 
-
-extern void mnuReleaseResourceList(u32);
 
 /* Destroy the menu windows, then release their associated resource lists. */
 void mnuReleaseStaffSpriteAndResourceHandles(u8 *menuBytes) {

@@ -1793,25 +1793,13 @@ u8 mnuHasActivePanelResource(MenuScrollPanel *resources) {
 
 INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BB510);
 
-/* Three resource-slot handles at +0xE4/+0xE8/+0xEC. */
-typedef struct MenuSlotEffectHandles {
-    u8 pad00[0xE4];
-    u32 handles[3];
-} MenuSlotEffectHandles;
-
-void mnuLoadPanelSectionResources(MenuSlotEffectHandles *slot,
+void mnuLoadPanelSectionResources(MenuPageSlot *slot,
                                   EffectSlotSet *model, u32 firstValue,
-                                  u32 secondValue, s32 thirdValue
-                                    ) {
-    u32 handle;
-
-    handle = (u32)effCreateResourceSlotSet(model, firstValue, 1);
-    slot->handles[0] = handle;
-    handle = (u32)effCreateResourceSlotSet(model, secondValue, 1);
-    slot->handles[1] = handle;
+                                  u32 secondValue, s32 thirdValue) {
+    slot->panelResourceHandles[0] = effCreateResourceSlotSet(model, firstValue, 1);
+    slot->panelResourceHandles[1] = effCreateResourceSlotSet(model, secondValue, 1);
     if (-1 < thirdValue) {
-        handle = (u32)effCreateResourceSlotSet(model, thirdValue, 1);
-        slot->handles[2] = handle;
+        slot->panelResourceHandles[2] = effCreateResourceSlotSet(model, thirdValue, 1);
     }
 }
 
