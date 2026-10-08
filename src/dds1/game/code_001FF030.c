@@ -1996,7 +1996,7 @@ void btlSelectLinkedTargets(s32 actor, s32 input, s8 invert) {
     btlFreeIndexList(list);
 }
 
-extern s32 btlCanUseLinkedActor();
+extern s32 btlCanUseLinkedActor(BtlLinkedCommand *);
 
 
 /* Resolve a command's linked actor, retaining each independent task fallback. */
@@ -2068,7 +2068,7 @@ extern f32 func_002F9F60(f32);
 extern f32 func_002FA060(f32);
 extern f32 func_002FA148(f32);
 extern void func_002DD688(f32);
-extern void func_001DB698();
+extern s32 func_001DB698(BtlCamState *);
 
 /* Frame one unit approaching its target (DDS2 func_00217470 without the explicit angle): the pull-back and the
    swing angle interpolate with how far the command's state has advanced (ratio, capped at 1). */
@@ -3151,7 +3151,7 @@ s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, command->backCamera.direction);
     command->backCamera.distance += 45.0f;
-    func_001DB698(command->backCamera.position);
+    func_001DB698(&command->backCamera);
     return 1;
 }
 
@@ -4938,14 +4938,12 @@ s32 btlHandleTargetedDefeatAction(u8 *unit) {
     return 0;
 }
 
-extern s32 btlIsActorCategoryMarked(s32);
+extern s32 btlIsActorCategoryMarked(BtlLinkedCommand *);
 extern void func_001DF410(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-/* Opaque pose parameters use the native owners defined in code_001C8890. */
-typedef struct CameraPoseAction CameraPoseAction;
-typedef struct CameraPoseTransform CameraPoseTransform;
-extern void btlSetupCameraPoseAimUnit(CameraPoseAction *, CameraPoseTransform *, CameraPoseTransform *);
-extern void btlPrepareRandomizedActionCameraPose(CameraPoseAction *, CameraPoseTransform *, CameraPoseTransform *);
+/* Pose helpers use the existing command and camera owners. */
+extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 /* Boss action camera (proposed btlSelectBossActionCameraPose): aim poses for ally actors, fixed DERUTA/I-E key
  * sets for mode 0x11B. */
@@ -4954,7 +4952,7 @@ s32 func_0020B818(BtlLinkedCommand *command, s8 a, s8 b) {
     s32 kind;
     u32 shot;
 
-    if (btlIsActorCategoryMarked((s32)command) != 0) {
+    if (btlIsActorCategoryMarked(command) != 0) {
         return 0;
     }
     if (task->unit->flags & 0x200) {
@@ -4964,8 +4962,8 @@ s32 func_0020B818(BtlLinkedCommand *command, s8 a, s8 b) {
         kind = datActionAnimationRecords[command->actionCode].cameraKind;
         if (kind < 8) {
             if (kind >= 6) {
-                btlSetupCameraPoseAimUnit((CameraPoseAction *)command, (CameraPoseTransform *)&command->frontCamera,
-                                          (CameraPoseTransform *)&command->backCamera);
+                btlSetupCameraPoseAimUnit(command, &command->frontCamera,
+                                          &command->backCamera);
                 return 1;
             }
         }
@@ -5042,8 +5040,8 @@ s32 func_0020B818(BtlLinkedCommand *command, s8 a, s8 b) {
             break;
         }
     }
-    btlPrepareRandomizedActionCameraPose((CameraPoseAction *)command, (CameraPoseTransform *)&command->frontCamera,
-                                         (CameraPoseTransform *)&command->backCamera);
+    btlPrepareRandomizedActionCameraPose(command, &command->frontCamera,
+                                         &command->backCamera);
     return 1;
 }
 
