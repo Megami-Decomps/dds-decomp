@@ -1,6 +1,7 @@
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_staff.h"
+#include "dat_state.h"
 
 
 extern void mnuCampMenuHandleInput(s32);
@@ -16,9 +17,6 @@ extern void func_00272668(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawWindowContainer(s32, s32, s32, s32, s32);
 extern u32 mnuHasSelectedListNodeId(s32);
 extern s32 D_003BAA98;
-extern s32 datGameState;
-extern s32 mnuIsEntryCostUnaffordable(u16, struct DatPartyRecord *);
-extern s32 mnuConsumeEntryCost(s32, struct DatPartyRecord *);
 extern void mnuInitPartyPanelSlots(s32);
 extern void func_00280048(s32);
 extern u32 mnuMapPadMaskToFlags(u32);
@@ -202,13 +200,16 @@ s32 ptySkillMenuUseSelectedInField(id, context)
     s32 context;
 {
     s32 window = context + 0x15C;
-    s32 slotA = datGameState + ((SkillMenuContext *)context)->selection->cursor->index * 0x1A4 + 0xA60;
-    s32 slotB = datGameState + ((SkillMenuContext *)context)->target->cursor->index * 0x1A4 + 0xA60;
-    if (mnuIsEntryCostUnaffordable(id, (struct DatPartyRecord *)slotA) != 0) {
+    DatPartyRecord *selectedEntry =
+        &datGameState->party[((SkillMenuContext *)context)->selection->cursor->index];
+    DatPartyRecord *targetEntry =
+        &datGameState->party[((SkillMenuContext *)context)->target->cursor->index];
+    if (mnuIsEntryCostUnaffordable(id, selectedEntry) != 0) {
         return 0;
     }
-    if (ptySkillApplyFieldUseEffect((MenuPageWindow *)window, id, (struct DatPartyRecord *)slotA, (struct DatPartyRecord *)slotB) != 0) {
-        mnuConsumeEntryCost(id, (struct DatPartyRecord *)slotA);
+    if (ptySkillApplyFieldUseEffect((MenuPageWindow *)window, id,
+                                    selectedEntry, targetEntry) != 0) {
+        mnuConsumeEntryCost(id, selectedEntry);
         mnuInitPartyPanelSlots(context + 0x7EC);
         mnuUpdateHandleStates((MenuPageWindow *)window);
         func_00280048(window);
@@ -228,11 +229,12 @@ typedef struct SkillLink {
 } SkillLink;
 
 void mnuFlagMatchingEntries(s32 context) {
-    s32 slot = datGameState + ((SkillMenuContext *)context)->selection->cursor->index * 0x1A4 + 0xA60;
+    DatPartyRecord *selectedEntry =
+        &datGameState->party[((SkillMenuContext *)context)->selection->cursor->index];
     SkillLink *link = (SkillLink *)((SkillMenuContext *)context)->menu->selected->list->first;
     if (link != NULL) {
         do {
-            if (mnuIsEntryCostUnaffordable(link->id, (struct DatPartyRecord *)slot)) {
+            if (mnuIsEntryCostUnaffordable(link->id, selectedEntry)) {
                 link->flags |= 1;
             }
             link = link->next;
