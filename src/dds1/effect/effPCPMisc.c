@@ -4769,64 +4769,64 @@ typedef struct EffPCPGroupSet {
     void *workHandle;
 } EffPCPGroupSet;
 
-EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *first, u32 *blocks) {
-    u32 count = first->count;
-    void *resource = sdfAllocGeneralBlock(count * 0x18 + 0x180);
-    EffPCPGroupSet *copy = (void *)sdfResourceRetainAddress(resource);
-    EffPCPGroupEntry *entry;
-    u32 g;
-    u32 i;
+EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *header, u32 *sourceResources) {
+    u32 entryCount = header->count;
+    void *workResource = sdfAllocGeneralBlock(entryCount * 0x18 + 0x180);
+    EffPCPGroupSet *groupSet = (void *)sdfResourceRetainAddress(workResource);
+    EffPCPGroupEntry *groupEntryCursor;
+    u32 groupIndex;
+    u32 entryIndex;
 
-    copy->head = *first;
-    copy->scale = 1.0f;
-    copy->color = 0x80808080;
-    copy->workHandle = resource;
-    copy->unk16C = first->spawnParams.start[1];
-    entry = (EffPCPGroupEntry *)(copy + 1);
-    copy->entries = entry;
-    copy->duplicates = 0;
-    if (blocks != NULL) {
-        u32 size = count * 16;
-        u32 *list = blocks;
-        u32 offset;
-        u32 stride;
-        u8 *flags;
+    groupSet->head = *header;
+    groupSet->scale = 1.0f;
+    groupSet->color = 0x80808080;
+    groupSet->workHandle = workResource;
+    groupSet->unk16C = header->spawnParams.start[1];
+    groupEntryCursor = (EffPCPGroupEntry *)(groupSet + 1);
+    groupSet->entries = groupEntryCursor;
+    groupSet->duplicates = 0;
+    if (sourceResources != NULL) {
+        u32 allocationBytes = entryCount * 16;
+        u32 *sourceResourceCursor = sourceResources;
+        u32 groupByteOffset;
+        u32 groupByteWidth;
+        u8 *activeGroupFlags;
 
-        g = 0;
-        copy->duplicateHandle = sdfAllocGeneralBlock(size);
-        flags = first->activeGroups;
-        offset = 0;
-        stride = count * 4;
-        copy->duplicates = (void *)sdfResourceRetainAddress(copy->duplicateHandle);
-        memset(copy->duplicates, 0, size);
-        for (; g < 4; g++) {
-            u32 *slot = (u32 *)((u8 *)copy->duplicates + offset);
+        groupIndex = 0;
+        groupSet->duplicateHandle = sdfAllocGeneralBlock(allocationBytes);
+        activeGroupFlags = header->activeGroups;
+        groupByteOffset = 0;
+        groupByteWidth = entryCount * 4;
+        groupSet->duplicates = (void *)sdfResourceRetainAddress(groupSet->duplicateHandle);
+        memset(groupSet->duplicates, 0, allocationBytes);
+        for (; groupIndex < 4; groupIndex++) {
+            u32 *destinationHandles = (u32 *)((u8 *)groupSet->duplicates + groupByteOffset);
 
-            if (*flags != 0) {
-                u32 head;
+            if (*activeGroupFlags != 0) {
+                u32 firstCreatedHandle;
 
-                if (g < 2) {
-                    *slot = effParamWorkCreate(0, (void *)*list);
+                if (groupIndex < 2) {
+                    *destinationHandles = effParamWorkCreate(0, (void *)*sourceResourceCursor);
                 } else {
-                    *slot = effParamWorkCreate(6, (void *)*list);
+                    *destinationHandles = effParamWorkCreate(6, (void *)*sourceResourceCursor);
                 }
-                head = *slot;
-                for (i = 1; i < count; i++) {
-                    slot++;
-                    *slot = effParamWorkDuplicate(head);
+                firstCreatedHandle = *destinationHandles;
+                for (entryIndex = 1; entryIndex < entryCount; entryIndex++) {
+                    destinationHandles++;
+                    *destinationHandles = effParamWorkDuplicate(firstCreatedHandle);
                 }
             }
-            list++;
-            flags++;
-            offset += stride;
+            sourceResourceCursor++;
+            activeGroupFlags++;
+            groupByteOffset += groupByteWidth;
         }
     }
-    for (g = 0; g < count; g++) {
-        entry->handle = (u32)effThunderFragCreate(&first->spawnParams);
-        entry->frame = 0;
-        entry++;
+    for (groupIndex = 0; groupIndex < entryCount; groupIndex++) {
+        groupEntryCursor->handle = (u32)effThunderFragCreate(&header->spawnParams);
+        groupEntryCursor->frame = 0;
+        groupEntryCursor++;
     }
-    return copy;
+    return groupSet;
 }
 
 void effPcpGroupSetCreateFromTable(void *args) {
