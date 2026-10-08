@@ -185,7 +185,7 @@ extern s32 evtGetCapturedWindowPanelValue();
 
 extern s32 func_002B06A8();
 
-extern void mnuPrepareStaffValueChangeDialog();
+extern void mnuPrepareStaffValueChangeDialog(s32, DatPartyRecord *, s32, s32);
 
 extern char D_003E7530[];
 

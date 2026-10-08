@@ -134,7 +134,7 @@ extern s8 (*D_00435E3C)[6];
 
 extern s32 D_00386288[];
 
-extern void mnuSetPartyEntryCurrentId(DatPartyRecord *, s32);
+extern u32 mnuSetPartyEntryCurrentId(DatPartyRecord *, u32);
 
 extern s32 func_0011AEE0(s32);
 

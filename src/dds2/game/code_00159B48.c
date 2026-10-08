@@ -717,7 +717,7 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
     state->header.gifRegisters = SDF_GIF_REGISTER_AD;
     state->test.value = 0x51001;
     state->test.registerId = SDF_GS_TEST_1;
-    state->alpha.value = 0x44;
+    state->alpha.value = SDF_GS_ALPHA_INTERPOLATE_SOURCE_ALPHA;
     state->alpha.registerId = SDF_GS_ALPHA_1;
     sdfAppendPacket(list, (u32)state);
 
@@ -730,17 +730,17 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
     state->test.registerId = SDF_GS_TEST_2;
     switch (source->blendMode) {
     case 2:
-        state->alpha.value = 0x58;
-        restoreBlend = 0x48;
+        state->alpha.value = SDF_GS_ALPHA_ADD_DESTINATION_ALPHA;
+        restoreBlend = SDF_GS_ALPHA_ADD_SOURCE_ALPHA;
         break;
     case 3:
-        state->alpha.value = 0x52;
-        restoreBlend = 0x42;
+        state->alpha.value = SDF_GS_ALPHA_SUBTRACT_DESTINATION_ALPHA;
+        restoreBlend = SDF_GS_ALPHA_SUBTRACT_SOURCE_ALPHA;
         break;
     case 0:
     case 1:
-        state->alpha.value = 0x54;
-        restoreBlend = 0x44;
+        state->alpha.value = SDF_GS_ALPHA_INTERPOLATE_DESTINATION_ALPHA;
+        restoreBlend = SDF_GS_ALPHA_INTERPOLATE_SOURCE_ALPHA;
         break;
     default:
         restoreBlend = 0;
