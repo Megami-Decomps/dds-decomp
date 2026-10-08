@@ -141,7 +141,9 @@ typedef struct BattleActorPanelPresentation {
     u8 pad02[2];
     s8 presentationState;
     s8 presentationValue;
-    u8 pad06[0xA];
+    u8 pad06[2];
+    s32 unk08; /* Reserve initializer clears this word. */
+    s32 unk0C; /* Reserve initializer sets this word to 180. */
     s32 transitionGeometry[4];
     u8 transitionFade[2];
     u8 pad22[2];
@@ -209,7 +211,7 @@ typedef struct BattleActorPanelWork {
     s32 activeCount;
     s32 reserveCount;
     BattleActorPanelEntry activeEntries[3];
-    u16 unk7BC;
+    s16 selectedReserveIndex;
     s16 partyRecordIndex;
     BattleActorPanelEntry reserveEntries[4];
     struct SdfMemBlock *reserveUnitAllocation;
