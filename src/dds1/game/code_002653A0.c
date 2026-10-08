@@ -204,7 +204,34 @@ s32 mnuCountAdvancingTitleAnimations(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildLevelUpList);
+s32 brsBuildLevelUpList(BrsRewardBatch *batch) {
+    s32 i;
+    u8 *values = (u8 *)&batch->rows + sizeof(batch->rows[0].unit);
+
+    memset(batch, 0, sizeof(*batch));
+    batch->count = 0;
+    for (i = 0; i < 5; i++) {
+        DatPartyRecord *unit = &datGameState->party[i];
+        u16 occupied = unit->flags & 1;
+
+        if (occupied != 0) {
+            s32 levelUps = ptyCalcLevelUps(unit);
+            if (levelUps > 0) {
+                s32 count = batch->count;
+                BrsRewardValues *rowValues =
+                    (BrsRewardValues *)(values + count * sizeof(BrsRewardRow));
+
+                rowValues->amount = levelUps;
+                batch->rows[count].unit = unit;
+
+                ((BrsRewardValues *)(values +
+                    batch->count * sizeof(BrsRewardRow)))->secondaryValue = i;
+                batch->count++;
+            }
+        }
+    }
+    return batch->count;
+}
 
 
 
