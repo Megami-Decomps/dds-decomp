@@ -3497,7 +3497,8 @@ typedef struct FieldTargetGuideState {
     s32 disabled;
     f32 position[3];
     f32 yaw;
-    u8 pad18[8];
+    f32 unk18; /* 0x18: previous model frame, synchronized when update bit 2 is set. */
+    f32 unk1C; /* 0x1C: current model frame. */
     s16 gridX;
     s16 gridY;
     s16 targetGridX;
@@ -3925,7 +3926,106 @@ void fldUpdateViewAngle(void) {
     state->yaw = 180.0f - angle;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00152C88);
+extern const f32 D_00413F68[4];
+extern f32 D_00451D4C[];
+extern void effObjSetNodeFlags(ObjectTransform *inner, u32 flags);
+extern void effObjClearNodeFlags(ObjectTransform *inner, u32 flags);
+extern void mdlAddEntryFlaggedEx(MdlCtx *ctx, s32 searchId, s32 motionIndex,
+                                 f32 blendLeadFrames, f32 blendDurationFrames);
+
+void func_00152C88(void) {
+    f32 position[4] __attribute__((aligned(16)));
+    f32 smoothedPosition[4] __attribute__((aligned(16)));
+    f32 axis[4] __attribute__((aligned(16)));
+    f32 rotation[4] __attribute__((aligned(16)));
+    MdlCtx *model = D_00435F20;
+    s32 animation;
+    s32 changeAnimation;
+    f32 angle;
+    f32 previousFrame;
+    f32 currentFrame;
+
+    memset(position, 0, sizeof(position));
+    position[3] = 1.0f;
+    memset(smoothedPosition, 0, sizeof(smoothedPosition));
+    smoothedPosition[3] = 1.0f;
+    memcpy(axis, D_00413F68, sizeof(axis));
+    memset(rotation, 0, sizeof(rotation));
+    rotation[3] = 1.0f;
+
+    position[0] = fldTargetGuideState.position[0];
+    position[1] = 0.0f;
+    position[2] = fldTargetGuideState.position[2];
+    effObjSetInnerFirstVec(D_00435F1C, (u128 *)position);
+
+    VU0_LOAD_VF(vf10, axis);
+    angle = (D_00451D4C[0] * 3.14f) / 180.0f;
+    effMiscAxisAngleToQuaternionVU(angle);
+    /* SDK store: the quaternion is consumed by the following vector setter. */
+    VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+    effObjSetInnerSecondVec(D_00435F1C, (u128 *)rotation);
+
+    if (fldTargetGuideState.updateFlags & 0x40) {
+        effObjSetNodeFlags(D_00435F1C->inner, 8);
+        PCP_COPY_VECTOR_F32(smoothedPosition, D_00435F1C->inner->smoothedPosition);
+        if (fabsf(smoothedPosition[0] - position[0]) < 1.0f) {
+            D_00435F1C->inner->smoothedPosition[0] = position[0];
+        } else {
+            D_00435F1C->inner->smoothedPosition[0] =
+                smoothedPosition[0] + (position[0] - smoothedPosition[0]) / 3.0f;
+        }
+        if (fabsf(smoothedPosition[1] - position[1]) < 1.0f) {
+            D_00435F1C->inner->smoothedPosition[1] = position[1];
+        } else {
+            D_00435F1C->inner->smoothedPosition[1] =
+                smoothedPosition[1] + (position[1] - smoothedPosition[1]) / 3.0f;
+        }
+        if (fabsf(smoothedPosition[2] - position[2]) < 1.0f) {
+            D_00435F1C->inner->smoothedPosition[2] = position[2];
+        } else {
+            D_00435F1C->inner->smoothedPosition[2] =
+                smoothedPosition[2] + (position[2] - smoothedPosition[2]) / 3.0f;
+        }
+        D_00435F1C->inner->smoothedPosition[3] = 1.0f;
+    } else {
+        effObjClearNodeFlags(D_00435F1C->inner, 8);
+    }
+
+    if (fldTargetGuideState.updateFlags & 0x20) {
+        mdlAddEntryFlagged(model, 0, fldTargetGuideState.unk54);
+    } else if (fldTargetGuideState.updateFlags & 2) {
+        animation = fldTargetGuideState.unk54;
+        changeAnimation = 1;
+        /* Only zero and the 16..18 family suppress a repeated animation. */
+        if (animation == 0) {
+            goto compare_animation;
+        }
+        if (animation < 0) {
+            goto apply_animation;
+        }
+        if (animation >= 19) {
+            goto apply_animation;
+        }
+        if (animation < 16) {
+            goto apply_animation;
+        }
+compare_animation:
+        changeAnimation = animation != (s32)model->current.h.arg;
+apply_animation:
+        if (changeAnimation) {
+            model->first->frameStep = 1.0f;
+            mdlAddEntryFlaggedEx(model, 0, fldTargetGuideState.unk54, 6.0f, 6.0f);
+        }
+    }
+
+    previousFrame = fldTargetGuideState.unk1C;
+    currentFrame = model->first->currentFrame;
+    fldTargetGuideState.unk1C = currentFrame;
+    fldTargetGuideState.unk18 = previousFrame;
+    if (fldTargetGuideState.updateFlags & 2) {
+        fldTargetGuideState.unk18 = currentFrame;
+    }
+}
 
 static inline s32 scaleToVolume(s32 dist, s32 max, s32 range) {
     return (max - dist) * 127 / range;
