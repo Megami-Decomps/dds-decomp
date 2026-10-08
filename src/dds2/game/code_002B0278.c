@@ -279,7 +279,6 @@ typedef struct MenuContext {
 } MenuContext;
 
 
-extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
 
 extern void effResolveAndReleaseResource(s32);
 
@@ -2058,7 +2057,7 @@ void ptySkillMenuCopyPageState(s32 context) {
     } else {
         window->list->stateFlags &= ~0x10;
     }
-    mnuDrawWindowContainer(0x1190, 0x658, 0, (s32)window, 0x53);
+    mnuDrawWindowContainer(0x1190, 0x658, 0, window, 0x53);
     for (j = 0; j < 4; j++) {
         if (j != index) {
             memcpy(&windows[j]->block, &window->block, sizeof(MenuPanelBlock));
@@ -3396,7 +3395,6 @@ void mnuDrawVisibleWindowIconRows(u32 x, u32 y, u32 flags, MenuWindowContainer *
 void mnuDrawWindowSelectionPanel(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 drawArg);
 
 /* Draw the window, then advance its fade scale without a post-addition clamp. */
-void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, s32 drawArg);
 
 void func_002B9FB8(MenuWindowContainer *window);
 

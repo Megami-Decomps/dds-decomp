@@ -129,6 +129,17 @@ extern void sdfDevWaitThenReleaseCommandState(DevState *);
 
 
 extern MenuWork *fileLoadSelectionWork;
+extern void fileApplyMenuFlagsToModel(MenuWork *);
+extern void fldPrepareDeferredSceneTransition(void);
+extern void fileCopySaveHeaderNumbers(FileRecordHeader *);
+extern void func_002D0AB8(void);
+extern void fileSaveAndDisplayCurrentMoney(void);
+extern s32 func_002D0B08(s32);
+extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
+extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
+extern void mtrMantraEventBitReset(void);
+extern void ptyResetPartyRecordsAndProfiles(void);
+extern u32 kwlnDrawControlFlags;
 
 extern u32 fileWaitTicksRemaining;
 
@@ -3237,9 +3248,67 @@ u32 func_002D0490(void) {
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B8F8);
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D0498);
+void *func_002D0498(void) {
+    s32 i;
 
-extern s32 func_002D0498();
+    if (kwlnDrawControlFlags & 2) {
+        return NULL;
+    }
+    fileSetMenuFlowState(0);
+    D_00437D18 = -1;
+    D_00437D1C = 0;
+    fldPrepareDeferredSceneTransition();
+    if (fileLoadSelectionWork->unk30 == 0) {
+        return func_002D0490;
+    }
+    if (fileLoadSelectionWork->startBranchFlag == 0) {
+        mdlFlagSet(0xB8F);
+        fileCopySaveHeaderNumbers(&fileLoadSelectionWork->header);
+    } else {
+        fileCopyRecordHeader(&fileLoadSelectionWork->header, &datGameState->header);
+    }
+    fileApplyMenuFlagsToModel(fileLoadSelectionWork);
+    func_002D0AB8();
+    fileSaveAndDisplayCurrentMoney();
+    for (i = 0; i < 5; i++) {
+        u16 activeFlag = datGameState->party[i].flags & DAT_PARTY_FLAG_OCCUPIED;
+        if (activeFlag && func_002D0B08(datGameState->party[i].unitId)) {
+            u32 maximumMp;
+            u16 restoredHp;
+            datGameState->party[i].maxHp =
+                datComputeSkillBoostedMaxHp(&datGameState->party[i]);
+            maximumMp = datComputeSkillBoostedMaxMp(&datGameState->party[i]);
+            restoredHp = datGameState->party[i].maxHp;
+            datGameState->party[i].maxMp = maximumMp;
+            datGameState->party[i].hp = restoredHp;
+            datGameState->party[i].mp = maximumMp;
+        }
+    }
+    if (fileLoadSelectionWork->unk31 != 0) {
+        DatGameState *state;
+        u16 startBranchFlag;
+        mdlFlagSet(0x80E);
+        state = datGameState;
+        startBranchFlag = fileLoadSelectionWork->startBranchFlag;
+        state->header.unk2C |= 0x80000000;
+        if (startBranchFlag) {
+            mtrMantraEventBitReset();
+            ptyResetPartyRecordsAndProfiles();
+            func_0035B6E0("scd:hard init\n");
+        }
+    } else {
+        mdlFlagClear(0x80E);
+        datGameState->header.unk2C &= 0x7FFFFFFF;
+    }
+    if (mdlFlagTest(0xB8F)) {
+        mdlFlagClear(0x801);
+        mdlFlagSet(0x81D);
+        mdlFlagSet(0x805);
+        mdlFlagSet(0x806);
+    }
+    return func_002D0490;
+}
+
 
 void *fileBeginFadeAndConfirmSound(void) {
     kwlnFadeInStart(0, 0, 0, 8);
@@ -3313,7 +3382,6 @@ void *fileNextMenuFlowState(void) {
     return fileBeginLoadConfirmationDialog;
 }
 
-extern u32 kwlnDrawControlFlags;
 
 s32 fileResetPendingRequest(void) {
     s32 mode;

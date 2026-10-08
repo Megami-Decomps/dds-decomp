@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_ref_obj.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -91,14 +92,6 @@ typedef struct EffectObjectNode {
 extern EffectObjectNode *effFloorModelListHead;
 
 extern u32 D_003BD058;
-
-/* Reference-counted object header (layout inferred from field accesses). */
-typedef struct RefObj {
-    u8 pad_0x00[0x14]; // 0x00
-    s32 cnt14;         // 0x14
-    s32 unk18;         // 0x18
-    s32 cnt1C;         // 0x1C
-} RefObj; // 0x20
 
 extern s32 D_003BC970[2];
 

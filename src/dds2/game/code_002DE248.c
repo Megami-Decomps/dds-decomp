@@ -1,5 +1,6 @@
 #include "eff_bill.h"
 #include "common.h"
+#include "eff_ref_obj.h"
 #include "sdf_resource.h"
 
 #include "dds3_path.h"
@@ -500,14 +501,6 @@ extern u32 D_00438774;
 extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 extern void *func_002DDAA8(void *);
-
-/* Reference-counted object header (layout inferred from field accesses). */
-typedef struct RefObj {
-    u8 pad_0x00[0x14]; // 0x00
-    s32 refCount;      // 0x14 incremented with the global reference count
-    s32 unk18;         // 0x18
-    s32 cnt1C;         // 0x1C
-} RefObj; // 0x20
 
 extern u32 effSharedTextureReferenceCount;
 
@@ -1087,7 +1080,7 @@ void effSetFadeMapParameter(EffKindWork *work, u32 value) {
 }
 
 u32 effCreateFixedSlotBlurWorkFromFadeOutput(void *source) {
-    return (u32)func_0018EBC8((u8 *)source + 0xC0);
+    return (u32)effBlurCreateScatterWork((EffBlurScatterParams *)((u8 *)source + 0xC0));
 }
 
 void effReleaseFixedSlotBlurWork(s32 handle) {
@@ -1149,7 +1142,7 @@ void effUpdateFadeMapA(EffKindWork *work) {
     out->rateA = func_002D7770(&config->blendB, limit, progress) * 0.01f;
     out->rateB = func_002D7770(&config->rateA.curve, limit, progress) * 0.01f;
     out->param = work->mode;
-    func_0018ECD0((EffBlurScatterWork *)out);
+    effBlurStepScatterSlotsAndDraw((EffBlurScatterWork *)out);
 }
 
 void effSetWideFadeMapParameter(EffKindWork *work, u32 value) {

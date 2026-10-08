@@ -12,6 +12,11 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *page, u16 ability,
 /* Rebuild the five party-panel rows from occupied party records. */
 void mnuInitPartyPanelSlots(PartyPanel *party);
 
+void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *page);
+#ifdef VERSION_DDS1
+void mnuClearListFlags(s32 which, MenuPageWindow *page);
+#endif
+
 #ifdef VERSION_DDS2
 struct MenuPanelState;
 
@@ -22,7 +27,6 @@ void mnuBeginWindowFadeTransition(void *windowAddress, void *work);
 void mnuUpdateAndDrawWindowTransition(s32 x, s32 y, s32 depth,
                                      MenuFadeFields *fade, s32 option);
 void mnuClearActionFlags(s32 kind, MenuPageWindow *page);
-void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *page);
 s32 mnuUseStaffItem(s32 itemId, MenuStaffContext *context);
 void mnuApplyResourceSelection(s32 itemId, MenuStaffContext *context);
 s32 mnuIsStaffWindowReadyForItem(s32 itemId, MenuStaffContext *context);
