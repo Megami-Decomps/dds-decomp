@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "eff.h"
+#include "eff_pcp_flash.h"
 #include "pcp_vu0.h"
 
 /* Work records keep SDF allocation ownership separate from drawable records.
@@ -8,7 +9,6 @@
    scale growth independently of the color fade. */
 
 extern void *effParamTableGetBlock(void *table, s32 index);
-extern PcpFlashTrianglePulseWork *effFlashRecordCreate();
 extern void effReleaseRecordPoolResourceAndBuffer(EffRecordPool *pool);
 extern void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool);
 extern void effReleaseRecordGroupResources(EffRecordPool *pool);
@@ -393,11 +393,11 @@ void effFlashTrianglePulseSpawnFromTable(void *table) {
     void *effectParams;
 
     effectParams = effParamTableGetBlock(table, 0);
-    effFlashRecordCreate(effectParams);
+    effFlashRecordCreate((PcpFlashTrianglePulseParams *)effectParams);
 }
 
-void func_00171E20(void) {
-    effFlashRecordCreate();
+PcpFlashTrianglePulseWork *func_00171E20(PcpFlashTrianglePulseParams *params) {
+    return effFlashRecordCreate(params);
 }
 
 void effFlashTrianglePulseDestroy(PcpFlashTrianglePulseWork *work) {
