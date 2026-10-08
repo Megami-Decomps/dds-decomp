@@ -545,8 +545,9 @@ extern void mnuDrawMantraSprite(s32, s32, s32, s32, s32, s32, s32);
 extern s32 mnuDrawLoadedProgressPanels(DatPartyRecord *, MenuProgressHost *, s32);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16, u32);
 extern void mnuDrawCurrentProfilePanel(s32, s32, s32, MenuProgressHost *, s32);
-extern s8 evtStageTestUpdate(s32);
-extern u8 D_00380818[];
+struct SdfPoolNode;
+extern s8 evtStageTestUpdate(struct SdfPoolNode **);
+extern struct SdfPoolNode *D_00380818[4];
 
 s32 func_00288158(void) {
     MnuStatusResource *work = (MnuStatusResource *)sdfGetTaskValueByKey((struct TaskWork *)mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
@@ -572,7 +573,7 @@ s32 func_00288158(void) {
         work->flags.profileReady = 1;
     }
     mnuDrawCurrentProfilePanel(0xE80, 0x5B8, 1, work->progressHost, 0x53);
-    if (evtStageTestUpdate((s32)D_00380818) >= 2) {
+    if (evtStageTestUpdate(D_00380818) >= 2) {
         work->flags.fadeProgress = 1;
     }
     return 0;

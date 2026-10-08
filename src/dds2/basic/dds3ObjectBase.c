@@ -352,23 +352,14 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32 arg);
 extern void func_00108D80(void);
 extern void func_00108E20(void);
 extern void evtSubmitGradientRectAtDepth();
-extern void mdlProcessContextNodesAndTransforms(void *context, const void *state);
-extern s32 D_00380818[4];
-
-typedef struct ObjRenderContextInner {
-    u8 pad00[0x19];
-    u8 flags19;
-} ObjRenderContextInner;
-
-typedef struct ObjRenderContext {
-    u8 pad00[0x18];
-    ObjRenderContextInner *inner;
-} ObjRenderContext;
+struct SdfPoolNode;
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
+extern struct SdfPoolNode *D_00380818[4];
 
 void func_00112328(void *object) {
     ObjBase *base;
-    ObjRenderContext *context;
-    ObjRenderContextInner *inner;
+    MdlCtx *context;
+    SdfModel *inner;
 
     base = dds3GetObjectOwnedHandle(object);
     evtSetDrawSurfaceIndex(0x4A);
@@ -384,11 +375,11 @@ void func_00112328(void *object) {
     evtSubmitPrimaryGsTest(1, 1, 0x80, 2, 0, 0, 1, 1);
     func_00108D80();
 
-    context = (ObjRenderContext *)base->resourceHandle;
+    context = (MdlCtx *)base->resourceHandle;
     inner = context->inner;
-    inner->flags19 |= 0x20;
+    inner->flags |= 0x20;
     mdlProcessContextNodesAndTransforms(context, D_00380818);
-    inner->flags19 &= ~0x20;
+    inner->flags &= ~0x20;
     dds3SetObjectFlags(object, 0x10000);
 
     evtSetDrawSurfaceIndex(0x4E);
