@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
+#include "par_draw_block.h"
 #include "eff.h"
 
 #include "pcp_vu0.h"
@@ -1603,35 +1604,28 @@ void func_0015D0C0(void) {
     D_003BB014 = NULL;
 }
 
-typedef struct ParBlock {
-    s32 count;       /* 0x00 */
-    u32 color;       /* 0x04 */
-    u128 *positions; /* 0x08: vertex quadword buffer */
-    u32 *colors;     /* 0x0C: one color per vertex */
-    s32 object;      /* 0x10 */
-    s32 handle;      /* 0x14 */
-} ParBlock;
+
 
 ParBlock *parAllocateDrawBlock(s32 count) {
     s32 points = count * 3;
     s32 colorBytes = points * 4;
-    s32 handle = (u32)sdfAllocGeneralBlock((colorBytes + points) * 4 + 0x18);
-    s32 base = sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock((colorBytes + points) * 4 + 0x18);
+    s32 base = sdfResourceRetainAddress(allocation);
     u8 *vertices = (u8 *)base + points * 16;
     ParBlock *block = (ParBlock *)(vertices + colorBytes);
     block->color = 0x80808080;
     block->count = count;
     block->colors = (u32 *)vertices;
-    block->handle = handle;
+    block->allocation = allocation;
     block->positions = (u128 *)base;
-    block->object = (s32)sdfCreateAssetWithDrawEntries();
-    func_002DA420(block->object, 1.0f);
+    block->asset = sdfCreateAssetWithDrawEntries();
+    func_002DA420((s32)block->asset, 1.0f);
     return block;
 }
 
 void parReleaseDrawBlock(ParBlock *block) {
-    sdfQueueAssetRelease((SdfAsset *)block->object);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(block->handle));
+    sdfQueueAssetRelease(block->asset);
+    sdfReleaseResourceAllocation(block->allocation);
 }
 
 
