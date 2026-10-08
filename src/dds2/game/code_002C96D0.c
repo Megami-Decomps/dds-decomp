@@ -29,11 +29,11 @@ extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32,
 
 typedef struct MenuWork {
     FileSavePreviewRecord header;
-    s8 unk30;
-    s8 unk31;
-    u16 unk32;
+    s8 applyLoadResult;
+    s8 hardInitSelected;
+    u16 flowConditionMask;
     u16 startBranchFlag; /* 0x34: selects one of two initial menu flows */
-    u16 unk36;
+    u16 flowRowCursor;
     u16 unk38;
     u16 unk3A;
     struct SdfMemBlock *unk3C;
@@ -3213,7 +3213,7 @@ s32 func_002D0498(void) {
     D_00437D18 = -1;
     D_00437D1C = 0;
     fldPrepareDeferredSceneTransition();
-    if (fileLoadSelectionWork->unk30 == 0) {
+    if (fileLoadSelectionWork->applyLoadResult == 0) {
         return (s32)func_002D0490;
     }
     if (fileLoadSelectionWork->startBranchFlag == 0) {
@@ -3239,7 +3239,7 @@ s32 func_002D0498(void) {
             datGameState->party[i].mp = maximumMp;
         }
     }
-    if (fileLoadSelectionWork->unk31 != 0) {
+    if (fileLoadSelectionWork->hardInitSelected != 0) {
         DatGameState *state;
         u16 startBranchFlag;
         mdlFlagSet(0x80E);
@@ -3272,27 +3272,27 @@ s32 fileBeginFadeAndConfirmSound(void) {
 }
 
 
-s32 func_002D06B0(void) {
-    fileLoadSelectionWork->unk31 = 0;
+s32 fileSelectLoadWithoutHardInit(void) {
+    fileLoadSelectionWork->hardInitSelected = 0;
     return fileBeginFadeAndConfirmSound();
 }
 
-s32 func_002D06D0(void) {
-    fileLoadSelectionWork->unk31 = 1;
+s32 fileSelectLoadWithHardInit(void) {
+    fileLoadSelectionWork->hardInitSelected = 1;
     return fileBeginFadeAndConfirmSound();
 }
 
 s32 fileBeginLoadBranchDialog(void) {
     fileSetMenuFlowState(0);
     D_00437D1C = 12;
-    return fileBeginFourWayDialog((u32)func_002D06B0, (u32)func_002D06D0, 0, 0);
+    return fileBeginFourWayDialog((u32)fileSelectLoadWithoutHardInit, (u32)fileSelectLoadWithHardInit, 0, 0);
 }
 
 s32 fileStartLoadDetectionAfterBranchDialog(void) {
     D_00437D18 = -1;
     D_00437D1C = 0;
     fileSetMenuFlowState(0x18);
-    fileLoadSelectionWork->unk30 = 1;
+    fileLoadSelectionWork->applyLoadResult = 1;
     return fileCreateDetectionAudioCallback((u32)fileBeginLoadBranchDialog);
 }
 
@@ -3324,12 +3324,12 @@ typedef struct FileFlowEntry {
 extern FileFlowEntry D_003E7FC8[];
 
 s32 fileNextMenuFlowState(void) {
-    while (fileLoadSelectionWork->unk36 < 4) {
+    while (fileLoadSelectionWork->flowRowCursor < 4) {
         MenuWork *work = fileLoadSelectionWork;
-        u32 index = work->unk36;
+        u32 index = work->flowRowCursor;
 
-        work->unk36 = index + 1;
-        if (D_003E7FC8[index].mask & work->unk32) {
+        work->flowRowCursor = index + 1;
+        if (D_003E7FC8[index].mask & work->flowConditionMask) {
             fileSetMenuFlowState(D_003E7FC8[index].state);
             return (s32)fileWaitForLoadStepBeforeDetection;
         }
@@ -3358,7 +3358,7 @@ s32 fileFadeBeforeResettingRequest(void) {
 s32 fileBeginLoadOrAbortDialog(void) {
     fileSetMenuFlowState(0);
     D_00437D1C = 10;
-    fileLoadSelectionWork->unk30 = 0;
+    fileLoadSelectionWork->applyLoadResult = 0;
     return fileBeginFourWayDialog((u32)fileRestartSelectionFlow, (u32)fileBeginFadeAndConfirmSound, (u32)fileFadeBeforeResettingRequest, 0);
 }
 
@@ -3369,7 +3369,7 @@ s32 mcdContinueLoadSelection(void) {
     if (state != 0) {
         if (state == 2) {
             block = fileLoadSelectionWork;
-            block->unk36 = 0;
+            block->flowRowCursor = 0;
             fileApplyMenuFlagsToModel(block);
             sndSetSequenceVolumePan(8, 0x7f, 0x3f);
             next = (s32)fileNextMenuFlowState;
@@ -3394,7 +3394,7 @@ s32 fileMenuWorkStart(void) {
     if (fileLoadSelectionWork->startBranchFlag == 0) {
         return (s32)fileBeginLoadOrAbortDialog;
     }
-    fileLoadSelectionWork->unk30 = 1;
+    fileLoadSelectionWork->applyLoadResult = 1;
     return fileBeginLoadBranchDialog();
 }
 
@@ -3406,11 +3406,11 @@ void fileMenuWorkCreate(u32 startBranchFlag) {
     fileLoadSelectionWork = (MenuWork *)sdfResourceRetainAddress(buffer);
     memset(fileLoadSelectionWork, 0, 0x40);
     work = fileLoadSelectionWork;
-    work->unk30 = 0;
+    work->applyLoadResult = 0;
     work->unk3C = buffer;
     work->startBranchFlag = startBranchFlag;
     work->unk38 = 0;
-    fileLoadSelectionWork->unk31 = 0;
+    fileLoadSelectionWork->hardInitSelected = 0;
 }
 
 void fileReleaseMenuFlowResource(void) {
@@ -3467,17 +3467,17 @@ void fileApplyMenuFlagsToModel(MenuWork *work) {
     }
     for (i = 0; i < 5; i++) {
         if (mdlFlagTest(D_003E8CE8[i].flag)) {
-            work->unk32 |= 2;
+            work->flowConditionMask |= 2;
             break;
         }
     }
     for (i = 0; i < 0x18; i++) {
         if (mdlFlagTest(D_003E8D10[i].flag)) {
-            work->unk32 |= 4;
+            work->flowConditionMask |= 4;
             break;
         }
     }
-    work->unk32 |= 9;
+    work->flowConditionMask |= 9;
 }
 
 s32 fileLoadStateChanged(void) {
