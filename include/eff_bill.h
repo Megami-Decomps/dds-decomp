@@ -163,6 +163,8 @@ typedef struct EffBillCellConfig {
     u8 pad89[3];
 } EffBillCellConfig; /* kind 2, 0x8C */
 
+struct RefObj;
+
 /* Track-set allocations end with this 0x30-byte header. Kind selects the
  * geometry and optional column strides; tail follows the geometry buffer. */
 typedef struct EffTrackSet {
@@ -174,19 +176,19 @@ typedef struct EffTrackSet {
     s32 count;
     u8 flag;
     u8 pad15[3];
-    void *shared;
+    struct RefObj *shared;
     u8 *buffer;
     u8 *columns;
     u8 *tail;
     s32 *handle;
-    u8 *allocation;
+    struct SdfMemBlock *allocation;
 } EffTrackSet;
 
 /* Resource kinds 1..8 allocate sixteen bytes before their entry array. */
 typedef struct EffBillFrameState {
     u8 *entries;
     EffTrackSet *asset;
-    u32 allocation;
+    struct SdfMemBlock *allocation;
     u32 unk0C;
 } EffBillFrameState;
 
