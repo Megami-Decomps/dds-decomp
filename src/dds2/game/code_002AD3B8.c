@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_staff.h"
@@ -60,7 +61,6 @@ extern char D_003E7514[];
 extern char D_003E7530[];
 extern char D_003E7434[];
 extern char D_003E7488[];
-extern s32 mnuMapPadMaskToFlags(s32);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern s32 mnuUpdateStaffEntrySelectionFlags(s32, s32, MenuStaffContext *);
 extern u32 mnuSetPartyEntryCurrentId(DatPartyRecord *, u32);

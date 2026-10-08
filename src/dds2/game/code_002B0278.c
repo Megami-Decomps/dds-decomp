@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "sdf_resource.h"
@@ -156,10 +157,6 @@ extern void mnuHandlePanelListPageJumpInput();
 extern char D_003E7758[];
 
 extern s32 ptySkillMenuApplyFieldUseAndCost();
-
-extern u32 mnuMapPadMaskToFlags();
-
-
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 

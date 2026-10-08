@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "mnu.h"
 #include "sdf_resource.h"
 #include "mnu_list.h"
@@ -1677,8 +1678,6 @@ void mnuClearListFlags(s32 which, MenuPageWindow *menu) {
         menu->flags &= ~0x20;
     }
 }
-
-extern u32 mnuMapPadMaskToFlags(u32);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
