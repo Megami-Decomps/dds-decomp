@@ -1064,7 +1064,93 @@ f32 evtGetShortestAngleDelta(f32 fromDegrees, f32 toDegrees) {
     return toDegrees - fromDegrees;
 }
 
-INCLUDE_ASM(const s32, "game/code_00222AC0", func_00224CD8);
+extern void effObjFetchInnerFirstVec(EffWorldNode *object);
+extern void effObjFetchInnerSecondVecNorm(EffWorldNode *object);
+extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
+extern f32 sdfAtan2(f32 y, f32 x);
+
+u32 func_00224CD8(void) {
+    EvtUnit *unit;
+    EffWorldNode *actor;
+    EffWorldNode *source;
+    f32 *sourceVector;
+    f32 rotation[4] __attribute__((aligned(16)));
+    f32 actorPosition[4] __attribute__((aligned(16)));
+    f32 sourcePosition[4] __attribute__((aligned(16)));
+    f32 referenceAngle;
+    f32 targetAngle;
+    f32 angleDelta;
+    s32 frames;
+
+    unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
+    if (unit == NULL) {
+        return 1;
+    }
+    unit->motionTicks = 0;
+
+    actor = (EffWorldNode *)dds3FindWorldObjectNodeByKey(
+        dds3GetWorldObject(), scrReadIntParameter(0), 5);
+    if (actor == NULL) {
+        return 1;
+    }
+    source = (EffWorldNode *)dds3FindWorldObjectNodeByKey(
+        dds3GetWorldObject(), scrReadIntParameter(1), 0x11);
+    if (source == NULL) {
+        return 1;
+    }
+
+    sourceVector = (f32 *)source->data;
+    effObjFetchInnerFirstVec(actor);
+    VU0_STORE_VF(vf10, actorPosition);
+    PCP_COPY_VECTOR_F32(sourcePosition, sourceVector);
+
+    if ((unit->unkD8Flags & 1) == 0) {
+        effObjFetchInnerSecondVecNorm(actor);
+        referenceAngle = effMiscComputeQuaternionRotatedReferenceAngle();
+        unit->unkD8Flags |= 1;
+        unit->unkDC = -(referenceAngle * 57.29577637f);
+    }
+
+    targetAngle = sdfAtan2(actorPosition[0] - sourcePosition[0],
+                           actorPosition[2] - sourcePosition[2]) * 57.32484055f;
+    angleDelta = evtGetShortestAngleDelta(unit->unkDC, targetAngle);
+    if (angleDelta < -135.0f) {
+        targetAngle -= angleDelta + 135.0f;
+        angleDelta = -135.0f;
+    } else if (angleDelta > 135.0f) {
+        targetAngle -= angleDelta - 135.0f;
+        angleDelta = 135.0f;
+    }
+    targetAngle -= (angleDelta + angleDelta) / 3.0f;
+
+    func_002E7F20(0.0f, targetAngle * 0.017453293f, 0.0f);
+    /* First write to this output vector; the SDK store touches only it. */
+    VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+
+    frames = scrReadIntParameter(2);
+    if (frames >= 101) {
+        frames = 100;
+    }
+    angleDelta = evtGetShortestAngleDelta(unit->unkDC, targetAngle);
+    if (angleDelta < 0.0f) {
+        angleDelta = -angleDelta;
+    }
+    if (angleDelta > 90.0f) {
+        angleDelta = 90.0f;
+    }
+    frames = (frames * (s32)angleDelta) / 90;
+    if (frames <= 0) {
+        frames = 1;
+    }
+    if (frames > 100) {
+        frames = 100;
+    }
+
+    evtBeginVectorTransition(unit, (s128 *)rotation, frames);
+    evtArmEffectObjectPendingValue(actor, source->key);
+    return 1;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_00222AC0", func_00224F48);
 
