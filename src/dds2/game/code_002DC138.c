@@ -8,6 +8,7 @@
 #include "sdf.h"
 #include "sdf_texture_file.h"
 #include "sdf_chunk.h"
+#include "eff_expanded_list.h"
 
 typedef struct EffModelOwner {
     f32 scale;
@@ -68,7 +69,7 @@ extern u32 D_00437E38;
 
 extern u32 D_00437E3C;
 
-extern u32 func_002DDF48(u32);
+extern struct EffExpandedList *func_002DDF48(u32);
 
 extern u32 effCloneSharedReferenceWithValue(u32, u32);
 
@@ -862,14 +863,14 @@ s32 effCountExpandedEntries(void *work) {
 
 INCLUDE_ASM(const s32, "game/code_002DC138", func_002DDF48);
 
-void effReleaseReferenceHolder(u32 *holder) {
+void effReleaseReferenceHolder(EffExpandedList *holder) {
     u32 i;
 
-    if (--((EffExpandedList *)holder)->refCount == 0) {
-        for (i = 0; i < ((EffExpandedList *)holder)->count; i++) {
-            effReleaseSharedReference(((EffExpandedList *)holder)->handles[i]);
+    if (--holder->refCount == 0) {
+        for (i = 0; i < holder->count; i++) {
+            effReleaseSharedReference(holder->handles[i]);
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)((EffExpandedList *)holder)->buffer);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)holder->buffer);
     }
 }
 

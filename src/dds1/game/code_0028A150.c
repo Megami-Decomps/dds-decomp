@@ -9,6 +9,7 @@
 #include "fpu.h"
 #include "mnu_list.h"
 #include "kwln_task_lifecycle.h"
+#include "eff_expanded_list.h"
 struct SdfTex;
 struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
@@ -126,7 +127,7 @@ typedef struct FileRecordType {
     s32 dataBytes;
 } FileRecordType;
 
-extern u32 func_0029C230(u32);
+extern struct EffExpandedList *func_0029C230(u32);
 
 extern void *fileDuplicateJob(void *);
 
@@ -484,7 +485,6 @@ extern void *fileAllocateGridRecordSlots(u16 type, u32 count, void *src);
 
 extern void *billCloneObjectRetainingSharedData(void *handle);
 
-extern void *effReferenceObjectRetain(void *holder);
 
 /* Init record at fileCursorPulseState. */
 typedef struct Init374E0 {
@@ -535,7 +535,7 @@ typedef struct LoadObj {
     void *deviceHandle; /* 0x34 */
     u32 unk38;          /* 0x38 */
     u32 unk3C;          /* 0x3C */
-    void *referenceHolder; /* 0x40: released by effReleaseReferenceHolder */
+    struct EffExpandedList *referenceHolder; /* 0x40 */
     void *recordWork;     /* 0x44: created by fileAllocateGridRecordSlots */
     s16 unk48;          /* 0x48 */
     u16 unk4A;
@@ -4989,7 +4989,7 @@ void effLoadObjectDestroy(LoadObj *obj) {
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(obj->unk3C));
     }
     if (obj->referenceHolder != NULL) {
-        effReleaseReferenceHolder((s32)obj->referenceHolder);
+        effReleaseReferenceHolder(obj->referenceHolder);
     }
     if (obj->recordWork != NULL) {
         fileReleaseGridRecordHandle((s32)obj->recordWork);
@@ -5051,7 +5051,7 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
     }
     case 7:
         if (dst->referenceHolder != NULL) {
-            effReleaseReferenceHolder((s32)dst->referenceHolder);
+            effReleaseReferenceHolder(dst->referenceHolder);
         }
         dst->referenceHolder = effReferenceObjectRetain(src->referenceHolder);
         break;
@@ -5129,13 +5129,13 @@ void fileReplaceEffectSurfaceJobs(LoadObj *obj, FileJobPayload *job) {
 }
 
 void fileReplaceReferenceHolder(LoadObj *obj, u32 resource) {
-    u32 holder;
+    struct EffExpandedList *holder;
 
     if (obj->referenceHolder != NULL) {
-        effReleaseReferenceHolder((s32)obj->referenceHolder);
+        effReleaseReferenceHolder(obj->referenceHolder);
     }
     holder = func_0029C230(resource);
-    obj->referenceHolder = (void *)holder;
+    obj->referenceHolder = holder;
 }
 
 void fileClearLoadObjectReferences(LoadObj *obj) {
