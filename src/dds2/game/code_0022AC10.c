@@ -144,7 +144,7 @@ extern u8 D_00380860[];
 
 extern u8 D_00380870[];
 
-extern s32 kwlnHeldTextureReference;
+extern SdfTex *kwlnHeldTextureReference;
 
 extern void sdfFreeMemoryFromEitherHeap(void *);
 
@@ -162,7 +162,7 @@ extern void sdfCreateDescriptorPacket(SdfListHead *list, s32 descriptorAddress,
                                       s32 arg2, s32 arg3, s32 arg4, s32 arg5,
                                       s32 imageAddress, s32 (*allocatePacket)(s32));
 
-extern void kwlnCreateHeldTextureBuffer(s32, s32, f32);
+extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
 
 extern s32 kwlnTextureSetReferenceFlagIfPresent(void);
 
@@ -1261,7 +1261,7 @@ s32 btlReleaseEntryIfReady(s32 kind, s32 id) {
 
 INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022CD60);
 
-extern s32 sdfConsCreateDrawPacket(s32, s32, s32);
+extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern void sdfQueueTexturedQuad(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
                                  s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 
@@ -1277,7 +1277,7 @@ void func_0022CE30(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
     s32 horizontal[4];
     s32 vertical[4];
 
-    sdfConsCreateDrawPacket(list, kwlnHeldTextureReference, (primitive >> 9) & 1);
+    sdfConsCreateDrawPacket((SdfListHead *)list, kwlnHeldTextureReference, (primitive >> 9) & 1);
     halfWidth = 0x1000;
     halfHeight = 0x700;
     xOffset = (s32)((f32)halfWidth * scale);
@@ -1412,7 +1412,7 @@ void btlInitializeGraphicsRuntime(void) {
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
     SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
-    sdfCreateDescriptorPacket(packetList, (s32)((SdfTex *)kwlnHeldTextureReference)->primaryResource,
+    sdfCreateDescriptorPacket(packetList, (s32)kwlnHeldTextureReference->primaryResource,
                               0, 0, 0x200, 0xe0, (s32)runtime->resource, 0);
     D_00380608.append((SdfListHead *)&D_00380608, packetList);
     sdfQueueNonzeroResourceId(runtime->handle);
@@ -1425,7 +1425,7 @@ void btlInitializeOverlayGraphics(void) {
     SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
     SdfLinkedPacketList *context = (SdfLinkedPacketList *)sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);
-    sdfCreateGraphBufferCopyPacket(packetList, context, ((SdfTex *)kwlnHeldTextureReference)->primaryResource, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
+    sdfCreateGraphBufferCopyPacket(packetList, context, kwlnHeldTextureReference->primaryResource, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfAppendPacketChainNode((SdfPacketChain *)D_00380860, context);
     D_00380608.append((SdfListHead *)&D_00380608, packetList);
     btlRuntimeState.options |= 1;
