@@ -214,9 +214,46 @@ void ptyMarkPresetSkillPool(DatPartyRecord *unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002CC750", ptyRebuildProfileSkills);
+extern void ptyApplyProfile(DatPartyRecord *, u16);
+extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
+extern s32 prfBuildRawSkillList(u16, PrfSkillList *);
+extern s32 scrSetFlag(DatPartyRecord *, u16);
+extern void scrSetSecondaryScriptFlag(DatPartyRecord *, u16);
+extern void scrClearFlags(DatPartyRecord *);
 
-void ptyRebuildProfileSkills(s32 useCurrentProfile, DatPartyRecord *unit);
+/* Rebuild skill flags from the preset (no current profile) or from the current profile. */
+void ptyRebuildProfileSkills(s32 useCurrentProfile, DatPartyRecord *unit) {
+    PrfSkillList skillList;
+    s32 profileId;
+    u16 profile;
+    u32 skillIndex;
+    u16 skillId;
+
+    ptyApplyProfilePreset(useCurrentProfile, unit);
+    if (useCurrentProfile == 0) {
+        ptyLoadPresetSkillSlots(unit);
+        ptyMarkPresetSkillPool(unit);
+        ptyRecomputeMaxHpMp(unit);
+        unit->hp = unit->maxHp;
+        unit->mp = unit->maxMp;
+    } else {
+        profileId = ptyGetCurrentProfileId(unit);
+        if (profileId != 0) {
+            profile = (u16)profileId;
+            ptyApplyProfile(unit, profile);
+            memset(&skillList, 0, sizeof(PrfSkillList));
+            prfBuildRawSkillList(profile, &skillList);
+            if (skillList.count != 0) {
+                scrClearFlags(unit);
+                for (skillIndex = 0; skillIndex < skillList.count; skillIndex++) {
+                    skillId = skillList.skills[skillIndex];
+                    scrSetFlag(unit, skillId);
+                    scrSetSecondaryScriptFlag(unit, skillId);
+                }
+            }
+        }
+    }
+}
 
 /* Rebuild skill lists for the five occupied party slots. */
 void ptyRebuildAllProfiles(void) {
@@ -346,7 +383,6 @@ u32 sdfSetFlagBySlotId(DatPartyRecord *unit, u32 slotId) {
     return 0;
 }
 
-extern void ptyApplyProfile(DatPartyRecord *, u16);
 INCLUDE_ASM(const s32, "game/code_002CC750", ptyApplyProfile);
 
 s32 ptyTestProfileFlag0(DatPartyRecord *work, u16 id) {

@@ -63,7 +63,7 @@ extern void mnuDrawWindowSprites();
 
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 
-extern s32 func_002CD240(s32, s32 *);
+extern s32 func_002CD240(s32, u8 **);
 
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 
@@ -1864,7 +1864,7 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 p
 
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, MenuPageSlot *unusedSlot,
                      s32 partyIndex, s32 param) {
-    s32 outValue;
+    u8 *outValue;
     s32 profileId = ptyGetCurrentProfileId(&datGameState->party[partyIndex]);
     s32 code;
     s32 color;
@@ -1877,7 +1877,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
             mnuDrawCenteredLabel(0x1120, 0x5F0, depth, color, code, param);
             return;
         }
-        glyph = itfCreateConvertedTextGlyph(0, 0, depth, color, (const u8 *)outValue, 0);
+        glyph = itfCreateConvertedTextGlyph(0, 0, depth, color, outValue, 0);
         func_00196088(0x1710, 0x5F0, glyph);
         func_001958A0(glyph, 1, param);
         frFontQueueGlyphInSelectedSlot(glyph);
