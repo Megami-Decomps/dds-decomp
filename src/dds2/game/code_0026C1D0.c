@@ -760,7 +760,41 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D710);
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D7E8);
 
-INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D988);
+/* The sixth work stores the combined availability state for the five profiles. */
+void func_0026D988(EvtMantraWork **selectionWorks) {
+    EvtMantraNodePositionRecord *node;
+    u16 *combinedEntry;
+    s32 recordCount;
+    s32 remaining;
+    s32 profileIndex;
+
+    node = (EvtMantraNodePositionRecord *)mnuMantraNodePositionTable->recordsAddress;
+    combinedEntry = selectionWorks[5]->entries;
+    recordCount = (s32)mnuGetMantraNodePositionRecordCount();
+    if (recordCount <= 0) {
+        return;
+    }
+    remaining = recordCount;
+    do {
+        if (node->id != 0) {
+            profileIndex = 0;
+            while (selectionWorks[profileIndex] != NULL && profileIndex < 5) {
+                u16 *profileEntries = selectionWorks[profileIndex]->entries;
+                if ((u16)((profileEntries[node->id] >> 8) & 1)) {
+                    *combinedEntry = (*combinedEntry & 0xFF0F) | 0x10;
+                    break;
+                }
+                if (((*combinedEntry & 0xF0) >> 4) != 1) {
+                    *combinedEntry = (*combinedEntry & 0xFF0F) | 0x20;
+                }
+                profileIndex++;
+            }
+        }
+        remaining--;
+        combinedEntry++;
+        node++;
+    } while (remaining != 0);
+}
 
 extern s32 prfGetIndexedProfileByte(s32, s32);
 /* Scan the low-halfword entry id's five attributes into caller-owned summary words.
