@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_resource.h"
+#include "sdf_chip.h"
 #include "eff_curve.h"
 #include "file.h"
 #include "file_slot.h"
@@ -605,7 +606,6 @@ extern s32 mcPollWithExtendedErrors(void);
 
 extern s32 mcPollNormalizedCommandStatus(void);
 
-extern void sdfReleaseChipBlock();
 
 extern f32 fileSaveHighlightPhase;
 
@@ -4743,7 +4743,7 @@ FileJob *fileJobCreate(void) {
 }
 
 void fileDestroyJob(FileJob *job) {
-    sdfReleaseChipBlock();
+    sdfReleaseChipBlock(job);
 }
 
 FileQueue *fileCloneQueueEntries(FileQueue *source) {
