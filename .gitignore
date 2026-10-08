@@ -20,6 +20,7 @@ orig/*/
 /objdiff.json
 /report.json
 /report.json.raw
+/report.json.proof.json
 /ctx.c
 /nonmatchings/
 /permuter/
