@@ -57,7 +57,30 @@ void evtInitializeVisualData(SolarOverlayWork *overlay) {
     noise->unk0E = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0022A248", evtUpdateSolarPhaseTransition);
+/* Restart the transition timer when the solar phase changes; count it down afterwards. */
+void evtUpdateSolarPhaseTransition(SolarOverlayWork *overlay) {
+    SolarOverlayState *state = &overlay->state;
+    u8 solarPhase;
+    u32 flags;
+    s32 remaining;
+
+    solarPhase = evtGetSolarPhase();
+    if (state->solarPhase != solarPhase) {
+        flags = state->flags;
+        state->transitionTimer = 20;
+        state->solarPhase = solarPhase;
+        state->flags = flags | 1;
+        evtSetSolarPointActiveCount(overlay, evtGetMirroredSolarPhase());
+    }
+    remaining = state->transitionTimer;
+    if (remaining != 0) {
+        remaining--;
+        state->transitionTimer = remaining;
+        if (remaining == 0) {
+            state->flags &= ~1;
+        }
+    }
+}
 
 /* Advance the fade and draw with scaled alpha; renderContext is forwarded unchanged. */
 void evtAdvanceSolarOverlayFadeAndDraw(s32 x, s32 y, s32 z, s32 alpha, SolarOverlayWork *overlay, s32 renderContext) {

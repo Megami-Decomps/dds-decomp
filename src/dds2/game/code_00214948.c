@@ -266,7 +266,7 @@ extern void func_001E3108(void *, f32 *);
 
 extern void btlSetUnitPosition(BtlUnit *, f32 *);
 
-extern s32 btlIsUnitDefeatTriggeredByValueDelta(s32, s32);
+extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
 
 extern s32 btlIsActiveActor();
 
@@ -1426,11 +1426,11 @@ void func_00218250(void) {
     *(u32 *)((BattleWork *)battle)->sub = 0;
 }
 
-void btlClaimCommandSlot(ActionUnit *unit, u32 *entry) {
-    ActionUnit **state;
+void btlClaimCommandSlot(BtlUnit *unit, u32 *entry) {
+    BtlUnit **state;
 
     if (unit->flags & 0x400) {
-        state = (ActionUnit **)((BattleActionScene *)btlGetRuntime())->state;
+        state = (BtlUnit **)((BattleActionScene *)btlGetRuntime())->state;
         entry[0x28 / 4] &= ~1;
         entry[0x28 / 4] &= ~2;
         if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0)) {
@@ -2018,11 +2018,11 @@ void btlClearSubtaskHandle(void) {
     work->sub->task = 0;
 }
 
-void btlClaimCommandSlotAndTarget(ActionUnit *unit, u32 *entry) {
-    ActionUnit **state;
+void btlClaimCommandSlotAndTarget(BtlUnit *unit, u32 *entry) {
+    BtlUnit **state;
 
     if (unit->flags & 0x400) {
-        state = (ActionUnit **)((BattleActionScene *)btlGetRuntime())->state;
+        state = (BtlUnit **)((BattleActionScene *)btlGetRuntime())->state;
         entry[0x28 / 4] &= ~1;
         entry[0x28 / 4] &= ~2;
         if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0)) {
@@ -4091,11 +4091,11 @@ u32 btlTickAction19A(ActionUnit *unit) {
     return 0;
 }
 
-s32 btlSelectMarkedActorAndClearEntryFlags(ActionUnit *unit, u32 *entry) {
-    ActionUnit **state;
+s32 btlSelectMarkedActorAndClearEntryFlags(BtlUnit *unit, u32 *entry) {
+    BtlUnit **state;
 
     if (unit->flags & 0x400) {
-        state = (ActionUnit **)((BattleActionScene *)btlGetRuntime())->state;
+        state = (BtlUnit **)((BattleActionScene *)btlGetRuntime())->state;
         entry[0x28 / 4] &= ~1;
         entry[0x28 / 4] &= ~2;
         if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0)) {
@@ -4642,11 +4642,11 @@ void btlApplySpecialActionRenderGroup(ActionUnit *unit, u32 group, f32 opacity) 
     }
 }
 
-void btlPrepareSpecialActionSelection(ActionUnit *unit, u32 *entry) {
+void btlPrepareSpecialActionSelection(BtlUnit *unit, u32 *entry) {
     u8 *state;
 
     if (unit->flags & 0x400) {
-        if (unit->mode != 0x121) {
+        if (unit->partyRecord.unitId != 0x121) {
             state = ((BattleActionScene *)btlGetRuntime())->state;
             entry[0x28 / 4] &= ~1;
             entry[0x28 / 4] &= ~2;
