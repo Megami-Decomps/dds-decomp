@@ -2667,10 +2667,10 @@ u32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
         return 1;
     }
     switch (datCommandRecords[args->category].costMode) {
-    case 1:
+    case DAT_COMMAND_COST_MODE_HP:
         btlAdjustUnitHp(&unit->partyRecord, -args->amount);
         return 1;
-    case 2:
+    case DAT_COMMAND_COST_MODE_MP:
         btlAdjustUnitMp(&unit->partyRecord, -args->amount);
         return 1;
     default:

@@ -434,7 +434,7 @@ s32 datCalculateCommandBaseValue(DatPartyRecord *entry, s32 value) {
 
     value = 0;
     switch (commands[commandId].costMode) {
-    case 1:
+    case DAT_COMMAND_COST_MODE_HP:
         if (entry->flags & 0x20) {
             return 0;
         }
@@ -444,7 +444,7 @@ s32 datCalculateCommandBaseValue(DatPartyRecord *entry, s32 value) {
             value = 1;
         }
         break;
-    case 2:
+    case DAT_COMMAND_COST_MODE_MP:
         if ((entry->flags & 0x20) &&
             (datEnemyRecords[entry->unitId].flags & 0x10)) {
             return 0;

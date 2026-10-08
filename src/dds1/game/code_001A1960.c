@@ -387,12 +387,12 @@ s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *arg0, s32 arg1) {
     }
     scale = 1.0f;
     switch (datCommandRecords[arg1].costMode) {
-    case 1:
+    case DAT_COMMAND_COST_MODE_HP:
         if (btlCheckSpecialAbility(arg0, 0x234)) {
             scale = datAbilityParameters[0x234 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         break;
-    case 2:
+    case DAT_COMMAND_COST_MODE_MP:
         if (btlCheckSpecialAbility(arg0, 0x235)) {
             scale = datAbilityParameters[0x235 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
@@ -414,7 +414,7 @@ s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
         return 0;
     }
     if (datCommandRecords[command].kind == 1 ||
-        datCommandRecords[command].costMode == 2) {
+        datCommandRecords[command].costMode == DAT_COMMAND_COST_MODE_MP) {
         if ((unit->partyRecord.status & 0x7FFF) == 0x10) {
             return 3;
         }
@@ -437,7 +437,7 @@ s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
 
     cost = btlApplyCommandAbilityMultiplier(&unit->partyRecord, command);
     switch (datCommandRecords[command].costMode) {
-    case 1:
+    case DAT_COMMAND_COST_MODE_HP:
         if ((datCommandRecords[command].flags & 8) == 0) {
             if (cost >= unit->partyRecord.hp) {
                 result = 1;
@@ -446,7 +446,7 @@ s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
             result = 1;
         }
         break;
-    case 2:
+    case DAT_COMMAND_COST_MODE_MP:
         result = unit->partyRecord.mp < cost ? 2 : 0;
         break;
     }
@@ -613,7 +613,7 @@ s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *targets) {
             index = action->indexWork.skillId;
         }
         if (datCommandRecords[index].unk_08 == 0 &&
-            datCommandRecords[index].attribute.parts.kind == 2 &&
+            datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_FLAG_MASK &&
             datCommandRecords[index].attribute.parts.flagMask != 0) {
             for (i = 0; i < count; i++) {
                 if ((datCommandRecords[index].attribute.parts.flagMask &

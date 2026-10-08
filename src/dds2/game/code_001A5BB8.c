@@ -1967,12 +1967,12 @@ s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *battler, s32 command) {
     }
     scale = 1.0f;
     switch (datCommandRecords[command].costMode) {
-    case 1:
+    case DAT_COMMAND_COST_MODE_HP:
         if (btlCheckSpecialAbility(battler, 0x254)) {
             scale = datAbilityParameters[0x254 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         break;
-    case 2:
+    case DAT_COMMAND_COST_MODE_MP:
         if (btlCheckSpecialAbility(battler, 0x255)) {
             scale = datAbilityParameters[0x255 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
@@ -2006,7 +2006,7 @@ s32 func_001ABB10(BtlUnit *unit, s32 command) {
         }
     }
     if ((datCommandRecords[command].kind == 1 ||
-         datCommandRecords[command].costMode == 2) &&
+         datCommandRecords[command].costMode == DAT_COMMAND_COST_MODE_MP) &&
         (unit->partyRecord.status & 0x7FFF) == 0x10) {
         return 3;
     }
@@ -2187,7 +2187,7 @@ s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *targets) {
             index = action->indexWork.skillId;
         }
         if (datCommandRecords[index].unk_08 == 0 &&
-            datCommandRecords[index].attribute.parts.kind == 2 &&
+            datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_FLAG_MASK &&
             datCommandRecords[index].attribute.parts.flagMask != 0) {
             for (i = 0; i < count; i++) {
                 if ((datCommandRecords[index].attribute.parts.flagMask &

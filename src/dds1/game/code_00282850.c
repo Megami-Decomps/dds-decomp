@@ -41,8 +41,6 @@ extern char D_003BC7A0[];
 #define MNU_PAD_TRIGGER_BIT 2
 #define MNU_COMMAND_RECORD_BYTES 0x38
 #define MNU_COMMAND_ID_MASK 0xFFFF
-#define MNU_COST_KIND_HP 1
-#define MNU_COST_KIND_MP 2
 #define MNU_PERCENT_SCALE 100
 #define MNU_COMMAND_USE_STATUS_BOUNDARY 0x200
 #define MNU_RATIO_QUARTER_PERCENT 25
@@ -1447,7 +1445,7 @@ u16 mnuLookupPartyTableValue(u32 valueCount, s32 baseIndex, s32 alternate) {
 u16 mnuGetSecondaryValueIfKind2(s32 commandId) {
     DatCommandRecord *command = (DatCommandRecord *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
 
-    if (command->attribute.parts.kind != 2) {
+    if (command->attribute.parts.kind != DAT_COMMAND_ATTRIBUTE_KIND_FLAG_MASK) {
         return 0;
     }
     return command->attribute.parts.flagMask;
@@ -1463,7 +1461,7 @@ u16 mnuGetAdjustedEntryValue(s32 commandId, s32 actorAddress) {
     DatCommandRecord *command = (DatCommandRecord *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
     u16 entryValue = command->costPercentage;
     u16 flatAddition = command->costBase;
-    if (mnuGetRangeEntryKind(commandId & MNU_COMMAND_ID_MASK) == MNU_COST_KIND_HP) {
+    if (mnuGetRangeEntryKind(commandId & MNU_COMMAND_ID_MASK) == DAT_COMMAND_COST_MODE_HP) {
         entryValue = flatAddition + ((DatPartyRecord *)actorAddress)->maxHp * entryValue / MNU_PERCENT_SCALE;
     }
     return entryValue;
@@ -1475,7 +1473,7 @@ u16 mnuGetAdjustedPartyRangeValue(s32 id) {
     u16 scale = record->costPercentage;
     u16 addition = record->costBase;
 
-    if (mnuGetRangeEntryKind(index) == 1) {
+    if (mnuGetRangeEntryKind(index) == DAT_COMMAND_COST_MODE_HP) {
         s32 count = 0;
         s32 sum = 0;
         DatPartyRecord *entry = datGameState->party;
@@ -1504,12 +1502,12 @@ s32 mnuCanAffordEntryCost(u16 commandId, s32 actorAddress) {
     s32 costKind = mnuGetRangeEntryKind(commandId);
 
     switch (costKind) {
-    case MNU_COST_KIND_HP:
+    case DAT_COMMAND_COST_MODE_HP:
         if (((DatPartyRecord *)actorAddress)->hp < cost) {
             return 0;
         }
         break;
-    case MNU_COST_KIND_MP:
+    case DAT_COMMAND_COST_MODE_MP:
         if (((DatPartyRecord *)actorAddress)->mp < cost) {
             return 0;
         }
@@ -1538,12 +1536,12 @@ s32 mnuIsEntryCostUnaffordable(u16 commandId, s32 actorAddress) {
     u16 cost = datCommandRecords[commandId].costPercentage;
 
     switch (costKind) {
-    case MNU_COST_KIND_HP:
+    case DAT_COMMAND_COST_MODE_HP:
         if (((DatPartyRecord *)actorAddress)->hp < cost) {
             return 1;
         }
         break;
-    case MNU_COST_KIND_MP:
+    case DAT_COMMAND_COST_MODE_MP:
         if (((DatPartyRecord *)actorAddress)->mp < cost) {
             return 1;
         }
@@ -1558,13 +1556,13 @@ s32 mnuConsumeEntryCost(s32 commandId, u8 *actorEntry) {
     u16 cost = command->costPercentage;
 
     switch (command->costMode) {
-    case MNU_COST_KIND_HP:
+    case DAT_COMMAND_COST_MODE_HP:
         if (((DatPartyRecord *)actorEntry)->hp < cost) {
             return 0;
         }
         datAdjustCurrentHp(actorEntry, -cost);
         return 1;
-    case MNU_COST_KIND_MP:
+    case DAT_COMMAND_COST_MODE_MP:
         if (((DatPartyRecord *)actorEntry)->mp < cost) {
             return 0;
         }

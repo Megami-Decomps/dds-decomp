@@ -13,6 +13,15 @@ typedef union DatCommandAttribute {
     } parts;
 } DatCommandAttribute;
 
+/* Named values used by the costMode byte; other values remain possible. */
+#define DAT_COMMAND_COST_MODE_HP 1
+#define DAT_COMMAND_COST_MODE_MP 2
+
+/* Named values used by attribute.parts.kind to interpret its mask. */
+#define DAT_COMMAND_ATTRIBUTE_KIND_ELEMENT_MASK 1
+#define DAT_COMMAND_ATTRIBUTE_KIND_FLAG_MASK 2
+#define DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK 3
+
 typedef struct DatCommandRecord {
     u8 flags;                     /* 0x00 */
     u8 unk_01;

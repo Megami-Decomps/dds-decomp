@@ -516,7 +516,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
     u16 flag;
 
     mask = datCommandRecords[index].attribute.parts.flagMask;
-    if (datCommandRecords[index].attribute.parts.kind == 3) {
+    if (datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK) {
         count = 0;
         for (bit = 0; bit < 16; bit++) {
             if ((mask >> bit) & 1) {
@@ -527,8 +527,8 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
         mask = 1 << list[effMiscRandMod(0, count)];
     }
     if (mask != 0 &&
-        (datCommandRecords[index].attribute.parts.kind == 1 ||
-         datCommandRecords[index].attribute.parts.kind == 3)) {
+        (datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_ELEMENT_MASK ||
+         datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK)) {
         kind = datFlagToElementIndex(mask);
         if (!(datCommandRecords[index].unk30 == 4 && (packed->flagsAndValue & 0x7FFF) == 8)) {
             if (datGetEffectiveAffinity((struct DatUnitStatus *)packed, kind) & 0x170000) {
@@ -587,7 +587,8 @@ u32 sdfQueryChannelValue(s32 channel, s32 queryArg, SdfPackedValue *item) {
     u32 result;
     u32 mode = datCommandRecords[channel].attribute.parts.kind;
 
-    if (mode != 1 && mode != 3) {
+    if (mode != DAT_COMMAND_ATTRIBUTE_KIND_ELEMENT_MASK &&
+        mode != DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK) {
         return 0;
     }
     result = sdfRollActionHit(channel, queryArg, item);
@@ -600,7 +601,7 @@ u32 sdfQueryChannelValue(s32 channel, s32 queryArg, SdfPackedValue *item) {
 u32 sdfQueryChannelBits(s32 channel, s32 queryArg, SdfPackedValue *item) {
     u32 result;
 
-    if (datCommandRecords[channel].attribute.parts.kind != 2) {
+    if (datCommandRecords[channel].attribute.parts.kind != DAT_COMMAND_ATTRIBUTE_KIND_FLAG_MASK) {
         return 0;
     }
     result = sdfRollActionHit(channel, queryArg, item);
