@@ -2,6 +2,9 @@
 #include "eff.h"
 #include "eff_node_descriptor.h"
 
+struct SdfTex;
+extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
+
 typedef struct EffectSource {
     u32 type;
     u32 field4;
@@ -122,7 +125,7 @@ typedef struct TexRecord {
 void effReleaseSharedTextureRecord(TexRecord *entry) {
     entry->refCount--;
     if (entry->refCount == 0) {
-        sdfTexReleaseReferenceViaHandler(entry->texture);
+        sdfTexReleaseReferenceViaHandler((struct SdfTex *)entry->texture);
         sdfReleaseResourceAllocation(entry->allocation);
     }
 }

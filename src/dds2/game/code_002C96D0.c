@@ -163,7 +163,7 @@ extern s32 D_00437D60;
 extern s32 D_00437D5C;
 extern u8 (*D_00437D54)[32];
 extern u8 (*D_00437D58)[32];
-extern s32 sdfTexReleaseReferenceViaHandler(s32);
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern s32 dds3GetWorldObject(void);
 extern void dds3SetWorldObjectDataValue(s32, s32);
 extern void fileWaitReady(u32);
@@ -2828,41 +2828,41 @@ void fileReleaseMenuResources(void) {
             handle = *slot;
             i--;
             if (handle != 0) {
-                sdfTexReleaseReferenceViaHandler(handle);
+                sdfTexReleaseReferenceViaHandler((SdfTex *)handle);
                 *slot = 0;
             }
             slot++;
         } while (i >= 0);
         if (D_00437D78 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_00437D78);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)D_00437D78);
             D_00437D78 = 0;
         }
         if (D_00437D74 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_00437D74);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)D_00437D74);
             D_00437D74 = 0;
         }
         if (D_00437D70 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_00437D70);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)D_00437D70);
             D_00437D70 = 0;
         }
         if (D_00437D6C != 0) {
-            sdfTexReleaseReferenceViaHandler(D_00437D6C);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)D_00437D6C);
             D_00437D6C = 0;
         }
         if (D_00437D68 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_00437D68);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)D_00437D68);
             D_00437D68 = 0;
         }
         if (D_00437D64 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_00437D64);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)D_00437D64);
             D_00437D64 = 0;
         }
         if (D_00437D60 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_00437D60);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)D_00437D60);
             D_00437D60 = 0;
         }
         if (D_00437D5C != 0) {
-            sdfTexReleaseReferenceViaHandler(D_00437D5C);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)D_00437D5C);
             D_00437D5C = 0;
         }
         if (D_00437D54 != 0) {
