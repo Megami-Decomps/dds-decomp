@@ -835,9 +835,9 @@ void func_0026DB68(void) {
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026DB70);
 
-/* Call the existing flag routine with entry zero and selector zero; ignore its result. */
-void func_0026DB90(u32 context) {
-    scrTestEntryFlag(context, 0, 0);
+/* Return the flag test's result through the native selector-zero wrapper. */
+s32 func_0026DB90(u32 context) {
+    return scrTestEntryFlag((DatPartyRecord *)context, 0, 0);
 }
 
 void func_0026DBB0(void) {
