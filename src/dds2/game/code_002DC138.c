@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_ref_obj.h"
 #include "sdf_resource.h"
 #include "eff_anim.h"
 #include "file.h"
@@ -92,20 +93,6 @@ extern void sdfAppendPacket(SdfListHead *list, u32 packetAddress);
 extern u32 mdlGetBroadcastValue(MdlCtx *model);
 extern SdfPoolNode *D_00380788[13][4];
 extern u64 D_003E9640[];
-
-/* Reference-counted texture object at the end of its combined allocation. */
-typedef struct RefObj {
-    u8 *base;                 // 0x00: retained base of the combined allocation
-    u8 *pixels;               // 0x04: image data after the palette
-    u8 *palette;              // 0x08: palette data after the copied header
-    s32 paletteWidth;         // 0x0C
-    s32 paletteHeight;        // 0x10
-    s32 refCount;             // 0x14
-    s32 index;                // 0x18
-    u32 allocationHandle;     // 0x1C: handle released with the final reference
-} RefObj; // 0x20
-
-typedef char RefObj_size_must_be_0x20[(sizeof(RefObj) == 0x20) ? 1 : -1];
 
 extern RefObj *func_002DDAA8(SdfTextureFileHeader *);
 
@@ -753,7 +740,7 @@ RefObj *func_002DDAA8(SdfTextureFileHeader *source) {
     s32 imageBytes;
     s32 payloadBytes;
     s32 textureOffset;
-    u32 allocationHandle;
+    struct SdfMemBlock *allocationHandle;
     u8 *cursor;
     RefObj *texture;
 
@@ -769,8 +756,8 @@ RefObj *func_002DDAA8(SdfTextureFileHeader *source) {
     imageBytes = sdfFormatImageSize(source->pixelFormat, source->width, source->height) << 4;
     payloadBytes = imageBytes + paletteBytes;
     textureOffset = payloadBytes + 0x40;
-    allocationHandle = (u32)sdfAllocGeneralBlock(payloadBytes + 0x60);
-    cursor = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)allocationHandle);
+    allocationHandle = sdfAllocGeneralBlock(payloadBytes + 0x60);
+    cursor = (u8 *)sdfResourceRetainAddress(allocationHandle);
     texture = (RefObj *)(cursor + textureOffset);
     texture->base = cursor;
     cursor += 0x40;
@@ -816,7 +803,7 @@ void effReleaseSharedReference(RefObj *obj) {
         sdfTexReleaseReference((struct SdfTex *)texture);
     }
     if (--obj->refCount == 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)obj->allocationHandle);
+        sdfReleaseResourceAllocation(obj->allocationHandle);
     }
 }
 
