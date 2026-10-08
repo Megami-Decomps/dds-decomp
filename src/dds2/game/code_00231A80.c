@@ -465,24 +465,24 @@ void mdlStorePrimaryVectorVU(MdlCtx *ctx) {
     VU0_STORE_VF(vf10, primaryVector);
 }
 
-/* vu0 routine: load the secondary vector into vf10 without interpreting it. */
-void mdlLoadSecondaryVectorVU(MdlCtx *ctx) {
-    void *secondaryVector = ctx->inner->unk60;
-    VU0_LOAD_VF_MEMORY(vf10, secondaryVector);
+/* vu0 routine: load the stored rotation quaternion into vf10. */
+void mdlLoadRotationQuaternionVU(MdlCtx *ctx) {
+    void *rotationQuaternion = ctx->inner->rotationQuaternion;
+    VU0_LOAD_VF_MEMORY(vf10, rotationQuaternion);
 }
 
 extern void effMiscQuaternionToMatrixVU(void);
 
-/* vu0 routine: consume vf10 as a quaternion, preserve it in the secondary vector,
+/* vu0 routine: consume vf10 as a quaternion, preserve it in the model,
  * then store the resulting basis rows from vf28-vf30. No C argument supplies vf10. */
 void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *ctx) {
-    void *secondaryVector;
+    void *rotationQuaternion;
     void *basisRow0;
     void *basisRow1;
     void *basisRow2;
 
-    secondaryVector = ctx->inner->unk60;
-    VU0_STORE_VF(vf10, secondaryVector);
+    rotationQuaternion = ctx->inner->rotationQuaternion;
+    VU0_STORE_VF(vf10, rotationQuaternion);
     effMiscQuaternionToMatrixVU();
     basisRow0 = ctx->inner->matrix[0];
     VU0_STORE_VF(vf28, basisRow0);

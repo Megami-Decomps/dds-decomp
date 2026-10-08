@@ -2686,7 +2686,7 @@ s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 co
     }
     if (actor->flags & 0x200) {
         if (command != 0) {
-            if (datCommandRecords[command].unk_08 == 0) {
+            if (datCommandRecords[command].targetType == 0) {
                 return 0;
             }
         }
@@ -3987,7 +3987,7 @@ s32 btlCheckLinkedActionEffectTarget(BtlUnit *actor, BtlUnit *target, s32 comman
         }
         blocked = func_001A3360(unit, 0, 0);
     } else {
-        blocked = datCommandRecords[command].unk_08;
+        blocked = datCommandRecords[command].targetType;
     }
     if (blocked != 0) {
         return 4;

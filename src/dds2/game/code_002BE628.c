@@ -1093,17 +1093,19 @@ void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 value, s32 option) {
     panel->unk14 = option;
 }
 
+extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
+
 /* Create a profile panel and initialize its five native random words. */
 u32 *mnuCreateProfilePanel(s32 selectionState) {
     MenuProfilePanel *panel = (MenuProfilePanel *)sdfAllocSizeClassBlock(MNU_PROFILE_PANEL_BYTES);
     s32 profileId;
-    u32 profileRecordAddress;
+    DatProfileRecord *profileRecord;
     u32 randomWordIndex;
 
     memset(panel, 0, MNU_PROFILE_PANEL_BYTES);
     profileId = scrGetSelectedScriptEntryId(selectionState);
-    profileRecordAddress = ptyGetCurrentProfileRecord(selectionState);
-    mnuSetProfilePanelValues(panel, ptyGetProfileRecordCap((u16)profileId), *(u32 *)profileRecordAddress);
+    profileRecord = ptyGetCurrentProfileRecord((DatPartyRecord *)selectionState);
+    mnuSetProfilePanelValues(panel, ptyGetProfileRecordCap((u16)profileId), profileRecord->value);
     for (randomWordIndex = 0; randomWordIndex < 5; randomWordIndex++) {
         panel->unk2C[randomWordIndex] = effMiscRand(0) % 0xC0 + 0x40;
     }
@@ -1717,12 +1719,12 @@ s32 mnuConsumeEntryCost(s32 commandId, u8 *actorEntry) {
 }
 
 /* Map the native category byte 0/1/2 to 1/2/3; command zero bypasses the record read. */
-s32 mnuGetAbilityByteCategory(u16 commandId) {
+s32 mnuGetAbilityTargetCategory(u16 commandId) {
     u8 category;
     if (commandId == 0) {
         return 1;
     }
-    category = datCommandRecords[commandId].unk_08;
+    category = datCommandRecords[commandId].targetType;
     switch (category) {
     case 0:
         return 1;
@@ -1752,7 +1754,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRe
         return 1;
     }
 
-    if (mnuGetAbilityByteCategory(ability) == 1) {
+    if (mnuGetAbilityTargetCategory(ability) == 1) {
         mask = mnuGetMatchingPartyEntryMask(entry);
 
         if (func_0022C600(ability, mask) != 0) {

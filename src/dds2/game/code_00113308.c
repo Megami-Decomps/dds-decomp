@@ -743,7 +743,7 @@ s32 func_00114150(EffWorldNode *object) {
     if (model != NULL) {
         effObjClearNodeFlags(object->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
         effObjFetchInnerSecondVecNorm(object);
-        VU0_STORE_VF(vf10, model->unk60);
+        VU0_STORE_VF(vf10, model->rotationQuaternion);
         dds3LoadOrBuildObjectMatrix(object);
         effObjFetchInnerFirstVec(object);
         if (func_00143910(object->key, &coordinates[0], &coordinates[1], &coordinates[2]) != 0) {

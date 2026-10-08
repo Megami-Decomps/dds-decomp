@@ -3569,7 +3569,8 @@
 0x00217EE0	mdlCheckNodeByte30	inferred	finds node by id, returns 2 when missing else whether byte at +0x30 equals 5
 0x00217F18	mdlGetNodeFrameStep	inferred	Reads Motion.frameStep at +0x20 or zero for a missing node; the motion updater adds it to currentFrame.
 0x00217F40	mdlSetNodeFrameStep	inferred	Writes Motion.frameStep at +0x20 when the searched node exists; the motion updater adds it to currentFrame.
-0x00217FB8	mdlUpdateContextRotationBasisFromQuaternion	inferred	Converts the context quaternion to rotation basis vectors. [names_reviewed11.tsv]
+0x00217FA0	mdlLoadRotationQuaternionVU	inferred	Loads SdfModel.rotationQuaternion at +0x60 into vf10; viewer and actor callers use it as the stored rotation quaternion.
+0x00217FB8	mdlUpdateContextRotationBasisFromQuaternion	inferred	Stores vf10 as SdfModel.rotationQuaternion at +0x60, then converts it to rotation basis vectors.
 0x002180A8	mdlBroadcastMasked	inferred	stores arg to inner +0x1C then walks list14 with (arg & 0xFF000000)|0x808080
 0x002180E0	mdlBroadcastValue	inferred	stores arg to inner +0x1C then walks list14 with arg
 0x00218100	mdlSetAmountOnAllContextResources	inferred	Applies an amount to every resource node owned by the model context. [names_reviewed10.tsv]
@@ -4938,7 +4939,7 @@
 0x002864D8	mnuGetEntryUseStatus	inferred	Returns failure when cost unavailable, separate flags-based availability otherwise. [names_reviewed5.tsv]
 0x00286540	mnuIsEntryCostUnaffordable	inferred	Tests if primary or secondary available count is below entry's required amount. [names_reviewed5.tsv]
 0x002865B8	mnuConsumeEntryCost	inferred	Subtracts range-entry cost from selected primary or secondary count when affordable. [names_reviewed5.tsv]
-0x00286648	mnuGetAbilityByteCategory	inferred	Maps skill/ability metadata byte to category result, treating zero ID as default. [names_reviewed5.tsv]
+0x00286648	mnuGetAbilityTargetCategory	inferred	Maps a command's serialized targetType into the menu category used for field-action routing; command zero defaults to category one, known raw values 0/1/2 map to 1/2/3.
 0x002866D0	ptySkillApplyFieldUseEffect	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002868C0	mnuIsAbilityValueMarked	inferred	Tests ability paired metadata byte against the marker value one. [names_reviewed5.tsv]
 0x002868E0	ptyGetAffinityKind	inferred	wrong or missing short module prefix [names_audit.tsv]

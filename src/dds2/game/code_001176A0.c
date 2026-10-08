@@ -75,15 +75,7 @@ typedef struct SdfPackedValue {
 #define SDF_UNIT_ENEMY 0x20
 
 
-typedef struct SdfEnemyVitals {
-    u32 flags;          /* 0x00 */
-    u8 pad04[4];
-    u16 maxHp;          /* 0x08 */
-    u8 pad0A[2];
-    u16 maxMp;          /* 0x0C */
-} SdfEnemyVitals;
-
-extern s32 datEnemyRecords;
+extern DatEnemyRecord *datEnemyRecords;
 /* Party-unit header: flags, record index into the enemy table (stride 76), hp / max hp. */
 typedef struct SdfPartyUnit {
     u16 flags;          /* 0x00 */
@@ -410,8 +402,7 @@ s32 ptyComputeMaxHp(DatPartyRecord *unit) {
     s32 result;
 
     if ((unit->flags & SDF_UNIT_ENEMY) != 0) {
-        return ((SdfEnemyVitals *)(datEnemyRecords +
-                unit->unitId * 76))->maxHp;
+        return datEnemyRecords[unit->unitId].maxHp;
     }
     level = unit->level;
     stat = datGetStatWithStatusOverride(unit, 1);
@@ -432,8 +423,7 @@ s32 ptyComputeMaxMp(DatPartyRecord *unit) {
     s32 result;
 
     if ((unit->flags & SDF_UNIT_ENEMY) != 0) {
-        return ((SdfEnemyVitals *)(datEnemyRecords +
-                unit->unitId * 76))->maxMp;
+        return datEnemyRecords[unit->unitId].maxMp;
     }
     level = unit->level;
     stat = datGetStatWithStatusOverride(unit, 2);
@@ -596,7 +586,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
         } else if (!(*(u16 *)queryArg & 4)) {
             mask &= 0xFFFE;
         } else if ((actor->flags & SDF_UNIT_ENEMY) == 0 ||
-                   (((SdfEnemyVitals *)(datEnemyRecords + actor->unitId * 76))->flags & 0x440) != 0) {
+                   (datEnemyRecords[actor->unitId].flags & 0x440) != 0) {
             mask &= 0xFFFE;
         }
     }

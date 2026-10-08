@@ -1533,7 +1533,7 @@ s32 btlHasEligibleQueuedSpecialAction(void) {
                 continue;
             }
             actionEntry = (DatCommandRecord *)(actionId * 0x38 + (s32)datCommandRecords);
-            if (actionEntry->unk_08 == 0) {
+            if (actionEntry->targetType == 0) {
                 continue;
             }
             if (actionEntry->options != 2) {
@@ -7506,7 +7506,7 @@ s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 co
     }
     if (actor->flags & 0x200) {
         if (command != 0) {
-            if (datCommandRecords[command].unk_08 == 0) {
+            if (datCommandRecords[command].targetType == 0) {
                 return 0;
             }
         }
