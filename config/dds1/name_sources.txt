@@ -2344,6 +2344,7 @@
 0x00192CC8	effCreatePrimitiveCurve	inferred	Fam_Mid3
 0x00192DE0	effFreeBuffers	inferred	frees +0x4 buffer if +0x14 word set, then frees +0x0
 0x00192E30	effAdvancePrimCursor	inferred	steps channel-B idx/pos via helper, wraps at 1.0, resets at count
+0x00192ED0	effSamplePrimitiveCurveVertex	inferred	Evaluates packed XYZ primitive-curve coefficients or adjacent linear keys into the output vertex; cubic interpolation also writes homogeneous W=1.
 0x00193000	effSamplePrimitiveCurve	inferred	confidence=high; matched-C; src/dds1/game/code_00192488.c:337:func_00193000; Evaluates precomputed cubic xyz coefficients in Horner order or interpolates neighboring linear xyz keys by mode; leaves the sampled input vector in vf10. Linear-path W behavior is left unchanged.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00193130	effResetPrimitiveRecordCursor	inferred	confidence=high; matched-C; src/dds1/game/code_00192488.c:364:func_00193130; requires-symbol-registration; Resets the primitive curve cursor index and interpolation position.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x00193140	effSetPrimitiveRecordCursorStep	inferred	confidence=high; matched-C; src/dds1/game/code_00192488.c:369:func_00193140; requires-symbol-registration; Sets the primitive curve cursor increment.; source=reviewed-prior-QP15 [names_qp15.tsv]
