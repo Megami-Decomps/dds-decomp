@@ -299,7 +299,7 @@ extern u16 mdlGetContextResourceGroup(MdlCtx *);
 
 extern u16 mdlGetContextResourceId(MdlCtx *);
 
-extern f32 func_00208000(u32, f32 *, f32 *);
+extern f32 func_00208000(s32, f32 *, f32 *);
 extern s32 func_001E3230(BtlUnit *, s32);
 
 extern s32 func_0035C860();

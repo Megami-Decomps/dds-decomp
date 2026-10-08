@@ -7389,7 +7389,7 @@ s32 btlCheckActorDistanceLimit(void) {
     return 1;
 }
 
-extern f32 func_001F66D8(s32, f32 *, s32);
+extern f32 func_001F66D8(s32, f32 *, f32 *);
 
 s32 btlIsEntryHeightWithinLimit(void) {
     if (func_001F66D8(0x400, 0, 0) > 600.0f) {
