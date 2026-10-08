@@ -113,7 +113,7 @@ typedef struct EffPCPBlockSetWork {
     EffParamWork **list[3];
     EffParamWork *handleB[5];
     EffParamWork *tailHandle;
-    u32 alloc[3];
+    struct SdfMemBlock *alloc[3];
     struct EffPCPBlockSetWork *source;
 } EffPCPBlockSetWork;
 
@@ -3415,14 +3415,14 @@ EffPCPBlockSetWork *effPcpCreateBlockSetWork(void *first, void **blocks) {
     for (i = 0; i < 3; i++) {
         if (work->params.groupSize[i] > 0) {
             n = work->count * work->params.groupSize[i];
-            work->alloc[i] = (u32)sdfAllocGeneralBlock(n * 4);
-            work->list[i] = (EffParamWork **)sdfResourceRetainAddress((void *)work->alloc[i]);
+            work->alloc[i] = sdfAllocGeneralBlock(n * 4);
+            work->list[i] = (EffParamWork **)sdfResourceRetainAddress(work->alloc[i]);
             work->list[i][0] = effParamWorkCreate(0, blocks[6 + i]);
             for (j = 1; j < n; j++) {
                 work->list[i][j] = 0;
             }
         } else {
-            work->alloc[i] = 0;
+            work->alloc[i] = NULL;
         }
     }
     work->handleB[0] = effParamWorkCreate(0, blocks[9]);
@@ -3472,14 +3472,14 @@ void effPcpDuplicateBlockSetHandles(EffPCPBlockSetWork *work, EffPCPBlockSetWork
     for (groupIndex = 0; groupIndex < ARRAY_COUNT(work->list); groupIndex++) {
         if (work->params.groupSize[groupIndex] > 0) {
             groupHandleCount = work->count * work->params.groupSize[groupIndex];
-            work->alloc[groupIndex] = (u32)sdfAllocGeneralBlock(groupHandleCount * 4);
-            work->list[groupIndex] = (EffParamWork **)sdfResourceRetainAddress((void *)work->alloc[groupIndex]);
+            work->alloc[groupIndex] = sdfAllocGeneralBlock(groupHandleCount * 4);
+            work->list[groupIndex] = (EffParamWork **)sdfResourceRetainAddress(work->alloc[groupIndex]);
             work->list[groupIndex][0] = effParamWorkDuplicate(src->list[groupIndex][0]);
             for (handleIndex = 1; handleIndex < groupHandleCount; handleIndex++) {
                 work->list[groupIndex][handleIndex] = 0;
             }
         } else {
-            work->alloc[groupIndex] = 0;
+            work->alloc[groupIndex] = NULL;
         }
     }
     for (handleIndex = 0; handleIndex < ARRAY_COUNT(work->handleB); handleIndex++) {
@@ -3526,7 +3526,7 @@ void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work) {
                         effDispatchParameterDataAndFreeWork(work->list[groupIndex][handleIndex]);
                     }
                 }
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->alloc[groupIndex]));
+                sdfReleaseResourceAllocation(work->alloc[groupIndex]);
             }
         }
         for (handleIndex = 0; handleIndex < 5; handleIndex++) {
