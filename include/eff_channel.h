@@ -21,9 +21,11 @@ typedef struct EffChanHead {
 } EffChanHead;
 
 /* One randomized channel record. */
+struct EffParamWork;
+
 typedef struct EffChanRecord {
     s32 delay;
-    void *param;
+    struct EffParamWork *param; /* Retained compact effect owner, cloned per record. */
 } EffChanRecord;
 
 /* Allocated channel owner shared by the event factory and channel consumers. */
