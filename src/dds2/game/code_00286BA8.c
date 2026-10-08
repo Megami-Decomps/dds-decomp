@@ -72,7 +72,6 @@ extern void mnuCloseCurrentProfilePanel(MenuProgressHost *);
 extern void mnuReleaseMantraMenuDrawResources(MnuStatusResource *);
 
 extern s32 dspCloseChannel(void);
-extern void sdfQueueNonzeroResourceId(u32);
 extern SdfTaskItemDesc D_003CFCD4;
 extern void mnuReleaseFirstMantraSpriteSlots(void);
 extern void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *);
@@ -124,8 +123,8 @@ void func_00286F18(s32 unused, MnuStatusResource *resourceWork) {
     if (resourceWork != NULL) {
 
         dspCloseChannel();
-        sdfQueueNonzeroResourceId(resourceWork->resourceIdA);
-        sdfQueueNonzeroResourceId(resourceWork->resourceIdB);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)resourceWork->resourceIdA);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)resourceWork->resourceIdB);
         mnuReleaseFirstMantraSpriteSlots();
         mnuReleaseStaffAndTitleVisualResources(resourceWork->progressHost);
         evtPrintDeveloperConsoleMessage("trmDestroyStatusResource()!!!! \n");

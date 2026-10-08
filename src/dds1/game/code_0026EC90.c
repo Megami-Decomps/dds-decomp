@@ -112,7 +112,7 @@ void mnuFinishStaffMovieAndFreeState(void) {
     do {
         pendingWork = sdfCheckPendingWorkWithInterrupts();
     } while (pendingWork != 0);
-    sdfQueueNonzeroResourceId(mnuMovieWork->allocation);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)mnuMovieWork->allocation);
     mnuMovieWork = NULL;
 }
 
