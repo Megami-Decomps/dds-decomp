@@ -3102,7 +3102,54 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0012F578);
 /* ASM signed verticalStepDirection: adjust player Y by -2/+2 and save previous XYZ. */
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012FC20);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0012FD00);
+extern void func_0026A5F0(s32 soundEntryIndex);
+extern void mnuTitleStreamUpdateAndLogBgm(void);
+extern void mnuMarkTitleStreamResetPending(void);
+extern void mnuResetTitleStreamLocked(void);
+
+/* Advance the field transition while the camera model's motion drives completion. */
+s32 func_0012FD00(void) {
+    FldAreaWork *work = (FldAreaWork *)fldAreaState;
+    MdlCtx *model;
+    s16 node;
+
+    if (work->unk17C > 0) {
+        model = (MdlCtx *)fldCameraModelObject;
+        node = model->current.h.arg;
+        if (node != 7) {
+            kwlnFadeStartIn(8);
+            func_0026A5F0(0x26);
+            model = (MdlCtx *)fldCameraModelObject;
+            model->first->frameStep = 1.0f;
+            mdlAddEntryPlain(model, 0, 7);
+        }
+
+        {
+            Motion *const thresholdMotion = ((MdlCtx *)fldCameraModelObject)->first;
+            f32 currentFrame = thresholdMotion->currentFrame;
+            if (work->unk16C < 13.0f && 13.0f <= currentFrame) {
+                kwlnPadStartMotor(0, 1, 10);
+                kwlnPadStartMotor(1, 0xE6, 10);
+                mnuTitleStreamUpdateAndLogBgm();
+            }
+        }
+        {
+            Motion *const completionMotion = ((MdlCtx *)fldCameraModelObject)->first;
+            if (completionMotion->state == 5) {
+                mnuMarkTitleStreamResetPending();
+                mnuResetTitleStreamLocked();
+                ((FldAreaWork *)fldAreaState)->unk17C = 0;
+                fldSetSceneControlFlags(0x40);
+                return 0;
+            }
+        }
+
+        func_0012EEA0(node, 7);
+        return -1;
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0012FE30);
 
