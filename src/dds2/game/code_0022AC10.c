@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "file_pac.h"
 #include "btl_state.h"
+#include "btl_model_record.h"
 #include "btl_sound.h"
 #include "btl_task_args.h"
 #include "btl_command.h"
@@ -240,7 +241,7 @@ typedef struct BattleScriptTaskData {
     u32 frames;
 } BattleScriptTaskData;
 
-extern void func_0035C860(char *, const char *, ...);
+extern s32 func_0035C860(char *, const char *, ...);
 
 extern char D_0041B650[];
 
@@ -1987,7 +1988,104 @@ INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022F068);
 
 INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022F180);
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_002303D0);
+extern BtlUnit *D_00436D90;
+extern BtlActorStatusRecord D_004532C0;
+extern const char *D_003BFBE8[12];
+extern char D_00436F08[];
+extern char D_00436F10[];
+extern char D_00436F18[];
+extern char D_00436F20[];
+extern char D_00436F28[];
+extern char D_00436F30[];
+extern char D_00436F38[];
+extern char D_00436F40[];
+extern char D_00436F48[];
+extern char D_00436F50[];
+extern char D_00436F58[];
+extern u8 sdfPfsDebugMode;
+extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
+extern void *sdfAllocateBlockBySizeThreshold(s32);
+extern void sdfFreeMemoryFromEitherHeap(void *);
+extern char *sdfDevGetPathBuffer(void);
+extern s32 func_00369B70(const char *, s32, ...);
+extern s32 func_0036A420(s32, s32, s32);
+extern s32 func_00369DF8(s32);
+extern s32 func_0036BCD0(const char *, s32);
+
+/* Write the selected model header and its bank's motion rows to table.txt. */
+void func_002303D0(void) {
+    BtlUnit *unit = D_00436D90;
+    BtlActorStatusRecord *record;
+    BtlActorMotionSlot *motion;
+    u8 *rowCursor;
+    char *buffer;
+    char *cursor;
+    char path[0x70];
+    s32 fd;
+    u32 i;
+
+    btlGetRuntime();
+    record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+    buffer = sdfAllocateBlockBySizeThreshold(10000);
+    cursor = buffer;
+    if (unit->flags & 0x200) {
+        cursor += func_0035C860(cursor, D_00436F08, D_003BFBE8[0]);
+    } else {
+        cursor += func_0035C860(cursor, D_00436F08, D_003BFBE8[1]);
+    }
+    cursor += func_0035C860(cursor, "ID:0x%X\n", unit->resourceIndex);
+    cursor += func_0035C860(cursor, "%s: %.2f,%.2f,%.2f\n", D_003BFBE8[2],
+                            (double)D_004532C0.position[0], (double)D_004532C0.position[1],
+                            (double)D_004532C0.position[2]);
+    cursor += func_0035C860(cursor, "%s: %.2f\n", D_003BFBE8[3], (double)D_004532C0.scale);
+    cursor += func_0035C860(cursor, "%s: %.2f\n", D_003BFBE8[4], (double)D_004532C0.z);
+    cursor += func_0035C860(cursor, "%s: %.2f\n", D_003BFBE8[5], (double)D_004532C0.unk18);
+    cursor += func_0035C860(cursor, "%s: %.2f\n", D_003BFBE8[6], (double)D_004532C0.unk1C);
+    cursor += func_0035C860(cursor, "%s: %.2f\n", D_003BFBE8[7], (double)D_004532C0.unk20);
+    cursor += func_0035C860(cursor, "%s: %.2f\n", D_003BFBE8[8], (double)D_004532C0.unk24);
+    cursor += func_0035C860(cursor, D_00436F10, D_003BFBE8[9]);
+    switch (D_004532C0.shadowKind) {
+    case 0: cursor += func_0035C860(cursor, D_00436F08, "UV_SHADOW_NON"); break;
+    case 1: cursor += func_0035C860(cursor, D_00436F08, "UV_SHADOW_S"); break;
+    case 2: cursor += func_0035C860(cursor, D_00436F08, "UV_SHADOW_M"); break;
+    case 3: cursor += func_0035C860(cursor, D_00436F08, "UV_SHADOW_L"); break;
+    case 4: cursor += func_0035C860(cursor, D_00436F08, "UV_SHADOW_LL"); break;
+    }
+    cursor += func_0035C860(cursor, D_00436F18, D_003BFBE8[10], D_004532C0.model);
+    cursor += func_0035C860(cursor, D_00436F20, D_003BFBE8[11]);
+    rowCursor = (u8 *)record;
+    for (i = 0; i < 29; i++) {
+        motion = (BtlActorMotionSlot *)(rowCursor + 0x2C);
+        cursor += func_0035C860(cursor, D_00436F28, i);
+        switch (motion->moveKind) {
+        case 0: cursor += func_0035C860(cursor, D_00436F30, "UV_MV_NON "); break;
+        case 1: cursor += func_0035C860(cursor, D_00436F30, "UV_MV_ROT "); break;
+        case 2: cursor += func_0035C860(cursor, D_00436F30, "UV_MV_DASH"); break;
+        }
+        cursor += func_0035C860(cursor, D_00436F38, motion->frameCount);
+        switch (motion->kind) {
+        case 0: cursor += func_0035C860(cursor, "{%s,%2d},", "UV_END_NORM ", motion->alphaStartFrame); break;
+        case 1: cursor += func_0035C860(cursor, "{%s,%2d},", "UV_END_PAUSE", motion->alphaStartFrame); break;
+        case 2: cursor += func_0035C860(cursor, "{%s,%2d},", "UV_END_OUT  ", motion->alphaStartFrame); break;
+        case 3: cursor += func_0035C860(cursor, "{%s,%2d},", "UV_END_STOP ", motion->alphaStartFrame); break;
+        }
+        rowCursor += sizeof(BtlActorMotionSlot);
+        cursor += func_0035C860(cursor, D_00436F40, (double)motion->alphaFrameScale);
+        cursor += func_0035C860(cursor, D_00436F48, (double)motion->unk0C);
+        cursor += func_0035C860(cursor, "{%2d,%2d}", motion->alphaDuration, motion->unk12);
+        cursor += func_0035C860(cursor, D_00436F50);
+    }
+    if (sdfPfsDebugMode) {
+        fd = func_00369B70("pfs0:/model/table.txt", 0x602, 0666);
+    } else {
+        func_0035C860(path, "%smodel/table.txt", sdfDevGetPathBuffer());
+        fd = func_00369B70(path, 0x602);
+    }
+    func_0036A420(fd, (s32)buffer, cursor - buffer);
+    func_00369DF8(fd);
+    func_0036BCD0(D_00436F58, 0);
+    sdfFreeMemoryFromEitherHeap(buffer);
+}
 
 void func_00230960(void) {
     D_00436F5D = 0;
