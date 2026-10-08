@@ -3,6 +3,8 @@
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "kwln_task_lifecycle.h"
+#include "mnu_movie_transfer.h"
+#include "mnu_movie_list.h"
 
 extern s32 scrReadIntParameter(s32);
 
@@ -11,18 +13,6 @@ extern u16 mnuMovieTaskState;
 extern s32 mnuMovieShutdownCounter;
 
 extern MovObj mnuMovieDrawContext;
-
-/* State of the debug viewer: an IPU register word and a 0x40-byte block, edited nibble by nibble. */
-typedef struct MnuMovieTransfer {
-    u8 started;          /* 0x00 */
-    u8 cursor;           /* 0x01: nibble being edited, 0..15 */
-    u8 wordPending;      /* 0x02 */
-    u8 blockPending;     /* 0x03 */
-    u32 wordSource;      /* 0x04: register address, dereferenced as s32 when copying word */
-    u32 blockSource;     /* 0x08 */
-    s32 word;            /* 0x0C */
-    u8 block[0x40];      /* 0x10 */
-} MnuMovieTransfer;
 
 extern MnuMovieTransfer mnuMovieDrawSources;
 
@@ -33,18 +23,7 @@ typedef struct MovieListNode {
     char path[4];
 } MovieListNode;
 
-typedef struct MovieList {
-    u32 task;
-    MovieListNode *head;
-    s16 top;       /* first visible entry */
-    s16 cursor;
-    s16 total;
-    s8 playing;
-    u8 padF;
-    SdfListHead *packets;
-} MovieList;
-
-extern MovieList mnuMovieList;
+extern MnuMovieList mnuMovieList;
 
 extern s32 func_0011F250(s32, s32, s32, s32, s32, s32, s32);
 
