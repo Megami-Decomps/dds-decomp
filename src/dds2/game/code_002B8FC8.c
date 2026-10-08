@@ -8,6 +8,7 @@
 struct StaffMenuRuntime;
 
 extern void itfGridStorePosition(MenuGridSlot *, EffectSlotSet *, s32);
+extern void mnuClearPageSelectionHandles(MenuPageWindow *);
 
 #define MNU_ENTRY_SPRITE_COUNT 4
 #define MNU_ENTRY_COLOR_COUNT 4
@@ -483,7 +484,7 @@ s32 mnuStepStaffCampPageControl(s32 callback);
 
 extern void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 extern void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource);
-extern u32 *mnuCreateProfilePanel(DatPartyRecord *selectionState);
+extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void mnuSetGroupProperties(s32, s32, s32, s32, s32);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
@@ -511,7 +512,8 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags)
 
 void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, MenuPanelGroup *packedGroup, s32 group, s32 unused, s32 spriteFlags);
 
-void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSpriteState *spriteState, u32 resource,
+void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSpriteState *spriteState,
+                                    MenuProfilePanel *resource,
                                     u32 unused4, u32 spriteFlags);
 
 
@@ -1999,7 +2001,7 @@ void mnuSetIndexedWindowPageSpriteFlags(s32 index, u8 *menu, u32 first, u32 seco
 void mnuClearEntries(u8 *menu) {
     MenuSprites **entry = &((MenuPageWindow *)menu)->slots[0].windowSprites;
     u32 i = 0;
-    mnuClearPageSelectionHandles(menu);
+    mnuClearPageSelectionHandles((MenuPageWindow *)menu);
     do {
         if (*entry != NULL) {
             mnuFreeIconSprites(*entry);
@@ -2423,7 +2425,8 @@ void mnuClearPageSelectionHandles(MenuPageWindow *window) {
     mnuClearPageSelection(window);
 }
 
-void mnuFlagActiveWindows(u8 *menu) {
+void mnuFlagActiveWindows(MenuPageWindow *window) {
+    u8 *menu = (u8 *)window;
     u8 *kind = menu + 8;
     u8 *flags = menu + 0xc;
     u32 i;
@@ -2435,11 +2438,11 @@ void mnuFlagActiveWindows(u8 *menu) {
     }
 }
 
-void mnuClearPartyPanelActiveFlags(s32 menu) {
+void mnuClearPartyPanelActiveFlags(MenuPageWindow *window) {
     u32 *flags;
     u32 index;
 
-    flags = (u32 *)(menu + 0x7c);
+    flags = (u32 *)((u8 *)window + 0x7c);
     index = 0;
     do {
         index = index + 1;

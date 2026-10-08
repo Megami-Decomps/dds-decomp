@@ -29,8 +29,8 @@ extern void func_002ABEB0(s32);
 extern void func_002AC660(s32);
 extern void func_002ACA98(s32);
 extern void func_002B2C88(s32, s32, s32, s32);
-extern void mnuClearPageSelectionHandles(s32);
-extern void mnuClearEntries(s32);
+extern void mnuClearPageSelectionHandles(MenuPageWindow *);
+extern void mnuClearEntries(u8 *);
 extern void func_002C1B68(u32 *, u32);
 extern void mnuReleaseStaffMenuTextureHandles(s32);
 extern void func_002C2AA8(struct MenuPanelItem *, u32);
@@ -453,12 +453,12 @@ s32 mnuInitializeSelectedStaffPage(s32 unused) {
 /* Release the current entry list, its panel group and its auxiliary resource. */
 s32 mnuReleaseSelectedStaffPageResources(s32 unused) {
     s32 context = kwlnTaskGetUserValue();
-    s32 entryList = context + 0x284;
+    MenuPageWindow *entryList = &((MenuStaffContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     func_002ABEB0(context);
-    func_002B2C88(entryList, 0, 0, 0);
+    func_002B2C88((s32)entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
-    mnuClearEntries(entryList);
+    mnuClearEntries((u8 *)entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {
         mnuDestroyPanelGroup(((MenuStaffContext *)context)->panelHandle);
         ((MenuStaffContext *)context)->panelHandle = 0;
@@ -716,12 +716,12 @@ s32 mnuInitializeStaffPageWithSlotAsset(s32 unused) {
 /* Variant cleanup for the adjacent menu state; keep the same release ordering. */
 s32 mnuReleaseStaffSelectionPageResources(s32 unused) {
     s32 context = kwlnTaskGetUserValue();
-    s32 entryList = context + 0x284;
+    MenuPageWindow *entryList = &((MenuStaffContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     func_002AC660(context);
-    func_002B2C88(entryList, 0, 0, 0);
+    func_002B2C88((s32)entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
-    mnuClearEntries(entryList);
+    mnuClearEntries((u8 *)entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {
         mnuDestroyPanelGroup(((MenuStaffContext *)context)->panelHandle);
         ((MenuStaffContext *)context)->panelHandle = 0;
@@ -1007,12 +1007,12 @@ s32 mnuInitializeStaffValuePage(s32 unused) {
 /* Third menu-state cleanup uses the matching state-specific pre-release. */
 s32 mnuReleaseStaffValuePageResources(s32 unused) {
     s32 context = kwlnTaskGetUserValue();
-    s32 entryList = context + 0x284;
+    MenuPageWindow *entryList = &((MenuStaffContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuStaffContext *)context)->activeWindow, &((MenuStaffContext *)context)->fade);
     func_002ACA98(context);
-    func_002B2C88(entryList, 0, 0, 0);
+    func_002B2C88((s32)entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
-    mnuClearEntries(entryList);
+    mnuClearEntries((u8 *)entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {
         mnuDestroyPanelGroup(((MenuStaffContext *)context)->panelHandle);
         ((MenuStaffContext *)context)->panelHandle = 0;

@@ -1,5 +1,7 @@
 #include "prf_requirement.h"
 #include "common.h"
+
+extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 #include "kwln.h"
 #include "dat_state.h"
 #include "itf.h"
@@ -4328,7 +4330,7 @@ MantraBurstSlot *mnuSpawnBurstSlot(MantraBurstPool *pool, s8 wide, s8 side) {
 u32 mnuRequestEffectResource(u32 context, u32 config) {
     MantraEffectResource *resource = (MantraEffectResource *)sdfAllocSizeClassBlock(sizeof(MantraEffectResource));
     memset(resource, 0, sizeof(MantraEffectResource));
-    effRequestResourceByMode(context, config, 0, &resource->handle);
+    effRequestResourceByMode((const char *)context, (const char *)config, 0, &resource->handle);
     return (u32)resource;
 }
 

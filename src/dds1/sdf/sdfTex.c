@@ -1,27 +1,10 @@
 #include "common.h"
+#include "sdf_texture_file.h"
 #include "sdf.h"
 #include "ee_mmi.h"
 
 /* PlayStation 2 GS pixel storage formats used to size indexed palettes. */
 enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
-
-typedef struct SdfTextureFileHeader {
-    u8 unk00;
-    u8 flags;
-    u8 pad02[0xE];
-    u8 unk10;
-    u8 unk11;
-    s16 width;
-    s16 height;
-    u8 pixelFormat;
-    u8 clutFormat;
-    u16 lodParameters;
-    u8 unk1A;
-    u8 clampMode;
-    s32 resourceKey;
-    s32 unk20;
-    u8 pad24[0x1C];
-} SdfTextureFileHeader;
 
 extern SdfTex *sdfResourceListHead;
 extern u8 sdfTextureReleaseQueue;
