@@ -76,7 +76,7 @@ extern void EIntr(void);
 extern void (*D_003BD304)(s32 size, s32 allocationMode);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 struct SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 arg1);
-void sdfUpdateTextureHeadsWithInterruptsMasked(void *block);
+void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 void sdfTexCreateSecondPacket(SdfTex *texture);
 void sdfTexRefreshResourcePackets(SdfTex *texture);
 void *sdfAllocAndClearQuadwords(s32 size);
@@ -543,8 +543,7 @@ void func_002D1B28(void) {
 }
 
 /* Mark a range free and coalesce its neighbors while interrupts are masked. */
-void sdfUpdateTextureHeadsWithInterruptsMasked(void *block) {
-    SdfTexResource *textureBlock = block;
+void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock) {
     s32 restoreInterrupts;
 
     if (textureBlock == NULL) {
