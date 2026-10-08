@@ -66,7 +66,6 @@ extern s32 mnuUpdateStaffEntrySelectionFlags(s32, s32, MenuStaffContext *);
 extern u32 mnuSetPartyEntryCurrentId(DatPartyRecord *, u32);
 extern void func_002B9808(MenuWindowContainer *);
 
-extern void mnuHandlePanelListPageJumpInput();
 
 extern void mnuRetreatListCursorDefault(struct MenuList *);
 extern void mnuAdvanceListCursorDefault(struct MenuList *);
@@ -542,7 +541,6 @@ s32 mnuStaffListInput(KwlnTask *task) {
 
 /* Handle staff-item selection, confirmation and popup input. */
 s32 func_002AE580(KwlnTask *task) {
-    extern void mnuHandlePanelListPageJumpInput(u32, u32);
     extern s32 func_002ABED8(s32, s32, MenuStaffContext *);
     extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *, u32);
     extern char D_003E7434[];
@@ -581,7 +579,7 @@ s32 func_002AE580(KwlnTask *task) {
             if (buttons & MNU_STAFF_INPUT_NEXT_ROW) {
                 mnuAdvanceWindowListSelection(window);
             }
-            mnuHandlePanelListPageJumpInput((u32)window, (u32)&buttons);
+            mnuHandlePanelListPageJumpInput(window, (u32 *)&buttons);
             mnuClearWindowPanelTransitionFlag(window);
             input = buttons;
 
@@ -812,7 +810,6 @@ s32 mnuHandleStaffSelectionListNavigation(KwlnTask *task) {
 }
 
 s32 func_002AF020(KwlnTask *task) {
-    extern void mnuHandlePanelListPageJumpInput(u32, u32);
 
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
@@ -847,7 +844,7 @@ s32 func_002AF020(KwlnTask *task) {
             if (buttons & MNU_STAFF_INPUT_NEXT_ROW) {
                 mnuAdvanceWindowListSelection(window);
             }
-            mnuHandlePanelListPageJumpInput((u32)window, (u32)&buttons);
+            mnuHandlePanelListPageJumpInput(window, (u32 *)&buttons);
             mnuClearWindowPanelTransitionFlag(window);
 
             if (buttons & MNU_STAFF_INPUT_CONFIRM) {
@@ -1161,7 +1158,7 @@ s32 func_002AFE18(KwlnTask *task) {
         if (input & 0x20) {
             mnuAdvanceWindowListSelection(window);
         }
-        mnuHandlePanelListPageJumpInput((u32)window, (u32)&input);
+        mnuHandlePanelListPageJumpInput(window, &input);
         mnuClearWindowPanelTransitionFlag(window);
         if (input & 1) {
             current = mnuGetPartyEntryCurrentId(party);

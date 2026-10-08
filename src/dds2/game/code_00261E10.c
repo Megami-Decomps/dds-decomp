@@ -97,7 +97,6 @@ extern void func_002958B0();
 extern void func_002971E0(struct MenuList *, u32);
 extern void func_002B9808(MenuWindowContainer *);
 
-extern void mnuHandleListPageJumpInput(s32, u8 *, u32 *);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern u8 D_003CE578[];
 
@@ -464,8 +463,8 @@ s32 func_00262F78(KwlnTask *task) {
                 } else if (inputFlags & 0x20) {
                     mnuAdvanceWindowListSelection(state->window);
                 }
-                mnuHandleListPageJumpInput(state->windowResource,
-                                          (u8 *)state->window, &inputFlags);
+                mnuHandleListPageJumpInput(state->windowResource, state->window,
+                                          &inputFlags);
             }
             mnuPlayInputSound(0, inputFlags, &state->window->list->stateFlags);
             break;
