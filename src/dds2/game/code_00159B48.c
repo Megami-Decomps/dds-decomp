@@ -383,7 +383,7 @@ s32 billGetFirstEntryFramePeriod(BillObj *effect) {
 
 u16 billGetKindOneParameter(BillObj *effect) {
     if (effect->kind == 1) {
-        return effect->unk50;
+        return effect->animationActive;
     }
     return 0;
 }

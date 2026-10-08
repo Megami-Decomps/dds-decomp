@@ -384,10 +384,10 @@ s32 billGetFirstEntryFramePeriod(BillObj *effect) {
     return 0;
 }
 
-/* Read the kind-one billboard's halfword at +0x50. */
+/* Read the animation-active gate for list billboards. */
 u16 billGetKindOneParameter(BillObj *effect) {
     if (effect->kind == 1) {
-        return effect->unk50;
+        return effect->animationActive;
     }
     return 0;
 }

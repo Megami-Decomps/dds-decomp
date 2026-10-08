@@ -489,7 +489,7 @@ BillObj *billAllocList(void *resourceData) {
     newobj = sdfAllocSizeClassBlock(n * 20 + 0x6C);
     newobj->animationData = data;
     newobj->resolvedEntries = (BillOut *)((u8 *)newobj + 0x6C);
-    newobj->unk50 = 1;
+    newobj->animationActive = 1;
     newobj->pair.packetList = 0;
     newobj->pair.next = 0;
     newobj->pair.unk8 = 0;
@@ -508,7 +508,7 @@ BillObj *billCloneList(BillObj *obj) {
     newobj = sdfAllocSizeClassBlock(n * 20 + 0x6C);
     newobj->animationData = data;
     newobj->resolvedEntries = (BillOut *)((u8 *)newobj + 0x6C);
-    newobj->unk50 = 1;
+    newobj->animationActive = 1;
     newobj->pair.packetList = 0;
     newobj->pair.next = 0;
     billSetAnimationEntry(newobj, 0);
@@ -537,7 +537,7 @@ BillChildPayload *func_00158F88(BillObj *obj, BillOut *out) {
         out->frameIndex++;
         if ((u32)out->frameIndex >= entry->frameCount) {
             if (entry->flags & 0x10) {
-                obj->unk50 = 0;
+                obj->animationActive = 0;
                 out->frameIndex = entry->frameCount - 1;
             } else {
                 out->frameIndex = 0;
@@ -633,7 +633,7 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
     BillAnimationEntry *entry = data->entries + index;
 
     if (entry->frameCount == 0) {
-        obj->unk50 = 0;
+        obj->animationActive = 0;
         return;
     }
     if (entry->flags & 0x10000000) {
@@ -665,7 +665,7 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
     if (entry->unk8 & 0x100) {
         func_0035B6E0("billAnim..P2A POLYGON\n");
     }
-    obj->unk50 = 1;
+    obj->animationActive = 1;
 }
 
 extern s32 func_0035B6E0(const char *format, ...);
