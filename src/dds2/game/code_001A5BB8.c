@@ -1,3 +1,4 @@
+#include "fld_area_work.h"
 #include "common.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
@@ -262,7 +263,7 @@ extern AiSpecies *datEnemyAiRecords;
 extern s32 func_001B32F8(s32, s32 *);
 
 extern char D_00415840[]; /* "btl:endure=%d%%[ratio=%.2f]\n" */
-extern s32 fldAreaState[];
+
 extern u8 D_003B4EC8[];
 extern char D_004159A0[];
 
@@ -5060,9 +5061,9 @@ u32 func_001B5600(void) {
     }
     for (i = 0; i < 0x12; i++) {
         u8 area = D_003B4EC8[i * 2];
-        if (area == fldAreaState[4]) {
+        if (area == fldAreaState.area) {
             u8 zone = D_003B4EC8[i * 2 + 1];
-            if (zone == fldAreaState[5] + 1) {
+            if (zone == fldAreaState.floor + 1) {
                 btlBossDebugPrintf(D_004159A0, area, zone);
                 return 1;
             }

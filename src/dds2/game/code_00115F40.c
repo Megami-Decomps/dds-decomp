@@ -1,3 +1,4 @@
+#include "fld_area_work.h"
 #include "common.h"
 #include "bill_object_api.h"
 #include "dds3obj.h"
@@ -88,8 +89,6 @@ void billCopySourceVectorAndSetConfig(EffWorldNode *owner, BillConfig *config) {
 extern s32 fldTestMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueOffset);
 extern void billSetChildParameter(struct BillObj *billboard, u32 parameter);
-struct FldAreaWork;
-extern struct FldAreaWork fldAreaState;
 extern f32 sdfViewTargetVector[4];
 
 void effUpdateConfiguredBillboard(EffWorldNode *object) {
@@ -109,9 +108,8 @@ void effUpdateConfiguredBillboard(EffWorldNode *object) {
 
     config = resource->config;
     if (config->mapSelector != 0) {
-        s32 *areaWords = (s32 *)&fldAreaState;
-        s32 mapId = areaWords[4];
-        u32 slotIndex = areaWords[5] + 1;
+        s32 mapId = fldAreaState.area;
+        u32 slotIndex = fldAreaState.floor + 1;
 
         if (fldTestMapTargetFlag(mapId, slotIndex, config->mapSelector)) {
             resource->flags &= ~1;
@@ -179,9 +177,9 @@ void effUpdateConfiguredBillboard(EffWorldNode *object) {
         break;
     case 1:
         if (config->mapSelector != 0) {
-            s32 *areaWords = (s32 *)&fldAreaState;
-            s32 entry = fldGetMapSlotByte(areaWords[4], (u32)areaWords[5] + 1,
-                                          config->mapSelector);
+            s32 entry = fldGetMapSlotByte(fldAreaState.area,
+                                         (u32)fldAreaState.floor + 1,
+                                         config->mapSelector);
 
             if (entry != -1) {
                 billSetKind1Entry((struct BillObj *)resource->handle, (u32)entry);

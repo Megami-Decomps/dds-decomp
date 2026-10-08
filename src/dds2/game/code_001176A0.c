@@ -457,8 +457,8 @@ s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contextArg, u
     return result;
 }
 
-void sdfDispatchCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
-    sdfDispatchPrimaryUnitScript(unitIndex, scriptArg, contextArg, (u8)mode);
+s32 sdfDispatchCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
+    return sdfDispatchPrimaryUnitScript(unitIndex, scriptArg, contextArg, (u8)mode);
 }
 
 s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
@@ -480,16 +480,16 @@ s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, 
     return result;
 }
 
-void func_00118C58(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
-    evtRunContext(10, scriptArg, contextArg, unitIndex, mode);
+s32 func_00118C58(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+    return evtRunContext(10, scriptArg, contextArg, unitIndex, mode);
 }
 
-void func_00118C80(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
-    evtRunContext(7, scriptArg, contextArg, unitIndex, mode);
+s32 func_00118C80(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+    return evtRunContext(7, scriptArg, contextArg, unitIndex, mode);
 }
 
-void sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
-    func_00118C80(unitIndex, scriptArg, contextArg, (u8)mode);
+s32 sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
+    return func_00118C80(unitIndex, scriptArg, contextArg, (u8)mode);
 }
 
 

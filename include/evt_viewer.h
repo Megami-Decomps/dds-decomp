@@ -164,8 +164,8 @@ typedef struct EvtRuntime {
     u8 pad23B9[3];
     s32 horizontalOffset;
     s32 updateCount;
-    u8 pad23C4;
-    u8 windowActive;
+    s8 windowShadeFade; /* +0x23C4: signed viewer shade ramp, capped at 94. */
+    s8 windowActive;
     s16 unk23C6;
     s32 tableColumn;
     s32 cameraColorActive;
