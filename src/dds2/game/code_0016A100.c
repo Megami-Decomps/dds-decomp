@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "btl_state.h"
 #include "eff.h"
@@ -95,7 +96,6 @@ extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
 
 extern void sdfReleaseChipBlock(void *p);
 
-extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
 extern void func_00164C68(void *system, u32 value);
 extern void parRiseFallSymmetricCellAlpha(void *system, void *a, void *b, void *c);

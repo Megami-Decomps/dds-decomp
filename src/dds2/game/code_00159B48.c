@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "sdf_gs_packet.h"
 #include "pcp_vu0.h"
@@ -49,7 +50,6 @@ typedef struct EffEmitterHead {
 } EffEmitterHead;
 
 
-extern void parReleaseCellSystem(s32);
 extern void effTrackPolyDestroyModelWorkList(s32);
 
 extern void effDestroyResources(EffEmitterHead *owner);
@@ -870,10 +870,10 @@ void effDestroyResources(EffEmitterHead *owner) {
         effParReleaseNodeResource(owner->sub.value.table);
         break;
     case 2:
-        parReleaseCellSystem((s32)owner->sub.primaryDrawSystem);
+        parReleaseCellSystem(owner->sub.primaryDrawSystem);
         break;
     case 3:
-        parReleaseCellSystem((s32)owner->sub.secondaryDraw.system);
+        parReleaseCellSystem(owner->sub.secondaryDraw.system);
         break;
     case 4:
         effTrackPolyDestroyModelWorkList((s32)owner->sub.secondaryDraw.modelList);

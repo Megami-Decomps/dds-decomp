@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "eff.h"
@@ -26,11 +27,10 @@ extern f32 sdfViewTargetVector[4];
 extern f32 D_003B1530[4];
 
 
-extern void parReleaseCellSystem(u32);
 extern void func_0017ED50(void *, void *);
 
 void effPCPNeedleFree(EffPCPNeedleWork *work) {
-    parReleaseCellSystem(work->system);
+    parReleaseCellSystem((ParSystem *)work->system);
     effReleaseAttachedResources(work->resource);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }

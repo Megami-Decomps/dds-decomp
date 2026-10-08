@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff.h"
@@ -10,7 +11,6 @@
 extern void *effParamTableGetBlock(void *data, s32 index);
 extern void *effCreateThunderCellSystemWork(void *work);
 
-extern void parReleaseCellSystem(ParSystem *system);
 extern void parFillSymmetricCellColors(u32 param0, u32 param1, void *cells, u32 param3);
 extern void parDecreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
 extern void parIncreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
@@ -151,7 +151,6 @@ u32 func_0016B198(u32 value) {
 }
 
 /* The descriptor owns the allocation; retention returns its 32-bit address. */
-extern ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void func_00164C68(void *system, u32 value);
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
 extern void parPrependCellNode(void *system);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "btl_state.h"
 #include "eff.h"
@@ -623,7 +624,6 @@ typedef struct {
     u32 handle;
 } ParamThunderWork;
 
-extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void parRiseFallSymmetricCellAlpha(void *system, u32 arg1, u32 arg2, u32 arg3);
 extern void func_0015D078(void *system, u32 value);
 
