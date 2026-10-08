@@ -3999,3 +3999,35 @@ structure assignment: the byte-copy alias contract preserves the dependency
 record's vector-pointer store before the unaligned eight-byte transfers.
 No packing, additional owner view, or compiler flag override is required.
 
+The DDS1 twin `func_001150F0` uses the same
+`EffectEventVectorParameters` shape and `D_0039F7D0` initializer. That
+initial copy retains the last three parameters and color while the two
+SDK vector copies replace only the first 32 bytes. The native mixer
+dependency is the `SoundMixer *` returned by `func_00190100`, whose
+matched implementation calls `sndMixerClone`.
+
+## Panel resources and typed pair updates
+
+DDS2's `MenuPanelGroup.texture` is the `EffectSlotSet *` passed to the
+footer draw and group constructor, not an integer texture identifier.
+The existing complete `MenuPanelItem` owns the pair setter's +18/+1C
+stores (`value18` and `option`); its definition must precede that setter.
+`MenuStaffContext.spriteArg1` still belongs to the legacy window-resource
+word API. Its one explicit word-to-pointer conversion at group creation
+is the same boundary used by the neighbouring sprite constructor.
+Retyping that transport field and its producer/consumer API is separate
+end-to-end debt, not a reason to add pointer/integer round trips elsewhere.
+
+## Serialized model commands and buffered reference lookup
+
+`SdfCommandNode.payload` is packet storage for kind 1 and the serialized
+command pointer for kinds 2/3. Its +C allocation descriptor is independent.
+Reference commands carry a kind byte, flags at +16, a count at +18 and
+halfword object indices at +1A. Their dispatcher receives the primary
+`SdfModel *` and indexes `model->list->buffer` as `SdfDrawNode **`; the old
+pointer-to-padded-context view incorrectly described those two loads.
+Both existing dispatchers retain their native flag/count guards and real
+bottom-tested loop. The model builder and reset provider consume a
+`u32 *` serialized command-list stream, with the draw-node owner typed
+end-to-end. These owner/API changes preserve every affected function.
+

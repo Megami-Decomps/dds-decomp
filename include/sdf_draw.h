@@ -42,13 +42,31 @@ typedef struct SdfCommandNode {
     u8 kind;
     s8 packetSelector;
     s16 quadwordCount;
-    u32 unk08;
+    void *payload; /* Packet bytes for kind 1; serialized commands for kinds 2/3. */
     struct SdfMemBlock *allocation;
 } SdfCommandNode;
 
 typedef char SdfCommandNode_size_must_be_0x10[(sizeof(SdfCommandNode) == 0x10) ? 1 : -1];
+typedef char SdfCommandNode_payload_offset_must_be_8[
+    ((u32)&((SdfCommandNode *)0)->payload == 0x08) ? 1 : -1];
 typedef char SdfCommandNode_allocation_offset_must_be_C[
     ((u32)&((SdfCommandNode *)0)->allocation == 0x0C) ? 1 : -1];
+
+/* Serialized kinds 5/7 name draw nodes by index in the model's buffered list. */
+typedef struct SdfObjectRefCommand {
+    u8 kind;
+    u8 pad01[0x15];
+    u16 flags;
+    u16 count;
+    u16 objectIndices[1];
+} SdfObjectRefCommand;
+
+typedef char SdfObjectRefCommand_flags_at_16[
+    ((u32)&((SdfObjectRefCommand *)0)->flags == 0x16) ? 1 : -1];
+typedef char SdfObjectRefCommand_count_at_18[
+    ((u32)&((SdfObjectRefCommand *)0)->count == 0x18) ? 1 : -1];
+typedef char SdfObjectRefCommand_indices_at_1A[
+    ((u32)&((SdfObjectRefCommand *)0)->objectIndices == 0x1A) ? 1 : -1];
 
 struct SdfModel;
 struct Motion;
@@ -124,6 +142,7 @@ typedef struct SdfModel {
 typedef char SdfModel_size_must_be_0x9C[(sizeof(SdfModel) == 0x9C) ? 1 : -1];
 
 SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id);
+void sdfProcessReferencedObjects(SdfModel *model, SdfObjectRefCommand *source);
 
 
 /* Serialized clip duration/reserved remain halfwords (tools/fld.py).
