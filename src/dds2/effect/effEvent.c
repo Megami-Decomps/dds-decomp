@@ -1139,9 +1139,7 @@ void effEventSetState(EffEventWork *work, void *actor) {
     work->actor = actor;
 }
 
-extern void func_00197F60(EffEventWork *work);
-
-INCLUDE_ASM(const s32, "effect/effEvent", func_00197F60);
+INCLUDE_ASM(const s32, "effect/effEvent", effEventUpdateEffectParameters);
 
 
 /* 0x3C-byte event holder: a handle, the event it owns, an init block copied to the event. */
@@ -1197,7 +1195,7 @@ EffEventLight *effEventLightClone(EffEventLight *src) {
 
 /* Apply the native owner operation to the pointer stored in the record prefix. */
 void func_00198448(EffEventLight *work) {
-    func_00197F60(work->owner);
+    effEventUpdateEffectParameters(work->owner);
 }
 
 /* Copy xyz, lower y by half the aim height, clear w and publish the record. */

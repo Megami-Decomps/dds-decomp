@@ -2292,6 +2292,7 @@
 0x00190238	effEventCopyFileRecordHeader	inferred	Copies the complete 0x30-byte file record header from source to destination.
 0x001902A0	effEventCopySerializedRecord	inferred	readability/matching review (QP16)
 0x00190308	effEventSetScale	inferred	readability/matching review (QP16)
+0x00190328	effEventUpdateEffectParameters	inferred	confidence=high; paired native bodies; updates active effect rows from event position/orientation, dispatches position/matrix/color values and advances the effect cursor; paired DDS2 0x00197F60.
 0x00190640	effEventLightCreate	inferred	0x3C holder: handle, owner event, 0x30 init block, active flag [names_M61_EffVu.tsv]
 0x00190708	effEventLightDestroy	inferred	confidence=high; matched-C; src/dds1/effect/effEvent.c:853:func_00190708; Releases light owner, conditionally releases cloned handle and frees light work.; twin=0x00198340, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00190748	effEventLightClone	inferred	clone: new owner event from src handle + init block copy [names_M61_EffVu.tsv]
