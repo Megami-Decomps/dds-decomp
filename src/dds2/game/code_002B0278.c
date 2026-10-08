@@ -388,13 +388,6 @@ void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32
 
 extern void mnuDrawStaffPartySelectionPanel(s32);
 
-typedef struct MenuPartyView {
-    u8 pad00[0x18];
-    MenuWindowContainer *window;
-    u8 pad1C[0x30];
-    s32 viewMode;
-} MenuPartyView;
-
 extern const char *D_003E78D0[];
 extern s32 D_00435E70;
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
@@ -404,7 +397,7 @@ extern void mnuClearStaffSceneConfigEntries(MenuPanelGroup *);
 
 void mnuDrawStaffPartySelectionPanel(s32 task) {
     MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(task);
-    MenuPartyView *view = (MenuPartyView *)context->party;
+    MenuStaffChoices *choices = (MenuStaffChoices *)context->party;
     DatPartyRecord *unit = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
     s32 selection;
     FrFontGlyph *glyph;
@@ -412,9 +405,11 @@ void mnuDrawStaffPartySelectionPanel(s32 task) {
     mnuDrawCampIconBackdropByKind(1, task);
     mnuCreateStaffImageSprite(12);
     mnuApplyPackedGroupValues(context->panelGroup, unit->itemId);
-    selection = view->window->list->count == 0 ? 0 : view->window->list->cursor->sortKeySecondary;
+    selection = choices->windows[4]->list->count == 0
+                    ? 0 : choices->windows[4]->list->cursor->sortKeySecondary;
     if (selection != 0) {
-        mnuSetPanelItemsFromRow(context->panelGroup, view->window->list->cursor->sortKeyTertiary);
+        mnuSetPanelItemsFromRow(context->panelGroup,
+                                choices->windows[4]->list->cursor->sortKeyTertiary);
     }
     mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, unit, context->panelGroup, 2, 0x53);
     if (selection != 0) {
@@ -422,8 +417,8 @@ void mnuDrawStaffPartySelectionPanel(s32 task) {
     }
     mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0, &context->transition, 0x53);
     if (selection != 0) {
-        if (view->viewMode == 0) {
-            if (view->window->list->cursor->sortKeyPrimary != 0) {
+        if (choices->thirdListReset == 0) {
+            if (choices->windows[4]->list->cursor->sortKeyPrimary != 0) {
                 func_002AAC70(2, selection, D_00435E70, context, 1, 1, 0x53);
             } else {
                 func_002AAC98(2, 0, 0, context, 1, 0x53);
@@ -444,8 +439,8 @@ void mnuDrawStaffPartySelectionPanel(s32 task) {
     } else {
         func_002AAC98(2, 0, 0, context, 1, 0x53);
     }
-    if (view->window->list->cursor != view->window->list->first) {
-        if (view->viewMode == 0) {
+    if (choices->windows[4]->list->cursor != choices->windows[4]->list->first) {
+        if (choices->thirdListReset == 0) {
             func_002AA7A0(8, context->displayHandle);
         } else {
             func_002AA7A0(7, context->displayHandle);
