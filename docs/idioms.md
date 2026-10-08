@@ -3333,6 +3333,12 @@ DDS2 `func_00315950` and `mnuIsResourceCategoryAvailable` use the canonical
 header/adjacency view is unnecessary. This owner fold leaves
 `code_00313BB8` at `94 match, 0 differ`.
 
+The menu's eight-byte unit entries contain an eight-bit `nodeId`, not a
+13-bit ID. `00289CA0` and `00289CE8` store that byte; `00289CB0..00289CF8`
+separately update the four-bit kind and marked bit with `LHU`/`SH`.
+Keep these fields in the same `u16` bitfield container, with the ID occupying
+its aligned low byte. No union or alternate entry view is needed.
+
 
 ## DDS1 HARI form counter
 
@@ -3358,3 +3364,14 @@ these pointer contracts. Clients that only compare the lookup result with
 NULL can use the canonical incomplete `struct ScrData *` tag without adding
 a second script-data definition or importing the complete script header.
 
+
+## Reward-panel glyph pointer contracts
+
+DDS1 `code_002649B0`'s formatted reward text retains the actual
+`FrFontGlyph *` returned by `func_001979C8`. The font measurement provider
+returns `u32`, and `frFontSetContextPair` receives that glyph pointer with
+two `u32` coordinates. Importing the canonical interface declaration removes
+the caller's old integer-handle prototypes and pointer casts without changing
+either enabled text routine. The three-row reward renderer remains ASM:
+the true-pointer candidate still differs in five instruction words, involving
+the final color-array store and the second text call's argument scheduling.
