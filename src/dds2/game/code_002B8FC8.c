@@ -216,7 +216,6 @@ extern void func_002B2408();
 
 extern MenuIconBundle *mnuCreateIconBundle(u32);
 
-extern MenuIconState *func_002B9FF8();
 extern s32 effConfigureIndexedSlotMaterial(u8 *, u32, u8 *, u32, u32, u32, u32);
 
 
@@ -1209,7 +1208,7 @@ INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AEE8);
 
 INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AF00);
 
-MenuIconState *func_002B9FF8(u32 mode, s32 resource, s32 material) {
+MenuIconState *mnuCreatePanelIconState(u32 mode, s32 resource, s32 material) {
     s32 keys[6] = { 0x20, 0x22, 0x1F, 0x21, 0x22, 0x1F };
     MenuIconState *panel;
     s32 index;
@@ -1920,60 +1919,63 @@ void mnuSetPageParams(MenuSprites *page, s32 mode) {
 }
 
 typedef struct MenuSpritePlacement {
-    u32 *source;
+    EffectSlotSet *source;
     u32 index;
     s32 x;
     s32 y;
 } MenuSpritePlacement;
 
 typedef struct MenuGatedSpritePlacement {
-    u32 *source;
+    EffectSlotSet *source;
     u32 index;
     s32 x;
     s32 y;
     s8 requiresFlag;
 } MenuGatedSpritePlacement;
 
-void *func_002BBA38(s32 kind, s32 mainResource, s32 itemResource,
-                   s32 iconResource, s32 cursorResource, s32 alternateResource) {
+MenuSprites *mnuCreatePageSpriteSet(s32 kind, EffectSlotSet *mainResource,
+                                    EffectSlotSet *itemResource,
+                                    EffectSlotSet *iconResource,
+                                    EffectSlotSet *cursorResource,
+                                    EffectSlotSet *alternateResource) {
     u32 i;
     s32 enabled = mdlFlagTest(0x901);
     MenuSpritePlacement icons[5] = {
-        {(u32 *)iconResource, 7, 0x170, 0xA0},
-        {(u32 *)mainResource, 0x14, 0x8A0, 0xE8},
-        {(u32 *)iconResource, 3, 0x1E0, 0x1E0},
-        {(u32 *)iconResource, 4, 0x1020, 0x1E0},
-        {(u32 *)iconResource, 5, 0x310, 0xE0}
+        {iconResource, 7, 0x170, 0xA0},
+        {mainResource, 0x14, 0x8A0, 0xE8},
+        {iconResource, 3, 0x1E0, 0x1E0},
+        {iconResource, 4, 0x1020, 0x1E0},
+        {iconResource, 5, 0x310, 0xE0}
     };
     MenuSpritePlacement cursors[4] = {
-        {(u32 *)itemResource, 0x12, 0x720, 0x358},
-        {(u32 *)itemResource, 0x12, 0x720, 0x430},
-        {(u32 *)cursorResource, 0x2C, 0, 0},
-        {(u32 *)alternateResource, 0x18, 0, 0}
+        {itemResource, 0x12, 0x720, 0x358},
+        {itemResource, 0x12, 0x720, 0x430},
+        {cursorResource, 0x2C, 0, 0},
+        {alternateResource, 0x18, 0, 0}
     };
     MenuGatedSpritePlacement items[11] = {
-        {(u32 *)itemResource, 0xE, 0x1B0, 0x348, 0},
-        {(u32 *)itemResource, 7, 0x410, 0x358, 0},
-        {(u32 *)itemResource, 0x10, 0xD0, 0x428, 1},
-        {(u32 *)itemResource, 7, 0x410, 0x430, 1},
-        {(u32 *)itemResource, 8, 0x570, 0x380, 0},
-        {(u32 *)itemResource, 0xA, 0xCB0, 0x380, 0},
-        {(u32 *)itemResource, 0xC, 0xDF0, 0x380, 0},
-        {(u32 *)itemResource, 0xD, 0x1170, 0x380, 0},
-        {(u32 *)itemResource, 9, 0x570, 0x458, 0},
-        {(u32 *)itemResource, 0xB, 0xE20, 0x458, 0},
-        {(u32 *)itemResource, 0xF, 0xEB0, 0x330, 0}
+        {itemResource, 0xE, 0x1B0, 0x348, 0},
+        {itemResource, 7, 0x410, 0x358, 0},
+        {itemResource, 0x10, 0xD0, 0x428, 1},
+        {itemResource, 7, 0x410, 0x430, 1},
+        {itemResource, 8, 0x570, 0x380, 0},
+        {itemResource, 0xA, 0xCB0, 0x380, 0},
+        {itemResource, 0xC, 0xDF0, 0x380, 0},
+        {itemResource, 0xD, 0x1170, 0x380, 0},
+        {itemResource, 9, 0x570, 0x458, 0},
+        {itemResource, 0xB, 0xE20, 0x458, 0},
+        {itemResource, 0xF, 0xEB0, 0x330, 0}
     };
     MenuSprites *page = sdfAllocSizeClassBlock(sizeof(MenuSprites));
     memset(page, 0, sizeof(MenuSprites));
     page->unkC = kind;
     for (i = 0; i < 5; i++) {
-        page->icon[i] = effCreateResourceSlotSet(icons[i].source, icons[i].index, 1);
+        page->icon[i] = effCreateResourceSlotSet((u32 *)icons[i].source, icons[i].index, 1);
         itfSetGridEntryQuantizedAndRefresh(page->icon[i], 0, icons[i].x, icons[i].y, 0, 0);
     }
     for (i = 0; i < 11; i++) {
         if (!items[i].requiresFlag || enabled) {
-            page->item[i] = effCreateResourceSlotSet(items[i].source, items[i].index, 1);
+            page->item[i] = effCreateResourceSlotSet((u32 *)items[i].source, items[i].index, 1);
             itfSetGridEntryQuantizedAndRefresh(page->item[i], 0, items[i].x, items[i].y, 0, 0);
         } else {
             page->item[i] = NULL;
@@ -1981,7 +1983,7 @@ void *func_002BBA38(s32 kind, s32 mainResource, s32 itemResource,
     }
     for (i = 0; i < 4; i++) {
         if (cursors[i].source != NULL) {
-            page->cursor[i] = effCreateResourceSlotSet(cursors[i].source, cursors[i].index, 1);
+            page->cursor[i] = effCreateResourceSlotSet((u32 *)cursors[i].source, cursors[i].index, 1);
             itfSetGridEntryQuantizedAndRefresh(page->cursor[i], 0, cursors[i].x, cursors[i].y, 0, 0);
         } else {
             page->cursor[i] = NULL;
@@ -2027,12 +2029,11 @@ void mnuDrawIconRow(s32 unusedA, s32 unusedB, s32 depth, s32 skip, MenuSprites *
     }
 }
 
-extern void *func_002BBA38();
-
-
 void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6) {
     mnuSelectPage(menu, index);
-    menu->slots[index].windowSprites = func_002BBA38(0, a2, a3, a4, a5, a6);
+    menu->slots[index].windowSprites = mnuCreatePageSpriteSet(
+        0, (EffectSlotSet *)a2, (EffectSlotSet *)a3, (EffectSlotSet *)a4,
+        (EffectSlotSet *)a5, (EffectSlotSet *)a6);
     menu->flags |= MNU_PAGE_WINDOW_SPRITE_MODE;
 }
 
