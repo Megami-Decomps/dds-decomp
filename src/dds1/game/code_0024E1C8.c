@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_resource_slots.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "eff.h"
@@ -545,7 +546,7 @@ void mnuReleaseResourceSlots(MnuResourceTaskWork *unusedWork) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < MNU_MANTRA_RESOURCE_SLOT_COUNT; ++slotIndex) {
         if (D_0036C698[slotIndex] != 0) {
-            effDestroyResourceSlotSet(D_0036C698[slotIndex]);
+            effDestroyResourceSlotSet((EffectSlotSet *)D_0036C698[slotIndex]);
             D_0036C698[slotIndex] = 0;
         }
     }

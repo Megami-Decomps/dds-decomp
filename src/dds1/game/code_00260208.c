@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_resource_slots.h"
 #include "mnu_staff.h"
 #include "kwln.h"
 #include "sdf_resource.h"
