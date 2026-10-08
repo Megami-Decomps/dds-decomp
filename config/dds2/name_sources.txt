@@ -1322,6 +1322,7 @@
 0x001784E0	effSetRecordPoolDrawMode	inferred	confidence=high; matched-C; src/dds2/game/code_00176E28.c:673:func_001784E0; Sets the record-pool submission mode used to choose the draw sink or alternate blend packet path.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001784E8	effSetRecordPoolColor	inferred	confidence=high; matched-C; src/dds2/game/code_00176E28.c:678:func_001784E8; Sets the packed color supplied to the record-pool packet builder.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001784F0	effSetRecordPoolScale	inferred	confidence=high; matched-C; src/dds2/game/code_00176E28.c:682:func_001784F0; Sets the uniform scale used by the scaled record-pool transform.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x001784F8	effScatterCreateRadialWork	inferred	allocates and initializes radial work with particles, a child pool, and optional duplicate group work
 0x001787E0	effScatterCreateFromParameterTriplet	inferred	Extracts three packed parameter blocks and creates scatter work from them. [names_reviewed6.tsv]
 0x001789C0	effPcpScatterInitRadialParticle	inferred	readability/matching review (QP16)
 0x00179168	effScatterCopyRadialVector	inferred	queued
@@ -1388,6 +1389,7 @@
 0x0017D770	effScatterSetFlatInstanceScale	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x00175B18, input-family pairing. [names_qp10.tsv]
 0x0017D778	effScatterSetFlatInstanceColor	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x00175B20, input-family pairing. [names_qp10.tsv]
 0x0017D780	effScatterCopyFlatInstanceMatrix	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x00175B28, input-family pairing. [names_qp10.tsv]
+0x0017D7A8	effScatterCreateDrawObject	inferred	allocates a drawable owner with geometry arrays and an SDF asset for scatter effects
 0x0017DD08	effGetScatterEntry	inferred	Returns the indexed word from a scatter object's entry table.
 0x0017DD20	effScatterStoreSourceTransformMatrix	inferred	Copies a source transform matrix into scatter effect work using VU registers. [names_reviewed14.tsv]
 0x0017DD50	effNeedleCreateWork	inferred	U3
