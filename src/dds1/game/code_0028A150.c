@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "sdf_chip.h"
 #include "eff_curve.h"
@@ -11,6 +12,7 @@
 #include "mnu_list.h"
 #include "kwln_task_lifecycle.h"
 #include "eff_expanded_list.h"
+typedef struct MenuResourceWork MenuResourceWork;
 struct SdfTex;
 struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
@@ -476,13 +478,11 @@ extern void *effRetainResource(void *name);
 
 extern void *billCreateIndexed(s32 mode, void *name);
 
-extern void billMarkKindOneFlag(void *handle);
 
 extern void billSetBillboardMode(void *handle, s16 index);
 
 extern void *fileAllocateGridRecordSlots(u16 type, u32 count, void *src);
 
-extern void *billCloneObjectRetainingSharedData(void *handle);
 
 
 /* Init record at fileCursorPulseState. */
@@ -3181,7 +3181,7 @@ typedef struct FileConfigTask {
     u32 effect;     /* 0x38: effect resource requested for the save scene */
 } FileConfigTask;
 
-extern void mnuReleaseEffectResource(u32);
+extern void mnuReleaseEffectResource(MenuResourceWork *);
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
 
 void fileConfigTaskDestroy(void) {
@@ -3193,7 +3193,7 @@ void fileConfigTaskDestroy(void) {
         fileSavedSlotFlags = datGameState->world.slotFlags;
         if (*(u32 *)(fileConfigTaskWork + 4) == 1) {
             dds3AdminSubmitModeRequest(2, &request, 4, 0);
-            mnuReleaseEffectResource(((FileConfigTask *)fileConfigTaskWork)->effect);
+            mnuReleaseEffectResource((MenuResourceWork *)((FileConfigTask *)fileConfigTaskWork)->effect);
             mnuAdvanceTitleStateUnderSemaphore();
         }
         node = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->head;
@@ -5014,8 +5014,8 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
         if (dst->deviceHandle != NULL) {
             billDispatchByKind(dst->deviceHandle);
         }
-        dst->deviceHandle = billCloneObjectRetainingSharedData(src->deviceHandle);
-        billMarkKindOneFlag(dst->deviceHandle);
+        dst->deviceHandle = billCloneObjectRetainingSharedData((struct BillObj *)src->deviceHandle);
+        billMarkKindOneFlag((struct BillObj *)(dst->deviceHandle));
         if (dst->recordWork != NULL) {
             FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)dst->recordWork)->data0;
             billSetBillboardMode(dst->deviceHandle, (s16)record->alphaTrack.surfaceIndex);
@@ -5096,7 +5096,7 @@ void fileLoadObjectOpenAndStartDevice(LoadObj *obj, void *name) {
         billDispatchByKind(obj->deviceHandle);
     }
     obj->deviceHandle = billCreateIndexed(1, name);
-    billMarkKindOneFlag(obj->deviceHandle);
+    billMarkKindOneFlag((struct BillObj *)(obj->deviceHandle));
     if (obj->recordWork != NULL) {
         FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)obj->recordWork)->data0;
         billSetBillboardMode(obj->deviceHandle, (s16)record->alphaTrack.surfaceIndex);

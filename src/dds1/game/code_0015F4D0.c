@@ -45,7 +45,9 @@ extern u32 D_003BB01C;
 extern u32 D_003BB020;
 
 typedef struct EffectDispatchState {
-    u8 pad00[0xB0];
+    u8 pad00[0x60];
+    u32 value60;
+    u8 pad64[0x4C];
     u16 handler;
     u16 valueB2;
 } EffectDispatchState;
@@ -126,8 +128,8 @@ void effComposeBillboardTransformMatrix(u8 *effect, void *matrix) {
     VU0_STORE_MATRIX(effect + 0x20);
 }
 
-void func_0015F6E8(BillObj *effect, void *value) {
-    effect->unk60 = value;
+void func_0015F6E8(EffectDispatchState *effect, u32 value) {
+    effect->value60 = value;
 }
 
 /* A value staged with no pending work is immediately mirrored to the active slot. */

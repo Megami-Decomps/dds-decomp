@@ -2,6 +2,7 @@
 #include "sdf_task_work.h"
 #include "mnu_mantra_grid.h"
 #include "mnu_profile_progress.h"
+#include "mnu_scene_work.h"
 #include "sdf_grid.h"
 
 typedef struct MantraNeighborRecord {
@@ -50,42 +51,37 @@ u32 func_00258508(s32 direction, MnuMantraGridEntry *scene, MantraNeighborState 
 
 INCLUDE_ASM(const s32, "game/code_00258258", func_00258620);
 
-typedef struct {
-    s32 count;
-    s32 mode;
-} SoundVoice;
-
 void func_0024E728(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
 
 INCLUDE_ASM(const s32, "game/code_00258258", func_00258A70);
 
 
-void func_00258AF0(u32 *state, u32 value) {
-    state[1] = value;
-    *state = 0;
+void func_00258AF0(MnuGridFeedbackState *state, u32 mode) {
+    state->mode = mode;
+    state->frame = 0;
 }
 
 void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
 
 
-/* Step the voice's notification counter (wraps at 31); mode 1 plays the cue once at count 0 and then
- * drops back to mode 0. Implicit int: retail keeps jal + epilogue for the trailing void call. */
-func_00258B00(SoundVoice *voice) {
+/* Step the notification frame (wraps at 31); mode 1 plays the cue once at frame 0.
+ * Its unused implicit-int result preserves the call's non-sibling epilogue. */
+func_00258B00(MnuGridFeedbackState *voice) {
     s32 notify;
 
     notify = 0;
     switch (voice->mode) {
     case 0:
-        voice->count = voice->count + 1;
-        if (voice->count >= 0x1F) {
-            voice->count = 0;
+        voice->frame = voice->frame + 1;
+        if (voice->frame >= 0x1F) {
+            voice->frame = 0;
         }
         break;
     case 1:
-        notify = voice->count == 0;
-        voice->count = voice->count + 1;
-        if (voice->count >= 0x1F) {
-            voice->count = 0;
+        notify = voice->frame == 0;
+        voice->frame = voice->frame + 1;
+        if (voice->frame >= 0x1F) {
+            voice->frame = 0;
             voice->mode = 0;
         }
         break;
@@ -100,7 +96,7 @@ void func_0024E3C0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
 void func_0024E470(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                    s32 placementIndex, s32 context, f32 rotation);
 
-void func_00258B90(s32 x, s32 y, s32 z, s32 alpha, SoundVoice *state,
+void func_00258B90(s32 x, s32 y, s32 z, s32 alpha, MnuGridFeedbackState *state,
                    s32 context) {
     f32 progress;
 
@@ -109,7 +105,7 @@ void func_00258B90(s32 x, s32 y, s32 z, s32 alpha, SoundVoice *state,
     case 0: {
         f32 rotation;
         f32 degrees;
-        progress = (f32)state->count / 30.0f;
+        progress = (f32)state->frame / 30.0f;
         rotation = 6.2831853f;
         degrees = 57.29578f;
         func_0024E3C0(x, y, z, alpha, 0x20, 0x43, context);
@@ -125,11 +121,11 @@ void func_00258B90(s32 x, s32 y, s32 z, s32 alpha, SoundVoice *state,
         f32 secondary;
         f32 degrees;
         s32 count;
-        progress = (f32)state->count / 30.0f;
+        progress = (f32)state->frame / 30.0f;
         progress = 1.0f - progress;
         originalAlpha = (f32)alpha;
         func_0024E3C0(x, y, z, (s32)(originalAlpha * progress), 0x20, 0x41, context);
-        count = state->count;
+        count = state->frame;
         if (count < 10) {
             progress = (f32)count / 10.0f;
             fade = 1.0f;
@@ -151,7 +147,7 @@ void func_00258B90(s32 x, s32 y, s32 z, s32 alpha, SoundVoice *state,
         func_0024E470(x, y, z, alpha, 0x20, 0x40, context, progress * 1.5707963f * degrees);
         func_0024E470(x, y, z, (s32)(originalAlpha * secondary), 0x20, 0x40, context,
                       1.5707963f * 57.29578f);
-        progress = (f32)state->count / 30.0f;
+        progress = (f32)state->frame / 30.0f;
         func_0024E3C0(x, y, z, (s32)(originalAlpha * progress), 0x20, 0x43, context);
         break;
     }
@@ -243,22 +239,22 @@ extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *scene, MnuProfileProgres
 extern void func_00258EB8(MnuMantraGridEntry *entry);
 
 void func_002593E0(MnuProfileProgress *target, SdfGrid *grid, SdfGridCell *entry) {
-    void *scene;
+    MenuSceneWork *scene;
     MnuMantraGridEntry *displayEntry;
     u32 flags;
 
-    scene = (void *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
+    scene = (MenuSceneWork *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
     displayEntry = (MnuMantraGridEntry *)(u32)entry->value;
     displayEntry->frame += 1;
     if ((f32)displayEntry->frame > 60.0f) {
         displayEntry->frame = 0;
     }
     flags = mnuGetMantraDisplayFlags(displayEntry, target);
-    if ((flags & 1) != 0) {
-        func_00258B00((u8 *)scene + 0x488);
+    if ((flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) != 0) {
+        func_00258B00(&scene->gridFeedback);
         return;
     }
-    if ((flags & 2) != 0) {
+    if ((flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP) != 0) {
         func_00258EB8(displayEntry);
     }
 }

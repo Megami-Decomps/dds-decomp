@@ -1,5 +1,6 @@
 #include "kwln.h"
 #include "common.h"
+#include "bill_object_api.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -204,7 +205,6 @@ void sdfStreamCreateWithParams(s32, s32, s32, s32, s32);
 
 void effApplyNodeScale(s32, float);
 
-void billSetChildScaleComponents(s32, float, float);
 
 s32 func_0011F250(s32, s32, s32, s32, s32, s32, s32);
 
@@ -833,7 +833,7 @@ MdlResourceItem *mdlInsertResourceItem(MdlCtx *owner, s32 type, s32 subtype) {
 }
 
 void mdlAdvanceBillboardPart(MdlPartEntry *entry) {
-    billCloneObjectRetainingSharedData((u32)entry->object);
+    billCloneObjectRetainingSharedData((struct BillObj *)entry->object);
     entry->state = entry->state + 1;
 }
 
@@ -1140,7 +1140,7 @@ void mdlSetResourceFrame(MdlCtx *owner, MdlResourceItem *item, s32 frame) {
 void mdlSetResourceAmount(MdlCtx *owner, MdlResourceItem *item, float amount) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
-        billSetChildScaleComponents(item->payload.part.handle, amount, amount);
+        billSetChildScaleComponents((struct BillObj *)item->payload.part.handle, amount, amount);
         return;
     case MDL_RESOURCE_EFFECT:
         effApplyNodeScale(item->payload.part.handle, amount);
