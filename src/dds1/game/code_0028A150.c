@@ -482,7 +482,6 @@ extern void billSetBillboardMode(void *handle, s16 index);
 
 extern void *fileAllocateGridRecordSlots(u16 type, u32 count, void *src);
 
-extern void *billCloneObjectRetainingSharedData(void *handle);
 
 
 /* Init record at fileCursorPulseState. */
@@ -5014,7 +5013,7 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
         if (dst->deviceHandle != NULL) {
             billDispatchByKind(dst->deviceHandle);
         }
-        dst->deviceHandle = billCloneObjectRetainingSharedData(src->deviceHandle);
+        dst->deviceHandle = billCloneObjectRetainingSharedData((struct BillObj *)src->deviceHandle);
         billMarkKindOneFlag((struct BillObj *)(dst->deviceHandle));
         if (dst->recordWork != NULL) {
             FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)dst->recordWork)->data0;

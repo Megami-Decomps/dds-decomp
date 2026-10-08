@@ -5,6 +5,7 @@
 
 struct BillObj;
 
+struct BillObj *billCloneObjectRetainingSharedData(struct BillObj *source);
 void billMarkKindOneFlag(struct BillObj *billboard);
 void billSetChildHalfExtents(struct BillObj *billboard, f32 width, f32 height);
 

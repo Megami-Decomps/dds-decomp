@@ -92,7 +92,6 @@ typedef struct EffectSurfaceNode {
 extern u32 effRetainResource(u32);
 extern void billSetBillboardMode(u32, s16);
 extern u32 billCreateIndexed(u32, u32);
-extern u32 billCloneObjectRetainingSharedData(u32);
 extern u32 fileSaveReadBuffer;
 extern u32 fileAllocateGridRecordSlots(u16, u32, void *);
 typedef struct MdlFlagPair {
@@ -5537,8 +5536,8 @@ void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *
         if (dst->resource != NULL) {
             billDispatchByKind(dst->resource);
         }
-        dst->resource = (void *)billCloneObjectRetainingSharedData((u32)src->resource);
-        billMarkKindOneFlag((struct BillObj *)((u32)dst->resource));
+        dst->resource = billCloneObjectRetainingSharedData((struct BillObj *)src->resource);
+        billMarkKindOneFlag((struct BillObj *)dst->resource);
         if (dst->active != 0) {
             billSetBillboardMode((u32)dst->resource, (s16)((FileKeyBlock *)((FileSlotTable *)dst->active)->data0)->alphaTrack.surfaceIndex);
         }

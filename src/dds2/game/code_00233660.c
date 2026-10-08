@@ -1,5 +1,6 @@
 #include "kwln.h"
 #include "common.h"
+#include "bill_object_api.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -833,7 +834,7 @@ MdlResourceItem *mdlInsertResourceItem(MdlCtx *owner, s32 type, s32 subtype) {
 }
 
 void mdlAdvanceBillboardPart(MdlPartEntry *entry) {
-    billCloneObjectRetainingSharedData((u32)entry->object);
+    billCloneObjectRetainingSharedData((struct BillObj *)entry->object);
     entry->state = entry->state + 1;
 }
 

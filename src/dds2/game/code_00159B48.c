@@ -476,7 +476,7 @@ u8 *billCreateUnitObject(s32 entryIndex) {
 u8 *billCloneUnitObject(EffInstance *source) {
     EffInstance *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
 
-    instance->billboard = (BillObj *)billCloneObjectRetainingSharedData((s32)source->billboard);
+    instance->billboard = (s32)billCloneObjectRetainingSharedData((struct BillObj *)source->billboard);
     instance->renderState = sdfCreateAssetWithDrawEntries();
     func_003332D0(instance->renderState, 1.0f);
     func_00333288(instance->renderState, 0x80808080);
