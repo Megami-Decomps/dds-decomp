@@ -84,7 +84,6 @@ extern u8 D_003B22A0[];
 
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
 
-extern EffBlurScaleWork *effCloneBlurWorkWithSlots(void *arg);
 
 extern EffScreenDrawParams D_003B22D0;
 
@@ -745,7 +744,7 @@ void effInitWorks(void) {
     effBlurPixelWork = effCloneBlurTemplate((EffBlurTemplateBody *)D_003B2208);
     effFilterBlurWork = effBlurCreateScatterWork((EffBlurScatterParams *)D_003B21D8);
     effTexturedSquareWork = effCloneResourceTemplate((EffResourceRectParams *)D_003B2278);
-    effStaggeredBlurWork = effCloneBlurWorkWithSlots(D_003B22A0);
+    effStaggeredBlurWork = effCloneBlurWorkWithSlots((EffBlurScaleParams *)D_003B22A0);
     effGetCh76Work()->params.count = EFF_EVENT_STAGGERED_SLOT_COUNT;
 }
 

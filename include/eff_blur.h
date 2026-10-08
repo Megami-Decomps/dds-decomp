@@ -125,6 +125,8 @@ typedef char EffBlurScaleSlotsOffsetCheck[((u32)&((EffBlurScaleWork *)0)->slots 
 EffBlurScatterWork *effBlurCreateScatterWork(EffBlurScatterParams *params);
 void effBlurReleaseFirstResource(EffBlurScatterWork *work);
 void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work);
+EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *params);
+void effBlurReleaseSecondResource(EffBlurScaleWork *work);
 
 void effAppendBlurRectanglePackets(void *list, EffBlurQuad *source, u8 fixedPointCoordinates);
 void effDrawBlurSource(EffBlurQuad *source, s32 resource, u8 fixedPointCoordinates);
