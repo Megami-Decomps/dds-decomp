@@ -3,6 +3,7 @@
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 #include "ee_mmi.h"
+#include "sdf_texture_file.h"
 
 enum {
     SDF_TMX_MAGIC = 0x30584D54,
@@ -496,29 +497,16 @@ void *func_00348188(const f32 vertices[][4], const u32 *colors, s32 vertexCount,
     return sdfDrawClippedLinePairs(vertices, colors, vertexCount, primitiveFlags);
 }
 
-typedef struct SdfTmxHeader {
-    u8 type;          /* 0x00 */
-    u8 pad01[7];
-    u32 magic;        /* 0x08: 'TMX0' */
-    u8 pad0C[4];
-    u8 flagA;         /* 0x10 */
-    u8 flagB;         /* 0x11 */
-    u16 width;        /* 0x12 */
-    u16 height;       /* 0x14 */
-    u8 depth;         /* 0x16 */
-    u8 pad17[0x29];
-} SdfTmxHeader;
-
 /* Initialize a zeroed TMX0 header; retain the caller-supplied flag bytes. */
-void sdfInitializeTmxImageHeader(SdfTmxHeader *header, s32 width, s32 height, s32 depth, s32 flagA, s32 flagB) {
-    memset(header, 0, sizeof(SdfTmxHeader));
-    header->flagB = flagB;
+void sdfInitializeTmxImageHeader(SdfTextureFileHeader *header, s32 width, s32 height, s32 depth, s32 flagA, s32 flagB) {
+    memset(header, 0, sizeof(SdfTextureFileHeader));
+    header->unk11 = flagB;
     header->width = width;
     header->height = height;
-    header->depth = depth;
-    header->flagA = flagA;
+    header->pixelFormat = depth;
+    header->unk10 = flagA;
     header->magic = SDF_TMX_MAGIC;
-    header->type = 2;
+    header->unk00 = 2;
 }
 
 /* Queue at most one staging-buffer-sized read; the completion callback advances the byte counts. */

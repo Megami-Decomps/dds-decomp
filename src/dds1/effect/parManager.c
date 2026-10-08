@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
+#include "par_kind_api.h"
 #include "ee_mmi.h"
 #include "eff.h"
 #include "par_table.h"
@@ -260,7 +261,7 @@ void effParReleaseNodeResource(ParTable *table) {
     sdfReleaseResourceAllocation(table->allocation);
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", func_00159CF0);
+INCLUDE_ASM(const s32, "effect/parManager", parPrependHistorySample);
 
 extern void billSetChildScaleComponents(BillObj *billboard, f32 scaleX, f32 scaleY);
 extern void billInvokeCallback(BillObj *billboard);

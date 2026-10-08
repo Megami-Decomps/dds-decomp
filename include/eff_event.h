@@ -19,6 +19,7 @@ typedef struct EffEventWork EffEventWork;
  * parameter record. Its retained work owner is opaque to external users. */
 EffEventWork *effEventCreate(struct SoundMixer *owner, u16 kind, const void *params);
 void effEventReleaseNode(EffEventWork *work);
+void effEventSetScale(EffEventWork *work, f32 scale);
 
 ObjBase *dds3GetResourceOwnerHandle(EffWorldNode *object);
 

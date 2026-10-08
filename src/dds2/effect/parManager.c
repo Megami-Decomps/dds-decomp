@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
+#include "par_kind_api.h"
 
 #include "ee_mmi.h"
 
@@ -135,7 +136,6 @@ extern s32 effMiscRand(void *);
 extern f32 effMiscRandUnitFloat(void *);
 extern u8 D_003AA868[];
 extern u8 effEmitterDelayRandomState[];
-extern void parDispatchKindInit(void *, u32);
 
 /* Initialize one 64-byte particle record and its kind-specific state. Negative
    ages delay activation; radial distance changes toward a jittered target over
@@ -261,7 +261,7 @@ void effParReleaseNodeResource(ParTable *table) {
     sdfReleaseResourceAllocation(table->allocation);
 }
 
-INCLUDE_ASM(const s32, "effect/parManager", func_001618E0);
+INCLUDE_ASM(const s32, "effect/parManager", parPrependHistorySample);
 
 extern void billSetChildScaleComponents(BillObj *billboard, f32 scaleX, f32 scaleY);
 extern void billInvokeCallback(BillObj *billboard);

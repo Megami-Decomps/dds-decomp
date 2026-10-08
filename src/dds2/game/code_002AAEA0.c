@@ -17,7 +17,6 @@ extern u8 D_003E7200[];
 
 extern u8 D_003E73F8[];
 
-extern s32 func_002A9AB8(s32);
 extern void func_002B9808(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
@@ -80,7 +79,7 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
     if (state != 0) {
         return state;
     }
-    state = func_002A9AB8(callback);
+    state = mnuInitializeCampMenuWhenResourcesReady(callback);
     if (state == 0) {
         return state;
     }
