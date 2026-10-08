@@ -3186,7 +3186,107 @@ void evtEmitGroupTypeTwentyFivePayloads(s32 output, EvtRuntime *runtime) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00259AE8);
+extern u8 sdfPfsDebugMode;
+extern char *sdfDevGetPathBuffer(void);
+extern s32 func_0035C860(char *buffer, const char *format, ...);
+extern s32 func_00369B70(const char *path, s32 flags, ...);
+extern s32 func_00369DF8(s32 descriptor);
+extern s32 func_0036BCD0(const char *device, s32 flags);
+extern void func_00258CC8(s32 output, s32 format, EvtRuntime *runtime);
+extern char D_004377C0[];
+extern char D_004377C8[];
+
+/* Save the runtime to its paired PM2/PM3 files. Mode zero uses the
+ * viewer name; other modes use the selected event and cut identifiers. */
+s32 func_00259AE8(s32 mode, EvtRuntime *runtime) {
+    char pm2Path[64];
+    char pm3Path[64];
+    s32 pm2;
+    s32 pm3;
+    s32 section;
+    EvtRuntimeGroup *group;
+
+    for (group = runtime->groups; group != NULL; group = group->next) {
+    }
+
+    if (mode == 0) {
+        if (sdfPfsDebugMode) {
+            func_0035C860(pm2Path, "pfs0:/event/pmvtool/%s.PM2", (char *)&runtime->nameStorage[0x14]);
+            func_0035C860(pm3Path, "pfs0:/event/pmvtool/%s.PM3", (char *)&runtime->nameStorage[0x14]);
+        } else {
+            func_0035C860(pm2Path, "%sevent/pmvtool/%s.PM2", sdfDevGetPathBuffer(), (char *)&runtime->nameStorage[0x14]);
+            func_0035C860(pm3Path, "%sevent/pmvtool/%s.PM3", sdfDevGetPathBuffer(), (char *)&runtime->nameStorage[0x14]);
+        }
+    } else if (sdfPfsDebugMode) {
+        func_0035C860(pm2Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
+            ((u32)D_004372B0 / 10U) * 10, D_004372B0, D_004372B0,
+            D_004372B2, D_004372B0, D_004372B2);
+        func_0035C860(pm3Path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
+            ((u32)D_004372B0 / 10U) * 10, D_004372B0, D_004372B0,
+            D_004372B2, D_004372B0, D_004372B2);
+    } else {
+        func_0035C860(pm2Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
+            sdfDevGetPathBuffer(), ((u32)D_004372B0 / 10U) * 10,
+            D_004372B0, D_004372B0, D_004372B2, D_004372B0, D_004372B2);
+        func_0035C860(pm3Path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
+            sdfDevGetPathBuffer(), ((u32)D_004372B0 / 10U) * 10,
+            D_004372B0, D_004372B0, D_004372B2, D_004372B0, D_004372B2);
+    }
+
+    if (sdfPfsDebugMode) {
+        func_0035B6E0("hdd -> %s\n", pm2Path);
+        pm2 = func_00369B70(pm2Path, 0x602, 0666);
+        pm3 = func_00369B70(pm3Path, 0x602, 0666);
+    } else {
+        func_0035B6E0("pc -> %s\n", pm2Path);
+        pm2 = func_00369B70(pm2Path, 0x602);
+        pm3 = func_00369B70(pm3Path, 0x602);
+    }
+    if (pm2 < 0 || pm3 < 0) {
+        func_0035B6E0(D_004377C0);
+        return 0;
+    }
+
+    func_00258CC8(pm2, 2, runtime);
+    for (section = 0; section < 26; section++) {
+        switch (section) {
+        case 0: evtWriteRuntimeHeaderValues(pm2, runtime); break;
+        case 1: evtWriteFixedSizeEntries(pm2, runtime); break;
+        case 4: func_00259298(pm2, 2, runtime); break;
+        case 5: evtWriteGroupHeader(pm2, runtime); break;
+        case 13: evtCopyRuntimeChildPayloadsToBuffer(pm2, runtime); break;
+        case 14: evtEmitGroupTypeElevenPayloads(pm2, runtime); break;
+        case 15: evtEmitGroupTypeThirteenPayloads(pm2, runtime); break;
+        case 16: evtEmitGroupTypeFourteenPayloads(pm2, runtime); break;
+        case 17: evtEmitGroupTypeFifteenPayloads(pm2, runtime); break;
+        case 18: evtEmitGroupTypeSixteenPayloads(pm2, runtime); break;
+        case 19: evtEmitGroupTypeSeventeenPayloads(pm2, runtime); break;
+        case 20: evtEmitGroupTypeTwentyThreePayloads(pm2, runtime); break;
+        case 24: evtEmitGroupTypeTwentySevenPayloads(pm2, runtime); break;
+        case 21:
+            evtWriteGroupMetadata(pm2, runtime);
+            func_0035B6E0("save object table\n");
+            break;
+        case 25:
+            evtEmitGroupTypeTwentyFivePayloads(pm2, runtime);
+            func_0035B6E0("save rain data\n");
+            break;
+        }
+    }
+    func_00369DF8(pm2);
+    func_0036BCD0(D_004377C8, 0);
+    func_00258CC8(pm3, 3, runtime);
+    for (section = 0; section < 26; section++) {
+        if (section == 4) {
+            func_00259298(pm3, 3, runtime);
+        }
+    }
+    func_00369DF8(pm3);
+    func_0035B6E0("save pm3 file\n");
+    func_0036BCD0(D_004377C8, 0);
+    return 1;
+}
+
 
 /* The same table has compact 0x10-byte rows or extended 0x2C-byte rows. */
 typedef struct EvtRowTable {
