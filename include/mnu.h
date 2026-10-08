@@ -12,6 +12,10 @@ struct MenuWindowContainer;
 struct MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width,
                                                     s32 height, s32 visibleCount,
                                                     s32 rowSpacing);
+void mnuRetreatWindowListSelection(struct MenuWindowContainer *window);
+void mnuAdvanceWindowListSelection(struct MenuWindowContainer *window);
+/* Clear only the window's panel-transition bit. */
+void mnuClearWindowPanelTransitionFlag(struct MenuWindowContainer *window);
 
 /* DDS2 scheduler word: zero or the encoded next-handler address. */
 extern s32 func_002C4038(void *work, s32 *entrySlot, s32 mode, void *callback);

@@ -421,9 +421,7 @@ s32 mnuDestroyWindowOwnerResourceSet(KwlnTask *task) {
 }
 
 extern void func_002B9808(s32);
-extern void mnuRetreatWindowListSelection(s32);
-extern void mnuAdvanceWindowListSelection(s32);
-extern void mnuClearWindowPanelTransitionFlag(s32);
+
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char D_003E7450[];
 extern char D_003E746C[];
@@ -491,12 +489,12 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
                 func_002B9808((s32)window);
             }
             if (input & 0x10) {
-                mnuRetreatWindowListSelection((s32)window);
+                mnuRetreatWindowListSelection(window);
             }
             if (input & 0x20) {
-                mnuAdvanceWindowListSelection((s32)window);
+                mnuAdvanceWindowListSelection(window);
             }
-            mnuClearWindowPanelTransitionFlag((s32)window);
+            mnuClearWindowPanelTransitionFlag(window);
             mnuPlayInputSound(0, input, &window->list->stateFlags);
         }
     }
@@ -638,13 +636,13 @@ s32 func_002AD118(KwlnTask *callback) {
             func_002B9808((s32)window);
         }
         if (input & 0x10) {
-            mnuRetreatWindowListSelection((s32)window);
+            mnuRetreatWindowListSelection(window);
         }
         if (input & 0x20) {
-            mnuAdvanceWindowListSelection((s32)window);
+            mnuAdvanceWindowListSelection(window);
         }
         mnuHandlePanelListPageJumpInput((u32)window, (u32)&input);
-        mnuClearWindowPanelTransitionFlag((s32)window);
+        mnuClearWindowPanelTransitionFlag(window);
         mnuPlayInputSound(0, input, &window->list->stateFlags);
     }
     return 0;

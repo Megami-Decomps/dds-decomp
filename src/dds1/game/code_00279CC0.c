@@ -44,8 +44,6 @@ extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 
 extern void func_00272668(s32, s32, s32, s32, s32, s32);
 
-extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
-
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
 extern void mnuSetPopupEntryFlagged(s32 *, char *);
@@ -271,12 +269,12 @@ s32 mnuUpdateSkillListInput(KwlnTask *callback) {
         }
         list = menu + 1;
         if (buttons & 0x10) {
-            mnuRetreatWindowListSelection(list[8 + menu[11]]);
+            mnuRetreatWindowListSelection((MenuWindowContainer *)list[8 + menu[11]]);
         }
         if (buttons & 0x20) {
-            mnuAdvanceWindowListSelection(list[8 + menu[11]]);
+            mnuAdvanceWindowListSelection((MenuWindowContainer *)list[8 + menu[11]]);
         }
-        mnuClearWindowPanelTransitionFlag(list[8 + menu[11]]);
+        mnuClearWindowPanelTransitionFlag((MenuWindowContainer *)list[8 + menu[11]]);
         mnuPlayInputSound(0, buttons, &((MenuWindowContainer *)list[8 + menu[11]])->list->stateFlags);
         if (buttons & 2) {
             mnuSetPopupEntryFlagged(popup, D_0037CC20);
