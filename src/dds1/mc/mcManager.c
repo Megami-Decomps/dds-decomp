@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mc_poll.h"
 
 #define MC_CARD_SLOT 0
 #define MC_SYNC_POLL_MODE 1
@@ -6,14 +7,10 @@
 #define MC_SDK_COMMAND_SUCCESS 0
 #define MC_SDK_SPECIAL_ERROR (-4)
 #define MC_SDK_EXTENDED_ERROR_LIMIT (-10)
-#define MC_POLL_PENDING 0
-#define MC_POLL_SUCCESS 1
-#define MC_POLL_ERROR (-1)
-#define MC_POLL_SPECIAL_ERROR (-2)
 
 /* Return 1 only for completed status zero, -1 for other completed statuses.
  * Every SDK poll return other than 1 maps to 0, including SDK-level failures. */
-s32 mcPollStrictSuccess(void) {
+McPollResult mcPollStrictSuccess(void) {
     u32 commandId;
     s32 commandResult;
     s32 pollResult = func_002F6858(MC_SYNC_POLL_MODE, &commandId, &commandResult);
@@ -36,7 +33,7 @@ extern s32 func_002F6858(s32, s32 *, s32 *);
 
 /* Accept only completed status zero; translate -4 to -2 and other statuses
  * to -1. Any SDK poll return other than 1 maps to 0; this does not wait. */
-s32 mcPollSyncResult(void) {
+McPollResult mcPollSyncResult(void) {
     s32 commandId;
     s32 commandResult;
 
@@ -56,7 +53,7 @@ void mcMakeDirectory(u32 port, u32 path) {
 
 /* Accept only completed status zero. Completed statuses below -10 map to
  * -2, all other nonzero statuses to -1; non-complete SDK polls map to 0. */
-s32 mcPollWithExtendedErrors(void) {
+McPollResult mcPollWithExtendedErrors(void) {
     u32 commandId;
     s32 commandResult;
     s32 pollResult = func_002F6858(MC_SYNC_POLL_MODE, &commandId, &commandResult);
@@ -82,7 +79,7 @@ void mcReadDirectoryEntries(u32 port, u32 path, u32 entriesAddress, u32 entryLim
 /* Accept any completed nonnegative status and write it to resultOut, which
  * must be valid on success and stays untouched otherwise. Translate -4 to
  * -2, other negatives to -1; non-complete SDK polls map to 0. */
-s32 mcPollNonnegativeResult(s32 *resultOut) {
+McPollResult mcPollNonnegativeResult(s32 *resultOut) {
     u32 commandId;
     s32 commandResult;
     s32 pollResult = func_002F6858(MC_SYNC_POLL_MODE, &commandId, &commandResult);
@@ -106,7 +103,7 @@ void mcDeleteFilePath(u32 port, u32 pathAddress) {
 }
 
 /* Same zero-only completion policy as mcPollSyncResult; no blocking loop. */
-s32 mcPollNormalizedCommandStatus(void) {
+McPollResult mcPollNormalizedCommandStatus(void) {
     s32 commandId;
     s32 commandResult;
 
@@ -127,7 +124,7 @@ void mcOpenFilePath(u32 port, u32 pathAddress, u32 openFlags) {
 
 /* Accept any completed nonnegative status, writing resultOut only then.
  * Preserve the -4/-2 translation and all other poll/result distinctions. */
-s32 mcPollCommandStatusWithResult(s32 *resultOut) {
+McPollResult mcPollCommandStatusWithResult(s32 *resultOut) {
     u32 commandId;
     s32 commandResult;
     s32 pollResult = func_002F6858(MC_SYNC_POLL_MODE, &commandId, &commandResult);
@@ -152,7 +149,7 @@ void mcCloseOpenFile(void) {
 
 /* Despite its name, poll once rather than waiting; success requires status
  * zero, -4 maps to -2 and other completed statuses to -1. */
-s32 mcPollZeroCommandResult(void) {
+McPollResult mcPollZeroCommandResult(void) {
     s32 commandId;
     s32 commandResult;
 
@@ -172,7 +169,7 @@ void mcReadOpenFile(void) {
 
 /* Any completed nonnegative status succeeds, but the SDK status is not
  * returned to a caller output. Non-complete SDK polls map to 0. */
-s32 mcPollCompletionStatus(void) {
+McPollResult mcPollCompletionStatus(void) {
     u32 commandId;
     s32 commandResult;
     s32 pollResult = func_002F6858(MC_SYNC_POLL_MODE, &commandId, &commandResult);
@@ -197,7 +194,7 @@ void mcBeginWrite(s32 request, u32 first, u32 second) {
 
 /* Poll once: any completed nonnegative write status returns 1; -4 becomes
  * -2 and other negatives become -1. Non-complete SDK polls map to 0. */
-s32 mcPollWriteCompletion(void) {
+McPollResult mcPollWriteCompletion(void) {
     s32 commandId;
     s32 commandResult;
     s32 pollResult = func_002F6858(MC_SYNC_POLL_MODE, &commandId, &commandResult);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mc_poll.h"
 #include "bill_object_api.h"
 #include "eff_resource_slots.h"
 #include "sdf_resource.h"
@@ -384,7 +385,6 @@ extern void fileDrawCursorPulse(s32, s32, s32);
 extern s32 D_00437D78;
 
 extern s32 fileReadSlotPreviewBegin(void);
-extern s32 mcPollCommandStatusWithResult(s32 *);
 extern void mcReadOpenFile(s32, u32, s32);
 extern s32 mcHandleSetupResult(void);
 extern s32 fileSaveFileDescriptor;
@@ -419,7 +419,6 @@ extern void fileReqSetSlotFlags(s32 context, s32 slot, s32 flags);
 
 extern s32 mcHandleSlotWriteResult(void);
 
-extern s32 mcPollNonnegativeResult(void *result);
 
 extern s32 fileBeginSlotPromptFive(void);
 
@@ -560,7 +559,6 @@ extern char D_0042B698[];
 
 extern s32 fileAbortSlotScanOnInput(void);
 
-extern s32 mcPollSyncResult(void);
 
 extern void mcReadDirectoryEntries(u32 context, const char *path, void *buffer, s32 mode);
 
@@ -609,9 +607,7 @@ extern FileJob *fileQueueFindById(FileQueue *queue, u32 id);
 extern FileJob *fileQueueGetAt(FileQueue *queue, s32 index);
 extern s32 fileFindQueuedJobIndex(FileQueue *queue, FileJob *target);
 
-extern s32 mcPollWithExtendedErrors(void);
 
-extern s32 mcPollNormalizedCommandStatus(void);
 
 
 extern f32 fileSaveHighlightPhase;
@@ -1085,7 +1081,7 @@ s32 fileBeginSlotOpen(void) {
 }
 
 s32 fileReadSlotPreviewBegin(void) {
-    s32 status = mcPollCommandStatusWithResult(&fileSaveFileDescriptor);
+    McPollResult status = mcPollCommandStatusWithResult(&fileSaveFileDescriptor);
 
     if (status == 0) {
         return 0;
@@ -1099,12 +1095,11 @@ s32 fileReadSlotPreviewBegin(void) {
     return fileBeginSlotMetadataRefresh();
 }
 
-extern s32 mcPollCompletionStatus(void);
 extern void mcCloseOpenFile(u32);
 extern s32 fileStoreSlotHeader(void);
 
 s32 fileReadSlotPreviewWait(void) {
-    s32 r = mcPollCompletionStatus();
+    McPollResult r = mcPollCompletionStatus();
 
     if (r == 0) {
         return 0;
@@ -1117,11 +1112,10 @@ s32 fileReadSlotPreviewWait(void) {
     return fileBeginSlotMetadataRefresh();
 }
 
-extern s32 mcPollZeroCommandResult(void);
 extern FileRecordHeader D_004580C0[];
 
 s32 fileStoreSlotHeader(void) {
-    s32 status = mcPollZeroCommandResult();
+    McPollResult status = mcPollZeroCommandResult();
 
     if (status == 0) {
         return 0;
@@ -1676,7 +1670,7 @@ s32 fileBeginReadSlotIcon(void) {
 }
 
 s32 fileScanSlotIconSysBegin(void) {
-    s32 t = mcPollSyncResult();
+    McPollResult t = mcPollSyncResult();
 
     if (t == 0) {
         return 0;
@@ -1694,7 +1688,7 @@ s32 fileScanSlotIconSysBegin(void) {
 
 s32 mcHandleSlotWriteResult(void) {
     s32 value;
-    s32 status = mcPollNonnegativeResult(&value);
+    McPollResult status = mcPollNonnegativeResult(&value);
     if (status == 0) {
         return 0;
     }
@@ -1741,7 +1735,7 @@ s32 fileBeginSaveSlotIconScan(void) {
 }
 
 s32 fileScanSlotIconSysAltBegin(void) {
-    s32 t = mcPollSyncResult();
+    McPollResult t = mcPollSyncResult();
 
     if (t == 0) {
         return 0;
@@ -1762,7 +1756,7 @@ s32 fileScanSlotIconSysAltBegin(void) {
 
 s32 mcHandleDirectoryWriteResult(void) {
     s32 value;
-    s32 status = mcPollNonnegativeResult(&value);
+    McPollResult status = mcPollNonnegativeResult(&value);
     if (status == 0) {
         return 0;
     }
@@ -1850,7 +1844,7 @@ s32 fileCreateMainBegin(void) {
 }
 
 s32 mcHandleSearchResult(void) {
-    s32 status = mcPollWithExtendedErrors();
+    McPollResult status = mcPollWithExtendedErrors();
     if (status == 0) {
         return 0;
     }
@@ -1864,7 +1858,7 @@ s32 mcHandleSearchResult(void) {
 }
 
 s32 filePrepareMainBlobWrite(void) {
-    s32 t = mcPollSyncResult();
+    McPollResult t = mcPollSyncResult();
 
     if (t == 0) {
         return 0;
@@ -1881,7 +1875,7 @@ s32 filePrepareMainBlobWrite(void) {
 }
 
 s32 fileBuildMainBlobAfterDelete(void) {
-    s32 t = mcPollNormalizedCommandStatus();
+    McPollResult t = mcPollNormalizedCommandStatus();
 
     if (t == 0) {
         return 0;
@@ -2029,7 +2023,7 @@ extern s32 mcHandleLoadResult(void);
 extern s32 fileFinishRequest(void);
 
 s32 fileWriteWaitOpen(void) {
-    s32 status = mcPollCommandStatusWithResult(&fileSaveFileDescriptor);
+    McPollResult status = mcPollCommandStatusWithResult(&fileSaveFileDescriptor);
 
     if (status == 0) {
         return 0;
@@ -2050,11 +2044,10 @@ s32 fileWriteWaitOpen(void) {
 }
 
 
-extern s32 mcPollWriteCompletion(void);
 extern s32 mcDispatchReadCallback(void);
 
 s32 mcHandleLoadResult(void) {
-    s32 status = mcPollWriteCompletion();
+    McPollResult status = mcPollWriteCompletion();
 
     if (status == 0) {
         return 0;
@@ -2073,7 +2066,7 @@ s32 mcHandleLoadResult(void) {
 
 extern u32 D_00439050;
 s32 mcDispatchReadCallback(void) {
-    s32 status = mcPollZeroCommandResult();
+    McPollResult status = mcPollZeroCommandResult();
 
     if (status == 0) {
         return 0;
@@ -2098,7 +2091,7 @@ s32 fileFinishRequest(void) {
 }
 
 s32 mcHandleDetectionResult(void) {
-    s32 status = mcPollStrictSuccess();
+    McPollResult status = mcPollStrictSuccess();
 
     if (status == 0) {
         return 0;
@@ -2152,7 +2145,7 @@ s32 fileBeginSlotCreate(void) {
 }
 
 s32 fileLoadMainBlobBegin(void) {
-    s32 status = mcPollCommandStatusWithResult(&fileSaveFileDescriptor);
+    McPollResult status = mcPollCommandStatusWithResult(&fileSaveFileDescriptor);
     u32 size;
 
     if (status == 0) {
@@ -2172,7 +2165,7 @@ s32 fileLoadMainBlobBegin(void) {
 
 extern s32 mcdHandleSaveSetupDone(void);
 s32 mcHandleSetupResult(void) {
-    s32 status = mcPollCompletionStatus();
+    McPollResult status = mcPollCompletionStatus();
 
     if (status == 0) {
         return 0;
@@ -2190,7 +2183,7 @@ s32 mcHandleSetupResult(void) {
 extern s8 D_00437CD5;
 
 s32 mcdHandleSaveSetupDone(void) {
-    s32 status = mcPollZeroCommandResult();
+    McPollResult status = mcPollZeroCommandResult();
 
     if (status == 0) {
         return 0;
