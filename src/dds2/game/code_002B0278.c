@@ -1252,8 +1252,8 @@ void mnuDrawSelectedPartySlotMarkers(s32 context, StaffSlots *resources) {
     s32 alpha;
 
     alpha = 0x100 - ((MenuPageWindow *)context)->slots[((MenuPageWindow *)context)->lists[0]->cursor->index].windowSprites->fade;
-    func_00306CD0(0xa0, 0xa30, 0, alpha, 1, (EffectSlotSet *)resources->baseResources[1], 0x55, 0x53);
-    func_00306CD0(0x30, 0xaf8, 0, alpha, 1, (EffectSlotSet *)resources->baseResources[0], 0x1a, 0x53);
+    func_00306CD0(0xa0, 0xa30, 0, alpha, 1, resources->baseResources[1], 0x55, 0x53);
+    func_00306CD0(0x30, 0xaf8, 0, alpha, 1, resources->baseResources[0], 0x1a, 0x53);
 }
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags) {

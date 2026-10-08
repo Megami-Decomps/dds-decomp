@@ -470,7 +470,7 @@ extern void mnuReleaseStaffResourceGroups(StaffSlots *);
 /* Create the group and sprite backing the skill-package panel for the
  * selected reward row, then forward its unit's ID to the menu. */
 void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
-    u32 *group = work->staffSlots.baseResources;
+    u32 *group = (u32 *)work->staffSlots.baseResources;
     MenuPanelGroup *panel;
 
     mnuReleaseStaffMenuResources(group);
@@ -479,8 +479,8 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     work->panelHandle = panel;
     mnuUpdateFiveListEntries(panel, work->unitHandle);
     work->spriteHandle =
-        mnuCreateSpriteState((struct EffectSlotSet *)work->staffSlots.baseResources[5],
-                             (struct EffectSlotSet *)work->staffSlots.baseResources[2],
+        mnuCreateSpriteState(work->staffSlots.baseResources[5],
+                             work->staffSlots.baseResources[2],
                              work->staffSlots.pairResources[0]);
     evtStageTestInit(0);
     mnuForwardTableByte(work->primaryRewards.rows[work->selectedRow].unit->unitId);

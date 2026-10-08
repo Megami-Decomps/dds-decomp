@@ -742,7 +742,7 @@ void mnuEnsureProfilePanelEffect(DatPartyRecord *selectionState, MenuProgressHos
     if (host->currentEffect == 0) {
         MenuProfilePanel *effect = mnuCreateProfilePanel(selectionState);
         host->currentEffect = effect;
-        mnuSetGroupProperties(effect, (EffectSlotSet *)host->staffSlots.baseResources[0],
+        mnuSetGroupProperties(effect, host->staffSlots.baseResources[0],
                               host->staffSlots.pairResources[1], 1, 2);
     }
 }
