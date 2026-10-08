@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "fr_font_measure.h"
 #include "fr_font.h"
 #include "eff_resource_slots.h"
@@ -5680,7 +5681,6 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001BC540);
 extern SdfPoolNode D_003255A8;
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(SdfListHead *list);
-extern s32 sdfConsCreateDrawPacket(s32 list, s32 texture, s32 context);
 extern void sdfQueueGouraudTexturedQuad(
     s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
     s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
@@ -5692,7 +5692,7 @@ extern void sdfQueueGouraudTexturedQuad(
 s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
                   s32 x2, s32 y2, s32 x3, s32 y3,
                   s32 u, s32 v, s32 width, s32 height,
-                  const s32 *colors, s32 texture) {
+                  const s32 *colors, SdfTex *texture) {
     SdfListHead *list;
     s32 uFixed;
     s32 vFixed;
@@ -5701,7 +5701,7 @@ s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
 
     list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    sdfConsCreateDrawPacket((s32)list, texture, 0);
+    sdfConsCreateDrawPacket(list, texture, 0);
     uFixed = u * 0x10;
     vFixed = v * 0x10;
     uRight = uFixed + width * 0x10;
