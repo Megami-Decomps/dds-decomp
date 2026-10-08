@@ -33,7 +33,6 @@ extern void sdfReleaseChipBlock();
 
 extern void sdfTexReleaseReference(struct SdfTex *texture);
 
-extern void effReleaseSharedReference();
 
 extern u8 btlIsRuntimeAllocated(void);
 
@@ -72,7 +71,6 @@ extern u32 D_00437E3C;
 
 extern struct EffExpandedList *func_002DDF48(u32);
 
-extern u32 effCloneSharedReferenceWithValue(u32, u32);
 
 extern s32 btlGetRuntime(void);
 
@@ -785,12 +783,12 @@ RefObj *func_002DDAA8(SdfTextureFileHeader *source) {
     return texture;
 }
 
-u32 effCloneSharedReferenceWithValue(u32 source, u32 value) {
+RefObj *effCloneSharedReferenceWithValue(SdfTextureFileHeader *source, u32 textureIndex) {
     RefObj *copy;
 
-    copy = (RefObj *)func_002DDAA8((void *)source);
-    copy->index = value;
-    return (u32)copy;
+    copy = func_002DDAA8(source);
+    copy->index = textureIndex;
+    return copy;
 }
 
 void effReleaseSharedReference(RefObj *obj) {

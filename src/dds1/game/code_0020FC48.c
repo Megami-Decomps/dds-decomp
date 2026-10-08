@@ -134,7 +134,6 @@ extern s32 btlLowestSetPairIndex(u32);
 
 extern u64 btlStartTask(void *);
 
-extern void effReleaseSharedReference(void *);
 
 extern void kwlnTextureClearReferenceFlag(void);
 
@@ -1460,7 +1459,7 @@ void btlClearOverlayBuffers(void) {
 }
 
 void btlReleaseRuntimeResource(void) {
-    void *resource = btlRuntimeState.resource;
+    RefObj *resource = btlRuntimeState.resource;
     if (resource != 0) {
         effReleaseSharedReference(resource);
         btlRuntimeState.resource = 0;
