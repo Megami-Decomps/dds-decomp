@@ -173,7 +173,7 @@ extern u32 effLoadIndexedResource(char *, char *, s32);
 
 extern u32 effLoadMappedResource(char *, char *);
 
-extern void effRequestResourceByMode(char *, char *, s32, u32 *);
+extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
 extern void effRequestMappedResource(char *, char *, u32 *);
 
