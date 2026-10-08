@@ -9497,7 +9497,7 @@ u32 effStoreBattleCameraSnapshot(u32 arg0) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002FE5B8);
 
-extern void func_002FE5B8(const char *, const void *, s32);
+extern u32 func_002FE5B8(const char *, const void *, u32);
 
 extern char D_0042CEF8[];
 

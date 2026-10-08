@@ -449,7 +449,7 @@ extern const BtlCameraTimedInstruction *D_003BC0C8[];
 extern void btlBuildApproachCamera(BtlLinkedCommand *, BtlCamState *);
 extern void btlUpdateActionTargetCameraPose(BtlLinkedCommand *);
 extern void btlBuildGroupFramingCameraPose(BtlCamState *, BtlCamState *);
-extern void func_001F3E48(s32);
+extern void func_001F3E48(BtlLinkedCommand *);
 extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 
 extern void func_001FA480(BtlLinkedCommand *, BtlCamState *, const BtlCameraTimedInstruction *);
@@ -6149,7 +6149,7 @@ void btlDispatchActionCursorStepByKind(BtlLinkedCommand *action) {
         btlAdvanceCursorForUnmarkedUnit(action, &action->camera);
         break;
     case 0xC:
-        func_001F3E48((s32)action);
+        func_001F3E48(action);
         break;
     }
 }
@@ -7648,12 +7648,11 @@ void func_001F3C30(BtlLinkedCommand *action) {
     action->motionParameter = D_003B6E50[unitId].mode[mode].motionParameter;
     action->flags |= 0x80041;
     action->motionProgress = 1;
-    *(s32 *)action->pad140 = 0;
+    action->cameraFrame = 0;
 }
 
 /* Advance the configured actor camera transition and blend its distance. */
-void func_001F3E48(s32 argument) {
-    BtlLinkedCommand *action = (BtlLinkedCommand *)argument;
+void func_001F3E48(BtlLinkedCommand *action) {
     BtlUnit *user = action->link->unit;
     u16 unitId = user->partyRecord.unitId;
     u32 selectedMode;
@@ -7694,8 +7693,8 @@ void func_001F3E48(s32 argument) {
         action->motionProgress = 0;
     }
 
-    if (*(s32 *)action->pad140 >= motionFrame) {
-        if (*(s32 *)action->pad140 == motionFrame) {
+    if (action->cameraFrame >= motionFrame) {
+        if (action->cameraFrame == motionFrame) {
             btlClearAllUnitDefeatCandidates();
             btlFlagUnitDefeatCandidate(user);
             count = btlGetIndexListCount(action->targetList);
@@ -7744,7 +7743,7 @@ void func_001F3E48(s32 argument) {
         btlCopyUnitRotationQuaternion(user, action->rotation);
     }
 
-    (*(s32 *)action->pad140)++;
+    action->cameraFrame++;
 }
 
 /* The descriptor pointer is stored in retail non-small .data. */
