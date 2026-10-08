@@ -787,16 +787,16 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
 }
 
 s32 btlAllActiveUnitsReady(void) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x228);
-    for (; node != 0; node = *(s32 *)(node + 0x344)) {
-        u32 flags = *(u32 *)(node + 0x110);
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
+    for (; actor != NULL; actor = actor->next) {
+        u32 flags = actor->flags;
         if ((flags & 1) != 0) {
             if ((flags & 0x400) != 0) {
                 if ((flags & 0xC0) != 0) {
                     return 0;
                 }
                 if ((flags & 0x20) != 0) {
-                    if ((*(u32 *)(node + 0x114) & 1) == 0) {
+                    if ((actor->stateFlags & 1) == 0) {
                         return 0;
                     }
                 }
@@ -1471,7 +1471,7 @@ s32 btlComputeStatusPenaltyFifth(BtlUnit *object) {
 
 s32 btlRollFearChance(s32 unused, u8 *actor, u32 flags, u32 options) {
     s32 ratio;
-    if ((*(u32 *)(btlGetRuntime() + 0x1FC) & 0x80) != 0) return 0;
+    if ((((BtlState *)btlGetRuntime())->unk_1FC & 0x80) != 0) return 0;
     if ((((BtlUnit *)actor)->stateFlags & 8) != 0) return 0;
     if ((flags & 1) == 0) return 0;
     if ((((BtlUnit *)actor)->partyRecord.status & 1) != 0) return 0;
@@ -1978,7 +1978,7 @@ s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta) {
     if (btlGetEntryFlagsUnlessDisabled(&actor->partyRecord) & 4) return 0;
     if (btlHasEnemyRecordDefeatExemptionFlag(actor)) return 0;
     if ((actor->partyRecord.status & 0x7FFF) == 0x4000) return 1;
-    if ((*(u32 *)(btlGetRuntime() + 0x1F4) & 0x80) == 0) return 0;
+    if ((((BtlState *)btlGetRuntime())->battleFlags & 0x80) == 0) return 0;
     return actor->partyRecord.hp + delta < 1;
 }
 
