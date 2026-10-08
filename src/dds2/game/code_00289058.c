@@ -488,8 +488,8 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_0028B738);
 extern MantraMenuSrc *func_0028FD10(void);
 
 /* Binds the source record (or the default one) and unpacks its two bit fields. */
-s32 mnuBindMantraMenuSourceRecord(s32 object, MantraMenuSrc *src) {
-    MantraMenuWork *state = (MantraMenuWork *)(object + 0x240);
+s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src) {
+    MantraMenuWork *state = &object->menu;
 
     if (src != 0) {
         state->src = src;
@@ -512,20 +512,20 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_0028C8F8);
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028CBF8);
 
 
-void mnuStartMantraPanelEntryTransition(s32 object) {
-    ((MantraMenuWork *)(object + 0x240))->panelTransitionTimer = 0;
-    ((MantraMenuWork *)(object + 0x240))->panelTransitionMode = 1;
+void mnuStartMantraPanelEntryTransition(MnuStatusResource *object) {
+    object->menu.panelTransitionTimer = 0;
+    object->menu.panelTransitionMode = 1;
 }
 
-void mnuStartMantraPanelExitTransition(s32 object) {
-    ((MantraMenuWork *)(object + 0x240))->panelTransitionTimer = 0;
-    ((MantraMenuWork *)(object + 0x240))->panelTransitionMode = 2;
+void mnuStartMantraPanelExitTransition(MnuStatusResource *object) {
+    object->menu.panelTransitionTimer = 0;
+    object->menu.panelTransitionMode = 2;
 }
 
 
 /* Advances the 6-frame countdown of mode 1 (-> 3) or mode 2 (-> 0). */
-void mnuAdvanceMantraPanelTransitionTimer(s32 object) {
-    MantraMenuWork *state = (MantraMenuWork *)(object + 0x240);
+void mnuAdvanceMantraPanelTransitionTimer(MnuStatusResource *object) {
+    MantraMenuWork *state = &object->menu;
 
     switch (state->panelTransitionMode) {
     case 0:
