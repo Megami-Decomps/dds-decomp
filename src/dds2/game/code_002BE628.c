@@ -1269,8 +1269,8 @@ MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState) {
     return panel;
 }
 
-void mnuFreeProfilePanelWork(void *work) {
-    sdfReleaseChipBlock(work);
+void mnuFreeProfilePanelWork(MenuProfilePanel *panel) {
+    sdfReleaseChipBlock(panel);
 }
 
 void mnuSetGroupProperties(MenuProfilePanel *panel, u32 first, u32 second, u32 third, u32 fourth) {

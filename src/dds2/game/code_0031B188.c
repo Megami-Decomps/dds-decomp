@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "mnu_work.h"
 #include "file.h"
 #include "pcp_vu0.h"
@@ -155,7 +156,7 @@ void dds3InitSoundSlotPool(void) {
 
 void dds3ReleaseSoundSlotPool(void) {
     if (dds3SoundSlotPool != (u32 *)0x0) {
-        sdfReleaseResourceAllocation(*dds3SoundSlotPool);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*dds3SoundSlotPool));
         dds3SoundSlotPool = (u32 *)0x0;
     }
 }

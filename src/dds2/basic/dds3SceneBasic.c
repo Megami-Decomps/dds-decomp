@@ -1,11 +1,11 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "dds3obj.h"
 #include "evt_world.h"
 #include "kwln.h"
 
 struct SdfMemBlock;
 
-extern void sdfReleaseResourceAllocation(struct SdfMemBlock *allocation);
 extern u32 sdfResourceRetainAddress(struct SdfMemBlock *allocation);
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern s32 bfFindScriptIndexByName(void *, const char *);

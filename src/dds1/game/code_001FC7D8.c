@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_task_condition.h"
 #include "btl_action.h"
 #include "btl.h"
 #include "btl_state.h"
@@ -13,6 +14,7 @@ extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 extern void effObjFetchInnerFirstVec(s32);
 extern s32 sdfLoadMapRecordPositionVector(struct SdfModel *, s32);
 extern void func_0011E280(s32, f32, f32, f32, f32);
+extern void func_001BCB88(s8, s32);
 
 extern s32 btlGetRuntime();
 extern s8 btlHistoryCounter;
@@ -438,8 +440,8 @@ BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind) {
     BtlRuntimeTask *task = btlAllocTask(0x34);
     BtlLinkedEffectArgs *args;
 
-    task->startCondition.kind = 1;
-    task->endCondition.kind = 0;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     switch (kind) {
     case 0:
         task->taskId = 0x39;
@@ -480,8 +482,8 @@ BtlRuntimeTask *btlCreateEffectCounterTask(BtlUnit *owner, s32 kind) {
     BtlRuntimeTask *task = btlAllocTask(0x2C);
     BtlLinkedEffectArgs *args;
 
-    task->startCondition.kind = 1;
-    task->endCondition.kind = 0;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->flags |= 2;
     task->taskId = 0x3B;
     task->ownerId = owner->identity;
@@ -540,8 +542,8 @@ BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, s32 arg) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlObjLink *link;
 
-    task->startCondition.kind = 1;
-    task->endCondition.kind = 0;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->flags |= 2;
     task->taskId = 0x40;
     task->ownerId = owner->identity;
@@ -575,8 +577,8 @@ BtlRuntimeTask *btlCreateOwnerLinkedTimedTask(BtlUnit *owner, s32 arg) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlObjLink *link;
 
-    task->startCondition.kind = 1;
-    task->endCondition.kind = 0;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->flags |= 2;
     task->taskId = 0x41;
     task->ownerId = owner->identity;
@@ -649,10 +651,10 @@ BtlRuntimeTask *btlCreateEffObjA(BtlUnit *owner, s32 arg) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlObjLink *link;
 
-    task->startCondition.kind = 1;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x42;
     task->flags |= 2;
-    task->endCondition.kind = 0;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     if (owner != NULL) {
         task->ownerId = owner->identity;
     }
@@ -694,10 +696,10 @@ BtlRuntimeTask *btlCreateEffObjB(BtlUnit *owner, s32 messageId) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlObjLink *link;
 
-    task->startCondition.kind = 1;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x3C;
     task->flags |= 2;
-    task->endCondition.kind = 0;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     if (owner != NULL) {
         task->ownerId = owner->identity;
     }
@@ -734,10 +736,10 @@ BtlRuntimeTask *btlCreateEffObjC(BtlUnit *owner, s32 messageId) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlObjLink *link;
 
-    task->startCondition.kind = 1;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x3D;
     task->flags |= 2;
-    task->endCondition.kind = 0;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     if (owner != NULL) {
         task->ownerId = owner->identity;
     }
@@ -757,8 +759,8 @@ BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 arg) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlObjLink *link;
 
-    task->startCondition.kind = 1;
-    task->endCondition.kind = 0;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->flags |= 2;
     task->taskId = 0x3E;
     task->ownerId = owner->identity;
@@ -794,8 +796,8 @@ BtlRuntimeTask *btlCreateOwnerLinkedTimedPresentation(BtlUnit *owner, s32 messag
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlObjLink *link;
 
-    task->startCondition.kind = 1;
-    task->endCondition.kind = 0;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->flags |= 2;
     task->taskId = 0x3F;
     task->ownerId = owner->identity;
@@ -827,10 +829,10 @@ BtlRuntimeTask *btlCreateEffectWaitTask(BtlUnit *owner, u16 mode) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlObjLink *link;
 
-    task->startCondition.kind = 1;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x43;
     task->flags |= 2;
-    task->endCondition.kind = 0;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     if (owner != NULL) {
         task->ownerId = owner->identity;
     }
@@ -872,8 +874,8 @@ BtlRuntimeTask *btlCreateEffectTask44(BtlUnit *owner) {
     BtlRuntimeTask *task = btlAllocTask(8);
     BtlObjLink *link;
 
-    task->startCondition.kind = 1;
-    task->endCondition.kind = 0;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->flags |= 2;
     task->taskId = 0x44;
     task->ownerId = owner->identity;

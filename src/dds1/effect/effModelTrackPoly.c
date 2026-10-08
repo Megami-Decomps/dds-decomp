@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff.h"
 #include "mdl.h"
 #include "sdf.h"
@@ -104,7 +105,6 @@ typedef struct EffTrackPolyList {
 
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 extern void sdfQueueAssetRelease(SdfAsset *asset);
 
 /* Clone count tracks from one parameter block, each with its own data. */

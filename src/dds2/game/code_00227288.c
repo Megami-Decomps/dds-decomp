@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_task_condition.h"
 #include "btl_state.h"
 #include "btl_command.h"
 #include "btl_action.h"
@@ -480,7 +481,7 @@ void func_002286D8(ActionStateLink *action) {
             }
 
             task = sndCreateCustomTask((s32)0x80FFFFFF, 0xC);
-            task->startCondition.kind = 8;
+            task->startCondition.kind = BTL_TASK_CONDITION_OWNER_RUNNING_OR_ABSENT;
             task->startCondition.value.handle = scriptSequence;
             if (unit->partyRecord.unitId == 0x12F) {
                 task->startDelay = 0x6C;
@@ -500,7 +501,7 @@ void func_002286D8(ActionStateLink *action) {
 
         {
             BtlRuntimeTask *refreshTask = btlScheduleRefreshTask(unit);
-            refreshTask->startCondition.kind = 7;
+            refreshTask->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
             refreshTask->startCondition.value.handle = scriptSequence;
             refreshTask->ownerId = refreshSequence;
             btlStartTask(refreshTask);
@@ -509,7 +510,7 @@ void func_002286D8(ActionStateLink *action) {
         if ((unit->flags & 0xE0) == 0) {
             BtlRuntimeTask *modelTask = btlCreateModelLoadPollTask(unit, unit->resourceKind,
                 unit->partyRecord.unitId, 1);
-            modelTask->startCondition.kind = 7;
+            modelTask->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
             modelTask->startCondition.value.handle = refreshSequence;
             modelTask->ownerId = modelSequence;
             btlStartTask(modelTask);
@@ -520,14 +521,14 @@ void func_002286D8(ActionStateLink *action) {
         ActionStateLink *sceneAction;
 
         task = btlCreateSoundUpdateTask(0);
-        task->startCondition.kind = 7;
+        task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
         task->startCondition.value.handle = modelSequence;
         task->startDelay = 2;
         task->ownerId = action->unit->owner;
         btlStartTask(task);
 
         task = btlCreateCommandSoundUpdateTask();
-        task->startCondition.kind = 7;
+        task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
         task->startCondition.value.handle = modelSequence;
         task->ownerId = action->unit->owner;
         btlStartTask(task);
@@ -536,20 +537,20 @@ void func_002286D8(ActionStateLink *action) {
         if (sceneAction != 0 && (sceneAction->pendingFlags & 8) != 0 &&
             (sceneAction->unit->flags & 0x200) != 0) {
             task = btlCreateCommandSoundTask((s32)sceneAction, 9);
-            task->startCondition.kind = 7;
+            task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
             task->startCondition.value.handle = modelSequence;
             task->ownerId = action->unit->owner;
             btlStartTask(task);
         } else {
             task = btlCreateCommandSoundTask(0, 3);
-            task->startCondition.kind = 7;
+            task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
             task->startCondition.value.handle = modelSequence;
             task->ownerId = action->unit->owner;
             btlStartTask(task);
         }
 
         task = btlCreateFadeInTask(0x10);
-        task->startCondition.kind = 7;
+        task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
         task->startCondition.value.handle = modelSequence;
         task->endDelay = 0x1F;
         task->ownerId = action->unit->owner;

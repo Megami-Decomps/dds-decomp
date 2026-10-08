@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "sdf_resource.h"
 #include "sdf.h"
 #include "mnu_shop.h"
 #include "mnu_list.h"
@@ -168,7 +169,7 @@ typedef struct CampMenuContext {
     MenuSpriteState *sprite;  /* 0x8FC */
     MenuSimpleSpriteState *effect; /* 0x900 */
     u8 pad904[8];
-    s32 menu;                 /* 0x90C */
+    void *menu;               /* 0x90C: retained child work; active menu selects its type */
     u8 pad910[0x10];
     MenuProfilePanel *extraResource; /* 0x920 */
 } CampMenuContext;
@@ -374,7 +375,6 @@ void mnuCopyPartyEntries(context)
 }
 
 extern void func_00285960(DatPartyRecord *, s32, u32, PartyPanel *);
-extern void mnuUpdateHandleStates(MenuPageWindow *);
 extern void func_00280048(s32);
 
 /* Transfer one current party record and refresh the selected panel slot. */
@@ -425,7 +425,7 @@ void mnuRestorePartyEntriesAndRefresh(context)
     PartyEntryCopy *entryCursor = menuWork->current;
     s32 entryCounter;
     s32 backupByteOffset;
-    s32 panelWork;
+    MenuPageWindow *panelWork;
 
     for (entryCounter = 0; entryCounter < MNU_STAFF_PARTY_SLOT_COUNT; entryCounter++) {
         if (entryCursor->flags & MNU_STAFF_PARTY_ACTIVE_BIT) {
@@ -438,11 +438,11 @@ void mnuRestorePartyEntriesAndRefresh(context)
         *(PartyEntryCopy *)(backupByteOffset + (s32)datGameState + MNU_STAFF_PARTY_BASE) = *(PartyEntryCopy *)(backupByteOffset + (s32)menuWork + PARTY_BACKUP_OFFSET);
         backupByteOffset += MNU_STAFF_PARTY_ENTRY_BYTES;
     }
-    panelWork = (s32)&((CampMenuContext *)context)->partyWindow;
+    panelWork = &((CampMenuContext *)context)->partyWindow;
     mnuReleasePartyPanelTextures(panelWork);
     mnuInitPartyPanelSlots(&((CampMenuContext *)context)->partyPanel);
-    mnuUpdateHandleStates((MenuPageWindow *)panelWork);
-    func_00280048(panelWork);
+    mnuUpdateHandleStates(panelWork);
+    func_00280048((s32)panelWork);
 }
 
 /* Count active entries in the five-slot party array, capped at three. */
@@ -483,7 +483,7 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
 
 /* Release panel textures before reinitializing slots and updating handle state. */
 void mnuRefreshPartyPanelSlots(s32 context) {
-    mnuReleasePartyPanelTextures((s32)&((CampMenuContext *)context)->partyWindow);
+    mnuReleasePartyPanelTextures(&((CampMenuContext *)context)->partyWindow);
     mnuInitPartyPanelSlots(&((CampMenuContext *)context)->partyPanel);
     mnuUpdateHandleStates(&((CampMenuContext *)context)->partyWindow);
 }
@@ -498,7 +498,7 @@ s32 func_002755E0(KwlnTask *task) {
     PartyMenuData *menu = (PartyMenuData *)sdfResourceRetainAddress(allocation);
     s32 i;
 
-    context->menu = (s32)menu;
+    context->menu = menu;
     memset(menu, 0, sizeof(*menu));
     menu->allocation = (s32)allocation;
 
@@ -531,7 +531,7 @@ s32 mnuShopReleaseResources(void) {
     mnuRefreshPartyPanelSlots(context);
     mnuDestroyPartySelectionWindow(context);
     func_00274BA0(context);
-    sdfReleaseResourceAllocation(menu->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(menu->allocation));
     return 1;
 }
 
@@ -805,10 +805,10 @@ INCLUDE_ASM(const s32, "game/code_00274B80", func_00276368);
 
 s32 mnuStaffCloseSelectionState(void) {
     s32 context = kwlnTaskGetUserValue();
-    s32 menu = ((CampMenuContext *)context)->menu;
+    void *menu = ((CampMenuContext *)context)->menu;
     mnuResetWorkFloats();
     mnuReleaseMenuWindowHandles(context);
-    sdfReleaseResourceAllocation(*(s32 *)menu);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*(s32 *)menu));
     return 1;
 }
 
@@ -1364,7 +1364,7 @@ s32 mnuCampMenuInit(void) {
     s32 *menu = sdfResourceRetainAddress(handle);
     CampMenuContext *work = (CampMenuContext *)context;
 
-    work->menu = (s32)menu;
+    work->menu = menu;
     memset(menu, 0, 0x38);
     *menu = handle;
     func_00277DD0(context);
@@ -1392,7 +1392,7 @@ s32 mnuCloseItemSelectionState(s32 contextArg) {
         mnuDestroySelectedPartyWindow(contextArg);
     }
     func_00277DF0(context);
-    sdfReleaseResourceAllocation(menu->handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(menu->handle));
     return 1;
 }
 
@@ -1482,9 +1482,9 @@ void mnuClearPartySkillSlot(DatPartyRecord *partyEntry, s32 skillSlot) {
  * Native list reads precede the late window guard; preserve that ordering. */
 void mnuCampMenuHandleInput(void) {
     s32 context = kwlnTaskGetUserValue();
-    s32 menuWork = ((CampMenuContext *)context)->menu;
+    StaffMenuWork *menuWork = ((CampMenuContext *)context)->menu;
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_SKILL_INPUT_MASK);
-    s32 window = ((StaffMenuWork *)menuWork)->selectedList;
+    s32 window = menuWork->selectedList;
     s32 list = (s32)((MenuInputNode *)window)->flags;
 
     ((MenuInputFlags *)list)->bits &= ~MNU_LIST_SELECTION_FLAG;
