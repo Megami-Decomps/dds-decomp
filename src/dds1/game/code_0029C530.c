@@ -77,9 +77,6 @@ extern char D_003B3BA0[]; /* "/tool/effect/hlp/" */
 
 extern void effMiscQuaternionToMatrixVU(void);
 
-extern s32 billGetFirstEntryFramePeriod(u32);
-
-
 extern f32 effComputeProjectedOffsetAngle(u8 *, void *);
 
 extern f32 func_00152560(u8 *, void *);
@@ -1380,7 +1377,7 @@ typedef struct EffBillboardWork {
     f32 heightScale; /* 0x2C */
     f32 widthScale;  /* 0x30 */
     u8 unk34[0x30];  /* Remaining copied configuration, not alignment padding. */
-    u32 billboard;   /* 0x64 */
+    BillObj *billboard; /* 0x64: owned billboard handle. */
 } EffBillboardWork;
 
 u8 *effCreateBillboardWork(u8 *source) {
@@ -1402,7 +1399,7 @@ u8 *effCreateBillboardWork(u8 *source) {
 }
 
 void effBillboardWorkRelease(u32 work) {
-    s32 billboard;
+    BillObj *billboard;
 
     billboard = ((EffBillboardWork *)work)->billboard;
     if (billboard != 0) {
@@ -1419,13 +1416,12 @@ u8 *effDuplicateBillState(const u8 *source) {
 }
 
 void effReplaceBillboardClone(s32 dst, s32 src) {
-    u32 billboard;
+    BillObj *billboard;
 
     if (((EffBillboardWork *)dst)->billboard != 0) {
         billDispatchByKind(((EffBillboardWork *)dst)->billboard);
     }
-    billboard = (u32)billCloneObjectRetainingSharedData(
-        (struct BillObj *)((EffBillboardWork *)src)->billboard);
+    billboard = billCloneObjectRetainingSharedData(((EffBillboardWork *)src)->billboard);
     ((EffBillboardWork *)dst)->billboard = billboard;
 }
 
@@ -1462,10 +1458,10 @@ void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
         scale *= work->scale;
         width = scale * work->widthScale;
         height = work->heightScale * work->scale;
-        billSetChildScaleComponents((struct BillObj *)work->billboard, width, height);
-        billSetLengthExtent(work->billboard, length);
-        effCopyVector(work->billboard, (u8 *)work);
-        billInvokeCallback(work->billboard);
+        billSetChildScaleComponents(work->billboard, width, height);
+        billSetLengthExtent((u32)work->billboard, length);
+        effCopyVector((u32)work->billboard, (u8 *)work);
+        billInvokeCallback((u32)work->billboard);
         work->frame++;
     }
 }
