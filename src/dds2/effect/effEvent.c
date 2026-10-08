@@ -7,6 +7,7 @@
 #include "eff_math.h"
 #include "eff_channel.h"
 #include "eff_event.h"
+#include "eff_event_sound.h"
 #include "eff_event_setup.h"
 #include "pcp_vu0.h"
 
@@ -1049,11 +1050,11 @@ void effEventSetScaleBlurParameters(EffBlurScaleParams *parameters) {
     D_003B2AF8 = *parameters;
 }
 
-SoundMixer *func_00197D38(SoundMixer *source) {
+SoundMixer *effEventCloneSoundMixer(SoundMixer *source) {
     return sndMixerClone(source);
 }
 
-void func_00197D50(SoundMixer *mixer) {
+void effEventReleaseSoundMixerVoices(SoundMixer *mixer) {
     sndReleaseAllVoices(mixer);
 }
 /* Copied event parameters: position, quaternion and aim dimensions (0x30). */
@@ -1155,7 +1156,7 @@ EffEventLight *effEventLightCreate(SoundMixer *arg, f32 param) {
     work->init.position[0] = 0;
     work->init.position[2] = 0;
     work->init.position[3] = 0;
-    work->handle = func_00197D38(arg);
+    work->handle = effEventCloneSoundMixer(arg);
     work->owner = effEventCreate(work->handle, 0, &work->init);
     work->active = 1;
     return work;
@@ -1165,7 +1166,7 @@ EffEventLight *effEventLightCreate(SoundMixer *arg, f32 param) {
 void effEventLightDestroy(EffEventLight *work) {
     effEventReleaseNode(work->owner);
     if (work->active != 0) {
-        func_00197D50(work->handle);
+        effEventReleaseSoundMixerVoices(work->handle);
     }
     sdfReleaseChipBlock(work);
 }

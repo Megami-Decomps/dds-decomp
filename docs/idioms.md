@@ -4003,8 +4003,8 @@ The DDS1 twin `func_001150F0` uses the same
 `EffectEventVectorParameters` shape and `D_0039F7D0` initializer. That
 initial copy retains the last three parameters and color while the two
 SDK vector copies replace only the first 32 bytes. The native mixer
-dependency is the `SoundMixer *` returned by `func_00190100`, whose
-matched implementation calls `sndMixerClone`.
+dependency is the `SoundMixer *` returned by `effEventCloneSoundMixer`, whose
+implementation calls `sndMixerClone`.
 
 ## Panel resources and typed pair updates
 
@@ -4216,4 +4216,3 @@ Command addresses are serialized `u32` words converted to the existing
 command-list pointer type at the SDK boundary. The canonical function is
 `void`: IDA's apparent return values are incidental comparison constants.
 The live DDS1 `sdfModel.c` gate reports 18 match, 0 differ.
-
