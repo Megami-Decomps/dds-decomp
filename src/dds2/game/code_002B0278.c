@@ -185,7 +185,7 @@ extern s32 evtGetCapturedWindowPanelValue();
 
 extern s32 func_002B06A8();
 
-extern void mnuPrepareStaffValueChangeDialog(s32, DatPartyRecord *, s32, s32);
+extern void mnuPrepareStaffValueChangeDialog(MenuStaffContext *, DatPartyRecord *, s32, s32);
 
 extern char D_003E7530[];
 
@@ -499,7 +499,8 @@ s32 mnuUpdatePartySlotAssignmentPopup(s32 callback) {
     }
     if (evtGetCapturedWindowPanelValue() == 0) {
         label = ((MenuWindowContainer *)*(s32 *)(menu + 0x18))->list->cursor->sortKeySecondary;
-        mnuPrepareStaffValueChangeDialog(context, slot, label, func_002B06A8(menu, slot, label));
+        mnuPrepareStaffValueChangeDialog((MenuStaffContext *)context, slot, label,
+                                         func_002B06A8(menu, slot, label));
         mnuInitPartyPanelSlots(&((MenuContext *)context)->partyPanel);
         func_002BCAB0(&((MenuContext *)context)->partyWindow);
         *(s32 *)(menu + 0x40) = label;
