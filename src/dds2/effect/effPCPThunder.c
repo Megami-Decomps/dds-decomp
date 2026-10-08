@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_append.h"
 #include "eff_thunder_vector.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
@@ -3031,8 +3032,6 @@ void effAppendFragmentHistoryPoints(EffFragmentResources *history, u128 *source)
 extern SdfPoolNode *D_003B1210[];
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfConsAppendClearPacket(s32, s32 (*)(s32));
-extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
 extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 func_00167A10(EffThunderDrawParams *);
 
@@ -3056,8 +3055,8 @@ void effThunderDrawHistoryAndEndCap(EffFragmentResources *history) {
     }
     list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    sdfConsAppendClearPacket((s32)list, 0);
-    sdfConsAppendAssetPacket((s32)list, history->resourceHandle, 0);
+    sdfConsAppendClearPacket(list, 0);
+    sdfConsAppendAssetPacket(list, history->resourceHandle, 0);
     recent = history->activePointCount;
     start[0] = history->position - recent;
     if (start[0] < 3) {
