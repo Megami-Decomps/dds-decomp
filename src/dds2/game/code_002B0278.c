@@ -1,3 +1,4 @@
+#include "sdf_chip.h"
 #include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
@@ -340,7 +341,6 @@ typedef struct SkillMenuRuntime {
     s32 fade; /* 0x38: shared skill-category marker fade. */
 } SkillMenuRuntime;
 
-extern MenuListNode *sdfAllocAndClearQuadwords(s32);
 
 extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
 
@@ -3503,7 +3503,6 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending);
 /* Allocate four native fade records into pointer slots after the list header. */
 void mnuAllocateListEntries(s32 *list);
 
-extern void sdfReleaseChipBlock();
 
 /* Free the four record blocks, not their nested window pointers. */
 void mnuFreeListEntries(s32 *list);
@@ -3559,7 +3558,6 @@ void mnuSetPageParams(MenuSprites *page, s32 mode);
 
 extern s32 effDestroyResourceSlotSet();
 
-extern void sdfReleaseChipBlock();
 
 
 void mnuFreeIconSprites(MenuSprites *menu);

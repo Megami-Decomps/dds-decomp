@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 
 extern s32 scrReadIntParameter(s32);
 /* The native VM commands pass operands to these parameterless party stubs. */
@@ -26,7 +27,6 @@ struct Dds3Node {
 
 extern s32 func_001951C8(u32, s32, s32, s32, s32);
 extern void frFontSetContextPair(s32, u32, u32);
-extern s32 sdfAllocAndClearQuadwords(s32);
 extern Dds3NodeVTable dds3FontNodeVTable;
 
 /* Remove the party unit specified by script operand 0 and return success to
@@ -165,8 +165,8 @@ void itfConfigureOwnedGlyphChainFlag(Dds3Node *node, u8 value) {
     frFontSetChainFlag(node->glyph, value);
 }
 
-void frFontReleaseOwnerStorage(void) {
-    sdfReleaseChipBlock();
+void frFontReleaseOwnerStorage(void *memory) {
+    sdfReleaseChipBlock(memory);
 }
 
 Dds3NodeVTable dds3FontNodeVTable __attribute__((section(".sdata"))) = {

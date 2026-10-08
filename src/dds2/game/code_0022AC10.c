@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "snd_slot.h"
 #include "sdf_resource.h"
 #include "file_pac.h"
@@ -93,7 +94,6 @@ extern s32 btlGetRuntime(void);
 
 extern s32 btlCountTasksByKind(u16);
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
 extern void func_002C7CE8(void *);
 
@@ -321,7 +321,6 @@ extern u8 D_00436EF8[];
 
 extern SdfPoolNode kwlnPositionedTextSurface;
 
-extern void sdfReleaseChipBlock(void *);
 
 
 extern void mdlDestroyContext(MdlCtx *);
@@ -330,7 +329,6 @@ extern void mdlDestroyPartList(DevRequest *);
 
 extern void sdfResourceListRelease(DevRequest *, s32);
 
-extern void sdfReleaseChipBlock(void *);
 
 extern s32 abs(s32);
 extern f32 btlGetUnitModelValue1C(BtlUnit *);

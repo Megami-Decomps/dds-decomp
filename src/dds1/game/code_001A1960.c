@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
@@ -21,7 +22,6 @@ extern void mdlFlagSet(s32 flag);
 extern void dspCloseChannel(void);
 extern s32 dspStartEntry(s32 entry);
 extern void evtCreateMessageWindowIfMissing(void *text);
-extern void sdfReleaseChipBlock(void *block);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
@@ -123,7 +123,6 @@ typedef struct SndPad {
 
 extern SndPad D_00324510;
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
 extern s8 D_00324530[];
 
@@ -4495,8 +4494,8 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2998);
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B2AC8);
 
 void btlReleaseBattleScratchBlocks(void) {
-    sdfReleaseChipBlock(D_003BD834);
-    sdfReleaseChipBlock(D_003BD838);
+    sdfReleaseChipBlock((void *)D_003BD834);
+    sdfReleaseChipBlock((void *)D_003BD838);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A29F0);
@@ -4768,7 +4767,7 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001B4F10);
 
 void btlReleaseRegisteredTaskBuffer(s64 unused) {
     btlGetRuntime();
-    sdfReleaseChipBlock(D_003BB3DC);
+    sdfReleaseChipBlock((void *)D_003BB3DC);
     D_003BB3DC = 0;
     btlSetTrackedTaskHandle(4, 0);
 }

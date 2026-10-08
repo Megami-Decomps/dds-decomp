@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -123,7 +124,6 @@ extern u32 sdfCreateReferenceDmaNode(u32);
 
 extern u32 sdfAllocSizeClassBlock(u32);
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
 typedef struct SdfDescriptorSource {
     u8 pad00[0xC];
@@ -174,7 +174,6 @@ extern void sdfBuildFillPacket101(s32, s32, s32, s32, s32, s32, s32, s32);
 
 void sdfDestroyObjectList(SdfModel *owner);
 
-extern void sdfReleaseChipBlock(void *allocation);
 
 
 extern void sdfDestroyDevRequest(DevRequest *request);
@@ -1804,7 +1803,6 @@ void sdfDestroyObjectList(SdfModel *owner) {
 }
 
 extern void sdfReleaseQueuedResource(void *resource, s32 retained);
-extern void sdfReleaseChipBlock();
 
 void sdfReleaseDevSlot(SdfModel *slot, s32 recycle, s32 release) {
     if (slot == NULL) {

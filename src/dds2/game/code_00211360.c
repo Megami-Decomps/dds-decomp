@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "btl_command.h"
@@ -168,9 +169,7 @@ extern void btlDebugPrintf(const char *, ...);
 
 extern u16 btlReadUnitStatusMask(DatPartyRecord *);
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
-extern void sdfReleaseChipBlock(void *);
 
 extern s32 btlMatchesActorEntryCodeCondition();
 

@@ -1,6 +1,7 @@
 #include "eff_bill.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
 
@@ -402,9 +403,7 @@ extern void *fileResolvePrimaryBuffer();
 
 extern void *fileResolveSecondaryBuffer(FileJobPayload *);
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
-extern void sdfReleaseChipBlock();
 
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 
@@ -694,7 +693,7 @@ void effCreateSmallHeaderFromFile(void) {
 
 void effReleaseFadeHeaderAllocation(u32 allocation) {
     kwlnCancelConfiguredFadeFrames();
-    sdfReleaseChipBlock(allocation);
+    sdfReleaseChipBlock((void *)allocation);
 }
 
 void effCloneSmallHeaderFromWork(s32 work) {
@@ -833,7 +832,7 @@ void effCreateSelectionHeaderFromFile(void) {
 
 void effReleaseSelectionHeaderAllocation(u32 allocation) {
     evtDestroySelectionState();
-    sdfReleaseChipBlock(allocation);
+    sdfReleaseChipBlock((void *)allocation);
 }
 
 void effCloneSelectionHeaderFromWork(s32 work) {
@@ -1602,7 +1601,7 @@ void effBillboardWorkRelease(u32 work) {
     if (billboard != 0) {
         billDispatchByKind(billboard);
     }
-    sdfReleaseChipBlock(work);
+    sdfReleaseChipBlock((void *)work);
 }
 
 u8 *effDuplicateBillState(const u8 *source) {
@@ -3084,7 +3083,7 @@ u32 *effSegmentPointerSet(u8 *work) {
 
 void effReleaseRingResourceHandle(u32 handle) {
     effAssetQueueRelease(*(u32 *)handle);
-    sdfReleaseChipBlock(handle);
+    sdfReleaseChipBlock((void *)handle);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E64F0);
@@ -3369,7 +3368,7 @@ EffRingResource *effCreateRingHandle(EffRadialRingParams *work) {
 
 void effReleaseRingHandle(EffRingResource *handle) {
     effAssetQueueRelease((u32)handle->pointSet);
-    sdfReleaseChipBlock((u32)handle);
+    sdfReleaseChipBlock(handle);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E6F48);
@@ -7496,7 +7495,7 @@ void effReleaseOwnedClassResourceWork(u32 handle) {
     if (*(s32 *)handle != 0) {
         effDestroyClassResourceWork(*(s32 *)handle);
     }
-    sdfReleaseChipBlock(handle);
+    sdfReleaseChipBlock((void *)handle);
 }
 
 /* vu0 routine: orient along the vector between two requested positions and advance the resource. */
@@ -7575,7 +7574,7 @@ void effReleaseOwnedSurfaceNodeWork(u32 handle) {
     if (*(s32 *)handle != 0) {
         effDestroySurfaceNode(*(EffectSlotNode54 **)handle);
     }
-    sdfReleaseChipBlock(handle);
+    sdfReleaseChipBlock((void *)handle);
 }
 
 /* Resolve and apply the surface's endpoint requests, then acquire its retained record. */
@@ -7843,7 +7842,7 @@ void effReleaseQueuedDrawableAssetWork(u32 work) {
     if (resource != 0) {
         sdfQueueAssetRelease(resource);
     }
-    sdfReleaseChipBlock(work);
+    sdfReleaseChipBlock((void *)work);
 }
 
 void func_002F8640(void) {
@@ -11187,7 +11186,7 @@ s32 effDispatchRecordBuckets(s32 refresh, EffectOwnerRecord *list, s32 drawOptio
 /* Release bucket records before freeing the owner list. */
 u32 effDestroyOwnerRecordList(u32 buckets) {
     effReleaseRecordBuckets((EffectOwnerRecord *)buckets);
-    sdfReleaseChipBlock(buckets);
+    sdfReleaseChipBlock((void *)buckets);
     return 1;
 }
 
@@ -11559,7 +11558,7 @@ u32 effDestroyResourceSlotSet(u32 effect) {
     }
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(set->descriptionAllocation));
     effReleaseSlotWorkAllocation(effect);
-    sdfReleaseChipBlock(effect);
+    sdfReleaseChipBlock((void *)effect);
     return 1;
 }
 

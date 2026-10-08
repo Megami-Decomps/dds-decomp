@@ -1,6 +1,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_primitive.h"
 
 #include "kwln.h"

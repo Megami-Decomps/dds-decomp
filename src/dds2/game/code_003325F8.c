@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "pcp_vu0.h"
 
 #include "sdf.h"
@@ -117,7 +118,6 @@ void sdfDestroyDevRequest(DevRequest *);
 
 extern s32 sdfLiveAssetCount;
 
-extern void sdfReleaseChipBlock(void *);
 
 void sdfAssetRelease(SdfAsset *);
 
@@ -633,7 +633,6 @@ void sdfSetTextScalarPair(SdfTextParam *param, f32 first, f32 second) {
     param->dirtyFlags = param->dirtyFlags | SDF_ASSET_PAIR_STATE_DIRTY;
 }
 
-extern void *sdfAllocAndClearQuadwords(s32);
 /* Allocate both native draw-entry command blocks and mark every change group dirty. */
 SdfAsset *sdfCreateAssetWithDrawEntries(void) {
     SdfAsset *asset;
