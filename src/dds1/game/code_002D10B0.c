@@ -284,7 +284,43 @@ void sdfServiceGraphicsBuffers(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1590);
+extern void func_002D0E30(SdfGraphObj *, s32, s32);
+extern s32 sdfCreateThread(void *, void *, s32, s32);
+extern s32 _StartThread(s32, s32);
+extern void sdfStartTrackedThread(SdfThreadNode *, s32, s32, s64, s32, s32);
+
+extern u8 D_003BD2E8;
+extern u8 D_003BD2E9;
+extern SdfThreadNode D_003BD9D0;
+extern u8 D_003E3820[0x8000];
+extern u8 D_003E2820[0x1000];
+extern void sdfResizeDoubleBuffer(s32);
+extern void sdfResetPacketSlotState(void);
+extern void sdfRegisterTextureReleaseRequestHandler(void);
+
+void func_002D1590(s32 size) {
+    s32 thread;
+    SdfGraphObj *graph = &D_003980E0;
+
+    sceGsResetPath();
+    D_003BD2E8 = 1;
+    func_002D0E30(graph, 1, 1);
+    sdfGraphRecreateBuffers(graph);
+    D_003BD2E9 = 0;
+    sdfBufferSlotIndices[0] = sdfBufferSlotIndices[1] = -1;
+    sdfBusyBufferIndex = -1;
+    D_003BD9DD = 1;
+    sdfResizeDoubleBuffer(size);
+    sdfResetPacketSlotState();
+    sdfRegisterTextureReleaseRequestHandler();
+    sdfGsImageUploadSemaphore = sdfCreateSemaphore(1, 0x20, 0);
+    D_003BD2FC = sdfCreateSemaphore(0, 0x20, 0);
+    thread = sdfCreateThread((void *)func_002D1380, D_003E3820, 0x8000, 0x44);
+    D_003BD9D8 = thread;
+    _StartThread(thread, 0);
+    sdfStartTrackedThread(&D_003BD9D0, (s32)sdfServiceGraphicsBuffers, (s32)D_003E2820,
+                          0x1000, 0x40, 0);
+}
 
 extern vu8 sdfCurrentBufferIndex;
 extern void sdfVuClearTransformCache(void);
