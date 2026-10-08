@@ -1230,11 +1230,11 @@ void mnuFreeProfilePanelWork(void *work) {
     sdfReleaseChipBlock(work);
 }
 
-void mnuSetGroupProperties(u32 *entry, u32 first, u32 second, u32 third, u32 fourth) {
-    entry[6] = first;
-    entry[7] = second;
-    entry[9] = third;
-    entry[10] = fourth;
+void mnuSetGroupProperties(MenuProfilePanel *panel, u32 first, u32 second, u32 third, u32 fourth) {
+    panel->resourceHandle = first;
+    panel->unk1C = second;
+    panel->unk24 = third;
+    panel->unk28 = fourth;
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C33C0);

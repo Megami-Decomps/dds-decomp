@@ -666,7 +666,7 @@ void effObjectListCountersReset(void) {
 }
 
 extern s32 sdfFormatImageSize(u32 format, s32 width, s32 height);
-extern SdfTex *func_002D2AB8(s32, s32, u32, u32, u32, u32);
+extern SdfTex *sdfTexCreateWithAllocatedResources(s32, s32, u32, u32, u32, u32);
 extern void sdfTexCreateFirstPacket(SdfTex *texture);
 
 RefObj *func_0029BD90(SdfTextureFileHeader *source) {
@@ -713,7 +713,7 @@ RefObj *func_0029BD90(SdfTextureFileHeader *source) {
     memcpy(texture->pixels, cursor, imageBytes);
 
     if (effSharedTextureReferenceCount == 0) {
-        D_003BC958 = func_002D2AB8(0x100, 0x100, 0x13, 0, 0, 1);
+        D_003BC958 = sdfTexCreateWithAllocatedResources(0x100, 0x100, 0x13, 0, 0, 1);
         sdfTexCreateFirstPacket(D_003BC958);
     }
     effSharedTextureReferenceCount++;

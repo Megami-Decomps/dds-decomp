@@ -931,7 +931,7 @@ SdfTex *func_0032B6B0(SdfTex *source) {
     texture->primaryBuffer = NULL;
     texture->secondaryBuffer = NULL;
     texture->data = NULL;
-    texture->auxiliaryAllocation = NULL;
+    texture->intensityMap = NULL;
     sdfTexListInsert(texture);
     if (texture->secondaryResource != NULL) {
         texture->secondaryResource = sdfTexAllocHead(

@@ -263,7 +263,7 @@ typedef struct SdfTex {
     u8 *data;
     s32 dataSize;
     s32 unk38;
-    void *auxiliaryAllocation; /* Owned heap allocation released alongside data. */
+    u8 *intensityMap; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
 } SdfTex;
 
 /* Semaphore ID and attached work pointers (0x14); DDS1/2 game/code_002D10B0/00329F60.c. */
