@@ -87,7 +87,7 @@ typedef struct FrFontSystem {
     void *textureHead0;
     void *textureHead1;
     FrFontAtlas atlas;
-    s32 imageBuffers[6];
+    u32 imageBuffers[6];
     u8 pad190[4];
     struct FrFontGlyph *glyphSlots[2];
 } FrFontSystem;
