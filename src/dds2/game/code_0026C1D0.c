@@ -1,4 +1,5 @@
 #include "kwln.h"
+#include "mnu_list.h"
 #include "kwln_task_state.h"
 #include "evt_world.h"
 #include "sdf_resource.h"
@@ -463,13 +464,20 @@ s32 evtLoadTextureFromResourcePath(u32 path) {
 extern u32 D_00437890[];
 extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
 
+/* The outer panel owner is unresolved; its list pointer is shared by
+ * the viewport flag and height consumers. */
+typedef struct {
+    u8 pad0[0x18];
+    struct MenuList *list;
+} EvtPanelRecord;
+
 /* Draw top/bottom viewport indicators; each flag selects its brighter color.
  * DDS2 copies its two colors from the data table rather than using DDS1 literals. */
-void evtDrawListViewportIndicators(s32 x, s32 topY, s32 bottomY, s32 size, s32 record) {
+void evtDrawListViewportIndicators(s32 x, s32 topY, s32 bottomY, s32 size, EvtPanelRecord *record) {
     s32 coordinates[2][3];
     s32 xRadius = (size << 4) >> 1;
     s32 yOffset = size << 3;
-    u32 flags = *(u32 *)(*(s32 *)(record + 0x18) + 4);
+    u32 flags = record->list->flags;
     u32 colors[2];
 
     memcpy(colors, D_00437890, sizeof(colors));
@@ -487,16 +495,7 @@ void evtDrawListViewportIndicators(s32 x, s32 topY, s32 bottomY, s32 size, s32 r
         (flags & EVT_SCROLL_BOTTOM_FLAG) ? colors[0] : colors[1], EVT_PANEL_DRAW_COMMAND);
 }
 
-extern s32 mnuGetListViewportHeight(s32);
-
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, u32, s32);
-
-extern void evtDrawListViewportIndicators(s32, s32, s32, s32, s32);
-
-typedef struct {
-    u8 pad0[0x18];
-    s32 heightSource; /* 0x18: passed to mnuGetListViewportHeight for the panel height */
-} EvtPanelRecord;
 
 typedef struct EvtMantraNodePositionRecord {
     union {
@@ -512,10 +511,10 @@ typedef struct EvtMantraNodePositionRecord {
 } EvtMantraNodePositionRecord; /* 0x20 */
 
 void evtDrawListViewportPanel(s32 x, s32 y, s32 width, EvtPanelRecord *record) {
-    s32 height = mnuGetListViewportHeight(record->heightSource) + 0x80;
+    s32 height = mnuGetListViewportHeight(record->list) + 0x80;
 
     uiDrawUniformColorRect(x, y, 0, width, height, 0x30303040, 0x53);
-    evtDrawListViewportIndicators(x + width - 0xA0, y, y + height, 8, (s32)record);
+    evtDrawListViewportIndicators(x + width - 0xA0, y, y + height, 8, record);
 }
 
 /* Draw a plain background rectangle with the shared panel color and command. */
