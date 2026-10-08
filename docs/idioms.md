@@ -3375,3 +3375,18 @@ the caller's old integer-handle prototypes and pointer casts without changing
 either enabled text routine. The three-row reward renderer remains ASM:
 the true-pointer candidate still differs in five instruction words, involving
 the final color-array store and the second text call's argument scheduling.
+
+## Action-camera helper contracts and legacy arity
+
+The camera core (`001DEFE0` / `001EC868`) receives a
+`BtlLinkedCommand *`, a `BtlCamState *`, and an `f32` framing parameter.
+Its fallback wrappers pass `27.5f`; the tilt wrappers pass `20.0f` and
+operate on the pose's direction vector. Their callers pass the actual
+embedded camera members, not integer handles or alternate effect views.
+
+DDS2 `btlUpdateActionPoseForLinkedTarget` deliberately leaves the target
+unit in `$a2`: native `001EBD6C` loads it there before the tail call at
+`001EBD88`. The fallback `001ECBF8` only consumes `$a0/$a1`, forwarding
+those two pointers to the camera core with `27.5f`. Keep an unprototyped
+declaration ahead of that genuine three-argument legacy caller and the
+typed two-parameter definition afterwards; do not invent a third formal.
