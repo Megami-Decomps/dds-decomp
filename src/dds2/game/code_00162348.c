@@ -62,11 +62,7 @@ typedef struct ParReleaseRecord {
     SdfAsset *asset;     /* 0x40 */
 } ParReleaseRecord;
 
-typedef struct ParScaleObj {
-    u16 kind;
-    u8 pad2[6];
-    f32 scale; /* 0x8 */
-} ParScaleObj;
+
 
 extern f32 D_00451F30[];
 
@@ -389,7 +385,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_001629A0);
 
 /* Kinds 2-4 keep the scale at +8 of their own record; copy it into the
  * shared vector and store the (vf10 - vf11) difference. */
-void parUpdateSharedScaleAndDelta(ParScaleObj *obj) {
+void parUpdateSharedScaleAndDelta(ParKindState *obj) {
     f32 scale;
 
     switch (obj->kind) {
@@ -397,15 +393,15 @@ void parUpdateSharedScaleAndDelta(ParScaleObj *obj) {
     case 1:
         return;
     case 2:
-        scale = obj->scale;
+        scale = obj->value.scale;
         D_00451F40[0] = D_00451F40[1] = D_00451F40[2] = scale;
         break;
     case 3:
-        scale = obj->scale;
+        scale = obj->value.scale;
         D_00451F40[0] = D_00451F40[1] = D_00451F40[2] = scale;
         break;
     case 4:
-        scale = obj->scale;
+        scale = obj->value.scale;
         D_00451F40[0] = D_00451F40[1] = D_00451F40[2] = scale;
         break;
     default:
