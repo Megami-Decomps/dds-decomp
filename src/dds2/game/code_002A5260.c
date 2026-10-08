@@ -76,7 +76,7 @@ extern char D_00429938[]; /* "staffImageProc" */
 extern char D_00429968[]; /* "staffProc" */
 
 extern MovObj mnuMovieDrawContext;
-void mnuRequestIndexedMovieResource();
+void mnuRequestIndexedMovieResource(s32 index);
 void mnuStopMovieDrawTask(void);
 
 extern SdfPoolNode D_003803C8;
@@ -331,7 +331,7 @@ void mnuDrawTitleSceneForPhase(void) {
 void mnuArmTitleMovieDrawAndResetFrame(u32 arg0, s32 arg1) {
     MenuTitleState *work;
 
-    mnuRequestIndexedMovieResource();
+    mnuRequestIndexedMovieResource(arg0);
     work = mnuMovieMenuState;
     if (mnuMovieMenuState != 0) {
         ((MenuTitleState *)mnuMovieMenuState)->movieDrawActive = 1;
