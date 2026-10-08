@@ -5,13 +5,10 @@
 #include "sdf_movie_state.h"
 #include "sdf_stream_read.h"
 #include "sdf_dev_event.h"
+#include "sdf_dev_state.h"
 
-typedef struct DevState DevState;
-
-s32 sdfDevQueueRead(DevState *state, void *data, s32 size);
 s32 sdfDevQueueControlRequest(DevState *state);
 s32 sdfDevQueueActiveOperation(DevState *state);
-s32 sdfDevQueueReleaseState(DevState *state);
 s32 WaitSema(s32 semaphore);
 s32 SignalSema(s32 semaphore);
 void *memcpy(void *destination, const void *source, u32 size);
