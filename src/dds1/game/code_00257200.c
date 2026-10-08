@@ -130,7 +130,9 @@ void func_00257718(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
             n--;
         } while (n >= 0);
     }
-    n = (display->boundsFlags & 1) != 0 ? 0x1E : 0x1A;
+    n = (display->boundsFlags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) != 0
+            ? 0x1E
+            : 0x1A;
     for (row = 0; row <= n; row++) {
         func_0024EDC0(arg0, arg1, arg2, arg3, row, 0x20, 1.0f, 1.0f, arg6);
     }
@@ -178,7 +180,9 @@ void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
             n--;
         } while (n >= 0);
     }
-    n = (display->boundsFlags & 1) != 0 ? 0x1E : 0x1A;
+    n = (display->boundsFlags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) != 0
+            ? 0x1E
+            : 0x1A;
     for (row = 0; row <= n; row++) {
         func_0024EDC0(arg0, arg1, arg2, arg3, row, 0x20, scaleX, scaleY, arg6);
     }

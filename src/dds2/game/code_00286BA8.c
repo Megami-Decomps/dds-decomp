@@ -308,7 +308,7 @@ s32 mtrMantraEquipInit(void) {
     func_00267B40(snapshot, work->progressHost);
     mnuEnsureProfilePanelEffect(snapshot, work->progressHost);
     mnuInitPartyPanelSlots(&work->progressHost->partyPanel);
-    func_002BCAB0(&work->progressHost->partyWindow);
+    mnuRefreshPartyPanelBars(&work->progressHost->partyWindow);
     work->flags.fadeProgress = 0;
     work->flags.profileReady = 0;
     equip->state = 1;
