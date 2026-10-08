@@ -1756,18 +1756,18 @@ s32 mnuGetRangeEntryFlatValue(s32 id) {
 }
 
 /* Compare the stored raw HP/MP cost; equality is affordable and other kinds pass. */
-s32 mnuCanAffordEntryCost(u16 commandId, s32 actorAddress) {
+s32 mnuCanAffordEntryCost(u16 commandId, DatPartyRecord *actorEntry) {
     u16 cost = datCommandRecords[commandId].costPercentage;
     s32 costKind = mnuGetRangeEntryKind(commandId);
 
     switch (costKind) {
     case DAT_COMMAND_COST_MODE_HP:
-        if (((DatPartyRecord *)actorAddress)->hp < cost) {
+        if (actorEntry->hp < cost) {
             return 0;
         }
         break;
     case DAT_COMMAND_COST_MODE_MP:
-        if (((DatPartyRecord *)actorAddress)->mp < cost) {
+        if (actorEntry->mp < cost) {
             return 0;
         }
         break;
@@ -1775,11 +1775,9 @@ s32 mnuCanAffordEntryCost(u16 commandId, s32 actorAddress) {
     return 1;
 }
 
-extern s32 mnuCanAffordEntryCost(u16, s32);
-
 /* Return -1 for insufficient raw cost, else 0 for flagged IDs below the boundary, or 1. */
-s32 mnuGetEntryUseStatus(s32 actorAddress, u16 commandId) {
-    if (mnuCanAffordEntryCost(commandId, actorAddress) == 0) return -1;
+s32 mnuGetEntryUseStatus(DatPartyRecord *actorEntry, u16 commandId) {
+    if (mnuCanAffordEntryCost(commandId, actorEntry) == 0) return -1;
     if ((((DatCommandRecord *)((s32)datCommandRecords + commandId * MNU_COMMAND_RECORD_BYTES))->unk_01 & 1) == 0) return 1;
     if (commandId < MNU_COMMAND_USE_STATUS_BOUNDARY) return 0;
     return 1;
