@@ -4,6 +4,7 @@
 #include "pcp_vu0.h"
 #include "fpu.h"
 #include "eff.h"
+#include "eff_math.h"
 
 #define EFF_DISPATCH_RESULT_BYTES 8
 #define EFF_SUBWORK_PREFIX_BYTES 0x40
@@ -661,11 +662,11 @@ f32 effPointToLineDistance(f32 *direction, f32 *origin, f32 *point) {
 
 /* Allocate/retain slot storage and return its header after the slots, not the slot base.
    Only the two native slot defaults are initialized; count/allocation validity is unchecked. */
-void *effAllocSlotArray(s32 count) {
+EffArrHdr *effAllocSlotArray(s32 count) {
     void *allocation = sdfAllocGeneralBlock(count * EFF_SLOT_BYTES + EFF_SLOT_HEADER_BYTES);
     void *retainedAddress = (void *)sdfResourceRetainAddress(allocation);
     u32 slotIndex = 0;
-    EffSlot38 *slot = retainedAddress;
+    EffCubicBezierSlot *slot = retainedAddress;
     u8 *headerAddress = (u8 *)slot + count * EFF_SLOT_BYTES;
 
     ((EffArrHdr *)headerAddress)->allocation = allocation;
@@ -674,12 +675,12 @@ void *effAllocSlotArray(s32 count) {
     if (count != 0) {
         do {
             slotIndex++;
-            slot->unk30 = 0;
-            slot->unk34 = 0.05f;
-            slot = (EffSlot38 *)((u8 *)slot + EFF_SLOT_BYTES);
+            slot->t = 0;
+            slot->step = 0.05f;
+            slot = (EffCubicBezierSlot *)((u8 *)slot + EFF_SLOT_BYTES);
         } while (slotIndex < count);
     }
-    return headerAddress;
+    return (EffArrHdr *)headerAddress;
 }
 
 INCLUDE_RODATA(const s32, "game/code_0018CAC8", D_003A0F88);
