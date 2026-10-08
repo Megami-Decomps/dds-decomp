@@ -5123,7 +5123,6 @@ void effPcpSetSprayScale(EffPCPPulseWork *work, f32 val) {
     work->scale = val;
 }
 
-extern void effEventSetScale(struct EffEventWork *event, f32 scale);
 extern void effEventCopyFileRecordHeader(void *dst, const void *src);
 extern void func_00190328(struct EffEventWork *event);
 
