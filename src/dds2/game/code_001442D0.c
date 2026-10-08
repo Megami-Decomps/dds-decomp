@@ -2993,7 +2993,6 @@ extern s32 func_0014EDB8(void);
 
 extern void fldReleaseTitleMiniTexture(void);
 
-
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413C80);
 
 void fldStartMiniTitleForUnlock(s32 id) {
