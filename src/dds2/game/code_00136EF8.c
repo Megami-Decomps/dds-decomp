@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_dev_state.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "fld_waypoint.h"
@@ -173,11 +174,8 @@ extern s32 func_0035C860(char *, const char *, ...);
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
 
-extern u32 sdfDevCreateCommandState(const char *);
 
-extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
 
-extern void sdfDevWaitThenReleaseCommandState(u32);
 
 extern s32 fldValueRecordCount;
 extern s32 D_00436188;
@@ -361,7 +359,7 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
     FldColorParams *color = &setting->color;
 
     if (color->enabled != 0) {
-        fldCameraColorParameters->color.colorB = fldCameraColorParameters->color.colorA =
+        fldCameraColorParameters->color.finalColor = fldCameraColorParameters->color.initialColor =
             (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
         fldCameraColorParameters->alpha.alpha = color->vectorY;
         switch (color->mode) {
@@ -1223,7 +1221,7 @@ s32 fldGetActorSlotAttribute(s32 actorId, s32 attribute) {
 void fldLoadInfoTable(s32 field) {
     char path[64];
     char directory[32];
-    u32 command;
+    DevState *command;
     if (field < 200) {
         fldFormatAreaDirectory(directory, field, 1);
         func_0035C860(path, D_00413448, directory, field);
@@ -1745,7 +1743,7 @@ void fldResetActorSlots(void) {
 void fldLoadActorWaypointTable(s32 field) {
     char path[64];
     char directory[32];
-    u32 command;
+    DevState *command;
     if (field >= 100) {
         memset(&fldActorWaypointRows, 0, 0x6D00);
     } else {

@@ -431,7 +431,7 @@ typedef struct MenuPageBar {
     u8 settingIndex;
     s8 positionY;
     u8 pad1A[2];
-    s32 textures[7]; /* 0x1C */
+    struct EffectSlotSet *textures[7]; /* 0x1C */
     struct MenuEffectNode *effects[2]; /* 0x38 */
     s32 activeEffect;
     s32 fade;

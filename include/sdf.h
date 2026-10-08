@@ -573,25 +573,31 @@ extern s32 sdfChipPageCount[2];
 extern SdfPendingRequest sdfChipReleaseRequest;
 extern SdfChipClassTable sdfChipClassTable;
 
+enum SdfColorTrackMode {
+    SDF_COLOR_TRACK_MODE_ENDPOINTS = 0,
+    SDF_COLOR_TRACK_MODE_ONE_INTERMEDIATE_KEY = 1,
+    SDF_COLOR_TRACK_MODE_TWO_INTERMEDIATE_KEYS = 2
+};
+
 /* The flag-list factory appends this owner after its vertex, color and mark
  * arrays. Its parameter record is copied whole into the owner. */
 typedef struct SdfColorTrack {
-    u8 mode;
+    u8 segmentMode; /* enum SdfColorTrackMode, stored as a byte */
     u8 pad01[3];
-    u32 colorA;
-    u32 colorB;
-    u32 colorC;
-    f32 fractionA;
-    u32 colorD;
-    f32 fractionB;
+    u32 initialColor;
+    u32 finalColor;
+    u32 firstKeyColor;
+    f32 firstFraction;
+    u32 secondKeyColor;
+    f32 secondFraction;
     u8 pad1C[8];
 } SdfColorTrack;
 
 typedef struct SdfAlphaTrack {
     u32 alpha;
     s32 surfaceIndex;
-    f32 fadeIn;
-    f32 fadeOut;
+    f32 fadeInFraction;
+    f32 fadeOutFraction;
 } SdfAlphaTrack;
 
 typedef struct SdfFlagListParams {
@@ -619,7 +625,18 @@ typedef struct SdfFlagListWork {
 } SdfFlagListWork;
 
 typedef char SdfColorTrack_size_must_be_0x24[(sizeof(SdfColorTrack) == 0x24) ? 1 : -1];
+typedef char SdfColorTrack_fields_offset[((unsigned long)&((SdfColorTrack *)0)->segmentMode == 0x00 &&
+                                          (unsigned long)&((SdfColorTrack *)0)->initialColor == 0x04 &&
+                                          (unsigned long)&((SdfColorTrack *)0)->finalColor == 0x08 &&
+                                          (unsigned long)&((SdfColorTrack *)0)->firstKeyColor == 0x0C &&
+                                          (unsigned long)&((SdfColorTrack *)0)->firstFraction == 0x10 &&
+                                          (unsigned long)&((SdfColorTrack *)0)->secondKeyColor == 0x14 &&
+                                          (unsigned long)&((SdfColorTrack *)0)->secondFraction == 0x18) ? 1 : -1];
 typedef char SdfAlphaTrack_size_must_be_0x10[(sizeof(SdfAlphaTrack) == 0x10) ? 1 : -1];
+typedef char SdfAlphaTrack_fields_offset[((unsigned long)&((SdfAlphaTrack *)0)->alpha == 0x00 &&
+                                          (unsigned long)&((SdfAlphaTrack *)0)->surfaceIndex == 0x04 &&
+                                          (unsigned long)&((SdfAlphaTrack *)0)->fadeInFraction == 0x08 &&
+                                          (unsigned long)&((SdfAlphaTrack *)0)->fadeOutFraction == 0x0C) ? 1 : -1];
 typedef char SdfFlagListParams_size_must_be_0x40[(sizeof(SdfFlagListParams) == 0x40) ? 1 : -1];
 typedef char SdfFlagListMark_size_must_be_0x08[(sizeof(SdfFlagListMark) == 0x08) ? 1 : -1];
 typedef char SdfFlagListWork_size_must_be_0x58[(sizeof(SdfFlagListWork) == 0x58) ? 1 : -1];
