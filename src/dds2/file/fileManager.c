@@ -54,7 +54,7 @@ typedef struct FileCleanup {
 
 extern s32 btlDestroyStageTask(void *);
 extern void func_0035B6E0(const char *fmt, ...);
-extern void func_00346AE8(void *);
+extern void sdfPacUseHighAddressAllocator(void *);
 #define FILE_REQUEST_KIND_CALLBACK 0
 #define FILE_REQUEST_KIND_PAC 1
 #define FILE_REQUEST_KIND_VALUE_PAIR 2
@@ -186,7 +186,7 @@ void *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchVa
     dispatchPacket = (PacState *)(requestWork + FILE_PAC_PACKET_OFFSET);
     sdfPacInitializeDispatchPacket(dispatchPacket, dispatchValue);
     if (flags != 0) {
-        func_00346AE8(dispatchPacket);
+        sdfPacUseHighAddressAllocator(dispatchPacket);
     }
     fileManQueueNamedRequest(requestWork, FILE_REQUEST_KIND_PAC, requestName, onComplete, userData);
     return requestWork;

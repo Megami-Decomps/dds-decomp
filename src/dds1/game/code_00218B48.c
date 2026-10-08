@@ -200,11 +200,11 @@ void func_00101A80(s32, s32);
 
 void mdlCleanupViewerTasksAndResources(void);
 
-void func_002EDC30(void *buffer);
+void sdfPacUsePacketPayloadMemory(void *buffer);
 
 void func_00218768(s32, s32, s32, s32);
 
-void func_002EDC50(void *buffer);
+void sdfPacReleasePacketQueueNodes(void *buffer);
 
 
 s32 mdlCountRecords(s32);
@@ -257,11 +257,11 @@ void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, void *requestFirst, 
 
     sdfPacInitializeDispatchPacket((PacState *)&request, 0);
     if (flags & 2) {
-        func_002EDC30(&request);
+        sdfPacUsePacketPayloadMemory(&request);
     }
     sdfPacFeedInput((PacState *)&request, requestFirst, requestSecond);
     func_00218768(request.handle, first, second, flags);
-    func_002EDC50(&request);
+    sdfPacReleasePacketQueueNodes(&request);
 }
 
 void func_00218BE8(s32 resource) {
