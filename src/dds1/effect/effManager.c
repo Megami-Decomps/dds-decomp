@@ -119,7 +119,7 @@ s32 effInvokeOptionalNodeInstanceCallback(EffNode *node) {
     return effNodeTypeOperations[node->type].fn24(node->instance);
 }
 extern void func_003003F0(const char *fmt, ...);
-extern void *sdfReadNamedResource(void *, u32 *, s32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void *sdfReleaseResourceAllocation(void *);
 
 typedef struct EffNodeInstance {

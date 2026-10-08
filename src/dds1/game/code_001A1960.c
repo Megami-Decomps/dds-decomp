@@ -3115,7 +3115,7 @@ extern s32 sdfAllocGeneralBlock(s32);
 
 extern u32 *sdfResourceRetainAddress(s32);
 
-extern s32 sdfReadNamedResource(char *, void *, s32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 void btlPanelResourcesLoad(void) {
     u8 params[16];
@@ -3129,9 +3129,9 @@ void btlPanelResourcesLoad(void) {
         block->resA = 0;
         block->resB = 0;
         block->unk1C = 0;
-        btlResourceBlock->nameA = sdfReadNamedResource(D_003A21C8, params, 0);
-        btlResourceBlock->nameB = sdfReadNamedResource(D_003A21E8, params, 0);
-        btlResourceBlock->nameC = sdfReadNamedResource(D_003A2208, params, 0);
+        btlResourceBlock->nameA = (s32)(u32)sdfReadNamedResource(D_003A21C8, params, 0);
+        btlResourceBlock->nameB = (s32)(u32)sdfReadNamedResource(D_003A21E8, params, 0);
+        btlResourceBlock->nameC = (s32)(u32)sdfReadNamedResource(D_003A2208, params, 0);
         btlResourceBlockLoaded = 0;
     }
     D_003BB3E4 = 1;
