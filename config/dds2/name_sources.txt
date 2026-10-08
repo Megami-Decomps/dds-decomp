@@ -1709,6 +1709,7 @@
 0x0018A8E8	effPcpDriftCreateFromTable	inferred	fetches three effect parameter blocks to construct the drift work [names_reviewed5.tsv]
 0x0018A950	effPcpClonePairedDriftEvents	inferred	readability/matching review (QP16)
 0x0018AC20	effPcpRandomizeSlot	inferred	Computes evenly spaced phase and randomized speed and signed spin for one particle slot.
+0x0018AD50	effPcpUpdatePairedDriftEvents	inferred	updates paired drift entries, their fragment geometry and fading, both endpoint events, and repeat-frame state
 0x0018B118	effPcpCopyRandomizedVector	inferred	Copies the particle effect vector in the randomized-slot group. [names_reviewed21.tsv]
 0x0018B350	effPcpSlotEffectCreateFromTable	inferred	extracts two parameter blocks before creating randomized-slot effect work [names_reviewed5.tsv]
 0x0018B398	effPcpCloneSpawnRangeEvents	inferred	readability/matching review (QP16)

@@ -5497,7 +5497,7 @@ void effPcpRandomizeSlot(EffPCPPairedEventWork *work, s32 index) {
 extern const f32 D_003556A0[4] __attribute__((aligned(16)));
 
 /* vu0 routine: rotate a fragment around the view and place events at both ends. */
-void func_001830F8(EffPCPPairedEventWork *work) {
+void effPcpUpdatePairedDriftEvents(EffPCPPairedEventWork *work) {
     EffPCPEventPlace place;
     f32 origin[4] __attribute__((aligned(16)));
     f32 direction[4] __attribute__((aligned(16)));
