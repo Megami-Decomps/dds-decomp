@@ -6093,6 +6093,7 @@
 0x0033A388	sdfConsBuildMatrixPacket	inferred	Packs two transformed matrices and vectors into a VU packet. [names_reviewed8.tsv]
 0x0033A480	sdfConsCacheTransformedNode	inferred	Caches the transformed node and its matrix-derived position. [names_reviewed8.tsv]
 0x0033A5C8	sdfCameraBuildProjection	inferred	builds perspective matrix in vf28-31 from near/far/width/height/aspect (or fov), stores it at +0x30 and fills the screen offsets at +0x70..+0x8C [names_M64_EffVu2.tsv]
+0x0033A7E8	sdfBuildLightingPacket	inferred	Builds the lighting DMA packet from three SdfLightSources and a color/direction vector; its output is appended or attached as model lighting.
 0x0033AAA0	sdfConsBuildFrustumPacket	inferred	Encodes frustum scale and midpoint into DMA and GIF fields. [names_reviewed8.tsv]
 0x0033ABB8	sdfConsAppendProgramReferencePacket	inferred	Appends a reference to the resident VU program buffer. [names_reviewed8.tsv]
 0x0033AD68	sdfInitializeResourceQueuesAndTextureWords	inferred	Caches texture resource words and registers the resource queue callbacks. [names_reviewed9.tsv]

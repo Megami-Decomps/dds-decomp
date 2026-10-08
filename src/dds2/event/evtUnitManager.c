@@ -573,7 +573,7 @@ void evtLoadUnitDirectionVectorVU(EvtUnit *unit) {
 
 
 extern void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit);
-extern void func_0033A7E8(void *, SdfLightSources, f32 *);
+extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Refresh endpoint render work after the value-change flag is cleared; defer
  * to the matching-slot selector when no target or color transition is active. */
@@ -614,7 +614,7 @@ void evtRefreshUnitEndpointWork(EvtUnit *unit) {
             color[i] = 1.0f;
         }
     }
-    func_0033A7E8(unit->endpointWork, desc, color);
+    sdfBuildLightingPacket(unit->endpointWork, desc, color);
     unit->value = (u32)unit->endpointWork;
 }
 

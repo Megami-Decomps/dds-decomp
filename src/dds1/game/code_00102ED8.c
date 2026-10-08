@@ -820,7 +820,7 @@ extern void sdfClearLinkedPacketList(SdfLinkedPacketList *);
 extern void sdfInitSceneNode(SdfSceneNode *, SdfGraphObj *);
 extern void sdfBuildCenteredViewBoundsPacket(u64 *, s32, s32, s32, s32);
 extern void sdfAppendLinkedPacketPayload(SdfListHead *, SdfLinkedPacketList *, u32 *);
-extern void func_002E1938(void *, SdfLightSources, f32 *);
+extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Initialize the selected frame bank's scene and overlay packet chains. */
 void func_00105150(s32 bufferIndex) {
@@ -845,7 +845,7 @@ void func_00105150(s32 bufferIndex) {
                              &sdfSceneProjectionParameters, sdfViewMatrix);
     sdfAppendPacket(&D_00325870[bufferIndex].sceneList,
                     (u32)&D_00325870[bufferIndex].sceneMatrix);
-    func_002E1938(&D_00325870[bufferIndex].scenePacketStorage,
+    sdfBuildLightingPacket(&D_00325870[bufferIndex].scenePacketStorage,
                   D_00324770, kwlnDefaultColorVector);
     sdfAppendPacket(&D_00325870[bufferIndex].sceneList,
                     (u32)&D_00325870[bufferIndex].scenePacketStorage);
@@ -855,7 +855,7 @@ void func_00105150(s32 bufferIndex) {
                              &D_00324980, D_00329790);
     sdfAppendPacket(&D_00325870[bufferIndex].thirdList,
                     (u32)&D_00325870[bufferIndex].thirdMatrix);
-    func_002E1938(&D_00325870[bufferIndex].overlayLightPacket,
+    sdfBuildLightingPacket(&D_00325870[bufferIndex].overlayLightPacket,
                   D_00324B10, D_00324B20);
     sdfAppendPacket(&D_00325870[bufferIndex].thirdList,
                     (u32)&D_00325870[bufferIndex].overlayLightPacket);

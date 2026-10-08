@@ -980,7 +980,7 @@ void sdfCameraBuildProjection(SdfCamera *camera) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DDC98", func_002E1938);
+INCLUDE_ASM(const s32, "game/code_002DDC98", sdfBuildLightingPacket);
 
 typedef struct ConsFrustumParams {
     f32 left;

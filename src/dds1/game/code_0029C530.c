@@ -6729,7 +6729,7 @@ extern u128 D_003DCBA0[];
 
 extern SdfLightSources D_0037EE80;
 
-extern void func_002E1938(void *, SdfLightSources, void *);
+extern void sdfBuildLightingPacket(void *, SdfLightSources, void *);
 
 s32 effComputeLightDirectionVU(MdlCtx *vector, void *target) {
     s32 result = btlIsRuntimeAllocated();
@@ -6744,7 +6744,7 @@ s32 effComputeLightDirectionVU(MdlCtx *vector, void *target) {
         VU0_CLEAR_W(vf10);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF($vf10, D_003DCBA0);
-        func_002E1938(target, D_0037EE80, D_003DCBD0);
+        sdfBuildLightingPacket(target, D_0037EE80, D_003DCBD0);
         return 1;
     }
     return result;
