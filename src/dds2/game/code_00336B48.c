@@ -70,11 +70,16 @@ extern u8 D_00476250[];
 extern u8 D_00476210[];
 
 typedef struct VuBlendNode {
-    u8 pad00[0x30];
+    f32 position[4];
+    u8 pad10[0x20];
     u8 result[0x10];
     struct VuBlendNode *next;
     void *sourceA;
     void *sourceB;
+    f32 weight;
+    u8 region;
+    u8 clipFlags;
+    u8 pad52[0xE];
 } VuBlendNode;
 
 extern f32 D_00439190;
@@ -445,7 +450,7 @@ void sdfVuBlendNodeXY(VuBlendNode *node) {
     }
 }
 
-/* vu0 routine: lerp of two source rows (+0x20, +0x30) by the weight at node + 0x40 */
+/* vu0 routine: lerp of two source rows (+0x20, +0x30) by the weight at node + 0x4C */
 void sdfVuBlendNodeVectors(VuBlendNode *node) {
     while (node != NULL) {
         void *sourceA = node->sourceA;
