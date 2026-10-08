@@ -306,7 +306,38 @@ void sdfServiceGraphicsBuffers(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A440);
+extern u8 D_004389D8;
+extern u8 D_004389D9;
+extern SdfThreadNode D_00439130;
+extern u8 D_004601D0[0x8000];
+extern u8 D_0045F1D0[0x1000];
+extern void sdfResizeDoubleBuffer(s32);
+extern void sdfResetPacketSlotState(void);
+extern void sdfRegisterTextureReleaseRequestHandler(void);
+
+void func_0032A440(s32 size) {
+    s32 thread;
+    SdfGraphObj *graph = &D_0040B290;
+
+    sceGsResetPath();
+    D_004389D8 = 1;
+    func_00329CE0(graph, 1, 1);
+    sdfGraphRecreateBuffers(graph);
+    D_004389D9 = 0;
+    sdfBufferSlotIndices[0] = sdfBufferSlotIndices[1] = -1;
+    sdfBusyBufferIndex = -1;
+    D_0043913D = 1;
+    sdfResizeDoubleBuffer(size);
+    sdfResetPacketSlotState();
+    sdfRegisterTextureReleaseRequestHandler();
+    sdfGsImageUploadSemaphore = sdfCreateSemaphore(1, 0x20, 0);
+    D_004389EC = sdfCreateSemaphore(0, 0x20, 0);
+    thread = sdfCreateThread((s32)func_0032A230, (s32)D_004601D0, 0x8000, 0x44);
+    D_00439138 = thread;
+    _StartThread(thread, 0);
+    sdfStartTrackedThread(&D_00439130, (s32)sdfServiceGraphicsBuffers, (s32)D_0045F1D0,
+                          0x1000, 0x40, 0);
+}
 
 /* Wait until the other buffer is no longer busy before selecting it. */
 void sdfWaitAndSelectBuffer(void) {

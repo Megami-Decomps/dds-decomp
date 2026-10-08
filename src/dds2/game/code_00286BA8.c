@@ -861,3 +861,4 @@ INCLUDE_SDATA(const s32, "game/code_00286BA8", mnuMantraSelectionResource);
 INCLUDE_SDATA(const s32, "game/code_00286BA8", D_00437928);
 
 INCLUDE_SDATA(const s32, "game/code_00286BA8", D_0043792C);
+

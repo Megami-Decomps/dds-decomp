@@ -229,3 +229,4 @@ void func_003214D0(u32 unused, s32 resource) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00320FD0", D_0043899C);
+
