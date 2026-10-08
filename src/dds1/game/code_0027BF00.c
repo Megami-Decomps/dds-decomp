@@ -1412,8 +1412,8 @@ void mnuReleasePartyPanelSpriteTextures(s32 window) {
 }
 
 /* Copy eight resource handles into the window's primary handle bank. */
-void mnuCopyPrimaryWindowHandles(MenuPageWindow *window, u32 *source) {
-    u32 value;
+void mnuCopyPrimaryWindowHandles(MenuPageWindow *window, struct EffectSlotSet **source) {
+    struct EffectSlotSet *value;
     s32 *destination;
     u32 index;
 
@@ -1423,14 +1423,14 @@ void mnuCopyPrimaryWindowHandles(MenuPageWindow *window, u32 *source) {
         value = *source;
         source = source + 1;
         index = index + 1;
-        *destination = value;
+        *destination = (s32)value;
         destination = destination + 1;
     } while (index < 8);
 }
 
 /* Copy eight resource handles into the window's secondary handle bank. */
-void mnuCopySecondaryWindowHandles(MenuPageWindow *window, u32 *source) {
-    u32 value;
+void mnuCopySecondaryWindowHandles(MenuPageWindow *window, struct EffectSlotSet **source) {
+    struct EffectSlotSet *value;
     s32 *destination;
     u32 index;
 
@@ -1440,18 +1440,18 @@ void mnuCopySecondaryWindowHandles(MenuPageWindow *window, u32 *source) {
         value = *source;
         source = source + 1;
         index = index + 1;
-        *destination = value;
+        *destination = (s32)value;
         destination = destination + 1;
     } while (index < 8);
 }
 
 extern void effResolveAndReleaseResource(u32 *);
 
-void mnuRegisterResourceHandles(MenuPageWindow *destination, s32 *source) {
+void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSet **source) {
     u32 i;
     for (i = 0; i < 5; i++) {
         effResolveAndReleaseResource((u32 *)source[i]);
-        destination->handlesC[i] = source[i];
+        destination->handlesC[i] = (s32)source[i];
     }
 }
 
