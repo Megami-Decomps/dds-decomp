@@ -131,8 +131,6 @@ extern void frFontSetContextPair();
 
 extern void frFontStoreShiftedContextValue();
 
-extern void frFontSetChildColors();
-
 extern void frFontClearFlagBits();
 
 extern char D_003E7588[];

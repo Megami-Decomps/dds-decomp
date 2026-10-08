@@ -178,7 +178,7 @@ void mnuDrawPartyCommandPage(s32 unusedX, s32 unusedY, s32 depth, s32 partyIndex
 }
 
 extern void func_00314500(u32, s32, char *);
-extern void frFontSetChildColors(s32, u32);
+extern void frFontSetChildColors(FrFontGlyph *, u32);
 extern void frFontSetContextPair(s32, s32, s32);
 
 void func_002BE080(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
@@ -188,7 +188,7 @@ void func_002BE080(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
     color = (color & 0xFF) | 0xD7ABFA00;
     func_00314500(textId & 0xFFFF, 1, text);
     item = (s32)(u32)func_0019CE78(text, 0, 0, 0, 0);
-    frFontSetChildColors(item, color);
+    frFontSetChildColors((FrFontGlyph *)(u32)item, color);
     frFontSetContextPair(item, x, y);
     func_0019D550((FrFontGlyph *)item, 1, param);
     frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)item);
