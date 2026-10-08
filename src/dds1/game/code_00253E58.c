@@ -58,7 +58,7 @@ s32 mnuDrawMantraCostTransition(void) {
         func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
         func_0024E260(0, 0, 0, scaled, 0x5B, 0x53);
         cost = mnuGetSelectedNodeValue();
-        mnuDrawMantraCostAfterListAdvance(*cost, &scene->displayList590, scaled, 0x53);
+        mnuDrawMantraCostAfterListAdvance(*cost, &scene->costTransitionList, scaled, 0x53);
         func_0024E260(0x20, 0, 0, scaled, 0xB, 0x53);
         break;
     case 2:
@@ -72,12 +72,12 @@ s32 mnuDrawMantraCostTransition(void) {
         func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
         func_0024E260(0, 0, 0, scaled, 0x5B, 0x53);
         cost = mnuGetSelectedNodeValue();
-        mnuDrawMantraCostAfterListAdvance(*cost, &scene->displayList590, scaled, 0x53);
+        mnuDrawMantraCostAfterListAdvance(*cost, &scene->costTransitionList, scaled, 0x53);
         func_0024E260(0x20, 0, 0, scaled, 0xB, 0x53);
         break;
     case 1:
         /* frac keeps its 0.0f initializer when raw == 0. */
-        raw = scene->transitionState;
+        raw = scene->transitionBlendCounter;
         if (raw > 0) {
             frac = (f32)raw / 10.0f;
         } else if (raw < 0) {
@@ -91,7 +91,7 @@ s32 mnuDrawMantraCostTransition(void) {
         func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
         func_0024E260(0, 0, 0, 0x80, 0x5B, 0x53);
         cost = mnuGetSelectedNodeValue();
-        mnuDrawMantraCostAfterListAdvance(*cost, &scene->displayList590, 0x80, 0x53);
+        mnuDrawMantraCostAfterListAdvance(*cost, &scene->costTransitionList, 0x80, 0x53);
         func_0024E260(0x20, 0, 0, 0x80, 0xB, 0x53);
         break;
     default:

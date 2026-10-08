@@ -69,11 +69,19 @@ typedef struct BattleEventResourceTriggerState {
     u8 armed;
 } BattleEventResourceTriggerState;
 
+/* The linked-defeat mode allocates four bytes at 00229F14/0022A41C. */
+typedef struct BattleQueryEffectState {
+    u8 enabled;
+    u8 pad01;
+    u16 count;
+} BattleQueryEffectState;
+
 typedef union BattleEffectPayload {
     BtlSelectCtrl selection;
     BattleMarkedCommandState markedCommand;
     BattleLinkedEffectState linked;
     BattleEventResourceTriggerState eventTrigger;
+    BattleQueryEffectState query;
     s32 turnCount; /* mode 785 */
     u8 statIndex; /* mode 795: one-byte allocation */
 } BattleEffectPayload;

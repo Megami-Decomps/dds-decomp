@@ -3,6 +3,7 @@
 #include "btl_sound.h"
 #include "kwln_sprite.h"
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 #include "eff.h"
 
 extern void sdfInitPacketList(SdfListHead *);
@@ -253,7 +254,149 @@ u64 *effBuildDrawPacketWithFlags(u32 flags) {
     return packet;
 }
 
-INCLUDE_ASM(const s32, "game/code_0015F4D0", func_0015FE20);
+typedef struct EffPacketParams {
+    s16 parameterCount;
+    s16 vertexCount;
+    u16 primitive;
+    u16 mask;
+    u32 color;
+    u32 *parameters;
+    u128 *positions;
+    u128 *normals;
+    u32 *texcoords;
+    u32 *extraTexcoords;
+    u32 *colors;
+    void *(*allocate)(s32);
+    f32 depth;
+} EffPacketParams;
+
+extern u32 D_0034E6A0[];
+
+void *func_0015FE20(EffPacketParams *params) {
+    s32 parameterCount = params->parameterCount;
+    s32 vertexCount = params->vertexCount;
+    u32 primitive = params->primitive | 0x48;
+    u32 mode = 0x60;
+    s32 stride = 3;
+    s32 overhead = 16;
+    s32 allocationSize;
+    s32 i;
+    s32 offset;
+    void *packet;
+    void *(*allocate)(s32);
+    u32 *cursor;
+    u32 *stream;
+    const u128 *vector;
+    u32 countCode;
+    u32 *stream2;
+
+    if (params->normals != NULL) {
+        mode = 0xE0;
+        overhead = 17;
+        stride = 6;
+    }
+    if (params->texcoords != NULL) {
+        mode |= 0x100;
+        primitive |= 0x10;
+        overhead++;
+        stride += 2;
+        if (params->extraTexcoords != NULL) {
+            primitive |= 0x1000;
+            stride += 2;
+        }
+    }
+    if (params->colors != NULL) {
+        mode |= 0x200;
+        primitive |= 0x800;
+        overhead++;
+        stride++;
+    }
+    allocationSize = (overhead + parameterCount + stride * vertexCount) * 4;
+    allocationSize = (allocationSize + 15) & ~15;
+    allocate = params->allocate;
+    if (allocate == NULL) {
+        allocate = sdfAllocPacketAligned;
+    }
+    packet = allocate(allocationSize);
+
+    *(u64 *)packet = (u64)(u16)((allocationSize >> 4) - 1) | 0x20000000ULL;
+    ((u32 *)packet)[2] = 0x6102C000;
+    ((u32 *)packet)[3] = (~params->mask) & 0xFFFF;
+    ((u32 *)packet)[4] = 0x6E01C002;
+    ((u32 *)packet)[5] = params->color;
+    ((u32 *)packet)[6] = 0x6001C003;
+    cursor = (u32 *)packet + 7;
+    *cursor++ = (u32)params->depth;
+    *cursor++ = 0x04000004;
+    *cursor++ = 0x14000000;
+    *cursor++ = 0x6D01C000;
+    *cursor++ = (u16)parameterCount | ((u32)(u16)vertexCount << 16);
+    *cursor++ = (primitive & 0xFFFF) | (mode << 16);
+    *cursor++ = 0x6E00C001 | ((u32)parameterCount << 16);
+
+    if (params->parameters == NULL) {
+        memcpy(cursor, D_0034E6A0, parameterCount * 4);
+    } else {
+        memcpy(cursor, params->parameters, parameterCount * 4);
+    }
+    cursor += parameterCount;
+    offset = parameterCount + 1;
+    countCode = vertexCount << 16;
+    *cursor++ = countCode | offset | 0x6800C000;
+    vector = params->positions;
+    i = 0;
+    do {
+        EE_MMI_STORE_VEC3_VALUE(cursor, *vector);
+        i++;
+        cursor += 3;
+        vector++;
+    } while (i != vertexCount);
+    offset += vertexCount;
+
+    vector = params->normals;
+    if (vector != NULL) {
+        *cursor++ = countCode | offset | 0x6800C000;
+        i = 0;
+        do {
+            EE_MMI_STORE_VEC3_VALUE(cursor, *vector);
+            i++;
+            cursor += 3;
+            vector++;
+        } while (i != vertexCount);
+        offset += vertexCount;
+    }
+    stream = params->texcoords;
+    if (stream != NULL) {
+        stream2 = params->extraTexcoords;
+        if (stream2 == NULL) {
+            *cursor++ = countCode | offset | 0x6400C000;
+            memcpy(cursor, stream, vertexCount * 8);
+            cursor += vertexCount * 2;
+        } else {
+            *cursor++ = countCode | offset | 0x6C00C000;
+            i = 0;
+            do {
+                *cursor++ = *stream++;
+                *cursor++ = *stream++;
+                *cursor++ = *stream2++;
+                *cursor++ = *stream2++;
+                i++;
+            } while (i != vertexCount);
+        }
+        offset += vertexCount;
+    }
+    stream = params->colors;
+    if (stream != NULL) {
+        *cursor++ = countCode | offset | 0x6E00C000;
+        memcpy(cursor, stream, vertexCount * 4);
+        cursor += vertexCount;
+    }
+    *cursor = 0x1400000C;
+    while ((u32)++cursor & 15) {
+        *cursor = 0;
+    }
+    return packet;
+}
 
 void dds3StartCrossfade(s32 frames) {
     u8 *entry;
