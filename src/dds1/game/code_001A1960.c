@@ -355,11 +355,51 @@ BtlUnit *btlFindActiveActorByKind(s32 index) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A1D48);
+extern void btlCopyUnitStats(s32 actorAddress, s32 recordAddress);
+
+/* Insert a complete party record before actors with a larger priority. */
+void func_001A1D48(BtlUnit *unit, u8 sourceIndex, u8 priority) {
+    DatPartyRecord saved;
+    s32 insertion = 0;
+    s32 i;
+
+    if (datGameState->party[0].flags & 2) {
+        do {
+            if ((u16)(datGameState->party[insertion].flags & 1) == 0) {
+                break;
+            }
+            if (priority < btlFindActiveActorByKind(insertion)->lookupId) {
+                break;
+            }
+            insertion++;
+            if (insertion >= 5) {
+                break;
+            }
+        } while (datGameState->party[insertion].flags & 2);
+    }
+    memcpy(&saved, &datGameState->party[sourceIndex], sizeof(saved));
+    for (i = sourceIndex; i < 4; i++) {
+        memcpy(&datGameState->party[i], &datGameState->party[i + 1], sizeof(saved));
+        if (datGameState->party[i + 1].flags & 2) {
+            btlFindActiveActorByKind(i + 1)->unk2C4 = i;
+        }
+    }
+    for (i = 4; i > insertion; i--) {
+        memcpy(&datGameState->party[i], &datGameState->party[i - 1], sizeof(saved));
+        if (datGameState->party[i - 1].flags & 2) {
+            btlFindActiveActorByKind(i - 1)->unk2C4 = i;
+        }
+    }
+    memcpy(&datGameState->party[i], &saved, sizeof(saved));
+    btlCopyUnitStats((s32)unit, (s32)&saved);
+    unit->partyRecord.flags |= 2;
+    datGameState->party[i].flags |= 2;
+    unit->unk2C4 = i;
+    func_001A1CD0();
+    btlBossDebugPrintf("btl:party in %d->%d[%d]\n", sourceIndex, i, saved.unitId);
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2258);
-
-extern void btlCopyUnitStats(s32 actorAddress, s32 recordAddress);
 
 /* Swap complete records while keeping the actor in its original party slot. */
 void func_001A2608(BtlUnit *actor, u8 targetIndex) {
