@@ -10,7 +10,7 @@ typedef struct MenuScenePoint {
 } MenuScenePoint;
 
 typedef struct MenuSceneWork {
-    s32 allocationHandle; /* 0x000 */
+    struct SdfMemBlock *allocation; /* 0x000: retained general-heap owner */
     u8 pad004[0x480];
     SdfGrid *gridHandle; /* 0x484 */
     u32 gridRefreshControl[2]; /* 0x488 */
