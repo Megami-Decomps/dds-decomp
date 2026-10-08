@@ -5302,6 +5302,7 @@
 0x0029BD18	effSetModelRotationQuaternion	inferred	confidence=high; matched-C; src/dds1/game/code_0029A840.c:578:func_0029BD18; Loads the supplied quaternion into vf10 and updates the resource-owner model rotation basis.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x0029BD38	effPropagateResourceModelMask	inferred	confidence=high; matched-C; src/dds1/game/code_0029A840.c:583:func_0029BD38; Propagates the resource-owner model through its masked model callback.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x0029BD80	effObjectListCountersReset	inferred	paired effect body: effect work operation [names_R_FuncNames7.tsv]
+0x0029BD90	effCreateSharedTextureReference	inferred	allocates and returns a retained shared texture reference from a serialized texture header
 0x0029BF88	effCloneSharedReferenceWithValue	inferred	Clones a reference object then assigns the supplied value to its metadata word. [names_reviewed5.tsv]
 0x0029BFB0	effReleaseSharedReference	inferred	eff effect resources and animation in game/code_0029A840.c
 0x0029C378	effReleaseReferenceHolder	inferred	eff effect resources and animation in game/code_0029A840.c
