@@ -274,7 +274,6 @@ s32 mnuIsFinalItemIndex(s32 index, s32 item) {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00274BC0);
 
-extern s32 mnuCreateWindowContainer(s32, s32, s32, s32, s32);
 extern void mnuSetWindowContainerState(MenuWindowContainer *, u32);
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s32, s32);
@@ -286,7 +285,7 @@ void mnuCreatePartySelectionWindow(CampMenuContext *context) {
     s32 i;
     s32 placement;
 
-    window = (MenuWindowContainer *)mnuCreateWindowContainer(0, 0x140, 0x10, 6, 0x15);
+    window = mnuCreateWindowContainer(0, 0x140, 0x10, 6, 0x15);
     mnuSetWindowContainerState(window, 0x100);
     mnuForwardDupArg(window, context->option, 0, context->panelResource, 0x20);
     mnuSetWindowPanelBounds(window, context->partySelectionLayout, 0x30, 0x530, -0x90, 0xA10);

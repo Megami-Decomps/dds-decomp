@@ -33,7 +33,6 @@ void func_002AB8C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 }
 
 extern char (*D_00435E5C)[25];
-extern MenuWindowContainer *mnuCreateWindowContainer(s32, s32, s32, s32, s32);
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 extern void mnuSetWindowEntryParameters(u32, MenuWindowContainer *, u32, u32, u32);
 extern void mnuInitializeBasicWindowLayout(MenuWindowContainer *, u32, u32);

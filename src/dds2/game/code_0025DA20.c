@@ -1210,8 +1210,6 @@ s32 mnuCampHasEligibleOwnedItems(void) {
     return result;
 }
 
-extern MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height,
-                                                       s32 visibleCount, s32 rowSpacing);
 extern void func_00295400(void);
 
 s32 mnuCreateEnabledCampEntryWindow(s32 count, s32 *enabled, MenuTerminalContext *settings) {
