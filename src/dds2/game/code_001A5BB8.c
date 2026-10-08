@@ -427,12 +427,6 @@ void itfResetWindowResourceBlock(ItfMesBlkA4 *block) {
     func_001A6078(block, 0, 0);
 }
 
-/* Paired arrays: a nonzero slot marker owns the handle at the same index. */
-typedef struct UiResourceSlots {
-    s32 markers[32];
-    SdfMemBlock *handles[32];
-} UiResourceSlots;
-
 /* Clear 32 words, from the end back toward the beginning of the buffer. */
 void itfClearDrawStateWords(ItfMesTextSlots *slots) {
     s32 remaining;
@@ -481,14 +475,14 @@ void btlReleaseEffectResourceHandles(ItfMesState *effect) {
 }
 
 /* Release the handles in the second half for occupied entries in the first. */
-void itfReleaseUiResourceSlotHandles(UiResourceSlots *slots) {
+void itfReleaseUiResourceSlotHandles(ItfMesTextSlots *slots) {
     s32 remaining;
-    s32 *entries = slots->markers;
+    u32 *entries = slots->addresses;
 
     remaining = 0x1f;
     do {
         if (*entries != 0) {
-            sdfReleaseResourceAllocation(slots->handles[entries - slots->markers]);
+            sdfReleaseResourceAllocation(slots->handles[entries - slots->addresses]);
             *entries = 0;
         }
         remaining = remaining - 1;

@@ -4,6 +4,7 @@
 #include "common.h"
 #include "eff.h"
 #include "sdf.h"
+#include "fr_font.h"
 
 /* Native 0xC-byte fade record shared by message windows and sound UI state. */
 typedef struct BtlFade {
@@ -61,8 +62,16 @@ typedef struct FrFontGlyph {
         u32 w;
         u8 b[4];
     } unk18;
-    struct FrFontGlyph *firstChild;
-    struct FrFontGlyph *unk20;
+    /* Parent: first child. Font item: retained glyph-cache record. */
+    union {
+        struct FrFontGlyph *firstChild;
+        FrFontRecord *cachedItem;
+    } link1C;
+    /* Parent/message: last child or shade. Font item: borrowed source. */
+    union {
+        struct FrFontGlyph *linkedGlyph;
+        FrFontRecord *sourceItem;
+    } link20;
     struct FrFontGlyph *previous;
     struct FrFontGlyph *next;
     struct FrFontGlyph *chainHead;
@@ -185,7 +194,7 @@ typedef struct ItfMesBlkA4 {
 
 typedef struct ItfMesTextSlots {
     u32 addresses[0x20];
-    u32 handles[0x20];
+    SdfMemBlock *handles[0x20];
 } ItfMesTextSlots;
 
 typedef struct ItfMesState {
