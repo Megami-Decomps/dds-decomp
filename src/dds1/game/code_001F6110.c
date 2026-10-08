@@ -8,6 +8,10 @@
 #include "scr.h"
 #include "sdf.h"
 #include "dat_command.h"
+#include "sce_io.h"
+
+extern s32 func_003101B8(s32 directory);
+extern s32 func_00310320(s32 directory, SceDirent *entry);
 
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
@@ -2501,34 +2505,27 @@ s32 btlOpenPfsDebugDirectory(s32 directoryName) {
 }
 
 /* Close the scanned directory only in debug filesystem mode; ignore the native result. */
-void btlClosePfsDebugDirectory(void) {
+void btlClosePfsDebugDirectory(s32 directoryHandle) {
     if (sdfPfsDebugMode == 0) {
         return;
     }
-    func_003101B8();
+    func_003101B8(directoryHandle);
 }
 
 
 extern char *D_00360380[];
-extern s32 func_00310320(void);
-
-typedef struct BtlReader {
-    u32 flags;
-    u8 unk_04[0x3C];
-    char name[0x40];
-} BtlReader;
 
 /* Debug mode delegates to the native reader. Built-in mode returns each name's length,
    clears the directory-type bit, and returns zero when the eight-name table is exhausted. */
-s32 btlReadBattleResourceDirectoryEntry(s32 directoryHandle, BtlReader *reader) {
+s32 btlReadBattleResourceDirectoryEntry(s32 directoryHandle, SceDirent *reader) {
     if (sdfPfsDebugMode != 0) {
-        return func_00310320();
+        return func_00310320(directoryHandle, reader);
     }
     if ((u32)D_003BD868 >= BTL_BUILTIN_NAME_COUNT) {
         return 0;
     }
     strcpy(reader->name, D_00360380[D_003BD868]);
-    reader->flags &= ~BTL_DIRECTORY_FLAG_CLEAR;
+    reader->stat.mode &= ~BTL_DIRECTORY_FLAG_CLEAR;
     D_003BD868++;
     return strlen(reader->name);
 }
