@@ -89,7 +89,6 @@ typedef struct EffChanSource {
     EffChanSourceOwner *owner; /* 0x168 */
 } EffChanSource;
 
-extern void effParamWorkCallback0(void *param, void *value);
 
 /* Clone channel work, allocate slots and duplicate a parameter template per record.
  * The record count is captured before allocation; a nonpositive delay modulus becomes one. */
@@ -143,7 +142,6 @@ void effDestroyChannelWork(EffChanWork *work) {
 extern f32 sdfViewTargetVector[4];
 extern f32 sdfViewEyeVector[4];
 extern f32 effMiscRandUnitFloat(void *);
-extern void effParamWorkCallback3(void *param, u32 value);
 
 /* vu0 routine: Jitter four control points normal to the path and viewing direction.
  * Reuse the final edge normal for the endpoint; retain XYZ-only scale initialization. */
