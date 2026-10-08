@@ -1223,7 +1223,7 @@ void func_00211A60(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
 }
 
 extern u8 kwlnFrameDrawPacketRecords[];
-extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfAllocPacketAligned(s32);
 extern s32 kwlnGetDrawBufferIndex(void);
 extern void sdfAppendDmaPrimary(s32, void *, void *);
 
@@ -1241,7 +1241,7 @@ void func_00211B88(s32 list, s32 primitive, s32 color, f32 scale, s32 depth) {
     void *packet;
     s32 index;
 
-    packet = sdfAllocPacketAligned(0x20);
+    packet = (void *)sdfAllocPacketAligned(0x20);
     index = kwlnGetDrawBufferIndex();
     sdfAppendDmaPrimary(list, kwlnFrameDrawPacketRecords + index * 0x1F40, packet);
     halfWidth = 0x1000;
@@ -1291,10 +1291,10 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
         btlRuntimeState.resource = effCreateSharedTextureReference((struct SdfTextureFileHeader *)effGetWindTextureHandle());
         btlCopyPaletteLowByteToAlpha((s32 *)btlRuntimeState.resource->palette);
     }
-    tag = sdfAllocPacketAligned(0x40);
+    tag = (SdfPacket *)sdfAllocPacketAligned(0x40);
     func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, tag, 1);
     sdfAppendDmaTagToList(list, tag);
-    registers = sdfAllocPacketAligned(0x40);
+    registers = (SdfPacket *)sdfAllocPacketAligned(0x40);
     registers[0].unk0 = 3;
     registers[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
     registers[0].unk10 = (((u64)0x10000000 << 32) | 0x8002);
@@ -1304,7 +1304,7 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
     registers[1].unk10 = 0x44;
     registers[1].unk18 = 0x43;
     sdfAppendPacket((void *)list, (s32)registers);
-    registers = sdfAllocPacketAligned(0x40);
+    registers = (SdfPacket *)sdfAllocPacketAligned(0x40);
     registers[0].unk0 = 3;
     registers[0].unk8 = (((u64)0x50000003 << 16 | 0x1000) << 16);
     registers[0].unk10 = (((u64)0x10000000 << 32) | 0x8002);
@@ -1326,7 +1326,7 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
     if (btlRuntimeState.phaseSpeed > -0.02f) {
         btlRuntimeState.phaseSpeed = -0.02f;
     }
-    tag = sdfAllocPacketAligned(0x40);
+    tag = (SdfPacket *)sdfAllocPacketAligned(0x40);
     func_002D4CC8(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, tag, 1);
     sdfAppendDmaTagToList(list, tag);
 }
@@ -1492,7 +1492,7 @@ void btlReleaseRuntimeResource(void) {
 
 
 
-extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfAllocPacketAligned(s32);
 
 extern void sdfClearLinkedPacketList(SdfLinkedPacketList *);
 
@@ -1956,7 +1956,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, BtlDebugMenuCursor *select
     u32 selectedIndex;
     s32 rowY;
     func_001FB140(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, mode, selectionState->rows * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET, 0x80806020, 0x30000000);
-    indexPackets = sdfAllocPacketAligned(0x20);
+    indexPackets = (void *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(indexPackets);
     firstIndex = selectionState->top;
     visibleRowCount = selectionState->rows;
