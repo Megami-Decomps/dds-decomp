@@ -378,7 +378,7 @@ extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 
 /* Filter staff entries, size the window and preserve each entry's original ordinal. */
-MenuWindowContainer *func_00271B50(void *const *entries, s32 count, s32 width,
+MenuWindowContainer *mnuCreateFilteredStaffEntryWindow(void *const *entries, s32 count, s32 width,
                                      StaffMenuWork *work, const s32 *flagIds) {
     MenuWindowContainer *window;
     s32 visibleCount = 0;
@@ -464,11 +464,11 @@ MenuWindowContainer *func_00271B50(void *const *entries, s32 count, s32 width,
 void mnuCreateStaffPanelSet(StaffMenuWork *menu) {
     menu->resourceList = mnuCreatePanelSpriteHandles(
         0, (EffectSlotSet *)menu->staffSlots.baseResources[3], menu->secondaryImage);
-    menu->images[0] = (u32)func_00271B50(D_0037B950, 8, 0x300, menu, D_0037C388);
+    menu->images[0] = (u32)mnuCreateFilteredStaffEntryWindow(D_0037B950, 8, 0x300, menu, D_0037C388);
     mnuForwardDupArg(menu->images[0], menu->staffSlots.baseResources[5], 0, 0, 0);
-    menu->images[1] = (u32)func_00271B50(D_0037B970, 3, 0x2C0, menu, 0);
+    menu->images[1] = (u32)mnuCreateFilteredStaffEntryWindow(D_0037B970, 3, 0x2C0, menu, 0);
     mnuSetWindowFadeScale(menu->images[1], 0x100);
-    menu->images[2] = (u32)func_00271B50(D_0037B980, 2, 0x200, menu, 0);
+    menu->images[2] = (u32)mnuCreateFilteredStaffEntryWindow(D_0037B980, 2, 0x200, menu, 0);
     mnuSetWindowFadeScale(menu->images[2], 0x100);
 }
 
