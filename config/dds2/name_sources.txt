@@ -6314,6 +6314,7 @@
 0x00344120	sdfRelocatePackedResourceWords	inferred	Decodes a byte-coded relocation stream and adds the payload base to each selected word or run of words; verified in its MIPS assembly.
 0x00344208	sdfStreamNodeUnlink	inferred	unlinks node from the same list, clears queued flag
 0x00344298	sdfStreamNodeAppend	inferred	appends node to tail of global list D_0043920C/D_00439210 with optional EIntr
+0x00344420	sdfBuildStreamInputDmaChain	inferred	Consumes the bytes after the parsed frame header, builds max-0xFFF00-byte input DMA chain tags, and stores their chain under the SdfStreamFrameNode owner for sdfSoundStartIpuInputDma.
 0x003444F8	sdfBuildStreamFrameTransferPackets	inferred	builds and stores both transfer packet buffers for a full SdfStreamFrameNode before submission
 0x003447D8	sdfStreamOpen	inferred	init params, allocates frame buffers, appends to stream list
 0x00344870	sdfSoundInitFormattedNode	inferred	Byte-identical DDS1 counterpart: Initializes a sound node using format and callback values and allocates its sample buffer.
@@ -6323,6 +6324,7 @@
 0x00344D60	sdfSoundStartIpuInputDma	inferred	Fam_Mid3
 0x00345198	sdfIpuDmaCompletionWorker	inferred	confidence=high; src/dds2/game/code_003425B0.c:func_00345198; Waits for IPU worker wakeups, stops DMA, updates completion/loop state, requeues unfinished work with interrupt protection, and resumes processing. [names_qp9.tsv]
 0x00345408	sdfSubmitBufferedPlayback	inferred	Submits the selected pending buffer's address range, then advances buffered playback.
+0x00345488	sdfAdvanceStreamPlayback	inferred	Called by the movie scheduler with a cadence; retries deferred input DMA, submits buffered frames on phase transitions, advances playback cadence, and refills active feeds.
 0x003455F0	sdfSoundInitAndAppendNode	inferred	Byte-identical DDS1 counterpart: Initializes a sound node, stores the caller value, and appends it to the active-node list.
 0x00345628	sdfStreamCreateWithParams	inferred	copies 4-byte params, overrides mode byte from source+0x1A
 0x003456C0	sdfSoundInitFormattedAndAppendNode	inferred	Byte-identical DDS1 counterpart: Initializes a formatted sound node, stores the caller value, and appends it to the active-node list.

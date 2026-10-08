@@ -65,7 +65,7 @@ void mnuStopMovieDrawTask(void);
 s32 mnuCheckMovieDecoderStatus(void);
 
 s32 mnuSetFrameDivisor(void) {
-    func_00345488(0x3c / mnuMovieTaskState);
+    sdfAdvanceStreamPlayback(0x3c / mnuMovieTaskState);
     return 0;
 }
 
