@@ -5885,6 +5885,11 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415DC8);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415DF0);
 
+extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
+extern const u32 D_00415DF0[4];
+extern const s32 D_00415E00[2][3], D_00415E18[2][3], D_00415E30[2][3], D_00415F08[2][3];
+extern const s32 D_00415E48[16][3];
+
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B8E68);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B9158);
