@@ -728,12 +728,79 @@ void itfCopyTextSegment(char *src, char *dst, s32 segmentIndex) {
     *dst = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019FA08);
-
+/* Cycling text cache follows the shared empty-string bytes. */
+extern u16 D_00436582;
+extern s32 D_00436584;
+extern s32 D_00436588;
 extern u8 *func_0019DE70(s32 textId, FrFontTextBank *bank, s32 mode);
 extern s32 func_0019DB30(FrFontGlyph *text);
 extern s32 func_0019DBA8(s32 line, FrFontGlyph *text);
 extern void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *text);
+
+FrFontGlyph *func_0019FA08(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *bank, s32 flags) {
+    char buffer[0x80];
+    u8 *text;
+    u32 mode;
+    FrFontGlyph *handle;
+    s32 separators;
+
+    if (D_00436582 != textId) {
+        D_00436582 = textId;
+        D_00436584 = 0;
+        D_00436588 = 0;
+    }
+    text = func_0019DE70(textId, bank, 0);
+    if (text == 0) {
+        return 0;
+    }
+    mode = (u16)flags;
+    switch (mode) {
+    case 1:
+        frFontClearFlagBits(4);
+        break;
+    case 2:
+        frFontAddSharedGlyphFlags(8);
+        break;
+    case 4:
+        frFontAddSharedGlyphFlags(0x20);
+        break;
+    }
+    separators = itfCountTextSeparators((char *)text);
+    if (++D_00436588 == 30) {
+        D_00436588 = 0;
+        if (++D_00436584 > separators) {
+            D_00436584 = 0;
+        }
+    }
+    itfCopyTextSegment((char *)text, buffer, D_00436584);
+    /* The original draw uses the full stream rather than the copied segment. */
+    handle = itfDrawPlainEncodedTextWithByteColors(x, y, depth, 1, 0, 0, 0x80, text, 0);
+    if (flags & 0x10000) {
+        s32 maxWidth = 0;
+        s32 i;
+        s32 width;
+        for (i = 0; i < func_0019DB30(handle); i++) {
+            width = func_0019DBA8(i, handle);
+            if (maxWidth < width) {
+                maxWidth = width;
+            }
+        }
+        frFontMoveChainTo(x - maxWidth / 2, y, handle);
+    }
+    switch (mode) {
+    case 1:
+        frFontAddSharedGlyphFlags(4);
+        break;
+    case 2:
+        frFontClearFlagBits(8);
+        break;
+    case 4:
+        frFontClearFlagBits(0x20);
+        break;
+    }
+    return handle;
+}
+
 
 FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *bank, s32 flags) {
     u8 *text = func_0019DE70(textId, bank, 0);
