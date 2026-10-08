@@ -1270,14 +1270,16 @@ extern char D_003A3648[]; /* "btl:command=%d\n" */
 
 extern char D_003A3648[]; /* "btl:command=%d\n" */
 
+void func_001D12A0(BtlTask *task, BattleIndexWork *work);
+
 void btlCommandPrintAndFetchOwner(BtlTask *task) {
     BtlTask *link = task;
-    s32 *commandPtr;
+    BattleIndexWork *commandWork;
     s32 command;
     btlBossDebugPrintf(D_003A3648, link->indexWork.phase);
-    commandPtr = &link->indexWork.phase;
-    func_001D12A0(task, commandPtr);
-    command = *commandPtr;
+    commandWork = &link->indexWork;
+    func_001D12A0(task, commandWork);
+    command = commandWork->phase;
     if (command <= 0) {
         return;
     }
