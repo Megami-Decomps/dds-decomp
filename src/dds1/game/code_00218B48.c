@@ -8,6 +8,7 @@
 #include "ee_mmi.h"
 #include "dat_state.h"
 #include "sdf_draw.h"
+#include "sdf_chunk.h"
 #include "eff.h"
 #include "sdf_sif_command.h"
 #include "eff_transform.h"
@@ -34,8 +35,6 @@
 #define MDL_RESOURCE_TRACK_POLY 2
 #define MDL_RESOURCE_OBJECT 3
 #define MDL_MAP_POSITION_TAG 0x534F504D
-#define MDL_MAP_POSITION_DATA_OFFSET 0x10
-#define MDL_MAP_POSITION_RECORD_BYTES 0x40
 
 
 /* Viewer-wide state for the model viewer task (DDS1 game/code_00218B48 and
@@ -793,14 +792,12 @@ typedef struct MdlPartRec {
 } MdlPartRec;
 
 
-extern void *sdfChunkFindRecordById(SdfModel *model, s32 id);
-
 /* Bind each consecutive record ID to a newly created part when the chunk contains it. */
 void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype, s32 type, s32 (*createPart)(MdlPartEntry *)) {
     MdlPartEntry *partSlot = (MdlPartEntry *)mdlFindViewerPartSlot(owner, partRecord->partIndex);
 
     if (partSlot != NULL) {
-        void *chunk = owner->inner;
+        SdfModel *model = owner->inner;
         s32 recordId = partRecord->firstId;
         s32 remainingRecords = partRecord->count;
         f32 optionalValue = 0.0f;
@@ -810,7 +807,7 @@ void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype
             optionalValue = partRecord->value;
         }
         do {
-            void *chunkRecord = sdfChunkFindRecordById(chunk, recordId++);
+            SdfMapPositionRecord *chunkRecord = sdfChunkFindRecordById(model, recordId++);
 
             if (chunkRecord != NULL) {
                 MdlResourceItem *resourceItem = mdlInsertResourceItem(owner, type, subtype);
@@ -1291,7 +1288,42 @@ void mdlRotateViewList(void) {
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021A9F8);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021AAB8);
+extern const char *D_003679D0[];
+
+void func_0021AAB8(void) {
+    const char **label;
+    u32 i;
+
+    if (mdlViewerState.taskPhase != 0) {
+        return;
+    }
+
+    mdlAppendViewerRectToDrawList(0x7690, 0x7A08, 0xFF0080, 0xC60, 0x2D0, 0);
+    label = D_003679D0;
+    i = 0;
+    do {
+        s32 style = (i == mdlViewerState.unk14 && mdlViewerState.unk09 < 0x14) ? 4 : 0;
+        s32 xOffset;
+        u32 row;
+        u32 packet;
+
+        if (i >= 7) {
+            xOffset = 0x600;
+            row = i - 7;
+        } else {
+            xOffset = 0;
+            row = i;
+        }
+        packet = (u32)sdfCreateFormattedSifCommand(0x76C0 + xOffset,
+                                                   0x7A20 + row * 0x60,
+                                                   0xFF0080, style, *label);
+        i++;
+        sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, packet);
+        label++;
+    } while (i != 13);
+}
+
+
 
 void mdlDrawViewerModelAndMotionSummary(void) {
     SifCommand packet;
@@ -1403,7 +1435,124 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABCD8);
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021AE00);
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021B0B0);
+extern char D_003BBC30[];
+extern char D_003BBC38[];
+extern char D_003BBC40[];
+extern char D_003BBC48[];
+extern char D_003BBC50[];
+extern char D_003BBC58[];
+extern char D_003BBC60[];
+extern char D_003BBC68[];
+
+
+/* Draw the pending resource details and the current selection in each model node. */
+void func_0021B0B0(void) {
+    SifCommand packet;
+    char basename[32];
+    s32 panelTop;
+    s32 panelHeight;
+    s32 basenameWidth;
+    s32 rowY;
+    s32 index;
+    void *formatted;
+    const char *format;
+
+    if (mdlViewerState.selectedNodeId == 0) {
+        panelTop = 0x8560;
+        panelHeight = 0x90;
+    } else {
+        panelTop = 0x8440;
+        panelHeight = 0x1B0;
+    }
+    mdlAppendViewerRectToDrawList(0x8410, panelTop - 0x18, 0xFF0080, 0xAE0,
+                                 panelHeight, 0);
+
+    mdlCopyResourceBasename(mdlViewerState.unk1C, mdlViewerState.unk1E, basename, 0x20);
+    basenameWidth = (s32)strlen(basename) * 3 << 6;
+    mdlAppendViewerRectToDrawList(0x8E90 - basenameWidth,
+                                 panelTop - 0xD8, 0xFF0080,
+                                 basenameWidth + 0x60, 0x90, 0);
+    formatted = sdfCreateFormattedSifCommand(0x8EC0 - basenameWidth,
+                                             panelTop - 0xC0, 0xFF0080, 0,
+                                             basename);
+    sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, (u32)formatted);
+
+    sdfPktInit(&packet, 0x8440, panelTop + mdlViewerState.selectedNodeId * 0x60,
+               0xFF0080, mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 0 ? 4 : 0);
+    formatted = sdfFormatSifPacket(&packet, D_003BBC30, mdlViewerState.unk1C + 0x30);
+    sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, (u32)formatted);
+
+    sdfPktSetCmd(&packet, 0);
+    formatted = sdfFormatSifPacket(&packet, D_003BBC38);
+    sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, (u32)formatted);
+
+    sdfPktSetCmd(&packet,
+                 mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 1 ? 4 : 0);
+    if (mdlViewerState.unk0F == 0) {
+        format = D_003BBC40;
+    } else {
+        format = D_003BBC48;
+    }
+    formatted = sdfFormatSifPacket(&packet, format, mdlViewerState.unk1E);
+    sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, (u32)formatted);
+
+    sdfPktSetCmd(&packet,
+                 mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 3 ? 4 : 0);
+    formatted = sdfFormatSifPacket(&packet, "    %02d", mdlViewerState.entryHeight);
+    sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, (u32)formatted);
+
+    sdfPktSetCmd(&packet,
+                 mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 4 ? 4 : 0);
+    formatted = sdfFormatSifPacket(&packet, D_003BBC50, mdlViewerState.entryWidth);
+    sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, (u32)formatted);
+
+    rowY = panelTop;
+    index = 0;
+    while (mdlViewerState.selectedNodeId == 0 ? index <= 0 : index < 4) {
+        s32 referenceCount = mdlGetNodeRefHalf(mdlViewerState.resources[0], index);
+
+        if (mdlViewerState.selectedNodeId == index) {
+            s32 style = mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 2 ? 4 : 0;
+
+            if (referenceCount == 0) {
+                formatted = sdfCreateFormattedSifCommand(
+                    0x88C0, rowY, 0xFF0080, style, D_003BBC58);
+            } else {
+                if (mdlViewerState.unk0F == 0) {
+                    format = D_003BBC60;
+                } else {
+                    format = D_003BBC68;
+                }
+                formatted = sdfCreateFormattedSifCommand(
+                    0x88C0, rowY, 0xFF0080, style, format,
+                    (s16)mdlViewerState.selectedEntryId);
+            }
+        } else {
+            referenceCount = mdlGetNodeRefHalf(mdlViewerState.resources[0], index);
+            if (referenceCount == 0) {
+                formatted = sdfCreateFormattedSifCommand(
+                    0x88C0, rowY, 0xFF0080, 0, D_003BBC28);
+            } else {
+                s32 motionIndex;
+
+                referenceCount--;
+                motionIndex = mdlGetNodeField2C(mdlViewerState.resources[0], index);
+                if (mdlViewerState.unk0F == 0) {
+                    format = D_003ABCC8;
+                } else {
+                    format = D_003ABCD8;
+                }
+                formatted = sdfCreateFormattedSifCommand(
+                    0x88C0, rowY, 0xFF0080, 0, format,
+                    motionIndex, referenceCount);
+            }
+        }
+        rowY += 0x60;
+        index++;
+        sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, (u32)formatted);
+    }
+}
+
 
 u32 mdlRunViewerAssetSelectionTask(void) {
     func_0021AE00();
@@ -2367,26 +2516,20 @@ extern f32 D_00367C50[][4];
 
 extern u32 D_00367CB0[];
 
-extern u32 sdfCountMapPositionRecords(SdfModel *model);
-
-extern void *sdfChunkFindByTag(SdfModel *model, s32 tag);
-
-struct SdfMapPositionRecord;
-extern void sdfSetLookAtBasisFromRecord(SdfModel *model, struct SdfMapPositionRecord *record);
-
 /* Walk native 64-byte map-position records and submit their visualization in one packet list. */
 void mdlDrawMapPositionRecords(MdlCtx *resource) {
     s32 recordCount = sdfCountMapPositionRecords(resource->inner);
     s32 recordIndex;
     s32 packetList;
-    u8 *recordCursor;
+    SdfMapPositionRecord *recordCursor;
 
     if (recordCount > 0) {
         packetList = sdfCreateResetPacketList();
-        recordCursor = (u8 *)sdfChunkFindByTag(resource->inner, MDL_MAP_POSITION_TAG) + MDL_MAP_POSITION_DATA_OFFSET;
+        recordCursor = (SdfMapPositionRecord *)(
+            (SdfMapPositionChunkPrefix *)sdfChunkFindByTag(resource->inner, MDL_MAP_POSITION_TAG) + 1);
         for (recordIndex = 0; recordIndex != recordCount; recordIndex++) {
-            sdfSetLookAtBasisFromRecord(resource->inner, (struct SdfMapPositionRecord *)recordCursor);
-            recordCursor += MDL_MAP_POSITION_RECORD_BYTES;
+            sdfSetLookAtBasisFromRecord(resource->inner, recordCursor);
+            recordCursor++;
             sdfAppendPacket((SdfListHead *)(packetList), (u32)((s32)func_002EF2E0(D_00367C50, D_00367CB0, 6, 0x80)));
         }
         D_00325048.submit(&D_00325048, packetList);
