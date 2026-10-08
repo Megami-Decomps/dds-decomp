@@ -107,33 +107,26 @@ f32 sdfSampleActiveLinearCurve(Dds3PathCurveWork *user) {
     return 0.0f;
 }
 
-typedef struct SdfCounter {
-    s32 direction;   /* 0x00: 0 counts up, 1 counts down */
-    u32 flags;       /* 0x04: 8 = frozen, 0x20 = wrap */
-    f32 limit;       /* 0x08 */
-    f32 value;       /* 0x0C */
-} SdfCounter;
-
 /* Step the counter by one; returns 0 when it ran out and does not wrap. */
-s32 sdfStepWrappingFloatCounter(SdfCounter *counter) {
+s32 sdfStepWrappingFloatCounter(Dds3PathCurveWork *path) {
     s32 result = 1;
 
-    if (counter->flags & 8) {
+    if (path->flags & 8) {
         return 1;
     }
-    if (counter->direction == 0) {
-        if (counter->limit > counter->value) {
-            counter->value = counter->value + 1.0f;
-        } else if (counter->flags & 0x20) {
-            counter->value = 0.0f;
+    if (path->direction == 0) {
+        if (path->duration > path->time) {
+            path->time = path->time + 1.0f;
+        } else if (path->flags & 0x20) {
+            path->time = 0.0f;
         } else {
             result = 0;
         }
-    } else if (counter->direction == 1) {
-        if (counter->value > 0.0f) {
-            counter->value = counter->value - 1.0f;
-        } else if (counter->flags & 0x20) {
-            counter->value = counter->limit;
+    } else if (path->direction == 1) {
+        if (path->time > 0.0f) {
+            path->time = path->time - 1.0f;
+        } else if (path->flags & 0x20) {
+            path->time = path->duration;
         } else {
             result = 0;
         }
