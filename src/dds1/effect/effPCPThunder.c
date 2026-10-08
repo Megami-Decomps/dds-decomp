@@ -1038,9 +1038,9 @@ typedef struct {
     u32 color;               /* 0x58 */
     union {
         u32 updateCount;     /* single-system variant */
-        void *secondarySystem; /* dual-system variant */
+        ParSystem *secondarySystem; /* dual-system variant */
     } state;                 /* 0x5C */
-    void *system;            /* 0x60 */
+    ParSystem *system;            /* 0x60 */
     SdfMemBlock *allocationHandle; /* 0x64 */
 } EffThunderFragmentWork; /* 0x68 */
 
@@ -2244,12 +2244,12 @@ void effThunderUpdateChainSegments(EffThunderGroup *group) {
         points++;
         fragmentCount = work->head.fragmentCount;
         color = effMultiplyPackedColors(group->color, work->color);
-        cell = ((ParSystem *)work->system)->cells;
+        cell = work->system->cells;
         for (j = 0; j < fragmentCount; j++) {
             if (i > 0) {
                 previous = group->handles[i - 1];
                 func_001673D0(work, j,
-                    ((ParSystem *)previous->system)->cells[j].history + ((ParSystem *)previous->system)->cells[j].vertexCount - 5);
+                    previous->system->cells[j].history + previous->system->cells[j].vertexCount - 5);
             } else {
                 effThunderBuildFragmentStrip(work, j);
             }
