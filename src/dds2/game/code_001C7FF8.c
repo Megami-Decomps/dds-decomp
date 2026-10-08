@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "btl_scene_fade.h"
 #include "btl_command.h"
 #include "btl_state.h"
@@ -512,7 +513,6 @@ s32 btlUpdateBattleSceneCommands(KwlnTask *task) {
 }
 
 extern void btlReleaseBattleScratchBlocks(void);
-extern void sdfReleaseChipBlock(void *);
 
 void fldClearBattleSceneObject(KwlnTask *task) {
     sdfReleaseChipBlock((void *)kwlnTaskGetUserValue(task));
@@ -932,7 +932,6 @@ s32 fldStepSceneStateMachine(KwlnTask *handle) {
 
 
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
 
 

@@ -3,6 +3,7 @@
 #include "mnu_list.h"
 
 struct MnuStatusResource;
+struct MantraDrawPool;
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
@@ -52,7 +53,7 @@ typedef struct MantraMenuWork {
     u8 pad998[0x14];
     u32 displaySprite;
     u8 pad9B0[0x10];
-    u32 drawPool;
+    struct MantraDrawPool *drawPool;
 } MantraMenuWork;
 
 typedef struct MenuSearchObject {
@@ -75,7 +76,7 @@ extern const char D_004273C0[];
 extern const char D_004273E0[];
 extern const char D_004273F0[];
 
-extern s32 mnuGetNodeValueByIndex(struct MnuStatusResource *, s32);
+extern DatPartyRecord *mnuGetNodeValueByIndex(struct MnuStatusResource *, s32);
 
 extern s32 ptyAnyActivePartyMemberAtProfileCap(u16, u16);
 
@@ -225,7 +226,7 @@ s32 mnuSelectPreferredMantraNode(MenuSearchObject *object, MenuSearchState *stat
     for (i = 0, slot = work->slots; i < 5; i++, slot++) {
         if (slot->nodeId != 0) {
             record = (MantraNodePos *)mnuGetMantraNodePositionRecord(slot->nodeId);
-            value = (DatPartyRecord *)mnuGetNodeValueByIndex((struct MnuStatusResource *)object, i);
+            value = mnuGetNodeValueByIndex((struct MnuStatusResource *)object, i);
             if (ptyAnyActivePartyMemberAtProfileCap(record->id, value->unitId) == 0) {
                 for (j = 0; j < 6; j++) {
                     entry = record->entries[j];
@@ -319,7 +320,7 @@ void mnuSelectMantraLimitLine(MenuSearchObject *object, u16 id) {
     evtPrintDeveloperConsoleMessage(
         "-----------------------LimitLineSetting!!!!!!!!![%x]\n", flags);
     if (flags != 0) {
-        mnuArmMantraLimitLineFlags(object->work.drawPool, flags);
+        mnuArmMantraLimitLineFlags((u32)object->work.drawPool, flags);
     }
 }
 
@@ -351,8 +352,8 @@ void func_0028F8A8(u8 *object) {
         }
     }
 
-    mnuQueueMantraLimitLineFlags(menu->work.drawPool, flags);
-    mnuSetMantraBackgroundSelection(menu->work.drawPool, flags);
+    mnuQueueMantraLimitLineFlags((u32)menu->work.drawPool, flags);
+    mnuSetMantraBackgroundSelection((u32)menu->work.drawPool, flags);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0028E568", D_004274B0);

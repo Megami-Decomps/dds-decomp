@@ -91,7 +91,7 @@ typedef struct MantraMenu {
 extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern MantraNodePos *mnuGetMantraPanelPositionRecord(s16);
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
-extern u32 mnuGetSelectedNodeValue(u8 *);
+extern DatPartyRecord *mnuGetSelectedNodeValue(u8 *);
 extern struct MantraIconPool *mnuAllocateMantraIconPool(u32);
 extern u32 mnuCreateMantraIconListA();
 extern u32 mnuCreateMantraIconListB();
@@ -3010,7 +3010,7 @@ u32 mnuCreateMantraIconListA(s32 unused, u8 *menu) {
     ((MantraFadeData *)data)->iconPool = mnuAllocateMantraIconPool(0xA);
     ((MantraFadeData *)data)->state = 1;
     slot = &((MantraMenu *)menu)->work;
-    first = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId((DatPartyRecord *)mnuGetSelectedNodeValue(menu)));
+    first = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(menu)));
     mnuSpawnMantraIcon(first->x / 10.0f * 40.0f, first->y / 10.0f * 39.0f, ((MantraFadeData *)data)->iconPool, 0x20);
     second = slot->selectedNode;
     mnuSpawnMantraIcon(second->x / 10.0f * 40.0f, second->y / 10.0f * 39.0f, ((MantraFadeData *)data)->iconPool, 0x10);
@@ -3081,7 +3081,7 @@ u32 mnuCreateMantraIconListB(s32 unused, u8 *menu) {
     ((MantraFadeData *)data)->iconPool = mnuAllocateMantraIconPool(0xA);
     ((MantraFadeData *)data)->state = 1;
     slot = &((MantraMenu *)menu)->work;
-    first = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId((DatPartyRecord *)mnuGetSelectedNodeValue(menu)));
+    first = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(menu)));
     mnuSpawnMantraIcon(first->x * 20 / 10.0f, first->y * 20 / 10.0f, ((MantraFadeData *)data)->iconPool, 0x60);
     second = slot->selectedNode;
     mnuSpawnMantraIcon(second->x * 20 / 10.0f, second->y * 20 / 10.0f, ((MantraFadeData *)data)->iconPool, 0x50);

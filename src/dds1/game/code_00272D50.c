@@ -68,7 +68,6 @@ extern void mnuDestroyWindowContainer(MenuWindowContainer *);
 
 
 typedef struct MenuWindowSpriteGroup MenuWindowSpriteGroup;
-extern s32 mnuCreateWindowContainer(s32, s32, s32, s32, s32);
 extern void mnuSetWindowContainerState(MenuWindowContainer *, u32);
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s32, s32);
@@ -90,7 +89,7 @@ void func_00272D50(StaffDisplayContext *context) {
     s32 secondTextOffset;
     s32 minimumQuantity;
 
-    window = (MenuWindowContainer *)mnuCreateWindowContainer(0, 0x60, 0x10, 8, 0x15);
+    window = mnuCreateWindowContainer(0, 0x60, 0x10, 8, 0x15);
     mnuSetWindowContainerState(window, 0x100);
     mnuSetWindowPanelBounds(window, context->panelLayout, 0x30, 0x530, -0x90, 0xA10);
     mnuInitializeWindowEntryPlacement(0, window, context->unk74, 10, 0x10);
@@ -127,7 +126,7 @@ void func_00272D50(StaffDisplayContext *context) {
     mnuAttachWindowTextureState(resources->windows[0], -0xE0, 0x370, 0, context->unkDC);
     mnuConfigureWindowSpriteSlots(resources->windows[0]->textures, context->spriteResource);
 
-    window = (MenuWindowContainer *)mnuCreateWindowContainer(0, 0x1B0, 0x10, 8, 0x15);
+    window = mnuCreateWindowContainer(0, 0x1B0, 0x10, 8, 0x15);
     mnuSetWindowContainerState(window, 0x100);
     mnuSetWindowPanelBounds(window, context->panelLayout, 0x30, 0x530, -0x90, 0xA10);
     mnuInitializeWindowEntryPlacement(0, window, context->unk74, 10, 0x10);
@@ -181,7 +180,7 @@ void mnuCreateStaffBulletItemWindow(StaffDisplayContext *context) {
     s32 textOffset = 25;
     u32 quantity;
 
-    window = (MenuWindowContainer *)mnuCreateWindowContainer(0, 0x60, 0x10, 8, 0x15);
+    window = mnuCreateWindowContainer(0, 0x60, 0x10, 8, 0x15);
     mnuSetWindowContainerState(window, 0x100);
     mnuSetWindowPanelBounds(window, context->panelLayout, 0x30, 0x530, -0x90, 0xA10);
     mnuInitializeWindowEntryPlacement(0, window, context->unk74, 10, 16);
@@ -248,9 +247,7 @@ s32 mnuStaffFreeDisplayResources(KwlnTask *task) {
 extern void mnuSetPopupEntry(s32, s32);
 extern void mnuSetPopupEntryFlagged(s32, s32);
 extern void func_0027C788(MenuWindowContainer *);
-extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
-extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
-extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
+
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char D_0037C9C8[];
 extern char D_0037C9E4[];

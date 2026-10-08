@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff.h"
+#include "eff_pcp_flash.h"
 #include "pcp_vu0.h"
 
 /* Packed effect parameter-set accessor shared with the effect constructors. */
@@ -3173,15 +3174,14 @@ void effThunderDrawHistoryAndEndCap(EffFragmentResources *history) {
 extern EffRecordPool *effRecordPoolCreateTriple(s32 count);
 
 /* Clone the 0x30-byte parameter block, create the record pool and clear every particle's age. */
-PcpFlashTrianglePulseWork *effFlashRecordCreate(src)
-    PcpFlashTrianglePulseWork *src;
+PcpFlashTrianglePulseWork *effFlashRecordCreate(PcpFlashTrianglePulseParams *params)
 {
-    SdfMemBlock *handle = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpFlashPulseParticle) + sizeof(PcpFlashTrianglePulseWork));
+    SdfMemBlock *handle = sdfAllocGeneralBlock(params->particleCount * sizeof(PcpFlashPulseParticle) + sizeof(PcpFlashTrianglePulseWork));
     PcpFlashTrianglePulseWork *work = (PcpFlashTrianglePulseWork *)sdfResourceRetainAddress(handle);
     EffRecordPool *record;
     u32 i;
 
-    memcpy(work, src, 0x30);
+    memcpy(work, params, 0x30);
     work->parts = (PcpFlashPulseParticle *)(work + 1);
     work->tintColor = 0x80808080;
     work->allocationHandle = handle;

@@ -96,8 +96,7 @@ extern void mnuStorePendingMenuCommandValue(struct MenuList *, u32);
 extern void func_002958B0();
 extern void func_002971E0(struct MenuList *, u32);
 extern void func_002B9808(MenuWindowContainer *);
-extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
-extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
+
 extern void mnuHandleListPageJumpInput(s32, u8 *, u32 *);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern u8 D_003CE578[];
@@ -958,7 +957,7 @@ extern void func_00295030(s32, s32, s32, void *, s32, s32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, void *, s32);
 extern void func_002969D8(s32, s32, s32, void *, s32);
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, u8 *, s32);
-extern void mnuClearWindowPanelTransitionFlag(void *);
+
 extern void func_00296B48(s32, s32, s32, s32, s32, s32);
 extern void func_00296D90(void *, s32);
 extern void func_00296E98(s32, u32, s32, s32);

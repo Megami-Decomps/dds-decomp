@@ -1,6 +1,7 @@
 #include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
+#include "mnu_panel_state.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "mnu_staff.h"
@@ -41,7 +42,7 @@ typedef struct SkillMenuState {
     u8 pad00[0xC];
     struct MenuList *partyList;             /* 0x0C */
     MenuWindowContainer *window[4];  /* 0x10 */
-    s32 panelState;              /* 0x20 */
+    struct MenuPanelState *panelState; /* 0x20 */
     MenuWindowContainer *selected;   /* 0x24 */
     u8 pad28[8];
     u32 selectionFlags;          /* 0x30 */
@@ -68,7 +69,6 @@ typedef struct SkillMenuContext {
 } SkillMenuContext;
 
 extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
-extern void mnuSetPanelState(s32, s32);
 extern void func_00282DA0(s32, s32, s32, s32, s32);
 
 s32 ptySkillMenuUpdate(KwlnTask *callback) {
@@ -111,7 +111,7 @@ void ptySkillMenuCopyPageState(s32 context) {
     itfDrawGridWithResolvedSlot(0x10E0, 0xA18, 0, 1, pageGrid,
                                 0x1D, 0x53);
     mnuSetPanelState(menu->panelState, index);
-    func_00282DA0(0xDE0, 0x350, 0, menu->panelState, 0x53);
+    func_00282DA0(0xDE0, 0x350, 0, (s32)menu->panelState, 0x53);
     mnuDrawWindowContainer(0x1220, 0x678, 0,
                            *getSkillPageSlot(windows, index), 0x53);
     for (i = 0; i < 4; i++) {

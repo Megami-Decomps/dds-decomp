@@ -237,9 +237,7 @@ extern s32 mnuInitializeStaffPartyScene(KwlnTask *);
 extern void mnuSetPopupEntry();
 extern void mnuSetPopupEntryFlagged(s32, void *);
 extern void func_0027C788(s32);
-extern void mnuRetreatWindowListSelection(s32);
-extern void mnuAdvanceWindowListSelection(s32);
-extern void mnuClearWindowPanelTransitionFlag(s32);
+
 extern void mnuPlayInputSound(s32, u32, s32);
 extern u8 D_0037CC74[];
 extern u8 D_0037CC3C[];
@@ -274,7 +272,6 @@ s32 mnuIsFinalItemIndex(s32 index, s32 item) {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00274BC0);
 
-extern s32 mnuCreateWindowContainer(s32, s32, s32, s32, s32);
 extern void mnuSetWindowContainerState(MenuWindowContainer *, u32);
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s32, s32);
@@ -286,7 +283,7 @@ void mnuCreatePartySelectionWindow(CampMenuContext *context) {
     s32 i;
     s32 placement;
 
-    window = (MenuWindowContainer *)mnuCreateWindowContainer(0, 0x140, 0x10, 6, 0x15);
+    window = mnuCreateWindowContainer(0, 0x140, 0x10, 6, 0x15);
     mnuSetWindowContainerState(window, 0x100);
     mnuForwardDupArg(window, context->option, 0, context->panelResource, 0x20);
     mnuSetWindowPanelBounds(window, context->partySelectionLayout, 0x30, 0x530, -0x90, 0xA10);
@@ -536,12 +533,12 @@ s32 func_00275920(s32 callback) {
             func_0027C788((s32)window);
         }
         if (inputFlags & 0x10) {
-            mnuRetreatWindowListSelection((s32)window);
+            mnuRetreatWindowListSelection(window);
         }
         if (inputFlags & 0x20) {
-            mnuAdvanceWindowListSelection((s32)window);
+            mnuAdvanceWindowListSelection(window);
         }
-        mnuClearWindowPanelTransitionFlag((s32)window);
+        mnuClearWindowPanelTransitionFlag(window);
         if (inputFlags & 1) {
             switch (mnuIsFinalItemIndex(window->list->cursor->index, (s32)window->list)) {
             case 0:
@@ -1569,12 +1566,12 @@ void ptySkillMenuHandleSelection(KwlnTask *callback) {
             func_0027C788((s32)window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
-            mnuRetreatWindowListSelection((s32)window);
+            mnuRetreatWindowListSelection(window);
         }
         if (inputFlags & MNU_STAFF_INPUT_NEXT) {
-            mnuAdvanceWindowListSelection((s32)window);
+            mnuAdvanceWindowListSelection(window);
         }
-        mnuClearWindowPanelTransitionFlag((s32)window);
+        mnuClearWindowPanelTransitionFlag(window);
         mnuPlayInputSound(0, inputFlags, (s32)&window->list->stateFlags);
     }
 }
@@ -1629,12 +1626,12 @@ void ptySkillMenuHandleSlotReorder(KwlnTask *callback) {
             func_0027C788((s32)window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
-            mnuRetreatWindowListSelection((s32)window);
+            mnuRetreatWindowListSelection(window);
         }
         if (inputFlags & MNU_STAFF_INPUT_NEXT) {
-            mnuAdvanceWindowListSelection((s32)window);
+            mnuAdvanceWindowListSelection(window);
         }
-        mnuClearWindowPanelTransitionFlag((s32)window);
+        mnuClearWindowPanelTransitionFlag(window);
         mnuPlayInputSound(0, inputFlags, (s32)window->list);
     }
 }

@@ -1,6 +1,8 @@
+#include "sdf_chip.h"
 #include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
+#include "mnu_panel_state.h"
 #include "sdf_resource.h"
 #include "mnu_staff.h"
 #include "mnu_list.h"
@@ -140,9 +142,6 @@ extern char D_003E7588[];
 extern char D_00380788[];
 
 extern void evtStageTestUpdate();
-
-extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
-
 
 extern char D_003E7790[];
 
@@ -339,7 +338,6 @@ typedef struct SkillMenuRuntime {
     s32 fade; /* 0x38: shared skill-category marker fade. */
 } SkillMenuRuntime;
 
-extern MenuListNode *sdfAllocAndClearQuadwords(s32);
 
 extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
 
@@ -371,7 +369,6 @@ extern s32 mnuGetEntryUseStatus(DatPartyRecord *, u16);
 extern void func_002B3CA0(s32, s32, s32, MenuList *, MenuListNode *, s32);
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
-MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s32 rowSpacing);
 void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu, u32 first, u32 second);
 void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *menu, u32 second, u32 third, u32 fourth);
 /* Copy the native panel layout, override its bounds, and mark its transition flag. */
@@ -1877,10 +1874,10 @@ void mnuCampMenuHandleInput(KwlnTask *callback) {
             func_002B9808((s32)window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
-            mnuRetreatWindowListSelection((s32)window);
+            mnuRetreatWindowListSelection(window);
         }
         if (inputFlags & MNU_STAFF_INPUT_NEXT) {
-            mnuAdvanceWindowListSelection((s32)window);
+            mnuAdvanceWindowListSelection(window);
         }
         mnuClearWindowPanelTransitionFlag(window);
         mnuPlayInputSound(0, inputFlags, &window->list->stateFlags);
@@ -1936,10 +1933,10 @@ void ptySkillMenuHandleSelection(KwlnTask *callback) {
             func_002B9808((s32)window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
-            mnuRetreatWindowListSelection((s32)window);
+            mnuRetreatWindowListSelection(window);
         }
         if (inputFlags & MNU_STAFF_INPUT_NEXT) {
-            mnuAdvanceWindowListSelection((s32)window);
+            mnuAdvanceWindowListSelection(window);
         }
         mnuClearWindowPanelTransitionFlag(window);
         mnuPlayInputSound(0, inputFlags, &window->list->stateFlags);
@@ -1990,10 +1987,10 @@ void ptySkillMenuHandleSlotReorder(KwlnTask *callback) {
             func_002B9808((s32)window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
-            mnuRetreatWindowListSelection((s32)window);
+            mnuRetreatWindowListSelection(window);
         }
         if (inputFlags & MNU_STAFF_INPUT_NEXT) {
-            mnuAdvanceWindowListSelection((s32)window);
+            mnuAdvanceWindowListSelection(window);
         }
         mnuClearWindowPanelTransitionFlag(window);
         mnuPlayInputSound(0, inputFlags, &window->list->stateFlags);
@@ -2032,7 +2029,6 @@ typedef struct MenuPanelWindow {
     s32 field94;
 } MenuPanelWindow;
 
-extern void mnuSetPanelState();
 extern void func_002C0958();
 
 void ptySkillMenuCopyPageState(s32 context) {
@@ -2046,7 +2042,7 @@ void ptySkillMenuCopyPageState(s32 context) {
     slot = windows + index;
     window = *slot;
     itfDrawGridWithResolvedSlot(0xED0, 0x2E0, 0, 1, ((MenuContext *)context)->labelHandle, 0x24, 0x53);
-    mnuSetPanelState(party[8], index);
+    mnuSetPanelState((struct MenuPanelState *)party[8], index);
     func_002C0958(0xED0, 0x328, 0, party[8], 0x53);
     if (window->list->cursor->index == 0) {
         window->list->stateFlags |= 0x10;
@@ -2295,10 +2291,10 @@ s32 ptySkillMenuBrowseCandidatePages(KwlnTask *callback) {
         func_002B9808((s32)window);
     }
     if (input & 0x10) {
-        mnuRetreatWindowListSelection((s32)window);
+        mnuRetreatWindowListSelection(window);
     }
     if (input & 0x20) {
-        mnuAdvanceWindowListSelection((s32)window);
+        mnuAdvanceWindowListSelection(window);
     }
     mnuHandlePanelListPageJumpInput(window, &input);
     if (!(buttons & 0xC00000)) {
@@ -2512,10 +2508,10 @@ s32 mnuUpdateSkillListInput(KwlnTask *callback) {
     }
     list = menu + 1;
     if (buttons & 0x10) {
-        mnuRetreatWindowListSelection(list[8 + menu[11]]);
+        mnuRetreatWindowListSelection((MenuWindowContainer *)list[8 + menu[11]]);
     }
     if (buttons & 0x20) {
-        mnuAdvanceWindowListSelection(list[8 + menu[11]]);
+        mnuAdvanceWindowListSelection((MenuWindowContainer *)list[8 + menu[11]]);
     }
     mnuHandlePanelListPageJumpInput(list[8 + menu[11]], &buttons);
     mnuClearWindowPanelTransitionFlag((MenuWindowContainer *)list[8 + menu[11]]);
@@ -3344,11 +3340,6 @@ void mnuSetWindowContainerLayout(MenuWindowContainer *menu, u32 layout2C, u32 la
 
 void mnuCreateListWithDefaults(MenuWindowContainer *menu, u32 first, u32 second, u32 third, u32 fourth);
 
-/* Clear only the window's panel-transition bit. */
-void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *window);
-
-
-
 void mnuRemoveWindowListCursorNode(MenuWindowContainer *menu);
 
 /* Advance selection; clear its byte and panel sprite flags only when a node is returned. */
@@ -3356,10 +3347,6 @@ MenuListNode *mnuAdvanceListSelection(MenuWindowContainer *menu, s32 step);
 
 /* Retreat selection with the same conditional byte/panel cleanup as advancement. */
 MenuListNode *mnuReverseListSelection(MenuWindowContainer *menu, s32 step);
-
-void mnuAdvanceWindowListSelection(MenuWindowContainer *menu);
-
-void mnuRetreatWindowListSelection(MenuWindowContainer *menu);
 
 void func_002B9808(MenuWindowContainer *menu);
 
@@ -3504,7 +3491,6 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending);
 /* Allocate four native fade records into pointer slots after the list header. */
 void mnuAllocateListEntries(s32 *list);
 
-extern void sdfReleaseChipBlock();
 
 /* Free the four record blocks, not their nested window pointers. */
 void mnuFreeListEntries(s32 *list);
@@ -3560,7 +3546,6 @@ void mnuSetPageParams(MenuSprites *page, s32 mode);
 
 extern s32 effDestroyResourceSlotSet();
 
-extern void sdfReleaseChipBlock();
 
 
 void mnuFreeIconSprites(MenuSprites *menu);

@@ -33,7 +33,6 @@ void func_002AB8C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 }
 
 extern char (*D_00435E5C)[25];
-extern MenuWindowContainer *mnuCreateWindowContainer(s32, s32, s32, s32, s32);
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 extern void mnuSetWindowEntryParameters(u32, MenuWindowContainer *, u32, u32, u32);
 extern void mnuInitializeBasicWindowLayout(MenuWindowContainer *, u32, u32);
@@ -422,9 +421,7 @@ s32 mnuDestroyWindowOwnerResourceSet(KwlnTask *task) {
 }
 
 extern void func_002B9808(s32);
-extern void mnuRetreatWindowListSelection(s32);
-extern void mnuAdvanceWindowListSelection(s32);
-extern void mnuClearWindowPanelTransitionFlag(s32);
+
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char D_003E7450[];
 extern char D_003E746C[];
@@ -492,12 +489,12 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
                 func_002B9808((s32)window);
             }
             if (input & 0x10) {
-                mnuRetreatWindowListSelection((s32)window);
+                mnuRetreatWindowListSelection(window);
             }
             if (input & 0x20) {
-                mnuAdvanceWindowListSelection((s32)window);
+                mnuAdvanceWindowListSelection(window);
             }
-            mnuClearWindowPanelTransitionFlag((s32)window);
+            mnuClearWindowPanelTransitionFlag(window);
             mnuPlayInputSound(0, input, &window->list->stateFlags);
         }
     }
@@ -639,13 +636,13 @@ s32 func_002AD118(KwlnTask *callback) {
             func_002B9808((s32)window);
         }
         if (input & 0x10) {
-            mnuRetreatWindowListSelection((s32)window);
+            mnuRetreatWindowListSelection(window);
         }
         if (input & 0x20) {
-            mnuAdvanceWindowListSelection((s32)window);
+            mnuAdvanceWindowListSelection(window);
         }
         mnuHandlePanelListPageJumpInput((u32)window, (u32)&input);
-        mnuClearWindowPanelTransitionFlag((s32)window);
+        mnuClearWindowPanelTransitionFlag(window);
         mnuPlayInputSound(0, input, &window->list->stateFlags);
     }
     return 0;

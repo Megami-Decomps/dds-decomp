@@ -371,14 +371,6 @@ extern void func_00242C30(EvtRuntime *, EvtRuntimeGroup *, s32, f32 (*)[4], f32 
 extern void func_00242E70(EvtRuntime *, EvtRuntimeGroup *, s32, CampDisplayDefaults *);
 extern void func_00242F78(EvtRuntime *, EvtRuntimeGroup *, CampListLayout *);
 extern EffScreenDrawParams *effGetLoadDescA(void);
-typedef struct EffBlurTemplateBody {
-    s32 extent;
-    EffBlurQuad source;
-} EffBlurTemplateBody;
-typedef struct EffBlurTemplate {
-    EffBlurTemplateBody body;
-    u32 resourceWord;
-} EffBlurTemplate;
 extern EffBlurTemplate *effGetCh71Work(void);
 extern EffBlurScatterWork *effGetCh72Work(void);
 extern EffBlurScaleWork *effGetCh76Work(void);

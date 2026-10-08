@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "snd_slot.h"
 #include "kwln.h"
 #include "btl_task_state.h"
@@ -39,7 +40,6 @@ extern s32 mdlGetNodeField2C(MdlCtx *, s32);
 extern void effObjSetOpacityPassEnabled(u32 enabled);
 extern u32 mdlGetBroadcastValue(MdlCtx *);
 
-extern void sdfReleaseChipBlock(void *block);
 extern s32 btlIsUnitInActiveList(void *unit);
 
 typedef struct SceneAiEntry {
@@ -293,7 +293,6 @@ extern s32 sndTickFadeCounter();
 
 extern s32 btlQueueTintTransitionWhenEnabled(u32 *);
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
 extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
 
@@ -3399,7 +3398,7 @@ void btlFreeTask(s32 taskAddress) {
     } else {
         context->taskTail = task->prev;
     }
-    sdfReleaseChipBlock(taskAddress);
+    sdfReleaseChipBlock((void *)taskAddress);
 }
 
 /* Install a fresh handle/reset phase counters, invoke startup, then reread handle. */
@@ -11450,7 +11449,7 @@ void btlUpdateJobPositionFromModel(s32 *args) {
 
 void sndDestroyFileQueueWrapper(u32 arg0) {
     fileQueueDestroy(*(u32 *)arg0);
-    sdfReleaseChipBlock(arg0);
+    sdfReleaseChipBlock((void *)arg0);
 }
 
 void func_001F3230(void) {

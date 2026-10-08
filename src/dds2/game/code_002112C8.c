@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "btl_command.h"
@@ -55,9 +56,7 @@ typedef struct AiSpecies {
 
 extern AiSpecies *datEnemyAiRecords;
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
-extern void sdfReleaseChipBlock(void *);
 
 /* Pick a weighted slot in one species row, run its action and release the shared scratch allocation. */
 void btlRunWeightedAiAction(ActionStateLink *task, s32 rowIndex) {
