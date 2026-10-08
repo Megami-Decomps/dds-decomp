@@ -16,7 +16,6 @@ extern void ptySkillMenuCopyPageState(s32);
 extern void mnuDrawStaffCampScreen(s32, s32);
 extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 extern void func_00272668(s32, s32, s32, s32, s32, s32);
-extern void mnuDrawWindowContainer(s32, s32, s32, s32, s32);
 extern u32 mnuHasSelectedListNodeId(s32);
 extern s32 D_003BAA98;
 extern void func_00280048(s32);
@@ -115,7 +114,7 @@ void ptySkillMenuCopyPageState(s32 context) {
     mnuSetPanelState(menu->panelState, index);
     func_00282DA0(0xDE0, 0x350, 0, menu->panelState, 0x53);
     mnuDrawWindowContainer(0x1220, 0x678, 0,
-                           (s32)*getSkillPageSlot(windows, index), 0x53);
+                           *getSkillPageSlot(windows, index), 0x53);
     for (i = 0; i < 4; i++) {
         if (i != index) {
             memcpy(&windows[i]->panel, &(*getSkillPageSlot(windows, index))->panel,
@@ -132,9 +131,9 @@ s32 ptySkillMenuEnterPage(KwlnTask *callback) {
     SkillMenuState *menu = work->menu;
     s32 label;
     if (work->panel->list->cursor->index == 0) {
-        mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->selected, 0x53);
+        mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->selected, 0x53);
     } else {
-        mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->selected, 0x53);
+        mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->selected, 0x53);
         ptySkillMenuCopyPageState(context);
     }
     mnuDrawStaffCampScreen(1, callback);
@@ -246,7 +245,7 @@ s32 ptySkillMenuEnterConfirm(KwlnTask *callback) {
     mnuCreateStaffImageSprite(3);
     func_00272518(1, menu->selected->list->cursor->sortKeyPrimary, D_003BAA98, context, 1, 1, 0x53);
     menu->selected->list->stateFlags &= ~8;
-    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->selected, 0x53);
+    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->selected, 0x53);
     mnuDrawStaffGridLabelsForKind(0, ((SkillMenuContext *)context)->actor);
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
