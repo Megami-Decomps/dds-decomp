@@ -90,8 +90,8 @@ u16 evtViewerPopHistory(EvtRuntime *viewer);
 
 extern void evtReorderListNodes(EvtRuntimeGroup *track);
 
-extern void func_00243048(u16 *from, u16 *to, u8 *out, f32 ratio);
 typedef struct CampDisplayDefaults CampDisplayDefaults;
+extern void func_00243048(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
 extern void mnuDrawCampScaledTexture(SdfTex *texture, CampDisplayDefaults *display);
 
 /* Interpolates parameter keys at the viewer's current frame, accounting for
@@ -110,7 +110,7 @@ void evtViewerApplyInterpolatedNodeKey(EvtRuntime *viewer, EvtRuntimeGroup *node
                 ratio = elapsed / span;
             }
         }
-        func_00243048(from, to, out, ratio);
+        func_00243048((EvtRuntimeChild *)from, (EvtRuntimeChild *)to, (CampDisplayDefaults *)out, ratio);
         mnuDrawCampScaledTexture((SdfTex *)node->entryValue, (CampDisplayDefaults *)out);
     }
 }
