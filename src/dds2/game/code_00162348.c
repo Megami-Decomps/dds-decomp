@@ -734,36 +734,26 @@ void parUpdateCellVertexTriangle(ParSystem *system, s32 index, const u128 *verti
     PCP_COPY_VECTOR(vertex + 2, vertices + 2);
 }
 
-void parTranslateCellTriangleVertices(ParSystem *system, s32 index, void *delta) {
+void parTranslateCellTriangleVertices(ParSystem *system, s32 index, const u128 *delta) {
     ParCell *cell = system->cells + index;
     s32 count = cell->vertexCount / 3;
-    u8 *vertex = (u8 *)cell->history;
+    u128 *vertex = cell->history;
     s32 i;
     VU0_LOAD_VF(vf11, delta);
-;
     if (count > 0) {
         i = count;
         do {
             VU0_LOAD_VF(vf10, vertex);
-;
             VU0_ADD(vf10, vf10, vf11);
-;
             VU0_STORE_VF(vf10, vertex);
-;
-            VU0_LOAD_VF(vf10, vertex + 0x10);
-;
+            VU0_LOAD_VF(vf10, vertex + 1);
             VU0_ADD(vf10, vf10, vf11);
-;
-            VU0_STORE_VF(vf10, vertex + 0x10);
-;
-            VU0_LOAD_VF(vf10, vertex + 0x20);
-;
+            VU0_STORE_VF(vf10, vertex + 1);
+            VU0_LOAD_VF(vf10, vertex + 2);
             VU0_ADD(vf10, vf10, vf11);
-;
-            VU0_STORE_VF(vf10, vertex + 0x20);
-;
+            VU0_STORE_VF(vf10, vertex + 2);
             i--;
-            vertex += 0x30;
+            vertex += 3;
         } while (i != 0);
     }
 }
