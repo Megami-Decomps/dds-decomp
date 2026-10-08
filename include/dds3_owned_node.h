@@ -34,6 +34,17 @@ typedef struct Dds3FontNode {
     struct FrFontGlyph *glyph;
 } Dds3FontNode;
 
+/* The L2D callback owner extends the intrusive prefix with a rectangle. */
+typedef struct Dds3L2dRectangle {
+    Dds3IntrusiveNode owner;
+    s32 left;
+    s32 top;
+    s32 width;
+    s32 height;
+    s32 depth;
+    s32 color;
+} Dds3L2dRectangle;
+
 extern Dds3IntrusiveNodeList dds3OwnedNodeListHead;
 extern Dds3IntrusiveNodeCallbacks dds3FontNodeVTable;
 
@@ -60,5 +71,13 @@ typedef char Dds3IntrusiveNodeListSizeCheck[sizeof(Dds3IntrusiveNodeList) == 0x0
 typedef char Dds3IntrusiveNodeCallbacksSizeCheck[sizeof(Dds3IntrusiveNodeCallbacks) == 0x08 ? 1 : -1];
 typedef char Dds3FontNodeGlyphOffsetCheck[((u32)&((Dds3FontNode *)0)->glyph == 0x10) ? 1 : -1];
 typedef char Dds3FontNodeSizeCheck[sizeof(Dds3FontNode) == 0x14 ? 1 : -1];
+typedef char Dds3L2dRectangleLayoutCheck[
+    ((u32)&((Dds3L2dRectangle *)0)->left == 0x10 &&
+     (u32)&((Dds3L2dRectangle *)0)->top == 0x14 &&
+     (u32)&((Dds3L2dRectangle *)0)->width == 0x18 &&
+     (u32)&((Dds3L2dRectangle *)0)->height == 0x1C &&
+     (u32)&((Dds3L2dRectangle *)0)->depth == 0x20 &&
+     (u32)&((Dds3L2dRectangle *)0)->color == 0x24 &&
+     sizeof(Dds3L2dRectangle) == 0x28) ? 1 : -1];
 
 #endif /* DDS3_OWNED_NODE_H */
