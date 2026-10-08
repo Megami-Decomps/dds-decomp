@@ -10,6 +10,7 @@
 #include "btl_action.h"
 #include "kwln.h"
 #include "dat_state.h"
+#include "dat_command.h"
 
 extern SceneSlotFadeWork *D_003BD83C;
 extern ActorSlotOrder *D_003BD840[2];
@@ -207,10 +208,6 @@ extern s32 D_003BAA20;
 
 extern s32 D_003BAA30;
 
-extern s32 datCommandSelectors;
-
-extern s32 datCommandRecords;
-
 extern s32 datRosterDetails;
 
 extern s32 fldCountSceneSlots(void);
@@ -388,7 +385,7 @@ s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *arg0, s32 arg1) {
         return 0;
     }
     scale = 1.0f;
-    switch (*(u8 *)(datCommandRecords + arg1 * 56 + 3)) {
+    switch (datCommandRecords[arg1].costMode) {
     case 1:
         if (btlCheckSpecialAbility(arg0, 0x234)) {
             scale = datAbilityParameters[0x234 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
@@ -415,17 +412,17 @@ s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
     if (command == 0) {
         return 0;
     }
-    if (*(u8 *)(datCommandRecords + command * 56 + 2) == 1 ||
-        *(u8 *)(datCommandRecords + command * 56 + 3) == 2) {
+    if (datCommandRecords[command].kind == 1 ||
+        datCommandRecords[command].costMode == 2) {
         if ((unit->partyRecord.status & 0x7FFF) == 0x10) {
             return 3;
         }
     }
-    if (*(s8 *)(datCommandSelectors + command * 2 + 1) == 2 &&
+    if (datCommandSelectors[command].kind == 2 &&
         (unit->partyRecord.status & 0x7FFF) == 0x40) {
         return 5;
     }
-    if (*(s8 *)(datCommandSelectors + command * 2 + 1) == 1) {
+    if (datCommandSelectors[command].kind == 1) {
         if ((unit->partyRecord.status & 0x7FFF) == 0x1000) {
             return 4;
         }
@@ -433,14 +430,14 @@ s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
             return 6;
         }
     }
-    if (*(u8 *)(datCommandRecords + command * 56) & 4) {
+    if (datCommandRecords[command].flags & 4) {
         return 0;
     }
 
     cost = btlApplyCommandAbilityMultiplier(&unit->partyRecord, command);
-    switch (*(u8 *)(datCommandRecords + command * 56 + 3)) {
+    switch (datCommandRecords[command].costMode) {
     case 1:
-        if ((*(u8 *)(datCommandRecords + command * 56) & 8) == 0) {
+        if ((datCommandRecords[command].flags & 8) == 0) {
             if (cost >= unit->partyRecord.hp) {
                 result = 1;
             }
@@ -526,7 +523,7 @@ s8 btlGetActorIndexedSignedValue(s32 object, s32 index) {
     if (index == 0 && (unit->flags & 0x400) != 0) {
         return datEnemyRecords[unit->partyRecord.unitId].unk46;
     }
-    return *(s8 *)(datCommandSelectors + index * 2);
+    return datCommandSelectors[index].stat;
 }
 
 extern s32 btlResolveUnitValueWithOverride(s32, s32);
@@ -614,11 +611,11 @@ s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *targets) {
         } else {
             index = action->indexWork.skillId;
         }
-        if (*(u8 *)(datCommandRecords + index * 56 + 8) == 0 &&
-            *(u8 *)(datCommandRecords + index * 56 + 0x24) == 2 &&
-            *(u16 *)(datCommandRecords + index * 56 + 0x26) != 0) {
+        if (datCommandRecords[index].unk_08 == 0 &&
+            datCommandRecords[index].attribute.parts.kind == 2 &&
+            datCommandRecords[index].attribute.parts.flagMask != 0) {
             for (i = 0; i < count; i++) {
-                if ((*(u16 *)(datCommandRecords + index * 56 + 0x26) &
+                if ((datCommandRecords[index].attribute.parts.flagMask &
                      ((BtlUnit *)btlGetIndexListEntry(targets, i))->partyRecord.status) != 0) {
                     return i;
                 }
@@ -1310,7 +1307,7 @@ s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *unit, u32 slot) {
 }
 
 s32 sndGetResourceForIndex(s32 index) {
-    s8 resource = *(s8 *)(datCommandSelectors + index * 2);
+    s8 resource = datCommandSelectors[index].stat;
     if (resource < 0) {
         return 0;
     }
@@ -1543,11 +1540,6 @@ typedef struct BattleCommandRangeContext {
     s32 (*commandRangeOverride)(BtlUnit *, s32);
 } BattleCommandRangeContext;
 
-typedef struct EventModeSlot {
-    s8 stat;
-    s8 kind;
-} EventModeSlot;
-
 typedef struct EventRosterStat {
     s16 base;
     u8 alternateA;
@@ -1558,25 +1550,6 @@ typedef struct EventRosterStat {
     u8 rangeMax;
     u8 pad10[4];
 } EventRosterStat;
-
-typedef struct EventStatRecord {
-    u8 pad00[0x11];
-    u8 stat11;
-    u8 pad12[2];
-    u8 rangeMin;
-    u8 rangeMax;
-    u8 pad16[2];
-    s16 stat18;
-    u8 pad1A[2];
-    s16 stat1C;
-    u8 pad1E[7];
-    u8 stat25;
-    u8 pad26[7];
-    u8 stat2D;
-    u8 pad2E[6];
-    s16 stat34;
-    s16 stat36;
-} EventStatRecord;
 
 u8 func_001A6968(BtlUnit *unit, s32 command) {
     BattleCommandRangeContext *context = (BattleCommandRangeContext *)btlGetRuntime();
@@ -1593,13 +1566,13 @@ u8 func_001A6968(BtlUnit *unit, s32 command) {
     if (command == 0) {
         return 1;
     }
-    if (((EventModeSlot *)datCommandSelectors)[command].kind == 5 &&
+    if (datCommandSelectors[command].kind == 5 &&
         (unit->flags & 0x200) != 0) {
         minimum = ((EventRosterStat *)datRosterDetails)[unit->partyRecord.unitId].rangeMin;
         maximum = ((EventRosterStat *)datRosterDetails)[unit->partyRecord.unitId].rangeMax;
     } else {
-        minimum = ((EventStatRecord *)datCommandRecords)[command].rangeMin;
-        maximum = ((EventStatRecord *)datCommandRecords)[command].rangeMax;
+        minimum = datCommandRecords[command].rangeMin;
+        maximum = datCommandRecords[command].rangeMax;
     }
     if (minimum < maximum) {
         result = minimum + effMiscRandMod(0, maximum - minimum + 1);
@@ -1635,7 +1608,7 @@ s32 func_001A6AA0(BtlUnit *unit, s32 actionId) {
     u32 delayIndex;
     s32 *delay;
 
-    if ((actionId == 0) || (*(s8 *)(datCommandSelectors + actionId * 2 + 1) == 5)) {
+    if ((actionId == 0) || (datCommandSelectors[actionId].kind == 5)) {
         if (((unit->flags & 0x200) != 0) && (unit->partyRecord.unitId == 6)) {
             return 9;
         }
@@ -1664,7 +1637,7 @@ s32 btlResolveSkillCategory(s32 unused, u32 id) {
     case 0x186:
         return 0x1E;
     default:
-        return *(s8 *)(datCommandSelectors + id * 2 + 1) == 2 ? 0x2D : 0;
+        return datCommandSelectors[id].kind == 2 ? 0x2D : 0;
     }
 }
 
@@ -1696,7 +1669,7 @@ void func_001A6BE0(BtlUnit *unit, BtlIndexList *targets, s32 actionId) {
         return;
     }
     if ((unit->flags & 0x200) != 0 &&
-        ((EventModeSlot *)datCommandSelectors)[actionId].kind == 5) {
+        datCommandSelectors[actionId].kind == 5) {
         mode = unit->partyRecord.unitId == 6 ? 2 : 0;
     } else {
         u32 delayIndex = ((BtlActionAnimationRecord *)datActionAnimationRecords)[actionId].delayIndex;
@@ -2088,7 +2061,7 @@ s32 btlSelectedEntryHitsElement(s32 arg0, BtlUnit *unit, s32 arg2) {
     btlGetRuntime();
     kind = btlGetActorIndexedSignedValue(arg0, arg2);
     mask = btlEncodeActorIndexAsSelectionMask(kind);
-    power = *(u16 *)(unit->selectedEntryIndex * 0x38 + datCommandRecords + 0x2E);
+    power = datCommandRecords[unit->selectedEntryIndex].unk2E;
     if (power == 0) {
         return 0;
     }
@@ -2104,7 +2077,7 @@ s32 btlSelectedEntryHitsElement(s32 arg0, BtlUnit *unit, s32 arg2) {
 s32 btlGetActionRecordLookupValue(s32 arg0) {
     u16 temp_v0;
 
-    temp_v0 = *(u16 *)(datCommandRecords + arg0 * 56 + 0x2e);
+    temp_v0 = datCommandRecords[arg0].unk2E;
     return D_00358510[temp_v0 * 3];
 }
 
@@ -2114,7 +2087,7 @@ s32 btlTestSelectedItemCategoryMask(s32 object, s32 mask) {
     if (index == -1) {
         return 0;
     }
-    item = *(u16 *)(datCommandRecords + index * 56 + 0x2E);
+    item = datCommandRecords[index].unk2E;
     return (D_00358518[item * 3] & btlEncodeActorIndexAsSelectionMask(mask)) != 0;
 }
 
@@ -2131,7 +2104,7 @@ s32 btlGetSelectedUnitProperty(s32 object) {
     if (index == -1) {
         return 0;
     }
-    return D_00358514[*(u16 *)(datCommandRecords + index * 56 + 0x2E) * 3];
+    return D_00358514[datCommandRecords[index].unk2E * 3];
 }
 
 s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlTargetResult *results) {
@@ -2392,10 +2365,10 @@ s32 btlChooseEligibleSkill(s32 object) {
         u32 id = *ids++;
         if (id != 0) {
             if (id < 0x260) {
-                s32 category = *(s8 *)(datCommandSelectors + id * 2 + 1);
+                s32 category = datCommandSelectors[id].kind;
                 if (category != 2) {
                     if (category != 4) {
-                        if ((*(u8 *)(datCommandRecords + id * 56 + 1) & 2) != 0) {
+                        if ((datCommandRecords[id].unk_01 & 2) != 0) {
                             if (id < 0xAB || (id >= 0xAD && id != 0xBF)) {
                                 choices[count++] = id;
                             }
@@ -2412,7 +2385,7 @@ s32 btlChooseEligibleSkill(s32 object) {
 }
 
 f32 btlGetActionCategoryMultiplier(BtlUnit *object, s32 unused, s32 index) {
-    s32 category = *(u16 *)(datCommandRecords + index * 56 + 0x16);
+    s32 category = datCommandRecords[index].primaryLimitKind;
     if (category < 14) {
         if (category >= 12) {
             return 1.0f;
@@ -2425,7 +2398,7 @@ f32 btlGetActionCategoryMultiplier(BtlUnit *object, s32 unused, s32 index) {
 }
 
 f32 btlGetActionCategoryGateAsFloat(s32 unused0, s32 unused1, s32 index) {
-    s32 category = *(u16 *)(datCommandRecords + index * 56 + 0x1A);
+    s32 category = datCommandRecords[index].secondaryLimitKind;
     if (category < 14) {
         if (category >= 12) {
             return 1.0f;
@@ -2435,7 +2408,7 @@ f32 btlGetActionCategoryGateAsFloat(s32 unused0, s32 unused1, s32 index) {
 }
 
 f32 btlGetActionRecordPercentAsFraction(s32 unused0, s32 unused1, s32 index) {
-    return (f32)*(u16 *)(datCommandRecords + index * 56 + 0x22) / 100.0f;
+    return (f32)datCommandRecords[index].unk22 / 100.0f;
 }
 
 u32 btlAdjustPointsForCombatFlags(u32 flags, u32 secondary, u32 points, s32 index) {
@@ -2446,11 +2419,11 @@ u32 btlAdjustPointsForCombatFlags(u32 flags, u32 secondary, u32 points, s32 inde
     if (secondary & 4) return points >> 1;
     if (secondary & 2) return points >> 1;
     if (flags & 4) {
-        if (*(u16 *)(datCommandRecords + index * 56 + 0x16) == 8 ||
-            *(u16 *)(datCommandRecords + index * 56 + 0x16) == 10) {
+        if (datCommandRecords[index].primaryLimitKind == 8 ||
+            datCommandRecords[index].primaryLimitKind == 10) {
             return points;
         }
-        if (*(u8 *)(datCommandRecords + index * 56 + 2) == 2) return points;
+        if (datCommandRecords[index].kind == 2) return points;
         return points + 0x64;
     }
     return points;
@@ -2718,7 +2691,7 @@ s32 btlIsBattleRecordEligible(u8 *actor, u8 *target, s32 recordIndex, s32 specie
         return 0;
     }
     if (speciesIndex != 0 &&
-        *(u8 *)(datCommandRecords + speciesIndex * 56 + 8) != 0) {
+        datCommandRecords[speciesIndex].unk_08 != 0) {
         return 0;
     }
     return 1;

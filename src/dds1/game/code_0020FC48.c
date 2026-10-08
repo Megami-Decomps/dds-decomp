@@ -11,6 +11,7 @@
 #include "sdf_packet_builders.h"
 #include "ee_mmi.h"
 #include "mdl.h"
+#include "dat_command.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 #define BTL_LIST_FLAG_MASK 0x7FFF
@@ -125,8 +126,6 @@ extern s32 btlGetRuntime(void);
 
 extern s32 btlMatchActorEntryCode(void *, s32);
 
-
-extern u8 *datCommandRecords;
 
 extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
 
@@ -621,9 +620,9 @@ s32 btlIndexListNoExpiredEntryCodes(BtlIndexList *indexList, s32 commandId) {
 
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
         actorEntry = btlGetIndexListEntry(indexList, entryIndex);
-        /* The row's +0x28 word is BtlCommandRecord.requiredEntryFlags.
+        /* The row's +0x28 word is its entry requirement mask.
            Keep this loop-invariant load per entry to match the original. */
-        requirementBits = *(s32 *)(datCommandRecords + commandId * BTL_COMMAND_RECORD_BYTES + 0x28);
+        requirementBits = datCommandRecords[commandId].requirementBits;
         switch (requirementBits) {
         case BTL_EXPIRED_POSITIVE_ENTRY_RULE:
             for (codeIndex = 0; codeIndex < BTL_ENTRY_CODE_COUNT; codeIndex++) {
@@ -653,8 +652,8 @@ s32 btlIndexListNoExpiredEntryCodes(BtlIndexList *indexList, s32 commandId) {
  * guard here; do not import DDS2's additional guards or cache table reads. */
 u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, BtlIndexList *indexList, s32 commandId) {
     s32 eligibility = BTL_COUNTER_ELIGIBILITY_UNSET;
-    if (datCommandRecords[commandId * BTL_COMMAND_RECORD_BYTES + 9] & 1) {
-        switch (*(u16 *)(datCommandRecords + commandId * BTL_COMMAND_RECORD_BYTES + 0x16)) {
+    if (datCommandRecords[commandId].options & 1) {
+        switch (datCommandRecords[commandId].primaryLimitKind) {
         case 2:
         case 5:
         case 7:
@@ -665,7 +664,7 @@ u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, BtlInd
             break;
         }
         if (eligibility != BTL_COUNTER_ELIGIBILITY_NOT_MET) {
-            switch (*(u16 *)(datCommandRecords + commandId * BTL_COMMAND_RECORD_BYTES + 0x1A)) {
+            switch (datCommandRecords[commandId].secondaryLimitKind) {
             case 2:
             case 5:
             case 7:
@@ -676,8 +675,10 @@ u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, BtlInd
                 break;
             }
             if (eligibility != BTL_COUNTER_ELIGIBILITY_NOT_MET) {
-                if (datCommandRecords[commandId * BTL_COMMAND_RECORD_BYTES + 0x24] == 2) {
-                    eligibility = btlListHasMatchingFlag(entryList, entryCount, *(u16 *)(datCommandRecords + commandId * BTL_COMMAND_RECORD_BYTES + 0x26)) == 0 ? BTL_COUNTER_ELIGIBILITY_MET : BTL_COUNTER_ELIGIBILITY_NOT_MET;
+                if (datCommandRecords[commandId].attribute.parts.kind == 2) {
+                    eligibility = btlListHasMatchingFlag(entryList, entryCount,
+                        datCommandRecords[commandId].attribute.parts.flagMask) == 0
+                        ? BTL_COUNTER_ELIGIBILITY_MET : BTL_COUNTER_ELIGIBILITY_NOT_MET;
                 }
             }
         }
@@ -685,33 +686,12 @@ u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, BtlInd
     return (eligibility < 0) ? BTL_COUNTER_ELIGIBILITY_NOT_MET : eligibility;
 }
 
-typedef struct BtlCommandRecord {
-    u8 flags;
-    u8 unk_01;
-    u8 kind;
-    u8 unk_03[5];
-    u8 special;
-    u8 ruleFlags;
-    u8 unk_0A[2];
-    u16 restriction;
-    u8 unk_0E[0x16];
-    u32 attributeBits;
-    u32 requiredEntryFlags; /* 0x28: entry-code pair mask, or 0x800/0x1000 expiry rule */
-    u8 unk_2C[4];
-    s32 unk30;
-    u8 unk_34[4];
-} BtlCommandRecord;
-
-extern s8 *datCommandSelectors;
-
-extern u8 *datCommandRecords;
-
 /* Query the command's block reason, freeing the temporary target list.
  * DDS1 additionally has the mode/flag gate returning 6. The final empty/all-
  * flagged-target reason is 9 here, versus 10 in DDS2. Zero means no block. */
 s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     BtlUnit *ownerUnit;
-    BtlCommandRecord *commandRecord;
+    DatCommandRecord *commandRecord;
     BtlIndexList *targetList;
     s32 targetCount;
     s32 flaggedTargetCount;
@@ -722,7 +702,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     if (commandId <= 0) {
         return 0;
     }
-    if (datCommandSelectors[commandId * 2 + 1] == 2) {
+    if (datCommandSelectors[commandId].kind == 2) {
         ownerUnit = actionTask->unit;
         if (ownerUnit->flags & 0x200) {
             if (ownerUnit->partyRecord.unitId == 4) {
@@ -732,8 +712,8 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
             }
         }
     }
-    commandRecord = (BtlCommandRecord *)(commandId * BTL_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
-    if ((commandRecord->attributeBits & 0x400000FF) == 0x40000002) {
+    commandRecord = (DatCommandRecord *)(commandId * BTL_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
+    if ((commandRecord->attribute.bits & 0x400000FF) == 0x40000002) {
         if ((~commandRecord->restriction & 0x7FFF) == 0x4000) {
             if (btlHasRestrictedUnit() == 0) {
                 return 2;
@@ -744,8 +724,8 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     targetList = btlAllocateIndexList(0xD);
     func_001A3360((s32)actionTask, targetList, 0);
     targetCount = btlGetIndexListCount(targetList);
-    /* Keep this byte-table load separate from commandRecord for the matching address calculation. */
-    if (datCommandRecords[commandId * BTL_COMMAND_RECORD_BYTES] & 8) {
+    /* Preserve this byte-sized prefix check separately from commandRecord. */
+    if (datCommandRecords[commandId].flags & 8) {
         for (targetIndex = 0; targetIndex < targetCount; targetIndex++) {
             if (((BtlUnit *)btlGetIndexListEntry(targetList, targetIndex))->partyRecord.status & 0x800) {
                 flaggedTargetCount++;
@@ -783,8 +763,8 @@ s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
     for (i = 0; i < count; i++) {
         entryList[i] = (u8 *)btlGetIndexListEntry(indexList, i) + 0x120;
     }
-    if (((BtlCommandRecord *)datCommandRecords)[commandId].kind == 2 ||
-        (((BtlCommandRecord *)datCommandRecords)[commandId].flags & 0x20)) {
+    if (datCommandRecords[commandId].kind == 2 ||
+        (datCommandRecords[commandId].flags & 0x20)) {
         for (i = 0; i < count; i++) {
             flags = btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)btlGetIndexListEntry(indexList, i))->partyRecord);
             if (flags & 0x40) {
@@ -792,7 +772,7 @@ s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
             }
         }
     }
-    if (((BtlCommandRecord *)datCommandRecords)[commandId].unk30 == 1) {
+    if (datCommandRecords[commandId].unk30 == 1) {
         if (battle->commandRestrictFlags & 0x10) {
             return 8;
         }
@@ -802,12 +782,12 @@ s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
             }
         }
     }
-    requirement = ((BtlCommandRecord *)datCommandRecords)[commandId].requiredEntryFlags;
+    requirement = datCommandRecords[commandId].requirementBits;
     if (requirement == 0x400 || requirement == 0x2000) {
         code = btlLowestSetPairIndex(requirement);
         if (code >= 0) {
             if (btlIndexListMatchesEntryCodes(indexList, code,
-                    ((BtlCommandRecord *)datCommandRecords)[commandId].requiredEntryFlags)) {
+                    datCommandRecords[commandId].requirementBits)) {
                 return 3;
             }
         }
@@ -826,7 +806,7 @@ s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *list, s32 row) {
     if (row <= 0) {
         return result;
     }
-    flags = ((BtlCommandRecord *)datCommandRecords)[row].requiredEntryFlags;
+    flags = datCommandRecords[row].requirementBits;
     if (flags == 0) {
         return result;
     }
