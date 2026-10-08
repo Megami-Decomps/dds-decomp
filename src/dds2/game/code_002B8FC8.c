@@ -1,3 +1,4 @@
+#include "fr_font.h"
 #include "sdf_chip.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
@@ -314,9 +315,6 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
 extern void scrClearSecondaryScriptFlag(DatPartyRecord *unit, u16 flagId);
 
 extern void func_0019D550(s32, s32, s32);
-
-extern void frFontQueueGlyphInSelectedSlot(s32);
-
 extern void func_0035B7F8(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
 
@@ -460,7 +458,6 @@ s32 mnuStepStaffCampPageControl(s32 callback);
 
 
 
-extern void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
@@ -2002,11 +1999,16 @@ void mnuDrawIconRow(s32 unusedA, s32 unusedB, s32 depth, s32 skip, MenuSprites *
     }
 }
 
-void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6) {
+void mnuSetWindowResource(s32 index, MenuPageWindow *menu,
+                          EffectSlotSet *mainResource,
+                          EffectSlotSet *itemResource,
+                          EffectSlotSet *iconResource,
+                          EffectSlotSet *cursorResource,
+                          EffectSlotSet *alternateResource) {
     mnuSelectPage(menu, index);
     menu->slots[index].windowSprites = mnuCreatePageSpriteSet(
-        0, (EffectSlotSet *)a2, (EffectSlotSet *)a3, (EffectSlotSet *)a4,
-        (EffectSlotSet *)a5, (EffectSlotSet *)a6);
+        0, mainResource, itemResource, iconResource, cursorResource,
+        alternateResource);
     menu->flags |= MNU_PAGE_WINDOW_SPRITE_MODE;
 }
 

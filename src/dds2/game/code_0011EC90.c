@@ -25,7 +25,6 @@ extern s32 scrSetIntegerReturnValue(s32 arg0);
 
 extern struct FrFontGlyph *func_0019CE78(void *text, s8 fontIndex,
     s8 firstOption, s8 secondOption, struct FrFontGlyph *previousGlyph);
-extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *glyph);
 extern s32 frFontDrawGlyphInDefaultMode(struct FrFontGlyph *glyph);
 extern void frFontSetChainFlag(struct FrFontGlyph *glyph, u8 value);
 

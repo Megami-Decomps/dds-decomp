@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font.h"
 #include "mc_poll.h"
 #include "mc_path_api.h"
 #include "bill_object_api.h"
@@ -606,7 +607,7 @@ u8 fileIsLoadedWithActiveFlow(s32 loaded) {
 void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     D_003BD8EC = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(D_003BD8EC, 1);
-    frFontQueueGlyphInSelectedSlot(D_003BD8EC);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)D_003BD8EC);
 }
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, u32 font) {
@@ -617,7 +618,7 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, u32 font) {
     frFontSetContextPair(D_003BD8F0, x << 4, y << 3);
     frFontSetChildColors(D_003BD8F0, color);
     func_001958A0(D_003BD8F0, 0, 0x56);
-    frFontQueueGlyphInSelectedSlot(D_003BD8F0);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)D_003BD8F0);
     frFontSetSharedRenderFlags(0x54);
 }
 
@@ -626,7 +627,7 @@ void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
 
     imageHandle = func_001978E8(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(imageHandle, 1);
-    frFontQueueGlyphInSelectedSlot(imageHandle);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)imageHandle);
 }
 
 extern f32 fileSaveHighlightPhase;

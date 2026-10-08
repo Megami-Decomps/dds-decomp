@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font.h"
 #include "kwln.h"
 #include "kwln_task_state.h"
 #include "sdf_resource.h"
@@ -587,8 +588,9 @@ FrFontGlyph *frFontCreateMeasuredFlaggedGlyph(x, y, depth, colors, text, parent)
     return handle;
 }
 
-void func_0019F448(void) {
-    frFontCreateMeasuredFlaggedGlyph();
+FrFontGlyph *func_0019F448(s32 x, s32 y, s32 depth, s32 colors,
+                           const char *text, FrFontGlyph *parent) {
+    return frFontCreateMeasuredFlaggedGlyph(x, y, depth, colors, text, parent);
 }
 
 /* Decode two-byte glyph codes before building and linking the text glyph. */

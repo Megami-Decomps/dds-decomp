@@ -78,9 +78,6 @@ void itfMesDestroyWindow(s32 window);
 void itfMesSetTextSlotFromValue(s32 window, s32 slotIndex, s32 value, s32 selector);
 
 s32 func_0019C9F0(s32 window, s32 arg1, s32 arg2);
-
-s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *arg0);
-
 void itfMesResetCursorState(void *arg0, s32 arg1);
 
 void itfResetCursorPositionAndState(void *arg0, s32 arg1);

@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "fr_font.h"
 #include "sdf_packet_list.h"
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
@@ -2367,7 +2368,7 @@ const u8 *second;
 
     object = itfCreateConvertedTextGlyph(x << 4, y << 4, 0, first, second, 0);
     frFontDrawGlyphInDefaultMode(object);
-    frFontQueueGlyphInSelectedSlot(object);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)object);
 }
 /* Packed quad input: geometry fields precede the live packet origin and depth.
  * Preserve the unclassified words for the opaque renderer. */

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font.h"
 #include "sdf_packet_list.h"
 #include "eff_resource_slots.h"
 #include "sdf_resource.h"
@@ -798,7 +799,7 @@ void mnuCampInitFontResource(EvtRuntime *scene) {
 }
 
 void mnuCampLinkFontGlyph(EvtRuntime *scene) {
-    frFontQueueGlyphInSelectedSlot(scene->glyph);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)scene->glyph);
     scene->glyph = 0;
 }
 
@@ -1072,7 +1073,7 @@ extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
 extern void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 extern void mnuOrEntryFlags(u32, u32 *);
 
-void func_0025F8B8(u32 object, MenuEffectResources *resources) {
+void func_0025F8B8(EffectSlotSet *object, MenuEffectResources *resources) {
     CampMapArguments mapArguments = D_00424A90;
     CampEffectRows rows = D_00424AC0;
     u32 dataAddress;
@@ -1140,7 +1141,7 @@ void func_0025FA28(MenuTerminalContext *scene) {
     case 3:
         scene->effectSlots[1] = effLoadIndexedResource(
             "/facility/spr/shop/", D_003CE470[2], 0);
-        func_0025F8B8((u32)scene->effectSlots[1], &scene->campEffect.resources);
+        func_0025F8B8(scene->effectSlots[1], &scene->campEffect.resources);
         break;
     }
     scene->effectSlots[2] = effLoadIndexedResource(
@@ -2109,7 +2110,7 @@ void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2
         handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)fontValue, enabled, fontArg);
         frFontSetChildColors(handle, 0x80808040);
         func_0019D550(handle, 0, flags);
-        frFontQueueGlyphInSelectedSlot(handle);
+        frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
     }
 }
 
