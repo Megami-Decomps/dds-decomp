@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "eff_event_setup.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
@@ -51,7 +52,6 @@ extern void func_003014F0();
 extern s32 sceDopen(void *arg0);
 extern void *sdfAllocSizeClassBlock(s32 arg0);
 extern void sdfInitPacketList(s32 arg0);
-extern void sdfConsCreateDrawPacket(s32 arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern void *sdfConsMeasurePacketWithHeader(s32 arg0);
 extern s32 sdfConsAllocateColumnPacket(s32 arg0);
 extern void sdfAppendPacket(s32 arg0, s32 arg1);

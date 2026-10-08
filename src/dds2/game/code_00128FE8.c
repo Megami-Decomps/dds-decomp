@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
 #include "sdf_packet_list.h"
 #include "sdf_dev_state.h"
@@ -245,7 +246,6 @@ extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void *sdfConsAllocateColumnPacket(s32);
 
-extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 

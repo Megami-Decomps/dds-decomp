@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
 #include "kwln.h"
 #include "kwln_task_state.h"
@@ -1133,7 +1134,6 @@ extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern void sdfAppendPacket(SdfListHead *, u32);
-extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 extern u64 D_00357998[];
 
