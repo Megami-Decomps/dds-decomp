@@ -47,7 +47,7 @@ typedef struct MenuSlotState {
     s32 dispatchStatus; /* 0x54 */
     u32 dispatchValue; /* 0x58 */
     EvtResourcePair messageResources; /* 0x5C */
-    s32 resourceBank[4]; /* 0x64: encoded base-resource owners */
+    EffectSlotSet *resourceBank[4]; /* 0x64: loaded effect-slot owners */
     EffectSlotSet *alternateBatch; /* 0x74 */
     struct MenuList *menuList;
     struct MenuList *progressList;
@@ -238,38 +238,38 @@ void func_002665E8(MenuSlotState *scene) {
     scene->reducedMode = func_002665C8(scene);
     if (scene->reducedMode == 0) {
         for (i = 0; i < 3; i++) {
-            scene->resourceBank[i] = (s32)effLoadIndexedResource(
+            scene->resourceBank[i] = (EffectSlotSet *)effLoadIndexedResource(
                 (s32)D_00424E48, (s32)D_003CE7A8[i], 1);
-            effResolveAndReleaseResource((u32 *)scene->resourceBank[i]);
+            effResolveAndReleaseResource(&scene->resourceBank[i]->sourceAllocation);
         }
-        scene->resourceBank[3] = (s32)effLoadIndexedResource(
+        scene->resourceBank[3] = (EffectSlotSet *)effLoadIndexedResource(
             (s32)D_00424E48,
             (s32)D_003CE7C0[mnuFirstPresentMainCharacterIndex()], 1);
-        effResolveAndReleaseResource((u32 *)scene->resourceBank[3]);
+        effResolveAndReleaseResource(&scene->resourceBank[3]->sourceAllocation);
         mnuInitScrollingStripState(&scene->panels[0], 0,
-            (void *)scene->resourceBank[0], 0x46, 0x43);
+            scene->resourceBank[0], 0x46, 0x43);
         func_0026BE28(&scene->panels[0], 1, 0x10, 0x20);
         mnuInitScrollingStripState(&scene->panels[1], 0,
-            (void *)scene->resourceBank[0], 0x46, 0x43);
+            scene->resourceBank[0], 0x46, 0x43);
         func_0026BE28(&scene->panels[1], 0, 0x10, 0x20);
         func_0026BEB0(&scene->panels[1], 0x1470, 0xCB8, 0);
         func_00266460((u32)scene->resourceBank[2], &scene->campEffect.resources);
     } else {
         for (i = 0; i < 2; i++) {
-            scene->resourceBank[i] = (s32)effLoadIndexedResource(
+            scene->resourceBank[i] = (EffectSlotSet *)effLoadIndexedResource(
                 (s32)D_00424E48, (s32)D_003CE7B8[i], 1);
-            effResolveAndReleaseResource((u32 *)scene->resourceBank[i]);
+            effResolveAndReleaseResource(&scene->resourceBank[i]->sourceAllocation);
         }
         mnuInitScrollingStripState(&scene->panels[0], 1,
-            (void *)scene->resourceBank[0], 0x46, 0x43);
+            scene->resourceBank[0], 0x46, 0x43);
         func_0026BE28(&scene->panels[0], 1, 0x10, 0x20);
         mnuInitScrollingStripState(&scene->panels[1], 1,
-            (void *)scene->resourceBank[0], 0x46, 0x43);
+            scene->resourceBank[0], 0x46, 0x43);
         func_0026BE28(&scene->panels[1], 0, 0x10, 0x20);
         func_0026BEB0(&scene->panels[1], 0x1470, 0xCB8, 0);
     }
     scene->alternateBatch = effCreateResourceSlotSet(
-        (u32 *)scene->resourceBank[0], 7, 1);
+        &scene->resourceBank[0]->sourceAllocation, 7, 1);
 }
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00266808);
@@ -278,14 +278,14 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00266808);
 void mnuReleaseResourceGroup(s32 address) {
     MenuSlotState *group = (MenuSlotState *)address;
     if (group->reducedMode == 0) {
-        effResolveAndReleaseResource((u32 *)group->resourceBank[0]);
-        effResolveAndReleaseResource((u32 *)group->resourceBank[1]);
-        effResolveAndReleaseResource((u32 *)group->resourceBank[2]);
-        effResolveAndReleaseResource((u32 *)group->resourceBank[3]);
+        effResolveAndReleaseResource(&group->resourceBank[0]->sourceAllocation);
+        effResolveAndReleaseResource(&group->resourceBank[1]->sourceAllocation);
+        effResolveAndReleaseResource(&group->resourceBank[2]->sourceAllocation);
+        effResolveAndReleaseResource(&group->resourceBank[3]->sourceAllocation);
         return;
     }
-    effResolveAndReleaseResource((u32 *)group->resourceBank[0]);
-    effResolveAndReleaseResource((u32 *)group->resourceBank[1]);
+    effResolveAndReleaseResource(&group->resourceBank[0]->sourceAllocation);
+    effResolveAndReleaseResource(&group->resourceBank[1]->sourceAllocation);
 }
 
 /* Release/reset the mode-dependent texture sets, preserving the first short-arity call. */
@@ -472,7 +472,7 @@ void func_00267238(s32 x, s32 y, s32 unused, MenuList *list, MenuListNode *node,
         width /= 2;
     }
     if (isCurrent) {
-        func_00306CD0(x, y, 0, width, 0, (EffectSlotSet *)host->resourceBank[0], 0x18, priority);
+        func_00306CD0(x, y, 0, width, 0, host->resourceBank[0], 0x18, priority);
         chainFlags = 4;
     }
     color = (node->flags48 & 1) ? 0xA09DC320 : 0xA09DC380;
@@ -567,10 +567,10 @@ void mnuThresholdNodeDrawCallback(s32 x, s32 y, s32 unused, MenuList *list, Menu
         width /= 2;
     }
     if (isCurrent) {
-        func_00306CD0(x, y, 0, width, 0, (EffectSlotSet *)host->resourceBank[0], 0x16, priority);
+        func_00306CD0(x, y, 0, width, 0, host->resourceBank[0], 0x16, priority);
         index += 1;
     }
-    func_00306CD0(x + 0x50, y - 0x10, 0, width, 0, (EffectSlotSet *)host->resourceBank[0], index, priority);
+    func_00306CD0(x + 0x50, y - 0x10, 0, width, 0, host->resourceBank[0], index, priority);
 }
 
 /* Omit the input-array position `excluded`, not all entries with that same value. */
@@ -1100,7 +1100,7 @@ void mnuDrawTerminalBackdrop(s32 address) {
     MenuSlotState *state = (MenuSlotState *)address;
     EffectSlotSet *bank;
     BdWork *work;
-    s32 resource;
+    EffectSlotSet *resource;
 
     if (state->stage == 0 || D_00437859 == 0) {
         return;
@@ -1108,10 +1108,10 @@ void mnuDrawTerminalBackdrop(s32 address) {
     if (state->reducedMode == 0) {
         switch (state->mode) {
         case 0:
-            func_00306CD0(0, 0, 0, 0x100, 0, (EffectSlotSet *)state->resourceBank[1], 0, MNU_TEXT_DRAW_PRIORITY);
-            bank = (EffectSlotSet *)state->resourceBank[3];
+            func_00306CD0(0, 0, 0, 0x100, 0, state->resourceBank[1], 0, MNU_TEXT_DRAW_PRIORITY);
+            bank = state->resourceBank[3];
             bank->workEntries[0].geometry.angleDegrees = 90.0f;
-            func_00306CD0(0x7B0, 0x698, 0, 0x100, 2, (EffectSlotSet *)state->resourceBank[3], 0, MNU_TEXT_DRAW_PRIORITY);
+            func_00306CD0(0x7B0, 0x698, 0, 0x100, 2, state->resourceBank[3], 0, MNU_TEXT_DRAW_PRIORITY);
             break;
         case 1:
         case 2:
@@ -1119,10 +1119,10 @@ void mnuDrawTerminalBackdrop(s32 address) {
             break;
         }
     } else {
-        func_00306CD0(0, 0, 0, 0x100, 0, (EffectSlotSet *)state->resourceBank[1], 0, MNU_TEXT_DRAW_PRIORITY);
+        func_00306CD0(0, 0, 0, 0x100, 0, state->resourceBank[1], 0, MNU_TEXT_DRAW_PRIORITY);
         resource = state->resourceBank[1];
-        func_00306CD0(0x60, -0x30, 0, 0x100, 0, (EffectSlotSet *)resource, 1, MNU_TEXT_DRAW_PRIORITY);
-        bank = (EffectSlotSet *)resource;
+        func_00306CD0(0x60, -0x30, 0, 0x100, 0, resource, 1, MNU_TEXT_DRAW_PRIORITY);
+        bank = resource;
         work = &bank->workEntries[1];
         work->geometry.angleDegrees += 0.6f;
         if (work->geometry.angleDegrees > 360.0f) {
@@ -1142,10 +1142,10 @@ void mnuDrawAndStepTerminalPanelFade(s32 decrement, MenuSlotState *state) {
         switch (state->mode) {
         case 0:
             func_00306CD0(0, 0, 0, state->panelFade, 1,
-                         (EffectSlotSet *)state->resourceBank[1], 1, 0x52);
-            ((EffectSlotSet *)state->resourceBank[3])->workEntries[1].geometry.angleDegrees = 90.0f;
+                         state->resourceBank[1], 1, 0x52);
+            state->resourceBank[3]->workEntries[1].geometry.angleDegrees = 90.0f;
             func_00306CD0(0x7B0, 0x698, 0, state->panelFade, 3,
-                         (EffectSlotSet *)state->resourceBank[3], 1, 0x52);
+                         state->resourceBank[3], 1, 0x52);
             if (state->panelHoldFrames > 0) {
                 state->panelHoldFrames--;
                 return;
@@ -1198,15 +1198,15 @@ void mnuTerminalConfigureEffects(u32 mode, MenuSlotState *state) {
     }
     switch (mode) {
     case 1:
-        effConfigureWithDefaultSetting(state->resourceBank[0], *slot, state->effect[4], 0, 5, 2);
+        effConfigureWithDefaultSetting((u32)state->resourceBank[0], *slot, state->effect[4], 0, 5, 2);
         break;
     case 2:
-        effConfigureWithDefaultSetting(state->resourceBank[0], *slot, state->effect[5], 0, 0, 2);
+        effConfigureWithDefaultSetting((u32)state->resourceBank[0], *slot, state->effect[5], 0, 0, 2);
         break;
     case 3:
-        effConfigureWithDefaultSetting(state->resourceBank[0], *slot, state->effect[4], 0, 0, 2);
+        effConfigureWithDefaultSetting((u32)state->resourceBank[0], *slot, state->effect[4], 0, 0, 2);
         if (slot[1] >= 0) {
-            effConfigureWithDefaultSetting(state->resourceBank[0], slot[1], state->effect[5], 0, 0, 2);
+            effConfigureWithDefaultSetting((u32)state->resourceBank[0], slot[1], state->effect[5], 0, 0, 2);
         }
         break;
     }
@@ -1241,7 +1241,7 @@ void mnuDrawTerminalSelectedSlots(s32 context) {
         for (i = 0, slot = state->selectedSlots; i < MNU_SELECTED_SLOT_COUNT; i++, slot++) {
             if (*slot >= 0) {
                 itfDrawGridWithResolvedSlot(position.firstValue, position.secondValue, 0, 0x81,
-                                            state->resourceBank[0], *slot, MNU_TEXT_DRAW_PRIORITY);
+                                            (u32)state->resourceBank[0], *slot, MNU_TEXT_DRAW_PRIORITY);
             }
         }
     }
@@ -1263,7 +1263,7 @@ u8 func_00268C08(MenuSlotState *scene) {
     s32 index;
 
     index = fldGetModeFrameRecordIndex((s32)scene);
-    return *(u8 *)&((EffectSlotSet *)scene->resourceBank[0])->workEntries[index].geometry.cornerColors[0];
+    return *(u8 *)&scene->resourceBank[0]->workEntries[index].geometry.cornerColors[0];
 }
 
 
@@ -1271,10 +1271,10 @@ u8 func_00268C08(MenuSlotState *scene) {
 void mnuConfigureSelectedSceneModeEffect(s32 mode, MenuSlotState *host) {
     switch (mode) {
     case 1:
-        effConfigureWithDefaultSetting(host->resourceBank[0], 6, host->effect[0], 0, 0, 2);
+        effConfigureWithDefaultSetting((u32)host->resourceBank[0], 6, host->effect[0], 0, 0, 2);
         return;
     case 2:
-        effConfigureWithDefaultSetting(host->resourceBank[0], 6, host->effect[3], 0, 0, 2);
+        effConfigureWithDefaultSetting((u32)host->resourceBank[0], 6, host->effect[3], 0, 0, 2);
         break;
     }
 }
@@ -1289,11 +1289,11 @@ void func_00268CC0(u32 mode, s32 context) {
     index = fldGetModeFrameRecordIndex(context);
     switch (mode) {
     case 1:
-        effConfigureWithDefaultSetting(state->resourceBank[0], index, state->effect[0], 0, 0, 2);
-        effConfigureWithDefaultSetting(state->resourceBank[0], 4, state->effect[6], 0, 0, 14);
-        effConfigureWithDefaultSetting(state->resourceBank[0], 6, state->effect[0], 0, 0, 2);
-        itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0], 7, 0, 0, -0x400, 0);
-        effConfigureWithDefaultSetting(state->resourceBank[0], 7, state->effect[5], 0, 5, 3);
+        effConfigureWithDefaultSetting((u32)state->resourceBank[0], index, state->effect[0], 0, 0, 2);
+        effConfigureWithDefaultSetting((u32)state->resourceBank[0], 4, state->effect[6], 0, 0, 14);
+        effConfigureWithDefaultSetting((u32)state->resourceBank[0], 6, state->effect[0], 0, 0, 2);
+        itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0], 7, 0, 0, -0x400, 0);
+        effConfigureWithDefaultSetting((u32)state->resourceBank[0], 7, state->effect[5], 0, 5, 3);
         i = 0;
         entries = state->alternateBatch->workEntries[0].geometry.cornerColors;
         for (; i < 4; i++) {
@@ -1301,14 +1301,14 @@ void func_00268CC0(u32 mode, s32 context) {
         }
         break;
     case 2:
-        effConfigureWithDefaultSetting(state->resourceBank[0], index, state->effect[3], 0, 0xF, 2);
-        effConfigureWithDefaultSetting(state->resourceBank[0], 6, state->effect[3], 0, 0xF, 2);
-        itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0], 7, 0, 0, 0, 0);
-        effConfigureWithDefaultSetting(state->resourceBank[0], 7, state->effect[3], 0, 0, 2);
+        effConfigureWithDefaultSetting((u32)state->resourceBank[0], index, state->effect[3], 0, 0xF, 2);
+        effConfigureWithDefaultSetting((u32)state->resourceBank[0], 6, state->effect[3], 0, 0xF, 2);
+        itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0], 7, 0, 0, 0, 0);
+        effConfigureWithDefaultSetting((u32)state->resourceBank[0], 7, state->effect[3], 0, 0, 2);
         return;
     case 3:
-        itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0], 7, 0, 0, -0x400, 0);
-        effConfigureWithDefaultSetting(state->resourceBank[0], 7, state->effect[5], 0, 0, 3);
+        itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0], 7, 0, 0, -0x400, 0);
+        effConfigureWithDefaultSetting((u32)state->resourceBank[0], 7, state->effect[5], 0, 0, 3);
         effConfigureWithDefaultSetting((u32)state->alternateBatch, 0, state->effect[5], 0, 0, 2);
         break;
     }
@@ -1330,15 +1330,15 @@ void func_00268EC8(s32 context) {
         return;
     }
     itfDrawGridWithResolvedSlot(position[0].firstValue, position[0].secondValue, 0, 0x81,
-                                state->resourceBank[0], index, MNU_TEXT_DRAW_PRIORITY);
-    batch = (EffectSlotSet *)state->resourceBank[0];
+                                (u32)state->resourceBank[0], index, MNU_TEXT_DRAW_PRIORITY);
+    batch = state->resourceBank[0];
     record = (BdWork *)(sizeof(*batch->workEntries) * index + (u32)batch->workEntries);
     progress = ((u32)*(u8 *)&record->geometry.cornerColors[0] << 8) /
         *(u8 *)&record->savedColors[0];
     if (state->reduced != 2) {
         func_00306CD0(position[1].firstValue, position[1].secondValue, 0,
                       progress, 0x81, batch, 4, MNU_TEXT_DRAW_PRIORITY);
-        batch = (EffectSlotSet *)state->resourceBank[0];
+        batch = state->resourceBank[0];
     }
     if (*(s32 *)((u8 *)state + 0xA0) != 0) {
         position[3].firstValue += 0x320;
@@ -1349,9 +1349,9 @@ void func_00268EC8(s32 context) {
                                 (u32)state->alternateBatch, 0, MNU_TEXT_DRAW_PRIORITY);
     if (state->mode != 2) {
         itfDrawGridWithResolvedSlot(position[2].firstValue, position[2].secondValue, 0, 0x81,
-                                    state->resourceBank[0], 6, MNU_TEXT_DRAW_PRIORITY);
+                                    (u32)state->resourceBank[0], 6, MNU_TEXT_DRAW_PRIORITY);
         mnuQueueFontGlyphFromSelectedAtlasSlot(position[4].firstValue, position[4].secondValue,
-                                                0, *(u8 *)&((EffectSlotSet *)state->resourceBank[0])->workEntries[6].geometry.cornerColors[0] | 0xA09DC300,
+                                                0, *(u8 *)&state->resourceBank[0]->workEntries[6].geometry.cornerColors[0] | 0xA09DC300,
                                                 (s8)state->slotCopy, (s8)state->mode);
     }
 }
@@ -1394,12 +1394,12 @@ void func_002690A8(u32 mode, s32 context) {
     effectAddress = sizeof(state->effect[0]) * index + (u32)context;
     effectAddress += (u32)((u8 *)&state->effect[0] - (u8 *)state);
     effect = (s32 *)effectAddress;
-    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0], 8, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting(state->resourceBank[0], 8, *effect, 0, setting, kind);
-    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0], 0x38, 0, y, 0, z);
-    effConfigureWithDefaultSetting(state->resourceBank[0], 0x38, *effect, 0, setting, kind);
-    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0], 0x39, 0, y, 0, z);
-    effConfigureWithDefaultSetting(state->resourceBank[0], 0x39, *effect, 0, setting, kind);
+    itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0], 8, 0, 0, 0, 0);
+    effConfigureWithDefaultSetting((u32)state->resourceBank[0], 8, *effect, 0, setting, kind);
+    itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0], 0x38, 0, y, 0, z);
+    effConfigureWithDefaultSetting((u32)state->resourceBank[0], 0x38, *effect, 0, setting, kind);
+    itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0], 0x39, 0, y, 0, z);
+    effConfigureWithDefaultSetting((u32)state->resourceBank[0], 0x39, *effect, 0, setting, kind);
 }
 
 
@@ -1455,21 +1455,21 @@ void func_00269478(u32 mode, s32 context) {
     /* The context word transports the terminal state address. */
     effect = (s32 *)(effectIndex * sizeof(state->effect[0]) + context +
         (u32)&((MenuSlotState *)0)->effect);
-    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0],
+    itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0],
         slot, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting(state->resourceBank[0], slot, *effect,
+    effConfigureWithDefaultSetting((u32)state->resourceBank[0], slot, *effect,
         0, materialFlags, color);
-    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0],
+    itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0],
         0x40, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting(state->resourceBank[0], 0x40, *effect,
+    effConfigureWithDefaultSetting((u32)state->resourceBank[0], 0x40, *effect,
         0, materialFlags, color);
-    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0],
+    itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0],
         0x41, 0, yOffset, 0, height);
-    effConfigureWithDefaultSetting(state->resourceBank[0], 0x41, *effect,
+    effConfigureWithDefaultSetting((u32)state->resourceBank[0], 0x41, *effect,
         0, materialFlags, color);
-    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)state->resourceBank[0],
+    itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0],
         0x42, 0, yOffset, 0, height);
-    effConfigureWithDefaultSetting(state->resourceBank[0], 0x42, *effect,
+    effConfigureWithDefaultSetting((u32)state->resourceBank[0], 0x42, *effect,
         0, materialFlags, color);
 }
 
@@ -1497,24 +1497,24 @@ void func_00269638(s32 close, MenuSlotState *host) {
         count = 7;
     }
     itfDrawGridWithResolvedSlot(rows[2].x, rows[2].y, 0, 0x80,
-                               host->resourceBank[0], rows[2].slot, 0x52);
+                               (u32)host->resourceBank[0], rows[2].slot, 0x52);
     slot = rows[3].slot;
     x = rows[3].x;
     y = rows[3].y;
     for (i = 0; i < count; i++) {
         itfDrawGridWithResolvedSlot(x, y, 0, 0,
-                                   host->resourceBank[0], slot, 0x52);
+                                   (u32)host->resourceBank[0], slot, 0x52);
         y += 0xB0;
     }
-    itfGridLookupValueOrDefault((EffectSlotSet *)host->resourceBank[0], slot);
+    itfGridLookupValueOrDefault(host->resourceBank[0], slot);
     mnuCallInitWide(0x3B0, 0x3D8, 0, (s32)host->secondaryList, 0x52);
     slot = func_00269418(host->secondaryList);
     itfDrawGridWithResolvedSlot(rows[0].x, rows[0].y, 0, 0x80,
-                               host->resourceBank[0], slot, 0x52);
+                               (u32)host->resourceBank[0], slot, 0x52);
     itfDrawGridWithResolvedSlot(rows[1].x, rows[1].y + count * 0xB0 - 0xB0, 0, 0x80,
-                               host->resourceBank[0], rows[1].slot, 0x52);
+                               (u32)host->resourceBank[0], rows[1].slot, 0x52);
     slot = func_00269418(host->secondaryList);
-    slots = (EffectSlotSet *)host->resourceBank[0];
+    slots = host->resourceBank[0];
     progress = ((u32)*(u8 *)&slots->workEntries[slot].geometry.cornerColors[0] << 8) /
                *(u8 *)&slots->workEntries[slot].savedColors[0];
     if (close != 0) {
@@ -1558,8 +1558,8 @@ void mnuApplyGridPanelHostSetting(u32 kind, MenuSlotState *host) {
         slot = 3;
         break;
     }
-    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)host->resourceBank[0], 0x1A, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting(host->resourceBank[0], 0x1A, host->effect[slot], 0, value, flags);
+    itfSetGridEntryQuantizedAndRefresh(host->resourceBank[0], 0x1A, 0, 0, 0, 0);
+    effConfigureWithDefaultSetting((u32)host->resourceBank[0], 0x1A, host->effect[slot], 0, value, flags);
 }
 
 
@@ -2034,7 +2034,7 @@ void mnuQueueTerminalCurrencyLabel(s32 fading, s32 context) {
     func_0035C860(text, D_00437868, datGameState->header.currency);
     if (fading == 0) {
         /* The scene record supplies the steady label's low packed-color byte. */
-        color = *(u8 *)&((EffectSlotSet *)((MenuSlotState *)context)->resourceBank[0])->workEntries[index].geometry.cornerColors[0] | 0xA09DC300;
+        color = *(u8 *)&((MenuSlotState *)context)->resourceBank[0]->workEntries[index].geometry.cornerColors[0] | 0xA09DC300;
     } else {
         color = uiBlendColors(0xA09DC380, 0xA09DC300, state->thresholdOwner->scale);
     }
