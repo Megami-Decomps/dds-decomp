@@ -347,7 +347,6 @@ typedef struct MantraFileRequest {
 
 extern void func_002C7CE8(void *);
 extern u32 func_00305148(void *, u32);
-extern void *fileQueuePlainDispatchRequest(const char *path);
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate,
                                 TaskDestroy, u32);
 s32 mnuLoadMantraSpriteTask(KwlnTask *task);
