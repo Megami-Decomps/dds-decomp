@@ -854,7 +854,7 @@ void func_0026D988(EvtMantraWork **selectionWorks) {
     } while (remaining != 0);
 }
 
-extern s32 prfGetIndexedProfileByte(s32, s32);
+extern u32 prfGetIndexedProfileByte(u16, s32);
 /* Scan the low-halfword entry id's five attributes into caller-owned summary words.
  * A nonzero summary[0] makes the next nonzero attribute report sentinel five.
  * Zero is treated as empty even after storing attribute index zero; neither
