@@ -4,6 +4,7 @@
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "sdf_stream_read.h"
+#include "sdf_dev_event.h"
 
 #define SDF_RELOC_HEADER_BYTES 0x20
 #define SDF_STREAM_NODE_BYTES 0x8C
@@ -237,19 +238,19 @@ s32 sdfSoundHandleRpcEvent(s32 unused, u32 event) {
     switch (event) {
     case 1:
         break;
-    case 3:
+    case SDF_DEV_EVENT_SEEK_REPLY:
         break;
-    case 6:
+    case SDF_DEV_EVENT_WRITE_REPLY:
         break;
-    case 5:
+    case SDF_DEV_EVENT_READ_REPLY:
         FlushCache(0);
         /* Fall through: flush and wake the waiting thread. */
-    case 4:
+    case SDF_DEV_EVENT_SIZE_REPLY:
         SignalSema(sdfSoundRpcSemaphore);
         break;
-    case 0:
-    case 2:
-    case 7:
+    case SDF_DEV_EVENT_INACTIVE:
+    case SDF_DEV_EVENT_OPENED:
+    case SDF_DEV_EVENT_CLOSED:
         SignalSema(sdfSoundRpcSemaphore);
         break;
     }
