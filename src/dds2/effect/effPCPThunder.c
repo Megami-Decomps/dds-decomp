@@ -76,7 +76,7 @@ typedef struct EffThunderVectorWork {
     u32 tintColor;      /* 0x50 multiplies each cell's sampled/faded color */
     f32 baseRadiusScale; /* 0x54 retained for absolute scale callbacks */
     f32 baseHeightScale; /* 0x58 retained for absolute scale callbacks */
-    void *cellSystem;   /* 0x5C */
+    ParSystem *cellSystem; /* 0x5C: allocated cell system */
     SdfMemBlock *allocationHandle; /* 0x60: allocation descriptor */
 } EffThunderVectorWork; /* 0x64 */
 
