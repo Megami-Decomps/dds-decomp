@@ -7,7 +7,6 @@
 #include "sdf.h"
 
 extern void *memcpy(void *, const void *, u32);
-extern BillChildPayload *func_00158F88(BillObj *, BillOut *);
 extern void billAppendChildQuad(BillObj *, BillChildPayload *);
 extern void func_00158430(BillObj *, BillRenderPair *);
 
@@ -520,7 +519,7 @@ void billReleaseList(BillObj *obj) {
 
 /* Advance an entry's frame timer and apply its current record to the shared
  * child payload. Plural descriptors are handled by the dispatcher instead. */
-BillChildPayload *func_00158F88(BillObj *obj, BillOut *out) {
+BillChildPayload *billStepAnimationEntryAndUpdateChild(BillObj *obj, BillOut *out) {
     BillAnimationEntry *entry = out->entry;
     BillData *data = obj->animationData;
     BillRecord *record;
@@ -746,7 +745,7 @@ void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
     BillChildPayload *record;
 
     if (obj->kind == 1) {
-        record = func_00158F88(obj, obj->resolvedEntries);
+        record = billStepAnimationEntryAndUpdateChild(obj, obj->resolvedEntries);
     } else if (obj->kind == 0 || obj->kind == 3) {
         record = obj->child;
     } else {
