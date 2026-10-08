@@ -373,9 +373,8 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_0028B1B0);
 
 
 extern s8 D_0037F510[64];
-struct MenuPanelObject;
-extern s32 mnuNavigateMantraSelector(struct MenuPanelObject *, s8);
-extern u16 mnuGetSelectedPanelValue(struct MenuPanelObject *);
+extern s32 mnuNavigateMantraSelector(MnuStatusResource *, s8);
+extern u16 mnuGetSelectedPanelValue(MnuStatusResource *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 
 s32 func_0028B318(MnuStatusResource *object) {
@@ -419,8 +418,7 @@ s32 func_0028B318(MnuStatusResource *object) {
     }
     if (((work->drawFlags >> 26) & 1) != 0 || D_0037F510[0x26] != 0 ||
         D_0037F510[0x27] != 0 || D_0037F510[0x24] != 0 || D_0037F510[0x25] != 0) {
-        if (mnuNavigateMantraSelector((struct MenuPanelObject *)object,
-                                      (s8)work->navigationMask) != 0) {
+        if (mnuNavigateMantraSelector(object, (s8)work->navigationMask) != 0) {
             MantraNodePos *position = (MantraNodePos *)work->defaultSelector;
             sound = 1;
             work->navigationMask = 0;
@@ -447,7 +445,7 @@ s32 func_0028B318(MnuStatusResource *object) {
             sound = 3;
             work->drawBits.iconFade = 0;
         } else if ((((MantraNodePos *)object->menu.defaultSelector)->selector.packed & 0x100) == 0) {
-            switch (mnuGetSelectedPanelValue((struct MenuPanelObject *)object) & 0xF) {
+            switch (mnuGetSelectedPanelValue(object) & 0xF) {
             case 1:
                 result = 2;
                 sound = 2;

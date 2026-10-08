@@ -18,6 +18,17 @@ enum {
     SDF_GIF_REGISTER_AD = 0x0E
 };
 
+/* Packed ALPHA operands: (A - B) * C / 128 + D. Cs/Cd denote
+ * source/destination colors, and As/Ad their alpha values. */
+enum {
+    SDF_GS_ALPHA_INTERPOLATE_SOURCE_ALPHA = 0x44,      /* (Cs - Cd) * As / 128 + Cd */
+    SDF_GS_ALPHA_ADD_SOURCE_ALPHA = 0x48,              /* Cs * As / 128 + Cd */
+    SDF_GS_ALPHA_SUBTRACT_SOURCE_ALPHA = 0x42,         /* Cd - Cs * As / 128 */
+    SDF_GS_ALPHA_INTERPOLATE_DESTINATION_ALPHA = 0x54, /* (Cs - Cd) * Ad / 128 + Cd */
+    SDF_GS_ALPHA_ADD_DESTINATION_ALPHA = 0x58,         /* Cs * Ad / 128 + Cd */
+    SDF_GS_ALPHA_SUBTRACT_DESTINATION_ALPHA = 0x52     /* Cd - Cs * Ad / 128 */
+};
+
 /* Appending the packet patches the DMA tag's link; the VIF and GIF words
  * retain the renderer's original commands and register-list encoding. */
 typedef struct SdfGsPacketHeader {
