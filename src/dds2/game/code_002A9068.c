@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "eff_resource_slots.h"
 #include "common.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -142,7 +143,6 @@ extern u32 D_003E6848[];
 
 extern char D_0042A950[];
 
-extern u32 effLoadIndexedResource(char *, u32, u32);
 
 #define MNU_STAFF_BASE_RESOURCE_COUNT 2
 #define MNU_STAFF_MAIN_RESOURCE_COUNT 16
@@ -164,19 +164,18 @@ extern u32 effLoadIndexedResource(char *, u32, u32);
 void mnuLoadCampResources(void) {
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
-        mnuCampResourceHandles[resourceIndex] = effLoadIndexedResource(D_0042A950, D_003E6848[resourceIndex * 2], MNU_STAFF_RETAIN_RESOURCE);
+        mnuCampResourceHandles[resourceIndex] = (u32)effLoadIndexedResource(
+            (const char *)D_0042A950, (const char *)D_003E6848[resourceIndex * 2], MNU_STAFF_RETAIN_RESOURCE);
     }
 }
 
-extern void effReleaseTextureHandlesAndResetSlots(u32);
 
-extern void effResolveAndReleaseResource(u32);
 
 /* Resolve each global handle, then copy its post-call value into destination. */
 void mnuSnapshotCampTextureHandles(u32 *destination) {
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
-        effResolveAndReleaseResource(mnuCampResourceHandles[resourceIndex]);
+        effResolveAndReleaseResource((struct EffectSlotSet *)mnuCampResourceHandles[resourceIndex]);
         destination[resourceIndex] = mnuCampResourceHandles[resourceIndex];
     }
 }
@@ -186,7 +185,7 @@ void mnuReleaseCampTextureHandlesAndClearOutput(u32 *destination) {
     s32 resourceCountdown = MNU_STAFF_BASE_RESOURCE_COUNT - 1;
     u32 byteOffset = 0;
     do {
-        effReleaseTextureHandlesAndResetSlots(*(u32 *)((u8 *)mnuCampResourceHandles + byteOffset));
+        effReleaseTextureHandlesAndResetSlots((struct EffectSlotSet *)*(u32 *)((u8 *)mnuCampResourceHandles + byteOffset));
         *(u32 *)((u8 *)destination + byteOffset) = 0;
         byteOffset += 4;
     } while (--resourceCountdown >= 0);
@@ -359,14 +358,14 @@ u8 *mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount, u8 *menuBytes) 
 void movReleaseActivePartyCategoryModels(s32 modelListAddress, s32 unusedCount, u8 *unusedWork) {
     s32 partyIndex;
 
-    effResolveAndReleaseResource(*(u32 *)modelListAddress);
+    effResolveAndReleaseResource((struct EffectSlotSet *)*(u32 *)modelListAddress);
     for (partyIndex = 0; partyIndex < MNU_STAFF_PARTY_COUNT; partyIndex++) {
         DatPartyRecord *partyRecord = &datGameState->party[partyIndex];
 
         if ((partyRecord->flags & MNU_STAFF_PARTY_PRESENT_BIT) != 0) {
             s32 modelIndex = partyRecord->unitId + D_00437B73;
 
-            effResolveAndReleaseResource(*(u32 *)(modelListAddress + modelIndex * 4 - 4));
+            effResolveAndReleaseResource((struct EffectSlotSet *)*(u32 *)(modelListAddress + modelIndex * 4 - 4));
         }
     }
 }
@@ -378,7 +377,7 @@ void movReleaseCategoryModels(s32 category, u8 *menuBytes) {
     if (category != MNU_STAFF_PARTY_CATEGORY) {
         s32 resourceIndex;
         for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++) {
-            effResolveAndReleaseResource(modelHandles[resourceIndex]);
+            effResolveAndReleaseResource((struct EffectSlotSet *)modelHandles[resourceIndex]);
         }
     } else {
         movReleaseActivePartyCategoryModels(modelHandles, entryCount, menuBytes);
@@ -394,7 +393,7 @@ void mnuReleaseStaffCategoryTextureHandles(s32 category, u8 *menuBytes) {
     if (entryCount > 0) {
         u32 *handleCursor = (u32 *)entryBytes;
         do {
-            effReleaseTextureHandlesAndResetSlots(*handleCursor++);
+            effReleaseTextureHandlesAndResetSlots((struct EffectSlotSet *)*handleCursor++);
         } while (++resourceIndex < entryCount);
     }
 }
@@ -517,15 +516,15 @@ void mnuReleaseTitleEffectSprites(StaffSlots *resourceSlots) {
     mnuReleaseCampTextureHandlesAndClearOutput(resourceSlots->baseResources);
     mainCursor = resourceSlots->mainResources;
     for (resourceCountdown = MNU_STAFF_MAIN_RESOURCE_COUNT - 1; resourceCountdown >= 0; resourceCountdown--) {
-        effDestroyResourceSlotSet((u32)*mainCursor++);
+        effDestroyResourceSlotSet((struct EffectSlotSet *)*mainCursor++);
     }
     extraCursor = resourceSlots->extraResources;
     for (resourceCountdown = MNU_STAFF_EXTRA_RESOURCE_COUNT - 1; resourceCountdown >= 0; resourceCountdown--) {
-        effDestroyResourceSlotSet((u32)*extraCursor++);
+        effDestroyResourceSlotSet((struct EffectSlotSet *)*extraCursor++);
     }
     pairCursor = resourceSlots->pairResources;
     for (resourceCountdown = MNU_STAFF_PAIR_RESOURCE_COUNT - 1; resourceCountdown >= 0; resourceCountdown--) {
-        effDestroyResourceSlotSet((u32)*pairCursor++);
+        effDestroyResourceSlotSet((struct EffectSlotSet *)*pairCursor++);
     }
 }
 

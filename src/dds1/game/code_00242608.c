@@ -1,4 +1,5 @@
 #include "kwln.h"
+#include "eff_resource_slots.h"
 #include "evt_viewer.h"
 #include "sdf_resource.h"
 #include "mnu.h"
@@ -86,7 +87,6 @@ extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
 extern u8 *effCreateStatusBatch(s32 kind);
 extern s32 effDestroyPackedBatch(s32);
 extern s32 D_0036AA60[];
-extern s32 effLoadIndexedResource(const char *, s32, s32);
 
 #define CAMP_TASK_PRIORITY 0x3EC
 

@@ -4003,8 +4003,8 @@ The DDS1 twin `func_001150F0` uses the same
 `EffectEventVectorParameters` shape and `D_0039F7D0` initializer. That
 initial copy retains the last three parameters and color while the two
 SDK vector copies replace only the first 32 bytes. The native mixer
-dependency is the `SoundMixer *` returned by `func_00190100`, whose
-matched implementation calls `sndMixerClone`.
+dependency is the `SoundMixer *` returned by `effEventCloneSoundMixer`, whose
+implementation calls `sndMixerClone`.
 
 ## Panel resources and typed pair updates
 

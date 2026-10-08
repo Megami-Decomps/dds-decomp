@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_resource_slots.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "dat_state.h"
@@ -21,7 +22,6 @@
 
 extern void *sdfAllocSizeClassBlock(s32);
 
-void effDestroyResourceSlotSet(u32);
 
 typedef struct MovieCueNode MovieCueNode;
 
@@ -165,7 +165,7 @@ u8 mnuHasEffectResourceHandle(MenuResourceWork *work) {
 }
 
 void mnuReleaseEffectResource(MenuResourceWork *work) {
-    effDestroyResourceSlotSet(work->resourceHandle);
+    effDestroyResourceSlotSet((struct EffectSlotSet *)work->resourceHandle);
     sdfReleaseChipBlock(work);
 }
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C0D8);
