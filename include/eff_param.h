@@ -26,6 +26,13 @@ EffParamWork *effParamCreateFromTable(void *table, s32 index);
 EffParamWork *effParamWorkDuplicate(EffParamWork *source);
 void *effParamWorkGetData(EffParamWork *work);
 void effParamWorkInvokeCallback(EffParamWork *work);
+/* Optional source and matrix operations retain their generic pointer domains. */
+void effParamWorkCallback0(EffParamWork *work, void *source);
+void effParamWorkCallback1(EffParamWork *work, f32 scale);
+void effParamWorkCallback2(EffParamWork *work, void *matrix);
+void effParamWorkExCallback0(EffParamWorkEx *work, void *source);
+void effParamWorkExCallback1(EffParamWorkEx *work, f32 scale);
+void effParamWorkExCallback2(EffParamWorkEx *work, void *matrix);
 void effDispatchParameterDataAndFreeWork(EffParamWork *work);
 
 #endif
