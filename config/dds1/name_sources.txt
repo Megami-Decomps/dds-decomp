@@ -2377,7 +2377,7 @@
 0x00194788	frFontReleaseUnreferencedGlyphItem	inferred	clears glyph item table and recycles node when references reach zero [names_reviewed5.tsv]
 0x00194800	frFontAdvanceOrRetainFadingGlyph	inferred	retains glyph while fade advances otherwise advances chain [names_reviewed5.tsv]
 0x00194840	frFontReleaseGlyphChain	inferred	confidence=high; matched-C; src/dds1/interface/frFont.c:217:func_00194840; Peer-matched C proposal; M141; source=names_pending_main.tsv:142 [names_qp12_apply.tsv]
-0x00194920	frFontQueueGlyphInSelectedSlot	inferred	links glyph into slot selected by current font index [names_reviewed5.tsv]
+0x00194920	frFontQueueGlyphForCurrentDrawBuffer	inferred	Links a glyph chain into the current draw-buffer slot using the selector low byte directly; returns signed zero. The runtime alternates selectors 0/1.
 0x00194CD0	frFontAppendClonedGlyph	inferred	Clones a glyph; if cloning succeeds, links it after the destination. [names_reviewed6.tsv]
 0x00194D20	frFontCreateAtlasItem	inferred	readability/matching review (QP16)
 0x00194E00	frFontCloneEntryResource	inferred	allocates 0x120 bytes, itfSplitRelativeSegments on the slot resource, then func_00198088 [names_M33_SmallSweep2.tsv]
@@ -2396,7 +2396,7 @@
 0x00195550	frFontAdvanceGlyphFade	inferred	reduces alpha and advances vertical position of fading glyph children [names_reviewed5.tsv]
 0x00195868	frFontDrawGlyphInDefaultMode	inferred	confidence=high; matched-C; src/dds1/interface/frFont.c:488:func_00195868; Uses shared font render flags with draw mode zero, not an override flag mask.; source=revalidated-unapplied-names_R_Names31.tsv:19 [names_qp12_apply.tsv]
 0x00195880	frFontDrawGlyphWithSharedFlags	inferred	forwards glyph and mode with shared render flags to drawing routine [names_reviewed5.tsv]
-0x00195B10	frFontAdvanceSelectedGlyphSlot	inferred	Advances one of the two font system glyph slots using func_00194840.
+0x00195B10	frFontReleaseOppositeDrawBufferGlyphs	inferred	Releases slot 1 when the current draw-buffer selector low byte is zero, otherwise slot 0; returns signed zero.
 0x00195B60	frFontLinkGlyphAfterPrevious	inferred	Links a glyph with position-next set so its horizontal position follows the preceding glyph.
 0x00195B78	frFontLinkGlyph	inferred	splices a glyph record into another's list with optional pos copy
 0x00195BD8	frFontLoadTemporaryEntry	inferred	loads font resource into temporary entry [names_reviewed5.tsv]

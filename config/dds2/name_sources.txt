@@ -1952,7 +1952,7 @@
 0x0019C418	frFontReleaseUnreferencedGlyphItem	inferred	clears glyph item table and recycles node when references reach zero [names_reviewed5.tsv]
 0x0019C490	frFontAdvanceOrRetainFadingGlyph	inferred	retains glyph while fade advances otherwise advances chain [names_reviewed5.tsv]
 0x0019C4D0	frFontReleaseGlyphChain	inferred	confidence=high; matched-C; src/dds2/interface/frFont.c:232:func_0019C4D0; Peer-matched C proposal; M141; source=names_pending_main.tsv:144 [names_qp12_apply.tsv]
-0x0019C5B0	frFontQueueGlyphInSelectedSlot	inferred	links glyph into slot selected by current font index [names_reviewed5.tsv]
+0x0019C5B0	frFontQueueGlyphForCurrentDrawBuffer	inferred	Links a glyph chain into the current draw-buffer slot using the selector low byte directly; returns signed zero. The runtime alternates selectors 0/1.
 0x0019C850	frFontAppendGlyphReference	inferred	readability/matching review (QP16)
 0x0019C980	frFontAppendClonedGlyph	inferred	Clones a glyph; if cloning succeeds, links it after the destination. [names_reviewed6.tsv]
 0x0019C9D0	frFontCreateAtlasItem	inferred	readability/matching review (QP16)
@@ -1971,6 +1971,7 @@
 0x0019D200	frFontAdvanceGlyphFade	inferred	reduces alpha and advances vertical position of fading glyph children [names_reviewed5.tsv]
 0x0019D518	frFontDrawGlyphInDefaultMode	inferred	confidence=high; matched-C; src/dds2/interface/frFont.c:496:func_0019D518; Uses shared font render flags with draw mode zero, not an override flag mask.; source=revalidated-unapplied-names_R_Names31.tsv:19 [names_qp12_apply.tsv]
 0x0019D530	frFontDrawGlyphWithSharedFlags	inferred	forwards glyph and mode with shared render flags to drawing routine [names_reviewed5.tsv]
+0x0019D7E0	frFontReleaseOppositeDrawBufferGlyphs	inferred	Releases slot 1 when the current draw-buffer selector low byte is zero, otherwise slot 0; returns signed zero.
 0x0019D830	frFontLinkGlyphAfterPrevious	inferred	Byte-identical DDS1 counterpart: Links a glyph with position-next set so its horizontal position follows the preceding glyph.
 0x0019D8A8	frFontLoadTemporaryEntry	inferred	loads font resource into temporary entry [names_reviewed5.tsv]
 0x0019D8C8	frFontFreeTemporaryEntry	inferred	releases temporary font entry [names_reviewed5.tsv]

@@ -710,7 +710,7 @@ void mnuCampInitFontResource(EvtRuntime *scene) {
 }
 
 void mnuCampLinkFontGlyph(EvtRuntime *scene) {
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)scene->glyph);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)scene->glyph);
     scene->glyph = 0;
 }
 
@@ -1555,7 +1555,7 @@ void mnuQueueCampTextGlyphWithChildColor(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4,
         handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)a0, a1, a4);
         frFontSetChildColors(handle, 0x80808040);
         func_001958A0(handle, 0, a5);
-        frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
+        frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
     }
 }
 

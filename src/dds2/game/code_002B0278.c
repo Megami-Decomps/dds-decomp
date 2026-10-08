@@ -401,7 +401,7 @@ void mnuDrawStaffPartySelectionPanel(KwlnTask *task) {
             glyph = itfCreateConvertedTextGlyph(0x2B0, 0xA20, 0, 0xA09DC380, (const u8 *)D_003E78D0[0], 0);
             frFontSetChainFlag(glyph, 4);
             func_0019D550(glyph, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot(glyph);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
             selection = mnuGetPartyEntryCurrentId(unit);
             if (selection != 0) {
                 func_002AAC70(3, selection, D_00435E70, context, 1, 1, 0x53);
@@ -1249,7 +1249,7 @@ void mnuDrawSlotIcons(s32 x, s32 context) {
         handle = itfDrawUnderscoreTextSegment(0x3c0, y, 0, 0xa09dc359, (const u8 *)(D_00435E54 + slot->unitId * 45), i);
         if (handle != 0) {
             func_0019D550(handle, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot(handle);
+            frFontQueueGlyphForCurrentDrawBuffer(handle);
         }
     }
 }
@@ -1272,7 +1272,7 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags)
     frFontSetChildColors(handle, color);
     frFontClearFlagBits(1);
     func_0019D550(handle, 1, flags);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
 
 void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, MenuPanelGroup *packedGroup, s32 group, s32 unused, s32 spriteFlags) {
@@ -1404,7 +1404,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
         glyph = func_0019F5E8(x + hpOffset, y - 8, depth, color, text, 0);
         frFontSetChainFlag(glyph, chainFlag);
         func_0019D550(glyph, 1, texture);
-        frFontQueueGlyphInSelectedSlot(glyph);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
     } else {
         mnuDrawRepeatedPanelSprites(x, y, depth, 0x100, 3, costResource, 0x1B, texture);
         return;
@@ -2374,7 +2374,7 @@ void mnuDrawSelectionLabel(u16 id) {
 
     frFontSetChildColors(label, 0xA09DC35A);
     func_0019D550(label, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot(label);
+    frFontQueueGlyphForCurrentDrawBuffer(label);
 }
 
 extern MenuPoint D_00437C08[];
@@ -2425,7 +2425,7 @@ void func_002B6898(u16 affinity, s32 resource, s32 labels) {
         }
         if (glyph != 0) {
             func_0019D550(glyph, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot(glyph);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
         }
     }
 }

@@ -2512,7 +2512,7 @@ void func_0012DDC0(s32 x, s32 y, u32 firstPayload, const u8 *secondPayload) {
 
     object = itfCreateConvertedTextGlyph(x << 4, y << 4, 0, firstPayload, secondPayload, 0);
     frFontDrawGlyphInDefaultMode(object);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)object);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)object);
 }
 
 void fldAdvanceQuadRow(FldQuadState *quad) {

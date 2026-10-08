@@ -129,7 +129,7 @@ void dds3UpdateLinkedNodes(void) {
 void frFontSubmitAndFreeGlyphOwner(void *owner) {
     Dds3FontNode *node = owner;
 
-    frFontQueueGlyphInSelectedSlot(node->glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(node->glyph);
     sdfReleaseChipBlock(node);
 }
 
