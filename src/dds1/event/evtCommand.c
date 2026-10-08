@@ -1,3 +1,4 @@
+#include "fld_area_work.h"
 #include "common.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
@@ -103,7 +104,7 @@ s32 fldParseRoomNumberFromName(char *name);
 
 s32 fldSetMapSlotValueFlag(s32 worldKey, s32 roomGroup, s32 roomNumber, s32 enabled);
 
-extern u32 fldAreaState[];
+
 
 extern u32 kwlnDrawControlFlags;
 
@@ -777,7 +778,7 @@ s32 func_002272B0(void) {
         if (target->roomName != NULL) {
             room = fldParseRoomNumberFromName(target->roomName);
             if (room > 0)
-                fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, room, 1);
+                fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, room, 1);
         }
         break;
     case 1:
@@ -785,7 +786,7 @@ s32 func_002272B0(void) {
         if (target->roomName != NULL) {
             room = fldParseRoomNumberFromName(target->roomName);
             if (room > 0)
-                fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, room, 0);
+                fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, room, 0);
         }
         break;
     }
@@ -1085,9 +1086,9 @@ s32 evtCommandSetUnitRoomFloatState(void) {
     roomNumber = fldParseRoomNumberFromName(roomName);
     if (roomNumber > 0) {
         if (bfWaitReadArgFloat(1) > 0.5f) {
-            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, roomNumber, 1);
+            fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 1);
         } else {
-            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, roomNumber, 0);
+            fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 0);
         }
     }
     return 1;
@@ -1119,9 +1120,9 @@ s32 evtCommandSetUnitRoomIntegerState(void) {
     roomNumber = fldParseRoomNumberFromName(roomName);
     if (roomNumber > 0) {
         if (scrReadIntParameter(1) == 0) {
-            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, roomNumber, 1);
+            fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 1);
         } else {
-            fldSetMapSlotValueFlag(fldAreaState[4], fldAreaState[5] + 1, roomNumber, 0);
+            fldSetMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, roomNumber, 0);
         }
     }
     return 1;

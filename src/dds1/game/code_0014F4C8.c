@@ -1,3 +1,4 @@
+#include "fld_area_work.h"
 #include "common.h"
 
 extern u32 sdfSoundIsCommandBusy(void);
@@ -14,7 +15,7 @@ u32 fldCmdGetCurrentSceneSelectionResource(void) {
     return 1;
 }
 
-extern s32 fldAreaState[];
+
 
 extern s32 scrReadIntParameter(s32);
 
@@ -23,26 +24,26 @@ s32 fldCommandClearSelectedFlag(void) {
     s32 changed = 0;
     switch (scrReadIntParameter(0)) {
     case 0:
-        if (fldAreaState[3] & 1) {
-            fldAreaState[3] &= ~1;
+        if (fldAreaState.consumedFlags & 1) {
+            fldAreaState.consumedFlags &= ~1;
             changed = 1;
         }
         break;
     case 1:
-        if (fldAreaState[3] & 2) {
-            fldAreaState[3] &= ~2;
+        if (fldAreaState.consumedFlags & 2) {
+            fldAreaState.consumedFlags &= ~2;
             changed = 1;
         }
         break;
     case 2:
-        if (fldAreaState[3] & 4) {
-            fldAreaState[3] &= ~4;
+        if (fldAreaState.consumedFlags & 4) {
+            fldAreaState.consumedFlags &= ~4;
             changed = 1;
         }
         break;
     case 3:
-        if (fldAreaState[3] & 8) {
-            fldAreaState[3] &= ~8;
+        if (fldAreaState.consumedFlags & 8) {
+            fldAreaState.consumedFlags &= ~8;
             changed = 1;
         }
         break;

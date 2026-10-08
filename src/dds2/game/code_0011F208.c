@@ -1,3 +1,4 @@
+#include "fld_area_work.h"
 #include "common.h"
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
@@ -122,21 +123,6 @@ extern u32 fldSceneControlFlags;
 extern u32 D_00435F70;
 
 extern FieldStageCoordinate D_00389170[];
-
-/* Contiguous player-scene work: saved transform, status words and deferred resource.
- * The data also exports a label at +0x3C for separate object-slot consumers. */
-typedef struct FieldPlayerSceneWork {
-    u128 position;
-    u128 rotation;
-    u8 pad20[0x14];
-    u32 primaryState;
-    u8 pad38[0x24];
-    u32 secondaryState;
-    u8 pad60[2];
-    s16 sequenceMode;
-    u8 pad64[0x1C];
-    s8 resourceName[0x20];
-} FieldPlayerSceneWork;
 
 extern FieldPlayerSceneWork D_0038A640;
 
@@ -348,112 +334,20 @@ extern u8 D_003807F8[];
 
 extern void sdfStoreMessageWordsAndNotifyConsumer(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 
-/* Named-resource records retained by the field loader and texture cleanup. */
-typedef struct FldResourceBlock {
-    s32 unk0;
-    s32 block;
-} FldResourceBlock;
 
-typedef struct FldTextureResource {
-    s32 unk0;
-    s32 block;
-    struct SdfTex *texture;
-} FldTextureResource;
 
-typedef char FldResourceBlock_size_check[(sizeof(FldResourceBlock) == 8) ? 1 : -1];
-typedef char FldTextureResource_size_check[(sizeof(FldTextureResource) == 0xC) ? 1 : -1];
 
-/* Complete field-area work, shared with the camera/motion and resource units.
- * Position is XYZ followed immediately by saved XYZ history, not a Vec4.
- * DDS2 inserts twelve bytes before the model variant and position/history tail. */
-typedef struct FldAreaWork {
-    u8 pad00[4];
-    char *fallbackResourceName; /* Last choice after override and saved scene names. */
-    u8 pad08[4];
-    s32 consumedFlags; /* Consumption markers, separate from game-state work flags. */
-    s32 area;
-    s32 floor; /* Zero-based; coordinate lookups use floor + 1. */
-    u8 pad18[8];
-    s32 unk20; /* Sequence initializers set this when reusing the current area. */
-    s32 unk24;
-    u8 pad28[0x28];
-    s32 mode;
-    u8 pad54[4];
-    s32 rowIdx;
-    u8 pad5C[8];
-    f32 negatedAngle;
-    u8 pad68[4];
-    f32 dist;
-    s32 sceneMode;
-    s32 sceneState;
-    u8 pad78[0xC];
-    s32 positionPending;
-    u8 pad88[8];
-    s32 unk90;
-    s32 unk94;
-    u8 pad98[0x28];
-    s32 unkC0;
-    u8 padC4[8];
-    s32 overlayMode;
-    s32 overlayCounter;
-    u8 padD4[0x10];
-    s32 encounterMode;
-    s32 unkE8;
-    s32 transitionCount;
-    s32 nextArea;
-    s32 nextFloor; /* Both queued values at -1 mean no request. */
-    u8 padF8[8];
-    s32 unk100; /* Consumed before pending-resource selection. */
-    s16 unk104;
-    u8 pad106[0xA];
-    s32 unk110;
-    s32 unk114;
-    s32 unk118;
-    u8 pad11C[0xC];
-    s16 sceneCommand;
-    u8 pad12A[2];
-    s32 commandEnabled;
-    s32 unk130;
-    s32 unk134;
-    u8 pad138[4];
-    s32 unk13C;
-    s32 unk140;
-    u8 pad144[4];
-    s32 playerModelVariant; /* Cached 0/1 player variant, or 2 for the location override. */
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 previousX; /* History starts here, not a homogeneous position W. */
-    f32 previousY;
-    f32 previousZ;
-    f32 targetX; /* XYZ installed when positionPending is consumed. */
-    f32 targetY;
-    f32 targetZ;
-    f32 angle; /* Current player heading in degrees. */
-    f32 targetAngle; /* Desired heading for the motion-unit updater. */
-    f32 unk178;
-    f32 unk17C;
-    f32 unk180;
-    s32 positionMode;
-    s32 unk188;
-    s32 verticalStepDirection; /* Positive lowers Y; negative raises it. */
-    s32 unk190;
-    u32 pointState;
-    f32 facingPointX;
-    f32 facingPointZ;
-    u32 angleState;
-    f32 overrideAngle;
-    FldResourceBlock mapResources[8]; /* 0x1A8: autmap_1,2,3,5,6,7,8,9. */
-    FldTextureResource fieldTextures[4]; /* 0x1E8: d2_fild1..4.tmx. */
-} FldAreaWork;
 
-typedef char FldAreaWork_size_check[(sizeof(FldAreaWork) == 0x218) ? 1 : -1];
-typedef char FldAreaWork_mapResources_offset_check[
-    ((u32)&((FldAreaWork *)0)->mapResources == 0x1A8) ? 1 : -1];
-typedef char FldAreaWork_fieldTextures_offset_check[
-    ((u32)&((FldAreaWork *)0)->fieldTextures == 0x1E8) ? 1 : -1];
 
-extern FldAreaWork fldAreaState;
+
+
+
+
+
+
+
+
+
 
 typedef struct FldEncEntry {
     s16 stage;
@@ -2819,7 +2713,7 @@ s32 func_001278D0(void) {
         func_00125380();
         dds3SetWorldObject(dds3GetWorldSecondaryObject());
         fldCreateInputPanelTask();
-        if (fldAreaState.unk104 == 0) evtSetSolarOverlayFullyVisible();
+        if (fldAreaState.transitionMode == 0) evtSetSolarOverlayFullyVisible();
         fldEnsureTask();
         if (fldAreaState.area >= 200) {
             D_00389988[0x2C / 4] = 0;
@@ -2827,7 +2721,7 @@ s32 func_001278D0(void) {
             func_00135A68(0, 0);
             fldBeginSelectedValueTransition(D_00389988[0x30 / 4]);
         }
-        if (fldAreaState.unk104 == 0) func_001512D8();
+        if (fldAreaState.transitionMode == 0) func_001512D8();
         coordinateFlags = fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1);
         if (coordinateFlags & 0x40) {
             blur.count = 15;
@@ -2870,7 +2764,7 @@ s32 func_001278D0(void) {
     case 1:
         if (fldStepSceneBgmArchive() != 0) {
             fldAreaState.unk130 = 0;
-            if (fldAreaState.unk104 == 0) {
+            if (fldAreaState.transitionMode == 0) {
                 if (fldGetSceneStatusCode() == 1 || fldGetSceneStatusCode() == 4 || fldGetSceneStatusCode() == 6) {
                     fldStartSceneBgmAlternate();
                 } else if (playerWork->sequenceMode == 0) {
@@ -2896,8 +2790,8 @@ s32 func_001278D0(void) {
     case 3:
         if (fldGetArchiveLoadPending() != 0) return 0;
         controller->stage++;
-        if (fldAreaState.unk188 == 0 && fldAreaState.unk134 == 0 &&
-            fldAreaState.unk24 == 0 && kwlnFadeIsActive() == 0) {
+        if (fldAreaState.unk188 == 0 && fldAreaState.skipFade == 0 &&
+            fldAreaState.titleFade == 0 && kwlnFadeIsActive() == 0) {
             kwlnFadeStartIn(8);
         }
         if (func_00101820(0x3EA) == NULL && func_00150F10() == 0) {
@@ -2907,18 +2801,18 @@ s32 func_001278D0(void) {
         fldSetSceneControlFlags(0x10);
         fldSetSceneControlFlags(0x20);
         fldRequestMiniTitleDismiss();
-        if (fldAreaState.unk114 == 1) fldStartDeferredFieldExit();
+        if (fldAreaState.deferredExit == 1) fldStartDeferredFieldExit();
         break;
     case 4:
         if (fldAreaState.unk13C != 0 && D_00389988[0x5C / 4] != 0) func_00153410();
         D_004360E8 = 1;
         if (fldTestSceneControlFlags(0x40) != 0 && fldRestartSceneResourceTask() != 0) return 0;
-        if (fldTestSceneControlFlags(0x40) != 0 && fldAreaState.unk24 != 0) {
+        if (fldTestSceneControlFlags(0x40) != 0 && fldAreaState.titleFade != 0) {
             func_0013DDC0((EffWorldNode *)fldPlayerObject);
             break;
         }
         fldFinishDeferredExit();
-        if (fldAreaState.unk104 != 0) {
+        if (fldAreaState.transitionMode != 0) {
             func_00150F20();
             func_00123B88(fldAreaState.floor, fldAreaState.unkC0,
                           fldAreaState.x, fldAreaState.z, 50.0f);
@@ -2928,8 +2822,8 @@ s32 func_001278D0(void) {
             if (D_00389988[0] == 0) fldUpdateNextFloorTransition();
         }
         if (func_00150F10() != 0) func_00150A60();
-        if (fldAreaState.unk110 == 1) fldAdvanceToNextScene();
-        if (fldIsTargetWithinInteractionRange() != 0 && fldAreaState.unk140 == 1) {
+        if (fldAreaState.pendingSceneRequest == 1) fldAdvanceToNextScene();
+        if (fldIsTargetWithinInteractionRange() != 0 && fldAreaState.targetGuideActive == 1) {
             func_00154F18(1);
             func_00126C80();
         } else if (fldTestSceneControlFlags(0x40) != 0) {
@@ -2955,8 +2849,8 @@ s32 func_001278D0(void) {
         fldSetPendingAreaAndFloor(fldAreaState.area, fldAreaState.floor + 1);
         controller->stage = 0;
         fldAreaState.transitionCount++;
-        if (fldAreaState.unk110 == 0) D_00435F78 = 1;
-        else fldAreaState.unk110 = 0;
+        if (fldAreaState.pendingSceneRequest == 0) D_00435F78 = 1;
+        else fldAreaState.pendingSceneRequest = 0;
         dds3AdminSubmitModeRequest(14, D_00435F98, 8, 1);
         return -1;
     case 6:
