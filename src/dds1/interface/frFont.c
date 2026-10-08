@@ -384,11 +384,11 @@ void frFontInitGlyph(FrFontGlyph *glyph) {
     glyph->link1C.firstChild = NULL;
     glyph->link20.linkedGlyph = NULL;
     glyph->unk18.w = 0;
-    glyph->unk30 = 0;
-    glyph->unk34 = 0;
-    glyph->unk38 = 0;
-    glyph->unk3C = 0;
-    glyph->unk40 = 0;
+    glyph->timedControlCode = 0;
+    glyph->pendingLipsStopCode = 0;
+    glyph->skipLipsStopWait = 0;
+    glyph->remainingWaitFrames = 0;
+    glyph->contextModeEnabled = 0;
 }
 
 extern void func_001949B0(void *, s32);
@@ -451,7 +451,7 @@ void frFontSetContextEncodedByte(FrFontGlyph *glyph, s32 inputValue) {
 
 /* Enable the glyph mode and initialize its encoded byte to the cap. */
 void frFontEnableContextMode(FrFontGlyph *glyph) {
-    glyph->unk40 = 1;
+    glyph->contextModeEnabled = 1;
     frFontSetContextEncodedByte(glyph, FR_FONT_CONTEXT_ENABLE_VALUE);
 }
 
@@ -591,20 +591,20 @@ s32 func_001955D8(FrFontGlyph *parent, FrFontGlyph *glyph, u8 threshold, u8 step
         canAdvanceFade = previousFade == 0x80;
     }
 
-    if (previousParent != NULL && parent->link1C.firstChild == glyph && parent->unk40 == 0) {
-        switch (previousParent->unk30) {
-        case 0xF214:
-            if (previousParent->unk3C > 0) {
+    if (previousParent != NULL && parent->link1C.firstChild == glyph && parent->contextModeEnabled == 0) {
+        switch (previousParent->timedControlCode) {
+        case ITF_GLYPH_CONTROL_WAIT_FRAMES:
+            if (previousParent->remainingWaitFrames > 0) {
                 canAdvanceFade = 0;
                 if (previousFade == 0x80) {
-                    previousParent->unk3C = previousParent->unk3C - 1;
+                    previousParent->remainingWaitFrames = previousParent->remainingWaitFrames - 1;
                 }
             }
             break;
-        case 0xF215:
-            if (previousParent->unk3C != 0xFFFF) {
-                if (previousParent->unk3C > 0) {
-                    previousParent->unk3C--;
+        case ITF_GLYPH_CONTROL_WAIT_FRAME_OR_SOUND:
+            if (previousParent->remainingWaitFrames != ITF_GLYPH_WAIT_FOR_SOUND_SENTINEL) {
+                if (previousParent->remainingWaitFrames > 0) {
+                    previousParent->remainingWaitFrames--;
                     canAdvanceFade = 0;
                 }
             } else if (mnuQueryTitleSoundBusy() != 0) {
@@ -614,9 +614,9 @@ s32 func_001955D8(FrFontGlyph *parent, FrFontGlyph *glyph, u8 threshold, u8 step
         }
     }
 
-    if (parent->unk34 == 0xF117 && parent->link20.linkedGlyph->u10.byte[0] == 0x80) {
-        if (parent->unk38 == 0 && parent->unk3C > 0) {
-            if (parent->unk3C == 0xFFFF) {
+    if (parent->pendingLipsStopCode == ITF_GLYPH_CONTROL_STOP_LIPS && parent->link20.linkedGlyph->u10.byte[0] == 0x80) {
+        if (parent->skipLipsStopWait == 0 && parent->remainingWaitFrames > 0) {
+            if (parent->remainingWaitFrames == ITF_GLYPH_WAIT_FOR_SOUND_SENTINEL) {
                 if (mnuQueryTitleSoundBusy() != 0) {
                     canStopLips = 0;
                 }
@@ -626,7 +626,7 @@ s32 func_001955D8(FrFontGlyph *parent, FrFontGlyph *glyph, u8 threshold, u8 step
         }
         if (canStopLips != 0) {
             evtLipsStopFunction();
-            parent->unk34 = 0;
+            parent->pendingLipsStopCode = 0;
         }
     }
 
@@ -723,18 +723,18 @@ s32 func_001958A0(FrFontGlyph *glyph, s8 mode, u32 flags) {
                     } while (child != NULL);
                 }
 
-                if (glyph->next == NULL && glyph->unk40 == 0) {
-                    switch (glyph->unk30) {
-                    case 0xF214:
-                        if (ready != 0 && glyph->unk3C > 0) {
-                            glyph->unk3C--;
+                if (glyph->next == NULL && glyph->contextModeEnabled == 0) {
+                    switch (glyph->timedControlCode) {
+                    case ITF_GLYPH_CONTROL_WAIT_FRAMES:
+                        if (ready != 0 && glyph->remainingWaitFrames > 0) {
+                            glyph->remainingWaitFrames--;
                             ready = 0;
                         }
                         break;
-                    case 0xF215:
-                        if (glyph->unk3C != 0xFFFF) {
-                            if (glyph->unk3C > 0) {
-                                glyph->unk3C--;
+                    case ITF_GLYPH_CONTROL_WAIT_FRAME_OR_SOUND:
+                        if (glyph->remainingWaitFrames != ITF_GLYPH_WAIT_FOR_SOUND_SENTINEL) {
+                            if (glyph->remainingWaitFrames > 0) {
+                                glyph->remainingWaitFrames--;
                                 ready = 0;
                             }
                         } else {
