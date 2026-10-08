@@ -187,7 +187,7 @@ void sdfAppendPacket(SdfListHead *, u32);
 
 
 void sdfStreamCreateWithParams(SdfStreamFrameNode *, SdfStreamParams *, s32, s32, SdfTex *);
-void func_002EBB60(SdfStreamFrameNode *);
+void sdfDestroyStreamFrameNode(SdfStreamFrameNode *);
 
 
 
@@ -681,7 +681,7 @@ void mdlAppendObjectPart(DevRequest *list, s32 sourceAddress, SdfMemBlock *backi
 
 void mdlObjDestroy(MdlObj *obj) {
     if (obj->initialized != 0) {
-        func_002EBB60(&obj->soundNode);
+        sdfDestroyStreamFrameNode(&obj->soundNode);
     }
     sdfReleaseResourceAllocation(obj->backingAllocation);
     sdfReleaseChipBlock(obj);

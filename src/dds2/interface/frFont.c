@@ -1,5 +1,6 @@
 #include "common.h"
 #include "itf.h"
+#include "itf_mem_node.h"
 
 
 extern s32 mnuQueryTitleSoundBusy(void);
@@ -27,11 +28,6 @@ extern u8 frFontSharedGlyphFlags;
 void frFontCreateContext();
 
 extern u8 D_00436578[];
-
-typedef struct MemNode MemNode;
-extern void *itfDequeueMemNode(MemNode *);
-
-
 
 extern s32 frFontDefaultGlyphCellSize;
 
@@ -168,8 +164,6 @@ FrFontGlyph *frFontAdvanceOrRetainFadingGlyph(FrFontGlyph *glyph) {
     }
     return frFontReleaseGlyphChain(glyph);
 }
-
-extern s32 itfEnqueueMemNode(void *node, MemNode *pool);
 
 /* Release parents backward and children forward, returning both to their pools.
  * Children with a borrowed source record bypass cached-item reference release. Return NULL. */
