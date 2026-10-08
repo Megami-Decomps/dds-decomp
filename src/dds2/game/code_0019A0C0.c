@@ -70,7 +70,7 @@ extern void effSampleChannelBezier(EffVert *arg0, EffChan *arg1, s32 arg2, f32 a
 /* List header defined in game/code_00193C08 (unsized: keeps absolute access). */
 
 
-extern void func_0019AE18(void *arg0, f32 *keys, u32 recordCount);
+extern void effBuildPrimitiveCurveTangents(f32 *tangents, f32 *keys, u32 recordCount);
 
 extern void effBuildPrimitiveCurveCoefficients(EffPrimitiveCurve *arg0, f32 *arg1);
 
@@ -484,10 +484,10 @@ void effSetPrimitiveRecordCursorStep(EffPrimitiveCurve *primitive, f32 step) {
 
 /* Build temporary coordinate-major tangents, select a coefficient policy, then release the temporary buffer. */
 void effBuildAndDispatch(EffPrimitiveCurve *primitive, s32 flattenEqualComponents) {
-    void *allocation = sdfAllocGeneralBlock(primitive->recordCount * EFF_CURVE_POINT_BYTES);
-    void *tangentData = (void *)sdfResourceRetainAddress(allocation);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(primitive->recordCount * EFF_CURVE_POINT_BYTES);
+    f32 *tangentData = (f32 *)sdfResourceRetainAddress(allocation);
 
-    func_0019AE18(tangentData, primitive->keys, primitive->recordCount);
+    effBuildPrimitiveCurveTangents(tangentData, primitive->keys, primitive->recordCount);
     if (flattenEqualComponents == 0) {
         effBuildPrimitiveCurveCoefficients(primitive, tangentData);
     } else {
@@ -496,7 +496,7 @@ void effBuildAndDispatch(EffPrimitiveCurve *primitive, s32 flattenEqualComponent
     sdfReleaseResourceAllocation(allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019AE18);
+INCLUDE_ASM(const s32, "game/code_0019A0C0", effBuildPrimitiveCurveTangents);
 
 /* Solve the cubic tangent system: endpoint diagonal 2, interior diagonal 4. */
 void effSolveCubicTangents(f32 *solution, f32 *rhs, s32 count) {
