@@ -132,6 +132,8 @@ typedef struct SoundFormat {
 extern SdfStreamFrameNode *sdfSoundNodeHead;
 extern SdfStreamFrameNode *D_003BDAA8;
 extern s32 D_003BDA94;
+extern s32 D_003BDAB4;
+extern s32 iWakeupThread(s32 threadId);
 extern s32 sceIpuSync(s32, s32);
 extern void *sdfAllocateBlockBySizeThreshold(s32);
 extern void sdfStreamOpen(SdfStreamFrameNode *, SoundFormat *, s32, s32);
@@ -1370,7 +1372,11 @@ void sdfIpuDmaCompletionWorker(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC3C0);
+s32 func_002EC3C0(void) {
+    iWakeupThread(D_003BDAB4);
+    EE_ENABLE_INTERRUPTS_SYNC();
+    return 0;
+}
 
 s32 func_002EC3F0(void) {
     SdfStreamFrameNode *stream = D_003BDAA8;
@@ -1528,14 +1534,12 @@ void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *f
 }
 
 extern u32 D_003BDAA4;
-extern s32 D_003BDAB4;
 extern void sceIpuInit(void);
 extern s32 sdfAddHandler(s32, s32, void *, s32, s32);
 extern void func_0030B638(s32);
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 extern void _StartThread();
 extern u8 sdfIpuStreamThreadStack[];
-extern s32 func_002EC3C0();
 extern void sdfIpuDmaCompletionWorker();
 void sdfSoundInitIpuStream(void) {
     s32 thread;
