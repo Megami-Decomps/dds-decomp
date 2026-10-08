@@ -252,12 +252,12 @@ void billSetBillboardMode(BillObj *effect, s32 mode) {
             s32 index = 0;
             do {
                 BillAnimationEntry *entry = entries[index].entry;
-                u32 flags = entry->flags & ~6U;
+                u32 flags = entry->flags & ~BILL_ANIMATION_FLAG_PACKET_LIST_MASK;
                 entry->flags = flags;
                 if (mode == 2) {
-                    entry->flags = flags | 2;
+                    entry->flags = flags | BILL_ANIMATION_FLAG_PACKET_LIST_2;
                 } else if (mode == 3) {
-                    entry->flags = flags | 4;
+                    entry->flags = flags | BILL_ANIMATION_FLAG_PACKET_LIST_3;
                 }
                 index++;
             } while (--remaining != 0);
