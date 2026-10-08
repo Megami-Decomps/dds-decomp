@@ -55,11 +55,11 @@ typedef struct {
 } MenuProgressOwner;
 
 
-extern s32 mnuFindMatchingPartyEntryIndex(s32);
+extern s32 mnuFindMatchingPartyEntryIndex(DatPartyRecord *targetEntry);
 extern s32 mnuSeekListNode(s32, struct MenuList *);
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
-extern MenuProfilePanel *mnuCreateProfilePanel(s32);
+extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32, u32);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
@@ -693,7 +693,7 @@ s32 mnuTickInitState(MenuProgressHost *work) {
 }
 
 /* Bind the party selection's textures/grid, then create its panel and profile visuals. */
-void mnuSetupStaffMenuProfilePage(s32 source, MenuProgressHost *work) {
+void mnuSetupStaffMenuProfilePage(DatPartyRecord *source, MenuProgressHost *work) {
     MenuPageWindow *window = &work->partyWindow;
     s32 index;
 

@@ -168,7 +168,7 @@ extern s32 mnuAllocateValueRecord(s32);
 
 extern void mnuAppendCampSpriteRequests(s32, s32);
 
-extern s32 mnuCreateProfilePanel(void);
+extern u32 *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 
 extern void mnuSetGroupProperties(s32, s32, s32, s32, s32);
 
@@ -758,9 +758,9 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00267B40);
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00267C48);
 
 /* Create/configure the profile-panel effect only when its retained handle is zero. */
-void mnuEnsureProfilePanelEffect(s32 unused, MenuProgressHost *host) {
+void mnuEnsureProfilePanelEffect(DatPartyRecord *selectionState, MenuProgressHost *host) {
     if (host->currentEffect == 0) {
-        s32 effect = mnuCreateProfilePanel();
+        s32 effect = (s32)mnuCreateProfilePanel(selectionState);
         host->currentEffect = effect;
         mnuSetGroupProperties(effect, host->staffSlots.baseResources[0], host->staffSlots.pairResources[1], 1, 2);
     }
