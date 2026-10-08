@@ -28,7 +28,6 @@ extern void btlBossDebugPrintf(const char *, ...);
 extern u32 fldGetSceneScriptTaskUserData(void);
 extern char *D_004367B8;
 
-extern s32 datEnemyRecords;
 
 extern char *btlCommandPanelTaskNameRef;
 
@@ -294,11 +293,6 @@ typedef struct BtlActionTableEntry {
     u16 flags;             /* 0x1C */
     u8 pad1E[2];
 } BtlActionTableEntry;
-
-typedef struct BtlResourceTableEntry {
-    u32 flags;
-    u8 pad04[72];
-} BtlResourceTableEntry;
 
 
 typedef struct BtlStateHandler {
