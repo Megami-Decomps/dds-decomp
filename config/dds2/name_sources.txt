@@ -3317,6 +3317,7 @@
 0x0023C568	evtLoadUnitDirectionVectorVU	inferred	Chooses unit direction vector or default direction and loads VU register vf10. [names_reviewed6.tsv]
 0x0023C5F0	evtRefreshUnitEndpointWork	inferred	Refreshes endpoint render work after the value-change flag is cleared; uses the matching-slot selector when no target or color transition is active.
 0x0023C828	evtUnitSetValueAndFlag	inferred	Writes a unit value at offset 0x6c and sets the 0x20000 flag.
+0x0023C870	evtInitializeUnitColorTransition	inferred	Stores the color transition duration and targets, captures both current color vectors, and selects explicit targets.
 0x0023C908	evtSetUnitNormalizedDirection	inferred	Normalizes VU direction into unit vector, copies another vector, and adjusts unit flags. [names_reviewed6.tsv]
 0x0023C978	evtSetUnitRgbTransition	inferred	Byte-identical DDS1 twin; updates the evt-unit RGB transition counters and applies or queues the low 24-bit model color
 0x0023CA60	evtSetUnitAlphaTransition	inferred	readability/matching review (QP16)

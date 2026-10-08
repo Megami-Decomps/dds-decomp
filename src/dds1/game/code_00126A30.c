@@ -3300,7 +3300,7 @@ extern char D_003A0138[];
 extern KwlnTask *kwlnTaskGetTaskByName(const char *);
 extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *object);
 extern void evtSetUnitStatusFlags(EvtUnit *unit);
-extern void func_00221D00(EvtUnit *unit, s32 index, u32 colorA, u32 colorB);
+extern void evtInitializeUnitColorTransition(EvtUnit *unit, s32 index, u32 colorA, u32 colorB);
 extern void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 index);
 
 /* Alternate the selected value at the requested rate, and apply live lighting edits. */
@@ -3352,7 +3352,7 @@ void func_00132BD0(void) {
         green = D_003306C0[1] * 128.0f;
         blue = D_003306C0[2] * 128.0f;
         colorB = red | (blue << 16) | (green << 8) | 0x80000000;
-        func_00221D00(player, 0, colorA, colorB);
+        evtInitializeUnitColorTransition(player, 0, colorA, colorB);
         direction[0] = D_00330670[4];
         direction[1] = D_00330670[5];
         direction[2] = D_00330670[6];
@@ -3382,7 +3382,7 @@ void func_00132E38(s32 duration, f32 redA, f32 greenA, f32 blueA,
     green = greenB * 128.0f;
     blue = blueB * 128.0f;
     colorB = red | (blue << 16) | (green << 8) | 0x80000000;
-    func_00221D00(player, duration, colorA, colorB);
+    evtInitializeUnitColorTransition(player, duration, colorA, colorB);
     direction[0] = x;
     direction[1] = y;
     direction[2] = z;
@@ -3564,7 +3564,7 @@ void fldApplySkyLightSetToPlayerVU(void) {
         green = light->unitColorB[1] * 128.0f;
         blue = light->unitColorB[2] * 128.0f;
         colorB = red | (blue << 16) | (green << 8) | 0x80000000;
-        func_00221D00(unit, 0, colorA, colorB);
+        evtInitializeUnitColorTransition(unit, 0, colorA, colorB);
         dir[0] = light->unitLightDirection[0];
         dir[1] = light->unitLightDirection[1];
         dir[2] = light->unitLightDirection[2];
