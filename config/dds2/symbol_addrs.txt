@@ -6479,6 +6479,7 @@ effTexturedSquareEnabled = 0x00436465;
 effStaggeredBlurEnabled = 0x00436466;
 frFontContextCursorSpacing = 0x00436554;
 frFontDefaultGlyphCellSize = 0x00436558;
+D_00436582 = 0x00436582; // size:0x2
 frFontSharedGlyphFlags = 0x00436564;
 frFontSharedRenderFlags = 0x00436568;
 itfFontTestScriptTask = 0x00436590;
