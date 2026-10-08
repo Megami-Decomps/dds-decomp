@@ -1430,7 +1430,7 @@ typedef struct {
     SdfMemBlock *allocationHandle; /* Owner follows its particles in this allocation. */
 } EffEventBillSet; /* 0x88 */
 
-extern void *billCreateFromResource(s32 kind, const char *path);
+extern BillObj *billCreateFromResource(s32 kind, const char *path);
 
 /* Allocate particles plus their owner, copy parameters and acquire shared textures. */
 INCLUDE_RODATA(const s32, "effect/effEvent", D_003A12E0);

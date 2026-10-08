@@ -59,7 +59,7 @@ extern const f32 D_0039F828[20];
 extern void *sdfAllocSizeClassBlock(s32 size);
 EffectDependencyState *effObjGetReadyData(EffectObj *obj);
 void *sdfReleaseResourceAllocation(void *arg);
-void *sdfReadNamedResource(void *resource, u32 *resolvedId, s32 options);
+struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern void *func_0014FE28(void);
 
@@ -74,7 +74,7 @@ extern void effCopyVector(void *source, void *destination);
 extern EffWorldNode *dds3GetFirstWorldObjectNodeOfKind2(void);
 extern void dds3EnsureWorldNodeInSlot(void *id, void *owner);
 
-extern void *billCreateFromResource(s32 kind, s32 resourceId);
+extern BillObj *billCreateFromResource(s32 kind, const char *path);
 
 extern void *billCreateIndexed(s32 kind, u32 billId);
 
@@ -235,10 +235,10 @@ void effObjCreateIndexedKindOne(u32 billId, void *firstVector, s32 secondVectorA
 }
 
 /* Create a kind-one resource bill; the native constructor result is discarded. */
-void effObjCreateResourceKindOne(s32 resourceId, void *firstVector, s32 secondVectorAddress) {
+void effObjCreateResourceKindOne(const char *path, void *firstVector, s32 secondVectorAddress) {
     void *bill;
 
-    bill = billCreateFromResource(1, resourceId);
+    bill = billCreateFromResource(1, path);
     effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
 }
 
@@ -298,10 +298,10 @@ void effObjCreateIndexedKindZero(u32 billId, void *firstVector, s32 secondVector
 }
 
 /* Create a kind-zero resource bill for the state-three constructor. */
-void effObjCreateResourceKindZero(s32 resourceId, void *firstVector, s32 secondVectorAddress) {
+void effObjCreateResourceKindZero(const char *path, void *firstVector, s32 secondVectorAddress) {
     void *bill;
 
-    bill = billCreateFromResource(0, resourceId);
+    bill = billCreateFromResource(0, path);
     effObjCreateBillNode(bill, firstVector, secondVectorAddress);
 }
 

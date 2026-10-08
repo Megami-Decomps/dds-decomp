@@ -431,10 +431,12 @@ void mnuClearNodeBroadcastFlag(u8 *node) {
 
 /* Resolves a model from a resource and releases its temporary resource data. */
 
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
+
 u32 mnuLoadNodeModelFromResource(u32 *owner, u32 resource) {
     u32 handle;
     u32 other;
-    u32 data = sdfReadNamedResource(resource, &handle, &other);
+    struct SdfMemBlock *data = sdfReadNamedResource((const char *)(u32)resource, &handle, &other);
     *owner = (u32)fileCloneQueueEntries((FileQueue *)handle);
     fileQueueNotifyAllJobsComplete(*owner);
     sdfReleaseResourceAllocation(data);

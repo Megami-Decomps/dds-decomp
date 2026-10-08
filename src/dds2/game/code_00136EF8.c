@@ -166,7 +166,7 @@ extern FldCameraSetting *fldCameraSettings;
 
 extern SdfFlagListParams fldCameraColorParameters[];
 
-extern u32 sdfReadNamedResource(const char *, u32 *, s32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 
 
