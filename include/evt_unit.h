@@ -2,6 +2,7 @@
 #define EVT_UNIT_H
 
 #include "common.h"
+#include "eff_transform.h"
 
 struct MdlCtx;
 struct SdfTex;
@@ -14,6 +15,21 @@ typedef enum EvtUnitMotionState {
     EVT_UNIT_MOTION_STATE_VECTOR = 3,
     EVT_UNIT_MOTION_STATE_VALUE = 4
 } EvtUnitMotionState;
+
+/* Bits consumed by the event unit's motion, value and visual transitions. */
+enum EvtUnitFlags {
+    EVT_UNIT_FLAG_PATH_REVERSE = 0x4,
+    EVT_UNIT_FLAG_USE_UNIT_FIRST_COLOR = 0x100,
+    EVT_UNIT_FLAG_USE_UNIT_SECOND_COLOR = 0x200,
+    EVT_UNIT_FLAG_USE_UNIT_COLOR_CHANNELS = 0x300,
+    EVT_UNIT_FLAG_RGB_TRANSITION = 0x8000,
+    EVT_UNIT_FLAG_ALPHA_TRANSITION = 0x10000,
+    EVT_UNIT_FLAG_VALUE_CHANGED = 0x20000,
+    EVT_UNIT_FLAG_TARGET_TRANSITION = 0x40000,
+    EVT_UNIT_FLAG_TARGET_BLEND_IN = 0x80000,
+    EVT_UNIT_FLAG_TARGET_BLEND_OUT = 0x100000,
+    EVT_UNIT_FLAG_TARGET_BLEND_PHASES = 0x180000
+};
 
 /* Shared light-target payload used by the event manager and battle base-light task. */
 typedef struct EvtTargetInfo {
@@ -29,24 +45,20 @@ typedef struct EvtTargetInfo {
 
 typedef char EvtTargetInfoSizeCheck[sizeof(EvtTargetInfo) == 0x68 ? 1 : -1];
 
-/* Effect-vector data saved/restored during the motion dry run. Planar aim
- * passes orientation to the quaternion-to-matrix VU routine. */
-typedef struct EvtEffData {
-    u8 pad00[0x40];
-    f32 position[4];               /* 0x40 */
-    f32 orientation[4];            /* 0x50 */
-} EvtEffData;
+enum EvtTargetInfoFlags {
+    EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR = 0x8
+};
 
-/* Target of the unit's vector updates, shared by planar aim and the manager. */
-typedef struct EvtEffObj {
-    u8 pad00[0x1C];
-    EvtEffData *data;              /* 0x1C */
-} EvtEffObj;
+typedef enum EvtUnitVectorSlotState {
+    EVT_UNIT_VECTOR_SLOT_EMPTY = 0,
+    EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK = 2,
+    EVT_UNIT_VECTOR_SLOT_UNIT_BOUND = 3
+} EvtUnitVectorSlotState;
 
 /* Native 0x40-byte slot: three vec4 followed by two auxiliary coordinates.
  * The static pool contains seven slots in DDS1 and ten in DDS2. */
 typedef struct EvtUnitVectorSlot {
-    s32 state;                    /* 0x00: active states are 2 and 3. */
+    s32 state;                    /* 0x00: EvtUnitVectorSlotState. */
     s32 id;                       /* 0x04: unit bound to a state-3 slot. */
     f32 vec[14];                  /* 0x08: vec4 at 0x08/0x18/0x28, then 0x38/0x3C. */
 } EvtUnitVectorSlot;
@@ -96,7 +108,7 @@ typedef struct EvtUnit {
     void *endpointWork;            /* 0x68: owned 0xE0 endpoint-work allocation */
     u32 value;                     /* 0x6C */
     f32 targetVector[4];           /* 0x70 */
-    EvtEffObj *effObj;             /* 0x80 */
+    EffWorldNode *effObj;          /* 0x80: kind-5 world node owning this motion work. */
     s32 currentTransitionValue;    /* 0x84 */
     s32 previousTransitionValue;   /* 0x88 */
     struct MdlCtx *owner;          /* 0x8C: model context and its SDK motion slots */

@@ -456,11 +456,11 @@ extern FldFileResource *D_003BD7B8;
 extern u32 D_003BD7BC;
 extern struct DevRequest *D_003BAC14;
 extern EffWorldNode *evtCreateScriptObjectWithResource(s32, void *, struct MotionTable *, void *, const char *);
-extern void *dds3SpawnInnerVecObj6(s32, f32 *, void *);
+extern EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
-extern void effObjSetModelHolder(void *, u32);
+extern void effObjSetActiveId(EffWorldNode *, s32);
 extern s32 fldParseRoomNumberFromName(const char *);
-extern void effObjSetRoomNumber(void *, u32);
+extern void effObjSetRoomNumber(EffWorldNode *, u32);
 extern void *dds3FindWorldObjectNodeByKey(void *, u32, s32);
 extern void dds3SetSlotByKind(void *, void *);
 extern void func_00111F40(void *);
@@ -474,7 +474,7 @@ void fldCreateResourceScriptObjects(void) {
     FldFileResource *resource = D_003BD7B0;
     u32 count = D_003BD7B4;
     void *world;
-    void *object;
+    EffWorldNode *object;
     FldFileResource *binding;
     FldFileNameEntry *name;
     FldScriptResource *script;
@@ -515,25 +515,25 @@ void fldCreateResourceScriptObjects(void) {
         dds3SetWorldNodeValue(object, (u32)resource->name);
         if (fldAreaState[4] >= 200 && fldAreaState[4] < 500) {
             if (fldAreaState[4] == 230 && fldAreaState[5] == 6 && i == 2) {
-                effObjSetModelHolder(object, 6);
+                effObjSetActiveId(object, 6);
             } else {
                 switch (i) {
                     case 0:
-                        effObjSetModelHolder(object, 2);
+                        effObjSetActiveId(object, 2);
                         break;
                     case 1:
-                        effObjSetModelHolder(object, 3);
+                        effObjSetActiveId(object, 3);
                         break;
                     case 2:
-                        effObjSetModelHolder(object, 4);
+                        effObjSetActiveId(object, 4);
                         break;
                     default:
-                        effObjSetModelHolder(object, 5);
+                        effObjSetActiveId(object, 5);
                         break;
                 }
             }
         } else {
-            effObjSetModelHolder(object, 7);
+            effObjSetActiveId(object, 7);
         }
         effObjSetRoomNumber(object, fldParseRoomNumberFromName(resource->name));
         dds3SetSlotByKind(object, dds3FindWorldObjectNodeByKey(world, resource->id, 10));
@@ -2661,7 +2661,7 @@ void fldUpdateCameraMoveOscillation(void) {
             phase -= 11.0f;
         }
         D_003BAD20 = phase;
-        effObjSetNodeFlags(camera->inner, 1);
+        effObjSetNodeFlags(camera->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
     }
 }
 
@@ -3300,7 +3300,7 @@ extern char D_003A0138[];
 extern KwlnTask *kwlnTaskGetTaskByName(const char *);
 extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *object);
 extern void evtSetUnitStatusFlags(EvtUnit *unit);
-extern void func_00221D00(EvtUnit *unit, s32 index, u32 colorA, u32 colorB);
+extern void evtInitializeUnitColorTransition(EvtUnit *unit, s32 index, u32 colorA, u32 colorB);
 extern void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 index);
 
 /* Alternate the selected value at the requested rate, and apply live lighting edits. */
@@ -3352,7 +3352,7 @@ void func_00132BD0(void) {
         green = D_003306C0[1] * 128.0f;
         blue = D_003306C0[2] * 128.0f;
         colorB = red | (blue << 16) | (green << 8) | 0x80000000;
-        func_00221D00(player, 0, colorA, colorB);
+        evtInitializeUnitColorTransition(player, 0, colorA, colorB);
         direction[0] = D_00330670[4];
         direction[1] = D_00330670[5];
         direction[2] = D_00330670[6];
@@ -3382,7 +3382,7 @@ void func_00132E38(s32 duration, f32 redA, f32 greenA, f32 blueA,
     green = greenB * 128.0f;
     blue = blueB * 128.0f;
     colorB = red | (blue << 16) | (green << 8) | 0x80000000;
-    func_00221D00(player, duration, colorA, colorB);
+    evtInitializeUnitColorTransition(player, duration, colorA, colorB);
     direction[0] = x;
     direction[1] = y;
     direction[2] = z;
@@ -3564,7 +3564,7 @@ void fldApplySkyLightSetToPlayerVU(void) {
         green = light->unitColorB[1] * 128.0f;
         blue = light->unitColorB[2] * 128.0f;
         colorB = red | (blue << 16) | (green << 8) | 0x80000000;
-        func_00221D00(unit, 0, colorA, colorB);
+        evtInitializeUnitColorTransition(unit, 0, colorA, colorB);
         dir[0] = light->unitLightDirection[0];
         dir[1] = light->unitLightDirection[1];
         dir[2] = light->unitLightDirection[2];

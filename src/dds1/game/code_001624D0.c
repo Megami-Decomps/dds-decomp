@@ -111,7 +111,7 @@ typedef struct EffBattleUnitColorCommand {
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void evtSetUnitStatusFlags(EvtUnit *);
-extern void func_00221D00(EvtUnit *, s32, u32, u32);
+extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 extern void evtSetUnitNormalizedDirection(EvtUnit *, s32);
 extern void effBattleMiscDirectionTo(BtlUnit *, EffectVectorRequest *, f32 *);
 extern u32 btlCameraVectorHasNaN(void);
@@ -181,7 +181,7 @@ void func_001624D0(BtlUnit *unit, EffBattleUnitColorCommand *command, u32 frame)
         for (index = 0; index < count; index++) {
             eventUnit = selected[index]->ext;
             evtSetUnitStatusFlags(eventUnit);
-            func_00221D00(eventUnit, startDuration, command->firstColor, command->secondColor);
+            evtInitializeUnitColorTransition(eventUnit, startDuration, command->firstColor, command->secondColor);
             effBattleMiscDirectionTo(selected[index], &command->request, direction);
             VU0_LOAD_VF(vf10, direction);
             evtSetUnitNormalizedDirection(eventUnit, startDuration);
@@ -206,7 +206,7 @@ void func_001624D0(BtlUnit *unit, EffBattleUnitColorCommand *command, u32 frame)
                 EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
                 secondColor = packedEnd[0];
             }
-            func_00221D00(eventUnit, endDuration, firstColor, secondColor);
+            evtInitializeUnitColorTransition(eventUnit, endDuration, firstColor, secondColor);
             VU0_LOAD_VF(vf10, selected[index]->lightDirection);
             evtSetUnitNormalizedDirection(eventUnit, endDuration);
         }

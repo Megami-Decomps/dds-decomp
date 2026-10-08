@@ -184,7 +184,7 @@ s32 effObjInnerCreate(EffWorldNode *node) {
     if (inner == NULL) {
         return 0;
     }
-    inner->flags = 1;
+    inner->flags = OBJECT_TRANSFORM_FLAG_UPDATE_PENDING;
     effObjInnerVecInit(inner);
     VU0_STORE_VF(vf0, &inner->unkB0);
     node->inner = inner;
@@ -248,7 +248,8 @@ void effObjSetInnerFirstVec(EffWorldNode *node, u128 *vector) {
     ObjectTransform *inner = node->inner;
     f32 *dst = inner->position;
 
-    inner->flags = (inner->flags | 1) & ~2;
+    inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
+        ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     PCP_COPY_VECTOR(dst, vector);
 }
 
@@ -256,7 +257,8 @@ void effObjSetInnerSecondVec(EffWorldNode *node, u128 *vector) {
     ObjectTransform *inner = node->inner;
     f32 *dst = inner->rotation;
 
-    inner->flags = (inner->flags | 1) & ~2;
+    inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
+        ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     PCP_COPY_VECTOR(dst, vector);
 }
 
@@ -264,7 +266,8 @@ void effObjSetInnerThirdVec(EffWorldNode *node, u128 *vector) {
     ObjectTransform *inner = node->inner;
     f32 *dst = inner->scale;
 
-    inner->flags = (inner->flags | 1) & ~2;
+    inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
+        ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     PCP_COPY_VECTOR(dst, vector);
 }
 
@@ -293,7 +296,8 @@ void effObjAddInnerFirstVec(EffWorldNode *node, void *vector) {
     u8 *src = (u8 *)&inner->position;
     u8 *dst;
 
-    inner->flags = (inner->flags | 1) & ~2;
+    inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
+        ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     VU0_LOAD_VF(vf10, src);
     VU0_LOAD_VF_MEMORY(vf11, vector);
     VU0_ADD(vf10, vf10, vf11);
@@ -303,7 +307,8 @@ void effObjAddInnerFirstVec(EffWorldNode *node, void *vector) {
 void effObjQuatMulInnerSecondVec(EffWorldNode *node, u128 *vector) {
     ObjectTransform *inner = node->inner;
 
-    inner->flags = (inner->flags | 1) & 0xFFFFFFFD;
+    inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
+        ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     VU0_LOAD_VF($vf10, &inner->rotation);
     VU0_LOAD_VF($vf11, vector);
     effMiscQuatMultiplyVU();
@@ -315,7 +320,8 @@ void effObjMulInnerThirdVec(EffWorldNode *node, void *vector) {
     u8 *src = (u8 *)&inner->scale;
     u8 *dst;
 
-    inner->flags = (inner->flags | 1) & ~2;
+    inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
+        ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     VU0_LOAD_VF(vf10, src);
     VU0_LOAD_VF_MEMORY(vf11, vector);
     VU0_MUL(vf10, vf10, vf11);

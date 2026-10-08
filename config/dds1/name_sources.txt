@@ -501,8 +501,9 @@
 0x00113AA8	evtEndObjectValueTransition	inferred	Ends the object value transition and clears its active identifier. [names_reviewed8.tsv]
 0x00113CD8	effObjGetDataHandle	inferred	confidence=high; matched-C; src/dds1/game/code_001130E0.c:380:func_00113CD8; Returns the handle word in the effect object data record, not the world-object pointer or transition-work pointer.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00113CE8	dds3SpawnInnerVecObj6	inferred	type 6 object with identity first vector and copied vec
-0x00113DC0	effObjSetModelHolder	inferred	confidence=high; matched-C; src/dds1/game/code_001130E0.c:426:func_00113DC0; Stores the supplied pointer in the effect object modelHolder member.; source=revalidated-unapplied-names_R_Names31.tsv:4 [names_qp12_apply.tsv]
-0x00113DD0	effObjSetRoomNumber	inferred	caller stores fldParseRoomNumberFromName(resource->name) in EffectObjectData.word04
+0x00113DC0	effObjSetActiveId	inferred	Sets the active resource ID on a kind-6 world node at EffectTransformData.activeId (+0x0C); fldCreateResourceScriptObjects supplies IDs 2-7.
+0x00113DD0	effObjSetRoomNumber	inferred	Stores the parsed room number in the kind-6 EffectTransformData.roomNumber field.
+0x00113DE0	effObjGetRoomNumberById	inferred	Looks up a kind-6 world node by key and returns its roomNumber payload word.
 0x00113E20	dds3SetObjectPayloadWord8	inferred	Writes the opaque word at node payload +0x08; kind-6 field callers use mode values while kind-5 payloads retain transition work there.
 0x00113E30	dds3GetObjectPayloadWord8	inferred	Reads the opaque word at node payload +0x08; native helper accesses no other payload fields and field callers compare mode values.
 0x00113E40	effObjSetOpacityPassEnabled	inferred	Callers gate effObjSubmitTransformOpacityPasses; setter stores the pass-enabled word.
@@ -3693,10 +3694,12 @@
 0x00221890	evtLoadUnitFirstColorVectorVU	inferred	Chooses packed unit color or target/default first vector and loads VU register vf10. [names_reviewed6.tsv]
 0x00221940	evtLoadUnitSecondColorVectorVU	inferred	Chooses second packed color or target/default vector and loads VU register vf10. [names_reviewed6.tsv]
 0x002219F8	evtLoadUnitDirectionVectorVU	inferred	Chooses unit direction vector or default direction and loads VU register vf10. [names_reviewed6.tsv]
+0x00221A80	evtRefreshUnitEndpointWork	inferred	Refreshes endpoint render work after the value-change flag is cleared; uses the matching-slot selector when no target or color transition is active.
 0x00221BE0	evtSetUnitValueTransition	inferred	Saves the previous unit value, installs a new value, and sets elapsed/duration and transition flags.
 0x00221C50	evtEndUnitValueTransition	inferred	Clears the current unit transition immediately or switches to its timed ending mode.
 0x00221CB8	evtUnitSetValueAndFlag	inferred	Byte-identical dds2 twin 0x0023C828; Writes a unit value at offset 0x6c and sets the 0x20000 flag. [names_conflicts.tsv]
 0x00221CD0	evtClearUnitValueChangeFlag	inferred	Clears the unit's value-change bit before updating the unit.
+0x00221D00	evtInitializeUnitColorTransition	inferred	Stores the color transition duration and targets, captures both current color vectors, and selects explicit targets.
 0x00221D98	evtSetUnitNormalizedDirection	inferred	Normalizes VU direction into unit vector, copies another vector, and adjusts unit flags. [names_reviewed6.tsv]
 0x00221E08	evtSetUnitRgbTransition	inferred	Updates the evt-unit RGB transition counters and applies or queues the low 24-bit model color
 0x00221EF0	evtSetUnitAlphaTransition	inferred	readability/matching review (QP16)

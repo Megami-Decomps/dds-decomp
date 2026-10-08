@@ -1,5 +1,6 @@
 #include "common.h"
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
 #include "eff.h"
 
 
@@ -113,7 +114,90 @@ void effReleaseScatterObject(PcpScatterDraw *object) {
     sdfReleaseChipBlock(object);
 }
 
-INCLUDE_ASM(const s32, "game/code_00175B00", func_00175DD0);
+/* Per-draw state consumed by the scatter packet builder (0x30 bytes). */
+typedef struct ScatterRenderState {
+    u16 primitiveCount;
+    u16 vertexCount;
+    u16 flags;
+    u8 pad06[2];
+    u32 color;
+    void *parameters;
+    f32 *points;
+    u8 pad14[4];
+    f32 *uv;
+    u8 pad1C[4];
+    u32 *colors;
+    u8 pad24[8];
+} ScatterRenderState;
+
+extern ScatterRenderState D_003D65B0;
+extern u8 D_00354B90[];
+extern SdfPoolNode *D_00354BF0[];
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern void sdfComposeVuMatrixFromRegisters(void);
+extern void sdfConsAppendVuPacket(s32, s32 (*)(s32));
+extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
+extern void sdfAppendPacket(SdfListHead *, u32);
+extern s32 func_0015FE20(ScatterRenderState *);
+struct SdfTextParam;
+extern void func_002DA438(struct SdfTextParam *, u32);
+
+/* Render scatter strips in batches of sixteen vertices, then submit the tail. */
+void func_00175DD0(PcpScatterDraw *object) {
+    f32 matrix[16] __attribute__((aligned(16)));
+    SdfListHead *packet;
+    ScatterRenderState *draw;
+    s32 count;
+    s32 remaining;
+    s32 index;
+    SdfPoolNode *surface;
+
+    packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packet);
+    EE_MMI_UNIT_MATRIX(matrix);
+    matrix[10] = matrix[5] = matrix[0] = object->scale;
+    object->matrix[12] = object->origin[0];
+    object->matrix[13] = object->origin[1];
+    object->matrix[14] = object->origin[2];
+    VU0_LOAD_MATRIX(object->matrix);
+    VU0_LOAD_MATRIX_B(matrix);
+    sdfComposeVuMatrixFromRegisters();
+    sdfConsAppendVuPacket((s32)packet, 0);
+    if (object->sharedResource != NULL) {
+        func_002DA438((struct SdfTextParam *)object->asset,
+                      (u32)object->sharedResource->textureHandle);
+    }
+    sdfConsAppendAssetPacket((s32)packet, (void *)object->asset, 0);
+    count = (s32)object->particleCount;
+    D_003D65B0.parameters = D_00354B90;
+    for (index = 0; index < count; index++) {
+        draw = &D_003D65B0;
+        remaining = object->stride;
+        draw->points = (f32 *)effGetScatterWideBlock(object, index);
+        draw->uv = (f32 *)effGetScatterNarrowBlock(object, index);
+        draw->colors = object->vertexColors;
+        draw->color = effGetScatterEntry(object, index);
+        draw->primitiveCount = 16;
+        draw->vertexCount = 18;
+        if ((draw->color & 0xFF000000) != 0) {
+            while (remaining >= 18) {
+                remaining -= 16;
+                sdfAppendPacket(packet, func_0015FE20(&D_003D65B0));
+                D_003D65B0.points += 64;
+                D_003D65B0.colors += 16;
+                D_003D65B0.uv += 32;
+            }
+            if (remaining >= 4) {
+                draw->primitiveCount = remaining - 2;
+                draw->vertexCount = remaining;
+                sdfAppendPacket(packet, func_0015FE20(draw));
+            }
+        }
+    }
+    surface = D_00354BF0[object->unk50];
+    surface->append((SdfListHead *)surface, packet);
+}
 
 /* Give this object its own reference to a newly created scatter resource. */
 void effCreateScatterResource(PcpScatterDraw *object, u32 resource) {

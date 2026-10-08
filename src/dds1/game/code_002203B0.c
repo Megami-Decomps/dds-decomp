@@ -138,7 +138,7 @@ void evtComputeHorizontalDisplacementVu(f32 *a, f32 *b) {
 void evtComputePlanarTargetDirectionVu(EvtUnit *unit) {
     f32 v[4];
 
-    VU0_LOAD_VF(vf10, unit->effObj->data->orientation);
+    VU0_LOAD_VF(vf10, unit->effObj->inner->rotation);
     effMiscQuaternionToMatrixVU();
     VU0_STORE_VF(vf30, v);
     v[1] = 0.0f;
@@ -156,7 +156,7 @@ s32 func_00220678(EvtUnit *unit) {
     case 0:
     case 1:
     case 2:
-        evtComputeHorizontalDisplacementVu(unit->targetVector, unit->effObj->data->position);
+        evtComputeHorizontalDisplacementVu(unit->targetVector, unit->effObj->inner->position);
         VU0_LENGTH_VF10(value);
         if (value <= 20.0f) {
             return 1;
@@ -164,7 +164,7 @@ s32 func_00220678(EvtUnit *unit) {
         break;
     case 3:
         value = evtGetValueScaleFactor((void *)unit->pathHandle);
-        if (unit->flags & 4) {
+        if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (value == 0.0f) {
                 return 1;
             }
@@ -191,7 +191,7 @@ s32 evtUnitStepScaledValue(EvtUnit *unit) {
         break;
     case 2:
         t = evtGetValueScaleFactor((void *)unit->pathHandle);
-        if (unit->flags & 4) {
+        if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (t == 0.0f) {
                 return 0;
             }

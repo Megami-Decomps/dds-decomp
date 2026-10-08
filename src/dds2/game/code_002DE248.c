@@ -6856,7 +6856,7 @@ extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern void effBattleMiscDirectionTo(BtlUnit *, EffectVectorRequest *, f32 *);
 extern u32 btlCameraVectorHasNaN(void);
 extern u32 btlBlendColorVec(f32 *, f32 *, f32);
-extern void func_0023C870(EvtUnit *, s32, u32, u32);
+extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
 void func_002F6000(EffActiveResource *work) {
     EffectVectorRequest request;
@@ -6927,7 +6927,7 @@ void func_002F6000(EffActiveResource *work) {
                 effect = actors[index]->ext;
                 evtSetUnitStatusFlags(effect);
                 if (config->colorFadeIn != -1 && config->colorFadeOut != -1) {
-                    func_0023C870(effect, config->colorFadeIn, config->firstColor, config->secondColor);
+                    evtInitializeUnitColorTransition(effect, config->colorFadeIn, config->firstColor, config->secondColor);
                 }
                 if (config->directionFadeIn != -1 && config->directionFadeOut != -1) {
                     if (request.kind == 3) {
@@ -6974,7 +6974,7 @@ void func_002F6000(EffActiveResource *work) {
                     EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
                     secondColor = packedEnd[0];
                 }
-                func_0023C870(effect, config->colorFadeOut, firstColor, secondColor);
+                evtInitializeUnitColorTransition(effect, config->colorFadeOut, firstColor, secondColor);
             }
         }
     }

@@ -38,7 +38,7 @@ extern FldUnitLightParams D_0038BB10;
 extern FldUnitLightColor D_0038BB60;
 extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *);
 extern void evtSetUnitStatusFlags(EvtUnit *);
-extern void func_0023C870(EvtUnit *, s32, u32, u32);
+extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 extern void evtSetUnitNormalizedDirection(EvtUnit *, s32);
 
 extern s32 fldCameraModelObject;
@@ -535,14 +535,12 @@ extern FldFileResource *D_00438EC0;
 extern u32 D_00438EC4;
 extern struct DevRequest *D_00435FA4;
 extern EffWorldNode *evtCreateScriptObjectWithResource(s32, void *, struct MotionTable *, void *, const char *);
-struct WorldObj;
-struct EffectObject;
 struct EffWorldNode;
-extern struct WorldObj *dds3SpawnInnerVecObj6(s32, f32 *, void *);
+extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
-extern void effObjSetModelHolder(struct EffectObject *, u32);
+extern void effObjSetActiveId(struct EffWorldNode *, s32);
 extern s32 fldParseRoomNumberFromName(char *);
-extern void effObjSetRoomNumber(struct EffectObject *, u32);
+extern void effObjSetRoomNumber(struct EffWorldNode *, u32);
 extern struct EffWorldNode *dds3FindWorldObjectNodeByKey(struct EffWorldNode *, u32, s32);
 extern void *dds3SetSlotByKind(ObjBase *, ObjData *);
 extern void func_00112168(void *);
@@ -556,7 +554,7 @@ void fldCreateResourceScriptObjects(void) {
     FldFileResource *resource = D_00438EB8;
     u32 count = D_00438EBC;
     void *world;
-    void *object;
+    struct EffWorldNode *object;
     FldFileResource *binding;
     FldFileNameEntry *name;
     FldScriptResource *script;
@@ -594,31 +592,31 @@ void fldCreateResourceScriptObjects(void) {
             rotation[3] = 0.0f;
         }
         object = dds3SpawnInnerVecObj6(resource->id, position, rotation);
-        dds3SetWorldNodeValue((struct EffWorldNode *)object, (u32)resource->name);
+        dds3SetWorldNodeValue(object, (u32)resource->name);
         if (fldAreaState[4] >= 200 && fldAreaState[4] < 500) {
             if (fldAreaState[4] == 230 && fldAreaState[5] == 6 && i == 2) {
-                effObjSetModelHolder(object, 6);
+                effObjSetActiveId(object, 6);
             } else {
                 switch (i) {
                     case 0:
-                        effObjSetModelHolder(object, 2);
+                        effObjSetActiveId(object, 2);
                         break;
                     case 1:
-                        effObjSetModelHolder(object, 3);
+                        effObjSetActiveId(object, 3);
                         break;
                     case 2:
-                        effObjSetModelHolder(object, 4);
+                        effObjSetActiveId(object, 4);
                         break;
                     default:
-                        effObjSetModelHolder(object, 5);
+                        effObjSetActiveId(object, 5);
                         break;
                 }
             }
         } else {
-            effObjSetModelHolder(object, 7);
+            effObjSetActiveId(object, 7);
         }
         effObjSetRoomNumber(object, fldParseRoomNumberFromName((char *)resource->name));
-        dds3SetSlotByKind(object, (ObjData *)dds3FindWorldObjectNodeByKey(world, resource->id, 10));
+        dds3SetSlotByKind((ObjBase *)object, (ObjData *)dds3FindWorldObjectNodeByKey(world, resource->id, 10));
         func_00112168(object);
         binding = D_00438EC0;
         for (j = 0; j < D_00438EC4; j++, binding++) {
@@ -636,7 +634,7 @@ void fldCreateResourceScriptObjects(void) {
         /* Retail fetches the link descriptor even when the object is NULL. */
         linkedName = (FldResourceName *)resource->word14;
         if (object != NULL) {
-            dds3SetSlotByKind(object, (ObjData *)dds3FindIndexedObjectChainNodeByName(world, 2, (const u8 *)linkedName->name));
+            dds3SetSlotByKind((ObjBase *)object, (ObjData *)dds3FindIndexedObjectChainNodeByName(world, 2, (const u8 *)linkedName->name));
             dds3RegisterObjectInHandlerIndex(object);
         }
     }
@@ -2686,7 +2684,7 @@ void fldUpdateCameraMoveOscillation(void) {
             phase -= 11.0f;
         }
         D_004360B0 = phase;
-        effObjSetNodeFlags(camera->inner, 1);
+        effObjSetNodeFlags(camera->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
     }
 }
 
@@ -3433,7 +3431,7 @@ void func_001355D8(void) {
         green = D_0038BB60.color[1] * 128.0f;
         blue = D_0038BB60.color[2] * 128.0f;
         colorB = red | (blue << 16) | (green << 8) | 0x80000000;
-        func_0023C870(player, 0, colorA, colorB);
+        evtInitializeUnitColorTransition(player, 0, colorA, colorB);
         direction[0] = D_0038BB10.direction[0];
         direction[1] = D_0038BB10.direction[1];
         direction[2] = D_0038BB10.direction[2];
@@ -3468,9 +3466,9 @@ void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
     green = greenB * 128.0f;
     blue = blueB * 128.0f;
     colorB = red | (blue << 16) | (green << 8) | 0x80000000;
-    func_0023C870(player, duration, colorA, colorB);
+    evtInitializeUnitColorTransition(player, duration, colorA, colorB);
     if (fldSecondarySceneObject != 0) {
-        func_0023C870(secondary, duration, colorA, colorB);
+        evtInitializeUnitColorTransition(secondary, duration, colorA, colorB);
     }
     direction[0] = x;
     direction[1] = y;

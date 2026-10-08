@@ -41,8 +41,8 @@ s32 dds3UpdateCameraObject(EffWorldNode *camera) {
 
     inner = camera->inner;
     data = ((CameraData *)camera->data);
-    if (effObjTestNodeFlags(inner, 1) == 1) {
-        effObjClearNodeFlags(inner, 1);
+    if (effObjTestNodeFlags(inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) == 1) {
+        effObjClearNodeFlags(inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
         dds3RebuildCameraBasis(camera);
         effObjInnerVecBackup(inner);
     }
