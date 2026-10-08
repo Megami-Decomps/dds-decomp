@@ -1,3 +1,4 @@
+#include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_task_condition.h"
 #include "btl_state.h"
@@ -521,7 +522,6 @@ void btlRaiseLinkedActionPose(BtlLinkedCommand *command) {
 }
 
 extern BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *);
-extern void btlInitMotionTransformFromComponents(BtlCamState *, f32, f32, f32, f32, f32, f32, f32, f32);
 extern void func_002DD608(f32);
 extern void func_002DD968(f32);
 extern void sdfComposeVuMatrixFromRegisters(void);
