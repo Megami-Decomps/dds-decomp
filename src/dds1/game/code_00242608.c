@@ -57,7 +57,7 @@
 extern void evtLoadResourcePair(const char *, u8 *);
 extern s32 evtCreateMessageWindowIfMissing(s32);
 extern s32 func_00244848();
-extern s32 D_003BC520;
+extern struct EffectSlotSet *D_003BC520;
 extern s32 itfMesGetWindowEntryItems(s32, s32);
 extern void mnuUnpackNibbleFields();
 
@@ -944,23 +944,26 @@ typedef struct ShopBatch {
 } ShopBatch;
 
 void mnuInitializeShopStatusBatches(ShopScene *scene) {
+    struct EffMappedResource *batchHandle;
     ShopBatch *batchObject;
     ShopBatchGraphics *batchGraphics;
     s32 *batchParameters;
     s32 initialParameter = CAMP_STATUS_INITIAL_PARAMETER;
     scene->batchState = 0;
-    batchObject = (ShopBatch *)effCreateStatusBatch(6);
+    batchHandle = effCreateStatusBatch(6);
+    batchObject = (ShopBatch *)batchHandle;
     batchGraphics = batchObject->graphics;
-    scene->batches[0] = (u8 *)batchObject;
+    scene->batches[0] = batchHandle;
     batchParameters = batchGraphics->params;
     batchParameters[0] = initialParameter;
     batchParameters[1] = 0;
     batchParameters[2] = 0;
     batchParameters[3] = 0;
     batchParameters[4] = 0;
-    batchObject = (ShopBatch *)effCreateStatusBatch(1);
+    batchHandle = effCreateStatusBatch(1);
+    batchObject = (ShopBatch *)batchHandle;
     batchGraphics = batchObject->graphics;
-    scene->batches[1] = (u8 *)batchObject;
+    scene->batches[1] = batchHandle;
     batchParameters = batchGraphics->params;
     batchParameters[0] = initialParameter;
     batchParameters[1] = 0;
@@ -968,11 +971,11 @@ void mnuInitializeShopStatusBatches(ShopScene *scene) {
 
 /* Destroy both batches and return the second destruction result. */
 s32 mnuShopReleaseSceneObjects(ShopScene *scene) {
-    s32 *batchCursor = (s32 *)scene->batches;
+    struct EffMappedResource **batchCursor = scene->batches;
     s32 destroyResult;
     u32 batchIndex;
     for (batchIndex = 0; batchIndex < CAMP_STATUS_BATCH_COUNT; batchIndex++) {
-        destroyResult = effDestroyPackedBatch((struct EffMappedResource *)(u32)*batchCursor++);
+        destroyResult = effDestroyPackedBatch(*batchCursor++);
     }
     return destroyResult;
 }
@@ -980,7 +983,7 @@ s32 mnuShopReleaseSceneObjects(ShopScene *scene) {
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF3D0);
 
 void mnuShopLoadSpriteAssets(ShopScene *scene) {
-    u32 *resource = &scene->spriteResource;
+    struct EffectSlotSet **resource = &scene->spriteResource;
     *resource = effLoadIndexedResource("/facility/spr/shop/", D_0036AA60[0], 0);
 }
 
@@ -1162,13 +1165,13 @@ s32 mnuCountActivePartyEntries(void) {
 }
 
 ShopScene *mnuShopCreateScene(void) {
-    s32 handle;
+    struct SdfMemBlock *allocation;
     ShopScene *obj;
 
-    handle = (u32)sdfAllocGeneralBlock(0xB4);
-    obj = (ShopScene *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    allocation = sdfAllocGeneralBlock(0xB4);
+    obj = (ShopScene *)sdfResourceRetainAddress(allocation);
     memset(obj, 0, 0xB4);
-    obj->resourceHandle = handle;
+    obj->resourceHandle = allocation;
     mnuClearPanelTransitionState(&obj->transitionWork);
     mnuShopLoadSpriteAssets(obj);
     mnuInitializeShopStatusBatches(obj);
@@ -1193,7 +1196,7 @@ void mnuShopDestroyScene(KwlnTask *arg) {
         mnuDrainPanelTransitions(&scene->transitionWork, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle(scene->resourcePair);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(scene->resourceHandle));
+        sdfReleaseResourceAllocation(scene->resourceHandle);
         D_003BC39C = 2;
     }
 }

@@ -12,7 +12,7 @@ typedef struct EffBillboardWork {
     u32 mode;   /* 0x10 */
     u32 color;  /* 0x14 */
     f32 scale;  /* 0x18 */
-    u32 handle; /* 0x1C */
+    struct BillObj *handle; /* 0x1C: owned billboard object */
 } EffBillboardWork;
 
 /* Creation parameters read by effCreateBillboardResourceWork. */
@@ -271,8 +271,8 @@ EffBillboardWork *effCreateBillboardResourceWork(EffBillboardParams *params) {
     EffBillboardWork *billboard = (EffBillboardWork *)sdfAllocSizeClassBlock(0x20);
 
     billboard->mode = params->mode;
-    billboard->handle = (u32)effCreateBillboardSharingIndexedResource(2);
-    billSetBillboardMode((struct BillObj *)billboard->handle, 2);
+    billboard->handle = effCreateBillboardSharingIndexedResource(2);
+    billSetBillboardMode(billboard->handle, 2);
     billboard->color = 0x80808080;
     billboard->scale = 100.0f;
     return billboard;

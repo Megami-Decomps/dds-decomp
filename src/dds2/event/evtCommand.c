@@ -155,7 +155,30 @@ extern char D_00421FB0[]; /* "LIGHT_PATH_MOVE error!\n" */
 
 extern char D_00421FC8[]; /* "error: LIGHT_PATH_MOVE.\n" */
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00240D20);
+/* Copy two source points into the primary effect object. */
+s32 func_00240D20(void) {
+    struct EffectObj *primary;
+    struct EffectObj *point0;
+    struct EffectObj *point1;
+
+    primary = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    if (primary == NULL) {
+        evtPrintDeveloperConsoleMessage("EFFMG1_POS mg1 ID error!\n");
+        return 1;
+    }
+
+    point0 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(1));
+    point1 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(2));
+    if (point0 == NULL || point1 == NULL) {
+        evtPrintDeveloperConsoleMessage("EFFMG1_POS point ID not found!\n");
+        return 1;
+    }
+    if (effObjCopyMagatuhiSourceParameters(primary, point0, point1, NULL, NULL) == 0) {
+        evtPrintDeveloperConsoleMessage("EFFMG1_POS set error!\n");
+        return 1;
+    }
+    return 1;
+}
 
 /* Apply four effect parameters after resolving every input object. */
 s32 func_00240DE0(void) {
