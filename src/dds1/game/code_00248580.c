@@ -1806,7 +1806,7 @@ u32 evtBeginSelectionExitFade(KwlnTask *task) {
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 extern s32 fileMenuTaskExists(void);
 extern void fileSetPreviewLocation();
-extern void fileEnterMcPackScene(s32);
+extern void fileEnterMcPackScene(s32 mode);
 
 s32 func_0024B868(KwlnTask *request) {
     s32 context = kwlnTaskGetUserValue(request);
