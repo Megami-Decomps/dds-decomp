@@ -826,7 +826,7 @@ typedef struct EffectSlotSet {
     BdWork *workEntries;
     u32 textureCount;
     struct SdfMemBlock *textureAllocation;
-    void **handles;
+    SdfTex **textureReferences;
     s32 defaultValue;
     u8 pad2C[4];
 } EffectSlotSet;
