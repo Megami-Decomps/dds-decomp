@@ -6317,6 +6317,7 @@
 0x003447D8	sdfStreamOpen	inferred	init params, allocates frame buffers, appends to stream list
 0x00344870	sdfSoundInitFormattedNode	inferred	Byte-identical DDS1 counterpart: Initializes a sound node using format and callback values and allocates its sample buffer.
 0x003448D0	sdfStreamInitializeFromHeader	inferred	confidence=high; matched-C; src/dds2/game/code_003425B0.c:756:func_003448D0; Peer-matched C proposal: P7; Waits for a complete streamed frame header, captures dimensions and format metadata, creates a texture when absent, allocates frame buffers and links the stream node.; source=names_pending_main.tsv:146 [names_qp13.tsv]
+0x00344A08	sdfDestroyStreamFrameNode	inferred	Duplicated DDS1 stream-node teardown: unlink both queues, stop active IPU DMA, release owned buffers and enqueue its texture resource
 0x00344B40	sndFillStreamFeedRing	inferred	confidence=high; src/dds2/game/code_003425B0.c:func_00344B40; Fills uncached stream-ring slots up to its reserve limit, handles partial EOF, preserves wrap history and updates occupancy. [names_qp9.tsv]
 0x00344D60	sdfSoundStartIpuInputDma	inferred	Fam_Mid3
 0x00345198	sdfIpuDmaCompletionWorker	inferred	confidence=high; src/dds2/game/code_003425B0.c:func_00345198; Waits for IPU worker wakeups, stops DMA, updates completion/loop state, requeues unfinished work with interrupt protection, and resumes processing. [names_qp9.tsv]
