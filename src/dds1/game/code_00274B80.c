@@ -425,7 +425,7 @@ void mnuRestorePartyEntriesAndRefresh(context)
     PartyEntryCopy *entryCursor = menuWork->current;
     s32 entryCounter;
     s32 backupByteOffset;
-    s32 panelWork;
+    MenuPageWindow *panelWork;
 
     for (entryCounter = 0; entryCounter < MNU_STAFF_PARTY_SLOT_COUNT; entryCounter++) {
         if (entryCursor->flags & MNU_STAFF_PARTY_ACTIVE_BIT) {
@@ -438,11 +438,11 @@ void mnuRestorePartyEntriesAndRefresh(context)
         *(PartyEntryCopy *)(backupByteOffset + (s32)datGameState + MNU_STAFF_PARTY_BASE) = *(PartyEntryCopy *)(backupByteOffset + (s32)menuWork + PARTY_BACKUP_OFFSET);
         backupByteOffset += MNU_STAFF_PARTY_ENTRY_BYTES;
     }
-    panelWork = (s32)&((CampMenuContext *)context)->partyWindow;
+    panelWork = &((CampMenuContext *)context)->partyWindow;
     mnuReleasePartyPanelTextures(panelWork);
     mnuInitPartyPanelSlots(&((CampMenuContext *)context)->partyPanel);
-    mnuUpdateHandleStates((MenuPageWindow *)panelWork);
-    func_00280048(panelWork);
+    mnuUpdateHandleStates(panelWork);
+    func_00280048((s32)panelWork);
 }
 
 /* Count active entries in the five-slot party array, capped at three. */
@@ -483,7 +483,7 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
 
 /* Release panel textures before reinitializing slots and updating handle state. */
 void mnuRefreshPartyPanelSlots(s32 context) {
-    mnuReleasePartyPanelTextures((s32)&((CampMenuContext *)context)->partyWindow);
+    mnuReleasePartyPanelTextures(&((CampMenuContext *)context)->partyWindow);
     mnuInitPartyPanelSlots(&((CampMenuContext *)context)->partyPanel);
     mnuUpdateHandleStates(&((CampMenuContext *)context)->partyWindow);
 }

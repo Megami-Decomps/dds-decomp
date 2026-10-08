@@ -581,7 +581,10 @@ void mnuReleasePageHandlesAndClearSelection(MenuPageWindow *);
 void mnuReleaseSpriteTextures(s32 *objectWords);
 #endif
 void mnuReleasePartyPanelSpriteTextures(MenuPageWindow *);
+void mnuReleasePartyPanelTextures(MenuPageWindow *);
 void mnuShutdownContext(MenuPageWindow *);
+void mnuFlagActiveWindows(MenuPageWindow *);
+void mnuClearPartyPanelActiveFlags(MenuPageWindow *);
 
 void mnuCopyPrimaryWindowHandles(MenuPageWindow *, struct EffectSlotSet **);
 void mnuCopySecondaryWindowHandles(MenuPageWindow *, struct EffectSlotSet **);
