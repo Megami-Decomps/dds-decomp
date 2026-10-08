@@ -11344,18 +11344,13 @@ void *effGetSlotWorkOrOverride(EffectSlotSet *owner, s32 slotIndex) {
     return (void *)entryAddress;
 }
 
-/* Start at zero when moving forward, otherwise at the full 16.16 endpoint.
- * The return value remains the original flag mask or full endpoint.
- */
-u32 effInitializeSlotPhase(EffTimedState *state) {
-    u32 value = state->flags & EFF_TIMED_STATE_DIRECTION_FORWARD;
-    if (value != 0) {
+/* Start at zero when moving forward, otherwise at the full 16.16 endpoint. */
+void effInitializeSlotPhase(EffTimedState *state) {
+    if (state->flags & EFF_TIMED_STATE_DIRECTION_FORWARD) {
         state->value = 0;
     } else {
-        value = EFF_PHASE_FULL;
-        state->value = value;
+        state->value = EFF_PHASE_FULL;
     }
-    return value;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_00304B18);
