@@ -1910,7 +1910,7 @@ s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
             BtlUnit *unit = btlGetIndexListEntry(list, i);
             if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == 1) {
                 u16 current = btlReadCurrentUnitHp(&unit->partyRecord);
-                if (best >= current && current != 0) {
+                if (current <= best && current != 0) {
                     best = current;
                     found++;
                     bestIndex = i;

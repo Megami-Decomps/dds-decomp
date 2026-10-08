@@ -4864,47 +4864,39 @@ void func_001E8580(BtlCamState *dst, BtlCamState *current, BtlCamState *target, 
 
 extern void func_001E8580(BtlCamState *, BtlCamState *, BtlCamState *, f32);
 
-extern void btlScalarRangeInitQuadratic(u8 *, f32);
-
-extern f32 btlScalarRangeStepQuadratic(f32);
-
-s32 btlStepPoseBlendHalf(u8 *fx) {
+s32 btlStepPoseBlendHalf(BtlLinkedCommand *command) {
     f32 t;
-    if (((BtlLinkedCommand *)fx)->state == 0) {
-        ((BtlLinkedCommand *)fx)->progressBits = 0;
-        btlScalarRangeInitQuadratic(fx + 0x160, (f32)(((BtlLinkedCommand *)fx)->durationFrames * 2));
-        btlCopyMotionTransform(&((BtlLinkedCommand *)fx)->camera, &((BtlLinkedCommand *)fx)->frontCamera);
+    if (command->state == 0) {
+        command->progressBits = 0;
+        btlScalarRangeInitQuadratic(&command->quadraticRange, (f32)(command->durationFrames * 2));
+        btlCopyMotionTransform(&command->camera, &command->frontCamera);
         return 0;
     }
-    t = btlScalarRangeStepQuadratic(1.0f);
+    t = btlScalarRangeStepQuadratic(&command->quadraticRange, 1.0f);
     if (t > 0.5f) {
         t = 0.5f;
     }
-    func_001E8580(&((BtlLinkedCommand *)fx)->camera, &((BtlLinkedCommand *)fx)->frontCamera, &((BtlLinkedCommand *)fx)->backCamera, t + t);
-    ((BtlLinkedCommand *)fx)->progress = t;
+    func_001E8580(&command->camera, &command->frontCamera, &command->backCamera, t + t);
+    command->progress = t;
     if (0.5f <= t) {
         return 1;
     }
     return 0;
 }
 
-extern void btlScalarRangeSetStartClearEnd(u8 *, f32);
-
-extern f32 btlScalarRangeStepExponential(u8 *);
-
 extern void func_001E8580(BtlCamState *, BtlCamState *, BtlCamState *, f32);
 
-s32 btlStepPoseBlend(u8 *fx) {
-    u8 *timer = fx + 0x158;
-    BtlCamState *pose = &((BtlLinkedCommand *)fx)->frontCamera;
+s32 btlStepPoseBlend(BtlLinkedCommand *command) {
+    BtlExponentialRange *timer = &command->exponentialRange;
+    BtlCamState *pose = &command->frontCamera;
     f32 t;
-    if (((BtlLinkedCommand *)fx)->state == 0) {
-        btlScalarRangeSetStartClearEnd(timer, ((BtlLinkedCommand *)fx)->motionParameter);
-        btlCopyMotionTransform(&((BtlLinkedCommand *)fx)->camera, pose);
+    if (command->state == 0) {
+        btlScalarRangeSetStartClearEnd(timer, command->motionParameter);
+        btlCopyMotionTransform(&command->camera, pose);
     }
     t = btlScalarRangeStepExponential(timer);
-    func_001E8580(&((BtlLinkedCommand *)fx)->camera, pose, &((BtlLinkedCommand *)fx)->backCamera, t);
-    ((BtlLinkedCommand *)fx)->progress = t;
+    func_001E8580(&command->camera, pose, &command->backCamera, t);
+    command->progress = t;
     if (0.999999f <= t) {
         return 1;
     }
@@ -4913,34 +4905,30 @@ s32 btlStepPoseBlend(u8 *fx) {
 
 extern void func_001E8580(BtlCamState *, BtlCamState *, BtlCamState *, f32);
 
-extern void btlScalarRangeInitQuadratic(u8 *, f32);
-
-extern f32 btlScalarRangeStepQuadratic(f32);
-
-s32 btlStepPoseBlendFrame(u8 *fx) {
+s32 btlStepPoseBlendFrame(BtlLinkedCommand *command) {
     f32 t;
-    if (((BtlLinkedCommand *)fx)->state == 0) {
-        ((BtlLinkedCommand *)fx)->progressBits = 0;
-        btlScalarRangeInitQuadratic(fx + 0x160, (f32)((BtlLinkedCommand *)fx)->durationFrames);
-        btlCopyMotionTransform(&((BtlLinkedCommand *)fx)->camera, &((BtlLinkedCommand *)fx)->frontCamera);
+    if (command->state == 0) {
+        command->progressBits = 0;
+        btlScalarRangeInitQuadratic(&command->quadraticRange, (f32)command->durationFrames);
+        btlCopyMotionTransform(&command->camera, &command->frontCamera);
         return 0;
     }
-    t = btlScalarRangeStepQuadratic(1.0f);
-    func_001E8580(&((BtlLinkedCommand *)fx)->camera, &((BtlLinkedCommand *)fx)->frontCamera, &((BtlLinkedCommand *)fx)->backCamera, t);
-    ((BtlLinkedCommand *)fx)->progress = t;
+    t = btlScalarRangeStepQuadratic(&command->quadraticRange, 1.0f);
+    func_001E8580(&command->camera, &command->frontCamera, &command->backCamera, t);
+    command->progress = t;
     if (0.999999f <= t) {
         return 1;
     }
     return 0;
 }
 
-s32 btlStepPoseBlendRatio(u8 *fx) {
-    f32 ratio = (f32)((BtlLinkedCommand *)fx)->state / (f32)((BtlLinkedCommand *)fx)->durationFrames;
+s32 btlStepPoseBlendRatio(BtlLinkedCommand *command) {
+    f32 ratio = (f32)command->state / (f32)command->durationFrames;
     if (ratio <= 1.0f) {
-        func_001E8580(&((BtlLinkedCommand *)fx)->camera, &((BtlLinkedCommand *)fx)->frontCamera, &((BtlLinkedCommand *)fx)->backCamera, ratio);
+        func_001E8580(&command->camera, &command->frontCamera, &command->backCamera, ratio);
         return 0;
     }
-    btlCopyMotionTransform(&((BtlLinkedCommand *)fx)->camera, &((BtlLinkedCommand *)fx)->backCamera);
+    btlCopyMotionTransform(&command->camera, &command->backCamera);
     return 0;
 }
 
