@@ -5,6 +5,7 @@
 #include "dat_state.h"
 #include "kwln.h"
 #include "eff.h"
+#include "itf.h"
 struct MenuScrollPanel;
 extern u32 kwlnTaskGetUserValue();
 extern void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *);
@@ -22,16 +23,13 @@ extern s32 evtStageTestSelectEntry(s32, s32, s32);
 extern void func_00276720(s32, s32, s32, s32);
 extern void mnuInitPartyPanelSlots(PartyPanel *);
 
-typedef struct FrFontGlyph FrFontGlyph;
-typedef struct FrFontCtx FrFontCtx;
-struct TextStyleNode;
 extern u32 uiBlendColors(u32, u32, u32);
 extern s32 mnuLookupRangeEntry(u16);
 extern u16 mnuGetAdjustedEntryValue(s32, s32);
 extern u16 mnuGetAdjustedPartyRangeValue(s32);
 extern u8 mnuGetRangeEntryKind(u32);
 extern s32 func_003014F0(char *, const char *, ...);
-extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
+extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern void frFontSetChainFlag(FrFontGlyph *, u8);
 extern s32 func_001958A0(FrFontGlyph *, s8, u32);
 extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
@@ -40,8 +38,8 @@ extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern s32 func_002CD240(u16, const char **);
 extern void func_002845F8(s32, s32, s32, u32, u16, s32, MenuEffectPair *, u32);
 extern void mnuDrawCenteredLabel(s32, s32, s32, s32, s32, s32);
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-extern void func_00196088(s32, s32, s32);
+extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
+extern void func_00196088(s32, s32, FrFontGlyph *);
 extern char D_003BC6F0[], D_003BC6F8[];
 extern char D_003BC700[];
 
@@ -279,7 +277,7 @@ extern u32 kwlnTaskGetUserValue();
 
 
 extern s32 D_003BAA7C;
-extern u32 itfDrawUnderscoreTextSegment();
+extern FrFontGlyph *itfDrawUnderscoreTextSegment(s32, s32, s32, u32, const u8 *, s32);
 extern s32 D_003BAA70;
 extern void mnuDestroyWindowContainer(u32);
 
@@ -645,17 +643,17 @@ void func_00275B40(EffectSlotSet **sets, MenuEffectPair *hpBar, MenuEffectPair *
         if (func_002CD240(profile, &name)) {
             mnuDrawCenteredLabel(0x650, 0xBC8, 0, color, profile, 0x53);
         } else {
-            glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+            glyph = itfCreateConvertedTextGlyph(
                 0x640, 0xBE8, 0, color, (const u8 *)name, 0);
-            func_00196088(0xD20, 0xBE8, (s32)glyph);
+            func_00196088(0xD20, 0xBE8, glyph);
             func_001958A0(glyph, 1, 0x53);
             frFontQueueGlyphInSelectedSlot(glyph);
         }
     } else {
-        glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+        glyph = itfCreateConvertedTextGlyph(
             0x640, 0xBE8, 0, color, (const u8 *)D_003BC6F0, 0);
-        glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(
-            0xB50, 0xBF0, 0, color, (const u8 *)D_003BC6F8, (s32)glyph);
+        glyph = itfCreateConvertedTextGlyph(
+            0xB50, 0xBF0, 0, color, (const u8 *)D_003BC6F8, glyph);
         func_001958A0(glyph, 1, 0x53);
         frFontQueueGlyphInSelectedSlot(glyph);
     }
@@ -1080,16 +1078,16 @@ void mnuDrawSlotIcons(s32 x, MenuPageWindow *page) {
     DatPartyRecord *slot = &datGameState->party[page->lists[0]->cursor->index];
     s32 i;
     s32 y;
-    s32 handle;
+    FrFontGlyph *handle;
 
     itfSetTextDrawLimit(0x13);
     x = x * 8;
     y = x + 0xbc0;
     for (i = 0; i < 3; i++, y += 0xa8) {
-        handle = itfDrawUnderscoreTextSegment(0x190, y, 0, 0xa09dc359, D_003BAA7C + slot->unitId * 45, i);
+        handle = itfDrawUnderscoreTextSegment(0x190, y, 0, 0xa09dc359, (const u8 *)(D_003BAA7C + slot->unitId * 45), i);
         if (handle != 0) {
-            func_001958A0((FrFontGlyph *)handle, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot((FrFontGlyph *)handle);
+            func_001958A0(handle, 1, 0x53);
+            frFontQueueGlyphInSelectedSlot(handle);
         }
     }
     itfSetTextDrawLimit(-1);
@@ -1113,24 +1111,20 @@ void mnuDrawStaffPanelGridBackdrop(s32 flag, StaffSlots *slots) {
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00276F70);
 
 extern void frFontAddSharedGlyphFlags(s32);
-extern FrFontCtx *frFontAppendGlyphFromData(void *, s8, s8, s8, s32);
-extern void frFontSetContextPair(FrFontCtx *, u32, u32);
-extern void frFontStoreShiftedContextValue(FrFontCtx *, u32);
-extern void frFontSetChildColors(struct TextStyleNode *, u32);
 extern u8 frFontClearFlagBits(u8);
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param) {
-    FrFontCtx *item;
+    FrFontGlyph *item;
     s32 top = y - 0x10;
 
     frFontAddSharedGlyphFlags(1);
     item = frFontAppendGlyphFromData((void *)textId, 0, 0, 0, 0);
     frFontSetContextPair(item, x, top);
     frFontStoreShiftedContextValue(item, scale * 0x10);
-    frFontSetChildColors((struct TextStyleNode *)item, color);
+    frFontSetChildColors(item, color);
     frFontClearFlagBits(1);
-    func_001958A0((FrFontGlyph *)item, 1, param);
-    frFontQueueGlyphInSelectedSlot((FrFontGlyph *)item);
+    func_001958A0(item, 1, param);
+    frFontQueueGlyphInSelectedSlot(item);
 }
 
 void mnuDrawPartySkillAndStatusPanel(u8 *entry, MenuPageWindow *page, MenuPanelGroup *packedGroup, MenuSpriteState *spriteState, s32 obj, s32 spriteFlags) {
@@ -1200,7 +1194,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     char text[16];
     u32 color;
     s32 value;
-    u32 glyph;
+    FrFontGlyph *glyph;
     u8 chainFlag;
 
     color = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
@@ -1224,9 +1218,9 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     func_003014F0(text, D_003BC700, value);
     glyph = func_001978E8(x - 0x90, y, depth, color, text, 0);
     x += 0x140;
-    frFontSetChainFlag((FrFontGlyph *)glyph, chainFlag);
-    func_001958A0((FrFontGlyph *)glyph, 1, texture);
-    frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
+    frFontSetChainFlag(glyph, chainFlag);
+    func_001958A0(glyph, 1, texture);
+    frFontQueueGlyphInSelectedSlot(glyph);
     switch (mnuGetRangeEntryKind(rangeId)) {
     case 1:
     default:

@@ -3,6 +3,7 @@
 #include "mnu_shop.h"
 #include "dat_state.h"
 #include "eff.h"
+#include "itf.h"
 
 extern EffPayload *effCreatePayload(u32);
 extern u32 effDestroyPayload(EffPayload *);
@@ -17,9 +18,9 @@ extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
 
 extern s32 D_003BAA98;
 
-struct FrFontGlyph;
 extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
 extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
+extern FrFontGlyph *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
 
 
 typedef struct MenuListNode MenuListNode;
@@ -125,16 +126,16 @@ s32 func_0027A0A8(s32 callback) {
 }
 
 void mnuDrawSelectionLabel(s32 selection) {
-    s32 item = itfDrawTextWithSelectedFontMode(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
+    FrFontGlyph *item = itfDrawTextWithSelectedFontMode(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
     frFontSetChildColors(item, 0xA09DC366);
-    func_001958A0((struct FrFontGlyph *)(u32)item, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)item);
+    func_001958A0(item, 1, 0x53);
+    frFontQueueGlyphInSelectedSlot(item);
 }
 
 extern s32 ptyGetAffinityKind(s32, s32);
 extern s32 ptyGetAffinityFlagsWithoutOverride(s32, s32);
 extern s32 mnuLookupRangeEntry(u16);
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
+extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern const u8 *D_0037CCC8[16];
 extern const u8 *D_003BAA8C;
@@ -146,7 +147,7 @@ void func_0027A140(u16 affinityId, s32 placeholderResource, s32 rangeResource) {
 
     for (slot = 0; slot < 3; slot++, y += 0xC8) {
         s32 kind = ptyGetAffinityKind((s32)affinityId, slot);
-        u32 glyph = 0;
+        FrFontGlyph *glyph = 0;
 
         if (kind < 0) {
             if (kind == -1) {
@@ -177,8 +178,8 @@ void func_0027A140(u16 affinityId, s32 placeholderResource, s32 rangeResource) {
         }
 
         if (glyph != 0) {
-            func_001958A0((struct FrFontGlyph *)(u32)glyph, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)glyph);
+            func_001958A0(glyph, 1, 0x53);
+            frFontQueueGlyphInSelectedSlot(glyph);
         }
     }
 }

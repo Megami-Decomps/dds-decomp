@@ -9,6 +9,7 @@ extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
 extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 #include "fpu.h"
 #include "sdf.h"
+#include "itf.h"
 
 extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 
@@ -68,9 +69,6 @@ extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 
 typedef struct MenuList MenuList;
 typedef struct MenuIconState MenuIconState;
-typedef struct FrFontGlyph FrFontGlyph;
-typedef struct FrFontCtx FrFontCtx;
-struct TextStyleNode;
 
 extern u32 uiBlendColors(u32, u32, u32);
 extern s32 mnuLookupRangeEntry(u16);
@@ -78,7 +76,7 @@ extern u16 mnuGetAdjustedEntryValue(s32, s32);
 extern s32 mnuGetRangeEntryFlatValue(s32);
 extern u8 mnuGetRangeEntryKind(u32);
 extern s32 func_0035C860(char *, const char *, ...);
-extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
+extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern void frFontSetChainFlag(FrFontGlyph *, u8);
 extern void mnuDrawRepeatedPanelSprites(s32, s32, s32, s32, s32, EffectSlotSet *, s32, s32);
 extern char D_00437BF8[];
@@ -107,7 +105,8 @@ extern void mnuReleasePartyIconBundles();
 
 extern void mnuClearEntries();
 
-extern u32 itfDrawUnderscoreTextSegment();
+extern FrFontGlyph *itfDrawUnderscoreTextSegment(s32, s32, s32, u32, const u8 *, s32);
+extern FrFontGlyph *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
 
 extern s32 D_00435E54;
 
@@ -128,10 +127,6 @@ extern void func_002C10F0();
 extern void mnuDrawSlotIcons();
 
 extern void frFontAddSharedGlyphFlags(s32);
-extern FrFontCtx *frFontAppendGlyphFromData(void *, s8, s8, s8, s32);
-extern void frFontSetContextPair(FrFontCtx *, u32, u32);
-extern void frFontStoreShiftedContextValue(FrFontCtx *, u32);
-extern void frFontSetChildColors(struct TextStyleNode *, u32);
 extern u8 frFontClearFlagBits(u8);
 
 extern char D_003E7588[];
@@ -402,7 +397,7 @@ typedef struct MenuPartyView {
 
 extern const char *D_003E78D0[];
 extern s32 D_00435E70;
-extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const char *, s32);
+extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 extern void func_002AF2E0(s32, s32, s32, MenuContext *);
 extern void mnuSetPanelItemsFromRow(MenuPanelGroup *, s32);
 extern void mnuClearStaffSceneConfigEntries(MenuPanelGroup *);
@@ -434,7 +429,7 @@ void mnuDrawStaffPartySelectionPanel(s32 task) {
                 func_002AAC98(2, 0, 0, context, 1, 0x53);
             }
         } else {
-            glyph = itfCreateConvertedTextGlyph(0x2B0, 0xA20, 0, 0xA09DC380, D_003E78D0[0], 0);
+            glyph = itfCreateConvertedTextGlyph(0x2B0, 0xA20, 0, 0xA09DC380, (const u8 *)D_003E78D0[0], 0);
             frFontSetChainFlag(glyph, 4);
             func_0019D550(glyph, 1, 0x53);
             frFontQueueGlyphInSelectedSlot(glyph);
@@ -1277,12 +1272,12 @@ void mnuDrawSlotIcons(s32 x, s32 context) {
     DatPartyRecord *slot = &datGameState->party[((MenuPageWindow *)context)->lists[0]->cursor->index];
     s32 i;
     s32 y = 0xb40;
-    s32 handle;
+    FrFontGlyph *handle;
     for (i = 0; i < 2; i++, y += 0xb8) {
-        handle = itfDrawUnderscoreTextSegment(0x3c0, y, 0, 0xa09dc359, D_00435E54 + slot->unitId * 45, i);
+        handle = itfDrawUnderscoreTextSegment(0x3c0, y, 0, 0xa09dc359, (const u8 *)(D_00435E54 + slot->unitId * 45), i);
         if (handle != 0) {
-            func_0019D550((FrFontGlyph *)handle, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot((FrFontGlyph *)handle);
+            func_0019D550(handle, 1, 0x53);
+            frFontQueueGlyphInSelectedSlot(handle);
         }
     }
 }
@@ -1297,15 +1292,15 @@ void mnuDrawSelectedPartySlotMarkers(s32 context, StaffSlots *resources) {
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags) {
     s32 top = y - 0x10;
-    FrFontCtx *handle;
+    FrFontGlyph *handle;
     frFontAddSharedGlyphFlags(1);
     handle = frFontAppendGlyphFromData((void *)model, 0, 0, 0, 0);
     frFontSetContextPair(handle, x, top);
     frFontStoreShiftedContextValue(handle, width << 4);
-    frFontSetChildColors((struct TextStyleNode *)handle, color);
+    frFontSetChildColors(handle, color);
     frFontClearFlagBits(1);
-    func_0019D550((FrFontGlyph *)handle, 1, flags);
-    frFontQueueGlyphInSelectedSlot((FrFontGlyph *)handle);
+    func_0019D550(handle, 1, flags);
+    frFontQueueGlyphInSelectedSlot(handle);
 }
 
 void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, MenuPanelGroup *packedGroup, s32 group, s32 unused, s32 spriteFlags) {
@@ -1401,7 +1396,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     char text[16];
     u32 color;
     s32 value;
-    u32 glyph;
+    FrFontGlyph *glyph;
     u8 chainFlag;
     s32 kind;
     s32 hpOffset = 0;
@@ -1433,9 +1428,9 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
         }
         func_0035C860(text, D_00437BF8, value);
         glyph = func_0019F5E8(x + hpOffset, y - 8, depth, color, text, 0);
-        frFontSetChainFlag((FrFontGlyph *)glyph, chainFlag);
-        func_0019D550((FrFontGlyph *)glyph, 1, texture);
-        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
+        frFontSetChainFlag(glyph, chainFlag);
+        func_0019D550(glyph, 1, texture);
+        frFontQueueGlyphInSelectedSlot(glyph);
     } else {
         mnuDrawRepeatedPanelSprites(x, y, depth, 0x100, 3, costResource, 0x1B, texture);
         return;
@@ -2372,11 +2367,11 @@ s32 func_002B6800(s32 callback) {
 }
 
 void mnuDrawSelectionLabel(u16 id) {
-    s32 label = itfDrawTextWithSelectedFontMode(0x11B0, 0xA88, 0, 0, id, 1);
+    FrFontGlyph *label = itfDrawTextWithSelectedFontMode(0x11B0, 0xA88, 0, 0, id, 1);
 
     frFontSetChildColors(label, 0xA09DC35A);
-    func_0019D550((FrFontGlyph *)label, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot((FrFontGlyph *)label);
+    func_0019D550(label, 1, 0x53);
+    frFontQueueGlyphInSelectedSlot(label);
 }
 
 extern MenuPoint D_00437C08[];
@@ -2409,19 +2404,19 @@ void func_002B6898(u16 affinity, s32 resource, s32 labels) {
                                                0, 1, labels, range + 1, 0x53);
                     glyph = itfCreateConvertedTextGlyph(x + textOffset.x, y + textOffset.y,
                                                        0, 0xA09DC380,
-                                                       (const char *)D_00435E64[requirement], 0);
+                                                       D_00435E64[requirement], 0);
                 }
             } else {
                 s32 requirement = ptyGetAffinityFlagsWithoutOverride(affinity, i);
                 glyph = itfCreateConvertedTextGlyph(x + textOffset.x, y + textOffset.y,
                                                    0, 0xA09DC380,
-                                                   (const char *)D_00435E68[requirement], 0);
+                                                   D_00435E68[requirement], 0);
                 itfDrawGridWithResolvedSlot(x + iconOffset.x, y + iconOffset.y,
                                            0, 1, resource, 0xA, 0x53);
             }
         } else {
             glyph = itfCreateConvertedTextGlyph(x + textOffset.x, y + textOffset.y,
-                                               0, 0xA09DC380, D_003E77C8[kind], 0);
+                                               0, 0xA09DC380, (const u8 *)D_003E77C8[kind], 0);
             itfDrawGridWithResolvedSlot(x + iconOffset.x, y + iconOffset.y,
                                        0, 1, resource, 0xA, 0x53);
         }
