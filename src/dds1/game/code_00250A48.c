@@ -17,20 +17,20 @@ void mnuBeginTransition(MenuSceneWork *work, s32 mode) {
             mnuResetResourceAnimation();
             mnuReinitializeSceneGrid(work);
         }
-        transition->value0C = mode;
+        transition->payload.transition.mode = mode;
         if (mode == 1) {
             work->transitionState = 10;
-            transition->value04 = *mnuGetSelectedNodeValue();
+            transition->payload.transition.fromValue = *mnuGetSelectedNodeValue();
             mnuStopResourceAnimation();
-            transition->value08 = *mnuGetSelectedNodeValue();
+            transition->payload.transition.toValue = *mnuGetSelectedNodeValue();
             mnuResetResourceAnimation();
             return;
         }
         if (mode == 2) {
             work->transitionState = -10;
-            transition->value04 = *mnuGetSelectedNodeValue();
+            transition->payload.transition.fromValue = *mnuGetSelectedNodeValue();
             mnuResetResourceAnimation();
-            transition->value08 = *mnuGetSelectedNodeValue();
+            transition->payload.transition.toValue = *mnuGetSelectedNodeValue();
             mnuStopResourceAnimation();
         }
     }
