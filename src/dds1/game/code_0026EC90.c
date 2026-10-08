@@ -5,6 +5,7 @@
 #include "mnu.h"
 #include "mnu_movie.h"
 #include "sdf.h"
+#include "mnu_movie_resource.h"
 #include "itf.h"
 #include "kwln_task_lifecycle.h"
 
@@ -18,7 +19,7 @@ extern char D_003B1140[]; /* "mnuStaffImageProc" */
 
 extern char D_003B1168[]; /* "staffProc" */
 
-extern u8 D_0037B168[];
+extern MnuMovieResourceEntry D_0037B168[];
 
 extern KwlnTask *mnuMovieDrawTask;
 extern KwlnTask *kwlnTaskCreate();
@@ -198,10 +199,9 @@ void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *
 }
 
 void mnuRequestIndexedMovieResource(s32 index) {
-    u8 *entry = D_0037B168 + index * 24;
+    MnuMovieResourceEntry *entry = &D_0037B168[index];
 
-    mnuStartMovieDrawTaskForResource((const char *)*(u32 *)entry,
-                                     (SdfMovieDescriptor *)(entry + 4));
+    mnuStartMovieDrawTaskForResource(entry->fileName, &entry->descriptor);
 }
 
 void mnuStopMovieDrawTask(void) {
