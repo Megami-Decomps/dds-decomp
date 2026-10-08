@@ -3160,7 +3160,27 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415308);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415318);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AED98);
+void func_001AED98(void) {
+    s32 count = 0;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
+
+    memset(D_00452EA0, 0, sizeof(D_00452EA0));
+    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+        if (unit->flags & 1) {
+            if (unit->flags & 0x200) {
+                D_00452EA0[count].flags = unit->flags;
+                D_00452EA0[count].unitId = unit->partyRecord.unitId;
+                memcpy(D_00452EA0[count].entrySlots, unit->entrySlots,
+                       sizeof(D_00452EA0[count].entrySlots));
+                D_00452EA0[count].status = unit->partyRecord.status & 0xCFF9;
+                count++;
+                func_0035B6E0("btl:state push[%d:%X]\n", count,
+                              unit->partyRecord.unitId);
+            }
+        }
+    }
+}
 
 
 extern const char D_00415340[];
