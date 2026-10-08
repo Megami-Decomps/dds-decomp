@@ -567,6 +567,13 @@ typedef struct MenuPageWindow {
 #ifdef VERSION_DDS2
 /* Marks the window-sprite mode toggled by page setup and entry resets. */
 #define MNU_PAGE_WINDOW_SPRITE_MODE 0x80
+
+void mnuSetWindowResource(s32 index, MenuPageWindow *menu,
+                          struct EffectSlotSet *mainResource,
+                          struct EffectSlotSet *itemResource,
+                          struct EffectSlotSet *iconResource,
+                          struct EffectSlotSet *cursorResource,
+                          struct EffectSlotSet *alternateResource);
 #endif
 
 void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth,
