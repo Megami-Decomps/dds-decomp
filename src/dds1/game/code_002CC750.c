@@ -1059,7 +1059,7 @@ void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32
     FrFontGlyph *handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, &frFontColoredGlyphResource, 0);
     frFontSetChildColors(handle, second);
     func_001958A0(handle, 1, option);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
 
 FrFontTextBank *frFontGetColoredGlyphResource(void) {

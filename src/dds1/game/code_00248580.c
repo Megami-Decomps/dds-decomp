@@ -187,7 +187,7 @@ void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 value, 
     }
     handle = itfCreateConvertedTextGlyph(gridX, gridY, depth, value, text, 0);
     func_001958A0(handle, 1, MNU_TEXT_DRAW_PRIORITY);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
 }
 
 
@@ -241,7 +241,7 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
     func_003014F0(text, mnuNumberSpriteFormat, number);
     sprite = func_001978E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), (s32)text, 0);
     func_001958A0(sprite, 1, priority);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)sprite);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)sprite);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF5A8);
@@ -2003,7 +2003,7 @@ void mnuDrawTerminalAmountText(s32 fading, s32 context) {
     }
     sprite = func_001979C8(0x1740, 0x210, 0, color, text, 0);
     func_001958A0(sprite, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)sprite);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)sprite);
 }
 
 extern void mnuDrawTerminalAmountText(s32, s32);

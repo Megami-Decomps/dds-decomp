@@ -327,7 +327,7 @@ typedef struct EffPCPRingWork {
     s32 handle;
 } EffPCPRingWork;
 void effPcpDispatchKindAndRelease(EffPCPRingWork *work) {
-    billDispatchByKind((u32)work->handle);
+    billDispatchByKind((BillObj *)(u32)work->handle);
     sdfReleaseChipBlock(work);
 }
 

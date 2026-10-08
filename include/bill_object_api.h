@@ -9,6 +9,7 @@ struct BillOut;
 struct BillChildPayload;
 struct SdfTex;
 
+void billDispatchByKind(struct BillObj *obj);
 struct SdfTex *effGetBillResourceTexture(s32 index);
 struct BillObj *effCreateBillboardSharingIndexedResource(s32 index);
 
