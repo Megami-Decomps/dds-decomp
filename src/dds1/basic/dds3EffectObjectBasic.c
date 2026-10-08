@@ -2,6 +2,7 @@
 #include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "eff_dependency.h"
+#include "eff_object.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
 #include "eff.h"
@@ -28,22 +29,9 @@
 
 
 
-typedef struct {
-    u8 pad0[0x40];
-    f32 vector[4];
-    u8 pad50[0x10];
-    f32 parameter;
-} EffectParameters;
+typedef ObjectTransform EffectParameters;
 
-typedef struct EffectObj {
-    u8 pad0[4];              /* 0x0 */
-    u32 worldCounter; /* 0x4 copied from the constructor's worldCounter */
-    u8 pad8[7];              /* 0x8 */
-    u8 kind;                 /* 0xF checked ==7 by effObjGetReadyData */
-    u8 pad10[8];             /* 0x10 */
-    EffectDependencyState *data;         /* 0x18 */
-    EffectParameters *params; /* 0x1C vector base read by effObjLoadReadyParameterVector/effObjGetIntParam */
-} EffectObj;
+typedef EffWorldNode EffectObj;
 
 void effObjFreeInner(void *arg);
 void dds3DestroyObjectBase(void *arg);
@@ -167,11 +155,11 @@ EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secon
     if (obj == NULL) {
         return NULL;
     }
-    obj->worldCounter = worldCounter;
+    obj->key = worldCounter;
     dds3EnsureSlotData(obj);
     effObjSetInnerFirstVec(obj, firstVec);
     effObjSetInnerSecondVec(obj, secondVec);
-    effObjInnerVecBackup(obj->params);
+    effObjInnerVecBackup(obj->inner);
     data = obj->data;
     data->flags = 0;
     data->state = 0;
@@ -219,7 +207,7 @@ EffectObj *effObjCreateKindTwo(void *bill, void *vec, s32 extra) {
 EffectObj *effObjSpawnSharedBillClone(EffectObj *obj, void *firstVector, s32 secondVectorAddress) {
     struct BillObj *bill;
 
-    bill = billCloneObjectRetainingSharedData((struct BillObj *)obj->data->handle);
+    bill = billCloneObjectRetainingSharedData((struct BillObj *)((EffectDependencyState *)obj->data)->handle);
     return effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
 }
 
@@ -241,7 +229,7 @@ EffectObj *effObjCreateResourceKindOne(const char *path, void *firstVector, s32 
 
 /* Select the stored bill's kind-one entry; no object/data/bill checks are made. */
 void func_00114CC8(EffectObj *obj) {
-    billSetKind1Entry(obj->data->handle);
+    billSetKind1Entry(((EffectDependencyState *)obj->data)->handle);
 }
 
 /* Create a state-three bill effect and attach the first kind-two world node if present.
@@ -282,7 +270,7 @@ EffectObj *effObjCreateBillNode(void *bill, void *firstVector, s32 secondVectorA
 EffectObj *effObjSpawnSharedBillNodeClone(EffectObj *obj, void *firstVector, s32 secondVectorAddress) {
     struct BillObj *bill;
 
-    bill = billCloneObjectRetainingSharedData((struct BillObj *)obj->data->handle);
+    bill = billCloneObjectRetainingSharedData((struct BillObj *)((EffectDependencyState *)obj->data)->handle);
     return effObjCreateBillNode(bill, firstVector, secondVectorAddress);
 }
 
@@ -574,7 +562,7 @@ EffectDependencyState *effObjGetReadyData(EffectObj *obj) {
     if (obj == NULL) {
         return data;
     }
-    if (obj->kind != EFF_OBJ_KIND) {
+    if (((u8 *)&obj->kindTag)[3] != EFF_OBJ_KIND) {
         return data;
     }
     data = obj->data;
@@ -589,7 +577,7 @@ s32 effObjLoadReadyParameterVector(EffectObj *obj) {
     if (effObjGetReadyData(obj) == NULL) {
         return 0;
     }
-    VU0_LOAD_VF(vf10, obj->params->vector);
+    VU0_LOAD_VF(vf10, obj->inner->position);
     return 1;
 }
 
@@ -600,8 +588,8 @@ s32 effObjGetIntParam(EffectObj *obj) {
     if (effObjGetReadyData(obj) == NULL) {
         return 0;
     }
-    parameters = obj->params;
-    return (s32)parameters->parameter;
+    parameters = obj->inner;
+    return (s32)parameters->scale[0];
 }
 
 extern void effMagatuhiInitializeInterpolatedHistory(void *bill);
@@ -610,7 +598,7 @@ extern void effMagatuhiDispatchByKind(void *bill);
 /* Dispatch bound-bill setup or four-row history initialization; two-row state does nothing.
    Native implicit-int fall-through leaves the return value unspecified. */
 effObjDispatchReadyState(EffectObj *obj) {
-    if (obj->kind == EFF_OBJ_KIND) {
+    if (((u8 *)&obj->kindTag)[3] == EFF_OBJ_KIND) {
         EffectDependencyState *data = obj->data;
 
         switch (data->state) {
@@ -632,7 +620,7 @@ s32 effObjCopyMagatuhiSourceParameters(EffectObj *obj, EffectObj *first, EffectO
     EffectDependencyState *data;
     f32 *parameterRows;
 
-    if (obj->kind != EFF_OBJ_KIND) {
+    if (((u8 *)&obj->kindTag)[3] != EFF_OBJ_KIND) {
         return 0;
     }
     data = obj->data;
@@ -675,12 +663,12 @@ s32 effObjCopyMagatuhiSourceParameters(EffectObj *obj, EffectObj *first, EffectO
 
 /* OR the requested flag bits into slot data; no object/data validation is performed. */
 void effObjSetFlags(EffectObj *obj, s32 flags) {
-    obj->data->flags |= flags;
+    ((EffectDependencyState *)obj->data)->flags |= flags;
 }
 
 /* Clear the requested flag bits; retain the signed mask parameter used by DDS1. */
 void effObjClearFlags(EffectObj *obj, s32 flags) {
-    obj->data->flags &= ~flags;
+    ((EffectDependencyState *)obj->data)->flags &= ~flags;
 }
 
 /* Accept owner kinds [4,10) or seventeen, reset link bookkeeping, and return one.
@@ -689,7 +677,7 @@ s32 effObjBindValidatedOwner(EffectObj *obj, EffectObj *owner) {
     EffectDependencyState *data;
     u8 kind;
 
-    kind = owner->kind;
+    kind = ((u8 *)&owner->kindTag)[3];
     if (kind < EFF_OBJ_OWNER_KIND_FIRST || (kind >= EFF_OBJ_OWNER_KIND_END && kind != EFF_OBJ_OWNER_KIND_EXTRA)) {
         return 0;
     }
@@ -700,7 +688,7 @@ s32 effObjBindValidatedOwner(EffectObj *obj, EffectObj *owner) {
     data->flags |= EFF_OBJ_FLAG_OWNER_LINK;
     data->flags &= ~EFF_OBJ_FLAG_OWNER_BILL_ENTRY;
     data->word10 = 0;
-    data->ownerKind = owner->kind;
+    data->ownerKind = ((u8 *)&owner->kindTag)[3];
     data->word14 = 0;
     return 1;
 }
@@ -727,8 +715,8 @@ void effObjForwardOwnerBillEntry(EffectObj *obj) {
     data = obj->data;
     if (data->flags & EFF_OBJ_FLAG_OWNER_BILL_ENTRY) {
         owner = data->owner;
-        if (owner->kind == EFF_OBJ_OWNER_BILL_KIND) {
-            bill = owner->data->handle;
+        if (((u8 *)&owner->kindTag)[3] == EFF_OBJ_OWNER_BILL_KIND) {
+            bill = (BillPayload *)((EffectObjectData *)owner->data)->modelHolder;
             if (bill->state != 0) {
                 return;
             }
