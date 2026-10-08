@@ -4074,3 +4074,36 @@ an unrelated integer. Both arranger bodies remain ASM: the natural typed
 twins have matching sizes/control flow but unresolved floating-register
 homes, recorded in their disabled candidates.
 
+## Field-reset call arity
+
+DDS1 `func_00131580` is a zero-argument reset: its matched definition
+clears `D_0032E538[0]` and does not consume incoming argument registers.
+The area initializer `00120EC8` still has `$4 = 0x10`, `$5 = D_0032E570`
+and `$6 = 1` before that call because it used them for earlier stores.
+Those live register values do not establish a three-argument call.
+The caller unit declares the actual `void (void)` contract; its remaining
+field-store scheduling differences are independent of this repair.
+
+## Event-viewer selected-label primary owners
+
+Both 228-byte `evtDrawSelectedEntryLabel` providers receive an
+`EvtRuntimeGroup *` and the owning `EvtRuntime *`. The signed word at
+group +8 is `entryHeader.word`; the name address is the corresponding
+`runtime->entryName[index]` row, not a second padded view or raw runtime
+offset. These typed accesses preserve both providers and both complete
+121-function units exactly. The initial list argument remains the
+existing callback word API, with conversions only at the packet boundary.
+
+## SDK interrupt-enable sequence
+
+`EE_ENABLE_INTERRUPTS_SYNC()` in `ee_mmi.h` represents the single SDK
+hardware operation `sync; ei`: complete prior stores before enabling
+interrupt handlers. The sequence occurs independently in DDS2
+`00345268`, `00345298`, and `00329F30`, and in DDS1 `002D2140`.
+Keep the two hardware instructions in one intrinsic rather than modeling
+them as independent compiler operations. Exact consumers are DDS1
+`002D2140` (51-function unit), DDS2 `00329F30` (5-function unit), and
+`00345268` (62-function unit), verified by whole-unit `check_unit.py`.
+Their callback results and actual argument contracts remain ordinary C;
+the only assembly is the evidenced SDK operation that C cannot express.
+

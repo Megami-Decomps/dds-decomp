@@ -369,7 +369,45 @@ s32 mnuFindFirstMatchingListItemIndex(MnuStatusResource *object) {
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028A1D0);
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_0028B1B0);
+extern void func_0026C900(MnuStatusResource *);
+extern s32 func_0028B738(s32, s32, s32, s32, MnuStatusResource *, s32);
+extern s32 func_00293DB0(MnuStatusResource *);
+extern s32 func_0028CBF8(s32, s32, s32, s32, MnuStatusResource *, s32);
+
+s32 func_0028B1B0(MnuStatusResource *object) {
+    MantraMenuWork *work;
+    f32 ratio;
+
+    func_0026C900(object);
+    work = &object->menu;
+    switch (work->drawBits.mode) {
+    case 2:
+        ratio = (f32)work->frame / 10.0f;
+        func_0028B738(0, 0, 0, (s32)(ratio * 128.0f), object, 0x53);
+        break;
+    case 3:
+        ratio = (f32)work->frame / 10.0f;
+        func_0028B738(0, 0, 0, (s32)((1.0f - ratio) * 128.0f), object, 0x53);
+        break;
+    case 5:
+    case 12:
+    case 13:
+    case 18:
+        func_0028B738(0, 0, 0, 0x80, object, 0x53);
+        break;
+    case 25:
+        func_00293DB0(object);
+        break;
+    case 19:
+    case 20:
+    case 21:
+        func_0028CBF8(0, 0, 0, 0x80, object, 0x52);
+        break;
+    case 1:
+        break;
+    }
+    return 0;
+}
 
 
 extern s8 D_0037F510[64];
