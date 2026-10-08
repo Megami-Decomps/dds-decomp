@@ -275,8 +275,6 @@ typedef struct MenuContext {
     s32 highlightOpacity;
 } MenuContext;
 
-extern void mnuReleaseSpriteTextures(s32);
-
 extern u32 kwlnTaskGetUserValue();
 
 extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
@@ -3665,10 +3663,6 @@ s32 mnuPercentOrHundred(s32 value, s32 total);
 
 
 
-void mnuReleasePartyPanelSpriteTextures(u8 *menu);
-
-
-
 /* Copy eight resource handles into the window's primary handle bank. */
 void mnuCopyPrimaryWindowHandles(MenuPageWindow *menu, struct EffectSlotSet **source);
 
@@ -3714,9 +3708,6 @@ void mnuClearPageSelection(MenuWindowSet *set);
 
 
 void mnuFreeWindowSprites(MenuPageSlot *win);
-
-void mnuShutdownContext(u8 *ctx);
-
 
 void mnuResolveUnselectedPageHandles(MenuPageWindow *window);
 

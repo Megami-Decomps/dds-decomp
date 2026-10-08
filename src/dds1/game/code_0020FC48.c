@@ -267,7 +267,7 @@ extern char D_003A6738[]; /* "/event/e%03d/e%03d/scr/e%03d.bf" */
 extern char D_003A6758[]; /* "btl:event[%s]\n" */
 extern char D_003A6768[]; /* "btl:event BE load[e%03d]\n" */
 extern char D_003A6788[]; /* "btl:event SMG load[%X]\n" */
-extern void *sdfReadNamedResource(const char *, void *, s32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern s32 mnuCampCreateTask(s32);
 extern void func_00101A80(s32, s32);
 

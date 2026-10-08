@@ -8,7 +8,7 @@ extern BillDispatch D_0034E060[];
 extern BillDispatch D_0034E068[];
 
 void *sdfAllocSizeClassBlock(s32 size);
-void *sdfReadNamedResource(s32 arg0, u32 *arg1, s32 arg2);
+struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 void sdfReleaseResourceAllocation(void *arg);
 void sdfReleaseChipBlock(void *arg);
 void effReleaseSharedTextureRecord(void *arg);
@@ -763,12 +763,12 @@ BillObj *billCreateIndexed(s32 index, u32 data) {
     return newobj;
 }
 
-void *billCreateFromResource(s32 kind, s32 resource) {
-    void *allocation;
-    void *billboard;
+BillObj *billCreateFromResource(s32 kind, const char *path) {
+    struct SdfMemBlock *allocation;
+    BillObj *billboard;
     u32 header[4];
 
-    allocation = sdfReadNamedResource(resource, header, 0);
+    allocation = sdfReadNamedResource(path, header, 0);
     billboard = billCreateIndexed(kind, header[0]);
     sdfReleaseResourceAllocation(allocation);
     return billboard;

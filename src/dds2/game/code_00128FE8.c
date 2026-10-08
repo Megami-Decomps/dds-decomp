@@ -197,7 +197,7 @@ typedef struct FldLoadRequest {
 
 extern u32 D_00444920[], D_00444930[], D_00444940[];
 extern char D_00435FD0[];
-extern u32 sdfReadNamedResource(const char *, u32 *, s32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void func_001289A8(u32, u32);
 
 extern f32 D_003897DC[];
@@ -669,7 +669,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
             if (D_00444920[i] != 0) {
                 fldFormatAreaDirectory(directory, fldAreaState[4], fldAreaState[5] + 1);
                 func_0035C860(path, D_00435FD0, directory, D_00444920[i]);
-                D_00444930[i] = sdfReadNamedResource(path, &D_00444940[i], 0);
+                D_00444930[i] = (u32)sdfReadNamedResource(path, &D_00444940[i], 0);
             }
         }
     }
@@ -2522,7 +2522,65 @@ void fldDrawFilledDisc(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012E958);
+void func_0012E958(s32 alpha, s32 offset) {
+    SdfListHead *list = (SdfListHead *)sdfAllocatePacketList(NULL);
+    SdfDmaNode *reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
+    u64 *texturePacket;
+    u64 *blendPacket;
+    s32 handle;
+    FldSpriteVertex *vertex;
+    s32 quarter;
+    SdfPoolNode *descriptor;
+
+    sdfAppendDmaPrimary((s32)list,
+        (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), reference);
+    texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
+    texturePacket[0] = 3;
+    texturePacket[1] = 0x5000000310000000ULL;
+    texturePacket[2] = 0x1000000000008002ULL;
+    texturePacket[3] = 0xE;
+    texturePacket[4] = 0x8000000080ULL;
+    texturePacket[5] = 0x3B;
+    texturePacket[6] = 0;
+    texturePacket[7] = 0x3F;
+    sdfAppendPacket(list, (u32)texturePacket);
+    blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
+    blendPacket[0] = 3;
+    blendPacket[1] = 0x5000000310000000ULL;
+    blendPacket[2] = 0x1000000000008002ULL;
+    blendPacket[3] = 0xE;
+    blendPacket[4] = 0x31001;
+    blendPacket[5] = 0x47;
+    blendPacket[6] = 0x48;
+    blendPacket[7] = 0x42;
+    sdfAppendPacket(list, (u32)blendPacket);
+    handle = (s32)sdfConsAllocateColumnPacket(1);
+    vertex = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(handle);
+    vertex->r = 0x80;
+    vertex->g = 0x80;
+    vertex->b = 0x80;
+    vertex->a = alpha;
+    quarter = offset;
+    if (offset < 0) {
+        quarter = offset + 3;
+    }
+    quarter >>= 2;
+    vertex->corner[0].u = 0;
+    vertex->corner[0].v = 0;
+    vertex->corner[0].x = 0x6FF7 - offset;
+    vertex->corner[0].y = 0x78FB - quarter;
+    vertex->corner[0].mask = 0x3FFF;
+    vertex->corner[0].flag = 0;
+    vertex->corner[1].u = 0x2000;
+    vertex->corner[1].v = 0xE00;
+    vertex->corner[1].x = offset + quarter + 0x9009;
+    vertex->corner[1].y = quarter + 0x8705;
+    vertex->corner[1].mask = 0x3FFF;
+    vertex->corner[1].flag = 0;
+    sdfAppendPacket(list, handle);
+    descriptor = &kwlnDrawSurfaces[fldDisplayRow];
+    descriptor->append((SdfListHead *)descriptor, list);
+}
 
 s32 fldGetEncounterRuntimeResult(void) {
     s32 state = fldEncounterRuntimeState;
@@ -3443,7 +3501,7 @@ extern u32 fldRainTextureData;
 
 extern char D_00413350[];
 
-extern u32 sdfReadNamedResource(const char *, u32 *, s32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 
 void fldLoadSkyResource(s32 area) {
@@ -3467,7 +3525,7 @@ void fldLoadSkyResource(s32 area) {
         sdfDevQueueReadAndWait(command, fldSkyLightSetBuffer, 0xE000);
         sdfDevWaitThenReleaseCommandState(command);
         if (area >= 2 && area < 100 && fldRainTextureResource == 0) {
-            fldRainTextureResource = sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
+            fldRainTextureResource = (s32)(u32)sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
             fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
         }
     }
@@ -3494,7 +3552,7 @@ void fldUploadSkyBuffer(FldSkyBuffer *src) {
     *fldSkyLightSetBuffer = *src;
     fldReleaseSkyResources();
     if (D_00389780[0] >= 2 && D_00389780[0] < 100 && fldRainTextureResource == 0) {
-        fldRainTextureResource = sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
+        fldRainTextureResource = (s32)(u32)sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
         fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
     }
 }
