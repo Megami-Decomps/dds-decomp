@@ -62,7 +62,7 @@ extern BtlAbilityParameter *datAbilityParameters;
 typedef struct BtlActionAnimationRecord {
     u8 cameraKind; /* 0x00: values 6 and 7 select an aim pose. */
     u8 delayIndex; /* 0x01: row of the action delay table */
-    u8 pad02;
+    u8 effectKind; /* 0x02: values 3 and 4 select target effect-flag behavior. */
     u8 kind;
     u16 displayCode;
     u8 pad06[0x16];
