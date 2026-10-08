@@ -12,6 +12,7 @@
 #include "dat_state.h"
 #include "sdf_draw.h"
 #include "sdf_chunk.h"
+#include "sdf_pac_state.h"
 #include "eff.h"
 #include "sdf_sif_command.h"
 #include "eff_transform.h"
@@ -199,11 +200,7 @@ void func_00101A80(s32, s32);
 
 void mdlCleanupViewerTasksAndResources(void);
 
-void sdfPacInitializeDispatchPacket(void *buffer, s32);
-
 void func_002EDC30(void *buffer);
-
-s32 sdfPacFeedInput(void *buffer, void *input, s32 available);
 
 void func_00218768(s32, s32, s32, s32);
 
@@ -258,11 +255,11 @@ typedef struct MdlPackageRequest {
 void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, void *requestFirst, s32 requestSecond) {
     MdlPackageRequest request;
 
-    sdfPacInitializeDispatchPacket(&request, 0);
+    sdfPacInitializeDispatchPacket((PacState *)&request, 0);
     if (flags & 2) {
         func_002EDC30(&request);
     }
-    sdfPacFeedInput(&request, requestFirst, requestSecond);
+    sdfPacFeedInput((PacState *)&request, requestFirst, requestSecond);
     func_00218768(request.handle, first, second, flags);
     func_002EDC50(&request);
 }
