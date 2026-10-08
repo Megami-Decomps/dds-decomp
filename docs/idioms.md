@@ -4324,7 +4324,26 @@ scanner deliberately passes the saved directory in `$a0` when closing;
 the apparent no-argument SDK close reaches a descriptor lookup that
 consumes that input. Preserve built-in iteration and partial-list failures.
 
-The four stat providers, two movie units, and two battle-reader units
+The four stat consumers, two movie units, and two battle-reader units
 remain exact. PiM's claimed effect-directory record copies are intentionally
 unchanged until that owner scope releases; this note does not claim that
 the movie scanners themselves have matching C.
+
+## Bound-effect pose synchronization shares the native SDK vector shape
+
+DDS2 `func_00226AB0` is native-identical to matched DDS1 `func_00205730`.
+Reuse its actor reloads, actual translated X/Z/height work, and 16-byte
+aligned quaternion output. The target performs native COP2 vector loads
+and stores around the quaternion helper; use the existing `pcp_vu0.h`
+macros, including the donor's `VU0_STORE_VF_UNCLOBBERED`, rather than
+adding raw asm or a second actor view. The rotation setter's existing
+quadword-pointer boundary still requires its ordinary vector-storage cast.
+
+## Movie suffix lookup returns a character pointer
+
+The SDK last-character search at DDS1 `00302240` / DDS2 `0035D5B0`
+has the standard `char *(const char *, int)` contract: it tracks the last
+matching address and also permits the terminator itself to match.
+Its movie-stream constructor consumers now receive that pointer directly,
+instead of declaring an integer result and casting it. Keep the current
+linker symbols until the normal names pass; no alias or adapter is needed.
