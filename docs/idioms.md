@@ -151,6 +151,16 @@ s64 f(s32 cb) { return mnuRequest(func_00101958(), 2, cb); }
 that genuinely recurs. Wrapping a one-off call in an inline just to get
 `jal` is a codegen lever, not source.
 
+## Narrow return types and `jal` tails
+
+A function whose recovered return type is narrow can return a narrow callee's
+result with `jal; epilogue` instead of a sibling `j`. DDS1 `func_0015AD48`
+(`u16` over `parGetRestartFlag`) and `func_0015ADB0` (`u8` over `parObjGetMode`)
+both match this way. The same call with an `s32` return, with or without a
+named local, tail-calls. Use the recovered type from the retail body:
+`parObjGetMode` returns the `u8` fields `mode150`/`mode151`, or 0. This is not a
+wider or invented return, which the `btlGetTaskState6` note above rules out.
+
 ## Lexical nested helpers and the static chain
 
 GNU C nested functions use `$v0` as a hidden static-chain register on EE. A
@@ -4440,3 +4450,16 @@ at +0x40. Its destination is a generic 16-byte SDK vector buffer.
 Use the primary actor directly at every caller; the former byte-owner
 and destination-quad casts do not represent separate objects.
 
+
+## DDS2 overlay particles complete the existing runtime owner
+
+DDS2 `0022D040` allocates 0x20-byte particles: a three-float direction,
+rotation angle/speed, displacement/speed, and alpha/age/delay bytes.
+The renderer at `0022D8A8` reads the same floating motion fields.
+`BattleRuntimeState +18..34` therefore owns the row dimensions,
+integer parameters and floating animation bounds; its `ownedData`
+points to these particles, not a second runtime layout.
+
+The constructor's unexplained third allocation-call register is not an
+allocator argument: the existing one-input provider does not consume it.
+Leave the constructor parked rather than inventing a prototype or dummy.
