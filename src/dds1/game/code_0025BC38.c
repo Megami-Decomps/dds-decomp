@@ -3,6 +3,7 @@
 #include "sdf.h"
 #include "dat_state.h"
 #include "mnu_profile_progress.h"
+#include "mnu_sprite_resource.h"
 
 #define MNU_MANTRA_GRID_ROW_COUNT 0x11
 #define MNU_MANTRA_GRID_COLUMN_COUNT 15
@@ -35,27 +36,20 @@ typedef struct {
 typedef struct MovieCueNode MovieCueNode;
 
 
-typedef struct {
-    s32 allocation;
-    SdfList *tasks[10];
-    s32 activeCount;
-    s32 spawnCountdown;
-} MovieResourceGroup;
-
 extern f32 effMiscRandUnitFloat(s32);
 extern void mnuReleaseOptionalDrawAllocation(void *, void *);
 
 
 
 
-void mnuDestroyMantraDrawPool(MovieResourceGroup *resources) {
+void mnuDestroyMantraDrawPool(MnuSpriteResourceGroup *resources) {
     s32 i;
     for (i = 0; i < 10; i++) {
         if (resources->tasks[i] != 0) {
             sdfDestroyTaskWork(resources->tasks[i]);
         }
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resources->allocation));
+    sdfReleaseResourceAllocation(resources->allocation);
 }
 
 extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
@@ -75,9 +69,9 @@ struct MovieCueNode {
     u8 enabled;           /* 0x12 */
 };
 
-extern void func_0025BA20(void *, SdfList *, void *, s8);
+extern void func_0025BA20(MnuSpriteResourceGroup *, SdfList *, void *, s8);
 
-SdfList *mnuTickResourceGroup(MovieResourceGroup *owner, SdfList *group) {
+SdfList *mnuTickResourceGroup(MnuSpriteResourceGroup *owner, SdfList *group) {
     SdfListNode *list = group->head;
     MovieCueNode *node;
 
@@ -100,7 +94,7 @@ SdfList *mnuTickResourceGroup(MovieResourceGroup *owner, SdfList *group) {
     } while (list != NULL);
     return group;
 }
-void func_0025BDD0(MovieResourceGroup *resources) {
+void func_0025BDD0(MnuSpriteResourceGroup *resources) {
     SdfList **slot;
     s32 i;
     SdfList *group;
@@ -139,7 +133,7 @@ extern f32 sdfSinPoly(f32);
 
 /* Draw every live cue in the ten task slots using its remaining-life sine fade. */
 void func_0025BF18(s32 x, s32 y, s32 depth, s32 alpha,
-                   MovieResourceGroup *resources, s32 drawArg) {
+                   MnuSpriteResourceGroup *resources, s32 drawArg) {
     SdfList **slot = resources->tasks;
     s32 i;
 
