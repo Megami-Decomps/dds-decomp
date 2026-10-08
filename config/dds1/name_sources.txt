@@ -1481,6 +1481,7 @@
 0x00165630	effThunderSetFragmentColor	inferred	queued
 0x00165690	effThunderApplyFragmentColorBands	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:542:func_00165690; Applies the three stored fragment color parameters to the particle system using its symmetric five-vertex color layout.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001656B8	effThunderRandomizeFrag	inferred	fills a 12-byte fragment with two rand-modulo values and grey 0x80808080
+0x00165D80	effThunderUpdateFragments	inferred	updates fragment countdowns, geometry, fade/restart state, colors and submits cells
 0x001660C8	effThunderReleaseDualFragmentWork	inferred	queued
 0x00166100	effThunderShiftEndpointsWithAnchor	inferred	Moves an effect origin by the same delta as its replacement anchor vector. [names_reviewed14.tsv]
 0x00166130	effThunderSetDualFragmentColor	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:600:func_00166130; Stores the packed color in the dual-fragment thunder work callback family.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
