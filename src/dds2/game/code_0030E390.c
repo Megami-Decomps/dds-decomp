@@ -27,51 +27,19 @@ extern u32 sdfReadNamedResource(const char *, void *, s32);
 
 extern struct SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
-struct SdfRing;
 
-extern struct SdfRing *sdfCreateLinkedRequestRing(s16, s16);
 
-extern void fldSetMapRequestInterval(s32, u16);
+extern void func_0030E940(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
 
-extern void func_0030E940(void);
 
-struct MapRequestQueue;
+extern void func_0030E958(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
 
-extern void func_0030E958(s32, s32, s32, struct MapRequestQueue *, s32, f32);
+extern MapRequestState *D_004390AC;
 
-extern s32 D_004390AC;
-
-extern s32 D_004390B0;
+extern MapRequestState *D_004390B0;
 
 extern s32 D_004390A8;
 
-typedef struct SdfRingNode {
-    u32 value;                       /* 0x00 */
-    u32 argument1;                   /* 0x04 */
-    u32 argument2;                   /* 0x08 */
-    s32 f0C;                        /* 0x0C */
-    struct SdfRingNode *next;       /* 0x10 */
-    struct SdfRingNode *prev;       /* 0x14 */
-    u8 pad18[8];
-} SdfRingNode;
-
-typedef struct SdfRing {
-    s32 allocation;                 /* 0x00 */
-    SdfRingNode *head;              /* 0x04 */
-    SdfRingNode *cursor;            /* 0x08 */
-    SdfRingNode *last;              /* 0x0C */
-    s16 count;                      /* 0x10 */
-    s16 limit;                      /* 0x12 */
-    s16 pad14;                      /* 0x14 */
-    s32 callback;                   /* 0x18 */
-} SdfRing;
-
-/* The ring of nodes lives inside the same block, 0x2C past the header. */
-typedef struct SdfRingBlock {
-    SdfRing header;
-    u8 pad1C[0x28];
-    SdfRingNode nodes[1]; /* 0x44 */
-} SdfRingBlock;
 
 
 extern s32 sdfAllocGeneralBlock(s32);
@@ -80,15 +48,6 @@ extern void *sdfMemoryGetBlockAddress(u32);
 
 extern void *memset(void *, s32, u32);
 
-/* The map-request queue stores its cursor at +8 and two halfword timers at +0x14. */
-typedef struct MapRequestQueue {
-    u8 pad00[8];
-    u32 *cursor;   /* 0x08: current request node */
-    u8 pad0C[8];
-    s16 interval;  /* 0x14 */
-    s16 elapsed;   /* 0x16 */
-    s32 callback;  /* 0x18: handler installed after queue creation */
-} MapRequestQueue;
 
 extern s32 D_0043909C;
 extern void func_0030DBF0(s32 x, s32 y, s32 z, u32 color0, u32 color1, u32 color2, u32 color3, s32 image, s32 flags,
@@ -158,13 +117,13 @@ void func_0030E878(void) {
 }
 
 void func_0030E880(void) {
-    s32 handler;
-    handler = (s32)sdfCreateLinkedRequestRing(0x14, 0xC);
-    D_004390AC = handler;
-    ((MapRequestQueue *)D_004390AC)->callback = (s32)func_0030E940;
-    fldSetMapRequestInterval(handler, 0);
-    D_004390B0 = (s32)sdfCreateLinkedRequestRing(0x14, 0x18);
-    ((MapRequestQueue *)D_004390B0)->callback = (s32)func_0030E958;
+    MapRequestState *state;
+    state = sdfCreateLinkedRequestRing(0x14, 0xC);
+    D_004390AC = state;
+    D_004390AC->callback = func_0030E940;
+    fldSetMapRequestInterval(state, 0);
+    D_004390B0 = sdfCreateLinkedRequestRing(0x14, 0x18);
+    D_004390B0->callback = func_0030E958;
     D_004390A8 = 5;
     D_004390A4 = 0;
 }
@@ -173,11 +132,11 @@ extern void sdfDrawUniformlyScaledSlotImage(s32, s32, s32, s32, s32, s32, s32, f
 
 extern void fldProjectPointToGridCell(s32 *, s32 *, f32, f32, f32);
 
-void func_0030EF18(u32 *resource);
+void func_0030EF18(MapRequestState *state);
 
 void fldReleaseMapRequestQueues(void) {
-    func_0030EF18((u32 *)D_004390AC);
-    func_0030EF18((u32 *)D_004390B0);
+    func_0030EF18(D_004390AC);
+    func_0030EF18(D_004390B0);
 }
 
 void fldDrawMapRequestMarker(s32 x, s32 y, s32 alpha, f32 scale) {
@@ -187,12 +146,12 @@ void fldDrawMapRequestMarker(s32 x, s32 y, s32 alpha, f32 scale) {
 INCLUDE_ASM(const s32, "game/code_0030E390", func_0030E940);
 
 /* The current request pulses; other requests enlarge and fade in later. */
-void func_0030E958(s32 x, s32 y, s32 z, MapRequestQueue *queue, s32 selected, f32 progress) {
+void func_0030E958(s32 x, s32 y, s32 z, MapRequestState *queue, MapRequestNode *selected, f32 progress) {
     s32 gridX;
     s32 gridY;
     f32 scale = (1.0f - progress) * 3.0f + progress;
 
-    if (queue->cursor[5] != selected) {
+    if (queue->next->prev != selected) {
         progress -= 0.5f;
         if (progress < 0.0f) {
             progress = 0.0f;
@@ -217,8 +176,7 @@ void sdfCommitPendingVectorAndMarkChanged(void) {
 extern s32 sdfCounterGetDisplayValue(void);
 extern f32 D_00400700[][4];
 extern s8 D_004388D1;
-extern void fldAdvanceMapRequest(s32, u32, u32, u32);
-extern void func_0030EF90(SdfRing *);
+extern void func_0030EF90(MapRequestState *);
 
 void fldUpdateMapRequestQueues(s32 enabled) {
     s8 index = sdfCounterGetDisplayValue() - 1;
@@ -250,12 +208,12 @@ void fldUpdateMapRequestQueues(s32 enabled) {
         D_0045C7A0[1] = (s32)D_00400700[index][1];
         D_0045C7A0[2] = (s32)D_00400700[index][2];
     }
-    func_0030EF90((SdfRing *)D_004390AC);
-    func_0030EF90((SdfRing *)D_004390B0);
+    func_0030EF90(D_004390AC);
+    func_0030EF90(D_004390B0);
 }
 
 extern f32 sdfCounterGetScaledValue(void);
-extern void func_0030F038(SdfRing *);
+extern void func_0030F038(MapRequestState *);
 
 /* Draw the selected map marker and overlay its highlight twice. */
 void fldDrawSelectedMapMarker(void) {
@@ -275,7 +233,7 @@ void fldDrawSelectedMapMarker(void) {
     } else if (remaining > 0.0f) {
         alpha = remaining;
     }
-    func_0030F038((SdfRing *)D_004390B0);
+    func_0030F038(D_004390B0);
     fldProjectPointToGridCell(&gridX, &gridY, D_00400700[index][0], D_00400700[index][1], D_00400700[index][2]);
     opacity = alpha * 32.0f;
     sdfDrawUniformlyScaledSlotImage(gridX, gridY, 0, opacity, 0x20, 0, 0x54, 2.0f);
@@ -284,63 +242,63 @@ void fldDrawSelectedMapMarker(void) {
 }
 
 /* Build a ring of `count` request nodes (0x20 bytes each) behind a 0x44-byte queue header. */
-SdfRing *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
+MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     s32 size = count * 0x20 + 0x44;
-    s32 allocation = sdfAllocGeneralBlock(size);
-    SdfRingBlock *block = (SdfRingBlock *)sdfMemoryGetBlockAddress(allocation);
-    SdfRing *ring = &block->header;
-    SdfRingNode *node;
-    SdfRingNode *next;
-    SdfRingNode *first;
+    u32 allocation = sdfAllocGeneralBlock(size);
+    MapRequestRing *block = (MapRequestRing *)sdfMemoryGetBlockAddress(allocation);
+    MapRequestState *ring = &block->header;
+    MapRequestNode *node;
+    MapRequestNode *next;
+    MapRequestNode *first;
     s32 n;
 
     memset(ring, 0, size);
-    ring->allocation = allocation;
+    ring->handle = allocation;
     node = block->nodes;
-    ring->head = node;
-    ring->last = node;
-    ring->cursor = node;
+    ring->first = node;
+    ring->third = node;
+    ring->next = node;
     for (n = count - 2; n != -1; n--) {
         next = node + 1;
         node->next = next;
         next->prev = node;
         node = node->next;
     }
-    first = ring->head;
+    first = ring->first;
     node->next = first;
     first->prev = node;
-    ring->limit = limit;
+    ring->arg = limit;
     ring->count = count;
-    ring->pad14 = 0;
+    ring->interval = 0;
     return ring;
 }
 
-void func_0030EF18(u32 *resource) {
-    if (resource != NULL) {
-        sdfQueueNonzeroResourceId(*resource);
+void func_0030EF18(MapRequestState *state) {
+    if (state != NULL) {
+        sdfQueueNonzeroResourceId(state->handle);
     }
 }
 
-void fldAdvanceMapRequest(s32 queue, u32 first, u32 second, u32 third) {
-    u32 *entry;
+void fldAdvanceMapRequest(MapRequestState *queue, u32 first, u32 second, u32 third) {
+    MapRequestNode *entry;
 
-    entry = ((MapRequestQueue *)queue)->cursor;
-    if (((MapRequestQueue *)queue)->elapsed == ((MapRequestQueue *)queue)->interval) {
-        if (entry[3] == 0) {
-            *entry = first;
-            entry[1] = second;
-            entry[2] = third;
-            ((MapRequestQueue *)queue)->cursor = (u32 *)entry[4];
-            entry[3] = 1;
+    entry = queue->next;
+    if (queue->elapsed == queue->interval) {
+        if (entry->active == 0) {
+            entry->value = first;
+            entry->argument1 = second;
+            entry->argument2 = third;
+            queue->next = entry->next;
+            entry->active = 1;
         }
-        ((MapRequestQueue *)queue)->elapsed = 0;
+        queue->elapsed = 0;
         return;
     }
-    ((MapRequestQueue *)queue)->elapsed = ((MapRequestQueue *)queue)->elapsed + 1;
+    queue->elapsed = queue->elapsed + 1;
 }
 
-void fldSetMapRequestInterval(s32 queue, u16 interval) {
-    ((MapRequestQueue *)queue)->interval = interval;
+void fldSetMapRequestInterval(MapRequestState *queue, u16 interval) {
+    queue->interval = interval;
 }
 
 /* Advance active ring nodes, retiring each node when it reaches the queue limit. */

@@ -10282,9 +10282,49 @@ void sndAddEffectReferences(SoundEffectReferenceArgs *args) {
     ++target->effectLink.referenceCount;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001F1110);
+extern void effBattleSetInputValue(BattleEffect *, s32);
 
-extern s32 func_001F1110(SoundEffectReferenceArgs *);
+s32 func_001F1110(SoundEffectReferenceArgs *args) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *owner;
+
+    if ((battle->battleFlags & 0x40000) == 0) {
+        return 1;
+    }
+    owner = args->option == 2 ? args->targetOwner.unit : args->sourceOwner.unit;
+    if (args->source->flags & 2) {
+        if (args->effect == NULL) {
+            args->effect = func_00160958(args->source->resourceHandle, args->option, owner, 0);
+            args->duration = sndSetEffectNodeParameter(args->source, args->option);
+            if ((owner->effectLink.packed & 0xA) == 8) {
+                args->duration = 35;
+                effBattleSetInputValue(args->effect, 35);
+                effBattleUpdateSelectedValue(args->effect, args->duration);
+            }
+            btlExtendTaskFrameLimit(args->source, args->duration);
+            return 0;
+        }
+        if (effBattleGetCurrentFrame(args->effect) >= args->duration) {
+            return 1;
+        }
+        effBTLFieldColorSetSelectors(args->sourceOwner.selectorKey, args->targetOwner.selectorKey,
+                                    args->sourceSelector, args->targetSelector);
+        switch (args->option) {
+        case 0:
+        case 2:
+            if (owner->flags & 4) {
+                args->effect->flags |= 8;
+            } else {
+                args->effect->flags &= ~8;
+            }
+            break;
+        }
+    }
+    if (args->effect != NULL && (owner->flags & 2)) {
+        func_00160D88(args->effect);
+    }
+    return 0;
+}
 
 void sndReleaseEffectReferences(SoundEffectReferenceArgs *args) {
     SoundResourceNode *effect;
