@@ -2,6 +2,7 @@
 #define MNU_H
 
 #include "common.h"
+#include "dat_stat.h"
 #include "mnu_transition.h"
 #ifdef VERSION_DDS2
 #include "mnu_shop.h"
@@ -37,7 +38,7 @@ static inline void panelSetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alph
 }
 
 /* Summary-menu entry count and pass threshold. */
-#define MENU_SUM_COUNT 5
+#define MENU_SUM_COUNT DAT_BASE_STAT_COUNT
 #define MENU_SUM_MINIMUM 99
 
 /* Camp task priority for the menu task family. */
@@ -132,7 +133,7 @@ typedef struct PartyPanelEntry {
     s32 mp;
     s32 maxHp;
     s32 maxMp;
-    s32 stats[5];
+    s32 stats[DAT_BASE_STAT_COUNT];
 } PartyPanelEntry;
 
 typedef struct PartyPanel {

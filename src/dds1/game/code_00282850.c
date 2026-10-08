@@ -1124,7 +1124,7 @@ void func_00285960(DatPartyRecord *entry, s32 unused, u32 index, PartyPanel *pan
     panel->slots[index].mp = entry->mp;
     panel->slots[index].maxHp = entry->maxHp;
     panel->slots[index].maxMp = entry->maxMp;
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
         panel->slots[index].stats[i] = entry->baseStats[i];
     }
 }
@@ -1791,23 +1791,23 @@ s32 btlItemApplyPermanentBonus(u16 itemId, DatPartyRecord *unit) {
 
     switch (itemId - 0x50) {
     case 0:
-        statIndex = 0;
+        statIndex = DAT_BASE_STAT_STRENGTH;
         accepted = 1;
         break;
     case 1:
-        statIndex = 1;
+        statIndex = DAT_BASE_STAT_VITALITY;
         accepted = 1;
         break;
     case 2:
-        statIndex = 2;
+        statIndex = DAT_BASE_STAT_MAGIC;
         accepted = 1;
         break;
     case 3:
-        statIndex = 3;
+        statIndex = DAT_BASE_STAT_AGILITY;
         accepted = 1;
         break;
     case 4:
-        statIndex = 4;
+        statIndex = DAT_BASE_STAT_LUCK;
         accepted = 1;
         break;
     case 5:

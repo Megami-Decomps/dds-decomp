@@ -1765,7 +1765,7 @@ void func_001AA898(DatPartyRecord *entry, s32 index) {
     entry->unitId = index;
     entry->level = datEnemyRecords[index].level;
     entry->totalExp = 0;
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
         entry->baseStats[i] = datEnemyRecords[index].baseStats[i];
     }
     count = 0;
@@ -1827,7 +1827,7 @@ void btlSyncPlayerWork(BtlUnit *actor) {
     maxMp = datComputeSkillBoostedMaxMp(dst);
     dst->hp = src->hp < maxHp ? src->hp : maxHp;
     dst->mp = src->mp < maxMp ? src->mp : maxMp;
-    memcpy(dst->baseStats, src->baseStats, 5);
+    memcpy(dst->baseStats, src->baseStats, sizeof(dst->baseStats));
     dst->status = src->status & 0x7FFF;
     dst->unk1AC = src->unk1AC;
     dst->unk1AE = src->unk1AE;

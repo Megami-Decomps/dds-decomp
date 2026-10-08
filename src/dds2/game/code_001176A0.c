@@ -405,7 +405,7 @@ s32 ptyComputeMaxHp(DatPartyRecord *unit) {
         return datEnemyRecords[unit->unitId].maxHp;
     }
     level = unit->level;
-    stat = datGetStatWithStatusOverride(unit, 1);
+    stat = datGetStatWithStatusOverride(unit, DAT_BASE_STAT_VITALITY);
     result = level * 4.0f +
              stat * datBattleParameters->maxHpGrowth[level - 1] + 10.0f;
     if ((unit->flags & SDF_UNIT_ENEMY) == 0) {
@@ -426,7 +426,7 @@ s32 ptyComputeMaxMp(DatPartyRecord *unit) {
         return datEnemyRecords[unit->unitId].maxMp;
     }
     level = unit->level;
-    stat = datGetStatWithStatusOverride(unit, 2);
+    stat = datGetStatWithStatusOverride(unit, DAT_BASE_STAT_MAGIC);
     result = level * 4.0f +
              stat * datBattleParameters->maxMpGrowth[level - 1] + 8.0f;
     if ((unit->flags & SDF_UNIT_ENEMY) == 0) {
