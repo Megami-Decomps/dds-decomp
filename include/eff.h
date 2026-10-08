@@ -833,7 +833,7 @@ typedef char EffectSlotSetSizeCheck[sizeof(EffectSlotSet) == 0x30 ? 1 : -1];
 /* Particle cell shared by the DDS1/2 particle subroutines (0x14 bytes). */
 typedef struct ParCell {
     u128 *history;   /* 0x00 */
-    void *vertices;  /* 0x04 */
+    u32 *colors;     /* 0x04: packed per-history-vector colors */
     s32 vertexCount; /* 0x08: active vectors in the topology-specific history */
     s32 historyAdvanceCountdown; /* 0x0C: updates until the next history shift */
     u32 color;       /* 0x10 initialized to grey 0x80808080 */
@@ -852,8 +852,8 @@ typedef struct ParSystem {
     s32 groupDivisor;   /* 0x0C: cell-system allocator input */
     struct SdfMemBlock *allocation; /* 0x10: geometry allocation descriptor */
     ParCell *cells;      /* 0x14 */
-    void *vertices;      /* 0x18 */
-    void *colors;        /* 0x1C */
+    u128 *vertices;      /* 0x18: backing vector history for all cells */
+    u32 *colors;         /* 0x1C: backing color stream for all cells */
     struct SdfAsset *asset; /* 0x20: submitted draw asset */
     struct ParSystem *next; /* 0x24: pending cell-system list */
     s32 unk28;           /* 0x28 */

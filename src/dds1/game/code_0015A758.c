@@ -615,15 +615,15 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
     base = sdfResourceRetainAddress(allocation);
     system = (ParSystem *)(base + cellsSize);
     memset(system, 0, 0x2C);
-    system->vertices = (void *)base;
+    system->vertices = (u128 *)base;
     base += total * 0x10;
-    system->colors = (void *)base;
+    system->colors = (u32 *)base;
     base += total * 4;
     system->cells = (ParCell *)base;
     for (i = 0; i < count; i++) {
         ParCell *cell = (ParCell *)(i * sizeof(ParCell) + (s32)system->cells);
         cell->history = (u128 *)((u8 *)system->vertices + i * perCell * 0x10);
-        cell->vertices = (u8 *)system->colors + i * perCell * 4;
+        cell->colors = system->colors + i * perCell;
         parCellInit(system, i);
     }
     system->asset = sdfCreateAssetWithDrawEntries();
@@ -753,7 +753,7 @@ void parTranslateCellTriangleVertices(ParSystem *system, s32 index, void *delta)
 void parFadeAlphaCell(s32 particle, s32 index) {
     ParSystem *system = (ParSystem *)particle;
     u32 count = system->cells[index].vertexCount >> 1;
-    u32 *vertex = system->cells[index].vertices;
+    u32 *vertex = system->cells[index].colors;
     u32 word = vertex[0];
     u32 i;
     s32 alpha[4];
@@ -1483,7 +1483,7 @@ void func_0015D0C0(void) {
                 parDrawControl.height = 18;
                 remaining = cell->vertexCount;
                 parDrawControl.positions = cell->history;
-                parDrawControl.colors = cell->vertices;
+                parDrawControl.colors = cell->colors;
                 parDrawControl.color = cell->color;
                 while (remaining >= 18) {
                     remaining -= 16;
@@ -1505,7 +1505,7 @@ void func_0015D0C0(void) {
                 parDrawControl.height = 15;
                 remaining = cell->vertexCount;
                 parDrawControl.positions = cell->history;
-                parDrawControl.colors = cell->vertices;
+                parDrawControl.colors = cell->colors;
                 parDrawControl.color = cell->color;
                 while (remaining >= 15) {
                     remaining -= 12;
@@ -1527,7 +1527,7 @@ void func_0015D0C0(void) {
                 parDrawControl.height = 10;
                 remaining = cell->vertexCount;
                 parDrawControl.positions = cell->history;
-                parDrawControl.colors = cell->vertices;
+                parDrawControl.colors = cell->colors;
                 parDrawControl.color = cell->color;
                 while (remaining >= 10) {
                     remaining -= 5;
@@ -1544,7 +1544,7 @@ void func_0015D0C0(void) {
                 parDrawControl.height = 12;
                 remaining = cell->vertexCount;
                 parDrawControl.positions = cell->history;
-                parDrawControl.colors = cell->vertices;
+                parDrawControl.colors = cell->colors;
                 parDrawControl.color = cell->color;
                 while (remaining >= 12) {
                     remaining -= 6;
@@ -1561,7 +1561,7 @@ void func_0015D0C0(void) {
                 parDrawControl.height = 16;
                 remaining = cell->vertexCount;
                 parDrawControl.positions = cell->history;
-                parDrawControl.colors = cell->vertices;
+                parDrawControl.colors = cell->colors;
                 parDrawControl.color = cell->color;
                 while (remaining >= 16) {
                     remaining -= 12;
