@@ -1,5 +1,6 @@
 #include "common.h"
 #include "itf.h"
+#include "itf_mem_node.h"
 
 
 
@@ -27,9 +28,6 @@ extern s32 frFontAdvanceGlyphFade(FrFontGlyph *glyph);
 
 
 extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
-
-typedef struct MemNode MemNode;
-extern void *itfDequeueMemNode(MemNode *queue);
 
 extern FrFontGlyph *frFontAppendGlyphReference(FrFontRecord *source, FrFontGlyph *destination);
 extern void frFontSetupGlyph(FrFontGlyph *glyph, s32 glyphId, s32 fontIndex, s32 firstOption, s32 packedFlags, s32 secondOption);
@@ -152,8 +150,6 @@ FrFontGlyph *frFontAdvanceOrRetainFadingGlyph(FrFontGlyph *glyph) {
     }
     return frFontReleaseGlyphChain(glyph);
 }
-
-extern s32 itfEnqueueMemNode(void *node, s32 pool);
 
 /* Release parents backward and children forward, returning both to their pools.
  * Children with a borrowed source record bypass cached-item reference release. Return NULL. */
