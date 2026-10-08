@@ -11278,7 +11278,7 @@ u32 effCreateMappedResource(u32 sourceAddress) {
 }
 
 /* Build one zeroed status record and allocate the category's required status storage. */
-u32 *effCreateStatusBatch(u32 category) {
+EffMappedResource *effCreateStatusBatch(u32 category) {
     EffMappedResource *batch = (EffMappedResource *)sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
     struct SdfMemBlock *allocation;
     u32 statusBytes;
@@ -11298,7 +11298,7 @@ u32 *effCreateStatusBatch(u32 category) {
     batch->records->status = statuses;
     memset(statuses, 0, statusBytes);
     batch->records->statusBytes = statusBytes;
-    return (u32 *)batch;
+    return batch;
 }
 
 /* Release each record's status storage, then the record allocation and batch header. */

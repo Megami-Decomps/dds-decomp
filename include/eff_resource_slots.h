@@ -4,6 +4,9 @@
 #include "common.h"
 
 struct EffectSlotSet;
+struct EffMappedResource;
+
+struct EffMappedResource *effCreateStatusBatch(u32 category);
 
 #ifdef VERSION_DDS2
 struct EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, s32 keepAllocation);
