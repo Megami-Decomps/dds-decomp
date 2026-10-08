@@ -177,7 +177,7 @@ typedef struct MantraMenuWork {
 /* func_00286E98 allocates and clears exactly 0xC08 bytes. The task keeps
  * this whole pointer while menu consumers address its work subobject. */
 typedef struct MnuStatusResource {
-    u32 allocationHandle;
+    struct SdfMemBlock *allocation;
     struct MenuList *list;
     u32 resourceSlots[12];
     u32 resourceIdA;
