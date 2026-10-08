@@ -1,6 +1,5 @@
 #include "common.h"
 #include "evt_viewer.h"
-extern struct KwlnTask *kwlnTaskGetTaskByName(const char *name);
 extern s32 kwlnTaskDestroyWithHierarchy(struct KwlnTask *task, s32 delayTicks);
 
 #include "evt_world.h"
@@ -3894,7 +3893,7 @@ s32 evtFindTaskById(u32 taskId) {
     u8 taskName[32];
 
     evtFormatTaskName(taskId, taskName);
-    return (s32)kwlnTaskGetTaskByName(taskName);
+    return (s32)kwlnTaskGetTaskByName((const char *)taskName);
 }
 
 /* The script-visible second payload word has a task-kind-specific meaning. */

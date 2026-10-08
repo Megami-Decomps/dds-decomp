@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "sdf_resource.h"
@@ -52,7 +53,6 @@ extern s32 btlAllocAndCheck(s32);
 extern u32 btlAssignTaskResultAndArgument(s32);
 extern void btlBindActorSlot(void *, s32);
 extern s32 btlRunRandomWeightedAiTableAction(BtlTask *);
-extern s32 kwlnTaskIsRegistered(s32);
 extern void btlDebugPrintf(const char *, ...);
 extern void btlBossDebugPrintf(const char *format, ...);
 extern u32 effMiscRandMod(void *state, u32 modulus);
@@ -1174,7 +1174,7 @@ s32 btlAiTaskUpdate(BtlTask *task) {
                     } else {
                         btlDispatchStateHandler(task, 0xC);
                     }
-                } else if (kwlnTaskIsRegistered(scene->boundTask) == 0) {
+                } else if (kwlnTaskIsRegistered((KwlnTask *)scene->boundTask) == 0) {
                     if (task->indexWork.phase == -1) {
                         btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
                         btlDebugPrintf("AI script return NULL\n");

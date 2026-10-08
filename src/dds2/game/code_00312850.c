@@ -20,7 +20,6 @@ extern void sdfReleaseChipBlock();
 extern void sdfDestroyCallbackWork();
 
 
-extern s32 kwlnTaskGetTaskByName(u32);
 
 
 extern SdfTaskEntry *func_00312A48(SdfTaskItemDesc *);

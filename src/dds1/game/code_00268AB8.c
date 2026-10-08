@@ -126,7 +126,6 @@ extern void Exit(s32 status);
 
 extern s32 D_003BD8C0;
 
-extern KwlnTask *kwlnTaskGetTaskByName(const char *);
 extern char D_003AFBA0[]; /* "result2_draw" */
 
 typedef struct BrsResultCounter {
