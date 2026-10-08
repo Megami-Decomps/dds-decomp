@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "sdf_pending.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
 #include "ee_mmi.h"
@@ -18,9 +19,6 @@
 #define SDF_QWORD_ALIGNMENT_MASK 0xF
 #define SDF_PACKET_BUFFER_ALIGNMENT_MASK 0x7F
 #define SDF_PACKET_BUFFER_COUNT 2
-#define SDF_PENDING_NODE_BYTES 0x10
-#define SDF_PENDING_BUFFER_BYTES 0x100
-#define SDF_PENDING_BUFFER_CAPACITY 0x3F
 #define SDF_PENDING_SLOT_COUNT 2
 #define SDF_PENDING_LAST_SLOT 1
 #define SDF_PATCHABLE_PACKET_BYTES 0x100
@@ -123,8 +121,8 @@ extern s32 func_00312C08(void);
 
 extern s32 sdfPendingQueueSemaphore;
 extern s32 sdfCreateSemaphore(u32, u32, u32);
-extern u8 sdfTextureReleaseQueue;
-extern u8 sdfObjectListReleaseQueue;
+extern SdfPendingRequest sdfTextureReleaseQueue;
+extern SdfPendingRequest sdfObjectListReleaseQueue;
 extern volatile s8 sdfPacketSlotIndex;
 extern s32 D_003BD338;
 extern SdfPacketSlot D_00398158[];
@@ -140,24 +138,18 @@ typedef struct SdfDescriptorSource {
 
 extern SdfDescriptorSource *sdfPacketResourceEntries[];
 
-void sdfTexRelease(void);
-void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void));
+void sdfTexRelease(SdfTex *texture);
 void sdfPrependPacketList(SdfListHead *list, SdfListHead *item);
 void sdfWriteImageTransferRegisters(SdfPacket *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
                   s64 destinationFormat, s64 destinationX, s64 destinationY,
                   u32 sourceBufferAddress, s32 sourceBufferWidth, s32 sourceFormat,
                   s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight, s32 transferDirection);
-void sdfDestroyObjectList();
+void sdfDestroyObjectList(SdfModel *owner);
 void sdfConnectPacketLists(SdfListHead *previous, SdfListHead *item);
 void sdfPrepareFrameDepthPacket(SdfPacketBuilder *packet, s32 bufferIndex);
 s32 sdfAllocPacketAligned(s32 size);
 void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end);
 void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, u32 *node);
-
-typedef struct SdfSynchronizedRequest {
-    u32 value;
-    u32 state;
-} SdfSynchronizedRequest;
 
 extern void sdfReleaseQueuedResource(void *resource, s32 retained);
 
@@ -321,38 +313,16 @@ void sdfCreateDescriptorPacket(SdfListHead *list, s32 descriptorAddress, s32 a, 
 }
 
 /* Register a completion callback, creating the shared semaphore on first use. */
-void sdfInitializeSynchronizedRequest(void *request, void (*callback)(void)) {
-    void **head = request;
-
+void sdfInitializeSynchronizedRequest(SdfPendingRequest *request, SdfPendingCallback callback) {
     if (sdfPendingQueueSemaphore < 0) {
         sdfPendingQueueSemaphore = sdfCreateSemaphore(1, 0x7f, 0);
     }
-    head[0] = (void *)callback;
-    head[1] = NULL;
+    request->handler = callback;
+    request->pending = NULL;
 }
 
-typedef struct SdfPendingOwner SdfPendingOwner;
-
-/* One chunk of queued entries: link to the previous chunk, then 0x3F entries. */
-typedef struct SdfPendingBuffer {
-    struct SdfPendingBuffer *next;
-    u32 entry[0x3F];
-} SdfPendingBuffer;
-
-typedef struct SdfPendingNode {
-    struct SdfPendingNode *next;    /* 0x00 */
-    SdfPendingOwner *owner;         /* 0x04 */
-    SdfPendingBuffer *buffer;       /* 0x08 */
-    s32 remaining;                  /* 0x0C */
-} SdfPendingNode;
-
-struct SdfPendingOwner {
-    void (*handler)(u32);
-    SdfPendingNode *pending;
-};
-
 /* Queue an entry on the owner's pending node, adding a node or buffer chunk as needed. */
-void sdfPendingQueuePush(SdfPendingOwner *owner, u32 entry) {
+void sdfPendingQueuePush(SdfPendingRequest *owner, u32 entry) {
     SdfPendingNode *pendingNode;
     SdfPendingBuffer *entryBuffer;
     s32 freeEntries;
@@ -406,7 +376,7 @@ void sdfPendingQueueFlush(SdfPendingNode *pendingNode) {
     SdfPendingNode *nextPendingNode;
     SdfPendingBuffer *entryBuffer;
     SdfPendingBuffer *nextEntryBuffer;
-    void (*entryHandler)(u32);
+    SdfPendingCallback entryHandler;
     s32 entryCount;
     s32 entryIndex;
 
@@ -442,7 +412,7 @@ void sdfRotatePendingSlots(void) {
 
     sdfPendingQueueRotationActive = 1;
     WaitSema(sdfPendingQueueSemaphore);
-    sdfPendingQueueFlush(sdfPendingQueueSlots[0]);
+    sdfPendingQueueFlush((SdfPendingNode *)sdfPendingQueueSlots[0]);
     for (slotIndex = 0; slotIndex < SDF_PENDING_LAST_SLOT; slotIndex++) {
         sdfPendingQueueSlots[slotIndex] = sdfPendingQueueSlots[slotIndex + 1];
     }
@@ -1825,7 +1795,7 @@ void sdfReleaseDevSlot(SdfModel *slot, s32 recycle, s32 release) {
         sdfDestroyDevRequest(slot->slotPairs);
     }
     if (recycle != 0) {
-        sdfPendingQueuePush((SdfPendingOwner *)&sdfObjectListReleaseQueue, (u32)slot);
+        sdfPendingQueuePush(&sdfObjectListReleaseQueue, (u32)slot);
     } else {
         sdfDestroyDevRequest(slot->list);
         sdfReleaseChipBlock(slot);

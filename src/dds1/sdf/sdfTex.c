@@ -1,20 +1,20 @@
 #include "common.h"
 #include "sdf_texture_file.h"
 #include "sdf.h"
+#include "sdf_pending.h"
 #include "ee_mmi.h"
 
 /* PlayStation 2 GS pixel storage formats used to size indexed palettes. */
 enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
 
 extern SdfTex *sdfResourceListHead;
-extern u8 sdfTextureReleaseQueue;
+extern SdfPendingRequest sdfTextureReleaseQueue;
 
 void *sdfAllocateBlockBySizeThreshold(s32 arg0);
 void *memcpy(void *arg0, void *arg1, u32 arg2);
 void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
 void sdfReleaseChipBlock(void *arg0);
 void sdfFreeMemoryFromEitherHeap(void *arg0);
-void sdfPendingQueuePush(void *arg0, void *arg1);
 SdfTexBuf *sdfTexCreateResourcePacket(SdfTex *texture, s32 variant);
 SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode);
 void *sdfAllocSizeClassBlock(s32 arg0);
@@ -100,7 +100,7 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
         ref->refCount = count;
         if (count == 0) {
             texture->resourceKey = 0;
-            sdfPendingQueuePush(&sdfTextureReleaseQueue, texture);
+            sdfPendingQueuePush(&sdfTextureReleaseQueue, (u32)texture);
         }
     }
 }
