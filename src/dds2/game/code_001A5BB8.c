@@ -2636,7 +2636,7 @@ s32 btlCountAvailableParticipants(void) {
     return count;
 }
 
-f32 func_001ADBD0(ActionStateLink *task) {
+f32 btlGetActorStateScale(ActionStateLink *task) {
     if (task == NULL) {
         return 1.0f;
     }

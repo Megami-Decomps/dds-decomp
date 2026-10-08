@@ -1278,7 +1278,7 @@ s32 evtTestSolarPhaseOrModelFlag(u32 flags) {
 }
 
 
-u8 func_0011C790(s32 index) {
+u8 btlSelectConditionalEncounterGroup(s32 index) {
     s8 enabled[3];
     s32 i;
     u8 code;
@@ -1348,7 +1348,7 @@ s32 func_0011CAB0(s32 index) {
     if (index == 0) {
         return 0;
     }
-    variant = func_0011C790(index);
+    variant = btlSelectConditionalEncounterGroup(index);
     total = 0;
     for (i = 0; i < 20; i++) {
         total += D_003BAA3C[index].groups[variant].entries[i].weight;
