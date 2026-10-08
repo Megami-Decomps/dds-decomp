@@ -1503,8 +1503,8 @@ s32 evtDrawConditionalHeapUsageOverlay(void) {
 }
 
 extern void *func_0011D3E8(s32, s32, s32, s32, s32, u32, u32);
-extern s32 func_00194998(void);
-extern s32 func_00194988(void);
+extern s32 frFontGetParentGlyphCount(void);
+extern s32 frFontGetChildGlyphCount(void);
 extern s32 effGetFontListCount(void);
 extern const char D_0039E220[];
 
@@ -1527,8 +1527,8 @@ s32 func_0010B590(KwlnTask *task) {
     sdfAppendPacket(list, (u32)packet);
     sdfAppendPacket(list, (u32)func_0011D3E8(0x70d0, 0x7968, 0xffff7f,
                                           0xf70, 0x98, 0x20000000, 0x40806040));
-    fontCount = func_00194998();
-    textCount = func_00194988();
+    fontCount = frFontGetParentGlyphCount();
+    textCount = frFontGetChildGlyphCount();
     gsCount = effGetFontListCount();
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7100, 0x7980,
                     0xffff80, 0, D_0039E220, fontCount, textCount, gsCount));
