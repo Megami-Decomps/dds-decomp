@@ -18,6 +18,7 @@ extern s32 datActionAnimationRecords;
 extern void func_003014F0();
 
 extern s32 btlGetRuntime(void);
+extern u32 effMiscRandMod(void *, u32);
 
 extern void func_001D6300(void *, void *);
 
@@ -37,7 +38,7 @@ extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
 
 extern u64 btlStartTask(void *);
 
-extern void func_001DB698();
+extern s32 func_001DB698(BtlCamState *);
 
 extern s8 D_003BB880[];
 
@@ -419,9 +420,9 @@ void btlSelectRandomDefeatCamera(BtlLinkedCommand *command) {
     }
 }
 
-extern void btlBuildLinkedCommandCameraPair(void *, void *, void *, s32, s32, f32, f32, f32);
+extern void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *, s8, s8, f32, f32, f32);
 
-extern void func_001DB698(void *);
+extern s32 func_001DB698(BtlCamState *);
 
 /* Frame the linked units, extend both camera distances by 500 and mirror origins.
  * The old coordinate50/coordinateE0 names described distance scalars, not height. */
@@ -555,22 +556,20 @@ s32 func_0020DE70(BtlLinkedCommand *command) {
     return 1;
 }
 
-extern s32 btlIsActorCategoryMarked(s32);
+extern s32 btlIsActorCategoryMarked(BtlLinkedCommand *);
 extern s32 btlHasLinkedEffectNodeTrigger(u8 *);
 extern s32 func_0020DE70(BtlLinkedCommand *);
 extern void func_001DF410(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-/* Opaque pose parameters use the native owners defined in code_001C8890. */
-typedef struct CameraPoseAction CameraPoseAction;
-typedef struct CameraPoseTransform CameraPoseTransform;
-extern void btlSetupCameraPoseAimUnit(CameraPoseAction *, CameraPoseTransform *, CameraPoseTransform *);
+/* Pose helpers use the existing command and camera owners. */
+extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-extern void btlPrepareRandomizedActionCameraPose(CameraPoseAction *, CameraPoseTransform *, CameraPoseTransform *);
+extern void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 s32 btlSelectSpecialActionCameraPose(BtlLinkedCommand *command, s8 a, s8 b) {
     s32 kind;
 
-    if (btlIsActorCategoryMarked((s32)command) != 0) {
+    if (btlIsActorCategoryMarked(command) != 0) {
         return 0;
     }
     if (command->task->unit->flags & 0x200) {
@@ -585,19 +584,32 @@ s32 btlSelectSpecialActionCameraPose(BtlLinkedCommand *command, s8 a, s8 b) {
         kind = ((BtlActionTableRow *)datActionAnimationRecords)[command->actionCode].pad00[0];
         if (kind < 8) {
             if (kind >= 6) {
-                btlSetupCameraPoseAimUnit((CameraPoseAction *)command, (CameraPoseTransform *)&command->frontCamera,
-                                          (CameraPoseTransform *)&command->backCamera);
+                btlSetupCameraPoseAimUnit(command, &command->frontCamera,
+                                          &command->backCamera);
                 return 1;
             }
         }
         func_001DF410(command, &command->frontCamera, &command->backCamera);
         return 1;
     }
-    btlPrepareRandomizedActionCameraPose((CameraPoseAction *)command,
-                                         (CameraPoseTransform *)&command->frontCamera,
-                                         (CameraPoseTransform *)&command->backCamera);
+    btlPrepareRandomizedActionCameraPose(command,
+                                         &command->frontCamera,
+                                         &command->backCamera);
     return 1;
 }
+
+extern u32 func_001DD2C0(BtlLinkedCommand *);
+extern s32 btlCanUseLinkedActor(BtlLinkedCommand *);
+extern u32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *);
+extern void btlClearAllUnitDefeatCandidatesTask(void);
+extern void btlApplyCombinedActorFlags(u8 *);
+extern void func_001E0398(u8 *, u8 *, u8 *);
+extern void func_001E0718(u8 *, u8 *, u8 *);
+extern void func_001E2578(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern char D_003A6338[];
+extern char D_003A6358[];
+extern char D_003A6398[];
+extern char D_003A63C0[];
 
 INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020E170);
 
