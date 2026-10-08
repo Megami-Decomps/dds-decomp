@@ -1492,6 +1492,7 @@
 0x00167E78	effApplyParamBlockPair	inferred	Obtains blocks zero and one from effect parameter table and passes the pair to effect handler.
 0x00168138	effReleaseGroupSlotsAndResources	inferred	Walks group slots releasing resource arrays and effect nodes before group cleanup. [names_reviewed21.tsv]
 0x00169940	effCreateFragmentResources	inferred	Allocates and initializes EffFragmentResources with history buffers and SDF draw descriptors; constructors store its result in slot->resources.
+0x00169B90	effInitializeFragmentHistoryColors	inferred	Maps four supplied gradient colors into the owned fragment history's three per-point color lanes with a rising alpha ramp.
 0x00169E10	effThunderDrawHistoryAndEndCap	inferred	L13
 0x0016A088	effFlashRecordCreate	inferred	readability/matching review (QP16)
 0x0016A1A8	effFlashTrianglePulseSpawnFromTable	inferred	Takes parameter block zero from the supplied table for the triangular flash initializer. [names_reviewed5.tsv]
