@@ -78,7 +78,7 @@ typedef struct BtlCameraCursor {
     f32 eyeTo[4];           /* 0x50 */
     f32 focusFrom[4];       /* 0x60 */
     f32 focusTo[4];         /* 0x70 */
-    u8 pad80[0x10];
+    f32 direction[4];       /* 0x80: captured camera direction */
     f32 distance;           /* 0x90 */
     u8 pad94[0xC];
     f32 fov;                /* 0xA0 */
@@ -4306,7 +4306,7 @@ s32 value;
 void btlSetActorEffectParameterOrMuzzlePosition(u32 arg0, s32 arg1) {
     s64 temp_v0;
 
-    temp_v0 = btlSetActorEffectParameter();
+    temp_v0 = btlSetActorEffectParameter((BtlUnit *)arg0, arg1);
     if (temp_v0 == 0) {
         btlUnitGetMuzzlePosVU(arg0);
         return;
@@ -9148,6 +9148,46 @@ s32 func_001EB1B0(s32 action, BtlCamState *pose, s8 bypassUpper, s8 bypassLower)
 }
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001EB368);
+
+/* Serialized camera instructions advance by 0x10 in 001E9DE0. */
+typedef struct BtlCameraTimedInstruction {
+    s32 kind;
+    s16 parameterIndex;
+    u8 pad06[2];
+    f32 startFrame;
+    f32 duration;
+} BtlCameraTimedInstruction;
+
+/* Camera parameter banks are indexed with a native 0x80-byte stride. */
+typedef struct BtlCameraParameterRecord {
+    u8 flags00;
+    u8 pad01[0xF];
+    f32 value[4];
+    u8 flags20;
+    u8 pad21[0xF];
+    f32 fadeInDuration;
+    u8 pad34[0xC];
+    f32 fadeOutDuration;
+    u8 pad44[0x18];
+    f32 curveScale5C;
+    f32 curveScale60;
+    u8 pad64[0xC];
+    s8 stop;
+    u8 pad71[0xF];
+} BtlCameraParameterRecord;
+
+typedef char BtlCameraTimedInstruction_size[(sizeof(BtlCameraTimedInstruction) == 0x10) ? 1 : -1];
+typedef char BtlCameraParameterRecord_size[(sizeof(BtlCameraParameterRecord) == 0x80) ? 1 : -1];
+
+extern void func_001EBE88(BtlLinkedCommand *, BtlCamState *,
+                         const BtlCameraTimedInstruction *, const s32 *,
+                         const BtlCameraParameterRecord *, f32 *);
+extern void func_002DD608(f32);
+extern void func_002E7F20(f32, f32, f32);
+extern f32 D_0035F590[4];
+extern f32 D_0035F5A0[4];
+extern f32 D_0035F5B0[4];
+extern f32 D_003BB690;
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001EBE88);
 
