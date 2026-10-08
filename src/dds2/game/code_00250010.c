@@ -3118,7 +3118,257 @@ s32 evtIndexGroupTypeTwentyFiveChildren(EvtRuntime *runtime) {
     return index;
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00258CC8);
+extern s32 evtEventViewerCountEntriesById(s32 id, EvtRuntime *runtime);
+extern s32 evtEventViewerCountEntries(EvtRuntime *runtime);
+extern s32 evtEventViewerSumNodeCounts(s32 mode, EvtRuntime *runtime);
+
+/* Fixed prefix shared by PMD directory streams. */
+typedef struct EvtPmdFilePrefix {
+    u8 reserved00;
+    u8 reserved01;
+    u16 reserved02;
+    s32 byteLength;
+    char tag[4];
+    s32 reserved0C;
+    s32 count;
+    s32 kind;
+    s32 reserved18;
+    s32 reserved1C;
+} EvtPmdFilePrefix;
+typedef char EvtPmdFilePrefix_size_check[sizeof(EvtPmdFilePrefix) == 0x20 ? 1 : -1];
+
+/* Build the directory after assigning each payload its serialized index. */
+void func_00258CC8(s32 output, s32 mode, EvtRuntime *runtime) {
+    EvtPmdFilePrefix header;
+    PmdEntry entry;
+    s32 directoryCount = 0;
+    s32 payloadOffset = 0;
+    s32 id0Count;
+    s32 id1Count;
+    s32 nodeCount;
+    s32 nodeBytes;
+    s32 nameCount;
+    s32 nameBytes;
+    s32 id2Count;
+    s32 id2Bytes;
+    s32 typeACount;
+    s32 typeABytes;
+    s32 typeBCount;
+    s32 typeBBytes;
+    s32 typeDCount;
+    s32 typeDBytes;
+    s32 typeECount;
+    s32 typeEBytes;
+    s32 typeFCount;
+    s32 typeFBytes;
+    s32 type16Count;
+    s32 type16Bytes;
+    s32 type17Count;
+    s32 type17Bytes;
+    s32 type23Count;
+    s32 type23Bytes;
+    s32 type27Count;
+    s32 type27Bytes;
+    s32 groupCount;
+    s32 groupBytes;
+    s32 type25Count;
+    s32 type25Bytes;
+    s32 byteLength;
+    s32 i;
+
+    if (mode == 1) {
+        return;
+    }
+    id0Count = evtEventViewerCountEntriesById(0, runtime);
+    id1Count = evtEventViewerCountEntriesById(1, runtime);
+    nodeCount = evtEventViewerSumNodeCounts(mode, runtime);
+    nodeBytes = nodeCount * 0x2C;
+    nameCount = runtime->entryTotal;
+    nameBytes = nameCount * 0x20;
+    id2Count = evtEventViewerCountEntriesById(2, runtime);
+    id2Bytes = id2Count * 0x10;
+    typeACount = evtAssignRuntimeChildSequenceAndCount(runtime);
+    typeABytes = typeACount * 0x30;
+    typeBCount = evtIndexGroupTypeElevenChildren(runtime);
+    typeBBytes = typeBCount * 0x20;
+    typeDCount = evtIndexGroupTypeThirteenChildren(runtime);
+    typeDBytes = typeDCount * 0x28;
+    typeECount = evtIndexGroupTypeFourteenChildren(runtime);
+    typeEBytes = typeECount * 0x2C;
+    typeFCount = evtIndexGroupTypeFifteenChildren(runtime);
+    typeFBytes = typeFCount * 0x2C;
+    type16Count = evtIndexGroupTypeSixteenChildren(runtime);
+    type16Bytes = type16Count * 0x18;
+    type17Count = evtIndexGroupTypeSeventeenChildren(runtime);
+    type17Bytes = type17Count * 0x24;
+    type23Count = evtIndexGroupTypeTwentyThreeChildren(runtime);
+    type23Bytes = type23Count * 0x2C;
+    type27Count = evtIndexGroupTypeTwentySevenChildren(runtime);
+    type27Bytes = type27Count * 0x28;
+    groupCount = evtEventViewerCountEntries(runtime);
+    groupBytes = groupCount * 8;
+    type25Count = evtIndexGroupTypeTwentyFiveChildren(runtime);
+    type25Bytes = type25Count * 0x40;
+
+    byteLength = 0x20;
+    switch (mode) {
+    case 1:
+        break;
+    case 2:
+        directoryCount = 15;
+        payloadOffset = 0x110;
+        byteLength = nameBytes + 0x120;
+        byteLength += nodeBytes;
+        byteLength += id2Bytes;
+        byteLength += typeABytes;
+        byteLength += typeBBytes;
+        byteLength += typeDBytes;
+        byteLength += typeEBytes;
+        byteLength += typeFBytes;
+        byteLength += type16Bytes;
+        byteLength += type17Bytes;
+        byteLength += type23Bytes;
+        byteLength += groupBytes;
+        byteLength += type27Bytes;
+        byteLength += type25Bytes;
+        break;
+    case 3:
+        directoryCount = 1;
+        payloadOffset = 0x30;
+        byteLength = nodeBytes + payloadOffset;
+        break;
+    }
+    header.reserved00 = 0;
+    header.reserved01 = 0;
+    header.reserved02 = 0;
+    header.byteLength = byteLength;
+    header.tag[0] = 'P';
+    header.tag[1] = 'M';
+    header.tag[2] = 'D';
+    header.tag[3] = mode + '0';
+    header.reserved0C = 0;
+    header.count = directoryCount;
+    header.kind = 9;
+    header.reserved18 = 0;
+    header.reserved1C = 0;
+    func_002588A0(output, (s32)&header, sizeof(header));
+
+    for (i = 0; i < 26; i++) {
+        entry.type = i;
+        entry.unk_04 = 0;
+        entry.value = 0;
+        entry.offset = 0;
+        switch (i) {
+        case 0:
+            if (mode == 2) {
+                entry.unk_04 = 0x10;
+                entry.value = 1;
+            }
+            break;
+        case 2:
+            if (mode == 1) {
+                entry.unk_04 = 0x10;
+                entry.value = id0Count;
+            }
+            break;
+        case 3:
+            if (mode == 1) {
+                entry.unk_04 = 0x20;
+                entry.value = id1Count;
+            }
+            break;
+        case 4:
+            if (mode == 2 || mode == 3) {
+                entry.unk_04 = 0x2C;
+                entry.value = nodeCount;
+            }
+            break;
+        case 1:
+            if (mode != 3) {
+                entry.unk_04 = 0x20;
+                entry.value = nameCount;
+            }
+            break;
+        case 5:
+            if (mode == 2) {
+                entry.unk_04 = 0x10;
+                entry.value = id2Count;
+            }
+            break;
+        case 13:
+            if (mode == 2) {
+                entry.unk_04 = 0x30;
+                entry.value = typeACount;
+            }
+            break;
+        case 14:
+            if (mode == 2) {
+                entry.unk_04 = 0x20;
+                entry.value = typeBCount;
+            }
+            break;
+        case 15:
+            if (mode == 2) {
+                entry.unk_04 = 0x28;
+                entry.value = typeDCount;
+            }
+            break;
+        case 16:
+            if (mode == 2) {
+                entry.unk_04 = 0x2C;
+                entry.value = typeECount;
+            }
+            break;
+        case 17:
+            if (mode == 2) {
+                entry.unk_04 = 0x2C;
+                entry.value = typeFCount;
+            }
+            break;
+        case 20:
+            if (mode == 2) {
+                entry.unk_04 = 0x2C;
+                entry.value = type23Count;
+            }
+            break;
+        case 24:
+            if (mode == 2) {
+                entry.unk_04 = 0x28;
+                entry.value = type27Count;
+            }
+            break;
+        case 18:
+            if (mode == 2) {
+                entry.unk_04 = 0x18;
+                entry.value = type16Count;
+            }
+            break;
+        case 19:
+            if (mode == 2) {
+                entry.unk_04 = 0x24;
+                entry.value = type17Count;
+            }
+            break;
+        case 21:
+            if (mode == 2) {
+                entry.unk_04 = 8;
+                entry.value = groupCount;
+            }
+            break;
+        case 25:
+            if (mode == 2) {
+                entry.unk_04 = 0x40;
+                entry.value = type25Count;
+            }
+            break;
+        }
+        if (entry.unk_04 != 0 || entry.value != 0) {
+            entry.offset = payloadOffset;
+            payloadOffset += (s32)entry.unk_04 * (s32)entry.value;
+            func_002588A0(output, (s32)&entry, sizeof(entry));
+        }
+    }
+}
 
 
 /* Emit first, range, third and metadata words in file order. The range word
