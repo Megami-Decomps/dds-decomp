@@ -6,5 +6,6 @@
 struct BillObj;
 
 void billMarkKindOneFlag(struct BillObj *billboard);
+void billSetChildHalfExtents(struct BillObj *billboard, f32 width, f32 height);
 
 #endif
