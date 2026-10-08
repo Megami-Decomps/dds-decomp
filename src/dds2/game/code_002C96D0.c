@@ -9,6 +9,7 @@
 #include "file.h"
 #include "sdf_dev_state.h"
 #include "file_slot.h"
+#include "file_save_record.h"
 #include "dat_state.h"
 #include "mnu_list.h"
 #include "pcp_vu0.h"
@@ -24,24 +25,8 @@ extern s32 D_00437D4C;
 extern s32 func_002C9BD0(void);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
 
-/* Compact metadata copied from the beginning of each save blob. */
-typedef struct FileRecordHeader {
-    char signature[3];
-    s8 version;
-    s8 mapGroup;
-    s8 mapIndex;
-    u8 pad06[2];
-    s32 playTicks;
-    s16 status;
-    s16 newCycle;
-    s8 party[8];
-    s8 levels[8];
-    u32 money;
-    u32 progressWords[3];
-} FileRecordHeader;
-
 typedef struct MenuWork {
-    FileRecordHeader header;
+    FileSavePreviewRecord header;
     s8 unk30;
     s8 unk31;
     u16 unk32;
@@ -123,7 +108,7 @@ struct SdfMemBlock;
 extern MenuWork *fileLoadSelectionWork;
 extern void fileApplyMenuFlagsToModel(MenuWork *);
 extern void fldPrepareDeferredSceneTransition(void);
-extern void fileCopySaveHeaderNumbers(FileRecordHeader *);
+extern void fileCopySaveHeaderNumbers(FileSavePreviewRecord *);
 extern void func_002D0AB8(void);
 extern void fileSaveAndDisplayCurrentMoney(void);
 extern s32 func_002D0B08(s32);
@@ -381,7 +366,7 @@ extern s32 fileReadSlotPreviewBegin(void);
 extern void mcReadOpenFile(s32, u32, s32);
 extern s32 mcHandleSetupResult(void);
 extern s32 fileSaveFileDescriptor;
-extern u32 fileSaveReadBufferResource;
+extern struct SdfMemBlock *fileSaveReadBufferResource;
 extern s32 fileReadSlotPreviewWait(void);
 
 extern s32 func_002CBA90(void);
@@ -1074,8 +1059,8 @@ s32 fileReadSlotPreviewBegin(void) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
-        fileSaveReadBufferResource = (u32)sdfAllocGeneralBlock(0x30);
-        fileSaveReadBuffer = sdfResourceRetainAddress((struct SdfMemBlock *)(fileSaveReadBufferResource));
+        fileSaveReadBufferResource = sdfAllocGeneralBlock(0x30);
+        fileSaveReadBuffer = sdfResourceRetainAddress(fileSaveReadBufferResource);
         mcReadOpenFile(fileSaveFileDescriptor, fileSaveReadBuffer, 0x30);
         return (s32)fileReadSlotPreviewWait;
     }
@@ -1095,11 +1080,11 @@ s32 fileReadSlotPreviewWait(void) {
         mcCloseOpenFile(fileSaveFileDescriptor);
         return (s32)fileStoreSlotHeader;
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
     return fileBeginSlotMetadataRefresh();
 }
 
-extern FileRecordHeader D_004580C0[];
+extern FileSavePreviewRecord D_004580C0[];
 
 s32 fileStoreSlotHeader(void) {
     McPollResult status = mcPollZeroCommandResult();
@@ -1109,10 +1094,10 @@ s32 fileStoreSlotHeader(void) {
     }
     if (status == MC_POLL_SUCCESS) {
         memcpy(&D_004580C0[fileSlotScanIndex], (void *)fileSaveReadBuffer, 0x30);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+        sdfReleaseResourceAllocation(fileSaveReadBufferResource);
         return func_002CBA90();
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
     return fileBeginSlotMetadataRefresh();
 }
 
@@ -1924,7 +1909,7 @@ extern u32 D_00439014;
 
 s32 fileBuildMainBlobAndWrite(void) {
     char filename[0x50];
-    FileRecordHeader *header;
+    FileSavePreviewRecord *header;
     s32 slot = fileReqGetSelectedSlot(fileMemoryCardRequestContext);
 
     mcdFormatSaveSlotName(filename, slot);
@@ -1952,7 +1937,7 @@ s32 fileBuildMainBlobAndWrite(void) {
     datGameState->header.partyLevels[6] = 0;
     datGameState->header.partyLevels[7] = 0;
 
-    header = (FileRecordHeader *)datGameState;
+    header = (FileSavePreviewRecord *)datGameState;
     D_004580C0[slot].signature[0] = header->signature[0];
     D_004580C0[slot].signature[1] = header->signature[1];
     D_004580C0[slot].signature[2] = header->signature[2];
@@ -1965,9 +1950,9 @@ s32 fileBuildMainBlobAndWrite(void) {
     memcpy(D_004580C0[slot].party, header->party, 8);
     memcpy(D_004580C0[slot].levels, header->levels, 8);
     D_004580C0[slot].money = header->money;
-    D_004580C0[slot].progressWords[0] = header->progressWords[0];
-    D_004580C0[slot].progressWords[1] = header->progressWords[1];
-    D_004580C0[slot].progressWords[2] = header->progressWords[2];
+    D_004580C0[slot].stateWords[0] = header->stateWords[0];
+    D_004580C0[slot].stateWords[1] = header->stateWords[1];
+    D_004580C0[slot].stateWords[2] = header->stateWords[2];
     D_00439010 = datGameState;
     D_00439014 = sizeof(DatGameState);
     if (D_00437D08 == 0 || D_00437D08 == 2) {
@@ -2139,8 +2124,8 @@ s32 fileLoadMainBlobBegin(void) {
         return 0;
     }
     size = fileMainBlobSize();
-    fileSaveReadBufferResource = (u32)sdfAllocGeneralBlock(size);
-    fileSaveReadBuffer = sdfResourceRetainAddress((struct SdfMemBlock *)(fileSaveReadBufferResource));
+    fileSaveReadBufferResource = sdfAllocGeneralBlock(size);
+    fileSaveReadBuffer = sdfResourceRetainAddress(fileSaveReadBufferResource);
     if (status == MC_POLL_SUCCESS) {
         mcReadOpenFile(fileSaveFileDescriptor, fileSaveReadBuffer, size);
         return (s32)mcHandleSetupResult;
@@ -2161,7 +2146,7 @@ s32 mcHandleSetupResult(void) {
         mcCloseOpenFile(fileSaveFileDescriptor);
         return (s32)mcdHandleSaveSetupDone;
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
     fileSetMenuFlowState(0);
     D_00437D3C = 3;
     return (s32)fileAbortSlotScanOnInput;
@@ -2177,7 +2162,7 @@ s32 mcdHandleSaveSetupDone(void) {
     }
     if (status == MC_POLL_SUCCESS) {
         fileReloadSaveBuffer();
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+        sdfReleaseResourceAllocation(fileSaveReadBufferResource);
         D_00437CD5 = 1;
         fileDestroyMenuTask();
         if (fileLoadStateChanged() == 0) {
@@ -2188,7 +2173,7 @@ s32 mcdHandleSaveSetupDone(void) {
         fileSetMenuFlowState(13);
         return fileSetMenuCallbackAndClearResult(-1);
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
     fileSetMenuFlowState(0);
     D_00437D3C = 3;
     return (s32)fileAbortSlotScanOnInput;
@@ -2206,7 +2191,7 @@ s32 mcdAdvanceToLoadSelection(void) {
 extern s32 D_00437D00;
 extern void fileLoadSetMode(s8);
 extern void fileSetMenuValueAndInitializeFlags(u32);
-extern void fileCopyRecordHeader(FileRecordHeader *, const void *);
+extern void fileCopyRecordHeader(FileSavePreviewRecord *, const void *);
 
 s32 func_002CCAD0(void) {
     s32 oldSelection = D_00437D2C;
@@ -2370,7 +2355,7 @@ s32 func_002CD028(s32 work) {
     s32 hours;
     s32 minutes;
     s32 seconds;
-    FileRecordHeader *preview;
+    FileSavePreviewRecord *preview;
     f32 targetY;
     f32 delta;
     f32 wave;
@@ -2596,7 +2581,7 @@ s32 func_002CD028(s32 work) {
                         }
                     }
                 }
-                if (D_004580C0[slot].progressWords[2] & 0x80000000) {
+                if (D_004580C0[slot].stateWords[2] & 0x80000000) {
                     u32 badgeColor = (alpha << 24) | 0x808080;
                     func_00108EC0(0x1B, y + 0x4C, 0x57, 0x23, 2, 0x5D, 0x57, 0x23, badgeColor, badgeColor, badgeColor, badgeColor, D_00437D70);
                 }
@@ -3464,16 +3449,16 @@ INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B938);
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D0B08);
 
-void fileCopySaveHeaderNumbers(FileRecordHeader *source) {
+void fileCopySaveHeaderNumbers(FileSavePreviewRecord *source) {
     DatGameState *state = datGameState;
 
     state->header.unk20 = source->money;
-    state->header.unk24 = source->progressWords[0];
-    state->header.unk28 = source->progressWords[1];
-    state->header.unk2C = source->progressWords[2];
+    state->header.unk24 = source->stateWords[0];
+    state->header.unk28 = source->stateWords[1];
+    state->header.unk2C = source->stateWords[2];
 }
 
-void fileCopyRecordHeader(FileRecordHeader *destination, const void *source) {
+void fileCopyRecordHeader(FileSavePreviewRecord *destination, const void *source) {
     memcpy(destination, source, sizeof(*destination));
 }
 
