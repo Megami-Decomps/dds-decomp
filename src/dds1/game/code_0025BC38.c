@@ -604,23 +604,23 @@ s32 func_0025D7F8(MnuSceneListNode *node, s32 index, s32 drawArg) {
         if (progress > 1.0f) {
             progress = 1.0f;
         }
-        mnuDrawMantraCostIcon(0, 0, 0, node->value08,
+        mnuDrawMantraCostIcon(0, 0, 0, node->payload.timedDraw.recordAddress,
                               (s32)(progress * 128.0f), context);
     }
 
     if (node->next == NULL) {
         if (opening == 0) {
-            mnuDrawMantraCostIcon(0, 0, 0, node->value08, 0x80,
+            mnuDrawMantraCostIcon(0, 0, 0, node->payload.timedDraw.recordAddress, 0x80,
                                   context);
         }
     }
 
     if (opening != 0) {
         progress = (f32)frame / 6.0f;
-        if (node->value0C == 1) {
+        if (node->payload.timedDraw.kind == 1) {
             func_0024E260((s32)(progress * -16.0f + -27.0f), 52, 1,
                           (s32)(progress * 96.0f + 32.0f), 0x18, context);
-        } else if (node->value0C == 2) {
+        } else if (node->payload.timedDraw.kind == 2) {
             func_0024E260((s32)(progress * 16.0f + -27.0f), 52, 1,
                           (s32)(progress * 96.0f + 32.0f), 0x19, context);
         }
@@ -630,10 +630,10 @@ s32 func_0025D7F8(MnuSceneListNode *node, s32 index, s32 drawArg) {
         if (frame < 9) {
             progress = (f32)(frame - 3) / 6.0f;
             progress = sdfSinPoly(progress * 3.14159265f);
-            if (node->value0C == 1) {
+            if (node->payload.timedDraw.kind == 1) {
                 func_0024E260(-27, 52, 1, (s32)(progress * 128.0f),
                               0x16, context);
-            } else if (node->value0C == 2) {
+            } else if (node->payload.timedDraw.kind == 2) {
                 func_0024E260(-27, 52, 1, (s32)(progress * 128.0f),
                               0x17, context);
             }
