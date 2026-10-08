@@ -909,7 +909,7 @@ extern EffEventSetupRecord D_003B2878;
 extern s8 D_00436504;
 
 /* Prepare from the channel's source, process it, then honor the control-byte reset. */
-s8 func_001978B8(void) {
+s8 effEventAdvanceScreenDrawSetup(void) {
     if (D_00436504 == 0) {
         if (D_003B2878.callback != 0) {
             *D_003B2878.callbackResult = D_003B2878.callback(D_003B2878.source);
@@ -1183,7 +1183,7 @@ EffEventLight *effEventLightClone(EffEventLight *src) {
 }
 
 /* Apply the native owner operation to the pointer stored in the record prefix. */
-void func_00198448(EffEventLight *work) {
+void effEventLightUpdateEffectParameters(EffEventLight *work) {
     effEventUpdateEffectParameters(work->owner);
 }
 
