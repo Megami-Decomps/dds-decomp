@@ -323,7 +323,7 @@ typedef struct EffPayload {
     u8 *records;
 } EffPayload;
 
-/* Two-child draw descriptor embedded in the billboard instance at +0x34. */
+/* Two-child draw descriptor at +0x34 in animation-list objects; child allocations end before it. */
 typedef struct BillRenderPair {
     struct BillChildPayload *children[2];
     u16 unk8;
@@ -336,7 +336,10 @@ typedef struct BillRenderPair {
 typedef char BillRenderPair_size_must_be_0x1C[
     (sizeof(BillRenderPair) == 0x1C) ? 1 : -1];
 
-/* Billboard instance and kind-specific payload (0x64); DDS1/2 effect/billManager.c and game billboard units. */
+struct BillData;
+struct BillChildPayload;
+
+/* Billboard common prefix and animation-list view (max 0x64); child allocations are 0x34 bytes. */
 typedef struct BillObj {
     f32 unk0;
     f32 unk4;
@@ -350,9 +353,13 @@ typedef struct BillObj {
     u32 childParam;   /* 0x24: set by billSetChildParameter */
     void (*callback)(); /* 0x28: called by billInvokeCallback; set from the
                           per-index table by billCreateIndexed */
-    u16 kind;         /* 0x2C: Kind: child (0) or entry list (1). */
-    u16 unk2E;
-    void *entryList;  /* 0x30 */
+    u16 kind;         /* 0x2C: kind 0/3 child, kind 1 animation list */
+    u16 requestedPacketListIndex; /* 0x2E: selected child packet-list pool */
+    union {
+        void *payload; /* 0x30: kind-discriminated payload when its type is unknown */
+        struct BillChildPayload *child; /* child kinds */
+        struct BillData *animationData; /* kind 1 */
+    };
     BillRenderPair pair; /* 0x34: used by the mode-0x80 entry renderer */
     u16 unk50;
     u8 pad52[2];
@@ -364,6 +371,8 @@ typedef struct BillObj {
 
 typedef char BillObj_size_must_be_0x64[
     (sizeof(BillObj) == 0x64) ? 1 : -1];
+typedef char BillObj_payload_offset_must_be_0x30[
+    ((u32)&((BillObj *)0)->payload == 0x30) ? 1 : -1];
 
 /* Serialized entry offsets are relative to BillData.base. */
 typedef struct BillAnimationEntry {

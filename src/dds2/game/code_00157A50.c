@@ -133,8 +133,8 @@ void effInitializeBillResourceOwners(void) {
                                           (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)node->blockHandle));
             scale = (f32 *)(configOffset + (u32)scaleTable);
             configOffset += sizeof(EffBillResourceInit);
+            payload = billboard->child;
             *owner++ = billboard;
-            payload = (BillChildPayload *)billboard->entryList;
             payload->halfWidth = payload->halfWidth * *scale;
             payload->halfHeight = payload->halfHeight * *scale;
             sdfReleaseResourceAllocation((struct SdfMemBlock *)(node->blockHandle));

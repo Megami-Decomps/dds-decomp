@@ -162,14 +162,14 @@ void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 index);
 
 
 /* Create a billboard sharing the indexed entry's resource. Word two of the
- * resource stores the reference count; the BillObj entryList is not an emitter. */
+ * resource stores the reference count; the BillObj payload is not an emitter. */
 u32 effRetainResource(s32 index) {
     BillObj *effect = (BillObj *)billCreateIndexed(D_0034DF54[index].billboardKind, 0);
-    s32 *resource = ((BillObj *)effBillResourceOwners[index])->entryList;
-    s32 references = resource[2];
+    BillChildPayload *resource = ((BillObj *)effBillResourceOwners[index])->child;
+    s32 references = resource->refCount;
 
-    effect->entryList = resource;
-    resource[2] = references + 1;
+    effect->child = resource;
+    resource->refCount = references + 1;
     return (u32)effect;
 }
 
@@ -178,7 +178,7 @@ u32 func_00151FC0(void) {
 }
 
 s32 effGetResourceFirstWord(s32 index) {
-    return *(s32 *)((BillObj *)effBillResourceOwners[index])->entryList;
+    return ((BillObj *)effBillResourceOwners[index])->child->value;
 }
 
 void effCopyVector(void *dst, void *src) {
@@ -202,7 +202,7 @@ void billSetChildParameter(BillObj *effect, u32 value) {
 
 void effCopyPosition(BillObj *effect, const void *position) {
     if (effect->kind == 0) {
-        memcpy((void *)((s32)effect->entryList + 0xc), position, 16);
+        memcpy((void *)((s32)effect->child + 0xc), position, 16);
     }
 }
 
@@ -223,7 +223,7 @@ void billSetBillboardMode(BillObj *effect, s32 mode) {
     switch (effect->kind) {
     case 0:
     case 3:
-        effect->unk2E = mode;
+        effect->requestedPacketListIndex = mode;
         break;
     case 1:
         entryCount = effect->entryCount;
@@ -263,11 +263,11 @@ void billSetAllChildVariants(BillObj *effect, s32 variant) {
     variant = (s16)variant;
     switch (effect->kind) {
     case 0:
-        ((BillChildPayload *)effect->entryList)->signedVariant = variant;
+        effect->child->signedVariant = variant;
         break;
     case 1:
-        remainingChildren = ((BillData *)effect->entryList)->childCount;
-        childEntries = ((BillData *)effect->entryList)->children;
+        remainingChildren = effect->animationData->childCount;
+        childEntries = effect->animationData->children;
 
         if (remainingChildren > 0) {
             childCursor = childEntries;
@@ -283,7 +283,7 @@ void billSetAllChildVariants(BillObj *effect, s32 variant) {
 
 s32 billGetChildValue(BillObj *effect) {
     if (effect->kind == 0) {
-        return ((BillChildPayload *)effect->entryList)->value;
+        return effect->child->value;
     }
     return 0;
 }
@@ -298,7 +298,7 @@ void billSetVariantValue(BillObj *effect, s32 value) {
 
     switch (effect->kind) {
     case 0:
-        ((BillChildPayload *)effect->entryList)->signedVariant = variantValue;
+        effect->child->signedVariant = variantValue;
         break;
     case 1:
         effect->pair.unk8 = variantValue;
@@ -309,7 +309,7 @@ void billSetVariantValue(BillObj *effect, s32 value) {
 u16 billGetVariantValue(BillObj *effect) {
     switch (effect->kind) {
     case 0:
-        return ((BillChildPayload *)effect->entryList)->variant;
+        return effect->child->variant;
     case 1:
         return effect->pair.unk8;
     default:
@@ -334,7 +334,7 @@ s32 billGetKindOneEntry(BillObj *effect) {
 
 s32 billGetLinkedChildValue(s32 billboard) {
     if (((BillObj *)billboard)->kind == 1) {
-        return ((BillLinkedValue *)((BillData *)((BillObj *)billboard)->entryList)->base)->value;
+        return ((BillLinkedValue *)((BillObj *)billboard)->animationData->base)->value;
     }
     return 0;
 }
@@ -413,7 +413,7 @@ void billMarkKindOneFlag(s32 billboard) {
 /* Kind 0 stores half the supplied width/height; other kinds remain unchanged. */
 void billSetChildHalfExtents(s32 billboard, float width, float height) {
     if (((BillObj *)billboard)->kind == 0) {
-        s32 payloadAddress = (s32)((BillObj *)billboard)->entryList;
+        s32 payloadAddress = (s32)((BillObj *)billboard)->child;
         ((BillChildPayload *)payloadAddress)->halfWidth = width * 0.5f;
         ((BillChildPayload *)payloadAddress)->halfHeight = height * 0.5f;
     }
