@@ -76,6 +76,8 @@ extern s32 mnuLookupRangeEntry(u16);
 
 extern s32 ptyGetCombinedRecordAndSlotValue(s32, s32);
 
+extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
+
 
 extern s32 func_002C6CE8(void);
 
@@ -2016,8 +2018,8 @@ u16 mnuGetPartyEntryMenuValue(DatPartyRecord *entry) {
     return entry->menuValue;
 }
 
-u32 mnuSetPartyEntryCurrentId(u32 entry, u32 id) {
-    ((DatPartyRecord *)entry)->itemId = id;
+u32 mnuSetPartyEntryCurrentId(DatPartyRecord *entry, u32 id) {
+    entry->itemId = id;
     mnuMarkEntryBlocked(id);
     ptyRecomputeMaxHpMp(entry);
     return 1;
