@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "eff_resource_slots.h"
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "sdf_resource.h"
@@ -10,7 +11,6 @@
 #include "kwln.h"
 #include "eff.h"
 #include "itf.h"
-extern void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *);
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);

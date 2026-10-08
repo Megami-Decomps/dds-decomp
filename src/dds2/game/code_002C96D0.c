@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_resource_slots.h"
 #include "sdf_resource.h"
 #include "sdf_chip.h"
 #include "eff_curve.h"
@@ -106,7 +107,6 @@ extern void mdlFlagSet(s32);
 extern void mdlFlagClear(s32);
 extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
 extern s32 mnuDestroyListState();
-extern s32 effDestroyResourceSlotSet();
 #include "kwln.h"
 #include "fpu.h"
 struct MenuListNode;
