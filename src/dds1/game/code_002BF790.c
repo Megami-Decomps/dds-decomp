@@ -39,7 +39,41 @@ void itfDrawGridWithResolvedSlot(s32 offsetX, s32 offsetY, s32 z, s32 drawFlags,
                   surfaceIndex);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002BF828);
+extern void func_002BD3D8(void *, s32, void *);
+
+/* Advance the indexed slot's timed source and carry its active state forward. */
+void func_002BF828(EffectSlotSet *owner, s32 index) {
+    BdWork *base = &owner->workEntries[index];
+    const u32 timedByteOffset = (index + base->slotOffset) * sizeof(BdWork);
+    BdWork *timed = (BdWork *)(timedByteOffset + (u32)owner->workEntries);
+    BdWork *previous = (BdWork *)effGetSlotWorkOrOverride(owner, index + base->slotOffset);
+    BdWork *next;
+    u32 advance = 0;
+
+    if (timed->unk98 == 0) {
+        timed->unk98 = owner->descriptions[index + base->slotOffset].unk7E;
+        if ((u32)(index + timed->slotOffset + 1) < owner->count) {
+            const s32 nextFlags = owner->descriptions[index + base->slotOffset + 1].flags & 0x20;
+            const u32 shouldAdvance = nextFlags > 0;
+            advance = shouldAdvance;
+        }
+        if (advance == 1) {
+            base->slotOffset++;
+        } else {
+            if (base->slotOffset == 0) {
+                return;
+            }
+            base->slotOffset = 0;
+        }
+        func_002BD3D8(owner, index + base->slotOffset, previous);
+        next = (BdWork *)effGetSlotWorkOrOverride(owner, index + base->slotOffset);
+        next->states[0].flags = previous->states[0].flags;
+        next->states[0].source = previous->states[0].source;
+        next->states[0].value = previous->states[0].value;
+    } else {
+        timed->unk98--;
+    }
+}
 
 /* Resolve an entry by key, falling back to the object's stored value. */
 s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key) {
@@ -55,8 +89,6 @@ s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key) {
     }
     return result;
 }
-
-extern void func_002BD3D8(void *, s32, void *);
 
 void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *object, s32 index, s32 x, s32 y, s32 width, s32 height) {
     EffectSlotDescription *entry = &object->descriptions[index];
