@@ -391,7 +391,7 @@ typedef struct BillOut {
 
 /* Runtime header precedes the copied resource bytes; the child table is indirect. */
 typedef struct BillData {
-    void *allocation;
+    struct SdfMemBlock *allocation; /* Retained general-heap descriptor. */
     u8 *base;
     BillAnimationEntry *entries;
     s32 entryCount;
