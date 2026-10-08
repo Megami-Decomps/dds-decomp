@@ -107,7 +107,7 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
     y = child->y * obj->childScaleY;
     halfWidth = child->halfWidth * obj->childScaleX;
     halfHeight = child->halfHeight * obj->childScaleY;
-    if (obj->lengthScale == 0.0f) {
+    if (obj->rotationAngle == 0.0f) {
         work->offsets[index][0] = x - halfWidth;
         work->offsets[index][1] = y - halfHeight;
         work->offsets[index][2] = x + halfWidth;
@@ -117,8 +117,8 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
         work->offsets[index][6] = x - halfWidth;
         work->offsets[index][7] = y + halfHeight;
     } else {
-        cosine = sdfEvaluateCosineViaSinePhaseShift(obj->lengthScale);
-        sine = sdfSinPoly(obj->lengthScale);
+        cosine = sdfEvaluateCosineViaSinePhaseShift(obj->rotationAngle);
+        sine = sdfSinPoly(obj->rotationAngle);
         cornerX = x - halfWidth;
         cornerY = y - halfHeight;
         work->offsets[index][0] = cornerX * cosine - cornerY * sine;
@@ -328,7 +328,7 @@ void func_00158430(BillObj *obj, BillRenderPair *node) {
     y = child->y * obj->childScaleY;
     halfWidth = child->halfWidth * obj->childScaleX;
     halfHeight = child->halfHeight * obj->childScaleY;
-    if (obj->lengthScale == 0.0f) {
+    if (obj->rotationAngle == 0.0f) {
         work->offsets[index][0] = x - halfWidth;
         work->offsets[index][1] = y - halfHeight;
         work->offsets[index][2] = x + halfWidth;
@@ -338,8 +338,8 @@ void func_00158430(BillObj *obj, BillRenderPair *node) {
         work->offsets[index][6] = x - halfWidth;
         work->offsets[index][7] = y + halfHeight;
     } else {
-        cosine = sdfEvaluateCosineViaSinePhaseShift(obj->lengthScale);
-        sine = sdfSinPoly(obj->lengthScale);
+        cosine = sdfEvaluateCosineViaSinePhaseShift(obj->rotationAngle);
+        sine = sdfSinPoly(obj->rotationAngle);
         cornerX = x - halfWidth;
         cornerY = y - halfHeight;
         work->offsets[index][0] = cornerX * cosine - cornerY * sine;
@@ -557,7 +557,7 @@ BillChildPayload *billStepAnimationEntryAndUpdateChild(BillObj *obj, BillOut *ou
     } else {
         obj->requestedPacketListIndex = 1;
     }
-    obj->lengthScale = record->scale;
+    obj->rotationAngle = record->rotationAngle;
     child->uv.components[0] = record->u0;
     child->uv.components[1] = record->v0;
     child->uv.components[2] = record->u1;

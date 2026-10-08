@@ -334,7 +334,7 @@ void func_0015A9A0(ParObj *effect) {
 
             if (age < lifetime && age >= 0) {
                 PCP_COPY_VECTOR(billboard, record->position);
-                billboard->lengthScale = record->spin;
+                billboard->rotationAngle = record->spin;
                 billboard->childParam = record->unk24;
                 billboard->childScaleX = billboard->childScaleY = record->scale;
                 record->scale += scaleStep;

@@ -554,7 +554,7 @@ s32 mnuListContainsFinalNode(MenuList *list) {
 MenuListNode *mnuListAdvanceCursor(MenuList *, s32, s32);
 MenuListNode *mnuListRetreatCursor(MenuList *, s32, s32);
 
-MenuListNode *func_0027B540(MenuList *list, MenuListNode *anchor,
+MenuListNode *mnuInsertListNodeRelativeToAnchor(MenuList *list, MenuListNode *anchor,
                          const void *value, s32 mode, u32 options) {
     MenuListNode *node;
     MenuListNode *walk;
@@ -575,7 +575,7 @@ MenuListNode *func_0027B540(MenuList *list, MenuListNode *anchor,
 
     node = sdfAllocAndClearQuadwords(sizeof(MenuListNode));
     node->value = value;
-    if (options & 2) {
+    if (options & MNU_LIST_INSERT_AFTER_ANCHOR) {
         node->prev = anchor;
         node->index = anchor->index;
         node->next = anchor->next;

@@ -2955,9 +2955,9 @@ s32 mnuListContainsFinalNode(MenuList *list) {
 MenuListNode *mnuListAdvanceCursor(MenuList *, s32, s32);
 MenuListNode *mnuListRetreatCursor(MenuList *, s32, s32);
 
-/* Insert a node holding `value` before (or, with options & 2, after) anchor, keeping the visible window and
+/* Insert a node holding `value` before (or, with options & MNU_LIST_INSERT_AFTER_ANCHOR, after) anchor, keeping the visible window and
  * cursor in place. */
-MenuListNode *func_002B83A0(MenuList *list, MenuListNode *anchor,
+MenuListNode *mnuInsertListNodeRelativeToAnchor(MenuList *list, MenuListNode *anchor,
                          const void *value, s32 mode, u32 options) {
     MenuListNode *node;
     MenuListNode *walk;
@@ -2978,7 +2978,7 @@ MenuListNode *func_002B83A0(MenuList *list, MenuListNode *anchor,
 
     node = sdfAllocAndClearQuadwords(sizeof(MenuListNode));
     node->value = value;
-    if (options & 2) {
+    if (options & MNU_LIST_INSERT_AFTER_ANCHOR) {
         node->prev = anchor;
         node->index = anchor->index;
         node->next = anchor->next;

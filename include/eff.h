@@ -316,7 +316,7 @@ typedef struct BillObj {
     f32 childScaleY;  /* 0x14 */
     f32 unk18;
     f32 unk1C;
-    f32 lengthScale;  /* 0x20: set by billSetLengthExtent */
+    f32 rotationAngle;  /* 0x20: radian angle used to rotate the quad corners. */
     u32 childParam;   /* 0x24: set by billSetChildParameter */
     void (*callback)(); /* 0x28: called by billInvokeCallback; set from the
                           per-index table by billCreateIndexed */
@@ -372,7 +372,7 @@ typedef struct BillRecord {
     u16 v1;
     s16 childIndex;
     s16 frameDelay; /* 0x12: signed countdown loaded when selecting a frame */
-    f32 scale;
+    f32 rotationAngle; /* 0x14: copied into the runtime quad rotation in radians. */
 } BillRecord;
 
 /* The 0x10000000 animation format is a list of positioned, delayed entry
