@@ -196,7 +196,7 @@ typedef struct MenuIconBundle {
     void *sprite[3];
 #else
     u8 pad0[0xC];
-    s32 sprite[4];
+    struct EffectSlotSet *sprite[4];
 #endif
     s32 fade;
     s32 fadeOut;
@@ -208,6 +208,8 @@ typedef char MenuIconBundle_size_must_be_0x20[
 #else
 typedef char MenuIconBundle_size_must_be_0x24[
     sizeof(MenuIconBundle) == 0x24 ? 1 : -1];
+typedef char MenuIconBundle_dds1_sprites_offset_check[
+    ((u32)&((MenuIconBundle *)0)->sprite == 0xC) ? 1 : -1];
 #endif
 
 
