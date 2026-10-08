@@ -28,7 +28,7 @@ extern void mnuStorePendingMenuCommandValue(struct MenuList *, u32);
 extern void func_0025ECD0();
 extern u8 D_0036AB64[];
 
-extern void func_0025E108(s32, s32);
+extern void func_0025E108(ShopScene *, s32);
 
 extern void mnuSetCommandPhase(ShopScene *, u32);
 extern void func_00260570(struct MenuList *, u32);
@@ -387,7 +387,7 @@ s32 evtQueryStateProgress(KwlnTask *callbackContext) {
 s32 evtFetchDispatchStart(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
 
-    func_0025E108(stateAddress, ((ShopScene *)stateAddress)->progressTicks);
+    func_0025E108((ShopScene *)stateAddress, ((ShopScene *)stateAddress)->progressTicks);
     return menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
