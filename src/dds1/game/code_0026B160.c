@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "kwln_task_lifecycle.h"
 #include "mnu.h"
+#include "mnu_sprite_resource.h"
 
 extern u8 D_003DC1C0[];
 
@@ -17,7 +18,7 @@ extern void mnuStopMovieDrawTask(void);
 extern void mnuReleaseMenuResourceSlots(void);
 extern void mnuReleaseSpriteHandle(void);
 extern void mnuDestroyMovieMenuSelectionList(void);
-extern void mnuReleaseMovieResourceGroup();
+extern void mnuReleaseMovieResourceGroup(MnuSpriteResourceGroup *);
 extern void mnuMovieShutdownA(void);
 
 void func_0026B160(void) {
