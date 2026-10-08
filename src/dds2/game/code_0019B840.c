@@ -155,13 +155,13 @@ void sdfUploadGsImageUnderSemaphore(s32 buffer, s32 image) {
 void frFontUploadClearedTexture(void) {
     u8 loadImage[FR_FONT_IMAGE_DESCRIPTOR_BYTES];
     s32 imageSize;
-    s32 allocation;
+    struct SdfMemBlock *allocation;
     void *pixels;
 
     imageSize = frFontWork.atlas.height * frFontWork.atlas.width;
     imageSize = (u32)imageSize >> 1;
-    allocation = (u32)sdfAllocGeneralBlock(imageSize);
-    pixels = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
+    allocation = sdfAllocGeneralBlock(imageSize);
+    pixels = (void *)sdfResourceRetainAddress(allocation);
     memset(pixels, 0, imageSize);
     sceGsSetDefLoadImage(loadImage, (s16)frFontWork.atlas.bufferBase, (s16)frFontWork.atlas.bufferWidth, FR_FONT_GS_PSMT4, 0, 0,
                          (s16)frFontWork.atlas.width, (s16)frFontWork.atlas.height);
@@ -170,7 +170,7 @@ void frFontUploadClearedTexture(void) {
     sceGsExecLoadImage(loadImage, (s32)pixels);
     sceGsSyncPath(0, 0);
     SignalSema(sdfGsImageUploadSemaphore);
-    sdfReleaseResourceAllocation((void *)allocation);
+    sdfReleaseResourceAllocation(allocation);
 }
 
 extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);

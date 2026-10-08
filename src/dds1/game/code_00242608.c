@@ -84,7 +84,6 @@ extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
 extern s32 mnuShopRestoreMiddleVector;
 extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
-extern s32 effDestroyPackedBatch(s32);
 extern s32 D_0036AA60[];
 
 #define CAMP_TASK_PRIORITY 0x3EC
@@ -988,7 +987,7 @@ s32 mnuShopReleaseSceneObjects(ShopScene *scene) {
     s32 destroyResult;
     u32 batchIndex;
     for (batchIndex = 0; batchIndex < CAMP_STATUS_BATCH_COUNT; batchIndex++) {
-        destroyResult = effDestroyPackedBatch(*batchCursor++);
+        destroyResult = effDestroyPackedBatch((struct EffMappedResource *)(u32)*batchCursor++);
     }
     return destroyResult;
 }
