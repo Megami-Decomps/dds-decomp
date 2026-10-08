@@ -6,6 +6,7 @@
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "evt_task.h"
+#include "evt_event_pack.h"
 #include "scr.h"
 #include "evt_solar.h"
 
@@ -105,7 +106,6 @@ extern void func_00340DC8(f32, f32, f32);
 extern void effMiscQuatMultiplyVU(void);
 
 
-s32 evtGetTaskValueWord(s32 id);
 
 extern void func_00101968(KwlnTask *parent, KwlnTask *child);
 
@@ -874,7 +874,7 @@ s32 evtCommandWaitForCampTask(void) {
         func_00101968(commandWork->task, mnuCampCreateTask(taskId));
         return 0;
     }
-    if (evtGetTaskValueWord(taskId) == EVT_CAMP_TASK_READY_VALUE) {
+    if (evtGetEventPackLoadedState(taskId) == EVT_CAMP_TASK_READY_VALUE) {
         message = D_00421ED8;
         evtPrintDeveloperConsoleMessage(message, taskId);
         sdfPrintFormattedDevMessage(message, taskId);
@@ -907,7 +907,7 @@ s32 evtCommandTestCampTaskReady(void) {
     s32 taskId = scrReadIntParameter(0);
     s32 isReady;
 
-    if (scrGetCurrentContext() != 0 && evtFindTaskById(taskId) != 0 && evtGetTaskValueWord(taskId) == EVT_CAMP_TASK_READY_VALUE) {
+    if (scrGetCurrentContext() != 0 && evtFindTaskById(taskId) != 0 && evtGetEventPackLoadedState(taskId) == EVT_CAMP_TASK_READY_VALUE) {
         evtPrintDeveloperConsoleMessage(D_00421ED8, taskId);
         isReady = 1;
     } else {

@@ -12,6 +12,7 @@
 #include "kwln.h"
 #include "evt_task.h"
 #include "evt_unit.h"
+#include "evt_event_pack.h"
 #include "evt_polygon_movie.h"
 #include "fld.h"
 #include "kwln_task_lifecycle.h"
@@ -3896,27 +3897,26 @@ KwlnTask *evtFindTaskById(u32 taskId) {
     return kwlnTaskGetTaskByName((const char *)taskName);
 }
 
-/* The script-visible second payload word has a task-kind-specific meaning. */
-s32 evtGetTaskValueWord(u32 taskId) {
+/* Return this event task's loaded state, or -1 when it does not exist. */
+s32 evtGetEventPackLoadedState(u32 taskId) {
     KwlnTask *task;
 
     task = evtFindTaskById(taskId);
     if (task != 0) {
-        s32 *words = (s32 *)kwlnTaskGetUserValue(task);
-        return words[1];
-    } else {
-        return -1;
+        EvtPackLoadState *state = (EvtPackLoadState *)kwlnTaskGetUserValue(task);
+        return state->loaded;
     }
+    return -1;
 }
 
-void *evtGetTaskData(u32 taskId) {
+EvtPackLoadState *evtGetEventPackLoadState(u32 taskId) {
     KwlnTask *task;
 
     task = evtFindTaskById(taskId);
     if (task != 0) {
-        return (void *)kwlnTaskGetUserValue(task);
+        return (EvtPackLoadState *)kwlnTaskGetUserValue(task);
     }
-    return (void *)task;
+    return NULL;
 }
 
 
@@ -3946,7 +3946,7 @@ extern SdfTex *sdfTexAcquireResourceTexture(void *);
 extern void effSetCh72Id(u32);
 
 void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
-    EvtPackLoadState *data = evtGetTaskData(taskId);
+    EvtPackLoadState *data = evtGetEventPackLoadState(taskId);
     void *address = evtFindTaskResourceEntryByKey(taskId, key);
     SdfTex *texture;
     if (address != 0) {

@@ -3,6 +3,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "evt_unit.h"
+#include "evt_event_pack.h"
 #include "file.h"
 #include "evt_motion_se.h"
 #include "evt_task.h"
@@ -20,7 +21,6 @@ enum {
     EVT_PACK_LOAD_COMPLETE = 2
 };
 
-extern void *evtGetTaskData(s32 eventId);
 extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32, s32, s32);
 extern void fldSetRelocateOnRelease(u32);
 extern u32 kwlnDrawControlFlags;
@@ -44,7 +44,7 @@ s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId) {
     u8 *payload;
     s32 unitKey;
 
-    data = evtGetTaskData(eventId);
+    data = evtGetEventPackLoadState(eventId);
     i = 0;
     if (data->header->entryCount > 0) {
         entry = data->entries;
@@ -92,7 +92,7 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
     s32 *type3Data;
     s32 *type4Data;
 
-    data = evtGetTaskData(eventId);
+    data = evtGetEventPackLoadState(eventId);
     baseData = NULL;
     type3Data = NULL;
     type2Data = NULL;
@@ -150,7 +150,7 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
     if (node == NULL) {
         return -1;
     }
-    data = evtGetTaskData(params->eventTaskId);
+    data = evtGetEventPackLoadState(params->eventTaskId);
     if (data == NULL) {
         return -1;
     }
