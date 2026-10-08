@@ -3,6 +3,7 @@
 #include "ee_mmi.h"
 #include "btl_sound.h"
 #include "eff_blur.h"
+#include "eff_event_draw.h"
 #include "eff.h"
 #include "eff_math.h"
 #include "eff_channel.h"
@@ -53,20 +54,6 @@ extern void *memcpy(void *, const void *, u32);
 
 /* Packet-source layouts and concrete blur owners mirror their constructors.
  * Equal-sized parameter prefixes do not make the blur variants interchangeable. */
-
-typedef struct EffScreenDrawParams {
-    EffBlurQuad source;
-    u8 pad28[8];
-} EffScreenDrawParams;
-
-typedef struct EffSolidRectParams {
-    u32 color;
-    s32 blendControl;
-    s32 left;
-    s32 top;
-    s32 right;
-    s32 bottom;
-} EffSolidRectParams;
 
 extern EffScreenDrawParams effBlurRectangleParameters;
 

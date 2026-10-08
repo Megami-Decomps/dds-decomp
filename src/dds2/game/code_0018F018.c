@@ -2,17 +2,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "eff_blur.h"
-
-
-
-typedef struct {
-    u32 color;
-    s32 blendControl;
-    s32 left;
-    s32 top;
-    s32 right;
-    s32 bottom;
-} EffSolidRectParams;
+#include "eff_event_draw.h"
 
 
 
