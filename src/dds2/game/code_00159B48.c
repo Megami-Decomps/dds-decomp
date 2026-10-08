@@ -650,19 +650,13 @@ void effDrawGeneratedTextureQuad(SdfListHead *list, EffGeneratedTextureDescripto
     sdfAppendPacket(list, (u32)packet);
 }
 
-/* Effect owner installs a callback at +0x10 to accept a new packet list. */
-typedef struct EffPacketSink {
-    u8 pad00[0x10];
-    void (*submit)(s32 owner, s32 packet);
-} EffPacketSink;
-
-/* Allocate/init a packet list, generate its texture payload, then submit it to the sink. */
-void effSubmitGeneratedTexturePacket(s32 sink, s32 source) {
+/* Allocate/init a packet list, generate its texture payload, then append it to the draw surface. */
+void effSubmitGeneratedTexturePacket(SdfPoolNode *surface, EffGeneratedTextureDescriptor *source) {
     s32 packetAddress = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
 
     sdfInitPacketList(packetAddress);
-    effDrawGeneratedTextureQuad((SdfListHead *)packetAddress, (EffGeneratedTextureDescriptor *)source);
-    ((EffPacketSink *)sink)->submit(sink, packetAddress);
+    effDrawGeneratedTextureQuad((SdfListHead *)packetAddress, source);
+    surface->append((SdfListHead *)surface, (SdfListHead *)packetAddress);
 }
 
 /* Caller-built composite draw description; 0x68 bytes. */
@@ -834,13 +828,13 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
 }
 
 
-/* Allocate/init a packet list, generate its composite GS payload, then submit it to the sink. */
-void effSubmitCompositeGsPacket(s32 sink, s32 source) {
+/* Allocate/init a packet list, generate its composite GS payload, then append it to the draw surface. */
+void effSubmitCompositeGsPacket(SdfPoolNode *surface, EffCompositeGsDescriptor *source) {
     s32 packetAddress = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
 
     sdfInitPacketList(packetAddress);
-    effDrawCompositeTextureQuad((SdfListHead *)packetAddress, (EffCompositeGsDescriptor *)source);
-    ((EffPacketSink *)sink)->submit(sink, packetAddress);
+    effDrawCompositeTextureQuad((SdfListHead *)packetAddress, source);
+    surface->append((SdfListHead *)surface, (SdfListHead *)packetAddress);
 }
 
 void func_0015B270(void) {

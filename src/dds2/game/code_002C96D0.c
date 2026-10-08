@@ -4164,8 +4164,8 @@ void fileResetRenderFlags(void) {
     effModelUpdateControlFlags = 0;
 }
 
-u32 func_002D2CB0(s32 index) {
-    return D_003E9150[index];
+SdfPoolNode *func_002D2CB0(s32 index) {
+    return (SdfPoolNode *)D_003E9150[index];
 }
 
 void mnuProjectViewPoint(void) {
