@@ -5198,6 +5198,7 @@
 0x002F3D58	effReleaseScalyTextureReference	inferred	High: decrements that owner count and releases and clears the shared scaly clone on its last reference; the argument is unused. [names_qp9.tsv]
 0x002F3F08	effReleaseScalyStripResources	inferred	Releases strip-specific texture state then queues its asset and frees its allocation. [names_reviewed5.tsv]
 0x002F45A8	effSeedParticleSpanParameters	inferred	Seeds each span record with randomized scale and range parameters and clears flags. [names_reviewed5.tsv]
+0x002F46D8	effCreateParticleSpanTable	inferred	Allocates per-map-position point sets, span entries and optional shared-reference track sets from the model frame count.
 0x002F5358	effCreateModelResourceWithInlineData	inferred	confidence=high; src/dds2/game/code_002DE248.c:func_002F5358; Allocates kind-sized inline source data, initializes model-effect defaults and optionally creates/updates a child model resource. [names_qp9.tsv]
 0x002F5488	effCreateModelResourceFromFile	inferred	Resolves primary and secondary file buffers and creates model resource for requested kind. [names_reviewed5.tsv]
 0x002F5520	effCreateModelResource	inferred	DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described createEffectModelResource behavior.
