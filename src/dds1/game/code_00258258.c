@@ -1,11 +1,23 @@
 #include "common.h"
 
+typedef struct MantraPulseState {
+    u16 timer;
+    s16 duration;
+    u32 mode;
+} MantraPulseState;
+
 typedef struct DspScene {
     s32 frame;
-    u8 pad04[8];
+    s32 value;
+    s32 cap;
     u16 sceneId;
-    u8 pad0E[6];
+    u16 param7b6;
+    u32 param7b5;
     s32 state;
+    u8 rawSkillList[0x34];
+    MantraPulseState pulse;
+    s8 profileFlag;
+    u8 pad55[3];
 } DspScene;
 
 typedef struct DspProfileSelection {
@@ -111,7 +123,78 @@ INCLUDE_ASM(const s32, "game/code_00258258", func_00258B90);
 
 INCLUDE_ASM(const s32, "game/code_00258258", func_00258EB8);
 
-INCLUDE_ASM(const s32, "game/code_00258258", func_00258FD0);
+void func_0024E3C0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
+                   s32 placementIndex, s32 context);
+void func_0024E470(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
+                   s32 placementIndex, s32 context, f32 rotation);
+
+void func_00258FD0(s32 x, s32 y, s32 z, s32 alpha, DspScene *entry,
+                   s32 context) {
+    MantraPulseState *pulse = &entry->pulse;
+    u32 mode = pulse->mode;
+    f32 progress;
+
+    if ((u32)mode >= 6) {
+        return;
+    }
+
+    /* The first two ring pieces interpolate in radians, then draw in degrees. */
+    switch (mode) {
+    case 0:
+    case 1:
+        func_0024E3C0(x, y, z, alpha, 0x20, 0x44, context);
+        func_0024E3C0(x, y, z, alpha, 0x20, 0x45, context);
+        func_0024E3C0(x, y, z, alpha, 0x20, 0x46, context);
+        return;
+
+    case 2: {
+        progress = (f32)(s16)pulse->timer / (f32)pulse->duration;
+
+        func_0024E470(x, y, z, alpha, 0x20, 0x44, context,
+                      progress * -1.0210175f * 57.29578f);
+        func_0024E470(x, y, z, alpha, 0x20, 0x45, context,
+                      progress * 0.31415924f * 57.29578f);
+        func_0024E3C0(x, y, z, alpha, 0x20, 0x46, context);
+        return;
+    }
+
+    case 3:
+        func_0024E470(x, y, z, alpha, 0x20, 0x44, context,
+                      -1.0210175f * 57.29578f);
+        func_0024E470(x, y, z, alpha, 0x20, 0x45, context,
+                      0.31415924f * 57.29578f);
+        func_0024E3C0(x, y, z, alpha, 0x20, 0x46, context);
+        return;
+
+    case 4: {
+        progress = (f32)(s16)pulse->timer / (f32)pulse->duration;
+        progress = 1.0f - progress;
+
+        func_0024E470(x, y, z, alpha, 0x20, 0x44, context,
+                      progress * -1.0210175f * 57.29578f);
+        func_0024E470(x, y, z, alpha, 0x20, 0x45, context,
+                      progress * 0.31415924f * 57.29578f);
+        func_0024E3C0(x, y, z, alpha, 0x20, 0x46, context);
+        return;
+    }
+
+    case 5: {
+        s16 timer = (s16)pulse->timer;
+
+        if (timer < 50) {
+            progress = (f32)timer / 50.0f;
+        } else {
+            progress = (f32)(60 - timer) / 10.0f;
+        }
+        func_0024E470(x, y, z, alpha, 0x20, 0x44, context,
+                      progress * -1.0210175f * 57.29578f);
+        func_0024E470(x, y, z, alpha, 0x20, 0x45, context,
+                      progress * 0.31415924f * 57.29578f);
+        func_0024E3C0(x, y, z, alpha, 0x20, 0x46, context);
+        break;
+    }
+    }
+}
 
 extern s32 mnuSceneResourceContext;
 typedef struct MantraPulseGrid MantraPulseGrid;
