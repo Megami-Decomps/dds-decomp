@@ -68,7 +68,7 @@ void sdfTexRelease(SdfTex *texture) {
         sdfResourceListHead = prev;
     }
     sdfFreeMemoryFromEitherHeap(texture->data);
-    sdfFreeMemoryFromEitherHeap(texture->auxiliaryAllocation);
+    sdfFreeMemoryFromEitherHeap(texture->intensityMap);
     sdfReleaseChipBlock(texture->reference);
     sdfReleaseChipBlock(texture);
 }
@@ -240,10 +240,10 @@ void sdfTexBuildIntensityMap(SdfTex *texture) {
         stride = 2;
         count = (u32)texture->dataSize >> 1;
     }
-    output = texture->auxiliaryAllocation;
+    output = texture->intensityMap;
     if (output == NULL) {
         output = sdfAllocateBlockBySizeThreshold(count);
-        texture->auxiliaryAllocation = output;
+        texture->intensityMap = output;
     }
     source = texture->data;
     do {
