@@ -50,6 +50,24 @@ extern u32 func_0035A828(s32 bytes);
 extern u8 *mnuGetResourceProgressStepState(void);
 extern u32 mnuGetActiveEffectWorkEntry(void);
 
+typedef struct MenuMovementRecord18 {
+    union {
+        u8 pad00[0xA];
+        struct {
+            u8 pad00To04[4];
+            u32 parameterTag;
+            u8 pad08[2];
+            u16 movementScale;
+            u8 pad0C[0xC];
+        };
+    };
+} MenuMovementRecord18;
+
+typedef char MenuMovementRecordLayoutAssert[
+    (sizeof(MenuMovementRecord18) == 0x18 &&
+     (unsigned long)&((MenuMovementRecord18 *)0)->parameterTag == 4 &&
+     (unsigned long)&((MenuMovementRecord18 *)0)->movementScale == 0xA) ? 1 : -1];
+
 typedef struct ShortRecord {
     u8 kind;
     u8 pad01;
@@ -470,10 +488,11 @@ void func_003224B8(MenuRuntimeRecord *record, MenuWorkEntry *entry, struct MnuSh
 void func_003224C0(MenuRuntimeRecord *record, MenuRuntimeRecord *other, struct MnuShootingWork *context) {
 }
 
-extern u16 D_0040B248[];
+/* Each packed table word contains signed X and Y hit radii. */
+extern s8 D_0040B248[][2];
 
 u16 *func_003224C8(s32 index) {
-    return &D_0040B248[index];
+    return (u16 *)&D_0040B248[index];
 }
 
 void mnuBindMenuRecordRegistry(MenuRegistry *records, u32 count) {
@@ -491,7 +510,8 @@ void func_00322510(u32 records, u32 count) {
     D_004390E0 = count;
 }
 
-u8 *func_00322520(u16 index) {
+u8 *func_00322520(u32 taggedIndex) {
+    u16 index = taggedIndex;
     return (u8 *)D_004390DC + index * 24;
 }
 
@@ -804,7 +824,72 @@ u32 mnuAdvanceWorkEntry(MenuWorkEntry *entry, s32 elapsed) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00323988);
+/* Find the first active runtime record overlapping the work entry's hit rectangle. */
+MenuRuntimeRecord *func_00323988(MenuWorkEntry *work, struct MnuShootingWork *context) {
+    MenuRuntimeList *list = func_00321EC8();
+    MenuRegistryParameters *parameters = NULL;
+    MenuRuntimeRecord *record;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+    s32 i;
+    u32 tag = work->tag;
+
+    switch (tag & 0xFFFF0000) {
+    case 0x01000000: {
+        MenuMovementRecord18 *fixed = (MenuMovementRecord18 *)func_00322520(tag);
+        parameters = func_00322550(fixed->parameterTag);
+        break;
+    }
+    case 0x02010000: {
+        MenuRegistry *registry;
+        if (work->remaining == 0) {
+            return NULL;
+        }
+        if (work->control.bits.countdownEnabled) {
+            return NULL;
+        }
+        registry = mnuGetMenuRecordRegistryEntry(tag);
+        parameters = func_00322550(registry->parameterIndex);
+        break;
+    }
+    }
+    if (parameters->hitWidth == 0) {
+        return NULL;
+    }
+    left = (s32)(work->x0 + (f32)parameters->hitOffsetX);
+    top = (s32)(work->y0 + (f32)parameters->unk26);
+    right = left + parameters->hitWidth;
+    bottom = top + parameters->unk2A;
+    record = list->records;
+    for (i = 0; i < list->capacity; i++, record++) {
+        if (record->state.word & MNU_WORK_ACTIVE) {
+            s32 x = (s32)((record->unk0C + record->unk18) + record->unk04);
+            s32 y = (s32)((record->unk10 + record->unk1C) + record->unk08);
+            s32 kind = record->state.kind & 0xF;
+            s32 radiusX = D_0040B248[kind][0];
+            s32 radiusY;
+
+            if (right < x - radiusX || x + radiusX < left) {
+                continue;
+            }
+            radiusY = D_0040B248[kind][1];
+            if (bottom < y - radiusY || y + radiusY < top) {
+                continue;
+            }
+            if ((work->tag & 0xFFFF0000) == 0x01000000 && kind == 3) {
+                D_004389AC(record, work, context);
+                return record;
+            }
+            if (work->inputCountdown == 0 && work->remaining != 0) {
+                D_004389AC(record, work, context);
+                return record;
+            }
+        }
+    }
+    return NULL;
+}
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00323BB8);
 
@@ -838,15 +923,7 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_003242D0);
 extern f32 sdfVec3Normalize(f32 *vector);
 extern void sdfVectorScale(f32 factor, f32 *vector);
 
-typedef struct MenuMovementRecord18 {
-    u8 pad00[0xA];
-    u16 movementScale;
-    u8 pad0C[0xC];
-} MenuMovementRecord18;
 
-typedef char MenuMovementRecordLayoutAssert[
-    (sizeof(MenuMovementRecord18) == 0x18 &&
-     (unsigned long)&((MenuMovementRecord18 *)0)->movementScale == 0xA) ? 1 : -1];
 
 s32 func_00324840(void) {
     MenuWorkEntry *work = (MenuWorkEntry *)mnuActiveEffectEntry;

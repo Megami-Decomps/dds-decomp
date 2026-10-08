@@ -164,9 +164,18 @@ typedef struct MenuProgressParameters {
 } MenuProgressParameters;
 
 typedef struct MenuRegistryParameters {
-    u8 pad00[0x26];
+    union {
+        u8 pad00[0x26];
+        struct {
+            u8 pad00To24[0x24];
+            s16 hitOffsetX;
+        };
+    };
     s16 unk26;
-    u8 pad28[2];
+    union {
+        u8 pad28[2];
+        u16 hitWidth;
+    };
     u16 unk2A;
     u8 pad2C[4];
 } MenuRegistryParameters;
@@ -195,6 +204,10 @@ typedef char MenuResourceLayoutsAssert[
      (unsigned long)&((MenuRegistry*)0)->unk08==8 &&
      sizeof(((MenuRegistry*)0)->unk08)==2 &&
      sizeof(MenuRegistryParameters)==0x30 &&
+     (unsigned long)&((MenuRegistryParameters*)0)->hitOffsetX==0x24 &&
+     sizeof(((MenuRegistryParameters*)0)->hitOffsetX)==2 &&
+     (unsigned long)&((MenuRegistryParameters*)0)->hitWidth==0x28 &&
+     sizeof(((MenuRegistryParameters*)0)->hitWidth)==2 &&
      (unsigned long)&((MenuRegistryParameters*)0)->unk26==0x26 &&
      (unsigned long)&((MenuRegistryParameters*)0)->unk2A==0x2A &&
      sizeof(MenuRegistry)==0x1C &&
