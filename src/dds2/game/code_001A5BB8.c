@@ -2146,7 +2146,28 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AAC50);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AB160);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AB510);
+extern const char D_00415130[];
+extern void btlCopyUnitStats(BtlUnit *, DatPartyRecord *);
+
+/* Swap the actor's roster entry, refresh its stats, and mark the active entry. */
+void func_001AB510(BtlUnit *actor, u8 targetIndex) {
+    DatPartyRecord previous;
+
+    if (actor->unk2E4 != targetIndex) {
+        memcpy(&previous, &datGameState->party[actor->unk2E4], sizeof(previous));
+        memcpy(&datGameState->party[actor->unk2E4], &datGameState->party[targetIndex], sizeof(previous));
+        memcpy(&datGameState->party[targetIndex], &previous, sizeof(previous));
+
+        btlCopyUnitStats(actor, &datGameState->party[actor->unk2E4]);
+        actor->partyRecord.flags |= 2;
+        datGameState->party[actor->unk2E4].flags |= 2;
+        datGameState->party[targetIndex].flags &= ~2;
+        func_001AABD8();
+        btlBossDebugPrintf(D_00415130,
+                           actor->unk2E4, targetIndex, previous.unitId,
+                           actor->partyRecord.unitId);
+    }
+}
 
 s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record) {
     if ((record->flags & 4) != 0) {
@@ -2379,6 +2400,8 @@ s32 btlGetLoggedIndexedCommandItem(s32 index) {
 u16 btlGetActorBedAssetIdFromIndex(s32 arg0) {
     return *(u16 *)(arg0 * 8 + datItemSkillRecords + 2);
 }
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415130);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415158);
 
