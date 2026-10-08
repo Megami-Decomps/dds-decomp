@@ -3372,14 +3372,14 @@ EffPCPTripleWork *effPcpTripleHandleDuplicate(EffPCPTripleWork *src) {
 }
 
 void effPcpTripleHandleRelease(EffPCPTripleWork *work) {
-    u32 *p = work->handles;
-    u32 i;
+    u32 *handleCursor = work->handles;
+    u32 slotIndex;
 
-    for (i = 0; i < 7; i++) {
-        effDestroyNode(p[14]);
-        effDestroyNode(p[7]);
-        effDestroyNode(p[0]);
-        p++;
+    for (slotIndex = 0; slotIndex < 7; slotIndex++) {
+        effDestroyNode(handleCursor[14]);
+        effDestroyNode(handleCursor[7]);
+        effDestroyNode(handleCursor[0]);
+        handleCursor++;
     }
     sdfReleaseChipBlock(work);
 }
@@ -6320,4 +6320,3 @@ INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_00436438);
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_0043643C);
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_0043643D);
-
