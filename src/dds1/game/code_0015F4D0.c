@@ -540,10 +540,10 @@ extern void effBattleRebuildClonedParameterBanks(SoundMixer *dst, SoundMixer *sr
 
 /* Clone a mixer: copy its banks, rebuild the voice state from the original and start with no voices. */
 SoundMixer *sndMixerClone(SoundMixer *src) {
-    u32 handle = (u32)sdfAllocGeneralBlock(sizeof(SoundMixer));
-    SoundMixer *mixer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(SoundMixer));
+    SoundMixer *mixer = (void *)sdfResourceRetainAddress(allocation);
 
-    mixer->resource = (void *)handle;
+    mixer->resource = allocation;
     memcpy(mixer, src, 0xC38);
     effBattleRebuildClonedParameterBanks(mixer, src);
     mixer->active = 0;
