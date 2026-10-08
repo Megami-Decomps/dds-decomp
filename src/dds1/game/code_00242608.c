@@ -407,35 +407,20 @@ void func_00242E70(EvtRuntime *viewer, EvtRuntimeGroup *track, s32 value, CampDi
     func_00243048(lo, hi, display, ratio);
 }
 
-typedef struct CampListLayout {
-    s32 width0;
-    s32 width1;
-    s32 width2;
-    s32 unkC;               /* 0xC: layout default, no reader in this unit */
-    s32 unk10;              /* 0x10: layout default, no reader in this unit */
-    s32 unk14;              /* 0x14: layout default, no reader in this unit */
-    u8 pad18[8];
-    s32 unk20;              /* 0x20: layout default, no reader in this unit */
-    s32 unk24;              /* 0x24: layout default, no reader in this unit */
-    s32 unk28;              /* 0x28: layout default, no reader in this unit */
-    s32 unk2C;              /* 0x2C: layout default, no reader in this unit */
-    s32 unk30;              /* 0x30: layout default, no reader in this unit */
-    s32 unk34;              /* 0x34: layout default, no reader in this unit */
-} CampListLayout;
 
-void mnuInitializeCampListLayoutDefaults(CampListLayout *layout) {
-    layout->width0 = 0x96;
-    layout->width1 = 0x96;
-    layout->unk10 = 0x50;
-    layout->width2 = 0x96;
-    layout->unkC = 0x1E;
-    layout->unk14 = 1;
-    layout->unk20 = 7;
-    layout->unk24 = 4;
-    layout->unk28 = 0xA;
-    layout->unk2C = 0x20;
-    layout->unk30 = 0x10;
-    layout->unk34 = 0x10;
+void mnuInitializeCampListLayoutDefaults(EvtBlendKey *layout) {
+    layout->w[0] = 0x96;
+    layout->w[1] = 0x96;
+    layout->x = 0x50;
+    layout->w[2] = 0x96;
+    layout->w[3] = 0x1E;
+    layout->flagWord = 1;
+    layout->y[0] = 7;
+    layout->y[1] = 4;
+    layout->y[2] = 0xA;
+    layout->z[0] = 0x20;
+    layout->z[1] = 0x10;
+    layout->z[2] = 0x10;
 }
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00242F78);
