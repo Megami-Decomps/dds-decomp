@@ -141,7 +141,7 @@ extern s32 func_001978E8(s32, s32, s32, s32, s32, s32);
 
 extern char mnuNumberSpriteFormat[];
 
-extern void func_001958A0(s32, s32, s32);
+extern void frFontDrawGlyphChain(s32, s32, s32);
 typedef struct EffectPair {
     s32 firstValue;
     s32 secondValue;
@@ -186,7 +186,7 @@ void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 value, 
         text = D_003482A8[slot].encodedText;
     }
     handle = itfCreateConvertedTextGlyph(gridX, gridY, depth, value, text, 0);
-    func_001958A0(handle, 1, MNU_TEXT_DRAW_PRIORITY);
+    frFontDrawGlyphChain(handle, 1, MNU_TEXT_DRAW_PRIORITY);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
 }
 
@@ -240,7 +240,7 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
 
     func_003014F0(text, mnuNumberSpriteFormat, number);
     sprite = func_001978E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), (s32)text, 0);
-    func_001958A0(sprite, 1, priority);
+    frFontDrawGlyphChain(sprite, 1, priority);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)sprite);
 }
 
@@ -2000,7 +2000,7 @@ void mnuDrawTerminalAmountText(s32 fading, s32 context) {
         color = uiBlendColors(0xA09DC380, 0xA09DC300, scene->list->scale);
     }
     sprite = func_001979C8(0x1740, 0x210, 0, color, text, 0);
-    func_001958A0(sprite, 1, 0x53);
+    frFontDrawGlyphChain(sprite, 1, 0x53);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)sprite);
 }
 

@@ -14,7 +14,7 @@ extern void mnuCreateConfigTasks(s32 mode);
 typedef struct FrFontGlyph FrFontGlyph;
 extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
 extern void frFontSetChainFlag(FrFontGlyph *, u8);
-extern s32 func_001958A0(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern char D_003BC6C8[];
 extern const char D_003BC6D0[];
@@ -172,7 +172,7 @@ void func_00272BC0(s32 x, s32 y, s32 z, struct MenuList *list,
                        datGameState->inventory.counts[node->sortKeySecondary]);
         count = (FrFontGlyph *)func_001978E8(x + 0x910, y + 0x20, z, color,
                                           buffer, (s32)label);
-        func_001958A0(count, 1, drawArg);
+        frFontDrawGlyphChain(count, 1, drawArg);
         frFontQueueGlyphForCurrentDrawBuffer(count);
     } else {
         s32 selected = (list->cursor == node);
