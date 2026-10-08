@@ -115,7 +115,7 @@ extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, 
 extern s32 func_003014F0(char *, const char *, ...);
 extern FrFontGlyph *func_001979C8(s32, s32, s32, s32, char *, FrFontGlyph *);
 extern u32 frFontMeasureLines(FrFontGlyph *);
-extern s32 func_001958A0(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern char D_003BC568[];
 
 /* Draw each nonempty reward icon row with its name and formatted parameter. */
@@ -146,7 +146,7 @@ void func_002650C8(s32 x, s32 y, s32 depth, u32 color, BrsRewardSummary *summary
             func_003014F0(formatted, D_003BC560, parameter);
             valueGlyph = func_001979C8(x + 0xC60, y + 0x18, depth, color,
                                        formatted, iconGlyph);
-            func_001958A0(valueGlyph, 1, textStyle);
+            frFontDrawGlyphChain(valueGlyph, 1, textStyle);
             frFontQueueGlyphForCurrentDrawBuffer(valueGlyph);
             y += 0xB0;
         }
@@ -160,7 +160,7 @@ void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, 
     func_003014F0(text, D_003BC568, info->totalExp);
     glyph = func_001979C8(x, y, z, w, text, 0);
     frFontSetContextPair(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
-    func_001958A0(glyph, 1, color);
+    frFontDrawGlyphChain(glyph, 1, color);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
@@ -171,7 +171,7 @@ void mnuQueueRightAlignedFormattedInfoText(s32 x, s32 y, s32 z, s32 w, const Brs
     func_003014F0(text, D_003BC568, info->macca);
     glyph = func_001979C8(x, y, z, w, text, 0);
     frFontSetContextPair(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
-    func_001958A0(glyph, 1, color);
+    frFontDrawGlyphChain(glyph, 1, color);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 

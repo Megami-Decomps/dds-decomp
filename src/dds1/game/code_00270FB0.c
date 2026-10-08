@@ -639,7 +639,7 @@ u8 mnuIsFadeIdle(void) {
 extern s32 func_003014F0(char *, const char *, s32);
 extern s32 func_00197A98(s32, s32, s32, u32, u32, s32);
 typedef struct FrFontGlyph FrFontGlyph;
-extern s32 func_001958A0(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern char D_003BC6C0[];
 
 
@@ -652,7 +652,7 @@ void mnuDrawStaffCampSlotsAndCurrency(s32 unused0, s32 unused1, s32 z, s32 first
     itfDrawGridWithResolvedSlot(0x2B0, 0xCE8, 0, 1, (EffectSlotSet *)(u32)secondSlot, 3, drawFlags);
     func_003014F0(text, D_003BC6C0, datGameState->header.currency);
     glyph = func_00197A98(0x4B0, 0xCD8, z, 0x80808080, (u32)text, 0);
-    func_001958A0((FrFontGlyph *)glyph, 1, drawFlags);
+    frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, drawFlags);
     frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
 }
 
@@ -662,7 +662,7 @@ extern u8 *D_0037B988[];
 void mnuCreateStaffImageSprite(s32 imageIndex) {
     FrFontGlyph *sprite = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x2F0, 0x1E0, 0, 0xa09dc35a,
                                       D_0037B988[imageIndex], 0);
-    func_001958A0(sprite, 1, 0x54);
+    frFontDrawGlyphChain(sprite, 1, 0x54);
     frFontQueueGlyphForCurrentDrawBuffer(sprite);
 }
 typedef struct StaffGridLabelRow {
@@ -678,21 +678,20 @@ typedef char StaffGridLabelRow_gridIds_offset_check[
 
 extern const StaffGridLabelRow D_003B2100[];
 
-void mnuDrawStaffGridLabelsForKind(s32 kind, s32 slot) {
+void mnuDrawStaffGridLabelsForKind(s32 kind, struct EffectSlotSet *resources) {
     StaffGridLabelRow rows[7];
     s32 i;
     memcpy(rows, D_003B2100, sizeof(rows));
     for (i = 0; i < rows[kind].count; i++) {
         if (rows[kind].x[i] != 0) {
             itfDrawGridWithResolvedSlot(rows[kind].x[i], 0xCF0, 0, 1,
-                                       (EffectSlotSet *)(u32)slot, rows[kind].gridIds[i], 0x53);
+                                       resources, rows[kind].gridIds[i], 0x53);
         }
     }
 }
 
 
-typedef struct TextStyleNode TextStyleNode;
-extern void frFontSetChildColors(TextStyleNode *, u32);
+extern void frFontSetChildColors(struct FrFontGlyph *, u32);
 extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
 
 void func_00272518(s32 kind, s32 labelIndex, s32 textTable, s32 context,
@@ -708,8 +707,8 @@ void func_00272518(s32 kind, s32 labelIndex, s32 textTable, s32 context,
     itfDrawGridWithResolvedSlot(0x280, 0x9A0, 0, drawOption, menu->staffSlots.baseResources[1], 2, layer);
     if (textTable != 0) {
         glyph = itfDrawBankTextWithLayoutFlags(0x2C0, 0xA70, 0, labelIndex, textTable, textOption);
-        frFontSetChildColors((TextStyleNode *)glyph, 0xA09DC366);
-        func_001958A0((FrFontGlyph *)glyph, 0, layer);
+        frFontSetChildColors((struct FrFontGlyph *)(u32)glyph, 0xA09DC366);
+        frFontDrawGlyphChain((FrFontGlyph *)glyph, 0, layer);
         frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
     }
 }

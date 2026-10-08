@@ -1503,6 +1503,7 @@
 0x001655D0	effThunderReleaseFragmentWork	inferred	queued
 0x00165600	effThunderShiftOriginByVectorDelta	inferred	Stores new source vector and adds its delta to the existing origin vector. [names_reviewed6.tsv]
 0x00165630	effThunderSetFragmentColor	inferred	queued
+0x00165638	effThunderGetFragmentParameters	inferred	Returns the borrowed leading fragment parameters from the owned thunder fragment work
 0x00165690	effThunderApplyFragmentColorBands	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:542:func_00165690; Applies the three stored fragment color parameters to the particle system using its symmetric five-vertex color layout.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001656B8	effThunderRandomizeFrag	inferred	fills a 12-byte fragment with two rand-modulo values and grey 0x80808080
 0x00165758	effThunderBuildFragmentStrip	inferred	builds a fragment's one-system strip by writing paired five-vector rows into its cell history
@@ -2403,8 +2404,10 @@
 0x00195530	frFontClearFlagBits	inferred	interface/frFont: clears mask bits from the shared font flag byte D_003BB174 and returns the previous value; setter is func_00195520 [names_L10_LiteSweep.tsv]
 0x00195548	frFontSetSharedRenderFlags	inferred	stores render flags used when drawing glyphs [names_reviewed5.tsv]
 0x00195550	frFontAdvanceGlyphFade	inferred	reduces alpha and advances vertical position of fading glyph children [names_reviewed5.tsv]
+0x001955D8	frFontAdvanceChildFadeAndGetJitter	inferred	Gates child fade on predecessor/control state, advances its low byte up to 0x80 and returns the transient X jitter.
 0x00195868	frFontDrawGlyphInDefaultMode	inferred	confidence=high; matched-C; src/dds1/interface/frFont.c:488:func_00195868; Uses shared font render flags with draw mode zero, not an override flag mask.; source=revalidated-unapplied-names_R_Names31.tsv:19 [names_qp12_apply.tsv]
 0x00195880	frFontDrawGlyphWithSharedFlags	inferred	forwards glyph and mode with shared render flags to drawing routine [names_reviewed5.tsv]
+0x001958A0	frFontDrawGlyphChain	inferred	Draws parent/child chains with fade and wait control, returning their total child-glyph count only when ready; DDS2 also gates the result on a positive delay counter.
 0x00195B10	frFontReleaseOppositeDrawBufferGlyphs	inferred	Releases slot 1 when the current draw-buffer selector low byte is zero, otherwise slot 0; returns signed zero.
 0x00195B60	frFontLinkGlyphAfterPrevious	inferred	Links a glyph with position-next set so its horizontal position follows the preceding glyph.
 0x00195B78	frFontLinkGlyph	inferred	splices a glyph record into another's list with optional pos copy
@@ -4213,6 +4216,7 @@
 0x00244320	mnuShopLoadSpriteAssets	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
 0x00244360	mnuReleaseShopSceneSpriteResources	inferred	confidence=high; src/dds1/game/code_00242608.c:func_00244360; Releases the sprite resource slot set belonging to the shop scene. [names_qp9.tsv]
 0x00244380	mnuShopHasPendingFlag	inferred	scans 0xC0 flag bytes for an active entry
+0x002443F8	mnuCreateShopListWindow	inferred	Creates the ShopScene list window, its rows and shop-list context
 0x00244508	campFlagRowValue	inferred	DDS1 twin of DDS2 func_00260138: value of the highest set flag in a 26-byte row. [names_M44_Mid3.tsv]
 0x002445E0	mnuCampFindActiveSlot	inferred	mnu camp returns the highest slot index whose flag id is set
 0x00244740	mnuShopReleaseSprites	inferred	frees sprite buffers and releases sprite handles

@@ -30,8 +30,7 @@ extern u16 mnuGetAdjustedPartyRangeValue(s32);
 extern u8 mnuGetRangeEntryKind(u32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
-extern void frFontSetChainFlag(FrFontGlyph *, u8);
-extern s32 func_001958A0(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern void func_002BF4E0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, u32);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern s32 func_002CD240(u16, u8 **);
@@ -594,7 +593,7 @@ void func_00275B40(EffectSlotSet **sets, MenuEffectPair *hpBar, MenuEffectPair *
             glyph = itfCreateConvertedTextGlyph(
                 0x640, 0xBE8, 0, color, name, 0);
             func_00196088(0xD20, 0xBE8, glyph);
-            func_001958A0(glyph, 1, 0x53);
+            frFontDrawGlyphChain(glyph, 1, 0x53);
             frFontQueueGlyphForCurrentDrawBuffer(glyph);
         }
     } else {
@@ -602,7 +601,7 @@ void func_00275B40(EffectSlotSet **sets, MenuEffectPair *hpBar, MenuEffectPair *
             0x640, 0xBE8, 0, color, (const u8 *)D_003BC6F0, 0);
         glyph = itfCreateConvertedTextGlyph(
             0xB50, 0xBF0, 0, color, (const u8 *)D_003BC6F8, glyph);
-        func_001958A0(glyph, 1, 0x53);
+        frFontDrawGlyphChain(glyph, 1, 0x53);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
     if (marker) {
@@ -717,7 +716,7 @@ s32 mnuDrawPartySelectionPanelAndStep(KwlnTask *callback) {
     mnuCreateStaffImageSprite(0x13);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->primaryWindow, 0x53);
     func_00276018(context);
-    mnuDrawStaffGridLabelsForKind(0, ((CampMenuContext *)context)->actor);
+    mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((CampMenuContext *)context)->actor));
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
@@ -823,7 +822,6 @@ extern u8 D_0037C3A8[];
 extern s32 effHasFirstTextureHandle(s32);
 extern void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task);
 extern void mnuCreateStaffImageSprite();
-extern void mnuDrawStaffGridLabelsForKind();
 extern void func_00272668();
 
 s32 mnuDrawStaffCampPageWithImage(KwlnTask *callback) {
@@ -842,7 +840,7 @@ s32 mnuDrawStaffCampPageWithImage(KwlnTask *callback) {
         mnuCreateStaffImageSprite(0x11);
     }
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, work->panel, 0x53);
-    mnuDrawStaffGridLabelsForKind(0, work->actor);
+    mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(work->actor));
     if (menu->selectedList != 0) {
         s32 *slot = &((MenuWindowContainer *)work->panel)->list->cursor->index;
 
@@ -1041,7 +1039,7 @@ void mnuDrawSlotIcons(s32 x, MenuPageWindow *page) {
     for (i = 0; i < 3; i++, y += 0xa8) {
         handle = itfDrawUnderscoreTextSegment(0x190, y, 0, 0xa09dc359, (const u8 *)(D_003BAA7C + slot->unitId * 45), i);
         if (handle != 0) {
-            func_001958A0(handle, 1, 0x53);
+            frFontDrawGlyphChain(handle, 1, 0x53);
             frFontQueueGlyphForCurrentDrawBuffer(handle);
         }
     }
@@ -1100,7 +1098,7 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param
     frFontStoreShiftedContextValue(item, scale * 0x10);
     frFontSetChildColors(item, color);
     frFontClearFlagBits(1);
-    func_001958A0(item, 1, param);
+    frFontDrawGlyphChain(item, 1, param);
     frFontQueueGlyphForCurrentDrawBuffer(item);
 }
 
@@ -1147,15 +1145,15 @@ s32 func_00277390(KwlnTask *task) {
     if (menu->staffMode == 0) {
         mnuDrawPartySkillAndStatusPanel(partyEntry, page, context->sceneGroup,
                                         context->sprite, (s32)slots, 0x53);
-        mnuDrawStaffGridLabelsForKind(5, context->actor);
+        mnuDrawStaffGridLabelsForKind(5, (struct EffectSlotSet *)(u32)(context->actor));
     } else {
         mnuDrawProfilePanelAndSprite((s32)partyEntry, (s32)page,
                                      (s32)context->effect, (s32)context->extraResource,
                                      (s32)slots, 0x53);
         if (menu->staffImage == 0) {
-            mnuDrawStaffGridLabelsForKind(6, context->actor);
+            mnuDrawStaffGridLabelsForKind(6, (struct EffectSlotSet *)(u32)(context->actor));
         } else {
-            mnuDrawStaffGridLabelsForKind(4, context->actor);
+            mnuDrawStaffGridLabelsForKind(4, (struct EffectSlotSet *)(u32)(context->actor));
         }
     }
 
@@ -1241,7 +1239,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     glyph = func_001978E8(x - 0x90, y, depth, color, text, 0);
     x += 0x140;
     frFontSetChainFlag(glyph, chainFlag);
-    func_001958A0(glyph, 1, texture);
+    frFontDrawGlyphChain(glyph, 1, texture);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
     switch (mnuGetRangeEntryKind(rangeId)) {
     case 1:
@@ -1522,7 +1520,7 @@ s32 mnuCampMenuDrawSlotLabel(KwlnTask *param) {
     } else {
         mnuDrawWindowContainer(0x1C0, 0x3D0, 0, ((CampMenuContext *)context)->panel, 0x53);
     }
-    mnuDrawStaffGridLabelsForKind(0, ((CampMenuContext *)context)->actor);
+    mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((CampMenuContext *)context)->actor));
     return menuRunPanel((void *)context, 1, (void *)param);
 }
 

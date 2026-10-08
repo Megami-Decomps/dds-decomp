@@ -4,6 +4,7 @@
 #include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff.h"
+#include "eff_thunder_fragment.h"
 #include "eff_event.h"
 #include "eff_event_sound.h"
 #include "eff_pcp_flash.h"
@@ -982,7 +983,7 @@ void func_00165110(EffThunderSparkWork *work) {
 
 /* Single- and dual-system variants share this allocation layout, but the
    single-system update counts frames where the dual variant keeps a system. */
-typedef struct {
+struct EffThunderFragmentWork {
     EffThunderFragmentParams head;
     EffThunderFrag *fragments; /* 0x54 */
     u32 color;               /* 0x58 */
@@ -992,7 +993,7 @@ typedef struct {
     } state;                 /* 0x5C */
     ParSystem *system;            /* 0x60 */
     SdfMemBlock *allocationHandle; /* 0x64 */
-} EffThunderFragmentWork; /* 0x68 */
+}; /* 0x68 */
 
 extern void effThunderRandomizeFrag(EffThunderFragmentWork *work, s32 index);
 
@@ -1040,9 +1041,9 @@ void effThunderSetFragmentColor(EffThunderFragmentWork *work, u32 color) {
     work->color = color;
 }
 
-/* Preserve the caller's word unchanged; its wider callback role is unknown. */
-u32 func_00165638(u32 value) {
-    return value;
+/* Borrow the leading parameters without transferring work ownership. */
+EffThunderFragmentParams *effThunderGetFragmentParameters(EffThunderFragmentWork *work) {
+    return &work->head;
 }
 
 /* Forward the system and its opaque fragment configuration through the native call. */

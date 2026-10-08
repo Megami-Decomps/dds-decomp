@@ -3,6 +3,7 @@
 #include "itf_draw_grid.h"
 #include "kwln.h"
 #include "mnu.h"
+#include "mnu_staff.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "mnu_camp_work.h"
@@ -14,7 +15,7 @@ extern void mnuCreateConfigTasks(s32 mode);
 typedef struct FrFontGlyph FrFontGlyph;
 extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
 extern void frFontSetChainFlag(FrFontGlyph *, u8);
-extern s32 func_001958A0(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern char D_003BC6C8[];
 extern const char D_003BC6D0[];
@@ -33,7 +34,6 @@ extern void func_0027E8D8(s32, s32, s32, u32, s32);
 
 extern void mnuCreateStaffImageSprite(s32);
 
-extern void mnuDrawStaffGridLabelsForKind(s32, u32);
 extern s32 func_002719F0(s32);
 extern void mnuSetPopupEntry(s32, s32);
 extern void func_0027C788(MenuWindowContainer *);
@@ -136,7 +136,7 @@ s32 mnuDrawStaffImageScreen(KwlnTask *callback) {
     mnuDrawBackdrop((s32)(context->background), 0x20);
     func_0027E8D8(-0x10, -8, 0, context->scrollPanel, 0x54);
     mnuCreateStaffImageSprite(0x14);
-    mnuDrawStaffGridLabelsForKind(2, (u32)context->staffSlots.baseResources[6]);
+    mnuDrawStaffGridLabelsForKind(2, context->staffSlots.baseResources[6]);
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
@@ -172,7 +172,7 @@ void func_00272BC0(s32 x, s32 y, s32 z, struct MenuList *list,
                        datGameState->inventory.counts[node->sortKeySecondary]);
         count = (FrFontGlyph *)func_001978E8(x + 0x910, y + 0x20, z, color,
                                           buffer, (s32)label);
-        func_001958A0(count, 1, drawArg);
+        frFontDrawGlyphChain(count, 1, drawArg);
         frFontQueueGlyphForCurrentDrawBuffer(count);
     } else {
         s32 selected = (list->cursor == node);

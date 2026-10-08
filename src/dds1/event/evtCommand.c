@@ -673,7 +673,31 @@ s32 evtCommandAddFlaggedEffectUnitToWorld(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00226E98);
+/* Relink the selected camera owner to its path, reporting any failure. */
+s32 func_00226E98(void) {
+    void *owner;
+    void *path;
+
+    if (scrReadIntParameter(0) < 0) {
+        owner = (void *)fldGetPlayerSceneState();
+    } else {
+        owner = evtFindWorldObjectByIdAndKind(4, scrReadIntParameter(0));
+    }
+    if (owner == NULL) {
+        func_003003F0("CAM_PATH_MOVE error!\n");
+        return 1;
+    }
+    path = evtFindWorldObjectByIdAndKind(0x10, scrReadIntParameter(1));
+    if (path == NULL) {
+        func_003003F0("CAM_PATH_MOVE error!\n");
+        return 1;
+    }
+    if (evtStageRelinkOwnedNodeResource(path, owner) == 0) {
+        func_003003F0("CAM_PATH_MOVE error!\n");
+        return 1;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "event/evtCommand", func_00226F38);
 
