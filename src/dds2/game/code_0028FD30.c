@@ -361,10 +361,39 @@ MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *object) {
     return object->menu.defaultSelector;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290A78);
-
 extern void func_0026D168(void *, s32, s32);
 extern void *evtAllocateMantraSelectionWork(s32, s32);
+extern void func_0026D988(void *);
+
+s32 func_00290A78(MnuStatusResource *object) {
+    MantraMenuWork *menu;
+    struct MenuListNode *node;
+    MantraFlagResource **slot;
+    s32 source;
+
+    menu = &object->menu;
+    node = object->list->first;
+    if (node != 0) {
+        slot = menu->slots;
+        while (node != 0) {
+            source = node->unk70;
+            if (*slot != 0) {
+                func_0026D168(*slot, source, 0);
+            } else {
+                *slot = evtAllocateMantraSelectionWork(source, 0);
+            }
+            node = node->next;
+            slot++;
+        }
+    }
+    if (menu->slots[5] != 0) {
+        func_0026D988(menu->slots);
+    } else {
+        menu->slots[5] = evtAllocateMantraSelectionWork(0, 0);
+        func_0026D988(menu->slots);
+    }
+    return 1;
+}
 
 s32 mnuUpdateSelectedPanelSlot(MnuStatusResource *object) {
     s32 index;

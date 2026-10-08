@@ -137,7 +137,7 @@ typedef struct BtlState {
     u8 pad22C[0x14];
     struct BattleModelEntry *modelEntries; /* 0x240 */
     u16 cameraPresetMode; /* 0x244: selects the marked actor's camera preset. */
-    u8 pad246[2];
+    u16 cameraActorHighWater; /* 0x246: largest actor count arranged for a side. */
     u16 turnPhase; /* 0x248 */
     u8 unk24A; /* Nonzero selects stream 2 when the scene has no override. */
     u8 pad24B[1];
@@ -201,7 +201,7 @@ typedef struct BtlState {
     u8 pad5A4[8];
     void (*actorParameterDeltaCallback)(BtlUnit *, s32 *); /* 0x5AC */
     u8 pad5B0[8];
-    s32 unk_5B8;
+    void (*postPlacementCallback)(void); /* 0x5B8: runs after actor positions and rotations. */
     s32 (*effectParameterCallback)(BtlUnit *, s32); /* 0x5BC: actor record-index override, DDS1 001D645C. */
     u8 pad5C0[4];
     BtlUnit *(*findReusableUnit)(u32, u32); /* 0x5C4 */
@@ -419,13 +419,14 @@ typedef struct BtlState {
     u8 pad5C4[4];
     void (*bossCleanup)(void); /* 0x5C8 */
     s32 (*selectScriptArg)(void); /* 0x5CC */
-    u8 pad5D0[4];
+    s32 (*hitResultOverride)(BtlUnit *, BtlUnit *, s32); /* 0x5D0: 001B1848 supplies source, target and command. */
     s32 (*chooseMotion)(BtlUnit *, s32, s32); /* 0x5D4 */
     s32 (*unk5D8)(BtlUnit *);
     s32 (*unk5DC)(BtlUnit *, s32);
     void (*actorParameterDeltaCallback)(BtlUnit *, s32 *); /* 0x5E0 */
     s32 (*sceneCallback)(); /* 0x5E4 */
-    u8 pad5E8[8];
+    u8 pad5E8[4];
+    void (*postPlacementCallback)(void); /* 0x5EC: runs after actor positions and rotations. */
     s32 (*effectParameterCallback)(BtlUnit *, s32); /* 0x5F0: same override, DDS2 001E3264. */
     void (*initializeUnitEntry)(BtlUnit *); /* 0x5F4: scene-entry unit flag/status setup. */
     BtlUnit *(*findModelActor)(s32, s32); /* 0x5F8 */
@@ -474,7 +475,8 @@ typedef struct BtlState {
     s32 (*unitLiftPredicate)(BtlUnit *); /* 0x6B4 */
     u8 pad6B8[0x18];
     void (*actionResourceNameHook)(struct ActionStateLink *, s32, char *);
-    u8 pad6D4[8];
+    u32 (*enemyLimitOverride)(BtlUnit *, DatBattleSceneRecord *, u32); /* 0x6D4: 001B325C overrides the unsigned scene limit. */
+    u8 pad6D8[4];
     s32 (*commandRangeOverride)(BtlUnit *, s32); /* 0x6DC: func_001B0B30 calls the range override. */
     BtlUnit *(*selectSoundEffectTarget)(BtlUnit *); /* 0x6E0: DDS2 00201FD8 consumes the returned actor. */
     s32 (*unk6E4)(BtlUnit *);
@@ -485,7 +487,9 @@ typedef struct BtlState {
     void (*unk6F8)(BtlUnit *, s32, s32);
     s32 (*unk6FC)(BtlUnit *, s32, s32);
     void (*unitReturnHook)(struct ActionStateLink *); /* 0x700: custom return-to-group handling */
-    u8 pad704[0xC];
+    f32 (*hitChanceScale)(BtlUnit *, BtlUnit *, s32); /* 0x704: 001B1B20 multiplies the callback result in f0. */
+    u8 pad708[4];
+    s32 (*selectSingleTargetOverride)(struct ActionStateLink *); /* 0x70C: 0021552C calls the single-target override. */
     s32 (*unk710)(BtlUnit *, s32);
     void (*modelChangeSoundHook)(struct ActionStateLink *, u64, s32); /* 0x714: prerequisite handle, delay */
     BattleEffectPayload *effect; /* 0x718: allocation depends on battle mode. */

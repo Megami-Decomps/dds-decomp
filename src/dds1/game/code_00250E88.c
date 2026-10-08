@@ -479,7 +479,7 @@ extern void effUpdateAttached(s32, s32, s32, s32, s32);
 extern s32 evtStageTestUpdate(void *);
 extern s64 evtGetMessageWindowControlState(void);
 extern u8 D_00325818[];
-extern void uiDrawGradientColorRect(s32, s32, s32, s32, s32, u32 *, s32);
+extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 
 /* Update attached visuals and stage completion, then ramp the message-window shade over ten frames.
  * Only the final two rectangle colors receive alpha; preserve both native selection lookups and the zero return. */
