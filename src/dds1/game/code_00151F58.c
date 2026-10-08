@@ -224,7 +224,7 @@ void billSetBillboardMode(BillObj *effect, s32 mode) {
         entryCount = effect->entryCount;
         if (entryCount > 0) {
             remaining = entryCount;
-            frameSlotAddress = (s32)effect->unk60 + 0xc;
+            frameSlotAddress = (s32)effect->resolvedEntries + 0xc;
             do {
                 s32 frameData = *(s32 *)frameSlotAddress;
                 u32 frameFlags = ((BillAnimationEntry *)frameData)->flags & ~BILL_FRAME_MODE_BITS;
@@ -340,7 +340,7 @@ void billSetEntryFrameMode0(BillObj *effect, u32 startFrame) {
         s32 entryCount = effect->entryCount;
 
         if (entryCount > 0) {
-            BillOut *entry = (BillOut *)effect->unk60;
+            BillOut *entry = effect->resolvedEntries;
             s32 remaining = entryCount;
 
             do {
@@ -361,7 +361,7 @@ void billSetEntryFrameMode1(BillObj *effect, u32 startFrame) {
         s32 entryCount = effect->entryCount;
 
         if (entryCount > 0) {
-            BillOut *entry = (BillOut *)effect->unk60;
+            BillOut *entry = effect->resolvedEntries;
             s32 remaining = entryCount;
 
             do {
@@ -379,7 +379,7 @@ void billSetEntryFrameMode1(BillObj *effect, u32 startFrame) {
 /* Read the animation modulus of the first entry, if this is a list billboard. */
 s32 billGetFirstEntryFramePeriod(BillObj *effect) {
     if (effect->kind == 1) {
-        return ((BillOut *)effect->unk60)->entry->frameCount;
+        return (effect->resolvedEntries)->entry->frameCount;
     }
     return 0;
 }
@@ -529,15 +529,15 @@ void effReadBillboardModeValues(EffUnitObject *instance, s32 *modeValues) {
 
         if (modeFlags & 0x40) {
             modeValues[0] = 2;
-            modeValues[2] = (s32)func_00151398(billboard, billboard->unk60);
-            modeValues[1] = (s32)func_00151398(billboard, (BillOut *)billboard->unk60 + 1);
+            modeValues[2] = (s32)func_00151398(billboard, billboard->resolvedEntries);
+            modeValues[1] = (s32)func_00151398(billboard, billboard->resolvedEntries + 1);
         } else if (modeFlags & 0x80) {
             modeValues[0] = 3;
-            modeValues[2] = (s32)func_00151398(billboard, billboard->unk60);
-            modeValues[1] = (s32)func_00151398(billboard, (BillOut *)billboard->unk60 + 1);
+            modeValues[2] = (s32)func_00151398(billboard, billboard->resolvedEntries);
+            modeValues[1] = (s32)func_00151398(billboard, billboard->resolvedEntries + 1);
         } else {
             modeValues[0] = 0;
-            modeValues[1] = (s32)func_00151398(billboard, billboard->unk60);
+            modeValues[1] = (s32)func_00151398(billboard, billboard->resolvedEntries);
         }
     }
 }
