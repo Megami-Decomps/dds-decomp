@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 
 extern u8 D_003DC1C0[];
 
@@ -22,7 +23,6 @@ extern void mnuReleaseSpriteHandle(void);
 extern void mnuDestroyMovieMenuSelectionList(void);
 extern void mnuReleaseMovieResourceGroup();
 extern void mnuMovieShutdownA(void);
-extern void sdfReleaseResourceAllocation(u32);
 
 void func_0026B160(void) {
     mnuStopMovieDrawTask();
@@ -31,7 +31,7 @@ void func_0026B160(void) {
     mnuDestroyMovieMenuSelectionList();
     mnuReleaseMovieResourceGroup(mnuMovieMenuState->resources);
     mnuMovieShutdownA();
-    sdfReleaseResourceAllocation(mnuMovieMenuState->handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(mnuMovieMenuState->handle));
     mnuMovieMenuState = 0;
     D_003BA730 = 1;
 }

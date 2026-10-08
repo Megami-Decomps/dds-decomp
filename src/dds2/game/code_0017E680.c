@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "eff.h"
@@ -94,7 +95,7 @@ EffResourceWork *effCreateResourceEntryWork(s32 index) {
 void effReleaseAttachedResources(EffResourceWork *effect) {
     sdfQueueAssetRelease(effect->graphics6C);
     effReleaseOptionalResource(effect);
-    sdfReleaseResourceAllocation(effect->resource70);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(effect->resource70));
 }
 
 /* Emit scaled, translated triangle batches with separate vector and packed-color streams. */
@@ -239,7 +240,7 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
 
 void effReleaseOptionalResource(EffResourceWork *effect) {
     if (effect->resource68 != 0) {
-        sdfReleaseResourceAllocation(effect->resource68);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(effect->resource68));
         return;
     }
 }

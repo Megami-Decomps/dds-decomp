@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "par_draw.h"
 #include "ee_mmi.h"
 #include "eff.h"
@@ -121,7 +122,6 @@ typedef struct {
 extern ParDispatch parKindConstructorEntries[];
 extern void (*D_0034E2F0[])();
 
-void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 void effDestroyResources(void *arg);
 void sdfReleaseChipBlock(void *arg);
 extern void sdfComposeVuMatrixFromRegisters(void);

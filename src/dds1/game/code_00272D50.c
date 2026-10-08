@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "sdf_resource.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "dat_state.h"
@@ -238,7 +239,7 @@ s32 mnuStaffFreeDisplayResources(void) {
     StaffWindowResources *resources = context->resources;
     mnuReleaseStaffPrimaryWindows(context);
     func_002733B0(context);
-    sdfReleaseResourceAllocation(resources->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resources->allocation));
     return 1;
 }
 
@@ -344,7 +345,6 @@ extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern void ptyAdjustItemQuantity(s32, s32);
 extern void mnuInitPartyPanelSlots(s32);
-extern void mnuUpdateHandleStates(s32);
 extern void func_00280048(s32);
 
 /* Use a field item: resolve its direct effect (or field-use skill) against the
@@ -365,7 +365,7 @@ s32 mnuUseStaffItem(s32 itemId, s32 context) {
     }
     ptyAdjustItemQuantity(itemId, -1);
     mnuInitPartyPanelSlots(context + 0x7EC);
-    mnuUpdateHandleStates(partyPanel);
+    mnuUpdateHandleStates((MenuPageWindow *)partyPanel);
     func_00280048(partyPanel);
     return 1;
 }

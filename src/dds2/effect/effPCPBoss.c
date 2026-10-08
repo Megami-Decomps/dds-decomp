@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -148,7 +149,6 @@ extern f32 D_004334C4;
 extern void effBossInitializeModelGroups(EffBossWork *work);
 extern EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src);
 extern void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *handle);
 extern void parReleaseCellSystem(u32 system);
 
 /* Randomize geometry and initial age; the two extents remain proportional. */

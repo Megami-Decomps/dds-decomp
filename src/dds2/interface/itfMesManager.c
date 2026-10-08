@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "itf.h"
 
 void sdfRelocatePackedResourceWords(int *param_1, int param_2, u8 *param_3, int param_4);
@@ -106,7 +107,6 @@ extern struct ItfMesPoolNode *itfAcquirePoolNode();
 
 extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 extern u32 sdfResourceRetainAddress(SdfMemBlock *);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 extern u32 strlen(const char *);
 extern void *memset(void *, s32, u32);
 extern void *memcpy(void *, const void *, u32);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "file_pac.h"
 #include "btl_state.h"
 #include "btl_sound.h"
@@ -299,7 +300,6 @@ extern char D_0041B7A8[];
 
 extern char D_0041B7D0[];
 
-extern void sdfReleaseResourceAllocation(s32);
 
 extern void *func_0019F448(s32, s32, u32, u32, s32, s32);
 
@@ -587,7 +587,7 @@ void btlReleaseEventAssets(void) {
     btlReleaseEventData();
     eventAssets = battleState->eventAssets;
     if (eventAssets != 0) {
-        sdfReleaseResourceAllocation(eventAssets);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)eventAssets);
         battleState->eventAssets = 0;
     }
     btlBossDebugPrintf(D_0041B7D0);
@@ -2187,12 +2187,12 @@ void btlDestroyGroupNode(BattleGroupNode *groupNode) {
         sdfQueueNonzeroResourceId((void *)groupNode->requestHandle);
         for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
             if (groupNode->slots[slotIndex].resourceHandle != 0) {
-                sdfReleaseResourceAllocation(groupNode->slots[slotIndex].resourceHandle);
+                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(groupNode->slots[slotIndex].resourceHandle));
             }
         }
     }
     mdlDestroyPartList(groupNode->partList);
-    sdfReleaseResourceAllocation(groupNode->resourceHandle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(groupNode->resourceHandle));
     sdfReleaseChipBlock(groupNode);
 }
 

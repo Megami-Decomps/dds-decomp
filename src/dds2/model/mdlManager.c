@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
 
@@ -40,7 +41,6 @@ void mdlReleaseFirstMatch(MdlCtx *ctx, s32 id) {
 }
 
 
-extern void sdfReleaseResourceAllocation();
 
 /* Release slot `index`: destroy its motions in every context and free the attached resource. */
 void mdlReleaseOwnerSlotResources(BattleGroupNode *owner, s32 index) {
@@ -55,7 +55,7 @@ void mdlReleaseOwnerSlotResources(BattleGroupNode *owner, s32 index) {
         }
         if (owner->ownsResources != 0) {
             if (owner->slots[index].resourceHandle != 0) {
-                sdfReleaseResourceAllocation(owner->slots[index].resourceHandle);
+                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(owner->slots[index].resourceHandle));
             }
         }
         owner->slots[index].data = NULL;
@@ -131,6 +131,6 @@ void mdlRecordLoadedSizeAndReleaseHandle(struct FileWork *resource, MdlLoadReque
     resourceList = sndBuildResourceHandleListFromOffsets((const void *)handle);
     destination->payload.resourceList = resourceList;
     handle = fileGetResourceHandle(resource);
-    sdfReleaseResourceAllocation(handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
     filePollEntryCleanup(resource);
 }

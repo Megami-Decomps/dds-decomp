@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "kwln.h"
 #include "file.h"
 
@@ -920,7 +921,7 @@ void mnuReleaseSoundBuffer(void) {
     if (allocationHandle == 0) {
         return;
     }
-    sdfReleaseResourceAllocation(allocationHandle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocationHandle));
     streamState[MNU_STREAM_ALLOCATION_INDEX] = 0;
 }
 
