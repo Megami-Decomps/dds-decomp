@@ -52,13 +52,14 @@ typedef struct ParListNode {
 } ParListNode;
 
 
-/* Kind resource owner: release flag and handles at +0x10/+0x40. */
+/* Resource header view: native flags select its geometry regions; the
+ * descriptor and asset are released through their canonical resource APIs. */
 typedef struct ParReleaseRecord {
-    u16 released;       /* 0x00 */
+    u16 flags;          /* 0x00: constructor flags, set to 1 on release */
     u8 pad02[0x0E];
-    u32 allocation;     /* 0x10 */
+    struct SdfMemBlock *allocation; /* 0x10 */
     u8 pad14[0x2C];
-    u32 asset;          /* 0x40 */
+    SdfAsset *asset;     /* 0x40 */
 } ParReleaseRecord;
 
 typedef struct ParScaleObj {
@@ -552,9 +553,9 @@ void func_00162E40(void) {
 INCLUDE_ASM(const s32, "game/code_00162348", func_00162E48);
 
 void parReleaseAssetRecord(ParReleaseRecord *record) {
-    record->released = 1;
-    sdfQueueAssetRelease(record->asset);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(record->allocation));
+    record->flags = 1;
+    sdfQueueAssetRelease((s32)record->asset);
+    sdfReleaseResourceAllocation(record->allocation);
 }
 
 void parPrependRecordListNode(ParListNode *node) {
