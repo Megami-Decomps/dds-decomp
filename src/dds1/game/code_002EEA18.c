@@ -5,6 +5,7 @@
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
 #include "sce_io.h"
+#include "sdf_dev_event.h"
 
 enum {
     SDF_TMX_MAGIC = 0x30584D54,
@@ -493,11 +494,11 @@ s32 func_002EF408(DevState *deviceState, s32 command, s32 sourceAddress,
     s32 timer;
 
     switch (command) {
-    case 4:
+    case SDF_DEV_EVENT_SIZE_REPLY:
         stream->readResult = byteCount;
         SignalSema(stream->semaphore);
         break;
-    case 5: {
+    case SDF_DEV_EVENT_READ_REPLY: {
         struct {
             s32 source;
             s32 destination;
@@ -529,11 +530,11 @@ s32 func_002EF408(DevState *deviceState, s32 command, s32 sourceAddress,
         }
         break;
     }
-    case 2:
-    case 7:
+    case SDF_DEV_EVENT_OPENED:
+    case SDF_DEV_EVENT_CLOSED:
         SignalSema(stream->semaphore);
         break;
-    case 0:
+    case SDF_DEV_EVENT_INACTIVE:
         SignalSema(stream->semaphore);
         break;
     }
