@@ -1390,11 +1390,11 @@ s32 mnuPercentOrHundred(s32 value, s32 total) {
 
 INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027FAA8);
 
-void mnuReleasePartyPanelSpriteTextures(s32 window) {
+void mnuReleasePartyPanelSpriteTextures(MenuPageWindow *window) {
     u32 i;
-    for (i = 0; i < 5; i++, window += 0x134) {
-        mnuReleaseSpriteTextures((s32 *)(window + 0x94));
-        mnuReleaseSpriteTextures((s32 *)(window + 0xe8));
+    for (i = 0; i < 5; i++) {
+        mnuReleaseSpriteTextures((s32 *)&window->slots[i].hp);
+        mnuReleaseSpriteTextures((s32 *)&window->slots[i].mp);
     }
 }
 
@@ -1562,7 +1562,7 @@ void mnuShutdownContext(MenuPageWindow *window) {
     for (i = 0; i < 5; i++) {
         mnuReleaseHandles(&window->slots[i]);
     }
-    mnuReleasePartyPanelSpriteTextures((s32)window);
+    mnuReleasePartyPanelSpriteTextures(window);
     mnuDestroyWindowOwnedLists(window);
 }
 
