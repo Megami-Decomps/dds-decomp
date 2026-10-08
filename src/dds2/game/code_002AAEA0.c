@@ -3,6 +3,7 @@
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "dat_state.h"
+#include "mnu_scroll_panel.h"
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -37,7 +38,7 @@ typedef struct CampVisualWork {
     u8 padF4[0x10];
     MenuWindowContainer *skillFlagRoot; /* 0x104 */
     u8 pad108[0x10];
-    u32 modelHandle;        /* 0x118 */
+    MenuScrollPanel *modelHandle; /* 0x118: retained scroll-panel allocation */
     u8 pad11C[0xB0B4];
     u32 titleFadingOut;    /* 0xB1D0 */
     u32 titleOpacity;      /* 0xB1D4 */
