@@ -3,6 +3,7 @@
 #include "dat_state.h"
 #include "mnu_scene.h"
 #include "mnu_profile_progress.h"
+#include "mnu_mantra_grid.h"
 
 #define MNU_DISPLAY_TEXT_RGB 0xA09DC300
 #define MNU_DISPLAY_DIM_TEXT_RGB 0xA09D7D00
@@ -32,13 +33,6 @@ typedef struct {
     u8 pad06[0xE];
     u16 level; /* 0x14: party level, displayed with the two-column level format */
 } DspEntry;
-
-typedef struct {
-    u8 pad0[0xC];
-    u16 sceneId; /* 0xC: label lookup and displayed scene identifier */
-    u8 pad0E[6];
-    s32 state;
-} DspScene;
 
 typedef struct {
     u8 pad0[0x1C];
@@ -224,7 +218,7 @@ extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 /* Populate the unit and both mantra labels, plus the selected mantra's cost. */
 void itfDspPopulatePrimaryLabels(void) {
     MnuProfileProgress *selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
-    DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
+    MnuMantraGridEntry *scene = (MnuMantraGridEntry *)fldGetSceneMetadataNode();
     char text[16];
 
     evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->partyRecord->unitId].encodedText);
@@ -240,7 +234,7 @@ void itfDspPopulatePrimaryLabels(void) {
 /* Populate the same menu labels, selecting the alternate display signal. */
 void itfDspPopulateAlternateLabels(void) {
     MnuProfileProgress *selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
-    DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
+    MnuMantraGridEntry *scene = (MnuMantraGridEntry *)fldGetSceneMetadataNode();
     char text[16];
 
     evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->partyRecord->unitId].encodedText);
@@ -256,7 +250,7 @@ void itfDspPopulateAlternateLabels(void) {
 /* Populate menu labels for the third display signal. */
 void itfDspPopulateThirdLabels(void) {
     MnuProfileProgress *selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
-    DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
+    MnuMantraGridEntry *scene = (MnuMantraGridEntry *)fldGetSceneMetadataNode();
     char text[16];
 
     evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->partyRecord->unitId].encodedText);
@@ -422,7 +416,7 @@ extern u32 prfGetCapValue(u16);
 extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
 extern u32 func_00250758(u16);
 
-u32 mnuGetMantraDisplayFlags(DspScene *entry, MnuProfileProgress *target) {
+u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *entry, MnuProfileProgress *target) {
     u32 flags = 0;
     u32 cap;
 
@@ -622,7 +616,7 @@ extern s32 mnuGetSelectedNodeValue(void);
 
 typedef struct {
     u8 pad0[4];
-    DspScene *entry; /* 0x4: entry tested by mnuGetMantraDisplayFlags */
+    MnuMantraGridEntry *entry; /* 0x4: entry tested by mnuGetMantraDisplayFlags */
 } DspEntryLink;
 
 typedef struct {
@@ -637,7 +631,7 @@ typedef struct {
 
 void mnuChooseDisplaySpriteKindFromEntryFlags(DspDisplayObject *obj, s32 scale, s32 context) {
     MnuProfileProgress *target = (MnuProfileProgress *)mnuGetSelectedNodeValue();
-    DspScene *entry = obj->entries->link->entry;
+    MnuMantraGridEntry *entry = obj->entries->link->entry;
     u32 flags;
     s32 kind;
 
