@@ -566,7 +566,7 @@ void func_00163238(ParReleaseRecord *record) {
     func_003332E8(record->asset);
 }
 
-/* Draw parameter block filled per strip by func_00164CB0. */
+/* Draw parameter block filled per strip by parDrawPendingCellSystems. */
 typedef struct ParDrawState {
     u16 width;    /* 0x00 */
     u16 height;   /* 0x02 */
@@ -1470,7 +1470,7 @@ extern ParDrawCmd D_00380248;
 extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
 
 /* Batch pending cell systems by topology, then submit the five draw buckets. */
-void func_00164CB0(void) {
+void parDrawPendingCellSystems(void) {
     s32 lists[5];
     s32 *slot;
     s32 list;

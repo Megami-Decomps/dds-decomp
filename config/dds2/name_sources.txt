@@ -1073,6 +1073,7 @@
 0x001649E0	parIncreaseSymmetricCellAlpha	inferred	U0
 0x00164AE8	parRiseFallSymmetricCellAlpha	inferred	U0
 0x00164C68	parSetCellDrawBucket	inferred	stores the u16 draw bucket in the ParSystem header at offset 0x02
+0x00164CB0	parDrawPendingCellSystems	inferred	drains the pending ParSystem list, batches cells by bucket and topology, and submits their packets
 0x00165300	parAllocateDrawBlock	inferred	Allocates particle draw block with vertex colors and model object. [names_reviewed8.tsv]
 0x001653A8	parReleaseDrawBlock	inferred	Releases draw block model object and allocation handle. [names_reviewed8.tsv]
 0x001653D8	parSubmitCellDrawPackets	inferred	Builds cell draw packet batches and submits via emitter finish callback. [names_reviewed8.tsv]

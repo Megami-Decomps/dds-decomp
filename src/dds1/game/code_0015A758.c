@@ -1448,7 +1448,7 @@ extern ParDrawCmd D_00325248;
 extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
 
 /* Batch pending cell systems by topology, then submit the five draw buckets. */
-void func_0015D0C0(void) {
+void parDrawPendingCellSystems(void) {
     s32 lists[5];
     s32 *slot;
     s32 list;
