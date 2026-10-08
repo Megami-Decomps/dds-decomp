@@ -9,6 +9,7 @@
 #include "sdf_chip.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
+#include "file_request_api.h"
 
 #include "dds3_path.h"
 #include "eff_transform.h"
@@ -10916,13 +10917,11 @@ typedef struct EffRequest {
 } EffRequest;
 
 
-extern s32 fileRequestIsReady(void *);
 
 extern void func_002C7CE8(void *);
 
 extern void *fileQueuePlainDispatchRequest(const char *path);
 
-extern void func_002C81D0(void *);
 
 u32 effAppendListEntry(EffectList *list, u32 value, u32 length,
                           u32 kind, u32 reference) {
@@ -10980,10 +10979,10 @@ s32 effPollResourceList(EffectList *list) {
                 }
                 list->request = fileQueuePlainDispatchRequest(node->length);
                 if (list->mode == 2) {
-                    func_002C81D0(list->request);
+                    func_002C81D0((struct FileRequest *)list->request);
                 }
                 node->state = 1;
-            } else if (fileRequestIsReady(list->request) != 0) {
+            } else if (fileRequestIsReady((struct FileRequest *)list->request) != 0) {
                 for (item = list->request->items; item != NULL; item = item->next) {
                     if (item->kind == 1) {
                         node = list->first;

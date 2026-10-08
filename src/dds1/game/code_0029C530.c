@@ -24,6 +24,7 @@
 #include "sdf.h"
 #include "eff.h"
 #include "eff_resource_list.h"
+#include "file_request_api.h"
 
 
 typedef struct EffPacketParams {
@@ -225,13 +226,11 @@ extern void effBlurStepScaleSlotsAndDraw(void *);
 
 extern s32 effRequestResourceByMode(u32, u32, u32, void **);
 
-extern s32 fileRequestIsReady(void *);
 
 extern void func_00288788(void *);
 
 extern void *fileQueuePlainDispatchRequest(u32);
 
-extern void func_00288C50(void *);
 
 extern void *func_002BD9C0(u32, u32);
 
@@ -9479,10 +9478,10 @@ s32 effPollResourceList(EffectList *list) {
                 }
                 list->request = fileQueuePlainDispatchRequest(node->length);
                 if (list->mode == 2) {
-                    func_00288C50(list->request);
+                    func_00288C50((struct FileRequest *)list->request);
                 }
                 node->state = 1;
-            } else if (fileRequestIsReady(list->request) != 0) {
+            } else if (fileRequestIsReady((struct FileRequest *)list->request) != 0) {
                 for (item = list->request->items; item != NULL; item = item->next) {
                     if (item->kind == 1) {
                         node = list->first;

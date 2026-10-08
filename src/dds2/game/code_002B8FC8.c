@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "fr_font_context.h"
 #include "sdf_chip.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
@@ -126,10 +127,6 @@ extern void func_002C10F0();
 extern void mnuDrawSlotIcons();
 
 extern void frFontAddSharedGlyphFlags();
-
-extern void frFontSetContextPair();
-
-extern void frFontStoreShiftedContextValue();
 
 extern void frFontClearFlagBits();
 

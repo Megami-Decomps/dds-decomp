@@ -177,17 +177,17 @@ void sdfPacInitializeDispatchPacket(PacState *packet, void *callbackAddress) {
 }
 
 /* Retain packet-owned payload memory rather than allocating a separate resource. */
-void func_00346AD8(PacState *state) {
+void sdfPacUsePacketPayloadMemory(PacState *state) {
     state->flags = state->flags | PAC_STATE_USE_PACKET_MEMORY;
 }
 
 /* Select the high-address allocator for packet payload resources. */
-void func_00346AE8(PacState *state) {
+void sdfPacUseHighAddressAllocator(PacState *state) {
     state->flags = state->flags | PAC_STATE_ALLOCATE_HIGH;
 }
 
 /* Advance the queue cursor before returning each node to the chip allocator. */
-void func_00346AF8(PacState *state) {
+void sdfPacReleasePacketQueueNodes(PacState *state) {
     PacWork *cursor = state->queueHead;
     PacWork *current = cursor;
 
@@ -199,7 +199,7 @@ void func_00346AF8(PacState *state) {
 }
 
 /* Mark the caller's phase byte finished. */
-void func_00346B30(u8 *phaseByte) {
+void sdfPacMarkPhaseFinished(u8 *phaseByte) {
     *phaseByte = PAC_PHASE_FINISHED;
 }
 
@@ -238,7 +238,7 @@ void sdfPacAdvanceCallbackBoundary(PacState *state) {
     packetCallback = state->packetCallback;
     callbackResult = packetCallback(state, 0, inputHeader, payloadBytes);
     if (callbackResult == PAC_CALLBACK_FINISHED) {
-        func_00346B30(&state->phase);
+        sdfPacMarkPhaseFinished(&state->phase);
         return;
     }
     if (callbackResult == PAC_CALLBACK_ALIGN) {
@@ -260,7 +260,7 @@ void sdfDecodePacNodeAndAdvanceTail(PacState *state) {
 
     callbackResult = state->packetCallback(state, 1, state->queueTail->packet);
     if (callbackResult == PAC_CALLBACK_FINISHED) {
-        func_00346B30(&state->phase);
+        sdfPacMarkPhaseFinished(&state->phase);
         return;
     }
     if (callbackResult == PAC_CALLBACK_DROP_TAIL) {

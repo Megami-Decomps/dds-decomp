@@ -1,5 +1,6 @@
 #include "common.h"
 #include "fr_font.h"
+#include "fr_font_context.h"
 #include "sdf_packet_list.h"
 #include "eff_resource_slots.h"
 #include "sdf_resource.h"
@@ -96,8 +97,6 @@ extern void sdfCreateDescriptorPacket();
 extern s32 evtQueueValidatedBgmSoundCode(s32, s32);
 
 extern s32 strcmp(const char *a, const char *b);
-
-extern void frFontSetContextPair(s32, s32, s32);
 
 extern s32 D_003C99B8[];
 
@@ -793,7 +792,8 @@ void mnuCampInitFontResource(EvtRuntime *scene) {
     scene->glyph = 0;
     fontHandle = (s32)(u32)func_0019CE78((const char *)D_003C99B8, 0, 0, 0, 0);
     scene->glyph = fontHandle;
-    frFontSetContextPair(fontHandle, CAMP_FONT_CONTEXT_WIDTH, CAMP_FONT_CONTEXT_HEIGHT);
+    frFontSetContextPair((struct FrFontGlyph *)(u32)fontHandle,
+        CAMP_FONT_CONTEXT_WIDTH, CAMP_FONT_CONTEXT_HEIGHT);
 }
 
 void mnuCampLinkFontGlyph(EvtRuntime *scene) {
