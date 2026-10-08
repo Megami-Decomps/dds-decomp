@@ -4493,21 +4493,25 @@ remains assembly. All 17 actual `mnu_result.h` clients gate 596 match,
 0 differ with no context, rodata or undefined-symbol rows after resplit.
 
 
-## Effect constructors use the canonical world-node owner
+## EffectObj and EffWorldNode merger is parked on the kind alias contract
 
-The effect constructors' retired `EffectObj` prefixes describe the same
-0x44-byte `EffWorldNode` returned by `dds3AppendWorldObjectNode`. Its identity
-is `key` at +04, its kind-7 payload is `EffectDependencyState` at +18,
-and its separately allocated vectors belong to `ObjectTransform` at +1C.
-Use those owners instead of prefix casts or local parameter projections.
+The constructor allocates the same 0x44-byte object described by both
+owners: identity at +04, kind-7 payload at +18 and `ObjectTransform` at +1C.
+Retail writes the kind word at +0C (DDS1 0010F418 / DDS2 0010F640), but
+effect providers read its high byte at +0F (001158B8 / 00115B20).
 
-The constructor writes `kindTag` as a word at +0C, while effect providers
-read the kind byte at +0F. Their documented word/byte union preserves both
-real accesses. Replacing the byte member with `kindTag >> 24` still emits
-an `lbu`, but changes alias analysis and reorders four stores in
-`effObjBindValidatedOwner`; using the actual byte member restores the
-native source contract without a scheduling cast or control-flow reshape.
+A real word/byte union makes both effect units exact, but regresses both
+constructors by 12/54 words. Retail reads the operations-table slot before
+initialization (DDS1 0010F45C..0010F464, before SW at 0010F468); the union
+prevents gcc from hoisting that read. Explicitly reading it first leaves
+four instruction differences; an unsigned 24/8-bit field view still leaves
+the original twelve. The operations tables live in `.data`, so qualifying
+their externs `const` is not an acceptable fix.
 
+Keeping the original word field and using `kindTag >> 24` emits LBU but
+reorders four stores in `effObjBindValidatedOwner` (+3C/+44/+4C/+54).
+The merger and union therefore remain private, and existing matching C
+is retained. No alias cast, dummy qualifier, or store-order search is used.
 
 ## DDS2 stat gauge span is signed; pulse division is still unresolved
 
@@ -4552,4 +4556,13 @@ zero (native `00261C6C` masks its low two bits) and price at four.
 Completing its padding removes the need for another item-record view.
 The body remains parked: `+154..15C` still has a three-store schedule
 rotation, which does not justify store-order search.
+
+## Object-base render setup uses the complete model owner
+
+DDS1 `func_00112100` follows `ObjBase.resourceHandle` to `MdlCtx.inner`
+and temporarily changes `SdfModel.flags` at +19. The existing complete
+owners replace the two render-only prefix views without changing code.
+`mdlProcessContextNodesAndTransforms` receives the actual `s32` SDK
+update argument; the surface-table pointer crosses that address-word
+boundary explicitly, rather than through a false pointer prototype.
 
