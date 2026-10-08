@@ -17,7 +17,7 @@ extern SdfGraphObj D_0040B290;
 
 void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
 
-void *sdfAllocImageBuffer(s32 arg0, s32 arg1, s32 arg2);
+SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
 
 void sdfGraphSetDisplayMode(s32 mode) {
     D_004389D8 = (u8)mode;
