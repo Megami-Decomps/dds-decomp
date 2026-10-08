@@ -99,9 +99,7 @@ extern void mnuReleaseStaffExtraWindow();
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 extern void mnuReleaseStaffMenuTextureHandles();
-extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
-extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
-extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
+
 extern void func_0027C788(MenuWindowContainer *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuClearListFlagsOneAndTwo();

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf.h"
 #include "sdf_pending.h"
 #include "pcp_vu0.h"
@@ -103,7 +104,6 @@ extern f32 D_003BD35C;
 extern SdfPendingRequest sdfResourceReleaseQueue;
 extern SdfPendingRequest sdfAssetReleaseQueue;
 extern s32 sdfLiveAssetCount;
-extern void sdfReleaseChipBlock(void *);
 extern u64 sdfTexGetPrimaryTextureState(SdfTex *);
 extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
 extern u64 sdfTexGetPrimaryClampState(SdfTex *);
@@ -121,7 +121,6 @@ extern void sdfBuildPrimaryAlphaAdditiveDmaPacket(void *);
 extern void sdfBuildPrimaryAlphaSubtractiveDmaPacket(void *);
 
 void *sdfAllocSizeClassBlock(s32 size);
-void *sdfAllocAndClearQuadwords(s32 size);
 void sdfResourceListReleaseAssets(DevRequest *list);
 void sdfCopyAssetParameterState(SdfAsset *, SdfAsset *);
 void sdfAssetRelease(SdfAsset *);

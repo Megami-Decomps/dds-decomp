@@ -1,11 +1,11 @@
 #include "common.h"
-#include "btl_sound.h"
 #include "sdf_resource.h"
 #include "eff_dependency.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
 #include "eff.h"
 #include "sdf_draw.h"
+#include "btl_sound.h"
 
 #define EFF_OBJ_KIND 7
 #define EFF_OBJ_STATE_BOUND_BILL 1
@@ -448,12 +448,12 @@ EffectObj *func_001150F0(source, firstVector, secondVector)
     return obj;
 }
 
+
 void *func_00115298(void *resource, void *position, void *scale) {
     return func_001150F0(resource, position, scale);
 }
 
-/* Resolve the resource identifier, create from it, then release the temporary resource.
-   The legacy constructor call and its argument types are deliberately unchanged. */
+/* Resolve the resource address, create from it, then release the temporary resource. */
 void *effObjCreateFromResolvedResource(void *resource, void *firstVector, void *secondVector) {
     u32 resolvedId;
     void *resourceHandle;
@@ -461,7 +461,7 @@ void *effObjCreateFromResolvedResource(void *resource, void *firstVector, void *
 
     resolvedId = 0;
     resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
-    created = func_001150F0(resolvedId, firstVector, secondVector);
+    created = func_001150F0((SoundMixer *)resolvedId, firstVector, secondVector);
     sdfReleaseResourceAllocation(resourceHandle);
     return created;
 }

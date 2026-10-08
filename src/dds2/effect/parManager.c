@@ -7,6 +7,7 @@
 #include "pcp_vu0.h"
 
 #include "eff.h"
+#include "par_table.h"
 
 struct ParSystem;
 struct EffTrackPolyList;
@@ -36,26 +37,6 @@ typedef struct ParColorRamp {
     u32 fadeIn;        /* 0x3C */
     u32 fadeOut;       /* 0x40 */
 } ParColorRamp;
-
-typedef struct {
-    u128 *points;
-    u16 pointCount;
-    u8 pad06[2];
-    u32 color;
-    f32 billboardScale;
-} ParSlot; /* 0x10 */
-
-/* The slot table and its allocation owner are one record, not two views.
- * The native allocator returns this header after the point/slot arrays. */
-typedef struct ParTable {
-    u16 slotCount;
-    u16 pointCapacity;
-    ParSlot *slots;
-    BillObj **billboardRef;
-    SdfMemBlock *resource;
-} ParTable; /* 0x10 */
-
-
 
 /* Record contents depend on the emitter; radial records are ParBurstPacket. */
 typedef struct {
@@ -277,7 +258,7 @@ INCLUDE_ASM(const s32, "effect/parManager", func_001617F8);
 
 /* Release the slot table's allocation handle, not a separate node object. */
 void effParReleaseNodeResource(ParTable *table) {
-    sdfReleaseResourceAllocation(table->resource);
+    sdfReleaseResourceAllocation(table->allocation);
 }
 
 INCLUDE_ASM(const s32, "effect/parManager", func_001618E0);
@@ -285,7 +266,7 @@ INCLUDE_ASM(const s32, "effect/parManager", func_001618E0);
 extern void billSetChildScaleComponents(BillObj *billboard, f32 scaleX, f32 scaleY);
 extern void billInvokeCallback(BillObj *billboard);
 
-void func_00161958(ParTable *table, s32 slotIndex, const f32 *origin, u32 color,
+void parPopulateSlotFromHistory(ParTable *table, s32 slotIndex, const f32 *origin, u32 color,
                    ParHistoryTable *source, f32 scale) {
     f32 localOrigin[4];
     ParHistory *history;
@@ -321,7 +302,7 @@ void func_00161958(ParTable *table, s32 slotIndex, const f32 *origin, u32 color,
     slot->billboardScale = scale;
 }
 
-void func_00161A10(ParTable *table) {
+void parDrawHistorySlots(ParTable *table) {
     BillObj *billboard;
     ParSlot *slot;
     s32 remainingSlots;
@@ -405,7 +386,7 @@ void parDispatchByKind(ParObj *obj) {
 }
 
 /* Draw live particles after applying the requested number of emitter updates. */
-void func_00161FE8(ParObj *effect) {
+void parUpdateAndDrawObject(ParObj *effect) {
     EffectBufferRecord *record;
     BillObj *billboard;
     u32 step;

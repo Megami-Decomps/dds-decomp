@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "file_pac.h"
@@ -49,7 +50,6 @@ typedef struct PacBuf {
 extern u8 sdfPacDispatchPacket[];
 
 
-extern void *sdfAllocAndClearQuadwords(s32 size);
 extern void *sdfDevCreateCallbackState(s32 path, void *callback, s32 context);
 extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
 extern s32 func_00302240(const char *text, s32 delimiter);
@@ -141,7 +141,6 @@ void func_002ED8D0(MovObj *owner, SdfMovieDescriptor *descriptor, const char *na
 
 extern s32 sdfDevQueueActiveOperation(void *);
 extern void sdfCreateSemaphoreFromOptions(void);
-extern void sdfReleaseChipBlock(void *);
 extern void func_002EBB60(void *);
 extern void func_002E98F0(void);
 
@@ -269,7 +268,6 @@ void sdfPacAdvanceCallbackBoundary(PacState *state) {
 }
 
 
-extern void sdfReleaseChipBlock(void *);
 
 /* Notify completion with the tail's header: result 1 finishes; result 4 releases the tail. */
 void sdfDecodePacNodeAndAdvanceTail(PacState *state) {

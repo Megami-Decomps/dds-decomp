@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "btl_task_condition.h"
 #include "eff_transform.h"
 #include "btl_state.h"
@@ -134,9 +135,7 @@ extern s32 btlAnyUnitHasQueuedQuery(s32, s32, u32);
 
 extern u32 func_001A9488(s32);
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
-extern void sdfReleaseChipBlock(void *);
 
 extern s32 btlRunAiAction();
 

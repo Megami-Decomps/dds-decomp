@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 
@@ -87,11 +88,9 @@ typedef struct PacState {
 void sdfPacStartPacketPayload(PacState *state, PacHead *packet);
 void sdfDecodePacNodeAndAdvanceTail(PacState *state);
 void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 size);
-void sdfReleaseChipBlock(void *allocation);
 void sdfPacAdvanceInput(PacState *state, s32 consumedBytes);
 void sdfPacAdvanceCallbackBoundary(PacState *state);
 PacWork *sdfPacEnqueuePacket(PacState *state, PacHead *packet);
-void *sdfAllocAndClearQuadwords(s32 size);
 void *sdfAllocSizeClassBlock(s32 size);
 void func_002EE6F8(PacState *state, PacHead *packet, PacBuf *buffer);
 void sdfPacRelocateQueuedPayload(PacState *state);

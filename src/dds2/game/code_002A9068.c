@@ -88,7 +88,6 @@ extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void func_002BB510(s32, s32, s32, s32, s32);
 
-extern void mnuDrawPanelListDefault(s32, s32, s32, u8 *, s32);
 
 extern void mnuDrawCampTitleCurrencyAndFade(s32, s32, s32, s32, u8 *, s32);
 
@@ -1064,7 +1063,7 @@ void mnuDrawCampIconBackdropByKind(s32 kind, KwlnTask *task) {
     }
     if (func_002A9AB8(task) != 0) {
         func_002BB510(-0x10, -8, 0, visual->modelHandle, 0x53);
-        mnuDrawPanelListDefault(0, 0, 0, work + 0x284, 0x53);
+        mnuDrawPanelListDefault(0, 0, 0, (MenuPageWindow *)(work + 0x284), 0x53);
         mnuDrawCampTitleCurrencyAndFade(0, 0, 0, visual->titleContext, work, 0x53);
     }
 }

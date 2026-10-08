@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "btl.h"
@@ -33,9 +34,7 @@ extern s32 btlActionScratchWork;
 
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
-extern s32 sdfAllocAndClearQuadwords(s32);
 
-extern void sdfReleaseChipBlock(s32);
 
 extern void func_002152D8(s32, s32);
 
@@ -1011,16 +1010,16 @@ s32 btlRandomInclusiveRange(s32 lower, s32 upper) {
 }
 
 s32 btlAllocAndCheck(s32 object) {
-    s32 allocation = sdfAllocAndClearQuadwords(0x10);
+    void *allocation = sdfAllocAndClearQuadwords(0x10);
     s32 actor = (s32)((ActionStateLink *)object)->unit;
 
-    btlActionScratchWork = allocation;
+    btlActionScratchWork = (s32)allocation;
     *(s32 *)allocation = object;
     if (btlIsLowHpActionReady(actor, 0) != 0) {
-        sdfReleaseChipBlock(btlActionScratchWork);
+        sdfReleaseChipBlock((void *)btlActionScratchWork);
         return 1;
     }
-    sdfReleaseChipBlock(btlActionScratchWork);
+    sdfReleaseChipBlock((void *)btlActionScratchWork);
     return 0;
 }
 
@@ -1061,7 +1060,7 @@ s32 btlDispatchPackedActionWithScratch(s32 context, BtlUnit *owner, s32 mask) {
     work[1] = owner->partyRecord.unitId;
     work[0] = context;
     result = btlDispatchPackedEffectAction((s32)owner, mask);
-    sdfReleaseChipBlock(btlActionScratchWork);
+    sdfReleaseChipBlock((void *)btlActionScratchWork);
     return result;
 }
 
@@ -1113,7 +1112,7 @@ s32 btlRunRandomWeightedAiTableAction(ActionStateLink *task) {
     index = btlPickWeightedAiSlot(unit, species, row);
     func_00211EA8(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
                   datEnemyAiRecords[species].slot[row * 5 + index].actionArg);
-    sdfReleaseChipBlock(btlActionScratchWork);
+    sdfReleaseChipBlock((void *)btlActionScratchWork);
     return 1;
 }
 

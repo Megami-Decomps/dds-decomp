@@ -1,3 +1,4 @@
+#include "sdf_chip.h"
 #include "mnu_input.h"
 #include "mnu.h"
 #include "sdf_resource.h"
@@ -82,11 +83,6 @@ typedef struct MenuListNode MenuListNode;
 
 extern void func_00300508(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
-extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
-
-
-
-
 extern void mnuSelectPage(MenuPageWindow *window, s32 selected);
 
 typedef struct ScrollParams {
@@ -110,7 +106,6 @@ extern ScrollHandle *effCreateStatusBatch(s32);
 extern void func_0027FCA0(s32, s32, s32);
 
 
-extern void sdfReleaseChipBlock(void *);
 
 extern MenuPanelHandles *mnuCreatePanelSpriteHandles(u32, s32, s32);
 
@@ -131,7 +126,6 @@ extern char D_003B2348[];
 extern void itfGridLookupValueOrDefault(s32, s32);
 
 
-extern MenuListNode *sdfAllocAndClearQuadwords(s32);
 
 void mnuClearListFlagsOneAndTwo(u32 *flags);
 
@@ -246,7 +240,7 @@ extern MenuPanelPositionTable2 D_003B23A0;
 
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
-s32 mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s32 rowSpacing) {
+MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s32 rowSpacing) {
     MenuWindowContainer *window = (MenuWindowContainer *)sdfAllocAndClearQuadwords(MNU_WINDOW_CONTAINER_BYTES);
     MenuList *list;
     window->width = width;
@@ -255,7 +249,7 @@ s32 mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s3
     list = mnuCreateListState(id, visibleCount, rowSpacing);
     window->fade = 0;
     window->list = list;
-    return (s32)window;
+    return window;
 }
 
 /* Destroy the owned list and optional sprite resources before freeing the window. */
