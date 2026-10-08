@@ -28,7 +28,7 @@ extern f32 D_003B1530[4];
 extern void func_0017ED50(void *, void *);
 
 void effPCPNeedleFree(EffPCPNeedleWork *work) {
-    parReleaseCellSystem((ParSystem *)work->system);
+    parReleaseCellSystem(work->system);
     effReleaseAttachedResources(work->resource);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
@@ -195,21 +195,21 @@ void func_0017E080(EffPCPNeedleWork *work) {
                     VU0_MOVE_VF(vf10, vf12);
                     VU0_SUB(vf11, vf11, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf11, vertices[1]);
-                    parUpdateCellVertexPair(work->system, i, vertices);
-                    parFadeAlphaCell(work->system, i);
-                    effBillSetEntryValue(work->system, i, (color & 0xFF000000) | 0x808080);
+                    parUpdateCellVertexPair((u32)work->system, i, vertices);
+                    parFadeAlphaCell((u32)work->system, i);
+                    effBillSetEntryValue((u32)work->system, i, (color & 0xFF000000) | 0x808080);
                 }
             } else {
                 effSetResourceEntryValue(work->resource, i, 0);
-                effBillSetEntryValue(work->system, i, 0);
-                parCellInit((ParSystem *)work->system, i);
+                effBillSetEntryValue((u32)work->system, i, 0);
+                parCellInit(work->system, i);
             }
             slot->age++;
             i++;
             slot++;
         } while (i < count);
     }
-    parPrependCellNode((ParSystem *)work->system);
+    parPrependCellNode(work->system);
     effDrawInstancedResourceTrianglesVU(work->resource);
 }
 

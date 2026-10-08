@@ -246,9 +246,9 @@ EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *params) {
     work->resource = resource;
     effBuildRadialFanStreams(resource, params->fanSegments, params->centerColor,
                             params->outerColor, params->radiusScale, params->viewOffset);
-    work->system = (u32)parAllocateCellSystem(work->count, work->params.unk54, 0, PAR_CELL_TOPOLOGY_PAIR);
-    parDispatchSub(work->system, 1, work->params.unk58, work->params.unk58);
-    parSetCellDrawBucket((ParSystem *)work->system, (u16)work->params.mode);
+    work->system = parAllocateCellSystem(work->count, work->params.unk54, 0, PAR_CELL_TOPOLOGY_PAIR);
+    parDispatchSub((u32)work->system, 1, work->params.unk58, work->params.unk58);
+    parSetCellDrawBucket(work->system, (u16)work->params.mode);
     count = work->count;
     delayRange = params->randomDelayRange;
     slot = work->slots;
