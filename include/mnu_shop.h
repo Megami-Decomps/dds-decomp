@@ -68,6 +68,7 @@ typedef char MenuIconState_size_must_be_0x38[(sizeof(struct MenuIconState) == 0x
 typedef char MenuWindowContainer_size_must_be_0x98[(sizeof(MenuWindowContainer) == 0x98) ? 1 : -1];
 #else
 struct MenuWindowSpriteGroup;
+struct EffMappedResource;
 
 /* DDS1's generic window panel is embedded at +0x4C and copied as 0x38 bytes. */
 typedef struct MenuPanelHandles {
@@ -81,6 +82,10 @@ typedef struct MenuPanelHandles {
     u32 bottom;
     s32 transition;
 } MenuPanelHandles;
+
+MenuPanelHandles *mnuCreatePanelSpriteHandles(u32 panelKind,
+                                              struct EffectSlotSet *resource,
+                                              struct EffMappedResource *target);
 
 /* The DDS1 generic window constructor allocates and clears 0x8C bytes. */
 typedef struct MenuWindowContainer {

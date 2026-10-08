@@ -91,7 +91,6 @@ extern void func_0027FCA0(s32, s32, s32);
 
 
 
-extern MenuPanelHandles *mnuCreatePanelSpriteHandles(u32, s32, s32);
 
 extern MenuIconBundle *mnuCreateFadeSpriteResourceSet(u32);
 
@@ -552,7 +551,8 @@ typedef struct MenuPanelSlotIndices {
 
 extern MenuPanelSlotIndices D_003B2368;
 /* Panel kind chooses the native sprite-slot layout. */
-MenuPanelHandles *mnuCreatePanelSpriteHandles(u32 panelKind, s32 resource, s32 target) {
+MenuPanelHandles *mnuCreatePanelSpriteHandles(u32 panelKind, EffectSlotSet *resource,
+                                             EffMappedResource *target) {
     MenuPanelSlotIndices indices = D_003B2368;
     MenuPanelHandles *panel = (MenuPanelHandles *)sdfAllocAndClearQuadwords(sizeof(MenuPanelHandles));
     s32 i;
@@ -562,29 +562,29 @@ MenuPanelHandles *mnuCreatePanelSpriteHandles(u32 panelKind, s32 resource, s32 t
     case MNU_PANEL_KIND_SIX_SLOTS:
         panel->count = 6;
         for (i = 0; i < panel->count; i++) {
-            panel->handles[i] = (EffectSlotSet *)effCreateResourceSlotSet((EffectSlotSet *)resource, indices.slots[i], 1);
+            panel->handles[i] = effCreateResourceSlotSet(resource, indices.slots[i], 1);
         }
-        effConfigureWithDefaultSetting(panel->handles[4], 0, (struct EffMappedResource *)(u32)target, 0, 0, 12);
-        effConfigureWithDefaultSetting(panel->handles[5], 0, (struct EffMappedResource *)(u32)target, 0, 0, 12);
+        effConfigureWithDefaultSetting(panel->handles[4], 0, target, 0, 0, 12);
+        effConfigureWithDefaultSetting(panel->handles[5], 0, target, 0, 0, 12);
         break;
     case MNU_PANEL_KIND_FOUR_OFFSET_ICONS:
         panel->count = 4;
-        panel->handles[0] = (EffectSlotSet *)effCreateResourceSlotSet((EffectSlotSet *)resource, 23, 1);
-        panel->handles[1] = (EffectSlotSet *)effCreateResourceSlotSet((EffectSlotSet *)resource, 23, 1);
-        panel->handles[2] = (EffectSlotSet *)effCreateResourceSlotSet((EffectSlotSet *)resource, 22, 1);
-        panel->handles[3] = (EffectSlotSet *)effCreateResourceSlotSet((EffectSlotSet *)resource, 22, 1);
-        effConfigureIndexedSlotMaterial(panel->handles[0], 0, (struct EffMappedResource *)(u32)target, 1, 10, 10, 12);
-        effConfigureIndexedSlotMaterial(panel->handles[1], 0, (struct EffMappedResource *)(u32)target, 1, 0, 10, 12);
-        effConfigureIndexedSlotMaterial(panel->handles[2], 0, (struct EffMappedResource *)(u32)target, 1, 0, 10, 12);
-        effConfigureIndexedSlotMaterial(panel->handles[3], 0, (struct EffMappedResource *)(u32)target, 1, 10, 10, 12);
+        panel->handles[0] = effCreateResourceSlotSet(resource, 23, 1);
+        panel->handles[1] = effCreateResourceSlotSet(resource, 23, 1);
+        panel->handles[2] = effCreateResourceSlotSet(resource, 22, 1);
+        panel->handles[3] = effCreateResourceSlotSet(resource, 22, 1);
+        effConfigureIndexedSlotMaterial(panel->handles[0], 0, target, 1, 10, 10, 12);
+        effConfigureIndexedSlotMaterial(panel->handles[1], 0, target, 1, 0, 10, 12);
+        effConfigureIndexedSlotMaterial(panel->handles[2], 0, target, 1, 0, 10, 12);
+        effConfigureIndexedSlotMaterial(panel->handles[3], 0, target, 1, 10, 10, 12);
         break;
     case MNU_PANEL_KIND_FIXED_ICON_PAIRS:
         panel->count = 4;
         for (i = 0; i < panel->count; i++) {
-            panel->handles[i] = (EffectSlotSet *)effCreateResourceSlotSet((EffectSlotSet *)resource, indices.slots[i + 2], 1);
+            panel->handles[i] = effCreateResourceSlotSet(resource, indices.slots[i + 2], 1);
         }
-        effConfigureWithDefaultSetting(panel->handles[2], 0, (struct EffMappedResource *)(u32)target, 0, 0, 12);
-        effConfigureWithDefaultSetting(panel->handles[3], 0, (struct EffMappedResource *)(u32)target, 0, 0, 12);
+        effConfigureWithDefaultSetting(panel->handles[2], 0, target, 0, 0, 12);
+        effConfigureWithDefaultSetting(panel->handles[3], 0, target, 0, 0, 12);
         break;
     }
     return panel;

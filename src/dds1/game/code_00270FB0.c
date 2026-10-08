@@ -16,7 +16,6 @@
 
 extern void mnuDestroyWindowContainer(u32);
 
-extern MenuPanelHandles *mnuCreatePanelSpriteHandles(u32, s32, s32);
 extern void mnuReleaseResourceList(MenuPanelHandles *);
 
 extern s32 kwlnFadeIsActive(void);
@@ -461,7 +460,8 @@ MenuWindowContainer *func_00271B50(void *const *entries, s32 count, s32 width,
 }
 
 void mnuCreateStaffPanelSet(StaffMenuWork *menu) {
-    menu->resourceList = mnuCreatePanelSpriteHandles(0, menu->staffSlots.baseResources[3], (s32)menu->secondaryImage);
+    menu->resourceList = mnuCreatePanelSpriteHandles(
+        0, (EffectSlotSet *)menu->staffSlots.baseResources[3], menu->secondaryImage);
     menu->images[0] = (u32)func_00271B50(D_0037B950, 8, 0x300, menu, D_0037C388);
     mnuForwardDupArg(menu->images[0], menu->staffSlots.baseResources[5], 0, 0, 0);
     menu->images[1] = (u32)func_00271B50(D_0037B970, 3, 0x2C0, menu, 0);
