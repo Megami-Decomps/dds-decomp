@@ -4200,23 +4200,39 @@ s32 btlCountEligibleLinkedActors(BtlState *battle) {
 
 extern const char *D_003BB3C0;
 
+typedef struct BattleRegisteredPanelWork {
+    s32 state;
+    s32 mode;
+    s32 variant;
+    s32 x;
+    s32 y;
+    s32 spriteAlpha;
+    s32 overlayAlpha;
+    s32 backdropAlpha;
+} BattleRegisteredPanelWork;
+
+typedef char BattleRegisteredPanelWork_size_check[
+    sizeof(BattleRegisteredPanelWork) == 0x20 ? 1 : -1];
+typedef char BattleRegisteredPanelWork_backdrop_offset_check[
+    (u32)&((BattleRegisteredPanelWork *)0)->backdropAlpha == 0x1C ? 1 : -1];
+
 extern s32 func_001B0E68(KwlnTask *);
 
 extern void btlReleaseRegisteredChildTaskWork(KwlnTask *);
 
 void btlStartRegisteredChildTask(void) {
     s32 context = btlGetRuntime();
-    u32 data = (u32)sdfAllocAndClearQuadwords(0x20);
+    u32 data = (u32)sdfAllocAndClearQuadwords(sizeof(BattleRegisteredPanelWork));
     u32 task = (u32)kwlnTaskCreate(D_003BB3C0, 0x2B0E, 1, 1, func_001B0E68, btlReleaseRegisteredChildTaskWork, data);
     func_00101A80((KwlnTask *)*(u32 *)(context + 0x29C), (KwlnTask *)task);
     btlSetTrackedTaskHandle(7, task);
 }
 
-void func_001B0E48(s32 arg0) {
-    *(u32 *)(arg0 + 4) = 1;
-    *(u32 *)(arg0 + 12) = 0x80;
-    *(u32 *)(arg0 + 16) = 0;
-    *(u32 *)(arg0 + 0) = 0;
+void func_001B0E48(BattleRegisteredPanelWork *work) {
+    work->mode = 1;
+    work->x = 0x80;
+    work->y = 0;
+    work->state = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B0E68);
