@@ -52,6 +52,22 @@ typedef struct BrsResultTransition {
     s32 state;
 } BrsResultTransition;
 
+typedef struct BrsFadeAnimation {
+#ifdef VERSION_DDS1
+    u8 pad00[0x14];
+    s8 state;
+    u8 pad15[7];
+    u32 opacity;
+    u8 pad20[8];
+#else
+    u8 pad00[0x10];
+    s8 state;
+    u8 pad11[7];
+    u32 opacity;
+    u8 pad1C[0xC];
+#endif
+} BrsFadeAnimation;
+
 /* Both games use 0x68-byte progress rows, with different live field offsets. */
 typedef struct BrsProgressAnimation {
 #ifdef VERSION_DDS1
@@ -76,7 +92,11 @@ typedef struct BrsProgressAnimation {
     u8 pad1A[2];
     s32 remaining;
     s32 applied;
-    u8 pad24[0x3C];
+    u8 pad24[0x28];
+    s8 iconState;
+    u8 pad4D[3];
+    u32 iconOpacity;
+    u8 pad54[0xC];
     s8 progressInitialized;
     u8 pad61[3];
     s32 previousProgress;
@@ -130,7 +150,9 @@ typedef struct BrsSkillPackageWork {
     u32 opacity;
     s8 resultPhase;
     s8 unkD4D;
-    u8 padD4E[0x192];
+    u8 padD4E[0x52];
+    BrsFadeAnimation fadeAnimation[5];
+    u8 padE68[0x78];
     BrsProgressAnimation levelAnimation[5];
     u8 pad10E8[0x138];
     BrsProgressAnimation profileAnimation[5];
@@ -143,7 +165,9 @@ typedef struct BrsSkillPackageWork {
     u32 opacity;
     s8 resultPhase; /* 0xAEB8: 1 -> 2 once the result counters finish (func_0029DB58) */
     s8 unkAEB9;     /* 0xAEB9: set when the confirm input lands at full opacity */
-    u8 padAEBA[0x1A6];
+    u8 padAEBA[0x56];
+    BrsFadeAnimation fadeAnimation[5];
+    u8 padAFD8[0x88];
     BrsProgressAnimation levelAnimation[5];
     u8 padB268[0x138];
     BrsProgressAnimation profileAnimation[5];
@@ -163,6 +187,7 @@ typedef struct BrsSkillPackageWork {
 #endif
 } BrsSkillPackageWork;
 
+typedef char BrsFadeAnimation_size_must_be_0x28[(sizeof(BrsFadeAnimation) == 0x28) ? 1 : -1];
 typedef char BrsRewardRow_size_must_be_0x18[(sizeof(BrsRewardRow) == 0x18) ? 1 : -1];
 typedef char BrsRewardBatch_size_must_be_0x7C[(sizeof(BrsRewardBatch) == 0x7C) ? 1 : -1];
 typedef char BrsActiveProgressList_size_must_be_0xE0[(sizeof(BrsActiveProgressList) == 0xE0) ? 1 : -1];

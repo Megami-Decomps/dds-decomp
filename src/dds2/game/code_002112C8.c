@@ -5694,7 +5694,61 @@ void btlResetActionScale(void) {
     state->scale = 1.0f;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00221568);
+/* Mode 786 retains one actor and chains model, light and fade tasks before
+ * positioning it. Both transforms wait for the same completed fade. */
+extern f32 D_003BF910[4] __attribute__((aligned(16)));
+extern f32 D_003BF920[4] __attribute__((aligned(16)));
+
+u64 func_00221568(u64 prerequisiteHandle) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BattleLinkedEffectState *effect = &battle->effect->linked;
+    BtlRuntimeTask *load;
+    BtlRuntimeTask *light;
+    BtlRuntimeTask *fade;
+    BtlRuntimeTask *task;
+    BtlUnit *unit;
+    u64 owner;
+
+    if (effect->actor != NULL) {
+        return btlAdvanceRuntimeSequenceCounter();
+    }
+    effect->actor = btlCreateUnit();
+    func_001AA898(&effect->actor->partyRecord, 0x10B);
+    load = btlCreateModelLoadPollTask(effect->actor, 1, 0x10B, 0);
+    if (prerequisiteHandle != 0) {
+        load->startCondition.value.handle = prerequisiteHandle;
+        load->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+    }
+    btlStartTask(load);
+    owner = 0x8000000000000003ULL;
+    light = btlCreateUnitBaseLightTask(effect->actor);
+    light->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+    light->startCondition.value.handle = load->handle;
+    light->ownerId = owner;
+    btlStartTask(light);
+    fade = func_001E5FF8(effect->actor, 0);
+    fade->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+    fade->startCondition.value.handle = light->handle;
+    fade->ownerId = owner;
+    btlStartTask(fade);
+    task = btlCreateUnitRotationInterpolationTask(effect->actor, D_003BF920, 1, 1.0f);
+    task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+    task->startCondition.value.handle = fade->handle;
+    task->ownerId = owner;
+    btlStartTask(task);
+    task = btlCreateUnitPositionLerpTowardTargetTask(effect->actor, D_003BF910, 1.0f);
+    task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
+    task->startCondition.value.handle = fade->handle;
+    task->ownerId = owner;
+    btlStartTask(task);
+    unit = effect->actor;
+    PCP_COPY_VECTOR(unit->position, D_003BF910);
+    PCP_COPY_VECTOR(unit->rotation, D_003BF920);
+    unit->flags &= ~0x80000;
+    unit->flags &= ~1;
+    unit->stateFlags |= 0x20000;
+    return load->handle;
+}
 
 extern f32 *D_0037F770[];
 extern void evtSetUnitRgbTransition(struct EvtUnit *unit, s32 duration, u32 color);

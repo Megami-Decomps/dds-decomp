@@ -1840,7 +1840,40 @@ void fldReleaseTextureSlots(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00147638);
+extern u32 fldPlayerObject;
+
+extern void effObjFetchInnerSecondVecNorm(EffWorldNode *object);
+
+extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
+
+extern void func_002DD688(f32 angle);
+
+void func_00147638(void) {
+    f32 vec[4];
+    u8 mat[64];
+    f32 angle;
+    s32 i;
+
+    memset(vec, 0, sizeof(vec));
+    vec[3] = 1.0f;
+    effObjFetchInnerSecondVecNorm((EffWorldNode *)fldPlayerObject);
+    angle = effMiscComputeQuaternionRotatedReferenceAngle();
+    for (i = 0; i < 4; i++) {
+        if (fldEffectTextureNodes[i] != 0) {
+            vec[0] = FLD_WORK->x;
+            vec[2] = FLD_WORK->z;
+            vec[1] = FLD_WORK->y;
+            if (i == 3) {
+                vec[1] = FLD_WORK->y - 100.0f;
+            }
+            effCopyVectorToNodeInstance((struct EffNode *)fldEffectTextureNodes[i], vec);
+            func_002DD688(-angle);
+            VU0_STORE_MATRIX_UNCLOBBERED(mat);
+            effApplyNodeTransformMatrix((struct EffNode *)fldEffectTextureNodes[i], mat);
+            effUpdateNode(fldEffectTextureNodes[i]);
+        }
+    }
+}
 
 extern s32 mnuPositionedResourceNodes[];
 
