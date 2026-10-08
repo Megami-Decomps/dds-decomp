@@ -220,7 +220,7 @@ extern void effBlurReleaseSecondResource(EffBlurScaleWork *work);
 extern void effBlurSecondInitSlots(EffBlurScaleWork *work);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
-extern void func_00188050(EffResourceRectWork *work);
+extern void effReleaseResourceTemplate(EffResourceRectWork *work);
 extern void *effPcpTripleHandleCreate(void *block0, void **blocks);
 
 extern void *effCreateThunderCellSystemWork(void *params);
@@ -2193,7 +2193,7 @@ void effPcpCompactRespawn(EffPCPCompactFadeWork *work) {
 }
 
 void effPcpCompactEffectRelease(EffPCPCompactFadeWork *work) {
-    func_00188050((EffResourceRectWork *)work->resource);
+    effReleaseResourceTemplate((EffResourceRectWork *)work->resource);
     sdfReleaseChipBlock(work);
 }
 
@@ -6181,4 +6181,3 @@ INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB048);
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB04C);
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB04D);
-
