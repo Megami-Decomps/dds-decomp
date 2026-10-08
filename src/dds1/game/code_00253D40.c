@@ -1,56 +1,36 @@
 #include "common.h"
+#include "mnu_scene_work.h"
 
-typedef struct MnuTransRec {
-    u8 unk0[4];   /* 0x0 */
-    s32 startId;  /* 0x4 */
-    s32 endId;    /* 0x8 */
-    s16 mode;     /* 0xC */
-} MnuTransRec;
-
-typedef struct MnuTransHead {
-    u8 unk0[8];         /* 0x0 */
-    MnuTransRec *first; /* 0x8 */
-} MnuTransHead;
-
-typedef struct MnuTransWork {
-    u8 unk0[0x550];       /* 0x0 */
-    s32 state;            /* 0x550: |state| > 5 triggers a resource reset */
-    u8 unk554[0x30];      /* 0x554 */
-    MnuTransHead list584; /* 0x584 */
-    MnuTransHead list590; /* 0x590 */
-} MnuTransWork;
-
-extern MnuTransRec *mnuAppendNodeToDisplayList(MnuTransHead *head);
 extern u32 *mnuGetSelectedNodeValue(void);
 extern void mnuStopResourceAnimation(void);
 extern void mnuResetResourceAnimation(void);
-extern void func_00253558(MnuTransWork *work);
+extern void func_00253558(MenuSceneWork *work);
 
-void mnuBeginTransitionAlt(MnuTransWork *work, s32 mode) {
-    MnuTransRec *transition = mnuAppendNodeToDisplayList(&work->list590);
+void mnuBeginTransitionAlt(MenuSceneWork *work, s32 mode) {
+    MnuSceneListNode *transition = mnuAppendNodeToDisplayList(&work->displayList590);
 
     if (transition != NULL) {
-        if (work->state >= 6) {
+        if (work->transitionState >= 6) {
             mnuStopResourceAnimation();
             func_00253558(work);
-        } else if (work->state < -5) {
+        } else if (work->transitionState < -5) {
             mnuResetResourceAnimation();
             func_00253558(work);
         }
-        transition->mode = mode;
+        transition->payload.transition.mode = mode;
         if (mode == 1) {
-            work->state = 10;
-            transition->startId = *mnuGetSelectedNodeValue();
+            work->transitionState = 10;
+            transition->payload.transition.fromValue = *mnuGetSelectedNodeValue();
             mnuStopResourceAnimation();
-            transition->endId = *mnuGetSelectedNodeValue();
+            transition->payload.transition.toValue = *mnuGetSelectedNodeValue();
             mnuResetResourceAnimation();
             return;
         }
         if (mode == 2) {
-            work->state = -10;
-            transition->startId = *mnuGetSelectedNodeValue();
+            work->transitionState = -10;
+            transition->payload.transition.fromValue = *mnuGetSelectedNodeValue();
             mnuResetResourceAnimation();
-            transition->endId = *mnuGetSelectedNodeValue();
+            transition->payload.transition.toValue = *mnuGetSelectedNodeValue();
             mnuStopResourceAnimation();
         }
     }
