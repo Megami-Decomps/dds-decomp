@@ -254,7 +254,7 @@ void mnuDestroyShootingWork(MnuShootingWork *work) {
         work->effectWork = NULL;
     }
     if (work->work24 != NULL) {
-        sdfReleaseResourceAllocation(work->work24->allocation);
+        sdfReleaseResourceAllocation((SdfMemBlock *)work->work24->handle);
         work->work24 = NULL;
     }
     slot = work->resourceSlots;
@@ -345,7 +345,178 @@ void func_00318570(MnuShootingWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00318660);
 
-INCLUDE_ASM(const s32, "game/code_00316E08", func_00318C00);
+typedef struct MenuRuntimeList {
+    MenuRuntimeRecord *records;
+    s32 capacity;
+    u32 activeCount;
+    u32 unk0C;
+} MenuRuntimeList;
+
+
+extern u32 mnuGetWorkEntryPool(void);
+extern void mnuVisitActiveWorkAndEffectEntry(s32 context);
+extern MenuRuntimeList *func_00321ED8(void);
+extern MenuRuntimeList *func_00321EC8(void);
+extern void func_0031D558(ModelInstanceWork *work, u32 flags);
+extern void func_0031CE60(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context);
+extern void func_0031CF88(s32 x, s32 y, s32 z, s32 alpha, f32 xScale, f32 yScale,
+                          s32 flags, s32 index, s32 context);
+extern void func_0031D120(s32 x, s32 y, s32 z, s32 alpha, s32 flags, s32 index, s32 context, f32 angle);
+extern void mnuUpdateEffectQueues(MnuEffectWork *work, s32 paused);
+extern void func_0031CBC8(MnuSectionModelWork *work, s32 paused);
+extern void func_0031DA38(struct WideSlotPool *work, u32 flags);
+extern void func_0031E020(struct CompactSlotPool *work, u32 flags);
+extern void mnuSetNodePrimaryVector(u8 *node, f32 x, f32 y, f32 z);
+extern void mnuSetNodeScaleVector(u8 *node, f32 value);
+extern void mnuBroadcastNodeModelState(u8 *node, u32 state);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *context, s32 parameter);
+extern void itfDrawFullExtentWorkPanels(MnuShootingWork *work);
+extern void itfDispatchObjectFadeSequenceMode(MnuShootingWork *work);
+extern void func_0031B080(MnuShootingWork *work);
+extern MnuModelNode *D_00438928;
+extern u8 D_00380788[];
+
+typedef char MenuRuntimeListLayoutAssert[
+    (sizeof(MenuRuntimeList) == 0x10 &&
+     (unsigned long)&((MenuRuntimeList *)0)->records == 0 &&
+     (unsigned long)&((MenuRuntimeList *)0)->capacity == 4 &&
+     (unsigned long)&((MenuRuntimeList *)0)->activeCount == 8 &&
+     (unsigned long)&((MenuRuntimeList *)0)->unk0C == 0xC) ? 1 : -1];
+
+s32 func_00318C00(MnuShootingWork *work) {
+    MenuProgressParameters *origin = mnuGetResourceProgressParameters();
+    MenuRuntimeList *list;
+    MenuRuntimeRecord *record;
+    s32 originX;
+    s32 originY;
+    s32 index;
+
+    (void)mnuGetResourceProgressStepState();
+    (void)mnuGetWorkEntryPool();
+    originX = origin->x;
+    originY = origin->y;
+    mnuVisitActiveWorkAndEffectEntry((s32)work);
+
+    if (work->unk70Bit0 == 0) {
+        func_0031D558(work->work24, 0);
+    } else {
+        func_0031D558(work->work24, 1);
+    }
+
+    list = func_00321ED8();
+    record = list->records;
+    index = 0;
+    while (index < list->capacity) {
+        u32 stateWord = record->state.word;
+        if ((stateWord & 1) != 0) {
+            s32 x = (s32)((record->unk0C + record->unk18) + record->unk04);
+            s32 y = (s32)((record->unk10 + record->unk1C) + record->unk08);
+            s32 kind = record->state.kind & 0xF;
+
+            switch (kind) {
+            case 0:
+                switch ((s32)(stateWord >> 1) & 0xF) {
+                case 2: {
+                    s32 drawX = x + originX;
+                    s32 drawY = y + originY;
+                    func_0031CE60(drawX, drawY, 0, 0x80, 0, 0x42, 0x53);
+                    func_0031CE60(drawX, drawY, 0, 0x80, 0, 0x43, 0x53);
+                    break;
+                }
+                case 3:
+                    func_0031CE60(x + originX, y + originY, 0, 0x80, 0, 0x44, 0x53);
+                    break;
+                case 4:
+                    func_0031CE60(x + originX, y + originY, 0, 0x80, 0, 0x45, 0x53);
+                    break;
+                }
+                break;
+            case 5:
+                switch ((s32)(stateWord >> 1) & 0xF) {
+                case 3:
+                    func_0031CE60(x + originX, y + originY, 0, 0x80, 0, 0x48, 0x53);
+                    break;
+                case 4:
+                    func_0031CE60(x + originX, y + originY, 0, 0x80, 0, 0x49, 0x53);
+                    break;
+                }
+                break;
+            case 4:
+                mnuUpdateTimedEffectPosition();
+                break;
+            default:
+                func_0031CE60(x + originX, y + originY, 0, 0x80, 0, 6, 0x53);
+                break;
+            }
+        }
+        index++;
+        record++;
+    }
+
+    list = func_00321EC8();
+    record = list->records;
+    index = 0;
+    while (index < list->capacity) {
+        u32 stateWord = record->state.word;
+        if ((stateWord & 1) != 0) {
+            s32 x = (s32)((record->unk0C + record->unk18) + record->unk04);
+            s32 y = (s32)((record->unk10 + record->unk1C) + record->unk08);
+            s32 kind = record->state.kind & 0xF;
+
+            switch (kind) {
+            case 1:
+                func_0031D120(x + originX - 8, y + originY - 8, 0, 0x80, 0, 5, 0x53,
+                    -(((f32)record->state.directionDegrees * 3.141592503f) / 180.0f + record->angle));
+                break;
+            case 2:
+                func_0031CF88(x + originX, y + originY, 0, 0x80, 2.0f, 2.0f, 0, 1, 0x53);
+                break;
+            case 3:
+                func_0031CE60(x + originX, y + originY, 0, 0x80, 0, 0x4A, 0x53);
+                break;
+            default:
+                func_0031CF88(x + originX, y + originY, 0, 0x80, 4.0f, 4.0f, 0, 0, 0x53);
+                break;
+            }
+        }
+        index++;
+        record++;
+    }
+
+    if ((work->unk70Bit0 & 1) == 0) {
+        mnuUpdateEffectQueues(work->effectWork, 0);
+        func_0031CBC8(work->modelWork, 0);
+        func_0031DA38(work->spriteWork, 0);
+        func_0031E020(work->tintWork, 0);
+    } else {
+        mnuUpdateEffectQueues(work->effectWork, 1);
+        func_0031CBC8(work->modelWork, 1);
+        func_0031DA38(work->spriteWork, 1);
+        func_0031E020(work->tintWork, 1);
+    }
+
+    if (D_00438928 != NULL) {
+        mnuSetNodePrimaryVector((u8 *)D_00438928, 0.0f, 0.0f, 150.0f);
+        mnuSetNodeScaleVector((u8 *)D_00438928, 1.0f);
+        switch (work->round) {
+        case 0:
+            mnuBroadcastNodeModelState((u8 *)D_00438928, 0x8059606C);
+            break;
+        case 1:
+            mnuBroadcastNodeModelState((u8 *)D_00438928, 0x80404C4C);
+            break;
+        case 2:
+            mnuBroadcastNodeModelState((u8 *)D_00438928, 0x80664C4C);
+            break;
+        }
+        mdlProcessContextNodesAndTransforms(D_00438928->model, (s32)D_00380788);
+    }
+
+    itfDrawFullExtentWorkPanels(work);
+    itfDispatchObjectFadeSequenceMode(work);
+    func_0031B080(work);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_003191B0);
 
