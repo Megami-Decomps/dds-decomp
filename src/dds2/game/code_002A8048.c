@@ -45,12 +45,19 @@ typedef struct MnuViewerPad {
 } MnuViewerPad;
 
 extern MnuViewerPad sdfPadButtonStates;
+extern s8 D_0037F510[64];
+extern SdfMovieDescriptor D_003E56B8;
+extern u16 D_00438A90[4];
+extern u16 D_00438FF0;
+extern SdfPoolNode D_003805A8;
 extern SdfPoolNode D_00380708;
 extern char D_0042A428[];
 extern s32 sdfCreateResetPacketList(void);
 extern void sdfCreatePacketA(SdfListHead *, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 
-extern s32 mnuMovieViewer();
+extern s32 mnuMovieViewer(void);
+extern void mnuStartMovieDrawTaskForResource(const char *, SdfMovieDescriptor *);
+extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));
 
 void mnuRequestIndexedMovieResource(s32 index);
 
@@ -200,7 +207,68 @@ void mnuDrawMovieProgressCounter(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002A8048", mnuMovieViewer);
+s32 mnuMovieViewer(void) {
+    MovieListNode *node;
+    s32 nextTop;
+
+    if (D_0037F510[0x2D] != 0) {
+        mnuMovieDrawContext.soundNode.playbackMode = 1;
+    } else {
+        mnuMovieDrawContext.soundNode.playbackMode = 0x1E;
+    }
+
+    if (D_0037F510[0x28] < 0) {
+        D_003E56B8.unk00 = 0x7000;
+        D_003E56B8.unk02 = 0x7900;
+        D_003E56B8.unk08 = 0x2000;
+        D_003E56B8.unk0A = 0x0E00;
+    }
+    if (D_0037F510[0x2A] < 0) {
+        D_003E56B8.unk00 = 0x7000;
+        D_003E56B8.unk02 = 0x7B00;
+        D_003E56B8.unk08 = 0x2000;
+        D_003E56B8.unk0A = 0x0A00;
+    }
+
+    if (mnuMovieList.playing != 0) {
+        if (mnuCheckMovieDecoderStatus() != 0) {
+            mnuMovieList.playing = 0;
+        } else {
+            s32 previousButtons = D_00438FF0;
+            if (((D_00438A90[0] ^ previousButtons) & D_00438A90[0]) != 0) {
+                mnuMovieList.playing = 0;
+            }
+        }
+    } else if (D_0037F510[0x21] < 0 || D_0037F510[0x28] < 0 || D_0037F510[0x2A] < 0) {
+        node = mnuGetMovieListNodeAtOffset();
+        if (node != NULL) {
+            mnuStopMovieDrawTask();
+            mnuStartMovieDrawTaskForResource(node->path, &D_003E56B8);
+            mnuMovieList.playing = 1;
+        } else {
+            mnuStopMovieDrawTask();
+            mnuRequestIndexedMovieResource(0x30);
+        }
+    } else if (((u8)D_0037F510[0x27] & 2) != 0 && mnuMovieList.cursor < mnuMovieList.total - 1) {
+        mnuMovieList.cursor++;
+        nextTop = mnuMovieList.cursor - 7;
+        if (mnuMovieList.top < nextTop) {
+            mnuMovieList.top = nextTop;
+        }
+    } else if (((u8)D_0037F510[0x26] & 2) != 0 && mnuMovieList.cursor > 0) {
+        mnuMovieList.cursor--;
+        if (mnuMovieList.cursor < mnuMovieList.top) {
+            mnuMovieList.top = mnuMovieList.cursor;
+        }
+    }
+
+    mnuMovieList.packets = (SdfListHead *)sdfAllocatePacketList(0);
+    mnuDrawMovieList();
+    mnuDrawMovieProgressCounter();
+    D_003805A8.append((SdfListHead *)&D_003805A8, mnuMovieList.packets);
+    D_00438FF0 = D_00438A90[0];
+    return 0;
+}
 
 void mnuCreateMovieViewerTask(void) {
     func_002A8268();

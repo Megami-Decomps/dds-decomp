@@ -106,7 +106,6 @@ extern char D_003E75C4[];
 
 extern void mnuDrawWindowDecorations(s32, s32, s32, s32, s32);
 
-extern struct MenuListNode *func_002B86E8(struct MenuList *);
 
 extern void func_002AAE80();
 
@@ -2871,7 +2870,7 @@ u32 mnuDestroyListState(MenuList *list) {
     MenuListNode *result;
 
     do {
-        result = func_002B86E8(list);
+        result = mnuRemoveListCursorNode(list);
     } while (result != 0);
     sdfReleaseChipBlock(list);
     return 1;
@@ -3054,7 +3053,7 @@ MenuListNode *mnuInsertListNodeRelativeToAnchor(MenuList *list, MenuListNode *an
     return node;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B86E8);
+INCLUDE_ASM(const s32, "game/code_002B0278", mnuRemoveListCursorNode);
 
 typedef struct MenuSpriteRef {
     s32 sprite;
@@ -3323,9 +3322,6 @@ void mnuClearListFlagsOneAndTwo(u32 *flags) {
 u32 mnuTestListFlagTwo(u32 *flags) {
     return *flags & 2;
 }
-
-/* Subtract the fade step only when positive, then clamp any negative result to zero. */
-void mnuDecreaseListNodeFadeCounters(u8 *menu);
 
 /* Draw one four-sprite bank; the cursor entry selects the second bank. */
 void mnuDrawFourEntries(s32 x, s32 y, s32 depth, MenuList *list, MenuListNode *node, s32 drawArg);
