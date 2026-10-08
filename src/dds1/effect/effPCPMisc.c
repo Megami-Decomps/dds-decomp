@@ -324,10 +324,10 @@ typedef struct EffPCPRingWork {
     u32 color10;
     u32 color14;
     f32 scale;
-    s32 handle;
+    BillObj *handle;
 } EffPCPRingWork;
 void effPcpDispatchKindAndRelease(EffPCPRingWork *work) {
-    billDispatchByKind((BillObj *)(u32)work->handle);
+    billDispatchByKind(work->handle);
     sdfReleaseChipBlock(work);
 }
 
@@ -345,7 +345,7 @@ void effPcpDrawViewAlignedRing(EffPCPRingWork *work) {
     f32 pos[4];
     f32 dir[4];
     f32 size[4];
-    s32 handle;
+    BillObj *handle;
     f32 scale;
     u32 color;
     s32 i;
@@ -365,15 +365,15 @@ void effPcpDrawViewAlignedRing(EffPCPRingWork *work) {
     VU0_LOAD_VF($vf11, work);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF($vf10, pos);
-    effCopyVector((void *)handle, pos);
+    effCopyVector(handle, pos);
     scale = work->scale;
     color = 0x10808080;
     for (i = 0; i < 10; i++) {
-        billSetChildScaleComponents((BillObj *)handle, scale, scale);
+        billSetChildScaleComponents(handle, scale, scale);
         scale *= 0.975f;
-        billSetChildParameter((BillObj *)handle, effMultiplyPackedColors(effMultiplyPackedColors(color, work->color14), work->color10));
+        billSetChildParameter(handle, effMultiplyPackedColors(effMultiplyPackedColors(color, work->color14), work->color10));
         color += 0x05000000;
-        billInvokeCallback((BillObj *)handle);
+        billInvokeCallback(handle);
     }
 }
 
@@ -947,7 +947,7 @@ extern u16 D_00354D10[8];
 extern f32 D_00354D20[8];
 
 /* vu0 routine: capture staggered model points, then draw their growing history. */
-void func_00178790(EffPCPChargeWork *work) {
+void effPcpChargeUpdateAndDrawHistory(EffPCPChargeWork *work) {
     f32 position[4] __attribute__((aligned(16)));
     u32 i;
     u32 color;
@@ -5099,7 +5099,7 @@ typedef struct EffPCPDriftEventParams {
 } EffPCPDriftEventParams;
 
 typedef struct EffPCPDriftEvent {
-    void *event;
+    EffEventWork *event;
     s32 frame;
     f32 position, positionStep, angle, angleStep;
 } EffPCPDriftEvent;
@@ -5339,7 +5339,7 @@ typedef struct EffPCPPairedEventParams {
 
 typedef struct EffPCPPairedEvent {
     u32 fragment;
-    void *eventA, *eventB;
+    EffEventWork *eventA, *eventB;
     f32 phase, radius;
     f32 tilt;
     f32 tiltStep;
@@ -5634,7 +5634,7 @@ typedef struct EffPCPSpawnRangeParams {
 } EffPCPSpawnRangeParams;
 
 typedef struct EffPCPSpawnRangeEvent {
-    void *event;
+    EffEventWork *event;
     s32 frame;
     f32 height, heightStep, angle, angularStep, position, positionStep;
 } EffPCPSpawnRangeEvent;
@@ -5873,7 +5873,7 @@ typedef struct {
     u8 pad11[3];
     s32 age;
     s32 frameLimit;
-    void *event;
+    EffEventWork *event;
 } EffPCPMapEventEntry;
 
 /* Serialized model placement and fade parameters (0x1C bytes). */

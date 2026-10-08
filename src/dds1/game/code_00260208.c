@@ -31,13 +31,13 @@ enum {
 };
 
 extern BrsIconRecord D_0036C728[];
-extern s32 D_003BC520;
-extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
+extern struct EffectSlotSet *D_003BC520;
+extern void func_002BF4E0(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 
 /* Draw a selected result icon and its fixed companion at the same opacity. */
 void func_00260208(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
     f32 strength;
-    s32 layer;
+    struct EffectSlotSet *layer;
 
     layer = D_003BC520;
     strength = (f32)alpha * 0.00390625f;
@@ -55,7 +55,7 @@ void func_00260208(s32 unused, u32 alpha, s32 iconIndex, s32 option) {
 void func_00260370(s32 unused, u32 value, s32 iconIndex, s32 option) {
     f32 normalized;
     f32 companionPosition;
-    s32 layer;
+    struct EffectSlotSet *layer;
     s32 companionX;
     s32 selectedIndex;
 
