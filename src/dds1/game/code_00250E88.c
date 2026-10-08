@@ -4,6 +4,7 @@
 #include "dat_state.h"
 #include "mnu_profile_progress.h"
 #include "mnu_mantra_grid.h"
+#include "mnu_scene_work.h"
 
 #define MNU_SCENE_WORK_SIZE 0x5B0
 #define MNU_SCENE_SHADE_FRAME_LIMIT 10
@@ -42,45 +43,13 @@ extern SceneEntry D_0036BE38[];
 typedef s16 MnuVariantSpritePlacement[6];
 extern MnuVariantSpritePlacement D_0036B7F0[];
 
-/* Fields initialized and released around the scene's 0x5B0-byte work block. */
-typedef struct MenuSceneWork {
-    s32 allocationHandle; /* 0x000 */
-    u8 pad004[0x480];
-    struct MenuGrid *gridHandle; /* 0x484 */
-    u32 gridRefreshControl[2]; /* 0x488 */
-    u8 pad490[0x5C];
-    s32 pendingMantras[8]; /* 0x4EC: entries awaiting display */
-    u8 pad50C[0x34];
-    s32 coordinateA;      /* 0x540 */
-    s32 coordinateB;      /* 0x544 */
-    u8 pad548[0x5C];
-    s16 scrollX;          /* 0x5A4 */
-    s16 scrollY;          /* 0x5A6 */
-    u8 pad5A8[4];
-    u8 boundsFlags;       /* 0x5AC */
-    u8 pad5AD[3];
-} MenuSceneWork;
-
-
 typedef struct ScrVmOperand ScrVmOperand;
-
-typedef struct MenuGridCell {
-    u32 index;
-    s32 value;
-} MenuGridCell;
 
 typedef struct MenuGridCoordinate {
     s16 x;
     s16 y;
     u8 pad04[8];
 } MenuGridCoordinate;
-
-typedef struct MenuGrid {
-    u8 pad00[8];
-    MenuGridCell *cursor;
-    u8 pad0C[0x24];
-    MenuGridCoordinate *entries;
-} MenuGrid;
 
 extern void sdfReleaseChipBlock(void *);
 
@@ -117,7 +86,8 @@ void func_00250E88(s32 *xCoordinate, s32 *yCoordinate, u16 index,
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00250F60);
 
 void func_00251260(MenuSceneWork *work) {
-    MnuMantraGridEntry *entry = (MnuMantraGridEntry *)work->gridHandle->cursor->value;
+    MnuMantraGridEntry *entry =
+        (MnuMantraGridEntry *)(u32)work->gridHandle->cursor->value;
     s32 maximumX = 0x307;
     u8 flags = work->boundsFlags;
     s32 position[2];
@@ -160,7 +130,7 @@ extern u32 mnuGetSelectedNodeValue(void);
 extern s32 fldGetSceneMetadataNode(void);
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern s32 dspStartEntry(s32);
-extern void *sdfGridSelectFilledCell(MenuGrid *, s32, s32);
+extern void *sdfGridSelectFilledCell(SdfGrid *, s32, s32);
 
 /* Display the selected mantra and move the scene grid to its filled cell. */
 s32 mnuDisplayNextPendingMantra(s32 context) {
@@ -169,7 +139,7 @@ s32 mnuDisplayNextPendingMantra(s32 context) {
     MnuProfileProgress *selection;
     s32 *pendingFlags;
     s32 i;
-    MenuGrid *grid;
+    SdfGrid *grid;
     s32 x;
     s32 y;
 
@@ -303,18 +273,18 @@ void mnuReinitializeSceneGrid(s32 sceneAddress) {
     mnuCopySceneCoordinates(sceneAddress);
 }
 
-extern void func_002CBB48(MenuGrid *grid);
+extern void func_002CBB48(SdfGrid *grid);
 extern void func_00253208(s32 context, s32 sceneId, s32 *x, s32 *y);
-extern void *sdfGridSelectFilledCell(MenuGrid *grid, s32 x, s32 y);
-extern void func_002CC0D0(MenuGrid *grid);
+extern void *sdfGridSelectFilledCell(SdfGrid *grid, s32 x, s32 y);
+extern void func_002CC0D0(SdfGrid *grid);
 
 
 void func_00253558(s32 context) {
-    MenuGrid *grid = ((MenuSceneWork *)context)->gridHandle;
-    MenuGridCell *cursor = grid->cursor;
+    SdfGrid *grid = ((MenuSceneWork *)context)->gridHandle;
+    SdfGridCell *cursor = grid->cursor;
     s32 selected = cursor->value;
     u16 entryId = *(u16 *)(selected + 0xC);
-    MenuGridCoordinate *entries = grid->entries;
+    MenuGridCoordinate *entries = (MenuGridCoordinate *)grid->userData;
     s16 x = entries[entryId].x;
     s16 y = entries[entryId].y;
     s32 scene;

@@ -4,6 +4,7 @@
 #include "mnu_scene.h"
 #include "mnu_profile_progress.h"
 #include "mnu_mantra_grid.h"
+#include "mnu_scene_work.h"
 
 #define MNU_DISPLAY_TEXT_RGB 0xA09DC300
 #define MNU_DISPLAY_DIM_TEXT_RGB 0xA09D7D00
@@ -186,7 +187,8 @@ extern MnuSpritePlacement D_0036B510[];
 extern s32 D_0036C698[];
 extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 
-void mnuDrawMantraPanelSprite(s32 x, s32 y, s32 z, s32 alpha) {
+void mnuDrawMantraPanelSprite(s32 x, s32 y, s32 z, s32 alpha,
+                              u16 unusedSceneId, s32 unusedContext) {
     s32 resource = D_0036C698[D_0036B510[41].resourceIndex];
 
     func_002BF4E0((x + D_0036B510[41].x) << 4,
@@ -614,24 +616,10 @@ INCLUDE_ASM(const s32, "game/code_00254B30", func_00256E90);
 
 extern s32 mnuGetSelectedNodeValue(void);
 
-typedef struct {
-    u8 pad0[4];
-    MnuMantraGridEntry *entry; /* 0x4: entry tested by mnuGetMantraDisplayFlags */
-} DspEntryLink;
-
-typedef struct {
-    u8 pad0[8];
-    DspEntryLink *link; /* 0x8 */
-} DspEntryContainer;
-
-typedef struct {
-    u8 pad0[0x484];
-    DspEntryContainer *entries; /* 0x484 */
-} DspDisplayObject;
-
-void mnuChooseDisplaySpriteKindFromEntryFlags(DspDisplayObject *obj, s32 scale, s32 context) {
+void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *obj, s32 scale, s32 context) {
     MnuProfileProgress *target = (MnuProfileProgress *)mnuGetSelectedNodeValue();
-    MnuMantraGridEntry *entry = obj->entries->link->entry;
+    MnuMantraGridEntry *entry =
+        (MnuMantraGridEntry *)(u32)obj->gridHandle->cursor->value;
     u32 flags;
     s32 kind;
 
