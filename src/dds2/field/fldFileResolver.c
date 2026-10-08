@@ -8,16 +8,16 @@ extern void *dds3GetWorldSecondaryObject(void);
 extern void *dds3FindIndexedObjectChainNodeByName(void *world, s32 index, const char *name);
 struct EffWorldNode;
 extern u32 dds3AdvanceWorldCounter(void);
-extern void *dds3SpawnInnerVecObj6(s32, u32 *, u32 *);
+extern struct EffWorldNode *dds3SpawnInnerVecObj6(s32, f32 *, void *);
 extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern char D_00412FF0[]; /* "FLD_DMY_MATTER" */
 extern s32 fldGetRecordValueById(s32 id);
 extern void fldSetRecordValueById(s32 id, s32 value);
 extern s32 strcmp(const char *left, const char *right);
 
-void *fldCreateDummyMatter(void) {
+struct EffWorldNode *fldCreateDummyMatter(void) {
     u32 args[8];
-    void *matter;
+    struct EffWorldNode *matter;
     args[0] = 0;
     args[1] = 0;
     args[2] = 0;
@@ -26,7 +26,7 @@ void *fldCreateDummyMatter(void) {
     args[5] = 0;
     args[6] = 0;
     args[7] = 0;
-    matter = dds3SpawnInnerVecObj6(dds3AdvanceWorldCounter(), args, args + 4);
+    matter = dds3SpawnInnerVecObj6(dds3AdvanceWorldCounter(), (f32 *)args, args + 4);
     dds3SetWorldNodeValue(matter, (u32)D_00412FF0);
     return matter;
 }

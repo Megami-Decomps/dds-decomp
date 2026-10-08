@@ -8,12 +8,6 @@
 
 
 
-typedef struct EvtTarget {
-    u8 pad0[0x18];
-    EvtTargetInfo *info; /* 0x18 */
-    EvtEffData *data;
-} EvtTarget;
-
 extern f32 *D_00324770[];
 extern u8 kwlnDefaultColorVector[];
 
@@ -32,7 +26,7 @@ s32 func_00222498(EvtUnit *unit, f32 *dir, f32 scale);
 extern f32 evtGetValueScaleFactor(s32 path);
 extern void evtScaleValueByMultiplier(s32 path, f32 multiplier);
 
-void func_00221D00(EvtUnit *unit, s32 duration, u32 firstColor, u32 secondColor);
+void evtInitializeUnitColorTransition(EvtUnit *unit, s32 duration, u32 firstColor, u32 secondColor);
 
 /* Length of the path's vec4 trajectory sampled at 20 steps of the value multiplier. */
 f32 evtMeasurePathTrajectoryLength(s32 path) {
@@ -109,7 +103,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
     previousWeight = 0.0f;
     /* The model RGB and alpha tracks preserve the other packed channel. */
     flags = unit->flags;
-    if (flags & 0x8000) {
+    if (flags & EVT_UNIT_FLAG_RGB_TRANSITION) {
         u32 packed;
         factor = unit->rgbDuration ? (f32)unit->rgbElapsed / unit->rgbDuration : 1.0f;
         rgbTarget[0] = unit->color64;
@@ -125,13 +119,13 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         rgbResult[0] = packed;
         mdlBroadcastMasked((MdlCtx *)unit->owner, (oldColor & 0xFF000000) | (rgbResult[0] & 0xFFFFFF));
         if (unit->rgbElapsed >= unit->rgbDuration) {
-            flags = unit->flags &= ~0x8000;
+            flags = unit->flags &= ~EVT_UNIT_FLAG_RGB_TRANSITION;
         } else {
             flags = unit->flags;
             unit->rgbElapsed++;
         }
     }
-    if (flags & 0x10000) {
+    if (flags & EVT_UNIT_FLAG_ALPHA_TRANSITION) {
         u32 packed;
         factor = unit->alphaDuration ? (f32)unit->alphaElapsed / unit->alphaDuration : 1.0f;
         alphaTarget[0] = unit->color64;
@@ -147,21 +141,21 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         alphaResult[0] = packed;
         mdlBroadcastMasked((MdlCtx *)unit->owner, (oldColor & 0xFFFFFF) | (alphaResult[0] & 0xFF000000));
         if (unit->alphaElapsed >= unit->alphaDuration) {
-            flags = unit->flags &= ~0x10000;
+            flags = unit->flags &= ~EVT_UNIT_FLAG_ALPHA_TRANSITION;
         } else {
             flags = unit->flags;
             unit->alphaElapsed++;
         }
     }
     /* Stale world-node references must not reach the target-vector reads. */
-    if (flags & 0x40000) {
+    if (flags & EVT_UNIT_FLAG_TARGET_TRANSITION) {
         if (unit->currentTransitionValue == 0) {
-            unit->flags = flags & ~0x40000;
+            unit->flags = flags & ~EVT_UNIT_FLAG_TARGET_TRANSITION;
         } else if (!dds3ContainsNodeInObjectChain(dds3GetWorldObject(), 9,
                                                  (EffWorldNode *)unit->currentTransitionValue)) {
             unit->currentTransitionValue = 0;
             unit->previousTransitionValue = 0;
-            unit->flags &= ~0x40000;
+            unit->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
         }
     }
     if (unit->previousTransitionValue &&
@@ -176,17 +170,17 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
     currentWeight = 0.0f;
     if (unit->currentTransitionValue) {
         flags = unit->flags;
-        if (flags & 0x40000) {
+        if (flags & EVT_UNIT_FLAG_TARGET_TRANSITION) {
             f32 distance;
-            target = ((EvtTarget *)unit->currentTransitionValue)->info;
+            target = ((EffWorldNode *)unit->currentTransitionValue)->data;
             if (unit->previousTransitionValue) {
-                previous = ((EvtTarget *)unit->previousTransitionValue)->info;
+                previous = ((EffWorldNode *)unit->previousTransitionValue)->data;
             }
             if (!sdfLoadMapRecordPositionVector(unit->owner->inner, 0)) {
                 mdlLoadPrimaryVectorVU(unit->owner);
             }
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
-            VU0_LOAD_VF(vf11, ((EvtTarget *)unit->currentTransitionValue)->data->position);
+            VU0_LOAD_VF(vf11, ((EffWorldNode *)unit->currentTransitionValue)->inner->position);
             VU0_SUB(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, targetDirection);
             VU0_LENGTH_VF10(distance);
@@ -201,7 +195,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
             if (previous) {
                 f32 previousDistance;
                 VU0_LOAD_VF(vf10, position);
-                VU0_LOAD_VF(vf11, ((EvtTarget *)unit->previousTransitionValue)->data->position);
+                VU0_LOAD_VF(vf11, ((EffWorldNode *)unit->previousTransitionValue)->inner->position);
                 VU0_SUB(vf10, vf10, vf11);
                 VU0_STORE_VF_UNCLOBBERED(vf10, previousDirection);
                 VU0_LENGTH_VF10(previousDistance);
@@ -215,28 +209,28 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
                 }
             }
             VU0_LOAD_VF(vf10, targetDirection);
-            if (target->flags & 8) {
+            if (target->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
                 VU0_STORE_VF_UNCLOBBERED(vf10, target->direction);
                 flags = unit->flags;
                 ownVector = 1;
             } else {
-                if (unit->flags & 0x180000) {
+                if (unit->flags & EVT_UNIT_FLAG_TARGET_BLEND_PHASES) {
                     if ((u16)unit->transitionFrameCount) {
                         transition = (f32)(u16)unit->transitionElapsed / (u16)unit->transitionFrameCount;
                     } else {
                         transition = 1.0f;
                     }
-                    if (unit->flags & 0x100000) {
+                    if (unit->flags & EVT_UNIT_FLAG_TARGET_BLEND_OUT) {
                         transition = 1.0f - transition;
                     }
                     if ((u16)unit->transitionFrameCount) {
                         if ((u16)unit->transitionFrameCount <= (u16)++unit->transitionElapsed) {
-                            if (unit->flags & 0x100000) {
+                            if (unit->flags & EVT_UNIT_FLAG_TARGET_BLEND_OUT) {
                                 unit->currentTransitionValue = 0;
-                                unit->flags &= ~0x40000;
+                                unit->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
                             }
                             unit->previousTransitionValue = 0;
-                            unit->flags &= ~0x180000;
+                            unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_PHASES;
                         }
                     }
                 } else {
@@ -379,7 +373,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         unit->color5C = unit->color54;
         if (unit->colorFramesRemaining == 0) {
             if (originalFlags & 0x1000) {
-                flags = unit->flags = originalFlags & ~0x300;
+                flags = unit->flags = originalFlags & ~EVT_UNIT_FLAG_USE_UNIT_COLOR_CHANNELS;
             }
             unit->flags = flags & ~0x1800;
         } else {
@@ -388,7 +382,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
     } else {
         u32 firstPacked;
         u32 secondPacked;
-        if (!(originalFlags & 0x100)) {
+        if (!(originalFlags & EVT_UNIT_FLAG_USE_UNIT_FIRST_COLOR)) {
             if (ownVector) {
                 VU0_LOAD_VF(vf10, target);
             } else {
@@ -398,7 +392,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
             defaultFirst[0] = firstPacked;
             unit->color0C = defaultFirst[0];
         }
-        if (!(originalFlags & 0x200)) {
+        if (!(originalFlags & EVT_UNIT_FLAG_USE_UNIT_SECOND_COLOR)) {
             if (ownVector) {
                 VU0_LOAD_VF(vf10, target->secondColor);
             } else {
@@ -506,13 +500,13 @@ void evtLoadUnitFirstColorVectorVU(EvtUnit *unit) {
     s32 color;
     f32 scale;
 
-    if (unit->currentTransitionValue != 0 && (unit->flags & 0x40000)) {
-        info = ((EvtTarget *)unit->currentTransitionValue)->info;
-        if (info->flags & 0x8) {
+    if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
+        info = ((EffWorldNode *)unit->currentTransitionValue)->data;
+        if (info->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
     }
-    if (unit->flags & 0x100) {
+    if (unit->flags & EVT_UNIT_FLAG_USE_UNIT_FIRST_COLOR) {
         scale = 0.0078125f;
         color = unit->color;
         EE_MMI_RGBA_UNPACK(&color, scale);
@@ -530,13 +524,13 @@ void evtLoadUnitSecondColorVectorVU(EvtUnit *unit) {
     s32 color;
     f32 scale;
 
-    if (unit->currentTransitionValue != 0 && (unit->flags & 0x40000)) {
-        info = ((EvtTarget *)unit->currentTransitionValue)->info;
-        if (info->flags & 0x8) {
+    if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
+        info = ((EffWorldNode *)unit->currentTransitionValue)->data;
+        if (info->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
     }
-    if (unit->flags & 0x200) {
+    if (unit->flags & EVT_UNIT_FLAG_USE_UNIT_SECOND_COLOR) {
         scale = 0.0078125f;
         color = unit->color50;
         EE_MMI_RGBA_UNPACK(&color, scale);
@@ -551,8 +545,8 @@ void evtLoadUnitSecondColorVectorVU(EvtUnit *unit) {
 void evtLoadUnitDirectionVectorVU(EvtUnit *unit) {
     s32 ownVector = 0;
 
-    if (unit->currentTransitionValue != 0 && (unit->flags & 0x40000)) {
-        if (((EvtTarget *)unit->currentTransitionValue)->info->flags & 0x8) {
+    if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
+        if (((EvtTargetInfo *)((EffWorldNode *)unit->currentTransitionValue)->data)->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
     }
@@ -568,9 +562,9 @@ void evtLoadUnitDirectionVectorVU(EvtUnit *unit) {
 
 extern void func_002E1938(void *, SdfLightSources, f32 *);
 
-/* Rebuild the unit's endpoint render work from its own colour/vector when the
- * value-change flag is set; otherwise defer to the matching-slot selector. */
-void func_00221A80(EvtUnit *unit) {
+/* Refresh endpoint render work after the value-change flag is cleared; defer
+ * to the matching-slot selector when no target or color transition is active. */
+void evtRefreshUnitEndpointWork(EvtUnit *unit) {
     f32 ends[4][4];
     f32 color[4];
     SdfLightSources desc = { ends, 0, 0 };
@@ -581,11 +575,11 @@ void func_00221A80(EvtUnit *unit) {
     u32 flags = unit->flags;
     s32 i;
 
-    if (flags & 0x20000) {
+    if (flags & EVT_UNIT_FLAG_VALUE_CHANGED) {
         return;
     }
     unit->value = 0;
-    if (!(flags & 0x40000)) {
+    if (!(flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
         if (!(flags & 0x700)) {
             evtApplyMatchingUnitSlotEndpoints(unit);
             return;
@@ -611,18 +605,18 @@ void func_00221A80(EvtUnit *unit) {
     unit->value = (u32)unit->endpointWork;
 }
 
-void evtSetUnitValueTransition(EvtUnit *unit, s32 value, s32 duration) {
-    unit->flags |= 0x40000;
+void evtSetUnitValueTransition(EvtUnit *unit, EffWorldNode *target, s32 duration) {
+    unit->flags |= EVT_UNIT_FLAG_TARGET_TRANSITION;
     unit->previousTransitionValue = unit->currentTransitionValue;
-    unit->currentTransitionValue = value;
+    unit->currentTransitionValue = (s32)target;
     if (duration == 0) {
         unit->previousTransitionValue = 0;
         unit->transitionElapsed = 0;
         unit->transitionDuration = 0;
-        unit->flags &= ~0x180000;
+        unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_PHASES;
     } else {
-        unit->flags |= 0x80000;
-        unit->flags &= ~0x100000;
+        unit->flags |= EVT_UNIT_FLAG_TARGET_BLEND_IN;
+        unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_OUT;
         unit->transitionDuration = duration;
         unit->transitionElapsed = 0;
     }
@@ -631,13 +625,13 @@ void evtSetUnitValueTransition(EvtUnit *unit, s32 value, s32 duration) {
 void evtEndUnitValueTransition(EvtUnit *unit, s32 duration) {
     if (unit->currentTransitionValue != 0) {
         if (duration == 0) {
-            unit->flags &= ~0x40000;
-            unit->flags &= ~0x180000;
+            unit->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
+            unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_PHASES;
             unit->currentTransitionValue = 0;
         } else {
-            unit->flags &= ~0x80000;
+            unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_IN;
             unit->transitionDuration = duration;
-            unit->flags |= 0x100000;
+            unit->flags |= EVT_UNIT_FLAG_TARGET_BLEND_OUT;
             unit->transitionElapsed = 0;
         }
     }
@@ -646,12 +640,12 @@ void evtEndUnitValueTransition(EvtUnit *unit, s32 duration) {
 void evtUnitSetValueAndFlag(EvtUnit *unit, u32 value)
 {
     unit->value = value;
-    unit->flags = unit->flags | 0x20000;
+    unit->flags = unit->flags | EVT_UNIT_FLAG_VALUE_CHANGED;
 }
 
 void evtClearUnitValueChangeFlag(EvtUnit *unit) {
-    unit->flags = unit->flags & ~0x20000;
-    func_00221A80(unit);
+    unit->flags = unit->flags & ~EVT_UNIT_FLAG_VALUE_CHANGED;
+    evtRefreshUnitEndpointWork(unit);
 }
 
 typedef struct EvtUnitColorEndpoints {
@@ -663,7 +657,7 @@ typedef struct EvtUnitColorEndpoints {
     u32 secondTarget;  /* 0x58 */
 } EvtUnitColorEndpoints;
 
-void func_00221D00(EvtUnit *unit, s32 duration, u32 firstColor, u32 secondColor) {
+void evtInitializeUnitColorTransition(EvtUnit *unit, s32 duration, u32 firstColor, u32 secondColor) {
     s32 color1[4];
     s32 color2[4];
     u32 packed1;
@@ -708,13 +702,13 @@ void evtSetUnitRgbTransition(EvtUnit *unit, s32 duration, u32 color) {
         mdlBroadcastMasked((MdlCtx *)unit->owner,
             (mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFF000000) | (color & 0xFFFFFF));
         unit->color60 = (unit->color60 & 0xFF000000) | (color & 0xFFFFFF);
-        unit->flags &= ~0x8000;
+        unit->flags &= ~EVT_UNIT_FLAG_RGB_TRANSITION;
     } else {
         u32 currentRgb = mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFFFFFF;
 
         unit->color60 = (unit->color60 & 0xFF000000) | currentRgb;
         unit->color64 = (unit->color64 & 0xFF000000) | (color & 0xFFFFFF);
-        unit->flags |= 0x8000;
+        unit->flags |= EVT_UNIT_FLAG_RGB_TRANSITION;
     }
 }
 
@@ -725,13 +719,13 @@ void evtSetUnitAlphaTransition(EvtUnit *unit, s32 duration, u32 color) {
         mdlBroadcastMasked((MdlCtx *)unit->owner,
             (mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFFFFFF) | (color & 0xFF000000));
         unit->color60 = (unit->color60 & 0xFFFFFF) | (color & 0xFF000000);
-        unit->flags &= ~0x10000;
+        unit->flags &= ~EVT_UNIT_FLAG_ALPHA_TRANSITION;
     } else {
         u32 currentAlpha = mdlGetBroadcastValue((MdlCtx *)unit->owner) & 0xFF000000;
 
         unit->color60 = (unit->color60 & 0xFFFFFF) | currentAlpha;
         unit->color64 = (unit->color64 & 0xFFFFFF) | (color & 0xFF000000);
-        unit->flags |= 0x10000;
+        unit->flags |= EVT_UNIT_FLAG_ALPHA_TRANSITION;
     }
 }
 
@@ -742,7 +736,7 @@ u8 evtTestUnitStatusFlags(EvtUnit *unit)
 
 void evtSetUnitStatusFlags(EvtUnit *unit)
 {
-    unit->flags = unit->flags | 0x300;
+    unit->flags = unit->flags | EVT_UNIT_FLAG_USE_UNIT_COLOR_CHANNELS;
 }
 
 void evtConfigureUnitTransition(EvtUnit *unit, s32 arg) {
@@ -751,7 +745,7 @@ void evtConfigureUnitTransition(EvtUnit *unit, s32 arg) {
         unit->flags &= ~0x5000;
         unit->flags &= ~0x2800;
     } else {
-        func_00221D00(unit, arg, 0, 0);
+        evtInitializeUnitColorTransition(unit, arg, 0, 0);
         unit->flags = (unit->flags & ~0x800) | 0x1000;
                 VU0_MOVE_VF(vf10, vf0);
         evtSetUnitNormalizedDirection(unit, arg);
@@ -779,7 +773,7 @@ extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfReleaseChipBlock(void *block);
 extern const s32 D_003AC060[];
 
-EvtUnit *evtCreateUnitTransitionWork(EvtEffObj *effObj, MdlCtx *owner) {
+EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {
     EvtUnit *work;
     void *endpoint;
     f32 defaultVector[4];
@@ -932,7 +926,7 @@ s32 evtAimUnitFromFlatQuaternion(EvtUnit *unit, f32 *quat, f32 angle) {
     VU0_SET_AXIS_CLEAR_W(0.0f, y);
     VU0_NORMALIZE_VF10();
     VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_LOAD_VF(vf11, unit->effObj->data->position);
+    VU0_LOAD_VF(vf11, unit->effObj->inner->position);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, v);
     return func_00222498(unit, v, angle);
@@ -941,7 +935,7 @@ s32 evtAimUnitFromFlatQuaternion(EvtUnit *unit, f32 *quat, f32 angle) {
 s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
     f32 v[4];
     f32 scale;
-    EvtEffObj *obj;
+    EffWorldNode *obj;
 
     func_00222498(unit, unit->targetVector, unit->directionOffset * 0.01f);
     if (unit->directionOffset != 0) {
@@ -950,7 +944,7 @@ s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
     } else {
         VU0_LOAD_VF(vf10, unit->targetVector);
         obj = unit->effObj;
-        VU0_LOAD_VF(vf11, obj->data->position);
+        VU0_LOAD_VF(vf11, obj->inner->position);
         VU0_SUB(vf10, vf10, vf11);
         VU0_NORMALIZE_VF10();
     }
@@ -980,8 +974,8 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
     s32 count = 0;
     s32 i;
     for (i = 0; i < 4; i++) {
-        savedA[i] = unit->effObj->data->position[i];
-        savedB[i] = unit->effObj->data->orientation[i];
+        savedA[i] = unit->effObj->inner->position[i];
+        savedB[i] = unit->effObj->inner->rotation[i];
     }
     copy = *unit;
     while (func_00220678(&copy) == 0) {
@@ -989,8 +983,8 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
         evtApplyUnitDirectionOffset(&copy);
     }
     for (i = 0; i < 4; i++) {
-        unit->effObj->data->position[i] = savedA[i];
-        unit->effObj->data->orientation[i] = savedB[i];
+        unit->effObj->inner->position[i] = savedA[i];
+        unit->effObj->inner->rotation[i] = savedB[i];
     }
     if (count == 0) {
         func_003003F0("ymove frameno = 0\n");
@@ -999,7 +993,7 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
         return 0;
     }
     VU0_LOAD_VF(vf10, unit->targetVector);
-    VU0_LOAD_VF(vf11, unit->effObj->data->position);
+    VU0_LOAD_VF(vf11, unit->effObj->inner->position);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, delta);
     unit->stepCount = count;

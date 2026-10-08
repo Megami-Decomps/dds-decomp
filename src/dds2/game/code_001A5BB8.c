@@ -1,4 +1,5 @@
 #include "common.h"
+#include "pcp_vu0.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
 #include "eff.h"
@@ -3412,7 +3413,94 @@ s32 btlMapActionCode(s32 unused, u32 id) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B0DB0);
+extern void btlUnitGetMuzzlePosVU(BtlUnit *);
+
+typedef struct BtlAnimationModeRow {
+    u8 mode;
+    u8 pad01[3];
+    s32 delay;
+} BtlAnimationModeRow;
+
+/* Sort same-side targets for the selected animation, or perform thirteen swaps. */
+void func_001B0DB0(BtlUnit *unit, BtlIndexList *targets, s32 actionId) {
+    BtlUnit *pair[2];
+    f32 muzzle[2][4];
+    u32 randomIndices[2];
+    u32 count;
+    u32 mode;
+    u32 i;
+    u32 last;
+    s32 sorted;
+
+    count = btlGetIndexListCount(targets);
+    if (count < 2) {
+        return;
+    }
+    if ((unit->flags & 0x200) != 0 &&
+        datCommandSelectors[actionId].kind == 5) {
+        mode = unit->partyRecord.unitId == 6 ? 2 : 0;
+    } else {
+        u32 delayIndex = ((BtlActionAnimationRecord *)datActionAnimationRecords)[actionId].delayIndex;
+        mode = ((BtlAnimationModeRow *)D_003B4EF0)[delayIndex].mode;
+    }
+    switch (mode) {
+    case 0:
+        btlBossDebugPrintf("btl:anim=non\n");
+        return;
+    case 1:
+        btlBossDebugPrintf("btl:anim=left\n");
+        break;
+    case 2:
+        btlBossDebugPrintf("btl:anim=right\n");
+        break;
+    case 3:
+        btlBossDebugPrintf("btl:anim=rand\n");
+        break;
+    }
+    if (mode != 3) {
+        last = count - 1;
+        do {
+            sorted = 1;
+            for (i = 0; i < last; i++) {
+                pair[0] = btlGetIndexListEntry(targets, i);
+                pair[1] = btlGetIndexListEntry(targets, i + 1);
+                btlUnitGetMuzzlePosVU(pair[0]);
+                VU0_STORE_VF(vf10, muzzle[0]);
+                btlUnitGetMuzzlePosVU(pair[1]);
+                VU0_STORE_VF(vf10, muzzle[1]);
+                if ((pair[0]->flags & 0x400) && (pair[1]->flags & 0x400)) {
+                    if (mode == 1) {
+                        if (muzzle[0][0] > muzzle[1][0]) {
+                            btlSwapIndexListEntries(targets, i, i + 1);
+                            sorted = 0;
+                        }
+                    } else if (muzzle[0][0] < muzzle[1][0]) {
+                        btlSwapIndexListEntries(targets, i, i + 1);
+                        sorted = 0;
+                    }
+                } else if ((pair[0]->flags & 0x200) && (pair[1]->flags & 0x200)) {
+                    if (mode == 1) {
+                        if (muzzle[0][0] < muzzle[1][0]) {
+                            btlSwapIndexListEntries(targets, i, i + 1);
+                            sorted = 0;
+                        }
+                    } else if (muzzle[0][0] > muzzle[1][0]) {
+                        btlSwapIndexListEntries(targets, i, i + 1);
+                        sorted = 0;
+                    }
+                }
+            }
+        } while (sorted == 0);
+    } else {
+        for (i = 0; i < 13; i++) {
+            randomIndices[0] = effMiscRandMod(0, count);
+            randomIndices[1] = effMiscRandMod(0, count);
+            if (randomIndices[0] != randomIndices[1]) {
+                btlSwapIndexListEntries(targets, randomIndices[0], randomIndices[1]);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B1090);
 
@@ -6571,11 +6659,117 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1520);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C16B0);
 
+typedef struct BattleActorPanelPositions {
+    BattleSelectionPosition entries[3];
+} BattleActorPanelPositions;
+
+extern const BattleActorPanelPositions D_00416798;
+extern s32 func_001C16B0(s8);
+
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00416780);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00416798);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1A68);
+void func_001C1A68(BtlState *battle, BattleActorPanelWork *work) {
+    BattleActorPanelPositions positions = D_00416798;
+    BtlUnit *actor;
+    KwlnTask *task;
+    BattleSceneObject *scene;
+    s32 eligibleCount;
+    s32 ordinal;
+    s32 slot;
+    s32 limit;
+
+    eligibleCount = btlCountEligibleLinkedActors(battle);
+    actor = battle->units;
+    task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    func_001C16B0(0);
+    if (task == NULL) {
+        ordinal = 0;
+        while (actor != NULL && ordinal < eligibleCount) {
+            if (btlHasRequiredActorStatusBits(actor)) {
+                slot = actor->lookupId;
+                switch (btlTrackedTaskHandles->presentationState) {
+                case 1:
+                    work->activeEntries[slot].fade -= btlTrackedTaskHandles->status.bytes.fadeStep;
+                    work->activeEntries[slot].fade = work->activeEntries[slot].fade <= 0 ? 0 :
+                        work->activeEntries[slot].fade > 0x80 ? 0x80 : work->activeEntries[slot].fade;
+                    work->activeEntries[slot].presentationState = 4;
+                    work->activeEntries[slot].pendingSceneState = 5;
+                    work->activeEntries[slot].transitionState = 4;
+                    break;
+                case 0:
+                case 2:
+                    work->activeEntries[slot].fade += 0x20;
+                    work->activeEntries[slot].fade = work->activeEntries[slot].fade <= 0 ? 0 :
+                        work->activeEntries[slot].fade > 0x80 ? 0x80 : work->activeEntries[slot].fade;
+                    break;
+                }
+                ordinal++;
+            }
+            actor = actor->nextActor;
+        }
+    } else {
+        ordinal = 0;
+        scene = (BattleSceneObject *)kwlnTaskGetUserValue(task);
+        while (actor != NULL && ordinal < eligibleCount) {
+            if (btlHasRequiredActorStatusBits(actor)) {
+                slot = actor->lookupId;
+                switch (scene->state) {
+                case 1:
+                    work->activeEntries[slot].fade += 0x20;
+                    work->activeEntries[slot].fade = work->activeEntries[slot].fade <= 0 ? 0 :
+                        work->activeEntries[slot].fade > 0x80 ? 0x80 : work->activeEntries[slot].fade;
+                    break;
+                case 2:
+                    work->activeEntries[slot].fade += 0x20;
+                    work->activeEntries[slot].fade = work->activeEntries[slot].fade <= 0 ? 0 :
+                        work->activeEntries[slot].fade > 0x80 ? 0x80 : work->activeEntries[slot].fade;
+                    break;
+                case 3:
+                    work->activeEntries[slot].fade += 0x20;
+                    work->activeEntries[slot].fade = work->activeEntries[slot].fade <= 0 ? 0 :
+                        work->activeEntries[slot].fade > 0x80 ? 0x80 : work->activeEntries[slot].fade;
+                    break;
+                case 7:
+                case 9:
+                    work->activeEntries[slot].fade += 0x20;
+                    work->activeEntries[slot].fade = work->activeEntries[slot].fade <= 0 ? 0 :
+                        work->activeEntries[slot].fade > 0x80 ? 0x80 : work->activeEntries[slot].fade;
+                    work->activeEntries[slot].baseX += 2;
+                    limit = positions.entries[slot].x;
+                    work->activeEntries[slot].baseX = work->activeEntries[slot].baseX <= limit - 8 ? limit - 8 :
+                        work->activeEntries[slot].baseX < limit ? work->activeEntries[slot].baseX : limit;
+                    if (scene->state == 9) {
+                        func_001C16B0(1);
+                    }
+                    break;
+                case 11:
+                    work->activeEntries[slot].fade -= btlTrackedTaskHandles->status.bytes.fadeStep;
+                    work->activeEntries[slot].fade = work->activeEntries[slot].fade <= 0 ? 0 :
+                        work->activeEntries[slot].fade > 0x80 ? 0x80 : work->activeEntries[slot].fade;
+                    work->activeEntries[slot].presentationState = 4;
+                    work->activeEntries[slot].pendingSceneState = 5;
+                    work->activeEntries[slot].transitionState = 4;
+                    break;
+                case 6:
+                case 8:
+                    work->activeEntries[slot].fade -= 0x20;
+                    work->activeEntries[slot].fade = work->activeEntries[slot].fade <= 0 ? 0 :
+                        work->activeEntries[slot].fade > 0x80 ? 0x80 : work->activeEntries[slot].fade;
+                    work->activeEntries[slot].presentationState = 4;
+                    work->activeEntries[slot].pendingSceneState = 5;
+                    if (work->activeEntries[slot].fade <= 0) {
+                        work->activeEntries[slot].baseX = positions.entries[slot].x - 6;
+                    }
+                    break;
+                }
+                ordinal++;
+            }
+            actor = actor->nextActor;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C1F10);
 

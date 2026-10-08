@@ -28,13 +28,14 @@ typedef char EffectObjectData_tail_at_0x3C[((u32)&((EffectObjectData *)0)->limit
 /* Kind-6 world nodes allocate this complete transform payload at 0x30 bytes. */
 typedef struct EffectTransformData {
     ObjBase *resourceState;
-    u32 flags;
+    u32 roomNumber;
     u32 opacityMode;
     s32 activeId;
     f32 offset[4];
     f32 position[4];
 } EffectTransformData;
 typedef char EffectTransformData_size_must_be_0x30[(sizeof(EffectTransformData) == 0x30) ? 1 : -1];
+typedef char EffectTransformData_roomNumber_at_0x04[((u32)&((EffectTransformData *)0)->roomNumber == 0x04) ? 1 : -1];
 typedef char EffectTransformData_position_at_0x20[((u32)&((EffectTransformData *)0)->position == 0x20) ? 1 : -1];
 
 ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);

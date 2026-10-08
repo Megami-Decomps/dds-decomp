@@ -31,7 +31,7 @@ extern void effObjSetInnerThirdVec(void *object, void *vector);
 extern u8 evtTestUnitStatusFlags(EvtUnit *unit);
 
 extern EvtUnit *evtGetWorldUnitNestedValue(s32 idx);
-extern void func_00221D00(EvtUnit *unit, s32 arg, u32 color1, u32 color2);
+extern void evtInitializeUnitColorTransition(EvtUnit *unit, s32 arg, u32 color1, u32 color2);
 extern void evtSetUnitRgbTransition(EvtUnit *unit, s32 arg, u32 color);
 extern void evtSetUnitAlphaTransition(EvtUnit *unit, s32 arg, u32 color);
 
@@ -88,8 +88,8 @@ extern void effObjSetInnerSecondVec(void *, void *);
 
 extern void dds3SetObjectFlags(void *object, s32 flags);
 extern void dds3ClearObjectFlags(void *object, s32 flags);
-extern void evtResetObjectPendingValue(void *arg0);
-extern void evtArmEffectObjectPendingValue(void *arg0, s32 arg1);
+extern void evtResetObjectPendingValue(EffWorldNode *object);
+extern void evtArmEffectObjectPendingValue(EffWorldNode *object, s32 value);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId);
 extern s32 evtCreateMotionSeTask(s32 arg0, s32 arg1, s32 arg2);
@@ -99,7 +99,7 @@ extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg
 extern void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern s32 func_003003F0();
 extern u8 D_003AC480[];
-extern void evtSetUnitValueTransition(EvtUnit *unit, void *target, s32 arg2);
+extern void evtSetUnitValueTransition(EvtUnit *unit, EffWorldNode *target, s32 duration);
 extern s32 mdlCheckNodeByte30(u32 *arg0, s32 arg1);
 extern void *memset(void *dst, s32 c, u32 n);
 extern void effObjReplaceActiveEventNode(void *arg0, u32 arg1);
@@ -283,10 +283,10 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
     }
     switch (dirFlag) {
     case 0:
-        work->flags &= ~4;
+        work->flags &= ~EVT_UNIT_FLAG_PATH_REVERSE;
         break;
     case 1:
-        work->flags |= 4;
+        work->flags |= EVT_UNIT_FLAG_PATH_REVERSE;
         break;
     }
     switch (sideMode) {
@@ -335,7 +335,7 @@ void evtResetUnitVectorSlots(void) {
 
     for (i = 0; i < 7; i++) {
         mnuInitializeCampPanelVisualDefaults(&D_003D7BD8[i].vec[0], &D_003D7BD8[i].vec[4], &D_003D7BD8[i].vec[8], &D_003D7BD8[i].vec[12], &D_003D7BD8[i].vec[13]);
-        D_003D7BD8[i].state = 0;
+        D_003D7BD8[i].state = EVT_UNIT_VECTOR_SLOT_EMPTY;
         D_003D7BD8[i].id = 0;
     }
 }
@@ -355,7 +355,7 @@ void evtSetSlotVectors(s32 slotIndex, s32 slotState, s32 unitId, f32 *firstEndpo
         D_003D7BD8[slotIndex].vec[9] = color[1];
         D_003D7BD8[slotIndex].vec[10] = color[2];
         D_003D7BD8[slotIndex].vec[11] = 1.0f;
-        if (slotState == 3) {
+        if (slotState == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND) {
             D_003D7BD8[slotIndex].id = unitId;
         } else {
             D_003D7BD8[slotIndex].id = 0;
@@ -371,14 +371,14 @@ s32 func_00223718(s32 id, f32 *out) {
     s32 i;
 
     for (i = 0; i < 7; i++) {
-        if (D_003D7BD8[i].state == 3 && D_003D7BD8[i].id == id) {
+        if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && D_003D7BD8[i].id == id) {
             found = i;
             break;
         }
     }
     if (found == -1) {
         for (i = 0; i < 7; i++) {
-            if (D_003D7BD8[i].state == 2) {
+            if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK) {
                 found = i;
                 break;
             }
@@ -402,14 +402,14 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
     s32 i;
 
     for (i = 0; i < 7; i++) {
-        if (D_003D7BD8[i].state == 3 && D_003D7BD8[i].id == (s32)unit) {
+        if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && D_003D7BD8[i].id == (s32)unit) {
             found = i;
             break;
         }
     }
     if (found == -1) {
         for (i = 0; i < 7; i++) {
-            if (D_003D7BD8[i].state == 2) {
+            if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK) {
                 found = i;
                 break;
             }
@@ -439,19 +439,19 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
     unit->value = (u32)unit->endpointWork;
 }
 
-/* Find the vector of the slot bound to `id`, else of the first slot in state 2. */
-s32 evtFindUnitSlotAuxCoordinates(s32 id, f32 *outX, f32 *outY) {
+/* Find auxiliary coordinates for the unit-bound slot, else the shared fallback. */
+s32 evtFindUnitSlotAuxCoordinates(EvtUnit *unit, f32 *outX, f32 *outY) {
     s32 i;
 
     for (i = 0; i < 7; i++) {
-        if (D_003D7BD8[i].state == 3 && D_003D7BD8[i].id == id) {
+        if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && D_003D7BD8[i].id == (s32)unit) {
             *outX = D_003D7BD8[i].vec[12];
             *outY = D_003D7BD8[i].vec[13];
             return 1;
         }
     }
     for (i = 0; i < 7; i++) {
-        if (D_003D7BD8[i].state == 2) {
+        if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK) {
             *outX = D_003D7BD8[i].vec[12];
             *outY = D_003D7BD8[i].vec[13];
             return 1;
@@ -1147,7 +1147,7 @@ u32 evtOpSetUnitGradientColors(void) {
     VU0_SET_W_ONE(vf10);
     EE_MMI_RGBA_PACK_UNIT(packed2, scale);
     color2[0] = packed2;
-    func_00221D00(unit, scrReadIntParameter(1), packed1, packed2);
+    evtInitializeUnitColorTransition(unit, scrReadIntParameter(1), packed1, packed2);
     return 1;
 }
 
@@ -1187,7 +1187,7 @@ u32 evtOpSetUnitPackedAlpha(void) {
 u32 evtOpSetUnitValueTransitionTarget(void) {
     s32 id;
     EvtUnit *unit;
-    void *target;
+    EffWorldNode *target;
 
     id = scrReadIntParameter(0);
     unit = evtGetWorldUnitNestedValue(id);

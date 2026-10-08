@@ -11,6 +11,7 @@
 #include "dds3obj.h"
 #include "evt_unit.h"
 #include "eff_transform.h"
+#include "eff_object.h"
 #include "mdl.h"
 #include "sdf.h"
 
@@ -269,7 +270,7 @@ extern s32 sndFindPackedTrackLoadStatus(u32);
 typedef struct SceneLightRestoreArgs { u32 value; } SceneLightRestoreArgs;
 extern s64 func_00201520(SceneLightRestoreArgs *);
 extern void evtSetUnitStatusFlags(EvtUnit *);
-extern void func_0023C870(EvtUnit *, s32, u32, u32);
+extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
 extern s64 func_00201718(void);
 
@@ -1875,11 +1876,134 @@ s32 btlHasMatchingModel(s32 effect, s32 model) {
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001E1B80);
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E1BB8);
+/* Native actor-model setup providers used by func_001E1BB8. */
+extern s32 mdlSpawnCameraSlotViewerObject(s32 kind, s32 id);
+extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *world, u32 key, s32 kind);
+extern void *dds3GetWorldObject(void);
+extern void dds3RemoveWorldObjectNode(s32 node);
+extern struct SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id);
+extern void btlMarkTaskReady(SoundResourceLink *resource);
+extern void btlResetUnitModelProgress(BtlUnit *unit);
+extern void btlSetUnitPosition(BtlUnit *unit, f32 *position);
+extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
+extern void func_001E1B80(BtlUnit *unit, BtlUnit *reused);
+
+typedef struct BtlActorMotionSlot {
+    u8 pad00[4];
+    s16 kind; /* 0x04 */
+    s16 alphaStartFrame; /* 0x06 */
+    f32 alphaFrameScale; /* 0x08 */
+    u8 pad0C[4];
+    s16 alphaDuration; /* 0x10 */
+    u8 pad12[2];
+} BtlActorMotionSlot;
+
+typedef struct BtlActorStatusRecord {
+    u8 pad00[0x2A];
+    u16 model; /* 0x2A */
+    BtlActorMotionSlot motions[29]; /* 0x2C; provider stride 0x270 */
+} BtlActorStatusRecord;
+
+void func_001E1BB8(u8 *unitAddress, u32 kind, u32 index) {
+    BtlUnit *unit = (BtlUnit *)unitAddress;
+    BtlUnit *reused = NULL;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    MdlCtx *model;
+    BtlActorStatusRecord *status;
+    EffWorldNode *object;
+    ObjectTransform *inner;
+    EffectObjectData *objectData;
+    s32 key;
+
+    unit->resourceKind = kind;
+    unit->resourceIndex = index;
+    unit->unkCC = 0;
+    btlInitializeEffectVectorsFromSourceRecords(unit, kind, index);
+    if (battle->findModelActor != NULL) {
+        reused = battle->findModelActor(kind, index);
+        if (reused != NULL) {
+            if (reused->resourceKind != kind || reused->resourceIndex != index) {
+                key = mdlSpawnCameraSlotViewerObject(kind, index);
+                object = dds3FindWorldObjectNodeByKey(
+                    (EffWorldNode *)dds3GetWorldObject(), (u32)key, 5);
+                dds3RemoveWorldObjectNode((s32)object);
+            }
+            func_001E1B80(unit, reused);
+        }
+    }
+    if (battle->beforeActorModelReady != NULL) {
+        battle->beforeActorModelReady(unit);
+    }
+    if (reused == NULL) {
+        key = mdlSpawnCameraSlotViewerObject(kind, index);
+        unit->effectObject = (s32)dds3FindWorldObjectNodeByKey(
+            (EffWorldNode *)dds3GetWorldObject(), (u32)key, 5);
+        objectData = (EffectObjectData *)((EffWorldNode *)unit->effectObject)->data;
+        unit->ext = objectData->transitionWork;
+        model = unit->ext->owner;
+        unit->ext->flags |= 0x200000;
+        VU0_SET_ONES_XYZ(vf10);
+        VU0_SCALAR_OP(unit->unk50, "vmulx.xyzw vf10, vf10, vf2x");
+        inner = ((EffWorldNode *)unit->effectObject)->inner;
+        inner->flags = (inner->flags | 1) & ~2;
+        VU0_STORE_VF(vf10, inner->scale);
+        mdlStoreTertiaryVectorVU(model);
+        if (unit->unk50 != 1.0f) {
+            mdlSetAmountOnAllContextResources(model, unit->unk50);
+        }
+        dds3ClearObjectFlags(unit->effectObject, 0x400);
+        unit->flags |= 8;
+        unit->unk328 = (s32)sndAcquireSlotOwner(kind, index);
+        unit->flags |= 2;
+    }
+    btlSetUnitPosition(unit, unit->position);
+    btlSetUnitRotation(unit, (s128 *)unit->rotation);
+    unit->updateFlags = 0;
+    unit->unkF8 = 0;
+    unit->unkEC = -1;
+    unit->unkFA = 0;
+    btlRefreshUnitMotionSelection(unit);
+    if (unit->effectIndex != 0xB) {
+        if ((battle->commandRestrictFlags & 0x40000) != 0 && (unit->flags & 0x400) != 0) {
+            btlApplyScaledUnitEffectParameter((u8 *)unit, 2, 1, 1.0f);
+        } else {
+            btlApplyScaledUnitEffectParameter((u8 *)unit, unit->effectIndex, 1, 1.0f);
+        }
+    } else {
+        btlApplyScaledUnitEffectParameter((u8 *)unit, 0xB, 2, 1.0f);
+    }
+    if (unit->link31C != NULL) {
+        btlMarkTaskReady(unit->link31C);
+    }
+    unit->flags |= 0x40000000;
+    if (unit->flags & 0x20) {
+        model = unit->ext->owner;
+        unit->ext->motionState = EVT_UNIT_MOTION_STATE_IDLE;
+        unit->ext->flags &= ~0xA0;
+        mdlAddEntryPlain(model, 0, 0xB);
+        unit->unkEC = 0xB;
+        sdfMotionSampleAtFrame(model->first, (f32)model->first->frameCount);
+        unit->flags = unit->flags & 0x7FFFFFFF & 0xBFFFFFFF;
+    } else if (btlTestActorStatusPredicate(unit)) {
+        unit->ext->motionState = EVT_UNIT_MOTION_STATE_IDLE;
+        model = unit->ext->owner;
+        unit->ext->flags &= ~0xA0;
+        status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(kind, index);
+        mdlAddEntryPlain(model, 0, 1);
+        unit->unkEC = 1;
+        sdfMotionSampleAtFrame(model->first, (f32)status->model);
+        btlResetUnitModelProgress(unit);
+        unit->flags = (unit->flags | 0x2000) & 0x7FFFFFFF & 0xBFFFFFFF;
+    }
+    unit->flags |= 0x80004;
+    if (battle->afterActorModelReady != NULL) {
+        battle->afterActorModelReady(unit);
+    }
+}
+
 
 extern void sndReleaseSlotOwner(struct SoundSlotOwner *);
 extern void sdfReleaseDevSlot(s32, s32, s32);
-extern void dds3RemoveWorldObjectNode(s32);
 extern char D_00417940[]; /* "btl:unit transparency delete[%p]\n" */
 
 void btlReleaseActorModelResources(BtlUnit *unit) {
@@ -3330,7 +3454,7 @@ u32 func_001E50E0(BtlModelChangeArgs *args) {
             VU0_LOAD_VF(vf10, unit->colorEnd);
             EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
             secondColor = packedEnd[0];
-            func_0023C870(unit->ext, 0, firstColor, secondColor);
+            evtInitializeUnitColorTransition(unit->ext, 0, firstColor, secondColor);
         }
         unit->gunResourceFlags = (unit->gunResourceFlags & ~1) | 2;
         if (args->phase == 1) {
@@ -3452,7 +3576,7 @@ void btlApplyLinkedUnitStatusWhenActorActive(s32 taskArgs) {
 
 u32 btlApplyUnitFxWhenLoaded(u32 *taskArgs) {
     if ((btlUnitStatusPair((BtlUnit *)taskArgs[3]) & 0x1000000002) == 0x1000000002) {
-        func_0023C870(((BtlUnit *)taskArgs[3])->ext, taskArgs[2], *taskArgs, taskArgs[1]);
+        evtInitializeUnitColorTransition(((BtlUnit *)taskArgs[3])->ext, taskArgs[2], *taskArgs, taskArgs[1]);
     }
     return 1;
 }
@@ -4274,22 +4398,6 @@ BtlRuntimeTask *btlCreateDefeatCandidateClearTask(BtlUnit *unit) {
     return task;
 }
 
-typedef struct BtlActorMotionSlot {
-    u8 pad00[4];
-    s16 kind; /* 0x04 */
-    s16 alphaStartFrame; /* 0x06 */
-    f32 alphaFrameScale; /* 0x08 */
-    u8 pad0C[4];
-    s16 alphaDuration; /* 0x10 */
-    u8 pad12[2];
-} BtlActorMotionSlot;
-
-typedef struct BtlActorStatusRecord {
-    u8 pad00[0x2A];
-    u16 model; /* 0x2A */
-    BtlActorMotionSlot motions[29]; /* 0x2C; provider stride 0x270 */
-} BtlActorStatusRecord;
-
 /* Update motion completion, alpha transitions, and the selected-unit color pulse. */
 void func_001E7648(void) {
     BtlState *runtime = (BtlState *)btlGetRuntime();
@@ -4666,8 +4774,8 @@ void btlApplyUnitEffectScale(BtlUnit *unit) {
         VU0_SET_ONES_XYZ(vf10);
         VU0_SCALAR_OP(unit->unk50, "vmulx.xyzw vf10, vf10, vf2x");
         inner = ((EffWorldNode *)unit->effectObject)->inner;
-        inner->flags |= 1;
-        inner->flags &= ~2;
+        inner->flags |= OBJECT_TRANSFORM_FLAG_UPDATE_PENDING;
+        inner->flags &= ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
         VU0_STORE_VF(vf10, inner->scale);
         mdlStoreTertiaryVectorVU(unit->ext->owner);
         mdlSetAmountOnAllContextResources(unit->ext->owner, unit->unk50);
@@ -5063,7 +5171,6 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001E9130);
 extern f32 D_003B6D70[4], D_003B6D80[4];
 extern f32 D_003B6D50[4], D_003B6D60[4];
 extern u32 D_00436A98;
-extern void *dds3GetWorldObject(void);
 extern EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *);
 extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 extern EffWorldNode *dds3CreateCameraObject(s32, void *, void *);
@@ -8294,7 +8401,7 @@ s32 func_00201268(SceneLightRestoreArgs *args) {
                 VU0_LOAD_VF(vf10, unit->colorEnd);
                 EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
                 secondColor = packedEnd[0];
-                func_0023C870(unit->ext, args->value, firstColor, secondColor);
+                evtInitializeUnitColorTransition(unit->ext, args->value, firstColor, secondColor);
                 VU0_LOAD_VF(vf10, unit->lightDirection);
                 evtSetUnitNormalizedDirection(unit->ext, args->value);
             }

@@ -113,9 +113,9 @@ extern void dds3SetObjectFlags(void *object, s32 flags);
 
 extern void dds3ClearObjectFlags(void *object, s32 flags);
 
-extern void evtArmEffectObjectPendingValue(void *arg0, s32 arg1);
+extern void evtArmEffectObjectPendingValue(EffWorldNode *object, s32 value);
 
-extern void evtResetObjectPendingValue(void *arg0);
+extern void evtResetObjectPendingValue(EffWorldNode *object);
 
 extern void *memset(void *dst, s32 c, u32 n);
 
@@ -177,7 +177,7 @@ extern void effMiscQuatMultiplyVU();
 extern void effObjSetInnerSecondVec(void *, void *);
 
 extern EvtUnit *evtGetWorldUnitNestedValue(s32 idx);
-extern void func_0023C870(EvtUnit *unit, s32 arg, u32 color1, u32 color2);
+extern void evtInitializeUnitColorTransition(EvtUnit *unit, s32 arg, u32 color1, u32 color2);
 extern void evtSetUnitRgbTransition(EvtUnit *unit, s32 arg, u32 color);
 extern void evtSetUnitAlphaTransition(EvtUnit *unit, s32 arg, u32 color);
 
@@ -219,7 +219,7 @@ extern void evtConfigureUnitTransition(EvtUnit *unit, s32 arg1);
 
 extern u8 evtTestUnitStatusFlags(EvtUnit *unit);
 
-extern void evtSetUnitValueTransition(EvtUnit *unit, void *target, s32 arg2);
+extern void evtSetUnitValueTransition(EvtUnit *unit, EffWorldNode *target, s32 duration);
 
 extern void evtEndUnitValueTransition(EvtUnit *unit, s32 arg1);
 
@@ -345,10 +345,10 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
     }
     switch (dirFlag) {
     case 0:
-        work->flags &= ~4;
+        work->flags &= ~EVT_UNIT_FLAG_PATH_REVERSE;
         break;
     case 1:
-        work->flags |= 4;
+        work->flags |= EVT_UNIT_FLAG_PATH_REVERSE;
         break;
     }
     switch (sideMode) {
@@ -395,7 +395,7 @@ void evtResetUnitVectorSlots(void) {
 
     for (i = 0; i < 10; i++) {
         mnuInitializeCampPanelVisualDefaults(&evtUnitVectorSlots[i].vec[0], &evtUnitVectorSlots[i].vec[4], &evtUnitVectorSlots[i].vec[8], &evtUnitVectorSlots[i].vec[12], &evtUnitVectorSlots[i].vec[13]);
-        evtUnitVectorSlots[i].state = 0;
+        evtUnitVectorSlots[i].state = EVT_UNIT_VECTOR_SLOT_EMPTY;
         evtUnitVectorSlots[i].id = 0;
     }
 }
@@ -415,7 +415,7 @@ void evtSetSlotVectors(s32 slotIndex, s32 slotState, s32 unitId, f32 *firstEndpo
         evtUnitVectorSlots[slotIndex].vec[9] = color[1];
         evtUnitVectorSlots[slotIndex].vec[10] = color[2];
         evtUnitVectorSlots[slotIndex].vec[11] = 1.0f;
-        if (slotState == 3) {
+        if (slotState == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND) {
             evtUnitVectorSlots[slotIndex].id = unitId;
         } else {
             evtUnitVectorSlots[slotIndex].id = 0;
@@ -431,14 +431,14 @@ s32 func_0023E350(s32 id, f32 *out) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        if (evtUnitVectorSlots[i].state == 3 && evtUnitVectorSlots[i].id == id) {
+        if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && evtUnitVectorSlots[i].id == id) {
             found = i;
             break;
         }
     }
     if (found == -1) {
         for (i = 0; i < 10; i++) {
-            if (evtUnitVectorSlots[i].state == 2) {
+            if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK) {
                 found = i;
                 break;
             }
@@ -462,14 +462,14 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        if (evtUnitVectorSlots[i].state == 3 && evtUnitVectorSlots[i].id == (s32)unit) {
+        if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && evtUnitVectorSlots[i].id == (s32)unit) {
             found = i;
             break;
         }
     }
     if (found == -1) {
         for (i = 0; i < 10; i++) {
-            if (evtUnitVectorSlots[i].state == 2) {
+            if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK) {
                 found = i;
                 break;
             }
@@ -499,19 +499,19 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
     unit->value = (u32)unit->endpointWork;
 }
 
-/* Find the vector of the slot bound to `id`, else of the first slot in state 2. */
-s32 evtFindUnitSlotAuxCoordinates(s32 id, f32 *outX, f32 *outY) {
+/* Find auxiliary coordinates for the unit-bound slot, else the shared fallback. */
+s32 evtFindUnitSlotAuxCoordinates(EvtUnit *unit, f32 *outX, f32 *outY) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        if (evtUnitVectorSlots[i].state == 3 && evtUnitVectorSlots[i].id == id) {
+        if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && evtUnitVectorSlots[i].id == (s32)unit) {
             *outX = evtUnitVectorSlots[i].vec[12];
             *outY = evtUnitVectorSlots[i].vec[13];
             return 1;
         }
     }
     for (i = 0; i < 10; i++) {
-        if (evtUnitVectorSlots[i].state == 2) {
+        if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK) {
             *outX = evtUnitVectorSlots[i].vec[12];
             *outY = evtUnitVectorSlots[i].vec[13];
             return 1;
@@ -1125,7 +1125,92 @@ f32 evtGetShortestAngleDelta(f32 a, f32 b) {
     return b - a;
 }
 
-INCLUDE_ASM(const s32, "game/code_0023D658", func_0023F938);
+extern void effObjFetchInnerFirstVec(EffWorldNode *object);
+extern void effObjFetchInnerSecondVecNorm(EffWorldNode *object);
+extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
+extern f32 sdfAtan2(f32 y, f32 x);
+
+u32 func_0023F938(void) {
+    EvtUnit *unit;
+    EffWorldNode *actor;
+    EffWorldNode *source;
+    f32 *sourceVector;
+    f32 rotation[4] __attribute__((aligned(16)));
+    f32 actorPosition[4] __attribute__((aligned(16)));
+    f32 sourcePosition[4] __attribute__((aligned(16)));
+    f32 referenceAngle;
+    f32 targetAngle;
+    f32 angleDelta;
+    s32 frames;
+
+    unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
+    if (unit == NULL) {
+        return 1;
+    }
+    unit->motionTicks = 0;
+
+    actor = (EffWorldNode *)dds3FindWorldObjectNodeByKey(
+        dds3GetWorldObject(), scrReadIntParameter(0), 5);
+    if (actor == NULL) {
+        return 1;
+    }
+    source = (EffWorldNode *)dds3FindWorldObjectNodeByKey(
+        dds3GetWorldObject(), scrReadIntParameter(1), 0x11);
+    if (source == NULL) {
+        return 1;
+    }
+
+    sourceVector = (f32 *)source->data;
+    effObjFetchInnerFirstVec(actor);
+    VU0_STORE_VF(vf10, actorPosition);
+    PCP_COPY_VECTOR_F32(sourcePosition, sourceVector);
+
+    if ((unit->unkD8Flags & 1) == 0) {
+        effObjFetchInnerSecondVecNorm(actor);
+        referenceAngle = effMiscComputeQuaternionRotatedReferenceAngle();
+        unit->unkD8Flags |= 1;
+        unit->unkDC = -(referenceAngle * 57.29577637f);
+    }
+
+    targetAngle = sdfAtan2(actorPosition[0] - sourcePosition[0],
+                           actorPosition[2] - sourcePosition[2]) * 57.32484055f;
+    angleDelta = evtGetShortestAngleDelta(unit->unkDC, targetAngle);
+    if (angleDelta < -135.0f) {
+        targetAngle -= angleDelta + 135.0f;
+        angleDelta = -135.0f;
+    } else if (angleDelta > 135.0f) {
+        targetAngle -= angleDelta - 135.0f;
+        angleDelta = 135.0f;
+    }
+    targetAngle -= (angleDelta + angleDelta) / 3.0f;
+
+    func_00340DC8(0.0f, targetAngle * 0.017453293f, 0.0f);
+    /* First write to this output vector; the SDK store touches only it. */
+    VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+
+    frames = scrReadIntParameter(2);
+    if (frames >= 101) {
+        frames = 100;
+    }
+    angleDelta = evtGetShortestAngleDelta(unit->unkDC, targetAngle);
+    if (angleDelta < 0.0f) {
+        angleDelta = -angleDelta;
+    }
+    if (angleDelta > 90.0f) {
+        angleDelta = 90.0f;
+    }
+    frames = (frames * (s32)angleDelta) / 90;
+    if (frames <= 0) {
+        frames = 1;
+    }
+    if (frames > 100) {
+        frames = 100;
+    }
+
+    evtBeginVectorTransition(unit, (s128 *)rotation, frames);
+    evtArmEffectObjectPendingValue(actor, source->key);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_0023D658", func_0023FBA8);
 
@@ -1208,7 +1293,7 @@ u32 evtOpSetUnitGradientColors(void) {
     VU0_SET_W_ONE(vf10);
     EE_MMI_RGBA_PACK_UNIT(packed2, scale);
     color2[0] = packed2;
-    func_0023C870(unit, scrReadIntParameter(1), packed1, packed2);
+    evtInitializeUnitColorTransition(unit, scrReadIntParameter(1), packed1, packed2);
     return 1;
 }
 
@@ -1249,7 +1334,7 @@ u32 evtOpSetUnitPackedAlpha(void) {
 u32 evtOpSetUnitValueTransitionTarget(void) {
     s32 id;
     EvtUnit *unit;
-    void *target;
+    EffWorldNode *target;
 
     id = scrReadIntParameter(0);
     unit = evtGetWorldUnitNestedValue(id);

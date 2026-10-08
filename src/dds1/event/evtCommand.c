@@ -68,7 +68,7 @@ void evtDrainSecondaryWorldNodes(void);
 
 void dds3RemoveWorldObjectNode(void *unit);
 
-void dds3RefreshStoredVec3(void *);
+void dds3RefreshStoredVec3(EffWorldNode *object);
 
 void fldStopCurrentBgm(void);
 
@@ -163,7 +163,7 @@ typedef struct EvtWorldUnit {
     EvtWorldUnitInner *inner; /* 0x18 */
 } EvtWorldUnit;
 
-extern EffWorldNode *dds3FindObjectChainNodeByName(s32 world, char *id);
+extern EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, const u8 *id);
 
 extern void fldSetDeferredFieldCommand(s32 a, s32 b);
 
@@ -305,7 +305,8 @@ INCLUDE_ASM(const s32, "event/evtCommand", func_00226540);
 s32 evtCommandReadSecondaryWorldIdValue(void) {
     EffWorldNode *node;
 
-    node = dds3FindObjectChainNodeByName(dds3GetWorldSecondaryObject(), scrReadStringParameter(0));
+    node = dds3FindObjectChainNodeByName((EffWorldNode *)dds3GetWorldSecondaryObject(),
+                                         (const u8 *)scrReadStringParameter(0));
     if (node == NULL) {
         func_003003F0("ID : id not found!! <%s>\n", scrReadStringParameter(0));
         evtPrintDeveloperConsoleMessage("WARNING: ID not found! <%s>\n", scrReadStringParameter(0));

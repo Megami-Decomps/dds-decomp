@@ -908,7 +908,23 @@ s32 btlCountAvailableParticipants(void) {
     return count;
 }
 
-INCLUDE_ASM(const f32, "game/code_001A1960", func_001A47F0);
+f32 func_001A47F0(BtlTask *task) {
+    BtlState *battle;
+    BtlUnit *unit;
+
+    if (task == NULL) {
+        return 1.0f;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    if ((battle->battleFlags & 0x8000) != 0) {
+        unit = task->unit;
+        if ((btlUnitStatusPair(unit) & 0x1200) == 0x200) {
+            return 1.0f;
+        }
+        return 3.0f;
+    }
+    return 1.0f;
+}
 
 void btlClearActorEntrySlot(BtlUnit *unit, s32 index);
 
@@ -4805,11 +4821,117 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001B6308);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B6498);
 
+typedef struct BattleActorPanelPositions {
+    BattleSelectionPosition entries[3];
+} BattleActorPanelPositions;
+
+extern const BattleActorPanelPositions D_003A2C28;
+extern s32 func_001B6498(s8);
+
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2C10);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2C28);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001B6850);
+void func_001B6850(BtlState *battle, BattleActorPanelWork *work) {
+    BattleActorPanelPositions positions = D_003A2C28;
+    BtlUnit *actor;
+    KwlnTask *task;
+    BattleSceneObject *scene;
+    s32 eligibleCount;
+    s32 ordinal;
+    s32 slot;
+    s32 limit;
+
+    eligibleCount = btlCountEligibleLinkedActors(battle);
+    actor = battle->units;
+    task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    func_001B6498(0);
+    if (task == NULL) {
+        ordinal = 0;
+        while (actor != NULL && ordinal < eligibleCount) {
+                if (btlHasRequiredActorStatusBits(actor)) {
+                    slot = actor->lookupId;
+                    switch (btlTrackedTaskHandles->presentationState) {
+                    case 1:
+                        work->activeEntries[slot].fade -= btlTrackedTaskHandles->status.bytes.fadeStep;
+                        work->activeEntries[slot].fade = work->activeEntries[slot].fade <= 0 ? 0 :
+                            work->activeEntries[slot].fade > 0x80 ? 0x80 : work->activeEntries[slot].fade;
+                        work->activeEntries[slot].presentationState = 4;
+                        work->activeEntries[slot].pendingSceneState = 5;
+                        work->activeEntries[slot].transitionState = 4;
+                        break;
+                    case 0:
+                    case 2:
+                        work->activeEntries[slot].fade += 0x20;
+                        work->activeEntries[slot].fade = work->activeEntries[slot].fade <= 0 ? 0 :
+                            work->activeEntries[slot].fade > 0x80 ? 0x80 : work->activeEntries[slot].fade;
+                        break;
+                    }
+                    ordinal++;
+                }
+                actor = actor->next;
+        }
+    } else {
+        ordinal = 0;
+        scene = (BattleSceneObject *)kwlnTaskGetUserValue(task);
+        while (actor != NULL && ordinal < eligibleCount) {
+                if (btlHasRequiredActorStatusBits(actor)) {
+                    slot = actor->lookupId;
+                    switch (scene->state) {
+                    case 1:
+                        work->activeEntries[slot].fade += 0x20;
+                        work->activeEntries[slot].fade = work->activeEntries[slot].fade <= 0 ? 0 :
+                            work->activeEntries[slot].fade > 0x80 ? 0x80 : work->activeEntries[slot].fade;
+                        break;
+                    case 2:
+                        work->activeEntries[slot].fade += 0x20;
+                        work->activeEntries[slot].fade = work->activeEntries[slot].fade <= 0 ? 0 :
+                            work->activeEntries[slot].fade > 0x80 ? 0x80 : work->activeEntries[slot].fade;
+                        break;
+                    case 3:
+                        work->activeEntries[slot].fade += 0x20;
+                        work->activeEntries[slot].fade = work->activeEntries[slot].fade <= 0 ? 0 :
+                            work->activeEntries[slot].fade > 0x80 ? 0x80 : work->activeEntries[slot].fade;
+                        break;
+                    case 7:
+                    case 9:
+                        work->activeEntries[slot].fade += 0x20;
+                        work->activeEntries[slot].fade = work->activeEntries[slot].fade <= 0 ? 0 :
+                            work->activeEntries[slot].fade > 0x80 ? 0x80 : work->activeEntries[slot].fade;
+                        work->activeEntries[slot].baseX += 2;
+                        limit = positions.entries[slot].x;
+                        work->activeEntries[slot].baseX = work->activeEntries[slot].baseX <= limit - 8 ? limit - 8 :
+                            work->activeEntries[slot].baseX < limit ? work->activeEntries[slot].baseX : limit;
+                        if (scene->state == 9) {
+                            func_001B6498(1);
+                        }
+                        break;
+                    case 11:
+                        work->activeEntries[slot].fade -= btlTrackedTaskHandles->status.bytes.fadeStep;
+                        work->activeEntries[slot].fade = work->activeEntries[slot].fade <= 0 ? 0 :
+                            work->activeEntries[slot].fade > 0x80 ? 0x80 : work->activeEntries[slot].fade;
+                        work->activeEntries[slot].presentationState = 4;
+                        work->activeEntries[slot].pendingSceneState = 5;
+                        work->activeEntries[slot].transitionState = 4;
+                        break;
+                    case 6:
+                    case 8:
+                        work->activeEntries[slot].fade -= 0x20;
+                        work->activeEntries[slot].fade = work->activeEntries[slot].fade <= 0 ? 0 :
+                            work->activeEntries[slot].fade > 0x80 ? 0x80 : work->activeEntries[slot].fade;
+                        work->activeEntries[slot].presentationState = 4;
+                        work->activeEntries[slot].pendingSceneState = 5;
+                        if (work->activeEntries[slot].fade <= 0) {
+                            work->activeEntries[slot].baseX = positions.entries[slot].x - 6;
+                        }
+                        break;
+                    }
+                    ordinal++;
+                }
+                actor = actor->next;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B6CF8);
 
