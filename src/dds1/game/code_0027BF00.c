@@ -101,7 +101,6 @@ typedef struct ScrollHandle {
     ScrollInner *inner;
 } ScrollHandle;
 
-extern ScrollHandle *effCreateStatusBatch(s32);
 
 extern void func_0027FCA0(s32, s32, s32);
 
@@ -937,18 +936,18 @@ void mnuUpdateFade(s32 *list) {
 void mnuInitScrollHandles(MenuScrollPanel *menu) {
     ScrollHandle *handle;
 
-    handle = effCreateStatusBatch(1);
+    handle = (ScrollHandle *)effCreateStatusBatch(1);
     menu->handles[0] = handle;
     handle->inner->params->a = 10;
     handle->inner->params->b = 0;
 
-    handle = effCreateStatusBatch(3);
+    handle = (ScrollHandle *)effCreateStatusBatch(3);
     menu->handles[1] = handle;
     handle->inner->params->a = 8;
     handle->inner->params->b = 4;
     handle->inner->params->c = 8;
 
-    handle = effCreateStatusBatch(1);
+    handle = (ScrollHandle *)effCreateStatusBatch(1);
     menu->handles[2] = handle;
     handle->inner->params->a = 10;
     handle->inner->params->b = 0;

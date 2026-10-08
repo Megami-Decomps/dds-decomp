@@ -109,7 +109,6 @@ extern s32 func_002C6CE8(void);
 
 extern void mnuReleaseResourceList(struct MenuIconState *list);
 
-extern u32 effCreateStatusBatch(u32);
 
 
 
@@ -986,7 +985,7 @@ void mnuCyclePairedEffectSetting(MenuPageBar *pair) {
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1E48);
 
 void mnuCreatePairedEffects(MenuPageBar *pair) {
-    u32 effectHandle;
+    struct EffMappedResource *effectHandle;
 
     effectHandle = effCreateStatusBatch(3);
     pair->effects[0] = (MenuEffectNode *)effectHandle;
