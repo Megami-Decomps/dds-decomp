@@ -4593,6 +4593,7 @@
 0x002BC5D0	mnuCopyPrimaryWindowHandles	inferred	High: copies eight source words into the window handle bank at +0x24; mnuInitializeCampPanelResources supplies resources+4. Same role as DDS1 func_0027FBE0. [names_qp9.tsv]
 0x002BC600	mnuCopySecondaryWindowHandles	inferred	High: copies eight source words into the window handle bank at +0x44; mnuInitializeCampPanelResources supplies resources+0xC. Same role as DDS1 func_0027FC10. [names_qp9.tsv]
 0x002BC9A8	mnuRefreshWindowSlots	inferred	wrong or missing short module prefix [names_audit.tsv]
+0x002BCA98	mnuReleaseAndRefreshWindowSlots	inferred	Releases previously loaded window resource slots, then refreshes each party row through the panel update helper.
 0x002BCBD8	mnuInitScrollLists	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002BCCB0	mnuDestroyWindowOwnedLists	inferred	Destroys both list states owned by a menu window. [names_reviewed12.tsv]
 0x002BCCF0	mnuRebuildScrollLists	inferred	Destroys both scroll lists then initializes them from new counts. [names_reviewed5.tsv]

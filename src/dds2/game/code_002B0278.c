@@ -733,7 +733,7 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
     memset(menuWork->backup, 0, MNU_STAFF_BACKUP_BYTES);
     ((MenuContext *)context)->partyPanel.unk0 = 1;
     ((MenuContext *)context)->partyPanel.unk4 = mnuCountActiveSlots() - 1;
-    func_002BCA98(&((MenuContext *)context)->partyWindow);
+    mnuReleaseAndRefreshWindowSlots(&((MenuContext *)context)->partyWindow);
     for (entryIndex = 0; entryIndex < MNU_STAFF_PARTY_SLOT_COUNT; entryIndex++) {
         ((MenuContext *)context)->partyWindow.slots[entryIndex].flags |= 0x40;
     }
@@ -747,7 +747,7 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
 void mnuRefreshPartyPanelSlots(s32 context) {
     mnuReleasePartyPanelTextures((MenuPageWindow *)(context + MNU_STAFF_PARTY_PANEL_BASE));
     mnuInitPartyPanelSlots(&((MenuContext *)context)->partyPanel);
-    func_002BCA98(&((MenuContext *)context)->partyWindow);
+    mnuReleaseAndRefreshWindowSlots(&((MenuContext *)context)->partyWindow);
 }
 
 struct MenuSlotEffectHandles;
@@ -2113,7 +2113,7 @@ s32 ptySkillMenuApplyFieldUseAndCost(id, context)
     if (ptySkillApplyFieldUseEffect(window, id, slotA, slotB) != 0) {
         mnuConsumeEntryCost(id, slotA);
         mnuInitPartyPanelSlots(&((MenuContext *)context)->partyPanel);
-        func_002BCA98(window);
+        mnuReleaseAndRefreshWindowSlots(window);
         func_002BCAB0(window);
         return 1;
     }
