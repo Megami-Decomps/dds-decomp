@@ -2746,7 +2746,7 @@ u32 effCreateTrackSetWithSharedReferences(u32 count, u16 kind, u32 sharedRef) {
                 break;
             }
         } else {
-            effect->shared = func_002DDAA8((struct SdfTextureFileHeader *)sharedRef);
+            effect->shared = effCreateSharedTextureReference((struct SdfTextureFileHeader *)sharedRef);
         }
     }
     return (u32)effect;
@@ -5675,7 +5675,7 @@ u32 effCreateRibbonWithSharedResource(u32 count, u32 repeat, u32 resource) {
         references++;
         effSharedRibbonReferenceCount = references;
     } else {
-        ((EffRibbonWork *)node)->resource = func_002DDAA8((struct SdfTextureFileHeader *)resource);
+        ((EffRibbonWork *)node)->resource = effCreateSharedTextureReference((struct SdfTextureFileHeader *)resource);
     }
     return (u32)node;
 }
