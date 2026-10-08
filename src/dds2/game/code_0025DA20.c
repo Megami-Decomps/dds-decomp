@@ -370,7 +370,67 @@ void mnuFxWorldDropOutOfRange(EvtRuntime *scene, s32 threshold) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025DE08);
+void func_0025DE08(EvtRuntime *world, s32 threshold, s32 delta) {
+    EvtRuntimeGroup *track;
+    EvtRuntimeChild *key;
+    s32 end = 0;
+    s32 i;
+    s32 length;
+    s32 offset;
+
+    for (track = world->groups; track != NULL; track = track->next) {
+        for (key = track->children; key != NULL; key = key->next) {
+            for (i = 0; i < D_003C9538[track->type].columns; i++) {
+                switch (D_003C9538[track->type].columnTypes[i]) {
+                case 1:
+                case 15:
+                    length = key->duration;
+                    if (length != 0) {
+                        offset = key->frame;
+                        if (offset < threshold) {
+                            if (offset + length >= threshold) {
+                                key->duration = length + delta;
+                            }
+                        }
+                    }
+                    break;
+                case 9:
+                    switch (track->type) {
+                    case 0x12:
+                        end = key->p08.sh[0];
+                        break;
+                    case 3:
+                    case 0x14:
+                    case 0x15:
+                    case 0x1A:
+                        end = key->p08.sh[1];
+                        break;
+                    }
+                    if (key->frame < threshold && end >= threshold && end != 0) {
+                        switch (track->type) {
+                        case 0x12:
+                            key->p08.sh[0] += delta;
+                            if (key->p08.sh[0] < 0) {
+                                key->p08.sh[0] = 0;
+                            }
+                            break;
+                        case 3:
+                        case 0x14:
+                        case 0x15:
+                        case 0x1A:
+                            key->p08.sh[1] += delta;
+                            if (key->p08.sh[1] < 0) {
+                                key->p08.sh[1] = 0;
+                            }
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+}
 
 /* Default three-vector slot contents; the trailing two scalars have unknown roles. */
 void mnuInitializeCampPanelVisualDefaults(f32 *firstVector, f32 *secondVector, f32 *thirdVector, f32 *scalarA, f32 *scalarB) {
