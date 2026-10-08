@@ -29,7 +29,7 @@ extern void *sdfAllocAndClearQuadwords(s32);
 
 extern void sdfReleaseChipBlock();
 
-extern void sdfTexReleaseReference();
+extern void sdfTexReleaseReference(struct SdfTex *texture);
 
 extern void effReleaseSharedReference();
 
@@ -84,6 +84,13 @@ extern void mdlDestroyContext(MdlCtx *);
 extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 
 extern void effFloorModelListRemove(EffectObjectNode *);
+
+extern s32 sdfAllocPacketAligned(s32 size);
+extern void sdfInitPacketList(SdfListHead *list);
+extern void sdfAppendPacket(SdfListHead *list, u32 packetAddress);
+extern u32 mdlGetBroadcastValue(MdlCtx *model);
+extern SdfPoolNode *D_00380788[13][4];
+extern u64 D_003E9640[];
 
 /* Reference-counted texture object at the end of its combined allocation. */
 typedef struct RefObj {
@@ -370,13 +377,61 @@ EffModelOwner *effDuplicateFloorModelOwner(EffModelOwner *source) {
     return owner;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002DC808);
+void func_002DC808(EffModelOwner *owner) {
+    SdfListHead *list;
+    u64 *packet;
+    SdfPoolNode *surface;
+    s32 index;
+
+    mdlBroadcastMasked(owner->model,
+                       (mdlGetBroadcastValue(owner->model) & 0xFFFFFF) | 0x80000000);
+
+    for (index = 0; index != 4; index++) {
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        packet = (u64 *)sdfAllocPacketAligned(0x30);
+        packet[0] = 2;
+        packet[1] = 0x5000000210000000ULL;
+        packet[2] = 0x1000000000008001ULL;
+        packet[3] = 0xE;
+        if (index == 0) {
+            packet[4] = 0x7000D;
+        } else {
+            packet[4] = 0x71007;
+        }
+        packet[5] = 0x47;
+        sdfAppendPacket(list, (u32)packet);
+        surface = D_00380788[1][index];
+        surface->append((SdfListHead *)surface, list);
+    }
+
+    if (effComputeLightDirectionVU(owner->model, owner->ownedBuffer)) {
+        owner->model->inner->lighting = owner->ownedBuffer;
+    }
+
+    mdlProcessContextNodesAndTransforms(owner->model, (s32)D_00380788[1]);
+
+    for (index = 1; index != 4; index++) {
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        packet = (u64 *)sdfAllocPacketAligned(0x30);
+        packet[0] = 2;
+        packet[1] = 0x5000000210000000ULL;
+        packet[2] = 0x1000000000008001ULL;
+        packet[3] = 0xE;
+        packet[4] = D_003E9640[index];
+        packet[5] = 0x47;
+        sdfAppendPacket(list, (u32)packet);
+        surface = D_00380788[1][index];
+        surface->append((SdfListHead *)surface, list);
+    }
+}
 
 void effMarkFloorModelForUpdate(u32 *p) {
     ((EffModelOwner *)p)->flags |= 1;
     if (!(((EffModelOwner *)p)->flags & 4)) {
         if (!(effModelUpdateControlFlags & 1)) {
-            func_002DC808(p);
+            func_002DC808((EffModelOwner *)p);
         }
     } else if (effModelUpdateControlFlags & 1) {
         ((EffModelOwner *)p)->flags |= 0x30;
@@ -777,7 +832,7 @@ void effReleaseSharedReference(RefObj *obj) {
         texture->width = 0x100;
         texture->height = 0x100;
         D_00437E38 = 0xffffffff;
-        sdfTexReleaseReference(texture);
+        sdfTexReleaseReference((struct SdfTex *)texture);
     }
     if (--obj->refCount == 0) {
         sdfReleaseResourceAllocation((SdfMemBlock *)obj->allocationHandle);

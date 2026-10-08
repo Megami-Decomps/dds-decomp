@@ -6,6 +6,7 @@
 #include "kwln.h"
 #include "fpu.h"
 #include "mnu_list.h"
+struct SdfTex;
 struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 struct EffectSlotSet;
@@ -53,7 +54,7 @@ extern s32 D_003BC870;
 extern s32 D_003BC874;
 extern s32 D_003BC878;
 extern s32 D_003BC87C;
-extern s32 sdfTexReleaseReferenceViaHandler();
+extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
 extern s32 dds3GetWorldObject();
 extern void dds3SetWorldObjectDataValue();
 extern void fileWaitReady();
@@ -2816,41 +2817,41 @@ void fileReleaseMenuResources(void) {
             handle = *slot;
             i--;
             if (handle != 0) {
-                sdfTexReleaseReferenceViaHandler(handle);
+                sdfTexReleaseReferenceViaHandler((struct SdfTex *)handle);
                 *slot = 0;
             }
             slot++;
         } while (i >= 0);
         if (D_003BC884 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_003BC884);
+            sdfTexReleaseReferenceViaHandler((struct SdfTex *)D_003BC884);
             D_003BC884 = 0;
         }
         if (D_003BC880 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_003BC880);
+            sdfTexReleaseReferenceViaHandler((struct SdfTex *)D_003BC880);
             D_003BC880 = 0;
         }
         if (D_003BC87C != 0) {
-            sdfTexReleaseReferenceViaHandler(D_003BC87C);
+            sdfTexReleaseReferenceViaHandler((struct SdfTex *)D_003BC87C);
             D_003BC87C = 0;
         }
         if (D_003BC878 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_003BC878);
+            sdfTexReleaseReferenceViaHandler((struct SdfTex *)D_003BC878);
             D_003BC878 = 0;
         }
         if (D_003BC874 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_003BC874);
+            sdfTexReleaseReferenceViaHandler((struct SdfTex *)D_003BC874);
             D_003BC874 = 0;
         }
         if (D_003BC870 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_003BC870);
+            sdfTexReleaseReferenceViaHandler((struct SdfTex *)D_003BC870);
             D_003BC870 = 0;
         }
         if (D_003BC86C != 0) {
-            sdfTexReleaseReferenceViaHandler(D_003BC86C);
+            sdfTexReleaseReferenceViaHandler((struct SdfTex *)D_003BC86C);
             D_003BC86C = 0;
         }
         if (D_003BC868 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_003BC868);
+            sdfTexReleaseReferenceViaHandler((struct SdfTex *)D_003BC868);
             D_003BC868 = 0;
         }
         world = dds3GetWorldObject();

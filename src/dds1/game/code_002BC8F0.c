@@ -154,7 +154,7 @@ extern u16 D_003BC944;
 
 extern u8 *D_003BC958;
 
-extern void sdfTexReleaseReference(void *);
+extern void sdfTexReleaseReference(SdfTex *texture);
 
 extern void *sdfAllocGeneralBlock(u32);
 

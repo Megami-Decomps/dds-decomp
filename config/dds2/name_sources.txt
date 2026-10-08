@@ -945,6 +945,7 @@
 0x0015A3B0	billSetChildValue	inferred	func_00159C00 on child at +0x80
 0x0015A3C8	effVuCopyMatrix	inferred	vf28-31 copy of 4x4 matrix; copied through vf28-vf31; effCopyMatrix already exists at another address
 0x0015A3F0	effReadBillboardModeValues	inferred	confidence=high; matched-C; src/dds2/game/code_00159B48.c:547:func_0015A3F0; For kind-one billboard, writes output mode and one/two parameter-derived values selected by billboard flags.; twin=0x00152800, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x0015AA30	effDrawGeneratedTextureQuad	inferred	Allocates primary texture-state and quad geometry packets from texture dimensions, scales and optional angle; DDS1 counterpart00152E40.
 0x0015ACB0	effSubmitGeneratedTexturePacket	inferred	confidence=high; matched-C; src/dds2/game/code_00159B48.c:571:func_0015ACB0; Allocates a packet list, builds its textured GS payload using source, submits to effect packet sink.; source=revalidated-unapplied-names_R_Names24o.tsv:6 [names_qp12_apply.tsv]
 0x0015AD18	effDrawCompositeTextureQuad	inferred	Builds test/blend and texture-state packets for both GS contexts, emits the positioned two-texture quad, and restores frame/test/blend state.
 0x0015B208	effSubmitCompositeGsPacket	inferred	confidence=high; matched-C; src/dds2/game/code_00159B48.c:581:func_0015B208; Allocates a packet list, builds a composite GS payload from source, submits to effect packet sink.; source=revalidated-unapplied-names_R_Names24o.tsv:7 [names_qp12_apply.tsv]
@@ -5198,6 +5199,7 @@
 0x002F3D58	effReleaseScalyTextureReference	inferred	High: decrements that owner count and releases and clears the shared scaly clone on its last reference; the argument is unused. [names_qp9.tsv]
 0x002F3F08	effReleaseScalyStripResources	inferred	Releases strip-specific texture state then queues its asset and frees its allocation. [names_reviewed5.tsv]
 0x002F45A8	effSeedParticleSpanParameters	inferred	Seeds each span record with randomized scale and range parameters and clears flags. [names_reviewed5.tsv]
+0x002F46D8	effCreateParticleSpanTable	inferred	Allocates per-map-position point sets, span entries and optional shared-reference track sets from the model frame count.
 0x002F5358	effCreateModelResourceWithInlineData	inferred	confidence=high; src/dds2/game/code_002DE248.c:func_002F5358; Allocates kind-sized inline source data, initializes model-effect defaults and optionally creates/updates a child model resource. [names_qp9.tsv]
 0x002F5488	effCreateModelResourceFromFile	inferred	Resolves primary and secondary file buffers and creates model resource for requested kind. [names_reviewed5.tsv]
 0x002F5520	effCreateModelResource	inferred	DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described createEffectModelResource behavior.

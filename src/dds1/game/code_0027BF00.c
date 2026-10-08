@@ -45,7 +45,7 @@ extern void func_0027CA90();
 
 extern void mnuReleasePageHandlesAndClearSelection();
 
-extern void effReleaseTextureHandlesAndResetSlots(s32);
+extern void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *);
 
 extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
 
@@ -1445,12 +1445,12 @@ void mnuCopySecondaryWindowHandles(MenuPageWindow *window, u32 *source) {
     } while (index < 8);
 }
 
-extern void effResolveAndReleaseResource(s32);
+extern void effResolveAndReleaseResource(u32 *);
 
 void mnuRegisterResourceHandles(MenuPageWindow *destination, s32 *source) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        effResolveAndReleaseResource(source[i]);
+        effResolveAndReleaseResource((u32 *)source[i]);
         destination->handlesC[i] = source[i];
     }
 }
@@ -1463,8 +1463,8 @@ void mnuUpdateHandleStates(MenuPageWindow *obj) {
 
     for (i = 0; i < 8U; i++, handle++) {
         if (effHasFirstTextureHandle(*handle) != 0) {
-            effReleaseTextureHandlesAndResetSlots(*handle);
-            effReleaseTextureHandlesAndResetSlots(handle[8]);
+            effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)*handle);
+            effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)handle[8]);
         }
     }
     for (i = 0; i < 5U; i++) {
@@ -1605,8 +1605,8 @@ void mnuResolveUnselectedPageHandles(MenuPageWindow *window) {
 
             if (id >= 0) {
                 if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
-                    effResolveAndReleaseResource(window->handlesA[id]);
-                    effResolveAndReleaseResource(window->handlesB[id]);
+                    effResolveAndReleaseResource((u32 *)window->handlesA[id]);
+                    effResolveAndReleaseResource((u32 *)window->handlesB[id]);
                 }
             }
         }
@@ -1624,8 +1624,8 @@ void mnuReleasePageTexturesAndSelectedResources(MenuPageWindow *window) {
         id = record->unk8;
         if (id >= 0) {
             if (effHasFirstTextureHandle(window->handlesA[id]) != 0) {
-                effReleaseTextureHandlesAndResetSlots(window->handlesA[id]);
-                effReleaseTextureHandlesAndResetSlots(window->handlesB[id]);
+                effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)window->handlesA[id]);
+                effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)window->handlesB[id]);
             }
         }
     }
@@ -1633,13 +1633,34 @@ void mnuReleasePageTexturesAndSelectedResources(MenuPageWindow *window) {
     id = record->unk8;
     if (id >= 0) {
         if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
-            effResolveAndReleaseResource(window->handlesA[id]);
-            effResolveAndReleaseResource(window->handlesB[id]);
+            effResolveAndReleaseResource((u32 *)window->handlesA[id]);
+            effResolveAndReleaseResource((u32 *)window->handlesB[id]);
         }
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", mnuSelectPage);
+void mnuSelectPage(MenuPageWindow *window, s32 selected) {
+    u32 i;
+    s32 selection;
+
+    for (i = 0; i < 5; i++) {
+        effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)window->handlesC[i]);
+    }
+
+    selection = mnuGetSelectionFromFlags((s32)&datGameState->party[
+        window->records->slots[selected].index]);
+    for (i = 0; i < 5; i++) {
+        if (i == selection) {
+            effResolveAndReleaseResource((u32 *)window->handlesC[i]);
+        }
+    }
+
+    if (window->selected >= 0) {
+        mnuResolveUnselectedPageHandles(window);
+    }
+    window->selected = selected;
+    mnuReleasePageTexturesAndSelectedResources(window);
+}
 
 void mnuReleasePageHandlesAndClearSelection(window)
     MenuPageWindow *window;
@@ -1648,7 +1669,7 @@ void mnuReleasePageHandlesAndClearSelection(window)
     u32 i;
 
     for (i = 0; i < 5; i++) {
-        effResolveAndReleaseResource(*resource++);
+        effResolveAndReleaseResource((u32 *)*resource++);
     }
     if (window->selected >= 0) {
         mnuResolveUnselectedPageHandles(window);

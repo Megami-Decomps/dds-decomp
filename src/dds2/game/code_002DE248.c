@@ -413,7 +413,7 @@ extern u128 D_00458470[];
 extern SdfLightSources D_003E9F50;
 
 
-extern void sdfTexReleaseReference();
+extern void sdfTexReleaseReference(SdfTex *texture);
 
 extern void effReleaseSharedReference();
 
@@ -1572,13 +1572,13 @@ s32 *effCreateResourceHolderFromSelectedKind(s32 *source, u16 kind) {
     return object;
 }
 
-extern void sdfTexReleaseReferenceViaHandler(s32);
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 void effKindAssetReferenceRelease(s32 *object) {
     object[1]--;
     if (object[1] == 0) {
         if (object[0] != 4) {
-            sdfTexReleaseReferenceViaHandler(object[2]);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)object[2]);
         }
         sdfReleaseChipBlock(object);
     }
@@ -6174,7 +6174,7 @@ typedef struct EffSpanEntry {
 typedef struct EffSpanRecord {
     EffSpanEntry *entries;
     EffPointSet *pointSet;
-    u32 references;
+    EffTrackSet *references;
     u32 pointCount;
 } EffSpanRecord;
 
@@ -6246,7 +6246,72 @@ void effSeedParticleSpanParameters(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002F46D8);
+extern EffPointSet *effCreatePointSet3(s32 count);
+
+/* Build the point and reference sets for each model map-position record. */
+EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
+    u32 total = model->first->frameCount;
+    u32 count = sdfCountMapPositionRecords(model->inner);
+    u32 spans;
+    u32 partialSpan;
+    u8 *allocation;
+    EffSpanTable *table;
+    EffSpanRecord *record;
+    EffSpanEntry *entries;
+    u32 i;
+    u32 j;
+    u32 triplets;
+    u32 *colors;
+    u32 middleColor;
+    u32 edgeColor;
+    EffTrackSet *tracks;
+
+    model->first->frameStep = 1.0f;
+    mdlAddEntryPlain(model, 0, 0);
+    if (config->perSpan == 0) {
+        config->perSpan = 1;
+    }
+    partialSpan = total % config->perSpan != 0;
+    spans = partialSpan + total / config->perSpan;
+    if (config->unkAC == 0) {
+        config->unkAC = 1;
+    }
+    allocation = (u8 *)sdfAllocGeneralBlock(sizeof(EffSpanTable) +
+                 count * sizeof(EffSpanRecord) + count * spans * sizeof(EffSpanEntry));
+    table = (EffSpanTable *)sdfResourceRetainAddress((u32)allocation);
+    table->allocation = (u32)allocation;
+    table->records = (EffSpanRecord *)(table + 1);
+    entries = (EffSpanEntry *)(table->records + count);
+    table->total = total;
+    table->count = count;
+    for (i = 0, record = table->records; i < count; i++, record++) {
+        record->pointSet = effCreatePointSet3(total);
+        record->pointSet->type = config->pointSetType;
+        record->pointSet->flag = config->pointSetFlag;
+        if (config->drawPoints) {
+            triplets = record->pointSet->rows / 3;
+            colors = (u32 *)record->pointSet->tail;
+            middleColor = config->middleColor;
+            edgeColor = config->edgeColor;
+            for (j = 0; j < triplets; j++, colors += 3) {
+                colors[0] = edgeColor;
+                colors[1] = middleColor;
+                colors[2] = edgeColor;
+            }
+        }
+        record->entries = entries;
+        entries += spans;
+        if (config->drawReferences) {
+            tracks = (EffTrackSet *)effCreateTrackSetWithSharedReferences(spans, 0, 0);
+            record->references = tracks;
+            tracks->type = config->referenceType;
+            tracks->flag = config->pointSetFlag;
+        } else {
+            record->references = 0;
+        }
+    }
+    return table;
+}
 
 extern void effReleaseModelPointSetAsset(s32);
 
@@ -11279,7 +11344,7 @@ void effResolveAndReleaseSelectedResource(u32 *owner, s32 mapping) {
     }
 }
 
-extern void sdfTexReleaseReference(s32, u32, u32);
+extern void sdfTexReleaseReference(SdfTex *texture);
 
 void effReleaseSlotTextureReferencesAndResetWork(u8 *owner, s32 preserve) {
     u32 i = 0;
@@ -11291,7 +11356,7 @@ void effReleaseSlotTextureReferencesAndResetWork(u8 *owner, s32 preserve) {
         do {
             if (resources[i] != 0) {
                 u32 *current;
-                sdfTexReleaseReference(resources[i], (u32)resources, count);
+                sdfTexReleaseReference((SdfTex *)resources[i]);
                 current = (u32 *)((EffectSlotSet *)owner)->handles;
                 count = ((EffectSlotSet *)owner)->textureCount;
                 resources = current;

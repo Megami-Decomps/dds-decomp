@@ -246,12 +246,14 @@ EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *object) {
 
 EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *object);
 
-void dds3SetWorldPlayerObject(EffWorldNode *object, EffWorldNode *value) {
+EffWorldNode *dds3SetWorldPlayerObject(EffWorldNode *object, EffWorldNode *value) {
     EvtWorldTable *data;
+    EffWorldNode *previous;
 
     data = ((EvtWorldTable *)object->data);
-    dds3GetWorldPlayerObject(object);
+    previous = dds3GetWorldPlayerObject(object);
     data->playerObject = value;
+    return previous;
 }
 
 EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *object) {

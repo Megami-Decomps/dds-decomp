@@ -175,7 +175,7 @@ s32 sdfAllocPacketAligned(s32 size);
 void sdfInitPacketList(s32 packet);
 
 typedef struct EffGeneratedTextureDescriptor EffGeneratedTextureDescriptor;
-void func_0015AA30(SdfListHead *packet, EffGeneratedTextureDescriptor *source);
+void effDrawGeneratedTextureQuad(SdfListHead *packet, EffGeneratedTextureDescriptor *source);
 
 typedef struct EffCompositeGsDescriptor EffCompositeGsDescriptor;
 void effDrawCompositeTextureQuad(SdfListHead *packet, EffCompositeGsDescriptor *source);
@@ -574,28 +574,29 @@ extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern f32 sdfSinPoly(f32);
 extern void func_0033B530(u8 *, const f32 *, u32, const BillTextureQuad *, const f32 *);
 
-void func_0015AA30(SdfListHead *list, EffGeneratedTextureDescriptor *source) {
+void effDrawGeneratedTextureQuad(SdfListHead *list, EffGeneratedTextureDescriptor *source) {
     f32 matrix[16] __attribute__((aligned(16)));
     BillTextureQuad uv;
     f32 corners[4][2];
+    SdfGsTexturePacket *texturePacket;
     u64 *packet;
     s16 width, height;
     f32 halfWidth, halfHeight;
     f32 cosine, sine;
     f32 cornerX, cornerY;
 
-    packet = (u64 *)sdfAllocPacketAligned(0x50);
-    packet[0] = 4;
-    packet[1] = 0x5000000410000000ULL;
-    packet[2] = 0x1000000000008003ULL;
-    packet[3] = 0xE;
-    packet[4] = sdfTexGetPrimarySamplingState(source->texture);
-    packet[5] = 0x14;
-    packet[6] = sdfTexGetPrimaryTextureState(source->texture);
-    packet[7] = 6;
-    packet[8] = sdfTexGetPrimaryClampState(source->texture);
-    packet[9] = 8;
-    sdfAppendPacket(list, (u32)packet);
+    texturePacket = (SdfGsTexturePacket *)sdfAllocPacketAligned(sizeof(SdfGsTexturePacket));
+    texturePacket->header.dmaTag = 4;
+    texturePacket->header.vifCommands = 0x5000000410000000ULL;
+    texturePacket->header.gifTag = 0x1000000000008003ULL;
+    texturePacket->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    texturePacket->sampling.value = sdfTexGetPrimarySamplingState(source->texture);
+    texturePacket->sampling.registerId = SDF_GS_TEX1_1;
+    texturePacket->texture.value = sdfTexGetPrimaryTextureState(source->texture);
+    texturePacket->texture.registerId = SDF_GS_TEX0_1;
+    texturePacket->clamp.value = sdfTexGetPrimaryClampState(source->texture);
+    texturePacket->clamp.registerId = SDF_GS_CLAMP_1;
+    sdfAppendPacket(list, (u32)texturePacket);
 
     EE_MMI_UNIT_MATRIX(matrix);
     packet = (u64 *)sdfAllocPacketAligned(0x38);
@@ -660,7 +661,7 @@ void effSubmitGeneratedTexturePacket(s32 sink, s32 source) {
     s32 packetAddress = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
 
     sdfInitPacketList(packetAddress);
-    func_0015AA30((SdfListHead *)packetAddress, (EffGeneratedTextureDescriptor *)source);
+    effDrawGeneratedTextureQuad((SdfListHead *)packetAddress, (EffGeneratedTextureDescriptor *)source);
     ((EffPacketSink *)sink)->submit(sink, packetAddress);
 }
 
@@ -716,7 +717,7 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
     state->header.gifRegisters = SDF_GIF_REGISTER_AD;
     state->test.value = 0x51001;
     state->test.registerId = SDF_GS_TEST_1;
-    state->alpha.value = 0x44;
+    state->alpha.value = SDF_GS_ALPHA_INTERPOLATE_SOURCE_ALPHA;
     state->alpha.registerId = SDF_GS_ALPHA_1;
     sdfAppendPacket(list, (u32)state);
 
@@ -729,17 +730,17 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
     state->test.registerId = SDF_GS_TEST_2;
     switch (source->blendMode) {
     case 2:
-        state->alpha.value = 0x58;
-        restoreBlend = 0x48;
+        state->alpha.value = SDF_GS_ALPHA_ADD_DESTINATION_ALPHA;
+        restoreBlend = SDF_GS_ALPHA_ADD_SOURCE_ALPHA;
         break;
     case 3:
-        state->alpha.value = 0x52;
-        restoreBlend = 0x42;
+        state->alpha.value = SDF_GS_ALPHA_SUBTRACT_DESTINATION_ALPHA;
+        restoreBlend = SDF_GS_ALPHA_SUBTRACT_SOURCE_ALPHA;
         break;
     case 0:
     case 1:
-        state->alpha.value = 0x54;
-        restoreBlend = 0x44;
+        state->alpha.value = SDF_GS_ALPHA_INTERPOLATE_DESTINATION_ALPHA;
+        restoreBlend = SDF_GS_ALPHA_INTERPOLATE_SOURCE_ALPHA;
         break;
     default:
         restoreBlend = 0;

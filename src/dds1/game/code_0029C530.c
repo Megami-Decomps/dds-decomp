@@ -173,7 +173,7 @@ extern u32 effCreateModelResourceWithInlineData(u16, void *, void *, u32);
 
 extern u32 effCreateResourceInstance(u16, void *, void *, u32);
 
-extern void sdfTexReleaseReferenceViaHandler(u32);
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 extern u32 effCreateSurfaceGridNode(u32, u32);
 
@@ -943,7 +943,7 @@ void effUpdateTarget(EffKindWork *work, u32 target) {
     u32 previous = work->target;
     if (previous != 0 && previous != target) {
         if (work->sourceKind != 4) {
-            sdfTexReleaseReferenceViaHandler(previous);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)previous);
         }
         work->target = target;
     }
@@ -1020,7 +1020,7 @@ void effTextureReferenceRelease(EffKindWork *work, u32 target) {
     u32 previous = work->target;
     if (previous != 0 && previous != target) {
         if (work->sourceKind != 4) {
-            sdfTexReleaseReferenceViaHandler(previous);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)previous);
         }
         work->target = target;
     }
@@ -1097,7 +1097,7 @@ void effReplaceKindLinkedTarget(EffKindWork *work, u32 target) {
     u32 previous = work->target;
     if (previous != 0 && previous != target) {
         if (work->sourceKind != 4) {
-            sdfTexReleaseReferenceViaHandler(previous);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)previous);
         }
         work->target = target;
     }
@@ -1201,7 +1201,7 @@ void effReplaceLinkedKindWorkTarget(EffKindWork *work, u32 target) {
     u32 previous = work->target;
     if (previous != 0 && previous != target) {
         if (work->sourceKind != 4) {
-            sdfTexReleaseReferenceViaHandler(previous);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)previous);
         }
         work->target = target;
     }
@@ -1271,7 +1271,7 @@ void effReleaseLinkedTarget(EffKindWork *work) {
         D_0037E770[work->kind].destroy(handle);
     }
     if (work->target != 0 && work->sourceKind != 4) {
-        sdfTexReleaseReferenceViaHandler(work->target);
+        sdfTexReleaseReferenceViaHandler((SdfTex *)work->target);
     }
     sdfReleaseChipBlock(work);
 }
@@ -1366,7 +1366,7 @@ void effReleaseAlternateKindWork(EffKindWork *work) {
         D_0037E7E8[work->kind].destroy(handle);
     }
     if (work->target != 0 && work->sourceKind != 4) {
-        sdfTexReleaseReferenceViaHandler(work->target);
+        sdfTexReleaseReferenceViaHandler((SdfTex *)work->target);
     }
     sdfReleaseChipBlock(work);
 }
@@ -5894,7 +5894,7 @@ typedef struct EffModelResource {
 typedef struct EffSpanRecord {
     EffSpanEntry *entries;
     EffPointSet *pointSet;
-    u32 references;
+    EffTrackSet *references;
     u32 pointCount;
 } EffSpanRecord;
 
@@ -5966,7 +5966,73 @@ void effSeedParticleSpanParameters(u8 *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B12D8);
+extern EffPointSet *effCreatePointSet3(s32 count);
+extern void mdlAddEntryPlain(MdlCtx *model, s32 first, s32 second);
+
+/* Build the point and reference sets for each model map-position record. */
+EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
+    u32 total = model->first->frameCount;
+    u32 count = sdfCountMapPositionRecords(model->inner);
+    u32 spans;
+    u32 partialSpan;
+    u8 *allocation;
+    EffSpanTable *table;
+    EffSpanRecord *record;
+    EffSpanEntry *entries;
+    u32 i;
+    u32 j;
+    u32 triplets;
+    u32 *colors;
+    u32 middleColor;
+    u32 edgeColor;
+    EffTrackSet *tracks;
+
+    model->first->frameStep = 1.0f;
+    mdlAddEntryPlain(model, 0, 0);
+    if (config->perSpan == 0) {
+        config->perSpan = 1;
+    }
+    partialSpan = total % config->perSpan != 0;
+    spans = partialSpan + total / config->perSpan;
+    if (config->unkAC == 0) {
+        config->unkAC = 1;
+    }
+    allocation = (u8 *)sdfAllocGeneralBlock(sizeof(EffSpanTable) +
+                 count * sizeof(EffSpanRecord) + count * spans * sizeof(EffSpanEntry));
+    table = (EffSpanTable *)sdfResourceRetainAddress((u32)allocation);
+    table->allocation = (u32)allocation;
+    table->records = (EffSpanRecord *)(table + 1);
+    entries = (EffSpanEntry *)(table->records + count);
+    table->total = total;
+    table->count = count;
+    for (i = 0, record = table->records; i < count; i++, record++) {
+        record->pointSet = effCreatePointSet3(total);
+        record->pointSet->type = config->pointSetType;
+        record->pointSet->flag = config->pointSetFlag;
+        if (config->drawPoints) {
+            triplets = record->pointSet->rows / 3;
+            colors = (u32 *)record->pointSet->tail;
+            middleColor = config->middleColor;
+            edgeColor = config->edgeColor;
+            for (j = 0; j < triplets; j++, colors += 3) {
+                colors[0] = edgeColor;
+                colors[1] = middleColor;
+                colors[2] = edgeColor;
+            }
+        }
+        record->entries = entries;
+        entries += spans;
+        if (config->drawReferences) {
+            tracks = (EffTrackSet *)effCreateTrackSetWithSharedReferences(spans, 0, 0);
+            record->references = tracks;
+            tracks->type = config->referenceType;
+            tracks->flag = config->pointSetFlag;
+        } else {
+            record->references = 0;
+        }
+    }
+    return table;
+}
 
 extern void effReleaseModelPointSetAsset(s32);
 
@@ -5977,7 +6043,7 @@ void effReleaseParticleList(u8 *list) {
     for (i = 0; i < ((EffSpanTable *)list)->count; i++, entry++) {
         effReleaseModelPointSetAsset((s32)entry->pointSet);
         if (entry->references != 0) {
-            effReleaseResourceRefs(entry->references);
+            effReleaseResourceRefs((u8 *)entry->references);
         }
     }
     sdfReleaseResourceAllocation(((EffSpanTable *)list)->allocation);
