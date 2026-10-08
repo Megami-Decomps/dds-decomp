@@ -6224,6 +6224,7 @@
 0x00344120	sdfRelocatePackedResourceWords	inferred	Decodes a byte-coded relocation stream and adds the payload base to each selected word or run of words; verified in its MIPS assembly.
 0x00344208	sdfStreamNodeUnlink	inferred	unlinks node from the same list, clears queued flag
 0x00344298	sdfStreamNodeAppend	inferred	appends node to tail of global list D_0043920C/D_00439210 with optional EIntr
+0x003444F8	sdfBuildStreamFrameTransferPackets	inferred	builds and stores both transfer packet buffers for a full SdfStreamFrameNode before submission
 0x003447D8	sdfStreamOpen	inferred	init params, allocates frame buffers, appends to stream list
 0x00344870	sdfSoundInitFormattedNode	inferred	Byte-identical DDS1 counterpart: Initializes a sound node using format and callback values and allocates its sample buffer.
 0x003448D0	sdfStreamInitializeFromHeader	inferred	confidence=high; matched-C; src/dds2/game/code_003425B0.c:756:func_003448D0; Peer-matched C proposal: P7; Waits for a complete streamed frame header, captures dimensions and format metadata, creates a texture when absent, allocates frame buffers and links the stream node.; source=names_pending_main.tsv:146 [names_qp13.tsv]

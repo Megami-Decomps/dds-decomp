@@ -327,9 +327,9 @@ typedef struct MenuVoiceState {
 } MenuVoiceState;
 
 
-extern void ptyRecomputeMaxHpMp();
+extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
 
-extern void scrClearSecondaryScriptFlag();
+extern void scrClearSecondaryScriptFlag(DatPartyRecord *unit, u16 flagId);
 
 extern void func_0019D550(s32, s32, s32);
 
@@ -2152,8 +2152,8 @@ void mnuReleasePartyPanelSpriteTextures(u8 *menu) {
 
 
 /* Copy eight resource handles into the window's primary handle bank. */
-void mnuCopyPrimaryWindowHandles(MenuPageWindow *menu, u32 *source) {
-    u32 value;
+void mnuCopyPrimaryWindowHandles(MenuPageWindow *menu, struct EffectSlotSet **source) {
+    struct EffectSlotSet *value;
     EffectSlotSet **destination;
     u32 index;
 
@@ -2163,14 +2163,14 @@ void mnuCopyPrimaryWindowHandles(MenuPageWindow *menu, u32 *source) {
         value = *source;
         source = source + 1;
         index = index + 1;
-        *destination = (EffectSlotSet *)value;
+        *destination = value;
         destination = destination + 1;
     } while (index < 8);
 }
 
 /* Copy eight resource handles into the window's secondary handle bank. */
-void mnuCopySecondaryWindowHandles(MenuPageWindow *menu, u32 *source) {
-    u32 value;
+void mnuCopySecondaryWindowHandles(MenuPageWindow *menu, struct EffectSlotSet **source) {
+    struct EffectSlotSet *value;
     EffectSlotSet **destination;
     u32 index;
 
@@ -2180,16 +2180,16 @@ void mnuCopySecondaryWindowHandles(MenuPageWindow *menu, u32 *source) {
         value = *source;
         source = source + 1;
         index = index + 1;
-        *destination = (EffectSlotSet *)value;
+        *destination = value;
         destination = destination + 1;
     } while (index < 8);
 }
 
-void mnuRegisterResourceHandles(MenuPageWindow *destination, u32 *source) {
+void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSet **source) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        effResolveAndReleaseResource((u32 *)(source[i]));
-        destination->handlesC[i] = (EffectSlotSet *)source[i];
+        effResolveAndReleaseResource((u32 *)source[i]);
+        destination->handlesC[i] = source[i];
     }
 }
 

@@ -819,7 +819,38 @@ void func_002A6018(void) {
     mnuUnloadStaffFonts();
 }
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6030);
+struct FrFontGlyph;
+/* This legacy call supplies an unused ninth word to the eight-word builder. */
+extern struct FrFontGlyph *frFontBuildColoredGlyphWithSharedFlags();
+extern u32 frFontMeasureLines(struct FrFontGlyph *);
+extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
+extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
+
+void func_002A6030(s32 font, u32 color, const char *text, f32 x, f32 y) {
+    s32 byteAlpha = color & 0xFF;
+    f32 alpha = byteAlpha;
+    f32 opacity = 1.0f;
+    struct FrFontGlyph *glyph;
+
+    if (y < 192.0f) {
+        opacity = (y + 48.0f) / 240.0f;
+    } else if (y > 256.0f) {
+        opacity = (496.0f - y) / 240.0f;
+    }
+    byteAlpha = (s32)(alpha * opacity);
+    color = (color & 0xFFFFFF00) | byteAlpha;
+    if (font == 0) {
+        glyph = frFontBuildColoredGlyphWithSharedFlags((s32)(x * 16.0f),
+            (s32)(y * 8.0f), 0, 1, 1, 10, color, text, 0);
+    } else {
+        glyph = frFontBuildColoredGlyphWithSharedFlags((s32)(x * 16.0f),
+            (s32)(y * 8.0f), 0, 0, 1, 8, color, text, 0);
+    }
+    frFontMeasureLines(glyph);
+    frFontDrawGlyphWithSharedFlags(glyph, 1);
+    frFontQueueGlyphInSelectedSlot(glyph);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6180);
 

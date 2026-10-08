@@ -511,12 +511,12 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
 
     mnuReleaseStaffMenuResources((s32)group);
     mnuInitializeCampPanelResources(&work->partyWindow, &work->staffSlots, 0, &work->partyPanel);
-    panel = mnuCreatePanelGroup(work->staffSlots.baseResources[1], work->staffSlots.pairResources[0], 0);
+    panel = mnuCreatePanelGroup(work->staffSlots.baseResources[1], (s32)work->staffSlots.pairResources[0], 0);
     work->panelHandle = panel;
     mnuUpdateFiveListEntries(panel, work->unitHandle);
     work->spriteHandle =
         mnuCreateSpriteState((struct EffectSlotSet *)work->staffSlots.baseResources[1],
-                             (struct EffectSlotSet *)work->staffSlots.pairResources[0],
+                             work->staffSlots.pairResources[0],
                              (struct EffectSlotSet *)work->staffSlots.baseResources[0]);
     evtStageTestInit(0);
     mnuForwardTableByte(work->primaryRewards.rows[work->selectedRow].unit->unitId);
