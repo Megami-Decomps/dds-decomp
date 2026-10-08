@@ -3632,7 +3632,8 @@
 0x0025CC90	evtEncodeBgmSoundCode	inferred	Maps an event BGM identifier into the high halfword and adds the second argument as a low-word value for playback and preload.
 0x0025CE68	evtQueueValidatedBgmSoundCode	inferred	Rejects out-of-range BGM IDs, encodes fade and submits the resulting sound code. [names_reviewed19.tsv]
 0x0025CF00	evtStartBgmBySoundIdAndFade	inferred	Accepts a bounded BGM ID, encodes its fade and submits the resulting sound command. [names_reviewed21.tsv]
-0x0025CF98	evtGetTaskValueWord	inferred	Reads a task's data word at offset four by ID or returns minus one if the task is missing.
+0x0025CF98	evtGetEventPackLoadedState	inferred	Returns EvtPackLoadState.loaded for a numeric event task ID, or -1 when absent; camp readiness and battle event-sequence callers compare it with the completed value 2.
+0x0025CFD0	evtGetEventPackLoadState	inferred	Returns the EvtPackLoadState stored in the event task userValue, or NULL when that task ID is absent; the camp creator, callbacks and pack consumers use this same 0x48-byte owner.
 0x0025D008	evtFindTaskResourceEntryByKey	inferred	Finds task of resource kind and resolves entry by key into base-plus-offset address. [names_reviewed7.tsv]
 0x0025D0B8	evtRefreshTaskEffectTexture	inferred	DDS1 twin: replaces the event task's retained effect texture when the keyed resource is present, updates channel 72, and stores the replacement at task-data +0x38.
 0x0025D140	evtSpawnResourceObject	inferred	DDS1 twin 0x00241D28 [names_M95_Event.tsv]
