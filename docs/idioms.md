@@ -3081,3 +3081,15 @@ These are genuine word/byte representations of the same storage.
 Both games' `btlGetEffectActor` returns `BtlUnit *`, and the actor
 predicate and target comparisons use that pointer contract directly.
 
+
+## Event-viewer pointer and key storage
+
+DDS1 `evtViewerHasUpdateFlag` and `evtViewerDispatchFlagMode` take the
+primary `EventViewerState *`; their retail bodies read its flags and
+glyph position directly. Kind-18 dispatch at `0022CED0` reads the
+track's signed resource argument at `+0x14`; voice-conflict handling
+saves the current glyph position in the viewer's signed word at
+`+0x2480`. The existing primary owners expose those fields without
+additional views. The dispatcher's calls into claimed `0022FB30`
+retain its existing address-word interface at that single boundary.
+
