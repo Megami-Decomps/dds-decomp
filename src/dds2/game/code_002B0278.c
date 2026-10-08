@@ -163,11 +163,9 @@ extern char *D_003E7818[];
 extern char *D_003E7820[];
 
 
-extern u32 effLoadMappedResource(char *, char *);
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
-extern void effRequestMappedResource(char *, char *, u32 *);
 
 extern void mnuFreeWindowSprites();
 
@@ -2693,7 +2691,7 @@ void mnuLoadEffectResources(MenuEffectResources *resources) {
     mnuInitializeMapPacket(0, D_003E7828, 0xb, &resources->packet);
     mnuCopyCampEffectRowData(&D_003E7858, resources);
     resources->packet.sheets[0] = (u32)effLoadIndexedResource("/camp/spr/n_min/", D_003E7818[0], 0);
-    resources->animationHandle = effLoadMappedResource("/camp/mot/", D_003E7820[0]);
+    resources->animationHandle = (u32)effLoadMappedResource("/camp/mot/", D_003E7820[0]);
     mnuBindCampEffectAnimation(resources);
 }
 
