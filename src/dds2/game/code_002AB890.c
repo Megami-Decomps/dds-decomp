@@ -35,7 +35,6 @@ void func_002AB8C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 extern char (*D_00435E5C)[25];
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 extern void mnuSetWindowEntryParameters(u32, MenuWindowContainer *, u32, u32, u32);
-extern void mnuInitializeBasicWindowLayout(MenuWindowContainer *, u32, u32);
 extern void mnuCreateListWithDefaults(MenuWindowContainer *, u32, u32, u32, u32);
 extern s32 mnuIsBulletItemId(s32);
 extern s32 func_002C54B0(s32);
@@ -64,7 +63,7 @@ void func_002AB8F0(MenuStaffContext *owner) {
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
     mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, owner->unkF8, 0, 0, 0, 0);
-    mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xD, 7);
+    mnuSetWindowEntryParameters(0, window, (u32)owner->spriteArg0, 0xD, 7);
     window->list->context = owner;
     window->list->drawCallback = func_002AB8C0;
 
@@ -112,12 +111,12 @@ void func_002AB8F0(MenuStaffContext *owner) {
 
     resources->windows[0] = window;
     mnuInitializeBasicWindowLayout(window, owner->spriteArg2, 0xF);
-    mnuCreateListWithDefaults(resources->windows[0], 0, 0, 0, owner->spriteArg0);
+    mnuCreateListWithDefaults(resources->windows[0], 0, 0, 0, (u32)owner->spriteArg0);
 
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
     mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
-    mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
+    mnuSetWindowEntryParameters(0, window, (u32)owner->spriteArg0, 0xC, 7);
     window->list->context = owner;
     window->list->drawCallback = mnuDrawCampGridResourceSlot;
 
@@ -131,7 +130,7 @@ void func_002AB8F0(MenuStaffContext *owner) {
 
     resources->windows[1] = window;
     mnuInitializeBasicWindowLayout(window, owner->spriteArg2, 0x13);
-    mnuCreateListWithDefaults(resources->windows[1], 0, 0, 0, owner->spriteArg0);
+    mnuCreateListWithDefaults(resources->windows[1], 0, 0, 0, (u32)owner->spriteArg0);
 }
 
 void mnuDestroyResourceOwnerWindowContainers(MenuStaffContext *object) {
@@ -164,7 +163,7 @@ void mnuCreateStaffBulletItemWindow(MenuStaffContext *owner) {
     window = mnuCreateWindowContainer(0, 0x160, 0x10, 8, 0x16);
     mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
-    mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
+    mnuSetWindowEntryParameters(0, window, (u32)owner->spriteArg0, 0xC, 7);
     window->list->context = owner;
     window->list->drawCallback = func_002AB890;
     do {
@@ -179,7 +178,7 @@ void mnuCreateStaffBulletItemWindow(MenuStaffContext *owner) {
     } while (itemId < 0x100);
     resources->windows[2] = window;
     mnuInitializeBasicWindowLayout(window, owner->spriteArg2, 0x12);
-    mnuCreateListWithDefaults(resources->windows[2], 0, 0, 0, owner->spriteArg0);
+    mnuCreateListWithDefaults(resources->windows[2], 0, 0, 0, (u32)owner->spriteArg0);
 }
 
 void func_002ABEB0(MenuStaffContext *object) {
@@ -190,7 +189,6 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABED8);
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC050);
 
-extern void mnuSetWindowContainerLayout(MenuWindowContainer *, u32, u32, u32, u32, u32, u32, u32, u32);
 extern void func_002AC050();
 extern DatPartyRecord *mnuFindPartySlotByCurrentId(u32);
 extern DatPartyRecord *mnuFindReserveSlotByCurrentId(u32);
@@ -207,12 +205,12 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
     u16 *ordinal = &owner->catalogOrdinals[itemId];
     u16 catalogOrdinal;
     s32 showUnknown;
-    u32 frameResource;
+    struct EffectSlotSet *frameResource;
 
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
     mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
-    mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
+    mnuSetWindowEntryParameters(0, window, (u32)owner->spriteArg0, 0xC, 7);
     window->list->context = owner;
     window->list->drawCallback = func_002AC050;
     node = mnuAppendWindowListNode(window, D_00437BC8);
@@ -258,7 +256,7 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
     frameResource = owner->spriteArg2;
     resources->windows[3] = window;
     mnuInitializeBasicWindowLayout(window, frameResource, 0x10);
-    mnuCreateListWithDefaults(resources->windows[3], 0, 0, 0, owner->spriteArg0);
+    mnuCreateListWithDefaults(resources->windows[3], 0, 0, 0, (u32)owner->spriteArg0);
 }
 
 void func_002AC660(MenuStaffContext *object) {
@@ -304,7 +302,7 @@ void func_002AC750(s32 x, s32 y, s32 depth, struct MenuList *list,
     }
     if (node == list->first) {
         if (selected) {
-            EffectSlotSet *resources = (EffectSlotSet *)owner->spriteArg2;
+            EffectSlotSet *resources = owner->spriteArg2;
 
             resources->workEntries[1].geometry.cornerColors[0] = 0x89FEFF80;
             resources->workEntries[1].geometry.cornerColors[1] = 0x89FEFF80;
@@ -312,19 +310,19 @@ void func_002AC750(s32 x, s32 y, s32 depth, struct MenuList *list,
             resources->workEntries[1].geometry.cornerColors[3] = 0x89FEFF80;
             func_00306CD0(x + 0x1B0, y + 0x10, 0, listScale, 0,
                           resources, 1, 0x53);
-            itfGridCopyEntryQuad((s32)(EffectSlotSet *)owner->spriteArg2, 1);
+            itfGridCopyEntryQuad((s32)owner->spriteArg2, 1);
 
             func_00306CD0(x - 0x20, y - 8, 0, 0x100, 0,
-                          (EffectSlotSet *)owner->spriteArg0, 0x1F, 0x53);
+                          owner->spriteArg0, 0x1F, 0x53);
             func_00306CD0(x + 0x960, y - 8, 0, 0x100, 0,
-                          (EffectSlotSet *)owner->spriteArg0, 0x1F, 0x53);
+                          owner->spriteArg0, 0x1F, 0x53);
         } else {
             func_00306CD0(x + 0x1B0, y + 0x10, 0, listScale, 0,
-                          (EffectSlotSet *)owner->spriteArg2, 1, 0x53);
+                          owner->spriteArg2, 1, 0x53);
             func_00306CD0(x + 0x60, y, 0, 0xFF, 0,
-                          (EffectSlotSet *)owner->spriteArg0, 0xA, 0x53);
+                          owner->spriteArg0, 0xA, 0x53);
             func_00306CD0(x + 0x950, y, 0, 0xFF, 0,
-                          (EffectSlotSet *)owner->spriteArg0, 0xA, 0x53);
+                          owner->spriteArg0, 0xA, 0x53);
         }
     } else {
         func_002AB890(x, y, depth, (s32)list, (s32)node, drawArg);
@@ -340,12 +338,12 @@ void mnuCreateOwnedCatalogItemWindow(MenuStaffContext *owner) {
     const MenuCatalogItem *catalog;
     u32 ordinal = 0;
     u32 itemId;
-    u32 frameResource;
+    struct EffectSlotSet *frameResource;
 
     window = mnuCreateWindowContainer(0, 0x160, 0x10, 8, 0x16);
     mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
-    mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
+    mnuSetWindowEntryParameters(0, window, (u32)owner->spriteArg0, 0xC, 7);
     window->list->context = owner;
     window->list->drawCallback = func_002AC750;
     node = mnuAppendWindowListNode(window, D_00437BC8);
@@ -367,7 +365,7 @@ void mnuCreateOwnedCatalogItemWindow(MenuStaffContext *owner) {
     resources->windows[4] = window;
     mnuSetWindowContainerLayout(window, frameResource, 0x15, frameResource,
         0x410, 0x16, frameResource, 0x17, 0x3E0);
-    mnuCreateListWithDefaults(resources->windows[4], 0, 0, 0, owner->spriteArg0);
+    mnuCreateListWithDefaults(resources->windows[4], 0, 0, 0, (u32)owner->spriteArg0);
 }
 
 void func_002ACA98(MenuStaffContext *object) {
@@ -401,7 +399,7 @@ u32 mnuInitializeWindowOwnerResourceSet(KwlnTask *task) {
     func_002ACB18((u32)context);
     func_002AB8F0(context);
     mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->unk118,
-                              context->spriteArg2, 0, 0);
+                              (s32)context->spriteArg2, 0, 0);
     mnuBeginWindowFadeTransition(context->activeWindow, &context->fade);
     mnuSeekListNode(0, context->activeWindow->list);
     return 1;
@@ -479,7 +477,7 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
         if (input & 2) {
             mnuSetPopupEntryFlagged(popup, D_003E7418);
             mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->unk118,
-                                      context->group, 0, 1);
+                                      (s32)context->group, 0, 1);
             mnuBeginWindowFadeTransition(context->skillWindow, &context->fade);
         }
         window = context->activeWindow;
@@ -501,7 +499,6 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
 }
 
 extern void func_002AAC98(s32, s32, s32, s32, s32, s32);
-extern void mnuDrawStaffGridLabelsForKind(s32, s32);
 extern u8 D_003E7050[];
 
 s32 func_002ACE58(KwlnTask *callback) {

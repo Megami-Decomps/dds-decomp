@@ -11,7 +11,6 @@ extern u32 func_0011B150();
 
 extern void frFontSetContextPair(struct FrFontGlyph *glyph, u32 x, u32 y);
 extern s32 frFontDrawGlyphInDefaultMode(struct FrFontGlyph *glyph);
-extern void frFontSetChainFlag(struct FrFontGlyph *glyph, u8 value);
 
 /* Remove the party unit specified by script operand 0 and return success to
  * the script VM, while writing whether a unit was actually removed. */

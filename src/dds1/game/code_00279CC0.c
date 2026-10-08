@@ -24,7 +24,7 @@ extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
 
 extern s32 D_003BAA98;
 
-extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern FrFontGlyph *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
 
 
@@ -35,7 +35,6 @@ extern void func_00272778(s32);
 
 extern void mnuCreateStaffImageSprite(s32);
 
-extern void mnuDrawStaffGridLabelsForKind(s32, s32);
 
 extern void ptySkillMenuCopyPageState(s32);
 
@@ -115,7 +114,7 @@ s32 mnuOpenSkillDetailPanel(KwlnTask *callback) {
     window = menu[9];
     ((MenuWindowContainer *)window)->list->stateFlags |= 8;
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, window, 0x53);
-    mnuDrawStaffGridLabelsForKind(3, *(s32 *)(context + 0x78));
+    mnuDrawStaffGridLabelsForKind(3, (struct EffectSlotSet *)(u32)(*(s32 *)(context + 0x78)));
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
@@ -126,7 +125,7 @@ s32 func_0027A0A8(KwlnTask *callback) {
 void mnuDrawSelectionLabel(s32 selection) {
     FrFontGlyph *item = itfDrawTextWithSelectedFontMode(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
     frFontSetChildColors(item, 0xA09DC366);
-    func_001958A0(item, 1, 0x53);
+    frFontDrawGlyphChain(item, 1, 0x53);
     frFontQueueGlyphForCurrentDrawBuffer(item);
 }
 
@@ -175,7 +174,7 @@ void func_0027A140(u16 affinityId, s32 placeholderResource, s32 rangeResource) {
         }
 
         if (glyph != 0) {
-            func_001958A0(glyph, 1, 0x53);
+            frFontDrawGlyphChain(glyph, 1, 0x53);
             frFontQueueGlyphForCurrentDrawBuffer(glyph);
         }
     }
@@ -345,7 +344,7 @@ s32 mnuCampMenuDrawStatus(KwlnTask *param) {
             func_0027A140(label, ((MenuContextSprites *)context)->label68, ((MenuContextSprites *)context)->spriteE0);
         }
     }
-    mnuDrawStaffGridLabelsForKind(2, ((MenuContextSprites *)context)->sprite78);
+    mnuDrawStaffGridLabelsForKind(2, (struct EffectSlotSet *)(u32)(((MenuContextSprites *)context)->sprite78));
     return menuRunPanel((void *)context, 1, (void *)param);
 }
 
