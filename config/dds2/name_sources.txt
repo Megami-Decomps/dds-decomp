@@ -6302,6 +6302,10 @@
 0x003456C0	sdfSoundInitFormattedAndAppendNode	inferred	Byte-identical DDS1 counterpart: Initializes a formatted sound node, stores the caller value, and appends it to the active-node list.
 0x003456F8	sdfSoundInitIpuStream	inferred	sceIpuInit, IPU_CMD write, registers DMA handlers 3/4 and starts thread
 0x003458F0	sdfSetGridScaledDrawBounds	inferred	Stores grid-scaled draw bounds and the supplied mode. [names_reviewed10.tsv]
+0x00345EB0	sdfMovieHandleLinearDeviceEvent	inferred	Handles device open, size, read, and release events for a movie's linear stream.
+0x003460D8	sdfMovieHandlePacDeviceEvent	inferred	Handles device events for movie PAC header, mask, and payload reads.
+0x00346468	sdfMovieLinearStreamReadCallback	inferred	SdfStreamRead callback for linear movie buffer queries, copies, and refill requests.
+0x00346608	sdfMoviePacStreamReadCallback	inferred	SdfStreamRead callback for movie PAC buffer queries, copies, and refill requests.
 0x00346988	sdfCancelAndReleasePacWork	inferred	readability/matching review (QP16)
 0x00346A60	sdfPacCheckDecoderStatus	inferred	confidence=medium; matched-C; src/dds2/game/code_00346778.c:111:func_00346A60; Checks the decoder status pair: the first byte must be nonzero and the second zero; called by movie playback status polling without claiming exact flag meanings.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00346A80	sdfPacInitializeDispatchPacket	inferred	confidence=high; src/dds2/game/code_00346778.c:func_00346A80; Clears the PAC dispatch packet, sets status to minus one, and chooses a supplied dispatch callback or the default. [names_qp9.tsv]

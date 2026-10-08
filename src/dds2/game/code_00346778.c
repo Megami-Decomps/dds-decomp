@@ -57,10 +57,10 @@ extern char *func_0035D5B0(const char *text, s32 delimiter);
 extern s32 func_0035CB10(const char *text, const char *suffix);
 extern void sdfSoundInitFormattedAndAppendNode(u8 *state, s32 format,
                                                 SdfStreamRead read, u32 source, s32 resource);
-extern s32 func_00345EB0(void *, s32, s32, s32, s32);
-extern s32 func_003460D8(void *, s32, s32, s32, s32);
-extern s32 func_00346468(SdfStreamFrameNode *, u32, s32, void *, s32);
-extern s32 func_00346608(SdfStreamFrameNode *, u32, s32, void *, s32);
+extern s32 sdfMovieHandleLinearDeviceEvent(void *, s32, s32, s32, s32);
+extern s32 sdfMovieHandlePacDeviceEvent(void *, s32, s32, s32, s32);
+extern s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *, u32, s32, void *, s32);
+extern s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *, u32, s32, void *, s32);
 extern s32 D_00438D08;
 extern s32 D_0043921C;
 extern u8 D_00438D28[];
@@ -109,9 +109,9 @@ void func_00346778(MovObj *owner, SdfMovieDescriptor *descriptor, const char *na
         }
         owner->state = SDF_MOVIE_STATE_INITIAL;
         owner->deviceState = sdfDevCreateCallbackState((s32)name,
-                                                        (void *)func_00345EB0, (s32)owner);
+                                                        (void *)sdfMovieHandleLinearDeviceEvent, (s32)owner);
         sdfSoundInitFormattedAndAppendNode((u8 *)&owner->soundNode, (s32)soundFormat,
-                                            func_00346468, (u32)owner, descriptor->source);
+                                            sdfMovieLinearStreamReadCallback, (u32)owner, descriptor->source);
         return;
     }
 
@@ -132,11 +132,11 @@ void func_00346778(MovObj *owner, SdfMovieDescriptor *descriptor, const char *na
     pacWork->scratch = pacWork->scratchBuffer;
     owner->state = SDF_MOVIE_STATE_INITIAL;
     owner->deviceState = sdfDevCreateCallbackState((s32)name,
-                                                    (void *)func_003460D8, (s32)owner);
+                                                    (void *)sdfMovieHandlePacDeviceEvent, (s32)owner);
     owner->pacEnabled = 1;
     owner->packetLimit = 0x7F;
     sdfSoundInitFormattedAndAppendNode((u8 *)&owner->soundNode, (s32)soundFormat,
-                                        func_00346608, (u32)owner, descriptor->source);
+                                        sdfMoviePacStreamReadCallback, (u32)owner, descriptor->source);
 }
 
 extern s32 sdfDevQueueActiveOperation(void *);
