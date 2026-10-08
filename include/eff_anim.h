@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+struct RefObj;
+
 /* Animation segments contribute length frames plus one boundary frame. */
 typedef struct EffAnimSegment {
     u32 length;     // 0x00
@@ -15,7 +17,7 @@ typedef struct EffAnimSet {
     u32 flags;                 // 0x08: 1 loop, 4 double Y scale
     u8 pad_0C[4];
     EffAnimSegment *segments;  // 0x10
-    void **handles;            // 0x14
+    struct RefObj **handles;   // 0x14
     u32 length;                // 0x18
     u32 refCount;              // 0x1C
     s32 unk20;                 // 0x20: initialized to -1 by the container constructor
