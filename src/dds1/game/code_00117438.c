@@ -411,15 +411,15 @@ void sdfResetChannels(void) {
 
 /* Enemy vitals use a 76-byte base table; party vitals come from a script,
  * a unit-specific bonus, and a maximum of 999. */
-s32 ptyComputeMaxHp(s32 unit) {
+s32 ptyComputeMaxHp(DatPartyRecord *unit) {
     s32 result;
 
-    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) != 0) {
-        return ((SdfEnemyVitals *)(datEnemyRecords + ((SdfPartyUnit *)unit)->unitId * 76))->maxHp;
+    if ((unit->flags & SDF_UNIT_ENEMY) != 0) {
+        return ((SdfEnemyVitals *)(datEnemyRecords + unit->unitId * 76))->maxHp;
     }
-    result = evtRunContext(1, unit, 0, 0, 0);
-    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) == 0) {
-        result += ((SdfPartyUnit *)unit)->hpBonus;
+    result = evtRunContext(1, (s32)unit, 0, 0, 0);
+    if ((unit->flags & SDF_UNIT_ENEMY) == 0) {
+        result += unit->hpBonus;
         if (result >= 1000) {
             result = 999;
         }
@@ -428,15 +428,15 @@ s32 ptyComputeMaxHp(s32 unit) {
 }
 
 /* Compute the matching MP value from the base table or the MP script. */
-s32 ptyComputeMaxMp(s32 unit) {
+s32 ptyComputeMaxMp(DatPartyRecord *unit) {
     s32 result;
 
-    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) != 0) {
-        return ((SdfEnemyVitals *)(datEnemyRecords + ((SdfPartyUnit *)unit)->unitId * 76))->maxMp;
+    if ((unit->flags & SDF_UNIT_ENEMY) != 0) {
+        return ((SdfEnemyVitals *)(datEnemyRecords + unit->unitId * 76))->maxMp;
     }
-    result = evtRunContext(2, unit, 0, 0, 0);
-    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) == 0) {
-        result += ((SdfPartyUnit *)unit)->mpBonus;
+    result = evtRunContext(2, (s32)unit, 0, 0, 0);
+    if ((unit->flags & SDF_UNIT_ENEMY) == 0) {
+        result += unit->mpBonus;
         if (result >= 1000) {
             result = 999;
         }
