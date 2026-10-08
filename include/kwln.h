@@ -15,8 +15,8 @@ struct KwlnTask {
     u32 priority;            /* 0x20: ascending task queue priority. */
     u32 unk24;
     u32 timer;               /* 0x28 */
-    s16 unk2C;               /* Positive ticks until activation. */
-    s16 unk2E;               /* Destruction delay; zero destroys immediately. */
+    s16 startDelayTicks;     /* 0x2C: signed; positive values count down, zero activates, negatives remain queued. */
+    s16 destroyDelayTicks;   /* 0x2E: signed; positive values count down, zero destroys, negatives stay pending. */
     TaskUpdate update;       /* 0x30 */
     TaskDestroy destroy;     /* 0x34 */
     u32 userValue;           /* 0x38: caller-supplied value exposed by accessors. */
