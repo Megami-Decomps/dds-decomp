@@ -1165,6 +1165,8 @@
 0x0016ABF8	effReleaseDispatchedParameterWork	inferred	Dispatches effect parameter cleanup and releases its work. [names_reviewed9.tsv]
 0x0016AC40	effInvokeParameterWorkDispatch	inferred	Calls a work-selected effect dispatch routine. [names_reviewed9.tsv]
 0x0016AC78	effCloneDispatchedParameterWork	inferred	src/dds2/game/code_0016A100.c func_0016AC78: Copies ID and parameter index, recreates table-backed payload or invokes alternate clone callback. Twin of DDS1 func_00163020. [names_reviewed24.tsv]
+0x0016AEA0	effParamDescriptorGetKind	inferred	Reads the descriptor's first word as the extended-work kind.
+0x0016AEA8	effParamDescriptorGetTableIndex	inferred	Reads the descriptor's second word as its fallback table index.
 0x0016AF38	effCreateThunderCellSystemWork	inferred	confidence=high; src/dds2/game/code_0016A100.c:func_0016AF38; Copies thunder head parameters, allocates/configures its cell system, initializes all cell records and sets default color. [names_qp9.tsv]
 0x0016B130	effThunderReleaseVectorWork	inferred	queued
 0x0016B170	effThunderSetVectorTint	inferred	queued
