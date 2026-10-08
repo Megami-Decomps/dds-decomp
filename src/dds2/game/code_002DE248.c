@@ -11585,7 +11585,7 @@ u32 effSlotTransitionClearTarget(s32 work, u32 unused) {
     return 1;
 }
 
-s32 effClampSlotPhaseAtEnd(u32 effect, u32 slot, EffTimedState *state) {
+s32 effClampSlotPhaseAtEnd(EffectSlotSet *owner, u32 slot, EffTimedState *state) {
     if (0x10000 < state->value) {
         u32 flags = state->flags;
         state->value = 0x10000;
@@ -11593,7 +11593,7 @@ s32 effClampSlotPhaseAtEnd(u32 effect, u32 slot, EffTimedState *state) {
             if (flags & EFF_TIMED_STATE_PING_PONG) {
                 state->flags = flags & ~EFF_TIMED_STATE_DIRECTION_FORWARD;
             } else {
-                effInitializeSlotWork((EffectSlotSet *)effect, slot);
+                effInitializeSlotWork(owner, slot);
             }
             return 0;
         }
@@ -11601,7 +11601,7 @@ s32 effClampSlotPhaseAtEnd(u32 effect, u32 slot, EffTimedState *state) {
     return 1;
 }
 
-s32 effClampSlotPhaseAtStart(u32 effect, u32 slot, EffTimedState *state) {
+s32 effClampSlotPhaseAtStart(EffectSlotSet *owner, u32 slot, EffTimedState *state) {
     if (state->value < 0) {
         u32 flags = state->flags;
         state->value = 0;
@@ -11609,7 +11609,7 @@ s32 effClampSlotPhaseAtStart(u32 effect, u32 slot, EffTimedState *state) {
             if (flags & EFF_TIMED_STATE_PING_PONG) {
                 state->flags = flags | EFF_TIMED_STATE_DIRECTION_FORWARD;
             } else {
-                effInitializeSlotWork((EffectSlotSet *)effect, slot);
+                effInitializeSlotWork(owner, slot);
             }
             return 0;
         }
@@ -11646,7 +11646,7 @@ EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entry
                     if (state->value != 0x10000) {
                         state->value += step;
                         idle = 0;
-                        if (effClampSlotPhaseAtEnd((u32)effect, slot, state) == 0) {
+                        if (effClampSlotPhaseAtEnd(effect, slot, state) == 0) {
                             state->delay = state->delayMax;
                             return 0;
                         }
@@ -11654,7 +11654,7 @@ EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entry
                 } else if (state->value != 0) {
                     state->value -= step;
                     idle = 0;
-                    if (effClampSlotPhaseAtStart((u32)effect, slot, state) == 0) {
+                    if (effClampSlotPhaseAtStart(effect, slot, state) == 0) {
                         state->delay = state->delayMax;
                         return 0;
                     }
