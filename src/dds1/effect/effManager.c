@@ -1,6 +1,7 @@
 #include "common.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "eff_node_descriptor.h"
 
 void effManagerInitializeSubsystems(void) {
     func_001536A0();
@@ -121,15 +122,6 @@ extern void func_003003F0(const char *fmt, ...);
 extern void *sdfReadNamedResource(void *, u32 *, s32);
 extern void *sdfReleaseResourceAllocation(void *);
 
-typedef struct EffNodeDescriptor {
-    u16 type;      /* 0x00 */
-    u8 pad02[2];
-    u16 arg;       /* 0x04 */
-    u8 pad06[6];
-    f32 version;   /* 0x0C */
-    u8 payload[1]; /* 0x10 */
-} EffNodeDescriptor;
-
 typedef struct EffNodeInstance {
     u8 pad00[0x20];
     u8 matrix20[0x40]; /* 0x20 */
@@ -148,7 +140,7 @@ EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor) {
         func_003003F0("old version!![%f]\n", descriptor->version);
         func_0014FF28(descriptor);
     }
-    node = effCreateNode(descriptor->type, descriptor->arg, (s32)descriptor->payload);
+    node = effCreateNode((u16)descriptor->type, (u16)descriptor->arg, (s32)descriptor->payload);
     if (descriptor->version <= 1.02f) {
         switch (node->type) {
         case 0:
