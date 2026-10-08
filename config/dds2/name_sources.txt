@@ -6321,7 +6321,11 @@
 0x00344A08	sdfDestroyStreamFrameNode	inferred	Duplicated DDS1 stream-node teardown: unlink both queues, stop active IPU DMA, release owned buffers and enqueue its texture resource
 0x00344B40	sndFillStreamFeedRing	inferred	confidence=high; src/dds2/game/code_003425B0.c:func_00344B40; Fills uncached stream-ring slots up to its reserve limit, handles partial EOF, preserves wrap history and updates occupancy. [names_qp9.tsv]
 0x00344D60	sdfSoundStartIpuInputDma	inferred	Fam_Mid3
+0x00344F08	sdfStartStreamNodeIpuTransfer	inferred	Native setup consumes the stream node, installs it as the active IPU transfer, and starts input DMA.
+0x003450D8	sdfDispatchNextStreamNode	inferred	Scans queued stream nodes, selects an eligible node, unlinks it, and starts its IPU transfer.
 0x00345198	sdfIpuDmaCompletionWorker	inferred	confidence=high; src/dds2/game/code_003425B0.c:func_00345198; Waits for IPU worker wakeups, stops DMA, updates completion/loop state, requeues unfinished work with interrupt protection, and resumes processing. [names_qp9.tsv]
+0x00345268	sdfWakeIpuCompletionWorker	inferred	Type-3 handler wakes the IPU completion worker and reenables interrupts.
+0x00345298	sdfCompleteIpuInputFeedDma	inferred	Type-4 handler consumes the input-DMA callback node, advances/refills feed slots, and restarts input DMA.
 0x00345408	sdfSubmitBufferedPlayback	inferred	Submits the selected pending buffer's address range, then advances buffered playback.
 0x00345488	sdfAdvanceStreamPlayback	inferred	Called by the movie scheduler with a cadence; retries deferred input DMA, submits buffered frames on phase transitions, advances playback cadence, and refills active feeds.
 0x003455F0	sdfSoundInitAndAppendNode	inferred	Byte-identical DDS1 counterpart: Initializes a sound node, stores the caller value, and appends it to the active-node list.
