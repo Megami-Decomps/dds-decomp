@@ -1162,13 +1162,13 @@ s32 mnuCountActivePartyEntries(void) {
 }
 
 ShopScene *mnuShopCreateScene(void) {
-    s32 handle;
+    struct SdfMemBlock *allocation;
     ShopScene *obj;
 
-    handle = (u32)sdfAllocGeneralBlock(0xB4);
-    obj = (ShopScene *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    allocation = sdfAllocGeneralBlock(0xB4);
+    obj = (ShopScene *)sdfResourceRetainAddress(allocation);
     memset(obj, 0, 0xB4);
-    obj->resourceHandle = handle;
+    obj->resourceHandle = allocation;
     mnuClearPanelTransitionState(&obj->transitionWork);
     mnuShopLoadSpriteAssets(obj);
     mnuInitializeShopStatusBatches(obj);
@@ -1193,7 +1193,7 @@ void mnuShopDestroyScene(KwlnTask *arg) {
         mnuDrainPanelTransitions(&scene->transitionWork, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle(scene->resourcePair);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(scene->resourceHandle));
+        sdfReleaseResourceAllocation(scene->resourceHandle);
         D_003BC39C = 2;
     }
 }
