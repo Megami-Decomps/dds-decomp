@@ -24,7 +24,6 @@ struct BillObj;
 extern void effObjSetFlags(struct EffectObj *object, s32 flags);
 extern void billSetKind1Entry(struct BillObj *billboard, u32 entry);
 extern void billSetVariantValue(struct BillObj *billboard, s32 value);
-extern void billSetBillboardMode(struct BillObj *billboard, s32 mode);
 
 typedef struct BillConfig {
     u32 flags;   /* 0x00: bit 0 / bit 1 select the billboard mode */

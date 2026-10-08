@@ -224,7 +224,6 @@ extern ParDispatch parKindConstructorEntries[];
 
 
 
-extern void billSetBillboardMode(BillObj *, s32);
 
 
 
