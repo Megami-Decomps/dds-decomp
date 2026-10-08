@@ -1154,6 +1154,7 @@ effBTLFieldColorTestFlags = 0x001695F8; // type:func
 effBTLFieldColorResetFlags = 0x00169608; // type:func
 effBTLFieldColorGetActorScale = 0x00169610; // type:func
 effBattleMiscQueryPosition = 0x001696D0; // type:func
+effBattleMiscCallByFinalSelector = 0x00169740; // type:func
 effBattleMiscQueryOverrideAttachment = 0x00169770; // type:func
 effBattleMiscQueryFinalAttachment = 0x001697A0; // type:func
 effBattleComputeTargetPosition = 0x001697D0; // type:func

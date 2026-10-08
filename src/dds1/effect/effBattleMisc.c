@@ -51,7 +51,7 @@ void effBattleMiscCallByOwnerA(u32 unused, void *arg) {
     effBattleComputeTargetPosition(effBTLFieldColorGetOverrideSelector(), arg);
 }
 
-void func_00161B10(u32 unused, void *arg) {
+void effBattleMiscCallByFinalSelector(u32 unused, void *arg) {
     effBattleComputeTargetPosition(effBTLFieldColorGetFinalSelector(), arg);
 }
 
