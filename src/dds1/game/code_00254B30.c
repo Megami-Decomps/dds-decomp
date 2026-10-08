@@ -212,7 +212,7 @@ typedef struct DspUnitName {
 
 extern DspUnitName *D_003BAA70;
 extern DspMantraName *D_003BAA78;
-extern s32 fldGetSceneMetadataNode();
+extern MnuMantraGridEntry *fldGetSceneMetadataNode(void);
 extern void evtCopyEntryStringToActiveWindow(s32, void *);
 extern s32 mnuGetMantraSourceValue(s32);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
@@ -222,7 +222,7 @@ extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 /* Populate the unit and both mantra labels, plus the selected mantra's cost. */
 void itfDspPopulatePrimaryLabels(void) {
     MnuProfileProgress *selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
-    MnuMantraGridEntry *scene = (MnuMantraGridEntry *)fldGetSceneMetadataNode();
+    MnuMantraGridEntry *scene = fldGetSceneMetadataNode();
     char text[16];
 
     evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->partyRecord->unitId].encodedText);
@@ -238,7 +238,7 @@ void itfDspPopulatePrimaryLabels(void) {
 /* Populate the same menu labels, selecting the alternate display signal. */
 void itfDspPopulateAlternateLabels(void) {
     MnuProfileProgress *selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
-    MnuMantraGridEntry *scene = (MnuMantraGridEntry *)fldGetSceneMetadataNode();
+    MnuMantraGridEntry *scene = fldGetSceneMetadataNode();
     char text[16];
 
     evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->partyRecord->unitId].encodedText);
@@ -254,7 +254,7 @@ void itfDspPopulateAlternateLabels(void) {
 /* Populate menu labels for the third display signal. */
 void itfDspPopulateThirdLabels(void) {
     MnuProfileProgress *selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
-    MnuMantraGridEntry *scene = (MnuMantraGridEntry *)fldGetSceneMetadataNode();
+    MnuMantraGridEntry *scene = fldGetSceneMetadataNode();
     char text[16];
 
     evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->partyRecord->unitId].encodedText);

@@ -7,7 +7,7 @@ extern u32 mnuSceneResourceContext;
 extern u32 *mnuGetSelectedNodeValue(void);
 extern s32 func_00255E08();
 extern void func_0024E5A0(s32, s32, s32, s32, s32, s32, f32, f32);
-extern void func_0025D2F8(s32, s32, s32, s32, s32, s32);
+extern void func_0025D2F8(s32, s32, s32, s32, MenuSceneWork *, s32);
 extern void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *, s32, s32);
 extern f32 sdfSinPoly(f32 angle);
 extern void func_00254758(s32, s32, s32, s32, s32);
@@ -55,7 +55,7 @@ s32 mnuDrawMantraCostTransition(void) {
         scaled = (s32)(frac * 128.0f);
         func_0024E5A0(0, 0, 0, scaled, 0x3A, 0x53, 1.5f, 1.5f);
         mnuDrawPanelWithPackedColorPattern(0, 0, 0, scaled, 0x53);
-        func_0025D2F8(0, 0, 1, scaled, nodeNext, 0x53);
+        func_0025D2F8(0, 0, 1, scaled, scene, 0x53);
         func_00254758(0, 0, 1, 0x80, 0x53);
         func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
         func_0024E260(0, 0, 0, scaled, 0x5B, 0x53);
@@ -69,7 +69,7 @@ s32 mnuDrawMantraCostTransition(void) {
         scaled = (s32)(frac * 128.0f);
         func_0024E5A0(0, 0, 0, scaled, 0x3A, 0x53, 1.5f, 1.5f);
         mnuDrawPanelWithPackedColorPattern(0, 0, 0, scaled, 0x53);
-        func_0025D2F8(0, 0, 1, scaled, nodeNext, 0x53);
+        func_0025D2F8(0, 0, 1, scaled, scene, 0x53);
         func_00254758(0, 0, 0, 0x80, 0x53);
         func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
         func_0024E260(0, 0, 0, scaled, 0x5B, 0x53);
@@ -88,7 +88,7 @@ s32 mnuDrawMantraCostTransition(void) {
         frac = 1.0f - sdfSinPoly(frac * 3.14159265f);
         func_0024E5A0(0, 0, 0, 0x80, 0x3A, 0x53, 1.5f, 1.5f);
         mnuDrawPanelWithPackedColorPattern(0, 0, 0, 0x80, 0x53);
-        func_0025D2F8(0, 0, 1, (s32)(frac * 128.0f), nodeNext, 0x53);
+        func_0025D2F8(0, 0, 1, (s32)(frac * 128.0f), scene, 0x53);
         func_00254758(0, 0, 1, 0x80, 0x53);
         func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
         func_0024E260(0, 0, 0, 0x80, 0x5B, 0x53);

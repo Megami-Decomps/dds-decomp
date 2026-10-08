@@ -5,10 +5,12 @@
 #include "mnu_profile_progress.h"
 #include "mnu_sprite_resource.h"
 #include "mnu_scene_list.h"
+#include "sdf_grid.h"
+#include "mnu_scene_work.h"
+#include "mnu_mantra_grid.h"
 
 #define MNU_MANTRA_GRID_ROW_COUNT 0x11
 #define MNU_MANTRA_GRID_COLUMN_COUNT 15
-#define MNU_MANTRA_GRID_SLOT_BYTES 8
 #define MNU_MANTRA_PROFILE_MATCH_FLAG 1
 #define MNU_MANTRA_PROFILE_CAP_FLAG 2
 #define MNU_MANTRA_ENTRY_STATE_PAIR_MASK 0xC
@@ -177,32 +179,6 @@ typedef s16 MnuSpritePlacement[4];
 /* Packed 12-byte scene row used by the profile-menu placement table. */
 typedef s16 MnuSceneSpriteEntry[6];
 
-typedef struct MnuSceneSelectionNode {
-    u8 pad00[0xC];
-    u16 entryIndex; /* 0x0C */
-} MnuSceneSelectionNode;
-
-typedef struct MnuSceneSelectionSlot {
-    u8 pad00[4];
-    MnuSceneSelectionNode *node; /* 0x04 */
-} MnuSceneSelectionSlot;
-
-typedef struct MnuSceneSelectionGrid {
-    u8 pad00[8];
-    MnuSceneSelectionSlot *slot; /* 0x08 */
-} MnuSceneSelectionGrid;
-
-typedef struct MnuSceneRenderWork {
-    u8 pad000[0x484];
-    MnuSceneSelectionGrid *grid; /* 0x484 */
-    u8 pad488[0x114];
-    s16 cursorX; /* 0x59C */
-    s16 cursorY; /* 0x59E */
-    u8 pad5A0[0xC];
-    u8 displayFlags; /* 0x5AC */
-    u8 cursorMoving; /* 0x5AD */
-} MnuSceneRenderWork;
-
 enum {
     MNU_SCENE_SPRITE_INDEX = 1,
     MNU_SCENE_SPRITE_X_OFFSET,
@@ -289,35 +265,30 @@ void mnuAdvanceLoopingFrame(s32 *frame) {
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C588);
 
-extern u32 mnuGetMantraDisplayFlags(void *, MnuProfileProgress *);
+extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *, MnuProfileProgress *);
 
-void mnuAdvanceGridSlotAnimation(MnuProfileProgress *animationContext, s32 unusedGrid, u8 *slot) {
-    s32 *counter = *(s32 **)(slot + 4);
-    s32 value = *counter + 1;
+void mnuAdvanceGridSlotAnimation(MnuProfileProgress *animationContext, SdfGrid *unusedGrid, SdfGridCell *slot) {
+    MnuMantraGridEntry *entry = (MnuMantraGridEntry *)(u32)slot->value;
+    s32 value = entry->frame + 1;
 
-    *counter = value;
+    entry->frame = value;
     if ((f32)value > 60.0f) {
-        *counter = 0;
+        entry->frame = 0;
     }
-    mnuGetMantraDisplayFlags(counter, animationContext);
+    mnuGetMantraDisplayFlags(entry, animationContext);
 }
 
-typedef struct MenuAnimationSlot {
-    s32 unk00;
-    s32 counterAddress; /* 0x04: address of the frame counter */
-} MenuAnimationSlot;
-
 /* Advance only occupied animation slots across the fixed mantra grid. */
-void mnuAdvanceActiveGridSlotAnimations(MnuProfileProgress *animationContext, s32 gridOwner) {
-    u8 *grid = *(u8 **)(gridOwner + 0x484);
+void mnuAdvanceActiveGridSlotAnimations(MnuProfileProgress *animationContext, MenuSceneWork *gridOwner) {
+    SdfGrid *grid = gridOwner->gridHandle;
     s32 row;
     s32 column;
 
     for (row = 0; row < MNU_MANTRA_GRID_ROW_COUNT; row++) {
-        MenuAnimationSlot *slot = (MenuAnimationSlot *)(*(s32 *)(grid + 4) + row * *(s32 *)(grid + 0x14) * MNU_MANTRA_GRID_SLOT_BYTES);
+        SdfGridCell *slot = grid->cells + row * grid->width;
         for (column = 0; column < MNU_MANTRA_GRID_COLUMN_COUNT; column++) {
-            if (slot[column].counterAddress != 0) {
-                mnuAdvanceGridSlotAnimation(animationContext, (s32)grid, (u8 *)&slot[column]);
+            if (slot[column].value != 0) {
+                mnuAdvanceGridSlotAnimation(animationContext, grid, &slot[column]);
             }
         }
     }
@@ -326,22 +297,22 @@ void mnuAdvanceActiveGridSlotAnimations(MnuProfileProgress *animationContext, s3
 extern void func_0025C278(s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Choose draw codes from profile-match, cap and entry-state flags; cap overlay is half-strength. */
-void func_0025C8D0(s32 x, s32 y, s32 depth, s32 amount, MnuProfileProgress *profileAddress, u8 *entry, s32 drawArg) {
+void func_0025C8D0(s32 x, s32 y, s32 depth, s32 amount, MnuProfileProgress *profileAddress, MnuMantraGridEntry *entry, s32 drawArg) {
     u32 flags = mnuGetMantraDisplayFlags(entry, profileAddress);
 
     if (flags & MNU_MANTRA_PROFILE_MATCH_FLAG) {
-        func_0025C278(x, y, depth, amount, *(u16 *)(entry + 0xC), MNU_MANTRA_SELECTED_DRAW_CODE, 0, drawArg);
+        func_0025C278(x, y, depth, amount, entry->sceneId, MNU_MANTRA_SELECTED_DRAW_CODE, 0, drawArg);
     } else if (flags & MNU_MANTRA_PROFILE_CAP_FLAG) {
-        func_0025C278(x, y, depth, amount, *(u16 *)(entry + 0xC), MNU_MANTRA_CAP_DRAW_CODE, 0, drawArg);
+        func_0025C278(x, y, depth, amount, entry->sceneId, MNU_MANTRA_CAP_DRAW_CODE, 0, drawArg);
     } else if (flags & MNU_MANTRA_ENTRY_STATE_PAIR_MASK) {
-        func_0025C278(x, y, depth, amount, *(u16 *)(entry + 0xC), MNU_MANTRA_STATE_DRAW_CODE, 0, drawArg);
+        func_0025C278(x, y, depth, amount, entry->sceneId, MNU_MANTRA_STATE_DRAW_CODE, 0, drawArg);
     }
     if (flags & MNU_MANTRA_PROFILE_CAP_FLAG) {
         func_0025C278(x, y, depth, (s32)((f32)amount * 0.5f),
-                      *(u16 *)(entry + 0xC), MNU_MANTRA_CAP_OVERLAY_CODE, 0, drawArg);
+                      entry->sceneId, MNU_MANTRA_CAP_OVERLAY_CODE, 0, drawArg);
     }
     if (flags & MNU_MANTRA_PROFILE_MATCH_FLAG) {
-        func_0025C278(x, y, depth, amount, *(u16 *)(entry + 0xC), MNU_MANTRA_SELECTED_OVERLAY_CODE, 0, drawArg);
+        func_0025C278(x, y, depth, amount, entry->sceneId, MNU_MANTRA_SELECTED_OVERLAY_CODE, 0, drawArg);
     }
 }
 
@@ -375,16 +346,16 @@ void mnuDrawCappedProfileMarkers(s32 x, s32 y, s32 depth, s32 alpha,
 }
 
 extern void func_0025CA50(s32, s32, s32, s32, s32,
-                          MnuProfileProgress *, u8 *, s32);
+                          MnuProfileProgress *, MnuMantraGridEntry *, s32);
 extern void func_0025C588(s32, s32, s32, s32, s32, s32);
 
 /* Draw the grid background and profile markers, then animation and status layers in separate passes. */
 void func_0025D100(s32 x, s32 y, s32 z, s32 alpha,
-                   MnuProfileProgress *profileOwner, s32 gridOwner,
+                   MnuProfileProgress *profileOwner, MenuSceneWork *gridOwner,
                    s32 context) {
-    u8 *grid = *(u8 **)(gridOwner + 0x484);
-    u8 *entry;
-    u8 *counter;
+    SdfGrid *grid = gridOwner->gridHandle;
+    SdfGridCell *cell;
+    MnuMantraGridEntry *entry;
     s32 row;
     s32 column;
 
@@ -393,37 +364,35 @@ void func_0025D100(s32 x, s32 y, s32 z, s32 alpha,
                                 (s32)((f32)alpha * 0.5f),
                                 profileOwner, context);
     for (row = 0; row < MNU_MANTRA_GRID_ROW_COUNT; row++) {
-        entry = (u8 *)(*(s32 *)(grid + 4) +
-                       row * *(s32 *)(grid + 0x14) * MNU_MANTRA_GRID_SLOT_BYTES);
-        for (column = 0; column < MNU_MANTRA_GRID_COLUMN_COUNT; column++, entry += MNU_MANTRA_GRID_SLOT_BYTES) {
-            counter = (u8 *)*(s32 *)(entry + 4);
-            if (counter != NULL) {
+        cell = grid->cells + row * grid->width;
+        for (column = 0; column < MNU_MANTRA_GRID_COLUMN_COUNT; column++, cell++) {
+            entry = (MnuMantraGridEntry *)(u32)cell->value;
+            if (entry != NULL) {
                 func_0025CA50(x, y, z,
                               (s32)((f32)alpha * 0.5f),
-                              gridOwner, profileOwner, counter, context);
+                              (s32)gridOwner, profileOwner, entry, context);
             }
         }
     }
     for (row = 0; row < MNU_MANTRA_GRID_ROW_COUNT; row++) {
-        entry = (u8 *)(*(s32 *)(grid + 4) +
-                       row * *(s32 *)(grid + 0x14) * MNU_MANTRA_GRID_SLOT_BYTES);
-        for (column = 0; column < MNU_MANTRA_GRID_COLUMN_COUNT; column++, entry += MNU_MANTRA_GRID_SLOT_BYTES) {
-            counter = (u8 *)*(s32 *)(entry + 4);
-            if (counter != NULL) {
+        cell = grid->cells + row * grid->width;
+        for (column = 0; column < MNU_MANTRA_GRID_COLUMN_COUNT; column++, cell++) {
+            entry = (MnuMantraGridEntry *)(u32)cell->value;
+            if (entry != NULL) {
                 func_0025C8D0(x, y, z, alpha,
-                              profileOwner, counter, context);
+                              profileOwner, entry, context);
             }
         }
     }
-    func_0025C588(x, y, z, alpha, gridOwner, context);
+    func_0025C588(x, y, z, alpha, (s32)gridOwner, context);
 }
 
-extern void mnuAdvanceActiveGridSlotAnimations(MnuProfileProgress *, s32);
+extern void mnuAdvanceActiveGridSlotAnimations(MnuProfileProgress *, MenuSceneWork *);
 
 /* Update the owner's grid slots and its independent looping-frame counter. */
-void mnuAdvanceDisplayGridAndLoopingFrame(s32 gridOwner, MnuProfileProgress *animationContext) {
+void mnuAdvanceDisplayGridAndLoopingFrame(MenuSceneWork *gridOwner, MnuProfileProgress *animationContext) {
     mnuAdvanceActiveGridSlotAnimations(animationContext, gridOwner);
-    mnuAdvanceLoopingFrame((s32 *)(gridOwner + 0x490));
+    mnuAdvanceLoopingFrame(&gridOwner->gridFrame);
 }
 
 typedef struct MnuRequirementIds {
@@ -453,10 +422,10 @@ extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 /* Build the mantra selection surface, including requirement-dependent panels,
  * then draw the grid and restore the surface state for the caller. */
 void func_0025D2F8(s32 x, s32 y, s32 unusedDepth, s32 alpha,
-                   MnuSceneRenderWork *gridOwner, s32 context) {
+                   MenuSceneWork *gridOwner, s32 context) {
     MnuProfileProgress *profileOwner = (MnuProfileProgress *)mnuGetSelectedNodeValue();
 
-    mnuAdvanceDisplayGridAndLoopingFrame((s32)gridOwner, profileOwner);
+    mnuAdvanceDisplayGridAndLoopingFrame(gridOwner, profileOwner);
     sdfSubmitGsTestOneRegisterPacket(0x30000, context);
     uiDrawUniformColorRect(0, 0, -1, 0x2000, 0xE00, 0, context);
     sdfSubmitGsTestOneRegisterPacket(0x3000DL, context);
@@ -501,7 +470,7 @@ void func_0025D2F8(s32 x, s32 y, s32 unusedDepth, s32 alpha,
     }
 
     {
-        u32 displayFlags = gridOwner->displayFlags;
+        u32 displayFlags = gridOwner->boundsFlags;
 
         if (displayFlags & 1) {
             uiDrawUniformColorRect(0, 0x280, 0, 0x1BF0, 0xB80, 0x80,
@@ -516,7 +485,7 @@ void func_0025D2F8(s32 x, s32 y, s32 unusedDepth, s32 alpha,
     sdfDispatchSurfaceWithPreparedTexturePacket(context);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, context);
     sdfSubmitGsTestOneRegisterPacket(0x50000, context);
-    func_0025D100(x, y, 1, alpha, profileOwner, (s32)gridOwner, context);
+    func_0025D100(x, y, 1, alpha, profileOwner, gridOwner, context);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, context);
     sdfSubmitGsTestOneRegisterPacket(0x30000, context);
     uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, context);
@@ -527,8 +496,8 @@ extern f32 func_002C84F0(f32 *);
 extern s32 D_003BC4E0;
 
 /* Ease the live cursor toward the selected scene row and track whether it moved. */
-void func_0025D628(MnuSceneRenderWork *work) {
-    MnuSceneSelectionNode *selectedNode;
+void func_0025D628(MenuSceneWork *work) {
+    MnuMantraGridEntry *selectedEntry;
     s32 entryIndex;
     s32 targetX;
     s32 targetY;
@@ -539,34 +508,34 @@ void func_0025D628(MnuSceneRenderWork *work) {
     s32 next;
 
     moving = 0;
-    selectedNode = work->grid->slot->node;
-    entryIndex = selectedNode->entryIndex;
+    selectedEntry = (MnuMantraGridEntry *)(u32)work->gridHandle->cursor->value;
+    entryIndex = selectedEntry->sceneId;
     targetX = D_0036BE38[entryIndex][MNU_SCENE_SPRITE_X_OFFSET];
     targetY = D_0036BE38[entryIndex][MNU_SCENE_SPRITE_Y_OFFSET];
     memset(direction, 0, sizeof(direction));
-    direction[0] = targetX - work->cursorX;
-    direction[1] = targetY - work->cursorY;
+    direction[0] = targetX - work->entryPosition.x;
+    direction[1] = targetY - work->entryPosition.y;
     func_002C84F0(direction);
 
-    current = work->cursorX;
+    current = work->entryPosition.x;
     difference = targetX - current;
     if (difference != 0) {
         moving = 1;
         next = (s32)((f32)current + direction[0] * 15.0f);
-        work->cursorX = next;
+        work->entryPosition.x = next;
         if (difference * (targetX - (s16)next) < 0) {
-            work->cursorX = targetX;
+            work->entryPosition.x = targetX;
         }
     }
 
-    current = work->cursorY;
+    current = work->entryPosition.y;
     difference = targetY - current;
     if (difference != 0) {
         moving = 1;
         next = (s32)((f32)current + direction[1] * 15.0f);
-        work->cursorY = next;
+        work->entryPosition.y = next;
         if (difference * (targetY - (s16)next) < 0) {
-            work->cursorY = targetY;
+            work->entryPosition.y = targetY;
         }
     }
 
@@ -780,4 +749,3 @@ INCLUDE_SDATA(const s32, "game/code_0025BC38", D_003BC4D8);
 INCLUDE_SDATA(const s32, "game/code_0025BC38", D_003BC4E0);
 
 INCLUDE_SDATA(const s32, "game/code_0025BC38", D_003BC4E8);
-
