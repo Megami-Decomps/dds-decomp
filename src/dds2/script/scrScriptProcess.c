@@ -146,7 +146,32 @@ void scrDestroyAllNamedProcesses(void)
     }
 }
 
-INCLUDE_ASM(const s32, "script/scrScriptProcess", func_0010C058);
+/* Start procedure `index` on a script process: copy its name, set pc, clear the stack and timers. Returns 0 for an out-of-range index. */
+s32 func_0010C058(ScrData *process, s32 index)
+{
+    s32 i;
+
+    if (index < 0 || index >= process->sections->count) {
+        return 0;
+    }
+    for (i = 0; (process->name[i] = process->procedures[index].name[i]) != 0; i++) {
+    }
+    process->pc = process->procedures[index].addr;
+    process->sp = 0;
+    {
+        ScrStackValue *value = process->stackValues;
+        s8 *type = process->stackTypes;
+
+        for (i = SCR_STACK_RET; i >= 0; i--) {
+            *type++ = 0;
+            value++->i = 0;
+        }
+    }
+    process->procedureIndex = index;
+    process->timer = 0;
+    process->cmdTimer = 0;
+    return 1;
+}
 
 /* Find the node whose name matches, or NULL when the table is exhausted. */
 ScrData *scrFindNamedProcessNode(char *name) {
