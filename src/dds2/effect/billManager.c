@@ -7,7 +7,7 @@
 
 extern void *memcpy(void *, const void *, u32);
 extern BillChildPayload *func_00158F88(BillObj *, BillOut *);
-extern void func_00157EA0(BillObj *, BillChildPayload *);
+extern void billAppendChildQuad(BillObj *, BillChildPayload *);
 extern void func_00158430(BillObj *, BillRenderPair *);
 
 extern BillObj *billCreateIndexed(s32 index, u32 data);
@@ -20,7 +20,7 @@ void *func_00157D38(void *arg);
 
 void billSetAnimationEntry(BillObj *arg0, s32 arg1);
 
-void *func_00159678(void *arg);
+BillData *billCreateAnimationDataFromResource(void *arg);
 
 extern BillDispatch D_003AA998[];
 
@@ -45,7 +45,7 @@ extern BillChildPayload *D_00438EFC;
 
 /* Keep each child's pending list synchronized with the instance's draw mode,
  * then append one quad to its fifteen-record streams. */
-void func_00157EA0(BillObj *obj, BillChildPayload *child) {
+void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
     f32 matrix[16];
     f32 direction[4];
     f32 dot;
@@ -157,7 +157,7 @@ void func_00157EA0(BillObj *obj, BillChildPayload *child) {
 extern BillChildPayload *D_00438EFC;
 extern SdfPoolNode *D_003AA960[5];
 
-void func_00158340(void) {
+void billFlushPendingChildPackets(void) {
     BillChildPayload *node;
 
     node = D_00438EFC;
@@ -412,7 +412,7 @@ void func_00158AA0(BillRenderPair *pair) {
 extern SdfPoolNode D_00380228;
 extern void func_0032DB78(const void *, void *, s32);
 
-void func_00158C00(void) {
+void billFlushPendingRenderPairs(void) {
     BillRenderPair *node = D_00438F00;
     SdfListHead *list;
     void *texture;
@@ -472,7 +472,7 @@ void billReleaseChild(BillObj *obj) {
 }
 
 void billProcessChild(BillObj *obj) {
-    func_00157EA0(obj, obj->entryList);
+    billAppendChildQuad(obj, obj->entryList);
 }
 
 BillObj *billAllocList(void *resourceData) {
@@ -482,7 +482,7 @@ BillObj *billAllocList(void *resourceData) {
 
     data = NULL;
     if (resourceData != NULL) {
-        data = func_00159678(resourceData);
+        data = billCreateAnimationDataFromResource(resourceData);
     }
     n = data->entryCount;
     newobj = sdfAllocSizeClassBlock(n * 20 + 0x6C);
@@ -669,7 +669,7 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
 
 extern s32 func_0035B6E0(const char *format, ...);
 
-void *func_00159678(void *resource) {
+BillData *billCreateAnimationDataFromResource(void *resource) {
     u8 *sourceBytes = resource;
     s32 *resourceHeader = resource;
     s32 *childOffsetCursor = (s32 *)(sourceBytes + resourceHeader[0]);
