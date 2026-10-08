@@ -97,7 +97,6 @@ extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
 extern void sdfReleaseChipBlock(void *p);
 
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
-extern void parRiseFallSymmetricCellAlpha(void *system, void *a, void *b, void *c);
 
 /* Parameter head (0x4C bytes) copied verbatim into the work. */
 typedef struct {

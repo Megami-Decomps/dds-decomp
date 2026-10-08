@@ -4551,6 +4551,7 @@
 0x002B9CF8	mnuDrawWindowDecorations	inferred	U0
 0x002B9DD8	mnuDrawWindowSelectionPanel	inferred	Draws visible panel at scrolled row and advances window transition. [names_reviewed5.tsv]
 0x002B9EA0	mnuDrawWindowContainer	inferred	Draws icon rows, selected panel and window frame then advances fade state. [names_reviewed5.tsv]
+0x002B9FF8	mnuCreatePanelIconState	inferred	allocates a MenuIconState and selects its sprite handles by panel kind
 0x002BA268	mnuClearEntryFlags	inferred	Clears bit 0 from each present panel slot flags and reinitializes its work; callers use it after advancing or retreating list selection. DDS1 equivalent: mnuClearEntryFlags at 0x0027D740.
 0x002BA378	mnuDrawIconPanelFade	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002BA518	mnuDrawIconRow6	inferred	wrong or missing short module prefix [names_audit.tsv]
@@ -4581,6 +4582,7 @@
 0x002BB8D8	mnuReleasePartyPanelTextures	inferred	Releases three texture slots for each party panel and clears panel flags. [names_reviewed5.tsv]
 0x002BB998	mnuResetPartyPanelFade	inferred	Clears both party-panel fades and optionally restores their scales to full. [names_reviewed5.tsv]
 0x002BB9D0	mnuSetPageParams	inferred	DDS1 has the same unprefixed symbol; game/code_002B0278 uses mnu for the already-described menuSetPageParams behavior.
+0x002BBA38	mnuCreatePageSpriteSet	inferred	allocates a MenuSprites owner and fills its icon, item, and cursor EffectSlotSet arrays
 0x002BBE78	mnuFreeIconSprites	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002BBF38	mnuDrawIconRow	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002BBFC8	mnuSetWindowResource	inferred	wrong or missing short module prefix [names_audit.tsv]

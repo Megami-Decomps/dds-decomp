@@ -16,8 +16,6 @@ extern void sdfBuildVuRotationFromAxisAngle(f32 *axis, f32 angle);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 blend);
-extern void parUpdateCellVertexPair(u32 system, s32 index, f32 vertices[2][4]);
-extern void parFadeAlphaCell(u32 system, s32 index);
 extern void effBillSetEntryValue(u32 system, s32 index, u32 value);
 
 extern f32 sdfViewEyeVector[4];
@@ -197,8 +195,8 @@ void func_00176428(EffPCPNeedleWork *work) {
                     VU0_MOVE_VF(vf10, vf12);
                     VU0_SUB(vf11, vf11, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf11, vertices[1]);
-                    parUpdateCellVertexPair((u32)work->system, i, vertices);
-                    parFadeAlphaCell((u32)work->system, i);
+                    parUpdateCellVertexPair(work->system, i, (const u128 *)vertices);
+                    parFadeAlphaCell(work->system, i);
                     effBillSetEntryValue((u32)work->system, i, (color & 0xFF000000) | 0x808080);
                 }
             } else {
