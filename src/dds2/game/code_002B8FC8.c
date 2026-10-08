@@ -166,11 +166,9 @@ extern char *D_003E7818[];
 extern char *D_003E7820[];
 
 
-extern u32 effLoadMappedResource(char *, char *);
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
-extern void effRequestMappedResource(char *, char *, u32 *);
 
 extern void mnuFreeWindowSprites();
 
@@ -671,7 +669,6 @@ void mnuOrEntryFlags(u32 flags, u32 *entryFlags);
 
 void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 
-void mnuSetCampEffectResourceHandles(u32 first, u32 second, MenuEffectResources *);
 
 
 void mnuBindCampEffectAnimation(MenuEffectResources *);

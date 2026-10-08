@@ -448,7 +448,7 @@ void movLoadTitleEffects(u8 *menuBytes) {
     EffMappedRecord *records;
     s32 *statusWords;
 
-    work->motionResource = (EffMappedResource *)effLoadMappedResource("/camp/mot/", D_003E6970[0]);
+    work->motionResource = effLoadMappedResource("/camp/mot/", D_003E6970[0]);
     batch = effCreateStatusBatch(6);
     records = batch->records;
     work->motion[0] = batch;
