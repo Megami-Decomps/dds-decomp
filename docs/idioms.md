@@ -3027,6 +3027,13 @@ two different owned allocations, the effect and then its mixer. Keep
 that generic release local rather than adding casts between unrelated
 owners; the public release prototypes retain their concrete types.
 
+## Battle-group extent output contract
+
+DDS1 `001F66D8` and DDS2 `00208000` take an `s32` group mask and two
+nullable `f32 *` outputs, and return the extent in `$f0`. DDS2 `+0x248`
+and `+0x250` store the float outputs with `SWC1`; integer-address formals
+at these positions obscure the real API.
+
 ## Font glyphs, draw controllers, and message-window ownership
 
 The font parent pool allocates `0x44`-byte `FrFontGlyph` nodes. Their
@@ -3189,6 +3196,20 @@ keys, as documented by `ActorEffectOwner`; no additional actor prefix
 view is needed. The sound duration can be forced to 35 frames by the
 actor's packed effect state, then updates the effect and task limits.
 
+## Indexed retained billboards return their SDK address word
+
+`effRetainResource` creates a billboard, binds the indexed owner's
+`entryList`, and increments that resource's reference count. Its returned
+`u32` is the established billboard handle/address-word interface, not a
+new pointer-argument adaptation. DDS2's provider already returns this
+value explicitly; DDS1's equivalent provider must return it too.
+
+The particle shared-resource constructors (`002B4798` / `002F99E8`)
+store the return register in their native `billHandle` word at `+0xA4`.
+The DDS1 provider's void definition omitted a real return contract even
+though its existing consumers use that value.
+
+
 
 
 ## Font root, retained UVs and original prototype scope
@@ -3258,12 +3279,13 @@ though that helper does not need to read it.
 
 ## Event-viewer group window row limit
 
-The group viewer counts its two fixed rows separately from the type-`0x18`
-group chain. Initialize the visible-row limit to the window's capacity,
-then reduce it when the full count is smaller. DDS1 `0023BB20` and DDS2
-`002569D0` use capacity 15 and the same cap-first clamp as the matched
-neighboring world-node viewer. Keep the full count for `kwlnStepTwoListCursors`; pass the real
-`EvtRuntime.groupFirst` and `groupCursor` addresses to its pointer API.
+The type-`0x18` group viewer counts two fixed rows separately from the
+group chain; the type-`1` viewer counts three. Initialize the visible-row
+limit to the window's capacity, then reduce it when the full count is
+smaller. DDS1 `0023BB20`/`0023A688` and DDS2 `002569D0`/`00255538`
+use capacity 15 and the same cap-first clamp as the matched neighboring
+world-node viewer. Keep the full count for `kwlnStepTwoListCursors`; pass
+the real `EvtRuntime.groupFirst` and `groupCursor` addresses to its pointer API.
 
 ## Serialized waypoint and actor block
 
@@ -3301,4 +3323,23 @@ upper FRAME register word at builder `+0x54`. The initializer's formals
 follow those real field types. The callback itself remains ASM: honest
 64-bit GS packing with the matched neighboring convention differs in the
 width rounding shift (`dsra32` versus retail `sra`).
+
+
+## Mantra node tables and profile requirements
+
+DDS2 `func_00315950` and `mnuIsResourceCategoryAvailable` use the canonical
+`MantraNodePos` from `mnu_mantra.h`. Their whole-word tag reads belong to
+`selector.packed`, and their six links belong to `neighbors`; a separate
+header/adjacency view is unnecessary. This owner fold leaves
+`code_00313BB8` at `94 match, 0 differ`.
+
+
+## DDS1 HARI form counter
+
+`BattleEffectState`'s first word is mode-dependent. HARI1 uses its
+`formCount` halfword, not the actor-pointer or stat-selector view.
+`btlQueueHariFormChangeOrPartyCommand` checks the three-change limit and
+increments it; `btlGetEventEffectValue` and the special-enemy phase gate
+read the same halfword. The union preserves the existing actor/timing
+layout without treating every mode's payload as an actor.
 
