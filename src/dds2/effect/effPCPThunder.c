@@ -4,6 +4,7 @@
 #include "btl_sound.h"
 #include "eff.h"
 #include "eff_event.h"
+#include "eff_event_sound.h"
 #include "eff_pcp_flash.h"
 #include "pcp_vu0.h"
 
@@ -2322,7 +2323,6 @@ typedef struct EffGroup {
     SdfMemBlock *allocation;
 } EffGroup;
 
-extern SoundMixer *func_00197D38(SoundMixer *);
 extern EffFragmentResources *effCreateFragmentResources(s32, s32);
 extern void effInitializeFragmentHistoryColors(EffFragmentResources *, u32 *);
 
@@ -2344,7 +2344,7 @@ void *eventParams;
     work->hasHandle58 = 1;
     work->slots = slot;
     work->color = 0x80808080;
-    work->owner = func_00197D38(eventParams);
+    work->owner = effEventCloneSoundMixer(eventParams);
     a = work->params.unk38;
     if (a == 0) {
         work->params.unk38 = 1;
@@ -2457,7 +2457,6 @@ EffGroup *func_0016FB18(EffGroup *src) {
 
 
 extern void effReleaseEffectResources(EffFragmentResources *work);
-extern void func_00197D50(u32 handle);
 
 /* Release every slot's effect resources and event node, then the optional handle and the group allocation. */
 void effReleaseGroupSlotsAndResources(EffGroup *group) {
@@ -2474,7 +2473,7 @@ void effReleaseGroupSlotsAndResources(EffGroup *group) {
         } while (i < count);
     }
     if (group->hasHandle58 != 0) {
-        func_00197D50((u32)group->owner);
+        effEventReleaseSoundMixerVoices(group->owner);
     }
     sdfReleaseResourceAllocation(group->allocation);
 }
