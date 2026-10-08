@@ -327,9 +327,9 @@ typedef struct MenuVoiceState {
 } MenuVoiceState;
 
 
-extern void ptyRecomputeMaxHpMp();
+extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
 
-extern void scrClearSecondaryScriptFlag();
+extern void scrClearSecondaryScriptFlag(DatPartyRecord *unit, u16 flagId);
 
 extern void func_0019D550(s32, s32, s32);
 
