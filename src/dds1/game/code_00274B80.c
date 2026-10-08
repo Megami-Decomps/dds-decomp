@@ -1551,7 +1551,36 @@ void mnuHighlightSelectedListNode(KwlnTask *task) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00278C90);
+s32 func_00278C90(KwlnTask *task) {
+    CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(task);
+    SkillMenuRuntime *menu = (SkillMenuRuntime *)context->menu;
+    s32 index = -1;
+
+    if (menu->selectionFlags != 0) {
+        mnuSeekListNode(0, menu->selectedWindow->list);
+        mnuClearSelectedListNodeId(task);
+    } else if (((MenuWindowContainer *)(u32)context->panel)->list->cursor->index != 0) {
+        MenuWindowContainer **categoryWindows = menu->skillWindows;
+        MenuWindowContainer *window;
+        struct MenuListNode *node;
+
+        if (categoryWindows[menu->categoryList->cursor->index]->list->cursor->index != 0) {
+            window = menu->selectedWindow;
+            node = window->list->first;
+            while (node != NULL) {
+                if (node->sortKeyPrimary == 0) {
+                    index = node->index;
+                    break;
+                }
+                node = node->next;
+            }
+            if (index >= 0) {
+                mnuSeekListNode(index, menu->selectedWindow->list);
+            }
+        }
+    }
+    return 1;
+}
 
 u32 mnuResetStaffSelectionFlags(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
