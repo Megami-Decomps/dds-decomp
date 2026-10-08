@@ -3,7 +3,6 @@
 
 
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern void *sdfAllocGeneralBlock(s32 size);
 extern u32 effGetResourceFirstWord(s32 index);
 extern s16 D_003D6670[];
 

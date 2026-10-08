@@ -631,7 +631,6 @@ void brsTaskLatchPendingRows(BrsSkillPackageWork *context) {
     }
 }
 
-extern s32 sdfAllocGeneralBlock(s32);
 extern struct EffectList *mnuAllocateValueRecord(u32);
 extern char D_003D05C8[];
 extern s32 func_0029D008(BrsRewardBatch *, BrsRewardSummary *);
@@ -652,7 +651,7 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     BrsRewardBatch *secondary;
     BrsSkillPackageWork *work;
 
-    handle = sdfAllocGeneralBlock(sizeof(BrsSkillPackageWork));
+    handle = (u32)sdfAllocGeneralBlock(sizeof(BrsSkillPackageWork));
     work = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     memset(work, 0, sizeof(BrsSkillPackageWork));
     work->handle = handle;

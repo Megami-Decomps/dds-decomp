@@ -78,7 +78,6 @@ extern void *func_002CB5F0(SdfTaskItemDesc *);
 
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
-extern s32 sdfAllocGeneralBlock(s32);
 
 extern void *sdfMemoryGetBlockAddress(u32);
 
@@ -500,7 +499,7 @@ void func_002CAAC8(s32 *points, u32 tail, u32 *colors, s32 count,
 
 /* Return a callback-list header address, retaining its allocation handle and teardown userData. */
 SdfList *sdfCreateTaskHeader(void *userData) {
-    s32 allocation = sdfAllocGeneralBlock(sizeof(SdfList));
+    s32 allocation = (u32)sdfAllocGeneralBlock(sizeof(SdfList));
     SdfList *obj = sdfMemoryGetBlockAddress(allocation);
 
     memset(obj, 0, sizeof(SdfList));
@@ -837,7 +836,7 @@ extern void sdfCallbackWorkOnRemove();
 
 /* Create a task resource work block with the name copied to two formatted buffers. */
 TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, void *userData) {
-    s32 allocation = sdfAllocGeneralBlock(0x14);
+    s32 allocation = (u32)sdfAllocGeneralBlock(0x14);
     TaskWork *work = sdfMemoryGetBlockAddress(allocation);
 
     memset(work, 0, 0x14);

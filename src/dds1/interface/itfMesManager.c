@@ -132,7 +132,6 @@ extern void func_0019F6A0(void);
 
 extern struct ItfMesPoolNode *itfAcquirePoolNode();
 
-extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern u32 strlen(const char *text);
 extern void *memset(void *destination, s32 value, u32 size);
 extern void *memcpy(void *destination, const void *source, u32 size);

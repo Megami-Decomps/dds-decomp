@@ -371,7 +371,6 @@ extern u32 effParamWorkDuplicate(u32 param);
 
 extern void effPcpScatterSharePoolResource(PcpScatterPool *dst, PcpScatterPool *src);
 
-extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 
 
 extern void *memset(void *dst, s32 value, u32 size);

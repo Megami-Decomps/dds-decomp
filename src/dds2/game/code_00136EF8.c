@@ -64,7 +64,6 @@ extern void sdfQueueNonzeroResourceId(u32 resource);
 
 extern void *memset(void *s, s32 c, u32 n);
 
-extern void *sdfAllocGeneralBlock(s32 size);
 
 
 extern u32 D_0038BD50[];
@@ -388,15 +387,16 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
 /* Keep both the resource handles and retained addresses: callers use the
  * retained storage, whereas the handles are needed at release time. */
 void fldAllocateRecordStorage(void) {
-    u8 *storage = sdfAllocGeneralBlock(FIELD_VALUE_RECORD_STORAGE_SIZE);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(FIELD_VALUE_RECORD_STORAGE_SIZE);
+    void *storage;
 
-    fldValueRecordResource = (u32)storage;
-    storage = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(storage));
+    fldValueRecordResource = (u32)allocation;
+    storage = (void *)sdfResourceRetainAddress(allocation);
     fldValueRecords = (u32)storage;
     memset(storage, 0, FIELD_VALUE_RECORD_STORAGE_SIZE);
-    storage = sdfAllocGeneralBlock(FIELD_AUX_RECORD_STORAGE_SIZE);
-    fldAuxRecordResource = (u32)storage;
-    storage = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(storage));
+    allocation = sdfAllocGeneralBlock(FIELD_AUX_RECORD_STORAGE_SIZE);
+    fldAuxRecordResource = (u32)allocation;
+    storage = (void *)sdfResourceRetainAddress(allocation);
     fldAuxRecordBuffer = (u32)storage;
     memset(storage, 0, FIELD_AUX_RECORD_STORAGE_SIZE);
 }

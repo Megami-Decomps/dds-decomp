@@ -625,7 +625,6 @@ void mnuResetProgressModeFromOwner(u8 *work) {
     ((MenuTerminalWork *)work)->initState = *(s32 *)(*(u8 **)(owner + 0x1C) + 0x60);
 }
 
-extern s32 sdfAllocGeneralBlock(s32);
 
 
 extern void *memset(void *, s32, u32);
@@ -641,7 +640,7 @@ extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 
 /* Allocate/zero the visual host, retain its allocation, and begin resource setup. */
 MenuProgressHost *mnuCreateWorkBlock(void) {
-    s32 handle = sdfAllocGeneralBlock(MNU_MENU_HOST_BYTES);
+    s32 handle = (u32)sdfAllocGeneralBlock(MNU_MENU_HOST_BYTES);
     MenuProgressHost *work = (MenuProgressHost *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
 
     memset(work, 0, MNU_MENU_HOST_BYTES);
@@ -897,7 +896,7 @@ u8 *mnuTerminalCreateScene(reduced, slot)
     u8 *obj;
     u32 i;
 
-    handle = sdfAllocGeneralBlock(MNU_TERMINAL_SCENE_BYTES);
+    handle = (u32)sdfAllocGeneralBlock(MNU_TERMINAL_SCENE_BYTES);
     obj = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     memset(obj, 0, MNU_TERMINAL_SCENE_BYTES);
     ((MenuTerminalWork *)obj)->allocation = handle;

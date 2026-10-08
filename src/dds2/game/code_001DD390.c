@@ -922,16 +922,15 @@ void btlResetIndexWork(BattleIndexWork *work) {
 }
 
 
-extern u32 sdfAllocGeneralBlock(s32);
 
 
 /* Allocate the index list and retained groups, then initialize their headers. */
 void btlInitBattleIndexWork(BattleIndexWork *work) {
-    u32 handle;
+    struct SdfMemBlock *allocation;
     work->indices = btlAllocateIndexList(13);
-    handle = sdfAllocGeneralBlock(0x48EC);
-    work->groups = (BtlOperandGroup *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
-    work->allocationHandle = handle;
+    allocation = sdfAllocGeneralBlock(0x48EC);
+    work->groups = (BtlOperandGroup *)sdfResourceRetainAddress(allocation);
+    work->allocationHandle = (u32)allocation;
     work->ownerId = 0;
     btlResetIndexWork(work);
 }
@@ -4536,11 +4535,11 @@ extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern void *memset(void *, s32, u32);
 
 BtlUnit *btlCreateUnit(void) {
-    u32 handle = sdfAllocGeneralBlock(0x368);
-    BtlUnit *unit = (BtlUnit *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x368);
+    BtlUnit *unit = (BtlUnit *)sdfResourceRetainAddress(allocation);
     BtlState *work;
     memset(unit, 0, 0x368);
-    unit->handle35C = handle;
+    unit->handle35C = (u32)allocation;
     unit->owner = btlAdvanceRuntimeSequenceCounter();
     unit->flags = 0;
     unit->stateFlags = 0;

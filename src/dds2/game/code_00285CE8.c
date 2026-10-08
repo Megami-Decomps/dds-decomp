@@ -1,7 +1,6 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
-extern s32 sdfAllocGeneralBlock(s32 size);
 extern s8 *sdfMemoryGetBlockAddress();
 
 
@@ -161,7 +160,7 @@ s32 mtrMantraEventBitPush(void) {
     s32 handle;
     s32 i;
 
-    handle = sdfAllocGeneralBlock(0x76);
+    handle = (u32)sdfAllocGeneralBlock(0x76);
     data = sdfMemoryGetBlockAddress(handle);
     memset(data, 0, 0x76);
     for (i = 0; i < 0x70; i++) {

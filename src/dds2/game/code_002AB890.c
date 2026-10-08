@@ -392,7 +392,7 @@ void func_002ACB38(s32 object) {
 
 u32 mnuInitializeWindowOwnerResourceSet(void) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue();
-    s32 handle = sdfAllocGeneralBlock(0x54);
+    s32 handle = (u32)sdfAllocGeneralBlock(0x54);
     MenuStaffChoices *resource = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
 
     context->menu = resource;

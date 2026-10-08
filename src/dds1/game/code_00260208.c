@@ -593,7 +593,6 @@ void brsTaskLatchPendingRows(BrsSkillPackageWork *task) {
     }
 }
 
-extern s32 sdfAllocGeneralBlock(s32);
 extern struct EffectList *mnuAllocateValueRecord(u32);
 extern void evtCreateMessageWindowIfMissing(void *);
 extern void evtSetMessageWindowPageValue(s32);
@@ -614,7 +613,7 @@ BrsSkillPackageWork *brsCreateTaskContext(void) {
     BrsRewardBatch *secondary;
     BrsSkillPackageWork *work;
 
-    handle = sdfAllocGeneralBlock(sizeof(BrsSkillPackageWork));
+    handle = (u32)sdfAllocGeneralBlock(sizeof(BrsSkillPackageWork));
     work = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     memset(work, 0, sizeof(BrsSkillPackageWork));
     work->handle = handle;

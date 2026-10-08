@@ -55,7 +55,7 @@ extern s32 mnuPollTitleStreamStateLocked(void);
 extern u32 D_00437A2C;
 
 typedef struct MovieMenuState {
-    struct MemBlock *allocation;
+    struct SdfMemBlock *allocation;
     u8 pad04[0x0C];
     s32 state;
     s32 cursor;
@@ -105,9 +105,7 @@ extern s32 WaitSema(u32);
 
 extern s32 SignalSema(u32);
 
-typedef struct MemBlock MemBlock;
-extern MemBlock *sdfAllocGeneralBlock(s32 size);
-extern u32 sdfMemoryGetBlockAddress(MemBlock *block);
+extern u32 sdfMemoryGetBlockAddress(struct SdfMemBlock *block);
 extern s32 sceSifInitIopHeap(void);
 extern s32 sceSifAllocIopHeap(s32 size);
 extern void Exit(s32 status);
@@ -583,7 +581,6 @@ extern s32 fileGetResourceHandle(u32);
 extern u32 fileGetLoadedDataAddress(u32);
 extern s32 fileGetResourceSize(u32);
 extern void filePollEntryCleanup(u32);
-extern MemBlock *sdfAllocGeneralBlockHigh(s32);
 extern void func_003504A8(u32 *);
 
 /* Allocate in global status, but use the supplied state's copy destination
@@ -596,7 +593,7 @@ s32 mnuCompleteTitleStreamFileLoad(u32 *destinationState) {
         s32 resourceHandle = fileGetResourceHandle(D_00438FEC);
         u32 fileDataAddress = fileGetLoadedDataAddress(D_00438FEC);
         s32 fileBytes = fileGetResourceSize(D_00438FEC);
-        MemBlock *allocation;
+        struct SdfMemBlock *allocation;
 
         filePollEntryCleanup(D_00438FEC);
         allocation = sdfAllocGeneralBlockHigh(fileBytes);
@@ -765,7 +762,7 @@ INCLUDE_RODATA(const s32, "game/code_002A05C0", D_00428650);
 void mnuInitializeTitleSoundBuffer(void) {
     u32 *streamState = mnuTitleSoundBufferState;
     u32 *decoder = D_00455D98;
-    MemBlock *allocation;
+    struct SdfMemBlock *allocation;
     s32 bufferAddress;
 
     WaitSema(mnuTitleStreamSemaphore);
@@ -788,7 +785,7 @@ extern char D_00428650[];
 
 /* Each format reserves 600 compressed frames before loading its named stream. */
 void func_002A2628(s32 soundEntryIndex) {
-    MemBlock *allocation = NULL;
+    struct SdfMemBlock *allocation = NULL;
     s32 bufferAddress;
     char soundPath[MNU_TITLE_SOUND_PATH_BYTES];
 
@@ -832,7 +829,7 @@ void func_002A2628(s32 soundEntryIndex) {
  * format while holding the shared sound-buffer semaphore. The native code
  * has no default-format guard or buffer-capacity check. */
 void func_002A27A8(void *compressedData, s32 dataBytes, s32 format) {
-    MemBlock *allocation = NULL;
+    struct SdfMemBlock *allocation = NULL;
     s32 bufferAddress;
     s32 frameCount;
 
@@ -944,7 +941,7 @@ extern s32 func_002A30C0(KwlnTask *);
 extern u32 D_00435CBC;
 
 KwlnTask *mnuCreateTitleMenuTask(s32 mode) {
-    MemBlock *allocation;
+    struct SdfMemBlock *allocation;
 
     kwlnFadeBackgroundStartOut(0);
     mnuStopTitleMovieDraw();

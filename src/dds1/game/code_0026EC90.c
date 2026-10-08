@@ -146,7 +146,6 @@ extern u16 mnuMovieTaskState;
 
 extern char D_003B1168[];
 
-extern s32 sdfAllocGeneralBlock(s32);
 
 
 extern void func_0026A5F0(s32);
@@ -160,7 +159,7 @@ void mnuMovieCreateTask(void) {
     MnuStaffMovieWork *movie;
 
     D_003BA8EC = 0x80000000;
-    handle = sdfAllocGeneralBlock(0x20);
+    handle = (u32)sdfAllocGeneralBlock(0x20);
     movie = (MnuStaffMovieWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     mnuMovieWork = movie;
     movie->allocation = handle;

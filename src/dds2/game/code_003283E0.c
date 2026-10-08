@@ -21,11 +21,10 @@ extern s32 RemoveSbusIntcHandler(s32);
 extern void (*sdfTickCallback)(void);
 
 extern void *sdfAllocSizeClassBlock();
-extern void *sdfAllocGeneralBlock(void);
 
 void *sdfAllocateBlockBySizeThreshold(s32 size) {
     if (size >= 0x401) {
-        return (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock());
+        return (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock(size));
     }
     return sdfAllocSizeClassBlock(size);
 }

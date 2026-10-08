@@ -91,7 +91,6 @@ extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
 
 extern void sdfReleaseChipBlock(void *p);
 
-extern u32 sdfAllocGeneralBlock(s32 size);
 extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
 extern void func_00164C68(void *system, u32 value);
@@ -632,7 +631,7 @@ EffParamWork *effParamCreateFromTable(EffParamWork *table, s32 index) {
  * the cell system with native arguments groupDivisor=0 and kind=4.
  * Only three words per cell are zeroed here; vector/range storage is untouched. */
 EffThunderWork4C *effCreateThunderCellSystemWork(EffThunderHead4C *source) {
-    u32 allocationHandle = sdfAllocGeneralBlock(source->count * sizeof(EffThunderCell2C) + sizeof(EffThunderWork4C));
+    u32 allocationHandle = (u32)sdfAllocGeneralBlock(source->count * sizeof(EffThunderCell2C) + sizeof(EffThunderWork4C));
     EffThunderWork4C *work = (EffThunderWork4C *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
     u32 cellIndex;
 

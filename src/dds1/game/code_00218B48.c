@@ -305,7 +305,6 @@ typedef struct MdlViewerHeader {
     s16 unk06;
 } MdlViewerHeader;
 
-extern s32 sdfAllocGeneralBlock(s32 size);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern u32 strlen(const char *);
 extern char *strcpy(char *, const char *);
@@ -319,13 +318,13 @@ void mdlInitializeViewerResourceTable(void) {
     char *copiedText;
 
     mdlReleaseViewerSlotResources();
-    D_003BBB6C = sdfAllocGeneralBlock(MDL_VIEWER_HEADER_BYTES);
+    D_003BBB6C = (u32)sdfAllocGeneralBlock(MDL_VIEWER_HEADER_BYTES);
     D_003BD880 = (MdlViewerHeader *)sdfResourceRetainAddress((struct SdfMemBlock *)(D_003BBB6C));
     D_003BD880->kind = 5;
     D_003BD880->unk02 = 0;
     D_003BD880->unk04 = 0x1000;
     D_003BD880->unk06 = 0x3E8;
-    D_003BBB70 = sdfAllocGeneralBlock(MDL_VIEWER_NAME_TABLE_BYTES);
+    D_003BBB70 = (u32)sdfAllocGeneralBlock(MDL_VIEWER_NAME_TABLE_BYTES);
     D_003BD884 = (char **)sdfResourceRetainAddress((struct SdfMemBlock *)(D_003BBB70));
     for (sourceIndex = 0; sourceIndex != MDL_VIEWER_LABEL_COUNT; sourceIndex++) {
         switch (sourceIndex) {

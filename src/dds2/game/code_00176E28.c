@@ -75,7 +75,6 @@ typedef struct EffRingBlock {
     EffRingParticle vertices[1];
 } EffRingBlock;
 
-extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 
 
 extern EffRecordPool *effAllocateIdentityMatrixWork(u32 count);
