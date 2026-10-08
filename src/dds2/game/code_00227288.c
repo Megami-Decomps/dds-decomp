@@ -872,7 +872,39 @@ void func_002294B8(void) {
     ptyRebalanceFrontline(8);
 }
 
-INCLUDE_ASM(const s32, "game/code_00227288", btlRemapListedUnitAction);
+extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *unit);
+
+/* Only scene-listed special units use these alternate action codes. */
+s32 btlRemapListedUnitAction(BtlUnit *unit, s32 action) {
+    BtlState *battle;
+    u16 *listedMode;
+    u32 i;
+
+    if ((unit->flags & 0x400) == 0) {
+        return action;
+    }
+    battle = (BtlState *)btlGetRuntime();
+    i = 0;
+    listedMode = ((DatBattleSceneRecord *)(battle->battleMode * (s32)sizeof(DatBattleSceneRecord) +
+                                      (u32)datBattleSceneRecords))->unitModes;
+    while (i < 0xB && listedMode[i] != unit->partyRecord.unitId) {
+        i++;
+    }
+    if (i == 0xB) {
+        return action;
+    }
+    switch (action) {
+    case 2:
+    case 9:
+        return btlIsCurrentValueBelowQuarterThreshold(unit) ? 10 : 0;
+    case 11:
+        return 1;
+    case 13:
+        return -1;
+    default:
+        return action;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_002295D8);
 
