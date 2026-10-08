@@ -398,7 +398,7 @@ void fileManInit(void) {
     memset(&fileManagerWork, 0, 0x40);
     fileManagerWork.freeSlots = 4;
     fileManagerWork.sema = sdfCreateSemaphore(1, 0x7F, 0);
-    fileManagerWork.buffer = sdfResourceRetainAddress((struct SdfMemBlock *)(sdfAllocGeneralBlock(0x40000)));
+    fileManagerWork.buffer = (u8 *)sdfResourceRetainAddress(sdfAllocGeneralBlock(0x40000));
     kwlnTaskCreate((s32)&D_00437CC8, 0x384, 1, 0, (s32)&fileMan, 0, 0);
     fileIdleUpdateCallback = fileManUpdate;
 }
