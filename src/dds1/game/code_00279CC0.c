@@ -24,7 +24,7 @@ extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
 
 extern s32 D_003BAA98;
 
-extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern FrFontGlyph *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
 
 
@@ -126,7 +126,7 @@ s32 func_0027A0A8(KwlnTask *callback) {
 void mnuDrawSelectionLabel(s32 selection) {
     FrFontGlyph *item = itfDrawTextWithSelectedFontMode(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
     frFontSetChildColors(item, 0xA09DC366);
-    func_001958A0(item, 1, 0x53);
+    frFontDrawGlyphChain(item, 1, 0x53);
     frFontQueueGlyphForCurrentDrawBuffer(item);
 }
 
@@ -175,7 +175,7 @@ void func_0027A140(u16 affinityId, s32 placeholderResource, s32 rangeResource) {
         }
 
         if (glyph != 0) {
-            func_001958A0(glyph, 1, 0x53);
+            frFontDrawGlyphChain(glyph, 1, 0x53);
             frFontQueueGlyphForCurrentDrawBuffer(glyph);
         }
     }

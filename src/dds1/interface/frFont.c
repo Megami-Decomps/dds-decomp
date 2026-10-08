@@ -38,7 +38,7 @@ extern s8 D_00356470[];
 
 extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s32 positionNext);
 
-extern s32 func_001958A0(FrFontGlyph *glyph, s8 mode, u32 flags);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 flags);
 
 
 FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *previous, FrFontGlyph *next);
@@ -64,6 +64,12 @@ extern void frFontEnsureSlotLoaded(s32 id, const char *path);
 #define FR_FONT_CONTEXT_ENABLE_VALUE 0x80
 #define FR_FONT_CONTEXT_VALUE_SHIFT 4
 #define FR_FONT_FADE_OPTION 2
+#define FR_FONT_FADE_COMPLETE 0x80
+#define FR_FONT_FADE_ADVANCE_SCALE 22
+#define FR_FONT_JITTER_OPTION 1
+#define FR_FONT_JITTER_PERIOD 5
+#define FR_FONT_JITTER_CENTER 2
+#define FR_FONT_FADE_PREDECESSOR_THRESHOLD 0x1C
 #define FR_FONT_FADE_VALUE_STEP 8
 #define FR_FONT_FADE_Y_STEP 0x10
 #define FR_FONT_POSITION_SHIFT 4
@@ -552,12 +558,12 @@ s32 frFontAdvanceGlyphFade(FrFontGlyph *glyph) {
 }
 
 /* Advance one rendered glyph's fade state and return its transient X jitter. */
-s32 func_001955D8(FrFontGlyph *parent, FrFontGlyph *glyph, u8 threshold, u8 step) {
+s32 frFontAdvanceChildFadeAndGetJitter(FrFontGlyph *parent, FrFontGlyph *glyph, u8 threshold, u8 step) {
     FrFontGlyph *previousParent;
     FrFontGlyph *previousGlyph;
     u32 *fadeWord;
     u8 previousOption;
-    u8 previousFade = 0x80;
+    u8 previousFade = FR_FONT_FADE_COMPLETE;
     s32 canAdvanceFade = 0;
     s32 canStopLips = 1;
     s32 glyphJitter = 0;
@@ -581,7 +587,7 @@ s32 func_001955D8(FrFontGlyph *parent, FrFontGlyph *glyph, u8 threshold, u8 step
             canAdvanceFade = 1;
         }
     } else {
-        canAdvanceFade = previousFade == 0x80;
+        canAdvanceFade = previousFade == FR_FONT_FADE_COMPLETE;
     }
 
     if (previousParent != NULL && parent->link1C.firstChild == glyph && parent->contextModeEnabled == 0) {
@@ -589,7 +595,7 @@ s32 func_001955D8(FrFontGlyph *parent, FrFontGlyph *glyph, u8 threshold, u8 step
         case ITF_GLYPH_CONTROL_WAIT_FRAMES:
             if (previousParent->remainingWaitFrames > 0) {
                 canAdvanceFade = 0;
-                if (previousFade == 0x80) {
+                if (previousFade == FR_FONT_FADE_COMPLETE) {
                     previousParent->remainingWaitFrames = previousParent->remainingWaitFrames - 1;
                 }
             }
@@ -607,7 +613,7 @@ s32 func_001955D8(FrFontGlyph *parent, FrFontGlyph *glyph, u8 threshold, u8 step
         }
     }
 
-    if (parent->pendingLipsStopCode == ITF_GLYPH_CONTROL_STOP_LIPS && parent->link20.linkedGlyph->u10.byte[0] == 0x80) {
+    if (parent->pendingLipsStopCode == ITF_GLYPH_CONTROL_STOP_LIPS && parent->link20.linkedGlyph->u10.byte[0] == FR_FONT_FADE_COMPLETE) {
         if (parent->skipLipsStopWait == 0 && parent->remainingWaitFrames > 0) {
             if (parent->remainingWaitFrames == ITF_GLYPH_WAIT_FOR_SOUND_SENTINEL) {
                 if (mnuQueryTitleSoundBusy() != 0) {
@@ -627,13 +633,13 @@ s32 func_001955D8(FrFontGlyph *parent, FrFontGlyph *glyph, u8 threshold, u8 step
         u32 currentFadeWord;
 
         if ((s8)step >= 0) {
-            step = (step * 22) / (glyph->advance + parent->u0.b.b1);
+            step = (step * FR_FONT_FADE_ADVANCE_SCALE) / (glyph->advance + parent->u0.b.b1);
         }
         currentFadeWord = *fadeWord;
-        if ((u32)(0x80 - (currentFadeWord & 0xFF)) >= step) {
+        if ((u32)(FR_FONT_FADE_COMPLETE - (currentFadeWord & FR_FONT_BYTE_MASK)) >= step) {
             *fadeWord = currentFadeWord + step;
         } else {
-            *fadeWord = (currentFadeWord & ~0xFF) | 0x80;
+            *fadeWord = (currentFadeWord & ~FR_FONT_BYTE_MASK) | FR_FONT_FADE_COMPLETE;
         }
     }
 
@@ -642,8 +648,8 @@ s32 func_001955D8(FrFontGlyph *parent, FrFontGlyph *glyph, u8 threshold, u8 step
         u16 glyphValue = glyph->unk2;
 
         if (currentFade >= 0) {
-            if (glyph->u14.b[2] == 1) {
-                glyphJitter = -((((glyphValue * 2) % 5) - 2) << 4);
+            if (glyph->u14.b[2] == FR_FONT_JITTER_OPTION) {
+                glyphJitter = -((((glyphValue * 2) % FR_FONT_JITTER_PERIOD) - FR_FONT_JITTER_CENTER) << FR_FONT_POSITION_SHIFT);
             }
         }
     }
@@ -657,17 +663,17 @@ s32 frFontDrawGlyphInDefaultMode(FrFontGlyph *glyph) {
 
 /* Pass the selected mode and current shared render-flag word to the renderer. */
 s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *glyph, s8 mode) {
-    return func_001958A0(glyph, mode, frFontSharedRenderFlags);
+    return frFontDrawGlyphChain(glyph, mode, frFontSharedRenderFlags);
 }
 
-/* Draw every child glyph, advance each parent chain, and report its measured
- * width only while all control/fade conditions remain ready. */
-s32 func_001958A0(FrFontGlyph *glyph, s8 mode, u32 flags) {
+/* Draw every child glyph, advance each parent chain, and report its total
+ * child-glyph count only while all control/fade conditions remain ready. */
+s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 flags) {
     FrFontGlyph *child;
     s32 ready = 1;
     s32 enabled = 1;
     s32 result = 0;
-    s32 totalAdvance = 0;
+    s32 totalGlyphCount = 0;
     s32 titleSoundBusy;
     const FrFontAtlas *atlas;
 
@@ -684,7 +690,7 @@ s32 func_001958A0(FrFontGlyph *glyph, s8 mode, u32 flags) {
                     atlas = &frFontWork.atlas;
                     do {
                         s32 xOffset = mode != 0 ? 0 :
-                            func_001955D8(glyph, child, 0x1C, (u8)glyph->u0.b.b0);
+                            frFontAdvanceChildFadeAndGetJitter(glyph, child, FR_FONT_FADE_PREDECESSOR_THRESHOLD, (u8)glyph->u0.b.b0);
                         u32 glyphState;
                         if (child->link20.sourceItem == NULL) {
                             if ((u16)child->u0.h < 0x80) {
@@ -708,10 +714,10 @@ s32 func_001958A0(FrFontGlyph *glyph, s8 mode, u32 flags) {
                         if (glyphState != 0) {
                             child->unk2++;
                         }
-                        if (glyphState < 0x80) {
+                        if (glyphState < FR_FONT_FADE_COMPLETE) {
                             ready = 0;
                         }
-                        x += (child->advance + spacing) << 4;
+                        x += (child->advance + spacing) << FR_FONT_POSITION_SHIFT;
                         child = child->next;
                     } while (child != NULL);
                 }
@@ -739,11 +745,11 @@ s32 func_001958A0(FrFontGlyph *glyph, s8 mode, u32 flags) {
                         break;
                     }
                 }
-                totalAdvance += glyph->unk18.w;
+                totalGlyphCount += glyph->unk18.w;
                 glyph = glyph->next;
             } while (glyph != NULL);
         }
-        result = totalAdvance;
+        result = totalGlyphCount;
         if (ready == 0) {
             result = 0;
         }

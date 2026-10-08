@@ -1978,8 +1978,10 @@
 0x0019D1E0	frFontClearFlagBits	inferred	interface/frFont: clears mask bits from the shared font flag byte D_00436564 and returns the previous value; setter is func_0019D1D0 [names_L10_LiteSweep.tsv]
 0x0019D1F8	frFontSetSharedRenderFlags	inferred	stores render flags used when drawing glyphs [names_reviewed5.tsv]
 0x0019D200	frFontAdvanceGlyphFade	inferred	reduces alpha and advances vertical position of fading glyph children [names_reviewed5.tsv]
+0x0019D288	frFontAdvanceChildFadeAndGetJitter	inferred	Gates child fade on predecessor/control state, advances its low byte up to 0x80 and returns the transient X jitter.
 0x0019D518	frFontDrawGlyphInDefaultMode	inferred	confidence=high; matched-C; src/dds2/interface/frFont.c:496:func_0019D518; Uses shared font render flags with draw mode zero, not an override flag mask.; source=revalidated-unapplied-names_R_Names31.tsv:19 [names_qp12_apply.tsv]
 0x0019D530	frFontDrawGlyphWithSharedFlags	inferred	forwards glyph and mode with shared render flags to drawing routine [names_reviewed5.tsv]
+0x0019D550	frFontDrawGlyphChain	inferred	Draws parent/child chains with fade and wait control, returning their total child-glyph count only when ready; DDS2 also gates the result on a positive delay counter.
 0x0019D7E0	frFontReleaseOppositeDrawBufferGlyphs	inferred	Releases slot 1 when the current draw-buffer selector low byte is zero, otherwise slot 0; returns signed zero.
 0x0019D830	frFontLinkGlyphAfterPrevious	inferred	Byte-identical DDS1 counterpart: Links a glyph with position-next set so its horizontal position follows the preceding glyph.
 0x0019D8A8	frFontLoadTemporaryEntry	inferred	loads font resource into temporary entry [names_reviewed5.tsv]
