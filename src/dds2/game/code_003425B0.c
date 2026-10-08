@@ -2,6 +2,10 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_draw.h"
+#include "ee_mmi.h"
+
+extern s32 D_00439214;
+extern s32 iWakeupThread(s32 threadId);
 
 #define SDF_STREAM_NODE_BYTES 0x8C
 #define SDF_STREAM_FRAME_HEADER_BYTES 0x10
@@ -1373,7 +1377,11 @@ void sdfIpuDmaCompletionWorker(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00345268);
+s32 func_00345268(void) {
+    iWakeupThread(D_00439214);
+    EE_ENABLE_INTERRUPTS_SYNC();
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00345298);
 
@@ -1524,7 +1532,6 @@ void sdfSoundInitFormattedAndAppendNode(u8 *state, s32 format, SdfStreamRead rea
 
 extern s32 D_004391FC;
 extern s32 D_00439200;
-extern s32 D_00439214;
 extern u8 sdfIpuStreamThreadStack[];
 extern s32 sdfAddHandler();
 extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
@@ -1532,7 +1539,6 @@ extern void func_003668B8();
 extern void sceIpuInit();
 extern void _StartThread();
 extern void sdfIpuDmaCompletionWorker();
-extern void func_00345268();
 extern void func_00345298();
 
 void sdfSoundInitIpuStream(void) {

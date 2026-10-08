@@ -105,4 +105,14 @@ s32 sdfGetTaskValueByKey(TaskWork *work, s32 key);
 void sdfSetTaskItemMode(TaskWork *, s32, u32);
 SdfTaskEntry *sdfCreateTaskEntry(SdfTaskItemDesc *);
 
+/* Cleanup receives the entry itself; the list adapter receives it as value. */
+void sdfDestroyCallbackWork(SdfTaskEntry *entry);
+void sdfCallbackWorkOnRemove(s32 key, SdfTaskEntry *entry);
+
+/* Native defaults used when a task description omits an entry callback.
+ * The no-op is also the initial generic list teardown callback. */
+s32 sdfDefaultTaskEntryInit(void);
+void sdfNoOpKeyValueCallback(s32 key, s32 value);
+s32 sdfDefaultTaskEntryUpdate(s32 key, s32 initResult);
+
 #endif /* SDF_TASK_WORK_H */

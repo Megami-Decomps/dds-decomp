@@ -152,7 +152,6 @@ extern char D_003E7774[];
 
 extern char D_003E773C[];
 
-extern void mnuHandlePanelListPageJumpInput();
 
 extern char D_003E7758[];
 
