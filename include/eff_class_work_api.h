@@ -5,7 +5,7 @@
 
 struct EffClassWork;
 
-struct EffClassWork *effPayloadPointerSet(u16 kind, void *source);
+struct EffClassWork *effCreateClassWork(u16 kind, void *source);
 void effDestroyClassWork(struct EffClassWork *work);
 void effInitializeClassFrame(struct EffClassWork *work);
 

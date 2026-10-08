@@ -3176,7 +3176,7 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
     state->allocation = allocation;
     state->scales = scales;
     memcpy(source->classConfig, source, sizeof(source->classConfig));
-    state->effect = effPayloadPointerSet(1, source->classConfig);
+    state->effect = effCreateClassWork(1, source->classConfig);
     tracks = (EffTrackSet *)effCreateTrackSetWithSharedReferences(count, 2, 0);
     first = source->ring.firstColor;
     state->references = (u32)tracks;
@@ -3417,7 +3417,7 @@ void billDrawCellBlendB(EffClassWork *work) {
     }
 }
 
-EffClassWork *effPayloadPointerSet(u16 kind, void *source) {
+EffClassWork *effCreateClassWork(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = D_003E9B80[kind].payloadSize;
     u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
@@ -3438,7 +3438,7 @@ void effCreateClassWorkFromFile(s32 request) {
     void *source;
 
     source = fileResolvePrimaryBuffer();
-    effPayloadPointerSet(((FileJob *)request)->option, source);
+    effCreateClassWork(((FileJob *)request)->option, source);
 }
 
 void effDestroyClassWork(EffClassWork *work) {
@@ -3447,7 +3447,7 @@ void effDestroyClassWork(EffClassWork *work) {
 }
 
 void effCreateClassWorkFromRequest(s32 work) {
-    effPayloadPointerSet(*(u16 *)(work + 0x2c), ((EffClassWork *)work)->payload);
+    effCreateClassWork(*(u16 *)(work + 0x2c), ((EffClassWork *)work)->payload);
 }
 
 void effInitializeClassFrame(EffClassWork *work) {
