@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu.h"
 
 void mnuClearPairedSpriteRecords(s32 scene, s32 groupIndex) {
     s32 remaining;
@@ -12,13 +13,6 @@ void mnuClearPairedSpriteRecords(s32 scene, s32 groupIndex) {
         entry = entry + 0x20;
     } while (-1 < remaining);
 }
-
-typedef struct MenuPanelFade {
-    u8 pad00[8];
-    s32 compact;
-    u8 pad0C[0xC];
-    s32 blend;
-} MenuPanelFade;
 
 extern u32 uiBlendColors(u32, u32, s32);
 extern void uiDrawGradientColorRect(s32, s32, s32, s32, s32, s32 *, s32);
