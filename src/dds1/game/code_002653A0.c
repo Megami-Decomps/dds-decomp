@@ -240,7 +240,41 @@ extern s32 ptyTestProfileFlag0(DatPartyRecord *, u16);
 extern u32 prfBuildSkillListState0(DatPartyRecord *, DatProfileRecord *, PrfSkillList *);
 extern u32 prfGetCapValue(u16);
 
-INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildProfileCapList);
+s32 brsBuildProfileCapList(BrsRewardBatch *batch) {
+    s32 i;
+    u32 partyOffset = 0;
+    u8 *values = (u8 *)&batch->rows + sizeof(batch->rows[0].unit);
+
+    memset(batch, 0, sizeof(*batch));
+    batch->count = 0;
+    for (i = 4; i >= 0; i--) {
+        DatPartyRecord *unit = (DatPartyRecord *)((u8 *)&datGameState->party + partyOffset);
+        u16 occupied = unit->flags & 1;
+
+        partyOffset += sizeof(DatPartyRecord);
+
+        if (occupied != 0) {
+            DatProfileRecord *profile = ptyGetCurrentProfileRecord(unit);
+            PrfSkillList skills;
+            s32 profileId;
+
+            prfBuildSkillListState0(unit, profile, &skills);
+            profileId = unit->profileId;
+            if (profileId != 0 &&
+                prfGetCapValue((u16)profileId) == profile->value &&
+                ptyTestProfileFlag0(unit, (u16)unit->profileId) == 0) {
+                s32 count = batch->count;
+                BrsRewardValues *rowValues =
+                    (BrsRewardValues *)(values + count * sizeof(BrsRewardRow));
+
+                rowValues->amount = skills.count;
+                batch->rows[count].unit = unit;
+                batch->count++;
+            }
+        }
+    }
+    return batch->count;
+}
 
 s32 mnuAdvanceTitleEntryAnimation(DatPartyRecord *entry) {
     s32 step = ptyCalcLevelUps(entry);
