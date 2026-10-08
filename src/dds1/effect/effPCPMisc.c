@@ -292,7 +292,6 @@ extern void mdlStorePrimaryVectorVU(void *obj);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 extern u8 D_00325828[];
 extern void mdlBroadcastMasked(void *obj, u32 mask);
-extern u32 func_00165638(u32 handle);
 extern u32 func_001619E8(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(void *unit);
@@ -1210,7 +1209,7 @@ static inline void effPcpShiftThunderHandles(EffPCPThunderGroup *work, s32 count
     s32 i;
 
     for (i = 0; i < count; i++) {
-        obj = (u8 *)func_00165638((u32)work->handles[i]);
+        obj = (u8 *)effThunderGetFragmentParameters(work->handles[i]);
         VU0_LOAD_VF($vf10, obj + 0x10);
         VU0_STORE_VF($vf10, &saved[1]);
         VU0_LOAD_VF($vf11, work);
@@ -3925,7 +3924,7 @@ void effPcpUpdateMuzzleThunderRay(EffPCPBurstWork *work) {
         VU0_SUB(vf10, vf10, vf11);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, direction);
-        params = (u8 *)func_00165638((u32)work->handle);
+        params = (u8 *)effThunderGetFragmentParameters(work->handle);
         distance = work->startDistance;
         dirX = direction[0];
         dirY = direction[1];
@@ -5329,7 +5328,7 @@ typedef struct EffPCPPairedEventParams {
 } EffPCPPairedEventParams;
 
 typedef struct EffPCPPairedEvent {
-    u32 fragment;
+    EffThunderFragmentWork *fragment;
     EffEventWork *eventA, *eventB;
     f32 phase, radius;
     f32 tilt;
@@ -5382,7 +5381,7 @@ EffPCPPairedEventWork *effPcpCreateDelayedDriftEntries(EffPCPPairedEventParams *
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
-        entry->fragment = (u32)effThunderFragCreate(&src->fragmentParams);
+        entry->fragment = effThunderFragCreate(&src->fragmentParams);
         entry->eventA = effEventCreate(work->ownerA, 2, &place);
         entry->eventB = effEventCreate(work->ownerB, 2, &place);
         entry->frame = -(effMiscRand(D_0034DF38) % life);
@@ -5433,7 +5432,7 @@ EffPCPPairedEventWork *effPcpClonePairedDriftEvents(EffPCPPairedEventWork *src) 
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
-        entry->fragment = (u32)effThunderFragCreate(&src->params.fragmentParams);
+        entry->fragment = effThunderFragCreate(&src->params.fragmentParams);
         entry->eventA = effEventCreate(src->ownerA, 2, &place);
         entry->eventB = effEventCreate(src->ownerB, 2, &place);
         entry->frame = -(effMiscRand(D_0034DF38) % life);
@@ -5452,7 +5451,7 @@ void effPcpPairedEventGroupRelease(EffPCPPairedEventWork *work) {
         do {
             effEventReleaseNode(entry->eventA);
             effEventReleaseNode(entry->eventB);
-            effThunderReleaseFragmentWork((void *)entry->fragment);
+            effThunderReleaseFragmentWork(entry->fragment);
             entry++;
             i++;
         } while (i < count);
@@ -5544,7 +5543,7 @@ void effPcpUpdatePairedDriftEvents(EffPCPPairedEventWork *work) {
                 f32 fade;
                 u32 fadedColor;
 
-                fragment = (EffThunderFragmentParams *)func_00165638(entry->fragment);
+                fragment = effThunderGetFragmentParameters(entry->fragment);
                 sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)viewAxis, entry->phase);
                 VU0_LOAD_VF(vf10, D_003556A0);
                 VU0_LOAD_VF(vf11, viewAxis);
@@ -5580,8 +5579,8 @@ void effPcpUpdatePairedDriftEvents(EffPCPPairedEventWork *work) {
                     }
                 }
                 fadedColor = effBlendColor(color & 0xFFFFFF, color, fade);
-                effThunderSetFragmentColor((EffThunderFragmentWork *)entry->fragment, fadedColor);
-                effThunderUpdateFragments((EffThunderFragmentWork *)entry->fragment);
+                effThunderSetFragmentColor(entry->fragment, fadedColor);
+                effThunderUpdateFragments(entry->fragment);
                 place.color = fadedColor;
                 PCP_COPY_VECTOR(place.pos, fragment->end);
                 effEventCopyFileRecordHeader(entry->eventA, &place);

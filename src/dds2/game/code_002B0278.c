@@ -349,7 +349,6 @@ extern s32 mnuGetEntryUseStatus(DatPartyRecord *, u16);
 extern void func_002B3CA0(s32, s32, s32, MenuList *, MenuListNode *, s32);
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
-void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu, u32 first, u32 second);
 void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *menu, u32 second, u32 third, u32 fourth);
 /* Copy the native panel layout, override its bounds, and mark its transition flag. */
 void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32 left, u32 top,
@@ -590,7 +589,7 @@ void mnuCreatePartySelectionWindow(MenuContext *context) {
 
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 6, 0x16);
     mnuSetWindowFadeScale(window, 0x100);
-    mnuInitializeBasicWindowLayout(window, context->panelModel, 0xC);
+    mnuInitializeBasicWindowLayout(window, (struct EffectSlotSet *)context->panelModel, 0xC);
     mnuSetWindowPanelBounds(window, context->partySelectionLayout, 0, 0, 0, 0);
     window->list->context = context;
     window->list->drawCallback = func_002B0D90;
@@ -1442,7 +1441,7 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *callback) {
     }
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, skillCount, 0x16);
     mnuSetWindowFadeScale(window, MNU_FULL_FADE);
-    mnuInitializeBasicWindowLayout(window, context->labelHandle, 0x1A);
+    mnuInitializeBasicWindowLayout(window, (struct EffectSlotSet *)context->labelHandle, 0x1A);
     mnuSetWindowPanelBounds(window, context->equippedSkillLayout, 0, 0, 0, 0);
     mnuSetWindowEntryParameters(0, window, context->resourceHandle, 0xD, placement);
     window->list->context = context;
@@ -3333,12 +3332,6 @@ void mnuCallInitWide(s32 x, s32 y, s32 depth, s32 menu, s32 drawArg);
 
 /* Destroy the owned list and optional sprite resources before freeing the window. */
 
-void mnuSetWindowOverlaySprite(MenuWindowContainer *menu, u32 layout);
-
-
-void mnuSetWindowContainerLayout(MenuWindowContainer *menu, u32 layout2C, u32 layout30, u32 layout34,
-                                    u32 layout48, u32 layout38, u32 layout3C, u32 layout40,
-                                    u32 layout4C);
 
 
 
