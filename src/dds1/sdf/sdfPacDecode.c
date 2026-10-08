@@ -3,6 +3,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_pac_packet.h"
+#include "sdf_pac_work.h"
 
 enum {
     PAC_COMMAND_PAYLOAD = 1,
@@ -25,14 +26,6 @@ typedef struct PacReloc {
     u8 pad08[8];
     u8 payload[1]; /* 0x10 */
 } PacReloc;
-
-typedef struct PacWork {
-    struct PacWork *next; /* 0x0 */
-    struct PacState *owner; /* 0x4 */
-    s32 resourceHandle; /* 0x8 */
-    u8 *dataCursor; /* 0xC */
-    u8 packet[1]; /* 0x10: copied header and packet data */
-} PacWork;
 
 typedef struct PacBuf {
     s32 result; /* 0x0: decoded result word, including completed resource addresses */
@@ -81,7 +74,6 @@ void sdfDecodePacNodeAndAdvanceTail(PacState *state);
 void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 size);
 void sdfPacAdvanceInput(PacState *state, s32 consumedBytes);
 void sdfPacAdvanceCallbackBoundary(PacState *state);
-PacWork *sdfPacEnqueuePacket(PacState *state, SdfPacStreamPacketHeader *packet);
 void *sdfAllocSizeClassBlock(s32 size);
 void func_002EE6F8(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer);
 void sdfPacRelocateQueuedPayload(PacState *state);

@@ -139,7 +139,7 @@ void ptyResetPartyRecordsAndProfiles(void) {
     ptyRebuildAllProfiles();
 }
 
-extern u32 mnuCampResourceHandles[2];
+extern struct EffectSlotSet *mnuCampResourceHandles[2];
 
 extern u32 D_003E6848[];
 
@@ -166,7 +166,7 @@ extern char D_0042A950[];
 void mnuLoadCampResources(void) {
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
-        mnuCampResourceHandles[resourceIndex] = (u32)effLoadIndexedResource(
+        mnuCampResourceHandles[resourceIndex] = effLoadIndexedResource(
             (const char *)D_0042A950, (const char *)D_003E6848[resourceIndex * 2], MNU_STAFF_RETAIN_RESOURCE);
     }
 }
@@ -177,8 +177,8 @@ void mnuLoadCampResources(void) {
 void mnuSnapshotCampTextureHandles(u32 *destination) {
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
-        effResolveAndReleaseResource((struct EffectSlotSet *)mnuCampResourceHandles[resourceIndex]);
-        destination[resourceIndex] = mnuCampResourceHandles[resourceIndex];
+        effResolveAndReleaseResource(mnuCampResourceHandles[resourceIndex]);
+        destination[resourceIndex] = (u32)mnuCampResourceHandles[resourceIndex];
     }
 }
 
@@ -187,7 +187,8 @@ void mnuReleaseCampTextureHandlesAndClearOutput(u32 *destination) {
     s32 resourceCountdown = MNU_STAFF_BASE_RESOURCE_COUNT - 1;
     u32 byteOffset = 0;
     do {
-        effReleaseTextureHandlesAndResetSlots((struct EffectSlotSet *)*(u32 *)((u8 *)mnuCampResourceHandles + byteOffset));
+        effReleaseTextureHandlesAndResetSlots(
+            *(struct EffectSlotSet **)((u8 *)mnuCampResourceHandles + byteOffset));
         *(u32 *)((u8 *)destination + byteOffset) = 0;
         byteOffset += 4;
     } while (--resourceCountdown >= 0);
@@ -484,16 +485,16 @@ void movReleaseTitleEffects(u32 *resourceSlots) {
 
 void mnuInitializeCampPanelResources(MenuPageWindow *container, StaffSlots *resources,
                                      u32 unused, PartyPanel *records) {
-    /* Loader callbacks publish instance addresses through these u32 output slots. */
-    func_002BCD90(container, records, (struct EffectSlotSet *)resources->baseResources[0],
-                 1, (struct EffectSlotSet *)resources->baseResources[1], 0x2d,
-                 (struct EffectSlotSet *)resources->baseResources[1], 0x1d);
-    func_002BC498(container, resources->baseResources[1]);
+    /* Base resources are synchronous owners; queued sprite groups use the other arrays. */
+    func_002BCD90(container, records, resources->baseResources[0],
+                 1, resources->baseResources[1], 0x2d,
+                 resources->baseResources[1], 0x1d);
+    func_002BC498(container, (s32)resources->baseResources[1]);
     mnuCopyPrimaryWindowHandles(container, resources->mainResources);
     mnuCopySecondaryWindowHandles(container, resources->mainResources + 8);
     mnuRegisterResourceHandles(container, resources->extraResources);
     mnuReleaseAndRefreshWindowSlots(container);
-    mnuSetPanelSlotValues(container, (struct EffectSlotSet *)resources->baseResources[1]);
+    mnuSetPanelSlotValues(container, resources->baseResources[1]);
 }
 
 /* Snapshot base handles, then queue the main, extra and paired sprite groups.
@@ -502,7 +503,7 @@ void mnuAppendCampSpriteRequests(u32 *resourceList, StaffSlots *resourceSlots) {
     s32 resourceIndex;
     s32 tableColumn;
 
-    mnuSnapshotCampTextureHandles(resourceSlots->baseResources);
+    mnuSnapshotCampTextureHandles((u32 *)resourceSlots->baseResources);
     tableColumn = mnuGetValueRecordOwner(resourceList) == 1;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
         effAppendListEntry(resourceList, D_0042A950, D_003E6858[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32 *)&resourceSlots->mainResources[resourceIndex]);
@@ -523,7 +524,7 @@ void mnuReleaseTitleEffectSprites(StaffSlots *resourceSlots) {
     struct EffectSlotSet **extraCursor;
     struct EffectSlotSet **pairCursor;
 
-    mnuReleaseCampTextureHandlesAndClearOutput(resourceSlots->baseResources);
+    mnuReleaseCampTextureHandlesAndClearOutput((u32 *)resourceSlots->baseResources);
     mainCursor = resourceSlots->mainResources;
     for (resourceCountdown = MNU_STAFF_MAIN_RESOURCE_COUNT - 1; resourceCountdown >= 0; resourceCountdown--) {
         effDestroyResourceSlotSet((struct EffectSlotSet *)*mainCursor++);

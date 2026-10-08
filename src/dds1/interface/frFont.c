@@ -189,17 +189,17 @@ s32 frFontQueueGlyphForCurrentDrawBuffer(FrFontGlyph *glyph) {
 }
 
 /* Return the live count of retained font-cache records. */
-s32 func_00194978(void) {
+s32 frFontGetCachedItemCount(void) {
     return frFontWork.cachedItemCount;
 }
 
 /* Return the live pooled child-glyph count. */
-s32 func_00194988(void) {
+s32 frFontGetChildGlyphCount(void) {
     return frFontWork.itemCount;
 }
 
 /* Return the live pooled parent-glyph count. */
-s32 func_00194998(void) {
+s32 frFontGetParentGlyphCount(void) {
     return frFontWork.glyphCount;
 }
 
@@ -386,7 +386,7 @@ void frFontInitGlyph(FrFontGlyph *glyph) {
 
 extern void func_001949B0(void *, s32);
 
-FrFontGlyph *func_00195010(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption) {
+FrFontGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption) {
     FrFontGlyph *glyph;
     s32 glyphIndex;
     s32 fontIndex = fontIndexArg & 0xFF;
