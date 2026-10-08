@@ -578,7 +578,51 @@ DatPartyRecord *dds3FindEntry(rosterIndex)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011AEE0);
+s32 func_0011AEE0(s32 rosterIndex) {
+    DatGameState *scanState;
+    DatPartyRecord savedEntry;
+    s32 selectedIndex;
+    s32 scanIndex;
+    s32 frontlineCount;
+
+    selectedIndex = dds3FindEntryIndex(rosterIndex);
+    if (selectedIndex < 0) {
+        return 0;
+    }
+
+    {
+        DatPartyRecord *const selectedEntry = &datGameState->party[selectedIndex];
+        if ((selectedEntry->flags & 2) != 0) {
+            return 0;
+        }
+    }
+
+    scanState = datGameState;
+    scanIndex = 0;
+    frontlineCount = 0;
+    for (; scanIndex < PTY_ACTIVE_ROSTER_COUNT; scanIndex++) {
+        DatPartyRecord *const currentEntry = &scanState->party[scanIndex];
+        u16 flags = currentEntry->flags;
+
+        if ((u16)(flags & 1) != 0) {
+            if ((flags & 2) == 0) {
+                break;
+            }
+            frontlineCount++;
+        }
+    }
+
+    if (frontlineCount >= 3) {
+        frontlineCount--;
+        scanState->party[frontlineCount].flags &= (u16)~2;
+    }
+
+    datGameState->party[selectedIndex].flags |= 2;
+    memcpy(&savedEntry, &datGameState->party[selectedIndex], sizeof(savedEntry));
+    memcpy(&datGameState->party[selectedIndex], &datGameState->party[frontlineCount], sizeof(savedEntry));
+    memcpy(&datGameState->party[frontlineCount], &savedEntry, sizeof(savedEntry));
+    return 1;
+}
 
 u8 ptyIsRosterEntryPresent(void) {
     DatPartyRecord *entry;
