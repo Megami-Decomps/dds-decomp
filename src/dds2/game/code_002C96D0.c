@@ -285,7 +285,9 @@ typedef struct FileTypeCallbacks {
     void (*unk4)(void *);
     void (*destroy)(void *);
     void *(*createChild)(void *, u16);
-    u8 unk10[0x18];
+    u8 unk10[4];
+    void (*reset)(void *);
+    u8 unk18[0x10];
 } FileTypeCallbacks;
 
 extern FileTypeCallbacks fileJobTypeOperations[];
@@ -327,7 +329,6 @@ typedef struct EffDispatchColor {
     u8 pad04[0x24];
 } EffDispatchColor;
 
-extern EffDispatchEntry D_003E917C[];
 
 extern EffDispatchExtra D_003E9180[];
 
@@ -4434,8 +4435,8 @@ void fileJobNotifyPair(FileJobPayload *left, FileJobPayload *right) {
 void fileJobNotifyComplete(void *work) {
     u16 id = ((FileJobPayload *)work)->type;
 
-    if (D_003E917C[id].func != NULL) {
-        D_003E917C[id].func(((FileJobPayload *)work)->data);
+    if (fileJobTypeOperations[id].reset != NULL) {
+        fileJobTypeOperations[id].reset(((FileJobPayload *)work)->data);
     }
 }
 
