@@ -5,6 +5,16 @@
 
 #ifndef VERSION_DDS2
 
+/* Result bits shared by the mantra-entry flag producer and its draw/update readers. */
+enum MnuMantraDisplayFlag {
+    MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH = 0x01,
+    MNU_MANTRA_DISPLAY_FLAG_AT_CAP = 0x02,
+    MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_1 = 0x04,
+    MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_2 = 0x08,
+    MNU_MANTRA_DISPLAY_FLAG_REQUIREMENT_PAIR_CLEAR_FALLBACK = 0x10,
+    MNU_MANTRA_DISPLAY_FLAG_REQUIREMENT_PAIR_SET_FALLBACK = 0x20,
+};
+
 typedef struct MnuMantraGridPulse {
     u16 timer;
     s16 duration;

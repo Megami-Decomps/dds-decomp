@@ -87,10 +87,12 @@ void func_00251260(MenuSceneWork *work) {
     u8 flags = work->boundsFlags;
     s32 position[2];
 
-    if ((flags & 4) == 0) {
+    if ((flags & MENU_SCENE_REQUIREMENT_GROUP_2_MET) == 0) {
         maximumX = 0x2C8;
-        if ((flags & 2) == 0) {
-            maximumX = (flags & 1) != 0 ? 0x24C : 0x1BE;
+        if ((flags & MENU_SCENE_REQUIREMENT_GROUP_1_MET) == 0) {
+            maximumX = (flags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) != 0
+                           ? 0x24C
+                           : 0x1BE;
         }
     }
     position[0] = work->scrollX;
@@ -207,7 +209,30 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_00252E38);
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_00252F88);
 
-INCLUDE_ASM(const s32, "game/code_00250E88", func_00253018);
+extern u8 D_0036B410[17][15];
+extern s32 func_00252E38(SdfGrid *, s32, s32, u32);
+extern SdfGridCell *func_002CC238(SdfGrid *);
+
+s32 func_00253018(SdfGrid *grid) {
+    MenuSceneWork *scene = (MenuSceneWork *)sdfGetTaskValueByKey(
+        (TaskWork *)mnuSceneResourceContext, 1);
+    MnuMantraGridEntry *entry = (MnuMantraGridEntry *)grid->cursor->value;
+    MenuGridCoordinate *coordinates = (MenuGridCoordinate *)grid->userData;
+    s32 x = coordinates[entry->sceneId].x;
+    s32 y = coordinates[entry->sceneId].y;
+
+    if ((x != 10 || scene->boundsFlags == 0) &&
+        (D_0036B410[y][x] & 0x3C) != 0) {
+        if (func_00252E38(grid, x, y, 0) != 0) {
+            return 1;
+        }
+    } else {
+        if (func_002CC238(grid) != NULL) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 extern s32 prfReqCheckWithFallback(ScrVmOperand *, u16);
 extern void *sdfAllocSizeClassBlock(s32);

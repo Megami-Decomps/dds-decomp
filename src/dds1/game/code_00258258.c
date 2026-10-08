@@ -254,11 +254,11 @@ void func_002593E0(MnuProfileProgress *target, SdfGrid *grid, SdfGridCell *entry
         displayEntry->frame = 0;
     }
     flags = mnuGetMantraDisplayFlags(displayEntry, target);
-    if ((flags & 1) != 0) {
+    if ((flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) != 0) {
         func_00258B00((u8 *)scene + 0x488);
         return;
     }
-    if ((flags & 2) != 0) {
+    if ((flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP) != 0) {
         func_00258EB8(displayEntry);
     }
 }

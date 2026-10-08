@@ -224,7 +224,7 @@ extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
 
 extern void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *);
 
-extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern char D_003E75E0[];
 extern char D_003E75A8[];
 
@@ -893,7 +893,7 @@ MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height,
     window->height = height;
     window->id = id;
     list = mnuCreateListState(id, visibleCount, rowSpacing);
-    window->state = 0;
+    window->fadeScale = 0;
     window->list = list;
     return window;
 }
@@ -911,8 +911,8 @@ void mnuSetWindowOverlaySprite(MenuWindowContainer *menu, u32 layout) {
     menu->decorations[2].sprite = layout;
 }
 
-void mnuSetWindowContainerState(MenuWindowContainer *menu, u32 state) {
-    menu->state = state;
+void mnuSetWindowFadeScale(MenuWindowContainer *menu, u32 fadeScale) {
+    menu->fadeScale = fadeScale;
 }
 
 void mnuSetWindowContainerLayout(MenuWindowContainer *menu, u32 layout2C, u32 layout30, u32 layout34,
@@ -1048,25 +1048,63 @@ void mnuReleaseWindowTextures(MenuIconSprites *menu) {
 void func_002B9A38(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002B9A40);
+void func_002B9A40(s32 x, s32 y, s32 depth, u32 opacity, MenuList *list,
+                   MenuIconSprites *resource, s32 drawArg) {
+    s32 top;
+    s32 trackExtent;
+    s32 bottom;
+    s32 count;
+    s32 visible;
+    s32 rowOffset;
+    EffectSlotSet *firstSprite;
+    EffectSlotDescription *firstDescription;
+    BdWork *firstWork;
+    BdWork *lastWork;
+
+    if (resource == NULL) {
+        return;
+    }
+
+    firstSprite = resource->sprite[0];
+    firstDescription = firstSprite->descriptions;
+    firstWork = firstSprite->workEntries;
+    lastWork = resource->sprite[2]->workEntries;
+    trackExtent = firstDescription->rect[1] * 8 - 0x28;
+    top = firstWork->geometry.bounds[3];
+    top += trackExtent;
+    bottom = lastWork->geometry.bounds[3];
+    count = list->count;
+    visible = list->visibleCount;
+    if (count == 0 || visible == 0 || count <= visible) {
+        return;
+    }
+
+    rowOffset = (top - bottom) * list->head->index / (count - visible);
+    func_00306CD0(x, y, depth, opacity, 1,
+                  firstSprite, 0, drawArg);
+    func_00306CD0(x, y + top, depth, opacity, 1,
+                  resource->sprite[1], 0, drawArg);
+    func_00306CD0(x, y + rowOffset + 0x28, depth, opacity, 1,
+                  resource->sprite[2], 0, drawArg);
+}
 
 void mnuDrawWindowResourceSpriteRows(s32 x, s32 y, u32 flags, MenuWindowContainer *window, u32 option) {
-    func_002B9A40(x - 0xf0, y - 8, flags, window->state,
-                                (u32)window->list, (u32)window->resource, option);
+    func_002B9A40(x - 0xf0, y - 8, flags, window->fadeScale,
+                  window->list, window->resource, option);
 }
 
 void mnuDrawWindowIconRows(s32 x, s32 y, u32 flags, MenuWindowContainer *window, s32 count, s32 option) {
     s32 i;
     s32 sprite = window->sprite20;
-    s32 state = window->state;
+    s32 state = window->fadeScale;
     s32 field = window->field1C;
     if (sprite != 0) {
         if (field == 0) {
-            func_00306CD0(x - 0xD0, y - 0xB8, flags, state, 1, sprite, window->param28, option);
+            func_00306CD0(x - 0xD0, y - 0xB8, flags, state, 1, (EffectSlotSet *)(u32)sprite, window->param28, option);
         }
         for (i = 0; i < count; i++) {
             func_00306CD0(x + window->originX, i * window->list->rowStep + y + window->originY, flags, state, 1,
-                          window->sprite20, window->param24, option);
+                          (EffectSlotSet *)(u32)window->sprite20, window->param24, option);
         }
     }
 }
@@ -1079,7 +1117,7 @@ void mnuDrawVisibleWindowIconRows(u32 x, u32 y, u32 flags, MenuWindowContainer *
 void mnuDrawWindowDecorations(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 option)
 {
     u32 i;
-    u32 state = window->state;
+    u32 state = window->fadeScale;
 
     for (i = 0; i < 3; i++) {
         u32 sprite = window->decorations[i].sprite;
@@ -1088,7 +1126,7 @@ void mnuDrawWindowDecorations(s32 x, s32 y, s32 depth, MenuWindowContainer *wind
 
         if (sprite != 0) {
             func_00306CD0(x + offset + 0xC0, y - 0xB8, depth, state,
-                         1, sprite, parameter, option);
+                         1, (EffectSlotSet *)sprite, parameter, option);
         }
     }
 }
@@ -1098,7 +1136,7 @@ void mnuDrawWindowDecorations(s32 x, s32 y, s32 depth, MenuWindowContainer *wind
 void mnuDrawWindowSelectionPanel(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 drawArg) {
     MenuList *list;
     s32 selectionMode;
-    s32 fadeScale = window->state;
+    s32 fadeScale = window->fadeScale;
 
     if (window->panel.sprite[0] != NULL) {
         list = window->list;
@@ -1128,7 +1166,7 @@ void mnuDrawWindowSelectionPanel(s32 x, s32 y, s32 depth, MenuWindowContainer *w
 
 /* Draw the window, then advance its fade scale without a post-addition clamp. */
 void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, s32 drawArg) {
-    s32 fadeScale = menu->state;
+    s32 fadeScale = menu->fadeScale;
     s32 value;
 
     menu->list->scale = fadeScale;
@@ -1142,9 +1180,9 @@ void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, 
     if (menu->resource != 0) {
         mnuDrawWindowResourceSpriteRows(x, y, depth, menu, drawArg);
     }
-    value = menu->state;
+    value = menu->fadeScale;
     if (value < MNU_FULL_FADE) {
-        menu->state = value + MNU_WINDOW_FADE_STEP;
+        menu->fadeScale = value + MNU_WINDOW_FADE_STEP;
     }
     menu->flags |= MNU_WINDOW_TRANSITION_FLAG;
 }
@@ -1675,7 +1713,7 @@ void mnuUpdateAndDrawWindowTransition(s32 x, s32 y, s32 depth, MenuFadeFields *m
 
     if (menu->previousProgress < 0x200) {
         menu->previousWindow.originY = 160 * menu->previousProgress / 512;
-        mnuSetWindowContainerState(&menu->previousWindow, 256 - menu->previousProgress / 2);
+        mnuSetWindowFadeScale(&menu->previousWindow, 256 - menu->previousProgress / 2);
         if (menu->hasResourceCopy != 0) {
             menu->previousWindow.resource = &menu->savedResource;
         }
@@ -1684,7 +1722,7 @@ void mnuUpdateAndDrawWindowTransition(s32 x, s32 y, s32 depth, MenuFadeFields *m
     if (menu->currentWindow != NULL) {
         t = fsqrtf(40.0f) * (512 - menu->currentProgress) / 512.0f;
         menu->currentWindow->originY = -8 * (s32)(t * t);
-        mnuSetWindowContainerState(menu->currentWindow, menu->currentProgress / 2);
+        mnuSetWindowFadeScale(menu->currentWindow, menu->currentProgress / 2);
         if (menu->currentWindow->panel.fade == 0) {
             menu->currentWindow->flags &= ~4;
         }
@@ -1978,14 +2016,13 @@ void mnuFreeIconSprites(MenuSprites *menu) {
     sdfReleaseChipBlock(menu);
 }
 
-extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 
 
 void mnuDrawIconRow(s32 unusedA, s32 unusedB, s32 depth, s32 skip, MenuSprites *set, s32 drawArg) {
     u32 i;
     if (skip == 0) {
         for (i = 0; i < 5; i++) {
-            func_00306CD0(0xBC0, 0x3C8, depth, set->fade, 0, (s32)set->icon[i], 0, drawArg);
+            func_00306CD0(0xBC0, 0x3C8, depth, set->fade, 0, set->icon[i], 0, drawArg);
         }
     }
 }
@@ -1996,7 +2033,7 @@ extern void *func_002BBA38();
 void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6) {
     mnuSelectPage(menu, index);
     menu->slots[index].windowSprites = func_002BBA38(0, a2, a3, a4, a5, a6);
-    menu->flags |= 0x80;
+    menu->flags |= MNU_PAGE_WINDOW_SPRITE_MODE;
 }
 
 void mnuSetIndexedWindowPageSpriteFlags(s32 index, MenuPageWindow *menu, u32 first, u32 second) {
@@ -2019,7 +2056,7 @@ void mnuClearEntries(MenuPageWindow *menu) {
         i++;
         entry += sizeof(MenuPageSlot) / sizeof(*entry);
     } while (i < 5);
-    menu->flags &= ~0x80;
+    menu->flags &= ~MNU_PAGE_WINDOW_SPRITE_MODE;
 }
 
 
@@ -2062,9 +2099,9 @@ void mnuReleaseIconBundleAndSprites(MenuIconBundle *menu) {
 void mnuDrawFadeIcons(s32 x, s32 y, s32 depth, s32 unused, MenuIconBundle *obj, s32 drawArg) {
     s32 fade = obj->fade;
     s32 next;
-    func_00306CD0(x, y, depth, fade, 0, (s32)obj->sprite[0], 0, drawArg);
-    func_00306CD0(x, y, depth, fade, 0, (s32)obj->sprite[1], 0, drawArg);
-    func_00306CD0(x, y, depth, fade, 0, (s32)obj->sprite[2], 0, drawArg);
+    func_00306CD0(x, y, depth, fade, 0, obj->sprite[0], 0, drawArg);
+    func_00306CD0(x, y, depth, fade, 0, obj->sprite[1], 0, drawArg);
+    func_00306CD0(x, y, depth, fade, 0, obj->sprite[2], 0, drawArg);
     if (obj->fadeOut == 0) {
         MNU_ADVANCE_FADE(obj->fade, 0x10, 0x100);
     } else {
@@ -2251,10 +2288,10 @@ void func_002BC690(MenuPageWindow *menu, s32 index, s32 kind) {
 
 
 
-void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 flag) {
+void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 preserveResourceHandles) {
     u32 i;
     EffectSlotSet **res;
-    if (flag == 0) {
+    if (preserveResourceHandles == MNU_WINDOW_SLOT_REFRESH_RELEASE_HANDLES) {
         for (i = 0, res = menu->mainResources; i < 8; i++, res++) {
             if (effHasFirstTextureHandle((s32)(*res)) != 0) {
                 effReleaseTextureHandlesAndResetSlots(*res);
@@ -2276,11 +2313,11 @@ void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 flag) {
     }
 }
 
-void func_002BCA98(MenuPageWindow *menu) {
-    mnuRefreshWindowSlots(menu, 0);
+void mnuReleaseAndRefreshWindowSlots(MenuPageWindow *menu) {
+    mnuRefreshWindowSlots(menu, MNU_WINDOW_SLOT_REFRESH_RELEASE_HANDLES);
 }
 
-INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BCAB0);
+INCLUDE_ASM(const s32, "game/code_002B8FC8", mnuRefreshPartyPanelBars);
 
 extern char D_00437C30[];
 
