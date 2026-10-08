@@ -5776,12 +5776,12 @@ f32 effSampleScalarCurve(const EffScalarCurve *curve, s32 frame, s32 duration) {
     }
     durationFloat = duration;
     switch (curve->mode) {
-    case 0:
+    case EFF_SCALAR_CURVE_MODE_ENDPOINTS:
         factor = (f32)frame / durationFloat;
         from = curve->initialValue;
         to = curve->finalValue;
         break;
-    case 1:
+    case EFF_SCALAR_CURVE_MODE_ONE_INTERMEDIATE_KEY:
         firstFrame = (s32)(curve->firstFraction * durationFloat);
         if (frame < firstFrame) {
             factor = (f32)frame / firstFrame;
@@ -5794,7 +5794,7 @@ f32 effSampleScalarCurve(const EffScalarCurve *curve, s32 frame, s32 duration) {
             to = curve->finalValue;
         }
         break;
-    case 2:
+    case EFF_SCALAR_CURVE_MODE_TWO_INTERMEDIATE_KEYS:
         firstFrame = (s32)(curve->firstFraction * durationFloat);
         if (frame < firstFrame) {
             factor = (f32)frame / firstFrame;
