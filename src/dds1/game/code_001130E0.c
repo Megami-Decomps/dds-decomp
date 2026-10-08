@@ -50,8 +50,8 @@ EvtUnit *effObjGetTransitionWork(EffWorldNode *object) {
     return ((EffectObjectData *)object->data)->transitionWork;
 }
 
-void func_00113100(EffWorldNode *obj, u32 value) {
-    ((EffectObjectData *)obj->data)->word14 = value;
+void effObjSetFollowParameterIndex(EffWorldNode *obj, u32 value) {
+    ((EffectObjectData *)obj->data)->followParameterIndex = value;
 }
 
 /* Return the signed shortest turn from one degree angle to another.
@@ -194,7 +194,7 @@ s32 effObjInitializeFollowModelData(EffWorldNode *object) {
     data->modelHolder = dds3CreateSlotResourceState(object);
     data->transitionWork = NULL;
     data->activeId = -1;
-    data->word14 = -1;
+    data->followParameterIndex = -1;
     data->pendingValue = 0;
     data->timer = 0;
     data->angle = 0.0f;
@@ -362,10 +362,10 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
     if (dds3TestObjectFlags(obj, 0x200) && target != NULL && !(target->owner->flags & 1)) {
         func_0011ECC8(obj);
     }
-    if ((s32)((EffectObjectData *)obj->data)->word14 == -1) {
+    if ((s32)((EffectObjectData *)obj->data)->followParameterIndex == -1) {
         func_001122F0(D_00325788, obj);
     } else {
-        func_001122F0(D_00325788 + (s32)((EffectObjectData *)obj->data)->word14 * 0x10, obj);
+        func_001122F0(D_00325788 + (s32)((EffectObjectData *)obj->data)->followParameterIndex * 0x10, obj);
     }
     if (!dds3TestObjectFlags(obj, 0x400)) {
         return 1;
