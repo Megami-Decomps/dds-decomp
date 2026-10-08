@@ -1725,8 +1725,8 @@ u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *entryAddress) {
 }
 
 /* Return the low 15 status bits; do not expose the stored high bit. */
-u16 btlReadUnitStatusMask(s32 entryAddress) {
-    return ((DatPartyRecord *)entryAddress)->status & BTL_ENTRY_STATUS_MASK;
+u16 btlReadUnitStatusMask(DatPartyRecord *entry) {
+    return entry->status & BTL_ENTRY_STATUS_MASK;
 }
 
 void func_001AA850(void) {
@@ -6056,11 +6056,11 @@ u8 btlHasRequiredActorStatusBits(BtlUnit *unit) {
     return (~btlUnitStatusPair(unit) & 0x201) == 0;
 }
 
-void func_001BB988(s32 unit, u16 a, u16 b, u16 c) {
-    u8 *data = *(u8 **)(*(s32 *)(unit + 0x2C) + 0x18);
-    *(u16 *)(data + 0x2CC) = a;
-    *(u16 *)(data + 0x2CE) = b;
-    *(u16 *)(data + 0x2D0) = c;
+void func_001BB988(BattleSceneObject *object, s32 first, s32 second, s32 slot) {
+    BtlUnit *unit = object->owner->unit;
+    unit->partyRecord.unk1AC = first;
+    unit->partyRecord.unk1AE = second;
+    unit->partyRecord.actionSlot = slot;
 }
 
 s32 btlCountEligibleLinkedActors(BtlState *battle) {

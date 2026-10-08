@@ -79,7 +79,7 @@ extern void mdlBroadcastMasked(MdlCtx *, u32);
 extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
 extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
 extern void mdlDestroyContext(MdlCtx *);
-extern s32 effComputeLightDirectionVU(MdlCtx *, void *);
+extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 
 extern void effFloorModelListRemove(EffectObjectNode *);
 

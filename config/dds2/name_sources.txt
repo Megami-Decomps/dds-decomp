@@ -2916,7 +2916,7 @@
 0x00212640	btlValidateItemStillAvailable	inferred	Returns false with an explicit "Item is already thrown away" diagnostic when the item lookup rejects it.
 0x002126C8	btlIsModelGateActiveForEligibleUnit	inferred	Requires unit state and battle progression conditions before testing the model flag. [names_reviewed14.tsv]
 0x00212728	btlIsGroup200CountAtMost	inferred	DDS1 func_00200328 twin; counts group 200 units against limit [names_R_FuncNames.tsv]
-0x00212788	btlUnitHasActionMask	inferred	DDS1 func_00200388 twin; tests action lookup mask [names_R_FuncNames.tsv]
+0x00212788	btlUnitHasAnyStatusInMask	inferred	Returns true when any requested bit is set in the BtlUnit's low-15-bit DatPartyRecord.status value.
 0x002127B8	btlAnyGroup400HasActionMask	inferred	DDS1 func_002003B8 twin; scans group 400 action mask [names_R_FuncNames.tsv]
 0x00212838	btlHasActorOrSlotMatchingActionQuery	inferred	Searches live actors and slot records for the requested group and action mask. [names_reviewed14.tsv]
 0x00212948	btlAnyGroup200HasActionMask	inferred	DDS1 func_00200438 twin; scans group 200 action mask [names_R_FuncNames.tsv]

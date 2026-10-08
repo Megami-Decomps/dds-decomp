@@ -462,6 +462,7 @@ INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5988);
 INCLUDE_ASM(const s32, "game/code_001FF030", func_001FFE30);
 
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
+extern u16 btlReadUnitStatusMask(DatPartyRecord *);
 
 extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
@@ -560,8 +561,8 @@ s32 btlIsGroup200CountAtMost(s32 unused, u32 maximumCount) {
 }
 
 /* Return whether the native unit-status query intersects any requested action-mask bit. */
-s32 btlUnitHasActionMask(s32 unitAddress, s32 actionMask) {
-    return (btlReadUnitStatusMask((s32)&((BtlUnit *)unitAddress)->partyRecord, actionMask) & actionMask) != 0;
+s32 btlUnitHasAnyStatusInMask(BtlUnit *unit, s32 actionMask) {
+    return (btlReadUnitStatusMask(&unit->partyRecord) & actionMask) != 0;
 }
 
 /* Test active enemy-side units for any requested action bit; do not filter bit 0x20. */
@@ -569,7 +570,7 @@ s32 btlAnyGroup400HasActionMask(s32 unused, s32 actionMask) {
     BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
     while (unitCursor != 0) {
         if ((*(u64 *)&unitCursor->flags & BTL_ENEMY_ACTIVE_MASK) == BTL_ENEMY_ACTIVE_FLAGS) {
-            if (btlUnitHasActionMask((s32)unitCursor, actionMask) != 0) {
+            if (btlUnitHasAnyStatusInMask(unitCursor, actionMask) != 0) {
                 return 1;
             }
         }
@@ -583,7 +584,7 @@ s32 btlAnyGroup200HasActionMask(s32 unused, s32 actionMask) {
     BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
     while (unitCursor != 0) {
         if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
-            if (btlUnitHasActionMask((s32)unitCursor, actionMask) != 0) {
+            if (btlUnitHasAnyStatusInMask(unitCursor, actionMask) != 0) {
                 return 1;
             }
         }
@@ -597,7 +598,7 @@ s32 btlAllGroup200HaveActionMask(s32 unused, s32 actionMask) {
     BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
     while (unitCursor != 0) {
         if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
-            if (btlUnitHasActionMask((s32)unitCursor, actionMask) == 0) {
+            if (btlUnitHasAnyStatusInMask(unitCursor, actionMask) == 0) {
                 return 0;
             }
         }
@@ -1638,7 +1639,7 @@ s32 btlSelectTargetsByActionMask(s32 actor, s32 mask) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {
-            if (btlUnitHasActionMask(btlGetIndexListEntry(list, i), mask) != 0) {
+            if (btlUnitHasAnyStatusInMask(btlGetIndexListEntry(list, i), mask) != 0) {
                 flags[i] = 1;
             }
         }
@@ -1664,7 +1665,7 @@ s32 btlSelectTargetsWithoutActionMask(s32 actor, s32 mask) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {
-            if (btlUnitHasActionMask(btlGetIndexListEntry(list, i), mask) == 0) {
+            if (btlUnitHasAnyStatusInMask(btlGetIndexListEntry(list, i), mask) == 0) {
                 flags[i] = 1;
             }
         }
@@ -1996,7 +1997,7 @@ void btlSelectLinkedTargets(s32 actor, s32 input, s8 invert) {
     btlFreeIndexList(list);
 }
 
-extern s32 btlCanUseLinkedActor();
+extern s32 btlCanUseLinkedActor(BtlLinkedCommand *);
 
 
 /* Resolve a command's linked actor, retaining each independent task fallback. */
@@ -2068,7 +2069,7 @@ extern f32 func_002F9F60(f32);
 extern f32 func_002FA060(f32);
 extern f32 func_002FA148(f32);
 extern void func_002DD688(f32);
-extern void func_001DB698();
+extern s32 func_001DB698(BtlCamState *);
 
 /* Frame one unit approaching its target (DDS2 func_00217470 without the explicit angle): the pull-back and the
    swing angle interpolate with how far the command's state has advanced (ratio, capped at 1). */
@@ -2874,13 +2875,13 @@ u8 *btlFindFlaggedSpecialSpeciesUnit(s32 category, s32 species) {
     return 0;
 }
 
-s32 btlGetAdjustedUnitDisplaySpecies(s32 unit) {
-    s32 mode = ((BtlUnit *)unit)->partyRecord.unitId;
+s32 btlGetAdjustedUnitDisplaySpecies(BtlUnit *unit) {
+    s32 mode = unit->partyRecord.unitId;
 
     if ((mode >= 0x107) && ((mode < 0x109) || (mode == 0x124))) {
         return 0x124;
     }
-    return ((BtlUnit *)unit)->displaySpecies;
+    return unit->displaySpecies;
 }
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00206450);
@@ -2902,7 +2903,7 @@ extern s32 btlCreateSecondaryCommandSoundTask();
 
 extern s32 btlCreateCommandSoundTask();
 
-extern s32 btlCreateEffObjB();
+extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 
 extern u8 *fldCreateSceneGroupAction(BtlTask *, u32, s32);
 
@@ -3151,7 +3152,7 @@ s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, command->backCamera.direction);
     command->backCamera.distance += 45.0f;
-    func_001DB698(command->backCamera.position);
+    func_001DB698(&command->backCamera);
     return 1;
 }
 
@@ -4940,14 +4941,12 @@ s32 btlHandleTargetedDefeatAction(u8 *unit) {
     return 0;
 }
 
-extern s32 btlIsActorCategoryMarked(s32);
+extern s32 btlIsActorCategoryMarked(BtlLinkedCommand *);
 extern void func_001DF410(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-/* Opaque pose parameters use the native owners defined in code_001C8890. */
-typedef struct CameraPoseAction CameraPoseAction;
-typedef struct CameraPoseTransform CameraPoseTransform;
-extern void btlSetupCameraPoseAimUnit(CameraPoseAction *, CameraPoseTransform *, CameraPoseTransform *);
-extern void btlPrepareRandomizedActionCameraPose(CameraPoseAction *, CameraPoseTransform *, CameraPoseTransform *);
+/* Pose helpers use the existing command and camera owners. */
+extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 /* Boss action camera (proposed btlSelectBossActionCameraPose): aim poses for ally actors, fixed DERUTA/I-E key
  * sets for mode 0x11B. */
@@ -4956,7 +4955,7 @@ s32 func_0020B818(BtlLinkedCommand *command, s8 a, s8 b) {
     s32 kind;
     u32 shot;
 
-    if (btlIsActorCategoryMarked((s32)command) != 0) {
+    if (btlIsActorCategoryMarked(command) != 0) {
         return 0;
     }
     if (task->unit->flags & 0x200) {
@@ -4966,8 +4965,8 @@ s32 func_0020B818(BtlLinkedCommand *command, s8 a, s8 b) {
         kind = datActionAnimationRecords[command->actionCode].cameraKind;
         if (kind < 8) {
             if (kind >= 6) {
-                btlSetupCameraPoseAimUnit((CameraPoseAction *)command, (CameraPoseTransform *)&command->frontCamera,
-                                          (CameraPoseTransform *)&command->backCamera);
+                btlSetupCameraPoseAimUnit(command, &command->frontCamera,
+                                          &command->backCamera);
                 return 1;
             }
         }
@@ -5044,8 +5043,8 @@ s32 func_0020B818(BtlLinkedCommand *command, s8 a, s8 b) {
             break;
         }
     }
-    btlPrepareRandomizedActionCameraPose((CameraPoseAction *)command, (CameraPoseTransform *)&command->frontCamera,
-                                         (CameraPoseTransform *)&command->backCamera);
+    btlPrepareRandomizedActionCameraPose(command, &command->frontCamera,
+                                         &command->backCamera);
     return 1;
 }
 

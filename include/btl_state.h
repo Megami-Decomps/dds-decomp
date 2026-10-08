@@ -195,9 +195,10 @@ typedef struct BtlState {
     s32 (*effectParameterCallback)(BtlUnit *, s32); /* 0x5BC: actor record-index override, DDS1 001D645C. */
     u8 pad5C0[4];
     BtlUnit *(*findReusableUnit)(u32, u32); /* 0x5C4 */
-    u8 pad5C8[8];
+    u64 (*callback5C8)(u64); /* 0x5C8 */
+    s32 (*callback5CC)(BtlUnit *); /* 0x5CC */
     void (*cleanup)(void); /* 0x5D0 */
-    u8 pad5D4[4];
+    u64 (*callback5D4)(u64); /* 0x5D4 */
     void (*prepareModelUnit)(BtlUnit *); /* 0x5D8 */
     void (*beforeMotionUpdate)(void); /* 0x5DC */
     void (*finishModelUnit)(BtlUnit *); /* 0x5E0 */

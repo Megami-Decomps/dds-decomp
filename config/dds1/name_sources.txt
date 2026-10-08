@@ -3299,7 +3299,7 @@
 0x00200238	btlIsGroup400CountAtMost	inferred	counts active group 400 units and compares to limit [names_R_FuncNames.tsv]
 0x00200298	btlIsGroup200EligibleCountAtMost	inferred	counts group 200 units excluding +12E bit 0x800 [names_R_FuncNames.tsv]
 0x00200328	btlIsGroup200CountAtMost	inferred	counts active group 200 units and compares to limit [names_R_FuncNames.tsv]
-0x00200388	btlUnitHasActionMask	inferred	checks lookup on unit stats at +0x120 against argument mask [names_R_FuncNames.tsv]
+0x00200388	btlUnitHasAnyStatusInMask	inferred	Returns true when any requested bit is set in the BtlUnit's low-15-bit DatPartyRecord.status value.
 0x002003B8	btlAnyGroup400HasActionMask	inferred	iterates group 400 units looking for +0x120 action mask [names_R_FuncNames.tsv]
 0x00200438	btlAnyGroup200HasActionMask	inferred	iterates group 200 units looking for +0x120 action mask [names_R_FuncNames.tsv]
 0x002004B8	btlAllGroup200HaveActionMask	inferred	returns false upon first group 200 unit without action mask [names_R_FuncNames.tsv]

@@ -349,7 +349,117 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B0D0);
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BF830);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002BFEA0);
+extern const s32 D_0042B130[4];
+extern const s32 D_0042B140[4];
+extern const s32 D_00437C70[];
+extern char D_00437C68[]; /* "%2d", shared with func_002BF830. */
+extern u32 uiBlendColors(u32, u32, u32);
+struct MenuPageSpriteSlot;
+extern void func_002BE438(s32, s32, s32, struct MenuPageSpriteSlot *, s32, s32, s32);
+extern void func_002BF660(s32, s32, s32, MenuQueuedCommand *, s32 *, s32);
+extern void func_002BD710(s32, s32, s32, MenuPageWindow *, s32, s32, s32, s32);
+/* Both native page renderers also forward the surface word; the
+ * selection helper consumes only its first five arguments. */
+extern s32 mnuClearWindowPendingFlagAfterSelection();
+extern void uiDrawActiveSurfaceRegion(s32);
+extern void uiDrawSurfaceAtNearDepth(u32);
+extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
+typedef struct FrFontGlyph FrFontGlyph;
+extern s32 func_0035C860(char *, const char *, ...);
+extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
+u32 mnuGetPanelRatioColor(s32, s32, s32);
+void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
+
+/* Draw one party page: queued commands, level text, selection and HP/MP bars. */
+void func_002BFEA0(s32 x, s32 y, s32 z, MenuPageWindow *menu,
+                  s32 panelIndex, s32 surface) {
+    char text[16];
+    s32 commandArgs[6];
+    s32 positions[4];
+    s32 framePositions[4];
+    s32 barPosition[2];
+    MenuPageSlot *panel = &menu->slots[panelIndex];
+    s32 alpha = menu->transitionValue;
+    u32 textColor = uiBlendColors(0x80808080, 0x80808000, alpha);
+    s32 labelX;
+    s32 labelY;
+    FrFontGlyph *glyph;
+    s32 selection;
+    s32 level;
+    s32 iconX;
+    s32 iconY;
+
+    memcpy(positions, D_0042B130, sizeof(positions));
+    memcpy(framePositions, D_0042B140, sizeof(framePositions));
+    memcpy(barPosition, D_00437C70, sizeof(barPosition));
+    if (panel->flags & 1) {
+        return;
+    }
+    iconX = x + positions[0];
+    iconY = y + positions[1];
+    if (panel->unkE4 != 0 && (panel->flags & 0x40)) {
+        func_002BE438(x, y, z, (struct MenuPageSpriteSlot *)panel,
+                      panelIndex, 1, surface);
+        return;
+    }
+
+    func_00306CD0(iconX, iconY, z, alpha,
+                  1, panel->icon[1], 0, surface);
+    uiDrawActiveSurfaceRegion(surface);
+    func_00306CD0(x + framePositions[0], y + framePositions[1],
+                  0xFFFFFF, alpha, 1, panel->frame[6], 0, surface);
+    sdfDispatchSurfaceWithPreparedTexturePacket(surface);
+    commandArgs[0] = panelIndex;
+    commandArgs[1] = (s32)menu;
+    commandArgs[2] = 0;
+    commandArgs[3] = 0;
+    commandArgs[4] = framePositions[2];
+    commandArgs[5] = framePositions[3];
+    func_002BF660(x, y, z, panel->commands, commandArgs, surface);
+    uiDrawSurfaceAtNearDepth(surface);
+    uiDrawActiveSurfaceRegion(surface);
+    func_00306CD0(x + framePositions[0], y + framePositions[1],
+                  0xFFFFFF, alpha, 1, panel->frame[6], 0, surface);
+    sdfDispatchSurfaceWithPreparedTexturePacket(surface);
+    func_002BD710(x, y, z, menu, panelIndex, 0, menu->fade, surface);
+
+    labelX = x + positions[2];
+    labelY = y + positions[3];
+    func_00306CD0(labelX, labelY, z, alpha, 1, panel->icon[2], 0, surface);
+    level = menu->records->slots[panelIndex].level;
+    func_0035C860(text, D_00437C68, level);
+    glyph = func_0019F5E8(labelX + 0x140, labelY - 8,
+                                       z, textColor, text, 0);
+    func_0019D550(glyph, 1, surface);
+    frFontQueueGlyphInSelectedSlot(glyph);
+    if (panel->frame[7] == NULL) {
+        func_00306CD0(x + framePositions[0], y + framePositions[1], z,
+                      alpha, 1, panel->frame[6], 0, surface);
+    } else {
+        func_00306CD0(x + framePositions[0], y + framePositions[1], z,
+                      alpha, 1, panel->frame[7], 0, surface);
+    }
+    selection = mnuClearWindowPendingFlagAfterSelection(
+        x + framePositions[2], y + framePositions[3], z,
+        &menu->flags, panelIndex, surface);
+    func_00306CD0(x + framePositions[2], y + framePositions[3], z,
+                  alpha, 1, panel->frame[selection + 4], 0, surface);
+    if (panel->hp.textures[0] != 0) {
+        s32 hp = menu->records->slots[panelIndex].hp;
+        u32 hpColor = mnuGetPanelRatioColor(0, hp,
+                                           menu->records->slots[panelIndex].maxHp);
+
+        mnuDrawAndAdvanceRatioPanel(x + barPosition[0], y + barPosition[1], z,
+                                    hpColor, hp, -1, &panel->hp, surface);
+        mnuDrawAndAdvanceRatioPanel(x + barPosition[0], y + barPosition[1] + 0x90,
+                                    z, 0xA09DC380,
+                                    menu->records->slots[panelIndex].mp,
+                                    -1, &panel->mp, surface);
+    }
+}
+
 
 
 extern void func_002BF830(s32, s32, s32, MenuPageWindow *, s32, s32);
@@ -383,9 +493,9 @@ typedef struct MenuSpacing {
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B118);
 
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B130);
+const s32 D_0042B130[4] = {320, 24, 1056, 120};
 
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B140);
+const s32 D_0042B140[4] = {512, 56, 1088, 208};
 
 void mnuCalcListEntryOffset(s32 *out, MenuPageWindow *menu, s32 index) {
     MenuSpacing spacing = {0x310, 0x370, 0x190};
@@ -872,7 +982,7 @@ u32 mnuGetPanelRatioColor(s32 useDefault, s32 amount, s32 divisor) {
 typedef struct FrFontGlyph FrFontGlyph;
 extern char D_00437C88[];
 extern s32 func_0035C860(char *, const char *, ...);
-extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
+extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern s32 func_0019D550(FrFontGlyph *, s8, u32);
 extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 
@@ -1077,7 +1187,7 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
     }
     color = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
     func_0035C860(text, D_00437C88, value);
-    glyph = (FrFontGlyph *)func_0019F5E8(x + 0x2D0, y, depth, color, text, 0);
+    glyph = func_0019F5E8(x + 0x2D0, y, depth, color, text, 0);
     frFontSetChainFlag(glyph, fontFlags);
     func_0019D550(glyph, 1, flags);
     frFontQueueGlyphInSelectedSlot(glyph);
@@ -2939,15 +3049,15 @@ void func_002C7CE8(void) {
     btlDestroyStageTask();
 }
 
-INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B610);
-
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C58);
 
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C60);
 
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C68);
 
-INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C70);
+const s32 D_00437C70[2] = {2096, 104};
+
+INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B610);
 
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C78);
 

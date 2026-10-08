@@ -226,7 +226,7 @@ void effModelAnimationStop(EffModelOwner *owner) {
 
 extern u8 D_00325828[];
 
-extern s32 effComputeLightDirectionVU(MdlCtx *, void *);
+extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 
 extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
 
