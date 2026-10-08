@@ -374,8 +374,10 @@ void mnuBindAssetEffectPayloads(MenuAssets *assets) {
     effSetMaterialSlots(assets->sprites[4], 4, 0, (u32)assets->layerB->records);
     effSetSlotIndexedResource((s32)assets->layerA->records + 0x28, assets->material, 2, 0xd);
     effSetSlotOverrideWork(assets->sprites[1], 0, (u32)assets->layerA->records);
-    effConfigureIndexedSlotResource(assets->sprites[2], 0, assets->material, 3, 4);
-    effConfigureIndexedSlotResource(assets->sprites[3], 0, assets->material, 4, 4);
+    effConfigureIndexedSlotResource((struct EffectSlotSet *)(u32)assets->sprites[2], 0,
+                                    (struct EffMappedResource *)(u32)assets->material, 3, 4);
+    effConfigureIndexedSlotResource((struct EffectSlotSet *)(u32)assets->sprites[3], 0,
+                                    (struct EffMappedResource *)(u32)assets->material, 4, 4);
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027AD80);

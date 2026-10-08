@@ -3420,7 +3420,7 @@ s32 btlSetTaskPhase2(void) {
 
 extern void btlUpdateActorSlotPresentationState(BtlUnit *, s8, s8);
 
-void func_001ACF10(BtlUnit *unit, s8 side) {
+void btlHighlightActorStatPanel(BtlUnit *unit, s8 side) {
     KwlnTask *task;
     BattleActorPanelWork *work;
     u32 index;
@@ -3519,14 +3519,14 @@ u32 btlIsNamedBattleTaskRegistered(void) {
     return 0;
 }
 
-void func_001AD1F8(void) {
-    u8 *puVar1;
-    KwlnTask *temp_v0;
+void btlRequestMahenPanelClose(void) {
+    MesWindowList *work;
+    KwlnTask *task;
 
-    temp_v0 = kwlnTaskGetTaskByName(btlMahenPanelTaskNameRef);
-    if (temp_v0 != 0) {
-        puVar1 = (u8 *)kwlnTaskGetUserValue(temp_v0);
-        *puVar1 = 2;
+    task = kwlnTaskGetTaskByName(btlMahenPanelTaskNameRef);
+    if (task != 0) {
+        work = (MesWindowList *)kwlnTaskGetUserValue(task);
+        work->state = 2;
     }
 }
 
@@ -3605,14 +3605,14 @@ s32 btlGetRegisteredTaskValueOrDefault(void) {
     return *(s8 *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(btlAnalyzPanelTaskNameRef));
 }
 
-u32 func_001AD428(void) {
-    u8 *puVar1;
-    KwlnTask *temp_v0;
+u32 btlRequestAnalysisPanelClose(void) {
+    BtlAnalysisPanelWork *work;
+    KwlnTask *task;
 
-    temp_v0 = kwlnTaskGetTaskByName(btlAnalyzPanelTaskNameRef);
-    if (temp_v0 != 0) {
-        puVar1 = (u8 *)kwlnTaskGetUserValue(temp_v0);
-        *puVar1 = 2;
+    task = kwlnTaskGetTaskByName(btlAnalyzPanelTaskNameRef);
+    if (task != 0) {
+        work = (BtlAnalysisPanelWork *)kwlnTaskGetUserValue(task);
+        work->state = 2;
     }
     return 1;
 }

@@ -1116,7 +1116,7 @@ extern void sdfFreeMemoryFromEitherHeap(void *);
 extern void sdfTexQueueResourceRelease(s32);
 extern void sdfTexQueuePendingWork(SdfTexResource *texture);
 
-void func_002EBB60(SdfStreamFrameNode *node) {
+void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
     s32 interruptsEnabled;
     s32 wasActive;
     u32 dmaEnable;

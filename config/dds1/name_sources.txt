@@ -2698,10 +2698,13 @@
 0x001ACAE0	btlCountSceneSlots	inferred	returns occupied scene slot count while refreshing fade-kind cache
 0x001ACCF0	btlClearSharedBattleStateWords	inferred	Clears the consecutive state words in the shared battle work region. [names_reviewed17.tsv]
 0x001ACED0	btlSetTaskPhase2	inferred	task phase = 2 via kwlnTaskGetTaskByName(D_003BB3A0)
+0x001ACF10	btlHighlightActorStatPanel	inferred	selects actor HP or MP highlight state and refreshes presentation
 0x001ACFE0	btlCreateMahenPanelTask	inferred	LeverAudit
 0x001AD1B0	btlIsNamedBattleTaskRegistered	inferred	Requires the indexed battle task to be registered and its named task to exist. [names_reviewed17.tsv]
+0x001AD1F8	btlRequestMahenPanelClose	inferred	sets registered Mahen panel to its closing state
 0x001AD3A8	btlHasRegisteredAnalysisPanelTask	inferred	confidence=high; matched-C; src/dds1/game/code_001A1960.c:2200:func_001AD3A8; Requires tracked analysis-panel handle to remain registered and named analysis task to exist.; twin=0x001B7FB8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x001AD3F0	btlGetRegisteredTaskValueOrDefault	inferred	Returns a registered task value or a fixed default when unavailable. [names_reviewed9.tsv]
+0x001AD428	btlRequestAnalysisPanelClose	inferred	sets registered analysis panel to its closing state and returns one
 0x001AD468	btlCreateGuidePanelTask	inferred	U0
 0x001AD5A0	btlRequestGuidePanelClose	inferred	Guide task constructor and registration check use the same task name; dialog release caller requests state 2 before its close transition; paired native function is a relocation twin.
 0x001AD5D8	btlHasRegisteredGuidePanelTask	inferred	confidence=high; src/dds1/game/code_001A1960.c:func_001AD5D8; Requires tracked task slot nine to remain registered and the retail bpnl_guide_nm named task to exist. [names_qp9.tsv]
@@ -6679,6 +6682,7 @@
 0x002EB8C0	sdfSoundInitNodeFromFormat	inferred	memset node, translate hasAudio/stereo into twoChannel 0/1/2
 0x002EB9C8	sdfSoundInitFormattedNode	inferred	Initializes a sound node using format and callback values and allocates its sample buffer.
 0x002EBA28	sdfStreamInitializeFromHeader	inferred	confidence=high; matched-C; src/dds1/game/code_002E9708.c:843:func_002EBA28; Peer-matched C proposal: P7; Waits for a complete streamed frame header, captures dimensions and format metadata, creates a texture when absent, allocates frame buffers and links the stream node.; source=names_pending_main.tsv:143 [names_qp13.tsv]
+0x002EBB60	sdfDestroyStreamFrameNode	inferred	destroys the sound node, unlinks it from both queues, stops active IPU DMA, and releases all owned stream resources
 0x002EBC98	sndFillStreamFeedRing	inferred	confidence=high; src/dds1/game/code_002E9708.c:func_002EBC98; Fills uncached stream-ring slots up to its reserve limit, handles partial EOF, preserves wrap history and updates occupancy. [names_qp9.tsv]
 0x002EBEB8	sdfSoundStartIpuInputDma	inferred	Fam_Mid3
 0x002EBF88	sdfSoundQueueIpuBuffer	inferred	Writes the selected buffer address size and start command to IPU MMIO registers
