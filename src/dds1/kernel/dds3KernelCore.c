@@ -1,8 +1,6 @@
 #include "common.h"
 #include "kwln.h"
-
-/* Low four bits encode the scheduler list/state; upper bits are independent flags. */
-#define KWLN_TASK_STATE_MASK 0xF
+#include "kwln_task_state.h"
 
 extern void kwlnTaskRemoveFromStateQueue(KwlnTask* task);
 
@@ -78,7 +76,7 @@ extern u8 D_0039DEF8[];
 void kwlnTaskActivate(KwlnTask* task)
 {
     kwlnTaskRemoveFromStateQueue(task);
-    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 2;
+    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | KWLN_TASK_ACTIVE;
     kwlnTaskInsertIntoOrderedStateQueue(task);
     task->unk24 = 0;
     task->timer = 0;
@@ -143,7 +141,7 @@ s32 func_00100B40(KwlnTask *task) {
         if (nextUpdate != 0) {
             task->update = (TaskUpdate)nextUpdate;
         }
-        if (nextUpdate == -1 && (task->flags & KWLN_TASK_STATE_MASK) == 2) {
+        if (nextUpdate == -1 && (task->flags & KWLN_TASK_STATE_MASK) == KWLN_TASK_ACTIVE) {
             kwlnTaskRequestDestroy(task);
             D_003BA824 = 0;
             return 0;
@@ -181,14 +179,14 @@ void kwlnTaskRequestDestroy(KwlnTask* task)
     u32 state;
 
     state = task->flags & KWLN_TASK_STATE_MASK;
-    if (state >= 3) {
+    if (state >= KWLN_TASK_DESTROY_PENDING) {
         return;
     }
-    if (state == 0) {
+    if (state == KWLN_TASK_DETACHED) {
         return;
     }
     kwlnTaskRemoveFromStateQueue(task);
-    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 3;
+    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | KWLN_TASK_DESTROY_PENDING;
     kwlnTaskInsertIntoOrderedStateQueue(task);
     if (task->unk2E == 0) {
         kwlnTaskFinalizeDestroy(task);
@@ -281,11 +279,11 @@ void func_00101060(s32 setFlags, KwlnTask *task, u32 flags, s32 mode)
 void* kwlnTaskGetStateList(u32 state)
 {
     switch (state & KWLN_TASK_STATE_MASK) {
-    case 1:
+    case KWLN_TASK_DELAYED_START:
         return kwlnDelayedStartTaskCount;
-    case 2:
+    case KWLN_TASK_ACTIVE:
         return kwlnActiveTaskCount;
-    case 3:
+    case KWLN_TASK_DESTROY_PENDING:
         return kwlnDelayedDestroyTaskCount;
     default:
         return 0;
@@ -371,12 +369,12 @@ KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 des
         i++;
     }
     task->priority = priority;
-    task->flags = 1;
+    task->flags = KWLN_TASK_DELAYED_START;
     task->unk2C = startDelay;
     task->unk2E = destroyDelay;
     task->update = update;
     task->destroy = destroy;
-    task->unk38 = userValue;
+    task->userValue = userValue;
     task->name[0x17] = 0;
     task->unk24 = 0;
     task->timer = 0;
@@ -407,11 +405,11 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskDestroyWithHierarchy);
 
 void kwlnTaskMarkDestroyPending(KwlnTask* task)
 {
-    if ((task->flags & KWLN_TASK_STATE_MASK) != 2) {
+    if ((task->flags & KWLN_TASK_STATE_MASK) != KWLN_TASK_ACTIVE) {
         return;
     }
     kwlnTaskRemoveFromStateQueue(task);
-    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 3;
+    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | KWLN_TASK_DESTROY_PENDING;
     kwlnTaskInsertIntoOrderedStateQueue(task);
 }
 
@@ -420,10 +418,10 @@ void kwlnTaskSetDestroyDelay(KwlnTask* task, s32 delayTicks)
     u32 state;
 
     state = task->flags & KWLN_TASK_STATE_MASK;
-    if (state == 0) {
+    if (state == KWLN_TASK_DETACHED) {
         return;
     }
-    if (state < 4) {
+    if (state < KWLN_TASK_STATE_LIMIT) {
         task->unk2E = delayTicks;
     }
 }
@@ -433,10 +431,10 @@ s32 kwlnTaskGetRegisteredState(KwlnTask* task)
     u32 state;
 
     if (kwlnTaskIsRegistered(task) == 0) {
-        return 0;
+        return KWLN_TASK_DETACHED;
     }
     state = task->flags & KWLN_TASK_STATE_MASK;
-    return (state < 4) ? state : 0;
+    return (state < KWLN_TASK_STATE_LIMIT) ? state : KWLN_TASK_DETACHED;
 }
 
 KwlnTask* kwlnTaskGetTaskByName(const char* name)
@@ -564,12 +562,12 @@ u32 kwlnTaskGetTimer(KwlnTask* task)
 
 void kwlnTaskSetUserValue(KwlnTask* task, u32 value)
 {
-    task->unk38 = value;
+    task->userValue = value;
 }
 
 u32 kwlnTaskGetUserValue(KwlnTask* task)
 {
-    return task->unk38;
+    return task->userValue;
 }
 
 void func_00101A78(void) {

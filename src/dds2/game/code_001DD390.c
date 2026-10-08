@@ -10813,8 +10813,8 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
                 mnuResetSoundBufferLocked();
                 mnuReleaseSoundBufferLocked();
             }
-            data = sdfMemoryGetBlockAddress(soundWork->resourceHandles[args->unk_08]);
-            size = sdfMemoryGetBlockSize(soundWork->resourceHandles[args->unk_08]);
+            data = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)soundWork->resourceHandles[args->unk_08]);
+            size = sdfMemoryGetBlockSize((struct SdfMemBlock *)(u32)soundWork->resourceHandles[args->unk_08]);
             func_002A27A8(data, size, 2);
             mnuClearInactiveSoundBufferState();
             work->unk288 = 0;

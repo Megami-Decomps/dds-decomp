@@ -316,7 +316,6 @@ extern u32 D_003308B0[];
 extern u32 fileRequestIsReady(u32 arg0);
 extern void *memset(void *s, s32 c, u32 n);
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 extern s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task);
 extern s32 kwlnTaskIsRegistered(u32 arg0);
 extern s32 func_00213B50(void);
@@ -894,8 +893,6 @@ extern void fldSetNpcPalette();
 extern void fldUploadSkyBuffer();
 extern void fldCopyActorWaypointTable();
 extern void fldCopyInfoTable(const void *);
-extern u32 sdfMemoryGetBlockSize(u32);
-extern u32 sdfMemoryGetBlockAddress(u32);
 extern void fldSetSceneRecordChunk(u32, u32);
 extern void fldCacheMapLabelLengths();
 
@@ -942,10 +939,11 @@ void fldLoadAreaPackedResources(void) {
                 sdfQueueNonzeroResourceId(entry->blockHandle);
                 break;
             case 5:
-                fldAreaCachedResource = (u32)sdfAllocGeneralBlock(sdfMemoryGetBlockSize(entry->blockHandle));
-                memcpy((void *)sdfMemoryGetBlockAddress(fldAreaCachedResource),
-                       (void *)sdfMemoryGetBlockAddress(entry->blockHandle),
-                       sdfMemoryGetBlockSize(entry->blockHandle));
+                fldAreaCachedResource = (u32)sdfAllocGeneralBlock(
+                    sdfMemoryGetBlockSize((struct SdfMemBlock *)(u32)entry->blockHandle));
+                memcpy((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)fldAreaCachedResource),
+                       (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)entry->blockHandle),
+                       sdfMemoryGetBlockSize((struct SdfMemBlock *)(u32)entry->blockHandle));
                 sdfQueueNonzeroResourceId(entry->blockHandle);
                 break;
             case 6:
@@ -4026,10 +4024,10 @@ void fldAllocateRecordStorage(void) {
 
 /* Release both retained resources and clear the usable buffer addresses. */
 void fldReleaseRecordStorage(void) {
-    sdfDecrementAllocationReferenceCount(fldValueRecordResource);
+    sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)fldValueRecordResource);
     sdfQueueNonzeroResourceId(fldValueRecordResource);
     fldValueRecords = 0;
-    sdfDecrementAllocationReferenceCount(fldAuxRecordResource);
+    sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)fldAuxRecordResource);
     sdfQueueNonzeroResourceId(fldAuxRecordResource);
     fldAuxRecordBuffer = 0;
 }

@@ -196,7 +196,6 @@ typedef struct ItfGridResource {
     u32 entryCount;
 } ItfGridResource;
 
-extern void sdfDecrementAllocationReferenceCount(u32);
 
 /* Return the address of entry `index` of the resource's 8-byte-stride offset table, or NULL when out of range. */
 u8 *itfGetGridResourceEntryData(ItfGridResource *object, u32 index) {
@@ -216,11 +215,11 @@ u8 *itfGetGridResourceEntryData(ItfGridResource *object, u32 index) {
     for (i = 0; i < count; i++, cursor += 8) {
         result = base + *(u32 *)(cursor + 4);
         if (index == i) {
-            sdfDecrementAllocationReferenceCount(object->handle);
+            sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)object->handle);
             return result;
         }
     }
-    sdfDecrementAllocationReferenceCount(object->handle);
+    sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)object->handle);
     return 0;
 }
 

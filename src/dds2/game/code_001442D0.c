@@ -314,7 +314,6 @@ extern s32 fldGetCurrentSceneSelectionResource(void);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
-extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 
 extern s32 fldFieldTaskUpdate(void);
 
@@ -2349,7 +2348,6 @@ extern void func_002C81D0(void *);
 
 extern void func_002C7CE8(void *);
 
-extern s32 sdfMemoryGetBlockAddress(s32);
 
 typedef struct FldLbNode {
     struct FldLbNode *next; /* 0x00 */
@@ -2407,11 +2405,11 @@ void fldParseMixLb(void) {
         switch (index) {
         case 5:
             D_00436338 = node->value;
-            D_0043633C = sdfMemoryGetBlockAddress(node->value);
+            D_0043633C = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)node->value);
             break;
         case 6:
             D_004362D4 = node->value;
-            D_004362D8 = sdfMemoryGetBlockAddress(node->value);
+            D_004362D8 = sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)node->value);
             break;
         case 0:
         case 1:

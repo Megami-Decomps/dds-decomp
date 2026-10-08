@@ -970,9 +970,7 @@ extern void fldUploadSkyBuffer();
 
 extern void fldCopyActorWaypointTable(u32);
 
-extern u32 sdfMemoryGetBlockSize(u32);
 
-extern u32 sdfMemoryGetBlockAddress(u32);
 
 extern void fldSetSceneRecordChunk(u32, u32);
 
@@ -1007,10 +1005,11 @@ void fldLoadAreaPackedResources(void) {
                 sdfQueueNonzeroResourceId(entry->blockHandle);
                 break;
             case 5:
-                fldAreaCachedResource = (u32)sdfAllocGeneralBlock(sdfMemoryGetBlockSize(entry->blockHandle));
-                memcpy((void *)sdfMemoryGetBlockAddress(fldAreaCachedResource),
-                       (void *)sdfMemoryGetBlockAddress(entry->blockHandle),
-                       sdfMemoryGetBlockSize(entry->blockHandle));
+                fldAreaCachedResource = (u32)sdfAllocGeneralBlock(
+                    sdfMemoryGetBlockSize((struct SdfMemBlock *)(u32)entry->blockHandle));
+                memcpy((void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)fldAreaCachedResource),
+                       (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)entry->blockHandle),
+                       sdfMemoryGetBlockSize((struct SdfMemBlock *)(u32)entry->blockHandle));
                 sdfQueueNonzeroResourceId(entry->blockHandle);
                 break;
             case 6:

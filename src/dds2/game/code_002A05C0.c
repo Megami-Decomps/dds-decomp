@@ -4,8 +4,6 @@
 #include "mnu.h"
 #include "file.h"
 
-extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
-
 #define BRS_RESULT_COUNTER_PAIR_COUNT 5
 #define BRS_RESULT_SETTLED_POLL_LIMIT 6
 #define BRS_RESULT_SETTLED_POLL_CLAMP 7
@@ -105,7 +103,6 @@ extern s32 WaitSema(u32);
 
 extern s32 SignalSema(u32);
 
-extern u32 sdfMemoryGetBlockAddress(struct SdfMemBlock *block);
 extern s32 sceSifInitIopHeap(void);
 extern s32 sceSifAllocIopHeap(s32 size);
 extern void Exit(s32 status);

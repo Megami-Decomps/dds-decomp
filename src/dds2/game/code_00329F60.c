@@ -60,9 +60,6 @@ typedef struct SdfTexReleaseEntry {
 } SdfTexReleaseEntry; /* 0xA0 */
 
 extern s32 sdfChipIsInRange();
-extern SdfMemBlock *sdfFindGeneralBlockByAddress(void *);
-
-
 extern u8 D_004389E0;
 
 extern u8 *D_004389E4;
