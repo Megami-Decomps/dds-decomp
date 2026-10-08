@@ -59,7 +59,6 @@ typedef struct {
 
 
 extern s32 mnuFindMatchingPartyEntryIndex(DatPartyRecord *targetEntry);
-extern s32 mnuSeekListNode(s32, struct MenuList *);
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);

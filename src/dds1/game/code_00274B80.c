@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "mnu_staff.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "mnu_shop.h"
@@ -217,7 +218,6 @@ typedef struct MenuInputNode {
 } MenuInputNode;
 
 extern void mnuForwardDupArg(MenuWindowContainer *, s32, s32, s32, s32);
-extern void mnuSeekListNode(s32, s32);
 
 
 
@@ -246,8 +246,6 @@ extern u8 D_0037CC74[];
 extern u8 D_0037CC3C[];
 extern u8 D_0037CAB0[];
 extern u8 D_0037CA78[];
-extern void mnuStepPartyPanelListFromInput();
-extern void mnuClearListFlags();
 extern void evtStageTestInit(s32);
 
 extern s32 func_002877A8(void);
@@ -851,7 +849,6 @@ extern void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task);
 extern void mnuCreateStaffImageSprite();
 extern void mnuDrawStaffGridLabelsForKind();
 extern void func_00272668();
-extern void mnuDrawWindowContainer();
 
 s32 mnuDrawStaffCampPageWithImage(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
@@ -1256,7 +1253,7 @@ void mnuSeekFirstAvailableStaffListNode(KwlnTask *task) {
         listNode = listNode->next;
     }
     if (listNode != NULL) {
-        mnuSeekListNode(listNode->index, (s32)((MenuSelectionState *)menuWork->selectedList)->list);
+        mnuSeekListNode(listNode->index, ((MenuSelectionState *)menuWork->selectedList)->list);
     }
 }
 
@@ -1267,7 +1264,7 @@ u32 ptySkillMenuRebuildAfterMutation(s32 actor, KwlnTask *contextArg) {
 
     mnuDestroySelectedPartyWindow(contextArg);
     ptySkillMenuBuildEquippedSlots(actor, contextArg);
-    mnuSeekListNode(selected, (s32)((MenuSelectionState *)menu->selectedList)->list);
+    mnuSeekListNode(selected, ((MenuSelectionState *)menu->selectedList)->list);
     state = menu->selectedList;
     *(s32 *)(state + 0x44) = 0x200;
     *(s32 *)(state + 0x48) = 0x100;

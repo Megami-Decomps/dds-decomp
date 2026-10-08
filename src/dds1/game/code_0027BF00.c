@@ -3,6 +3,7 @@
 #include "mnu_list.h"
 #include "eff.h"
 #include "mnu_shop.h"
+#include "mnu_staff.h"
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
 #include "dat_command.h"
@@ -107,7 +108,6 @@ extern ScrollHandle *effCreateStatusBatch(s32);
 
 extern void func_0027FCA0(s32, s32, s32);
 
-extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
 
 extern void sdfReleaseChipBlock(void *);
 
@@ -143,7 +143,6 @@ MenuListNode *mnuListAdvanceCursor(MenuList *list, s32 noScroll, s32 keepFade);
 
 MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade);
 
-s32 mnuSeekListNode(s32 index, MenuList *list);
 
 u32 mnuTestListFlagTwo(u32 *flags);
 
@@ -925,7 +924,7 @@ void mnuDrawFadingWindows(s32 depth, s32 *list, s32 drawArg) {
     u32 slotIndex;
     for (slotIndex = 0; slotIndex < (u32)list[0]; slotIndex++) {
         s32 *entry = (s32 *)list[slotIndex + 1];
-        mnuDrawWindowContainer(entry[2], entry[3], depth, entry[4], drawArg);
+        mnuDrawWindowContainer(entry[2], entry[3], depth, (MenuWindowContainer *)entry[4], drawArg);
     }
 }
 
