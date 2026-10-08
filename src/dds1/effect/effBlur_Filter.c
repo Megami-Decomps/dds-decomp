@@ -33,9 +33,9 @@ void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *
     s32 centerY;
     slot->delay = effMiscRand(D_0034DF38) % (work->params.delaySpread + 1);
     slot->angle = -3.14159265f;
-    quad->angle = work->params.unk14;
+    quad->angle = work->params.uvDisplacementAngleDegrees;
     quad->color = work->params.color;
-    quad->blendControl = work->params.unk10;
+    quad->blendControl = work->params.blendControl;
     spread = work->params.positionSpread;
     halfSize = work->params.size;
     quad->x = work->params.x +
@@ -97,7 +97,7 @@ void func_00187098(EffBlurScatterWork *work)
     if (func_0011E278() == 0) {
         list = (void *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
-        effAppendBlurRenderState(list, work->params.unk10, work->sourceHandle);
+        effAppendBlurRenderState(list, work->params.blendControl, work->sourceHandle);
         slot = work->slots;
         if (work->params.count > 0) {
             count = work->params.count;
@@ -106,7 +106,7 @@ void func_00187098(EffBlurScatterWork *work)
                     if (slot->angle > 3.14159265f) {
                         effBlurInitializeScatterSlot(work, slot);
                     }
-                    slot->quad.displacement = work->params.unk18 * sdfSinPoly(slot->angle) + 1.0f;
+                    slot->quad.displacement = work->params.uvDisplacementAmplitude * sdfSinPoly(slot->angle) + 1.0f;
                     alpha = (u32)((f32)(work->params.color >> 24) *
                                   (3.14159265f - fabs(slot->angle)) * (1.0f / 3.14159265f));
                     slot->quad.color = (slot->quad.color & 0xFFFFFF) | (alpha << 24);
@@ -164,8 +164,8 @@ void effBlurResetScaleSlot(EffBlurScaleWork *work, EffBlurScaleSlot *slot) {
     slot->phase = 0.0f;
     slot->angle = 0.0f;
     quad->color = work->params.color;
-    quad->blendControl = work->params.unk10;
-    quad->angle = work->params.unk14;
+    quad->blendControl = work->params.blendControl;
+    quad->angle = work->params.uvDisplacementAngleDegrees;
     quad->x = work->params.x;
     quad->y = work->params.y;
 }
