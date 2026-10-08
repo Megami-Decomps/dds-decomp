@@ -333,7 +333,6 @@ extern f32 effComputeProjectedOffsetAngle(void *, void *);
 extern f32 func_0015A150(void *, void *);
 
 
-extern void billSetLengthExtent(u32, f32);
 
 extern void effCopyVector(u32, void *);
 
@@ -1556,7 +1555,7 @@ void effBillboardEntryFrameReset(s32 work) {
 }
 
 
-/* Update a live billboard frame's projected scale, length, and position before its callback. */
+/* Update a live billboard frame's projected scale, rotation, and position before its callback. */
 void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
     u128 dir;
     f32 angle;
@@ -1576,7 +1575,7 @@ void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
         }
         len *= work->scale;
         billSetChildScaleComponents(work->billboard, len * work->widthScale, work->heightScale * work->scale);
-        billSetLengthExtent((u32)work->billboard, angle);
+        billSetRotationAngle(work->billboard, angle);
         effCopyVector((u32)work->billboard, work);
         billInvokeCallback((u32)work->billboard);
         work->frame++;
