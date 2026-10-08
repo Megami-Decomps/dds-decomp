@@ -4,6 +4,7 @@
 
 #include "evt_world.h"
 #include "eff_object.h"
+#include "eff_event.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "mdl.h"
@@ -4072,7 +4073,6 @@ extern EvtModelScaleEntry *D_00435DF0;
 extern void *memset(void *, s32, u32);
 extern void effObjSetFlags(void *object, s32 flags);
 extern void *func_00115500(void *obj, void *vecA, void *vecB);
-extern void effEventSetScale(void *target, f32 scale);
 
 /* Spawn from a keyed task resource with two zeroed constructor vectors.
  * A nonnegative index applies the selected model-table scale relative to the base. */

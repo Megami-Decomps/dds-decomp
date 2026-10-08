@@ -12,6 +12,15 @@ typedef struct DdsSlotResourceBlock {
 
 typedef char DdsSlotResourceBlock_size_must_be_0x10[(sizeof(DdsSlotResourceBlock) == 0x10) ? 1 : -1];
 
+struct SoundMixer;
+typedef struct EffEventWork EffEventWork;
+
+/* The event constructor copies a serialized, caller-specific 0x30-byte
+ * parameter record. Its retained work owner is opaque to external users. */
+EffEventWork *effEventCreate(struct SoundMixer *owner, u16 kind, const void *params);
+void effEventReleaseNode(EffEventWork *work);
+void effEventSetScale(EffEventWork *work, f32 scale);
+
 ObjBase *dds3GetResourceOwnerHandle(EffWorldNode *object);
 
 #endif

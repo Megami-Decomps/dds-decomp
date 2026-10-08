@@ -7,7 +7,10 @@
 typedef struct SdfTextureFileHeader {
     u8 unk00;
     u8 flags;          /* 0x01: high nibble contributes to the variable payload offset. */
-    u8 pad02[0xE];     /* 0x02 */
+    u8 pad02[2];       /* 0x02 */
+    u32 byteCount;     /* 0x04 */
+    u32 magic;         /* 0x08 */
+    u8 pad0C[4];       /* 0x0C */
     u8 unk10;          /* 0x10 */
     u8 unk11;          /* 0x11 */
     s16 width;         /* 0x12 */
@@ -28,6 +31,10 @@ typedef char SdfTextureFileHeader_size_must_be_0x40[
     ((u32)&(((SdfTextureFileHeader *)0)->field))
 typedef char SdfTextureFileHeader_flags_offset_must_be_0x01[
     (SDF_TEXTURE_FILE_HEADER_OFFSET(flags) == 0x01) ? 1 : -1];
+typedef char SdfTextureFileHeader_byte_count_offset_must_be_0x04[
+    (SDF_TEXTURE_FILE_HEADER_OFFSET(byteCount) == 0x04) ? 1 : -1];
+typedef char SdfTextureFileHeader_magic_offset_must_be_0x08[
+    (SDF_TEXTURE_FILE_HEADER_OFFSET(magic) == 0x08) ? 1 : -1];
 typedef char SdfTextureFileHeader_unk10_offset_must_be_0x10[
     (SDF_TEXTURE_FILE_HEADER_OFFSET(unk10) == 0x10) ? 1 : -1];
 typedef char SdfTextureFileHeader_unk11_offset_must_be_0x11[
