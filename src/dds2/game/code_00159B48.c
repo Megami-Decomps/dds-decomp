@@ -42,7 +42,7 @@ typedef struct EffEmitterHead {
     u8 pad9C[0x14];
     f32 matrix[16];        /* 0xB0 */
     u32 colorMask;         /* 0xF0 */
-    s32 billboard;
+    BillObj *billboard; /* 0xF4: owned billboard shared with the particle view */
     EffectBufferTail *buffer; /* 0xF8 */
     u8 padFC[0x46];
     u16 active;            /* 0x142 */
@@ -474,7 +474,7 @@ u8 *billCreateUnitObject(s32 entryIndex) {
 u8 *billCloneUnitObject(EffInstance *source) {
     EffInstance *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
 
-    instance->billboard = (s32)billCloneObjectRetainingSharedData((struct BillObj *)source->billboard);
+    instance->billboard = billCloneObjectRetainingSharedData(source->billboard);
     instance->renderState = sdfCreateAssetWithDrawEntries();
     func_003332D0(instance->renderState, 1.0f);
     func_00333288(instance->renderState, 0x80808080);

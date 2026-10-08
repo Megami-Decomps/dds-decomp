@@ -40,7 +40,7 @@ typedef struct EffEmitterHead {
     u8 pad9C[0x14];
     f32 matrix[16];        /* 0xB0 */
     u32 colorMask;         /* 0xF0 */
-    s32 billboard;
+    BillObj *billboard; /* 0xF4: owned billboard shared with the particle view */
     EffectBufferTail *buffer; /* 0xF8 */
     u8 padFC[0x46];
     u16 active;            /* 0x142 */
@@ -201,7 +201,7 @@ void billSetChildTextureQuad(BillObj *effect, const BillTextureQuad *textureQuad
 /* Each effect scene object owns a billboard and an asset reference. */
 typedef struct EffUnitObject {
     u8 matrix[0x80];
-    s32 billboard;  /* 0x80 */
+    BillObj *billboard; /* 0x80: scene-owned billboard */
     void *resource; /* 0x84 */
 } EffUnitObject;
 
@@ -465,7 +465,7 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_00152560);
 u8 *billCreateUnitObject(s32 entryIndex) {
     u8 *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
 
-    ((EffUnitObject *)instance)->billboard = (s32)billCreateIndexed(1, entryIndex);
+    ((EffUnitObject *)instance)->billboard = billCreateIndexed(1, entryIndex);
     ((EffUnitObject *)instance)->resource = sdfCreateAssetWithDrawEntries();
     func_002DA420(((EffUnitObject *)instance)->resource, 1.0f);
     EE_MMI_UNIT_MATRIX(instance + EFF_MATRIX_BYTES);
@@ -476,8 +476,8 @@ u8 *billCreateUnitObject(s32 entryIndex) {
 u8 *billCloneUnitObject(u8 *source) {
     u8 *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
 
-    ((EffUnitObject *)instance)->billboard = (s32)billCloneObjectRetainingSharedData(
-        (struct BillObj *)((EffUnitObject *)source)->billboard);
+    ((EffUnitObject *)instance)->billboard = billCloneObjectRetainingSharedData(
+        ((EffUnitObject *)source)->billboard);
     ((EffUnitObject *)instance)->resource = sdfCreateAssetWithDrawEntries();
     func_002DA420(((EffUnitObject *)instance)->resource, 1.0f);
     func_002DA3D8(((EffUnitObject *)instance)->resource, 0x80808080);
@@ -520,7 +520,7 @@ void effVuCopyMatrix(void *dst, void *src) {
 
 /* Kind 1 writes mode plus one/two entry values; untouched output words retain their contents. */
 void effReadBillboardModeValues(EffUnitObject *instance, s32 *modeValues) {
-    BillObj *billboard = (BillObj *)instance->billboard;
+    BillObj *billboard = instance->billboard;
 
     if (billboard->kind == 1) {
         u32 modeFlags = billboard->modeFlags;
