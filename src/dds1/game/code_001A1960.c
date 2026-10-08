@@ -103,7 +103,7 @@ extern u32 datComputeSkillBoostedMaxMp(DatPartyRecord *);
 
 extern void datClearUnitStatusBits(DatPartyRecord *record, s32 mask);
 
-extern void func_001BCB88(s32, s32);
+extern void func_001BCB88(s8, s32);
 
 extern s32 datGetClampedProfileAdjustedStat(DatPartyRecord *, s32);
 extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
@@ -5522,7 +5522,58 @@ s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
     return -128;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001BCB88);
+void func_001BCB88(s8 mode, s32 duration) {
+    KwlnTask *commandTask = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    KwlnTask *panelTask = kwlnTaskGetTaskByName(D_003BB3B0);
+    KwlnTask *registeredTask = kwlnTaskGetTaskByName(D_003BB3C0);
+
+    switch (mode) {
+    case 0: {
+        s32 step;
+        if (commandTask != NULL) {
+            ((BattleSceneObject *)kwlnTaskGetUserValue(commandTask))->state = 11;
+            btlCommandPanelWork->state = 4;
+        }
+        if (panelTask != NULL) {
+            btlTrackedTaskHandles->presentationState = 1;
+        }
+        if (registeredTask != NULL) {
+            ((BattleRegisteredPanelWork *)kwlnTaskGetUserValue(registeredTask))->mode = 3;
+        }
+        {
+            BattleTrackedTaskWork *tracked = btlTrackedTaskHandles;
+            step = 0x80 / duration;
+            tracked->threshold = duration;
+            tracked->status.bytes.state = 1;
+            tracked->counter = 0;
+            tracked->status.bytes.fadeStep = step;
+        }
+        break;
+    }
+    case 1: {
+        s32 step;
+        if (commandTask != NULL) {
+            ((BattleSceneObject *)kwlnTaskGetUserValue(commandTask))->state = mode;
+            btlCommandPanelWork->state = mode;
+        }
+        if (panelTask != NULL) {
+            btlTrackedTaskHandles->presentationState = 2;
+        }
+        if (registeredTask != NULL) {
+            func_001B0E48((BattleRegisteredPanelWork *)kwlnTaskGetUserValue(registeredTask));
+        }
+        {
+            BattleTrackedTaskWork *tracked = btlTrackedTaskHandles;
+            step = 0x80 / duration;
+            tracked->threshold = duration;
+            tracked->status.bytes.state = 3;
+            tracked->counter = 0;
+            tracked->status.bytes.fadeStep = step;
+        }
+        break;
+    }
+    }
+}
 
 
 s32 btlUpdateCommandUiTransition(void) {
