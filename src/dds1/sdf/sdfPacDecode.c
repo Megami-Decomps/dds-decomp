@@ -64,7 +64,6 @@ void sdfQueueAndResetPacketWork(PacState *state, void *packet);
 void sdfAppendResourceListItem(s32 handle, s32 resource);
 SdfTex *sdfTexAcquireAlternateResourceTexture(void *resource);
 SdfTex *sdfTexAcquireResourceTexture(void *resource);
-void sdfReleaseMemorySlot(void *slot);
 void sdfStoreWordAndSetState(void *decoder, void *destination);
 s32 func_002EEAE0(void *decoder, void *input, s32 available);
 extern void *memcpy(void *dst, const void *src, u32 n);
