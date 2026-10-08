@@ -46,8 +46,6 @@ extern char D_003BC700[];
 #define MNU_STAFF_PARTY_LAST_SLOT 4
 #define MNU_STAFF_DISPLAY_OVERFLOW 4
 #define MNU_STAFF_DISPLAY_LIMIT 3
-#define MNU_STAFF_PARTY_ENTRY_BYTES 0x1A4
-#define MNU_STAFF_PARTY_BASE 0xA60
 #define MNU_STAFF_BACKUP_BYTES 0x834
 #define MNU_STAFF_PARTY_ACTIVE_BIT 1
 #define MNU_STAFF_NODE_UNAVAILABLE 1
@@ -102,24 +100,16 @@ extern char D_003BC700[];
 
 
 
-typedef struct PartyEntryCopy {
-    u16 flags;
-    u16 pad02;
-    u16 displayId; /* 0x04: used to select a party display asset */
-    u16 pad06;
-    u32 word[0x67];
-} PartyEntryCopy; /* 0x1A4 bytes */
-
 /* One allocated party-selection work area: original/current/backup entries,
  * saved panel payloads, and fade state all belong to this same allocation. */
 typedef struct PartyMenuData {
     s32 allocation;
     u8 pad04[4];
     MenuWindowContainer *primaryWindow;   /* 0x08: owned generic window */
-    PartyEntryCopy original[5];               /* 0x0C */
-    PartyEntryCopy current[5];
+    DatPartyRecord original[5];               /* 0x0C */
+    DatPartyRecord current[5];
     s32 activeCount; /* 0x1074 */
-    PartyEntryCopy backup[5];
+    DatPartyRecord backup[5];
     s32 selection; /* 0x18AC */
     u8 panelSnapshots[5][0xA8]; /* 0x18B0: copied panel subrecords */
     s32 fadeA;                 /* 0x1BF8 */
@@ -346,20 +336,20 @@ void mnuCopyPartyEntries(context)
     s32 context;
 {
     PartyMenuData *menuWork = (PartyMenuData *)((CampMenuContext *)context)->menu;
-    PartyEntryCopy *entryCursor = menuWork->current;
+    DatPartyRecord *entryCursor = menuWork->current;
     s32 entryIndex;
-    s32 flagsByteOffset = MNU_STAFF_PARTY_BASE;
-    s32 copyByteOffset = 0;
+    s32 partyFlagsByteOffset = (s32)&((DatGameState *)0)->party;
+    s32 partyCopyByteOffset = 0;
 
     menuWork->activeCount = 0;
     for (entryIndex = 0; entryIndex < MNU_STAFF_PARTY_SLOT_COUNT; entryIndex++) {
-        *entryCursor = *(PartyEntryCopy *)(copyByteOffset + (s32)datGameState + MNU_STAFF_PARTY_BASE);
-        if (((PartyEntryCopy *)((s32)datGameState + flagsByteOffset))->flags & MNU_STAFF_PARTY_ACTIVE_BIT) {
+        *entryCursor = *(DatPartyRecord *)(partyCopyByteOffset + (s32)datGameState + (s32)&((DatGameState *)0)->party);
+        if (((DatPartyRecord *)((s32)datGameState + partyFlagsByteOffset))->flags & MNU_STAFF_PARTY_ACTIVE_BIT) {
             menuWork->activeCount = menuWork->activeCount + 1;
         }
-        flagsByteOffset += MNU_STAFF_PARTY_ENTRY_BYTES;
+        partyFlagsByteOffset += sizeof(DatPartyRecord);
         entryCursor++;
-        copyByteOffset += MNU_STAFF_PARTY_ENTRY_BYTES;
+        partyCopyByteOffset += sizeof(DatPartyRecord);
     }
     if (menuWork->activeCount >= MNU_STAFF_DISPLAY_OVERFLOW) {
         menuWork->activeCount = MNU_STAFF_DISPLAY_LIMIT;
@@ -378,18 +368,17 @@ void func_00275030(s32 partyIndex, s32 mode, s32 skipUpdate,
     s32 previousPanelOther = context->partyPanel.unk4;
     s32 panelIndex;
 
-    menu->backup[menu->selection] = *(PartyEntryCopy *)(
-        partyIndex * (s32)sizeof(PartyEntryCopy) + (s32)menu + PARTY_CURRENT_OFFSET);
-    memset(&menu->current[partyIndex], 0, sizeof(menu->current[partyIndex]));
+    menu->backup[menu->selection] = *(DatPartyRecord *)(partyIndex * (s32)sizeof(DatPartyRecord) + (s32)menu + PARTY_CURRENT_OFFSET);
+    memset((DatPartyRecord *)(partyIndex * (s32)sizeof(DatPartyRecord) + (s32)menu + PARTY_CURRENT_OFFSET), 0, sizeof(DatPartyRecord));
 
     if (mode == 2) {
         menu->backup[menu->selection].flags |= 2;
         context->partyWindow.slots[menu->selection].flags &= ~0x80;
-        func_00285960((DatPartyRecord *)&menu->backup[menu->selection], 0,
+        func_00285960(&menu->backup[menu->selection], 0,
                       menu->selection, &context->partyPanel);
     } else {
         menu->backup[menu->selection].flags &= ~2;
-        func_00285960((DatPartyRecord *)&menu->backup[menu->selection], 0,
+        func_00285960(&menu->backup[menu->selection], 0,
                       menu->selection, &context->partyPanel);
     }
 
@@ -410,12 +399,12 @@ void func_00275030(s32 partyIndex, s32 mode, s32 skipUpdate,
 }
 
 /* Notify active snapshot entries, restore the backup, then refresh panel resources.
- * The second loop counts down while the backup byte offset advances forward. */
+ * The final loop counts down while copying backup entries forward. */
 void mnuRestorePartyEntriesAndRefresh(context)
     s32 context;
 {
     PartyMenuData *menuWork = (PartyMenuData *)((CampMenuContext *)context)->menu;
-    PartyEntryCopy *entryCursor = menuWork->current;
+    DatPartyRecord *entryCursor = menuWork->current;
     s32 entryCounter;
     s32 backupByteOffset;
     MenuPageWindow *panelWork;
@@ -428,8 +417,8 @@ void mnuRestorePartyEntriesAndRefresh(context)
     }
     backupByteOffset = 0;
     for (entryCounter = MNU_STAFF_PARTY_LAST_SLOT; entryCounter >= 0; entryCounter--) {
-        *(PartyEntryCopy *)(backupByteOffset + (s32)datGameState + MNU_STAFF_PARTY_BASE) = *(PartyEntryCopy *)(backupByteOffset + (s32)menuWork + PARTY_BACKUP_OFFSET);
-        backupByteOffset += MNU_STAFF_PARTY_ENTRY_BYTES;
+        *(DatPartyRecord *)(backupByteOffset + (s32)datGameState + (s32)&((DatGameState *)0)->party) = *(DatPartyRecord *)(backupByteOffset + (s32)menuWork + PARTY_BACKUP_OFFSET);
+        backupByteOffset += sizeof(DatPartyRecord);
     }
     panelWork = &((CampMenuContext *)context)->partyWindow;
     mnuReleasePartyPanelTextures(panelWork);
@@ -1119,11 +1108,11 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param
     frFontQueueGlyphInSelectedSlot(item);
 }
 
-void mnuDrawPartySkillAndStatusPanel(u8 *entry, MenuPageWindow *page, MenuPanelGroup *packedGroup, MenuSpriteState *spriteState, s32 obj, s32 spriteFlags) {
+void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, MenuPageWindow *page, MenuPanelGroup *packedGroup, MenuSpriteState *spriteState, s32 obj, s32 spriteFlags) {
     mnuDrawAndAdvancePanelGroup(0xeb0, 0x518, 0, entry, packedGroup, spriteFlags);
     mnuDrawPartyInfoSprites(0, 0, 0, entry, spriteState, spriteFlags);
     itfDrawGridWithResolvedSlot(0xb0, 0xa68, 0, 1, *(s32 *)(obj + 0x1c), 0x37, spriteFlags);
-    mnuDrawTextSprite(0x220, 0xa20, 0, 0xa09dc380, D_003BAA70 + ((PartyEntryCopy *)entry)->displayId * 17 + 0x110, spriteFlags);
+    mnuDrawTextSprite(0x220, 0xa20, 0, 0xa09dc380, D_003BAA70 + entry->unitId * 17 + 0x110, spriteFlags);
     itfDrawGridWithResolvedSlot(0x120, 0xad0, 0, 1, *(s32 *)(obj + 0x14), 0x25, spriteFlags);
     mnuDrawSlotIcons(-0x16, page);
 }
