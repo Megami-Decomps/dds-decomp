@@ -66,7 +66,7 @@ extern s32 D_0043921C;
 extern u8 D_00438D28[];
 
 /* Initialize an inline sound/IPU node and the selected linear or movie-PAC stream. */
-void func_00346778(MovObj *owner, SdfMovieDescriptor *descriptor, const char *name) {
+void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor, const char *name) {
     u8 soundFormat[4];
     void *work;
     struct SdfMemBlock *allocation;
