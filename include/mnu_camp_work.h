@@ -23,9 +23,9 @@ typedef struct StaffMenuWork {
     u32 categoryGroup[4];
     u32 partyModels[9];
     u32 singleResource;
-    u32 primaryImage;
+    struct EffMappedResource *primaryImage;
     MenuPanelHandles *resourceList;
-    u32 secondaryImage;
+    struct EffMappedResource *secondaryImage;
     u32 images[3];
     struct EffMappedResource *extraImages[2];
     MenuScrollPanel *scrollPanel;
