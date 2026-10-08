@@ -131,7 +131,7 @@ def realign_rodata(text: str, pool: Pool, unit_rodata_start: int | None) -> str:
             section = line.split()[1]
         elif section == ".rodata" and line.strip() == ".align 3":
             addr = next((int(m.group(1), 16) for l in lines[i + 1:i + 8] if (m := DLABEL_ADDR.match(l))), None)
-            if addr is not None and addr % 16 == 0 and addr > unit_rodata_start:
+            if addr is not None and addr % 16 == 0 and addr >= unit_rodata_start:
                 before = pool.elf[pool.va_to_off(pool.segs, addr - 8):][:8]
                 if before == bytes(8):
                     lines[i] = ".align 4"
