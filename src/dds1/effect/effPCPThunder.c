@@ -198,7 +198,7 @@ extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 /* Sample a width multiplier, then bend the cell's placement vector around
  * a perturbed axis while emitting five-vector rows into its kind-4 history.
  */
-void func_00163780(EffThunderVectorWork *work, s32 index) {
+void effThunderBuildVectorHistory(EffThunderVectorWork *work, s32 index) {
     f32 position[4] __attribute__((aligned(16)));
     f32 placement[4] __attribute__((aligned(16)));
     f32 axis[4] __attribute__((aligned(16)));
@@ -353,7 +353,7 @@ void func_00163AF8(EffThunderVectorWork *work, s32 index) {
 }
 
 
-extern void func_00163780(EffThunderVectorWork *, s32);
+extern void effThunderBuildVectorHistory(EffThunderVectorWork *, s32);
 extern void func_00163AF8(EffThunderVectorWork *, s32);
 
 /* Delay -> active geometry -> alpha fade -> restart; tint each render cell.
@@ -372,7 +372,7 @@ void effThunderUpdateVectorCells(EffThunderVectorWork *work) {
         do {
             if (cell->delayFrames == 0) {
                 if (cell->activeFrames != 0) {
-                    func_00163780(work, i);
+                    effThunderBuildVectorHistory(work, i);
                     func_00163AF8(work, i);
                     cell->activeFrames--;
                 } else if (cell->color & EFF_THUNDER_ALPHA_MASK) {

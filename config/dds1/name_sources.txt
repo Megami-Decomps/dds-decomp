@@ -1462,6 +1462,7 @@
 0x00163518	effThunderSetVectorTint	inferred	queued
 0x00163520	effThunderScaleVectorDimensions	inferred	queued
 0x00163548	effThunderCellRestart	inferred	random counters, two unit vectors, two ranges (twin 0x164078) [names_M61_EffVu.tsv]
+0x00163780	effThunderBuildVectorHistory	inferred	writes the vector variant's five-vector cell-history rows while rotating its placement around a perturbed axis
 0x00163CD0	effThunderUpdateVectorCells	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:182:func_00163CD0; Peer-matched C proposal; P7; source=names_pending_main.tsv:136 [names_qp12_apply.tsv]
 0x00163E10	effThunderWorkCreate	inferred	0x4C head copy, particle system, cells zeroed [names_M61_EffVu.tsv]
 0x00163FD0	effThunderReleaseIndexedVectorWork	inferred	queued
