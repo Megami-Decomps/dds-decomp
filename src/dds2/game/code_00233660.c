@@ -177,11 +177,11 @@ void mdlDrawViewerSelectionLabel(void);
 
 
 
-void func_00346AD8(void *buffer);
+void sdfPacUsePacketPayloadMemory(void *buffer);
 
 void func_00233280(s32, s32, s32, s32);
 
-void func_00346AF8(void *buffer);
+void sdfPacReleasePacketQueueNodes(void *buffer);
 
 s32 mdlCountRecords(s32);
 
@@ -312,11 +312,11 @@ void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, s32 requestFirst, s3
 
     sdfPacInitializeDispatchPacket((PacState *)&request, 0);
     if (flags & 2) {
-        func_00346AD8(&request);
+        sdfPacUsePacketPayloadMemory(&request);
     }
     sdfPacFeedInput((PacState *)&request, (void *)(u32)requestFirst, requestSecond);
     func_00233280(request.handle, first, second, flags);
-    func_00346AF8(&request);
+    sdfPacReleasePacketQueueNodes(&request);
 }
 
 void func_00233700(void *memory) {

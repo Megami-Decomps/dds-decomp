@@ -6732,6 +6732,10 @@
 0x002EDAE0	sdfCancelAndReleasePacWork	inferred	readability/matching review (QP16)
 0x002EDBB8	sdfPacCheckDecoderStatus	inferred	confidence=medium; matched-C; src/dds1/game/code_002ED8D0.c:99:func_002EDBB8; Checks the decoder status pair: the first byte must be nonzero and the second zero; called by movie playback status polling without claiming exact flag meanings.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002EDBD8	sdfPacInitializeDispatchPacket	inferred	confidence=high; src/dds1/game/code_002ED8D0.c:func_002EDBD8; Clears the PAC dispatch packet, sets status to minus one, and chooses a supplied dispatch callback or the default. [names_qp9.tsv]
+0x002EDC30	sdfPacUsePacketPayloadMemory	inferred	Native byte flags OR 1; decoder retains the packet payload instead of allocating a resource.
+0x002EDC40	sdfPacUseHighAddressAllocator	inferred	Native byte flags OR 2; payload decoder selects the high-address general allocator.
+0x002EDC50	sdfPacReleasePacketQueueNodes	inferred	Native follows queue head at 0x30 and releases each chip node after capturing next; links are not reset.
+0x002EDC88	sdfPacMarkPhaseFinished	inferred	Native writes byte -1 through the supplied phase address.
 0x002EDC98	sdfPacAdvanceInput	inferred	Advances the PAC input pointer and adjusts available and consumed byte counts.
 0x002EDCC0	sdfPacAdvanceCallbackBoundary	inferred	confidence=high; src/dds1/game/code_002ED8D0.c:func_002EDCC0; Handles 64-byte consumption boundaries, advances input, invokes the callback, and updates activity/remainder according to callback results. [names_qp9.tsv]
 0x002EDD98	sdfDecodePacNodeAndAdvanceTail	inferred	Reads the next PAC node, links it into decoder tail, and processes read completion codes. [names_reviewed21.tsv]

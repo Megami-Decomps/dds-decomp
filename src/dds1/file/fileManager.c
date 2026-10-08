@@ -179,7 +179,7 @@ void fileUnlinkNode(FileWork *list, FileNode *node) {
     *incomingLink = node->next;
 }
 
-extern void func_002EDC40(void *);
+extern void sdfPacUseHighAddressAllocator(void *);
 /* Clear a PAC request, initialize its embedded dispatch packet and optionally
  * apply extra packet setup for any nonzero flags. Queue its copied name and
  * completion context as kind one, returning the allocated work. No failure guard. */
@@ -189,7 +189,7 @@ void *fileAllocateDispatchRequest(u32 requestName, u32 flags, u32 dispatchValue,
 
     sdfPacInitializeDispatchPacket(dispatchPacket, (void *)dispatchValue);
     if (flags != 0) {
-        func_002EDC40(dispatchPacket);
+        sdfPacUseHighAddressAllocator(dispatchPacket);
     }
     fileManQueueNamedRequest(requestWork, FILE_REQUEST_KIND_PAC, requestName, onComplete, userData);
     return requestWork;
