@@ -4163,3 +4163,23 @@ needed for callers that already own a color array.
 Both providers and all nine affected source units gate with zero
 differences; this contract closure credits no newly matched body bytes.
 
+## Scene bounds flag signedness
+
+DDS1 `00253018` reads `MenuSceneWork.boundsFlags` at +0x5AC with
+`lb`, not `lbu`. Keep the primary byte field signed. The drawing
+consumer `00251260` deliberately copies it into a `u8` local for
+the 1/2/4 mask tests; that unsigned interpretation remains unchanged.
+No second scene view or cast solely to select a load instruction is needed.
+The selected-position routine still has an unresolved boolean-tail
+lowering difference and remains ASM.
+
+
+## Item-command scene pointer boundary
+
+DDS2 `001C9BE8` reads the scene object's selection halfwords at
++0x0C/+0x0E, just as the landed DDS1 `btlDrawItemCommandRows`
+(`001BE8A0`) does. Its declaration takes `BattleSceneObject *`.
+The dispatcher retains its existing integer context transport and casts
+once at that pointer boundary; the other option-count providers keep
+their own existing word contracts.
+
