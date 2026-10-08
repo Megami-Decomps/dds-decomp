@@ -470,7 +470,7 @@ void func_0025D2F8(s32 x, s32 y, s32 unusedDepth, s32 alpha,
     }
 
     {
-        u32 displayFlags = gridOwner->boundsFlags;
+        u32 displayFlags = (u8)gridOwner->boundsFlags;
 
         if (displayFlags & 1) {
             uiDrawUniformColorRect(0, 0x280, 0, 0x1BF0, 0xB80, 0x80,
