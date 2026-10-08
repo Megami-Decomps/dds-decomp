@@ -1414,7 +1414,7 @@ void mnuReleasePartyPanelSpriteTextures(s32 window) {
 /* Copy eight resource handles into the window's primary handle bank. */
 void mnuCopyPrimaryWindowHandles(MenuPageWindow *window, struct EffectSlotSet **source) {
     struct EffectSlotSet *value;
-    s32 *destination;
+    struct EffectSlotSet **destination;
     u32 index;
 
     destination = window->handlesA;
@@ -1423,7 +1423,7 @@ void mnuCopyPrimaryWindowHandles(MenuPageWindow *window, struct EffectSlotSet **
         value = *source;
         source = source + 1;
         index = index + 1;
-        *destination = (s32)value;
+        *destination = value;
         destination = destination + 1;
     } while (index < 8);
 }
@@ -1431,7 +1431,7 @@ void mnuCopyPrimaryWindowHandles(MenuPageWindow *window, struct EffectSlotSet **
 /* Copy eight resource handles into the window's secondary handle bank. */
 void mnuCopySecondaryWindowHandles(MenuPageWindow *window, struct EffectSlotSet **source) {
     struct EffectSlotSet *value;
-    s32 *destination;
+    struct EffectSlotSet **destination;
     u32 index;
 
     destination = window->handlesB;
@@ -1440,7 +1440,7 @@ void mnuCopySecondaryWindowHandles(MenuPageWindow *window, struct EffectSlotSet 
         value = *source;
         source = source + 1;
         index = index + 1;
-        *destination = (s32)value;
+        *destination = value;
         destination = destination + 1;
     } while (index < 8);
 }
@@ -1451,20 +1451,20 @@ void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSe
     u32 i;
     for (i = 0; i < 5; i++) {
         effResolveAndReleaseResource((u32 *)source[i]);
-        destination->handlesC[i] = (s32)source[i];
+        destination->handlesC[i] = source[i];
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027FCA0);
 
 void mnuUpdateHandleStates(MenuPageWindow *obj) {
-    s32 *handle = obj->handlesA;
+    struct EffectSlotSet **handle = obj->handlesA;
     s32 i;
 
     for (i = 0; i < 8U; i++, handle++) {
-        if (effHasFirstTextureHandle(*handle) != 0) {
-            effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)*handle);
-            effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)handle[8]);
+        if (effHasFirstTextureHandle((s32)*handle) != 0) {
+            effReleaseTextureHandlesAndResetSlots(*handle);
+            effReleaseTextureHandlesAndResetSlots(handle[8]);
         }
     }
     for (i = 0; i < 5U; i++) {
@@ -1512,28 +1512,15 @@ extern void mnuClearPageSelection(MenuPageWindow *);
 /* The resource and panel bank begins at the window's +0x20 word. */
 typedef struct MenuWindowResourceBank {
     s32 unk20;
-    s32 handlesA[8];
-    s32 handlesB[8];
-    s32 handlesC[5];
+    struct EffectSlotSet *handlesA[8];
+    struct EffectSlotSet *handlesB[8];
+    struct EffectSlotSet *handlesC[5];
     MenuPageSlot slots[5];
     MenuList *lists[2];
     s32 selected;
     s32 scrollOffset;
     s32 fade;
 } MenuWindowResourceBank;
-
-typedef union MenuWindowBankView {
-    MenuPageWindow fields;
-    struct {
-        u8 prefix[0x20];
-        MenuWindowResourceBank resources;
-    } bank;
-} MenuWindowBankView;
-
-typedef char MenuWindowBankView_size_check[
-    sizeof(MenuWindowBankView) == sizeof(MenuPageWindow) ? 1 : -1];
-typedef char MenuWindowBankView_bank_offset_check[
-    (u32)&((MenuWindowBankView *)0)->bank.resources == 0x20 ? 1 : -1];
 
 void mnuClearPageSelection(MenuPageWindow *window) {
     s32 selected = window->selected;
@@ -1601,7 +1588,7 @@ void mnuResolveUnselectedPageHandles(MenuPageWindow *window) {
             s32 id = window->records->slots[i].unk8;
 
             if (id >= 0) {
-                if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
+                if (effHasFirstTextureHandle((s32)window->handlesA[id]) == 0) {
                     effResolveAndReleaseResource((u32 *)window->handlesA[id]);
                     effResolveAndReleaseResource((u32 *)window->handlesB[id]);
                 }
@@ -1620,16 +1607,16 @@ void mnuReleasePageTexturesAndSelectedResources(MenuPageWindow *window) {
         record = &window->records->slots[i];
         id = record->unk8;
         if (id >= 0) {
-            if (effHasFirstTextureHandle(window->handlesA[id]) != 0) {
-                effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)window->handlesA[id]);
-                effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)window->handlesB[id]);
+            if (effHasFirstTextureHandle((s32)window->handlesA[id]) != 0) {
+                effReleaseTextureHandlesAndResetSlots(window->handlesA[id]);
+                effReleaseTextureHandlesAndResetSlots(window->handlesB[id]);
             }
         }
     }
     record = &window->records->slots[selected];
     id = record->unk8;
     if (id >= 0) {
-        if (effHasFirstTextureHandle(window->handlesA[id]) == 0) {
+        if (effHasFirstTextureHandle((s32)window->handlesA[id]) == 0) {
             effResolveAndReleaseResource((u32 *)window->handlesA[id]);
             effResolveAndReleaseResource((u32 *)window->handlesB[id]);
         }
@@ -1641,7 +1628,7 @@ void mnuSelectPage(MenuPageWindow *window, s32 selected) {
     s32 selection;
 
     for (i = 0; i < 5; i++) {
-        effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)window->handlesC[i]);
+        effReleaseTextureHandlesAndResetSlots(window->handlesC[i]);
     }
 
     selection = mnuGetSelectionFromFlags(&datGameState->party[
@@ -1662,7 +1649,7 @@ void mnuSelectPage(MenuPageWindow *window, s32 selected) {
 void mnuReleasePageHandlesAndClearSelection(window)
     MenuPageWindow *window;
 {
-    s32 *resource = window->handlesC;
+    struct EffectSlotSet **resource = window->handlesC;
     u32 i;
 
     for (i = 0; i < 5; i++) {

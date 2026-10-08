@@ -507,9 +507,9 @@ typedef struct MenuPageWindow {
     struct EffectSlotSet *mainResources[16];
     struct EffectSlotSet *handlesC[5];
 #else
-    s32 handlesA[8];
-    s32 handlesB[8];
-    s32 handlesC[5];
+    struct EffectSlotSet *handlesA[8];
+    struct EffectSlotSet *handlesB[8];
+    struct EffectSlotSet *handlesC[5];
 #endif
     MenuPageSlot slots[5];
     struct MenuList *lists[2];
@@ -544,6 +544,17 @@ void func_002BCD90(MenuPageWindow *, PartyPanel *, struct EffectSlotSet *,
                    s32, struct EffectSlotSet *, s32, struct EffectSlotSet *, s32);
 void mnuSetPanelSlotValues(MenuPageWindow *, struct EffectSlotSet *);
 void mnuInitializeCampPanelResources(MenuPageWindow *, StaffSlots *, u32, PartyPanel *);
+#else
+typedef char MenuPageWindow_handlesA_offset_check[
+    ((u32)&((MenuPageWindow *)0)->handlesA == 0x24) ? 1 : -1];
+typedef char MenuPageWindow_handlesA_extent_check[
+    sizeof(((MenuPageWindow *)0)->handlesA) == 0x20 ? 1 : -1];
+typedef char MenuPageWindow_handlesB_offset_check[
+    ((u32)&((MenuPageWindow *)0)->handlesB == 0x44) ? 1 : -1];
+typedef char MenuPageWindow_handlesC_offset_check[
+    ((u32)&((MenuPageWindow *)0)->handlesC == 0x64) ? 1 : -1];
+typedef char MenuPageWindow_handlesC_extent_check[
+    sizeof(((MenuPageWindow *)0)->handlesC) == 0x14 ? 1 : -1];
 #endif
 
 void mnuCopyPrimaryWindowHandles(MenuPageWindow *, struct EffectSlotSet **);
