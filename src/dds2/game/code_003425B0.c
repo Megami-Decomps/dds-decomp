@@ -46,7 +46,7 @@ extern s32 iWakeupThread(s32 threadId);
 #define SDF_IPU_FDEC 0x40000000
 #define SDF_IPU_FDEC_BYTE 0x40000008
 
-extern s32 D_00439204;
+extern SdfStreamFrameNode *D_00439204;
 
 extern u32 sdfSoundCommandBusy;
 
@@ -143,8 +143,8 @@ typedef struct SdfResourceList {
 
 extern s32 func_0036DE70(void);
 
-extern void func_003450D8(s32);
-extern s32 func_00344F08(void *);
+extern void sdfDispatchNextStreamNode(s32);
+extern s32 sdfStartStreamNodeIpuTransfer(SdfStreamFrameNode *);
 
 
 extern char sdfGsMemoryDumpHeader[]; /* " <<< GS memory information >>>..." */
@@ -1030,7 +1030,7 @@ void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 sourceAddr
     if (interruptsEnabled != 0) {
         EIntr();
     }
-    func_003450D8(0);
+    sdfDispatchNextStreamNode(0);
 }
 
 extern void *sdfAllocateBlockBySizeThreshold(s32);
@@ -1110,7 +1110,7 @@ void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
     node->drained = 1;
     sdfSoundRemoveNode(node);
     sdfStreamNodeUnlink(node, 1);
-    if (D_00439204 == (u32)node) {
+    if (D_00439204 == node) {
         *(volatile u32 *)0x10002010 = 0x40000000;
         sceIpuSync(0, 0);
         dmaEnable = *(volatile u32 *)0x1000F520;
@@ -1118,7 +1118,7 @@ void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
         *(volatile u32 *)0x1000B400 = 1;
         *(volatile u32 *)0x1000B000 = 0;
         *(volatile u32 *)0x1000F520 = dmaEnable;
-        D_00439204 = 0;
+        D_00439204 = NULL;
         wasActive = 1;
     }
     if (interruptsEnabled != 0) {
@@ -1136,7 +1136,7 @@ void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
         sdfTexQueuePendingWork(node->textureHead);
     }
     if (wasActive != 0) {
-        func_003450D8(0);
+        sdfDispatchNextStreamNode(0);
     }
 }
 
@@ -1242,14 +1242,14 @@ s32 sdfSoundSyncIpu(void) {
     return decodedBits;
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_00344F08);
+INCLUDE_ASM(const s32, "game/code_003425B0", sdfStartStreamNodeIpuTransfer);
 
 /* Remove and advance the first list item matching the IPU cleanup test. */
-void func_003450D8(s32 skipInterruptGuard) {
+void sdfDispatchNextStreamNode(s32 skipInterruptGuard) {
     SdfStreamFrameNode *node;
     s32 interruptsEnabled = 0;
 
-    if (D_00439204 != 0) {
+    if (D_00439204 != NULL) {
         return;
     }
     if (skipInterruptGuard == 0) {
@@ -1261,7 +1261,7 @@ void func_003450D8(s32 skipInterruptGuard) {
         if (node->unk1A + node->unk13 < 2 &&
             (node->active != 1 || node->filledSlots != 0)) {
             sdfStreamNodeUnlink(node, 1);
-            func_00344F08(node);
+            sdfStartStreamNodeIpuTransfer(node);
             break;
         }
         node = node->streamNext;
@@ -1283,7 +1283,7 @@ void sdfIpuDmaCompletionWorker(void) {
 
     for (;;) {
         SleepThread();
-        work = (SdfStreamFrameNode *)D_00439204;
+        work = D_00439204;
         if (work == NULL) {
             continue;
         }
@@ -1295,7 +1295,7 @@ void sdfIpuDmaCompletionWorker(void) {
             work->playbackPhase = SDF_STREAM_PLAYBACK_FIRST_COMPLETION;
         }
         work->unk1A++;
-        D_00439204 = 0;
+        D_00439204 = NULL;
         work->tickCount++;
         if (work->tickCount == work->cycleLength) {
             if (work->loopMode != 0) {
@@ -1313,17 +1313,17 @@ void sdfIpuDmaCompletionWorker(void) {
                 EIntr();
             }
         }
-        func_003450D8(0);
+        sdfDispatchNextStreamNode(0);
     }
 }
 
-s32 func_00345268(void) {
+s32 sdfWakeIpuCompletionWorker(void) {
     iWakeupThread(D_00439214);
     EE_ENABLE_INTERRUPTS_SYNC();
     return 0;
 }
 
-s32 func_00345298(void) {
+s32 sdfCompleteIpuInputFeedDma(void) {
     SdfStreamFrameNode *stream = D_00439208;
 
     if (stream != NULL) {
@@ -1381,7 +1381,7 @@ void sdfAdvanceBufferedPlayback(SdfStreamFrameNode *node) {
     if (interruptsEnabled != 0) {
         EIntr();
     }
-    func_003450D8(0);
+    sdfDispatchNextStreamNode(0);
 }
 
 extern void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet);
@@ -1406,7 +1406,7 @@ extern u32 D_00438D04;
 
 /* Advance playback cadence, refill active feeds and retry a deferred IPU input. */
 void sdfAdvanceStreamPlayback(s32 cadence) {
-    SdfStreamFrameNode *node = (SdfStreamFrameNode *)D_00439204;
+    SdfStreamFrameNode *node = D_00439204;
     s32 elapsed;
     s32 interruptsEnabled;
 
@@ -1453,7 +1453,7 @@ void sdfAdvanceStreamPlayback(s32 cadence) {
         }
         node = node->next;
     }
-    func_003450D8(0);
+    sdfDispatchNextStreamNode(0);
 }
 
 void sdfSoundInitAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, s32 source, s32 size, s32 resource) {
@@ -1497,10 +1497,10 @@ void sdfSoundInitIpuStream(void) {
     sceIpuInit();
     *(vu32 *)0x10002000 = 0x90000000;
     sdfSoundNodeHead = 0;
-    D_00439204 = 0;
-    D_004391FC = sdfAddHandler(1, 3, func_00345268, -1, 0);
+    D_00439204 = NULL;
+    D_004391FC = sdfAddHandler(1, 3, sdfWakeIpuCompletionWorker, -1, 0);
     func_003668B8(3);
-    D_00439200 = sdfAddHandler(1, 4, func_00345298, -1, 0);
+    D_00439200 = sdfAddHandler(1, 4, sdfCompleteIpuInputFeedDma, -1, 0);
     func_003668B8(4);
     D_00439214 = sdfCreateThread((void *)sdfIpuDmaCompletionWorker, sdfIpuStreamThreadStack, 0x800, 0x46);
     _StartThread(D_00439214, 0);
