@@ -1,5 +1,6 @@
 #include "mnu.h"
 #include "dat_state.h"
+#include "mnu_profile_progress.h"
 
 extern void sdfReleaseChipBlock(void *);
 /* Retail retains a jal and epilogue; default TU -O2 changes the shape. */
@@ -33,12 +34,10 @@ typedef struct MantraPulseEntry {
 } MantraPulseEntry;
 
 typedef struct MantraPulseGrid MantraPulseGrid;
-typedef struct MnuProfileOwner MnuProfileOwner;
-
 extern MnuVariantSpritePlacement D_0036B7F0[];
 extern s32 mnuSceneResourceContext;
 extern void *func_002CB3B8(s32, s32);
-extern u32 mnuGetMantraDisplayFlags(DspScene *, MnuProfileOwner *);
+extern u32 mnuGetMantraDisplayFlags(DspScene *, MnuProfileProgress *);
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern void func_0024EC08(s32, s32, s32, s32, s32, s32, f32, f32, s32);
 extern void func_00258A70(s32, s32, s32, s32, u32, f32, f32, s32);
@@ -48,7 +47,7 @@ INCLUDE_ASM(const s32, "game/code_00259498", func_00259498);
 INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4A0);
 
 void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
-                   MnuProfileOwner *profileOwner, MantraPulseGrid *grid,
+                   MnuProfileProgress *profileOwner, MantraPulseGrid *grid,
                    f32 scaleX, f32 scaleY, MantraPulseEntry *entry,
                    s32 context) {
     u8 mappedIds[6] = { 5, 15, 45, 52, 63, 68 };
@@ -185,7 +184,7 @@ extern char D_003BC488[];
 extern char D_003BC490[];
 extern char D_003BC498[];
 extern u32 mnuGetSelectedNodeValue(void);
-extern u32 func_00258508(s8, DspScene *, MantraPrerequisiteState *, MnuProfileOwner *);
+extern u32 func_00258508(s8, DspScene *, MantraPrerequisiteState *, MnuProfileProgress *);
 extern void mnuDrawScaledVariantSprite(s32, s32, s32, s32, s32, s32, f32, f32, s32);
 extern s32 frFontMeasureAndQueueGlyph(s32, s32, s32, u32, const u8 *, s32);
 
@@ -195,7 +194,7 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, MantraPulseGrid *grid,
                    MantraPulseEntry *entry, s32 context) {
     u32 prerequisiteFlags[4];
     DspScene *scene;
-    MnuProfileOwner *selection;
+    MnuProfileProgress *selection;
     MantraPrerequisiteState *states;
     MantraPrerequisiteRecord *record;
     MantraPulseDisplayWork *display;
@@ -208,7 +207,7 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, MantraPulseGrid *grid,
     if (scene == NULL) {
         return;
     }
-    selection = (MnuProfileOwner *)mnuGetSelectedNodeValue();
+    selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
     states = grid->prerequisites;
     display = func_002CB3B8(mnuSceneResourceContext, 1);
     record = &D_0036AE80[scene->sceneId];

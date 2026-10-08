@@ -521,7 +521,7 @@ void mnuLoadMantraPanelFlagsFromScript(MnuStatusResource *object) {
 
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 extern u32 ptyGetProfileRecordCap(u16 scriptId);
-extern u32 ptyGetProfileRecordValue(u32 work, u16 scriptId);
+extern u32 ptyGetProfileRecordValue(DatPartyRecord *work, u16 scriptId);
 
 s32 mnuValidateProfileEntry(MantraFlagResource *slot, s32 arg1) {
     u16 target = scrGetSelectedScriptEntryId((DatPartyRecord *)arg1) & 0xFFFF;
@@ -538,7 +538,7 @@ s32 mnuValidateProfileEntry(MantraFlagResource *slot, s32 arg1) {
             }
         }
     }
-    if (target != 0 && ptyGetProfileRecordCap(target) == ptyGetProfileRecordValue(arg1, target)) {
+    if (target != 0 && ptyGetProfileRecordCap(target) == ptyGetProfileRecordValue((DatPartyRecord *)arg1, target)) {
         return target;
     }
     return 0;

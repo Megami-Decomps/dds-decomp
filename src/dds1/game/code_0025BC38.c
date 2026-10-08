@@ -1,5 +1,7 @@
 #include "common.h"
 #include "sdf.h"
+#include "dat_state.h"
+#include "mnu_profile_progress.h"
 
 #define MNU_MANTRA_GRID_ROW_COUNT 0x11
 #define MNU_MANTRA_GRID_COLUMN_COUNT 15
@@ -315,9 +317,9 @@ void mnuAdvanceLoopingFrame(s32 *frame) {
 
 INCLUDE_ASM(const s32, "game/code_0025BC38", func_0025C588);
 
-extern u32 mnuGetMantraDisplayFlags(void *, s32);
+extern u32 mnuGetMantraDisplayFlags(void *, MnuProfileProgress *);
 
-void mnuAdvanceGridSlotAnimation(s32 animationContext, s32 unusedGrid, u8 *slot) {
+void mnuAdvanceGridSlotAnimation(MnuProfileProgress *animationContext, s32 unusedGrid, u8 *slot) {
     s32 *counter = *(s32 **)(slot + 4);
     s32 value = *counter + 1;
 
@@ -334,7 +336,7 @@ typedef struct MenuAnimationSlot {
 } MenuAnimationSlot;
 
 /* Advance only occupied animation slots across the fixed mantra grid. */
-void mnuAdvanceActiveGridSlotAnimations(s32 animationContext, s32 gridOwner) {
+void mnuAdvanceActiveGridSlotAnimations(MnuProfileProgress *animationContext, s32 gridOwner) {
     u8 *grid = *(u8 **)(gridOwner + 0x484);
     s32 row;
     s32 column;
@@ -352,7 +354,7 @@ void mnuAdvanceActiveGridSlotAnimations(s32 animationContext, s32 gridOwner) {
 extern void func_0025C278(s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Choose draw codes from profile-match, cap and entry-state flags; cap overlay is half-strength. */
-void func_0025C8D0(s32 x, s32 y, s32 depth, s32 amount, s32 profileAddress, u8 *entry, s32 drawArg) {
+void func_0025C8D0(s32 x, s32 y, s32 depth, s32 amount, MnuProfileProgress *profileAddress, u8 *entry, s32 drawArg) {
     u32 flags = mnuGetMantraDisplayFlags(entry, profileAddress);
 
     if (flags & MNU_MANTRA_PROFILE_MATCH_FLAG) {
@@ -377,25 +379,21 @@ typedef struct MnuProfileIdList {
     s8 ids[22];
 } MnuProfileIdList;
 
-typedef struct MnuProfileOwner {
-    u32 unit;
-} MnuProfileOwner;
-
 extern const MnuProfileIdList D_003AFA00;
 extern u32 prfGetCapValue(u16);
-extern u32 ptyGetProfileRecordValue(u32, u16);
+extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
 extern void func_0025C1C8(s32, s32, s32, s32, s32, s32, s32);
 
 /* Draw cap markers, with a second marker for the first four profiles. */
 void mnuDrawCappedProfileMarkers(s32 x, s32 y, s32 depth, s32 alpha,
-                   MnuProfileOwner *owner, s32 context) {
+                   MnuProfileProgress *owner, s32 context) {
     MnuProfileIdList profiles = D_003AFA00;
     s32 i;
     u32 cap;
 
     for (i = 0; i < 22; i++) {
         cap = prfGetCapValue(profiles.ids[i]);
-        if (cap == ptyGetProfileRecordValue(owner->unit, profiles.ids[i])) {
+        if (cap == ptyGetProfileRecordValue(owner->partyRecord, profiles.ids[i])) {
             func_0025C1C8(x, y, depth, alpha, i + 0x10, 0, context);
             if (i < 4) {
                 func_0025C1C8(x, y, depth, alpha, i + 0x2B, 0x20, context);
@@ -405,12 +403,12 @@ void mnuDrawCappedProfileMarkers(s32 x, s32 y, s32 depth, s32 alpha,
 }
 
 extern void func_0025CA50(s32, s32, s32, s32, s32,
-                          MnuProfileOwner *, u8 *, s32);
+                          MnuProfileProgress *, u8 *, s32);
 extern void func_0025C588(s32, s32, s32, s32, s32, s32);
 
 /* Draw the grid background and profile markers, then animation and status layers in separate passes. */
 void func_0025D100(s32 x, s32 y, s32 z, s32 alpha,
-                   MnuProfileOwner *profileOwner, s32 gridOwner,
+                   MnuProfileProgress *profileOwner, s32 gridOwner,
                    s32 context) {
     u8 *grid = *(u8 **)(gridOwner + 0x484);
     u8 *entry;
@@ -441,17 +439,17 @@ void func_0025D100(s32 x, s32 y, s32 z, s32 alpha,
             counter = (u8 *)*(s32 *)(entry + 4);
             if (counter != NULL) {
                 func_0025C8D0(x, y, z, alpha,
-                              (s32)profileOwner, counter, context);
+                              profileOwner, counter, context);
             }
         }
     }
     func_0025C588(x, y, z, alpha, gridOwner, context);
 }
 
-extern void mnuAdvanceActiveGridSlotAnimations(s32, s32);
+extern void mnuAdvanceActiveGridSlotAnimations(MnuProfileProgress *, s32);
 
 /* Update the owner's grid slots and its independent looping-frame counter. */
-void mnuAdvanceDisplayGridAndLoopingFrame(s32 gridOwner, s32 animationContext) {
+void mnuAdvanceDisplayGridAndLoopingFrame(s32 gridOwner, MnuProfileProgress *animationContext) {
     mnuAdvanceActiveGridSlotAnimations(animationContext, gridOwner);
     mnuAdvanceLoopingFrame((s32 *)(gridOwner + 0x490));
 }
@@ -484,9 +482,9 @@ extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
  * then draw the grid and restore the surface state for the caller. */
 void func_0025D2F8(s32 x, s32 y, s32 unusedDepth, s32 alpha,
                    MnuSceneRenderWork *gridOwner, s32 context) {
-    MnuProfileOwner *profileOwner = (MnuProfileOwner *)mnuGetSelectedNodeValue();
+    MnuProfileProgress *profileOwner = (MnuProfileProgress *)mnuGetSelectedNodeValue();
 
-    mnuAdvanceDisplayGridAndLoopingFrame((s32)gridOwner, (s32)profileOwner);
+    mnuAdvanceDisplayGridAndLoopingFrame((s32)gridOwner, profileOwner);
     sdfSubmitGsTestOneRegisterPacket(0x30000, context);
     uiDrawUniformColorRect(0, 0, -1, 0x2000, 0xE00, 0, context);
     sdfSubmitGsTestOneRegisterPacket(0x3000DL, context);
@@ -500,7 +498,7 @@ void func_0025D2F8(s32 x, s32 y, s32 unusedDepth, s32 alpha,
         MnuPanelRegion *region;
         s32 remaining;
 
-        if (prfReqCheckWithFallback((void *)profileOwner->unit,
+        if (prfReqCheckWithFallback((void *)profileOwner->partyRecord,
                                     requirementIds.ids[0]) != 0) {
             uiDrawUniformColorRect(0x1980, 0, 0, 0x680, 0x280, 0x80,
                                    context);
@@ -512,19 +510,19 @@ void func_0025D2F8(s32 x, s32 y, s32 unusedDepth, s32 alpha,
         requirement = &requirementIds.ids[1];
         for (remaining = 2; remaining >= 0;
              remaining--, requirement++, region++) {
-            if (prfReqCheckWithFallback((void *)profileOwner->unit,
+            if (prfReqCheckWithFallback((void *)profileOwner->partyRecord,
                                         *requirement) != 0) {
                 uiDrawUniformColorRect(region->x << 4, region->y << 3, 0,
                                        0x200, 0x100, 0x80, context);
             }
         }
 
-        if (prfReqCheckWithFallback((void *)profileOwner->unit, 0x4E) != 0 ||
+        if (prfReqCheckWithFallback((void *)profileOwner->partyRecord, 0x4E) != 0 ||
             mdlFlagTest(0x908) != 0) {
             uiDrawUniformColorRect(0x1C90, 0x640, 0, 0x200, 0xA0, 0x80,
                                    context);
         }
-        if (prfReqCheckWithFallback((void *)profileOwner->unit, 0x4F) != 0) {
+        if (prfReqCheckWithFallback((void *)profileOwner->partyRecord, 0x4F) != 0) {
             uiDrawUniformColorRect(0x1C90, 0x6E0, 0, 0x200, 0xA0, 0x80,
                                    context);
         }
