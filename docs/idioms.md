@@ -4741,3 +4741,27 @@ the front/back camera arguments at +30/+C0 for `001E4AC0`. DDS2's
 members of `BtlLinkedCommand`, not integer-address parameters; the dispatch
 callback therefore accepts the command pointer directly.
 
+
+## Effect-preview selection has an unsigned count and status result
+
+DDS2 `002FE5B8` iterates its source records with `sltu` and transports an
+unsigned source index through the menu's floating-point value. Its shared
+exit explicitly copies the status word to `$v0`; the result is `u32`, not
+`void`. Creation-menu wrappers intentionally discard that result.
+
+
+## Actor-specific camera timing uses an owned signed frame counter
+
+DDS2 `001F3C30` initializes linked-command +140 to zero; `001F3E48`
+compares that signed word with the actor's motion frame and increments it.
+It is `BtlLinkedCommand.cameraFrame`, not unused byte padding. The update
+routine receives the same command pointer that the cursor dispatcher owns,
+so its formal and callers do not need integer-address conversions.
+
+## Removed debug text retains its fixed four-argument interface
+
+DDS1 `001FC924` supplies x, y, style and a text pointer to `001FB130`,
+even though retail's provider discards the output. Its unused formals
+match the recovered DDS2 `0020D1B0` interface; the empty body does not
+make it a zero-argument function or a variadic formatter.
+
