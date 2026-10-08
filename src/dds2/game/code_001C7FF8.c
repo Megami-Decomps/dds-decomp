@@ -1235,6 +1235,18 @@ void func_001CE5C8(void) {
 
 extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
 
+INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436878);
+
+INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436880);
+
+INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436888);
+
+INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436890);
+
+INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436898);
+
+INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004368A0);
+
 void func_001CE838(void) {
     u32 overlays[2] = {0x0000FF00, 0xFF000000};
     u32 colors[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
@@ -1636,19 +1648,6 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CFC40);
 INCLUDE_ASM(const s32, "game/code_001C7FF8", fldDestroySceneTasksAndBuffers);
 
 INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416FA0);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436878);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436880);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436888);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436890);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436898);
-
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004368A0);
-
 
 INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004368B0);
 
