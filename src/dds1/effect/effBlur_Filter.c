@@ -51,7 +51,7 @@ void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *
     quad->bottom = centerY + halfSize;
 }
 
-EffBlurScatterWork *func_00186F90(void *params)
+EffBlurScatterWork *func_00186F90(EffBlurScatterParams *params)
 {
     struct SdfMemBlock *allocation;
     EffBlurScatterWork *work;
@@ -60,7 +60,7 @@ EffBlurScatterWork *func_00186F90(void *params)
 
     allocation = sdfAllocGeneralBlock(sizeof(EffBlurScatterWork) + 100 * sizeof(EffBlurScatterSlot));
     work = (EffBlurScatterWork *)sdfResourceRetainAddress(allocation);
-    work->params = *(EffBlurScatterParams *)params;
+    work->params = *params;
     work->allocation = allocation;
     work->slots = (EffBlurScatterSlot *)(work + 1);
     work->sourceHandle = effGetResourceFirstWord(2);
