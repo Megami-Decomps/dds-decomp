@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_viewer.h"
 #include "evt_solar.h"
 
 #define SOLAR_FADE_DRAW_ENABLED 1
@@ -148,33 +149,23 @@ void func_00245F80(void) {
 }
 
 
-typedef struct EventListNode {
-    u16 orderKey;
-    u8 pad02[0x2E];
-    struct EventListNode *next; /* 0x30 */
-    struct EventListNode *prev; /* 0x34 */
-} EventListNode;
 
-typedef struct {
-    u8 pad00[0x50];
-    s32 count;            /* 0x50 */
-    EventListNode *first; /* 0x54 */
-    EventListNode *last;  /* 0x58 */
-} EventList;
+
+
 /* Insert after existing equal keys, keeping ascending order and incrementing count. */
-void evtInsertListNodeByOrderKey(EventList *list, EventListNode *insertedNode) {
-    EventListNode *cursor = list->first;
+void evtInsertListNodeByOrderKey(EvtRuntimeGroup *list, EvtRuntimeChild *insertedNode) {
+    EvtRuntimeChild *cursor = list->children;
 
     if (cursor == 0) {
-        list->first = insertedNode;
-        list->last = insertedNode;
+        list->children = insertedNode;
+        list->lastChild = insertedNode;
         insertedNode->next = 0;
         insertedNode->prev = 0;
     } else {
         while (cursor != 0) {
-            if (insertedNode->orderKey < cursor->orderKey) {
+            if (insertedNode->frame < cursor->frame) {
                 if (cursor->prev == 0) {
-                    list->first = insertedNode;
+                    list->children = insertedNode;
                     cursor->prev = insertedNode;
                     insertedNode->next = cursor;
                     insertedNode->prev = 0;
@@ -189,51 +180,51 @@ void evtInsertListNodeByOrderKey(EventList *list, EventListNode *insertedNode) {
             cursor = cursor->next;
         }
         if (cursor == 0) {
-            EventListNode *tailNode = list->last;
+            EvtRuntimeChild *tailNode = list->lastChild;
             tailNode->next = insertedNode;
-            insertedNode->prev = list->last;
+            insertedNode->prev = list->lastChild;
             insertedNode->next = 0;
-            list->last = insertedNode;
+            list->lastChild = insertedNode;
         }
     }
-    list->count++;
+    list->childCount++;
 }
 
 /* Unlink an attached node, clear its links, and decrement the owning list's count. */
-void evtUnlinkListNode(EventList *list, EventListNode *removedNode) {
-    EventListNode *nextNode = removedNode->next;
-    EventListNode *previousNode = removedNode->prev;
+void evtUnlinkListNode(EvtRuntimeGroup *list, EvtRuntimeChild *removedNode) {
+    EvtRuntimeChild *nextNode = removedNode->next;
+    EvtRuntimeChild *previousNode = removedNode->prev;
     if (previousNode == 0) {
-        list->first = nextNode;
+        list->children = nextNode;
     } else {
         previousNode->next = nextNode;
     }
     {
-        EventListNode *previousNeighbor = removedNode->prev;
-        EventListNode *nextNeighbor = removedNode->next;
+        EvtRuntimeChild *previousNeighbor = removedNode->prev;
+        EvtRuntimeChild *nextNeighbor = removedNode->next;
         if (nextNeighbor == 0) {
-            list->last = previousNeighbor;
+            list->lastChild = previousNeighbor;
         } else {
             nextNeighbor->prev = previousNeighbor;
         }
     }
     {
-        s32 nodeCount = list->count;
+        s32 nodeCount = list->childCount;
         removedNode->prev = 0;
         removedNode->next = 0;
-        list->count = nodeCount - 1;
+        list->childCount = nodeCount - 1;
     }
 }
 
 /* Walk the linked list and reinsert the first out-of-order successor. */
-void evtReorderListNodes(EventList *list) {
+void evtReorderListNodes(EvtRuntimeGroup *list) {
     if (list != 0) {
-        EventListNode *anchorNode = list->first;
+        EvtRuntimeChild *anchorNode = list->children;
         while (anchorNode != 0) {
-            EventListNode *resumeNode = anchorNode->next;
-            EventListNode *candidateNode = resumeNode;
+            EvtRuntimeChild *resumeNode = anchorNode->next;
+            EvtRuntimeChild *candidateNode = resumeNode;
             while (candidateNode != 0) {
-                if (candidateNode->orderKey < anchorNode->orderKey) {
+                if (candidateNode->frame < anchorNode->frame) {
                     evtUnlinkListNode(list, candidateNode);
                     evtInsertListNodeByOrderKey(list, candidateNode);
                     /* Resume from the relocated node's new successor, not its old one. */
