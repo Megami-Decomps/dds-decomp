@@ -516,8 +516,8 @@ typedef char ParDispatch_size_must_be_0x0C[(sizeof(ParDispatch) == 0x0C) ? 1 : -
 typedef struct EffectBufferRecord {
     f32 position[4];
     u8 pad10[0x10];
-    s32 unk20;       /* 0x20: per-record tag, decays by decayStep */
-    s32 unk24;
+    s32 age;        /* 0x20: live frame age; negative values encode delays or initialization states. */
+    u32 color;      /* 0x24: packed color passed to billboard and subeffect drawing. */
     f32 scale;      /* 0x28: current billboard scale */
     f32 spin;       /* 0x2C: current billboard rotation */
     u8 pad30[0x10];

@@ -874,8 +874,8 @@ EffectBufferTail *effAllocateBuffer(s32 recordCount) {
         s32 remaining = recordCount;
         do {
             remaining--;
-            recordCursor->unk20 = 0;
-            recordCursor->unk24 = 0;
+            recordCursor->age = 0;
+            recordCursor->color = 0;
             recordCursor++;
         } while (remaining != 0);
     }
@@ -921,7 +921,7 @@ void effSetTemplateTagPeriod(EffTemplatePacketList *effect) {
     packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            packetCursor->unk20 = packetTag;
+            packetCursor->age = packetTag;
             nextPacketIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
             if (nextPacketIndex % effect->tailWords[0] == 0) {
@@ -1128,7 +1128,7 @@ void effResetDiscPacketAges(EffTemplatePacketList *effect) {
     packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            packetCursor->unk20 = EFF_PACKET_INITIAL_TAG;
+            packetCursor->age = EFF_PACKET_INITIAL_TAG;
             packetIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
         } while (packetIndex < effect->packetCount);
@@ -1312,7 +1312,7 @@ void effResetBallisticPacketAges(EffTemplatePacketList *effect) {
     packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            packetCursor->unk20 = EFF_PACKET_INITIAL_TAG;
+            packetCursor->age = EFF_PACKET_INITIAL_TAG;
             packetIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
         } while (packetIndex < effect->packetCount);
@@ -1451,7 +1451,7 @@ void effInitLookAtRingPacketSchedule(EffTemplatePacketList *effect) {
     if (effect->packetCount != 0) {
         do {
             effEmitterLookAtRingSpawn((EffLookAtRingEmitter *)effect, packetIndex);
-            packetCursor->unk20 = packetTag;
+            packetCursor->age = packetTag;
             nextPacketIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
             if (nextPacketIndex % effect->tailWords[0] == 0) {
@@ -1628,7 +1628,7 @@ void effResetBurstPacketAges(EffTemplatePacketList *effect) {
     packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            packetCursor->unk20 = EFF_PACKET_INITIAL_TAG;
+            packetCursor->age = EFF_PACKET_INITIAL_TAG;
             packetIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
         } while (packetIndex < effect->packetCount);
@@ -1829,7 +1829,7 @@ void effResetSpherePacketAges(EffTemplatePacketList *effect) {
     packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            packetCursor->unk20 = EFF_PACKET_INITIAL_TAG;
+            packetCursor->age = EFF_PACKET_INITIAL_TAG;
             packetIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
         } while (packetIndex < effect->packetCount);
@@ -2019,7 +2019,7 @@ void effInitExpandRingPacketSchedule(EffTemplatePacketList *effect) {
     packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            packetCursor->unk20 = packetTag;
+            packetCursor->age = packetTag;
             nextPacketIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
             if (nextPacketIndex % effect->tailWords[1] == 0) {
@@ -2194,7 +2194,7 @@ void effResetConePacketAges(EffTemplatePacketList *effect) {
     packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            packetCursor->unk20 = EFF_PACKET_INITIAL_TAG;
+            packetCursor->age = EFF_PACKET_INITIAL_TAG;
             packetIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
         } while (packetIndex < effect->packetCount);
@@ -2611,7 +2611,7 @@ void effResetOffsetGravityPacketAges(EffTemplatePacketList *effect) {
     packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            packetCursor->unk20 = EFF_PACKET_INITIAL_TAG;
+            packetCursor->age = EFF_PACKET_INITIAL_TAG;
             packetIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
         } while (packetIndex < effect->packetCount);
@@ -2891,7 +2891,7 @@ void effResetDiscAuxPacketAges(EffTemplatePacketList *effect) {
     packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            packetCursor->unk20 = EFF_PACKET_INITIAL_TAG;
+            packetCursor->age = EFF_PACKET_INITIAL_TAG;
             packetIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
         } while (packetIndex < effect->packetCount);
@@ -3086,7 +3086,7 @@ void effMarkAllTemplateBufferRecords(EffTemplatePacketList *effect) {
     packetCursor = effect->buffer->records;
     if (effect->packetCount != 0) {
         do {
-            packetCursor->unk20 = EFF_PACKET_INITIAL_TAG;
+            packetCursor->age = EFF_PACKET_INITIAL_TAG;
             packetIndex = packetIndex + 1;
             packetCursor = packetCursor + 1;
         } while (packetIndex < effect->packetCount);
