@@ -4116,3 +4116,50 @@ Use `BattleEffectPayload.query`, not a cast of the linked-actor member:
 the separate Brahma mode allocates sixteen bytes and reads +0 as an actor
 pointer. The mode-selected payload union owns both interpretations.
 
+
+## Actor-extrema camera output and mode transport
+
+DDS1 `001E0DA0` and DDS2 `001EE690` receive the owning
+`BtlCamState *`: retail publishes position, direction, distance and FOV
+at +0, +0x10, +0x20 and +0x24, then calls the camera finalizer.
+Their four C callers pass the embedded front/back camera owners directly,
+not a position-only view or a cast to `f32 *`.
+
+Keep the mode argument's existing `s32` caller transport. The provider
+decodes its low byte internally; its entry `andi 0xFF` does not by itself
+prove a byte-width formal. The independently reviewed DDS2 continuation
+found that a `u8` formal changes the already matched caller. The two
+provider bodies remain ASM with their register/scheduling residuals.
+
+
+## Actor-panel cursor and mirrored-sprite constructor
+
+DDS2 `001C3EC0` and DDS1 `001B8CB8` use the actor panel's primary
+presentation block: signed option selection at +0xDD, pending group index
+at +0xDE, halfword option at +0xE0, XY offsets at +0xE4/+0xE8 and an
+unsigned phase counter at +0xEC. The signed echo count at +0xF4 addresses
+the four existing +0xF8 mirrored-sprite records with `count - 1`; it does
+not establish a fifth record or a separate cursor view.
+
+DDS2 `001B7208` and DDS1 `001AC5F8` initialize that same
+`BattleMirroredSpriteRecord`: active byte, indexed alpha, slot halfword,
+scale, XY words and frame word. Give the initializer its real record
+pointer rather than an integer-address formal and raw-offset stores.
+
+## Gradient rectangle color-array API
+
+`uiDrawGradientColorRect` (DDS1 `002C0F88`, DDS2 `003089B8`) forwards
+its sixth argument unchanged to the four-vertex strip provider. That
+provider reads four packed color words at offsets 0, 4, 8 and 12; the
+contract is `const u32 *`, not an encoded scalar color.
+Own stack arrays are `u32[4]` and pass directly, including the paired
+menu gradient-fade callers. The real leaf's finite declaration uses
+the same pointer contract; its body remains ASM.
+
+The generic `effSelectPresetAndDispatch` word API remains unchanged.
+Each game's wrapper performs one explicit word-to-color-pointer
+conversion at this boundary; no intermediate integer casts are
+needed for callers that already own a color array.
+Both providers and all nine affected source units gate with zero
+differences; this contract closure credits no newly matched body bytes.
+
