@@ -108,9 +108,7 @@ extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...)
 
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
 extern EffBlurScaleWork *effCloneBlurWorkWithSlots(void *arg);
-extern void effDrawBlurRectangle(EffScreenDrawParams *arg);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
-extern void effBlurDrawFramebufferQuad(EffScreenDrawParams *arg);
 extern void func_00187C08(EffSolidRectParams *arg);
 extern void effResourceRectDrawPixels(EffResourceRectWork *arg);
 
@@ -751,7 +749,7 @@ void effInitWorks(void) {
 /* Dispatch enabled draw families independently, in their native order. */
 void effDispatchActive(void) {
     if (effRectangleBlurEnabled) {
-        effDrawBlurRectangle(&effBlurRectangleParameters);
+        effDrawBlurRectangle(&effBlurRectangleParameters.source);
     }
     if (effTexturedBlurEnabled) {
         effDrawBlurPixelRectWithResource(effBlurPixelWork);
@@ -763,7 +761,7 @@ void effDispatchActive(void) {
         effBlurStepScaleSlotsAndDraw(effStaggeredBlurWork);
     }
     if (D_003BB073) {
-        effBlurDrawFramebufferQuad(&D_00355908);
+        effBlurDrawFramebufferQuad(&D_00355908.source);
     }
     if (effColorRectangleEnabled) {
         func_00187C08(&effColorRectangleParameters);

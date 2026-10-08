@@ -858,12 +858,10 @@ extern f32 func_002D7770(EffScalarCurve *, s32, s32);
 
 extern f32 mnuMeasureProjectedPerpendicularDistance(f32);
 
-extern void effDrawBlurRectangle(void *);
 
 
 extern void effBlurStepScaleSlotsAndDraw(void *);
 
-extern void effBlurDrawFramebufferQuad(void *);
 
 extern void func_0018F840(void *);
 

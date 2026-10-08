@@ -224,7 +224,6 @@ extern void func_00187C08(void *);
 
 extern f32 func_00297270(EffScalarCurve *, s32, s32);
 
-extern void effBlurDrawFramebufferQuad(void *);
 
 extern f32 mnuMeasureProjectedPerpendicularDistance(f32);
 
