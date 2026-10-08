@@ -165,7 +165,7 @@ extern FrFontSystem frFontWork;
 extern s32 D_003BAA98;
 extern s32 D_003BAA9C;
 
-s32 func_001964F8(s32 code, FrFontCtx *stream) {
+s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
     s32 *position = &stream->offset;
     u8 *bytes = stream->bytes;
     s32 payloadWords = code & 0xF;
@@ -277,7 +277,7 @@ advanceLine:
 
 extern s8 D_003BB160;
 
-FrFontGlyph *func_001968C0(FrFontCtx *stream) {
+FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
     u8 encodedText[3];
     s32 value;
     u8 *bytes = stream->bytes;
@@ -298,7 +298,7 @@ FrFontGlyph *func_001968C0(FrFontCtx *stream) {
             break;
         }
         if ((value & 0xF0) == 0xF0) {
-            if (func_001964F8(value, stream)) {
+            if (itfProcessEncodedTextControl(value, stream)) {
                 break;
             }
         } else if (value == 10) {
@@ -348,7 +348,7 @@ FrFontGlyph *itfDrawCustomColorText(s32 x, s32 y, s32 channel0, s32 channel1, s3
     return itfDrawEncodedTextStream(x, y, 0, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, sub);
 }
 
-extern FrFontGlyph *func_001968C0(FrFontCtx *);
+extern FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *);
 
 FrFontGlyph *itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, FrFontGlyph *sub) {
     FrFontCtx args;
@@ -365,7 +365,7 @@ FrFontGlyph *itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32
     args.offset = 0;
     args.pendingCreate = 1;
     args.pendingPosition = 1;
-    return func_001968C0(&args);
+    return itfBuildGlyphChainFromEncodedStream(&args);
 }
 
 FrFontGlyph *itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
