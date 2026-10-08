@@ -210,7 +210,6 @@ typedef struct MenuList MenuList;
 
 extern u8 D_003CE944[];
 
-extern u32 mnuDestroyListState(struct MenuList *);
 
 extern void mnuReleaseCampTextureHandlesAndClearOutput(u32 *);
 
