@@ -51,6 +51,7 @@ extern f32 sdfQuatDot(f32 *, f32 *);
 extern f32 func_002FA060(f32);
 
 extern s32 kwlnTaskGetTaskByName(u32);
+extern void sdfGridReleaseAllCells(SdfGrid *);
 
 
 typedef struct SdfTaskItemDesc {
@@ -1015,14 +1016,14 @@ void sdfSetShortPairValues(SdfGrid *grid, s32 columnMargin, s32 rowMargin) {
 /* Release cells, invoke onDestroy(0, userData), then release the grid header allocation. */
 void sdfDestroyGridWork(SdfGrid *work) {
     if (work != NULL) {
-        sdfGridReleaseAllCells();
+        sdfGridReleaseAllCells(work);
         work->onDestroy(0, work->userData);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->allocation));
+        sdfReleaseResourceAllocation(work->allocation);
     }
 }
 
-void func_002CBB48(void) {
-    sdfGridReleaseAllCells();
+void func_002CBB48(SdfGrid *grid) {
+    sdfGridReleaseAllCells(grid);
 }
 
 
