@@ -92,16 +92,34 @@ typedef struct BrsProgressAnimation {
     u8 pad1A[2];
     s32 remaining;
     s32 applied;
-    u8 pad24[0x28];
+    u8 pad24[0x14];
+    s8 progressIconEnabled;
+    u8 pad39[7];
+    u32 progressIconOpacity;
+    s32 progressIconX;
+    s32 progressIconY;
     s8 iconState;
     u8 pad4D[3];
     u32 iconOpacity;
-    u8 pad54[0xC];
+    u32 unk54;
+    u8 pad58[8];
     s8 progressInitialized;
     u8 pad61[3];
     s32 previousProgress;
 #endif
 } BrsProgressAnimation;
+
+#ifdef VERSION_DDS1
+/* DDS1 skill-icon row (0x14 B). Retail func_00264D90 reads row 0 at +0xD58 and row 1 at +0xD6C.
+ * Only opacity, x, y and count are observed; the other bytes are pad [INFERENCE]. */
+typedef struct BrsSkillIconRow {
+    u32 opacity;
+    s32 x;
+    s32 y;
+    s8 count;   /* row 0 gates the row 1 draw when 0 < count < 4 */
+    u8 pad0D[7];
+} BrsSkillIconRow;
+#endif
 
 /* Allocation/zeroing: DDS1 00262684/0026269C; DDS2 0029959C/002995B4. */
 typedef struct BrsSkillPackageWork {
@@ -150,7 +168,9 @@ typedef struct BrsSkillPackageWork {
     u32 opacity;
     s8 resultPhase;
     s8 unkD4D;
-    u8 padD4E[0x52];
+    u8 padD4E[0xA];
+    BrsSkillIconRow skillIconRows[2];
+    u8 padD80[0x20];
     BrsFadeAnimation fadeAnimation[5];
     u8 padE68[0x78];
     BrsProgressAnimation levelAnimation[5];
@@ -191,6 +211,9 @@ typedef char BrsFadeAnimation_size_must_be_0x28[(sizeof(BrsFadeAnimation) == 0x2
 typedef char BrsRewardRow_size_must_be_0x18[(sizeof(BrsRewardRow) == 0x18) ? 1 : -1];
 typedef char BrsRewardBatch_size_must_be_0x7C[(sizeof(BrsRewardBatch) == 0x7C) ? 1 : -1];
 typedef char BrsActiveProgressList_size_must_be_0xE0[(sizeof(BrsActiveProgressList) == 0xE0) ? 1 : -1];
+#ifdef VERSION_DDS1
+typedef char BrsSkillIconRow_size_must_be_0x14[(sizeof(BrsSkillIconRow) == 0x14) ? 1 : -1];
+#endif
 #ifdef VERSION_DDS1
 typedef char BrsRewardSummary_size_must_be_0x2C[(sizeof(BrsRewardSummary) == 0x2C) ? 1 : -1];
 typedef char BrsSkillPackageWork_size_must_be_0x1590[(sizeof(BrsSkillPackageWork) == 0x1590) ? 1 : -1];
