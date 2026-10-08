@@ -72,9 +72,9 @@ typedef struct SdfQuad {
     u32 word[4];
 } SdfQuad;
 
-/* Reference-counted texture handle (0x8); DDS1 sdf/sdfTex.c and DDS1/2 SdfTex owners. */
+/* Per-texture reference count and non-owning clone source (0x8). */
 typedef struct SdfTexRef {
-    void *unk0; /* Non-null suppresses primary-resource release. */
+    struct SdfTex *cloneSource; /* Borrowed source pointer; marks the shared-primary clone path. */
     s32 refCount;
 } SdfTexRef;
 
@@ -249,15 +249,15 @@ typedef struct SdfTex {
     s16 height;
     SdfTexResource *primaryResource;
     SdfTexResource *secondaryResource;
-    u8 unk18;
+    u8 paletteCount;
     u8 clutFormat;
     u8 pixelFormat;
     u8 maxMipLevel;
     u16 lodParameters; /* Packed GS TEX1 L/K parameters. */
     u8 unk1E;
     u8 clampMode;
-    s32 unk20;
-    s32 unk24;
+    s32 resourceKey;
+    s32 battleTextureSlot;
     SdfTexBuf *primaryBuffer;
     SdfTexBuf *secondaryBuffer;
     u8 *data;

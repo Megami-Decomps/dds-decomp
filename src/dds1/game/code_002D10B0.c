@@ -707,8 +707,8 @@ s32 sdfTexGetSecondaryBufferSize(SdfTex *texture) {
     return ((buffer->gifTagWord & SDF_GIF_LOOP_COUNT_MASK) + 1) << SDF_QWORD_BYTE_SHIFT;
 }
 
-u8 func_002D2390(SdfTex *texture) {
-    return texture->unk18;
+u8 sdfTexGetPaletteCount(SdfTex *texture) {
+    return texture->paletteCount;
 }
 
 u32 sdfTexGetSecondaryResourceWord(SdfTex *texture) {
@@ -865,12 +865,12 @@ void sdfTexListInsert(SdfTex *texture) {
     sdfResourceListHead = texture;
 }
 
-SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, s32 primary, s32 paletteFormat, s32 arg6, s32 secondary) {
+SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, s32 primary, s32 paletteFormat, s32 paletteCount, s32 secondary) {
     SdfTex *tex = sdfAllocAndClearQuadwords(0x40);
     SdfTexRef *ref = sdfAllocAndClearQuadwords(8);
 
     ref->refCount = 1;
-    tex->unk18 = arg6;
+    tex->paletteCount = paletteCount;
     tex->clutFormat = paletteFormat;
     tex->width = x;
     tex->height = y;
@@ -897,12 +897,12 @@ SdfTex *func_002D2800(SdfTex *source) {
     texture = sdfAllocSizeClassBlock(sizeof(*texture));
     *texture = *source;
     reference = sdfAllocAndClearQuadwords(sizeof(*reference));
-    original = reference->unk0;
+    original = reference->cloneSource;
     reference->refCount = 1;
     texture->reference = reference;
     if (original == NULL) {
         original = source;
-        reference->unk0 = original;
+        reference->cloneSource = original;
     }
     texture->primaryBuffer = NULL;
     texture->secondaryBuffer = NULL;
@@ -911,7 +911,7 @@ SdfTex *func_002D2800(SdfTex *source) {
     sdfTexListInsert(texture);
     if (texture->secondaryResource != NULL) {
         texture->secondaryResource = sdfTexAllocHead(
-            texture->pixelFormat, texture->clutFormat, texture->unk18);
+            texture->pixelFormat, texture->clutFormat, texture->paletteCount);
         func_002D2A58(texture);
         sdfTexCopyImageData(texture, original->data);
         texture->unk38 = 0x80808080;
