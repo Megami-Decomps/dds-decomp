@@ -9,6 +9,7 @@
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
+#include "mnu_panel_state.h"
 #include "mnu_staff.h"
 #include "mdl.h"
 #include "eff.h"

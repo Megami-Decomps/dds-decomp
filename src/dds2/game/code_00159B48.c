@@ -13,6 +13,7 @@ extern void billSetAnimationEntry();
 extern s32 effEmitterDelayRandomState[];
 extern void effMiscSeedRandomFromClock();
 #include "eff.h"
+#include "par_table.h"
 
 #define BILL_ENTRY_BYTES 0x14
 #define BILL_VARIANT_MASK 0xFFFF
@@ -25,7 +26,7 @@ extern void effMiscSeedRandomFromClock();
 typedef struct EffEmitterSub {
     u16 kind;
     u8 pad02[6];
-    s32 nodeResource;       /* Kind 1: particle-node resource. */
+    ParTable *nodeResource; /* Kind 1: particle-node table. */
     u32 unk0C;
     s32 primaryCellSystem;  /* Kind 2: cell system. */
     s32 secondaryResource;  /* Kind 3: cell system; kind 4: tracked model work. */
@@ -56,7 +57,6 @@ typedef struct EffEmitterHead {
 } EffEmitterHead;
 
 
-extern void effParReleaseNodeResource(s32);
 extern void parReleaseCellSystem(s32);
 extern void effTrackPolyDestroyModelWorkList(s32);
 

@@ -10,6 +10,7 @@ extern void func_002DA3D8(void *, u32);
 extern void func_002DA3C0(void *, u32);
 extern void func_002DA3F0(void *, u32);
 #include "eff.h"
+#include "par_table.h"
 
 #define BILL_ENTRY_BYTES 0x14
 #define BILL_FRAME_MODE_BITS 6
@@ -23,7 +24,7 @@ extern void func_002DA3F0(void *, u32);
 typedef struct EffEmitterSub {
     u16 kind;
     u8 pad02[6];
-    s32 nodeResource;       /* Kind 1: particle-node resource. */
+    ParTable *nodeResource; /* Kind 1: particle-node table. */
     u32 unk0C;
     s32 primaryCellSystem;  /* Kind 2: cell system. */
     s32 secondaryResource;  /* Kind 3: cell system; kind 4: tracked model work. */
