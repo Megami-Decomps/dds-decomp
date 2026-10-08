@@ -1315,28 +1315,28 @@ void mnuClearEntries(MenuPageWindow *menu) {
 
 MenuIconBundle *mnuCreateFadeSpriteResourceSet(u32 resource) {
     MenuIconBundle *item = (MenuIconBundle *)sdfAllocSizeClassBlock(0x24);
-    s32 sprite;
+    EffectSlotSet *sprite;
 
     memset(item, 0, 0x24);
-    sprite = (s32)effCreateResourceSlotSet((u32 *)resource, 0x1F, 1);
+    sprite = effCreateResourceSlotSet((u32 *)resource, 0x1F, 1);
     item->sprite[0] = sprite;
-    itfSetGridEntryQuantizedAndRefresh(sprite, 0, 0, 0x40, 0, 0);
-    sprite = (s32)effCreateResourceSlotSet((u32 *)resource, 0x1E, 1);
+    itfSetGridEntryQuantizedAndRefresh((s32)sprite, 0, 0, 0x40, 0, 0);
+    sprite = effCreateResourceSlotSet((u32 *)resource, 0x1E, 1);
     item->sprite[1] = sprite;
-    itfSetGridEntryQuantizedAndRefresh(sprite, 0, 0x5E0, -0x20, 0, 0);
-    sprite = (s32)effCreateResourceSlotSet((u32 *)resource, 7, 1);
+    itfSetGridEntryQuantizedAndRefresh((s32)sprite, 0, 0x5E0, -0x20, 0, 0);
+    sprite = effCreateResourceSlotSet((u32 *)resource, 7, 1);
     item->sprite[2] = sprite;
-    itfSetGridEntryQuantizedAndRefresh(sprite, 0, 0x5E0, -0x18, 0, 0);
-    sprite = (s32)effCreateResourceSlotSet((u32 *)resource, 0x1D, 1);
+    itfSetGridEntryQuantizedAndRefresh((s32)sprite, 0, 0x5E0, -0x18, 0, 0);
+    sprite = effCreateResourceSlotSet((u32 *)resource, 0x1D, 1);
     item->sprite[3] = sprite;
-    itfSetGridEntryQuantizedAndRefresh(sprite, 0, 0xB40, 0x40, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh((s32)sprite, 0, 0xB40, 0x40, 0, 0);
     return item;
 }
 
 void mnuReleaseFourResourceList(MenuIconBundle *list) {
     u32 i;
     for (i = 0; i < 4; i++) {
-        effDestroyResourceSlotSet(list->sprite[i]);
+        effDestroyResourceSlotSet((s32)list->sprite[i]);
     }
     sdfReleaseChipBlock(list);
 }
@@ -1349,10 +1349,10 @@ void mnuDrawAndUpdateFadingSprites(s32 x, s32 y, s32 z, s32 unused, MenuIconBund
     s32 nextAlpha;
     s32 lowerAlpha;
 
-    func_002BF4E0(px, py, z, alpha, 0, sprites->sprite[0], 0, param);
-    func_002BF4E0(px, py, z, alpha, 0, sprites->sprite[1], 0, param);
-    func_002BF4E0(px, py, z, alpha, 0, sprites->sprite[2], 0, param);
-    func_002BF4E0(px, py, z, alpha, 0, sprites->sprite[3], 0, param);
+    func_002BF4E0(px, py, z, alpha, 0, (s32)sprites->sprite[0], 0, param);
+    func_002BF4E0(px, py, z, alpha, 0, (s32)sprites->sprite[1], 0, param);
+    func_002BF4E0(px, py, z, alpha, 0, (s32)sprites->sprite[2], 0, param);
+    func_002BF4E0(px, py, z, alpha, 0, (s32)sprites->sprite[3], 0, param);
     if (sprites->fadeOut == 0) {
         fade = sprites->fade;
         nextAlpha = fade + 0x10;
