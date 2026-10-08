@@ -2426,7 +2426,211 @@ extern u32 D_003BAD58;
 extern u32 D_003BAC08[2];
 extern EffBlurScatterWork *D_003BABE4;
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", fldProcSequence);
+s32 fldProcSequence(void) {
+    EffBlurScatterParams blur;
+    FieldPlayerSceneWork *scene = &D_0032F1A0;
+    FldSequenceController *controller = &fldSceneLifecycleFlags;
+    s32 mode;
+    s32 coordinateFlags;
+
+    if (dds3AdminGetRequestedMode() != -1) return 0;
+    if (fileMenuTaskExists() != 0) return 0;
+    fldPollAreaResourceLoad();
+    if (controller->stage == 0) {
+        if (fldGetResourceReadyFlag() == 1) return 0;
+        if (fldAreaState.transitionMode == 0 && mnuPollTitleStreamStateLocked() != 0) {
+            mnuMarkTitleStreamResetPending();
+            mnuResetTitleStreamLocked();
+            return 0;
+        }
+    }
+    mode = fldGetCampSceneControlMode();
+    if (mode < 3) {
+        if (mode > 0) {
+            func_00124F58();
+            return 0;
+        }
+    }
+    if (fldTestSceneControlFlags(0x40) == 0) func_00131688();
+    switch (controller->stage) {
+    case 0:
+        D_003BABE8 = 0;
+        fldAreaState.unk130 = 1;
+        func_00120EC8();
+        D_003BA8EC = 0x80000000;
+        evtEnableSolarPhaseAdvance();
+        D_003BAD58 = 0;
+        func_001233D0();
+        dds3SetWorldObject(dds3GetWorldSecondaryObject());
+        fldCreateInputPanelTask();
+        if (fldAreaState.transitionMode == 0) evtSetSolarOverlayFullyVisible();
+        fldEnsureTask();
+        if (fldAreaState.area >= 200) {
+            D_0032E570[11] = 0;
+            D_0032E570[12] = 0;
+            func_00132FD0(0, 0);
+            fldBeginSelectedValueTransition(D_0032E570[12]);
+        }
+        coordinateFlags = fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1);
+        if (coordinateFlags & 0x40) {
+            blur.count = 15;
+            blur.delaySpread = 15;
+            blur.angleStep = 0.1999999881f;
+            blur.color = 0x3C989884;
+            blur.unk10 = 0x44;
+            blur.unk14 = 0.005f;
+            blur.unk18 = 0.13f;
+            blur.x = 0;
+            blur.y = 0;
+            blur.positionSpread = 0x100;
+            blur.size = 200;
+            D_003BABE4 = func_00186F90(&blur);
+        } else if (coordinateFlags & 0x80) {
+            blur.count = 60;
+            blur.delaySpread = 15;
+            blur.angleStep = 0.221999988f;
+            blur.color = 0x28848484;
+            blur.unk10 = 0x44;
+            blur.unk14 = 0.005f;
+            blur.unk18 = 0.13f;
+            blur.x = 0;
+            blur.y = 0;
+            blur.positionSpread = 0x100;
+            blur.size = 136;
+            D_003BABE4 = func_00186F90(&blur);
+        }
+        kwlnFadeStartOut(0);
+        fldPrepareSceneBgmArchive();
+        fldLoadSceneModelsAndCamera();
+        fldClearSceneControlFlags(0x40);
+        fldDispatchPendingSceneResource();
+        fldUpdateCameraFollow();
+        controller->stage++;
+        break;
+    case 1:
+        if (fldStepSceneBgmArchive() != 0) {
+            fldAreaState.unk130 = 0;
+            if (fldAreaState.transitionMode == 0) {
+                if (fldGetSceneStatusCode() == 1 || fldGetSceneStatusCode() == 4 || fldGetSceneStatusCode() == 6) {
+                    fldStartSceneBgmAlternate();
+                } else if (scene->sequenceMode == 0) {
+                    fldStartSceneBgm();
+                } else {
+                    fldStartTitleBgmIfSelected();
+                }
+            }
+            controller->stage++;
+        }
+        break;
+    case 2:
+        controller->stage++;
+        break;
+    case 3:
+        if (fldGetArchiveLoadPending() != 0) return 0;
+        controller->stage++;
+        if (fldAreaState.unk17C == 0 && fldAreaState.skipFade == 0 &&
+            fldAreaState.unk24 == 0 && kwlnFadeIsActive() == 0) {
+            kwlnFadeStartIn(8);
+        }
+        if (kwlnTaskFindByPriority(0x3EA) == NULL && func_0014CAF8() == 0) {
+            fldPreparePlayerSceneCameraTarget();
+        }
+        dds3ClearObjectFlags((void *)fldPlayerObject, 0x40);
+        fldSetSceneControlFlags(0x10);
+        fldSetSceneControlFlags(0x20);
+        fldRequestMiniTitleDismiss();
+        if (fldAreaState.deferredExit == 1) fldStartDeferredFieldExit();
+        break;
+    case 4:
+        D_003BAD58 = 1;
+        if (fldTestSceneControlFlags(0x40) != 0 && fldRestartSceneResourceTask() != 0) return 0;
+        if (fldTestSceneControlFlags(0x40) != 0 && fldAreaState.unk24 != 0) {
+            func_0013B1D8((EffWorldNode *)fldPlayerObject);
+            break;
+        }
+        fldFinishDeferredExit();
+        if (fldAreaState.transitionMode != 0) {
+            func_0014CB08();
+            func_00121B88(fldAreaState.floor, fldAreaState.unkC0,
+                         fldAreaState.x, fldAreaState.z, 50.0f);
+        } else if (D_0032E570[0] == 0) {
+            func_00124F58();
+            if (fldTestSceneControlFlags(0x20) == 0) break;
+            if (D_0032E570[0] == 0) fldUpdateNextFloorTransition();
+        }
+        if (func_0014CAF8() != 0) func_0014C648();
+        if (fldAreaState.pendingSceneRequest == 1) fldAdvanceToNextScene();
+        if (fldTestSceneControlFlags(0x40) != 0) {
+            func_0014DAF0(1);
+            func_001249E0();
+        }
+        if (fldTestSceneLifecycleFlags(2) == 1) {
+            controller->stage++;
+            break;
+        }
+        fldUpdateCameraFrame();
+        if (fldTestSceneControlFlags(0x40) != 0) func_0013B1D8((EffWorldNode *)fldPlayerObject);
+        break;
+    case 5:
+        dds3SetWorldObjectDataValue(dds3GetWorldObject(), 0);
+        fldSetEncounterMode(fldAreaState.encounterMode);
+        func_0014DAF0(0);
+        fldStopCurrentBgm();
+        sndSetSequenceVolumePan(15, 127, 63);
+        /* Both exit phases release the same scene resources. */
+    case 7:
+        fldFreeDisplayObjects();
+        fldSetPendingAreaAndFloor(fldAreaState.area, fldAreaState.floor + 1);
+        controller->stage = 0;
+        fldAreaState.transitionCount++;
+        if (fldAreaState.pendingSceneRequest == 0) D_003BABE8 = 1;
+        else fldAreaState.pendingSceneRequest = 0;
+        dds3AdminSubmitModeRequest(14, D_003BAC08, 8, 1);
+        return -1;
+    case 6:
+    default:
+        break;
+    }
+    switch (fldAreaState.overlayMode) {
+    case 2:
+        if (fldAreaState.overlayCounter > 0) fldAreaState.overlayCounter--;
+        break;
+    case 6:
+        if (fldAreaState.overlayCounter > 0) fldAreaState.overlayCounter--;
+        break;
+    case 3:
+    case 7:
+        if (fldAreaState.overlayCounter < 15) fldAreaState.overlayCounter++;
+        break;
+    case 0:
+    case 1:
+    case 4:
+    case 5:
+    default:
+        break;
+    }
+    if (fldGetCampSceneControlMode() != 1) {
+        fldUpdateSceneCommand();
+        func_00132BD0();
+        fldUpdateSwayOffset();
+    }
+    if (controller->stage >= 4) {
+        func_001415F8();
+        if (D_0032E570[0] == 0) {
+            fldCheckSceneReady();
+            fldGetSceneReadyFlag();
+        }
+        if (fldGetSceneReadyFlag() == 0 && fldGetCampSceneControlMode() == 0 &&
+            fldHasKiretaLabelProcess() == 0 && fldHasHirakenaiLabelProcess() == 0 &&
+            fldHasBadkaifukuLabelProcess() == 0) {
+            fldFlushQueuedEffectPositions();
+            fldUpdateObjectActivation();
+        }
+    }
+    if (fldGetCampSceneControlMode() != 1) fldUpdateCameraFollow();
+    return 0;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", fldProcDraw);
 
