@@ -2,6 +2,7 @@
 #include "kwln.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_dev_state.h"
 #include "sdf_resource.h"
 #include "field_stage.h"
 #include "eff_blur.h"
@@ -818,11 +819,8 @@ INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011ECC8);
 
 extern u8 D_0033EC90[], D_00347C68[], D_003482A8[], D_00349030[], D_0032EF18[], D_0032EFE0[], D_0032F510[], fldCameraFollowRows[], D_0032E5C8[], D_00336A60[];
 extern void *fldCameraSettings;
-extern u32 sdfDevCreateCommandState(const char *);
-extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
-extern void sdfDevWaitThenReleaseCommandState(u32);
 void fldLoadFieldTables(void) {
-    u32 command = sdfDevCreateCommandState("/fld/f/bin/FLDALL.TBL");
+    DevState *command = sdfDevCreateCommandState("/fld/f/bin/FLDALL.TBL");
 
     sdfDevQueueReadAndWait(command, D_0033EC90, 0x3D8);
     sdfDevQueueReadAndWait(command, D_0033F068, 0x3800);

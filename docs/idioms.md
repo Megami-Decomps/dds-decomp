@@ -4369,17 +4369,29 @@ literal copy inlines while its final 32-byte copy calls `memcpy`.
 Use a size local only when it represents a genuine reused extent, not a
 dummy temporary introduced solely to inhibit builtin expansion.
 
-## DDS2 result fade rows own both background and portrait state
+## Result background and portrait helpers encode different row origins
 
-DDS2 `0029DF18` writes the background state/opacity at `AF20`/`AF28`;
-`0029E478` writes the portrait state/opacity at `AF34`/`AF3C` and its
-position at `AF40`/`AF44`. Their shared 0x28-byte `BrsFadeAnimation` rows
-therefore begin at `BrsSkillPackageWork + AF20`, not `AF10`. Complete the
-single primary row with both sets of fields; preserve the `B060` level
-animation bank and the `B704` allocation extent by adjusting only padding.
-The DDS1 branch is intentionally unchanged pending its claimed five-row
-skill-icon completion. All 17 actual result-header includers gated
-595 match/0 differ after this DDS2-only correction.
+DDS2 `0029DF18` forms `AF10 + index * 0x28` and accesses background
+state/opacity at +0x10/+0x18. Conservatively retain that encoded background
+bank origin. Direct primary-field C still folds these members into an
+`AF20` base with +0/+8 accesses, leaving the same four-word difference;
+this occurs with either owner origin and does not prove the original type.
+The portrait helper `0029E478` instead forms `AF20 + index * 0x28`,
+with state/opacity/position at +0x14/+0x1C/+0x20/+0x24.
+These active bytes can be grouped physically, but that does not prove an
+original combined array. Moving the portrait fields relative to `AF10`
+would put some beyond the 0x28 element; do not invent a second view or
+next-row indexing to route around the unresolved staggered ownership.
+
+DDS1 has the analogous distinct encoded bases `DA0` (background fields
++0x14/+0x1C) and `DB0` (portrait fields +0x18/+0x20/+0x24/+0x28).
+Its claimed skill-icon completion remains unchanged. DDS2's primary
+`BrsFadeAnimation` therefore exposes only its evidenced background fields;
+the `B060` level bank and `B704` owner extent are unchanged.
+
+All 17 actual result-header includers gated 596 match/0 differ after this
+background-only correction and restoration of the unrelated `D_00415130`
+split; no context, rodata or undefined-symbol row remained.
 
 ## DDS2 named state records own the copied initial tag
 
@@ -4406,3 +4418,25 @@ The color-threshold getter takes `BtlUnit *` and reads `partyRecord.hp`
 and `partyRecord.maxHp` at `+126`/`+128`, as the already-C DDS1 getter
 does. Its remaining legacy integer-address callers convert only at that
 API boundary; no `UiObject` view is needed by the getter.
+
+## DDS2 page bars retain real sprite resource owners
+
+`MenuPageBar.textures[7]` at `+1C..+34` contains the `EffectSlotSet *`
+results of `effCreateResourceSlotSet`, not numeric texture IDs. Drawing,
+grid updates and release consume those same owners directly. The template
+argument is also an `EffectSlotSet *`; the factory copies its resource metadata.
+`002C1FF0` takes the page owner, variant, settings pointer, Y position,
+quantized span, template, index array and count. Its `002C2128` wrapper
+forwards the first six inputs and supplies one of two genuine seven-index
+tables. The camp caller converts only its stored allocation/resource words
+at these pointer boundaries. The existing default-setting wrapper still
+publishes a word-address API, so its conversion remains at that call.
+
+## The quaternion getter takes the primary actor owner
+
+`btlCopyUnitRotationQuaternion` at DDS1 `001D66D0` / DDS2 `001E34D8`
+copies the actor's `BtlUnit.orientation` at +0x70, not its world rotation
+at +0x40. Its destination is a generic 16-byte SDK vector buffer.
+Use the primary actor directly at every caller; the former byte-owner
+and destination-quad casts do not represent separate objects.
+

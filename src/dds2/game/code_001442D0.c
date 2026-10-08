@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_dev_state.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "sdf_model.h"
@@ -2837,11 +2838,8 @@ void fldFireRoomEffects(void) {
     }
 }
 
-extern u32 sdfDevCreateCommandState(const char *);
 
-extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
 
-extern void sdfDevWaitThenReleaseCommandState(u32);
 
 typedef struct FldNpcPalette {
     u32 word[0x80];
@@ -2852,7 +2850,7 @@ extern FldNpcPalette D_0044FD90;
 void fldLoadNpcPalette(s32 field) {
     char path[64];
     char directory[32];
-    u32 command;
+    DevState *command;
 
     if (field < 100) {
         fldFormatAreaDirectory(directory, field, 1);
