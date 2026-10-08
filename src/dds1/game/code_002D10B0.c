@@ -851,7 +851,7 @@ u8 *sdfTexSubmitPixelsForFormat(SdfTex *texture, u32 destination, u8 *pixels, s3
 
 void sdfTexUploadSecondaryResource(SdfTex *tex) {
     if (tex->secondaryResource != NULL) {
-        sdfTexSubmitPixelsForFormat(tex, sdfTexGetSecondaryResourceWord(tex), tex->data, 0);
+        sdfTexSubmitPixelsForFormat(tex, sdfTexGetSecondaryResourceWord(tex), tex->paletteData, 0);
     }
 }
 
@@ -907,14 +907,14 @@ SdfTex *func_002D2800(SdfTex *source) {
     }
     texture->primaryBuffer = NULL;
     texture->secondaryBuffer = NULL;
-    texture->data = NULL;
+    texture->paletteData = NULL;
     texture->intensityMap = NULL;
     sdfTexListInsert(texture);
     if (texture->secondaryResource != NULL) {
         texture->secondaryResource = sdfTexAllocHead(
             texture->pixelFormat, texture->clutFormat, texture->paletteCount);
         func_002D2A58(texture);
-        sdfTexCopyImageData(texture, original->data);
+        sdfTexCopyImageData(texture, original->paletteData);
         texture->unk38 = 0x80808080;
     }
     sdfTexCreateFirstPacket(texture);
