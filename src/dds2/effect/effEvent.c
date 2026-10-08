@@ -5,6 +5,7 @@
 #include "eff_blur.h"
 #include "eff.h"
 #include "eff_channel.h"
+#include "eff_event.h"
 #include "pcp_vu0.h"
 
 #define EFF_EVENT_VECTOR_COMPONENTS 4
@@ -1077,22 +1078,23 @@ typedef struct EffEventInit {
 } EffEventInit;
 
 /* Compact event owner: the allocator reserves exactly 0x38 bytes. */
-typedef struct EffEventWork {
+struct EffEventWork {
     EffEventInit init;
     void *actor;          /* Linked model/event owner; concrete identity is unknown. */
     BattleEffect *effect;
-} EffEventWork;
+};
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void func_00169168(BattleEffect *, f32);
 
 /* Allocate the compact record, copy its init prefix, then attach the new effect. */
-EffEventWork *effEventCreate(SoundMixer *owner, u16 kind, const EffEventInit *params) {
+EffEventWork *effEventCreate(SoundMixer *owner, u16 kind, const void *params) {
+    const EffEventInit *init = (const EffEventInit *)params;
     EffEventWork *work = sdfAllocSizeClassBlock(EFF_EVENT_COMPACT_WORK_BYTES);
 
-    memcpy(work, params, sizeof(*params));
+    memcpy(work, init, sizeof(*init));
     work->actor = NULL;
     work->effect = func_00168548(owner, kind, 0, 0);
-    func_00169168(work->effect, params->param);
+    func_00169168(work->effect, init->param);
     return work;
 }
 
