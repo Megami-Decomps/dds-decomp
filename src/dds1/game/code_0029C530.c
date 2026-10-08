@@ -371,7 +371,6 @@ extern u8 D_003DF910[];
 
 extern u8 *D_003BD074;
 
-extern void *func_0029BD90(void *);
 
 extern void func_002A6440(s32);
 
@@ -2638,7 +2637,7 @@ u32 effCreateTrackSetWithSharedReferences(u32 count, u32 kind, u32 sharedRef) {
                 break;
             }
         } else {
-            effect->shared = func_0029BD90((void *)sharedRef);
+            effect->shared = func_0029BD90((struct SdfTextureFileHeader *)sharedRef);
         }
     }
     return (u32)effect;
@@ -5372,7 +5371,7 @@ u32 effCreateRibbonWithSharedResource(u32 count, u32 repeat, u32 resource) {
         references++;
         effSharedRibbonReferenceCount = references;
     } else {
-        ((EffRibbonWork *)node)->resource = func_0029BD90((void *)resource);
+        ((EffRibbonWork *)node)->resource = func_0029BD90((struct SdfTextureFileHeader *)resource);
     }
     return (u32)node;
 }
