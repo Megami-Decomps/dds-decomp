@@ -33,10 +33,6 @@ extern void frFontSetChainFlag(FrFontGlyph *, u8);
 
 
 
-extern SdfTaskEntry *func_00312A48(SdfTaskItemDesc *);
-
-
-
 extern s32 kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
 
@@ -769,7 +765,7 @@ s32 kwlnTaskExists(const char *name) {
 }
 
 void sdfAttachTaskItem(TaskWork *work, SdfTaskItemDesc *item) {
-    SdfListNode *node = sdfListAppend(work->list, item->key, func_00312A48(item));
+    SdfListNode *node = sdfListAppend(work->list, item->key, sdfCreateTaskEntry(item));
     if (work->currentNode == NULL) {
         work->currentNode = node;
     }

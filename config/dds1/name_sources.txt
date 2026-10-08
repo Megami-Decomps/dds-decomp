@@ -5945,9 +5945,10 @@
 0x002CB300	sdfAttachTaskItem	inferred	sdf system, device, DMA, or task infrastructure in game/code_002C97E8.c
 0x002CB358	sdfRemoveTaskItem	inferred	sdf system, device, DMA, or task infrastructure in game/code_002C97E8.c
 0x002CB390	sdfFindTaskItemValueByKey	inferred	Returns the matching task-list item's stored value or zero if the key is absent.
-0x002CB3F8	sdfSetTaskItemMode	inferred	Selects one of five mode-dependent status bit updates on the task item's referenced word.
+0x002CB3F8	sdfSetTaskItemMode	inferred	Mode 0 enables active/update/callback, 1 queues activation, 2 suspends, 3 selects callback only, and 4 selects update only.
 0x002CB4B8	sdfCreateNamedTaskWork	inferred	confidence=high; src/dds1/game/code_002C97E8.c:func_002CB4B8; Allocates task work and its header, installs destruction callbacks, and allocates primary and draw-prefixed task names. [names_qp9.tsv]
 0x002CB5A8	sdfDestroyTaskResourceWork	inferred	Destroys nested task work, frees two buffers, and releases its allocation.
+0x002CB5F0	sdfCreateTaskEntry	inferred	confidence=high; matched-C; Allocates and initializes the complete task entry from its descriptor, including default callbacks; twin=0x00312A48.
 0x002CB6B8	sdfDestroyCallbackWork	inferred	Calls the work's destruction callback with stored arguments, then frees the work.
 0x002CB6F8	sdfCallbackWorkOnRemove	inferred	confidence=high; matched-C; src/dds1/game/code_002C97E8.c:833:func_002CB6F8; Secondary-list removal callback: ignores the node key and destroys the callback-work payload through its owned destructor and storage release.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x002CB718	sdfTaskWorkStepEntry	inferred	DDS2 twin func_00312B70; DDS1 also promotes flag 0x100000 to 0x10000 and falls into the run case [names_M49_GridSdf.tsv]
