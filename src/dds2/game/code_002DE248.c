@@ -4138,10 +4138,61 @@ void effSubmitIndexedRenderPacket(u32 index) {
     effCurrentRenderPacket = 0;
 }
 
-extern EffQuadWork *func_002EA120(FileJob *job);
+extern EffQuadWork *func_002EA120(FileJobPayload *job);
 void effDuplicateRenderResourceOwner(EffQuadWork *work, const EffQuadWork *source);
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002EA120);
+extern EffPacketParams D_00458370;
+extern u32 D_003E9CC0[];
+extern u32 D_003E9CD0[];
+
+EffQuadWork *func_002EA120(FileJobPayload *job) {
+    EffQuadWork *work = sdfAllocSizeClassBlock(sizeof(EffQuadWork));
+    void *buffer;
+
+    memset(work, 0, sizeof(EffQuadWork));
+    VU0_STORE_VF(vf0, work->position);
+    VU0_STORE_VF(vf0, work->orientation);
+    work->scale = 1.0f;
+    work->color = 0x80808080;
+    work->billHandle = NULL;
+    work->reference = NULL;
+    work->assetHandle = (u32)sdfCreateAssetWithDrawEntries();
+    func_003332D0((SdfAsset *)work->assetHandle, 1.0f);
+    memset(&D_00458370, 0, sizeof(EffPacketParams));
+    D_00458370.primitive = 0x4000;
+    D_00458370.parameters = D_003E9CC0;
+    D_00458370.colors = D_003E9CD0;
+    D_00458370.parameterCount = 2;
+    D_00458370.vertexCount = 4;
+    if (job == NULL) {
+        return work;
+    }
+    work->sourceKind = job->option;
+    buffer = fileResolvePrimaryBuffer(job);
+    memcpy(&work->source, buffer, sizeof(work->source));
+    buffer = fileResolveSecondaryBuffer(job);
+    if (buffer != NULL) {
+        switch (job->primary.selector) {
+        case 1:
+            work->billHandle = billCreateIndexed(0, (u32)buffer);
+            break;
+        case 2:
+            work->billHandle = billCreateIndexed(1, (u32)buffer);
+            break;
+        case 4:
+            work->billHandle = effCreateBillboardSharingIndexedResource(*(s32 *)buffer);
+            break;
+        case 7:
+            work->reference = func_002DDF48((u32)buffer);
+            break;
+        }
+        if (work->billHandle != NULL) {
+            billMarkKindOneFlag(work->billHandle);
+            billSetBillboardMode(work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
+        }
+    }
+    return work;
+}
 
 void effReleaseRenderResources(EffQuadWork *work) {
     if (work->billHandle != 0) {
