@@ -155,7 +155,7 @@ s32 brsCalcExpGain(DatPartyRecord *unit, s32 exp) {
     return result;
 }
 
-u32 func_0029D000(void) {
+s32 func_0029D000(DatPartyRecord *unit) {
     return 0;
 }
 
