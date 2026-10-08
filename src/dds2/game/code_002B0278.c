@@ -3312,9 +3312,6 @@ u32 mnuTestListFlagTwo(u32 *flags) {
     return *flags & 2;
 }
 
-/* Return the stored row step times the visible row count, in native units. */
-s32 mnuGetListViewportHeight(MenuList *list);
-
 /* Subtract the fade step only when positive, then clamp any negative result to zero. */
 void mnuDecreaseListNodeFadeCounters(u8 *menu);
 
