@@ -10,6 +10,7 @@
 #include "kwln.h"
 #include "evt_world.h"
 #include "evt_unit.h"
+#include "evt_event_pack.h"
 #include "dat_state.h"
 #include "mnu_list.h"
 #include "eff.h"
@@ -2034,4 +2035,3 @@ INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437828);
 INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437830);
 
 INCLUDE_SDATA(const s32, "game/code_0025DA20", D_00437838);
-
