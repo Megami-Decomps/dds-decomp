@@ -57,7 +57,7 @@ extern void evtCreateMessageWindowIfMissing(s32);
 
 extern u8 D_003E5778[];
 
-extern void func_002A9908(u8 *);
+extern void mnuBuildCampTitleEffectResourceList(u8 *);
 
 extern void mnuResetGradientFadeColor(u8 *, s32);
 
@@ -566,7 +566,7 @@ s32 movAreTitleEffectsReady(s32 resourceListAddress, StaffSlots *resourceSlots) 
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A9068", func_002A9908);
+INCLUDE_ASM(const s32, "game/code_002A9068", mnuBuildCampTitleEffectResourceList);
 
 /* Title-effect work: sprite handle list at 0x60, then the resource slot sets. */
 typedef struct TitleEffectHandles {
@@ -732,7 +732,7 @@ u8 *mnuCreateStaffMenuWork(void) {
     mnuEnableCampBadgeFade(effectBytes);
     evtCreateMessageWindowIfMissing((s32)D_003E5778);
     movLoadTitleEffects(menuBytes);
-    func_002A9908(menuBytes);
+    mnuBuildCampTitleEffectResourceList(menuBytes);
     mnuResetGradientFadeColor(menuBytes + 0xAA50, 0x60);
     mnuBuildListSlotTableA((ListSlotWork *)menuBytes);
     mnuBuildListSlotTableB((ListSlotWork *)menuBytes);

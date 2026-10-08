@@ -4332,6 +4332,7 @@
 0x002A9640	mnuAppendCampSpriteRequests	inferred	appends /camp/spr/n_min/ and /camp/spr/n_sta/ resource requests (16+5+2 entries) selected by func_00303D70(list)==1 [names_M85_SplitCallers.tsv]
 0x002A9788	mnuReleaseTitleEffectSprites	inferred	releases three groups of sprite handles (16, 5, 2 entries) after func_002A9200 [names_M51_FieldMenu.tsv]
 0x002A9820	movAreTitleEffectsReady	inferred	Checks that all 2, 16, 5 and 2 movie title effect handle slots are populated.
+0x002A9908	mnuBuildCampTitleEffectResourceList	inferred	Builds the camp value record's sprite resource list from the selected party-owner directory and eight configured camp sprite entries.
 0x002A9A40	mnuReleaseTitleEffectResourceGroups	inferred	Destroys title effect sprites, fixed resource groups, additional groups, and final group. [names_reviewed19.tsv]
 0x002A9AB8	mnuInitializeCampMenuWhenResourcesReady	inferred	Reads the task's staff work state, waits for title-effect and handle readiness, then initializes the camp resource lists, scroll panel and panel resources once.
 0x002A9BC8	mnuDrawCampGridResourceSlot	inferred	Draws resolved grid slot selected from record resource fields. [names_reviewed21.tsv]
