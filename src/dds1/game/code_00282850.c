@@ -2198,7 +2198,51 @@ void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption)
     evtStageTestSelectEntry(entryIndex, EVT_STAGE_USE_ENTRY_MOTION, assetOption);
 }
 
-INCLUDE_ASM(const s32, "game/code_00282850", func_002877A8);
+extern u64 sdfCheckPendingWorkWithInterrupts(void);
+extern MdlCtx *func_00217680(s32 resource, s32 modelId);
+
+/* Poll model requests: 0 for an empty queue, 1 while handling a request, 2 otherwise. */
+s32 func_002877A8(void) {
+    StageTestSlot *slot = evtStageTestState.queue.slot;
+    s32 ready;
+
+    if (evtStageTestState.queue.flags != 0) {
+        if (evtStageTestState.queue.flags & EVT_STAGE_QUEUE_REQUESTING) {
+            s32 requestMode = evtStageTestState.mode;
+
+            ready = 0;
+            if (requestMode != 1) {
+                if (evtStageTestRequestModelAsset(slot->assetResource,
+                        slot->modelId, slot->assetOption) != 0) {
+                    ready = evtStageTestRequestModelAsset(slot->assetResource,
+                        slot->modelId, slot->assetOption) != -1;
+                }
+            }
+            if (requestMode == 1 || sdfCheckPendingWorkWithInterrupts() != 0) {
+                ready = 0;
+            }
+            if (ready != 0) {
+                if (evtStageTestState.mode != 1) {
+                    evtStageTestState.model = (s32)func_00217680(
+                        slot->assetResource, slot->modelId);
+                }
+                if (mnuHasPendingBlockFlag(&evtStageTestState.queue.flags)) {
+                    btlStopStage();
+                    mnuCommitPendingBlock(&evtStageTestState.queue);
+                    evtStageTestState.queue.flags |= EVT_STAGE_QUEUE_REQUESTING;
+                    return 1;
+                }
+                func_002878D8(slot->initialMotionIndex);
+                evtStageTestState.queue.flags =
+                    (evtStageTestState.queue.flags & ~EVT_STAGE_QUEUE_REQUESTING) |
+                    EVT_STAGE_QUEUE_SETUP_COMPLETE;
+            }
+            return 1;
+        }
+        return 2;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00282850", func_002878D8);
 
