@@ -3932,3 +3932,15 @@ from the zero-argument `001200E0` gate skips both operations. The natural
 early return matches all 112 native bytes; the older gated-block candidate
 had eight differing words. No alternate list owner or callback signature is
 needed.
+
+## Save confirmation restores maxima before currents
+
+DDS2 `002D0498` walks the five canonical `DatPartyRecord` entries in
+forward order and re-reads `datGameState` across the selector/stat calls.
+Its natural early guards and signed index let gcc derive the native
+countdown. After computing maximum MP, the source sets `maxMp` before
+restoring current HP and MP; ee-gcc schedules the native stores to
+`mp`, `hp`, then `maxMp`. Named `u16` locals preserve the actual occupied
+flag narrowing and current maximum-HP read. No alternate record view,
+artificial counter, or register-control construct is needed.
+
