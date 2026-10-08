@@ -15,7 +15,7 @@
 
 extern void func_002512F0(s32, s32);
 
-extern void mnuInitializeMantraSelectionGrid(s32);
+extern void mnuInitializeMantraSelectionGrid(MenuSceneWork *);
 
 extern void mnuCopySceneCoordinates(MenuSceneWork *);
 
@@ -171,7 +171,7 @@ s32 mnuCreateSceneWork(void) {
 
     memset(sceneWork, 0, MNU_SCENE_WORK_SIZE);
     ((MenuSceneWork *)sceneWork)->allocation = allocation;
-    mnuInitializeMantraSelectionGrid((s32)sceneWork);
+    mnuInitializeMantraSelectionGrid((MenuSceneWork *)sceneWork);
     ((MenuSceneWork *)sceneWork)->scenePhase = 0;
     ((MenuSceneWork *)sceneWork)->phaseFrame = 0;
     ((MenuSceneMetadata *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY))->displayedCurrency = datGameState->header.currency;
@@ -263,7 +263,7 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_00253208);
 /* Recreate the scene's selection grid and copy its resulting coordinates. */
 void mnuReinitializeSceneGrid(s32 sceneAddress) {
     sdfDestroyGridWork(((MenuSceneWork *)sceneAddress)->gridHandle);
-    mnuInitializeMantraSelectionGrid(sceneAddress);
+    mnuInitializeMantraSelectionGrid((MenuSceneWork *)(u32)sceneAddress);
     mnuCopySceneCoordinates((MenuSceneWork *)(u32)sceneAddress);
 }
 
