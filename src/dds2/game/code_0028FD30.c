@@ -14,7 +14,7 @@ extern void mnuEnableMantraBackground(u32);
 extern void mnuToggleMantraTitleVariant(u32);
 extern void mnuBeginMantraUnitPanelExit(u32);
 extern u32 mnuRegisterMantraUnitPanelDraw(u32, u32);
-extern u32 mnuGetSelectedNodeValue(MnuStatusResource *);
+extern DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *);
 extern s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *, s8);
 extern void func_0028D070(MnuStatusResource *, s32, s32);
 extern void func_00291590(MnuStatusResource *, s16, s32, s8, s8, s32);
@@ -357,8 +357,8 @@ MantraNodePos *mnuResolveSpecialMantraNeighbor(MnuStatusResource *object, u16 id
     return NULL;
 }
 
-u32 mnuGetDefaultPanelSelector(MnuStatusResource *object) {
-    return (u32)object->menu.defaultSelector;
+MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *object) {
+    return object->menu.defaultSelector;
 }
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290A78);
@@ -1039,7 +1039,7 @@ s32 func_002933F0(MnuStatusResource *object) {
         mnuShowMantraScrollCursor(object->menu.selectionController);
         mnuRegisterMantraUnitPanelDraw(object->menu.selectionController, (u32)state->collectedValues);
         func_0028D070(object, 2, 0);
-        position = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId((DatPartyRecord *)mnuGetSelectedNodeValue(object)));
+        position = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(object)));
         mnuSpawnMantraShortLoopIconAtPosition((s32)((f32)position->x / 10.0f * 40.0f),
             (s32)((f32)position->y / 10.0f * 39.0f), object->menu.selectionController);
         state->defaultSelector = state->savedSelector;

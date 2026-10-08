@@ -64,21 +64,6 @@ typedef struct EffSolidRectParams {
     s32 bottom;
 } EffSolidRectParams;
 
-typedef struct EffBlurTemplateBody {
-    s32 extent;
-    EffBlurQuad source;
-} EffBlurTemplateBody;
-
-typedef struct EffBlurTemplate {
-    EffBlurTemplateBody body;
-    u32 resourceWord;
-} EffBlurTemplate;
-
-
-
-
-
-
 extern EffScreenDrawParams effBlurRectangleParameters;
 
 
@@ -105,9 +90,6 @@ extern u8 D_003B21D8[];
 extern u8 D_003B2278[];
 
 extern u8 D_003B22A0[];
-
-extern EffBlurTemplate *effCloneBlurTemplate(void *arg);
-
 
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
 
@@ -144,9 +126,6 @@ extern s8 effTexturedBlurEnabled;
 extern s8 effRectangleBlurEnabled;
 
 extern void effDrawBlurRectangle(EffScreenDrawParams *arg);
-
-extern void effDrawBlurPixelRectWithResource(EffBlurTemplate *arg);
-
 
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
 
@@ -776,7 +755,7 @@ void effInitCh75Id(void) {
 
 /* Clone the four default work templates; only the staggered slot count is overridden. */
 void effInitWorks(void) {
-    effBlurPixelWork = effCloneBlurTemplate(D_003B2208);
+    effBlurPixelWork = effCloneBlurTemplate((EffBlurTemplateBody *)D_003B2208);
     effFilterBlurWork = effBlurCreateScatterWork((EffBlurScatterParams *)D_003B21D8);
     effTexturedSquareWork = effCloneResourceTemplate((EffResourceRectParams *)D_003B2278);
     effStaggeredBlurWork = effCloneBlurWorkWithSlots(D_003B22A0);

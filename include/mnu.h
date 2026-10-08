@@ -8,6 +8,11 @@
 #include "mnu_shop.h"
 #endif
 
+struct MenuWindowContainer;
+struct MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width,
+                                                    s32 height, s32 visibleCount,
+                                                    s32 rowSpacing);
+
 /* DDS2 scheduler word: zero or the encoded next-handler address. */
 extern s32 func_002C4038(void *work, s32 *entrySlot, s32 mode, void *callback);
 #ifdef VERSION_DDS2

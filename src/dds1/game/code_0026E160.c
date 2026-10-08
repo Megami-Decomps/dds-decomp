@@ -221,3 +221,4 @@ void mnuUpdateMovieRollEntry(MnuMovieRollEntry *entry) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_0026E160", mnuMovieWork);
+

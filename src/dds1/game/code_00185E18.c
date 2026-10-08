@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "sdf_chip.h"
 #include "eff_blur.h"
 #include "eff.h"
 #include "pcp_vu0.h"
@@ -466,30 +467,20 @@ void effDrawBlurPixelRectangle(EffBlurPixelRect *work) {
     effDrawBlurRectangle((BlurSource *)&work->color);
 }
 
-typedef struct EffBlurTemplateBody {
-    s32 extent;        /* 0x00 */
-    BlurSource source; /* 0x04: same source view used for draw packet construction */
-} EffBlurTemplateBody;
-
-typedef struct EffBlurTemplate {
-    EffBlurTemplateBody body;  /* 0x00: copied from the source template */
-    u32 resourceWord;          /* 0x2C */
-} EffBlurTemplate;
-
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern u32 effGetResourceFirstWord(s32 index);
 
 /* Clone a blur template into a fresh allocation. */
-EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplate *src) {
+EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplateBody *src) {
     EffBlurTemplate *dst = sdfAllocSizeClassBlock(sizeof(EffBlurTemplate));
 
     dst->resourceWord = effGetResourceFirstWord(2);
-    dst->body = src->body;
+    dst->body = *src;
     return dst;
 }
 
-void effReleaseBlurTemplate(void) {
-    sdfReleaseChipBlock();
+void effReleaseBlurTemplate(EffBlurTemplate *owner) {
+    sdfReleaseChipBlock(owner);
 }
 
 typedef struct BlurRect {
@@ -500,18 +491,18 @@ typedef struct BlurRect {
 } BlurRect;
 
 /* Pixel-coordinate variant of the fixed-point rectangle below: the extent is not halved for Y. */
-void effDrawBlurPixelRectWithResource(BlurRect *rect) {
+void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
     s32 centerX, centerY, halfExtent;
 
     if (func_0011E278(rect) == 0) {
-        centerX = rect->source.x + 0x100;
-        centerY = rect->source.y + 0xE0;
-        halfExtent = rect->extent;
-        rect->source.left = centerX - halfExtent;
-        rect->source.top = centerY - halfExtent;
-        rect->source.right = centerX + halfExtent;
-        rect->source.bottom = centerY + halfExtent;
-        effDrawBlurSource(&rect->source, rect->resource, 0);
+        centerX = rect->body.source.x + 0x100;
+        centerY = rect->body.source.y + 0xE0;
+        halfExtent = rect->body.extent;
+        rect->body.source.left = centerX - halfExtent;
+        rect->body.source.top = centerY - halfExtent;
+        rect->body.source.right = centerX + halfExtent;
+        rect->body.source.bottom = centerY + halfExtent;
+        effDrawBlurSource(&rect->body.source, rect->resourceWord, 0);
     }
 }
 

@@ -3964,12 +3964,38 @@ until their independent instruction differences are resolved.
 
 ## Timeline clamp halves share their parameter union
 
-DDS1 `002429F0` walks the existing `EvtRuntime` groups and keys. Duration
-columns update `EvtRuntimeChild.duration`; the supported end-offset kinds
+DDS1 `002429F0` and its exact DDS2 twin `0025DE08` walk the existing
+`EvtRuntime` groups and keys. Duration columns update
+`EvtRuntimeChild.duration`; the supported end-offset kinds
 use the two signed halves of the existing `p08` parameter union. Both clamp
 writes therefore belong to `EvtViewParam`, rather than an independent
 scalar beside a one-half union. This primary-owner closure reproduces the
 native group-type reload at both clamp joins and both generated switch
 tables with ordinary C. Unsupported end-offset kinds retain the previous
 `end` value, as the native traversal does.
+
+## Action-light integer-address dependency
+
+The primary action-animation record is 0x20 bytes: byte 0 is `cameraKind`,
+byte 3 is `kind`, +8 is `f32 lightColorMode`, +C holds three light-color
+floats, +18 is `s32 defaultValue`, and +1C is the flag halfword. A private
+`BtlActionAnimationRecord *datActionAnimationRecords` consumer cutover
+leaves just one word different in both `btlBuildActionLightParameters`
+twins (`001EF6B8` / `00200290`): +40 becomes `daddu`, not native `addu`.
+The matched integer-address expression multiplies the index by `sizeof`
+before adding the table address. All four retail callers supply the captured
+signed `indexWork.skillId`; an unsigned formal is not independently proven.
+This suggests an original integer-address calculation or differently typed
+index. The pointer closure remains private; no steering cast, byte view,
+unsupported unsigned formal, or regression of the matched builders is kept.
+
+## Event-vector record copying
+
+DDS2 `func_00115358` builds a 48-byte, word-aligned parameter record from
+`D_00412950`, replacing its first two vectors with the established SDK
+`PCP_COPY_VECTOR` primitive. Retail's two fixed-scratch-register `lq`/`sq`
+pairs support that macro use. The full record copy is `memcpy`, not typed
+structure assignment: the byte-copy alias contract preserves the dependency
+record's vector-pointer store before the unaligned eight-byte transfers.
+No packing, additional owner view, or compiler flag override is required.
 

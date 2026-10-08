@@ -2,6 +2,7 @@
 #include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
+#include "mnu_panel_state.h"
 #include "sdf_resource.h"
 #include "mnu_staff.h"
 #include "mnu_list.h"
@@ -371,7 +372,6 @@ extern s32 mnuGetEntryUseStatus(DatPartyRecord *, u16);
 extern void func_002B3CA0(s32, s32, s32, MenuList *, MenuListNode *, s32);
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
-MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s32 rowSpacing);
 void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu, u32 first, u32 second);
 void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *menu, u32 second, u32 third, u32 fourth);
 /* Copy the native panel layout, override its bounds, and mark its transition flag. */
@@ -2032,7 +2032,6 @@ typedef struct MenuPanelWindow {
     s32 field94;
 } MenuPanelWindow;
 
-extern void mnuSetPanelState();
 extern void func_002C0958();
 
 void ptySkillMenuCopyPageState(s32 context) {
@@ -2046,7 +2045,7 @@ void ptySkillMenuCopyPageState(s32 context) {
     slot = windows + index;
     window = *slot;
     itfDrawGridWithResolvedSlot(0xED0, 0x2E0, 0, 1, ((MenuContext *)context)->labelHandle, 0x24, 0x53);
-    mnuSetPanelState(party[8], index);
+    mnuSetPanelState((struct MenuPanelState *)party[8], index);
     func_002C0958(0xED0, 0x328, 0, party[8], 0x53);
     if (window->list->cursor->index == 0) {
         window->list->stateFlags |= 0x10;
