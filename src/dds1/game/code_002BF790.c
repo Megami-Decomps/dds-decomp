@@ -28,6 +28,13 @@ extern s32 sdfGridSeekSelectedNodeByIndex(s32, GridTextWidget *);
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 
+typedef struct SdfDrawPacket SdfDrawPacket;
+
+extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
+extern s32 sdfConsMeasurePacketWithHeader(s32 address);
+extern void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitive, s32 registerCount,
+                                     s64 registers, s32 loopCount);
+
 extern s32 sdfAllocPacketAligned(s32);
 
 extern void sdfInitPacketList(SdfListHead *);
@@ -423,7 +430,7 @@ void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
     SdfListHead *context;
     SdfPoolNode *entry;
 
-    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     descriptor[0] = normalized;
     if (!alternate) {
@@ -448,7 +455,7 @@ void itfSubmitToggledGridWord(s32 data, s32 alternate, s32 kind) {
     SdfListHead *context;
     SdfPoolNode *entry;
 
-    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     descriptor[0] = data;
     if (!alternate) {
@@ -476,7 +483,7 @@ void sdfSubmitGsAlphaRegisterPacket(s32 data, s32 alternate, s32 kind) {
     SdfListHead *context;
     SdfPoolNode *entry;
 
-    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     descriptor[0] = data;
     if (!alternate) {
@@ -501,7 +508,7 @@ void sdfSubmitGsPabeRegisterPacket(s32 data, s32 kind) {
     SdfListHead *context;
     SdfPoolNode *entry;
 
-    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     descriptor[1] = 0x49;
     descriptor[0] = data;
@@ -518,7 +525,7 @@ void sdfSubmitGsTexRegisterPacket(s32 data, s32 kind) {
     SdfListHead *context;
     SdfPoolNode *entry;
 
-    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     descriptor[1] = 0x14;
     descriptor[0] = data;
@@ -571,12 +578,43 @@ void uiDrawFrameEdges(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32
     uiDrawUniformColorLine(x, y + height, z, x + width + 0x10, y + height, z, color, context);
 }
 
+void func_002C10C0(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
+                  const u32 *colors, u32 surfaceIndex);
+
 void uiDrawUniformColorLine(u32 startX, u32 startY, u32 startZ, u32 endX, u32 endY, u32 endZ, u32 color, u32 surfaceIndex) {
     u32 vertexColors[2] = {color, color};
     func_002C10C0(startX, startY, startZ, endX, endY, endZ, vertexColors, surfaceIndex);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002C10C0);
+typedef struct GridPackedLineVertex {
+    u64 channels[2];
+    u64 xy;
+    u64 depth;
+} GridPackedLineVertex;
+
+void func_002C10C0(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
+                  const u32 *colors, u32 surfaceIndex)
+{
+    s32 packet;
+    GridPackedLineVertex *vertices;
+    SdfListHead *list;
+    SdfPoolNode *surface;
+
+    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(4, 1));
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x149, 4, 0x5151, 1);
+    vertices = (GridPackedLineVertex *)sdfConsMeasurePacketWithHeader(packet);
+    itfGridUnpackColorChannels(vertices[0].channels, colors[0]);
+    vertices[0].xy = (x0 + 0x7000) | ((u64)(y0 + 0x7900) << 32);
+    vertices[0].depth = z0;
+    itfGridUnpackColorChannels(vertices[1].channels, colors[1]);
+    vertices[1].xy = (x1 + 0x7000) | ((u64)(y1 + 0x7900) << 32);
+    vertices[1].depth = z1;
+    list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
+    sdfInitPacketList(list);
+    sdfAppendPacket(list, packet);
+    surface = &kwlnDrawSurfaces[surfaceIndex];
+    surface->append((SdfListHead *)surface, list);
+}
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C1228);
 
