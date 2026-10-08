@@ -5,6 +5,7 @@
 #include "mnu.h"
 #include "eff.h"
 #include "mnu_list.h"
+#include "kwln_task_lifecycle.h"
 
 extern KwlnTask *kwlnTaskCreate();
 extern void sdfCancelAndReleasePacWork(void *);
@@ -1253,7 +1254,7 @@ void mnuStopMovieDrawTask(void) {
         return;
     }
     sdfCancelAndReleasePacWork(&mnuMovieDrawContext);
-    kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
+    kwlnTaskDestroyWithHierarchy((KwlnTask *)mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }
 

@@ -22,7 +22,7 @@ extern void sdfDestroyCallbackWork();
 
 
 
-extern s32 kwlnTaskDestroyWithHierarchyByName(char *, s32);
+
 
 extern void sdfGridReleaseAllCells(SdfGrid *);
 

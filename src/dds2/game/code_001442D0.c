@@ -10,6 +10,7 @@
 #include "dat_state.h"
 #include "eff.h"
 #include "dds3obj.h"
+#include "kwln_task_lifecycle.h"
 
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 extern void effMiscQuatMultiplyVU(void);
@@ -413,7 +414,6 @@ extern void sdfWaitSlotReady(void);
 
 extern void fldReleaseSceneDevSlotsAndTextures(void);
 
-extern void kwlnTaskDestroyWithHierarchyByName(const char *, s32);
 
 extern s32 fldGetCurrentSceneSelectionId(void);
 
@@ -569,7 +569,6 @@ extern s32 dds3GetWorldObject(void);
 
 extern int strcmp(const char *, const char *);
 
-extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
 extern u8 fldGetCampSceneControlMode(void);
 extern u8 fldGetSceneReadyOrPendingState(void);
@@ -716,7 +715,7 @@ void fldEnsureTask(void) {
 
 void fldDestroyTask(void) {
     if (fldFieldTaskHandle != 0) {
-        kwlnTaskDestroyWithHierarchy(fldFieldTaskHandle, 1);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)fldFieldTaskHandle, 1);
     }
 }
 

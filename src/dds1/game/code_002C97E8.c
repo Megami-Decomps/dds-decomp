@@ -7,6 +7,7 @@
 #include "sdf_grid.h"
 #include "sdf_task_work.h"
 #include "itf.h"
+#include "kwln_task_lifecycle.h"
 
 extern s8 D_00324510[];
 
@@ -55,7 +56,7 @@ extern f32 func_002FA060(f32);
 extern void sdfGridReleaseAllCells(SdfGrid *);
 
 
-extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
+
 
 
 

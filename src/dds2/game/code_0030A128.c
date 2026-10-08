@@ -5,6 +5,7 @@
 #include "itf_grid_text.h"
 #include "fld_lmap_task.h"
 #include "sdf_sif_command.h"
+#include "kwln_task_lifecycle.h"
 
 extern s32 func_0030AC10(void);
 
@@ -30,7 +31,6 @@ extern char fldLocalMapTaskName[]; /* "LmapMain" */
 
 extern void fldShutdownLmapResources(void);
 
-extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
 typedef GridTextListItem LmapNode;
 typedef GridTextWidget LmapList;

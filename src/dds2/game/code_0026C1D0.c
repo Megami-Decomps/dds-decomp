@@ -3,6 +3,7 @@
 #include "evt_world.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
+#include "kwln_task_lifecycle.h"
 
 extern s32 scrTestEntryFlag(DatPartyRecord *context, u16 entryId, u32 bit);
 
@@ -111,7 +112,7 @@ void evtFillQuadRecordFields(u32 firstWord, u32 secondWord, u32 thirdWord, s16 f
 s32 evtDestroyRegisteredTaskIfPresent(s32 task) {
     if (task != 0) {
         if (kwlnTaskGetRegisteredState((KwlnTask *)task) != 0) {
-            kwlnTaskDestroyWithHierarchy(task, 0);
+            kwlnTaskDestroyWithHierarchy((KwlnTask *)task, 0);
         }
     }
 }

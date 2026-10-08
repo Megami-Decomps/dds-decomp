@@ -1,7 +1,6 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
-extern s32 kwlnTaskDestroyWithHierarchy(struct KwlnTask *task, s32 delayTicks);
 
 #include "evt_world.h"
 #include "eff_object.h"
@@ -14,6 +13,7 @@ extern s32 kwlnTaskDestroyWithHierarchy(struct KwlnTask *task, s32 delayTicks);
 #include "evt_unit.h"
 #include "evt_polygon_movie.h"
 #include "fld.h"
+#include "kwln_task_lifecycle.h"
 
 extern s32 evtIsMenuTableEntryEnabled(s32 *);
 extern s32 func_00237428();

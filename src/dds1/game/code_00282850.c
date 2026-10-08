@@ -11,6 +11,7 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "eff.h"
+#include "kwln_task_lifecycle.h"
 
 struct FrFontGlyph;
 extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);

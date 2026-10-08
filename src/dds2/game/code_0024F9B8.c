@@ -6,6 +6,7 @@
 #include "evt_world.h"
 #include "evt_polygon_movie.h"
 #include "file.h"
+#include "kwln_task_lifecycle.h"
 
 
 extern SdfTex *itfLoadTextureFromAsset(const char *);
@@ -110,7 +111,7 @@ void evtClearContextFlag(KwlnTask *task) {
 }
 
 void evtDestroyTaskHierarchy(u32 task) {
-    kwlnTaskDestroyWithHierarchy(task, 1);
+    kwlnTaskDestroyWithHierarchy((KwlnTask *)task, 1);
 }
 
 /* Allocate the picture task's flag and texture state. */

@@ -6,6 +6,7 @@
 #include "sdf.h"
 #include "sdf_task_work.h"
 #include "itf.h"
+#include "kwln_task_lifecycle.h"
 
 extern s8 D_0037F510[];
 
@@ -33,7 +34,7 @@ extern void frFontSetChainFlag(FrFontGlyph *, u8);
 
 
 
-extern s32 kwlnTaskDestroyWithHierarchyByName(char *, s32);
+
 
 
 extern f32 func_003532B8(f32);

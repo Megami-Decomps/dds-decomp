@@ -11,6 +11,7 @@
 #include "dds3obj.h"
 #include "kwln.h"
 #include "dat_state.h"
+#include "kwln_task_lifecycle.h"
 
 /* Signed selectors read signed storage; all writes retain the selected width. */
 enum {
@@ -270,7 +271,6 @@ extern char D_00412B90[];
 
 extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay, TaskUpdate update, TaskDestroy destroy, u32 userValue);
 
-extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
 extern s32 D_00435EE0;
 

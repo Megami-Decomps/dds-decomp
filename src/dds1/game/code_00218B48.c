@@ -14,6 +14,7 @@
 #include "sdf_sif_command.h"
 #include "eff_transform.h"
 #include "file.h"
+#include "kwln_task_lifecycle.h"
 
 #define MDL_VIEWER_RESOURCE_SLOTS 12
 #define MDL_VIEWER_TABLE_SLOT 5
@@ -187,7 +188,6 @@ void sdfAppendPacket(SdfListHead *, u32);
 void sdfStreamCreateWithParams(s32, s32, s32, s32, s32);
 
 
-extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
@@ -2497,7 +2497,7 @@ void mdlSubmitViewerResourceDrawPacket(void) {
 
 void mdlViewerTaskDestroy(void) {
     if (mdlViewerState.viewerTask != 0) {
-        kwlnTaskDestroyWithHierarchy(mdlViewerState.viewerTask, 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)mdlViewerState.viewerTask, 0);
         mdlViewerState.viewerTask = 0;
     }
 }
@@ -2710,7 +2710,6 @@ void mdlFreeViewResources(void) {
     }
 }
 
-extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 flag);
 
 extern void func_00103498(const char *name, s32, s32, s32);
 

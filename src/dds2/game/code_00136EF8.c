@@ -3,6 +3,7 @@
 #include "sdf_resource.h"
 #include "fld_waypoint.h"
 #include "fld_inf.h"
+#include "kwln_task_lifecycle.h"
 extern FldInfTable D_0038E2D0;
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -73,7 +74,6 @@ extern ScrData *scrFindNamedProcessNode(char *name);
 extern void evtDestroyNamedTask(void *unusedContext, const char *taskName);
 
 
-extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
 extern s32 fldTaskSlotCount;
 
@@ -965,7 +965,7 @@ u32 fldDestroyTaskSlot(u32 index) {
     u32 *taskSlot = &D_0038BD50[index];
 
     if (kwlnTaskIsRegistered((KwlnTask *)*taskSlot) != 0) {
-        kwlnTaskDestroyWithHierarchy(*taskSlot, 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)*taskSlot, 0);
     }
     *taskSlot = 0;
     return 0;

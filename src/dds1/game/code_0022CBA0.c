@@ -15,13 +15,13 @@
 #include "eff_object.h"
 #include "mdl.h"
 #include "evt_polygon_movie.h"
+#include "kwln_task_lifecycle.h"
 
 struct EvtRuntime;
 struct EvtRuntime;
 struct EvtRuntime;
 
 extern char evtViewerTaskName[]; /* "EventViewer" */
-extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 s32 evtViewerHasUpdateFlag(struct EvtRuntime *viewer);
 s32 evtViewerUpdateFrame(KwlnTask *task);
 void fldInitializeCameraColorResource(void);

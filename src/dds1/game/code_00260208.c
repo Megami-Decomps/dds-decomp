@@ -4,6 +4,7 @@
 #include "mnu_result.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
+#include "kwln_task_lifecycle.h"
 
 extern s8 brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *);
 extern s32 func_002877A8(void);
@@ -681,7 +682,6 @@ s32 mnuStaffCreateTasks(void) {
 extern char brsStaffInputTaskName[];
 extern char mnuStaffPrimaryPanelTaskName[];
 extern char mnuStaffSecondaryPanelTaskName[];
-extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
 u32 mnuStaffDestroyTasks(void) {
     s8 state = brsTaskState;

@@ -10,6 +10,7 @@
 #include "dat_state.h"
 #include "eff.h"
 #include "kwln.h"
+#include "kwln_task_lifecycle.h"
 
 extern u8 D_00324510[2][2][16];
 extern u8 D_003BA878[2][2];
@@ -145,7 +146,6 @@ extern s32 D_0033EB78[];
 
 extern void func_002E96D8(s32 arg0);
 
-extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
 extern s32 dds3GetWorldObject(void);
 
@@ -240,7 +240,6 @@ extern s32 kwlnTaskCreate(void *name, s32 arg1, s32 arg2, s32 arg3, void *update
 
 extern u8 D_003BAE78[];
 
-extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
 typedef struct {
     s32 flags;
@@ -388,7 +387,7 @@ void fldEnsureTask(void) {
 
 void fldDestroyTask(void) {
     if (fldFieldTaskHandle != 0) {
-        kwlnTaskDestroyWithHierarchy(fldFieldTaskHandle, 1);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)fldFieldTaskHandle, 1);
     }
 }
 
