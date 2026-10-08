@@ -1,5 +1,6 @@
 #include "common.h"
 #include "mc_poll.h"
+#include "mc_path_api.h"
 #include "bill_object_api.h"
 #include "eff_resource_slots.h"
 #include "sdf_resource.h"
@@ -191,10 +192,6 @@ extern u32 *D_003BD934;
 extern u32 D_003BC824;
 
 extern s32 fileBeginRequest(const char *, u32 *, u32 *, void *, u32 *);
-
-extern void mcOpenFilePath(u32, const char *, s32);
-
-extern void mcDeleteFilePath(u32 port, u32 pathAddress);
 
 extern s32 fileWriteWaitOpen(void);
 
@@ -412,12 +409,8 @@ extern s32 fileBeginWait(void *callback);
 
 extern void mcFormatSaveFilename(void *dst, s32 number);
 
-extern void mcChangeCurrentDirectory(u32 request, void *data);
-
 extern s32 fileScanSlotIconSysBegin(void);
 
-
-extern void mcReadDirectoryEntries(u32 request, const char *path, void *data, s32 option);
 
 extern char D_003B2678[];
 
@@ -1534,7 +1527,7 @@ s32 fileBeginReadSlotIcon(void) {
 
     buf[0] = 0x2F;
     mcFormatSaveFilename(&buf[1], fileSlotScanIndex);
-    mcChangeCurrentDirectory(fileMemoryCardRequestContext, buf);
+    mcChangeCurrentDirectory(fileMemoryCardRequestContext, (const char *)buf);
     return (s32)fileScanSlotIconSysBegin;
 }
 
@@ -1627,7 +1620,7 @@ s32 fileBeginSaveSlotIconScan(void) {
 
     buf[0] = 0x2F;
     mcFormatSaveFilename(&buf[1], fileSlotScanIndex);
-    mcChangeCurrentDirectory(fileMemoryCardRequestContext, buf);
+    mcChangeCurrentDirectory(fileMemoryCardRequestContext, (const char *)buf);
     return (s32)fileScanSlotIconSysAltBegin;
 }
 
@@ -1725,7 +1718,7 @@ s32 mcPrepareDirectory(void) {
     }
     name[0] = '/';
     mcFormatSaveFilename(name + 1, slot);
-    mcMakeDirectory(entry, name);
+    mcMakeDirectory(entry, (const char *)name);
     return (s32)mcHandleSearchResult;
 }
 
@@ -1736,7 +1729,7 @@ s32 fileCreateMainBegin(void) {
 
     buf[0] = 0x2F;
     mcFormatSaveFilename(&buf[1], v);
-    mcChangeCurrentDirectory(entry, buf);
+    mcChangeCurrentDirectory(entry, (const char *)buf);
     return (s32)filePrepareMainBlobWrite;
 }
 
@@ -2143,7 +2136,7 @@ s32 mcChooseLoadPath(void) {
     if (!(flags & 8)) {
         return fileBuildMainBlobAndWrite();
     }
-    mcDeleteFilePath(entry, (u32)D_003B2678);
+    mcDeleteFilePath(entry, D_003B2678);
     return (s32)fileBuildMainBlobAfterDelete;
 }
 
