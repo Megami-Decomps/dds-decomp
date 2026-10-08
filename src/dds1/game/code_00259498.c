@@ -72,7 +72,7 @@ void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
         {
             s32 displayFlags = (u8)display->boundsFlags;
 
-            if (displayFlags & 1) {
+            if (displayFlags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) {
                 func_0024EC08(x, y, depth, alpha, scene->sceneId, 0x20,
                               scaleX, scaleY, context);
             } else {
@@ -255,11 +255,11 @@ void func_0025AE80(MenuSceneWork *display, s32 inputScale, s32 param) {
         enabled[2] = 1;
     }
 
-    if (display->boundsFlags & 4) {
+    if (display->boundsFlags & MENU_SCENE_REQUIREMENT_GROUP_2_MET) {
         threshold = 0x307;
-    } else if (display->boundsFlags & 2) {
+    } else if (display->boundsFlags & MENU_SCENE_REQUIREMENT_GROUP_1_MET) {
         threshold = 0x2C8;
-    } else if (display->boundsFlags & 1) {
+    } else if (display->boundsFlags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) {
         threshold = 0x24C;
     } else {
         threshold = 0x1BE;

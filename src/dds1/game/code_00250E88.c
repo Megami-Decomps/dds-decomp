@@ -87,10 +87,12 @@ void func_00251260(MenuSceneWork *work) {
     u8 flags = work->boundsFlags;
     s32 position[2];
 
-    if ((flags & 4) == 0) {
+    if ((flags & MENU_SCENE_REQUIREMENT_GROUP_2_MET) == 0) {
         maximumX = 0x2C8;
-        if ((flags & 2) == 0) {
-            maximumX = (flags & 1) != 0 ? 0x24C : 0x1BE;
+        if ((flags & MENU_SCENE_REQUIREMENT_GROUP_1_MET) == 0) {
+            maximumX = (flags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) != 0
+                           ? 0x24C
+                           : 0x1BE;
         }
     }
     position[0] = work->scrollX;
