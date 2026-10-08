@@ -2345,13 +2345,15 @@ void func_001FB1D0(void) {
 void func_001FB1D8(void) {
 }
 
-void func_001FB1E0(void) {
+void func_001FB1E0(void *context) {
+    (void)context;
 }
 
 void func_001FB1E8(void) {
 }
 
-void func_001FB1F0(void) {
+void func_001FB1F0(void *context) {
+    (void)context;
 }
 
 /* Packed command entries have a 0x18-byte stride. */
