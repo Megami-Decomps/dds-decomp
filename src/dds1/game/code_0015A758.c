@@ -648,7 +648,7 @@ void parCellInit(ParSystem *system, s32 index) {
     ParCell *cell = (ParCell *)(index * 20 + (u32)system->cells);
 
     cell->color = 0x80808080;
-    cell->unk0C = 0;
+    cell->historyAdvanceCountdown = 0;
     cell->vertexCount = 0;
 }
 
@@ -663,19 +663,19 @@ void parUpdateCellVertexPair(ParSystem *system, s32 index, const u128 *vertices)
     s32 shiftCount;
     s32 i;
 
-    if (cell->unk0C == 0) {
+    if (cell->historyAdvanceCountdown == 0) {
         shiftCount = system->vertexWordCount - 2;
         vertex = cell->history + shiftCount;
         for (i = 0; i < shiftCount; i++) {
             vertex--;
             PCP_COPY_VECTOR(vertex + 2, vertex);
         }
-        cell->unk0C = system->groupDivisor;
+        cell->historyAdvanceCountdown = system->groupDivisor;
         if (cell->vertexCount < shiftCount + 2) {
             cell->vertexCount += 2;
         }
     } else {
-        cell->unk0C--;
+        cell->historyAdvanceCountdown--;
         vertex = cell->history;
     }
     PCP_COPY_VECTOR(vertex, vertices);
@@ -706,19 +706,19 @@ void parUpdateCellVertexTriangle(ParSystem *system, s32 index, const u128 *verti
     s32 shiftCount;
     s32 i;
 
-    if (cell->unk0C == 0) {
+    if (cell->historyAdvanceCountdown == 0) {
         shiftCount = system->vertexWordCount - 3;
         vertex = cell->history + shiftCount;
         for (i = 0; i < shiftCount; i++) {
             vertex--;
             PCP_COPY_VECTOR(vertex + 3, vertex);
         }
-        cell->unk0C = system->groupDivisor;
+        cell->historyAdvanceCountdown = system->groupDivisor;
         if (cell->vertexCount < shiftCount + 3) {
             cell->vertexCount += 3;
         }
     } else {
-        cell->unk0C--;
+        cell->historyAdvanceCountdown--;
         vertex = cell->history;
     }
     PCP_COPY_VECTOR(vertex, vertices);
