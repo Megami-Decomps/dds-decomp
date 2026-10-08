@@ -323,7 +323,7 @@ extern u32 *dds3WritePendingNamedReferenceValues(u32 *);
 extern void dds3ApplyRelocationOffsets(void *, void *, void *, u32);
 extern void func_0035A880(void *);
 
-SdfRelocatedResource *func_00325CC8(u32 *owner, ResourceList **source,
+SdfRelocatedResource *sdfCloneRelocatedResourceGroups(u32 *owner, ResourceList **source,
                                   ResourceList **groups) {
     SdfRelocatedResource *result;
     ResourceNode *node;
