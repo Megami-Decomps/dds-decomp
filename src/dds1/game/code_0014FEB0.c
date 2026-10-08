@@ -1,5 +1,6 @@
 #include "common.h"
 #include "eff.h"
+#include "eff_node_descriptor.h"
 
 typedef struct EffectSource {
     u32 type;
@@ -37,15 +38,6 @@ void *effCloneSourceWithTypeHandler(EffectSource *source) {
     copy->argument = D_0034DE40[source->type].handler(argument);
     return copy;
 }
-
-/* Variable-length serialized descriptor; compatibility reads the full tag words. */
-typedef struct EffNodeDescriptor {
-    u32 type;
-    u32 arg;
-    u32 pad08;
-    f32 version;
-    u8 payload[0];
-} EffNodeDescriptor;
 
 extern s32 func_003003F0(const char *format, ...);
 
