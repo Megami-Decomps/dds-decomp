@@ -1709,7 +1709,7 @@ typedef struct {
     EffThunderCellParams head;
     EffThunderCell *cells;   /* 0x48 */
     u32 unk4C;               /* 0x4C: settable, otherwise unobserved */
-    void *system;            /* 0x50 */
+    ParSystem *system;       /* 0x50: allocated cell system */
     SdfMemBlock *allocationHandle;    /* 0x54 */
 } EffThunderCellWork; /* 0x58 */
 
@@ -1929,7 +1929,7 @@ void effThunderCellUpdate(EffThunderCellWork *work) {
     s32 i = 0;
     s32 cellCount = work->head.cellCount;
     EffThunderCell *cell = work->cells;
-    ParCell *renderCells = ((ParSystem *)work->system)->cells;
+    ParCell *renderCells = work->system->cells;
 
     if (cellCount > 0) {
         do {
