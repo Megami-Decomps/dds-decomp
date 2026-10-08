@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
@@ -1406,7 +1407,6 @@ s32 func_0022CD60(s32 kind, s32 id) {
     return 0;
 }
 
-extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern void sdfQueueTexturedQuad(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
                                  s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 

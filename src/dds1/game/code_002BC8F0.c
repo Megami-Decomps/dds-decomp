@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "itf_draw_grid.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
@@ -969,7 +970,6 @@ extern void sdfTexSetPrimaryBufferModeBits(SdfTex *, s32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
-extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern void effSelectPresetByKind(u32, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 
