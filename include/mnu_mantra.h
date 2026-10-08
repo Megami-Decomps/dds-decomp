@@ -157,7 +157,7 @@ typedef struct MantraMenuWork {
     u16 sourceFlag;
     u8 pad96C[4];
     MtrUnitMenuEntry unitEntries[5];
-    MantraMenuSrc *currentSlot;
+    MtrUnitMenuEntry *currentSlot;
     s32 masteryFrames;
     s32 delayFrames;
     s32 navigationState;
