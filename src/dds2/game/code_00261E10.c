@@ -146,7 +146,96 @@ s32 evtAdvancePhaseOne(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00261E10", func_00261F48);
+extern s32 func_00297250(MenuTerminalContext *);
+extern u8 D_003CE55C[];
+
+s32 func_00261F48(KwlnTask *task) {
+    MenuTerminalContext *state;
+    MenuWindowContainer *window;
+    struct MenuList *list;
+    s32 inputFlags;
+    s32 phase;
+    s32 dispatchResult;
+    u32 selection;
+    s32 initialAllowed = 1;
+
+    state = (MenuTerminalContext *)kwlnTaskGetUserValue(task);
+    inputFlags = mnuMapPadMaskToFlags(0x33);
+    window = state->ownedWindows[0];
+    list = window->list;
+    dispatchResult = func_002C4038(&state->transitionWork, &state->popupState, 0,
+                                   task);
+    if (dispatchResult != 0) {
+        return dispatchResult;
+    }
+
+    phase = func_00297250(state);
+    switch (phase) {
+    case -1:
+        return 0;
+    case 0:
+        mnuSetCommandPhase(state, 3);
+        mnuStorePendingMenuCommandValue(list, 10);
+        return 0;
+    case 1: {
+        struct MenuListNode *node = state->ownedWindows[0]->list->cursor;
+        mnuSetPopupEntryFlagged(&state->popupState,
+                                (void *)(D_003CE4B4 + node->camp.value * 0x1C));
+        return 0;
+    }
+    case 2:
+        mnuSetPopupEntryFlagged(&state->popupState, D_003CE55C);
+        return 0;
+    case 3:
+        evtInstallStateTable((s32)state);
+        break;
+    default:
+        break;
+    }
+
+    if (state->popupState == 0) {
+        if ((inputFlags & 1) != 0) {
+            if ((s16)state->selectedSlot == 0) {
+                struct MenuListNode *node = state->ownedWindows[0]->list->cursor;
+                initialAllowed = node->camp.value != 3;
+            }
+
+            if (initialAllowed != 0) {
+                struct MenuListNode *node = state->ownedWindows[0]->list->cursor;
+                selection = node->camp.value + 1U;
+                if (selection < 7) {
+                    if (selection >= 5) {
+                        mnuSetPopupEntryFlagged(
+                            &state->popupState,
+                            (void *)(D_003CE4B4 + node->camp.value * sizeof(MenuPopupEntry)));
+                    } else {
+                        mnuSetCommandPhase(state, 1);
+                        func_002971E0(list, 4);
+                    }
+                } else {
+                    mnuSetCommandPhase(state, 1);
+                    func_002971E0(list, 4);
+                }
+            } else {
+                state->dispatchMode = 2;
+            }
+        } else if ((inputFlags & 2) != 0) {
+            mnuSetCommandPhase(state, 2);
+            func_002971E0(list, 4);
+        } else if ((inputFlags & 0x300000) == 0) {
+            func_002B9808(state->ownedWindows[0]);
+        } else if ((inputFlags & 0x10) != 0) {
+            mnuRetreatWindowListSelection(state->ownedWindows[0]);
+        } else if ((inputFlags & 0x20) != 0) {
+            mnuAdvanceWindowListSelection(state->ownedWindows[0]);
+        }
+    }
+
+    window = state->ownedWindows[0];
+    mnuPlayInputSound(0, inputFlags, &window->list->stateFlags);
+    return 0;
+}
+
 
 s32 func_00262190(s32 callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue();

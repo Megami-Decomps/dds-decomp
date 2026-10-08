@@ -1428,7 +1428,30 @@ INCLUDE_ASM(const s32, "game/code_0011F208", func_00123B88);
 
 INCLUDE_ASM(const s32, "game/code_0011F208", func_00123DE8);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00123EE0);
+s32 func_00123EE0(s32 floor, f32 x, f32 z) {
+    FieldStageCoordinate *record = fldFindStageCoordinateRecord(fldAreaState.area, floor);
+    s32 cellX;
+    s32 row;
+    s32 byte;
+    s32 bit;
+    u32 rowOffset;
+
+    if (record == NULL) {
+        return 0;
+    }
+    cellX = (s32)(x - record->originX) / record->cellSize;
+    row = -((s32)(z - record->originZ) / record->cellSize);
+    bit = cellX % 8;
+    byte = cellX / 8;
+    fldFindStageCoordinateIndex(fldAreaState.area, floor);
+    rowOffset = fldFindStageCoordinateRowOffset(fldAreaState.area, floor);
+    if (byte >= 0 && row >= 0 && byte < record->cols && row < record->rows) {
+        if ((datGameState->pad11130[(row + rowOffset) * 10 + byte] >> bit) & 1) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 /* Return to-minus-from after integer-degree reduction and one wrap adjustment. */
 f32 fldAngleDifference(f32 fromAngle, f32 toAngle) {
