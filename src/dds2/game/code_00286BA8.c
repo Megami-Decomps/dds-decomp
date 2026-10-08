@@ -95,7 +95,6 @@ void func_00286E20(void) {
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraSetBitAll()]*****************\n");
 }
 
-extern u32 sdfMemoryGetBlockAddress(void *block);
 extern MenuProgressHost *mnuCreateProgressHost(void);
 extern void mnuInitPanelSoundEntries(void);
 

@@ -1,7 +1,6 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
-extern s8 *sdfMemoryGetBlockAddress();
 
 
 extern void evtPrintDeveloperConsoleMessage();
@@ -161,7 +160,7 @@ s32 mtrMantraEventBitPush(void) {
     s32 i;
 
     handle = (u32)sdfAllocGeneralBlock(0x76);
-    data = sdfMemoryGetBlockAddress(handle);
+    data = (s8 *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)handle);
     memset(data, 0, 0x76);
     for (i = 0; i < 0x70; i++) {
         if (mdlFlagTest(i + 0x920)) {
@@ -179,11 +178,10 @@ s32 mtrMantraEventBitPush(void) {
     return handle;
 }
 
-extern s8 *sdfMemoryGetBlockAddress(void);
 
 void mtrMantraEventBitPop(s32 arg) {
     s32 i;
-    s8 *data = sdfMemoryGetBlockAddress();
+    s8 *data = (s8 *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)arg);
 
     for (i = 0; i < 0x70; i++) {
         if (*data != 0) {

@@ -10,7 +10,6 @@ extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
 extern MnuStaffMovieWork *mnuMovieWork;
 
 
-extern void *sdfMemoryGetBlockAddress(s32);
 
 extern f32 effMiscRandUnitFloat(s32);
 
@@ -118,7 +117,7 @@ typedef struct {
 
 void *mnuCreateMovieSpriteResource(s32 owner, u8 sprite, u8 variant) {
     s32 allocation = (u32)sdfAllocGeneralBlock(0x48);
-    MovieSpriteResource *resource = sdfMemoryGetBlockAddress(allocation);
+    MovieSpriteResource *resource = (MovieSpriteResource *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)allocation);
     memset(resource, 0, 0x48);
     resource->allocation = allocation;
     resource->owner = owner;
