@@ -638,7 +638,119 @@ s32 sdfFormatImageSize(u32 format, s32 width, s32 height) {
     return (transferBitsPerPixel * width * height) >> 7;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1D80);
+typedef struct SdfImageUploadPrefix {
+    struct SdfImageUploadPrefix *next;
+    s32 chipAddress;
+    SdfMemBlock *allocation;
+    u8 releaseMode;
+    u8 pad0D[3];
+} SdfImageUploadPrefix;
+
+typedef char SdfImageUploadPrefix_size_must_be_0x10[(sizeof(SdfImageUploadPrefix) == 0x10) ? 1 : -1];
+
+void func_002D1D80(SdfImageUploadRequest *request) {
+    SdfSemaObj *queue = &sdfTextureQueueWork;
+    SdfImageUploadPrefix *releaseEntry;
+    SdfTexPacketTail *oldTail;
+    u64 *setup;
+    u64 *packet;
+    void *allocation;
+    u32 format;
+    u16 width;
+    u16 height;
+    u16 bufferWidth;
+    s32 qwordCount;
+    s32 allocationBlocks;
+    s32 remaining;
+    s32 bufferWidthUnits;
+    s32 isLast;
+    u32 sourceAddress;
+    u64 formatAndDestination;
+    u64 coordinates;
+    u64 dimensions;
+
+    format = request->format;
+    width = request->width;
+    height = request->height;
+    bufferWidth = request->bufferWidth;
+    bufferWidthUnits = bufferWidth >> 6;
+    if (bufferWidthUnits == 0) {
+        bufferWidthUnits = 1;
+    }
+
+    qwordCount = sdfFormatImageSize(format, width, height);
+    allocationBlocks = (qwordCount + 0x7FEF) / 0x7FF0;
+    allocation = sdfAllocSizeClassBlock(allocationBlocks * 0x30 + 0x80);
+    releaseEntry = (SdfImageUploadPrefix *)allocation;
+    releaseEntry->next = NULL;
+    releaseEntry->chipAddress = (s32)request->pixels;
+    releaseEntry->allocation = request->allocation;
+    releaseEntry->releaseMode = request->allocationMode;
+
+    setup = (u64 *)((u8 *)allocation + 0x10);
+    packet = (u64 *)((u8 *)allocation + 0x70);
+    formatAndDestination = ((u64)format << 56) |
+                          ((u64)bufferWidthUnits << 48) |
+                          ((u64)(request->destination >> 6) << 32);
+    coordinates = ((u64)request->y << 48) | ((u64)request->x << 32);
+    dimensions = ((u64)height << 32) | width;
+
+    setup[0] = 0x0000000010000005ULL;
+    setup[1] = 0x5000000500000000ULL;
+    setup[2] = 0x1000000000000004ULL;
+    setup[3] = 0x000000000000000EULL;
+    setup[4] = formatAndDestination;
+    setup[5] = 0x50ULL;
+    setup[6] = coordinates;
+    setup[7] = 0x51ULL;
+    setup[8] = dimensions;
+    setup[9] = 0x52ULL;
+    setup[10] = 0;
+    setup[11] = 0x53ULL;
+
+    sourceAddress = (u32)request->pixels & 0x0FFFFFFF;
+    remaining = qwordCount;
+    isLast = 0;
+    do {
+        s32 chunk = 0x7FF0;
+
+        if (remaining < 0x7FF1) {
+            chunk = remaining;
+            isLast = 1;
+        }
+
+        packet[0] = 0x0000000010000001ULL;
+        packet[1] = 0x5000000100000000ULL;
+        packet[2] = ((u64)chunk | ((u64)isLast << 15)) | 0x0800000000000000ULL;
+        packet[4] = ((u32)chunk & 0xFFFF) | 0x30000000ULL | ((u64)sourceAddress << 32);
+        packet[5] = ((u64)((u32)chunk | 0x51000000)) << 32;
+
+        sourceAddress += (u32)chunk << 4;
+        remaining -= chunk;
+        packet += 6;
+    } while (isLast == 0);
+
+    WaitSema(queue->semaphoreId);
+
+    if (queue->releaseTail != NULL) {
+        ((SdfImageUploadPrefix *)queue->releaseTail)->next = releaseEntry;
+    } else {
+        queue->unk4 = releaseEntry;
+    }
+    queue->releaseTail = releaseEntry;
+
+    setup = (u64 *)((u32)setup & 0x0FFFFFFF);
+    oldTail = (SdfTexPacketTail *)queue->packetTail;
+    if (oldTail != NULL) {
+        oldTail->next = 0;
+        oldTail->tag = ((u64)(u32)setup << 32) | 0x20000000ULL;
+    } else {
+        queue->unkC = (void *)(u32)setup;
+    }
+    queue->packetTail = (s32)packet;
+    SignalSema(queue->semaphoreId);
+}
+
 
 void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet) {
     SdfSemaObj *obj = &sdfTextureQueueWork;
