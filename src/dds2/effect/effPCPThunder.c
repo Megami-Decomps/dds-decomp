@@ -13,9 +13,6 @@
 /* Packed effect parameter-set accessor shared with the effect constructors. */
 extern void *effParamTableGetBlock(void *data, s32 index);
 
-extern void parFillSymmetricCellColors(u32 param0, u32 param1, void *cells, u32 param3);
-extern void parDecreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
-extern void parIncreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
 extern u32 effMiscRand(void *state);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_003AA868[];
@@ -1047,19 +1044,19 @@ EffThunderFragmentParams *effThunderGetFragmentParameters(EffThunderFragmentWork
     return &work->head;
 }
 
-/* Forward the system and its opaque fragment configuration through the native call. */
-void func_0016D298(EffThunderFragmentWork *work) {
-    parDecreaseSymmetricCellAlpha((u32)work->system, work->head.arg40, (void *)work->head.arg48, work->head.arg50);
+/* Apply decreasing alpha along each fragment cell using the retained color words. */
+void effThunderApplyFragmentDecreasingAlphaRamp(EffThunderFragmentWork *work) {
+    parDecreaseSymmetricCellAlpha(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
 }
 
-/* Alternate native operation on the same system and opaque fragment configuration. */
-void func_0016D2C0(EffThunderFragmentWork *work) {
-    parIncreaseSymmetricCellAlpha((u32)work->system, work->head.arg40, (void *)work->head.arg48, work->head.arg50);
+/* Apply increasing alpha along each fragment cell using the retained color words. */
+void effThunderApplyFragmentIncreasingAlphaRamp(EffThunderFragmentWork *work) {
+    parIncreaseSymmetricCellAlpha(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
 }
 
 /* Apply symmetric cell-color bands using the fragment configuration's native arguments. */
 void effThunderApplyFragmentColorBands(EffThunderFragmentWork *work) {
-    parFillSymmetricCellColors((u32)work->system, work->head.arg40, (void *)work->head.arg48, work->head.arg50);
+    parFillSymmetricCellColors(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
 }
 
 /* Resample delay/active countdowns and restore the fixed fragment grey.
@@ -1929,13 +1926,13 @@ EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src) {
     memset(group->handles, 0, sizeof(group->handles));
     group->head = *src;
     group->handles[0] = effThunderFragCreate(&group->head.params);
-    func_0016D2C0(group->handles[0]);
+    effThunderApplyFragmentIncreasingAlphaRamp(group->handles[0]);
     for (i = 1; i < src->count - 2; i++) {
         group->handles[i] = effThunderFragCreate(&group->head.params);
         effThunderApplyFragmentColorBands(group->handles[i]);
     }
     group->handles[i] = effThunderFragCreate(&group->head.params);
-    func_0016D298(group->handles[i]);
+    effThunderApplyFragmentDecreasingAlphaRamp(group->handles[i]);
     group->color = 0x80808080;
     return group;
 }
