@@ -67,7 +67,48 @@ void effMiscSeedRandomFromClock(void *state) {
     effMiscSeedRandom(state, t * 0x3C + now.sec);
 }
 
-INCLUDE_ASM(const s32, "game/code_00341240", func_003413F0);
+typedef struct SdfCdClock {
+    u8 status;
+    u8 second;
+    u8 minute;
+    u8 hour;
+    u8 pad4;
+    u8 day;
+    u8 month;
+    u8 year;
+} SdfCdClock;
+
+extern s32 func_0034D308(SdfCdClock *);
+extern s32 sdfBcdStrToInt(s32);
+extern u8 D_00438B70;
+extern ClockTime D_00438B78;
+
+INCLUDE_SDATA(const s32, "game/code_00341240", D_00438B78);
+
+s32 func_003413F0(ClockTime *now) {
+    SdfCdClock clock;
+    s32 result = 1;
+    s32 year;
+
+    if (D_00438B70 == 0) {
+        func_0034D308(&clock);
+        result = -1;
+        if ((clock.status & 0x103) == 0) {
+            D_00438B78.sec = sdfBcdStrToInt(clock.second);
+            D_00438B78.min = sdfBcdStrToInt(clock.minute);
+            D_00438B78.hour = sdfBcdStrToInt(clock.hour);
+            D_00438B78.day = sdfBcdStrToInt(clock.day);
+            D_00438B78.month = sdfBcdStrToInt(clock.month);
+            /* Retail reuses the month byte as the two-digit year input. */
+            year = sdfBcdStrToInt(clock.month);
+            result = 0;
+            D_00438B78.year = year + (year < 70 ? 2000 : 1900);
+        }
+        D_00438B70 = 20;
+    }
+    *now = D_00438B78;
+    return result;
+}
 
 u32 sndReserveIopWorkMemory(s32 size) {
     return (u32)sceSifAllocIopHeap(size);
@@ -106,8 +147,4 @@ void sdfServiceUnblockedWorkerThread(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00341240", func_003415A8);
-
-INCLUDE_SDATA(const s32, "game/code_00341240", D_00438B78);
-
-INCLUDE_SDATA(const s32, "game/code_00341240", D_00438B79);
 

@@ -1,3 +1,4 @@
+#include "fld_area_work.h"
 #include "ee_mmi.h"
 #include "kwln.h"
 #include "pcp_vu0.h"
@@ -74,91 +75,11 @@ extern s32 D_003BAB14;
 extern s32 D_003BAB18;
 extern s32 D_003BAB1C;
 extern s32 D_003BAB20;
-/* Native field-area work prefix, shared with the camera/motion unit.
- * Position is XYZ followed immediately by saved XYZ history, not a Vec4.
- * DDS2 inserts twelve bytes before the model variant and position/history tail. */
-typedef struct FldAreaWork {
-    u8 pad00[4];
-    char *fallbackResourceName; /* Last choice after override and saved scene names. */
-    u8 pad08[4];
-    s32 consumedFlags; /* Consumption markers, separate from game-state work flags. */
-    s32 area;
-    s32 floor; /* Zero-based; coordinate lookups use floor + 1. */
-    u8 pad18[8];
-    s32 unk20; /* Sequence initializers set this when reusing the current area. */
-    s32 unk24;
-    u8 pad28[0x28];
-    s32 mode;
-    u8 pad54[4];
-    s32 rowIdx;
-    u8 pad5C[8];
-    f32 negatedAngle;
-    u8 pad68[4];
-    f32 dist;
-    s32 sceneMode;
-    s32 sceneState;
-    u8 pad78[0xC];
-    s32 positionPending;
-    u8 pad88[8];
-    s32 unk90;
-    s32 unk94;
-    u8 pad98[0x28];
-    s32 unkC0;
-    u8 padC4[8];
-    s32 overlayMode;
-    s32 overlayCounter;
-    u8 padD4[0x10];
-    s32 encounterMode;
-    s32 unkE8;
-    u32 transitionCount; /* 0xEC */
-    s32 nextArea;
-    s32 nextFloor; /* Both queued values at -1 mean no request. */
-    u8 padF8[8];
-    s32 unk100; /* Consumed before pending-resource selection. */
-    s16 transitionMode; /* 0x104 */
-    u8 pad106[0xA];
-    u32 pendingSceneRequest; /* 0x110: pending scene request, cleared on exit */
-    s32 deferredExit; /* 0x114 */
-    s32 unk118;
-    u8 pad11C[0xC];
-    s16 sceneCommand;
-    u8 pad12A[2];
-    s32 commandEnabled;
-    s32 unk130;
-    s32 skipFade; /* 0x134 */
-    u8 pad138[4];
-    s32 playerModelVariant; /* Cached 0/1 player variant, or 2 for the location override. */
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 previousX; /* History starts here, not a homogeneous position W. */
-    f32 previousY;
-    f32 previousZ;
-    f32 targetX; /* XYZ installed when positionPending is consumed. */
-    f32 targetY;
-    f32 targetZ;
-    f32 angle; /* Current player heading in degrees. */
-    f32 targetAngle; /* Desired heading for the motion-unit updater. */
-    f32 unk16C;
-    f32 unk170;
-    f32 unk174;
-    s32 positionMode;
-    s32 unk17C;
-    s32 verticalStepDirection; /* Positive lowers Y; negative raises it. */
-    s32 unk184;
-    u32 pointState;
-    f32 facingPointX;
-    f32 facingPointZ;
-    u32 angleState;
-    f32 overrideAngle;
-} FldAreaWork;
-typedef char FldAreaWork_transitionMode_offset_check[
-    (u32)&((FldAreaWork *)0)->transitionMode == 0x104 ? 1 : -1];
-typedef char FldAreaWork_pendingSceneRequest_offset_check[
-    (u32)&((FldAreaWork *)0)->pendingSceneRequest == 0x110 ? 1 : -1];
-typedef char FldAreaWork_skipFade_offset_check[
-    (u32)&((FldAreaWork *)0)->skipFade == 0x134 ? 1 : -1];
-extern FldAreaWork fldAreaState;
+
+
+
+
+
 extern s32 D_0032E4DC[];
 extern u8 D_00324F88[];
 extern u8 D_003257F8[];
@@ -207,21 +128,6 @@ extern void fldActivateObjectById(s32);
 extern void mdlFlagSet(s32);
 extern void func_0011B150(s32);
 void fldDispatchDeferredFieldCommand(void);
-
-/* Contiguous player-scene work: saved transform, status words and deferred resource.
- * The data also exports a label at +0x3C for separate object-slot consumers. */
-typedef struct FieldPlayerSceneWork {
-    u128 position;
-    u128 rotation;
-    u8 pad20[0x14];
-    u32 primaryState;
-    u8 pad38[0x24];
-    u32 secondaryState;
-    u8 pad60[2];
-    s16 sequenceMode; /* 0x62: copied by the sequence initializer */
-    u8 pad64[0x1C];
-    s8 resourceName[0x20];
-} FieldPlayerSceneWork;
 
 extern FieldPlayerSceneWork D_0032F1A0;
 extern FieldStageCoordinate D_0032DDB0[];
@@ -2643,7 +2549,7 @@ s32 fldProcSequence(void) {
         if (fldGetArchiveLoadPending() != 0) return 0;
         controller->stage++;
         if (fldAreaState.unk17C == 0 && fldAreaState.skipFade == 0 &&
-            fldAreaState.unk24 == 0 && kwlnFadeIsActive() == 0) {
+            fldAreaState.titleFade == 0 && kwlnFadeIsActive() == 0) {
             kwlnFadeStartIn(8);
         }
         if (kwlnTaskFindByPriority(0x3EA) == NULL && func_0014CAF8() == 0) {
@@ -2658,7 +2564,7 @@ s32 fldProcSequence(void) {
     case 4:
         D_003BAD58 = 1;
         if (fldTestSceneControlFlags(0x40) != 0 && fldRestartSceneResourceTask() != 0) return 0;
-        if (fldTestSceneControlFlags(0x40) != 0 && fldAreaState.unk24 != 0) {
+        if (fldTestSceneControlFlags(0x40) != 0 && fldAreaState.titleFade != 0) {
             func_0013B1D8((EffWorldNode *)fldPlayerObject);
             break;
         }

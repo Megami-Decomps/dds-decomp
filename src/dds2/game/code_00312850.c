@@ -49,7 +49,6 @@ extern void sdfVec3ScaleInPlace(f32, f32 *);
 
 extern void func_0019D550(u64, s32, s32);
 extern void frFontSetChildColors(u64, u64);
-extern u64 func_0019CE78(u64, u64, s32, u64, u64);
 extern void frFontSetContextPair(u64, s32, s32);
 extern void frFontStoreShiftedContextValue(u64, u64);
 extern void frFontSetChainFlag(u64, u8);

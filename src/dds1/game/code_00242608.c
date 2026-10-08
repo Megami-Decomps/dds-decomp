@@ -698,19 +698,18 @@ void func_00243A18(EvtRuntime *scene) {
 }
 
 extern s32 D_00368BD8[];
-extern s32 func_001951C8(s32 *resources, s32, s32, s32, s32);
 extern void frFontSetContextPair(s32 resource, s32 width, s32 height);
 
 void mnuCampInitFontResource(EvtRuntime *scene) {
     s32 fontHandle;
     scene->glyph = 0;
-    fontHandle = func_001951C8(D_00368BD8, 0, 0, 0, 0);
+    fontHandle = (s32)(u32)func_001951C8((const char *)D_00368BD8, 0, 0, 0, 0);
     scene->glyph = fontHandle;
     frFontSetContextPair(fontHandle, CAMP_FONT_CONTEXT_WIDTH, CAMP_FONT_CONTEXT_HEIGHT);
 }
 
 void mnuCampLinkFontGlyph(EvtRuntime *scene) {
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)scene->glyph);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)scene->glyph);
     scene->glyph = 0;
 }
 
@@ -1555,7 +1554,7 @@ void mnuQueueCampTextGlyphWithChildColor(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4,
         handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)a0, a1, a4);
         frFontSetChildColors(handle, 0x80808040);
         func_001958A0(handle, 0, a5);
-        frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
+        frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
     }
 }
 

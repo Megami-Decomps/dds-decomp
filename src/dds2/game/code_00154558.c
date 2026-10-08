@@ -1,3 +1,4 @@
+#include "fld_area_work.h"
 #include "common.h"
 extern void func_00140BC8(const char *name);
 #include "pcp_vu0.h"
@@ -15,37 +16,7 @@ extern void func_001442A0(s32);
 
 extern void func_00144270(s32);
 
-/* Field work area (fldAreaState) fields reached through a pointer. */
-typedef struct FldWorkView {
-    u8 unk00[0x14];
-    s32 stage;            /* 0x14 */
-    u8 unk18[0x18];
-    f32 focusPos[3];      /* 0x30 */
-    u8 unk3C[4];
-    char requestedSceneName[0x10];
-    s32 focusActive;      /* 0x50 */
-    u8 unk54[0x10];
-    f32 negatedAngle;     /* 0x64 */
-    u8 unk68[8];
-    s32 unk70;            /* 0x70 */
-    u8 unk74[0x4C];
-    s32 unkC0;            /* 0xC0 */
-    u8 unkC4[0x40];
-    s16 eventActive;      /* 0x104 */
-    u8 unk106[0x24];
-    s16 unk12A;           /* 0x12A */
-    u8 unk12C[0x20];
-    f32 x;                /* 0x14C */
-    f32 y;
-    f32 z;
-    u8 unk158[0x18];
-    f32 angle;            /* 0x170 */
-    u8 unk174[0x4C];
-    struct {
-        s32 value;
-        s32 block;
-    } fldmix[5];          /* 0x1C0 */
-} FldWorkView;
+
 
 extern void fldSetRoomObjectModeFlag(s32, s32, s32, s32);
 
@@ -238,7 +209,7 @@ extern u8 D_00436208[];
 
 extern s32 fldPendingSoundCount;
 
-extern s32 fldAreaState[];
+
 
 extern s32 fldCurrentBgmId[];
 
@@ -584,7 +555,7 @@ extern void func_001300A0(void);
 
 /* The kind-4 lookup returns a camera with a separately owned world transform. */
 s32 fldCmdFocusCameraOnObject(void) {
-    FldWorkView *work;
+    FldAreaWork *work;
     EffWorldNode *obj;
     u64 world = dds3GetWorldSecondaryObject();
 
@@ -592,8 +563,8 @@ s32 fldCmdFocusCameraOnObject(void) {
     if (obj == NULL) {
         return 1;
     }
-    work = (FldWorkView *)fldAreaState;
-    work->focusActive = 1;
+    work = &fldAreaState;
+    work->mode = 1;
     work->focusPos[0] = obj->inner->position[0];
     work->focusPos[1] = obj->inner->position[1];
     work->focusPos[2] = obj->inner->position[2];
@@ -620,11 +591,11 @@ extern void fldClearCameraObjectHighlightFlag();
 extern void func_0012F078();
 
 s32 fldUpdateLookAtSegment(void) {
-    FldWorkView *cam = (FldWorkView *)fldAreaState;
+    FldAreaWork *cam = &fldAreaState;
     FldVec3 near;
     FldVec3 far;
 
-    cam->focusActive = 0;
+    cam->mode = 0;
     cam->negatedAngle = -cam->angle;
     near.x = cam->x - sdfSinPoly((cam->angle + 180.0f) * 3.14f / 180.0f);
     near.y = cam->y - 200.0f - 10.0f + 60.0f;
@@ -650,16 +621,16 @@ s32 fldCmdSetScenePhaseThree(void) {
 }
 
 s32 fldCmdSetLookAtHeading(void) {
-    FldWorkView *cam;
+    FldAreaWork *cam;
     FldVec3 near;
     FldVec3 far;
 
     if (scrReadIntParameter(0) < 0) {
-        ((FldWorkView *)fldAreaState)->negatedAngle = -((FldWorkView *)fldAreaState)->angle;
+        fldAreaState.negatedAngle = -fldAreaState.angle;
     } else {
-        ((FldWorkView *)fldAreaState)->negatedAngle = -45 * scrReadIntParameter(0);
+        fldAreaState.negatedAngle = -45 * scrReadIntParameter(0);
     }
-    cam = (FldWorkView *)fldAreaState;
+    cam = &fldAreaState;
     near.x = cam->x - sdfSinPoly((cam->angle + 180.0f) * 3.14f / 180.0f);
     near.y = cam->y - 200.0f - 10.0f + 60.0f;
     near.z = cam->z + sdfEvaluateCosineViaSinePhaseShift((cam->angle + 180.0f) * 3.14f / 180.0f);
@@ -718,8 +689,8 @@ s32 fldCmdSetRequestedSceneName(void) {
     char *name;
 
     name = scrReadStringParameter(0);
-    fldAreaState[0x14] = 5;
-    strcpy(((FldWorkView *)fldAreaState)->requestedSceneName, name);
+    fldAreaState.mode = 5;
+    strcpy(fldAreaState.requestedSceneName, name);
     return 1;
 }
 
@@ -732,27 +703,27 @@ extern void evtEnableSolarOverlayAlpha(void);
 s32 fldCmdSetSolarOverlayMode(void) {
     s32 mode = scrReadIntParameter(0);
 
-    fldAreaState[0xCC / 4] = mode;
-    fldAreaState[0xD0 / 4] = 0;
+    fldAreaState.overlayMode = mode;
+    fldAreaState.overlayCounter = 0;
     if (mode < 4) {
-        fldAreaState[0xD4 / 4] = mode;
+        fldAreaState.unkD4 = mode;
     }
-    switch (fldAreaState[0xCC / 4]) {
+    switch (fldAreaState.overlayMode) {
     case 0:
         evtSetSolarOverlayFullyTransparent();
         break;
     case 1:
         evtSetSolarOverlayFullyVisible();
-        fldAreaState[0x138 / 4] = 1;
+        fldAreaState.unk138 = 1;
         break;
     case 2:
         evtDisableSolarOverlayAlpha();
-        fldAreaState[0xD0 / 4] = 15;
+        fldAreaState.overlayCounter = 15;
         break;
     case 3:
         evtEnableSolarOverlayAlpha();
-        fldAreaState[0xD0 / 4] = 0;
-        fldAreaState[0x138 / 4] = 1;
+        fldAreaState.overlayCounter = 0;
+        fldAreaState.unk138 = 1;
         break;
     case 4:
     case 5:
@@ -852,11 +823,11 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
 
     world = scrReadIntParameter(0);
     if (world == 0) {
-        world = fldAreaState[4];
+        world = fldAreaState.area;
     }
     stage = scrReadIntParameter(1);
     if (stage == 0) {
-        stage = fldAreaState[5] + 1;
+        stage = fldAreaState.floor + 1;
     }
     mode = scrReadIntParameter(3);
     name = scrReadStringParameter(2);
@@ -868,7 +839,7 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
         room = fldParseRoomNumberFromName(name);
         fldSetRoomModeFlag(world, stage, room, 0);
     }
-    if (world == fldAreaState[4] && stage == fldAreaState[5] + 1) {
+    if (world == fldAreaState.area && stage == fldAreaState.floor + 1) {
         list = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 6);
         if (dds3GetWorldValueCount((WorldValueIndices *)list) != 0) {
             dds3ResetObjectValueCursor((WorldValueIndices *)list);
@@ -909,11 +880,11 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
 
     world = scrReadIntParameter(0);
     if (world == 0) {
-        world = fldAreaState[4];
+        world = fldAreaState.area;
     }
     stage = scrReadIntParameter(1);
     if (stage == 0) {
-        stage = fldAreaState[5] + 1;
+        stage = fldAreaState.floor + 1;
     }
     mode = scrReadIntParameter(3);
     name = scrReadStringParameter(2);
@@ -928,7 +899,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
         room = fldParseRoomNumberFromName(name);
         fldSetRoomModeFlag(world, stage, room, 1);
     }
-    if (world == fldAreaState[4] && stage == fldAreaState[5] + 1) {
+    if (world == fldAreaState.area && stage == fldAreaState.floor + 1) {
         list = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 6);
         if (dds3GetWorldValueCount((WorldValueIndices *)list) != 0) {
             dds3ResetObjectValueCursor((WorldValueIndices *)list);
@@ -966,11 +937,11 @@ s32 fldCmdApplyRoomObjectModeZero(void) {
 
     world = scrReadIntParameter(0);
     if (world == 0) {
-        world = fldAreaState[4];
+        world = fldAreaState.area;
     }
     stage = scrReadIntParameter(1);
     if (stage == 0) {
-        stage = fldAreaState[5] + 1;
+        stage = fldAreaState.floor + 1;
     }
     name = scrReadStringParameter(2);
     if (name == NULL) {
@@ -980,8 +951,8 @@ s32 fldCmdApplyRoomObjectModeZero(void) {
     } else {
         fldSetRoomObjectModeFlag(world, stage, fldParseRoomNumberFromName(name), 0);
     }
-    if (world == fldAreaState[4]) {
-        if (stage == fldAreaState[5] + 1) {
+    if (world == fldAreaState.area) {
+        if (stage == fldAreaState.floor + 1) {
             searchId = fldFindSearchId(name);
             if (searchId != -1) {
                 obj = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), searchId, 6);
@@ -1011,10 +982,10 @@ s32 fldApplyRoomObjectModeZero(s32 world, s32 stage, char *name, s32 mode) {
     void *obj;
 
     if (world == 0) {
-        world = fldAreaState[4];
+        world = fldAreaState.area;
     }
     if (stage == 0) {
-        stage = fldAreaState[5] + 1;
+        stage = fldAreaState.floor + 1;
     }
     if (name == NULL) {
         for (i = 0; i < 16; i++) {
@@ -1023,8 +994,8 @@ s32 fldApplyRoomObjectModeZero(s32 world, s32 stage, char *name, s32 mode) {
     } else {
         fldSetRoomObjectModeFlag(world, stage, fldParseRoomNumberFromName(name), 0);
     }
-    if (world == fldAreaState[4]) {
-        if (stage == fldAreaState[5] + 1) {
+    if (world == fldAreaState.area) {
+        if (stage == fldAreaState.floor + 1) {
             searchId = fldFindSearchId(name);
             if (searchId != -1) {
                 obj = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), searchId, 6);
@@ -1058,11 +1029,11 @@ s32 fldCmdApplyRoomObjectModeOne(void) {
 
     world = scrReadIntParameter(0);
     if (world == 0) {
-        world = fldAreaState[4];
+        world = fldAreaState.area;
     }
     stage = scrReadIntParameter(1);
     if (stage == 0) {
-        stage = fldAreaState[5] + 1;
+        stage = fldAreaState.floor + 1;
     }
     name = scrReadStringParameter(2);
     if (name == NULL) {
@@ -1072,8 +1043,8 @@ s32 fldCmdApplyRoomObjectModeOne(void) {
     } else {
         fldSetRoomObjectModeFlag(world, stage, fldParseRoomNumberFromName(name), 1);
     }
-    if (world == fldAreaState[4]) {
-        if (stage == fldAreaState[5] + 1) {
+    if (world == fldAreaState.area) {
+        if (stage == fldAreaState.floor + 1) {
             searchId = fldFindSearchId(name);
             if (searchId != -1) {
                 obj = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), searchId, 6);
@@ -1100,10 +1071,10 @@ s32 fldApplyRoomObjectModeOne(s32 world, s32 stage, char *name, s32 mode) {
     void *obj;
 
     if (world == 0) {
-        world = fldAreaState[4];
+        world = fldAreaState.area;
     }
     if (stage == 0) {
-        stage = fldAreaState[5] + 1;
+        stage = fldAreaState.floor + 1;
     }
     if (name == NULL) {
         for (i = 0; i < 16; i++) {
@@ -1112,8 +1083,8 @@ s32 fldApplyRoomObjectModeOne(s32 world, s32 stage, char *name, s32 mode) {
     } else {
         fldSetRoomObjectModeFlag(world, stage, fldParseRoomNumberFromName(name), 1);
     }
-    if (world == fldAreaState[4]) {
-        if (stage == fldAreaState[5] + 1) {
+    if (world == fldAreaState.area) {
+        if (stage == fldAreaState.floor + 1) {
             searchId = fldFindSearchId(name);
             if (searchId != -1) {
                 obj = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), searchId, 6);
@@ -1292,11 +1263,11 @@ s32 fldOpClearRoomStateFlags(void) {
 
     world = scrReadIntParameter(0);
     if (world == 0) {
-        world = fldAreaState[4];
+        world = fldAreaState.area;
     }
     stage = scrReadIntParameter(1);
     if (stage == 0) {
-        stage = fldAreaState[5] + 1;
+        stage = fldAreaState.floor + 1;
     }
     name = scrReadStringParameter(2);
     if (name == NULL) {
@@ -1306,8 +1277,8 @@ s32 fldOpClearRoomStateFlags(void) {
     } else {
         fldSetMapSlotAuxiliaryFlag(world, stage, fldParseRoomNumberFromName(name), 0);
     }
-    if (world == fldAreaState[4]) {
-        if (stage == fldAreaState[5] + 1) {
+    if (world == fldAreaState.area) {
+        if (stage == fldAreaState.floor + 1) {
             fldFireRoomEffects();
         }
     }
@@ -1322,11 +1293,11 @@ s32 fldOpSetRoomStateFlags(void) {
 
     world = scrReadIntParameter(0);
     if (world == 0) {
-        world = fldAreaState[4];
+        world = fldAreaState.area;
     }
     stage = scrReadIntParameter(1);
     if (stage == 0) {
-        stage = fldAreaState[5] + 1;
+        stage = fldAreaState.floor + 1;
     }
     name = scrReadStringParameter(2);
     if (name == NULL) {
@@ -1336,8 +1307,8 @@ s32 fldOpSetRoomStateFlags(void) {
     } else {
         fldSetMapSlotAuxiliaryFlag(world, stage, fldParseRoomNumberFromName(name), 1);
     }
-    if (world == fldAreaState[4]) {
-        if (stage == fldAreaState[5] + 1) {
+    if (world == fldAreaState.area) {
+        if (stage == fldAreaState.floor + 1) {
             fldFireRoomEffects();
         }
     }
@@ -1696,26 +1667,26 @@ s32 fldCommandClearSelectedFlag(void) {
     s32 changed = 0;
     switch (scrReadIntParameter(0)) {
     case 0:
-        if (fldAreaState[3] & 1) {
-            fldAreaState[3] &= ~1;
+        if (fldAreaState.consumedFlags & 1) {
+            fldAreaState.consumedFlags &= ~1;
             changed = 1;
         }
         break;
     case 1:
-        if (fldAreaState[3] & 2) {
-            fldAreaState[3] &= ~2;
+        if (fldAreaState.consumedFlags & 2) {
+            fldAreaState.consumedFlags &= ~2;
             changed = 1;
         }
         break;
     case 2:
-        if (fldAreaState[3] & 4) {
-            fldAreaState[3] &= ~4;
+        if (fldAreaState.consumedFlags & 4) {
+            fldAreaState.consumedFlags &= ~4;
             changed = 1;
         }
         break;
     case 3:
-        if (fldAreaState[3] & 8) {
-            fldAreaState[3] &= ~8;
+        if (fldAreaState.consumedFlags & 8) {
+            fldAreaState.consumedFlags &= ~8;
             changed = 1;
         }
         break;

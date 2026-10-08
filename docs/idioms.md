@@ -4637,3 +4637,44 @@ and callers consume its returned object pointer. A `void(void)` declaration
 only happened to preserve those registers in the old wrapper's machine code;
 the real three-pointer, pointer-returning contract is now explicit in both.
 This closure does not change the separately parked script-setter return ABI.
+
+## Viewer window shading uses signed byte state
+
+DDS1 `00230140` and DDS2 `0024AD48` load both `EvtRuntime` bytes
+at `+0x23C4/+0x23C5` with `lb`. The first is `windowShadeFade`:
+inactive windows subtract nine down to zero, active windows add three
+up to 94, and the overlay alpha is `128 - windowShadeFade`.
+The arithmetic assignments also reload the stored byte with `lbu`;
+that does not make the primary field unsigned. The cleanup functions
+reset the same signed owner field, and the active/inactive setters retain
+their zero/one stores. The packet-building bodies remain ASM: completing
+these primary fields does not resolve their packet-address scheduling.
+
+## Adjustment script wrappers return the script result
+
+DDS1 `00118558/00118620/00118648/00118670` and DDS2
+`00118B90/00118C58/00118C80/00118CA8` are true tail forwards
+to the selected unit script, `evtRunContext`, or another such forwarder.
+Their final instructions jump directly to the callee after restoring the
+frame; the surviving `v0` is the callee's result, not fall-through garbage.
+The adjustment evaluators consume that result as a signed word.
+These wrappers therefore return `s32` with an explicit `return` expression;
+the existing byte-mode conversion is unchanged. Both whole units still
+match, while the separately parked evaluators remain ASM.
+
+## Field controller, camera state and resource banks share one owner
+
+`fld_area_work.h` owns the complete `FldAreaWork`; the field, camera,
+script and billboard consumers no longer keep prefix views or word-array
+aliases. `area/floor` are at +10/+14, with `floor` zero-based. The separate
+resource-load state at +78/+7C/+80 is `resourceFlag/resourceArea/resourceFloor`,
+not another controller's area/floor.
+
+DDS2 inserts twelve bytes before the player-model/XYZ history tail.
+The retained map bank starts at +19C with four records in DDS1, and at
++1A8 with eight records in DDS2; DDS2's four texture records follow at +1E8.
+The five records once named `fldmix` by DDS2's script unit are the same
+map-bank entries 3 through 7, not a second layout. XYZ remains three
+coordinates followed immediately by saved XYZ history. Compile-time size
+and offset checks preserve both games' actual complete owner extents.
+

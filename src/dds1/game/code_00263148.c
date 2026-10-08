@@ -358,7 +358,7 @@ void func_00263A00(BrsSkillPackageWork *scene) {
     func_003014F0(text, D_003BC550, delta);
     glyph = func_001979C8(x, 0x408, 0, color, text, 0);
     func_001958A0(glyph, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)glyph);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
 
     if (item->unitId == 1) {
         if (scene->iconFade < 0x100) {

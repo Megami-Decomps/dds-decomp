@@ -147,7 +147,7 @@ void func_002650C8(s32 x, s32 y, s32 depth, u32 color, BrsRewardSummary *summary
             valueGlyph = func_001979C8(x + 0xC60, y + 0x18, depth, color,
                                        formatted, iconGlyph);
             func_001958A0(valueGlyph, 1, textStyle);
-            frFontQueueGlyphInSelectedSlot(valueGlyph);
+            frFontQueueGlyphForCurrentDrawBuffer(valueGlyph);
             y += 0xB0;
         }
     }
@@ -161,7 +161,7 @@ void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, 
     glyph = func_001979C8(x, y, z, w, text, 0);
     frFontSetContextPair(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
     func_001958A0(glyph, 1, color);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 void mnuQueueRightAlignedFormattedInfoText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 color) {
@@ -172,7 +172,7 @@ void mnuQueueRightAlignedFormattedInfoText(s32 x, s32 y, s32 z, s32 w, const Brs
     glyph = func_001979C8(x, y, z, w, text, 0);
     frFontSetContextPair(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
     func_001958A0(glyph, 1, color);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002649B0", D_003BC560);
