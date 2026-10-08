@@ -77,7 +77,6 @@ extern u8 *datItemSkillRecords;
 extern s32 func_00286A00(s32);
 extern s32 evtCheckValueThreshold(s32, s32);
 extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
-extern void mnuConfigureWindowSpriteSlots(MenuWindowSpriteGroup *, u32);
 
 void func_00272D50(StaffDisplayContext *context) {
     StaffWindowResources *resources = context->resources;
@@ -123,7 +122,8 @@ void func_00272D50(StaffDisplayContext *context) {
     resources->windows[0] = window;
     mnuForwardDupArg(window, context->unk74, 0, context->unkD8, 0xD);
     mnuAttachWindowTextureState(resources->windows[0], -0xE0, 0x370, 0, context->unkDC);
-    mnuConfigureWindowSpriteSlots(resources->windows[0]->textures, context->spriteResource);
+    mnuConfigureWindowSpriteSlots(resources->windows[0]->textures,
+                                  (struct EffMappedResource *)context->spriteResource);
 
     window = mnuCreateWindowContainer(0, 0x1B0, 0x10, 8, 0x15);
     mnuSetWindowFadeScale(window, 0x100);
@@ -145,7 +145,8 @@ void func_00272D50(StaffDisplayContext *context) {
     resources->windows[1] = window;
     mnuForwardDupArg(window, context->unk74, 0, context->unkD8, 0xE);
     mnuAttachWindowTextureState(resources->windows[1], -0xE0, 0x370, 0, context->unkDC);
-    mnuConfigureWindowSpriteSlots(resources->windows[1]->textures, context->spriteResource);
+    mnuConfigureWindowSpriteSlots(resources->windows[1]->textures,
+                                  (struct EffMappedResource *)context->spriteResource);
 }
 
 void mnuReleaseStaffPrimaryWindows(StaffDisplayContext *context) {
@@ -198,7 +199,8 @@ void mnuCreateStaffBulletItemWindow(StaffDisplayContext *context) {
     resources->windows[2] = window;
     mnuForwardDupArg(window, context->unk74, 0, context->unkD8, 15);
     mnuAttachWindowTextureState(resources->windows[2], -0xE0, 0x370, 0, context->unkDC);
-    mnuConfigureWindowSpriteSlots(resources->windows[2]->textures, context->spriteResource);
+    mnuConfigureWindowSpriteSlots(resources->windows[2]->textures,
+                                  (struct EffMappedResource *)context->spriteResource);
 }
 
 void mnuReleaseStaffExtraWindow(StaffDisplayContext *context) {
