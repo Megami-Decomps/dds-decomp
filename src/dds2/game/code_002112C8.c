@@ -6158,7 +6158,86 @@ s32 btlLiftTowardLinkedTarget(s32 object) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00222F18);
+extern s32 btlCanUseActorCategoryFlag4(s32);
+extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern void func_001ECCB0(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+extern char D_0041ADA8[];
+
+s32 func_00222F18(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
+    s32 cameraKind;
+
+    if (btlIsActorCategoryMarked((s32)command)) {
+        return 0;
+    }
+    if (command->link->unit->flags & 0x200) {
+        if (modeA == 1 || modeB != 1) {
+            return 0;
+        }
+        if (btlHasLinkedEffectNodeTrigger(command)) {
+            btlChooseBrahmaMoveCamera(command);
+            command->flags |= 0x800;
+            return 1;
+        }
+        cameraKind = datActionAnimationRecords[command->actionCode].cameraKind;
+        if (cameraKind < 8) {
+            if (cameraKind >= 6) {
+                btlSetupCameraPoseAimUnit(command, &command->frontCamera, &command->backCamera);
+                return 1;
+            }
+        }
+        func_001ECCB0(command, &command->frontCamera, &command->backCamera);
+        return 1;
+    }
+    if (modeA != 1 || modeB == 1) {
+        if (btlCanUseActorCategoryFlag4((s32)command) == 0) {
+            command->flags |= 0x800;
+            btlChooseBrahmaIndividualCamera((u32)command);
+            return 1;
+        }
+    }
+    switch (command->actionCode) {
+    case 0x175:
+    case 0x176:
+    case 0x177:
+    case 0x178:
+    case 0x17D:
+    case 0x19D:
+    case 0x19E:
+    case 0x19F:
+        command->flags |= 0x800;
+        return 1;
+    case 0x9B:
+    case 0x9C:
+    case 0x9F:
+        command->motionProgress = 0;
+        break;
+    }
+    btlFlagAllUnitDefeatCandidatesTask();
+    switch (effMiscRandMod(NULL, 3)) {
+    case 0:
+        btlBossDebugPrintf(D_0041ACA8);
+        btlSetEffectCameraKeys((s32)command,
+            -821.6f, -1.0f, -1625.0f, -0.133f, -0.143f, 0.007f, 0.971f, -705.2f,
+            -1316.4f, -603.8f, -0.139f, -0.135f, 0.006f, 0.971f, 40.0f, 25.0f);
+        return 1;
+    case 1:
+        btlBossDebugPrintf(D_0041ACC0);
+        btlSetEffectCameraKeys((s32)command,
+            2440.9f, -375.9f, -2238.3f, -0.072f, 0.178f, -0.024f, 0.971f, 1175.7f,
+            -1698.8f, -585.1f, -0.091f, 0.192f, -0.029f, 0.967f, 40.0f, 20.0f);
+        return 1;
+    case 2:
+        btlBossDebugPrintf(D_0041ADA8);
+        btlSetEffectCameraKeys((s32)command,
+            1539.2f, -237.2f, -1616.7f, -0.107f, 0.187f, -0.033f, 0.967f, 1297.3f,
+            -780.2f, -1088.7f, -0.136f, 0.187f, -0.039f, 0.963f, 40.0f, 15.0f);
+        return 1;
+    default:
+        return 0;
+    }
+}
+
+INCLUDE_RODATA(const s32, "game/code_002112C8", D_0041ADA8);
 
 s32 btlSetSpecialLinkedActionCamera(BtlLinkedCommand *command) {
     if (btlIsActorCategoryMarked((s32)command) == 0) {
@@ -7142,14 +7221,13 @@ u32 btlFlagBattleForSpecialAction(u32 unit, u32 actor, u32 action) {
     return 0;
 }
 
-struct DatUnitStatus;
-extern s32 datGetStatWithStatusOverride(struct DatUnitStatus *, s32);
+extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
 
 s32 btlSelectLowestStatTarget(BattleActor *actor) {
     BattleActionContext *battle;
     u8 *statIndex;
-    BattleActionUnit *unit;
-    BattleActionUnit *target;
+    BtlUnit *unit;
+    BtlUnit *target;
     s8 minimum;
 
     if (!(actor->dispatchFlags & 8)) {
@@ -7168,7 +7246,7 @@ s32 btlSelectLowestStatTarget(BattleActor *actor) {
     }
     target = NULL;
     minimum = 99;
-    for (unit = battle->firstUnit; unit != NULL; unit = unit->next) {
+    for (unit = ((BtlState *)battle)->units; unit != NULL; unit = unit->nextActor) {
         u32 flags = unit->flags;
         s8 value;
 
@@ -7181,8 +7259,7 @@ s32 btlSelectLowestStatTarget(BattleActor *actor) {
         if (flags & 0xE0) {
             continue;
         }
-        value = datGetStatWithStatusOverride(
-            (struct DatUnitStatus *)&unit->entryFlags, *statIndex);
+        value = datGetStatWithStatusOverride(&unit->partyRecord, *statIndex);
         if (value < minimum) {
             minimum = value;
             target = unit;

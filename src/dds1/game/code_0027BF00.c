@@ -3,6 +3,7 @@
 #include "eff.h"
 #include "mnu_shop.h"
 #include "dat_state.h"
+#include "dat_command.h"
 struct MenuListNode;
 struct FrFontGlyph;
 struct FrFontCtx;
@@ -1792,7 +1793,6 @@ extern u16 evtGetIndexedEventRecordId(s32);
 extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern u8 *D_003BAA84;
-extern u8 *datCommandRecords;
 extern char D_003BC720[];
 extern u8 D_003BC730[];
 extern char D_003BC738[];
@@ -1817,7 +1817,7 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
     } while (i < 2);
     if (value != 0) {
         glyphAddress = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BAA84 + value * 25, 0);
-        func_003014F0(text, D_003BC720, *(s16 *)(datCommandRecords + evtGetIndexedEventRecordId(value) * 0x38 + 0x18));
+        func_003014F0(text, D_003BC720, datCommandRecords[evtGetIndexedEventRecordId(value)].stat18);
         glyphAddress = func_001978E8(x + 0xF70, y + 0x348, z, color, text, glyphAddress);
     } else {
         glyphAddress = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);

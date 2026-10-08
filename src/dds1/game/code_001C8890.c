@@ -14,6 +14,7 @@
 #include "btl_action.h"
 #include "sdf.h"
 #include "file.h"
+#include "dat_command.h"
 
 
 extern s32 mdlGetNodeField2C(MdlCtx *, s32);
@@ -366,10 +367,6 @@ extern s32 btlGetRuntime(void);
 
 extern s32 datItemSkillRecords;
 
-extern s32 datCommandSelectors;
-
-extern s32 datCommandRecords;
-
 extern s32 datActionAnimationRecords;
 
 extern s32 func_001F5028(s32 arg0);
@@ -491,16 +488,6 @@ extern s32 func_001EB1B0(s32, BtlCamState *, s8, s8);
 
 
 
-
-typedef struct BtlCategoryTableEntry {
-    u8 flags00;
-    u8 pad01[2];
-    u8 kind03;
-    u8 pad04[0x2A];
-    u16 unk2E;
-    s32 categoryType;
-    u8 pad34[4];
-} BtlCategoryTableEntry;
 
 typedef struct BtlStatArgs {
     BtlUnit *unit;
@@ -2284,7 +2271,7 @@ void btlDispatchCommandViaHookOrDefault(u8 *command, u8 *argument) {
     case 3:
     case 7:
     case 8:
-        if (*(s8 *)(datCommandSelectors + *(s32 *)(argument + 4) * 2 + 1) != 1) {
+        if (datCommandSelectors[*(s32 *)(argument + 4)].kind != 1) {
             btlDispatchStateHandler(command, 0xE);
         } else {
             if (*(u32 *)(*(s32 *)(command + 0x18) + 0x110) & 0x200) {
@@ -2407,7 +2394,7 @@ s32 btlClassifyActionResult(u8 *arg0, u32 arg1, s32 arg2, u32 arg3, s32 arg4, u8
 
     btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)arg0)->partyRecord);
     if (arg6 >= 0) {
-        switch (*(u32 *)(datCommandRecords + arg6 * 56 + 0x30)) {
+        switch ((u32)datCommandRecords[arg6].unk30) {
         case 1:
         case 2:
         case 9:
@@ -2415,7 +2402,7 @@ s32 btlClassifyActionResult(u8 *arg0, u32 arg1, s32 arg2, u32 arg3, s32 arg4, u8
             return -1;
         }
     }
-    if ((*(u32 *)(datCommandRecords + arg6 * 56 + 0x24) & 0x400000FF) == 0x40000002) {
+    if ((datCommandRecords[arg6].attribute.bits & 0x400000FF) == 0x40000002) {
         return -1;
     }
     if (arg1 & 0x50004) {
@@ -2443,7 +2430,7 @@ s32 btlActionEntryIsEmpty(s32 index, BtlOperandGroup *slot, BtlOperandEntry *ent
     s32 kind;
 
     if (index >= 0) {
-        switch (((BtlCategoryTableEntry *)datCommandRecords)[index].categoryType) {
+        switch (datCommandRecords[index].unk30) {
         case 1:
         case 2:
         case 9:
@@ -2671,7 +2658,7 @@ u32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
     if ((*(u32 *)(context + 0x1F4) & 0x80) == 0) {
         return 1;
     }
-    if (((BtlCategoryTableEntry *)datCommandRecords)[args->category].flags00 & 8) {
+    if (datCommandRecords[args->category].flags & 8) {
         btlAdjustUnitHp(&unit->partyRecord, -0x7FFF);
         func_001A1948(&unit->partyRecord, 0x4000);
         unit->flags |= 0x20;
@@ -2679,11 +2666,11 @@ u32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
     if (args->amount == 0) {
         return 1;
     }
-    switch (((BtlCategoryTableEntry *)datCommandRecords)[args->category].kind03) {
-    case 1:
+    switch (datCommandRecords[args->category].costMode) {
+    case DAT_COMMAND_COST_MODE_HP:
         btlAdjustUnitHp(&unit->partyRecord, -args->amount);
         return 1;
-    case 2:
+    case DAT_COMMAND_COST_MODE_MP:
         btlAdjustUnitMp(&unit->partyRecord, -args->amount);
         return 1;
     default:
@@ -7292,7 +7279,7 @@ s32 btlIsActorCategoryTypeTwo(s32 arg0) {
     if (temp_v1 == 0) {
         return 0;
     }
-    return ((*(s32 *)(datCommandRecords + temp_v1 * 56 + 0x30) ^ 2) < 1U);
+    return ((datCommandRecords[temp_v1].unk30 ^ 2) < 1U);
 }
 
 u32 btlCanUseActorCategoryFlag2(s32 actor) {
@@ -7315,7 +7302,7 @@ u32 btlCanUseActorCategoryFlag2(s32 actor) {
 
 s32 btlHasSingleLinkedResource(s32 actor) {
     s32 index = *(s32 *)(actor + 0x114);
-    if (index != 0 && *(u8 *)(datCommandRecords + index * 56 + 8) != 0) {
+    if (index != 0 && datCommandRecords[index].unk_08 != 0) {
         return 0;
     }
     return btlGetIndexListCount(*(struct BtlIndexList **)(actor + 0x118)) == 1;
@@ -7341,7 +7328,7 @@ s32 btlIsActorCategoryMarked(s32 actor) {
     if (index == 0) {
         return 0;
     }
-    return *(s32 *)(datCommandRecords + index * 56 + 0x30) == 1;
+    return datCommandRecords[index].unk30 == 1;
 }
 
 s32 btlHasActorCategoryFlag40(s32 actor) {
@@ -10673,7 +10660,7 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
     u16 effectId;
 
     if (actor->selectedEntryIndex > 0) {
-        effectId = ((BtlCategoryTableEntry *)datCommandRecords)[actor->selectedEntryIndex].unk2E;
+        effectId = datCommandRecords[actor->selectedEntryIndex].unk2E;
     } else {
         effectId = 0;
     }

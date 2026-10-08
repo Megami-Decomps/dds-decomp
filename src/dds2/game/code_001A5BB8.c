@@ -1872,12 +1872,15 @@ s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record) {
     return datEnemyRecords[record->unitId].flags;
 }
 
-void func_001AB8C0(void) {
-    datGetClampedProfileAdjustedStat();
+extern s32 datGetClampedProfileAdjustedStat(DatPartyRecord *, s32);
+extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
+
+void func_001AB8C0(DatPartyRecord *unit, s32 statIndex) {
+    datGetClampedProfileAdjustedStat(unit, statIndex);
 }
 
-void func_001AB8D8(void) {
-    datGetStatWithStatusOverride();
+s32 func_001AB8D8(DatPartyRecord *unit, s32 statIndex) {
+    return datGetStatWithStatusOverride(unit, statIndex);
 }
 
 s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *battler, s32 command) {
@@ -1889,12 +1892,12 @@ s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *battler, s32 command) {
     }
     scale = 1.0f;
     switch (datCommandRecords[command].costMode) {
-    case 1:
+    case DAT_COMMAND_COST_MODE_HP:
         if (btlCheckSpecialAbility(battler, 0x254)) {
             scale = datAbilityParameters[0x254 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
         break;
-    case 2:
+    case DAT_COMMAND_COST_MODE_MP:
         if (btlCheckSpecialAbility(battler, 0x255)) {
             scale = datAbilityParameters[0x255 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
         }
@@ -1928,7 +1931,7 @@ s32 func_001ABB10(BtlUnit *unit, s32 command) {
         }
     }
     if ((datCommandRecords[command].kind == 1 ||
-         datCommandRecords[command].costMode == 2) &&
+         datCommandRecords[command].costMode == DAT_COMMAND_COST_MODE_MP) &&
         (unit->partyRecord.status & 0x7FFF) == 0x10) {
         return 3;
     }
@@ -2109,7 +2112,7 @@ s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *targets) {
             index = action->indexWork.skillId;
         }
         if (datCommandRecords[index].unk_08 == 0 &&
-            datCommandRecords[index].attribute.parts.kind == 2 &&
+            datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_FLAG_MASK &&
             datCommandRecords[index].attribute.parts.flagMask != 0) {
             for (i = 0; i < count; i++) {
                 if ((datCommandRecords[index].attribute.parts.flagMask &
@@ -4283,7 +4286,7 @@ s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 skipDown) {
         if ((flags & 1) != 0) {
             if (skipDown == 0 || (flags & 0x20) == 0) {
                 if ((unit->entryMask & mask) != 0) {
-                    s32 value = datGetStatWithStatusOverride((s32)&unit->entryMask, attribute);
+                    s32 value = datGetStatWithStatusOverride((DatPartyRecord *)&unit->entryMask, attribute);
                     count++;
                     sum += value;
                 }

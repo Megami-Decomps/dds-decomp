@@ -1341,8 +1341,10 @@ s32 mnuBuildSkillCodeBitset(void) {
     return (s32)bits;
 }
 
-void func_002782E0(void) {
-    sdfReleaseChipBlock();
+extern void sdfReleaseChipBlock(void *);
+
+void func_002782E0(u32 *bits) {
+    sdfReleaseChipBlock(bits);
 }
 
 s32 mnuIsSkillCodeInBitset(s32 code, u32 *bits) {

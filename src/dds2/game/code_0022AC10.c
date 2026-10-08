@@ -927,7 +927,7 @@ u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, BtlInd
             }
             if (eligibility != BTL_COUNTER_ELIGIBILITY_NOT_MET) {
                 if (datCommandRecords[commandId].requirementBits == 0) {
-                    if (datCommandRecords[commandId].attribute.parts.kind == 2) {
+                    if (datCommandRecords[commandId].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_FLAG_MASK) {
                         eligibility = btlListHasMatchingFlag(entryList, entryCount, datCommandRecords[commandId].attribute.parts.flagMask) == 0 ? BTL_COUNTER_ELIGIBILITY_MET : BTL_COUNTER_ELIGIBILITY_NOT_MET;
                     }
                 }

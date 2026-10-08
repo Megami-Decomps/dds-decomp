@@ -3,6 +3,7 @@
 #include "dat_state.h"
 #include "sdf.h"
 #include "btl_action.h"
+#include "dat_command.h"
 
 enum {
     PTY_ACTIVE_ROSTER_COUNT = 5,
@@ -42,10 +43,8 @@ extern u8 D_0032AF70[];
 extern s32 func_0011B158(s32, s32, u8);
 
 
-extern s32 datCommandSelectors;
 extern s32 datRosterDetails;
 extern DatEnemyRecord *datEnemyRecords;
-extern s32 datCommandRecords;
 extern s32 datItemSkillRecords;
 extern s32 D_003BAAB8;
 extern DatPartyRecord *D_003BAA04;
@@ -61,14 +60,6 @@ typedef struct Entry4 {
     u8 pad3; /* 0x3 */
 } Entry4;
 
-typedef struct CommandValueRecord {
-    u8 pad0[3];
-    u8 mode;
-    u16 percentage;
-    u16 base;
-    u8 pad8[0x30];
-} CommandValueRecord;
-
 
 /* Script-visible data tables indexed by roster number or event parameter. */
 typedef struct RosterDetail {
@@ -78,27 +69,6 @@ typedef struct RosterDetail {
     f32 scale;         /* 0x04 */
     u8 pad8[0xC];
 } RosterDetail; /* 0x14 */
-
-typedef struct EventStatRow {
-    u8 pad0[0x11];
-    u8 stat;           /* 0x11 */
-    u8 pad12[6];
-    s16 stat18;        /* 0x18: script-selected value */
-    u8 pad1A[2];
-    s16 stat1C;        /* 0x1C: alternate script-selected value */
-    u8 pad1E[7];
-    u8 scaledStat;     /* 0x25 */
-    u8 pad26[7];
-    u8 grade;          /* 0x2D */
-    u8 pad2E[6];
-    s16 total;         /* 0x34 */
-    s16 max;           /* 0x36 */
-} EventStatRow; /* 0x38 */
-
-typedef struct EventSelector {
-    s8 stat;
-    s8 kind;           /* 0x01: kind five uses roster details instead */
-} EventSelector; /* 0x02 */
 
 typedef struct EventIndexRecord {
     u8 pad00[2];
@@ -460,25 +430,26 @@ s32 evtHasMatchingFlaggedEntry(s32 skillId) {
  * value is intentionally reused: incoming command ID, then resolved result. */
 s32 datCalculateCommandBaseValue(DatPartyRecord *entry, s32 value) {
     s32 commandId = value;
-    CommandValueRecord *commands = (CommandValueRecord *)datCommandRecords;
+    DatCommandRecord *commands = datCommandRecords;
 
     value = 0;
-    switch (commands[commandId].mode) {
-    case 1:
+    switch (commands[commandId].costMode) {
+    case DAT_COMMAND_COST_MODE_HP:
         if (entry->flags & 0x20) {
             return 0;
         }
-        value = entry->maxHp * commands[commandId].percentage / 100 + commands[commandId].base;
+        value = entry->maxHp * commands[commandId].costPercentage / 100 +
+                commands[commandId].costBase;
         if (value <= 0) {
             value = 1;
         }
         break;
-    case 2:
+    case DAT_COMMAND_COST_MODE_MP:
         if ((entry->flags & 0x20) &&
             (datEnemyRecords[entry->unitId].flags & 0x10)) {
             return 0;
         }
-        value = commands[commandId].percentage;
+        value = commands[commandId].costPercentage;
         break;
     }
     return value;
@@ -814,8 +785,7 @@ extern s32 btlResolveUnitValueWithOverride(DatPartyRecord *, s32);
 extern u32 datReadLowHalfOfCalculatedValue(DatPartyRecord *, s32);
 /* Push the first entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushFirstRosterSelectedStat(void) {
-    s8 statIndex = ((EventSelector *)datCommandSelectors)[
-        ((EvtScriptContext *)D_003C2E70)->third].stat;
+    s8 statIndex = datCommandSelectors[((EvtScriptContext *)D_003C2E70)->third].stat;
     s32 statValue;
 
     switch (statIndex) {
@@ -840,8 +810,7 @@ s32 evtPushFirstRosterSelectedStat(void) {
 
 /* Push the second entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushSecondRosterSelectedStat(void) {
-    s8 statIndex = ((EventSelector *)datCommandSelectors)[
-        ((EvtScriptContext *)D_003C2E70)->third].stat;
+    s8 statIndex = datCommandSelectors[((EvtScriptContext *)D_003C2E70)->third].stat;
     s32 statValue;
 
     switch (statIndex) {
@@ -935,10 +904,10 @@ s32 evtPushSelectedStatOrRosterLowValue(void) {
     EvtScriptContext *scriptContext = (EvtScriptContext *)D_003C2E70;
     s32 commandIndex = scriptContext->third;
     s32 statValue;
-    if (((EventSelector *)datCommandSelectors)[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
+    if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
         statValue = ((RosterDetail *)datRosterDetails)[((DatPartyRecord *)scriptContext->first)->unitId].lowValue;
     } else {
-        statValue = ((EventStatRow *)datCommandRecords)[commandIndex].stat;
+        statValue = datCommandRecords[commandIndex].stat11;
     }
     scrSetIntegerReturnValue(statValue);
     return 1;
@@ -948,8 +917,8 @@ s32 evtPushSelectedStatOrRosterLowValue(void) {
 s32 evtPushSelectedScaledStat(void) {
     EvtScriptContext *scriptContext = (EvtScriptContext *)D_003C2E70;
     s32 commandIndex = scriptContext->third;
-    s32 statValue = ((EventStatRow *)datCommandRecords)[commandIndex].scaledStat;
-    if (((EventSelector *)datCommandSelectors)[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
+    s32 statValue = datCommandRecords[commandIndex].attribute.parts.hitChance;
+    if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
         f32 rosterScale = ((RosterDetail *)datRosterDetails)[((DatPartyRecord *)scriptContext->first)->unitId].scale;
         statValue = (s32)((f32)statValue * rosterScale);
     }
@@ -958,7 +927,7 @@ s32 evtPushSelectedScaledStat(void) {
 }
 
 s32 evtPushSelectedStatGrade(void) {
-    scrSetIntegerReturnValue(((EventStatRow *)datCommandRecords)[D_003C2E74[0]].grade);
+    scrSetIntegerReturnValue(datCommandRecords[D_003C2E74[0]].stat2D);
     return 1;
 }
 
@@ -968,10 +937,10 @@ s32 evtSelectScriptStatValue(void) {
 
     switch (((EvtScriptContext *)D_003C2E70)->options) {
     case 1:
-        statValue = ((EventStatRow *)datCommandRecords)[((EvtScriptContext *)D_003C2E70)->third].stat18;
+        statValue = datCommandRecords[((EvtScriptContext *)D_003C2E70)->third].stat18;
         break;
     case 2:
-        statValue = ((EventStatRow *)datCommandRecords)[((EvtScriptContext *)D_003C2E70)->third].stat1C;
+        statValue = datCommandRecords[((EvtScriptContext *)D_003C2E70)->third].stat1C;
         break;
     default:
         statValue = 0;
@@ -990,10 +959,10 @@ s32 evtPushEntryIndexedStatOption(void) {
 
     switch (statOption) {
     case 1:
-        statValue = ((EventStatRow *)datCommandRecords)[commandIndex].stat18;
+        statValue = datCommandRecords[commandIndex].stat18;
         break;
     case 2:
-        statValue = ((EventStatRow *)datCommandRecords)[commandIndex].stat1C;
+        statValue = datCommandRecords[commandIndex].stat1C;
         break;
     default:
         statValue = 0;
@@ -1008,17 +977,17 @@ s32 evtPushSelectedTotalOrRosterHighValue(void) {
     EvtScriptContext *scriptContext = (EvtScriptContext *)D_003C2E70;
     s32 commandIndex = scriptContext->third;
     s32 statValue;
-    if (((EventSelector *)datCommandSelectors)[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
+    if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
         statValue = ((RosterDetail *)datRosterDetails)[((DatPartyRecord *)scriptContext->first)->unitId].highValue;
     } else {
-        statValue = ((EventStatRow *)datCommandRecords)[commandIndex].total;
+        statValue = datCommandRecords[commandIndex].stat34;
     }
     scrSetIntegerReturnValue(statValue);
     return 1;
 }
 
 s32 evtPushSelectedStatMaximum(void) {
-    scrSetIntegerReturnValue(((EventStatRow *)datCommandRecords)[D_003C2E74[0]].max);
+    scrSetIntegerReturnValue(datCommandRecords[D_003C2E74[0]].stat36);
     return 1;
 }
 
