@@ -2,6 +2,7 @@
 #include "eff_transform.h"
 #include "btl_state.h"
 #include "btl_command.h"
+#include "btl_model_record.h"
 #include "sdf_draw.h"
 #include "evt_unit.h"
 #include "mdl.h"
@@ -3674,17 +3675,6 @@ typedef struct BtlScaleTransitionState {
 typedef char BtlScaleTransitionStateSizeCheck[
     sizeof(BtlScaleTransitionState) == 8 ? 1 : -1];
 
-/* The model parameter banks are 0x270-byte records. This routine consumes the
- * model scale and z values at +0x10/+0x14; the rest remains opaque here. */
-typedef struct BtlModelScaleRecord {
-    u8 pad00[0x10];
-    f32 scale; /* 0x10 */
-    f32 z;     /* 0x14 */
-    u8 pad18[0x258];
-} BtlModelScaleRecord;
-typedef char BtlModelScaleRecordSizeCheck[
-    sizeof(BtlModelScaleRecord) == 0x270 ? 1 : -1];
-
 void func_00208A50(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlScaleTransitionState *transition;
@@ -3692,8 +3682,8 @@ void func_00208A50(void) {
     BtlUnit *selected;
     MdlCtx *model;
     ObjectTransform *inner;
-    BtlModelScaleRecord *modelA;
-    BtlModelScaleRecord *modelB;
+    BtlActorStatusRecord *modelA;
+    BtlActorStatusRecord *modelB;
     f32 currentScale;
     f32 modelAScale;
     f32 modelBScale;
@@ -3746,8 +3736,8 @@ void func_00208A50(void) {
     VU0_STORE_VF(vf10, inner->scale);
     mdlStoreTertiaryVectorVU(selected->ext->owner);
 
-    modelA = (BtlModelScaleRecord *)btlGetSideIndexedActorStatusTable(1, 0x10D);
-    modelB = (BtlModelScaleRecord *)btlGetSideIndexedActorStatusTable(1, 0x11D);
+    modelA = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(1, 0x10D);
+    modelB = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(1, 0x11D);
     if (modelA->scale != modelB->scale) {
         modelAScale = modelA->scale;
         modelBScale = modelB->scale;
