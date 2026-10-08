@@ -285,7 +285,7 @@ extern void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *);
 
 INCLUDE_ASM(const s32, "game/code_00289058", mnuOpenMantraSelectionAndLoadTitleStream);
 
-extern void mnuDestroyMantraDrawPool(u32 address);
+extern void mnuDestroyMantraDrawPool(struct MantraDrawPool *pool);
 extern void evtReleaseMantraSelectionWork(u32 *p);
 extern void mnuReleaseMantraIconSpriteHandle(u32 *sprite);
 
@@ -295,7 +295,7 @@ void mnuReleaseMantraMenuDrawResources(MnuStatusResource *object) {
     s32 i;
 
     if (object->menu.selectionController != 0) {
-        mnuDestroyMantraDrawPool((u32)object->menu.selectionController);
+        mnuDestroyMantraDrawPool(object->menu.selectionController);
     }
     state = &object->menu;
     handle = state->slots;
