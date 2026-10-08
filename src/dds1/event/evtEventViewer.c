@@ -22,13 +22,6 @@ typedef struct EvtGroupRec {
 /* Event viewer: name table at 0x20, entry list at 0x2030. */
 
 
-/* Min/max tracker fed from a live value. */
-typedef struct EvtRange {
-    u8 pad00[0x10];    /* 0x0 */
-    s32 min;          /* 0x10 */
-    s32 max;          /* 0x14 */
-    s32 value;        /* 0x18 */
-} EvtRange;
 
 
 void evtUnlinkListNode(EvtRuntimeGroup *entry, EvtRuntimeChild *node);
@@ -308,25 +301,25 @@ void evtEventViewerDestroyEntry(EvtRuntimeGroup *entry, EvtRuntime *viewer)
     sdfReleaseChipBlock(entry);
 }
 
-void evtViewerSetMinimumFromCurrent(EvtRange *range)
+void evtViewerSetMinimumFromCurrent(EvtRuntime *range)
 {
     s32 value;
 
-    value = range->value;
-    range->min = value;
-    if (range->max < value) {
-        range->max = value;
+    value = range->curFrame;
+    range->headerFirst = value;
+    if (range->frameRange.word < value) {
+        range->frameRange.word = value;
     }
 }
 
-void evtViewerSetMaximumFromCurrent(EvtRange *range)
+void evtViewerSetMaximumFromCurrent(EvtRuntime *range)
 {
     s32 value;
 
-    value = range->value;
-    range->max = value;
-    if (value < range->min) {
-        range->min = value;
+    value = range->curFrame;
+    range->frameRange.word = value;
+    if (value < range->headerFirst) {
+        range->headerFirst = value;
     }
 }
 

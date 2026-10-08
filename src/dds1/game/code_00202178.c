@@ -877,7 +877,6 @@ void func_002045E8(BtlLinkedCommand *command, BtlCamState *out, f32 frontLift, f
 
 extern void btlFlagAllUnitsDefeatCandidate(void);
 
-extern void btlCopyMotionTransform();
 
 extern void btlUnitFaceTarget(BtlUnit *, BtlUnit *);
 

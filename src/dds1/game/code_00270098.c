@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "kwln.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
@@ -79,7 +80,7 @@ s32 func_00270088(void);
 void mnuStopMovieDrawTask(void);
 
 s32 mnuSetFrameDivisor(void) {
-    func_002EC5E0(0x3c / mnuMovieTaskState);
+    sdfAdvanceStreamPlayback(0x3c / mnuMovieTaskState);
     return 0;
 }
 
@@ -222,7 +223,6 @@ extern SdfMovieDescriptor D_0037B938;
 extern u16 D_003BD3A0[4];
 extern u16 D_003BD8E4;
 extern SdfPoolNode D_003255A8;
-extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));
 extern void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *descriptor);
 
 s32 mnuMovieViewer(void) {

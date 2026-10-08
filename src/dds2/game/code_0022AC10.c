@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
 #include "sdf_resource.h"
@@ -173,8 +174,6 @@ extern SdfTex *kwlnHeldTextureReference;
 extern void sdfFreeMemoryFromEitherHeap(void *);
 
 
-
-extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));
 
 extern void sdfClearLinkedPacketList(SdfLinkedPacketList *);
 
