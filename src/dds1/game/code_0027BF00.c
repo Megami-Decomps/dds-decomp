@@ -56,7 +56,7 @@ extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s
 
 extern void func_0027D850(s32, s32, s32, s32, MenuPanelHandles *, s32, s32);
 
-extern MenuSprites *func_0027F230(s32, s32, s32);
+extern MenuSprites *func_0027F230(s32, EffectSlotSet *, EffectSlotSet *);
 
 extern void mnuDrawFourPanelIconsAtOffsets(s32, s32, s32, s32, MenuPanelHandles *, s32);
 
@@ -1263,32 +1263,33 @@ void mnuSetPageParams(MenuSprites *page, s32 mode) {
     }
 }
 
-MenuSprites *func_0027F230(s32 value, s32 mainResource, s32 secondaryResource) {
+MenuSprites *func_0027F230(s32 value, EffectSlotSet *mainResource,
+                            EffectSlotSet *secondaryResource) {
     MenuSprites *page = (MenuSprites *)sdfAllocSizeClassBlock(0x50);
 
     memset(page, 0, 0x50);
     page->unkC = value;
-    page->firstSprite = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 6, 1);
+    page->firstSprite = effCreateResourceSlotSet(secondaryResource, 6, 1);
     itfSetGridEntryQuantizedAndRefresh(page->firstSprite, 0, 0xE60, 0x430, 0, 0);
-    page->sprites[0] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 8, 1);
+    page->sprites[0] = effCreateResourceSlotSet(secondaryResource, 8, 1);
     itfSetGridEntryQuantizedAndRefresh(page->sprites[0], 0, 0xF50, 0x648, 0, 0);
-    page->sprites[1] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0x3B, 1);
+    page->sprites[1] = effCreateResourceSlotSet(mainResource, 0x3B, 1);
     itfSetGridEntryQuantizedAndRefresh(page->sprites[1], 0, 0x1C20, 0x6D0, 0, 0);
-    page->sprites[2] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 9, 1);
+    page->sprites[2] = effCreateResourceSlotSet(secondaryResource, 9, 1);
     itfSetGridEntryQuantizedAndRefresh(page->sprites[2], 0, 0x1120, 0x708, 0, 0);
-    page->sprites[3] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0xA, 1);
+    page->sprites[3] = effCreateResourceSlotSet(secondaryResource, 0xA, 1);
     itfSetGridEntryQuantizedAndRefresh(page->sprites[3], 0, 0x1BB0, 0x708, 0, 0);
-    page->sprites[4] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0xD, 1);
+    page->sprites[4] = effCreateResourceSlotSet(secondaryResource, 0xD, 1);
     itfSetGridEntryQuantizedAndRefresh(page->sprites[4], 0, 0x1450, 0x640, 0, 0);
-    page->sprites[5] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0xB, 1);
+    page->sprites[5] = effCreateResourceSlotSet(secondaryResource, 0xB, 1);
     itfSetGridEntryQuantizedAndRefresh(page->sprites[5], 0, 0x1540, 0x5E0, 0, 0);
-    page->sprites[6] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0xC, 1);
+    page->sprites[6] = effCreateResourceSlotSet(secondaryResource, 0xC, 1);
     itfSetGridEntryQuantizedAndRefresh(page->sprites[6], 0, 0x1980, 0x660, 0, 0);
-    page->primarySprite = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0x3C, 1);
+    page->primarySprite = effCreateResourceSlotSet(mainResource, 0x3C, 1);
     itfSetGridEntryQuantizedAndRefresh(page->primarySprite, 0, 0x110, 0x280, 0, 0);
-    page->overlaySprites[0] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0x35, 1);
+    page->overlaySprites[0] = effCreateResourceSlotSet(mainResource, 0x35, 1);
     itfSetGridEntryQuantizedAndRefresh(page->overlaySprites[0], 0, 0x8E0, 0x288, 0, 0);
-    page->overlaySprites[1] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0x36, 1);
+    page->overlaySprites[1] = effCreateResourceSlotSet(mainResource, 0x36, 1);
     itfSetGridEntryQuantizedAndRefresh(page->overlaySprites[1], 0, 0xEE0, 0x288, 0, 0);
     mnuSetPageParams(page, 0);
     return page;
@@ -1333,7 +1334,8 @@ void mnuDrawIconSpriteGroup(s32 unusedX, s32 unusedY, s32 depth, s32 skip, MenuS
 
 void mnuSetWindowResource(s32 index, MenuPageWindow *window, s32 resource, s32 option) {
     mnuSelectPage(window, index);
-    window->slots[index].windowSprites = func_0027F230(0, resource, option);
+    window->slots[index].windowSprites =
+        func_0027F230(0, (EffectSlotSet *)resource, (EffectSlotSet *)option);
     window->flags |= 0x100;
 }
 
