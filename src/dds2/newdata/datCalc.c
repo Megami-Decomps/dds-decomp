@@ -124,7 +124,7 @@ void datAdjustCurrentMp(DatPartyRecord *unit, s32 delta) {
     unit->mp = (s16)currentMp;
 }
 
-extern s32 func_00314C10(DatPartyRecord *unit);
+extern s32 ptyGetCurrentProfileId(DatPartyRecord *unit);
 extern u32 prfGetIndexedProfileByte(u16 id, s32 sub);
 
 
@@ -132,7 +132,7 @@ extern u32 prfGetIndexedProfileByte(u16 id, s32 sub);
  * the existing result to 1..127. Keep the profile callee's unsigned return type. */
 s32 datGetClampedProfileAdjustedStat(DatPartyRecord *unit, s32 statIndex) {
     s32 adjustedStat = unit->baseStats[statIndex] +
-                prfGetIndexedProfileByte(func_00314C10(unit), statIndex);
+                prfGetIndexedProfileByte(ptyGetCurrentProfileId(unit), statIndex);
 
     if (adjustedStat <= 0) {
         adjustedStat = 1;

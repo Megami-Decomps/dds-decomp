@@ -105,6 +105,8 @@ typedef struct MenuAssets {
 
 typedef char MenuAssets_size_must_be_0x20[(sizeof(MenuAssets) == 0x20) ? 1 : -1];
 
+struct EffectSlotSet;
+
 /* Native staff sprite banks; DDS2 retains only two base resources. */
 typedef struct StaffSlots {
 #ifdef VERSION_DDS2
@@ -112,9 +114,9 @@ typedef struct StaffSlots {
 #else
     u32 baseResources[7];
 #endif
-    u32 pairResources[2];
-    u32 mainResources[16];
-    u32 extraResources[5];
+    struct EffectSlotSet *pairResources[2];
+    struct EffectSlotSet *mainResources[16];
+    struct EffectSlotSet *extraResources[5];
 } StaffSlots;
 
 #ifdef VERSION_DDS2
@@ -166,10 +168,10 @@ typedef struct MenuSprites {
     void *cursor[4];
     s32 fade;
 #else
-    s32 firstSprite;
-    s32 primarySprite;
-    s32 sprites[7];
-    s32 overlaySprites[2];
+    struct EffectSlotSet *firstSprite;
+    struct EffectSlotSet *primarySprite;
+    struct EffectSlotSet *sprites[7];
+    struct EffectSlotSet *overlaySprites[2];
     s32 profileFade;
 #endif
     s32 drawAlpha;
@@ -182,6 +184,11 @@ typedef struct MenuSprites {
 #endif
 } MenuSprites;
 
+#ifndef VERSION_DDS2
+typedef char MenuSprites_dds1_size_check[
+    sizeof(MenuSprites) == 0x50 ? 1 : -1];
+#endif
+
 /* The allocated icon bundle owns its draw fade and fade direction. */
 typedef struct MenuIconBundle {
 #ifdef VERSION_DDS2
@@ -189,19 +196,27 @@ typedef struct MenuIconBundle {
     void *sprite[3];
 #else
     u8 pad0[0xC];
-    s32 sprite[4];
+    struct EffectSlotSet *sprite[4];
 #endif
     s32 fade;
     s32 fadeOut;
 } MenuIconBundle;
+
+#ifdef VERSION_DDS2
+typedef char MenuIconBundle_size_must_be_0x20[
+    sizeof(MenuIconBundle) == 0x20 ? 1 : -1];
+#else
+typedef char MenuIconBundle_size_must_be_0x24[
+    sizeof(MenuIconBundle) == 0x24 ? 1 : -1];
+typedef char MenuIconBundle_dds1_sprites_offset_check[
+    ((u32)&((MenuIconBundle *)0)->sprite == 0xC) ? 1 : -1];
+#endif
 
 
 typedef struct MenuPoint {
     s32 x;
     s32 y;
 } MenuPoint;
-
-struct EffectSlotSet;
 
 /* Native sprite-state allocation: three resource-set owners and a state word. */
 typedef struct MenuSpriteState {
@@ -422,7 +437,7 @@ typedef struct MenuPageSlot {
     MenuPageBar mp;               /* 0x6C */
     struct EffectSlotSet *frame[8]; /* 0xBC */
     struct MenuSprites *windowSprites; /* 0xDC */
-    u32 iconBundle;
+    MenuIconBundle *iconBundle;
     u32 unkE4;
     u8 padE8[8];
     MenuQueuedCommand commands[2]; /* 0xF0 and 0x1114 */
@@ -448,19 +463,24 @@ typedef struct MenuPageSlot {
     s32 kind;
     u32 flags;
     u8 pad08[8];
-    s32 icon[3];
+    struct EffectSlotSet *icon[3];
     u8 pad1C[0x4C];
     s32 scaleA;
     s32 offsetA;
     u8 pad70[0x4C];
     s32 scaleB;
     s32 offsetB;
-    s32 frame[6];
+    struct EffectSlotSet *frame[6];
     struct MenuPageResources *resources;
     struct MenuSprites *windowSprites;
-    u32 iconBundle;
+    MenuIconBundle *iconBundle;
     u8 padE8[0x4C];
 } MenuPageSlot;
+typedef char MenuPageSlot_size_check_dds1[(sizeof(MenuPageSlot) == 0x134) ? 1 : -1];
+typedef char MenuPageSlot_icon_check_dds1[
+    ((u32)&((MenuPageSlot *)0)->icon == 0x10) ? 1 : -1];
+typedef char MenuPageSlot_frame_check_dds1[
+    ((u32)&((MenuPageSlot *)0)->frame == 0xC4) ? 1 : -1];
 #endif
 
 typedef struct MenuPageWindow {
@@ -487,9 +507,9 @@ typedef struct MenuPageWindow {
     struct EffectSlotSet *mainResources[16];
     struct EffectSlotSet *handlesC[5];
 #else
-    s32 handlesA[8];
-    s32 handlesB[8];
-    s32 handlesC[5];
+    struct EffectSlotSet *handlesA[8];
+    struct EffectSlotSet *handlesB[8];
+    struct EffectSlotSet *handlesC[5];
 #endif
     MenuPageSlot slots[5];
     struct MenuList *lists[2];
@@ -522,12 +542,24 @@ typedef char MenuPageWindow_alternateSlot_offset_check[
 
 void func_002BCD90(MenuPageWindow *, PartyPanel *, struct EffectSlotSet *,
                    s32, struct EffectSlotSet *, s32, struct EffectSlotSet *, s32);
-void mnuCopyPrimaryWindowHandles(MenuPageWindow *, u32 *);
-void mnuCopySecondaryWindowHandles(MenuPageWindow *, u32 *);
-void mnuRegisterResourceHandles(MenuPageWindow *, u32 *);
 void mnuSetPanelSlotValues(MenuPageWindow *, struct EffectSlotSet *);
 void mnuInitializeCampPanelResources(MenuPageWindow *, StaffSlots *, u32, PartyPanel *);
+#else
+typedef char MenuPageWindow_handlesA_offset_check[
+    ((u32)&((MenuPageWindow *)0)->handlesA == 0x24) ? 1 : -1];
+typedef char MenuPageWindow_handlesA_extent_check[
+    sizeof(((MenuPageWindow *)0)->handlesA) == 0x20 ? 1 : -1];
+typedef char MenuPageWindow_handlesB_offset_check[
+    ((u32)&((MenuPageWindow *)0)->handlesB == 0x44) ? 1 : -1];
+typedef char MenuPageWindow_handlesC_offset_check[
+    ((u32)&((MenuPageWindow *)0)->handlesC == 0x64) ? 1 : -1];
+typedef char MenuPageWindow_handlesC_extent_check[
+    sizeof(((MenuPageWindow *)0)->handlesC) == 0x14 ? 1 : -1];
 #endif
+
+void mnuCopyPrimaryWindowHandles(MenuPageWindow *, struct EffectSlotSet **);
+void mnuCopySecondaryWindowHandles(MenuPageWindow *, struct EffectSlotSet **);
+void mnuRegisterResourceHandles(MenuPageWindow *, struct EffectSlotSet **);
 
 typedef struct MenuGradientFade {
     u32 active;

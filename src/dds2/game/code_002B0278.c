@@ -104,7 +104,7 @@ extern struct MenuListNode *func_002B86E8(struct MenuList *);
 
 extern void func_002AAE80();
 
-extern void mnuReleasePartyIconBundles();
+extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 
 extern void mnuClearEntries(MenuPageWindow *);
 
@@ -216,7 +216,7 @@ extern void func_002AA7A0();
 extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
 
-extern u32 mnuCreateIconBundle(u32);
+extern MenuIconBundle *mnuCreateIconBundle(u32);
 
 extern MenuIconState *func_002B9FF8();
 
@@ -346,9 +346,9 @@ typedef struct SkillMenuRuntime {
 
 extern MenuListNode *sdfAllocAndClearQuadwords(s32);
 
-extern void ptyRecomputeMaxHpMp();
+extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
 
-extern void scrClearSecondaryScriptFlag();
+extern void scrClearSecondaryScriptFlag(DatPartyRecord *unit, u16 flagId);
 
 extern s32 func_0019D550(FrFontGlyph *, s8, u32);
 
@@ -928,11 +928,11 @@ void mnuUpdateStaffFade(s32 opening, PartyMenuData *menuWork) {
 }
 
 
-extern s32 mnuGetSelectionFromFlags(s32);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void mnuSetGroupProperties(MenuProfilePanel *, u32, u32, u32, u32);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
 extern void mnuFreeProfilePanelWork(void *);
+extern void func_002C16F0(s32, s32, s32, DatPartyRecord *, s32, s32, s32);
 
 extern void func_002B2408(MenuContext *);
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2408);
@@ -1102,7 +1102,7 @@ s32 mnuStepStaffCampPageControl(s32 callback) {
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2C88);
 
 extern void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
-extern void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource);
+extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
 extern void func_002B2C88(s32, s32, s32, s32);
@@ -1149,12 +1149,11 @@ s32 mnuCreatePanels(s32 callback) {
 s32 mnuDestroyPanels(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
     StaffMenuRuntime *menu = (StaffMenuRuntime *)((MenuContext *)context)->party;
-    s32 window;
+    MenuPageWindow *window = &((MenuContext *)context)->partyWindow;
     mnuBeginWindowFadeTransition(((MenuContext *)context)->imageHandle, &((MenuContext *)context)->transition);
-    window = context + 0x284;
-    func_002B2C88(window, 0, menu->staffView, menu->staffMode);
+    func_002B2C88((s32)window, 0, menu->staffView, menu->staffMode);
     evtStageTestStop();
-    mnuClearEntries((MenuPageWindow *)window);
+    mnuClearEntries(window);
     mnuReleasePartyIconBundles(window);
     if (((MenuContext *)context)->panelGroup != 0) {
         mnuDestroyPanelGroup(((MenuContext *)context)->panelGroup);
@@ -1845,10 +1844,10 @@ void mnuAddPartySkillIfMissing(DatPartyRecord *partyEntry, s32 skillId, s32 skil
     }
 }
 
-/* Clear one skill slot, retaining the native short-arity maxima recomputation. */
+/* Clear one skill slot and recompute the owning party record's maxima. */
 void mnuClearPartySkillSlot(DatPartyRecord *partyEntry, s32 skillSlot) {
     partyEntry->effectData[skillSlot] = 0;
-    ptyRecomputeMaxHpMp();
+    ptyRecomputeMaxHpMp(partyEntry);
 }
 
 /* Open the selected skill's popup or cancel, then process list navigation.
@@ -3650,7 +3649,7 @@ typedef struct MenuIconLayout {
 
 extern MenuIconLayout D_0042AFD8;
 
-u32 mnuCreateIconBundle(u32 resource);
+MenuIconBundle *mnuCreateIconBundle(u32 resource);
 
 void mnuReleaseIconBundleAndSprites(MenuIconBundle *menu);
 
@@ -3658,9 +3657,9 @@ void mnuReleaseIconBundleAndSprites(MenuIconBundle *menu);
 void mnuDrawFadeIcons(s32 x, s32 y, s32 depth, s32 unused, MenuIconBundle *obj, s32 drawArg);
 
 
-void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource);
+void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource);
 
-void mnuReleasePartyIconBundles(u8 *menu);
+void mnuReleasePartyIconBundles(MenuPageWindow *menu);
 
 s32 mnuPercentOrHundred(s32 value, s32 total);
 
@@ -3671,12 +3670,12 @@ void mnuReleasePartyPanelSpriteTextures(u8 *menu);
 
 
 /* Copy eight resource handles into the window's primary handle bank. */
-void mnuCopyPrimaryWindowHandles(MenuPageWindow *menu, u32 *source);
+void mnuCopyPrimaryWindowHandles(MenuPageWindow *menu, struct EffectSlotSet **source);
 
 /* Copy eight resource handles into the window's secondary handle bank. */
-void mnuCopySecondaryWindowHandles(MenuPageWindow *menu, u32 *source);
+void mnuCopySecondaryWindowHandles(MenuPageWindow *menu, struct EffectSlotSet **source);
 
-void mnuRegisterResourceHandles(MenuPageWindow *destination, u32 *source);
+void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSet **source);
 
 
 

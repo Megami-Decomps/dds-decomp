@@ -1170,7 +1170,7 @@ s32 evtPushSecondRosterMaximumHp(void) {
 }
 
 extern s32 btlResolveUnitValueWithOverride(s32, s32);
-extern u32 datReadLowHalfOfCalculatedValue(s32, s32);
+extern u32 datReadLowHalfOfCalculatedValue(DatPartyRecord *, s32);
 /* Push the first entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushFirstRosterSelectedStat(void) {
     s8 statIndex = datCommandSelectors[D_0043E5C0.third].stat;
@@ -1186,7 +1186,8 @@ s32 evtPushFirstRosterSelectedStat(void) {
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(D_0043E5C0.first, statIndex);
         } else {
-            statValue = datReadLowHalfOfCalculatedValue(D_0043E5C0.first, statIndex);
+            statValue = datReadLowHalfOfCalculatedValue(
+                (DatPartyRecord *)D_0043E5C0.first, statIndex);
         }
         break;
     }
@@ -1209,7 +1210,8 @@ s32 evtPushSecondRosterSelectedStat(void) {
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(D_0043E5C0.second, statIndex);
         } else {
-            statValue = datReadLowHalfOfCalculatedValue(D_0043E5C0.second, statIndex);
+            statValue = datReadLowHalfOfCalculatedValue(
+                (DatPartyRecord *)D_0043E5C0.second, statIndex);
         }
         break;
     }
@@ -1233,7 +1235,8 @@ s32 evtPushFirstRosterOptionStat(void) {
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(D_0043E5C0.first, statIndex);
         } else {
-            statValue = datReadLowHalfOfCalculatedValue(D_0043E5C0.first, statIndex);
+            statValue = datReadLowHalfOfCalculatedValue(
+                (DatPartyRecord *)D_0043E5C0.first, statIndex);
         }
         break;
     }
@@ -1255,7 +1258,8 @@ s32 evtPushSecondRosterOptionStat(void) {
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(D_0043E5C0.second, statIndex);
         } else {
-            statValue = datReadLowHalfOfCalculatedValue(D_0043E5C0.second, statIndex);
+            statValue = datReadLowHalfOfCalculatedValue(
+                (DatPartyRecord *)D_0043E5C0.second, statIndex);
         }
         break;
     }
@@ -1502,11 +1506,11 @@ s32 func_0011E018(void) {
     return 1;
 }
 
-extern s32 datComputeSkillBoostedMaxHp(s32);
+extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
 
 /* Push the coarse HP-percentage table value; only exactly 100 percent uses index zero. */
 s32 evtSelectStatGrade(void) {
-    s32 maximumHp = datComputeSkillBoostedMaxHp(D_0043E5C0.second);
+    s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)D_0043E5C0.second);
     s32 currentHp = ((DatPartyRecord *)D_0043E5C0.second)->hp;
     s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
     s32 gradeIndex = 0;
@@ -1580,7 +1584,7 @@ s32 evtPushRosterBaseValue(void) {
 
 /* Push the finer HP-percentage table value; only exactly 100 percent uses index zero. */
 s32 evtSelectFineStatGrade(void) {
-    s32 maximumHp = datComputeSkillBoostedMaxHp(D_0043E5C0.second);
+    s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)D_0043E5C0.second);
     s32 currentHp = ((DatPartyRecord *)D_0043E5C0.second)->hp;
     s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
     s32 gradeIndex = 0;

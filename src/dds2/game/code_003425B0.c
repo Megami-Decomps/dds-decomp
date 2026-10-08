@@ -1043,7 +1043,7 @@ void sdfAllocateStreamFrameBuffers(SdfStreamFrameNode *node) {
 
 INCLUDE_ASM(const s32, "game/code_003425B0", func_00344420);
 
-INCLUDE_ASM(const s32, "game/code_003425B0", func_003444F8);
+INCLUDE_ASM(const s32, "game/code_003425B0", sdfBuildStreamFrameTransferPackets);
 
 /* The four bytes used to initialize the stream node; matches the DDS1 format. */
 typedef struct SoundFormat {
@@ -1158,7 +1158,7 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
 
 extern void sdfFreeMemoryFromEitherHeap(void *);
 extern void sdfTexQueueResourceRelease(s32);
-extern void sdfTexQueuePendingWork(s32);
+extern void sdfTexQueuePendingWork(SdfTexResource *texture);
 
 void func_00344A08(SdfStreamFrameNode *node) {
     s32 interruptsEnabled;
@@ -1193,7 +1193,7 @@ void func_00344A08(SdfStreamFrameNode *node) {
         sdfFreeMemoryFromEitherHeap((void *)(node->scratchBuffer - 0x100));
     }
     if (node->textureHead != 0) {
-        sdfTexQueuePendingWork((s32)node->textureHead);
+        sdfTexQueuePendingWork(node->textureHead);
     }
     if (wasActive != 0) {
         func_003450D8(0);
@@ -1420,7 +1420,7 @@ void sdfAdvanceBufferedPlayback(MidiPlaybackState *state) {
 }
 
 extern void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet);
-extern void func_003444F8();
+extern void sdfBuildStreamFrameTransferPackets(SdfStreamFrameNode *node);
 
 /* Return zero only when nothing is pending; otherwise call the zero-buffer handler if needed, queue and advance. */
 s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
@@ -1431,7 +1431,7 @@ s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
     /* Equivalent to &state->buffers[state->bufferIndex]; index-first arithmetic matches retail. */
     selectedBuffer = (u32 *)(state->bufferIndex * 4 + (s32)state + 0x28);
     if (*selectedBuffer == 0) {
-        func_003444F8();
+        sdfBuildStreamFrameTransferPackets((SdfStreamFrameNode *)state);
     }
     sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, (void *)(*selectedBuffer + state->bufferSize - SDF_STREAM_QWORD_BYTES));
     sdfAdvanceBufferedPlayback(state);

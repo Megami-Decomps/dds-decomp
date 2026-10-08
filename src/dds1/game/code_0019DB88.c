@@ -45,6 +45,7 @@ typedef struct SndPad {
     s8 fineDown;
     u8 pad39;
     s8 fineUp;
+    u8 pad3B[5]; /* Complete two-port current/edge byte storage. */
 } SndPad;
 
 
@@ -1066,7 +1067,169 @@ s32 itfStepFloatWithPad(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f3
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019FF60);
+typedef struct ItfBlurPanelWork {
+    s16 editing;
+    s16 selection;
+    u32 blink;
+    u8 pad08[8];
+} ItfBlurPanelWork;
+
+extern ItfBlurPanelWork D_003D73D0;
+extern const char *D_00358348[6];
+extern s32 D_003BA910[2];
+extern u8 kwlnDrawOverlayEnabled;
+extern s16 kwlnDrawOverlayAlpha;
+extern s16 kwlnDrawOverlayScale;
+extern SdfPoolNode kwlnPositionedTextSurface;
+extern char D_003BB260[];
+extern char D_003BB268[];
+extern char D_003BB270[];
+extern char D_003BB278[];
+extern char D_003BB280[];
+extern char D_003BB288[];
+
+/* Draw the blur settings and handle selection, editing and cancellation. */
+s32 func_0019FF60(void) {
+    SifCommand packet;
+    s32 list;
+    s32 row;
+    s32 y;
+    s16 previous;
+    s32 highlight;
+
+    list = sdfCreateResetPacketList();
+    sdfAppendPacket((SdfListHead *)list,
+        func_0011D3E8(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
+    sdfPktInit(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
+    sdfAppendPacket((SdfListHead *)list, (u32)sdfFormatSifPacket(&packet,
+        "BLUR:        %s", kwlnDrawOverlayEnabled ? D_003BB260 : D_003BB268));
+
+    y = 0x7A20;
+    if (D_003D73D0.editing == 0) {
+        sdfPktInit(&packet, 0x82C0, D_003D73D0.selection * 0x60 + 0x7A20, 0xFF0000, 0);
+        D_003D73D0.blink++;
+        if (D_003D73D0.blink < 32 || (D_003D73D0.blink & 31) < 18) {
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfFormatSifPacket(&packet, D_003BB270));
+        }
+    }
+
+    for (row = 0; row != 3; row++) {
+        sdfPktInit(&packet, 0x82C0, y, 0xFF0000, 0);
+        sdfAppendPacket((SdfListHead *)list,
+            (u32)sdfFormatSifPacket(&packet, D_003BB278, D_00358348[row]));
+        highlight = 0;
+        if (D_003D73D0.editing != 0 && row == D_003D73D0.selection) {
+            highlight = 6;
+        }
+        sdfPktInit(&packet, 0x8800, y, 0xFF0000, highlight);
+        switch (row) {
+        case 0:
+            sdfAppendPacket((SdfListHead *)list,
+                (u32)sdfFormatSifPacket(&packet, D_003BB280, kwlnDrawOverlayAlpha));
+            break;
+        case 1:
+            sdfAppendPacket((SdfListHead *)list,
+                (u32)sdfFormatSifPacket(&packet, D_003BB280, kwlnDrawOverlayScale));
+            break;
+        case 2:
+            sdfAppendPacket((SdfListHead *)list,
+                (u32)sdfFormatSifPacket(&packet, D_003BB288, D_003BA910[0], D_003BA910[1]));
+            break;
+        }
+        y += 0x60;
+    }
+    sdfAppendPacket((SdfListHead *)list,
+        func_0011D3E8((D_003BA910[0] * 16) + 0x7FC0, (D_003BA910[1] * 8) + 0x7FE0,
+            0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
+
+    if ((s8)D_00324510.unk32 < 0) {
+        kwlnDrawOverlayEnabled ^= 1;
+    }
+    if (D_003D73D0.editing == 0) {
+        previous = D_003D73D0.selection;
+        if ((u8)D_00324510.unk36 & 2) {
+            D_003D73D0.selection--;
+            if (D_003D73D0.selection < 0) {
+                D_003D73D0.selection = 2;
+            }
+        }
+        if ((u8)D_00324510.unk37 & 2) {
+            D_003D73D0.selection++;
+            if (D_003D73D0.selection >= 3) {
+                D_003D73D0.selection = 0;
+            }
+        }
+        if (previous != D_003D73D0.selection) {
+            D_003D73D0.blink = 0;
+        }
+        if (D_00324510.unk31 < 0) {
+            D_003D73D0.editing ^= 1;
+            D_003D73D0.blink = 0;
+        }
+        if ((u8)D_00324510.cancel & 2) {
+            return -1;
+        }
+    } else {
+        if (D_003D73D0.selection == 2) {
+            if (D_00324510.unk36 != 0) {
+                D_003BA910[1] -= 16;
+                if (D_003BA910[1] < -224) {
+                    D_003BA910[1] = -224;
+                }
+            }
+            if (D_00324510.unk37 != 0) {
+                D_003BA910[1] += 16;
+                if (D_003BA910[1] > 224) {
+                    D_003BA910[1] = 224;
+                }
+            }
+            if (D_00324510.coarseDown != 0) {
+                D_003BA910[0] -= 16;
+                if (D_003BA910[0] < -256) {
+                    D_003BA910[0] = -256;
+                }
+            }
+            if (D_00324510.coarseUp != 0) {
+                D_003BA910[0] += 16;
+                if (D_003BA910[0] > 256) {
+                    D_003BA910[0] = 256;
+                }
+            }
+        } else if (D_003D73D0.selection == 0) {
+            if ((u8)D_00324510.coarseDown & 2) {
+                kwlnDrawOverlayAlpha -= 10;
+                if (kwlnDrawOverlayAlpha < 0) {
+                    kwlnDrawOverlayAlpha = 0;
+                }
+            }
+            if ((u8)D_00324510.coarseUp & 2) {
+                kwlnDrawOverlayAlpha += 10;
+                if (kwlnDrawOverlayAlpha > 255) {
+                    kwlnDrawOverlayAlpha = 255;
+                }
+            }
+        } else {
+            if ((u8)D_00324510.coarseDown & 2) {
+                kwlnDrawOverlayScale -= 10;
+                if (kwlnDrawOverlayScale < -255) {
+                    kwlnDrawOverlayScale = -255;
+                }
+            }
+            if ((u8)D_00324510.coarseUp & 2) {
+                kwlnDrawOverlayScale += 10;
+                if (kwlnDrawOverlayScale > 255) {
+                    kwlnDrawOverlayScale = 255;
+                }
+            }
+        }
+        if (D_00324510.cancel < 0) {
+            D_003D73D0.editing ^= 1;
+            D_003D73D0.blink = 0;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB230);
 

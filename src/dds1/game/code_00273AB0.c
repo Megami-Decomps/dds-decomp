@@ -95,13 +95,13 @@ extern s32 func_00273220(s32 itemToInsert, s32 inventoryItem, StaffImageContext 
 extern void mnuSelectPage(MenuPageWindow *, s32);
 extern void mnuCreateStaffBulletItemWindow();
 extern void mnuReleaseStaffMenuResources();
-extern void mnuSetWindowResource();
-extern void mnuAttachPartyIconBundle();
+extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
+extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern void func_00276720();
 extern void mnuReleaseStaffExtraWindow();
 extern void mnuReleasePageHandlesAndClearSelection();
-extern void mnuClearEntries();
-extern void mnuReleasePartyIconBundles();
+extern void mnuClearEntries(MenuPageWindow *);
+extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 extern void mnuReleaseStaffMenuTextureHandles();
 extern void mnuSeekListNode(s32, s32);
 extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
@@ -346,8 +346,11 @@ s32 mnuInitializeStaffValuePage(s32 unused) {
     mnuSelectPage(&((StaffImageContext *)context)->pageWindow, index);
     mnuCreateStaffBulletItemWindow(context);
     mnuReleaseStaffMenuResources(context + 0x60);
-    mnuSetWindowResource(index, context + 0x15C, ((StaffImageContext *)context)->spriteScene, ((StaffImageContext *)context)->windowParam);
-    mnuAttachPartyIconBundle(index, context + 0x15C, ((StaffImageContext *)context)->spriteScene);
+    mnuSetWindowResource(index, &((StaffImageContext *)context)->pageWindow,
+                         ((StaffImageContext *)context)->spriteScene,
+                         ((StaffImageContext *)context)->windowParam);
+    mnuAttachPartyIconBundle(index, &((StaffImageContext *)context)->pageWindow,
+                             ((StaffImageContext *)context)->spriteScene);
     ((StaffImageContext *)context)->panelHandle = mnuCreatePanelGroup(((StaffImageContext *)context)->spriteScene);
     ((StaffImageContext *)context)->spriteHandle =
         mnuCreateSpriteState((struct EffectSlotSet *)((StaffImageContext *)context)->spriteArg0,
@@ -366,8 +369,8 @@ s32 mnuReleaseStaffValuePageResources(s32 unused) {
     mnuReleaseStaffExtraWindow(context);
     func_00276720(context + 0x15C, 0, 0, 0);
     mnuReleasePageHandlesAndClearSelection(context + 0x15C);
-    mnuClearEntries(context + 0x15C);
-    mnuReleasePartyIconBundles(context + 0x15C);
+    mnuClearEntries(&((StaffImageContext *)context)->pageWindow);
+    mnuReleasePartyIconBundles(&((StaffImageContext *)context)->pageWindow);
     if (((StaffImageContext *)context)->panelHandle != 0) {
         mnuDestroyPanelGroup(((StaffImageContext *)context)->panelHandle);
         ((StaffImageContext *)context)->panelHandle = 0;

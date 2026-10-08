@@ -57,7 +57,7 @@ extern u16 D_0036BC68[][4];
 extern s32 D_0036C6AC[];
 extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 extern void mnuDestroyMantraDrawPool(void *);
-extern void mnuReleaseStaffMenuContextAndResources(u32 *);
+extern void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *);
 extern s32 dspCloseChannel(void);
 extern void sdfQueueNonzeroResourceId(s32);
 extern void sdfReleaseResourceAllocation(s32);
@@ -69,7 +69,7 @@ extern void mnuResetTitleStreamLocked(void);
 extern void func_0026A5F0(s32);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern void *mnuCreateSpriteResource(s32, u8, u8);
-extern u8 *mnuCreateWorkBlock(void);
+extern MenuProgressHost *mnuCreateWorkBlock(void);
 
 typedef struct MnuResourceTaskWork {
     s32 allocation;
@@ -79,7 +79,7 @@ typedef struct MnuResourceTaskWork {
     s32 messageResource2;
     u32 messageResourceInfo2;
     u8 pad18[0xC];
-    u32 *staffMenuContext;
+    MenuProgressHost *staffMenuContext;
     u8 pad28[0x210];
     void *drawPool;
     u8 pad23C[0xC];
@@ -568,7 +568,7 @@ MnuResourceTaskWork *func_0024F608(void) {
     mnuRequestMantraResources(resourceWork);
     resourceWork->drawPool = mnuCreateSpriteResource(0x3C, 8, 0);
     if (resourceWork->staffMenuContext == NULL) {
-        resourceWork->staffMenuContext = (u32 *)mnuCreateWorkBlock();
+        resourceWork->staffMenuContext = mnuCreateWorkBlock();
     }
     return resourceWork;
 }

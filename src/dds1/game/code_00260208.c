@@ -456,7 +456,7 @@ void brsApplyRewardBundle(BrsSkillPackageWork *partyWork, BrsRewardSummary *batc
 }
 
 extern void mnuReleaseStaffMenuResources(s32 *);
-extern void mnuInitializeStaffPageWindows(s32, StaffSlots *, s32, s32);
+extern void mnuInitializeStaffPageWindows(MenuPageWindow *, StaffSlots *, u32, PartyPanel *);
 extern void evtStageTestInit(s32);
 extern void mnuForwardTableByte(s32);
 extern void mnuReleaseStaffResourceGroups(StaffSlots *);
@@ -470,25 +470,25 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     MenuPanelGroup *panel;
 
     mnuReleaseStaffMenuResources(group);
-    mnuInitializeStaffPageWindows((s32)&work->partyWindow, &work->staffSlots, 0, (s32)&work->partyPanel);
-    panel = mnuCreatePanelGroup(work->staffSlots.pairResources[0]);
+    mnuInitializeStaffPageWindows(&work->partyWindow, &work->staffSlots, 0, &work->partyPanel);
+    panel = mnuCreatePanelGroup((s32)work->staffSlots.pairResources[0]);
     work->panelHandle = panel;
     mnuUpdateFiveListEntries(panel, work->unitHandle);
     work->spriteHandle =
         mnuCreateSpriteState((struct EffectSlotSet *)work->staffSlots.baseResources[5],
                              (struct EffectSlotSet *)work->staffSlots.baseResources[2],
-                             (struct EffectSlotSet *)work->staffSlots.pairResources[0]);
+                             work->staffSlots.pairResources[0]);
     evtStageTestInit(0);
     mnuForwardTableByte(work->primaryRewards.rows[work->selectedRow].unit->unitId);
 }
 
 void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
-    s32 panelContext = (s32)&ctx->partyWindow;
+    MenuPageWindow *panelContext = &ctx->partyWindow;
 
     effDestroyResourceSlotSet(ctx->unitHandle);
     mnuClearEntries(panelContext);
     mnuReleasePartyIconBundles(panelContext);
-    mnuShutdownContext(panelContext);
+    mnuShutdownContext((s32)panelContext);
     mnuDestroyPanelGroup(ctx->panelHandle);
     mnuFreeSpriteStateWork(ctx->spriteHandle);
     mnuReleaseAssets(&ctx->assets);
@@ -594,7 +594,7 @@ void brsTaskLatchPendingRows(BrsSkillPackageWork *task) {
 
 extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfResourceRetainAddress(s32);
-extern s32 mnuAllocateValueRecord(s32);
+extern struct EffectList *mnuAllocateValueRecord(u32);
 extern void evtCreateMessageWindowIfMissing(void *);
 extern void evtSetMessageWindowPageValue(s32);
 extern void func_001A1530(BrsRewardSummary *);
@@ -619,7 +619,7 @@ BrsSkillPackageWork *brsCreateTaskContext(void) {
     memset(work, 0, sizeof(BrsSkillPackageWork));
     work->handle = handle;
     mnuClearPanelTransitionState(&work->transition.data);
-    work->fadeTarget = mnuAllocateValueRecord(1);
+    work->fadeTarget = (s32)mnuAllocateValueRecord(1);
     evtCreateMessageWindowIfMissing(D_0036C858);
     evtSetMessageWindowPageValue(200);
     rewards = &work->rewards;
@@ -807,15 +807,15 @@ void brsSelectLevelBonusMode(DatPartyRecord *source, BrsSkillPackageWork *work) 
     work->rewardIndex = eligible[(u32)effMiscRand(0) % (u32)eligibleCount];
 }
 
-extern void mnuClearEntries(s32 *window);
-extern void mnuReleasePartyIconBundles(s32 window);
+extern void mnuClearEntries(MenuPageWindow *window);
+extern void mnuReleasePartyIconBundles(MenuPageWindow *window);
 extern void mnuSelectPage(MenuPageWindow *window, s32 index);
 extern void mnuResetPartyPanelFade(s32 window, s32 index, s32 unused,
                                    s32 retainScale);
-extern void mnuSetWindowResource(s32 index, s32 window, s32 resource,
+extern void mnuSetWindowResource(s32 index, MenuPageWindow *window, s32 resource,
                                  s32 option);
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
-extern void mnuAttachPartyIconBundle(s32 index, s32 window, u32 resource);
+extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window, u32 resource);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
 extern void evtStageTestQueueMotion(s32 kind, u32 index);
 extern void func_002E8DD0(u32 sequence);
@@ -834,16 +834,16 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
         s32 page = work->primaryRewards.rows[selectedRow].values.secondaryValue;
         s32 *selectedIndex = &work->selectedRow;
 
-        mnuClearEntries((s32 *)window);
-        mnuReleasePartyIconBundles((s32)window);
+        mnuClearEntries(window);
+        mnuReleasePartyIconBundles(window);
         mnuSelectPage(window, page);
         mnuResetPartyPanelFade((s32)window, page, 0, 0);
-        mnuSetWindowResource(page, (s32)window, work->staffSlots.pairResources[0],
-                             work->staffSlots.pairResources[1]);
+        mnuSetWindowResource(page, window, (s32)work->staffSlots.pairResources[0],
+                             (s32)work->staffSlots.pairResources[1]);
         mnuSetPageParams(work->partyWindow.slots[page].windowSprites, 2);
-        mnuAttachPartyIconBundle(page, (s32)window, work->staffSlots.pairResources[0]);
+        mnuAttachPartyIconBundle(page, window, (u32)work->staffSlots.pairResources[0]);
 
-        ((MenuIconBundle *)work->partyWindow.slots[page].iconBundle)->fade = 0x100;
+        work->partyWindow.slots[page].iconBundle->fade = 0x100;
         window->flags |= 0x400;
         work->selectedRewardRow = &work->primaryRewards.rows[(*selectedIndex)++];
         brsSelectLevelBonusMode(work->selectedRewardRow->unit, work);

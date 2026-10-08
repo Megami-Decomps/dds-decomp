@@ -53,53 +53,6 @@ extern u32 effMiscRandMod(void *state, u32 modulus);
 extern u64 btlStartTask(void *);
 extern void btlDispatchStateHandler(void *, s32);
 
-
-typedef struct SceneSlot {
-    u8 a;
-    u8 b;
-    u8 id;
-} SceneSlot;
-
-
-
-typedef struct BattleController {
-    u8 pad_000[0x160];
-    u32 runtimeFlags;
-    void *activeSlot;
-    u8 pad_168[0x20];
-    struct BtlIndexList *pendingSoundList;
-    u8 pad_18C[0x68];
-    u32 flags;
-    u8 pad_1F8[0x30];
-    BtlUnit *actors;
-    u8 pad_22C[0x20];
-    u16 variant;
-    u8 pad_24E[2];
-    s32 step;
-    u8 pad_254[0x28];
-    s32 mode;
-    u8 pad_280[0x10];
-    s32 fieldF1; /* 0x290: field resource allocations */
-    s32 fieldF2;
-    s32 fieldF3;
-    s32 taskParent;
-    u8 pad_2A0[4];
-    s32 boundTask;
-    u8 pad_2A8[4];
-    s32 spriteObject;
-    u8 pad_2B0[0x24];
-    SceneSlot slots[8];
-    BtlTask *groupPrimary[20];
-    BtlTask *groupSecondary[45];
-    BtlTask *groupTertiary[15];
-    u8 pad_42C[0x184];
-    s32 (*sceneCallback)();
-    u8 pad_5B4[0x5C];
-    s32 (*actionCameraInitHook)(struct BtlLinkedCommand *); /* 0x610 */
-    u8 pad_614[0x18];
-    s32 (*actionCameraStepHook)(u8 *); /* 0x62C */
-} BattleController;
-
 /* Battle camera cursor (0x130 bytes at D_0035F100): script cursor fields, then the camera path state
  * read by func_001EB368 (retail offsets noted). */
 typedef struct BtlCameraCursor {
@@ -821,12 +774,12 @@ void func_001C8F88(s32 arg0) {
 }
 
 void btlActionSeqCheckDispatch(u8 *task) {
-    BattleController *scene = (BattleController *)btlGetRuntime();
-    u32 flags = scene->flags;
+    BtlState *scene = (BtlState *)btlGetRuntime();
+    u32 flags = scene->battleFlags;
     BtlUnit *unit = ((BtlTask *)task)->unit;
     BtlUnit *actor;
     if (!(flags & 0x20)) {
-        for (actor = scene->actors; actor != 0; actor = actor->next) {
+        for (actor = scene->units; actor != 0; actor = actor->next) {
             u32 actorFlags = actor->flags;
             if (actorFlags & 0x4000) {
                 return;
@@ -1024,10 +977,10 @@ extern void fldSetSceneObjectAndGroupStates(void);
 extern s32 btlAiCheckStatusRollEligibility(BtlTask *task);
 
 void func_001C9660(BtlTask *task) {
-    BattleController *scene = (BattleController *)btlGetRuntime();
+    BtlState *scene = (BtlState *)btlGetRuntime();
     s32 state;
 
-    if (scene->flags & 0x20) {
+    if (scene->battleFlags & 0x20) {
         return;
     }
     if (!(task->flags & 4) && sndHasActiveActor() == 0 &&
@@ -1050,7 +1003,7 @@ void func_001C9660(BtlTask *task) {
                 btlDispatchStateHandler(task, 0xC);
             }
         }
-    } else if (scene->flags & 0x8000) {
+    } else if (scene->battleFlags & 0x8000) {
         fldSetSceneObjectAndGroupStates();
         btlDispatchStateHandler(task, 9);
     }
@@ -1191,10 +1144,10 @@ void func_001C9C20(s32 arg0) {
 
 /* Bind the acting unit's AI slot once, then wait for its script task. */
 s32 btlAiTaskUpdate(BtlTask *task) {
-    BattleController *scene = (BattleController *)btlGetRuntime();
+    BtlState *scene = (BtlState *)btlGetRuntime();
     u16 index;
 
-    if (!(scene->flags & 0x20)) {
+    if (!(scene->battleFlags & 0x20)) {
         if (sndHasActiveActor() == 0) {
             if (fldCheckSceneResourcesIdle(task->unit) != 0) {
                 if (!(task->flags & 0x80)) {
@@ -1208,10 +1161,10 @@ s32 btlAiTaskUpdate(BtlTask *task) {
                         btlRunRandomWeightedAiTableAction(task);
                     }
                     task->flags |= 0x80;
-                    scene->flags &= ~0x100000;
+                    scene->battleFlags &= ~0x100000;
                 }
                 if (scene->boundTask == 0) {
-                    scene->flags |= 0x100000;
+                    scene->battleFlags |= 0x100000;
                     if (btlAiCheckStatusRollEligibility(task) != 0) {
                         btlDispatchStateHandler(task, 0xB);
                     } else {
@@ -1223,7 +1176,7 @@ s32 btlAiTaskUpdate(BtlTask *task) {
                         btlDebugPrintf("AI script return NULL\n");
                         btlRunRandomWeightedAiTableAction(task);
                     }
-                    scene->flags |= 0x100000;
+                    scene->battleFlags |= 0x100000;
                     if (btlAiCheckStatusRollEligibility(task) != 0) {
                         btlDispatchStateHandler(task, 0xB);
                     } else {
@@ -2266,7 +2219,7 @@ extern char D_003A37C8[];
 
 /* Display the eight slot entries, retaining each group's last valid task. */
 void btlDebugPrintActionOrder(s32 x, s32 y) {
-    BattleController *controller = (BattleController *)btlGetRuntime();
+    BtlState *controller = (BtlState *)btlGetRuntime();
     BtlTask **primary;
     BtlTask **secondary;
     BtlTask **tertiary;
@@ -2274,7 +2227,7 @@ void btlDebugPrintActionOrder(s32 x, s32 y) {
     s32 color;
     u32 i;
 
-    if ((controller->flags & 4) == 0) {
+    if ((controller->battleFlags & 4) == 0) {
         return;
     }
     btlBossDebugPrintfN(x, y, 0, (s32)D_003A37C8);
@@ -2282,7 +2235,7 @@ void btlDebugPrintActionOrder(s32 x, s32 y) {
     secondary = controller->groupSecondary;
     tertiary = controller->groupTertiary;
     for (i = 0; i < 8; i++) {
-        switch (controller->slots[i].a) {
+        switch (controller->slots[i].group) {
         case 1:
             color = 0;
             task = *primary;
@@ -2312,7 +2265,7 @@ void btlDebugPrintActionOrder(s32 x, s32 y) {
         if (task == NULL || task->unit == NULL) {
             continue;
         }
-        if (controller->slots[i].b == 100) {
+        if (controller->slots[i].remaining == 100) {
             btlBossDebugPrintfN(x, y + (i + 1) * 12, color, (s32)D_003BB5E0,
                                D_00359B28[task->state].name);
         } else {
@@ -6933,13 +6886,13 @@ void func_001DC0E8(void) {
 
 
 void btlClearPendingSoundList(void) {
-    BattleController *work = (BattleController *)btlGetRuntime();
-    BtlIndexList *list = work->pendingSoundList;
+    BtlState *work = (BtlState *)btlGetRuntime();
+    BtlIndexList *list = work->cameraCommand.targetList;
     if (list != 0) {
         btlFreeIndexList(list);
-        work->pendingSoundList = 0;
+        work->cameraCommand.targetList = 0;
     }
-    work->flags &= ~0x10;
+    work->battleFlags &= ~0x10;
 }
 
 void btlCopyMotionTransform(u8 *dst, u8 *src) {
@@ -7015,16 +6968,16 @@ f32 btlGetPoseBlendProgress(s32 arg0) {
 }
 
 s32 btlIsUnitInActiveList(void *unit) {
-    BattleController *work = (BattleController *)btlGetRuntime();
-    u8 *slot = work->activeSlot;
+    BtlState *work = (BtlState *)btlGetRuntime();
+    BtlTask *slot = work->cameraCommand.task;
     u32 count;
     u32 i;
-    if (slot != 0 && *(void **)(slot + 0x18) == unit) {
+    if (slot != 0 && slot->unit == unit) {
         return 1;
     }
-    count = btlGetIndexListCount(work->pendingSoundList);
+    count = btlGetIndexListCount(work->cameraCommand.targetList);
     for (i = 0; i < count; i++) {
-        if (btlGetIndexListEntry(work->pendingSoundList, i) == unit) {
+        if (btlGetIndexListEntry(work->cameraCommand.targetList, i) == unit) {
             return 1;
         }
     }
@@ -7032,12 +6985,12 @@ s32 btlIsUnitInActiveList(void *unit) {
 }
 
 void btlResetActiveUnitList(void) {
-    BattleController *work;
+    BtlState *work;
 
-    work = (BattleController *)btlGetRuntime();
-    work->activeSlot = 0;
-    work->runtimeFlags = work->runtimeFlags | 0x400;
-    btlClearIndexList(work->pendingSoundList);
+    work = (BtlState *)btlGetRuntime();
+    work->cameraCommand.task = 0;
+    work->cameraCommand.flags = work->cameraCommand.flags | 0x400;
+    btlClearIndexList(work->cameraCommand.targetList);
 }
 
 void btlClearRuntimeFlag2000(void) {
@@ -7086,7 +7039,7 @@ extern void sdfSetViewFieldOfView(f32);
 void btlRefreshWorldCameraHandle(void) {
     WorldObj *object;
     EffWorldNode *handle;
-    if (((BattleController *)btlGetRuntime())->flags & 2) {
+    if (((BtlState *)btlGetRuntime())->battleFlags & 2) {
         object = dds3GetWorldObject();
         if (object != NULL) {
             handle = dds3GetWorldCameraObject((EffWorldNode *)object);
@@ -7109,7 +7062,7 @@ extern s32 D_003BB664;
 
 s32 btlGetWorldObjectDefault(void) {
     EffWorldNode *camera;
-    if (!(((BattleController *)btlGetRuntime())->flags & 2)) {
+    if (!(((BtlState *)btlGetRuntime())->battleFlags & 2)) {
         return D_003BB668;
     }
     camera = dds3GetWorldCameraObject(dds3GetWorldObject());
@@ -7218,7 +7171,7 @@ extern void btlBossDebugPrintfN(s32, s32, s32, s32, ...);
 void btlDebugPrintWorldTransform(s32 arg0, u8 *arg1) {
     EffWorldNode *object;
 
-    if (((BattleController *)btlGetRuntime())->flags & 2) {
+    if (((BtlState *)btlGetRuntime())->battleFlags & 2) {
         object = dds3GetWorldCameraObject(dds3GetWorldObject());
         if (object != 0) {
             btlBossDebugPrintfN(arg0, (s32)arg1, 0, (s32)D_003A3DF0,
@@ -7745,7 +7698,7 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3DF0);
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3E08);
 
 void btlDispatchActionCameraStep(u8 *actor) {
-    BattleController *runtime = (BattleController *)btlGetRuntime();
+    BtlState *runtime = (BtlState *)btlGetRuntime();
     s32 (*callback)(u8 *) = runtime->actionCameraStepHook;
 
     if (callback != 0 && callback(actor) != 0) {
@@ -8735,13 +8688,13 @@ void func_001E4720(BtlCamState *source, BtlCamState *from,
     f32 fov;
     f32 minX;
     f32 length;
-    BattleController *scene;
+    BtlState *scene;
     BtlUnit *unit;
     BtlUnit *selected;
     s32 first;
     u32 flags;
 
-    scene = (BattleController *)btlGetRuntime();
+    scene = (BtlState *)btlGetRuntime();
     fov = source->fov;
     from->fov = fov;
     to->fov = fov;
@@ -8751,7 +8704,7 @@ void func_001E4720(BtlCamState *source, BtlCamState *from,
     first = 1;
     selected = NULL;
     minX = 0.0f;
-    for (unit = (BtlUnit *)scene->actors; unit != NULL; unit = unit->next) {
+    for (unit = scene->units; unit != NULL; unit = unit->next) {
         flags = unit->flags;
         if (flags & 1) {
             if (flags & 0x200) {
@@ -9334,7 +9287,7 @@ void func_001EEED8(s32 action, s32 state) {
 }
 
 void btlInitCommandCursorForFirstActor(s32 arg0, s32 arg1) {
-    BattleController *work = (BattleController *)btlGetRuntime();
+    BtlState *work = (BtlState *)btlGetRuntime();
     u8 *first = btlGetIndexListEntry(*(struct BtlIndexList **)(arg0 + 0x118), 0);
     memset(CURSOR, 0, 0x130);
     btlRefreshUnitEffectMotionAndEntry(first);
@@ -9343,7 +9296,7 @@ void btlInitCommandCursorForFirstActor(s32 arg0, s32 arg1) {
     } else {
         func_001E6BB0(arg0, arg1, 5, 0);
     }
-    if (work->mode == 0x10E) {
+    if (work->battleMode == 0x10E) {
         CURSOR->unk_0C = 3;
     } else {
         CURSOR->unk_0C = 0;
@@ -9499,25 +9452,25 @@ extern void sdfQueueNonzeroResourceId(s32);
 
 
 void btlFreeFieldBlocks(void) {
-    BattleController *context = (BattleController *)btlGetRuntime();
+    BtlState *context = (BtlState *)btlGetRuntime();
     btlWaitForPendingWorkAndReleaseBuffers();
-    if (context->fieldF3 != 0) {
-        sdfQueueNonzeroResourceId(context->fieldF3);
-        context->fieldF3 = 0;
+    if (context->fieldTBResourceId != 0) {
+        sdfQueueNonzeroResourceId(context->fieldTBResourceId);
+        context->fieldTBResourceId = 0;
         btlBossDebugPrintf(D_003A4AD8);
     }
-    if (context->fieldF2 != 0) {
-        sdfQueueNonzeroResourceId(context->fieldF2);
-        context->fieldF2 = 0;
+    if (context->fieldF2ResourceId != 0) {
+        sdfQueueNonzeroResourceId(context->fieldF2ResourceId);
+        context->fieldF2ResourceId = 0;
         btlBossDebugPrintf(D_003A4AF0);
     }
-    if (context->fieldF1 != 0) {
-        sdfQueueNonzeroResourceId(context->fieldF1);
-        context->fieldF1 = 0;
+    if (context->fieldF1ResourceId != 0) {
+        sdfQueueNonzeroResourceId(context->fieldF1ResourceId);
+        context->fieldF1ResourceId = 0;
         btlBossDebugPrintf(D_003A4B08);
     }
-    context = (BattleController *)btlGetRuntime();
-    context->flags &= ~2;
+    context = (BtlState *)btlGetRuntime();
+    context->battleFlags &= ~2;
 }
 
 extern f32 *D_00324770[];
@@ -9905,7 +9858,7 @@ extern char D_003A4B60[]; /* "btl:field load[%s]\n" */
 extern char D_003A4B78[]; /* "btl:field load end[f%03d_%03d]\n" */
 
 u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
-    BattleController *blocks = (BattleController *)btlGetRuntime();
+    BtlState *blocks = (BtlState *)btlGetRuntime();
     char directory[0x80];
     char path[0x80];
     BtlFieldArchiveNode *node;
@@ -9928,15 +9881,15 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
             while (node != NULL) {
                 switch (i) {
                 case 0:
-                    blocks->fieldF3 = node->handle;
+                    blocks->fieldTBResourceId = node->handle;
                     args->fieldTB = node->data;
                     break;
                 case 1:
-                    blocks->fieldF2 = node->handle;
+                    blocks->fieldF2ResourceId = node->handle;
                     args->fieldF2 = node->data;
                     break;
                 case 2:
-                    blocks->fieldF1 = node->handle;
+                    blocks->fieldF1ResourceId = node->handle;
                     args->fieldF1 = node->data;
                     break;
                 }
@@ -9951,12 +9904,12 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
                                              (s32)args->fieldF1, (s32)args->fieldF2,
                                              (s32)args->fieldTB, 0);
             btlInitializeSceneLightingAndTint();
-            if (blocks->fieldF3 != 0) {
-                sdfQueueNonzeroResourceId(blocks->fieldF3);
-                blocks->fieldF3 = 0;
+            if (blocks->fieldTBResourceId != 0) {
+                sdfQueueNonzeroResourceId(blocks->fieldTBResourceId);
+                blocks->fieldTBResourceId = 0;
                 btlBossDebugPrintf(D_003A4AD8);
             }
-            blocks->flags |= 2;
+            blocks->battleFlags |= 2;
             btlBossDebugPrintf(D_003A4B78, args->stage, args->variant);
             return 1;
         }
