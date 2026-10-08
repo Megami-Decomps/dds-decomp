@@ -27,7 +27,7 @@ jobs:
           python3 tools/test_lb.py
           python3 tools/test_battle_tbl.py
           python3 tools/test_check_unit.py
-          python3 tools/test_reconcile_report.py
+          python3 tools/test_production_report.py
           python3 tools/test_dev_elf.py
           python3 tools/test_include_sdata.py
           python3 tools/test_include_rodata.py
@@ -123,3 +123,11 @@ jobs:
           path: |
             build/dds1/report.all.json
             build/dds2/report.all.json
+            build/dds1/report.json.raw
+            build/dds2/report.json.raw
+            build/dds1/report.all.json.raw
+            build/dds2/report.all.json.raw
+            build/dds1/report.json.proof.json
+            build/dds2/report.json.proof.json
+            build/dds1/report.all.json.proof.json
+            build/dds2/report.all.json.proof.json
