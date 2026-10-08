@@ -2697,8 +2697,6 @@ void fileResetMenuFlowState(void) {
 struct SdfMemBlock;
 struct SdfTex;
 extern void func_001004A0(void);
-extern void *fileQueuePlainDispatchRequest(const char *);
-
 extern void func_002C7CE8(void *);
 extern struct SdfTex *sdfTexAcquireResourceTexture(void *);
 extern struct SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);

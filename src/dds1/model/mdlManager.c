@@ -879,7 +879,7 @@ void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *requestOwner, MdlDoneJob *compl
     }
 }
 
-extern void *fileAllocateDispatchRequest();
+extern void *fileAllocateDispatchRequest(const char *requestName, u32 flags, u32 dispatchValue, u32 onComplete, u32 userData);
 
 extern void mdlCompleteGroupedJobAndNotify();
 
@@ -898,7 +898,8 @@ s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, s32 requestHandle,
     completionJob->arg = jobArg;
     completionJob->doneArg = callbackArg;
     completionJob->done = onComplete;
-    requestSlot = fileAllocateDispatchRequest(requestHandle, 0, 0, mdlCompleteGroupedJobAndNotify, completionJob);
+    requestSlot = fileAllocateDispatchRequest((const char *)requestHandle, 0, 0,
+                                              (u32)mdlCompleteGroupedJobAndNotify, (u32)completionJob);
     completionJob->owner = requestSlot;
     if (onComplete == NULL) {
         func_00288C50((struct FileRequest *)requestSlot);

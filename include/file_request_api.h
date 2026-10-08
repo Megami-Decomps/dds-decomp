@@ -5,6 +5,9 @@
 
 struct FileRequest;
 
+void *fileQueuePlainDispatchRequest(const char *requestName);
+void *fileQueueAlternateCallbackRequest(const char *requestName);
+
 s32 fileIsRequestReadyInCurrentMode(struct FileRequest *request);
 s32 fileRequestIsReady(struct FileRequest *request);
 void fileWaitReady(struct FileRequest *request);

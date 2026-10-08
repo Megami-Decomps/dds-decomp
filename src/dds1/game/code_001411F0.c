@@ -1990,8 +1990,6 @@ void fldUpdateMenuResourceEffects(void) {
     }
 }
 
-extern void *fileQueuePlainDispatchRequest(const char *);
-
 
 extern void func_00288788(void *);
 

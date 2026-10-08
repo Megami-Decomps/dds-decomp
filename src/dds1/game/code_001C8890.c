@@ -5988,8 +5988,6 @@ void *btlCreateUnitFxVectorRefreshTask(u8 *owner) {
 
 extern void sdfFreeMemoryFromEitherHeap(s32);
 
-extern s32 fileQueueAlternateCallbackRequest(char *);
-
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3CA0);
 
 void btlStartGunFinishLoad(s32 task) {
@@ -6003,7 +6001,7 @@ void btlStartGunFinishLoad(s32 task) {
         *(s32 *)(actor + 0x30C) = 0;
     }
     if (btlFormatUnitBedName(actor, filename)) {
-        s32 handle = fileQueueAlternateCallbackRequest(filename);
+        s32 handle = (s32)fileQueueAlternateCallbackRequest(filename);
         *(s32 *)(task + 4) = handle;
         btlBossDebugPrintf("btl:gun & finish load start[%s][%p]\n", filename, handle);
     }
@@ -10099,8 +10097,6 @@ typedef struct BtlFieldLoadArgs {
 } BtlFieldLoadArgs;
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
-extern s32 fileQueuePlainDispatchRequest(const char *);
-
 extern void func_00288788(s32);
 extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32, s32, s32);
 
@@ -11345,9 +11341,6 @@ SoundTask *sndCreateSetStateTask(void) {
     return task;
 }
 
-extern s32 fileQueuePlainDispatchRequest(const char *path);
-
-
 extern void func_00288788(s32 archive);
 
 extern char D_003A5008[];
@@ -11355,7 +11348,7 @@ extern char D_003A5020[];
 /* Consume archive records only for enabled SYSEFF rows; clear unavailable entries. */
 void sndLoadSysEffLb(void) {
     const char *path = D_003A5008;
-    s32 archive = fileQueuePlainDispatchRequest(path);
+    s32 archive = (s32)fileQueuePlainDispatchRequest(path);
     s32 node;
     u32 i;
 

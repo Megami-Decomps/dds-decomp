@@ -182,7 +182,7 @@ extern void sdfPacUseHighAddressAllocator(void *);
 /* Clear a PAC request, initialize its embedded dispatch packet and optionally
  * apply extra packet setup for any nonzero flags. Queue its copied name and
  * completion context as kind one, returning the allocated work. No failure guard. */
-void *fileAllocateDispatchRequest(u32 requestName, u32 flags, u32 dispatchValue, u32 onComplete, u32 userData) {
+void *fileAllocateDispatchRequest(const char *requestName, u32 flags, u32 dispatchValue, u32 onComplete, u32 userData) {
     void *requestWork = sdfAllocAndClearQuadwords(FILE_PAC_REQUEST_BYTES);
     PacState *dispatchPacket = (PacState *)((u8 *)requestWork + FILE_PAC_PACKET_OFFSET);
 
@@ -195,12 +195,12 @@ void *fileAllocateDispatchRequest(u32 requestName, u32 flags, u32 dispatchValue,
 }
 
 /* Queue PAC work without extra packet setup or completion context. */
-void *fileQueuePlainDispatchRequest(u32 requestName) {
+void *fileQueuePlainDispatchRequest(const char *requestName) {
     return fileAllocateDispatchRequest(requestName, 0, 0, 0, 0);
 }
 
 /* Queue PAC work with extra packet setup enabled and no completion context. */
-void fileQueueFlaggedDispatchRequest(u32 requestName) {
+void fileQueueFlaggedDispatchRequest(const char *requestName) {
     fileAllocateDispatchRequest(requestName, 1, 0, 0, 0);
 }
 
@@ -213,7 +213,7 @@ typedef struct FileRequestCallbackWork {
 /* Clear kind-zero request work and narrow callbackMode into byte three.
  * callbackAddress is the queue callback; userData is its context, not another
  * callback. Preserve the existing integer-address parameter representations. */
-void *fileCreateCallbackRequest(u32 requestName, u32 callbackMode, u32 callbackAddress, u32 userData) {
+void *fileCreateCallbackRequest(const char *requestName, u32 callbackMode, u32 callbackAddress, u32 userData) {
     FileRequestCallbackWork *requestWork = sdfAllocAndClearQuadwords(sizeof(FileRequestCallbackWork));
 
     requestWork->unk03 = callbackMode;
@@ -223,12 +223,12 @@ void *fileCreateCallbackRequest(u32 requestName, u32 callbackMode, u32 callbackA
 
 /* Queue a callback-kind request with mode zero and no callback/context. */
 void *fileQueueDefaultCallbackRequest(const char *requestName) {
-    return fileCreateCallbackRequest((u32)requestName, 0, 0, 0);
+    return fileCreateCallbackRequest(requestName, 0, 0, 0);
 }
 
 /* Queue a callback-kind request with mode one and no callback/context. */
-void fileQueueAlternateCallbackRequest(u32 requestName) {
-    fileCreateCallbackRequest(requestName, 1, 0, 0);
+void *fileQueueAlternateCallbackRequest(const char *requestName) {
+    return fileCreateCallbackRequest(requestName, 1, 0, 0);
 }
 
 /* Return the stored resource handle without changing ownership. work is required. */

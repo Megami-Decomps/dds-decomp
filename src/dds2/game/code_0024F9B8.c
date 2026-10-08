@@ -6,6 +6,7 @@
 #include "evt_world.h"
 #include "evt_polygon_movie.h"
 #include "file.h"
+#include "file_request_api.h"
 #include "kwln_task_lifecycle.h"
 
 
