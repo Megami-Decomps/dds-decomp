@@ -1024,9 +1024,6 @@ void func_0016CD68(EffThunderSparkWork *work) {
 }
 
 
-extern void parRiseFallSymmetricCellAlpha(void *system, u32 a, u32 b, u32 c);
-
-
 /* Single- and dual-system variants share this allocation layout, but the
    single-system update counts frames where the dual variant keeps a system. */
 typedef struct {
@@ -1675,8 +1672,6 @@ void effThunderUpdateDualFragments(EffThunderFragmentWork *work) {
     parPrependCellNode(work->state.secondarySystem);
     parPrependCellNode(work->system);
 }
-
-extern void parDecreaseStripCellAlpha(void *system, u32 a, u32 b, u32 c);
 
 /* Parameter head (0x48 bytes) of the cell effect, copied verbatim into the work. */
 typedef struct {
