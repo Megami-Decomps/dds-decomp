@@ -549,14 +549,14 @@ s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);
     StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
     s32 index = ((StaffImageContext *)context)->pageWindow.lists[0]->cursor->index;
-    s32 partyEntry = (s32)&datGameState->party[index];
+    DatPartyRecord *partyEntry = &datGameState->party[index];
     MenuWindowContainer *list;
     struct MenuList *window;
 
     mnuDrawStaffPanelGridBackdrop(1, (StaffSlots *)(context + 0x60));
     mnuDrawStaffCampScreen(1, task);
     mnuCreateStaffImageSprite(8);
-    mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, (void *)partyEntry,
+    mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, partyEntry,
                   ((StaffImageContext *)context)->panelHandle, 0x53);
     if (mdlFlagTest(0x901) != 0) {
         mnuDrawPartyInfoSprites(0, 0, 0, partyEntry,
