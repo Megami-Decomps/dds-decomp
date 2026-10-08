@@ -1,4 +1,5 @@
 #include "eff_bill.h"
+#include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
 #include "sdf_chip.h"
@@ -2644,7 +2645,8 @@ void effSetActiveInstanceMatrixComponent(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
-extern s32 *sdfCreateAssetWithDrawEntries(void);
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
+extern void sdfQueueAssetRelease(s32 assetAddress);
 
 extern void func_003332D0(void *, f32);
 
@@ -2829,7 +2831,7 @@ void effReleaseResourceRefs(EffTrackSet *work) {
             effReleaseSharedReference(work->shared);
         }
     }
-    sdfQueueAssetRelease((u32)work->handle);
+    sdfQueueAssetRelease((s32)work->handle);
     sdfReleaseResourceAllocation(work->allocation);
 }
 
@@ -3039,7 +3041,7 @@ typedef struct EffClassDrawState {
         EffCounterHeader *ring;
         f32 *scales;
     };
-    u32 effect;
+    EffClassWork *effect;
     u32 references;
     struct SdfMemBlock *allocation;
 } EffClassDrawState;
@@ -3133,7 +3135,7 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
 }
 
 void effResetClassFrameAndFlags(s32 work) {
-    u32 resource;
+    EffClassWork *resource;
 
     resource = ((EffClassDrawState *)((EffClassWork *)work)->resource)->effect;
     ((EffCounterHeader *)((EffClassDrawState *)((EffClassWork *)work)->resource)->references)->frame = 0;
@@ -3151,7 +3153,6 @@ typedef struct EffRingClassConfig {
     f32 scaleRand;
 } EffRingClassConfig;
 
-extern u8 *effPayloadPointerSet(u16, void *);
 
 EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
     u32 count = source->ring.segments;
@@ -3176,7 +3177,7 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
     state->allocation = allocation;
     state->scales = scales;
     memcpy(source->classConfig, source, sizeof(source->classConfig));
-    state->effect = (u32)effPayloadPointerSet(1, source->classConfig);
+    state->effect = effCreateClassWork(1, source->classConfig);
     tracks = (EffTrackSet *)effCreateTrackSetWithSharedReferences(count, 2, 0);
     first = source->ring.firstColor;
     state->references = (u32)tracks;
@@ -3417,7 +3418,7 @@ void billDrawCellBlendB(EffClassWork *work) {
     }
 }
 
-u8 *effPayloadPointerSet(u16 kind, void *source) {
+EffClassWork *effCreateClassWork(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = D_003E9B80[kind].payloadSize;
     u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
@@ -3431,28 +3432,28 @@ u8 *effPayloadPointerSet(u16 kind, void *source) {
     memcpy(((EffClassWork *)effect)->payload, source, size);
     ((EffClassWork *)effect)->resource = D_003E9B80[kind].createResource(source);
     D_003E9B80[kind].initialize(effect);
-    return effect;
+    return (EffClassWork *)effect;
 }
 
 void effCreateClassWorkFromFile(s32 request) {
     void *source;
 
     source = fileResolvePrimaryBuffer();
-    effPayloadPointerSet(((FileJob *)request)->option, source);
+    effCreateClassWork(((FileJob *)request)->option, source);
 }
 
-void effDestroyClassWork(u32 *obj) {
-    D_003E9B80[obj[0x2C / 4]].destroyResource(obj[0x30 / 4]);
-    sdfReleaseChipBlock(obj);
+void effDestroyClassWork(EffClassWork *work) {
+    D_003E9B80[work->kind].destroyResource(work->resource);
+    sdfReleaseChipBlock(work);
 }
 
 void effCreateClassWorkFromRequest(s32 work) {
-    effPayloadPointerSet(*(u16 *)(work + 0x2c), ((EffClassWork *)work)->payload);
+    effCreateClassWork(*(u16 *)(work + 0x2c), ((EffClassWork *)work)->payload);
 }
 
-void effInitializeClassFrame(u8 *work) {
-    D_003E9B80[((EffClassWork *)work)->kind].initialize();
-    ((EffClassWork *)work)->frame = 0;
+void effInitializeClassFrame(EffClassWork *work) {
+    D_003E9B80[work->kind].initialize();
+    work->frame = 0;
 }
 
 void effAdvanceClassFrame(work)
@@ -3520,7 +3521,7 @@ u8 *effCreatePointSet4(u32 count) {
 
 /* Queue the draw asset for release and return the backing allocation. */
 void effAssetQueueRelease(s32 work) {
-    sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
+    sdfQueueAssetRelease((s32)((EffPointSet *)work)->handle);
     sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
 }
 
@@ -4054,10 +4055,10 @@ typedef struct EffSurfaceGridNode {
     u32 type;           // 0x30
     u8 *buffer;         // 0x34
     u8 *tail;           // 0x38
-    s32 *handle;        // 0x3C
+    SdfAsset *handle;     // 0x3C
     u8 *queueA;         // 0x40
     u8 *queueB;         // 0x44
-    u8 *allocation;     // 0x48
+    struct SdfMemBlock *allocation; // 0x48
 } EffSurfaceGridNode;
 
 u32 effCreateSurfaceGridNode(u32 count, u32 columns) {
@@ -4152,8 +4153,8 @@ void effFillSurfaceGridColorGradient(u32 nodeAddr, u32 *colors) {
 }
 
 void effReleaseSurfaceGridBuffers(s32 work) {
-    sdfQueueAssetRelease((u32)((EffSurfaceGridNode *)work)->handle);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)((EffSurfaceGridNode *)work)->allocation));
+    sdfQueueAssetRelease((s32)((EffSurfaceGridNode *)work)->handle);
+    sdfReleaseResourceAllocation(((EffSurfaceGridNode *)work)->allocation);
 }
 
 void effResetSurfaceGridFrame(s32 work) {
@@ -4850,7 +4851,7 @@ EffPointSet *effCreatePointSet5(s32 count) {
 
 /* Queue the draw asset for release and return the backing allocation. */
 void effReleasePointSetAsset(s32 work) {
-    sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
+    sdfQueueAssetRelease((s32)((EffPointSet *)work)->handle);
     sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
 }
 
@@ -5021,8 +5022,8 @@ typedef struct EffRibbonWork {
     u8 *positions;      // 0x20
     u8 *uvs;            // 0x24
     u8 *extra;          // 0x28
-    s32 *handle;        // 0x2C
-    u8 *allocation;     // 0x30
+    SdfAsset *handle;     // 0x2C
+    struct SdfMemBlock *allocation; // 0x30
 } EffRibbonWork;
 
 void effResetBillTable(u8 *p) {
@@ -5683,8 +5684,8 @@ void effSharedAssetReferenceRelease(s32 work) {
     else {
         effReleaseSharedReference(((EffRibbonWork *)work)->resource);
     }
-    sdfQueueAssetRelease(((EffRibbonWork *)work)->handle);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(((EffRibbonWork *)work)->allocation));
+    sdfQueueAssetRelease((s32)((EffRibbonWork *)work)->handle);
+    sdfReleaseResourceAllocation(((EffRibbonWork *)work)->allocation);
 }
 
 u8 *effCloneRibbonWithSharedResource(u32 *source) {
@@ -6008,8 +6009,8 @@ typedef struct EffStripWork {
     u8 *uvsA;           // 0x20
     u8 *uvsB;           // 0x24
     u8 *extra;          // 0x28
-    s32 *handle;        // 0x2C
-    u8 *allocation;     // 0x30
+    SdfAsset *handle;     // 0x2C
+    struct SdfMemBlock *allocation; // 0x30
 } EffStripWork;
 
 void effOffsetNodeRowsVU(u8 *work) {
@@ -6229,8 +6230,8 @@ u64 effCreateTexturedStripWithSharedTexture(void) {
 
 void effReleaseScalyStripResources(u8 *work) {
     effReleaseScalyTextureReference(effSharedScalyStripResource);
-    sdfQueueAssetRelease(((EffStripWork *)work)->handle);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(((EffStripWork *)work)->allocation));
+    sdfQueueAssetRelease((s32)((EffStripWork *)work)->handle);
+    sdfReleaseResourceAllocation(((EffStripWork *)work)->allocation);
 }
 
 /* Recreate the source strip's dimensions and retain another shared texture reference. */
@@ -6531,7 +6532,7 @@ EffPointSet *effCreatePointSet3(s32 count) {
 
 /* Queue the draw asset for release and return the backing allocation. */
 void effReleaseModelPointSetAsset(s32 work) {
-    sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
+    sdfQueueAssetRelease((s32)((EffPointSet *)work)->handle);
     sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
 }
 
@@ -7815,13 +7816,13 @@ void effApplyModelTransform(u8 *work) {
     effDrawClassResourceWork(modelContext->material);
 }
 
-extern s32 *sdfCreateAssetWithDrawEntries(void);
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 s32 *effCreateDrawableAssetWithDefaultOpacity() {
     s32 *work = sdfAllocAndClearQuadwords(0xC);
     s32 *position;
     work[2] = 0;
-    position = sdfCreateAssetWithDrawEntries();
+    position = (s32 *)sdfCreateAssetWithDrawEntries();
     work[1] = (s32)position;
     ((EffDrawableAsset *)position)->opacity = 1.0f;
     return work;

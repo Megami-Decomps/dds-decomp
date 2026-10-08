@@ -50,7 +50,6 @@ extern void func_00289BA0(struct MnuStatusResource *);
 extern s32 func_00288920(struct MnuStatusResource *);
 extern s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *, s8);
 
-extern s32 func_00312810(TaskWork *, s32);
 
 extern u32 mnuMantraSelectionResource;
 extern void mnuReleaseMantraPanelPositionTable(void);
@@ -157,7 +156,7 @@ void mnuStopResourceTask(void) {
 }
 
 s32 func_00287030(void) {
-    MnuStatusResource *selected = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
+    MnuStatusResource *selected = (MnuStatusResource *)sdfGetTaskValueByKey((struct TaskWork *)mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
     s32 result = func_00287078(&selected->resourceLoad, 0);
 
     if (result != 0) {
@@ -173,7 +172,7 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287078);
 
 /* Initialize the unit-selection state of the current resource-task work; return zero. */
 s32 mtrUnitSelectInit(void) {
-    MnuStatusResource *resourceWork = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
+    MnuStatusResource *resourceWork = (MnuStatusResource *)sdfGetTaskValueByKey((struct TaskWork *)mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
 
     mtrInitUnitSelectionWork(resourceWork);
     evtPrintDeveloperConsoleMessage("mtrUnitSelectInit\n");
@@ -182,7 +181,7 @@ s32 mtrUnitSelectInit(void) {
 
 /* Release the current work's unit-selection list, profile panel and drawing resources. */
 void mtrUnitSelectRelease(void) {
-    MnuStatusResource *resourceWork = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
+    MnuStatusResource *resourceWork = (MnuStatusResource *)sdfGetTaskValueByKey((struct TaskWork *)mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
 
     mnuReleaseSelectionWorkResources(resourceWork);
     evtPrintDeveloperConsoleMessage("mtrUnitSelectRelease\n");
@@ -190,8 +189,8 @@ void mtrUnitSelectRelease(void) {
 
 /* Status 3 continues this selection task; only status 4 ends it. */
 s32 func_00287670(s32 mode) {
-    MnuStatusResource *resource = (MnuStatusResource *)func_00312810(
-        (struct TaskWork *)mnuMantraSelectionResource, -1);
+    MnuStatusResource *resource = (MnuStatusResource *)sdfGetTaskValueByKey(
+        (struct TaskWork *)mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
 
     switch (func_00288748(resource)) {
     case 1:
@@ -223,14 +222,14 @@ s32 func_00287670(s32 mode) {
 u64 func_00287768(void) {
     MnuStatusResource *resourceWork;
 
-    resourceWork = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
+    resourceWork = (MnuStatusResource *)sdfGetTaskValueByKey((struct TaskWork *)mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
     func_00288920(resourceWork);
     return 0;
 }
 
 /* Enter mantra selection on the current work address and disable terminal-track mode; return zero. */
 s32 mtrMantraSelectInit(void) {
-    u64 resourceAddress = func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
+    u64 resourceAddress = sdfGetTaskValueByKey((struct TaskWork *)mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
 
     mnuEnableTerminalTrackMode(0);
     mnuOpenMantraSelectionAndLoadTitleStream(resourceAddress);
@@ -241,7 +240,7 @@ s32 mtrMantraSelectInit(void) {
 /* Release mantra visuals, clear the work's visible bit and restore terminal-track mode. */
 void mtrMantraSelectRelease(void) {
     MnuStatusResource *resourceWork =
-        (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
+        (MnuStatusResource *)sdfGetTaskValueByKey((struct TaskWork *)mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
 
     mnuReleaseMantraPanelPositionTable();
     mnuCleanupMantraVisualsAndResetTitleStream(resourceWork);
@@ -258,7 +257,7 @@ extern s32 func_0028A1D0(MnuStatusResource *);
  * case 4 queues item 1 for activation and returns -1, while other results return zero. */
 s32 func_00287848(s32 key) {
     mnuTickPanelSoundEntries();
-    switch (func_0028A1D0((MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1))) {
+    switch (func_0028A1D0((MnuStatusResource *)sdfGetTaskValueByKey((struct TaskWork *)mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY))) {
     case 1:
         break;
     case 2:
@@ -279,7 +278,7 @@ s32 func_00287848(s32 key) {
 u64 func_00287900(void) {
     u64 resourceAddress;
 
-    resourceAddress = func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
+    resourceAddress = sdfGetTaskValueByKey((struct TaskWork *)mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
     func_0028B1B0(resourceAddress);
     return 0;
 }
@@ -293,7 +292,7 @@ extern char D_00426218[];
 
 /* Initialize the equip panel from the selected party entry and selector. */
 s32 mtrMantraEquipInit(void) {
-    MnuStatusResource *work = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
+    MnuStatusResource *work = (MnuStatusResource *)sdfGetTaskValueByKey((struct TaskWork *)mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
     DatPartyRecord *snapshot = &work->snapshot;
     MtrEquipState *equip = &work->menu.equip;
     MantraNodePos *selector;
@@ -373,7 +372,7 @@ s32 func_00287C20(void) {
     char text[16];
 
     mnuTickPanelSoundEntries();
-    work = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
+    work = (MnuStatusResource *)sdfGetTaskValueByKey((struct TaskWork *)mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
     equip = &work->menu.equip;
     selectedRecord = mnuGetSelectedNodeValue(work);
     defaultSelector = mnuGetDefaultPanelSelector(work);
@@ -549,7 +548,7 @@ extern s8 evtStageTestUpdate(s32);
 extern u8 D_00380818[];
 
 s32 func_00288158(void) {
-    MnuStatusResource *work = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
+    MnuStatusResource *work = (MnuStatusResource *)sdfGetTaskValueByKey((struct TaskWork *)mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
     f32 ratio;
     s32 value;
 

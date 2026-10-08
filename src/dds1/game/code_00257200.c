@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_task_work.h"
 #include "mnu_profile_progress.h"
 #include "mnu_mantra_grid.h"
 #include "mnu_scene_work.h"
@@ -86,7 +87,6 @@ void mnuDrawMantraPulseGridPasses(MantraPulseDisplayWork *work, s32 surface) {
     sdfSubmitGsTestOneRegisterPacket(0x5100DL, surface);
 }
 
-extern void *func_002CB3B8(s32, s32);
 extern void func_002593E0(MnuProfileProgress *, SdfGrid *, SdfGridCell *);
 extern s32 mnuSceneResourceContext;
 
@@ -95,7 +95,7 @@ void mnuAdvanceMantraPulseGridEntries(MnuProfileProgress *selection, SdfGrid *gr
     s32 row;
     s32 col;
 
-    func_002CB3B8(mnuSceneResourceContext, 1);
+    sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
     for (row = 0; row < 0x11; row++) {
         cell = grid->cells + row * grid->width;
         for (col = 0; col < 15; col++) {
@@ -107,7 +107,6 @@ void mnuAdvanceMantraPulseGridEntries(MnuProfileProgress *selection, SdfGrid *gr
 }
 
 
-extern void *func_002CB3B8(s32, s32);
 extern void func_0024EDC0(s32, s32, s32, s32, s32, s32, f32, f32, s32);
 extern void func_00259498(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, SdfGridCell *, s32);
 extern void func_00259890(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, f32, f32, SdfGridCell *, s32);
@@ -126,7 +125,7 @@ void func_00257718(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
     s32 row;
     s32 n;
 
-    display = func_002CB3B8(mnuSceneResourceContext, 1);
+    display = (MantraPulseDisplayWork *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
     for (row = 0; row < 0xD; row++) {
         func_0024EDC0(arg0, arg1, arg2, arg3, row + 0x1F, 0x20, 1.0f, 1.0f, arg6);
     }
@@ -174,7 +173,7 @@ void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
     s32 row;
     s32 n;
 
-    display = func_002CB3B8(mnuSceneResourceContext, 1);
+    display = (MantraPulseDisplayWork *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
     for (row = 0; row < 0xD; row++) {
         func_0024EDC0(arg0, arg1, arg2, arg3, row + 0x1F, 0x20, scaleX, scaleY, arg6);
     }
