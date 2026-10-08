@@ -1699,6 +1699,7 @@
 0x00175B28	effScatterCopyFlatInstanceMatrix	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x0017D780, input-family pairing. [names_qp10.tsv]
 0x00175B50	effScatterCreateDrawObject	inferred	allocates a drawable owner with geometry arrays and an SDF asset for scatter effects
 0x00175D88	effReleaseScatterObject	inferred	Releases the optional scatter resource and two owned handles before freeing the object.
+0x00175DD0	effScatterDrawObject	inferred	builds scatter geometry packets and submits them to the selected render surface
 0x00176020	effCreateScatterResource	inferred	Creates a scatter resource and stores its handle at offset 0x7C.
 0x00176050	effShareScatterResource	inferred	Increments a source object's scatter resource reference and stores the resulting handle.
 0x00176080	effGetScatterWideBlock	inferred	Computes base at offset 0x64 plus index times object stride times 16.
