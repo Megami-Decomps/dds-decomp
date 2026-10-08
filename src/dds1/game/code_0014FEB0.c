@@ -38,7 +38,55 @@ void *effCloneSourceWithTypeHandler(EffectSource *source) {
     return copy;
 }
 
-INCLUDE_ASM(const s32, "game/code_0014FEB0", func_0014FF28);
+/* Variable-length serialized descriptor; compatibility reads the full tag words. */
+typedef struct EffNodeDescriptor {
+    u32 type;
+    u32 arg;
+    u32 pad08;
+    f32 version;
+    u8 payload[0];
+} EffNodeDescriptor;
+
+extern s32 func_003003F0(const char *format, ...);
+
+/* Normalize legacy payloads before the effect manager constructs their nodes. */
+void func_0014FF28(EffNodeDescriptor *descriptor) {
+    u8 *payload = descriptor->payload;
+
+    if (descriptor->version == 1.0f) {
+        u32 type = descriptor->type;
+        switch (type) {
+        case 0:
+            *(u32 *)(payload + 0xA0) = 0xAC;
+            break;
+        case 1:
+            {
+                u8 *source = payload + *(u32 *)(payload + 4);
+                payload = source + 0x10;
+                *(u32 *)(payload + 0xA0) = 0xAC;
+            }
+            break;
+        case 2:
+            *(u32 *)(payload + 0x18) = 0x20;
+            break;
+        }
+    }
+
+    if (descriptor->version <= 1.01f) {
+        u32 type = descriptor->type;
+        if (type == 1) {
+            u8 *source = payload + *(u32 *)(payload + 4);
+            payload = source + 0x10;
+            *(f32 *)(payload + 0x8C) =
+                *(f32 *)(payload + 0x8C) * 0.1f *
+                    (f32)*(s32 *)(payload + 0x24) +
+                *(f32 *)(payload + 0x10);
+        }
+        if (type < 2 && descriptor->arg == 0) {
+            func_003003F0("effManager:par spiral old version!![%f]\n", descriptor->version);
+        }
+    }
+}
 
 void effInitializeBillResourceOwners(void) {
     u32 i;
