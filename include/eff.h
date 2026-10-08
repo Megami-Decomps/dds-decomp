@@ -334,7 +334,7 @@ typedef struct BillObj {
     u16 animationActive; /* 0x50: cleared by empty or completed nonlooping animation */
     u8 pad52[2];
     u32 modeFlags; /* 0x54: bits 0x40/0x80 select billboard entry modes */
-    u32 unk58;
+    u32 animationEntryIndex; /* 0x58: selected nonempty animation descriptor */
     s32 entryCount;
     struct BillOut *resolvedEntries; /* 0x60: runtime animation state array */
 } BillObj;

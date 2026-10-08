@@ -633,7 +633,7 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
 
         func_003003F0("billAnim..PLURAL SET\n");
         obj->modeFlags = 0x10000000;
-        obj->unk58 = index;
+        obj->animationEntryIndex = index;
         obj->entryCount = entry->frameCount;
         records = (BillPluralRecord *)(data->base + entry->offset);
         for (; i < entry->frameCount; i++) {
@@ -643,14 +643,14 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
     } else if (entry->unk8 & 0xC0) {
         func_003003F0("billAnim..(A)MTEX SET\n");
         obj->modeFlags = entry->unk8;
-        obj->unk58 = index;
+        obj->animationEntryIndex = index;
         obj->entryCount = 2;
         billResolveEntry(data, index, obj->resolvedEntries);
         billResolveEntry(data, index + 1, obj->resolvedEntries + 1);
     } else {
         obj->modeFlags = 0;
         obj->entryCount = 1;
-        obj->unk58 = index;
+        obj->animationEntryIndex = index;
         billResolveEntry(data, index, obj->resolvedEntries);
     }
     if (entry->unk8 & 0x100) {

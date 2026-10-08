@@ -304,7 +304,7 @@ u16 billGetVariantValue(BillObj *effect) {
 
 /* Replace the selected list entry only when its index changes. */
 void billSetKind1Entry(BillObj *effect, u32 entryIndex) {
-    if (effect->kind == 1 && effect->unk58 != entryIndex) {
+    if (effect->kind == 1 && effect->animationEntryIndex != entryIndex) {
         billSetAnimationEntry(effect, entryIndex);
     }
 }
@@ -312,7 +312,7 @@ void billSetKind1Entry(BillObj *effect, u32 entryIndex) {
 /* Read the selected entry for list billboards; other kinds have none. */
 s32 billGetKindOneEntry(BillObj *effect) {
     if (effect->kind == 1) {
-        return effect->unk58;
+        return effect->animationEntryIndex;
     }
     return 0;
 }
