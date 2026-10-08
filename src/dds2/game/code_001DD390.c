@@ -2519,7 +2519,7 @@ s32 btlIsUnitModelStateFive(BtlUnit *unit) {
     return unit->ext->owner->first->state == 5;
 }
 
-extern void effObjSetInnerFirstVec(s32, f32 *);
+extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
 
 void btlSetUnitPosition(BtlUnit *unit, f32 *vec) {
     f32 pos[4];
@@ -2532,7 +2532,7 @@ void btlSetUnitPosition(BtlUnit *unit, f32 *vec) {
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         if (unit->flags & 2) {
             pos[2] += unit->positionZOffset;
-            effObjSetInnerFirstVec(unit->effectObject, pos);
+            effObjSetInnerFirstVec(unit->effectObject, (u128 *)pos);
         }
     }
 }
@@ -2648,7 +2648,7 @@ extern u8 D_004179E0[];
 
 extern void effMiscQuatMultiplyVU(void);
 
-extern void effObjSetInnerSecondVec(EffWorldNode *, void *);
+extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
 
 void btlSetUnitRotation(BtlUnit *unit, s128 *quat) {
     f32 result[4];
@@ -2663,7 +2663,7 @@ void btlSetUnitRotation(BtlUnit *unit, s128 *quat) {
         effMiscQuatMultiplyVU();
         VU0_STORE_VF_UNCLOBBERED(vf10, result);
         if (unit->flags & 2) {
-            effObjSetInnerSecondVec(unit->effectObject, result);
+            effObjSetInnerSecondVec(unit->effectObject, (u128 *)result);
         }
     }
 }
@@ -4098,7 +4098,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
             pos[0] += scale;
             pos[2] += args->unit->positionZOffset;
         }
-        effObjSetInnerFirstVec(args->unit->effectObject, pos);
+        effObjSetInnerFirstVec(args->unit->effectObject, (u128 *)pos);
         args->scale *= 0.85f;
     } else {
         if (btlUnitStatusPair(args->unit) & 0x808000000000) {
@@ -4108,7 +4108,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
             func_001E3108(args->unit, pos);
             pos[2] += args->unit->positionZOffset;
         }
-        effObjSetInnerFirstVec(args->unit->effectObject, pos);
+        effObjSetInnerFirstVec(args->unit->effectObject, (u128 *)pos);
         return 1;
     }
     args->count += 1;
@@ -5189,8 +5189,8 @@ void func_001E9410(void) {
     VU0_STORE_VF(vf10, position);
     camera = dds3GetWorldCameraObject(dds3GetWorldObject());
     if (camera != NULL) {
-        effObjSetInnerFirstVec(camera, position);
-        effObjSetInnerSecondVec(camera, D_003B6D80);
+        effObjSetInnerFirstVec(camera, (u128 *)position);
+        effObjSetInnerSecondVec(camera, (u128 *)D_003B6D80);
         data = camera->data;
         dds3SetCameraFieldOfView(camera, 0.6981317f);
         data->fovUpdatePending |= 1;
@@ -10838,7 +10838,7 @@ void btlMoveOtherUnitsAway(ActionStateLink *link) {
                 func_001E3108(other, pos);
                 pos[1] += 1000000.0f;
                 pos[0] = 0;
-                effObjSetInnerFirstVec(other->effectObject, pos);
+                effObjSetInnerFirstVec(other->effectObject, (u128 *)pos);
                 btlSetUnitPosition(other, pos);
             }
         }
@@ -11194,7 +11194,7 @@ void func_00206C18(ActionStateLink *link, BtlUnit *other) {
                     if ((btlUnitStatusPair(unit) & 0x102) == 0x102) {
                         PCP_COPY_VECTOR(pos, &D_003BE0A0);
                         pos[1] += 1000000.0f;
-                        effObjSetInnerFirstVec(unit->effectObject, pos);
+                        effObjSetInnerFirstVec(unit->effectObject, (u128 *)pos);
                     }
                 }
             }
