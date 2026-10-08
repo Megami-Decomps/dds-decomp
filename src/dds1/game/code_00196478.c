@@ -52,58 +52,15 @@ extern u32 D_003BB18C;
 extern SdfTex *itfBackgroundSpriteTexture;
 
 extern u8 D_003BB188[];
-typedef struct FrFontCtx FrFontCtx;
-typedef struct TextDrawArgs TextDrawArgs;
-/* Complete 0x44-byte nodes allocated by the font parent pool. */
-typedef struct FrFontGlyph {
-    union {
-        s16 h;                        /* 0x0: halfword view */
-        struct { s8 b0; s8 b1; } b;   /* 0x0: byte views */
-    } u0;
-    u16 unk2;         /* 0x2 */
-    s32 x;            /* 0x4: horizontal position */
-    s32 y;            /* 0x8: vertical position */
-    s32 advance;      /* 0xC: advance shifted by four when linking glyphs */
-    union {
-        u32 word;     /* 0x10: word view */
-        u16 half[2];  /* 0x10: halfword views */
-        u8 byte[4];   /* 0x10: byte views */
-    } u10;
-    union {
-        u32 w;        /* 0x14: word view */
-        u8 b[4];      /* 0x14: byte views */
-    } u14;
-    union {
-        u32 w;            /* 0x18: word view */
-        u8 b[4];          /* 0x18: byte views */
-    } unk18;
-    struct FrFontGlyph *firstChild; /* 0x1C: chain traversed by frFontMeasureGlyphChain */
-    struct FrFontGlyph *unk20; /* 0x20 */
-    struct FrFontGlyph *previous; /* 0x24: backward link through the glyph chain */
-    struct FrFontGlyph *next; /* 0x28: next glyph in chain */
-    struct FrFontGlyph *chainHead; /* 0x2C: first glyph in the linked chain */
-    u32 unk30;        /* 0x30 */
-    u32 unk34;        /* 0x34 */
-    u32 unk38;        /* 0x38 */
-    s32 unk3C;        /* 0x3C */
-    s32 unk40;        /* 0x40 */
-} FrFontGlyph;
-
-struct TextStyleNode;
 extern FrFontGlyph *func_001951C8(void *, s8, s8, s8, FrFontGlyph *);
 extern void frFontCheckPendingGlyphState(FrFontCtx *);
 extern void frFontAdvanceContextCursor(FrFontCtx *);
-extern void func_00196220(u8, TextDrawArgs *);
+extern void func_00196220(u8, FrFontCtx *);
 extern u8 frFontSharedGlyphFlags;
 extern void mnuSetTitleVoicePrefixIndex(s32);
 extern void mnuPlayTitleVoiceFile(char *);
 extern s32 mnuGetTitleEffectFrameCounter(void);
 
-extern FrFontCtx *frFontAppendGlyphFromData(void *, s8, s8, s8, s32);
-extern void frFontStoreShiftedContextValue(FrFontCtx *, u32);
-extern void frFontSetContextPair(FrFontCtx *, u32, u32);
-extern void frFontSetChildColors(struct TextStyleNode *, u32);
-extern void frFontSetFlagAndMeasureGlyphs();
 extern FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *, FrFontGlyph *);
 extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *, FrFontGlyph *, s32);
 
@@ -222,18 +179,6 @@ typedef struct TextPool {
     TextPoolNode *freeTail;
 } TextPool;
 
-typedef struct TextStyleNode {
-    u8 pad00[4];
-    u32 x;
-    u32 y;
-    u8 pad0C[4];
-    u32 color;
-    u8 pad14[8];
-    struct TextStyleNode *firstChild;
-    u8 pad20[4];
-    struct TextStyleNode *next;
-    struct TextStyleNode *nextChild;
-} TextStyleNode;
 
 typedef struct TextVector {
     s32 x;
@@ -242,23 +187,12 @@ typedef struct TextVector {
     s32 w;
 } TextVector;
 
-struct TextDrawArgs {
-    s32 x;         /* 0x00 */
-    s32 y;         /* 0x04 */
-    s32 z;         /* 0x08 */
-    u8 color[4];   /* 0x0C */
-    u8 *encodedText; /* 0x10: encoded input base */
-    FrFontGlyph *sub; /* 0x14: glyph subcontext */
-    s32 offset;    /* 0x18: current byte position */
-    s8 unk1C;      /* 0x1C */
-    u8 unk1D;      /* 0x1D */
-};
-extern s32 func_00197068(TextDrawArgs *args);
+extern s32 func_00197068(FrFontCtx *args);
 
 /* Subtract one modulo 256 from the first byte, then advance over the whole pair. */
-u32 itfReadEncodedTextLead(TextDrawArgs *args) {
+u32 itfReadEncodedTextLead(FrFontCtx *args) {
     s32 *position = &args->offset;
-    u8 *byte = args->encodedText + *position;
+    u8 *byte = args->bytes + *position;
     u32 value = *byte;
 
     *position += 2;
@@ -267,8 +201,8 @@ u32 itfReadEncodedTextLead(TextDrawArgs *args) {
 
 /* Decode a little-endian pair; encoded high byte 0xFF is the zero escape.
  * Neither reader checks the input length. */
-u32 itfReadEncodedCode(TextDrawArgs *args) {
-    u8 *bytes = args->encodedText;
+u32 itfReadEncodedCode(FrFontCtx *args) {
+    u8 *bytes = args->bytes;
     u32 first;
     u32 second;
 
@@ -287,11 +221,10 @@ extern u32 D_003D6E20[];
 extern FrFontSystem frFontWork;
 extern s32 D_003BAA98;
 extern s32 D_003BAA9C;
-s32 itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub);
 
-s32 func_001964F8(s32 code, TextDrawArgs *stream) {
+s32 func_001964F8(s32 code, FrFontCtx *stream) {
     s32 *position = &stream->offset;
-    u8 *bytes = stream->encodedText;
+    u8 *bytes = stream->bytes;
     s32 payloadWords = code & 0xF;
     s32 payloadPosition = *position;
 
@@ -299,25 +232,25 @@ s32 func_001964F8(s32 code, TextDrawArgs *stream) {
     *position = payloadPosition;
     switch (code) {
     case 0xF206:
-        stream->color[0] = bytes[payloadPosition] - 1;
+        stream->channel0 = bytes[payloadPosition] - 1;
         *position = payloadPosition + 2;
         break;
     case 0xF202:
-        stream->color[1] = bytes[payloadPosition] - 1;
+        stream->channel1 = bytes[payloadPosition] - 1;
         *position = payloadPosition + 2;
         break;
     case 0xF209:
-        stream->color[2] = bytes[payloadPosition] - 1;
+        stream->channel2 = bytes[payloadPosition] - 1;
         *position = payloadPosition + 2;
         break;
     case 0xF207:
-        stream->color[3] = bytes[payloadPosition] - 1;
+        stream->channel3 = bytes[payloadPosition] - 1;
         *position = payloadPosition + 2;
         break;
     case 0xF203:
         if (D_003D6E20[bytes[*position] - 1] != 0) {
-            frFontCheckPendingGlyphState((FrFontCtx *)stream);
-            func_00196220((u8)(stream->encodedText[*position] - 1), stream);
+            frFontCheckPendingGlyphState(stream);
+            func_00196220((u8)(stream->bytes[*position] - 1), stream);
         }
         *position += 2;
         break;
@@ -346,7 +279,7 @@ checkAutomaticLine:
             break;
         }
 advanceLine:
-        frFontAdvanceContextCursor((FrFontCtx *)stream);
+        frFontAdvanceContextCursor(stream);
         break;
     case 0xF112:
         D_003BB15C |= 4;
@@ -356,24 +289,24 @@ advanceLine:
         mnuPlayTitleVoiceFile((char *)itfReadEncodedCode(stream));
         break;
     case 0xF214:
-        if (stream->sub->unk34 != 0) {
-            stream->sub->unk38 = 1;
+        if (stream->glyphChain->unk34 != 0) {
+            stream->glyphChain->unk38 = 1;
         }
-        stream->sub->unk30 = code;
-        stream->sub->unk3C = itfReadEncodedCode(stream);
+        stream->glyphChain->unk30 = code;
+        stream->glyphChain->unk3C = itfReadEncodedCode(stream);
         break;
     case 0xF215:
-        if (stream->sub->unk34 != 0) {
-            stream->sub->unk38 = 1;
+        if (stream->glyphChain->unk34 != 0) {
+            stream->glyphChain->unk38 = 1;
         }
-        stream->sub->unk30 = code;
-        stream->sub->unk3C = itfReadEncodedCode(stream);
-        if (stream->sub->unk3C != 0xFFFF) {
+        stream->glyphChain->unk30 = code;
+        stream->glyphChain->unk3C = itfReadEncodedCode(stream);
+        if (stream->glyphChain->unk3C != 0xFFFF) {
             s32 frame = mnuGetTitleEffectFrameCounter();
-            stream->sub->unk3C -= frame;
+            stream->glyphChain->unk3C -= frame;
         }
-        if (stream->sub->unk3C < 0) {
-            stream->sub->unk3C = 0;
+        if (stream->glyphChain->unk3C < 0) {
+            stream->glyphChain->unk3C = 0;
         }
         break;
     case 0xF416:
@@ -382,7 +315,7 @@ advanceLine:
         D_003BB15C |= 8;
         break;
     case 0xF117:
-        stream->sub->unk34 = code;
+        stream->glyphChain->unk34 = code;
         break;
     case 0xF20A:
     case 0xF20B:
@@ -393,44 +326,44 @@ advanceLine:
         stream->offset += (payloadWords - 1) << 1;
         break;
     }
-    if (stream->unk1C == 0) {
-        stream->unk1C = 1;
+    if (stream->pendingCreate == 0) {
+        stream->pendingCreate = 1;
     }
     return 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_001968C0);
 
-void itfDrawDefaultColorText(s32 x, s32 y, s32 encodedText, s32 sub) {
-    itfDrawEncodedTextStream(x, y, 0, 0, 0, 0, 0x80, encodedText, sub);
+FrFontGlyph *itfDrawDefaultColorText(s32 x, s32 y, u8 *encodedText, FrFontGlyph *sub) {
+    return itfDrawEncodedTextStream(x, y, 0, 0, 0, 0, 0x80, encodedText, sub);
 }
 
-void itfDrawCustomColorText(s32 x, s32 y, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub) {
-    itfDrawEncodedTextStream(x, y, 0, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, sub);
+FrFontGlyph *itfDrawCustomColorText(s32 x, s32 y, s32 channel0, s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, FrFontGlyph *sub) {
+    return itfDrawEncodedTextStream(x, y, 0, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, sub);
 }
 
-extern s32 func_001968C0(TextDrawArgs *);
+extern FrFontGlyph *func_001968C0(FrFontCtx *);
 
-s32 itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub) {
-    TextDrawArgs args;
+FrFontGlyph *itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, FrFontGlyph *sub) {
+    FrFontCtx args;
 
     args.x = x;
     args.y = y;
     args.z = depth << 4;
-    args.color[0] = channel0;
-    args.color[1] = channel1;
-    args.color[2] = channel2;
-    args.color[3] = channel3;
-    args.encodedText = (u8 *)(u32)encodedText;
-    args.sub = (FrFontGlyph *)(u32)sub;
+    args.channel0 = channel0;
+    args.channel1 = channel1;
+    args.channel2 = channel2;
+    args.channel3 = channel3;
+    args.bytes = encodedText;
+    args.glyphChain = sub;
     args.offset = 0;
-    args.unk1C = 1;
-    args.unk1D = 1;
+    args.pendingCreate = 1;
+    args.pendingPosition = 1;
     return func_001968C0(&args);
 }
 
-s32 itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
-                   s32 channel2, s32 channel3, s32 encodedText, s32 unusedSub) {
+FrFontGlyph *itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
+                   s32 channel2, s32 channel3, u8 *encodedText, FrFontGlyph *unusedSub) {
     return itfDrawEncodedTextStream(x, y, depth, channel0 & 0xff, channel1 & 0xff,
                   channel2 & 0xff, channel3 & 0xff, encodedText, 0);
 }
@@ -457,21 +390,21 @@ INCLUDE_ASM(const s32, "game/code_00196478", func_00196ED0);
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_00197068);
 
-s32 itfInitTextDrawArgs(s32 encodedText, s32 sub) {
-    TextDrawArgs args;
+s32 itfInitTextDrawArgs(u8 *encodedText, FrFontGlyph *sub) {
+    FrFontCtx args;
 
     args.x = 0;
     args.y = 0;
     args.z = 0;
-    args.color[0] = 0;
-    args.color[1] = 0;
-    args.color[2] = 0;
-    args.color[3] = 0;
-    args.encodedText = (u8 *)(u32)encodedText;
-    args.sub = (FrFontGlyph *)(u32)sub;
+    args.channel0 = 0;
+    args.channel1 = 0;
+    args.channel2 = 0;
+    args.channel3 = 0;
+    args.bytes = encodedText;
+    args.glyphChain = sub;
     args.offset = 0;
-    args.unk1C = 1;
-    args.unk1D = 1;
+    args.pendingCreate = 1;
+    args.pendingPosition = 1;
     return func_00197068(&args);
 }
 
@@ -492,8 +425,8 @@ void itfSetTextDrawLimit(s32 limit) {
     frFontDefaultGlyphCellSize = limit;
 }
 
-FrFontCtx *frFontBuildColoredGlyphWithSharedFlags(u32 x, u32 y, s32 depth, s32 alt, s32 measureFlag, u64 entryFlag, u32 colors, void *source) {
-    FrFontCtx *glyph;
+FrFontGlyph *frFontBuildColoredGlyphWithSharedFlags(u32 x, u32 y, s32 depth, s32 alt, s32 measureFlag, u64 entryFlag, u32 colors, void *source) {
+    FrFontGlyph *glyph;
     s32 kind = 4;
 
     if (alt) {
@@ -510,8 +443,8 @@ FrFontCtx *frFontBuildColoredGlyphWithSharedFlags(u32 x, u32 y, s32 depth, s32 a
     frFontSetFlagAndMeasureGlyphs(glyph, measureFlag);
     frFontSetContextPair(glyph, x, y);
     frFontStoreShiftedContextValue(glyph, depth << 4);
-    frFontSetChildColors((TextStyleNode *)glyph, colors);
-    frFontSetChainFlag((FrFontGlyph *)glyph, 5);
+    frFontSetChildColors(glyph, colors);
+    frFontSetChainFlag(glyph, 5);
     return glyph;
 }
 
@@ -562,15 +495,15 @@ void itfConvertText(u8 *output, const char *input) {
 /* Build a glyph with a fixed 16x18 cell, then attach it to its parent. */
 void itfAttachGlyph16x18(u32 x, u32 y, s32 depth, u32 colors,
                                     void *glyphSource, FrFontGlyph *parent) {
-    FrFontCtx *glyph;
+    FrFontGlyph *glyph;
 
     glyph = frFontAppendGlyphFromData(glyphSource, 0, 0, 0, 0);
-    frFontSetGlyphChainDimensions((FrFontGlyph *)glyph, 0x10, 0x12);
+    frFontSetGlyphChainDimensions(glyph, 0x10, 0x12);
     frFontSetContextPair(glyph, x, y);
     frFontStoreShiftedContextValue(glyph, depth << 4);
-    frFontSetChildColors((TextStyleNode *)glyph, colors);
+    frFontSetChildColors(glyph, colors);
     frFontSetFlagAndMeasureGlyphs(glyph, -4);
-    frFontLinkGlyph(parent, (FrFontGlyph *)glyph, 0);
+    frFontLinkGlyph(parent, glyph, 0);
 }
 
 FrFontGlyph *itfAppendTextGlyphChain(s32 x, s32 y, s32 depth, u32 colors, const char *text,
@@ -590,7 +523,7 @@ FrFontGlyph *itfAppendTextGlyphChain(s32 x, s32 y, s32 depth, u32 colors, const 
     if (length > 0) {
         do {
             const char *character = text + position;
-            TextStyleNode *glyph;
+            FrFontGlyph *glyph;
 
             if (character[0] >= 0) {
                 glyphData[0] = character[0];
@@ -602,11 +535,11 @@ FrFontGlyph *itfAppendTextGlyphChain(s32 x, s32 y, s32 depth, u32 colors, const 
                 glyphLength = 2;
                 glyphData[2] = 0;
             }
-            glyph = (TextStyleNode *)frFontAppendGlyphFromData(glyphData, glyphMode, 0, 0, 0);
-            frFontStoreShiftedContextValue((FrFontCtx *)glyph, depth << 4);
+            glyph = frFontAppendGlyphFromData(glyphData, glyphMode, 0, 0, 0);
+            frFontStoreShiftedContextValue(glyph, depth << 4);
             frFontSetChildColors(glyph, colors);
-            frFontSetFlagAndMeasureGlyphs((FrFontCtx *)glyph, 3);
-            chain = frFontLinkGlyphAfterPrevious(chain, (FrFontGlyph *)glyph);
+            frFontSetFlagAndMeasureGlyphs(glyph, 3);
+            chain = frFontLinkGlyphAfterPrevious(chain, glyph);
             if (position == 0) {
                 glyph->x = x;
             }
@@ -622,15 +555,15 @@ FrFontGlyph *itfAppendTextGlyphChain(s32 x, s32 y, s32 depth, u32 colors, const 
     return chain;
 }
 
-s32 frFontCreateMeasuredFlaggedGlyph(x, y, depth, colors, text, parent)
+FrFontGlyph *frFontCreateMeasuredFlaggedGlyph(x, y, depth, colors, text, parent)
 s32 x;
 s32 y;
 s32 depth;
 s32 colors;
-s32 text;
-s32 parent;
+const char *text;
+FrFontGlyph *parent;
 {
-    s32 handle = (s32)itfAppendTextGlyphChain(x, y, depth, colors, (const char *)text, 1, 0, (FrFontGlyph *)parent);
+    FrFontGlyph *handle = itfAppendTextGlyphChain(x, y, depth, colors, text, 1, 0, parent);
 
     frFontSetFlagAndMeasureGlyphs(handle, 3);
     return handle;
@@ -641,11 +574,11 @@ void func_00197748(void) {
 }
 
 /* Decode two-byte glyph codes before building and linking the text glyph. */
-u32 itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, s32 parent) {
+FrFontGlyph *itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, FrFontGlyph *parent) {
     u8 buffer[0x400];
     s32 i;
     s32 length = strlen((const char *)text);
-    FrFontCtx *glyph;
+    FrFontGlyph *glyph;
 
     buffer[length] = 0;
     for (i = 0; i < length; i++) {
@@ -674,49 +607,49 @@ u32 itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *t
     frFontClearFlagBits(1);
     frFontSetContextPair(glyph, x, y);
     frFontStoreShiftedContextValue(glyph, depth << 4);
-    frFontSetChildColors((struct TextStyleNode *)glyph, colors);
-    return (u32)frFontLinkGlyph((FrFontGlyph *)parent, (FrFontGlyph *)glyph, 0);
+    frFontSetChildColors(glyph, colors);
+    return frFontLinkGlyph(parent, glyph, 0);
 }
 
-u32 func_001978E8(s32 x, s32 y, s32 depth, u32 colors, char *text, s32 previousGlyph) {
+FrFontGlyph *func_001978E8(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFontGlyph *previousGlyph) {
     FrFontGlyph *glyph;
 
-    glyph = (FrFontGlyph *)frFontAppendGlyphFromData(D_003BB188, 0, 0, 0, previousGlyph);
+    glyph = frFontAppendGlyphFromData(D_003BB188, 0, 0, 0, previousGlyph);
     frFontClearFlagBits(2);
     glyph = func_001951C8(text, 2, 0, 0, glyph);
-    frFontSetFlagAndMeasureGlyphs((FrFontCtx *)glyph, -1);
+    frFontSetFlagAndMeasureGlyphs(glyph, -1);
     frFontAddSharedGlyphFlags(2);
-    frFontSetContextPair((FrFontCtx *)glyph, x, y);
-    frFontStoreShiftedContextValue((FrFontCtx *)glyph, depth << 4);
-    frFontSetChildColors((TextStyleNode *)glyph, colors);
-    return (u32)glyph;
+    frFontSetContextPair(glyph, x, y);
+    frFontStoreShiftedContextValue(glyph, depth << 4);
+    frFontSetChildColors(glyph, colors);
+    return glyph;
 }
 
-u32 func_001979C8(s32 x, s32 y, s32 depth, s32 colors, char *text, s32 previousGlyph) {
+FrFontGlyph *func_001979C8(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFontGlyph *previousGlyph) {
     FrFontGlyph *glyph;
 
-    glyph = (FrFontGlyph *)frFontAppendGlyphFromData(D_003BB188, 0, 0, 0, previousGlyph);
+    glyph = frFontAppendGlyphFromData(D_003BB188, 0, 0, 0, previousGlyph);
     frFontClearFlagBits(2);
     glyph = func_001951C8(text, 3, 0, 0, glyph);
     frFontAddSharedGlyphFlags(2);
-    frFontSetContextPair((FrFontCtx *)glyph, x, y);
-    frFontStoreShiftedContextValue((FrFontCtx *)glyph, depth << 4);
-    frFontSetChildColors((TextStyleNode *)glyph, colors);
-    return (u32)glyph;
+    frFontSetContextPair(glyph, x, y);
+    frFontStoreShiftedContextValue(glyph, depth << 4);
+    frFontSetChildColors(glyph, colors);
+    return glyph;
 }
 
-u32 func_00197A98(s32 x, s32 y, s32 depth, s32 colors, char *text, s32 previousGlyph) {
+FrFontGlyph *func_00197A98(s32 x, s32 y, s32 depth, s32 colors, char *text, FrFontGlyph *previousGlyph) {
     FrFontGlyph *glyph;
 
-    glyph = (FrFontGlyph *)frFontAppendGlyphFromData(D_003BB188, 0, 0, 0, previousGlyph);
+    glyph = frFontAppendGlyphFromData(D_003BB188, 0, 0, 0, previousGlyph);
     frFontClearFlagBits(2);
     glyph = func_001951C8(text, 3, 0, 0, glyph);
-    frFontSetFlagAndMeasureGlyphs((FrFontCtx *)glyph, -2);
+    frFontSetFlagAndMeasureGlyphs(glyph, -2);
     frFontAddSharedGlyphFlags(2);
-    frFontSetContextPair((FrFontCtx *)glyph, x, y);
-    frFontStoreShiftedContextValue((FrFontCtx *)glyph, depth << 4);
-    frFontSetChildColors((TextStyleNode *)glyph, colors);
-    return (u32)glyph;
+    frFontSetContextPair(glyph, x, y);
+    frFontStoreShiftedContextValue(glyph, depth << 4);
+    frFontSetChildColors(glyph, colors);
+    return glyph;
 }
 
 /* Attach the alternate font glyph, with a 12x16 cell, to its parent. */
@@ -726,22 +659,22 @@ void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
 
     glyph = func_001951C8(glyphSource, 0, 0, 0, 0);
     frFontSetGlyphChainDimensions(glyph, 0xc, 0x10);
-    frFontSetFlagAndMeasureGlyphs((FrFontCtx *)glyph, 3);
-    frFontSetContextPair((FrFontCtx *)glyph, x, y);
-    frFontStoreShiftedContextValue((FrFontCtx *)glyph, depth << 4);
-    frFontSetChildColors((TextStyleNode *)glyph, colors);
+    frFontSetFlagAndMeasureGlyphs(glyph, 3);
+    frFontSetContextPair(glyph, x, y);
+    frFontStoreShiftedContextValue(glyph, depth << 4);
+    frFontSetChildColors(glyph, colors);
     frFontLinkGlyph(parent, glyph, 0);
 }
 
-extern s32 func_001961B0(u16 textId, s32 bank, s32 mode);
-extern s32 func_00195E60(s32 text);
-extern s32 func_00195ED8(s32 line, s32 text);
-extern void frFontMoveChainTo(s32 x, s32 y, s32 text);
+extern u8 *func_001961B0(u16 textId, s32 bank, s32 mode);
+extern s32 func_00195E60(FrFontGlyph *text);
+extern s32 func_00195ED8(s32 line, FrFontGlyph *text);
+extern void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *text);
 
-s32 itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, s32 bank, s32 flags) {
-    s32 text = func_001961B0(textId, bank, 0);
+FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, s32 bank, s32 flags) {
+    u8 *text = func_001961B0(textId, bank, 0);
     u32 mode;
-    s32 handle;
+    FrFontGlyph *handle;
 
     if (text == 0) {
         return 0;
@@ -1161,28 +1094,28 @@ void itfScaleVectors(TextVector *output, s32 scaleX, s32 scaleY, s32 scaleZ,
 }
 
 /* Replace each child color; parent color words are not modified. */
-void itfSetStyleColor(TextStyleNode *entry, u32 color) {
-    for (; entry != NULL; entry = entry->next) {
-        TextStyleNode *child;
-        for (child = entry->firstChild; child != NULL; child = child->nextChild) {
-            child->color = color;
+void itfSetStyleColor(FrFontGlyph *entry, u32 color) {
+    for (; entry != NULL; entry = entry->previous) {
+        FrFontGlyph *child;
+        for (child = entry->firstChild; child != NULL; child = child->next) {
+            child->u10.word = color;
         }
     }
 }
 
 /* Clear each child's low byte, then OR unmasked bits into the full color word. */
-void itfSetStyleColorBits(TextStyleNode *entry, u32 colorBits) {
-    for (; entry != NULL; entry = entry->next) {
-        TextStyleNode *child;
-        for (child = entry->firstChild; child != NULL; child = child->nextChild) {
-            child->color = (child->color & ~ITF_BYTE_MASK) | colorBits;
+void itfSetStyleColorBits(FrFontGlyph *entry, u32 colorBits) {
+    for (; entry != NULL; entry = entry->previous) {
+        FrFontGlyph *child;
+        for (child = entry->firstChild; child != NULL; child = child->next) {
+            child->u10.word = (child->u10.word & ~ITF_BYTE_MASK) | colorBits;
         }
     }
 }
 
 /* Translate parent entries only; child coordinates are left unchanged. */
-void itfTranslateStyleEntries(TextStyleNode *entry, u32 xOffset, u32 yOffset) {
-    for (; entry != NULL; entry = entry->next) {
+void itfTranslateStyleEntries(FrFontGlyph *entry, u32 xOffset, u32 yOffset) {
+    for (; entry != NULL; entry = entry->previous) {
         entry->x += xOffset;
         entry->y += yOffset;
     }

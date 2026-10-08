@@ -1,23 +1,5 @@
 #include "common.h"
-typedef struct SolarNoiseLayer {
-    s16 x;
-    s16 y;
-    s16 age;
-    s8 active;
-    u8 scale;
-} SolarNoiseLayer;
-
-typedef struct SolarNoiseState {
-    s16 centerX;
-    s16 centerY;
-    s16 radiusX;
-    s16 radiusY;
-    u16 spawnAge;
-    s16 spawnInterval;
-    u16 activeCount;
-    u16 pad0E;
-    SolarNoiseLayer layers[10];
-} SolarNoiseState;
+#include "evt_solar.h"
 
 typedef struct SolarNoiseDebugData {
     const char *label;
@@ -54,12 +36,6 @@ typedef struct SolarOverlayShape {
 extern f32 sdfSinPoly(f32 angle);
 extern void func_00228E20(s32, s32, s32, s32, s32, s32, s32, s32, f32);
 
-typedef struct SolarPoint {
-    u16 age;
-    s16 duration;
-    u8 active;
-    u8 pad05;
-} SolarPoint;
 
 typedef struct {
     u8 pad00[4];
@@ -441,8 +417,8 @@ void evtDrawLongSolarNoiseLayers(s32 x, s32 y, s32 z, s32 width, SolarNoiseState
 }
 
 /* Activate the first inactive solar point. */
-void evtActivateNextSolarPoint(s32 object) {
-    SolarPoint *points = (SolarPoint *)(object + 0xC);
+void evtActivateNextSolarPoint(SolarOverlayWork *overlay) {
+    SolarPoint *points = overlay->state.points;
     s32 i;
 
     for (i = 0; i < 8; i++) {
@@ -454,8 +430,8 @@ void evtActivateNextSolarPoint(s32 object) {
 }
 
 /* Deactivate the last active solar point. */
-void evtDeactivateLastSolarPoint(s32 object) {
-    SolarPoint *points = (SolarPoint *)(object + 0xC);
+void evtDeactivateLastSolarPoint(SolarOverlayWork *overlay) {
+    SolarPoint *points = overlay->state.points;
     s32 i;
 
     for (i = 7; i >= 0; i--) {
@@ -466,14 +442,14 @@ void evtDeactivateLastSolarPoint(s32 object) {
     }
 }
 
-void evtSetSolarPointActiveCount(s32 object, u32 desiredCount) {
+void evtSetSolarPointActiveCount(SolarOverlayWork *overlay, u32 desiredCount) {
     SolarPoint *point;
     u8 *active;
     u32 activeCount;
     s32 i;
 
     activeCount = 0;
-    point = (SolarPoint *)(object + 0xC);
+    point = overlay->state.points;
     active = &point->active;
     for (i = 0; i < 8; i++, active += sizeof(*point)) {
         if (*active == 1) {
@@ -483,17 +459,17 @@ void evtSetSolarPointActiveCount(s32 object, u32 desiredCount) {
     while (activeCount != desiredCount) {
         if (activeCount < desiredCount) {
             activeCount++;
-            evtActivateNextSolarPoint(object);
+            evtActivateNextSolarPoint(overlay);
         } else if (desiredCount < activeCount) {
             activeCount--;
-            evtDeactivateLastSolarPoint(object);
+            evtDeactivateLastSolarPoint(overlay);
         }
     }
 }
 
 /* Each active point restarts with a randomized duration near 120-150 frames. */
-void evtUpdateSolarPointTimers(s32 object) {
-    SolarPoint *point = (SolarPoint *)(object + 0xC);
+void evtUpdateSolarPointTimers(SolarOverlayWork *overlay) {
+    SolarPoint *point = overlay->state.points;
     s32 i;
     for (i = 7; i >= 0; i--, point++) {
         if (point->active != 0) {

@@ -7,6 +7,7 @@
 #include "evt_unit.h"
 #include "dat_state.h"
 #include "fld.h"
+#include "evt_solar.h"
 
 #define CAMP_TASK_NAME_BYTES 0x20
 #define CAMP_TASK_DATA_BYTES 0x48
@@ -1469,7 +1470,6 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_002457E8);
 
 extern u32 D_0036A260[][16];
 extern char (*D_003BAA84)[25];
-extern u8 evtGetSolarPhase(void);
 extern void func_0025ECD0();
 
 s32 func_00245A40(ShopScene *scene) {

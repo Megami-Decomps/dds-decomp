@@ -3027,3 +3027,42 @@ two different owned allocations, the effect and then its mixer. Keep
 that generic release local rather than adding casts between unrelated
 owners; the public release prototypes retain their concrete types.
 
+## Font glyphs, draw controllers, and message-window ownership
+
+The font parent pool allocates `0x44`-byte `FrFontGlyph` nodes. Their
+`previous` link is at `+0x24`, `next` at `+0x28`, and child chain at
+`+0x1C`. The packed word/halfword/byte members are the existing font
+owner's actual representations, not alternative controller views.
+`FrFontCtx` is a separate `0x20`-byte encoded-text draw controller:
+input bytes at `+0x10`, glyph chain at `+0x14`, and cursor at `+0x18`.
+Glyph-only setters must receive the glyph, not a cast to that controller.
+
+Message-window text status is the signed byte at state `+0x34`.
+The three resource fields at `+0xA4` are `UiSprite *` objects; their
+release helper owns the sprite's payload and record allocations.
+The default/shared-flags glyph draw wrappers forward the renderer's
+real measured-advance result, which the sound-selector UI tests before
+advancing its message and fade state. Both games' 16 current `itf.h`
+includers gate with zero differences after this owner/type closure.
+
+## Solar overlay state and kernel value boundary
+
+DDS1 `00228A00` and DDS2 `002436A8` allocate `0x104` bytes: a sprite
+handle at `+0`, followed by the `0x100`-byte animation state at `+4`.
+Its eight six-byte points start at work `+0x0C`; the two `0x60`-byte
+noise states start at `+0x3C` and `+0x9C`, and the cached phase is at
+`+0xFC`. These are one `SolarOverlayWork`, not separate visual-table
+and point-owner views.
+
+The phase getter returns `s32` even though it loads a byte field.
+The transition caller's `ANDI 0xFF` establishes the wider return
+contract; the provider's `LBU` alone does not establish a `u8` return.
+The work initializer only writes the two noise geometries, their
+intervals and `unk0E`, plus the cached phase; it does not reset all
+animation fields.
+
+Solar scheduler callbacks use `KwlnTask *` and the kernel's `s32`
+update result. The work pointer crosses the genuine `u32` user-value
+API once on set/get, and a returned next-update address crosses the
+same encoded-word scheduler boundary.
+

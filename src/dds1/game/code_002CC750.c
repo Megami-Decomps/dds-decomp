@@ -157,10 +157,8 @@ extern void func_002FE978(s32, const char *, s32, s32);
 extern void func_002FE360(s32);
 extern char sdfDebugLogAppendMode[];
 extern char sdfDebugLogPairFormat[];
-extern u32 itfDrawBankTextWithLayoutFlags(s32, s32, u32, u16, u32, u32);
-extern void frFontSetChildColors(u32, u32);
-extern void func_001958A0(u32, s32, s32);
-extern void frFontQueueGlyphInSelectedSlot(u32);
+extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
+extern s32 func_001958A0(FrFontGlyph *, s8, u32);
 extern void *fileResolvePrimaryBuffer(void *);
 extern s32 ptyTestProfileFlag0(DatPartyRecord *, u16);
 extern u16 D_003907BC[];
@@ -950,7 +948,7 @@ Entry84W *prfReqGetEntryRecord(u16 index) {
 }
 
 void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
-    u32 handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, (u32)frFontColoredGlyphResource, 0);
+    FrFontGlyph *handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, (FrFontTextBank *)frFontColoredGlyphResource, 0);
     frFontSetChildColors(handle, second);
     func_001958A0(handle, 1, option);
     frFontQueueGlyphInSelectedSlot(handle);

@@ -201,13 +201,11 @@ extern char sdfDebugLogPairFormat[];
 
 void func_003140C8(s32 useCurrentProfile, DatPartyRecord *unit);
 
-extern u32 itfDrawBankTextWithLayoutFlags(s32, s32, u32, u16, u32, u32);
+extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
 
-extern void frFontSetChildColors(u32, u32);
 
-extern void func_0019D550(u32, s32, s32);
+extern s32 func_0019D550(FrFontGlyph *, s8, u32);
 
-extern void frFontQueueGlyphInSelectedSlot(u32);
 
 void sdfAppendFormattedDebugLogPair(s32 left, s32 right) {
     s32 file = func_00359A98("debug.log", sdfDebugLogAppendMode);
@@ -1134,7 +1132,7 @@ u16 scrGetEntryLowFlags(DatPartyRecord *context, u16 entryId) {
 }
 
 void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
-    u32 handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, (u32)frFontColoredGlyphResource, 0);
+    FrFontGlyph *handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, (FrFontTextBank *)frFontColoredGlyphResource, 0);
     frFontSetChildColors(handle, second);
     func_0019D550(handle, 1, option);
     frFontQueueGlyphInSelectedSlot(handle);

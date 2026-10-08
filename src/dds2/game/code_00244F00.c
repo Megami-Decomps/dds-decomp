@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_solar.h"
 
 #define SOLAR_FADE_DRAW_ENABLED 1
 #define SOLAR_FADE_IN 2
@@ -10,11 +11,9 @@ extern s32 evtSolarOverlayFadeCounter;
 
 extern s32 evtSolarOverlayFadeDuration;
 
-void evtInitializeVisualData(s32 visualAddress);
 
 extern s8 evtSolarOverlayFadeFlags;
 
-s32 evtGetSolarPhase(s32 object);
 
 extern char D_004221D8[]; /* "EventTest" */
 
@@ -24,14 +23,6 @@ void kwlnTaskDestroyWithHierarchyByName(void *name, s32 flag);
 
 void evtDestroySecondaryWorldNode(void);
 
-typedef struct EventVisualData {
-    u8 pad00[0x3C];
-    s16 firstValues[8];
-    u8 pad4C[0x50];
-    s16 secondValues[8];
-    u8 padAC[0x50];
-    u8 solarPhase;
-} EventVisualData;
 
 extern u32 D_00435CBC;
 
@@ -41,37 +32,34 @@ extern s32 D_0043722C;
 
 INCLUDE_ASM(const s32, "game/code_00244F00", evtDrawFadingSolarOverlayFrame);
 
-/* Seed both visual-value tables and cache the current raw solar phase. */
-void evtInitializeVisualData(s32 visualAddress) {
-    s32 solarPhase = evtGetSolarPhase(visualAddress);
-    s16 *visualValues = ((EventVisualData *)visualAddress)->firstValues;
-    ((EventVisualData *)visualAddress)->solarPhase = solarPhase;
-    visualValues[0] = 0x39;
-    visualValues[1] = 0x33;
-    visualValues[2] = 0x1D;
-    visualValues[3] = 0x23;
-    visualValues[5] = 5;
-    visualValues[7] = 10;
-    visualValues = ((EventVisualData *)visualAddress)->secondValues;
-    visualValues[0] = 0x37;
-    visualValues[1] = 0x32;
-    visualValues[2] = 15;
-    visualValues[3] = 15;
-    visualValues[5] = 10;
-    visualValues[7] = 0;
+/* Seed both noise-state geometries and cache the current solar phase. */
+void evtInitializeVisualData(SolarOverlayWork *overlay) {
+    u8 solarPhase = evtGetSolarPhase();
+    SolarNoiseState *noise = &overlay->state.firstNoise;
+    overlay->state.solarPhase = solarPhase;
+    noise->centerX = 0x39;
+    noise->centerY = 0x33;
+    noise->radiusX = 0x1D;
+    noise->radiusY = 0x23;
+    noise->spawnInterval = 5;
+    noise->unk0E = 10;
+    noise = &overlay->state.secondNoise;
+    noise->centerX = 0x37;
+    noise->centerY = 0x32;
+    noise->radiusX = 15;
+    noise->radiusY = 15;
+    noise->spawnInterval = 10;
+    noise->unk0E = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_00244F00", evtUpdateSolarPhaseTransition);
-extern s32 evtGetMirroredSolarPhase(void);
-extern void evtUpdateSolarPhaseTransition(u32 overlayAddress);
-extern void evtDrawFadingSolarOverlayFrame(s32 x, s32 y, s32 z, s32 alpha, s32 mirroredPhase, u32 overlayAddress, s32 renderContext);
 
 /* Advance the fade and draw with scaled alpha; renderContext is forwarded unchanged. */
-void evtAdvanceSolarOverlayFadeAndDraw(s32 x, s32 y, s32 z, s32 alpha, u32 overlayAddress, s32 renderContext) {
+void evtAdvanceSolarOverlayFadeAndDraw(s32 x, s32 y, s32 z, s32 alpha, SolarOverlayWork *overlay, s32 renderContext) {
     s32 mirroredPhase;
     /* Preserve signed-byte narrowing before forwarding the mirrored phase. */
     mirroredPhase = (s8)evtGetMirroredSolarPhase();
-    evtUpdateSolarPhaseTransition(overlayAddress);
+    evtUpdateSolarPhaseTransition(overlay);
     if ((evtSolarOverlayFadeFlags & SOLAR_FADE_DRAW_ENABLED) != 0) {
         if ((evtSolarOverlayFadeFlags & SOLAR_FADE_IN) != 0) {
             if (evtSolarOverlayFadeCounter < evtSolarOverlayFadeDuration) {
@@ -90,12 +78,12 @@ void evtAdvanceSolarOverlayFadeAndDraw(s32 x, s32 y, s32 z, s32 alpha, u32 overl
         if ((evtSolarOverlayFadeFlags & SOLAR_FADE_DRAW_ENABLED) != 0) {
             f32 fadeRatio = (f32)evtSolarOverlayFadeCounter / (f32)evtSolarOverlayFadeDuration;
             s32 fadedAlpha = (s32)((f32)alpha * fadeRatio);
-            evtDrawFadingSolarOverlayFrame(x, y, z, fadedAlpha, mirroredPhase, overlayAddress, renderContext);
+            evtDrawFadingSolarOverlayFrame(x, y, z, fadedAlpha, mirroredPhase, overlay, renderContext);
             return;
         }
     }
     if ((evtSolarOverlayFadeFlags & SOLAR_FADE_OUT) == 0) {
-        evtDrawFadingSolarOverlayFrame(x, y, z, alpha, mirroredPhase, overlayAddress, renderContext);
+        evtDrawFadingSolarOverlayFrame(x, y, z, alpha, mirroredPhase, overlay, renderContext);
     }
 }
 

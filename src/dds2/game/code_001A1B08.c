@@ -49,7 +49,6 @@ typedef struct PanelRecSub {
     s8 status;     /* 0x10: status read and written by itfPanelGet/SetStatus */
 } PanelRecSub;
 
-typedef struct FrFontGlyph FrFontGlyph;
 
 /* The same option-list block used by itfMesBuildOptionList at window +0x40. */
 typedef struct PanelOptionBlock {

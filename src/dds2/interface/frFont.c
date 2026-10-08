@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf.h"
 
 typedef struct FrFontRecord {
     u16 id;      /* 0x00 */
@@ -46,40 +47,6 @@ extern u32 frFontSharedRenderFlags;
 
 extern u32 frFontContextCursorSpacing;
 
-/* Glyph/record chain walked by func_001958A0/func_00195B78. */
-typedef struct FrFontGlyph {
-    union {
-        s16 h;                        /* 0x0: halfword view */
-        struct { s8 b0; s8 b1; } b;   /* 0x0: byte views */
-    } u0;
-    u16 unk2;         /* 0x2 */
-    s32 x;            /* 0x4: horizontal position */
-    s32 y;            /* 0x8: vertical position */
-    s32 advance;      /* 0xC: advance shifted by four when linking glyphs */
-    union {
-        u32 word;     /* 0x10: word view */
-        u16 half[2];  /* 0x10: halfword views */
-        u8 byte[4];   /* 0x10: byte views */
-    } u10;
-    union {
-        u32 w;        /* 0x14: word view */
-        u8 b[4];      /* 0x14: byte views */
-    } u14;
-    union {
-        u32 w;            /* 0x18: word view */
-        u8 b[4];          /* 0x18: byte views */
-    } unk18;
-    struct FrFontGlyph *firstChild; /* 0x1C: child glyph chain */
-    struct FrFontGlyph *unk20; /* 0x20 */
-    struct FrFontGlyph *previous; /* 0x24: back-link in the glyph chain */
-    struct FrFontGlyph *next; /* 0x28: next glyph in chain */
-    struct FrFontGlyph *chainHead; /* 0x2C: first glyph in the linked chain */
-    u32 unk30;        /* 0x30 */
-    u32 unk34;        /* 0x34 */
-    u32 unk38;        /* 0x38 */
-    s32 unk3C;        /* 0x3C */
-    s32 unk40;        /* 0x40 */
-} FrFontGlyph;
 
 extern FrFontGlyph *D_004528B4[];
 
@@ -104,39 +71,8 @@ extern FrFontSave D_00452864;
 
 extern u8 frFontSharedGlyphFlags;
 
-/* Record shared by the matched helpers below; offsets are from retail.
- * func_00195388 receives the message-window node itself (itfMesManager
- * func_0019DB40 passes its chain node straight in). */
-typedef struct FrFontCtx {
-    union {
-        u32 word;            /* 0x0: whole word read by func_001963E0 */
-        struct {
-            u8 unk0;         /* 0x0 */
-            u8 flag1;        /* 0x1: set by func_001953A8 */
-            u8 unk2[2];      /* 0x2 */
-        } bytes;
-    } u0;
-    u32 contextCursor;     /* 0x4: advanced by frFontAdvanceContextCursor */
-    u32 unk8;                /* 0x8 */
-    union {
-        u32 w;                   /* 0xC: word view */
-        struct { u8 pad; s8 bD; s8 bE; u8 bF; } b; /* 0xC: byte views */
-    } uC;                        /* 0xC: refreshed by func_001953A8 */
-    u32 unk10;               /* 0x10 */
-    union {
-        u32 shifted;         /* 0x14: value stored shifted by func_00195460 */
-        void *ptr;           /* 0x14: child pointer read by func_001963E0 */
-    } u14;
-    u32 unk18;               /* 0x18 */
-    s8 flag1C;               /* 0x1C */
-    s8 flag1D;               /* 0x1D */
-    u8 unk1E[0x22];          /* 0x1E */
-    u32 mode40;              /* 0x40: set by func_00195388 */
-} FrFontCtx;
 
-extern void frFontSetContextEncodedByte(FrFontCtx *ctx, s32 inputValue);
 
-extern void frFontSetContextPair(FrFontCtx *ctx, u32 first, u32 second);
 
 void frFontCreateContext();
 
@@ -184,18 +120,6 @@ extern void func_001A00B8(void *dst, s32 option, void *block, FrFontSegments *se
 
 extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
 
-typedef struct TextStyleNode {
-    u8 pad00[4];
-    u32 x;
-    u32 y;
-    u8 pad0C[4];
-    u32 color;
-    u8 pad14[8];
-    struct TextStyleNode *firstChild;
-    u8 pad20[4];
-    struct TextStyleNode *next;
-    struct TextStyleNode *nextChild;
-} TextStyleNode;
 
 extern s32 frFontAdvanceGlyphFade(FrFontGlyph *glyph);
 
@@ -207,7 +131,6 @@ u32 frFontGetGlyphCellHeight(u8);
 
 FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *previous, FrFontGlyph *next);
 
-void frFontDrawGlyphWithSharedFlags(FrFontGlyph *glyph, s8 mode);
 
 extern s32 func_0019D550(FrFontGlyph *glyph, s8 mode, u32 flags);
 
@@ -581,43 +504,43 @@ FrFontGlyph *func_0019CCC0(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 sec
 }
 
 /* Build text and position its chain after the previous glyph. A NULL build
- * result preserves the existing integer-address return convention. */
-FrFontCtx *frFontAppendGlyphFromData(void *text, s8 fontIndex, s8 firstOption, s8 secondOption, s32 previousGlyphAddress) {
+ * preserves the previous chain. */
+FrFontGlyph *frFontAppendGlyphFromData(void *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *previousGlyph) {
     FrFontGlyph *newGlyphChain = func_0019CE78(text, fontIndex, firstOption, secondOption, 0);
 
     if (newGlyphChain == NULL) {
-        return (FrFontCtx *)previousGlyphAddress;
+        return previousGlyph;
     }
-    return (FrFontCtx *)frFontLinkGlyphAfterPrevious((FrFontGlyph *)previousGlyphAddress, newGlyphChain);
+    return frFontLinkGlyphAfterPrevious(previousGlyph, newGlyphChain);
 }
 
 INCLUDE_ASM(const s32, "interface/frFont", func_0019CE78);
 
 /* Double the masked input byte and saturate the stored byte at 0x80.
  * Keep the original signed constant used for the saturated byte assignment. */
-void frFontSetContextEncodedByte(FrFontCtx *ctx, s32 inputValue) {
+void frFontSetContextEncodedByte(FrFontGlyph *glyph, s32 inputValue) {
     s32 encodedValue = (inputValue & FR_FONT_BYTE_MASK) * 2;
 
     if (encodedValue >= FR_FONT_CONTEXT_BYTE_THRESHOLD) {
-        ctx->u0.bytes.unk0 = FR_FONT_CONTEXT_BYTE_CAP;
+        glyph->u0.b.b0 = FR_FONT_CONTEXT_BYTE_CAP;
     } else {
-        ctx->u0.bytes.unk0 = encodedValue;
+        glyph->u0.b.b0 = encodedValue;
     }
 }
 
-/* Mark context mode enabled and initialize its encoded byte to the cap. */
-void frFontEnableContextMode(FrFontCtx *ctx) {
-    ctx->mode40 = 1;
-    frFontSetContextEncodedByte(ctx, FR_FONT_CONTEXT_ENABLE_VALUE);
+/* Enable the glyph mode and initialize its encoded byte to the cap. */
+void frFontEnableContextMode(FrFontGlyph *glyph) {
+    glyph->unk40 = 1;
+    frFontSetContextEncodedByte(glyph, FR_FONT_CONTEXT_ENABLE_VALUE);
 }
 
 /* Store the requested flag byte and refresh the cached child-chain advance. */
-void frFontSetFlagAndMeasureGlyphs(FrFontCtx *ctx, u8 requestedFlag) {
+void frFontSetFlagAndMeasureGlyphs(FrFontGlyph *glyph, s32 requestedFlag) {
     u32 measuredAdvance;
 
-    ctx->u0.bytes.flag1 = requestedFlag;
-    measuredAdvance = frFontMeasureGlyphChain(ctx);
-    ctx->uC.w = measuredAdvance;
+    glyph->u0.b.b1 = requestedFlag;
+    measuredAdvance = frFontMeasureGlyphChain(glyph);
+    glyph->advance = measuredAdvance;
 }
 
 /* Set the initial glyph's halfword dimensions and every visited child's advance/
@@ -638,15 +561,15 @@ void frFontSetGlyphChainDimensions(FrFontGlyph *glyph, s32 cellAdvance, s32 cell
     targetGlyph->advance = frFontMeasureGlyphChain(targetGlyph);
 }
 
-/* Store the ordered pair without scaling; the second field remains opaque. */
-void frFontSetContextPair(FrFontCtx *ctx, u32 first, u32 second) {
-    ctx->contextCursor = first;
-    ctx->unk8 = second;
+/* Store the glyph position without scaling. */
+void frFontSetContextPair(FrFontGlyph *glyph, u32 first, u32 second) {
+    glyph->x = first;
+    glyph->y = second;
 }
 
-/* Store an unsigned value divided by 16; do not reinterpret its union view. */
-void frFontStoreShiftedContextValue(FrFontCtx *ctx, u32 unshiftedValue) {
-    ctx->u14.shifted = unshiftedValue >> FR_FONT_CONTEXT_VALUE_SHIFT;
+/* Store the glyph render value in sixteenths. */
+void frFontStoreShiftedContextValue(FrFontGlyph *glyph, u32 unshiftedValue) {
+    glyph->u14.w = unshiftedValue >> FR_FONT_CONTEXT_VALUE_SHIFT;
 }
 
 /* Assign the first option byte across all visited children; NULL is a no-op. */
@@ -660,12 +583,12 @@ void frFontSetChainFlag(FrFontGlyph *glyph, u8 flagValue) {
     }
 }
 
-/* Replace each child's full color word across the style-node chain. */
-void frFontSetChildColors(TextStyleNode *parentNode, u32 colorWord) {
-    for (; parentNode != NULL; parentNode = parentNode->next) {
-        TextStyleNode *childNode;
-        for (childNode = parentNode->firstChild; childNode != NULL; childNode = childNode->nextChild) {
-            childNode->color = colorWord;
+/* Replace each child's full color word across the parent glyph chain. */
+void frFontSetChildColors(FrFontGlyph *parentNode, u32 colorWord) {
+    for (; parentNode != NULL; parentNode = parentNode->previous) {
+        FrFontGlyph *childNode;
+        for (childNode = parentNode->firstChild; childNode != NULL; childNode = childNode->next) {
+            childNode->u10.word = colorWord;
         }
     }
 }
@@ -817,13 +740,13 @@ s32 func_0019D288(FrFontGlyph *parent, FrFontGlyph *glyph, u8 threshold, u8 step
 }
 
 /* Draw through the shared render flags with mode zero. */
-void frFontDrawGlyphInDefaultMode(FrFontGlyph *glyph) {
-    frFontDrawGlyphWithSharedFlags(glyph, 0);
+s32 frFontDrawGlyphInDefaultMode(FrFontGlyph *glyph) {
+    return frFontDrawGlyphWithSharedFlags(glyph, 0);
 }
 
 /* Pass the selected mode and current shared render-flag word to the renderer. */
-void frFontDrawGlyphWithSharedFlags(FrFontGlyph *glyph, s8 mode) {
-    func_0019D550(glyph, mode, frFontSharedRenderFlags);
+s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *glyph, s8 mode) {
+    return func_0019D550(glyph, mode, frFontSharedRenderFlags);
 }
 
 /* Draw every child glyph, advance each parent chain, and report its measured
@@ -1186,11 +1109,11 @@ void frFontCreateContext(ctx)
     FrFontCtx *ctx;
 
 {
-    FrFontCtx *childContext = frFontAppendGlyphFromData(&D_00436578, 0, ctx->uC.b.bD, ctx->uC.b.bE, ctx->u14.shifted);
+    FrFontGlyph *childGlyph = frFontAppendGlyphFromData(&D_00436578, 0, ctx->channel1, ctx->channel2, ctx->glyphChain);
 
-    ctx->u14.ptr = childContext;
-    frFontSetContextEncodedByte(childContext, ctx->uC.b.bF);
-    ctx->flag1C = 0;
+    ctx->glyphChain = childGlyph;
+    frFontSetContextEncodedByte(childGlyph, ctx->channel3);
+    ctx->pendingCreate = 0;
 }
 
 /* Cancel creation for an empty child, process pending creation, then process
@@ -1198,33 +1121,33 @@ void frFontCreateContext(ctx)
 void frFontCheckPendingGlyphState(FrFontCtx *ctx) {
     s8 pending;
 
-    if (ctx->u14.ptr == NULL) {
-        pending = ctx->flag1C;
+    if (ctx->glyphChain == NULL) {
+        pending = ctx->pendingCreate;
     }
     else {
-        if (((FrFontGlyph *)ctx->u14.ptr)->firstChild == NULL) {
-            ctx->flag1C = 0;
+        if (ctx->glyphChain->firstChild == NULL) {
+            ctx->pendingCreate = 0;
         }
-        pending = ctx->flag1C;
+        pending = ctx->pendingCreate;
     }
     if (pending == '\0') {
-        pending = ctx->flag1D;
+        pending = ctx->pendingPosition;
     }
     else {
         frFontCreateContext();
-        pending = ctx->flag1D;
+        pending = ctx->pendingPosition;
     }
     if (pending != '\0') {
-        frFontSetContextPair(ctx->u14.ptr, ctx->u0.word, ctx->contextCursor);
-        ctx->flag1D = 0;
+        frFontSetContextPair(ctx->glyphChain, ctx->x, ctx->y);
+        ctx->pendingPosition = 0;
     }
 }
 
 /* Advance by eight times cursor spacing and request both context updates. */
 void frFontAdvanceContextCursor(FrFontCtx *ctx) {
-    ctx->contextCursor += frFontContextCursorSpacing * FR_FONT_CONTEXT_CURSOR_SCALE;
-    ctx->flag1C = 1;
-    ctx->flag1D = 1;
+    ctx->y += frFontContextCursorSpacing * FR_FONT_CONTEXT_CURSOR_SCALE;
+    ctx->pendingCreate = 1;
+    ctx->pendingPosition = 1;
 }
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_00436550);
