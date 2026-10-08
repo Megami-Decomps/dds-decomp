@@ -27,7 +27,7 @@ extern void btlSetUnitPosition(BtlUnit *, void *);
 
 extern s32 btlSetLinkedDefeatCameraPresetA();
 
-extern s32 btlSetLinkedDefeatCameraPresetB();
+extern s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *, BtlCamState *, s32);
 
 extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
 
@@ -507,11 +507,57 @@ s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *came
 
 INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020DE50);
 
-INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020DE70);
+extern void btlClearAllUnitDefeatCandidates(void);
+extern void btlFlagUnitDefeatCandidate(BtlUnit *);
+extern void btlUnitGetMuzzlePosVU(BtlUnit *);
+
+s32 func_0020DE70(BtlLinkedCommand *command) {
+    BtlTask *task;
+    BtlUnit *target;
+    f32 position[4] __attribute__((aligned(16)));
+    s32 flags;
+
+    btlGetRuntime();
+    task = command->task;
+    flags = task->unit->flags;
+    if (flags & 0x200) {
+        if ((flags & 0x1000) == 0) {
+            return 0;
+        }
+        if (btlGetIndexListCount(task->indexWork.indices) == 1) {
+            target = btlGetIndexListEntry(task->indexWork.indices, 0);
+            if (target->flags & 0x400) {
+                btlClearAllUnitDefeatCandidates();
+                btlFlagUnitDefeatCandidate(task->unit);
+                btlFlagUnitDefeatCandidate(target);
+                btlUnitGetMuzzlePosVU(task->unit);
+                VU0_STORE_VF(vf10, position);
+                if (position[0] < 0.0f) {
+                    btlSetEffectCameraKeys(command,
+                        451.8f, -62.8f, -471.5f, -0.135f, 0.038f, -0.019f, 0.981f,
+                        431.1f, -89.0f, -136.8f, -0.155f, 0.039f, -0.020f, 0.978f,
+                        40.0f, 20.0f);
+                } else {
+                    btlSetEffectCameraKeys(command,
+                        -225.0f, -27.7f, -492.1f, -0.154f, -0.118f, 0.007f, 0.972f,
+                        -174.9f, -7.4f, -129.8f, -0.165f, -0.117f, 0.008f, 0.970f,
+                        40.0f, 20.0f);
+                }
+                return 1;
+            }
+            return 0;
+        }
+        btlFlagAllUnitDefeatCandidatesTask();
+        btlSetLinkedDefeatCameraPresetB(command, (BtlCamState *)command, 0);
+        return 1;
+    }
+    btlSelectRandomDefeatCamera(command);
+    return 1;
+}
 
 extern s32 btlIsActorCategoryMarked(s32);
 extern s32 btlHasLinkedEffectNodeTrigger(u8 *);
-extern void func_0020DE70(BtlLinkedCommand *);
+extern s32 func_0020DE70(BtlLinkedCommand *);
 extern void func_001DF410(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 /* Opaque pose parameters use the native owners defined in code_001C8890. */
