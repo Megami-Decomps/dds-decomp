@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_transform.h"
 #include "sdf_model.h"
 #include "sdf.h"
 #include "sdf_projection.h"
@@ -204,7 +205,7 @@ extern s32 D_0032E3C0[];
 
 extern s32 fldSceneSoundBase;
 
-extern void ddsReleaseUnitObject(s32 arg0);
+extern void ddsReleaseUnitObject(EffWorldNode *node);
 
 typedef struct {
     s32 unk0;
@@ -2739,7 +2740,7 @@ void fldClearObjectEntryHandles(void) {
 
         i--;
         if (temp != 0) {
-            ddsReleaseUnitObject(temp);
+            ddsReleaseUnitObject((EffWorldNode *)temp);
             entry->unk0 = 0;
         }
         entry++;

@@ -373,7 +373,7 @@ extern char D_00413C80[]; /* "fldTitleMini" */
 
 extern void effUpdateNode(u32 arg0);
 
-extern void ddsReleaseUnitObject(s32 arg0);
+extern void ddsReleaseUnitObject(EffWorldNode *node);
 
 typedef struct {
     s32 objectHandle;
@@ -3217,7 +3217,7 @@ void fldClearObjectEntryHandles(void) {
 
         i--;
         if (objectHandle != 0) {
-            ddsReleaseUnitObject(objectHandle);
+            ddsReleaseUnitObject((EffWorldNode *)objectHandle);
             entry->objectHandle = 0;
         }
         entry++;
