@@ -853,7 +853,38 @@ void func_002A6030(s32 font, u32 color, const char *text, f32 x, f32 y) {
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6180);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6480);
+extern s32 mnuPollTitleStreamStateLocked(void);
+extern void mnuResetTitleStreamAfterFileIdle(void);
+extern void func_002A2200(s32);
+
+void func_002A6480(void)
+{
+    if (mnuMovieWork->frame / 60 > D_003E4A7C / 60 - 4) {
+        return;
+    }
+    if (mnuMovieWork->streamPhase == 3) {
+        return;
+    }
+    if (mnuMovieWork->frame < 3601) {
+        return;
+    }
+    if (D_00437AB8 == 4) {
+        switch (mnuPollTitleStreamStateLocked()) {
+        case 0: /* MNU_STREAM_LOAD_IDLE */
+            mnuMovieWork->streamPhase = 2;
+            func_002A2200(23);
+            break;
+        case 1: /* MNU_STREAM_LOAD_PENDING */
+            break;
+        case 2: /* MNU_STREAM_LOAD_COPIED */
+            mnuMovieWork->streamPhase = 3;
+            mnuResetTitleStreamAfterFileIdle();
+            break;
+        }
+    } else {
+        mnuMovieWork->streamPhase = 1;
+    }
+}
 
 extern s32 func_002A6580(void);
 
