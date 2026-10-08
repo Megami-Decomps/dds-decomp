@@ -1168,7 +1168,7 @@ void func_0025FA28(MenuTerminalContext *scene) {
     func_0026BE28(secondPanel, 0, 0x10, 0x20);
     func_0026BEB0(secondPanel, 0x1150, 0xCB8, 0);
     scene->windowResource = mnuCreateWindowSpriteResources(
-        0, 0, 0, (u32)scene->effectSlots[0], indices, 3);
+        0, 0, 0, scene->effectSlots[0], indices, 3);
 }
 
 

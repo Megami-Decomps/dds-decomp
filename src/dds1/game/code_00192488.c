@@ -32,7 +32,7 @@ typedef struct EffFloatRows {
 /* Small channel object (0x18 bytes, created by effCreateChannel): float block
  * plus the channel-A cursor (count at +0x4, index at +0xC). */
 typedef struct EffChan {
-    void *unk0; /* 0x0: mem handle */
+    struct SdfMemBlock *allocation; /* 0x0: owns the channel allocation. */
     u32 recordCount; /* 0x4: number of keyframe records */
     EffFloatRows *rows; /* 0x8: interpolation rows owned by the channel */
     u32 cursorIndex; /* 0xC: channel-A record index */
@@ -579,7 +579,7 @@ void effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(EffPrimitiveCur
 /* Allocate the small channel when at least four records exist; borrow the supplied rows and set its default step. */
 void *effCreateChannel(void *rows, u32 recordCount) {
     void *channel = NULL;
-    void *allocation;
+    SdfMemBlock *allocation;
     EffChan *channelObject;
 
     if (recordCount < EFF_BEZIER_MIN_RECORD_COUNT) {
@@ -588,7 +588,7 @@ void *effCreateChannel(void *rows, u32 recordCount) {
     allocation = sdfAllocGeneralBlock(EFF_CHANNEL_BYTES);
     channel = (void *)sdfResourceRetainAddress(allocation);
     channelObject = channel;
-    channelObject->unk0 = allocation;
+    channelObject->allocation = allocation;
     channelObject->cursorStep = EFF_CHANNEL_DEFAULT_STEP;
     channelObject->recordCount = recordCount;
     channelObject->rows = rows;
