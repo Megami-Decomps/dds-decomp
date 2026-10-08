@@ -247,7 +247,7 @@ EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *params) {
     work->resource = resource;
     effBuildRadialFanStreams(resource, params->fanSegments, params->centerColor,
                             params->outerColor, params->radiusScale, params->viewOffset);
-    work->system = parAllocateCellSystem(work->count, work->params.unk54, 0, 0);
+    work->system = parAllocateCellSystem(work->count, work->params.unk54, 0, PAR_CELL_TOPOLOGY_PAIR);
     parDispatchSub(work->system, 1, work->params.unk58, work->params.unk58);
     func_00164C68(work->system, (u16)work->params.mode);
 
