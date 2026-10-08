@@ -994,9 +994,9 @@ extern SdfGrid *func_002CB9C0(s32, s32, s32, s32, s32, s32, void *, s32);
 extern void sdfSetShortPairValues(SdfGrid *, s32, s32);
 extern void mnuFreeTaskData(u32, u32);
 extern void mnuDrawMantraEntryStatus(s32, s32, s32, SdfGrid *, SdfGridCell *, s32);
-extern void func_002CC0D0(SdfGrid *);
+extern SdfGridCell *func_002CC0D0(SdfGrid *);
 extern void func_00253208(s32, s32, s32 *, s32 *);
-extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, s32, s32);
+extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, u32, u32);
 extern void func_002512F0(s32, s32);
 
 /* Construct the selection grid and callbacks, select its initial coordinates, then reset the cached scroll position. */
