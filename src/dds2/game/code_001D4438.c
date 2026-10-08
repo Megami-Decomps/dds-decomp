@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_task_condition.h"
 #include "dat_command.h"
 #include "btl_scene_fade.h"
 #include "btl_command.h"
@@ -1099,7 +1100,7 @@ void btlStartCommandAudioAndSelectedAction(u8 *task) {
             break;
         case 8:
             sceneTask = fldCreateSceneGroupAction((ActionStateLink *)task, 0x64, 1);
-            sceneTask->startCondition.kind = 7;
+            sceneTask->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
             sceneTask->startCondition.value.owner = ownerId;
             sceneTask->ownerId = unit->owner;
             btlStartTask(sceneTask);
@@ -1109,18 +1110,18 @@ void btlStartCommandAudioAndSelectedAction(u8 *task) {
             mp = unit->partyRecord.maxMp;
             block.mpDelta = mp / 10;
             effectTask = btlCreateActorParameterDeltaTask(unit, &block);
-            effectTask->startCondition.kind = 7;
+            effectTask->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
             effectTask->startCondition.value.owner = ownerId;
             btlStartTask(effectTask);
             if (block.hpDelta > 0) {
                 object = btlCreateLinkedEffectTask(unit, block.hpDelta, 0);
-                object->startCondition.kind = 4;
+                object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 object->startCondition.value.handle = effectTask->handle;
                 btlStartTask(object);
             }
             if (block.mpDelta > 0) {
                 object = btlCreateLinkedEffectTask(unit, block.mpDelta, 1);
-                object->startCondition.kind = 4;
+                object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 object->startCondition.value.handle = effectTask->handle;
                 btlStartTask(object);
             }
@@ -1128,7 +1129,7 @@ void btlStartCommandAudioAndSelectedAction(u8 *task) {
             break;
         case 0x800:
             sceneTask = fldCreateSceneGroupAction((ActionStateLink *)task, 0x64, 1);
-            sceneTask->startCondition.kind = 7;
+            sceneTask->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
             sceneTask->startCondition.value.owner = ownerId;
             sceneTask->ownerId = unit->owner;
             btlStartTask(sceneTask);
@@ -1589,7 +1590,7 @@ s32 btlCommandGunChangeStart(ActionStateLink *task) {
         for (other = state->units; other != NULL; other = other->nextActor) {
             if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
                 spawned = btlScheduleRefreshTask(other);
-                spawned->startCondition.kind = 4;
+                spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 spawned->startDelay = 1;
                 spawned->startCondition.value.handle = sound->handle;
                 spawned->ownerId = unit->owner;
@@ -1597,18 +1598,18 @@ s32 btlCommandGunChangeStart(ActionStateLink *task) {
             }
         }
         change = btlCreateModelChangeTask(unit, unit->modelId, unit->modelVariant, motion, 0x18, 0);
-        change->startCondition.kind = 4;
+        change->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         change->startCondition.value.handle = sound->handle;
         btlStartTask(change);
         for (other = state->units; other != NULL; other = other->nextActor) {
             if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
                 load = btlCreateModelLoadPollTask(other, other->resourceKind, other->resourceIndex, 0);
-                load->startCondition.kind = 4;
+                load->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 load->startCondition.value.handle = change->handle;
                 load->ownerId = unit->owner;
                 btlStartTask(load);
                 spawned = btlCreateUnitFadeInTask(other, 0, 0);
-                spawned->startCondition.kind = 4;
+                spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 spawned->startCondition.value.handle = load->handle;
                 spawned->ownerId = unit->owner;
                 btlStartTask(spawned);
@@ -1618,29 +1619,29 @@ s32 btlCommandGunChangeStart(ActionStateLink *task) {
         btlStartTask(sndCreateEffectSourceTask(state->resources[45], unit, change->handle));
         btlStartTask(sndCreateStationedSeTask(0x1000F));
         spawned = btlCreateEffObjA(unit, task->indexWork.phase);
-        spawned->startCondition.kind = 4;
+        spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
         spawned = btlCreateCommandSoundUpdateTask();
-        spawned->startCondition.kind = 4;
+        spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
         spawned = btlCreateSecondaryCommandSoundTask();
-        spawned->startCondition.kind = 4;
+        spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
         spawned = btlCreateCommandSoundTask((s32)task, 0xE);
-        spawned->startCondition.kind = 4;
+        spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
         spawned = btlAllocateIndexedUnitEffectTask((u8 *)unit, 0x11,
                                                                 btlGetSlotRateKind((u8 *)unit, 0x11), 1.0f);
-        spawned->startCondition.kind = 4;
+        spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
         if (!btlDoesEnabledStatusMatchCurrentId(&task->unit->partyRecord, 0xE0)) {
             spawned = fldCreateSceneGroupAction(task, 0x64, 1);
-            spawned->startCondition.kind = 4;
+            spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             spawned->startCondition.value.handle = sound->handle;
             spawned->ownerId = unit->owner;
             btlStartTask(spawned);
@@ -1718,7 +1719,7 @@ void func_001DA740(ActionStateLink *task) {
         for (other = state->units; other != NULL; other = other->nextActor) {
             if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
                 spawned = btlScheduleRefreshTask(other);
-                spawned->startCondition.kind = 4;
+                spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 spawned->startDelay = 1;
                 spawned->startCondition.value.handle = sound->handle;
                 spawned->ownerId = unit->owner;
@@ -1726,18 +1727,18 @@ void func_001DA740(ActionStateLink *task) {
             }
         }
         change = btlCreateModelChangeTask(unit, unit->unkDC, unit->combatantKind, motion, 0x18, 0);
-        change->startCondition.kind = 4;
+        change->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         change->startCondition.value.handle = sound->handle;
         btlStartTask(change);
         for (other = state->units; other != NULL; other = other->nextActor) {
             if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
                 load = btlCreateModelLoadPollTask(other, other->resourceKind, other->resourceIndex, 0);
-                load->startCondition.kind = 4;
+                load->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 load->startCondition.value.handle = change->handle;
                 load->ownerId = unit->owner;
                 btlStartTask(load);
                 spawned = btlCreateUnitFadeInTask(other, 0, 0);
-                spawned->startCondition.kind = 4;
+                spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 spawned->startCondition.value.handle = load->handle;
                 spawned->ownerId = unit->owner;
                 btlStartTask(spawned);
@@ -1747,28 +1748,28 @@ void func_001DA740(ActionStateLink *task) {
         btlStartTask(sndCreateEffectSourceTask(state->resources[45], unit, change->handle));
         btlStartTask(sndCreateStationedSeTask(0x1000F));
         spawned = btlCreateEffObjA(unit, task->indexWork.phase);
-        spawned->startCondition.kind = 4;
+        spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
         spawned = btlCreateCommandSoundUpdateTask();
-        spawned->startCondition.kind = 4;
+        spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
         spawned = btlCreateSecondaryCommandSoundTask();
-        spawned->startCondition.kind = 4;
+        spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
         spawned = btlCreateCommandSoundTask((s32)task, 0xE);
-        spawned->startCondition.kind = 4;
+        spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
         spawned = btlAllocateIndexedUnitEffectTask((u8 *)unit, 0x10, btlGetSlotRateKind((u8 *)unit, 0x10), 1.0f);
-        spawned->startCondition.kind = 4;
+        spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         spawned->startCondition.value.handle = sound->handle;
         btlStartTask(spawned);
         if (!btlDoesEnabledStatusMatchCurrentId(&task->unit->partyRecord, 0xE0)) {
             spawned = fldCreateSceneGroupAction(task, 0x64, 1);
-            spawned->startCondition.kind = 4;
+            spawned->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             spawned->startCondition.value.handle = sound->handle;
             spawned->ownerId = unit->owner;
             btlStartTask(spawned);
@@ -2059,7 +2060,7 @@ void func_001DC540(void *data) {
                 btlStartTask(deltaTask);
                 if (spec.hpDelta != 0) {
                     effectTask = btlCreateLinkedEffectTask(unit, spec.hpDelta, 0);
-                    effectTask->startCondition.kind = 4;
+                    effectTask->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                     effectTask->startCondition.value.handle = deltaTask->handle;
                     effectTask->ownerId = btlAdvanceRuntimeSequenceCounter();
                     btlStartTask(effectTask);
@@ -2082,7 +2083,7 @@ void func_001DC540(void *data) {
         btlStartTask(deltaTask);
         if (spec.hpDelta != 0) {
             effectTask = btlCreateLinkedEffectTask(unit, spec.hpDelta, 0);
-            effectTask->startCondition.kind = 4;
+            effectTask->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             effectTask->startCondition.value.handle = deltaTask->handle;
             effectTask->ownerId = btlAdvanceRuntimeSequenceCounter();
             btlStartTask(effectTask);
@@ -2182,7 +2183,7 @@ void btlStartActorDefeatTransition(ActionStateLink *command) {
         if (!(command->pendingFlags & 0x100)) {
             if (!(actor->flags & 0x8000000) && actor->unkEC != 11) {
                 object = btlCreateActorModelBlendTask(actor, 0, 11, 2, 1.0f);
-                object->startCondition.kind = 4;
+                object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 object->startCondition.value.handle = sequence;
                 btlStartTask(object);
             }
@@ -2192,11 +2193,11 @@ void btlStartActorDefeatTransition(ActionStateLink *command) {
         btlAccumulateEnemyDefeatRewards(actor);
         if (actor->flags & 0x8000000) {
             object = btlCreateSelectedEffectUpdateTask(actor);
-            object->startCondition.kind = 4;
+            object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             object->startCondition.value.handle = sequence;
             btlStartTask(object);
             object = sndCreateStationedSeTask(0x1000E);
-            object->startCondition.kind = 4;
+            object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             object->startCondition.value.handle = sequence;
             btlStartTask(object);
             actor->flags &= ~1;
@@ -2214,7 +2215,7 @@ void btlStartActorDefeatTransition(ActionStateLink *command) {
                 if (result != 0) {
                     if (actor->unkEC != 11) {
                         object = btlCreateActorModelBlendTask(actor, 0, 11, 2, 1.0f);
-                        object->startCondition.kind = 4;
+                        object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                         object->startCondition.value.handle = sequence;
                         btlStartTask(object);
                     }
@@ -2222,7 +2223,7 @@ void btlStartActorDefeatTransition(ActionStateLink *command) {
                 }
             } else {
                 object = (BtlRuntimeTask *)func_001E6428((s32)actor, 0);
-                object->startCondition.kind = 4;
+                object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 object->startCondition.value.handle = sequence;
                 btlStartTask(object);
                 actor->flags &= ~1;

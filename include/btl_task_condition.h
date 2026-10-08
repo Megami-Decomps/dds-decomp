@@ -1,0 +1,20 @@
+#ifndef BTL_TASK_CONDITION_H
+#define BTL_TASK_CONDITION_H
+
+/* The task scheduler evaluates these predicates for either task phase.
+ * Storage stays u8; count/handle/owner/task-kind data is stored separately. */
+enum BtlTaskConditionKind {
+    BTL_TASK_CONDITION_NEVER = 0,
+    BTL_TASK_CONDITION_ALWAYS = 1,
+    BTL_TASK_CONDITION_COUNT_REACHED = 2,
+    BTL_TASK_CONDITION_HANDLE_PRESENT = 3,
+    BTL_TASK_CONDITION_HANDLE_ABSENT = 4,
+    BTL_TASK_CONDITION_HANDLE_RUNNING_OR_ABSENT = 5,
+    BTL_TASK_CONDITION_OWNER_PRESENT = 6,
+    BTL_TASK_CONDITION_OWNER_ABSENT = 7,
+    BTL_TASK_CONDITION_OWNER_RUNNING_OR_ABSENT = 8,
+    BTL_TASK_CONDITION_KIND_PRESENT = 9,
+    BTL_TASK_CONDITION_KIND_ABSENT = 10,
+};
+
+#endif /* BTL_TASK_CONDITION_H */

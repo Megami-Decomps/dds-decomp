@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_task_condition.h"
 #include "sdf_resource.h"
 #include "btl_state.h"
 #include "btl_action.h"
@@ -288,11 +289,11 @@ extern s32 D_00435E7C;
 BtlRuntimeTask *btlCreateControlObject(void) {
     BtlRuntimeTask *task;
     task = btlAllocTask(0);
-    task->startCondition.kind = 1;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->callback = btlCommandRecenterParty;
     task->taskId = 0x66;
     task->onStart = NULL;
-    task->endCondition.kind = 0;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     return task;
 }
 

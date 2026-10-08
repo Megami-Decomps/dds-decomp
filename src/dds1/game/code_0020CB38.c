@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_task_condition.h"
 #include "btl_state.h"
 #include "btl_command.h"
 #include "btl_action.h"
@@ -164,16 +165,16 @@ void func_0020D2E0(BtlTask *task, s32 unusedCommand, BtlUnit *supplied,
     case 2:
     case 3:
     case 4:
-        created->startCondition.kind = 4;
+        created->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         created->startCondition.value.handle = prerequisiteHandle;
         break;
     case 0:
     case 1:
-        created->startCondition.kind = 7;
+        created->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
         created->startCondition.value.owner = ownerId;
         break;
     default:
-        created->startCondition.kind = 7;
+        created->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
         created->startCondition.value.owner = ownerId;
         break;
     }
@@ -181,7 +182,7 @@ void func_0020D2E0(BtlTask *task, s32 unusedCommand, BtlUnit *supplied,
 
     sound = (BtlRuntimeTask *)sndCreateStationedSeTask(
         (u32)(state->sequenceHandle + species - 0x130));
-    sound->startCondition.kind = 5;
+    sound->startCondition.kind = BTL_TASK_CONDITION_HANDLE_RUNNING_OR_ABSENT;
     sound->startCondition.value.handle = created->handle;
     btlStartTask(sound);
 }
