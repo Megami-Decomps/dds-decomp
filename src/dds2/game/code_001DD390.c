@@ -45,7 +45,7 @@ extern void func_001EC5F0(u32);
 extern void func_001EF030(void *, void *);
 extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
 extern void func_001E38F0(BtlUnit *, MdlCtx *, SdfModel *, SdfPoolNode **, u32);
-extern void dds3ClearObjectFlags(s32, s32);
+extern void dds3ClearObjectFlags(void *, u32);
 extern u8 D_00380788[];
 extern SdfPoolNode *D_003B6BD0[];
 
@@ -1879,7 +1879,7 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001E1B80);
 extern s32 mdlSpawnCameraSlotViewerObject(s32 kind, s32 id);
 extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *world, u32 key, s32 kind);
 extern void *dds3GetWorldObject(void);
-extern void dds3RemoveWorldObjectNode(s32 node);
+extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
 extern struct SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id);
 extern void btlMarkTaskReady(SoundResourceLink *resource);
 extern void btlResetUnitModelProgress(BtlUnit *unit);
@@ -1926,7 +1926,7 @@ void func_001E1BB8(u8 *unitAddress, u32 kind, u32 index) {
                 key = mdlSpawnCameraSlotViewerObject(kind, index);
                 object = dds3FindWorldObjectNodeByKey(
                     (EffWorldNode *)dds3GetWorldObject(), (u32)key, 5);
-                dds3RemoveWorldObjectNode((s32)object);
+                dds3RemoveWorldObjectNode(object);
             }
             func_001E1B80(unit, reused);
         }
@@ -1936,15 +1936,15 @@ void func_001E1BB8(u8 *unitAddress, u32 kind, u32 index) {
     }
     if (reused == NULL) {
         key = mdlSpawnCameraSlotViewerObject(kind, index);
-        unit->effectObject = (s32)dds3FindWorldObjectNodeByKey(
+        unit->effectObject = dds3FindWorldObjectNodeByKey(
             (EffWorldNode *)dds3GetWorldObject(), (u32)key, 5);
-        objectData = (EffectObjectData *)((EffWorldNode *)unit->effectObject)->data;
+        objectData = (EffectObjectData *)unit->effectObject->data;
         unit->ext = objectData->transitionWork;
         model = unit->ext->owner;
         unit->ext->flags |= 0x200000;
         VU0_SET_ONES_XYZ(vf10);
         VU0_SCALAR_OP(unit->unk50, "vmulx.xyzw vf10, vf10, vf2x");
-        inner = ((EffWorldNode *)unit->effectObject)->inner;
+        inner = unit->effectObject->inner;
         inner->flags = (inner->flags | 1) & ~2;
         VU0_STORE_VF(vf10, inner->scale);
         mdlStoreTertiaryVectorVU(model);
@@ -2700,9 +2700,9 @@ void btlReleaseUnitModelColorResource(BtlUnit *unit, u32 value, f32 scalar) {
     mdlReleaseInnerResourceHandle(unit->ext->owner, (value & 0xFFFFFF) | 0x80000000, scalar);
 }
 
-extern void effObjFetchInnerFirstVec(s32);
+extern void effObjFetchInnerFirstVec(EffWorldNode *);
 
-extern void effObjFetchInnerSecondVecNorm(s32);
+extern void effObjFetchInnerSecondVecNorm(EffWorldNode *);
 
 
 void btlRefreshUnitFxVectors(BtlUnit *unit) {
@@ -2866,7 +2866,7 @@ void func_001E38F0(BtlUnit *unit, MdlCtx *model, SdfModel *overlay,
 }
 
 
-extern void dds3SetObjectFlags(s32, s32);
+extern void dds3SetObjectFlags(void *, u32);
 
 void btlCreateUnitTransparency(BtlUnit *unit) {
     BattleGroupNode *shape;
@@ -4781,7 +4781,7 @@ void btlApplyUnitEffectScale(BtlUnit *unit) {
         btlInitializeEffectVectorsFromSourceRecords(unit, unit->resourceKind, unit->resourceIndex);
         VU0_SET_ONES_XYZ(vf10);
         VU0_SCALAR_OP(unit->unk50, "vmulx.xyzw vf10, vf10, vf2x");
-        inner = ((EffWorldNode *)unit->effectObject)->inner;
+        inner = unit->effectObject->inner;
         inner->flags |= OBJECT_TRANSFORM_FLAG_UPDATE_PENDING;
         inner->flags &= ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
         VU0_STORE_VF(vf10, inner->scale);
@@ -4831,15 +4831,15 @@ void btlInterpolateVectorStep(f32 *src) {
     VU0_LOAD_VF_MEMORY(vf10, vec);
 }
 
-u32 func_001E8568(void) {
+u32 func_001E8568(BtlLinkedCommand *command) {
     return 1;
 }
 
-u32 func_001E8570(void) {
+u32 func_001E8570(BtlLinkedCommand *command) {
     return 1;
 }
 
-u32 func_001E8578(void) {
+u32 func_001E8578(BtlLinkedCommand *command) {
     return 1;
 }
 
@@ -5764,8 +5764,8 @@ static inline s32 btlHasFlag(u32 flags, u32 mask) {
     return (flags & mask) != 0;
 }
 
-s32 btlHasActorCategoryFlag100(s32 actor) {
-    s32 category = ((BtlLinkedCommand *)actor)->actionCode;
+s32 btlHasActorCategoryFlag100(BtlLinkedCommand *action) {
+    s32 category = action->actionCode;
 
     if (category == 0) {
         return 0;
@@ -5773,8 +5773,8 @@ s32 btlHasActorCategoryFlag100(s32 actor) {
     return btlHasFlag(((BtlActionTableEntry *)datActionAnimationRecords)[category].flags, 0x100);
 }
 
-s32 btlIsActorCategoryTypeTwo(s32 actor) {
-    s32 category = ((BtlLinkedCommand *)actor)->actionCode;
+s32 btlIsActorCategoryTypeTwo(BtlLinkedCommand *action) {
+    s32 category = action->actionCode;
 
     if (category == 0) {
         return 0;
@@ -5832,8 +5832,8 @@ s32 btlIsActorCategoryMarked(s32 actor) {
     return datCommandRecords[category].unk30 == 1;
 }
 
-s32 btlHasActorCategoryFlag40(s32 actor) {
-    s32 category = ((BtlLinkedCommand *)actor)->actionCode;
+s32 btlHasActorCategoryFlag40(BtlLinkedCommand *action) {
+    s32 category = action->actionCode;
 
     if (category == 0) {
         return 0;
@@ -5886,8 +5886,8 @@ s32 btlHasFirstLinkedCategoryFlag1000(s32 actor) {
     return btlHasFlag(datEnemyRecords[category].flags, 0x1000);
 }
 
-u8 func_001EA940(s32 action) {
-    return ((BtlLinkedCommand *)action)->actionCode == 0x5f;
+u8 func_001EA940(BtlLinkedCommand *action) {
+    return action->actionCode == 0x5f;
 }
 
 s32 btlMapActorCategory(s32 actor) {
@@ -5928,8 +5928,8 @@ u32 func_001EAA00(BtlLinkedCommand *action) {
     return 0;
 }
 
-u8 func_001EAA08(s32 action) {
-    return ((BtlLinkedCommand *)action)->actionCode == 0x1a0;
+u8 func_001EAA08(BtlLinkedCommand *action) {
+    return action->actionCode == 0x1a0;
 }
 
 void func_001EAA18(void) {
@@ -6218,7 +6218,7 @@ void func_001EC198(BtlLinkedCommand *action) {
         func_001F17C8(action, &action->camera, target, 0);
         return;
     }
-    if (btlHasActorCategoryFlag100((s32)action) != 0) {
+    if (btlHasActorCategoryFlag100(action) != 0) {
         return;
     }
     btlUnitGetBodyPosVU(target);

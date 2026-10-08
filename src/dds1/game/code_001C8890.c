@@ -6566,15 +6566,15 @@ void btlInterpolateVectorStep(f32 *src) {
     VU0_LOAD_VF_MEMORY(vf10, vec);
 }
 
-u32 func_001DB358(void) {
+u32 func_001DB358(BtlLinkedCommand *command) {
     return 1;
 }
 
-u32 func_001DB360(void) {
+u32 func_001DB360(BtlLinkedCommand *command) {
     return 1;
 }
 
-u32 func_001DB368(void) {
+u32 func_001DB368(BtlLinkedCommand *command) {
     return 1;
 }
 
@@ -7461,25 +7461,25 @@ s32 btlHasLinkedEffectNodeTrigger(u8 *fx) {
     return *(s16 *)(table + index * 0x14 + 0x2C) == 2;
 }
 
-s32 btlHasActorCategoryFlag100(s32 actor) {
-    s32 index = *(s32 *)(actor + 0x114);
+s32 btlHasActorCategoryFlag100(BtlLinkedCommand *action) {
+    s32 index = action->actionCode;
     if (index == 0) {
         return 0;
     }
-    if ((*(u16 *)(datActionAnimationRecords + index * 0x20 + 0x1C) & 0x100) == 0) {
+    if ((((BtlActionAnimationRecord *)datActionAnimationRecords)[index].flags & 0x100) == 0) {
         return 0;
     }
     return 1;
 }
 
-s32 btlIsActorCategoryTypeTwo(s32 arg0) {
-    s32 temp_v1;
+s32 btlIsActorCategoryTypeTwo(BtlLinkedCommand *action) {
+    s32 index;
 
-    temp_v1 = *(s32 *)(arg0 + 0x114);
-    if (temp_v1 == 0) {
+    index = action->actionCode;
+    if (index == 0) {
         return 0;
     }
-    return ((datCommandRecords[temp_v1].unk30 ^ 2) < 1U);
+    return datCommandRecords[index].unk30 == 2;
 }
 
 u32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *actor) {
@@ -7531,12 +7531,12 @@ s32 btlIsActorCategoryMarked(BtlLinkedCommand *actor) {
     return datCommandRecords[index].unk30 == 1;
 }
 
-s32 btlHasActorCategoryFlag40(s32 actor) {
-    s32 index = *(s32 *)(actor + 0x114);
+s32 btlHasActorCategoryFlag40(BtlLinkedCommand *action) {
+    s32 index = action->actionCode;
     if (index == 0) {
         return 0;
     }
-    if ((*(u16 *)(datActionAnimationRecords + index * 0x20 + 0x1C) & 0x40) == 0) {
+    if ((((BtlActionAnimationRecord *)datActionAnimationRecords)[index].flags & 0x40) == 0) {
         return 0;
     }
     return 1;
@@ -7579,12 +7579,12 @@ s32 btlHasFirstLinkedCategoryFlag1000(u8 *node) {
     return 0;
 }
 
-u8 func_001DD488(s32 arg0) {
-    return *(s32 *)(arg0 + 0x114) == 0x5f;
+u8 func_001DD488(BtlLinkedCommand *action) {
+    return action->actionCode == 0x5f;
 }
 
-u8 func_001DD498(s32 arg0) {
-    return *(s32 *)(arg0 + 0x114) == 0x1a0;
+u8 func_001DD498(BtlLinkedCommand *action) {
+    return action->actionCode == 0x1a0;
 }
 
 void func_001DD4A8(void) {
@@ -7841,7 +7841,7 @@ void func_001DE960(BtlLinkedCommand *action) {
         func_001E3E58(action, action, target, 0);
         return;
     }
-    if (btlHasActorCategoryFlag100((s32)action) != 0) {
+    if (btlHasActorCategoryFlag100(action) != 0) {
         return;
     }
     btlUnitGetBodyPosVU(target);
