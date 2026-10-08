@@ -221,7 +221,8 @@ extern void func_002B2408();
 
 extern u32 mnuCreateIconBundle(u32);
 
-extern MenuIconState *func_002B9FF8(u32 mode, s32 resource, ...);
+extern MenuIconState *func_002B9FF8();
+extern s32 effConfigureIndexedSlotMaterial(u8 *, u32, u8 *, u32, u32, u32, u32);
 
 
 extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
@@ -344,9 +345,6 @@ extern void func_0026C900(void);
 
 
 extern void *memset(void *, s32, u32);
-
-MenuIconSprites *mnuCreateWindowSpriteResources(u32 width, u32 height, u32 value,
-                    u32 resourceHandle, s32 *indices, u32 unused);
 
 typedef struct MenuListDefaults {
     s32 indices[3];
@@ -916,12 +914,9 @@ MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height,
 
 /* Destroy the owned list and optional sprite resources before freeing the window. */
 void mnuDestroyWindowContainer(MenuWindowContainer *menu) {
-    s32 resource;
-
     mnuDestroyListState(menu->list);
-    resource = (s32)menu->resource;
-    if (resource != 0) {
-        mnuReleaseWindowTextures(resource);
+    if (menu->resource != NULL) {
+        mnuReleaseWindowTextures(menu->resource);
     }
     sdfReleaseChipBlock(menu);
 }
@@ -1179,6 +1174,7 @@ void func_002B9FB8(MenuWindowContainer *window) {
     }
 }
 
+/* Only kind 4 consumes the third resource word. */
 INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AE90);
 
 INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AEA0);
@@ -1189,7 +1185,50 @@ INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AEE8);
 
 INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AF00);
 
-INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002B9FF8);
+MenuIconState *func_002B9FF8(u32 mode, s32 resource, s32 material) {
+    s32 keys[6] = { 0x20, 0x22, 0x1F, 0x21, 0x22, 0x1F };
+    MenuIconState *panel;
+    s32 index;
+    s32 first;
+
+    panel = sdfAllocAndClearQuadwords(sizeof(MenuIconState));
+    panel->kind = mode;
+    switch (mode) {
+    case 0:
+    case 1:
+        panel->count = 3;
+        first = mode == 1 ? 3 : 0;
+        for (index = 0; index < panel->count; index++) {
+            panel->sprite[index] = effCreateResourceSlotSet((u32 *)resource, keys[first + index], 1);
+        }
+        break;
+    case 2:
+    case 3:
+        panel->count = 2;
+        first = mode == 3 ? 3 : 0;
+        for (index = 0; index < panel->count; index++) {
+            panel->sprite[index] = effCreateResourceSlotSet((u32 *)resource, keys[first + index], 1);
+        }
+        break;
+    case 4:
+        panel->count = 6;
+        panel->sprite[0] = effCreateResourceSlotSet((u32 *)resource, 0x16, 1);
+        panel->sprite[1] = effCreateResourceSlotSet((u32 *)resource, 0x15, 1);
+        panel->sprite[2] = effCreateResourceSlotSet((u32 *)resource, 0x0D, 1);
+        panel->sprite[3] = effCreateResourceSlotSet((u32 *)resource, 0x0D, 1);
+        panel->sprite[4] = effCreateResourceSlotSet((u32 *)resource, 0x0E, 1);
+        panel->sprite[5] = effCreateResourceSlotSet((u32 *)resource, 0x0E, 1);
+        effConfigureIndexedSlotMaterial((u8 *)panel->sprite[2], 0, (u8 *)material, 1, 0, 0, 0x0C);
+        effConfigureIndexedSlotMaterial((u8 *)panel->sprite[4], 0, (u8 *)material, 1, 0, 0, 0x0C);
+        break;
+    case 5:
+        panel->count = 2;
+        panel->sprite[0] = effCreateResourceSlotSet((u32 *)resource, 0x0D, 1);
+        panel->sprite[1] = effCreateResourceSlotSet((u32 *)resource, 0x0E, 1);
+        break;
+    }
+    return panel;
+}
 
 extern void effInitializeSlotWork(s32, s32);
 
