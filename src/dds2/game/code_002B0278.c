@@ -218,7 +218,7 @@ extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
 extern u32 mnuCreateIconBundle(u32);
 
-extern MenuIconState *func_002B9FF8(u32 mode, s32 resource, ...);
+extern MenuIconState *func_002B9FF8();
 
 
 extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);

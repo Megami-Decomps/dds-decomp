@@ -81,7 +81,7 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 
 extern s32 func_002C6CE8(void);
 
-extern struct MenuIconState *func_002B9FF8(u32 mode, s32 resource, ...);
+extern struct MenuIconState *func_002B9FF8();
 extern void mnuReleaseResourceList(struct MenuIconState *list);
 
 extern u32 effCreateStatusBatch(u32);
