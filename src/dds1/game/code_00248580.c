@@ -55,7 +55,7 @@ typedef struct {
 } MenuProgressOwner;
 
 
-extern s32 mnuFindMatchingPartyEntryIndex(s32);
+extern s32 mnuFindMatchingPartyEntryIndex(DatPartyRecord *targetEntry);
 extern s32 mnuSeekListNode(s32, struct MenuList *);
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
@@ -697,7 +697,7 @@ void mnuSetupStaffMenuProfilePage(DatPartyRecord *source, MenuProgressHost *work
     MenuPageWindow *window = &work->partyWindow;
     s32 index;
 
-    mnuSeekListNode(mnuFindMatchingPartyEntryIndex((s32)source), work->partyWindow.lists[0]);
+    mnuSeekListNode(mnuFindMatchingPartyEntryIndex(source), work->partyWindow.lists[0]);
     index = work->partyWindow.lists[0]->cursor->index;
     mnuSetWindowResource(index, window, work->staffSlots.pairResources[0], work->staffSlots.pairResources[1]);
     mnuAttachPartyIconBundle(index, window, work->staffSlots.pairResources[0]);
