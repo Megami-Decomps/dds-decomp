@@ -343,7 +343,6 @@ extern s32 D_00436FAC;
 
 extern s32 D_00436FB0;
 
-extern void sdfReleaseMemorySlot(s32 *slot);
 
 /* Release all three handles in each viewer-table entry, then clear its tables and backing allocations. */
 void mdlReleaseViewerSlotResources(void) {

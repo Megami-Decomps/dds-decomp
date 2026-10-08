@@ -242,8 +242,6 @@ extern s32 D_003BBB6C;
 
 extern s32 D_003BBB70;
 
-extern void sdfReleaseMemorySlot(s32 *slot);
-
 /* Native 0x40-byte package request; the package helpers fill handle at +0x30. */
 typedef struct MdlPackageRequest {
     u8 pad00[0x30];
