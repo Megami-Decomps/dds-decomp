@@ -158,7 +158,6 @@ extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfReleaseChipBlock(void *ptr);
 extern void *sdfAllocAndClearQuadwords(s32 size);
 extern void func_002D0750(s32 arg0, s32 arg1);
-extern void sdfDecrementAllocationReferenceCount(s32 arg0);
 extern u32 strlen(const char *s);
 extern void func_002F4190(u32 arg0);
 extern u32 sdfDiscType;
@@ -1846,7 +1845,7 @@ void sdfDevBufferedRequestGrow(DevRequest *request) {
         sdfDevResizeBufferedRequest(request, request->growStep);
         return;
     }
-    sdfDecrementAllocationReferenceCount(request->handle);
+    sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)(u32)request->handle);
     request->capacity = request->capacity + request->growStep;
     func_002D0750(request->handle, (s16)request->capacity * request->stride);
     request->buffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(request->handle));
@@ -1867,7 +1866,7 @@ void sdfDevResizeBufferedRequest(DevRequest *request, s32 elementCount) {
         request->capacity = 0;
         request->buffer = 0;
     } else {
-        sdfDecrementAllocationReferenceCount(request->handle);
+        sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)(u32)request->handle);
         request->capacity = elementCount;
         func_002D0750(request->handle, request->stride * elementCount);
         request->buffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(request->handle));

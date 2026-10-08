@@ -17,7 +17,6 @@ extern s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contex
 extern char sdfRuntimeTaskName[]; /* "GBWK" */
 extern void kwlnTaskDestroyWithHierarchyByName(char *name, s32 flag);
 extern void func_00117A80(void);
-extern void sdfDecrementAllocationReferenceCount(u32 allocation);
 extern struct EffWorldNode *dds3AppendWorldObjectNode();
 
 
@@ -226,7 +225,7 @@ void sdfDestroyRuntimeTask(void) {
     kwlnTaskDestroyWithHierarchyByName(sdfRuntimeTaskName, 0);
     func_00117A80();
     allocation = datGameState->header.backingAllocation;
-    sdfDecrementAllocationReferenceCount(allocation);
+    sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)allocation);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     datGameState = 0;
 }
@@ -277,7 +276,6 @@ extern s32 D_00438EA8;
 extern u32 D_00438EAC;
 extern s32 mdlFlagTest(s32 flag);
 extern s32 mnuCreateFlagEntries(void);
-extern void *sdfMemoryGetBlockAddress(void *handle);
 extern void func_0011D130(void);
 extern s32 mtrMantraEventBitPush(void);
 
@@ -311,20 +309,20 @@ void sdfSaveResetSnapshot(void) {
     D_00385218[2] = datGameState->header.unk2C;
     D_00438E90 = mnuCreateFlagEntries();
     D_00438E94 = sdfAllocGeneralBlock(sizeof(datGameState->mantraBits));
-    copy = sdfMemoryGetBlockAddress(D_00438E94);
+    copy = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)D_00438E94);
     memcpy(copy, datGameState->mantraBits, sizeof(datGameState->mantraBits));
     D_00438E98 = sdfAllocGeneralBlock(sizeof(datGameState->profileBanks));
-    copy = sdfMemoryGetBlockAddress(D_00438E98);
+    copy = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)D_00438E98);
     memcpy(copy, datGameState->profileBanks, sizeof(datGameState->profileBanks));
     func_0011D130();
     D_00438E9C = sdfAllocGeneralBlock(sizeof(datGameState->templates));
-    copy = sdfMemoryGetBlockAddress(D_00438E9C);
+    copy = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)D_00438E9C);
     memcpy(copy, datGameState->templates, sizeof(datGameState->templates));
     D_00438EA0 = sdfAllocGeneralBlock(0x40);
-    copy = sdfMemoryGetBlockAddress(D_00438EA0);
+    copy = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)D_00438EA0);
     memcpy(copy, &datGameState->inventory.counts[0xC0], 0x40);
     D_00438EA4 = sdfAllocGeneralBlock(sizeof(datGameState->itemBlockedFlags));
-    copy = sdfMemoryGetBlockAddress(D_00438EA4);
+    copy = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)D_00438EA4);
     memcpy(copy, datGameState->itemBlockedFlags, sizeof(datGameState->itemBlockedFlags));
     D_00438EA8 = mtrMantraEventBitPush();
     D_00438EAC = datGameState->world.slotFlags;

@@ -6,19 +6,11 @@
 #define SDF_HEAP_BLOCK_USED 1
 #define SDF_HEAP_BLOCK_END 2
 
-#define SDF_HEAP_STAT_TOTAL_BYTES 0
-#define SDF_HEAP_STAT_FREE_BYTES 1
-#define SDF_HEAP_STAT_LARGEST_FREE 2
-#define SDF_HEAP_STAT_SMALLEST_FREE 3
-#define SDF_HEAP_STAT_BLOCK_COUNT 4
-#define SDF_HEAP_STAT_FREE_BLOCK_COUNT 5
-
 #define SDF_NAMED_REQUEST_OVERHEAD_BYTES 0xC
 #define SDF_RPC_REPLY_ALIGNMENT_MASK 0x3F
 #define SDF_NAMED_RESOURCE_RPC_ID 0x6F496453
 #define SDF_RPC_BIND_RETRY_TICKS 0x1ED2
 
-extern SdfMemBlock *sdfFindGeneralBlockByAddress(void *address);
 extern void sdfReleaseChipBlock(void *block);
 extern s32 func_00312C08(void);
 extern void EIntr(void);
@@ -99,10 +91,10 @@ u32 sdfResourceRetainAddress(SdfMemBlock *allocation) {
 }
 
 /* This path reads the same reference-count storage unsigned and never decrements zero. */
-void sdfDecrementAllocationReferenceCount(u8 *allocation) {
-    u16 referenceCount = *(u16 *)(allocation + 0xE);
+void sdfDecrementAllocationReferenceCount(SdfMemBlock *allocation) {
+    u16 referenceCount = (u16)allocation->referenceCount;
     if (referenceCount != 0) {
-        *(u16 *)(allocation + 0xE) = referenceCount - 1;
+        allocation->referenceCount = (s16)(referenceCount - 1);
     }
 }
 

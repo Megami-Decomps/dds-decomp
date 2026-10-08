@@ -105,7 +105,6 @@ extern char D_004142C0[];
 extern EffBillResourceArchive *fileQueuePlainDispatchRequest(const char *path);
 extern void func_002C81D0(EffBillResourceArchive *archive);
 extern void func_002C7CE8(EffBillResourceArchive *archive);
-extern u32 sdfMemoryGetBlockAddress(MemBlock *block);
 extern BillObj *billCreateIndexed(s32 kind, u32 data);
 extern void func_0035B6E0(const char *format, ...);
 
@@ -131,7 +130,7 @@ void effInitializeBillResourceOwners(void) {
         configOffset = 0;
         do {
             billboard = billCreateIndexed(((EffBillResourceInit *)(configOffset + (u32)configTable))->billboardKind,
-                                          sdfMemoryGetBlockAddress(node->blockHandle));
+                                          (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)node->blockHandle));
             scale = (f32 *)(configOffset + (u32)scaleTable);
             configOffset += sizeof(EffBillResourceInit);
             *owner++ = billboard;

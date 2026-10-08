@@ -607,15 +607,13 @@ void mnuCampLinkFontGlyph(EvtRuntime *scene) {
     scene->glyph = 0;
 }
 
-extern void sdfGetGeneralHeapStats(s32 *);
-
 /* Retail keeps only the divide-by-zero check (break 7) of a division whose result is never used. */
 void mnuCampCheckClockDivisor(void) {
     s32 heapStats[CAMP_HEAP_STATS_WORD_COUNT];
     s32 quotient;
 
     sdfGetGeneralHeapStats(heapStats);
-    quotient = 1 / heapStats[0];
+    quotient = 1 / heapStats[SDF_HEAP_STAT_TOTAL_BYTES];
 }
 
 void mnuEnterCampSceneMenuState(EvtRuntime *scene) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf.h"
 
 /* The backing resource is identified by its data address, not an allocation ID. */
@@ -12,7 +13,6 @@ typedef struct {
     ModelRangeData *rangeData;
 } ModelRangeObj;
 
-SdfMemBlock *sdfFindGeneralBlockByAddress(void *resourceAddress);
 void sdfQueueNonzeroResourceId(s32 arg);
 void sdfReleaseChipBlock(void *arg);
 

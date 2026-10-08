@@ -403,10 +403,10 @@ void fldAllocateRecordStorage(void) {
 
 /* Release both retained resources and clear the usable buffer addresses. */
 void fldReleaseRecordStorage(void) {
-    sdfDecrementAllocationReferenceCount(fldValueRecordResource);
+    sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)fldValueRecordResource);
     sdfQueueNonzeroResourceId(fldValueRecordResource);
     fldValueRecords = 0;
-    sdfDecrementAllocationReferenceCount(fldAuxRecordResource);
+    sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)fldAuxRecordResource);
     sdfQueueNonzeroResourceId(fldAuxRecordResource);
     fldAuxRecordBuffer = 0;
 }
@@ -1985,7 +1985,6 @@ s32 func_00144028(void *task) {
 }
 
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 
 void *fldInitializeTitleBannerTask(KwlnTask *task) {
     s16 *node = sdfAllocSizeClassBlock(8);

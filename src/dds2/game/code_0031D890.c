@@ -33,7 +33,6 @@ typedef struct CompactSlotPool {
     s32 count;
 } CompactSlotPool;
 
-extern u32 sdfMemoryGetBlockAddress(SdfMemBlock *allocation);
 extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
 
 typedef char WideSlotLayoutAssert[

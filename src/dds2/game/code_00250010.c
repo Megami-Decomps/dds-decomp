@@ -2286,7 +2286,6 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00256CF0);
 
 extern s32 effEventAdvanceResourceTemplateSetup();
 
-extern u32 kwlnTaskGetTimer(KwlnTask *task);
 
 typedef struct EvtSelectionCache {
     u8 pad00[0x24];

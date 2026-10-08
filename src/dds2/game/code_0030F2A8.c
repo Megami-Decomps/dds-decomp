@@ -16,7 +16,6 @@ extern f32 fldNormalizedVectorDot(f32 *, f32 *);
 extern f32 fldVectorLength(f32 *);
 
 
-extern void *sdfMemoryGetBlockAddress(u32);
 
 extern void *memset(void *, s32, u32);
 
