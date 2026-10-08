@@ -20,6 +20,8 @@ struct BillChildPayload *billCreateChildPayloadFromTextureResource(void *resourc
 void billMarkKindOneFlag(struct BillObj *billboard);
 void billSetChildHalfExtents(struct BillObj *billboard, f32 width, f32 height);
 void billSetChildScaleComponents(struct BillObj *billboard, f32 x, f32 y);
+/* Radian rotation of the billboard quad in its plane. */
+void billSetRotationAngle(struct BillObj *billboard, f32 angle);
 void billSetBillboardMode(struct BillObj *billboard, s32 mode);
 void billSetAnimationEntry(struct BillObj *billboard, s32 entryIndex);
 void billSetAnimationFrameForImmediateAdvance(struct BillObj *billboard, u32 frame);

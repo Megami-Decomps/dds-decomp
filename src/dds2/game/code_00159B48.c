@@ -217,8 +217,8 @@ void *src;
     PCP_COPY_VECTOR(dst, src);
 }
 
-void billSetLengthExtent(BillObj *effect, float scale) {
-    effect->lengthScale = scale;
+void billSetRotationAngle(BillObj *effect, float angle) {
+    effect->rotationAngle = angle;
 }
 
 void billSetChildScaleComponents(BillObj *effect, float x, float y) {

@@ -176,9 +176,9 @@ void effCopyVector(void *dst, void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-/* Adjust the scalar used by an existing billboard instance. */
-void billSetLengthExtent(BillObj *effect, float scale) {
-    effect->lengthScale = scale;
+/* Set the radian rotation applied to the billboard quad corners. */
+void billSetRotationAngle(BillObj *effect, float angle) {
+    effect->rotationAngle = angle;
 }
 
 /* Set the two child scale components stored at +0x10 and +0x14. */
