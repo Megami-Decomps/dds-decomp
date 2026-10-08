@@ -343,7 +343,6 @@ s32 mnuStaffRunPanel2b(KwlnTask *request) {
 extern s32 btlItemApplyDirectEffect(s32, s32, s32, s32);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern void ptyAdjustItemQuantity(s32, s32);
-extern void mnuInitPartyPanelSlots(s32);
 extern void func_00280048(s32);
 
 /* Use a field item: resolve its direct effect (or field-use skill) against the
@@ -363,7 +362,7 @@ s32 mnuUseStaffItem(s32 itemId, s32 context) {
         }
     }
     ptyAdjustItemQuantity(itemId, -1);
-    mnuInitPartyPanelSlots(context + 0x7EC);
+    mnuInitPartyPanelSlots((PartyPanel *)(context + 0x7EC));
     mnuUpdateHandleStates((MenuPageWindow *)partyPanel);
     func_00280048(partyPanel);
     return 1;

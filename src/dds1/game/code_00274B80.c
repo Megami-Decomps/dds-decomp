@@ -20,7 +20,6 @@ extern MenuPanelHandles *mnuCreatePanelSpriteHandles(u32, s32, s32);
 extern s32 mnuClassifyQuarterHalfPercent(s32, s32);
 extern s32 evtStageTestSelectEntry(s32, s32, s32);
 extern void func_00276720(s32, s32, s32, s32);
-extern void mnuInitPartyPanelSlots(PartyPanel *);
 
 extern u32 uiBlendColors(u32, u32, u32);
 extern s32 mnuLookupRangeEntry(u16);

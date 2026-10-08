@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_staff.h"
 #include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_list.h"
@@ -632,7 +633,6 @@ extern void *memset(void *, s32, u32);
 
 extern struct EffectList *mnuAllocateValueRecord(u32);
 extern void func_002BC618(struct EffectList *);
-extern void mnuInitPartyPanelSlots(PartyPanel *);
 extern void mnuAppendCampSpriteRequests(struct EffectList *, StaffSlots *);
 extern void mnuReleaseStaffMenuTextureHandles(u32 *);
 extern void mnuReleaseStaffResourceGroups(StaffSlots *);
