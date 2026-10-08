@@ -56,23 +56,21 @@ extern void sdfComposeVuMatrixFromRegisters(void);
 typedef struct PcpScatterRadialWork PcpScatterRadialWork;
 typedef struct PcpScatterSpinWork PcpScatterSpinWork;
 typedef struct PcpScatterRibbonWork PcpScatterRibbonWork;
+typedef struct PcpScatterInstanceB PcpScatterInstanceB;
+typedef struct PcpScatterInstanceC PcpScatterInstanceC;
+typedef struct PcpScatterPlainInstance PcpScatterPlainInstance;
 
 /* Constructors also serve the legacy parameter-table dispatch surface. */
 extern PcpScatterRadialWork *func_001708A0();
 extern PcpScatterSpinWork *effScatterCreateSpinWork();
 extern PcpScatterRibbonWork *effScatterCreateRibbonWork();
-extern void *effScatterCreateDampedRing();
-extern void *effScatterCreateTwoColorRing();
-extern void *effPcpScatterCreatePlainInstance();
+extern PcpScatterInstanceB *effScatterCreateDampedRing();
+extern PcpScatterInstanceC *effScatterCreateTwoColorRing();
+extern PcpScatterPlainInstance *effPcpScatterCreatePlainInstance();
 
 
 /* Serialized parameter heads precede each scatter effect's runtime state. */
 typedef struct PcpScatterInstance PcpScatterInstance;
-typedef struct PcpScatterInstanceB PcpScatterInstanceB;
-typedef struct PcpScatterInstanceC PcpScatterInstanceC;
-typedef struct PcpScatterPlainInstance PcpScatterPlainInstance;
-
-
 extern void effPcpScatterSharePoolResource(PcpScatterPool *work, PcpScatterPool *src);
 
 extern PcpScatterPool *effPcpScatterPoolCreate(s32 groups);
@@ -1666,7 +1664,7 @@ void effPcpScatterTransformMatrix(PcpScatterInstance *work, void *source)
  * Normalize the copied delay range too, because loop restarts read that stored value. */
 /* Return the radius-damped ring variant with a shared instance clock.
  * Normalize the copied delay range too, because loop restarts read that stored value. */
-void *effScatterCreateDampedRing(src, resource)
+PcpScatterInstanceB *effScatterCreateDampedRing(src, resource)
     PcpScatterParamsB *src;
     u32 resource;
 {
@@ -1956,7 +1954,7 @@ void effScatterComposeWorkMatrix(PcpScatterInstanceB *work, void *source)
 
 
 /* Return two-color ring work with an instance clock and normalized stored delay range. */
-void *effScatterCreateTwoColorRing(src, resource)
+PcpScatterInstanceC *effScatterCreateTwoColorRing(src, resource)
     PcpScatterParamsC *src;
     u32 resource;
 {
@@ -2306,7 +2304,7 @@ struct PcpScatterPlainInstance {
 
 /* Return flat-ring work with an identity source matrix and randomized negative ages.
  * Like the first ring variant, only the local delay modulus is normalized. */
-void *effPcpScatterCreatePlainInstance(src, resource)
+PcpScatterPlainInstance *effPcpScatterCreatePlainInstance(src, resource)
     PcpScatterPlainParams *src;
     u32 resource;
 {
