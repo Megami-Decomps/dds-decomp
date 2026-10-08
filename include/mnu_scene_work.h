@@ -31,7 +31,7 @@ typedef struct MenuSceneWork {
     s16 scrollX; /* 0x5A4 */
     s16 scrollY; /* 0x5A6 */
     u8 pad5A8[4];
-    u8 boundsFlags; /* 0x5AC */
+    s8 boundsFlags; /* 0x5AC */
     u8 cursorMoving; /* 0x5AD */
     u8 pad5AE[2];
 } MenuSceneWork;
