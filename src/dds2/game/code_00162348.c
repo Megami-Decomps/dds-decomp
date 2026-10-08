@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
+#include "par_kind_api.h"
 #include "par_draw_block.h"
 
 #include "eff.h"
@@ -62,11 +63,7 @@ typedef struct ParReleaseRecord {
     SdfAsset *asset;     /* 0x40 */
 } ParReleaseRecord;
 
-typedef struct ParScaleObj {
-    u16 kind;
-    u8 pad2[6];
-    f32 scale; /* 0x8 */
-} ParScaleObj;
+
 
 extern f32 D_00451F30[];
 
@@ -102,13 +99,13 @@ extern void parUpdateCellVertexTriangle(ParSystem *, s32, const u128 *);
 
 extern s32 parObjGetMode();
 
-extern void func_001618E0(s32);
+extern void func_001618E0(struct ParTable *table, s32 index, u32 color, f32 speed);
 
-extern void parUpdateBillboardCrossStrip();
+extern void parUpdateBillboardCrossStrip(s32 particle, s32 index, u32 color);
 
-extern void parUpdateBillboardCrossTriangle();
+extern void parUpdateBillboardCrossTriangle(s32 particle, s32 index, u32 color);
 
-extern void parUpdateTrackPolygonCrossAxes();
+extern void parUpdateTrackPolygonCrossAxes(s32 particle, s32 index, u32 color);
 
 extern void effBillSetEntryValue(s32, s32, u32);
 
@@ -389,7 +386,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_001629A0);
 
 /* Kinds 2-4 keep the scale at +8 of their own record; copy it into the
  * shared vector and store the (vf10 - vf11) difference. */
-void parUpdateSharedScaleAndDelta(ParScaleObj *obj) {
+void parUpdateSharedScaleAndDelta(ParKindState *obj) {
     f32 scale;
 
     switch (obj->kind) {
@@ -397,15 +394,15 @@ void parUpdateSharedScaleAndDelta(ParScaleObj *obj) {
     case 1:
         return;
     case 2:
-        scale = obj->scale;
+        scale = obj->value.scale;
         D_00451F40[0] = D_00451F40[1] = D_00451F40[2] = scale;
         break;
     case 3:
-        scale = obj->scale;
+        scale = obj->value.scale;
         D_00451F40[0] = D_00451F40[1] = D_00451F40[2] = scale;
         break;
     case 4:
-        scale = obj->scale;
+        scale = obj->value.scale;
         D_00451F40[0] = D_00451F40[1] = D_00451F40[2] = scale;
         break;
     default:
@@ -417,19 +414,19 @@ void parUpdateSharedScaleAndDelta(ParScaleObj *obj) {
     VU0_STORE_VF($vf10, D_00451F30);
 }
 
-void parDispatchKindUpdate(ParKindState *work) {
+void parDispatchKindUpdate(ParKindState *work, s32 index, u32 color, f32 speed) {
     switch ((u16)work->kind) {
     case 1:
-        func_001618E0((s32)work->value.table);
+        func_001618E0(work->value.table, index, color, speed);
         return;
     case 2:
-        parUpdateBillboardCrossStrip((s32)work->primaryDrawSystem);
+        parUpdateBillboardCrossStrip((s32)work->primaryDrawSystem, index, color);
         return;
     case 3:
-        parUpdateBillboardCrossTriangle((s32)work->secondaryDraw.system);
+        parUpdateBillboardCrossTriangle((s32)work->secondaryDraw.system, index, color);
         return;
     case 4:
-        parUpdateTrackPolygonCrossAxes((s32)work->secondaryDraw.modelList);
+        parUpdateTrackPolygonCrossAxes((s32)work->secondaryDraw.modelList, index, color);
         break;
     }
 }

@@ -4206,7 +4206,73 @@ u32 btlTickLinkedDefeatCandidateAction(ActionUnit *unit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00221158);
+s32 func_00221158(ActionStateLink *link) {
+    BattleEffectPayload *effect;
+    BtlOperandGroup *group;
+    BtlUnit *entry;
+    u32 count;
+    s32 i;
+    u32 k;
+    s32 matched;
+    s32 hasHpLoss;
+
+    if (link == 0) {
+        return -1;
+    }
+    if (link->unit == 0) {
+        return -1;
+    }
+    effect = ((BtlState *)btlGetRuntime())->effect;
+    if (effect->query.enabled == 0) {
+        return -1;
+    }
+    matched = 0;
+    hasHpLoss = 0;
+    group = link->indexWork.groups;
+    if (link->unit->flags & 0x200) {
+        count = btlGetIndexListCount(link->indexWork.indices);
+        for (i = 0; i < count; i++, group++) {
+            entry = btlGetIndexListEntry(link->indexWork.indices, i);
+            if (entry->flags & 0x400) {
+                if (entry->partyRecord.unitId == 0x116) {
+                    matched = 1;
+                    if (group->reflected == 0) {
+                        for (k = 0; k < group->count; k++) {
+                            if (group->entries[k].hpDelta < 0) {
+                                hasHpLoss = 1;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        count = btlGetIndexListCount(link->indexWork.indices);
+        for (i = 0; i < count; i++, group++) {
+            entry = btlGetIndexListEntry(link->indexWork.indices, i);
+            if (entry->flags & 0x200) {
+                if (group->reflected != 0) {
+                    matched = 1;
+                    for (k = 0; k < group->count; k++) {
+                        if (group->entries[k].hpDelta < 0) {
+                            hasHpLoss = 1;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (!matched) {
+        return -1;
+    }
+    if (link->indexWork.parameter == 0xB) {
+        effect->query.count += 1;
+        return 0xF3;
+    }
+    return hasHpLoss ? 0xF5 : -1;
+}
 
 u32 btlInitializeMarkedActionTimer(ActionUnit *unit) {
     if (unit->action == 0x6b) {
