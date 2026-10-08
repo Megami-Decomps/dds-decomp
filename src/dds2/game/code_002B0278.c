@@ -5,6 +5,7 @@
 #include "mnu_shop.h"
 #include "dat_state.h"
 struct MenuListNode;
+struct StaffMenuRuntime;
 extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
 extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 #include "fpu.h"
@@ -88,6 +89,8 @@ extern s32 D_00435E5C;
 extern void itfDrawGridWithResolvedSlot();
 
 extern void mnuClearListFlagsOneAndTwo();
+
+extern void mnuReleaseResourceList(MenuIconState *list);
 
 extern s32 func_002C6CE8(void);
 
@@ -210,7 +213,7 @@ extern void mnuCreateStaffImageSprite();
 extern void func_002AA7A0();
 
 
-extern void mnuIdleVoiceTimer();
+extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
 
 extern u32 mnuCreateIconBundle(u32);
@@ -999,18 +1002,18 @@ void mnuReleaseStaffMenuTextureHandles(s32 menuWork) {
 u32 mnuCreateSelectState(u32 unused, s32 flag) {
     s32 context = kwlnTaskGetUserValue();
     u32 handle = sdfAllocGeneralBlock(0x30);
-    u32 *state = (u32 *)sdfResourceRetainAddress((SdfMemBlock *)handle);
-    *(u32 **)(context + 0xaa48) = state;
+    StaffMenuRuntime *state = (StaffMenuRuntime *)sdfResourceRetainAddress((SdfMemBlock *)handle);
+    *(StaffMenuRuntime **)(context + 0xaa48) = state;
     memset(state, 0, 0x30);
-    state[0] = handle;
-    state[5] = flag;
+    state->allocation = (SdfMemBlock *)handle;
+    state->staffView = flag;
     if (flag == 0) {
-        state[4] = 0;
+        state->staffMode = 0;
     } else {
-        state[4] = 1;
+        state->staffMode = 1;
     }
     func_002B27F0(context);
-    state[9] = 1;
+    state->active = 1;
     mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->displayResource, 0, 0);
     evtStageTestInit(0);
     return 1;
@@ -1018,11 +1021,11 @@ u32 mnuCreateSelectState(u32 unused, s32 flag) {
 
 s32 mnuStaffCloseSelectionState(void) {
     s32 context = kwlnTaskGetUserValue();
-    s32 party = ((MenuContext *)context)->party;
+    StaffMenuRuntime *menuWork = (StaffMenuRuntime *)((MenuContext *)context)->party;
 
     mnuResetWorkFloats();
     mnuReleaseMenuWindowHandles(context);
-    sdfReleaseResourceAllocation(*(s32 *)party);
+    sdfReleaseResourceAllocation((s32)menuWork->allocation);
     return 1;
 }
 
@@ -1046,7 +1049,7 @@ void func_002B2A10(void) {
  * Return a nonzero popup-update word unchanged, or zero after handling input. */
 s32 mnuStaffPopupUpdate(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    u8 *menuWork = (u8 *)((MenuContext *)context)->party;
+    StaffMenuRuntime *menuWork = (StaffMenuRuntime *)((MenuContext *)context)->party;
     s32 *popupState = ((MenuContext *)context)->popupState;
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_POPUP_INPUT_MASK);
     s32 stateWord;
@@ -1059,9 +1062,9 @@ s32 mnuStaffPopupUpdate(s32 callback) {
         panelWork = &((MenuContext *)context)->partyWindow;
         mnuStepPartyPanelListFromInput(4, panelWork);
         if (inputFlags & MNU_STAFF_INPUT_CONFIRM) {
-            ((StaffMenuRuntime *)menuWork)->staffSelection = ((MenuContext *)context)->partyWindow.lists[0]->cursor->index;
+            menuWork->staffSelection = ((MenuContext *)context)->partyWindow.lists[0]->cursor->index;
             mnuSetPopupEntry(popupState, D_003E75E0);
-            *(s32 *)(menuWork + 0x24) = 1;
+            menuWork->active = 1;
         }
         if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
             mnuSetPopupEntryFlagged(popupState, D_003E75A8);
@@ -1075,20 +1078,20 @@ s32 mnuStaffPopupUpdate(s32 callback) {
 
 s32 mnuDrawStaffCampPageWithImage(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    s32 *menu = (s32 *)((MenuContext *)context)->party;
+    StaffMenuRuntime *menu = (StaffMenuRuntime *)((MenuContext *)context)->party;
     if (effHasFirstTextureHandle(((MenuContext *)context)->resourceHandle)) {
         mnuDrawCampIconBackdropByKind(0, callback);
     } else {
         mnuDrawCampIconBackdropByKind(1, callback);
     }
-    if (menu[5] == 0) {
+    if (menu->staffView == 0) {
         mnuCreateStaffImageSprite(0x16);
     } else {
         mnuCreateStaffImageSprite(0x15);
     }
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuContext *)context)->transition, 0x53);
     func_002AA7A0(0, ((MenuContext *)context)->displayHandle);
-    if (menu[9] != 0) {
+    if (menu->active != 0) {
         func_002AAC98(0, ((MenuContext *)context)->imageHandle->list->cursor->index, D_003E69B0, context, 1, 0x53);
     }
     return menuSetHandler((void *)context, 1, (void *)callback);
@@ -1114,7 +1117,7 @@ s32 mnuCreatePanels(s32 callback) {
     s32 index = list->cursor->index;
     DatPartyRecord *data = &datGameState->party[index];
     MenuPageWindow *window = &((MenuContext *)context)->partyWindow;
-    s32 *party = (s32 *)menuContext->party;
+    StaffMenuRuntime *party = (StaffMenuRuntime *)menuContext->party;
     u32 *profile;
 
     mnuSetWindowResource(index, (u32 *)window, menuContext->displayHandle,
@@ -1134,25 +1137,25 @@ s32 mnuCreatePanels(s32 callback) {
     menuContext->resourceList = profile;
     mnuSetGroupProperties(profile, menuContext->displayHandle,
                           menuContext->alternateResource, 1, 2);
-    party[8] = (s32)func_002B9FF8(4, menuContext->displayHandle, menuContext->skillPanelResource);
+    party->iconPanel = func_002B9FF8(4, menuContext->displayHandle, menuContext->skillPanelResource);
     if (mnuClassifyQuarterHalfPercent(data->hp, data->maxHp) < 2) {
-        party[11] = -1;
+        party->motionSelection = -1;
     } else {
-        party[11] = 0xA;
+        party->motionSelection = 0xA;
     }
-    evtStageTestSelectEntry(data->unitId, party[11], 0);
-    func_002B2C88(window, 1, party[5], party[4]);
+    evtStageTestSelectEntry(data->unitId, party->motionSelection, 0);
+    func_002B2C88(window, 1, party->staffView, party->staffMode);
     mnuBeginWindowFadeTransition(0, &((MenuContext *)context)->transition);
     return 1;
 }
 
 s32 mnuDestroyPanels(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    s32 *menu = (s32 *)((MenuContext *)context)->party;
+    StaffMenuRuntime *menu = (StaffMenuRuntime *)((MenuContext *)context)->party;
     s32 window;
     mnuBeginWindowFadeTransition(((MenuContext *)context)->imageHandle, &((MenuContext *)context)->transition);
     window = context + 0x284;
-    func_002B2C88(window, 0, menu[5], menu[4]);
+    func_002B2C88(window, 0, menu->staffView, menu->staffMode);
     evtStageTestStop();
     mnuClearEntries(window);
     mnuReleasePartyIconBundles(window);
@@ -1172,7 +1175,7 @@ s32 mnuDestroyPanels(s32 callback) {
         mnuFreeProfilePanelWork(((MenuContext *)context)->resourceList);
         ((MenuContext *)context)->resourceList = 0;
     }
-    mnuReleaseResourceList((MenuIconState *)menu[8]);
+    mnuReleaseResourceList(menu->iconPanel);
     return 1;
 }
 
@@ -1214,11 +1217,11 @@ s32 mnuStaffSwitchPartyPage(s32 requestArgument) {
  * stateWord holds the update result first, then the stored popup state. */
 s32 mnuStaffBrowsePartyUpdate(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    u8 *menuWork = (u8 *)((MenuContext *)context)->party;
+    StaffMenuRuntime *menuWork = (StaffMenuRuntime *)((MenuContext *)context)->party;
     s32 *popupState;
     u32 inputFlags;
     s32 stateWord;
-    if (((StaffMenuRuntime *)menuWork)->staffView == 0) {
+    if (menuWork->staffView == 0) {
         inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_VIEW_INPUT_MASK);
     } else {
         inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_INPUT_CANCEL);
@@ -1232,28 +1235,28 @@ s32 mnuStaffBrowsePartyUpdate(s32 callback) {
         return 0;
     }
     stateWord = *popupState;
-    ((StaffMenuRuntime *)menuWork)->staffExit = 0;
+    menuWork->staffExit = 0;
     if (stateWord == 0) {
         if (mnuStaffSwitchPartyPage(callback) != 0) {
             return 0;
         }
         if (inputFlags & MNU_STAFF_VIEW_TOGGLE_MASK) {
-            if (((StaffMenuRuntime *)menuWork)->staffMode == 0) {
-                ((StaffMenuRuntime *)menuWork)->staffMode = 1;
-                func_002B2C88(context + MNU_STAFF_PARTY_PANEL_BASE, 3, ((StaffMenuRuntime *)menuWork)->staffView, 1);
+            if (menuWork->staffMode == 0) {
+                menuWork->staffMode = 1;
+                func_002B2C88(context + MNU_STAFF_PARTY_PANEL_BASE, 3, menuWork->staffView, 1);
                 mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->alternateResource, 0, 0);
             } else {
-                ((StaffMenuRuntime *)menuWork)->staffMode = 0;
-                func_002B2C88(context + MNU_STAFF_PARTY_PANEL_BASE, 2, ((StaffMenuRuntime *)menuWork)->staffView, 0);
+                menuWork->staffMode = 0;
+                func_002B2C88(context + MNU_STAFF_PARTY_PANEL_BASE, 2, menuWork->staffView, 0);
                 mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->displayResource, 0, 0);
             }
-            ((StaffMenuRuntime *)menuWork)->idleFrames = 0;
+            menuWork->idleFrames = 0;
         }
         if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
             if (func_002C6CE8() != 1) {
                 evtStageTestStop();
-                ((StaffMenuRuntime *)menuWork)->staffExit = 1;
-                *(s32 *)(menuWork + 0x24) = 1;
+                menuWork->staffExit = 1;
+                menuWork->active = 1;
                 mnuSetPopupEntryFlagged(popupState, D_003E75C4);
             } else {
                 inputFlags = MNU_STAFF_INPUT_REJECTED;
@@ -1357,17 +1360,17 @@ s32 func_002B3788(s32 callback) {
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
-void mnuIdleVoiceTimer(s32 object) {
+void mnuIdleVoiceTimer(StaffMenuRuntime *object) {
     u32 count;
-    if (((StaffMenuRuntime *)object)->motionSelection == -1) {
+    if (object->motionSelection == -1) {
         if (func_002C6CE8() != 1) {
             if (evtStageTestHasPendingMotion() == 0) {
-                ((StaffMenuRuntime *)object)->idleFrames += 1;
+                object->idleFrames += 1;
             }
-            if (((StaffMenuRuntime *)object)->idleFrames >= 0x12d) {
+            if (object->idleFrames >= 0x12d) {
                 count = evtStageTestCountFlags(0);
                 evtStageTestQueueMotion(0, effMiscRand(0) % count);
-                ((StaffMenuRuntime *)object)->idleFrames = 0;
+                object->idleFrames = 0;
             }
         }
     }
@@ -1375,8 +1378,8 @@ void mnuIdleVoiceTimer(s32 object) {
 
 s32 mnuStaffIdlePartyUpdate(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
-    s32 *menu = (s32 *)((MenuContext *)context)->party;
-    if (menu[4] == 0) {
+    StaffMenuRuntime *menu = (StaffMenuRuntime *)((MenuContext *)context)->party;
+    if (menu->staffMode == 0) {
         mnuIdleVoiceTimer(menu);
     }
     return menuSetHandler((void *)context, 2, (void *)callback);
