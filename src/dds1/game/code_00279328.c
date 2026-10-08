@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_list.h"
@@ -18,7 +19,6 @@ extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 extern void func_00272668(s32, s32, s32, s32, s32, s32);
 extern s32 D_003BAA98;
 extern void func_00280048(s32);
-extern u32 mnuMapPadMaskToFlags(u32);
 extern s32 mnuGetAbilityTargetCategory(u16);
 extern void mnuSetPopupEntry(s32 *, char *);
 extern char D_0037CC58[];

@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "mnu_shop.h"
@@ -29,7 +30,6 @@ extern void mnuDrawStaffCampScreen(s32, s32);
 extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 extern s32 mdlFlagTest(s32);
 extern s32 D_003BAA9C;
-extern s32 mnuMapPadMaskToFlags();
 extern void func_00283BF0(u32 *out, u32 value);
 extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *, u32);
 extern void mnuSetPopupEntryFlagged();

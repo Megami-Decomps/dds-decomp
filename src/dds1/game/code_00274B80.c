@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "sdf_resource.h"
@@ -230,7 +231,6 @@ typedef struct MenuSpriteArguments {
     s8 variant; /* 0x55: passed to sprite renderer */
 } MenuSpriteArguments;
 
-extern u32 mnuMapPadMaskToFlags(u32);
 extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern void sndSetSequenceVolumePan();
 extern s32 mnuInitializeStaffPartyScene(KwlnTask *);
