@@ -2350,6 +2350,8 @@
 0x00193140	effSetPrimitiveRecordCursorStep	inferred	confidence=high; matched-C; src/dds1/game/code_00192488.c:369:func_00193140; requires-symbol-registration; Sets the primitive curve cursor increment.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x00193148	effBuildAndDispatch	inferred	allocs/inits work buffer via func_001931E0 then runs func_001934E8/001935B8 by flag
 0x00193368	effSolveCubicTangents	inferred	U2
+0x001934E8	effBuildPrimitiveCurveCoefficients	inferred	Builds cubic, quadratic and linear Hermite power-basis XYZ coefficient banks from interleaved keys and coordinate-major tangents.
+0x001935B8	effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents	inferred	Builds the same Hermite coefficient banks but zeroes all three coefficients for each component whose adjacent endpoint values are exactly equal.
 0x001936A8	effCreateChannel	inferred	allocates and inits 0x18 channel object, NULL when count < 4
 0x00193720	effReleaseInterpolationChannel	inferred	src/dds1/game/code_00192488.c func_00193720: If channel pointer exists, releases allocation handle stored in its first word. [names_reviewed24.tsv]
 0x00193740	effAdvanceChanCursor	inferred	steps channel-A idx/pos (+3) via helper, wraps at 1.0, resets at count
