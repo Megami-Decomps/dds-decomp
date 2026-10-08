@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
 #include "fld_waypoint.h"
@@ -2117,7 +2118,6 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
     descriptor->append((SdfListHead *)descriptor, (SdfListHead *)command);
 }
 
-extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));
 extern void sdfAppendDmaPrimary(s32, u32, SdfDmaNode *);
 
 /* Submit the field overlay's fixed register state and textured sprite payload. */
@@ -2390,13 +2390,12 @@ void fldReleaseBackgroundBuffer(void) {
 }
 
 extern u32 D_003980F0[];
-extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));
 extern void sdfCreateDescriptorPacket(u32, u32, s32, s32, s32, s32, u32, s32);
 extern void sdfCreateResourcePacket(u32, u32, s32, s32, s32, s32, u32, s32, s32, s32);
 
 void fldSubmitBackgroundResourcePacket(void) {
     if (fldBackgroundBuffer != 0) {
-        u32 packet = sdfAllocatePacketList(0);
+        u32 packet = (u32)sdfAllocatePacketList(0);
         SdfPoolNode *descriptor;
         sdfCreateResourcePacket(packet, D_003980F0[0], 0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0, 0, 0);
         descriptor = &kwlnDrawSurfaces[fldDisplayRow];
@@ -2406,7 +2405,7 @@ void fldSubmitBackgroundResourcePacket(void) {
 
 void fldSubmitBackgroundDescriptorPacket(void) {
     if (fldBackgroundBuffer != 0) {
-        u32 packet = sdfAllocatePacketList(0);
+        u32 packet = (u32)sdfAllocatePacketList(0);
         SdfPoolNode *descriptor;
         sdfCreateDescriptorPacket(packet, D_003980F0[0], 0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0);
         descriptor = &kwlnDrawSurfaces[fldDisplayRow];

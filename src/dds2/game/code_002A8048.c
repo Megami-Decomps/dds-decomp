@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "kwln.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
@@ -57,8 +58,6 @@ extern void sdfCreatePacketA(SdfListHead *, s32, s32, s32, s32, s32, s32, s32, s
 
 extern s32 mnuMovieViewer(void);
 extern void mnuStartMovieDrawTaskForResource(const char *, SdfMovieDescriptor *);
-extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));
-
 void mnuRequestIndexedMovieResource(s32 index);
 
 void mnuStopMovieDrawTask(void);
