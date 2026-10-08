@@ -2428,6 +2428,8 @@
 0x00196450	frFontAdvanceContextCursor	inferred	increments context cursor by font advance factor and sets flags [names_reviewed5.tsv]
 0x00196478	itfReadEncodedTextLead	inferred	Reads and decodes the first byte of a two-byte text code, advancing by two.
 0x001964A0	itfReadEncodedCode	inferred	itf interface rendering and text in game/code_00196478.c
+0x001964F8	itfProcessEncodedTextControl	inferred	Combine the already consumed control lead with its next byte, apply context/voice/wait/stop controls and advance the encoded-text cursor; return whether stream processing stops.
+0x001968C0	itfBuildGlyphChainFromEncodedStream	inferred	Consume encoded bytes from the context cursor, dispatch controls and line advances, append glyphs with the current font/options, apply pending updates and return the glyph chain.
 0x00196AB0	itfDrawDefaultColorText	inferred	Draws encoded text using the fixed default color channels. [names_reviewed8.tsv]
 0x00196AE8	itfDrawCustomColorText	inferred	Draws encoded text using caller-supplied color channels. [names_reviewed8.tsv]
 0x00196B88	itfDrawColor	inferred	itf interface rendering and text in game/code_00196478.c
