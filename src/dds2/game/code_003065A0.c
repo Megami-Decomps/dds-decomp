@@ -37,7 +37,88 @@ void sdfCopyCornerWordsWithEdgeByte(u32 *source, u32 *destination, u8 *edgeValue
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_003065A0", func_00306678);
+extern void itfDrawRotatedTexturedRect(u32, u32, u32, u32, u32, u32, u32, u32,
+                                      f32, u32, u32, u32, u32);
+
+/* Draw enabled border strips and restore the temporary texture-coordinate changes. */
+void func_00306678(s32 x, s32 y, s32 depth, s32 width, s32 height,
+                  const u32 *edgeExtents, u8 *edgeColorBytes,
+                  u32 *textureCoordinates, u32 *sourceCornerColors, u32 kind,
+                  u32 mode, u32 flip, u32 texture, u32 buffer) {
+    s32 position[2];
+    s32 dimensions[2];
+    u32 savedTextureCoordinates[4];
+    u32 cornerColors[4];
+    s32 i;
+
+    for (i = 0; i < 4; i++) {
+        savedTextureCoordinates[i] = textureCoordinates[i];
+    }
+
+    if (edgeExtents[0] != 0) {
+        position[0] = x;
+        position[1] = y - (edgeExtents[0] << 3);
+        dimensions[0] = width;
+        dimensions[1] = edgeExtents[0] << 3;
+        textureCoordinates[3] = textureCoordinates[1] + 1;
+        sdfCopyCornerWordsWithEdgeByte(sourceCornerColors, cornerColors,
+                                       edgeColorBytes, 0);
+        itfDrawRotatedTexturedRect(position[0], position[1], depth,
+                                   dimensions[0], dimensions[1],
+                                   (u32)textureCoordinates, (u32)cornerColors,
+                                   kind, 0.0f, mode, flip,
+                                   texture, buffer);
+        textureCoordinates[3] = savedTextureCoordinates[3];
+    }
+
+    if (edgeExtents[1] != 0) {
+        position[0] = x;
+        position[1] = y + height;
+        dimensions[0] = width;
+        dimensions[1] = edgeExtents[1] << 3;
+        textureCoordinates[1] = textureCoordinates[3] - 1;
+        sdfCopyCornerWordsWithEdgeByte(sourceCornerColors, cornerColors,
+                                       edgeColorBytes, 1);
+        itfDrawRotatedTexturedRect(position[0], position[1], depth,
+                                   dimensions[0], dimensions[1],
+                                   (u32)textureCoordinates, (u32)cornerColors,
+                                   kind, 0.0f, mode, flip,
+                                   texture, buffer);
+        textureCoordinates[1] = savedTextureCoordinates[1];
+    }
+
+    if (edgeExtents[2] != 0) {
+        position[0] = x - (edgeExtents[2] << 4);
+        position[1] = y;
+        dimensions[0] = edgeExtents[2] << 4;
+        dimensions[1] = height;
+        textureCoordinates[2] = textureCoordinates[0] + 1;
+        sdfCopyCornerWordsWithEdgeByte(sourceCornerColors, cornerColors,
+                                       edgeColorBytes, 2);
+        itfDrawRotatedTexturedRect(position[0], position[1], depth,
+                                   dimensions[0], dimensions[1],
+                                   (u32)textureCoordinates, (u32)cornerColors,
+                                   kind, 0.0f, mode, flip,
+                                   texture, buffer);
+        textureCoordinates[2] = savedTextureCoordinates[2];
+    }
+
+    if (edgeExtents[3] != 0) {
+        position[0] = x + width;
+        position[1] = y;
+        dimensions[0] = edgeExtents[3] << 4;
+        dimensions[1] = height;
+        textureCoordinates[0] = textureCoordinates[2] - 1;
+        sdfCopyCornerWordsWithEdgeByte(sourceCornerColors, cornerColors,
+                                       edgeColorBytes, 3);
+        itfDrawRotatedTexturedRect(position[0], position[1], depth,
+                                   dimensions[0], dimensions[1],
+                                   (u32)textureCoordinates, (u32)cornerColors,
+                                   kind, 0.0f, mode, flip,
+                                   texture, buffer);
+        textureCoordinates[0] = savedTextureCoordinates[0];
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_003065A0", func_00306970);
 
