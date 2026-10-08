@@ -4684,13 +4684,13 @@ typedef struct EffPCPGroupSet {
     f32 unk16C;
     u32 color;           /* 0x170 */
     EffParamWork **duplicates; /* 0x174: four groups of parameter work */
-    void *duplicateHandle;
-    void *workHandle;
+    struct SdfMemBlock *duplicateHandle;
+    struct SdfMemBlock *workHandle;
 } EffPCPGroupSet;
 
 EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *header, u32 *sourceResources) {
     u32 entryCount = header->count;
-    void *workResource = sdfAllocGeneralBlock(entryCount * 0x18 + 0x180);
+    struct SdfMemBlock *workResource = sdfAllocGeneralBlock(entryCount * 0x18 + 0x180);
     EffPCPGroupSet *groupSet = (void *)sdfResourceRetainAddress(workResource);
     EffPCPGroupEntry *groupEntryCursor;
     u32 index;
