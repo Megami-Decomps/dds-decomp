@@ -88,7 +88,7 @@ extern void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 arg1, s32 arg2, s32 ar
 extern s32 func_003003F0();
 extern u8 D_003AC480[];
 extern void evtSetUnitValueTransition(EvtUnit *unit, EffWorldNode *target, s32 duration);
-extern s32 mdlCheckNodeByte30(u32 *arg0, s32 arg1);
+extern s32 mdlCheckNodeByte30(MdlCtx *arg0, s32 arg1);
 extern void *memset(void *dst, s32 c, u32 n);
 extern void effObjReplaceActiveEventNode(void *arg0, u32 arg1);
 extern void effObjSetInnerFirstVec(void *object, void *vector);

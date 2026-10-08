@@ -115,7 +115,7 @@ extern void evtSetUnitAlphaTransition(EvtUnit *unit, s32 arg, u32 color);
 
 extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
 
-extern s32 mdlCheckNodeByte30(u32 *arg0, s32 arg1);
+extern s32 mdlCheckNodeByte30(MdlCtx *arg0, s32 arg1);
 
 extern void dds3RemoveWorldObjectNode(void *arg0);
 

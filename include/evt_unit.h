@@ -128,14 +128,16 @@ typedef struct EvtUnit {
     s16 motionParameter;           /* 0xB4: frames in setup; direction scale in updater */
     s16 directionOffset;           /* 0xB6: updater multiplies by 0.01 */
     f32 unkB8;                     /* 0xB8: stored motion-scale parameter */
-    u16 unkBC;                     /* 0xBC: stored script/motion parameter */
+    s16 unkBC;                     /* 0xBC: stored script/motion parameter */
     s16 unkBE;                     /* 0xBE: first stored short parameter */
     s16 unkC0;                     /* 0xC0: second stored short parameter */
     u8 padC2[2];
     s16 unkC4;                     /* 0xC4 */
     s16 unkC6;                     /* 0xC6 */
     s16 unkC8;                     /* 0xC8 */
-    u8 padCA[6];
+    s16 motionEndFrame;            /* 0xCA: threshold for the timed motion's final phase */
+    s16 movingTicks;               /* 0xCC: saturates at 32767 while moving */
+    s16 idleTicks;                 /* 0xCE: six idle frames clear movingTicks */
     s8 firstSlot;                  /* 0xD0: consumed by stored-slot activation */
     s8 secondSlot;                 /* 0xD1 */
     u8 padD2;
