@@ -801,13 +801,13 @@ s32 mnuGetListViewportHeight(MenuList *list) {
 
 /* Cancel the pending animation on every node in this list. */
 void mnuResetListNodeFadeCounters(MenuList *list) {
-    s32 node;
+    MenuListNode *node;
 
-    node = (s32)list->first;
+    node = list->first;
     if (node != 0) {
-        ((MenuListNode *)node)->animationTimer = 0;
-        while (node = (s32)((MenuListNode *)node)->next, node != 0) {
-            ((MenuListNode *)node)->animationTimer = 0;
+        node->animationTimer = 0;
+        while (node = node->next, node != 0) {
+            node->animationTimer = 0;
         }
     }
 }
