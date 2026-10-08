@@ -101,7 +101,7 @@ s32 mnuStaffImageEnterA(KwlnTask *task) {
         mnuRefreshStaffWindowDescription(context, 0);
     } else {
         if (menu->secondListState == 0) {
-            func_00306CD0(0x390, 0x570, 0, object->state, 1, (struct EffectSlotSet *)((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
+            func_00306CD0(0x390, 0x570, 0, object->fadeScale, 1, (struct EffectSlotSet *)((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         }
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
@@ -335,7 +335,7 @@ s32 mnuStaffImageEnterD(KwlnTask *task) {
     if (object->list->count != 0) {
         mnuRefreshStaffWindowDescription(context, 1);
     } else {
-        func_00306CD0(0x390, 0x570, 0, object->state, 1, (struct EffectSlotSet *)((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
+        func_00306CD0(0x390, 0x570, 0, object->fadeScale, 1, (struct EffectSlotSet *)((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
     mnuDrawStaffGridLabelsForKind(2, ((MenuStaffContext *)context)->group);
@@ -660,7 +660,7 @@ s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
         }
         mnuDrawStaffCaption(selectedLabel, (u8 *)context);
     } else {
-        func_00306CD0(0x390, 0x570, 0, window->state, 1,
+        func_00306CD0(0x390, 0x570, 0, window->fadeScale, 1,
                      (struct EffectSlotSet *)((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         func_002AAC98(1, 0, 0, context, 1, 0x53);
         mnuDrawStaffCaption(0, (u8 *)context);
@@ -945,7 +945,7 @@ s32 func_002AF5E0(KwlnTask *task) {
             func_002BDAA8(0x770, 0xB98, 0x100, selectionId, context->spriteArg0, 0x2C);
         }
     } else {
-        func_00306CD0(0x390, 0x570, 0, menu->windows[3]->state, 1,
+        func_00306CD0(0x390, 0x570, 0, menu->windows[3]->fadeScale, 1,
                      (struct EffectSlotSet *)context->spriteArg2, 0x11, 0x53);
         func_002AAC98(1, 0, 0, (s32)context, 1, 0x53);
         func_002AF2E0(0, 0, 0, context);

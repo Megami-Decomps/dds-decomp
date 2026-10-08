@@ -893,7 +893,7 @@ MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height,
     window->height = height;
     window->id = id;
     list = mnuCreateListState(id, visibleCount, rowSpacing);
-    window->state = 0;
+    window->fadeScale = 0;
     window->list = list;
     return window;
 }
@@ -912,7 +912,7 @@ void mnuSetWindowOverlaySprite(MenuWindowContainer *menu, u32 layout) {
 }
 
 void mnuSetWindowContainerState(MenuWindowContainer *menu, u32 state) {
-    menu->state = state;
+    menu->fadeScale = state;
 }
 
 void mnuSetWindowContainerLayout(MenuWindowContainer *menu, u32 layout2C, u32 layout30, u32 layout34,
@@ -1051,14 +1051,14 @@ void func_002B9A38(void) {
 INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002B9A40);
 
 void mnuDrawWindowResourceSpriteRows(s32 x, s32 y, u32 flags, MenuWindowContainer *window, u32 option) {
-    func_002B9A40(x - 0xf0, y - 8, flags, window->state,
+    func_002B9A40(x - 0xf0, y - 8, flags, window->fadeScale,
                                 (u32)window->list, (u32)window->resource, option);
 }
 
 void mnuDrawWindowIconRows(s32 x, s32 y, u32 flags, MenuWindowContainer *window, s32 count, s32 option) {
     s32 i;
     s32 sprite = window->sprite20;
-    s32 state = window->state;
+    s32 state = window->fadeScale;
     s32 field = window->field1C;
     if (sprite != 0) {
         if (field == 0) {
@@ -1079,7 +1079,7 @@ void mnuDrawVisibleWindowIconRows(u32 x, u32 y, u32 flags, MenuWindowContainer *
 void mnuDrawWindowDecorations(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 option)
 {
     u32 i;
-    u32 state = window->state;
+    u32 state = window->fadeScale;
 
     for (i = 0; i < 3; i++) {
         u32 sprite = window->decorations[i].sprite;
@@ -1098,7 +1098,7 @@ void mnuDrawWindowDecorations(s32 x, s32 y, s32 depth, MenuWindowContainer *wind
 void mnuDrawWindowSelectionPanel(s32 x, s32 y, s32 depth, MenuWindowContainer *window, s32 drawArg) {
     MenuList *list;
     s32 selectionMode;
-    s32 fadeScale = window->state;
+    s32 fadeScale = window->fadeScale;
 
     if (window->panel.sprite[0] != NULL) {
         list = window->list;
@@ -1128,7 +1128,7 @@ void mnuDrawWindowSelectionPanel(s32 x, s32 y, s32 depth, MenuWindowContainer *w
 
 /* Draw the window, then advance its fade scale without a post-addition clamp. */
 void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, s32 drawArg) {
-    s32 fadeScale = menu->state;
+    s32 fadeScale = menu->fadeScale;
     s32 value;
 
     menu->list->scale = fadeScale;
@@ -1142,9 +1142,9 @@ void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, 
     if (menu->resource != 0) {
         mnuDrawWindowResourceSpriteRows(x, y, depth, menu, drawArg);
     }
-    value = menu->state;
+    value = menu->fadeScale;
     if (value < MNU_FULL_FADE) {
-        menu->state = value + MNU_WINDOW_FADE_STEP;
+        menu->fadeScale = value + MNU_WINDOW_FADE_STEP;
     }
     menu->flags |= MNU_WINDOW_TRANSITION_FLAG;
 }
