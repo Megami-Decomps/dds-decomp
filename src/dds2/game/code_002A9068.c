@@ -332,23 +332,24 @@ INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A940);
 
 INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042A950);
 
-u8 *mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount, u8 *menuBytes) {
+struct EffectSlotSet **mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount,
+                                                 u8 *menuBytes) {
     switch (category) {
     case 1:
         *outEntryCount = 1;
-        return menuBytes + 0xC8;
+        return (struct EffectSlotSet **)(menuBytes + 0xC8);
     case 2:
         *outEntryCount = 1;
-        return menuBytes + 0xC4;
+        return (struct EffectSlotSet **)(menuBytes + 0xC4);
     case 3:
         *outEntryCount = 2;
-        return menuBytes + 0x68;
+        return (struct EffectSlotSet **)(menuBytes + 0x68);
     case MNU_STAFF_PARTY_CATEGORY:
         *outEntryCount = 9;
-        return menuBytes + 0xCC;
+        return (struct EffectSlotSet **)(menuBytes + 0xCC);
     case 5:
         *outEntryCount = 1;
-        return menuBytes + 0xF0;
+        return (struct EffectSlotSet **)(menuBytes + 0xF0);
     default:
         *outEntryCount = 0;
         return 0;
@@ -357,17 +358,18 @@ u8 *mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount, u8 *menuBytes) 
 
 /* Resolve entry zero and the active party's adjusted one-based model indices.
  * The supplied count and work are unused; model indices are not range-clamped. */
-void movReleaseActivePartyCategoryModels(s32 modelListAddress, s32 unusedCount, u8 *unusedWork) {
+void movReleaseActivePartyCategoryModels(struct EffectSlotSet **modelHandles, s32 unusedCount,
+                                         u8 *unusedWork) {
     s32 partyIndex;
 
-    effResolveAndReleaseResource((struct EffectSlotSet *)*(u32 *)modelListAddress);
+    effResolveAndReleaseResource(modelHandles[0]);
     for (partyIndex = 0; partyIndex < MNU_STAFF_PARTY_COUNT; partyIndex++) {
         DatPartyRecord *partyRecord = &datGameState->party[partyIndex];
 
         if ((partyRecord->flags & MNU_STAFF_PARTY_PRESENT_BIT) != 0) {
             s32 modelIndex = partyRecord->unitId + D_00437B73;
 
-            effResolveAndReleaseResource((struct EffectSlotSet *)*(u32 *)(modelListAddress + modelIndex * 4 - 4));
+            effResolveAndReleaseResource((modelHandles + modelIndex)[-1]);
         }
     }
 }
@@ -375,11 +377,12 @@ void movReleaseActivePartyCategoryModels(s32 modelListAddress, s32 unusedCount, 
 /* Resolve all category entries, except party models selected by active records. */
 void movReleaseCategoryModels(s32 category, u8 *menuBytes) {
     s32 entryCount;
-    s32 *modelHandles = (s32 *)mnuGetStaffCategoryEntries(category, &entryCount, menuBytes);
+    struct EffectSlotSet **modelHandles =
+        mnuGetStaffCategoryEntries(category, &entryCount, menuBytes);
     if (category != MNU_STAFF_PARTY_CATEGORY) {
         s32 resourceIndex;
         for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++) {
-            effResolveAndReleaseResource((struct EffectSlotSet *)modelHandles[resourceIndex]);
+            effResolveAndReleaseResource(modelHandles[resourceIndex]);
         }
     } else {
         movReleaseActivePartyCategoryModels(modelHandles, entryCount, menuBytes);
@@ -390,12 +393,13 @@ void movReleaseCategoryModels(s32 category, u8 *menuBytes) {
 void mnuReleaseStaffCategoryTextureHandles(s32 category, u8 *menuBytes) {
     s32 entryCount;
     s32 resourceIndex = 0;
-    u8 *entryBytes = mnuGetStaffCategoryEntries(category, &entryCount, menuBytes);
+    struct EffectSlotSet **entries =
+        mnuGetStaffCategoryEntries(category, &entryCount, menuBytes);
 
     if (entryCount > 0) {
-        u32 *handleCursor = (u32 *)entryBytes;
+        struct EffectSlotSet **handleCursor = entries;
         do {
-            effReleaseTextureHandlesAndResetSlots((struct EffectSlotSet *)*handleCursor++);
+            effReleaseTextureHandlesAndResetSlots(*handleCursor++);
         } while (++resourceIndex < entryCount);
     }
 }
