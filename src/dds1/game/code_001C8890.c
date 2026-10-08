@@ -12514,11 +12514,89 @@ SoundTask *btlCreateAdvanceTitleStateTask(void) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001F4D50);
+extern f32 D_0035F9B0[4];
+extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
+extern f32 sdfSinPoly(f32);
+
+/* Orient party actors and expand their formation when the marked count grows. */
+s32 func_001F4D50(f32 *center) {
+    BtlUnit *actors[16];
+    f32 position[4];
+    f32 direction[4];
+    f32 target[4];
+    BtlState *battle;
+    BtlUnit *unit;
+    s32 count = 0;
+    s32 markedCount = 0;
+    s32 i;
+    f32 angle;
+    f32 step;
+    f32 radius;
+    f32 adjustedAngle;
+
+    battle = (BtlState *)btlGetRuntime();
+    for (unit = battle->units; unit != 0; unit = unit->next) {
+        s32 flags = unit->flags;
+        if (flags & 0x200) {
+            actors[count++] = unit;
+            if ((flags & 1) || battle->cameraPresetMode == 3) {
+                markedCount++;
+            }
+        }
+    }
+    func_001F66D8(0x400, 0, 0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    for (i = count - 1; i >= 0; i--) {
+        unit = actors[i];
+        if (!(unit->flags & 0x80000)) {
+            PCP_COPY_VECTOR(unit->rotation, D_0035F9B0);
+        } else if (unit->flags & 0xE0) {
+            PCP_COPY_VECTOR(unit->rotation, D_0035F9B0);
+        } else {
+            btlUnitGetMuzzlePosVU(unit);
+            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            if (btlAimHorizontalDirectionVU(position, target) != 0) {
+                VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+                btlSetUnitRotation((u8 *)unit, direction);
+            }
+        }
+    }
+    if (battle->cameraPresetMode >= markedCount) {
+        return 0;
+    }
+    if (markedCount >= 2) {
+        angle = (markedCount - 1) * 0.6981316805f * 0.5f;
+    } else {
+        angle = 0;
+    }
+    step = -0.6981316805f;
+    radius = 400.0f;
+    for (i = count - 1; i >= 0; i--) {
+        unit = actors[i];
+        if (unit->flags & 1) {
+            position[0] = center[0] - sdfSinPoly(angle) * radius;
+            position[1] = center[1];
+            position[2] = center[2] - sdfEvaluateCosineViaSinePhaseShift(angle) * radius;
+        } else {
+            adjustedAngle = angle - step * 0.25f;
+            position[0] = center[0] - sdfSinPoly(adjustedAngle) * radius;
+            position[1] = center[1];
+            position[2] = center[2] - sdfEvaluateCosineViaSinePhaseShift(adjustedAngle) * radius;
+        }
+        PCP_COPY_VECTOR(unit->position, position);
+        btlSetUnitPosition((u8 *)unit, position);
+        angle += step;
+    }
+    if (battle->cameraPresetMode < markedCount) {
+        battle->cameraPresetMode = markedCount;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001F5028);
 
-extern void func_001F4D50(void *);
+extern s32 func_001F4D50(f32 *);
 
 void btlRepositionPartyAroundBattleCenter(void) {
     f32 vector[4];
