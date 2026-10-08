@@ -3,6 +3,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "eff_param.h"
 #include "eff_scatter_draw.h"
 
 #define EFF_SCATTER_NEUTRAL_COLOR 0x80808080
@@ -41,7 +42,6 @@
 extern void *effParamTableGetBlock(void *data, s32 index);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern u32 effParamWorkDuplicate(u32 param);
 extern void sdfReleaseChipBlock(void *ptr);
 
 extern void sdfQueueAssetRelease(u32 res);
@@ -50,7 +50,6 @@ extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern void effPcpScatterResRelease(PcpScatterRes *res);
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 
-extern void effDispatchParameterDataAndFreeWork(u32 handle);
 extern void sdfComposeVuMatrixFromRegisters(void);
 
 typedef struct PcpScatterRadialWork PcpScatterRadialWork;
@@ -75,7 +74,6 @@ extern void effPcpScatterSharePoolResource(PcpScatterPool *work, PcpScatterPool 
 extern PcpScatterPool *effPcpScatterPoolCreate(s32 groups);
 extern void effPcpScatterCreatePoolResource(PcpScatterPool *work, u32 resId);
 extern u32 effMiscRand(void *table);
-extern u32 effParamWorkCreate(s32 kind, void *params);
 extern u8 D_0034DF38[];
 extern f32 effMiscRandUnitFloat(void *state);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
@@ -142,7 +140,7 @@ struct PcpScatterRadialWork {
     PcpScatterPool *childWork;
     SdfMemBlock *allocation;
     u32 duplicateGroupCount;
-    u32 *duplicatedHandles;
+    EffParamWork **duplicatedHandles;
     SdfMemBlock *duplicateAllocation;
 };
 
@@ -193,7 +191,7 @@ struct PcpScatterSpinWork {
     PcpScatterPool *childWork;
     SdfMemBlock *allocation;
     u32 duplicateGroupCount;
-    u32 *duplicatedHandles;
+    EffParamWork **duplicatedHandles;
     SdfMemBlock *duplicateAllocation;
 };
 
@@ -239,7 +237,7 @@ struct PcpScatterRibbonWork {
     PcpScatterPool *childWork;
     SdfMemBlock *allocation;
     u32 duplicateGroupCount;
-    u32 *duplicatedHandles;
+    EffParamWork **duplicatedHandles;
     SdfMemBlock *duplicateAllocation;
 };
 
@@ -371,7 +369,7 @@ PcpScatterRadialWork *effPcpScatterSharedDuplicate(source)
     PcpScatterRadialWork *work;
     u32 count;
     SdfMemBlock *allocation;
-    u32 *handles;
+    EffParamWork **handles;
     u32 i;
 
     work = effScatterCreateRadialWork(&source->params, 0, 0);
@@ -383,7 +381,7 @@ PcpScatterRadialWork *effPcpScatterSharedDuplicate(source)
         }
         count = work->duplicateGroupCount;
         allocation = sdfAllocGeneralBlock(count * EFF_SCATTER_WORD_BYTES);
-        handles = (u32 *)sdfResourceRetainAddress(allocation);
+        handles = (EffParamWork **)sdfResourceRetainAddress(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         for (i = 0; i < count; i++) {
@@ -445,7 +443,6 @@ extern u32 effBlendColor(u32, u32, f32);
 extern f32 sdfAtan2Poly(f32 ratio);
 extern void effParamWorkCallback3(u32 handle, u32 color);
 extern void effParamWorkCallback0(u32 handle, void *position);
-extern void effParamWorkInvokeCallback(u32 handle);
 
 /* Advance radial particles and build each six-vertex strip in the shared pool. */
 void func_00170F28(PcpScatterRadialWork *work) {
@@ -598,12 +595,12 @@ void func_00170F28(PcpScatterRadialWork *work) {
         }
         if (duplicates && age >= duplicateStart && age >= 0 && i % perGroup == 0) {
             u32 group = i / perGroup;
-            effParamWorkCallback3(work->duplicatedHandles[group], baseColor);
+            effParamWorkCallback3((u32)work->duplicatedHandles[group], baseColor);
             VU0_LOAD_VF(vf10, work->params.origin);
             VU0_LOAD_VF(vf11, duplicatePosition);
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, duplicatePosition);
-            effParamWorkCallback0(work->duplicatedHandles[group], duplicatePosition);
+            effParamWorkCallback0((u32)work->duplicatedHandles[group], duplicatePosition);
             effParamWorkInvokeCallback(work->duplicatedHandles[group]);
         }
         particle->age++;
@@ -643,7 +640,7 @@ PcpScatterSpinWork *effScatterCreateSpinWork(params, resource, particleParams)
     PcpScatterSpinWork *work;
     PcpScatterSpinParticle *particle;
     SdfMemBlock *allocation;
-    u32 *handles;
+    EffParamWork **handles;
     u32 count;
     u32 i;
     s32 delaySpread;
@@ -672,7 +669,7 @@ PcpScatterSpinWork *effScatterCreateSpinWork(params, resource, particleParams)
         }
         count = work->duplicateGroupCount;
         allocation = sdfAllocGeneralBlock(count * sizeof(u32));
-        handles = (u32 *)sdfResourceRetainAddress(allocation);
+        handles = (EffParamWork **)sdfResourceRetainAddress(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         /* Native setup seeds group zero even when the computed group count is zero. */
@@ -707,7 +704,7 @@ PcpScatterSpinWork *effScatterCloneSpinWork(source)
     PcpScatterSpinWork *work;
     u32 count;
     SdfMemBlock *allocation;
-    u32 *handles;
+    EffParamWork **handles;
     u32 i;
 
     work = effScatterCreateSpinWork(&source->params, 0, 0);
@@ -719,7 +716,7 @@ PcpScatterSpinWork *effScatterCloneSpinWork(source)
         }
         count = work->duplicateGroupCount;
         allocation = sdfAllocGeneralBlock(count * EFF_SCATTER_WORD_BYTES);
-        handles = (u32 *)sdfResourceRetainAddress(allocation);
+        handles = (EffParamWork **)sdfResourceRetainAddress(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         for (i = 0; i < count; i++) {
@@ -932,12 +929,12 @@ void func_00171B28(PcpScatterSpinWork *work) {
         }
         if (duplicates && age >= duplicateStart && age >= 0 && i % perGroup == 0) {
             u32 group = i / perGroup;
-            effParamWorkCallback3(work->duplicatedHandles[group], baseColor);
+            effParamWorkCallback3((u32)work->duplicatedHandles[group], baseColor);
             VU0_LOAD_VF(vf10, work->params.origin);
             VU0_LOAD_VF(vf11, duplicatePosition);
             VU0_ADD(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, duplicatePosition);
-            effParamWorkCallback0(work->duplicatedHandles[group], duplicatePosition);
+            effParamWorkCallback0((u32)work->duplicatedHandles[group], duplicatePosition);
             effParamWorkInvokeCallback(work->duplicatedHandles[group]);
         }
         particle->age++;
@@ -976,7 +973,7 @@ PcpScatterRibbonWork *effScatterCreateRibbonWork(params, resource, particleParam
     PcpScatterRibbonWork *work;
     PcpScatterRibbonParticle *particle;
     SdfMemBlock *allocation;
-    u32 *handles;
+    EffParamWork **handles;
     u32 count;
     u32 i;
     s32 delaySpread;
@@ -1005,7 +1002,7 @@ PcpScatterRibbonWork *effScatterCreateRibbonWork(params, resource, particleParam
         }
         count = work->duplicateGroupCount;
         allocation = sdfAllocGeneralBlock(count * sizeof(u32));
-        handles = (u32 *)sdfResourceRetainAddress(allocation);
+        handles = (EffParamWork **)sdfResourceRetainAddress(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         /* Native setup seeds group zero even when the computed group count is zero. */
@@ -1041,7 +1038,7 @@ PcpScatterRibbonWork *effScatterCloneRibbonWork(source)
     PcpScatterRibbonWork *work;
     u32 count;
     SdfMemBlock *allocation;
-    u32 *handles;
+    EffParamWork **handles;
     u32 i;
 
     work = effScatterCreateRibbonWork(&source->params, 0, 0);
@@ -1056,7 +1053,7 @@ PcpScatterRibbonWork *effScatterCloneRibbonWork(source)
         }
         count = work->duplicateGroupCount;
         allocation = sdfAllocGeneralBlock(count * EFF_SCATTER_WORD_BYTES);
-        handles = (u32 *)sdfResourceRetainAddress(allocation);
+        handles = (EffParamWork **)sdfResourceRetainAddress(allocation);
         work->duplicateAllocation = allocation;
         work->duplicatedHandles = handles;
         for (i = 0; i < count; i++) {
