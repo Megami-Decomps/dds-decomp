@@ -47,11 +47,13 @@ extern void func_0030F8D0(f32 *);
 extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
 extern void sdfVec3ScaleInPlace(f32, f32 *);
 
+struct FrFontGlyph;
+
 extern void frFontDrawGlyphChain(u64, s32, s32);
-extern void frFontSetChildColors(u64, u64);
+extern void frFontSetChildColors(struct FrFontGlyph *, u32);
 extern void frFontSetContextPair(u64, s32, s32);
 extern void frFontStoreShiftedContextValue(u64, u64);
-extern void frFontSetChainFlag(u64, u8);
+extern void frFontSetChainFlag(struct FrFontGlyph *, u8);
 extern void frFontSetFlagAndMeasureGlyphs(u64, s32);
 
 extern u64 func_0019F798(s32, s32, u64, u64, u64, u64);

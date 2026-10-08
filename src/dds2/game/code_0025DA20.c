@@ -172,7 +172,7 @@ extern u8 D_003CDA88[];
 
 extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, u64, u64, u64, u64);
 
-extern void frFontSetChildColors(s32, u32);
+extern void frFontSetChildColors(struct FrFontGlyph *, u32);
 
 extern s32 frFontDrawGlyphChain(s32, s32, u32);
 
@@ -2106,7 +2106,7 @@ void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2
 
     if (enabled != 0) {
         handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)fontValue, enabled, fontArg);
-        frFontSetChildColors(handle, 0x80808040);
+        frFontSetChildColors((struct FrFontGlyph *)(u32)handle, 0x80808040);
         frFontDrawGlyphChain(handle, 0, flags);
         frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
     }

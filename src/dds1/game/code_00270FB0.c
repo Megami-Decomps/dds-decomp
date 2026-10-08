@@ -691,8 +691,7 @@ void mnuDrawStaffGridLabelsForKind(s32 kind, s32 slot) {
 }
 
 
-typedef struct TextStyleNode TextStyleNode;
-extern void frFontSetChildColors(TextStyleNode *, u32);
+extern void frFontSetChildColors(struct FrFontGlyph *, u32);
 extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
 
 void func_00272518(s32 kind, s32 labelIndex, s32 textTable, s32 context,
@@ -708,7 +707,7 @@ void func_00272518(s32 kind, s32 labelIndex, s32 textTable, s32 context,
     itfDrawGridWithResolvedSlot(0x280, 0x9A0, 0, drawOption, menu->staffSlots.baseResources[1], 2, layer);
     if (textTable != 0) {
         glyph = itfDrawBankTextWithLayoutFlags(0x2C0, 0xA70, 0, labelIndex, textTable, textOption);
-        frFontSetChildColors((TextStyleNode *)glyph, 0xA09DC366);
+        frFontSetChildColors((struct FrFontGlyph *)(u32)glyph, 0xA09DC366);
         frFontDrawGlyphChain((FrFontGlyph *)glyph, 0, layer);
         frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
     }
