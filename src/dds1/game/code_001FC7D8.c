@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_action.h"
 #include "btl.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
@@ -468,7 +469,7 @@ typedef struct BtlEffectTask {
     u8 pad68[8];
 } BtlEffectTask;
 
-extern BtlEffectTask *btlAllocTask(s32);
+extern void *btlAllocTask(s32);
 extern s32 func_001FD5C8();
 
 /* Create the selected numbered-display task with its frame count starting at zero. */
@@ -728,8 +729,8 @@ s32 btlJyokyoEffectUpdate(BtlObjLink *link) {
     return 0;
 }
 
-BtlEffectTask *btlCreateEffObjB(BtlUnit *owner, s32 messageId) {
-    BtlEffectTask *task = btlAllocTask(0xC);
+BtlRuntimeTask *btlCreateEffObjB(BtlUnit *owner, s32 messageId) {
+    BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlObjLink *link;
 
     task->startCondition.kind = 1;
@@ -737,9 +738,9 @@ BtlEffectTask *btlCreateEffObjB(BtlUnit *owner, s32 messageId) {
     task->flags |= 2;
     task->endCondition.kind = 0;
     if (owner != NULL) {
-        task->owner = owner->identity;
+        task->ownerId = owner->identity;
     }
-    task->update = btlJyokyoEffectUpdate;
+    task->callback = btlJyokyoEffectUpdate;
     link = btlGetTaskArguments(task);
     link->owner = owner;
     link->arg = messageId;
