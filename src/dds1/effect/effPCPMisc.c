@@ -481,18 +481,18 @@ EffPCPTwinWork *effTwinEffectCreateFromTable(void *src) {
 }
 
 void effTwinEffectRelease(EffPCPTwinWork *work) {
-    s32 i;
-    u32 *a;
-    u32 *b;
+    s32 pairIndex;
+    u32 *pairHandleCursor;
+    u32 *sharedHandleCursor;
 
-    a = &work->pair[0][0];
-    b = work->shared;
-    for (i = 7; i >= 0; i--) {
-        effDispatchParameterDataAndFreeWork(*b);
-        b++;
-        effDispatchParameterDataAndFreeWork(a[1]);
-        effDispatchParameterDataAndFreeWork(a[0]);
-        a += 2;
+    pairHandleCursor = &work->pair[0][0];
+    sharedHandleCursor = work->shared;
+    for (pairIndex = 7; pairIndex >= 0; pairIndex--) {
+        effDispatchParameterDataAndFreeWork(*sharedHandleCursor);
+        sharedHandleCursor++;
+        effDispatchParameterDataAndFreeWork(pairHandleCursor[1]);
+        effDispatchParameterDataAndFreeWork(pairHandleCursor[0]);
+        pairHandleCursor += 2;
     }
     sdfReleaseChipBlock(work);
 }
