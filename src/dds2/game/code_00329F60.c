@@ -3,6 +3,7 @@
 
 #include "sdf.h"
 #include "sdf_pending.h"
+#include "sdf_texture_release.h"
 
 /* GS pixel-storage modes, using the same private names as sdfTex.c. */
 enum {
@@ -51,14 +52,6 @@ typedef struct SdfTexPacketTail {
 
 extern void sdfReleaseChipBlock();
 s32 sdfCoalesceUnusedTextureBlocks(SdfTexResource *block);
-
-typedef struct SdfTexReleaseEntry {
-    struct SdfTexReleaseEntry *next; /* 0x00 */
-    s32 address;                     /* 0x04 */
-    SdfMemBlock *handle;              /* 0x08 */
-    u8 mode;                         /* 0x0C: 1 = handle, 2 = chip memory address */
-    u8 pad0D[0x93];
-} SdfTexReleaseEntry; /* 0xA0 */
 
 extern s32 sdfChipIsInRange();
 extern u8 D_004389E0;
@@ -690,11 +683,11 @@ void sdfTexQueueResourceRelease(s32 address) {
     if (address != 0) {
         entry = sdfAllocAndClearQuadwords(0xA0);
         if (sdfChipIsInRange(address) != 0) {
-            entry->address = address;
-            entry->mode = 2;
+            entry->chipAddress = address;
+            entry->releaseMode = SDF_TEX_RELEASE_CHIP_ADDRESS;
         } else {
-            entry->mode = 1;
-            entry->handle = sdfFindGeneralBlockByAddress((void *)address);
+            entry->releaseMode = SDF_TEX_RELEASE_GENERAL_ALLOCATION;
+            entry->allocation = sdfFindGeneralBlockByAddress((void *)address);
         }
         WaitSema(obj->semaphoreId);
         if (obj->releaseTail != NULL) {
@@ -757,12 +750,12 @@ void func_0032B018(void) {
     while (entry != NULL) {
         SdfTexReleaseEntry *next = entry->next;
 
-        switch (entry->mode) {
-        case 1:
-            sdfReleaseResourceAllocation(entry->handle);
+        switch (entry->releaseMode) {
+        case SDF_TEX_RELEASE_GENERAL_ALLOCATION:
+            sdfReleaseResourceAllocation(entry->allocation);
             break;
-        case 2:
-            sdfReleaseChipBlock((void *)entry->address);
+        case SDF_TEX_RELEASE_CHIP_ADDRESS:
+            sdfReleaseChipBlock((void *)entry->chipAddress);
             break;
         }
         sdfReleaseChipBlock(entry);
