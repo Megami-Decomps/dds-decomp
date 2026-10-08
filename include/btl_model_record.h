@@ -3,8 +3,6 @@
 
 #include "common.h"
 
-#ifdef VERSION_DDS1
-
 /* One motion row in the side-indexed model parameter bank. */
 typedef struct BtlActorMotionSlot {
     s16 moveKind;            /* 0x00: UV_MV mode */
@@ -36,7 +34,5 @@ typedef struct BtlActorStatusRecord {
 
 typedef char BtlActorMotionSlotSizeCheck[sizeof(BtlActorMotionSlot) == 0x14 ? 1 : -1];
 typedef char BtlActorStatusRecordSizeCheck[sizeof(BtlActorStatusRecord) == 0x270 ? 1 : -1];
-
-#endif
 
 #endif

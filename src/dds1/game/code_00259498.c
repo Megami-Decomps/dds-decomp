@@ -1,6 +1,8 @@
 #include "mnu.h"
 #include "dat_state.h"
+#include "mnu_scene.h"
 #include "mnu_profile_progress.h"
+#include "mnu_mantra_grid.h"
 
 extern void sdfReleaseChipBlock(void *);
 /* Retail retains a jal and epilogue; default TU -O2 changes the shape. */
@@ -20,24 +22,16 @@ extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 
 typedef s16 MnuVariantSpritePlacement[6];
 
-typedef struct DspScene {
-    s32 frame;
-    u8 pad04[8];
-    u16 sceneId;
-    u8 pad0E[6];
-    s32 state;
-} DspScene;
-
 typedef struct MantraPulseEntry {
     s32 unk00;
-    DspScene *scene;
+    MnuMantraGridEntry *scene;
 } MantraPulseEntry;
 
 typedef struct MantraPulseGrid MantraPulseGrid;
 extern MnuVariantSpritePlacement D_0036B7F0[];
 extern s32 mnuSceneResourceContext;
 extern void *func_002CB3B8(s32, s32);
-extern u32 mnuGetMantraDisplayFlags(DspScene *, MnuProfileProgress *);
+extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *, MnuProfileProgress *);
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern void func_0024EC08(s32, s32, s32, s32, s32, s32, f32, f32, s32);
 extern void func_00258A70(s32, s32, s32, s32, u32, f32, f32, s32);
@@ -51,7 +45,7 @@ void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
                    f32 scaleX, f32 scaleY, MantraPulseEntry *entry,
                    s32 context) {
     u8 mappedIds[6] = { 5, 15, 45, 52, 63, 68 };
-    DspScene *scene;
+    MnuMantraGridEntry *scene;
     s32 drawX;
     s32 drawY;
     s32 i;
@@ -184,7 +178,7 @@ extern char D_003BC488[];
 extern char D_003BC490[];
 extern char D_003BC498[];
 extern u32 mnuGetSelectedNodeValue(void);
-extern u32 func_00258508(s8, DspScene *, MantraPrerequisiteState *, MnuProfileProgress *);
+extern u32 func_00258508(s8, MnuMantraGridEntry *, MantraPrerequisiteState *, MnuProfileProgress *);
 extern void mnuDrawScaledVariantSprite(s32, s32, s32, s32, s32, s32, f32, f32, s32);
 extern s32 frFontMeasureAndQueueGlyph(s32, s32, s32, u32, const u8 *, s32);
 
@@ -193,7 +187,7 @@ extern s32 frFontMeasureAndQueueGlyph(s32, s32, s32, u32, const u8 *, s32);
 void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, MantraPulseGrid *grid,
                    MantraPulseEntry *entry, s32 context) {
     u32 prerequisiteFlags[4];
-    DspScene *scene;
+    MnuMantraGridEntry *scene;
     MnuProfileProgress *selection;
     MantraPrerequisiteState *states;
     MantraPrerequisiteRecord *record;
