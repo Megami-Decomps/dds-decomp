@@ -5853,7 +5853,7 @@ void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u32 color, char *text) {
 
     itfSetTextDrawLimit(0x13);
     glyph = func_001978E8(x << 4, y << 3, 0, color, text, 0);
-    func_001958A0(glyph, 1, 0x53);
+    frFontDrawGlyphChain(glyph, 1, 0x53);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
     itfSetTextDrawLimit(-1);
 }

@@ -1,5 +1,6 @@
 #include "sdf_chip.h"
 #include "file.h"
+#include "sdf_pac_state.h"
 #include "sdf_dev_state.h"
 
 /* Intrusive list node threaded through +0x4. */
@@ -178,16 +179,15 @@ void fileUnlinkNode(FileWork *list, FileNode *node) {
     *incomingLink = node->next;
 }
 
-extern void sdfPacInitializeDispatchPacket(void *, u32);
 extern void func_002EDC40(void *);
 /* Clear a PAC request, initialize its embedded dispatch packet and optionally
  * apply extra packet setup for any nonzero flags. Queue its copied name and
  * completion context as kind one, returning the allocated work. No failure guard. */
 void *fileAllocateDispatchRequest(u32 requestName, u32 flags, u32 dispatchValue, u32 onComplete, u32 userData) {
     void *requestWork = sdfAllocAndClearQuadwords(FILE_PAC_REQUEST_BYTES);
-    void *dispatchPacket = (u8 *)requestWork + FILE_PAC_PACKET_OFFSET;
+    PacState *dispatchPacket = (PacState *)((u8 *)requestWork + FILE_PAC_PACKET_OFFSET);
 
-    sdfPacInitializeDispatchPacket(dispatchPacket, dispatchValue);
+    sdfPacInitializeDispatchPacket(dispatchPacket, (void *)dispatchValue);
     if (flags != 0) {
         func_002EDC40(dispatchPacket);
     }

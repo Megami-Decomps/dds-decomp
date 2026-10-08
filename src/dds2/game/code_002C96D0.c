@@ -64,6 +64,8 @@ extern void fileLoadCtxSlideUpdate(void);
 extern u8 D_003E8B98[];
 extern u8 D_003E8BB0[];
 extern u8 D_003E8BD0[];
+extern void frFontSetChainFlag(struct FrFontGlyph *glyph, u8 flagValue);
+extern void frFontSetChildColors(struct FrFontGlyph *glyph, u32 colorWord);
 typedef struct EffectSurfaceNode {
     u32 capacity;
     u32 color;
@@ -653,7 +655,7 @@ void func_002C9818(s32 x, s32 y, u32 colors, const u8 *text) {
 void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     u32 handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     D_00439008 = handle;
-    frFontSetChainFlag(handle, 3);
+    frFontSetChainFlag((struct FrFontGlyph *)(u32)handle, 3);
     frFontDrawGlyphWithSharedFlags(D_00439008, 1);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_00439008);
 }
@@ -664,8 +666,8 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
     frFontClearFlagBits(1);
     frFontSetFlagAndMeasureGlyphs(D_0043900C, 1);
     frFontSetContextPair(D_0043900C, x << 4, y << 3);
-    frFontSetChildColors(D_0043900C, colors);
-    func_0019D550(D_0043900C, 0, 0x56);
+    frFontSetChildColors((struct FrFontGlyph *)(u32)D_0043900C, colors);
+    frFontDrawGlyphChain(D_0043900C, 0, 0x56);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_0043900C);
     frFontSetSharedRenderFlags(0x54);
 }
