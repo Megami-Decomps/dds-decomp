@@ -111,13 +111,12 @@ typedef struct {
 } EffThunderSpark; /* 0x20 */
 
 
-/* Create the first vector variant from the first packed parameter block;
-   this callback deliberately ignores the constructor's returned work. */
-void effPCPThunderCreate(void *parameterTable) {
+/* Create the first vector variant from the first packed parameter block. */
+void *effPCPThunderCreate(void *parameterTable) {
     void *parameters;
 
     parameters = effParamTableGetBlock(parameterTable, EFF_THUNDER_PARAMETER_BLOCK);
-    effCreateThunderCellSystemWork(parameters);
+    return effCreateThunderCellSystemWork(parameters);
 }
 /* Direct parameter-pointer entry for the first vector variant. */
 void func_0016B118(void *parameters) {

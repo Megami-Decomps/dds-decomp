@@ -10,7 +10,7 @@
 
 /* Packed effect parameter-set accessor shared with the effect constructors. */
 extern void *effParamTableGetBlock(void *data, s32 index);
-extern void effCreateThunderCellSystemWork(void *work);
+extern void *effCreateThunderCellSystemWork(void *work);
 
 extern void parFillSymmetricCellColors(u32 param0, u32 param1, void *cells, u32 param3);
 extern void parDecreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
@@ -111,13 +111,12 @@ typedef struct {
 } EffThunderSpark; /* 0x20 */
 
 
-/* Create the first vector variant from the first packed parameter block;
-   this callback deliberately ignores the constructor's returned work. */
-void effPCPThunderCreate(void *parameterTable) {
+/* Create the first vector variant from the first packed parameter block. */
+void *effPCPThunderCreate(void *parameterTable) {
     void *parameters;
 
     parameters = effParamTableGetBlock(parameterTable, EFF_THUNDER_PARAMETER_BLOCK);
-    effCreateThunderCellSystemWork(parameters);
+    return effCreateThunderCellSystemWork(parameters);
 }
 /* Direct parameter-pointer entry for the first vector variant. */
 void func_001634C0(void *parameters) {
