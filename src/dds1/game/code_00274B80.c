@@ -169,7 +169,7 @@ typedef struct CampMenuContext {
     MenuSpriteState *sprite;  /* 0x8FC */
     MenuSimpleSpriteState *effect; /* 0x900 */
     u8 pad904[8];
-    s32 menu;                 /* 0x90C */
+    void *menu;               /* 0x90C: retained child work; active menu selects its type */
     u8 pad910[0x10];
     MenuProfilePanel *extraResource; /* 0x920 */
 } CampMenuContext;
@@ -498,7 +498,7 @@ s32 func_002755E0(KwlnTask *task) {
     PartyMenuData *menu = (PartyMenuData *)sdfResourceRetainAddress(allocation);
     s32 i;
 
-    context->menu = (s32)menu;
+    context->menu = menu;
     memset(menu, 0, sizeof(*menu));
     menu->allocation = (s32)allocation;
 
@@ -805,7 +805,7 @@ INCLUDE_ASM(const s32, "game/code_00274B80", func_00276368);
 
 s32 mnuStaffCloseSelectionState(void) {
     s32 context = kwlnTaskGetUserValue();
-    s32 menu = ((CampMenuContext *)context)->menu;
+    void *menu = ((CampMenuContext *)context)->menu;
     mnuResetWorkFloats();
     mnuReleaseMenuWindowHandles(context);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*(s32 *)menu));
@@ -1364,7 +1364,7 @@ s32 mnuCampMenuInit(void) {
     s32 *menu = sdfResourceRetainAddress(handle);
     CampMenuContext *work = (CampMenuContext *)context;
 
-    work->menu = (s32)menu;
+    work->menu = menu;
     memset(menu, 0, 0x38);
     *menu = handle;
     func_00277DD0(context);
@@ -1482,9 +1482,9 @@ void mnuClearPartySkillSlot(DatPartyRecord *partyEntry, s32 skillSlot) {
  * Native list reads precede the late window guard; preserve that ordering. */
 void mnuCampMenuHandleInput(void) {
     s32 context = kwlnTaskGetUserValue();
-    s32 menuWork = ((CampMenuContext *)context)->menu;
+    StaffMenuWork *menuWork = ((CampMenuContext *)context)->menu;
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_SKILL_INPUT_MASK);
-    s32 window = ((StaffMenuWork *)menuWork)->selectedList;
+    s32 window = menuWork->selectedList;
     s32 list = (s32)((MenuInputNode *)window)->flags;
 
     ((MenuInputFlags *)list)->bits &= ~MNU_LIST_SELECTION_FLAG;
