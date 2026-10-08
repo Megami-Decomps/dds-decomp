@@ -38,18 +38,6 @@ typedef struct {
 } SdfPacket; /* 0x10 */
 
 
-typedef struct SdfSlotPair {
-    s32 index;
-    f32 weight;
-} SdfSlotPair;
-
-
-typedef struct SdfSlotEntry {
-    SdfSlotPair pair[2];
-} SdfSlotEntry;
-
-
-
 typedef struct {
     s32 firstWord;
     s32 work;

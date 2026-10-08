@@ -806,13 +806,6 @@ void sdfAssetCopyTextureState(SdfAsset *asset, SdfAssetEntry *entry) {
     }
 }
 
-/* 3x2 affine transform the asset writeback stores in a draw entry at +0x68:
- * the two scaled rotation columns followed by the translation, six floats.
- * The packed view aliases the same six floats as three pairs. */
-typedef union SdfDrawTransform {
-    f32 m[6];
-    u64 words[3];
-} SdfDrawTransform;
 
 /* Build the 3x2 scalar-block transform from the sub-parameter's five floats
  * and rotation, or the identity layout when the block is absent. */

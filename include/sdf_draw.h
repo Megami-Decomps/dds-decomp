@@ -62,6 +62,20 @@ typedef struct SdfDrawNode {
     f32 worldMatrix[4][4];       /* 0xC0: local transform composed with its parent */
 } SdfDrawNode;
 
+/* Two index/weight pairs stored in each 0x10-byte model slot entry. */
+typedef struct SdfSlotPair {
+    s32 index;
+    f32 weight;
+} SdfSlotPair;
+
+typedef struct SdfSlotEntry {
+    SdfSlotPair pair[2];
+} SdfSlotEntry;
+
+typedef char SdfSlotPair_size_must_be_8[(sizeof(SdfSlotPair) == 8) ? 1 : -1];
+typedef char SdfSlotEntry_size_must_be_0x10[(sizeof(SdfSlotEntry) == 0x10) ? 1 : -1];
+
+
 /* The buffered-transform constructor allocates and clears all 0x9C bytes. */
 typedef struct SdfModel {
     DevRequest *list;

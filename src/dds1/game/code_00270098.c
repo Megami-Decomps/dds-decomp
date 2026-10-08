@@ -2,7 +2,7 @@
 #include "sdf.h"
 #include "sdf_sif_command.h"
 
-extern u8 mnuMovieDrawContext[];
+extern MovObj mnuMovieDrawContext;
 
 extern char D_003B1168[]; /* "staffProc" */
 
@@ -223,12 +223,6 @@ void mnuDrawMovieList(void) {
     }
 }
 
-typedef struct MovieStatus {
-    u8 pad00[0x64];
-    s32 total;
-    s32 pad68;
-    s32 current;
-} MovieStatus;
 
 extern s32 D_003DC570[];
 
@@ -237,7 +231,7 @@ void mnuDrawMovieProgressCounter(void) {
     if (mnuCheckMovieDecoderStatus() == 0) {
         list = (SdfListHead *)D_003DC570[0];
         sdfAppendPacket(list, func_0011D3E8(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", ((MovieStatus *)mnuMovieDrawContext)->current, ((MovieStatus *)mnuMovieDrawContext)->total));
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", mnuMovieDrawContext.soundNode.unk48, (s32)mnuMovieDrawContext.soundNode.cycleLength));
     }
 }
 
@@ -265,7 +259,7 @@ void mnuMarkMovieDrawValuesPending(void) {
 
 void mnuBindMovieDrawValueSources(void) {
     mnuMovieDrawSources.wordSource = 0x10002010;
-    mnuMovieDrawSources.blockSource = (u32)mnuMovieDrawContext;
+    mnuMovieDrawSources.blockSource = (u32)&mnuMovieDrawContext;
     mnuMarkMovieDrawValuesPending();
 }
 
