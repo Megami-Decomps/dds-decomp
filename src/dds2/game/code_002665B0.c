@@ -163,7 +163,7 @@ extern s32 sdfAllocGeneralBlock(s32);
 
 extern s32 sdfResourceRetainAddress(s32);
 
-extern s32 mnuAllocateValueRecord(s32);
+extern EffectList *mnuAllocateValueRecord(u32);
 
 
 extern void mnuAppendCampSpriteRequests(s32, s32);

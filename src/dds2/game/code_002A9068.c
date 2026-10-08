@@ -43,7 +43,7 @@ extern void kwlnFadeOutStart(s8, s8, s8, s32);
 
 extern s32 dds3AdminReadPreviousSignedSample(void);
 
-extern s32 mnuAllocateValueRecord(s32);
+extern struct EffectList *mnuAllocateValueRecord(u32);
 
 
 extern void mnuLoadEffectResources(u8 *);
@@ -716,9 +716,11 @@ u8 *mnuCreateStaffMenuWork(void) {
     effectBytes = menuBytes + 0x11C;
     mnuClearPanelTransitionState((MenuPopupState *)(menuBytes + 8));
     if (dds3AdminReadPreviousSignedSample() != 0) {
-        ((CampVisualWork *)menuBytes)->menuResource = mnuAllocateValueRecord(1);
+        ((CampVisualWork *)menuBytes)->menuResource =
+            (u32)mnuAllocateValueRecord(1);
     } else {
-        ((CampVisualWork *)menuBytes)->menuResource = mnuAllocateValueRecord(0);
+        ((CampVisualWork *)menuBytes)->menuResource =
+            (u32)mnuAllocateValueRecord(0);
     }
     mnuInitPartyPanelSlots(&((MenuStaffContext *)menuBytes)->partyPanel);
     mnuLoadEffectResources(effectBytes);

@@ -633,7 +633,7 @@ void brsTaskLatchPendingRows(BrsSkillPackageWork *context) {
 
 extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfResourceRetainAddress(s32);
-extern s32 mnuAllocateValueRecord(s32);
+extern struct EffectList *mnuAllocateValueRecord(u32);
 extern char D_003D05C8[];
 extern s32 func_0029D008(BrsRewardBatch *, BrsRewardSummary *);
 extern s32 func_0029D2D8(BrsRewardBatch *);
@@ -658,7 +658,7 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     memset(work, 0, sizeof(BrsSkillPackageWork));
     work->handle = handle;
     mnuClearPanelTransitionState(&work->transition.data);
-    work->fadeTarget = mnuAllocateValueRecord(1);
+    work->fadeTarget = (s32)mnuAllocateValueRecord(1);
     evtCreateMessageWindowIfMissing(D_003D05C8);
     evtSetMessageWindowPageValue(200);
     rewards = &work->rewards;
