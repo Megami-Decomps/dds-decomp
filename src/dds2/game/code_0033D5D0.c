@@ -153,7 +153,6 @@ extern f32 sdfNormalizedAsinSamples[];
 
 extern s32 sdfAllocGeneralBlock(s32 size);
 
-extern s32 sdfResourceRetainAddress(s32 arg0);
 
 extern s32 GetThreadId(void);
 
@@ -1275,7 +1274,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
             if (transferResult != 0) {
                 buffer = state->requestData;
                 if (buffer == NULL) {
-                    buffer = (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock(transferResult));
+                    buffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(sdfAllocGeneralBlock(transferResult)));
                 }
                 state->requestData = buffer;
                 state->state = SDF_DEV_STATE_READING;
@@ -1418,7 +1417,7 @@ void D_0033F3E0(DevWorkerEntry *worker) {
             if (transferResult != 0) {
                 data = state->requestData;
                 if (data == NULL) {
-                    data = (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock(transferResult));
+                    data = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(sdfAllocGeneralBlock(transferResult)));
                 }
                 state->requestData = data;
                 state->state = SDF_DEV_STATE_READING;
@@ -1879,7 +1878,7 @@ DevRequest *sdfDevCreateBufferedRequest(s32 elementCount, s32 elementStride, s32
     request->stride = elementStride;
     if (elementCount != 0) {
         request->handle = sdfAllocGeneralBlock(elementStride * elementCount);
-        request->buffer = (void *)sdfResourceRetainAddress(request->handle);
+        request->buffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(request->handle));
     } else {
         request->handle = 0;
         request->buffer = 0;
@@ -1906,7 +1905,7 @@ void sdfDevBufferedRequestGrow(DevRequest *request) {
     sdfDecrementAllocationReferenceCount(request->handle);
     request->capacity = request->capacity + request->growStep;
     func_00329600(request->handle, (s16)request->capacity * request->stride);
-    request->buffer = (void *)sdfResourceRetainAddress(request->handle);
+    request->buffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(request->handle));
 }
 
 /* Resize storage and clamp the live entry count to the new capacity. */
@@ -1915,7 +1914,7 @@ void sdfDevResizeBufferedRequest(DevRequest *request, s32 elementCount) {
         if (elementCount > 0) {
             request->capacity = elementCount;
             request->handle = sdfAllocGeneralBlock(request->stride * elementCount);
-            request->buffer = (void *)sdfResourceRetainAddress(request->handle);
+            request->buffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(request->handle));
         }
     } else if (elementCount <= 0) {
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(request->handle));
@@ -1927,7 +1926,7 @@ void sdfDevResizeBufferedRequest(DevRequest *request, s32 elementCount) {
         sdfDecrementAllocationReferenceCount(request->handle);
         request->capacity = elementCount;
         func_00329600(request->handle, request->stride * elementCount);
-        request->buffer = (void *)sdfResourceRetainAddress(request->handle);
+        request->buffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(request->handle));
         if (elementCount < request->usedCount) {
             request->usedCount = elementCount;
         }

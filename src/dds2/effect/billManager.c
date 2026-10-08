@@ -668,7 +668,6 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
 }
 
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
-extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
 extern s32 func_0035B6E0(const char *format, ...);
 
 void *func_00159678(void *resource) {

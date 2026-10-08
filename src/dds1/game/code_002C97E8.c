@@ -3,6 +3,7 @@
 
 #include "fpu.h"
 #include "sdf.h"
+#include "sdf_grid.h"
 #include "itf.h"
 
 extern s8 D_00324510[];
@@ -1002,30 +1003,6 @@ void sdfReleaseCurrentTaskOwnedResources(void) {
 void func_002CB9B8(void) {
 }
 
-
-typedef struct SdfGridCell {
-    u32 index;
-    u32 value;
-} SdfGridCell;
-
-typedef struct SdfGrid {
-    u32 allocation;        /* 0x00 */
-    SdfGridCell *cells;    /* 0x04 */
-    SdfGridCell *cursor;   /* 0x08 */
-    SdfGridCell *viewportOrigin; /* 0x0C */
-    u32 cellCount;         /* 0x10 */
-    u32 width;             /* 0x14 */
-    void (*drawCell)(s32, s32, s32, struct SdfGrid *, SdfGridCell *, s32); /* 0x18 */
-    void (*releaseCell)(u32, u32); /* 0x1C */
-    void (*onDestroy)(s32, u32); /* 0x20 */
-    u16 cellWidth;         /* 0x24 */
-    u16 cellHeight;        /* 0x26 */
-    u16 visibleColumns;    /* 0x28 */
-    u16 visibleRows;       /* 0x2A */
-    u16 columnMargin;      /* 0x2C */
-    u16 rowMargin;         /* 0x2E */
-    u32 userData;          /* 0x30 */
-} SdfGrid;
 
 INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB9C0);
 

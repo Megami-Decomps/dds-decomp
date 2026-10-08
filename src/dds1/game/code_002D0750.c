@@ -37,7 +37,7 @@ void sdfSkipNextListNode(SdfMemBlock *node) {
 }
 
 /* Coalesce adjacent free records, then recycle this record or mark it free. */
-void sdfReleaseResourceAllocation(SdfMemBlock *allocation) {
+void sdfReleaseResourceAllocation(struct SdfMemBlock *allocation) {
     SdfMemBlock *nextBlock;
     s32 interruptsDisabled;
 
@@ -77,7 +77,7 @@ void sdfReleaseMemorySlot(s32 *handleSlot) {
     allocationHandle = *handleSlot;
     if (allocationHandle != 0) {
         *handleSlot = 0;
-        sdfReleaseResourceAllocation((SdfMemBlock *)allocationHandle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)allocationHandle);
         return;
     }
 }
@@ -196,7 +196,7 @@ s32 sdfSendNamedResourceRequest(char *name, s32 dataSize, void *data, s32 *outSi
     u8 replyScratch[0x50];
     s32 nameLength = strlen(name);
     s32 requestBytes = nameLength + dataSize + SDF_NAMED_REQUEST_OVERHEAD_BYTES;
-    u32 *requestWords = (u32 *)sdfResourceRetainAddress((SdfMemBlock *)sdfAllocGeneralBlock(requestBytes));
+    u32 *requestWords = (u32 *)sdfResourceRetainAddress((struct SdfMemBlock *)sdfAllocGeneralBlock(requestBytes));
     u32 *replyWords;
     s32 result;
 

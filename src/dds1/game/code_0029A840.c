@@ -9,7 +9,6 @@
 #include "sdf_texture_file.h"
 #include "sdf_chunk.h"
 
-extern u32 sdfResourceRetainAddress(u32);
 
 extern void *sdfAllocGeneralBlock(u32);
 
@@ -559,7 +558,7 @@ u8 *func_0029B368(void *source) {
         data = (u8 *)fileResolveSecondaryBuffer(source);
         if (data != NULL) {
             owner->buffer = sdfAllocGeneralBlock(owner->count * 4);
-            owner->entries = (void **)sdfResourceRetainAddress((u32)owner->buffer);
+            owner->entries = (void **)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)owner->buffer));
             owner->entries[0] = fileCloneQueueEntries((struct FileQueue *)data);
             for (i = 1; i < owner->count; i++) {
                 owner->entries[i] = fileQueueClone(owner->entries[0]);
@@ -624,7 +623,7 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
             sdfReleaseResourceAllocation(dst->buffer);
         }
         dst->buffer = sdfAllocGeneralBlock(dst->count * 4);
-        dst->entries = (void **)sdfResourceRetainAddress((u32)dst->buffer);
+        dst->entries = (void **)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)dst->buffer));
         for (i = 0; i < dst->count; i++) {
             dst->entries[i] = fileQueueClone(*src->entries);
         }
@@ -694,7 +693,7 @@ RefObj *func_0029BD90(SdfTextureFileHeader *source) {
     payloadBytes = imageBytes + paletteBytes;
     textureOffset = payloadBytes + 0x40;
     allocationHandle = (u32)sdfAllocGeneralBlock(payloadBytes + 0x60);
-    cursor = (u8 *)sdfResourceRetainAddress(allocationHandle);
+    cursor = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
     texture = (RefObj *)(cursor + textureOffset);
     texture->base = cursor;
     cursor += 0x40;

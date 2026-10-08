@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "kwln.h"
 #include "sdf.h"
 #include "mnu.h"
@@ -8,7 +9,6 @@
 extern KwlnTask *kwlnTaskCreate();
 extern void sdfCancelAndReleasePacWork(void *);
 extern SdfMemBlock *sdfAllocGeneralBlock(s32);
-extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 extern void sdfQueueNonzeroResourceId(s32);
 extern u32 effLoadIndexedResource(const char *, const char *, s32);
 extern u32 effDestroyResourceSlotSet(u32);
