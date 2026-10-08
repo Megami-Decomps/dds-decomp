@@ -333,19 +333,6 @@ typedef struct CampDisplayDefaults {
     s32 enabled, variant;
 } CampDisplayDefaults;
 
-typedef struct CampListLayout {
-    s32 width0, width1, width2;
-    s32 unkC, unk10, unk14;
-    u8 pad18[8];
-    union {
-        struct { s32 unk20, unk24, unk28; };
-        s32 firstValues[3];
-    };
-    union {
-        struct { s32 unk2C, unk30, unk34; };
-        s32 secondValues[3];
-    };
-} CampListLayout;
 
 typedef struct EvtViewerDrawVector {
     f32 x, y, z, w;
@@ -361,7 +348,7 @@ extern void *sdfAllocSizeClassBlock(s32);
 extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
 extern void func_00242C30(EvtRuntime *, EvtRuntimeGroup *, s32, f32 (*)[4], f32 *, f32 *);
 extern void func_00242E70(EvtRuntime *, EvtRuntimeGroup *, s32, CampDisplayDefaults *);
-extern void func_00242F78(EvtRuntime *, EvtRuntimeGroup *, CampListLayout *);
+extern void func_00242F78(EvtRuntime *, EvtRuntimeGroup *, EvtBlendKey *);
 extern EffBlurTemplate *effGetCh71Work(void);
 extern EffBlurScatterWork *effGetCh72Work(void);
 extern EffBlurScaleWork *effGetCh76Work(void);
@@ -371,7 +358,7 @@ extern EvtViewerDrawVector kwlnDrawVector;
 /* Capture kind-specific defaults before adding a new key to its track. */
 EvtRuntimeChild *func_0022B7A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer) {
     CampDisplayDefaults display;
-    CampListLayout layout;
+    EvtBlendKey layout;
     f32 first, second;
     f32 (*vectors)[4] = NULL;
     EvtRuntimeChild *key;
@@ -527,15 +514,15 @@ EvtRuntimeChild *func_0022B7A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *vi
         EvtCameraColorPayload *payload = sdfAllocSizeClassBlock(0x40);
         s32 i;
         key->payload = payload;
-        payload->parameters.x = layout.unk10;
-        payload->parameters.w[0] = layout.width0;
-        payload->parameters.w[1] = layout.width1;
-        payload->parameters.w[2] = layout.width2;
-        payload->parameters.w[3] = layout.unkC;
-        payload->parameters.flagWord = layout.unk14;
+        payload->parameters.x = layout.x;
+        payload->parameters.w[0] = layout.w[0];
+        payload->parameters.w[1] = layout.w[1];
+        payload->parameters.w[2] = layout.w[2];
+        payload->parameters.w[3] = layout.w[3];
+        payload->parameters.flagWord = layout.flagWord;
         for (i = 0; i < 3; i++) {
-            payload->parameters.y[i] = layout.firstValues[i];
-            payload->parameters.z[i] = layout.secondValues[i];
+            payload->parameters.y[i] = layout.y[i];
+            payload->parameters.z[i] = layout.z[i];
         }
         break;
     }
