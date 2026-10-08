@@ -3816,18 +3816,10 @@ void effIndexedFloatCallbackDispatch(ValPtr44 *p, float v) {
     dds3DispatchIndexedCallback(p->p44, v);
 }
 
-typedef struct EffMotionSetup {
-    u16 mode;    // 0x00
-    u16 kind;    // 0x02
-    u16 flags;   // 0x04
-    u8 pad_06[6];
-    void *table; // 0x0C
-    u8 pad_10[0x1C];
-} EffMotionSetup; // 0x2C
 
-extern EffMotionSetup D_003DCA40;
+extern EffPacketParams D_003DCA40;
 
-extern EffMotionSetup D_003DCA70;
+extern EffPacketParams D_003DCA70;
 
 extern u8 D_0037EB90[];
 
@@ -3876,14 +3868,14 @@ u32 effCreateSurfaceGridNode(u32 count, u32 columns) {
     node->field_14 = 0;
     node->handle = sdfCreateAssetWithDrawEntries();
     func_002DA420(node->handle, 1.0f);
-    memset(&D_003DCA40, 0, sizeof(EffMotionSetup));
-    D_003DCA40.flags = 0x4000;
-    D_003DCA40.table = D_0037EB90;
-    memset(&D_003DCA70, 0, sizeof(EffMotionSetup));
-    D_003DCA70.flags = 0x4000;
-    D_003DCA70.table = D_0037EBE0;
-    D_003DCA70.mode = 6;
-    D_003DCA70.kind = 8;
+    memset(&D_003DCA40, 0, sizeof(EffPacketParams));
+    D_003DCA40.primitive = 0x4000;
+    D_003DCA40.parameters = (u32 *)D_0037EB90;
+    memset(&D_003DCA70, 0, sizeof(EffPacketParams));
+    D_003DCA70.primitive = 0x4000;
+    D_003DCA70.parameters = (u32 *)D_0037EBE0;
+    D_003DCA70.parameterCount = 6;
+    D_003DCA70.vertexCount = 8;
     return (u32)node;
 }
 
@@ -5347,7 +5339,7 @@ void effSetBlockResourceMatrixComponent(EffClassWork *work, float value) {
 
 
 
-extern EffMotionSetup D_003DCB00;
+extern EffPacketParams D_003DCB00;
 
 u8 *effCreateRibbonWork(u32 count, u32 repeat) {
     u32 rowStride = repeat * 4 + 4;
@@ -5377,8 +5369,8 @@ u8 *effCreateRibbonWork(u32 count, u32 repeat) {
     }
     work->handle = sdfCreateAssetWithDrawEntries();
     func_002DA420(work->handle, 1.0f);
-    memset(&D_003DCB00, 0, sizeof(EffMotionSetup));
-    D_003DCB00.flags = 0x4000;
+    memset(&D_003DCB00, 0, sizeof(EffPacketParams));
+    D_003DCB00.primitive = 0x4000;
     return (u8 *)work;
 }
 
@@ -5924,7 +5916,7 @@ void effReleaseScalyTextureReference(s32 unused) {
     }
 }
 
-extern EffMotionSetup D_003DCB30;
+extern EffPacketParams D_003DCB30;
 
 /* Allocate position/UV/color rows and a draw handle using count and repeat. */
 u8 *effAllocateTexturedStripWork(count, repeat)
@@ -5960,8 +5952,8 @@ u32 repeat;
     }
     work->handle = sdfCreateAssetWithDrawEntries();
     func_002DA420(work->handle, 1.0f);
-    memset(&D_003DCB30, 0, sizeof(EffMotionSetup));
-    D_003DCB30.flags = 0x4000;
+    memset(&D_003DCB30, 0, sizeof(EffPacketParams));
+    D_003DCB30.primitive = 0x4000;
     return (u8 *)work;
 }
 

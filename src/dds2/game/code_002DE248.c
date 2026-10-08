@@ -3888,14 +3888,6 @@ void func_002E7F60(EffectSlotNode54 *dst, u8 *work) {
     dst->kind = src->kind;
 }
 
-typedef struct EffMotionSetup {
-    u16 mode;       // 0x00
-    u16 kind;       // 0x02
-    u16 flags;      // 0x04
-    u8 pad_06[6];
-    void *table;    // 0x0C
-    u8 pad_10[0x1C];
-} EffMotionSetup;   // 0x2C
 
 
 extern u32 effCreateSurfaceGridNode(u32, u32);
@@ -4074,9 +4066,9 @@ void effIndexedFloatCallbackDispatch(u8 *p, f32 value) {
     dds3DispatchIndexedCallback(((EffectSlotNode54 *)p)->record, value);
 }
 
-extern EffMotionSetup D_00458310;
+extern EffPacketParams D_00458310;
 
-extern EffMotionSetup D_00458340;
+extern EffPacketParams D_00458340;
 
 extern u8 D_003E9C40[];
 
@@ -4124,14 +4116,14 @@ u32 effCreateSurfaceGridNode(u32 count, u32 columns) {
     node->field_24 = 0;
     node->handle = sdfCreateAssetWithDrawEntries();
     func_003332D0(node->handle, 1.0f);
-    memset(&D_00458310, 0, sizeof(EffMotionSetup));
-    D_00458310.flags = 0x4000;
-    D_00458310.table = D_003E9C40;
-    memset(&D_00458340, 0, sizeof(EffMotionSetup));
-    D_00458340.flags = 0x4000;
-    D_00458340.table = D_003E9C90;
-    D_00458340.mode = 6;
-    D_00458340.kind = 8;
+    memset(&D_00458310, 0, sizeof(EffPacketParams));
+    D_00458310.primitive = 0x4000;
+    D_00458310.parameters = (u32 *)D_003E9C40;
+    memset(&D_00458340, 0, sizeof(EffPacketParams));
+    D_00458340.primitive = 0x4000;
+    D_00458340.parameters = (u32 *)D_003E9C90;
+    D_00458340.parameterCount = 6;
+    D_00458340.vertexCount = 8;
     return (u32)node;
 }
 
@@ -5648,13 +5640,13 @@ void effSetBlockResourceMatrixComponent(Matrix4 *mat, float value) {
     mat->u.m[2][0] = value;
 }
 
-extern EffMotionSetup D_004584C0;
+extern EffPacketParams D_004584C0;
 
-extern EffMotionSetup D_00458400;
+extern EffPacketParams D_00458400;
 
 
 
-extern EffMotionSetup D_004583D0;
+extern EffPacketParams D_004583D0;
 
 u8 *effCreateRibbonWork(u32 count, u32 repeat) {
     u32 rowStride = repeat * 4 + 4;
@@ -5684,8 +5676,8 @@ u8 *effCreateRibbonWork(u32 count, u32 repeat) {
     }
     work->handle = sdfCreateAssetWithDrawEntries();
     func_003332D0(work->handle, 1.0f);
-    memset(&D_004583D0, 0, sizeof(EffMotionSetup));
-    D_004583D0.flags = 0x4000;
+    memset(&D_004583D0, 0, sizeof(EffPacketParams));
+    D_004583D0.primitive = 0x4000;
     return (u8 *)work;
 }
 
@@ -6248,8 +6240,8 @@ u32 repeat;
     }
     work->handle = sdfCreateAssetWithDrawEntries();
     func_003332D0(work->handle, 1.0f);
-    memset(&D_00458400, 0, sizeof(EffMotionSetup));
-    D_00458400.flags = 0x4000;
+    memset(&D_00458400, 0, sizeof(EffPacketParams));
+    D_00458400.primitive = 0x4000;
     return (u8 *)work;
 }
 
@@ -7983,11 +7975,11 @@ s32 *effCreateMotionResource(s32 *context) {
     work[0] = 0;
     work[1] = (s32)sdfCreateAssetWithDrawEntries();
     func_003332D0((void *)work[1], 1.0f);
-    memset(&D_004584C0, 0, sizeof(EffMotionSetup));
-    D_004584C0.flags = 0x4000;
-    D_004584C0.table = D_003E9FF0;
-    D_004584C0.mode = 4;
-    D_004584C0.kind = 6;
+    memset(&D_004584C0, 0, sizeof(EffPacketParams));
+    D_004584C0.primitive = 0x4000;
+    D_004584C0.parameters = (u32 *)D_003E9FF0;
+    D_004584C0.parameterCount = 4;
+    D_004584C0.vertexCount = 6;
     return work;
 }
 

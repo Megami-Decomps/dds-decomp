@@ -3796,3 +3796,14 @@ layers forward the float through a named `setScale` member. Existing PCP
 callers already supply the float; their separate legacy handle ownership
 is intentionally outside this narrow ABI correction.
 
+
+## Surface, ribbon, and motion packet descriptors
+
+The `0x2C`-byte globals initialized by the billboard surface, ribbon,
+scaly-strip, and DDS2 motion-resource constructors are `EffPacketParams`,
+not a separate `EffMotionSetup` prefix. Native halfword stores at
+`+0x00`/`+0x02` set parameter/vertex counts, `+0x04` sets the primitive,
+and the pointer at `+0x0C` selects the packed parameter table. All nine
+globals across the two billboard units now use the same complete packet
+owner and its existing members, without a second view.
+
