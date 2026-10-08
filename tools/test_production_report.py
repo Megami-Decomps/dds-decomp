@@ -557,7 +557,7 @@ class ProductionUnitTests(ProductionFixture):
         self.assertEqual([f["raw_fuzzy_match_percent"] for f in evidence["functions"]], [0.0, 75.0, 0.0])
         self.assertEqual([f["owner"] for f in evidence["functions"]], ["c", "c", "include_asm"])
         self.assertEqual([f["production_exact"] for f in evidence["functions"]], [True, True, False])
-        self.assertEqual(evidence["delta"], (16, 2, 1000.0))
+        self.assertNotIn("delta", evidence)
         self.assertEqual(unit["measures"]["matched_code"], "16")
         self.assertEqual(unit["measures"]["matched_functions"], 2)
         self.assertEqual(unit["measures"]["total_code"], "24")
@@ -817,9 +817,26 @@ class ReconciliationTests(ProductionFixture):
         report["units"][0]["name"] = "dds1/game/test"
         report["units"][0]["metadata"]["progress_categories"].append("dds1")
         report["categories"].append({"id": "dds1", "measures": copy.deepcopy(report["measures"])})
-        evidence = production_report.reconcile(report, "all", self.root)
+        evidence = production_report.reconcile(report, "all", self.root, expected_versions=["dds1"])
         self.assertEqual(report["categories"][-1]["measures"], report["measures"])
         self.assertEqual(evidence["units"][0]["version"], "dds1")
+
+    def test_combined_report_cannot_drop_a_whole_configured_game(self):
+        report = self.report()
+        report["units"][0]["name"] = "dds1/game/test"
+        report["units"][0]["metadata"]["progress_categories"].append("dds1")
+        report["categories"].append({"id": "dds1", "measures": copy.deepcopy(report["measures"])})
+        # This is internally consistent DDS1-only JSON. It cannot stand in for
+        # the dual-game report requested by configure, even if DDS2's category
+        # and denominator have also been removed.
+        with patch.dict(production_report.VERSIONS, {"dds2": {}}):
+            with self.assertRaisesRegex(ValueError, "report versions"):
+                production_report.reconcile(report, "all", self.root,
+                                            expected_versions=["dds1", "dds2"])
+
+    def test_combined_report_requires_external_version_inventory(self):
+        with self.assertRaisesRegex(ValueError, "requires configured versions"):
+            production_report.reconcile(self.report(), "all", self.root)
 
     def test_assembly_only_sdk_units_are_unchanged(self):
         report = self.report()

@@ -397,7 +397,7 @@ def write_objdiff_reports(n, units: dict[str, list[dict]]) -> None:
            description="objdiff report $out")
     n.rule(
         "production_report",
-        f"{sys.executable} tools/production_report.py report --scope $scope $in $out",
+        f"{sys.executable} tools/production_report.py report --scope $scope $versions $in $out",
         description="reconcile report $out",
     )
 
@@ -423,7 +423,9 @@ def write_objdiff_reports(n, units: dict[str, list[dict]]) -> None:
                 ])
         n.build(out, "production_report", raw, implicit=dependencies,
                 implicit_outputs=[f"{out}.proof.json"],
-                variables={"scope": scope})
+                variables={"scope": scope, "versions": " ".join(
+                    f"--version {version}" for version in units if scope in ("all", version)
+                )})
 
     n.build("objdiff", "phony", objdiff_objects)
     report("report.json", ".", objdiff_objects, "all")

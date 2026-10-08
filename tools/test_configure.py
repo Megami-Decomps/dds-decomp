@@ -380,7 +380,7 @@ class ObjdiffProgressTests(unittest.TestCase):
             "implicit": all_objects + ["objdiff.json"], "variables": {"project": "."},
         })
         self.assertEqual(builds["report.json"].args, ("report.json", "production_report", "report.json.raw"))
-        self.assertEqual(builds["report.json"].kwargs["variables"], {"scope": "all"})
+        self.assertEqual(builds["report.json"].kwargs["variables"], {"scope": "all", "versions": "--version dds1 --version dds2"})
         expected_reports = {"report.json"}
         for version, rows in self.units.items():
             for selected, project, out in (
@@ -394,7 +394,7 @@ class ObjdiffProgressTests(unittest.TestCase):
                     "implicit": objects + [f"{project}/objdiff.json"], "variables": {"project": project},
                 })
                 self.assertEqual(builds[out].args, (out, "production_report", f"{out}.raw"))
-                self.assertEqual(builds[out].kwargs["variables"], {"scope": version})
+                self.assertEqual(builds[out].kwargs["variables"], {"scope": version, "versions": f"--version {version}"})
         self.assertEqual(set(builds["report"].args[2]), expected_reports)
         writer.rule.assert_any_call(
             "objdiff_report", f"{configure.OBJDIFF} report generate -p $project -o $out",
@@ -413,6 +413,8 @@ class ObjdiffProgressTests(unittest.TestCase):
                         continue
                     scope = call.kwargs["variables"]["scope"]
                     expected_versions = versions if scope == "all" else (scope,)
+                    self.assertEqual(call.kwargs["variables"]["versions"],
+                                     " ".join(f"--version {v}" for v in expected_versions))
                     dependencies = call.kwargs["implicit"]
                     for version in ("dds1", "dds2"):
                         for dependency in (
