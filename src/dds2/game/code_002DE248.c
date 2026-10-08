@@ -385,7 +385,6 @@ extern u8 D_004386E8[];
 
 struct FileWork;
 extern u32 fileGetResourceHandle(struct FileWork *);
-extern void *fileCreateCallbackRequest(const char *, s32, s32, s32);
 
 extern EffectSlotSet *func_00305148(u32, u32);
 
@@ -10921,7 +10920,6 @@ typedef struct EffRequest {
 
 extern void func_002C7CE8(void *);
 
-extern void *fileQueuePlainDispatchRequest(const char *path);
 
 
 u32 effAppendListEntry(EffectList *list, u32 value, u32 length,
@@ -10978,7 +10976,7 @@ s32 effPollResourceList(EffectList *list) {
                 if (list->request != NULL) {
                     func_002C7CE8(list->request);
                 }
-                list->request = fileQueuePlainDispatchRequest(node->length);
+                list->request = (EffRequest *)fileQueuePlainDispatchRequest((const char *)node->length);
                 if (list->mode == 2) {
                     func_002C81D0((struct FileRequest *)list->request);
                 }
