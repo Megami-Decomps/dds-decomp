@@ -250,7 +250,7 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", func_00103430);
 void func_001034E0(void) {
 }
 
-extern s8 D_0037F510[];
+extern s8 D_0037F510[64];
 
 /* Fresh presses wrap; repeat-bit input stops at the implemented end bounds.
  * Without scrolling, forward motion is bounded by visibleRows, not itemCount. */
@@ -368,7 +368,47 @@ s32 kwlnDebugPulseColors(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_001038D0);
+extern s32 D_0037F3C0[4][16];
+extern s32 D_0037F4C0[2][2];
+extern u8 D_0037F4D0[2][2][16];
+extern u8 D_00435C30[2][2][2];
+extern u8 D_00435C38[2][2];
+extern u8 D_00435C40[2][2][2];
+extern u8 D_00435C48[2][2];
+extern u8 D_00438D98[2];
+extern u32 D_00438DA0[2];
+
+void func_001038D0(void) {
+    s32 port;
+    s32 bank;
+    s32 i;
+    s32 (*inputTimers)[16] = D_0037F3C0;
+
+    for (port = 0; port < 2; port++) {
+        for (bank = 0; bank < 2; bank++) {
+            for (i = 0; i < 16; i++) {
+                D_0037F4D0[bank][port][i] = 0;
+                D_0037F510[bank * 32 + port * 16 + i] = 0;
+                inputTimers[bank * 2 + port][i] = 0;
+            }
+        }
+        for (i = 0; i < 2; i++) {
+            D_0037F4C0[port][i] = 0;
+            D_00435C30[port][i][0] = 0;
+            D_00435C30[port][i][1] = 0;
+            D_00435C38[port][i] = 0;
+            D_00435C40[port][i][0] = 0;
+            D_00435C40[port][i][1] = 0;
+            D_00435C48[port][i] = 0;
+        }
+    }
+    kwlnPadMotorLevels[KWLN_PAD_SMALL_MOTOR] = 0;
+    D_00438D98[KWLN_PAD_SMALL_MOTOR] = 0;
+    D_00438DA0[KWLN_PAD_SMALL_MOTOR] = 0;
+    kwlnPadMotorLevels[KWLN_PAD_LARGE_MOTOR] = 0;
+    D_00438D98[KWLN_PAD_LARGE_MOTOR] = 0;
+    D_00438DA0[KWLN_PAD_LARGE_MOTOR] = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_00103A00);
 
@@ -392,8 +432,6 @@ void kwlnPadStepLargeMotorLevel(void) {
     }
 }
 
-extern u8 D_00438D98[2];
-extern u32 D_00438DA0[2];
 extern s32 fileTestSavedSlotFlags(u32 kind);
 extern void sdfPadSetSmallMotor(s32 padIndex, u16 strength);
 extern void sdfPadSetLargeMotor(s32 padIndex, u8 strength);
