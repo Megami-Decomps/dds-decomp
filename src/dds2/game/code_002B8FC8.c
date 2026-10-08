@@ -144,9 +144,6 @@ extern char D_00380788[];
 
 extern void evtStageTestUpdate();
 
-extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
-
-
 extern char D_003E7790[];
 
 extern char D_003E7720[];

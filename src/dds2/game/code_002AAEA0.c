@@ -19,9 +19,7 @@ extern u8 D_003E73F8[];
 
 extern s32 func_002A9AB8(s32);
 extern void func_002B9808(MenuWindowContainer *);
-extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
-extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
-extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
+
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern u8 D_003E6F38[];
 
