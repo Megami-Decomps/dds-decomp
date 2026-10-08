@@ -11,7 +11,6 @@ extern void func_003332A0(void *, u32);
 
 extern void *sdfCreateAssetWithDrawEntries();
 extern void func_003332D0(void *, f32);
-extern void billSetAnimationEntry();
 extern s32 effEmitterDelayRandomState[];
 extern void effMiscSeedRandomFromClock();
 #include "eff.h"
