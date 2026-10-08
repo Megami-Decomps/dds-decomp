@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "cwd": "/your/frozen-case",
+  "environment": {
+    "PATH": "/usr/bin:/bin",
+    "HOME": "/your/frozen-case",
+    "LANG": "C",
+    "LC_ALL": "C",
+    "TZ": "UTC",
+    "TMPDIR": "/your/frozen-case/tmp"
+  },
+  "compiler": "/your/toolchain/cc1",
+  "qemu": "/your/qemu-i386",
+  "assembler": "/your/toolchain/as",
+  "command": [
+    "/your/qemu-i386",
+    "/your/runtime/ld-linux.so.2",
+    "--library-path",
+    "/your/runtime",
+    "/your/toolchain/cc1",
+    "-quiet",
+    "-O2",
+    "-da",
+    "-dumpbase",
+    "/your/frozen-case/rtl",
+    "input.c",
+    "-o",
+    "candidate.s"
+  ],
+  "assembler_command": [
+    "/your/qemu-i386",
+    "/your/runtime/ld-linux.so.2",
+    "--library-path",
+    "/your/runtime",
+    "/your/toolchain/as",
+    "-EL",
+    "-G8",
+    "-g",
+    "-o",
+    "candidate.o",
+    "candidate.s"
+  ],
+  "function": "target_function",
+  "inputs": {
+    "/your/toolchain/cc1": "d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1",
+    "/your/qemu-i386": "0000000000000000000000000000000000000000000000000000000000000000",
+    "/your/toolchain/as": "0000000000000000000000000000000000000000000000000000000000000000",
+    "/your/runtime/ld-linux.so.2": "0000000000000000000000000000000000000000000000000000000000000000",
+    "/your/runtime/libc.so.6": "0000000000000000000000000000000000000000000000000000000000000000",
+    "/your/frozen-case/input.c": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "logs": {
+    "cc1_stdout": "/your/frozen-case/cc1.stdout",
+    "cc1_stderr": "/your/frozen-case/cc1.stderr",
+    "as_stdout": "/your/frozen-case/as.stdout",
+    "as_stderr": "/your/frozen-case/as.stderr"
+  },
+  "artifacts": [
+    {
+      "path": "/your/frozen-case/candidate.s",
+      "archive": "candidate.s"
+    },
+    {
+      "path": "/your/frozen-case/candidate.o",
+      "archive": "candidate.o"
+    },
+    {
+      "root": "/your/frozen-case",
+      "pattern": "rtl.[0-9][0-9].*",
+      "archive_dir": "rtl"
+    },
+    {
+      "path": "/your/frozen-case/cc1.stdout",
+      "archive": "cc1.stdout"
+    },
+    {
+      "path": "/your/frozen-case/cc1.stderr",
+      "archive": "cc1.stderr"
+    },
+    {
+      "path": "/your/frozen-case/as.stdout",
+      "archive": "as.stdout"
+    },
+    {
+      "path": "/your/frozen-case/as.stderr",
+      "archive": "as.stderr"
+    }
+  ],
+  "transport": {
+    "kind": "unix"
+  },
+  "timeout_seconds": 1800
+}

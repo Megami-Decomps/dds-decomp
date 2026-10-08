@@ -1,10 +1,10 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff_blur.h"
 
 extern s32 effGetResourceFirstWord(s32);
 extern struct SdfMemBlock *sdfAllocGeneralBlock(s32 bytes);
 extern u32 sdfResourceRetainAddress(struct SdfMemBlock *allocation);
-extern void sdfReleaseResourceAllocation(struct SdfMemBlock *allocation);
 extern u32 effMiscRand(void *);
 extern f32 effMiscRandUnitFloat(void *);
 extern u8 D_003AA868[];

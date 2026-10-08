@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 
 /* Circular doubly-linked list node; prev/next at +0x18/+0x1C. */
 typedef struct FntNode {
@@ -18,7 +19,6 @@ typedef struct {
 } FmGslWork;
 
 extern FmGslWork frFontResourceList;
-extern void sdfReleaseResourceAllocation(void *);
 
 /* Release the group's handles once and clear its active-node flag. */
 s32 fmGslReleaseActiveResourceBuffers(void) {

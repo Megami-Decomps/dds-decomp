@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff.h"
 #include "pcp_vu0.h"
 
@@ -11,7 +12,6 @@ extern void *effParamTableGetBlock(void *data, s32 index);
 extern void effReleaseRecordPoolResourceAndBuffer(EffRecordPool *pool);
 extern void effReleaseRecordGroupResources(EffRecordPool *pool);
 extern void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 extern void *effGetGroupIndexRecord(EffRecordPool *pool, s32 index);
 extern u32 effMultiplyPackedColors(u32 color, u32 param);
 extern u8 D_0034DF38[];

@@ -1,4 +1,5 @@
 #include "dsp_name.h"
+#include "sdf_resource.h"
 #include "mnu.h"
 #include "dat_state.h"
 #include "mnu_profile_progress.h"
@@ -21,7 +22,6 @@ extern void sdfDestroyGridWork(s32);
 
 extern void mnuReleaseDisplayListNodes(s32);
 
-extern void sdfReleaseResourceAllocation(s32);
 
 extern void mnuResetWorkFloats(void);
 
@@ -232,7 +232,7 @@ void mnuReleaseSceneContext(s32 unused, s32 sceneAddress) {
     func_002CB3B8(mnuSceneResourceContext, -1);
     sdfDestroyGridWork((s32)((MenuSceneWork *)sceneAddress)->gridHandle);
     mnuReleaseDisplayListNodes(sceneAddress + 0x584);
-    sdfReleaseResourceAllocation(((MenuSceneWork *)sceneAddress)->allocationHandle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((MenuSceneWork *)sceneAddress)->allocationHandle));
     mnuResetWorkFloats();
 }
 

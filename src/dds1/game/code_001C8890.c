@@ -1,7 +1,9 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf_model.h"
 #include "btl.h"
 #include "btl_state.h"
+#include "btl_model_record.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
 #include "eff_field_color.h"
@@ -1578,23 +1580,6 @@ void func_001CEA58(s32 arg0) {
 
 extern u8 *btlCreateModelChangeTask(u8 *, s32, s32, s32, s32, u8);
 
-typedef struct BtlActorMotionSlot {
-    u8 pad00[2];
-    u16 frameCount; /* 0x02 */
-    s16 kind; /* 0x04: motion/effect-kind discriminator */
-    s16 alphaStartFrame; /* 0x06 */
-    f32 alphaFrameScale; /* 0x08 */
-    u8 pad0C[4];
-    s16 alphaDuration; /* 0x10 */
-    u8 pad12[2];
-} BtlActorMotionSlot;
-
-typedef struct BtlActorStatusRecord {
-    u8 pad00[0x2A];
-    u16 model; /* 0x2A: model-change task operand */
-    BtlActorMotionSlot motions[29]; /* 0x2C: record stride is 0x270 */
-} BtlActorStatusRecord;
-
 void func_001CEA70(u8 *task) {
     u8 *actor;
     u8 *effectTask;
@@ -2586,7 +2571,7 @@ void btlInitBattleIndexWork(BattleIndexWork *object) {
 void btlReleaseObjectBuffers(BattleIndexWork *object) {
     u32 handle = object->allocationHandle;
     if (handle != 0) {
-        sdfReleaseResourceAllocation(handle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
         object->allocationHandle = 0;
     }
     if (object->indices != 0) {
@@ -6313,7 +6298,7 @@ void btlDestroyUnit(u8 *actor) {
     } else {
         *(u8 **)(btlGetRuntime() + 0x228) = *(u8 **)(actor + 0x344);
     }
-    sdfReleaseResourceAllocation(*(s32 *)(actor + 0x33C));
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*(s32 *)(actor + 0x33C)));
 }
 
 void btlDestroyAllUnits(void) {
@@ -10803,7 +10788,7 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
     resource = fileGetResourceHandle(args->loadHandle);
     effect->resourceHandle =
         sndMixerClone(sdfResourceRetainAddress(resource));
-    sdfReleaseResourceAllocation(resource);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
     filePollEntryCleanup(args->loadHandle);
     effect->flags = (effect->flags & ~1) | 2;
     return 0;
@@ -11746,7 +11731,7 @@ u32 sndPollMotSeFileAndSpu(SoundFileRequest *request) {
         }
     } else if (sndFindPackedTrackLoadStatus(node->position) != 0) {
         btlBossDebugPrintf(D_003A5138, (u16)(node->position >> 16));
-        sdfReleaseResourceAllocation(request->resourceHandle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(request->resourceHandle));
         filePollEntryCleanup(request->handle);
         node->flags = (node->flags & ~8) | 0x10;
         return 1;
@@ -12033,7 +12018,7 @@ void sndReleaseSlotOwner(u8 *ownerAddress) {
                 filePollEntryCleanup(*requests);
             }
             if (*resources != 0) {
-                sdfReleaseResourceAllocation(*resources);
+                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*resources));
             }
         }
         if (node->next != 0) {
@@ -12297,7 +12282,7 @@ s32 sndPollAtrac3SELoadTask(BattleVoiceLoad *args) {
         size = fileGetResourceSize(args->request);
         filePollEntryCleanup(args->request);
         func_0026ABA8(data, size, D_00377650[args->index].volume);
-        sdfReleaseResourceAllocation(resource);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
         btlBossDebugPrintf(D_003A5358);
         return 1;
     }
@@ -12393,7 +12378,7 @@ u32 sndUpdateEarringDeadPlayback(u32 *args) {
 void sndFinishEarringPlaybackTask(u32 *sound) {
     u8 *state = (u8 *)btlGetRuntime();
     if (sound[2]) {
-        sdfReleaseResourceAllocation(sound[2]);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(sound[2]));
     }
     --*(u16 *)(state + 0x260);
 }

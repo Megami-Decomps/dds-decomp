@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "sdf_resource.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "dat_state.h"
@@ -238,7 +239,7 @@ s32 mnuStaffFreeDisplayResources(void) {
     StaffWindowResources *resources = context->resources;
     mnuReleaseStaffPrimaryWindows(context);
     func_002733B0(context);
-    sdfReleaseResourceAllocation(resources->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resources->allocation));
     return 1;
 }
 

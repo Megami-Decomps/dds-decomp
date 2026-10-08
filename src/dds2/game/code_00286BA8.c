@@ -1,4 +1,5 @@
 #include "mnu_mantra.h"
+#include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "dat_state.h"
@@ -79,7 +80,6 @@ extern void sdfSetTaskItemMode(void *, s32, u32);
 extern void mnuReleaseFirstMantraSpriteSlots(void);
 extern void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
-extern void sdfReleaseResourceAllocation(u32);
 extern void mnuReleasePanelEntryPool(void);
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00286BA8);
 
@@ -134,7 +134,7 @@ void func_00286F18(s32 unused, MnuStatusResource *resourceWork) {
         mnuReleaseFirstMantraSpriteSlots();
         mnuReleaseStaffAndTitleVisualResources(resourceWork->progressHost);
         evtPrintDeveloperConsoleMessage("trmDestroyStatusResource()!!!! \n");
-        sdfReleaseResourceAllocation(resourceWork->allocationHandle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resourceWork->allocationHandle));
         mnuReleasePanelEntryPool();
     }
     evtPrintDeveloperConsoleMessage("mtrRelease\n");

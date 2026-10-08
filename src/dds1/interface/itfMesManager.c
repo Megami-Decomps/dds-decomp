@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "itf.h"
 
 
@@ -133,7 +134,6 @@ extern struct ItfMesPoolNode *itfAcquirePoolNode();
 
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern u32 sdfResourceRetainAddress(SdfMemBlock *block);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *block);
 extern u32 strlen(const char *text);
 extern void *memset(void *destination, s32 value, u32 size);
 extern void *memcpy(void *destination, const void *source, u32 size);

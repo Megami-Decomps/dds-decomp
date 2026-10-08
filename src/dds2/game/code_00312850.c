@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 
 #include "fpu.h"
 #include "sdf.h"
@@ -11,7 +12,6 @@ extern void *sdfMemoryGetBlockAddress(u32);
 
 extern void func_00313BA8(s32, s32);
 
-extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 
 extern void sdfReleaseChipBlock();
 

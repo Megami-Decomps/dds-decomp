@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 
 extern s8 D_0043643D;
 

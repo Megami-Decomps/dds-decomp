@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -156,7 +157,6 @@ void polyUpdateBasicRingCells(PolyNode *obj);
 void func_0015DC70(PolyNode *node, s32 index);
 void polyStripPushPairsApart(PolyNode *node, s32 index);
 void sdfReleaseChipBlock(void *arg);
-void sdfReleaseResourceAllocation(struct SdfMemBlock *allocation);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
 extern void func_002DD608(f32 angle);

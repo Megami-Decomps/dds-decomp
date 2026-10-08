@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_list.h"
 #include "kwln.h"
@@ -659,7 +660,7 @@ void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *work) {
     mnuReleaseStaffMenuTextureHandles(work->staffSlots.baseResources);
     mnuReleaseStaffResourceGroups(&work->staffSlots);
     func_002BC618(work->titleEffectHandle);
-    sdfReleaseResourceAllocation(work->heapHandle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->heapHandle));
 }
 
 extern s32 mnuStaffSlotsAllFilled(struct EffectList *, StaffSlots *);
@@ -926,7 +927,6 @@ extern s32 mnuCheckResourceTask(void);
 extern void mnuStopResourceTask(void);
 extern void func_00126038(s32 a, s32 b);
 extern void fldProcessDeferredSceneCommand(void);
-extern void sdfReleaseResourceAllocation(s32 handle);
 extern s8 mnuTerminalTaskState;
 
 /* Release the terminal task's resources/effects, then hand its mode/slot to the field.
@@ -941,7 +941,7 @@ void mnuReleaseTerminalWorkAndResumeField(s32 arg) {
         mnuDrainPanelTransitions(&work->transitionWork, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle((u32 *)work->messageResources);
-        sdfReleaseResourceAllocation(work->allocation);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->allocation));
         mnuTerminalTaskState = 2;
     }
     if (mnuCheckResourceTask() != 0) {
