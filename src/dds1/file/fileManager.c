@@ -190,7 +190,8 @@ void *fileAllocateDispatchRequest(const char *requestName, u32 flags, u32 dispat
     if (flags != 0) {
         sdfPacUseHighAddressAllocator(dispatchPacket);
     }
-    fileManQueueNamedRequest(requestWork, FILE_REQUEST_KIND_PAC, requestName, onComplete, userData);
+    fileManQueueNamedRequest(requestWork, FILE_REQUEST_KIND_PAC, requestName,
+                             (void *)onComplete, (void *)userData);
     return requestWork;
 }
 
@@ -217,7 +218,8 @@ void *fileCreateCallbackRequest(const char *requestName, u32 callbackMode, u32 c
     FileRequestCallbackWork *requestWork = sdfAllocAndClearQuadwords(sizeof(FileRequestCallbackWork));
 
     requestWork->unk03 = callbackMode;
-    fileManQueueNamedRequest(requestWork, FILE_REQUEST_KIND_CALLBACK, requestName, callbackAddress, userData);
+    fileManQueueNamedRequest(requestWork, FILE_REQUEST_KIND_CALLBACK, requestName,
+                             (void *)callbackAddress, (void *)userData);
     return requestWork;
 }
 
