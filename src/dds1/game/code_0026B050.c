@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "kwln.h"
 #include "mnu.h"
+#include "mnu_sprite_resource.h"
 
 
 extern void kwlnFadeBackgroundStartOut(s32);
@@ -10,7 +11,7 @@ extern void *memset(void *, s32, u32);
 extern void mnuRecreateMenuSelectionList(void);
 extern void mnuSelectMenuListCursorByAdvance(s32);
 extern void func_0026AEB0(void);
-extern void *mnuCreateMovieSpriteResource(s32, u8, u8);
+extern MnuSpriteResourceGroup *mnuCreateMovieSpriteResource(s32, u8, u8);
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 extern s32 func_0026B1F0(KwlnTask *);
 extern u32 D_003BA8EC;

@@ -4,6 +4,7 @@
 #include "mnu_scene.h"
 #include "mnu_profile_progress.h"
 #include "mnu_mantra_grid.h"
+#include "mnu_sprite_resource.h"
 #include "sdf_grid.h"
 
 extern void sdfReleaseChipBlock(void *);
@@ -419,26 +420,15 @@ void mnuReleaseOptionalDrawAllocation(void *unused, void *allocation) {
 }
 
 
-typedef struct {
-    s32 allocation;    /* 0x00 */
-    u8 pad04[0x2C];
-    s32 lifetime;      /* 0x30 */
-    s32 owner;         /* 0x34 */
-    u8 pad38[0xC];
-    u8 variant;       /* 0x44 */
-    u8 sprite;        /* 0x45 */
-    u8 pad46[2];
-} MovieSpriteResource;
-
-void *mnuCreateSpriteResource(s32 owner, u8 sprite, u8 variant) {
-    s32 allocation = (u32)sdfAllocGeneralBlock(0x48);
-    MovieSpriteResource *resource = (MovieSpriteResource *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)allocation);
+MnuSpriteResourceGroup *mnuCreateSpriteResource(s32 owner, u8 sprite, u8 variant) {
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x48);
+    MnuSpriteResourceGroup *resource = (MnuSpriteResourceGroup *)sdfMemoryGetBlockAddress(allocation);
     memset(resource, 0, 0x48);
     resource->allocation = allocation;
     resource->owner = owner;
     resource->sprite = sprite;
     resource->variant = variant;
-    resource->lifetime = (s32)(effMiscRandUnitFloat(0) * 30.0f + 10.0f);
+    resource->spawnCountdown = (s32)(effMiscRandUnitFloat(0) * 30.0f + 10.0f);
     return resource;
 }
 
