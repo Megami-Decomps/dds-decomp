@@ -365,7 +365,7 @@ s32 fldGetSceneMetadataNode(void) {
 
 extern s32 dspCloseChannel(void);
 extern s32 evtCreateMessageWindowIfMissing(s32);
-extern void mnuSetupStaffMenuProfilePage(s32, void *);
+extern void mnuSetupStaffMenuProfilePage(DatPartyRecord *, void *);
 extern u32 mnuGetSelectedNodeValue(void);
 extern void *memcpy(void *, const void *, u32);
 
@@ -384,7 +384,7 @@ s32 func_00253640(void) {
     evtCreateMessageWindowIfMissing(scene->messageWindowResource);
     memcpy((u32 *)((u8 *)scene + 0x28), (u32 *)*(u32 *)mnuGetSelectedNodeValue(), 0x1A4);
     ((u8 *)scene)[0x7D] = (u8)scene->pendingProfileId;
-    mnuSetupStaffMenuProfilePage((s32)((u8 *)scene + 0x28), (void *)scene->attachedEffect);
+    mnuSetupStaffMenuProfilePage((DatPartyRecord *)((u8 *)scene + 0x28), (void *)scene->attachedEffect);
     scene->stageFinished = 0;
     scene->stageStarted = 0;
     return 0;

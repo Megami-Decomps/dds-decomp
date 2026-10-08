@@ -17,7 +17,7 @@ extern u32 kwlnTextureViewerPageIndex;
 
 extern u32 kwlnTextureReferenceFlag;
 
-extern u32 D_00435CC4;
+extern SdfTexResource *D_00435CC4;
 
 extern SdfTex *kwlnHeldTextureReference;
 
@@ -697,23 +697,12 @@ s32 (*kwlnTextureFindIncompleteResource(void))(void) {
     return kwlnLoadDefaultResource;
 }
 
-typedef struct SdfTexHead {
-    struct SdfTexHead *next;
-    struct SdfTexHead *prev;
-    s32 allocationMode;
-    u32 address;
-    s32 size;
-    s16 width;
-    s16 height;
-    s32 format;
-} SdfTexHead;
-
 extern void sdfAppendFillRectanglePacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 
 /* Draw one allocation-map block in address units, choosing color by mode.
  * Only the initial partial row forces a nonzero remainder to occupy one cell;
  * the final partial row retains its truncated cell count. */
-void func_00104D40(void *packetList, s32 x, s32 y, SdfTexHead *block, u8 mode) {
+void func_00104D40(void *packetList, s32 x, s32 y, SdfTexResource *block, u8 mode) {
     s32 color;
     u32 remainingUnits;
     s32 columnIndex;
@@ -723,7 +712,7 @@ void func_00104D40(void *packetList, s32 x, s32 y, SdfTexHead *block, u8 mode) {
     s32 cellCount;
 
     if (mode == 0) {
-        switch (block->allocationMode) {
+        switch ((s32)block->allocationMode) {
         case 1:
             color = KWLN_MAP_GREEN;
             break;
@@ -741,8 +730,8 @@ void func_00104D40(void *packetList, s32 x, s32 y, SdfTexHead *block, u8 mode) {
         color = mode == 1 ? KWLN_MAP_BLUE : KWLN_MAP_CYAN;
     }
     remainingUnits = block->size;
-    topY = y + (block->address >> KWLN_MAP_ROW_SHIFT) * KWLN_MAP_ROW_Y_STEP;
-    columnIndex = (block->address & KWLN_MAP_ROW_MASK) >> KWLN_MAP_COLUMN_SHIFT;
+    topY = y + (block->word >> KWLN_MAP_ROW_SHIFT) * KWLN_MAP_ROW_Y_STEP;
+    columnIndex = (block->word & KWLN_MAP_ROW_MASK) >> KWLN_MAP_COLUMN_SHIFT;
     leftX = x + columnIndex * KWLN_MAP_CELL_X_STEP;
     if (columnIndex > 0) {
         rowUnits = (KWLN_MAP_COLUMN_COUNT - columnIndex) * KWLN_MAP_COLUMN_UNITS;
@@ -776,11 +765,11 @@ void func_00104D40(void *packetList, s32 x, s32 y, SdfTexHead *block, u8 mode) {
     }
 }
 
-extern SdfTexHead *sdfGetTextureListHead(void);
+extern SdfTexResource *sdfGetTextureListHead(void);
 
 /* Draw the allocation-map border, then walk blocks through their prev links. */
 void kwlnDrawTextureListDiagnostic(void *packetList, s32 x, s32 y) {
-    SdfTexHead *block = sdfGetTextureListHead();
+    SdfTexResource *block = sdfGetTextureListHead();
 
     if (block != NULL) {
         sdfAppendPacket(packetList, (u32)func_0011F250(x - 0x20, y - 0x10,
@@ -944,8 +933,8 @@ extern u16 D_00435CCC;
 extern u16 D_00435CCE;
 extern void kwlnTextureReleaseHeldReference(void);
 extern void func_00105290(void);
-extern u32 sdfAllocImageBuffer(u32 width, u32 height, u32 mode);
-extern SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, s32 primary, s32 paletteFormat, s32 arg6, s32 secondary);
+extern SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
+extern SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 arg6, SdfTexResource *secondary);
 extern void sdfTexSetClampMode(SdfTex *texture, u8 value);
 extern void sdfTexCreateFirstPacket(SdfTex *texture);
 extern void sdfTexReleaseReference(SdfTex *texture);
