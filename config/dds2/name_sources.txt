@@ -1159,6 +1159,8 @@
 0x0016B170	effThunderSetVectorTint	inferred	queued
 0x0016B178	effThunderScaleVectorDimensions	inferred	queued
 0x0016B1A0	effThunderCellRestart	inferred	random counters, two unit vectors, two ranges (twin 0x164078) [names_M61_EffVu.tsv]
+0x0016B3D8	effThunderBuildVectorHistory	inferred	writes the vector variant's five-vector cell-history rows while rotating its placement around a perturbed axis
+0x0016B750	effThunderRotateVectorPlacementAndHistory	inferred	rotates the live XZ placement vector and each five-vector history row around the effect origin
 0x0016B928	effThunderUpdateVectorCells	inferred	confidence=high; matched-C; src/dds2/effect/effPCPThunder.c:182:func_0016B928; Peer-matched C proposal; P7; source=names_pending_main.tsv:141 [names_qp12_apply.tsv]
 0x0016BA68	effThunderWorkCreate	inferred	0x4C head copy, particle system, cells zeroed [names_M61_EffVu.tsv]
 0x0016BC28	effThunderReleaseIndexedVectorWork	inferred	queued
@@ -1166,6 +1168,8 @@
 0x0016BCA0	effThunderSetIndexedVectorTint	inferred	queued
 0x0016BCA8	effThunderScaleIndexedVectorDimensions	inferred	queued
 0x0016BCD0	effThunderRestartIndexedCell	inferred	Selects a cell by index and reinitializes its random parameters and direction vectors. [names_reviewed6.tsv]
+0x0016BF08	effThunderBuildIndexedVectorHistory	inferred	writes each indexed cell's kind-0 history as two-vector rows from its current placement, radius and axis
+0x0016C1F8	effThunderRotateIndexedPlacementAndHistory	inferred	rotates the live XZ placement direction and each two-vector history row around the effect origin
 0x0016C350	effThunderUpdateIndexedVectorCells	inferred	confidence=high; matched-C; src/dds2/effect/effPCPThunder.c:311:func_0016C350; Peer-matched C proposal; P7; source=names_pending_main.tsv:142 [names_qp12_apply.tsv]
 0x0016C490	effThunderSparkCreate	inferred	0xA4 head copy, one particle system per spark [names_M61_EffVu.tsv]
 0x0016C688	effThunderReleaseSparkWork	inferred	queued
@@ -4330,7 +4334,9 @@
 0x002A9640	mnuAppendCampSpriteRequests	inferred	appends /camp/spr/n_min/ and /camp/spr/n_sta/ resource requests (16+5+2 entries) selected by func_00303D70(list)==1 [names_M85_SplitCallers.tsv]
 0x002A9788	mnuReleaseTitleEffectSprites	inferred	releases three groups of sprite handles (16, 5, 2 entries) after func_002A9200 [names_M51_FieldMenu.tsv]
 0x002A9820	movAreTitleEffectsReady	inferred	Checks that all 2, 16, 5 and 2 movie title effect handle slots are populated.
+0x002A9908	mnuBuildCampTitleEffectResourceList	inferred	Builds the camp value record's sprite resource list from the selected party-owner directory and eight configured camp sprite entries.
 0x002A9A40	mnuReleaseTitleEffectResourceGroups	inferred	Destroys title effect sprites, fixed resource groups, additional groups, and final group. [names_reviewed19.tsv]
+0x002A9AB8	mnuInitializeCampMenuWhenResourcesReady	inferred	Reads the task's staff work state, waits for title-effect and handle readiness, then initializes the camp resource lists, scroll panel and panel resources once.
 0x002A9BC8	mnuDrawCampGridResourceSlot	inferred	Draws resolved grid slot selected from record resource fields. [names_reviewed21.tsv]
 0x002A9BF8	mnuCreateStaffResourceListWindow	inferred	Constructs a staff MenuWindowContainer, filters its entry table through optional model-flag IDs, and appends the surviving entries.
 0x002A9E00	mnuStaffInitResourceLists	inferred	DDS2-only symbol; game/code_0029BC58 uses mnu for the already-described staffInitResourceLists behavior.

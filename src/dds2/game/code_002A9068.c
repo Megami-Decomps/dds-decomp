@@ -34,7 +34,7 @@ extern s8 D_00437B73;
 
 extern void *memset(void *, s32, u32);
 
-extern s32 mnuHandleCampFieldSkillInput(s32);
+extern s32 mnuHandleCampFieldSkillInput(KwlnTask *);
 
 extern void func_002AB0E0();
 
@@ -57,7 +57,7 @@ extern void evtCreateMessageWindowIfMissing(s32);
 
 extern u8 D_003E5778[];
 
-extern void func_002A9908(u8 *);
+extern void mnuBuildCampTitleEffectResourceList(u8 *);
 
 extern void mnuResetGradientFadeColor(u8 *, s32);
 
@@ -566,7 +566,7 @@ s32 movAreTitleEffectsReady(s32 resourceListAddress, StaffSlots *resourceSlots) 
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A9068", func_002A9908);
+INCLUDE_ASM(const s32, "game/code_002A9068", mnuBuildCampTitleEffectResourceList);
 
 /* Title-effect work: sprite handle list at 0x60, then the resource slot sets. */
 typedef struct TitleEffectHandles {
@@ -580,7 +580,7 @@ typedef struct TitleEffectHandles {
 
 INCLUDE_ASM(const s32, "game/code_002A9068", mnuReleaseTitleEffectResourceGroups);
 
-INCLUDE_ASM(const s32, "game/code_002A9068", func_002A9AB8);
+INCLUDE_ASM(const s32, "game/code_002A9068", mnuInitializeCampMenuWhenResourcesReady);
 
 typedef struct StaffResourceHeader {
     u8 pad00[0x64];
@@ -732,7 +732,7 @@ u8 *mnuCreateStaffMenuWork(void) {
     mnuEnableCampBadgeFade(effectBytes);
     evtCreateMessageWindowIfMissing((s32)D_003E5778);
     movLoadTitleEffects(menuBytes);
-    func_002A9908(menuBytes);
+    mnuBuildCampTitleEffectResourceList(menuBytes);
     mnuResetGradientFadeColor(menuBytes + 0xAA50, 0x60);
     mnuBuildListSlotTableA((ListSlotWork *)menuBytes);
     mnuBuildListSlotTableB((ListSlotWork *)menuBytes);
@@ -770,8 +770,6 @@ u32 func_002AA278(KwlnTask *task) {
     return 0;
 }
 
-extern s32 func_002A9AB8(s32);
-
 extern s32 evtGetMessageWindowControlState(void);
 
 extern s32 func_002C6CE8(void);
@@ -784,11 +782,11 @@ extern void mnuPlayInputSound(s32, s32, u32 *);
 
 /* Mapped cancel input closes camp only through the full guard chain.
  * Return -1 on closure, otherwise 0; blocked nested guards use the alternate sound. */
-s32 mnuStaffCampCancelCheck(s32 menu) {
+s32 mnuStaffCampCancelCheck(KwlnTask *task) {
     u32 mappedButtons = mnuMapPadMaskToFlags(MNU_CAMP_CANCEL_MASK);
     s32 result;
 
-    if (func_002A9AB8(menu) == 0) {
+    if (mnuInitializeCampMenuWhenResourcesReady(task) == 0) {
         return 0;
     }
     result = 0;
@@ -1064,7 +1062,7 @@ void mnuDrawCampIconBackdropByKind(s32 kind, KwlnTask *task) {
         visual->highlightOpacity = 0;
         break;
     }
-    if (func_002A9AB8(task) != 0) {
+    if (mnuInitializeCampMenuWhenResourcesReady(task) != 0) {
         func_002BB510(-0x10, -8, 0, visual->modelHandle, 0x53);
         mnuDrawPanelListDefault(0, 0, 0, (MenuPageWindow *)(work + 0x284), 0x53);
         mnuDrawCampTitleCurrencyAndFade(0, 0, 0, visual->titleContext, work, 0x53);

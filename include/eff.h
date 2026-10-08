@@ -833,23 +833,36 @@ typedef char EffectSlotSetSizeCheck[sizeof(EffectSlotSet) == 0x30 ? 1 : -1];
 /* Particle cell shared by the DDS1/2 particle subroutines (0x14 bytes). */
 typedef struct ParCell {
     u128 *history;   /* 0x00 */
-    void *vertices;  /* 0x04 */
-    s32 vertexCount; /* 0x08: processed in groups of three */
-    s32 unk0C;       /* 0x0C cleared */
+    u32 *colors;     /* 0x04: packed per-history-vector colors */
+    s32 vertexCount; /* 0x08: active vectors in the topology-specific history */
+    s32 historyAdvanceCountdown; /* 0x0C: updates until the next history shift */
     u32 color;       /* 0x10 initialized to grey 0x80808080 */
 } ParCell;
 
+typedef char ParCell_size_must_be_0x14[(sizeof(ParCell) == 0x14) ? 1 : -1];
+typedef char ParCell_history_countdown_at_0x0C[
+    ((u32)&((ParCell *)0)->historyAdvanceCountdown == 0x0C) ? 1 : -1];
+
+/* Topology codes determine the vector rows allocated and submitted per cell. */
+typedef enum ParCellTopology {
+    PAR_CELL_TOPOLOGY_PAIR = 0,
+    PAR_CELL_TOPOLOGY_TRIANGLE = 1,
+    PAR_CELL_TOPOLOGY_SIX_VECTOR = 2,
+    PAR_CELL_TOPOLOGY_FOUR_VECTOR = 3,
+    PAR_CELL_TOPOLOGY_FIVE_VECTOR = 4,
+} ParCellTopology;
+
 /* The cell-system allocation ends with this complete 0x2C-byte owner. */
 typedef struct ParSystem {
-    u16 kind;            /* 0x00: topology selector */
+    u16 kind;            /* 0x00: ParCellTopology code; native integer storage */
     u16 bucket;          /* 0x02: packet submission bucket */
     s32 cellCount;       /* 0x04 */
     s32 vertexWordCount; /* 0x08 */
     s32 groupDivisor;   /* 0x0C: cell-system allocator input */
     struct SdfMemBlock *allocation; /* 0x10: geometry allocation descriptor */
     ParCell *cells;      /* 0x14 */
-    void *vertices;      /* 0x18 */
-    void *colors;        /* 0x1C */
+    u128 *vertices;      /* 0x18: backing vector history for all cells */
+    u32 *colors;         /* 0x1C: backing color stream for all cells */
     struct SdfAsset *asset; /* 0x20: submitted draw asset */
     struct ParSystem *next; /* 0x24: pending cell-system list */
     s32 unk28;           /* 0x28 */
