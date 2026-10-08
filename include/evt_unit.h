@@ -2,6 +2,7 @@
 #define EVT_UNIT_H
 
 #include "common.h"
+#include "eff_transform.h"
 
 struct MdlCtx;
 struct SdfTex;
@@ -40,20 +41,6 @@ typedef struct EvtTargetInfo {
 } EvtTargetInfo;
 
 typedef char EvtTargetInfoSizeCheck[sizeof(EvtTargetInfo) == 0x68 ? 1 : -1];
-
-/* Effect-vector data saved/restored during the motion dry run. Planar aim
- * passes orientation to the quaternion-to-matrix VU routine. */
-typedef struct EvtEffData {
-    u8 pad00[0x40];
-    f32 position[4];               /* 0x40 */
-    f32 orientation[4];            /* 0x50 */
-} EvtEffData;
-
-/* Target of the unit's vector updates, shared by planar aim and the manager. */
-typedef struct EvtEffObj {
-    u8 pad00[0x1C];
-    EvtEffData *data;              /* 0x1C */
-} EvtEffObj;
 
 typedef enum EvtUnitVectorSlotState {
     EVT_UNIT_VECTOR_SLOT_EMPTY = 0,
@@ -114,7 +101,7 @@ typedef struct EvtUnit {
     void *endpointWork;            /* 0x68: owned 0xE0 endpoint-work allocation */
     u32 value;                     /* 0x6C */
     f32 targetVector[4];           /* 0x70 */
-    EvtEffObj *effObj;             /* 0x80 */
+    EffWorldNode *effObj;          /* 0x80: kind-5 world node owning this motion work. */
     s32 currentTransitionValue;    /* 0x84 */
     s32 previousTransitionValue;   /* 0x88 */
     struct MdlCtx *owner;          /* 0x8C: model context and its SDK motion slots */
