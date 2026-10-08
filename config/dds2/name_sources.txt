@@ -5837,6 +5837,7 @@
 0x0032B1B0	sdfTexGetPrimaryBuffer	inferred	Byte-identical DDS1 counterpart: Returns the texture's primary buffer address.
 0x0032B1B8	sdfTexGetPrimaryBufferSize	inferred	Packed primary buffer count (+1), masked by 0x7FFF and converted to 16-byte units.
 0x0032B218	sdfTexGetSecondaryBufferSize	inferred	Same packed size calculation for the secondary texture buffer.
+0x0032B240	sdfTexGetPaletteCount	inferred	Returns SdfTex.paletteCount; the paired native palette allocator uses this byte as its palette-count input.
 0x0032B2C0	sdfTexFormatSizeHint	inferred	readability/matching review (QP16)
 0x0032B318	sdfTexGetPrimaryTextureState	inferred	confidence=high; matched-C; src/dds2/game/code_00329F60.c:512:func_0032B318; Returns the primary texture buffer textureState packed u64 without modification.; source=fresh-R_Names31 [names_qp11.tsv]
 0x0032B328	sdfTexGetPrimarySamplingState	inferred	confidence=high; matched-C; src/dds2/game/code_00329F60.c:516:func_0032B328; Returns primary-buffer samplingState; neighboring mode setter updates this word with GS mag/min filtering bits.; source=fresh-R_Names31 [names_qp11.tsv]

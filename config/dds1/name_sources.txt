@@ -6118,6 +6118,7 @@
 0x002D2308	sdfTexGetPrimaryBufferSize	inferred	Packed primary buffer count (+1), masked by 0x7FFF and converted to 16-byte units.
 0x002D2330	sdfTexGetOrInitializeSecondaryBuffer	inferred	Returns the texture's secondary buffer, initializing it when the pointer is null.
 0x002D2368	sdfTexGetSecondaryBufferSize	inferred	Same packed size calculation for the secondary texture buffer.
+0x002D2390	sdfTexGetPaletteCount	inferred	Returns SdfTex.paletteCount; the paired native palette allocator uses this byte as its palette-count input.
 0x002D2398	sdfTexGetSecondaryResourceWord	inferred	Returns the secondary resource's word at offset 0xC, or zero when absent.
 0x002D23B0	sdfTexGetPrimaryResourceWord	inferred	Returns the primary resource's word at offset 0xC.
 0x002D23C0	sdfFormatBitsPerPixelC	inferred	same format switch, default 4; DDS2 twin 0032B270 [names_M40_SmallSweep8.tsv]
