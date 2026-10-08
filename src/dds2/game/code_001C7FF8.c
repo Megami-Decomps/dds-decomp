@@ -1233,12 +1233,179 @@ void func_001CE5C8(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001CE838);
+extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
+
+void func_001CE838(void) {
+    u32 overlays[2] = {0x0000FF00, 0xFF000000};
+    u32 colors[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
+    s32 bank;
+    s32 last;
+    s32 channel;
+    s32 fade;
+
+    bank = D_00438F54->bank;
+    if (D_00438F54->enabled[bank] <= 0) {
+        return;
+    }
+    last = D_00438F54->currentIndex - 1;
+    if (last >= 0) {
+        /* Solid background strips use the live fade again after color lookup. */
+        if (last == 1 || last == 2) {
+            for (channel = 0; channel < 4; channel++) {
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 16, channel,
+                D_00438F54->fade[2][bank]);
+                if (D_00438F54->fade[2][bank] > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_00306C28(425 << 4, 21 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 16, 0x53);
+        }
+        if (last >= 2) {
+            for (channel = 0; channel < 4; channel++) {
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 17, channel,
+                D_00438F54->fade[3][bank]);
+                if (D_00438F54->fade[3][bank] > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_00306C28(392 << 4, 33 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 17, 0x53);
+        }
+        if (last >= 3) {
+            for (channel = 0; channel < 4; channel++) {
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 18, channel,
+                D_00438F54->fade[4][bank]);
+                if (D_00438F54->fade[4][bank] > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_00306C28(425 << 4, 21 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 18, 0x53);
+            for (channel = 0; channel < 4; channel++) {
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 19, channel,
+                D_00438F54->fade[4][bank]);
+                if (D_00438F54->fade[4][bank] > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_00306C28(349 << 4, 21 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 19, 0x53);
+        }
+        if (last >= 4) {
+            for (channel = 0; channel < 4; channel++) {
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 20, channel,
+                D_00438F54->fade[5][bank]);
+                if (D_00438F54->fade[5][bank] > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_00306C28(298 << 4, 21 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 20, 0x53);
+        }
+        if (last >= 7) {
+            for (channel = 0; channel < 4; channel++) {
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 17, channel,
+                D_00438F54->fade[8][bank]);
+                if (D_00438F54->fade[8][bank] > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_00306C28(206 << 4, 33 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 17, 0x53);
+        }
+
+    }
+
+    if (last >= 0) {
+        /* Foreground connectors retain the selected corner fade across lookup. */
+        for (channel = 0; channel < 4; channel++) {
+            if (channel == 0 || channel == 2) {
+                fade = D_00438F54->fade[1][bank];
+            } else {
+                fade = D_00438F54->fade[0][bank];
+            }
+            colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 10, channel, fade);
+            if (fade > 128) {
+                colors[channel] |= overlays[bank];
+            }
+        }
+        func_00306C28(440 << 4, 6 << 3, 0, colors, 0,
+        btlResourceBlock->resC, 10, 0x53);
+        if (last >= 3) {
+            for (channel = 0; channel < 4; channel++) {
+                if (channel == 0 || channel == 2) {
+                    fade = D_00438F54->fade[4][bank];
+                } else {
+                    fade = D_00438F54->fade[3][bank];
+                }
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 11, channel, fade);
+                if (fade > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_00306C28(395 << 4, 21 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 11, 0x53);
+            for (channel = 0; channel < 4; channel++) {
+                if (channel == 0 || channel == 2) {
+                    fade = D_00438F54->fade[4][bank];
+                } else {
+                    fade = D_00438F54->fade[3][bank];
+                }
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 12, channel, fade);
+                if (fade > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_00306C28(362 << 4, 21 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 12, 0x53);
+        }
+        if (last == 5) {
+            for (channel = 0; channel < 4; channel++) {
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 13, channel,
+                D_00438F54->fade[6][bank]);
+                if (D_00438F54->fade[6][bank] > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_00306C28(302 << 4, 46 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 13, 0x53);
+        }
+        if (last >= 6) {
+            for (channel = 0; channel < 4; channel++) {
+                if (channel == 0 || channel == 2) {
+                    fade = D_00438F54->fade[7][bank];
+                } else {
+                    fade = D_00438F54->fade[6][bank];
+                }
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 14, channel, fade);
+                if (fade > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_00306C28(302 << 4, 48 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 14, 0x53);
+            for (channel = 0; channel < 4; channel++) {
+                if (channel == 0 || channel == 2) {
+                    fade = D_00438F54->fade[7][bank];
+                } else {
+                    fade = D_00438F54->fade[6][bank];
+                }
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 15, channel, fade);
+                if (fade > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_00306C28(269 << 4, 48 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 15, 0x53);
+        }
+    }
+}
+
 
 extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
 extern const s32 D_00416FA0[10][3];
 
-INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_00416EF8);
 
 void func_001CF0B0(void) {
     u32 overlays[4] = {0x0000FF00, 0xFF000000, 0x8080FF00, 0xFF808000};
@@ -1482,7 +1649,6 @@ INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436898);
 
 INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004368A0);
 
-INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004368A8);
 
 INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_004368B0);
 
