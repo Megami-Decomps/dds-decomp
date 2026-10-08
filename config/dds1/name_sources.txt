@@ -6689,7 +6689,11 @@
 0x002EBEB8	sdfSoundStartIpuInputDma	inferred	Fam_Mid3
 0x002EBF88	sdfSoundQueueIpuBuffer	inferred	Writes the selected buffer address size and start command to IPU MMIO registers
 0x002EBFF0	sdfSoundSyncIpu	inferred	writes IPU command MMIO then synchronizes sceIpuSync
+0x002EC060	sdfStartStreamNodeIpuTransfer	inferred	Native setup consumes the stream node, installs it as the active IPU transfer, and starts input DMA.
+0x002EC230	sdfDispatchNextStreamNode	inferred	Scans queued stream nodes, selects an eligible node, unlinks it, and starts its IPU transfer.
 0x002EC2F0	sdfIpuDmaCompletionWorker	inferred	confidence=high; src/dds1/game/code_002E9708.c:func_002EC2F0; Waits for IPU worker wakeups, stops DMA, updates completion/loop state, requeues unfinished work with interrupt protection, and resumes processing. [names_qp9.tsv]
+0x002EC3C0	sdfWakeIpuCompletionWorker	inferred	Type-3 handler wakes the IPU completion worker and reenables interrupts.
+0x002EC3F0	sdfCompleteIpuInputFeedDma	inferred	Type-4 handler consumes the input-DMA callback node, advances/refills feed slots, and restarts input DMA.
 0x002EC488	sdfMidiPreviousEntry	inferred	reads the prior entry slot while channel enabled
 0x002EC4B0	sndGetSelectedChannelEntry	inferred	snd sound tasks and playback in game/code_002E9708.c
 0x002EC4D8	sdfAdvanceBufferedPlayback	inferred	Consumes a pending buffer, flips its buffer index and advances the looping playback counter.
