@@ -1544,3 +1544,4 @@ INCLUDE_SDATA(const s32, "game/code_00196478", itfFontTestScriptTask);
 INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB198);
 
 INCLUDE_SDATA(const s32, "game/code_00196478", D_003BB1A0);
+
