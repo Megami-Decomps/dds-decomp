@@ -7,6 +7,18 @@ struct EffectSlotSet;
 struct EffMappedResource;
 struct EffTimedState;
 
+/* EffTimedState.flags bits used by phase initialization and endpoint handling. */
+enum EffTimedStateFlag {
+    /* Selects incrementing from zero instead of decrementing from the endpoint. */
+    EFF_TIMED_STATE_DIRECTION_FORWARD = 0x1,
+    /* Initialize the phase when a resource is bound to the state. */
+    EFF_TIMED_STATE_INITIALIZE_PHASE_ON_BIND = 0x2,
+    /* At either endpoint, restart the work or reverse direction when ping-pong is set. */
+    EFF_TIMED_STATE_RESTART_AT_ENDPOINT = 0x4,
+    /* With restart-at-endpoint set, switch between forward and reverse. */
+    EFF_TIMED_STATE_PING_PONG = 0x8,
+};
+
 u32 effSetSlotIndexedResource(struct EffTimedState *target,
                               struct EffMappedResource *resources, s32 item,
                               u32 flags);
