@@ -9,6 +9,7 @@
 #include "file.h"
 #include "sdf_dev_state.h"
 #include "file_slot.h"
+#include "file_save_record.h"
 #include "dat_state.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
@@ -92,23 +93,7 @@ extern s32 mnuSelectFileBranch(void);
 
 
 
-/* Compact metadata copied from the beginning of each save blob. */
-typedef struct FileSlotPreview {
-    char signature[3];
-    s8 version;
-    s8 mapGroup;
-    s8 mapIndex;
-    u8 pad06[2];
-    s32 playTicks;
-    s16 status;
-    s16 newCycle;
-    s8 party[8];
-    s8 levels[8];
-    u32 money;
-    u32 modelFlags[3];
-} FileSlotPreview;
-
-extern FileSlotPreview D_003DC800[];
+extern FileSavePreviewRecord D_003DC800[];
 
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_003BC880;
@@ -203,7 +188,7 @@ extern s32 fileBuildMainBlobAfterDelete(void);
 
 extern s32 fileSaveFileDescriptor;
 
-extern u32 fileSaveReadBufferResource;
+extern struct SdfMemBlock *fileSaveReadBufferResource;
 
 
 extern void mcCloseOpenFile(s32);
@@ -976,8 +961,8 @@ s32 fileReadSlotPreviewBegin(void) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
-        fileSaveReadBufferResource = (u32)sdfAllocGeneralBlock(0x30);
-        fileSaveReadBuffer = sdfResourceRetainAddress((struct SdfMemBlock *)(fileSaveReadBufferResource));
+        fileSaveReadBufferResource = sdfAllocGeneralBlock(0x30);
+        fileSaveReadBuffer = sdfResourceRetainAddress(fileSaveReadBufferResource);
         mcReadOpenFile(fileSaveFileDescriptor, fileSaveReadBuffer, 0x30);
         return (s32)fileReadSlotPreviewWait;
     }
@@ -993,7 +978,7 @@ s32 fileReadSlotPreviewWait(void) {
         mcCloseOpenFile(fileSaveFileDescriptor);
         return (s32)fileStoreSlotHeader;
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
     return fileBeginSlotMetadataRefresh();
 }
 
@@ -1005,10 +990,10 @@ s32 fileStoreSlotHeader(void) {
     }
     if (status == MC_POLL_SUCCESS) {
         memcpy(&D_003DC800[fileSlotScanIndex], (void *)fileSaveReadBuffer, 0x30);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+        sdfReleaseResourceAllocation(fileSaveReadBufferResource);
         return fileAdvanceSlotScan();
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
     return fileBeginSlotMetadataRefresh();
 }
 
@@ -2118,9 +2103,9 @@ s32 fileBuildMainBlobAndWrite(void) {
     memcpy(D_003DC800[slot].party, datGameState->header.partyIds, 8);
     memcpy(D_003DC800[slot].levels, datGameState->header.partyLevels, 8);
     D_003DC800[slot].money = datGameState->header.unk20;
-    D_003DC800[slot].modelFlags[0] = datGameState->header.unk24;
-    D_003DC800[slot].modelFlags[1] = datGameState->header.unk28;
-    D_003DC800[slot].modelFlags[2] = datGameState->header.unk2C;
+    D_003DC800[slot].stateWords[0] = datGameState->header.unk24;
+    D_003DC800[slot].stateWords[1] = datGameState->header.unk28;
+    D_003DC800[slot].stateWords[2] = datGameState->header.unk2C;
     D_003BD8F4 = (u32)datGameState;
     D_003BD8F8 = 0x33600;
     if (D_003BC820 == 0 || D_003BC820 == 2) {
@@ -2276,8 +2261,8 @@ s32 fileLoadMainBlobBegin(void) {
         return 0;
     }
     size = fileMainBlobSize();
-    fileSaveReadBufferResource = (u32)sdfAllocGeneralBlock(size);
-    fileSaveReadBuffer = sdfResourceRetainAddress((struct SdfMemBlock *)(fileSaveReadBufferResource));
+    fileSaveReadBufferResource = sdfAllocGeneralBlock(size);
+    fileSaveReadBuffer = sdfResourceRetainAddress(fileSaveReadBufferResource);
     if (status == MC_POLL_SUCCESS) {
         mcReadOpenFile(fileSaveFileDescriptor, fileSaveReadBuffer, size);
         return (s32)mcHandleSetupResult;
@@ -2296,7 +2281,7 @@ s32 mcHandleSetupResult(void) {
         mcCloseOpenFile(fileSaveFileDescriptor);
         return (s32)mcdHandleSaveSetupDone;
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
     fileSetMenuFlowState(0);
     D_003BC854 = 3;
     return (s32)fileAbortSlotScanOnInput;
@@ -2314,7 +2299,7 @@ s32 mcdHandleSaveSetupDone(void) {
     }
     if (status == MC_POLL_SUCCESS) {
         fileReloadSaveBuffer();
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+        sdfReleaseResourceAllocation(fileSaveReadBufferResource);
         D_003BC7ED = 1;
         fileDestroyMenuTask();
         if (fileLoadStateChanged() == 0) {
@@ -2325,7 +2310,7 @@ s32 mcdHandleSaveSetupDone(void) {
         fileSetMenuFlowState(13);
         return fileSetMenuCallbackAndClearResult(-1);
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
+    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
     fileSetMenuFlowState(0);
     D_003BC854 = 3;
     return (s32)fileAbortSlotScanOnInput;
@@ -2493,7 +2478,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
     s32 hours;
     s32 minutes;
     s32 seconds;
-    FileSlotPreview *preview;
+    FileSavePreviewRecord *preview;
     f32 targetY;
     f32 delta;
     f32 wave;
