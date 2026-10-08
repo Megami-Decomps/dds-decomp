@@ -2344,11 +2344,15 @@
 0x00192CC8	effCreatePrimitiveCurve	inferred	Fam_Mid3
 0x00192DE0	effFreeBuffers	inferred	frees +0x4 buffer if +0x14 word set, then frees +0x0
 0x00192E30	effAdvancePrimCursor	inferred	steps channel-B idx/pos via helper, wraps at 1.0, resets at count
+0x00192ED0	effSamplePrimitiveCurveVertex	inferred	Evaluates packed XYZ primitive-curve coefficients or adjacent linear keys into the output vertex; cubic interpolation also writes homogeneous W=1.
 0x00193000	effSamplePrimitiveCurve	inferred	confidence=high; matched-C; src/dds1/game/code_00192488.c:337:func_00193000; Evaluates precomputed cubic xyz coefficients in Horner order or interpolates neighboring linear xyz keys by mode; leaves the sampled input vector in vf10. Linear-path W behavior is left unchanged.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00193130	effResetPrimitiveRecordCursor	inferred	confidence=high; matched-C; src/dds1/game/code_00192488.c:364:func_00193130; requires-symbol-registration; Resets the primitive curve cursor index and interpolation position.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x00193140	effSetPrimitiveRecordCursorStep	inferred	confidence=high; matched-C; src/dds1/game/code_00192488.c:369:func_00193140; requires-symbol-registration; Sets the primitive curve cursor increment.; source=reviewed-prior-QP15 [names_qp15.tsv]
-0x00193148	effBuildAndDispatch	inferred	allocs/inits work buffer via func_001931E0 then runs func_001934E8/001935B8 by flag
+0x00193148	effBuildAndDispatch	inferred	Allocates temporary coordinate-major tangents, selects standard or equal-component-flattening coefficient construction, then releases the temporary allocation.
+0x001931E0	effBuildPrimitiveCurveTangents	inferred	Reads borrowed interleaved XYZ keys and solves one cubic tangent system per coordinate into three coordinate-major float arrays.
 0x00193368	effSolveCubicTangents	inferred	U2
+0x001934E8	effBuildPrimitiveCurveCoefficients	inferred	Builds cubic, quadratic and linear Hermite power-basis XYZ coefficient banks from interleaved keys and coordinate-major tangents.
+0x001935B8	effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents	inferred	Builds the same Hermite coefficient banks but zeroes all three coefficients for each component whose adjacent endpoint values are exactly equal.
 0x001936A8	effCreateChannel	inferred	allocates and inits 0x18 channel object, NULL when count < 4
 0x00193720	effReleaseInterpolationChannel	inferred	src/dds1/game/code_00192488.c func_00193720: If channel pointer exists, releases allocation handle stored in its first word. [names_reviewed24.tsv]
 0x00193740	effAdvanceChanCursor	inferred	steps channel-A idx/pos (+3) via helper, wraps at 1.0, resets at count
@@ -4854,6 +4858,7 @@
 0x0027C770	mnuRetreatWindowListSelection	inferred	Adapts window container to its list and retreats selection by default direction. [names_reviewed18.tsv]
 0x0027CCD0	mnuDrawWindowSelectionPanel	inferred	Draws visible panel at scrolled row and advances window transition. [names_reviewed5.tsv]
 0x0027CDD0	mnuDrawWindowContainer	inferred	Draws icon rows, selected panel and window frame then advances fade state. [names_reviewed5.tsv]
+0x0027CF28	mnuInitializeWindowSpriteGroup	inferred	Initializes all seven sprite slots, sets their grid entries, and refreshes paired corner colors for the window sprite group.
 0x0027D148	mnuCreateWindowState	inferred	Allocates 0x28-byte object, zeroes it, stores handle and initializes with four args.
 0x0027D1E8	mnuReleaseWindowTextures	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027D248	mnuConfigureWindowSpriteSlots	inferred	Applies configuration for six of the seven MenuWindowSpriteGroup sprite slots.
