@@ -83,14 +83,41 @@ extern u32 itfFontTestScriptTask;
 
 extern s64 kwlnTaskGetRegisteredState(u32);
 
-/* Byte stream read by func_00196478/func_001964A0: base at +0x10, position at +0x18. */
-typedef struct TextSub {
-    u8 pad00[0x30];
-    s32 unk30;
-    s32 unk34;
-    s32 unk38;
-    s32 unk3C;
-} TextSub;
+/* Complete 0x44-byte glyph nodes from the font parent pool. */
+struct FrFontGlyph {
+    union {
+        s16 h;                        /* 0x0: halfword view */
+        struct { s8 b0; s8 b1; } b;   /* 0x0: byte views */
+    } u0;
+    u16 unk2;         /* 0x2 */
+    s32 x;            /* 0x4: horizontal position */
+    s32 y;            /* 0x8: vertical position */
+    s32 advance;      /* 0xC: advance shifted by four when linking glyphs */
+    union {
+        u32 word;     /* 0x10: word view */
+        u16 half[2];  /* 0x10: halfword views */
+        u8 byte[4];   /* 0x10: byte views */
+    } u10;
+    union {
+        u32 w;        /* 0x14: word view */
+        u8 b[4];      /* 0x14: byte views */
+    } u14;
+    union {
+        u32 w;            /* 0x18: word view */
+        u8 b[4];          /* 0x18: byte views */
+    } unk18;
+    struct FrFontGlyph *firstChild; /* 0x1C: child glyph chain */
+    struct FrFontGlyph *unk20; /* 0x20 */
+    struct FrFontGlyph *previous; /* 0x24: back-link in the glyph chain */
+    struct FrFontGlyph *next; /* 0x28: next glyph in chain */
+    struct FrFontGlyph *chainHead; /* 0x2C: first glyph in the linked chain */
+    u32 unk30;        /* 0x30 */
+    u32 unk34;        /* 0x34 */
+    u32 unk38;        /* 0x38 */
+    s32 unk3C;        /* 0x3C */
+    s32 unk40;        /* 0x40 */
+};
+typedef FrFontGlyph TextSub;
 
 typedef struct TextStream {
     s32 x;           /* 0x0 */
@@ -224,7 +251,133 @@ u32 itfReadEncodedCode(TextStream *stream) {
     return (second << 8) | first;
 }
 
-INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E1B8);
+extern void frFontCheckPendingGlyphState(FrFontCtx *);
+extern void frFontAdvanceContextCursor(FrFontCtx *);
+extern void func_0019DEE0(u8, TextStream *);
+extern u8 frFontSharedGlyphFlags;
+extern void mnuSetTitleVoicePrefixIndex(s32);
+extern void mnuPlayTitleVoiceFile(char *);
+extern s32 mnuGetTitleEffectFrameCounter(void);
+/* Non-GP data import; the native parser consumes its first sequence word. */
+extern s32 D_003B2F28[];
+extern s32 D_0043656C;
+extern void sndSetSequenceVolumePan(s32, s32, s32);
+
+s32 func_0019E1B8(s32 code, TextStream *stream) {
+    s32 *position = &stream->offset;
+    u8 *bytes = stream->bytes;
+    s32 payloadWords = code & 0xF;
+    s32 payloadPosition = *position;
+
+    code = (code << 8) | bytes[payloadPosition++];
+    *position = payloadPosition;
+    switch (code) {
+    case 0xF206:
+        stream->channel0 = bytes[payloadPosition] - 1;
+        *position = payloadPosition + 2;
+        break;
+    case 0xF202:
+        stream->channel1 = bytes[payloadPosition] - 1;
+        *position = payloadPosition + 2;
+        break;
+    case 0xF209:
+        stream->channel2 = bytes[payloadPosition] - 1;
+        *position = payloadPosition + 2;
+        break;
+    case 0xF207:
+        stream->channel3 = bytes[payloadPosition] - 1;
+        *position = payloadPosition + 2;
+        break;
+    case 0xF203:
+        if (D_004528C0[bytes[*position] - 1] != 0) {
+            frFontCheckPendingGlyphState((FrFontCtx *)stream);
+            func_0019DEE0((u8)(stream->bytes[*position] - 1), stream);
+        }
+        *position += 2;
+        break;
+    case 0xF20E:
+        *position = payloadPosition + 1;
+        break;
+    case 0xF10F:
+        if (!(frFontSharedGlyphFlags & 4)) {
+            goto advanceLine;
+        }
+        break;
+    case 0xF110:
+        D_0043654C |= 2;
+        return 1;
+    case 0xF111:
+        if (!(frFontSharedGlyphFlags & 8)) {
+            goto checkAutomaticLine;
+        }
+        /* This flagged form requests the same stop as opcode F104. */
+    case 0xF104:
+        D_0043654C |= 1;
+        return 1;
+
+checkAutomaticLine:
+        if (!(frFontSharedGlyphFlags & 0x20)) {
+            break;
+        }
+advanceLine:
+        frFontAdvanceContextCursor((FrFontCtx *)stream);
+        break;
+    case 0xF112:
+        D_0043654C |= 4;
+        break;
+    case 0xF413:
+        mnuSetTitleVoicePrefixIndex(itfReadEncodedTextLead(stream));
+        mnuPlayTitleVoiceFile((char *)itfReadEncodedCode(stream));
+        break;
+    case 0xF214:
+        if (stream->sub->unk34 != 0) {
+            stream->sub->unk38 = 1;
+        }
+        stream->sub->unk30 = code;
+        stream->sub->unk3C = itfReadEncodedCode(stream);
+        break;
+    case 0xF215:
+        if (stream->sub->unk34 != 0) {
+            stream->sub->unk38 = 1;
+        }
+        stream->sub->unk30 = code;
+        stream->sub->unk3C = itfReadEncodedCode(stream);
+        if (stream->sub->unk3C != 0xFFFF) {
+            s32 frame = mnuGetTitleEffectFrameCounter();
+            stream->sub->unk3C -= frame;
+        }
+        if (stream->sub->unk3C < 0) {
+            stream->sub->unk3C = 0;
+        }
+        break;
+    case 0xF416:
+        D_0043655C = itfReadEncodedTextLead(stream);
+        D_00436560 = itfReadEncodedTextLead(stream);
+        D_0043654C |= 8;
+        break;
+    case 0xF117:
+        stream->sub->unk34 = code;
+        break;
+    case 0xF218:
+        if (itfReadEncodedTextLead(stream) == 0) {
+            D_0043656C = 20;
+            sndSetSequenceVolumePan(D_003B2F28[0], 0x7F, 0x3F);
+        }
+        break;
+    case 0xF20A:
+    case 0xF20B:
+    case 0xF20C:
+    case 0xF20D:
+        break;
+    default:
+        stream->offset += (payloadWords - 1) << 1;
+        break;
+    }
+    if (stream->unk1C == 0) {
+        stream->unk1C = 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019E5D8);
 

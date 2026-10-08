@@ -583,18 +583,6 @@ typedef struct BtlFadeArgs {
     u32 color;
 } BtlFadeArgs;
 
-typedef struct BtlEffObjInner {
-    u8 pad00[0x60];
-    f32 vec60[4];
-    u8 pad70[0x50];
-    u32 flagsC0;
-} BtlEffObjInner;
-
-typedef struct BtlEffObj {
-    u8 pad00[0x1C];
-    BtlEffObjInner *inner;
-} BtlEffObj;
-
 typedef struct BtlCameraResetWork {
     u8 pad_000[0x174];
     s32 activeUnitId;
@@ -6342,15 +6330,15 @@ extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 extern void mdlSetAmountOnAllContextResources(MdlCtx *, f32);
 
 void btlApplyUnitEffectScale(BtlUnit *unit) {
-    BtlEffObjInner *inner;
+    ObjectTransform *inner;
     if (unit->flags & 2) {
         btlInitializeEffectVectorsFromSourceRecords(unit, unit->resourceKind, unit->species);
         VU0_SET_ONES_XYZ(vf10);
         VU0_SCALAR_OP(unit->effectScale, "vmulx.xyzw vf10, vf10, vf2x");
-        inner = ((BtlEffObj *)unit->effectObject)->inner;
-        inner->flagsC0 |= 1;
-        inner->flagsC0 &= ~2;
-        VU0_STORE_VF(vf10, inner->vec60);
+        inner = unit->effectObject->inner;
+        inner->flags |= OBJECT_TRANSFORM_FLAG_UPDATE_PENDING;
+        inner->flags &= ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
+        VU0_STORE_VF(vf10, inner->scale);
         mdlStoreTertiaryVectorVU(unit->ext->owner);
         mdlSetAmountOnAllContextResources(unit->ext->owner, unit->effectScale);
         btlSetUnitPosition((u8 *)unit, (u8 *)unit->currentPosition);

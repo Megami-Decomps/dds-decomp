@@ -12,7 +12,7 @@
 extern EvtUnitVectorSlot D_003D7BD8[7];
 
 
-extern void func_002E1938(void *, SdfLightSources, f32 *);
+extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 typedef struct {
     u8 pad00[0x10];     /* 0x00 */
@@ -39,14 +39,9 @@ extern u32 evtWindowMotionUnit;
 extern s32 D_003BBDB0;
 
 /* Event lip-sync registry: world -> root -> list -> unit links. */
-typedef struct EvtLipsModel {
-    u8 pad00[0x18];
-    void *chunk;        /* 0x18 */
-} EvtLipsModel;
-
 typedef struct EvtLipsMh {
     u8 pad00[0x0C];
-    EvtLipsModel *model; /* 0x0C */
+    MdlCtx *model;      /* 0x0C */
 } EvtLipsMh;
 
 typedef struct EvtLipsLink {
@@ -54,14 +49,6 @@ typedef struct EvtLipsLink {
     void *unit;         /* 0x08 */
     EvtLipsMh *mh;      /* 0x0C */
 } EvtLipsLink;
-
-typedef struct EvtLipsNode {
-    u8 pad00[0x18];
-    EvtLipsLink *link;  /* 0x18 */
-    u8 pad1C[0x04];
-    struct EvtLipsNode *next; /* 0x20 */
-} EvtLipsNode;
-
 
 extern u32 sdfGetUniqueChunkValue();
 
@@ -116,26 +103,6 @@ typedef struct EvtModelHeader {
     f32 positionZ;      /* 0x18 */
 } EvtModelHeader;
 
-typedef struct EvtModelParams {
-    u8 pad00[0x40];
-    f32 positionX;      /* 0x40: script-supplied translation */
-    f32 positionY;      /* 0x44 */
-    f32 positionZ;      /* 0x48 */
-    u8 pad4C[0x04];
-    f32 rotationX;      /* 0x50: copied from the source's second vector */
-    f32 rotationY;      /* 0x54 */
-    f32 rotationZ;      /* 0x58 */
-    f32 rotationW;      /* 0x5C */
-    u8 pad60[0x60];
-    u32 flagsC0;        /* 0xC0 */
-} EvtModelParams;
-
-typedef struct EvtModelObj {
-    u8 pad00[0x18];
-    EvtModelHeader *header; /* 0x18 */
-    EvtModelParams *params; /* 0x1C */
-} EvtModelObj;
-
 typedef struct EvtSourceVec {
     f32 positionX;      /* 0x00: copied into model position */
     f32 positionY;      /* 0x04 */
@@ -147,10 +114,6 @@ typedef struct EvtSourceVec {
     f32 rotationW;      /* 0x1C */
 } EvtSourceVec;
 
-typedef struct EvtSourceObj {
-    u8 pad00[0x18];
-    EvtSourceVec *vec;  /* 0x18 */
-} EvtSourceObj;
 extern char D_003AC588[];
 extern u8 D_003AC2A0[];
 extern u8 D_003AC550[];
@@ -177,11 +140,6 @@ typedef struct EvtLodModel {
     EvtLodWork *workbase; /* 0x0C */
 } EvtLodModel;
 
-typedef struct EvtLodUnit {
-    u8 pad00[0x18];
-    EvtLodModel *model;   /* 0x18 */
-} EvtLodUnit;
-
 extern s32 sdfGetLodChunkValue();
 extern s32 scrGetWindow(void);
 extern void itfMesSetWindowCallbackAddress(s32 window, void (*callback)(void));
@@ -199,11 +157,6 @@ extern void evtConfigureUnitTransition(EvtUnit *unit, s32 arg1);
 extern void evtEndUnitValueTransition(EvtUnit *unit, s32 arg1);
 extern void evtActivateStoredUnitMotionSlot(u32 arg0);
 
-typedef struct EvtWorldUnitRef {
-    u8 pad00[0x18];
-    s128 *transform; /* 0x18: first aligned vector */
-} EvtWorldUnitRef;
-
 void evtBeginVectorTransition(EvtUnit *work, s128 *vector, s32 frames) {
     if (frames > 0 && frames <= 100) {
         work->linkedUnit = NULL;
@@ -217,11 +170,11 @@ void evtBeginVectorTransition(EvtUnit *work, s128 *vector, s32 frames) {
 }
 
 void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
-    EvtWorldUnitRef *worldUnit;
+    EffWorldNode *worldUnit;
 
     worldUnit = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (worldUnit != NULL) {
-        evtBeginVectorTransition(work, worldUnit->transform + 1, frames);
+        evtBeginVectorTransition(work, (s128 *)worldUnit->data + 1, frames);
         work->linkedUnit = worldUnit;
     }
 }
@@ -239,11 +192,11 @@ void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unu
 }
 
 void evtBeginUnitTransitionTowardWorldObject(EvtUnit *work, s32 mode, s32 objectId, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast) {
-    EvtWorldUnitRef *worldUnit;
+    EffWorldNode *worldUnit;
 
     worldUnit = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (worldUnit != NULL) {
-        evtBeginUnitVectorTransition(work, mode, worldUnit->transform, unused, frames, valueB6, value94, unusedLast);
+        evtBeginUnitVectorTransition(work, mode, (s128 *)worldUnit->data, unused, frames, valueB6, value94, unusedLast);
         work->transitionSourceKind = 1;
         work->linkedUnit = worldUnit;
     }
@@ -435,7 +388,7 @@ void evtApplyMatchingUnitSlotEndpoints(EvtUnit *unit) {
             color[i] = 1.0f;
         }
     }
-    func_002E1938(unit->endpointWork, desc, color);
+    sdfBuildLightingPacket(unit->endpointWork, desc, color);
     unit->value = (u32)unit->endpointWork;
 }
 
@@ -615,7 +568,8 @@ u32 evtOpClearWorldObjectPendingValue(void) {
 u32 evtOpModelLodChg(void) {
     s32 lod;
     void *world;
-    EvtLodUnit *unit;
+    EffWorldNode *unit;
+    EvtLodModel *model;
     EvtLodRoot *root;
     s32 max;
 
@@ -627,15 +581,16 @@ u32 evtOpModelLodChg(void) {
         func_003003F0("warning!! MODEL_LOD_CHG(int,int) unit pointer null\n");
         return 1;
     }
-    if (unit->model->workbase == NULL) {
+    model = unit->data;
+    if (model->workbase == NULL) {
         func_003003F0("warning!! MODEL_LOD_CHG(int,int) workbase pointer null\n");
         return 1;
     }
-    if (unit->model->workbase->mh == NULL) {
+    if (model->workbase->mh == NULL) {
         func_003003F0("warning!! MODEL_LOD_CHG(int,int) mh pointer null\n");
         return 1;
     }
-    root = unit->model->workbase->mh->root;
+    root = model->workbase->mh->root;
     if (root == NULL) {
         func_003003F0("warning!! MODEL_LOD_CHG(int,int) root pointer null\n");
         return 1;
@@ -777,16 +732,16 @@ INCLUDE_RODATA(const s32, "game/code_00222AC0", D_003AC2A0);
 
 void evtLipsExecFunction(s32 id, s32 motion) {
     void *unit = NULL;
-    EvtLipsModel *model = NULL;
-    EvtLipsNode *node;
+    MdlCtx *model = NULL;
+    EffWorldNode *node;
 
     if (id == 0) {
         return;
     }
     for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
-        model = node->link->mh->model;
-        if (sdfGetUniqueChunkValue(model->chunk) == id) {
-            unit = node->link->unit;
+        model = ((EvtLipsLink *)node->data)->mh->model;
+        if (sdfGetUniqueChunkValue(model->inner) == id) {
+            unit = ((EvtLipsLink *)node->data)->unit;
             break;
         }
     }
@@ -794,7 +749,7 @@ void evtLipsExecFunction(s32 id, s32 motion) {
         func_003003F0("warning: call evtLipsExecFunction() but not find now reegisted unit same UnitUniqID\n");
         return;
     }
-    if (motion >= mdlGetNodeRefHalf((MdlCtx *)model, 2)) {
+    if (motion >= mdlGetNodeRefHalf(model, 2)) {
         func_003003F0("warning: call evtLipsExecFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }
@@ -805,16 +760,16 @@ void evtLipsExecFunction(s32 id, s32 motion) {
 
 void evtLipsStopFunction(void) {
     void *unit = NULL;
-    EvtLipsModel *model = NULL;
-    EvtLipsNode *node;
+    MdlCtx *model = NULL;
+    EffWorldNode *node;
 
     if (D_003BBDB0 == 0) {
         return;
     }
     for (node = ((EvtWorldTable *)((EffWorldNode *)dds3GetWorldObject())->data)->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
-        model = node->link->mh->model;
-        if (sdfGetUniqueChunkValue(model->chunk) == D_003BBDB0) {
-            unit = node->link->unit;
+        model = ((EvtLipsLink *)node->data)->mh->model;
+        if (sdfGetUniqueChunkValue(model->inner) == D_003BBDB0) {
+            unit = ((EvtLipsLink *)node->data)->unit;
             break;
         }
     }
@@ -822,7 +777,7 @@ void evtLipsStopFunction(void) {
         func_003003F0("warning: call evtLipsStopFunction() but not find now reegisted unit same UnitUniqID\n");
         return;
     }
-    if (mdlGetNodeRefHalf((MdlCtx *)model, 2) == 0) {
+    if (mdlGetNodeRefHalf(model, 2) == 0) {
         func_003003F0("warning: call evtLipsStopFunction() but over have motionno fpr user specified motion no.\n");
         return;
     }
@@ -1492,27 +1447,27 @@ u32 evtScriptDestroyWorldEffectObject(void) {
 }
 
 u32 evtOpSetModelObjectPosition(void) {
-    EvtModelObj *obj;
+    EffWorldNode *obj;
     EvtModelHeader *header;
 
     obj = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
-    header = obj->header;
+    header = (EvtModelHeader *)obj->data;
     if (header->flags & 4) {
         header->positionX = bfWaitReadArgFloat(1);
         header->positionY = bfWaitReadArgFloat(2);
         header->positionZ = bfWaitReadArgFloat(3);
     } else {
-        obj->params->positionX = bfWaitReadArgFloat(1);
-        obj->params->positionY = bfWaitReadArgFloat(2);
-        obj->params->positionZ = bfWaitReadArgFloat(3);
-        obj->params->flagsC0 = (obj->params->flagsC0 | 1) & ~2;
+        obj->inner->position[0] = bfWaitReadArgFloat(1);
+        obj->inner->position[1] = bfWaitReadArgFloat(2);
+        obj->inner->position[2] = bfWaitReadArgFloat(3);
+        obj->inner->flags = (obj->inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) & ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     }
     return 1;
 }
 
 u32 evtOpSetModelObjectRotationFromAngles(void) {
     f32 v[4];
-    EvtModelObj *obj;
+    EffWorldNode *obj;
     f32 toRad;
     f32 x;
     f32 y;
@@ -1520,7 +1475,7 @@ u32 evtOpSetModelObjectRotationFromAngles(void) {
     memset(v, 0, 0x10);
     v[3] = 1.0f;
     obj = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
-    if (!(obj->header->flags & 4)) {
+    if (!(((EvtModelHeader *)obj->data)->flags & 4)) {
         toRad = 0.017453293f;
         x = bfWaitReadArgFloat(1) * toRad;
         y = bfWaitReadArgFloat(2) * toRad;
@@ -1535,10 +1490,10 @@ u32 evtOpSetModelObjectRotationFromAngles(void) {
 }
 
 u32 evtOpCopyModelTransformFromSource(void) {
-    EvtModelObj *obj;
-    EvtSourceObj *source;
+    EffWorldNode *obj;
+    EffWorldNode *source;
     EvtSourceVec *vec;
-    EvtModelParams *params;
+    ObjectTransform *params;
 
     obj = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     if (obj == NULL) {
@@ -1548,18 +1503,18 @@ u32 evtOpCopyModelTransformFromSource(void) {
     if (source == NULL) {
         return 1;
     }
-    vec = source->vec;
-    if (!(obj->header->flags & 4)) {
-        params = obj->params;
-        params->positionX = vec->positionX;
-        params->positionY = vec->positionY;
-        params->positionZ = vec->positionZ;
-        params->rotationX = vec->rotationX;
-        params->rotationY = vec->rotationY;
-        params->rotationZ = vec->rotationZ;
-        params->rotationW = vec->rotationW;
+    vec = source->data;
+    if (!(((EvtModelHeader *)obj->data)->flags & 4)) {
+        params = obj->inner;
+        params->position[0] = vec->positionX;
+        params->position[1] = vec->positionY;
+        params->position[2] = vec->positionZ;
+        params->rotation[0] = vec->rotationX;
+        params->rotation[1] = vec->rotationY;
+        params->rotation[2] = vec->rotationZ;
+        params->rotation[3] = vec->rotationW;
     }
-    obj->params->flagsC0 = (obj->params->flagsC0 | 1) & ~2;
+    obj->inner->flags = (obj->inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) & ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     return 1;
 }
 

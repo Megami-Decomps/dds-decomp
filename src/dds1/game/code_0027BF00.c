@@ -1510,7 +1510,47 @@ void mnuRebuildScrollLists(MenuPageWindow *menu, s32 *counts) {
 
 extern void mnuClearPageSelection(MenuPageWindow *);
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", mnuClearPageSelection);
+/* The resource and panel bank begins at the window's +0x20 word. */
+typedef struct MenuWindowResourceBank {
+    s32 unk20;
+    s32 handlesA[8];
+    s32 handlesB[8];
+    s32 handlesC[5];
+    MenuPageSlot slots[5];
+    MenuList *lists[2];
+    s32 selected;
+    s32 scrollOffset;
+    s32 fade;
+} MenuWindowResourceBank;
+
+typedef union MenuWindowBankView {
+    MenuPageWindow fields;
+    struct {
+        u8 prefix[0x20];
+        MenuWindowResourceBank resources;
+    } bank;
+} MenuWindowBankView;
+
+typedef char MenuWindowBankView_size_check[
+    sizeof(MenuWindowBankView) == sizeof(MenuPageWindow) ? 1 : -1];
+typedef char MenuWindowBankView_bank_offset_check[
+    (u32)&((MenuWindowBankView *)0)->bank.resources == 0x20 ? 1 : -1];
+
+void mnuClearPageSelection(MenuPageWindow *window) {
+    s32 selected = window->selected;
+
+    if (selected >= 0) {
+        u32 bankAddress = (u32)&window->unk20;
+
+        *(s32 *)(bankAddress + selected * (s32)sizeof(MenuPageSlot)
+                 + (u32)&((MenuWindowResourceBank *)0)->slots[0].scaleA) = 0x100;
+        *(s32 *)(bankAddress + window->selected * (s32)sizeof(MenuPageSlot)
+                 + (u32)&((MenuWindowResourceBank *)0)->slots[0].scaleB) = 0x100;
+        window->selected = -1;
+    }
+    window->flags &= ~0x400;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0027BF00", mnuInitPageWindow);
 

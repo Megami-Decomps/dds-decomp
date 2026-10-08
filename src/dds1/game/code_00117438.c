@@ -189,13 +189,13 @@ void *func_00117648(EffWorldNode *node) {
     return node->data;
 }
 
-void *func_00117650(EffWorldNode *node) {
+void *dds3GetWorldNodeData(EffWorldNode *node) {
     return node->data;
 }
 
 /* Load the world node's borrowed data vector into VF10. */
 void evtLoadValueVectorIntoVu(EffWorldNode *node) {
-    void *vec = func_00117650(node);
+    void *vec = dds3GetWorldNodeData(node);
 
     VU0_LOAD_VF_MEMORY(vf10, vec);
 
@@ -203,7 +203,7 @@ void evtLoadValueVectorIntoVu(EffWorldNode *node) {
 
 /* Same, from the second quadword in the borrowed vector. */
 void evtLoadValueSecondaryVectorIntoVu(EffWorldNode *node) {
-    void *vec = (void *)((u8 *)func_00117650(node) + 0x10);
+    void *vec = (void *)((u8 *)dds3GetWorldNodeData(node) + 0x10);
 
     VU0_LOAD_VF_MEMORY(vf10, vec);
 
