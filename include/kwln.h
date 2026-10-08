@@ -30,5 +30,8 @@ struct KwlnTask {
 u32 kwlnTaskGetTimer(KwlnTask *task);
 void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 u32 kwlnTaskGetUserValue(KwlnTask *task);
+KwlnTask *kwlnTaskGetTaskByName(const char *name);
+s32 kwlnTaskIsRegistered(KwlnTask *task);
+s32 kwlnTaskExists(const char *name);
 
 #endif /* KWLN_H */

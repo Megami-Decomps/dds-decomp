@@ -14,7 +14,6 @@ extern s32 btlReleaseScriptResource(void);
 
 extern void func_0035C860(char *, const char *, const char *, s32);
 
-extern s32 kwlnTaskIsRegistered(s32);
 
 extern char btlPrimaryScriptResourceName[];
 
@@ -52,7 +51,7 @@ s32 btlReleaseScriptResource(void) {
     if (battle->eventTaskId == -1) {
         return 1;
     }
-    if (kwlnTaskIsRegistered(battle->scriptTask) == 0) {
+    if (kwlnTaskIsRegistered((KwlnTask *)battle->scriptTask) == 0) {
         battle->scriptTask = 0;
         return 1;
     }

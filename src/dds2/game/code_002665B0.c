@@ -2410,7 +2410,6 @@ u32 func_0026B4A0(void) {
     return 1;
 }
 
-extern KwlnTask *kwlnTaskGetTaskByName(const char *);
 extern s32 mnuHasMantraSpriteTaskFinished(void);
 extern char D_00425008[];
 extern char D_003CE960[];

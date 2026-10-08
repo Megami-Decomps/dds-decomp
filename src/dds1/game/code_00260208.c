@@ -5,7 +5,6 @@
 #include "mnu_list.h"
 #include "mnu_shop.h"
 
-extern s32 kwlnTaskGetTaskByName(char *);
 extern s8 brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *);
 extern s32 func_002877A8(void);
 
@@ -720,13 +719,13 @@ u32 brsTaskTryDestroy(void) {
 }
 
 s32 func_002629A8(void) {
-    s32 task = kwlnTaskGetTaskByName(mnuStaffPrimaryPanelTaskName);
+    KwlnTask *task = kwlnTaskGetTaskByName(mnuStaffPrimaryPanelTaskName);
     BrsSkillPackageWork *work;
 
     if (task == 0) {
         return 0;
     }
-    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue((KwlnTask *)task);
+    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     if (0x100 - work->fadeProgress <= 0 &&
         brsTaskIsUiUpdateAllowed(work) != 0 &&
         work->opacityReady == 1) {

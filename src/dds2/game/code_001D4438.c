@@ -14,7 +14,6 @@
 extern s32 btlGetRuntime(void);
 extern void btlDispatchStateHandler(void *obj, s32 kind);
 
-extern s32 kwlnTaskGetTaskByName(const char *);
 
 extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
 
@@ -1332,7 +1331,6 @@ extern void btlAssignTaskResultAndArgument();
 extern void btlBindActorSlot();
 extern void btlRunRandomWeightedAiTableAction();
 extern s32 btlAiCheckStatusRollEligibility();
-extern s32 kwlnTaskIsRegistered();
 
 /* AI task: binds the acting unit's slot on first run, then waits for the
  * pending AI task and dispatches state 0xB or 0xC. */
@@ -1362,7 +1360,7 @@ s32 btlAiTaskUpdate(ActionStateLink *task) {
                     } else {
                         btlDispatchStateHandler(task, 0xC);
                     }
-                } else if (kwlnTaskIsRegistered(scene->boundTask) == 0) {
+                } else if (kwlnTaskIsRegistered((KwlnTask *)scene->boundTask) == 0) {
                     if (task->indexWork.phase == -1) {
                         btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
                         btlDebugPrintf("AI script return NULL\n");

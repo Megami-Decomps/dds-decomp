@@ -67,7 +67,6 @@ extern u32 kwlnDrawControlFlags;
 
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
-extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 
 extern KwlnTask *kwlnTaskFindByPriority(u32 prio);
 

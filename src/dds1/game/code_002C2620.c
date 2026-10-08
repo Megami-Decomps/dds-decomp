@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf.h"
 #include "itf_grid_text.h"
 #include "sdf_sif_command.h"
@@ -8,7 +9,6 @@ extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
 extern char fldLocalMapTaskName[]; /* "LmapMain" */
 
-extern s32 kwlnTaskGetTaskByName(u32);
 
 extern u32 D_003BD25C;
 
@@ -374,7 +374,7 @@ void fldStopLmapTask(void) {
 }
 
 s32 fldLmapTaskExists(void) {
-    return kwlnTaskGetTaskByName((u32)fldLocalMapTaskName) != 0;
+    return kwlnTaskGetTaskByName(fldLocalMapTaskName) != NULL;
 }
 
 void func_002C2EF8(const char *fmt, ...) {

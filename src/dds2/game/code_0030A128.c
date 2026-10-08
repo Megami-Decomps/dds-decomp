@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "itf_grid_text.h"
@@ -24,7 +25,6 @@ extern s32 D_00439090; /* fade timer: func_0030B1E8 tests >= 31 with slti */
 
 extern s32 mdlFlagTest(u32);
 
-extern s32 kwlnTaskGetTaskByName(u32);
 
 extern char fldLocalMapTaskName[]; /* "LmapMain" */
 
@@ -336,7 +336,7 @@ void fldStopLmapTask(void) {
 }
 
 s32 fldLmapTaskExists(void) {
-    return kwlnTaskGetTaskByName((u32)fldLocalMapTaskName) != 0;
+    return kwlnTaskGetTaskByName(fldLocalMapTaskName) != NULL;
 }
 
 void func_0030AA68(const char *fmt, ...) {
