@@ -16,6 +16,14 @@
 #include "file.h"
 #include "dat_command.h"
 
+extern s32 fileTestSavedSlotFlags(u32);
+extern s32 btlGetCommandFailureReason(BtlUnit *, s32);
+extern u32 func_001A3360(void *, BtlIndexList *, s32);
+extern BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *, BtlIndexList *);
+extern BtlUnit *btlFindActorForOwner(s64);
+void func_001D3FE8(BtlTask *, BattleIndexWork *);
+
+
 
 extern s32 mdlGetNodeField2C(MdlCtx *, s32);
 extern void effObjSetOpacityPassEnabled(u32 enabled);
@@ -1229,7 +1237,7 @@ void btlMarkSceneTaskAfterReset(BtlTask *task) {
 
 s32 btlCommandStateSelectB(s32 arg0) {
     if (sndHasActiveActor() == 0) {
-        func_001D3FE8(arg0, arg0 + 0x20);
+        func_001D3FE8((BtlTask *)arg0, &((BtlTask *)arg0)->indexWork);
         if (btlAiCheckStatusRollEligibility(arg0) != 0) {
             btlDispatchStateHandler(arg0, 0xB);
         } else {
@@ -6186,14 +6194,14 @@ void btlRemoveActorsWithFlags(u32 mask) {
     }
 }
 
-s32 btlFindActorForOwner(s64 target) {
-    s32 context = btlGetRuntime();
-    s32 actor = *(s32 *)(context + 0x228);
+BtlUnit *btlFindActorForOwner(s64 target) {
+    BtlState *context = (BtlState *)btlGetRuntime();
+    BtlUnit *actor = context->units;
     while (actor != 0) {
-        if (*(s64 *)(actor + 0x108) == target) {
+        if (actor->identity == target) {
             return actor;
         }
-        actor = *(s32 *)(actor + 0x344);
+        actor = actor->next;
     }
     return 0;
 }
