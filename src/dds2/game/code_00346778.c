@@ -69,7 +69,6 @@ extern u8 D_00438D28[];
 /* Initialize an inline sound/IPU node and the selected linear or movie-PAC stream. */
 void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor, const char *name) {
     u8 soundFormat[4];
-    void *work;
     struct SdfMemBlock *allocation;
     u8 *resource;
     MovLinearStream *stream;
@@ -97,9 +96,8 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
     soundFormat[3] = descriptor->unk12;
 
     if (!isPac) {
-        work = sdfAllocAndClearQuadwords(0x14);
-        owner->stream = work;
-        stream = work;
+        stream = sdfAllocAndClearQuadwords(0x14);
+        owner->stream.linear = stream;
         allocation = sdfAllocGeneralBlock(0x20000);
         stream->allocation = allocation;
         {
@@ -120,9 +118,8 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
         D_00438D08 = sdfCreateSemaphore(1, 1, 0);
     }
     D_0043921C = -1;
-    work = sdfAllocAndClearQuadwords(0x78);
-    owner->stream = work;
-    pacWork = work;
+    pacWork = sdfAllocAndClearQuadwords(0x78);
+    owner->stream.pac = pacWork;
     allocation = sdfAllocGeneralBlock(0x24000);
     pacWork->allocation = allocation;
     resource = (u8 *)sdfResourceRetainAddress(allocation);
@@ -147,8 +144,6 @@ extern void func_00342798(void);
 
 /* Wait for active work's release phase, free its owned buffers, then deactivate it. */
 void sdfCancelAndReleasePacWork(MovObj *job) {
-    void *ownedBuffers;
-
     if (job->active != 0) {
         job->stopRequested = 1;
         /* Queue phase 5 as phase 7; phase 6 is the release gate below. */
@@ -159,14 +154,15 @@ void sdfCancelAndReleasePacWork(MovObj *job) {
         while (job->state != SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK) {
             sdfCreateSemaphoreFromOptions();
         }
-        ownedBuffers = job->stream;
         if (job->isPac == 0) {
-            sdfReleaseResourceAllocation(((MovLinearStream *)ownedBuffers)->allocation);
-            sdfReleaseChipBlock(ownedBuffers);
+            MovLinearStream *stream = job->stream.linear;
+            sdfReleaseResourceAllocation(stream->allocation);
+            sdfReleaseChipBlock(stream);
         } else {
-            sdfReleaseResourceAllocation(((MovPacStream *)ownedBuffers)->payloadAllocation);
-            sdfReleaseResourceAllocation(((MovPacStream *)ownedBuffers)->allocation);
-            sdfReleaseChipBlock(ownedBuffers);
+            MovPacStream *stream = job->stream.pac;
+            sdfReleaseResourceAllocation(stream->payloadAllocation);
+            sdfReleaseResourceAllocation(stream->allocation);
+            sdfReleaseChipBlock(stream);
         }
         sdfDestroyStreamFrameNode(&job->soundNode);
         if (job->pacEnabled != 0) {

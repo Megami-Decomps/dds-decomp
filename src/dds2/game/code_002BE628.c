@@ -1257,8 +1257,8 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
 
 
 void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 value, s32 option) {
-    panel->unk10 = value;
-    panel->unk14 = option;
+    panel->capValue = value;
+    panel->option = option;
 }
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
@@ -1276,9 +1276,9 @@ MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState) {
     profileRecord = ptyGetCurrentProfileRecord(selectionState);
     mnuSetProfilePanelValues(panel, ptyGetProfileRecordCap((u16)profileId), profileRecord->value);
     for (randomWordIndex = 0; randomWordIndex < 5; randomWordIndex++) {
-        panel->unk2C[randomWordIndex] = effMiscRand(0) % 0xC0 + 0x40;
+        panel->randomOpacity[randomWordIndex] = effMiscRand(0) % 0xC0 + 0x40;
     }
-    panel->unk44 = 0x100;
+    panel->opacity = 0x100;
     return panel;
 }
 
@@ -1286,21 +1286,23 @@ void mnuFreeProfilePanelWork(MenuProfilePanel *panel) {
     sdfReleaseChipBlock(panel);
 }
 
-void mnuSetGroupProperties(MenuProfilePanel *panel, u32 first, u32 second, u32 third, u32 fourth) {
-    panel->resourceHandle = first;
-    panel->unk1C = second;
-    panel->unk24 = third;
-    panel->unk28 = fourth;
+void mnuSetGroupProperties(MenuProfilePanel *panel, EffectSlotSet *panelSet,
+                           EffectSlotSet *particleSet, s32 trailIndex, s32 particleIndex) {
+    panel->sets[0] = panelSet;
+    panel->sets[1] = particleSet;
+    panel->trailIndex = trailIndex;
+    panel->particleIndex = particleIndex;
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C33C0);
+extern void func_002C33C0(s32, s32, s32, MenuProfilePanel *, s32);
 
 /* Draw first, then advance the native phase by one with a single period subtraction. */
 void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 option) {
     s32 phase;
     s32 nextPhase;
 
-    func_002C33C0(x, y, z, (u32 *)panel, option);
+    func_002C33C0(x, y, z, panel, option);
     phase = panel->phase;
     nextPhase = phase + MNU_PROFILE_PHASE_STEP;
     if (phase < MNU_PROFILE_PHASE_PERIOD) {
