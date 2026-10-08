@@ -9,7 +9,7 @@
 extern void *effParamTableGetBlock(void *data, s32 index);
 extern void effCreateThunderCellSystemWork(void *work);
 
-extern void parReleaseCellSystem(u32 handle);
+extern void parReleaseCellSystem(ParSystem *system);
 extern void parFillSymmetricCellColors(u32 param0, u32 param1, void *cells, u32 param3);
 extern void parDecreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
 extern void parIncreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
@@ -96,7 +96,7 @@ typedef struct {
     u32 activeFrames; /* 0x10 countdown before the color fade */
 } EffThunderCell; /* 0x14 */
 
-/* 0x20-byte sub-element holding a handle released by parReleaseCellSystem. */
+/* Each spark owns a separate particle cell system. */
 typedef struct {
     s32 age;            /* 0x00 negative during the initial delay */
     f32 verticalOffset; /* 0x04 */
@@ -105,7 +105,7 @@ typedef struct {
     f32 angularSpeed;   /* 0x10 */
     f32 orbitRadius;    /* 0x14 */
     f32 heightOffset;   /* 0x18 subtracted from the moving Y position */
-    u32 systemHandle;   /* 0x1C released by parReleaseCellSystem */
+    ParSystem *system;  /* 0x1C released by parReleaseCellSystem */
 } EffThunderSpark; /* 0x20 */
 
 
@@ -124,7 +124,7 @@ void func_001634C0(void *parameters) {
 
 /* Release the cell system before releasing the containing work allocation. */
 void effThunderReleaseVectorWork(EffThunderVectorWork *work) {
-    parReleaseCellSystem((u32)work->cellSystem);
+    parReleaseCellSystem(work->cellSystem);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
@@ -149,20 +149,13 @@ u32 func_00163540(u32 value) {
     return value;
 }
 
-extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
+extern ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void func_0015D078(void *system, u32 value);
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
 extern void parPrependCellNode(void *system);
 extern void parCellInit(void *system, s32 index);
 extern s32 effMultiplyPackedColors(s32 color, s32 param);
 
-
-typedef struct {
-    u8 pad00[8];
-    s32 vertexCount;    /* 0x08 quadword vector capacity per cell */
-    u8 pad0C[8];
-    ParCell *cells; /* 0x14 */
-} EffThunderParSystem;
 
 /* Resample timing, normalize X/Z before assigning Y, then sample the axis.
    Both timing moduli are unchecked; the fourth scratch lane is not initialized. */
@@ -215,7 +208,7 @@ void func_00163780(EffThunderVectorWork *work, s32 index) {
     f32 width[4] __attribute__((aligned(16)));
     f32 outerWidth[4] __attribute__((aligned(16)));
     f32 rotation[4] __attribute__((aligned(16)));
-    EffThunderParSystem *system = work->cellSystem;
+    ParSystem *system = work->cellSystem;
     ParCell *cell = &system->cells[index];
     EffThunderVectorCell *source;
     u128 *vertices;
@@ -225,8 +218,8 @@ void func_00163780(EffThunderVectorWork *work, s32 index) {
     f32 rotationScale;
     f32 radius;
 
-    count = system->vertexCount / 5;
-    cell->vertexCount = system->vertexCount;
+    count = system->vertexWordCount / 5;
+    cell->vertexCount = system->vertexWordCount;
     source = &work->cells[index];
     vertices = cell->history;
     widthScale = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.2f + 1.0f;
@@ -304,11 +297,11 @@ void func_00163780(EffThunderVectorWork *work, s32 index) {
 void func_00163AF8(EffThunderVectorWork *work, s32 index) {
     f32 axis[4] __attribute__((aligned(16)));
     f32 direction[4] __attribute__((aligned(16)));
-    EffThunderParSystem *system = work->cellSystem;
+    ParSystem *system = work->cellSystem;
     EffThunderVectorCell *source = &work->cells[index];
     ParCell *cell = &system->cells[index];
     u128 *vertices = cell->history;
-    s32 rows = system->vertexCount / 5;
+    s32 rows = system->vertexWordCount / 5;
     s32 i;
     f32 sample;
     f32 angle;
@@ -366,7 +359,7 @@ extern void func_00163AF8(EffThunderVectorWork *, s32);
    The unsigned wrap-add is not a saturating fade. Submit even for signed count <= 0. */
 void effThunderUpdateVectorCells(EffThunderVectorWork *work) {
     s32 i = 0;
-    EffThunderParSystem *renderSystem = work->cellSystem;
+    ParSystem *renderSystem = work->cellSystem;
     s32 cellCount = work->head.cellCount;
     u32 tintColor = work->tintColor;
     EffThunderVectorCell *cell = work->cells;
@@ -426,7 +419,7 @@ EffThunderVectorWork *effThunderWorkCreate(EffThunderVectorParams *parameters) {
 
 /* Tear down the indexed vector variant: system first, containing allocation last. */
 void effThunderReleaseIndexedVectorWork(EffThunderVectorWork *work) {
-    parReleaseCellSystem((u32)work->cellSystem);
+    parReleaseCellSystem(work->cellSystem);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
@@ -508,7 +501,7 @@ void func_001642B0(EffThunderVectorWork *work, s32 index) {
     f32 origin[4] __attribute__((aligned(16)));
     f32 width[4] __attribute__((aligned(16)));
     f32 rotation[4] __attribute__((aligned(16)));
-    EffThunderParSystem *system = work->cellSystem;
+    ParSystem *system = work->cellSystem;
     ParCell *cell = &system->cells[index];
     EffThunderVectorCell *source;
     u128 *vertices;
@@ -519,8 +512,8 @@ void func_001642B0(EffThunderVectorWork *work, s32 index) {
     f32 angleJitter;
     f32 radius;
 
-    count = system->vertexCount >> 1;
-    cell->vertexCount = system->vertexCount;
+    count = system->vertexWordCount >> 1;
+    cell->vertexCount = system->vertexWordCount;
     source = &work->cells[index];
     vertices = cell->history;
     widthScale = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.3f + 1.0f;
@@ -585,11 +578,11 @@ void func_001642B0(EffThunderVectorWork *work, s32 index) {
 void func_001645A0(EffThunderVectorWork *work, s32 index) {
     f32 axis[4] __attribute__((aligned(16)));
     f32 direction[4] __attribute__((aligned(16)));
-    EffThunderParSystem *system = work->cellSystem;
+    ParSystem *system = work->cellSystem;
     EffThunderVectorCell *source = &work->cells[index];
     ParCell *cell = &system->cells[index];
     u128 *vertices = cell->history;
-    s32 rows = system->vertexCount >> 1;
+    s32 rows = system->vertexWordCount >> 1;
     s32 i;
     f32 sample;
     f32 angle;
@@ -632,7 +625,7 @@ extern void func_001645A0(EffThunderVectorWork *, s32);
    Fade is unsigned wrap-add; submission is unconditional after the signed-count loop. */
 void effThunderUpdateIndexedVectorCells(EffThunderVectorWork *work) {
     s32 i = 0;
-    EffThunderParSystem *renderSystem = work->cellSystem;
+    ParSystem *renderSystem = work->cellSystem;
     s32 cellCount = work->head.cellCount;
     u32 tintColor = work->tintColor;
     EffThunderVectorCell *cell = work->cells;
@@ -728,9 +721,9 @@ EffThunderSparkWork *effThunderSparkCreate(EffThunderSparkParams *parameters) {
     }
     delaySpread = work->head.startDelaySpread;
     for (sparkIndex = 0; sparkIndex < work->head.sparkCount; sparkIndex++) {
-        work->sparks[sparkIndex].systemHandle = (u32)parAllocateCellSystem(EFF_THUNDER_SINGLE_CELL, work->head.halfLife * 2 - 1, 0, 0);
-        parDispatchSub((void *)work->sparks[sparkIndex].systemHandle, 2, work->head.dispatchArg, work->head.dispatchArg);
-        func_0015D078((void *)work->sparks[sparkIndex].systemHandle, work->head.systemParam);
+        work->sparks[sparkIndex].system = parAllocateCellSystem(EFF_THUNDER_SINGLE_CELL, work->head.halfLife * 2 - 1, 0, 0);
+        parDispatchSub(work->sparks[sparkIndex].system, 2, work->head.dispatchArg, work->head.dispatchArg);
+        func_0015D078(work->sparks[sparkIndex].system, work->head.systemParam);
         effThunderSparkInit(work, sparkIndex);
         work->sparks[sparkIndex].age = -(effMiscRand(D_0034DF38) % delaySpread);
     }
@@ -744,7 +737,7 @@ void effThunderReleaseSparkWork(EffThunderSparkWork *work) {
 
     if (sparkCount > 0) {
         do {
-            parReleaseCellSystem(work->sparks[sparkIndex].systemHandle);
+            parReleaseCellSystem(work->sparks[sparkIndex].system);
             sparkIndex++;
         } while (sparkIndex < sparkCount);
     }
@@ -799,7 +792,7 @@ void func_00164BA8(EffThunderSparkWork *work, s32 index) {
     f32 stepScale[4] __attribute__((aligned(16)));
     f32 previousSide[4] __attribute__((aligned(16)));
     f32 delta[4] __attribute__((aligned(16)));
-    EffThunderParSystem *system;
+    ParSystem *system;
     ParCell *cell;
     u128 *vertices;
     u128 *join;
@@ -816,9 +809,9 @@ void func_00164BA8(EffThunderSparkWork *work, s32 index) {
 
     VEC3_SPLAT(width, work->head.width);
     VEC3_SPLAT(negativeWidth, -width[0]);
-    system = (EffThunderParSystem *)work->sparks[index].systemHandle;
+    system = work->sparks[index].system;
     cell = system->cells;
-    cell->vertexCount = system->vertexCount;
+    cell->vertexCount = system->vertexWordCount;
     vertices = cell->history;
     segments = work->head.halfLife;
     VU0_LOAD_VF(vf10, work->head.position);
@@ -993,7 +986,7 @@ void func_00165110(EffThunderSparkWork *work) {
         age = spark->age;
         if (age == 0) {
             effThunderSparkInit(work, i);
-            parCellInit((void *)spark->systemHandle, 0);
+            parCellInit(spark->system, 0);
         } else if (age > 0 && age <= duration) {
             angle = spark->orbitAngle;
             radius = spark->orbitRadius;
@@ -1012,7 +1005,7 @@ void func_00165110(EffThunderSparkWork *work) {
                 alpha = 1.0f;
             }
             color = effMultiplyPackedColors(((u32)(alpha * 127.0f) << 24) | 0x808080, tintColor);
-            renderCell = ((EffThunderParSystem *)spark->systemHandle)->cells;
+            renderCell = spark->system->cells;
             lowerHeight = position[1] - heightOffset;
             work->head.loweredPosition[0] = position[0];
             work->head.loweredPosition[1] = lowerHeight;
@@ -1022,7 +1015,7 @@ void func_00165110(EffThunderSparkWork *work) {
             work->head.position[2] = position[2];
             func_00164BA8(work, i);
             renderCell->color = color;
-            parPrependCellNode((void *)spark->systemHandle);
+            parPrependCellNode(spark->system);
         }
         if (age >= duration && loop) {
             spark->age = -(effMiscRand(D_0034DF38) % delaySpread);
@@ -1075,7 +1068,7 @@ EffThunderFragmentWork *effThunderFragCreate(EffThunderFragmentParams *parameter
 
 /* Release the single fragment system before its containing work allocation. */
 void effThunderReleaseFragmentWork(EffThunderFragmentWork *work) {
-    parReleaseCellSystem((u32)work->system);
+    parReleaseCellSystem(work->system);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
@@ -1149,7 +1142,7 @@ void func_00165758(EffThunderFragmentWork *work, s32 index) {
     f32 stepScale[4] __attribute__((aligned(16)));
     f32 previousSide[4] __attribute__((aligned(16)));
     f32 delta[4] __attribute__((aligned(16)));
-    EffThunderParSystem *system = work->system;
+    ParSystem *system = work->system;
     ParCell *cell = &system->cells[index];
     u128 *vertices;
     u128 *join;
@@ -1167,7 +1160,7 @@ void func_00165758(EffThunderFragmentWork *work, s32 index) {
     VEC3_SPLAT(width, work->head.bandWidth);
     VEC3_SPLAT(outerWidth, width[0] + work->head.edgeWidth);
     VEC3_SPLAT(negativeOuterWidth, -outerWidth[0]);
-    cell->vertexCount = system->vertexCount;
+    cell->vertexCount = system->vertexWordCount;
     vertices = cell->history;
     segments = work->head.halfLife;
     VU0_LOAD_VF(vf10, work->head.end);
@@ -1338,7 +1331,7 @@ void func_00165758(EffThunderFragmentWork *work, s32 index) {
  */
 void func_00165D80(EffThunderFragmentWork *work) {
     s32 i = 0;
-    EffThunderParSystem *system = work->system;
+    ParSystem *system = work->system;
     s32 count = work->head.fragmentCount;
     u32 restartLimit = work->head.restartFrameLimit;
     u32 tintColor = work->color;
@@ -1404,8 +1397,8 @@ EffThunderFragmentWork *func_00165ED0(EffThunderFragmentParams *parameters) {
 
 /* Release secondary then primary systems before freeing the shared work allocation. */
 void effThunderReleaseDualFragmentWork(EffThunderFragmentWork *work) {
-    parReleaseCellSystem((u32)work->state.secondarySystem);
-    parReleaseCellSystem((u32)work->system);
+    parReleaseCellSystem(work->state.secondarySystem);
+    parReleaseCellSystem(work->system);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
@@ -1457,8 +1450,8 @@ void func_001661D8(EffThunderFragmentWork *work, s32 index) {
     f32 stepScale[4] __attribute__((aligned(16)));
     f32 previousSide[4] __attribute__((aligned(16)));
     f32 delta[4] __attribute__((aligned(16)));
-    EffThunderParSystem *secondarySystem = work->state.secondarySystem;
-    EffThunderParSystem *primarySystem = work->system;
+    ParSystem *secondarySystem = work->state.secondarySystem;
+    ParSystem *primarySystem = work->system;
     ParCell *secondaryCell = &secondarySystem->cells[index];
     ParCell *primaryCell = &primarySystem->cells[index];
     u128 *vertices;
@@ -1478,8 +1471,8 @@ void func_001661D8(EffThunderFragmentWork *work, s32 index) {
     VEC3_SPLAT(width, work->head.coreWidth);
     VEC3_SPLAT(outerWidth, (width[0] + work->head.edgeWidth) + work->head.bandWidth);
     VEC3_SPLAT(negativeOuterWidth, -outerWidth[0]);
-    secondaryCell->vertexCount = secondarySystem->vertexCount;
-    primaryCell->vertexCount = primarySystem->vertexCount;
+    secondaryCell->vertexCount = secondarySystem->vertexWordCount;
+    primaryCell->vertexCount = primarySystem->vertexWordCount;
     vertices = secondaryCell->history;
     coreVertices = primaryCell->history;
     segments = work->head.halfLife;
@@ -1650,9 +1643,9 @@ extern void func_001661D8(EffThunderFragmentWork *, s32);
    Secondary initialization/submission precedes primary; submission also occurs for count <= 0. */
 void effThunderUpdateDualFragments(EffThunderFragmentWork *work) {
     s32 index = 0;
-    EffThunderParSystem *secondarySystem = work->state.secondarySystem;
+    ParSystem *secondarySystem = work->state.secondarySystem;
     s32 fragmentCount = work->head.fragmentCount;
-    EffThunderParSystem *primarySystem = work->system;
+    ParSystem *primarySystem = work->system;
     ParCell *primaryCells = primarySystem->cells;
     u32 tintColor = work->color;
     EffThunderFrag *fragment = work->fragments;
@@ -1742,7 +1735,7 @@ EffThunderCellWork *effThunderCellCreate(EffThunderCellParams *parameters) {
 
 /* Release the cell system before releasing the containing work allocation. */
 void effThunderReleaseCellWork(EffThunderCellWork *work) {
-    parReleaseCellSystem((u32)work->system);
+    parReleaseCellSystem(work->system);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
@@ -1786,7 +1779,7 @@ void func_00166C18(EffThunderCellWork *work, s32 index) {
     f32 direction[4] __attribute__((aligned(16)));
     f32 cameraDirection[4] __attribute__((aligned(16)));
     f32 side[4] __attribute__((aligned(16)));
-    EffThunderParSystem *system = work->system;
+    ParSystem *system = work->system;
     EffThunderCell *source = &work->cells[index];
     ParCell *cell = &system->cells[index];
     u128 *vertices;
@@ -1801,7 +1794,7 @@ void func_00166C18(EffThunderCellWork *work, s32 index) {
     VEC3_SPLAT(bandWidth, width[0] + work->head.bandWidth);
     VEC3_SPLAT(outerWidth, bandWidth[0] + work->head.edgeWidth);
     VEC3_SPLAT(negativeOuterWidth, -outerWidth[0]);
-    cell->vertexCount = system->vertexCount;
+    cell->vertexCount = system->vertexWordCount;
     vertices = cell->history;
     segments = work->head.halfLife;
     VU0_LOAD_VF(vf10, sdfViewEyeVector);
@@ -1935,7 +1928,7 @@ void effThunderCellUpdate(EffThunderCellWork *work) {
     s32 i = 0;
     s32 cellCount = work->head.cellCount;
     EffThunderCell *cell = work->cells;
-    ParCell *renderCells = ((EffThunderParSystem *)work->system)->cells;
+    ParCell *renderCells = ((ParSystem *)work->system)->cells;
 
     if (cellCount > 0) {
         do {
@@ -2039,7 +2032,7 @@ void func_001673D0(EffThunderFragmentWork *work, s32 index, const u128 *seed) {
     f32 stepScale[4] __attribute__((aligned(16)));
     f32 previousSide[4] __attribute__((aligned(16)));
     f32 delta[4] __attribute__((aligned(16)));
-    EffThunderParSystem *system = work->system;
+    ParSystem *system = work->system;
     ParCell *cell = &system->cells[index];
     u128 *vertices;
     u128 *join;
@@ -2057,7 +2050,7 @@ void func_001673D0(EffThunderFragmentWork *work, s32 index, const u128 *seed) {
     VEC3_SPLAT(width, work->head.bandWidth);
     VEC3_SPLAT(outerWidth, width[0] + work->head.edgeWidth);
     VEC3_SPLAT(negativeOuterWidth, -outerWidth[0]);
-    cell->vertexCount = system->vertexCount;
+    cell->vertexCount = system->vertexWordCount;
     vertices = cell->history;
     segments = work->head.halfLife;
     VU0_LOAD_VF(vf10, work->head.end);
@@ -2250,12 +2243,12 @@ void effThunderUpdateChainSegments(EffThunderGroup *group) {
         points++;
         fragmentCount = work->head.fragmentCount;
         color = effMultiplyPackedColors(group->color, work->color);
-        cell = ((EffThunderParSystem *)work->system)->cells;
+        cell = ((ParSystem *)work->system)->cells;
         for (j = 0; j < fragmentCount; j++) {
             if (i > 0) {
                 previous = group->handles[i - 1];
                 func_001673D0(work, j,
-                    ((EffThunderParSystem *)previous->system)->cells[j].history + ((EffThunderParSystem *)previous->system)->cells[j].vertexCount - 5);
+                    ((ParSystem *)previous->system)->cells[j].history + ((ParSystem *)previous->system)->cells[j].vertexCount - 5);
             } else {
                 func_00165758(work, j);
             }
