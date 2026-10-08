@@ -2332,7 +2332,7 @@ typedef struct EffGroup {
 } EffGroup;
 
 extern SoundMixer *func_00190100(SoundMixer *);
-extern EffFragmentResources *func_00169940(s32, s32);
+extern EffFragmentResources *effCreateFragmentResources(s32, s32);
 extern void func_00169B90(EffFragmentResources *, u32 *);
 extern void *effEventCreate(SoundMixer *, u16, EffPCPEventPlace *);
 
@@ -2385,7 +2385,7 @@ void *eventParams;
     place.unk28 = 1.0f;
     place.color = 0x80808080;
     for (i = 0; i < count; i++, slot++) {
-        slot->resources = func_00169940(a, b);
+        slot->resources = effCreateFragmentResources(a, b);
         func_00169B90(slot->resources, palette);
         slot->age = 0;
         slot->scale = 1.0f;
@@ -2453,7 +2453,7 @@ EffGroup *func_00167EC0(EffGroup *src) {
     place.unk28 = 1.0f;
     place.color = 0x80808080;
     for (i = 0; i < count; i++, slot++) {
-        slot->resources = func_00169940(a, b);
+        slot->resources = effCreateFragmentResources(a, b);
         func_00169B90(slot->resources, palette);
         slot->age = 0;
         slot->scale = 1.0f;
@@ -2979,7 +2979,7 @@ extern void *memcpy(void *, const void *, u32);
 /* Lay out history vertices/colors, eight cap vertices/colors, then the owner.
  * The two global draw descriptors are reset through their native 0x2C prefix.
  */
-EffFragmentResources *func_00169940(s32 historyLength, s32 subdivisions) {
+EffFragmentResources *effCreateFragmentResources(s32 historyLength, s32 subdivisions) {
     s32 count = historyLength * subdivisions * 3 + 6;
     u32 colorBytes = count * sizeof(u32);
     u32 bufferBytes = count * (sizeof(u128) + sizeof(u32)) + 8 * (sizeof(u128) + sizeof(u32));

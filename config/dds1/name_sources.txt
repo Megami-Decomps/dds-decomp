@@ -1491,6 +1491,7 @@
 0x00167A78	effThunderUpdateChainSegments	inferred	confidence=high; matched-C; src/dds1/game/code_00167178.c:88:func_00167A78; Propagates adjacent parent point pairs into each thunder child segment, seeds later child fragment histories from the preceding segment, multiplies parent/child colors, advances the child counter and queues its particle system.; source=names_P5.tsv:14 [names_qp11.tsv]
 0x00167E78	effApplyParamBlockPair	inferred	Obtains blocks zero and one from effect parameter table and passes the pair to effect handler.
 0x00168138	effReleaseGroupSlotsAndResources	inferred	Walks group slots releasing resource arrays and effect nodes before group cleanup. [names_reviewed21.tsv]
+0x00169940	effCreateFragmentResources	inferred	Allocates and initializes EffFragmentResources with history buffers and SDF draw descriptors; constructors store its result in slot->resources.
 0x00169E10	effThunderDrawHistoryAndEndCap	inferred	L13
 0x0016A088	effFlashRecordCreate	inferred	readability/matching review (QP16)
 0x0016A1A8	effFlashTrianglePulseSpawnFromTable	inferred	Takes parameter block zero from the supplied table for the triangular flash initializer. [names_reviewed5.tsv]
