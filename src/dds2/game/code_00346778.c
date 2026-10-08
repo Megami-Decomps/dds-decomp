@@ -1,9 +1,9 @@
 #include "common.h"
+#include "sdf.h"
 #include "file_pac.h"
 
 typedef struct DevState DevState;
 typedef struct MemBlock MemBlock;
-typedef struct SdfStreamTextureHead SdfStreamTextureHead;
 
 enum {
     PAC_HEADER_BYTES = 0x10,
@@ -47,18 +47,6 @@ typedef struct PacBuf {
 /* The built-in packet callback is referenced as an address in this unit. */
 extern u8 sdfPacDispatchPacket[];
 
-typedef struct SdfMovieDescriptor {
-    u16 unk00;
-    u16 unk02;
-    u32 unk04;
-    u16 unk08;
-    u16 unk0A;
-    s32 source;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 pad13;
-} SdfMovieDescriptor;
 
 /* The two stream variants have distinct native allocations: 0x14 and 0x78. */
 typedef struct MovLinearStream {
@@ -92,62 +80,6 @@ typedef struct MovPacStream {
     u8 *scratch;
 } MovPacStream;
 
-/* Native 0x8C sound/IPU stream node, owned inline by the movie object. */
-typedef struct SdfStreamFrameNode {
-    u8 pad00[8];
-    struct SdfStreamFrameNode *next;
-    u8 active;
-    u8 pad0D[2];
-    u8 drained;
-    u8 pad10[4];
-    u8 audioMode;
-    u8 loopMode;
-    u8 playbackMode;
-    u8 pad17[3];
-    u8 unk1A;
-    u8 pad1B;
-    s32 bufferSize;
-    u32 buffers[2];
-    s32 textureResources[2];
-    u8 pad30[4];
-    s32 resourceWord;
-    SdfStreamTextureHead *textureHead;
-    u16 width;
-    u16 height;
-    s32 sourceBytes;
-    u8 pad44[8];
-    u32 unk4C;
-    u8 headerReady;
-    u8 done;
-    u8 filledSlots;
-    u8 firstSlot;
-    u32 scratchBuffer;
-    u8 pad58[4];
-    s32 (*read)(struct SdfStreamFrameNode *, u32, s32, void *, s32);
-    u32 source;
-    u8 pad64[0x28];
-} SdfStreamFrameNode;
-
-typedef struct MovObj {
-    u8 active;
-    u8 state;
-    u8 stopRequested;
-    u8 isPac;
-    u16 unk04;
-    u16 unk06;
-    u32 unk08;
-    u16 unk0C;
-    u16 unk0E;
-    DevState *deviceState;
-    s32 totalBytes;
-    s32 remainingBytes;
-    void *stream; /* MovLinearStream or MovPacStream, selected by isPac. */
-    u8 pacEnabled;
-    u8 pad21;
-    u8 packetLimit;
-    u8 pad23;
-    SdfStreamFrameNode soundNode;
-} MovObj;
 
 extern void *sdfAllocAndClearQuadwords(s32 size);
 extern void *sdfAllocGeneralBlock(s32 size);

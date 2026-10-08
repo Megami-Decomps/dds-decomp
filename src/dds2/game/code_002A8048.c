@@ -8,7 +8,7 @@ extern u16 mnuMovieTaskState;
 
 extern s32 mnuMovieShutdownCounter;
 
-extern u8 mnuMovieDrawContext[];
+extern MovObj mnuMovieDrawContext;
 
 /* State of the debug viewer: an IPU register word and a 0x40-byte block, edited nibble by nibble. */
 typedef struct MnuMovieTransfer {
@@ -206,12 +206,6 @@ void mnuDrawMovieList(void) {
     }
 }
 
-typedef struct MovieStatus {
-    u8 pad00[0x64];
-    s32 total;
-    s32 pad68;
-    s32 current;
-} MovieStatus;
 
 extern s32 D_00457E58[];
 
@@ -220,7 +214,7 @@ void mnuDrawMovieProgressCounter(void) {
     if (mnuCheckMovieDecoderStatus() == 0) {
         list = (SdfListHead *)D_00457E58[0];
         sdfAppendPacket(list, func_0011F250(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", ((MovieStatus *)mnuMovieDrawContext)->current, ((MovieStatus *)mnuMovieDrawContext)->total));
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", mnuMovieDrawContext.soundNode.unk48, (s32)mnuMovieDrawContext.soundNode.cycleLength));
     }
 }
 
@@ -248,7 +242,7 @@ void mnuMarkMovieDrawValuesPending(void) {
 
 void mnuBindMovieDrawValueSources(void) {
     mnuMovieDrawSources.wordSource = 0x10002010;
-    mnuMovieDrawSources.blockSource = (u32)mnuMovieDrawContext;
+    mnuMovieDrawSources.blockSource = (u32)&mnuMovieDrawContext;
     mnuMarkMovieDrawValuesPending();
 }
 

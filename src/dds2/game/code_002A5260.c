@@ -76,7 +76,9 @@ extern char D_00429938[]; /* "staffImageProc" */
 
 extern char D_00429968[]; /* "staffProc" */
 
-extern u8 mnuMovieDrawContext[];
+extern MovObj mnuMovieDrawContext;
+void mnuRequestIndexedMovieResource();
+void mnuStopMovieDrawTask(void);
 
 extern SdfPoolNode D_003803C8;
 
@@ -1079,15 +1081,15 @@ s32 mnuStopStaffTasks(void) {
 }
 
 s32 mnuMovieDraw(void) {
-    func_00345BA0(mnuMovieDrawContext, &D_003803C8);
+    func_00345BA0(&mnuMovieDrawContext, &D_003803C8);
     return 0;
 }
 
 extern char D_0042A338[]; /* "mnuMovieDraw" */
 
-void mnuStartMovieDrawTaskForResource(u32 resource, void *data) {
+void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *descriptor) {
     if (mnuMovieDrawTask == 0) {
-        func_00346778(mnuMovieDrawContext, data, resource);
+        func_00346778(&mnuMovieDrawContext, descriptor, fileName);
         mnuMovieDrawTask = kwlnTaskCreate(D_0042A338, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
     }
 }
@@ -1101,7 +1103,8 @@ void mnuRequestIndexedMovieResource(index)
 s32 index;
 {
     u32 *entry = (u32 *)&D_003E4C48[index];
-    mnuStartMovieDrawTaskForResource(*entry, entry + 1);
+    mnuStartMovieDrawTaskForResource((const char *)*entry,
+                                     (SdfMovieDescriptor *)(entry + 1));
 }
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A7B28);
@@ -1111,13 +1114,21 @@ extern char D_0042A348[];
 extern char D_0042A380[];
 
 extern u32 D_00437AD0;
+extern u32 sdfSoundGetCommandStatus(void);
+extern s32 sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *);
+extern SdfMovieDescriptor D_00457DB0;
+extern char D_00457DC8[];
+extern char D_0042A3B0[];
+extern u32 D_00437AD4;
+extern SdfTexResource *D_00437AD8;
+extern u32 D_00437ADC, D_00437AE0, D_00437AE4;
 
 s32 mnuMovieDrawNextProc(s32 procedure) {
     if (mnuMovieDrawTask == 0) {
         func_0035B6E0(D_0042A348);
         return -1;
     }
-    func_002A7B28(mnuMovieDrawContext, &D_003803C8);
+    func_002A7B28(&mnuMovieDrawContext, &D_003803C8);
     D_00437AD0++;
     if (D_00437AD0 == 0x1E) {
         func_0035B6E0(D_0042A380, procedure);
@@ -1126,55 +1137,54 @@ s32 mnuMovieDrawNextProc(s32 procedure) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A7DB0);
+s32 func_002A7DB0(void) {
+    MovObj *movie;
 
-typedef struct MovieDrawParams {
-    s16 x, y;
-    u32 unk04;
-    u16 width, height;
-    u32 unk0C;
-    u8 unk10[4];
-} MovieDrawParams;
+    if (mnuMovieDrawTask == 0) {
+        if (D_00437AD4 != 0) {
+            sdfUpdateTextureHeadsWithInterruptsMasked(D_00437AD8);
+            D_00437AD4 = 0;
+        }
+        return -1;
+    }
+    if (sdfSoundGetCommandStatus() == 0) {
+        movie = &mnuMovieDrawContext;
+        func_00346778(movie, &D_00457DB0, D_00457DC8);
+        movie->soundNode.textureHead = D_00437AD8;
+        movie->soundNode.width = D_00437ADC;
+        movie->soundNode.height = D_00437AE0;
+        movie->soundNode.audioMode = D_00437AE4;
+        D_00437AD4 = 0;
+        return -1;
+    }
+    return 0;
+}
 
-typedef struct MoviePlaybackContext {
-    u8 pad00[0x38];
-    u8 unk38;
-    u8 pad39[0x23];
-    u32 *unk5C;
-    u16 unk60, unk62;
-} MoviePlaybackContext;
 
 extern char *strcpy(char *, const char *);
-extern MovieDrawParams D_00457DB0;
-extern char D_00457DC8[];
-extern char D_0042A3B0[];
-extern u32 D_00437AD4;
-extern u32 *D_00437AD8;
-extern u32 D_00437ADC, D_00437AE0, D_00437AE4;
-extern s32 func_002A7DB0();
 
 /* Retain the current movie parameters while its stream is stopped, then queue
  * the replacement playback task. */
-KwlnTask *mnuRequestMoviePlayback(const char *file, const MovieDrawParams *params) {
-    MoviePlaybackContext *context;
+KwlnTask *mnuRequestMoviePlayback(const char *file, const SdfMovieDescriptor *params) {
+    MovObj *context;
 
     D_00457DB0 = *params;
     if (mnuMovieDrawTask != 0) {
-        context = (MoviePlaybackContext *)mnuMovieDrawContext;
+        context = &mnuMovieDrawContext;
         D_00437AD4 = 1;
-        D_00437AD8 = context->unk5C;
-        D_00437ADC = context->unk60;
-        D_00437AE0 = context->unk62;
-        D_00437AE4 = context->unk38;
+        D_00437AD8 = context->soundNode.textureHead;
+        D_00437ADC = context->soundNode.width;
+        D_00437AE0 = context->soundNode.height;
+        D_00437AE4 = context->soundNode.audioMode;
         strcpy(D_00457DC8, file);
-        context->unk5C = 0;
+        context->soundNode.textureHead = 0;
         sdfCancelAndReleasePacWork(context);
-        D_00457DB0.unk0C = D_00437AD8[3];
+        D_00457DB0.source = D_00437AD8->word;
         D_00437AD0 = 0;
         return kwlnTaskCreate(D_0042A3B0, 0x2AFB, 0, 0, func_002A7DB0, 0, 0);
     } else {
         D_00437AD4 = 0;
-        func_00346778(mnuMovieDrawContext, &D_00457DB0, file);
+        func_00346778(&mnuMovieDrawContext, &D_00457DB0, file);
         mnuMovieDrawTask = kwlnTaskCreate(D_0042A338, 0x2AFB, 1, 1, mnuMovieDraw, 0, 0);
     }
     return mnuMovieDrawTask;
@@ -1182,20 +1192,20 @@ KwlnTask *mnuRequestMoviePlayback(const char *file, const MovieDrawParams *param
 
 void func_002A7F98(s32 index) {
     u32 *entry = (u32 *)&D_003E4C48[index];
-    mnuRequestMoviePlayback((const char *)*entry, (const MovieDrawParams *)(entry + 1));
+    mnuRequestMoviePlayback((const char *)*entry, (const SdfMovieDescriptor *)(entry + 1));
 }
 
 void mnuStopMovieDrawTask(void) {
     if (mnuMovieDrawTask == 0) {
         return;
     }
-    sdfCancelAndReleasePacWork(mnuMovieDrawContext);
+    sdfCancelAndReleasePacWork(&mnuMovieDrawContext);
     kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }
 
 s32 mnuCheckMovieDecoderStatus(void) {
-    return sdfPacCheckDecoderStatus(mnuMovieDrawContext);
+    return sdfPacCheckDecoderStatus(&mnuMovieDrawContext);
 }
 
 extern u8 D_003E563C[];
@@ -1205,7 +1215,7 @@ u8 func_002A8028(void) {
 }
 
 u8 func_002A8038(void) {
-    return mnuMovieDrawContext[0];
+    return mnuMovieDrawContext.active;
 }
 
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_00429968);

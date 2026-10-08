@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_primitive.h"
 #include "sdf.h"
+#include "sdf_draw.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -135,28 +136,9 @@ extern s32 sdfGetPacketCursor(void);
 
 extern u16 D_00439184;
 
-typedef struct VuAsset {
-    u8 pad00[4];
-    u32 param4;            /* 0x04 */
-    u32 param8;            /* 0x08 */
-    u32 unkC;              /* 0x0C */
-    u8 pad10[0xC];
-    f32 scale;             /* 0x1C */
-    u32 unk20;             /* 0x20 */
-    u32 mode;              /* 0x24 */
-    f32 y;                 /* 0x28 */
-    f32 x;                 /* 0x2C */
-    u8 pad30[8];
-    u64 unk38;             /* 0x38 */
-    u64 unk40;             /* 0x40 */
-    u64 unk48;             /* 0x48 */
-    u64 unk50;             /* 0x50 */
-    u64 unk58;             /* 0x58 */
-    u64 unk60;             /* 0x60 */
-} VuAsset;
 
 typedef struct {
-    u8 pad00[0x40];
+    f32 matrix[4][4];      /* 0x00 */
     u16 param0;            /* 0x40 */
     s16 param1;            /* 0x42 */
     u32 selectedFlags;     /* 0x44 */
@@ -164,7 +146,7 @@ typedef struct {
     u32 flags;             /* 0x4C */
     s16 nodeCount;         /* 0x50: geometry references submitted to VU in chunks */
     u8 pad52[2];
-    VuAsset *asset;        /* 0x54 */
+    SdfAssetEntry *asset;  /* 0x54 */
     u32 unk58;             /* 0x58 */
     f32 offsetX;           /* 0x5C */
     f32 offsetY;           /* 0x60 */
@@ -180,8 +162,13 @@ typedef struct {
     u8 *dataStart;         /* 0x88 */
     u8 *cursor;            /* 0x8C */
     u8 *payload;           /* 0x90 */
-    u8 pad94[0x10];
-    u32 unkA4;             /* 0xA4 */
+    u8 *strip;             /* 0x94 */
+    u8 *positions;         /* 0x98 */
+    u8 *normals;           /* 0x9C */
+    u8 *coordinates;       /* 0xA0 */
+    u8 *secondCoordinates; /* 0xA4 */
+    u8 *vertexColors;      /* 0xA8 */
+    f32 depth;             /* 0xAC */
 } VuWork;
 
 typedef struct VuGeomRef {
@@ -409,10 +396,10 @@ void sdfVuRotateObjectBasis(void *vectors) {
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_00336EC0);
 
-void sdfVuTransformWorkAtOffset(void *out, VuAsset *work, void *reference, f32 deltaX, f32 deltaY) {
+void sdfVuTransformWorkAtOffset(void *out, SdfAssetEntry *work, void *reference, f32 deltaX, f32 deltaY) {
     func_00336EC0(out, D_00439188, reference,
-                  work->param8, work->param4,
-                  work->scale,
+                  work->unk08, work->unk04,
+                  work->unk1C,
                   work->x + deltaX,
                   work->y + deltaY);
 }
@@ -486,7 +473,7 @@ void sdfVuEmitTexturedTriangleBatches(work)
     s32 first;
     u32 *out;
     VuGeomRef *ref;
-    VuAsset *asset;
+    SdfAssetEntry *asset;
 
     if (remaining != 0) {
         out = (u32 *)work->cursor;
@@ -681,18 +668,18 @@ void sdfVuEmitSelectedNodePacket(s32 workAddress) {
 /* Finish the selected node's transformed rows and emit its textured geometry. */
 void func_00339188(u32 workAddress) {
     VuWork *work = (VuWork *)workAddress;
-    VuAsset *asset;
+    SdfAssetEntry *asset;
     u32 mode;
     u32 paramC;
     u32 param8;
 
-    func_00337718((void *)work->ringSrc, work->param1, (void *)work->unkA4,
+    func_00337718((void *)work->ringSrc, work->param1, work->secondCoordinates,
                   (u8 *)work->asset + 0x80);
     sdfVuBlendNodeXY(work->blend);
     asset = work->asset;
     mode = asset->mode;
-    paramC = asset->unkC;
-    param8 = asset->param8;
+    paramC = asset->unk0C;
+    param8 = asset->unk08;
     switch (mode) {
         case 0:
         case 1:
@@ -701,7 +688,7 @@ void func_00339188(u32 workAddress) {
                 u128 parameters[3];
 
                 func_00336EC0(parameters, D_00439188, (void *)work->unk58,
-                              paramC, asset->param4, asset->scale,
+                              paramC, asset->unk04, asset->unk1C,
                               asset->x + work->offsetX, asset->y + work->offsetY);
                 func_00337830(work, parameters);
             }
@@ -975,8 +962,8 @@ void sdfConsBuildMatrixPacket(SdfVuBonePacket *packet, SdfProjectionRecord *node
     packet->reservedB = 0;
 }
 
-extern u8 D_0040B660[];
 extern u8 D_0040B620[];
+extern u8 D_0040B660[];
 extern u8 D_0040B6A0[];
 extern u8 D_0040B580[];
 

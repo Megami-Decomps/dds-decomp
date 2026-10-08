@@ -5,7 +5,7 @@
 
 extern u8 D_0037B8BC[];
 
-extern u8 mnuMovieDrawContext[];
+extern MovObj mnuMovieDrawContext;
 
 extern SdfPoolNode D_003253C8;
 
@@ -185,13 +185,13 @@ s32 mnuStopStaffTasks(void) {
 }
 
 s32 mnuMovieDraw(void) {
-    func_002ECCF8(mnuMovieDrawContext, &D_003253C8);
+    func_002ECCF8(&mnuMovieDrawContext, &D_003253C8);
     return 0;
 }
 
-void mnuStartMovieDrawTaskForResource(u32 resource, void *data) {
+void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *descriptor) {
     if (mnuMovieDrawTask == 0) {
-        func_002ED8D0(mnuMovieDrawContext, data, resource);
+        func_002ED8D0(&mnuMovieDrawContext, descriptor, fileName);
         mnuMovieDrawTask = kwlnTaskCreate(D_003B1A78, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
     }
 }
@@ -199,21 +199,23 @@ void mnuStartMovieDrawTaskForResource(u32 resource, void *data) {
 void mnuRequestIndexedMovieResource(s32 index) {
     u8 *entry = D_0037B168 + index * 24;
 
-    mnuStartMovieDrawTaskForResource(*(s32 *)entry, (s32)(entry + 4));
+    mnuStartMovieDrawTaskForResource((const char *)*(u32 *)entry,
+                                     (SdfMovieDescriptor *)(entry + 4));
 }
 
 void mnuStopMovieDrawTask(void) {
     if (mnuMovieDrawTask == 0) {
         return;
     }
-    sdfCancelAndReleasePacWork(mnuMovieDrawContext);
+    sdfCancelAndReleasePacWork(&mnuMovieDrawContext);
     kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }
 
 s32 mnuCheckMovieDecoderStatus(void) {
-    sdfPacCheckDecoderStatus(mnuMovieDrawContext);
+    sdfPacCheckDecoderStatus(&mnuMovieDrawContext);
 }
+
 
 s32 func_00270088(void) {
     return D_0037B8BC[0];

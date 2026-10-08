@@ -105,6 +105,118 @@ typedef struct SdfTexResource {
 
 typedef char SdfTexResource_size_must_be_0x1C[
     (sizeof(SdfTexResource) == 0x1C) ? 1 : -1];
+/* IPU register state saved across stream callbacks (0x24 bytes). */
+typedef struct IpuDmaState {
+    u32 inputAddress;
+    u32 inputTagAddress;
+    u32 inputQwords;
+    u32 inputControl;
+    u32 outputAddress;
+    u32 outputQwords;
+    u32 outputControl;
+    u32 bitPointer;
+    u32 ipuControl;
+} IpuDmaState;
+
+typedef char IpuDmaState_size_must_be_0x24[
+    (sizeof(IpuDmaState) == 0x24) ? 1 : -1];
+
+/* One 0x8C allocation owns the stream/sound links and IPU transfer state. */
+typedef struct SdfStreamFrameNode {
+    struct SdfStreamFrameNode *streamPrev;
+    struct SdfStreamFrameNode *streamNext;
+    struct SdfStreamFrameNode *next;
+    u8 active;
+    u8 queued;
+    u8 unk0E;
+    u8 drained;
+    u8 firstStop;
+    u8 unk11;
+    u8 pad12;
+    u8 unk13;
+    u8 audioMode;
+    u8 loopMode;
+    u8 playbackMode;
+    u8 pad17;
+    u8 bufferIndex;
+    u8 pad19;
+    u8 unk1A;
+    u8 pad1B;
+    s32 bufferSize;
+    u32 buffers[2];
+    s32 textureResources[2];
+    u8 pad30[4];
+    s32 resourceWord;
+    SdfTexResource *textureHead;
+    u16 width;
+    u16 height;
+    u32 cycleLength;
+    u32 tickCount;
+    s32 unk48; /* Movie progress reader; no producer has been located. */
+    u32 unk4C;
+    u8 headerReady;
+    u8 done;
+    u8 filledSlots;
+    u8 firstSlot;
+    u32 scratchBuffer;
+    u8 pad58[4];
+    s32 (*read)(struct SdfStreamFrameNode *, u32, s32, void *, s32);
+    u32 source;
+    u8 pad64;
+    u8 unk65;
+    u8 pad66[2];
+    IpuDmaState dma;
+} SdfStreamFrameNode;
+
+typedef char SdfStreamFrameNode_size_must_be_0x8C[
+    (sizeof(SdfStreamFrameNode) == 0x8C) ? 1 : -1];
+typedef char SdfStreamFrameNode_dma_offset_must_be_0x68[
+    ((u32)&((SdfStreamFrameNode *)0)->dma == 0x68) ? 1 : -1];
+
+typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, u32, s32, void *, s32);
+
+typedef struct SdfMovieDescriptor {
+    u16 unk00;
+    u16 unk02;
+    u32 unk04;
+    u16 unk08;
+    u16 unk0A;
+    s32 source;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 pad13;
+} SdfMovieDescriptor;
+
+typedef char SdfMovieDescriptor_size_must_be_0x14[
+    (sizeof(SdfMovieDescriptor) == 0x14) ? 1 : -1];
+
+typedef struct MovObj {
+    u8 active;
+    u8 state;
+    u8 stopRequested;
+    u8 isPac;
+    u16 unk04;
+    u16 unk06;
+    u32 unk08;
+    u16 unk0C;
+    u16 unk0E;
+    struct DevState *deviceState;
+    s32 totalBytes;
+    s32 remainingBytes;
+    void *stream;
+    u8 pacEnabled;
+    u8 pad21;
+    u8 packetLimit;
+    u8 pad23;
+    SdfStreamFrameNode soundNode;
+} MovObj;
+
+typedef char MovObj_size_must_be_0xB0[
+    (sizeof(MovObj) == 0xB0) ? 1 : -1];
+
+void func_002ED8D0(MovObj *, SdfMovieDescriptor *, const char *);
+void func_00346778(MovObj *, SdfMovieDescriptor *, const char *);
 
 /* Graph target: two color buffers followed by the auxiliary/depth buffer (0x14). */
 typedef struct SdfGraphObj {
@@ -115,6 +227,18 @@ typedef struct SdfGraphObj {
     u8 auxiliaryFormat;
     SdfTexResource *buffers[3];
 } SdfGraphObj;
+/* A mode's 12-byte display defaults row, copied into SdfGraphObj. */
+typedef struct SdfGraphModeDefaults {
+    s16 width;
+    s16 unk2;
+    s16 height;
+    u16 bufferFormat;
+    u16 auxiliaryFormat;
+    u8 pad0A[2];
+} SdfGraphModeDefaults;
+
+typedef char SdfGraphModeDefaults_size_must_be_0xC[
+    (sizeof(SdfGraphModeDefaults) == 0xC) ? 1 : -1];
 
 /* Linked texture and its two buffers/resources (0x40); DDS1/2 sdf/sdfTex.c and game texture units. */
 typedef struct SdfTex {
@@ -301,21 +425,40 @@ typedef struct SdfAsset {
     f32 unk44;
 } SdfAsset;
 
-/* Asset entry with packed payload words (0x50); DDS1/2 game/code_002D9748/003325F8.c. */
+/* Draw entries store six transform floats and expose the same bytes as three qwords. */
+typedef union SdfDrawTransform {
+    f32 m[6];
+    u64 words[3];
+} SdfDrawTransform;
+
+/* Native 0xA0-byte draw-entry block allocated by SDF_ASSET_DRAW_ENTRY_BYTES. */
 typedef struct SdfAssetEntry {
-    u32 pad00;
-    u32 unk04;
-    u32 unk08;
-    u32 pad0C;
-    u32 unk10;
-    u32 unk14;
-    u32 pad18;
-    f32 unk1C;
-    u8 pad20[0x18];
-    u64 unk38;
-    u64 unk40;
-    u64 unk48;
+    u32 pad00;             /* 0x00 */
+    u32 unk04;             /* 0x04 */
+    u32 unk08;             /* 0x08 */
+    u32 unk0C;             /* 0x0C */
+    u32 unk10;             /* 0x10 */
+    u32 unk14;             /* 0x14 */
+    u32 pad18;             /* 0x18 */
+    f32 unk1C;             /* 0x1C */
+    u32 unk20;             /* 0x20 */
+    u32 mode;              /* 0x24 */
+    f32 y;                 /* 0x28 */
+    f32 x;                 /* 0x2C */
+    u8 pad30[8];           /* 0x30 */
+    u64 unk38;             /* 0x38 */
+    u64 unk40;             /* 0x40 */
+    u64 unk48;             /* 0x48 */
+    u64 unk50;             /* 0x50 */
+    u64 unk58;             /* 0x58 */
+    u64 unk60;             /* 0x60 */
+    SdfDrawTransform transforms[2]; /* 0x68 */
+    u32 unk98;             /* 0x98 */
+    u32 unk9C;             /* 0x9C */
 } SdfAssetEntry;
+
+typedef char SdfAssetEntry_size_must_be_0xA0[
+    (sizeof(SdfAssetEntry) == 0xA0) ? 1 : -1];
 
 /* Linked thread registry entry (0x8); DDS1/2 sdfThread and thread-control units. */
 typedef struct SdfThreadNode {
