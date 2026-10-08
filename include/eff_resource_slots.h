@@ -5,6 +5,11 @@
 
 struct EffectSlotSet;
 struct EffMappedResource;
+struct EffTimedState;
+
+u32 effSetSlotIndexedResource(struct EffTimedState *target,
+                              struct EffMappedResource *resources, s32 item,
+                              u32 flags);
 
 struct EffMappedResource *effCreateStatusBatch(u32 category);
 #ifdef VERSION_DDS2
