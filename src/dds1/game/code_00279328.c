@@ -195,7 +195,7 @@ void mnuFlagMatchingEntries(s32 context) {
         do {
             u16 skillId = (u16)node->sortKeyPrimary;
             if (mnuIsEntryCostUnaffordable(skillId, selectedEntry)) {
-                node->flags48 |= 1;
+                node->flags48 |= MNU_STAFF_NODE_UNAVAILABLE;
             }
             node = node->next;
         } while (node != NULL);

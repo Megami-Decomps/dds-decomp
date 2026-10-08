@@ -49,7 +49,6 @@ extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 #define MNU_STAFF_DISPLAY_LIMIT 3
 #define MNU_STAFF_BACKUP_BYTES 0x8D4
 #define MNU_STAFF_PARTY_ACTIVE_BIT 1
-#define MNU_STAFF_NODE_UNAVAILABLE 1
 #define MNU_STAFF_NODE_SELECTED 2
 #define MNU_STAFF_PARTY_PANEL_BASE 0x284
 #define MNU_STAFF_FADE_STEP 0x10
@@ -2138,7 +2137,7 @@ void mnuFlagMatchingEntries(s32 context) {
         do {
             /* Cost lookup uses the low halfword of the list key. */
             if (mnuIsEntryCostUnaffordable((u16)link->sortKeyPrimary, slot)) {
-                link->flags48 |= 1;
+                link->flags48 |= MNU_STAFF_NODE_UNAVAILABLE;
             }
             link = link->next;
         } while (link != NULL);

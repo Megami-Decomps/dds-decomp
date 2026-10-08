@@ -3,6 +3,9 @@
 
 #include "mnu.h"
 
+/* Staff-list nodes with unavailable entries carry this lifecycle flag. */
+#define MNU_STAFF_NODE_UNAVAILABLE 1
+
 struct DatPartyRecord;
 /* Field-use skills operate on the selected party records and their page. */
 s32 ptySkillApplyFieldUseEffect(MenuPageWindow *page, u16 ability,
