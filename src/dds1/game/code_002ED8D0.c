@@ -302,3 +302,4 @@ void sdfDecodePacNodeAndAdvanceTail(PacState *state) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_002ED8D0", D_003BD638);
+
