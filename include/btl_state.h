@@ -95,8 +95,7 @@ typedef struct BtlState {
     f32 lightColor[4]; /* 0x50: scene light color used by battle light transitions. */
     f32 ambientColor[4]; /* 0x60: default ambient color used by battle light transitions. */
     /* The same command payload is passed to the action-camera helpers. */
-    BtlLinkedCommand cameraCommand; /* 0x70..0x1AB */
-    u8 pad1AC[0x14];
+    BtlLinkedCommand cameraCommand; /* 0x70..0x1BF */
     s16 eventTaskId; /* 0x1C0: -1 when no event task is available */
     u8 pad1C2[2];
     u32 scriptFlags; /* 0x1C4 */
@@ -280,8 +279,7 @@ typedef struct BtlState {
     f32 lightColor[4]; /* 0x50: scene light color used by battle light transitions. */
     f32 ambientColor[4]; /* 0x60: default ambient color used by battle light transitions. */
     /* The same command payload is passed to the action-camera helpers. */
-    BtlLinkedCommand cameraCommand; /* 0x70..0x1CF */
-    u8 pad1D0[0x14];
+    BtlLinkedCommand cameraCommand; /* 0x70..0x1E3 */
     s16 eventTaskId; /* 0x1E4 */
     u8 pad1E6[2];
     u32 scriptFlags; /* 0x1E8 */

@@ -6597,86 +6597,74 @@ void func_001DB370(BtlCamState *dst, BtlCamState *current, BtlCamState *target, 
     dst->fov = current->fov + delta * blend;
 }
 
-extern void btlScalarRangeInitQuadratic(u8 *, f32);
-
-extern f32 btlScalarRangeStepQuadratic(u8 *, f32);
-
 extern void func_001DB370(BtlCamState *, BtlCamState *, BtlCamState *, f32);
 
-s32 btlStepPoseBlendHalf(u8 *object) {
+s32 btlStepPoseBlendHalf(BtlLinkedCommand *command) {
     f32 blend;
-    if (*(u32 *)(object + 0x110) == 0) {
-        *(f32 *)(object + 0x128) = 0.0f;
-        btlScalarRangeInitQuadratic(object + 0x13C, (f32)(*(s32 *)(object + 0x12C) * 2));
-        btlCopyMotionTransform((u8 *)&((BtlLinkedCommand *)object)->camera,
-                               (u8 *)&((BtlLinkedCommand *)object)->frontCamera);
+    if (command->state == 0) {
+        command->progress = 0.0f;
+        btlScalarRangeInitQuadratic(&command->quadraticRange, (f32)(command->durationFrames * 2));
+        btlCopyMotionTransform((u8 *)&command->camera,
+                               (u8 *)&command->frontCamera);
         return 0;
     }
-    blend = btlScalarRangeStepQuadratic(object + 0x13C, 1.0f);
+    blend = btlScalarRangeStepQuadratic(&command->quadraticRange, 1.0f);
     if (blend > 0.5f) {
         blend = 0.5f;
     }
-    func_001DB370(&((BtlLinkedCommand *)object)->camera, &((BtlLinkedCommand *)object)->frontCamera,
-                  &((BtlLinkedCommand *)object)->backCamera, 2.0f * blend);
-    *(f32 *)(object + 0x128) = blend;
+    func_001DB370(&command->camera, &command->frontCamera,
+                  &command->backCamera, 2.0f * blend);
+    command->progress = blend;
     if (blend >= 0.5f) {
         return 1;
     }
     return 0;
 }
 
-extern void btlScalarRangeSetStartClearEnd(u8 *, f32);
-
-extern f32 btlScalarRangeStepExponential(u8 *);
-
 extern void btlCopyMotionTransform(u8 *, u8 *);
 
 extern void func_001DB370(BtlCamState *, BtlCamState *, BtlCamState *, f32);
 
-s32 btlStepPoseBlend(u8 *actor) {
-    u8 *motion = actor + 0x134;
-    BtlCamState *from = &((BtlLinkedCommand *)actor)->frontCamera;
+s32 btlStepPoseBlend(BtlLinkedCommand *command) {
+    BtlExponentialRange *motion = &command->exponentialRange;
+    BtlCamState *from = &command->frontCamera;
     f32 value;
-    if (*(u32 *)(actor + 0x110) == 0) {
-        btlScalarRangeSetStartClearEnd(motion, *(f32 *)(actor + 0x130));
-        btlCopyMotionTransform((u8 *)&((BtlLinkedCommand *)actor)->camera, (u8 *)from);
+    if (command->state == 0) {
+        btlScalarRangeSetStartClearEnd(motion, command->motionParameter);
+        btlCopyMotionTransform((u8 *)&command->camera, (u8 *)from);
     }
     value = btlScalarRangeStepExponential(motion);
-    func_001DB370(&((BtlLinkedCommand *)actor)->camera, from,
-                  &((BtlLinkedCommand *)actor)->backCamera, value);
-    *(f32 *)(actor + 0x128) = value;
+    func_001DB370(&command->camera, from,
+                  &command->backCamera, value);
+    command->progress = value;
     return 0.9999990f <= value;
 }
 
-extern void btlScalarRangeInitQuadratic(u8 *, f32);
-
-extern f32 btlScalarRangeStepQuadratic(u8 *, f32);
-
-s32 btlStepPoseBlendFrame(u8 *actor) {
+s32 btlStepPoseBlendFrame(BtlLinkedCommand *command) {
     f32 value;
-    if (*(u32 *)(actor + 0x110) == 0) {
-        *(u32 *)(actor + 0x128) = 0;
-        btlScalarRangeInitQuadratic(actor + 0x13C, (f32)*(s32 *)(actor + 0x12C));
-        btlCopyMotionTransform((u8 *)&((BtlLinkedCommand *)actor)->camera,
-                               (u8 *)&((BtlLinkedCommand *)actor)->frontCamera);
+    if (command->state == 0) {
+        command->progressBits = 0;
+        btlScalarRangeInitQuadratic(&command->quadraticRange, (f32)command->durationFrames);
+        btlCopyMotionTransform((u8 *)&command->camera,
+                               (u8 *)&command->frontCamera);
         return 0;
     }
-    value = btlScalarRangeStepQuadratic(actor + 0x13C, 1.0f);
-    func_001DB370(&((BtlLinkedCommand *)actor)->camera, &((BtlLinkedCommand *)actor)->frontCamera,
-                  &((BtlLinkedCommand *)actor)->backCamera, value);
-    *(f32 *)(actor + 0x128) = value;
+    value = btlScalarRangeStepQuadratic(&command->quadraticRange, 1.0f);
+    func_001DB370(&command->camera, &command->frontCamera,
+                  &command->backCamera, value);
+    command->progress = value;
     return 0.9999990f <= value;
 }
 
-s32 btlStepPoseBlendRatio(u8 *actor) {
-    f32 ratio = (f32)*(s32 *)(actor + 0x110) / (f32)*(s32 *)(actor + 0x12C);
+s32 btlStepPoseBlendRatio(BtlLinkedCommand *command) {
+    f32 ratio = (f32)command->state / (f32)command->durationFrames;
     if (ratio <= 1.0f) {
-        func_001DB370(&((BtlLinkedCommand *)actor)->camera, &((BtlLinkedCommand *)actor)->frontCamera,
-                      &((BtlLinkedCommand *)actor)->backCamera, ratio);
+        func_001DB370(&command->camera, &command->frontCamera,
+                      &command->backCamera, ratio);
         return 0;
     }
-    btlCopyMotionTransform((u8 *)&((BtlLinkedCommand *)actor)->camera,
-                           (u8 *)&((BtlLinkedCommand *)actor)->backCamera);
+    btlCopyMotionTransform((u8 *)&command->camera,
+                           (u8 *)&command->backCamera);
     return 0;
 }
 

@@ -957,25 +957,16 @@ u32 btlBlendColorVec(f32 *colorA, f32 *colorB, f32 blendFactor) {
     return packedStorage[0];
 }
 
-/* Scalar interpolation state shared by the initialization routines below. */
-typedef struct BtlScalarRange {
-    f32 start;       /* 0x00 */
-    f32 end;         /* 0x04 */
-    f32 inverseSpan; /* 0x08 */
-    f32 zero;        /* 0x0C */
-    f32 target;      /* 0x10 */
-} BtlScalarRange;
 
-/* Store the starting span and clear end; the other state fields are untouched. */
-void btlScalarRangeSetStartClearEnd(s32 rangeAddress, f32 start) {
-    ((BtlScalarRange *)rangeAddress)->start = start;
-    ((BtlScalarRange *)rangeAddress)->end = 0;
+/* Store the exponential span and clear its progress. */
+void btlScalarRangeSetStartClearEnd(BtlExponentialRange *state, f32 start) {
+    state->start = start;
+    state->end = 0;
 }
 
 /* Advance progress by (1 - progress) / span and return at most one.
    Only the return is capped: stored progress is raw. A nonpositive span is unchanged. */
-f32 btlScalarRangeStepExponential(s32 rangeAddress) {
-    BtlScalarRange *state = (BtlScalarRange *)rangeAddress;
+f32 btlScalarRangeStepExponential(BtlExponentialRange *state) {
     f32 result = 0.0f;
     f32 span = state->start;
     f32 progress = state->end;
@@ -996,25 +987,25 @@ f32 btlScalarRangeStepExponential(s32 rangeAddress) {
 }
 
 /* Initialize the quadratic accumulator; a zero span leaves inverseSpan unchanged. */
-void btlScalarRangeInitQuadratic(s32 rangeAddress, f32 start) {
+void btlScalarRangeInitQuadratic(BtlScalarRange *state, f32 start) {
     f32 initialValue;
 
-    ((BtlScalarRange *)rangeAddress)->zero = 0.0f;
-    ((BtlScalarRange *)rangeAddress)->start = start;
-    initialValue = ((BtlScalarRange *)rangeAddress)->zero;
-    ((BtlScalarRange *)rangeAddress)->end = start;
-    ((BtlScalarRange *)rangeAddress)->target = initialValue;
+    state->velocity = 0.0f;
+    state->start = start;
+    initialValue = state->velocity;
+    state->end = start;
+    state->value = initialValue;
     if (start == initialValue) {
         return;
     }
-    ((BtlScalarRange *)rangeAddress)->inverseSpan = 1.0f / (start * start * 0.25f);
+    state->inverseSpan = 1.0f / (start * start * 0.25f);
 }
 
 /* Integrate the quadratic accumulator, reversing acceleration after the midpoint.
    Completion returns one without updating state; intermediate values are not capped. */
 f32 btlScalarRangeStepQuadratic(BtlScalarRange *state, f32 timeStep) {
-    f32 accumulatedValue = state->target;
-    f32 velocity = state->zero;
+    f32 accumulatedValue = state->value;
+    f32 velocity = state->velocity;
     f32 remainingSpan = state->end;
 
     remainingSpan -= timeStep;
@@ -1028,9 +1019,9 @@ f32 btlScalarRangeStepQuadratic(BtlScalarRange *state, f32 timeStep) {
         velocity += state->inverseSpan * timeStep;
     }
     state->end = remainingSpan;
-    state->zero = velocity;
+    state->velocity = velocity;
     accumulatedValue += velocity * timeStep;
-    state->target = accumulatedValue;
+    state->value = accumulatedValue;
     return accumulatedValue;
 }
 
