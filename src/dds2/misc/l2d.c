@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf.h"
+#include "sdf_packet_list.h"
 #include "dds3_owned_node.h"
 
 /* Rectangle in object space: origin, extent, depth and 15-bit colour. */
@@ -16,8 +17,6 @@ typedef struct L2dRect {
 
 
 extern SdfPoolNode D_003805A8;
-
-extern s32 sdfAllocatePacketList(s32 (*alloc)(s32));
 
 extern void sdfAppendClosedRectanglePacket(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top,
                           s32 right, s32 bottom, s32 depth, s32 (*alloc)(s32));
