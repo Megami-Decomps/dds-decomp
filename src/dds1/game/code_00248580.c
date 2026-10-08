@@ -680,10 +680,10 @@ void mnuSetupStaffMenuProfilePage(DatPartyRecord *source, MenuProgressHost *work
     mnuAttachPartyIconBundle(index, window, (u32)work->staffSlots.pairResources[0]);
     work->panelGroup = mnuCreatePanelGroup((s32)work->staffSlots.pairResources[0]);
     work->effectResource = mnuAllocateSimpleSprite(
-        (struct EffectSlotSet *)work->staffSlots.baseResources[5],
-        (struct EffectSlotSet *)work->staffSlots.baseResources[2],
-        (struct EffectSlotSet *)work->staffSlots.baseResources[3],
-        (struct EffectSlotSet *)work->staffSlots.baseResources[0],
+        work->staffSlots.baseResources[5],
+        work->staffSlots.baseResources[2],
+        work->staffSlots.baseResources[3],
+        work->staffSlots.baseResources[0],
         work->staffSlots.pairResources[0]);
     work->currentEffect = mnuCreateProfilePanel(source);
     mnuCacheProfilePanelGridPositions(work->currentEffect, (u32)work->staffSlots.pairResources[1], 5, 14, 15);

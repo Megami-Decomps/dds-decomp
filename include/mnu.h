@@ -125,9 +125,9 @@ typedef char MenuAssets_size_must_be_0x20[(sizeof(MenuAssets) == 0x20) ? 1 : -1]
 /* Native staff sprite banks; DDS2 retains only two base resources. */
 typedef struct StaffSlots {
 #ifdef VERSION_DDS2
-    u32 baseResources[2];
+    struct EffectSlotSet *baseResources[2];
 #else
-    u32 baseResources[7];
+    struct EffectSlotSet *baseResources[7];
 #endif
     struct EffectSlotSet *pairResources[2];
     struct EffectSlotSet *mainResources[16];
