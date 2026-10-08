@@ -4812,7 +4812,71 @@ void btlRestoreUnitMinimumValueAndClearStatus(UiObject *object, s32 resource) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B52D8);
+s32 func_001B52D8(ActionStateLink *action) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlOperandGroup *group;
+    BtlUnit *unit;
+    u32 count;
+    u32 i;
+    u32 targetSideA;
+    u32 targetSideB;
+    u32 activeSideA;
+    u32 activeSideB;
+
+    if ((action->pendingFlags & 0x40) != 0) {
+        return 0;
+    }
+    if (battle->requestArgument != 0) {
+        return 0;
+    }
+    if ((battle->commandRestrictFlags & 1) != 0) {
+        return 0;
+    }
+
+    targetSideA = 0;
+    targetSideB = 0;
+    count = btlGetIndexListCount(action->indexWork.indices);
+    group = action->indexWork.groups;
+    for (i = 0; i < count; i++, group++) {
+        if (group->inactive != 0) {
+            BtlUnit *target;
+            if (group->reflected != 0) {
+                target = action->unit;
+            } else {
+                target = btlGetIndexListEntry(action->indexWork.indices, i);
+            }
+            if ((target->flags & 0x200) != 0) {
+                targetSideA++;
+            } else if ((target->flags & 0x400) != 0) {
+                targetSideB++;
+            }
+        }
+    }
+
+    activeSideA = 0;
+    activeSideB = 0;
+    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+        s32 flags = unit->flags;
+        if ((flags & 1) == 0) {
+            continue;
+        }
+        if ((flags & 0xE0) != 0) {
+            continue;
+        }
+        if ((flags & 0x200) != 0) {
+            activeSideA++;
+        } else if ((flags & 0x400) != 0) {
+            activeSideB++;
+        }
+    }
+    if (targetSideA >= activeSideA) {
+        return 0;
+    }
+    if (targetSideB < activeSideB) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 btlCanUseActorCommandForModelEntry(s32 object, s32 other, s32 offset, s32 index) {
     s32 (*predicate)(s32, s32, s32);
