@@ -382,9 +382,6 @@ extern u8 D_004386E8[];
 
 
 
-struct FileWork;
-extern u32 fileGetResourceHandle(struct FileWork *);
-
 extern EffectSlotSet *func_00305148(u32, u32);
 
 
@@ -11037,7 +11034,7 @@ EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, s32 ke
 }
 
 /* Publish the instance, release its source allocation, then clean up the completed file job. */
-void effCompleteTransientResourceJob(void *job, u32 *outInstance) {
+void effCompleteTransientResourceJob(struct FileRequest *job, u32 *outInstance) {
     u32 allocation;
     EffectSlotSet *instance;
 
@@ -11049,7 +11046,7 @@ void effCompleteTransientResourceJob(void *job, u32 *outInstance) {
 }
 
 /* Publish the instance without releasing its source allocation, then clean up the file job. */
-void effCompleteRetainedResourceJob(void *job, u32 *outInstance) {
+void effCompleteRetainedResourceJob(struct FileRequest *job, u32 *outInstance) {
     u32 allocation;
     EffectSlotSet *instance;
 
@@ -11085,7 +11082,7 @@ EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
 }
 
 /* Publish mapped records before releasing their source allocation and completing the file job. */
-void effCompleteMappedResourceJob(void *job, u32 *outMappedResource) {
+void effCompleteMappedResourceJob(struct FileRequest *job, u32 *outMappedResource) {
     u32 allocation;
     u32 sourceAddress;
     EffMappedResource *mappedResource;

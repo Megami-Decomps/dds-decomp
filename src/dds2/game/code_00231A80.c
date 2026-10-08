@@ -60,8 +60,6 @@ extern s32 sdfRelocatePackedResourcePayload();
 
 
 struct FileWork;
-extern u32 fileGetResourceHandle(struct FileWork *);
-extern u32 fileGetLoadedDataAddress(struct FileWork *);
 extern void filePollEntryCleanup(struct FileWork *);
 extern void mdlExecuteAndFreeJob(MdlLoadRequest *);
 
