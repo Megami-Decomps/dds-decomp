@@ -341,7 +341,7 @@ extern void func_00342580(s32 arg0);
 
 extern s32 fldCurrentBgmId[];
 
-extern void func_00341C78();
+extern void func_00341C78(u32);
 
 extern void fldRelocatePackedTransferChunk(u32 arg0, s32 arg1);
 
@@ -3905,7 +3905,7 @@ extern void fldReleaseTargetGuideResource(void);
 
 extern void fldResetViewState(void);
 
-extern void func_00341C78(s32);
+extern void func_00341C78(u32);
 
 void fldResetTargetViewAndSound(void) {
     fldReleaseTargetGuideResource();
@@ -4102,7 +4102,7 @@ s32 fldIsTargetWithinInteractionRange(void) {
     return inRange;
 }
 
-s32 func_00153560(void) {
+s32 func_00153560(s32 unusedArea, s32 unusedRoom) {
     if (fldAreaState[4] == 23) {
         if (fldAreaState[5] == 10 && mdlFlagTest(1254)) {
             return 0;
