@@ -9,6 +9,7 @@
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
+#include "mnu_list.h"
 #include "mnu_panel_state.h"
 #include "mnu_staff.h"
 #include "mdl.h"
@@ -90,7 +91,7 @@ extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 typedef struct MenuPanelItem MenuPanelItem;
 extern s32 D_00437C9C;
 extern s32 func_002B8E30();
-extern s32 mnuScrollListToEnd();
+extern s32 mnuScrollListToEnd(struct MenuList *list);
 
 extern void func_002BE730();
 extern void func_002BED10(MenuQueuedCommand *entry);
@@ -1589,18 +1590,18 @@ s32 mnuMapPadMaskToFlags(s32 buttonMask) {
     return inputFlags;
 }
 
-void mnuHandleListPageJumpInput(s32 active, u8 *menu, u32 *buttons) {
+void mnuHandleListPageJumpInput(s32 active, MenuWindowContainer *window, u32 *buttons) {
     s32 top = 0;
     s32 bottom = 0;
-    u8 *list = *(u8 **)(menu + 0x18);
+    MenuList *list = window->list;
 
     if (active != 0) {
-        if (*(s32 *)(list + 0x20) >= *(s32 *)(list + 0xC)) {
+        if (list->count >= list->visibleCount) {
             if (*buttons & 0x400) {
                 top = func_002B8E30(list);
             }
             if (*buttons & 0x800) {
-                bottom = mnuScrollListToEnd(*(u8 **)(menu + 0x18));
+                bottom = mnuScrollListToEnd(window->list);
             }
             if (top == 0) {
                 *buttons &= ~0x400;
@@ -1608,7 +1609,7 @@ void mnuHandleListPageJumpInput(s32 active, u8 *menu, u32 *buttons) {
             if (bottom == 0) {
                 *buttons &= ~0x800;
             }
-            mnuClearWindowPanelTransitionFlag((MenuWindowContainer *)menu);
+            mnuClearWindowPanelTransitionFlag(window);
             return;
         }
     }
@@ -1616,8 +1617,8 @@ void mnuHandleListPageJumpInput(s32 active, u8 *menu, u32 *buttons) {
     *buttons &= ~0x800;
 }
 
-void mnuHandlePanelListPageJumpInput(u32 item, u32 option) {
-    mnuHandleListPageJumpInput(*(u32 *)((s32)item + 0x90), item, option);
+void mnuHandlePanelListPageJumpInput(MenuWindowContainer *window, u32 *buttons) {
+    mnuHandleListPageJumpInput((s32)window->resource, window, buttons);
 }
 
 /* Bits 0x8000 and 0x4000 return early in that order; state bits may suppress navigation SE. */
