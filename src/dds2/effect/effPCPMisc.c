@@ -691,12 +691,12 @@ extern void func_00197D50();
 extern void effThunderReleaseFragmentWork(void *work);
 
 
-/* Effect initializers implemented in assembly below (func_001708A0 lives in
+/* Effect initializers implemented in assembly below (effScatterCreateRadialWork lives in
    another unit). Each is entered with and without spawn arguments, so they
    are declared unchecked. */
 extern void *effPcpCreateDelayedEventEntries();
 
-/* Effect initializers implemented in assembly below (func_001708A0 lives in
+/* Effect initializers implemented in assembly below (effScatterCreateRadialWork lives in
    another unit). Each is entered with and without spawn arguments, so they
    are declared unchecked. */
 extern void *effPcpEventWorkCreate();
