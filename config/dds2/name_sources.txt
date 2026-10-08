@@ -1168,6 +1168,7 @@
 0x0016AEA0	effParamDescriptorGetKind	inferred	Reads the descriptor's first word as the extended-work kind.
 0x0016AEA8	effParamDescriptorGetTableIndex	inferred	Reads the descriptor's second word as its fallback table index.
 0x0016AF38	effCreateThunderCellSystemWork	inferred	confidence=high; src/dds2/game/code_0016A100.c:func_0016AF38; Copies thunder head parameters, allocates/configures its cell system, initializes all cell records and sets default color. [names_qp9.tsv]
+0x0016B118	effThunderCloneCellSystemWork	inferred	Duplicate callback recreates the vector cell-system work from its retained parameter prefix.
 0x0016B130	effThunderReleaseVectorWork	inferred	queued
 0x0016B170	effThunderSetVectorTint	inferred	queued
 0x0016B178	effThunderScaleVectorDimensions	inferred	queued

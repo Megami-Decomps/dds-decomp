@@ -1470,6 +1470,7 @@
 0x00163290	effParamCreateFromTable	inferred	reads kind id and data block from a packed row, then creates the work
 0x001632E0	effCreateThunderCellSystemWork	inferred	confidence=high; src/dds1/game/code_001624D0.c:func_001632E0; Copies thunder parameters into retained work, allocates its cell system, initializes every cell and sets default color. [names_qp9.tsv]
 0x001634A0	effPCPThunderCreate	inferred	spawn wrapper: param-set block 0 + init func_001632E0
+0x001634C0	effThunderCloneCellSystemWork	inferred	Duplicate callback recreates the vector cell-system work from its retained parameter prefix.
 0x001634D8	effThunderReleaseVectorWork	inferred	queued
 0x00163518	effThunderSetVectorTint	inferred	queued
 0x00163520	effThunderScaleVectorDimensions	inferred	queued
