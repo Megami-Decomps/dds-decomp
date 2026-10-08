@@ -172,7 +172,7 @@ extern s32 sceSifAllocIopHeap(s32);
 
 extern void func_0034D400(s32, s32, s32);
 
-extern void sdfDevLoadWholeFile(s32);
+extern void sdfDevLoadWholeFile(const char *);
 
 typedef struct Bytes7 {
     s8 b[7];
@@ -673,13 +673,13 @@ extern s32 func_0036A1B0(s32, s32, s32);
 extern s32 func_00369DF8(s32);
 
 /* Read a whole named file into the loader's allocated EE buffer, then close it. */
-void sdfDevLoadWholeFile(s32 fileNameAddress) {
-    s32 fileHandle = func_00369B70(fileNameAddress, SDF_DEV_FILE_OPEN_READ);
+void sdfDevLoadWholeFile(const char *fileName) {
+    s32 fileHandle = func_00369B70(fileName, SDF_DEV_FILE_OPEN_READ);
     s32 fileBytes;
     s32 bufferAddress;
 
     if (fileHandle < 0) {
-        sdfPanicHaltPrintf(D_0042E288, fileNameAddress);
+        sdfPanicHaltPrintf(D_0042E288, fileName);
     }
     fileBytes = func_00369F78(fileHandle, 0, SDF_DEV_SEEK_END);
     func_00369F78(fileHandle, 0, SDF_DEV_SEEK_START);
@@ -690,14 +690,14 @@ void sdfDevLoadWholeFile(s32 fileNameAddress) {
 }
 
 /* Record the disc search path, preload a separate file, and initialize an aligned IOP buffer. */
-void sdfDevStartLoad(s32 discFileNameAddress, s32 preloadFileNameAddress) {
+void sdfDevStartLoad(const char *discFileName, const char *preloadFileName) {
     u32 discFileRecord[SDF_DEV_DISC_FILE_WORDS];
     s32 iopHeapAddress;
 
-    sdfDiscLoadFilename = discFileNameAddress;
-    sdfDevLoadWholeFile(preloadFileNameAddress);
-    if (sceCdSearchFile(discFileRecord, discFileNameAddress) == 0) {
-        sdfPanicHaltPrintf(D_0042E288, discFileNameAddress);
+    sdfDiscLoadFilename = (u32)discFileName;
+    sdfDevLoadWholeFile(preloadFileName);
+    if (sceCdSearchFile(discFileRecord, (s32)discFileName) == 0) {
+        sdfPanicHaltPrintf(D_0042E288, discFileName);
     }
     D_004391A0 = discFileRecord[0];
     iopHeapAddress = sceSifAllocIopHeap(SDF_DEV_IOP_BUFFER_BYTES);
