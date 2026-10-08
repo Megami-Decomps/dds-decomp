@@ -477,10 +477,10 @@ void func_002CAAC8(s32 *points, u32 tail, u32 *colors, s32 count,
 }
 
 
-/* Return a callback-list header address, retaining its allocation handle and teardown userData. */
+/* Return a callback-list header with its allocation descriptor and teardown userData. */
 SdfList *sdfCreateTaskHeader(void *userData) {
-    s32 allocation = (u32)sdfAllocGeneralBlock(sizeof(SdfList));
-    SdfList *obj = (SdfList *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)allocation);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(SdfList));
+    SdfList *obj = (SdfList *)sdfMemoryGetBlockAddress(allocation);
 
     memset(obj, 0, sizeof(SdfList));
     obj->allocation = allocation;
@@ -494,7 +494,7 @@ void sdfDestroyTaskWork(SdfList *work) {
     if (work != NULL) {
         sdfClearTaskList(work);
         work->onDestroy(-1, work->userData);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->allocation));
+        sdfReleaseResourceAllocation(work->allocation);
     }
 }
 
