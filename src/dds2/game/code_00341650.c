@@ -1,6 +1,15 @@
 #include "snd_ring.h"
 #include "common.h"
 
+#define SND_COMMAND_RING_ENTRY_COUNT 32
+#define SND_COMMAND_RING_INDEX_MASK (SND_COMMAND_RING_ENTRY_COUNT - 1)
+#define SND_COMMAND_HEADER_BYTES 0x14
+#define SND_COMMAND_QUADWORD_BYTES 16
+#define SND_COMMAND_QUADWORD_SHIFT 4
+#define SND_COMMAND_CHANNEL_MASK 0xFFFF
+#define SND_COMMAND_ID_SHIFT 16
+#define SND_COMMAND_LENGTH_SHIFT 28
+
 typedef struct CmdPacket {
     /* 0x0 */ u32 trackId;
     /* 0x4 */ u32 unk4;
@@ -59,7 +68,7 @@ extern s32 sceSifInitIopHeap(void);
 extern s32 func_003415A8(void);
 extern void func_003417E0(s32, void *, s32);
 
-extern SndRingPacket D_00477A00[32];
+extern SndRingPacket D_00477A00[SND_COMMAND_RING_ENTRY_COUNT];
 extern u32 D_00438B90;
 /* The worker consumes entries while this producer publishes and polls cursors. */
 extern vu16 D_004391E2;
@@ -69,32 +78,36 @@ extern s32 WakeupThread(s32 thread);
 extern s32 func_003414E8(void);
 extern void *memcpy(void *, const void *, u32);
 
-u32 func_00341650(u32 command, u32 channel, void *packet, s32 size) {
-    s32 next;
-    s32 retries;
+u32 func_00341650(u32 command, u32 channel, void *packet, s32 payloadBytes) {
+    s32 nextWriteIndex;
+    s32 wakeAttemptsRemaining;
     SndRingPacket *entry;
-    u32 packetQuadwords;
+    u32 transferQuadwords;
 
     if (++D_00438B90 == 0) {
         D_00438B90 = 1;
     }
-    next = ((s16)D_004391E4 + 1) & 31;
-    if (next == (s16)D_004391E2) {
-        for (retries = 8; retries != 0; retries--) {
+    nextWriteIndex = ((s16)D_004391E4 + 1) & SND_COMMAND_RING_INDEX_MASK;
+    if (nextWriteIndex == (s16)D_004391E2) {
+        for (wakeAttemptsRemaining = 8; wakeAttemptsRemaining != 0; wakeAttemptsRemaining--) {
             do {
                 WakeupThread(D_004391E8);
-            } while ((s16)D_004391E2 != next);
+            } while ((s16)D_004391E2 != nextWriteIndex);
         }
         return 0;
     }
     entry = &D_00477A00[(s16)D_004391E4];
     entry->sequence = D_00438B90;
-    if (size != 0) {
-        memcpy(entry->payload, packet, size);
+    if (payloadBytes != 0) {
+        memcpy(entry->payload, packet, payloadBytes);
     }
-    packetQuadwords = (size + 0x14 + 15) >> 4;
-    entry->command = (command << 16) | (channel & 0xffff) | (packetQuadwords << 28);
-    D_004391E4 = next;
+    /* The SIF length includes the transport/command header and rounds up to quadwords. */
+    transferQuadwords = (payloadBytes + SND_COMMAND_HEADER_BYTES +
+                        (SND_COMMAND_QUADWORD_BYTES - 1)) >> SND_COMMAND_QUADWORD_SHIFT;
+    entry->command = (command << SND_COMMAND_ID_SHIFT) |
+                     (channel & SND_COMMAND_CHANNEL_MASK) |
+                     (transferQuadwords << SND_COMMAND_LENGTH_SHIFT);
+    D_004391E4 = nextWriteIndex;
     if (D_004391E0 != 0) {
         while (func_003414E8() != 0) {
         }
