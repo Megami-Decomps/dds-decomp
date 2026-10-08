@@ -129,13 +129,12 @@ typedef struct FldAreaWork {
     s32 floor;
     u8 pad18[0xC];
     s32 unk24;
-    u8 pad28[0x10];
-    s32 skyAlphaOffset;
-    u8 pad3C[0x14];
+    u8 pad28[0x28];
     s32 mode;
     u8 pad54[4];
     s32 rowIdx;
-    u8 pad5C[8];
+    f32 unk5C; /* 0x5C: retail lwc1 in func_0012CED0 (lerp target) */
+    f32 unk60; /* 0x60: retail lwc1 in func_0012CED0 (lerp source) */
     f32 negatedAngle;
     u8 pad68[4];
     f32 dist;
@@ -147,7 +146,8 @@ typedef struct FldAreaWork {
     s16 unk104;
     u8 pad106[0x12];
     s32 unk118;
-    u8 pad11C[0x0E];
+    u8 pad11C[0x0C];
+    s16 sceneHold; /* 0x128: retail lh of fldAreaState in func_00132FD0 */
     s16 colorEffectSuppressed;
     u8 pad12C[0x14];
     f32 x;
@@ -3594,47 +3594,6 @@ void func_00132E38(s32 duration, f32 redA, f32 greenA, f32 blueA,
     D_003306C0[2] = blueB;
 }
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00132FD0);
-
-extern s32 D_0032E3C0[];
-extern s16 D_0032E4D8[];
-extern s32 D_003BAD58;
-
-void fldApplyPendingSceneValueWithSpeed(s32 speed) {
-    if (D_003BAD58 == 0 && D_0032E3C0[0] < 40) {
-        speed = 0;
-    }
-    if (D_003BADC8 != 0 && D_003BAD98 != D_003BADC8) {
-        if (D_0032E4D8[0] == 0) {
-            D_0032E59C[0] = D_003BADC8;
-        }
-        func_00132FD0(D_003BADC8, speed);
-    }
-}
-
-INCLUDE_ASM(const s32, "game/code_00126A30", func_001332E8);
-
-void fldSetCameraObjectActiveFlag(s32 enabled) {
-    if (enabled == 0) {
-        dds3ClearObjectFlags(fldPlayerObject, 0x100);
-        return;
-    }
-    dds3SetObjectFlags(fldPlayerObject, 0x100);
-    evtEndObjectValueTransition((EffWorldNode *)fldPlayerObject);
-}
-
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00133640);
-
-INCLUDE_ASM(const s32, "game/code_00126A30", fldSetDisplayState);
-
-void fldInitializeDisplayPointerTable(void) {
-    u32 *displayPointers = D_00330738;
-
-    memset(displayPointers, 0, 0x14);
-    displayPointers[0] = (u32)D_003306B0;
-    displayPointers[1] = (u32)D_003306C0;
-}
-
 /* Three directional light vectors and paired values, plus fixed-point and
  * final homogeneous vectors. The opaque light setters consume each triplet. */
 typedef struct {
@@ -3677,6 +3636,47 @@ typedef struct {
     u8 padA4[0x30];
     f32 unitColorB[3];
 } FldLightSet; /* 0xE0 bytes */
+INCLUDE_ASM(const s32, "game/code_00126A30", func_00132FD0);
+
+extern s32 D_0032E3C0[];
+extern s16 D_0032E4D8[];
+extern s32 D_003BAD58;
+
+void fldApplyPendingSceneValueWithSpeed(s32 speed) {
+    if (D_003BAD58 == 0 && D_0032E3C0[0] < 40) {
+        speed = 0;
+    }
+    if (D_003BADC8 != 0 && D_003BAD98 != D_003BADC8) {
+        if (D_0032E4D8[0] == 0) {
+            D_0032E59C[0] = D_003BADC8;
+        }
+        func_00132FD0(D_003BADC8, speed);
+    }
+}
+
+INCLUDE_ASM(const s32, "game/code_00126A30", func_001332E8);
+
+void fldSetCameraObjectActiveFlag(s32 enabled) {
+    if (enabled == 0) {
+        dds3ClearObjectFlags(fldPlayerObject, 0x100);
+        return;
+    }
+    dds3SetObjectFlags(fldPlayerObject, 0x100);
+    evtEndObjectValueTransition((EffWorldNode *)fldPlayerObject);
+}
+
+INCLUDE_ASM(const s32, "game/code_00126A30", func_00133640);
+
+INCLUDE_ASM(const s32, "game/code_00126A30", fldSetDisplayState);
+
+void fldInitializeDisplayPointerTable(void) {
+    u32 *displayPointers = D_00330738;
+
+    memset(displayPointers, 0, 0x14);
+    displayPointers[0] = (u32)D_003306B0;
+    displayPointers[1] = (u32)D_003306C0;
+}
+
 extern s32 kwlnSetDrawColorTarget(s32, void *);
 extern s32 kwlnSetLightColorTarget(s32, s32, void *);
 extern s32 kwlnSetBackgroundColorTarget(s32, void *);

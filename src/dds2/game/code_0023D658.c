@@ -56,7 +56,7 @@ extern f32 evtMeasurePathTrajectoryLength(s32);
 extern void evtScaleValueByMultiplier(s32, f32);
 extern void sdfSetFloatCounterDirection(s32, s32);
 
-extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast);
+extern void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast);
 
 extern void *dds3GetWorldObject(void);
 
@@ -200,7 +200,7 @@ void evtBeginVectorTransition(EvtUnit *work, s128 *vector, s32 frames) {
         PCP_COPY_VECTOR(destination, vector);
         work->motionParameter = frames;
         work->directionOffset = 0;
-        work->unk94 = 0;
+        work->motionCallback = 0;
         work->motionTicks = 0;
     }
 }
@@ -217,7 +217,7 @@ void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
 }
 
 /* Configure a mode-one vector transition, without retaining a world source. */
-void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast) {
+void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast) {
     f32 *destination = work->targetVector;
 
     work->motionSubmode = mode;
@@ -227,17 +227,17 @@ void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unu
     PCP_COPY_VECTOR(destination, vector);
     work->motionParameter = frames;
     work->directionOffset = valueB6;
-    work->unk94 = value94;
+    work->motionCallback = callback;
     work->motionTicks = 0;
 }
 
 /* Configure the same transition from a secondary-world object's vector. */
-void evtBeginUnitTransitionTowardWorldObject(EvtUnit *work, s32 mode, s32 objectId, s32 unused, s32 frames, s32 valueB6, s32 value94, s32 unusedLast) {
+void evtBeginUnitTransitionTowardWorldObject(EvtUnit *work, s32 mode, s32 objectId, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast) {
     EffWorldNode *worldUnit;
 
     worldUnit = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (worldUnit != NULL) {
-        evtBeginUnitVectorTransition(work, mode, (s128 *)worldUnit->data, unused, frames, valueB6, value94, unusedLast);
+        evtBeginUnitVectorTransition(work, mode, (s128 *)worldUnit->data, unused, frames, valueB6, callback, unusedLast);
         work->transitionSourceKind = 1;
         work->linkedUnit = worldUnit;
     }
@@ -304,15 +304,15 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
     VU0_STORE_VF($vf10, work->targetVector);
     work->motionParameter = frames;
     work->directionOffset = valueB6;
-    work->unk94 = 0;
+    work->motionCallback = 0;
     work->motionTicks = 0;
 }
 
-s32 evtStartUnitModeWithValue(EvtUnit *eventUnit, s32 value) {
+s32 evtStartUnitModeWithValue(EvtUnit *eventUnit, s32 (*callback)(EvtUnit *, s32)) {
     s32 result = 0;
 
-    if (value != 0) {
-        eventUnit->unk94 = value;
+    if (callback != 0) {
+        eventUnit->motionCallback = callback;
         eventUnit->motionTicks = 0;
         eventUnit->motionState = EVT_UNIT_MOTION_STATE_VALUE;
         result = 1;

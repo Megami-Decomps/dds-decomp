@@ -115,7 +115,7 @@ typedef struct EvtUnit {
     s32 previousTransitionValue;   /* 0x88 */
     struct MdlCtx *owner;          /* 0x8C: model context and its SDK motion slots */
     void *linkedUnit;              /* 0x90: retained source of a transition */
-    s32 unk94;                     /* 0x94 */
+    s32 (*motionCallback)(struct EvtUnit *, s32); /* 0x94: returns 1 when motion completes. */
     f32 wobblePhase;               /* 0x98: wrapping radians used by model scale/rotation wobble. */
     s32 unk9C;                     /* 0x9C */
     s32 pathHandle;                /* 0xA0: freed when replacing the path */

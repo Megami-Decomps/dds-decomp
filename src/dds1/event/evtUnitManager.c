@@ -899,7 +899,7 @@ void evtPrepareUnitMotionState(EvtUnit *unit, s32 a, s32 b, s32 c, s32 mode) {
     unit->unkC8 = c;
     unit->flags |= 0x80;
     unit->motionTicks = 0;
-    unit->unk94 = 0;
+    unit->motionCallback = 0;
     switch (mode) {
     case 0:
         unit->flags |= 0x20;
