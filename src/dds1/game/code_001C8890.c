@@ -259,7 +259,7 @@ typedef struct ActiveSoundNode {
 
 typedef struct SoundLink {
     BtlUnit *owner;
-    SoundVoice *effectHandle;
+    BattleEffect *effectHandle;
     SoundResourceNode *effect;
     u16 variant;
     u16 unk_0E;
@@ -269,7 +269,7 @@ extern void btlUpdateUnitCommandEffect(SoundLink *);
 
 typedef struct SoundResourceLink {
     BtlUnit *owner;
-    SoundVoice *effectHandle;
+    BattleEffect *effectHandle;
     SoundResourceNode *effect;
     u32 variant;
     u8 refreshRequested;
@@ -5448,16 +5448,14 @@ u8 *func_001D9468(u8 *owner, u32 value) {
 typedef struct UnitEffectTaskArgs {
     BtlUnit *unit;
     SoundMixer *mixer;
-    SoundVoice *effect;
+    BattleEffect *effect;
     s32 duration;
     s32 counter;
 } UnitEffectTaskArgs;
 
-extern void *func_00160958(SoundMixer *, u16, void *, s32);
 
-extern void effBattleUpdateSelectedValue(u8 *, s32);
 
-extern void func_00160D88(u8 *);
+extern void func_00160D88(BattleEffect *);
 
 /* Start from the selected-unit SYSEFF source, then update through its duration.
  * Return one for an ineligible unit or expiry, zero while updating. */
@@ -5498,7 +5496,7 @@ u32 btlUpdateSelectedUnitEffect(UnitEffectTaskArgs *arguments) {
 extern u32 btlUpdateSelectedUnitEffect(UnitEffectTaskArgs *);
 
 void btlFinishSelectedUnitEffect(UnitEffectTaskArgs *arguments) {
-    SoundVoice *voice = arguments->effect;
+    BattleEffect *voice = arguments->effect;
     if (voice != 0) {
         effReleaseBattleVoiceOwner(voice);
     }
@@ -10063,7 +10061,7 @@ BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *effect, BtlUnit *s
 
 typedef struct ActorEffectTaskArgs {
     SoundResourceNode *source;
-    SoundVoice *effect;
+    BattleEffect *effect;
     ActorEffectOwner owner;
     u32 duration;
     s32 counter;
@@ -10081,7 +10079,6 @@ void sndStartEffectTask(ActorEffectTaskArgs *args) {
     unit->effectLink.referenceCount++;
 }
 
-extern u32 effBattleGetCurrentFrame(SoundVoice *effect);
 extern void effBTLFieldColorSetSelectors(s32, u32, s32, s32);
 
 s32 func_001F1470(ActorEffectTaskArgs *args) {

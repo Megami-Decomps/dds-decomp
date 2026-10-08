@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_sound.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -8,17 +9,12 @@ enum {
     EFF_BATTLE_PARAMETER_WORK_CAPACITY = 0x3C
 };
 
-typedef struct EffBattleVoiceState {
-    u8 pad00[0xC3C];
-    s32 activeCount;
-} EffBattleVoiceState;
 
 
 typedef struct EffParamWork EffParamWork;
 extern char D_00414478[];
 extern void effDispatchParameterDataAndFreeWork(EffParamWork *);
 extern void func_0035B6E0(const char *fmt, ...);
-extern void sndUnlinkVoice(void *);
 extern void sdfReleaseChipBlock(void *);
 extern f32 D_003AF1A0[4];
 extern f32 D_003AF190[4];
@@ -42,22 +38,6 @@ typedef struct EffBattleEntryList {
     EffBattleEntry entries[1]; /* 0x78 */
 } EffBattleEntryList;
 
-/* Shared primary work area for the battle-effect helpers in this TU. */
-typedef struct BattleEffect {
-    u32 unk00;
-    EffBattleVoiceState *state; /* 0x04 */
-    u8 pad08[8];
-    u32 currentFrame;  /* 0x10: incremented after each native update */
-    u32 triggerFrame;  /* 0x14: invokes triggerFrameCallbackAddress on equality */
-    u32 colorRampEndFrame; /* 0x18: endpoint passed to the native color-ramp helper */
-    u16 kind; /* 0x1C: selects the frame policy and identifies the effect in diagnostics */
-    u8 pad1E[6];
-    EffBattleEntryList *list; /* 0x24 */
-    EffParamWork *parameterWorks[EFF_BATTLE_PARAMETER_WORK_CAPACITY]; /* 0x28 */
-    u32 sourceFrameCallbackAddress; /* 0x118: called when currentFrame equals source +0x48 */
-    u32 triggerFrameCallbackAddress; /* 0x11C: called when currentFrame equals triggerFrame */
-    u32 value120;      /* 0x120: caller-controlled word; interpretation not established */
-} BattleEffect;
 
 /* Release each nonzero parameter-work slot, unlink the owner, then drop its active count.
  * The diagnostic observes the decremented count before the owner is freed. */
@@ -70,9 +50,9 @@ void effReleaseBattleVoiceOwner(BattleEffect *owner) {
         }
     }
     sndUnlinkVoice(owner);
-    owner->state->activeCount--;
+    owner->state->active--;
     func_0035B6E0(D_00414478, owner->kind, owner->state,
-                  owner->state->activeCount);
+                  owner->state->active);
     sdfReleaseChipBlock(owner);
 }
 
@@ -137,12 +117,12 @@ u32 effBattleGetSelectedValue(BattleEffect *effect) {
 
 /* Store the opaque caller word without assigning it a stronger semantic role. */
 void effBattleStoreOpaqueWord(BattleEffect *effect, u32 value) {
-    effect->value120 = value;
+    effect->unk120 = value;
 }
 
 /* Return the same opaque caller word. */
 u32 effBattleReadOpaqueWord(BattleEffect *effect) {
-    return effect->value120;
+    return effect->unk120;
 }
 
 /* Blend toward the neutral tint over the final six frames of the ramp. */

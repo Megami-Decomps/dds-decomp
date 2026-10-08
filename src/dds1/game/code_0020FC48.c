@@ -3,6 +3,7 @@
 #include "file_pac.h"
 #include "dat_state.h"
 #include "btl_state.h"
+#include "btl_sound.h"
 #include "btl_task_args.h"
 #include "btl_command.h"
 #include "sdf.h"

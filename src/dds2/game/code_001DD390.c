@@ -135,14 +135,14 @@ typedef struct FxTask {
 
 typedef struct SoundLink {
     BtlUnit *owner;
-    struct SoundVoice *effectHandle;
+    BattleEffect *effectHandle;
     SoundResourceNode *effect;
     u16 flags;
 } SoundLink;
 
 typedef struct SoundResourceLink {
     BtlUnit *owner;
-    struct SoundVoice *effectHandle;
+    BattleEffect *effectHandle;
     struct SoundResourceNode *effect;
     u32 flags;
     u8 refreshRequested;
@@ -3891,14 +3891,12 @@ BtlRuntimeTask *func_001E6428(BtlUnit *actor, s32 option) {
 typedef struct UnitEffectTaskArgs {
     BtlUnit *unit;
     SoundMixer *mixer;
-    SoundVoice *effect;
+    BattleEffect *effect;
     s32 duration;
     s32 counter;
 } UnitEffectTaskArgs;
 
-extern SoundVoice *func_00168548(SoundMixer *, s32, BtlUnit *, s32);
-extern void effBattleUpdateSelectedValue(SoundVoice *, s32);
-extern void func_00168978(SoundVoice *);
+extern void func_00168978(BattleEffect *);
 
 /* Start from the selected-unit SYSEFF source, then update through its duration.
  * Return one for an ineligible unit or expiry, zero while updating. */
@@ -3933,7 +3931,7 @@ s32 btlUpdateSelectedUnitEffect(UnitEffectTaskArgs *args) {
 }
 
 void btlFinishSelectedUnitEffect(UnitEffectTaskArgs *arguments) {
-    SoundVoice *voice = arguments->effect;
+    BattleEffect *voice = arguments->effect;
     if (voice != 0) {
         effReleaseBattleVoiceOwner(voice);
     }
@@ -8670,7 +8668,7 @@ BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *effect, BtlUnit *s
 
 typedef struct ActorEffectTaskArgs {
     SoundResourceNode *source;
-    SoundVoice *effect;
+    BattleEffect *effect;
     ActorEffectOwner owner;
     u32 duration;
     s32 counter;
@@ -8688,7 +8686,6 @@ void sndStartEffectTask(ActorEffectTaskArgs *args) {
     unit->effectLink.referenceCount++;
 }
 
-extern u32 effBattleGetCurrentFrame(SoundVoice *);
 extern void effBTLFieldColorSetSelectors(s32, u32, s32, s32);
 
 s32 func_00202100(ActorEffectTaskArgs *args) {

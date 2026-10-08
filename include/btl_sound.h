@@ -13,23 +13,37 @@ typedef struct SoundBank {
     u8 pad7C[0x59C];
 } SoundBank;
 
-typedef struct SoundVoice SoundVoice;
+typedef struct BattleEffect BattleEffect;
+struct EffBattleEntryList;
+struct EffParamWork;
 
 typedef struct SoundMixer {
     SoundBank banks[2];
     u8 pad0C30[8];
     void *resource;
     u32 active;
-    SoundVoice *voiceList;
+    BattleEffect *voiceList;
 } SoundMixer;
 
-struct SoundVoice {
-    void *owner;
-    SoundMixer *mixer;
-    u32 color; /* DDS1 001609B8 / DDS2 001685A8: initialized color. */
-    u16 flags; /* DDS1 001609DC / DDS2 001685CC: initialized flags. */
-    u8 pad0E[0x116];
-    SoundVoice *next;
+/* DDS1 00160958 / DDS2 00168548 allocate and clear exactly 0x128 bytes. */
+struct BattleEffect {
+    void *owner; /* 0x00 */
+    SoundMixer *state; /* 0x04 */
+    u32 color; /* 0x08 */
+    u16 flags; /* 0x0C */
+    u8 pad0E[2];
+    u32 currentFrame; /* 0x10 */
+    u32 triggerFrame; /* 0x14 */
+    u32 colorRampEndFrame; /* 0x18 */
+    u16 kind; /* 0x1C */
+    u8 pad1E[2];
+    s32 unk20;
+    struct EffBattleEntryList *list; /* 0x24 */
+    struct EffParamWork *parameterWorks[0x3C]; /* 0x28 */
+    u32 sourceFrameCallbackAddress; /* 0x118 */
+    u32 triggerFrameCallbackAddress; /* 0x11C */
+    u32 unk120;
+    BattleEffect *next; /* 0x124 */
 };
 
 /* The allocated 0x20-byte resource is also the system-effect task owner. */
@@ -55,7 +69,7 @@ typedef struct SoundEffectReferenceArgs {
     SoundResourceNode *source;
     u16 option;
     u8 pad06[2];
-    SoundVoice *effect;
+    BattleEffect *effect;
     ActorEffectOwner sourceOwner;
     s32 sourceSelector;
     s32 targetSelector;
@@ -65,7 +79,7 @@ typedef struct SoundEffectReferenceArgs {
 
 typedef struct SoundEffectSourceArgs {
     SoundResourceNode *source;
-    SoundVoice *effect;
+    BattleEffect *effect;
     struct BtlUnit *unit;
     u8 pad0C[4];
     u64 resource;
@@ -107,6 +121,11 @@ s32 sndHasResourceFlagsOneOrEight(struct ActiveSoundNode *node);
 struct SoundResourceLink *sndAllocResourceLink(struct BtlUnit *owner);
 struct SoundLink *sndAllocLink(struct BtlUnit *owner);
 struct BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *source, struct BtlUnit *owner, u64 resource);
-void effReleaseBattleVoiceOwner(void *voice);
+BattleEffect *func_00160958(SoundMixer *mixer, u16 kind, void *owner, s32 value);
+BattleEffect *func_00168548(SoundMixer *mixer, u16 kind, void *owner, s32 value);
+void sndUnlinkVoice(BattleEffect *effect);
+void effReleaseBattleVoiceOwner(BattleEffect *effect);
+u32 effBattleGetCurrentFrame(BattleEffect *effect);
+void effBattleUpdateSelectedValue(BattleEffect *effect, u32 endFrame);
 
 #endif /* BTL_SOUND_H */
