@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_effect_position.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
 #include "btl_task_state.h"
