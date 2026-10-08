@@ -713,8 +713,7 @@ BillData *billCreateAnimationDataFromResource(void *resource) {
 extern void effReleaseSharedTextureRecord(void *arg);
 
 /* Drop one reference; the last one releases every entry and the block itself. */
-void billReleaseSharedEntryBlock(void *arg) {
-    BillData *block = arg;
+void billReleaseSharedEntryBlock(BillData *block) {
     s32 i;
 
     block->listRefCount--;
