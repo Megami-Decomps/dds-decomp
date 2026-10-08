@@ -284,7 +284,7 @@ u64 func_00287900(void) {
     return 0;
 }
 
-extern u32 mnuGetDefaultPanelSelector(MnuStatusResource *);
+extern MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *);
 extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
 extern void func_00267B40(DatPartyRecord *, MenuProgressHost *);
 extern void mnuEnsureProfilePanelEffect(DatPartyRecord *, MenuProgressHost *);
@@ -296,15 +296,15 @@ s32 mtrMantraEquipInit(void) {
     MnuStatusResource *work = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
     DatPartyRecord *snapshot = &work->snapshot;
     MtrEquipState *equip = &work->menu.equip;
-    u8 *selector;
+    MantraNodePos *selector;
 
     work->flags.unk04 = 0;
-    selector = (u8 *)mnuGetDefaultPanelSelector(work);
+    selector = mnuGetDefaultPanelSelector(work);
     dspCloseChannel();
     evtCreateMessageWindowIfMissing(work->messageWindow);
     mnuCloseCurrentProfilePanel(work->progressHost);
     memcpy(snapshot, work->list->cursor->items, sizeof(*snapshot));
-    work->snapshot.profileId = selector[2];
+    work->snapshot.profileId = ((u8 *)selector)[2];
     evtPrintDeveloperConsoleMessage(D_00426208, work->snapshot.maxHp, work->snapshot.maxMp);
     func_00267B40(snapshot, work->progressHost);
     mnuEnsureProfilePanelEffect(snapshot, work->progressHost);
@@ -333,7 +333,7 @@ extern DspMantraName *D_00435E50;
 extern s8 D_0037F510[];
 extern u32 mnuGetSelectedNodeValue(MnuStatusResource *);
 extern u16 mnuGetSelectedPanelValue(MnuStatusResource *);
-extern u32 mnuGetDefaultPanelSelector(MnuStatusResource *);
+extern MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *);
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 extern s32 mnuGetMantraSourceValue(u16);
 extern u8 scrSelectScriptEntryAndInitialize(DatPartyRecord *, u32);
@@ -376,7 +376,7 @@ s32 func_00287C20(void) {
     work = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
     equip = &work->menu.equip;
     selectedRecord = (DatPartyRecord *)mnuGetSelectedNodeValue(work);
-    defaultSelector = (MantraNodePos *)mnuGetDefaultPanelSelector(work);
+    defaultSelector = mnuGetDefaultPanelSelector(work);
     selectedEntryId = defaultSelector->selector.fields.index;
     selectedPanelFlags = mnuGetSelectedPanelValue(work);
     switch (equip->state) {
