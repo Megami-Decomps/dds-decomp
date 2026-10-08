@@ -995,12 +995,12 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     effDrawBlurRectangle(out);
 }
 
-void effCreateFadeBlendWorkFromOutput(s32 work) {
-    effCloneBlurTemplate(work + 0xc0);
+u32 effCreateFadeBlendWorkFromOutput(void *work) {
+    return (u32)effCloneBlurTemplate((EffBlurTemplateBody *)((u8 *)work + 0xc0));
 }
 
-void effReleaseFadeBlendWork(void) {
-    effReleaseBlurTemplate();
+void effReleaseFadeBlendWork(u32 resourceHandle) {
+    effReleaseBlurTemplate((EffBlurTemplate *)resourceHandle);
 }
 
 typedef struct EffFadeMapOut {
