@@ -25,4 +25,7 @@ typedef char RefObjSizeCheck[sizeof(RefObj) == 0x20 ? 1 : -1];
 typedef char RefObjAllocationOffsetCheck[
     ((u32)&((RefObj *)0)->allocationHandle == 0x1C) ? 1 : -1];
 
+RefObj *effCloneSharedReferenceWithValue(struct SdfTextureFileHeader *source, u32 textureIndex);
+void effReleaseSharedReference(RefObj *obj);
+
 #endif

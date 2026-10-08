@@ -15,7 +15,6 @@
 
 extern s32 btlGetRuntime(void);
 
-extern u32 effCloneSharedReferenceWithValue(u32, u32);
 
 extern struct EffExpandedList *func_0029C230(u32);
 
@@ -708,12 +707,12 @@ RefObj *func_0029BD90(SdfTextureFileHeader *source) {
     return texture;
 }
 
-u32 effCloneSharedReferenceWithValue(u32 source, u32 value) {
-    void *copy;
+RefObj *effCloneSharedReferenceWithValue(SdfTextureFileHeader *source, u32 textureIndex) {
+    RefObj *copy;
 
-    copy = func_0029BD90((void *)source);
-    ((RefObj *)copy)->index = value;
-    return (u32)copy;
+    copy = func_0029BD90(source);
+    copy->index = textureIndex;
+    return copy;
 }
 
 extern void sdfTexReleaseReference(SdfTex *texture);
