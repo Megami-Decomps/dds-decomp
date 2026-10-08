@@ -151,7 +151,7 @@ typedef struct EvtRuntime {
     s32 messageField;
     s32 compareField;
     s32 fieldIndex;
-    u8 pad239C[4];
+    s32 lightPanelOffset; /* 0x239C: light/color editor horizontal offset. */
     s32 floatSelection;
     s32 floatEditMode;
     f32 floatEditX;
