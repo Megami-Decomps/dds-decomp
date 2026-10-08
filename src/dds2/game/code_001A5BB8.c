@@ -3228,14 +3228,14 @@ s32 btlTestActorStatusPredicate(BtlUnit *unit) {
     return (unit->partyRecord.status & 0x2806) != 0;
 }
 
-s32 btlComputeStatusPenaltyFifth(UiObject *object) {
+s32 btlComputeStatusPenaltyFifth(BtlUnit *unit) {
     u16 status;
     s32 amount;
 
-    status = object->statusFlags & 0x7fff;
+    status = unit->partyRecord.status & 0x7fff;
     amount = 0;
     if ((status == 0x80) || (status == 0x400)) {
-        amount = (s32)-(u32)object->maximumValue / 5;
+        amount = (s32)-(u32)unit->partyRecord.maxHp / 5;
     }
     return amount;
 }
