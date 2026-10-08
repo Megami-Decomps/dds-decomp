@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font.h"
 #include "sdf_chip.h"
 #include "kwln.h"
 #include "sdf_primitive.h"
@@ -39,8 +40,6 @@ enum {
 extern s32 func_00316ED0(void);
 
 extern u32 D_00435D28;
-
-extern u64 func_0019F448(s32, s32, u64, u64, u64, u64);
 
 extern u32 kwlnDrawSurfaceIndex;
 
@@ -748,12 +747,12 @@ void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     surface->append((SdfListHead *)surface, list);
 }
 
-void evtPrepareSizedDrawResource(s32 width, s32 height, u64 first, u64 second) {
-    u64 resource;
+void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors, const char *text) {
+    struct FrFontGlyph *glyph;
 
-    resource = func_0019F448(width << 4, height << 3, 0, first, second, 0);
-    frFontDrawGlyphInDefaultMode(resource);
-    frFontQueueGlyphInSelectedSlot(resource);
+    glyph = func_0019F448(width << 4, height << 3, 0, colors, text, NULL);
+    frFontDrawGlyphInDefaultMode(glyph);
+    frFontQueueGlyphInSelectedSlot(glyph);
 }
 
 /* Zero frames leaves the prior state untouched; zero countLimit selects the -1 sentinel. */
