@@ -6,6 +6,7 @@
 #include "sdf_stream_read.h"
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
+#include "mdl_object_stream.h"
 
 #define SDF_RELOC_HEADER_BYTES 0x20
 #define SDF_STREAM_NODE_BYTES 0x8C
@@ -125,13 +126,6 @@ u32 sndSendCommandPacket(u32 command, u32 value, void *data, u32 size);
 u32 func_002E87A8(u32 command, u32 value, void *data, u32 size);
 
 
-typedef struct SoundFormat {
-    u8 hasAudio;
-    u8 stereo;
-    u8 loopMode;
-    u8 playbackMode;
-} SoundFormat;
-
 extern SdfStreamFrameNode *sdfSoundNodeHead;
 extern SdfStreamFrameNode *D_003BDAA8;
 extern s32 D_003BDA94;
@@ -160,13 +154,6 @@ extern SdfStreamFrameNode *sdfStreamNodeListTail;
 extern void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet);
 
 extern void sdfBuildStreamFrameTransferPackets(SdfStreamFrameNode *node);
-
-typedef struct SdfStreamParams {
-    u8 mode;
-    u8 param1;
-    u8 param2;
-    u8 param3;
-} SdfStreamParams;
 
 extern u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 
@@ -1482,20 +1469,20 @@ void func_002EC5E0(s32 cadence) {
     func_002EC230(0);
 }
 
-void sdfSoundInitAndAppendNode(SdfStreamFrameNode *node, s32 format, s32 source, s32 sourceSize, s32 value) {
+void sdfSoundInitAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, s32 source, s32 sourceSize, s32 value) {
     sdfStreamOpen(node, format, source, sourceSize);
     node->resourceWord = value;
     sdfSoundAppendNode(node);
 }
 
-void sdfStreamCreateWithParams(s32 node, SdfStreamParams *params, s32 sourceData, s32 sourceSize, u8 *source) {
+void sdfStreamCreateWithParams(SdfStreamFrameNode *node, SdfStreamParams *params, s32 sourceData, s32 sourceSize, SdfTex *source) {
     SdfStreamParams local = *params;
-    switch (source[0x1A]) {
+    switch (source->pixelFormat) {
     case 0:
-        local.mode = 0;
+        local.hasAudio = 0;
         break;
     case 2:
-        local.mode = 1;
+        local.hasAudio = 1;
         break;
     }
     sdfSoundInitAndAppendNode(node, &local, sourceData, sourceSize, sdfTexGetPrimaryResourceWord(source));
