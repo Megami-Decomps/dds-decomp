@@ -736,16 +736,16 @@ void *sdfMotionCreateKeyFlagBinding(void *a0, s32 a1, s32 a2) {
     return r;
 }
 
-void sdfMotionUpdateKeyFlag(HasSubU *a0, f32 t) {
-    SdfMotionKeyInterval b;
-    SubU *s;
+void sdfMotionUpdateKeyFlag(HasSubU *binding, f32 frame) {
+    SdfMotionKeyInterval keyInterval;
+    SubU *sub;
 
-    sdfFindMotionKeyInterval(a0, &b, t);
-    s = a0->sub;
-    if (*(u8 *)b.firstKey == 0) {
-        s->u14 = s->u14 | 0x10;
+    sdfFindMotionKeyInterval(binding, &keyInterval, frame);
+    sub = binding->sub;
+    if (*(u8 *)keyInterval.firstKey == 0) {
+        sub->u14 = sub->u14 | 0x10;
     } else {
-        s->u14 = s->u14 & 0xFFEF;
+        sub->u14 = sub->u14 & 0xFFEF;
     }
 }
 
