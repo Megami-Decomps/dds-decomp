@@ -1,3 +1,4 @@
+#include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_effect_position.h"
 #include "btl_task_condition.h"
@@ -127,7 +128,6 @@ extern u8 D_00360EE0[];
 
 extern u8 D_00360EF0[];
 
-extern void btlInitMotionTransformFromVectors(s32, u8 *, u8 *);
 
 extern u32 btlNextScaledRandom(u32);
 
@@ -1325,7 +1325,7 @@ s32 func_002055F8(void) {
 }
 
 s32 btlInitializeResources(s32 unused, s32 resource) {
-    btlInitMotionTransformFromVectors(resource, D_00360EE0, D_00360EF0);
+    btlInitMotionTransformFromVectors((BtlCamState *)resource, (f32 *)D_00360EE0, (f32 *)D_00360EF0);
     return 1;
 }
 
@@ -3669,7 +3669,6 @@ void btlChooseRandomPresetCameraKeys(unit)
 
 INCLUDE_ASM(const s32, "game/code_00202178", func_0020B190);
 
-extern void btlInitMotionTransformFromComponents(BtlCamState *, f32, f32, f32, f32, f32, f32, f32, f32);
 
 extern void func_002DD608(f32);
 

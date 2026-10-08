@@ -73,7 +73,6 @@ extern const s32 D_0037C388[];
 
 extern const char D_003B2058[16];
 extern char *D_0037C380[];
-extern u32 effLoadMappedResource(char *base, char *name);
 
 typedef struct ResourceRef8 {
     s32 index;
@@ -236,9 +235,9 @@ void func_00271368(void *menuData) {
     u32 *statusWords;
     u32 primaryResource;
 
-    primaryResource = effLoadMappedResource(D_003B2058, D_0037C380[0]);
+    primaryResource = (u32)effLoadMappedResource(D_003B2058, D_0037C380[0]);
     menu->primaryImage = primaryResource;
-    menu->secondaryImage = effLoadMappedResource(D_003B2058, D_0037C380[1]);
+    menu->secondaryImage = (u32)effLoadMappedResource(D_003B2058, D_0037C380[1]);
 
     batch = effCreateStatusBatch(6);
     record = batch->records;

@@ -84,9 +84,15 @@ typedef struct MapPacket {
 
 typedef struct MenuEffectResources {
     MapPacket packet;
-    u32 animationHandle;
+    struct EffMappedResource *animationHandle;
     CampEffectRows rows;
 } MenuEffectResources;
+
+#ifdef VERSION_DDS2
+void mnuSetCampEffectResourceHandles(u32 sheet,
+                                    struct EffMappedResource *animation,
+                                    MenuEffectResources *resources);
+#endif
 
 /* DDS2 result/camp backdrop: resources, sixteen sparks and the badge fade. */
 typedef struct MenuCampEffect {
@@ -375,15 +381,7 @@ typedef struct MenuProfilePanel {
 typedef char MenuProfilePanel_size_must_be_0x3C[(sizeof(MenuProfilePanel) == 0x3C) ? 1 : -1];
 #endif
 
-typedef struct MenuEffectPosition {
-    u8 pad00[0x20];
-    s32 *coordinates;
-} MenuEffectPosition;
-
-typedef struct MenuEffectNode {
-    u8 pad00[8];
-    MenuEffectPosition *position;
-} MenuEffectNode;
+struct EffMappedResource;
 
 /* Complete DDS1 0x54-byte numeric-bar texture/effect owner. */
 typedef struct MenuEffectPair {
@@ -397,7 +395,7 @@ typedef struct MenuEffectPair {
     struct EffectSlotSet *resourceSets[7];
     struct EffectSlotSet *leftGrid;
     struct EffectSlotSet *rightGrid;
-    MenuEffectNode *effects[2];
+    struct EffMappedResource *effects[2];
     s32 updateState;
     s32 opacity;
     s32 fadeOut;
@@ -432,7 +430,7 @@ typedef struct MenuPageBar {
     s8 positionY;
     u8 pad1A[2];
     struct EffectSlotSet *textures[7]; /* 0x1C */
-    struct MenuEffectNode *effects[2]; /* 0x38 */
+    struct EffMappedResource *effects[2]; /* 0x38 */
     s32 activeEffect;
     s32 fade;
     s32 fadeOut;
