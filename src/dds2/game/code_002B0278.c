@@ -72,7 +72,7 @@ typedef struct MenuIconState MenuIconState;
 
 extern u32 uiBlendColors(u32, u32, u32);
 extern s32 mnuLookupRangeEntry(u16);
-extern u16 mnuGetAdjustedEntryValue(s32, s32);
+extern u16 mnuGetAdjustedEntryValue(s32, DatPartyRecord *);
 extern s32 mnuGetRangeEntryFlatValue(s32);
 extern u8 mnuGetRangeEntryKind(u32);
 extern s32 func_0035C860(char *, const char *, ...);
@@ -1410,7 +1410,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
         return;
     }
     if (actor != 0) {
-        value = mnuGetAdjustedEntryValue(rangeId, (s32)actor);
+        value = mnuGetAdjustedEntryValue(rangeId, actor);
     } else {
         value = mnuGetRangeEntryFlatValue(rangeId);
     }

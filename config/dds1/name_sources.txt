@@ -4932,7 +4932,7 @@
 0x00286138	mnuPickPairedTableValue	inferred	returns u16 from D_0037CE18 or D_0037CE1A by flag, used beside the range-table lookup
 0x00286170	mnuGetIndexedNonzeroEffect	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x002861B8	mnuLookupPartyTableValue	inferred	Byte-identical dds2 twin 0x002C4CA8; DDS1 has the same unprefixed symbol; game/code_002BE628 uses mnu for the already-described lookupPartyTableValue behavior. [names_conflicts.tsv]
-0x00286288	mnuGetSecondaryValueIfKind2	inferred	Reads RangeEntry.secondaryValue only when secondaryKind equals 2; sequel twin 002C4D78.
+0x00286288	mnuGetCommandFlagMask	inferred	Returns the command attribute mask only when kind 2 selects flag-mask semantics; its consumer tests the returned 0x4000 flag.
 0x002862C0	mnuGetRangeEntryKind	inferred	Returns the kind byte from a range entry selected by its input index.
 0x002862E0	mnuGetAdjustedEntryValue	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x00286368	mnuGetAdjustedPartyRangeValue	inferred	Applies the average across qualifying party members to range kind one and returns the adjusted value.

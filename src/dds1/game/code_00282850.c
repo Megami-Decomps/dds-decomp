@@ -1443,14 +1443,14 @@ u16 mnuLookupPartyTableValue(u32 valueCount, s32 baseIndex, s32 alternate) {
     return D_0037CE1A[D_0037CE42[(baseIndex + mappingSum) * 3]];
 }
 
-/* Only secondary-kind-2 entries expose the paired value. */
-u16 mnuGetSecondaryValueIfKind2(s32 commandId) {
+/* Return the attribute mask only for kind 2, which selects flag-mask semantics. */
+u16 mnuGetCommandFlagMask(s32 commandId) {
     DatCommandRecord *command = (DatCommandRecord *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
 
     if (command->attribute.parts.kind != DAT_COMMAND_ATTRIBUTE_KIND_FLAG_MASK) {
         return 0;
     }
-    return command->attribute.parts.flagMask;
+    return command->attribute.parts.valueMask;
 }
 
 /* Return the native value/cost kind from the low-sixteen-bit command ID. */
@@ -1459,12 +1459,12 @@ u8 mnuGetRangeEntryKind(u32 commandId) {
 }
 
 /* HP-kind values use max HP as a percentage basis; other kinds retain the stored value. */
-u16 mnuGetAdjustedEntryValue(s32 commandId, s32 actorAddress) {
+u16 mnuGetAdjustedEntryValue(s32 commandId, DatPartyRecord *actor) {
     DatCommandRecord *command = (DatCommandRecord *)((commandId & MNU_COMMAND_ID_MASK) * MNU_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
     u16 entryValue = command->costPercentage;
     u16 flatAddition = command->costBase;
     if (mnuGetRangeEntryKind(commandId & MNU_COMMAND_ID_MASK) == DAT_COMMAND_COST_MODE_HP) {
-        entryValue = flatAddition + ((DatPartyRecord *)actorAddress)->maxHp * entryValue / MNU_PERCENT_SCALE;
+        entryValue = flatAddition + actor->maxHp * entryValue / MNU_PERCENT_SCALE;
     }
     return entryValue;
 }
@@ -1650,7 +1650,7 @@ s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 select
         multiTarget = 1;
     }
 
-    if (mnuGetSecondaryValueIfKind2(ability) & 0x4000) {
+    if (mnuGetCommandFlagMask(ability) & 0x4000) {
         sndSetSequenceVolumePan(0x17, 0x7F, 0x3F);
     } else if (multiTarget == 0) {
         sndSetSequenceVolumePan(0x10, 0x7F, 0x3F);

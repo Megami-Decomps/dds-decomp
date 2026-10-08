@@ -19,6 +19,7 @@ from check_unit import (
     owned_nobits_size,
     owns_exact_section_item,
     relocate_sdata_item,
+    rodata_code_pointers,
     section_symbols,
     source_owned_item_size,
     symbols,
@@ -56,6 +57,37 @@ class AsmLiteralSharingTests(unittest.TestCase):
                 asm_literal_users(candidate, asm_dir, syms, 0x00300010),
                 ["other"],
             )
+
+
+class RodataCodePointerTests(unittest.TestCase):
+    def test_mixed_callback_relocations_and_next_table_boundary(self):
+        data = struct.pack("<IIII", 0x24, 4, 0x28, 0x2C)
+        relocs = {0: ("R_MIPS_32", ".text"),
+                  4: ("R_MIPS_32", "asmCallback"),
+                  8: ("R_MIPS_32", ".text"),
+                  12: ("R_MIPS_32", ".text")}
+        funcs = [(0x20, 0x10, "localCallback")]
+        syms = {"localCallback": 0x101000, "asmCallback": 0x202000}
+        self.assertEqual(rodata_code_pointers(
+            data, 0, 12, relocs, funcs, syms, {0x101000, 0x202000}),
+            [(0, 0x101004), (4, 0x202004), (8, 0x101008)])
+
+    def test_data_symbol_does_not_extend_code_table(self):
+        data = struct.pack("<II", 0x24, 0)
+        relocs = {0: ("R_MIPS_32", ".text"),
+                  4: ("R_MIPS_32", "dataTable")}
+        self.assertEqual(rodata_code_pointers(
+            data, 0, 8, relocs, [(0x20, 0x10, "callback")],
+            {"callback": 0x101000, "dataTable": 0x303000}, {0x101000}),
+            [(0, 0x101004)])
+
+    def test_unresolved_or_unsupported_code_pointer_remains_invalid(self):
+        data = struct.pack("<II", 0x40, 0x24)
+        relocs = {0: ("R_MIPS_32", ".text"),
+                  4: ("R_MIPS_HI16", ".text")}
+        self.assertEqual(rodata_code_pointers(
+            data, 0, 8, relocs, [(0x20, 0x10, "callback")],
+            {"callback": 0x101000}, {0x101000}), [(0, None), (4, None)])
 
 
 class SdataRelocationTests(unittest.TestCase):

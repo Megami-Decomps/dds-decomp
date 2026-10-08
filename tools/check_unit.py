@@ -399,6 +399,34 @@ def trim_sdata_item(item, item_offset, relocs):
         else item.rstrip(b"\0") or item[:4]
 
 
+def rodata_code_pointers(data, offset, end, relocs, funcs, syms, function_addrs):
+    """Resolve a consecutive table of case labels or function pointers.
+
+    A callback array can mix section-relative pointers to compiled functions
+    with named pointers to functions still supplied by assembly. Both forms
+    refer to code; a named data symbol must still end the code-pointer table.
+    """
+    entries = []
+    while offset + 4 <= end:
+        rtype, sym = relocs.get(offset, ("", ""))
+        base = sym.split("+", 1)[0]
+        target = address(base, syms)
+        if base != ".text" and target not in function_addrs:
+            break
+        addend = struct.unpack_from("<I", data, offset)[0]
+        if base == ".text":
+            owner = next(((o, s, n) for o, s, n in funcs
+                          if o <= addend < o + s), None)
+            target = address(owner[2], syms) if owner else None
+            if target is not None:
+                target += addend - owner[0]
+        else:
+            target += addend
+        entries.append((offset, target if rtype == "R_MIPS_32" else None))
+        offset += 4
+    return entries
+
+
 def inline_asm_share(text):
     """{function: (inline asm instructions, all instructions)} from cc1 output
     (asm statements sit between `#APP` and `#NO_APP`)."""
@@ -815,8 +843,10 @@ def main():
     for table_off, retail_addr, name in dict.fromkeys(tables):
         if not 0 <= table_off < len(rodata):
             continue
-        if rodata_relocs.get(table_off, ("", ""))[1] != ".text":
-            end = next(s for s in starts if s > table_off)
+        end = next(s for s in starts if s > table_off)
+        code_pointers = rodata_code_pointers(
+            rodata, table_off, end, rodata_relocs, funcs_by_off, syms, func_starts)
+        if not code_pointers:
             item = rodata[table_off:end]
             # Words the linker fills in (a table of pointers to strings or
             # data) hold only an addend here: compare the rest, and leave the
@@ -857,15 +887,11 @@ def main():
         k, wrong = 0, 0
         # Stop at the next table: with the asm skipped, tables of C functions
         # that retail keeps apart can sit back to back here.
-        while rodata_relocs.get(table_off + 4 * k, ("", ""))[1] == ".text" \
-                and (k == 0 or table_off + 4 * k not in starts):
-            label = struct.unpack_from("<I", rodata, table_off + 4 * k)[0]
-            owner = next(((o, n) for o, s, n in funcs_by_off if o <= label < o + s), None)
+        for pointer_off, target in code_pointers:
             want = struct.unpack_from("<I", retail, va_to_off(segs, retail_addr + 4 * k))[0]
-            if owner is None or address(owner[1], syms) is None \
-                    or address(owner[1], syms) + label - owner[0] != want:
+            if target is None or target != want:
                 wrong += 1
-            covered.update(range(table_off + 4 * k, table_off + 4 * k + 4))
+            covered.update(range(pointer_off, pointer_off + 4))
             k += 1
         if wrong:
             bad += 1
