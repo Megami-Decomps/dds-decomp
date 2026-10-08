@@ -242,7 +242,7 @@ s32 mnuResetSelection(s32 selection) {
     context = kwlnTaskGetUserValue(selection);
     menu = *(s32 *)(context + 0x90C);
     ptySkillMenuBuildLinkageSkills(selection);
-    mnuFlagActiveWindows(context + 0x15C);
+    mnuFlagActiveWindows((MenuPageWindow *)(context + 0x15C));
     ((MenuPartyRuntime *)menu)->selectedPage = 0;
     return 1;
 }
@@ -250,7 +250,7 @@ s32 mnuResetSelection(s32 selection) {
 s32 mnuCloseSkillSelection(s32 selection) {
     s32 context = kwlnTaskGetUserValue();
     mnuDestroySkillSelectionWindow(selection);
-    mnuClearPartyPanelActiveFlags(context + 0x15c);
+    mnuClearPartyPanelActiveFlags((MenuPageWindow *)(context + 0x15c));
     mnuCloseItemSelectionState(selection);
     return 1;
 }
