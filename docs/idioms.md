@@ -4637,3 +4637,16 @@ and callers consume its returned object pointer. A `void(void)` declaration
 only happened to preserve those registers in the old wrapper's machine code;
 the real three-pointer, pointer-returning contract is now explicit in both.
 This closure does not change the separately parked script-setter return ABI.
+
+## Viewer window shading uses signed byte state
+
+DDS1 `00230140` and DDS2 `0024AD48` load both `EvtRuntime` bytes
+at `+0x23C4/+0x23C5` with `lb`. The first is `windowShadeFade`:
+inactive windows subtract nine down to zero, active windows add three
+up to 94, and the overlay alpha is `128 - windowShadeFade`.
+The arithmetic assignments also reload the stored byte with `lbu`;
+that does not make the primary field unsigned. The cleanup functions
+reset the same signed owner field, and the active/inactive setters retain
+their zero/one stores. The packet-building bodies remain ASM: completing
+these primary fields does not resolve their packet-address scheduling.
+
