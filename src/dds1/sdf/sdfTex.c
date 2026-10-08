@@ -44,7 +44,7 @@ void *sdfTexCopyImageData(SdfTex *texture, void *source) {
     return memcpy(texture->data, source, texture->dataSize);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_002D2AB8);
+INCLUDE_ASM(const s32, "sdf/sdfTex", sdfTexCreateWithAllocatedResources);
 
 /* Release both GPU resources and unlink the texture from the active list. */
 void sdfTexRelease(SdfTex *texture) {
@@ -155,7 +155,7 @@ void sdfTexRefreshResourcePackets(SdfTex *texture) {
     }
 }
 
-extern SdfTex *func_002D2AB8(s32, s32, u32, u32, u32, u32);
+extern SdfTex *sdfTexCreateWithAllocatedResources(s32, s32, u32, u32, u32, u32);
 extern u8 sdfTexGetPaletteCount(SdfTex *);
 extern void func_002D2A58(SdfTex *);
 extern u8 *sdfTexSubmitPixelsForFormat(SdfTex *texture, u32 destination, u8 *pixels, s32 borrowPixels);
@@ -183,7 +183,7 @@ SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {
             existing = existing->prev;
         }
     }
-    texture = func_002D2AB8(header->width, header->height, header->pixelFormat, header->clutFormat, header->unk11, header->unk10);
+    texture = sdfTexCreateWithAllocatedResources(header->width, header->height, header->pixelFormat, header->clutFormat, header->unk11, header->unk10);
     texture->lodParameters = header->lodParameters;
     texture->unk1E = header->unk1A;
     texture->clampMode = header->clampMode;
