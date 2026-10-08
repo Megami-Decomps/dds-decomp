@@ -403,11 +403,11 @@ void billMarkKindOneFlag(BillObj *billboard) {
 }
 
 /* Kind 0 stores half the supplied width/height; other kinds remain unchanged. */
-void billSetChildHalfExtents(s32 billboard, float width, float height) {
-    if (((BillObj *)billboard)->kind == 0) {
-        s32 payloadAddress = (s32)((BillObj *)billboard)->child;
-        ((BillChildPayload *)payloadAddress)->halfWidth = width * 0.5f;
-        ((BillChildPayload *)payloadAddress)->halfHeight = height * 0.5f;
+void billSetChildHalfExtents(BillObj *billboard, float width, float height) {
+    if (billboard->kind == 0) {
+        BillChildPayload *child = billboard->child;
+        child->halfWidth = width * 0.5f;
+        child->halfHeight = height * 0.5f;
     }
 }
 
