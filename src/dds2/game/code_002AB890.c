@@ -35,7 +35,6 @@ void func_002AB8C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 extern char (*D_00435E5C)[25];
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 extern void mnuSetWindowEntryParameters(u32, MenuWindowContainer *, u32, u32, u32);
-extern void mnuInitializeBasicWindowLayout(MenuWindowContainer *, u32, u32);
 extern void mnuCreateListWithDefaults(MenuWindowContainer *, u32, u32, u32, u32);
 extern s32 mnuIsBulletItemId(s32);
 extern s32 func_002C54B0(s32);
@@ -111,7 +110,7 @@ void func_002AB8F0(MenuStaffContext *owner) {
     }
 
     resources->windows[0] = window;
-    mnuInitializeBasicWindowLayout(window, (u32)owner->spriteArg2, 0xF);
+    mnuInitializeBasicWindowLayout(window, owner->spriteArg2, 0xF);
     mnuCreateListWithDefaults(resources->windows[0], 0, 0, 0, (u32)owner->spriteArg0);
 
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
@@ -130,7 +129,7 @@ void func_002AB8F0(MenuStaffContext *owner) {
     }
 
     resources->windows[1] = window;
-    mnuInitializeBasicWindowLayout(window, (u32)owner->spriteArg2, 0x13);
+    mnuInitializeBasicWindowLayout(window, owner->spriteArg2, 0x13);
     mnuCreateListWithDefaults(resources->windows[1], 0, 0, 0, (u32)owner->spriteArg0);
 }
 
@@ -178,7 +177,7 @@ void mnuCreateStaffBulletItemWindow(MenuStaffContext *owner) {
         textOffset += 25;
     } while (itemId < 0x100);
     resources->windows[2] = window;
-    mnuInitializeBasicWindowLayout(window, (u32)owner->spriteArg2, 0x12);
+    mnuInitializeBasicWindowLayout(window, owner->spriteArg2, 0x12);
     mnuCreateListWithDefaults(resources->windows[2], 0, 0, 0, (u32)owner->spriteArg0);
 }
 
@@ -190,7 +189,6 @@ INCLUDE_ASM(const s32, "game/code_002AB890", func_002ABED8);
 
 INCLUDE_ASM(const s32, "game/code_002AB890", func_002AC050);
 
-extern void mnuSetWindowContainerLayout(MenuWindowContainer *, u32, u32, u32, u32, u32, u32, u32, u32);
 extern void func_002AC050();
 extern DatPartyRecord *mnuFindPartySlotByCurrentId(u32);
 extern DatPartyRecord *mnuFindReserveSlotByCurrentId(u32);
@@ -207,7 +205,7 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
     u16 *ordinal = &owner->catalogOrdinals[itemId];
     u16 catalogOrdinal;
     s32 showUnknown;
-    u32 frameResource;
+    struct EffectSlotSet *frameResource;
 
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
     mnuSetWindowFadeScale(window, 0x100);
@@ -255,7 +253,7 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
         ordinal++;
     } while (itemId < 0x100);
     mnuSortItems(window->list, 2, 1);
-    frameResource = (u32)owner->spriteArg2;
+    frameResource = owner->spriteArg2;
     resources->windows[3] = window;
     mnuInitializeBasicWindowLayout(window, frameResource, 0x10);
     mnuCreateListWithDefaults(resources->windows[3], 0, 0, 0, (u32)owner->spriteArg0);
@@ -340,7 +338,7 @@ void mnuCreateOwnedCatalogItemWindow(MenuStaffContext *owner) {
     const MenuCatalogItem *catalog;
     u32 ordinal = 0;
     u32 itemId;
-    u32 frameResource;
+    struct EffectSlotSet *frameResource;
 
     window = mnuCreateWindowContainer(0, 0x160, 0x10, 8, 0x16);
     mnuSetWindowFadeScale(window, 0x100);
@@ -363,7 +361,7 @@ void mnuCreateOwnedCatalogItemWindow(MenuStaffContext *owner) {
             node->sortKeyTertiary = ordinal;
         }
     }
-    frameResource = (u32)owner->spriteArg2;
+    frameResource = owner->spriteArg2;
     resources->windows[4] = window;
     mnuSetWindowContainerLayout(window, frameResource, 0x15, frameResource,
         0x410, 0x16, frameResource, 0x17, 0x3E0);

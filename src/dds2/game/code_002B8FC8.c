@@ -887,21 +887,21 @@ void mnuSetWindowFadeScale(MenuWindowContainer *menu, u32 fadeScale) {
     menu->fadeScale = fadeScale;
 }
 
-void mnuSetWindowContainerLayout(MenuWindowContainer *menu, u32 layout2C, u32 layout30, u32 layout34,
-                                    u32 layout48, u32 layout38, u32 layout3C, u32 layout40,
+void mnuSetWindowContainerLayout(MenuWindowContainer *menu, struct EffectSlotSet *layout2C, u32 layout30, struct EffectSlotSet *layout34,
+                                    u32 layout48, u32 layout38, struct EffectSlotSet *layout3C, u32 layout40,
                                     u32 layout4C) {
-    menu->decorations[0].sprite = layout2C;
+    menu->decorations[0].sprite = (u32)layout2C;
     menu->decorationX[2] = layout4C;
     menu->decorations[0].parameter = layout30;
-    menu->decorations[1].sprite = layout34;
+    menu->decorations[1].sprite = (u32)layout34;
     menu->decorations[1].parameter = layout38;
     menu->decorationX[1] = layout48;
-    menu->decorations[2].sprite = layout3C;
+    menu->decorations[2].sprite = (u32)layout3C;
     menu->decorations[2].parameter = layout40;
     menu->decorationX[0] = 0;
 }
 
-void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu, u32 first, u32 second) {
+void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu, struct EffectSlotSet *first, u32 second) {
     mnuSetWindowContainerLayout(menu, first, second, 0, 0, 0, 0, 0, 0);
 }
 
