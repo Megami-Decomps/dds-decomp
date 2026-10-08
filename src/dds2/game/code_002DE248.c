@@ -2841,7 +2841,7 @@ void effReleaseResourceRefs(EffTrackSet *work) {
         }
     }
     sdfQueueAssetRelease((u32)work->handle);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)work->allocation));
+    sdfReleaseResourceAllocation(work->allocation);
 }
 
 /* Copy a track set: same size and kind, retaining the source's shared reference (or counting one more user of the built-in one). */
@@ -2902,7 +2902,7 @@ void func_002E5E88(u8 *work, void *matrix) {
     sdfConsAppendVuPacket(list, 0);
 
     if (track->columns != NULL) {
-        RefObj *reference = (RefObj *)track->shared;
+        RefObj *reference = track->shared;
         SdfTex *texture;
 
         if (reference == NULL) {
