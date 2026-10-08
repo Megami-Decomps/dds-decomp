@@ -110,7 +110,7 @@ extern void evtViewerDispatchFlagMode();
 extern KwlnTask *func_00101820(u32 priority);
 
 
-extern s32 func_00261B98(s32);
+extern s32 func_00261B98(MenuTerminalContext *);
 
 
 extern char D_00437838[]; /* "camp" */
@@ -1569,7 +1569,8 @@ typedef struct ShopSourcePriceRow {
 } ShopSourcePriceRow;
 
 typedef struct ShopItemPriceRecord {
-    u8 pad00[4];
+    u8 flags; /* Low two bits select fixed versus solar-phase price. */
+    u8 pad01[3];
     s32 price;
 } ShopItemPriceRecord;
 
