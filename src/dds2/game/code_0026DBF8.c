@@ -4000,7 +4000,72 @@ void func_00282B50(u32 unused, s32 view) {
 void func_00282B60(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00282B68);
+extern void *memcpy(void *, const void *, u32);
+extern u8 D_00437900[];
+
+s32 func_00282B68(s32 x, s32 y, u32 z, s32 alpha, MantraPanelPool *unused,
+                  MantraPanelAnimation *panel, u32 packet) {
+    u8 spriteOrder[4];
+    f32 phase;
+    f32 pulse;
+    f32 angle;
+    s32 drawX;
+    s32 drawY;
+    u32 i;
+
+    memcpy(spriteOrder, D_00437900, sizeof(spriteOrder));
+    panel->stateA++;
+    if (panel->stateA >= 121) {
+        panel->stateA = 0;
+    }
+    panel->stateB++;
+    if (panel->stateB >= 121) {
+        panel->stateB = 0;
+    }
+    phase = panel->stateA / 120.0f;
+    if (panel->stateB < 40) {
+        pulse = panel->stateB / 40.0f;
+    } else if (panel->stateB < 100) {
+        pulse = (panel->stateB - 40) / 60.0f;
+    } else {
+        pulse = 1.0f;
+    }
+    angle = phase * 6.2831853f;
+    pulse = (sdfSinPoly(pulse * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
+    mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
+    mnuDrawMantraSprite(x, y, z, alpha, 0xE6, 0, packet);
+    mnuDrawMantraSprite(x, y, z, alpha, 0xE8, 0, packet);
+    mnuDrawMantraSprite(x, y, z, alpha, 0xE9, 0, packet);
+    mnuDrawMantraSprite(x, y, 0, alpha, 0xED, 0, packet);
+    mnuDrawMantraSprite(x, y, 0, alpha, 0xEE, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+    uiDrawUniformColorRect((u32)(x - 128) << 4, (u32)(y - 128) << 3, 0xFF, 0x1000, 0x800, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
+    uiDrawActiveSurfaceRegion(packet);
+    mnuDrawMantraSprite(x, y, 0, alpha, 0xEA, 0x20, packet);
+    sdfDispatchSurfaceWithPreparedTexturePacket(packet);
+    drawX = (s32)((f32)x + sdfEvaluateCosineViaSinePhaseShift(angle) * 7.0f + sdfSinPoly(angle) * -14.0f);
+    drawY = (s32)((f32)y + sdfEvaluateCosineViaSinePhaseShift(angle) * -14.0f - sdfSinPoly(angle) * 7.0f);
+    mnuDrawMantraSprite(drawX, drawY, 0, alpha, 0xEB, 0, packet);
+    drawX = (s32)((f32)x + sdfEvaluateCosineViaSinePhaseShift(angle) * -6.0f + sdfSinPoly(angle) * 16.0f);
+    drawY = (s32)((f32)y + sdfEvaluateCosineViaSinePhaseShift(angle) * 16.0f - sdfSinPoly(angle) * -6.0f);
+    mnuDrawMantraSprite(drawX, drawY, 0, alpha, 0xEC, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+    uiDrawUniformColorRect((u32)(x - 128) << 4, (u32)(y - 128) << 3, 0, 0x1000, 0x800, 0, packet);
+    for (i = 0; i < 4; i++) {
+        if (panel->id == spriteOrder[i]) {
+            mnuDrawMantraSprite(x, y, 0, alpha, 0xEF + i * 2, 0, packet);
+            mnuDrawMantraSprite(x, y, 0, (s32)((f32)alpha * pulse), 0xF0 + i * 2, 0, packet);
+            i = -1;
+            break;
+        }
+    }
+    if (i != -1) {
+        mnuDrawMantraSprite(x, y, 0, alpha, 0xEF, 0, packet);
+        mnuDrawMantraSprite(x, y, 0, (s32)((f32)alpha * pulse), 0xF0, 0, packet);
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425D68);
 
