@@ -208,8 +208,6 @@ extern EffPCPSpanWork *effPcpSpanCreate(void *params, void *handleParams);
 extern u32 effCreateNodeFromDescriptor(u32 param);
 extern u32 effCloneSourceWithTypeHandler(u32 handle);
 extern void effDestroyNode(s32 handle);
-extern EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *params);
-extern void effBlurReleaseSecondResource(EffBlurScaleWork *work);
 extern void effBlurSecondInitSlots(EffBlurScaleWork *work);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
@@ -2476,8 +2474,6 @@ void effPcpReleaseLongFadeTimerWork(EffPCPFadeTimerLong *work) {
 }
 
 
-extern void effDrawBlurRectangle(u32 *color);
-
 /* Same timeline as effPcpFadeTimerUpdate on the longer work layout. */
 void effPcpFadeTimerLongUpdate(EffPCPFadeTimerLong *work) {
     s32 frame = work->frame;
@@ -2505,7 +2501,7 @@ void effPcpFadeTimerLongUpdate(EffPCPFadeTimerLong *work) {
         t = 1.0f;
     }
     work->params.source.color = effMultiplyPackedColors(effBlendColor(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
-    effDrawBlurRectangle(&work->params.source.color);
+    effDrawBlurRectangle(&work->params.source);
     work->frame++;
 }
 
