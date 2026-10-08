@@ -3563,28 +3563,28 @@ EffPCPBlockSetWork *effPcpBlockSetCloneShared(EffPCPBlockSetWork *src) {
 }
 
 void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work) {
-    u32 i;
-    u32 j;
-    u32 n;
+    u32 groupIndex;
+    u32 handleIndex;
+    u32 groupHandleCount;
 
     if (work->source == NULL) {
         effDispatchParameterDataAndFreeWork(work->headHandle);
-        for (j = 0; j < 5; j++) {
-            effDispatchParameterDataAndFreeWork(work->handleA[j]);
+        for (handleIndex = 0; handleIndex < 5; handleIndex++) {
+            effDispatchParameterDataAndFreeWork(work->handleA[handleIndex]);
         }
-        for (i = 0; i < 3; i++) {
-            if (work->alloc[i] != 0) {
-                n = work->count * work->params.groupSize[i];
-                for (j = 0; j < n; j++) {
-                    if (work->list[i][j] != 0) {
-                        effDispatchParameterDataAndFreeWork(work->list[i][j]);
+        for (groupIndex = 0; groupIndex < 3; groupIndex++) {
+            if (work->alloc[groupIndex] != 0) {
+                groupHandleCount = work->count * work->params.groupSize[groupIndex];
+                for (handleIndex = 0; handleIndex < groupHandleCount; handleIndex++) {
+                    if (work->list[groupIndex][handleIndex] != 0) {
+                        effDispatchParameterDataAndFreeWork(work->list[groupIndex][handleIndex]);
                     }
                 }
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->alloc[i]));
+                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->alloc[groupIndex]));
             }
         }
-        for (j = 0; j < 5; j++) {
-            effDispatchParameterDataAndFreeWork(work->handleB[j]);
+        for (handleIndex = 0; handleIndex < 5; handleIndex++) {
+            effDispatchParameterDataAndFreeWork(work->handleB[handleIndex]);
         }
         effDispatchParameterDataAndFreeWork(work->tailHandle);
     }
