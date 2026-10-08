@@ -244,7 +244,9 @@ MenuSpriteState *mnuCreateSpriteState(struct EffectSlotSet *, struct EffectSlotS
 void mnuFreeSpriteStateWork(MenuSpriteState *);
 
 #ifndef VERSION_DDS2
-void mnuDrawPartyInfoSprites(s32, s32, s32, void *, MenuSpriteState *, s32);
+void mnuDrawPartyInfoSprites(s32 x, s32 y, s32 depth,
+                             struct DatPartyRecord *entry,
+                             MenuSpriteState *spriteState, s32 flags);
 #endif
 
 #ifdef VERSION_DDS2
