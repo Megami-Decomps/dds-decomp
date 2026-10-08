@@ -19,7 +19,7 @@ struct KwlnTask {
     s16 unk2E;               /* Destruction delay; zero destroys immediately. */
     TaskUpdate update;       /* 0x30 */
     TaskDestroy destroy;     /* 0x34 */
-    u32 unk38;               /* Value exposed by the task user-value accessors. */
+    u32 userValue;           /* 0x38: caller-supplied value exposed by accessors. */
     KwlnTask *listNext;      /* 0x3C */
     KwlnTask *listPrev;      /* 0x40 */
     KwlnTask *parent;        /* 0x44 */
@@ -27,6 +27,8 @@ struct KwlnTask {
     KwlnTask *next;          /* 0x4C */
 };
 
+u32 kwlnTaskGetTimer(KwlnTask *task);
+void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 u32 kwlnTaskGetUserValue(KwlnTask *task);
 
 #endif /* KWLN_H */
