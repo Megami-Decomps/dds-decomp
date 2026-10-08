@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "par_draw.h"
 #include "par_kind_api.h"
+#include "par_table.h"
 #include "par_draw_block.h"
 #include "eff.h"
 
@@ -416,7 +417,6 @@ void parUpdateSharedScaleAndDelta(ParKindState *obj) {
     VU0_STORE_VF($vf10, D_003D6490);
 }
 
-extern void func_00159CF0(struct ParTable *table, s32 index, u32 color, f32 speed);
 
 extern void parUpdateBillboardCrossStrip(s32, s32, u32);
 
@@ -427,7 +427,7 @@ extern void parUpdateTrackPolygonCrossAxes(s32, s32, u32);
 void parDispatchKindUpdate(ParKindState *work, s32 index, u32 color, f32 speed) {
     switch ((u16)work->kind) {
     case 1:
-        func_00159CF0(work->value.table, index, color, speed);
+        parPrependHistorySample(work->value.table, index, color, speed);
         return;
     case 2:
         parUpdateBillboardCrossStrip((s32)work->primaryDrawSystem, index, color);
