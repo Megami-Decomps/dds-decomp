@@ -29,7 +29,7 @@ extern u16 D_003BA91E;
 
 extern u32 kwlnTextureReferenceFlag;
 
-extern u32 D_003BA8F4;
+extern SdfTexResource *D_003BA8F4;
 
 extern SdfTex *kwlnHeldTextureReference;
 
@@ -917,8 +917,8 @@ extern u16 D_003BA8FC;
 extern u16 D_003BA8FE;
 extern void kwlnTextureReleaseHeldReference(void);
 extern void func_00105370(void);
-extern u32 sdfAllocImageBuffer(u32 width, u32 height, u32 mode);
-extern SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, s32 primary, s32 paletteFormat, s32 arg6, s32 secondary);
+extern SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
+extern SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 arg6, SdfTexResource *secondary);
 extern void sdfTexSetClampMode(SdfTex *texture, u8 value);
 extern void sdfTexCreateFirstPacket(SdfTex *texture);
 extern void sdfTexReleaseReference(SdfTex *texture);

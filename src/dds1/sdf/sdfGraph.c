@@ -12,7 +12,7 @@ extern u8 D_003BD9DC;
 
 void func_002D0E30(void *arg0, s32 arg1, s32 arg2);
 void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
-void *sdfAllocImageBuffer(s32 arg0, s32 arg1, s32 arg2);
+SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
 
 void sdfGraphSetDisplayMode(s32 arg0) {
     D_003BD2E8 = (u8)arg0;
