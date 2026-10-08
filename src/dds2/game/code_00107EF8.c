@@ -3,6 +3,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "sdf.h"
+#include "sdf_resource.h"
 #include "sdf_sif_command.h"
 #include "scr.h"
 
@@ -1501,7 +1502,6 @@ typedef struct SdfChipStats {
     u32 usedCells[7];
 } SdfChipStats;
 
-extern void sdfGetGeneralHeapStats(s32 *stats);
 extern void sdfGetChipHeapStats(SdfChipStats *stats);
 extern char D_00435D50[];
 extern char D_00435D58[];
@@ -1517,12 +1517,12 @@ void evtDrawHeapUsageOverlay(SdfPoolNode *surface) {
     void *packetList;
 
     sdfGetGeneralHeapStats(generalHeapStats);
-    D_00435D4C = generalHeapStats[0];
+    D_00435D4C = generalHeapStats[SDF_HEAP_STAT_TOTAL_BYTES];
     sdfGetChipHeapStats(&chipHeapStats);
     packetList = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(packetList);
     func_0010B3D8(packetList, 0x8AC0, 0x79C0);
-    func_0035C860(statusText, D_00435D50, generalHeapStats[1]);
+    func_0035C860(statusText, D_00435D50, generalHeapStats[SDF_HEAP_STAT_FREE_BYTES]);
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x86C0,
         (D_00435D4C / (D_00435D4C >> 8)) * 8 + 0x7A00, 0x0FFFFF80, 0, statusText));
     func_0035C860(statusText, D_00435D58, chipHeapStats.freeBytes);
@@ -1557,7 +1557,7 @@ s32 func_0010B7B8(KwlnTask *task) {
 
     sdfGetGeneralHeapStats(heapStats);
     /* The unused heap ratio retains the native zero-divisor check. */
-    heapRatio = heapStats[1] / heapStats[0];
+    heapRatio = heapStats[SDF_HEAP_STAT_FREE_BYTES] / heapStats[SDF_HEAP_STAT_TOTAL_BYTES];
     list = (SdfListHead *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(list);
     packet = (void *)sdfAllocPacketAligned(0x40);
