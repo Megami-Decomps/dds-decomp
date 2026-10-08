@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mdl.h"
 #include "field_stage.h"
 #include "eff_blur.h"
 #include "pcp_vu0.h"
@@ -331,7 +332,7 @@ void fldUnloadPlayerModel(void);
 
 extern void dds3ClearObjectFlags(u32, s32);
 
-extern void dds3SetWorldPlayerObject(EffWorldNode *object, EffWorldNode *value);
+extern EffWorldNode *dds3SetWorldPlayerObject(EffWorldNode *object, EffWorldNode *value);
 
 extern void func_00112058(u32, s32, s32);
 
@@ -2146,17 +2147,147 @@ void fldCreatePlayerObject(void) {
     }
 }
 
+extern void effObjSetInnerFloat(u32, f32);
+extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
+extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
+extern void effObjSetInnerThirdVec(EffWorldNode *, u128 *);
+extern void effMiscAxisAngleToQuaternionVU(f32);
+extern void effMiscQuatMultiplyVU(void);
+extern u32 dds3GetObjectBaseResourceHandle(void *);
+extern void dds3SetObjectFlags(void *, u32);
+extern void fldResetCameraModelHandles(void);
+extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
+extern void mdlFlagClear(s32);
+extern void sdfSetTextFloatPairOverride(void *, f32, f32);
+extern void fldActivatePendingSceneCommand(void);
+extern s32 fldGetSceneCommandState(void);
+/* The scene reset ignores the command word supplied by this caller. */
+extern void func_00136098();
+extern void func_001360B8(s16, s32);
+extern s32 func_00133B10(void);
+extern EffWorldNode *evtSpawnActionObj11(s32, void *, s32);
+extern char D_00412F00[];
+extern f32 D_0038A610[12];
+extern char D_00435F50[];
+
 INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412EB0);
 
 INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412EC0);
 
-INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412ED0);
+void func_00126110(f32 *input) {
+    f32 work[4];
+    EffWorldNode *player;
+    s32 locationFlags;
 
-INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412EE0);
+    memset(work, 0, sizeof(work));
+    work[3] = 1.0f;
+    {
+        f32 axis[4] = {0, 1.0f, 0, 1.0f};
+        f32 unitScale[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+        f32 secondaryScale[4] = {1.0f, -1.0f, 1.0f, 1.0f};
 
-INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412EF0);
+        VU0_LOAD_VF(vf10, axis);
+        effMiscAxisAngleToQuaternionVU(3.14159265f);
+        VU0_LOAD_VF(vf11, input + 4);
+        effMiscQuatMultiplyVU();
+        VU0_STORE_VF(vf10, work);
 
-INCLUDE_ASM(const s32, "game/code_0011F208", func_00126110);
+        player = (EffWorldNode *)fldPlayerObject;
+        if (player == NULL) {
+            player = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), input, work);
+            fldPlayerObject = (u32)player;
+            dds3SetWorldNodeValue(player, (u32)D_00412EC0);
+            dds3SetWorldPlayerObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)fldPlayerObject);
+            if (D_00435F30 != 0) {
+                dds3ClearObjectFlags(fldPlayerObject, 0x20);
+            }
+            fldPrepareResourceBuffer();
+            func_00112058(fldPlayerObject, 2, D_0038A67C[0]);
+            player = (EffWorldNode *)fldPlayerObject;
+        } else {
+            ObjectTransform *inner = player->inner;
+            PCP_COPY_VECTOR_F32(inner->position, input);
+            PCP_COPY_VECTOR_F32(inner->smoothedPosition, input);
+            PCP_COPY_VECTOR_F32(inner->rotation, input + 4);
+        }
+
+        effObjSetInnerFirstVec(player, (u128 *)input);
+        effObjSetInnerSecondVec((EffWorldNode *)fldPlayerObject, (u128 *)work);
+        effObjSetInnerThirdVec((EffWorldNode *)fldPlayerObject, (u128 *)unitScale);
+        fldCameraModelObject = dds3GetObjectBaseResourceHandle((EffWorldNode *)fldPlayerObject);
+        effObjSetInnerFloat(fldPlayerObject, 90.0f);
+
+        if (fldAreaState.unk118 == 0) {
+            mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 0, 2);
+        } else {
+            mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 0, 2);
+            mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 1, 2);
+            fldResetCameraModelHandles();
+        }
+        sdfSetTextFloatPairOverride(((MdlCtx *)fldCameraModelObject)->inner, 15.0f, 0.0f);
+        fldSecondarySceneObject = 0;
+
+        locationFlags = fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1);
+        if ((locationFlags & 4) != 0) {
+            VU0_LOAD_VF(vf10, axis);
+            effMiscAxisAngleToQuaternionVU(3.14159265f);
+            VU0_LOAD_VF(vf11, input + 4);
+            effMiscQuatMultiplyVU();
+            VU0_STORE_VF(vf10, work);
+            fldSecondarySceneObject = (u32)dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), input, work);
+            dds3SetWorldNodeValue((EffWorldNode *)fldSecondarySceneObject, (u32)D_00412F00);
+            func_00112058(fldSecondarySceneObject, 2, D_0038A67C[0]);
+            effObjSetInnerFirstVec((EffWorldNode *)fldSecondarySceneObject, (u128 *)input);
+            effObjSetInnerSecondVec((EffWorldNode *)fldSecondarySceneObject, (u128 *)work);
+            effObjSetInnerThirdVec((EffWorldNode *)fldSecondarySceneObject, (u128 *)secondaryScale);
+            fldSecondarySceneModelHandle = dds3GetObjectBaseResourceHandle((EffWorldNode *)fldSecondarySceneObject);
+            effObjSetInnerFloat(fldSecondarySceneObject, 90.0f);
+            mdlAddEntryFlagged((MdlCtx *)fldSecondarySceneModelHandle, 0, 0);
+            sdfSetTextFloatPairOverride(((MdlCtx *)fldSecondarySceneModelHandle)->inner, 15.0f, 0.0f);
+            ((MdlCtx *)fldSecondarySceneModelHandle)->inner->flags |= 8;
+        }
+
+        if (fldSecondarySceneObject != 0) {
+            dds3SetObjectFlags((void *)fldPlayerObject, 0x400);
+        } else {
+            dds3SetObjectFlags((void *)fldPlayerObject, 0x200);
+        }
+
+        if (fldAreaState.area < 0x14) {
+            fldClearSceneCommandFlag();
+        }
+        locationFlags = fldGetLocationCoordinateValue(fldAreaState.area, fldAreaState.floor + 1);
+        if ((locationFlags & 1) != 0) {
+            fldAreaState.commandEnabled = 1;
+        } else {
+            fldAreaState.commandEnabled = 0;
+            mdlFlagClear(0x818);
+        }
+
+        if (fldAreaState.area < 0xC8) {
+            func_001360B8(0, 0);
+            func_00135A68(D_00389988[0x2C / 4], 0);
+            fldBeginSelectedValueTransition(D_00389988[0x30 / 4]);
+            if (fldGetSceneCommandState() == 1) {
+                if (fldAreaState.commandEnabled != 0) {
+                    fldActivatePendingSceneCommand();
+                } else {
+                    mdlFlagClear(0x818);
+                    fldAreaState.sceneCommand = 0;
+                    func_001360B8(0, 0);
+                    func_00135A68(D_00389988[0x2C / 4], 0);
+                    fldBeginSelectedValueTransition(D_00389988[0x30 / 4]);
+                }
+            } else if (fldAreaState.commandEnabled == 0) {
+                mdlFlagClear(0x818);
+                fldAreaState.sceneCommand = 0;
+            }
+            func_00136098(fldAreaState.commandEnabled);
+        }
+        func_00133B10();
+        evtSpawnActionObj11(dds3AdvanceWorldCounter(), D_0038A610, (s32)(u32)D_00435F50);
+    }
+}
 
 typedef struct FieldVec4 {
     f32 x;
@@ -2617,6 +2748,8 @@ s32 fldDispatchPendingSceneResource(void) {
     }
     return 0;
 }
+
+INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412F00);
 
 INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412F10);
 
