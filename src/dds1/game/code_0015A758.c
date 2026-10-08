@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bill_object_api.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
@@ -113,7 +114,7 @@ extern void billSetChildScaleComponents(BillObj *, f32, f32);
 
 extern void billSetBillboardMode(BillObj *, s32);
 
-extern void billMarkKindOneFlag(s32);
+
 
 extern ParDispatch D_0034E258[];
 
@@ -251,7 +252,7 @@ ParObj *parCreateResourceKindObject(s32 kind, ParKindResource *resource) {
         billboard = billCreateIndexed(resource->type, (u32)(resource + 1));
         billSetChildScaleComponents(billboard, object->scaleX, object->scaleY);
         billSetBillboardMode(billboard, object->billboardMode);
-        billMarkKindOneFlag((s32)billboard);
+        billMarkKindOneFlag(billboard);
         object->billboard = billboard;
     } else {
         object = parKindConstructorEntries[kind].func(object);
@@ -267,7 +268,7 @@ ParObj *parInstantiateKind(ParObj *source) {
         BillObj *billboard = billCloneObjectRetainingSharedData(source->billboard);
         billSetChildScaleComponents(billboard, particle->scaleX, particle->scaleY);
         billSetBillboardMode(billboard, particle->billboardMode);
-        billMarkKindOneFlag((s32)billboard);
+        billMarkKindOneFlag(billboard);
         particle->billboard = billboard;
     }
     return particle;
