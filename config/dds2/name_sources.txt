@@ -4416,6 +4416,7 @@
 0x002ABD60	mnuCreateStaffBulletItemWindow	inferred	Matched DDS2 staff bullet-item window constructor; DDS1 counterpart mnuCreateStaffBulletItemWindow; creates and populates the bullet-item inventory window using DDS2 layout and item bounds.
 0x002AC408	mnuCreateOrderedStaffItemWindow	inferred	U3
 0x002AC688	mnuUpdateStaffEntrySelectionFlags	inferred	confidence=high; matched-C; src/dds2/game/code_002AB890.c:86:func_002AC688; Peer-matched C proposal: M143; source=names_pending_main.tsv:145 [names_qp13.tsv]
+0x002AC750	mnuDrawOwnedCatalogListNode	inferred	draws the owned-catalog header node specially and delegates remaining nodes to the generic renderer
 0x002AC8F0	mnuCreateOwnedCatalogItemWindow	inferred	U0
 0x002ACB40	mnuInitializeWindowOwnerResourceSet	inferred	confidence=high; src/dds2/game/code_002AB890.c:func_002ACB40; Allocates and clears retained resource-set work, configures the panel and seeks the initial window list node. [names_qp9.tsv]
 0x002ACBF8	mnuDestroyWindowOwnerResourceSet	inferred	confidence=high; src/dds2/game/code_002AB890.c:func_002ACBF8; Destroys owner window containers, performs local cleanup and releases the retained resource-set handle. [names_qp9.tsv]
