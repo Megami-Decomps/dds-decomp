@@ -3612,12 +3612,12 @@ void fldLoadBattleSkyAndFilter(void) {
         for (i = 0; i < FIELD_CAMERA_SETTING_COUNT; i++) {
             fldCameraSettings[i] = D_003306D0;
         }
-        fldCameraColorParameters->color.mode = 0;
-        fldCameraColorParameters->color.colorB = fldCameraColorParameters->color.colorA = 0x80808080;
+        fldCameraColorParameters->color.segmentMode = SDF_COLOR_TRACK_MODE_ENDPOINTS;
+        fldCameraColorParameters->color.finalColor = fldCameraColorParameters->color.initialColor = 0x80808080;
         fldCameraColorParameters->alpha.alpha = 0x40;
         fldCameraColorParameters->alpha.surfaceIndex = 2;
-        fldCameraColorParameters->alpha.fadeIn = 0.0f;
-        fldCameraColorParameters->alpha.fadeOut = 1.0f;
+        fldCameraColorParameters->alpha.fadeInFraction = 0.0f;
+        fldCameraColorParameters->alpha.fadeOutFraction = 1.0f;
         fldCameraColorParameters->maxFrames = 0;
         fldCameraColorParameters->count = 0xFF;
         fldCameraColorParameters->speed = 20.0f;
@@ -4174,7 +4174,7 @@ void fldActivateCameraColorSetting(s32 enable) {
         fldCameraColorEffect = 0;
         color = &setting->color;
         if (color->enabled != 0) {
-            fldCameraColorParameters->color.colorB = fldCameraColorParameters->color.colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
+            fldCameraColorParameters->color.finalColor = fldCameraColorParameters->color.initialColor = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
             fldCameraColorParameters->alpha.alpha = color->vectorY;
             switch (color->mode) {
             case 0:
@@ -4262,7 +4262,7 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
     FldColorParams *color = &setting->color;
 
     if (color->enabled != 0) {
-        fldCameraColorParameters->color.colorB = fldCameraColorParameters->color.colorA = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
+        fldCameraColorParameters->color.finalColor = fldCameraColorParameters->color.initialColor = (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
         fldCameraColorParameters->alpha.alpha = color->vectorY;
         switch (color->mode) {
         case 0:
