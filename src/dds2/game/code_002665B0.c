@@ -170,7 +170,7 @@ extern void mnuAppendCampSpriteRequests(s32, s32);
 
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 
-extern void mnuSetGroupProperties(s32, s32, s32, s32, s32);
+extern void mnuSetGroupProperties(MenuProfilePanel *, u32, u32, u32, u32);
 
 extern void mnuDrawListPanels(s32, s32, s32, s32, s32, s32);
 
@@ -760,7 +760,7 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00267C48);
 /* Create/configure the profile-panel effect only when its retained handle is zero. */
 void mnuEnsureProfilePanelEffect(DatPartyRecord *selectionState, MenuProgressHost *host) {
     if (host->currentEffect == 0) {
-        s32 effect = (s32)mnuCreateProfilePanel(selectionState);
+        MenuProfilePanel *effect = mnuCreateProfilePanel(selectionState);
         host->currentEffect = effect;
         mnuSetGroupProperties(effect, host->staffSlots.baseResources[0], host->staffSlots.pairResources[1], 1, 2);
     }
@@ -768,14 +768,13 @@ void mnuEnsureProfilePanelEffect(DatPartyRecord *selectionState, MenuProgressHos
 
 /* Release the retained profile panel and clear its handle. */
 void mnuCloseCurrentProfilePanel(MenuProgressHost *host) {
-    mnuFreeProfilePanelWork((void *)(u32)host->currentEffect);
+    mnuFreeProfilePanelWork(host->currentEffect);
     host->currentEffect = 0;
 }
 
 /* Draw/advance the retained profile panel with the caller's coordinates, mode, and option. */
 void mnuDrawCurrentProfilePanel(s32 x, s32 y, s32 mode, MenuProgressHost *host, s32 option) {
-    mnuDrawAndAdvanceProfilePanel(x, y, mode,
-                                  (MenuProfilePanel *)(u32)host->currentEffect, option);
+    mnuDrawAndAdvanceProfilePanel(x, y, mode, host->currentEffect, option);
 }
 
 /* Draw loaded progress panels only in state two; preserve the accumulated draw flags. */
