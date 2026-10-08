@@ -851,7 +851,7 @@ u8 *sdfTexSubmitPixelsForFormat(SdfTex *texture, u32 destination, u8 *pixels, s3
 
 void sdfTexUploadSecondaryResource(SdfTex *tex) {
     if (tex->secondaryResource != NULL) {
-        sdfTexSubmitPixelsForFormat(tex, sdfTexGetSecondaryResourceWord(tex), tex->data, 0);
+        sdfTexSubmitPixelsForFormat(tex, sdfTexGetSecondaryResourceWord(tex), tex->paletteData, 0);
     }
 }
 
@@ -886,7 +886,7 @@ SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 max
 }
 
 extern SdfTexResource *sdfTexAllocHead(s32, s32, s32);
-extern void func_002D2A58(SdfTex *);
+extern void sdfTexAllocatePaletteData(SdfTex *);
 extern void sdfTexCopyImageData(SdfTex *, void *);
 extern void sdfTexCreateFirstPacket(SdfTex *);
 
@@ -907,14 +907,14 @@ SdfTex *func_002D2800(SdfTex *source) {
     }
     texture->primaryBuffer = NULL;
     texture->secondaryBuffer = NULL;
-    texture->data = NULL;
+    texture->paletteData = NULL;
     texture->intensityMap = NULL;
     sdfTexListInsert(texture);
     if (texture->secondaryResource != NULL) {
         texture->secondaryResource = sdfTexAllocHead(
             texture->pixelFormat, texture->clutFormat, texture->paletteCount);
-        func_002D2A58(texture);
-        sdfTexCopyImageData(texture, original->data);
+        sdfTexAllocatePaletteData(texture);
+        sdfTexCopyImageData(texture, original->paletteData);
         texture->unk38 = 0x80808080;
     }
     sdfTexCreateFirstPacket(texture);
