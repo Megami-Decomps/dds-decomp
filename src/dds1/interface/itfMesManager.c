@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "itf.h"
+#include "kwln.h"
 
 
 typedef struct ItfMesWindowRec ItfMesWindowRec;
@@ -122,13 +123,13 @@ extern SdfTex *itfLoadTextureFromAsset(const char *path);
 
 extern void itfInitPool(ItfMesPool *pool, ItfMesPoolNode *nodes, s32 count, s32 stride);
 
-extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
+extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 extern s32 sndVisitQueuedResources(void);
 
 extern void sndFlushMessageQueue(void);
 
-extern void func_0019F6A0(void);
+extern s32 func_0019F6A0(KwlnTask *task);
 
 extern struct ItfMesPoolNode *itfAcquirePoolNode();
 
@@ -928,8 +929,8 @@ void itfMesInit(void) {
     for (poolNode = itfMesWork.pool.firstFree; poolNode != NULL; poolNode = poolNode->next) {
         poolNode->stateAddress = 0;
     }
-    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (void (*)(void))sndVisitQueuedResources, sndFlushMessageQueue, NULL);
-    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, func_0019F6A0, sndFlushMessageQueue, NULL);
+    kwlnTaskCreate("CalcMsgMng", 0x409, 0, 0, (TaskUpdate)sndVisitQueuedResources, (TaskDestroy)sndFlushMessageQueue, 0);
+    kwlnTaskCreate("DrawMsgMng", 0x2B1A, 0, 0, func_0019F6A0, (TaskDestroy)sndFlushMessageQueue, 0);
 }
 
 /* Set manager flags; the stored result is narrowed to its existing u16 field. */

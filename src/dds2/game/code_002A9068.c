@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "common.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -766,8 +767,6 @@ u32 func_002AA278(KwlnTask *task) {
     mnuDrawAndStepGradientFade(work + 0xaa50, 0x53);
     return 0;
 }
-
-extern u32 mnuMapPadMaskToFlags(s32);
 
 extern s32 func_002A9AB8(s32);
 

@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "sdf_resource.h"
@@ -49,7 +50,6 @@ extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 #define MNU_STAFF_DISPLAY_LIMIT 3
 #define MNU_STAFF_BACKUP_BYTES 0x8D4
 #define MNU_STAFF_PARTY_ACTIVE_BIT 1
-#define MNU_STAFF_NODE_UNAVAILABLE 1
 #define MNU_STAFF_NODE_SELECTED 2
 #define MNU_STAFF_PARTY_PANEL_BASE 0x284
 #define MNU_STAFF_FADE_STEP 0x10
@@ -157,10 +157,6 @@ extern void mnuHandlePanelListPageJumpInput();
 extern char D_003E7758[];
 
 extern s32 ptySkillMenuApplyFieldUseAndCost();
-
-extern u32 mnuMapPadMaskToFlags();
-
-
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
@@ -1892,7 +1888,7 @@ void mnuCampMenuHandleInput(KwlnTask *callback) {
 }
 
 /* Apply a selected skill to the current slot, then process window input. */
-void func_002B5580(KwlnTask *callback) {
+void ptySkillMenuHandleSelection(KwlnTask *callback) {
     MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(callback);
     SkillMenuRuntime *menuWork = (SkillMenuRuntime *)context->party;
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_SKILL_INPUT_MASK);
@@ -2014,7 +2010,7 @@ s32 ptySkillMenuUpdate(KwlnTask *callback) {
     if (((MenuContext *)context)->imageHandle->list->cursor->index == 0) {
         mnuCampMenuHandleInput(callback);
     } else if (menu[12] == 0) {
-        func_002B5580(callback);
+        ptySkillMenuHandleSelection(callback);
     } else {
         ptySkillMenuHandleSlotReorder(callback);
     }
@@ -2138,7 +2134,7 @@ void mnuFlagMatchingEntries(s32 context) {
         do {
             /* Cost lookup uses the low halfword of the list key. */
             if (mnuIsEntryCostUnaffordable((u16)link->sortKeyPrimary, slot)) {
-                link->flags48 |= 1;
+                link->flags48 |= MNU_STAFF_NODE_UNAVAILABLE;
             }
             link = link->next;
         } while (link != NULL);
@@ -3311,12 +3307,6 @@ void mnuClearListFlagsOneAndTwo(u32 *flags) {
 u32 mnuTestListFlagTwo(u32 *flags) {
     return *flags & 2;
 }
-
-/* Return the stored row step times the visible row count, in native units. */
-s32 mnuGetListViewportHeight(MenuList *list);
-
-/* Cancel the pending animation on every node in this list. */
-void mnuResetListNodeFadeCounters(MenuList *list);
 
 /* Subtract the fade step only when positive, then clamp any negative result to zero. */
 void mnuDecreaseListNodeFadeCounters(u8 *menu);

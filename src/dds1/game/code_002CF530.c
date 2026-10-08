@@ -1,8 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
+#include "sdf_chip.h"
 
-
-extern s32 sdfChipIsInRange(void *);
 extern void sdfReleaseChipBlock(void *);
 extern void sdfReleaseCurrentResourceHandle(void *);
 
@@ -35,7 +34,7 @@ void *sdfAllocateBlockBySizeThreshold(s32 size) {
 
 void sdfFreeMemoryFromEitherHeap(void *data) {
     if (data != NULL) {
-        if (sdfChipIsInRange(data)) {
+        if (sdfChipIsInRange((s32)data)) {
             sdfReleaseChipBlock(data);
             return;
         }
@@ -46,7 +45,7 @@ void sdfFreeMemoryFromEitherHeap(void *data) {
 
 void sdfReleaseChipOrRetainedResource(void *data) {
     if (data != NULL) {
-        if (sdfChipIsInRange(data)) {
+        if (sdfChipIsInRange((s32)data)) {
             sdfQueuePendingChipRelease(data);
             return;
         }
@@ -59,7 +58,7 @@ void sdfFreeMemorySlotFromEitherHeap(void **slot) {
     void *data = *slot;
     if (data != NULL) {
         *slot = NULL;
-        if (sdfChipIsInRange(data)) {
+        if (sdfChipIsInRange((s32)data)) {
             sdfReleaseChipBlock(data);
             return;
         }

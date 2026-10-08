@@ -2108,6 +2108,7 @@
 0x00187988	effBlurDrawFramebufferQuad	inferred	confidence=high; matched-C; src/dds1/game/code_001873E0.c:125:func_00187988; Builds a frame-buffer texture quad packet list with source DMA, sampling, texture-alpha, blend and overlay-sensitive clamp state, then submits the draw packet.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00187DB0	effResourceQuadDraw	inferred	confidence=high; func_00187DB0 builds colored quad packets from RGBA, GS ALPHA control and four edges, appending the selected resource; its flag chooses already-scaled versus pixel coordinates.; sources=names_R_Structs54b.tsv; twin=0x0018F9E8, input-family pairing. [names_qp10.tsv]
 0x00187FC0	effCloneResourceTemplate	inferred	src/dds1/game/code_00187DB0.c func_00187FC0: Allocates template, copies nine-word body and installs effect resource first word. [names_reviewed24.tsv]
+0x00188050	effReleaseResourceTemplate	inferred	releases the complete rectangle allocation returned by effCloneResourceTemplate; native tail-call forwards the owner to chip release
 0x00188068	effResourceRectDrawPixels	inferred	confidence=high; func_00188068 generates bounds around center offsets 256/224 and calls the quad renderer with coordinate-scaling flag 0.; sources=names_R_Structs54b.tsv; twin=0x0018FCA0, input-family pairing. [names_qp10.tsv]
 0x001880D8	effComputeBlurRectBounds	inferred	readability/matching review (QP16)
 0x00188150	effTrackPolyCreateWork	inferred	confidence=high; src/dds1/game/code_00187DB0.c:func_00188150; Copies source work and creates a point-history buffer, then installs its initial vector and control value. CORRECTED: callees are effModelTrackPoly.c tracks; the caller declares it EffTrackPolyWork *(EffTrackPolyModel *), so 'effect clone with point history' was a claim beyond the body. [names_qp9.tsv]
@@ -5301,6 +5302,7 @@
 0x0029BD18	effSetModelRotationQuaternion	inferred	confidence=high; matched-C; src/dds1/game/code_0029A840.c:578:func_0029BD18; Loads the supplied quaternion into vf10 and updates the resource-owner model rotation basis.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x0029BD38	effPropagateResourceModelMask	inferred	confidence=high; matched-C; src/dds1/game/code_0029A840.c:583:func_0029BD38; Propagates the resource-owner model through its masked model callback.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x0029BD80	effObjectListCountersReset	inferred	paired effect body: effect work operation [names_R_FuncNames7.tsv]
+0x0029BD90	effCreateSharedTextureReference	inferred	allocates and returns a retained shared texture reference from a serialized texture header
 0x0029BF88	effCloneSharedReferenceWithValue	inferred	Clones a reference object then assigns the supplied value to its metadata word. [names_reviewed5.tsv]
 0x0029BFB0	effReleaseSharedReference	inferred	eff effect resources and animation in game/code_0029A840.c
 0x0029C378	effReleaseReferenceHolder	inferred	eff effect resources and animation in game/code_0029A840.c

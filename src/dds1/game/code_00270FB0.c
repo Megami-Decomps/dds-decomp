@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "common.h"
 #include "mnu_staff.h"
 #include "kwln.h"
