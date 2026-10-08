@@ -1,5 +1,6 @@
 #include "mnu_input.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_records.h"
 #include "common.h"
 #include "itf_draw_grid.h"
 #include "mnu_staff.h"
@@ -226,23 +227,12 @@ void mnuSetStaffDisplayMode(s32 nextCategory, StaffMenuWork *menu) {
     }
 }
 
-typedef struct StaffStatusBatch {
-    u32 references;
-    u32 allocation;
-    u32 payload;
-} StaffStatusBatch;
-
-typedef struct StaffStatusBatchPayload {
-    u8 pad00[0x20];
-    u32 *values;
-} StaffStatusBatchPayload;
-
 /* Load both mapped images and initialize the two status batches' word arrays.
  * Batch categories and the initial 0xF word remain opaque. */
 void func_00271368(void *menuData) {
     StaffMenuWork *menu = (StaffMenuWork *)menuData;
-    StaffStatusBatch *batch;
-    StaffStatusBatchPayload *batchPayload;
+    EffMappedResource *batch;
+    EffMappedRecord *record;
     u32 *statusWords;
     u32 primaryResource;
 
@@ -250,27 +240,27 @@ void func_00271368(void *menuData) {
     menu->primaryImage = primaryResource;
     menu->secondaryImage = effLoadMappedResource(D_003B2058, D_0037C380[1]);
 
-    batch = (StaffStatusBatch *)effCreateStatusBatch(6);
-    batchPayload = (StaffStatusBatchPayload *)batch->payload;
-    menu->extraImages[0] = (u32)batch;
-    statusWords = batchPayload->values;
+    batch = effCreateStatusBatch(6);
+    record = batch->records;
+    menu->extraImages[0] = batch;
+    statusWords = (u32 *)record->status;
     statusWords[0] = 0xF;
     statusWords[1] = 0;
     statusWords[2] = 0;
     statusWords[3] = 0;
     statusWords[4] = 0;
 
-    batch = (StaffStatusBatch *)effCreateStatusBatch(1);
-    batchPayload = (StaffStatusBatchPayload *)batch->payload;
-    menu->extraImages[1] = (u32)batch;
-    statusWords = batchPayload->values;
+    batch = effCreateStatusBatch(1);
+    record = batch->records;
+    menu->extraImages[1] = batch;
+    statusWords = (u32 *)record->status;
     statusWords[0] = 0xF;
     statusWords[1] = 0;
 }
 
 /* Destroy the mapped images followed by both status batches. */
 void mnuReleaseStaffSpriteHandles(StaffMenuWork *menu) {
-    u32 *batchCursor = menu->extraImages;
+    EffMappedResource **batchCursor = menu->extraImages;
     u32 batchIndex = 0;
     effDestroyPackedBatch(menu->primaryImage);
     effDestroyPackedBatch(menu->secondaryImage);
