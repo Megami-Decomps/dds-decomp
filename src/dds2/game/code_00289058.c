@@ -92,17 +92,22 @@ typedef struct MantraMenuWork {
     s32 masteryFrames;
     s32 delayFrames;
     s32 navigationState;
-    u8 pad9A8[4];
+    u32 navigationMask;
     u32 displaySprite;
     u8 pad9B0[0x10];
     u32 drawPool;
 } MantraMenuWork;
 
 typedef struct EvtMantraNodePositionRecord {
-    u32 kind : 4;
-    s32 modelFlagState : 4;
-    u32 reserved : 8;
-    s16 id;
+    union {
+        u32 packed;
+        struct {
+            u32 kind : 4;
+            s32 modelFlagState : 4;
+            u32 reserved : 8;
+            s16 id;
+        };
+    };
     s16 firstKey;
     s16 secondKey;
     struct EvtMantraNodePositionRecord *neighbors[6]; /* 0x08: ring of six adjacent nodes, NULL when absent */
@@ -467,7 +472,116 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_0028A1D0);
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028B1B0);
 
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_0028B318);
+extern s8 D_0037F510[64];
+struct MenuPanelObject;
+extern s32 mnuNavigateMantraSelector(struct MenuPanelObject *, s8);
+extern u16 mnuGetSelectedPanelValue(struct MenuPanelObject *);
+extern void sndSetSequenceVolumePan(s32, s32, s32);
+
+s32 func_0028B318(MenuContainer *object) {
+    MantraMenuWork *work = &object->work;
+    s32 sound = 0;
+    s32 result = 0;
+    s32 direction = 0;
+
+    if (D_0037F510[0x26] != 0) {
+        direction = 1;
+    } else if (D_0037F510[0x27] != 0) {
+        direction |= 4;
+    }
+    if (D_0037F510[0x24] != 0) {
+        direction |= 8;
+    } else if (D_0037F510[0x25] != 0) {
+        direction |= 2;
+    }
+    if (D_0037F510[0x26] < 0 || D_0037F510[0x27] < 0 ||
+        D_0037F510[0x24] < 0 || D_0037F510[0x25] < 0) {
+        if (work->navigationState != 0) {
+            work->navigationState = 9;
+        }
+    }
+    if (work->navigationState > 0) {
+        work->navigationState--;
+        if (work->navigationState >= 8) {
+            work->navigationMask |= direction;
+        } else if (work->navigationState == 7) {
+            work->navigationMask |= direction;
+            work->flags |= 0x04000000;
+        } else {
+            work->navigationMask = direction;
+            work->flags &= ~0x04000000;
+        }
+    } else if (direction != 0) {
+        work->navigationMask = direction;
+        work->navigationState = 9;
+    } else {
+        work->navigationMask = 0;
+    }
+    if (((work->flags >> 26) & 1) != 0 || D_0037F510[0x26] != 0 ||
+        D_0037F510[0x27] != 0 || D_0037F510[0x24] != 0 || D_0037F510[0x25] != 0) {
+        if (mnuNavigateMantraSelector((struct MenuPanelObject *)object,
+                                      (s8)work->navigationMask) != 0) {
+            EvtMantraNodePositionRecord *position = (EvtMantraNodePositionRecord *)work->resourceId;
+            sound = 1;
+            work->navigationMask = 0;
+            mnuSpawnMantraIconAtPosition(
+                (s32)((f32)position->firstKey / 10.0f * 40.0f),
+                (s32)((f32)position->secondKey / 10.0f * 39.0f),
+                object->work.drawPool);
+        }
+    }
+    if (work->navigationState == 0) {
+        if (D_0037F510[0x28] < 0) {
+            sound = 4;
+            func_002891C0(object);
+            work->navigationState = 5;
+        } else if (D_0037F510[0x2A] < 0) {
+            sound = 4;
+            func_002893A0(object);
+            work->navigationState = 5;
+        }
+    }
+    if (D_0037F510[0x21] < 0 && work->navigationState < 3) {
+        work->navigationState = 0;
+        if (work->bits.iconFade != 0) {
+            sound = 3;
+            work->bits.iconFade = 0;
+        } else if ((((EvtMantraNodePositionRecord *)object->work.resourceId)->packed & 0x100) == 0) {
+            switch (mnuGetSelectedPanelValue((struct MenuPanelObject *)object) & 0xF) {
+            case 1:
+                result = 2;
+                sound = 2;
+                if (work->bits.showOverlay != 0) {
+                    mnuSetMantraFadeState(object->work.drawPool, 5, 0);
+                }
+                break;
+            default:
+                sound = 3;
+                break;
+            }
+        }
+    } else if (D_0037F510[0x23] < 0 && work->navigationState == 0) {
+        sound = 3;
+        if (work->bits.iconFade != 0) {
+            work->bits.iconFade ^= 1;
+        } else {
+            result = 3;
+        }
+    } else if (D_0037F510[0x20] < 0 && work->navigationState == 0) {
+        sound = 2;
+        result = 5;
+    } else if (D_0037F510[0x2D] < 0) {
+        sound = 2;
+        result = 6;
+    }
+    switch (sound) {
+    case 1: sndSetSequenceVolumePan(2, 0x7F, 0x3F); break;
+    case 2: sndSetSequenceVolumePan(8, 0x7F, 0x3F); break;
+    case 3: sndSetSequenceVolumePan(0xA, 0x7F, 0x3F); break;
+    case 4: sndSetSequenceVolumePan(4, 0x7F, 0x3F); break;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028B738);
 
