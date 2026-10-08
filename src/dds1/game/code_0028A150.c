@@ -475,11 +475,9 @@ extern u32 D_003DC7C0[];
 
 extern void billDispatchByKind(void *handle);
 
-extern void *effRetainResource(void *name);
 
 
 
-extern void billSetBillboardMode(void *handle, s16 index);
 
 extern void *fileAllocateGridRecordSlots(u16 type, u32 count, void *src);
 
@@ -4961,7 +4959,7 @@ LoadObj *effLoadObjectCreateFromJob(FileJobPayload *job) {
             fileLoadObjectOpenAndStartDevice(obj, secondary);
             break;
         case 4:
-            fileLoadObjectOpenNamedDevice(obj, *(void **)secondary);
+            fileLoadObjectOpenNamedDevice(obj, *(s32 *)secondary);
             break;
         case 5:
             fileReplaceEffectSurfaceJobs(obj, secondary);
@@ -5065,12 +5063,12 @@ void fileLoadObjectSetResource(LoadObj *obj, u32 type, void *data) {
     obj->recordWork = fileAllocateGridRecordSlots(type, (u32)obj->owner, data);
 }
 
-void fileLoadObjectOpenNamedDevice(LoadObj *obj, void *name) {
-    void *handle;
+void fileLoadObjectOpenNamedDevice(LoadObj *obj, s32 resourceIndex) {
+    struct BillObj *handle;
     if (obj->deviceHandle != NULL) {
         billDispatchByKind(obj->deviceHandle);
     }
-    handle = effRetainResource(name);
+    handle = effCreateBillboardSharingIndexedResource(resourceIndex);
     obj->deviceHandle = handle;
     if (obj->recordWork != NULL) {
         FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)obj->recordWork)->data0;

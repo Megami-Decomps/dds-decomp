@@ -1,3 +1,4 @@
+#include "bill_object_api.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
@@ -20,8 +21,6 @@ typedef struct EffBillboardParams {
 } EffBillboardParams;
 
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern u32 effRetainResource(s32 kind);
-extern void billSetBillboardMode(u32 handle, s32 mode);
 extern void *sdfCreateAssetWithDrawEntries(void);
 extern void func_003332D0(u32 asset, f32 value);
 typedef struct {
@@ -272,8 +271,8 @@ EffBillboardWork *effCreateBillboardResourceWork(EffBillboardParams *params) {
     EffBillboardWork *billboard = (EffBillboardWork *)sdfAllocSizeClassBlock(0x20);
 
     billboard->mode = params->mode;
-    billboard->handle = effRetainResource(2);
-    billSetBillboardMode(billboard->handle, 2);
+    billboard->handle = (u32)effCreateBillboardSharingIndexedResource(2);
+    billSetBillboardMode((struct BillObj *)billboard->handle, 2);
     billboard->color = 0x80808080;
     billboard->scale = 100.0f;
     return billboard;
