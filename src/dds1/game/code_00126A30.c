@@ -319,8 +319,8 @@ extern s32 fldValueRecordCount;
 extern s32 D_003BADF8;
 extern s32 D_003BADEC;
 extern u8 D_003BA734;
-extern s32 scrFindNamedProcessNode(u32 arg0);
-extern s32 evtDestroyNamedTask(u64 arg0, u32 arg1);
+extern ScrData *scrFindNamedProcessNode(char *name);
+extern void evtDestroyNamedTask(void *unusedContext, const char *taskName);
 extern u32 fldAreaCachedResource;
 extern u32 fldAreaPackedArchive;
 extern u8 D_003BAC90[];
@@ -363,7 +363,7 @@ extern void sdfResourceListRelease();
 extern void fldReleaseBackgroundBuffer(void);
 
 extern FldWaypointBlock fldActorWaypointRows;
-extern u32 *D_003307B0[];
+extern FldFileResource *D_003307B0[];
 extern void fldDrawMarkerQuad(f32 *pos);
 
 typedef struct {
@@ -4173,11 +4173,11 @@ void fldResetTaskSlots(void) {
     world = dds3GetWorldSecondaryObject();
     if (world != 0) {
         for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
-            taskInfo = *(FldTaskInfo **)(D_003307B0[slotIndex] + 8);
+            taskInfo = (FldTaskInfo *)D_003307B0[slotIndex]->data;
             if (taskInfo->slot >= 0) {
                 task = dds3GetWorldObjectPayload((EffWorldNode *)dds3FindWorldObjectNodeByKey(world, *(u32 *)D_003C92E0[taskInfo->slot], 0xD));
-                if (scrFindNamedProcessNode((u32)task) != 0) {
-                    evtDestroyNamedTask((s32)dds3GetWorldObject(), (u32)task);
+                if (scrFindNamedProcessNode(task) != 0) {
+                    evtDestroyNamedTask(dds3GetWorldObject(), task);
                 }
             }
         }
@@ -4216,7 +4216,7 @@ s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
     position[3] = 1.0f;
     for (i = 0; i < fldTaskSlotCount; i++) {
         if (fldRoomRecords[i].unk108 == entry->key) {
-            kind = *((FldProbeKind *)D_003307B0[i][8])->kind;
+            kind = *((FldProbeKind *)D_003307B0[i]->data)->kind;
             switch (kind) {
             case 0:
                 source = entry->data;
@@ -4282,7 +4282,7 @@ s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry) {
     position[3] = 1.0f;
     for (i = 0; i < fldTaskSlotCount; i++) {
         if (fldRoomRecords[i].unk108 == entry->key) {
-            kind = *((FldProbeKind *)D_003307B0[i][8])->kind;
+            kind = *((FldProbeKind *)D_003307B0[i]->data)->kind;
             switch (kind) {
             case 0:
                 PCP_COPY_VECTOR(position, entry->data);
@@ -4337,7 +4337,7 @@ s32 fldTestActorRoomProbeCondition(s32 index, EffWorldNode *actor, f32 *position
     f32 angle;
     u32 kind;
 
-    kind = *((FldProbeKind *)D_003307B0[index][8])->kind;
+    kind = *((FldProbeKind *)D_003307B0[index]->data)->kind;
     switch (kind) {
     case 0:
         VU0_LOAD_VF(vf10, actor->inner->rotation);
@@ -4430,10 +4430,10 @@ s32 fldRoomContainsPoint(f32 *point, s32 room) {
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013AFC8);
 
-s32 fldDestroyFlaggedNamedTask(u32 flag, u32 slot) {
+s32 fldDestroyFlaggedNamedTask(char *flag, u32 slot) {
     D_003308B0[slot] = 0;
     if (scrFindNamedProcessNode(flag) != 0) {
-        evtDestroyNamedTask((s32)dds3GetWorldObject(), flag);
+        evtDestroyNamedTask(dds3GetWorldObject(), flag);
         return 0;
     }
     return -1;
@@ -4456,12 +4456,12 @@ s32 fldRestartSceneResourceTask(void) {
         return 0;
     }
     if ((state & 2) != 0 && D_0032C9A0[0] != 0) {
-        evtDestroyNamedTask((s32)dds3GetWorldObject(), (u32)D_0032C9A0);
+        evtDestroyNamedTask(dds3GetWorldObject(), (const char *)D_0032C9A0);
     }
     D_0032C9A0[0] = 0;
     D_003BAB3C = 0;
     object = fldSelectCurrentActorOnNextFloor();
-    if (scrFindNamedProcessNode((u32)object) == 0) {
+    if (scrFindNamedProcessNode((char *)object) == 0) {
         evtStartSceneResourceTask((s32)dds3GetWorldObject(), object);
     }
     return 1;
@@ -4473,9 +4473,9 @@ void fldDrawTaskMarkers(void) {
     s32 count = fldTaskSlotCount;
     s32 i = 0;
     if (count > 0) {
-        u32 **entry = D_003307B0;
+        FldFileResource **entry = D_003307B0;
         do {
-            fldDrawMarkerQuad((f32 *)(*entry)[4]);
+            fldDrawMarkerQuad((*entry)->transform);
             i++;
             entry++;
         } while (i < fldTaskSlotCount);
@@ -4503,7 +4503,7 @@ s32 fldFindTaskRecordId(u32 task) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
         if (D_003308B0[slotIndex] == task) {
-            return D_003307B0[slotIndex][0];
+            return D_003307B0[slotIndex]->id;
         }
     }
     return -1;
@@ -4524,12 +4524,12 @@ s32 fldFindRoomByTask(u32 task) {
 }
 
 
-/* Return the first matching task slot's third record word; zero on miss. */
-s32 fldGetTaskRecordValue(u32 task) {
+/* Return the first matching task slot's record name; NULL on miss. */
+const char *fldGetTaskRecordValue(u32 task) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldTaskSlotCount; slotIndex++) {
         if (D_003308B0[slotIndex] == task) {
-            return D_003307B0[slotIndex][2];
+            return D_003307B0[slotIndex]->name;
         }
     }
     return 0;
@@ -4905,7 +4905,7 @@ s32 fldQuerySelectedActorMotionState(s32 query) {
 void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
     s32 index;
     s32 kind;
-    s32 record;
+    const char *record;
     FldActorEntry *entry;
 
     if (checkTaskRecord != 0) {
@@ -4913,7 +4913,7 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
         if (record == 0) {
             return;
         }
-        if (fldFindActorEntryByName((const char *)record) == 0) {
+        if (fldFindActorEntryByName(record) == 0) {
             return;
         }
     }

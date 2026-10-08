@@ -160,7 +160,7 @@ void fldClearPrimarySceneFlag(void);
 
 extern char D_00412F30[];
 
-extern s32 scrFindNamedProcessNode(const char *arg0);
+extern struct ScrData *scrFindNamedProcessNode(char *arg0);
 
 extern char D_00412F58[];
 
