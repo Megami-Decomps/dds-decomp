@@ -689,11 +689,154 @@ void itfClearSelectionFlags(MenuPanelObject *object) {
     state->flags &= 0xff0000ff;
 }
 
+extern void mnuSpawnMantraShortLoopIconAtPosition(u32, u32, u32);
+extern void mnuSpawnMantraIconAtPosition(s32, s32, u32);
+extern void mnuSpawnMantraVariantIconAtPosition(u32, u32, u32);
+extern void mnuSpawnMantraShortLoopVariantIconAtPosition(u32, u32, u32);
+extern void func_00278F60(u32);
+extern void func_00278EA8(u32);
+extern void func_00278EE0(u32);
+extern void func_00279080(u32);
+extern void func_002790B8(u32);
+extern void func_002790F0(s32, s32, u32);
+extern void func_00291C68(MenuPanelObject *, s32, u16);
+extern void func_00291A20(MenuPanelObject *, s32, u16, s32);
+extern void func_00291DD0(MenuPanelObject *, s32);
+extern void mnuHideMantraInfo(u32);
+extern void mnuShowMantraInfo(u32);
+extern void mnuHideMantraTitle(u32);
+extern void mnuShowMantraTitle(u32);
+extern void mnuSetMantraBackgroundVariant(u32, s8);
+extern void mnuBeginMantraBackgroundMaskFadeOut(u32);
+extern void mnuBeginMantraBackgroundMaskFadeIn(u32);
+extern u32 mnuRegisterMantraIconListCDraw(u32, u32);
+extern void mnuBeginMantraIconListExit(u32);
+extern void sndSetSequenceVolumePan(s32, s32, s32);
+
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427720);
 
 INCLUDE_RODATA(const s32, "game/code_0028FD30", D_00427740);
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_00292478);
+s32 func_00292478(void *context, s32 panelId, s32 action) {
+    MenuPanelObject *object = context;
+    MenuPanelState *state = &object->state;
+    MantraNodePos *position;
+    u16 id = panelId;
+    u32 flags;
+
+    switch (action) {
+    case 0:
+        state->defaultSelector = mnuGetMantraPanelPositionRecord((s16)id);
+        mnuSpawnMantraShortLoopIconAtPosition(
+            (s32)((f32)state->defaultSelector->x / 10.0f * 40.0f),
+            (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f),
+            object->state.selectionController);
+        mnuSpawnMantraIconAtPosition(
+            (s32)((f32)state->defaultSelector->x / 10.0f * 40.0f),
+            (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f),
+            object->state.selectionController);
+        return 0;
+    case 1:
+        position = mnuGetMantraPanelPositionRecord((s16)id);
+        func_00278F60(object->state.selectionController);
+        func_002790F0((s32)((f32)position->x / 10.0f * 40.0f),
+                     (s32)((f32)position->y / 10.0f * 39.0f),
+                     object->state.selectionController);
+        return 0;
+    case 2:
+        func_00278EA8(object->state.selectionController);
+        func_00279080(object->state.selectionController);
+        return 0;
+    case 3:
+        func_00278EE0(object->state.selectionController);
+        func_002790B8(object->state.selectionController);
+        return 0;
+    case 4:
+        func_002917C0(object, state->flagBytes[3] & 15, id);
+        return 0;
+    case 5:
+        func_00291C68(object, state->flagBytes[3] & 15, id);
+        return 0;
+    case 6:
+        mnuActivatePanelSelection(object, state->flagBytes[3] & 15);
+        goto play_selection_sound;
+    case 7:
+        mnuTransitionActivePanelAnimations(state->resource, 1);
+        func_00291A20(object, state->flagBytes[3] & 15, id, 5);
+        return 0;
+    case 8:
+        mnuTransitionActivePanelAnimations(state->resource, 1);
+        flags = state->flags;
+        func_00291590(object, 5, 1, (flags >> 24) & 15,
+                     (flags >> 28) & 1, 0);
+        return 0;
+    case 9:
+        mnuHideMantraInfo(object->state.selectionController);
+        mnuHideMantraTitle(object->state.selectionController);
+        mnuSetMantraBackgroundVariant(object->state.selectionController, 3);
+        mnuBeginMantraBackgroundMaskFadeOut(object->state.selectionController);
+        func_00278EE0(object->state.selectionController);
+        func_002790B8(object->state.selectionController);
+        mnuTransitionActivePanelAnimations(state->resource, 1);
+        {
+            u32 drawFlags = state->drawFlags;
+            u32 controller = object->state.selectionController;
+
+            state->drawFlags = (drawFlags & ~1) | ((drawFlags & 1) ^ 1);
+            mnuRegisterMantraIconListCDraw(controller, (u32)object);
+        }
+        object->state.unk9B5 = 1;
+        object->state.unk9B6 = 0;
+        break;
+    case 10:
+        mnuShowMantraInfo(object->state.selectionController);
+        mnuShowMantraTitle(object->state.selectionController);
+        mnuSetMantraBackgroundVariant(object->state.selectionController, 0);
+        mnuBeginMantraBackgroundMaskFadeIn(object->state.selectionController);
+        func_00278EA8(object->state.selectionController);
+        func_00279080(object->state.selectionController);
+        flags = state->flags;
+        func_00291590(object, 5, 1, (flags >> 24) & 15,
+                     (flags >> 28) & 1, 0);
+        {
+            u32 drawFlags = state->drawFlags;
+            u32 controller = object->state.selectionController;
+
+            state->drawFlags = (drawFlags & ~1) | ((drawFlags & 1) ^ 1);
+            mnuBeginMantraIconListExit(controller);
+        }
+        object->state.unk9B5 = 2;
+        object->state.unk9B6 = 0;
+        break;
+    case 11:
+        position = mnuGetMantraPanelPositionRecord((s16)id);
+        mnuSpawnMantraVariantIconAtPosition(
+            (s32)((f32)(position->x * 20) / 10.0f),
+            (s32)((f32)(position->y * 20) / 10.0f),
+            object->state.selectionController);
+        return 0;
+    case 12:
+        position = mnuGetMantraPanelPositionRecord((s16)id);
+        mnuSpawnMantraShortLoopVariantIconAtPosition(
+            (s32)((f32)(position->x * 20) / 10.0f),
+            (s32)((f32)(position->y * 20) / 10.0f),
+            object->state.selectionController);
+        return 0;
+    case 13:
+        mnuSetPanelSelection(object, state->flagBytes[3] & 15);
+play_selection_sound:
+        sndSetSequenceVolumePan(4, 127, 63);
+        return 0;
+    case 14:
+        func_00291DD0(object, 0);
+        return 0;
+    case 15:
+        return 1;
+    default:
+        return 0;
+    }
+    return 0;
+}
 
 void func_00292998(MenuPanelObject *object) {
     MantraPanelPool *resource;
