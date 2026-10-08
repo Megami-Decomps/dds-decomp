@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "kwln_task_lifecycle.h"
+#include "mnu.h"
 
 extern u8 D_003DC1C0[];
 
@@ -9,12 +10,6 @@ extern u8 D_003DC1D0[];
 extern char D_003AFD80[]; /* "titleProc" */
 
 s32 mnuApplyInnerEffectVectorsAndTickObject(void);
-
-typedef struct MovieMenuState {
-    u32 handle;     /* 0x00 */
-    u8 pad04[0x2C];
-    u32 resources;  /* 0x30 */
-} MovieMenuState;
 
 extern MovieMenuState *mnuMovieMenuState;
 extern s32 D_003BA730;
@@ -32,7 +27,7 @@ void func_0026B160(void) {
     mnuDestroyMovieMenuSelectionList();
     mnuReleaseMovieResourceGroup(mnuMovieMenuState->resources);
     mnuMovieShutdownA();
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(mnuMovieMenuState->handle));
+    sdfReleaseResourceAllocation(mnuMovieMenuState->allocation);
     mnuMovieMenuState = 0;
     D_003BA730 = 1;
 }
