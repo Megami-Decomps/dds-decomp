@@ -255,7 +255,7 @@ void mnuDestroyShootingWork(MnuShootingWork *work) {
         work->effectWork = NULL;
     }
     if (work->work24 != NULL) {
-        sdfReleaseResourceAllocation(work->work24->allocation);
+        sdfReleaseResourceAllocation((SdfMemBlock *)work->work24->handle);
         work->work24 = NULL;
     }
     slot = work->resourceSlots;
