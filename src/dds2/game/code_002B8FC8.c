@@ -483,7 +483,7 @@ s32 mnuStepStaffCampPageControl(s32 callback);
 
 extern void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 extern void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource);
-extern u32 *mnuCreateProfilePanel(DatPartyRecord *selectionState);
+extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void mnuSetGroupProperties(s32, s32, s32, s32, s32);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
@@ -511,7 +511,8 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags)
 
 void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, MenuPanelGroup *packedGroup, s32 group, s32 unused, s32 spriteFlags);
 
-void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSpriteState *spriteState, u32 resource,
+void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSpriteState *spriteState,
+                                    MenuProfilePanel *resource,
                                     u32 unused4, u32 spriteFlags);
 
 
