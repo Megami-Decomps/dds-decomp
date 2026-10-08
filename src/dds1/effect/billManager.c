@@ -439,7 +439,7 @@ void billFlushPendingRenderPairs(void) {
     D_003BD7F8 = NULL;
 }
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00151178);
+INCLUDE_ASM(const s32, "effect/billManager", billInitializeCommonDrawState);
 
 BillObj *billAllocChild(void *resourceData) {
     BillObj *obj;
@@ -749,7 +749,7 @@ BillObj *billCreateIndexed(s32 index, u32 data) {
     BillObj *newobj;
 
     newobj = D_0034E060[index].func(data);
-    func_00151178(newobj);
+    billInitializeCommonDrawState(newobj);
     newobj->kind = index;
     newobj->callback = D_0034E060[index].callback;
     return newobj;
@@ -766,8 +766,6 @@ BillObj *billCreateFromResource(s32 kind, const char *path) {
     return billboard;
 }
 
-extern void func_00151178(BillObj *obj);
-
 /* Duplicate a billboard object: an entry list is cloned, a child shares (and refs) the source's data block. */
 BillObj *billCloneObjectRetainingSharedData(BillObj *source) {
     BillObj *copy;
@@ -777,12 +775,12 @@ BillObj *billCloneObjectRetainingSharedData(BillObj *source) {
 
     if (source->kind == 1) {
         copy = billCloneList(source);
-        func_00151178(copy);
+        billInitializeCommonDrawState(copy);
         copy->kind = source->kind;
         copy->callback = source->callback;
     } else {
         copy = billAllocChild(NULL);
-        func_00151178(copy);
+        billInitializeCommonDrawState(copy);
         sourceKind = source->kind;
         data = source->child;
         sourceCallback = source->callback;

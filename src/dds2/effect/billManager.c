@@ -443,7 +443,7 @@ void billFlushPendingRenderPairs(void) {
     D_00438F00 = NULL;
 }
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00158D68);
+INCLUDE_ASM(const s32, "effect/billManager", billInitializeCommonDrawState);
 
 BillObj *billAllocChild(void *resourceData) {
     BillObj *obj;
@@ -755,13 +755,11 @@ void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
 
 extern BillDispatch D_003AA990[];
 
-extern void func_00158D68(void *);
-
 BillObj *billCreateIndexed(s32 index, u32 data) {
     BillObj *newobj;
 
     newobj = D_003AA990[index].func(data);
-    func_00158D68(newobj);
+    billInitializeCommonDrawState(newobj);
     newobj->kind = index;
     newobj->callback = D_003AA990[index].callback;
     return newobj;
@@ -787,12 +785,12 @@ BillObj *billCloneObjectRetainingSharedData(BillObj *source) {
 
     if (source->kind == 1) {
         copy = billCloneList(source);
-        func_00158D68(copy);
+        billInitializeCommonDrawState(copy);
         copy->kind = source->kind;
         copy->callback = source->callback;
     } else {
         copy = billAllocChild(NULL);
-        func_00158D68(copy);
+        billInitializeCommonDrawState(copy);
         sourceKind = source->kind;
         data = source->child;
         sourceCallback = source->callback;
