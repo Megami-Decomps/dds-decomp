@@ -1285,6 +1285,7 @@
 0x00158FA8	parInitializeRadialParticle	inferred	confidence=high; src/dds1/effect/parManager.c:func_00158FA8; Initializes delayed particle age, independently jittered radial offset, rotation axis, radial step, billboard scale and initial phase. [names_qp9.tsv]
 0x001596E8	parInitColorRamp	inferred	Initializes color-ramp data. [names_qp9.tsv]
 0x00159CD8	effParReleaseNodeResource	inferred	releases particle node resource [names_reviewed5.tsv]
+0x00159D68	parPopulateSlotFromHistory	inferred	copies ring-history points into the selected particle slot with origin, color, and scale
 0x00159F30	parClearSlotFlag	inferred	Clears the halfword flag of the indexed particle-table slot.
 0x0015A2F8	effParModulateColors	inferred	multiplies particle RGBA channels using VU [names_reviewed5.tsv]
 0x0015A378	parCreateIndexed	inferred	creates particle via D_0034E250 table, stamps index at +0x140

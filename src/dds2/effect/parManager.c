@@ -266,7 +266,7 @@ INCLUDE_ASM(const s32, "effect/parManager", func_001618E0);
 extern void billSetChildScaleComponents(BillObj *billboard, f32 scaleX, f32 scaleY);
 extern void billInvokeCallback(BillObj *billboard);
 
-void func_00161958(ParTable *table, s32 slotIndex, const f32 *origin, u32 color,
+void parPopulateSlotFromHistory(ParTable *table, s32 slotIndex, const f32 *origin, u32 color,
                    ParHistoryTable *source, f32 scale) {
     f32 localOrigin[4];
     ParHistory *history;
