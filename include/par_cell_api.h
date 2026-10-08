@@ -10,5 +10,6 @@ struct ParSystem *parAllocateCellSystem(s32 count, s32 perCell,
 void parReleaseCellSystem(struct ParSystem *system);
 void parCellInit(struct ParSystem *system, s32 index);
 void parPrependCellNode(struct ParSystem *system);
+void parSetCellDrawBucket(struct ParSystem *system, u16 value);
 
 #endif

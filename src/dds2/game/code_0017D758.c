@@ -218,7 +218,6 @@ void effScatterStoreSourceTransformMatrix(PcpScatterDraw *object, void *src) {
 }
 
 extern void parDispatchSub(u32, s32, s32, s32);
-extern void func_00164C68(u32, u16);
 extern u32 effMiscRand(void *);
 extern f32 effMiscRandUnitFloat(void *);
 extern u8 D_003AA868[];
@@ -249,7 +248,7 @@ EffPCPNeedleWork *effNeedleCreateWork(EffPCPNeedleParams *params) {
                             params->outerColor, params->radiusScale, params->viewOffset);
     work->system = (u32)parAllocateCellSystem(work->count, work->params.unk54, 0, PAR_CELL_TOPOLOGY_PAIR);
     parDispatchSub(work->system, 1, work->params.unk58, work->params.unk58);
-    func_00164C68(work->system, (u16)work->params.mode);
+    parSetCellDrawBucket((ParSystem *)work->system, (u16)work->params.mode);
 
     count = work->count;
     delayRange = params->randomDelayRange;
