@@ -822,7 +822,7 @@ extern void effPcpScatterCreatePoolResource(PcpScatterPool *work, u32 resource);
 extern u32 effParamWorkCreate(s32 kind, void *params);
 extern u32 effParamWorkDuplicate(u32 handle);
 
-PcpScatterRadialWork *func_001784F8(params, resource, particleParams)
+PcpScatterRadialWork *effScatterCreateRadialWork(params, resource, particleParams)
     const PcpScatterRadialParams *params;
     u32 resource;
     void *particleParams;
