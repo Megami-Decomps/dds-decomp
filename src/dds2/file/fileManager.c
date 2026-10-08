@@ -368,5 +368,5 @@ void fileQueuePendingRequestInFreeSlot(FileRequest *request) {
     }
     SignalSema(work->sema);
     sdfDevQueueRead((DevState *)request->handle,
-                    (void *)(work->buffer + (slotIndex << FILE_READ_SLOT_SHIFT)), chunkBytes);
+                    work->buffer + (slotIndex << FILE_READ_SLOT_SHIFT), chunkBytes);
 }
