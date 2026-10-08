@@ -73,11 +73,13 @@ typedef struct CampEffectRows {
     u32 values[2][4];
 } CampEffectRows;
 
+struct EffectSlotSet;
+
 /* The backdrop packet's complete resource payload, also used by shop callbacks. */
 typedef struct MapPacket {
     u32 type;
     u32 value;
-    u32 sheets[1]; /* The resource destructor iterates this one-sheet bank. */
+    struct EffectSlotSet *sheets[1]; /* The resource destructor iterates this one-sheet bank. */
     u32 items[11];
     s32 count;
 } MapPacket;
@@ -89,7 +91,7 @@ typedef struct MenuEffectResources {
 } MenuEffectResources;
 
 #ifdef VERSION_DDS2
-void mnuSetCampEffectResourceHandles(u32 sheet,
+void mnuSetCampEffectResourceHandles(struct EffectSlotSet *sheet,
                                     struct EffMappedResource *animation,
                                     MenuEffectResources *resources);
 #endif
@@ -112,15 +114,13 @@ struct EffPayload;
 
 /* DDS1's complete two-layer backdrop asset set. */
 typedef struct MenuAssets {
-    u32 sprites[5];
+    struct EffectSlotSet *sprites[5];
     struct EffMappedResource *material;
     struct EffPayload *layerA;
     struct EffPayload *layerB;
 } MenuAssets;
 
 typedef char MenuAssets_size_must_be_0x20[(sizeof(MenuAssets) == 0x20) ? 1 : -1];
-
-struct EffectSlotSet;
 
 /* Native staff sprite banks; DDS2 retains only two base resources. */
 typedef struct StaffSlots {
@@ -567,6 +567,13 @@ typedef struct MenuPageWindow {
 #ifdef VERSION_DDS2
 /* Marks the window-sprite mode toggled by page setup and entry resets. */
 #define MNU_PAGE_WINDOW_SPRITE_MODE 0x80
+
+void mnuSetWindowResource(s32 index, MenuPageWindow *menu,
+                          struct EffectSlotSet *mainResource,
+                          struct EffectSlotSet *itemResource,
+                          struct EffectSlotSet *iconResource,
+                          struct EffectSlotSet *cursorResource,
+                          struct EffectSlotSet *alternateResource);
 #endif
 
 void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth,
