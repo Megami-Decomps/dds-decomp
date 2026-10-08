@@ -7,6 +7,8 @@
 
 #include "eff_curve.h"
 
+struct BillObj;
+
 /* Lens-flare constructors copy 0x40 bytes into a 0x58-byte owner at +0x18
  * (DDS1 0029C620 / DDS2 002DE338). Draw callbacks read strength with LWC1,
  * compare frame/limit signed, and select the flare set with LBU at +0x54. */
@@ -41,7 +43,7 @@ typedef struct EffectStripNode {
     f32 opacity;
     u8 copiedHeader[0x20];
     u32 transform;
-    u32 resource;
+    struct BillObj *resource;
     u32 active;
     u16 count;
 } EffectStripNode;
