@@ -105,7 +105,8 @@ extern void datClearUnitStatusBits(DatPartyRecord *record, s32 mask);
 
 extern void func_001BCB88(s32, s32);
 
-extern s32 datGetStatWithStatusOverride(s32, s32);
+extern s32 datGetClampedProfileAdjustedStat(DatPartyRecord *, s32);
+extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
 
 
 typedef struct SndPad {
@@ -369,12 +370,12 @@ s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record) {
     return datEnemyRecords[record->unitId].flags;
 }
 
-void func_001A29B8(void) {
-    datGetClampedProfileAdjustedStat();
+void func_001A29B8(DatPartyRecord *unit, s32 statIndex) {
+    datGetClampedProfileAdjustedStat(unit, statIndex);
 }
 
-u32 func_001A29D0(s32 arg0, s32 arg1) {
-    return datGetStatWithStatusOverride(arg0, arg1);
+s32 func_001A29D0(DatPartyRecord *unit, s32 statIndex) {
+    return datGetStatWithStatusOverride(unit, statIndex);
 }
 
 s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *arg0, s32 arg1) {
@@ -2528,7 +2529,7 @@ s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 allowDisabled) {
         if ((flags & 1) != 0) {
             if (allowDisabled == 0 || (flags & 0x20) == 0) {
                 if ((*(u16 *)(node + 0x120) & mask) != 0) {
-                    s32 value = datGetStatWithStatusOverride(node + 0x120, attribute);
+                    s32 value = datGetStatWithStatusOverride((DatPartyRecord *)(node + 0x120), attribute);
                     count++;
                     sum += value;
                 }

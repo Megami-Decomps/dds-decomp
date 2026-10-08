@@ -7142,14 +7142,13 @@ u32 btlFlagBattleForSpecialAction(u32 unit, u32 actor, u32 action) {
     return 0;
 }
 
-struct DatUnitStatus;
-extern s32 datGetStatWithStatusOverride(struct DatUnitStatus *, s32);
+extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
 
 s32 btlSelectLowestStatTarget(BattleActor *actor) {
     BattleActionContext *battle;
     u8 *statIndex;
-    BattleActionUnit *unit;
-    BattleActionUnit *target;
+    BtlUnit *unit;
+    BtlUnit *target;
     s8 minimum;
 
     if (!(actor->dispatchFlags & 8)) {
@@ -7168,7 +7167,7 @@ s32 btlSelectLowestStatTarget(BattleActor *actor) {
     }
     target = NULL;
     minimum = 99;
-    for (unit = battle->firstUnit; unit != NULL; unit = unit->next) {
+    for (unit = ((BtlState *)battle)->units; unit != NULL; unit = unit->nextActor) {
         u32 flags = unit->flags;
         s8 value;
 
@@ -7181,8 +7180,7 @@ s32 btlSelectLowestStatTarget(BattleActor *actor) {
         if (flags & 0xE0) {
             continue;
         }
-        value = datGetStatWithStatusOverride(
-            (struct DatUnitStatus *)&unit->entryFlags, *statIndex);
+        value = datGetStatWithStatusOverride(&unit->partyRecord, *statIndex);
         if (value < minimum) {
             minimum = value;
             target = unit;

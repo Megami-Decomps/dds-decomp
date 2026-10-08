@@ -254,8 +254,6 @@ extern void fldPollAreaResourceLoad();
 extern s32 fldGetResourceReadyFlag();
 extern s32 brsTaskPollDone();
 
-extern u32 func_001AB8D8();
-
 extern s32 func_001B2630();
 
 

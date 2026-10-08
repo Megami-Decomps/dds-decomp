@@ -1947,12 +1947,15 @@ s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record) {
     return datEnemyRecords[record->unitId].flags;
 }
 
-void func_001AB8C0(void) {
-    datGetClampedProfileAdjustedStat();
+extern s32 datGetClampedProfileAdjustedStat(DatPartyRecord *, s32);
+extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
+
+void func_001AB8C0(DatPartyRecord *unit, s32 statIndex) {
+    datGetClampedProfileAdjustedStat(unit, statIndex);
 }
 
-void func_001AB8D8(void) {
-    datGetStatWithStatusOverride();
+s32 func_001AB8D8(DatPartyRecord *unit, s32 statIndex) {
+    return datGetStatWithStatusOverride(unit, statIndex);
 }
 
 s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *battler, s32 command) {
@@ -4358,7 +4361,7 @@ s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 skipDown) {
         if ((flags & 1) != 0) {
             if (skipDown == 0 || (flags & 0x20) == 0) {
                 if ((unit->entryMask & mask) != 0) {
-                    s32 value = datGetStatWithStatusOverride((s32)&unit->entryMask, attribute);
+                    s32 value = datGetStatWithStatusOverride((DatPartyRecord *)&unit->entryMask, attribute);
                     count++;
                     sum += value;
                 }
