@@ -9,6 +9,7 @@
 #include "pcp_vu0.h"
 #include "btl_action.h"
 #include "dat_state.h"
+#include "dat_command.h"
 
 #define BTL_AI_SLOT_COUNT 5
 #define BTL_AI_WEIGHT_MASK 0xFFFF
@@ -110,10 +111,6 @@ extern s32 btlFindUnitByActor(s32);
 extern void func_001A1990(DatPartyRecord *, s32);
 
 extern void func_001D6300(void *, void *);
-
-extern u8 *datCommandRecords;
-
-extern s8 *datCommandSelectors;
 
 extern s32 mdlFlagTest(s32);
 
@@ -1178,11 +1175,11 @@ s32 func_00201900(s32 mask, s16 actionId, s8 force) {
         for (i = 0; i < 0x13; i++) {
             value = btlElementToBitIndex(mask, i);
             if (value != 0x80) {
-                if (datCommandSelectors[actionId * 2] == value) {
+                if (datCommandSelectors[actionId].stat == value) {
                     if (force != 0) {
                         return 1;
                     }
-                    if ((u8)(datCommandRecords[actionId * 0x38 + 9] - 1) < 2) {
+                    if ((u8)(datCommandRecords[actionId].options - 1) < 2) {
                         return 1;
                     }
                 }
@@ -1190,11 +1187,11 @@ s32 func_00201900(s32 mask, s16 actionId, s8 force) {
         }
         return 0;
     }
-    if (datCommandSelectors[actionId * 2] == mask) {
+    if (datCommandSelectors[actionId].stat == mask) {
         if (force != 0) {
             return 1;
         }
-        if ((u8)(datCommandRecords[actionId * 0x38 + 9] - 1) < 2) {
+        if ((u8)(datCommandRecords[actionId].options - 1) < 2) {
             return 1;
         }
     }
@@ -2008,7 +2005,7 @@ BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *command) {
     if ((u32)(kind - 1) >= 0x25F) {
         return command->task->unit;
     }
-    if (datCommandSelectors[kind * 2 + 1] != 1) {
+    if (datCommandSelectors[kind].kind != 1) {
         return command->task->unit;
     }
     if (command->linkedA == NULL && command->linkedB == NULL) {
@@ -2202,7 +2199,7 @@ s32 btlClassifyLinkedSkillRequest(s32 unused, s32 unit, s32 index) {
     if (!(((BtlUnit *)unit)->flags & 0x400)) {
         return result;
     }
-    if (datCommandRecords[index * 0x38 + 2] == 2) {
+    if (datCommandRecords[index].kind == 2) {
         if (btlWouldUiValueFallBelowQuarter(unit, 0) != 0 && mdlFlagTest(0x802) != 0) {
             return 1;
         }
@@ -2689,7 +2686,7 @@ s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 co
     }
     if (actor->flags & 0x200) {
         if (command != 0) {
-            if (datCommandRecords[command * 0x38 + 8] == 0) {
+            if (datCommandRecords[command].unk_08 == 0) {
                 return 0;
             }
         }
@@ -3983,14 +3980,14 @@ s32 btlCheckLinkedActionEffectTarget(BtlUnit *actor, BtlUnit *target, s32 comman
     if (!(target->flags & 0x400)) {
         return 0;
     }
-    if (datCommandSelectors[command * 2 + 1] != 1) {
+    if (datCommandSelectors[command].kind != 1) {
         unit = btlFindUnitByActor((s32)actor);
         if (unit == 0) {
             return 0;
         }
         blocked = func_001A3360(unit, 0, 0);
     } else {
-        blocked = datCommandRecords[command * 0x38 + 8];
+        blocked = datCommandRecords[command].unk_08;
     }
     if (blocked != 0) {
         return 4;
