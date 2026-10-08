@@ -375,10 +375,10 @@ s32 func_002ADDA0(s32 task) {
     if (menu->windows[0]->list->count != 0) {
         item = menu->windows[0]->list->cursor->sortKeySecondary;
     }
-    if (mnuGetAbilityByteCategory(evtGetIndexedEventRecordId(item)) == 2) {
+    if (mnuGetAbilityTargetCategory(evtGetIndexedEventRecordId(item)) == 2) {
         party->flags |= 0x10;
     }
-    if (mnuGetAbilityByteCategory(evtGetIndexedEventRecordId(item)) == 3) {
+    if (mnuGetAbilityTargetCategory(evtGetIndexedEventRecordId(item)) == 3) {
         party->flags |= 0x20;
     }
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {

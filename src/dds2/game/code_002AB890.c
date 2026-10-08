@@ -607,7 +607,7 @@ s32 func_002AD118(void *callback) {
                 node = panel->cursor;
                 if (node->flags48 == 0) {
                     itemId = node->sortKeySecondary;
-                    if (mnuGetAbilityByteCategory(evtGetIndexedEventRecordId(itemId)) == 0) {
+                    if (mnuGetAbilityTargetCategory(evtGetIndexedEventRecordId(itemId)) == 0) {
                         mnuApplyResourceSelection(itemId, context);
                     } else {
                         mnuSetPopupEntry(popup, D_003E74DC);

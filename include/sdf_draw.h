@@ -99,7 +99,7 @@ typedef struct SdfModel {
     s16 unk1A;
     u32 color;
     f32 matrix[4][4];
-    f32 unk60[4];
+    f32 rotationQuaternion[4];
     f32 scaleVector[4];
     void *lighting;
     u32 unk84;

@@ -355,7 +355,7 @@ extern s32 func_00214868(void);
 
 u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
 
-extern s32 datEnemyRecords;
+extern DatEnemyRecord *datEnemyRecords;
 
 extern void func_001DEFE0(s32, s32, f32);
 
@@ -2977,7 +2977,7 @@ u32 btlRefreshEligibleActors(void) {
             if (flags & 1) {
                 if ((flags & 0xE0) == 0 &&
                     (u16)(*(u16 *)(actor + 0x124) - 1) < 0x17F) {
-                    u32 entry = *(u32 *)(datEnemyRecords + *(u16 *)(actor + 0x124) * 76);
+                    u32 entry = datEnemyRecords[*(u16 *)(actor + 0x124)].flags;
                     if ((entry & 0x40) == 0) {
                         if ((entry & 0x400) == 0) {
                             if ((*(u32 *)(actor + 0x114) & 8) == 0) {
@@ -4126,7 +4126,7 @@ void btlGetUnitWorldPos(u8 *object, void *worldPosition) {
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
-extern void mdlLoadSecondaryVectorVU(MdlCtx *);
+extern void mdlLoadRotationQuaternionVU(MdlCtx *);
 extern void mdlStorePrimaryVectorVU(MdlCtx *);
 extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
@@ -4162,12 +4162,12 @@ void btlSetActorEffectParameterOrMuzzlePosition(u32 arg0, s32 arg1) {
     }
 }
 
-/* vu0 routine: preserve the actor's primary and secondary vectors while
+/* vu0 routine: preserve the actor's primary position and rotation quaternion while
  * evaluating the requested model record; return the sampled vector in vf10. */
 s32 func_001D6428(BtlUnit *unit, s32 value) {
     f32 currentVector[4] __attribute__((aligned(16)));
     f32 primaryVector[4] __attribute__((aligned(16)));
-    f32 secondaryVector[4] __attribute__((aligned(16)));
+    f32 rotationQuaternion[4] __attribute__((aligned(16)));
     s32 (*callback)(BtlUnit *, s32);
     s8 result;
 
@@ -4180,14 +4180,14 @@ s32 func_001D6428(BtlUnit *unit, s32 value) {
     }
     mdlLoadPrimaryVectorVU(unit->ext->owner);
     VU0_STORE_VF_UNCLOBBERED(vf10, primaryVector);
-    mdlLoadSecondaryVectorVU(unit->ext->owner);
-    VU0_STORE_VF_UNCLOBBERED(vf10, secondaryVector);
+    mdlLoadRotationQuaternionVU(unit->ext->owner);
+    VU0_STORE_VF_UNCLOBBERED(vf10, rotationQuaternion);
     btlRefreshUnitFxVectors(unit);
     result = sdfLoadMapRecordPositionVector(unit->ext->owner->inner, value);
     VU0_STORE_VF_UNCLOBBERED(vf10, currentVector);
     VU0_LOAD_VF(vf10, primaryVector);
     mdlStorePrimaryVectorVU(unit->ext->owner);
-    VU0_LOAD_VF(vf10, secondaryVector);
+    VU0_LOAD_VF(vf10, rotationQuaternion);
     mdlUpdateContextRotationBasisFromQuaternion(unit->ext->owner);
     sdfModelUpdateCurrentFrameTransforms(unit->ext->owner->inner);
     VU0_LOAD_VF(vf10, currentVector);
@@ -7302,7 +7302,7 @@ u32 btlCanUseActorCategoryFlag2(s32 actor) {
 
 s32 btlHasSingleLinkedResource(s32 actor) {
     s32 index = *(s32 *)(actor + 0x114);
-    if (index != 0 && datCommandRecords[index].unk_08 != 0) {
+    if (index != 0 && datCommandRecords[index].targetType != 0) {
         return 0;
     }
     return btlGetIndexListCount(*(struct BtlIndexList **)(actor + 0x118)) == 1;
@@ -7375,7 +7375,7 @@ s32 btlHasFirstLinkedCategoryFlag1000(u8 *node) {
     if ((*(u32 *)(actor + 0x110) & 0x400) == 0) return 0;
     id = *(u32 *)(actor + 0xC8);
     if (id >= 0x180) return 0;
-    if (*(u32 *)(datEnemyRecords + id * 76) & 0x1000) return 1;
+    if (datEnemyRecords[id].flags & 0x1000) return 1;
     return 0;
 }
 

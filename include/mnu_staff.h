@@ -19,7 +19,7 @@ void mnuInitPartyPanelSlots(PartyPanel *party);
 s32 mnuUseStaffItem(s32 itemId, MenuStaffContext *context);
 void mnuApplyResourceSelection(s32 itemId, MenuStaffContext *context);
 s32 mnuIsStaffWindowReadyForItem(s32 itemId, MenuStaffContext *context);
-s32 mnuGetAbilityByteCategory(u16 commandId);
+s32 mnuGetAbilityTargetCategory(u16 commandId);
 s32 mnuGetMatchingPartyEntryMask(struct DatPartyRecord *entry);
 s32 mnuFindMatchingPartyEntryIndex(struct DatPartyRecord *entry);
 s32 ptySkillApplyFieldUseEffect(MenuPageWindow *page, u16 ability,

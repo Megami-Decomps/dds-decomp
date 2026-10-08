@@ -913,15 +913,17 @@ void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 value, s32 option) {
     panel->option = option;
 }
 
+extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
+
 /* Create a profile panel from the selection state's current profile ID and record. */
 MenuProfilePanel *mnuCreateProfilePanel(s32 selectionState) {
     MenuProfilePanel *panel = (MenuProfilePanel *)sdfAllocSizeClassBlock(sizeof(MenuProfilePanel));
     s32 profileId;
-    u32 profileRecordAddress;
+    DatProfileRecord *profileRecord;
     memset(panel, 0, sizeof(MenuProfilePanel));
     profileId = scrGetSelectedOperandIndex(selectionState);
-    profileRecordAddress = ptyGetCurrentProfileRecord(selectionState);
-    mnuSetProfilePanelValues(panel, prfGetCapValue((u16)profileId), *(u32 *)profileRecordAddress);
+    profileRecord = ptyGetCurrentProfileRecord((DatPartyRecord *)selectionState);
+    mnuSetProfilePanelValues(panel, prfGetCapValue((u16)profileId), profileRecord->value);
     panel->opacity = 0x100;
     return panel;
 }
@@ -1574,12 +1576,12 @@ s32 mnuConsumeEntryCost(s32 commandId, u8 *actorEntry) {
 }
 
 /* Map the native category byte 0/1/2 to 1/2/3; command zero bypasses the record read. */
-s32 mnuGetAbilityByteCategory(u16 commandId) {
+s32 mnuGetAbilityTargetCategory(u16 commandId) {
     u8 category;
     if (commandId == 0) {
         return 1;
     }
-    category = datCommandRecords[commandId].unk_08;
+    category = datCommandRecords[commandId].targetType;
     switch (category) {
     case 0:
         return 1;
@@ -1609,7 +1611,7 @@ s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 select
         return 1;
     }
 
-    if (mnuGetAbilityByteCategory(ability) == 1) {
+    if (mnuGetAbilityTargetCategory(ability) == 1) {
         mask = mnuGetMatchingPartyEntryMask((s32)entry);
 
         if (func_002111A0(ability, mask) != 0) {

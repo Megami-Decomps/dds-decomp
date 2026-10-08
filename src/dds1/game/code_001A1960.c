@@ -612,7 +612,7 @@ s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *targets) {
         } else {
             index = action->indexWork.skillId;
         }
-        if (datCommandRecords[index].unk_08 == 0 &&
+        if (datCommandRecords[index].targetType == 0 &&
             datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_FLAG_MASK &&
             datCommandRecords[index].attribute.parts.flagMask != 0) {
             for (i = 0; i < count; i++) {
@@ -2692,7 +2692,7 @@ s32 btlIsBattleRecordEligible(u8 *actor, u8 *target, s32 recordIndex, s32 specie
         return 0;
     }
     if (speciesIndex != 0 &&
-        datCommandRecords[speciesIndex].unk_08 != 0) {
+        datCommandRecords[speciesIndex].targetType != 0) {
         return 0;
     }
     return 1;
@@ -5618,7 +5618,7 @@ s32 func_001BD0D0(BattleSceneObject *object, s8 mode) {
     }
     return classes[mode];
 }
-extern void func_001BD2C0(s32, s16 *, s32, s32, s32);
+extern u16 *func_001BD2C0(s32, s16 *, u16, u16, u16);
 extern void btlBuildEligibleActorList(s32, s16 *);
 extern u8 *func_001BD708(u8 *, u16 *);
 
@@ -5663,7 +5663,80 @@ u32 btlGetCommandOptionCount(s32 object, s8 mode, s8 unlimited) {
     return ((u32 *)(D_003BD834 + 0x14))[kind];
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001BD2C0);
+extern u16 D_00359960[12];
+extern u16 D_00358B20[0x260];
+
+u16 *func_001BD2C0(s32 address, s16 *outCount, u16 firstKind, u16 secondKind, u16 thirdKind) {
+    BattleSceneObject *object = (BattleSceneObject *)address;
+    s32 wanted;
+    BtlUnit *unit;
+    u16 *source;
+    u16 *out;
+    s32 gathered;
+    s32 count;
+    DatCommandSelector *selectors;
+    DatCommandRecord *records;
+    s32 i;
+
+    if (!(btlUnitStatusPair(object->owner->unit) & 0x1400)) {
+        wanted = firstKind ? firstKind : 5;
+    } else {
+        wanted = firstKind;
+    }
+    btlGetRuntime();
+    unit = object->owner->unit;
+    out = D_00359960;
+    memset(out, 0, 0x18);
+    selectors = datCommandSelectors;
+    records = datCommandRecords;
+    source = unit->partyRecord.effectData;
+    gathered = 0;
+    for (i = 0; i < 24; i++, source++) {
+        u16 id = *source;
+        s32 kind = selectors[id].kind;
+        if (kind != wanted && kind != secondKind && kind != thirdKind) {
+            continue;
+        }
+        if (wanted == 2 && id == 0xE0) {
+            continue;
+        }
+        if (!(records[id].unk_01 & 2)) {
+            continue;
+        }
+        if (btlUnitStatusPair(object->owner->unit) & 0x1400) {
+            if (selectors[id].kind == 5) {
+                continue;
+            }
+        } else if (selectors[id].kind != 5) {
+            continue;
+        }
+        if (id != 0) {
+            *out++ = id;
+            gathered++;
+        }
+    }
+    count = gathered;
+    out = D_00358B20;
+    memcpy(out, D_00359960, count * 2);
+    i = 0;
+    while (i < count) {
+        if (out[i] >= 0x200) {
+            s32 j;
+            for (j = i; j < count; j++) {
+                out[j] = out[j + 1];
+            }
+            count--;
+        } else {
+            i++;
+        }
+    }
+    if (wanted == 0 || wanted == 5) {
+        count++;
+    }
+    *outCount = count;
+    return out;
+}
+
 
 extern u16 D_00359960[];
 

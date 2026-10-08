@@ -103,11 +103,6 @@ typedef struct BtlActionTableEntry {
     u8 pad1E[2];
 } BtlActionTableEntry;
 
-typedef struct BtlResourceTableEntry {
-    u32 flags;
-    u8 pad04[72];
-} BtlResourceTableEntry;
-
 typedef struct BtlStateHandler {
     void (*start)(void *);
     void (*update)(void *);
@@ -1365,7 +1360,7 @@ BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *actor, s32 amount) {
     return task;
 }
 
-extern s32 datEnemyRecords;
+extern DatEnemyRecord *datEnemyRecords;
 
 u32 btlRefreshEligibleActors(void) {
     BtlState *work = (BtlState *)btlGetRuntime();
@@ -1375,7 +1370,7 @@ u32 btlRefreshEligibleActors(void) {
         if (flags & 0x400) {
             if (flags & 1) {
                 if ((flags & 0xE0) == 0 && (u16)(unit->partyRecord.unitId - 1) < 0x17F) {
-                    u32 entry = ((BtlResourceTableEntry *)datEnemyRecords)[unit->partyRecord.unitId].flags;
+                    u32 entry = datEnemyRecords[unit->partyRecord.unitId].flags;
                     if ((entry & 0x40) == 0) {
                         if ((entry & 0x400) == 0) {
                             if ((unit->stateFlags & 8) == 0) {
@@ -2551,7 +2546,7 @@ void btlGetUnitWorldPos(BtlUnit *unit, f32 *dst) {
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
-extern void mdlLoadSecondaryVectorVU(MdlCtx *);
+extern void mdlLoadRotationQuaternionVU(MdlCtx *);
 extern void mdlStorePrimaryVectorVU(MdlCtx *);
 extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
@@ -2577,12 +2572,12 @@ void btlSetActorEffectParameterOrMuzzlePosition(BtlUnit *unit, s32 mode) {
     }
 }
 
-/* vu0 routine: preserve the actor's primary and secondary vectors while
+/* vu0 routine: preserve the actor's primary position and rotation quaternion while
  * evaluating the requested model record; return the sampled vector in vf10. */
 s32 func_001E3230(BtlUnit *unit, s32 value) {
     f32 currentVector[4] __attribute__((aligned(16)));
     f32 primaryVector[4] __attribute__((aligned(16)));
-    f32 secondaryVector[4] __attribute__((aligned(16)));
+    f32 rotationQuaternion[4] __attribute__((aligned(16)));
     s32 (*callback)(BtlUnit *, s32);
     s8 result;
 
@@ -2595,14 +2590,14 @@ s32 func_001E3230(BtlUnit *unit, s32 value) {
     }
     mdlLoadPrimaryVectorVU(unit->ext->owner);
     VU0_STORE_VF_UNCLOBBERED(vf10, primaryVector);
-    mdlLoadSecondaryVectorVU(unit->ext->owner);
-    VU0_STORE_VF_UNCLOBBERED(vf10, secondaryVector);
+    mdlLoadRotationQuaternionVU(unit->ext->owner);
+    VU0_STORE_VF_UNCLOBBERED(vf10, rotationQuaternion);
     btlRefreshUnitFxVectors(unit);
     result = sdfLoadMapRecordPositionVector(unit->ext->owner->inner, value);
     VU0_STORE_VF_UNCLOBBERED(vf10, currentVector);
     VU0_LOAD_VF(vf10, primaryVector);
     mdlStorePrimaryVectorVU(unit->ext->owner);
-    VU0_LOAD_VF(vf10, secondaryVector);
+    VU0_LOAD_VF(vf10, rotationQuaternion);
     mdlUpdateContextRotationBasisFromQuaternion(unit->ext->owner);
     sdfModelUpdateCurrentFrameTransforms(unit->ext->owner->inner);
     VU0_LOAD_VF(vf10, currentVector);
@@ -5800,7 +5795,7 @@ s32 btlCanUseActorCategoryFlag2(s32 actor) {
 s32 btlHasSingleLinkedResource(s32 actor) {
     s32 category = ((BtlLinkedCommand *)actor)->actionCode;
 
-    if (category != 0 && datCommandRecords[category].unk_08 != 0) {
+    if (category != 0 && datCommandRecords[category].targetType != 0) {
         return 0;
     }
     return btlGetIndexListCount(((BtlLinkedCommand *)actor)->targetList) == 1;
@@ -5880,7 +5875,7 @@ s32 btlHasFirstLinkedCategoryFlag1000(s32 actor) {
     if (category >= 0x180) {
         return 0;
     }
-    return btlHasFlag(((BtlResourceTableEntry *)datEnemyRecords)[category].flags, 0x1000);
+    return btlHasFlag(datEnemyRecords[category].flags, 0x1000);
 }
 
 u8 func_001EA940(s32 action) {

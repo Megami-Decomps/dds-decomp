@@ -1820,14 +1820,14 @@ void sdfReleaseFreeRoot(SdfDrawNode *root) {
 }
 
 
-/* Allocate a model root and seed its unit matrix, unit scale and colour. */
+/* Allocate a model root and seed its unit matrix, identity rotation quaternion, unit scale and colour. */
 SdfModel *sdfCreateBufferedTransformSlot(void) {
     SdfModel *slot;
 
     slot = sdfAllocAndClearQuadwords(sizeof(SdfModel));
     slot->list = sdfDevCreateBufferedRequest(0, 4, 0x20);
     EE_MMI_UNIT_MATRIX(slot->matrix);
-    VU0_STORE_VF(vf0, slot->unk60);
+    VU0_STORE_VF(vf0, slot->rotationQuaternion);
     VU0_SET_ONES_XYZ(vf10);
     VU0_STORE_VF(vf10, slot->scaleVector);
     slot->unk1A = -1;
