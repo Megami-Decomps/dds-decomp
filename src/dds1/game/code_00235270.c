@@ -849,12 +849,15 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
     return 0;
 }
 
-void evtDrawSelectedEntryLabel(s32 list, s32 *sel, s32 x, s32 unused, u8 *base) {
+void evtDrawSelectedEntryLabel(s32 list, EvtRuntimeGroup *selected, s32 x,
+                               s32 unused, EvtRuntime *runtime) {
     x += 0x6C0;
     kwlnDrawSpriteCell((u32)list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
     sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, 0x7AE0, 0xFEFFFF, 0xE, D_003BC0C8));
-    if (sel[2] >= 0) {
-        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + 0x3C0, 0x7AE0, 0xFEFFFF, 0, D_003BC088, base + sel[2] * 32 + 0x24));
+    if (selected->entryHeader.word >= 0) {
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(
+            x + 0x3C0, 0x7AE0, 0xFEFFFF, 0, D_003BC088,
+            runtime->entryName[selected->entryHeader.word]));
     }
 }
 

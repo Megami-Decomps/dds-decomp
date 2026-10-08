@@ -6,6 +6,8 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
+extern void sdfQueueAssetRelease(SdfAsset *asset);
+
 typedef struct ParListNode ParListNode;
 
 extern ParSystem *D_003BB014;
@@ -155,7 +157,7 @@ extern void parCellInit();
 extern void parUpdateCellVertexPair(ParSystem *, s32, const u128 *);
 extern void parUpdateCellVertexTriangle(ParSystem *, s32, const u128 *);
 
-extern s32 sdfCreateAssetWithDrawEntries();
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 extern void func_002DA420(s32, f32);
 
@@ -423,19 +425,19 @@ extern void parUpdateBillboardCrossTriangle(s32, s32, u32);
 
 extern void parUpdateTrackPolygonCrossAxes(s32, s32, u32);
 
-void parDispatchKindUpdate(ParSystem *work, s32 index, u32 color) {
+void parDispatchKindUpdate(ParKindState *work, s32 index, u32 color) {
     switch ((u16)work->kind) {
     case 1:
-        func_00159CF0(work->vertexWordCount);
+        func_00159CF0((s32)work->value.table);
         return;
     case 2:
-        parUpdateBillboardCrossStrip(work->handle, index, color);
+        parUpdateBillboardCrossStrip((s32)work->primaryDrawSystem, index, color);
         return;
     case 3:
-        parUpdateBillboardCrossTriangle((s32)work->cells, index, color);
+        parUpdateBillboardCrossTriangle((s32)work->secondaryDraw.system, index, color);
         return;
     case 4:
-        parUpdateTrackPolygonCrossAxes((s32)work->cells, index, color);
+        parUpdateTrackPolygonCrossAxes((s32)work->secondaryDraw.modelList, index, color);
         break;
     }
 }
@@ -444,19 +446,19 @@ extern void parClearSlotFlag(s32);
 
 extern void effTrackPolyResetIndexedWork(s32);
 
-void parDispatchKindInit(ParSystem *work, s32 index) {
+void parDispatchKindInit(ParKindState *work, s32 index) {
     switch ((u16)work->kind) {
     case 1:
-        parClearSlotFlag(work->vertexWordCount);
+        parClearSlotFlag((s32)work->value.table);
         return;
     case 2:
-        parCellInit((void *)work->handle, index);
+        parCellInit(work->primaryDrawSystem, index);
         return;
     case 3:
-        parCellInit((void *)work->cells, index);
+        parCellInit(work->secondaryDraw.system, index);
         return;
     case 4:
-        effTrackPolyResetIndexedWork((s32)work->cells);
+        effTrackPolyResetIndexedWork((s32)work->secondaryDraw.modelList);
         break;
     }
 }
@@ -559,7 +561,7 @@ INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B258);
 
 void parReleaseAssetRecord(ParReleaseRecord *record) {
     record->released = 1;
-    sdfQueueAssetRelease(record->asset);
+    sdfQueueAssetRelease((SdfAsset *)record->asset);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(record->allocation));
 }
 
@@ -581,7 +583,7 @@ void parControlInit(void) {
 
 ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
     s32 total;
-    s32 handle;
+    struct SdfMemBlock *allocation;
     s32 base;
     s32 cellsSize;
     ParSystem *system;
@@ -610,8 +612,8 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
     }
     total = count * perCell;
     cellsSize = (total + count) * 0x14;
-    handle = (u32)sdfAllocGeneralBlock(cellsSize + 0x2C);
-    base = sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    allocation = sdfAllocGeneralBlock(cellsSize + 0x2C);
+    base = sdfResourceRetainAddress(allocation);
     system = (ParSystem *)(base + cellsSize);
     memset(system, 0, 0x2C);
     system->vertices = (void *)base;
@@ -625,22 +627,22 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
         cell->vertices = (u8 *)system->colors + i * perCell * 4;
         parCellInit(system, i);
     }
-    system->object = sdfCreateAssetWithDrawEntries();
-    func_002DA420(system->object, 1.0f);
+    system->asset = sdfCreateAssetWithDrawEntries();
+    func_002DA420((s32)system->asset, 1.0f);
     system->kind = kind;
     system->cellCount = count;
     system->bucket = 2;
     system->vertexWordCount = perCell;
     system->groupDivisor = groupDivisor;
-    system->handle = handle;
+    system->allocation = allocation;
     system->next = 0;
     system->unk28 = 0;
     return system;
 }
 
 void parReleaseCellSystem(ParSystem *system) {
-    sdfQueueAssetRelease(system->object);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(system->handle));
+    sdfQueueAssetRelease(system->asset);
+    sdfReleaseResourceAllocation(system->allocation);
 }
 
 void parCellInit(ParSystem *system, s32 index) {
@@ -1472,7 +1474,7 @@ void func_0015D0C0(void) {
             sdfConsAppendClearPacket(*slot, NULL);
             list = *slot;
         }
-        sdfConsAppendAssetPacket(list, (void *)system->object, NULL);
+        sdfConsAppendAssetPacket(list, (void *)system->asset, NULL);
         count = system->cellCount;
         if (system->kind == 0) {
             parDrawControl.indices = D_0034E360;
@@ -1622,13 +1624,13 @@ ParBlock *parAllocateDrawBlock(s32 count) {
     block->colors = (u32 *)vertices;
     block->handle = handle;
     block->positions = (u128 *)base;
-    block->object = sdfCreateAssetWithDrawEntries();
+    block->object = (s32)sdfCreateAssetWithDrawEntries();
     func_002DA420(block->object, 1.0f);
     return block;
 }
 
 void parReleaseDrawBlock(ParBlock *block) {
-    sdfQueueAssetRelease(block->object);
+    sdfQueueAssetRelease((SdfAsset *)block->object);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(block->handle));
 }
 
