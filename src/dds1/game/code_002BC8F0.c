@@ -1,7 +1,9 @@
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "itf_draw_grid.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
+#include "file_request_api.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "eff.h"
@@ -244,8 +246,6 @@ void effCompleteRetainedResourceJob(u64 job, u32 *outInstance) {
 
 extern s32 func_003014F0(char *, const char *, ...);
 
-extern void fileCreateCallbackRequest(const char *, u32, void (*)(u64, u32 *), u32 *);
-
 /* Clear the output first; only mode one selects the retained-allocation completion path. */
 void effRequestResourceByMode(const char *base, const char *name, u32 mode, u32 *outInstance) {
     char path[EFF_RESOURCE_PATH_BYTES];
@@ -253,9 +253,9 @@ void effRequestResourceByMode(const char *base, const char *name, u32 mode, u32 
     func_003014F0(path, D_003BD198, base, name);
     *outInstance = 0;
     if (mode == EFF_RESOURCE_KEEP_ALLOCATION) {
-        fileCreateCallbackRequest(path, 0, effCompleteRetainedResourceJob, outInstance);
+        fileCreateCallbackRequest(path, 0, (u32)effCompleteRetainedResourceJob, (u32)outInstance);
     } else {
-        fileCreateCallbackRequest(path, 0, effCompleteTransientResourceJob, outInstance);
+        fileCreateCallbackRequest(path, 0, (u32)effCompleteTransientResourceJob, (u32)outInstance);
     }
 }
 
@@ -293,7 +293,7 @@ void effRequestMappedResource(const char *base, const char *name, u32 *outMapped
 
     func_003014F0(path, D_003BD198, base, name);
     *outMappedResource = 0;
-    fileCreateCallbackRequest(path, 0, effCompleteMappedResourceJob, outMappedResource);
+    fileCreateCallbackRequest(path, 0, (u32)effCompleteMappedResourceJob, (u32)outMappedResource);
 }
 
 /* Create an owner list with sixteen initially empty record buckets. */
@@ -968,7 +968,6 @@ extern void sdfTexSetPrimaryBufferModeBits(SdfTex *, s32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
-extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern void effSelectPresetByKind(u32, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 
