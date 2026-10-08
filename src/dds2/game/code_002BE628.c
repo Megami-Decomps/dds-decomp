@@ -471,7 +471,7 @@ void func_002BFEA0(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     }
     iconX = x + positions[0];
     iconY = y + positions[1];
-    if (panel->unkE4 != 0 && (panel->flags & 0x40)) {
+    if (panel->panelResourceHandles[0] != 0 && (panel->flags & 0x40)) {
         func_002BE438(x, y, z, (struct MenuPageSpriteSlot *)panel,
                       panelIndex, 1, surface);
         return;
