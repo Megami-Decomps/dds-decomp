@@ -23,6 +23,7 @@
 #include "mdl.h"
 #include "sdf.h"
 #include "eff.h"
+#include "eff_resource_list.h"
 
 
 typedef struct EffPacketParams {
@@ -9402,7 +9403,7 @@ EffectList *mnuAllocateValueRecord(u32 mode) {
     return list;
 }
 
-void func_002BC618(EffectList *list) {
+void effDestroyEffectList(EffectList *list) {
     sdfReleaseChipBlock(list);
 }
 

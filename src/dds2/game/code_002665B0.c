@@ -3,6 +3,7 @@
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
+#include "eff_resource_list.h"
 #include "mnu.h"
 #include "sdf_resource.h"
 #include "mnu_staff.h"
@@ -710,7 +711,7 @@ MenuProgressHost *mnuCreateProgressHost(void) {
 void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *host) {
     mnuReleaseStaffMenuTextureHandles((s32)&host->staffSlots);
     mnuReleaseTitleEffectSprites(&host->staffSlots);
-    func_00303D58(host->titleEffectHandle);
+    effDestroyEffectList(host->titleEffectHandle);
     sdfReleaseResourceAllocation(host->allocation);
 }
 
