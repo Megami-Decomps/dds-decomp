@@ -1626,6 +1626,7 @@
 0x00170888	effSetRecordPoolDrawMode	inferred	confidence=high; matched-C; src/dds1/game/code_0016F1D0.c:682:func_00170888; Sets the record-pool submission mode used to choose the draw sink or alternate blend packet path.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00170890	effSetRecordPoolColor	inferred	confidence=high; matched-C; src/dds1/game/code_0016F1D0.c:687:func_00170890; Sets the packed color supplied to the record-pool packet builder.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00170898	effSetRecordPoolScale	inferred	confidence=high; matched-C; src/dds1/game/code_0016F1D0.c:691:func_00170898; Sets the uniform scale used by the scaled record-pool transform.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x001708A0	effScatterCreateRadialWork	inferred	allocates and initializes radial work with particles, a child pool, and optional duplicate group work
 0x00170B88	effScatterCreateFromParameterTriplet	inferred	Extracts three packed parameter blocks and creates scatter work from them. [names_reviewed6.tsv]
 0x00170BF0	effPcpScatterSharedDuplicate	inferred	duplicate of the shared-particle effect: copies the child work, then re-creates the handle array via effParamWorkDuplicate
 0x00170CE0	effPcpScatterReleaseParticleGroup	inferred	releases each particle handle in the scatter work array then frees the array and child work resources
@@ -1696,6 +1697,7 @@
 0x00175B18	effScatterSetFlatInstanceScale	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x0017D770, input-family pairing. [names_qp10.tsv]
 0x00175B20	effScatterSetFlatInstanceColor	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x0017D778, input-family pairing. [names_qp10.tsv]
 0x00175B28	effScatterCopyFlatInstanceMatrix	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x0017D780, input-family pairing. [names_qp10.tsv]
+0x00175B50	effScatterCreateDrawObject	inferred	allocates a drawable owner with geometry arrays and an SDF asset for scatter effects
 0x00175D88	effReleaseScatterObject	inferred	Releases the optional scatter resource and two owned handles before freeing the object.
 0x00176020	effCreateScatterResource	inferred	Creates a scatter resource and stores its handle at offset 0x7C.
 0x00176050	effShareScatterResource	inferred	Increments a source object's scatter resource reference and stores the resulting handle.
@@ -5436,7 +5438,7 @@
 0x002A4DF8	effCreateRingHandle	inferred	Byte-identical dds2 twin 0x002E6E70; DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described createEffectRingHandle behavior. [names_conflicts.tsv]
 0x002A4EA0	effReleaseRingHandle	inferred	Queues ring asset release and frees its enclosing handle allocation. [names_reviewed5.tsv]
 0x002A5118	billDrawCellBlendB	inferred	same as above
-0x002A5288	effPayloadPointerSet	inferred	paired effect body: stores payload [names_R_FuncNames7.tsv]
+0x002A5288	effCreateClassWork	inferred	allocates the complete class work and copied kind-selected payload, creates its resource, and initializes it
 0x002A5378	effCreateClassWorkFromFile	inferred	File-job callback resolves primary buffer and creates class work for request kind. [names_R_FuncNames4.tsv]
 0x002A53A8	effDestroyClassWork	inferred	Calls kind-indexed resource destructor and frees class work. [names_R_FuncNames4.tsv]
 0x002A53F0	effCreateClassWorkFromRequest	inferred	Creates class work using kind and source fields in the request. [names_R_FuncNames4.tsv]
@@ -5992,6 +5994,9 @@
 0x002CC3A8	sdfGridSelectFilledCell	inferred	DDS2 func_00313810 [names_M49_GridSdf.tsv]
 0x002CC430	sdfGridDrawVisibleCells	inferred	confidence=high; matched-C; src/dds1/game/code_002C97E8.c:1114:func_002CC430; Traverses the visible row/column window beginning at viewportOrigin and invokes drawCell at cellWidth/cellHeight-spaced screen positions.; source=names_P5.tsv:9 [names_qp11.tsv]
 0x002CC728	sdfMultiplyAddFloat	inferred	Returns a float multiplied by a factor and added to an offset. [names_reviewed9.tsv]
+0x002CC738	sdfDefaultTaskEntryInit	inferred	Default task entry initializer returns zero.
+0x002CC740	sdfNoOpKeyValueCallback	inferred	Default list and task entry teardown callback ignores both key and value.
+0x002CC748	sdfDefaultTaskEntryUpdate	inferred	Default task entry update returns zero; reused by the legacy callback fallback.
 0x002CC750	sdfAppendFormattedDebugLogPair	inferred	Both exact C twins write a formatted value pair to debug.log. [names_reviewed13.tsv]
 0x002CC7D8	ptyClearProfileRecords	inferred	legacy PartyUnitProfileRecords_ClearAll: clears the save-backed profile-point sidecar block
 0x002CC808	ptySelectProfileStage	inferred	party/profile lane; legacy PartyUnit_SelectProfileStageAndInitCurrent: writes unit.current_profile from the 4-row stage table and initialises current_profile-related state
