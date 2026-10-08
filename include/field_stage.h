@@ -22,6 +22,25 @@ typedef char FieldStageCoordinate_cols_at_C[((u32)&((FieldStageCoordinate *)0)->
 typedef char FieldStageCoordinate_rows_at_D[((u32)&((FieldStageCoordinate *)0)->rows == 0xD) ? 1 : -1];
 typedef char FieldStageCoordinate_cellSize_at_E[((u32)&((FieldStageCoordinate *)0)->cellSize == 0xE) ? 1 : -1];
 
+/* Contiguous player-scene work: saved transform, status words and deferred resource.
+ * The data also exports a label at +0x3C for separate object-slot consumers. */
+typedef struct FieldPlayerSceneWork {
+    u128 position;
+    u128 rotation;
+    u8 pad20[0x14];
+    u32 primaryState;
+    u8 pad38[0x20];
+    u32 unk58;
+    u32 secondaryState;
+    u8 pad60[2];
+    s16 sequenceMode; /* 0x62: copied by the sequence initializer */
+    u8 pad64[0x1C];
+    s8 resourceName[0x20];
+} FieldPlayerSceneWork;
+
+typedef char FieldPlayerSceneWork_size_must_be_0xA0[(sizeof(FieldPlayerSceneWork) == 0xA0) ? 1 : -1];
+typedef char FieldPlayerSceneWork_unk58_at_58[((u32)&((FieldPlayerSceneWork *)0)->unk58 == 0x58) ? 1 : -1];
+
 FieldStageCoordinate *fldFindStageCoordinateRecord(s32 x, s32 y);
 
 #endif /* FIELD_STAGE_H */
