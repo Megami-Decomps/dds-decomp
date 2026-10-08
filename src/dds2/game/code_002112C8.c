@@ -204,12 +204,6 @@ typedef struct BattleWork {
     struct BattleSub *sub; /* 0x718: reused as BtlSelectCtrl in unit-selection modes. */
 } BattleWork;
 
-/* Battle-select controller at work+0x718: the unit being selected and the previous one. */
-typedef struct BtlSelectCtrl {
-    BtlUnit *unit;
-    BtlUnit *prevUnit;
-    s8 pending;
-} BtlSelectCtrl;
 
 
 
@@ -2191,11 +2185,11 @@ s32 btlSelectTargetsByMode(s32 task, s32 mode) {
     return 1;
 }
 
-extern u32 btlGetEffectActor(void);
+extern BtlUnit *btlGetEffectActor(void);
 
 u32 btlAppendEffectActorToCommandIndices(s32 task) {
-    u32 actor = btlGetEffectActor();
-    btlAppendIndexListEntry(((ActionStateLink *)task)->indexWork.indices, (void *)actor);
+    BtlUnit *actor = btlGetEffectActor();
+    btlAppendIndexListEntry(((ActionStateLink *)task)->indexWork.indices, actor);
     return 1;
 }
 
@@ -3048,7 +3042,7 @@ s32 btlIsUnitListReady(void) {
 extern void btlAttachActionEffectToUnit(BtlUnit *unit);
 void btlAttachActionEffectToUnit(BtlUnit *unit) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    BtlSelectCtrl *ctrl = (BtlSelectCtrl *)battle->effect;
+    BtlSelectCtrl *ctrl = &battle->effect->selection;
     f32 position[3];
 
     ctrl->unit = unit;
@@ -5223,15 +5217,10 @@ void func_00220368(void) {
 }
 
 /* This command mode allocates exactly three state bytes. */
-typedef struct BattleMarkedCommandState {
-    u8 requested;
-    u8 current;
-    u8 actionFlag;
-} BattleMarkedCommandState;
 
 void func_00220450(BtlUnit *unused, s32 *delta) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    BattleMarkedCommandState *state = (BattleMarkedCommandState *)battle->effect;
+    BattleMarkedCommandState *state = &battle->effect->markedCommand;
     ActionStateLink *actor;
 
     if (delta[10] & 0x8000) {
@@ -5460,7 +5449,7 @@ void btlQueueLoneFreeTeamHandle(void)
     s32 secondUnavailable;
     ActionStateLink *handle;
 
-    if (battle->effect->actor != 0) {
+    if (battle->effect->linked.actor != 0) {
         first = NULL;
         second = NULL;
         firstUnavailable = 1;
@@ -5711,12 +5700,12 @@ extern f32 *D_0037F770[];
 extern void evtSetUnitRgbTransition(struct EvtUnit *unit, s32 duration, u32 color);
 
 void func_00221760(void) {
-    BattleLinkedEffectState *effect = ((BtlState *)btlGetRuntime())->effect;
+    BattleEffectPayload *effect = ((BtlState *)btlGetRuntime())->effect;
     BtlUnit *actor;
     u32 packed[4];
 
     if (effect != NULL) {
-        actor = (BtlUnit *)effect->actor;
+        actor = effect->linked.actor;
         if (actor != NULL && (actor->flags & 2)) {
             VU0_LOAD_VF(vf10, D_0037F770[0]);
             EE_MMI_RGBA_PACK(packed[0]);
@@ -6789,7 +6778,7 @@ typedef struct BattleActionContext {
     u8 pad272[0x2E];
     s32 battleId;
     u8 pad2A4[0x474];
-    BattleEffectState *effect;
+    BattleEffectPayload *effect;
 } BattleActionContext;
 
 extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32,
@@ -7303,7 +7292,7 @@ void btlSetSpecialBattleEffectActorByte(u8 value) {
 
     battle = (BattleActionContext *)btlGetRuntime();
     if (battle->battleId == 0x31b) {
-        /* Only the low byte at +0x00 changes; other paths use the full word as an actor. */
+        /* Mode 0x31B owns a one-byte statistic selector, not an actor word. */
         battle->effect->statIndex = value;
     }
 }
@@ -7466,33 +7455,33 @@ INCLUDE_ASM(const s32, "game/code_002112C8", func_00226AB0);
 
 
 void btlBeginEffectActorFadeOut(void) {
-    BattleEffectState *effect = ((BattleActionContext *)btlGetRuntime())->effect;
-    BtlUnit *actor = effect->actor;
+    BattleEffectPayload *effect = ((BattleActionContext *)btlGetRuntime())->effect;
+    BtlUnit *actor = effect->linked.actor;
     if (actor != 0) {
         u32 state = actor->stateFlags;
         u32 flags = actor->flags | 0x100;
         state &= ~0x80;
         state &= ~0x100;
-        effect->actor = 0;
+        effect->linked.actor = 0;
         actor->flags = flags;
         actor->stateFlags = state;
         btlRefreshUnitMotionSelection(actor);
         actor->flags |= 8;
-        effect->height = -125.0f;
-        effect->speed = 20.0f;
+        effect->linked.height = -125.0f;
+        effect->linked.speed = 20.0f;
     }
 }
 
 void btlResetEffectState(void) {
-    BattleEffectState *state = ((BattleActionContext *)btlGetRuntime())->effect;
-    state->active = 1;
-    state->speed = 20.0f;
-    state->flags = 0;
-    state->phase = 0;
-    state->value = 0;
-    state->timer = 0;
-    state->effect = 0;
-    state->owner = 0;
+    BattleEffectPayload *state = ((BattleActionContext *)btlGetRuntime())->effect;
+    state->linked.active = 1;
+    state->linked.speed = 20.0f;
+    state->linked.linkedUnit = NULL;
+    state->linked.phase = 0;
+    state->linked.value = 0;
+    state->linked.timer = 0;
+    state->linked.effect = 0;
+    state->linked.actor = NULL;
 }
 
 INCLUDE_RODATA(const s32, "game/code_002112C8", D_0041B4D0);
@@ -7500,7 +7489,7 @@ INCLUDE_RODATA(const s32, "game/code_002112C8", D_0041B4D0);
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00226C98);
 
 s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 command, s32 bits) {
-    BattleEffectState *effect;
+    BattleEffectPayload *effect;
     if (!(target->flags & 0x400)) {
         return 0;
     }
@@ -7512,7 +7501,7 @@ s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 co
         return 0;
     }
     effect = ((BattleActionContext *)btlGetRuntime())->effect;
-    if (effect->active != 1) {
+    if (effect->linked.active != 1) {
         return 0;
     }
     if (actor->flags & 0x200) {
@@ -7536,7 +7525,7 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
     BtlUnit *mainUnit = NULL;
     BtlState *battle;
     BtlUnit *unit;
-    BattleLinkedEffectState *effect;
+    BattleEffectPayload *effect;
     f32 position[4];
     s32 flags;
 
@@ -7560,7 +7549,7 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
         unit = unit->nextActor;
     }
 
-    if (effect->active == 1 || effect->actor == 0) {
+    if (effect->linked.active == 1 || effect->linked.actor == 0) {
         mainUnit->position[0] = 0.0f;
         btlSetUnitPosition(mainUnit, mainUnit->position);
         PCP_COPY_VECTOR(twin->position, mainUnit->position);

@@ -30,7 +30,7 @@
 #define BTL_TASK_CONDITION_HANDLE_GONE 4
 #define BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE 5
 
-extern u32 btlGetEffectActor(void);
+extern BtlUnit *btlGetEffectActor(void);
 
 extern u32 func_001A3360(s32, BtlIndexList *, s32);
 
@@ -1891,10 +1891,10 @@ u32 func_00204028(u32 task, u32 input) {
 }
 
 u32 btlAppendEffectActorToCommandIndices(s32 task) {
-    u32 actor;
+    BtlUnit *actor;
 
     actor = btlGetEffectActor();
-    btlAppendIndexListEntry(((BtlTask *)task)->indexWork.indices, (void *)actor);
+    btlAppendIndexListEntry(((BtlTask *)task)->indexWork.indices, actor);
     return 1;
 }
 
@@ -2930,14 +2930,14 @@ s32 btlEffectTaskStartFinale(BtlTask *task) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_002069C0);
 
-s32 btlIsEffectActor(s32 actor) {
-    s32 effectActor;
+s32 btlIsEffectActor(BtlUnit *actor) {
+    BtlUnit *effectActor;
 
-    effectActor = ((BtlState *)btlGetRuntime())->effect->owner;
+    effectActor = ((BtlState *)btlGetRuntime())->effect->actor;
     if (effectActor == 0) {
         return 0;
     }
-    return (effectActor ^ actor) == 0;
+    return effectActor == actor;
 }
 
 extern s32 btlHasEffectActor(void);
@@ -2951,7 +2951,7 @@ s32 btlGetSoleTargetKind(void) {
     if (btlHasEffectActor() == 0) {
         return -1;
     }
-    target = (BtlUnit *)btlGetEffectActor();
+    target = btlGetEffectActor();
     last = NULL;
     count = 0;
     for (unit = state->units; unit != NULL; unit = unit->next) {
@@ -2972,7 +2972,7 @@ s32 btlGetSoleTargetKind(void) {
     return -1;
 }
 
-s32 btlHasDifferentActiveTarget(u32 target) {
+s32 btlHasDifferentActiveTarget(BtlUnit *target) {
     if (btlHasEffectActor() == 0) {
         return 1;
     }
@@ -2997,7 +2997,7 @@ s32 btlSetLinkFlagOff(BtlUnit *requestedUnit) {
         }
     }
     if (unit != NULL) {
-        other = (BtlUnit *)btlGetEffectActor();
+        other = btlGetEffectActor();
         if (!(other->flags & 2)) {
             return 1;
         }
@@ -3036,7 +3036,7 @@ s32 btlSetLinkFlagOn(BtlUnit *requestedUnit) {
         }
     }
     if (unit != NULL) {
-        other = (BtlUnit *)btlGetEffectActor();
+        other = btlGetEffectActor();
         if (!(other->flags & 2)) {
             return 1;
         }
@@ -3211,11 +3211,11 @@ u32 btlGetEffectValue(void) {
     return ((BattleEffectState *)effect)->value;
 }
 
-u32 btlGetEffectActor(void) {
+BtlUnit *btlGetEffectActor(void) {
     s32 battle;
 
     battle = btlGetRuntime();
-    return ((BtlState *)battle)->effect->owner;
+    return ((BtlState *)battle)->effect->actor;
 }
 
 s32 btlIsSpecialEnemyEffectLinkSatisfied(void) {

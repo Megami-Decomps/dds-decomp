@@ -28,10 +28,20 @@ typedef struct BtlItemDrop {
 } BtlItemDrop;
 
 #ifdef VERSION_DDS2
+/* Mode 786 owns the actor pair and vertical-motion state. */
 typedef struct BattleLinkedEffectState {
-    u32 actor;
+    struct BtlUnit *actor;
     struct BtlUnit *linkedUnit;
-    u32 value;
+    /* The public getter reads the word; boss routing reads signed bytes. */
+    union {
+        u32 value;
+        struct {
+            s8 valueByte;
+            u8 pad09;
+            s8 unk0A;
+            u8 pad0B;
+        };
+    };
     u16 timer;
     u8 active, phase;
     union {
@@ -40,6 +50,34 @@ typedef struct BattleLinkedEffectState {
     };
     f32 speed;
 } BattleLinkedEffectState;
+
+/* Observed mode-specific payloads allocated into DDS2 battle work +0x718. */
+typedef struct BtlSelectCtrl {
+    BtlUnit *unit;
+    BtlUnit *prevUnit;
+    s8 pending;
+} BtlSelectCtrl;
+
+typedef struct BattleMarkedCommandState {
+    u8 requested;
+    u8 current;
+    u8 actionFlag;
+} BattleMarkedCommandState;
+
+typedef struct BattleEventResourceTriggerState {
+    u8 consumed;
+    u8 armed;
+} BattleEventResourceTriggerState;
+
+typedef union BattleEffectPayload {
+    BtlSelectCtrl selection;
+    BattleMarkedCommandState markedCommand;
+    BattleLinkedEffectState linked;
+    BattleEventResourceTriggerState eventTrigger;
+    s32 turnCount; /* mode 785 */
+    u8 statIndex; /* mode 795: one-byte allocation */
+} BattleEffectPayload;
+
 #endif
 
 /* Full battle-work layout for state users; unit/task-only users include btl.h. */
@@ -421,7 +459,7 @@ typedef struct BtlState {
     u8 pad704[0xC];
     s32 (*unk710)(BtlUnit *, s32);
     void (*modelChangeSoundHook)(struct ActionStateLink *, u64, s32); /* 0x714: prerequisite handle, delay */
-    struct BattleLinkedEffectState *effect; /* 0x718 */
+    BattleEffectPayload *effect; /* 0x718: allocation depends on battle mode. */
     u32 tint71C;
     u8 pad720[4];
     s32 unk724;

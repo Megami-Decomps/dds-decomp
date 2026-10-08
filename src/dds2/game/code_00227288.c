@@ -27,7 +27,7 @@ extern u32 btlGetEffectActive(void);
 
 extern u32 btlGetEffectValue(void);
 
-extern u32 btlGetEffectActor(void);
+extern BtlUnit *btlGetEffectActor(void);
 
 /* The model flag word is the first member of the extension's +0x8C info object.
  * Retail accesses unit+0x340 -> extension+0x8C -> flags+0; no second unit view. */
@@ -91,8 +91,8 @@ void func_00227288(void) {
 INCLUDE_ASM(const s32, "game/code_00227288", func_002272A0);
 
 s32 btlIsEffectPhaseInRange(s32 unused, s32 value) {
-    BattleLinkedEffectState *effect = ((BtlState *)btlGetRuntime())->effect;
-    if (effect->active != 1) {
+    BattleEffectPayload *effect = ((BtlState *)btlGetRuntime())->effect;
+    if (effect->linked.active != 1) {
         return 0;
     }
     switch (value) {
@@ -113,7 +113,7 @@ s32 btlRemapEffectActiveCombatantAction(BtlUnit *unit, s32 code) {
     if (!(unit->flags & 0x400)) {
         return code;
     }
-    if (((BtlState *)btlGetRuntime())->effect->active != 1) {
+    if (((BtlState *)btlGetRuntime())->effect->linked.active != 1) {
         return code;
     }
     id = unit->partyRecord.unitId;
@@ -191,7 +191,7 @@ extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
 /* Lower the linked actor, or return eligible actors to ground level. */
 void func_00227820(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    BattleLinkedEffectState *effect;
+    BattleEffectPayload *effect;
     f32 vector[4] __attribute__((aligned(16)));
     f32 height;
     f32 speed;
@@ -201,8 +201,8 @@ void func_00227820(void) {
         return;
     }
     effect = battle->effect;
-    if (effect->actor != 0) {
-        BtlUnit *selected = (BtlUnit *)effect->actor;
+    if (effect->linked.actor != 0) {
+        BtlUnit *selected = effect->linked.actor;
         BtlUnit *actor;
         if ((selected->flags & 2) == 0) {
             return;
@@ -212,16 +212,16 @@ void func_00227820(void) {
         if (!(vector[1] > -125.0f)) {
             return;
         }
-        actor = (BtlUnit *)effect->actor;
+        actor = effect->linked.actor;
         limit = actor->resourceIndex == 0x16 ? -62.5f : -125.0f;
-        height = effect->height - effect->speed;
-        speed = effect->speed / 1.11f;
-        effect->height = height;
-        effect->speed = speed;
+        height = effect->linked.height - effect->linked.speed;
+        speed = effect->linked.speed / 1.11f;
+        effect->linked.height = height;
+        effect->linked.speed = speed;
         if (height < limit) {
-            effect->height = limit;
+            effect->linked.height = limit;
         }
-        vector[1] = effect->height;
+        vector[1] = effect->linked.height;
         effObjSetInnerFirstVec((EffWorldNode *)actor->effectObject, (u128 *)vector);
         return;
     }
@@ -247,14 +247,14 @@ void func_00227820(void) {
                             VU0_STORE_VF(vf10, (u128 *)vector);
                             if (!(vector[1] > ceiling)) {
                                 if (vector[1] < lowerLimit) {
-                                    height = effect->height + effect->speed;
-                                    speed = effect->speed * decay;
-                                    effect->height = height;
-                                    effect->speed = speed;
+                                    height = effect->linked.height + effect->linked.speed;
+                                    speed = effect->linked.speed * decay;
+                                    effect->linked.height = height;
+                                    effect->linked.speed = speed;
                                     if (height > zero) {
-                                        effect->height = zero;
+                                        effect->linked.height = zero;
                                     }
-                                    vector[1] = effect->height;
+                                    vector[1] = effect->linked.height;
                                     effObjSetInnerFirstVec((EffWorldNode *)unit->effectObject, (u128 *)vector);
                                 } else {
                                     vector[1] = zero;
@@ -273,23 +273,23 @@ void func_00227820(void) {
 INCLUDE_ASM(const s32, "game/code_00227288", func_002279F0);
 
 s32 btlGetEffectTaskActorMatchCode(ActionStateLink *task) {
-    BattleLinkedEffectState *effect;
+    BattleEffectPayload *effect;
     if ((task->pendingFlags & 8) == 0) {
         return -1;
     }
     effect = ((BtlState *)btlGetRuntime())->effect;
-    return effect->actor == (u32)task->unit ? 12 : -1;
+    return effect->linked.actor == task->unit ? 12 : -1;
 }
 
 s32 btlEffectTaskStartFinale(ActionStateLink *task) {
-    BattleLinkedEffectState *effect;
+    BattleEffectPayload *effect;
     BtlRuntimeTask *group;
 
     if ((task->pendingFlags & 8) == 0) {
         return -1;
     }
     effect = ((BtlState *)btlGetRuntime())->effect;
-    if (effect->actor != (u32)task->unit) {
+    if (effect->linked.actor != task->unit) {
         return -1;
     }
     btlStartTask(btlCreateCommandSoundUpdateTask());
@@ -299,15 +299,15 @@ s32 btlEffectTaskStartFinale(ActionStateLink *task) {
     group = fldCreateSceneGroupAction(task, 0x64, 1);
     group->startDelay = 0x16;
     btlStartTask(group);
-    effect->phase = 1;
+    effect->linked.phase = 1;
     return (task->unit->partyRecord.status & 0x480) ? 0x19 : 0x1B;
 }
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_00227DA8);
 
-s32 btlIsEffectActor(u32 actor) {
-    BattleLinkedEffectState *state = ((BtlState *)btlGetRuntime())->effect;
-    u32 active = state->actor;
+s32 btlIsEffectActor(BtlUnit *actor) {
+    BattleEffectPayload *state = ((BtlState *)btlGetRuntime())->effect;
+    BtlUnit *active = state->linked.actor;
     if (active != 0) {
         return active == actor;
     }
@@ -323,7 +323,7 @@ s32 btlGetSoleTargetKind(void) {
     if (btlHasEffectActor() == 0) {
         return -1;
     }
-    target = (BtlUnit *)btlGetEffectActor();
+    target = btlGetEffectActor();
     last = NULL;
     count = 0;
     for (unit = state->units; unit != NULL; unit = unit->nextActor) {
@@ -344,7 +344,7 @@ s32 btlGetSoleTargetKind(void) {
     return -1;
 }
 
-s32 btlHasDifferentActiveTarget(u32 target) {
+s32 btlHasDifferentActiveTarget(BtlUnit *target) {
     if (btlHasEffectActor() == 0) {
         return 1;
     }
@@ -367,7 +367,7 @@ s32 btlSetLinkFlagOff(BtlUnit *requestedUnit) {
         }
     }
     if (unit != NULL) {
-        other = (BtlUnit *)btlGetEffectActor();
+        other = btlGetEffectActor();
         if (!(other->flags & 2)) {
             return 1;
         }
@@ -404,7 +404,7 @@ s32 btlSetLinkFlagOn(BtlUnit *requestedUnit) {
         }
     }
     if (unit != NULL) {
-        other = (BtlUnit *)btlGetEffectActor();
+        other = btlGetEffectActor();
         if (!(other->flags & 2)) {
             return 1;
         }
@@ -427,7 +427,7 @@ s32 btlSetLinkFlagOn(BtlUnit *requestedUnit) {
 
 void func_002286D8(ActionStateLink *action) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    BattleLinkedEffectState *effect = battle->effect;
+    BattleEffectPayload *effect = battle->effect;
     BtlUnit *unit;
     BtlRuntimeTask *task;
     u64 soundSequence;
@@ -435,7 +435,7 @@ void func_002286D8(ActionStateLink *action) {
     u64 modelSequence;
     u64 scriptSequence;
 
-    effect->active = 0;
+    effect->linked.active = 0;
     soundSequence = btlAdvanceRuntimeSequenceCounter();
     refreshSequence = btlAdvanceRuntimeSequenceCounter();
     modelSequence = btlAdvanceRuntimeSequenceCounter();
@@ -492,9 +492,9 @@ void func_002286D8(ActionStateLink *action) {
             btlStartTask(task);
         } else {
             if (unitId == 0x12E) {
-                effect->timer |= 4;
+                effect->linked.timer |= 4;
             } else {
-                effect->timer |= 2;
+                effect->linked.timer |= 2;
             }
         }
 
@@ -561,13 +561,13 @@ void func_002286D8(ActionStateLink *action) {
 
 s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    BattleLinkedEffectState *effect;
+    BattleEffectPayload *effect;
     BtlUnit *other;
     if ((unit->flags & 0x400) == 0) {
         return 1;
     }
     effect = battle->effect;
-    if (effect->active != 0) {
+    if (effect->linked.active != 0) {
         return 1;
     }
     if (unit->resourceIndex == 0x119) {
@@ -695,13 +695,13 @@ s32 func_00228F48(BtlLinkedCommand *command) {
 u32 btlGetEffectActive(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     u32 battleId = battle->battleMode;
-    BattleLinkedEffectState *state;
+    BattleEffectPayload *state;
     if (battleId != 0x312) {
         return 0;
     }
     state = battle->effect;
     if (state != NULL) {
-        return state->active;
+        return state->linked.active;
     }
     return 0;
 }
@@ -709,7 +709,7 @@ u32 btlGetEffectActive(void) {
 s32 btlHasEffectActor(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     u32 battleId = battle->battleMode;
-    BattleLinkedEffectState *state;
+    BattleEffectPayload *state;
     if (battleId != 0x312) {
         return 0;
     }
@@ -717,32 +717,32 @@ s32 btlHasEffectActor(void) {
     if (state == NULL) {
         return 0;
     }
-    return state->actor != 0;
+    return state->linked.actor != 0;
 }
 
 u32 btlGetEffectValue(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     u32 battleId = battle->battleMode;
-    BattleLinkedEffectState *state;
+    BattleEffectPayload *state;
     if (battleId != 0x312) {
         return 0;
     }
     state = battle->effect;
     if (state != NULL) {
-        return state->value;
+        return state->linked.value;
     }
     return 0;
 }
 
-u32 btlGetEffectActor(void) {
-    BattleLinkedEffectState *state = ((BtlState *)btlGetRuntime())->effect;
-    return state->actor;
+BtlUnit *btlGetEffectActor(void) {
+    BattleEffectPayload *state = ((BtlState *)btlGetRuntime())->effect;
+    return state->linked.actor;
 }
 
 s32 btlIsSpecialEnemyEffectLinkSatisfied(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit = battle->units;
-    BattleLinkedEffectState *effect = battle->effect;
+    BattleEffectPayload *effect = battle->effect;
     while (unit != 0) {
         if ((unit->flags & 0x400) &&
             unit->partyRecord.unitId == 0x12F) {
@@ -756,17 +756,17 @@ s32 btlIsSpecialEnemyEffectLinkSatisfied(void) {
     if (!(unit->flags & 0xe0)) {
         return 0;
     }
-    return effect->linkedUnit == unit;
+    return effect->linked.linkedUnit == unit;
 }
 
 void btlArmEventResourceTrigger(void) {
-    u8 *puVar1;
+    BattleEventResourceTriggerState *trigger;
     BtlState *battle;
 
     battle = (BtlState *)btlGetRuntime();
-    puVar1 = (u8 *)battle->effect;
-    puVar1[1] = 1;
-    *puVar1 = 0;
+    trigger = &battle->effect->eventTrigger;
+    trigger->armed = 1;
+    trigger->consumed = 0;
 }
 
 u32 func_00229278(void) {
