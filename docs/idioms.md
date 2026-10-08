@@ -3729,11 +3729,11 @@ parameter before committing the count reset and camera flags; a named
 Its single forwarding caller receives a `BtlLinkedCommand *` and passes
 the embedded front/back `BtlCamState` objects.
 
-The initializer owns the 96-byte preset table formerly `D_004183D8`.
-The retail split includes eight additional zero alignment bytes before the
-following jump table. The instruction body is exact; the normal full-unit
-gate and linked retail checksum determine the data layout, not added dummy
-fields or artificial padding in the camera record.
+The copied 96-byte default bank is the true const `D_004183D8` owner,
+containing two existing `BattlePairCameraPreset` rows. Its definition replaces
+the old data include at that owner boundary; the routine copies the aggregate
+before selecting a row. The retail split's eight zero alignment bytes before
+the following jump table are not record fields or artificial C padding.
 
 
 ## Battle lift/settle task workspace
@@ -3758,4 +3758,17 @@ and limit as signed words, and load the flare-set index at `+0x54` with
 narrow billboard header; the file wrapper forwards its work argument and
 returns the created object. The vector operations retain the existing SDK
 VU macros, with no new inline assembly.
+
+
+## Strip owner and copied source header
+
+DDS1 `002AAF70` and DDS2 `002EE348` allocate a `0x3C`-byte `EffectStripNode`.
+Its file constructors copy `0x20` source bytes into the member at `+0x0C`;
+the grid-record provider value is at `+0x34`, and the trailing count is a
+halfword at `+0x38`. The same primary owner serves construction, cloning,
+release, color/opacity updates, and record forwarding in both games.
+The clone uses this owner's active record, not an `EffClassWork` view of
+the same address; opacity likewise belongs to the strip owner rather than
+a separate `ValPtr34` prefix. Provider-word APIs retain their existing
+contracts in this owner-only cutover.
 

@@ -1430,10 +1430,10 @@ f32 fldSnapAngleToCardinalDirection(f32 angle) {
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_001228D8);
 
-extern f32 func_001228D8();
+extern f32 func_001228D8(f32, f32, f32, f32);
 
-f32 fldGetNormalizedComplementaryAngle(void) {
-    s32 angle = (s32)(360.0f - func_001228D8() + 90.0f);
+f32 fldGetNormalizedComplementaryAngle(f32 ax, f32 ay, f32 bx, f32 by) {
+    s32 angle = (s32)(360.0f - func_001228D8(ax, ay, bx, by) + 90.0f);
     return (f32)(angle % 360);
 }
 
