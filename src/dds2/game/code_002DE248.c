@@ -866,7 +866,7 @@ typedef struct EffFadeConfig {
     u8 pad58[8];
     EffScalarTrack rateA;   /* 0x60 */
     EffScalarTrack rateB;   /* 0x8C */
-    s32 progress;         /* 0xB8 */
+    s32 duration;         /* 0xB8 */
     u8 padBC[4];
     EffSolidRectParams out; /* 0xC0 */
 } EffFadeConfig;
@@ -880,18 +880,18 @@ typedef struct EffRateConfig {
     u8 pad58[8];
     EffScalarTrack rateA;   /* 0x60 */
     EffScalarTrack rateB;   /* 0x8C */
-    s32 progress;         /* 0xB8 */
+    s32 duration;         /* 0xB8 */
     u8 fixedMode;         /* 0xBC */
     u8 padBD[3];
     EffBlurQuad out;       /* 0xC0 */
 } EffRateConfig;
 
-/* Draw a fade rectangle when progress is zero or reaches the signed frame limit.
- * Blend its packed color and use percent-scaled curves for the output rates. */
+/* Draw through the configured duration; zero duration uses frame zero.
+ * Blend the packed color and use percent-scaled curves for the output rates. */
 void effUpdateFadeBlendA(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
-    s32 progress = config->progress;
-    s32 limit = 0;
+    s32 duration = config->duration;
+    s32 frame = 0;
     EffBlurQuad *out = &config->out;
     s32 color1[4];
     s32 color2[4];
@@ -900,10 +900,10 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     u32 unit;
     u32 second;
 
-    if (progress != 0) {
-        limit = work->frame;
+    if (duration != 0) {
+        frame = work->frame;
     }
-    if (progress < limit) {
+    if (duration < frame) {
         return;
     }
     out->x = 0;
@@ -912,7 +912,7 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     out->top = 0;
     out->right = 0x200;
     out->bottom = 0x1C0;
-    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, limit, progress);
+    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -923,8 +923,8 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->color = blended[0];
-    out->displacement = effSampleScalarCurve(&config->blendB, limit, progress) * 0.01f + 1.0f;
-    out->angle = effSampleScalarCurve(&config->rateA.curve, limit, progress) * 0.01f;
+    out->displacement = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f + 1.0f;
+    out->angle = effSampleScalarCurve(&config->rateA.curve, frame, duration) * 0.01f;
     out->blendControl = work->mode;
     effDrawBlurRectangle(out);
 }
@@ -942,8 +942,8 @@ void effReleaseFadeBlendWork(u32 resourceHandle) {
 void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
     EffBlurTemplate *out = (EffBlurTemplate *)work->handle;
-    s32 progress = config->progress;
-    s32 limit = 0;
+    s32 duration = config->duration;
+    s32 frame = 0;
     f32 rate;
     f32 pos[4];
     s32 color1[4];
@@ -953,13 +953,13 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     u32 unit;
     u32 second;
 
-    if (progress != 0) {
-        limit = work->frame;
+    if (duration != 0) {
+        frame = work->frame;
     }
-    if (progress < limit) {
+    if (duration < frame) {
         return;
     }
-    rate = effSampleScalarCurve(&config->rateB.curve, limit, progress);
+    rate = effSampleScalarCurve(&config->rateB.curve, frame, duration);
     if (config->fixedMode != 0) {
         out->body.source.x = 0;
         out->body.source.y = 0;
@@ -982,7 +982,7 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
         out->body.source.x = px;
         out->body.source.y = py << 1;
     }
-    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, limit, progress);
+    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -993,8 +993,8 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->body.source.color = blended[0];
-    out->body.source.displacement = effSampleScalarCurve(&config->blendB, limit, progress) * 0.01f + 1.0f;
-    out->body.source.angle = effSampleScalarCurve(&config->rateA.curve, limit, progress) * 0.01f;
+    out->body.source.displacement = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f + 1.0f;
+    out->body.source.angle = effSampleScalarCurve(&config->rateA.curve, frame, duration) * 0.01f;
     out->body.source.blendControl = work->mode;
     effDrawBlurFixedPointRectangle(out);
 }
@@ -1016,8 +1016,8 @@ void effReleaseFixedSlotBlurWork(EffBlurScatterWork *handle) {
 void effUpdateFadeMapA(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
     EffBlurScatterWork *out = (EffBlurScatterWork *)work->handle;
-    s32 progress = config->progress;
-    s32 limit = 0;
+    s32 duration = config->duration;
+    s32 frame = 0;
     f32 rate;
     f32 pos[4];
     s32 color1[4];
@@ -1027,13 +1027,13 @@ void effUpdateFadeMapA(EffKindWork *work) {
     u32 unit;
     u32 second;
 
-    if (progress != 0) {
-        limit = work->frame;
+    if (duration != 0) {
+        frame = work->frame;
     }
-    if (progress < limit) {
+    if (duration < frame) {
         return;
     }
-    rate = effSampleScalarCurve(&config->rateB.curve, limit, progress);
+    rate = effSampleScalarCurve(&config->rateB.curve, frame, duration);
     if (config->fixedMode != 0) {
         out->params.positionSpread = (s32)rate;
         out->params.x = 0;
@@ -1052,7 +1052,7 @@ void effUpdateFadeMapA(EffKindWork *work) {
         out->params.x = (s32)pos[0] - 0x800;
         out->params.y = ((s32)pos[1] - 0x800) << 1;
     }
-    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, limit, progress);
+    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -1063,8 +1063,8 @@ void effUpdateFadeMapA(EffKindWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->params.color = blended[0];
-    out->params.uvDisplacementAmplitude = effSampleScalarCurve(&config->blendB, limit, progress) * 0.01f;
-    out->params.uvDisplacementAngleDegrees = effSampleScalarCurve(&config->rateA.curve, limit, progress) * 0.01f;
+    out->params.uvDisplacementAmplitude = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f;
+    out->params.uvDisplacementAngleDegrees = effSampleScalarCurve(&config->rateA.curve, frame, duration) * 0.01f;
     out->params.blendControl = work->mode;
     effBlurStepScatterSlotsAndDraw(out);
 }
@@ -1082,12 +1082,12 @@ void effReleaseVariableSlotBlurWork(EffBlurScaleWork *work) {
 }
 
 /* Draw the same pixel-unit fade into the wider renderer output record.
- * The native work header and progress gate remain shared with the other kind callbacks. */
+ * The native work header and duration gate remain shared with the other kind callbacks. */
 void effUpdateFadeMapB(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
     EffBlurScaleWork *out = (EffBlurScaleWork *)work->handle;
-    s32 progress = config->progress;
-    s32 limit = 0;
+    s32 duration = config->duration;
+    s32 frame = 0;
     f32 rate;
     f32 pos[4];
     s32 color1[4];
@@ -1097,13 +1097,13 @@ void effUpdateFadeMapB(EffKindWork *work) {
     u32 unit;
     u32 second;
 
-    if (progress != 0) {
-        limit = work->frame;
+    if (duration != 0) {
+        frame = work->frame;
     }
-    if (progress < limit) {
+    if (duration < frame) {
         return;
     }
-    rate = effSampleScalarCurve(&config->rateB.curve, limit, progress);
+    rate = effSampleScalarCurve(&config->rateB.curve, frame, duration);
     if (config->fixedMode != 0) {
         out->params.size = (s32)rate;
         out->params.x = 0;
@@ -1122,7 +1122,7 @@ void effUpdateFadeMapB(EffKindWork *work) {
         out->params.x = (s32)pos[0] - 0x800;
         out->params.y = ((s32)pos[1] - 0x800) << 1;
     }
-    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, limit, progress);
+    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -1133,8 +1133,8 @@ void effUpdateFadeMapB(EffKindWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->params.color = blended[0];
-    out->params.angleStep = effSampleScalarCurve(&config->blendB, limit, progress) * 0.01f;
-    out->params.uvDisplacementAngleDegrees = effSampleScalarCurve(&config->rateA.curve, limit, progress) * 0.01f;
+    out->params.angleStep = effSampleScalarCurve(&config->blendB, frame, duration) * 0.01f;
+    out->params.uvDisplacementAngleDegrees = effSampleScalarCurve(&config->rateA.curve, frame, duration) * 0.01f;
     out->params.blendControl = work->mode;
     effBlurStepScaleSlotsAndDraw(out);
 }
@@ -1147,8 +1147,8 @@ void effSetFadeBlendParameter(EffKindWork *work, u32 value) {
  * The generic kind work supplies its packed color, mode and frame limit. */
 void effUpdateFadeBlendB(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
-    s32 progress = config->progress;
-    s32 limit = 0;
+    s32 duration = config->duration;
+    s32 frame = 0;
     EffBlurQuad *out = &config->out;
     s32 color1[4];
     s32 color2[4];
@@ -1157,10 +1157,10 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     u32 unit;
     u32 second;
 
-    if (progress != 0) {
-        limit = work->frame;
+    if (duration != 0) {
+        frame = work->frame;
     }
-    if (progress < limit) {
+    if (duration < frame) {
         return;
     }
     out->x = 0;
@@ -1169,7 +1169,7 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     out->top = 0;
     out->right = 0x200;
     out->bottom = 0x1C0;
-    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, limit, progress);
+    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -1180,8 +1180,8 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->color = blended[0];
-    out->displacement = effSampleScalarCurve(&config->blendB, limit, progress) + 1.0f;
-    out->angle = effSampleScalarCurve(&config->rateA.curve, limit, progress);
+    out->displacement = effSampleScalarCurve(&config->blendB, frame, duration) + 1.0f;
+    out->angle = effSampleScalarCurve(&config->rateA.curve, frame, duration);
     out->blendControl = work->mode;
     effBlurDrawFramebufferQuad(out);
 }
@@ -1192,8 +1192,8 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002DF6C8);
  * Its output uses fixed rectangle bounds and the kind work's packed color and mode. */
 void effUpdateFadeBlendC(EffKindWork *work) {
     EffFadeConfig *config = work->payload;
-    s32 progress = config->progress;
-    s32 limit = 0;
+    s32 duration = config->duration;
+    s32 frame = 0;
     EffSolidRectParams *out = &config->out;
     s32 color1[4];
     s32 color2[4];
@@ -1202,17 +1202,17 @@ void effUpdateFadeBlendC(EffKindWork *work) {
     u32 unit;
     u32 second;
 
-    if (progress != 0) {
-        limit = work->frame;
+    if (duration != 0) {
+        frame = work->frame;
     }
-    if (progress < limit) {
+    if (duration < frame) {
         return;
     }
     out->left = 0;
     out->top = 0;
     out->right = 0x200;
     out->bottom = 0x1C0;
-    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, limit, progress);
+    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
     color1[0] = work->color;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
