@@ -3,7 +3,7 @@
 #include "mnu_scene_work.h"
 
 extern void func_0024E260(s32, s32, s32, s32, s32, s32);
-extern u32 mnuSceneResourceContext;
+extern TaskWork *mnuSceneResourceContext;
 extern u32 *mnuGetSelectedNodeValue(void);
 extern s32 func_00255E08();
 extern void func_0024E5A0(s32, s32, s32, s32, s32, s32, f32, f32);
@@ -44,8 +44,8 @@ s32 mnuDrawMantraCostTransition(void) {
 
     frac = 0.0f;
     mnuGetSelectedNodeValue();
-    nodePrev = sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
-    nodeNext = sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
+    nodePrev = sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
+    nodeNext = sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     scene = (MenuSceneWork *)(u32)nodeNext;
     func_00255E08(nodePrev, 0x80, 0x52);
     level = *(s32 *)(nodePrev + 0x1C);
