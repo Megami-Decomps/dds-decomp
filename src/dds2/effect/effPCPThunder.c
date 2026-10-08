@@ -1024,9 +1024,6 @@ void func_0016CD68(EffThunderSparkWork *work) {
 }
 
 
-extern void parRiseFallSymmetricCellAlpha(void *system, u32 a, u32 b, u32 c);
-
-
 /* Single- and dual-system variants share this allocation layout, but the
    single-system update counts frames where the dual variant keeps a system. */
 typedef struct {
@@ -1675,8 +1672,6 @@ void effThunderUpdateDualFragments(EffThunderFragmentWork *work) {
     parPrependCellNode(work->state.secondarySystem);
     parPrependCellNode(work->system);
 }
-
-extern void parDecreaseStripCellAlpha(void *system, u32 a, u32 b, u32 c);
 
 /* Parameter head (0x48 bytes) of the cell effect, copied verbatim into the work. */
 typedef struct {
@@ -2503,7 +2498,6 @@ extern void effAppendFragmentHistoryPoints(EffFragmentResources *, u128 *);
 extern f32 sdfAtan2(f32, f32);
 extern void func_00340DC8(f32, f32, f32);
 extern void effEventCopyFileRecordHeader(void *, const void *);
-extern void func_00197F60(void *);
 void effThunderDrawHistoryAndEndCap(EffFragmentResources *);
 
 /* Each slot owns two joined cubic segments, a ribbon history and an end cap.
@@ -2930,7 +2924,7 @@ void func_0016FE18(EffGroup *group) {
                 func_00340DC8(0.0f, sdfAtan2(delta[0], delta[2]), 0.0f);
                 VU0_STORE_VF_UNCLOBBERED(vf10, &place.unk00[4]);
                 effEventCopyFileRecordHeader((FileRecordHeader *)slot->node, (const FileRecordHeader *)&place);
-                func_00197F60(slot->node);
+                effEventUpdateEffectParameters(slot->node);
             }
             effThunderDrawHistoryAndEndCap(slot->resources);
         }

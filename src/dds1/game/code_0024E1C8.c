@@ -8,6 +8,7 @@
 #include "prf_requirement.h"
 #include "sdf_grid.h"
 #include "sdf_task_work.h"
+#include "mnu_scene_work.h"
 
 #define MNU_MANTRA_RESOURCE_SLOT_COUNT 14
 #define MNU_MANTRA_SOURCE_ACTIVE_BIT 0x20
@@ -989,14 +990,6 @@ s32 func_002508D8(u16 profileId) {
     return 0;
 }
 
-typedef struct MnuSceneContext {
-    u8 pad00[0x484];
-    SdfGrid *grid;
-    u8 pad488[0x11C];
-    u16 cursorX;
-    u16 cursorY;
-} MnuSceneContext;
-
 extern SdfGrid *func_002CB9C0(s32, s32, s32, s32, s32, s32, void *, s32);
 extern void sdfSetShortPairValues(SdfGrid *, s32, s32);
 extern void mnuFreeTaskData(u32, u32);
@@ -1006,26 +999,26 @@ extern void func_00253208(s32, s32, s32 *, s32 *);
 extern SdfGridCell *sdfGridSelectFilledCell(SdfGrid *, u32, u32);
 extern void func_002512F0(s32, s32);
 
-/* Construct the selection grid and callbacks, select its initial coordinates, then reset cached cursor coordinates. */
-void mnuInitializeMantraSelectionGrid(s32 sceneAddress) {
-    MnuSceneContext *sceneWork = (MnuSceneContext *)sceneAddress;
+/* Construct the selection grid and callbacks, select its initial coordinates, then reset the cached scroll position. */
+void mnuInitializeMantraSelectionGrid(MenuSceneWork *sceneWork) {
     s32 selectedCoordinates[2];
     s32 resourceTaskAddress;
     s32 fieldAddress;
 
-    sceneWork->grid = func_002CB9C0(0xF, 0x11, 0x40, 0x43, 4, 4,
-                                (u8 *)sceneWork + 4, 0);
-    sdfSetShortPairValues(sceneWork->grid, 1, 1);
-    sceneWork->grid->releaseCell = mnuFreeTaskData;
-    sceneWork->grid->drawCell = mnuDrawMantraEntryStatus;
+    sceneWork->gridHandle = func_002CB9C0(0xF, 0x11, 0x40, 0x43, 4, 4,
+                                          (u8 *)sceneWork + 4, 0);
+    sdfSetShortPairValues(sceneWork->gridHandle, 1, 1);
+    sceneWork->gridHandle->releaseCell = mnuFreeTaskData;
+    sceneWork->gridHandle->drawCell = mnuDrawMantraEntryStatus;
     resourceTaskAddress = sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 0);
     fieldAddress = *(s32 *)(*(s32 *)(resourceTaskAddress + 0xC) + 0x1C);
-    func_00253208(sceneAddress, *(s32 *)(fieldAddress + 0x70),
+    func_00253208((s32)sceneWork, *(s32 *)(fieldAddress + 0x70),
                   &selectedCoordinates[0], &selectedCoordinates[1]);
-    if (sdfGridSelectFilledCell(sceneWork->grid, selectedCoordinates[0], selectedCoordinates[1]) == NULL) {
-        func_002CC0D0(sceneWork->grid);
+    if (sdfGridSelectFilledCell(sceneWork->gridHandle,
+                                selectedCoordinates[0], selectedCoordinates[1]) == NULL) {
+        func_002CC0D0(sceneWork->gridHandle);
     }
-    sceneWork->cursorX = 0;
-    sceneWork->cursorY = 0;
-    func_002512F0(sceneAddress, 1);
+    sceneWork->scrollX = 0;
+    sceneWork->scrollY = 0;
+    func_002512F0((s32)sceneWork, 1);
 }
