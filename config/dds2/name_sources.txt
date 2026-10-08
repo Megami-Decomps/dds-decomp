@@ -5557,8 +5557,10 @@
 0x00310BF8	sdfQuaternionMagnitude	inferred	DDS1 has the same unprefixed symbol; game/code_0030B7D0 uses sdf for the already-described quaternionMagnitude behavior.
 0x00310C18	sdfQuaternionInverse	inferred	DDS1 has the same unprefixed symbol; game/code_0030B7D0 uses sdf for the already-described quaternionInverse behavior.
 0x00310CB0	sdfQuaternionNormalize	inferred	DDS1 has the same unprefixed symbol; game/code_0030B7D0 uses sdf for the already-described quaternionNormalize behavior.
+0x00310D28	sdfQuatFromAxisAngle	inferred	Normalizes XYZ and uses nonnegative sqrt((1-cos(angle))/2) and sqrt((1+cos(angle))/2) half-angle components.
 0x00310DE8	sdfQuatFromVectors	inferred	normalizes two directions, cross product plus sqrt(2*(dot+1)) gives the shortest-arc quaternion; twin of DDS1 func_002C9A08 [names_M90_MovieDraw.tsv]
 0x00310EB0	sdfQuatFromEuler	inferred	confidence=high; matched-C; src/dds2/game/code_00310BC8.c:253:func_00310EB0; requires-symbol-registration; Builds quaternion components from sine/cosine of negative Euler half angles; identical named DDS1 math body.; source=reviewed-prior-QP15 [names_qp15.tsv]
+0x00310FD0	sdfQuatToAxisAngle	inferred	Writes XYZ divided by sqrt(1-W*W), with small-denominator fallback, and angle twice acos(W).
 0x003110F0	sdfQuaternionBlendNormalize	inferred	DDS1 has the same unprefixed symbol; game/code_0030B7D0 uses sdf for the already-described quaternionBlendNormalize behavior.
 0x00311178	sdfQuatSlerp	inferred	slerp with shorter-arc negation and sdfQuaternionBlendNormalize fallback; twin of DDS1 func_002C9D98 [names_M90_MovieDraw.tsv]
 0x003118E8	sdfDivideVerticalMagnitudeByForwardDot	inferred	Divides the absolute vertical direction component by the target forward dot product. [names_reviewed9.tsv]

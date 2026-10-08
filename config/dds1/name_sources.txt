@@ -5931,8 +5931,10 @@
 0x002C9818	sdfQuaternionMagnitude	inferred	Byte-identical dds2 twin 0x00310BF8; DDS1 has the same unprefixed symbol; game/code_0030B7D0 uses sdf for the already-described quaternionMagnitude behavior. [names_conflicts.tsv]
 0x002C9838	sdfQuaternionInverse	inferred	Byte-identical dds2 twin 0x00310C18; DDS1 has the same unprefixed symbol; game/code_0030B7D0 uses sdf for the already-described quaternionInverse behavior. [names_conflicts.tsv]
 0x002C98D0	sdfQuaternionNormalize	inferred	Byte-identical dds2 twin 0x00310CB0; DDS1 has the same unprefixed symbol; game/code_0030B7D0 uses sdf for the already-described quaternionNormalize behavior. [names_conflicts.tsv]
+0x002C9948	sdfQuatFromAxisAngle	inferred	Normalizes XYZ and uses nonnegative sqrt((1-cos(angle))/2) and sqrt((1+cos(angle))/2) half-angle components.
 0x002C9A08	sdfQuatFromVectors	inferred	twin of DDS2 func_00310DE8 [names_M90_MovieDraw.tsv]
 0x002C9AD0	sdfQuatFromEuler	inferred	twin of DDS2 func_00310EB0 [names_M90_MovieDraw.tsv]
+0x002C9BF0	sdfQuatToAxisAngle	inferred	Writes XYZ divided by sqrt(1-W*W), with small-denominator fallback, and angle twice acos(W).
 0x002C9D10	sdfQuaternionBlendNormalize	inferred	Byte-identical dds2 twin 0x003110F0; DDS1 has the same unprefixed symbol; game/code_0030B7D0 uses sdf for the already-described quaternionBlendNormalize behavior. [names_conflicts.tsv]
 0x002C9D98	sdfQuatSlerp	inferred	twin of DDS2 func_00311178 [names_M90_MovieDraw.tsv]
 0x002C9F60	sdfQuatBlendAngular	inferred	Blends quaternion components with angular weights, falling back to normalized linear blending.

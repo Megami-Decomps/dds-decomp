@@ -6,6 +6,7 @@
 #include "mnu_profile_progress.h"
 #include "mnu_mantra_grid.h"
 #include "mnu_scene_work.h"
+#include "mnu_scene_list.h"
 
 #define MNU_DISPLAY_TEXT_RGB 0xA09DC300
 #define MNU_DISPLAY_DIM_TEXT_RGB 0xA09D7D00
@@ -24,7 +25,7 @@ extern void dspStartEntry(s32 signal);
 
 extern void func_0024E260(s32, s32, s32, s32, s32, s32);
 
-extern s32 sdfAllocSizeClassBlock(u32);
+extern void *sdfAllocSizeClassBlock(s32);
 
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
@@ -516,26 +517,15 @@ s32 mnuDrawPulsingDisplaySprites(s32 frame, s32 scale, s32 context) {
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00256540);
 
-typedef struct DspListNode {
-    u8 pad00[0x10];
-    struct DspListNode *next; /* 0x10 */
-} DspListNode;
-
-typedef struct {
-    s32 frameCount;        /* 0x00 */
-    u32 pad04;            /* 0x04 */
-    DspListNode *first;   /* 0x08 */
-} DspListHead;
-
-DspListNode *mnuAllocateDisplayListNode(void) {
-    DspListNode *node = (DspListNode *)sdfAllocSizeClassBlock(0x14);
+MnuSceneListNode *mnuAllocateDisplayListNode(void) {
+    MnuSceneListNode *node = sdfAllocSizeClassBlock(0x14);
 
     memset(node, 0, 0x14);
     return node;
 }
 
-DspListNode *mnuAppendDisplayListNode(DspListHead *head) {
-    DspListNode *node = head->first;
+MnuSceneListNode *mnuAppendDisplayListNode(MnuSceneListHead *head) {
+    MnuSceneListNode *node = head->first;
     if (node == NULL) {
         node = mnuAllocateDisplayListNode();
         head->first = node;
@@ -549,28 +539,28 @@ DspListNode *mnuAppendDisplayListNode(DspListHead *head) {
     return node;
 }
 
-DspListNode *mnuReleaseDisplayListNodeAndGetNext(DspListNode *node) {
-    DspListNode *next;
+MnuSceneListNode *mnuReleaseDisplayListNodeAndGetNext(MnuSceneListNode *node) {
+    MnuSceneListNode *next;
 
     next = node->next;
     sdfReleaseChipBlock(node);
     return next;
 }
 
-void mnuReleaseDisplayListNodes(DspListHead *head) {
-    DspListNode *node = head->first;
+void mnuReleaseDisplayListNodes(MnuSceneListHead *head) {
+    MnuSceneListNode *node = head->first;
 
     while (node != NULL) {
         node = mnuReleaseDisplayListNodeAndGetNext(node);
     }
 }
 
-extern s32 func_00256540(DspListNode *, s32, s32);
+extern s32 func_00256540(MnuSceneListNode *, s32, s32);
 
 /* Advance the display list's timer and release completed nodes in order. */
-s32 itfAdvanceDisplayList(DspListHead *head, s32 scale, s32 context) {
+s32 itfAdvanceDisplayList(MnuSceneListHead *head, s32 scale, s32 context) {
     s32 *counter = &head->frameCount;
-    DspListNode *node = head->first;
+    MnuSceneListNode *node = head->first;
     s32 index = 0;
 
     if (mnuDrawPulsingDisplaySprites(*counter, scale, context) != 0) {
