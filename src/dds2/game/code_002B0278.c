@@ -755,7 +755,7 @@ void mnuClearPartySelectionAndActivateSlots(s32 context) {
 
 /* Release panel textures before reinitializing slots and updating handle state. */
 void mnuRefreshPartyPanelSlots(s32 context) {
-    mnuReleasePartyPanelTextures(context + MNU_STAFF_PARTY_PANEL_BASE);
+    mnuReleasePartyPanelTextures((MenuPageWindow *)(context + MNU_STAFF_PARTY_PANEL_BASE));
     mnuInitPartyPanelSlots(&((MenuContext *)context)->partyPanel);
     func_002BCA98(&((MenuContext *)context)->partyWindow);
 }
@@ -3601,7 +3601,6 @@ typedef struct MenuSlotEffectHandles {
 void mnuLoadPanelSectionResources(MenuSlotEffectHandles *slot, u32 model, u32 firstValue, u32 secondValue, s32 thirdValue
                                     );
 
-void mnuReleasePartyPanelTextures(s32 menu);
 
 
 void mnuResetPartyPanelFade(u8 *menu, s32 index, u32 unused, u32 preserve);
@@ -3718,9 +3717,6 @@ void mnuRefreshPageHandles(MenuPageWindow *window);
 
 void mnuClearPageSelectionHandles(MenuPageWindow *window);
 
-void mnuFlagActiveWindows(MenuPageWindow *window);
-
-void mnuClearPartyPanelActiveFlags(MenuPageWindow *window);
 
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437BE0);
 
