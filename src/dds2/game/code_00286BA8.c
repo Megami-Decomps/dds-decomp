@@ -37,7 +37,7 @@ typedef struct MenuList {
 
 typedef struct MtrSelectionState {
     s16 state;
-    u16 unk02;
+    s16 outcome;
     s32 timer;
     s32 alpha;
     f32 scale;
@@ -174,7 +174,7 @@ typedef struct MnuStatusResource {
     u32 resourceIdA;      /* 0x38 */
     u32 resourceIdB;      /* 0x3C */
     s32 messageWindow;
-    u8 pad44[4];
+    s32 messageDefinition; /* Resource word forwarded to the message-window provider. */
     MenuProgressHost *progressHost; /* 0x48 */
     u8 pad4C[8];
     MnuPartySnapshot snapshot;
@@ -570,7 +570,82 @@ void mnuReleaseSelectionWorkResources(MnuStatusResource *resourceWork) {
     mnuReleaseMantraMenuDrawResources(resourceWork);
 }
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00288748);
+extern s32 mnuHandleMantraSelectionInput(MnuStatusResource *);
+extern s32 dspStartEntry(s32);
+extern s32 evtGetMessageWindowControlState(void);
+
+s32 func_00288748(MnuStatusResource *resourceWork) {
+    MtrSelectionState *selection;
+    s32 result = 0;
+
+    if (resourceWork->flags.visible == 0) {
+        return 1;
+    }
+    selection = &resourceWork->selection;
+    switch (selection->state) {
+    case 1:
+        if (++selection->timer >= 8) {
+            selection->state = 5;
+        }
+        break;
+    case 2:
+        if (++selection->timer >= 16) {
+            selection->timer = 0;
+            selection->state = 4;
+        }
+        break;
+    case 3:
+        if (++selection->timer >= 10) {
+            selection->timer = 0;
+            selection->state = 1;
+            result = 2;
+        }
+        break;
+    case 4:
+        if (selection->outcome != 2) {
+            selection->outcome = 0;
+            selection->state = 1;
+            result = 4;
+        } else {
+            selection->outcome = 2;
+            selection->state = 3;
+            kwlnFadeInStart(0, 0, 0, 10);
+        }
+        break;
+    case 5:
+        result = mnuHandleMantraSelectionInput(resourceWork);
+        switch (result) {
+        case 2:
+            if (mdlFlagTest(0x1B1) == 0) {
+                selection->state = 6;
+                result = 0;
+                break;
+            }
+            /* Confirmation and cancellation both enter the selection fade. */
+        case 3:
+            selection->outcome = result;
+            selection->state = 2;
+            result = 0;
+            break;
+        }
+        break;
+    case 6:
+        dspCloseChannel();
+        evtCreateMessageWindowIfMissing(resourceWork->messageDefinition);
+        dspStartEntry(2);
+        selection->state = 7;
+        break;
+    case 7:
+        if (evtGetMessageWindowControlState() == 0) {
+            selection->state = 8;
+        }
+        break;
+    case 8:
+        selection->state = 5;
+        break;
+    }
+    return result;
+}
 
 extern void func_0026C900(void);
 extern s32 func_00288BD8(s32, s32, s32, s32, MnuStatusResource *, s32, f32);
