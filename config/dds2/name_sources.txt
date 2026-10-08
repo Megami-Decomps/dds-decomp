@@ -1166,6 +1166,7 @@
 0x0016BCA0	effThunderSetIndexedVectorTint	inferred	queued
 0x0016BCA8	effThunderScaleIndexedVectorDimensions	inferred	queued
 0x0016BCD0	effThunderRestartIndexedCell	inferred	Selects a cell by index and reinitializes its random parameters and direction vectors. [names_reviewed6.tsv]
+0x0016BF08	effThunderBuildIndexedVectorHistory	inferred	writes each indexed cell's kind-0 history as two-vector rows from its current placement, radius and axis
 0x0016C350	effThunderUpdateIndexedVectorCells	inferred	confidence=high; matched-C; src/dds2/effect/effPCPThunder.c:311:func_0016C350; Peer-matched C proposal; P7; source=names_pending_main.tsv:142 [names_qp12_apply.tsv]
 0x0016C490	effThunderSparkCreate	inferred	0xA4 head copy, one particle system per spark [names_M61_EffVu.tsv]
 0x0016C688	effThunderReleaseSparkWork	inferred	queued

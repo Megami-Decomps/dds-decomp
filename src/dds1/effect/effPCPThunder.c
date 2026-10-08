@@ -493,7 +493,7 @@ void effThunderRestartIndexedCell(EffThunderVectorWork *work, s32 index) {
 /* Generate the indexed variant as two-vector rows in its kind-0 history.
  * It samples wider axis perturbations and refreshes the cell angle per row.
  */
-void func_001642B0(EffThunderVectorWork *work, s32 index) {
+void effThunderBuildIndexedVectorHistory(EffThunderVectorWork *work, s32 index) {
     f32 position[4] __attribute__((aligned(16)));
     f32 placement[4] __attribute__((aligned(16)));
     f32 axis[4] __attribute__((aligned(16)));
@@ -619,7 +619,7 @@ void func_001645A0(EffThunderVectorWork *work, s32 index) {
 }
 
 
-extern void func_001642B0(EffThunderVectorWork *, s32);
+extern void effThunderBuildIndexedVectorHistory(EffThunderVectorWork *, s32);
 extern void func_001645A0(EffThunderVectorWork *, s32);
 
 /* Indexed vector countdown/fade/restart with shared tint and native render-cell stride.
@@ -638,7 +638,7 @@ void effThunderUpdateIndexedVectorCells(EffThunderVectorWork *work) {
         do {
             if (cell->delayFrames == 0) {
                 if (cell->activeFrames != 0) {
-                    func_001642B0(work, i);
+                    effThunderBuildIndexedVectorHistory(work, i);
                     func_001645A0(work, i);
                     cell->activeFrames--;
                 } else if (cell->color & EFF_THUNDER_ALPHA_MASK) {
