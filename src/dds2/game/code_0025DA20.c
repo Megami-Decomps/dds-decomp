@@ -1426,11 +1426,11 @@ void mnuCampClearListedItemCounts(void) {
 }
 
 MenuTerminalContext *mnuTerminalCreateContext(void) {
-    s32 handle;
+    struct SdfMemBlock *handle;
     MenuTerminalContext *obj;
 
-    handle = (u32)sdfAllocGeneralBlock(0x38C);
-    obj = (MenuTerminalContext *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    handle = sdfAllocGeneralBlock(0x38C);
+    obj = (MenuTerminalContext *)sdfResourceRetainAddress(handle);
     memset(obj, 0, 0x38C);
     obj->resourceHandle = handle;
     mnuClearPanelTransitionState(&obj->transitionWork);
@@ -1456,7 +1456,7 @@ void mnuTerminalReleaseContextAndResources(KwlnTask *arg) {
         mnuDrainPanelTransitions(&scene->transitionWork, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle(scene->messageResources);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(scene->resourceHandle));
+        sdfReleaseResourceAllocation(scene->resourceHandle);
         mnuPanelTaskCompletionState = 2;
     }
 }
