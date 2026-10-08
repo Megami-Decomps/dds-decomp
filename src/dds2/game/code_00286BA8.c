@@ -77,7 +77,7 @@ extern struct SdfTaskItemDesc D_003CFCD4;
 extern void sdfAttachTaskItem(struct TaskWork *, struct SdfTaskItemDesc *);
 extern void sdfSetTaskItemMode(void *, s32, u32);
 extern void mnuReleaseFirstMantraSpriteSlots(void);
-extern void mnuReleaseStaffAndTitleVisualResources(u32 *);
+extern void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void sdfReleaseResourceAllocation(u32);
 extern void mnuReleasePanelEntryPool(void);
@@ -97,7 +97,7 @@ void func_00286E20(void) {
 
 extern u32 sdfAllocGeneralBlock(s32 size);
 extern u32 sdfMemoryGetBlockAddress(void *block);
-extern s32 mnuCreateProgressHost(void);
+extern MenuProgressHost *mnuCreateProgressHost(void);
 extern void mnuInitPanelSoundEntries(void);
 
 extern s32 func_00288748(MnuStatusResource *);
@@ -117,7 +117,7 @@ MnuStatusResource *func_00286E98(void) {
 
     memset(resourceWork, 0, MTR_STATUS_RESOURCE_BYTES);
     resourceWork->allocationHandle = allocationHandle;
-    resourceWork->progressHost = (MenuProgressHost *)mnuCreateProgressHost();
+    resourceWork->progressHost = mnuCreateProgressHost();
     evtPrintDeveloperConsoleMessage("trmLoadStartStatusResource()!!!! \n");
     evtPrintDeveloperConsoleMessage("mtrInit\n");
     mnuInitPanelSoundEntries();
@@ -132,7 +132,7 @@ void func_00286F18(s32 unused, MnuStatusResource *resourceWork) {
         sdfQueueNonzeroResourceId(resourceWork->resourceIdA);
         sdfQueueNonzeroResourceId(resourceWork->resourceIdB);
         mnuReleaseFirstMantraSpriteSlots();
-        mnuReleaseStaffAndTitleVisualResources((u32 *)resourceWork->progressHost);
+        mnuReleaseStaffAndTitleVisualResources(resourceWork->progressHost);
         evtPrintDeveloperConsoleMessage("trmDestroyStatusResource()!!!! \n");
         sdfReleaseResourceAllocation(resourceWork->allocationHandle);
         mnuReleasePanelEntryPool();
