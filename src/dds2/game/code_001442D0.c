@@ -314,7 +314,6 @@ extern s32 fldGetCurrentSceneSelectionResource(void);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
-extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 
 extern s32 fldFieldTaskUpdate(void);
 

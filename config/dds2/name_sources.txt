@@ -41,6 +41,7 @@
 0x00103050	kwlnFindNamedSlot	inferred	confidence=high; matched-C; src/dds2/game/code_00102DC8.c:203:func_00103050; M143; source=names_M143.tsv:1; review=Walks linked named slots, requires an exact NUL-terminated string match and returns slot index or -1. [names_qp11.tsv]
 0x001034E8	kwlnStepListCursor	inferred	confidence=high; matched-C; src/dds2/game/code_00102DC8.c:237:func_001034E8; Updates a list cursor and optional scroll offset from caller-selected pad directions, wrapping on initial presses and bounding repeats.; source=names_pending_main.tsv:122 [names_qp11.tsv]
 0x001036B0	kwlnStepTwoListCursors	inferred	confidence=high; matched-C; src/dds2/game/code_00102DC8.c:308:func_001036B0; Updates two list cursor/scroll pairs with the directional inputs and returns positive/negative confirmation/cancellation, otherwise zero.; source=names_pending_main.tsv:123 [names_qp11.tsv]
+0x00103860	kwlnDebugPulsePadMotors	inferred	Starts the small and large pad motors when the task timer reaches the pulse interval; varies the large-motor level.
 0x00103F58	kwlnPadStartMotor	inferred	confidence=high; matched-C; src/dds2/game/code_00102DC8.c:378:func_00103F58; Peer-matched C proposal; M141; source=names_pending_main.tsv:137 [names_qp12_apply.tsv]
 0x00104020	kwlnPadResetMotorLevelsAndOutput	inferred	Zeroes both pad motor levels and queued outputs and clears the motor command pair. [names_reviewed11.tsv]
 0x00104568	kwlnDrawImageOutline	inferred	M141; sources=names_pending_main.tsv; twin=0x00104678, input-family pairing. [names_qp10.tsv]
