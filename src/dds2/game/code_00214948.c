@@ -1,3 +1,4 @@
+#include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_task_condition.h"
 #include "sdf.h"
@@ -2903,7 +2904,6 @@ extern s8 btlGetCommandResultKindFromFlags(s32, s32, s32);
 
 extern void btlCopyMotionTransform(void *, f32 *);
 
-extern void btlInitMotionTransformFromComponents(BtlEffect *, f32, f32, f32, f32, f32, f32, f32, f32);
 
 extern void func_003364B8(f32);
 
@@ -3048,15 +3048,15 @@ s32 rotate;
     btlFlagAllUnitDefeatCandidatesTask();
     switch (kind) {
     case 0:
-        btlInitMotionTransformFromComponents(camera, -1401.0f, -931.0f, -2245.4f,
+        btlInitMotionTransformFromComponents((BtlCamState *)camera, -1401.0f, -931.0f, -2245.4f,
             0.103f, -0.19f, -0.032f, 0.967f, 40.0f);
         break;
     case 1:
-        btlInitMotionTransformFromComponents(camera, 131.1f, -940.3f, -2451.9f,
+        btlInitMotionTransformFromComponents((BtlCamState *)camera, 131.1f, -940.3f, -2451.9f,
             0.107f, 0.012f, -0.01f, 0.985f, 40.0f);
         break;
     case 2:
-        btlInitMotionTransformFromComponents(camera, 971.8f, -875.7f, -2539.8f,
+        btlInitMotionTransformFromComponents((BtlCamState *)camera, 971.8f, -875.7f, -2539.8f,
             0.099f, 0.118f, 0.0f, 0.979f, 40.0f);
         break;
     }
@@ -5132,7 +5132,7 @@ void btlRaiseActionCameraPoints(u32 unit) {
 }
 
 void func_002240C0(u32 unit) {
-    btlInitMotionTransformFromComponents(unit, -851.6f, -144.4f, -2098.0f, -0.068f,
+    btlInitMotionTransformFromComponents((BtlCamState *)unit, -851.6f, -144.4f, -2098.0f, -0.068f,
                     -0.141f, -0.004f, 0.979f, 40.0f);
 }
 
@@ -5306,15 +5306,15 @@ s32 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlEffect *camera
     btlFlagAllUnitDefeatCandidatesTask();
     switch (kind) {
     case 0:
-        btlInitMotionTransformFromComponents(camera, -785.9f, -20.1f, -1457.7f,
+        btlInitMotionTransformFromComponents((BtlCamState *)camera, -785.9f, -20.1f, -1457.7f,
             -0.108f, -0.2f, 0.008f, 0.965f, 40.0f);
         break;
     case 1:
-        btlInitMotionTransformFromComponents(camera, 25.4f, -36.7f, -1778.6f,
+        btlInitMotionTransformFromComponents((BtlCamState *)camera, 25.4f, -36.7f, -1778.6f,
             -0.081f, 0.014f, -0.015f, 0.988f, 40.0f);
         break;
     case 2:
-        btlInitMotionTransformFromComponents(camera, 622.8f, -36.7f, -1458.3f,
+        btlInitMotionTransformFromComponents((BtlCamState *)camera, 622.8f, -36.7f, -1458.3f,
             -0.093f, 0.166f, -0.036f, 0.972f, 40.0f);
         break;
     }
@@ -5416,7 +5416,7 @@ void func_00224EE8(u32 unit) {
 }
 
 void func_00224F88(u32 unit) {
-    btlInitMotionTransformFromComponents(unit, 81.4f, -37.8f, -1866.2f, -0.112f,
+    btlInitMotionTransformFromComponents((BtlCamState *)unit, 81.4f, -37.8f, -1866.2f, -0.112f,
                     0.01f, -0.017f, 0.982f, 40.0f);
 }
 
@@ -5624,15 +5624,15 @@ s32 btlSetSpecialDefeatCameraPreset(BattleActionUnit *command, BtlCamState *came
     }
     switch (kind) {
     case 0:
-        btlInitMotionTransformFromComponents((u32)camera, -612.2f, -26.6f, -1527.1f,
+        btlInitMotionTransformFromComponents(camera, -612.2f, -26.6f, -1527.1f,
             -0.098f, -0.152f, 0.001f, 0.975f, 40.0f);
         break;
     case 1:
-        btlInitMotionTransformFromComponents((u32)camera, 106.1f, -78.3f, -1692.6f,
+        btlInitMotionTransformFromComponents(camera, 106.1f, -78.3f, -1692.6f,
             -0.07f, 0.021f, -0.015f, 0.988f, 40.0f);
         break;
     case 2:
-        btlInitMotionTransformFromComponents((u32)camera, 706.1f, -25.4f, -1706.9f,
+        btlInitMotionTransformFromComponents(camera, 706.1f, -25.4f, -1706.9f,
             -0.062f, 0.156f, -0.023f, 0.977f, 40.0f);
         break;
     }
@@ -6102,7 +6102,7 @@ u32 func_00226868(BattleActionUnit *unit) {
     if (btlHasMarkedEntry14((u32)unit)) {
         if (unit->frameCounter >= 0x34) {
             btlClearRuntimeFlag2000();
-            btlInitMotionTransformFromComponents((u32)unit, 517.3f, -476.0f, -947.2f, 0.177f,
+            btlInitMotionTransformFromComponents((BtlCamState *)unit, 517.3f, -476.0f, -947.2f, 0.177f,
                            0.283f, 0.042f, 0.933f, 40.0f);
         }
         ++unit->frameCounter;
