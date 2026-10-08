@@ -1337,7 +1337,40 @@ void mdlRotateViewList(void) {
 INCLUDE_ASM(const s32, "game/code_00233660", func_00235568);
 
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00235628);
+extern const char *D_003C8780[];
+
+void func_00235628(void) {
+    const char **label;
+    u32 i;
+
+    if (mdlViewerState.taskPhase != 0) {
+        return;
+    }
+
+    mdlAppendViewerRectToDrawList(0x7690, 0x7A08, 0xFF0080, 0xC60, 0x2D0, 0);
+    label = D_003C8780;
+    i = 0;
+    do {
+        s32 style = (i == mdlViewerState.unk14 && mdlViewerState.unk09 < 0x14) ? 4 : 0;
+        s32 xOffset;
+        u32 row;
+        u32 packet;
+
+        if (i >= 7) {
+            xOffset = 0x600;
+            row = i - 7;
+        } else {
+            xOffset = 0;
+            row = i;
+        }
+        packet = (u32)sdfCreateFormattedSifCommand(0x76C0 + xOffset,
+                                                   0x7A20 + row * 0x60,
+                                                   0xFF0080, style, *label);
+        i++;
+        sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, packet);
+        label++;
+    } while (i != 13);
+}
 
 void mdlDrawViewerModelAndMotionSummary(void) {
     SifCommand packet;
