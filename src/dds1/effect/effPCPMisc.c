@@ -317,7 +317,7 @@ extern u8 D_00325828[];
 extern void mdlBroadcastMasked(void *obj, u32 mask);
 extern u32 func_00163540(u32 value);
 extern u32 func_00165638(u32 handle);
-extern void func_00165D80(u32 handle);
+extern void effThunderUpdateFragments(u32 handle);
 extern void effThunderSetFragmentColor(void *work, u32 value);
 extern u32 func_001619E8(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
@@ -1252,7 +1252,7 @@ static inline void effPcpShiftThunderHandles(EffPCPThunderGroup *work, s32 count
         VU0_STORE_VF($vf10, &saved[0]);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF($vf10, obj);
-        func_00165D80(work->handles[i]);
+        effThunderUpdateFragments(work->handles[i]);
         PCP_COPY_VECTOR(obj, &saved[0]);
         PCP_COPY_VECTOR(obj + 0x10, &saved[1]);
     }
@@ -3988,7 +3988,7 @@ void effPcpUpdateMuzzleThunderRay(EffPCPBurstWork *work) {
         point[2] = z + dirZ * distance;
         PCP_COPY_VECTOR(params + 0x10, point);
         effThunderSetFragmentColor((void *)work->handle, work->unk10);
-        func_00165D80(work->handle);
+        effThunderUpdateFragments(work->handle);
     }
 }
 
@@ -5646,7 +5646,7 @@ void func_001830F8(EffPCPPairedEventWork *work) {
                 }
                 fadedColor = effBlendColor(color & 0xFFFFFF, color, fade);
                 effThunderSetFragmentColor((void *)entry->fragment, fadedColor);
-                func_00165D80(entry->fragment);
+                effThunderUpdateFragments(entry->fragment);
                 place.color = fadedColor;
                 PCP_COPY_VECTOR(place.pos, fragment->end);
                 effEventCopyFileRecordHeader(entry->eventA, &place);
