@@ -1039,9 +1039,9 @@ typedef struct {
     u32 color;               /* 0x58 */
     union {
         u32 updateCount;     /* single-system variant */
-        void *secondarySystem; /* dual-system variant */
+        ParSystem *secondarySystem; /* dual-system variant */
     } state;                 /* 0x5C */
-    void *system;            /* 0x60 */
+    ParSystem *system;            /* 0x60 */
     SdfMemBlock *allocationHandle;    /* 0x64 */
 } EffThunderFragmentWork; /* 0x68 */
 
@@ -1129,7 +1129,7 @@ extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 /* Build the first strip from the work's own start point. Each step emits
  * two five-vector rows; later chain segments reuse the final row as a seed.
  */
-void func_0016D3B0(EffThunderFragmentWork *work, s32 index) {
+void effThunderBuildFragmentStrip(EffThunderFragmentWork *work, s32 index) {
     f32 width[4] __attribute__((aligned(16)));
     f32 outerWidth[4] __attribute__((aligned(16)));
     f32 negativeOuterWidth[4] __attribute__((aligned(16)));
@@ -1332,7 +1332,7 @@ void func_0016D3B0(EffThunderFragmentWork *work, s32 index) {
 /* Update each fragment through delay, active geometry and alpha fade. The
  * optional frame limit stops new restarts; active geometry and fades continue.
  */
-void func_0016D9D8(EffThunderFragmentWork *work) {
+void effThunderUpdateFragments(EffThunderFragmentWork *work) {
     s32 i = 0;
     ParSystem *system = work->system;
     s32 count = work->head.fragmentCount;
@@ -1348,7 +1348,7 @@ void func_0016D9D8(EffThunderFragmentWork *work) {
         do {
             if (fragment->delayFrames == 0) {
                 if (fragment->activeFrames != 0) {
-                    func_0016D3B0(work, i);
+                    effThunderBuildFragmentStrip(work, i);
                     fragment->activeFrames--;
                 } else if (fragment->color & EFF_THUNDER_ALPHA_MASK) {
                     fragment->color += EFF_THUNDER_ALPHA_WRAP_ADD;
@@ -1437,7 +1437,7 @@ extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 /* Build synchronized kind-0 core and kind-1 outer strips. Each step emits
  * two rows of two core vertices and three outer vertices from the same path.
  */
-void func_0016DE30(EffThunderFragmentWork *work, s32 index) {
+void effThunderBuildCoreAndEdgeFragmentStrips(EffThunderFragmentWork *work, s32 index) {
     f32 width[4] __attribute__((aligned(16)));
     f32 outerWidth[4] __attribute__((aligned(16)));
     f32 negativeOuterWidth[4] __attribute__((aligned(16)));
@@ -1638,7 +1638,7 @@ void func_0016DE30(EffThunderFragmentWork *work, s32 index) {
 }
 
 
-extern void func_0016DE30(EffThunderFragmentWork *, s32);
+extern void effThunderBuildCoreAndEdgeFragmentStrips(EffThunderFragmentWork *, s32);
 
 /* One countdown/fade/restart state drives both systems; write the same tinted color to each.
    Secondary initialization/submission precedes primary; submission also occurs for count <= 0. */
@@ -1657,7 +1657,7 @@ void effThunderUpdateDualFragments(EffThunderFragmentWork *work) {
         do {
             if (fragment->delayFrames == 0) {
                 if (fragment->activeFrames != 0) {
-                    func_0016DE30(work, index);
+                    effThunderBuildCoreAndEdgeFragmentStrips(work, index);
                     fragment->activeFrames--;
                 } else if (fragment->color & EFF_THUNDER_ALPHA_MASK) {
                     fragment->color -= EFF_THUNDER_ALPHA_FADE_STEP;
@@ -1993,7 +1993,7 @@ EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src) {
 
 
 
-extern void func_0016D3B0(EffThunderFragmentWork *work, s32 index);
+extern void effThunderBuildFragmentStrip(EffThunderFragmentWork *work, s32 index);
 extern void func_0016F028(EffThunderFragmentWork *work, s32 index, const u128 *seed);
 extern void parPrependCellNode(void *system);
 
@@ -2250,14 +2250,14 @@ void effThunderUpdateChainSegments(EffThunderGroup *group) {
         points++;
         fragmentCount = work->head.fragmentCount;
         color = effMultiplyPackedColors(group->color, work->color);
-        cell = ((ParSystem *)work->system)->cells;
+        cell = work->system->cells;
         for (j = 0; j < fragmentCount; j++) {
             if (i > 0) {
                 previous = group->handles[i - 1];
                 func_0016F028(work, j,
-                    ((ParSystem *)previous->system)->cells[j].history + ((ParSystem *)previous->system)->cells[j].vertexCount - 5);
+                    previous->system->cells[j].history + previous->system->cells[j].vertexCount - 5);
             } else {
-                func_0016D3B0(work, j);
+                effThunderBuildFragmentStrip(work, j);
             }
             cell[j].color = color;
         }
