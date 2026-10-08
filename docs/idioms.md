@@ -4203,3 +4203,17 @@ cameras through the command and does not need its two explicit camera
 parameters; the body remains unchanged. DDS1's corresponding
 `001E5730` uses the same interface.
 
+
+## Fixed-pass SDF item command dispatch
+
+DDS1 `002D86E0` dispatches three inline command addresses or a
+zero-terminated address list through two buffered passes. Fixed counters
+terminate with `!= 3` and `!= 2`, matching the existing fixed-pass loop in
+`sdfModelResetAndInitNodes`; range comparisons instead introduce SLTI
+instructions and change the saved-register set. The list cursor reads
+and advances before testing its sentinel: `while ((address = *cursor++) != 0)`.
+Command addresses are serialized `u32` words converted to the existing
+command-list pointer type at the SDK boundary. The canonical function is
+`void`: IDA's apparent return values are incidental comparison constants.
+The live DDS1 `sdfModel.c` gate reports 18 match, 0 differ.
+

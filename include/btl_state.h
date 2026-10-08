@@ -455,7 +455,7 @@ typedef struct BtlState {
     s32 (*actionCameraSetupHook)(BtlLinkedCommand *); /* 0x654: same action-camera setup override. */
     s32 (*unk658)(BtlUnit *);
     u8 pad65C[4];
-    s32 (*unk660)(BtlUnit *, s32, s32);
+    s32 (*cameraPoseBlendHook)(BtlLinkedCommand *, s32, s32); /* 0x660: same target-side pose override as DDS1 +0x628. */
     s32 (*actionCameraStepHook)(struct BtlLinkedCommand *); /* 0x664: nonzero handles the camera step. */
     s32 (*handleActorCategoryCamera)(struct BtlLinkedCommand *, s32, s32); /* 0x668: same category camera override. */
     s32 (*unk66C)(BtlUnit *);
