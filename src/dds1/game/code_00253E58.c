@@ -8,7 +8,6 @@ extern u32 *mnuGetSelectedNodeValue(void);
 extern s32 func_00255E08();
 extern void func_0024E5A0(s32, s32, s32, s32, s32, s32, f32, f32);
 extern void func_0025D2F8(s32, s32, s32, s32, s32, s32);
-extern void mnuDrawMantraCostAfterListAdvance(s32, s32, s32, s32);
 extern void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *, s32, s32);
 extern f32 sdfSinPoly(f32 angle);
 extern void func_00254758(s32, s32, s32, s32, s32);
@@ -34,6 +33,7 @@ void mnuDrawPanelWithPackedColorPattern(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0) 
 s32 mnuDrawMantraCostTransition(void) {
     s32 nodePrev;
     s32 nodeNext;
+    MenuSceneWork *scene;
     s32 level;
     s32 scaled;
     s32 raw;
@@ -44,6 +44,7 @@ s32 mnuDrawMantraCostTransition(void) {
     mnuGetSelectedNodeValue();
     nodePrev = sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
     nodeNext = sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
+    scene = (MenuSceneWork *)(u32)nodeNext;
     func_00255E08(nodePrev, 0x80, 0x52);
     level = *(s32 *)(nodePrev + 0x1C);
     switch (level) {
@@ -57,7 +58,7 @@ s32 mnuDrawMantraCostTransition(void) {
         func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
         func_0024E260(0, 0, 0, scaled, 0x5B, 0x53);
         cost = mnuGetSelectedNodeValue();
-        mnuDrawMantraCostAfterListAdvance(*cost, nodeNext + 0x590, scaled, 0x53);
+        mnuDrawMantraCostAfterListAdvance(*cost, &scene->displayList590, scaled, 0x53);
         func_0024E260(0x20, 0, 0, scaled, 0xB, 0x53);
         break;
     case 2:
@@ -71,12 +72,12 @@ s32 mnuDrawMantraCostTransition(void) {
         func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
         func_0024E260(0, 0, 0, scaled, 0x5B, 0x53);
         cost = mnuGetSelectedNodeValue();
-        mnuDrawMantraCostAfterListAdvance(*cost, nodeNext + 0x590, scaled, 0x53);
+        mnuDrawMantraCostAfterListAdvance(*cost, &scene->displayList590, scaled, 0x53);
         func_0024E260(0x20, 0, 0, scaled, 0xB, 0x53);
         break;
     case 1:
         /* frac keeps its 0.0f initializer when raw == 0. */
-        raw = *(s32 *)(nodeNext + 0x550);
+        raw = scene->transitionState;
         if (raw > 0) {
             frac = (f32)raw / 10.0f;
         } else if (raw < 0) {
@@ -90,14 +91,13 @@ s32 mnuDrawMantraCostTransition(void) {
         func_0024E260(0, 0, 0, 0x80, 0xF, 0x53);
         func_0024E260(0, 0, 0, 0x80, 0x5B, 0x53);
         cost = mnuGetSelectedNodeValue();
-        mnuDrawMantraCostAfterListAdvance(*cost, nodeNext + 0x590, 0x80, 0x53);
+        mnuDrawMantraCostAfterListAdvance(*cost, &scene->displayList590, 0x80, 0x53);
         func_0024E260(0x20, 0, 0, 0x80, 0xB, 0x53);
         break;
     default:
         break;
     }
-    mnuChooseDisplaySpriteKindFromEntryFlags((MenuSceneWork *)(u32)nodeNext,
-                                             0x80, 0x53);
+    mnuChooseDisplaySpriteKindFromEntryFlags(scene, 0x80, 0x53);
     func_0024E260(0, 0, 0, 0x80, 0xD, 0x53);
     return 0;
 }

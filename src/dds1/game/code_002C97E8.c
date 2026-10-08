@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_quaternion.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 
@@ -92,7 +93,7 @@ void sdfQuaternionNormalize(float *values) {
 }
 
 /* Quaternion from an axis and angle. */
-void func_002C9948(f32 *out, f32 x, f32 y, f32 z, f32 angle) {
+void sdfQuatFromAxisAngle(f32 *out, f32 x, f32 y, f32 z, f32 angle) {
     f32 axis[4];
     f32 a;
     f32 b;
@@ -150,7 +151,7 @@ void sdfQuatFromEuler(f32 *out, f32 x, f32 y, f32 z) {
     out[3] = cz * cy * cx - sz * sy * sx;
 }
 
-void func_002C9BF0(f32 *axis, f32 *angle, f32 *q) {
+void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *q) {
     f32 w = q[3];
     f32 twiceAngle = 2.0f * func_002FA1C0(w);
     f32 scale = fsqrtf(1.0f - w * w);
