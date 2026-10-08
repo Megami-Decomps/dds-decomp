@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf.h"
 
 /* Picture task data: active flags and the attached texture. */
@@ -7,7 +8,6 @@ typedef struct {
     void *texture;
 } Picture;
 
-extern void *kwlnTaskGetUserValue(void);
 extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
 extern void sdfReleaseChipBlock(void *);
 
@@ -31,10 +31,10 @@ void evtSubmitPictureDrawPacket(void *texture) {
 }
 
 /* Run the picture's own update step while its active flag is set. */
-s32 evtUpdatePictureWhenFlagged(void) {
+s32 evtUpdatePictureWhenFlagged(KwlnTask *task) {
     Picture *picture;
 
-    picture = kwlnTaskGetUserValue();
+    picture = (Picture *)kwlnTaskGetUserValue(task);
     if (picture->flags & 1) {
         if (picture->texture != 0) {
             evtSubmitPictureDrawPacket(picture->texture);
@@ -45,10 +45,10 @@ s32 evtUpdatePictureWhenFlagged(void) {
 }
 
 /* Drop the picture's texture, then free the task data. */
-void evtPictureReleaseTaskTextureAndState(void) {
+void evtPictureReleaseTaskTextureAndState(KwlnTask *task) {
     Picture *picture;
 
-    picture = kwlnTaskGetUserValue();
+    picture = (Picture *)kwlnTaskGetUserValue(task);
     if (picture->texture != 0) {
         sdfTexReleaseReferenceViaHandler((struct SdfTex *)picture->texture);
         picture->texture = 0;

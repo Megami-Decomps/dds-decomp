@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 #include "fld_waypoint.h"
 #include "fld_inf.h"
@@ -113,7 +114,6 @@ extern s32 fldHasKiretaLabelProcess(void);
 extern s32 fldHasHirakenaiLabelProcess(void);
 extern s32 fldHasBadkaifukuLabelProcess(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
-extern u32 kwlnTaskGetUserValue(void *);
 extern void func_0012DDC0(s32, s32, u32, const u8 *);
 
 extern s16 D_00444C68[];
@@ -1985,15 +1985,15 @@ s32 func_00144028(void *task) {
 }
 
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern void kwlnTaskSetUserValue(s32, void *);
+extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 
-void *fldInitializeTitleBannerTask(s32 task) {
+void *fldInitializeTitleBannerTask(KwlnTask *task) {
     s16 *node = sdfAllocSizeClassBlock(8);
     node[1] = 1;
     node[0] = 0;
     node[2] = 0;
     node[3] = 0;
-    kwlnTaskSetUserValue(task, node);
+    kwlnTaskSetUserValue(task, (u32)node);
     return func_00144028;
 }
 

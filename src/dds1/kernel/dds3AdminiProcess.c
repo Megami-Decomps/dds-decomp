@@ -4,7 +4,6 @@
 
 extern char dds3AdminTaskName[];
 extern void *kwlnTaskGetTaskByName(char *);
-extern u32 kwlnTaskGetUserValue(KwlnTask *);
 extern void sdfReleaseChipBlock(void *);
 extern void *sdfAllocSizeClassBlock(s32);
 extern void *memcpy(void *, void *, s32);

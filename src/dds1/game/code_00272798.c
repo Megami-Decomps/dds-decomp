@@ -1,3 +1,4 @@
+#include "kwln.h"
 #include "mnu.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
@@ -16,7 +17,6 @@ extern char D_003BC6C8[];
 extern const char D_003BC6D0[];
 extern char D_003BC6D8[];
 
-extern s32 kwlnTaskGetUserValue();
 
 extern s64 fileConsumeConfigTaskReady(void);
 
@@ -45,13 +45,13 @@ extern u8 D_0037C748[];
 
 
 
-s32 mnuHandleCampFieldSkillInput(s32 callback) {
+s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
     StaffMenuWork *context;
     s32 *popup;
     u32 input;
     s32 state;
 
-    context = (StaffMenuWork *)kwlnTaskGetUserValue();
+    context = (StaffMenuWork *)kwlnTaskGetUserValue(callback);
     input = mnuMapPadMaskToFlags(0x33);
     popup = &context->value54;
     state = func_00285670(&context->panel, popup, 0, (void *)callback);
@@ -96,13 +96,13 @@ s32 mnuHandleCampFieldSkillInput(s32 callback) {
 INCLUDE_ASM(const s32, "game/code_00272798", func_002728F8);
 
 /* Submit a request to the active menu dispatcher in mode 2. */
-s32 func_002729C8(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_002729C8(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 
-s32 mnuStartStaffDisplay(void) {
-    StaffMenuWork *context = (StaffMenuWork *)kwlnTaskGetUserValue();
+s32 mnuStartStaffDisplay(KwlnTask *task) {
+    StaffMenuWork *context = (StaffMenuWork *)kwlnTaskGetUserValue(task);
     mnuSetStaffDisplayMode(5, context);
     mnuActivatePanelAndConfigureGridResources(context->scrollPanel, context->singleResource, 0, 1);
     mnuCreateConfigTasks(0);
@@ -110,16 +110,16 @@ s32 mnuStartStaffDisplay(void) {
 }
 
 /* Switch the staff display to the fourth base resource. */
-u32 mnuConfigureCampDrawContextPanel(void) {
-    StaffMenuWork *context = (StaffMenuWork *)kwlnTaskGetUserValue();
+u32 mnuConfigureCampDrawContextPanel(KwlnTask *task) {
+    StaffMenuWork *context = (StaffMenuWork *)kwlnTaskGetUserValue(task);
     mnuActivatePanelAndConfigureGridResources(context->scrollPanel,
                                                context->staffSlots.baseResources[3], 0, 1);
     return 1;
 }
 
 /* Dispatch a callback; on idle, install the default entry unless busy. */
-s32 mnuDispatchStaffMenuWithIdlePopup(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuDispatchStaffMenuWithIdlePopup(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     s32 *dispatchEntry = (s32 *)(context + 0x54);
     s32 state = menuRunPanel((void *)context, 0, (void *)callback);
     if (state == 0) {
@@ -131,8 +131,8 @@ s32 mnuDispatchStaffMenuWithIdlePopup(s32 callback) {
     return state;
 }
 
-s32 mnuDrawStaffImageScreen(s32 callback) {
-    StaffMenuWork *context = (StaffMenuWork *)kwlnTaskGetUserValue();
+s32 mnuDrawStaffImageScreen(KwlnTask *callback) {
+    StaffMenuWork *context = (StaffMenuWork *)kwlnTaskGetUserValue(callback);
     mnuDrawBackdrop((s32)(context->background), 0x20);
     func_0027E8D8(-0x10, -8, 0, context->scrollPanel, 0x54);
     mnuCreateStaffImageSprite(0x14);
@@ -140,8 +140,8 @@ s32 mnuDrawStaffImageScreen(s32 callback) {
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
-s32 func_00272B80(s32 request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 func_00272B80(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
     return menuRunPanel((void *)context, 2, (void *)request);
 }
 

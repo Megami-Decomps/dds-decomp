@@ -1,3 +1,4 @@
+#include "kwln.h"
 #include "mnu.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
@@ -26,7 +27,6 @@ extern FrFontGlyph *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32)
 
 typedef struct MenuListNode MenuListNode;
 
-extern s32 kwlnTaskGetUserValue();
 
 extern void func_00272778(s32);
 
@@ -36,7 +36,7 @@ extern void func_002723B0(s32, s32);
 
 extern void ptySkillMenuCopyPageState(s32);
 
-extern void mnuDrawStaffCampScreen(s32, s32);
+extern void mnuDrawStaffCampScreen(s32, KwlnTask *);
 
 extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 
@@ -56,7 +56,6 @@ extern void sdfReleaseChipBlock(void *);
 
 extern s32 func_0027B888(u32);
 
-extern s32 kwlnTaskGetUserValue();
 
 
 
@@ -101,8 +100,8 @@ void mnuSeekSelectedWindowRow(s32 menu, s32 target) {
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", ptySkillMenuBrowseCandidatePages);
 
-s32 mnuOpenSkillDetailPanel(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuOpenSkillDetailPanel(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     s32 *menu = *(s32 **)(context + 0x90C);
     s32 index = ((MenuList *)menu[3])->cursor->index;
     s32 label = ((MenuWindowContainer *)*(s32 *)((s32)menu + 0x10 + (index << 2)))->list->cursor->sortKeyPrimary;
@@ -122,8 +121,8 @@ s32 mnuOpenSkillDetailPanel(s32 callback) {
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
-s32 func_0027A0A8(s32 callback) {
-    return menuRunPanel((void *)kwlnTaskGetUserValue(), 2, (void *)callback);
+s32 func_0027A0A8(KwlnTask *callback) {
+    return menuRunPanel((void *)kwlnTaskGetUserValue(callback), 2, (void *)callback);
 }
 
 void mnuDrawSelectionLabel(s32 selection) {
@@ -226,17 +225,17 @@ s32 mnuHasAvailableSlotResource(s32 id) {
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", ptySkillMenuBuildLinkageSkills);
 
-u32 mnuDestroySkillSelectionWindow() {
+u32 mnuDestroySkillSelectionWindow(KwlnTask *task) {
     s32 window;
 
-    window = kwlnTaskGetUserValue();
+    window = kwlnTaskGetUserValue(task);
     window = *(s32 *)(window + 0x90c);
     mnuDestroyWindowContainer(((MenuPartyRuntime *)window)->selectedWindow);
     ((MenuPartyRuntime *)window)->selectedWindow = 0;
     return 1;
 }
 
-s32 mnuResetSelection(s32 selection) {
+s32 mnuResetSelection(KwlnTask *selection) {
     s32 context;
     s32 menu;
     mnuCampMenuInit();
@@ -248,16 +247,16 @@ s32 mnuResetSelection(s32 selection) {
     return 1;
 }
 
-s32 mnuCloseSkillSelection(s32 selection) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuCloseSkillSelection(KwlnTask *selection) {
+    s32 context = kwlnTaskGetUserValue(selection);
     mnuDestroySkillSelectionWindow(selection);
     mnuClearPartyPanelActiveFlags((MenuPageWindow *)(context + 0x15c));
     mnuCloseItemSelectionState(selection);
     return 1;
 }
 
-s32 mnuUpdateSkillListInput(s32 callback) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuUpdateSkillListInput(KwlnTask *callback) {
+    s32 context = kwlnTaskGetUserValue(callback);
     s32 *popup = (s32 *)(context + 0x54);
     s32 *menu = *(s32 **)(context + 0x90C);
     u32 buttons = mnuMapPadMaskToFlags(0x32);
@@ -327,8 +326,8 @@ void mnuDrawListFrames(s32 menu) {
     }
 }
 
-s32 mnuCampMenuDrawStatus(s32 param) {
-    s32 context = kwlnTaskGetUserValue();
+s32 mnuCampMenuDrawStatus(KwlnTask *param) {
+    s32 context = kwlnTaskGetUserValue(param);
     s32 menu = *(s32 *)(context + 0x90C);
     s32 slots;
     MenuList *list;
@@ -353,8 +352,8 @@ s32 mnuCampMenuDrawStatus(s32 param) {
     return menuRunPanel((void *)context, 1, (void *)param);
 }
 
-s32 func_0027AC00(s32 callback) {
-    return menuRunPanel((void *)kwlnTaskGetUserValue(), 2, (void *)callback);
+s32 func_0027AC00(KwlnTask *callback) {
+    return menuRunPanel((void *)kwlnTaskGetUserValue(callback), 2, (void *)callback);
 }
 
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "btl_task_condition.h"
 #include "dat_command.h"
 #include "btl_scene_fade.h"
@@ -37,7 +38,6 @@ extern void func_001C7DB8(s32, s32);
 
 extern void func_001C35F0(s32, s32, s32);
 
-extern u32 kwlnTaskGetUserValue();
 
 extern void func_00230960(s32);
 

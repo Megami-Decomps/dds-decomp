@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 
 #include "fpu.h"
@@ -741,9 +742,9 @@ typedef struct TaskWork {
     SdfListNode *currentNode; /* Next node to visit; reset to the list head at pass end. */
 } TaskWork;
 
-extern s32 sdfTaskWorkRunAllEntries(void);
-extern s32 sdfTaskWorkRunAll(void);
-extern void sdfReleaseCurrentTaskOwnedResources(void);
+extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
+extern s32 sdfTaskWorkRunAll(KwlnTask *task);
+extern void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task);
 extern void kwlnTaskCreate();
 extern TaskWork *sdfCreateNamedTaskWork(char *, SdfListCallback, void *);
 
@@ -905,7 +906,6 @@ void sdfCallbackWorkOnRemove(u32 unused, SdfTaskEntry *work) {
 }
 
 
-extern void *kwlnTaskGetUserValue(void);
 
 /* Visit one entry: initialize, remove if pending, otherwise update.
  * An update result of -1 queues removal for its next visit. Returns 0 at pass end. */
@@ -974,8 +974,8 @@ s32 sdfTaskWorkStep(TaskWork *work) {
     return 1;
 }
 
-s32 sdfTaskWorkRunAllEntries(void) {
-    TaskWork *work = kwlnTaskGetUserValue();
+s32 sdfTaskWorkRunAllEntries(KwlnTask *task) {
+    TaskWork *work = (TaskWork *)kwlnTaskGetUserValue(task);
 
     if (work->currentNode == NULL) {
         return -1;
@@ -985,8 +985,8 @@ s32 sdfTaskWorkRunAllEntries(void) {
     return 0;
 }
 
-s32 sdfTaskWorkRunAll(void) {
-    TaskWork *work = kwlnTaskGetUserValue();
+s32 sdfTaskWorkRunAll(KwlnTask *task) {
+    TaskWork *work = (TaskWork *)kwlnTaskGetUserValue(task);
 
     if (work->currentNode == NULL) {
         return -1;
@@ -996,8 +996,8 @@ s32 sdfTaskWorkRunAll(void) {
     return 0;
 }
 
-void sdfReleaseCurrentTaskOwnedResources(void) {
-    sdfDestroyTaskResourceWork(kwlnTaskGetUserValue());
+void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task) {
+    sdfDestroyTaskResourceWork((void *)kwlnTaskGetUserValue(task));
 }
 
 void func_002CB9B8(void) {

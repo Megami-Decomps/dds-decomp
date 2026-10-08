@@ -1,10 +1,14 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 #include "evt_unit.h"
 #include "file.h"
 #include "evt_motion_se.h"
 #include "eff_transform.h"
 #include "mdl.h"
+
+s32 evtTickPackLoad(KwlnTask *task);
+void evtReleaseEventPackResources(KwlnTask *task);
 
 extern EffWorldNode *dds3GetWorldObject(void);
 extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *, s32, s32);
@@ -17,7 +21,6 @@ enum {
     EVT_PACK_LOAD_COMPLETE = 2
 };
 
-s32 kwlnTaskGetUserValue(void);
 void sdfReleaseChipBlock(s32 arg0);
 extern void *evtGetTaskData(s32 eventId);
 extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32, s32, s32);
@@ -125,7 +128,7 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
     return 0;
 }
 
-s32 evtUpdateMotionSeTask(void) {
+s32 evtUpdateMotionSeTask(KwlnTask *task) {
     EvtMotionSeTaskParams *params;
     EffWorldNode *node;
     EvtPackLoadState *data;
@@ -136,7 +139,7 @@ s32 evtUpdateMotionSeTask(void) {
     s32 cueIndex;
     EvtMotionSeCue *cues;
 
-    params = (EvtMotionSeTaskParams *)kwlnTaskGetUserValue();
+    params = (EvtMotionSeTaskParams *)kwlnTaskGetUserValue(task);
     if (dds3GetWorldObject() == NULL) {
         return -1;
     }
@@ -174,9 +177,9 @@ s32 evtUpdateMotionSeTask(void) {
 }
 
 /* Free the current task's user-value block. */
-void evtFreeEventPackState(void)
+void evtFreeEventPackState(KwlnTask *task)
 {
-    sdfReleaseChipBlock(kwlnTaskGetUserValue());
+    sdfReleaseChipBlock((void *)kwlnTaskGetUserValue(task));
 }
 
 extern void func_003014F0(char *, const char *, ...);
@@ -257,8 +260,8 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
     }
 }
 
-s32 evtTickPackLoad(void) {
-    EvtPackLoadState *state = (EvtPackLoadState *)kwlnTaskGetUserValue();
+s32 evtTickPackLoad(KwlnTask *task) {
+    EvtPackLoadState *state = (EvtPackLoadState *)kwlnTaskGetUserValue(task);
 
     switch (state->loaded) {
     default:
@@ -286,8 +289,8 @@ extern void sdfQueueNonzeroResourceId(s32);
 
 /* Release the event task's owned handles, then free its state.
  * File I/O is waited on even when the user-value handle is zero. */
-void evtReleaseEventPackResources(void) {
-    s32 stateHandle = kwlnTaskGetUserValue();
+void evtReleaseEventPackResources(KwlnTask *task) {
+    s32 stateHandle = kwlnTaskGetUserValue(task);
     EvtPackLoadState *state = (EvtPackLoadState *)stateHandle;
 
     fileWaitIdle();
