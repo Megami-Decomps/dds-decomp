@@ -251,7 +251,7 @@ extern void sdfReleaseResourceAllocation(s32);
 
 void btlReplaceResourceHandle(BtlResourceDescriptor *, s32);
 
-extern s32 sdfTexAcquireResourceTexture(s32);
+extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 extern char *D_003BEA80[];
 
@@ -3030,7 +3030,7 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, s32 textureReso
         sdfTexReleaseReferenceViaHandler((SdfTex *)textureHandle);
         descriptor->handle = 0;
     }
-    descriptor->handle = sdfTexAcquireResourceTexture(textureResource);
+    descriptor->handle = (s32)sdfTexAcquireResourceTexture((void *)textureResource);
 }
 
 INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E1E0);

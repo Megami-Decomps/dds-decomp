@@ -40,13 +40,14 @@ typedef struct EffBattleTexHeaders {
 
 extern u8 sdfTexGetPaletteCount(SdfTex *texture);
 
-extern u8 *sdfTexSubmitPixelsForFormat(void *, u32, u8 *, s32);
+extern u8 *sdfTexSubmitPixelsForFormat(SdfTex *texture, u32 destination, u8 *pixels, s32 borrowPixels);
 
-extern s32 sdfTexSubmitImageCopy(u32, s16, s16, u8, u8 *, s32);
+extern u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height,
+    u32 format, u8 *pixels, s32 borrowPixels);
 
-extern u32 sdfTexGetPrimaryResourceWord(void *);
+extern u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 
-extern u32 sdfTexGetSecondaryResourceWord(void *);
+extern u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
 
 extern u32 D_003BC950;
 
@@ -230,6 +231,12 @@ extern u8 D_00325828[];
 extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 
 extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
+extern s32 sdfAllocPacketAligned(s32 size);
+extern void sdfInitPacketList(SdfListHead *list);
+extern void sdfAppendPacket(SdfListHead *list, u32 packetAddress);
+extern u32 mdlGetBroadcastValue(MdlCtx *model);
+extern SdfPoolNode *D_00325788[13][4];
+extern u64 D_0037E5B0[];
 
 /* Attach the owner's lighting buffer when the direction update succeeds. */
 void effRefreshModelLighting(EffModelOwner *work) {
@@ -339,7 +346,55 @@ u32 *effDuplicateFloorModelOwner(u8 *source) {
     return owner;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029A840", func_0029AE88);
+void func_0029AE88(EffModelOwner *owner) {
+    SdfListHead *list;
+    u64 *packet;
+    SdfPoolNode *surface;
+    s32 index;
+
+    mdlBroadcastMasked(owner->model,
+                       (mdlGetBroadcastValue(owner->model) & 0xFFFFFF) | 0x80000000);
+
+    for (index = 0; index != 4; index++) {
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        packet = (u64 *)sdfAllocPacketAligned(0x30);
+        packet[0] = 2;
+        packet[1] = 0x5000000210000000ULL;
+        packet[2] = 0x1000000000008001ULL;
+        packet[3] = 0xE;
+        if (index == 0) {
+            packet[4] = 0x7000D;
+        } else {
+            packet[4] = 0x71007;
+        }
+        packet[5] = 0x47;
+        sdfAppendPacket(list, (u32)packet);
+        surface = D_00325788[1][index];
+        surface->append((SdfListHead *)surface, list);
+    }
+
+    if (effComputeLightDirectionVU(owner->model, owner->ownedBuffer)) {
+        owner->model->inner->lighting = owner->ownedBuffer;
+    }
+
+    mdlProcessContextNodesAndTransforms(owner->model, (s32)D_00325788[1]);
+
+    for (index = 1; index != 4; index++) {
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        packet = (u64 *)sdfAllocPacketAligned(0x30);
+        packet[0] = 2;
+        packet[1] = 0x5000000210000000ULL;
+        packet[2] = 0x1000000000008001ULL;
+        packet[3] = 0xE;
+        packet[4] = D_0037E5B0[index];
+        packet[5] = 0x47;
+        sdfAppendPacket(list, (u32)packet);
+        surface = D_00325788[1][index];
+        surface->append((SdfListHead *)surface, list);
+    }
+}
 
 extern u32 effModelUpdateControlFlags;
 
@@ -349,7 +404,7 @@ void effMarkFloorModelForUpdate(u8 *work) {
     ((EffModelOwner *)work)->flags = flags;
     if ((flags & 4) == 0) {
         if ((effModelUpdateControlFlags & 1) == 0) {
-            func_0029AE88(work);
+            func_0029AE88((EffModelOwner *)work);
         }
     } else if ((effModelUpdateControlFlags & 1) != 0) {
         ((EffModelOwner *)work)->flags = previous | 0x31;

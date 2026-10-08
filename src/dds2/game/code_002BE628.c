@@ -1206,9 +1206,10 @@ void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 value, s32 option) {
 }
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
+extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 
 /* Create a profile panel and initialize its five native random words. */
-u32 *mnuCreateProfilePanel(s32 selectionState) {
+u32 *mnuCreateProfilePanel(DatPartyRecord *selectionState) {
     MenuProfilePanel *panel = (MenuProfilePanel *)sdfAllocSizeClassBlock(MNU_PROFILE_PANEL_BYTES);
     s32 profileId;
     DatProfileRecord *profileRecord;
@@ -1216,7 +1217,7 @@ u32 *mnuCreateProfilePanel(s32 selectionState) {
 
     memset(panel, 0, MNU_PROFILE_PANEL_BYTES);
     profileId = scrGetSelectedScriptEntryId(selectionState);
-    profileRecord = ptyGetCurrentProfileRecord((DatPartyRecord *)selectionState);
+    profileRecord = ptyGetCurrentProfileRecord(selectionState);
     mnuSetProfilePanelValues(panel, ptyGetProfileRecordCap((u16)profileId), profileRecord->value);
     for (randomWordIndex = 0; randomWordIndex < 5; randomWordIndex++) {
         panel->unk2C[randomWordIndex] = effMiscRand(0) % 0xC0 + 0x40;

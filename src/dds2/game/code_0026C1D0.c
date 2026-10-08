@@ -1,6 +1,10 @@
 #include "evt_world.h"
 #include "dat_state.h"
 
+extern s32 scrTestEntryFlag(DatPartyRecord *context, u16 entryId, u32 bit);
+
+typedef struct SdfTex SdfTex;
+
 #define EVT_ACTIVE_ENTRY_LIMIT 0x100
 #define EVT_DISPLAY_VALUE_COUNT 0x10
 #define EVT_LAST_DISPLAY_VALUE 0xF
@@ -439,7 +443,7 @@ s32 evtOpReadDisplayValue(void) {
     return 1;
 }
 
-extern s32 sdfTexAcquireResourceTexture(u32);
+extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 /* Acquire the loaded data's texture reference, then release its temporary resource.
  * DDS2 passes the size-output address as an integer, unlike DDS1's pointer slot. */
 s32 evtLoadTextureFromResourcePath(u32 path) {
@@ -448,7 +452,7 @@ s32 evtLoadTextureFromResourcePath(u32 path) {
     s32 texture;
 
     allocation = sdfReadNamedResource(path, &info[0], (u32)&info[1]);
-    texture = sdfTexAcquireResourceTexture(info[0]);
+    texture = (s32)sdfTexAcquireResourceTexture((void *)info[0]);
     sdfReleaseResourceAllocation(allocation);
     return texture;
 }
@@ -758,8 +762,8 @@ INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D590);
 
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026D710);
 
-extern s32 func_0026DB48(u32 context, u8 entry);
-extern s32 func_0026DB90(u32 context);
+extern s32 func_0026DB48(DatPartyRecord *context, u8 entry);
+extern s32 func_0026DB90(DatPartyRecord *context);
 
 /* Return true when all six neighbor conditions are satisfied across active party members. */
 s32 func_0026D7E8(u16 entry) {
@@ -787,8 +791,8 @@ s32 func_0026D7E8(u16 entry) {
 
                 if (neighbor != NULL) {
                     if ((neighbor->packedHeader & 0xF) == 1) {
-                        if (func_0026DB90((u32)party) != 0) {
-                            if (func_0026DB48((u32)party, (u8)(*neighborSlot)->id) != 0) {
+                        if (func_0026DB90(party) != 0) {
+                            if (func_0026DB48(party, (u8)(*neighborSlot)->id) != 0) {
                                 satisfiedNeighbors |= 1 << slot;
                             }
                         } else {
@@ -879,7 +883,7 @@ void func_0026DB20(void) {
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026DB28);
 
 /* Return whether bit 15 is set for the supplied entry. */
-s32 func_0026DB48(u32 context, u8 entry) {
+s32 func_0026DB48(DatPartyRecord *context, u8 entry) {
     return scrTestEntryFlag(context, entry, 0xf);
 }
 
@@ -889,8 +893,8 @@ void func_0026DB68(void) {
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026DB70);
 
 /* Return the flag test's result through the native selector-zero wrapper. */
-s32 func_0026DB90(u32 context) {
-    return scrTestEntryFlag((DatPartyRecord *)context, 0, 0);
+s32 func_0026DB90(DatPartyRecord *context) {
+    return scrTestEntryFlag(context, 0, 0);
 }
 
 void func_0026DBB0(void) {
@@ -899,7 +903,7 @@ void func_0026DBB0(void) {
 INCLUDE_ASM(const s32, "game/code_0026C1D0", func_0026DBB8);
 
 /* Call the existing flag routine with entry zero and selector one; ignore its result. */
-void func_0026DBD8(u32 context) {
+void func_0026DBD8(DatPartyRecord *context) {
     scrTestEntryFlag(context, 0, 1);
 }
 

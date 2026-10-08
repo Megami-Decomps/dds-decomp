@@ -151,7 +151,7 @@ extern SdfStreamFrameNode *sdfStreamNodeListHead;
 
 extern SdfStreamFrameNode *sdfStreamNodeListTail;
 
-extern void sdfTexEnqueuePacketWithSemaphore(s32, s32);
+extern void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet);
 
 extern void func_002EB650();
 
@@ -162,7 +162,7 @@ typedef struct SdfStreamParams {
     u8 param3;
 } SdfStreamParams;
 
-extern s32 sdfTexGetPrimaryResourceWord();
+extern u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 
 void func_002E9708(void) {
     func_002E87A8(0x180, 0, 0, 0);
@@ -1424,7 +1424,7 @@ s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
     if (*selectedBuffer == 0) {
         func_002EB650();
     }
-    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, *selectedBuffer + state->bufferSize - SDF_STREAM_QWORD_BYTES);
+    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, (void *)(*selectedBuffer + state->bufferSize - SDF_STREAM_QWORD_BYTES));
     sdfAdvanceBufferedPlayback(state);
     return 1;
 }

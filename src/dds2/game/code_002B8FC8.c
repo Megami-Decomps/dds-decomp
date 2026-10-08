@@ -5,6 +5,8 @@
 #include "eff.h"
 #include "mnu_shop.h"
 
+struct StaffMenuRuntime;
+
 extern void itfGridStorePosition(MenuGridSlot *, EffectSlotSet *, s32);
 
 #define MNU_ENTRY_SPRITE_COUNT 4
@@ -187,7 +189,7 @@ extern s32 evtGetCapturedWindowPanelValue();
 
 extern s32 func_002B06A8();
 
-extern void mnuPrepareStaffValueChangeDialog(s32, DatPartyRecord *, s32, s32);
+extern void mnuPrepareStaffValueChangeDialog(MenuStaffContext *, DatPartyRecord *, s32, s32);
 
 extern char D_003E7530[];
 
@@ -212,7 +214,7 @@ extern void mnuCreateStaffImageSprite();
 extern void func_002AA7A0();
 
 
-extern void mnuIdleVoiceTimer();
+extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
 extern void func_002B2408();
 
@@ -481,7 +483,7 @@ s32 mnuStepStaffCampPageControl(s32 callback);
 
 extern void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 extern void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource);
-extern s32 mnuCreateProfilePanel(s32 source);
+extern u32 *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void mnuSetGroupProperties(s32, s32, s32, s32, s32);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
@@ -514,7 +516,7 @@ void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSprite
 
 
 
-void mnuIdleVoiceTimer(s32 object);
+void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
 s32 mnuStaffIdlePartyUpdate(s32 callback);
 

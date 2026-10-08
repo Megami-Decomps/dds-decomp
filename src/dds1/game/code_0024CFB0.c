@@ -3,6 +3,8 @@
 #include "dat_state.h"
 #include "evt_world.h"
 
+struct SdfTex;
+
 #define EVT_ACTIVE_ENTRY_LIMIT 0xC0
 #define EVT_DISPLAY_VALUE_COUNT 0x10
 #define EVT_LAST_DISPLAY_VALUE 0xF
@@ -55,6 +57,8 @@ typedef struct {
 extern EvtActiveFlagTable evtActiveEntryFlags;
 
 extern u32 sdfReadNamedResource(u32, u32 *, u32 *);
+
+extern struct SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 extern s32 kwlnTaskGetUserValue();
 
@@ -697,7 +701,7 @@ s32 evtOpReadDisplayValue(void) {
 u32 evtLoadTextureFromResourcePath(u32 path) {
     u32 info[2];
     u32 allocation = sdfReadNamedResource(path, info, &info[1]);
-    u32 texture = sdfTexAcquireResourceTexture(info[0]);
+    u32 texture = (u32)sdfTexAcquireResourceTexture((void *)info[0]);
 
     sdfReleaseResourceAllocation(allocation);
     return texture;
