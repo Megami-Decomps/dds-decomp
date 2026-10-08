@@ -27,9 +27,9 @@ typedef struct UiInputState {
 
 extern const char *D_004367CC;
 
-extern u32 kwlnTaskGetUserValue(void *);
+extern u32 kwlnTaskGetUserValue(struct KwlnTask *);
 
-extern void *kwlnTaskGetTaskByName(const char *name);
+extern struct KwlnTask *kwlnTaskGetTaskByName(const char *name);
 
 extern s32 btlGetRuntime(void);
 
@@ -446,7 +446,74 @@ s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
     return -128;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C35F0", func_001C7DB8);
+extern const char *D_004367DC;
+extern BattleCmdPanel *btlCommandPanelWork;
+typedef struct BattleRegisteredPanelWork {
+    s32 state;
+    s32 mode;
+    s32 variant;
+    s32 x;
+    s32 y;
+    s32 spriteAlpha;
+    s32 overlayAlpha;
+    s32 backdropAlpha;
+} BattleRegisteredPanelWork;
+typedef char BattleRegisteredPanelWork_size_check[
+    sizeof(BattleRegisteredPanelWork) == 0x20 ? 1 : -1];
+extern void func_001BBA60(BattleRegisteredPanelWork *);
+
+void func_001C7DB8(s8 mode, s32 duration) {
+    struct KwlnTask *commandTask = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    struct KwlnTask *panelTask = kwlnTaskGetTaskByName(D_004367CC);
+    struct KwlnTask *registeredTask = kwlnTaskGetTaskByName(D_004367DC);
+
+    switch (mode) {
+    case 0: {
+        s32 step;
+        if (commandTask != NULL) {
+            ((BattleSceneObject *)kwlnTaskGetUserValue(commandTask))->state = 11;
+            btlCommandPanelWork->state = 4;
+        }
+        if (panelTask != NULL) {
+            ((BattleTrackedTaskWork *)btlTrackedTaskHandles)->presentationState = 1;
+        }
+        if (registeredTask != NULL) {
+            ((BattleRegisteredPanelWork *)kwlnTaskGetUserValue(registeredTask))->mode = 3;
+        }
+        {
+            BattleTrackedTaskWork *tracked = (BattleTrackedTaskWork *)btlTrackedTaskHandles;
+            step = 0x80 / duration;
+            tracked->threshold = duration;
+            tracked->status.bytes.state = 1;
+            tracked->counter = 0;
+            tracked->status.bytes.fadeStep = step;
+        }
+        break;
+    }
+    case 1: {
+        s32 step;
+        if (commandTask != NULL) {
+            ((BattleSceneObject *)kwlnTaskGetUserValue(commandTask))->state = mode;
+            btlCommandPanelWork->state = mode;
+        }
+        if (panelTask != NULL) {
+            ((BattleTrackedTaskWork *)btlTrackedTaskHandles)->presentationState = 2;
+        }
+        if (registeredTask != NULL) {
+            func_001BBA60((BattleRegisteredPanelWork *)kwlnTaskGetUserValue(registeredTask));
+        }
+        {
+            BattleTrackedTaskWork *tracked = (BattleTrackedTaskWork *)btlTrackedTaskHandles;
+            step = 0x80 / duration;
+            tracked->threshold = duration;
+            tracked->status.bytes.state = 3;
+            tracked->counter = 0;
+            tracked->status.bytes.fadeStep = step;
+        }
+        break;
+    }
+    }
+}
 
 extern s32 btlAreLinkedSceneCountersAtThreshold(void);
 extern void func_001C35F0(ActionStateLink *, s8, s8);
