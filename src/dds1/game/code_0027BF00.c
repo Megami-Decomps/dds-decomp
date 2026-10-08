@@ -1554,42 +1554,39 @@ void mnuClearPageSelection(MenuPageWindow *window) {
 INCLUDE_ASM(const s32, "game/code_0027BF00", mnuInitPageWindow);
 
 
-void mnuReleaseHandles(s32 obj) {
-    MenuPageSlot *page = (MenuPageSlot *)obj;
-    s32 *handle = page->icon;
+void mnuReleaseHandles(MenuPageSlot *page) {
+    struct EffectSlotSet **handle = page->icon;
     u32 i;
 
     for (i = 0; i < 3; i++, handle++) {
         if (*handle != 0) {
-            effDestroyResourceSlotSet(*handle);
+            effDestroyResourceSlotSet((u32)*handle);
         }
     }
     if (page->frame[0] != 0) {
-        effDestroyResourceSlotSet(page->frame[0]);
+        effDestroyResourceSlotSet((u32)page->frame[0]);
     }
     if (page->frame[1] != 0) {
-        effDestroyResourceSlotSet(page->frame[1]);
+        effDestroyResourceSlotSet((u32)page->frame[1]);
     }
     if (page->frame[2] != 0) {
-        effDestroyResourceSlotSet(page->frame[2]);
+        effDestroyResourceSlotSet((u32)page->frame[2]);
     }
     if (page->frame[3] != 0) {
-        effDestroyResourceSlotSet(page->frame[3]);
+        effDestroyResourceSlotSet((u32)page->frame[3]);
     }
     if (page->frame[4] != 0) {
-        effDestroyResourceSlotSet(page->frame[4]);
+        effDestroyResourceSlotSet((u32)page->frame[4]);
     }
     if (page->frame[5] != 0) {
-        effDestroyResourceSlotSet(page->frame[5]);
+        effDestroyResourceSlotSet((u32)page->frame[5]);
     }
 }
-
-extern void mnuReleaseHandles(s32);
 
 void mnuShutdownContext(s32 context) {
     u32 i;
     for (i = 0; i < 5; i++) {
-        mnuReleaseHandles((s32)&((MenuPageWindow *)context)->slots[i]);
+        mnuReleaseHandles(&((MenuPageWindow *)context)->slots[i]);
     }
     mnuReleasePartyPanelSpriteTextures(context);
     mnuDestroyWindowOwnedLists(context);
