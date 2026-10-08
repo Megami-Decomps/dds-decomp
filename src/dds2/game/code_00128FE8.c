@@ -197,7 +197,7 @@ typedef struct FldLoadRequest {
 
 extern u32 D_00444920[], D_00444930[], D_00444940[];
 extern char D_00435FD0[];
-extern u32 sdfReadNamedResource(const char *, u32 *, s32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void func_001289A8(u32, u32);
 
 extern f32 D_003897DC[];
@@ -669,7 +669,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
             if (D_00444920[i] != 0) {
                 fldFormatAreaDirectory(directory, fldAreaState[4], fldAreaState[5] + 1);
                 func_0035C860(path, D_00435FD0, directory, D_00444920[i]);
-                D_00444930[i] = sdfReadNamedResource(path, &D_00444940[i], 0);
+                D_00444930[i] = (u32)sdfReadNamedResource(path, &D_00444940[i], 0);
             }
         }
     }
@@ -3501,7 +3501,7 @@ extern u32 fldRainTextureData;
 
 extern char D_00413350[];
 
-extern u32 sdfReadNamedResource(const char *, u32 *, s32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 
 void fldLoadSkyResource(s32 area) {
@@ -3525,7 +3525,7 @@ void fldLoadSkyResource(s32 area) {
         sdfDevQueueReadAndWait(command, fldSkyLightSetBuffer, 0xE000);
         sdfDevWaitThenReleaseCommandState(command);
         if (area >= 2 && area < 100 && fldRainTextureResource == 0) {
-            fldRainTextureResource = sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
+            fldRainTextureResource = (s32)(u32)sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
             fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
         }
     }
@@ -3552,7 +3552,7 @@ void fldUploadSkyBuffer(FldSkyBuffer *src) {
     *fldSkyLightSetBuffer = *src;
     fldReleaseSkyResources();
     if (D_00389780[0] >= 2 && D_00389780[0] < 100 && fldRainTextureResource == 0) {
-        fldRainTextureResource = sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
+        fldRainTextureResource = (s32)(u32)sdfReadNamedResource(D_00413350, &fldRainTextureData, 0);
         fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
     }
 }

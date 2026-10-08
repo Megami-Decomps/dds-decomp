@@ -413,7 +413,7 @@ typedef struct FldSceneRequest {
 
 extern u32 D_003C91D0[], D_003C91E0[], D_003C91F0[];
 extern char D_003BAC40[];
-extern u32 sdfReadNamedResource(const char *, u32 *, s32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void func_001263F0(u32, u32);
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_00126A30);
@@ -573,7 +573,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
             if (D_003C91D0[i] != 0) {
                 fldFormatAreaDirectory(directory, fldAreaState[4], fldAreaState[5] + 1);
                 func_003014F0(path, D_003BAC40, directory, D_003C91D0[i]);
-                D_003C91E0[i] = sdfReadNamedResource(path, &D_003C91F0[i], 0);
+                D_003C91E0[i] = (u32)sdfReadNamedResource(path, &D_003C91F0[i], 0);
             }
         }
     }
@@ -3349,7 +3349,7 @@ void fldLoadBattleSkyAndFilter(void) {
 
 extern char D_003A0100[];
 extern u32 fldRainTextureData;
-extern u32 sdfReadNamedResource(const char *, u32 *, s32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 void fldLoadSkyResource(s32 area) {
     char path[64];
@@ -3364,7 +3364,7 @@ void fldLoadSkyResource(s32 area) {
         sdfDevQueueReadAndWait(command, fldSkyLightSetBuffer, 0xE000);
         sdfDevWaitThenReleaseCommandState(command);
         if (area >= 2 && area < 100 && fldRainTextureResource == 0) {
-            fldRainTextureResource = sdfReadNamedResource(D_003A0100, &fldRainTextureData, 0);
+            fldRainTextureResource = (s32)(u32)sdfReadNamedResource(D_003A0100, &fldRainTextureData, 0);
             fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
         }
     }
@@ -3391,7 +3391,7 @@ void fldUploadSkyBuffer(void *src) {
     memcpy(fldSkyLightSetBuffer, src, 0xE000);
     fldReleaseSkyResources();
     if (D_0032E3C0[0] >= 2 && D_0032E3C0[0] < 100 && fldRainTextureResource == 0) {
-        fldRainTextureResource = sdfReadNamedResource(D_003A0100, &fldRainTextureData, 0);
+        fldRainTextureResource = (s32)(u32)sdfReadNamedResource(D_003A0100, &fldRainTextureData, 0);
         fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
     }
 }
@@ -3942,10 +3942,10 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_00134348);
 
 extern char D_003A0100[];
 extern u32 fldRainTextureData;
-extern u32 sdfReadNamedResource(const char *, u32 *, s32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 void fldInitializeCameraColorResource(void) {
-    fldRainTextureResource = sdfReadNamedResource(D_003A0100, &fldRainTextureData, 0);
+    fldRainTextureResource = (s32)(u32)sdfReadNamedResource(D_003A0100, &fldRainTextureData, 0);
     fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
     fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
     if (fldRainTextureResource != 0) {

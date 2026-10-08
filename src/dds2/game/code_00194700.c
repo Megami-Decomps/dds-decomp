@@ -23,7 +23,7 @@ extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
-extern u64 sdfReadNamedResource(u64, u32 *, u64);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
@@ -522,9 +522,9 @@ void effSetMsgPair(EffMsg *message, u32 first, u32 second) {
 
 /* Release the previous texture reference before loading/acquiring its replacement.
    Release the temporary loaded resource afterward; native failure results are unchecked. */
-void effSetWorkTextureResource(EffWork *work, u64 textureResource) {
+void effSetWorkTextureResource(EffWork *work, const char *textureResource) {
     SdfTex *texture;
-    u64 loadedResource;
+    SdfMemBlock *loadedResource;
     u32 resourceWords[4];
 
     if (work->textureHandle != NULL) {

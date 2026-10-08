@@ -106,7 +106,7 @@ extern s32 D_00436AF0;
 
 extern s32 D_00438F6C;
 
-extern s32 sdfReadNamedResource(s32, u32 *, s32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
@@ -3009,7 +3009,7 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *descriptor, s32 name
         sdfTexReleaseReferenceViaHandler((SdfTex *)textureHandle);
         descriptor->handle = 0;
     }
-    allocationHandle = sdfReadNamedResource(nameAddress, &loadedResource, 0);
+    allocationHandle = sdfReadNamedResource((const char *)(u32)nameAddress, &loadedResource, 0);
     btlReplaceResourceHandle(descriptor, loadedResource);
     sdfReleaseResourceAllocation(allocationHandle);
 }

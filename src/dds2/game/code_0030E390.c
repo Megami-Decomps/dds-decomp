@@ -23,7 +23,7 @@ typedef struct MapResource {
 
 extern u32 fldReleaseMapResource(s32 *);
 
-extern u32 sdfReadNamedResource(const char *, void *, s32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern struct SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
@@ -308,7 +308,7 @@ INCLUDE_ASM(const s32, "game/code_0030E390", func_0030EF90);
 INCLUDE_ASM(const s32, "game/code_0030E390", func_0030F038);
 
 s32 fldLoadMapResource(const char *name, MapResource *record) {
-    u32 handle = sdfReadNamedResource(name, &record->descriptor, 0);
+    u32 handle = (u32)sdfReadNamedResource(name, &record->descriptor, 0);
     u32 descriptor = record->descriptor;
     record->handle = handle;
     record->image = (u32)sdfTexAcquireResourceTexture((void *)descriptor);
