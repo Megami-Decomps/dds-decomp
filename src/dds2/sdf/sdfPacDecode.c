@@ -3,6 +3,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_pac_packet.h"
+#include "sdf_pac_work.h"
 
 enum {
     PAC_COMMAND_PAYLOAD = 1,
@@ -17,14 +18,6 @@ enum {
     PAC_STATE_USE_PACKET_MEMORY = 1,
     PAC_STATE_ALLOCATE_HIGH = 2
 };
-
-typedef struct PacWork {
-    struct PacWork *next; /* 0x0 */
-    struct PacState *owner; /* 0x4 */
-    s32 resourceHandle; /* 0x8 */
-    u8 *dataCursor; /* 0xC */
-    u8 packet[1]; /* 0x10: copied header and packet data */
-} PacWork;
 
 typedef struct PacBuf {
     s32 result; /* 0x0: decoded result word, including completed resource addresses */
@@ -67,9 +60,6 @@ typedef struct PacState {
     PacWork *queueHead; /* 0x30 */
     PacWork *queueTail; /* 0x34 */
 } PacState;
-
-PacWork *sdfPacEnqueuePacket(PacState *state, SdfPacStreamPacketHeader *packet);
-
 
 extern void *memcpy(void *dst, const void *src, u32 n);
 
