@@ -1,5 +1,6 @@
 #include "prf_requirement.h"
 #include "common.h"
+#include "pcp_vu0.h"
 #include "sdf_resource.h"
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
@@ -3319,7 +3320,7 @@ void func_0027A7F8(void) {
 }
 
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
-extern void func_0027AFE0(s32 x, s32 y, s32 z, s32 amount, s32 unused, u8 *object, s32 packet);
+extern s32 func_0027AFE0(s32, s32, s32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 
 /* Mantra panel C transition / appear draw: kinds 6..9 fade the panel in or out over its frame counter, kind 0
  * draws it steady, and kind 1 plays the 60-frame appear (panel fade-in, pulsing inner glow, wave flash and three
@@ -3412,7 +3413,7 @@ s32 mnuDrawMantraPanelCTransition(s32 x, s32 y, s32 z, s32 amount, s32 unused, u
         mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
         mnuDrawMantraSprite(x, y, z, alpha, 0x95, 0, packet);
         alpha = (f32)amount * pulse;
-        func_0027AFE0(x, y, z, alpha, unused, object, packet);
+        func_0027AFE0(x, y, z, alpha, (MantraPanelPool *)unused, panel, packet);
         mnuDrawMantraSprite(x, y, z, alpha, 0x99, 0, packet);
         mnuDrawMantraSprite(x, y, z, (f32)amount * wave * 0.7f, 0x99, 0, packet);
         sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
@@ -3459,7 +3460,88 @@ void mnuResetMantraPulsePhase(s32 unused, u8 *object) {
 void func_0027AFD8(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027AFE0);
+extern void *memcpy(void *, const void *, u32);
+extern const s16 D_004378D8[];
+extern const f32 D_00425A98[];
+
+s32 func_0027AFE0(s32 x, s32 y, s32 z, s32 alpha, MantraPanelPool *unused, MantraPanelAnimation *panel, u32 packet) {
+    f32 phases[3];
+    s16 offsets[2][2];
+    f32 scaled[4] __attribute__((aligned(16)));
+    f32 directions[2][4] __attribute__((aligned(16)));
+    f32 phaseA;
+    f32 phaseB;
+    f32 radius;
+    s32 drawX;
+    s32 drawY;
+    s32 i;
+
+    memcpy(offsets, D_004378D8, sizeof(offsets));
+    memcpy(directions, D_00425A98, sizeof(directions));
+    panel->stateB++;
+    if (panel->stateB >= 201) panel->stateB = 0;
+    panel->stateA++;
+    if (panel->stateA >= 121) panel->stateA = 0;
+    panel->stateC++;
+    if (panel->stateC >= 71) panel->stateC = 0;
+    phaseB = panel->stateB / 200.0f;
+    phaseA = panel->stateA / 120.0f;
+    if (panel->stateC < 15) phases[0] = panel->stateC / 15.0f;
+    else phases[0] = 0.0f;
+    if (panel->stateC < 3) phases[1] = 0.0f;
+    else if (panel->stateC < 20) phases[1] = (panel->stateC - 3) / 15.0f;
+    else phases[1] = 0.0f;
+    if (panel->stateC < 18) phases[2] = panel->stateC / 18.0f;
+    else phases[2] = 0.0f;
+    phases[2] = (sdfSinPoly(phases[2] * 6.2831853f + -1.5707963f) + 1.0f) * 0.5f;
+    mnuDrawMantraSprite(x, y, z, alpha, 0x77, 0, packet);
+    mnuDrawMantraSprite(x, y, z, alpha, 0x78, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+    uiDrawUniformColorRect((u32)(x - 128) << 4, (u32)(y - 128) << 3, 0xFFFFFF, 0x1000, 0x800, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
+    uiDrawActiveSurfaceRegion(packet);
+    mnuDrawMantraSprite(x, y, 0, alpha, 0x7C, 0x60, packet);
+    sdfDispatchSurfaceWithPreparedTexturePacket(packet);
+    radius = 15.0f;
+    for (i = 0; i < 3; i++) {
+        const f32 angularOffset = (f32)i * 2.0943951f;
+        const f32 angle = phaseA * -6.2831853f + angularOffset;
+        drawX = (s32)((f32)x + sdfEvaluateCosineViaSinePhaseShift(angle) * radius);
+        drawY = (s32)((f32)y + -sdfSinPoly(angle) * radius);
+        sdfSubmitGsAlphaOneRegisterPacket(0x58, packet);
+        mnuDrawMantraSprite(drawX, drawY, 1, (s32)((f32)alpha * 0.4f), 0x7D, 0x40, packet);
+    }
+    for (i = 0; i < 2; i++) {
+        VU0_LOAD_VF(vf10, directions[i]);
+        VU0_SCALE_VF(vf10, 150.0f);
+        VU0_STORE_VF(vf10, scaled);
+        drawX = (s32)((f32)(x + offsets[i][0]) + scaled[0] * phases[i]);
+        drawY = (s32)((f32)(y + offsets[i][1]) + scaled[1] * phases[i]);
+        sdfSubmitGsAlphaOneRegisterPacket(0x58, packet);
+        mnuDrawMantraScaledCenteredSprite(drawX, drawY, 10, (s32)((f32)alpha * 0.35f), 0x7E, 0x40, packet, 2.5f);
+    }
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+    uiDrawUniformColorRect((u32)(x - 128) << 4, (u32)(y - 128) << 3, 0xFFFFFF, 0x1000, 0x800, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, packet);
+    uiDrawActiveSurfaceRegion(packet);
+    mnuDrawMantraSprite(x, y, 0, alpha, 0x7A, 0x60, packet);
+    sdfDispatchSurfaceWithPreparedTexturePacket(packet);
+    radius = 26.0f;
+    for (i = 0; i < 3; i++) {
+        const f32 angularOffset = (f32)i * 2.0943951f;
+        const f32 angle = phaseB * -6.2831853f + angularOffset;
+        drawX = (s32)((f32)x + sdfEvaluateCosineViaSinePhaseShift(angle) * radius);
+        drawY = (s32)((f32)y + -sdfSinPoly(angle) * radius);
+        mnuDrawMantraSprite(drawX, drawY, 1, (s32)((f32)alpha * 0.8f), 0x7B, 0, packet);
+    }
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+    mnuDrawMantraSprite(x, y, 0, (s32)((f32)alpha * (phases[2] * 0.1f + 0.5f)), 0x79, 0x20, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
+    uiDrawUniformColorRect((u32)(x - 128) << 4, (u32)(y - 128) << 3, 0, 0x1000, 0x800, 0, packet);
+    sdfSubmitGsTestOneRegisterPacket(0x5100DL, packet);
+    return 0;
+}
+
 
 INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425A98);
 

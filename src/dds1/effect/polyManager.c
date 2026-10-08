@@ -377,98 +377,98 @@ void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius)
 {
     PolyStrip *strip = band->strip;
     PolyStripEntry *entry = &strip->entries[index];
-    f32 dir[4];
+    f32 radialDirection[4];
     f32 baseRadiusVector[4];
     f32 offsetRadiusVector[4];
-    f32 step;
+    f32 angleStep;
     f32 angle;
-    f32 *out;
-    f32 *first;
+    f32 *pointCursor;
+    f32 *firstPointPair;
     s32 pairs;
     s32 i;
 
     entry->count = strip->count;
-    out = entry->points;
+    pointCursor = entry->points;
     pairs = strip->count / 2;
     VEC3_SPLAT(baseRadiusVector, radius);
     VEC3_SPLAT(offsetRadiusVector, radius + band->radialWidth);
-    step = 3.14159265f * 2.0f / (f32)band->segments;
+    angleStep = 3.14159265f * 2.0f / (f32)band->segments;
     VU0_LOAD_MATRIX(band->head.matrix);
     angle = 0.0f;
     VU0_LOAD_VF(vf12, band->head.origin);
     for (i = 0; i < pairs - 1; i++) {
-        dir[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
-        dir[1] = 0;
-        dir[2] = sdfSinPoly(angle);
-        VU0_LOAD_VF(vf10, dir);
+        radialDirection[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        radialDirection[1] = 0;
+        radialDirection[2] = sdfSinPoly(angle);
+        VU0_LOAD_VF(vf10, radialDirection);
         VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF(vf10, dir);
+        VU0_STORE_VF(vf10, radialDirection);
         VU0_LOAD_VF(vf11, baseRadiusVector);
         VU0_MUL(vf10, vf10, vf11);
         VU0_ADD(vf10, vf10, vf12);
-        VU0_STORE_VF(vf10, out + 4);
-        VU0_LOAD_VF(vf10, dir);
+        VU0_STORE_VF(vf10, pointCursor + 4);
+        VU0_LOAD_VF(vf10, radialDirection);
         VU0_LOAD_VF(vf11, offsetRadiusVector);
         VU0_MUL(vf10, vf10, vf11);
         VU0_ADD(vf10, vf10, vf12);
-        VU0_STORE_VF(vf10, out);
-        out += 8;
-        angle += step;
+        VU0_STORE_VF(vf10, pointCursor);
+        pointCursor += 8;
+        angle += angleStep;
     }
-    first = entry->points;
-    PCP_COPY_VECTOR(out, first);
-    PCP_COPY_VECTOR(out + 4, first + 4);
+    firstPointPair = entry->points;
+    PCP_COPY_VECTOR(pointCursor, firstPointPair);
+    PCP_COPY_VECTOR(pointCursor + 4, firstPointPair + 4);
 }
 
 /* Add one radius step and local-y lift step to existing point pairs, then close the strip. */
-void polyStripBuildScaledRing(PolyBand *ring, s32 index) {
-    PolyStrip *strip = ring->strip;
-    PolyBandRecord *rec = &ring->records[index];
+void polyStripBuildScaledRing(PolyBand *band, s32 index) {
+    PolyStrip *strip = band->strip;
+    PolyBandRecord *rec = &band->records[index];
     PolyStripEntry *entry = &strip->entries[index];
-    f32 dir[4];
-    f32 scale[4];
-    f32 lift[4];
-    f32 step;
+    f32 radialDirection[4];
+    f32 radiusStepVector[4];
+    f32 liftVector[4];
+    f32 angleStep;
     f32 angle;
-    f32 *out;
-    f32 *first;
+    f32 *pointCursor;
+    f32 *firstPointPair;
     s32 pairs;
     s32 i;
 
     entry->count = strip->count;
-    out = entry->points;
+    pointCursor = entry->points;
     pairs = strip->count >> 1;
-    scale[2] = scale[1] = scale[0] = rec->radiusStep;
-    lift[1] = ring->liftStep;
-    lift[2] = lift[0] = 0;
-    step = 3.14159265f * 2.0f / (f32)ring->segments;
-    VU0_LOAD_MATRIX(ring->head.matrix);
+    radiusStepVector[2] = radiusStepVector[1] = radiusStepVector[0] = rec->radiusStep;
+    liftVector[1] = band->liftStep;
+    liftVector[2] = liftVector[0] = 0;
+    angleStep = 3.14159265f * 2.0f / (f32)band->segments;
+    VU0_LOAD_MATRIX(band->head.matrix);
     angle = 0.0f;
     for (i = 0; i < pairs - 1; i++) {
-        dir[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
-        dir[1] = 0;
-        dir[2] = sdfSinPoly(angle);
-        VU0_LOAD_VF(vf10, dir);
+        radialDirection[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        radialDirection[1] = 0;
+        radialDirection[2] = sdfSinPoly(angle);
+        VU0_LOAD_VF(vf10, radialDirection);
         VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_LOAD_VF(vf11, scale);
+        VU0_LOAD_VF(vf11, radiusStepVector);
         VU0_MUL(vf10, vf10, vf11);
-        VU0_LOAD_VF(vf11, lift);
+        VU0_LOAD_VF(vf11, liftVector);
         VU0_APPLY_MATRIX(vf11, vf11);
         VU0_ADD(vf10, vf10, vf11);
         VU0_MOVE_VF(vf12, vf10);
-        VU0_LOAD_VF(vf11, out + 4);
+        VU0_LOAD_VF(vf11, pointCursor + 4);
         VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, out + 4);
+        VU0_STORE_VF(vf10, pointCursor + 4);
         VU0_MOVE_VF(vf10, vf12);
-        VU0_LOAD_VF(vf11, out);
+        VU0_LOAD_VF(vf11, pointCursor);
         VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF(vf10, out);
-        out += 8;
-        angle += step;
+        VU0_STORE_VF(vf10, pointCursor);
+        pointCursor += 8;
+        angle += angleStep;
     }
-    first = entry->points;
-    PCP_COPY_VECTOR(out, first);
-    PCP_COPY_VECTOR(out + 4, first + 4);
+    firstPointPair = entry->points;
+    PCP_COPY_VECTOR(pointCursor, firstPointPair);
+    PCP_COPY_VECTOR(pointCursor + 4, firstPointPair + 4);
 }
 
 /* Scale the band's row width, lift step, and initial/target radii in retail order. */
@@ -585,61 +585,62 @@ void func_0015E900(PolyArc *obj, s32 index) {
 }
 
 
-/* Lay a ring of point pairs for strip entry `index` on an arc of the node: the inner row sits at the arc's sine radius, the outer row `width` further out. */
-void polyUpdateArcRingStripPoints(PolyArc *obj, s32 index) {
-    PolyStrip *strip = obj->strip;
-    PolyArcRecord *rec = &obj->records[index];
-    PolyStripEntry *entry = &strip->entries[index];
-    f32 dir[4];
-    f32 ring[4];
-    f32 radius;
-    f32 inner;
-    f32 drop;
-    f32 width;
-    f32 step;
+/* Lay an arc ring's inner and outer point rows at the projected radius and
+ * radial offset for this record's age. */
+void polyUpdateArcRingStripPoints(PolyArc *arc, s32 index) {
+    PolyStrip *strip = arc->strip;
+    PolyArcRecord *record = &arc->records[index];
+    PolyStripEntry *stripEntry = &strip->entries[index];
+    f32 innerPointVector[4];
+    f32 outerPointVector[4];
+    f32 recordRadius;
+    f32 projectedInnerRadius;
+    f32 verticalOffset;
+    f32 radialWidth;
+    f32 angleStep;
     f32 angle;
-    f32 *out;
-    f32 *first;
+    f32 *pointCursor;
+    f32 *firstPointPair;
     s32 pairs;
     s32 i;
 
-    entry->count = strip->count;
-    out = entry->points;
+    stripEntry->count = strip->count;
+    pointCursor = stripEntry->points;
     pairs = strip->count >> 1;
-    radius = rec->radius;
-    angle = (f32)rec->age / (f32)obj->head.duration * 3.14159265f;
-    inner = radius * sdfSinPoly(angle);
-    drop = radius * sdfEvaluateCosineViaSinePhaseShift(angle) - radius;
-    step = 3.14159265f * 2.0f / (f32)obj->segments;
-    VU0_LOAD_MATRIX(obj->head.matrix);
-    width = obj->radialWidth;
+    recordRadius = record->radius;
+    angle = (f32)record->age / (f32)arc->head.duration * 3.14159265f;
+    projectedInnerRadius = recordRadius * sdfSinPoly(angle);
+    verticalOffset = recordRadius * sdfEvaluateCosineViaSinePhaseShift(angle) - recordRadius;
+    angleStep = 3.14159265f * 2.0f / (f32)arc->segments;
+    VU0_LOAD_MATRIX(arc->head.matrix);
+    radialWidth = arc->radialWidth;
     angle = 0.0f;
-    VU0_LOAD_VF(vf12, obj->head.origin);
+    VU0_LOAD_VF(vf12, arc->head.origin);
     for (i = 0; i < pairs - 1; i++) {
-        dir[0] = ring[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
-        dir[2] = sdfSinPoly(angle);
-        ring[1] = drop;
-        ring[2] = dir[2] * (inner + width);
-        ring[0] *= inner + width;
-        VU0_LOAD_VF(vf10, ring);
+        innerPointVector[0] = outerPointVector[0] = sdfEvaluateCosineViaSinePhaseShift(angle);
+        innerPointVector[2] = sdfSinPoly(angle);
+        outerPointVector[1] = verticalOffset;
+        outerPointVector[2] = innerPointVector[2] * (projectedInnerRadius + radialWidth);
+        outerPointVector[0] *= projectedInnerRadius + radialWidth;
+        VU0_LOAD_VF(vf10, outerPointVector);
         VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF(vf10, ring);
-        dir[1] = drop;
-        dir[0] *= inner;
-        dir[2] *= inner;
-        VU0_LOAD_VF(vf10, dir);
+        VU0_STORE_VF(vf10, outerPointVector);
+        innerPointVector[1] = verticalOffset;
+        innerPointVector[0] *= projectedInnerRadius;
+        innerPointVector[2] *= projectedInnerRadius;
+        VU0_LOAD_VF(vf10, innerPointVector);
         VU0_APPLY_MATRIX(vf10, vf10);
         VU0_ADD(vf10, vf10, vf12);
-        VU0_STORE_VF(vf10, out + 4);
-        VU0_LOAD_VF(vf10, ring);
+        VU0_STORE_VF(vf10, pointCursor + 4);
+        VU0_LOAD_VF(vf10, outerPointVector);
         VU0_ADD(vf10, vf10, vf12);
-        VU0_STORE_VF(vf10, out);
-        out += 8;
-        angle += step;
+        VU0_STORE_VF(vf10, pointCursor);
+        pointCursor += 8;
+        angle += angleStep;
     }
-    first = entry->points;
-    PCP_COPY_VECTOR(out, first);
-    PCP_COPY_VECTOR(out + 4, first + 4);
+    firstPointPair = stripEntry->points;
+    PCP_COPY_VECTOR(pointCursor, firstPointPair);
+    PCP_COPY_VECTOR(pointCursor + 4, firstPointPair + 4);
 }
 
 /* Scale the arc's base radius, leaving its jitter fraction unchanged. */
