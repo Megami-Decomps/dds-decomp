@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "purpose": "Public read-only EE GCC observer qualification",
+  "date_utc": "2026-10-08",
+  "python_version": "3.12.14",
+  "compiler_sha256": "d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1",
+  "source_sha256": "a5681b65a3508f0229ad651ad87c437496fcdab05276ce24c8acbe3580b713d3",
+  "live_mode": "allocation",
+  "target_function": "func_001ECCA8",
+  "events": 6034,
+  "artifact_count": 28,
+  "all_artifacts_byte_equal": true,
+  "artifact_inventories_equal": true,
+  "raw_artifacts_also_equal_existing_frozen_baseline": true,
+  "frozen_inputs_verified": 174,
+  "frozen_case_original_manifest_inputs_verified_after_run": 173,
+  "same_compiler_cwd_environment_argv_output_paths_and_dumpbase": true,
+  "transport": {
+    "kind": "loopback-copy",
+    "address": "127.0.0.1",
+    "spawned_qemu_socket_ownership_verified_before_connection": true
+  },
+  "static_hook_signatures_available": 35,
+  "static_hook_signatures_exercised": 28,
+  "tests": {
+    "observer_normal": 39,
+    "observer_python_optimized": 39,
+    "existing_ee_gcc_aslr": 3,
+    "existing_ee_gcc_contracts": 41,
+    "existing_ee_gcc_diagnostics": 56,
+    "existing_ee_gcc_source_locations": 5
+  },
+  "limitations": [
+    "Public runner live qualification used allocation mode; retained operand hooks have offline coverage and prior observer evidence.",
+    "Unix-domain path has offline coverage; this host qualification used the explicitly selected pinned loopback copy.",
+    "28 raw full-unit artifacts; prior 51-file receipts also counted extracted target duplicates.",
+    "No new retail-matching or original-source uniqueness claim."
+  ],
+  "artifact_sha256": {
+    "as.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "as.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "candidate.o": "0299a4a68180995d3192a4923267af7665f61665808b28df7d8de86f5034a1cf",
+    "candidate.s": "f1830f9ea61506192048526fe0f5e3765fe065411ade451182d078cccbd103f9",
+    "cc1.stderr": "a1eed1944f3f368a1ee00a048e2b40d4d4dbe15381e89a4483ce285e6fbaf2df",
+    "cc1.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rtl/cam.00.rtl": "b7da639c237253940f554c32d49469cb36353bd6f085273d713dccd87718412d",
+    "rtl/cam.01.sibling": "2aa7f20dc06d918ba0d6940ea004051a4768e8721c975f4ed107fecef3e90ef3",
+    "rtl/cam.02.jump": "6b0f36828bc58f0afdd0e3edd0f6f0a8bc2abbd0f740a24c8f33228253b13e9b",
+    "rtl/cam.03.cse": "17473e33402682429dd3f75a22e683d65e25977e6f65437c14db980bd34fa7d0",
+    "rtl/cam.04.addressof": "2ea050403afab4e2849a1c700faa12128bce42fb2f84ac9af7212dbd4d0bf6f4",
+    "rtl/cam.08.gcse": "eb6b358f4dfc91951bf398f93c62d6ef9fd7c85f116a32bc552f18e3c4124fd6",
+    "rtl/cam.09.loop": "15019e1725026695a4299552f2c83646ab926f09b1afad92c2c27c0d951691c2",
+    "rtl/cam.10.cse2": "a8751f9393126c53a93a6f7a0fa76a3feca5d1172419e74134f426f4adb35aa8",
+    "rtl/cam.11.cfg": "ea164ac34a69267a60a2044599edac450085bdd35c418c2011401ba1f73873f5",
+    "rtl/cam.13.life": "03fa95b0b8ad4501656504767cca6fe79001c699197d928af3a4fa4baa251448",
+    "rtl/cam.14.combine": "718b880456459709baa2ddf64985661e1876adb616e8695b42af2e6b4f227da7",
+    "rtl/cam.15.ce": "9688d79a47e82001bdb0fa1a92a9131946d3d4da985415c88deea04a564a363f",
+    "rtl/cam.16.regmove": "60a26867e44b4f3831a94df3b88ad1b1f3ef1e7a567f806c6b8eaddcdcefdc50",
+    "rtl/cam.17.sched": "13f4931de3db9296a414dd773a2aa1d240893e0e9e6c3e0be1b6ab5e25140155",
+    "rtl/cam.19.lreg": "e2d4dda5b6ac52b6e06ee06121f90390bf1dd3332871554ec39ae587efb2fe57",
+    "rtl/cam.20.greg": "db248c62a1dec47a8b661c6987d18e010b367d95d81226952040a1f0c8648f8a",
+    "rtl/cam.21.flow2": "f78fce6f21d18a4b999f1971ffc4964e93b92448bda60459df6379bdacbab124",
+    "rtl/cam.22.ce2": "36062de53e1906aaad84050be0c50b216bf045ff152571c08b271747cfc13f84",
+    "rtl/cam.25.sched2": "a18083f69701e86ce9c90456f72403195cbe09ac76f0bc4cda99abb4171858d7",
+    "rtl/cam.27.jump2": "7cb1fd960ce16f7ba9a2a7ddf219486bcd5f0cfe42336e57cf0117e0fc89b510",
+    "rtl/cam.28.mach": "7cb1fd960ce16f7ba9a2a7ddf219486bcd5f0cfe42336e57cf0117e0fc89b510",
+    "rtl/cam.29.dbr": "4227a82b801017781cb1dc5a814c3e4c95af0b8ea057ca0f9b1598d1de0161d7"
+  },
+  "contribution_sha256": {
+    "tools/_ee_gcc_observer.py": "4bd0823583fdeecd952f30adc39eea31cdf30933d5b6b12011f17266a608e924",
+    "tools/ee_gcc_observe.py": "655b85c68035e71fe71836b9ba04a639b06f14c1cec5577ce761e7b23db201c3",
+    "tools/ee_gcc_qemu_loopback.py": "ad9ac3edafbc2112cae5c52d97f529f4c6c3466ce191d99f1079bb1ca2b785b6",
+    "tests/test_ee_gcc_observe.py": "2b817b3197cae15e321d211394f842e79809edf3be12af280e50fb79e20bf074",
+    "docs/compiler-live-observer.md": "8fd33ba45dfd3a851e80e2736476817e754867b26982503ea79e0c2110b36c04",
+    "docs/ee-gcc-observer-hooks.json": "60f21380e8cb45457a2398d959e286515ee162641024a672ea60110efda64afa",
+    "docs/ee-gcc-observer-case.example.json": "699329517a8d0ee6e8b8412de0db77be47a9bfa7c46e06dd7489eec359ce9ff0"
+  },
+  "post_live_validator_change": {
+    "description": "Added an exact nine-key compiler/runtime environment allowlist, rejecting all other keys before archive creation; clarified the conservative Unix-help compatibility-gate message. No execution, observer decoding, transport selection, hook, or artifact comparison algorithm changed.",
+    "environment_keys": [
+      "PATH",
+      "HOME",
+      "LANG",
+      "LC_ALL",
+      "TZ",
+      "TMPDIR",
+      "DDS_I386_LIBDIR",
+      "DDS_VERSION",
+      "DDS_AS_UNIT"
+    ],
+    "live_tool_sha256": {
+      "ee_gcc_observe.py": "7f7d9e481e8facd4f691c2513236fb24d594475598dcf1e9a27f3a2dd70a83fb",
+      "_ee_gcc_observer.py": "4bd0823583fdeecd952f30adc39eea31cdf30933d5b6b12011f17266a608e924",
+      "ee_gcc_qemu_loopback.py": "ad9ac3edafbc2112cae5c52d97f529f4c6c3466ce191d99f1079bb1ca2b785b6"
+    },
+    "final_tool_sha256": {
+      "ee_gcc_observe.py": "655b85c68035e71fe71836b9ba04a639b06f14c1cec5577ce761e7b23db201c3",
+      "_ee_gcc_observer.py": "4bd0823583fdeecd952f30adc39eea31cdf30933d5b6b12011f17266a608e924",
+      "ee_gcc_qemu_loopback.py": "ad9ac3edafbc2112cae5c52d97f529f4c6c3466ce191d99f1079bb1ca2b785b6"
+    },
+    "final_validator_dry_run_verified_frozen_inputs": 174,
+    "normal_and_optimized_offline_tests_rerun_after_change": 39,
+    "live_compile_repeated_after_validator_only_change": false,
+    "environment_preserved_without_filtering_or_ambient_inheritance": true,
+    "rejection_before_any_archive_or_process_tested": true,
+    "public_fixture_environment_checked_synthetic": true
+  }
+}
