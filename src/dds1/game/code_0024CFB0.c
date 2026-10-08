@@ -1,5 +1,6 @@
 #include "kwln_task_state.h"
 #include "mnu.h"
+#include "mnu_list.h"
 #include "sdf_resource.h"
 #include "kwln.h"
 #include "dat_state.h"
@@ -708,14 +709,11 @@ u32 evtLoadTextureFromResourcePath(u32 path) {
     return texture;
 }
 
-typedef struct EvtListViewportState {
-    u8 pad0[4];
-    u32 flags;
-} EvtListViewportState;
-
+/* The outer panel owner is unresolved; its list pointer is shared by
+ * the viewport flag and height consumers. */
 typedef struct EvtListPanelRecord {
     u8 pad0[0x14];
-    EvtListViewportState *viewport;
+    struct MenuList *list;
 } EvtListPanelRecord;
 
 extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
@@ -738,7 +736,7 @@ void evtDrawListViewportIndicators(s32 x, s32 topY, s32 bottomY, s32 size, EvtLi
     s32 coordinates[2][3];
     s32 xRadius = (size << 4) >> 1;
     s32 yOffset = size << 3;
-    u32 flags = record->viewport->flags;
+    u32 flags = record->list->flags;
     u32 colors[2] = {0x8080C040, 0x30306040};
 
     coordinates[0][0] = x;
@@ -755,8 +753,8 @@ void evtDrawListViewportIndicators(s32 x, s32 topY, s32 bottomY, s32 size, EvtLi
                           (flags & EVT_SCROLL_BOTTOM_FLAG) ? colors[0] : colors[1], EVT_PANEL_DRAW_COMMAND);
 }
 
-void evtDrawListViewportPanel(s32 x, s32 y, s32 width, s32 record) {
-    s32 height = mnuGetListViewportHeight(*(s32 *)(record + 0x14)) + 0x80;
+void evtDrawListViewportPanel(s32 x, s32 y, s32 width, EvtListPanelRecord *record) {
+    s32 height = mnuGetListViewportHeight(record->list) + 0x80;
     uiDrawUniformColorRect(x, y, 0, width, height, 0x30303040, 0x53);
     evtDrawListViewportIndicators(x + width - 0xA0, y, y + height, 8, record);
 }

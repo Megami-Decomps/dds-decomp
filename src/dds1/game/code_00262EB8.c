@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_result.h"
@@ -5,7 +6,6 @@
 
 extern void mnuRefreshPanelLayer(BrsSkillPackageWork *);
 
-extern s32 mnuMapPadMaskToFlags(s32);
 extern s32 brsTaskIsUiUpdateAllowed(s32);
 extern void func_002650C0(void *);
 extern s32 brsPollResultCounterCompletion(void);

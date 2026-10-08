@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "sdf_resource.h"
@@ -48,7 +49,6 @@ extern char D_003BC700[];
 #define MNU_STAFF_DISPLAY_LIMIT 3
 #define MNU_STAFF_BACKUP_BYTES 0x834
 #define MNU_STAFF_PARTY_ACTIVE_BIT 1
-#define MNU_STAFF_NODE_UNAVAILABLE 1
 #define MNU_STAFF_NODE_SELECTED 2
 #define MNU_STAFF_FADE_STEP 0x10
 #define MNU_STAFF_FADE_CLOSE_THRESHOLD 0x50
@@ -231,7 +231,6 @@ typedef struct MenuSpriteArguments {
     s8 variant; /* 0x55: passed to sprite renderer */
 } MenuSpriteArguments;
 
-extern u32 mnuMapPadMaskToFlags(u32);
 extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern void sndSetSequenceVolumePan();
 extern s32 mnuInitializeStaffPartyScene(KwlnTask *);

@@ -25,7 +25,7 @@ extern struct { s32 v[6]; } D_0036D4B0;
 extern u32 uiBlendColors(u32, u32, s32);
 extern void itfDrawCountText(s32, s32, s32, s32, const BrsRewardSummary *, s32);
 extern void mnuQueueRightAlignedFormattedInfoText(s32, s32, s32, s32, const BrsRewardSummary *, s32);
-extern void func_002650C8(s32, s32, s32, u32, BrsRewardSummary *, s32, BrsSkillPackageWork *);
+extern void func_002650C8(s32, s32, s32, u32, BrsRewardSummary *, u32, BrsSkillPackageWork *);
 
 void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *work) {
     BrsRewardSummary *res = &work->rewards;
