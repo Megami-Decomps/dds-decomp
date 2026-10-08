@@ -119,7 +119,6 @@ extern f32 effMiscRandUnitFloat(void *);
 
 extern EffectConfig D_0034DF54[];
 
-s32 billCreateIndexed(s32 kind, s32 index);
 
 extern s32 effBillResourceOwners[];
 
@@ -157,7 +156,7 @@ void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 index);
 /* Create a billboard sharing the indexed entry's resource. Word two of the
  * resource stores the reference count; the BillObj payload is not an emitter. */
 u32 effRetainResource(s32 index) {
-    BillObj *effect = (BillObj *)billCreateIndexed(D_0034DF54[index].billboardKind, 0);
+    BillObj *effect = billCreateIndexed(D_0034DF54[index].billboardKind, 0);
     BillChildPayload *resource = ((BillObj *)effBillResourceOwners[index])->child;
     s32 references = resource->refCount;
 
@@ -466,7 +465,7 @@ INCLUDE_ASM(const s32, "game/code_00151F58", func_00152560);
 u8 *billCreateUnitObject(s32 entryIndex) {
     u8 *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
 
-    ((EffUnitObject *)instance)->billboard = billCreateIndexed(1, entryIndex);
+    ((EffUnitObject *)instance)->billboard = (s32)billCreateIndexed(1, entryIndex);
     ((EffUnitObject *)instance)->resource = sdfCreateAssetWithDrawEntries();
     func_002DA420(((EffUnitObject *)instance)->resource, 1.0f);
     EE_MMI_UNIT_MATRIX(instance + EFF_MATRIX_BYTES);

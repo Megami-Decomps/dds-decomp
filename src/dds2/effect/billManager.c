@@ -10,7 +10,6 @@ extern void *memcpy(void *, const void *, u32);
 extern void billAppendChildQuad(BillObj *, BillChildPayload *);
 extern void func_00158430(BillObj *, BillRenderPair *);
 
-extern BillObj *billCreateIndexed(s32 index, u32 data);
 
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
