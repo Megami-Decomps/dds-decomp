@@ -1176,16 +1176,17 @@ void mnuReleaseSlotResources(MenuPageWindow *context) {
     }
 }
 
-void mnuLoadPanelSectionResources(MenuPageSlot *panel, u32 resource, u32 left, u32 center, s32 right
+void mnuLoadPanelSectionResources(MenuPageSlot *panel, EffectSlotSet *resource,
+                                 u32 left, u32 center, s32 right
                                     ) {
     EffectSlotSet *handle;
 
-    handle = effCreateResourceSlotSet((EffectSlotSet *)resource, left, 1);
+    handle = effCreateResourceSlotSet(resource, left, 1);
     panel->leftHandle = handle;
-    handle = effCreateResourceSlotSet((EffectSlotSet *)resource, center, 1);
+    handle = effCreateResourceSlotSet(resource, center, 1);
     panel->centerHandle = handle;
     if (-1 < right) {
-        handle = effCreateResourceSlotSet((EffectSlotSet *)resource, right, 1);
+        handle = effCreateResourceSlotSet(resource, right, 1);
         panel->rightHandle = handle;
     }
 }
