@@ -1353,7 +1353,7 @@ void D_0033F3E0(DevWorkerEntry *worker) {
             state->transferred = 0;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 2, 0, 0, state->callbackContext);
+                callback(state, SDF_DEV_EVENT_OPENED, 0, 0, state->callbackContext);
             }
             continue;
 
@@ -1361,7 +1361,7 @@ void D_0033F3E0(DevWorkerEntry *worker) {
             state->state = SDF_DEV_STATE_ACTIVE;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 4, 0, sdfDevGetFileSize(),
+                callback(state, SDF_DEV_EVENT_SIZE_REPLY, 0, sdfDevGetFileSize(),
                                 state->callbackContext);
             }
             continue;
@@ -1377,7 +1377,7 @@ void D_0033F3E0(DevWorkerEntry *worker) {
             state->transferred += result;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 5, (s32)state->requestData, result,
+                callback(state, SDF_DEV_EVENT_READ_REPLY, (s32)state->requestData, result,
                                 state->callbackContext);
             }
             continue;
@@ -1389,7 +1389,7 @@ void D_0033F3E0(DevWorkerEntry *worker) {
             state->state = SDF_DEV_STATE_COMPLETE;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 7, 0, 0, state->callbackContext);
+                callback(state, SDF_DEV_EVENT_CLOSED, 0, 0, state->callbackContext);
             }
             continue;
 
@@ -1424,7 +1424,7 @@ void D_0033F3E0(DevWorkerEntry *worker) {
             state->state = SDF_DEV_STATE_COMPLETE;
             callback = state->callback;
             if (callback != NULL) {
-                callback(state, 8, (s32)state->requestData, transferResult,
+                callback(state, SDF_DEV_EVENT_BUFFER_REPLY, (s32)state->requestData, transferResult,
                                 state->callbackContext);
             }
             continue;
