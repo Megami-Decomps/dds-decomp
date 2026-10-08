@@ -6,6 +6,7 @@
 #include "mnu_scroll_panel.h"
 
 struct EffectList;
+struct EffectSlotSet;
 struct EffMappedResource;
 
 #ifndef VERSION_DDS2
@@ -19,13 +20,13 @@ typedef struct StaffMenuWork {
     u8 pad58[4];
     struct EffectList *resourceQueue;
     StaffSlots staffSlots;
-    u32 categoryPair[2];
-    u32 categoryGroup[4];
-    u32 partyModels[9];
-    u32 singleResource;
-    u32 primaryImage;
+    struct EffectSlotSet *categoryPair[2];
+    struct EffectSlotSet *categoryGroup[4];
+    struct EffectSlotSet *partyModels[9];
+    struct EffectSlotSet *singleResource;
+    struct EffMappedResource *primaryImage;
     MenuPanelHandles *resourceList;
-    u32 secondaryImage;
+    struct EffMappedResource *secondaryImage;
     u32 images[3];
     struct EffMappedResource *extraImages[2];
     MenuScrollPanel *scrollPanel;
