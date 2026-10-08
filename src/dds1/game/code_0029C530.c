@@ -135,7 +135,6 @@ extern s32 effSharedStripReferenceCount;
 
 extern u32 effSharedScalyStripResource;
 
-extern u32 effCloneSharedReferenceWithValue(u32, u32);
 
 extern u32 effWindTextureHandle;
 
@@ -371,7 +370,6 @@ extern u8 D_003DF910[];
 
 extern u8 *D_003BD074;
 
-extern void *func_0029BD90(void *);
 
 extern void func_002A6440(s32);
 
@@ -2626,19 +2624,19 @@ u32 effCreateTrackSetWithSharedReferences(u32 count, u32 kind, u32 sharedRef) {
             switch (effect->kind) {
             case 3:
                 if (D_003BC970[0] == 0) {
-                    D_003BC978[0] = (RefObj *)effCloneSharedReferenceWithValue(effFlashTextureHandles, 0x100);
+                    D_003BC978[0] = effCloneSharedReferenceWithValue((struct SdfTextureFileHeader *)effFlashTextureHandles, 0x100);
                 }
                 D_003BC970[0]++;
                 break;
             case 4:
                 if (D_003BC970[1] == 0) {
-                    D_003BC978[1] = (RefObj *)effCloneSharedReferenceWithValue(D_003BC96C, 0x101);
+                    D_003BC978[1] = effCloneSharedReferenceWithValue((struct SdfTextureFileHeader *)D_003BC96C, 0x101);
                 }
                 D_003BC970[1]++;
                 break;
             }
         } else {
-            effect->shared = func_0029BD90((void *)sharedRef);
+            effect->shared = effCreateSharedTextureReference((struct SdfTextureFileHeader *)sharedRef);
         }
     }
     return (u32)effect;
@@ -5366,13 +5364,13 @@ u32 effCreateRibbonWithSharedResource(u32 count, u32 repeat, u32 resource) {
         s32 references = effSharedRibbonReferenceCount;
         ((EffRibbonWork *)node)->resource = NULL;
         if (references == 0) {
-            D_003BC990 = effCloneSharedReferenceWithValue(effWindTextureHandle, 0x300);
+            D_003BC990 = (u32)effCloneSharedReferenceWithValue((struct SdfTextureFileHeader *)effWindTextureHandle, 0x300);
             references = effSharedRibbonReferenceCount;
         }
         references++;
         effSharedRibbonReferenceCount = references;
     } else {
-        ((EffRibbonWork *)node)->resource = func_0029BD90((void *)resource);
+        ((EffRibbonWork *)node)->resource = effCreateSharedTextureReference((struct SdfTextureFileHeader *)resource);
     }
     return (u32)node;
 }
@@ -5381,7 +5379,7 @@ void effSharedAssetReferenceRelease(s32 work) {
     if (((EffRibbonWork *)work)->resource == NULL) {
         effSharedRibbonReferenceCount = effSharedRibbonReferenceCount - 1;
         if (effSharedRibbonReferenceCount == 0) {
-            effReleaseSharedReference(D_003BC990);
+            effReleaseSharedReference((RefObj *)D_003BC990);
             D_003BC990 = 0;
         }
     }
@@ -5884,7 +5882,7 @@ void effSetModelBlockMatrixComponent(EffClassWork *work, float value) {
 /* Retain and return the lazy shared reference to /effect/scaly00.tmx. */
 u32 effRetainScalyTextureReference(void) {
     if (effSharedStripReferenceCount == 0) {
-        effSharedScalyStripResource = effCloneSharedReferenceWithValue(effScalyTextureHandle, 0x200);
+        effSharedScalyStripResource = (u32)effCloneSharedReferenceWithValue((struct SdfTextureFileHeader *)effScalyTextureHandle, 0x200);
     }
     effSharedStripReferenceCount = effSharedStripReferenceCount + 1;
     return effSharedScalyStripResource;
@@ -5894,7 +5892,7 @@ u32 effRetainScalyTextureReference(void) {
 void effReleaseScalyTextureReference(s32 unused) {
     effSharedStripReferenceCount = effSharedStripReferenceCount - 1;
     if (effSharedStripReferenceCount == 0) {
-        effReleaseSharedReference(effSharedScalyStripResource);
+        effReleaseSharedReference((RefObj *)effSharedScalyStripResource);
         effSharedScalyStripResource = 0;
     }
 }
