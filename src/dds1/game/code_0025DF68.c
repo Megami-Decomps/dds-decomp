@@ -2,8 +2,8 @@
 #include "dat_state.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
+#include "itf.h"
 
-struct FrFontCtx;
 
 typedef s16 BrsIconRecord[4];
 
@@ -122,9 +122,9 @@ void mnuDrawIconTriple(s32 x, s32 y, s32 z, s32 a, s32 b, s32 c) {
 
 extern s32 ptyCountBulletItem(s32);
 extern s32 func_003014F0(char *, const char *, ...);
-extern struct FrFontCtx *func_00197A98(s32, s32, s32, u32, const char *, s32);
-extern void func_001958A0(struct FrFontCtx *, s32, s32);
-extern void frFontQueueGlyphInSelectedSlot(struct FrFontCtx *);
+extern FrFontGlyph *func_00197A98(s32, s32, s32, s32, char *, FrFontGlyph *);
+extern s32 func_001958A0(FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern char D_003BC4F0[];
 
 /* Draw the selected item quantity; bullets include matching party slot values. */
@@ -144,7 +144,7 @@ void func_0025E6B0(s32 x, s32 y, s32 depth, ShopScene *scene, s32 alpha, s32 mod
         CampWindowParams *item = &list->cursor->camp;
         s32 quantity = datGameState->inventory.counts[item->id];
         u32 style = (s32)((f32)(alpha << 7) * 0.00390625f) | 0xA09DC300;
-        struct FrFontCtx *glyph;
+        FrFontGlyph *glyph;
 
         if (item->mode == 2) {
             quantity = ptyCountBulletItem(item->id);
@@ -231,7 +231,7 @@ void func_0025F4E0(s32 x, s32 y, s32 z, s32 unused, MenuWindowContainer *object,
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025F680);
 
-extern void frFontSetChainFlag(struct FrFontCtx *, u8);
+extern void frFontSetChainFlag(FrFontGlyph *, u8);
 
 void func_0025F7F0(s32 x, s32 y, s32 depth, ShopScene *scene, u32 alpha, s32 option) {
     char text[16];
@@ -241,7 +241,7 @@ void func_0025F7F0(s32 x, s32 y, s32 depth, ShopScene *scene, u32 alpha, s32 opt
     s32 row;
     s32 firstIndex;
     u32 color;
-    struct FrFontCtx *glyph;
+    FrFontGlyph *glyph;
 
     if (list->count != 0) {
         firstIndex = list->head->index;
@@ -308,7 +308,7 @@ void func_0025FD50(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
     u32 texture = D_003BC520;
     MenuWindowContainer *object = panel->window;
     struct MenuList *inner;
-    struct FrFontCtx *glyph;
+    FrFontGlyph *glyph;
 
     func_002BF4E0(D_0036C728[25][BRS_ICON_X] << 4, D_0036C728[25][BRS_ICON_Y] << 3,
                   0, 0x100, 0, texture, D_0036C728[25][BRS_ICON_ID], option);
@@ -333,7 +333,7 @@ extern void sndSetSequenceVolumePan(s32, s32, s32);
 void mnuDrawIconFixedEntryWithBadge(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     char text[16];
     s32 value;
-    struct FrFontCtx *glyph;
+    FrFontGlyph *glyph;
 
     func_002BF4E0(x + (D_0036C728[25][BRS_ICON_X] << 4), y + (D_0036C728[25][BRS_ICON_Y] << 3), z, scale, 0, D_003BC520, D_0036C728[25][BRS_ICON_ID], option);
     value = (s32)((f32)(scale << 7) * 0.00390625f) | 0xA09DC300;
@@ -349,7 +349,7 @@ void func_0025FFC8(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
     u32 texture = D_003BC520;
     MenuWindowContainer *object = panel->window;
     struct MenuList *inner;
-    struct FrFontCtx *glyph;
+    FrFontGlyph *glyph;
 
     func_002BF4E0(D_0036C728[25][BRS_ICON_X] << 4, D_0036C728[25][BRS_ICON_Y] << 3,
                   0, 0x100, 0, texture, D_0036C728[25][BRS_ICON_ID], option);
@@ -388,7 +388,7 @@ void func_00260100(ShopScene *state, s32 style) {
     }
 
     {
-        struct FrFontCtx *glyph = func_00197A98(0x17C0, 0x2B8, 0, style, text, 0);
+        FrFontGlyph *glyph = func_00197A98(0x17C0, 0x2B8, 0, style, text, 0);
 
         func_001958A0(glyph, 1, 0x53);
         frFontQueueGlyphInSelectedSlot(glyph);

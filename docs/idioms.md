@@ -3046,8 +3046,14 @@ unrelated linked named-resource `SdfResource`; the paired-slot release
 helper receives the same `ItfMesTextSlots` used by its allocation producer.
 The default/shared-flags glyph draw wrappers forward the renderer's
 real measured-advance result, which the sound-selector UI tests before
-advancing its message and fade state. Both games' 16 current `itf.h`
+advancing its message and fade state. Both games' initial 16 `itf.h`
 includers gate with zero differences after this owner/type closure.
+
+`frFontMeasureGlyphChain` receives the parent `FrFontGlyph *` and returns
+the existing unsigned sum of child advances and signed spacing. Utility
+draw helpers carry glyph pointers, not integer handles or controller views.
+The colored-text resource itself is one serialized `FrFontTextBank`; its
+getter returns the bank's address, which the layout helpers consume directly.
 
 ## Solar overlay state and kernel value boundary
 
@@ -3209,4 +3215,71 @@ object's message-window word is at `+0x44`; the state remains at
 `+0x240`. These are primary-owner fields, not a second tutorial view.
 `00292B90` and `002917C0` are void transition constructors; the
 tutorial's actual status-polling helper is `00292CF0`.
+
+
+## Actor-panel secondary transition state
+
+`BattleActorPanelPresentation.transitionState` at presentation `+0x70`
+is signed. DDS1 `001BA660+0x28` reads the byte with `lb`, not `lbu`,
+before dispatching the secondary pulse phases. The existing C consumers
+only store the closing phase value `4`; the signed type preserves that
+work without changing the allocation or introducing another panel view.
+
+
+## Camera-command scale and corner-frame work
+
+The corner-frame task passes the battle state's embedded camera command at
+`+0x70`, not a separate scene object. Its expansion reads
+`BtlLinkedCommand.panelScale` at command `+0x138` in DDS1 and `+0x15C` in
+DDS2. Completing this tail consumes eight bytes of the enclosing state's
+opaque gap; every later state offset is unchanged. These are the only
+by-value command embeddings, and neither command has a `sizeof` consumer.
+
+The existing unit-local `BattlePanelEdgeWork` owns both signed phase bytes
+at `+0x30/+0x31`, the frame timer at `+0x34`, the anchor vector at `+0x40`,
+four corner vectors at `+0x50`, and the signed alpha at `+0x90`. The corner
+advance helper's first argument is the same camera-command pointer even
+though that helper does not need to read it.
+
+
+## Event-viewer group window row limit
+
+The group viewer counts its two fixed rows separately from the type-`0x18`
+group chain. Initialize the visible-row limit to the window's capacity,
+then reduce it when the full count is smaller. DDS1 `0023BB20` and DDS2
+`002569D0` use capacity 15 and the same cap-first clamp as the matched
+neighboring world-node viewer. Keep the full count for `kwlnStepTwoListCursors`; pass the real
+`EvtRuntime.groupFirst` and `groupCursor` addresses to its pointer API.
+
+## Serialized waypoint and actor block
+
+`fld_waypoint.h` owns the complete WAP payload: five DDS1 or eight DDS2
+`0x20`-byte headers followed by 256 canonical `FldActorEntry` records.
+The loader/copy lengths are `0x6CA0` and `0x6D00`, and the actor arrays
+start at `+0xA0` and `+0x100`. Header `sequenceArg` is a signed word:
+the actor-trigger sequence constructor reads it with `LW`; the short
+getters begin at `+4`, so no dual-use union is warranted.
+Use the block's `headers` and `actors` members, including the selected
+actor's motion, rather than separate interior-address aliases or a
+second word-array view of the copied allocation.
+
+## Result fade rows and profile icons
+
+`BrsSkillPackageWork` owns five `0x28`-byte fade rows at `+0xDA0` in DDS1
+and `+0xAF10` in DDS2. Their state and opacity fields are at row
+`+0x14/+0x1C` and `+0x10/+0x18`, respectively. DDS2's profile-icon
+renderer reads the existing `0x68`-byte `profileAnimation` rows at
+`+0x4C/+0x50`; it does not need a second overlapping title-menu view.
+The fade updates remain ASM: direct canonical accesses fold the row base
+by `0x10` differently from retail, although the effective accesses agree.
+
+## Frame/depth packet builder callback
+
+`SdfPacketBuilder.prepare` receives the builder and the selected buffer
+index: both games' indirect callers deliberately set `$a0/$a1`.
+Its `source` is the canonical `SdfGraphObj *`, and `frameMask` is the
+upper FRAME register word at builder `+0x54`. The initializer's formals
+follow those real field types. The callback itself remains ASM: honest
+64-bit GS packing with the matched neighboring convention differs in the
+width rounding shift (`dsra32` versus retail `sra`).
 
