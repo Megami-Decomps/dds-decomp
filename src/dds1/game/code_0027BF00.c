@@ -3,6 +3,7 @@
 #include "mnu_list.h"
 #include "eff.h"
 #include "mnu_shop.h"
+#include "mnu_staff.h"
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
 #include "dat_command.h"

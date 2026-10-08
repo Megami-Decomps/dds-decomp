@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "mnu_staff.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "mnu_shop.h"
@@ -246,8 +247,6 @@ extern u8 D_0037CC74[];
 extern u8 D_0037CC3C[];
 extern u8 D_0037CAB0[];
 extern u8 D_0037CA78[];
-extern void mnuStepPartyPanelListFromInput();
-extern void mnuClearListFlags();
 extern void evtStageTestInit(s32);
 
 extern s32 func_002877A8(void);

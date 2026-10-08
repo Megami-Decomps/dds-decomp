@@ -22,10 +22,8 @@ extern s32 D_003BAA98;
 extern void func_00280048(s32);
 extern u32 mnuMapPadMaskToFlags(u32);
 extern s32 mnuGetAbilityTargetCategory(u16);
-extern void mnuStepPartyPanelListFromInput();
 extern void mnuSetPopupEntry(s32 *, char *);
 extern char D_0037CC58[];
-extern void mnuClearListFlags();
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
 /* These context pointers lack a proven allocator path; retain only their
