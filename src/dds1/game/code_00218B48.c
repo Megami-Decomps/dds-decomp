@@ -17,6 +17,7 @@
 #include "eff_transform.h"
 #include "file.h"
 #include "kwln_task_lifecycle.h"
+#include "mdl_object_stream.h"
 
 #define MDL_VIEWER_RESOURCE_SLOTS 12
 #define MDL_VIEWER_TABLE_SLOT 5
@@ -185,7 +186,8 @@ void mdlDrawViewerSelectionLabel(void);
 void sdfAppendPacket(SdfListHead *, u32);
 
 
-void sdfStreamCreateWithParams(s32, s32, s32, s32, s32);
+void sdfStreamCreateWithParams(SdfStreamFrameNode *, SdfStreamParams *, s32, s32, SdfTex *);
+void func_002EBB60(SdfStreamFrameNode *);
 
 
 
@@ -664,50 +666,31 @@ void mdlAddEffectPart(DevRequest *partList, s32 descriptorIndex) {
 }
 
 
-typedef struct MdlHandlerNode {
-    s32 a;      /* 0x00 */
-    void *b;    /* 0x04 */
-    u8 pad08[8];
-    s32 c;      /* 0x10 */
-    u8 pad14[0x98];
-} MdlHandlerNode;
-
-void mdlAppendObjectPart(DevRequest *list, s32 a, void *b, s32 c) {
-    MdlHandlerNode *node = sdfAllocAndClearQuadwords(0xAC);
+void mdlAppendObjectPart(DevRequest *list, s32 sourceAddress, SdfMemBlock *backingAllocation, s32 sourceSize) {
+    MdlObj *node = sdfAllocAndClearQuadwords(sizeof(*node));
     MdlPartEntry *entry = &((MdlPartEntry *)list->buffer)[list->usedCount];
 
-    node->c = c;
-    node->a = a;
-    node->b = b;
+    node->sourceSize = sourceSize;
+    node->sourceAddress = sourceAddress;
+    node->backingAllocation = backingAllocation;
     entry->kind = MDL_PART_OBJECT;
     entry->state = 0;
     entry->object = (s32)node;
     list->usedCount += 1;
 }
 
-typedef struct MdlObj {
-    s32 unk0;             /* 0x00 */
-    s32 handle;           /* 0x04 */
-    u8 inUse;             /* 0x08: set when an item claims the object */
-    u8 initialized;       /* 0x09 */
-    u8 pad0A[6];
-    s32 unk10;            /* 0x10 */
-    u8 pad14[0xC];
-    u8 data[1];           /* 0x20 */
-} MdlObj;
-
 void mdlObjDestroy(MdlObj *obj) {
     if (obj->initialized != 0) {
-        func_002EBB60(obj->data);
+        func_002EBB60(&obj->soundNode);
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(obj->handle));
+    sdfReleaseResourceAllocation(obj->backingAllocation);
     sdfReleaseChipBlock(obj);
 }
 
-void mdlObjInit(MdlObj *obj, s32 data, s32 attributes) {
+void mdlObjInit(MdlObj *obj, SdfTex *resource, SdfStreamParams *params) {
     if (obj->initialized == 0) {
         obj->initialized = 1;
-        sdfStreamCreateWithParams((s32)obj->data, attributes, obj->unk0, obj->unk10, data);
+        sdfStreamCreateWithParams(&obj->soundNode, params, obj->sourceAddress, obj->sourceSize, resource);
     }
 }
 
@@ -925,7 +908,9 @@ void mdlCondInitEntry(s32 itemAddress) {
         if ((u32)(s32)motionTime < (u32)minimumTime) {
             return;
         }
-        mdlObjInit(objectAddress, ((MdlResourceItem *)itemAddress)->payload.object.data, (s32)((MdlResourceItem *)itemAddress)->payload.object.attributes);
+        mdlObjInit((MdlObj *)objectAddress,
+                   (SdfTex *)((MdlResourceItem *)itemAddress)->payload.object.data,
+                   (SdfStreamParams *)((MdlResourceItem *)itemAddress)->payload.object.attributes);
     }
 }
 
