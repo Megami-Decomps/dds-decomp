@@ -423,19 +423,19 @@ extern void parUpdateBillboardCrossTriangle(s32, s32, u32);
 
 extern void parUpdateTrackPolygonCrossAxes(s32, s32, u32);
 
-void parDispatchKindUpdate(ParSystem *work, s32 index, u32 color) {
+void parDispatchKindUpdate(ParKindState *work, s32 index, u32 color) {
     switch ((u16)work->kind) {
     case 1:
-        func_00159CF0(work->vertexWordCount);
+        func_00159CF0((s32)work->value.table);
         return;
     case 2:
-        parUpdateBillboardCrossStrip(work->handle, index, color);
+        parUpdateBillboardCrossStrip((s32)work->primaryDrawSystem, index, color);
         return;
     case 3:
-        parUpdateBillboardCrossTriangle((s32)work->cells, index, color);
+        parUpdateBillboardCrossTriangle((s32)work->secondaryDraw.system, index, color);
         return;
     case 4:
-        parUpdateTrackPolygonCrossAxes((s32)work->cells, index, color);
+        parUpdateTrackPolygonCrossAxes((s32)work->secondaryDraw.modelList, index, color);
         break;
     }
 }
@@ -444,19 +444,19 @@ extern void parClearSlotFlag(s32);
 
 extern void effTrackPolyResetIndexedWork(s32);
 
-void parDispatchKindInit(ParSystem *work, s32 index) {
+void parDispatchKindInit(ParKindState *work, s32 index) {
     switch ((u16)work->kind) {
     case 1:
-        parClearSlotFlag(work->vertexWordCount);
+        parClearSlotFlag((s32)work->value.table);
         return;
     case 2:
-        parCellInit((void *)work->handle, index);
+        parCellInit(work->primaryDrawSystem, index);
         return;
     case 3:
-        parCellInit((void *)work->cells, index);
+        parCellInit(work->secondaryDraw.system, index);
         return;
     case 4:
-        effTrackPolyResetIndexedWork((s32)work->cells);
+        effTrackPolyResetIndexedWork((s32)work->secondaryDraw.modelList);
         break;
     }
 }
