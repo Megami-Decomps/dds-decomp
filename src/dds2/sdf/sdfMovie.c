@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_movie_stream.h"
+#include "sdf_movie_state.h"
 
 typedef struct DevState DevState;
 
@@ -31,11 +32,11 @@ void func_00345E18(MovObj *movie) {
         return;
     }
     if (0x20000 - stream->bufferedBytes < 0x4000) {
-        movie->state = 5;
+        movie->state = SDF_MOVIE_STATE_WAITING_FOR_BUFFER_SPACE;
         return;
     }
 
-    movie->state = 4;
+    movie->state = SDF_MOVIE_STATE_DATA_READ;
     readSize = 0x4000;
     if (remaining <= 0x4000) {
         readSize = remaining;
@@ -61,27 +62,29 @@ s32 func_00345EB0(DevState *deviceState, s32 operation, void *data, s32 bytesRea
     movie->deviceState = deviceState;
     stream = movie->stream;
 
-    if (movie->stopRequested != 0 && (movie->state < 6 || movie->state > 7)) {
-        movie->state = 7;
+    if (movie->stopRequested != 0 &&
+        (movie->state < SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK ||
+         movie->state > SDF_MOVIE_STATE_STOP_REQUESTED)) {
+        movie->state = SDF_MOVIE_STATE_STOP_REQUESTED;
         sdfDevQueueActiveOperation(deviceState);
         return 0;
     }
 
     switch (movie->state) {
-    case 0:
+    case SDF_MOVIE_STATE_INITIAL:
         if (operation == 2) {
-            movie->state = 1;
+            movie->state = SDF_MOVIE_STATE_CONTROL_REQUEST;
             sdfDevQueueControlRequest(deviceState);
         }
         break;
-    case 1:
+    case SDF_MOVIE_STATE_CONTROL_REQUEST:
         if (operation == 4) {
             movie->totalBytes = bytesRead;
             movie->remainingBytes = bytesRead;
             func_00345E18(movie);
         }
         break;
-    case 4:
+    case SDF_MOVIE_STATE_DATA_READ:
         if (operation == 5) {
             restoreInterrupts = func_0036DE70();
             stream->bufferedBytes += bytesRead;
@@ -90,17 +93,17 @@ s32 func_00345EB0(DevState *deviceState, s32 operation, void *data, s32 bytesRea
                 EIntr();
             }
             if (movie->remainingBytes == 0) {
-                movie->state = 7;
+                movie->state = SDF_MOVIE_STATE_STOP_REQUESTED;
                 sdfDevQueueActiveOperation(deviceState);
             } else {
                 func_00345E18(movie);
             }
         }
         break;
-    case 7:
+    case SDF_MOVIE_STATE_STOP_REQUESTED:
         if (operation == 7) {
             movie->deviceState = NULL;
-            movie->state = 6;
+            movie->state = SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK;
             sdfDevQueueReleaseState(deviceState);
         }
         break;
@@ -120,10 +123,10 @@ void sdfMovieProcessPendingData(MovObj *movie) {
         return;
     }
     if ((0x10000 - stream->pacBufferedBytes) < 0x4000 || ((stream->unk6C - stream->ringLength) + 0x10000) < 0x4000) {
-        movie->state = 5;
+        movie->state = SDF_MOVIE_STATE_WAITING_FOR_BUFFER_SPACE;
         return;
     }
-    movie->state = 4;
+    movie->state = SDF_MOVIE_STATE_DATA_READ;
     sdfDevQueueRead(movie->deviceState, stream->pendingCursor, remaining <= 0x4000 ? remaining : 0x4000);
 }
 
@@ -134,43 +137,45 @@ s32 func_003460D8(DevState *deviceState, s32 operation, void *data, s32 bytesRea
     movie->deviceState = deviceState;
     stream = movie->stream;
 
-    if (movie->stopRequested != 0 && (movie->state < 6 || movie->state > 7)) {
-        movie->state = 7;
+    if (movie->stopRequested != 0 &&
+        (movie->state < SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK ||
+         movie->state > SDF_MOVIE_STATE_STOP_REQUESTED)) {
+        movie->state = SDF_MOVIE_STATE_STOP_REQUESTED;
         sdfDevQueueActiveOperation(deviceState);
         return 0;
     }
 
     switch (movie->state) {
-    case 0:
+    case SDF_MOVIE_STATE_INITIAL:
         if (operation == 2) {
-            movie->state = 1;
+            movie->state = SDF_MOVIE_STATE_CONTROL_REQUEST;
             sdfDevQueueControlRequest(deviceState);
         }
         break;
-    case 1:
+    case SDF_MOVIE_STATE_CONTROL_REQUEST:
         if (operation == 4) {
             movie->totalBytes = bytesRead;
             movie->remainingBytes = bytesRead;
-            movie->state = 2;
+            movie->state = SDF_MOVIE_STATE_PAC_HEADER_READ;
             sdfDevQueueRead(deviceState, stream, 0x40);
         }
         break;
-    case 2:
+    case SDF_MOVIE_STATE_PAC_HEADER_READ:
         if (operation == 5) {
             s32 payloadBytes = stream->packetBytes - 0x40;
             stream->payloadAllocation = sdfAllocGeneralBlock(payloadBytes);
             stream->blockMask = (u8 *)sdfResourceRetainAddress(stream->payloadAllocation);
-            movie->state = 3;
+            movie->state = SDF_MOVIE_STATE_PAC_MASK_READ;
             sdfDevQueueRead(deviceState, stream->blockMask, payloadBytes);
             movie->remainingBytes -= stream->packetBytes;
         }
         break;
-    case 3:
+    case SDF_MOVIE_STATE_PAC_MASK_READ:
         if (operation == 5) {
             sdfMovieProcessPendingData(movie);
         }
         break;
-    case 4: {
+    case SDF_MOVIE_STATE_DATA_READ: {
         if (operation == 5) {
             u8 *source = data;
             s32 blockBytes = stream->blockBytes;
@@ -224,7 +229,7 @@ s32 func_003460D8(DevState *deviceState, s32 operation, void *data, s32 bytesRea
 
             movie->remainingBytes -= bytesRead;
             if (movie->remainingBytes == 0) {
-                movie->state = 7;
+                movie->state = SDF_MOVIE_STATE_STOP_REQUESTED;
                 sdfDevQueueActiveOperation(deviceState);
             } else {
                 sdfMovieProcessPendingData(movie);
@@ -232,10 +237,10 @@ s32 func_003460D8(DevState *deviceState, s32 operation, void *data, s32 bytesRea
         }
         break;
     }
-    case 7:
+    case SDF_MOVIE_STATE_STOP_REQUESTED:
         if (operation == 7) {
             movie->deviceState = NULL;
-            movie->state = 6;
+            movie->state = SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK;
             sdfDevQueueReleaseState(deviceState);
         }
         break;
@@ -285,7 +290,7 @@ s32 func_00346468(void *unused, MovObj *movie, s32 operation, u8 *data, s32 size
         if (movie->stopRequested != 0) {
             return 0;
         }
-        if (movie->state == 5) {
+        if (movie->state == SDF_MOVIE_STATE_WAITING_FOR_BUFFER_SPACE) {
             func_00345E18(movie);
         }
         break;
@@ -338,7 +343,7 @@ s32 func_00346608(void *unused, MovObj *movie, s32 operation, u8 *data, s32 size
         if (movie->stopRequested != 0) {
             return 0;
         }
-        if (movie->state == 5) {
+        if (movie->state == SDF_MOVIE_STATE_WAITING_FOR_BUFFER_SPACE) {
             sdfMovieProcessPendingData(movie);
         }
         break;
