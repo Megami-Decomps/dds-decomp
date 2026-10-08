@@ -724,7 +724,7 @@ struct MenuIconSprites;
 
 /* Terminal/shop modes share this complete 0x38C-byte scene allocation. */
 typedef struct MenuTerminalContext {
-    s32 resourceHandle;
+    struct SdfMemBlock *resourceHandle;
     u8 pad04[4];
     s32 type;
     MenuPopupState transitionWork;
