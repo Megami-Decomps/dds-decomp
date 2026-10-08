@@ -65,12 +65,6 @@ extern u16 mdlGetContextResourceGroup(MdlCtx *);
 
 extern u16 mdlGetContextResourceId(MdlCtx *);
 
-/* Extended work: a full-word kind, fallback-table index, and payload. */
-typedef struct EffParamWorkEx {
-    u32 kind;       /* 0x00 effect kind */
-    u32 tableIndex; /* 0x04 fallback index, retained for cloning */
-    void *payload;  /* 0x08 callback payload */
-} EffParamWorkEx; /* 0x0C */
 
 extern u32 effBattleMiscGetTableEntry(s32 index);
 extern s32 btlGetRuntime(void);

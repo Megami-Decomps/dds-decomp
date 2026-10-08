@@ -37,12 +37,6 @@ typedef struct EffDispatchEntry {
 } EffDispatchEntry; /* 0x28 */
 
 
-/* Extended work: a full-word kind, fallback-table index, and payload. */
-typedef struct EffParamWorkEx {
-    u32 kind;       /* 0x00 effect kind */
-    u32 tableIndex; /* 0x04 fallback index, retained for cloning */
-    void *payload;  /* 0x08 callback payload */
-} EffParamWorkEx; /* 0x0C */
 
 
 extern EffDispatchEntry effParamWorkFactories[];
