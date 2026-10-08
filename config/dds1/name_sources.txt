@@ -1788,6 +1788,7 @@
 0x00178620	effCreateChargeWork	inferred	eff effect resources and animation in effect/effPCPMisc.c
 0x001786C0	effPcpChargeReleaseResources	inferred	releases both param handles and backing allocation [names_R_FuncNames.tsv]
 0x001786F8	effCopyChargeResources	inferred	eff effect resources and animation in effect/effPCPMisc.c
+0x00178790	effPcpChargeUpdateAndDrawHistory	inferred	registered charge callback captures up to 25 rows of seven model positions, ages and scales active samples, and draws billboard history with saved animation frames
 0x00178B08	effPcpChargeSetScale	inferred	Sets the charge effect work scale parameter. [names_reviewed6.tsv]
 0x00178B10	effPcpChargeSetColor	inferred	Sets the charge effect work packed color parameter. [names_reviewed6.tsv]
 0x00178B18	effPcpSpawnOnceCreate	inferred	allocates compact work with two table parameter handles [names_R_FuncNames.tsv]
