@@ -193,13 +193,11 @@ struct PcpScatterInstanceC {
     SdfMemBlock *allocationHandle;
 };
 
-extern void *effScatterCreateDampedRing();
-
-extern void *effScatterCreateTwoColorRing();
-
-extern void *effPcpScatterCreatePlainInstance();
-
 typedef struct PcpScatterPlainInstance PcpScatterPlainInstance;
+
+extern PcpScatterInstanceB *effScatterCreateDampedRing();
+extern PcpScatterInstanceC *effScatterCreateTwoColorRing();
+extern PcpScatterPlainInstance *effPcpScatterCreatePlainInstance();
 
 
 
@@ -1678,7 +1676,7 @@ void effPcpScatterTransformMatrix(PcpScatterInstance *work, void *source) {
  * Normalize the copied delay range too, because loop restarts read that stored value. */
 /* Return the radius-damped ring variant with a shared instance clock.
  * Normalize the copied delay range too, because loop restarts read that stored value. */
-void *effScatterCreateDampedRing(src, resource)
+PcpScatterInstanceB *effScatterCreateDampedRing(src, resource)
     PcpScatterParamsB *src;
     u32 resource;
 {
@@ -1969,7 +1967,7 @@ void effScatterComposeWorkMatrix(PcpScatterInstanceB *work, void *source) {
 
 
 /* Return two-color ring work with an instance clock and normalized stored delay range. */
-void *effScatterCreateTwoColorRing(src, resource)
+PcpScatterInstanceC *effScatterCreateTwoColorRing(src, resource)
     PcpScatterParamsC *src;
     u32 resource;
 {
@@ -2320,7 +2318,7 @@ struct PcpScatterPlainInstance {
 
 /* Return flat-ring work with an identity source matrix and randomized negative ages.
  * Like the first ring variant, only the local delay modulus is normalized. */
-void *effPcpScatterCreatePlainInstance(src, resource)
+PcpScatterPlainInstance *effPcpScatterCreatePlainInstance(src, resource)
     PcpScatterPlainParams *src;
     u32 resource;
 {
