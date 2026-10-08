@@ -357,8 +357,8 @@ MantraNodePos *mnuResolveSpecialMantraNeighbor(MnuStatusResource *object, u16 id
     return NULL;
 }
 
-u32 mnuGetDefaultPanelSelector(MnuStatusResource *object) {
-    return (u32)object->menu.defaultSelector;
+MantraNodePos *mnuGetDefaultPanelSelector(MnuStatusResource *object) {
+    return object->menu.defaultSelector;
 }
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00290A78);
