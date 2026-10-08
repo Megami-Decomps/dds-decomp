@@ -42,7 +42,11 @@ typedef struct SdfBattleParameters {
     u8 padB74[8];
     f32 preemptiveModeScale; /* 0xB7C: encounter-kind-3 preemptive chance scale. */
     f32 majinRewardScale; /* 0xB80: DDS2 battle-mode-3 experience multiplier. */
-    u8 padB84[0x14];
+    f32 unkB84; /* 0xB84: source-conditioned factor, DDS2 001B1B64. */
+    f32 unkB88; /* 0xB88: target-conditioned factor, DDS2 001B1B8C. */
+    u8 unkB8C; /* 0xB8C: source-conditioned minimum chance, DDS2 001B1E90. */
+    u8 unkB8D; /* 0xB8D: target-conditioned minimum chance, DDS2 001B1EBC. */
+    u8 padB8E[0xA];
     s8 criticalPartyAttackerBias; /* 0xB98: signed critical chance adjustments. */
     s8 criticalPartyDefenderBias; /* 0xB99 */
     u8 padB9A[0xA];

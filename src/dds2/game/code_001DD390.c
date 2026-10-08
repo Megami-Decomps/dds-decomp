@@ -6259,7 +6259,7 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001EBE30);
 void func_001EC190(void) {
 }
 
-extern void func_001EE690(BtlLinkedCommand *, f32 *, s32, f32, f32);
+extern void func_001EE690(BtlLinkedCommand *, BtlCamState *, s32, f32, f32);
 
 void func_001EC198(BtlLinkedCommand *action) {
     BtlUnit *target;
@@ -6283,8 +6283,8 @@ void func_001EC198(BtlLinkedCommand *action) {
     } else {
         kind = 3;
     }
-    func_001EE690(action, action->frontCamera.position, kind, 45.0f, 0.25f);
-    func_001EE690(action, action->backCamera.position, kind, 1.0f, 0.5f);
+    func_001EE690(action, &action->frontCamera, kind, 45.0f, 0.25f);
+    func_001EE690(action, &action->backCamera, kind, 1.0f, 0.5f);
     action->motionParameter = 30.0f;
     action->flags |= 0x41;
 }

@@ -2679,7 +2679,7 @@ void btlTriggerSpecialUnitAction(void) {
         unit = (u8 *)((BtlUnit *)unit)->next;
     }
     if (unit != 0) {
-        ((BtlState *)battle)->unk_5B8 = 0;
+        ((BtlState *)battle)->postPlacementCallback = 0;
         btlInitializeEffectVectorsFromSourceRecords(unit, 1, 0x11d);
         func_001F53F0();
     }
