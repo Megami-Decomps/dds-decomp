@@ -4183,3 +4183,12 @@ The dispatcher retains its existing integer context transport and casts
 once at that pointer boundary; the other option-count providers keep
 their own existing word contracts.
 
+## Target-side camera pose override
+
+DDS1 `BtlState.cameraPoseBlendHook` at +0x628 and DDS2's corresponding
+member at +0x660 receive a `BtlLinkedCommand *` and the two target-side
+presence flags, not a `BtlUnit *`. DDS2 `001EAE88` loads +0x660 and passes
+the command plus the 0x200/0x400 scan results. The existing
+`btlStartLinkedActionPoseBlendIfEligible` dispatcher uses the same
+interface; it passes its command directly without a second actor view.
+
