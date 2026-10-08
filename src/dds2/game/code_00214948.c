@@ -5855,30 +5855,30 @@ u32 btlFlagBattleForSpecialAction(u32 unit, u32 actor, u32 action) {
 
 extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32);
 
-s32 btlSelectLowestStatTarget(BattleActor *actor) {
-    BattleActionContext *battle;
+s32 btlSelectLowestStatTarget(ActionStateLink *actor) {
+    BtlState *battle;
     u8 *statIndex;
     BtlUnit *unit;
     BtlUnit *target;
     s8 minimum;
 
-    if (!(actor->dispatchFlags & 8)) {
+    if (!(actor->pendingFlags & 8)) {
         return 0;
     }
-    if (actor->commandId != 0x108) {
+    if (actor->indexWork.skillId != 0x108) {
         return 0;
     }
-    if (!(actor->owner->flags & 0x400)) {
+    if (!(actor->unit->flags & 0x400)) {
         return 0;
     }
-    battle = (BattleActionContext *)btlGetRuntime();
+    battle = (BtlState *)btlGetRuntime();
     statIndex = &battle->effect->statIndex;
     if (*statIndex >= DAT_BASE_STAT_COUNT) {
         return 0;
     }
     target = NULL;
     minimum = 99;
-    for (unit = ((BtlState *)battle)->units; unit != NULL; unit = unit->nextActor) {
+    for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
         u32 flags = unit->flags;
         s8 value;
 
@@ -5900,7 +5900,7 @@ s32 btlSelectLowestStatTarget(BattleActor *actor) {
     if (target == NULL) {
         return 0;
     }
-    btlAppendIndexListEntry(actor->targetIndexList, target);
+    btlAppendIndexListEntry(actor->indexWork.indices, target);
     return 1;
 }
 

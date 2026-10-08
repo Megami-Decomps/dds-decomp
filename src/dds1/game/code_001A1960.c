@@ -3969,15 +3969,17 @@ void func_001AE250(s32 section, s32 delta) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001AE540);
 
+extern void btlInitCursorAndApplyAction(BtlLinkedCommand *, BtlCamState *);
+
 void btlReleaseTaskAndRefreshCursorIfFlagged(KwlnTask *handle) {
-    u8 *context = (u8 *)btlGetRuntime();
+    BtlState *work = (BtlState *)btlGetRuntime();
     u8 *data = (u8 *)kwlnTaskGetUserValue(handle);
     sdfReleaseChipBlock(data);
     btlSetTrackedTaskHandle(11, 0);
-    if (*(u16 *)(*(u8 **)(*(u8 **)(context + 0x164) + 0x18) + 0x12E) & 0x80) {
-        btlInitCursorAndApplyAction(context + 0x70, context + 0x70);
+    if (work->cameraCommand.task->unit->partyRecord.status & 0x80) {
+        btlInitCursorAndApplyAction(&work->cameraCommand, &work->cameraCommand.camera);
     }
-    *(u32 *)(context + 0x1F4) |= 0x100000;
+    work->battleFlags |= 0x100000;
 }
 
 typedef struct BattlePanelEdgeWork {
