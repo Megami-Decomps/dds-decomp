@@ -1,5 +1,6 @@
 #include "common.h"
 #include "fr_font.h"
+#include "fr_font_context.h"
 #include "mc_poll.h"
 #include "mc_path_api.h"
 #include "bill_object_api.h"
@@ -608,8 +609,8 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, u32 font) {
     frFontAddSharedGlyphFlags(1);
     D_003BD8F0 = (u32)func_001951C8((const char *)(u32)font, 0, 0, 0, 0);
     frFontClearFlagBits(1);
-    frFontSetFlagAndMeasureGlyphs(D_003BD8F0, 1);
-    frFontSetContextPair(D_003BD8F0, x << 4, y << 3);
+    frFontSetFlagAndMeasureGlyphs((struct FrFontGlyph *)(u32)D_003BD8F0, 1);
+    frFontSetContextPair((struct FrFontGlyph *)(u32)D_003BD8F0, x << 4, y << 3);
     frFontSetChildColors((struct FrFontGlyph *)(u32)D_003BD8F0, color);
     frFontDrawGlyphChain(D_003BD8F0, 0, 0x56);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_003BD8F0);

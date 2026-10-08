@@ -6,7 +6,7 @@
 
 extern void sdfInitPacketList(SdfListHead *list);
 extern void sdfAppendPacket(SdfListHead *list, u32 packetAddress);
-extern void *sdfAllocPacketAligned(s32 size);
+extern s32 sdfAllocPacketAligned(s32 size);
 extern s32 sdfConsCreateDrawPacket(SdfListHead *list, SdfTex *texture, s32 context);
 extern void *effCreateSizedDrawPacket(s32 height, s32 flags);
 struct EffectDispatchState;

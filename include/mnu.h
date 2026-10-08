@@ -903,7 +903,7 @@ typedef struct MenuStaffContext {
     MenuWindowContainer *skillWindow; /* 0x104: field-skill window; 002AAEA0 reads list->last. */
     MenuWindowContainer *activeWindow; /* 0x108 */
     u8 pad10C[0xC];
-    s32 unk118;
+    struct MenuScrollPanel *scrollPanel; /* 0x118: owned camp scroll panel */
     u8 pad11C[0x168];
     /* 002BD480 consumes the full page owner; its first list is at 0xA914. */
     MenuPageWindow partyWindow; /* 0x284..0xA927 */

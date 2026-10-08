@@ -30,7 +30,7 @@ extern void (*D_003AAFC0[])();
 extern BillDispatch effBillConstructorEntries[];
 
 extern void sdfComposeVuMatrixFromRegisters(void);
-extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfAllocPacketAligned(s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
 extern void effBattleReleaseParameterBanks(void *);
@@ -163,7 +163,7 @@ s32 billGetWorkTransformMatrix(EffectDispatchState *effect) {
 }
 
 void *effCreateSizedDrawPacket(s32 height, s32 flags) {
-    void *packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(9, height));
+    void *packet = (void *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(9, height));
     sdfConsInitPacketHeader(packet, flags | 0x54, 9, 0x525252521, height);
     return packet;
 }
@@ -201,7 +201,7 @@ void effAppendGouraudTexturedQuadPacket(s32 chain, s32 primitive,
                  s32 x1, s32 y1, f32 s1, f32 t1, s32 color1,
                  s32 x2, s32 y2, f32 s2, f32 t2, s32 color2,
                  s32 x3, s32 y3, f32 s3, f32 t3, s32 color3, s32 depth) {
-    u64 *packet = sdfAllocPacketAligned(0x90);
+    u64 *packet = (u64 *)sdfAllocPacketAligned(0x90);
 
     packet[0] = 0x20000008;
     packet[1] = 0x5000000810000000ULL;
@@ -236,7 +236,7 @@ void effAppendTexturedTrianglePacket(s32 chain, s32 color, s32 primitive,
                  s32 x0, s32 y0, f32 u0, f32 v0,
                  s32 x1, s32 y1, f32 u1, f32 v1,
                  s32 x2, s32 y2, f32 u2, f32 v2, s32 depth) {
-    u64 *packet = sdfAllocPacketAligned(0x60);
+    u64 *packet = (u64 *)sdfAllocPacketAligned(0x60);
 
     packet[0] = 0x20000005;
     packet[1] = 0x5000000510000000ULL;
@@ -246,7 +246,7 @@ void effAppendTexturedTrianglePacket(s32 chain, s32 color, s32 primitive,
 }
 
 u64 *effBuildDrawPacketWithFlags(u32 flags) {
-    u64 *packet = sdfAllocPacketAligned(0x80);
+    u64 *packet = (u64 *)sdfAllocPacketAligned(0x80);
 
     packet[0] = 7;
     packet[1] = 0x5000000700000000ULL;
@@ -457,13 +457,13 @@ void func_00167EE8(void) {
         return;
     }
     if (D_0043640C == 0) {
-        list = sdfAllocPacketAligned(0x20);
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
-        reference = sdfAllocPacketAligned(0x20);
+        reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
         sdfAppendDmaPrimary((s32)list,
             (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40),
             reference);
-        texturePacket = sdfAllocPacketAligned(0x40);
+        texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
         texturePacket[0] = 3;
         texturePacket[1] = 0x5000000310000000ULL;
         texturePacket[2] = 0x1000000000008002ULL;
@@ -473,7 +473,7 @@ void func_00167EE8(void) {
         texturePacket[6] = 0;
         texturePacket[7] = 0x3F;
         sdfAppendPacket(list, (u32)texturePacket);
-        blendPacket = sdfAllocPacketAligned(0x40);
+        blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
         blendPacket[0] = 3;
         blendPacket[1] = 0x5000000310000000ULL;
         blendPacket[2] = 0x1000000000008002ULL;
@@ -507,7 +507,7 @@ void func_00167EE8(void) {
     D_0043640C = (u32)D_0043640C + 1;
     alpha = (128 - (u32)((f32)(u32)D_0043640C * 128.0f /
                        (f32)(u32)D_00436410)) & 0xFF;
-    list = sdfAllocPacketAligned(0x20);
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
     sdfConsCreateDrawPacket(list, kwlnTextureGetHeldReference(), 0);
     sprite = sdfConsAllocateColumnPacket(1);

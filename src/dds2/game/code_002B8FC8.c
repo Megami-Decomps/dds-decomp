@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "fr_font_context.h"
 #include "sdf_chip.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
@@ -127,17 +128,13 @@ extern void mnuDrawSlotIcons();
 
 extern void frFontAddSharedGlyphFlags();
 
-extern void frFontSetContextPair();
-
-extern void frFontStoreShiftedContextValue();
-
 extern void frFontClearFlagBits();
 
 extern char D_003E7588[];
 
-extern char D_00380788[];
+extern struct SdfPoolNode *D_00380788[13][4];
 
-extern void evtStageTestUpdate();
+extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 
 extern char D_003E7790[];
 

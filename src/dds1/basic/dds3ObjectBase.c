@@ -338,8 +338,9 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32 arg);
 extern void func_00108E60(void);
 extern void func_00108F00(void);
 extern void evtSubmitGradientRectAtDepth();
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *context, s32 updateArg);
-extern s32 D_00325818[4];
+struct SdfPoolNode;
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
+extern struct SdfPoolNode *D_00325818[4];
 
 
 void func_00112100(void *object) {
@@ -364,7 +365,7 @@ void func_00112100(void *object) {
     context = (MdlCtx *)base->resourceHandle;
     inner = context->inner;
     inner->flags |= 0x20;
-    mdlProcessContextNodesAndTransforms(context, (s32)D_00325818);
+    mdlProcessContextNodesAndTransforms(context, D_00325818);
     inner->flags &= ~0x20;
     dds3SetObjectFlags(object, 0x10000);
 

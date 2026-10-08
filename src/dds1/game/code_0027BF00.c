@@ -1,4 +1,5 @@
 #include "sdf_chip.h"
+#include "fr_font_measure.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
@@ -1981,9 +1982,6 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
 }
 
 extern void func_002CD0D8(u32 textId, s32 arg1, char *out);
-
-extern u32 frFontMeasureGlyphChain(FrFontGlyph *);
-
 
 void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
     char text[0x40];

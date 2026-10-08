@@ -51,9 +51,9 @@ extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
 
 extern void func_0035B6E0(const char *fmt, ...);
 
-extern u8 D_00380828[];
+extern struct SdfPoolNode *D_00380828[4];
 
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 
 
 typedef struct EffectObjectNode {
@@ -217,7 +217,7 @@ void effRefreshModelLighting(EffModelOwner *work) {
     } else {
         model = work->model;
     }
-    mdlProcessContextNodesAndTransforms(model, (s32)D_00380828);
+    mdlProcessContextNodesAndTransforms(model, D_00380828);
 }
 
 void effApplyModelPrimaryVector(EffModelOwner *owner, u8 *vec) {
@@ -372,7 +372,7 @@ void func_002DC808(EffModelOwner *owner) {
         owner->model->inner->lighting = owner->ownedBuffer;
     }
 
-    mdlProcessContextNodesAndTransforms(owner->model, (s32)D_00380788[1]);
+    mdlProcessContextNodesAndTransforms(owner->model, D_00380788[1]);
 
     for (index = 1; index != 4; index++) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
