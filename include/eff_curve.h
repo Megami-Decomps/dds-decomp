@@ -26,4 +26,11 @@ typedef struct EffScalarTrack {
 
 f32 effSampleScalarCurve(const EffScalarCurve *curve, s32 frame, s32 duration);
 
+struct SdfColorTrack;
+struct SdfAlphaTrack;
+
+u32 effSampleColorAlphaTracks(const struct SdfColorTrack *colorTrack,
+                              const struct SdfAlphaTrack *alphaTrack,
+                              s32 frame, s32 duration);
+
 #endif

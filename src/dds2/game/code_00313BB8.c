@@ -3,6 +3,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "eff_curve.h"
 #include "sdf_projection.h"
 extern void memset();
 
@@ -1302,7 +1303,6 @@ void sdfReleaseFlagListResource(SdfFlagListWork *work) {
 extern f32 sdfViewTargetVector[4];
 extern u32 D_00438918;
 extern void vuBuildLookAtBasis(void);
-extern u32 func_002D7458(const void *, const void *, s32, s32);
 extern f32 sdfAtan2Poly(f32 ratio);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u32 effMiscRand(void *state);
@@ -1342,7 +1342,7 @@ void func_00316680(SdfFlagListWork *work) {
     }
     spawn = 1;
     vuBuildLookAtBasis();
-    color = func_002D7458(&work->params.color, &work->params.alpha, frame, maxFrames);
+    color = effSampleColorAlphaTracks(&work->params.color, &work->params.alpha, frame, maxFrames);
     count = work->params.count;
     spawnRange = count >> 4;
     halfFov = sdfSceneProjectionParameters.camera.fov * 0.5f;
@@ -1500,7 +1500,7 @@ void scrSetOperandFloatValue(SdfFlagListWork *work, float value) {
 }
 
 void func_00316DE0(SdfFlagListWork *work) {
-    func_002D7458(&work->params.color, &work->params.alpha, 0, 0);
+    effSampleColorAlphaTracks(&work->params.color, &work->params.alpha, 0, 0);
 }
 
 INCLUDE_SDATA(const s32, "game/code_00313BB8", sdfDebugLogAppendMode);
