@@ -4129,13 +4129,86 @@ BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *unit, f32 value) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E6BF8);
+typedef struct BtlPositionEffectArgs {
+    BtlUnit *unit;
+    s32 tick;
+    f32 amount;
+    f32 velocity;
+} BtlPositionEffectArgs;
 
-extern u32 func_001E6BF8(u32 *);
+u32 func_001E6BF8(BtlPositionEffectArgs *task) {
+    BtlState *runtime = (BtlState *)btlGetRuntime();
+    BtlUnit *unit = task->unit;
+    s32 flags;
+    s32 approved;
+    s32 parameter;
+    f32 amplitude;
+    f32 offset;
+    f32 velocity;
+    f32 delta;
+    f32 position[4];
+
+    if (!(unit->flags & 2)) {
+        return 1;
+    }
+    flags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord);
+    if ((unit->flags & 0x200) || (flags & 0x200)) {
+        approved = 1;
+        if (runtime->unitLiftPredicate != NULL) {
+            approved = runtime->unitLiftPredicate(unit);
+        }
+        if (approved) {
+            parameter = 13;
+            if (runtime->chooseMotion != NULL) {
+                parameter = runtime->chooseMotion(unit, 13, 0);
+            }
+            if (parameter != -1) {
+                btlApplyScaledUnitEffectParameter((u8 *)unit, parameter, 0, 1.0f);
+                return 1;
+            }
+        }
+    }
+    amplitude = unit->unkBC * unit->scale * 0.8f;
+    if (amplitude > 100.0f) {
+        amplitude = 100.0f;
+    }
+    if (task->tick == 0) {
+        task->amount = 0.0f;
+        task->velocity = 0.3f;
+    }
+    velocity = task->velocity;
+    if (velocity >= 0.0f) {
+        offset = amplitude * task->amount;
+        task->velocity = velocity + 0.02f;
+        delta = (1.0f - task->amount) * velocity;
+        task->amount += delta;
+        if (task->amount >= 0.99f) {
+            task->velocity = -0.17999998f;
+        }
+    } else {
+        offset = amplitude * task->amount;
+        task->velocity = velocity - 0.01f;
+        delta = task->amount * -velocity;
+        task->amount -= delta;
+        if (task->amount <= 0.01f) {
+            func_001E3108((u8 *)task->unit, position);
+            position[2] += task->unit->positionZOffset;
+            effObjSetInnerFirstVec(task->unit->effectObject, (u128 *)position);
+            return 1;
+        }
+    }
+    func_001E3108((u8 *)task->unit, position);
+    position[0] += offset;
+    position[2] += task->unit->positionZOffset;
+    effObjSetInnerFirstVec(task->unit->effectObject, (u128 *)position);
+    task->tick++;
+    return 0;
+}
+
 
 BtlRuntimeTask *func_001E6E18(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(16);
-    SoundTaskArgs *args;
+    BtlPositionEffectArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = func_001E6BF8;
@@ -4143,8 +4216,8 @@ BtlRuntimeTask *func_001E6E18(BtlUnit *unit) {
     task->ownerId = unit->owner;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = unit;
-    args->option = 0;
+    args->unit = unit;
+    args->tick = 0;
     return task;
 }
 
@@ -6316,9 +6389,11 @@ void btlInitializeCursorForLinkedAction(s32 action) {
 
 void func_001EC760(void) {
 }
+extern void func_001F35C8(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-void func_001EC768(u32 action) {
-    func_001F35C8(action, &((BtlLinkedCommand *)action)->frontCamera, &((BtlLinkedCommand *)action)->backCamera);
+
+void func_001EC768(BtlLinkedCommand *action) {
+    func_001F35C8(action, &action->frontCamera, &action->backCamera);
 }
 
 typedef struct {
@@ -7425,7 +7500,82 @@ void btlChooseActionPoseBlendFromActorCount(BtlLinkedCommand *action) {
 void func_001F35C0(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001F35C8);
+/* vu0 routine: camera preset quaternions are composed with the unit rotation. */
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417F30);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_004180B0);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_004180C0);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418240);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418250);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418310);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418320);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418330);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418338);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418398);
+
+void func_001F35C8(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+    f32 quat[4];
+    BattlePairCameraPreset presets[2] = {
+        {{0x1.a9fbe6p-6f, -0x1.916872p-1f, -0x1.c28f5cp-5f, 0x1.34bc6ap-1f},
+         {-0x1.47ae14p-7f, -0x1.f9db22p-1f, -0x1.4fdf3ap-5f, 0x1.89374ap-5f},
+         0x1.4p+0f, 0x1.8p+1f, 0x1p+0f, 0x1.4p+4f},
+        {{-0x1.2b020cp-4f, -0x1.9eb85p-1f, -0x1.4bc6a6p-4f, -0x1.1e353ep-1f},
+         {-0x1.47ae14p-7f, -0x1.f9db22p-1f, -0x1.4fdf3ap-5f, 0x1.89374ap-5f},
+         0x1.4p+0f, 0x1.8p+1f, 0x1p+0f, 0x1.4p+4f}
+    };
+    BtlUnit *unit = action->link->unit;
+    s32 pose;
+    f32 fov;
+    f32 dist;
+    f32 motionParameter;
+
+    if (unit->flags & 2) {
+        btlClearAllUnitDefeatCandidates();
+        btlFlagMatchingUnitsDefeatCandidate(unit->flags & 0x600);
+        btlCopyUnitRotationQuaternion((u8 *)unit, (s128 *)quat);
+        pose = effMiscRandMod(0, 2);
+        fov = action->camera.fov;
+        from->fov = fov;
+        to->fov = fov;
+        if (func_001E3230(unit, 1) == 0) {
+            btlUnitGetMuzzlePosVU(unit);
+        }
+        VU0_STORE_VF(vf10, from->position);
+        VU0_STORE_VF(vf10, to->position);
+        from->position[1] *= presets[pose].fromHeightScale;
+        dist = unit->unkC0 * unit->scale / func_00353228(fov * 0.5f);
+        from->distance = dist * presets[pose].fromDistanceScale;
+        to->distance = dist * presets[pose].toDistanceScale;
+        VU0_LOAD_VF(vf10, presets[pose].fromQuaternion);
+        VU0_LOAD_VF(vf11, quat);
+        effMiscQuatMultiplyVU();
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, D_003E9130);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, from->direction);
+        VU0_LOAD_VF(vf10, presets[pose].toQuaternion);
+        VU0_LOAD_VF(vf11, quat);
+        effMiscQuatMultiplyVU();
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, D_003E9130);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, to->direction);
+        func_001E88A8(from);
+        func_001E88A8(to);
+        motionParameter = presets[pose].motionParameter;
+        action->motionProgress = 0;
+        action->flags |= 0x41;
+        action->motionParameter = motionParameter;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001F3888);
 
@@ -7617,27 +7767,6 @@ void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *action, BtlCamState *stat
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417F30);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_004180B0);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_004180C0);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418240);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418250);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418310);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418320);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418330);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418338);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418398);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_004183D8);
 
 void func_001F4E30(BtlLinkedCommand *action) {
     CURSOR->frame = 0;
