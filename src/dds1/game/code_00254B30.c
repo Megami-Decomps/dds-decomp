@@ -1,6 +1,8 @@
 #include "dsp_name.h"
 #include "common.h"
+#include "dat_state.h"
 #include "mnu_scene.h"
+#include "mnu_profile_progress.h"
 
 #define MNU_DISPLAY_TEXT_RGB 0xA09DC300
 #define MNU_DISPLAY_DIM_TEXT_RGB 0xA09D7D00
@@ -65,15 +67,8 @@ typedef struct {
 } DspMenuList;
 
 typedef struct {
-    DspEntry *entry;
-    s32 profileId;
-    s32 value;
-    s32 cap;
-} DspProfileProgress;
-
-typedef struct {
     u8 pad00[0x70];
-    DspProfileProgress *progress; /* 0x70 */
+    MnuProfileProgress *progress; /* 0x70 */
 } DspMenuListNode;
 
 typedef struct {
@@ -120,15 +115,15 @@ void func_00254C68(s32 x, s32 y, s32 layer, DspMenuList *list, DspMenuListNode *
                    s32 drawContext) {
     char levelText[MNU_DISPLAY_TEXT_BUFFER_BYTES];
     DspEntrySpriteLookup spriteLookup = D_003BC448[0];
-    DspProfileProgress *profileProgress = node->progress;
+    MnuProfileProgress *profileProgress = node->progress;
     s32 alpha = list->drawValues[0];
     u32 textColor;
 
     if (list->selectedNode == node) {
         func_0024E310(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x58,
-                      spriteLookup.spriteIndices[profileProgress->entry->unitId] + 1, drawContext);
+                      spriteLookup.spriteIndices[profileProgress->partyRecord->unitId] + 1, drawContext);
         func_0024E310(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x59, 0xB, drawContext);
-        func_003014F0(levelText, D_003BC450, profileProgress->entry->level);
+        func_003014F0(levelText, D_003BC450, profileProgress->partyRecord->level);
         textColor = alpha & MNU_DISPLAY_ALPHA_MASK;
         textColor |= MNU_DISPLAY_TEXT_RGB;
         itfDrawGlyphChainWithWidthQuery((x >> MNU_DISPLAY_FIXED_X_SHIFT) + 0xD5, (y >> MNU_DISPLAY_FIXED_Y_SHIFT) + 0x7D, layer,
@@ -136,9 +131,9 @@ void func_00254C68(s32 x, s32 y, s32 layer, DspMenuList *list, DspMenuListNode *
                                        4, levelText, 0, drawContext);
     } else {
         func_0024E310(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x58,
-                      spriteLookup.spriteIndices[profileProgress->entry->unitId], drawContext);
+                      spriteLookup.spriteIndices[profileProgress->partyRecord->unitId], drawContext);
         func_0024E310(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x59, 0xA, drawContext);
-        func_003014F0(levelText, D_003BC450, profileProgress->entry->level);
+        func_003014F0(levelText, D_003BC450, profileProgress->partyRecord->level);
         textColor = alpha & MNU_DISPLAY_ALPHA_MASK;
         textColor |= MNU_DISPLAY_TEXT_RGB;
         itfDrawGlyphChainWithWidthQuery((x >> MNU_DISPLAY_FIXED_X_SHIFT) + 0xD5, (y >> MNU_DISPLAY_FIXED_Y_SHIFT) + 0x7D, layer,
@@ -428,16 +423,11 @@ void itfDspDrawMarksB(s32 scale, s32 context) {
     func_0024E260(0, 0, 0, scale, 0x12, context);
 }
 
-typedef struct DspProfileSelection {
-    u32 unit;
-    s32 profileId;
-} DspProfileSelection;
-
 extern u32 prfGetCapValue(u16);
-extern u32 ptyGetProfileRecordValue(u32, u16);
+extern u32 ptyGetProfileRecordValue(struct DatPartyRecord *, u16);
 extern u32 func_00250758(u16);
 
-u32 mnuGetMantraDisplayFlags(DspScene *entry, DspProfileSelection *target) {
+u32 mnuGetMantraDisplayFlags(DspScene *entry, MnuProfileProgress *target) {
     u32 flags = 0;
     u32 cap;
 
@@ -445,7 +435,7 @@ u32 mnuGetMantraDisplayFlags(DspScene *entry, DspProfileSelection *target) {
         flags |= 1;
     }
     cap = prfGetCapValue(entry->sceneId);
-    if (cap == ptyGetProfileRecordValue(target->unit, entry->sceneId)) {
+    if (cap == ptyGetProfileRecordValue(target->partyRecord, entry->sceneId)) {
         flags |= 2;
     }
     if (entry->state == 1) {
@@ -651,7 +641,7 @@ typedef struct {
 } DspDisplayObject;
 
 void mnuChooseDisplaySpriteKindFromEntryFlags(DspDisplayObject *obj, s32 scale, s32 context) {
-    DspProfileSelection *target = (DspProfileSelection *)mnuGetSelectedNodeValue();
+    MnuProfileProgress *target = (MnuProfileProgress *)mnuGetSelectedNodeValue();
     DspScene *entry = obj->entries->link->entry;
     u32 flags;
     s32 kind;
