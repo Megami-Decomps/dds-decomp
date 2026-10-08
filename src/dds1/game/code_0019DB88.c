@@ -4,6 +4,7 @@
 #include "scr.h"
 #include "sdf_sif_command.h"
 #include "sdf_projection.h"
+#include "itf_panel_draw.h"
 
 
 
@@ -511,7 +512,83 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019EE58);
+extern DrawColorRec D_00357FC8[];
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfInitPacketList(SdfListHead *);
+extern void func_00198990(DrawVertex *, DrawColorRec *, u32, s32, SdfListHead *);
+extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
+extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
+extern void itfSendTablePacket(SdfListHead *, s32, s32);
+
+void func_0019EE58(ItfMesState *panel) {
+    DrawColorRec uv;
+    DrawColorRec color;
+    DrawVertex bounds[2];
+    ItfMesBlk40 *selection = &panel->blk40;
+    BtlFade *fade = &panel->fade;
+    s32 selected = selection->savedIndex;
+    SdfListHead *list;
+    s32 x;
+    s32 y;
+    s32 expansion;
+    s32 rightExpansion;
+    s32 verticalExpansion;
+    SdfPoolNode *surface;
+
+    if (selected == -1) {
+        return;
+    }
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    x = selection->x;
+    y = (s32)selection->y - ((selection->rowCount * 21 - 21) << 3) + selected * 0xA0;
+    bounds[0].x = x - 0x1D0;
+    bounds[0].y = y + 0x10;
+    bounds[1].x = x + func_00195ED8(selected, selection->glyphChain) + 0x1D0;
+    bounds[1].y = bounds[0].y + 0x80;
+    func_00198990(bounds, D_00357FC8, panel->renderValue, 0x1D0, list);
+
+    bounds[0].x = x;
+    bounds[0].y = y + 8;
+    bounds[1].x = x + 0x60;
+    bounds[1].y = y + 0x88;
+    uv.components[0] = 0x150;
+    uv.components[1] = 0x2F0;
+    uv.components[2] = 0x1B0;
+    uv.components[3] = 0x3F0;
+    color.components[0] = 0x80;
+    color.components[1] = 0x80;
+    color.components[2] = 0x80;
+    color.components[3] = 0x26;
+    itfQueueTextureBoundQuadPacket(bounds, &uv, &color, panel->renderValue,
+                                  itfMesWork.windowTexture, 0, list);
+
+    bounds[0].x = x - 0xF0;
+    bounds[0].y = y + 0x28;
+    bounds[1].x = x - 0x30;
+    bounds[1].y = y + 0x78;
+    uv.components[0] = 0x290;
+    uv.components[1] = 0x10;
+    uv.components[2] = 0x350;
+    uv.components[3] = 0xC0;
+    color.components[3] = fade->alpha;
+    itfQueueColoredTexturedQuadPacket(bounds, &uv, &color, panel->renderValue, 0, list);
+    if (fade->timer > 0) {
+        expansion = 0x80 - fade->timer;
+        rightExpansion = expansion << 1;
+        verticalExpansion = expansion >> 1;
+        bounds[0].x -= expansion;
+        bounds[0].y -= verticalExpansion;
+        bounds[1].x += rightExpansion;
+        bounds[1].y += verticalExpansion;
+        color.components[3] = fade->timer;
+        itfSendTablePacket(list, 1, 0);
+        itfQueueColoredTexturedQuadPacket(bounds, &uv, &color, panel->renderValue, 0, list);
+        itfSendTablePacket(list, 0, 0);
+    }
+    surface = &kwlnDrawSurfaces[panel->unk10];
+    surface->append((SdfListHead *)surface, list);
+}
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019F0F8);
 
