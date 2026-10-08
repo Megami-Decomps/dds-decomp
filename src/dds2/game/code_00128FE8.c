@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
 #include "sdf_packet_list.h"
 #include "sdf_dev_state.h"
@@ -213,8 +214,6 @@ extern char D_004130D8[]; /* "%sf%03d_%03d.LB" */
 
 extern s32 func_0035C860(char *, const char *, ...);
 
-extern void *fileQueuePlainDispatchRequest(const char *path);
-
 extern void fldFormatAreaDirectory(char *, s32, s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
@@ -245,7 +244,6 @@ extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void *sdfConsAllocateColumnPacket(s32);
 
-extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 
@@ -935,7 +933,7 @@ s32 fldLoadAreaResource(void) {
         fldAreaState.resourceFloor = floor;
         fldFormatAreaDirectory(directory, area, 1);
         func_0035C860(path, D_004130D8, directory, area, floor);
-        fldAreaLoadRequest = fileQueuePlainDispatchRequest(path);
+        fldAreaLoadRequest = (u32)fileQueuePlainDispatchRequest(path);
         fldAreaState.resourceFlag = 1;
         return 1;
     }
@@ -973,7 +971,7 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
     D_00435BB4 = 1;
     fldFormatAreaDirectory(directory, area, 1);
     func_0035C860(path, D_004130D8, directory, area, room);
-    fldAreaLoadRequest = fileQueuePlainDispatchRequest(path);
+    fldAreaLoadRequest = (u32)fileQueuePlainDispatchRequest(path);
     fldAreaState.resourceFlag = 1;
     return 1;
 }
@@ -1171,7 +1169,7 @@ void fldLoadAreaPackedResources(void) {
     if (fldAreaState.area < 200) {
         fldFormatAreaResourceName(name);
         strcpy(D_00444950, name);
-        fldAreaPackedArchive = fileQueuePlainDispatchRequest(name);
+        fldAreaPackedArchive = (u32)fileQueuePlainDispatchRequest(name);
         func_002C81D0((struct FileRequest *)fldAreaPackedArchive);
         for (entry = ((FldPackedArchive *)fldAreaPackedArchive)->entries; entry != NULL;
              entry = entry->next) {

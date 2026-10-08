@@ -1504,6 +1504,8 @@
 0x00165600	effThunderShiftOriginByVectorDelta	inferred	Stores new source vector and adds its delta to the existing origin vector. [names_reviewed6.tsv]
 0x00165630	effThunderSetFragmentColor	inferred	queued
 0x00165638	effThunderGetFragmentParameters	inferred	Returns the borrowed leading fragment parameters from the owned thunder fragment work
+0x00165640	effThunderApplyFragmentDecreasingAlphaRamp	inferred	Forwards the fragment system and three packed colors to the symmetric cell alpha ramp provider.
+0x00165668	effThunderApplyFragmentIncreasingAlphaRamp	inferred	Forwards the fragment system and three packed colors to the symmetric cell alpha ramp provider.
 0x00165690	effThunderApplyFragmentColorBands	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:542:func_00165690; Applies the three stored fragment color parameters to the particle system using its symmetric five-vertex color layout.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001656B8	effThunderRandomizeFrag	inferred	fills a 12-byte fragment with two rand-modulo values and grey 0x80808080
 0x00165758	effThunderBuildFragmentStrip	inferred	builds a fragment's one-system strip by writing paired five-vector rows into its cell history
@@ -2426,6 +2428,8 @@
 0x00196450	frFontAdvanceContextCursor	inferred	increments context cursor by font advance factor and sets flags [names_reviewed5.tsv]
 0x00196478	itfReadEncodedTextLead	inferred	Reads and decodes the first byte of a two-byte text code, advancing by two.
 0x001964A0	itfReadEncodedCode	inferred	itf interface rendering and text in game/code_00196478.c
+0x001964F8	itfProcessEncodedTextControl	inferred	Combine the already consumed control lead with its next byte, apply context/voice/wait/stop controls and advance the encoded-text cursor; return whether stream processing stops.
+0x001968C0	itfBuildGlyphChainFromEncodedStream	inferred	Consume encoded bytes from the context cursor, dispatch controls and line advances, append glyphs with the current font/options, apply pending updates and return the glyph chain.
 0x00196AB0	itfDrawDefaultColorText	inferred	Draws encoded text using the fixed default color channels. [names_reviewed8.tsv]
 0x00196AE8	itfDrawCustomColorText	inferred	Draws encoded text using caller-supplied color channels. [names_reviewed8.tsv]
 0x00196B88	itfDrawColor	inferred	itf interface rendering and text in game/code_00196478.c

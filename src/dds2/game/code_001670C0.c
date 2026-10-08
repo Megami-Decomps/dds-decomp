@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "sdf_resource.h"
 #include "btl_sound.h"
 #include "kwln_sprite.h"
@@ -12,7 +13,6 @@ extern void sdfAppendPacket(SdfListHead *, u32);
 extern void sdfAppendDmaPrimary(s32, u32, SdfDmaNode *);
 extern void *sdfConsAllocateColumnPacket(s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
-extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern s32 kwlnGetDrawBufferIndex(void);
 extern SdfTex *kwlnTextureGetHeldReference(void);
 extern u8 kwlnFrameDrawPacketRecords[];

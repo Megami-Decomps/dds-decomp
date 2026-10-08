@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
 #include "sdf_packet_list.h"
 #include "sdf_dev_state.h"
@@ -146,7 +147,6 @@ extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern void *sdfConsAllocateColumnPacket(s32);
-extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 
 extern s32 D_0032E3C0[];
 extern s8 D_0032C9A0[];
@@ -826,7 +826,6 @@ void fldSetPendingAreaAndFloor(u32 area, u32 floor) {
 
 extern char D_0039FE38[]; /* "%sf%03d_%03d.LB" */
 extern s32 func_003014F0(char *, const char *, ...);
-extern u32 fileQueuePlainDispatchRequest(char *);
 extern void fldFormatAreaDirectory(char *, s32, s32);
 
 s32 fldLoadAreaResource(void) {
@@ -841,7 +840,7 @@ s32 fldLoadAreaResource(void) {
         fldAreaState.resourceFloor = floor;
         fldFormatAreaDirectory(directory, area, 1);
         func_003014F0(path, D_0039FE38, directory, area, floor);
-        fldAreaLoadRequest = fileQueuePlainDispatchRequest(path);
+        fldAreaLoadRequest = (u32)fileQueuePlainDispatchRequest(path);
         fldAreaState.resourceFlag = 1;
         return 1;
     }
@@ -882,7 +881,7 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
     D_003BA734 = 1;
     fldFormatAreaDirectory(directory, area, 1);
     func_003014F0(path, D_0039FE38, directory, area, room);
-    fldAreaLoadRequest = fileQueuePlainDispatchRequest(path);
+    fldAreaLoadRequest = (u32)fileQueuePlainDispatchRequest(path);
     fldAreaState.resourceFlag = 1;
     return 1;
 }
@@ -1097,7 +1096,7 @@ void fldLoadAreaPackedResources(void) {
     if (fldAreaState.area < 200) {
         fldFormatAreaResourceName(name);
         strcpy(D_003C9200, name);
-        fldAreaPackedArchive = fileQueuePlainDispatchRequest(name);
+        fldAreaPackedArchive = (u32)fileQueuePlainDispatchRequest(name);
         func_00288C50((struct FileRequest *)fldAreaPackedArchive);
         for (entry = ((FldPackedArchive *)fldAreaPackedArchive)->entries; entry != NULL;
              entry = entry->next) {

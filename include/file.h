@@ -101,6 +101,6 @@ typedef char FileManWork_size_must_be_0x40[(sizeof(FileManWork) == 0x40) ? 1 : -
 extern FileManWork fileManagerWork;
 
 /* Queue a callback-kind request without a completion callback; return its work. */
-void *fileQueueDefaultCallbackRequest(const char *requestName);
+struct FileRequest *fileQueueDefaultCallbackRequest(const char *requestName);
 
 #endif /* FILE_H */
