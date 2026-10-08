@@ -1855,7 +1855,74 @@ extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
 extern SoundTask *sndCreateStationedSeTask(u32);
 extern u8 *btlCreateActorModelBlendTask(u8 *, u32, u32, u32, f32);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001CFD78);
+void func_001CFD78(BtlTask *action) {
+    BtlOperandEntry spec;
+    s32 amount;
+    BtlUnit *unit;
+    BtlRuntimeTask *deltaTask;
+    BtlRuntimeTask *effectTask;
+
+    if (btlCountTasksByKind(0x45) != 0) return;
+    if (btlCountTasksByKind(0x46) != 0) return;
+    if (btlCountTasksByKind(0x47) != 0) return;
+    unit = action->unit;
+    if (btlCountTasksForOwner(unit->identity) != 0) return;
+    if (action->indexWork.phase == 15) {
+        effectTask = (BtlRuntimeTask *)fldCreateSceneGroupAction((u8 *)action, 100, 1);
+        effectTask->ownerId = unit->identity;
+        btlStartTask(effectTask);
+    }
+    switch (unit->partyRecord.status & 0x7FFF) {
+    case 0x400:
+        amount = btlSumOtherTargetHitAmounts((u8 *)action);
+        if (amount < 0) {
+            btlStartTask(sndCreateStationedSeTask(0x1000A));
+            memset(&spec, 0, sizeof(spec));
+            spec.hpDelta = amount;
+            deltaTask = btlCreateActorParameterDeltaTask(unit, &spec);
+            btlStartTask(deltaTask);
+            if (spec.hpDelta != 0) {
+                effectTask = btlCreateLinkedEffectTask(unit, spec.hpDelta, 0);
+                effectTask->startCondition.kind = 4;
+                effectTask->startCondition.value.handle = deltaTask->handle;
+                effectTask->ownerId = btlAdvanceRuntimeSequenceCounter();
+                btlStartTask(effectTask);
+            }
+            if ((unit->flags & 0x200) != 0 && btlIsUnitDefeatTriggeredByValueDelta(unit, spec.hpDelta) != 0) {
+                btlStartTask(btlCreateActorModelBlendTask((u8 *)unit, 0, 11, 2, 1.0f));
+                btlStartTask(btlCreateMoveOtherUnitsTask((u8 *)unit, 11));
+            } else {
+                btlStartTask(btlCreateStiffenDamageShakeTask((u8 *)unit, 8.0f));
+            }
+        }
+        btlDispatchStateHandler(action, 0x1A);
+        return;
+    case 0x80:
+    case 0x2000:
+        btlStartTask(sndCreateStationedSeTask(0x1000A));
+        memset(&spec, 0, sizeof(spec));
+        spec.hpDelta = btlComputeStatusPenaltyFifth(unit);
+        deltaTask = btlCreateActorParameterDeltaTask(unit, &spec);
+        btlStartTask(deltaTask);
+        if (spec.hpDelta != 0) {
+            effectTask = btlCreateLinkedEffectTask(unit, spec.hpDelta, 0);
+            effectTask->startCondition.kind = 4;
+            effectTask->startCondition.value.handle = deltaTask->handle;
+            effectTask->ownerId = btlAdvanceRuntimeSequenceCounter();
+            btlStartTask(effectTask);
+        }
+        if ((unit->flags & 0x200) != 0 && btlIsUnitDefeatTriggeredByValueDelta(unit, spec.hpDelta) != 0) {
+            btlStartTask(btlCreateActorModelBlendTask((u8 *)unit, 0, 11, 2, 1.0f));
+            btlStartTask(btlCreateMoveOtherUnitsTask((u8 *)unit, 11));
+        } else {
+            btlStartTask(btlCreateStiffenDamageShakeTask((u8 *)unit, 8.0f));
+        }
+        btlDispatchStateHandler(action, 0x1A);
+        return;
+    }
+    btlDispatchStateHandler(action, 0x1A);
+}
+
 
 void btlSpawnSceneActionAndSwitchState(void) {
 }
