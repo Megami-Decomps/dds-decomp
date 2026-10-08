@@ -628,7 +628,6 @@ extern void sndLoadAndPlayStationedSe(u32);
 
 extern u32 effCreateTrackSetWithSharedReferences(u32, u16, u32);
 
-extern u32 effRetainResource(u32);
 
 
 typedef struct EffectNodeHeader {
@@ -3895,7 +3894,7 @@ void effSetSurfaceRetainedResource(s32 *object, s32 arg) {
     if (((EffectSlotNode54 *)work)->billResource != 0) {
         billDispatchByKind(((EffectSlotNode54 *)work)->billResource);
     }
-    ((EffectSlotNode54 *)work)->billResource = effRetainResource(arg);
+    ((EffectSlotNode54 *)work)->billResource = (u32)effCreateBillboardSharingIndexedResource(arg);
     if (((EffectSlotNode54 *)work)->record != 0) {
         billSetBillboardMode(((EffectSlotNode54 *)work)->billResource, (s16)((FileKeyBlock *)((FileSlotTable *)((EffectSlotNode54 *)work)->record)->data0)->alphaTrack.surfaceIndex);
     }
@@ -4909,7 +4908,7 @@ EffectStripNode *effCreateStripNode(u32 percent) {
     node->opacity = 1.0f;
     node->active = 0;
     node->transform = effCreateTrackSetWithSharedReferences(percent * 4, 2, 0);
-    node->resource = effRetainResource(0);
+    node->resource = (u32)effCreateBillboardSharingIndexedResource(0);
     node->count = 1;
     return node;
 }
@@ -7958,7 +7957,7 @@ s32 *effBillboardMotionResourceCreate(s32 *context, u16 kind, s32 *source) {
         resource[0] = (s32)billCreateIndexed(1, (u32)source);
         break;
     case 4:
-        resource[0] = effRetainResource(source[0]);
+        resource[0] = (s32)effCreateBillboardSharingIndexedResource(source[0]);
         break;
     }
     billMarkKindOneFlag((struct BillObj *)(resource[0]));

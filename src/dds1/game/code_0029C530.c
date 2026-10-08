@@ -3662,14 +3662,13 @@ void effReplaceResourceRef(EffectSurfaceNode *node, u32 entryId, void *resource)
     node->record = fileAllocateGridRecordSlots((u16)entryId, node->handleCount, resource);
 }
 
-extern u32 effRetainResource(u32);
 
 void effSetSurfaceRetainedResource(EffectSurfaceNode *node, u32 resourceId) {
     u32 resource = node->resource;
     if (resource != 0) {
         billDispatchByKind((void *)resource);
     }
-    resource = effRetainResource(resourceId);
+    resource = (u32)effCreateBillboardSharingIndexedResource(resourceId);
     node->resource = (void *)resource;
     if (node->record != 0) {
         billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->record)->data0)->alphaTrack.surfaceIndex);
@@ -4579,7 +4578,7 @@ EffectStripNode *effCreateStripNode(u32 percent) {
     node->opacity = 1.0f;
     node->active = 0;
     node->transform = effCreateTrackSetWithSharedReferences(percent * 4, 2, 0);
-    node->resource = effRetainResource(0);
+    node->resource = (u32)effCreateBillboardSharingIndexedResource(0);
     node->count = 1;
     return node;
 }
