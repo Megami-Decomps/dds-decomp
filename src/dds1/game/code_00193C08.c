@@ -148,8 +148,6 @@ void frFontUploadClearedTexture(void) {
 }
 
 extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
-extern void frFontBindResourceSections(u8, u8 *, void *);
-
 /* Load only when the slot word is not exactly one; slot one borrows entry zero's allocation. */
 void frFontEnsureSlotLoaded(s32 slotId, const char *path) {
     s32 slotIndex = slotId & FR_FONT_BYTE_MASK;
@@ -157,7 +155,7 @@ void frFontEnsureSlotLoaded(s32 slotId, const char *path) {
 
     if (frFontSlotLoadedFlags[slotIndex] != FR_FONT_LOADED_STATE) {
         if (slotIndex == FR_FONT_SYSTEM_SLOT) {
-            frFontBindResourceSections(FR_FONT_SYSTEM_SLOT, 0, fontSystem->entries[0].buffer);
+            frFontBindResourceSections(FR_FONT_SYSTEM_SLOT, 0, fontSystem->entries[0].allocation);
         } else {
             frFontBindResourceSections(slotIndex, 0, sdfReadNamedResource(path, 0, 0));
         }
@@ -183,18 +181,20 @@ void frFontReleaseAll(void) {
  * Optional flag/value sections each start with a byte-length word; their data
  * precedes the word table and remaining resource data. Offsets are unchecked.
  */
-void frFontBindResourceSections(u8 slotIndex, u8 *resourceBytes, void *allocation) {
+void frFontBindResourceSections(
+    u8 slotIndex, u8 *resourceBytes, struct SdfMemBlock *allocation
+) {
     FrFontEntry *entry;
     s32 sectionOffset;
     u32 lookupOffset;
 
     if (resourceBytes == NULL) {
         if (allocation != NULL) {
-            resourceBytes = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((s32)allocation));
+            resourceBytes = (u8 *)sdfResourceRetainAddress(allocation);
         }
     }
     entry = &frFontWork.entries[slotIndex];
-    entry->buffer = allocation;
+    entry->allocation = allocation;
     entry->resourceHeader = (FrFontHeader *)resourceBytes;
     sectionOffset = entry->resourceHeader->tableOffset + (entry->resourceHeader->tableCount << FR_FONT_TABLE_ENTRY_SHIFT);
     if (entry->resourceHeader->hasExtra != 0) {
@@ -242,8 +242,8 @@ void frFontFreeEntry(s32 slotId) {
     }
     frFontSlotLoadedFlags[slotIndex] = 0;
     entry = &frFontWork.entries[slotIndex];
-    if (entry->buffer != NULL) {
-        sdfReleaseResourceAllocation(entry->buffer);
+    if (entry->allocation != NULL) {
+        sdfReleaseResourceAllocation(entry->allocation);
         entry->resource = NULL;
     }
     entry->slots = NULL;

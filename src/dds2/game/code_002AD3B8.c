@@ -67,8 +67,6 @@ extern u32 mnuSetPartyEntryCurrentId(DatPartyRecord *, u32);
 extern void func_002B9808(MenuWindowContainer *);
 
 
-extern void mnuRetreatListCursorDefault(struct MenuList *);
-extern void mnuAdvanceListCursorDefault(struct MenuList *);
 extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern void sndSetSequenceVolumePan();
 extern void mnuSelectPage(MenuPageWindow *, s32);

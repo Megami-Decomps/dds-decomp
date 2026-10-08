@@ -5,6 +5,7 @@
 #include "eff_math.h"
 #include "eff_channel.h"
 #include "pcp_vu0.h"
+#include "fr_font.h"
 
 #define EFF_CURVE_COMPONENT_COUNT 3
 #define EFF_CURVE_POINT_BYTES 12
@@ -67,10 +68,6 @@ typedef struct SdfMemBlock SdfMemBlock;
 extern void effSampleChannelBezier(EffVert *arg0, EffChan *arg1, s32 arg2, f32 arg3);
 
 /* List header defined in game/code_00193C08 (unsized: keeps absolute access). */
-extern u8 frFontResourceList[];
-
-/* Word at D_003D68C0+0x18 (list header defined in game/code_00193C08). */
-extern s32 D_00452378[];
 
 
 extern void func_0019AE18(void *arg0, s32 arg1, u32 arg2);
@@ -673,12 +670,12 @@ void effSetChanStep(EffChan *channel, f32 step) {
     channel->cursorStep = step;
 }
 
-void *effGetFontListHead(void) {
-    return frFontResourceList;
+FntList *effGetFontListHead(void) {
+    return &frFontResourceList;
 }
 
 s32 effGetFontListCount(void) {
-    return D_00452378[0];
+    return frFontResourceList.count;
 }
 
 INCLUDE_ASM(const s32, "game/code_0019A0C0", func_0019B558);

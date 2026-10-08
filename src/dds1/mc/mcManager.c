@@ -1,5 +1,6 @@
 #include "common.h"
 #include "mc_poll.h"
+#include "mc_path_api.h"
 
 #define MC_CARD_SLOT 0
 #define MC_SYNC_POLL_MODE 1
@@ -24,9 +25,9 @@ McPollResult mcPollStrictSuccess(void) {
     return MC_POLL_ERROR;
 }
 
-/* Start a directory change on slot zero; the u32 argument holds the path address. */
-void mcChangeCurrentDirectory(u32 port, u32 pathAddress) {
-    func_002F6D50(port, MC_CARD_SLOT, pathAddress, 0);
+/* Start a directory change on slot zero using the supplied path. */
+void mcChangeCurrentDirectory(u32 port, const char *path) {
+    func_002F6D50(port, MC_CARD_SLOT, path, 0);
 }
 
 extern s32 func_002F6858(s32, s32 *, s32 *);
@@ -46,8 +47,8 @@ McPollResult mcPollSyncResult(void) {
     return MC_POLL_PENDING;
 }
 
-/* Start directory creation on slot zero; preserve the integer path representation. */
-void mcMakeDirectory(u32 port, u32 path) {
+/* Start directory creation on slot zero using the supplied path. */
+void mcMakeDirectory(u32 port, const char *path) {
     sceMcMkdir(port, MC_CARD_SLOT, path);
 }
 
@@ -70,10 +71,10 @@ McPollResult mcPollWithExtendedErrors(void) {
     return MC_POLL_PENDING;
 }
 
-/* Request directory entries on slot zero with SDK mode zero. The caller's
- * output address is SDK argument six; its entry limit is argument five. */
-void mcReadDirectoryEntries(u32 port, u32 path, u32 entriesAddress, u32 entryLimit) {
-    func_002F6B80(port, MC_CARD_SLOT, path, 0, entryLimit, entriesAddress);
+/* Request directory entries on slot zero with SDK mode zero. The output table
+ * is SDK argument six; its entry limit is argument five. */
+void mcReadDirectoryEntries(u32 port, const char *path, void *entries, s32 entryLimit) {
+    func_002F6B80(port, MC_CARD_SLOT, path, 0, entryLimit, entries);
 }
 
 /* Accept any completed nonnegative status and write it to resultOut, which
@@ -98,8 +99,8 @@ McPollResult mcPollNonnegativeResult(s32 *resultOut) {
 }
 
 /* Start removal of the supplied path on slot zero; no completion wait here. */
-void mcDeleteFilePath(u32 port, u32 pathAddress) {
-    func_002F6F60(port, MC_CARD_SLOT, pathAddress);
+void mcDeleteFilePath(u32 port, const char *path) {
+    func_002F6F60(port, MC_CARD_SLOT, path);
 }
 
 /* Same zero-only completion policy as mcPollSyncResult; no blocking loop. */
@@ -118,8 +119,8 @@ McPollResult mcPollNormalizedCommandStatus(void) {
 
 /* Start opening a path on slot zero. The last operand is numeric open flags,
  * not a data-buffer address (callers use 1 and 0x203). */
-void mcOpenFilePath(u32 port, u32 pathAddress, u32 openFlags) {
-    func_002F61D8(port, MC_CARD_SLOT, pathAddress, openFlags);
+void mcOpenFilePath(u32 port, const char *path, s32 openFlags) {
+    func_002F61D8(port, MC_CARD_SLOT, path, openFlags);
 }
 
 /* Accept any completed nonnegative status, writing resultOut only then.
