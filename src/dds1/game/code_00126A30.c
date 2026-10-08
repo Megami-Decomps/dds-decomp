@@ -330,7 +330,7 @@ extern void mdlSuspendAllContextMotions(MdlCtx *ctx);
 extern void mdlResumeAllContextMotions(MdlCtx *ctx);
 extern void mdlAddEntryPlainEx(MdlCtx *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
                                f32 blendDurationFrames);
-extern void mdlSetNodeFloat20(MdlCtx *ctx, s32 searchId, f32 value);
+extern void mdlSetNodeFrameStep(MdlCtx *ctx, s32 searchId, f32 value);
 extern void mdlAddEntryFlagged(MdlCtx *ctx, s32 searchId, s32 motionIndex);
 extern void mdlAddEntryFlaggedEx(MdlCtx *, s32, s32, f32, f32);
 extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
@@ -2808,7 +2808,7 @@ void func_0012EA50(s32 modelMotion, s32 motion, f32 blendFrames) {
             break;
         }
         if (D_003BAD34 == 1) {
-            mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+            mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 1, 1.0f);
             mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 1, motion, blendFrames, blendFrames);
             D_003BAD34 = -1;
             if (motion == 2 && D_003BAD3C == 3) {
@@ -2817,28 +2817,28 @@ void func_0012EA50(s32 modelMotion, s32 motion, f32 blendFrames) {
                 mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 2, blendFrames, blendFrames);
             }
         } else if (D_003BAD34 == 0x66) {
-            mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+            mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 1, 1.0f);
             mdlAddEntryPlainEx((MdlCtx *)fldCameraModelObject, 1, 2, 0.0f, blendFrames);
             D_003BAD34 = -1;
             D_003BAD3C = 0x66;
             ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
             mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 2, blendFrames, blendFrames);
         } else if (D_003BAD34 == 2) {
-            mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+            mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 1, 1.0f);
             mdlAddEntryPlainEx((MdlCtx *)fldCameraModelObject, 1, 2, 0.0f, blendFrames);
             D_003BAD34 = -1;
             D_003BAD3C = 2;
             ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
             mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 2, blendFrames, blendFrames);
         } else if (D_003BAD34 == 3) {
-            mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+            mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 1, 1.0f);
             mdlAddEntryPlainEx((MdlCtx *)fldCameraModelObject, 1, 3, 0.0f, blendFrames);
             D_003BAD34 = -1;
             D_003BAD3C = 3;
             ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.0f;
             mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 3, blendFrames, blendFrames);
         } else if (D_003BAD34 == 5) {
-            mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+            mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 1, 1.0f);
             mdlAddEntryPlainEx((MdlCtx *)fldCameraModelObject, 1, 5, 0.0f, blendFrames);
             D_003BAD34 = -1;
             D_003BAD3C = 5;
@@ -2846,11 +2846,11 @@ void func_0012EA50(s32 modelMotion, s32 motion, f32 blendFrames) {
             mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, 5, blendFrames, blendFrames);
         } else if (D_003BAD34 == 6) {
             if (motion == 1) {
-                mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 2.0f);
+                mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 1, 2.0f);
                 mdlAddEntryPlain((MdlCtx *)fldCameraModelObject, 1, 6);
                 D_003BAD34 = -1;
             } else {
-                mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 2.0f);
+                mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 1, 2.0f);
                 mdlAddEntryPlain((MdlCtx *)fldCameraModelObject, 1, 4);
                 D_003BAD34 = -1;
                 D_003BAD3C = 4;
@@ -2862,7 +2862,7 @@ void func_0012EA50(s32 modelMotion, s32 motion, f32 blendFrames) {
             ((MdlCtx *)fldCameraModelObject)->first->frameStep = 1.5f;
             mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 0, motion, blendFrames, blendFrames);
             if (D_003BAD38 == 0) {
-                mdlSetNodeFloat20((MdlCtx *)fldCameraModelObject, 1, 1.0f);
+                mdlSetNodeFrameStep((MdlCtx *)fldCameraModelObject, 1, 1.0f);
                 mdlAddEntryFlaggedEx((MdlCtx *)fldCameraModelObject, 1, motion, blendFrames, blendFrames);
             }
         }
@@ -3042,8 +3042,8 @@ void fldAddCameraModelEntry(s32 value) {
 }
 
 void fldAddCameraModelPair(s32 first, s32 second) {
-    mdlSetNodeFloat20((MdlCtx *)(u32)fldCameraModelObject, 0, 1.0f);
-    mdlSetNodeFloat20((MdlCtx *)(u32)fldCameraModelObject, 1, 1.0f);
+    mdlSetNodeFrameStep((MdlCtx *)(u32)fldCameraModelObject, 0, 1.0f);
+    mdlSetNodeFrameStep((MdlCtx *)(u32)fldCameraModelObject, 1, 1.0f);
     mdlAddEntryFlagged((MdlCtx *)(u32)fldCameraModelObject, 0, first);
     mdlAddEntryFlagged((MdlCtx *)(u32)fldCameraModelObject, 1, second);
 }
