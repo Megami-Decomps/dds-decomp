@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_slot.h"
 #include "sdf_resource.h"
 #include "file_pac.h"
 #include "btl_state.h"
@@ -94,7 +95,6 @@ extern void *sdfAllocAndClearQuadwords(s32);
 
 extern void func_002C7CE8(void *);
 
-extern void sndReleaseSlotOwner(void *);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
@@ -1198,18 +1198,6 @@ s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *list, s32 row) {
 
 INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022C600);
 
-/* 0x108-byte sound cache owner, with 29 file/handle slots; not a battler. */
-typedef struct SoundSlotOwner {
-    u32 flags;
-    s32 category;
-    s32 id;
-    s32 refCount;
-    s32 load[2];
-    s32 slot[0x1D];
-    s32 handle[0x1D];
-    struct SoundSlotOwner *prev;
-    struct SoundSlotOwner *next;
-} SoundSlotOwner;
 
 /* 0x20-byte model cache entry owns a file/PAC request and a sound-cache reference. */
 typedef struct BattleModelEntry {
