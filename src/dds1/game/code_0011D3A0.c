@@ -1865,7 +1865,7 @@ void fldResetPlayerSceneObjectState(void) {
 }
 
 extern void dds3ClearObjectFlags(void *, s32);
-extern void dds3SetWorldPlayerObject(EffWorldNode *object, EffWorldNode *value);
+extern EffWorldNode * dds3SetWorldPlayerObject(EffWorldNode *object, EffWorldNode *value);
 extern void func_00111E30(u32, s32, s32);
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32, void *, void *);
 extern s32 D_0032F1DC[];
