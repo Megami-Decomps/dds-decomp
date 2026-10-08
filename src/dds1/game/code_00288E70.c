@@ -1,4 +1,5 @@
 #include "common.h"
+#include "file_pac.h"
 #include "sdf_resource.h"
 #include "file.h"
 #include "file_slot_flags.h"
@@ -378,7 +379,65 @@ void fileManDispatchDone(void) {
     SignalSema(work->sema);
 }
 
-INCLUDE_ASM(const s32, "game/code_00288E70", fileManUpdate);
+extern s32 sdfPacFeedInput(PacState *state, void *input, s32 available);
+extern void fileManCancelRequest(struct FileNode *request);
+
+/* PAC completion linkage occupies the request's last four bytes. */
+s32 fileManUpdate(void) {
+    FileManWork *work = &fileManagerWork;
+    u32 activeSlots;
+    FilePacRequest **link;
+    FilePacRequest *request;
+
+    fileManDispatchDone();
+    activeSlots = work->activeSlots;
+    while (activeSlots != 0) {
+        u32 slot = work->currentSlot;
+        u8 *input = work->buffer + (slot << 16);
+        FileTransferJob *job = (FileTransferJob *)work->slots[slot].request;
+        u8 kind = job->kind;
+
+        if (kind == 1) {
+            FilePacRequest *request = (FilePacRequest *)job;
+            if (request != NULL &&
+                sdfPacFeedInput(&request->packet, input, work->slots[slot].value) == -1) {
+                fileManCancelRequest((struct FileNode *)request);
+                request->readinessEnabled = kind;
+                if (request->callback != NULL) {
+                    FilePacRequest **append = (FilePacRequest **)&work->unk14;
+                    FilePacRequest *next;
+
+                    while ((next = *append) != NULL) {
+                        append = (FilePacRequest **)&next->pad6C[0];
+                    }
+                    *append = request;
+                }
+            }
+            WaitSema(work->sema);
+            slot++;
+            if (slot == 4) {
+                slot = 0;
+            }
+            work->currentSlot = slot;
+            work->freeSlots++;
+            work->activeSlots--;
+            SignalSema(work->sema);
+            activeSlots = work->activeSlots;
+        }
+    }
+    func_00289540();
+    link = (FilePacRequest **)&work->unk14;
+    while ((request = *link) != NULL) {
+        if (request->state == 6) {
+            *link = *(FilePacRequest **)&request->pad6C[0];
+            ((void (*)(FilePacRequest *, void *))request->callback)(request, request->userData);
+        } else {
+            link = (FilePacRequest **)&request->pad6C[0];
+        }
+    }
+    return work->head != NULL;
+}
+
 
 /* Task callback driving asynchronous file work. */
 s32 fileMan(void) {
