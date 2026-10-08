@@ -331,7 +331,7 @@ typedef struct BillObj {
         struct BillData *animationData; /* kind 1 */
     };
     BillRenderPair pair; /* 0x34: used by the mode-0x80 entry renderer */
-    u16 unk50;
+    u16 animationActive; /* 0x50: cleared by empty or completed nonlooping animation */
     u8 pad52[2];
     u32 modeFlags; /* 0x54: bits 0x40/0x80 select billboard entry modes */
     u32 unk58;
