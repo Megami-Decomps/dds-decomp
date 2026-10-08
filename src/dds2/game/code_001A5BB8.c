@@ -6153,6 +6153,22 @@ s32 btlCountEligibleLinkedActors(BtlState *battle) {
 
 extern const char *D_004367DC;
 
+typedef struct BattleRegisteredPanelWork {
+    s32 state;
+    s32 mode;
+    s32 variant;
+    s32 x;
+    s32 y;
+    s32 spriteAlpha;
+    s32 overlayAlpha;
+    s32 backdropAlpha;
+} BattleRegisteredPanelWork;
+
+typedef char BattleRegisteredPanelWork_size_check[
+    sizeof(BattleRegisteredPanelWork) == 0x20 ? 1 : -1];
+typedef char BattleRegisteredPanelWork_backdrop_offset_check[
+    (u32)&((BattleRegisteredPanelWork *)0)->backdropAlpha == 0x1C ? 1 : -1];
+
 extern s32 func_001BBA80(KwlnTask *task);
 
 extern void btlReleaseRegisteredChildTaskWork(KwlnTask *task);
@@ -6161,16 +6177,16 @@ extern void *sdfAllocAndClearQuadwords(s32);
 
 void btlStartRegisteredChildTask(void) {
     BattleController *work = (BattleController *)btlGetRuntime();
-    KwlnTask *task = kwlnTaskCreate(D_004367DC, 0x2B0E, 1, 1, func_001BBA80, btlReleaseRegisteredChildTaskWork, (u32)sdfAllocAndClearQuadwords(0x20));
+    KwlnTask *task = kwlnTaskCreate(D_004367DC, 0x2B0E, 1, 1, func_001BBA80, btlReleaseRegisteredChildTaskWork, (u32)sdfAllocAndClearQuadwords(sizeof(BattleRegisteredPanelWork)));
     func_00101968(work->drawTask, task);
     btlSetTrackedTaskHandle(7, (s32)task);
 }
 
-void func_001BBA60(s32 arg0) {
-    *(u32 *)(arg0 + 4) = 1;
-    *(u32 *)(arg0 + 12) = 0x80;
-    *(u32 *)(arg0 + 16) = 0;
-    *(u32 *)(arg0 + 0) = 0;
+void func_001BBA60(BattleRegisteredPanelWork *work) {
+    work->mode = 1;
+    work->x = 0x80;
+    work->y = 0;
+    work->state = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BBA80);
