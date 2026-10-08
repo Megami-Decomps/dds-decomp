@@ -1,42 +1,9 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "sdf_movie_stream.h"
 
 typedef struct DevState DevState;
-typedef struct MemBlock MemBlock;
-
-/* The two stream variants have distinct native allocations: 0x14 and 0x78. */
-typedef struct MovLinearStream {
-    MemBlock *allocation;
-    u8 *bufferStart;
-    u8 *readCursor;
-    u8 *writeCursor;
-    s32 bufferedBytes;
-} MovLinearStream;
-
-/* The first 0x40 bytes receive the movie-PAC file header. This is not
- * the generic PAC decoder state. */
-typedef struct MovPacStream {
-    u8 pad00[0x18];
-    s32 packetBytes;
-    s32 blockBytes;
-    u8 pad20[0x20];
-    MemBlock *payloadAllocation;
-    u8 *blockMask;
-    s32 blockIndex;
-    MemBlock *allocation;
-    void *pendingCursor;
-    u8 *pacBuffer;
-    s32 pacReadOffset;
-    s32 pacBufferedBytes;
-    u8 *ringBuffer;
-    s32 ringOffset;
-    s32 ringLength;
-    s32 unk6C;
-    s32 scratchSize;
-    u8 *scratch;
-} MovPacStream;
-
 
 s32 sdfDevQueueRead(DevState *state, void *data, s32 size);
 s32 sdfDevQueueControlRequest(DevState *state);
@@ -191,8 +158,8 @@ s32 func_003460D8(DevState *deviceState, s32 operation, void *data, s32 bytesRea
     case 2:
         if (operation == 5) {
             s32 payloadBytes = stream->packetBytes - 0x40;
-            stream->payloadAllocation = (MemBlock *)sdfAllocGeneralBlock(payloadBytes);
-            stream->blockMask = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(stream->payloadAllocation));
+            stream->payloadAllocation = sdfAllocGeneralBlock(payloadBytes);
+            stream->blockMask = (u8 *)sdfResourceRetainAddress(stream->payloadAllocation);
             movie->state = 3;
             sdfDevQueueRead(deviceState, stream->blockMask, payloadBytes);
             movie->remainingBytes -= stream->packetBytes;
