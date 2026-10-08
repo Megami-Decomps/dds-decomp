@@ -1318,9 +1318,10 @@ s32 func_002B3788(KwlnTask *callback) {
                                     (StaffSlots *)&context->displayHandle);
 
     if (menuWork->staffMode == 0) {
-        context->partyWindow.flags = (context->partyWindow.flags | 0x200) & ~0x80;
+        context->partyWindow.flags =
+            (context->partyWindow.flags | 0x200) & ~MNU_PAGE_WINDOW_SPRITE_MODE;
     } else {
-        context->partyWindow.flags |= 0x280;
+        context->partyWindow.flags |= 0x200 | MNU_PAGE_WINDOW_SPRITE_MODE;
     }
 
     if (menuWork->staffMode == 0) {
@@ -3667,4 +3668,3 @@ INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C20);
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C28);
 
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C30);
-

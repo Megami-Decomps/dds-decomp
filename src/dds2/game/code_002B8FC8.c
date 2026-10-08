@@ -1996,7 +1996,7 @@ extern void *func_002BBA38();
 void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6) {
     mnuSelectPage(menu, index);
     menu->slots[index].windowSprites = func_002BBA38(0, a2, a3, a4, a5, a6);
-    menu->flags |= 0x80;
+    menu->flags |= MNU_PAGE_WINDOW_SPRITE_MODE;
 }
 
 void mnuSetIndexedWindowPageSpriteFlags(s32 index, MenuPageWindow *menu, u32 first, u32 second) {
@@ -2019,7 +2019,7 @@ void mnuClearEntries(MenuPageWindow *menu) {
         i++;
         entry += sizeof(MenuPageSlot) / sizeof(*entry);
     } while (i < 5);
-    menu->flags &= ~0x80;
+    menu->flags &= ~MNU_PAGE_WINDOW_SPRITE_MODE;
 }
 
 
