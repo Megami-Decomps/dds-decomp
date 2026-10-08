@@ -13,6 +13,7 @@
 #include "dat_state.h"
 #include "mnu_list.h"
 #include "eff.h"
+#include "eff_resource_records.h"
 #include "fld.h"
 #include "evt_task.h"
 #include "kwln_task_lifecycle.h"

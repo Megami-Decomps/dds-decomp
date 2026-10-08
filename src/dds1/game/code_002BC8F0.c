@@ -3,6 +3,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "eff.h"
+#include "eff_resource_records.h"
 #include "eff_record_bucket.h"
 #include "eff_owner_records.h"
 #include "sdf.h"
@@ -449,17 +450,17 @@ typedef struct EffMappedHeader {
  * The required-size calculation uses the first record, not the current row.
  * Returns the record-allocation handle, not its retained address.
  */
-u32 effLoadMappedStatusRecords(u8 *source, EffMappedHeader *headerOut) {
+struct SdfMemBlock *effLoadMappedStatusRecords(u8 *source, EffMappedHeader *headerOut) {
     EffMappedHeader header;
-    u32 allocation;
+    struct SdfMemBlock *allocation;
     EffMappedRecord *records;
     u32 recordIndex = 0;
     u32 statusBytes;
 
     memcpy(&header, source, sizeof(header));
     source += sizeof(header);
-    allocation = (u32)sdfAllocGeneralBlock(header.count * EFF_STATUS_RECORD_BYTES);
-    records = (EffMappedRecord *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
+    allocation = sdfAllocGeneralBlock(header.count * EFF_STATUS_RECORD_BYTES);
+    records = (EffMappedRecord *)sdfResourceRetainAddress(allocation);
     for (; recordIndex < header.count; recordIndex++) {
         EffMappedRecord *record = &records[recordIndex];
 
@@ -490,7 +491,7 @@ u32 effCreateMappedResource(u32 sourceAddress) {
     EffMappedHeader header;
 
     mappedResource->allocation = effLoadMappedStatusRecords((u8 *)sourceAddress, &header);
-    mappedResource->records = (EffMappedRecord *)sdfResourceRetainAddress((struct SdfMemBlock *)(mappedResource->allocation));
+    mappedResource->records = (EffMappedRecord *)sdfResourceRetainAddress(mappedResource->allocation);
     mappedResource->count = header.count;
     return (u32)mappedResource;
 }
@@ -498,15 +499,15 @@ u32 effCreateMappedResource(u32 sourceAddress) {
 /* Build one zeroed status record and allocate the category's required status storage. */
 u32 *effCreateStatusBatch(u32 category) {
     EffMappedResource *batch = sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
-    u32 allocation;
+    struct SdfMemBlock *allocation;
     u32 recordAddress;
     u32 statusBytes;
     void *statuses;
 
     batch->count = 1;
-    allocation = (u32)sdfAllocGeneralBlock(EFF_STATUS_RECORD_BYTES);
+    allocation = sdfAllocGeneralBlock(EFF_STATUS_RECORD_BYTES);
     batch->allocation = allocation;
-    recordAddress = sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
+    recordAddress = sdfResourceRetainAddress(allocation);
     batch->records = (EffMappedRecord *)recordAddress;
     memset((void *)recordAddress, 0, EFF_STATUS_RECORD_BYTES);
     {
@@ -528,7 +529,7 @@ u32 effDestroyPackedBatch(EffMappedResource *batch) {
     for (recordIndex = 0; recordIndex < batch->count; recordIndex++) {
         sdfReleaseChipBlock(batch->records[recordIndex].status);
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(batch->allocation));
+    sdfReleaseResourceAllocation(batch->allocation);
     sdfReleaseChipBlock(batch);
     return 1;
 }
@@ -658,12 +659,12 @@ u8 effHasFirstTextureHandle(s32 set) {
 EffPayload *effCreatePayload(u32 recordCount) {
     u32 recordBytes = recordCount * EFF_PAYLOAD_RECORD_BYTES;
     EffPayload *header = sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
-    u32 allocation = (u32)sdfAllocGeneralBlock(recordBytes);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(recordBytes);
     u8 *records;
 
     header->count = recordCount;
     header->allocation = allocation;
-    records = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
+    records = (u8 *)sdfResourceRetainAddress(allocation);
     header->records = records;
     memset(records, 0, recordBytes);
     return header;
@@ -671,7 +672,7 @@ EffPayload *effCreatePayload(u32 recordCount) {
 
 /* Release the record allocation before freeing its small header. */
 u32 effDestroyPayload(EffPayload *payload) {
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(payload->allocation));
+    sdfReleaseResourceAllocation(payload->allocation);
     sdfReleaseChipBlock(payload);
     return 1;
 }
