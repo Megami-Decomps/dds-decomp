@@ -3944,3 +3944,32 @@ restoring current HP and MP; ee-gcc schedules the native stores to
 flag narrowing and current maximum-HP read. No alternate record view,
 artificial counter, or register-control construct is needed.
 
+
+## Callback returns and skill-runtime visibility
+
+DDS2 `0030A8A8` receives its `KwlnTask *` in `$4`, forwards it to the task
+user-value getter, and propagates the controller's `-1` result. Its real
+contract is `s32 (KwlnTask *)`, not a zero-argument void callback. DDS1
+`0027B888` takes the primary `MenuList *` and returns its cursor pointer;
+the destructor's pending value is therefore `MenuListNode *`, not `s64`.
+The legacy terminal caller in `code_00248580` retains its old extern until
+`MenuTerminalWork.list` and `MenuProgressOwner` receive a separate primary
+list-owner cutover; no cross-type cast was added to disguise that debt.
+
+DDS1's `0x38`-byte `SkillMenuRuntime` is declared before the skill-refresh
+draft that uses it. The callback's context is `CampMenuContext *`, and its
+selected party list belongs to `partyWindow.lists[0]`; neither fact requires
+a second context or runtime view. These three target bodies remain assembly
+until their independent instruction differences are resolved.
+
+## Timeline clamp halves share their parameter union
+
+DDS1 `002429F0` walks the existing `EvtRuntime` groups and keys. Duration
+columns update `EvtRuntimeChild.duration`; the supported end-offset kinds
+use the two signed halves of the existing `p08` parameter union. Both clamp
+writes therefore belong to `EvtViewParam`, rather than an independent
+scalar beside a one-half union. This primary-owner closure reproduces the
+native group-type reload at both clamp joins and both generated switch
+tables with ordinary C. Unsupported end-offset kinds retain the previous
+`end` value, as the native traversal does.
+

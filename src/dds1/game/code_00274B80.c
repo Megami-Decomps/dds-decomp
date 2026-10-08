@@ -1283,6 +1283,23 @@ void func_00277DF0(s32 context) {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuDrawEntry);
 
+/* The camp initializer allocates and clears this complete 0x38-byte child.
+ * Skill pages own four category windows and a separate selected-slot window. */
+typedef struct SkillMenuRuntime {
+    struct SdfMemBlock *allocation;
+    u8 pad04[4];
+    s32 active;
+    struct MenuList *categoryList;
+    MenuWindowContainer *skillWindows[4];
+    void *panel;
+    MenuWindowContainer *selectedWindow;
+    s32 activeMark;
+    s32 motionSelection;
+    u32 selectionFlags;
+    u32 selectedIndex;
+} SkillMenuRuntime;
+
+typedef char SkillMenuRuntimeSizeCheck[(sizeof(SkillMenuRuntime) == 0x38) ? 1 : -1];
 INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuRefreshEntries);
 
 typedef struct SkillInfo {
@@ -1505,24 +1522,7 @@ void mnuCampMenuHandleInput(KwlnTask *task) {
     }
 }
 
-/* The camp initializer allocates and clears this complete 0x38-byte child.
- * Skill pages own four category windows and a separate selected-slot window. */
-typedef struct SkillMenuRuntime {
-    struct SdfMemBlock *allocation;
-    u8 pad04[4];
-    s32 active;
-    struct MenuList *categoryList;
-    MenuWindowContainer *skillWindows[4];
-    void *panel;
-    MenuWindowContainer *selectedWindow;
-    s32 activeMark;
-    s32 motionSelection;
-    u32 selectionFlags;
-    u32 selectedIndex;
-} SkillMenuRuntime;
-
-typedef char SkillMenuRuntimeSizeCheck[(sizeof(SkillMenuRuntime) == 0x38) ? 1 : -1];
-extern void ptySkillMenuRefreshEntries(s32);
+extern void ptySkillMenuRefreshEntries(CampMenuContext *);
 extern u8 D_0037CC90[];
 
 void ptySkillMenuHandleSelection(KwlnTask *callback) {
@@ -1562,7 +1562,7 @@ void ptySkillMenuHandleSelection(KwlnTask *callback) {
         mnuInitPartyPanelSlots(&context->partyPanel);
         func_00280048((s32)&context->partyWindow);
         mnuSetPopupEntryFlagged((s32)&context->popupState, D_0037CC90);
-        ptySkillMenuRefreshEntries((s32)context);
+        ptySkillMenuRefreshEntries(context);
         window->list->stateFlags |= MNU_LIST_SELECTION_FLAG;
     }
     if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
