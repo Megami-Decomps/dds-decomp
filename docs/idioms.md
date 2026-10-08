@@ -4094,3 +4094,16 @@ offset. These typed accesses preserve both providers and both complete
 121-function units exactly. The initial list argument remains the
 existing callback word API, with conversions only at the packet boundary.
 
+## SDK interrupt-enable sequence
+
+`EE_ENABLE_INTERRUPTS_SYNC()` in `ee_mmi.h` represents the single SDK
+hardware operation `sync; ei`: complete prior stores before enabling
+interrupt handlers. The sequence occurs independently in DDS2
+`00345268`, `00345298`, and `00329F30`, and in DDS1 `002D2140`.
+Keep the two hardware instructions in one intrinsic rather than modeling
+them as independent compiler operations. Exact consumers are DDS1
+`002D2140` (51-function unit), DDS2 `00329F30` (5-function unit), and
+`00345268` (62-function unit), verified by whole-unit `check_unit.py`.
+Their callback results and actual argument contracts remain ordinary C;
+the only assembly is the evidenced SDK operation that C cannot express.
+
