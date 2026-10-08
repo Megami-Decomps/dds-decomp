@@ -67,7 +67,7 @@ extern u32 fldDisplayRow;
 
 extern s32 fldBackgroundBuffer;
 
-extern s32 sdfAllocateBlockBySizeThreshold(u32);
+extern void *sdfAllocateBlockBySizeThreshold(s32);
 
 extern u32 D_00436088;
 
@@ -2244,7 +2244,7 @@ void fldDrawStretchableFrame(s32 x, s32 y, s32 width, s32 height) {
 
 void fldAllocateBackgroundBuffer(void) {
     if (fldBackgroundBuffer == 0) {
-        fldBackgroundBuffer = sdfAllocateBlockBySizeThreshold(0x70000);
+        fldBackgroundBuffer = (s32)(u32)sdfAllocateBlockBySizeThreshold(0x70000);
     }
 }
 
