@@ -509,7 +509,53 @@ DatPartyRecord *dds3FindEntry(s32 rosterIndex) {
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "game/code_00119900", ptyRebalanceFrontline);
+/* Promote the selected roster entry into the current frontline boundary. */
+s32 ptyRebalanceFrontline(s32 rosterIndex) {
+    DatGameState *scanState;
+    DatPartyRecord savedEntry;
+    const s32 selectedIndex = dds3FindEntryIndex(rosterIndex);
+    s32 frontlineCount;
+    s32 scanIndex;
+
+    if (selectedIndex < 0) {
+        return 0;
+    }
+
+    {
+        DatPartyRecord *const selectedEntry = &datGameState->party[selectedIndex];
+        if ((selectedEntry->flags & 2) != 0) {
+            return 0;
+        }
+    }
+
+    scanState = datGameState;
+    scanIndex = 0;
+    frontlineCount = 0;
+    for (; scanIndex < PTY_ACTIVE_ROSTER_COUNT; scanIndex++) {
+        DatPartyRecord *const currentEntry = &scanState->party[scanIndex];
+        u16 flags = currentEntry->flags;
+
+        if ((u16)(flags & 1) != 0) {
+            if ((flags & 2) == 0) {
+                break;
+            }
+            frontlineCount++;
+        }
+    }
+
+    if (frontlineCount >= 3) {
+        frontlineCount--;
+        scanState->party[frontlineCount].flags &= (u16)~2;
+    }
+
+    datGameState->party[selectedIndex].flags |= 2;
+    memcpy(&savedEntry, &datGameState->party[selectedIndex], sizeof(savedEntry));
+    memcpy(&datGameState->party[selectedIndex],
+           &datGameState->party[frontlineCount], sizeof(savedEntry));
+    memcpy(&datGameState->party[frontlineCount], &savedEntry,
+           sizeof(savedEntry));
+    return 1;
+}
 
 u8 ptyIsRosterEntryPresent(s32 rosterIndex) {
     return dds3FindEntry(rosterIndex) != 0;

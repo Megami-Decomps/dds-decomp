@@ -822,16 +822,16 @@ EffPCPTwinWork *effTwinEffectCreateFromTable(void *src) {
 }
 
 void effTwinEffectRelease(EffPCPTwinWork *work) {
-    s32 *a = (s32 *)work->shared;
-    s32 *b = (s32 *)work->pair;
-    s32 i;
+    s32 *sharedHandleCursor = (s32 *)work->shared;
+    s32 *pairHandleCursor = (s32 *)work->pair;
+    s32 pairIndex;
 
-    for (i = 0; i < 8; i++) {
-        effDispatchParameterDataAndFreeWork(a[0]);
-        effDispatchParameterDataAndFreeWork(b[1]);
-        effDispatchParameterDataAndFreeWork(b[0]);
-        a++;
-        b += 2;
+    for (pairIndex = 0; pairIndex < 8; pairIndex++) {
+        effDispatchParameterDataAndFreeWork(sharedHandleCursor[0]);
+        effDispatchParameterDataAndFreeWork(pairHandleCursor[1]);
+        effDispatchParameterDataAndFreeWork(pairHandleCursor[0]);
+        sharedHandleCursor++;
+        pairHandleCursor += 2;
     }
     sdfReleaseChipBlock(work);
 }
@@ -3351,35 +3351,35 @@ void effPcpTripleHandleCreateFromTable(void *data) {
 
 EffPCPTripleWork *effPcpTripleHandleDuplicate(EffPCPTripleWork *src) {
     EffPCPTripleWork *work;
-    u32 *from;
-    u32 *to;
-    u32 i;
+    u32 *sourceHandleCursor;
+    u32 *destinationHandleCursor;
+    u32 slotIndex;
 
     work = sdfAllocSizeClassBlock(0xAC);
     work->head = src->head;
     work->frame = 0;
     work->color = 0x80808080;
-    from = (src->handles + 14);
-    to = (work->handles + 14);
-    for (i = 0; i < 7; i++) {
-        to[-14] = effCloneSourceWithTypeHandler(from[-14]);
-        to[-7] = effCloneSourceWithTypeHandler(from[-7]);
-        to[0] = effCloneSourceWithTypeHandler(from[0]);
-        from++;
-        to++;
+    sourceHandleCursor = (src->handles + 14);
+    destinationHandleCursor = (work->handles + 14);
+    for (slotIndex = 0; slotIndex < 7; slotIndex++) {
+        destinationHandleCursor[-14] = effCloneSourceWithTypeHandler(sourceHandleCursor[-14]);
+        destinationHandleCursor[-7] = effCloneSourceWithTypeHandler(sourceHandleCursor[-7]);
+        destinationHandleCursor[0] = effCloneSourceWithTypeHandler(sourceHandleCursor[0]);
+        sourceHandleCursor++;
+        destinationHandleCursor++;
     }
     return work;
 }
 
 void effPcpTripleHandleRelease(EffPCPTripleWork *work) {
-    u32 *p = work->handles;
-    u32 i;
+    u32 *handleCursor = work->handles;
+    u32 slotIndex;
 
-    for (i = 0; i < 7; i++) {
-        effDestroyNode(p[14]);
-        effDestroyNode(p[7]);
-        effDestroyNode(p[0]);
-        p++;
+    for (slotIndex = 0; slotIndex < 7; slotIndex++) {
+        effDestroyNode(handleCursor[14]);
+        effDestroyNode(handleCursor[7]);
+        effDestroyNode(handleCursor[0]);
+        handleCursor++;
     }
     sdfReleaseChipBlock(work);
 }
@@ -3512,32 +3512,32 @@ EffPCPBlockSetWork *effPcpBuildBlockSet(args)
 
 /* Duplicate the block-set handles and allocate its three optional instance lists. */
 void effPcpDuplicateBlockSetHandles(EffPCPBlockSetWork *work, EffPCPBlockSetWork *src) {
-    EffPCPBlockModel *model;
-    u32 i;
-    u32 j;
-    u32 n;
+    EffPCPBlockModel *headModel;
+    u32 handleIndex;
+    u32 groupIndex;
+    u32 groupHandleCount;
 
     work->headHandle = effParamWorkDuplicate(src->headHandle);
-    for (i = 0; i < ARRAY_COUNT(work->handleA); i++) {
-        work->handleA[i] = effParamWorkDuplicate(src->handleA[i]);
+    for (handleIndex = 0; handleIndex < ARRAY_COUNT(work->handleA); handleIndex++) {
+        work->handleA[handleIndex] = effParamWorkDuplicate(src->handleA[handleIndex]);
     }
-    model = effParamWorkGetData(work->headHandle);
-    work->count = model->info->unk2E;
-    for (j = 0; j < ARRAY_COUNT(work->list); j++) {
-        if (work->params.groupSize[j] > 0) {
-            n = work->count * work->params.groupSize[j];
-            work->alloc[j] = (u32)sdfAllocGeneralBlock(n * 4);
-            work->list[j] = (void *)sdfResourceRetainAddress((void *)work->alloc[j]);
-            work->list[j][0] = effParamWorkDuplicate(src->list[j][0]);
-            for (i = 1; i < n; i++) {
-                work->list[j][i] = 0;
+    headModel = effParamWorkGetData(work->headHandle);
+    work->count = headModel->info->unk2E;
+    for (groupIndex = 0; groupIndex < ARRAY_COUNT(work->list); groupIndex++) {
+        if (work->params.groupSize[groupIndex] > 0) {
+            groupHandleCount = work->count * work->params.groupSize[groupIndex];
+            work->alloc[groupIndex] = (u32)sdfAllocGeneralBlock(groupHandleCount * 4);
+            work->list[groupIndex] = (void *)sdfResourceRetainAddress((void *)work->alloc[groupIndex]);
+            work->list[groupIndex][0] = effParamWorkDuplicate(src->list[groupIndex][0]);
+            for (handleIndex = 1; handleIndex < groupHandleCount; handleIndex++) {
+                work->list[groupIndex][handleIndex] = 0;
             }
         } else {
-            work->alloc[j] = 0;
+            work->alloc[groupIndex] = 0;
         }
     }
-    for (i = 0; i < ARRAY_COUNT(work->handleB); i++) {
-        work->handleB[i] = effParamWorkDuplicate(src->handleB[i]);
+    for (handleIndex = 0; handleIndex < ARRAY_COUNT(work->handleB); handleIndex++) {
+        work->handleB[handleIndex] = effParamWorkDuplicate(src->handleB[handleIndex]);
     }
     work->tailHandle = effParamWorkDuplicate(src->tailHandle);
 }
@@ -3563,28 +3563,28 @@ EffPCPBlockSetWork *effPcpBlockSetCloneShared(EffPCPBlockSetWork *src) {
 }
 
 void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work) {
-    u32 i;
-    u32 j;
-    u32 n;
+    u32 groupIndex;
+    u32 handleIndex;
+    u32 groupHandleCount;
 
     if (work->source == NULL) {
         effDispatchParameterDataAndFreeWork(work->headHandle);
-        for (j = 0; j < 5; j++) {
-            effDispatchParameterDataAndFreeWork(work->handleA[j]);
+        for (handleIndex = 0; handleIndex < 5; handleIndex++) {
+            effDispatchParameterDataAndFreeWork(work->handleA[handleIndex]);
         }
-        for (i = 0; i < 3; i++) {
-            if (work->alloc[i] != 0) {
-                n = work->count * work->params.groupSize[i];
-                for (j = 0; j < n; j++) {
-                    if (work->list[i][j] != 0) {
-                        effDispatchParameterDataAndFreeWork(work->list[i][j]);
+        for (groupIndex = 0; groupIndex < 3; groupIndex++) {
+            if (work->alloc[groupIndex] != 0) {
+                groupHandleCount = work->count * work->params.groupSize[groupIndex];
+                for (handleIndex = 0; handleIndex < groupHandleCount; handleIndex++) {
+                    if (work->list[groupIndex][handleIndex] != 0) {
+                        effDispatchParameterDataAndFreeWork(work->list[groupIndex][handleIndex]);
                     }
                 }
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->alloc[i]));
+                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->alloc[groupIndex]));
             }
         }
-        for (j = 0; j < 5; j++) {
-            effDispatchParameterDataAndFreeWork(work->handleB[j]);
+        for (handleIndex = 0; handleIndex < 5; handleIndex++) {
+            effDispatchParameterDataAndFreeWork(work->handleB[handleIndex]);
         }
         effDispatchParameterDataAndFreeWork(work->tailHandle);
     }
@@ -4909,64 +4909,64 @@ typedef struct EffPCPGroupSet {
     void *workHandle;
 } EffPCPGroupSet;
 
-EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *first, u32 *blocks) {
-    u32 count = first->count;
-    void *resource = sdfAllocGeneralBlock(count * 0x18 + 0x180);
-    EffPCPGroupSet *copy = (void *)sdfResourceRetainAddress(resource);
-    EffPCPGroupEntry *entry;
-    u32 g;
-    u32 i;
+EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *header, u32 *sourceResources) {
+    u32 entryCount = header->count;
+    void *workResource = sdfAllocGeneralBlock(entryCount * 0x18 + 0x180);
+    EffPCPGroupSet *groupSet = (void *)sdfResourceRetainAddress(workResource);
+    EffPCPGroupEntry *groupEntryCursor;
+    u32 index;
+    u32 duplicateIndex;
 
-    copy->head = *first;
-    copy->scale = 1.0f;
-    copy->color = 0x80808080;
-    copy->workHandle = resource;
-    copy->unk16C = first->spawnParams.start[1];
-    entry = (EffPCPGroupEntry *)(copy + 1);
-    copy->entries = entry;
-    copy->duplicates = 0;
-    if (blocks != NULL) {
-        u32 size = count * 16;
-        u32 *list = blocks;
-        u32 offset;
-        u32 stride;
-        u8 *flags;
+    groupSet->head = *header;
+    groupSet->scale = 1.0f;
+    groupSet->color = 0x80808080;
+    groupSet->workHandle = workResource;
+    groupSet->unk16C = header->spawnParams.start[1];
+    groupEntryCursor = (EffPCPGroupEntry *)(groupSet + 1);
+    groupSet->entries = groupEntryCursor;
+    groupSet->duplicates = 0;
+    if (sourceResources != NULL) {
+        u32 allocationBytes = entryCount * 16;
+        u32 *sourceResourceCursor = sourceResources;
+        u32 groupByteOffset;
+        u32 groupByteWidth;
+        u8 *activeGroupFlags;
 
-        g = 0;
-        copy->duplicateHandle = sdfAllocGeneralBlock(size);
-        flags = first->activeGroups;
-        offset = 0;
-        stride = count * 4;
-        copy->duplicates = (void *)sdfResourceRetainAddress(copy->duplicateHandle);
-        memset(copy->duplicates, 0, size);
-        for (; g < 4; g++) {
-            u32 *slot = (u32 *)((u8 *)copy->duplicates + offset);
+        index = 0;
+        groupSet->duplicateHandle = sdfAllocGeneralBlock(allocationBytes);
+        activeGroupFlags = header->activeGroups;
+        groupByteOffset = 0;
+        groupByteWidth = entryCount * 4;
+        groupSet->duplicates = (void *)sdfResourceRetainAddress(groupSet->duplicateHandle);
+        memset(groupSet->duplicates, 0, allocationBytes);
+        for (; index < 4; index++) {
+            u32 *destinationHandles = (u32 *)((u8 *)groupSet->duplicates + groupByteOffset);
 
-            if (*flags != 0) {
-                u32 head;
+            if (*activeGroupFlags != 0) {
+                u32 firstCreatedHandle;
 
-                if (g < 2) {
-                    *slot = effParamWorkCreate(0, (void *)*list);
+                if (index < 2) {
+                    *destinationHandles = effParamWorkCreate(0, (void *)*sourceResourceCursor);
                 } else {
-                    *slot = effParamWorkCreate(6, (void *)*list);
+                    *destinationHandles = effParamWorkCreate(6, (void *)*sourceResourceCursor);
                 }
-                head = *slot;
-                for (i = 1; i < count; i++) {
-                    slot++;
-                    *slot = effParamWorkDuplicate(head);
+                firstCreatedHandle = *destinationHandles;
+                for (duplicateIndex = 1; duplicateIndex < entryCount; duplicateIndex++) {
+                    destinationHandles++;
+                    *destinationHandles = effParamWorkDuplicate(firstCreatedHandle);
                 }
             }
-            list++;
-            flags++;
-            offset += stride;
+            sourceResourceCursor++;
+            activeGroupFlags++;
+            groupByteOffset += groupByteWidth;
         }
     }
-    for (g = 0; g < count; g++) {
-        entry->handle = (u32)effThunderFragCreate(&first->spawnParams);
-        entry->frame = 0;
-        entry++;
+    for (index = 0; index < entryCount; index++) {
+        groupEntryCursor->handle = (u32)effThunderFragCreate(&header->spawnParams);
+        groupEntryCursor->frame = 0;
+        groupEntryCursor++;
     }
-    return copy;
+    return groupSet;
 }
 
 void effPcpGroupSetCreateFromTable(void *args) {
@@ -4986,69 +4986,69 @@ void effPcpGroupSetCreateFromTable(void *args) {
 }
 
 EffPCPGroupSet *effBlockSetCloneWithDuplicates(EffPCPGroupSet *work) {
-    EffPCPGroupSet *copy = effPcpGroupSetCreate(&work->head, 0);
-    u32 group;
-    u32 offset;
-    u32 count;
-    u32 size;
-    u32 stride;
-    u8 *flags;
-    u32 i;
+    EffPCPGroupSet *groupSet = effPcpGroupSetCreate(&work->head, 0);
+    u32 groupIndex;
+    u32 groupByteOffset;
+    u32 entryCount;
+    u32 allocationBytes;
+    u32 groupByteWidth;
+    u8 *activeGroupFlags;
+    u32 entryIndex;
 
     if (work->duplicates != 0) {
-        count = work->head.count;
-        size = count * 16;
-        stride = count * 4;
-        group = 0;
-        flags = work->head.activeGroups;
-        offset = 0;
-        copy->duplicateHandle = sdfAllocGeneralBlock(size);
-        copy->duplicates = (void *)sdfResourceRetainAddress(copy->duplicateHandle);
-        memset(copy->duplicates, 0, size);
-        for (; group < 4; group++) {
-            u32 *slot = (u32 *)((u8 *)copy->duplicates + offset);
+        entryCount = work->head.count;
+        allocationBytes = entryCount * 16;
+        groupByteWidth = entryCount * 4;
+        groupIndex = 0;
+        activeGroupFlags = work->head.activeGroups;
+        groupByteOffset = 0;
+        groupSet->duplicateHandle = sdfAllocGeneralBlock(allocationBytes);
+        groupSet->duplicates = (void *)sdfResourceRetainAddress(groupSet->duplicateHandle);
+        memset(groupSet->duplicates, 0, allocationBytes);
+        for (; groupIndex < 4; groupIndex++) {
+            u32 *destinationHandles = (u32 *)((u8 *)groupSet->duplicates + groupByteOffset);
 
-            if (*flags != 0) {
-                u32 first = *(u32 *)(offset + (u32)work->duplicates);
-                for (i = 0; i < count; i++) {
-                    *slot++ = effParamWorkDuplicate(first);
+            if (*activeGroupFlags != 0) {
+                u32 sourceHandle = *(u32 *)(groupByteOffset + (u32)work->duplicates);
+                for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
+                    *destinationHandles++ = effParamWorkDuplicate(sourceHandle);
                 }
             }
-            flags++;
-            offset += stride;
+            activeGroupFlags++;
+            groupByteOffset += groupByteWidth;
         }
     }
-    return copy;
+    return groupSet;
 }
 
 void effBlockSetRelease(EffPCPGroupSet *work) {
-    u32 i = 0;
-    u32 count = work->head.count;
-    EffPCPGroupEntry *entry = work->entries;
-    u32 *list;
+    u32 releaseIndex = 0;
+    u32 releaseCount = work->head.count;
+    EffPCPGroupEntry *fragmentEntryCursor = work->entries;
+    u32 *duplicateHandleBase;
     u32 *duplicate;
 
-    if (count != 0) {
+    if (releaseCount != 0) {
         do {
-            u32 handle = entry->handle;
-            entry++;
-            i++;
-            effThunderReleaseFragmentWork((void *)handle);
-        } while (i < count);
+            u32 currentHandle = fragmentEntryCursor->handle;
+            fragmentEntryCursor++;
+            releaseIndex++;
+            effThunderReleaseFragmentWork((void *)currentHandle);
+        } while (releaseIndex < releaseCount);
     }
-    list = work->duplicates;
-    count = count * 4;
-    if (list != NULL) {
-        duplicate = list;
-        i = 0;
-        if (count != 0) {
+    duplicateHandleBase = work->duplicates;
+    releaseCount = releaseCount * 4;
+    if (duplicateHandleBase != NULL) {
+        duplicate = duplicateHandleBase;
+        releaseIndex = 0;
+        if (releaseCount != 0) {
             do {
-                u32 handle = *duplicate++;
-                if (handle != 0) {
-                    effDispatchParameterDataAndFreeWork(handle);
+                u32 currentHandle = *duplicate++;
+                if (currentHandle != 0) {
+                    effDispatchParameterDataAndFreeWork(currentHandle);
                 }
-                i++;
-            } while (i < count);
+                releaseIndex++;
+            } while (releaseIndex < releaseCount);
         }
         sdfReleaseResourceAllocation(work->duplicateHandle);
     }
@@ -6320,4 +6320,3 @@ INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_00436438);
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_0043643C);
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_0043643D);
-
