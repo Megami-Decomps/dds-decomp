@@ -6303,6 +6303,8 @@ void func_001EC198(BtlLinkedCommand *action) {
 void func_001EC2A0(void) {
 }
 
+extern void func_001F41F0(BtlLinkedCommand *, BtlCamState *);
+
 void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action) {
     BtlState *work = (BtlState *)btlGetRuntime();
     if (action->link->unit->flags & 0x400) {
@@ -6329,7 +6331,7 @@ void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action) {
         action->motionParameter = 200.0f;
         action->flags |= 0x10041;
     } else {
-        func_001F41F0(action, action);
+        func_001F41F0(action, &action->camera);
     }
 }
 
@@ -7744,7 +7746,339 @@ void func_001F3E48(s32 argument) {
     (*(s32 *)action->pad140)++;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001F41F0);
+/* The descriptor pointer is stored in retail non-small .data. */
+extern const BtlCameraTimedInstruction *D_003BBFC4 __attribute__((section(".data")));
+extern s16 D_00436AB0[];
+extern s16 D_00436AB8[];
+extern s16 D_00436AC0[];
+extern u32 btlNextScaledRandom(u32);
+
+void func_001F41F0(BtlLinkedCommand *command, BtlCamState *pose) {
+    s16 groupChoices[2];
+    s16 pathChoices[4];
+    s16 sideChoices[2];
+    s16 choice;
+    s32 orientation;
+    s32 initialFlags;
+    s32 skillId;
+    BtlUnit *entryUnit = command->link->unit;
+    BtlUnit *unit;
+
+    memcpy(groupChoices, D_00436AB0, sizeof(groupChoices));
+    initialFlags = entryUnit->flags;
+    memcpy(pathChoices, D_00436AB8, sizeof(pathChoices));
+    memcpy(sideChoices, D_00436AC0, sizeof(sideChoices));
+    if (initialFlags & 0x400) {
+        btlActionAimUserAtTargets(command, &command->frontCamera, &command->backCamera);
+        command->motionParameter = 20.0f;
+        command->flags |= 0x41;
+        return;
+    }
+    memset(CURSOR, 0, sizeof(*CURSOR));
+    skillId = (u16)command->link->indexWork.skillId;
+    switch (skillId) {
+    case 0x1D4:
+        CURSOR->unk_0A = 1;
+        CURSOR->unk_0E = 0;
+        if (btlCanUseLinkedActor((s32)command) == 0) {
+            CURSOR->unk_0C = 0x1E;
+        } else {
+            CURSOR->unk_0C = 0x21;
+        }
+        func_001F5868(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
+        func_001F5320(command, pose, 0, 4);
+        btlClearAllUnitDefeatCandidatesTask();
+        btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+        break;
+    case 0x1D3:
+        CURSOR->unk_0A = 1;
+        CURSOR->unk_0C = 0x1A;
+        CURSOR->unk_0E = 0;
+        func_001F5868(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
+        func_001F5320(command, pose, 0, 4);
+        btlClearAllUnitDefeatCandidatesTask();
+        btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+        break;
+    case 0x1DC:
+        CURSOR->unk_0A = 2;
+        CURSOR->unk_0E = 0;
+        func_001F5868(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
+        CURSOR->unk_0C = 0x17;
+        func_001F5320(command, pose, 0, 4);
+        btlClearAllUnitDefeatCandidatesTask();
+        btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+        break;
+    case 0x1BB:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0C = 0x1B;
+        CURSOR->unk_0E = 0;
+        func_001F5868(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        func_001F5320(command, pose, 0, 5);
+        break;
+    case 0x1BF:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        func_001F5868(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        CURSOR->unk_0C = 0x16;
+        func_001F5320(command, pose, 0, 5);
+        btlClearAllUnitDefeatCandidatesTask();
+        btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+        break;
+    case 0x1D2:
+        CURSOR->unk_0A = 2;
+        CURSOR->unk_0E = 0;
+        func_001F5868(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
+        CURSOR->unk_0C = pathChoices[(s16)btlNextScaledRandom(4)];
+        func_001F5320(command, pose, 0, 4);
+        btlClearAllUnitDefeatCandidatesTask();
+        btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+        break;
+    case 0x1D7:
+        CURSOR->unk_0A = 2;
+        CURSOR->unk_0E = 0;
+        func_001F5868(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
+        if (btlCanUseLinkedActor((s32)command) == 0) {
+            CURSOR->unk_0C = 0x1E;
+        } else {
+            CURSOR->unk_0C = 0xB;
+        }
+        func_001F5320(command, pose, 0, 4);
+        btlClearAllUnitDefeatCandidatesTask();
+        btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+        break;
+    case 0x1CF:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0C = 0x1D;
+        CURSOR->unk_0E = 0;
+        func_001F5868(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        func_001F5320(command, pose, 0, 5);
+        break;
+    case 0x1D1:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0C = 0x1C;
+        CURSOR->unk_0E = 0;
+        func_001F5868(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        func_001F5320(command, pose, 0, 5);
+        break;
+    case 0x1DD:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0C = 0x15;
+        CURSOR->unk_0E = 0;
+        func_001F5868(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        func_001F5320(command, pose, 0, 5);
+        break;
+    case 0x1DE:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0C = 8;
+        CURSOR->unk_0E = 0;
+        func_001F5868(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        func_001F5320(command, pose, 0, 5);
+        break;
+    case 0x1E0:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0C = 2;
+        CURSOR->unk_0E = 0;
+        func_001F5868(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        func_001F5320(command, pose, 0, 5);
+        break;
+    case 0x20D:
+    case 0x20E:
+    case 0x20F:
+    case 0x210:
+    case 0x1E1:
+    case 0x1E2:
+    case 0x1E3:
+    case 0x1E7:
+    case 0x1E8:
+    case 0x1E9:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        unit = command->link->unit;
+        orientation = unit->lookupId > command->linkedA->lookupId ? !btlHasFlag(unit->flags, 0x1000) : btlHasFlag(unit->flags, 0x1000);
+        if (orientation == 0) {
+            CURSOR->unk_0C = 0x1F;
+            choice = 0;
+        } else {
+            CURSOR->unk_0C = 0x20;
+            choice = 1;
+        }
+        func_001F5868(command, pose, 1, sideChoices[choice]);
+        func_001F5320(command, pose, 0, 5);
+        btlClearAllUnitDefeatCandidatesTask();
+        btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+        break;
+    case 0x1E4:
+    case 0x1E5:
+    case 0x1E6:
+    case 0x1EA:
+    case 0x1EB:
+    case 0x1EC:
+    case 0x1ED:
+    case 0x1EE:
+    case 0x1EF:
+    case 0x1F0:
+    case 0x1F1:
+    case 0x1F2:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        unit = command->link->unit;
+        orientation = unit->lookupId > command->linkedA->lookupId ? !btlHasFlag(unit->flags, 0x1000) : btlHasFlag(unit->flags, 0x1000);
+        if (orientation == 0) {
+            CURSOR->unk_0C = 0x13;
+            choice = 0;
+        } else {
+            CURSOR->unk_0C = 0x14;
+            choice = 1;
+        }
+        func_001F5868(command, pose, 1, sideChoices[choice]);
+        func_001F5320(command, pose, 0, 5);
+        btlClearAllUnitDefeatCandidatesTask();
+        btlFlagLinkedGroupDefeatCandidatesTask((s32)command);
+        break;
+    case 0x5B:
+    case 0x5C:
+    case 0x5D:
+    case 0x1B3:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        func_001F5868(command, pose, 1, sideChoices[1]);
+        if (skillId == 0x5C) {
+            CURSOR->unk_0C = 0x2E;
+        } else if (skillId == 0x5B) {
+            CURSOR->unk_0C = 0x30;
+        } else if (skillId == 0x5D) {
+            CURSOR->unk_0C = 0x2F;
+        } else {
+            CURSOR->unk_0C = 0x11;
+        }
+        func_001F5320(command, pose, 0, 5);
+        break;
+    case 0x1B7:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        func_001F5868(command, pose, 1, sideChoices[1]);
+        CURSOR->unk_0C = 0x12;
+        func_001F5320(command, pose, 0, 5);
+        break;
+    case 0x1C3:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        func_001F5868(command, pose, 1, sideChoices[1]);
+        CURSOR->unk_0C = 0xE;
+        func_001F5320(command, pose, 0, 5);
+        break;
+    case 0x1D5:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        switch (command->link->unit->lookupId) {
+        case 0: choice = 0; break;
+        case 2: choice = 1; break;
+        default: choice = (s16)btlNextScaledRandom(2); break;
+        }
+        CURSOR->unk_0C = choice + 0xC;
+        func_001F5868(command, pose, 1, sideChoices[choice]);
+        func_001F5320(command, pose, 0, 5);
+        break;
+    case 0x1D6:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        choice = (s16)btlNextScaledRandom(2);
+        switch (command->link->unit->lookupId) {
+        case 0: CURSOR->unk_0C = 9; break;
+        case 2: CURSOR->unk_0C = 10; break;
+        default: CURSOR->unk_0C = choice + 9; break;
+        }
+        func_001F5868(command, pose, 1, sideChoices[choice]);
+        func_001F5320(command, pose, 0, 5);
+        break;
+    case 0x1DA:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        choice = (s16)btlNextScaledRandom(2);
+        switch (command->link->unit->lookupId) {
+        case 0: CURSOR->unk_0C = 0xF; break;
+        case 2: CURSOR->unk_0C = 0x10; break;
+        default: CURSOR->unk_0C = choice + 0xF; break;
+        }
+        func_001F5868(command, pose, 1, sideChoices[choice]);
+        func_001F5320(command, pose, 0, 5);
+        break;
+    case 0x200:
+    case 0x204:
+        CURSOR->unk_0A = 6;
+        if (skillId == 0x200) {
+            CURSOR->unk_0C = 0x24;
+        } else {
+            CURSOR->unk_0C = 0x27;
+        }
+        CURSOR->unk_0E = 0;
+        func_001FA480(command, pose, D_003BBFC4);
+        choice = (s16)btlNextScaledRandom(2);
+        choice += 0x1F;
+        func_001F5868(command, pose, 1, choice);
+        func_001F5320(command, pose, 0, 0x12);
+        break;
+    case 0x202:
+    case 0x206:
+    case 0x208:
+        CURSOR->unk_0A = 6;
+        CURSOR->unk_0E = 0;
+        choice = (s16)btlNextScaledRandom(2);
+        if (!btlCanUseLinkedActor((s32)command)) choice = 1;
+        if (skillId == 0x202) {
+            CURSOR->unk_0C = choice + 0x28;
+        } else if (skillId == 0x208) {
+            CURSOR->unk_0C = choice + 0x2A;
+        } else {
+            CURSOR->unk_0C = choice + 0x2C;
+        }
+        func_001FA480(command, pose, D_003BBFC4);
+        choice += 0x1F;
+        func_001F5868(command, pose, 1, choice);
+        func_001F5320(command, pose, 0, 0x12);
+        break;
+    case 0x20C:
+        CURSOR->unk_0A = 6;
+        CURSOR->unk_0C = 0x25;
+        CURSOR->unk_0E = 0;
+        func_001FA480(command, pose, D_003BBFC4);
+        choice = (s16)btlNextScaledRandom(2);
+        choice += 0x1F;
+        func_001F5868(command, pose, 1, choice);
+        func_001F5320(command, pose, 0, 0x12);
+        break;
+    case 0x1D8:
+    case 0x1DF:
+    case 0x20A:
+    case 0x20B:
+    mode4_setup:
+        CURSOR->unk_0A = 4;
+        CURSOR->unk_0C = 5;
+        CURSOR->unk_0E = 0;
+        choice = (s16)btlNextScaledRandom(2);
+        choice += 8;
+        func_001F5868(command, pose, 1, choice);
+        func_001F5320(command, pose, 0, 0xC);
+        break;
+    case 0x1D9:
+        goto mode4_setup;
+    case 0x1D0:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0C = 0x26;
+        CURSOR->unk_0E = 0;
+        func_001F5868(command, pose, 1, sideChoices[(s16)btlNextScaledRandom(2)]);
+        func_001F5320(command, pose, 0, 5);
+        break;
+    default:
+        CURSOR->unk_0A = 3;
+        CURSOR->unk_0E = 0;
+        choice = (s16)btlNextScaledRandom(2);
+        CURSOR->unk_0C = 0x19 - choice;
+        func_001F5868(command, pose, 1, sideChoices[choice]);
+        func_001F5320(command, pose, 0, 5);
+        break;
+    }
+}
 
 void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *action, BtlCamState *state) {
     if (!(action->link->unit->flags & 0x400)) {
@@ -7851,7 +8185,6 @@ void func_001F4F10(BtlLinkedCommand *action, BtlCamState *state) {
 
 
 
-extern u32 btlNextScaledRandom(u32);
 extern s16 D_003BBD90[];
 extern s16 D_003BBD70[];
 

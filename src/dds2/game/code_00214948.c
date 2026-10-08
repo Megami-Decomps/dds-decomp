@@ -364,7 +364,80 @@ s32 btlGroup400UnitHasAction(void *unit, s32 action) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00214C78);
+s32 func_00214C78(BtlUnit *actor, s32 command, BtlUnit **outFirst, BtlUnit **outSecond) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    DatAffinityRecord *affinity = &datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND];
+    u32 requiredCount = 0;
+    s32 *requirementCursor;
+    u32 i;
+    BtlUnit *head;
+    BtlUnit *unit;
+
+    requirementCursor = affinity->requirements;
+    for (i = 0; i < 3; i++) {
+        if (*requirementCursor++ != -1) {
+            requiredCount++;
+        }
+    }
+    if (requiredCount < 2) {
+        return 0;
+    }
+
+    unit = state->units;
+    head = unit;
+    for (; unit != NULL; unit = unit->nextActor) {
+        BtlUnit *partner;
+
+        if (!(unit->flags & 1)) {
+            continue;
+        }
+        if (!(unit->flags & 0x400)) {
+            continue;
+        }
+        if (unit->partyRecord.status & 0x2A0E) {
+            continue;
+        }
+        if (actor == unit) {
+            continue;
+        }
+
+        if (requiredCount == 3) {
+            for (partner = head; partner != NULL; partner = partner->nextActor) {
+                if (!(partner->flags & 1)) {
+                    continue;
+                }
+                if (!(partner->flags & 0x400)) {
+                    continue;
+                }
+                if (partner->partyRecord.status & 0x2A0E) {
+                    continue;
+                }
+                if (actor == partner) {
+                    continue;
+                }
+                if (unit == partner) {
+                    continue;
+                }
+                if (outFirst != NULL) {
+                    *outFirst = unit;
+                }
+                if (outSecond != NULL) {
+                    *outSecond = partner;
+                }
+                return 1;
+            }
+        } else {
+            if (outFirst != NULL) {
+                *outFirst = unit;
+            }
+            if (outSecond != NULL) {
+                *outSecond = NULL;
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
 
 extern void func_0035B6E0(const char *fmt, ...);
 

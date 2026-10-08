@@ -120,11 +120,12 @@ Other diff tools:
   That separate compile can differ from the production build's C because of
   ee-gcc's context sensitivity, and equivalent linked values may use different
   relocations. `check_unit` recognizes a function that matches the executable.
-  The report postprocessor corrects only the units listed in
-  `config/report_reconciliations.json`, verifies the source-object/fallback
-  partition, and resolves every corrected function against that executable.
-  Unconfigured context differences stay visible. A fuzzy score is not a
-  substitute for the unit and retail checksum checks above.
+  The published tracker reports instead prove C ownership in the actual
+  production compilation and exact linked retail bytes for every game unit.
+  Hash receipts reject stale or missing compile/link evidence; ASM fallbacks
+  keep zero C credit. There is no per-function reconciliation list to update.
+  Raw objdiff scores remain in `.raw` reports and the build-audit artifact.
+  See [Reading progress](progress.md) for the proof and diagnostic fields.
 - asm-differ (`diff_settings.py`; `DDS_VERSION=dds2` for the sequel)
 - decomp.me (compiler `ee-gcc2.96`, flags `-O2`; `tools/m2ctx.py` writes the context)
 
