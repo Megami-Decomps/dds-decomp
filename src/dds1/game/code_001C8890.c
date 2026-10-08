@@ -2,6 +2,7 @@
 #include "sdf_model.h"
 #include "btl.h"
 #include "btl_state.h"
+#include "btl_model_record.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
 #include "eff_field_color.h"
@@ -1577,23 +1578,6 @@ void func_001CEA58(s32 arg0) {
 }
 
 extern u8 *btlCreateModelChangeTask(u8 *, s32, s32, s32, s32, u8);
-
-typedef struct BtlActorMotionSlot {
-    u8 pad00[2];
-    u16 frameCount; /* 0x02 */
-    s16 kind; /* 0x04: motion/effect-kind discriminator */
-    s16 alphaStartFrame; /* 0x06 */
-    f32 alphaFrameScale; /* 0x08 */
-    u8 pad0C[4];
-    s16 alphaDuration; /* 0x10 */
-    u8 pad12[2];
-} BtlActorMotionSlot;
-
-typedef struct BtlActorStatusRecord {
-    u8 pad00[0x2A];
-    u16 model; /* 0x2A: model-change task operand */
-    BtlActorMotionSlot motions[29]; /* 0x2C: record stride is 0x270 */
-} BtlActorStatusRecord;
 
 void func_001CEA70(u8 *task) {
     u8 *actor;
