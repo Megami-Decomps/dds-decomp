@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "eff.h"
+#include "eff_math.h"
 #include "eff_channel.h"
 #include "pcp_vu0.h"
 
@@ -35,12 +36,6 @@ typedef struct EffChan {
     f32 cursorStep; /* 0x14: channel-A position increment */
 } EffChan;
 
-/* Four XYZ Bezier controls, cursor position and step: the effMath EffBezierSlot layout. */
-typedef struct EffRec38 {
-    f32 controlPoints[4][3];
-    f32 scaledRandomValue; /* 0x30 */
-    f32 randomScale;       /* 0x34 */
-} EffRec38;
 
 /* Emitter handle for effFillRandRecords: target primitive at +0x8. */
 typedef struct EffEmit {
@@ -52,7 +47,6 @@ extern u32 effMiscRand(void *state);
 
 extern u8 D_003AA868[];
 
-extern void *effMathGetSlotAt(void *slots, s32 index);
 
 extern void effJitterChannelControlPoints(EffChanWork *arg0, u32 arg1);
 
@@ -83,7 +77,6 @@ extern void func_0019AE18(void *arg0, s32 arg1, u32 arg2);
 extern void func_0019B120(EffPrim *arg0, f32 *arg1);
 
 extern void func_0019B1F0(EffPrim *arg0, void *arg1);
-extern void effMathReleaseWorkResource(void *work);
 extern void effDispatchParameterDataAndFreeWork(void *handle);
 
 typedef struct EffChanSourceOwner {
@@ -96,9 +89,7 @@ typedef struct EffChanSource {
     EffChanSourceOwner *owner; /* 0x168 */
 } EffChanSource;
 
-extern void *effAllocSlotArray(u32 count);
 extern void *effParamWorkDuplicate(void *param);
-extern s32 effMathStepBezierSlot(void *slots, s32 index, f32 *out);
 extern void effParamWorkCallback0(void *param, void *value);
 extern void effParamWorkInvokeCallback(void *param);
 
@@ -164,7 +155,7 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
     f32 viewDirection[4];
     f32 jitteredPoint[4];
     EffChanRecord *record = work->records + recordIndex;
-    EffRec38 *bezierSlot;
+    EffCubicBezierSlot *bezierSlot;
     f32 cursorStep;
     f32 centeredRandom;
 
@@ -173,9 +164,9 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, viewDirection);
     cursorStep = 1.0f / (f32)work->head.steps;
-    bezierSlot = (EffRec38 *)effMathGetSlotAt(work->slots, recordIndex);
-    bezierSlot->scaledRandomValue = 0;
-    bezierSlot->randomScale = cursorStep;
+    bezierSlot = effMathGetSlotAt(work->slots, recordIndex);
+    bezierSlot->t = 0;
+    bezierSlot->step = cursorStep;
 
     centeredRandom = effMiscRandUnitFloat(D_003AA868) - 0.5f;
     jitterScale[0] = work->head.jitter[0] * (centeredRandom + centeredRandom);
@@ -255,7 +246,7 @@ void effJitterChannelControlPoints(EffChanWork *work, u32 recordIndex) {
  * The slot-zero lookup precedes the empty-count check; retain the time snapshot and later stored increments. */
 void effUpdateChannelWork(EffChanWork *work) {
     EffChanRecord *recordCursor = work->records;
-    void *bezierSlots = work->slots;
+    EffArrHdr *bezierSlots = work->slots;
     u32 recordCount = work->head.count;
     u32 recordIndex = 0;
     u8 cycleEnabled = work->head.enabled;
@@ -343,7 +334,7 @@ void effFillRandRecords(EffEmit *emitter) {
     u32 recordCount = channelWork->head.count;
     EffChanRecord *recordCursor = channelWork->records;
     u32 recordIndex = 0;
-    EffRec38 *bezierSlot;
+    EffCubicBezierSlot *bezierSlot;
     s32 randomStep;
     f32 cursorStep;
 
@@ -353,13 +344,13 @@ void effFillRandRecords(EffEmit *emitter) {
     do {
         effJitterChannelControlPoints(channelWork, recordIndex);
         recordCursor->delay = effMiscRand(&D_003AA868) % stepModulus;
-        bezierSlot = (EffRec38 *)effMathGetSlotAt(channelWork->slots, recordIndex);
+        bezierSlot = effMathGetSlotAt(channelWork->slots, recordIndex);
         recordIndex++;
         randomStep = recordCursor->delay;
-        cursorStep = bezierSlot->randomScale;
+        cursorStep = bezierSlot->step;
         recordCursor->delay = randomStep + 1;
         recordCursor++;
-        bezierSlot->scaledRandomValue = cursorStep * (f32)randomStep;
+        bezierSlot->t = cursorStep * (f32)randomStep;
     } while (recordIndex < recordCount);
 }
 
