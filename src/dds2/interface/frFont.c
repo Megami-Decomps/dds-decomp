@@ -31,8 +31,6 @@ extern u8 D_00436578[];
 
 extern s32 frFontDefaultGlyphCellSize;
 
-extern FrFontGlyph *func_0019CE78(void *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
-
 extern void *sdfAllocSizeClassBlock(s32 size);
 
 typedef struct FrFontSegments {
@@ -428,7 +426,7 @@ FrFontGlyph *func_0019CCC0(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 sec
 
 /* Build text and position its chain after the previous glyph. A NULL build
  * preserves the previous chain. */
-FrFontGlyph *frFontAppendGlyphFromData(void *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *previousGlyph) {
+FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *previousGlyph) {
     FrFontGlyph *newGlyphChain = func_0019CE78(text, fontIndex, firstOption, secondOption, 0);
 
     if (newGlyphChain == NULL) {
@@ -1028,7 +1026,7 @@ void frFontCreateContext(ctx)
     FrFontCtx *ctx;
 
 {
-    FrFontGlyph *childGlyph = frFontAppendGlyphFromData(&D_00436578, 0, ctx->channel1, ctx->channel2, ctx->glyphChain);
+    FrFontGlyph *childGlyph = frFontAppendTextToGlyphChain((const char *)&D_00436578, 0, ctx->channel1, ctx->channel2, ctx->glyphChain);
 
     ctx->glyphChain = childGlyph;
     frFontSetContextEncodedByte(childGlyph, ctx->channel3);

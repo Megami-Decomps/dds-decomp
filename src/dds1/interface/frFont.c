@@ -41,9 +41,6 @@ extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s3
 extern s32 func_001958A0(FrFontGlyph *glyph, s8 mode, u32 flags);
 
 
-extern FrFontGlyph *func_001951C8(void *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
-
-
 FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *previous, FrFontGlyph *next);
 
 
@@ -422,7 +419,7 @@ FrFontGlyph *func_00195010(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 sec
 
 /* Build text and position its chain after the previous glyph. A NULL build
  * preserves the previous chain. */
-FrFontGlyph *frFontAppendGlyphFromData(void *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *previousGlyph) {
+FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *previousGlyph) {
     FrFontGlyph *newGlyphChain = func_001951C8(text, fontIndex, firstOption, secondOption, 0);
 
     if (newGlyphChain == NULL) {
@@ -1015,7 +1012,7 @@ void frFontCreateContext(ctx)
     FrFontCtx *ctx;
 
 {
-    FrFontGlyph *childGlyph = frFontAppendGlyphFromData(&D_003BB180, 0, ctx->channel1, ctx->channel2, ctx->glyphChain);
+    FrFontGlyph *childGlyph = frFontAppendTextToGlyphChain((const char *)&D_003BB180, 0, ctx->channel1, ctx->channel2, ctx->glyphChain);
 
     ctx->glyphChain = childGlyph;
     frFontSetContextEncodedByte(childGlyph, ctx->channel3);
