@@ -227,6 +227,9 @@ extern void sdfInitPacketList(SdfListHead *);
 extern void sdfAppendPacket(SdfListHead *, u32);
 extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
 extern void evtCreateWorldObjectForKey(s32, s32);
+extern void itfGridSetQuantizedBounds(EffectSlotSet *, s32, s32, s32, s32, s32);
+extern u32 effDestroyResourceSlotSet(EffectSlotSet *);
+extern u32 effConfigureWithDefaultSetting(u32, u32, u32, u32, u32, u32);
 extern s32 D_00437CB8;
 extern s32 D_00437CBC;
 extern SdfPoolNode D_00380708;
@@ -972,7 +975,7 @@ void mnuCyclePairedEffectSetting(MenuPageBar *pair) {
     if (settings != 0) {
         setting = settings[(s8)pair->settingIndex];
     }
-    effConfigureWithDefaultSetting(pair->textures[3], 0, (s32)pair->effects[0], 0, setting, 0);
+    effConfigureWithDefaultSetting((u32)pair->textures[3], 0, (s32)pair->effects[0], 0, setting, 0);
     pair->settingIndex += 1;
     if ((s8)pair->settingIndex >= 4) {
         pair->settingIndex = 0;
@@ -1000,6 +1003,9 @@ void mnuReleasePairedEffectBatches(s32 *objectWords) {
     }
 }
 
+extern void func_002C1FF0(MenuPageBar *, s32, s32 *, s32, s32,
+                        EffectSlotSet *, const s32 *, s32);
+
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C1FF0);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B160);
@@ -1010,20 +1016,21 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B220);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B270);
 
-void mnuDrawPanelSequenceByRow(s32 x, s32 y, s32 depth, s32 color, s32 variant, s32 texture) {
+void mnuDrawPanelSequenceByRow(MenuPageBar *pair, s32 variant, s32 *settings,
+                             s32 positionY, s32 quantizedSpan, EffectSlotSet *source) {
     s32 tableA[7] = {0x29, 0x23, 0x24, 0x25, 0x25, 0x2A, 0x2C};
     s32 tableB[7] = {0x29, 0x26, 0x27, 0x28, 0x28, 0x2B, 0x2C};
 
-    if (y == 1) {
-        func_002C1FF0(x, y, depth, color, variant, texture, tableB, 7);
+    if (variant == 1) {
+        func_002C1FF0(pair, variant, settings, positionY, quantizedSpan, source, tableB, 7);
     } else {
-        func_002C1FF0(x, y, depth, color, variant, texture, tableA, 7);
+        func_002C1FF0(pair, variant, settings, positionY, quantizedSpan, source, tableA, 7);
     }
 }
 
 /* Release the seven sprite texture handles, then the paired effect batches. */
 void mnuReleaseSpriteTextures(u32 *objectWords) {
-    s32 *textureCursor = ((MenuPageBar *)objectWords)->textures;
+    EffectSlotSet **textureCursor = ((MenuPageBar *)objectWords)->textures;
     u32 textureIndex = 0;
     do {
         effDestroyResourceSlotSet(*textureCursor++);
@@ -1069,16 +1076,16 @@ void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
     BdWork *work;
 
     func_002C22D0(x, y, depth, color, fade, value, limit, pair, flags);
-    func_00306CD0(x, y, depth, fade, 1, (EffectSlotSet *)pair->textures[0], 0, flags);
+    func_00306CD0(x, y, depth, fade, 1, pair->textures[0], 0, flags);
     if (value != 0) {
-        texture = (EffectSlotSet *)pair->textures[1];
+        texture = pair->textures[1];
         work = texture->workEntries;
         barWidth = pair->quantizedSpan * 77 / 100;
         quantizedWidth = barWidth * 16;
         work->geometry.bounds[2] = quantizedWidth;
         work->parameters[2] = ~(77 - barWidth);
         func_00306CD0(x, y, depth, fade, 1, texture, 0, flags);
-        func_00306CD0(x + quantizedWidth, y, depth, fade, 1, (EffectSlotSet *)pair->textures[2], 0, flags);
+        func_00306CD0(x + quantizedWidth, y, depth, fade, 1, pair->textures[2], 0, flags);
         func_002C1E48(x, y, depth, fade, pair, flags);
     }
     if (pair->fadeOut == 0) {
