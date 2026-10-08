@@ -237,7 +237,36 @@ void billSetChildTextureQuad(BillObj *effect, const BillTextureQuad *textureQuad
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00159B48", billSetBillboardMode);
+/* Narrow mode for the child kinds, or update each resolved animation entry. */
+void billSetBillboardMode(BillObj *effect, s32 mode) {
+    mode = (s16)mode;
+    switch (effect->kind) {
+    case 0:
+    case 3:
+        effect->requestedPacketListIndex = mode;
+        break;
+    case 1: {
+        s32 entryCount = effect->entryCount;
+        if (entryCount > 0) {
+            s32 remaining = entryCount;
+            BillOut *entries = effect->resolvedEntries;
+            s32 index = 0;
+            do {
+                BillAnimationEntry *entry = entries[index].entry;
+                u32 flags = entry->flags & ~6U;
+                entry->flags = flags;
+                if (mode == 2) {
+                    entry->flags = flags | 2;
+                } else if (mode == 3) {
+                    entry->flags = flags | 4;
+                }
+                index++;
+            } while (--remaining != 0);
+        }
+        break;
+    }
+    }
+}
 
 
 
