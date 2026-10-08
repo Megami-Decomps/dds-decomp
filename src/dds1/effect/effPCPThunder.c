@@ -102,9 +102,9 @@ void effThunderScaleVectorDimensions(f32 factor, EffThunderVectorWork *work) {
     work->head.vector.heightScale = work->baseHeightScale * factor;
 }
 
-/* Preserve the caller's word unchanged; its wider callback role is unknown. */
-u32 func_00163540(u32 value) {
-    return value;
+/* The copied parameter head starts at the beginning of the full work. */
+EffThunderParameterHead *effThunderGetParameterHead(EffThunderVectorWork *work) {
+    return &work->head;
 }
 
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);

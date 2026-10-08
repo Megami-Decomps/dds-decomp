@@ -1473,6 +1473,7 @@
 0x001634D8	effThunderReleaseVectorWork	inferred	queued
 0x00163518	effThunderSetVectorTint	inferred	queued
 0x00163520	effThunderScaleVectorDimensions	inferred	queued
+0x00163540	effThunderGetParameterHead	inferred	Returns the full retained parameter head at offset zero of the complete thunder work; fade and respawn clients consume its variant fields
 0x00163548	effThunderCellRestart	inferred	random counters, two unit vectors, two ranges (twin 0x164078) [names_M61_EffVu.tsv]
 0x00163780	effThunderBuildVectorHistory	inferred	writes the vector variant's five-vector cell-history rows while rotating its placement around a perturbed axis
 0x00163AF8	effThunderRotateVectorPlacementAndHistory	inferred	rotates the live XZ placement vector and each five-vector history row around the effect origin
