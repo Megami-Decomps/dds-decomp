@@ -428,12 +428,6 @@ void func_002B27F0(u32 context);
 
 void mnuReleaseMenuWindowHandles(s32 context);
 
-/* Release both staff resource slots; their menu indices differ between games. */
-void mnuReleaseStaffMenuResources(s32 menuWork);
-
-/* Reset texture handles for the same two resource slots. */
-void mnuReleaseStaffMenuTextureHandles(s32 menuWork);
-
 u32 mnuCreateSelectState(u32 unused, s32 flag);
 
 s32 mnuStaffCloseSelectionState(void);
