@@ -1141,7 +1141,7 @@ s32 fileResolveAbortSlotFlow(void) {
 
 s32 fileLoadIconFileAndResetSelection(void) {
     D_003BD910 = 0;
-    fileSaveIconRequest = fileQueueDefaultCallbackRequest(D_003B2668);
+    fileSaveIconRequest = (u32)fileQueueDefaultCallbackRequest(D_003B2668);
     return fileResetSelection();
 }
 
@@ -1151,7 +1151,7 @@ s32 fileResetSlotSelection(void) {
 
 s32 fileLoadIconFileAndBeginSlotReset(void) {
     D_003BD910 = 0;
-    fileSaveIconRequest = fileQueueDefaultCallbackRequest(D_003B2668);
+    fileSaveIconRequest = (u32)fileQueueDefaultCallbackRequest(D_003B2668);
     return fileBeginSlotReset();
 }
 

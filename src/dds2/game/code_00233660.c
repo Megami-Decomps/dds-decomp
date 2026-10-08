@@ -2605,12 +2605,12 @@ void mdlLoadViewerPresentationConfig(void) {
     if (sdfPathExists(D_003C88A8) == 0) {
         return;
     }
-    fileRequest = fileQueueDefaultCallbackRequest(D_003C88A8);
+    fileRequest = (s32)fileQueueDefaultCallbackRequest(D_003C88A8);
     fileWaitReady((struct FileRequest *)(u32)fileRequest);
-    resourceHandle = fileGetResourceHandle(fileRequest);
-    fileData = fileGetLoadedDataAddress(fileRequest);
-    fileSize = fileGetResourceSize(fileRequest);
-    filePollEntryCleanup(fileRequest);
+    resourceHandle = fileGetResourceHandle((struct FileWork *)(u32)fileRequest);
+    fileData = fileGetLoadedDataAddress((struct FileWork *)(u32)fileRequest);
+    fileSize = fileGetResourceSize((struct FileWork *)(u32)fileRequest);
+    filePollEntryCleanup((struct FileCleanup *)(u32)fileRequest);
     lineOffset = 0;
     while (lineOffset < fileSize) {
         nextLineOffset = lineOffset;
