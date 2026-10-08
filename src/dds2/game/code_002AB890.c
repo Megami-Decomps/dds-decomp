@@ -392,12 +392,12 @@ void func_002ACB38(s32 object) {
 
 u32 mnuInitializeWindowOwnerResourceSet(KwlnTask *task) {
     MenuStaffContext *context = (MenuStaffContext *)kwlnTaskGetUserValue(task);
-    s32 handle = (u32)sdfAllocGeneralBlock(0x54);
-    MenuStaffChoices *resource = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x54);
+    MenuStaffChoices *resource = (void *)sdfResourceRetainAddress(allocation);
 
     context->menu = resource;
     memset(resource, 0, 0x54);
-    resource->allocation = handle;
+    resource->allocation = allocation;
     func_002ACB18((u32)context);
     func_002AB8F0(context);
     mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->unk118,
@@ -416,7 +416,7 @@ s32 mnuDestroyWindowOwnerResourceSet(KwlnTask *task) {
 
     mnuDestroyResourceOwnerWindowContainers(owner);
     func_002ACB38(context);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(party->allocation));
+    sdfReleaseResourceAllocation(party->allocation);
     return 1;
 }
 
