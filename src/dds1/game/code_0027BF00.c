@@ -99,7 +99,7 @@ extern s32 sdfAllocSizeClassBlock(u32);
 extern struct MenuWindowSpriteGroup *mnuCreateWindowState(u32, u32, u32, u32);
 
 
-extern void func_002BF4E0(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_002BF4E0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 extern char D_003B2330[];
 
@@ -628,13 +628,13 @@ void mnuDrawFourPanelIconsAtOffsets(s32 x, s32 y, s32 depth, s32 alpha, MenuPane
     MenuPanelPositionTable4 table = D_003B2380;
 
     func_002BF4E0(x + table.positions[0].x, y + table.positions[0].y, depth, alpha, 1,
-                  (s32)panel->handles[0], 0, drawArg);
+                  panel->handles[0], 0, drawArg);
     func_002BF4E0(x + table.positions[1].x, y + table.positions[1].y, depth, alpha, 1,
-                  (s32)panel->handles[1], 0, drawArg);
+                  panel->handles[1], 0, drawArg);
     func_002BF4E0(x + table.positions[2].x, y + table.positions[2].y, depth, alpha, 1,
-                  (s32)panel->handles[2], 0, drawArg);
+                  panel->handles[2], 0, drawArg);
     func_002BF4E0(x + table.positions[3].x, y + table.positions[3].y, depth, alpha, 1,
-                  (s32)panel->handles[3], 0, drawArg);
+                  panel->handles[3], 0, drawArg);
 }
 
 /* Draw two stacked icon pairs; the table already contains absolute screen positions. */
@@ -643,12 +643,12 @@ void mnuDrawPanelIconPairsAtFixedPositions(s32 x, s32 y, s32 depth, s32 alpha, M
     s32 positionX = table.positions[0].x;
     s32 positionY = table.positions[0].y;
 
-    func_002BF4E0(positionX, positionY, depth, alpha, 1, (s32)panel->handles[1], 0, drawArg);
-    func_002BF4E0(positionX, positionY, depth, alpha, 1, (s32)panel->handles[3], 0, drawArg);
+    func_002BF4E0(positionX, positionY, depth, alpha, 1, panel->handles[1], 0, drawArg);
+    func_002BF4E0(positionX, positionY, depth, alpha, 1, panel->handles[3], 0, drawArg);
     positionX = table.positions[1].x;
     positionY = table.positions[1].y;
-    func_002BF4E0(positionX, positionY, depth, alpha, 1, (s32)panel->handles[0], 0, drawArg);
-    func_002BF4E0(positionX, positionY, depth, alpha, 1, (s32)panel->handles[2], 0, drawArg);
+    func_002BF4E0(positionX, positionY, depth, alpha, 1, panel->handles[0], 0, drawArg);
+    func_002BF4E0(positionX, positionY, depth, alpha, 1, panel->handles[2], 0, drawArg);
 }
 
 /* Dispatch the three DDS1 panel kinds; only kind one forces full fade. */
@@ -1272,9 +1272,9 @@ void mnuDrawIconSpriteGroup(s32 unusedX, s32 unusedY, s32 depth, s32 skip, MenuS
     u32 i;
 
     if (skip == 0) {
-        func_002BF4E0(0, 0, depth, menu->profileFade, 0, (s32)menu->firstSprite, 0, param);
+        func_002BF4E0(0, 0, depth, menu->profileFade, 0, menu->firstSprite, 0, param);
         for (i = 0; i < 4; i++) {
-            func_002BF4E0(0, 0, depth, menu->profileFade, 0, (s32)menu->sprites[i], 0, param);
+            func_002BF4E0(0, 0, depth, menu->profileFade, 0, menu->sprites[i], 0, param);
         }
     }
 }
@@ -1333,10 +1333,10 @@ void mnuDrawAndUpdateFadingSprites(s32 x, s32 y, s32 z, s32 unused, MenuIconBund
     s32 nextAlpha;
     s32 lowerAlpha;
 
-    func_002BF4E0(px, py, z, alpha, 0, (s32)sprites->sprite[0], 0, param);
-    func_002BF4E0(px, py, z, alpha, 0, (s32)sprites->sprite[1], 0, param);
-    func_002BF4E0(px, py, z, alpha, 0, (s32)sprites->sprite[2], 0, param);
-    func_002BF4E0(px, py, z, alpha, 0, (s32)sprites->sprite[3], 0, param);
+    func_002BF4E0(px, py, z, alpha, 0, sprites->sprite[0], 0, param);
+    func_002BF4E0(px, py, z, alpha, 0, sprites->sprite[1], 0, param);
+    func_002BF4E0(px, py, z, alpha, 0, sprites->sprite[2], 0, param);
+    func_002BF4E0(px, py, z, alpha, 0, sprites->sprite[3], 0, param);
     if (sprites->fadeOut == 0) {
         fade = sprites->fade;
         nextAlpha = fade + 0x10;
@@ -1748,15 +1748,15 @@ void mnuDrawPartyRowFrameVariant(s32 x, s32 y, s32 z, MenuPageWindow *menu,
 
     if (func_00280A90(menu, index) == 1 || force != 0) {
         if (*partyFlags & 2) {
-            func_002BF4E0(x + 0x150, y + 0xA8, z, alpha, 1, menu->source, 11, context);
-            func_002BF4E0(x + 0x660, y + 0x110, z, alpha, 1, menu->source, 16, context);
-            func_002BF4E0(x + 0x130, y + 0x250, z, alpha, 1, menu->source, 20, context);
+            func_002BF4E0(x + 0x150, y + 0xA8, z, alpha, 1, (EffectSlotSet *)(u32)menu->source, 11, context);
+            func_002BF4E0(x + 0x660, y + 0x110, z, alpha, 1, (EffectSlotSet *)(u32)menu->source, 16, context);
+            func_002BF4E0(x + 0x130, y + 0x250, z, alpha, 1, (EffectSlotSet *)(u32)menu->source, 20, context);
         } else if (force == 0) {
-            func_002BF4E0(x + 0x1A0, y + 0x60, z, alpha, 1, menu->source, 21, context);
+            func_002BF4E0(x + 0x1A0, y + 0x60, z, alpha, 1, (EffectSlotSet *)(u32)menu->source, 21, context);
             uiDrawSurfaceAtNearDepth(context);
-            func_002BF4E0(x + 0x1E0, y + 0x58, z, alpha, 1, menu->source, 10, context);
+            func_002BF4E0(x + 0x1E0, y + 0x58, z, alpha, 1, (EffectSlotSet *)(u32)menu->source, 10, context);
         } else {
-            func_002BF4E0(x + 0x1C0, y + 0xE0, z, alpha, 1, menu->source, 20, context);
+            func_002BF4E0(x + 0x1C0, y + 0xE0, z, alpha, 1, (EffectSlotSet *)(u32)menu->source, 20, context);
         }
     }
     uiDrawSurfaceAtNearDepth(context);
@@ -1799,9 +1799,9 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
     alpha = page->drawAlpha;
     color = uiBlendColors(0xA09DC380, 0xA09DC300, alpha);
     x += page->slideOffset * 16;
-    func_002BF4E0(x, y, z, alpha, 0, (s32)page->primarySprite, 0, param);
+    func_002BF4E0(x, y, z, alpha, 0, page->primarySprite, 0, param);
     do {
-        func_002BF4E0(x, y, z, alpha, 0, (s32)*sprite++, 0, param);
+        func_002BF4E0(x, y, z, alpha, 0, *sprite++, 0, param);
         i++;
     } while (i < 2);
     if (value != 0) {
