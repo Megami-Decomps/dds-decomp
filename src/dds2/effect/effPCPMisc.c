@@ -6,6 +6,7 @@
 #include "eff_blur.h"
 #include "eff.h"
 #include "eff_node_descriptor.h"
+#include "eff_thunder_fragment.h"
 #include "eff_param.h"
 #include "eff_event.h"
 #include "eff_event_sound.h"
@@ -135,7 +136,6 @@ extern void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work);
 
 extern s8 D_0043643C;
 
-extern void *effThunderFragCreate(void *params);
 
 extern u8 D_003B1AF0[];
 
@@ -658,7 +658,6 @@ typedef struct EffPCPSpinWork {
 
 
 
-extern void effThunderReleaseFragmentWork(void *work);
 
 
 /* Effect initializers implemented in assembly below (effScatterCreateRadialWork lives in
@@ -1482,7 +1481,7 @@ void effPcpInitTwelveRadialParticles(EffPCPThunderGroup *group) {
         }
         D_003B1670->lifetime = life;
         D_003B1670->speed = speed;
-        *out = (u32)effThunderFragCreate(D_003B1670);
+        *out = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1670);
         out++;
         i++;
     } while (i < 12);
@@ -1610,7 +1609,7 @@ void effPcpSpawnConeTwelve(EffPCPThunderGroup *group) {
         }
         D_003B16D0->lifetime = life;
         D_003B16D0->speed = speed;
-        group->handles[i] = (u32)effThunderFragCreate(D_003B16D0);
+        group->handles[i] = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B16D0);
         i++;
     } while (i < 12);
 }
@@ -1705,7 +1704,7 @@ void effPcpSpawnVariableHeightParticles(EffPCPThunderGroup *group) {
         }
         D_003B1730->lifetime = life;
         D_003B1730->speed = speed;
-        group->handles[i] = (u32)effThunderFragCreate(D_003B1730);
+        group->handles[i] = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1730);
         i++;
     } while (i < 30);
 }
@@ -1801,7 +1800,7 @@ void effPcpSpawnWideConeTwelve(EffPCPThunderGroup *group) {
         }
         D_003B1790->lifetime = life;
         D_003B1790->speed = speed;
-        group->handles[i] = (u32)effThunderFragCreate(D_003B1790);
+        group->handles[i] = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1790);
         i++;
     } while (i < 12);
 }
@@ -2119,7 +2118,7 @@ void effPcpSpawnConeThirty(EffPCPThunderGroup *group) {
         }
         D_003B1990->lifetime = life;
         D_003B1990->speed = speed;
-        group->handles[i] = (u32)effThunderFragCreate(D_003B1990);
+        group->handles[i] = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1990);
         i++;
     } while (i < 30);
 }
@@ -3979,7 +3978,7 @@ EffPCPBurstWork *effAllocateThunderFragmentWork(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1AF0);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1AF0);
     return work;
 }
 
@@ -3993,7 +3992,7 @@ EffPCPBurstWork *effAllocateThunderFragmentBurstWork(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1B50);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1B50);
     return work;
 }
 
@@ -4007,7 +4006,7 @@ EffPCPBurstWork *effPcpCreateCyanBlueFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1BB0);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1BB0);
     return work;
 }
 
@@ -4021,7 +4020,7 @@ EffPCPBurstWork *effPcpCreateCyanBlueFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1C10);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1C10);
     return work;
 }
 
@@ -4035,7 +4034,7 @@ EffPCPBurstWork *effPcpCreateWhiteYellowFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1C70);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1C70);
     return work;
 }
 
@@ -4049,7 +4048,7 @@ EffPCPBurstWork *effPcpCreateWhiteYellowFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1CD0);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1CD0);
     return work;
 }
 
@@ -4063,7 +4062,7 @@ EffPCPBurstWork *effPcpCreateYellowOrangeFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1D30);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1D30);
     return work;
 }
 
@@ -4077,7 +4076,7 @@ EffPCPBurstWork *effPcpCreateYellowOrangeFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1D90);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1D90);
     return work;
 }
 
@@ -4091,7 +4090,7 @@ EffPCPBurstWork *effPcpCreateBrownRedFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1DF0);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1DF0);
     return work;
 }
 
@@ -4105,7 +4104,7 @@ EffPCPBurstWork *effPcpCreateBrownRedFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1E50);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1E50);
     return work;
 }
 
@@ -4119,7 +4118,7 @@ EffPCPBurstWork *effPcpCreateOrangeVioletFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1EB0);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1EB0);
     return work;
 }
 
@@ -4133,7 +4132,7 @@ EffPCPBurstWork *effPcpCreateOrangeVioletFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1F10);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1F10);
     return work;
 }
 
@@ -4808,7 +4807,7 @@ typedef struct EffPCPGroupHead {
 } EffPCPGroupHead;
 
 typedef struct EffPCPGroupEntry {
-    u32 handle;          /* 0x00 */
+    EffThunderFragmentWork *handle; /* 0x00 */
     s32 frame;            /* 0x04: negative until the start delay expires */
     f32 position;         /* 0x08: initial interpolated position */
     f32 positionStep;     /* 0x0C: change per frame */
@@ -4880,7 +4879,7 @@ EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *header, u32 *sourceResourc
         }
     }
     for (index = 0; index < entryCount; index++) {
-        groupEntryCursor->handle = (u32)effThunderFragCreate(&header->spawnParams);
+        groupEntryCursor->handle = effThunderFragCreate(&header->spawnParams);
         groupEntryCursor->frame = 0;
         groupEntryCursor++;
     }
@@ -4948,10 +4947,10 @@ void effBlockSetRelease(EffPCPGroupSet *work) {
 
     if (releaseCount != 0) {
         do {
-            u32 currentHandle = fragmentEntryCursor->handle;
+            EffThunderFragmentWork *currentHandle = fragmentEntryCursor->handle;
             fragmentEntryCursor++;
             releaseIndex++;
-            effThunderReleaseFragmentWork((void *)currentHandle);
+            effThunderReleaseFragmentWork(currentHandle);
         } while (releaseIndex < releaseCount);
     }
     duplicateHandleBase = work->duplicates;
