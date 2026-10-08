@@ -1,6 +1,7 @@
 #include "sdf_chip.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_records.h"
 #include "mnu_input.h"
 #include "mnu.h"
 #include "sdf_resource.h"
@@ -85,23 +86,6 @@ typedef struct MenuListNode MenuListNode;
 extern void func_00300508(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
 extern void mnuSelectPage(MenuPageWindow *window, s32 selected);
-
-typedef struct ScrollParams {
-    s32 a;
-    s32 b;
-    s32 c;
-} ScrollParams;
-
-typedef struct ScrollInner {
-    u8 unk0[0x20];
-    ScrollParams *params;
-} ScrollInner;
-
-typedef struct ScrollHandle {
-    u8 unk0[8];
-    ScrollInner *inner;
-} ScrollHandle;
-
 
 extern void func_0027FCA0(s32, s32, s32);
 
@@ -932,23 +916,23 @@ void mnuUpdateFade(s32 *list) {
 }
 
 void mnuInitScrollHandles(MenuScrollPanel *menu) {
-    ScrollHandle *handle;
+    EffMappedResource *handle;
 
-    handle = (ScrollHandle *)effCreateStatusBatch(1);
+    handle = effCreateStatusBatch(1);
     menu->handles[0] = handle;
-    handle->inner->params->a = 10;
-    handle->inner->params->b = 0;
+    ((s32 *)handle->records[0].status)[0] = 10;
+    ((s32 *)handle->records[0].status)[1] = 0;
 
-    handle = (ScrollHandle *)effCreateStatusBatch(3);
+    handle = effCreateStatusBatch(3);
     menu->handles[1] = handle;
-    handle->inner->params->a = 8;
-    handle->inner->params->b = 4;
-    handle->inner->params->c = 8;
+    ((s32 *)handle->records[0].status)[0] = 8;
+    ((s32 *)handle->records[0].status)[1] = 4;
+    ((s32 *)handle->records[0].status)[2] = 8;
 
-    handle = (ScrollHandle *)effCreateStatusBatch(1);
+    handle = effCreateStatusBatch(1);
     menu->handles[2] = handle;
-    handle->inner->params->a = 10;
-    handle->inner->params->b = 0;
+    ((s32 *)handle->records[0].status)[0] = 10;
+    ((s32 *)handle->records[0].status)[1] = 0;
 }
 
 void mnuReleaseScrollPanelAnimations(MenuScrollPanel *list) {
@@ -1008,7 +992,7 @@ void mnuActivatePendingPanelResource(MenuScrollPanel *menu) {
         itfSetGridEntryQuantizedAndRefresh(menu->active[0].sprite, menu->active[0].effect, 0, 0, 0x400, 0);
         effConfigureWithDefaultSetting((struct EffectSlotSet *)(u32)menu->active[0].sprite,
                                           menu->active[0].effect,
-                                          (struct EffMappedResource *)(u32)menu->handles[2],
+                                          menu->handles[2],
                                           0, 10, 2);
     }
 }
@@ -1020,10 +1004,10 @@ void mnuActivatePanelAndConfigureGridResources(MenuScrollPanel *menu, s32 x, s32
     menu->pending[1].sprite = x;
     menu->pending[1].effect = color;
     itfSetGridEntryQuantizedAndRefresh(x, y, 0, 0, -0x400, 0);
-    effConfigureIndexedSlotResource(x, y, menu->handles[0], 0, 3);
+    effConfigureIndexedSlotResource((struct EffectSlotSet *)(u32)x, y, menu->handles[0], 0, 3);
     itfSetGridEntryQuantizedAndRefresh(x, color, 0, 0, 0, 0);
     effConfigureWithDefaultSetting((struct EffectSlotSet *)(u32)x, color,
-                                   (struct EffMappedResource *)(u32)menu->handles[1], 0, 10, 0);
+                                   menu->handles[1], 0, 10, 0);
 }
 
 u8 mnuHasScrollPanelOverlay(MenuScrollPanel *panel) {
