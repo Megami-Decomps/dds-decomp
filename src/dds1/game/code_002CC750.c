@@ -1323,7 +1323,7 @@ void func_002CF3A0(SdfFlagListWork *work) {
 }
 
 void itfSetPackedRgbAlpha(SdfFlagListWork *p, u32 color) {
-    p->params.color.colorA = color & 0xFFFFFF;
+    p->params.color.initialColor = color & 0xFFFFFF;
     p->params.alpha.alpha = color >> 24;
 }
 
@@ -1336,7 +1336,7 @@ void func_002CF3F0(SdfFlagListWork *work, u32 value) {
 }
 
 void itfCopyColorFields(SdfFlagListWork *dst, const SdfFlagListParams *src) {
-    dst->params.color.colorA = src->color.colorA;
+    dst->params.color.initialColor = src->color.initialColor;
     dst->params.speed = src->speed;
     dst->params.alpha.alpha = src->alpha.alpha;
     dst->params.alpha.surfaceIndex = src->alpha.surfaceIndex;
