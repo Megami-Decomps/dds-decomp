@@ -59,4 +59,17 @@ typedef char ActorSlotOrder_scalePercent_offset[((unsigned long)&((ActorSlotOrde
 typedef char ActorSlotOrder_secondaryState_offset[((unsigned long)&((ActorSlotOrder *)0)->secondaryState == 0xAC) ? 1 : -1];
 typedef char ActorSlotOrder_colorAdjustments_offset[((unsigned long)&((ActorSlotOrder *)0)->colorAdjustments == 0xB4) ? 1 : -1];
 
+/* Copy the selected fixed order into its actor-slot bank. */
+void btlInitializeActorSlotOrder(s32 selector, s32 count);
+/* Return occupied scene slots, refreshing cached fade-kind counts as needed. */
+s32 btlCountSceneSlots(void);
+/* The output is the last fading-record index, including -1 for an empty list. */
+#ifdef VERSION_DDS1
+struct BattleController;
+s32 fldCountSceneFadeKinds(struct BattleController *scene, s32 *outLastFadeIndex);
+#else
+struct BattleSceneWork;
+s32 fldCountSceneFadeKinds(struct BattleSceneWork *scene, s32 *outLastFadeIndex);
+#endif
+
 #endif
