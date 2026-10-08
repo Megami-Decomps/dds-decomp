@@ -48,8 +48,8 @@ extern void func_003364B8(f32 angle);
 extern void func_00336818(f32 angle);
 extern void sdfMultiplyVuMatrixInPlace(void);
 extern void vu0RotMatrixXYZFromVec3(f32 *rot);
-extern s32 effGetScatterWideBlock(u32 object, s32 index);
-extern s32 effGetScatterNarrowBlock(u32 object, s32 index);
+extern s32 effGetScatterWideBlock(PcpScatterDraw *object, s32 index);
+extern s32 effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);
 
 
 /* Ownership handles refer to SDF allocation nodes, not their retained payloads. */
@@ -67,7 +67,7 @@ typedef struct PcpScatterInstance PcpScatterInstance;
 
 extern PcpScatterInstance *effPcpScatterCreateParticleInstance();
 
-extern void effShareScatterResource(u32 param0, u32 param1);
+extern void effShareScatterResource(PcpScatterDraw *object, PcpScatterDraw *source);
 
 typedef struct PcpScatterInstanceB PcpScatterInstanceB;
 
@@ -118,7 +118,7 @@ struct PcpScatterInstanceB {
     f32 scale;
     u32 color;
     s32 age;
-    u32 scatterObject;
+    PcpScatterDraw *scatterObject;
     SdfMemBlock *allocationHandle;
 };
 
@@ -170,7 +170,7 @@ struct PcpScatterInstanceC {
     f32 scale;
     u32 color;
     s32 age;
-    u32 scatterObject;
+    PcpScatterDraw *scatterObject;
     SdfMemBlock *allocationHandle;
 };
 
@@ -1373,7 +1373,7 @@ struct PcpScatterInstance {
     PcpScatterParticle *particles;
     f32 scale;
     u32 color;
-    u32 scatterObject;
+    PcpScatterDraw *scatterObject;
     SdfMemBlock *allocationHandle;
 };
 
@@ -1381,7 +1381,7 @@ struct PcpScatterInstance {
 extern PcpScatterDraw *effScatterCreateDrawObject(
     u32 particleCount, u32 segmentsPerParticle);
 
-extern void effCreateScatterResource(void *object, u32 resource);
+extern void effCreateScatterResource(PcpScatterDraw *object, u32 resource);
 
 extern u32 effMiscRand(void *state);
 
@@ -1412,7 +1412,7 @@ PcpScatterInstance *effPcpScatterCreateParticleInstance(src, resource)
     VU0_COPY_MATRIX(inst->matrix, src->matrix);
     object = effScatterCreateDrawObject(src->particleCount, src->unk60);
     drawWord = src->unk50;
-    inst->scatterObject = (u32)object;
+    inst->scatterObject = object;
     object->unk50 = drawWord;
     if (resource != 0) {
         effCreateScatterResource(object, resource);
@@ -1448,7 +1448,7 @@ PcpScatterInstance *effScatterCloneWithSharedObject(PcpScatterInstance *work) {
 
 /* Release the drawable before its owning SDF allocation descriptor. */
 void effScatterReleaseObjectAndBuffer(PcpScatterInstance *work) {
-    effReleaseScatterObject((PcpScatterDraw *)work->scatterObject);
+    effReleaseScatterObject(work->scatterObject);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
@@ -1477,7 +1477,7 @@ void effScatterRingInit(PcpScatterInstance *work, s32 index)
     u32 i;
 
     ring = &work->particles[index];
-    count = ((PcpScatterDraw *)work->scatterObject)->vectorsPerParticle >> 1;
+    count = work->scatterObject->vectorsPerParticle >> 1;
     angle = effMiscRandUnitFloat(D_003AA868) * (EFF_SCATTER_HALF_TURN * 2.0f);
     jitter = work->params.angleStepJitter;
     angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) / (f32)count;
@@ -1544,7 +1544,7 @@ void effScatterRingUpdate(PcpScatterInstance *work, s32 index)
     effGetScatterNarrowBlock(work->scatterObject, index);
     ring = &work->particles[index];
     radius = ring->radius + ring->radiusStep;
-    count = ((PcpScatterDraw *)work->scatterObject)->vectorsPerParticle >> 1;
+    count = work->scatterObject->vectorsPerParticle >> 1;
     rise = ring->rise;
     angle = ring->angle;
     step = ring->angleStep;
@@ -1586,7 +1586,7 @@ void effScatterUpdateLoopedParticleRing(PcpScatterInstance *work) {
     s32 loop;
     u32 i;
     u32 count = work->params.particleCount;
-    PcpScatterDraw *draw = (PcpScatterDraw *)work->scatterObject;
+    PcpScatterDraw *draw = work->scatterObject;
     PcpScatterParticle *particle = work->particles;
     s32 duration = work->params.duration;
     s32 fadeIn;
@@ -1685,7 +1685,7 @@ PcpScatterInstanceB *effScatterCreateDampedRing(src, resource)
     VU0_COPY_MATRIX(inst->matrix, src->matrix);
     object = effScatterCreateDrawObject(src->particleCount, src->unk60);
     drawWord = src->unk50;
-    inst->scatterObject = (u32)object;
+    inst->scatterObject = object;
     object->unk50 = drawWord;
     if (resource != 0) {
         effCreateScatterResource(object, resource);
@@ -1726,7 +1726,7 @@ PcpScatterInstanceB *effScatterCloneWithSharedResource(PcpScatterInstanceB *work
 
 /* Release the radius-damped drawable before its owning allocation node. */
 void effScatterReleaseInstanceResources(PcpScatterInstanceB *work) {
-    effReleaseScatterObject((PcpScatterDraw *)work->scatterObject);
+    effReleaseScatterObject(work->scatterObject);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
@@ -1753,7 +1753,7 @@ void effScatterRingInitScaled(PcpScatterInstanceB *work, s32 index)
     u32 i;
 
     ring = &work->particles[index];
-    count = ((PcpScatterDraw *)work->scatterObject)->vectorsPerParticle >> 1;
+    count = work->scatterObject->vectorsPerParticle >> 1;
     angle = effMiscRandUnitFloat(D_003AA868) * (EFF_SCATTER_HALF_TURN * 2.0f);
     jitter = work->params.angleStepJitter;
     angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) / (f32)count;
@@ -1820,7 +1820,7 @@ void effScatterRingUpdateScaled(PcpScatterInstanceB *work, s32 index)
     effGetScatterNarrowBlock(work->scatterObject, index);
     ring = &work->particles[index];
     radius = ring->radius + ring->radiusStep;
-    count = ((PcpScatterDraw *)work->scatterObject)->vectorsPerParticle >> 1;
+    count = work->scatterObject->vectorsPerParticle >> 1;
     rise = ring->rise;
     angle = ring->angle;
     step = ring->angleStep;
@@ -1861,7 +1861,7 @@ void effScatterRingUpdateScaled(PcpScatterInstanceB *work, s32 index)
 void effScatterUpdateLoopedScaledRing(PcpScatterInstanceB *work) {
     s32 loop;
     s32 duration = work->params.duration;
-    PcpScatterDraw *draw = (PcpScatterDraw *)work->scatterObject;
+    PcpScatterDraw *draw = work->scatterObject;
     PcpScatterParticle *particle = work->particles;
     u32 count = work->params.particleCount;
     s32 fadeIn;
@@ -1976,7 +1976,7 @@ PcpScatterInstanceC *effScatterCreateTwoColorRing(src, resource)
     VU0_COPY_MATRIX(inst->matrix, src->matrix);
     object = effScatterCreateDrawObject(src->particleCount, src->unk60);
     drawWord = src->unk50;
-    inst->scatterObject = (u32)object;
+    inst->scatterObject = object;
     object->unk50 = drawWord;
     if (resource != 0) {
         effCreateScatterResource(object, resource);
@@ -2017,7 +2017,7 @@ PcpScatterInstanceC *effCreateScatterChildSharingParentResource(PcpScatterInstan
 
 /* Release the two-color drawable before its owning allocation node. */
 void effReleaseScatterObjectAndOwnedBuffer(PcpScatterInstanceC *work) {
-    effReleaseScatterObject((PcpScatterDraw *)work->scatterObject);
+    effReleaseScatterObject(work->scatterObject);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
@@ -2043,7 +2043,7 @@ void effScatterInitStaggeredRing(PcpScatterInstanceC *work, s32 index)
     u32 i;
 
     ring = &work->particles[index];
-    count = ((PcpScatterDraw *)work->scatterObject)->vectorsPerParticle >> 1;
+    count = work->scatterObject->vectorsPerParticle >> 1;
     angle = effMiscRandUnitFloat(D_003AA868) * (EFF_SCATTER_HALF_TURN * 2.0f);
     jitter = work->params.angleStepJitter;
     angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) / (f32)count;
@@ -2110,7 +2110,7 @@ void effScatterRingUpdateScaledLong(PcpScatterInstanceC *work, s32 index)
     effGetScatterNarrowBlock(work->scatterObject, index);
     ring = &work->particles[index];
     radius = ring->radius + ring->radiusStep;
-    count = ((PcpScatterDraw *)work->scatterObject)->vectorsPerParticle >> 1;
+    count = work->scatterObject->vectorsPerParticle >> 1;
     rise = ring->rise;
     angle = ring->angle;
     step = ring->angleStep;
@@ -2149,7 +2149,7 @@ void effScatterRingUpdateScaledLong(PcpScatterInstanceC *work, s32 index)
 void effScatterUpdateTwoColor(PcpScatterInstanceC *work) {
     s32 loop;
     s32 duration = work->params.duration;
-    PcpScatterDraw *draw = (PcpScatterDraw *)work->scatterObject;
+    PcpScatterDraw *draw = work->scatterObject;
     PcpScatterParticle *particle = work->particles;
     u32 count = work->params.particleCount;
     s32 fadeIn;
@@ -2296,7 +2296,7 @@ struct PcpScatterPlainInstance {
     PcpScatterPlainParticle *particles;
     f32 scale;
     u32 color;
-    u32 scatterObject;
+    PcpScatterDraw *scatterObject;
     SdfMemBlock *allocationHandle;
 };
 
@@ -2325,7 +2325,7 @@ PcpScatterPlainInstance *effPcpScatterCreatePlainInstance(src, resource)
     EE_MMI_UNIT_MATRIX(inst->matrix);
     object = effScatterCreateDrawObject(src->particleCount, src->unk20);
     drawWord = src->unk10;
-    inst->scatterObject = (u32)object;
+    inst->scatterObject = object;
     object->unk50 = drawWord;
     if (resource != 0) {
         effCreateScatterResource(object, resource);
@@ -2364,7 +2364,7 @@ PcpScatterPlainInstance *effCloneScatterWithSharedResource(PcpScatterPlainInstan
 
 /* Release the flat-ring drawable before its owning allocation node. */
 void effReleaseScatterWorkResources(PcpScatterPlainInstance *work) {
-    effReleaseScatterObject((PcpScatterDraw *)work->scatterObject);
+    effReleaseScatterObject(work->scatterObject);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
@@ -2384,7 +2384,7 @@ void effScatterCreateFlatRing(PcpScatterPlainInstance *work, s32 index) {
     u32 i;
 
     ring = &work->particles[index];
-    count = ((PcpScatterDraw *)work->scatterObject)->vectorsPerParticle >> 1;
+    count = work->scatterObject->vectorsPerParticle >> 1;
     angle = effMiscRandUnitFloat(D_003AA868) * EFF_SCATTER_RADIAL_TURN;
     jitter = work->params.angleStepJitter;
     angleStep = work->params.angleStepBase * (effMiscRandUnitFloat(D_003AA868) * jitter + (1.0f - jitter)) / (f32)count;
@@ -2432,7 +2432,7 @@ void effScatterFlatRingUpdate(PcpScatterPlainInstance *work, s32 index)
 
     effGetScatterNarrowBlock(work->scatterObject, index);
     ring = &work->particles[index];
-    count = ((PcpScatterDraw *)work->scatterObject)->vectorsPerParticle >> 1;
+    count = work->scatterObject->vectorsPerParticle >> 1;
     angle = ring->angle + ring->angularSpeed;
     radius = ring->radius;
     step = ring->angleStep;
@@ -2471,7 +2471,7 @@ void effScatterUpdatePlainParticleRing(PcpScatterPlainInstance *work) {
     s32 loop;
     u32 i;
     u32 count = work->params.particleCount;
-    PcpScatterDraw *draw = (PcpScatterDraw *)work->scatterObject;
+    PcpScatterDraw *draw = work->scatterObject;
     PcpScatterPlainParticle *particle = work->particles;
     s32 duration = work->params.duration;
     s32 fadeIn;
