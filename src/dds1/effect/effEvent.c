@@ -7,6 +7,7 @@
 #include "eff_math.h"
 #include "eff_channel.h"
 #include "eff_event.h"
+#include "eff_event_setup.h"
 #include "pcp_vu0.h"
 
 #define EFF_EVENT_VECTOR_COMPONENTS 4
@@ -784,23 +785,10 @@ void effDispatchActive(void) {
     }
 }
 
-/* Optional callback/copy preparation shared by the seven setup paths below.
- * callbackResult must be valid whenever callback is present. */
-typedef struct ChState {
-    u8 pad00[0x1C];
-    void *source;
-    void *destination;
-    u32 copyBytes;
-    u8 pad28[4];
-    s32 (*callback)(void *);
-    u8 pad30[8];
-    s32 *callbackResult;
-} ChState;
-
-extern ChState D_00355AB8;
+/* callbackResult must be valid whenever callback is present. */
+extern EffEventSetupRecord D_00355AB8;
 extern s8 D_003BB0BD;
 extern s8 D_0039862B[];
-extern void func_0018CDD0(void *);
 extern void func_0018CDF8(void);
 extern void func_0018CDF0(void *);
 extern void func_0018CE00(void);
@@ -811,7 +799,7 @@ s32 effUpdateCh72Params(void) {
     u8 ready = D_003BB0BD;
 
     if (D_003BB0BD == 0) {
-        ChState *state = &D_00355AB8;
+        EffEventSetupRecord *state = &D_00355AB8;
 
         if (state->callback != NULL) {
             *state->callbackResult = state->callback(state->source);
@@ -825,7 +813,7 @@ s32 effUpdateCh72Params(void) {
         D_003BB0BD = ready;
     }
     if (ready != 0) {
-        func_0018CDD0(&D_00355AB8);
+        func_0018CDD0((u32)&D_00355AB8);
         func_0018CDF8();
         func_0018CDF0(&D_00355AB8);
         func_0018CE00();
@@ -846,7 +834,7 @@ void func_0018F9C0(void *parameters) {
     memcpy(&D_003559A0, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
-extern ChState D_00355C30;
+extern EffEventSetupRecord D_00355C30;
 extern s8 D_003BB0CD;
 
 /* Prepare the blur-template callback from its explicit parameter block,
@@ -855,7 +843,7 @@ s32 effEventAdvanceBlurTemplateSetup(void) {
     u8 ready = D_003BB0CD;
 
     if (D_003BB0CD == 0) {
-        ChState *state = &D_00355C30;
+        EffEventSetupRecord *state = &D_00355C30;
 
         if (state->callback != NULL) {
             *state->callbackResult = state->callback(&D_00355AF8);
@@ -869,7 +857,7 @@ s32 effEventAdvanceBlurTemplateSetup(void) {
         D_003BB0CD = ready;
     }
     if (ready != 0) {
-        func_0018CDD0(&D_00355C30);
+        func_0018CDD0((u32)&D_00355C30);
         func_0018CDF8();
         func_0018CDF0(&D_00355C30);
         func_0018CE00();
@@ -890,7 +878,7 @@ void effEventSetBlurTemplateParameters(EffBlurTemplateBody *parameters) {
     D_00355AF8 = *parameters;
 }
 
-extern ChState D_00355E08;
+extern EffEventSetupRecord D_00355E08;
 extern s8 D_003BB0FF;
 
 /* Prepare scatter setup from its explicit parameters, then process the channel. */
@@ -898,7 +886,7 @@ s32 effEventAdvanceScatterBlurSetup(void) {
     u8 ready = D_003BB0FF;
 
     if (D_003BB0FF == 0) {
-        ChState *state = &D_00355E08;
+        EffEventSetupRecord *state = &D_00355E08;
 
         if (state->callback != NULL) {
             *state->callbackResult = state->callback(&D_00355C70);
@@ -912,7 +900,7 @@ s32 effEventAdvanceScatterBlurSetup(void) {
         D_003BB0FF = ready;
     }
     if (ready != 0) {
-        func_0018CDD0(&D_00355E08);
+        func_0018CDD0((u32)&D_00355E08);
         func_0018CDF8();
         func_0018CDF0(&D_00355E08);
         func_0018CE00();
@@ -933,7 +921,7 @@ void effEventSetScatterBlurParameters(EffBlurScatterParams *parameters) {
     D_00355C70 = *parameters;
 }
 
-extern ChState D_00355F48;
+extern EffEventSetupRecord D_00355F48;
 extern s8 D_003BB114;
 
 /* Prepare from the channel's source, process it, then honor the control-byte reset. */
@@ -941,7 +929,7 @@ s32 func_0018FC80(void) {
     u8 ready = D_003BB114;
 
     if (D_003BB114 == 0) {
-        ChState *state = &D_00355F48;
+        EffEventSetupRecord *state = &D_00355F48;
 
         if (state->callback != NULL) {
             *state->callbackResult = state->callback(state->source);
@@ -955,7 +943,7 @@ s32 func_0018FC80(void) {
         D_003BB114 = ready;
     }
     if (ready != 0) {
-        func_0018CDD0(&D_00355F48);
+        func_0018CDD0((u32)&D_00355F48);
         func_0018CDF8();
         func_0018CDF0(&D_00355F48);
         func_0018CE00();
@@ -976,7 +964,7 @@ void func_0018FD48(void *parameters) {
     memcpy(&D_00355E48, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
-extern ChState D_00356048;
+extern EffEventSetupRecord D_00356048;
 extern s8 D_003BB127;
 
 /* Prepare solid-rectangle setup from the channel source, then process it. */
@@ -984,7 +972,7 @@ s32 effEventAdvanceSolidRectangleSetup(void) {
     u8 ready = D_003BB127;
 
     if (D_003BB127 == 0) {
-        ChState *state = &D_00356048;
+        EffEventSetupRecord *state = &D_00356048;
 
         if (state->callback != NULL) {
             *state->callbackResult = state->callback(state->source);
@@ -998,7 +986,7 @@ s32 effEventAdvanceSolidRectangleSetup(void) {
         D_003BB127 = ready;
     }
     if (ready != 0) {
-        func_0018CDD0(&D_00356048);
+        func_0018CDD0((u32)&D_00356048);
         func_0018CDF8();
         func_0018CDF0(&D_00356048);
         func_0018CE00();
@@ -1019,7 +1007,7 @@ void effEventSetSolidRectangleParameters(EffSolidRectParams *parameters) {
     D_00355F88 = *parameters;
 }
 
-extern ChState D_00356188;
+extern EffEventSetupRecord D_00356188;
 extern s8 D_003BB12C;
 
 /* Prepare resource-template setup from its explicit body, then process the channel. */
@@ -1027,7 +1015,7 @@ s32 effEventAdvanceResourceTemplateSetup(void) {
     u8 ready = D_003BB12C;
 
     if (D_003BB12C == 0) {
-        ChState *state = &D_00356188;
+        EffEventSetupRecord *state = &D_00356188;
 
         if (state->callback != NULL) {
             *state->callbackResult = state->callback(&D_00356088);
@@ -1041,7 +1029,7 @@ s32 effEventAdvanceResourceTemplateSetup(void) {
         D_003BB12C = ready;
     }
     if (ready != 0) {
-        func_0018CDD0(&D_00356188);
+        func_0018CDD0((u32)&D_00356188);
         func_0018CDF8();
         func_0018CDF0(&D_00356188);
         func_0018CE00();
@@ -1062,7 +1050,7 @@ void effEventSetResourceTemplateParameters(EffResourceRectParams *parameters) {
     D_00356088 = *parameters;
 }
 
-extern ChState D_00356360;
+extern EffEventSetupRecord D_00356360;
 extern s8 D_003BB13F;
 
 /* Prepare scale-blur setup from its explicit parameters, then process the channel. */
@@ -1070,7 +1058,7 @@ s32 effEventAdvanceScaleBlurSetup(void) {
     u8 ready = D_003BB13F;
 
     if (D_003BB13F == 0) {
-        ChState *state = &D_00356360;
+        EffEventSetupRecord *state = &D_00356360;
 
         if (state->callback != NULL) {
             *state->callbackResult = state->callback(&D_003561C8);
@@ -1084,7 +1072,7 @@ s32 effEventAdvanceScaleBlurSetup(void) {
         D_003BB13F = ready;
     }
     if (ready != 0) {
-        func_0018CDD0(&D_00356360);
+        func_0018CDD0((u32)&D_00356360);
         func_0018CDF8();
         func_0018CDF0(&D_00356360);
         func_0018CE00();
