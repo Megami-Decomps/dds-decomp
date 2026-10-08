@@ -9,11 +9,6 @@
 struct EffThunderVectorWork;
 
 
-/* Prefix of the SDK model data used to query attachment positions. */
-typedef struct EffPCPMapSource {
-    u8 pad00[0x18];
-    u32 mapHandle;
-} EffPCPMapSource;
 
 
 /* Shared 0x24-byte thunder ray work. The renderer places its first point
@@ -531,7 +526,7 @@ extern void effParamWorkCallback1(u32 handle, f32 value);
  * fires its handle pair; after frame 0x18 its position is pushed to the shared
  * handle. */
 void effTwinEffectUpdate(EffPCPTwinWork *work) {
-    void *obj[2];
+    MdlCtx *obj[2];
     u128 pos;
     u128 *posp;
     s32 i;
@@ -548,12 +543,12 @@ void effTwinEffectUpdate(EffPCPTwinWork *work) {
         effParamWorkCallback1(work->pair[i][0], work->scale * 1.5f);
         effParamWorkCallback1(work->pair[i][1], 1.75f);
         mdlBroadcastMasked(obj[1], work->color);
-        mdlProcessContextNodesAndTransforms((MdlCtx *)obj[0], (s32)D_00325828);
-        sdfLoadMapRecordPositionVector((struct SdfTextParam *)((EffPCPMapSource *)obj[0])->mapHandle, 1);
+        mdlProcessContextNodesAndTransforms(obj[0], (s32)D_00325828);
+        sdfLoadMapRecordPositionVector((struct SdfTextParam *)obj[0]->inner, 1);
         posp = &pos;
         VU0_STORE_VF_UNCLOBBERED(vf10, posp);
         mdlStorePrimaryVectorVU(obj[1]);
-        mdlProcessContextNodesAndTransforms((MdlCtx *)obj[1], (s32)D_00325828);
+        mdlProcessContextNodesAndTransforms(obj[1], (s32)D_00325828);
         if (work->frame > 0x18) {
             effParamWorkCallback0(work->shared[i], posp);
             effParamWorkInvokeCallback(work->shared[i]);
@@ -649,7 +644,7 @@ EffPCPStaggered *effCreatePairedResourceWork(EffPCPStaggered *source) {
 extern void effParamWorkCallback1(u32 handle, f32 value);
 
 void effPcpStaggerUpdate(EffPCPStaggered *work) {
-    void *obj[2];
+    MdlCtx *obj[2];
     f32 pos[4];
     s32 i;
 
@@ -667,10 +662,10 @@ void effPcpStaggerUpdate(EffPCPStaggered *work) {
             effParamWorkCallback1(work->handle[i * 2], work->scale * 1.5f);
             effParamWorkCallback1(work->handle[i * 2 + 1], 1.5f);
             mdlBroadcastMasked(obj[1], work->color);
-            mdlProcessContextNodesAndTransforms((MdlCtx *)obj[0], (s32)D_00325828);
-            sdfLoadMapRecordPositionVector((struct SdfTextParam *)((EffPCPMapSource *)obj[0])->mapHandle, 1);
+            mdlProcessContextNodesAndTransforms(obj[0], (s32)D_00325828);
+            sdfLoadMapRecordPositionVector((struct SdfTextParam *)obj[0]->inner, 1);
             mdlStorePrimaryVectorVU(obj[1]);
-            mdlProcessContextNodesAndTransforms((MdlCtx *)obj[1], (s32)D_00325828);
+            mdlProcessContextNodesAndTransforms(obj[1], (s32)D_00325828);
         }
     }
 }
@@ -795,8 +790,8 @@ extern void effParamWorkCallback1(u32 handle, f32 value);
 /* Per-frame update of the cross effect: scales the anchor model and fires each
  * of the 12 slots whose countdown has expired. */
 void effCrossEffectUpdate(EffPCPCrossWork *work) {
-    EffPCPMapSource *anchor;
-    void *obj;
+    MdlCtx *anchor;
+    MdlCtx *obj;
     s32 i;
     s32 j;
 
@@ -804,7 +799,7 @@ void effCrossEffectUpdate(EffPCPCrossWork *work) {
     VU0_LOAD_VF(vf10, work);
     mdlStorePrimaryVectorVU(anchor);
     effParamWorkCallback1(work->base, work->scale);
-    mdlProcessContextNodesAndTransforms((MdlCtx *)anchor, (s32)D_00325828);
+    mdlProcessContextNodesAndTransforms(anchor, (s32)D_00325828);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             if (work->state[i][j] != 0) {
@@ -813,9 +808,9 @@ void effCrossEffectUpdate(EffPCPCrossWork *work) {
             }
             obj = effParamWorkGetData(work->handle[i][j]);
             mdlBroadcastMasked(obj, work->color);
-            sdfLoadMapRecordPositionVector((struct SdfTextParam *)anchor->mapHandle, i * 4 + j + 1);
+            sdfLoadMapRecordPositionVector((struct SdfTextParam *)anchor->inner, i * 4 + j + 1);
             mdlStorePrimaryVectorVU(obj);
-            mdlProcessContextNodesAndTransforms((MdlCtx *)obj, (s32)D_00325828);
+            mdlProcessContextNodesAndTransforms(obj, (s32)D_00325828);
         }
     }
 }
@@ -902,7 +897,7 @@ EffPCPDelayedPairs *effCopyIndexedResourceWork(EffPCPDelayedPairs *source) {
 
 
 void effPcpDelayedPairsUpdate(EffPCPDelayedPairs *work) {
-    void *obj[2];
+    MdlCtx *obj[2];
     u128 vec;
     s32 i;
 
@@ -915,11 +910,11 @@ void effPcpDelayedPairsUpdate(EffPCPDelayedPairs *work) {
             VU0_LOAD_VF_MEMORY(vf10, work);
             mdlStorePrimaryVectorVU(obj[0]);
             mdlBroadcastMasked(obj[1], work->color);
-            mdlProcessContextNodesAndTransforms((MdlCtx *)obj[0], (s32)D_00325828);
-            sdfLoadMapRecordPositionVector((struct SdfTextParam *)((EffPCPMapSource *)obj[0])->mapHandle, 1);
+            mdlProcessContextNodesAndTransforms(obj[0], (s32)D_00325828);
+            sdfLoadMapRecordPositionVector((struct SdfTextParam *)obj[0]->inner, 1);
             VU0_STORE_VF_UNCLOBBERED(vf10, &vec);
             mdlStorePrimaryVectorVU(obj[1]);
-            mdlProcessContextNodesAndTransforms((MdlCtx *)obj[1], (s32)D_00325828);
+            mdlProcessContextNodesAndTransforms(obj[1], (s32)D_00325828);
         }
     }
 }
@@ -1095,15 +1090,15 @@ EffPCPSpawnOnceWork *effPcpSpawnOnceClone(EffPCPSpawnOnceWork *src) {
 }
 
 void effPcpSpawnOnce(EffPCPSpawnOnceWork *work) {
-    void *obj;
+    MdlCtx *obj;
     u128 vec;
 
     obj = effParamWorkGetData(work->primaryHandle);
     VU0_LOAD_VF_MEMORY(vf10, work);
     mdlStorePrimaryVectorVU(obj);
     effParamWorkCallback3(work->secondaryHandle, work->color);
-    mdlProcessContextNodesAndTransforms((MdlCtx *)obj, (s32)D_00325828);
-    sdfLoadMapRecordPositionVector((struct SdfTextParam *)((EffPCPMapSource *)obj)->mapHandle, 1);
+    mdlProcessContextNodesAndTransforms(obj, (s32)D_00325828);
+    sdfLoadMapRecordPositionVector((struct SdfTextParam *)obj->inner, 1);
     VU0_STORE_VF_TO_MEMORY(vf10, vec);
     effParamWorkCallback0(work->secondaryHandle, &vec);
     effParamWorkInvokeCallback(work->secondaryHandle);
@@ -6111,13 +6106,13 @@ void effPcpUpdateMapMotionEvents(EffPCPMapEventWork *work) {
     f32 scale[4] __attribute__((aligned(16)));
     s32 frame = work->frame;
     s32 frameLimit = work->frameLimit;
-    u32 mapHandle;
+    SdfModel *mapModel;
     s32 fadeIn;
     s32 fadeOut;
     u32 color;
     u32 count;
     u32 i;
-    EffPCPMapSource *model;
+    MdlCtx *model;
     EffPCPMapEventEntry *entry;
     f32 distance;
     f32 t;
@@ -6134,12 +6129,12 @@ void effPcpUpdateMapMotionEvents(EffPCPMapEventWork *work) {
     place.scaleD = 1.0f;
     if (frameLimit >= frame) {
         model = effParamWorkGetData(work->modelResource);
-        mapHandle = model->mapHandle;
+        mapModel = model->inner;
         VU0_LOAD_VF(vf10, work->params.position);
         mdlStorePrimaryVectorVU(model);
         VU0_LOAD_VF(vf10, scale);
         mdlStoreTertiaryVectorVU(model);
-        mdlProcessContextNodesAndTransforms((MdlCtx *)model, (s32)D_00325828);
+        mdlProcessContextNodesAndTransforms(model, (s32)D_00325828);
         count = work->count;
         fadeIn = work->params.fadeIn;
         fadeOut = work->params.fadeOut;
@@ -6150,7 +6145,7 @@ void effPcpUpdateMapMotionEvents(EffPCPMapEventWork *work) {
                 effEventSetScale(entry->event, work->scale);
             }
             if (frame >= 0) {
-                sdfLoadMapRecordPositionVector((struct SdfTextParam *)mapHandle, i);
+                sdfLoadMapRecordPositionVector((struct SdfTextParam *)mapModel, i);
                 VU0_STORE_VF(vf10, position);
                 if (frame == 0) {
                     entry->initialPosition[0] = position[0];
