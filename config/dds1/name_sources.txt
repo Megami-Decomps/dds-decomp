@@ -1442,6 +1442,8 @@
 0x00162BA0	effParamWorkCallback3	inferred	null-guarded dispatch of work data through the D_0035372C slot
 0x00162BE0	effParamWorkCallback4	inferred	null-guarded dispatch of work data through the D_00353730 slot
 0x00162C20	effParamWorkCallback5	inferred	null-guarded dispatch of work data through the D_00353734 slot
+0x00162C60	effParamCreateChildBillboard	inferred	Kind-zero compact parameter factory forwards resource data to billCreateIndexed; its provider creates a child billboard.
+0x00162C80	effParamCreateAnimatedBillboard	inferred	Kind-one compact parameter factory forwards serialized animation resource data to billCreateIndexed; its provider builds an animated billboard.
 0x00162CA0	effParamDispatchFloat	inferred	forwards one float argument twice to func_00152000 (vfpu f12/f13 pair)
 0x00162CB8	effParamInitWork	inferred	loads three vector constants to vf10 for model setup calls, sets grey 0x80808080, resets optional block word to 1.0f, clears flag bit0
 0x00162D60	effParamCreateInitWork	inferred	calls the 5-arg model setup, builds work, runs effParamInitWork, bumps the D_003BB044 counter
