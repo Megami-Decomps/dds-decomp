@@ -3040,6 +3040,10 @@ Glyph-only setters must receive the glyph, not a cast to that controller.
 Message-window text status is the signed byte at state `+0x34`.
 The three resource fields at `+0xA4` are `UiSprite *` objects; their
 release helper owns the sprite's payload and record allocations.
+Replacement-text slots pair relocated byte addresses with `SdfMemBlock *`
+allocation handles. Retain/release use the memory-block owner, not the
+unrelated linked named-resource `SdfResource`; the paired-slot release
+helper receives the same `ItfMesTextSlots` used by its allocation producer.
 The default/shared-flags glyph draw wrappers forward the renderer's
 real measured-advance result, which the sound-selector UI tests before
 advancing its message and fade state. Both games' 16 current `itf.h`
@@ -3121,6 +3125,18 @@ Bounds flags select maximum X in priority order 4, 2, 1; maximum Y is
 `0x38E`. The grid cell's generic value word supplies the selected
 `MenuSceneEntry *`, whose unsigned scene ID indexes the placement table.
 
+## Mantra-scene glow and particle ownership
+
+DDS1 `00255E08` uses the primary `MenuSceneMetadata.sparkles` at `+0x1CC`.
+`include/mnu_scene.h` owns this `0x6C` state and its eight `0x0C` particles;
+the complete scene remains `0x248` bytes, with currency still at `+0x23C`.
+Normalize the countdown first, then subtract that fraction from `1.0f`,
+as in the matched DDS2 `00285788` timer calculation. This preserves the
+retail float register/scheduling shape without artificial temporaries.
+The sine phase and base opacity use `3.14159265f` and `0.2f` literals,
+not extern globals for their `.lit4` pool entries. Scale the glow opacity
+by the incoming alpha before the integer sprite-renderer argument.
+
 ## Face-body task pointers and runtime sequence handles
 
 DDS2 `001E74A0` allocates an eight-byte task packet. Its callback
@@ -3133,4 +3149,30 @@ Its internal signed overflow test keeps the returned handle positive,
 but callers retain the full eight-byte value: `0021C1FC` stores it with
 `sd` into the runtime task's `ownerId`. Extern declarations follow the
 provider rather than narrowing or adapting this opaque handle.
+
+## Font root, retained UVs and original prototype scope
+
+`frFontWork` has one `FrFontSystem` owner in both games: nine resource
+entries, cache/pool controls, the atlas at `+0x160`, six image-buffer words
+at `+0x178`, and two glyph queues at `+0x194`. The retained resource header
+owns the dimensions and glyph-count bound; DDS2 places its lookup offset
+eight bytes later than DDS1.
+
+`FrFontGlyph` genuinely gives its `+0x1C` and `+0x20` pointer words two
+roles. A parent stores its first/last child, while a drawable item stores
+a retained `FrFontRecord` or a borrowed source record. The retained
+record's `FntNode` owns four UV words at `+4`. Native `00193D70` /
+`0019BA00` receive their address as the ninth argument, not a glyph Y
+coordinate; their width and half-height arguments are full signed words.
+
+The interface font TUs originally call `frFontListInsert` without a
+prototype in scope. Preserve that C89 implicit-call boundary: the
+callee is defined as `void` in the game font TU, but publishing its
+prototype to the interface TUs changes the retail caller's post-call
+counter register. This is original prototype scope, not a false return
+declaration.
+
+The selected queue can use direct indexed load/store through
+`frFontWork.glyphSlots`; no byte-offset view is needed. Glyph construction
+uses a named `FrFontEntry *` for the selected resource's glyph-count bound.
 

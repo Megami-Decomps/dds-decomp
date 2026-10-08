@@ -749,24 +749,7 @@ typedef struct MovieMenuState {
 
 typedef char MovieMenuState_size_must_be_0x40[(sizeof(MovieMenuState) == 0x40) ? 1 : -1];
 
-/* Mantra-scene state shared by its controller and animated currency display. */
-typedef struct MenuSceneMetadata {
-    u8 pad00[0x0C];
-    s32 messageWindowResource;
-    u8 pad10[8];
-    s32 state;
-    u8 pad1C[4];
-    s32 messageShadeFrames;
-    s32 attachedEffect;
-    u32 attachedEffectControl;
-    u16 entryId;
-    u8 pad02E[0x20E];
-    s32 displayedCurrency;
-    s32 currencyFrame;
-    u16 pendingProfileId;
-    s8 stageFinished;
-    s8 stageStarted;
-} MenuSceneMetadata;
+#include "mnu_scene.h"
 #endif
 
 #ifdef VERSION_DDS2

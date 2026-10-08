@@ -1,5 +1,6 @@
 #include "dsp_name.h"
 #include "common.h"
+#include "mnu_scene.h"
 
 #define MNU_DISPLAY_TEXT_RGB 0xA09DC300
 #define MNU_DISPLAY_DIM_TEXT_RGB 0xA09D7D00
@@ -300,15 +301,6 @@ extern f32 effMiscRandUnitFloat(s32);
 
 
 
-typedef struct DspParticle {
-    s16 x;         /* 0x00 */
-    s16 y;         /* 0x02 */
-    s16 timer;     /* 0x04 */
-    s16 timerMax;  /* 0x06 */
-    s16 z;         /* 0x08 */
-    s8 phase;      /* 0x0A */
-    u8 size;       /* 0x0B */
-} DspParticle;
 
 void mnuUpdateSparkle(DspParticle *spark) {
     spark->timer = spark->timer - 1;
@@ -331,12 +323,6 @@ void mnuUpdateSparkle(DspParticle *spark) {
 
 
 
-typedef struct {
-    s32 countdown;
-    s32 period;
-    f32 strength;
-    DspParticle particles[8];
-} DspParticleState;
 
 void mnuTickMantraSparkParticles(DspParticleState *state) {
     DspParticle *particle;
@@ -415,7 +401,20 @@ void func_00255B78(DspParticleState *state, s32 sprite, s32 surfaceIndex) {
 
 INCLUDE_ASM(const s32, "game/code_00254B30", func_00255D00);
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_00255E08);
+void func_00255E08(MenuSceneMetadata *scene, s32 alpha, s32 context) {
+    DspParticleState *sparkles;
+    f32 factor;
+
+    func_0024E260(0, 0, 0, alpha, 0x2A, context);
+    factor = (f32)scene->sparkles.countdown / (f32)scene->sparkles.period;
+    factor = 1.0f - factor;
+    factor = scene->sparkles.strength * sdfSinPoly(factor * 3.14159265f) +
+             0.2f;
+    func_0024E260(0, 0, 0, (f32)alpha * factor, 0x2B, context);
+    sparkles = &scene->sparkles;
+    mnuTickMantraSparkParticles(sparkles);
+    func_00255B78(sparkles, D_0036C698[1], context);
+}
 
 void itfDspDrawMarksA(s32 scale, s32 context) {
     func_0024E260(0, 0, 0, scale, 0x3A, context);

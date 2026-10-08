@@ -42,7 +42,7 @@ extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern s32 D_00435E6C;
 extern s32 D_00435E70;
 extern void itfSetTextDrawLimit(s32);
-extern s32 func_0019FA08(s32, s32, s32, u32, s32, s32);
+extern FrFontGlyph *func_0019FA08(s32, s32, s32, u16, FrFontTextBank *, s32);
 extern FrFontGlyph *func_0019E5D8(FrFontCtx *);
 extern void kwlnTaskCreate(const char *, s32, s32, s32, u32 (*)(void), void (*)(void), void *);
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
@@ -667,12 +667,12 @@ void itfCopyTextSegment(char *src, char *dst, s32 segmentIndex) {
 
 INCLUDE_ASM(const s32, "game/code_0019E138", func_0019FA08);
 
-extern u8 *func_0019DE70(u16 textId, s32 bank, s32 mode);
+extern u8 *func_0019DE70(s32 textId, FrFontTextBank *bank, s32 mode);
 extern s32 func_0019DB30(FrFontGlyph *text);
 extern s32 func_0019DBA8(s32 line, FrFontGlyph *text);
 extern void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *text);
 
-FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, s32 bank, s32 flags) {
+FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *bank, s32 flags) {
     u8 *text = func_0019DE70(textId, bank, 0);
     u32 mode;
     FrFontGlyph *handle;
@@ -719,19 +719,19 @@ FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId,
     return handle;
 }
 
-s32 itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMode, u16 textId, s32 flags) {
-    s32 result = 0;
+FrFontGlyph *itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMode, u16 textId, s32 flags) {
+    FrFontGlyph *result = NULL;
 
     itfSetTextDrawLimit(0x13);
     switch (fontMode) {
     case 0:
-        result = func_0019FA08(x, y, depth, textId, D_00435E6C, flags);
+        result = func_0019FA08(x, y, depth, textId, (FrFontTextBank *)D_00435E6C, flags);
         break;
     case 1:
-        result = func_0019FA08(x, y, depth, textId, D_00435E70, flags);
+        result = func_0019FA08(x, y, depth, textId, (FrFontTextBank *)D_00435E70, flags);
         break;
     case 2:
-        result = func_0019FA08(x, y, depth, textId, D_00435E6C, flags);
+        result = func_0019FA08(x, y, depth, textId, (FrFontTextBank *)D_00435E6C, flags);
         break;
     }
     itfSetTextDrawLimit(-1);
@@ -1102,7 +1102,7 @@ void itfScaleVectors(TextVector *output, s32 scaleX, s32 scaleY, s32 scaleZ,
 void itfSetStyleColor(FrFontGlyph *entry, u32 color) {
     for (; entry != NULL; entry = entry->previous) {
         FrFontGlyph *child;
-        for (child = entry->firstChild; child != NULL; child = child->next) {
+        for (child = entry->link1C.firstChild; child != NULL; child = child->next) {
             child->u10.word = color;
         }
     }
@@ -1112,7 +1112,7 @@ void itfSetStyleColor(FrFontGlyph *entry, u32 color) {
 void itfSetStyleColorBits(FrFontGlyph *entry, u32 colorBits) {
     for (; entry != NULL; entry = entry->previous) {
         FrFontGlyph *child;
-        for (child = entry->firstChild; child != NULL; child = child->next) {
+        for (child = entry->link1C.firstChild; child != NULL; child = child->next) {
             child->u10.word = (child->u10.word & ~ITF_BYTE_MASK) | colorBits;
         }
     }

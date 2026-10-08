@@ -116,55 +116,6 @@ typedef struct ItfBitRange {
     u32 end;
 } ItfBitRange;
 
-/* Native font resource header layout used by the binder. */
-typedef struct FrFontHeader {
-    u32 tableOffset;
-    u8 pad04[6];
-    u8 tableCount;
-    u8 pad0B[3];
-    u16 widthCount;
-    u16 cellWidth;  /* 0x10: returned by frFontGetSlotCellWidth */
-    u16 cellHeight; /* 0x12: returned by frFontGetSlotCellHeight */
-    u8 pad14[2];
-    u8 hasExtra;
-    u8 pad17;
-    u32 lookupOffset; /* 0x18; DDS2 stores this at 0x20 */
-} FrFontHeader;
-
-/* 0x24-byte table entry in the frFontWork font system. */
-typedef struct FrFontEntry {
-    void *buffer; /* 0x0: released by frFontFreeEntry */
-    FrFontHeader *resourceHeader; /* 0x4: retained resource header */
-    u32 unk8;    /* 0x8 */
-    u32 unkC;    /* 0xC */
-    u8 *flagBytes; /* 0x10: first byte enables entry, second stores value + 1 */
-    void *unk14; /* 0x14 */
-    void *unk18; /* 0x18 */
-    void *unk1C; /* 0x1C */
-    u32 unk20;   /* 0x20 */
-} FrFontEntry;
-
-/* Font system at frFontWork: 9 entries followed by shared control words.
- * The former resource-record view starts four bytes into each entry, at resourceHeader.
- */
-typedef struct FrFontSystem {
-    FrFontEntry entries[9]; /* 0x0 */
-    s32 unk144;             /* 0x144 */
-    s32 unk148;             /* 0x148 */
-    s32 unk14C;             /* 0x14C */
-    void *unk150;           /* 0x150: passed to itfReleaseMemNodeBuffer by frFontReleaseAll */
-    void *unk154;           /* 0x154: passed to itfReleaseMemNodeBuffer by frFontReleaseAll */
-    void *unk158;           /* 0x158: passed to sdfUpdateTextureHeadsWithInterruptsMasked by frFontReleaseAll */
-    void *unk15C;           /* 0x15C: passed to sdfUpdateTextureHeadsWithInterruptsMasked by frFontReleaseAll */
-    s32 width;              /* 0x160 */
-    s32 unk164;             /* 0x164 */
-    s32 height;             /* 0x168 */
-    s32 unk16C;             /* 0x16C */
-    s32 gsBuffer;           /* 0x170 */
-    s32 gsFormat;           /* 0x174 */
-    u8 unk178[0x1C];        /* 0x178 */
-    void *glyphSlots[2];    /* 0x194: glyph chain slots */
-} FrFontSystem;
 
 typedef struct TextPoolNode {
     struct TextPoolNode *previous;
@@ -666,12 +617,12 @@ void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
     frFontLinkGlyph(parent, glyph, 0);
 }
 
-extern u8 *func_001961B0(u16 textId, s32 bank, s32 mode);
+extern u8 *func_001961B0(s32 textId, FrFontTextBank *bank, s32 mode);
 extern s32 func_00195E60(FrFontGlyph *text);
 extern s32 func_00195ED8(s32 line, FrFontGlyph *text);
 extern void frFontMoveChainTo(s32 x, s32 y, FrFontGlyph *text);
 
-FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, s32 bank, s32 flags) {
+FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *bank, s32 flags) {
     u8 *text = func_001961B0(textId, bank, 0);
     u32 mode;
     FrFontGlyph *handle;
@@ -718,16 +669,16 @@ FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId,
     return handle;
 }
 
-s32 itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMode, u16 textId, s32 flags) {
-    s32 result = 0;
+FrFontGlyph *itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMode, u16 textId, s32 flags) {
+    FrFontGlyph *result = NULL;
 
     itfSetTextDrawLimit(0x13);
     switch (fontMode) {
     case 0:
-        result = itfDrawBankTextWithLayoutFlags(x, y, depth, textId, D_003BAA98, flags);
+        result = itfDrawBankTextWithLayoutFlags(x, y, depth, textId, (FrFontTextBank *)D_003BAA98, flags);
         break;
     case 1:
-        result = itfDrawBankTextWithLayoutFlags(x, y, depth, textId, D_003BAA9C, flags);
+        result = itfDrawBankTextWithLayoutFlags(x, y, depth, textId, (FrFontTextBank *)D_003BAA9C, flags);
         break;
     }
     itfSetTextDrawLimit(-1);
@@ -735,7 +686,7 @@ s32 itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMode, u16 te
 }
 
 
-u32 itfDrawUnderscoreTextSegment(x, y, depth, color, text, segmentIndex)
+FrFontGlyph *itfDrawUnderscoreTextSegment(x, y, depth, color, text, segmentIndex)
     s32 x;
     s32 y;
     s32 depth;
@@ -1097,7 +1048,7 @@ void itfScaleVectors(TextVector *output, s32 scaleX, s32 scaleY, s32 scaleZ,
 void itfSetStyleColor(FrFontGlyph *entry, u32 color) {
     for (; entry != NULL; entry = entry->previous) {
         FrFontGlyph *child;
-        for (child = entry->firstChild; child != NULL; child = child->next) {
+        for (child = entry->link1C.firstChild; child != NULL; child = child->next) {
             child->u10.word = color;
         }
     }
@@ -1107,7 +1058,7 @@ void itfSetStyleColor(FrFontGlyph *entry, u32 color) {
 void itfSetStyleColorBits(FrFontGlyph *entry, u32 colorBits) {
     for (; entry != NULL; entry = entry->previous) {
         FrFontGlyph *child;
-        for (child = entry->firstChild; child != NULL; child = child->next) {
+        for (child = entry->link1C.firstChild; child != NULL; child = child->next) {
             child->u10.word = (child->u10.word & ~ITF_BYTE_MASK) | colorBits;
         }
     }

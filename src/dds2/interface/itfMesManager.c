@@ -1063,7 +1063,7 @@ void itfMesClearGlobalWords(void) {
 
 extern ItfMesWindowRec D_00452960[];
 extern void btlReleaseEffectResourceHandles();
-extern void itfReleaseUiResourceSlotHandles();
+extern void itfReleaseUiResourceSlotHandles(ItfMesTextSlots *slots);
 extern void itfReleasePoolNode();
 
 /* Tear down installed content/resources, return the pool record and decrement
@@ -1219,21 +1219,21 @@ void func_001A5480(mes, slotIndex, source, byteCount)
     s32 allocationBytes;
 
     if (*textAddress != 0) {
-        sdfReleaseResourceAllocation((SdfMemBlock *)slots->handles[slotIndex]);
+        sdfReleaseResourceAllocation(slots->handles[slotIndex]);
         *textAddress = 0;
     }
     if (byteCount <= 0) {
         allocationBytes = (strlen(source) + ITF_MES_STRING_COPY_ROUND_BIAS) & ~ITF_MES_COPY_ALIGN_MASK;
-        slots->handles[slotIndex] = (u32)sdfAllocGeneralBlock(allocationBytes);
-        *textAddress = sdfResourceRetainAddress((SdfMemBlock *)slots->handles[slotIndex]);
+        slots->handles[slotIndex] = sdfAllocGeneralBlock(allocationBytes);
+        *textAddress = sdfResourceRetainAddress(slots->handles[slotIndex]);
         memset((void *)*textAddress, 0, allocationBytes);
         /* String mode copies the padded span, rather than only strlen + 1. */
         memcpy((void *)*textAddress, source, allocationBytes);
         return;
     }
     allocationBytes = (byteCount + ITF_MES_BINARY_COPY_ROUND_BIAS) & ~ITF_MES_COPY_ALIGN_MASK;
-    slots->handles[slotIndex] = (u32)sdfAllocGeneralBlock(allocationBytes);
-    *textAddress = sdfResourceRetainAddress((SdfMemBlock *)slots->handles[slotIndex]);
+    slots->handles[slotIndex] = sdfAllocGeneralBlock(allocationBytes);
+    *textAddress = sdfResourceRetainAddress(slots->handles[slotIndex]);
     memset((void *)*textAddress, 0, allocationBytes);
     memcpy((void *)*textAddress, source, byteCount);
 }
@@ -1356,7 +1356,7 @@ FrFontGlyph *itfMesGetLastNode(FrFontGlyph *node) {
 
 /* Copy the auxiliary glyph's shade bytes; its encoded intensity is unsigned. */
 void itfMesCopyGlyphShade(FrFontGlyph *glyph, ItfMesEntryBlock *entryBlock) {
-    FrFontGlyph *shade = glyph->unk20;
+    FrFontGlyph *shade = glyph->link20.linkedGlyph;
     u8 encodedIntensity = glyph->u0.b.b0;
 
     entryBlock->color[3] = encodedIntensity >> 1;
@@ -1416,7 +1416,7 @@ void itfMesSetRowItemFlag(FrFontGlyph *node, s32 first, s32 last, s32 requestedF
     }
     flagValue = requestedFlags;
     do {
-        for (child = node->firstChild; child != NULL; child = child->next) {
+        for (child = node->link1C.firstChild; child != NULL; child = child->next) {
             child->u14.b[0] = flagValue;
         }
         node = node->previous;
@@ -1428,7 +1428,7 @@ void itfMesSetChildChainFlags(FrFontGlyph *glyph, u8 flagValue) {
     FrFontGlyph *child;
 
     for (; glyph != NULL; glyph = glyph->previous) {
-        for (child = glyph->firstChild; child != NULL; child = child->next) {
+        for (child = glyph->link1C.firstChild; child != NULL; child = child->next) {
             child->u14.b[0] = flagValue;
         }
     }
@@ -1440,7 +1440,7 @@ void itfMesRecolorNodeChildren(FrFontGlyph *node, u32 color) {
     FrFontGlyph *child;
 
     for (; node != NULL; node = node->previous) {
-        for (child = node->firstChild; child != NULL; child = child->next) {
+        for (child = node->link1C.firstChild; child != NULL; child = child->next) {
             child->u10.word = child->u10.word & ITF_MES_COLOR_BYTE_CLEAR_MASK | color;
         }
     }
@@ -1486,7 +1486,7 @@ s32 itfMesNthClearBit(s32 clearBitsToSkip, u32 mask) {
  * NULL chain is allowed, but every visited node must have a first child. */
 void itfMesEnableUnflaggedNodeContexts(FrFontGlyph *node) {
     for (; node != NULL; node = node->previous) {
-        if (node->firstChild->u14.b[2] == 0) {
+        if (node->link1C.firstChild->u14.b[2] == 0) {
             frFontEnableContextMode(node);
         }
     }
