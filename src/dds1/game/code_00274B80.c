@@ -19,7 +19,6 @@ extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32,
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
 extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
-extern MenuPanelHandles *mnuCreatePanelSpriteHandles(u32, s32, s32);
 extern s32 mnuClassifyQuarterHalfPercent(s32, s32);
 extern s32 evtStageTestSelectEntry(s32, s32, s32);
 extern void func_00276720(s32, s32, s32, s32);
@@ -881,7 +880,9 @@ s32 mnuInitializeStaffPartyScene(KwlnTask *task) {
     profilePanel = mnuCreateProfilePanel(record);
     context->extraResource = profilePanel;
     mnuCacheProfilePanelGridPositions(profilePanel, context->staffParam, 5, 0xE, 0xF);
-    menu->resourceList = mnuCreatePanelSpriteHandles(1, context->displayVariant, context->unk120);
+    menu->resourceList = mnuCreatePanelSpriteHandles(
+        1, (EffectSlotSet *)(u32)context->displayVariant,
+        (struct EffMappedResource *)(u32)context->unk120);
     if (mnuClassifyQuarterHalfPercent(record->hp, record->maxHp) < 2) {
         menu->motionSelection = -1;
     } else {
