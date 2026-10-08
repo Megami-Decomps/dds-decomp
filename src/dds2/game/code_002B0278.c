@@ -1892,7 +1892,7 @@ void mnuCampMenuHandleInput(KwlnTask *callback) {
 }
 
 /* Apply a selected skill to the current slot, then process window input. */
-void func_002B5580(KwlnTask *callback) {
+void ptySkillMenuHandleSelection(KwlnTask *callback) {
     MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(callback);
     SkillMenuRuntime *menuWork = (SkillMenuRuntime *)context->party;
     u32 inputFlags = mnuMapPadMaskToFlags(MNU_STAFF_SKILL_INPUT_MASK);
@@ -2014,7 +2014,7 @@ s32 ptySkillMenuUpdate(KwlnTask *callback) {
     if (((MenuContext *)context)->imageHandle->list->cursor->index == 0) {
         mnuCampMenuHandleInput(callback);
     } else if (menu[12] == 0) {
-        func_002B5580(callback);
+        ptySkillMenuHandleSelection(callback);
     } else {
         ptySkillMenuHandleSlotReorder(callback);
     }

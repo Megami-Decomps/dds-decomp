@@ -4451,6 +4451,7 @@
 0x002B53B8	mnuAddPartySkillIfMissing	inferred	adds missing skill then recomputes HP/MP [names_R_FuncNames.tsv]
 0x002B5430	mnuClearPartySkillSlot	inferred	clears skill slot then recomputes HP/MP [names_R_FuncNames.tsv]
 0x002B5450	mnuCampMenuHandleInput	inferred	Handles confirm/cancel on selected skill window and advances its list cursor. [names_reviewed5.tsv]
+0x002B5580	ptySkillMenuHandleSelection	inferred	Paired DDS1 handler applies the selected skill to a party slot, rebuilds the party panel, and processes window input.
 0x002B5778	mnuSwapPartySkillSlots	inferred	swaps two 16-bit party skill entries [names_R_FuncNames.tsv]
 0x002B57A8	ptySkillMenuHandleSlotReorder	inferred	Picks two skill slots, exchanges their IDs and refreshes selected window cursor. [names_reviewed5.tsv]
 0x002B5980	ptySkillMenuUpdate	inferred	Dispatches skill list input to ordinary, transfer or reorder mode after popup polling. [names_reviewed5.tsv]
