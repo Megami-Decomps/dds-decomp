@@ -79,7 +79,7 @@ s32 func_00270088(void);
 void mnuStopMovieDrawTask(void);
 
 s32 mnuSetFrameDivisor(void) {
-    func_002EC5E0(0x3c / mnuMovieTaskState);
+    sdfAdvanceStreamPlayback(0x3c / mnuMovieTaskState);
     return 0;
 }
 
