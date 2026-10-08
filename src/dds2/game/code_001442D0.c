@@ -341,7 +341,7 @@ extern void func_00342580(s32 arg0);
 
 extern s32 fldCurrentBgmId[];
 
-extern void func_00341C78();
+extern void func_00341C78(u32);
 
 extern void fldRelocatePackedTransferChunk(u32 arg0, s32 arg1);
 
@@ -3905,7 +3905,7 @@ extern void fldReleaseTargetGuideResource(void);
 
 extern void fldResetViewState(void);
 
-extern void func_00341C78(s32);
+extern void func_00341C78(u32);
 
 void fldResetTargetViewAndSound(void) {
     fldReleaseTargetGuideResource();
@@ -4102,7 +4102,7 @@ s32 fldIsTargetWithinInteractionRange(void) {
     return inRange;
 }
 
-s32 func_00153560(void) {
+s32 func_00153560(s32 unusedArea, s32 unusedRoom) {
     if (fldAreaState[4] == 23) {
         if (fldAreaState[5] == 10 && mdlFlagTest(1254)) {
             return 0;
@@ -4142,7 +4142,219 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F68);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413F78);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001536B8);
+extern FieldGridCoordPair D_003AA6A8[10];
+extern FieldGridCoordPair D_003AA6D0[10];
+extern FieldGridCoordPair D_003AA6F8[10];
+
+/* Select the target guide's route endpoint, motion state and model visibility. */
+void func_001536B8(s32 mode) {
+    s32 previousMode;
+
+    if (func_00153560(FLD_WORK->area, FLD_WORK->room + 1) == 0) {
+        return;
+    }
+    previousMode = fldTargetGuideState.unk64;
+    fldTargetGuideState.updateFlags = 0x40;
+    fldTargetGuideState.unk64 = mode;
+
+    switch (mode) {
+    case 0:
+        fldUpdateViewAngle();
+        fldTargetGuideState.yaw = 180.0f;
+        fldTargetGuideState.targetYaw = 0.0f;
+        fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
+        func_001519E8(2);
+        func_00152C88();
+        func_00341C78(0x690061);
+        sndSetSequenceVolumePan(0x690061, 0, 0x3F);
+        break;
+    case 1:
+        fldUpdateViewAngle();
+        fldTargetGuideState.cycleIndex = 0;
+        fldTargetGuideState.yaw = 180.0f;
+        fldTargetGuideState.targetYaw = 0.0f;
+        fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
+        func_001519E8(5);
+        func_00152C88();
+        break;
+    case 2:
+        fldUpdateViewAngle();
+        fldTargetGuideState.targetYaw = 0.0f;
+        fldTargetGuideState.yaw = 180.0f;
+        fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
+        func_001519E8(6);
+        func_00152C88();
+        break;
+    case 3:
+        fldTargetGuideState.gridX = D_003AA6A8[1].x;
+        fldTargetGuideState.gridY = D_003AA6A8[1].y;
+        fldUpdateViewAngle();
+        fldTargetGuideState.yaw = 180.0f;
+        fldTargetGuideState.targetYaw = 0.0f;
+        fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
+        func_001519E8(2);
+        fldTargetGuideState.updateFlags |= 2;
+        func_00152C88();
+        func_00341C78(0x690061);
+        sndSetSequenceVolumePan(0x690061, 0, 0x3F);
+        break;
+    case 4:
+        fldTargetGuideState.gridX = D_003AA6A8[3].x;
+        fldTargetGuideState.gridY = D_003AA6A8[3].y;
+        fldUpdateViewAngle();
+        fldTargetGuideState.targetYaw = 90.0f;
+        fldTargetGuideState.yaw = 180.0f - fldTargetGuideState.targetYaw;
+        fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
+        func_001519E8(2);
+        fldTargetGuideState.updateFlags |= 2;
+        func_00152C88();
+        func_00341C78(0x690061);
+        sndSetSequenceVolumePan(0x690061, 0, 0x3F);
+        break;
+    case 5:
+        fldTargetGuideState.gridX = D_003AA6A8[5].x;
+        fldTargetGuideState.gridY = D_003AA6A8[5].y;
+        fldUpdateViewAngle();
+        fldTargetGuideState.yaw = 180.0f;
+        fldTargetGuideState.targetYaw = 0.0f;
+        fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
+        func_001519E8(2);
+        fldTargetGuideState.updateFlags |= 2;
+        func_00152C88();
+        func_00341C78(0x690061);
+        sndSetSequenceVolumePan(0x690061, 0, 0x3F);
+        break;
+    case 6:
+        fldTargetGuideState.gridX = D_003AA6D0[1].x;
+        fldTargetGuideState.gridY = D_003AA6D0[1].y;
+        fldUpdateViewAngle();
+        fldTargetGuideState.targetYaw = 180.0f;
+        fldTargetGuideState.yaw = 0.0f;
+        fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
+        func_001519E8(2);
+        fldTargetGuideState.updateFlags |= 2;
+        func_00152C88();
+        D_00435F20->flags &= ~1;
+        func_00341C78(0x690061);
+        sndSetSequenceVolumePan(0x690061, 0, 0x3F);
+        break;
+    case 7:
+        fldTargetGuideState.gridX = D_003AA6D0[3].x;
+        fldTargetGuideState.gridY = D_003AA6D0[3].y;
+        fldTargetGuideState.targetYaw = 180.0f;
+        fldTargetGuideState.yaw = 0.0f;
+        fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
+        func_001519E8(6);
+        func_00152C88();
+        func_00341C78(0x690061);
+        break;
+    case 8:
+        if (previousMode == 7) {
+            fldTargetGuideState.gridX = D_003AA6D0[3].x;
+            fldTargetGuideState.gridY = D_003AA6D0[3].y;
+            fldTargetGuideState.targetYaw = 180.0f;
+            fldTargetGuideState.yaw = 0.0f;
+            fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
+            func_001519E8(3);
+            fldTargetGuideState.updateFlags |= 2;
+            func_00152C88();
+            func_00341C78(0x690061);
+            sndSetSequenceVolumePan(0x690061, 0, 0x3F);
+        }
+        break;
+    case 9:
+        fldTargetGuideState.gridX = D_003AA6F8[1].x;
+        fldTargetGuideState.gridY = D_003AA6F8[1].y;
+        fldUpdateViewAngle();
+        fldTargetGuideState.yaw = 180.0f;
+        fldTargetGuideState.targetYaw = 0.0f;
+        fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
+        func_001519E8(2);
+        fldTargetGuideState.updateFlags |= 2;
+        func_00152C88();
+        D_00435F20->flags &= ~1;
+        func_00341C78(0x690061);
+        sndSetSequenceVolumePan(0x690061, 0, 0x3F);
+        break;
+    case 10:
+        fldTargetGuideState.gridX = D_003AA6F8[3].x;
+        fldTargetGuideState.gridY = D_003AA6F8[3].y;
+        fldTargetGuideState.yaw = 180.0f;
+        fldTargetGuideState.targetYaw = 0.0f;
+        fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
+        func_001519E8(6);
+        func_00152C88();
+        func_00341C78(0x690061);
+        break;
+    case 11:
+        if (previousMode == 10) {
+            fldTargetGuideState.gridX = D_003AA6F8[3].x;
+            fldTargetGuideState.gridY = D_003AA6F8[3].y;
+            fldTargetGuideState.yaw = 180.0f;
+            fldTargetGuideState.targetYaw = 0.0f;
+            fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
+            func_001519E8(3);
+            fldTargetGuideState.updateFlags |= 2;
+            func_00152C88();
+            func_00341C78(0x690061);
+            sndSetSequenceVolumePan(0x690061, 0, 0x3F);
+        }
+        break;
+    case 12:
+        fldTargetGuideState.gridX = D_003AA6D0[1].x;
+        fldTargetGuideState.gridY = D_003AA6D0[1].y;
+        fldUpdateViewAngle();
+        fldTargetGuideState.targetYaw = 180.0f;
+        fldTargetGuideState.yaw = 0.0f;
+        fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
+        func_001519E8(7);
+        fldTargetGuideState.updateFlags |= 2;
+        func_00152C88();
+        D_00435F20->flags |= 1;
+        func_00341C78(0x690061);
+        break;
+    case 13:
+        fldTargetGuideState.gridX = D_003AA6F8[1].x;
+        fldTargetGuideState.gridY = D_003AA6F8[1].y;
+        fldUpdateViewAngle();
+        fldTargetGuideState.yaw = 180.0f;
+        fldTargetGuideState.targetYaw = 0.0f;
+        fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
+        func_001519E8(7);
+        fldTargetGuideState.updateFlags |= 2;
+        func_00152C88();
+        D_00435F20->flags |= 1;
+        func_00341C78(0x690061);
+        break;
+    case 14:
+        fldTargetGuideState.gridX = 0;
+        fldTargetGuideState.gridY = 0;
+        fldUpdateViewAngle();
+        fldTargetGuideState.targetYaw = 0.0f;
+        fldTargetGuideState.yaw = 180.0f;
+        fldTargetGuideState.position[0] = fldTargetGuideState.targetYaw;
+        fldTargetGuideState.position[2] = fldTargetGuideState.targetYaw;
+        func_001519E8(8);
+        fldTargetGuideState.updateFlags |= 2;
+        func_00152C88();
+        D_00435F20->flags |= 1;
+        break;
+    case 15:
+        fldTargetGuideState.gridX = D_003AA6F8[5].x;
+        fldTargetGuideState.gridY = D_003AA6F8[5].y;
+        fldUpdateViewAngle();
+        fldTargetGuideState.targetYaw = 180.0f;
+        fldTargetGuideState.yaw = 0.0f;
+        fldMapGridToScreenPosition(fldTargetGuideState.gridX, fldTargetGuideState.gridY, &fldTargetGuideState.position[0], &fldTargetGuideState.position[2]);
+        func_001519E8(2);
+        fldTargetGuideState.updateFlags |= 2;
+        func_00152C88();
+        func_00341C78(0x690061);
+        sndSetSequenceVolumePan(0x690061, 0, 0x3F);
+        break;
+    }
+}
+
 
 void fldSetTargetGuideEnabled(s32 active) {
     if (active == 0) {
