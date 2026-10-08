@@ -137,7 +137,6 @@ extern void mdlAddEntryPlain(void *work, s32 arg1, s32 arg2);
 extern u32 parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void func_00164C68(u32 system, u32 value);
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
-extern u32 sdfResourceRetainAddress(SdfMemBlock *handle);
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
 extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);

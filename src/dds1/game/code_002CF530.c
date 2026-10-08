@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 
 extern void sdfQueuePendingChipValue(void *);
 extern void *sdfFindGeneralBlockByAddress(void *);
@@ -10,7 +11,6 @@ extern void sdfReleaseCurrentResourceHandle(void *);
 
 extern void (*sdfTickCallback)(void);
 
-extern void *sdfResourceRetainAddress(void *);
 
 extern void *sdfAllocGeneralBlock(void);
 
@@ -32,7 +32,7 @@ extern s32 RemoveSbusIntcHandler(s32);
 
 void *sdfAllocateBlockBySizeThreshold(s32 size) {
     if (size >= 0x401) {
-        return sdfResourceRetainAddress(sdfAllocGeneralBlock());
+        return (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock());
     }
     return sdfAllocSizeClassBlock(size);
 }

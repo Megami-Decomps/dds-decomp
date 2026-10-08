@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf.h"
 
 enum {
@@ -105,7 +106,6 @@ void sdfPacStartAllocationList(PacState *state, PacHead *packet);
 void sdfQueueAndResetPacketWork(PacState *state, void *packet);
 void sdfAppendResourceListItem(s32 handle, s32 resource);
 SdfTex *sdfTexAcquireAlternateResourceTexture(void *resource);
-s32 sdfResourceRetainAddress(s32 handle);
 SdfTex *sdfTexAcquireResourceTexture(void *resource);
 s32 sdfAllocGeneralBlockHigh(s32 size);
 s32 sdfAllocGeneralBlock(s32 size);
@@ -296,7 +296,7 @@ void sdfPacStartPacketPayload(PacState *state, PacHead *packet) {
         } else {
             node->resourceHandle = sdfAllocGeneralBlock(allocationSize);
         }
-        state->outputCursor = node->dataCursor = (u8 *)sdfResourceRetainAddress(node->resourceHandle);
+        state->outputCursor = node->dataCursor = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(node->resourceHandle));
         switch (packet->flags & PAC_ENCODING_MASK) {
         case PAC_ENCODING_RAW:
             state->onInput = sdfPacCopyPendingBytes;
@@ -378,7 +378,7 @@ void sdfPacCopyResourceChunk(PacState *state) {
                 return;
             }
         }
-        resourceBuffer->result = (s32)sdfTexAcquireResourceTexture((void *)sdfResourceRetainAddress(resourceBuffer->resourceSlot));
+        resourceBuffer->result = (s32)sdfTexAcquireResourceTexture((void *)sdfResourceRetainAddress((struct SdfMemBlock *)(resourceBuffer->resourceSlot)));
         sdfReleaseMemorySlot(&resourceBuffer->resourceSlot);
         state->onComplete(state);
     }
@@ -395,7 +395,7 @@ void sdfPacDecodeResourceChunk(PacState *state) {
     }
     {
         PacBuf *resourceBuffer = state->resourceBuffer;
-        resourceBuffer->result = (s32)sdfTexAcquireResourceTexture((void *)sdfResourceRetainAddress(resourceBuffer->resourceSlot));
+        resourceBuffer->result = (s32)sdfTexAcquireResourceTexture((void *)sdfResourceRetainAddress((struct SdfMemBlock *)(resourceBuffer->resourceSlot)));
         sdfReleaseMemorySlot(&resourceBuffer->resourceSlot);
     }
     sdfReleaseChipBlock(state->decoder);

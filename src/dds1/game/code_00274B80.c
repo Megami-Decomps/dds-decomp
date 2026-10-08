@@ -262,7 +262,6 @@ extern u8 D_0037CA78[];
 extern void mnuStepPartyPanelListFromInput();
 extern void mnuClearListFlags();
 extern SdfMemBlock *sdfAllocGeneralBlock(s32);
-extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 extern void evtStageTestInit(s32);
 
 extern s32 func_002877A8(void);
@@ -486,7 +485,6 @@ void mnuRefreshPartyPanelSlots(s32 context) {
     mnuUpdateHandleStates(&((CampMenuContext *)context)->partyWindow);
 }
 
-extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
 extern void mnuLoadPanelSectionResources(MenuPageSlot *, u32, u32,
                                          u32, s32);
 
@@ -1365,7 +1363,7 @@ void mnuDestroySkillMenuWindows(s32 context) {
 s32 mnuCampMenuInit(void) {
     s32 context = kwlnTaskGetUserValue();
     s32 handle = sdfAllocGeneralBlock(0x38);
-    s32 *menu = sdfResourceRetainAddress(handle);
+    s32 *menu = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     CampMenuContext *work = (CampMenuContext *)context;
 
     work->menu = menu;

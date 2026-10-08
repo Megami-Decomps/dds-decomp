@@ -152,7 +152,6 @@ extern void sdfFreeMemoryFromEitherHeap(void *);
 
 extern void *sdfAllocGeneralBlockHigh(s32);
 
-extern void *sdfResourceRetainAddress(void *);
 
 extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));
 
@@ -1526,7 +1525,7 @@ void btlInitializeGraphicsRuntime(void) {
     SdfListHead *packetList;
     SdfLinkedPacketList *context;
     runtime->handle = sdfAllocGeneralBlockHigh(0x70000);
-    runtime->resource = sdfResourceRetainAddress(runtime->handle);
+    runtime->resource = (void *)sdfResourceRetainAddress(runtime->handle);
     packetList = (SdfListHead *)sdfAllocatePacketList(0);
     context = (SdfLinkedPacketList *)sdfAllocPacketAligned(16);
     sdfClearLinkedPacketList(context);

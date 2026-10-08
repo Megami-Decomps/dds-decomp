@@ -485,7 +485,6 @@ extern void effDrawTriangleRecordPool(EffRecordPool *pool);
 
 /* Retention exposes the address without replacing the allocation descriptor. */
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
-extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
 extern void *memcpy(void *dst, const void *src, u32 n);
 
 void effFlashTrianglePulseUpdate(PcpFlashTrianglePulseWork *work) {

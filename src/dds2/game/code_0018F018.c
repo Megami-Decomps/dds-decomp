@@ -17,7 +17,6 @@ typedef struct {
 
 
 extern void *sdfAllocGeneralBlock(s32 size);
-extern void *sdfResourceRetainAddress(void *allocation);
 extern s32 effGetResourceFirstWord(s32 index);
 
 
