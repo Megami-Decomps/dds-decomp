@@ -794,6 +794,7 @@ typedef char MenuProgressHost_size_must_be_0x82C[(sizeof(MenuProgressHost) == 0x
 #ifndef VERSION_DDS2
 /* DDS1 staff movie task work allocated by mnuMovieCreateTask (0x20 bytes). */
 struct SdfMemBlock;
+struct MnuSpriteResourceGroup;
 
 typedef struct MnuStaffMovieWork {
     u32 allocation;      /* 0x00 */
@@ -817,7 +818,7 @@ typedef struct MovieMenuState {
     s32 unk1C;           /* 0x1C */
     u8 pad20[0x0C];
     struct MenuList *selectionList; /* 0x2C: created by the movie selection-list builder */
-    void *resources;     /* 0x30 */
+    struct MnuSpriteResourceGroup *resources; /* 0x30 */
     s32 unk34;           /* 0x34 */
     u8 pad38[8];
 } MovieMenuState;
