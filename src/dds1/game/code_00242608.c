@@ -57,7 +57,7 @@
 extern void evtLoadResourcePair(const char *, u8 *);
 extern s32 evtCreateMessageWindowIfMissing(s32);
 extern s32 func_00244848();
-extern s32 D_003BC520;
+extern struct EffectSlotSet *D_003BC520;
 extern s32 itfMesGetWindowEntryItems(s32, s32);
 extern void mnuUnpackNibbleFields();
 
@@ -980,7 +980,7 @@ s32 mnuShopReleaseSceneObjects(ShopScene *scene) {
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF3D0);
 
 void mnuShopLoadSpriteAssets(ShopScene *scene) {
-    u32 *resource = &scene->spriteResource;
+    struct EffectSlotSet **resource = &scene->spriteResource;
     *resource = effLoadIndexedResource("/facility/spr/shop/", D_0036AA60[0], 0);
 }
 

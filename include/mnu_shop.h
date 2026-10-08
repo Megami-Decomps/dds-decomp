@@ -136,7 +136,7 @@ typedef struct ShopScene {
     s32 stateTable;
     u8 resourcePair[4];
     s32 pairedHandle;
-    u32 spriteResource;
+    struct EffectSlotSet *spriteResource;
     s32 batchState;
     MenuWindowContainer *sprite;
     MenuWindowContainer *window;
