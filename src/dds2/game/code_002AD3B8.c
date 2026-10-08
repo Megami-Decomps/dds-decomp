@@ -868,7 +868,7 @@ s32 func_002AF020(KwlnTask *task) {
                         mnuSetPartyEntryCurrentId(party, (u32)selectionId);
                         menu->windows[3]->list->cursor->sortKeyPrimary = datGameState->inventory.counts[selectionId];
                         mnuInitPartyPanelSlots(&context->partyPanel);
-                        func_002BCAB0(&context->partyWindow);
+                        mnuRefreshPartyPanelBars(&context->partyWindow);
                         menu->secondListReset = 1;
                     } else {
                         buttons = 0x8000;
