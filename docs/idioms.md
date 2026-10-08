@@ -3586,3 +3586,42 @@ range; path distance is the measured length times the stepped factor.
 Use the existing VU0 macros for the native COP2 vector work. The target's
 own assembly file contains its fourteen-entry jump table, not another
 function's data; the natural C switch reproduces those entries.
+
+## Polygon-movie loader word arguments
+
+DDS1 `00234DA8` and DDS2 `0024FB48` preserve the event and scene arguments
+as full words, pass them to `evtFormatPolygonMoviePaths`, and store them in
+the primary `PolyMovieWork.eventId`/`sceneId` signed-word fields. Their shared
+declarations therefore use `s32` arguments, not halfwords.
+
+The resource loader returns a `SdfMemBlock *` descriptor but writes a `u32`
+represented address. The synthesized PMD2/PMD3 header providers instead
+write `void *`/`u8 *` outputs and return the descriptor as an `s32` address
+word. Preserve those actual boundaries rather than inventing narrower loader
+prototypes. The two movie loaders remain assembly: the current honest DDS2
+candidate still swaps the two argument-setup instructions at `+0x80/+0x84`.
+
+## Callback-list allocation descriptors
+
+`SdfList.allocation` is a `SdfMemBlock *`, not a numeric list index or the
+represented data address. The general-heap descriptor definition precedes
+`SdfList` so the canonical field uses the same owner as heap allocation and
+release. Its layout remains a `0x1C`-byte callback-list header.
+
+Both `sdfCreateTaskHeader` providers retain the descriptor, convert the getter's
+real `u32` represented address once to the list pointer, and release the retained
+descriptor directly. Task-work and grid allocation fields follow the same
+ownership rule; no pointer-to-word-to-pointer release adapters remain there.
+
+
+## Serialized field-sky gradient records
+
+DDS1 `00132010` and DDS2 `00134A18` read `0x124`-byte sky records:
+a signed mode word followed by an eight-row, nine-column packed-color grid.
+The DDS1 loader allocates/reads `0x12400` bytes, or 256 records, and
+`fldSetFadeTarget` writes the selected record's mode rather than a flat
+`area * 73` word offset. Area-work `+0x38` is the signed sky-alpha adjustment.
+The renderers clamp three corners' adjusted alpha but leave the bottom-left
+corner unclamped; their ordinary float-to-int C casts emit `CVT.W.S`.
+The renderer bodies remain assembly pending a genuine source-shape match.
+
