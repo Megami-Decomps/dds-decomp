@@ -57,7 +57,7 @@ typedef struct PcpScatterPlainInstance {
     PcpScatterPlainParticle *particles;
     f32 scale;
     u32 color;
-    u32 scatterObject;
+    PcpScatterDraw *scatterObject;
     u32 ownedBuffer;
 } PcpScatterPlainInstance;
 
@@ -125,7 +125,7 @@ extern s32 effGetScatterWideBlock(PcpScatterDraw *, s32);
 extern s32 effGetScatterNarrowBlock(PcpScatterDraw *, s32);
 extern u32 effGetScatterEntry(PcpScatterDraw *, s32);
 
-void func_0017DA28(PcpScatterDraw *object) {
+void effScatterDrawObject(PcpScatterDraw *object) {
     f32 matrix[16] __attribute__((aligned(16)));
     SdfListHead *packet;
     ScatterRenderState *draw;
