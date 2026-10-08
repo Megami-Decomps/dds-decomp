@@ -916,6 +916,7 @@
 0x00158F58	billReleaseList	inferred	Releases a billboard list's shared data and then frees the list object.
 0x00159158	effBillModulateColors	inferred	multiplies RGBA channels using VU and repacks result [names_reviewed5.tsv]
 0x001594C8	billSetAnimationEntry	inferred	LeverAudit
+0x00159678	billCreateAnimationDataFromResource	inferred	Copies serialized animation data, resolves child payloads and initializes the BillData consumed by billAllocList; DDS1 counterpart.
 0x00159848	billReleaseSharedEntryBlock	inferred	Decrements billboard block reference count; on zero releases entries and block. [names_reviewed21.tsv]
 0x001598D8	billCopyCurrentRecordToSnapshot	inferred	M141; sources=names_pending_main.tsv; twin=0x00151CE8, input-family pairing. [names_qp10.tsv]
 0x001599F8	billCreateFromResource	inferred	Opens a billboard resource to read its header, creates the indexed billboard, and releases the temporary allocation.

@@ -1175,6 +1175,7 @@
 0x00151568	effBillModulateColors	inferred	multiplies RGBA channels using VU and repacks result [names_reviewed5.tsv]
 0x001518A0	billResolveEntry	inferred	Resolves a billboard table entry's offset against its base and copies its 0x12 halfword into the output.
 0x001518D8	billSetAnimationEntry	inferred	LeverAudit
+0x00151A88	billCreateAnimationDataFromResource	inferred	Copies serialized animation data, resolves child payloads and initializes the BillData consumed by billAllocList.
 0x00151C58	billReleaseSharedEntryBlock	inferred	Decrements billboard block reference count; on zero releases entries and block. [names_reviewed21.tsv]
 0x00151CE8	billCopyCurrentRecordToSnapshot	inferred	M141; sources=names_pending_main.tsv; twin=0x001598D8, input-family pairing. [names_qp10.tsv]
 0x00151D88	billCreateIndexed	inferred	creates instance via D_0034E060 table, inits params/kind/draw

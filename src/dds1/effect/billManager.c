@@ -16,7 +16,7 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child);
 void billReleaseSharedEntryBlock(void *arg);
 void *func_00150148(void *arg);
 void billSetAnimationEntry(BillObj *arg0, s32 arg1);
-void *func_00151A88(void *arg);
+BillData *billCreateAnimationDataFromResource(void *arg);
 
 extern void *memcpy(void *dst, const void *src, u32 size);
 extern s32 sdfAllocPacketAligned(s32 size);
@@ -473,7 +473,7 @@ BillObj *billAllocList(void *resourceData) {
 
     data = NULL;
     if (resourceData != NULL) {
-        data = func_00151A88(resourceData);
+        data = billCreateAnimationDataFromResource(resourceData);
     }
     n = data->entryCount;
     newobj = sdfAllocSizeClassBlock(n * 20 + 0x6C);
@@ -660,7 +660,7 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
 
 extern s32 func_003003F0(const char *format, ...);
 
-void *func_00151A88(void *resource) {
+BillData *billCreateAnimationDataFromResource(void *resource) {
     u8 *sourceBytes = resource;
     s32 *resourceHeader = resource;
     s32 *childOffsetCursor = (s32 *)(sourceBytes + resourceHeader[0]);
