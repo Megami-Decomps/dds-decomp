@@ -442,7 +442,37 @@ void mnuInitializeCampListLayoutDefaults(CampListLayout *layout) {
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_00242F78);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00243048);
+/* Blend the display fields; control bytes always come from the lower key. */
+void func_00243048(EvtRuntimeChild *from, EvtRuntimeChild *to,
+                   CampDisplayDefaults *display, f32 ratio) {
+    if (from == NULL) {
+        mnuCampInitDisplayDefaults(display);
+        return;
+    }
+    if (to == NULL || ratio == 0.0f || from->p08.sh[0] == 0) {
+        display->x = from->p0C.sh[0];
+        display->y = from->p0C.sh[1];
+        display->color[0] = from->p10.b[0];
+        display->color[1] = from->p10.b[1];
+        display->color[2] = from->p10.b[2];
+        display->color[3] = from->p10.b[3];
+        display->scaleX = from->p14.f;
+        display->scaleY = from->p18.f;
+        display->enabled = from->p08.sb[0];
+        display->variant = from->p08.sb[1];
+        return;
+    }
+    display->x = from->p0C.sh[0] + (to->p0C.sh[0] - from->p0C.sh[0]) * ratio;
+    display->y = from->p0C.sh[1] + (to->p0C.sh[1] - from->p0C.sh[1]) * ratio;
+    display->color[0] = (u32)(from->p10.b[0] + (to->p10.b[0] - from->p10.b[0]) * ratio);
+    display->color[1] = (u32)(from->p10.b[1] + (to->p10.b[1] - from->p10.b[1]) * ratio);
+    display->color[2] = (u32)(from->p10.b[2] + (to->p10.b[2] - from->p10.b[2]) * ratio);
+    display->color[3] = (u32)(from->p10.b[3] + (to->p10.b[3] - from->p10.b[3]) * ratio);
+    display->scaleX = from->p14.f + (to->p14.f - from->p14.f) * ratio;
+    display->scaleY = from->p18.f + (to->p18.f - from->p18.f) * ratio;
+    display->enabled = from->p08.sb[0];
+    display->variant = from->p08.sb[1];
+}
 
 extern s32 evtViewerTestIndexedCondition(u32);
 
