@@ -152,7 +152,7 @@ void sdfPrependPacketList(SdfListHead *list, SdfListHead *item);
 
 void sdfConnectPacketLists();
 
-void sdfPrepareFrameDepthPacket();
+void sdfPrepareFrameDepthPacket(SdfPacketBuilder *packet, s32 bufferIndex);
 
 extern void *sdfPendingQueueHead;
 
@@ -1073,11 +1073,11 @@ void sdfAppendDmaSecondary(s32 list, u32 source, SdfDmaNode *node) {
 
 INCLUDE_ASM(const s32, "game/code_0032C278", sdfPrepareFrameDepthPacket);
 
-void sdfInitPacketBuilder(SdfPacketBuilder *packet, s32 source, s32 data, s32 region, s32 mode) {
+void sdfInitPacketBuilder(SdfPacketBuilder *packet, SdfGraphObj *source, u32 frameMask, s32 region, s32 mode) {
     sdfInitializeDmaReferenceTag(packet->packets, 2);
     packet->mode = mode;
     packet->source = source;
-    packet->data = data;
+    packet->frameMask = frameMask;
     packet->region = region;
     packet->prepare = sdfPrepareFrameDepthPacket;
 }

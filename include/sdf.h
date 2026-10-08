@@ -378,11 +378,11 @@ typedef struct SdfBigPacket {
 /* Two-slot packet builder and source/mode state (0x60); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct SdfPacketBuilder {
     u8 pad00[4];
-    void (*prepare)(void);
+    void (*prepare)(struct SdfPacketBuilder *, s32 bufferIndex);
     u8 pad08[8];
     SdfPacket packets[2];
-    s32 source;
-    s32 data;
+    SdfGraphObj *source;
+    u32 frameMask;
     s32 region;
     s32 mode;
 } SdfPacketBuilder;
