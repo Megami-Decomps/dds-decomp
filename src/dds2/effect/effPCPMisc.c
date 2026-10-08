@@ -3,6 +3,7 @@
 #include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff.h"
+#include "eff_event.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
@@ -16,7 +17,6 @@ extern void effDestroyNode(u32);
 extern u32 func_0016D290(u32 handle);
 extern void effThunderSetFragmentColor(void *work, u32 value);
 extern void func_0016D9D8(u32 handle);
-extern u32 effEventCreate(void *owner, s32 kind, void *place);
 
 
 
@@ -682,8 +682,6 @@ typedef struct EffPCPSpinWork {
 } EffPCPSpinWork; /* 0x68 */
 
 
-
-extern void effEventReleaseNode(void *event);
 
 extern void func_00197D50();
 
@@ -5321,7 +5319,7 @@ EffPCPDriftEventWork *effPcpEntryWorkBCreate(EffPCPDriftEventParams *src, void *
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
-        entry->event = (void *)effEventCreate(work->owner, 2, &place);
+        entry->event = effEventCreate(work->owner, 2, &place);
         if (life > 0) {
             entry->frame = -(effMiscRand(D_003AA868) % life);
         } else {
@@ -5372,7 +5370,7 @@ EffPCPDriftEventWork *effPcpCloneDriftEventWork(EffPCPDriftEventWork *src) {
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
-        entry->event = (void *)effEventCreate(src->owner, 2, &place);
+        entry->event = effEventCreate(src->owner, 2, &place);
         if (life > 0) {
             entry->frame = -(effMiscRand(D_003AA868) % life);
         } else {
@@ -5564,8 +5562,8 @@ EffPCPPairedEventWork *effPcpCreateDelayedDriftEntries(EffPCPPairedEventParams *
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
         entry->fragment = (u32)effThunderFragCreate(&src->fragmentParams);
-        entry->eventA = (void *)effEventCreate(work->ownerA, 2, &place);
-        entry->eventB = (void *)effEventCreate(work->ownerB, 2, &place);
+        entry->eventA = effEventCreate(work->ownerA, 2, &place);
+        entry->eventB = effEventCreate(work->ownerB, 2, &place);
         entry->frame = -(effMiscRand(D_003AA868) % life);
         entry++;
     }
@@ -5615,8 +5613,8 @@ EffPCPPairedEventWork *effPcpClonePairedDriftEvents(EffPCPPairedEventWork *src) 
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
         entry->fragment = (u32)effThunderFragCreate(&src->params.fragmentParams);
-        entry->eventA = (void *)effEventCreate(src->ownerA, 2, &place);
-        entry->eventB = (void *)effEventCreate(src->ownerB, 2, &place);
+        entry->eventA = effEventCreate(src->ownerA, 2, &place);
+        entry->eventB = effEventCreate(src->ownerB, 2, &place);
         entry->frame = -(effMiscRand(D_003AA868) % life);
         entry++;
     }
@@ -5853,7 +5851,7 @@ void *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *src, void *params)
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
-        entry->event = (void *)effEventCreate(work->owner, 2, &place);
+        entry->event = effEventCreate(work->owner, 2, &place);
         if (life > 0) {
             entry->frame = -(effMiscRand(D_003AA868) % life);
         } else {
@@ -5904,7 +5902,7 @@ EffPCPSpawnRangeWork *effPcpCloneSpawnRangeEvents(EffPCPSpawnRangeWork *src) {
     place.color = 0x80808080;
     life = work->params.delaySpread;
     for (i = 0; i < count; i++) {
-        entry->event = (void *)effEventCreate(work->owner, 2, &place);
+        entry->event = effEventCreate(work->owner, 2, &place);
         if (life > 0) {
             entry->frame = -(effMiscRand(D_003AA868) % life);
         } else {
@@ -6115,7 +6113,7 @@ void effPcpEventWorkInitEntries(EffPCPMapEventWork *work) {
         entry->hasMoved = 0;
         entry->age = 0;
         entry->frameLimit = 0;
-        entry->event = (void *)effEventCreate(work->owner, 2, &place);
+        entry->event = effEventCreate(work->owner, 2, &place);
         entry++;
     }
 }

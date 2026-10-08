@@ -4,6 +4,7 @@
 #include "pcp_vu0.h"
 #include "dds3obj.h"
 #include "eff.h"
+#include "eff_event.h"
 #include "sdf_draw.h"
 #include "btl_sound.h"
 
@@ -82,10 +83,6 @@ extern void *billCreateIndexed(s32 kind, u32 billId);
 extern void *billCloneObjectRetainingSharedData(void *arg);
 
 extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
-
-extern void effEventReleaseNode(void *node);
-
-extern void *effEventCreate(void *bill, u32 id, void *vec);
 
 extern EffectObj *dds3AppendWorldObjectNode(s32 kind);
 
@@ -485,7 +482,7 @@ void effObjReplaceActiveEventNode(EffectObj *obj, u32 entryId) {
         effEventReleaseNode(data->node);
         data->node = NULL;
     }
-    data->node = effEventCreate(data->handle, entryId & EFF_OBJ_ENTRY_ID_MASK, data->vector);
+    data->node = effEventCreate(data->handle, (u16)(entryId & EFF_OBJ_ENTRY_ID_MASK), data->vector);
 }
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115398);
