@@ -3447,7 +3447,7 @@ typedef struct EffectSurfaceNode {
     EffSurfaceParams params; /* 0x10: copied source header */
     u32 index;
     u32 handleBuffer;   // 0x30
-    void *resource;
+    BillObj *resource;
     u32 *jobs;          // 0x38
     u32 jobBuffer;      // 0x3C
     struct EffExpandedList *resourceHolder; // 0x40, released separately from the grid record
@@ -3584,8 +3584,8 @@ void func_002A5DE0(EffectSurfaceNode *dst, u8 *work) {
         if (dst->resource != NULL) {
             billDispatchByKind(dst->resource);
         }
-        dst->resource = billCloneObjectRetainingSharedData((struct BillObj *)src->resource);
-        billMarkKindOneFlag((struct BillObj *)dst->resource);
+        dst->resource = billCloneObjectRetainingSharedData(src->resource);
+        billMarkKindOneFlag(dst->resource);
         if (dst->record != 0) {
             FileSlotTable *record = (FileSlotTable *)dst->record;
             billSetBillboardMode((u32)dst->resource, (s16)((FileKeyBlock *)record->data0)->alphaTrack.surfaceIndex);
@@ -3664,40 +3664,40 @@ void effReplaceResourceRef(EffectSurfaceNode *node, u32 entryId, void *resource)
 
 
 void effSetSurfaceRetainedResource(EffectSurfaceNode *node, u32 resourceId) {
-    u32 resource = node->resource;
+    BillObj *resource = node->resource;
     if (resource != 0) {
-        billDispatchByKind((void *)resource);
+        billDispatchByKind(resource);
     }
-    resource = (u32)effCreateBillboardSharingIndexedResource(resourceId);
-    node->resource = (void *)resource;
+    resource = effCreateBillboardSharingIndexedResource(resourceId);
+    node->resource = resource;
     if (node->record != 0) {
-        billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->record)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode((u32)resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->record)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
 
 void effReplaceSurfacePrimaryBillboard(EffectSurfaceNode *node, u32 resourceId) {
-    u32 resource = node->resource;
+    BillObj *resource = node->resource;
     if (resource != 0) {
-        billDispatchByKind((void *)resource);
+        billDispatchByKind(resource);
     }
-    resource = (u32)billCreateIndexed(0, resourceId);
-    node->resource = (void *)resource;
+    resource = billCreateIndexed(0, resourceId);
+    node->resource = resource;
     if (node->record != 0) {
-        billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->record)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode((u32)resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->record)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
 void effReplaceSurfaceFlaggedBillboard(EffectSurfaceNode *node, u32 resourceId) {
-    u32 resource = node->resource;
+    BillObj *resource = node->resource;
     if (resource != 0) {
-        billDispatchByKind((void *)resource);
+        billDispatchByKind(resource);
     }
-    resource = (u32)billCreateIndexed(1, resourceId);
-    node->resource = (void *)resource;
-    billMarkKindOneFlag((struct BillObj *)(resource));
+    resource = billCreateIndexed(1, resourceId);
+    node->resource = resource;
+    billMarkKindOneFlag(resource);
     if (node->record != 0) {
-        billSetBillboardMode(node->resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->record)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode((u32)node->resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->record)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -10095,4 +10095,3 @@ INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BD200);
 INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BD208);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BD210);
-
