@@ -119,8 +119,8 @@ s32 brsCalcApGain(DatPartyRecord *unit, s32 baseApTotal, s32 perUnitBonus) {
 }
 
 /* Active party members take full EXP; benched members need the half/full
- * EXP skills (0x21F/0x220 respectively). The third caller arg is unused. */
-s32 brsCalcExpGain(DatPartyRecord *unit, s32 exp, s32 unused) {
+ * EXP skills (0x21F/0x220 respectively). */
+s32 brsCalcExpGain(DatPartyRecord *unit, s32 exp) {
     s32 result;
 
     if ((unit->flags & BRS_ACTIVE_PARTY_FLAG) != 0) {
@@ -144,7 +144,51 @@ s32 mnuIsTitleEntryAvailable(DatPartyRecord *entry) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildRewardRows);
+extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
+
+s32 brsBuildRewardRows(BrsRewardBatch *batch, BrsRewardSummary *summary) {
+    s32 i;
+    /* Value blocks are interleaved with each row's party-record pointer. */
+    u8 *values = (u8 *)&batch->rows + sizeof(batch->rows[0].unit);
+
+    memset(batch, 0, sizeof(*batch));
+    for (i = 0; i < 5; i++) {
+        DatPartyRecord *unit = &datGameState->party[i];
+        u16 occupied = unit->flags & 1;
+        if (occupied != 0 && (unit->status & 0x4000) == 0) {
+            DatProfileRecord *profile;
+            s32 ap;
+            s32 exp;
+
+            batch->rows[batch->count].unit = unit;
+            ((BrsRewardValues *)(values +
+                batch->count * sizeof(BrsRewardRow)))->partySlot = i;
+            profile = ptyGetCurrentProfileRecord(unit);
+            ap = brsCalcApGain(unit, summary->totalAp, summary->unitApBonus[i]);
+            exp = brsCalcExpGain(unit, summary->totalExp);
+            if (unit->profileId == 0) {
+                ap = 0;
+            }
+            if (mnuIsTitleEntryAvailable(unit) != 0) {
+                ap = 0;
+            }
+            {
+                BrsRewardValues *currentValues = (BrsRewardValues *)(values +
+                    batch->count * sizeof(BrsRewardRow));
+                currentValues->amount = ap;
+            }
+            ((BrsRewardValues *)(values +
+                batch->count * sizeof(BrsRewardRow)))->secondaryValue = exp;
+            ((BrsRewardValues *)(values +
+                batch->count * sizeof(BrsRewardRow)))->profileValue = profile->value;
+            ((BrsRewardValues *)(values +
+                batch->count * sizeof(BrsRewardRow)))->totalExp = unit->totalExp;
+            batch->count++;
+        }
+    }
+    return batch->count;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_002653A0", ptyCalcLevelUps);
 
@@ -164,7 +208,7 @@ INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildLevelUpList);
 
 
 
-extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
+
 extern s32 ptyTestProfileFlag0(DatPartyRecord *, u16);
 extern u32 prfBuildSkillListState0(DatPartyRecord *, DatProfileRecord *, PrfSkillList *);
 extern u32 prfGetCapValue(u16);

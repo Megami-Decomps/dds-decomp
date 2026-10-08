@@ -211,11 +211,15 @@ typedef struct BtlState {
     s32 (*cameraStateChangePredicate)(BtlLinkedCommand *); /* 0x610 */
     u8 pad614[8];
     s32 (*actionCameraSetupHook)(BtlLinkedCommand *); /* 0x61C: nonzero handles action-camera setup. */
-    u8 pad620[8];
+    u8 pad620[4];
+    u32 (*commandSoundDelay)(s32); /* 0x624: action-specific sound delay. */
     s32 (*cameraPoseBlendHook)(BtlLinkedCommand *, s32, s32); /* 0x628 */
     s32 (*actionCameraStepHook)(u8 *); /* 0x62C: nonzero handles the camera step. */
     s32 (*handleActorCategoryCamera)(struct BtlLinkedCommand *, s32, s32); /* 0x630: linked-list flags 0x200 / 0x400. */
-    u8 pad634[0x20];
+    u8 pad634[0x14];
+    void (*preActionHook)(BtlTask *, s32, u64, u64, u64); /* 0x648 */
+    void (*postTargetHook)(BtlTask *, s32, BtlUnit *, u64, u64, s32); /* 0x64C */
+    u8 pad650[4];
     s32 (*allowDefeatCandidate)(BtlUnit *); /* 0x654 */
     s32 (*unk658)(BtlUnit *);
     u8 pad65C[0x10];
@@ -256,6 +260,9 @@ typedef char BtlSceneLightDds1Offset6[((unsigned int)&((BtlState *)0)->listener 
 typedef char BtlFieldF1Offset[((unsigned int)&((BtlState *)0)->fieldF1ResourceId == 0x290) ? 1 : -1];
 typedef char BtlFieldF2Offset[((unsigned int)&((BtlState *)0)->fieldF2ResourceId == 0x294) ? 1 : -1];
 typedef char BtlFieldTBOffset[((unsigned int)&((BtlState *)0)->fieldTBResourceId == 0x298) ? 1 : -1];
+typedef char BtlCommandSoundDelayOffset[((unsigned int)&((BtlState *)0)->commandSoundDelay == 0x624) ? 1 : -1];
+typedef char BtlPreActionHookOffset[((unsigned int)&((BtlState *)0)->preActionHook == 0x648) ? 1 : -1];
+typedef char BtlPostTargetHookOffset[((unsigned int)&((BtlState *)0)->postTargetHook == 0x64C) ? 1 : -1];
 typedef char BtlSceneLightDds1Extent[(sizeof(BtlState) == 0xE10) ? 1 : -1];
 typedef char BtlSceneLightDds1Alignment[(__alignof__(BtlState) == 4) ? 1 : -1];
 #endif /* VERSION_DDS1 */
