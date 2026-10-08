@@ -168,7 +168,6 @@ extern void func_0030CC68();
 extern u8 D_00400AF0[];
 
 extern void sdfReleaseChipBlock();
-extern void mnuDestroyListState();
 extern void sdfCounterIncrease(void);
 extern void sdfCounterDecrease(void);
 extern void sdfDrawCounterChannelInfoLabel(s32, s32);
@@ -428,7 +427,7 @@ void sdfCounterDestroyRuntime(SdfCounterRuntime *rt) {
         }
         sdfReleaseChipBlock(rt->timer);
         rt->timer = NULL;
-        mnuDestroyListState(rt);
+        mnuDestroyListState((struct MenuList *)rt);
     }
 }
 

@@ -1449,7 +1449,7 @@ void mnuDestroySkillMenuWindows(s32 context) {
         u32 i = 0;
         u32 *resource = menu + 4;
         mnuDestroyPanelState(menu[8]);
-        mnuDestroyListState(menu[3]);
+        mnuDestroyListState((struct MenuList *)menu[3]);
         do {
             mnuDestroyWindowContainer(*resource++);
             i++;

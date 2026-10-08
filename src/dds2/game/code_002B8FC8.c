@@ -757,7 +757,6 @@ void mnuEnableCampBadgeFade(u32 *flags);
 
 MenuList *mnuCreateListState(u32 owner, u32 visibleCount, s32 rowSpacing);
 
-u32 mnuDestroyListState(MenuList *list);
 
 void mnuUpdateListScrollFlags(MenuList *list);
 

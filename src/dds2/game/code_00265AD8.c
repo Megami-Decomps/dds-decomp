@@ -1,6 +1,7 @@
 #include "kwln.h"
 #include "mnu.h"
 #include "sdf_resource.h"
+#include "mnu_flag_snapshot.h"
 
 
 
@@ -210,9 +211,9 @@ u32 func_00266230(void) {
 }
 
 /* Snapshot four primary flag pairs and sixteen extra pairs for restoration. */
-s32 mnuCreateFlagEntries(void) {
-    s32 handle = (u32)sdfAllocGeneralBlock(0x140);
-    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+struct SdfMemBlock *mnuCreateFlagEntries(void) {
+    struct SdfMemBlock *handle = sdfAllocGeneralBlock(0x140);
+    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
     u32 i;
 
     for (i = 0; i < 4; i++) {
@@ -230,8 +231,8 @@ s32 mnuCreateFlagEntries(void) {
     return handle;
 }
 
-void mnuApplyCampResourceFlagEntries(s32 handle) {
-    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+void mnuApplyCampResourceFlagEntries(struct SdfMemBlock *handle) {
+    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
     u32 i;
 
     for (i = 0; i < 4; i++) {

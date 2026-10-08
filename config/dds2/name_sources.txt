@@ -1147,9 +1147,13 @@
 0x00169608	effBTLFieldColorResetFlags	inferred	Clears all field-color state bits.
 0x00169610	effBTLFieldColorGetActorScale	inferred	readability/matching review (QP16)
 0x001696D0	effBattleMiscQueryPosition	inferred	dispatch table D_003528D8 by param type, stores vf10 to out [names_M61_EffVu.tsv]
+0x00169740	effBattleMiscCallByFinalSelector	inferred	Forwards the final selector and EffectVectorRequest to the shared target-position query; data table entry 7 is the final-selector counterpart to entry 6's override-selector adapter.
 0x00169770	effBattleMiscQueryOverrideAttachment	inferred	medium confidence; src/dds2/effect/effBattleMisc.c func_00169770: Uses the override-aware actor selector and parameter byte to load its effect attachment vector, falling back to the muzzle vector. [names_reviewed25.tsv]
 0x001697A0	effBattleMiscQueryFinalAttachment	inferred	medium confidence; src/dds2/effect/effBattleMisc.c func_001697A0: Uses the final actor selector and parameter byte to load its effect attachment vector, falling back to the muzzle vector. [names_reviewed25.tsv]
 0x001697D0	effBattleComputeTargetPosition	inferred	confidence=high; matched-C; src/dds2/effect/effBattleMisc.c:92:func_001697D0; Semantic counterpart of DDS1 0x00161BA0: computes unit-relative/camera-facing target position into VU vf10. DDS2 uses field-color flag bit 4 where DDS1 uses bit 1; both implement the same target-position role.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x00169A78	effBattleMiscQueryMaskedTargetPosition	inferred	Computes the battle-mask target position for an EffectVectorRequest and leaves the vector in vf10; paired adapter table and body support the mask domain.
+0x00169C58	effBattleMiscQueryOriginalTargetPosition	inferred	Uses the original selector's 0xE00 battle flags as the mask for the target-position query; registered as request kind 1.
+0x00169C88	effBattleMiscQueryVariantTargetPosition	inferred	Uses the variant selector's 0xE00 battle flags as the mask for the target-position query; registered as request kind 2.
 0x00169CB8	effBattleMiscBuildUnitPartOffsetVU	inferred	Uses unit part kind and subpart to build target offset direction in VU register. [names_reviewed6.tsv]
 0x00169EA0	effBattleMiscQueryScalar	inferred	switch on param type -> unit height scale / func_001F6970 [names_M61_EffVu.tsv]
 0x00169F68	effBattleMiscDirectionTo	inferred	normalized (muzzle|effect pos - queried pos) [names_M61_EffVu.tsv]
