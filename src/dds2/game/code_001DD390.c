@@ -6366,12 +6366,11 @@ void func_001EC670(void) {
     func_001F2AE8();
 }
 
-void btlAppendLinkedUnitToActorIndices(u32 action) {
-    s32 actor;
+extern void func_001F2E30(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-    actor = (s32)action;
-    btlAppendIndexListEntry(((BtlLinkedCommand *)actor)->targetList, ((BtlLinkedCommand *)actor)->link->unit);
-    func_001F2E30(action, &((BtlLinkedCommand *)actor)->frontCamera, &((BtlLinkedCommand *)actor)->backCamera);
+void btlAppendLinkedUnitToActorIndices(BtlLinkedCommand *action) {
+    btlAppendIndexListEntry(action->targetList, action->link->unit);
+    func_001F2E30(action, &action->frontCamera, &action->backCamera);
 }
 
 void func_001EC6C8(void) {

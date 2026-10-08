@@ -4108,22 +4108,22 @@ s32 btlCalculateAbilityRecoveryAmount(BtlUnit *unit) {
     return recovery;
 }
 
-extern s32 btlHasEnemyRecordDefeatExemptionFlag();
+extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
 
-s32 btlIsUnitDefeatTriggeredByValueDelta(u8 *unit, s32 delta) {
-    if (btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)unit)->partyRecord) & 4) {
+s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *unit, s32 delta) {
+    if (btlGetEntryFlagsUnlessDisabled(&unit->partyRecord) & 4) {
         return 0;
     }
     if (btlHasEnemyRecordDefeatExemptionFlag(unit) != 0) {
         return 0;
     }
-    if ((((UiObject *)unit)->statusFlags & 0x7FFF) == 0x4000) {
+    if ((unit->partyRecord.status & 0x7FFF) == 0x4000) {
         return 1;
     }
-    if (!(*(u32 *)(btlGetRuntime() + 0x218) & 0x80)) {
+    if (!(((BtlState *)btlGetRuntime())->battleFlags & 0x80)) {
         return 0;
     }
-    return ((UiObject *)unit)->currentValue + delta < 1;
+    return unit->partyRecord.hp + delta < 1;
 }
 
 s32 btlIsCurrentValueBelowQuarterThreshold(UiObject *object) {
@@ -4142,7 +4142,7 @@ s32 btlBothSidesActive(BtlUnit *unit) {
     UiObject *actor;
     s32 a;
     s32 b;
-    if (btlIsUnitDefeatTriggeredByValueDelta((u8 *)unit, 0) != 0) {
+    if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0) != 0) {
         return 0;
     }
     if (unit->flags & 0x60) {
@@ -4798,11 +4798,11 @@ s32 btlRollActorEligibilityWithAbilityOverride(BtlUnit *unit) {
     return btlRollAiBucket() < 5;
 }
 
-s32 btlHasEnemyRecordDefeatExemptionFlag(UiObject *object) {
+s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *object) {
     if ((object->flags & 0x400) == 0) {
         return 0;
     }
-    return ((s32)datEnemyRecords[object->index].flags & 0x100) > 0;
+    return ((s32)datEnemyRecords[object->partyRecord.unitId].flags & 0x100) > 0;
 }
 
 extern s32 effMiscRand(void *);
@@ -4859,7 +4859,7 @@ s32 func_001B4918(BtlUnit *unit, BtlUnit *target) {
     s32 threshold;
     u32 i;
 
-    if (btlIsUnitDefeatTriggeredByValueDelta((u8 *)unit, 0) != 0) {
+    if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0) != 0) {
         return -1;
     }
 
