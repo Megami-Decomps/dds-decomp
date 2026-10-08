@@ -7,6 +7,7 @@
 #include "mnu_mantra_grid.h"
 #include "mnu_sprite_resource.h"
 #include "sdf_grid.h"
+#include "mnu_scene_work.h"
 
 extern void sdfReleaseChipBlock(void *);
 /* Retail retains a jal and epilogue; default TU -O2 changes the shape. */
@@ -48,9 +49,9 @@ void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
 
     {
         u32 flags;
-        s32 display;
+        MenuSceneWork *display;
 
-        display = (s32)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
+        display = (MenuSceneWork *)(u32)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
         scene = (MnuMantraGridEntry *)(u32)entry->value;
         pulse = 0.0f;
         scene->frame++;
@@ -62,16 +63,16 @@ void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
         drawY = y + D_0036B7F0[scene->sceneId][3];
         flags = mnuGetMantraDisplayFlags(scene, profileOwner);
 
-        if (flags & 1) {
+        if (flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) {
             uiDrawUniformColorRect(drawX << 4, drawY << 3, 0, 0x300, 0x180,
                                    (s32)((f32)((alpha * 5) << 4) * 0.0078125f) |
                                        0x60501000,
                                    context);
         }
         {
-            s32 displayFlags = ((u8 *)display)[0x5AC];
+            s32 displayFlags = (u8)display->boundsFlags;
 
-            if (displayFlags & 1) {
+            if (displayFlags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) {
                 func_0024EC08(x, y, depth, alpha, scene->sceneId, 0x20,
                               scaleX, scaleY, context);
             } else {
@@ -109,54 +110,6 @@ typedef struct MantraPrerequisiteRecord {
     u8 flags[4];
 } MantraPrerequisiteRecord;
 
-typedef struct MantraPulseAnimationWork {
-    s32 frame;
-    u8 pad568[4];
-    s16 alpha[4];
-} MantraPulseAnimationWork;
-
-typedef struct MantraSceneCoordinates {
-    s32 x;
-    s32 y;
-} MantraSceneCoordinates;
-
-typedef struct MantraSceneTransitionList {
-    u8 pad00[8];
-    struct MnuTransRec *first;
-} MantraSceneTransitionList;
-
-/* Same display-work owner as the grid callback producer. */
-typedef struct MantraPulseDisplayWork {
-    s32 allocationHandle;
-    u8 pad004[0x480];
-    struct MenuGrid *gridHandle;
-    u32 gridRefreshControl[2];
-    s32 gridFrame;
-    u8 pad494[8];
-    MantraSceneCoordinates coordinates[10];
-    s32 pendingMantras[8];
-    u8 pad50C[0x34];
-    s32 coordinateA;
-    s32 coordinateB;
-    u8 pad548[8];
-    s32 transitionState;
-    u8 pad554[0xC];
-    s32 alpha;
-    MantraPulseAnimationWork pulse;
-    u8 pad574[0x10];
-    MantraSceneTransitionList transitions[2];
-    s16 cursorX;
-    s16 cursorY;
-    s16 scrollX;
-    s16 scrollY;
-    s16 targetX;
-    s16 targetY;
-    u8 pad5A8[4];
-    u8 flags;
-    u8 cursorMoving;
-    u8 pad5AE[2];
-} MantraPulseDisplayWork;
-
 extern MantraPrerequisiteRecord D_0036AE80[];
 extern char D_003BC458[];
 extern char D_003BC488[];
@@ -176,7 +129,7 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
     MnuProfileProgress *selection;
     MantraPrerequisiteState *states;
     MantraPrerequisiteRecord *record;
-    MantraPulseDisplayWork *display;
+    MenuSceneWork *display;
     s8 i;
     s32 alpha;
     u32 flags;
@@ -188,9 +141,9 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
     }
     selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
     states = (MantraPrerequisiteState *)(u32)grid->userData;
-    display = (MantraPulseDisplayWork *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
+    display = (MenuSceneWork *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
     record = &D_0036AE80[scene->sceneId];
-    alpha = display->alpha;
+    alpha = display->displayAlpha;
     memset(prerequisiteFlags, 0, sizeof(prerequisiteFlags));
     if (record->unk00 == 0) {
         for (i = 0; i < 4 && record->ids[i] != 0; i++) {
@@ -202,26 +155,26 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
     mnuDrawScaledVariantSprite(x, y, depth, alpha, scene->sceneId, 0x20,
                                1.0f, 1.0f, context);
     flags = mnuGetMantraDisplayFlags(scene, selection);
-    if (flags & 1) {
+    if (flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) {
         color = (s32)((f32)((alpha * 5) << 4) * 0.0078125f) | 0x60501000;
         uiDrawUniformColorRect((x - 4) << 4, (y - 4) << 3, 0, 0x1C0, 0xE0,
                                color, context);
     }
-    if (flags & 2) {
+    if (flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP) {
         color = (s32)((f32)((alpha * 15) << 4) * 0.0078125f) | 0x80802000;
         frFontMeasureAndQueueGlyph(x + 4, y, depth, color,
                                    (const u8 *)D_003BC458, context);
         frFontMeasureAndQueueGlyph(x, y, depth, color,
                                    (const u8 *)D_003BC488, context);
-    } else if (flags & 4) {
+    } else if (flags & MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_1) {
         frFontMeasureAndQueueGlyph(x, y, depth,
             (s32)((f32)((alpha * 15) << 4) * 0.0078125f) | 0x10808000,
             (const u8 *)D_003BC488, context);
-    } else if (flags & 8) {
+    } else if (flags & MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_2) {
         frFontMeasureAndQueueGlyph(x + 4, y, depth,
             (s32)((f32)((alpha * 15) << 4) * 0.0078125f) | 0x40404000,
             (const u8 *)D_003BC488, context);
-    } else if (flags & 0x20) {
+    } else if (flags & MNU_MANTRA_DISPLAY_FLAG_REQUIREMENT_PAIR_SET_FALLBACK) {
         frFontMeasureAndQueueGlyph(x, y, depth,
             (s32)((f32)(alpha << 7) * 0.0078125f) | 0x40404000,
             (const u8 *)D_003BC490, context);
@@ -284,7 +237,7 @@ void func_0025AD68(s32 frame, s32 size, s32 param) {
     func_0024E260(0, 0, 0, (s32)(scale * t), 3, param);
 }
 
-void func_0025AE80(MantraPulseDisplayWork *display, s32 inputScale, s32 param) {
+void func_0025AE80(MenuSceneWork *display, s32 inputScale, s32 param) {
     s8 enabled[4] __attribute__((aligned(4)));
     const u32 clearWord = 0;
     MantraPulseAnimationWork *pulse = &display->pulse;
@@ -292,26 +245,26 @@ void func_0025AE80(MantraPulseDisplayWork *display, s32 inputScale, s32 param) {
     s32 i;
 
     memcpy(enabled, &clearWord, sizeof(enabled));
-    if (display->scrollY != 0) {
+    if (display->cursorPosition.y != 0) {
         enabled[0] = 1;
     }
-    if (display->scrollY < 0x38E) {
+    if (display->cursorPosition.y < 0x38E) {
         enabled[1] = 1;
     }
-    if (display->scrollX != 0) {
+    if (display->cursorPosition.x != 0) {
         enabled[2] = 1;
     }
 
-    if (display->flags & 4) {
+    if (display->boundsFlags & MENU_SCENE_REQUIREMENT_GROUP_2_MET) {
         threshold = 0x307;
-    } else if (display->flags & 2) {
+    } else if (display->boundsFlags & MENU_SCENE_REQUIREMENT_GROUP_1_MET) {
         threshold = 0x2C8;
-    } else if (display->flags & 1) {
+    } else if (display->boundsFlags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) {
         threshold = 0x24C;
     } else {
         threshold = 0x1BE;
     }
-    if (display->scrollX < threshold) {
+    if (display->cursorPosition.x < threshold) {
         enabled[3] = 1;
     }
 
@@ -445,4 +398,3 @@ INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4C0);
 INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4C8);
 
 INCLUDE_SDATA(const s32, "game/code_00259498", mnuSceneResourceContext);
-

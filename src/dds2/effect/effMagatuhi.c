@@ -1,4 +1,5 @@
 #include "eff.h"
+#include "eff_math.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -89,7 +90,7 @@ typedef struct {
 typedef struct {
     EffMagatuhiHeadFirst head;
     EffMagatuhiDriftParticle *particles; /* 0x17C */
-    void *mathResource;    /* 0x180 */
+    EffArrHdr *mathResource;    /* 0x180 */
     u8 pad184[8];
     EffMagatuhiOwner *managedResource; /* 0x18C */
     void *allocationHandle; /* 0x190 opaque handle, not the particle address */
@@ -113,7 +114,7 @@ typedef struct {
 typedef struct {
     EffMagatuhiHeadSecond head;
     s32 *delays;           /* 0x180 */
-    void *mathResource;    /* 0x184 */
+    EffArrHdr *mathResource;    /* 0x184 */
     EffMagatuhiOwner *managedResource; /* 0x188 */
     void *allocationHandle; /* 0x18C opaque handle, not the work address */
 } EffMagatuhiWideSecond;
@@ -255,12 +256,10 @@ void effMagatuhiFillColorTable(EffMagatuhiValueWork *work, u32 colorA, u32 color
 
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_003AA868[];
-extern s32 effMathStepBezierSlot(void *slots, s32 index, f32 *out);
 extern f32 sdfViewTargetVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 extern f32 sdfViewEyeVector[EFF_MAGATUHI_VECTOR_WORD_COUNT];
 extern f32 sdfSinPoly(f32 angle);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
-extern void *effMathGetSlotAt(void *slots, s32 index);
 
 
 void func_001918B8(EffMagatuhiValueWork *valueWork, s32 index) {
@@ -278,7 +277,6 @@ typedef struct {
 } EffMagatuhiRingParticle;
 
 
-extern void *effAllocSlotArray(s32 count);
 extern u32 effMiscRand(void *state);
 extern u8 D_003AA868[];
 
@@ -316,11 +314,6 @@ void effMagatuhiReleaseMathOwnerAndBuffer(EffMagatuhiWideFirst *work) {
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
-typedef struct {
-    f32 controlPoints[EFF_MAGATUHI_CONTROL_POINT_COUNT][EFF_MAGATUHI_XYZ_COMPONENT_COUNT];
-    f32 t;    /* 0x30 Bezier evaluation parameter, as in effMath's slot */
-    f32 step; /* 0x34 per-frame increment of t */
-} EffMagatuhiSlot;
 /* Seed independent normalized XZ position/drift vectors and clear slot history.
  * The vector scratch w and the raw accesses below retain their native forms. */
 void effMagatuhiInitWideFirstParticle(EffMagatuhiWideFirst *work, s32 index) {
@@ -328,7 +321,7 @@ void effMagatuhiInitWideFirstParticle(EffMagatuhiWideFirst *work, s32 index) {
     f32 direction[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 radius;
     f32 random;
-    EffMagatuhiSlot *slot;
+    EffCubicBezierSlot *slot;
 
     random = effMiscRandUnitFloat(D_003AA868) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     radius = work->head.initialRadius * (random + random);
@@ -358,7 +351,7 @@ void effMagatuhiInitWideFirstParticle(EffMagatuhiWideFirst *work, s32 index) {
     particle->liftStep = work->head.baseLiftStep *
         (effMiscRandUnitFloat(D_003AA868) * work->head.liftVariation +
          (1.0f - work->head.liftVariation));
-    slot = (EffMagatuhiSlot *)effMathGetSlotAt(work->mathResource, index);
+    slot = effMathGetSlotAt(work->mathResource, index);
     slot->t = 0.0f;
     slot->step = 0.0f;
     func_001918B8(work->managedResource->valueWork, index);
@@ -377,10 +370,10 @@ void effMagatuhiUpdateWideFirst(EffMagatuhiWideFirst *work) {
     f32 sideAxis[4];
     f32 towardTarget[4];
     f32 startTangent[4];
-    void *mathResource;
+    EffArrHdr *mathResource;
     EffMagatuhiValueWork *valueWork;
     EffMagatuhiDriftParticle *particle;
-    EffMagatuhiSlot *slot;
+    EffCubicBezierSlot *slot;
     u8 respawn;
     u32 count;
     s32 life, spread, fadeIn, fadeOut;
@@ -405,7 +398,7 @@ void effMagatuhiUpdateWideFirst(EffMagatuhiWideFirst *work) {
     scaleStep = work->head.scaleStep;
     fadeIn = work->head.fadeInFrames;
     fadeOut = work->head.fadeOutFrames;
-    slot = (EffMagatuhiSlot *)effMathGetSlotAt(mathResource, 0);
+    slot = effMathGetSlotAt(mathResource, 0);
     PCP_COPY_VECTOR(origin, &work->head.unk00);
     captureDistance = work->head.captureDistance;
     pathJitter = work->head.pathJitter;
@@ -539,7 +532,7 @@ void effMagatuhiBuildBezierControlPointsVU(EffMagatuhiWideSecond *work, s32 inde
     f32 lastNormal[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 viewDirection[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 point[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    EffMagatuhiSlot *slot;
+    EffCubicBezierSlot *slot;
     f32 step;
     f32 random;
 
@@ -548,7 +541,7 @@ void effMagatuhiBuildBezierControlPointsVU(EffMagatuhiWideSecond *work, s32 inde
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, viewDirection);
     step = 1.0f / (f32)work->head.lifetimeFrames;
-    slot = (EffMagatuhiSlot *)effMathGetSlotAt(work->mathResource, index);
+    slot = effMathGetSlotAt(work->mathResource, index);
     slot->t = 0;
     slot->step = step;
 
@@ -631,7 +624,7 @@ void effMagatuhiBuildBezierControlPointsVU(EffMagatuhiWideSecond *work, s32 inde
 /* Advance delayed Bezier particles, pack their fade, and submit the owner.
  * Fade-in wins when its interval overlaps fade-out; divisors are unchecked. */
 void effMagatuhiUpdateBezierHistoryParticles(EffMagatuhiWideSecond *work) {
-    void *slots = work->mathResource;
+    EffArrHdr *slots = work->mathResource;
     EffMagatuhiValueWork *valueWork = work->managedResource->valueWork;
     s32 *delays = work->delays;
     u8 respawn = work->head.respawn;
@@ -704,12 +697,12 @@ void effMagatuhiInitializeInterpolatedHistory(EffMagatuhiCallback *arg) {
     u32 i;
     u32 j;
     s32 sampleSpan;
-    EffMagatuhiSlot *slot;
+    EffCubicBezierSlot *slot;
 
     for (i = 0; i < count; i += EFF_MAGATUHI_BEZIER_GROUP_STRIDE) {
         effMagatuhiBuildBezierControlPointsVU(work, i);
         *ages = effMiscRand(D_003AA868) % lifetimeFrames;
-        slot = (EffMagatuhiSlot *)effMathGetSlotAt(work->mathResource, i);
+        slot = effMathGetSlotAt(work->mathResource, i);
         if (historyFrames < *ages) {
             slot->t = slot->step * (f32)(*ages - historyFrames);
             sampleSpan = historyFrames;

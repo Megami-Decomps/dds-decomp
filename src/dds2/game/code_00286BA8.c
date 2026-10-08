@@ -345,14 +345,14 @@ extern s8 evtGetCapturedWindowPanelValue(void);
 extern void evtFinishMessageWindowAndNotify(void);
 extern void evtSetMessageWindowOptionWhenOpen(s32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
-extern void mnuShowMantraInfo(u32);
-extern void mnuShowMantraScrollCursor(u32);
-extern void mnuShowMantraUnitPanel(u32);
-extern void mnuToggleMantraTitleBlink(u32);
-extern void mnuToggleMantraTypeOnePanelMode(u32);
-extern void mnuSetMantraBackgroundVariant(u32, s8);
-extern void mnuShowMantraLimitLine(u32);
-extern void mnuKeepMantraBackgroundMaskVisible(u32);
+extern void mnuShowMantraInfo(struct MantraDrawPool *pool);
+extern void mnuShowMantraScrollCursor(struct MantraDrawPool *pool);
+extern void mnuShowMantraUnitPanel(struct MantraDrawPool *pool);
+extern void mnuToggleMantraTitleBlink(struct MantraDrawPool *pool);
+extern void mnuToggleMantraTypeOnePanelMode(struct MantraDrawPool *pool);
+extern void mnuSetMantraBackgroundVariant(struct MantraDrawPool *pool, s8);
+extern void mnuShowMantraLimitLine(struct MantraDrawPool *pool);
+extern void mnuKeepMantraBackgroundMaskVisible(struct MantraDrawPool *pool);
 /* The native call forwards only the work pointer; later callers pass all three provider inputs. */
 extern void func_0028D070();
 
@@ -507,16 +507,16 @@ s32 func_00287C20(void) {
             break;
         }
         evtFinishMessageWindowAndNotify();
-        mnuShowMantraInfo((u32)work->menu.selectionController);
-        mnuShowMantraScrollCursor((u32)work->menu.selectionController);
-        mnuShowMantraUnitPanel((u32)work->menu.selectionController);
-        mnuToggleMantraTitleBlink((u32)work->menu.selectionController);
-        mnuToggleMantraTypeOnePanelMode((u32)work->menu.selectionController);
-        mnuSetMantraBackgroundVariant((u32)work->menu.selectionController, 0);
+        mnuShowMantraInfo(work->menu.selectionController);
+        mnuShowMantraScrollCursor(work->menu.selectionController);
+        mnuShowMantraUnitPanel(work->menu.selectionController);
+        mnuToggleMantraTitleBlink(work->menu.selectionController);
+        mnuToggleMantraTypeOnePanelMode(work->menu.selectionController);
+        mnuSetMantraBackgroundVariant(work->menu.selectionController, 0);
         if (work->menu.drawBits.showOverlay) {
-            mnuShowMantraLimitLine((u32)work->menu.selectionController);
+            mnuShowMantraLimitLine(work->menu.selectionController);
         }
-        mnuKeepMantraBackgroundMaskVisible((u32)work->menu.selectionController);
+        mnuKeepMantraBackgroundMaskVisible(work->menu.selectionController);
         func_0028D070(work);
         sdfSetTaskItemMode((struct TaskWork *)mnuMantraSelectionResource, 2,
                            SDF_TASK_ITEM_MODE_PENDING_ACTIVATION);
@@ -539,7 +539,7 @@ s32 func_00287C20(void) {
 }
 
 extern void func_0026C900(void);
-extern void mnuUpdateMantraDrawPool(u8 *pool);
+extern void mnuUpdateMantraDrawPool(struct MantraDrawPool *pool);
 extern void mnuDrawMantraSprite(s32, s32, s32, s32, s32, s32, s32);
 extern s32 mnuDrawLoadedProgressPanels(DatPartyRecord *, MenuProgressHost *, s32);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16, u32);
@@ -553,7 +553,7 @@ s32 func_00288158(void) {
     s32 value;
 
     func_0026C900();
-    mnuUpdateMantraDrawPool((u8 *)work->menu.selectionController);
+    mnuUpdateMantraDrawPool(work->menu.selectionController);
     ratio = 0.0f;
     if (work->flags.fadeProgress) {
         if (work->menu.equip.timer < 30) {

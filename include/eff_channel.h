@@ -4,6 +4,8 @@
 #include "common.h"
 #include "sdf.h"
 
+struct EffArrHdr;
+
 /* Shared channel parameter block copied into each allocated channel work. */
 typedef struct EffChanHead {
     f32 controlPoints[4][4];
@@ -28,7 +30,7 @@ typedef struct EffChanRecord {
 typedef struct EffChanWork {
     EffChanHead head;
     EffChanRecord *records;
-    s32 *slots;
+    struct EffArrHdr *slots; /* Trailing allocation header, not the slot base. */
     SdfMemBlock *buffer;
 } EffChanWork;
 
