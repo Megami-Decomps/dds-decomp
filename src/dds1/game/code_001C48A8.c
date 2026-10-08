@@ -550,7 +550,115 @@ extern void btlClearActorSelectedEntryIndex(BtlUnit *);
 extern void btlRefreshUnitMotionSelection(u8 *);
 extern BtlRuntimeTask *btlCreateEffObjC(BtlUnit *, s32);
 
-INCLUDE_ASM(const s32, "game/code_001C48A8", btlAdvanceSceneWhenActorTasksReady);
+s32 btlAdvanceSceneWhenActorTasksReady(BattleSceneWork *scene) {
+    BtlTask *node = scene->linkedNodes;
+    BtlTask *head = node;
+    BtlUnit *unit;
+    s32 actorFlagMask;
+    s32 ready = 1;
+
+    if (scene->variant == 1) {
+        actorFlagMask = 0x200;
+    } else {
+        actorFlagMask = 0x400;
+    }
+    while (node != NULL) {
+        if ((node->flags & 8) != 0) {
+            if ((node->unit->flags & 1) != 0 && node->state >= 3u) {
+                ready = 0;
+                break;
+            }
+        }
+        node = node->next;
+    }
+
+    for (node = head; node != NULL; node = node->next) {
+        if ((node->flags & 8) != 0) {
+            u32 flags;
+
+            unit = node->unit;
+            flags = unit->flags;
+            if ((flags & actorFlagMask) != 0) {
+                if ((flags & 1) != 0) {
+                    if ((flags & 0xE0) != 0) {
+                        continue;
+                    }
+                    if (node->state != 2) {
+                        ready = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    if (ready != 0 && scene->frame >= 17) {
+        for (node = head; node != NULL; node = node->next) {
+            if ((node->flags & 8) != 0) {
+                unit = node->unit;
+                {
+                    u32 flags = unit->flags;
+
+                    if ((flags & 1) != 0) {
+                        if ((flags & 0xE0) != 0) {
+                            continue;
+                        }
+                        unit->flags = flags & ~0x10u;
+                        btlTickActorEntryCountdowns((u8 *)unit);
+                        if ((unit->partyRecord.status & 0x122F) != 0) {
+                            btlDispatchStateHandler(node, 4);
+                        }
+                        if ((unit->flags & actorFlagMask) != 0) {
+                            btlClearNodeFlags();
+                            btlClearActorSelectedEntryIndex(unit);
+                            btlRefreshUnitMotionSelection((u8 *)unit);
+                        }
+                    }
+                }
+            }
+        }
+
+        if ((scene->subFlags & 0x100) != 0) {
+            s32 eligibleCount = 0;
+            s32 unitCount = 0;
+            s32 kind;
+            BtlUnit *lastReadyUnit = NULL;
+
+            for (unit = scene->actors; unit != NULL; unit = unit->next) {
+                u32 flags = unit->flags;
+                u32 marked = flags & 0x400;
+
+                flags &= 1;
+                if (flags == 0) {
+                    continue;
+                }
+                if (marked == 0) {
+                    continue;
+                }
+                unitCount++;
+                if ((unit->partyRecord.status & 1) != 0) {
+                    eligibleCount++;
+                    lastReadyUnit = unit;
+                }
+            }
+            if (eligibleCount == 1) {
+                kind = 0;
+            } else {
+                kind = eligibleCount == unitCount ? 1 : 2;
+            }
+            if (eligibleCount != 0) {
+                BtlRuntimeTask *task;
+
+                task = btlCreateEffObjC(lastReadyUnit, kind);
+                task->startCondition.kind = BTL_TASK_CONDITION_KIND_ABSENT;
+                task->startCondition.value.taskKind = 0x2B;
+                btlStartTask(task);
+            }
+            scene->subFlags &= ~0x100u;
+        }
+        return 8;
+    }
+    return 0;
+}
 
 extern void fldClearSceneAdvanceFlag(void);
 extern s32 btlCanStartPrimaryScriptTask(void);
