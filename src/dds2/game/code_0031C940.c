@@ -1,6 +1,7 @@
 #include "eff.h"
 #include "common.h"
 #include "sdf_resource.h"
+#include "mnu_shooting.h"
 
 
 extern f32 func_00353228(f32);
@@ -8,36 +9,9 @@ extern f32 D_0037F5EC[];
 extern f32 sdfViewEyeVector[4];
 extern f32 sdfViewTargetVector[4];
 
-/* Records are 0x34 bytes; bit 0 of flags marks a claimed slot. */
-typedef struct ModelInstance {
-    f32 position[3];
-    u32 valueC;
-    f32 positionStep[3];
-    u8 pad1C[4];
-    u32 flags;
-    u16 remainingLifetime; /* decremented by each unpaused timed update */
-    u16 initialLifetime; /* retained as the draw ratio denominator; zero disables timed motion */
-    s16 animationFrame;
-    s16 animationLength;
-    u8 pad2C[4];
-    f32 scale;
-} ModelInstance;
-
 void itfDeactivateModelInstance(ModelInstance *item);
 void itfDrawModelInstanceImage(ModelInstance *item);
 extern s32 itfDrawUniformlyScaledIndexedImage(s32, s32, s32, s32, s32, s32, s32, f32);
-
-typedef struct ModelInstanceList {
-    ModelInstance *items;
-    s32 count;
-} ModelInstanceList;
-
-typedef struct ModelInstanceWork {
-    u32 handle;
-    s32 count;
-    ModelInstanceList *lists;
-    u32 unkC;
-} ModelInstanceWork;
 
 extern void *sdfMemoryGetBlockAddress(u32);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
