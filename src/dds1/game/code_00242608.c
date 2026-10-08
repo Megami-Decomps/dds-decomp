@@ -379,7 +379,35 @@ void mnuCampInitDisplayDefaults(CampDisplayDefaults *display) {
     display->variant = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00242E70);
+void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 value, EvtRuntimeChild **out1, EvtRuntimeChild **out2);
+void func_00243048(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
+
+void func_00242E70(EvtRuntime *viewer, EvtRuntimeGroup *track, s32 value, CampDisplayDefaults *display) {
+    EvtRuntimeChild *lo;
+    EvtRuntimeChild *hi;
+    s32 startFrame;
+    s32 endFrame;
+    f32 ratio;
+
+    mnuFindCampKeyTrackNeighbors(track, value, &lo, &hi);
+    if (lo != 0) {
+        startFrame = lo->frame;
+    } else {
+        mnuCampInitDisplayDefaults(display);
+        return;
+    }
+    if (hi != 0) {
+        endFrame = hi->frame;
+    } else {
+        endFrame = lo->frame;
+    }
+    if (endFrame != startFrame) {
+        ratio = (f32)(value - startFrame) / (f32)(endFrame - startFrame);
+    } else {
+        ratio = 0.0f;
+    }
+    func_00243048(lo, hi, display, ratio);
+}
 
 typedef struct CampListLayout {
     s32 width0;

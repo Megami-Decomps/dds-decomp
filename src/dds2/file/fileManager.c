@@ -1,5 +1,6 @@
 #include "sdf_chip.h"
 #include "file.h"
+#include "sdf_dev_state.h"
 
 /* Intrusive list node threaded through +0x4. */
 typedef struct FileNode {
@@ -51,7 +52,6 @@ typedef struct FileCleanup {
 } FileCleanup;
 
 extern s32 btlDestroyStageTask(void *);
-extern void sdfDevQueueReleaseState(u32);
 extern void func_0035B6E0(const char *fmt, ...);
 extern void sdfPacInitializeDispatchPacket(void *, void *);
 extern void func_00346AE8(void *);
@@ -76,7 +76,7 @@ s32 filePollEntryCleanup(FileCleanup *entry) {
     }
     if (entry->state == FILE_REQUEST_COMPLETE) {
         if (entry->handle != 0) {
-            sdfDevQueueReleaseState(entry->handle);
+            sdfDevQueueReleaseState((DevState *)entry->handle);
         }
         sdfReleaseChipBlock(entry->requestNameCopy);
         sdfReleaseChipBlock(entry);
@@ -333,7 +333,6 @@ s32 secondValue;
     fileWindowSlotCreate(requestNameAddress, firstValue, secondValue, 0, 0);
 }
 
-extern void sdfDevQueueRead(u32 handle, u32 buffer, u32 size);
 
 /* If capacity exists and state is ready, claim nextSlot and advance its
  * four-slot cursor; this does not search for an empty slot. Mark transferring
@@ -368,5 +367,6 @@ void fileQueuePendingRequestInFreeSlot(FileRequest *request) {
         chunkBytes = FILE_READ_SLOT_BYTES;
     }
     SignalSema(work->sema);
-    sdfDevQueueRead(request->handle, work->buffer + (slotIndex << FILE_READ_SLOT_SHIFT), chunkBytes);
+    sdfDevQueueRead((DevState *)request->handle,
+                    (void *)(work->buffer + (slotIndex << FILE_READ_SLOT_SHIFT)), chunkBytes);
 }

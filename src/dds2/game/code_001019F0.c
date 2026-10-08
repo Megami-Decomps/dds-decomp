@@ -55,7 +55,7 @@ extern void sceFsReset(void);
 extern void func_0034CB60(s32);
 extern void func_0034D038(u32);
 extern s32 sceSifLoadModule(const char *, s32, const char *);
-extern void sdfDevStartLoad(s32, s32);
+extern void sdfDevStartLoad(const char *, const char *);
 extern void sdfLoadIopModulePair(const char *, s32);
 extern void func_00328858(u32, u32, u32);
 extern void sdfPadRequestMode(s32, u8);
@@ -102,7 +102,7 @@ s32 func_00101AC0(void) {
     }
     while (sceSifLoadModule(D_004110E8, 0, 0) < 0) {
     }
-    sdfDevStartLoad((s32)D_00411108, (s32)D_00411118);
+    sdfDevStartLoad(D_00411108, D_00411118);
     sdfLoadIopModulePair(D_00411130, 1);
     func_00328858(0x17C0000, 0x200000, 0x335000);
     D_00438A8C = 1;
