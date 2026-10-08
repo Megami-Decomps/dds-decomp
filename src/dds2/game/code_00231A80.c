@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
 
@@ -782,7 +783,6 @@ void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *requestOwner, MdlDoneJob *compl
     }
 }
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
 extern void *fileCreatePacLoadWork(const char *path, s32 flags, void *dispatch, s32 onComplete, s32 userData);
 

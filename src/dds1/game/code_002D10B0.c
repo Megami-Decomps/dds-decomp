@@ -73,7 +73,6 @@ struct SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 arg1);
 void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 void sdfTexCreateSecondPacket(SdfTex *texture);
 void sdfTexRefreshResourcePackets(SdfTex *texture);
-void *sdfAllocAndClearQuadwords(s32 size);
 
 void sdfRequestDeferredGsImageCapture(u8 *destination, void (*onComplete)(void *)) {
     D_003BD2F4 = destination;

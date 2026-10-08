@@ -1,3 +1,4 @@
+#include "sdf_chip.h"
 #include "file.h"
 
 /* Intrusive list node threaded through +0x4. */
@@ -51,9 +52,7 @@ typedef struct FileCleanup {
 
 extern s32 btlDestroyStageTask(void *);
 extern void sdfDevQueueReleaseState(u32);
-extern void sdfReleaseChipBlock(void *);
 extern void func_0035B6E0(const char *fmt, ...);
-extern void *sdfAllocAndClearQuadwords(s32);
 extern void sdfPacInitializeDispatchPacket(void *, void *);
 extern void func_00346AE8(void *);
 #define FILE_REQUEST_KIND_CALLBACK 0

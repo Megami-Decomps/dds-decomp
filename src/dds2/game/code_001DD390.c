@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "snd_slot.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
@@ -35,7 +36,6 @@ extern void effObjSetOpacityPassEnabled(u32 enabled);
 extern void btlClearAllUnitDefeatCandidates(void);
 extern void func_001F3C30(BtlLinkedCommand *action);
 
-extern void sdfReleaseChipBlock(void *block);
 extern s32 btlIsUnitInActiveList(void *unit);
 
 extern s64 mnuGetSoundBufferStateLocked(void);
@@ -287,7 +287,6 @@ extern void sndFormatResourceNameFromUnitMode(s32, s32);
 
 extern s32 datActionAnimationRecords;
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
 typedef struct ActiveSoundNode {
     u32 flags;
@@ -1630,7 +1629,6 @@ s32 btlEvalTaskCondition(BtlTaskCondition *condition, s32 value) {
     return result;
 }
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
 /* Append a cleared task; positive size exposes argument bytes after the header. */
 BtlRuntimeTask *btlAllocTask(s32 size) {
@@ -1660,7 +1658,6 @@ void *btlGetTaskArguments(void *task) {
     return ((BtlRuntimeTask *)task)->args;
 }
 
-extern void sdfReleaseChipBlock(void *);
 
 /* Invoke the finish hook before unlinking, then release the task block. */
 void btlFreeTask(BtlRuntimeTask *task) {
@@ -9927,7 +9924,6 @@ SoundResourceNode *sndCreateResourceNode(SoundMixer *soundId) {
 }
 
 
-extern void sdfReleaseChipBlock(void *);
 
 /* Release owned voices, unlink the resource node, and free its allocation. */
 void sndFreeResourceNode(SoundResourceNode *node) {
@@ -10356,7 +10352,7 @@ void btlUpdateJobPositionFromModel(s32 *args) {
 
 void sndDestroyFileQueueWrapper(u32 queue) {
     fileQueueDestroy(*(u32 *)queue);
-    sdfReleaseChipBlock(queue);
+    sdfReleaseChipBlock((void *)queue);
 }
 
 void func_00203EC0(void) {

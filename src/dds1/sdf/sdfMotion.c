@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "sdf.h"
@@ -216,8 +217,6 @@ typedef struct FuncTab {
     void (*w10)(void *a0, f32 t1, f32 t2);
 } FuncTab;
 
-void *sdfAllocAndClearQuadwords(s32 size);
-void sdfReleaseChipBlock(void *a0);
 void *sdfAllocSizeClassBlock(s32 size);
 s32 sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
 void func_002DA3C0(void *a0, s32 a1);

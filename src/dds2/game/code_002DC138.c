@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
 #include "eff_anim.h"
@@ -27,9 +28,7 @@ extern void *fileResolvePrimaryBuffer(FileJobPayload *);
 
 extern void *fileResolveSecondaryBuffer(FileJobPayload *);
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
-extern void sdfReleaseChipBlock();
 
 extern void sdfTexReleaseReference(struct SdfTex *texture);
 

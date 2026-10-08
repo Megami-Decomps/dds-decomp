@@ -1,3 +1,4 @@
+#include "sdf_chip.h"
 #include "mnu_input.h"
 #include "mnu.h"
 #include "sdf_resource.h"
@@ -110,7 +111,6 @@ extern ScrollHandle *effCreateStatusBatch(s32);
 extern void func_0027FCA0(s32, s32, s32);
 
 
-extern void sdfReleaseChipBlock(void *);
 
 extern MenuPanelHandles *mnuCreatePanelSpriteHandles(u32, s32, s32);
 
@@ -131,7 +131,6 @@ extern char D_003B2348[];
 extern void itfGridLookupValueOrDefault(s32, s32);
 
 
-extern MenuListNode *sdfAllocAndClearQuadwords(s32);
 
 void mnuClearListFlagsOneAndTwo(u32 *flags);
 

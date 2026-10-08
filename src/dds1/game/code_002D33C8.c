@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_pending.h"
@@ -107,7 +108,6 @@ extern s32 sdfPendingQueueSlots[2];
 extern SdfResource *sdfResourceListHead;
 
 extern u32 sdfAllocSizeClassBlock(u32);
-extern void sdfReleaseChipBlock(void *allocation);
 
 extern u32 sdfCreateReferenceDmaNode(u32);
 
@@ -155,7 +155,6 @@ extern void sdfReleaseQueuedResource(void *resource, s32 retained);
 
 
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", func_002D33C8);
@@ -1725,7 +1724,6 @@ void *sdfEnsureFreeRootWorkspace(SdfDrawNode *root) {
     return workspace;
 }
 
-extern void sdfReleaseChipBlock(void *allocation);
 
 /* Release allocations in both free-node lists; the stored head pointers are not cleared. */
 void sdfFreeNodeLists(SdfDrawNode *root) {

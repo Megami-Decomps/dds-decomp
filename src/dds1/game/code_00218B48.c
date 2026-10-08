@@ -1,5 +1,6 @@
 #include "kwln.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_projection.h"
@@ -222,7 +223,6 @@ extern s8 D_00324510[64];
 
 extern void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, s8 *pad);
 
-extern void sdfReleaseChipBlock();
 
 /* Three independently allocated resources; their individual roles are unresolved. */
 typedef struct MdlSlotEntry {
@@ -282,9 +282,9 @@ void mdlReleaseViewerSlotResources(void) {
         entryIndex = 0;
         do {
             entryIndex++;
-            sdfReleaseChipBlock(slotEntry->secondHandle);
-            sdfReleaseChipBlock(slotEntry->firstHandle);
-            sdfReleaseChipBlock(slotEntry->thirdHandle);
+            sdfReleaseChipBlock((void *)slotEntry->secondHandle);
+            sdfReleaseChipBlock((void *)slotEntry->firstHandle);
+            sdfReleaseChipBlock((void *)slotEntry->thirdHandle);
             slotEntry++;
         } while (entryIndex < entryCount);
     }
@@ -664,7 +664,6 @@ void mdlAddEffectPart(DevRequest *partList, s32 descriptorIndex) {
     partList->usedCount += 1;
 }
 
-extern void *sdfAllocAndClearQuadwords(s32 size);
 
 typedef struct MdlHandlerNode {
     s32 a;      /* 0x00 */

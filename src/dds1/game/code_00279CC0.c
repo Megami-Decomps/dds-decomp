@@ -1,3 +1,4 @@
+#include "sdf_chip.h"
 #include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
@@ -12,7 +13,6 @@
 extern EffPayload *effCreatePayload(u32);
 extern u32 effDestroyPayload(EffPayload *);
 
-extern void *sdfAllocAndClearQuadwords(s32);
 struct MenuListNode;
 
 
@@ -53,7 +53,6 @@ extern void mnuSetPopupEntryFlagged(s32 *, char *);
 extern char D_0037CC20[];
 
 
-extern void sdfReleaseChipBlock(void *);
 
 extern MenuListNode *func_0027B888(MenuList *);
 

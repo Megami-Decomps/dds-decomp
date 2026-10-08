@@ -394,7 +394,6 @@ extern void sdfVuMatrixToQuaternion(f32 matrix[4][4]);
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
-extern void *sdfAllocAndClearQuadwords(s32 size);
 
 
 extern void fileClearRecordReferences(FileSlotTable *record);
