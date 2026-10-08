@@ -3,6 +3,7 @@
 #include "eff_blur.h"
 #include "eff.h"
 #include "mdl.h"
+#include "sdf_chunk.h"
 #include "pcp_vu0.h"
 extern u32 effMiscRand(void *state);
 #include "pcp_vu0.h"
@@ -14,7 +15,6 @@ extern void effDestroyNode(u32);
 extern u32 func_0016D290(u32 handle);
 extern void effThunderSetFragmentColor(void *work, u32 value);
 extern void func_0016D9D8(u32 handle);
-extern u32 sdfCountMapPositionRecords(SdfModel *model);
 extern u32 effEventCreate(void *owner, s32 kind, void *place);
 
 

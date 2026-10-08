@@ -3,6 +3,7 @@
 #include "dds3_path.h"
 #include "eff_transform.h"
 #include "sdf_model.h"
+#include "sdf_chunk.h"
 #include "eff_blur.h"
 #include "eff_curve.h"
 #include "file.h"
@@ -8336,7 +8337,6 @@ void effSetActiveSlotOpacity(s32 *work, f32 opacity) {
 }
 
 
-extern void *sdfChunkFindRecordById(SdfModel *, s32);
 extern void mdlSetResourceAmount(MdlCtx *, MdlResourceItem *, f32);
 extern void mdlSetAllResourceFrames(MdlCtx *, u32);
 
@@ -8378,7 +8378,7 @@ void effApplySharedModelParameters(EffSharedEffectWork *work) {
     f32 *amount;
     f32 scale;
     u32 i;
-    void *record;
+    SdfMapPositionRecord *record;
     MdlResourceItem *item;
 
     work->unk28 = 0;

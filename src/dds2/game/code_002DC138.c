@@ -5,6 +5,7 @@
 #include "ee_mmi.h"
 #include "mdl.h"
 #include "sdf.h"
+#include "sdf_chunk.h"
 
 typedef struct EffModelOwner {
     f32 scale;

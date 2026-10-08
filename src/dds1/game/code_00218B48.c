@@ -8,6 +8,7 @@
 #include "ee_mmi.h"
 #include "dat_state.h"
 #include "sdf_draw.h"
+#include "sdf_chunk.h"
 #include "eff.h"
 #include "sdf_sif_command.h"
 #include "eff_transform.h"
@@ -34,8 +35,6 @@
 #define MDL_RESOURCE_TRACK_POLY 2
 #define MDL_RESOURCE_OBJECT 3
 #define MDL_MAP_POSITION_TAG 0x534F504D
-#define MDL_MAP_POSITION_DATA_OFFSET 0x10
-#define MDL_MAP_POSITION_RECORD_BYTES 0x40
 
 
 /* Viewer-wide state for the model viewer task (DDS1 game/code_00218B48 and
@@ -793,14 +792,12 @@ typedef struct MdlPartRec {
 } MdlPartRec;
 
 
-extern void *sdfChunkFindRecordById(SdfModel *model, s32 id);
-
 /* Bind each consecutive record ID to a newly created part when the chunk contains it. */
 void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype, s32 type, s32 (*createPart)(MdlPartEntry *)) {
     MdlPartEntry *partSlot = (MdlPartEntry *)mdlFindViewerPartSlot(owner, partRecord->partIndex);
 
     if (partSlot != NULL) {
-        void *chunk = owner->inner;
+        SdfModel *model = owner->inner;
         s32 recordId = partRecord->firstId;
         s32 remainingRecords = partRecord->count;
         f32 optionalValue = 0.0f;
@@ -810,7 +807,7 @@ void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype
             optionalValue = partRecord->value;
         }
         do {
-            void *chunkRecord = sdfChunkFindRecordById(chunk, recordId++);
+            SdfMapPositionRecord *chunkRecord = sdfChunkFindRecordById(model, recordId++);
 
             if (chunkRecord != NULL) {
                 MdlResourceItem *resourceItem = mdlInsertResourceItem(owner, type, subtype);
@@ -2484,26 +2481,20 @@ extern f32 D_00367C50[][4];
 
 extern u32 D_00367CB0[];
 
-extern u32 sdfCountMapPositionRecords(SdfModel *model);
-
-extern void *sdfChunkFindByTag(SdfModel *model, s32 tag);
-
-struct SdfMapPositionRecord;
-extern void sdfSetLookAtBasisFromRecord(SdfModel *model, struct SdfMapPositionRecord *record);
-
 /* Walk native 64-byte map-position records and submit their visualization in one packet list. */
 void mdlDrawMapPositionRecords(MdlCtx *resource) {
     s32 recordCount = sdfCountMapPositionRecords(resource->inner);
     s32 recordIndex;
     s32 packetList;
-    u8 *recordCursor;
+    SdfMapPositionRecord *recordCursor;
 
     if (recordCount > 0) {
         packetList = sdfCreateResetPacketList();
-        recordCursor = (u8 *)sdfChunkFindByTag(resource->inner, MDL_MAP_POSITION_TAG) + MDL_MAP_POSITION_DATA_OFFSET;
+        recordCursor = (SdfMapPositionRecord *)(
+            (SdfMapPositionChunkPrefix *)sdfChunkFindByTag(resource->inner, MDL_MAP_POSITION_TAG) + 1);
         for (recordIndex = 0; recordIndex != recordCount; recordIndex++) {
-            sdfSetLookAtBasisFromRecord(resource->inner, (struct SdfMapPositionRecord *)recordCursor);
-            recordCursor += MDL_MAP_POSITION_RECORD_BYTES;
+            sdfSetLookAtBasisFromRecord(resource->inner, recordCursor);
+            recordCursor++;
             sdfAppendPacket((SdfListHead *)(packetList), (u32)((s32)func_002EF2E0(D_00367C50, D_00367CB0, 6, 0x80)));
         }
         D_00325048.submit(&D_00325048, packetList);
