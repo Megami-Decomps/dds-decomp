@@ -138,7 +138,8 @@ typedef struct FldAreaWork {
     f32 dist;
     u8 pad70[0x14];
     s32 positionPending;
-    u8 pad88[0x7C];
+    s32 unk88;
+    u8 pad8C[0x78];
     s16 unk104;
     u8 pad106[0x24];
     s16 colorEffectSuppressed;
@@ -4995,11 +4996,11 @@ u8 fldIsSceneStateEight(void) {
     return D_003BAE68 == 8;
 }
 
-void fldApplySceneRoomSelection(s8 *scene) {
-    if (scene[0x53] != 0) {
-        fldAreaState[0x22] = scene[0x53] - 1;
+void fldApplySceneRoomSelection(FldActorEntry *entry) {
+    if (entry->selectedRoom != 0) {
+        ((FldAreaWork *)fldAreaState)->unk88 = entry->selectedRoom - 1;
     }
-    fldAreaState[0x16] = scene[0x45];
+    ((FldAreaWork *)fldAreaState)->rowIdx = entry->rowIndex;
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013DF60);
