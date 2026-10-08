@@ -1,11 +1,10 @@
 #include "common.h"
+#include "fr_font_measure.h"
 #include "itf.h"
 #include "itf_mem_node.h"
 
 
 extern s32 mnuQueryTitleSoundBusy(void);
-
-extern u32 frFontMeasureGlyphChain(FrFontGlyph *parentGlyph);
 
 extern u32 frFontSharedRenderFlags;
 
