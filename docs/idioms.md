@@ -3499,6 +3499,14 @@ object. The transfer drain rechecks `D_00438A1C` after `SleepThread`;
 volatile, clear the active byte before testing the reset byte, and retain
 the existing volatile GS image-upload semaphore contract.
 
+DDS1 `002D1380` has the same protocol with `D_003BD32C` and
+`D_003BD32D`. Retail `002D51B0`/`002D5218`/`002D5258` repeatedly
+checks the reset byte while polling hardware; `002D52DC`/`002D5338`
+reloads it after sleeping, and `sdfWaitSlotReady` polls the active byte
+at `002D54B0`. These real shared controls justify the volatile byte
+contracts; they are not scheduling-only qualifiers. Its GS `BUSDIR`
+write at `002D148C` is a genuine 64-bit MMIO access.
+
 The worker acknowledges both graph requests before calling their handlers.
 Its reset path snapshots DMAC `D_ENABLER` before writing `D_ENABLEW` and
 stopping VIF1, then restores that enable state. Reading the enable register
@@ -3543,3 +3551,38 @@ pointer. Keep the heap descriptor pointer until the SDK address accessor,
 then convert that address word once. Express the allocation and first-entry
 address using the actual owner types; the three icon-list constructors consume
 the returned `MantraIconPool *` without integer-to-pointer casts.
+
+## Mantra asynchronous resource-loader ownership
+
+DDS2 `00287078` passes the stored `MtrResourceLoadState.fileEntry` directly
+to the file-request readiness, data, size, handle and cleanup APIs. Keep
+that work pointer opaque rather than transporting it through an integer.
+The same loader addresses twelve resource-handle words at
+`MnuStatusResource + 0x08`; these are `resourceSlots`, not padding or a
+second view of the status owner. The descriptor-table index remains `u16`:
+retail uses both `LHU` and explicit signed-halfword extension for table access.
+
+## VU clipped-vertex owner
+
+DDS2 `003379F0` and `00337FD8` index the existing `VuBlendNode` records
+with a `0x60`-byte stride. Their position vector starts at zero; category
+and clipping bytes are at `0x50`/`0x51`. The existing blend providers load
+the node's `0x40` quadword and use its W lane, the `weight` at `0x4C`;
+the other three words are the linked-list and source pointers.
+Complete this primary owner rather than introducing a second clip-vertex
+view. The triangle classifiers remain assembly until their C matches.
+
+## Timed battle-camera instruction banks
+
+DDS1 `001ECCA8` and DDS2 `001FD400` consume `0x10`-byte instructions
+and `0x80`-byte parameter records; the latter have a signed terminal byte
+at `0x70`. The real progress loop advances the parameter index only when
+the time window has expired and that record is not terminal.
+
+The DDS2 cursor keeps one primary `0x130`-byte owner: `pathEnd`/`pathStart`
+at `0x20`/`0x30`, captured direction at `0x80`, and distance at `0x90`.
+The input motion factor is stored separately from the stepped exponential
+range; path distance is the measured length times the stepped factor.
+Use the existing VU0 macros for the native COP2 vector work. The target's
+own assembly file contains its fourteen-entry jump table, not another
+function's data; the natural C switch reproduces those entries.

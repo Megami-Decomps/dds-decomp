@@ -28,7 +28,7 @@ typedef struct MtrSelectionFlags {
 } MtrSelectionFlags;
 
 typedef struct MtrResourceLoadState {
-    u32 fileEntry;
+    void *fileEntry;
     u32 unk04;
     s16 state;
     u16 entryIndex;
@@ -179,7 +179,7 @@ typedef struct MantraMenuWork {
 typedef struct MnuStatusResource {
     u32 allocationHandle;
     struct MenuList *list;
-    u8 pad08[0x30];
+    u32 resourceSlots[12];
     u32 resourceIdA;
     u32 resourceIdB;
     struct ItfMesSub *messageWindow;
