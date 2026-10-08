@@ -2671,8 +2671,8 @@ void *btlCreateDeferredUnitStatusTask(u8 *owner, u32 value) {
     s64 data;
     u32 *arguments;
 
-    task[0x10] = 0;
-    task[0] = 1;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x47;
     *(void **)(task + 0x4C) = btlApplyDeferredUnitStatus;
     data = *(s64 *)(owner + 0x108);
@@ -2715,8 +2715,8 @@ void *btlCreateCategoryStatDamageTask(u8 *owner, u32 value, u32 extra) {
     u8 *task = btlAllocTask(12);
     u32 *arguments;
 
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = btlApplyCategoryStatDamage;
     *(u16 *)(task + 0x20) = 0x48;
     *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
@@ -2878,8 +2878,8 @@ u8 *btlCreateActorSoundOptionTask(BtlUnit *arg0, s32 arg1) {
     u8 *task = btlAllocTask(8);
     BtlHuntExpArgs *data;
 
-    task[0x10] = 0;
-    task[0] = 1;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x4C;
     *(void **)(task + 0x4C) = func_001D3688;
     *(u64 *)(task + 0x40) = arg0->identity;
@@ -2901,8 +2901,8 @@ u8 *btlCreatePermittedBattleVoiceTask(s32 arg0, s32 arg1) {
     u8 *task = btlAllocTask(8);
     u32 *data;
 
-    task[0x10] = 0;
-    task[0] = 1;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x4D;
     *(void **)(task + 0x4C) = func_001D3A20;
     *(u64 *)(task + 0x40) = *(u64 *)(arg0 + 0x108);
@@ -2922,8 +2922,8 @@ u8 *btlCreateQueuedBattleVoiceTask(u8 *arg0, u16 arg1) {
     u8 *task = btlAllocTask(8);
     u32 *data;
 
-    task[0x10] = 0;
-    task[0] = 1;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x4E;
     *(void **)(task + 0x4C) = btlPlayQueuedBattleVoice;
     *(u64 *)(task + 0x40) = *(u64 *)(arg0 + 0x108);
@@ -2954,8 +2954,8 @@ u8 *btlScheduleEpPacketTask(u8 *owner, s32 value) {
     u8 *task = btlAllocTask(8);
     u32 *arguments;
 
-    task[0x10] = 0;
-    task[0] = 1;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x4F;
     *(void **)(task + 0x4C) = btlAddEpFromPacket;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
@@ -2987,8 +2987,8 @@ void *btlScheduleMoneyPacketTask(u8 *owner, u32 value) {
     s64 data;
     u32 *arguments;
 
-    task[0x10] = 0;
-    task[0] = 1;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x50;
     *(void **)(task + 0x4C) = btlAddMoneyFromPacket;
     data = *(s64 *)(owner + 0x108);
@@ -3034,11 +3034,11 @@ u32 btlRefreshEligibleActors(void) {
 
 void *btlCreateRefreshEligibleActorsTask(void) {
     u8 *task = btlAllocTask(0);
-    task[0] = 1;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(void **)(task + 0x4C) = btlRefreshEligibleActors;
     *(u16 *)(task + 0x20) = 0x51;
     *(u32 *)(task + 0x48) = 0;
-    task[0x10] = 0;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     return task;
 }
 
@@ -3527,11 +3527,11 @@ u32 func_001D4B28(void) {
 
 void *btlCreateImmediateCompletionTask(void) {
     u8 *task = btlAllocTask(0);
-    task[0] = 1;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(void **)(task + 0x4C) = func_001D4B28;
     *(u16 *)(task + 0x20) = 0x63;
     *(u32 *)(task + 0x48) = 0;
-    task[0x10] = 0;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     return task;
 }
 
@@ -4742,8 +4742,8 @@ u8 *btlAllocateIndexedUnitEffectTask(u8 *owner, s32 index, s32 value, f32 scale)
     u8 *task = btlAllocTask(16);
     u32 *arguments;
 
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u16 *)(task + 0x20) = 9;
     *(void **)(task + 0x4C) = btlApplyIndexedUnitEffectTask;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
@@ -4763,8 +4763,8 @@ u32 btlApplyScaledUnitModelTask(u32 *arg0) {
 
 void *btlCreateScaledUnitModelTask(u8 *owner) {
     u8 *task = btlAllocTask(4);
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = btlApplyScaledUnitModelTask;
     *(u16 *)(task + 0x20) = 10;
     *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
@@ -4787,8 +4787,8 @@ void *btlScheduleThresholdTask(u8 *owner, u32 threshold) {
     u8 *task = btlAllocTask(8);
     u32 *arguments;
 
-    task[0x10] = 0;
-    task[0] = 1;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0xB;
     *(void **)(task + 0x4C) = btlPollThresholdTask;
     *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
@@ -4858,8 +4858,8 @@ u8 *btlAllocateApproachTargetTask(u8 *owner, s32 index, f32 scale) {
     u8 *task = btlAllocTask(24);
     u32 *arguments;
 
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = btlApproachTargetTask;
     *(u16 *)(task + 0x20) = 0xE;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
@@ -5060,8 +5060,8 @@ void *btlScheduleRefreshTask(u8 *owner) {
     u8 *task = btlAllocTask(4);
     u32 *arguments;
 
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = btlReleaseUnitModelTask;
     *(u16 *)(task + 0x20) = 0x19;
     *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
@@ -5239,8 +5239,8 @@ extern u32 func_001D8190(BtlModelChangeArgs *);
 u8 *btlCreateModelChangeTask(u8 *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5) {
     u8 *task = btlAllocTask(0x1C);
     BtlModelChangeArgs *args;
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u16 *)(task + 0x20) = 0x1A;
     *(u16 *)(task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
     *(u64 *)(task + 0x40) = *(u64 *)(unit + 0x108);
@@ -5275,8 +5275,8 @@ u32 btlApplyUnitFxWhenLoaded(u32 *arg0) {
 u8 *btlCreateUnitTask0F(u8 *unit, s32 arg1, s32 arg2, s32 arg3) {
     u8 *task = btlAllocTask(16);
     u32 *args;
-    task[0x10] = 0;
-    task[0] = 1;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0xF;
     *(u64 *)(task + 0x40) = *(u64 *)(unit + 0x108);
     *(void **)(task + 0x48) = btlApplyLinkedUnitStatusWhenActorActive;
@@ -5308,8 +5308,8 @@ u32 btlApplyUnitVectorFxWhenLoaded(u8 *arguments) {
 u8 *btlCreateUnitTask10(u8 *unit, f32 *spawnPosition, s32 value) {
     u8 *task = btlAllocTask(0x18);
     u32 *args;
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u16 *)(task + 0x20) = 0x10;
     *(u64 *)(task + 0x40) = *(u64 *)(unit + 0x108);
     *(void **)(task + 0x48) = btlPrepareUnitStatusFxOnStart;
@@ -5359,8 +5359,8 @@ u8 *btlCreateUnitFadeInTask(u8 *owner, u32 value, u32 variant) {
     u8 *task = btlAllocTask(20);
     u32 *arguments;
 
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = btlUnitFadeInTask;
     *(u16 *)(task + 0x20) = 0x11;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
@@ -5405,8 +5405,8 @@ u8 *btlCreateUnitFadeOutTask(u8 *owner, u32 value, u32 variant) {
     u8 *task = btlAllocTask(16);
     u32 *arguments;
 
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = btlUnitFadeOutTask;
     *(u16 *)(task + 0x20) = 0x12;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
@@ -5455,8 +5455,8 @@ u8 *func_001D9038(u8 *owner, u32 value) {
     u8 *task = btlAllocTask(12);
     u32 *arguments;
 
-    task[0x10] = 0;
-    task[0] = 1;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x13;
     *(void **)(task + 0x4C) = btlStepUnitDefeatFadeIn;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
@@ -5493,8 +5493,8 @@ u8 *func_001D91E0(u8 *owner, u32 value) {
     u8 *task = btlAllocTask(12);
     u32 *arguments;
 
-    task[0x10] = 0;
-    task[0] = 1;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x14;
     *(void **)(task + 0x4C) = btlStepUnitDefeatFadeOut;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
@@ -5561,8 +5561,8 @@ u8 *func_001D9468(u8 *owner, u32 value) {
     u8 *task = btlAllocTask(12);
     u32 *arguments;
 
-    task[0x10] = 0;
-    task[0] = 1;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x15;
     *(void **)(task + 0x4C) = func_001D9268;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
@@ -5642,8 +5642,8 @@ u8 *btlCreateSelectedEffectUpdateTask(u8 *owner) {
     UnitEffectTaskArgs *arguments;
     BtlUnit *unit = (BtlUnit *)owner;
 
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u16 *)(task + 0x20) = 0x16;
     *(u16 *)(task + 0x24) |= BTL_TASK_FLAG_DEFERRED;
     *(u64 *)(task + 0x40) = unit->identity;
@@ -5680,10 +5680,10 @@ u32 btlUpdateCommandSoundTaskSecondary(void) {
 
 u8 *btlCreateSecondaryCommandSoundTask(void) {
     u8 *task = btlAllocTask(0);
-    task[0] = 1;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x1C;
     *(u16 *)(task + 0x24) |= BTL_TASK_FLAG_DEFERRED;
-    task[0x10] = 0;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u32 *)(task + 0x48) = 0;
     *(void **)(task + 0x4C) = btlUpdateCommandSoundTaskSecondary;
     return task;
@@ -5822,8 +5822,8 @@ u8 *btlCreateStiffenDamageShakeTask(u8 *owner, f32 value) {
     u8 *task = btlAllocTask(sizeof(BtlDamageShakeArgs));
     BtlDamageShakeArgs *arguments;
 
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u16 *)(task + 0x20) = 0x1D;
     *(void **)(task + 0x4C) = btlStiffenDamageShakeStep;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
@@ -5918,8 +5918,8 @@ u8 *func_001D9E48(u8 *arg0) {
     u8 *task = btlAllocTask(0x10);
     u32 *data;
 
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = func_001D9C28;
     *(u16 *)(task + 0x20) = 0x1E;
     *(u64 *)(task + 0x40) = *(u64 *)(arg0 + 0x108);
@@ -5943,8 +5943,8 @@ void *btlScheduleActorUpdate(u8 *owner) {
     u8 *task = btlAllocTask(4);
     u32 *arguments;
 
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = func_001D9EC0;
     *(u16 *)(task + 0x20) = 0x1F;
     *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
@@ -5961,8 +5961,8 @@ u32 btlRefreshUnitFxVectorTask(u32 *arg0) {
 
 void *btlCreateUnitFxVectorRefreshTask(u8 *owner) {
     u8 *task = btlAllocTask(4);
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = btlRefreshUnitFxVectorTask;
     *(u16 *)(task + 0x20) = 0x22;
     *(s64 *)(task + 0x40) = *(s64 *)(owner + 0x108);
@@ -6025,8 +6025,8 @@ u8 *btlCreateGunLoadPollTask(u8 *owner) {
     u8 *task = btlAllocTask(8);
     u32 *arguments;
 
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u16 *)(task + 0x20) = 0x23;
     *(u16 *)(task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
@@ -6071,10 +6071,10 @@ s32 btlCreateActorTransparency(BtlActorTransparencyArgs *arguments) {
 
 void *btlCreateActorTransparencyTask(BtlUnit *actor) {
     u8 *task = btlAllocTask(4);
-    task[0] = 1;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x25;
     *(void **)(task + 0x4C) = btlCreateActorTransparency;
-    task[0x10] = 0;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u32 *)(task + 0x48) = 0;
     ((BtlActorTransparencyArgs *)btlGetTaskArguments(task))->unit = actor;
     return task;
@@ -6087,8 +6087,8 @@ extern s32 func_001DA2E0(u32 *);
 u8 *btlCreateActorModelBlendTask(u8 *actor, u32 target, u32 index, u32 value, f32 scale) {
     u8 *task = btlAllocTask(0x1C);
     u32 *arguments;
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = func_001DA2E0;
     *(u16 *)(task + 0x20) = 0x26;
     *(u64 *)(task + 0x40) = *(u64 *)(actor + 0x108);
@@ -6749,9 +6749,9 @@ u32 btlInitializeMotionTransformFromTaskArguments(u8 *arguments) {
 u8 *btlCreateFloatTask28(u8 *actor, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f, f32 g, f32 h) {
     u8 *task = btlAllocTask(0x24);
     f32 *args;
-    task[0] = 1;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x28;
-    task[0x10] = 0;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     if (actor != 0 && *(u8 **)(actor + 0x18) != 0) {
         *(u64 *)(task + 0x40) = *(u64 *)(*(u8 **)(actor + 0x18) + 0x108);
     }
@@ -6785,9 +6785,9 @@ s32 btlApplyEffectCameraKeyframes(f32 *args) {
 u8 *btlCreateFloatTask29(u8 *actor, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, f32 a6, f32 a7, f32 a8, f32 a9, f32 a10, f32 a11, f32 a12, f32 a13, f32 a14, f32 a15, f32 a16) {
     u8 *task = btlAllocTask(0x44);
     f32 *args;
-    task[0] = 1;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x29;
-    task[0x10] = 0;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     if (actor != 0 && *(u8 **)(actor + 0x18) != 0) {
         *(u64 *)(task + 0x40) = *(u64 *)(*(u8 **)(actor + 0x18) + 0x108);
     }
@@ -10171,11 +10171,11 @@ s32 fldCreateSceneTileTask(u32 soundId, u32 variant) {
     u8 *task = btlAllocTask(40);
     u32 *arguments;
 
-    task[0] = 1;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
     *(u16 *)(task + 0x20) = 1;
     *(void **)(task + 0x4C) = btlPollFieldArchiveLoad;
-    task[0x10] = 0;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     arguments = btlGetTaskArguments(task);
     memset(arguments, 0, 40);
     arguments[0] = soundId;
@@ -10245,11 +10245,11 @@ u8 *btlCreateFloorLoadTask(u32 soundId, u32 variant) {
     u8 *task = btlAllocTask(20);
     u32 *arguments;
 
-    task[0] = 1;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
     *(u16 *)(task + 0x20) = 2;
     *(void **)(task + 0x4C) = btlPollFloorLoadTask;
-    task[0x10] = 0;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     arguments = btlGetTaskArguments(task);
     arguments[2] = soundId;
     arguments[3] = variant;
@@ -10267,8 +10267,8 @@ void *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value) {
     u8 *task = btlAllocTask(0x34);
     u8 *arguments;
 
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u16 *)(task + 0x20) = 3;
     *(u16 *)(task + 0x24) |= BTL_TASK_FLAG_DEFERRED;
     *(void **)(task + 0x4C) = func_001F0430;
@@ -10832,10 +10832,10 @@ u32 btlWaitUnitListIdle(void) {
 
 void *btlCreateWaitUnitListIdleTask(u32 sound) {
     u8 *task = btlAllocTask(4);
-    task[0] = 1;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x30;
     *(void **)(task + 0x4C) = btlWaitUnitListIdle;
-    task[0x10] = 0;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u32 *)btlGetTaskArguments(task) = sound;
     return task;
 }
@@ -10859,10 +10859,10 @@ u32 sndApplyToActiveActors(u32 *soundId) {
 
 void *btlCreateApplyToActiveActorsTask(u32 sound) {
     u8 *task = btlAllocTask(4);
-    task[0] = 1;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x31;
     *(void **)(task + 0x4C) = sndApplyToActiveActors;
-    task[0x10] = 0;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u32 *)btlGetTaskArguments(task) = sound;
     return task;
 }
@@ -10939,10 +10939,10 @@ u32 btlTaskStartFadeIn(u32 *arg0) {
 
 void *btlCreateFadeInTask(u32 sound) {
     u8 *task = btlAllocTask(4);
-    task[0] = 1;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x35;
     *(void **)(task + 0x4C) = btlTaskStartFadeIn;
-    task[0x10] = 0;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u32 *)(task + 0x48) = 0;
     *(u32 *)btlGetTaskArguments(task) = sound;
     return task;
@@ -11746,12 +11746,12 @@ u8 *sndCreateFileLoadTask(SoundLoadNode *node, u32 variant, const char *filename
     SoundFileRequest *request;
     char *name;
 
-    task[0] = 1;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x53;
     *(u16 *)(task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
     *(void **)(task + 0x48) = sndStartFileLoad;
     *(void **)(task + 0x4C) = sndPollMotSeFileAndSpu;
-    task[0x10] = 0;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     request = btlGetTaskArguments(task);
     name = (char *)(request + 1);
     request->node = node;
@@ -11773,8 +11773,8 @@ s32 sndLoadDataFile(s32 *data) {
 
 void *sndCreateDataFileLoadTask(u8 *owner) {
     u8 *task = btlAllocTask(4);
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = sndLoadDataFile;
     *(u16 *)(task + 0x20) = 0x56;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
@@ -12171,8 +12171,8 @@ void *btlCreateMoveOtherUnitsTask(u8 *owner, u32 soundId) {
     u8 *task = btlAllocTask(16);
     SoundTaskArgs *arguments;
 
-    task[0x10] = 0;
-    task[0] = 1;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x54;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
     *(void **)(task + 0x48) = btlQueueUnitSoundSlotFileLoad;
@@ -12296,11 +12296,11 @@ void *sndCreateAtracEffectLoadTask(u32 owner) {
     u8 *task = btlAllocTask(12);
     u32 *arguments;
 
-    task[0] = 1;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
     *(u16 *)(task + 0x20) = 0x58;
     *(u16 *)(task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
     *(void **)(task + 0x4C) = sndPollAtrac3SELoadTask;
-    task[0x10] = 0;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     arguments = btlGetTaskArguments(task);
     arguments[0] = 0;
     arguments[1] = 0;
@@ -12389,8 +12389,8 @@ void *sndCreateEarringPlaybackTask(u8 *owner) {
     u8 *task = btlAllocTask(12);
     u32 *arguments;
 
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u16 *)(task + 0x20) = 0x59;
     *(u16 *)(task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
     *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
@@ -12817,8 +12817,8 @@ u8 *btlCreateSoundPlaybackTask(u8 *owner, u32 soundId, u32 variant, u32 channel,
     u32 *arguments;
     u8 *sound;
 
-    task[0] = 1;
-    task[0x10] = 0;
+    task[0] = BTL_TASK_CONDITION_ALWAYS;
+    task[0x10] = BTL_TASK_CONDITION_NEVER;
     *(void **)(task + 0x4C) = func_001F5ED8;
     sound = *(u8 **)(owner + 0x18);
     *(u16 *)(task + 0x20) = 0x5F;
