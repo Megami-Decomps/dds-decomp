@@ -16,7 +16,6 @@ extern void func_002DA3F0(void *, u32);
 #include "par_kind_api.h"
 
 #define BILL_ENTRY_BYTES 0x14
-#define BILL_FRAME_MODE_BITS 6
 #define BILL_VARIANT_MASK 0xFFFF
 #define EFF_INSTANCE_BYTES 0x88
 #define EFF_MATRIX_BYTES 0x40
@@ -224,12 +223,13 @@ void billSetBillboardMode(BillObj *effect, s32 mode) {
             frameSlotAddress = (s32)effect->resolvedEntries + 0xc;
             do {
                 s32 frameData = *(s32 *)frameSlotAddress;
-                u32 frameFlags = ((BillAnimationEntry *)frameData)->flags & ~BILL_FRAME_MODE_BITS;
+                u32 frameFlags = ((BillAnimationEntry *)frameData)->flags &
+                    ~BILL_ANIMATION_FLAG_PACKET_LIST_MASK;
                 ((BillAnimationEntry *)frameData)->flags = frameFlags;
                 if (mode == 2) {
-                    ((BillAnimationEntry *)frameData)->flags = frameFlags | 2;
+                    ((BillAnimationEntry *)frameData)->flags = frameFlags | BILL_ANIMATION_FLAG_PACKET_LIST_2;
                 } else if (mode == 3) {
-                    ((BillAnimationEntry *)frameData)->flags = frameFlags | 4;
+                    ((BillAnimationEntry *)frameData)->flags = frameFlags | BILL_ANIMATION_FLAG_PACKET_LIST_3;
                 }
                 frameSlotAddress += BILL_ENTRY_BYTES;
             } while (--remaining != 0);
