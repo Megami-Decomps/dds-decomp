@@ -211,7 +211,37 @@ void func_00257BD8(MantraPulseDisplayWork *work, MnuProfileProgress *selection) 
     mnuAdvanceWrappingFrame(&work->frame);
 }
 
-INCLUDE_ASM(const s32, "game/code_00257200", mnuDrawMantraPulseFrame);
+/* The grid pass supplies its own depth; the frame preserves the caller's amount. */
+void mnuDrawMantraPulseFrame(s32 x, s32 y, s32 depth, s32 amount,
+                            MantraPulseDisplayWork *work, s32 surface) {
+    MnuProfileProgress *selection;
+    SdfGrid *grid;
+    s32 offsetX;
+    s32 offsetY;
+
+    selection = mnuGetSelectedNodeValue();
+    func_00257BD8(work, selection);
+    grid = work->grid;
+    offsetX = -9 - work->scrollX;
+    offsetY = 0x45 - work->scrollY;
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
+    uiDrawUniformColorRect(0, 0, -1, 0x2000, 0xE00, 0, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, surface);
+    uiDrawActiveSurfaceRegion(surface);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
+    uiDrawUniformColorRect(0, 0x190, 0, 0x2000, 0x8C0, 0x80, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
+    uiDrawUniformColorRect(0, 0, -1, 0x2000, 0x190, 0, surface);
+    uiDrawUniformColorRect(0, 0xA50, -1, 0x2000, 0x4B0, 0, surface);
+    sdfDispatchSurfaceWithPreparedTexturePacket(surface);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x50000, surface);
+    func_00257718(x + offsetX, y + offsetY, 1, amount, selection, grid, surface);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x5100DL, surface);
+}
 
 void func_00257DF0(s32 context, s32 layer) {
     s32 x = *(s16 *)(context + 0x59C) - *(s16 *)(context + 0x5A0) - 9;
