@@ -156,7 +156,6 @@ extern ParDrawState parDrawControl;
 
 extern u16 parGetRestartFlag(ParObj *obj);
 
-extern void parCellInit();
 
 
 extern void parUpdateCellVertexPair(ParSystem *, s32, const u128 *);
