@@ -338,8 +338,8 @@ void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, MenuPageWindow
     mnuAdvancePanelTransition(menu);
 }
 
-/* Same as mnuDrawStageTestList with no override value; arg5 is unused. */
-void mnuDrawPanelListDefault(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 param, s32 unused) {
+/* Same as mnuDrawStageTestList with no override value. */
+void mnuDrawPanelListDefault(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 param) {
     mnuDrawStageTestList(x, y, z, 0, menu, param);
 }
 

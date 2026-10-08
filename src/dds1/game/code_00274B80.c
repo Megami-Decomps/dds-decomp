@@ -237,9 +237,7 @@ extern s32 mnuInitializeStaffPartyScene(KwlnTask *);
 extern void mnuSetPopupEntry();
 extern void mnuSetPopupEntryFlagged(s32, void *);
 extern void func_0027C788(s32);
-extern void mnuRetreatWindowListSelection(s32);
-extern void mnuAdvanceWindowListSelection(s32);
-extern void mnuClearWindowPanelTransitionFlag(s32);
+
 extern void mnuPlayInputSound(s32, u32, s32);
 extern u8 D_0037CC74[];
 extern u8 D_0037CC3C[];
@@ -535,12 +533,12 @@ s32 func_00275920(s32 callback) {
             func_0027C788((s32)window);
         }
         if (inputFlags & 0x10) {
-            mnuRetreatWindowListSelection((s32)window);
+            mnuRetreatWindowListSelection(window);
         }
         if (inputFlags & 0x20) {
-            mnuAdvanceWindowListSelection((s32)window);
+            mnuAdvanceWindowListSelection(window);
         }
-        mnuClearWindowPanelTransitionFlag((s32)window);
+        mnuClearWindowPanelTransitionFlag(window);
         if (inputFlags & 1) {
             switch (mnuIsFinalItemIndex(window->list->cursor->index, (s32)window->list)) {
             case 0:
@@ -1568,12 +1566,12 @@ void ptySkillMenuHandleSelection(KwlnTask *callback) {
             func_0027C788((s32)window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
-            mnuRetreatWindowListSelection((s32)window);
+            mnuRetreatWindowListSelection(window);
         }
         if (inputFlags & MNU_STAFF_INPUT_NEXT) {
-            mnuAdvanceWindowListSelection((s32)window);
+            mnuAdvanceWindowListSelection(window);
         }
-        mnuClearWindowPanelTransitionFlag((s32)window);
+        mnuClearWindowPanelTransitionFlag(window);
         mnuPlayInputSound(0, inputFlags, (s32)&window->list->stateFlags);
     }
 }
@@ -1628,12 +1626,12 @@ void ptySkillMenuHandleSlotReorder(KwlnTask *callback) {
             func_0027C788((s32)window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
-            mnuRetreatWindowListSelection((s32)window);
+            mnuRetreatWindowListSelection(window);
         }
         if (inputFlags & MNU_STAFF_INPUT_NEXT) {
-            mnuAdvanceWindowListSelection((s32)window);
+            mnuAdvanceWindowListSelection(window);
         }
-        mnuClearWindowPanelTransitionFlag((s32)window);
+        mnuClearWindowPanelTransitionFlag(window);
         mnuPlayInputSound(0, inputFlags, (s32)window->list);
     }
 }
