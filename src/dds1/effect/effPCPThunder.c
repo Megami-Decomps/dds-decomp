@@ -2505,7 +2505,7 @@ extern void btlUnitGetMuzzlePosVU(struct BtlUnit *);
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
 extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 extern void effInitializeColorState(struct EffectColorState *);
-extern void func_00169D78(EffFragmentResources *, u128 *);
+extern void effAppendFragmentHistoryPoints(EffFragmentResources *, u128 *);
 extern f32 sdfAtan2(f32, f32);
 extern void func_002E7F20(f32, f32, f32);
 extern void effEventCopyFileRecordHeader(void *, const void *);
@@ -2850,7 +2850,7 @@ void func_001681C0(EffGroup *group) {
                     VU0_SUB_EXTENDED(vf11, vf11, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf11, ribbon[2]);
                     PCP_COPY_VECTOR(previous, point);
-                    func_00169D78(slot->resources, (u128 *)ribbon);
+                    effAppendFragmentHistoryPoints(slot->resources, (u128 *)ribbon);
                 }
                 effStepBezierSlotSegment(&slot->curve, point);
                 VU0_LOAD_VF(vf10, point);
@@ -2875,7 +2875,7 @@ void func_001681C0(EffGroup *group) {
                 VU0_MOVE_VF_EXTENDED(vf10, vf12);
                 VU0_SUB_EXTENDED(vf11, vf11, vf10);
                 VU0_STORE_VF_UNCLOBBERED(vf11, ribbon[2]);
-                func_00169D78(slot->resources, (u128 *)ribbon);
+                effAppendFragmentHistoryPoints(slot->resources, (u128 *)ribbon);
                 cap = (f32 (*)[4])slot->resources->endPoints;
                 slot->position[0] = point[0];
                 slot->position[1] = point[1];
@@ -3071,7 +3071,7 @@ void effInitializeFragmentHistoryColors(EffFragmentResources *history, u32 *grad
     }
 }
 
-void func_00169D78(EffFragmentResources *history, u128 *source) {
+void effAppendFragmentHistoryPoints(EffFragmentResources *history, u128 *source) {
     s32 position = history->position;
     u128 *points = history->points;
     s32 count;
