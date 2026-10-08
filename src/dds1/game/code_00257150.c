@@ -11,7 +11,7 @@ void mnuDrawSelectedMantraEntry(MenuSceneWork *object, s32 alpha, s32 context) {
         (MnuMantraGridEntry *)(u32)object->gridHandle->cursor->value;
 
     if (entry != NULL) {
-        if (object->unk548 == 0) {
+        if (object->entryMessageInProgress == 0) {
             if (entry->state != 3) {
                 if (entry->profileFlag != 0) {
                     func_00255368(0, 0, 1, alpha, entry->sceneId, context);
