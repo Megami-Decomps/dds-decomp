@@ -7230,7 +7230,7 @@ s32 btlSelectLowestStatTarget(BattleActor *actor) {
     }
     battle = (BattleActionContext *)btlGetRuntime();
     statIndex = &battle->effect->statIndex;
-    if (*statIndex >= 5) {
+    if (*statIndex >= DAT_BASE_STAT_COUNT) {
         return 0;
     }
     target = NULL;

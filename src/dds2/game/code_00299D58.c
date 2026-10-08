@@ -350,15 +350,15 @@ u32 func_0029A650(void) {
 
 void func_0029A658(BrsSkillPackageWork *scene) {
     struct ActiveItemSlots {
-        s32 indices[5];
-        s32 values[5];
+        s32 indices[DAT_BASE_STAT_COUNT];
+        s32 values[DAT_BASE_STAT_COUNT];
         s32 count;
     } active;
     DatPartyRecord *item = scene->selectedRewardRow->unit;
     s32 i;
 
     memset(&active, 0, sizeof(active));
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
         if (scene->statGains[i] > 0) {
             active.indices[active.count] = i;
             active.values[active.count] = scene->statGains[i];
@@ -395,7 +395,7 @@ void func_0029A768(BrsSkillPackageWork *scene) {
     s32 i;
     u16 kind;
 
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
         sum += item->baseStats[i];
     }
     if (495 - sum < available) {

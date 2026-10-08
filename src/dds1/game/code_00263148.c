@@ -194,8 +194,8 @@ u32 func_00263638(void) {
 }
 
 typedef struct ActiveItemSlots {
-    s32 indices[5];
-    s32 values[5];
+    s32 indices[DAT_BASE_STAT_COUNT];
+    s32 values[DAT_BASE_STAT_COUNT];
     s32 count;
 } ActiveItemSlots;
 
@@ -205,7 +205,7 @@ void func_00263640(BrsSkillPackageWork *scene) {
     s32 i;
 
     memset(&active, 0, sizeof(active));
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
         if (scene->statGains[i] > 0) {
             active.indices[active.count] = i;
             active.values[active.count] = scene->statGains[i];
@@ -235,7 +235,7 @@ void func_00263728(BrsSkillPackageWork *scene) {
     s32 sum = 0;
     s32 i;
 
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
         sum += item->baseStats[i];
     }
     if (495 - sum < available) {
@@ -435,7 +435,7 @@ u32 mnuInitializeItemSelectionExtent(void *unused) {
 
     scene = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
     sum = 0;
-    remaining = 4;
+    remaining = DAT_BASE_STAT_COUNT - 1;
     extent = scene->selectedRewardRow->values.amount * 3;
     byteCursor = scene->selectedRewardRow->unit->baseStats;
     do {
@@ -445,8 +445,8 @@ u32 mnuInitializeItemSelectionExtent(void *unused) {
         sum = sum + component;
     } while (-1 < remaining);
     scene->assignedStatPoints = 0;
-    remaining = 4;
-    slot = &scene->statGains[4];
+    remaining = DAT_BASE_STAT_COUNT - 1;
+    slot = &scene->statGains[DAT_BASE_STAT_COUNT - 1];
     if (0x1ef - sum < extent) {
         extent = 0x1ef - sum;
     }
@@ -471,8 +471,8 @@ void mnuClearItemSelectionSlots(BrsSkillPackageWork *scene) {
     s32 *slot;
 
     scene->assignedStatPoints = 0;
-    slot = &scene->statGains[4];
-    remaining = 4;
+    slot = &scene->statGains[DAT_BASE_STAT_COUNT - 1];
+    remaining = DAT_BASE_STAT_COUNT - 1;
     do {
         remaining = remaining - 1;
         *slot = 0;

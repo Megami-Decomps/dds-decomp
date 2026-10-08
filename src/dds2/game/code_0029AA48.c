@@ -83,7 +83,7 @@ void func_0029AC20(BrsSkillPackageWork *context, s32 copyOptions) {
     context->partyWindow.flags |= 0x200;
     mnuDrawPanelListDefault(0, 0, 0, &context->partyWindow, 0x53);
 
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
         if (copyOptions == 0) {
             mnuSetGroupSelection(context->panelHandle, i, context->statGains[i], 0);
         } else {
@@ -131,7 +131,7 @@ u32 mnuResetSelectionWidthsFromConfig(void) {
 
     context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
     reservedWidth = 0;
-    remaining = 4;
+    remaining = DAT_BASE_STAT_COUNT - 1;
     selectionWidth = context->selectedRewardRow->values.amount * 3;
     configWidths = context->selectedRewardRow->unit->baseStats;
     do {
@@ -141,8 +141,8 @@ u32 mnuResetSelectionWidthsFromConfig(void) {
         reservedWidth = reservedWidth + widthByte;
     } while (-1 < remaining);
     context->assignedStatPoints = 0;
-    remaining = 4;
-    widthSlot = &context->statGains[4];
+    remaining = DAT_BASE_STAT_COUNT - 1;
+    widthSlot = &context->statGains[DAT_BASE_STAT_COUNT - 1];
     if (0x1ef - reservedWidth < selectionWidth) {
         selectionWidth = 0x1ef - reservedWidth;
     }
@@ -167,8 +167,8 @@ void mnuClearItemSelectionSlots(BrsSkillPackageWork *context) {
     s32 *destination;
 
     context->assignedStatPoints = 0;
-    destination = &context->statGains[4];
-    remaining = 4;
+    destination = &context->statGains[DAT_BASE_STAT_COUNT - 1];
+    remaining = DAT_BASE_STAT_COUNT - 1;
     do {
         remaining = remaining - 1;
         *destination = 0;

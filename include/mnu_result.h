@@ -112,7 +112,7 @@ typedef struct BrsSkillPackageWork {
     u32 resetStateB;
     s32 availableStatPoints;
     s32 assignedStatPoints;
-    s32 statGains[5];
+    s32 statGains[DAT_BASE_STAT_COUNT];
     BrsActiveProgressList partyProgress;
     PrfSkillList skillList;
     StaffSlots staffSlots;
