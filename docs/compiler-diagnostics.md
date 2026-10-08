@@ -500,6 +500,12 @@ python3 tools/test_ee_as_relax.py
 
 ## Live compiler decisions: the camera case
 
+The reusable [read-only live observer](compiler-live-observer.md) now captures
+these decision hooks with a pinned compiler, restricted local transport and
+fresh baseline-versus-observed artifact equality. Its explicit case format,
+input/environment guards, offline tests and validation limits are documented
+there; it does not offer an output-altering matching mode.
+
 The [timed-camera case study](compiler-trace-camera-case.md) connects two
 truthful source changes to observed EE GCC decisions: a real call-argument
 copy supplies a surviving allocation preference, and a distinct scaled-distance
