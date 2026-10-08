@@ -1,5 +1,6 @@
 #include "common.h"
 #include "mc_poll.h"
+#include "mc_path_api.h"
 #include "bill_object_api.h"
 #include "eff_resource_slots.h"
 #include "sdf_resource.h"
@@ -242,8 +243,6 @@ extern s32 fileSlotScanIndex;
 
 extern void mcdFormatSaveSlotName(void *buffer, s32 slot);
 
-extern void mcChangeCurrentDirectory(u32 context, void *buffer);
-
 extern s32 fileScanSlotIconSysBegin(void);
 
 extern s32 fileScanSlotIconSysAltBegin(void);
@@ -390,8 +389,6 @@ extern s32 fileReadSlotPreviewWait(void);
 extern s32 func_002CBA90(void);
 
 extern void fileReqSetSelectedSlot(u32 ctx, s32 slot);
-
-extern void mcOpenFilePath(u32, const char *, s32);
 
 extern s32 fileBeginSlotOpen(void);
 
@@ -556,8 +553,6 @@ extern char D_0042B698[];
 extern s32 fileAbortSlotScanOnInput(void);
 
 
-extern void mcReadDirectoryEntries(u32 context, const char *path, void *buffer, s32 mode);
-
 extern char D_0042B6B8[];
 
 extern u8 D_00458040[];
@@ -575,8 +570,6 @@ extern s32 D_00437D2C;
 extern s32 fileBuildMainBlobAfterDelete(void);
 
 extern s32 fileBuildMainBlobAndWrite(void);
-
-extern void mcDeleteFilePath(void);
 
 extern s32 mnuSelectFileBranch(void);
 
@@ -1661,7 +1654,7 @@ s32 fileBeginReadSlotIcon(void) {
 
     buf[0] = 0x2F;
     mcdFormatSaveSlotName(&buf[1], fileSlotScanIndex);
-    mcChangeCurrentDirectory(fileMemoryCardRequestContext, buf);
+    mcChangeCurrentDirectory(fileMemoryCardRequestContext, (const char *)buf);
     return (s32)fileScanSlotIconSysBegin;
 }
 
@@ -1726,7 +1719,7 @@ s32 fileBeginSaveSlotIconScan(void) {
 
     buf[0] = 0x2F;
     mcdFormatSaveSlotName(&buf[1], fileSlotScanIndex);
-    mcChangeCurrentDirectory(fileMemoryCardRequestContext, buf);
+    mcChangeCurrentDirectory(fileMemoryCardRequestContext, (const char *)buf);
     return (s32)fileScanSlotIconSysAltBegin;
 }
 
@@ -1824,7 +1817,7 @@ s32 mcPrepareDirectory(void) {
     }
     name[0] = '/';
     mcdFormatSaveSlotName(name + 1, slot);
-    mcMakeDirectory(entry, name);
+    mcMakeDirectory(entry, (const char *)name);
     return (s32)mcHandleSearchResult;
 }
 
@@ -1835,7 +1828,7 @@ s32 fileCreateMainBegin(void) {
 
     buf[0] = 0x2F;
     mcdFormatSaveSlotName(&buf[1], v);
-    mcChangeCurrentDirectory(entry, buf);
+    mcChangeCurrentDirectory(entry, (const char *)buf);
     return (s32)filePrepareMainBlobWrite;
 }
 
@@ -1992,10 +1985,10 @@ s32 mcChooseLoadPath(void) {
     s32 slot = fileReqGetSelectedSlot(entry);
     u32 flags = fileReqGetSlotFlags(entry, slot);
     if (!(flags & 8)) {
-        /* Preserve the legacy context/path dispatch to this global-state endpoint. */
-        return ((s32 (*)())fileBuildMainBlobAndWrite)(entry, D_0042B6B8);
+        /* Build the main blob from the current global state. */
+        return fileBuildMainBlobAndWrite();
     }
-    mcDeleteFilePath();
+    mcDeleteFilePath(entry, D_0042B6B8);
     return (s32)fileBuildMainBlobAfterDelete;
 }
 

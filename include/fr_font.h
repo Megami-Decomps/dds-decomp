@@ -6,6 +6,7 @@
 struct FrFontGlyph;
 struct MemNode;
 struct FrFontRecord;
+struct SdfMemBlock;
 
 /* The cached node owns the four GS UV coordinates following its first word. */
 typedef struct FrFontUvRect {
@@ -32,7 +33,9 @@ typedef struct FrFontRecord {
 } FrFontRecord;
 
 typedef struct FntList {
-    u8 unk0[0x18];
+    struct SdfMemBlock *firstAllocation;
+    struct SdfMemBlock *secondAllocation;
+    u8 unk08[0x10];
     s32 count;
     FntNode *head;
 } FntList;
@@ -56,7 +59,7 @@ typedef struct FrFontHeader {
 } FrFontHeader;
 
 typedef struct FrFontEntry {
-    void *buffer;
+    struct SdfMemBlock *allocation;
     FrFontHeader *resourceHeader;
     s32 metricByteCount;
     s32 valueByteCount;
@@ -131,6 +134,8 @@ typedef struct FrFontSpritePacket {
 extern FrFontSystem frFontWork;
 extern FntList frFontResourceList;
 
+void frFontBindResourceSections(u8 slotIndex, u8 *resourceBytes,
+    struct SdfMemBlock *allocation);
 
 #ifdef VERSION_DDS1
 void func_00193D70(s32 x, s32 y, s32 width, s32 halfHeight, u8 style,
@@ -144,8 +149,15 @@ void func_0019BA00(s32 x, s32 y, s32 width, s32 halfHeight, u8 style,
 #endif
 
 typedef char FntNodeSizeCheck[sizeof(FntNode) == 0x20 ? 1 : -1];
+typedef char FntListSizeCheck[sizeof(FntList) == 0x20 ? 1 : -1];
+typedef char FntListFirstAllocationOffsetCheck[((u32)&((FntList *)0)->firstAllocation == 0x00) ? 1 : -1];
+typedef char FntListSecondAllocationOffsetCheck[((u32)&((FntList *)0)->secondAllocation == 0x04) ? 1 : -1];
+typedef char FntListUnknownSetupOffsetCheck[((u32)&((FntList *)0)->unk08 == 0x08) ? 1 : -1];
+typedef char FntListCountOffsetCheck[((u32)&((FntList *)0)->count == 0x18) ? 1 : -1];
+typedef char FntListHeadOffsetCheck[((u32)&((FntList *)0)->head == 0x1C) ? 1 : -1];
 typedef char FrFontRecordSizeCheck[sizeof(FrFontRecord) == 0x0C ? 1 : -1];
 typedef char FrFontEntrySizeCheck[sizeof(FrFontEntry) == 0x24 ? 1 : -1];
+typedef char FrFontEntryAllocationOffsetCheck[((u32)&((FrFontEntry *)0)->allocation == 0x00) ? 1 : -1];
 typedef char FrFontAtlasSizeCheck[sizeof(FrFontAtlas) == 0x18 ? 1 : -1];
 typedef char FrFontSystemSizeCheck[sizeof(FrFontSystem) == 0x19C ? 1 : -1];
 typedef char FrFontSpritePacketSizeCheck[sizeof(FrFontSpritePacket) == 0x90 ? 1 : -1];
