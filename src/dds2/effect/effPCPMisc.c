@@ -2790,7 +2790,7 @@ void effPcpReleaseCompactBlurWork(EffPCPCompactWork *work) {
 }
 
 /* vu0 routine: grow the scatter region and project its optional world center. */
-void func_00183BE8(EffPCPCompactWork *work) {
+void effPcpUpdateCompactScatterWork(EffPCPCompactWork *work) {
     EffBlurScatterWork *resource;
     f32 projected[4] __attribute__((aligned(16)));
     s32 frame = work->frame;
@@ -2890,7 +2890,7 @@ void effPcpReleaseSecondaryBlurWork(EffPCPCompactWork *work) {
 }
 
 /* vu0 routine: grow the scale slots and restart looping world-space bursts. */
-void func_00183F58(EffPCPCompactWork *work) {
+void effPcpUpdateCompactScaleWork(EffPCPCompactWork *work) {
     EffBlurScaleWork *resource;
     f32 projected[4] __attribute__((aligned(16)));
     s32 frame = work->frame;
