@@ -1505,7 +1505,91 @@ void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSe
 extern u8 effHasFirstTextureHandle(s32);
 extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027FCA0);
+/* Rebuild one party row's icon and frame resources from its current selectors. */
+void func_0027FCA0(MenuPageWindow *window, s32 index, s32 kind) {
+    MenuPageSlot *slot = &window->slots[index];
+    PartyPanelEntry *entry = &window->records->slots[index];
+    DatPartyRecord *actor = &datGameState->party[entry->index];
+    s32 resourceIndex;
+    s32 selection;
+
+    slot->kind = kind;
+    slot->flags = 0;
+    if (slot->icon[0] != NULL) {
+        effDestroyResourceSlotSet(slot->icon[0]);
+    }
+    if (slot->icon[1] != NULL) {
+        effDestroyResourceSlotSet(slot->icon[1]);
+    }
+    if (slot->icon[2] != NULL) {
+        effDestroyResourceSlotSet(slot->icon[2]);
+    }
+
+    if (kind < 3) {
+        if (kind > 0) {
+            EffectSlotSet *firstIcon = effCreateResourceSlotSet(
+                (EffectSlotSet *)(u32)window->source, window->slot, 1);
+            s32 secondarySlot = window->unk18;
+
+            slot->icon[0] = firstIcon;
+            slot->icon[1] = effCreateResourceSlotSet((EffectSlotSet *)(u32)window->unk14,
+                                                      secondarySlot, 1);
+        } else {
+            slot->icon[0] = effCreateResourceSlotSet((EffectSlotSet *)(u32)window->source,
+                                                      window->slot, 1);
+            slot->icon[1] = NULL;
+        }
+    } else {
+        slot->icon[0] = effCreateResourceSlotSet((EffectSlotSet *)(u32)window->source,
+                                                  window->slot, 1);
+        slot->icon[1] = NULL;
+    }
+    slot->icon[2] = effCreateResourceSlotSet((EffectSlotSet *)(u32)window->unk1C,
+                                              window->unk20, 1);
+
+    if (slot->frame[0] != NULL) {
+        effDestroyResourceSlotSet(slot->frame[0]);
+    }
+    if (slot->frame[1] != NULL) {
+        effDestroyResourceSlotSet(slot->frame[1]);
+    }
+    if (slot->frame[4] != NULL) {
+        effDestroyResourceSlotSet(slot->frame[4]);
+    }
+    if (slot->frame[5] != NULL) {
+        effDestroyResourceSlotSet(slot->frame[5]);
+    }
+    if (slot->frame[2] != NULL) {
+        effDestroyResourceSlotSet(slot->frame[2]);
+        effDestroyResourceSlotSet(slot->frame[3]);
+    }
+
+    resourceIndex = window->records->slots[index].unk8;
+    if (resourceIndex >= 0) {
+        if (effHasFirstTextureHandle((s32)window->handlesA[resourceIndex]) == 0) {
+            effResolveAndReleaseResource(window->handlesA[resourceIndex]);
+            effResolveAndReleaseResource(window->handlesB[resourceIndex]);
+        }
+        slot->frame[0] = effCreateResourceSlotSet(window->handlesA[resourceIndex], 0, 1);
+        slot->frame[1] = effCreateResourceSlotSet(window->handlesA[resourceIndex], 3, 1);
+        slot->frame[4] = effCreateResourceSlotSet(window->handlesA[resourceIndex], 1, 1);
+        slot->frame[2] = effCreateResourceSlotSet(window->handlesB[resourceIndex], 0, 1);
+        slot->frame[3] = effCreateResourceSlotSet(window->handlesB[resourceIndex], 1, 1);
+    } else {
+        slot->frame[0] = NULL;
+        slot->frame[1] = NULL;
+        slot->frame[4] = NULL;
+        slot->frame[2] = NULL;
+        slot->frame[3] = NULL;
+    }
+
+    selection = mnuGetSelectionFromFlags(actor);
+    if (selection >= 0) {
+        slot->frame[5] = effCreateResourceSlotSet(window->handlesC[selection], 0, 1);
+    } else {
+        slot->frame[5] = NULL;
+    }
+}
 
 void mnuUpdateHandleStates(MenuPageWindow *obj) {
     struct EffectSlotSet **handle = obj->handlesA;
