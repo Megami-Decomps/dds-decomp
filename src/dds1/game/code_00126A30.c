@@ -413,7 +413,242 @@ extern char D_003BAC40[];
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void func_001263F0(u32, u32);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_00126A30);
+/* Relocated collision headers contain their eight-word geometry header. */
+typedef struct FldSpawnCollision {
+    u32 kind;
+    u32 word04;
+    u32 *header;
+    u32 word0C;
+    u32 geometry[8];
+} FldSpawnCollision;
+
+typedef struct FldSpawnEvent {
+    u32 flags;
+    const char *label;
+    u32 reserved[2];
+} FldSpawnEvent;
+
+/* Type-10 placement records have a fixed four-word serialized header. */
+typedef struct FldPlacementData {
+    u32 kind;
+    s32 event;
+    u32 visible;
+    void *parameters;
+} FldPlacementData;
+
+typedef struct FldSpecialPoint {
+    u32 kind;
+    u32 id;
+} FldSpecialPoint;
+
+/* A relocated batch consists of a kind, count, and complete resource rows. */
+typedef struct FldSpawnBatch {
+    u32 kind;
+    u32 count;
+    FldFileResource *entries;
+} FldSpawnBatch;
+
+extern FldFileResource *D_003BD7B8;
+extern u32 D_003BD7BC;
+extern s32 D_003BAC10;
+extern s16 D_0032E4B4[];
+extern s32 fldParseRoomNumberFromName(const char *);
+extern void func_00135360(void *, f32 *, u32, s32, s32);
+extern EffWorldNode *evtSpawnActionObjB(s32, void *, f32 *, const char *);
+extern void dds3SetPathStateValue(EffWorldNode *, u32);
+extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
+extern EffWorldNode *evtSpawnActionObj10(s32, void *, s32);
+extern EffWorldNode *evtSpawnActionObj11(s32, void *, s32);
+extern u32 fldPushDisplayValue(u32, EffWorldNode *);
+extern void func_00138ED0(FldFileResource *, EffWorldNode *);
+extern void func_00148FF0(s32, u32, f32 *, f32, f32, f32);
+extern void func_001480D0(u32, f32 *, f32, f32, f32, s32, const char *, s32);
+extern void func_001486D0(u32, f32 *, f32, f32, f32);
+extern s32 fldSetSparkVectors(s32, const u128 *, const u128 *);
+extern void fldAppendClearEntry(s32, f32, f32, f32, f32);
+extern EffWorldNode *dds3CreateCameraObject(s32, void *, void *);
+extern void dds3SetWorldNodeValue(EffWorldNode *, u32);
+
+/* Serialized transforms leave the position W component zero. */
+static inline void fldCopySpawnTransform(f32 *position, f32 *rotation, const f32 *source) {
+    if (source != NULL) {
+        position[0] = source[0];
+        position[1] = source[1];
+        position[2] = source[2];
+        position[3] = 0.0f;
+        rotation[0] = source[4];
+        rotation[1] = source[5];
+        rotation[2] = source[6];
+        rotation[3] = source[7];
+    } else {
+        position[0] = 0.0f;
+        position[1] = 0.0f;
+        position[2] = 0.0f;
+        position[3] = 0.0f;
+        rotation[0] = 0.0f;
+        rotation[1] = 0.0f;
+        rotation[2] = 0.0f;
+        rotation[3] = 0.0f;
+    }
+}
+
+void func_00126A30(u32 batchAddress, u32 batchCount, s32 appended) {
+    f32 position[4];
+    f32 rotation[4];
+    f32 *transform;
+    FldSpawnBatch *batch = (FldSpawnBatch *)batchAddress;
+    FldFileResource *resource;
+    u32 count;
+    u32 i;
+    u32 batchIndex;
+    u32 pathState;
+    FldSpawnEvent *event;
+    u32 *parameters;
+    FldSpecialPoint *point;
+    EffWorldNode *object;
+    s32 room;
+    u32 id;
+
+    if (appended == 0) {
+        D_003BD7B8 = NULL;
+        D_003BD7BC = 0;
+    }
+    for (batchIndex = 0; batchIndex < batchCount; batchIndex++, batch++) {
+        resource = batch->entries;
+        count = batch->count;
+        switch (batch->kind) {
+        case 0:
+        case 1:
+        case 2:
+        case 5:
+        case 8:
+        case 11:
+            break;
+        case 3:
+            if (appended != 0) {
+                break;
+            }
+            D_003BD7B8 = resource;
+            D_003BD7BC = count;
+            pathState = 1;
+            for (i = 0; i < count; i++, resource++, pathState++) {
+                resource->id |= 0x10000;
+                fldCopySpawnTransform(position, rotation, resource->transform);
+                if (((FldSpawnCollision *)resource->data)->kind == 0) {
+                    room = fldParseRoomNumberFromName(resource->name);
+                    func_00135360(((FldSpawnCollision *)resource->data)->header,
+                                 position, resource->id, room, -1);
+                    object = evtSpawnActionObjB(resource->id, resource->data, position, resource->name);
+                    dds3SetPathStateValue(object, pathState);
+                }
+            }
+            break;
+        case 6:
+            for (i = 0; i < count; i++, resource++) {
+                if (appended != 0) {
+                    resource->id |= 0x800000;
+                } else {
+                    D_003BAC10++;
+                }
+                event = resource->data;
+                object = evtSpawnActionObjD(resource->id, (void *)event->label, (s32)resource->name);
+                fldPushDisplayValue((u32)resource, object);
+            }
+            break;
+        case 9:
+            for (i = 0; i < count; i++, resource++) {
+                if (appended != 0) {
+                    resource->id |= 0x800000;
+                }
+                evtSpawnActionObj10(resource->id, resource->data, (s32)resource->name);
+            }
+            break;
+        case 10:
+            for (i = 0; i < count; i++, resource++) {
+                if (appended != 0) {
+                    resource->id |= 0x800000;
+                }
+                transform = resource->transform;
+                fldCopySpawnTransform(position, rotation, transform);
+                switch (((FldPlacementData *)resource->data)->kind) {
+                case 8:
+                    point = ((FldPlacementData *)resource->data)->parameters;
+                    switch (point->kind) {
+                    case 1:
+                        func_00148FF0(0, point->id, rotation, position[0], position[1], position[2]);
+                        if (appended == 0) {
+                            D_003BAC10++;
+                        }
+                        break;
+                    case 2:
+                        func_00148FF0(1, point->id, rotation, position[0], position[1], position[2]);
+                        if (appended == 0) {
+                            D_003BAC10++;
+                        }
+                        break;
+                    case 3:
+                        fldSetSparkVectors(point->id, (const u128 *)position, (const u128 *)rotation);
+                        break;
+                    }
+                    break;
+                case 0:
+                    evtSpawnActionObj11(resource->id, transform, (s32)resource->name);
+                    break;
+                case 1:
+                    object = evtSpawnActionObj11(resource->id, transform, (s32)resource->name);
+                    func_00138ED0(resource, object);
+                    break;
+                case 2:
+                    if (D_0032E4B4[0] != 0) {
+                        break;
+                    }
+                    parameters = ((FldPlacementData *)resource->data)->parameters;
+                    id = parameters[0];
+                    room = fldParseRoomNumberFromName(resource->name);
+                    if (appended != 0) {
+                        FldPlacementData *placement = resource->data;
+                        func_001480D0(id, rotation, position[0], position[1], position[2],
+                                      room, resource->name, placement->event + D_003BAC10);
+                    } else {
+                        FldPlacementData *placement = resource->data;
+                        func_001480D0(id, rotation, position[0], position[1], position[2],
+                                      room, resource->name, placement->event);
+                    }
+                    break;
+                case 3:
+                    parameters = ((FldPlacementData *)resource->data)->parameters;
+                    func_001486D0(parameters[0], rotation, position[0], position[1], position[2]);
+                    if (appended == 0) {
+                        D_003BAC10++;
+                    }
+                    break;
+                case 7:
+                    parameters = ((FldPlacementData *)resource->data)->parameters;
+                    fldAppendClearEntry(parameters[1], *(f32 *)parameters,
+                                         position[0], position[1], position[2]);
+                    break;
+                }
+            }
+            break;
+        case 4:
+            for (i = 0; i < count; i++, resource++) {
+                if (appended != 0) {
+                    resource->id |= 0x800000;
+                }
+                fldCopySpawnTransform(position, rotation, resource->transform);
+                object = dds3CreateCameraObject(resource->id, position, rotation);
+                ((CameraData *)object->data)->fieldOfView = *(f32 *)resource->data;
+                dds3SetWorldNodeValue(object, (u32)resource->name);
+            }
+            break;
+        case 7:
+            for (;;) {
+            }
+            break;
+        }
+    }
+}
+
 
 void fldSpawnActionObjects(FldActionSpawn *list, u32 count) {
     u32 i;
@@ -6425,4 +6660,3 @@ INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE68);
 INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE6C);
 
 INCLUDE_SDATA(const s32, "game/code_00126A30", fldFieldTaskHandle);
-
