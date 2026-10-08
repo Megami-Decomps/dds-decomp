@@ -34,7 +34,6 @@ extern void func_002B2C88(s32, s32, s32, s32);
 extern void mnuClearPageSelectionHandles(MenuPageWindow *);
 extern void mnuClearEntries(MenuPageWindow *);
 extern void func_002C1B68(u32 *, u32);
-extern void mnuReleaseStaffMenuTextureHandles(s32);
 extern void func_002C2AA8(struct MenuPanelItem *, u32);
 extern char D_00437BD0[];
 extern char D_00437BD8[];
@@ -78,7 +77,6 @@ extern void mnuDrawCampIconBackdropByKind(s32, s32);
 extern void func_002AAC70(u32, u32, u32, u32, u32, u32, u32);
 extern s32 D_00435E70;
 extern void func_002BB9C8(MenuSprites *, u32);
-extern void mnuReleaseStaffMenuResources(s32 *);
 extern void mnuSetIndexedWindowPageSpriteFlags(s32, MenuPageWindow *, u32, u32);
 
 typedef struct MenuListNode MenuListNode;
@@ -462,7 +460,7 @@ s32 mnuReleaseSelectedStaffPageResources(KwlnTask *task) {
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 0);
-    mnuReleaseStaffMenuTextureHandles((s32)&((MenuStaffContext *)context)->group);
+    mnuReleaseStaffMenuTextureHandles(&((MenuStaffContext *)context)->group);
     return 1;
 }
 
@@ -628,7 +626,7 @@ void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
         fontHandle = func_0019F5E8(0x620, 0xA20, 0, 0xA09DC380, (s32)captionText, 0);
         frFontSetChainFlag(fontHandle, 4);
         func_0019D550((FrFontGlyph *)fontHandle, 1, 0x53);
-        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)fontHandle);
+        frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)fontHandle);
     }
 }
 
@@ -727,7 +725,7 @@ s32 mnuReleaseStaffSelectionPageResources(KwlnTask *task) {
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 0);
-    mnuReleaseStaffMenuTextureHandles((s32)&((MenuStaffContext *)context)->group);
+    mnuReleaseStaffMenuTextureHandles(&((MenuStaffContext *)context)->group);
     return 1;
 }
 
@@ -945,7 +943,7 @@ s32 func_002AF5E0(KwlnTask *task) {
         if (owned != 0 && mdlFlagTest(0x990) != 0) {
             glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x2B0, 0xB80, 0, 0xA09DC340, slotsCaption, 0);
             func_0019D550(glyph, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot(glyph);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
             func_002BDAA8(0x770, 0xB98, 0x100, selectionId, context->spriteArg0, 0x2C);
         }
     } else {
@@ -1019,7 +1017,7 @@ s32 mnuReleaseStaffValuePageResources(KwlnTask *task) {
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 0);
-    mnuReleaseStaffMenuTextureHandles((s32)&((MenuStaffContext *)context)->group);
+    mnuReleaseStaffMenuTextureHandles(&((MenuStaffContext *)context)->group);
     return 1;
 }
 

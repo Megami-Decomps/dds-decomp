@@ -121,8 +121,6 @@ typedef struct FrFontTextBank {
     FrFontTextIndex entries[1];
 } FrFontTextBank;
 
-FrFontGlyph *frFontAppendGlyphFromData(void *text, s8 fontIndex, s8 firstOption,
-    s8 secondOption, FrFontGlyph *previousGlyph);
 void frFontSetContextEncodedByte(FrFontGlyph *glyph, s32 inputValue);
 void frFontEnableContextMode(FrFontGlyph *glyph);
 void frFontSetFlagAndMeasureGlyphs(FrFontGlyph *glyph, s32 requestedFlag);

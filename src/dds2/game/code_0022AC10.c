@@ -1938,7 +1938,7 @@ s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
     struct FrFontGlyph *textGlyph = func_0019F448(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
         MNU_LIST_NORMAL_COLOR, (const char *)(u32)text, NULL);
     func_0019D550(textGlyph, 0, 0x60);
-    return frFontQueueGlyphInSelectedSlot(textGlyph);
+    return frFontQueueGlyphForCurrentDrawBuffer(textGlyph);
 }
 
 /* Draw the visible text interval, highlighting the selected absolute index.
@@ -1962,7 +1962,7 @@ s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 unusedMode, u8 *selectionState, 
             itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
             (const char *)(u32)rowTexts[itemIndex], NULL);
         func_0019D550(textGlyph, 0, 0x60);
-        frFontQueueGlyphInSelectedSlot(textGlyph);
+        frFontQueueGlyphForCurrentDrawBuffer(textGlyph);
         rowY += MNU_LIST_ROW_HEIGHT;
     }
 }
@@ -2308,7 +2308,7 @@ void btlDestroyGroupNode(BattleGroupNode *groupNode) {
         sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)groupNode->requestHandle);
         for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
             if (groupNode->slots[slotIndex].resourceHandle != 0) {
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(groupNode->slots[slotIndex].resourceHandle));
+                sdfReleaseResourceAllocation(groupNode->slots[slotIndex].resourceHandle);
             }
         }
     }

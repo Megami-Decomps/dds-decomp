@@ -72,7 +72,7 @@ typedef struct EffectSurfaceNode {
     u8 pad_10[0x1C];
     u32 index;
     u32 pad_30;
-    void *resource;
+    struct BillObj *resource;
     void **jobs;
     struct SdfMemBlock *jobAllocation;
     void **queues;
@@ -151,8 +151,6 @@ extern u32 D_00439004;
 extern u32 D_00439008;
 
 extern u32 D_0043900C;
-
-extern u32 func_0019CE78(u32, u32, u32, u32, u32);
 
 extern s32 D_00437CD8;
 
@@ -649,7 +647,7 @@ void func_002C9818(s32 x, s32 y, u32 colors, const u8 *text) {
     u32 handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     D_00439004 = handle;
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)D_00439004);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_00439004);
 }
 
 void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
@@ -657,18 +655,18 @@ void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     D_00439008 = handle;
     frFontSetChainFlag(handle, 3);
     frFontDrawGlyphWithSharedFlags(D_00439008, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)D_00439008);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_00439008);
 }
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
     frFontAddSharedGlyphFlags(1);
-    D_0043900C = func_0019CE78(glyphSource, 0, 0, 0, 0);
+    D_0043900C = (u32)func_0019CE78((const char *)(u32)glyphSource, 0, 0, 0, 0);
     frFontClearFlagBits(1);
     frFontSetFlagAndMeasureGlyphs(D_0043900C, 1);
     frFontSetContextPair(D_0043900C, x << 4, y << 3);
     frFontSetChildColors(D_0043900C, colors);
     func_0019D550(D_0043900C, 0, 0x56);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)D_0043900C);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_0043900C);
     frFontSetSharedRenderFlags(0x54);
 }
 
@@ -677,7 +675,7 @@ void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
 
     handle = func_0019F5E8(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
 }
 
 /* Animate the save-window highlight's alpha with a sinusoidal phase. */
@@ -5493,8 +5491,8 @@ void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *
         if (dst->resource != NULL) {
             billDispatchByKind(dst->resource);
         }
-        dst->resource = billCloneObjectRetainingSharedData((struct BillObj *)src->resource);
-        billMarkKindOneFlag((struct BillObj *)dst->resource);
+        dst->resource = billCloneObjectRetainingSharedData(src->resource);
+        billMarkKindOneFlag(dst->resource);
         if (dst->active != 0) {
             billSetBillboardMode(dst->resource, (s16)((FileKeyBlock *)((FileSlotTable *)dst->active)->data0)->alphaTrack.surfaceIndex);
         }
@@ -5563,37 +5561,37 @@ void fileLoadObjectSetResource(EffectSurfaceNode *node, u32 entryId, void *resou
 }
 
 void fileLoadObjectOpenNamedDevice(EffectSurfaceNode *node, u32 resourceId) {
-    u32 resource = node->resource;
+    struct BillObj *resource = node->resource;
     if (resource != 0) {
-        billDispatchByKind((void *)resource);
+        billDispatchByKind(resource);
     }
-    resource = (u32)effCreateBillboardSharingIndexedResource(resourceId);
-    node->resource = (void *)resource;
+    resource = effCreateBillboardSharingIndexedResource(resourceId);
+    node->resource = resource;
     if (node->active != 0) {
-        billSetBillboardMode((struct BillObj *)resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
 void fileLoadObjectOpenDevice(EffectSurfaceNode *node, u32 resourceId) {
-    u32 resource = node->resource;
+    struct BillObj *resource = node->resource;
     if (resource != 0) {
-        billDispatchByKind((void *)resource);
+        billDispatchByKind(resource);
     }
-    resource = (u32)billCreateIndexed(0, resourceId);
-    node->resource = (void *)resource;
+    resource = billCreateIndexed(0, resourceId);
+    node->resource = resource;
     if (node->active != 0) {
-        billSetBillboardMode((struct BillObj *)resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
 void fileLoadObjectOpenAndStartDevice(EffectSurfaceNode *node, u32 resourceId) {
-    u32 resource = node->resource;
+    struct BillObj *resource = node->resource;
     if (resource != 0) {
-        billDispatchByKind((void *)resource);
+        billDispatchByKind(resource);
     }
-    resource = (u32)billCreateIndexed(1, resourceId);
-    node->resource = (void *)resource;
-    billMarkKindOneFlag((struct BillObj *)(resource));
+    resource = billCreateIndexed(1, resourceId);
+    node->resource = resource;
+    billMarkKindOneFlag(resource);
     if (node->active != 0) {
         billSetBillboardMode(node->resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
     }

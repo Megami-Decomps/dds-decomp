@@ -434,7 +434,7 @@ void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock) {
     entryBlock = &mes->entryBlock;
     primaryTextBlock = &mes->blk14;
     if (entryBlock->glyphChain != NULL) {
-        frFontQueueGlyphInSelectedSlot(entryBlock->glyphChain);
+        frFontQueueGlyphForCurrentDrawBuffer(entryBlock->glyphChain);
         entryBlock->glyphChain = NULL;
     }
     itfMesResetCursorState(entryBlock, 0);
@@ -444,7 +444,7 @@ void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock) {
         return;
     }
     if (primaryTextBlock->glyphChain != NULL) {
-        frFontQueueGlyphInSelectedSlot(primaryTextBlock->glyphChain);
+        frFontQueueGlyphForCurrentDrawBuffer(primaryTextBlock->glyphChain);
         primaryTextBlock->glyphChain = NULL;
     }
     itfResetCursorPositionAndState(primaryTextBlock, 0);
@@ -492,7 +492,7 @@ void itfMesBuildOptionList(s32 window, s32 entryIndex) {
     s32 firstRowY;
 
     if (optionBlock->glyphChain != NULL) {
-        frFontQueueGlyphInSelectedSlot(optionBlock->glyphChain);
+        frFontQueueGlyphForCurrentDrawBuffer(optionBlock->glyphChain);
         optionBlock->glyphChain = NULL;
     }
     table = entry->table;
@@ -517,7 +517,7 @@ void itfMesResetWindow(s32 window) {
     ItfMesState *mes = itfWindowSlots[window].mes;
     ItfMesBlk40 *optionBlock = &mes->blk40;
     if (optionBlock->glyphChain != NULL) {
-        frFontQueueGlyphInSelectedSlot(optionBlock->glyphChain);
+        frFontQueueGlyphForCurrentDrawBuffer(optionBlock->glyphChain);
         optionBlock->glyphChain = NULL;
     }
     optionBlock->panelValue = 0;
@@ -860,7 +860,7 @@ s32 itfMesMeasureEntryItem(s32 window, s32 entryIndex, s32 itemIndex) {
     }
     glyphChain = itfDrawDefaultColorText(0, 0, (u8 *)encodedText, 0);
     textExtent = itfMesMaxGroupedExtent(glyphChain);
-    frFontQueueGlyphInSelectedSlot(glyphChain);
+    frFontQueueGlyphForCurrentDrawBuffer(glyphChain);
     return textExtent;
 }
 
@@ -1161,7 +1161,7 @@ void itfMesBuildEntryGlyph(ItfMesState *mes) {
 
     previousGlyph = entryBlock->glyphChain;
     if (previousGlyph != NULL) {
-        frFontQueueGlyphInSelectedSlot(previousGlyph);
+        frFontQueueGlyphForCurrentDrawBuffer(previousGlyph);
         entryBlock->glyphChain = NULL;
     }
     glyph = itfDrawCustomColorText((s32)mes->entryBlock.x, (s32)entryBlock->y, entryBlock->color[0], entryBlock->color[1], entryBlock->color[2], entryBlock->color[3],
@@ -1310,7 +1310,7 @@ FrFontGlyph *itfMesTrimGlyphChainToRow(FrFontGlyph *node, s32 from, s32 to) {
             node->next = NULL;
             node->chainHead = node;
             node->previous = NULL;
-            frFontQueueGlyphInSelectedSlot(node);
+            frFontQueueGlyphForCurrentDrawBuffer(node);
             node = nextNode;
             if (node == NULL) {
                 return NULL;
@@ -1329,7 +1329,7 @@ FrFontGlyph *itfMesTrimGlyphChainToRow(FrFontGlyph *node, s32 from, s32 to) {
         node->next = NULL;
         node->chainHead = node;
         node->previous = NULL;
-        frFontQueueGlyphInSelectedSlot(node);
+        frFontQueueGlyphForCurrentDrawBuffer(node);
         node = nextNode;
     }
     rowHead->next = NULL;

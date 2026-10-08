@@ -88,7 +88,7 @@ s32 func_0026F530(s32 alternate, u32 color, const char *source, f32 x, f32 y) {
     }
     frFontMeasureLines(glyph);
     frFontDrawGlyphWithSharedFlags(glyph, 1);
-    return frFontQueueGlyphInSelectedSlot(glyph);
+    return frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026F5E8);
