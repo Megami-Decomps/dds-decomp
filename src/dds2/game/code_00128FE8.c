@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font.h"
 #include "sdf_packet_list.h"
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
@@ -2511,7 +2512,7 @@ void func_0012DDC0(s32 x, s32 y, u32 firstPayload, const u8 *secondPayload) {
 
     object = itfCreateConvertedTextGlyph(x << 4, y << 4, 0, firstPayload, secondPayload, 0);
     frFontDrawGlyphInDefaultMode(object);
-    frFontQueueGlyphInSelectedSlot(object);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)object);
 }
 
 void fldAdvanceQuadRow(FldQuadState *quad) {

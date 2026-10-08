@@ -25,7 +25,6 @@ extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
 extern s32 D_003BAA98;
 
 extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
-extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
 extern FrFontGlyph *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
 
 
