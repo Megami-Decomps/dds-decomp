@@ -61,15 +61,7 @@ typedef struct EffSolidRectParams {
     s32 bottom;
 } EffSolidRectParams;
 
-typedef struct EffBlurTemplateBody {
-    s32 extent;
-    EffBlurQuad source;
-} EffBlurTemplateBody;
-
-typedef struct EffBlurTemplate {
-    EffBlurTemplateBody body;
-    u32 resourceWord;
-} EffBlurTemplate;
+/* EffBlurTemplate and its copied body are declared in eff_blur.h. */
 
 
 
@@ -123,11 +115,9 @@ extern void sdfInitPacketList(SdfListHead *);
 extern void sdfAppendPacket(SdfListHead *, u32);
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
-extern EffBlurTemplate *effCloneBlurTemplate(void *arg);
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
 extern EffBlurScaleWork *effCloneBlurWorkWithSlots(void *arg);
 extern void effDrawBlurRectangle(EffScreenDrawParams *arg);
-extern void effDrawBlurPixelRectWithResource(EffBlurTemplate *arg);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
 extern void effBlurDrawFramebufferQuad(EffScreenDrawParams *arg);
 extern void func_00187C08(EffSolidRectParams *arg);
@@ -760,7 +750,7 @@ void effInitCh75Id(void) {
 
 /* Clone the four default work templates; only the staggered slot count is overridden. */
 void effInitWorks(void) {
-    effBlurPixelWork = effCloneBlurTemplate(D_003558D8);
+    effBlurPixelWork = effCloneBlurTemplate((EffBlurTemplateBody *)D_003558D8);
     effFilterBlurWork = effBlurCreateScatterWork((EffBlurScatterParams *)D_003558A8);
     effTexturedSquareWork = effCloneResourceTemplate((EffResourceRectParams *)D_00355948);
     effStaggeredBlurWork = effCloneBlurWorkWithSlots(D_00355970);

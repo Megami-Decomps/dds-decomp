@@ -182,7 +182,7 @@ typedef struct EffPCPSharedTrail {
     u32 colors[2];
     f32 scale;
     s32 minSize;
-    struct EffPCPTrailObj *obj;
+    EffBlurTemplate *obj;
 } EffPCPSharedTrail;
 
 extern EffPCPSharedTrail *effPcpSharedTrailWork;
@@ -215,14 +215,12 @@ extern EffPCPSpanWork *effPcpSpanCreate(void *params, void *handleParams);
 extern u32 effCreateNodeFromDescriptor(u32 param);
 extern u32 effCloneSourceWithTypeHandler(u32 handle);
 extern void effDestroyNode(s32 handle);
-extern void effReleaseBlurTemplate(u32 handle);
 extern EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *params);
 extern void effBlurReleaseSecondResource(EffBlurScaleWork *work);
 extern void effBlurSecondInitSlots(EffBlurScaleWork *work);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
 extern void effReleaseResourceTemplate(EffResourceRectWork *work);
-extern void *effCloneBlurTemplate(void *params);
 extern void *effPcpTripleHandleCreate(void *block0, void **blocks);
 
 extern void *effCreateThunderCellSystemWork(void *params);
@@ -1997,7 +1995,7 @@ EffPCPSharedTrailRef *effPcpCreateSharedTrailRef(EffPCPTrailParams *params) {
     ref->frame = 0;
     if (D_003BB048 == 0) {
         effPcpSharedTrailWork = sdfAllocSizeClassBlock(sizeof(EffPCPSharedTrail));
-        effPcpSharedTrailWork->obj = effCloneBlurTemplate(&params->res);
+        effPcpSharedTrailWork->obj = effCloneBlurTemplate((EffBlurTemplateBody *)&params->res);
         effPcpSharedTrailWork->color = params->res.color;
         effPcpSharedTrailWork->frame = 0;
         effPcpSharedTrailWork->flags = 0x80808080;
@@ -2022,17 +2020,9 @@ void effPcpSharedWorkRelease(EffPCPSharedTrailRef *work)
     if (--D_003BB048 != 0) {
         return;
     }
-    effReleaseBlurTemplate((u32)effPcpSharedTrailWork->obj);
+    effReleaseBlurTemplate(effPcpSharedTrailWork->obj);
     sdfReleaseChipBlock(effPcpSharedTrailWork);
 }
-
-typedef struct EffPCPTrailObj {
-    s32 size;
-    u32 color;
-    u8 pad08[0x0C];
-    s32 x;
-    s32 y;
-} EffPCPTrailObj;
 
 typedef struct EffPCPTrailWork {
     f32 pos[4];
@@ -2044,21 +2034,18 @@ typedef struct EffPCPTrailWork {
     u32 colors[2];
     f32 scale; /* multiplies the computed trail size */
     s32 minSize;
-    EffPCPTrailObj *obj;
+    EffBlurTemplate *obj;
 } EffPCPTrailWork;
 
 extern s32 effMeasureCameraRightScreenOffsetVU(f32 value);
 extern u32 effMultiplyPackedColors(u32 flags, u32 color);
-extern void effDrawBlurPixelRectWithResource(EffPCPTrailObj *obj);
-
-
 #define EFF_SHARED_TRAIL ((EffPCPSharedTrail *)effPcpSharedTrailWork)
 
 void effPcpUpdateSharedTrail(ref)
     EffPCPSharedTrailRef *ref;
 {
     EffPCPSharedTrail *work;
-    EffPCPTrailObj *obj;
+    EffBlurTemplate *obj;
     f32 pos[4];
 
     if (ref->frame == 0) {
@@ -2078,14 +2065,14 @@ void effPcpUpdateSharedTrail(ref)
     if (work->frame < work->limit) {
         work->color = work->colors[work->frame & 1];
         VU0_LOAD_VF($vf10, work);
-        obj->size = (s32)((f32)effMeasureCameraRightScreenOffsetVU(EFF_SHARED_TRAIL->unk1C) * EFF_SHARED_TRAIL->scale);
+        obj->body.extent = (s32)((f32)effMeasureCameraRightScreenOffsetVU(EFF_SHARED_TRAIL->unk1C) * EFF_SHARED_TRAIL->scale);
         VU0_STORE_VF($vf10, pos);
-        obj->x = (s32)pos[0] - 0x800;
-        obj->y = ((s32)pos[1] - 0x800) << 1;
-        if (obj->size < EFF_SHARED_TRAIL->minSize) {
-            obj->size = EFF_SHARED_TRAIL->minSize;
+        obj->body.source.x = (s32)pos[0] - 0x800;
+        obj->body.source.y = ((s32)pos[1] - 0x800) << 1;
+        if (obj->body.extent < EFF_SHARED_TRAIL->minSize) {
+            obj->body.extent = EFF_SHARED_TRAIL->minSize;
         }
-        obj->color = effMultiplyPackedColors(EFF_SHARED_TRAIL->flags, EFF_SHARED_TRAIL->color);
+        obj->body.source.color = effMultiplyPackedColors(EFF_SHARED_TRAIL->flags, EFF_SHARED_TRAIL->color);
         effDrawBlurPixelRectWithResource(obj);
         EFF_SHARED_TRAIL->frame++;
     }
@@ -2107,7 +2094,7 @@ void effSetSharedScale(u32 unused, f32 value) {
 EffPCPTrailWork *effPcpTrailCreate(EffPCPTrailParams *params) {
     EffPCPTrailWork *work = sdfAllocSizeClassBlock(sizeof(EffPCPTrailWork));
 
-    work->obj = (EffPCPTrailObj *)effCloneBlurTemplate(&params->res);
+    work->obj = effCloneBlurTemplate((EffBlurTemplateBody *)&params->res);
     work->color = params->res.color;
     work->frame = 0;
     work->flags = 0x80808080;
@@ -2124,24 +2111,24 @@ EffPCPTrailWork *effPcpTrailCreate(EffPCPTrailParams *params) {
 }
 
 void effPcpTrailRelease(EffPCPTrailWork *work) {
-    effReleaseBlurTemplate((u32)work->obj);
+    effReleaseBlurTemplate(work->obj);
     sdfReleaseChipBlock(work);
 }
 
 /* Per-frame update: places the trail object from the work position and
  * alternates its colour between two entries until the count runs out. */
 void effPcpTrailUpdate(EffPCPTrailWork *work) {
-    EffPCPTrailObj *obj;
+    EffBlurTemplate *obj;
     f32 pos[4];
 
     obj = work->obj;
     VU0_LOAD_VF($vf10, work->pos);
-    obj->size = (s32)((f32)effMeasureCameraRightScreenOffsetVU(work->unk1C) * work->scale);
+    obj->body.extent = (s32)((f32)effMeasureCameraRightScreenOffsetVU(work->unk1C) * work->scale);
     VU0_STORE_VF($vf10, pos);
-    obj->x = (s32)pos[0] - 0x800;
-    obj->y = ((s32)pos[1] - 0x800) << 1;
-    if (obj->size < work->minSize) {
-        obj->size = work->minSize;
+    obj->body.source.x = (s32)pos[0] - 0x800;
+    obj->body.source.y = ((s32)pos[1] - 0x800) << 1;
+    if (obj->body.extent < work->minSize) {
+        obj->body.extent = work->minSize;
     }
     if (work->frame < work->count) {
         work->color = work->colors[work->frame & 1];
@@ -2149,7 +2136,7 @@ void effPcpTrailUpdate(EffPCPTrailWork *work) {
         work->color = work->colors[0];
     }
     work->frame++;
-    obj->color = effMultiplyPackedColors(work->flags, work->color);
+    obj->body.source.color = effMultiplyPackedColors(work->flags, work->color);
     effDrawBlurPixelRectWithResource(obj);
 }
 
@@ -2277,7 +2264,7 @@ EffPCPCompactFadeWork *effPcpCompactLongCreate(EffPCPCompactTexturedBlurParams *
     EffPCPCompactFadeWork *work;
 
     work = sdfAllocSizeClassBlock(0x3C);
-    work->resource = (u32)effCloneBlurTemplate(&params->res);
+    work->resource = (u32)effCloneBlurTemplate((EffBlurTemplateBody *)&params->res);
     work->frame = 0;
     work->color = 0x80808080;
     work->flags = params->timeline.flags;
@@ -2307,12 +2294,12 @@ void effPcpCompactLongRespawn(EffPCPCompactFadeWork *work) {
     params.timeline.fadeOut = work->fadeOut;
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
-    params.res = *(EffPCPTexturedBlurParams *)work->resource;
+    params.res = *(EffPCPTexturedBlurParams *)&((EffBlurTemplate *)work->resource)->body;
     effPcpCompactLongCreate(&params);
 }
 
 void effPcpCompactLongRelease(EffPCPCompactFadeWork *work) {
-    effReleaseBlurTemplate(work->resource);
+    effReleaseBlurTemplate((EffBlurTemplate *)work->resource);
     sdfReleaseChipBlock(work);
 }
 
@@ -2322,7 +2309,7 @@ void effPcpCompactLongUpdate(EffPCPCompactFadeWork *work) {
     f32 projected[4];
     s32 frame = work->frame;
     s32 duration = work->duration;
-    EffPCPTrailObj *rect = (EffPCPTrailObj *)work->resource;
+    EffBlurTemplate *rect = (EffBlurTemplate *)work->resource;
     s32 fadeIn;
     s32 fadeOut;
     f32 opacity;
@@ -2335,13 +2322,13 @@ void effPcpCompactLongUpdate(EffPCPCompactFadeWork *work) {
             VU0_LOAD_VF(vf10, work->position);
             sdfProjectVuVectorToScreen();
             VU0_STORE_VF(vf10, projected);
-            rect->x = (s32)projected[0] - 2048;
-            rect->y = ((s32)projected[1] - 2048) << 1;
+            rect->body.source.x = (s32)projected[0] - 2048;
+            rect->body.source.y = ((s32)projected[1] - 2048) << 1;
         } else {
-            rect->x = 0;
-            rect->y = 0;
+            rect->body.source.x = 0;
+            rect->body.source.y = 0;
         }
-        rect->size = effPcpInterpolateCompactExtent(
+        rect->body.extent = effPcpInterpolateCompactExtent(
             work->startExtent, work->endExtent, frame, duration);
         if (frame < fadeIn && fadeIn != 0) {
             opacity = (f32)frame / (f32)fadeIn;
@@ -2351,7 +2338,7 @@ void effPcpCompactLongUpdate(EffPCPCompactFadeWork *work) {
             opacity = 1.0f;
         }
         color = work->color;
-        rect->color = effMultiplyPackedColors(
+        rect->body.source.color = effMultiplyPackedColors(
             effBlendColor(color & 0xFFFFFF, color, opacity), work->baseColor);
         effDrawBlurPixelRectWithResource(rect);
         work->frame++;
@@ -6194,4 +6181,3 @@ INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB048);
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB04C);
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_003BB04D);
-

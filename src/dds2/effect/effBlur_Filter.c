@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_resource.h"
+#include "sdf_chip.h"
 #include "eff_blur.h"
 
 extern s32 effGetResourceFirstWord(s32);
@@ -10,8 +11,8 @@ extern u8 D_003AA868[];
 
 
 
-void effReleaseBlurTemplate(void) {
-    sdfReleaseChipBlock();
+void effReleaseBlurTemplate(EffBlurTemplate *owner) {
+    sdfReleaseChipBlock(owner);
 }
 
 /* Standalone rectangle input, not either particle-array work (0x30). */
@@ -24,18 +25,18 @@ typedef struct {
 extern u32 func_001200E0(void);
 
 /* Update pixel-coordinate edges and draw only when the eligibility check allows. */
-void effDrawBlurPixelRectWithResource(EffBlurRect *rect) {
+void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
     s32 x, y, w;
 
     if (func_001200E0() == 0) {
-        x = rect->quad.x + 0x100;
-        y = rect->quad.y + 0xE0;
-        w = rect->extent;
-        rect->quad.left = x - w;
-        rect->quad.top = y - w;
-        rect->quad.right = x + w;
-        rect->quad.bottom = y + w;
-        effDrawBlurSource(&rect->quad, rect->sourceHandle, 0);
+        x = rect->body.source.x + 0x100;
+        y = rect->body.source.y + 0xE0;
+        w = rect->body.extent;
+        rect->body.source.left = x - w;
+        rect->body.source.top = y - w;
+        rect->body.source.right = x + w;
+        rect->body.source.bottom = y + w;
+        effDrawBlurSource(&rect->body.source, rect->resourceWord, 0);
     }
 }
 
