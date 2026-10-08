@@ -13,6 +13,7 @@
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
+#include "mnu_shop.h"
 #include "mnu_list.h"
 #include "mnu_panel_state.h"
 #include "mnu_staff.h"
@@ -108,8 +109,6 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 
 
 extern s32 func_002C6CE8(void);
-
-extern void mnuReleaseResourceList(struct MenuIconState *list);
 
 
 

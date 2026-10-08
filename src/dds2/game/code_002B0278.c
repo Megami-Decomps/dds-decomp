@@ -93,8 +93,6 @@ extern s32 D_00435E5C;
 
 extern void mnuClearListFlagsOneAndTwo();
 
-extern void mnuReleaseResourceList(MenuIconState *list);
-
 extern s32 func_002C6CE8(void);
 
 extern s32 func_002C6480();
@@ -3403,8 +3401,6 @@ extern void effInitializeSlotWork();
 void mnuClearEntryFlags(MenuIconState *group);
 
 /* Destroy nonzero resource slots, retaining the native per-iteration count read, then free. */
-void mnuReleaseResourceList(MenuIconState *list);
-
 typedef struct MenuPos {
     s32 x;
     s32 y;
