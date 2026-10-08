@@ -174,7 +174,7 @@ extern void mnuSetGroupProperties(MenuProfilePanel *, u32, u32, u32, u32);
 
 extern void mnuDrawListPanels(s32, s32, s32, s32, s32, s32);
 
-extern void func_002C16F0(s32, s32, s32, s32, s32, s32, s32);
+extern void func_002C16F0(s32, s32, s32, DatPartyRecord *, s32, s32, s32);
 
 extern void mnuTerminalSetTrack(s8, s8);
 
@@ -778,13 +778,13 @@ void mnuDrawCurrentProfilePanel(s32 x, s32 y, s32 mode, MenuProgressHost *host, 
 }
 
 /* Draw loaded progress panels only in state two; preserve the accumulated draw flags. */
-s32 mnuDrawLoadedProgressPanels(s32 resource, MenuProgressHost *host, s32 mode) {
+s32 mnuDrawLoadedProgressPanels(DatPartyRecord *resource, MenuProgressHost *host, s32 mode) {
     if (host->loadState != 2) {
         return 0;
     }
     host->partyWindow.flags |= 0x280;
-    mnuDrawListPanels(0, 0, 0, *(u8 *)(resource + 0x55), (s32)&host->partyWindow, mode);
-    func_002C16F0(0, 0, 0, resource, *(u8 *)(resource + 0x55),
+    mnuDrawListPanels(0, 0, 0, resource->profileId, (s32)&host->partyWindow, mode);
+    func_002C16F0(0, 0, 0, resource, resource->profileId,
                    (s32)host->effectResource, mode);
     return 1;
 }
