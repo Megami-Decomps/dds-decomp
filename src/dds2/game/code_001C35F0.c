@@ -76,8 +76,8 @@ void func_001C35F0(ActionStateLink *actor, s8 mode, s8 value) {
     work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
     func_001C3A38(work, mode);
     btlUpdateActorSlotStates((u8 *)work, 0);
-    work->activeEntries[slot].presentationState = 2;
-    work->activeEntries[slot].presentationValue = value;
+    work->activeEntries[slot].presentation.presentationState = 2;
+    work->activeEntries[slot].presentation.presentationValue = value;
     if (mode == 0) {
         func_001C3DB0(actor, work, 0);
     } else if (mode == 2) {
@@ -192,21 +192,21 @@ INCLUDE_RODATA(const s32, "game/code_001C35F0", D_00416870);
 void func_001C4520(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 reserve) {
     s32 i;
 
-    switch (reserve == 0 ? work->activeEntries[slot].presentationState :
-                           work->reserveEntries[slot].presentationState) {
+    switch (reserve == 0 ? work->activeEntries[slot].presentation.presentationState :
+                           work->reserveEntries[slot].presentation.presentationState) {
     case 1:
         for (i = 0; i < 8; i++) {
             if (reserve == 0) {
-                work->activeEntries[slot].highlightPhase[i] =
-                    (work->activeEntries[slot].highlightPhase[i] + 8) % 360;
-                work->activeEntries[slot].highlightLevel[i] =
-                    (sdfSinPoly(((work->activeEntries[slot].highlightPhase[i] + 90) % 360) /
+                work->activeEntries[slot].presentation.highlightPhase[i] =
+                    (work->activeEntries[slot].presentation.highlightPhase[i] + 8) % 360;
+                work->activeEntries[slot].presentation.highlightLevel[i] =
+                    (sdfSinPoly(((work->activeEntries[slot].presentation.highlightPhase[i] + 90) % 360) /
                                180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 16.0f;
             } else {
-                work->reserveEntries[slot].highlightPhase[i] =
-                    (work->reserveEntries[slot].highlightPhase[i] + 8) % 360;
-                work->reserveEntries[slot].highlightLevel[i] =
-                    (sdfSinPoly(((work->reserveEntries[slot].highlightPhase[i] + 90) % 360) /
+                work->reserveEntries[slot].presentation.highlightPhase[i] =
+                    (work->reserveEntries[slot].presentation.highlightPhase[i] + 8) % 360;
+                work->reserveEntries[slot].presentation.highlightLevel[i] =
+                    (sdfSinPoly(((work->reserveEntries[slot].presentation.highlightPhase[i] + 90) % 360) /
                                180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 16.0f;
             }
         }
@@ -216,13 +216,13 @@ void func_001C4520(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 reser
     case 3:
         for (i = 0; i < 8; i++) {
             if (reserve == 0) {
-                if (work->activeEntries[slot].highlightLevel[i] != 0) {
-                    work->activeEntries[slot].highlightLevel[i]--;
+                if (work->activeEntries[slot].presentation.highlightLevel[i] != 0) {
+                    work->activeEntries[slot].presentation.highlightLevel[i]--;
                 }
-            } else if (work->reserveEntries[slot].highlightLevel[i] >= 32) {
-                work->reserveEntries[slot].highlightLevel[i] -= 32;
+            } else if (work->reserveEntries[slot].presentation.highlightLevel[i] >= 32) {
+                work->reserveEntries[slot].presentation.highlightLevel[i] -= 32;
             } else {
-                work->reserveEntries[slot].highlightLevel[i] = 0;
+                work->reserveEntries[slot].presentation.highlightLevel[i] = 0;
             }
         }
         break;
@@ -230,15 +230,15 @@ void func_001C4520(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 reser
     case 4:
         for (i = 0; i < 8; i++) {
             if (reserve == 0) {
-                if (work->activeEntries[slot].highlightLevel[i] >= 32) {
-                    work->activeEntries[slot].highlightLevel[i] -= 32;
+                if (work->activeEntries[slot].presentation.highlightLevel[i] >= 32) {
+                    work->activeEntries[slot].presentation.highlightLevel[i] -= 32;
                 } else {
-                    work->activeEntries[slot].highlightLevel[i] = 0;
+                    work->activeEntries[slot].presentation.highlightLevel[i] = 0;
                 }
-            } else if (work->reserveEntries[slot].highlightLevel[i] >= 32) {
-                work->reserveEntries[slot].highlightLevel[i] -= 32;
+            } else if (work->reserveEntries[slot].presentation.highlightLevel[i] >= 32) {
+                work->reserveEntries[slot].presentation.highlightLevel[i] -= 32;
             } else {
-                work->reserveEntries[slot].highlightLevel[i] = 0;
+                work->reserveEntries[slot].presentation.highlightLevel[i] = 0;
             }
         }
         break;

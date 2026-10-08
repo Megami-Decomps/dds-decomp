@@ -195,7 +195,7 @@ typedef struct BtlVec3 {
 
 extern f32 bfWaitReadArgFloat(s32);
 
-extern BtlRuntimeTask *btlCreateFloatTask28(BtlTask *, f32, f32, f32, f32, f32, f32, f32, f32);
+extern BtlRuntimeTask *btlCreateFloatTask28(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32);
 
 extern s32 btlScheduleContextReset(void);
 
@@ -203,7 +203,7 @@ extern f32 D_00452F90[];
 
 extern f32 D_00452FB0[];
 
-extern BtlRuntimeTask *btlCreateFloatTask29(BtlTask *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 extern void evtConfigureUnitTransition(s32, s32);
 

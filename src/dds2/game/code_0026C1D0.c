@@ -1,6 +1,5 @@
 #include "evt_world.h"
 #include "dat_state.h"
-#include "scr.h"
 
 #define EVT_ACTIVE_ENTRY_LIMIT 0x100
 #define EVT_DISPLAY_VALUE_COUNT 0x10

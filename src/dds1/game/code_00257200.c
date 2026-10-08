@@ -39,7 +39,9 @@ INCLUDE_ASM(const s32, "game/code_00257200", func_00257270);
 typedef struct MantraPulseDisplayWork {
     u8 pad00[0x484];
     MantraPulseGrid *grid;
-    u8 pad488[0x118];
+    u8 pad488[8];
+    s32 frame;
+    u8 pad494[0x10C];
     s16 scrollX;
     s16 scrollY;
     u8 pad5A4[8];
@@ -221,16 +223,9 @@ void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
     }
 }
 
-typedef struct {
-    u8 pad00[0x484];
-    MantraPulseGrid *grid; /* 0x484 */
-    u8 pad488[8];
-    s32 field_0x490;
-} DisplayGridWork;
-
-void func_00257BD8(DisplayGridWork *work, s32 argument) {
+void func_00257BD8(MantraPulseDisplayWork *work, s32 argument) {
     mnuAdvanceMantraPulseGridEntries(argument, work->grid);
-    mnuAdvanceWrappingFrame(&work->field_0x490);
+    mnuAdvanceWrappingFrame(&work->frame);
 }
 
 INCLUDE_ASM(const s32, "game/code_00257200", mnuDrawMantraPulseFrame);

@@ -32,22 +32,11 @@ struct SoundVoice {
     SoundVoice *next;
 };
 
-
-/* Shared 0x18-byte system-effect node prefix. Actor tasks maintain the
- * reference count at +4; timed effects maintain the active count at +8. */
-typedef struct SoundEffectNode {
-    u32 flags;
-    s32 referenceCount;     /* 0x04 */
-    u32 activeCount;        /* 0x08 */
-    u8 padC[4];
-    SoundMixer *handle;
-    void *source; /* DDS1/DDS2 system-effect creation reads the borrowed +14 source. */
-} SoundEffectNode;
-
+/* The allocated 0x20-byte resource is also the system-effect task owner. */
 typedef struct SoundResourceNode {
     u32 flags;
-    u32 unk_04;
-    u32 unk_08;
+    s32 referenceCount; /* 0x04: retained effect tasks, not a separate prefix object. */
+    u32 activeCount; /* 0x08: timed effects still using this resource. */
     s32 fadeCountdown;
     SoundMixer *resourceHandle; /* Owned clone, released by sndFreeResourceNode. */
     void *sourceHandle; /* Borrowed archive data kept by indexed nodes. */
@@ -55,8 +44,69 @@ typedef struct SoundResourceNode {
     struct SoundResourceNode *next;
 } SoundResourceNode;
 
+/* Effect callbacks dereference these words as units, while the selector
+ * provider stores their encoded keys (DDS1 001F1588 / DDS2 0020220C). */
+typedef union ActorEffectOwner {
+    struct BtlUnit *unit;
+    s32 selectorKey;
+} ActorEffectOwner;
+
+typedef struct SoundEffectReferenceArgs {
+    SoundResourceNode *source;
+    u16 option;
+    u8 pad06[2];
+    SoundVoice *effect;
+    ActorEffectOwner sourceOwner;
+    s32 sourceSelector;
+    s32 targetSelector;
+    ActorEffectOwner targetOwner;
+    u32 duration;
+} SoundEffectReferenceArgs;
+
+typedef struct SoundEffectSourceArgs {
+    SoundResourceNode *source;
+    SoundVoice *effect;
+    struct BtlUnit *unit;
+    u8 pad0C[4];
+    u64 resource;
+    u32 duration;
+    s32 counter;
+} SoundEffectSourceArgs;
+
+typedef struct TimedUnitEffectArgs {
+    SoundResourceNode *source;
+    u16 option;
+    u8 pad06[2];
+    struct BtlUnit *unit;
+    s32 channel;
+    u32 volume;
+    s32 frame;
+} TimedUnitEffectArgs;
+
+typedef struct EffectLoadArgs {
+    SoundResourceNode *effect;
+    void *loadHandle;
+    const char *name;
+} EffectLoadArgs;
+
+struct ActiveSoundNode;
+struct SoundResourceLink;
+struct SoundLink;
+
 SoundMixer *sndMixerClone(SoundMixer *source);
+s32 sndReadSelectedMixerBankValue(SoundMixer *mixer, u16 kind);
 void sndReleaseAllVoices(SoundMixer *mixer);
+void sndCreateSystemEffect(SoundResourceNode *effect);
+void sndDeleteSystemEffect(SoundResourceNode *effect);
+s32 sndSetEffectNodeParameter(SoundResourceNode *effect, u16 option);
+s32 sndGetEffectNodeParameter(SoundResourceNode *effect, u16 option);
+s32 sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect);
+void btlExtendTaskFrameLimit(SoundResourceNode *effect, s32 frames);
+u32 sndGetResourceStatus(SoundResourceNode *effect);
+s32 sndHasResourceFlagsOneOrEight(struct ActiveSoundNode *node);
+struct SoundResourceLink *sndAllocResourceLink(struct BtlUnit *owner);
+struct SoundLink *sndAllocLink(struct BtlUnit *owner);
+struct BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *source, struct BtlUnit *owner, u64 resource);
 void effReleaseBattleVoiceOwner(void *voice);
 
 #endif /* BTL_SOUND_H */

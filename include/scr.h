@@ -86,6 +86,7 @@ void scrProcDestroyTask(ScrData *process);
 ScrData *bfContextCreate(void *header, ScrSection *sections, ScrLabel *procedures,
                         ScrLabel *labels, ScrInstr *instructions, void *auxiliaryData,
                         char *strings, s32 procedureIndex);
+ScrData *scrCreateTaskWithDefaultOption(void *header);
 void scrPushInteger(ScrData *script, s32 value);
 void bfStackPushFloat(ScrData *script, f32 value);
 void scrPushString(ScrData *script, char *value);
@@ -95,6 +96,7 @@ f32 bfStackPopFloat(ScrData *script);
 KwlnTask *scrCreateTaskFromContextParameters(u32 priority, void *header,
     ScrSection *sections, ScrLabel *procedures, ScrLabel *labels,
     ScrInstr *instructions, void *auxiliaryData, char *strings, s32 procedureIndex);
+
 
 /* Integer/float VM registers (0x840); DDS1/2 script/scrTraceCode.c. */
 typedef struct ScrVM {

@@ -179,7 +179,8 @@ typedef struct DatGameState {
     DatWorldState world;                   /* 0x00A40 */
     DatPartyRecord party[5];               /* 0x00A60 */
 #ifdef VERSION_DDS1
-    u8 pad1294[8];
+    u8 partyOrder[5];                      /* 0x01294: ordered indices into party[]. */
+    u8 pad1299[3];
     s32 partyCount;                        /* 0x0129C */
     DatInventory inventory;               /* 0x012A0 */
     s32 unk1360;
@@ -199,7 +200,8 @@ typedef struct DatGameState {
     u8 pad335F0[0x10];
 #endif
 #ifdef VERSION_DDS2
-    u8 pad1334[8];
+    u8 partyOrder[5];                      /* 0x01334: ordered indices into party[]. */
+    u8 pad1339[3];
     s32 partyCount;                        /* 0x0133C */
     DatInventory inventory;               /* 0x01340 */
     s32 unk1440;
@@ -286,7 +288,8 @@ typedef struct DatBattleSceneRecord {
     s8 unk00;            /* 0x00: tested for nonzero (scene color/mode selection) */
     u8 unk01;            /* 0x01: id handed to the scene-entry loader, unk02 times */
     u8 unk02;            /* 0x02 */
-    u8 pad03[3];
+    u8 pad03;
+    u16 serialScene;     /* 0x04: forced follow-up encounter, zero selects the weighted policy. */
     u16 unitModes[11];   /* 0x06: enemy unit modes; zero marks an empty slot */
     u16 unk1C;           /* 0x1C: copied into the battle state with unk1E when both are set */
     u16 unk1E;           /* 0x1E */

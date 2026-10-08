@@ -70,8 +70,8 @@ s32 scrCreateTaskForProcessId(s32 priority, s32 processId, s32 option)
     return (s32)scrProcCreateTask(priority, bfParseFLW0((void *)processId, option));
 }
 
-ScrData *scrCreateTaskWithDefaultOption(u32 processId) {
-    return bfParseFLW0((void *)processId, 0);
+ScrData *scrCreateTaskWithDefaultOption(void *header) {
+    return bfParseFLW0(header, 0);
 }
 
 KwlnTask *scrCreateTaskFromContextParameters(u32 priority, void *header,

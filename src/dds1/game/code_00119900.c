@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr.h"
 #include "dat_state.h"
 #include "sdf.h"
 #include "btl_action.h"
@@ -120,7 +121,7 @@ typedef struct EvtScriptContext {
 extern TableEntry32 D_0032AEA8[];
 extern Entry4 D_0032AEE8[];
 
-extern u32 evtWorkScriptTask;
+extern ScrData *evtWorkScriptTask;
 
 extern s32 D_003C2E70[];
 extern s32 D_003C2E74[];
@@ -128,7 +129,6 @@ extern s32 D_003C2E78[];
 extern s32 D_003C2E7C[];
 extern s32 D_003C2E80[];
 
-extern s32 scrCreateTaskWithDefaultOption(void);
 extern s32 scrReadIntParameter(s32 idx);
 extern s32 scrSetIntegerReturnValue();
 extern void scrSetFloatReturnValue(f32 value);
@@ -489,7 +489,7 @@ void ptyInitRuntime(void) {
 
     for (i = 0; i < 5; i++) {
         memset(&datGameState->party[i], 0, sizeof(DatPartyRecord));
-        datGameState->pad1294[i] = i;
+        datGameState->partyOrder[i] = i;
     }
     datGameState->partyCount = 0;
     datGameState->party[0] = D_003BAA04[1];
@@ -751,8 +751,7 @@ s32 evtClearRandomStatusFlags(void) {
     return clearedAny;
 }
 
-extern void func_0010BE30(u32, s32);
-extern void bfStepContext(u32);
+extern s32 func_0010BE30(ScrData *context, s32 procedureIndex);
 
 /* Step the script with these context values; clear the written flag, not the stored result. */
 s32 evtRunContext(s32 script, s32 first, s32 second, s32 third, u16 options) {
@@ -767,13 +766,13 @@ s32 evtRunContext(s32 script, s32 first, s32 second, s32 third, u16 options) {
 }
 
 /* Create the script task and clear its separate 24-byte context. */
-void dds3WorkInit(void) {
-    evtWorkScriptTask = scrCreateTaskWithDefaultOption();
+void dds3WorkInit(void *header) {
+    evtWorkScriptTask = scrCreateTaskWithDefaultOption(header);
     memset(D_003C2E70, 0, EVT_CONTEXT_BYTES);
 }
 
 u32 scrGetWorkTaskHandle(void) {
-    return evtWorkScriptTask;
+    return (u32)evtWorkScriptTask;
 }
 
 void scrDestroyWorkTask(void) {

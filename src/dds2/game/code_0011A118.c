@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr.h"
 #include "sdf.h"
 #include "btl_action.h"
 #include "dat_state.h"
@@ -44,7 +45,7 @@ extern s32 datItemSkillRecords;
 
 extern DatPartyRecord *dds3FindEntry();
 
-extern u32 evtWorkScriptTask;
+extern ScrData *evtWorkScriptTask;
 
 extern s32 datEnemyRecords;
 
@@ -151,9 +152,8 @@ extern void scrRemoveAvailableSkillFlagAndSlot(DatPartyRecord *, s32);
 
 extern s32 datUnitHasSkill(DatPartyRecord *, s32);
 
-extern void func_0010C058(u32, s32);
+extern s32 func_0010C058(ScrData *context, s32 procedureIndex);
 
-extern void bfStepContext(u32);
 
 extern s32 btlAverageAllCurrentForMask(u32 arg0);
 
@@ -161,7 +161,6 @@ extern s32 btlAverageAllMaximumForMask(u32 arg0);
 
 extern s32 func_001B3A00(u32 arg0);
 
-extern s32 scrCreateTaskWithDefaultOption(void);
 
 extern void *memset(void *dst, s32 c, u32 n);
 extern DatPartyRecord *D_00435DD4;
@@ -541,7 +540,7 @@ void ptyInitRuntime(void) {
 
     for (i = 0; i < 5; i++) {
         memset(&datGameState->party[i], 0, sizeof(DatPartyRecord));
-        datGameState->pad1334[i] = i;
+        datGameState->partyOrder[i] = i;
     }
     datGameState->partyCount = 0;
     datGameState->party[0] = D_00435DD4[1];
@@ -1135,13 +1134,13 @@ s32 evtRunContext(s32 script, s32 first, s32 second, s32 third, u16 options) {
 }
 
 /* Create the script task and clear its separate 24-byte context. */
-void dds3WorkInit(void) {
-    evtWorkScriptTask = scrCreateTaskWithDefaultOption();
+void dds3WorkInit(void *header) {
+    evtWorkScriptTask = scrCreateTaskWithDefaultOption(header);
     memset(&D_0043E5C0, 0, sizeof(D_0043E5C0));
 }
 
 u32 scrGetWorkTaskHandle(void) {
-    return evtWorkScriptTask;
+    return (u32)evtWorkScriptTask;
 }
 
 void scrDestroyWorkTask(void) {
@@ -1785,7 +1784,7 @@ void func_0011EBE8(void) {
 void func_0011EBF0(void) {
 }
 
-void func_0011EBF8(void) {
+void func_0011EBF8(s32 chance) {
 }
 
 /* Mode zero queries presence; nonzero mode selects/moves the entry into the

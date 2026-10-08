@@ -539,11 +539,14 @@ u32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *object) {
     return datComputeSkillBoostedMaxMp(object);
 }
 
-void btlAdjustUnitHp(u8 *object, s32 value) {
+extern void datAdjustCurrentHp(DatPartyRecord *, s32);
+extern void datAdjustCurrentMp(DatPartyRecord *, s32);
+
+void btlAdjustUnitHp(DatPartyRecord *object, s32 value) {
     datAdjustCurrentHp(object, value);
 }
 
-void btlAdjustUnitMp(u8 *object, s32 value) {
+void btlAdjustUnitMp(DatPartyRecord *object, s32 value) {
     datAdjustCurrentMp(object, value);
 }
 

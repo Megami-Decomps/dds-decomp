@@ -2039,7 +2039,7 @@ void btlApplyPartySetupOverride(void) {
                 datGameState->party[i].flags =
                     (datGameState->party[i].flags | 0x1000) & ~2;
             }
-            datGameState->pad1294[i] = i;
+            datGameState->partyOrder[i] = i;
             datGameState->party[i].maxHp =
                 btlComputeSkillAdjustedMaxHp(&datGameState->party[i]);
             datGameState->party[i].maxMp =

@@ -47,53 +47,63 @@ typedef struct SceneAiWork {
 
 typedef struct BtlUnit BtlUnit;
 
-/* Retained operand payloads are 0x28 bytes in DDS1 and 0x2C in DDS2. */
+/* Retained command operands: 0x28 bytes in DDS1, 0x2C in DDS2.
+ * The task constructors copy the complete operand after the actor pointer. */
 typedef struct BtlOperandEntry {
-    s32 unk00;
-    s32 unk04;
-    s32 unk08;
-    s32 unk0C;
-    s32 unk10;
-    u8 pad14[4];
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
+    s32 hpDelta;
+    s32 mpDelta;
+    u32 addedStatus;
+    u32 removedStatus;
+    u32 entryChangeMask;
+    s16 entryChange;
+    u16 entryChangeFlags;
+    s32 entrySelection;
+    s32 hpRecovery;
+    s32 mpRecovery;
+    u16 deferredStatus;
 #ifdef VERSION_DDS1
-    u8 pad24[2];
     u16 flags;
 #else
-    u8 pad24[4];
+    u8 pad26[2];
     u32 flags;
 #endif
 } BtlOperandEntry;
+
+/* btlAllocTask reserves 0x2C/0x30 argument bytes for these command tasks. */
+typedef struct BtlOperandTaskArgs {
+    BtlUnit *unit;
+    BtlOperandEntry operand;
+} BtlOperandTaskArgs;
 
 /* The command work owns thirteen groups. Their payload counts and strides
  * differ: 64 operands/0xA1C bytes in DDS1, 32 operands/0x59C in DDS2. */
 typedef struct BtlOperandGroup {
     u8 count;
-#ifdef VERSION_DDS1
-    u8 pad01[7];
-    s32 kind;
-#else
     u8 pad01[3];
     s32 interval;
-    u32 unk08;
-#endif
-    s32 unk0C;
 #ifdef VERSION_DDS1
-    u8 skipped;
-    u8 pad11[3];
-    u8 unk14;
-    u8 pad15[7];
+    s32 kind;
+#else
+    u32 kind;
+#endif
+    s32 parameter;
+    /* Dispatch tests both bytes with lhu; reset and population use sb. */
+    union {
+        u16 inactiveOrStatusChanged;
+        struct {
+            u8 inactive;
+            u8 statusChanged;
+        };
+    };
+    u8 targetSpecialHit;
+    u8 sourceSpecialHit;
+    u8 reflected; /* Population prints "btl:HANSYA" when this is set. */
+    u8 reflectionKind;
+    u8 pad16[2];
+    s32 reactionCode;
+#ifdef VERSION_DDS1
     BtlOperandEntry entries[64];
 #else
-    u8 unk10; /* Reset bytewise; some predicates read the +0x10/+0x11 pair. */
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    u8 unk14;
-    u8 unk15;
-    u8 pad16[6];
     BtlOperandEntry entries[32];
 #endif
 } BtlOperandGroup;
@@ -105,8 +115,8 @@ typedef struct BattleIndexWork {
     s32 phase;
     s32 skillId;
     s32 reference;
-    s32 unk0C;
-    s32 unk10;
+    BtlUnit *companionA;
+    BtlUnit *companionB;
     BtlUnit *linkedUnit;
     s32 unk18;
     s32 stageValue;
@@ -128,7 +138,7 @@ typedef struct BattleIndexWork {
     s32 unk3C;
     BtlIndexList *indices;
     u8 pad44[4];
-    u64 unk48;
+    u64 ownerId;
     s32 unk50;
     s32 unk54;
     s32 unk58;
@@ -150,44 +160,63 @@ void btlInitBattleIndexWork(BattleIndexWork *work);
 void btlResetIndexWork(BattleIndexWork *work);
 void btlReleaseObjectBuffers(BattleIndexWork *work);
 
-/* Battle task link to a unit and task chain (0x170), shared by DDS1/2. */
-typedef struct BtlTask {
-    s32 state;              /* +0x00 */
-    u16 actionNumber;       /* +0x04: "btl:actnum 0" guard and scene-slot repetitions. */
-    u8 pad06[2];
-    u32 flags;               /* +0x08 */
-    u32 options;             /* +0x0C: command selection options. */
-#ifdef VERSION_DDS2
-    u8 unk_10[8];
-#else
-    s32 stateTime; /* +0x10: reset by dispatch, advanced by the actor update loop */
-    s32 unk14;
-#endif
-    BtlUnit *unit;           /* +0x18 */
-    u8 unk_1C[4];
 #ifdef VERSION_DDS1
+/* DDS1 btlCreateActionSeq owns one 0x170-byte command actor. */
+typedef struct BtlTask {
+    s32 state;
+    u16 actionNumber;
+    u8 pad06[2];
+    u32 flags;
+    u32 options;
+    s32 stateTime;
+    s32 unk14;
+    BtlUnit *unit;
+    u8 unk_1C[4];
     BattleIndexWork indexWork; /* +0x20..+0x87 */
     u8 pad88[0xC0];
-#else
-    s32 result;              /* +0x20 */
-    s32 arg;                 /* +0x24 */
-    s32 commandReference;    /* +0x28: command 4 resolves this item reference. */
-    u8 pad2C[0x24];
-    u16 actionStage; /* 0x50: 4 while the gun-change command still owes its effect */
-    u8 pad52[2];
-    s32 effect; /* 0x54 */
-    u8 pad58[8];
-    BtlIndexList *targetList; /* Selected unit/ID index list consumed by battle commands. */
-    u8 unk_64[0xE4];
-#endif
-    u32 actions[8];         /* +0x148: opaque queued action slots */
-#ifdef VERSION_DDS1
-    struct BtlTask *prev;   /* +0x168: set by the 0x170-byte actor constructor */
-#else
-    u8 pad168[4];
-#endif
-    struct BtlTask *next;   /* +0x16C */
+    u32 actions[8]; /* +0x148 */
+    struct BtlTask *prev; /* +0x168 */
+    struct BtlTask *next; /* +0x16C */
 } BtlTask;
+#endif
+
+#ifdef VERSION_DDS2
+/* Queued action slots are queried as complete words and low halfword IDs. */
+typedef union BattleActionSlot {
+    s32 word;
+    s16 actionId;
+} BattleActionSlot;
+
+/* DDS2 0x1DCF58 allocates this 0x180-byte command actor. It is not the
+ * 0x70-byte scheduler task or the 0x368-byte world unit. */
+typedef struct ActionStateLink {
+    u32 state;
+    u16 actionNumber;
+    u8 pad06[2];
+    /* fldUpdateSceneGroupTask reads both flag words with ld at 0x1D3C68. */
+    union {
+        u64 combinedFlags;
+        struct {
+            u32 pendingFlags;
+            u32 flags;
+        };
+    };
+    s32 stateTime;
+    s32 completedTurns;
+    BtlUnit *unit; /* +0x18 */
+    u8 pad1C[4];
+    BattleIndexWork indexWork; /* +0x20..+0x8F */
+    u16 aiCounter;
+    u8 pad92[0xBC];
+    s8 lowHpActionHold;
+    u8 pad14F;
+    BattleActionSlot actions[8]; /* +0x150 */
+    s32 lastMode;
+    struct ActionStateLink *prev; /* +0x174 */
+    struct ActionStateLink *next; /* +0x178 */
+    u8 pad17C[4];
+} ActionStateLink;
+#endif
 
 
 #endif /* BTL_TASK_H */

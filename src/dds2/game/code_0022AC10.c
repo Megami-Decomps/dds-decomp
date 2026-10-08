@@ -200,7 +200,7 @@ extern s32 btlFindModelEntry();
 
 struct BattleScriptTaskData;
 
-/* 0x70-byte queued-task header, distinct from the unit's 0x170-byte BtlTask.
+/* 0x70-byte queued-task header, distinct from the 0x180-byte ActionStateLink.
  * The callback union preserves each consumer's actual function prototype. */
 typedef struct BattleTask {
     u8 enabled;
@@ -939,7 +939,7 @@ u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, BtlInd
 /* Query the command's block reason, freeing the temporary target list.
  * DDS2 omits DDS1's mode/flag gate. Its final empty/all-flagged-target reason
  * is 10, versus 9 in DDS1. Zero means no block. */
-s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
+s32 btlGetCommandBlockReason(ActionStateLink *actionTask, s32 commandId) {
     DatCommandRecord *commandRecord;
     BtlIndexList *targetList;
     s32 targetCount;

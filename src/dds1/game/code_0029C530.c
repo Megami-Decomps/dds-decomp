@@ -6899,7 +6899,7 @@ void effApplyOverlaySpecs(u8 *work) {
         u32 flags = ((BtlUnit *)objects[i])->flags;
         if (flags & 2) {
             if ((flags & 0x20) == 0) {
-                if ((((BtlUnit *)objects[i])->unk310 & 0x10) == 0) {
+                if ((((BtlUnit *)objects[i])->effectLink.flags & 0x10) == 0) {
                     if (mdlGetNodeRefHalf(objects[i]->ext->owner, 0) > ((EffAnimInfo *)spec)->id) {
                         btlApplyScaledUnitEffectParameter((u8 *)objects[i], ((EffAnimInfo *)spec)->id, ((EffAnimInfo *)spec)->flags | 0x100, 1.0f);
                         if (((EffAnimInfo *)spec)->loop == 0) {

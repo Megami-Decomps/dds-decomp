@@ -2876,6 +2876,16 @@ The group's dispatch kind retains its game-specific signedness: DDS1 uses
 with `sltiu`; restoring the unsigned owner member leaves `code_0020E850`
 at `60 match, 0 differ`.
 
+The HP/MP forwarding entry points take a `DatPartyRecord *` and a signed
+delta in both games. DDS2's retained operand callback passes the actor's
+complete party record and its HP/MP deltas in the two argument registers;
+zero-parameter forwarding declarations obscure that native contract.
+The providers and their battle callers use the same record owner.
+
+The retained-operand hook is a primary `BtlState` member at DDS1 `+0x5AC`
+and DDS2 `+0x5E0`. Both native callbacks pass the unit and the copied
+operand's first word, rather than a separate short argument view.
+
 
 ## Actor overlay consumers read the low effect flags
 
@@ -2932,3 +2942,48 @@ The DDS1 actor row loads `+0x36` with `lh`, passing it either as a flag ID
 or a deferred-field selector. `sequenceValue` keeps those roles neutral.
 DDS2 copies the row's string at `+0x55` with `strcpy`, matching DDS1's
 existing `taskName[0xF]`; neither change alters the `0x6C` wire stride.
+
+## Battle-state clocks and actor-returning sound selectors
+
+DDS1's model-update clock at `BtlState +0x1F0` is distinct from the
+scene-phase counter at `+0x210`; keep both fields without shifting the
+`0xE10` owner. DDS2 `00201FD8` calls the `+0x6E0` selector with an actor
+and conditionally substitutes its returned actor pointer. Its contract is
+`BtlUnit *(*selectSoundEffectTarget)(BtlUnit *)`, not an integer status.
+Numbered callbacks whose purpose remains unknown use `unkNNN`, rather
+than assigning an unsupported meaning to their return values.
+
+## Serialized billboard and file-emitter record owners
+
+Billboard operation tables select genuinely different copied records, not
+alternate views of one large configuration. DDS2 `003E9D00` class rows copy
+`0x88`, `0x8C`, `0xAC`, and `0x88` bytes. Resource rows at `003E9DF4`,
+`003E9E10`, and `003E9E2C` copy vortex/column/spiral records of `0xF8`,
+`0xF4`, and `0xD8` bytes; animation row `003E9E7C` copies the `0x10C` flame
+record. Kind is local to its operation table. The frame table at DDS2
+`003E9950` / DDS1 `0037E8A0` has lengths `80,8C,9C,80,88,A4,A8,98`.
+Keep the point record embedded in its class work at its own `0x88` size.
+
+`FileSlot` and `FileSlotTable` are the primary `0x20` cell and `0x2C`
+runtime owner shared by the file providers and billboard consumers.
+The serialized `FileKeyBlock` owns color/alpha tracks at `+0x2C/+0x50`,
+including the surface-index word at `+0x54`; billboard openers consume its
+signed low half, while the strip output copies the entire word. This
+narrow consumer does not establish a second mode-record view.
+
+`FileKeyBlock.spawnRate` at `+0x24` remains unsigned: native emitter
+samplers use unsigned-to-float conversion. DDS1 capacity helpers instead
+interpret their factors as signed words (`LW` and `MULT` at `002A5A58`,
+also `002AF560`), so those products explicitly convert the rate to `s32`
+before applying their unsigned capacity cap.
+
+Native ribbon allocation uses `repeat * 4 + 4` position cells, each
+16 bytes, and UV cells of 8 bytes. An inactive particle advances its
+position pointer by `rowStride` and its float UV pointer by
+`rowStride * 2`, not four times those distances. Earlier emitter parks
+also omitted real position-vector stores: vortex normal Y is
+`climb / segmentCount`, column vectors contain their current/next vertical
+positions, and flame vectors contain the updated vertical position.
+Retail COP2 loads consume these lanes; restore them before comparing any
+parked source, rather than treating the remaining differences as regalloc.
+

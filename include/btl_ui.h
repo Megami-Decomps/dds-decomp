@@ -135,49 +135,48 @@ typedef struct BattleMirroredSpriteRecord {
 } BattleMirroredSpriteRecord;
 
 /* The actor-panel allocation has three active rows and four reserve rows. */
-typedef struct BattleActorPanelEntry {
-    s32 x;
-    s32 y;
-    s32 baseX;
-    s32 baseY;
+/* The state/render block begins at +0x10 within each 0x290-byte row. */
+typedef struct BattleActorPanelPresentation {
     s16 fade;
-    u8 pad12[2];
+    u8 pad02[2];
     s8 presentationState;
     s8 presentationValue;
-    u8 pad16[0xA];
+    u8 pad06[0xA];
     s32 transitionGeometry[4];
     u8 transitionFade[2];
-    u8 pad32[2];
+    u8 pad22[2];
     s32 pulseDirection[2];
-    s32 unk3C[2];
+    s32 pulseTimer[2];
     s32 pulseOffsets[2][2];
     s16 pulseLevel[2];
     u32 highlightPhase[8];
     u8 highlightLevel[8];
     u8 transitionState;
     s8 secondaryPresentationValue;
-    u8 pad82[0xA];
+    u8 pad72[0xA];
     s32 secondaryGeometry[4];
     u8 secondaryFade[2];
-    u8 pad9E[0x12];
+    u8 pad8E[2];
+    s32 secondaryPulseDirection[2];
+    s32 secondaryPulseTimer[2];
     s32 secondaryPulseOffsets[2][2];
     s16 secondaryPulseLevel[2];
-    u8 padC4[0x28];
+    u8 padB4[0x28];
     s8 pendingSceneState;
-    u8 padED[0x13];
-    u8 unk100;
-    u8 pad101[7];
+    u8 padDD[0x13];
+    u8 unkF0;
+    u8 padF1[7];
     BattleMirroredSpriteRecord mirroredSprites[4];
-    u8 pad1B8[4];
+    u8 pad1A8[4];
     s32 hpLevel;
     s32 mpLevel;
     s8 hpState;
     s8 mpState;
-    u8 pad1C6[2];
+    u8 pad1B6[2];
     s32 offsetX;
     s32 offsetY;
-    s32 unk1D0;
-    s32 unk1D4;
+    s32 unk1C0;
+    s32 unk1C4;
     s16 hpHighlightLevel;
     s16 mpHighlightLevel;
     s32 hpTarget;
@@ -186,15 +185,23 @@ typedef struct BattleActorPanelEntry {
     s8 mpEffectState;
     s16 hpEffectFade;
     s16 mpEffectFade;
-    u8 pad1EA[2];
+    u8 pad1DA[2];
     BattleStatPulse hpBarPulse;
     BattleStatPulse mpBarPulse;
     /* Signed frame counters, clamped to 0..12 before stacking three pulses. */
-    s8 unk214;
-    s8 unk215;
-    u8 pad216[2];
+    s8 hpPulseFrame;
+    s8 mpPulseFrame;
+    u8 pad206[2];
     BattleStatPulse hpBarPulses[3];
     BattleStatPulse mpBarPulses[3];
+} BattleActorPanelPresentation;
+
+typedef struct BattleActorPanelEntry {
+    s32 x;
+    s32 y;
+    s32 baseX;
+    s32 baseY;
+    BattleActorPanelPresentation presentation;
 } BattleActorPanelEntry;
 
 typedef struct BattleActorPanelWork {
@@ -208,9 +215,14 @@ typedef struct BattleActorPanelWork {
     struct SdfMemBlock *reserveUnitAllocation;
 } BattleActorPanelWork;
 
+typedef char BattleActorPanelPresentationSizeCheck[sizeof(BattleActorPanelPresentation) == 0x280 ? 1 : -1];
+typedef char BattleActorPanelPresentationOffsetCheck[((u32)&((BattleActorPanelEntry *)0)->presentation == 0x10) ? 1 : -1];
+
 typedef char BattleActorPanelEntrySizeCheck[sizeof(BattleActorPanelEntry) == 0x290 ? 1 : -1];
 typedef char BattleActorPanelWorkSizeCheck[sizeof(BattleActorPanelWork) == 0x1204 ? 1 : -1];
 typedef char BattleActorPanelActiveOffsetCheck[((u32)&((BattleActorPanelWork *)0)->activeEntries == 0xC) ? 1 : -1];
 typedef char BattleActorPanelReserveOffsetCheck[((u32)&((BattleActorPanelWork *)0)->reserveEntries == 0x7C0) ? 1 : -1];
+
+void btlSlotBankPromoteStates(BattleActorPanelWork *bank);
 
 #endif /* BTL_UI_H */

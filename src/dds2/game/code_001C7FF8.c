@@ -64,29 +64,6 @@ typedef struct SceneControl {
 extern BattleSceneObject *fldGetSceneObjectTaskUserData(void);
 
 
-typedef struct SceneTask {
-    s32 state;
-    u16 actionNumber;         /* 0x04 */
-    u8 pad06[2];
-    u32 flags;
-    u32 options;              /* 0x0C */
-    u8 pad10[8];
-    BtlUnit *actor;
-    u8 pad1C[4];
-    s32 command;
-    s32 commandValue;         /* 0x24 */
-    s32 commandReference;      /* 0x28: resolved for command 4 */
-    u8 pad2C[0x1C];
-    void (*onUpdate)(void);   /* 0x48 */
-    void (*onComplete)(void); /* 0x4C */
-    u16 actionStage;          /* 0x50 */
-    u8 pad52[2];
-    s32 effect;               /* 0x54 */
-    u8 pad58[8];
-    BtlIndexList *targetList; /* 0x60 */
-    u8 pad64[4];
-    s64 ownerId;
-} SceneTask;
 
 
 typedef struct SceneScriptState {
@@ -140,15 +117,15 @@ typedef struct BattleSceneWork {
     u8 pad2FC[2];
     BtlSceneSlot slots[8];
     u8 pad316[2];
-    SceneTask *groupPrimary[20];    /* 0x318 */
-    SceneTask *groupSecondary[45];  /* 0x368 */
-    SceneTask *groupTertiary[15];   /* 0x41C */
-    SceneTask *groupHandles[8];     /* 0x458 */
+    ActionStateLink *groupPrimary[20];    /* 0x318 */
+    ActionStateLink *groupSecondary[45];  /* 0x368 */
+    ActionStateLink *groupTertiary[15];   /* 0x41C */
+    ActionStateLink *groupHandles[8];     /* 0x458 */
     u16 groupHandleCount;
     u8 pad47A[2];
     s32 activeGroupCount;
     BtlSceneFadingRecord fading[8];
-    SceneTask *currentTask;
+    ActionStateLink *currentTask;
     u8 pad4C4[0x10];
     s32 scriptTarget;         /* 0x4D4 */
     u8 pad4D8[0xC];
@@ -525,16 +502,16 @@ s32 btlUpdateBattleSceneCommands(KwlnTask *task) {
             object->state = 3;
             ((SceneScriptState *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367B8)))->state = 3;
             slot = object->commandData->linkedUnit->lookupId;
-            panel->activeEntries[slot].unk100 = 0;
-            panel->activeEntries[slot].pendingSceneState = 5;
-            panel->activeEntries[slot].hpState = 3;
-            panel->activeEntries[slot].hpLevel = datGameState->party[panel->partyRecordIndex].hp;
-            panel->activeEntries[slot].hpTarget = panel->activeEntries[slot].hpLevel;
-            panel->activeEntries[slot].mpState = 3;
-            panel->activeEntries[slot].mpLevel = datGameState->party[panel->partyRecordIndex].mp;
-            panel->activeEntries[slot].mpTarget = panel->activeEntries[slot].mpLevel;
-            panel->activeEntries[slot].presentationState = 2;
-            panel->activeEntries[slot].presentationValue = 0;
+            panel->activeEntries[slot].presentation.unkF0 = 0;
+            panel->activeEntries[slot].presentation.pendingSceneState = 5;
+            panel->activeEntries[slot].presentation.hpState = 3;
+            panel->activeEntries[slot].presentation.hpLevel = datGameState->party[panel->partyRecordIndex].hp;
+            panel->activeEntries[slot].presentation.hpTarget = panel->activeEntries[slot].presentation.hpLevel;
+            panel->activeEntries[slot].presentation.mpState = 3;
+            panel->activeEntries[slot].presentation.mpLevel = datGameState->party[panel->partyRecordIndex].mp;
+            panel->activeEntries[slot].presentation.mpTarget = panel->activeEntries[slot].presentation.mpLevel;
+            panel->activeEntries[slot].presentation.presentationState = 2;
+            panel->activeEntries[slot].presentation.presentationValue = 0;
         }
         break;
     }
