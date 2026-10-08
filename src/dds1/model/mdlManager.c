@@ -2,6 +2,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
+#include "sdf_pac_work.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
 
@@ -818,14 +819,6 @@ void mdlCopyResourceBasename(s32 selectionListIndex, s32 selectionIndex, char *d
     memcpy(destination, basename, copyLength);
     destination[copyLength] = '\0';
 }
-
-typedef struct PacWork {
-    struct PacWork *next;
-    struct PacState *owner;
-    s32 resourceHandle;
-    u8 *dataCursor;
-    u8 packet[1];
-} PacWork;
 
 typedef struct PacHead {
     u8 command;
