@@ -442,18 +442,58 @@ void func_0027CEE8(MenuWindowContainer *window) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027CF28);
-
-
-
-
-extern void func_0027CF28(struct MenuWindowSpriteGroup *, u32, u32, u32, u32);
-
 typedef struct MenuWindowSpriteGroup {
     struct SdfMemBlock *allocation;
-    u8 pad4[8];
+    u32 variant;
+    u8 pad8[4];
     struct EffectSlotSet *sprites[7];
 } MenuWindowSpriteGroup;
+
+extern u8 D_0037CD28[];
+
+void func_0027CF28(MenuWindowSpriteGroup *group, u32 source, u32 mode, u32 variant, u32 option) {
+    s32 resourcePair;
+
+    group->variant = variant;
+    group->sprites[0] = effCreateResourceSlotSet((struct EffectSlotSet *)option, 0, 1);
+    group->sprites[1] = effCreateResourceSlotSet((struct EffectSlotSet *)option, 5, 1);
+    group->sprites[2] = effCreateResourceSlotSet((struct EffectSlotSet *)option, 7, 1);
+    group->sprites[3] = effCreateResourceSlotSet((struct EffectSlotSet *)option, 7, 1);
+    group->sprites[4] = effCreateResourceSlotSet((struct EffectSlotSet *)option, 7, 1);
+    group->sprites[5] = effCreateResourceSlotSet((struct EffectSlotSet *)option, 7, 1);
+    group->sprites[6] = effCreateResourceSlotSet((struct EffectSlotSet *)option, 6, 1);
+
+    itfSetGridEntryQuantizedAndRefresh(group->sprites[0], 0, source, mode, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(group->sprites[1], 0, source + 0x40, mode + 0x10, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(group->sprites[2], 0, source + 0x40, mode + 0x78, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(group->sprites[3], 0, source + 0x40, mode + 0xC0, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(group->sprites[4], 0, source + 0x40, mode + 0x100, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(group->sprites[5], 0, source + 0x40, mode + 0x148, 0, 0);
+    itfSetGridEntryQuantizedAndRefresh(group->sprites[6], 0, source + 0x40, mode + 0x190, 0, 0);
+
+    resourcePair = 0;
+    do {
+        struct EffectSlotSet *frontSlot = group->sprites[resourcePair + 1];
+        struct EffectSlotSet *backSlot = group->sprites[MNU_WINDOW_RESOURCE_SPRITES - 1 - resourcePair];
+        u8 *tableColor = &D_0037CD28[resourcePair];
+        struct BdWork *frontWork = frontSlot->workEntries;
+        struct BdWork *backWork = backSlot->workEntries;
+        s32 remaining = 3;
+        s32 cornerIndex = 0;
+
+        do {
+            u32 color = *tableColor | 0x80808000;
+            frontWork->savedColors[cornerIndex] = color;
+            frontWork->geometry.cornerColors[cornerIndex] = color;
+            backWork->savedColors[cornerIndex] = color;
+            backWork->geometry.cornerColors[cornerIndex] = color;
+            cornerIndex++;
+        } while (--remaining >= 0);
+        resourcePair++;
+    } while (resourcePair < 3);
+}
+
+extern void func_0027CF28(struct MenuWindowSpriteGroup *, u32, u32, u32, u32);
 
 /* Allocate/clear the native seven-sprite resource group before its initializer runs. */
 MenuWindowSpriteGroup *mnuCreateWindowState(u32 source, u32 mode, u32 variant, u32 option) {
