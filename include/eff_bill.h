@@ -180,9 +180,15 @@ typedef struct EffTrackSet {
     u8 *buffer;
     u8 *columns;
     u8 *tail;
-    s32 *handle;
+    SdfAsset *handle;
     struct SdfMemBlock *allocation;
 } EffTrackSet;
+
+typedef char EffTrackSet_size_must_be_0x30[(sizeof(EffTrackSet) == 0x30) ? 1 : -1];
+typedef char EffTrackSet_handle_offset_must_be_0x28[
+    ((u32)&((EffTrackSet *)0)->handle == 0x28) ? 1 : -1];
+typedef char EffTrackSet_allocation_offset_must_be_0x2C[
+    ((u32)&((EffTrackSet *)0)->allocation == 0x2C) ? 1 : -1];
 
 /* Resource kinds 1..8 allocate sixteen bytes before their entry array. */
 typedef struct EffBillFrameState {
