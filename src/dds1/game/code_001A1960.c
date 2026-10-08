@@ -1946,9 +1946,9 @@ s32 btlGetEnemyMoney(u8 *acquirer, u8 *enemy) {
 extern f32 func_001A7C20(u8 *, u8 *, s32);
 
 /* Hunt EP uses its own table quantity and the ratio calculator's mode 0. */
-s32 btlCalculateHuntEpReward(u8 *arg0, u8 *arg1) {
-    DatEnemyRecord *entry = &datEnemyRecords[((BtlUnit *)arg1)->partyRecord.unitId];
-    f32 ratio = func_001A7C20(arg0, arg1, 0);
+s32 btlCalculateHuntEpReward(u8 *acquirer, u8 *enemy) {
+    DatEnemyRecord *entry = &datEnemyRecords[((BtlUnit *)enemy)->partyRecord.unitId];
+    f32 ratio = func_001A7C20(acquirer, enemy, 0);
     u32 ep = (u32)((f32)entry->huntExperience * ratio);
     if (entry->flags & 0x2000) {
         ep *= 100;
@@ -2048,44 +2048,44 @@ extern s32 D_00358514[];
 
 extern s32 D_00358518[];
 
-s32 btlSelectedEntryHitsElement(s32 arg0, BtlUnit *unit, s32 arg2) {
-    u32 kind;
-    s32 mask;
-    u32 power;
+s32 btlSelectedEntryHitsElement(s32 unitAddress, BtlUnit *unit, s32 selectorIndex) {
+    u32 indexedSelectorValue;
+    s32 selectionMask;
+    u32 maskTableIndex;
     if (unit->selectedEntryIndex <= 0) {
         return 0;
     }
     btlGetRuntime();
-    kind = btlGetActorIndexedSignedValue(arg0, arg2);
-    mask = btlEncodeActorIndexAsSelectionMask(kind);
-    power = datCommandRecords[unit->selectedEntryIndex].unk2E;
-    if (power == 0) {
+    indexedSelectorValue = btlGetActorIndexedSignedValue(unitAddress, selectorIndex);
+    selectionMask = btlEncodeActorIndexAsSelectionMask(indexedSelectorValue);
+    maskTableIndex = datCommandRecords[unit->selectedEntryIndex].unk2E;
+    if (maskTableIndex == 0) {
         return 0;
     }
-    if (kind >= 0x10 && (kind < 0x12 || kind == -1)) {
+    if (indexedSelectorValue >= 0x10 && (indexedSelectorValue < 0x12 || indexedSelectorValue == -1)) {
         return 0;
     }
-    if (power >= 0x20) {
+    if (maskTableIndex >= 0x20) {
         return 0;
     }
-    return (D_00358518[power * 3] & mask) != 0;
+    return (D_00358518[maskTableIndex * 3] & selectionMask) != 0;
 }
 
-s32 btlGetActionRecordLookupValue(s32 arg0) {
-    u16 temp_v0;
+s32 btlGetActionRecordLookupValue(s32 actionRecordIndex) {
+    u16 lookupTableIndex;
 
-    temp_v0 = datCommandRecords[arg0].unk2E;
-    return D_00358510[temp_v0 * 3];
+    lookupTableIndex = datCommandRecords[actionRecordIndex].unk2E;
+    return D_00358510[lookupTableIndex * 3];
 }
 
-s32 btlTestSelectedItemCategoryMask(s32 object, s32 mask) {
-    s32 index = *(s32 *)(object + 0x2F0);
-    u16 item;
-    if (index == -1) {
+s32 btlTestSelectedItemCategoryMask(s32 unitAddress, s32 actorIndex) {
+    s32 selectedEntryIndex = *(s32 *)(unitAddress + 0x2F0);
+    u16 maskTableIndex;
+    if (selectedEntryIndex == -1) {
         return 0;
     }
-    item = datCommandRecords[index].unk2E;
-    return (D_00358518[item * 3] & btlEncodeActorIndexAsSelectionMask(mask)) != 0;
+    maskTableIndex = datCommandRecords[selectedEntryIndex].unk2E;
+    return (D_00358518[maskTableIndex * 3] & btlEncodeActorIndexAsSelectionMask(actorIndex)) != 0;
 }
 
 s32 fldGetSelectedUnitStat(s32 object) {
