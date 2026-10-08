@@ -48,7 +48,7 @@ extern s32 D_00435E6C;
 extern s32 D_00435E70;
 extern void itfSetTextDrawLimit(s32);
 extern FrFontGlyph *func_0019FA08(s32, s32, s32, u16, FrFontTextBank *, s32);
-extern FrFontGlyph *func_0019E5D8(FrFontCtx *);
+extern FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *);
 extern void kwlnTaskCreate(const char *, s32, s32, s32, u32 (*)(void), void (*)(void), void *);
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
 extern u32 itfDrawBackgroundAndGetTaskReadyMask(void);
@@ -186,7 +186,7 @@ extern s32 D_003B2F28[];
 extern s32 D_0043656C;
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 
-s32 func_0019E1B8(s32 code, FrFontCtx *stream) {
+s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
     s32 *position = &stream->offset;
     u8 *bytes = stream->bytes;
     s32 payloadWords = code & 0xF;
@@ -304,7 +304,7 @@ advanceLine:
 
 extern s8 D_00436550;
 
-FrFontGlyph *func_0019E5D8(FrFontCtx *stream) {
+FrFontGlyph *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
     u8 encodedText[3];
     s32 value;
     u8 *bytes = stream->bytes;
@@ -325,7 +325,7 @@ FrFontGlyph *func_0019E5D8(FrFontCtx *stream) {
             break;
         }
         if ((value & 0xF0) == 0xF0) {
-            if (func_0019E1B8(value, stream)) {
+            if (itfProcessEncodedTextControl(value, stream)) {
                 break;
             }
         } else if (value == 10) {
@@ -389,7 +389,7 @@ FrFontGlyph *itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32
     args.offset = 0;
     args.pendingCreate = 1;
     args.pendingPosition = 1;
-    return func_0019E5D8(&args);
+    return itfBuildGlyphChainFromEncodedStream(&args);
 }
 extern s8 D_00436550;
 
