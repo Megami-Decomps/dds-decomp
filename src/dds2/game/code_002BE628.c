@@ -1209,7 +1209,7 @@ extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 
 /* Create a profile panel and initialize its five native random words. */
-u32 *mnuCreateProfilePanel(DatPartyRecord *selectionState) {
+MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState) {
     MenuProfilePanel *panel = (MenuProfilePanel *)sdfAllocSizeClassBlock(MNU_PROFILE_PANEL_BYTES);
     s32 profileId;
     DatProfileRecord *profileRecord;
@@ -1223,7 +1223,7 @@ u32 *mnuCreateProfilePanel(DatPartyRecord *selectionState) {
         panel->unk2C[randomWordIndex] = effMiscRand(0) % 0xC0 + 0x40;
     }
     panel->unk44 = 0x100;
-    return (u32 *)panel;
+    return panel;
 }
 
 void mnuFreeProfilePanelWork(void *work) {
@@ -1240,12 +1240,11 @@ void mnuSetGroupProperties(u32 *entry, u32 first, u32 second, u32 third, u32 fou
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C33C0);
 
 /* Draw first, then advance the native phase by one with a single period subtraction. */
-void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, u32 *panelWords, s32 option) {
-    MenuProfilePanel *panel = (MenuProfilePanel *)panelWords;
+void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 option) {
     s32 phase;
     s32 nextPhase;
 
-    func_002C33C0(x, y, z, panelWords, option);
+    func_002C33C0(x, y, z, (u32 *)panel, option);
     phase = panel->phase;
     nextPhase = phase + MNU_PROFILE_PHASE_STEP;
     if (phase < MNU_PROFILE_PHASE_PERIOD) {

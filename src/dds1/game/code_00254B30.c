@@ -41,11 +41,6 @@ typedef struct {
 } DspScene;
 
 typedef struct {
-    DspEntry *entry;   /* 0x0: selected display entry */
-    s32 mantraId; /* 0x4: index into the mantra-name table */
-} DspSelection;
-
-typedef struct {
     u8 pad0[0x1C];
     s32 *selectedIndex; /* 0x1C */
     s32 entryCount; /* 0x20 */
@@ -228,12 +223,12 @@ extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
 /* Populate the unit and both mantra labels, plus the selected mantra's cost. */
 void itfDspPopulatePrimaryLabels(void) {
-    DspSelection *selection = (DspSelection *)mnuGetSelectedNodeValue();
+    MnuProfileProgress *selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
     DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
     char text[16];
 
-    evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->entry->unitId].encodedText);
-    evtCopyEntryStringToActiveWindow(1, D_003BAA78[selection->mantraId].encodedText);
+    evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->partyRecord->unitId].encodedText);
+    evtCopyEntryStringToActiveWindow(1, D_003BAA78[selection->profileId].encodedText);
     evtCopyEntryStringToActiveWindow(2, D_003BAA78[scene->sceneId].encodedText);
     func_003014F0(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
     evtCopyEntryStringToActiveWindow(3, text);
@@ -244,12 +239,12 @@ void itfDspPopulatePrimaryLabels(void) {
 
 /* Populate the same menu labels, selecting the alternate display signal. */
 void itfDspPopulateAlternateLabels(void) {
-    DspSelection *selection = (DspSelection *)mnuGetSelectedNodeValue();
+    MnuProfileProgress *selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
     DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
     char text[16];
 
-    evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->entry->unitId].encodedText);
-    evtCopyEntryStringToActiveWindow(1, D_003BAA78[selection->mantraId].encodedText);
+    evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->partyRecord->unitId].encodedText);
+    evtCopyEntryStringToActiveWindow(1, D_003BAA78[selection->profileId].encodedText);
     evtCopyEntryStringToActiveWindow(2, D_003BAA78[scene->sceneId].encodedText);
     func_003014F0(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
     evtCopyEntryStringToActiveWindow(3, text);
@@ -260,12 +255,12 @@ void itfDspPopulateAlternateLabels(void) {
 
 /* Populate menu labels for the third display signal. */
 void itfDspPopulateThirdLabels(void) {
-    DspSelection *selection = (DspSelection *)mnuGetSelectedNodeValue();
+    MnuProfileProgress *selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
     DspScene *scene = (DspScene *)fldGetSceneMetadataNode();
     char text[16];
 
-    evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->entry->unitId].encodedText);
-    evtCopyEntryStringToActiveWindow(1, D_003BAA78[selection->mantraId].encodedText);
+    evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->partyRecord->unitId].encodedText);
+    evtCopyEntryStringToActiveWindow(1, D_003BAA78[selection->profileId].encodedText);
     evtCopyEntryStringToActiveWindow(2, D_003BAA78[scene->sceneId].encodedText);
     func_003014F0(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
     evtCopyEntryStringToActiveWindow(3, text);

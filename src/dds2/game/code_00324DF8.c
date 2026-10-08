@@ -11,7 +11,7 @@ typedef struct SdfVec4 {
     f32 w;
 } SdfVec4;
 
-extern f32 sdfVec3Normalize();
+extern f32 sdfVec3Normalize(f32 *);
 
 
 extern u64 sdfAllocateBlockBySizeThreshold(u64);
@@ -467,11 +467,11 @@ void sdfVectorScale(float factor, float *vector) {
     vector[2] = vector[2] * factor;
 }
 
-extern f32 sdfVectorLength();
+extern f32 sdfVectorLength(const f32 *);
 
 /* Normalize the first three components; a zero-length vector stays unchanged. */
 f32 sdfVec3Normalize(f32 *vector) {
-    f32 length = sdfVectorLength();
+    f32 length = sdfVectorLength(vector);
 
     if (length == 0.0f) {
         return 0.0f;
@@ -489,8 +489,8 @@ f32 sdfVec3DotNormalized(void *first, void *second) {
     SdfVec4 firstNormalized = *(SdfVec4 *)first;
     SdfVec4 secondNormalized = *(SdfVec4 *)second;
 
-    sdfVec3Normalize(&firstNormalized);
-    sdfVec3Normalize(&secondNormalized);
+    sdfVec3Normalize(&firstNormalized.x);
+    sdfVec3Normalize(&secondNormalized.x);
     return firstNormalized.x * secondNormalized.x + firstNormalized.y * secondNormalized.y + firstNormalized.z * secondNormalized.z;
 }
 

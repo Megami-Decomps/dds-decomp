@@ -318,8 +318,13 @@ typedef struct BtlState {
     struct ActiveSoundNode *soundList;
     struct SoundSlotOwner *soundSlotOwners;
     u8 pad264[4];
-    u16 unk268;
-    u8 pad26A[2];
+    union {
+        struct {
+            u16 unk268;
+            u16 cameraActorHighWater;
+        };
+        u32 cameraActorConfiguration; /* 0x268: mode and persistent actor count. */
+    };
     u16 unk26C;
     u8 encounterKind; /* 0x26E: scene setup selects 0, 2 or 3. */
     u8 pad26F;
@@ -420,7 +425,8 @@ typedef struct BtlState {
     u8 pad634[4];
     void (*commandTurnEndHook)(struct ActionStateLink *);
     s32 (*commandHook)(s32, s32);
-    u8 pad640[8];
+    s32 (*cameraArrangementHook)(BtlLinkedCommand *, BtlCamState *, s32); /* 0x640: mode-specific pose override. */
+    u8 pad644[4];
     s32 (*unk648)(BtlUnit *);
     s32 (*unk64C)(BtlUnit *);
     s32 (*unk650)(BtlUnit *);
