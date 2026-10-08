@@ -370,7 +370,7 @@ KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 des
     task->unk2E = destroyDelay;
     task->update = update;
     task->destroy = destroy;
-    task->unk38 = userValue;
+    task->userValue = userValue;
     task->name[0x17] = 0;
     task->unk24 = 0;
     task->timer = 0;
@@ -555,12 +555,12 @@ u32 kwlnTaskGetTimer(KwlnTask* task)
 
 void kwlnTaskSetUserValue(KwlnTask* task, u32 value)
 {
-    task->unk38 = value;
+    task->userValue = value;
 }
 
 u32 kwlnTaskGetUserValue(KwlnTask* task)
 {
-    return task->unk38;
+    return task->userValue;
 }
 
 void func_00101960(void) {

@@ -6,20 +6,12 @@
 #define SDF_HEAP_BLOCK_USED 1
 #define SDF_HEAP_BLOCK_END 2
 
-#define SDF_HEAP_STAT_TOTAL_BYTES 0
-#define SDF_HEAP_STAT_FREE_BYTES 1
-#define SDF_HEAP_STAT_LARGEST_FREE 2
-#define SDF_HEAP_STAT_SMALLEST_FREE 3
-#define SDF_HEAP_STAT_BLOCK_COUNT 4
-#define SDF_HEAP_STAT_FREE_BLOCK_COUNT 5
-
 #define SDF_NAMED_REQUEST_OVERHEAD_BYTES 0xC
 #define SDF_RPC_REPLY_ALIGNMENT_MASK 0x3F
 #define SDF_NAMED_RESOURCE_RPC_ID 0x6F496453
 #define SDF_RPC_BIND_RETRY_TICKS 0x1ED2
 
 
-extern SdfMemBlock *sdfFindGeneralBlockByAddress(void *address);
 extern void sdfReleaseChipBlock(void *block);
 extern s32 func_0036DE70(void);
 extern void EIntr(void);

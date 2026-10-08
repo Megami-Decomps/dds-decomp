@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "sdf_linked_packet.h"
@@ -85,7 +86,6 @@ extern void sdfInitPacketList(SdfListHead *);
 extern void kwlnDrawTextureListDiagnostic(void *, s32, s32);
 extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
-extern u32 kwlnTaskGetTimer(void);
 extern s32 effMiscRandMod(s32, s32);
 extern void kwlnPadStartMotor(u32, u8, s32);
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
@@ -342,9 +342,9 @@ void kwlnDrawSpriteCellZ(u32 packetList, s32 column, s32 row, s32 columnCount, s
                                            0x60000000, 0x40806020));
 }
 
-/* Despite the legacy name, this periodically pulses both pad motors, not colors. */
-s32 kwlnDebugPulseColors(void) {
-    if (kwlnTaskGetTimer() % KWLN_DEBUG_RUMBLE_PERIOD == 0) {
+/* Periodically pulses both pad motors, varying the large-motor level. */
+s32 kwlnDebugPulsePadMotors(KwlnTask *task) {
+    if (kwlnTaskGetTimer(task) % KWLN_DEBUG_RUMBLE_PERIOD == 0) {
         kwlnPadStartMotor(KWLN_PAD_SMALL_MOTOR, 1, KWLN_DEBUG_SMALL_PULSE_FRAMES);
         kwlnPadStartMotor(KWLN_PAD_LARGE_MOTOR, (u8)(effMiscRandMod(0, KWLN_DEBUG_RUMBLE_VARIATION) + KWLN_DEBUG_RUMBLE_BASE), KWLN_DEBUG_LARGE_PULSE_FRAMES);
     }

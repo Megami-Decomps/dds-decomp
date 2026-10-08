@@ -4,8 +4,6 @@
 #include "scr.h"
 
 
-extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
-
 void scrSetCurrentActor(KwlnTask *task, void *actor) {
     ScrData *context;
 

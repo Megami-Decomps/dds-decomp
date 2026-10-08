@@ -71,8 +71,6 @@ extern void sceSifRegisterRpc(void *, s32, void *, void *, s32, s32, void *);
 extern void sceSifRpcLoop(void *);
 extern u32 D_003FEAC0[16];
 
-extern void sdfGetGeneralHeapStats(void *out);
-
 extern s32 sdfPrintFormattedDevMessage(const char *fmt, ...);
 extern char D_003B4880[];
 extern char D_003B48A0[];
@@ -762,7 +760,9 @@ void sndPrintMemoryInfo(void) {
     s32 info[6];
     sdfGetGeneralHeapStats(info);
     sdfPrintFormattedDevMessage(" <<< memory information >>>\n             total : 0x%06X\n        free total : 0x%06X\n     max free size : 0x%06X\n     min free size : 0x%06X\n      handle total : %d\n free handle count : %d\n\n",
-                    info[0], info[1], info[2], info[3], info[4], info[5]);
+                    info[SDF_HEAP_STAT_TOTAL_BYTES], info[SDF_HEAP_STAT_FREE_BYTES],
+                    info[SDF_HEAP_STAT_LARGEST_FREE], info[SDF_HEAP_STAT_SMALLEST_FREE],
+                    info[SDF_HEAP_STAT_BLOCK_COUNT], info[SDF_HEAP_STAT_FREE_BLOCK_COUNT]);
 }
 
 typedef struct SdfChipStats {
