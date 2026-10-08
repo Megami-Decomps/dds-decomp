@@ -257,25 +257,25 @@ advanceLine:
         mnuSetTitleVoicePrefixIndex(itfReadEncodedTextLead(stream));
         mnuPlayTitleVoiceFile((char *)itfReadEncodedCode(stream));
         break;
-    case 0xF214:
-        if (stream->glyphChain->unk34 != 0) {
-            stream->glyphChain->unk38 = 1;
+    case ITF_GLYPH_CONTROL_WAIT_FRAMES:
+        if (stream->glyphChain->pendingLipsStopCode != 0) {
+            stream->glyphChain->skipLipsStopWait = 1;
         }
-        stream->glyphChain->unk30 = code;
-        stream->glyphChain->unk3C = itfReadEncodedCode(stream);
+        stream->glyphChain->timedControlCode = code;
+        stream->glyphChain->remainingWaitFrames = itfReadEncodedCode(stream);
         break;
-    case 0xF215:
-        if (stream->glyphChain->unk34 != 0) {
-            stream->glyphChain->unk38 = 1;
+    case ITF_GLYPH_CONTROL_WAIT_FRAME_OR_SOUND:
+        if (stream->glyphChain->pendingLipsStopCode != 0) {
+            stream->glyphChain->skipLipsStopWait = 1;
         }
-        stream->glyphChain->unk30 = code;
-        stream->glyphChain->unk3C = itfReadEncodedCode(stream);
-        if (stream->glyphChain->unk3C != 0xFFFF) {
+        stream->glyphChain->timedControlCode = code;
+        stream->glyphChain->remainingWaitFrames = itfReadEncodedCode(stream);
+        if (stream->glyphChain->remainingWaitFrames != ITF_GLYPH_WAIT_FOR_SOUND_SENTINEL) {
             s32 frame = mnuGetTitleEffectFrameCounter();
-            stream->glyphChain->unk3C -= frame;
+            stream->glyphChain->remainingWaitFrames -= frame;
         }
-        if (stream->glyphChain->unk3C < 0) {
-            stream->glyphChain->unk3C = 0;
+        if (stream->glyphChain->remainingWaitFrames < 0) {
+            stream->glyphChain->remainingWaitFrames = 0;
         }
         break;
     case 0xF416:
@@ -283,8 +283,8 @@ advanceLine:
         D_00436560 = itfReadEncodedTextLead(stream);
         D_0043654C |= 8;
         break;
-    case 0xF117:
-        stream->glyphChain->unk34 = code;
+    case ITF_GLYPH_CONTROL_STOP_LIPS:
+        stream->glyphChain->pendingLipsStopCode = code;
         break;
     case 0xF218:
         if (itfReadEncodedTextLead(stream) == 0) {

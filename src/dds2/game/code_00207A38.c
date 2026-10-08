@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_scene_fade.h"
 #include "eff_ref_obj.h"
 #include "btl_task_condition.h"
 #include "sdf_resource.h"
@@ -94,7 +95,6 @@ extern u32 btlButtonIconTexture;
 
 extern u16 scrReadIntParameter(u32);
 
-extern s32 func_001B76F0(void);
 
 extern u64 func_00220958(void);
 
@@ -2227,10 +2227,10 @@ s32 btlCommandReportLinkedActionScene(void) {
     return 1;
 }
 
-u32 btlScriptReturnBattleValue(void) {
+u32 btlScriptReturnSceneSlotCount(void) {
     s32 result;
 
-    result = func_001B76F0();
+    result = btlCountSceneSlots();
     scrSetIntegerReturnValue(result);
     return 1;
 }

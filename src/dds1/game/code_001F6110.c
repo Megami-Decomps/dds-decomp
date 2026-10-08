@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_scene_fade.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
 #include "btl_state.h"
@@ -157,7 +158,6 @@ extern u32 btlGetSelectedBossEffectId(void);
 
 extern u32 btlGetSpecialModeEffectValue(void);
 
-extern s32 func_001ACAE0(void);
 
 extern u16 scrReadIntParameter(u32);
 
@@ -1905,10 +1905,10 @@ u32 btlCmdReportPartyEmptyMp(void) {
     return 1;
 }
 
-u32 btlScriptReturnBattleValue(void) {
+u32 btlScriptReturnSceneSlotCount(void) {
     s32 result;
 
-    result = func_001ACAE0();
+    result = btlCountSceneSlots();
     scrSetIntegerReturnValue(result);
     return 1;
 }
