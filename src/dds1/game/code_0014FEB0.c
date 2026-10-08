@@ -94,8 +94,8 @@ void effInitializeBillResourceOwners(void) {
     do {
         billboard = billCreateFromResource(effBillResourceInitTable[i].kind,
                                            (const char *)(u32)effBillResourceInitTable[i].resource);
+        payload = billboard->child;
         effBillResourceOwners[i] = billboard;
-        payload = (BillChildPayload *)billboard->entryList;
         payload->halfWidth *= effBillResourceInitTable[i].scale;
         payload->halfHeight *= effBillResourceInitTable[i].scale;
         i++;

@@ -59,7 +59,7 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
     f32 cornerX, cornerY;
 
     selected = child->packetListIndex;
-    if (selected != obj->unk2E) {
+    if (selected != obj->requestedPacketListIndex) {
         work = child->work;
         if (work->count > 0) {
             packet = sdfBuildCompactVertexVifPacket((const u128 *)work->positions, work->colors,
@@ -67,7 +67,7 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
             sdfAppendPacket(child->pendingLists[selected], packet);
             work->count = 0;
         }
-        selected = obj->unk2E;
+        selected = obj->requestedPacketListIndex;
         child->packetListIndex = selected;
     }
     if (child->pendingLists[selected] == NULL) {
@@ -454,9 +454,9 @@ BillObj *billAllocChild(void *resourceData) {
     BillObj *obj;
 
     obj = sdfAllocSizeClassBlock(0x34);
-    obj->entryList = NULL;
+    obj->child = NULL;
     if (resourceData != NULL) {
-        obj->entryList = func_00157D38(resourceData);
+        obj->child = func_00157D38(resourceData);
     }
     return obj;
 }
@@ -464,7 +464,7 @@ BillObj *billAllocChild(void *resourceData) {
 void billReleaseChild(BillObj *obj) {
     s32 child;
 
-    child = (s32)obj->entryList;
+    child = (s32)obj->child;
     if (child != 0) {
         effReleaseSharedTextureRecord(child);
     }
@@ -472,7 +472,7 @@ void billReleaseChild(BillObj *obj) {
 }
 
 void billProcessChild(BillObj *obj) {
-    billAppendChildQuad(obj, obj->entryList);
+    billAppendChildQuad(obj, obj->child);
 }
 
 BillObj *billAllocList(void *resourceData) {
@@ -486,7 +486,7 @@ BillObj *billAllocList(void *resourceData) {
     }
     n = data->entryCount;
     newobj = sdfAllocSizeClassBlock(n * 20 + 0x6C);
-    newobj->entryList = data;
+    newobj->animationData = data;
     newobj->unk60 = (u8 *)newobj + 0x6C;
     newobj->unk50 = 1;
     newobj->pair.packetList = 0;
@@ -501,11 +501,11 @@ BillObj *billCloneList(BillObj *obj) {
     s32 n;
     BillObj *newobj;
 
-    data = obj->entryList;
+    data = obj->animationData;
     n = data->entryCount;
     data->listRefCount = data->listRefCount + 1;
     newobj = sdfAllocSizeClassBlock(n * 20 + 0x6C);
-    newobj->entryList = data;
+    newobj->animationData = data;
     newobj->unk60 = (u8 *)newobj + 0x6C;
     newobj->unk50 = 1;
     newobj->pair.packetList = 0;
@@ -515,7 +515,7 @@ BillObj *billCloneList(BillObj *obj) {
 }
 
 void billReleaseList(BillObj *obj) {
-    billReleaseSharedEntryBlock(obj->entryList);
+    billReleaseSharedEntryBlock(obj->animationData);
     sdfReleaseChipBlock(obj);
 }
 
@@ -523,7 +523,7 @@ void billReleaseList(BillObj *obj) {
  * child payload. Plural descriptors are handled by the dispatcher instead. */
 BillChildPayload *func_00158F88(BillObj *obj, BillOut *out) {
     BillAnimationEntry *entry = out->entry;
-    BillData *data = obj->entryList;
+    BillData *data = obj->animationData;
     BillRecord *record;
     BillChildPayload *child;
     s32 index;
@@ -556,11 +556,11 @@ BillChildPayload *func_00158F88(BillObj *obj, BillOut *out) {
     obj->childParam = color;
     child = data->children[record->childIndex];
     if (entry->flags & 2) {
-        obj->unk2E = 2;
+        obj->requestedPacketListIndex = 2;
     } else if (entry->flags & 4) {
-        obj->unk2E = 3;
+        obj->requestedPacketListIndex = 3;
     } else {
-        obj->unk2E = 1;
+        obj->requestedPacketListIndex = 1;
     }
     obj->lengthScale = record->scale;
     child->uv.components[0] = record->u0;
@@ -628,7 +628,7 @@ extern s32 func_0035B6E0(const char *, ...);
 
 /* Select an animation and initialize the plural records' signed start delays. */
 void billSetAnimationEntry(BillObj *obj, s32 index) {
-    BillData *data = obj->entryList;
+    BillData *data = obj->animationData;
     BillAnimationEntry *entry = data->entries + index;
 
     if (entry->frameCount == 0) {
@@ -749,7 +749,7 @@ void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
     if (obj->kind == 1) {
         record = func_00158F88(obj, obj->unk60);
     } else if (obj->kind == 0 || obj->kind == 3) {
-        record = obj->entryList;
+        record = obj->child;
     } else {
         return;
     }
@@ -790,6 +790,8 @@ BillObj *billCreateFromResource(s32 kind, const char *path) {
 BillObj *billCloneObjectRetainingSharedData(BillObj *source) {
     BillObj *copy;
     BillChildPayload *data;
+    u16 sourceKind;
+    void (*sourceCallback)();
 
     if (source->kind == 1) {
         copy = billCloneList(source);
@@ -799,11 +801,13 @@ BillObj *billCloneObjectRetainingSharedData(BillObj *source) {
     } else {
         copy = billAllocChild(NULL);
         func_00158D68(copy);
-        copy->kind = source->kind;
-        copy->callback = source->callback;
-        data = source->entryList;
+        sourceKind = source->kind;
+        data = source->child;
+        sourceCallback = source->callback;
+        copy->kind = sourceKind;
+        copy->callback = sourceCallback;
         data->refCount = data->refCount + 1;
-        copy->entryList = data;
+        copy->child = data;
     }
     return copy;
 }

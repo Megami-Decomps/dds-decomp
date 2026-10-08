@@ -1584,7 +1584,7 @@ s32 func_00218798(BtlLinkedCommand *command) {
 }
 
 void func_00218968(void) {
-    func_0011AEE0(1);
+    ptyRebalanceFrontline(1);
 }
 
 s32 btlOverrideActionResultForEnemyMode(s32 battler, s32 action, s32 defaultValue) {
@@ -1671,7 +1671,7 @@ void btlResetUnitSelectionStateAndSetMode(void) {
     ((BtlSelectCtrl *)resource)->unit = 0;
     ((BtlSelectCtrl *)resource)->prevUnit = 0;
     ((BtlSelectCtrl *)resource)->pending = 0;
-    func_0011AEE0(6);
+    ptyRebalanceFrontline(6);
 }
 
 void func_00218BA8(BtlUnit *unit, u8 *arg1) {
@@ -3965,7 +3965,7 @@ u32 func_00220958(void) {
 }
 
 void func_00220998(void) {
-    func_0011AEE0(9);
+    ptyRebalanceFrontline(9);
 }
 
 void btlMarkUnitActionAndStatusForMode(ActionUnit *unit) {
