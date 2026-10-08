@@ -1,4 +1,8 @@
 #include "common.h"
+#include "evt_viewer.h"
+extern struct KwlnTask *kwlnTaskGetTaskByName(const char *name);
+extern s32 kwlnTaskDestroyWithHierarchy(struct KwlnTask *task, s32 delayTicks);
+
 #include "evt_world.h"
 #include "eff_object.h"
 #include "pcp_vu0.h"
@@ -9,6 +13,7 @@
 #include "kwln.h"
 #include "evt_unit.h"
 #include "evt_polygon_movie.h"
+#include "fld.h"
 
 extern s32 evtIsMenuTableEntryEnabled(s32 *);
 extern s32 func_00237428();
@@ -32,8 +37,6 @@ extern void *memset(void *, s32, u32);
 extern void effObjSetFlags(void *object, s32 flags);
 extern void *func_00115298(void *obj, void *vecA, void *vecB);
 extern void effEventSetScale(void *target, f32 scale);
-extern s32 kwlnTaskGetTaskByName(void *name);
-extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 extern void fldSetSwayMode(s32 mode);
 extern void fldSetSkyDrawState(s32 value);
 extern void func_00132B80(s32 value);
@@ -68,153 +71,27 @@ extern s16 evtSkyTransitionStartValue;
 extern s16 evtSkyTransitionTargetValue;
 
 
+
+
 /* Native viewer child node; frame rows traverse this same linked record. */
-typedef struct EvtRuntimeChild {
-    u16 unk00;
-    u16 unk02;
-    u16 unk04;
-    u8 pad06[2];
-    union {
-        s32 words[8];
-        struct {
-            u8 pad00[2];
-            u16 groupTypeIndex; /* Reassigned consecutively across children of a group type. */
-            u8 pad04[6];
-            u16 groupTypeAIndex;
-        } f;
-    } body; /* 0x08 */
-    u8 pad28[4];
-    void *payload; /* 0x2C: serialized child data */
-    struct EvtRuntimeChild *next; /* 0x30 */
-    struct EvtRuntimeChild *prev; /* 0x34 */
-} EvtRuntimeChild;
+
 
 /* World-slot node borrowed by a viewer group. Its data is slot-specific;
  * model groups use EvtModelSlot, while all named nodes share the list links. */
 
 /* The native 0x84-byte viewer entry owns its child list and borrows info.
  * EvtRuntime.frameGroup selects one of these entries, not a separate list. */
-typedef struct EvtRuntimeGroup {
-    s32 type;
-    union {
-        struct {
-            u8 metadataFlag; /* 0x04: included in serialized group metadata */
-            u8 pad05[3];
-        };
-        s32 setterId; /* 0x04: slot index used by the XY editor */
-    };
-    union {
-        s32 word;      /* 0x08: full value for group type 2 */
-        u16 shortValue; /* 0x08: truncated value in metadata */
-    } entryHeader;
-    u8 pad0C[4];
-    EffWorldNode *info; /* 0x10 */
-    u8 pad14[8];
-    s16 metadataValue; /* 0x1C */
-    s8 metadataByte1;  /* 0x1E */
-    s8 metadataByte2;  /* 0x1F */
-    u8 pad20[8];
-    s32 unk28; /* 0x28: cleared when this property editor is cancelled */
-    u8 pad2C[0x24];
-    s32 childCount; /* 0x50 */
-    EvtRuntimeChild *children; /* 0x54 */
-    EvtRuntimeChild *lastChild; /* 0x58 */
-    u8 pad5C[0x20];
-    struct EvtRuntimeGroup *next; /* 0x7C */
-    struct EvtRuntimeGroup *prev; /* 0x80 */
-} EvtRuntimeGroup;
+
 
 /* The command API stores words; timed-prompt drawing consumes their text pointers. */
-typedef union EvtCommandArgument {
-    s32 word;
-    char *text;
-} EvtCommandArgument;
+
 
 /* The file header emits this whole word; type-8 spans use its low halfword. */
-typedef union EvtFrameRange {
-    s32 word;
-    struct {
-        u16 end;
-        u16 unk02;
-    } f;
-} EvtFrameRange;
+
 /* Native 0x2490-byte viewer runtime shared by dialogs, task polls and file writers. */
-typedef struct EvtRuntime {
-    u8 pad00[4];
-    u32 flags; /* 0x04 */
-    PolyMovieWork *windowContext; /* 0x08: message window context */
-    s32 headerThird; /* 0x0C: third emitted header word */
-    s32 headerFirst; /* 0x10: first emitted header word */
-    EvtFrameRange frameRange; /* 0x14: second header word and terminal span value */
-    s32 curFrame; /* 0x18 */
-    u8 pad1C[4];
-    s32 entryTotal; /* 0x20 */
-    char entryName[256][32]; /* 0x24 */
-    u8 pad2024[0xC];
-    s32 entryCount; /* 0x2030 */
-    EvtRuntimeGroup *groups; /* 0x2034 */
-    u8 pad2038[0x248];
-    s32 actionMode; /* 0x2280 */
-    u8 pad2284[8];
-    s32 controlState; /* 0x228C */
-    u8 pad2290[0x18];
-    s32 inputA; /* 0x22A8 */
-    s32 groupFirst; /* 0x22AC */
-    u8 pad22B0[4];
-    s32 groupCursor; /* 0x22B4 */
-    s32 inputB; /* 0x22B8 */
-    s32 cursor; /* 0x22BC */
-    s32 itemCount; /* 0x22C0 */
-    char *title; /* 0x22C4 */
-    char **itemNames; /* 0x22C8 */
-    s32 charCol; /* 0x22CC */
-    s32 charRow; /* 0x22D0 */
-    char nameStorage[32]; /* 0x22D4 */
-    s32 entryCursor; /* 0x22F4 */
-    s32 entryFirst;  /* 0x22F8 */
-    s32 frameColumn; /* 0x22FC: column cursor within the selected frame row */
-    s32 frameFirst; /* 0x2300 */
-    s32 frameCursor; /* 0x2304 */
-    EvtRuntimeGroup *frameGroup; /* 0x2308: selected entry from groups */
-    u8 pad230C[0x4];
-    s32 value; /* 0x2310: modes D/E pack a 12-bit number and 4-bit option */
-    s32 valueMin; /* 0x2314 */
-    s32 valueMax; /* 0x2318 */
-    f32 floatValue; /* 0x231C */
-    f32 floatMin; /* 0x2320 */
-    f32 floatMax; /* 0x2324 */
-    u8 pad2328[0x68];
-    s32 messageField;
-    s32 compareField;
-    s32 fieldIndex; /* 0x2398: selected column of the motion editor row */
-    u8 pad239C[4];
-    s32 floatSelection; /* 0x23A0 */
-    s32 floatEditMode; /* 0x23A4 */
-    f32 floatEditX; /* 0x23A8 */
-    f32 floatEditY; /* 0x23AC */
-    f32 savedFloatEditX; /* 0x23B0 */
-    f32 savedFloatEditY; /* 0x23B4 */
-    u8 savedOverlayFlag; /* 0x23B8 */
-    u8 pad23B9[3];
-    s32 horizontalOffset; /* 0x23BC */
-    u8 pad23C0[8];
-    s32 tableColumn; /* 0x23C8 */
-    u8 pad23CC[0x14];
-    s32 selectedEntry; /* 0x23E0 */
-    s32 commandFirst; /* 0x23E4 */
-    EvtCommandArgument commandSecond; /* 0x23E8 */
-    EvtCommandArgument commandThird; /* 0x23EC */
-    u8 pad23F0[4];
-    s32 editField; /* 0x23F4 */
-    u8 pad23F8[0x1C];
-    s32 timedActive; /* 0x2414 */
-    u8 pad2418[0x10];
-    s32 pendingWork; /* 0x2428 */
-    s32 pendingResource; /* 0x242C */
-    u8 pad2430[0xC];
-    s32 headerMetadata; /* 0x243C: fourth serialized header word */
-    u8 pad2440[0x50]; /* Native DDS1 allocation ends at 0x2490. */
-} EvtRuntime;
+
+
+extern void fldApplyCameraColorKeyWords(EvtRuntime *runtime, const EvtBlendKey *source);
 
 typedef struct {
     s16 enabled;
@@ -228,7 +105,7 @@ extern u16 D_003BBE7A;
 
 extern u32 evtSkyOverlayEnabled;
 
-extern void kwlnDrawSpriteCell(s32 list, s32 x, s32 y, s32 w, s32 h);
+extern void kwlnDrawSpriteCell(u32 list, s32 x, s32 y, s32 w, s32 h);
 
 extern char D_003BC0C8[]; /* "NAME:" */
 
@@ -303,7 +180,7 @@ void evtResetSkyTaskFlags(void) {
 }
 
 void evtDestroySkyTask(void) {
-    s32 task;
+    KwlnTask *task;
 
     task = kwlnTaskGetTaskByName(evtSkyTaskName);
     if (task != 0) {
@@ -346,7 +223,7 @@ void evtDrawMenuFrame(u32 list, s32 x, s32 y, s32 width, s32 rows, s32 first, s3
     s32 textY;
     s32 index;
 
-    kwlnDrawSpriteCell(list, x, y, width, rows);
+    kwlnDrawSpriteCell((u32)list, x, y, width, rows);
     textX = (x << 4) + 0x7000;
     textY = (y << 3) + 0x7900;
     if (header != NULL) {
@@ -647,7 +524,7 @@ extern const char *D_003BC070[];
 extern const char *D_003AE0D8[];
 extern char D_003BC080[];
 extern char D_003BC088[];
-/* The camp provider owns the scene type (CampScene); the viewer passes its runtime. */
+/* The camp provider owns the scene type (EvtRuntime); the viewer passes its runtime. */
 extern u32 mnuCampGetPrimaryOption(void *scene);
 extern u32 mnuCampGetSecondaryOption(void *scene);
 
@@ -974,7 +851,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
 
 void evtDrawSelectedEntryLabel(s32 list, s32 *sel, s32 x, s32 unused, u8 *base) {
     x += 0x6C0;
-    kwlnDrawSpriteCell(list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
+    kwlnDrawSpriteCell((u32)list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
     sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, 0x7AE0, 0xFEFFFF, 0xE, D_003BC0C8));
     if (sel[2] >= 0) {
         sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + 0x3C0, 0x7AE0, 0xFEFFFF, 0, D_003BC088, base + sel[2] * 32 + 0x24));
@@ -1175,7 +1052,7 @@ s32 func_00238A88(s32 x, s32 y, EvtRuntime *ctx) {
 
 extern char D_003BC240[]; /* "P%d:" */
 extern char D_003BC248[]; /* "   %s" */
-extern s32 evtEventViewerGetPendingNode();
+extern EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *runtime);
 extern EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, char *name);
 
 void evtViewerDrawPendingNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
@@ -1188,7 +1065,7 @@ void evtViewerDrawPendingNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *
     if (ctx->inputB != index) {
         color = 0;
     }
-    slot = *(s8 *)(index + evtEventViewerGetPendingNode(ctx) + 0xC);
+    slot = evtEventViewerGetPendingNode(ctx)->parameterBytes[4 + index];
     if (slot >= 0) {
         node = dds3FindObjectChainNodeByName(dds3GetWorldObject(), ctx->entryName[slot]);
     }
@@ -1766,11 +1643,10 @@ void func_00239E30(s32 list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
     s32 i;
     s32 count = 0;
     s32 style = 0;
-    MdlCtx *model;
+    MdlCtx *model = (MdlCtx *)((EffectObjectData *)ctx->frameGroup->info->data)->modelHolder->resourceHandle;
     EvtMotionValue packed;
     char *loopNames[] = {D_003BC2A8, D_003BBFF0};
 
-    model = (MdlCtx *)((EffectObjectData *)ctx->frameGroup->info->data)->modelHolder->resourceHandle;
     if (ctx->fieldIndex == row) {
         style = 4;
     }
@@ -2382,33 +2258,10 @@ s32 evtPollRuntimeControlReady(void) {
     return 0;
 }
 
-typedef union EvtViewParam {
-    f32 f;
-    s32 i;
-    u32 u;
-    u16 h[2];
-    s16 sh[2];
-    u8 b[4];
-    s8 sb[4];
-} EvtViewParam;
 
-typedef struct EvtViewKey {
-    u16 frame;
-    u16 duration;
-    s32 interpolationMode;
-    EvtViewParam p08;
-    EvtViewParam p0C;
-    EvtViewParam p10;
-    EvtViewParam p14;
-    EvtViewParam p18;
-    EvtViewParam p1C;
-    u8 pad20[0xC];
-    void *payload;
-    struct EvtViewKey *next;
-    struct EvtViewKey *previous;
-} EvtViewKey;
 
-typedef char EvtViewKey_size_must_be_0x38[(sizeof(EvtViewKey) == 0x38) ? 1 : -1];
+
+typedef char EvtViewKey_size_must_be_0x38[(sizeof(EvtRuntimeChild) == 0x38) ? 1 : -1];
 
 extern void fldDrawPackedRgbEditor(void *packetList, s32 x, s32 y,
                                    s32 selected, u32 color,
@@ -2434,7 +2287,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEC20);
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEC30);
 
 s32 func_0023C248(EvtRuntime *runtime) {
-    EvtViewKey *key;
+    EvtRuntimeChild *key;
     u8 *channel;
     s32 packetList;
     s32 selectedChannel;
@@ -2444,8 +2297,8 @@ s32 func_0023C248(EvtRuntime *runtime) {
     s32 style;
 
     packetList = sdfCreateResetPacketList();
-    kwlnDrawSpriteCell(packetList, 0x78, 0x138, 0xC, 9);
-    key = (EvtViewKey *)evtEventViewerGetPendingNode(runtime);
+    kwlnDrawSpriteCell((u32)packetList, 0x78, 0x138, 0xC, 9);
+    key = evtEventViewerGetPendingNode(runtime);
 
     style = runtime->editField == 0 ? 6 : 0;
     sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
@@ -2635,7 +2488,336 @@ s32 func_0023C248(EvtRuntime *runtime) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023CA60);
+
+
+
+
+/* Type-0x19 node payload: the producer allocates and the writer emits 0x40 bytes. */
+
+
+typedef char EvtCameraColorPayload_size_must_be_0x40[
+    (sizeof(EvtCameraColorPayload) == 0x40) ? 1 : -1];
+
+/* Edit the camera color channels and the three speed/alpha parameter banks. */
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2C0);
+
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2C8);
+
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2D0);
+
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2D8);
+
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2E0);
+
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2E8);
+
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2F0);
+
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2F8);
+
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC300);
+
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC308);
+
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC310);
+
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC318);
+
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC320);
+
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC328);
+
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC330);
+
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC338);
+
+INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC340);
+
+s32 func_0023CA60(EvtRuntime *runtime) {
+    EvtCameraColorPayload *key;
+    s32 packetList;
+    s32 selectedChannel;
+    s32 color;
+    s32 style;
+    s32 bank;
+    s32 panelX;
+    s32 textX;
+    s32 textY;
+    s32 step;
+
+    packetList = sdfCreateResetPacketList();
+    panelX = 0x138;
+    kwlnDrawSpriteCell((u32)packetList, panelX, 0x30, 0xD, 0x10);
+    key = evtEventViewerGetPendingNode(runtime)->payload;
+
+    style = runtime->colorSelection == 0 ? 6 : 0;
+    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+        0x7000 + (panelX << 4), 0x7A80, 0xFEFFFF, 0, "SPEED:"));
+    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+        0x7000 + (panelX << 4), 0x7A80, 0xFEFFFF, style, "       %d", key->parameters.x));
+
+    if (runtime->colorSelection > 0 && runtime->editField < 4) {
+        selectedChannel = runtime->colorSelection - 1;
+    } else {
+        selectedChannel = -1;
+    }
+    color = key->parameters.w[0] | (key->parameters.w[1] << 8) | (key->parameters.w[2] << 16);
+    fldDrawPackedRgbEditor((void *)packetList, 0x7000 + (panelX << 4), 0x7AE0,
+                           selectedChannel, color, 0);
+
+    style = runtime->colorSelection == 4 ? 6 : 0;
+    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+        0x7000 + (panelX << 4), 0x7C00, 0xFEFFFF, 0, D_003BC328));
+    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+        0x7000 + (panelX << 4), 0x7C00, 0xFEFFFF, style, D_003BC290, key->parameters.w[3]));
+
+    style = runtime->colorSelection == 5 ? 6 : 0;
+    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+        0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, 0, D_003BC330));
+    switch ((s32)key->parameters.flagWord) {
+    case 0:
+        sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+            0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_003AEC00));
+        break;
+    case 1:
+        sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+            0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_003AEC10));
+        break;
+    case 2:
+        sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+            0x7000 + (panelX << 4), 0x7C60, 0xFEFFFF, style, D_003AEC20));
+        break;
+    }
+
+    bank = 0;
+    textX = 0x7000 + (panelX << 4);
+    for (; bank < 3; bank++) {
+        style = runtime->colorSelection == bank * 2 + 6 ? 6 : 0;
+        textY = 0x7900 + ((bank * 36 + 144) << 3);
+        sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+            textX, textY, 0xFEFFFF, 0,
+            "S%d SPEED:", bank));
+        sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+            textX, textY, 0xFEFFFF, style,
+            "          %d", key->parameters.y[bank]));
+
+        style = runtime->colorSelection == bank * 2 + 7 ? 6 : 0;
+        textY = 0x7900 + ((bank * 36 + 156) << 3);
+        sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+            textX, textY, 0xFEFFFF, 0,
+            "S0 ALPHA:"));
+        sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
+            textX, textY, 0xFEFFFF, style,
+            "          %d", key->parameters.z[bank]));
+    }
+
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface,
+                                     (SdfListHead *)packetList);
+    fldApplyCameraColorKeyWords(runtime, &key->parameters);
+
+    step = 0;
+    if ((D_00324510.incTen & 2) != 0) {
+        if (runtime->colorSelection >= 11) {
+            runtime->colorSelection = 0;
+        } else {
+            runtime->colorSelection++;
+        }
+    } else if ((D_00324510.decTen & 2) != 0) {
+        if (runtime->colorSelection <= 0) {
+            runtime->colorSelection = 11;
+        } else {
+            runtime->colorSelection--;
+        }
+    } else if ((D_00324510.decOne & 2) != 0) {
+        step = -1;
+    } else if ((D_00324510.incOne & 2) != 0) {
+        step = 1;
+    } else if ((D_00324510.unk29 & 2) != 0) {
+        step = -10;
+    } else if ((D_00324510.unk2B & 2) != 0) {
+        step = 10;
+    }
+
+    if (step != 0) {
+        switch (runtime->colorSelection) {
+        case 0:
+            key->parameters.x += step;
+            if (key->parameters.x < 0) {
+                key->parameters.x = 0;
+            }
+            if (key->parameters.x >= 1001) {
+                key->parameters.x = 1000;
+            }
+            break;
+        case 1:
+            key->parameters.w[0] += step;
+            if (key->parameters.w[0] < 0) {
+                key->parameters.w[0] = 0;
+            }
+            if (key->parameters.w[0] >= 256) {
+                key->parameters.w[0] = 255;
+            }
+            break;
+        case 2:
+            key->parameters.w[1] += step;
+            if (key->parameters.w[1] <= step && step < 0) {
+                key->parameters.w[1] = 255;
+            }
+            if (key->parameters.w[1] >= step + 255 && step > 0) {
+                key->parameters.w[1] = 0;
+            }
+            if (key->parameters.w[1] < 0) {
+                key->parameters.w[1] = 0;
+            }
+            if (key->parameters.w[1] >= 256) {
+                key->parameters.w[1] = 255;
+            }
+            break;
+        case 3:
+            key->parameters.w[2] += step;
+            if (key->parameters.w[2] <= step && step < 0) {
+                key->parameters.w[2] = 255;
+            }
+            if (key->parameters.w[2] >= step + 255 && step > 0) {
+                key->parameters.w[2] = 0;
+            }
+            if (key->parameters.w[2] < 0) {
+                key->parameters.w[2] = 0;
+            }
+            if (key->parameters.w[2] >= 256) {
+                key->parameters.w[2] = 255;
+            }
+            break;
+        case 4:
+            key->parameters.w[3] += step;
+            if (key->parameters.w[3] <= step && step < 0) {
+                key->parameters.w[3] = 255;
+            }
+            if (key->parameters.w[3] >= step + 255 && step > 0) {
+                key->parameters.w[3] = 0;
+            }
+            if (key->parameters.w[3] < 0) {
+                key->parameters.w[3] = 0;
+            }
+            if (key->parameters.w[3] >= 256) {
+                key->parameters.w[3] = 255;
+            }
+            break;
+        case 5:
+            key->parameters.flagWord += step;
+            if ((s32)key->parameters.flagWord <= step && step < 0) {
+                key->parameters.flagWord = 2;
+            }
+            if ((s32)key->parameters.flagWord >= step + 2 && step > 0) {
+                key->parameters.flagWord = 0;
+            }
+            if ((s32)key->parameters.flagWord < 0) {
+                key->parameters.flagWord = 0;
+            }
+            if ((s32)key->parameters.flagWord >= 3) {
+                key->parameters.flagWord = 2;
+            }
+            break;
+        case 6:
+            key->parameters.y[0] += step;
+            if (key->parameters.y[0] <= step && step < 0) {
+                key->parameters.y[0] = 1000;
+            }
+            if (key->parameters.y[0] >= step + 1000 && step > 0) {
+                key->parameters.y[0] = 0;
+            }
+            if (key->parameters.y[0] < 0) {
+                key->parameters.y[0] = 0;
+            }
+            if (key->parameters.y[0] >= 1001) {
+                key->parameters.y[0] = 1000;
+            }
+            break;
+        case 7:
+            key->parameters.z[0] += step;
+            if (key->parameters.z[0] <= step && step < 0) {
+                key->parameters.z[0] = 255;
+            }
+            if (key->parameters.z[0] >= step + 255 && step > 0) {
+                key->parameters.z[0] = 0;
+            }
+            if (key->parameters.z[0] < 0) {
+                key->parameters.z[0] = 0;
+            }
+            if (key->parameters.z[0] >= 256) {
+                key->parameters.z[0] = 255;
+            }
+            break;
+        case 8:
+            key->parameters.y[1] += step;
+            if (key->parameters.y[1] <= step && step < 0) {
+                key->parameters.y[1] = 1000;
+            }
+            if (key->parameters.y[1] >= step + 1000 && step > 0) {
+                key->parameters.y[1] = 0;
+            }
+            if (key->parameters.y[1] < 0) {
+                key->parameters.y[1] = 0;
+            }
+            if (key->parameters.y[1] >= 1001) {
+                key->parameters.y[1] = 1000;
+            }
+            break;
+        case 9:
+            key->parameters.z[1] += step;
+            if (key->parameters.z[1] <= step && step < 0) {
+                key->parameters.z[1] = 255;
+            }
+            if (key->parameters.z[1] >= step + 255 && step > 0) {
+                key->parameters.z[1] = 0;
+            }
+            if (key->parameters.z[1] < 0) {
+                key->parameters.z[1] = 0;
+            }
+            if (key->parameters.z[1] >= 256) {
+                key->parameters.z[1] = 255;
+            }
+            break;
+        case 10:
+            key->parameters.y[2] += step;
+            if (key->parameters.y[2] <= step && step < 0) {
+                key->parameters.y[2] = 1000;
+            }
+            if (key->parameters.y[2] >= step + 1000 && step > 0) {
+                key->parameters.y[2] = 0;
+            }
+            if (key->parameters.y[2] < 0) {
+                key->parameters.y[2] = 0;
+            }
+            if (key->parameters.y[2] >= 1001) {
+                key->parameters.y[2] = 1000;
+            }
+            break;
+        case 11:
+            key->parameters.z[2] += step;
+            if (key->parameters.z[2] <= step && step < 0) {
+                key->parameters.z[2] = 255;
+            }
+            if (key->parameters.z[2] >= step + 255 && step > 0) {
+                key->parameters.z[2] = 0;
+            }
+            if (key->parameters.z[2] < 0) {
+                key->parameters.z[2] = 0;
+            }
+            if (key->parameters.z[2] >= 256) {
+                key->parameters.z[2] = 255;
+            }
+            break;
+        }
+    }
+
+    if (D_00324510.cancel < 0) {
+        runtime->colorEditorActive = 0;
+        return 0;
+    }
+    return 1;
+}
+
 
 extern s32 effUpdateCh72Params(void);
 extern s32 effEventAdvanceBlurTemplateSetup(void);
@@ -2740,7 +2922,7 @@ s32 evtIndexGroupTypeElevenChildren(EvtRuntime *runtime) {
         if (group->type == 0xB) {
             EvtRuntimeChild *child;
             for (child = group->children; child != NULL; child = child->next) {
-                child->unk02 = index++;
+                child->duration = index++;
             }
         }
     }
@@ -3160,10 +3342,10 @@ void func_0023DFA8(s32 output, s32 mode, EvtRuntime *runtime) {
             s32 i;
             u16 value;
 
-            value = child->unk04;
+            value = child->value04;
             record.groupType = group->type;
-            record.start = child->unk00;
-            record.span = child->unk02;
+            record.start = child->frame;
+            record.span = child->duration;
             record.value = value;
             for (i = 0; i < 8; i++) {
                 record.body[i] = child->body.words[i];
@@ -3173,9 +3355,9 @@ void func_0023DFA8(s32 output, s32 mode, EvtRuntime *runtime) {
                     record.span = 0;
                 } else {
                     if (child->next != NULL) {
-                        record.span = child->next->unk00 - child->unk00;
+                        record.span = child->next->frame - child->frame;
                     } else {
-                        record.span = runtime->frameRange.f.end - child->unk00;
+                        record.span = runtime->frameRange.f.end - child->frame;
                     }
                 }
             }
@@ -3620,7 +3802,7 @@ s32 evtFindTaskById(u32 taskId) {
     u8 taskName[32];
 
     evtFormatTaskName(taskId, taskName);
-    return kwlnTaskGetTaskByName(taskName);
+    return (s32)kwlnTaskGetTaskByName(taskName);
 }
 
 /* The script-visible second payload word has a task-kind-specific meaning. */
@@ -3734,42 +3916,6 @@ void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
     }
     return found;
 }
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2C0);
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2C8);
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2D0);
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2D8);
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2E0);
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2E8);
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2F0);
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC2F8);
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC300);
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC308);
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC310);
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC318);
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC320);
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC328);
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC330);
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC338);
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC340);
-
-INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC348);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC350);
 
