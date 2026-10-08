@@ -206,8 +206,8 @@ u32 func_00159BB0(void) {
     return 0xf;
 }
 
-s32 effGetResourceFirstWord(s32 index) {
-    return ((BillObj *)effBillResourceOwners[index])->child->value;
+SdfTex *effGetBillResourceTexture(s32 index) {
+    return (SdfTex *)((BillObj *)effBillResourceOwners[index])->child->value;
 }
 
 void effCopyVector(dst, src)
