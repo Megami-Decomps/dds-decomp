@@ -3,6 +3,7 @@
 
 #include "mnu.h"
 #include "mnu_shop.h"
+#include "mnu_scroll_panel.h"
 
 struct EffectList;
 
@@ -26,7 +27,7 @@ typedef struct StaffMenuWork {
     u32 secondaryImage;
     u32 images[3];
     u32 extraImages[2];
-    u32 scrollPanel;
+    MenuScrollPanel *scrollPanel;
     u8 background[0x6B0];
     u8 partyPanel[0x124];
     s32 displayMode;
