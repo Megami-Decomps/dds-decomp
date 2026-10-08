@@ -2,6 +2,7 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "sdf_dev_state.h"
 #include "bill_object_api.h"
 #include "sdf_chip.h"
 #include "eff_ref_obj.h"
@@ -3891,10 +3892,61 @@ void effSubmitIndexedRenderPacket(u32 index) {
     effCurrentRenderPacket = 0;
 }
 
-extern EffQuadWork *func_002A7B68(FileJob *job);
+extern EffQuadWork *func_002A7B68(FileJobPayload *job);
 void effDuplicateRenderResourceOwner(EffQuadWork *work, const EffQuadWork *source);
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002A7B68);
+extern EffPacketParams D_003DCAA0;
+extern u32 D_0037EC10[];
+extern u32 D_0037EC20[];
+
+EffQuadWork *func_002A7B68(FileJobPayload *job) {
+    EffQuadWork *work = sdfAllocSizeClassBlock(sizeof(EffQuadWork));
+    void *buffer;
+
+    memset(work, 0, sizeof(EffQuadWork));
+    VU0_STORE_VF(vf0, work->position);
+    VU0_STORE_VF(vf0, work->orientation);
+    work->scale = 1.0f;
+    work->color = 0x80808080;
+    work->billHandle = NULL;
+    work->reference = NULL;
+    work->assetHandle = (u32)sdfCreateAssetWithDrawEntries();
+    func_002DA420((SdfAsset *)work->assetHandle, 1.0f);
+    memset(&D_003DCAA0, 0, sizeof(EffPacketParams));
+    D_003DCAA0.primitive = 0x4000;
+    D_003DCAA0.parameters = D_0037EC10;
+    D_003DCAA0.colors = D_0037EC20;
+    D_003DCAA0.parameterCount = 2;
+    D_003DCAA0.vertexCount = 4;
+    if (job == NULL) {
+        return work;
+    }
+    work->sourceKind = job->option;
+    buffer = fileResolvePrimaryBuffer(job);
+    memcpy(&work->source, buffer, sizeof(work->source));
+    buffer = fileResolveSecondaryBuffer(job);
+    if (buffer != NULL) {
+        switch (job->primary.selector) {
+        case 1:
+            work->billHandle = billCreateIndexed(0, (u32)buffer);
+            break;
+        case 2:
+            work->billHandle = billCreateIndexed(1, (u32)buffer);
+            break;
+        case 4:
+            work->billHandle = effCreateBillboardSharingIndexedResource(*(s32 *)buffer);
+            break;
+        case 7:
+            work->reference = func_0029C230((u32)buffer);
+            break;
+        }
+        if (work->billHandle != NULL) {
+            billMarkKindOneFlag(work->billHandle);
+            billSetBillboardMode(work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
+        }
+    }
+    return work;
+}
 
 void effReleaseRenderResources(EffQuadWork *work) {
     if (work->billHandle != 0) {
@@ -9122,7 +9174,7 @@ u32 fileLoadEffectSlotHelp(void) {
     FileJob *entry;
     EffFileResourceRecord *resource;
     u8 *buffer;
-    u32 command;
+    DevState *command;
     u32 totalLength;
     u32 dataLength;
     u32 allocation;

@@ -3978,7 +3978,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
     unit->motionRate = rate;
     unit->unkEC = index;
     unit->effectState = mode;
-    rate = rate * (30.0f / *(s8 *)(context + 0x490));
+    rate = rate * (30.0f / ((BtlState *)context)->timingRate);
     rate *= *(f32 *)(context + 0x494);
     evtPrepareUnitMotionState(unit->ext, index, start, end, mode);
     model = unit->ext->owner;
@@ -4078,7 +4078,7 @@ void btlRefreshUnitMotionSelection(u8 *unit) {
         }
     }
     *(f32 *)(unit + 0x104) = rate;
-    speed = rate * (30.0f / *(s8 *)(context + 0x490));
+    speed = rate * (30.0f / ((BtlState *)context)->timingRate);
     speed *= *(f32 *)(context + 0x494);
     *(s32 *)(unit + 0xFC) = index;
     evtUnitSetStoredParameter(*(struct EvtUnit **)(unit + 0x320), index);
@@ -4173,7 +4173,7 @@ void btlApplyUnitModelScaledValue(BtlUnit *object) {
     object->updateFlags &= ~1;
     volume = object->motionRate;
     object->ext->owner->first->frameStep =
-        volume * (30.0f / (f32)*(s8 *)(context + 0x490));
+        volume * (30.0f / (f32)((BtlState *)context)->timingRate);
 }
 
 void btlResetUnitModelProgress(BtlUnit *object) {
@@ -4414,8 +4414,8 @@ void btlSetUnitRotation(u8 *object, void *rotation) {
     }
 }
 
-void btlCopyUnitRotationQuaternion(u8 *object, void *position) {
-    PCP_COPY_VECTOR(position, object + 0x70);
+void btlCopyUnitRotationQuaternion(BtlUnit *unit, void *dst) {
+    PCP_COPY_VECTOR(dst, unit->orientation);
 }
 
 extern void evtSetUnitRgbTransition(struct EvtUnit *, s32, u32);
@@ -7989,7 +7989,7 @@ void func_001DF410(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to)
     if (unit->flags & 2) {
         btlClearAllUnitDefeatCandidates();
         btlFlagMatchingUnitsDefeatCandidate(unit->flags & 0x600);
-        btlCopyUnitRotationQuaternion((u8 *)unit, (s128 *)quaternion);
+        btlCopyUnitRotationQuaternion(unit, quaternion);
         pose = effMiscRandMod(0, 4);
         fov = action->camera.fov;
         from->fov = fov;
@@ -8064,7 +8064,7 @@ void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *action, BtlCamState 
     if (flags & 2) {
         btlClearAllUnitDefeatCandidates();
         btlFlagMatchingUnitsDefeatCandidate(flags & 0x600);
-        btlCopyUnitRotationQuaternion((u8 *)unit, quat);
+        btlCopyUnitRotationQuaternion(unit, quat);
         pose = effMiscRandMod(0, 4);
         fov = action->camera.fov;
         from->fov = fov;
@@ -8150,7 +8150,7 @@ void func_001DFAE0(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
         } else {
             func_001E1288(action, from, 1);
         }
-        btlCopyUnitRotationQuaternion((u8 *)unit, quat);
+        btlCopyUnitRotationQuaternion(unit, quat);
         btlUnitGetMuzzlePosVU(unit);
         VU0_STORE_VF(vf10, muzzle);
         VU0_LOAD_VF(vf10, muzzle);
@@ -8283,7 +8283,7 @@ void btlSetupCameraPoseAimUnit(BtlLinkedCommand *action, BtlCamState *from, BtlC
     f32 fov;
     btlClearAllUnitDefeatCandidates();
     btlFlagMatchingUnitsDefeatCandidate(unit->flags & 0x600);
-    btlCopyUnitRotationQuaternion((u8 *)unit, quat);
+    btlCopyUnitRotationQuaternion(unit, quat);
     fov = action->camera.fov;
     from->fov = fov;
     if (func_001D6428(unit, 1) == 0) {
@@ -9605,7 +9605,7 @@ void btlInitTargetCursorAndFacing(BtlLinkedCommand *action, BtlCamState *state) 
     if (unit->flags & 0x80000) {
         btlUnitGetPosVU(unit, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, position);
-        btlCopyUnitRotationQuaternion((u8 *)unit, (s128 *)quaternion);
+        btlCopyUnitRotationQuaternion(unit, quaternion);
         VU0_LOAD_VF(vf10, quaternion);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, offset);
