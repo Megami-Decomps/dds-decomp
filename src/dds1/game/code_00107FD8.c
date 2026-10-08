@@ -10,6 +10,8 @@
 #include "scr.h"
 #include "kwln_task_lifecycle.h"
 
+extern void mnuCreateConfigTasks(s32 mode);
+
 enum {
     EVT_PACKET_LIST_BYTES = 0x20,
     EVT_GS_COMMAND_BYTES = 0x30,
