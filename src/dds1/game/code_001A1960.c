@@ -3230,8 +3230,6 @@ void btlReleaseResourceBlock(void) {
     }
 }
 
-extern s32 func_001ACAE0(void);
-extern void func_001AC9E8(s32, s32);
 extern void btlClearTaskActorSlots(void);
 extern s32 func_001AD758(s32);
 
@@ -3247,7 +3245,7 @@ s32 btlResetSceneSlotFades(void) {
     memset(D_003BD840[0], 0, sizeof(*D_003BD840[0]));
     memset(D_003BD840[1], 0, sizeof(*D_003BD840[1]));
     btlTrackedTaskHandles->fadeKindsCached = 0;
-    func_001ACAE0();
+    btlCountSceneSlots();
     if (battle->mode == 1) {
         kind = 0;
         count = btlTrackedTaskHandles->fadeKindACount;
@@ -3272,7 +3270,7 @@ s32 btlResetSceneSlotFades(void) {
         (*bank)->unk6C[i] = 30.0f;
         (*bank)->unk8C[i] = 130;
     }
-    func_001AC9E8(kind, count);
+    btlInitializeActorSlotOrder(kind, count);
     btlClearTaskActorSlots();
     return func_001AD758(kind);
 }
@@ -3321,7 +3319,7 @@ typedef struct ActorOrder6 {
 extern const ActorOrder12 D_003A2228;
 extern const ActorOrder6 D_003A2258;
 
-void func_001AC9E8(s32 selector, s32 count) {
+void btlInitializeActorSlotOrder(s32 selector, s32 count) {
     ActorOrder12 primaryOrder = D_003A2228;
     ActorOrder6 secondaryOrder = D_003A2258;
     s32 *order = selector != 0 ? primaryOrder.entries : secondaryOrder.entries;
@@ -3338,9 +3336,8 @@ void func_001AC9E8(s32 selector, s32 count) {
     }
 }
 
-extern s32 fldCountSceneFadeKinds(BattleController *, s32 *);
 
-s32 func_001ACAE0(void) {
+s32 btlCountSceneSlots(void) {
     BattleController *scene;
     s32 fadeCounts[4];
 
