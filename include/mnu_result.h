@@ -66,14 +66,20 @@ typedef struct BrsProgressAnimation {
     s8 unk40;
     u8 pad41[0x27];
 #else
-    u8 pad00[0x10];
+    s8 drawPhase;
+    u8 pad01[7];
+    s32 alpha;
+    u8 pad0C[4];
     s8 state;
     u8 pad11[7];
     s16 level;
     u8 pad1A[2];
     s32 remaining;
     s32 applied;
-    u8 pad24[0x44];
+    u8 pad24[0x3C];
+    s8 progressInitialized;
+    u8 pad61[3];
+    s32 previousProgress;
 #endif
 } BrsProgressAnimation;
 
@@ -178,6 +184,14 @@ typedef char BrsSkillPackageWork_staffSlots_offset_check[
 typedef char BrsProgressAnimation_size_must_be_0x68[(sizeof(BrsProgressAnimation) == 0x68) ? 1 : -1];
 typedef char BrsSkillPackageWork_levelAnimation_offset_check[
     ((u32)&((BrsSkillPackageWork *)0)->levelAnimation == 0xB060) ? 1 : -1];
+typedef char BrsProgressAnimation_drawPhase_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->drawPhase == 0x00) ? 1 : -1];
+typedef char BrsProgressAnimation_alpha_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->alpha == 0x08) ? 1 : -1];
+typedef char BrsProgressAnimation_progressInitialized_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->progressInitialized == 0x60) ? 1 : -1];
+typedef char BrsProgressAnimation_previousProgress_offset_check[
+    ((u32)&((BrsProgressAnimation *)0)->previousProgress == 0x64) ? 1 : -1];
 typedef char BrsSkillPackageWork_profileAnimation_offset_check[
     ((u32)&((BrsSkillPackageWork *)0)->profileAnimation == 0xB3A0) ? 1 : -1];
 typedef char BrsSkillPackageWork_earnedItem_offset_check[
