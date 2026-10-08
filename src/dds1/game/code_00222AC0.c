@@ -1092,7 +1092,58 @@ u32 func_00224CD8(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00222AC0", func_00224F48);
+u32 func_00224F48(void) {
+    EvtUnit *unit;
+    EffWorldNode *actor;
+    f32 rotation[4] __attribute__((aligned(16)));
+    f32 referenceAngle;
+    f32 angleDelta;
+    s32 frames;
+
+    unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
+    if (unit == NULL) {
+        return 1;
+    }
+    unit->motionTicks = 0;
+    if ((unit->unkD8Flags & 1) == 0) {
+        return 1;
+    }
+    actor = (EffWorldNode *)dds3FindWorldObjectNodeByKey(
+        dds3GetWorldObject(), scrReadIntParameter(0), 5);
+    if (actor == NULL) {
+        return 1;
+    }
+
+    effObjFetchInnerSecondVecNorm(actor);
+    referenceAngle = -(effMiscComputeQuaternionRotatedReferenceAngle() * 57.29577637f);
+    func_002E7F20(0.0f, unit->unkDC * 0.017453293f, 0.0f);
+    /* This is the first write to the vector supplied to the transition. */
+    VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+
+    frames = scrReadIntParameter(1);
+    if (frames >= 101) {
+        frames = 100;
+    }
+    angleDelta = evtGetShortestAngleDelta(referenceAngle, unit->unkDC);
+    if (angleDelta < 0.0f) {
+        angleDelta = -angleDelta;
+    }
+    if (angleDelta > 90.0f) {
+        angleDelta = 90.0f;
+    }
+    frames = (frames * (s32)angleDelta) / 90;
+    frames = (frames * 40) / 100;
+    if (frames <= 0) {
+        frames = 1;
+    }
+    if (frames > 100) {
+        frames = 100;
+    }
+    evtBeginVectorTransition(unit, (s128 *)rotation, frames);
+    evtResetObjectPendingValue(actor);
+    return 1;
+}
+
 
 u32 evtUnitClearFlagBit(void) {
     s32 id;
