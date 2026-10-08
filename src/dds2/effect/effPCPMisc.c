@@ -483,14 +483,7 @@ typedef struct EffPCPFadeTimerLongParams {
     s32 duration;
     s32 fadeIn;
     s32 fadeOut;
-    u32 color;
-    u8 pad10[0x0C];
-    u32 unk1C;
-    u32 unk20;
-    u32 unk24;
-    u32 unk28;
-    u32 width;
-    u32 height;
+    EffBlurQuad source;
 } EffPCPFadeTimerLongParams;
 
 typedef struct EffPCPFadeTimerLong {
@@ -2730,7 +2723,7 @@ void *effPcpCopyWorkLong(src)
     dst->params = *src;
     dst->colorFrom = 0x80808080;
     dst->frame = 0;
-    dst->colorTo = src->color;
+    dst->colorTo = src->source.color;
     return dst;
 }
 
@@ -2764,12 +2757,12 @@ void effPcpFadeTimerLongUpdate(EffPCPFadeTimerLong *work) {
         return;
     }
     fadeIn = work->params.fadeIn;
-    work->params.unk1C = 0;
-    work->params.unk20 = 0;
-    work->params.unk24 = 0;
-    work->params.unk28 = 0;
-    work->params.width = 0x200;
-    work->params.height = 0x1C0;
+    work->params.source.x = 0;
+    work->params.source.y = 0;
+    work->params.source.left = 0;
+    work->params.source.top = 0;
+    work->params.source.right = 0x200;
+    work->params.source.bottom = 0x1C0;
     fadeOut = work->params.fadeOut;
     if (frame < fadeIn && fadeIn != 0) {
         t = (f32)frame / (f32)fadeIn;
@@ -2778,8 +2771,8 @@ void effPcpFadeTimerLongUpdate(EffPCPFadeTimerLong *work) {
     } else {
         t = 1.0f;
     }
-    work->params.color = effMultiplyPackedColors(effBlendColor(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
-    effDrawBlurRectangle(&work->params.color);
+    work->params.source.color = effMultiplyPackedColors(effBlendColor(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
+    effDrawBlurRectangle(&work->params.source.color);
     work->frame++;
 }
 
@@ -6292,4 +6285,3 @@ INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_00436438);
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_0043643C);
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_0043643D);
-
