@@ -151,7 +151,6 @@ extern char D_003E7774[];
 
 extern char D_003E773C[];
 
-extern void mnuHandlePanelListPageJumpInput();
 
 extern char D_003E7758[];
 
@@ -2513,7 +2512,7 @@ s32 mnuUpdateSkillListInput(KwlnTask *callback) {
     if (buttons & 0x20) {
         mnuAdvanceWindowListSelection((MenuWindowContainer *)list[8 + menu[11]]);
     }
-    mnuHandlePanelListPageJumpInput(list[8 + menu[11]], &buttons);
+    mnuHandlePanelListPageJumpInput((MenuWindowContainer *)list[8 + menu[11]], &buttons);
     mnuClearWindowPanelTransitionFlag((MenuWindowContainer *)list[8 + menu[11]]);
     mnuPlayInputSound(0, buttons, &((MenuWindowContainer *)list[8 + menu[11]])->list->stateFlags);
     if (buttons & 2) {
