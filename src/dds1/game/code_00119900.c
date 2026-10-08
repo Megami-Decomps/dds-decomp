@@ -553,7 +553,49 @@ s32 ptyGetAverageLevel(void) {
 
 INCLUDE_ASM(const s32, "game/code_00119900", ptyAddUnit);
 
-INCLUDE_ASM(const s32, "game/code_00119900", ptyRemoveUnit);
+extern s32 D_0032ACA8[128];
+extern void mdlFlagClear(s32);
+extern s32 ptyRebalanceFrontline(s32);
+
+s32 ptyRemoveUnit(s32 unitId) {
+    s32 partyIndex = dds3FindEntryIndex(unitId);
+    s32 i;
+    s32 completeSlotCount;
+    s32 *modelFlag;
+    DatPartyRecord *entry;
+
+    if (partyIndex < 0) {
+        return 0;
+    }
+
+    memcpy(&datGameState->templates[unitId], &datGameState->party[partyIndex], sizeof(DatPartyRecord));
+    for (i = partyIndex; i < 4; i++) {
+        memcpy(&datGameState->party[i], &datGameState->party[i + 1], sizeof(DatPartyRecord));
+    }
+    memset(&datGameState->party[i], 0, sizeof(DatPartyRecord));
+
+    modelFlag = &D_0032ACA8[unitId * 4];
+    for (i = 0; i < 4U; i++) {
+        if (*modelFlag != 0) {
+            mdlFlagClear(*modelFlag);
+        }
+        modelFlag++;
+    }
+
+    completeSlotCount = 0;
+    entry = datGameState->party;
+    for (i = 0; i < PTY_ACTIVE_ROSTER_COUNT; i++) {
+        if ((entry->flags & 3) == 3) {
+            completeSlotCount++;
+        }
+        entry++;
+    }
+    if (completeSlotCount != 0) {
+        return 1;
+    }
+    ptyRebalanceFrontline(1);
+    return 1;
+}
 
 u32 func_0011B140(void) {
     return 0;

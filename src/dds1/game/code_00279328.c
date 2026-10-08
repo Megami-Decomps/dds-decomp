@@ -16,9 +16,9 @@ extern void mnuDrawWindowContainer(s32, s32, s32, s32, s32);
 extern u32 mnuHasSelectedListNodeId(s32);
 extern s32 D_003BAA98;
 extern s32 datGameState;
-extern s32 mnuIsEntryCostUnaffordable(u16, s32);
+extern s32 mnuIsEntryCostUnaffordable(u16, struct DatPartyRecord *);
 extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
-extern void mnuConsumeEntryCost(s32, s32);
+extern s32 mnuConsumeEntryCost(s32, struct DatPartyRecord *);
 extern void mnuInitPartyPanelSlots(s32);
 extern void mnuUpdateHandleStates(s32);
 extern void func_00280048(s32);
@@ -205,11 +205,11 @@ s32 ptySkillMenuUseSelectedInField(id, context)
     s32 window = context + 0x15C;
     s32 slotA = datGameState + ((SkillMenuContext *)context)->selection->cursor->index * 0x1A4 + 0xA60;
     s32 slotB = datGameState + ((SkillMenuContext *)context)->target->cursor->index * 0x1A4 + 0xA60;
-    if (mnuIsEntryCostUnaffordable(id, slotA) != 0) {
+    if (mnuIsEntryCostUnaffordable(id, (struct DatPartyRecord *)slotA) != 0) {
         return 0;
     }
     if (ptySkillApplyFieldUseEffect(window, id, slotA, slotB) != 0) {
-        mnuConsumeEntryCost(id, slotA);
+        mnuConsumeEntryCost(id, (struct DatPartyRecord *)slotA);
         mnuInitPartyPanelSlots(context + 0x7EC);
         mnuUpdateHandleStates(window);
         func_00280048(window);
@@ -233,7 +233,7 @@ void mnuFlagMatchingEntries(s32 context) {
     SkillLink *link = (SkillLink *)((SkillMenuContext *)context)->menu->selected->list->first;
     if (link != NULL) {
         do {
-            if (mnuIsEntryCostUnaffordable(link->id, slot)) {
+            if (mnuIsEntryCostUnaffordable(link->id, (struct DatPartyRecord *)slot)) {
                 link->flags |= 1;
             }
             link = link->next;

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dat_state.h"
+#include "mnu_list.h"
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
@@ -11,18 +12,6 @@ typedef struct MenuSearchState {
     s8 selectedIndex;
     s16 targetId;
 } MenuSearchState;
-
-typedef struct MenuSearchNode {
-    u8 pad0[0x58];
-    struct MenuSearchNode *next;
-    u8 pad5C[0x14];
-    DatPartyRecord *value; /* 0x70: party record carried by the SDK node */
-} MenuSearchNode;
-
-typedef struct MenuSearchList {
-    u8 pad0[0x10];
-    MenuSearchNode *head;
-} MenuSearchList;
 
 typedef struct MantraNodePos {
     u32 kind : 4;
@@ -66,7 +55,7 @@ typedef struct MantraMenuWork {
 
 typedef struct MenuSearchObject {
     u8 pad0[4];
-    MenuSearchList *list;
+    struct MenuList *list;
     u8 pad8[0x238];
     MantraMenuWork work;
     u8 paddingC04[4];
@@ -153,7 +142,7 @@ s32 func_0028F380(MenuSearchObject *object, MenuSearchState *state) {
     MantraNodePos *record;
     MantraNodePos *entry;
     MantraMenuSlot *slot;
-    MenuSearchNode *node;
+    struct MenuListNode *node;
     DatPartyRecord *party;
     const MantraProfileRequirement *requirements;
     u32 value;
@@ -196,10 +185,10 @@ s32 func_0028F380(MenuSearchObject *object, MenuSearchState *state) {
         requirementCount = 18;
     }
 
-    node = object->list->head;
+    node = object->list->first;
     slotIndex = 0;
     for (; node != 0; slotIndex++, node = node->next) {
-        party = node->value;
+        party = node->partyRecord;
         for (entryIndex = 0; entryIndex < requirementCount; entryIndex++) {
             u16 id = requirements[entryIndex].id;
 
@@ -225,7 +214,7 @@ s32 mnuSelectPreferredMantraNode(MenuSearchObject *object, MenuSearchState *stat
     MantraNodePos *record;
     MantraNodePos *entry;
     MantraNodePos **entries;
-    MenuSearchNode *node;
+    struct MenuListNode *node;
     DatPartyRecord *value;
     s32 i, j;
     s32 cap;
@@ -258,9 +247,9 @@ s32 mnuSelectPreferredMantraNode(MenuSearchObject *object, MenuSearchState *stat
             }
         }
     }
-    node = object->list->head;
+    node = object->list->first;
     for (i = 0; i < 5; i++, node = node->next) {
-        value = node->value;
+        value = node->partyRecord;
         record = (MantraNodePos *)mnuGetMantraNodePositionRecord(state->requestedId);
         for (j = 0, entries = record->entries; j < 6; j++, entries++) {
             if (*entries != 0) {
@@ -278,10 +267,10 @@ s32 mnuSelectPreferredMantraNode(MenuSearchObject *object, MenuSearchState *stat
 /* Select the first list item whose ID matches the requested ID.
  * If absent, retain the previous selection; the return value is always zero. */
 s32 mnuSelectMatchingNode(MenuSearchObject *object, MenuSearchState *state) {
-    MenuSearchNode *current = object->list->head;
+    struct MenuListNode *current = object->list->first;
     s32 index = 0;
     while (current != 0) {
-        if (current->value->unitId == state->targetId) {
+        if (current->partyRecord->unitId == state->targetId) {
             state->selectedIndex = index;
             return 0;
         }

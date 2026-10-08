@@ -6447,11 +6447,254 @@ void func_001C3040(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001C32B0);
+extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB3A0);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", btlCommandPanelTaskNameRef);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB3A8);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB3AC);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB3B0);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB3B4);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB3B8);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB3BC);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB3C0);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB3C4);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", btlMahenPanelTaskNameRef);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", btlAnalyzPanelTaskNameRef);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB3D0);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB3D4);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", btlTrackedTaskHandles);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB3DC);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", btlCommandPanelWork);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB3E4);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", btlResourceBlockLoaded);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", btlResourceBlock);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB3F0);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB3F8);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB400);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB408);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB410);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB418);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB420);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB428);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB430);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB438);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB440);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB448);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB450);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB458);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB460);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB468);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB470);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB478);
+
+void func_001C32B0(void) {
+    u32 overlays[2] = {0x0000FF00, 0xFF000000};
+    u32 colors[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
+    s32 bank;
+    s32 last;
+    s32 channel;
+    s32 fade;
+
+    bank = D_003BD83C->bank;
+    if (D_003BD83C->enabled[bank] <= 0) {
+        return;
+    }
+    last = D_003BD83C->currentIndex - 1;
+    if (last >= 0) {
+        /* Solid background strips use the live fade again after color lookup. */
+        if (last == 1 || last == 2) {
+            for (channel = 0; channel < 4; channel++) {
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 16, channel,
+                D_003BD83C->fade[2][bank]);
+                if (D_003BD83C->fade[2][bank] > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_002BF438(425 << 4, 21 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 16, 0x53);
+        }
+        if (last >= 2) {
+            for (channel = 0; channel < 4; channel++) {
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 17, channel,
+                D_003BD83C->fade[3][bank]);
+                if (D_003BD83C->fade[3][bank] > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_002BF438(392 << 4, 33 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 17, 0x53);
+        }
+        if (last >= 3) {
+            for (channel = 0; channel < 4; channel++) {
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 18, channel,
+                D_003BD83C->fade[4][bank]);
+                if (D_003BD83C->fade[4][bank] > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_002BF438(425 << 4, 21 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 18, 0x53);
+            for (channel = 0; channel < 4; channel++) {
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 19, channel,
+                D_003BD83C->fade[4][bank]);
+                if (D_003BD83C->fade[4][bank] > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_002BF438(349 << 4, 21 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 19, 0x53);
+        }
+        if (last >= 4) {
+            for (channel = 0; channel < 4; channel++) {
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 20, channel,
+                D_003BD83C->fade[5][bank]);
+                if (D_003BD83C->fade[5][bank] > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_002BF438(298 << 4, 21 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 20, 0x53);
+        }
+        if (last >= 7) {
+            for (channel = 0; channel < 4; channel++) {
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 17, channel,
+                D_003BD83C->fade[8][bank]);
+                if (D_003BD83C->fade[8][bank] > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_002BF438(206 << 4, 33 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 17, 0x53);
+        }
+
+    }
+
+    if (last >= 0) {
+        /* Foreground connectors retain the selected corner fade across lookup. */
+        for (channel = 0; channel < 4; channel++) {
+            if (channel == 0 || channel == 2) {
+                fade = D_003BD83C->fade[1][bank];
+            } else {
+                fade = D_003BD83C->fade[0][bank];
+            }
+            colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 10, channel, fade);
+            if (fade > 128) {
+                colors[channel] |= overlays[bank];
+            }
+        }
+        func_002BF438(440 << 4, 6 << 3, 0, colors, 0,
+        btlResourceBlock->resC, 10, 0x53);
+        if (last >= 3) {
+            for (channel = 0; channel < 4; channel++) {
+                if (channel == 0 || channel == 2) {
+                    fade = D_003BD83C->fade[4][bank];
+                } else {
+                    fade = D_003BD83C->fade[3][bank];
+                }
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 11, channel, fade);
+                if (fade > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_002BF438(395 << 4, 21 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 11, 0x53);
+            for (channel = 0; channel < 4; channel++) {
+                if (channel == 0 || channel == 2) {
+                    fade = D_003BD83C->fade[4][bank];
+                } else {
+                    fade = D_003BD83C->fade[3][bank];
+                }
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 12, channel, fade);
+                if (fade > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_002BF438(362 << 4, 21 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 12, 0x53);
+        }
+        if (last == 5) {
+            for (channel = 0; channel < 4; channel++) {
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 13, channel,
+                D_003BD83C->fade[6][bank]);
+                if (D_003BD83C->fade[6][bank] > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_002BF438(302 << 4, 46 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 13, 0x53);
+        }
+        if (last >= 6) {
+            for (channel = 0; channel < 4; channel++) {
+                if (channel == 0 || channel == 2) {
+                    fade = D_003BD83C->fade[7][bank];
+                } else {
+                    fade = D_003BD83C->fade[6][bank];
+                }
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 14, channel, fade);
+                if (fade > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_002BF438(302 << 4, 48 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 14, 0x53);
+            for (channel = 0; channel < 4; channel++) {
+                if (channel == 0 || channel == 2) {
+                    fade = D_003BD83C->fade[7][bank];
+                } else {
+                    fade = D_003BD83C->fade[6][bank];
+                }
+                colors[channel] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 15, channel, fade);
+                if (fade > 128) {
+                    colors[channel] |= overlays[bank];
+                }
+            }
+            func_002BF438(269 << 4, 48 << 3, 0, colors, 0,
+            btlResourceBlock->resC, 15, 0x53);
+        }
+    }
+}
+
 
 extern const s32 D_003A32F0[10][3];
 
-INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A3248);
 
 void func_001C3B28(void) {
     u32 overlays[4] = {0x0000FF00, 0xFF000000, 0x8080FF00, 0xFF808000};
@@ -6727,4 +6970,92 @@ void fldDestroySceneTasksAndBuffers(void) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A32F0);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB488);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB494);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB496);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB498);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB4A0);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB4A8);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB4B0);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB4B8);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB4C0);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB4C8);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB4D0);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB4D8);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB4E0);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB4E8);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB4F0);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB4F8);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB500);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB508);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB510);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB518);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB520);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB528);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB530);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB538);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB540);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB548);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB550);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB558);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB560);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB568);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB570);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB578);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB580);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB588);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB590);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB598);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB5A0);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB5A8);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB5B0);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB5B8);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB5C0);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB5C8);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB5D0);
+
+INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB5D8);
 

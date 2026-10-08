@@ -4,6 +4,7 @@
 #include "btl_resource.h"
 #include "eff.h"
 #include "itf.h"
+#include "itf_panel_draw.h"
 #include "btl_state.h"
 #include "btl_ui.h"
 #include "sdf.h"
@@ -296,7 +297,7 @@ extern void itfSendTablePacket(SdfListHead *list, s32 context, s32 mode);
 
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 
-extern s32 func_0019DBA8();
+extern s32 func_0019DBA8(s32 row, FrFontGlyph *glyph);
 extern UiSprite *func_001A1858(s32, u32);
 extern void itfSetPanelLayoutAndNotify();
 extern void itfPanelUpdateValuesAndNotify();
@@ -773,7 +774,83 @@ void itfMesRenderActivePanelSprites(ItfMesState *panel) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6E88);
+extern DrawColorRec D_003B49B8[];
+extern void func_001A09C0(DrawVertex *, DrawColorRec *, u32, s32, SdfListHead *);
+extern void itfQueueColoredTexturedQuadPacket(DrawVertex *, DrawColorRec *, DrawColorRec *, u32, s32, SdfListHead *);
+
+/* Draw the selected sound row and its expanding fade outline. */
+void func_001A6E88(ItfMesState *panel) {
+    DrawColorRec uv;
+    DrawColorRec color;
+    DrawVertex bounds[2];
+    ItfMesBlk40 *selection = &panel->blk40;
+    BtlFade *fade = &panel->fade;
+    s32 selected = selection->savedIndex;
+    SdfListHead *list;
+    s32 x;
+    s32 y;
+    s32 bottom;
+    s32 expansion;
+    s32 rightExpansion;
+    s32 verticalExpansion;
+    SdfPoolNode *surface;
+
+    if (selected == -1) {
+        return;
+    }
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    x = selection->x;
+    y = (s32)selection->y - ((selection->rowCount * 25 - 23) << 3) + selected * 0xA0;
+    bottom = y + 0x88;
+    bounds[0].x = x - 0x1D0;
+    bounds[0].y = y + 0x20;
+    bounds[1].x = x + func_0019DBA8(selected, selection->glyphChain) + 0x1D0;
+    bounds[1].y = bounds[0].y + 0x90;
+    func_001A09C0(bounds, D_003B49B8, panel->renderValue, 0x1D0, list);
+
+    bounds[0].x = x;
+    bounds[0].y = y + 8;
+    bounds[1].x = x + 0x60;
+    bounds[1].y = bottom;
+    uv.components[0] = 0x150;
+    uv.components[1] = 0x2F0;
+    uv.components[2] = 0x1B0;
+    uv.components[3] = 0x3F0;
+    color.components[0] = 0x80;
+    color.components[1] = 0x80;
+    color.components[2] = 0x80;
+    color.components[3] = 0x26;
+    itfQueueTextureBoundQuadPacket(bounds, &uv, &color, panel->renderValue,
+                                  itfMesWork.windowTexture, 0, list);
+
+    bounds[0].x = x - 0xF0;
+    bounds[0].y = y + 0x30;
+    bounds[1].x = x - 0x30;
+    bounds[1].y = bottom;
+    uv.components[0] = 0x290;
+    uv.components[1] = 0x10;
+    uv.components[2] = 0x350;
+    uv.components[3] = 0xC0;
+    color.components[3] = fade->alpha;
+    itfQueueColoredTexturedQuadPacket(bounds, &uv, &color, panel->renderValue, 0, list);
+    if (fade->timer > 0) {
+        expansion = 0x80 - fade->timer;
+        rightExpansion = expansion << 1;
+        verticalExpansion = expansion >> 1;
+        bounds[0].x -= expansion;
+        bounds[0].y -= verticalExpansion;
+        bounds[1].x += rightExpansion;
+        bounds[1].y += verticalExpansion;
+        color.components[3] = fade->timer;
+        itfSendTablePacket(list, 1, 0);
+        itfQueueColoredTexturedQuadPacket(bounds, &uv, &color, panel->renderValue, 0, list);
+        itfSendTablePacket(list, 0, 0);
+    }
+    surface = &kwlnDrawSurfaces[panel->unk10];
+    surface->append((SdfListHead *)surface, list);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A7120);
 

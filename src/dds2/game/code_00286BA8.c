@@ -1,3 +1,4 @@
+#include "mnu_mantra.h"
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "dat_state.h"
@@ -9,14 +10,11 @@
 #define MTR_SELECTION_ALPHA_SCALE 128.0f
 #define MTR_UNIT_FADE_FRAMES 10
 
-
-
 extern void func_00286A58(DatPartyRecord *);
 
-typedef struct MenuListNode MenuListNode;
-typedef struct MenuContainer MenuContainer;
 struct MnuStatusResource;
 
+typedef struct MenuListNode MenuListNode;
 typedef struct MenuList {
     u32 stateFlags;
     u32 flags;
@@ -35,71 +33,18 @@ typedef struct MenuList {
     s32 scale;
 } MenuList;
 
-typedef struct MtrSelectionState {
-    s16 state;
-    s16 outcome;
-    s32 timer;
-    s32 alpha;
-    f32 scale;
-    f32 highlightAlpha;
-} MtrSelectionState;
-
-typedef struct MtrSelectionFlags {
-    u32 unk00 : 1;
-    u32 visible : 1;
-    u32 fadeProgress : 1;
-    u32 profileReady : 1;
-    u32 unk04 : 1;
-    u32 unk05 : 27;
-} MtrSelectionFlags;
-
-typedef struct MtrPlayerFlags {
-    u32 unk00 : 16;
-    u32 hasMarkedUnit : 1;
-    u32 unk17 : 15;
-} MtrPlayerFlags;
-
-typedef struct MtrUnitMenuEntry {
-    u16 unk00 : 13;
-    u16 marked : 1;
-    u16 unk14 : 2;
-    u8 pad02[6];
-} MtrUnitMenuEntry;
-
-typedef struct MnuPartySnapshot {
-    u16 flags;
-    u16 unk02;
-    u16 rosterIndex;
-    u16 unk06;
-    u16 hp;
-    u16 unk0A;
-    u16 mp;
-    u16 unk0E;
-    u32 totalExp;
-    u16 level;
-    u8 stats[5];
-    u8 pad1B[0x3A];
-    u8 unk55;
-    u8 pad56[0x16E];
-} MnuPartySnapshot;
-
 struct MenuListNode {
     s32 index;
     u8 pad04[0x6C];
     u8 *items;
 };
 
-typedef struct MtrEquipState {
-    s32 state;
-    s32 timer;
-} MtrEquipState;
-
 extern MenuList *func_002884C0(void);
 extern s32 mdlFlagTest(s32);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
 extern void func_00289BA0(struct MnuStatusResource *);
 extern s32 func_00288920(struct MnuStatusResource *);
-extern s32 mnuMoveNodeCursorToTargetIndex(MenuContainer *, s8);
+extern s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *, s8);
 
 struct TaskWork;
 extern s32 func_00312810(struct TaskWork *, s32);
@@ -122,7 +67,7 @@ extern u32 mnuDestroyListState(MenuList *);
 
 extern void mnuCloseCurrentProfilePanel(MenuProgressHost *);
 
-extern void mnuReleaseMantraMenuDrawResources(void *);
+extern void mnuReleaseMantraMenuDrawResources(MnuStatusResource *);
 
 extern void dspCloseChannel(void);
 extern void sdfQueueNonzeroResourceId(u32);
@@ -154,45 +99,6 @@ extern u32 sdfMemoryGetBlockAddress(void *block);
 extern s32 mnuCreateProgressHost(void);
 extern void mnuInitPanelSoundEntries(void);
 
-/* File-load state machine: seven table entries and the active roster bitmask. */
-typedef struct MtrResourceLoadState {
-    u32 fileEntry;
-    u32 unk04;
-    s16 state;
-    u16 entryIndex;
-    u32 partyMask;
-} MtrResourceLoadState;
-
-/* One allocated mantra/status work area. The create side stores its own
- * allocation handle and the progress host; the destroy side releases both
- * resource ids and the host. Only the fields either side touches are named;
- * the rest of the block is passed on to the menu task untouched. */
-typedef struct MnuStatusResource {
-    u32 allocationHandle; /* 0x00: the block's own handle, freed on destroy */
-    MenuList *list;       /* 0x04 */
-    u8 pad08[0x30];
-    u32 resourceIdA;      /* 0x38 */
-    u32 resourceIdB;      /* 0x3C */
-    s32 messageWindow;
-    s32 messageDefinition; /* Resource word forwarded to the message-window provider. */
-    MenuProgressHost *progressHost; /* 0x48 */
-    u8 pad4C[8];
-    MnuPartySnapshot snapshot;
-    MtrSelectionFlags flags;
-    MtrResourceLoadState resourceLoad; /* 0x21C */
-    MtrSelectionState selection; /* 0x22C */
-    u8 pad240[0x554];
-    MtrPlayerFlags playerFlags; /* 0x794 */
-    u8 pad798[0x40C];
-    u32 unkBA4;
-    u8 padBA8[8];
-    MtrUnitMenuEntry unitEntries[5]; /* 0xBB0 */
-    u8 padBD8[0x20];
-    MtrEquipState equip;
-    u32 drawPool;
-    u8 padC04[4];
-} MnuStatusResource; /* 0xC08 */
-
 extern s32 func_00288748(MnuStatusResource *);
 extern s32 mnuPollTitleEffectsReady(MenuProgressHost *);
 extern void mnuRebuildProfilePanelFromRenderSnapshot(MnuStatusResource *);
@@ -204,7 +110,7 @@ extern void mtrInitUnitSelectionWork(MnuStatusResource *);
 
 /* Allocate and clear status work, retain its allocation handle and create the progress host.
  * Print the native load banner and initialize panel sound entries before returning the work pointer. */
-void *func_00286E98(void) {
+MnuStatusResource *func_00286E98(void) {
     u32 allocationHandle = sdfAllocGeneralBlock(MTR_STATUS_RESOURCE_BYTES);
     MnuStatusResource *resourceWork = (MnuStatusResource *)sdfMemoryGetBlockAddress(allocationHandle);
 
@@ -382,7 +288,7 @@ u64 func_00287900(void) {
 }
 
 extern u32 mnuGetDefaultPanelSelector(MnuStatusResource *);
-extern void evtCreateMessageWindowIfMissing(s32);
+extern s32 evtCreateMessageWindowIfMissing(struct ItfMesSub *);
 extern void func_00267B40(s32, MenuProgressHost *);
 extern void mnuEnsureProfilePanelEffect(s32, MenuProgressHost *);
 extern char D_00426208[];
@@ -391,8 +297,8 @@ extern char D_00426218[];
 /* Initialize the equip panel from the selected party entry and selector. */
 s32 mtrMantraEquipInit(void) {
     MnuStatusResource *work = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
-    MnuPartySnapshot *snapshot = &work->snapshot;
-    MtrEquipState *equip = &work->equip;
+    DatPartyRecord *snapshot = &work->snapshot;
+    MtrEquipState *equip = &work->menu.equip;
     u8 *selector;
 
     work->flags.unk04 = 0;
@@ -401,8 +307,8 @@ s32 mtrMantraEquipInit(void) {
     evtCreateMessageWindowIfMissing(work->messageWindow);
     mnuCloseCurrentProfilePanel(work->progressHost);
     memcpy(snapshot, work->list->cursor->items, sizeof(*snapshot));
-    work->snapshot.unk55 = selector[2];
-    evtPrintDeveloperConsoleMessage(D_00426208, work->snapshot.hp, work->snapshot.mp);
+    work->snapshot.profileId = selector[2];
+    evtPrintDeveloperConsoleMessage(D_00426208, work->snapshot.maxHp, work->snapshot.maxMp);
     func_00267B40((s32)snapshot, work->progressHost);
     mnuEnsureProfilePanelEffect((s32)snapshot, work->progressHost);
     mnuInitPartyPanelSlots(&work->progressHost->partyPanel);
@@ -438,20 +344,20 @@ s32 func_00288158(void) {
     s32 value;
 
     func_0026C900();
-    mnuUpdateMantraDrawPool(work->drawPool);
+    mnuUpdateMantraDrawPool(work->menu.selectionController);
     ratio = 0.0f;
     if (work->flags.fadeProgress) {
-        if (work->equip.timer < 30) {
-            work->equip.timer++;
+        if (work->menu.equip.timer < 30) {
+            work->menu.equip.timer++;
         }
-        ratio = (f32)work->equip.timer / 30.0f;
+        ratio = (f32)work->menu.equip.timer / 30.0f;
     }
     value = (s32)(ratio * 128.0f);
     mnuDrawMantraSprite(0, 0, 0, value, 0x68, 0, 0x4A);
     mnuDrawMantraSprite(0, 0, 0, value, 0x69, 0, 0x4A);
     if (mnuDrawLoadedProgressPanels((s32)&work->snapshot, work->progressHost, 0x53) != 0) {
         if (!work->flags.profileReady) {
-            evtStageTestSelectEntryWithoutInitialValue(work->snapshot.rosterIndex, 0);
+            evtStageTestSelectEntryWithoutInitialValue(work->snapshot.unitId, 0);
         }
         work->flags.profileReady = 1;
     }
@@ -469,7 +375,7 @@ extern s32 frFontDrawTextVariantBAndMeasure(s32, s32, s32, u32, s32, char *, s32
 void mtrDrawUnitSelectionRow(s32 unusedX, s32 unusedY, s32 drawPool, MenuList *list,
                   MenuListNode *node, s32 depth) {
     MtrSelectionState *selection = (MtrSelectionState *)list->userData;
-    MnuPartySnapshot *record;
+    DatPartyRecord *record;
     s32 selected;
     s32 highlightAlpha;
     s8 icons[9] = {0, 6, 16, 8, 12, 10, 14, 18, 20};
@@ -477,11 +383,11 @@ void mtrDrawUnitSelectionRow(s32 unusedX, s32 unusedY, s32 drawPool, MenuList *l
 
     selected = list->cursor->index == node->index;
     highlightAlpha = selection->highlightAlpha;
-    record = (MnuPartySnapshot *)node->items;
+    record = (DatPartyRecord *)node->items;
     mnuDrawMantraSprite(0, node->index * 22 + (selection->scale - 1.0f) * 32.0f,
                         drawPool, selection->alpha, 0x22, 0, depth);
     mnuDrawMantraSprite(0, node->index * 22, drawPool, highlightAlpha,
-                        icons[record->rosterIndex] + selected, 0, depth);
+                        icons[record->unitId] + selected, 0, depth);
     mnuDrawMantraSprite(0, node->index * 22, drawPool, highlightAlpha,
                         selected + 0x20, 0, depth);
     func_0035C860(text, D_00437928, record->level);
@@ -548,11 +454,11 @@ void mtrInitUnitSelectionWork(MnuStatusResource *resourceWork) {
             kwlnFadeInStart(0, 0, 0, MTR_UNIT_FADE_FRAMES);
         }
         func_00289BA0(resourceWork);
-        if (resourceWork->unkBA4 != 0 || resourceWork->playerFlags.hasMarkedUnit) {
-            if (resourceWork->playerFlags.hasMarkedUnit) {
+        if (resourceWork->menu.src != 0 || resourceWork->menu.drawBits.hasQueuedMastery) {
+            if (resourceWork->menu.drawBits.hasQueuedMastery) {
                 for (unitIndex = 0; unitIndex < MTR_UNIT_ENTRY_COUNT; unitIndex++) {
-                    if (resourceWork->unitEntries[unitIndex].marked) {
-                        mnuMoveNodeCursorToTargetIndex((MenuContainer *)resourceWork, unitIndex);
+                    if (resourceWork->menu.unitEntries[unitIndex].marked) {
+                        mnuMoveNodeCursorToTargetIndex((MnuStatusResource *)resourceWork, unitIndex);
                         break;
                     }
                 }
