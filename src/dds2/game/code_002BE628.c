@@ -22,7 +22,7 @@
 /* DDS2's panel item is wider than the DDS1 variant, with five points at +0x74. */
 struct MenuPanelItem {
     u8 pad00[0x10];
-    u32 value10;
+    s32 value10; /* Pixel span used by signed stat scaling. */
     s32 value14;
     s32 value18;
     u32 option;
