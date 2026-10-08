@@ -116,26 +116,6 @@ typedef struct EvtModelHeader {
     f32 positionZ;      /* 0x18 */
 } EvtModelHeader;
 
-typedef struct EvtModelParams {
-    u8 pad00[0x40];
-    f32 positionX;      /* 0x40: script-supplied translation */
-    f32 positionY;      /* 0x44 */
-    f32 positionZ;      /* 0x48 */
-    u8 pad4C[0x04];
-    f32 rotationX;      /* 0x50: copied from the source's second vector */
-    f32 rotationY;      /* 0x54 */
-    f32 rotationZ;      /* 0x58 */
-    f32 rotationW;      /* 0x5C */
-    u8 pad60[0x60];
-    u32 flagsC0;        /* 0xC0 */
-} EvtModelParams;
-
-typedef struct EvtModelObj {
-    u8 pad00[0x18];
-    EvtModelHeader *header; /* 0x18 */
-    EvtModelParams *params; /* 0x1C */
-} EvtModelObj;
-
 typedef struct EvtSourceVec {
     f32 positionX;      /* 0x00: copied into model position */
     f32 positionY;      /* 0x04 */
@@ -1492,27 +1472,27 @@ u32 evtScriptDestroyWorldEffectObject(void) {
 }
 
 u32 evtOpSetModelObjectPosition(void) {
-    EvtModelObj *obj;
+    EffWorldNode *obj;
     EvtModelHeader *header;
 
     obj = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
-    header = obj->header;
+    header = (EvtModelHeader *)obj->data;
     if (header->flags & 4) {
         header->positionX = bfWaitReadArgFloat(1);
         header->positionY = bfWaitReadArgFloat(2);
         header->positionZ = bfWaitReadArgFloat(3);
     } else {
-        obj->params->positionX = bfWaitReadArgFloat(1);
-        obj->params->positionY = bfWaitReadArgFloat(2);
-        obj->params->positionZ = bfWaitReadArgFloat(3);
-        obj->params->flagsC0 = (obj->params->flagsC0 | 1) & ~2;
+        obj->inner->position[0] = bfWaitReadArgFloat(1);
+        obj->inner->position[1] = bfWaitReadArgFloat(2);
+        obj->inner->position[2] = bfWaitReadArgFloat(3);
+        obj->inner->flags = (obj->inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) & ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     }
     return 1;
 }
 
 u32 evtOpSetModelObjectRotationFromAngles(void) {
     f32 v[4];
-    EvtModelObj *obj;
+    EffWorldNode *obj;
     f32 toRad;
     f32 x;
     f32 y;
@@ -1520,7 +1500,7 @@ u32 evtOpSetModelObjectRotationFromAngles(void) {
     memset(v, 0, 0x10);
     v[3] = 1.0f;
     obj = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
-    if (!(obj->header->flags & 4)) {
+    if (!(((EvtModelHeader *)obj->data)->flags & 4)) {
         toRad = 0.017453293f;
         x = bfWaitReadArgFloat(1) * toRad;
         y = bfWaitReadArgFloat(2) * toRad;
@@ -1535,10 +1515,10 @@ u32 evtOpSetModelObjectRotationFromAngles(void) {
 }
 
 u32 evtOpCopyModelTransformFromSource(void) {
-    EvtModelObj *obj;
+    EffWorldNode *obj;
     EvtSourceObj *source;
     EvtSourceVec *vec;
-    EvtModelParams *params;
+    ObjectTransform *params;
 
     obj = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
     if (obj == NULL) {
@@ -1549,17 +1529,17 @@ u32 evtOpCopyModelTransformFromSource(void) {
         return 1;
     }
     vec = source->vec;
-    if (!(obj->header->flags & 4)) {
-        params = obj->params;
-        params->positionX = vec->positionX;
-        params->positionY = vec->positionY;
-        params->positionZ = vec->positionZ;
-        params->rotationX = vec->rotationX;
-        params->rotationY = vec->rotationY;
-        params->rotationZ = vec->rotationZ;
-        params->rotationW = vec->rotationW;
+    if (!(((EvtModelHeader *)obj->data)->flags & 4)) {
+        params = obj->inner;
+        params->position[0] = vec->positionX;
+        params->position[1] = vec->positionY;
+        params->position[2] = vec->positionZ;
+        params->rotation[0] = vec->rotationX;
+        params->rotation[1] = vec->rotationY;
+        params->rotation[2] = vec->rotationZ;
+        params->rotation[3] = vec->rotationW;
     }
-    obj->params->flagsC0 = (obj->params->flagsC0 | 1) & ~2;
+    obj->inner->flags = (obj->inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) & ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     return 1;
 }
 
