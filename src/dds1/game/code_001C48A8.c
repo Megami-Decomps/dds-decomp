@@ -113,7 +113,7 @@ extern u64 btlStartTask(void *);
 extern s32 fldCreateSceneTileTask(u32 soundId, u32 variant);
 extern void btlDispatchStateHandler(void *, s32);
 
-extern void func_001BCB88(s32, s32);
+extern void func_001BCB88(s8, s32);
 
 extern void btlUpdateScene(void);
 
