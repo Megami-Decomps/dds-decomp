@@ -18,7 +18,6 @@ extern u32 effMiscRand(void *state);
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
-extern u32 func_0016D290(u32 handle);
 
 
 
@@ -1523,7 +1522,7 @@ static inline void effPcpShiftThunderHandles(EffPCPThunderGroup *work, s32 count
     s32 i;
 
     for (i = 0; i < count; i++) {
-        obj = (u8 *)func_0016D290((u32)work->handles[i]);
+        obj = (u8 *)effThunderGetFragmentParameters(work->handles[i]);
         VU0_LOAD_VF($vf10, obj + 0x10);
         VU0_STORE_VF($vf10, &saved[1]);
         VU0_LOAD_VF($vf11, work);
@@ -4162,7 +4161,7 @@ void effPcpUpdateMuzzleThunderRay(EffPCPBurstWork *work) {
         VU0_SUB(vf10, vf10, vf11);
         VU0_NORMALIZE_VF10();
         VU0_STORE_VF(vf10, direction);
-        params = (u8 *)func_0016D290((u32)work->handle);
+        params = (u8 *)effThunderGetFragmentParameters(work->handle);
         distance = work->startDistance;
         dirX = direction[0];
         dirY = direction[1];
@@ -5656,7 +5655,7 @@ void effPcpUpdatePairedDriftEvents(EffPCPPairedEventWork *work) {
                 f32 fade;
                 u32 fadedColor;
 
-                fragment = (EffThunderFragmentParams *)func_0016D290((u32)entry->fragment);
+                fragment = effThunderGetFragmentParameters(entry->fragment);
                 sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)viewAxis, entry->phase);
                 VU0_LOAD_VF(vf10, D_003B1FD0);
                 VU0_LOAD_VF(vf11, viewAxis);
