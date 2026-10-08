@@ -562,7 +562,7 @@ extern s32 D_00437D2C;
 
 extern void *fileBuildMainBlobAfterDelete(void);
 
-extern void *func_002CC210(void);
+extern void *fileBuildMainBlobAndWrite(void);
 
 extern void mcDeleteFilePath(void);
 
@@ -1869,7 +1869,7 @@ void *fileBuildMainBlobAfterDelete(void) {
         return NULL;
     }
     if (t == 1) {
-        return func_002CC210();
+        return fileBuildMainBlobAndWrite();
     }
     if (t == -1) {
         fileSetMenuFlowState(0);
@@ -1923,7 +1923,7 @@ s32 fileRequestBaseIcon(void) {
 extern DatGameState *D_00439010;
 extern u32 D_00439014;
 
-void *func_002CC210(void) {
+void *fileBuildMainBlobAndWrite(void) {
     char filename[0x50];
     FileRecordHeader *header;
     s32 slot = fileReqGetSelectedSlot(fileMemoryCardRequestContext);
@@ -1985,7 +1985,7 @@ void *mcChooseLoadPath(void) {
     u32 flags = fileReqGetSlotFlags(entry, slot);
     if (!(flags & 8)) {
         /* Preserve the legacy context/path dispatch to this global-state endpoint. */
-        return ((void *(*)())func_002CC210)(entry, D_0042B6B8);
+        return ((void *(*)())fileBuildMainBlobAndWrite)(entry, D_0042B6B8);
     }
     mcDeleteFilePath();
     return fileBuildMainBlobAfterDelete;
