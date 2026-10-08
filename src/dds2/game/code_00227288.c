@@ -15,7 +15,6 @@
 extern void btlInterpolateVectorStep();
 
 
-extern void func_001E88A8();
 
 extern s32 mdlFlagTest(s32);
 
@@ -642,7 +641,7 @@ s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, command->backCamera.direction);
     command->backCamera.distance += 45.0f;
-    func_001E88A8(command->backCamera.position);
+    btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
     return 1;
 }
 
