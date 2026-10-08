@@ -639,7 +639,4 @@ void func_002DEC08(SdfFlagListWork *);
 /* Free-list kind for SDF pools. */
 #define SDF_POOL_FREE_KIND 0xFFFF
 
-/* Alternate item setup mode for SDF model entries. */
-#define SDF_MODEL_ALTERNATE_ITEM_SETUP 4
-
 #endif /* SDF_H */

@@ -285,7 +285,6 @@ u32 sdfCountMapPositionRecords(SdfModel *model) {
 }
 
 extern void sdfPostmultiplyVuMatrixFromMemory(void *);
-extern SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id);
 /* vu0 routine: build basis rows in vf28-vf31 from the map record, then
  * postmultiply using its draw-node matrix. */
 void sdfSetLookAtBasisFromRecord(SdfModel *model, SdfMapPositionRecord *record) {

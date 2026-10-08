@@ -3,8 +3,6 @@
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 
-#define SDF_MODEL_ALTERNATE_ITEM_SETUP 4
-
 extern void *sdfInitNodeHeaderFromWords(u32 *words, void *node, s32 wordIndex);
 extern void *sdfAllocSizeClassBlock(s32 arg0);
 extern void sdfInstallPoolNodeReleaseCallbacks(s32 arg0);
@@ -12,7 +10,7 @@ extern void *memcpy(void *dst, const void *src, u32 n);
 extern void sdfFreeNodeLists(SdfDrawNode *node);
 extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *node);
 extern void func_002D83F8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern void func_002D86E0(void *arg0, void *arg1);
+extern void func_002D86E0(SdfDrawNode *node, SdfItem *item);
 extern void sdfMultiplyVuMatrixInPlace(void);
 extern void sdfWriteVuLightingPacket(u32 arg0);
 extern vu8 sdfCurrentBufferIndex;
@@ -45,34 +43,14 @@ typedef struct {
     s32 fourthWord;
 } SdfMsg;
 
-struct SdfItemList {
-    s32 count;           /* 0x00: entry count */
-    u8 pad_0x04[0x0C];   /* 0x04 */
-    u8 firstItem;        /* 0x10: entries, 0x50 stride */
-};
-
-
-/* Per-item record applied to a draw node by sdfDrawNodeSetFromItem (0x50 bytes). */
-typedef struct {
-    u8 pad00[8];
-    s32 nodeId;       /* 0x08 */
-    u8 pad0C[4];      /* 0x0C: parent-node index used during construction */
-    f32 rotationX;    /* 0x10: Euler angles supplied to the quaternion builder */
-    f32 rotationY;    /* 0x14 */
-    f32 rotationZ;    /* 0x18 */
-    u8 pad1C[4];
-    u128 translation; /* 0x20 */
-    u128 scale;       /* 0x30 */
-    s32 boundsAddress; /* 0x40: optional local-box corners used by clipping */
-} SdfItem;
-
 extern void effMiscQuaternionToMatrixVU(void);
 extern void func_002E7F20(f32 x, f32 y, f32 z);
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
 
 
-/* Retail selects by nodeId when flags bit 0 is set, otherwise by array index. */
+/* Retail selects by nodeId when SDF_MODEL_FIND_DRAW_NODE_BY_ID is set,
+ * otherwise by array index. */
 SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id) {
     DevRequest *list = model->list;
     s16 count;
@@ -81,7 +59,7 @@ SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id) {
 
     count = list->usedCount;
     entries = list->buffer;
-    if (model->flags & 1) {
+    if (model->flags & SDF_MODEL_FIND_DRAW_NODE_BY_ID) {
         for (i = 0; i < count; i++) {
             SdfDrawNode *node = entries[i];
             if (node->nodeId == id) {
@@ -280,12 +258,12 @@ SdfModel *sdfModelCreateWithItems(void *data, SdfItemListRef *listRef) {
     SdfModel *model = sdfModelCreateFromAssetData(data, listRef);
     SdfItemList *list = listRef->items;
     s32 count = list->count;
-    u8 *item = &list->firstItem;
+    SdfItem *item = (SdfItem *)&list->firstItem;
 
     if (count != i) {
         do {
             func_002D86E0(((SdfDrawNode **)model->list->buffer)[i], item);
-            item += 0x50;
+            item++;
             i++;
         } while (i != count);
     }
@@ -298,16 +276,16 @@ SdfModel *sdfModelCreateWithAlternateItems(void *data, SdfItemListRef *listRef) 
     SdfModel *model = sdfModelCreateFromAssetData(data, listRef);
     SdfItemList *list;
     s32 count;
-    u8 *item;
+    SdfItem *item;
 
     model->flags |= SDF_MODEL_ALTERNATE_ITEM_SETUP;
     list = listRef->items;
     count = list->count;
-    item = &list->firstItem;
+    item = (SdfItem *)&list->firstItem;
     if (count != i) {
         do {
-            sdfDrawNodeSetFromItem(((SdfDrawNode **)model->list->buffer)[i], (SdfItem *)item);
-            item += 0x50;
+            sdfDrawNodeSetFromItem(((SdfDrawNode **)model->list->buffer)[i], item);
+            item++;
             i++;
         } while (i != count);
     }

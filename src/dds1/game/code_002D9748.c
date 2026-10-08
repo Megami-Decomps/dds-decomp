@@ -163,7 +163,6 @@ u8 *sdfParseAssetParameterFlags(SdfAsset *, DevRequest *, u8 *);
 void sdfAppendAssetToResourceList(DevRequest *, SdfAsset *);
 void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
 void sdfApplyAssetSecondaryEntry(SdfAsset *, void *);
-SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id);
 void sdfPostmultiplyVuMatrixFromMemory(void *);
 void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *, s32);
 extern f32 sdfSinPoly(f32 angle);

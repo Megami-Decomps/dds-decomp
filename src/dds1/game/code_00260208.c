@@ -774,7 +774,7 @@ s32 mnuStaffPickRoll(void) {
 
 
 void brsSelectLevelBonusMode(DatPartyRecord *source, BrsSkillPackageWork *work) {
-    s32 eligible[5];
+    s32 eligible[DAT_BASE_STAT_COUNT];
     s32 eligibleCount;
     s32 mode;
     s32 i;
@@ -792,7 +792,7 @@ void brsSelectLevelBonusMode(DatPartyRecord *source, BrsSkillPackageWork *work) 
     }
 
     eligibleCount = 0;
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
         if (source->baseStats[i] + 1 < 99) {
             eligible[eligibleCount] = i;
             eligibleCount++;

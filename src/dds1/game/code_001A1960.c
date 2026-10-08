@@ -264,7 +264,7 @@ void func_001A1990(DatPartyRecord *entry, s32 index) {
     entry->unitId = index;
     entry->level = datEnemyRecords[index].level;
     entry->totalExp = 0;
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
         entry->baseStats[i] = datEnemyRecords[index].baseStats[i];
     }
     count = 0;
@@ -325,7 +325,7 @@ void btlSyncPlayerWork(BtlUnit *actor) {
     maxMp = datComputeSkillBoostedMaxMp(dst);
     dst->hp = src->hp < maxHp ? src->hp : maxHp;
     dst->mp = src->mp < maxMp ? src->mp : maxMp;
-    memcpy(dst->baseStats, src->baseStats, 5);
+    memcpy(dst->baseStats, src->baseStats, sizeof(dst->baseStats));
     dst->status = src->status & 0x7FFF;
     dst->unk18C = src->unk18C;
     dst->unk18E = src->unk18E;
@@ -413,7 +413,7 @@ s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
     if (command == 0) {
         return 0;
     }
-    if (datCommandRecords[command].kind == 1 ||
+    if (datCommandRecords[command].effectType == 1 ||
         datCommandRecords[command].costMode == DAT_COMMAND_COST_MODE_MP) {
         if ((unit->partyRecord.status & 0x7FFF) == 0x10) {
             return 3;
@@ -2386,7 +2386,7 @@ s32 btlChooseEligibleSkill(s32 object) {
 }
 
 f32 btlGetActionCategoryMultiplier(BtlUnit *object, s32 unused, s32 index) {
-    s32 category = datCommandRecords[index].primaryLimitKind;
+    s32 category = datCommandRecords[index].hpType;
     if (category < 14) {
         if (category >= 12) {
             return 1.0f;
@@ -2399,7 +2399,7 @@ f32 btlGetActionCategoryMultiplier(BtlUnit *object, s32 unused, s32 index) {
 }
 
 f32 btlGetActionCategoryGateAsFloat(s32 unused0, s32 unused1, s32 index) {
-    s32 category = datCommandRecords[index].secondaryLimitKind;
+    s32 category = datCommandRecords[index].mpType;
     if (category < 14) {
         if (category >= 12) {
             return 1.0f;
@@ -2409,7 +2409,7 @@ f32 btlGetActionCategoryGateAsFloat(s32 unused0, s32 unused1, s32 index) {
 }
 
 f32 btlGetActionRecordPercentAsFraction(s32 unused0, s32 unused1, s32 index) {
-    return (f32)datCommandRecords[index].unk22 / 100.0f;
+    return (f32)datCommandRecords[index].effectPercent / 100.0f;
 }
 
 u32 btlAdjustPointsForCombatFlags(u32 flags, u32 secondary, u32 points, s32 index) {
@@ -2420,11 +2420,11 @@ u32 btlAdjustPointsForCombatFlags(u32 flags, u32 secondary, u32 points, s32 inde
     if (secondary & 4) return points >> 1;
     if (secondary & 2) return points >> 1;
     if (flags & 4) {
-        if (datCommandRecords[index].primaryLimitKind == 8 ||
-            datCommandRecords[index].primaryLimitKind == 10) {
+        if (datCommandRecords[index].hpType == 8 ||
+            datCommandRecords[index].hpType == 10) {
             return points;
         }
-        if (datCommandRecords[index].kind == 2) return points;
+        if (datCommandRecords[index].effectType == 2) return points;
         return points + 0x64;
     }
     return points;

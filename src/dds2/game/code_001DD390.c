@@ -6542,7 +6542,77 @@ void btlRefreshActionPoseBlendSnapshot(BtlLinkedCommand *action) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001ED6C8);
+void func_001ED6C8(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from) {
+    f32 targetPosition[4];
+    f32 rotation[4];
+    f32 bodyPosition[4];
+    f32 center[4];
+    BtlUnit *unit = action->link->unit;
+    BtlUnit *target;
+    u32 count;
+    u32 i;
+    u32 targetFlags;
+    f32 halfFov;
+    f32 minimumDistance;
+
+    if (unit->flags & 2) {
+        btlFlagAllUnitsDefeatCandidate();
+        count = btlGetIndexListCount(action->targetList);
+        if (btlHasSingleLinkedResource((s32)action) == 0) {
+            func_001EC868(action, from->position, 17.5f);
+            btlCopyMotionTransform((u8 *)to, (u8 *)from);
+            btlInterpolateVectorStep(from->position);
+            VU0_STORE_VF(vf10, targetPosition);
+            if (func_001E3230(unit, 1) == 0) {
+                btlUnitGetMuzzlePosVU(unit);
+            }
+            VU0_STORE_VF(vf10, to->position);
+            VU0_LOAD_VF(vf11, targetPosition);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_SET_VF10_COMPONENT(x, 0.0f);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, to->direction);
+            halfFov = to->fov * 0.5f;
+            minimumDistance = unit->unkC0 * unit->scale / func_00353228(halfFov);
+            to->distance *= 0.5f;
+            if (to->distance < minimumDistance) {
+                to->distance = minimumDistance;
+            }
+            from->distance += 150.0f;
+            if (unit->flags & 0x80000) {
+                btlUnitGetBodyPosVU(unit);
+                VU0_STORE_VF_UNCLOBBERED(vf10, bodyPosition);
+                targetFlags = 0;
+                for (i = 0; i < count; i++) {
+                    target = (BtlUnit *)btlGetIndexListEntry(action->targetList, i);
+                    targetFlags |= target->flags & 0x600;
+                }
+                func_00208000(targetFlags, 0, 0);
+                VU0_STORE_VF_UNCLOBBERED(vf10, center);
+                if (btlAimHorizontalDirectionVU(bodyPosition, center) != 0) {
+                    VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+                    btlSetUnitRotation(unit, (s128 *)rotation);
+                }
+            }
+        } else {
+            target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+            func_001EEB78(action, from, 2);
+            halfFov = to->fov * 0.5f * 1.3333333f;
+            btlCopyMotionTransform((u8 *)to, (u8 *)from);
+            minimumDistance = target->reach * target->scale / func_00353228(halfFov);
+            to->distance *= 0.6f;
+            if (to->distance < minimumDistance) {
+                to->distance = minimumDistance;
+            }
+            from->distance += 75.0f;
+        }
+        func_001E88A8(to);
+        func_001E88A8(from);
+        action->motionParameter = 20.0f;
+        action->flags |= 0x845;
+        action->motionProgress = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001ED9A0);
 

@@ -113,9 +113,9 @@ s32 func_00263EF8(void *request) {
             selection++;
         }
         if (selection < 0) {
-            selection = 4;
+            selection = DAT_BASE_STAT_COUNT - 1;
         }
-        if (selection >= 5) {
+        if (selection >= DAT_BASE_STAT_COUNT) {
             selection = 0;
         }
         mnuSetPanelGroupSelection(work->panelHandle, selection);

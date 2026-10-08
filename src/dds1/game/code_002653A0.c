@@ -182,7 +182,7 @@ s32 mnuAdvanceTitleEntryAnimation(DatPartyRecord *entry) {
 s32 btlAddBaseStats(s32 *src, DatPartyRecord *obj) {
     s32 i;
 
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
         s8 *stat = &obj->baseStats[i];
 
         *stat += src[i];

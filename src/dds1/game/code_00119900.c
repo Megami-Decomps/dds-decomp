@@ -937,10 +937,10 @@ s32 evtSelectScriptStatValue(void) {
 
     switch (((EvtScriptContext *)D_003C2E70)->options) {
     case 1:
-        statValue = datCommandRecords[((EvtScriptContext *)D_003C2E70)->third].stat18;
+        statValue = datCommandRecords[((EvtScriptContext *)D_003C2E70)->third].hpPower;
         break;
     case 2:
-        statValue = datCommandRecords[((EvtScriptContext *)D_003C2E70)->third].stat1C;
+        statValue = datCommandRecords[((EvtScriptContext *)D_003C2E70)->third].mpPower;
         break;
     default:
         statValue = 0;
@@ -959,10 +959,10 @@ s32 evtPushEntryIndexedStatOption(void) {
 
     switch (statOption) {
     case 1:
-        statValue = datCommandRecords[commandIndex].stat18;
+        statValue = datCommandRecords[commandIndex].hpPower;
         break;
     case 2:
-        statValue = datCommandRecords[commandIndex].stat1C;
+        statValue = datCommandRecords[commandIndex].mpPower;
         break;
     default:
         statValue = 0;

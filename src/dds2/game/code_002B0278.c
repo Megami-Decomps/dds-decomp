@@ -533,7 +533,7 @@ void mnuClearPartySelectionValues(DatPartyRecord *entry, s32 selection) {
         return;
     }
     selection -= 0xc0;
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
         datGameState->itemStatBonuses[selection][i] = 0;
     }
     datGameState->itemRequirementCounts[selection] = 0;
