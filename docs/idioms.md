@@ -4192,3 +4192,14 @@ the command plus the 0x200/0x400 scan results. The existing
 `btlStartLinkedActionPoseBlendIfEligible` dispatcher uses the same
 interface; it passes its command directly without a second actor view.
 
+
+## Uniform action-camera builder interface
+
+DDS2 `001EAE88` calls `btlChooseActionPoseBlendFromActorCount`
+(`001F34F8`) with the command and its front/back camera addresses
+(+0x30/+0xC0), just as it calls the other three-input pose builders.
+Keep that three-formal interface. This provider updates the embedded
+cameras through the command and does not need its two explicit camera
+parameters; the body remains unchanged. DDS1's corresponding
+`001E5730` uses the same interface.
+
