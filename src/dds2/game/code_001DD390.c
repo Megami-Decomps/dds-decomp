@@ -6460,6 +6460,13 @@ typedef struct BattlePairCameraPreset {
     f32 motionParameter;
 } BattlePairCameraPreset;
 
+/* The two default rows form one copied camera-preset bank. */
+typedef struct BattlePairCameraPresetSet {
+    BattlePairCameraPreset poses[2];
+} BattlePairCameraPresetSet;
+
+extern const BattlePairCameraPresetSet D_004183D8;
+
 void func_001ECCB0(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
     f32 quaternion[4];
     BattlePairCameraPreset poses[4] = {
@@ -7502,36 +7509,9 @@ void func_001F35C0(void) {
 }
 
 /* vu0 routine: camera preset quaternions are composed with the unit rotation. */
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417F30);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_004180B0);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_004180C0);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418240);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418250);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418310);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418320);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418330);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418338);
-
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418398);
-
 void func_001F35C8(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
     f32 quat[4];
-    BattlePairCameraPreset presets[2] = {
-        {{0x1.a9fbe6p-6f, -0x1.916872p-1f, -0x1.c28f5cp-5f, 0x1.34bc6ap-1f},
-         {-0x1.47ae14p-7f, -0x1.f9db22p-1f, -0x1.4fdf3ap-5f, 0x1.89374ap-5f},
-         0x1.4p+0f, 0x1.8p+1f, 0x1p+0f, 0x1.4p+4f},
-        {{-0x1.2b020cp-4f, -0x1.9eb85p-1f, -0x1.4bc6a6p-4f, -0x1.1e353ep-1f},
-         {-0x1.47ae14p-7f, -0x1.f9db22p-1f, -0x1.4fdf3ap-5f, 0x1.89374ap-5f},
-         0x1.4p+0f, 0x1.8p+1f, 0x1p+0f, 0x1.4p+4f}
-    };
+    BattlePairCameraPresetSet presets = D_004183D8;
     BtlUnit *unit = action->link->unit;
     s32 pose;
     f32 fov;
@@ -7551,18 +7531,18 @@ void func_001F35C8(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to)
         }
         VU0_STORE_VF(vf10, from->position);
         VU0_STORE_VF(vf10, to->position);
-        from->position[1] *= presets[pose].fromHeightScale;
+        from->position[1] *= presets.poses[pose].fromHeightScale;
         dist = unit->unkC0 * unit->scale / func_00353228(fov * 0.5f);
-        from->distance = dist * presets[pose].fromDistanceScale;
-        to->distance = dist * presets[pose].toDistanceScale;
-        VU0_LOAD_VF(vf10, presets[pose].fromQuaternion);
+        from->distance = dist * presets.poses[pose].fromDistanceScale;
+        to->distance = dist * presets.poses[pose].toDistanceScale;
+        VU0_LOAD_VF(vf10, presets.poses[pose].fromQuaternion);
         VU0_LOAD_VF(vf11, quat);
         effMiscQuatMultiplyVU();
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, D_003E9130);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, from->direction);
-        VU0_LOAD_VF(vf10, presets[pose].toQuaternion);
+        VU0_LOAD_VF(vf10, presets.poses[pose].toQuaternion);
         VU0_LOAD_VF(vf11, quat);
         effMiscQuatMultiplyVU();
         effMiscQuaternionToMatrixVU();
@@ -7571,7 +7551,7 @@ void func_001F35C8(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to)
         VU0_STORE_VF(vf10, to->direction);
         func_001E88A8(from);
         func_001E88A8(to);
-        motionParameter = presets[pose].motionParameter;
+        motionParameter = presets.poses[pose].motionParameter;
         action->motionProgress = 0;
         action->flags |= 0x41;
         action->motionParameter = motionParameter;
@@ -7767,6 +7747,37 @@ void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *action, BtlCamState *stat
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417F30);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_004180B0);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_004180C0);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418240);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418250);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418310);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418320);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418330);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418338);
+
+INCLUDE_RODATA(const s32, "game/code_001DD390", D_00418398);
+
+const BattlePairCameraPresetSet D_004183D8 = {
+    {
+        {{0x1.a9fbe6p-6f, -0x1.916872p-1f, -0x1.c28f5cp-5f, 0x1.34bc6ap-1f},
+         {-0x1.47ae14p-7f, -0x1.f9db22p-1f, -0x1.4fdf3ap-5f, 0x1.89374ap-5f},
+         0x1.4p+0f, 0x1.8p+1f, 0x1p+0f, 0x1.4p+4f},
+        {{-0x1.2b020cp-4f, -0x1.9eb85p-1f, -0x1.4bc6a6p-4f, -0x1.1e353ep-1f},
+         {-0x1.47ae14p-7f, -0x1.f9db22p-1f, -0x1.4fdf3ap-5f, 0x1.89374ap-5f},
+         0x1.4p+0f, 0x1.8p+1f, 0x1p+0f, 0x1.4p+4f}
+    }
+};
 
 
 void func_001F4E30(BtlLinkedCommand *action) {

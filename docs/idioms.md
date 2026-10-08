@@ -3729,11 +3729,11 @@ parameter before committing the count reset and camera flags; a named
 Its single forwarding caller receives a `BtlLinkedCommand *` and passes
 the embedded front/back `BtlCamState` objects.
 
-The initializer owns the 96-byte preset table formerly `D_004183D8`.
-The retail split includes eight additional zero alignment bytes before the
-following jump table. The instruction body is exact; the normal full-unit
-gate and linked retail checksum determine the data layout, not added dummy
-fields or artificial padding in the camera record.
+The copied 96-byte default bank is the true const `D_004183D8` owner,
+containing two existing `BattlePairCameraPreset` rows. Its definition replaces
+the old data include at that owner boundary; the routine copies the aggregate
+before selecting a row. The retail split's eight zero alignment bytes before
+the following jump table are not record fields or artificial C padding.
 
 
 ## Battle lift/settle task workspace
