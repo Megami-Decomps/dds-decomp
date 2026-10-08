@@ -64,7 +64,7 @@ extern void sdfQueueNonzeroResourceId(s32);
 extern void sdfReleaseResourceAllocation(s32);
 extern s32 sdfAllocGeneralBlock(s32);
 extern void *sdfMemoryGetBlockAddress(s32);
-extern s32 sdfReadNamedResource(const char *, u32 *, s32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void mnuMarkTitleStreamResetPending(void);
 extern void mnuResetTitleStreamLocked(void);
 extern void func_0026A5F0(s32);
@@ -557,9 +557,9 @@ MnuResourceTaskWork *func_0024F608(void) {
 
     memset(resourceWork, 0, sizeof(MnuResourceTaskWork));
     resourceWork->allocation = allocationHandle;
-    resourceWork->messageResource1 = sdfReadNamedResource(D_003AF758,
+    resourceWork->messageResource1 = (s32)(u32)sdfReadNamedResource(D_003AF758,
                                                   &resourceWork->messageResourceInfo1, 0);
-    resourceWork->messageResource2 = sdfReadNamedResource(D_003AF780,
+    resourceWork->messageResource2 = (s32)(u32)sdfReadNamedResource(D_003AF780,
                                                   &resourceWork->messageResourceInfo2, 0);
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
