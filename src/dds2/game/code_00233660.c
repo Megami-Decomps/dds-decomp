@@ -131,6 +131,7 @@ extern char D_00421238[]; /* "%02d/%02d" */
 extern char D_00421248[]; /* "%02x/%02x" */
 
 extern char D_00437068[]; /* "" */
+extern char D_00421278[];
 
 
 
@@ -1443,7 +1444,122 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421248);
 
 INCLUDE_ASM(const s32, "game/code_00233660", func_00235970);
 
-INCLUDE_ASM(const s32, "game/code_00233660", func_00235C20);
+extern char D_00437070[];
+extern char D_00437078[];
+extern char D_00437080[];
+extern char D_00437088[];
+extern char D_00437090[];
+extern char D_00437098[];
+extern char D_004370A0[];
+extern char D_004370A8[];
+
+/* Draw the pending resource details and the current selection in each model node. */
+void func_00235C20(void) {
+    SifCommand packet;
+    char basename[32];
+    s32 panelTop;
+    s32 panelHeight;
+    s32 basenameWidth;
+    s32 rowY;
+    s32 index;
+    void *formatted;
+    const char *format;
+
+    if (mdlViewerState.selectedNodeId == 0) {
+        panelTop = 0x8560;
+        panelHeight = 0x90;
+    } else {
+        panelTop = 0x8440;
+        panelHeight = 0x1B0;
+    }
+    mdlAppendViewerRectToDrawList(0x8410, panelTop - 0x18, 0xFF0080, 0xAE0,
+                                 panelHeight, 0);
+
+    mdlCopyResourceBasename(mdlViewerState.unk1C, mdlViewerState.unk1E, basename, 0x20);
+    basenameWidth = (s32)strlen(basename) * 3 << 6;
+    mdlAppendViewerRectToDrawList(0x8E90 - basenameWidth,
+                                 panelTop - 0xD8, 0xFF0080,
+                                 basenameWidth + 0x60, 0x90, 0);
+    formatted = sdfCreateFormattedSifCommand(0x8EC0 - basenameWidth,
+                                             panelTop - 0xC0, 0xFF0080, 0,
+                                             basename);
+    sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, (u32)formatted);
+
+    sdfPktInit(&packet, 0x8440, panelTop + mdlViewerState.selectedNodeId * 0x60,
+               0xFF0080, mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 0 ? 4 : 0);
+    formatted = sdfFormatSifPacket(&packet, D_00437070, mdlViewerState.unk1C + 0x30);
+    sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, (u32)formatted);
+
+    sdfPktSetCmd(&packet, 0);
+    formatted = sdfFormatSifPacket(&packet, D_00437078);
+    sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, (u32)formatted);
+
+    sdfPktSetCmd(&packet,
+                 mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 1 ? 4 : 0);
+    if (mdlViewerState.unk0F == 0) {
+        format = D_00437080;
+    } else {
+        format = D_00437088;
+    }
+    formatted = sdfFormatSifPacket(&packet, format, mdlViewerState.unk1E);
+    sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, (u32)formatted);
+
+    sdfPktSetCmd(&packet,
+                 mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 3 ? 4 : 0);
+    formatted = sdfFormatSifPacket(&packet, D_00421278, mdlViewerState.entryHeight);
+    sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, (u32)formatted);
+
+    sdfPktSetCmd(&packet,
+                 mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 4 ? 4 : 0);
+    formatted = sdfFormatSifPacket(&packet, D_00437090, mdlViewerState.entryWidth);
+    sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, (u32)formatted);
+
+    rowY = panelTop;
+    index = 0;
+    while (mdlViewerState.selectedNodeId == 0 ? index <= 0 : index < 4) {
+        s32 referenceCount = mdlGetNodeRefHalf(mdlViewerState.resources[0], index);
+
+        if (mdlViewerState.selectedNodeId == index) {
+            s32 style = mdlViewerState.unk09 < 0x14 && mdlViewerState.unk20 == 2 ? 4 : 0;
+
+            if (referenceCount == 0) {
+                formatted = sdfCreateFormattedSifCommand(
+                    0x88C0, rowY, 0xFF0080, style, D_00437098);
+            } else {
+                if (mdlViewerState.unk0F == 0) {
+                    format = D_004370A0;
+                } else {
+                    format = D_004370A8;
+                }
+                formatted = sdfCreateFormattedSifCommand(
+                    0x88C0, rowY, 0xFF0080, style, format,
+                    (s16)mdlViewerState.selectedEntryId);
+            }
+        } else {
+            referenceCount = mdlGetNodeRefHalf(mdlViewerState.resources[0], index);
+            if (referenceCount == 0) {
+                formatted = sdfCreateFormattedSifCommand(
+                    0x88C0, rowY, 0xFF0080, 0, D_00437068);
+            } else {
+                s32 motionIndex;
+
+                referenceCount--;
+                motionIndex = mdlGetNodeField2C(mdlViewerState.resources[0], index);
+                if (mdlViewerState.unk0F == 0) {
+                    format = D_00421238;
+                } else {
+                    format = D_00421248;
+                }
+                formatted = sdfCreateFormattedSifCommand(
+                    0x88C0, rowY, 0xFF0080, 0, format,
+                    motionIndex, referenceCount);
+            }
+        }
+        rowY += 0x60;
+        index++;
+        sdfAppendPacket((SdfListHead *)mdlViewerState.packetList, (u32)formatted);
+    }
+}
 
 u32 mdlRunViewerAssetSelectionTask(void) {
     func_00235970();
@@ -1752,6 +1868,8 @@ void mdlAdjustViewerScale(void) {
 extern void sdfAppendFillRectanglePacket();
 
 /* Draw the motion progress bar: timeline frame, playhead marker and "[time/length]" label, then the zoom value. */
+INCLUDE_RODATA(const s32, "game/code_00233660", D_00421278);
+
 void mdlDrawViewerMotionTimeline(void) {
     s32 packetList;
     MdlCtx *resource;
