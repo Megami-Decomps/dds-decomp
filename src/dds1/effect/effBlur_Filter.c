@@ -51,7 +51,7 @@ void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *
     quad->bottom = centerY + halfSize;
 }
 
-EffBlurScatterWork *func_00186F90(EffBlurScatterParams *params)
+EffBlurScatterWork *effBlurCreateScatterWork(EffBlurScatterParams *params)
 {
     struct SdfMemBlock *allocation;
     EffBlurScatterWork *work;
@@ -87,7 +87,7 @@ extern void effDrawBlurListWithFramePacket(void *list);
 extern f32 sdfSinPoly(f32 angle);
 extern f64 fabs(f64 value);
 
-void func_00187098(EffBlurScatterWork *work)
+void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work)
 {
     void *list;
     EffBlurScatterSlot *slot;

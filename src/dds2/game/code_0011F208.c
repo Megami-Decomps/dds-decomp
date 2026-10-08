@@ -2843,7 +2843,7 @@ s32 func_001278D0(void) {
             blur.y = 0;
             blur.positionSpread = 0x100;
             blur.size = 200;
-            D_00435F74 = (s32)func_0018EBC8(&blur);
+            D_00435F74 = (s32)effBlurCreateScatterWork(&blur);
         } else if (coordinateFlags & 0x80) {
             blur.count = 60;
             blur.delaySpread = 15;
@@ -2856,7 +2856,7 @@ s32 func_001278D0(void) {
             blur.y = 0;
             blur.positionSpread = 0x100;
             blur.size = 136;
-            D_00435F74 = (s32)func_0018EBC8(&blur);
+            D_00435F74 = (s32)effBlurCreateScatterWork(&blur);
         }
         kwlnFadeStartOut(0);
         fldPrepareSceneBgmArchive();

@@ -777,7 +777,7 @@ void effInitCh75Id(void) {
 /* Clone the four default work templates; only the staggered slot count is overridden. */
 void effInitWorks(void) {
     effBlurPixelWork = effCloneBlurTemplate(D_003B2208);
-    effFilterBlurWork = func_0018EBC8((EffBlurScatterParams *)D_003B21D8);
+    effFilterBlurWork = effBlurCreateScatterWork((EffBlurScatterParams *)D_003B21D8);
     effTexturedSquareWork = effCloneResourceTemplate(D_003B2278);
     effStaggeredBlurWork = effCloneBlurWorkWithSlots(D_003B22A0);
     effGetCh76Work()->params.count = EFF_EVENT_STAGGERED_SLOT_COUNT;
@@ -792,7 +792,7 @@ void effDispatchActive(void) {
         effDrawBlurPixelRectWithResource(effBlurPixelWork);
     }
     if (effFilterBlurEnabled) {
-        func_0018ECD0(effFilterBlurWork);
+        effBlurStepScatterSlotsAndDraw(effFilterBlurWork);
     }
     if (effStaggeredBlurEnabled) {
         effBlurStepScaleSlotsAndDraw(effStaggeredBlurWork);

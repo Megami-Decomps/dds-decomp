@@ -934,7 +934,7 @@ void effUpdateTarget(EffKindWork *work, u32 target) {
 }
 
 u32 effCreateFixedSlotBlurWorkFromFadeOutput(void *source) {
-    return (u32)func_00186F90((EffBlurScatterParams *)((u8 *)source + 0xC0));
+    return (u32)effBlurCreateScatterWork((EffBlurScatterParams *)((u8 *)source + 0xC0));
 }
 
 void effReleaseFixedSlotBlurWork(void *handle) {
@@ -996,7 +996,7 @@ void effUpdateFadeMapA(EffKindWork *work) {
     out->rateA = func_00297270(&config->blendB, limit, progress) * 0.01f;
     out->rateB = func_00297270(&config->rateA.curve, limit, progress) * 0.01f;
     out->param = work->mode;
-    func_00187098((EffBlurScatterWork *)out);
+    effBlurStepScatterSlotsAndDraw((EffBlurScatterWork *)out);
 }
 
 void effTextureReferenceRelease(EffKindWork *work, u32 target) {
