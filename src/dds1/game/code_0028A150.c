@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_resource.h"
+#include "sdf_chip.h"
 #include "eff_curve.h"
 #include "file.h"
 #include "file_slot.h"
@@ -395,7 +396,6 @@ extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern void *sdfAllocAndClearQuadwords(s32 size);
 
-extern void sdfReleaseChipBlock();
 
 extern void fileClearRecordReferences(FileSlotTable *record);
 
