@@ -846,7 +846,7 @@ typedef struct ParSystem {
     s32 cellCount;       /* 0x04 */
     s32 vertexWordCount; /* 0x08 */
     s32 groupDivisor;   /* 0x0C: cell-system allocator input */
-    s32 handle;          /* 0x10 */
+    struct SdfMemBlock *allocation; /* 0x10: geometry allocation descriptor */
     ParCell *cells;      /* 0x14 */
     void *vertices;      /* 0x18 */
     void *colors;        /* 0x1C */

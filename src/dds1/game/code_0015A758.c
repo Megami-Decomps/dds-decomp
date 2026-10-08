@@ -581,7 +581,7 @@ void parControlInit(void) {
 
 ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
     s32 total;
-    s32 handle;
+    struct SdfMemBlock *allocation;
     s32 base;
     s32 cellsSize;
     ParSystem *system;
@@ -610,8 +610,8 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
     }
     total = count * perCell;
     cellsSize = (total + count) * 0x14;
-    handle = (u32)sdfAllocGeneralBlock(cellsSize + 0x2C);
-    base = sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    allocation = sdfAllocGeneralBlock(cellsSize + 0x2C);
+    base = sdfResourceRetainAddress(allocation);
     system = (ParSystem *)(base + cellsSize);
     memset(system, 0, 0x2C);
     system->vertices = (void *)base;
@@ -632,7 +632,7 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
     system->bucket = 2;
     system->vertexWordCount = perCell;
     system->groupDivisor = groupDivisor;
-    system->handle = handle;
+    system->allocation = allocation;
     system->next = 0;
     system->unk28 = 0;
     return system;
@@ -640,7 +640,7 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
 
 void parReleaseCellSystem(ParSystem *system) {
     sdfQueueAssetRelease(system->object);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(system->handle));
+    sdfReleaseResourceAllocation(system->allocation);
 }
 
 void parCellInit(ParSystem *system, s32 index) {
