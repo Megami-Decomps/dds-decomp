@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "eff.h"
@@ -6,7 +7,6 @@
 #include "sdf.h"
 
 extern void *memcpy(void *, const void *, u32);
-extern BillChildPayload *func_00158F88(BillObj *, BillOut *);
 extern void billAppendChildQuad(BillObj *, BillChildPayload *);
 extern void func_00158430(BillObj *, BillRenderPair *);
 
@@ -17,8 +17,6 @@ extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddres
 void *sdfAllocSizeClassBlock(s32 size);
 
 void *func_00157D38(void *arg);
-
-void billSetAnimationEntry(BillObj *arg0, s32 arg1);
 
 BillData *billCreateAnimationDataFromResource(void *arg);
 
@@ -487,8 +485,8 @@ BillObj *billAllocList(void *resourceData) {
     n = data->entryCount;
     newobj = sdfAllocSizeClassBlock(n * 20 + 0x6C);
     newobj->animationData = data;
-    newobj->unk60 = (u8 *)newobj + 0x6C;
-    newobj->unk50 = 1;
+    newobj->resolvedEntries = (BillOut *)((u8 *)newobj + 0x6C);
+    newobj->animationActive = 1;
     newobj->pair.packetList = 0;
     newobj->pair.next = 0;
     newobj->pair.unk8 = 0;
@@ -506,8 +504,8 @@ BillObj *billCloneList(BillObj *obj) {
     data->listRefCount = data->listRefCount + 1;
     newobj = sdfAllocSizeClassBlock(n * 20 + 0x6C);
     newobj->animationData = data;
-    newobj->unk60 = (u8 *)newobj + 0x6C;
-    newobj->unk50 = 1;
+    newobj->resolvedEntries = (BillOut *)((u8 *)newobj + 0x6C);
+    newobj->animationActive = 1;
     newobj->pair.packetList = 0;
     newobj->pair.next = 0;
     billSetAnimationEntry(newobj, 0);
@@ -521,7 +519,7 @@ void billReleaseList(BillObj *obj) {
 
 /* Advance an entry's frame timer and apply its current record to the shared
  * child payload. Plural descriptors are handled by the dispatcher instead. */
-BillChildPayload *func_00158F88(BillObj *obj, BillOut *out) {
+BillChildPayload *billStepAnimationEntryAndUpdateChild(BillObj *obj, BillOut *out) {
     BillAnimationEntry *entry = out->entry;
     BillData *data = obj->animationData;
     BillRecord *record;
@@ -536,7 +534,7 @@ BillChildPayload *func_00158F88(BillObj *obj, BillOut *out) {
         out->frameIndex++;
         if ((u32)out->frameIndex >= entry->frameCount) {
             if (entry->flags & 0x10) {
-                obj->unk50 = 0;
+                obj->animationActive = 0;
                 out->frameIndex = entry->frameCount - 1;
             } else {
                 out->frameIndex = 0;
@@ -632,7 +630,7 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
     BillAnimationEntry *entry = data->entries + index;
 
     if (entry->frameCount == 0) {
-        obj->unk50 = 0;
+        obj->animationActive = 0;
         return;
     }
     if (entry->flags & 0x10000000) {
@@ -641,30 +639,30 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
 
         func_0035B6E0("billAnim..PLURAL SET\n");
         obj->modeFlags = 0x10000000;
-        obj->unk58 = index;
+        obj->animationEntryIndex = index;
         obj->entryCount = entry->frameCount;
         records = (BillPluralRecord *)(data->base + entry->offset);
         for (; i < entry->frameCount; i++) {
-            billResolveEntry(data, records[i].entryIndex, (BillOut *)obj->unk60 + i);
-            ((BillOut *)obj->unk60)[i].frameIndex = -records[i].delay;
+            billResolveEntry(data, records[i].entryIndex, obj->resolvedEntries + i);
+            (obj->resolvedEntries)[i].frameIndex = -records[i].delay;
         }
     } else if (entry->unk8 & 0xC0) {
         func_0035B6E0("billAnim..(A)MTEX SET\n");
         obj->modeFlags = entry->unk8;
-        obj->unk58 = index;
+        obj->animationEntryIndex = index;
         obj->entryCount = 2;
-        billResolveEntry(data, index, obj->unk60);
-        billResolveEntry(data, index + 1, (BillOut *)obj->unk60 + 1);
+        billResolveEntry(data, index, obj->resolvedEntries);
+        billResolveEntry(data, index + 1, obj->resolvedEntries + 1);
     } else {
         obj->modeFlags = 0;
         obj->entryCount = 1;
-        obj->unk58 = index;
-        billResolveEntry(data, index, obj->unk60);
+        obj->animationEntryIndex = index;
+        billResolveEntry(data, index, obj->resolvedEntries);
     }
     if (entry->unk8 & 0x100) {
         func_0035B6E0("billAnim..P2A POLYGON\n");
     }
-    obj->unk50 = 1;
+    obj->animationActive = 1;
 }
 
 extern s32 func_0035B6E0(const char *format, ...);
@@ -747,7 +745,7 @@ void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
     BillChildPayload *record;
 
     if (obj->kind == 1) {
-        record = func_00158F88(obj, obj->unk60);
+        record = billStepAnimationEntryAndUpdateChild(obj, obj->resolvedEntries);
     } else if (obj->kind == 0 || obj->kind == 3) {
         record = obj->child;
     } else {

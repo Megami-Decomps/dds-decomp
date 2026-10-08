@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "par_draw.h"
 #include "par_kind_api.h"
+#include "bill_object_api.h"
 
 #include "ee_mmi.h"
 
@@ -53,7 +54,9 @@ typedef struct ParObj {
     u8 pad18[8];
     s32 particleCount;            /* 0x20 */
     s32 lifetimeFrames;           /* 0x24 */
-    u8 pad28[8];
+    s32 billboardCloneMarker;     /* 0x28: PAR_BILLBOARD_CLONE_FROM_RESOURCE */
+    s16 billboardMode;            /* 0x2C */
+    u8 pad2E[2];
     ParKindState kindState;       /* 0x30 */
     ParColorRamp colorRamp;       /* 0x48 */
     u8 pad8C[8];
@@ -263,7 +266,6 @@ void effParReleaseNodeResource(ParTable *table) {
 
 INCLUDE_ASM(const s32, "effect/parManager", parPrependHistorySample);
 
-extern void billSetChildScaleComponents(BillObj *billboard, f32 scaleX, f32 scaleY);
 extern void billInvokeCallback(BillObj *billboard);
 
 void parPopulateSlotFromHistory(ParTable *table, s32 slotIndex, const f32 *origin, u32 color,

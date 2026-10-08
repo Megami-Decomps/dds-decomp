@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bill_object_api.h"
 #include "dds3obj.h"
 #include "eff_event.h"
 #include "eff_dependency.h"
@@ -23,7 +24,6 @@ struct EffectObj;
 struct BillObj;
 extern void effObjSetFlags(struct EffectObj *object, u32 flags);
 extern void billSetKind1Entry(struct BillObj *billboard, u32 entry);
-extern void billSetChildHalfExtents(s32 billboard, f32 width, f32 height);
 extern void billSetVariantValue(struct BillObj *billboard, s32 value);
 extern void billSetBillboardMode(struct BillObj *billboard, s32 mode);
 
@@ -51,7 +51,7 @@ void billCopySourceVectorAndSetConfig(EffWorldNode *owner, BillConfig *config) {
     switch (resource->config->kind) {
     case 0:
     case 3:
-        billSetChildHalfExtents((s32)resource->handle, resource->config->width, resource->config->height);
+        billSetChildHalfExtents((struct BillObj *)resource->handle, resource->config->width, resource->config->height);
         if (resource->config->kind == 3) {
             billSetVariantValue(resource->handle, 1);
         }

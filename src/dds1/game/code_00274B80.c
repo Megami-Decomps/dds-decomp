@@ -1058,7 +1058,31 @@ void mnuDrawStaffPanelGridBackdrop(s32 flag, StaffSlots *slots) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00276F70);
+typedef struct StaffPanelIconIndices {
+    s32 indices[10];
+} StaffPanelIconIndices;
+
+/* The backing table has eleven positions; this panel uses the first ten. */
+typedef struct StaffPanelIconPositions {
+    s32 positions[11][2];
+} StaffPanelIconPositions;
+
+extern const StaffPanelIconIndices D_003B21E0;
+extern const StaffPanelIconPositions D_003B2208;
+
+void func_00276F70(MenuPageWindow *window, StaffSlots *slots) {
+    MenuPageSlot *page = &window->slots[window->lists[0]->cursor->index];
+    EffectSlotSet *resource = slots->pairResources[0];
+    StaffPanelIconIndices indices = D_003B21E0;
+    StaffPanelIconPositions positions = D_003B2208;
+    u32 opacity = page->windowSprites->profileFade;
+    u32 i;
+
+    for (i = 0; i < 10; i++) {
+        func_002BF4E0(positions.positions[i][0], positions.positions[i][1],
+                     0, opacity, 1, resource, indices.indices[i], 0x53);
+    }
+}
 
 extern void frFontAddSharedGlyphFlags(s32);
 extern u8 frFontClearFlagBits(u8);
@@ -1093,7 +1117,52 @@ void mnuDrawProfilePanelAndSprite(s32 obj, s32 unused1, s32 spriteGroup, s32 dra
     mnuDrawAndAdvanceProfilePanel(0x1200, 0x730, 0, drawGroup, spriteFlags);
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00277390);
+extern void mnuDrawIconPanelFullFade(s32, s32, s32, MenuPanelHandles *, s32);
+extern void mnuUpdateWindowPanelHandleStates(MenuPanelHandles *);
+extern s8 evtStageTestUpdate(s32);
+extern u8 D_00325788[];
+
+s32 func_00277390(KwlnTask *task) {
+    CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(task);
+    DatGameState *gameState = datGameState;
+    StaffMenuWork *menu = (StaffMenuWork *)context->menu;
+    MenuPageWindow *page = &context->partyWindow;
+    StaffSlots *slots = (StaffSlots *)&context->unk60;
+    s32 partyIndex = context->partyWindow.lists[0]->cursor->index;
+    DatPartyRecord *partyEntry = &gameState->party[partyIndex];
+
+    func_00276F70(page, slots);
+    mnuDrawStaffPanelGridBackdrop(0, slots);
+
+    if (menu->staffMode == 0) {
+        page->flags = (page->flags | 0x400) & ~0x100;
+    } else {
+        page->flags |= 0x500;
+    }
+
+    mnuDrawStaffCampScreen(1, task);
+    if (menu->staffMode == 0) {
+        mnuDrawPartySkillAndStatusPanel(partyEntry, page, context->sceneGroup,
+                                        context->sprite, (s32)slots, 0x53);
+        mnuDrawStaffGridLabelsForKind(5, context->actor);
+    } else {
+        mnuDrawProfilePanelAndSprite((s32)partyEntry, (s32)page,
+                                     (s32)context->effect, (s32)context->extraResource,
+                                     (s32)slots, 0x53);
+        if (menu->staffImage == 0) {
+            mnuDrawStaffGridLabelsForKind(6, context->actor);
+        } else {
+            mnuDrawStaffGridLabelsForKind(4, context->actor);
+        }
+    }
+
+    if (menu->staffImage == 0) {
+        mnuDrawIconPanelFullFade(0, 0, 0, menu->resourceList, 0x53);
+        mnuUpdateWindowPanelHandleStates(menu->resourceList);
+    }
+    evtStageTestUpdate((s32)D_00325788);
+    return menuRunPanel((void *)context, 1, (void *)task);
+}
 
 extern u32 effMiscRand(s32);
 extern s32 evtStageTestHasPendingMotion();
@@ -1671,6 +1740,8 @@ void ptySkillMenuHandleSlotReorder(KwlnTask *callback) {
     }
 }
 
+INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B21E0);
+
 INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2208);
 
 INCLUDE_RODATA(const s32, "game/code_00274B80", D_003B2260);
@@ -1710,4 +1781,3 @@ INCLUDE_SDATA(const s32, "game/code_00274B80", D_003BC700);
 INCLUDE_SDATA(const s32, "game/code_00274B80", D_003BC708);
 
 INCLUDE_SDATA(const s32, "game/code_00274B80", D_003BC710);
-
