@@ -80,7 +80,7 @@ typedef struct MdlViewState {
     s16 unk3E;
     s16 editorMode; /* 0x40: 0 selects records, 1 edits a mark record */
     s16 unk42;
-    s16 unk44;
+    s16 effectListScroll; /* 0x44: first visible effect row */
     s16 markFieldCursor; /* 0x46: selected row in the mark parameter editor */
     s16 unk48;
     s16 unk4A;
@@ -219,7 +219,7 @@ extern s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *pad);
 
 extern void fldAdjustIntegerUsingMainPad(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep);
 
-extern s8 D_00324510[];
+extern s8 D_00324510[64];
 
 extern void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, s8 *pad);
 
@@ -2135,7 +2135,146 @@ void mdlUpdateViewerMarkEditorInput(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021D198);
+extern const char D_003ABEB0[];
+extern const char D_003BBCB0[];
+extern void sdfQueueFlatTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
+
+void func_0021D198(void) {
+    MdlViewState *state = &mdlViewerState;
+    MdlCtx *resource;
+    MdlRecord *firstList;
+    MdlRecord *secondList;
+    MdlRecord *record;
+    s32 firstCount;
+    s32 secondCount;
+    s32 totalCount;
+    s32 firstRemaining;
+    s32 selected;
+    s32 scroll;
+    s32 skipCount;
+    s32 rowCount;
+    s32 markerY;
+    s32 descriptionY;
+    s32 packetList;
+
+    mdlAppendViewerRectToDrawList(0x7150, 0x7A08, 0xFF007F, 0xF60, 0x270, 0);
+    resource = state->resources[0];
+    packetList = state->packetList;
+    firstList = mdlFindViewerRecord(resource, -1);
+    firstCount = mdlCountRecords((s32)firstList);
+    secondList = mdlFindViewerRecord(resource, state->activeEntryId);
+    secondCount = mdlCountRecords((s32)secondList);
+    totalCount = firstCount + secondCount;
+
+    if (totalCount == 0) {
+        sdfAppendPacket((SdfListHead *)packetList,
+                        (u32)sdfCreateFormattedSifCommand(0x7300, 0x7A20,
+                                                         0xFF0080, 0,
+                                                         D_003ABEB0));
+    } else {
+        s32 maxScroll = totalCount - 6;
+
+        if (maxScroll < 0) {
+            maxScroll = 0;
+        }
+        scroll = state->effectListScroll;
+        if (scroll > maxScroll) {
+            scroll = maxScroll;
+        }
+
+        firstRemaining = firstCount;
+        if (firstCount != 0) {
+            record = mdlGetFirstRecord((s32)firstList);
+        } else {
+            record = mdlGetFirstRecord((s32)secondList);
+        }
+
+        selected = mdlViewerState.unk42;
+        if (selected >= totalCount) {
+            selected = totalCount - 1;
+            mdlViewerState.unk42 = selected;
+        }
+        if (selected < scroll) {
+            scroll = selected;
+        } else if (selected >= scroll + 6) {
+            scroll = selected - 5;
+        }
+        mdlViewerState.effectListScroll = scroll;
+
+        skipCount = scroll;
+        rowCount = 0;
+        if (record != NULL) {
+            descriptionY = 0x7A20;
+            do {
+                s32 selectionMarker = ' ';
+
+                if (skipCount > 0) {
+                    skipCount--;
+                } else {
+                    s32 listMarker = ' ';
+                    s32 selectedStyle = 0;
+
+                    if (selected == 0) {
+                        if (mdlViewerState.editorMode == 0) {
+                            selectionMarker = '>';
+                        } else {
+                            selectedStyle = 4;
+                        }
+                    }
+
+                    if (firstRemaining > 0) {
+                        listMarker = '*';
+                    }
+
+                    markerY = 0x7A20 + rowCount * 0x60;
+                    if (selectionMarker != ' ' || listMarker != ' ') {
+                        sdfAppendPacket((SdfListHead *)packetList,
+                                        (u32)sdfCreateFormattedSifCommand(
+                                            0x7180, markerY, 0xFF0080, selectedStyle,
+                                            D_003BBCB0, selectionMarker, listMarker));
+                    }
+
+                    func_002193F8(packetList, 0x7300, descriptionY, 0xFF0080,
+                                  selectedStyle, record);
+                    descriptionY += 0x60;
+                    rowCount++;
+                }
+
+                if (firstRemaining > 0 && --firstRemaining == 0) {
+                    record = secondList != NULL ? mdlGetFirstRecord((s32)secondList) : NULL;
+                } else {
+                    record = mdlGetNextRecord(record);
+                }
+                selected--;
+                if (rowCount >= 6) {
+                    break;
+                }
+            } while (record != NULL);
+        }
+
+        if (scroll != 0) {
+            sdfQueueFlatTriangle(packetList, 0x8000A0C0, 0,
+                                 0x8040, 0x7A30, 0x8000, 0x7A70,
+                                 0x8080, 0x7A70, 0xFF0080, NULL);
+        }
+        if (record != NULL) {
+            sdfQueueFlatTriangle(packetList, 0x8000A0C0, 0,
+                                 0x8000, 0x7C10, 0x8080, 0x7C10,
+                                 0x8040, 0x7C50, 0xFF0080, NULL);
+        }
+    }
+
+    if (mdlViewerState.editorMode == 1) {
+        MdlRecord *markRecord = func_0021CF00();
+
+        if (markRecord != NULL && mdlRecordMatchesId(markRecord, 3)) {
+            mdlAppendViewerRectToDrawList(0x8590, 0x7A08, 0xFF007F, 0x960, 0xA50, 0);
+            mdlDrawMarkParamsPanel(packetList, 0x85C0, 0x7A20, 0xFF0080,
+                                   (EffMarkParams *)markRecord,
+                                   mdlViewerState.markFieldCursor);
+        }
+    }
+}
 
 u32 mdlRunViewerEffectEditorTask(void) {
     mdlUpdateViewerMarkEditorInput();
@@ -2281,6 +2420,8 @@ extern s32 func_00301588();
 extern s32 memcmp(const void *, const void *, u32);
 
 /* Read the viewer's config text file: bg-color=, eye-position=, target-position=, fovy=, fog= lines. */
+INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABEB0);
+
 void mdlLoadViewerPresentationConfig(void) {
     s32 fileRequest;
     s32 resourceHandle;
@@ -2599,7 +2740,169 @@ void mdlViewerStepEditedNumericValue(s32 index) {
 }
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_0021ECF0);
-INCLUDE_ASM(const s32, "game/code_00218B48", func_0021F098);
+typedef union MdlOptionControl {
+    u32 packed;
+    struct {
+        u8 active;
+        u8 blink;
+        s16 cursor;
+    } fields;
+} MdlOptionControl;
+
+/* Complete 0x38-byte option-panel state; the task updates both float values. */
+typedef struct MdlOptionState {
+    s8 *pad;
+    MdlOptionControl control;
+    u8 pad08[0x20];
+    f32 value;
+    f32 adjustment;
+    s32 packetList;
+    u8 pad34[4];
+} MdlOptionState;
+
+typedef struct MdlOptionLabel {
+    u16 x;
+    u16 y;
+    s32 style;
+    const char *format;
+} MdlOptionLabel;
+
+typedef char MdlOptionStateSize[sizeof(MdlOptionState) == 0x38 ? 1 : -1];
+extern MdlOptionState D_003D7B60;
+extern s8 D_00398638[16];
+extern MdlOptionLabel D_00367DB8[4];
+extern u16 D_00367DE8[4] __attribute__((section(".data")));
+extern f32 D_003BD358;
+extern f32 D_003BD35C;
+/* The selector occupies byte zero of its aligned small-data allocation. */
+extern u8 D_003BD344 __attribute__((section(".sdata")));
+extern const char D_003BBD58[];
+extern const char D_003BBD60[];
+extern const char D_003BBD68[];
+extern const char D_003BBD70[];
+extern const char D_003BBD78[];
+extern SdfPoolNode D_00325708;
+extern u32 kwlnTaskGetUserValue(KwlnTask *);
+extern void fldStepValueByPad(f32 *, u8 *, f32, f32, f32, f32);
+
+s32 func_0021F098(KwlnTask *task) {
+    MdlOptionState *state = &D_003D7B60;
+    MdlOptionLabel *label;
+    s8 *pad;
+    f32 value;
+    f32 adjustment;
+    s32 changed;
+    s32 i;
+    s32 valueStyle;
+    s32 adjustmentStyle;
+    const char *format;
+
+    if (kwlnTaskGetUserValue(task) == 0) {
+        pad = D_00398638;
+    } else {
+        pad = D_00324510;
+    }
+    value = D_003BD358;
+    adjustment = D_003BD35C;
+    state->pad = pad;
+    D_003D7B60.value = value;
+    D_003D7B60.adjustment = adjustment;
+    D_003D7B60.packetList = sdfCreateResetPacketList();
+    D_003D7B60.control.fields.blink++;
+    if (D_003D7B60.control.fields.blink == 30) {
+        D_003D7B60.control.fields.blink = 0;
+    }
+
+    if (D_003D7B60.control.fields.active == 0) {
+        changed = 1;
+        if (D_003D7B60.pad[7] & 0x80) {
+            if (D_003D7B60.control.fields.cursor >= 2) {
+                D_003D7B60.control.fields.cursor = 0;
+            } else {
+                D_003D7B60.control.fields.cursor++;
+            }
+        } else if (D_003D7B60.pad[7] & 2) {
+            if (D_003D7B60.control.fields.cursor < 2) {
+                D_003D7B60.control.fields.cursor++;
+            }
+        } else if (D_003D7B60.pad[6] & 0x80) {
+            if (D_003D7B60.control.fields.cursor > 0) {
+                D_003D7B60.control.fields.cursor--;
+            } else {
+                D_003D7B60.control.fields.cursor = 2;
+            }
+        } else if (D_003D7B60.pad[6] & 2) {
+            if (D_003D7B60.control.fields.cursor > 0) {
+                D_003D7B60.control.fields.cursor--;
+            }
+        } else if (D_003D7B60.pad[1] & 0x80) {
+            if (D_003D7B60.control.fields.cursor == 2) {
+                D_003BD344 ^= 1;
+            } else {
+                D_003D7B60.control.fields.active = 1;
+            }
+        } else {
+            changed = 0;
+        }
+        if (changed != 0) {
+            D_003D7B60.control.fields.blink = 0;
+        }
+    } else {
+        if (D_003D7B60.pad[1] & 0x80) {
+            D_003D7B60.control.fields.active = 0;
+        } else if (D_003D7B60.pad[3] & 0x80) {
+            D_003D7B60.control.fields.active = 0;
+        } else {
+            switch (D_003D7B60.control.fields.cursor) {
+            case 0:
+                fldStepValueByPad(&D_003D7B60.value, (u8 *)D_003D7B60.pad,
+                                  1.0f, 50.0f, 1.0f, 0.1f);
+                break;
+            case 1:
+                fldStepValueByPad(&D_003D7B60.adjustment, (u8 *)D_003D7B60.pad,
+                                  -50.0f, 50.0f, 0.1f, 0.01f);
+                break;
+            }
+        }
+    }
+
+    sdfAppendPacket((SdfListHead *)D_003D7B60.packetList,
+                    func_0011D3E8(0x84D0, 0x79A8, 0xFF007F, 0xA20, 0x270,
+                                  0x60000000, 0x40806020));
+    label = D_00367DB8;
+    for (i = 0; i != 4; i++, label++) {
+        sdfAppendPacket((SdfListHead *)D_003D7B60.packetList,
+                        (u32)sdfCreateFormattedSifCommand(label->x, label->y,
+                                                         0xFF0080, label->style,
+                                                         label->format));
+    }
+    if (D_003D7B60.control.fields.active == 0 && D_003D7B60.control.fields.blink < 20) {
+        sdfAppendPacket((SdfListHead *)D_003D7B60.packetList,
+                        (u32)sdfCreateFormattedSifCommand(0x8500,
+                                                         D_00367DE8[D_003D7B60.control.fields.cursor],
+                                                         0xFF0080, 0, D_003BBD58));
+    }
+
+    /* Ignore the blink byte when testing the active mode and selected row. */
+    valueStyle = (D_003D7B60.control.packed & 0xFFFF00FF) == 1 ? 6 : 0;
+    sdfAppendPacket((SdfListHead *)D_003D7B60.packetList,
+                    (u32)sdfCreateFormattedSifCommand(0x8B00, 0x7A80, 0xFF0080,
+                                                     valueStyle, D_003BBD60, D_003D7B60.value));
+    adjustmentStyle = (D_003D7B60.control.packed & 0xFFFF00FF) == 0x10001 ? 6 : 0;
+    sdfAppendPacket((SdfListHead *)D_003D7B60.packetList,
+                    (u32)sdfCreateFormattedSifCommand(0x8B00, 0x7AE0, 0xFF0080,
+                                                     adjustmentStyle, D_003BBD68, D_003D7B60.adjustment));
+    format = D_003BD344 == 0 ? D_003BBD70 : D_003BBD78;
+    sdfAppendPacket((SdfListHead *)D_003D7B60.packetList,
+                    (u32)sdfCreateFormattedSifCommand(0x8B00, 0x7BA0, 0xFF0080,
+                                                     0, format));
+    D_00325708.append((SdfListHead *)&D_00325708,
+                      (SdfListHead *)D_003D7B60.packetList);
+    D_003BD358 = D_003D7B60.value;
+    D_003BD35C = D_003D7B60.adjustment;
+    return 0;
+}
+
 
 
 

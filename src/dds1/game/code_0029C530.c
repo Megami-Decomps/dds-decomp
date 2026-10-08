@@ -533,7 +533,7 @@ extern u16 mdlGetContextResourceId(MdlCtx *);
 
 extern void effInitModelVUState(MdlCtx *);
 
-extern s32 effComputeLightDirectionVU(MdlCtx *, void *);
+extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 
 extern void *sdfAllocAndClearQuadwords(u32);
 
@@ -6603,7 +6603,7 @@ extern SdfLightSources D_0037EE80;
 
 extern void sdfBuildLightingPacket(void *, SdfLightSources, void *);
 
-s32 effComputeLightDirectionVU(MdlCtx *vector, void *target) {
+s32 effComputeLightDirectionVU(MdlCtx *vector, SdfLightingPacketStorage *target) {
     s32 result = btlIsRuntimeAllocated();
 
     if (result != 0) {

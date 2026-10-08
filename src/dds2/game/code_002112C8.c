@@ -272,7 +272,7 @@ extern void evtSetTransitionMotionScale(void *, f32);
 extern void evtStoreUnitMotionShortParameters(void *, s32, s32);
 
 
-extern s32 btlReadUnitStatusMask();
+extern u16 btlReadUnitStatusMask(DatPartyRecord *);
 
 extern void *sdfAllocAndClearQuadwords(s32);
 
@@ -785,8 +785,8 @@ s32 btlIsGroup200CountAtMost(s32 unused, u32 maximumCount) {
 }
 
 /* Return whether the native unit-status query intersects any requested action-mask bit. */
-s32 btlUnitHasActionMask(s32 unitAddress, s32 actionMask) {
-    return (btlReadUnitStatusMask(&((BtlUnit *)unitAddress)->partyRecord.flags, actionMask) & actionMask) != 0;
+s32 btlUnitHasAnyStatusInMask(BtlUnit *unit, s32 actionMask) {
+    return (btlReadUnitStatusMask(&unit->partyRecord) & actionMask) != 0;
 }
 
 /* Test active enemy-side units for any requested action bit; do not filter bit 0x20. */
@@ -794,7 +794,7 @@ s32 btlAnyGroup400HasActionMask(s32 unused, s32 actionMask) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
     for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
         if ((*(u64 *)&unitCursor->flags & BTL_ENEMY_ACTIVE_MASK) == BTL_ENEMY_ACTIVE_FLAGS &&
-            btlUnitHasActionMask((s32)unitCursor, actionMask)) {
+            btlUnitHasAnyStatusInMask(unitCursor, actionMask)) {
             return 1;
         }
     }
@@ -809,7 +809,7 @@ s32 btlHasActorOrSlotMatchingActionQuery(s32 unused, u32 query) {
     for (unit = ((BattleWork *)btlGetRuntime())->actorList; unit != 0; unit = unit->nextActor) {
         if (unit->partyRecord.unitId == ((query >> 16) & 0x3F)) {
             if (unit->flags & 1) {
-                if (btlUnitHasActionMask((s32)unit, query & 0xFFFF)) {
+                if (btlUnitHasAnyStatusInMask(unit, query & 0xFFFF)) {
                     return 1;
                 }
             }
@@ -821,7 +821,7 @@ s32 btlHasActorOrSlotMatchingActionQuery(s32 unused, u32 query) {
             if (!(record->flags & 2)) {
                 if (record->unitId == ((query >> 16) & 0x3F)) {
                     if ((query & 0xFFFF) == 0x7FFF) {
-                        return ((btlReadUnitStatusMask() & query) & 0xFFFF) != 0;
+                        return ((btlReadUnitStatusMask(record) & query) & 0xFFFF) != 0;
                     }
                     if ((record->status & 0x7FFF & query) != 0) {
                         return 1;
@@ -838,7 +838,7 @@ s32 btlAnyGroup200HasActionMask(s32 unused, s32 actionMask) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
     for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
         if ((*(u64 *)&unitCursor->flags & BTL_PARTY_ACTIVE_MASK) == BTL_PARTY_ACTIVE_FLAGS &&
-            btlUnitHasActionMask((s32)unitCursor, actionMask)) {
+            btlUnitHasAnyStatusInMask(unitCursor, actionMask)) {
             return 1;
         }
     }
@@ -850,7 +850,7 @@ s32 btlAllGroup200HaveActionMask(s32 unused, s32 actionMask) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
     for (; unitCursor != 0; unitCursor = unitCursor->nextActor) {
         if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS &&
-            !btlUnitHasActionMask((s32)unitCursor, actionMask)) {
+            !btlUnitHasAnyStatusInMask(unitCursor, actionMask)) {
             return 0;
         }
     }
@@ -1809,7 +1809,7 @@ s32 func_00214DF8(BtlUnit *unit, s32 command) {
             if (btlFindCommandPartnersByAffinity(unit, command, &members[1], &members[2]) != 0) {
                 members[0] = unit;
                 for (; i < 3; i++) {
-                    if (members[i] != NULL && btlUnitHasActionMask((s32)members[i], 0x10)) {
+                    if (members[i] != NULL && btlUnitHasAnyStatusInMask(members[i], 0x10)) {
                         return 0;
                     }
                 }
@@ -1824,7 +1824,7 @@ s32 func_00214DF8(BtlUnit *unit, s32 command) {
         } else if (func_00214C78(unit, command, &members[1], &members[2]) != 0) {
             members[0] = unit;
             for (i = 0; i < 3; i++) {
-                if (members[i] != NULL && btlUnitHasActionMask((s32)members[i], 0x10)) {
+                if (members[i] != NULL && btlUnitHasAnyStatusInMask(members[i], 0x10)) {
                     return 0;
                 }
             }
@@ -1989,7 +1989,7 @@ s32 btlSelectTargetsByActionMask(s32 task, s32 mask) {
         u16 picked[12] = {0};
 
         for (i = 0; i < count; i++) {
-            if (btlUnitHasActionMask(btlGetIndexListEntry(list, i), mask)) {
+            if (btlUnitHasAnyStatusInMask(btlGetIndexListEntry(list, i), mask)) {
                 picked[i] = 1;
             }
         }
@@ -2017,7 +2017,7 @@ s32 btlSelectTargetsWithoutActionMask(s32 task, s32 mask) {
         u16 picked[12] = {0};
 
         for (i = 0; i < count; i++) {
-            if (!btlUnitHasActionMask(btlGetIndexListEntry(list, i), mask)) {
+            if (!btlUnitHasAnyStatusInMask(btlGetIndexListEntry(list, i), mask)) {
                 picked[i] = 1;
             }
         }

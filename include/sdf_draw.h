@@ -106,7 +106,7 @@ typedef struct SdfModel {
     f32 matrix[4][4];
     f32 rotationQuaternion[4];
     f32 scaleVector[4];
-    void *lighting;
+    SdfLightingPacketStorage *lighting;
     u32 unk84;
     f32 unk88;
     f32 unk8C;

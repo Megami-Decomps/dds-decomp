@@ -6948,7 +6948,7 @@ void func_002F64D8(EffActiveResource *work) {
     }
 }
 
-s32 effComputeLightDirectionVU(MdlCtx *model, void *target) {
+s32 effComputeLightDirectionVU(MdlCtx *model, SdfLightingPacketStorage *target) {
     if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
@@ -8355,7 +8355,7 @@ typedef struct EffectBlob {
 typedef struct EffSharedEffectResource {
     MdlCtx *model;
     u32 deviceSlot;
-    u32 data;
+    SdfLightingPacketStorage *data;
     u32 unk0C;
     u16 references;
     u8 pad12[2];
@@ -8427,10 +8427,10 @@ u8 *func_002FB5C0(FileJobPayload *source) {
         work->resource = sdfAllocSizeClassBlock(sizeof(*work->resource));
         work->resource->model = NULL;
         work->resource->deviceSlot = 0;
-        work->resource->data = 0;
+        work->resource->data = NULL;
         work->resource->unk0C = func_001003F8();
         work->resource->references = 1;
-        work->resource->data = (u32)sdfAllocAndClearQuadwords(0xE0);
+        work->resource->data = sdfAllocAndClearQuadwords(0xE0);
         secondary = fileResolveSecondaryBuffer(source);
         work->resource->allocation = sdfAllocGeneralBlock(source->secondary.size);
         work->resource->entriesSize = source->secondary.size;
@@ -8449,8 +8449,8 @@ void effReleaseSharedResourceReference(EffSharedEffectWork *work) {
 
     resource->references--;
     if (resource->references == 0) {
-        s32 data = resource->data;
-        if (data != 0) {
+        SdfLightingPacketStorage *data = resource->data;
+        if (data != NULL) {
             sdfReleaseChipBlock(data);
         }
         resource = work->resource;
