@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "itf_draw_grid.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_panel_state.h"
@@ -68,7 +69,6 @@ typedef struct SkillMenuContext {
     SkillMenuState *menu;        /* 0x90C */
 } SkillMenuContext;
 
-extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern void func_00282DA0(s32, s32, s32, s32, s32);
 
 s32 ptySkillMenuUpdate(KwlnTask *callback) {
@@ -102,13 +102,13 @@ void ptySkillMenuCopyPageState(s32 context) {
     u32 i;
 
     itfDrawGridWithResolvedSlot(0x10E0, 0x598, 0, 1,
-                                work->pageLabels,
+                                (struct EffectSlotSet *)(u32)work->pageLabels,
                                 9, 0x53);
     itfDrawGridWithResolvedSlot(0x10E0, 0xC88, 0, 1,
-                                work->pageLabels,
+                                (struct EffectSlotSet *)(u32)work->pageLabels,
                                 0xA, 0x53);
     pageGrid = work->pageGrid;
-    itfDrawGridWithResolvedSlot(0x10E0, 0xA18, 0, 1, pageGrid,
+    itfDrawGridWithResolvedSlot(0x10E0, 0xA18, 0, 1, (struct EffectSlotSet *)(u32)pageGrid,
                                 0x1D, 0x53);
     mnuSetPanelState(menu->panelState, index);
     func_00282DA0(0xDE0, 0x350, 0, (s32)menu->panelState, 0x53);
