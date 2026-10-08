@@ -4076,12 +4076,12 @@ s32 btlIsCurrentValueBelowQuarterThreshold(UiObject *object) {
     return object->currentValue * 100 / object->maximumValue < 26;
 }
 
-s32 btlWouldUiValueFallBelowQuarter(UiObject *object, s32 delta) {
-    s32 value = object->currentValue + delta;
+s32 btlWouldUiValueFallBelowQuarter(BtlUnit *object, s32 delta) {
+    s32 value = object->partyRecord.hp + delta;
     if (value <= 0) {
         return 1;
     }
-    return value * 100 / object->maximumValue < 26;
+    return value * 100 / object->partyRecord.maxHp < 26;
 }
 
 s32 btlBothSidesActive(BtlUnit *unit) {
