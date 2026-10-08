@@ -6,9 +6,9 @@
 
 extern s8 D_0037F510[];
 
-extern s32 sdfAllocGeneralBlock(s32);
+extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 
-extern void *sdfMemoryGetBlockAddress(u32);
+extern u32 sdfMemoryGetBlockAddress(SdfMemBlock *);
 
 extern void func_00313BA8(s32, s32);
 
@@ -53,7 +53,7 @@ extern void func_00313A58(u8 *);
 
 
 typedef struct TaskWork {
-    u32 allocation;
+    SdfMemBlock *allocation;
     char *primaryTaskName;
     char *secondaryTaskName;
     SdfList *list;
@@ -85,7 +85,7 @@ typedef struct SdfGridCell {
 } SdfGridCell;
 
 typedef struct SdfGrid {
-    u32 allocation;        /* 0x00 */
+    SdfMemBlock *allocation; /* 0x00 */
     SdfGridCell *cells;    /* 0x04 */
     SdfGridCell *cursor;   /* 0x08 */
     SdfGridCell *viewportOrigin; /* 0x0C */
@@ -129,7 +129,6 @@ extern void func_00313BA8(s32, s32);
 extern s32 func_00313BA0(void);
 extern s32 func_00313BB0(s32, s32);
 
-extern s32 sdfAllocGeneralBlock(s32);
 extern u32 strlen(const char *);
 extern s32 func_0035C860(char *buffer, const char *fmt, ...);
 extern char D_004388D8[];
@@ -174,8 +173,8 @@ void sdfSetTaskItemMode(void *list, s32 key, u32 mode) {
 }
 
 TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, void *userData) {
-    s32 allocation = sdfAllocGeneralBlock(0x14);
-    TaskWork *work = sdfMemoryGetBlockAddress(allocation);
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(0x14);
+    TaskWork *work = (TaskWork *)sdfMemoryGetBlockAddress(allocation);
 
     memset(work, 0, 0x14);
     work->allocation = allocation;
@@ -194,7 +193,7 @@ void sdfDestroyTaskResourceWork(TaskWork *work) {
         sdfDestroyTaskWork(work->list);
         sdfReleaseChipBlock(work->primaryTaskName);
         sdfReleaseChipBlock(work->secondaryTaskName);
-        sdfReleaseResourceAllocation((SdfMemBlock *)work->allocation);
+        sdfReleaseResourceAllocation(work->allocation);
     }
 }
 
@@ -352,7 +351,7 @@ void sdfDestroyGridWork(SdfGrid *owner) {
     if (owner != NULL) {
         sdfGridReleaseAllCells();
         owner->onDestroy(0, owner->userData);
-        sdfReleaseResourceAllocation((SdfMemBlock *)owner->allocation);
+        sdfReleaseResourceAllocation(owner->allocation);
     }
 }
 

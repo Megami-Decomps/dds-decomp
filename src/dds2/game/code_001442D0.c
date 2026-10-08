@@ -1396,7 +1396,114 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00146250);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00148188);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00148488);
+extern f32 D_004362B0;
+extern f32 D_004362B4;
+extern f32 D_00384790[16];
+extern f32 sdfViewMatrix[16];
+extern SdfTex *D_0044F7F8[8];
+extern void sdfInvertScaledVuTransform(void);
+extern f32 sdfSinPoly(f32 angle);
+extern void func_00148188(f32 centerX, f32 centerY, f32 angle);
+extern void fldSelectDisplayBuffer(u32 buffer);
+extern void fldSubmitFrameQuad(s32 flag0, s32 flag1, s32 field4, s32 field12, s32 flag14, s32 flag15, s32 unused, s32 field17);
+extern void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3);
+extern void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, SdfTex *texture);
+extern void fldSubmitGsGradientQuad(s32 x, s32 y, s32 w, s32 h,
+                                    u32 r0, u32 g0, u32 b0, u32 a0,
+                                    u32 r1, u32 g1, u32 b1, u32 a1,
+                                    u32 r2, u32 g2, u32 b2, u32 a2,
+                                    u32 r3, u32 g3, u32 b3, u32 a3);
+extern void fldSubmitPrimaryFramePacket(void);
+extern void fldSubmitAlternateFramePacket(void);
+extern void func_0012BE18(s32 mode);
+
+void func_00148488(void) {
+    s32 textureRow;
+    s32 panelOffset;
+
+    D_004362B0 += 0.04f;
+    VU0_LOAD_MATRIX(D_00384790);
+    sdfInvertScaledVuTransform();
+    sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, D_00384790);
+
+    fldSelectDisplayBuffer(0x56);
+    fldSubmitFrameQuad(1, 0, 0x80, 1, 0, 0, 1, 1);
+    func_0012BE18(0);
+    fldSubmitGsQuadTagged(0, 0, 0x200, 0xE0, 0x40, 0, 0, 0x80);
+    fldSubmitSpriteRect(0, 0, 0x200, 0x1C0, 0, 0, 0x80, 0x80, 0x80808080, D_0044F7F8[0]);
+
+    D_004362B4 -= 0.5f;
+    if (D_004362B4 < 0.0f) {
+        D_004362B4 += 360.0f;
+    }
+    func_00148188(256.0f, 224.0f, D_004362B4);
+    panelOffset = (s32)(sdfSinPoly(D_004362B0) * 50.0f - 50.0f);
+
+    fldSubmitPrimaryFramePacket();
+    fldSubmitFrameQuad(1, 0, 0x80, 1, 0, 0, 1, 1);
+    func_0012BE18(0);
+    fldSubmitGsQuadTagged(0, 0, 0x200, 0xE0, 0, 0, 0, 0x80);
+    fldSubmitFrameQuad(1, 5, 0x10, 0, 0, 0, 1, 1);
+    func_0012BE18(0);
+
+    for (textureRow = 0; textureRow < 7; textureRow++) {
+        s32 y = textureRow * 0x40 + 7;
+        fldSubmitSpriteRect(0, y, 0x100, 0x40, 0, 0, 0x100, 0x40, 0x80808080, D_0044F7F0[3]);
+        fldSubmitSpriteRect(0x100, y, 0x100, 0x40, 0, 0, 0x100, 0x40, 0x80808080, D_0044F7F0[3]);
+    }
+    fldSubmitAlternateFramePacket();
+    fldSubmitFrameQuad(1, 0, 0x80, 1, 1, 0, 1, 1);
+    func_0012BE18(0);
+
+    fldSubmitGsGradientQuad(panelOffset, 0, 0x64, 0x1C0,
+                            0, 0, 0, 0xC,
+                            0, 0, 0, 0,
+                            0, 0, 0, 0xC,
+                            0, 0, 0, 0);
+    fldSubmitGsGradientQuad(0x19C - panelOffset, 0, 0x64, 0x1C0,
+                            0, 0, 0, 0,
+                            0, 0, 0, 0xC,
+                            0, 0, 0, 0,
+                            0, 0, 0, 0xC);
+    fldSubmitFrameQuad(1, 0, 0x80, 1, 0, 0, 1, 1);
+    func_0012BE18(0);
+    fldSubmitPrimaryFramePacket();
+    fldSubmitFrameQuad(1, 0, 0x80, 1, 0, 0, 1, 1);
+    func_0012BE18(0);
+    fldSubmitGsQuadTagged(0, 0, 0x200, 0xE0, 0, 0, 0, 0x80);
+    fldSubmitFrameQuad(1, 5, 0x10, 0, 0, 0, 1, 1);
+    func_0012BE18(0);
+
+    for (textureRow = 0; textureRow < 7; textureRow++) {
+        s32 y = textureRow * 0x40;
+
+        fldSubmitSpriteRect(0, y, 0x100, 0x40, 0, 0, 0x100, 0x40, 0x80808080, D_0044F7F0[3]);
+        fldSubmitSpriteRect(0x100, y, 0x100, 0x40, 0, 0, 0x100, 0x40, 0x80808080, D_0044F7F0[3]);
+    }
+    fldSubmitAlternateFramePacket();
+    fldSubmitFrameQuad(1, 0, 0x80, 1, 1, 0, 1, 1);
+    func_0012BE18(1);
+
+    fldSubmitGsGradientQuad(panelOffset, 0, 0x96, 0x1C0,
+                            0x80, 0x80, 0x80, 7,
+                            0x80, 0x80, 0x80, 0,
+                            0x80, 0x80, 0x80, 7,
+                            0x80, 0x80, 0x80, 0);
+    fldSubmitGsGradientQuad(0x16A - panelOffset, 0, 0x96, 0x1C0,
+                            0x80, 0x80, 0x80, 0,
+                            0x80, 0x80, 0x80, 7,
+                            0x80, 0x80, 0x80, 0,
+                            0x80, 0x80, 0x80, 7);
+
+    fldSubmitFrameQuad(1, 0, 0x80, 1, 0, 0, 1, 1);
+    func_0012BE18(0);
+    func_0012BE18(0);
+    sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+    fldSelectDisplayBuffer(0x5E);
+    fldSubmitFrameQuad(1, 5, 0x81, 1, 0, 0, 1, 2);
+    func_0012BE18(0);
+}
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00148A98);
 
@@ -2992,7 +3099,6 @@ extern s32 D_00436378;
 extern s32 func_0014EDB8(void);
 
 extern void fldReleaseTitleMiniTexture(void);
-
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413C80);
 
