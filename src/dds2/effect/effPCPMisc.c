@@ -203,16 +203,7 @@ typedef struct {
     EffPCPRectBounds bounds;
 } EffPCPRectParams;
 
-typedef struct {
-    u32 extent;
-    u32 color;
-    u32 blendControl;
-    f32 rotation;
-    f32 scale;
-    u32 centerX;
-    u32 centerY;
-    EffPCPRectBounds bounds;
-} EffPCPTexturedBlurParams;
+typedef EffBlurTemplateBody EffPCPTexturedBlurParams;
 
 
 
@@ -2291,8 +2282,8 @@ EffPCPSharedTrailRef *effPcpCreateSharedTrailRef(EffPCPTrailParams *params) {
     ref->frame = 0;
     if (D_00436438 == 0) {
         effPcpSharedTrailWork = sdfAllocSizeClassBlock(sizeof(EffPCPSharedTrail));
-        effPcpSharedTrailWork->obj = effCloneBlurTemplate((EffBlurTemplateBody *)&params->res);
-        effPcpSharedTrailWork->color = params->res.color;
+        effPcpSharedTrailWork->obj = effCloneBlurTemplate(&params->res);
+        effPcpSharedTrailWork->color = params->res.source.color;
         effPcpSharedTrailWork->frame = 0;
         effPcpSharedTrailWork->flags = 0x80808080;
         effPcpSharedTrailWork->pos[0] = 0;
@@ -2390,8 +2381,8 @@ void effSetSharedScale(u32 unused, f32 value) {
 EffPCPTrailWork *effPcpTrailCreate(EffPCPTrailParams *params) {
     EffPCPTrailWork *work = sdfAllocSizeClassBlock(sizeof(EffPCPTrailWork));
 
-    work->obj = effCloneBlurTemplate((EffBlurTemplateBody *)&params->res);
-    work->color = params->res.color;
+    work->obj = effCloneBlurTemplate(&params->res);
+    work->color = params->res.source.color;
     work->frame = 0;
     work->flags = 0x80808080;
     work->pos[0] = 0.0f;
@@ -2558,7 +2549,7 @@ EffPCPCompactFadeWork *effPcpCompactLongCreate(EffPCPCompactTexturedBlurParams *
     EffPCPCompactFadeWork *work;
 
     work = sdfAllocSizeClassBlock(0x3C);
-    work->resource = (u32)effCloneBlurTemplate((EffBlurTemplateBody *)&params->res);
+    work->resource = (u32)effCloneBlurTemplate(&params->res);
     work->frame = 0;
     work->color = 0x80808080;
     work->flags = params->timeline.flags;
@@ -2567,7 +2558,7 @@ EffPCPCompactFadeWork *effPcpCompactLongCreate(EffPCPCompactTexturedBlurParams *
     work->fadeOut = params->timeline.fadeOut;
     work->startExtent = params->timeline.startExtent;
     work->endExtent = params->timeline.endExtent;
-    work->baseColor = params->res.color;
+    work->baseColor = params->res.source.color;
     return work;
 }
 
@@ -2587,7 +2578,7 @@ void effPcpCompactLongRespawn(EffPCPCompactFadeWork *work) {
     params.timeline.fadeOut = work->fadeOut;
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
-    params.res = *(EffPCPTexturedBlurParams *)&((EffBlurTemplate *)work->resource)->body;
+    params.res = ((EffBlurTemplate *)work->resource)->body;
     effPcpCompactLongCreate(&params);
 }
 
