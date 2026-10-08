@@ -407,7 +407,7 @@ EffThunderVectorWork *effThunderWorkCreate(EffThunderVectorParams *parameters) {
     work->baseRadiusScale = parameters->radiusScale;
     work->baseHeightScale = parameters->heightScale;
     work->allocationHandle = allocationHandle;
-    work->cellSystem = parAllocateCellSystem(work->head.cellCount, work->head.perCell, 0, 0);
+    work->cellSystem = parAllocateCellSystem(work->head.cellCount, work->head.perCell, 0, PAR_CELL_TOPOLOGY_PAIR);
     parDispatchSub(work->cellSystem, 2, work->head.dispatchArg, work->head.dispatchArg);
     func_00164C68(work->cellSystem, work->head.systemParam);
     for (i = 0; i < work->head.cellCount; i++) {
@@ -723,7 +723,7 @@ EffThunderSparkWork *effThunderSparkCreate(EffThunderSparkParams *parameters) {
     }
     delaySpread = work->head.startDelaySpread;
     for (sparkIndex = 0; sparkIndex < work->head.sparkCount; sparkIndex++) {
-        work->sparks[sparkIndex].system = parAllocateCellSystem(EFF_THUNDER_SINGLE_CELL, work->head.halfLife * 2 - 1, 0, 0);
+        work->sparks[sparkIndex].system = parAllocateCellSystem(EFF_THUNDER_SINGLE_CELL, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_PAIR);
         parDispatchSub(work->sparks[sparkIndex].system, 2, work->head.dispatchArg, work->head.dispatchArg);
         func_00164C68(work->sparks[sparkIndex].system, work->head.systemParam);
         effThunderSparkInit(work, sparkIndex);
@@ -1057,7 +1057,7 @@ EffThunderFragmentWork *effThunderFragCreate(EffThunderFragmentParams *parameter
     work->head = *parameters;
     work->fragments = (EffThunderFrag *)(work + 1);
     work->allocationHandle = allocationHandle;
-    work->system = parAllocateCellSystem(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, 4);
+    work->system = parAllocateCellSystem(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_FIVE_VECTOR);
     parRiseFallSymmetricCellAlpha(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
     func_00164C68(work->system, work->head.systemParam);
     for (i = 0; i < work->head.fragmentCount; i++) {
@@ -1383,10 +1383,10 @@ EffThunderFragmentWork *func_0016DB28(EffThunderFragmentParams *parameters) {
     work->head = *parameters;
     work->fragments = (EffThunderFrag *)(work + 1);
     work->allocationHandle = allocationHandle;
-    work->state.secondarySystem = parAllocateCellSystem(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, 1);
+    work->state.secondarySystem = parAllocateCellSystem(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_TRIANGLE);
     parDispatchSub(work->state.secondarySystem, 2, work->head.arg48, work->head.arg50);
     func_00164C68(work->state.secondarySystem, work->head.systemParam);
-    work->system = parAllocateCellSystem(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, 0);
+    work->system = parAllocateCellSystem(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_PAIR);
     parDispatchSub(work->system, 2, work->head.arg40, work->head.arg40);
     func_00164C68(work->system, work->head.systemParam);
     for (i = 0; i < work->head.fragmentCount; i++) {
@@ -1725,7 +1725,7 @@ EffThunderCellWork *effThunderCellCreate(EffThunderCellParams *parameters) {
     work->head = *parameters;
     work->cells = (EffThunderCell *)(work + 1);
     work->allocationHandle = allocationHandle;
-    work->system = parAllocateCellSystem(work->head.cellCount, work->head.halfLife * 2 - 1, 0, 2);
+    work->system = parAllocateCellSystem(work->head.cellCount, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_SIX_VECTOR);
     parDecreaseStripCellAlpha(work->system, work->head.arg34, work->head.arg3C, work->head.arg44);
     func_00164C68(work->system, work->head.systemParam);
     for (i = 0; i < work->head.cellCount; i++) {

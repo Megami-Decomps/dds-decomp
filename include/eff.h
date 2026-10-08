@@ -843,9 +843,18 @@ typedef char ParCell_size_must_be_0x14[(sizeof(ParCell) == 0x14) ? 1 : -1];
 typedef char ParCell_history_countdown_at_0x0C[
     ((u32)&((ParCell *)0)->historyAdvanceCountdown == 0x0C) ? 1 : -1];
 
+/* Topology codes determine the vector rows allocated and submitted per cell. */
+typedef enum ParCellTopology {
+    PAR_CELL_TOPOLOGY_PAIR = 0,
+    PAR_CELL_TOPOLOGY_TRIANGLE = 1,
+    PAR_CELL_TOPOLOGY_SIX_VECTOR = 2,
+    PAR_CELL_TOPOLOGY_FOUR_VECTOR = 3,
+    PAR_CELL_TOPOLOGY_FIVE_VECTOR = 4,
+} ParCellTopology;
+
 /* The cell-system allocation ends with this complete 0x2C-byte owner. */
 typedef struct ParSystem {
-    u16 kind;            /* 0x00: topology selector */
+    u16 kind;            /* 0x00: ParCellTopology code; native integer storage */
     u16 bucket;          /* 0x02: packet submission bucket */
     s32 cellCount;       /* 0x04 */
     s32 vertexWordCount; /* 0x08 */

@@ -588,11 +588,11 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
     ParSystem *system;
     s32 i;
 
-    if (kind == 4) {
+    if (kind == PAR_CELL_TOPOLOGY_FIVE_VECTOR) {
         perCell = perCell * 5 + 5;
-    } else if (kind == 3) {
+    } else if (kind == PAR_CELL_TOPOLOGY_FOUR_VECTOR) {
         perCell = perCell * 4 + 4;
-    } else if (kind == 2) {
+    } else if (kind == PAR_CELL_TOPOLOGY_SIX_VECTOR) {
         perCell = perCell * 6 + 6;
     } else {
         perCell = perCell * 2;
@@ -605,7 +605,7 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
         }
         perCell &= ~1;
         perCell += 2;
-        if (kind == 1) {
+        if (kind == PAR_CELL_TOPOLOGY_TRIANGLE) {
             perCell += perCell >> 1;
         }
     }
@@ -1475,7 +1475,7 @@ void func_0015D0C0(void) {
         }
         sdfConsAppendAssetPacket(list, (void *)system->asset, NULL);
         count = system->cellCount;
-        if (system->kind == 0) {
+        if (system->kind == PAR_CELL_TOPOLOGY_PAIR) {
             parDrawControl.indices = D_0034E360;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
@@ -1497,7 +1497,7 @@ void func_0015D0C0(void) {
                     sdfAppendPacket((struct SdfListHead *)list, func_0015FE20(&parDrawControl));
                 }
             }
-        } else if (system->kind == 1) {
+        } else if (system->kind == PAR_CELL_TOPOLOGY_TRIANGLE) {
             parDrawControl.indices = D_0034E3E0;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
@@ -1519,7 +1519,7 @@ void func_0015D0C0(void) {
                     sdfAppendPacket((struct SdfListHead *)list, func_0015FE20(&parDrawControl));
                 }
             }
-        } else if (system->kind == 4) {
+        } else if (system->kind == PAR_CELL_TOPOLOGY_FIVE_VECTOR) {
             parDrawControl.indices = D_0034E520;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
@@ -1536,7 +1536,7 @@ void func_0015D0C0(void) {
                     parDrawControl.colors += 5;
                 }
             }
-        } else if (system->kind == 2) {
+        } else if (system->kind == PAR_CELL_TOPOLOGY_SIX_VECTOR) {
             parDrawControl.indices = D_0034E450;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
@@ -1666,7 +1666,7 @@ ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {
     if (desc->cells.verticesPerCell < 3) {
         desc->cells.verticesPerCell = 3;
     }
-    desc->cells.cellSystem = parAllocateCellSystem(desc->count, desc->cells.verticesPerCell, 1, 0);
+    desc->cells.cellSystem = parAllocateCellSystem(desc->count, desc->cells.verticesPerCell, 1, PAR_CELL_TOPOLOGY_PAIR);
     parDispatchSub(desc->cells.cellSystem, 0, desc->cells.unk14, desc->cells.unk18);
     func_0015DA10(desc);
     return desc;
