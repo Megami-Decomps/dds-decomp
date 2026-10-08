@@ -7,6 +7,7 @@
 #include "sdf_chip.h"
 #include "eff_curve.h"
 #include "file.h"
+#include "file_request_entry.h"
 #include "file_slot_flags.h"
 #include "sdf_dev_state.h"
 #include "file_slot.h"
@@ -201,8 +202,6 @@ extern s32 func_0035C860(char *dst, const char *fmt, ...);
 
 extern s32 fileSlotSelectPoll(void);
 
-extern void fileReqBegin(s32 context);
-
 extern s32 fileBeginSlotMetadataRefresh(void);
 
 extern s32 fileStartMemoryCardDetection(void);
@@ -212,8 +211,6 @@ extern s32 mcResetSlotMetadata(void);
 extern s32 filePollSlotDetectionAndBranch(void);
 
 extern s32 fileIsCardSpaceAboveMinimum(void);
-
-extern s32 fileReqGetSize(s32 context);
 
 extern u32 D_00439020;
 
@@ -372,8 +369,6 @@ extern s32 fileReadSlotPreviewWait(void);
 
 extern s32 func_002CBA90(void);
 
-extern void fileReqSetSelectedSlot(u32 ctx, s32 slot);
-
 extern s32 fileBeginSlotOpen(void);
 
 extern s32 fileSlotSelectPollClear(void);
@@ -401,8 +396,6 @@ extern s32 fileScanSlotStatesAdvance(void);
 extern s32 mcHandleDirectoryWriteResult(void);
 
 extern s32 mcPrepareDirectory(void);
-
-extern void fileReqMarkSlotMetadataDirty(s32);
 
 extern s32 mcHandleSearchResult(void);
 
@@ -537,8 +530,6 @@ extern s32 fileAbortSlotScanOnInput(void);
 extern char D_0042B6B8[];
 
 extern u8 D_00458040[];
-
-extern u8 fileReqIsSlotMetadataDirty(s32 context);
 
 extern s32 mcClearSlotMetadata(void);
 
