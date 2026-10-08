@@ -317,8 +317,13 @@ extern u32 mnuGetPanelGroupSelection(MenuPanelGroup *group);
 extern void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 option);
 #ifdef VERSION_DDS2
 extern void mnuApplyPackedGroupValues(MenuPanelGroup *group, s32 itemId);
+void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth,
+                                 struct DatPartyRecord *entry,
+                                 MenuPanelGroup *group, s32 mode, s32 drawFlags);
 #else
-extern void mnuDrawAndAdvancePanelGroup(s32, s32, s32, void *, MenuPanelGroup *, s32);
+void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth,
+                                 struct DatPartyRecord *entry,
+                                 MenuPanelGroup *group, s32 drawFlags);
 #endif
 
 /* An indexed render slot owned by an effect resource set. */
