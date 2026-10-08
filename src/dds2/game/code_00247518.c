@@ -1263,7 +1263,29 @@ extern void itfMesResetWindow(s32);
 void evtViewerMarkWindowInactive(EventViewerState *);
 void func_0024AD48(EventViewerState *);
 
-INCLUDE_ASM(const s32, "game/code_00247518", func_0024ABD0);
+void func_0024ABD0(EventViewerState *viewer) {
+    if (viewer->windowContext == 0) {
+        return;
+    }
+    if (viewer->windowContext->handle == -1) {
+        return;
+    }
+    if (itfMesGetWindowFlags(viewer->windowContext->handle) & 4) {
+        if ((viewer->flags & 1) == 0) {
+            itfMesCleanupWindow(viewer->windowContext->handle, 1);
+            itfMesFinishWindowAndClearStatus(viewer->windowContext->handle);
+        }
+    }
+    if (itfPanelGetPairFirst(viewer->windowContext->handle) < 0) {
+        itfPanelSetPairFirst(viewer->windowContext->handle, 0);
+        datGameState->script.ints[viewer->unk23C6] = itfMesGetWindowClearBitCount(viewer->windowContext->handle);
+        itfMesResetWindow(viewer->windowContext->handle);
+        evtViewerMarkWindowInactive(viewer);
+        viewer->flags ^= 1;
+        evtViewerDispatchFlagMode(viewer);
+    }
+    func_0024AD48(viewer);
+}
 
 
 void evtViewerCleanupMessageWindow(EventViewerState *viewer) {
