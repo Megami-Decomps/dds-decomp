@@ -194,7 +194,6 @@ extern s32 mnuPercentOrHundred(u16, u16);
 
 extern void mnuDrawPanelSequenceByRow(MenuPageBar *, s32, s32 *, s32, s32, EffectSlotSet *);
 
-extern s32 effDestroyPackedBatch(s32);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 
 
@@ -213,7 +212,7 @@ extern void mnuReleaseCampTextureHandlesAndClearOutput(u32 *);
 
 /* Destroy the camp effect's retained animation without freeing the effect. */
 void func_002665B0(MenuCampEffect *context) {
-    effDestroyPackedBatch((s32)context->resources.animationHandle);
+    effDestroyPackedBatch(context->resources.animationHandle);
 }
 
 /* Return whether model flag 0x31 is set; its storyline meaning is not asserted. */
@@ -862,7 +861,7 @@ void mnuDestroyAllMenuSlotEffectBatches(s32 object) {
     u32 i;
 
     for (i = 0; i < MNU_EFFECT_BATCH_COUNT; i++) {
-        effDestroyPackedBatch(batch[i]);
+        effDestroyPackedBatch((struct EffMappedResource *)(u32)batch[i]);
     }
 }
 

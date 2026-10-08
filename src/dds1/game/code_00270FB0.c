@@ -261,8 +261,8 @@ void func_00271368(void *menuData) {
 void mnuReleaseStaffSpriteHandles(StaffMenuWork *menu) {
     EffMappedResource **batchCursor = menu->extraImages;
     u32 batchIndex = 0;
-    effDestroyPackedBatch(menu->primaryImage);
-    effDestroyPackedBatch(menu->secondaryImage);
+    effDestroyPackedBatch((struct EffMappedResource *)menu->primaryImage);
+    effDestroyPackedBatch((struct EffMappedResource *)menu->secondaryImage);
     do {
         effDestroyPackedBatch(*batchCursor++);
         batchIndex++;

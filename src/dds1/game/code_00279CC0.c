@@ -405,7 +405,7 @@ void mnuReleaseAssets(MenuAssets *assets) {
         effDestroyResourceSlotSet(assets->sprites[i]);
     }
     effDestroyResourceSlotSet(assets->sprites[4]);
-    effDestroyPackedBatch(assets->material);
+    effDestroyPackedBatch((struct EffMappedResource *)assets->material);
     effDestroyPayload(assets->layerA);
     effDestroyPayload(assets->layerB);
 }
