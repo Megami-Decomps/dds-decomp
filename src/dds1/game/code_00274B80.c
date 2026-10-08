@@ -10,8 +10,8 @@ struct MenuScrollPanel;
 extern u32 kwlnTaskGetUserValue();
 extern void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *);
 extern void mnuStoreScrollPanelSelectionAndGridPosition(struct MenuScrollPanel *, u32, u32, u32);
-extern void mnuSetWindowResource(s32, s32, s32, s32);
-extern void mnuAttachPartyIconBundle(s32, s32, u32);
+extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
+extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32, u32);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
@@ -916,8 +916,8 @@ s32 mnuInitializeStaffPartyScene(KwlnTask *task) {
     effReleaseTextureHandlesAndResetSlots((EffectSlotSet *)context->resource);
     mnuStoreScrollPanelSelectionAndGridPosition((struct MenuScrollPanel *)context->display,
                                                context->staffVariant, 0x3D, 1);
-    mnuSetWindowResource(index, (s32)page, context->staffVariant, context->staffParam);
-    mnuAttachPartyIconBundle(index, (s32)page, context->staffVariant);
+    mnuSetWindowResource(index, page, context->staffVariant, context->staffParam);
+    mnuAttachPartyIconBundle(index, page, context->staffVariant);
     context->sceneGroup = mnuCreatePanelGroup(context->staffVariant);
     context->sprite = mnuCreateSpriteState((EffectSlotSet *)context->option,
                                         (EffectSlotSet *)context->unk68,
@@ -943,8 +943,8 @@ s32 mnuInitializeStaffPartyScene(KwlnTask *task) {
 
 
 extern void btlStopStage();
-extern void mnuClearEntries();
-extern void mnuReleasePartyIconBundles();
+extern void mnuClearEntries(MenuPageWindow *);
+extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void mnuReleaseResourceList(MenuPanelHandles *);
 
@@ -952,10 +952,10 @@ extern void mnuReleaseResourceList(MenuPanelHandles *);
 s32 mnuStaffReleasePanelScene(s32 unused) {
     s32 context = kwlnTaskGetUserValue();
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)context)->menu;
-    s32 entryList = (s32)&((CampMenuContext *)context)->partyWindow;
+    MenuPageWindow *entryList = &((CampMenuContext *)context)->partyWindow;
     CampMenuContext *work = (CampMenuContext *)context;
 
-    func_00276720(entryList, 0, menu->staffImage, menu->staffMode);
+    func_00276720((s32)entryList, 0, menu->staffImage, menu->staffMode);
     btlStopStage();
     mnuClearEntries(entryList);
     mnuReleasePartyIconBundles(entryList);

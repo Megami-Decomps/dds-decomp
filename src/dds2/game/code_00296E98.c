@@ -524,7 +524,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
 
 extern void effDestroyResourceSlotSet(s32);
 extern void mnuClearEntries(MenuPageWindow *);
-extern void mnuReleasePartyIconBundles();
+extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 extern void mnuShutdownContext();
 extern void mnuDestroyEffectResources(MenuEffectResources *);
 extern void mnuReleaseStaffMenuTextureHandles();
@@ -532,12 +532,12 @@ extern void mnuReleaseTitleEffectSprites(StaffSlots *);
 extern void mnuResetWorkFloats(void);
 
 void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
-    s32 panelContext = (s32)&ctx->partyWindow;
+    MenuPageWindow *panelContext = &ctx->partyWindow;
 
     effDestroyResourceSlotSet(ctx->unitHandle);
-    mnuClearEntries((MenuPageWindow *)panelContext);
+    mnuClearEntries(panelContext);
     mnuReleasePartyIconBundles(panelContext);
-    mnuShutdownContext(panelContext);
+    mnuShutdownContext((s32)panelContext);
     mnuDestroyPanelGroup(ctx->panelHandle);
     mnuFreeSpriteStateWork(ctx->spriteHandle);
     mnuDestroyEffectResources(&ctx->campEffect.resources);
