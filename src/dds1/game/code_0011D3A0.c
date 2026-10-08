@@ -192,7 +192,6 @@ extern s8 dds3AdminGetRequestedMode(void);
 extern s32 dds3AdminReadPreviousUnsignedSample(void);
 extern void func_0013F100(s32, u32);
 extern u32 D_0032E4EC[];
-extern void sdfQueueNonzeroResourceId(u32 arg0);
 extern s32 D_003BABEC;
 typedef struct FieldActivationRecord {
     s32 kind;
@@ -1760,7 +1759,7 @@ void fldLoadPlayerModel(void) {
 
 void fldUnloadPlayerModel(void) {
     if (fldPlayerModelResource != 0) {
-        sdfQueueNonzeroResourceId(fldPlayerModelResource);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldPlayerModelResource);
         fldPlayerModelResource = 0;
         D_0032E4EC[0] = 0;
     }
@@ -1779,13 +1778,13 @@ void fldPrepareResourceBuffer(void) {
     memcpy(buffer, source, D_003BAB60);
     D_003BAB5C = (u32)buffer;
     mdlLoadViewerPackage(2, 0, 0x101, buffer, D_003BAB60);
-    sdfQueueNonzeroResourceId(D_003BAB58);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003BAB58);
     D_003BAB58 = 0;
 }
 
 void fldReleaseResources(void) {
     if (D_003BAB58 != 0) {
-        sdfQueueNonzeroResourceId(D_003BAB58);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003BAB58);
         D_003BAB58 = 0;
     }
     if (D_0032E3D0[0] == 0 && D_003BABE8 == 0) {

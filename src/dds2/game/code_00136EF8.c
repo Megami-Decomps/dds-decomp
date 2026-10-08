@@ -61,7 +61,6 @@ extern u32 fldValueRecordResource;
 
 extern s32 D_004361F8;
 
-extern void sdfQueueNonzeroResourceId(u32 resource);
 
 extern void *memset(void *s, s32 c, u32 n);
 
@@ -328,7 +327,7 @@ void fldInitializeCameraColorResource(void) {
     fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
     fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
     if (fldRainTextureResource != 0) {
-        sdfQueueNonzeroResourceId(fldRainTextureResource);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldRainTextureResource);
         fldRainTextureResource = 0;
     }
     fldUpdateCameraColorEffect(fldCameraSettings);
@@ -404,10 +403,10 @@ void fldAllocateRecordStorage(void) {
 /* Release both retained resources and clear the usable buffer addresses. */
 void fldReleaseRecordStorage(void) {
     sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)fldValueRecordResource);
-    sdfQueueNonzeroResourceId(fldValueRecordResource);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldValueRecordResource);
     fldValueRecords = 0;
     sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)fldAuxRecordResource);
-    sdfQueueNonzeroResourceId(fldAuxRecordResource);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldAuxRecordResource);
     fldAuxRecordBuffer = 0;
 }
 

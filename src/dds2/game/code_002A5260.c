@@ -8,7 +8,6 @@
 
 extern KwlnTask *kwlnTaskCreate();
 extern void sdfCancelAndReleasePacWork(void *);
-extern void sdfQueueNonzeroResourceId(s32);
 extern u32 effLoadIndexedResource(const char *, const char *, s32);
 extern u32 effDestroyResourceSlotSet(u32);
 
@@ -1084,7 +1083,7 @@ void mnuFinishStaffMovieAndFreeState(void) {
     do {
         pending = sdfCheckPendingWorkWithInterrupts();
     } while (pending != 0);
-    sdfQueueNonzeroResourceId((s32)mnuMovieWork->handle);
+    sdfQueueGeneralAllocationRelease(mnuMovieWork->handle);
     mnuMovieWork = NULL;
 }
 

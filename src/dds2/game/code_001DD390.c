@@ -500,7 +500,6 @@ extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *);
 extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern u32 mdlGetBroadcastValue(MdlCtx *);
-extern void sdfQueueNonzeroResourceId(s32);
 extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
 extern u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *);
 extern u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *);
@@ -3527,7 +3526,7 @@ u32 func_001E50E0(BtlModelChangeArgs *args) {
             btlDestroyUnit(unit->mirror);
             unit->mirror = NULL;
             if (unit->unk350 != 0) {
-                sdfQueueNonzeroResourceId(unit->unk350);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)unit->unk350);
                 unit->unk350 = 0;
                 unit->unk34C = 0;
             }
@@ -4606,7 +4605,7 @@ void btlReleaseUnitResources(BtlUnit *unit) {
     }
     btlReleaseActorModelResources(unit);
     if (unit->unk350 != 0) {
-        sdfQueueNonzeroResourceId(unit->unk350);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)unit->unk350);
         unit->unk350 = 0;
         unit->unk34C = 0;
     }
@@ -8466,17 +8465,17 @@ void btlFreeFieldBlocks(void) {
     BattleFieldBlocks *blocks = (BattleFieldBlocks *)btlGetRuntime();
     btlWaitForPendingWorkAndReleaseBuffers();
     if (blocks->fieldTB != 0) {
-        sdfQueueNonzeroResourceId(blocks->fieldTB);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTB);
         blocks->fieldTB = 0;
         btlBossDebugPrintf(D_00418C58);
     }
     if (blocks->fieldF2 != 0) {
-        sdfQueueNonzeroResourceId(blocks->fieldF2);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldF2);
         blocks->fieldF2 = 0;
         btlBossDebugPrintf("btl:free field F2\n");
     }
     if (blocks->fieldF1 != 0) {
-        sdfQueueNonzeroResourceId(blocks->fieldF1);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldF1);
         blocks->fieldF1 = 0;
         btlBossDebugPrintf("btl:free field F1\n");
     }
@@ -8840,7 +8839,7 @@ u32 btlPollFieldArchiveLoad(args)
                                              args->fieldF1, args->fieldF2, args->fieldTB, 0);
             btlInitializeSceneLightingAndTint();
             if (blocks->fieldTB != 0) {
-                sdfQueueNonzeroResourceId(blocks->fieldTB);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTB);
                 blocks->fieldTB = 0;
                 btlBossDebugPrintf(D_00418C58);
             }

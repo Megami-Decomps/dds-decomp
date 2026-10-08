@@ -6072,7 +6072,7 @@
 0x002CFEB8	sdfAllocSizeClassBlock	inferred	confidence=high; matched-C; src/dds1/game/code_002CFC18.c:173:func_002CFEB8; Allocates a byte-sized block from power-of-two size classes through cursor slots while preserving interrupt state; widely used core allocator.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002CFF68	sdfAllocAndClearQuadwords	inferred	Allocates requested bytes and zeroes rounded-up quadwords. [names_reviewed6.tsv]
 0x002CFF98	sdfReleaseChipBlock	inferred	Retires block from slot, updates owner links or free list with interrupts preserved. [names_reviewed6.tsv]
-0x002D00B8	sdfQueuePendingChipValue	inferred	confidence=high; matched-C; src/dds1/sdf/sdfChip.c:89:func_002D00B8; Pushes given value to chip pending queue.; source=revalidated-unapplied-names_R_Names23.tsv:74 [names_qp13.tsv]
+0x002D00B8	sdfQueuePendingChipRelease	inferred	queues a checked chip-heap cell for the sdfReleaseChipBlock callback
 0x002D00D8	sdfChipIsInRange	inferred	Checks whether a value falls in the half-open range between two chip globals.
 0x002D01F0	sdfGetChipHeapStats	inferred	confidence=high; matched-C; src/dds1/game/code_002D00F8.c:38:func_002D01F0; Counts chip-heap blocks, free bytes and per-size-class used cells into the supplied statistics record.; source=names_pending_main.tsv:119 [names_qp11.tsv]
 0x002D02C0	sdfInitGeneralHeap	inferred	confidence=high; matched-C; src/dds1/game/code_002D00F8.c:101:func_002D02C0; Allocates the general heap and creates its aligned free block between two end sentinels, then initializes its synchronized release request.; source=names_pending_main.tsv:122 [names_qp11.tsv]
@@ -6087,7 +6087,7 @@
 0x002D0918	sdfReleaseResourceAllocation	inferred	confidence=high; matched-C; src/dds1/game/code_002D0750.c:28:func_002D0918; Releases an allocation under the interrupt lock: coalesces adjacent unused blocks or marks the released block unused and clears its reference count; restores interrupts only when previously enabled.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x002D09B8	sdfReleaseCurrentResourceHandle	inferred	Obtains the active resource handle and releases it. [names_reviewed21.tsv]
 0x002D09D8	sdfReleaseMemorySlot	inferred	Clears a nonzero handle from a caller-owned slot before releasing the handle.
-0x002D0A10	sdfQueueNonzeroResourceId	inferred	Pushes only nonzero resource IDs to the pending queue; release timing is not established. [names_reviewed10.tsv]
+0x002D0A10	sdfQueueGeneralAllocationRelease	inferred	installed general-heap callback releases each nonzero queued SdfMemBlock descriptor
 0x002D0A48	sdfResourceRetainAddress	inferred	Increments a resource reference counter and returns its address field.
 0x002D0A60	sdfDecrementAllocationReferenceCount	inferred	Decrements the allocation reference count unless it is already zero. [names_reviewed8.tsv]
 0x002D0A80	sdfFindGeneralBlockByAddress	inferred	confidence=high; matched-C; src/dds1/game/code_002D0750.c:103:func_002D0A80; Scans used general-heap blocks for an exact data-address match under the interrupt lock; does not promise NULL on a missing address.; source=names_pending_main.tsv:130 [names_qp11.tsv]
