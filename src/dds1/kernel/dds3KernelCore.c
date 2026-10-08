@@ -87,12 +87,12 @@ void kwlnTaskAdvanceStartDelays(void)
 
     node = kwlnDelayedStartTaskHead;
     while (node != 0) {
-        if (node->unk2C > 0) {
-            node->unk2C--;
+        if (node->startDelayTicks > 0) {
+            node->startDelayTicks--;
         }
         curr = node;
         node = node->listNext;
-        if (curr->unk2C == 0) {
+        if (curr->startDelayTicks == 0) {
             kwlnTaskActivate(curr);
         }
     }
@@ -186,7 +186,7 @@ void kwlnTaskRequestDestroy(KwlnTask* task)
     kwlnTaskRemoveFromStateQueue(task);
     task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | KWLN_TASK_DESTROY_PENDING;
     kwlnTaskInsertIntoOrderedStateQueue(task);
-    if (task->unk2E == 0) {
+    if (task->destroyDelayTicks == 0) {
         kwlnTaskFinalizeDestroy(task);
     }
 }
@@ -198,12 +198,12 @@ void kwlnTaskAdvanceDestroyDelays(void)
 
     node = kwlnDelayedDestroyTaskHead;
     while (node != 0) {
-        if (node->unk2E > 0) {
-            node->unk2E--;
+        if (node->destroyDelayTicks > 0) {
+            node->destroyDelayTicks--;
         }
         curr = node;
         node = node->listNext;
-        if (curr->unk2E == 0) {
+        if (curr->destroyDelayTicks == 0) {
             kwlnTaskFinalizeDestroy(curr);
         }
     }
@@ -368,8 +368,8 @@ KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 des
     }
     task->priority = priority;
     task->flags = KWLN_TASK_DELAYED_START;
-    task->unk2C = startDelay;
-    task->unk2E = destroyDelay;
+    task->startDelayTicks = startDelay;
+    task->destroyDelayTicks = destroyDelay;
     task->update = update;
     task->destroy = destroy;
     task->userValue = userValue;
@@ -382,7 +382,7 @@ KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 des
     task->childList = NULL;
     task->next = NULL;
     kwlnTaskInsertIntoOrderedStateQueue(task);
-    if (task->unk2C == 0) {
+    if (task->startDelayTicks == 0) {
         kwlnTaskActivate(task);
     }
     return task;
@@ -420,7 +420,7 @@ void kwlnTaskSetDestroyDelay(KwlnTask* task, s32 delayTicks)
         return;
     }
     if (state < KWLN_TASK_STATE_LIMIT) {
-        task->unk2E = delayTicks;
+        task->destroyDelayTicks = delayTicks;
     }
 }
 
