@@ -3,8 +3,6 @@
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 
-#define SDF_MODEL_ALTERNATE_ITEM_SETUP 4
-
 extern void *sdfInitNodeHeaderFromWords(u32 *words, void *node, s32 wordIndex);
 extern void *sdfAllocSizeClassBlock(s32 arg0);
 extern void sdfInstallPoolNodeReleaseCallbacks(s32 arg0);
@@ -72,7 +70,8 @@ void sdfDrawNodeBuildMatrix(SdfDrawNode *node);
 void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item);
 
 
-/* Retail selects by nodeId when flags bit 0 is set, otherwise by array index. */
+/* Retail selects by nodeId when SDF_MODEL_FIND_DRAW_NODE_BY_ID is set,
+ * otherwise by array index. */
 SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id) {
     DevRequest *list = model->list;
     s16 count;
@@ -81,7 +80,7 @@ SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id) {
 
     count = list->usedCount;
     entries = list->buffer;
-    if (model->flags & 1) {
+    if (model->flags & SDF_MODEL_FIND_DRAW_NODE_BY_ID) {
         for (i = 0; i < count; i++) {
             SdfDrawNode *node = entries[i];
             if (node->nodeId == id) {

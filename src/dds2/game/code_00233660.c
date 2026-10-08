@@ -302,7 +302,6 @@ typedef struct MdlNodeInfo {
 
 extern u8 sdfViewTargetVector[];
 
-extern SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id);
 
 extern void effCopyVector(s32 handle, f32 *src);
 

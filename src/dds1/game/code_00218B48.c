@@ -1011,7 +1011,6 @@ typedef struct MdlNodeInfo {
 
 extern u8 sdfViewTargetVector[];
 
-extern SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id);
 
 /* vu0 routine: positionOut = p + normalize(p - sdfViewTargetVector) * scale, p = transformed node position. */
 void mdlResolveAnchorPosition(SdfModel *model, MdlResourceItem *anchorRecord, f32 *positionOut) {
