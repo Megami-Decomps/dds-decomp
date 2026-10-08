@@ -360,24 +360,6 @@ extern u8 D_003BA870[2][2][2];
 extern u8 D_003BA878[2][2];
 extern u8 D_003BD698[2];
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA850);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA854);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA858);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA85C);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA85F);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA860);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA861);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA868);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA86F);
-
 void func_001039E0(void) {
     s32 port;
     s32 bank;
@@ -1306,6 +1288,106 @@ void kwlnFadeBackgroundStartIn(s32 duration) {
 
 /* Direction flags take precedence; idle visibility uses alpha in mode zero,
  * otherwise it tests whether the first ramp differs from its inactive maximum. */
+s32 kwlnFadeIsBackgroundOverlayActive(void) {
+    if (kwlnDrawControlFlags & KWLN_BGFADE_DIRECTION_BITS) {
+        return 1;
+    }
+    if (kwlnBackgroundFadeMode == 0) {
+        if (KWLN_FADE_MAX_ALPHA - kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] >= KWLN_FADE_MAX_ALPHA) {
+            return 0;
+        }
+    } else if (D_003BA92E == KWLN_BGFADE_FIRST_RAMP_MAX) {
+        return 0;
+    }
+    return 1;
+}
+
+/* Store the visibility mode; its stored zero value clears ramps, otherwise
+ * maximum alpha is selected. Counter direction and timing are unchanged. */
+void kwlnFadeSetMode(s32 visibilityMode) {
+    kwlnBackgroundFadeMode = visibilityMode;
+    if (kwlnBackgroundFadeMode == 0) {
+        D_003BA92E = 0;
+        D_003BA930 = 0;
+    } else {
+        kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
+    }
+}
+
+/* Step the u16 counter, then derive integer alpha and f32 ramp samples.
+ * Completion clears timing/flags after sampling, retaining endpoint values. */
+void kwlnStepBackgroundFade(void) {
+    f32 fadeRatio;
+
+    if (kwlnDrawControlFlags & KWLN_BGFADE_DIRECTION_BITS) {
+        if (kwlnDrawControlFlags & KWLN_BGFADE_COUNT_DOWN_BIT) {
+            kwlnBackgroundFadeCounter--;
+        } else {
+            kwlnBackgroundFadeCounter++;
+        }
+        fadeRatio = (f32)kwlnBackgroundFadeCounter / (f32)kwlnBackgroundFadeDuration;
+        kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = (kwlnBackgroundFadeCounter << KWLN_FADE_ALPHA_SHIFT) / kwlnBackgroundFadeDuration;
+        D_003BA92E = KWLN_BGFADE_FIRST_RAMP_SCALE - fadeRatio * KWLN_BGFADE_FIRST_RAMP_SCALE;
+        D_003BA930 = KWLN_BGFADE_SECOND_RAMP_SCALE - fadeRatio * KWLN_BGFADE_SECOND_RAMP_SCALE;
+        if (((kwlnDrawControlFlags & KWLN_BGFADE_COUNT_DOWN_BIT) && kwlnBackgroundFadeCounter == 0) ||
+            ((kwlnDrawControlFlags & KWLN_BGFADE_COUNT_UP_BIT) && kwlnBackgroundFadeCounter == kwlnBackgroundFadeDuration)) {
+            kwlnBackgroundFadeCounter = 0;
+            kwlnBackgroundFadeDuration = 0;
+            kwlnDrawControlFlags &= KWLN_BGFADE_KEEP_OTHER_BITS;
+        }
+    }
+}
+
+void func_00106368(void) {
+    s16 firstRamp = 0;
+    s16 secondRamp = 0;
+    s32 fade;
+    s32 alpha;
+
+    if (kwlnBackgroundFadeMode == 0) {
+        fade = KWLN_FADE_MAX_ALPHA - kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL];
+    } else {
+        firstRamp = D_003BA92E;
+        fade = 0;
+        secondRamp = D_003BA930;
+        if (firstRamp == KWLN_BGFADE_FIRST_RAMP_MAX) {
+            return;
+        }
+    }
+    if (fade >= KWLN_FADE_MAX_ALPHA) {
+        return;
+    }
+
+    evtSetDrawSurfaceIndex(0x4F);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    alpha = (KWLN_FADE_MAX_ALPHA - fade) << 24;
+    evtSubmitDefaultDepthGradientRect(0, -2 - firstRamp, 0x200, 0x33, alpha, alpha, alpha, alpha);
+    evtSubmitDefaultDepthGradientRect(0, secondRamp + 0x171, 0x200, 0x51, alpha, alpha, alpha, alpha);
+}
+
+void sdfSetViewFieldOfView(f32 value) {
+    D_003245EC[0] = value;
+}
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA850);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA854);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA858);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA85C);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA85F);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA860);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA861);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA868);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA86F);
+
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA870);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA871);
@@ -1392,87 +1474,7 @@ INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA923);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnBackgroundFadeColor);
 
-s32 kwlnFadeIsBackgroundOverlayActive(void) {
-    if (kwlnDrawControlFlags & KWLN_BGFADE_DIRECTION_BITS) {
-        return 1;
-    }
-    if (kwlnBackgroundFadeMode == 0) {
-        if (KWLN_FADE_MAX_ALPHA - kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] >= KWLN_FADE_MAX_ALPHA) {
-            return 0;
-        }
-    } else if (D_003BA92E == KWLN_BGFADE_FIRST_RAMP_MAX) {
-        return 0;
-    }
-    return 1;
-}
-
-/* Store the visibility mode; its stored zero value clears ramps, otherwise
- * maximum alpha is selected. Counter direction and timing are unchanged. */
-void kwlnFadeSetMode(s32 visibilityMode) {
-    kwlnBackgroundFadeMode = visibilityMode;
-    if (kwlnBackgroundFadeMode == 0) {
-        D_003BA92E = 0;
-        D_003BA930 = 0;
-    } else {
-        kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = KWLN_FADE_MAX_ALPHA;
-    }
-}
-
-/* Step the u16 counter, then derive integer alpha and f32 ramp samples.
- * Completion clears timing/flags after sampling, retaining endpoint values. */
-void kwlnStepBackgroundFade(void) {
-    f32 fadeRatio;
-
-    if (kwlnDrawControlFlags & KWLN_BGFADE_DIRECTION_BITS) {
-        if (kwlnDrawControlFlags & KWLN_BGFADE_COUNT_DOWN_BIT) {
-            kwlnBackgroundFadeCounter--;
-        } else {
-            kwlnBackgroundFadeCounter++;
-        }
-        fadeRatio = (f32)kwlnBackgroundFadeCounter / (f32)kwlnBackgroundFadeDuration;
-        kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] = (kwlnBackgroundFadeCounter << KWLN_FADE_ALPHA_SHIFT) / kwlnBackgroundFadeDuration;
-        D_003BA92E = KWLN_BGFADE_FIRST_RAMP_SCALE - fadeRatio * KWLN_BGFADE_FIRST_RAMP_SCALE;
-        D_003BA930 = KWLN_BGFADE_SECOND_RAMP_SCALE - fadeRatio * KWLN_BGFADE_SECOND_RAMP_SCALE;
-        if (((kwlnDrawControlFlags & KWLN_BGFADE_COUNT_DOWN_BIT) && kwlnBackgroundFadeCounter == 0) ||
-            ((kwlnDrawControlFlags & KWLN_BGFADE_COUNT_UP_BIT) && kwlnBackgroundFadeCounter == kwlnBackgroundFadeDuration)) {
-            kwlnBackgroundFadeCounter = 0;
-            kwlnBackgroundFadeDuration = 0;
-            kwlnDrawControlFlags &= KWLN_BGFADE_KEEP_OTHER_BITS;
-        }
-    }
-}
-
-void func_00106368(void) {
-    s16 firstRamp = 0;
-    s16 secondRamp = 0;
-    s32 fade;
-    s32 alpha;
-
-    if (kwlnBackgroundFadeMode == 0) {
-        fade = KWLN_FADE_MAX_ALPHA - kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL];
-    } else {
-        firstRamp = D_003BA92E;
-        fade = 0;
-        secondRamp = D_003BA930;
-        if (firstRamp == KWLN_BGFADE_FIRST_RAMP_MAX) {
-            return;
-        }
-    }
-    if (fade >= KWLN_FADE_MAX_ALPHA) {
-        return;
-    }
-
-    evtSetDrawSurfaceIndex(0x4F);
-    evtSubmitPrimaryAlphaBlendMode(0);
-    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-    alpha = (KWLN_FADE_MAX_ALPHA - fade) << 24;
-    evtSubmitDefaultDepthGradientRect(0, -2 - firstRamp, 0x200, 0x33, alpha, alpha, alpha, alpha);
-    evtSubmitDefaultDepthGradientRect(0, secondRamp + 0x171, 0x200, 0x51, alpha, alpha, alpha, alpha);
-}
-
-void sdfSetViewFieldOfView(f32 value) {
-    D_003245EC[0] = value;
-}
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA92B);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", kwlnBackgroundFadeMode);
 

@@ -611,6 +611,10 @@ extern char D_003A6358[];
 extern char D_003A6398[];
 extern char D_003A63C0[];
 
+INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8A8);
+
+INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8B0);
+
 s32 func_0020E170(BtlLinkedCommand *command, s8 firstSide, s8 secondSide) {
     BtlTask *task;
     s32 choice;
@@ -768,12 +772,6 @@ s32 btlApplyActionDefeatCamera(BtlLinkedCommand *command) {
     }
     return 0;
 }
-
-INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8A8);
-
-INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8B0);
-
-INCLUDE_SDATA(const s32, "game/code_0020CB38", D_003BB8B4);
 
 INCLUDE_SDATA(const s32, "game/code_0020CB38", btlPrimaryScriptResourceName);
 

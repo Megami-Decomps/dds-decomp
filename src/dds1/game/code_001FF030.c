@@ -33,7 +33,7 @@
 
 extern BtlUnit *btlGetEffectActor(void);
 
-extern u32 func_001A3360(s32, BtlIndexList *, s32);
+extern u32 func_001A3360(void *, BtlIndexList *, s32);
 
 
 
@@ -1514,7 +1514,7 @@ BtlIndexList *btlBuildActorIndexListAndCount(s32 actor, u32 *matchingCount, u32 
     BtlIndexList *list;
 
     list = btlAllocateIndexList(0xd);
-    result = func_001A3360(actor, list, 0);
+    result = func_001A3360((void *)actor, list, 0);
     *matchingCount = result;
     result = btlGetIndexListCount(list);
     *listCount = result;
@@ -3989,7 +3989,7 @@ s32 btlCheckLinkedActionEffectTarget(BtlUnit *actor, BtlUnit *target, s32 comman
         if (unit == 0) {
             return 0;
         }
-        blocked = func_001A3360(unit, 0, 0);
+        blocked = func_001A3360((void *)unit, 0, 0);
     } else {
         blocked = datCommandRecords[command].targetType;
     }

@@ -3,6 +3,7 @@
 #include "eff_blur.h"
 #include "eff.h"
 #include "mdl.h"
+#include "sdf_chunk.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -323,7 +324,6 @@ extern void effThunderSetFragmentColor(void *work, u32 value);
 extern u32 func_001619E8(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(void *unit);
-extern u32 sdfCountMapPositionRecords(SdfModel *model);
 extern u32 effEventCreate(SoundMixer *owner, s32 kind, void *place);
 
 
