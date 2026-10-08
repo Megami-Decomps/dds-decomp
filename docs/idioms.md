@@ -3586,3 +3586,17 @@ range; path distance is the measured length times the stepped factor.
 Use the existing VU0 macros for the native COP2 vector work. The target's
 own assembly file contains its fourteen-entry jump table, not another
 function's data; the natural C switch reproduces those entries.
+
+## Polygon-movie loader word arguments
+
+DDS1 `00234DA8` and DDS2 `0024FB48` preserve the event and scene arguments
+as full words, pass them to `evtFormatPolygonMoviePaths`, and store them in
+the primary `PolyMovieWork.eventId`/`sceneId` signed-word fields. Their shared
+declarations therefore use `s32` arguments, not halfwords.
+
+The resource loader returns a `SdfMemBlock *` descriptor but writes a `u32`
+represented address. The synthesized PMD2/PMD3 header providers instead
+write `void *`/`u8 *` outputs and return the descriptor as an `s32` address
+word. Preserve those actual boundaries rather than inventing narrower loader
+prototypes. The two movie loaders remain assembly: the current honest DDS2
+candidate still swaps the two argument-setup instructions at `+0x80/+0x84`.
