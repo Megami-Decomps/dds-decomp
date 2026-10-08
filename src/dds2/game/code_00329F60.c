@@ -497,8 +497,8 @@ s32 sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock) {
     }
 }
 
-void sdfTexQueuePendingWork(s32 value) {
-    sdfPendingQueuePush(&sdfTextureUpdateQueue, value);
+void sdfTexQueuePendingWork(SdfTexResource *texture) {
+    sdfPendingQueuePush(&sdfTextureUpdateQueue, (s32)texture);
 }
 
 void sdfTexInitializeLists(void) {
