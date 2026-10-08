@@ -5428,7 +5428,109 @@ void func_001BA198(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BA408);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001BA660);
+void func_001BA660(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
+    s32 i;
+
+    switch (work->activeEntries[slot].presentation.transitionState) {
+    case 3:
+        work->activeEntries[slot].presentation.secondaryGeometry[0]++;
+        work->activeEntries[slot].presentation.secondaryGeometry[1]--;
+        work->activeEntries[slot].presentation.secondaryGeometry[2]--;
+        work->activeEntries[slot].presentation.secondaryGeometry[3]++;
+    case 4:
+        for (i = 0; i < 2; i++) {
+            if (work->activeEntries[slot].presentation.secondaryFade[i] >= 16) {
+                work->activeEntries[slot].presentation.secondaryFade[i] -= 16;
+            } else {
+                work->activeEntries[slot].presentation.secondaryFade[i] = 0;
+            }
+            if (work->activeEntries[slot].presentation.secondaryPulseLevel[i] >= 16) {
+                work->activeEntries[slot].presentation.secondaryPulseLevel[i] -= 16;
+            } else {
+                work->activeEntries[slot].presentation.secondaryPulseLevel[i] = 0;
+            }
+        }
+        if (work->activeEntries[slot].presentation.secondaryFade[0] < 9) {
+            work->activeEntries[slot].presentation.transitionState = 0;
+        }
+        break;
+    case 1:
+        for (i = 0; i < 2; i++) {
+            switch (work->activeEntries[slot].presentation.secondaryPulseDirection[i]) {
+            case 0:
+                work->activeEntries[slot].presentation.secondaryPulseTimer[i]++;
+                work->activeEntries[slot].presentation.secondaryPulseTimer[i] =
+                    work->activeEntries[slot].presentation.secondaryPulseTimer[i] <= 0 ? 0 :
+                    work->activeEntries[slot].presentation.secondaryPulseTimer[i] > 10 ? 10 :
+                    work->activeEntries[slot].presentation.secondaryPulseTimer[i];
+                if (work->activeEntries[slot].presentation.secondaryPulseTimer[i] > 0) {
+                    work->activeEntries[slot].presentation.secondaryPulseDirection[i] = 1;
+                    work->activeEntries[slot].presentation.secondaryPulseTimer[i] = 0;
+                }
+                break;
+            case 1:
+                work->activeEntries[slot].presentation.secondaryPulseLevel[i] -= 2;
+                work->activeEntries[slot].presentation.secondaryPulseLevel[i] =
+                    work->activeEntries[slot].presentation.secondaryPulseLevel[i] <= 0 ? 0 :
+                    work->activeEntries[slot].presentation.secondaryPulseLevel[i] > 128 ? 128 :
+                    work->activeEntries[slot].presentation.secondaryPulseLevel[i];
+                if (work->activeEntries[slot].presentation.secondaryPulseLevel[i] <= 0) {
+                    work->activeEntries[slot].presentation.secondaryPulseDirection[i] = 2;
+                }
+                break;
+            case 2:
+            default:
+                work->activeEntries[slot].presentation.secondaryPulseTimer[i]++;
+                work->activeEntries[slot].presentation.secondaryPulseTimer[i] =
+                    work->activeEntries[slot].presentation.secondaryPulseTimer[i] <= 0 ? 0 :
+                    work->activeEntries[slot].presentation.secondaryPulseTimer[i] > 12 ? 12 :
+                    work->activeEntries[slot].presentation.secondaryPulseTimer[i];
+                if (work->activeEntries[slot].presentation.secondaryPulseTimer[i] > 0) {
+                    work->activeEntries[slot].presentation.secondaryPulseDirection[i] = 0;
+                    work->activeEntries[slot].presentation.secondaryPulseTimer[i] = 0;
+                    /* Native keeps separate channel reset paths with equal levels. */
+                    if (i == 0) {
+                        work->activeEntries[slot].presentation.secondaryPulseLevel[i] = 48;
+                    } else {
+                        work->activeEntries[slot].presentation.secondaryPulseLevel[i] = 48;
+                    }
+                }
+                break;
+            }
+        }
+        break;
+    case 2:
+        work->activeEntries[slot].presentation.secondaryGeometry[0] = 68;
+        work->activeEntries[slot].presentation.secondaryGeometry[1] = 38;
+        work->activeEntries[slot].presentation.secondaryGeometry[2] = 5;
+        work->activeEntries[slot].presentation.secondaryGeometry[3] = 64;
+        for (i = 0; i < 2; i++) {
+            work->activeEntries[slot].presentation.secondaryFade[i] += 16;
+            work->activeEntries[slot].presentation.secondaryFade[i] =
+                work->activeEntries[slot].presentation.secondaryFade[i] <= 0 ? 0 :
+                work->activeEntries[slot].presentation.secondaryFade[i] >= 128 ? 128 :
+                work->activeEntries[slot].presentation.secondaryFade[i];
+            work->activeEntries[slot].presentation.secondaryPulseLevel[i] += 8;
+            work->activeEntries[slot].presentation.secondaryPulseLevel[i] =
+                work->activeEntries[slot].presentation.secondaryPulseLevel[i] <= 0 ? 0 :
+                work->activeEntries[slot].presentation.secondaryPulseLevel[i] > 48 ? 48 :
+                work->activeEntries[slot].presentation.secondaryPulseLevel[i];
+        }
+        if (work->activeEntries[slot].presentation.secondaryFade[0] >= 128) {
+            work->activeEntries[slot].presentation.transitionState = 1;
+            work->activeEntries[slot].presentation.secondaryPulseDirection[0] = 0;
+            work->activeEntries[slot].presentation.secondaryPulseDirection[1] = 0;
+            work->activeEntries[slot].presentation.secondaryPulseTimer[0] = 0;
+            work->activeEntries[slot].presentation.secondaryPulseTimer[1] = 0;
+            work->activeEntries[slot].presentation.secondaryPulseOffsets[0][0] = 2;
+            work->activeEntries[slot].presentation.secondaryPulseOffsets[1][0] = 3;
+            work->activeEntries[slot].presentation.secondaryPulseOffsets[0][1] = 2;
+            work->activeEntries[slot].presentation.secondaryPulseOffsets[1][1] = 3;
+        }
+        break;
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BAB08);
 
