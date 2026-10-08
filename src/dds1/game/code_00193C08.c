@@ -100,7 +100,8 @@ INCLUDE_ASM(const s32, "game/code_00193C08", func_00193D70);
 void func_00193FD0(s32 x, s32 y, s32 depth, FrFontGlyph *glyph,
                   s32 drawFlags) {
     func_00193D70(x + glyph->x, y + glyph->y,
-                 glyph->unk18.b[0], glyph->unk18.b[1] >> FR_FONT_GLYPH_HEIGHT_SHIFT,
+                 glyph->childCountOrCellDimensions.cellDimensions.cellWidth,
+                 glyph->childCountOrCellDimensions.cellDimensions.cellHeight >> FR_FONT_GLYPH_HEIGHT_SHIFT,
                  glyph->u14.b[0], glyph->u10.word, depth, 1,
                  &glyph->link1C.cachedItem->list->uv, &frFontWork.atlas, drawFlags);
 }

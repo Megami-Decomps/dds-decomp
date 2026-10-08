@@ -577,7 +577,7 @@ void mnuLoadTitleStreamFrameData(char *filePath, u32 *streamState) {
 }
 
 void mnuStoreTaskResult(char *audioPath) {
-    D_00438FEC = fileQueueDefaultCallbackRequest(audioPath);
+    D_00438FEC = (u32)fileQueueDefaultCallbackRequest(audioPath);
     mnuTitleStreamStatus[9] = 1;
 }
 

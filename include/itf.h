@@ -58,10 +58,15 @@ typedef struct FrFontGlyph {
         u32 w;
         u8 b[4];
     } u14;
+    /* Parent: child count. Font item: child cell dimensions. */
     union {
-        u32 w;
-        u8 b[4];
-    } unk18;
+        u32 childCount;
+        struct {
+            u8 cellWidth;
+            u8 cellHeight;
+            u8 opaque[2];
+        } cellDimensions;
+    } childCountOrCellDimensions;
     /* Parent: first child. Font item: retained glyph-cache record. */
     union {
         struct FrFontGlyph *firstChild;
