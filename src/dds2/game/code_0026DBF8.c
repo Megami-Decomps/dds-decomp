@@ -351,8 +351,9 @@ extern u32 mnuInitMantraUnitPanelDraw();
 extern void mnuReleaseMantraUnitPanelDraw();
 void mnuStorePanelEntry(u32, u32);
 void effDestroyResourceSlotSet(u32);
-extern u32 sdfAllocGeneralBlock(u32);
-extern u32 sdfMemoryGetBlockAddress(u32);
+struct SdfMemBlock;
+extern struct SdfMemBlock *sdfAllocGeneralBlock(s32);
+extern u32 sdfMemoryGetBlockAddress(struct SdfMemBlock *);
 
 s32 mnuGetActiveMantraModelFlagState(void) {
     s32 result = 0;
@@ -943,8 +944,9 @@ void func_0026FAC8(void) {
 /* Allocate one header followed by fixed-size draw items; return the pool address word. */
 u32 mnuCreateMantraDrawPool(u32 itemCount) {
     u32 poolBytes = itemCount * MNU_MANTRA_DRAW_ITEM_BYTES + MNU_MANTRA_DRAW_POOL_HEADER_BYTES;
-    u32 allocationHandle = sdfAllocGeneralBlock(poolBytes);
-    MantraDrawPool *pool = (MantraDrawPool *)sdfMemoryGetBlockAddress(allocationHandle);
+    u32 allocationHandle = (u32)sdfAllocGeneralBlock((s32)poolBytes);
+    MantraDrawPool *pool = (MantraDrawPool *)sdfMemoryGetBlockAddress(
+        (struct SdfMemBlock *)allocationHandle);
     memset(pool, 0, poolBytes);
     pool->handle = allocationHandle;
     pool->count = itemCount;
@@ -2381,8 +2383,8 @@ MantraIconEntry *mnuSpawnMantraIcon(s32 x, s32 y, MantraIconPool *pool, u32 mode
 
 u32 mnuAllocateMantraIconPool(u32 count) {
     u32 size = count * 12 + 0x14;
-    u32 handle = sdfAllocGeneralBlock(size);
-    u32 block = sdfMemoryGetBlockAddress(handle);
+    u32 handle = (u32)sdfAllocGeneralBlock((s32)size);
+    u32 block = sdfMemoryGetBlockAddress((struct SdfMemBlock *)handle);
     memset((void *)block, 0, size);
     *(u32 *)block = handle;
     ((MantraIconPool *)block)->count = count;
@@ -2921,22 +2923,14 @@ void func_002799A0(u32 pool) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_002799D8);
-
-void mnuReleaseMantraIconSpriteHandle(u32 *sprite) {
-    if (sprite != 0) {
-        sdfReleaseResourceAllocation(*sprite);
-    }
-}
-
-
 typedef struct MantraPanelPool MantraPanelPool;
 typedef s32 (*MantraPanelDraw)(s32, s32, u32, s32,
     MantraPanelPool *, MantraPanelAnimation *, u32);
 typedef void (*MantraPanelInit)(MantraPanelPool *, MantraPanelAnimation *);
 typedef void (*MantraPanelRelease)(MantraPanelAnimation *);
 
-/* Native creator reserves 974 entries per callback table before the slot array. */
+/* Native creator copies fourteen callback entries into its stack snapshots,
+ * then initializes the full 974-slot tables from those snapshots. */
 struct MantraPanelPool {
     u32 handle;
     MantraPanelAnimation *items;
@@ -2946,6 +2940,132 @@ struct MantraPanelPool {
     MantraPanelRelease release[974];
     s32 unk2DB4;
 };
+
+typedef char MantraPanelPool_size_must_be_0x2DB8[
+    (sizeof(MantraPanelPool) == 0x2DB8) ? 1 : -1];
+
+extern void func_0027A7F0(void);
+extern void mnuResetMantraPulsePhase(s32, u8 *);
+extern void mnuRandomizeMantraPulseIconPhase(s32, u8 *);
+extern void btlInitPanelASprite(u32, s32);
+extern void mnuInitMantraPanelSpriteView(u32, s32);
+extern void func_0027DE30(void);
+extern void btlInitPanelBSprites(u32, s32);
+extern void mnuDrawMantraBackdropWithGsTest(void);
+extern void mnuResetMantraPanelAnimationStates(u32, s32);
+extern void func_002817B8(u32, s32);
+extern void mnuInitMantraPanelAccentSprite(u32, s32);
+extern void func_00282B50(u32, s32);
+extern void func_00283F90(u32, s32);
+extern void func_0027FDB8(void);
+
+extern void func_0027A7F8(void);
+extern void func_0027AFD8(void);
+extern void mnuDrawOscillatingMantraOverlay(void);
+extern void btlReleasePanelASprite(u32);
+extern void mnuReleaseMantraPanelSpriteView(u32);
+extern void func_0027DE38(void);
+extern void btlReleasePanelBSprites(s32);
+extern void func_0027FB68(void);
+extern void func_002803A0(void);
+extern void func_002817C0(void);
+extern void mnuReleaseMantraPanelAccentSprite(u32);
+extern void func_00282B60(void);
+extern void func_00283FA0(void);
+extern void func_0027FDC0(void);
+
+extern s32 mnuDrawMantraPanelCTransition(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 func_0027B678(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 mnuDrawMantraPulseIconWithFadeState(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 func_0027C558(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 func_0027D3D8(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 mnuDrawMantraPanelSpriteTransition(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 func_0027E360(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 mnuDrawMantraPanelBackdropTransition(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 func_002805E0(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 mnuDrawFadedMantraSingleCyclePanel(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 func_00281DC0(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 func_00283090(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 mnuDrawFadedMantraDualCyclePanel(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 func_0027FDC8(s32, s32, s32, s32, s32, u8 *, s32);
+MantraPanelPool *func_002799D8(s32 count, s32 userValue) {
+    MantraPanelInit initCallbacks[14] = {
+        (MantraPanelInit)func_0027A7F0,
+        (MantraPanelInit)mnuResetMantraPulsePhase,
+        (MantraPanelInit)mnuRandomizeMantraPulseIconPhase,
+        (MantraPanelInit)btlInitPanelASprite,
+        (MantraPanelInit)mnuInitMantraPanelSpriteView,
+        (MantraPanelInit)func_0027DE30,
+        (MantraPanelInit)btlInitPanelBSprites,
+        (MantraPanelInit)mnuDrawMantraBackdropWithGsTest,
+        (MantraPanelInit)mnuResetMantraPanelAnimationStates,
+        (MantraPanelInit)func_002817B8,
+        (MantraPanelInit)mnuInitMantraPanelAccentSprite,
+        (MantraPanelInit)func_00282B50,
+        (MantraPanelInit)func_00283F90,
+        (MantraPanelInit)func_0027FDB8,
+    };
+    MantraPanelRelease releaseCallbacks[14] = {
+        (MantraPanelRelease)func_0027A7F8,
+        (MantraPanelRelease)func_0027AFD8,
+        (MantraPanelRelease)mnuDrawOscillatingMantraOverlay,
+        (MantraPanelRelease)btlReleasePanelASprite,
+        (MantraPanelRelease)mnuReleaseMantraPanelSpriteView,
+        (MantraPanelRelease)func_0027DE38,
+        (MantraPanelRelease)btlReleasePanelBSprites,
+        (MantraPanelRelease)func_0027FB68,
+        (MantraPanelRelease)func_002803A0,
+        (MantraPanelRelease)func_002817C0,
+        (MantraPanelRelease)mnuReleaseMantraPanelAccentSprite,
+        (MantraPanelRelease)func_00282B60,
+        (MantraPanelRelease)func_00283FA0,
+        (MantraPanelRelease)func_0027FDC0,
+    };
+    MantraPanelDraw drawCallbacks[14] = {
+        (MantraPanelDraw)mnuDrawMantraPanelCTransition,
+        (MantraPanelDraw)func_0027B678,
+        (MantraPanelDraw)mnuDrawMantraPulseIconWithFadeState,
+        (MantraPanelDraw)func_0027C558,
+        (MantraPanelDraw)func_0027D3D8,
+        (MantraPanelDraw)mnuDrawMantraPanelSpriteTransition,
+        (MantraPanelDraw)func_0027E360,
+        (MantraPanelDraw)mnuDrawMantraPanelBackdropTransition,
+        (MantraPanelDraw)func_002805E0,
+        (MantraPanelDraw)mnuDrawFadedMantraSingleCyclePanel,
+        (MantraPanelDraw)func_00281DC0,
+        (MantraPanelDraw)func_00283090,
+        (MantraPanelDraw)mnuDrawFadedMantraDualCyclePanel,
+        (MantraPanelDraw)func_0027FDC8,
+    };
+    struct SdfMemBlock *handle;
+    MantraPanelPool *pool;
+    s32 allocationSize;
+    s32 i;
+
+    allocationSize = count * 48 + 0x2DB8;
+    handle = sdfAllocGeneralBlock(allocationSize);
+    pool = (MantraPanelPool *)sdfMemoryGetBlockAddress(handle);
+    memset(pool, 0, allocationSize);
+    pool->handle = (u32)handle;
+    pool->items = (MantraPanelAnimation *)((u8 *)pool + 0x2DB8);
+    pool->count = count;
+    pool->unk2DB4 = userValue;
+
+    for (i = 0; i < 974; i++) {
+        pool->draw[i] = drawCallbacks[i];
+        pool->init[i] = initCallbacks[i];
+        pool->release[i] = releaseCallbacks[i];
+    }
+    return pool;
+}
+
+
+void mnuReleaseMantraIconSpriteHandle(u32 *sprite) {
+    if (sprite != 0) {
+        sdfReleaseResourceAllocation(*sprite);
+    }
+}
+
 
 MantraPanelAnimation *mnuFindFreePanelSlot(MantraPanelPool *, s8);
 
@@ -3033,12 +3153,6 @@ void mnuTransitionActivePanelAnimations(MantraPanelPool *pool, s32 mode) {
         }
     }
 }
-
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004258B8);
-
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004258F0);
-
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425928);
 
 s32 mnuAdvanceMantraPanelAnim(s32 unused, MantraPanelAnimation *panel) {
     s32 result;
@@ -4110,8 +4224,8 @@ struct MantraBurstPool {
 };
 
 u32 mnuAllocateMantraPanelBurstPool(void) {
-    u32 handle = sdfAllocGeneralBlock(0x650);
-    u32 block = sdfMemoryGetBlockAddress(handle);
+    u32 handle = (u32)sdfAllocGeneralBlock(0x650);
+    u32 block = sdfMemoryGetBlockAddress((struct SdfMemBlock *)handle);
     memset((void *)block, 0, 0x650);
     ((MantraBurstPool *)block)->allocation = handle;
     ((MantraBurstPool *)block)->slots = (MantraBurstSlot *)(block + 0x10);
@@ -4161,8 +4275,8 @@ MantraBurstSlot *mnuSpawnBurstSlotSmall(MantraBurstPool *pool, s8 wide, s8 side)
 }
 
 u32 mnuAllocateMantraBackgroundBurstPool(void) {
-    u32 handle = sdfAllocGeneralBlock(0x650);
-    u32 block = sdfMemoryGetBlockAddress(handle);
+    u32 handle = (u32)sdfAllocGeneralBlock(0x650);
+    u32 block = sdfMemoryGetBlockAddress((struct SdfMemBlock *)handle);
     memset((void *)block, 0, 0x650);
     ((MantraBurstPool *)block)->allocation = handle;
     ((MantraBurstPool *)block)->slots = (MantraBurstSlot *)(block + 0x10);
@@ -4354,8 +4468,8 @@ typedef struct MantraEffectPoolHeader {
 
 u32 mnuAllocateMantraEffectSlotPool(u32 count) {
     u32 size = count * 12 + 0x28;
-    u32 handle = sdfAllocGeneralBlock(size);
-    u32 block = sdfMemoryGetBlockAddress(handle);
+    u32 handle = (u32)sdfAllocGeneralBlock((s32)size);
+    u32 block = sdfMemoryGetBlockAddress((struct SdfMemBlock *)handle);
     memset((void *)block, 0, size);
     ((MantraEffectPoolHeader *)block)->allocation = handle;
     ((MantraEffectPoolHeader *)block)->slots = block + 0x28;
