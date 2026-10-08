@@ -22,6 +22,8 @@
 #include "file.h"
 #include "dat_command.h"
 
+extern s32 func_003014F0(char *dst, const char *format, ...);
+
 extern s32 fileTestSavedSlotFlags(u32);
 extern s32 btlGetCommandFailureReason(BtlUnit *, s32);
 extern u32 func_001A3360(void *, BtlIndexList *, s32);
@@ -11003,9 +11005,28 @@ SoundTask *sndCreateClearBattleFlagTask(void) {
     return task;
 }
 
+extern const char D_003BB6A0[];
+
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A4C88);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001F2218);
+const char D_003A4CA8[16] __attribute__((aligned(8))) = "%s%03X.BED";
+const char D_003A4CB8[32] __attribute__((aligned(8))) = "/efftool/bed/BTL_TEST.BED";
+
+s32 func_001F2218(s32 index, char *output) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+
+    if ((state->battleFlags & 0x10000000) == 0) {
+        u16 assetId = ((BtlActionAnimationRecord *)datActionAnimationRecords)[index].displayCode;
+        if (assetId == 0) {
+            return 0;
+        }
+        func_003014F0(output, D_003A4CA8, D_003BB6A0, assetId);
+    } else {
+        func_003014F0(output, D_003A4CB8);
+    }
+    return 1;
+}
+
 
 s32 sndSetEffectNodeParameter(SoundResourceNode *effect, u16 option) {
     return sndReadSelectedMixerBankValue(effect->resourceHandle, option);
