@@ -190,12 +190,12 @@ void sdfDisableFloatCounterWrap(EvtScaledValue *value) {
     value->flags = value->flags & 0xffffffdf;
 }
 
-EffWorldNode *evtSpawnActionObj11(s32 a, s32 b, s32 c) {
+EffWorldNode *evtSpawnActionObj11(s32 key, void *data, s32 value) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(0x11);
 
-    obj->data = b;
-    obj->key = a;
-    obj->value = c;
+    obj->data = data;
+    obj->key = key;
+    obj->value = value;
     return obj;
 }
 
