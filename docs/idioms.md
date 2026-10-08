@@ -4600,3 +4600,40 @@ body remains assembly: a donor-backed private bank-copy draft has 28/178
 word differences, including scalar operand roles and the second muzzle
 buffer-address materialization. No extra asm/barrier is added to force it.
 
+## Camp camera-color keys use the canonical interpolation record
+
+Track type 25 (`0x19`) captures a 0x40-byte `EvtCameraColorPayload`;
+its first 0x38 bytes are the shared `EvtBlendKey` passed to
+`evtBlendParamsH`. The four former `CampListLayout` definitions describe
+that same record, not a separate menu owner. Both default constructors
+and both key-capture callers now use the canonical type and its w/x,
+flagWord and y/z members, preserving every store and opaque payload tail.
+The interpolation bodies at DDS1 `00242F78` / DDS2 `0025E390` remain
+assembly; retiring the duplicate views does not claim a body landing.
+
+
+## DDS2 profile panels own two resource sets, not an integer-word view
+
+`MenuProfilePanel` remains 0x48 bytes in DDS2: `capValue` and `option`
+are signed words at +10/+14; `sets[2]` holds the `EffectSlotSet *` values
+at +18/+1C. The five-argument `mnuSetGroupProperties` writes only those
+two pointers and the +24/+28 trail/particle indices; +20 is preserved.
+The five random opacities start at +2C, followed by signed phase/opacity
+at +40/+44. The renderer uses signed division for the percentage and
+signed comparisons/arithmetic shifts for opacity.
+
+Factories and forwarders use this one primary owner and real resource
+formals. Stored integer resource-address boundaries are converted only
+at their existing calls. DDS1 keeps its different 0x3C profile layout.
+Its already-matched `00285208` shows the authentic direct-indexed
+`BdWork.sourceWidth` crop and `geometry.bounds[2]` update idiom, but is
+not a byte-identical donor for DDS2's longer `002C33C0` renderer.
+
+## Resource effect wrappers forward their pointer arguments and result
+
+DDS1 `00115298` and DDS2 `00115500` are the same constructor forwarder:
+the resource and two vector pointers reach the inner constructor unchanged,
+and callers consume its returned object pointer. A `void(void)` declaration
+only happened to preserve those registers in the old wrapper's machine code;
+the real three-pointer, pointer-returning contract is now explicit in both.
+This closure does not change the separately parked script-setter return ABI.
