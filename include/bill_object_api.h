@@ -7,16 +7,23 @@ struct BillObj;
 struct BillData;
 struct BillOut;
 struct BillChildPayload;
+struct SdfTex;
+
+struct SdfTex *effGetBillResourceTexture(s32 index);
 
 /* The selected kind interprets the opaque payload word. */
 struct BillObj *billCreateIndexed(s32 kind, u32 data);
 struct BillObj *billCloneObjectRetainingSharedData(struct BillObj *source);
+void billInitializeCommonDrawState(struct BillObj *billboard);
 struct BillChildPayload *billCreateChildPayloadFromTextureResource(void *resource);
 void billMarkKindOneFlag(struct BillObj *billboard);
 void billSetChildHalfExtents(struct BillObj *billboard, f32 width, f32 height);
 void billSetChildScaleComponents(struct BillObj *billboard, f32 x, f32 y);
 void billSetAnimationEntry(struct BillObj *billboard, s32 entryIndex);
+void billSetAnimationFrameForImmediateAdvance(struct BillObj *billboard, u32 frame);
+void billSetAnimationFrameWithOneTickHold(struct BillObj *billboard, u32 frame);
 void billReleaseSharedEntryBlock(struct BillData *data);
+void effReleaseSharedTextureRecord(struct BillChildPayload *child);
 struct BillChildPayload *billStepAnimationEntryAndUpdateChild(
     struct BillObj *billboard, struct BillOut *entry);
 
