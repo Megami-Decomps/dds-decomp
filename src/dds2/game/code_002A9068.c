@@ -667,7 +667,7 @@ MenuWindowContainer *mnuCreateStaffResourceListWindow(void *const *entries, s32 
         style = 7;
         break;
     }
-    mnuSetWindowEntryParameters(0, window, ((MenuStaffContext *)work)->spriteArg0, 0xC, style);
+    mnuSetWindowEntryParameters(0, window, (u32)((MenuStaffContext *)work)->spriteArg0, 0xC, style);
 
     index = 0;
     if (count > 0) {

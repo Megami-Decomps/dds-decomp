@@ -97,13 +97,11 @@ void evtInstallStateTable(ShopScene *state) {
 
 extern s32 func_00244658();
 extern void func_002444D0(ShopScene *);
-extern s16 mnuShopHasPendingFlag(ShopScene *);
-
 /* Prepare the active menu state and copy the selection into its window. */
 s32 evtInitializeActiveMenuState(KwlnTask *task) {
     s32 stateAddress = kwlnTaskGetUserValue(task);
     MnuShopListContext *windowData;
-    s16 pendingSelection;
+    s32 pendingSelection;
 
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 2);
