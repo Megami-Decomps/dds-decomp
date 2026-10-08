@@ -629,12 +629,12 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_0028D2F8);
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028D7C8);
 
 /* Retail sign-extends mode and selection to halfwords at this call (+0x38/+0x4C sll/sra pairs). */
-extern s32 func_0028D7C8(s32, u16, s16, s16);
+extern s32 func_0028D7C8(MnuStatusResource *, u16, s16, s16);
 
 /* Pick the neighbouring mantra node to move to. The edge mask from func_0028D7C8 is filtered against the
  * neighbours whose model flag state is compatible with the mode (mode 3 also accepts empty slots); edges 0 and 5
  * use paired masks, the side edges test the two adjacent neighbours. */
-MantraNodePos *func_0028DC08(s32 object, u16 nodeId, s32 mode, s32 selection) {
+MantraNodePos *func_0028DC08(MnuStatusResource *object, u16 nodeId, s32 mode, s32 selection) {
     MantraNodePos *record;
     MantraNodePos *neighbor;
     MantraNodePos **neighbors;
@@ -703,13 +703,13 @@ void mtrDrawRankPass(s32 object, u16 index) {
 
     evtPrintDeveloperConsoleMessage("DrawRank[%d]\n", modelFlagState);
     memset(nodes, 0, sizeof(nodes));
-    selected = func_0028D7C8(object, index, modelFlagState, 0);
+    selected = func_0028D7C8((MnuStatusResource *)object, index, modelFlagState, 0);
     record = (MantraNodePos *)mnuGetMantraNodePositionRecord(index);
     neighbors = record->neighbors;
     nextNode = nodes;
     for (; i < 6; i++, neighbors++) {
         if ((selected >> i) & 1) {
-            *nextNode++ = func_0028DC08(object, (*neighbors)->id, modelFlagState, 0);
+            *nextNode++ = func_0028DC08((MnuStatusResource *)object, (*neighbors)->id, modelFlagState, 0);
             hasNode = 1;
         }
     }
@@ -721,7 +721,7 @@ void mtrDrawRankPass(s32 object, u16 index) {
             cursor = nodes;
             for (i = 2; i >= 0; i--, cursor++) {
                 if (*cursor != NULL) {
-                    *cursor = func_0028DC08(object, (*cursor)->id, modelFlagState, rank);
+                    *cursor = func_0028DC08((MnuStatusResource *)object, (*cursor)->id, modelFlagState, rank);
                     hasNode = 1;
                 }
             }

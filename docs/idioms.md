@@ -4705,3 +4705,12 @@ A nonzero `skipRamp` bypasses that ramp and uses the fixed fast
 step of 10000. These fields occupy the original padding; the
 level/profile bank origins, other fields, and DDS1 layout are unchanged.
 
+## DDS2 mantra navigation consumes the whole menu owner
+
+`0028D7C8` loads the flag resource from owner+7AC and the animation pool
+from owner+BEC. These are `MnuStatusResource.menu.slots` and
+`MnuStatusResource.menu.resource`, not the selection controller at C00.
+The reveal and neighbour-selection helpers take the whole typed owner.
+The unchanged rank-pass address-word interface decodes its argument at
+the three calls into these helpers; no alternate workspace layout is needed.
+
