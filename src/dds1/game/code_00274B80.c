@@ -35,7 +35,7 @@ extern s32 func_001958A0(FrFontGlyph *, s8, u32);
 extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern void func_002BF4E0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, u32);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
-extern s32 func_002CD240(u16, const char **);
+extern s32 func_002CD240(u16, u8 **);
 extern void func_002845F8(s32, s32, s32, u32, u16, s32, MenuEffectPair *, u32);
 extern void mnuDrawCenteredLabel(s32, s32, s32, s32, s32, s32);
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
@@ -604,7 +604,7 @@ s32 func_00275920(s32 callback) {
 void func_00275B40(EffectSlotSet **sets, MenuEffectPair *hpBar, MenuEffectPair *mpBar,
                    DatPartyRecord *entry, EffectSlotSet *marker, u32 opacity,
                    u32 iconOpacity, s32 dim) {
-    const char *name;
+    u8 *name;
     s32 profile = ptyGetCurrentProfileId(entry);
     u32 color = uiBlendColors(0xA09DC380, 0xA09DC300, opacity);
     FrFontGlyph *glyph;
@@ -639,7 +639,7 @@ void func_00275B40(EffectSlotSet **sets, MenuEffectPair *hpBar, MenuEffectPair *
             mnuDrawCenteredLabel(0x650, 0xBC8, 0, color, profile, 0x53);
         } else {
             glyph = itfCreateConvertedTextGlyph(
-                0x640, 0xBE8, 0, color, (const u8 *)name, 0);
+                0x640, 0xBE8, 0, color, name, 0);
             func_00196088(0xD20, 0xBE8, glyph);
             func_001958A0(glyph, 1, 0x53);
             frFontQueueGlyphInSelectedSlot(glyph);
