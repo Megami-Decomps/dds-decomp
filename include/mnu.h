@@ -774,7 +774,7 @@ void func_0025FD78(MenuTerminalContext *scene);
 
 
 typedef struct MenuIconSprites {
-    u32 handle;
+    struct SdfMemBlock *allocation; /* 0x00: retained descriptor for this bundle. */
     u32 value;
     u32 unk8;
     struct EffectSlotSet *sprite[3];
