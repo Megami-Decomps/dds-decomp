@@ -2654,9 +2654,9 @@ void mnuSetCampEffectResourceHandles(u32 first, u32 second, MenuEffectResources 
 
 
 void mnuBindCampEffectAnimation(MenuEffectResources *resources) {
-    effConfigureIndexedSlotResource(resources->packet.sheets[0],
+    effConfigureIndexedSlotResource((struct EffectSlotSet *)resources->packet.sheets[0],
                    resources->packet.items[4],
-                   resources->animationHandle, 0, 4);
+                   (struct EffMappedResource *)resources->animationHandle, 0, 4);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AD38);

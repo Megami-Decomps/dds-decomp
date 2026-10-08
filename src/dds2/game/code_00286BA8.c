@@ -47,6 +47,7 @@ extern MenuList *func_002884C0(void);
 extern s32 mdlFlagTest(s32);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
 extern void func_00289BA0(struct MnuStatusResource *);
+extern void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *);
 extern s32 func_00288920(struct MnuStatusResource *);
 extern s32 mnuMoveNodeCursorToTargetIndex(MnuStatusResource *, s8);
 
@@ -229,7 +230,7 @@ u64 func_00287768(void) {
 
 /* Enter mantra selection on the current work address and disable terminal-track mode; return zero. */
 s32 mtrMantraSelectInit(void) {
-    u64 resourceAddress = sdfGetTaskValueByKey((struct TaskWork *)mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
+    MnuStatusResource *resourceAddress = (MnuStatusResource *)sdfGetTaskValueByKey((struct TaskWork *)mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
 
     mnuEnableTerminalTrackMode(0);
     mnuOpenMantraSelectionAndLoadTitleStream(resourceAddress);
