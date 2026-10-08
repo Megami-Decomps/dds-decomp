@@ -284,13 +284,6 @@ typedef struct EffMsg {
     u32 *prefixRecord; /* Prefix string pointer is stored in the second word. */
 } EffMsg;
 
-/* Effect allocator slot and float value (0x38); DDS1/2 game/code_0018CAC8/00194700.c. */
-typedef struct EffSlot38 {
-    u8 unk0[0x30];
-    s32 unk30;
-    f32 unk34;
-} EffSlot38;
-
 /* Effect slot array owner and allocation handle (0xC); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct EffArrHdr {
     void *slots; /* Slot array base, read by effMathGetSlotAt. */
