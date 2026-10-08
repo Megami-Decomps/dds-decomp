@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_ref_obj.h"
 #include "sdf_resource.h"
 #include "btl_state.h"
 #include "ee_mmi.h"
@@ -159,7 +160,6 @@ extern u16 scrReadIntParameter(u32);
 
 extern u32 btlButtonIconTexture;
 
-extern u32 effCloneSharedReferenceWithValue(u32, u32);
 
 extern s32 btlGetRuntime(void);
 extern s32 btlDispatchPackedActionWithScratch(s32 context, s32 actor, u32 mask);
@@ -1002,7 +1002,7 @@ void btlRetainButtonTexture(void) {
     u32 resource;
 
     state = (BtlState *)btlGetRuntime();
-    resource = effCloneSharedReferenceWithValue(btlButtonIconTexture, 0x10000);
+    resource = (u32)effCloneSharedReferenceWithValue((struct SdfTextureFileHeader *)btlButtonIconTexture, 0x10000);
     state->buttonTextureHandle = resource;
 }
 
@@ -1010,7 +1010,7 @@ void btlReleaseButtonTexture(void) {
     BtlState *state;
 
     state = (BtlState *)btlGetRuntime();
-    effReleaseSharedReference(state->buttonTextureHandle);
+    effReleaseSharedReference((RefObj *)state->buttonTextureHandle);
     state->buttonTextureHandle = 0;
 }
 

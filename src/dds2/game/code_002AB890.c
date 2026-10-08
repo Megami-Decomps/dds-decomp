@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "sdf_resource.h"
@@ -420,7 +421,6 @@ s32 mnuDestroyWindowOwnerResourceSet(KwlnTask *task) {
     return 1;
 }
 
-extern s32 mnuMapPadMaskToFlags(s32);
 extern void func_002B9808(s32);
 extern void mnuRetreatWindowListSelection(s32);
 extern void mnuAdvanceWindowListSelection(s32);

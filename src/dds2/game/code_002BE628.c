@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "fpu.h"
 #include "common.h"
 #include "dat_command.h"

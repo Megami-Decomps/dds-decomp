@@ -25,7 +25,7 @@ extern struct { s32 v[6]; } D_0036D4B0;
 extern u32 uiBlendColors(u32, u32, s32);
 extern void itfDrawCountText(s32, s32, s32, s32, const BrsRewardSummary *, s32);
 extern void mnuQueueRightAlignedFormattedInfoText(s32, s32, s32, s32, const BrsRewardSummary *, s32);
-extern void func_002650C8(s32, s32, s32, u32, BrsRewardSummary *, s32, BrsSkillPackageWork *);
+extern void func_002650C8(s32, s32, s32, u32, BrsRewardSummary *, u32, BrsSkillPackageWork *);
 
 void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *work) {
     BrsRewardSummary *res = &work->rewards;
@@ -119,8 +119,8 @@ s32 brsCalcApGain(DatPartyRecord *unit, s32 baseApTotal, s32 perUnitBonus) {
 }
 
 /* Active party members take full EXP; benched members need the half/full
- * EXP skills (0x21F/0x220 respectively). The third caller arg is unused. */
-s32 brsCalcExpGain(DatPartyRecord *unit, s32 exp, s32 unused) {
+ * EXP skills (0x21F/0x220 respectively). */
+s32 brsCalcExpGain(DatPartyRecord *unit, s32 exp) {
     s32 result;
 
     if ((unit->flags & BRS_ACTIVE_PARTY_FLAG) != 0) {
@@ -144,7 +144,51 @@ s32 mnuIsTitleEntryAvailable(DatPartyRecord *entry) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildRewardRows);
+extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
+
+s32 brsBuildRewardRows(BrsRewardBatch *batch, BrsRewardSummary *summary) {
+    s32 i;
+    /* Value blocks are interleaved with each row's party-record pointer. */
+    u8 *values = (u8 *)&batch->rows + sizeof(batch->rows[0].unit);
+
+    memset(batch, 0, sizeof(*batch));
+    for (i = 0; i < 5; i++) {
+        DatPartyRecord *unit = &datGameState->party[i];
+        u16 occupied = unit->flags & 1;
+        if (occupied != 0 && (unit->status & 0x4000) == 0) {
+            DatProfileRecord *profile;
+            s32 ap;
+            s32 exp;
+
+            batch->rows[batch->count].unit = unit;
+            ((BrsRewardValues *)(values +
+                batch->count * sizeof(BrsRewardRow)))->partySlot = i;
+            profile = ptyGetCurrentProfileRecord(unit);
+            ap = brsCalcApGain(unit, summary->totalAp, summary->unitApBonus[i]);
+            exp = brsCalcExpGain(unit, summary->totalExp);
+            if (unit->profileId == 0) {
+                ap = 0;
+            }
+            if (mnuIsTitleEntryAvailable(unit) != 0) {
+                ap = 0;
+            }
+            {
+                BrsRewardValues *currentValues = (BrsRewardValues *)(values +
+                    batch->count * sizeof(BrsRewardRow));
+                currentValues->amount = ap;
+            }
+            ((BrsRewardValues *)(values +
+                batch->count * sizeof(BrsRewardRow)))->secondaryValue = exp;
+            ((BrsRewardValues *)(values +
+                batch->count * sizeof(BrsRewardRow)))->profileValue = profile->value;
+            ((BrsRewardValues *)(values +
+                batch->count * sizeof(BrsRewardRow)))->totalExp = unit->totalExp;
+            batch->count++;
+        }
+    }
+    return batch->count;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_002653A0", ptyCalcLevelUps);
 
@@ -160,11 +204,38 @@ s32 mnuCountAdvancingTitleAnimations(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002653A0", brsBuildLevelUpList);
+s32 brsBuildLevelUpList(BrsRewardBatch *batch) {
+    s32 i;
+    u8 *values = (u8 *)&batch->rows + sizeof(batch->rows[0].unit);
+
+    memset(batch, 0, sizeof(*batch));
+    batch->count = 0;
+    for (i = 0; i < 5; i++) {
+        DatPartyRecord *unit = &datGameState->party[i];
+        u16 occupied = unit->flags & 1;
+
+        if (occupied != 0) {
+            s32 levelUps = ptyCalcLevelUps(unit);
+            if (levelUps > 0) {
+                s32 count = batch->count;
+                BrsRewardValues *rowValues =
+                    (BrsRewardValues *)(values + count * sizeof(BrsRewardRow));
+
+                rowValues->amount = levelUps;
+                batch->rows[count].unit = unit;
+
+                ((BrsRewardValues *)(values +
+                    batch->count * sizeof(BrsRewardRow)))->secondaryValue = i;
+                batch->count++;
+            }
+        }
+    }
+    return batch->count;
+}
 
 
 
-extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
+
 extern s32 ptyTestProfileFlag0(DatPartyRecord *, u16);
 extern u32 prfBuildSkillListState0(DatPartyRecord *, DatProfileRecord *, PrfSkillList *);
 extern u32 prfGetCapValue(u16);

@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_list.h"
@@ -54,7 +55,7 @@ extern char D_0037CC20[];
 
 extern void sdfReleaseChipBlock(void *);
 
-extern s32 func_0027B888(u32);
+extern MenuListNode *func_0027B888(MenuList *);
 
 
 
@@ -466,10 +467,10 @@ MenuList *mnuCreateListState(s32 id, s32 visibleCount, s32 rowSpacing) {
 }
 
 u32 mnuDestroyListState(MenuList *list) {
-    s64 pending;
+    MenuListNode *pending;
 
     do {
-        pending = func_0027B888((u32)list);
+        pending = func_0027B888(list);
     } while (pending != 0);
     sdfReleaseChipBlock(list);
     return 1;
