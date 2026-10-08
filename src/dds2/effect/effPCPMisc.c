@@ -125,7 +125,7 @@ typedef struct EffPCPRotateParams {
 
 typedef struct EffPCPRotateWork {
     EffPCPRotateParams params;
-    s32 ids[3];
+    EffPCPBlockSetWork *blockSets[3];
     s32 frame;
 } EffPCPRotateWork;
 
@@ -3605,7 +3605,7 @@ EffPCPRotateWork *effPcpRotateCreate(EffPCPRotateParams *src, u32 *blocks) {
     work->frame = 0;
     for (i = 0; i < 3; i++) {
         blocks[3] = blocks[i];
-        work->ids[i] = (s32)effPcpCreateBlockSetWork(sub, (void **)&blocks[3]);
+        work->blockSets[i] = effPcpCreateBlockSetWork(sub, (void **)&blocks[3]);
         sub += 0x50;
     }
     return work;
@@ -3662,26 +3662,27 @@ EffPCPRotateWork *effPcpRotateClone(EffPCPRotateWork *src) {
     work->params = src->params;
     work->frame = 0;
     for (i = 0; i < 3; i++) {
-        work->ids[i] = (s32)sdfAllocSizeClassBlock(0x10C);
-        memset((void *)work->ids[i], 0, 0x10C);
-        ((EffPCPBlockSetWork *)work->ids[i])->params = ((EffPCPBlockSetWork *)src->ids[i])->params;
-        sub = (EffPCPBlockSetWork *)work->ids[i];
+        work->blockSets[i] = sdfAllocSizeClassBlock(0x10C);
+        memset(work->blockSets[i], 0, 0x10C);
+        memcpy(&work->blockSets[i]->params, &src->blockSets[i]->params,
+               sizeof(work->blockSets[i]->params));
+        sub = work->blockSets[i];
         sub->unkB0 = 0;
         sub->color = 0x80808080;
         sub->mode = 0;
         EE_MMI_UNIT_MATRIX(sub->matrix);
-        sub->source = (void *)src->ids[i];
+        sub->source = src->blockSets[i];
     }
     return work;
 }
 
 void effPcpRotateRelease(EffPCPRotateWork *work) {
     u32 i;
-    s32 *id;
+    EffPCPBlockSetWork **blockSets;
 
-    id = work->ids;
+    blockSets = work->blockSets;
     for (i = 0; i < 3; i++) {
-        effPcpBlockSetWorkRelease((EffPCPBlockSetWork *)id[i]);
+        effPcpBlockSetWorkRelease(blockSets[i]);
     }
     sdfReleaseChipBlock(work);
 }
@@ -3696,7 +3697,7 @@ void effPcpRotateFireIds(EffPCPRotateWork *work) {
     frame = work->frame;
     do {
         if (work->params.startFrame[i] <= frame) {
-            func_00185950(work->ids[i]);
+            func_00185950((u32)work->blockSets[i]);
             frame = work->frame;
         }
         i = i + 1;
@@ -3706,31 +3707,31 @@ void effPcpRotateFireIds(EffPCPRotateWork *work) {
 
 void effPcpRotateSetChildVectors(EffPCPRotateWork *work, void *src) {
     u32 i;
-    s32 *id;
+    EffPCPBlockSetWork **blockSets;
 
-    id = work->ids;
+    blockSets = work->blockSets;
     for (i = 0; i < 3; i++) {
-        effPcpCopyVector60((void *)id[i], src);
+        effPcpCopyVector60((void *)blockSets[i], src);
     }
 }
 
 void effPcpRotateSetChildValues(EffPCPRotateWork *work, u32 val) {
     u32 i;
-    s32 *id;
+    EffPCPBlockSetWork **blockSets;
 
-    id = work->ids;
+    blockSets = work->blockSets;
     for (i = 0; i < 3; i++) {
-        effPcpBlockSetSetColor((EffPCPBlockSetWork *)id[i], val);
+        effPcpBlockSetSetColor(blockSets[i], val);
     }
 }
 
 void effPcpRotateSetChildMatrices(EffPCPRotateWork *work, void *src) {
     u32 i;
-    s32 *id;
+    EffPCPBlockSetWork **blockSets;
 
-    id = work->ids;
+    blockSets = work->blockSets;
     for (i = 0; i < 3; i++) {
-        effPcpCopyBlockMatrix((void *)id[i], src);
+        effPcpCopyBlockMatrix((void *)blockSets[i], src);
     }
 }
 
