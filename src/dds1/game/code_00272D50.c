@@ -320,7 +320,7 @@ extern void mnuCreateStaffImageSprite(s32);
 extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 extern void func_00272668(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
-extern void func_002723B0(s32, s32);
+extern void mnuDrawStaffGridLabelsForKind(s32, s32);
 extern u8 D_0037C860[];
 extern s32 D_003BAA9C;
 
@@ -330,7 +330,7 @@ s32 mnuStaffDrawImagePanelA(KwlnTask *callback) {
     mnuCreateStaffImageSprite(4);
     func_00272668(1, ((StaffDisplayContext *)context)->activeWindow->list->cursor->index, (s32)D_0037C860, context, 1, 0x53);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, ((StaffDisplayContext *)context)->activeWindow, 0x53);
-    func_002723B0(0, ((StaffDisplayContext *)context)->group);
+    mnuDrawStaffGridLabelsForKind(0, ((StaffDisplayContext *)context)->group);
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 

@@ -602,7 +602,7 @@ typedef char StaffGridLabelRow_gridIds_offset_check[
 
 extern const StaffGridLabelRow D_003B2100[];
 
-void func_002723B0(s32 kind, s32 slot) {
+void mnuDrawStaffGridLabelsForKind(s32 kind, s32 slot) {
     StaffGridLabelRow rows[7];
     s32 i;
     memcpy(rows, D_003B2100, sizeof(rows));

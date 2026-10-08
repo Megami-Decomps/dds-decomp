@@ -760,7 +760,7 @@ s32 mnuDrawPartySelectionPanelAndStep(KwlnTask *callback) {
     mnuCreateStaffImageSprite(0x13);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->primaryWindow, 0x53);
     func_00276018(context);
-    func_002723B0(0, ((CampMenuContext *)context)->actor);
+    mnuDrawStaffGridLabelsForKind(0, ((CampMenuContext *)context)->actor);
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
@@ -862,7 +862,7 @@ extern u8 D_0037C3A8[];
 extern s32 effHasFirstTextureHandle(s32);
 extern void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task);
 extern void mnuCreateStaffImageSprite();
-extern void func_002723B0();
+extern void mnuDrawStaffGridLabelsForKind();
 extern void func_00272668();
 extern void mnuDrawWindowContainer();
 
@@ -882,7 +882,7 @@ s32 mnuDrawStaffCampPageWithImage(KwlnTask *callback) {
         mnuCreateStaffImageSprite(0x11);
     }
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, work->panel, 0x53);
-    func_002723B0(0, work->actor);
+    mnuDrawStaffGridLabelsForKind(0, work->actor);
     if (menu->selectedList != 0) {
         s32 *slot = ((MenuSelectionState *)work->panel)->list->selectedSlot;
 
@@ -1418,7 +1418,7 @@ s32 mnuCampMenuDrawSlotLabel(KwlnTask *param) {
     } else {
         mnuDrawWindowContainer(0x1C0, 0x3D0, 0, ((CampMenuContext *)context)->panel, 0x53);
     }
-    func_002723B0(0, ((CampMenuContext *)context)->actor);
+    mnuDrawStaffGridLabelsForKind(0, ((CampMenuContext *)context)->actor);
     return menuRunPanel((void *)context, 1, (void *)param);
 }
 

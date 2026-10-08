@@ -166,7 +166,7 @@ s32 mnuDrawStaffImageScreen(KwlnTask *callback) {
     mnuDrawCampIconBackdrop(context + 0x11C, 0x20);
     func_002BB510(-0x10, -8, 0, ((CampVisualWork *)context)->modelHandle, 0x54);
     mnuCreateStaffImageSprite(0x18);
-    func_002AA7A0(2, ((CampVisualWork *)context)->drawContext);
+    mnuDrawStaffGridLabelsForKind(2, ((CampVisualWork *)context)->drawContext);
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 

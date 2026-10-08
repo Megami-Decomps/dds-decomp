@@ -30,7 +30,7 @@ extern void func_0027E8D8(s32, s32, s32, u32, s32);
 
 extern void mnuCreateStaffImageSprite(s32);
 
-extern void func_002723B0(s32, u32);
+extern void mnuDrawStaffGridLabelsForKind(s32, u32);
 extern u32 mnuMapPadMaskToFlags(s32);
 extern s32 func_002719F0(s32);
 extern void mnuSetPopupEntry(s32, s32);
@@ -136,7 +136,7 @@ s32 mnuDrawStaffImageScreen(KwlnTask *callback) {
     mnuDrawBackdrop((s32)(context->background), 0x20);
     func_0027E8D8(-0x10, -8, 0, context->scrollPanel, 0x54);
     mnuCreateStaffImageSprite(0x14);
-    func_002723B0(2, context->staffSlots.baseResources[6]);
+    mnuDrawStaffGridLabelsForKind(2, context->staffSlots.baseResources[6]);
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
