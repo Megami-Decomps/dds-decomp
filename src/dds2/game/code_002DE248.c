@@ -7046,8 +7046,8 @@ void func_002F64D8(EffActiveResource *work) {
                         continue;
                     }
                     handled = 0;
-                    if (state->hook618 != NULL) {
-                        handled = state->hook618(actors[i]);
+                    if (state->unk618 != NULL) {
+                        handled = state->unk618(actors[i]);
                     }
                     if (!(btlGetEntryFlagsUnlessDisabled(&actors[i]->partyRecord) & 0x200) || handled == 1) {
                         continue;
@@ -7078,8 +7078,8 @@ void func_002F64D8(EffActiveResource *work) {
                         continue;
                     }
                     handled = 0;
-                    if (state->hook618 != NULL) {
-                        handled = state->hook618(actors[i]);
+                    if (state->unk618 != NULL) {
+                        handled = state->unk618(actors[i]);
                     }
                     if (!(btlGetEntryFlagsUnlessDisabled(&actors[i]->partyRecord) & 0x200) || handled == 1) {
                         continue;
@@ -7244,8 +7244,8 @@ void effApplySelectedActorEffects(EffActiveResource *owner) {
         count = effCollectModelEffectActors(actor, info->actorSelection);
         for (i = 0; i < count; i++) {
             if (actor[i]->flags & 2) {
-                if (!(actor[i]->flags & 0x20) && !(actor[i]->unk330 & 0x10)) {
-                    if (actor[i]->unk330 & 0x40) {
+                if (!(actor[i]->flags & 0x20) && !(actor[i]->effectLink.flags & 0x10)) {
+                    if (actor[i]->effectLink.flags & 0x40) {
                         switch (info->id) {
                         case 0:
                         case 2:

@@ -50,6 +50,16 @@ typedef struct BtlUnitEntrySlot {
     s16 countdown;
 } BtlUnitEntrySlot;
 
+/* DDS1 001F1194 / DDS2 00201D1C load this pair with LD; SH flags and SW reference counts also access its halves. */
+typedef union BtlEffectLinkState {
+    u64 packed;
+    struct {
+        u16 flags;
+        u8 pad02[2];
+        s32 referenceCount;
+    };
+} BtlEffectLinkState;
+
 #ifdef VERSION_DDS1
 /* Battle unit, DDS1 (0x348). Retail accessors distinguish world rotation at
  * +0x40 from the orientation quaternion at +0x70; body/muzzle offsets are
@@ -121,15 +131,13 @@ typedef struct BtlUnit {
     BtlUnitEntrySlot entrySlots[7]; /* 0x2C6 */
     s32 selectedEntryIndex; /* 0x2F0: -1 denotes no selected entry. */
     u32 unk2F4;
-    s32 resourceNode;
+    struct SoundResourceNode *resourceNode; /* 0x2F8: owned system-effect resource. */
     struct SoundResourceLink *resourceLink; /* 0x2FC: linked model-resource task. */
-    s32 link;
-    s32 listNode;
+    struct SoundLink *link; /* 0x300: per-unit command effect. */
+    struct ActiveSoundNode *listNode; /* 0x304: independently loaded sound node. */
     struct SoundSlotOwner *soundSlotOwner; /* 0x308: shared category/id motion-SE owner. */
     void *gunResource; /* 0x30C */
-    u16 unk310; /* 0x310: battle-effect entry conditions test bits 0..2. */
-    u8 pad312[2];
-    s32 unk314;
+    BtlEffectLinkState effectLink; /* 0x310: effect flags and outstanding effect-task references. */
     u8 firstCountdown; /* 0x318: linked-effect destruction decrements this */
     u8 secondCountdown; /* 0x319 */
     u8 pad31A[2];
@@ -206,7 +214,7 @@ typedef struct BtlUnit {
     u8 unk2E4;
     u8 pad2E5;
     BtlUnitEntrySlot entrySlots[7]; /* 0x2E6: btlClearActorEntrySlot clears each signed record. */
-    s32 unk310;
+    s32 selectedEntryIndex; /* 0x310: -1 denotes no selected entry. */
     s32 unk314;
     struct SoundResourceNode *node318;
     struct SoundResourceLink *link31C;
@@ -214,9 +222,7 @@ typedef struct BtlUnit {
     struct ActiveSoundNode *node324;
     s32 unk328; /* Owner of the actor model's file slots and allocation handles. */
     void *gunResource;
-    u16 unk330;
-    u8 pad332[2];
-    s32 unk334;
+    BtlEffectLinkState effectLink; /* 0x330: same flags/reference pair as DDS1 +0x310. */
     u8 pad338[4];
     s32 effectObject; /* 0x33C: effect whose first inner vector becomes the origin */
     struct EvtUnit *ext; /* 0x340: the event manager's complete 0x1D0-byte work. */
@@ -239,5 +245,8 @@ typedef char BtlUnitSizeCheck[(sizeof(BtlUnit) == 0x368) ? 1 : -1];
 static inline u64 btlUnitStatusPair(BtlUnit *unit) {
     return ((BtlUnitFlagPair *)&unit->flags)->bits;
 }
+
+/* Returns the signed projection length in f0; the projected point is in vf10. */
+f32 btlProjectOnPlaneVU(f32 *vertexA, f32 *vertexB, f32 *vertexC);
 
 #endif /* BTL_H */

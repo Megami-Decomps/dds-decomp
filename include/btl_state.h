@@ -79,7 +79,14 @@ typedef struct BtlState {
     u32 unk_1FC; /* Bit 0x800 bypasses command-block-reason checks. */
     struct EffWorldNode *cameraObject; /* 0x200: world camera stored at 001DC1EC. */
     s32 listener; /* 0x204: stored world-node address. */
-    u8 pad208[0x1C];
+    s32 currentScene; /* 0x208 */
+    s32 queuedScene; /* 0x20C */
+    s32 scenePhaseFrame; /* 0x210: scene-phase counter, distinct from the +0x1F0 model-update clock. */
+    s32 sceneState; /* 0x214: scheduled end-phase frame. */
+    s16 endDelay; /* 0x218: signed battle-end countdown. */
+    u16 endFlags; /* 0x21A: jingle, script-release and stream-reset latches. */
+    s32 scriptState; /* 0x21C */
+    s32 scriptArg; /* 0x220 */
     BtlTask *tasks; /* 0x224 */
     BtlUnit *units; /* 0x228 */
     u8 pad22C[0x14];
@@ -94,16 +101,19 @@ typedef struct BtlState {
     s32 turnCount; /* 0x250 */
     u8 pad254[4];
     u8 eventReady; /* 0x258 */
-    u8 pad259[3];
+    u8 pad259;
+    u16 unk25A;
     u16 phase; /* 0x25C */
     u8 requestMode; /* 0x25E: script sets this to 4 with requestArgument */
-    u8 pad25F[0x11];
+    u8 pad25F[0xD];
+    u16 unk26C;
+    u16 unk26E;
     s32 encounterPack; /* 0x270: ENC PACK test selection (func_00215FF8) */
     s32 adjustmentGroupIndex; /* 0x274: encounter reward lookup in code_001A1960 */
     s32 adjustmentEntryIndex; /* 0x278: entry within that encounter group */
     s32 battleMode; /* 0x27C */
     s32 requestArgument; /* 0x280: sign-extended script halfword */
-    u8 pad284[4];
+    s32 nextAdjustmentEntryIndex; /* 0x284: entry retained for a follow-up encounter. */
     u16 encounterParamA; /* 0x288: scene record +0x1C, else the test-menu default */
     u16 encounterParamB; /* 0x28A: scene record +0x1E, else the test-menu default */
     u8 pad28C[0x10];
@@ -140,7 +150,9 @@ typedef struct BtlState {
     void (*bossCleanup)(void); /* 0x594 */
     u8 pad598[8];
     s32 (*chooseMotion)(BtlUnit *, s32, s32); /* 0x5A0 */
-    u8 pad5A4[0x14];
+    u8 pad5A4[8];
+    void (*actorParameterDeltaCallback)(BtlUnit *, s32 *); /* 0x5AC */
+    u8 pad5B0[8];
     s32 unk_5B8;
     s32 (*effectParameterCallback)(BtlUnit *, s32); /* 0x5BC: actor record-index override, DDS1 001D645C. */
     u8 pad5C0[4];
@@ -151,13 +163,17 @@ typedef struct BtlState {
     void (*prepareModelUnit)(BtlUnit *); /* 0x5D8 */
     void (*beforeMotionUpdate)(void); /* 0x5DC */
     void (*finishModelUnit)(BtlUnit *); /* 0x5E0 */
-    u8 pad5E4[0xC];
+    u8 pad5E4[8];
+    s32 (*serialOverride)(void); /* 0x5EC: -1 cancels a scripted follow-up encounter. */
     void (*updateCallback)(void); /* 0x5F0 */
-    u8 pad5F4[0x38];
+    u8 pad5F4[0x1C];
+    s32 (*cameraStateChangePredicate)(BtlLinkedCommand *); /* 0x610 */
+    u8 pad614[0x14];
+    s32 (*cameraPoseBlendHook)(BtlLinkedCommand *, s32, s32); /* 0x628 */
     s32 (*actionCameraStepHook)(u8 *); /* 0x62C: nonzero handles the camera step. */
     u8 pad630[0x24];
-    s32 (*hook654)(BtlUnit *);
-    s32 (*hook658)(BtlUnit *);
+    s32 (*allowDefeatCandidate)(BtlUnit *); /* 0x654 */
+    s32 (*unk658)(BtlUnit *);
     u8 pad65C[0x10];
     s32 (*allowPositionEffect)(BtlUnit *); /* 0x66C */
     u8 pad670[0x24];
@@ -199,7 +215,6 @@ typedef char BtlSceneLightDds1Alignment[(__alignof__(BtlState) == 4) ? 1 : -1];
 
 #ifdef VERSION_DDS2
 struct ActionStateLink;
-struct SceneTask;
 struct BtlLinkedCommand;
 
 /* DDS2 0x1A9F30 loads the whole +0x2AC word; 0x1D0020 loads its two
@@ -251,8 +266,8 @@ typedef struct BtlState {
     s32 queuedScene;
     s32 frame;
     s32 sceneState;
-    u16 unk23C;
-    u16 unk23E;
+    s16 endDelay; /* 0x23C: signed battle-end countdown. */
+    u16 endFlags; /* 0x23E: same end-phase latches as DDS1. */
     s32 scriptState; /* 0x240 */
     s32 scriptArg;
     struct ActionStateLink *tasks; /* 0x248: 0x180-byte sequence list, next at +0x178 */
@@ -264,7 +279,8 @@ typedef struct BtlState {
     struct SoundSlotOwner *soundSlotOwners;
     u8 pad264[4];
     u16 unk268;
-    u8 pad26A[4];
+    u8 pad26A[2];
+    u16 unk26C;
     u8 encounterKind; /* 0x26E: scene setup selects 0, 2 or 3. */
     u8 pad26F;
     u16 mode; /* 0x270 */
@@ -288,7 +304,7 @@ typedef struct BtlState {
     s32 adjustmentEntryIndex; /* 0x29C: entry selector within the group */
     s32 battleMode; /* 0x2A0 */
     s32 requestArgument; /* 0x2A4 */
-    u8 pad2A8[4];
+    s32 nextAdjustmentEntryIndex; /* 0x2A8: entry retained for a follow-up encounter. */
     BtlBackgroundId background; /* 0x2AC */
     s32 loadStep;
     u8 specialEncounterBlocked; /* 0x2B4: scene setup latch blocks special encounter rolls. */
@@ -308,15 +324,15 @@ typedef struct BtlState {
     u16 specialEnemyDefeats; /* 0x2FC: defeated enemy kinds 100 through 103 */
     BtlSceneSlot slots[8]; /* 0x2FE */
     u8 pad316[2];
-    struct SceneTask *groupPrimary[20]; /* 0x318 */
-    struct SceneTask *groupSecondary[45]; /* 0x368 */
-    struct SceneTask *groupTertiary[15]; /* 0x41C */
-    struct SceneTask *groupHandles[8]; /* 0x458 */
+    struct ActionStateLink *groupPrimary[20]; /* 0x318 */
+    struct ActionStateLink *groupSecondary[45]; /* 0x368 */
+    struct ActionStateLink *groupTertiary[15]; /* 0x41C */
+    struct ActionStateLink *groupHandles[8]; /* 0x458 */
     u16 groupHandleCount;
     u8 pad47A[2];
     s32 activeGroupCount;
     BtlSceneFadingRecord fading[8]; /* 0x480 */
-    struct SceneTask *currentTask;
+    struct ActionStateLink *currentTask;
     s8 unk4C4;
     u8 pad4C5[3];
     f32 unk4C8;
@@ -338,9 +354,9 @@ typedef struct BtlState {
     void (*bossCleanup)(void); /* 0x5C8 */
     s32 (*selectScriptArg)(void); /* 0x5CC */
     u8 pad5D0[4];
-    s32 (*hook5D4)(BtlUnit *, s32, s32);
-    s32 (*hook5D8)(BtlUnit *);
-    s32 (*hook5DC)(BtlUnit *, s32);
+    s32 (*chooseMotion)(BtlUnit *, s32, s32); /* 0x5D4 */
+    s32 (*unk5D8)(BtlUnit *);
+    s32 (*unk5DC)(BtlUnit *, s32);
     void (*actorParameterDeltaCallback)(BtlUnit *, s32 *); /* 0x5E0 */
     s32 (*sceneCallback)(); /* 0x5E4 */
     u8 pad5E8[8];
@@ -354,9 +370,9 @@ typedef struct BtlState {
     void (*beforeActorModelReady)(BtlUnit *); /* 0x60C */
     u8 pad610[4];
     void (*afterActorModelReady)(BtlUnit *); /* 0x614 */
-    s32 (*hook618)(BtlUnit *);
-    s32 (*hook61C)(BtlUnit *);
-    u8 pad620[4];
+    s32 (*unk618)(BtlUnit *);
+    s32 (*unk61C)(BtlUnit *);
+    s32 (*serialOverride)(void); /* 0x620: -1 cancels a scripted follow-up encounter. */
     void (*afterUnitUpdate)(void); /* 0x624 */
     s32 (*selectScriptState)(void); /* 0x628 */
     void (*completionHook)(); /* 0x62C */
@@ -365,44 +381,45 @@ typedef struct BtlState {
     void (*commandTurnEndHook)(struct ActionStateLink *);
     s32 (*commandHook)(s32, s32);
     u8 pad640[8];
-    s32 (*hook648)(BtlUnit *);
-    s32 (*hook64C)(BtlUnit *);
-    s32 (*hook650)(BtlUnit *);
-    s32 (*hook654)(BtlUnit *);
-    s32 (*hook658)(BtlUnit *);
+    s32 (*unk648)(BtlUnit *);
+    s32 (*unk64C)(BtlUnit *);
+    s32 (*unk650)(BtlUnit *);
+    s32 (*unk654)(BtlUnit *);
+    s32 (*unk658)(BtlUnit *);
     u8 pad65C[4];
-    s32 (*hook660)(BtlUnit *, s32, s32);
+    s32 (*unk660)(BtlUnit *, s32, s32);
     s32 (*actionCameraStepHook)(struct BtlLinkedCommand *); /* 0x664: nonzero handles the camera step. */
-    s32 (*hook668)(BtlUnit *);
-    s32 (*hook66C)(BtlUnit *);
-    s32 (*hook670)(struct BtlLinkedCommand *);
+    s32 (*unk668)(BtlUnit *);
+    s32 (*unk66C)(BtlUnit *);
+    s32 (*unk670)(struct BtlLinkedCommand *);
     u8 pad674[0x10];
-    s32 (*hook684)(s32, s32);
-    s32 (*hook688)(s32, s32);
+    s32 (*unk684)(s32, s32);
+    s32 (*unk688)(s32, s32);
     void (*preActionHook)(struct ActionStateLink *, s32, u64, u64, u64);
     void (*postActionHook)(struct ActionStateLink *, s32, BtlUnit *, u64, u64, s32);
     u8 pad694[8];
-    s32 (*hook69C)(BtlUnit *);
-    s32 (*hook6A0)(BtlUnit *);
+    s32 (*unk69C)(BtlUnit *);
+    s32 (*unk6A0)(BtlUnit *);
     s32 (*actorEligibilityOverride)(BtlUnit *); /* 0x6A4: optional actor eligibility check. */
     void (*linkedActionHook)(struct ActionStateLink *);
-    u8 pad6AC[4];
+    s32 (*cameraStateChangePredicate)(BtlLinkedCommand *); /* 0x6AC */
     s32 (*cameraUpdatePredicate)(BtlLinkedCommand *); /* 0x6B0: gates the active camera handler. */
-    u8 pad6B4[0x1C];
+    s32 (*unitLiftPredicate)(BtlUnit *); /* 0x6B4 */
+    u8 pad6B8[0x18];
     void (*actionResourceNameHook)(struct ActionStateLink *, s32, char *);
     u8 pad6D4[8];
     s32 (*commandRangeOverride)(BtlUnit *, s32); /* 0x6DC: func_001B0B30 calls the range override. */
-    s32 (*hook6E0)(BtlUnit *);
-    s32 (*hook6E4)(BtlUnit *);
-    s32 (*hook6E8)(BtlUnit *);
+    BtlUnit *(*selectSoundEffectTarget)(BtlUnit *); /* 0x6E0: DDS2 00201FD8 consumes the returned actor. */
+    s32 (*unk6E4)(BtlUnit *);
+    s32 (*unk6E8)(BtlUnit *);
     s32 (*scriptReturnHook)(); /* Optional script-return hook; preserve its unspecified retail prototype. */
-    void (*hook6F0)(BtlUnit *, s32, s32, s32, s32, f32);
-    void (*hook6F4)(BtlUnit *, s32, f32);
-    void (*hook6F8)(BtlUnit *, s32, s32);
-    s32 (*hook6FC)(BtlUnit *, s32, s32);
-    void (*unitReturnHook)(struct SceneTask *); /* 0x700: custom return-to-group handling */
+    void (*unk6F0)(BtlUnit *, s32, s32, s32, s32, f32);
+    void (*unk6F4)(BtlUnit *, s32, f32);
+    void (*unk6F8)(BtlUnit *, s32, s32);
+    s32 (*unk6FC)(BtlUnit *, s32, s32);
+    void (*unitReturnHook)(struct ActionStateLink *); /* 0x700: custom return-to-group handling */
     u8 pad704[0xC];
-    s32 (*hook710)(BtlUnit *, s32);
+    s32 (*unk710)(BtlUnit *, s32);
     void (*modelChangeSoundHook)(struct ActionStateLink *, u64, s32); /* 0x714: prerequisite handle, delay */
     struct BattleLinkedEffectState *effect; /* 0x718 */
     u32 tint71C;

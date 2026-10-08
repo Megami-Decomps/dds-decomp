@@ -151,18 +151,6 @@ typedef struct UiObject {
     struct UiObject *next;
 } UiObject;
 
-/* Actor-task record; the separate unit-data list uses UiObject. */
-typedef struct SceneTask {
-    s32 state;
-    u8 pad04[4];
-    u32 flags;
-    u8 pad0C[0xC];
-    UiObject *actor;
-    u8 pad1C[0x134];
-    s32 actions[8]; /* 0x150 */
-    u8 pad170[8];
-    struct SceneTask *next; /* 0x178 */
-} SceneTask;
 
 typedef struct BattleItemDrop {
     u16 id;
@@ -176,7 +164,7 @@ typedef struct BattleController {
     u32 flags;
     u32 flags21C;
     u8 pad_220[0x28];
-    SceneTask *taskHead; /* 0x248 */
+    ActionStateLink *taskHead; /* 0x248 */
     UiObject *actors;
     u8 pad_250[0x1E];
     u8 mode; /* 0x26E: mode 3 scales defeat experience in DDS2. */
@@ -1777,12 +1765,15 @@ s32 btlComputeSkillAdjustedMaxMp(DatPartyRecord *stats) {
     return datComputeSkillBoostedMaxMp(stats);
 }
 
-void btlAdjustUnitHp(void) {
-    datAdjustCurrentHp();
+extern void datAdjustCurrentHp(DatPartyRecord *, s32);
+extern void datAdjustCurrentMp(DatPartyRecord *, s32);
+
+void btlAdjustUnitHp(DatPartyRecord *object, s32 value) {
+    datAdjustCurrentHp(object, value);
 }
 
-void btlAdjustUnitMp(void) {
-    datAdjustCurrentMp();
+void btlAdjustUnitMp(DatPartyRecord *object, s32 value) {
+    datAdjustCurrentMp(object, value);
 }
 
 /* Cache the skill-adjusted maximum and return current HP clamped to it.
@@ -1824,12 +1815,12 @@ void func_001AA868(void) {
 }
 
 /* Set the actor's selected entry index. */
-void btlSetActorSelectedEntryIndex(UiObject *actor, u32 index) {
+void btlSetActorSelectedEntryIndex(BtlUnit *actor, u32 index) {
     actor->selectedEntryIndex = index;
 }
 
 /* No selected entry is represented by -1. */
-void btlClearActorSelectedEntryIndex(UiObject *actor) {
+void btlClearActorSelectedEntryIndex(BtlUnit *actor) {
     actor->selectedEntryIndex = -1;
 }
 
@@ -2563,14 +2554,14 @@ extern u32 effMiscRandMod(void *, u32);
 s32 btlChooseAvailableUnit(void) {
     s32 candidates[16];
     s32 count = 0;
-    SceneTask *node;
-    UiObject *unit;
+    ActionStateLink *node;
+    BtlUnit *unit;
     u32 flags;
     for (node = ((BattleController *)btlGetRuntime())->taskHead; node != 0; node = node->next) {
-        if (!(node->flags & 8)) {
+        if (!(node->pendingFlags & 8)) {
             continue;
         }
-        unit = node->actor;
+        unit = node->unit;
         flags = unit->flags;
         if (flags & 1) {
             if (flags & 0x200) {
@@ -2637,7 +2628,7 @@ s32 btlCountAvailableParticipants(void) {
     return count;
 }
 
-f32 func_001ADBD0(BtlTask *task) {
+f32 func_001ADBD0(ActionStateLink *task) {
     if (task == NULL) {
         return 1.0f;
     }
@@ -2650,14 +2641,16 @@ f32 func_001ADBD0(BtlTask *task) {
     return 1.0f;
 }
 
-void btlClearAllActorEntrySlots(u32 arg0) {
+void btlClearActorEntrySlot(BtlUnit *unit, s32 index);
+
+void btlClearAllActorEntrySlots(BtlUnit *unit) {
     u32 temp_v0;
     u32 temp_v1;
 
     temp_v1 = 0;
     do {
         temp_v0 = temp_v1 + 1;
-        btlClearActorEntrySlot(arg0, temp_v1);
+        btlClearActorEntrySlot(unit, temp_v1);
         temp_v1 = temp_v0;
     } while (temp_v0 < 7);
 }
@@ -2693,7 +2686,7 @@ s32 btlMatchActorEntryCode(UiObject *unit, s32 index) {
     return 0;
 }
 
-void func_001ADD30(UiObject *unit, s32 index, s16 delta) {
+void func_001ADD30(BtlUnit *unit, s32 index, s16 delta) {
     s16 code = unit->entrySlots[index].code;
     code += delta;
 
@@ -2714,7 +2707,7 @@ void btlSetActorEntryCode(UiObject *unit, s32 index, u16 code) {
     unit->entrySlots[index].code = code;
 }
 
-void btlClearActorEntrySlot(UiObject *unit, s32 index) {
+void btlClearActorEntrySlot(BtlUnit *unit, s32 index) {
     unit->entrySlots[index].code = 0;
     unit->entrySlots[index].unk02 = -1;
     unit->entrySlots[index].countdown = -1;
@@ -2788,7 +2781,7 @@ f32 btlGetActorEntryMultiplier(UiObject *unit, u32 index, s8 includeCharge) {
     return factor;
 }
 
-void func_001ADFE0(UiObject *unit, u32 flags, s16 delta) {
+void func_001ADFE0(BtlUnit *unit, u32 flags, s16 delta) {
     if (flags == 0) {
         return;
     }
@@ -3671,7 +3664,7 @@ s32 btlWouldUiValueFallBelowQuarter(UiObject *object, s32 delta) {
     return value * 100 / object->maximumValue < 26;
 }
 
-s32 btlBothSidesActive(UiObject *unit) {
+s32 btlBothSidesActive(BtlUnit *unit) {
     UiObject *actor;
     s32 a;
     s32 b;
@@ -3752,7 +3745,7 @@ s32 btlGetActionRecordLookupValue(s32 arg0) {
 }
 
 s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 arg) {
-    s32 index = unit->unk310;
+    s32 index = unit->selectedEntryIndex;
     u16 kind;
     if (index == -1) {
         return 0;
@@ -5071,24 +5064,24 @@ s32 btlResetSceneSlotFades(void) {
 /* Clear each task's eight opaque words, forward for variant 1 and backward otherwise. */
 void btlClearTaskActorSlots(void) {
     BattleController *work = (BattleController *)btlGetRuntime();
-    SceneTask *node;
-    UiObject *owner;
-    s32 *slot;
-    s32 *reverse;
+    ActionStateLink *node;
+    BtlUnit *owner;
+    BattleActionSlot *slot;
+    BattleActionSlot *reverse;
     s32 i;
     for (node = work->taskHead; node != 0; node = node->next) {
-        owner = node->actor;
+        owner = node->unit;
         if (owner != 0) {
             if (work->variant == 1) {
                 if (owner->flags & 0x200) {
                     for (i = 0, slot = &node->actions[0]; i < 8; i++) {
-                        *slot = 0;
+                        slot->word = 0;
                         slot++;
                     }
                 }
             } else if (owner->flags & 0x400) {
                 for (i = 7, reverse = &node->actions[7]; i >= 0; i--) {
-                    *reverse = 0;
+                    reverse->word = 0;
                     reverse--;
                 }
             }
@@ -5214,11 +5207,11 @@ void func_001B7B20(BtlUnit *unit, s8 side) {
         if (task != NULL) {
             work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
             if (side == 0) {
-                work->activeEntries[index].hpState = 0x10;
-                work->activeEntries[index].hpHighlightLevel = 0x7F;
+                work->activeEntries[index].presentation.hpState = 0x10;
+                work->activeEntries[index].presentation.hpHighlightLevel = 0x7F;
             } else {
-                work->activeEntries[index].mpState = 0x10;
-                work->activeEntries[index].mpHighlightLevel = 0x7F;
+                work->activeEntries[index].presentation.mpState = 0x10;
+                work->activeEntries[index].presentation.mpHighlightLevel = 0x7F;
             }
             btlUpdateActorSlotPresentationState(unit, 0, 2);
         }
@@ -6617,26 +6610,13 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C2450);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001C26E0);
 
-typedef struct BtlSlot {
-    u8 pad0[4];
-    u8 state;
-    u8 pad5[0x28B];
-} BtlSlot;
-
-typedef struct BtlSlotBank {
-    u8 pad0[8];
-    s32 count;
-    u8 padC[0x7C4];
-    BtlSlot slots[1];
-} BtlSlotBank;
-
-void btlSlotBankPromoteStates(BtlSlotBank *bank) {
+void btlSlotBankPromoteStates(BattleActorPanelWork *bank) {
     s32 i;
-    for (i = 0; i < bank->count; i++) {
-        BtlSlot *slot = &bank->slots[i];
-        s32 state = slot->state;
-        if (state == 1 || state == 2) {
-            slot->state = 4;
+    for (i = 0; i < bank->reserveCount; i++) {
+        BattleActorPanelPresentation *slot = &bank->reserveEntries[i].presentation;
+        u8 state = slot->presentationState;
+        if (state - 1U < 2U) {
+            slot->presentationState = 4;
         }
     }
 }

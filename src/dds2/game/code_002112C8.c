@@ -219,7 +219,7 @@ extern SoundTask *sndCreateStationedSeTask(u32);
 extern u32 btlCreateScriptResourceTask(BtlUnit *, u32);
 
 
-extern void fldAppendSceneGroupHandle(s32);
+extern void fldAppendSceneGroupHandle(ActionStateLink *);
 
 
 /* Native 0x10-byte AI selection scratch. Its producer retains the command
@@ -405,8 +405,8 @@ u32 func_002115B0(void) {
 }
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_002115B8);
-
 extern u32 func_002115B8(u32 route);
+
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
 s32 func_00211658(s32 context, s32 species, u32 *selected, u32 requestedRow) {
@@ -2058,7 +2058,7 @@ s32 btlSelectLowestRankTarget(s32 task) {
         for (i = 0; i < count; i++) {
             u16 value = ((BtlUnit *)btlGetIndexListEntry(list, i))->partyRecord.level;
 
-            if (best >= value) {
+            if (value <= best) {
                 picked[bestIndex] = 0;
                 best = value;
                 picked[i] = 1;
@@ -2138,7 +2138,7 @@ u32 btlAppendSelfAfterTargetScan(s32 battle) {
     BtlIndexList *list = btlAllocateIndexList(13);
     func_001AC0F8(battle, list, 1, 1, 0);
     btlGetIndexListCount(list);
-    btlAppendIndexListEntry(((BtlTask *)battle)->targetList, ((BtlTask *)battle)->unit);
+    btlAppendIndexListEntry(((ActionStateLink *)battle)->indexWork.indices, ((ActionStateLink *)battle)->unit);
     btlFreeIndexList(list);
     return 1;
 }
@@ -2195,7 +2195,7 @@ extern u32 btlGetEffectActor(void);
 
 u32 btlAppendEffectActorToCommandIndices(s32 task) {
     u32 actor = btlGetEffectActor();
-    btlAppendIndexListEntry(((BtlTask *)task)->targetList, (void *)actor);
+    btlAppendIndexListEntry(((ActionStateLink *)task)->indexWork.indices, (void *)actor);
     return 1;
 }
 
@@ -2203,7 +2203,7 @@ u32 btlAppendCurrentUnitIdToCommandIndices(s32 task) {
     BtlUnit *unit;
 
     unit = btlGetSelectedOrCurrentActor();
-    btlAppendIndexListEntry(((BtlTask *)task)->targetList, unit);
+    btlAppendIndexListEntry(((ActionStateLink *)task)->indexWork.indices, unit);
     return 1;
 }
 
@@ -2631,7 +2631,7 @@ void btlStartUnitActionIfPairedSelected(void) {
             if (other != 0) {
                 if (other->flags & 0xE0) {
                     handle = btlFindUnitByActor(found);
-                    fldAppendSceneGroupHandle((s32)handle);
+                    fldAppendSceneGroupHandle(handle);
                     handle->indexWork.phase = 0x11;
                     handle->flags |= 8;
                     btlAppendIndexListEntry(handle->indexWork.indices, handle->unit);
@@ -2817,7 +2817,7 @@ void btlStartReadyUnitAction(void) {
         }
         if (unit != 0) {
             handle = btlFindUnitByActor(unit);
-            fldAppendSceneGroupHandle((s32)handle);
+            fldAppendSceneGroupHandle(handle);
             handle->indexWork.phase = 0x11;
             handle->flags |= 8;
             btlAppendIndexListEntry(handle->indexWork.indices, handle->unit);
@@ -2834,6 +2834,7 @@ void btlStartPrevUnitScriptAction(ActionStateLink *handle) {
     BtlSelectCtrl *ctrl = (BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub;
     s32 script;
     BtlRuntimeTask *task;
+    u32 flags;
 
     if (ctrl->prevUnit == 0) {
         return;
@@ -2865,8 +2866,9 @@ void btlStartPrevUnitScriptAction(ActionStateLink *handle) {
         task->startDelay = 0x14;
         btlStartTask(task);
     }
+    flags = handle->flags;
     ctrl->prevUnit = 0;
-    handle->flags &= ~8;
+    handle->flags = flags & ~8;
 }
 
 extern void evtPrepareUnitMotionState(EvtUnit *, s32, s32, s32, s32);
@@ -3160,7 +3162,7 @@ extern u8 *btlCreateCommandSoundTask(u8 *, s32);
 
 extern u8 *btlCreateEffObjB(s32, s32);
 
-extern u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
+extern BtlRuntimeTask *fldCreateSceneGroupAction(ActionStateLink *, u32, s32);
 
 /* Start the selected action's task group; its scene action carries a 22-tick start delay. */
 s32 btlStartActionRecordTasks(ActionStateLink *record) {
@@ -3175,7 +3177,7 @@ s32 btlStartActionRecordTasks(ActionStateLink *record) {
     btlStartTask(btlCreateSecondaryCommandSoundTask());
     btlStartTask(btlCreateCommandSoundTask((u8 *)record, 9));
     btlStartTask(btlCreateEffObjB((s32)record->unit, 0xD8));
-    task = (BtlRuntimeTask *)fldCreateSceneGroupAction((u8 *)record, 0x64, 1);
+    task = fldCreateSceneGroupAction(record, 0x64, 1);
     task->startDelay = 0x16;
     btlStartTask(task);
     return 0x1B;
@@ -3420,7 +3422,7 @@ void btlStartReadyUnitActionCopy(void) {
         }
         if (unit != 0) {
             handle = btlFindUnitByActor(unit);
-            fldAppendSceneGroupHandle((s32)handle);
+            fldAppendSceneGroupHandle(handle);
             handle->indexWork.phase = 0x11;
             handle->flags |= 8;
             btlAppendIndexListEntry(handle->indexWork.indices, handle->unit);
@@ -3442,6 +3444,7 @@ void func_002195E0(ActionStateLink *record) {
     s32 variant;
     BtlRuntimeTask *task;
     BtlRuntimeTask *follow;
+    u32 flags;
 
     if (ctrl->prevUnit == 0) {
         return;
@@ -3499,8 +3502,9 @@ void func_002195E0(ActionStateLink *record) {
     follow->startCondition.value.handle = task->handle;
     follow->ownerId = record->unit->owner;
     btlStartTask(follow);
-    record->flags &= ~8;
+    flags = record->flags;
     ctrl->prevUnit = 0;
+    record->flags = flags & ~8;
 }
 
 INCLUDE_ASM(const s32, "game/code_002112C8", func_00219760);
@@ -5452,7 +5456,7 @@ void btlQueueLoneFreeTeamHandle(void)
             BtlUnit *selectedUnit = firstUnavailable ? second : first;
 
             handle = btlFindUnitByActor(selectedUnit);
-            fldAppendSceneGroupHandle((s32)handle);
+            fldAppendSceneGroupHandle(handle);
             handle->indexWork.phase = 0x11;
             handle->flags |= 8;
             btlAppendIndexListEntry(handle->indexWork.indices, handle->unit);
@@ -5891,7 +5895,7 @@ s32 btlQueueMarkedSpecialActorSceneGroup(void) {
         return -1;
     }
     handle = btlFindUnitByActor(found);
-    fldAppendSceneGroupHandle((s32)handle);
+    fldAppendSceneGroupHandle(handle);
     handle->indexWork.phase = 0x11;
     handle->flags |= 8;
     btlAppendIndexListEntry(handle->indexWork.indices, handle->unit);

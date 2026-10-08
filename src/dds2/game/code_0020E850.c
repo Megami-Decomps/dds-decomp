@@ -180,12 +180,12 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_0020EB40);
 
 /* Accepts only when status bit 5 is set and task bit 6 is clear.
  * For a lone bit-5 status, compare the unsigned AI roll bucket to 70. */
-s32 btlAiCheckStatusRollEligibility(BtlTask *task) {
+s32 btlAiCheckStatusRollEligibility(ActionStateLink *task) {
     s32 result = 0;
     BtlUnit *unit = task->unit;
     u16 flags;
 
-    if (task->flags & 0x40) {
+    if (task->pendingFlags & 0x40) {
         return result;
     }
     flags = unit->partyRecord.status;
@@ -309,20 +309,20 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_0020F048);
 extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
 
 /* Select the owner's effect variant for its current condition and task action. */
-s32 func_0020F200(BtlTask *task) {
+s32 func_0020F200(ActionStateLink *task) {
     BtlUnit *unit = task->unit;
     switch (unit->partyRecord.status & 0x7FFF) {
     case 0x2000:
         return effOffsetIfOwnerFlagClear(unit, 0xD2);
     case 0x200:
-        if (task->result != 1) {
+        if (task->indexWork.phase != 1) {
             return effOffsetIfOwnerFlagClear(unit, 0x7A);
         }
         return effOffsetIfOwnerFlagClear(unit, 0x78);
     case 0x40:
         return effOffsetIfOwnerFlagClear(unit, 6);
     case 0x20:
-        switch (task->result) {
+        switch (task->indexWork.phase) {
         case 13:
             return effOffsetIfOwnerFlagClear(unit, 0x72);
         case 14:
@@ -331,7 +331,7 @@ s32 func_0020F200(BtlTask *task) {
         case 3:
         case 7:
         case 8:
-            if (task->arg == 0xE0) {
+            if (task->indexWork.skillId == 0xE0) {
                 return effOffsetIfOwnerFlagClear(unit, 0x6E);
             }
             break;
@@ -378,10 +378,10 @@ s16 btlGetCommandEffectId(ActionStateLink *link, s32 command) {
     u8 adjustSide;
 
     for (i = 0; i < count; i++, result++) {
-        if (result->unk10) {
+        if (result->inactive) {
             rejected++;
         } else {
-            switch (result->unk08) {
+            switch (result->kind) {
             case 2:
             case 4:
             case 0x10000:
@@ -389,7 +389,7 @@ s16 btlGetCommandEffectId(ActionStateLink *link, s32 command) {
                 rejected++;
                 break;
             default:
-                if (result->unk14) {
+                if (result->reflected) {
                     rejected++;
                 }
                 break;
@@ -956,7 +956,7 @@ s32 btlRandomInclusiveRange(s32 lower, s32 upper) {
 
 s32 btlAllocAndCheck(s32 object) {
     s32 allocation = sdfAllocAndClearQuadwords(0x10);
-    s32 actor = (s32)((BtlTask *)object)->unit;
+    s32 actor = (s32)((ActionStateLink *)object)->unit;
 
     btlActionScratchWork = allocation;
     *(s32 *)allocation = object;
@@ -969,8 +969,8 @@ s32 btlAllocAndCheck(s32 object) {
 }
 
 u32 btlAssignTaskResultAndArgument(s32 task) {
-    ((BtlTask *)task)->result = 0xb;
-    ((BtlTask *)task)->arg = 0xc2;
+    ((ActionStateLink *)task)->indexWork.phase = 0xb;
+    ((ActionStateLink *)task)->indexWork.skillId = 0xc2;
     return 1;
 }
 
@@ -1041,7 +1041,7 @@ extern u32 btlPickWeightedAiSlot();
 extern s32 func_00211EA8();
 
 /* Choose a row and a weighted slot of the unit's species AI table and run that action. */
-s32 btlRunRandomWeightedAiTableAction(BtlTask *task) {
+s32 btlRunRandomWeightedAiTableAction(ActionStateLink *task) {
     s32 *work = (s32 *)sdfAllocAndClearQuadwords(0x10);
     BtlUnit *unit;
     u16 species;

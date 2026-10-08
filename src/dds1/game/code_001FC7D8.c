@@ -307,7 +307,7 @@ s16 btlGetCommandEffectId(BtlTask *task, s32 command) {
     u8 adjustSide;
 
     for (i = 0; i < count; i++, result++) {
-        if (result->skipped || result->kind == 2 || result->kind == 4) {
+        if (result->inactive || result->kind == 2 || result->kind == 4) {
             rejected++;
         }
     }

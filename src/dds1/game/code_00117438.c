@@ -8,8 +8,9 @@
 
 extern u32 scrGetWorkTaskHandle(void);
 extern void scrDestroyWorkTask(void);
+extern void dds3WorkInit(void *header);
 
-extern u32 D_003BAAAC;
+extern void *D_003BAAAC;
 
 extern s32 datEnemyRecords;
 extern s32 datCommandSelectors;

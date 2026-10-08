@@ -27,7 +27,10 @@ typedef struct BtlLinkedCommand {
     BtlUnit *linkedA;         /* 0xF8 */
     BtlUnit *linkedB;         /* 0xFC */
     BtlUnit *selectedUnit;    /* 0x100: actor selected for camera setup. */
-    u8 pad104[0xC];
+    u32 status;              /* 0x104: command status used by callback dispatch. */
+    s32 actionKind;          /* 0x108: previous camera action kind. */
+    u16 stepKind;             /* 0x10C: camera initialization stores 9, 10 or 11. */
+    u8 pad10E[2];
     s32 state;               /* 0x110: aim waits for 0x1E, then resets this */
     s32 actionCode;          /* 0x114 */
     BtlIndexList *targetList; /* 0x118: indexed target list */
@@ -42,36 +45,6 @@ void btlDestroyActionSeq(BtlTask *actor);
 #endif /* VERSION_DDS1 */
 
 #ifdef VERSION_DDS2
-/* Queued action slot: some queries inspect the full word, others its ID. */
-typedef union BattleActionSlot {
-    s32 word;
-    s16 actionId;
-} BattleActionSlot;
-
-
-/* DDS2 0x1DCF58 allocates this 0x180-byte command actor; its two list links
- * are at 0x174/0x178. It is distinct from the 0x368-byte world unit. */
-typedef struct ActionStateLink {
-    u32 state; /* 0x00: scene readiness compares this state as an unsigned word. */
-    u16 actionNumber;
-    u8 pad06[2];
-    u32 pendingFlags; /* 0x08 */
-    u32 flags; /* 0x0C */
-    s32 stateTime;
-    s32 completedTurns;
-    BtlUnit *unit; /* 0x18 */
-    u8 pad1C[4];
-    BattleIndexWork indexWork; /* 0x20..0x8F */
-    u16 aiCounter; /* 0x90: wraps as a halfword, then clamps to 0xFF */
-    u8 pad92[0xBC];
-    s8 lowHpActionHold; /* 0x14E: positive suppresses the low-HP action */
-    u8 pad14F;
-    BattleActionSlot actions[8]; /* 0x150 */
-    s32 lastMode; /* 0x170 */
-    struct ActionStateLink *prev;
-    struct ActionStateLink *next;
-    u8 pad17C[4];
-} ActionStateLink;
 
 ActionStateLink *btlCreateActionSeq(void);
 void btlDestroyActionSeq(ActionStateLink *actor);

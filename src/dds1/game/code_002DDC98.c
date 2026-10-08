@@ -132,28 +132,9 @@ typedef struct VuBlendNode {
     void *sourceB;
 } VuBlendNode;
 
-typedef struct VuTransformWork {
-    u8 pad00[4];
-    u32 param4;            /* 0x04 */
-    u32 param8;            /* 0x08 */
-    u32 paramC;            /* 0x0C */
-    u8 pad10[0xC];
-    f32 scale;             /* 0x1C */
-    u32 unk20;             /* 0x20 */
-    u32 mode;              /* 0x24 */
-    f32 y;                 /* 0x28 */
-    f32 x;                 /* 0x2C */
-    u8 pad30[8];
-    u64 unk38;             /* 0x38 */
-    u64 unk40;             /* 0x40 */
-    u64 unk48;             /* 0x48 */
-    u64 unk50;             /* 0x50 */
-    u64 unk58;             /* 0x58 */
-    u64 unk60;             /* 0x60 */
-} VuTransformWork;
 
 typedef struct {
-    u8 pad00[0x40];
+    f32 matrix[4][4];      /* 0x00 */
     u16 param0;            /* 0x40 */
     s16 param1;            /* 0x42 */
     u32 selectedFlags;     /* 0x44 */
@@ -161,7 +142,7 @@ typedef struct {
     u32 flags;             /* 0x4C */
     s16 nodeCount;         /* 0x50 */
     u8 pad52[2];
-    VuTransformWork *node; /* 0x54 */
+    SdfAssetEntry *node;   /* 0x54 */
     void *reference;       /* 0x58 */
     f32 offsetX;           /* 0x5C */
     f32 offsetY;           /* 0x60 */
@@ -177,8 +158,13 @@ typedef struct {
     u32 *ringStart;        /* 0x88 */
     u32 *cursor;           /* 0x8C */
     u8 *payload;           /* 0x90 */
-    u8 pad94[0x10];
-    void *unkA4;           /* 0xA4 */
+    u8 *strip;             /* 0x94 */
+    u8 *positions;         /* 0x98 */
+    u8 *normals;           /* 0x9C */
+    u8 *coordinates;       /* 0xA0 */
+    u8 *secondCoordinates; /* 0xA4 */
+    u8 *vertexColors;      /* 0xA8 */
+    f32 depth;             /* 0xAC */
 } VuWork;
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
@@ -312,10 +298,10 @@ void sdfVuRotateObjectBasis(void *vectors) {
 
 INCLUDE_ASM(const s32, "game/code_002DDC98", func_002DE010);
 
-void sdfVuTransformWorkAtOffset(void *out, VuTransformWork *work, void *reference, f32 deltaX, f32 deltaY) {
+void sdfVuTransformWorkAtOffset(void *out, SdfAssetEntry *work, void *reference, f32 deltaX, f32 deltaY) {
     func_002DE010(out, D_003BDA28, reference,
-                  work->param8, work->param4,
-                  work->scale,
+                  work->unk08, work->unk04,
+                  work->unk1C,
                   work->x + deltaX,
                   work->y + deltaY);
 }
@@ -396,7 +382,7 @@ void sdfVuEmitTexturedTriangleBatches(work)
                 *cursor++ = 0;
             }
             if (first) {
-                VuTransformWork *node;
+                SdfAssetEntry *node;
                 *cursor++ = 0x6501C000;
                 *cursor++ = 4;
                 *cursor++ = ((chunk * 9 + 5) << 16) | 0x6C00C001;
@@ -579,18 +565,18 @@ void sdfVuEmitSelectedNodePacket(VuWork *work) {
 /* Finish the selected node's transformed rows and emit its textured geometry. */
 void func_002E02D8(u32 workAddress) {
     VuWork *work = (VuWork *)workAddress;
-    VuTransformWork *node;
+    SdfAssetEntry *node;
     u32 mode;
     u32 paramC;
     u32 param8;
 
-    func_002DE868((void *)work->dmaBase, work->param1, work->unkA4,
+    func_002DE868((void *)work->dmaBase, work->param1, work->secondCoordinates,
                   (u8 *)work->node + 0x80);
     sdfVuBlendNodeXY(work->blendList);
     node = work->node;
     mode = node->mode;
-    paramC = node->paramC;
-    param8 = node->param8;
+    paramC = node->unk0C;
+    param8 = node->unk08;
     switch (mode) {
         case 0:
         case 1:
@@ -599,7 +585,7 @@ void func_002E02D8(u32 workAddress) {
                 u128 parameters[3];
 
                 func_002DE010(parameters, D_003BDA28, work->reference,
-                              paramC, node->param4, node->scale,
+                              paramC, node->unk04, node->unk1C,
                               node->x + work->offsetX, node->y + work->offsetY);
                 func_002DE980(work, parameters);
             }

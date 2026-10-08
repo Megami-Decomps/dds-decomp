@@ -246,13 +246,13 @@ void func_001A1960(DatPartyRecord *record, s32 mask) {
 }
 
 /* Set the actor's selected entry index. */
-void btlSetActorSelectedEntryIndex(s32 actor, u32 index) {
-    ((BtlUnit *)actor)->selectedEntryIndex = index;
+void btlSetActorSelectedEntryIndex(BtlUnit *actor, u32 index) {
+    actor->selectedEntryIndex = index;
 }
 
 /* No selected entry is represented by -1. */
-void btlClearActorSelectedEntryIndex(s32 actor) {
-    ((BtlUnit *)actor)->selectedEntryIndex = -1;
+void btlClearActorSelectedEntryIndex(BtlUnit *actor) {
+    actor->selectedEntryIndex = -1;
 }
 
 /* Initialize enemy vitals/stats and pack its nonzero skill IDs into the party record. */
@@ -910,14 +910,16 @@ s32 btlCountAvailableParticipants(void) {
 
 INCLUDE_ASM(const f32, "game/code_001A1960", func_001A47F0);
 
-void btlClearAllActorEntrySlots(u32 arg0) {
+void btlClearActorEntrySlot(BtlUnit *unit, s32 index);
+
+void btlClearAllActorEntrySlots(BtlUnit *unit) {
     u32 temp_v0;
     u32 temp_v1;
 
     temp_v1 = 0;
     do {
         temp_v0 = temp_v1 + 1;
-        btlClearActorEntrySlot(arg0, temp_v1);
+        btlClearActorEntrySlot(unit, temp_v1);
         temp_v1 = temp_v0;
     } while (temp_v0 < 7);
 }
@@ -3362,11 +3364,11 @@ void func_001ACF10(BtlUnit *unit, s8 side) {
         if (task != NULL) {
             work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
             if (side == 0) {
-                work->activeEntries[index].hpState = 0x10;
-                work->activeEntries[index].hpHighlightLevel = 0x7F;
+                work->activeEntries[index].presentation.hpState = 0x10;
+                work->activeEntries[index].presentation.hpHighlightLevel = 0x7F;
             } else {
-                work->activeEntries[index].mpState = 0x10;
-                work->activeEntries[index].mpHighlightLevel = 0x7F;
+                work->activeEntries[index].presentation.mpState = 0x10;
+                work->activeEntries[index].presentation.mpHighlightLevel = 0x7F;
             }
             btlUpdateActorSlotPresentationState(unit, 0, 2);
         }
@@ -4845,26 +4847,13 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001B7238);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001B74C8);
 
-typedef struct BtlSlot {
-    u8 pad0[4];
-    u8 state;
-    u8 pad5[0x28B];
-} BtlSlot;
-
-typedef struct BtlSlotBank {
-    u8 pad0[8];
-    s32 count;
-    u8 padC[0x7C4];
-    BtlSlot slots[1];
-} BtlSlotBank;
-
-void btlSlotBankPromoteStates(BtlSlotBank *bank) {
+void btlSlotBankPromoteStates(BattleActorPanelWork *bank) {
     s32 i;
-    for (i = 0; i < bank->count; i++) {
-        BtlSlot *slot = &bank->slots[i];
-        s32 state = slot->state;
-        if (state == 1 || state == 2) {
-            slot->state = 4;
+    for (i = 0; i < bank->reserveCount; i++) {
+        BattleActorPanelPresentation *slot = &bank->reserveEntries[i].presentation;
+        u8 state = slot->presentationState;
+        if (state - 1U < 2U) {
+            slot->presentationState = 4;
         }
     }
 }
@@ -4912,8 +4901,8 @@ void func_001B83D8(BtlTask *task, s8 mode, s8 value) {
             panel = (BattleActorPanelWork *)kwlnTaskGetUserValue(panelTask);
             func_001B8838((u8 *)panel, mode);
             btlUpdateActorSlotStates((u8 *)panel, 0);
-            panel->activeEntries[slot].presentationState = 2;
-            panel->activeEntries[slot].presentationValue = value;
+            panel->activeEntries[slot].presentation.presentationState = 2;
+            panel->activeEntries[slot].presentation.presentationValue = value;
             if (mode == 0) {
                 func_001B8BB0(task, panel, 0);
             } else if (mode == 2) {
@@ -5047,21 +5036,21 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2D00);
 void func_001B9318(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 reserve) {
     s32 i;
 
-    switch (reserve == 0 ? work->activeEntries[slot].presentationState :
-                           work->reserveEntries[slot].presentationState) {
+    switch (reserve == 0 ? work->activeEntries[slot].presentation.presentationState :
+                           work->reserveEntries[slot].presentation.presentationState) {
     case 1:
         for (i = 0; i < 8; i++) {
             if (reserve == 0) {
-                work->activeEntries[slot].highlightPhase[i] =
-                    (work->activeEntries[slot].highlightPhase[i] + 8) % 360;
-                work->activeEntries[slot].highlightLevel[i] =
-                    (sdfSinPoly(((work->activeEntries[slot].highlightPhase[i] + 90) % 360) /
+                work->activeEntries[slot].presentation.highlightPhase[i] =
+                    (work->activeEntries[slot].presentation.highlightPhase[i] + 8) % 360;
+                work->activeEntries[slot].presentation.highlightLevel[i] =
+                    (sdfSinPoly(((work->activeEntries[slot].presentation.highlightPhase[i] + 90) % 360) /
                                180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 16.0f;
             } else {
-                work->reserveEntries[slot].highlightPhase[i] =
-                    (work->reserveEntries[slot].highlightPhase[i] + 8) % 360;
-                work->reserveEntries[slot].highlightLevel[i] =
-                    (sdfSinPoly(((work->reserveEntries[slot].highlightPhase[i] + 90) % 360) /
+                work->reserveEntries[slot].presentation.highlightPhase[i] =
+                    (work->reserveEntries[slot].presentation.highlightPhase[i] + 8) % 360;
+                work->reserveEntries[slot].presentation.highlightLevel[i] =
+                    (sdfSinPoly(((work->reserveEntries[slot].presentation.highlightPhase[i] + 90) % 360) /
                                180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 16.0f;
             }
         }
@@ -5071,13 +5060,13 @@ void func_001B9318(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 reser
     case 3:
         for (i = 0; i < 8; i++) {
             if (reserve == 0) {
-                if (work->activeEntries[slot].highlightLevel[i] != 0) {
-                    work->activeEntries[slot].highlightLevel[i]--;
+                if (work->activeEntries[slot].presentation.highlightLevel[i] != 0) {
+                    work->activeEntries[slot].presentation.highlightLevel[i]--;
                 }
-            } else if (work->reserveEntries[slot].highlightLevel[i] >= 32) {
-                work->reserveEntries[slot].highlightLevel[i] -= 32;
+            } else if (work->reserveEntries[slot].presentation.highlightLevel[i] >= 32) {
+                work->reserveEntries[slot].presentation.highlightLevel[i] -= 32;
             } else {
-                work->reserveEntries[slot].highlightLevel[i] = 0;
+                work->reserveEntries[slot].presentation.highlightLevel[i] = 0;
             }
         }
         break;
@@ -5085,15 +5074,15 @@ void func_001B9318(BtlUnit *unit, BattleActorPanelWork *work, s32 slot, s8 reser
     case 4:
         for (i = 0; i < 8; i++) {
             if (reserve == 0) {
-                if (work->activeEntries[slot].highlightLevel[i] >= 32) {
-                    work->activeEntries[slot].highlightLevel[i] -= 32;
+                if (work->activeEntries[slot].presentation.highlightLevel[i] >= 32) {
+                    work->activeEntries[slot].presentation.highlightLevel[i] -= 32;
                 } else {
-                    work->activeEntries[slot].highlightLevel[i] = 0;
+                    work->activeEntries[slot].presentation.highlightLevel[i] = 0;
                 }
-            } else if (work->reserveEntries[slot].highlightLevel[i] >= 32) {
-                work->reserveEntries[slot].highlightLevel[i] -= 32;
+            } else if (work->reserveEntries[slot].presentation.highlightLevel[i] >= 32) {
+                work->reserveEntries[slot].presentation.highlightLevel[i] -= 32;
             } else {
-                work->reserveEntries[slot].highlightLevel[i] = 0;
+                work->reserveEntries[slot].presentation.highlightLevel[i] = 0;
             }
         }
         break;
@@ -5631,16 +5620,16 @@ s32 func_001BF0F8(KwlnTask *task) {
             object->state = 3;
             ((SceneAiWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_003BB3A0)))->state = 3;
             slot = object->commandData->linkedUnit->lookupId;
-            panel->activeEntries[slot].unk100 = 0;
-            panel->activeEntries[slot].pendingSceneState = 5;
-            panel->activeEntries[slot].hpState = 3;
-            panel->activeEntries[slot].hpLevel = datGameState->party[panel->partyRecordIndex].hp;
-            panel->activeEntries[slot].hpTarget = panel->activeEntries[slot].hpLevel;
-            panel->activeEntries[slot].mpState = 3;
-            panel->activeEntries[slot].mpLevel = datGameState->party[panel->partyRecordIndex].mp;
-            panel->activeEntries[slot].mpTarget = panel->activeEntries[slot].mpLevel;
-            panel->activeEntries[slot].presentationState = 2;
-            panel->activeEntries[slot].presentationValue = 0;
+            panel->activeEntries[slot].presentation.unkF0 = 0;
+            panel->activeEntries[slot].presentation.pendingSceneState = 5;
+            panel->activeEntries[slot].presentation.hpState = 3;
+            panel->activeEntries[slot].presentation.hpLevel = datGameState->party[panel->partyRecordIndex].hp;
+            panel->activeEntries[slot].presentation.hpTarget = panel->activeEntries[slot].presentation.hpLevel;
+            panel->activeEntries[slot].presentation.mpState = 3;
+            panel->activeEntries[slot].presentation.mpLevel = datGameState->party[panel->partyRecordIndex].mp;
+            panel->activeEntries[slot].presentation.mpTarget = panel->activeEntries[slot].presentation.mpLevel;
+            panel->activeEntries[slot].presentation.presentationState = 2;
+            panel->activeEntries[slot].presentation.presentationValue = 0;
         }
         break;
     }

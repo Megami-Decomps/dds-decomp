@@ -7,10 +7,11 @@
 #include "dat_state.h"
 #include "dat_command.h"
 
-extern u32 D_00435E80;
+extern void *D_00435E80;
 
 
 extern u32 scrGetWorkTaskHandle(void);
+extern void dds3WorkInit(void *header);
 extern s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
 extern char sdfRuntimeTaskName[]; /* "GBWK" */
 extern void kwlnTaskDestroyWithHierarchyByName(char *name, s32 flag);

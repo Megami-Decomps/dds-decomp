@@ -1,6 +1,7 @@
 #include "common.h"
 #include "btl_state.h"
 #include "btl_command.h"
+#include "btl_action.h"
 #include "pcp_vu0.h"
 #include "evt_unit.h"
 #include "mdl.h"
@@ -59,7 +60,7 @@ extern s32 btlCreateCommandSoundTask();
 
 extern s32 btlCreateEffObjB();
 
-extern u8 *fldCreateSceneGroupAction(BtlTask *, u32, s32);
+extern BtlRuntimeTask *fldCreateSceneGroupAction(ActionStateLink *, u32, s32);
 
 extern char D_00436CF8[];
 
@@ -261,20 +262,20 @@ void func_00227820(void) {
 
 INCLUDE_ASM(const s32, "game/code_00227288", func_002279F0);
 
-s32 btlGetEffectTaskActorMatchCode(BtlTask *task) {
+s32 btlGetEffectTaskActorMatchCode(ActionStateLink *task) {
     BattleLinkedEffectState *effect;
-    if ((task->flags & 8) == 0) {
+    if ((task->pendingFlags & 8) == 0) {
         return -1;
     }
     effect = ((BtlState *)btlGetRuntime())->effect;
     return effect->actor == (u32)task->unit ? 12 : -1;
 }
 
-s32 btlEffectTaskStartFinale(BtlTask *task) {
+s32 btlEffectTaskStartFinale(ActionStateLink *task) {
     BattleLinkedEffectState *effect;
-    u8 *group;
+    BtlRuntimeTask *group;
 
-    if ((task->flags & 8) == 0) {
+    if ((task->pendingFlags & 8) == 0) {
         return -1;
     }
     effect = ((BtlState *)btlGetRuntime())->effect;
@@ -286,7 +287,7 @@ s32 btlEffectTaskStartFinale(BtlTask *task) {
     btlStartTask(btlCreateCommandSoundTask(task, 9));
     btlStartTask(btlCreateEffObjB(task->unit, 0xB4));
     group = fldCreateSceneGroupAction(task, 0x64, 1);
-    *(s32 *)(group + 0x28) = 0x16;
+    group->startDelay = 0x16;
     btlStartTask(group);
     effect->phase = 1;
     return (task->unit->partyRecord.status & 0x480) ? 0x19 : 0x1B;

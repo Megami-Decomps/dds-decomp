@@ -5,6 +5,7 @@
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
+#include "file.h"
 #include "sdf.h"
 #include "btl_action.h"
 #include "dds3obj.h"
@@ -132,9 +133,9 @@ typedef struct FxTask {
 } FxTask;
 
 typedef struct SoundLink {
-    u32 owner;
+    BtlUnit *owner;
     struct SoundVoice *effectHandle;
-    u32 *effect;
+    SoundResourceNode *effect;
     u16 flags;
 } SoundLink;
 
@@ -216,12 +217,6 @@ typedef struct BtlActiveSlot {
     void *unit;         /* 0x18 */
 } BtlActiveSlot;
 
-typedef struct BtlDeferredStats {
-    BtlUnit *actor;    /* 0x00 */
-    u8 pad04[0x1C];
-    s32 primary;       /* 0x20 */
-    s32 secondary;     /* 0x24 */
-} BtlDeferredStats;
 
 extern struct BtlRuntimeTask *btlCreateHookedUnitSoundTask();
 
@@ -237,7 +232,7 @@ extern s32 mdlFlagTest(u32);
 
 extern s32 func_0022F180(void);
 
-extern u8 *fldCreateSceneGroupAction(u8 *, u32, s32);
+extern BtlRuntimeTask *fldCreateSceneGroupAction(ActionStateLink *, u32, s32);
 
 extern s32 btlGetRuntime(void);
 
@@ -487,7 +482,6 @@ extern void fldApplyLightSetCurrent(void);
 
 extern f32 *D_0037F770[];
 
-extern s32 sndGetEffectNodeParameter(s32, u16);
 
 struct FileQueue;
 extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *);
@@ -516,6 +510,7 @@ extern void evtPrepareUnitMotionState(EvtUnit *, s32, s32, s32, s32);
 extern void evtStoreUnitMotionShortParameters(EvtUnit *, s32, s32);
 extern void sdfMotionSampleAtFrame(Motion *, f32);
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
+extern void btlClearActorSelectedEntryIndex(BtlUnit *);
 extern void btlClearAllActorEntrySlots(BtlUnit *);
 extern void btlReleaseUnitResources(BtlUnit *);
 extern void btlInitUnitFxDefaults(BtlUnit *);
@@ -523,6 +518,7 @@ extern void btlClearSceneTaskActiveFlag(ActionStateLink *);
 
 extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
 extern void func_001AA868(void *, s32);
+extern void func_001ADFE0(BtlUnit *, u32, s16);
 extern s32 btlCountTasksByKind(u16 kind);
 extern void btlRepositionPartyAroundBattleCenter(void);
 extern s32 func_001AC648(void);
@@ -535,7 +531,7 @@ extern void func_002A27A8(s32, s32, u8);
 extern void mdlBroadcastMasked(MdlCtx *, u32);
 extern s32 fldReleaseIdleSceneActorResources(BtlUnit *);
 extern void func_001AB160(BtlUnit *);
-extern void btlRemoveTaskFromSceneGroup(BtlUnit *);
+extern void btlRemoveTaskFromSceneGroup(ActionStateLink *);
 extern s32 func_001DACF8();
 
 extern void func_001DB048(void);
@@ -828,7 +824,7 @@ s32 btlActionEntryIsEmpty(s32 index, BtlOperandGroup *slot, BtlOperandEntry *ent
         }
     }
     if (slot != 0) {
-        kind = slot->unk08;
+        kind = slot->kind;
         if (kind == 2 || kind == 0x10000) {
             return 0;
         }
@@ -839,14 +835,14 @@ s32 btlActionEntryIsEmpty(s32 index, BtlOperandGroup *slot, BtlOperandEntry *ent
     if ((entry->flags & 2) != 0) {
         return 0;
     }
-    if (entry->unk00 == 0) {
-        if (entry->unk04 == 0) {
-            if (entry->unk08 == 0) {
-                if (entry->unk0C == 0) {
-                    if (entry->unk1C == 0) {
-                        if (entry->unk20 == 0) {
-                            if (entry->unk10 == 0) {
-                                if (entry->unk18 == 0) {
+    if (entry->hpDelta == 0) {
+        if (entry->mpDelta == 0) {
+            if (entry->addedStatus == 0) {
+                if (entry->removedStatus == 0) {
+                    if (entry->hpRecovery == 0) {
+                        if (entry->mpRecovery == 0) {
+                            if (entry->entryChangeMask == 0) {
+                                if (entry->entrySelection == 0) {
                                     return 1;
                                 }
                             }
@@ -864,15 +860,13 @@ s32 func_001DDAD0(s32 unused, BattleIndexWork *state) {
     u32 groupIndex;
     u32 entryIndex;
     u32 groupCount = btlGetIndexListCount(state->indices);
-    BtlOperandGroup *groups = state->groups;
+    BtlOperandGroup *group = state->groups;
 
-    for (groupIndex = 0; groupIndex < groupCount; groupIndex++) {
-        /* Entries begin eight bytes after the native group payload cursor. */
-        u8 *group = (u8 *)&groups[groupIndex] + 0x14;
-        u32 entryCount = group[-0x14];
+    for (groupIndex = 0; groupIndex < groupCount; groupIndex++, group++) {
+        u32 entryCount = group->count;
 
         for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
-            if (((BtlOperandEntry *)(group + 8))[entryIndex].flags & 1) {
+            if (group->entries[entryIndex].flags & 1) {
                 return 1;
             }
         }
@@ -890,8 +884,8 @@ void btlResetIndexWork(BattleIndexWork *work) {
     work->phase = -1;
     work->skillId = -1;
     work->reference = -1;
-    work->unk0C = 0;
-    work->unk10 = 0;
+    work->companionA = 0;
+    work->companionB = 0;
     work->linkedUnit = 0;
     work->unk18 = -1;
     work->stageValue = 0;
@@ -910,9 +904,9 @@ void btlResetIndexWork(BattleIndexWork *work) {
     work->unk60 = 0;
     for (i = 0; i < 13; i++) {
         work->groups[i].count = 0;
-        work->groups[i].unk08 = 0;
-        work->groups[i].unk14 = 0;
-        work->groups[i].unk10 = 0;
+        work->groups[i].kind = 0;
+        work->groups[i].reflected = 0;
+        work->groups[i].inactive = 0;
     }
     btlClearIndexList(work->indices);
 }
@@ -929,7 +923,7 @@ void btlInitBattleIndexWork(BattleIndexWork *work) {
     handle = sdfAllocGeneralBlock(0x48EC);
     work->groups = (BtlOperandGroup *)sdfResourceRetainAddress(handle);
     work->allocationHandle = handle;
-    work->unk48 = 0;
+    work->ownerId = 0;
     btlResetIndexWork(work);
 }
 
@@ -945,17 +939,17 @@ void btlReleaseObjectBuffers(BattleIndexWork *object) {
     }
 }
 
+extern void btlAdjustUnitHp(DatPartyRecord *, s32);
+extern void btlAdjustUnitMp(DatPartyRecord *, s32);
+
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001DF860);
 
-extern u32 func_001DF860(s32);
+extern u32 func_001DF860(BtlOperandTaskArgs *);
 
-typedef struct TaskBlock {
-    u32 word[11];
-} TaskBlock;
 
-BtlRuntimeTask *btlCreateActorParameterDeltaTask(BtlUnit *unit, TaskBlock *block) {
+BtlRuntimeTask *btlCreateActorParameterDeltaTask(BtlUnit *unit, BtlOperandEntry *block) {
     BtlRuntimeTask *task = btlAllocTask(0x30);
-    SoundTaskArgs *args;
+    BtlOperandTaskArgs *args;
     task->endCondition.kind = 0;
     task->startCondition.kind = 1;
     task->taskId = 0x49;
@@ -963,37 +957,37 @@ BtlRuntimeTask *btlCreateActorParameterDeltaTask(BtlUnit *unit, TaskBlock *block
     task->callback = func_001DF860;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->value = (s32)unit;
-    *(TaskBlock *)&args->option = *block;
+    args->unit = unit;
+    memcpy(&args->operand, block, sizeof(*block));
     return task;
 }
 
-u32 btlApplyDeferredActorStats(u8 *arguments) {
-    s32 context = btlGetRuntime();
-    u8 *actor = *(u8 **)arguments;
+u32 btlApplyDeferredActorStats(BtlOperandTaskArgs *arguments) {
+    BtlState *context = (BtlState *)btlGetRuntime();
+    BtlUnit *actor = arguments->unit;
     s32 primary;
-    u8 *resource;
-    if ((((BtlState *)context)->battleFlags & 0x80) == 0) {
+    DatPartyRecord *resource;
+    if ((context->battleFlags & 0x80) == 0) {
         return 1;
     }
-    primary = ((BtlDeferredStats *)arguments)->primary;
-    if (primary == 0 && ((BtlDeferredStats *)arguments)->secondary == 0) {
+    primary = arguments->operand.hpRecovery;
+    if (primary == 0 && arguments->operand.mpRecovery == 0) {
         return 1;
     }
-    if (((BtlUnit *)actor)->flags & 0x60) {
+    if (actor->flags & 0x60) {
         return 1;
     }
-    resource = actor + 0x120;
+    resource = &actor->partyRecord;
     btlAdjustUnitHp(resource, primary);
-    btlAdjustUnitMp(resource, ((BtlDeferredStats *)arguments)->secondary);
+    btlAdjustUnitMp(resource, arguments->operand.mpRecovery);
     btlRefreshUnitMotionSelection(actor);
     btlIsUnitDefeatTriggeredByValueDelta(actor, 0);
     return 1;
 }
 
-BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *unit, TaskBlock *block) {
+BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *unit, BtlOperandEntry *block) {
     BtlRuntimeTask *task = btlAllocTask(0x30);
-    SoundTaskArgs *args;
+    BtlOperandTaskArgs *args;
     task->endCondition.kind = 0;
     task->startCondition.kind = 1;
     task->taskId = 0x4A;
@@ -1001,8 +995,8 @@ BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *unit, TaskBlock *block)
     task->callback = btlApplyDeferredActorStats;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->value = (s32)unit;
-    *(TaskBlock *)&args->option = *block;
+    args->unit = unit;
+    memcpy(&args->operand, block, sizeof(*block));
     return task;
 }
 
@@ -1047,7 +1041,7 @@ s32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
         return 1;
     }
     if (datCommandRecords[args->category].flags & 8) {
-        btlAdjustUnitHp(&unit->partyRecord.flags, -0x7FFF);
+        btlAdjustUnitHp(&unit->partyRecord, -0x7FFF);
         func_001AA850(&unit->partyRecord.flags, 0x4000);
         unit->flags |= 0x20;
     }
@@ -1056,10 +1050,10 @@ s32 btlApplyCategoryStatDamage(BtlStatArgs *args) {
     }
     switch (datCommandRecords[args->category].costMode) {
     case 1:
-        btlAdjustUnitHp(&unit->partyRecord.flags, -args->amount);
+        btlAdjustUnitHp(&unit->partyRecord, -args->amount);
         return 1;
     case 2:
-        btlAdjustUnitMp(&unit->partyRecord.flags, -args->amount);
+        btlAdjustUnitMp(&unit->partyRecord, -args->amount);
         return 1;
     default:
         return 1;
@@ -1082,17 +1076,14 @@ BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *unit, u32 target, u32 o
     return task;
 }
 
-s32 func_001DFFE0(s32 taskArgs) {
-    s32 args;
-
-    args = taskArgs;
-    func_001ADFE0(*(s32 *)args, *(s32 *)(args + 0x14), *(s16 *)(args + 0x18));
+s32 func_001DFFE0(BtlOperandTaskArgs *args) {
+    func_001ADFE0(args->unit, args->operand.entryChangeMask, args->operand.entryChange);
     return 1;
 }
 
-BtlRuntimeTask *btlCreateMaskedActorEntryUpdateTask(BtlUnit *unit, TaskBlock *block) {
+BtlRuntimeTask *btlCreateMaskedActorEntryUpdateTask(BtlUnit *unit, BtlOperandEntry *block) {
     BtlRuntimeTask *task = btlAllocTask(0x30);
-    SoundTaskArgs *args;
+    BtlOperandTaskArgs *args;
     task->endCondition.kind = 0;
     task->startCondition.kind = 1;
     task->taskId = 0x4D;
@@ -1100,22 +1091,22 @@ BtlRuntimeTask *btlCreateMaskedActorEntryUpdateTask(BtlUnit *unit, TaskBlock *bl
     task->callback = func_001DFFE0;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->value = (s32)unit;
-    *(TaskBlock *)&args->option = *block;
+    args->unit = unit;
+    memcpy(&args->operand, block, sizeof(*block));
     return task;
 }
 
-u32 btlApplyQueuedActorEntrySelection(u32 *taskArgs) {
-    if (0 < (s32)taskArgs[7]) {
-        btlSetActorSelectedEntryIndex(*taskArgs, taskArgs[7]);
-        btlRefreshUnitMotionSelection(*taskArgs);
+u32 btlApplyQueuedActorEntrySelection(BtlOperandTaskArgs *taskArgs) {
+    if (0 < taskArgs->operand.entrySelection) {
+        btlSetActorSelectedEntryIndex(taskArgs->unit, taskArgs->operand.entrySelection);
+        btlRefreshUnitMotionSelection(taskArgs->unit);
     }
     return 1;
 }
 
-BtlRuntimeTask *btlCreateQueuedActorEntrySelectionTask(BtlUnit *unit, TaskBlock *block) {
+BtlRuntimeTask *btlCreateQueuedActorEntrySelectionTask(BtlUnit *unit, BtlOperandEntry *block) {
     BtlRuntimeTask *task = btlAllocTask(0x30);
-    SoundTaskArgs *args;
+    BtlOperandTaskArgs *args;
     task->endCondition.kind = 0;
     task->startCondition.kind = 1;
     task->taskId = 0x4E;
@@ -1123,12 +1114,12 @@ BtlRuntimeTask *btlCreateQueuedActorEntrySelectionTask(BtlUnit *unit, TaskBlock 
     task->callback = btlApplyQueuedActorEntrySelection;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->value = (s32)unit;
-    *(TaskBlock *)&args->option = *block;
+    args->unit = unit;
+    memcpy(&args->operand, block, sizeof(*block));
     return task;
 }
 
-u32 btlClearQueuedActorEntrySelection(u32 *taskArgs) {
+u32 btlClearQueuedActorEntrySelection(BtlUnit **taskArgs) {
     btlClearActorSelectedEntryIndex(*taskArgs);
     btlRefreshUnitMotionSelection(*taskArgs);
     return 1;
@@ -1136,7 +1127,7 @@ u32 btlClearQueuedActorEntrySelection(u32 *taskArgs) {
 
 BtlRuntimeTask *func_001E0238(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlUnit **args;
     task->startCondition.kind = 1;
     task->endCondition.kind = 0;
     task->callback = btlClearQueuedActorEntrySelection;
@@ -1144,7 +1135,7 @@ BtlRuntimeTask *func_001E0238(BtlUnit *unit) {
     task->ownerId = unit->owner;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = unit;
+    *args = unit;
     return task;
 }
 
@@ -1953,7 +1944,7 @@ s32 btlCheckModelAssetByMode(u8 *object, u32 effect, u32 model) {
 }
 
 void btlFlagUnitDefeatCandidate(BtlUnit *unit) {
-    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->hook69C;
+    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->unk69C;
     if (hook == 0 || hook(unit) != 0) {
         unit->flags |= 4;
         if (!(unit->flags & 0x8000000)) {
@@ -1966,7 +1957,7 @@ void btlFlagUnitDefeatCandidate(BtlUnit *unit) {
 }
 
 void btlClearUnitDefeatCandidate(BtlUnit *unit) {
-    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->hook6A0;
+    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->unk6A0;
     if (hook == 0 || hook(unit) != 0) {
         unit->flags &= ~4;
         unit->flags &= ~8;
@@ -2044,7 +2035,7 @@ void btlApplyUnitMotionSelection(u8 *object, u32 index, s32 mode, f32 rate) {
     if (table->nodes[index].rateKind == 2) {
         unit->updateFlags |= 6;
     }
-    chooseMotion = work->hook5D4;
+    chooseMotion = work->chooseMotion;
     if (chooseMotion != 0) {
         selected = chooseMotion(unit, index, 0);
         if (selected == -1) {
@@ -2100,7 +2091,7 @@ void btlApplyUnitMotionSelection(u8 *object, u32 index, s32 mode, f32 rate) {
             break;
         }
     }
-    keepRange = work->hook5DC;
+    keepRange = work->unk5DC;
     if (keepRange != 0 && keepRange(unit, index) != 0) {
         start = unit->unkF8;
         end = unit->unkFA;
@@ -2109,7 +2100,7 @@ void btlApplyUnitMotionSelection(u8 *object, u32 index, s32 mode, f32 rate) {
         end = 8;
         mode &= ~0x100;
     }
-    chooseMode = work->hook6FC;
+    chooseMode = work->unk6FC;
     if (chooseMode != 0) {
         mode = chooseMode(unit, index, mode);
     }
@@ -2118,8 +2109,8 @@ void btlApplyUnitMotionSelection(u8 *object, u32 index, s32 mode, f32 rate) {
     unit->effectState = mode;
     rate = rate * (30.0f / work->unk4C4);
     rate *= work->unk4C8;
-    if (work->hook6F0 != 0) {
-        work->hook6F0(unit, index, start, end, mode, rate);
+    if (work->unk6F0 != 0) {
+        work->unk6F0(unit, index, start, end, mode, rate);
     } else {
         evtPrepareUnitMotionState(unit->ext, index, start, end, mode);
         model = unit->ext->owner;
@@ -2135,8 +2126,8 @@ void btlApplyUnitMotionSelection(u8 *object, u32 index, s32 mode, f32 rate) {
     if (mode != 0 && mode != 3) {
         return;
     }
-    if (work->hook6F8 != 0) {
-        work->hook6F8(unit, 0, (s16)frameCount);
+    if (work->unk6F8 != 0) {
+        work->unk6F8(unit, 0, (s16)frameCount);
     } else {
         evtStoreUnitMotionShortParameters(unit->ext, 0, (s16)frameCount);
     }
@@ -2177,7 +2168,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         ((unit->flags & 0x200) || (entryFlags & 0x200))) {
         index = 10;
     }
-    if (unit->unk310 > 0 &&
+    if (unit->selectedEntryIndex > 0 &&
         ((unit->flags & 0x200) || (entryFlags & 0x200))) {
         index = 9;
     }
@@ -2196,7 +2187,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         unit->flags &= 0x7FFFFFFF;
         unit->flags &= ~0x2000;
     }
-    chooseStatus = work->hook5D8;
+    chooseStatus = work->unk5D8;
     if (chooseStatus != 0) {
         selected = chooseStatus(unit);
         if (selected >= 0) {
@@ -2214,7 +2205,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     resource = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(
         unit->resourceKind, unit->resourceIndex);
     rate = resource->nodes[index].scale;
-    chooseMotion = work->hook5D4;
+    chooseMotion = work->chooseMotion;
     if (chooseMotion != 0) {
         selected = chooseMotion(unit, index, 1);
         if (selected == -1) {
@@ -2228,7 +2219,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     unit->effectScale = rate;
     speed = rate * (30.0f / work->unk4C4);
     speed *= work->unk4C8;
-    setMotion = work->hook6F4;
+    setMotion = work->unk6F4;
     unit->effectIndex = index;
     if (setMotion != 0) {
         setMotion(unit, index, speed);
@@ -2236,7 +2227,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         evtUnitSetStoredParameter(unit->ext, index);
         evtSetTransitionMotionScale(unit->ext, speed);
     }
-    chooseMode = work->hook6FC;
+    chooseMode = work->unk6FC;
     mode = index != 11 ? 1 : 2;
     if (chooseMode != 0) {
         mode = chooseMode(unit, index, mode);
@@ -2255,7 +2246,7 @@ s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *unit) {
         return 0;
     }
     work = (BtlState *)btlGetRuntime();
-    if (work->hook5D8 != 0 && work->hook5D8(0) == unit->unkEC) {
+    if (work->unk5D8 != 0 && work->unk5D8(0) == unit->unkEC) {
         return 1;
     }
     switch (unit->unkEC) {
@@ -2874,11 +2865,11 @@ void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit) {
     if (unit->flags & 0x2000) {
         return;
     }
-    if (work->hook6F0 != 0) {
+    if (work->unk6F0 != 0) {
         if (unit->effectIndex != 0xB) {
-            work->hook6F0(unit, unit->effectIndex, 0, 0, 1, 1.0f);
+            work->unk6F0(unit, unit->effectIndex, 0, 0, 1, 1.0f);
         } else {
-            work->hook6F0(unit, unit->effectIndex, 0, 0, 2, 1.0f);
+            work->unk6F0(unit, unit->effectIndex, 0, 0, 2, 1.0f);
         }
     } else {
         if (unit->effectIndex != 0xB) {
@@ -4327,8 +4318,8 @@ void func_001E7648(void) {
         }
         if (unit->flags & 0x80000000) {
             parameter = 1;
-            if (runtime->hook5D4 != NULL) {
-                parameter = runtime->hook5D4(unit, 1, 0);
+            if (runtime->chooseMotion != NULL) {
+                parameter = runtime->chooseMotion(unit, 1, 0);
             }
             if (unit->unkEC != parameter && parameter != -1) {
                 btlApplyScaledUnitEffectParameter((u8 *)unit, parameter, 0, 1.0f);
@@ -4421,12 +4412,12 @@ void btlUpdateActorModelColorAndLinks(void) {
 }
 
 void btlResetUnitLinks(BtlUnit *unit) {
-    unit->unk310 = -1;
+    unit->selectedEntryIndex = -1;
     unit->unk314 = -1;
     unit->flags = 0;
     unit->stateFlags = 0;
     unit->gunResourceFlags = 0;
-    unit->unk330 = 0;
+    unit->effectLink.flags = 0;
     btlClearAllActorEntrySlots(unit);
     unit->link31C = sndAllocResourceLink(unit);
     unit->link320 = sndAllocLink(unit);
@@ -4445,10 +4436,10 @@ BtlUnit *btlCreateUnit(void) {
     unit->owner = btlAdvanceRuntimeSequenceCounter();
     unit->flags = 0;
     unit->stateFlags = 0;
-    unit->lookupId = unit->unk310 = -1;
+    unit->lookupId = unit->selectedEntryIndex = -1;
     unit->unk2E4 = 6;
     unit->gunResourceFlags = 0;
-    unit->unk334 = 0;
+    unit->effectLink.referenceCount = 0;
     unit->node318 = 0;
     unit->gunResource = 0;
     unit->effectObject = 0;
@@ -4971,7 +4962,7 @@ u32 btlInitializeMotionTransformFromTaskArguments(u8 *arguments) {
     return 1;
 }
 
-BtlRuntimeTask *btlCreateFloatTask28(BtlTask *actor, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f, f32 g, f32 h) {
+BtlRuntimeTask *btlCreateFloatTask28(ActionStateLink *actor, f32 a, f32 b, f32 c, f32 d, f32 e, f32 f, f32 g, f32 h) {
     BtlRuntimeTask *task = btlAllocTask(0x24);
     f32 *args;
     task->startCondition.kind = 1;
@@ -4983,7 +4974,7 @@ BtlRuntimeTask *btlCreateFloatTask28(BtlTask *actor, f32 a, f32 b, f32 c, f32 d,
     task->callback = btlInitializeMotionTransformFromTaskArguments;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    *(BtlTask **)args = actor;
+    *(ActionStateLink **)args = actor;
     args[1] = a;
     args[2] = b;
     args[3] = c;
@@ -5003,7 +4994,7 @@ s32 btlApplyEffectCameraKeyframes(f32 *args) {
     return 1;
 }
 
-BtlRuntimeTask *btlCreateFloatTask29(BtlTask *actor, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, f32 a6, f32 a7, f32 a8, f32 a9, f32 a10, f32 a11, f32 a12, f32 a13, f32 a14, f32 a15, f32 a16) {
+BtlRuntimeTask *btlCreateFloatTask29(ActionStateLink *actor, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, f32 a6, f32 a7, f32 a8, f32 a9, f32 a10, f32 a11, f32 a12, f32 a13, f32 a14, f32 a15, f32 a16) {
     BtlRuntimeTask *task = btlAllocTask(0x44);
     f32 *args;
     task->startCondition.kind = 1;
@@ -5015,7 +5006,7 @@ BtlRuntimeTask *btlCreateFloatTask29(BtlTask *actor, f32 a1, f32 a2, f32 a3, f32
     task->callback = btlApplyEffectCameraKeyframes;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    *(BtlTask **)args = actor;
+    *(ActionStateLink **)args = actor;
     args[1] = a1;
     args[2] = a2;
     args[3] = a3;
@@ -5044,7 +5035,7 @@ u32 btlApplyCameraKeysAndMarkRuntimeChange(u32 taskArgs) {
     return 1;
 }
 
-BtlRuntimeTask *btlCreateNotifyingCameraKeyframeTask(BtlTask *actor, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, f32 a6, f32 a7, f32 a8, f32 a9, f32 a10, f32 a11, f32 a12, f32 a13, f32 a14, f32 a15, f32 a16) {
+BtlRuntimeTask *btlCreateNotifyingCameraKeyframeTask(ActionStateLink *actor, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, f32 a6, f32 a7, f32 a8, f32 a9, f32 a10, f32 a11, f32 a12, f32 a13, f32 a14, f32 a15, f32 a16) {
     BtlRuntimeTask *task = btlCreateFloatTask29(actor, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16);
     task->callback = btlApplyCameraKeysAndMarkRuntimeChange;
     return task;
@@ -5507,7 +5498,7 @@ s32 btlHasMarkedEntry14(s32 actor) {
     count = btlGetIndexListCount(linked->indexWork.indices);
     entry = linked->indexWork.groups;
     for (i = 0; i < count; i++, entry++) {
-        if (entry->unk14 != 0) {
+        if (entry->reflected != 0) {
             return 1;
         }
     }
@@ -5558,7 +5549,7 @@ s32 btlHasMarkedEntry10(s32 actor) {
     count = btlGetIndexListCount(linked->indexWork.indices);
     entry = linked->indexWork.groups;
     for (i = 0; i < count; i++, entry++) {
-        if (entry->unk10 != 0) {
+        if (entry->inactive != 0) {
             return 1;
         }
     }
@@ -5604,7 +5595,7 @@ s32 btlHasIdleLinkedSlotKindTwo(u8 *actor) {
     count = btlGetIndexListCount(linked->indexWork.indices);
     entry = linked->indexWork.groups;
     for (; i < count; i++, entry++) {
-        if (entry->unk10 == 0 && entry->unk08 == 1 && entry->unk0C == 2 &&
+        if (entry->inactive == 0 && entry->kind == 1 && entry->parameter == 2 &&
             !(((BtlUnit *)btlGetIndexListEntry(linked->indexWork.indices, i))->flags & 0x80002000)) {
             return 1;
         }
@@ -5625,7 +5616,7 @@ s32 btlHasEligibleLinkedEntryTypeTwo(u8 *actor) {
     count = btlGetIndexListCount(linked->indexWork.indices);
     entry = linked->indexWork.groups;
     for (; i < count; i++, entry++) {
-        if (entry->unk08 == 2 &&
+        if (entry->kind == 2 &&
             !(((BtlUnit *)btlGetIndexListEntry(linked->indexWork.indices, i))->flags & 0x80002000)) {
             return 1;
         }
@@ -5846,8 +5837,8 @@ void btlChooseCameraPoseByActorHeights(BtlLinkedCommand *action) {
     f32 height;
 
     work = (BtlState *)btlGetRuntime();
-    if (work->hook670 != NULL) {
-        if (work->hook670(action)) {
+    if (work->unk670 != NULL) {
+        if (work->unk670(action)) {
             return;
         }
     }
@@ -5918,7 +5909,7 @@ extern void btlSetupActionCameraPair(BtlLinkedCommand *);
 
 /* Select the linked command's initial cursor step and prepare its camera. */
 void btlInitializeLinkedCommandCursor(BtlLinkedCommand *action) {
-    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->hook648;
+    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->unk648;
     ActionStateLink *link;
     u32 flags;
 
@@ -5962,7 +5953,7 @@ void btlInitializeLinkedCommandCursor(BtlLinkedCommand *action) {
 
 void btlDispatchActionCursorStepByKind(BtlLinkedCommand *action) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    if (work->hook64C != 0 && work->hook64C((BtlUnit *)action) != 0) {
+    if (work->unk64C != 0 && work->unk64C((BtlUnit *)action) != 0) {
         return;
     }
     switch (action->stepKind) {
@@ -6034,13 +6025,13 @@ void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
         return;
     }
     work = (BtlState *)btlGetRuntime();
-    if (work->hook66C != 0 && work->hook66C((BtlUnit *)action) != 0) {
+    if (work->unk66C != 0 && work->unk66C((BtlUnit *)action) != 0) {
         return;
     }
     category = btlMapActorCategory((s32)action);
     if (category > 0 && category == action->stageCount++) {
         btlClearRuntimeFlag2000();
-        if (work->hook658 != 0 && work->hook658((BtlUnit *)action) != 0) {
+        if (work->unk658 != 0 && work->unk658((BtlUnit *)action) != 0) {
             return;
         }
         if (btlIsSpecialActorCategory((s32)action) != 0) {
@@ -6132,7 +6123,7 @@ void func_001EC2A0(void) {
 void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action) {
     BtlState *work = (BtlState *)btlGetRuntime();
     if (action->link->unit->flags & 0x400) {
-        if (work->hook660 != 0) {
+        if (work->unk660 != 0) {
             s32 hasFlag200 = 0;
             s32 hasFlag400 = 0;
             u32 i;
@@ -6146,7 +6137,7 @@ void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action) {
                     hasFlag400 = 1;
                 }
             }
-            if (work->hook660((BtlUnit *)action, hasFlag200, hasFlag400) != 0) {
+            if (work->unk660((BtlUnit *)action, hasFlag200, hasFlag400) != 0) {
                 action->flags |= 0x10000;
                 return;
             }
@@ -6244,7 +6235,7 @@ void btlRunDefaultActionPoseUnlessHooked(void *actor) {
 }
 
 s32 func_001EC7E8(BtlUnit *unit) {
-    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->hook650;
+    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->unk650;
     s32 result = 0;
     if (hook != 0) {
         result = hook(unit);
@@ -6253,7 +6244,7 @@ s32 func_001EC7E8(BtlUnit *unit) {
 }
 
 s32 func_001EC828(BtlUnit *unit) {
-    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->hook658;
+    s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->unk658;
     s32 result = 0;
     if (hook != 0) {
         result = hook(unit);
@@ -8416,29 +8407,29 @@ BtlRuntimeTask *btlCreateSoundReleaseTask(void) {
     return task;
 }
 
-void btlExtendTaskFrameLimit(s32 task, s32 frames) {
-    if (*(s32 *)(task + 0xc) < frames) {
-        *(s32 *)(task + 0xc) = frames;
+void btlExtendTaskFrameLimit(SoundResourceNode *effect, s32 frames) {
+    if (effect->fadeCountdown < frames) {
+        effect->fadeCountdown = frames;
     }
 }
 
-u32 sndGetResourceStatus(u32 *sound) {
+u32 sndGetResourceStatus(SoundResourceNode *sound) {
     u32 flags;
-    if (!sound[1]) {
+    if (!sound->referenceCount) {
         return 0;
     }
-    flags = sound[0];
+    flags = sound->flags;
     if (flags & 1) {
         return 0xFFFFFFF;
     }
     if (flags & 2) {
-        return sound[3];
+        return sound->fadeCountdown;
     }
     return 0;
 }
 
 s32 sndLookupResourceType(s32 actor, s32 resourceIndex) {
-    s32 (*hook)(s32, s32) = ((BtlState *)btlGetRuntime())->hook684;
+    s32 (*hook)(s32, s32) = ((BtlState *)btlGetRuntime())->unk684;
     s32 type;
     if (hook != 0) {
         type = hook(actor, resourceIndex);
@@ -8451,65 +8442,68 @@ s32 sndLookupResourceType(s32 actor, s32 resourceIndex) {
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_00201828);
 
-void sndCreateSystemEffect(SoundEffectNode *effect) {
+void sndCreateSystemEffect(SoundResourceNode *effect) {
     if (effect->flags & 8) {
-        if (effect->handle == 0) {
+        if (effect->resourceHandle == 0) {
             if (effect->referenceCount == 0) {
-                effect->handle = sndMixerClone(effect->source);
-                btlBossDebugPrintf("btl:system effect create[%p]\n", effect->handle);
+                effect->resourceHandle = sndMixerClone(effect->sourceHandle);
+                btlBossDebugPrintf("btl:system effect create[%p]\n", effect->resourceHandle);
             }
         }
     }
 }
 
-void sndDeleteSystemEffect(SoundEffectNode *effect) {
-    if ((effect->flags & 8) && effect->handle && !effect->referenceCount) {
-        btlBossDebugPrintf("btl:system effect delete[%p]\n", effect->handle);
-        sndReleaseAllVoices(effect->handle);
-        effect->handle = 0;
+void sndDeleteSystemEffect(SoundResourceNode *effect) {
+    if ((effect->flags & 8) && effect->resourceHandle && !effect->referenceCount) {
+        btlBossDebugPrintf("btl:system effect delete[%p]\n", effect->resourceHandle);
+        sndReleaseAllVoices(effect->resourceHandle);
+        effect->resourceHandle = 0;
     }
 }
 
-void sndAddEffectReferences(s32 *taskArgs) {
-    s32 *effect;
-    s32 *target;
-    s32 *source;
-    taskArgs[2] = 0;
-    sndCreateSystemEffect(taskArgs[0]);
-    effect = (s32 *)taskArgs[0];
-    target = (s32 *)taskArgs[6];
-    source = (s32 *)taskArgs[3];
-    effect[1] = effect[1] + 1;
-    source[0x334 / 4] = source[0x334 / 4] + 1;
-    target[0x334 / 4] = target[0x334 / 4] + 1;
+void sndAddEffectReferences(SoundEffectReferenceArgs *args) {
+    SoundResourceNode *effect;
+    BtlUnit *target;
+    BtlUnit *source;
+    args->effect = 0;
+    sndCreateSystemEffect(args->source);
+    effect = args->source;
+    target = args->targetOwner.unit;
+    source = args->sourceOwner.unit;
+    effect->referenceCount = effect->referenceCount + 1;
+    source->effectLink.referenceCount = source->effectLink.referenceCount + 1;
+    target->effectLink.referenceCount = target->effectLink.referenceCount + 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_00201C98);
 
-void sndReleaseEffectReferences(s32 *taskArgs) {
-    s32 *effect;
-    s32 *target;
-    s32 *source;
-    if (taskArgs[2] != 0) {
-        effReleaseBattleVoiceOwner(taskArgs[2]);
+void sndReleaseEffectReferences(SoundEffectReferenceArgs *args) {
+    SoundResourceNode *effect;
+    BtlUnit *target;
+    BtlUnit *source;
+    if (args->effect != 0) {
+        effReleaseBattleVoiceOwner(args->effect);
     }
-    effect = (s32 *)taskArgs[0];
-    target = (s32 *)taskArgs[6];
-    source = (s32 *)taskArgs[3];
-    effect[1] = effect[1] - 1;
-    source[0x334 / 4] = source[0x334 / 4] - 1;
-    target[0x334 / 4] = target[0x334 / 4] - 1;
-    sndDeleteSystemEffect((u32 *)effect);
+    effect = args->source;
+    target = args->targetOwner.unit;
+    source = args->sourceOwner.unit;
+    effect->referenceCount = effect->referenceCount - 1;
+    source->effectLink.referenceCount = source->effectLink.referenceCount - 1;
+    target->effectLink.referenceCount = target->effectLink.referenceCount - 1;
+    sndDeleteSystemEffect(effect);
 }
 
-extern u32 func_00201C98(u32 *);
+extern s32 func_00201C98(SoundEffectReferenceArgs *);
 
-BtlRuntimeTask *btlCreateReferencedSoundEffectTask(u32 effect, s32 soundId, BtlUnit *actor, u16 frames) {
+BtlRuntimeTask *btlCreateReferencedSoundEffectTask(SoundResourceNode *effect, BtlUnit *source,
+                                                 BtlUnit *actor, u16 frames) {
     s32 v1 = 0;
     s32 v2;
-    BtlRuntimeTask *task = btlAllocTask(32);
-    SoundTaskArgs *args;
+    BtlRuntimeTask *task = btlAllocTask(sizeof(SoundEffectReferenceArgs));
+    SoundEffectReferenceArgs *args;
     BtlState *work;
+    ActorEffectOwner sourceOwner;
+    sourceOwner.unit = source;
     task->startCondition.kind = 1;
     task->endCondition.kind = 0;
     task->taskId = 0x2E;
@@ -8519,51 +8513,45 @@ BtlRuntimeTask *btlCreateReferencedSoundEffectTask(u32 effect, s32 soundId, BtlU
     task->callback = func_00201C98;
     task->onFinish = sndReleaseEffectReferences;
     work = (BtlState *)btlGetRuntime();
-    if (work->hook6E4 != 0) {
-        v1 = work->hook6E4(actor);
+    if (work->unk6E4 != 0) {
+        v1 = work->unk6E4(actor);
     }
     if (v1 == 0) {
-        v1 = soundId;
+        v1 = sourceOwner.selectorKey;
     }
     v2 = 0;
-    if (work->hook6E8 != 0) {
-        v2 = work->hook6E8(actor);
+    if (work->unk6E8 != 0) {
+        v2 = work->unk6E8(actor);
     }
     if (v2 == 0) {
-        v2 = soundId;
+        v2 = sourceOwner.selectorKey;
     }
-    if (work->hook6E0 != 0) {
-        s32 r = work->hook6E0(actor);
+    if (work->selectSoundEffectTarget != 0) {
+        BtlUnit *r = work->selectSoundEffectTarget(actor);
         if (r != 0) {
-            actor = (BtlUnit *)r;
+            actor = r;
         }
     }
     args = btlGetTaskArguments(task);
-    args->value = effect;
-    args->unk_0C = soundId;
-    args->unk_10 = v1;
-    args->unk_14 = v2;
-    args->optionId = frames;
-    args->unk_18 = (u32)actor;
-    args->unk_08 = 0;
-    args->unk_1C = 0;
+    args->source = effect;
+    args->sourceOwner.unit = source;
+    args->sourceSelector = v1;
+    args->targetSelector = v2;
+    args->option = frames;
+    args->targetOwner.unit = actor;
+    args->effect = 0;
+    args->duration = 0;
     return task;
 }
 
-BtlRuntimeTask *sndCreateEffectWithTargets(s32 effectId, s32 soundId, s32 source, s32 target, BtlUnit *actor, s32 frames) {
-    BtlRuntimeTask *effect = btlCreateReferencedSoundEffectTask(effectId, soundId, actor, frames & 0xFFFF);
-    SoundTaskArgs *args = btlGetTaskArguments(effect);
-    args->unk_10 = source;
-    args->unk_14 = target;
-    return effect;
+BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *effect, BtlUnit *sourceOwner,
+                                         s32 source, s32 target, BtlUnit *actor, s32 frames) {
+    BtlRuntimeTask *task = btlCreateReferencedSoundEffectTask(effect, sourceOwner, actor, frames & 0xFFFF);
+    SoundEffectReferenceArgs *args = btlGetTaskArguments(task);
+    args->sourceSelector = source;
+    args->targetSelector = target;
+    return task;
 }
-
-/* Retail 20212C/202220 dereference the unit; 20220C passes the same
- * encoded key to the integer selector provider (169418), which stores it. */
-typedef union ActorEffectOwner {
-    BtlUnit *unit;
-    s32 selectorKey;
-} ActorEffectOwner;
 
 typedef struct ActorEffectTaskArgs {
     SoundResourceNode *source;
@@ -8578,11 +8566,11 @@ void sndStartEffectTask(ActorEffectTaskArgs *args) {
     BtlUnit *unit;
 
     args->effect = 0;
-    sndCreateSystemEffect((u32 *)args->source);
+    sndCreateSystemEffect(args->source);
     source = args->source;
     unit = args->owner.unit;
-    source->unk_04++;
-    unit->unk334++;
+    source->referenceCount++;
+    unit->effectLink.referenceCount++;
 }
 
 extern u32 effBattleGetCurrentFrame(SoundVoice *);
@@ -8630,9 +8618,9 @@ void sndFinishActorEffectTask(ActorEffectTaskArgs *args) {
     }
     source = args->source;
     unit = args->owner.unit;
-    source->unk_04--;
-    unit->unk334--;
-    sndDeleteSystemEffect((u32 *)source);
+    source->referenceCount--;
+    unit->effectLink.referenceCount--;
+    sndDeleteSystemEffect(source);
 }
 
 
@@ -8658,32 +8646,33 @@ BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source, BtlUnit *own
 }
 
 
-void sndIncrementEffectActiveCount(s32 *taskArgs) {
-    ((SoundEffectNode *)*taskArgs)->activeCount = ((SoundEffectNode *)*taskArgs)->activeCount + 1;
+void sndIncrementEffectActiveCount(TimedUnitEffectArgs *args) {
+    args->source->activeCount = args->source->activeCount + 1;
 }
 
-u32 sndWaitEffectFramesAndApplyUnitParameter(u32 *args) {
-    u32 *effect = (u32 *)args[0];
+s32 sndWaitEffectFramesAndApplyUnitParameter(TimedUnitEffectArgs *args) {
+    SoundResourceNode *effect = args->source;
     s32 frames;
 
-    if ((effect[0] & 2) == 0) {
+    if ((effect->flags & 2) == 0) {
         return 0;
     }
-    frames = sndGetEffectNodeParameter((s32)effect, (u16)args[1]);
-    if ((s32)args[5] >= frames) {
-        ((SoundEffectNode *)args[0])->activeCount -= 1;
-        if ((s32)args[3] >= 0) {
-            btlApplyScaledUnitEffectParameter((u8 *)args[2], args[3], args[4], 1.0f);
+    frames = sndGetEffectNodeParameter(effect, args->option);
+    if (args->frame >= frames) {
+        args->source->activeCount -= 1;
+        if (args->channel >= 0) {
+            btlApplyScaledUnitEffectParameter((u8 *)args->unit, args->channel, args->volume, 1.0f);
         }
         return 1;
     }
-    args[5]++;
+    args->frame++;
     return 0;
 }
 
-BtlRuntimeTask *sndCreateTimedUnitEffectTask(u32 effect, BtlUnit *actor, u16 frames, u32 channel, u32 volume) {
-    BtlRuntimeTask *task = btlAllocTask(24);
-    SoundTaskArgs *args;
+BtlRuntimeTask *sndCreateTimedUnitEffectTask(SoundResourceNode *effect, BtlUnit *actor, u16 frames,
+                                          s32 channel, u32 volume) {
+    BtlRuntimeTask *task = btlAllocTask(sizeof(TimedUnitEffectArgs));
+    TimedUnitEffectArgs *args;
     task->startCondition.kind = 1;
     task->endCondition.kind = 0;
     task->taskId = 0x31;
@@ -8692,29 +8681,23 @@ BtlRuntimeTask *sndCreateTimedUnitEffectTask(u32 effect, BtlUnit *actor, u16 fra
     task->callback = sndWaitEffectFramesAndApplyUnitParameter;
     task->onFinish = 0;
     args = btlGetTaskArguments(task);
-    args->value = effect;
-    args->unk_08 = (u32)actor;
-    args->optionId = frames;
-    args->unk_0C = channel;
-    args->unk_10 = volume;
-    args->unk_14 = 0;
+    args->source = effect;
+    args->unit = actor;
+    args->option = frames;
+    args->channel = channel;
+    args->volume = volume;
+    args->frame = 0;
     return task;
 }
 
 
-typedef struct EffectLoadArgs {
-    SoundEffectNode *effect;
-    void *loadHandle;
-    const char *name;
-} EffectLoadArgs;
 
-void sndBeginEffectLoad(u32 arguments) {
-    EffectLoadArgs *args = (EffectLoadArgs *)arguments;
-    SoundEffectNode *effect = args->effect;
+void sndBeginEffectLoad(EffectLoadArgs *args) {
+    SoundResourceNode *effect = args->effect;
     if (effect->flags & 2) {
-        if (effect->handle != 0) {
-            sndReleaseAllVoices(effect->handle);
-            effect->handle = 0;
+        if (effect->resourceHandle != 0) {
+            sndReleaseAllVoices(effect->resourceHandle);
+            effect->resourceHandle = 0;
         }
         effect->flags &= ~2;
     }
@@ -8723,28 +8706,26 @@ void sndBeginEffectLoad(u32 arguments) {
     btlBossDebugPrintf("btl:effect load start[%s]\n", args->name);
 }
 
-u32 sndPollEffectLoad(s32 arg) {
-    EffectLoadArgs *args = (EffectLoadArgs *)arg;
-    SoundEffectNode *effect = args->effect;
+s32 sndPollEffectLoad(EffectLoadArgs *args) {
+    SoundResourceNode *effect = args->effect;
     s32 resource;
     if (effect->flags & 2) {
         return 1;
     }
-    if (fileIsRequestReadyInCurrentMode((s32)args->loadHandle) == 0) {
+    if (fileIsRequestReadyInCurrentMode(args->loadHandle) == 0) {
         return 0;
     }
     btlBossDebugPrintf("btl:effect load end[%s]\n", args->name);
-    resource = fileGetResourceHandle((s32)args->loadHandle);
-    effect->handle = sndMixerClone(sdfResourceRetainAddress(resource));
+    resource = fileGetResourceHandle(args->loadHandle);
+    effect->resourceHandle = sndMixerClone(sdfResourceRetainAddress(resource));
     sdfReleaseResourceAllocation(resource);
-    filePollEntryCleanup((s32)args->loadHandle);
+    filePollEntryCleanup(args->loadHandle);
     effect->flags = (effect->flags & ~1) | 2;
     return 0;
 }
 
-extern u32 sndPollEffectLoad(s32);
 
-BtlRuntimeTask *sndCreateEffectLoadTask(s32 value, char *name) {
+BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *effect, char *name) {
     BtlRuntimeTask *task = btlAllocTask(strlen(name) + sizeof(EffectLoadArgs));
     EffectLoadArgs *args;
     char *copy;
@@ -8756,7 +8737,7 @@ BtlRuntimeTask *sndCreateEffectLoadTask(s32 value, char *name) {
     task->endCondition.kind = 0;
     args = btlGetTaskArguments(task);
     copy = (char *)(args + 1);
-    args->effect = (SoundEffectNode *)value;
+    args->effect = effect;
     args->name = copy;
     strcpy(copy, name);
     return task;
@@ -8829,38 +8810,38 @@ BtlRuntimeTask *btlCreateFadeStateResetTask(void) {
     return task;
 }
 
-void sndAddSourceReferences(s32 *taskArgs) {
-    s32 *effect;
-    s32 *unit;
-    taskArgs[1] = 0;
-    sndCreateSystemEffect(taskArgs[0]);
-    effect = (s32 *)taskArgs[0];
-    unit = (s32 *)taskArgs[2];
-    effect[1] = effect[1] + 1;
-    unit[0x334 / 4] = unit[0x334 / 4] + 1;
+void sndAddSourceReferences(SoundEffectSourceArgs *args) {
+    SoundResourceNode *effect;
+    BtlUnit *unit;
+    args->effect = 0;
+    sndCreateSystemEffect(args->source);
+    effect = args->source;
+    unit = args->unit;
+    effect->referenceCount = effect->referenceCount + 1;
+    unit->effectLink.referenceCount = unit->effectLink.referenceCount + 1;
 }
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_00202958);
 
-void sndFinishEffectSourceTask(s32 *taskArgs) {
-    s32 effect;
-    s32 unit;
+void sndFinishEffectSourceTask(SoundEffectSourceArgs *args) {
+    SoundResourceNode *effect;
+    BtlUnit *unit;
 
-    if (taskArgs[1] != 0) {
-        effReleaseBattleVoiceOwner(taskArgs[1]);
+    if (args->effect != 0) {
+        effReleaseBattleVoiceOwner(args->effect);
     }
-    effect = *taskArgs;
-    unit = taskArgs[2];
-    ((SoundEffectNode *)effect)->referenceCount = ((SoundEffectNode *)effect)->referenceCount - 1;
-    ((BtlUnit *)unit)->unk334 = ((BtlUnit *)unit)->unk334 - 1;
+    effect = args->source;
+    unit = args->unit;
+    effect->referenceCount = effect->referenceCount - 1;
+    unit->effectLink.referenceCount = unit->effectLink.referenceCount - 1;
     sndDeleteSystemEffect(effect);
 }
 
-extern u32 func_00202958(u32 *);
+extern s32 func_00202958(SoundEffectSourceArgs *);
 
-BtlRuntimeTask *sndCreateEffectSourceTask(u32 effect, BtlUnit *owner, u64 resource) {
-    BtlRuntimeTask *task = btlAllocTask(32);
-    SoundTaskArgs *args;
+BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *effect, BtlUnit *owner, u64 resource) {
+    BtlRuntimeTask *task = btlAllocTask(sizeof(SoundEffectSourceArgs));
+    SoundEffectSourceArgs *args;
     task->startCondition.kind = 1;
     task->endCondition.kind = 0;
     task->taskId = 0x30;
@@ -8870,12 +8851,12 @@ BtlRuntimeTask *sndCreateEffectSourceTask(u32 effect, BtlUnit *owner, u64 resour
     task->callback = func_00202958;
     task->onFinish = sndFinishEffectSourceTask;
     args = btlGetTaskArguments(task);
-    args->value = effect;
-    args->unk_08 = (u32)owner;
-    *(u64 *)&args->unk_10 = resource;
-    args->option = 0;
-    args->unk_18 = 0;
-    args->unk_1C = 0;
+    args->source = effect;
+    args->unit = owner;
+    args->resource = resource;
+    args->effect = 0;
+    args->duration = 0;
+    args->counter = 0;
     return task;
 }
 
@@ -8958,25 +8939,25 @@ BtlRuntimeTask *sndCreateClearBattleFlagTask(void) {
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_00202EA8);
 
-s32 sndSetEffectNodeParameter(s32 effect, u16 option) {
-    return sndReadSelectedMixerBankValue(((SoundEffectNode *)effect)->handle, option);
+s32 sndSetEffectNodeParameter(SoundResourceNode *effect, u16 option) {
+    return sndReadSelectedMixerBankValue(effect->resourceHandle, option);
 }
 
-s32 sndGetEffectNodeParameter(s32 effect, u16 option) {
-    return func_00168448(((SoundEffectNode *)effect)->handle, option);
+s32 sndGetEffectNodeParameter(SoundResourceNode *effect, u16 option) {
+    return func_00168448(effect->resourceHandle, option);
 }
 
-s32 sndIsResourceNodeReferencedOrActive(s32 effect) {
-    if (((SoundEffectNode *)effect)->referenceCount != 0) {
+s32 sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect) {
+    if (effect->referenceCount != 0) {
         return 1;
     }
-    return ((SoundEffectNode *)effect)->activeCount != 0;
+    return effect->activeCount != 0;
 }
 
 s32 sndHasActiveActor(void) {
     BtlUnit *unit;
     for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->nextActor) {
-        if (unit->node318 != 0 && sndIsResourceNodeReferencedOrActive((s32)unit->node318) != 0) {
+        if (unit->node318 != 0 && sndIsResourceNodeReferencedOrActive(unit->node318) != 0) {
             return 1;
         }
     }
@@ -8987,8 +8968,8 @@ s32 sndHasActiveActor(void) {
 SoundResourceNode *sndAllocResourceNode(void) {
     SoundResourceNode *node = sdfAllocAndClearQuadwords(0x20);
     BtlState *work;
-    node->unk_04 = 0;
-    node->unk_08 = 0;
+    node->referenceCount = 0;
+    node->activeCount = 0;
     node->fadeCountdown = 0;
     node->resourceHandle = 0;
     work = (BtlState *)btlGetRuntime();
@@ -9035,7 +9016,7 @@ void btlUpdateFadeColor(void) {
     SoundResourceNode *node;
 
     for (node = context->soundResourceHead; node != 0; node = node->next) {
-        if (node->unk_04 == 0) {
+        if (node->referenceCount == 0) {
             node->fadeCountdown = 0;
         } else if (node->fadeCountdown > 0) {
             node->fadeCountdown = node->fadeCountdown - 1;
@@ -9150,8 +9131,8 @@ SoundResourceLink *sndAllocResourceLink(BtlUnit *owner) {
 void sndFreeResourceLink(SoundResourceLink *link) {
     if (link->effectHandle != 0) {
         effReleaseBattleVoiceOwner(link->effectHandle);
-        link->effect->unk_04--;
-        sndDeleteSystemEffect((u32 *)link->effect);
+        link->effect->referenceCount--;
+        sndDeleteSystemEffect(link->effect);
     }
     sdfReleaseChipBlock(link);
 }
@@ -9162,7 +9143,7 @@ void btlMarkTaskReady(SoundResourceLink *resource) {
     resource->refreshRequested = 1;
 }
 
-SoundLink *sndAllocLink(u32 owner) {
+SoundLink *sndAllocLink(BtlUnit *owner) {
     SoundLink *link = sdfAllocAndClearQuadwords(0x10);
     link->owner = owner;
     link->effectHandle = 0;
@@ -9174,7 +9155,7 @@ SoundLink *sndAllocLink(u32 owner) {
 void sndFreeLink(SoundLink *link) {
     if (link->effectHandle != 0) {
         effReleaseBattleVoiceOwner(link->effectHandle);
-        link->effect[1] = link->effect[1] - 1;
+        link->effect->referenceCount = link->effect->referenceCount - 1;
         sndDeleteSystemEffect(link->effect);
     }
     sdfReleaseChipBlock(link);
@@ -9183,26 +9164,26 @@ void sndFreeLink(SoundLink *link) {
 /* Blend the linked command effect through the SDK's packed-color vectors. */
 void btlUpdateUnitCommandEffect(SoundLink *link) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    BtlUnit *actor = (BtlUnit *)link->owner;
+    BtlUnit *actor = link->owner;
     u16 effectId;
 
-    if (actor->unk310 > 0) {
-        effectId = datCommandRecords[actor->unk310].unk2E;
+    if (actor->selectedEntryIndex > 0) {
+        effectId = datCommandRecords[actor->selectedEntryIndex].unk2E;
     } else {
         effectId = 0;
     }
     if (effectId != 0 && !(actor->partyRecord.status & 0x4000)) {
         if (link->effectHandle == 0) {
-            link->effect = (u32 *)work->resources[BTL_COMMAND_UNIT_EFFECT_SOUND_SLOT];
+            link->effect = work->resources[BTL_COMMAND_UNIT_EFFECT_SOUND_SLOT];
             sndCreateSystemEffect(link->effect);
-            link->effectHandle = func_00168548(link->effect[4], 2, actor, 0);
-            link->effect[1]++;
+            link->effectHandle = func_00168548(link->effect->resourceHandle, 2, actor, 0);
+            link->effect->referenceCount++;
             link->effectHandle->flags = (link->effectHandle->flags | 1) & ~6;
         }
         link->flags = effectId;
     } else if (link->effectHandle != 0) {
         effReleaseBattleVoiceOwner(link->effectHandle);
-        link->effect[1]--;
+        link->effect->referenceCount--;
         sndDeleteSystemEffect(link->effect);
         link->effectHandle = 0;
         link->effect = 0;
@@ -9703,10 +9684,10 @@ s32 sndIsCommandBusySigned(void) {
     return (s8)sdfSoundIsCommandBusy();
 }
 
-s32 sndHasResourceFlagsOneOrEight(s32 resource) {
+s32 sndHasResourceFlagsOneOrEight(ActiveSoundNode *resource) {
     s32 flags;
 
-    flags = *(s32 *)resource;
+    flags = resource->flags;
     if ((flags & 1) != 0) {
         return 1;
     }
@@ -9724,8 +9705,8 @@ void sndFormatResourceNameFromUnitMode(s32 unit, s32 output) {
 s32 sndResolveResourceId(s32 category, s32 id) {
     BtlState *work = (BtlState *)btlGetRuntime();
     s32 type = -1;
-    if (work->hook688 != 0) {
-        type = work->hook688(category, id);
+    if (work->unk688 != 0) {
+        type = work->unk688(category, id);
     }
     if (type == -1) {
         type = sndLookupResourceType(category, id);
@@ -10072,8 +10053,8 @@ struct BtlRuntimeTask *btlCreateHookedUnitSoundTask(unit, option)
     task->onStart = btlQueueUnitSoundSlotFileLoad;
     task->callback = sndPollMotionSePlayback;
     work = (BtlState *)btlGetRuntime();
-    if (work->hook710 != 0) {
-        option = work->hook710(unit, option);
+    if (work->unk710 != 0) {
+        option = work->unk710(unit, option);
     }
     args = btlGetTaskArguments(task);
     args->actor = unit;
