@@ -13,6 +13,9 @@ extern void mnuSetWindowResource(s32, s32, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, s32, u32);
 extern MenuProfilePanel *mnuCreateProfilePanel(s32);
 extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32, u32);
+extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
+extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
+extern s32 mnuGetSelectionFromFlags(s32);
 extern MenuPanelHandles *mnuCreatePanelSpriteHandles(u32, s32, s32);
 extern s32 mnuClassifyQuarterHalfPercent(s32, s32);
 extern s32 evtStageTestSelectEntry(s32, s32, s32);
@@ -125,7 +128,8 @@ typedef struct PartyMenuData {
     u8 panelSnapshots[5][0xA8]; /* 0x18B0: copied panel subrecords */
     s32 fadeA;                 /* 0x1BF8 */
     s32 fadeB;                 /* 0x1BFC */
-    u8 pad1C00[8];
+    s32 selectionKey;          /* 0x1C00: saved menu-list key */
+    s32 profilePanelPhase;     /* 0x1C04: profile animation phase */
 } PartyMenuData; /* 0x1C08: native party-selection allocation */
 
 /* Byte-offset copies keep their field displacement tied to the owner layout. */
@@ -698,7 +702,66 @@ void mnuUpdateStaffFade(s32 opening, PartyMenuData *menuWork) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00274B80", func_00276018);
+void func_00276018(s32 contextAddress) {
+    CampMenuContext *context = (CampMenuContext *)contextAddress;
+    PartyMenuData *menu = (PartyMenuData *)context->menu;
+    struct MenuList *list;
+    struct MenuListNode *node;
+    MenuProfilePanel *profilePanel;
+    DatPartyRecord *record;
+    EffectSlotSet **sets;
+    EffectSlotSet *marker;
+    s32 selectionKey;
+    s32 statusIndex;
+    s32 found = 0;
+
+    node = menu->primaryWindow->list->cursor;
+    if (mnuIsFinalItemIndex(node->index, (s32)menu->primaryWindow->list)) {
+        selectionKey = menu->selectionKey;
+        mnuUpdateStaffFade(0, menu);
+    } else {
+        selectionKey = menu->primaryWindow->list->cursor->index;
+        menu->selectionKey = selectionKey;
+        mnuUpdateStaffFade(1, menu);
+    }
+
+    list = menu->primaryWindow->list;
+    node = list->first;
+    if (node != NULL) {
+        do {
+            if (node->index == selectionKey) {
+                if ((node->flags48 & 1) != 0) {
+                    found = 1;
+                }
+            }
+            node = node->next;
+        } while (node != NULL);
+    }
+
+    record = (DatPartyRecord *)&menu->original[selectionKey];
+    statusIndex = mnuGetSelectionFromFlags((s32)record);
+    if (statusIndex >= 0) {
+        marker = *(EffectSlotSet **)((u8 *)context + 0xC4 + statusIndex * 4);
+    } else {
+        marker = NULL;
+    }
+    sets = (EffectSlotSet **)((u8 *)context + 0xF0);
+
+    func_00275B40(sets,
+                  (MenuEffectPair *)&menu->panelSnapshots[selectionKey][0],
+                  (MenuEffectPair *)&menu->panelSnapshots[selectionKey][0x54],
+                  record, marker,
+                  (u32)menu->fadeA, (u32)menu->fadeB, found);
+
+    profilePanel = mnuCreateProfilePanel((s32)record);
+    profilePanel->phase = menu->profilePanelPhase;
+    profilePanel->opacity = (u32)menu->fadeA;
+    mnuCacheProfilePanelGridPositions(profilePanel, (u32)sets[0],
+                                      0x18, 0x28, 0x29);
+    mnuDrawAndAdvanceProfilePanel(0x820, 0xCD8, 0, profilePanel, 0x53);
+    menu->profilePanelPhase = profilePanel->phase;
+    mnuFreeProfilePanelWork(profilePanel);
+}
 
 s32 mnuDrawPartySelectionPanelAndStep(s32 callback) {
     s32 context = kwlnTaskGetUserValue();
@@ -1080,7 +1143,6 @@ void mnuDrawPartySkillAndStatusPanel(u8 *entry, MenuPageWindow *page, MenuPanelG
 }
 
 extern void func_00283838(s32, s32, s32, s32, s32, s32, s32);
-extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, s32, s32);
 
 void mnuDrawProfilePanelAndSprite(s32 obj, s32 unused1, s32 spriteGroup, s32 drawGroup, s32 unused4, s32 spriteFlags) {
     func_00283838(0, 0, 0, obj, ((MenuSpriteArguments *)obj)->variant, spriteGroup, spriteFlags);

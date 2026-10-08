@@ -492,6 +492,9 @@
 0x001130C8	ddsReleaseUnitObject	inferred	src/dds1/basic/dds3UnitObjectBasic.c:func_001130C8; Unit-object cleanup entry called when clearing field object handles; delegates world-node removal without adding state. Registration: fldClearObjectEntryHandles. [names_qp9.tsv]
 0x001130E0	dds3GetEffectDataHandle	inferred	confidence=high; src/dds1/game/code_001130E0.c:func_001130E0; Returns the handle field from the effect object data. [names_qp9.tsv]
 0x001130F0	effObjGetTransitionWork	inferred	confidence=high; matched-C; src/dds1/game/code_001130E0.c:66:func_001130F0; Returns the effect object data transitionWork pointer.; source=revalidated-unapplied-names_R_Names31.tsv:3 [names_qp12_apply.tsv]
+0x00113100	effObjSetFollowParameterIndex	inferred	Stores the kind-5 follow-parameter table index at payload +0x14; the paired updater indexes 16-byte records and treats -1 as the base record. Four DDS1 native callback-table slots reference the setter.
+0x001131E0	effObjStepFollowAngleTowardPosition	inferred	Uses the target position X/Z to compute and clamp the follow angle, then advances it by up to 3 degrees.
+0x00113338	effObjStepFollowAngleTowardZero	inferred	After the angle-return delay, advances the follow angle toward zero by up to 1 degree and clears flag 0x2000 near zero.
 0x00113438	evtArmEffectObjectPendingValue	inferred	Stores an effect-object pending value, resets its timer and marks its flags. [names_reviewed10.tsv]
 0x00113478	evtResetObjectPendingValue	inferred	Resets an object pending value and arms its timer. [names_reviewed8.tsv]
 0x00113490	effObjInitializeFollowModelData	inferred	confidence=high; matched-C; src/dds1/game/code_001130E0.c:117:func_00113490; Creates inner transform and follow-model data, clears it, creates base slot-resource state, initializes IDs/timer and paired -45/+45 motion limits, then installs object flags 0x42.; source=fresh-R_Names31-today [names_qp11.tsv]
@@ -547,7 +550,7 @@
 0x001161D8	dds3SpawnInnerVecObj8	inferred	type 8 object with first/second inner vectors
 0x00116260	dds3InitializeInnerVectorEffectObject	inferred	Allocates an inner vector effect object and seeds its resource and transform parameters. [names_reviewed10.tsv]
 0x00116338	lightReleaseObject	inferred	Releases the light data buffer and resource before freeing the light object.
-0x00116388	lightBlendAmbientColors	inferred	DDS1 light update: blends unk68/unk6C towards unk0/unk40 over the unk70 fade count, packs to D_00324770/D_00324780, hands the pair to func_002E1938. Non-matching: 59/129 words differ, register allocation only. [names_L15_Units.tsv]
+0x00116388	lightBlendAmbientColors	inferred	DDS1 light update: blends unk68/unk6C towards unk0/unk40 over the unk70 fade count, packs to D_00324770/D_00324780, hands the pair to sdfBuildLightingPacket. Non-matching: 59/129 words differ, register allocation only. [names_L15_Units.tsv]
 0x00116598	dds3GetLightObjectResource	inferred	Kind-nine light payload getter returns its owned ObjBase resource at offset 0x74; complete constructor/destructor and kind selector establish ownership.
 0x001165A8	evtSpawnActionObj9	inferred	constructor for type 9 plus func_00112750
 0x001165F0	evtReleaseActionWorldNode	inferred	confidence=high; matched-C; src/dds1/game/code_00116590.c:59:func_001165F0; Action-object lifecycle callback removes world object node.; twin=0x00116858, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
@@ -586,6 +589,7 @@
 0x001175D0	sdfEnableFloatCounterWrap	inferred	src/dds1/game/code_00117438.c func_001175D0: Sets flag 0x20 used by counter step routine to wrap at endpoint. [names_reviewed24.tsv]
 0x001175E0	sdfDisableFloatCounterWrap	inferred	src/dds1/game/code_00117438.c func_001175E0: Clears flag 0x20 used by counter step routine for endpoint wrapping. [names_reviewed24.tsv]
 0x001175F8	evtSpawnActionObj11	inferred	constructor for type 0x11
+0x00117650	dds3GetWorldNodeData	inferred	Returns the canonical EffWorldNode.data pointer at offset +0x18; the payload interpretation depends on node kind.
 0x00117658	evtLoadValueVectorIntoVu	inferred	Loads the event value pointer vector directly into VU0 VF10; no scaling occurs. [names_reviewed16.tsv]
 0x00117678	evtLoadValueSecondaryVectorIntoVu	inferred	Loads the second vector quadword directly; the value getter performs no scaling. [names_reviewed18.tsv]
 0x001176A0	sdfCreateRuntimeTask	inferred	allocates/zeroes the 0x33600 GBWK runtime and schedules its tick task
@@ -5576,7 +5580,7 @@
 0x002B26B0	effGetWorldVector	inferred	Byte-identical dds2 twin 0x002F5AC0; DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described getEffectWorldVector behavior. [names_conflicts.tsv]
 0x002B27B8	effCollectModelEffectActors	inferred	Selects model-bearing actors by kind and active flags from the actor linked list. [names_reviewed5.tsv]
 0x002B2E98	effSyncLinkedActorChildParameter	inferred	For flagged linked actors copies source parameter to child and updates child with that value. [names_reviewed5.tsv]
-0x002B3090	effComputeLightDirectionVU	inferred	normalizes (vec - D_003DCBE0) with vrsqrt, stores D_003DCBA0, calls func_002E1938; returns 0 unless func_001A1438 and D_003BC9AC
+0x002B3090	effComputeLightDirectionVU	inferred	normalizes (vec - D_003DCBE0) with vrsqrt, stores D_003DCBA0, calls sdfBuildLightingPacket; returns 0 unless func_001A1438 and D_003BC9AC
 0x002B3130	effResetDefaultColorTables	inferred	eff copies two quadwords from *D_00324770 and one from D_00324780 then clears D_003BC9AC
 0x002B3350	effResetCopiedPayloadTargets	inferred	zeros state and flags on each non-null path target in the copied payload
 0x002B3390	effAllocateCopiedEffectPayload	inferred	Allocates reference-backed work with a source payload copy and its size. [names_reviewed5.tsv]
@@ -6424,6 +6428,7 @@
 0x002E14D8	sdfConsBuildMatrixPacket	inferred	Packs two transformed matrices and vectors into a VU packet. [names_reviewed8.tsv]
 0x002E15D0	sdfConsCacheTransformedNode	inferred	Caches the transformed node and its matrix-derived position. [names_reviewed8.tsv]
 0x002E1718	sdfCameraBuildProjection	inferred	builds perspective matrix in vf28-31 from near/far/width/height/aspect (or fov), stores it at +0x30 and fills the screen offsets at +0x70..+0x8C [names_M64_EffVu2.tsv]
+0x002E1938	sdfBuildLightingPacket	inferred	Builds the lighting DMA packet from three SdfLightSources and a color/direction vector; its output is appended or attached as model lighting.
 0x002E1BF0	sdfConsBuildFrustumPacket	inferred	Encodes frustum scale and midpoint into DMA and GIF fields. [names_reviewed8.tsv]
 0x002E1CC8	sdfConsInitDmaPacketHeader	inferred	sdf system, device, DMA, or task infrastructure in game/code_002DDC98.c
 0x002E1D08	sdfConsAppendProgramReferencePacket	inferred	Appends a reference to the resident VU program buffer. [names_reviewed8.tsv]

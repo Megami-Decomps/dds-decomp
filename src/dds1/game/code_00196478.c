@@ -53,9 +53,51 @@ extern SdfTex *itfBackgroundSpriteTexture;
 
 extern u8 D_003BB188[];
 typedef struct FrFontCtx FrFontCtx;
-typedef struct FrFontGlyph FrFontGlyph;
+typedef struct TextDrawArgs TextDrawArgs;
+/* Complete 0x44-byte nodes allocated by the font parent pool. */
+typedef struct FrFontGlyph {
+    union {
+        s16 h;                        /* 0x0: halfword view */
+        struct { s8 b0; s8 b1; } b;   /* 0x0: byte views */
+    } u0;
+    u16 unk2;         /* 0x2 */
+    s32 x;            /* 0x4: horizontal position */
+    s32 y;            /* 0x8: vertical position */
+    s32 advance;      /* 0xC: advance shifted by four when linking glyphs */
+    union {
+        u32 word;     /* 0x10: word view */
+        u16 half[2];  /* 0x10: halfword views */
+        u8 byte[4];   /* 0x10: byte views */
+    } u10;
+    union {
+        u32 w;        /* 0x14: word view */
+        u8 b[4];      /* 0x14: byte views */
+    } u14;
+    union {
+        u32 w;            /* 0x18: word view */
+        u8 b[4];          /* 0x18: byte views */
+    } unk18;
+    struct FrFontGlyph *firstChild; /* 0x1C: chain traversed by frFontMeasureGlyphChain */
+    struct FrFontGlyph *unk20; /* 0x20 */
+    struct FrFontGlyph *previous; /* 0x24: backward link through the glyph chain */
+    struct FrFontGlyph *next; /* 0x28: next glyph in chain */
+    struct FrFontGlyph *chainHead; /* 0x2C: first glyph in the linked chain */
+    u32 unk30;        /* 0x30 */
+    u32 unk34;        /* 0x34 */
+    u32 unk38;        /* 0x38 */
+    s32 unk3C;        /* 0x3C */
+    s32 unk40;        /* 0x40 */
+} FrFontGlyph;
+
 struct TextStyleNode;
 extern FrFontGlyph *func_001951C8(void *, s8, s8, s8, FrFontGlyph *);
+extern void frFontCheckPendingGlyphState(FrFontCtx *);
+extern void frFontAdvanceContextCursor(FrFontCtx *);
+extern void func_00196220(u8, TextDrawArgs *);
+extern u8 frFontSharedGlyphFlags;
+extern void mnuSetTitleVoicePrefixIndex(s32);
+extern void mnuPlayTitleVoiceFile(char *);
+extern s32 mnuGetTitleEffectFrameCounter(void);
 
 extern FrFontCtx *frFontAppendGlyphFromData(void *, s8, s8, s8, s32);
 extern void frFontStoreShiftedContextValue(FrFontCtx *, u32);
@@ -84,14 +126,6 @@ extern u32 D_003BD818;
 void frFontEnsureSlotLoaded(s32 id, const char *path);
 extern u16 itfGlyphDecodeTable[];
 extern u32 strlen(const char *str);
-
-/* Byte stream read by itfReadEncodedTextLead/itfReadEncodedCode: base at +0x10, position at +0x18. */
-typedef struct TextStream {
-    u8 unk0[0x10]; /* 0x0 */
-    u8 *bytes;       /* 0x10: encoded input base */
-    u8 unk14[4];   /* 0x14 */
-    s32 offset;      /* 0x18: current byte position */
-} TextStream;
 
 /* 8-byte node header; payload follows (itfDequeueMemNode/itfEnqueueMemNode). */
 typedef struct MemNode {
@@ -208,30 +242,23 @@ typedef struct TextVector {
     s32 w;
 } TextVector;
 
-typedef struct TextDrawArgs {
+struct TextDrawArgs {
     s32 x;         /* 0x00 */
     s32 y;         /* 0x04 */
     s32 z;         /* 0x08 */
     u8 color[4];   /* 0x0C */
-    s32 encodedText; /* 0x10: encoded input base */
-    s32 sub;         /* 0x14: text subcontext */
+    u8 *encodedText; /* 0x10: encoded input base */
+    FrFontGlyph *sub; /* 0x14: glyph subcontext */
     s32 offset;    /* 0x18: current byte position */
-    u8 unk1C;      /* 0x1C */
+    s8 unk1C;      /* 0x1C */
     u8 unk1D;      /* 0x1D */
-} TextDrawArgs;
+};
 extern s32 func_00197068(TextDrawArgs *args);
 
-extern u32 D_003BB15C;
-extern u32 D_003D6E20[];
-extern FrFontSystem frFontWork;
-extern s32 D_003BAA98;
-extern s32 D_003BAA9C;
-s32 itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub);
-
 /* Subtract one modulo 256 from the first byte, then advance over the whole pair. */
-u32 itfReadEncodedTextLead(TextStream *stream) {
-    s32 *position = &stream->offset;
-    u8 *byte = stream->bytes + *position;
+u32 itfReadEncodedTextLead(TextDrawArgs *args) {
+    s32 *position = &args->offset;
+    u8 *byte = args->encodedText + *position;
     u32 value = *byte;
 
     *position += 2;
@@ -240,12 +267,13 @@ u32 itfReadEncodedTextLead(TextStream *stream) {
 
 /* Decode a little-endian pair; encoded high byte 0xFF is the zero escape.
  * Neither reader checks the input length. */
-u32 itfReadEncodedCode(TextStream *stream) {
+u32 itfReadEncodedCode(TextDrawArgs *args) {
+    u8 *bytes = args->encodedText;
     u32 first;
     u32 second;
 
-    first = (stream->bytes[stream->offset++] + ITF_BYTE_MASK) & ITF_BYTE_MASK;
-    second = stream->bytes[stream->offset++];
+    first = (bytes[args->offset++] + ITF_BYTE_MASK) & ITF_BYTE_MASK;
+    second = bytes[args->offset++];
     if (second == ITF_BYTE_MASK) {
         second = 0;
     } else {
@@ -254,7 +282,122 @@ u32 itfReadEncodedCode(TextStream *stream) {
     return (second << 8) | first;
 }
 
-INCLUDE_ASM(const s32, "game/code_00196478", func_001964F8);
+extern u32 D_003BB15C;
+extern u32 D_003D6E20[];
+extern FrFontSystem frFontWork;
+extern s32 D_003BAA98;
+extern s32 D_003BAA9C;
+s32 itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, s32 encodedText, s32 sub);
+
+s32 func_001964F8(s32 code, TextDrawArgs *stream) {
+    s32 *position = &stream->offset;
+    u8 *bytes = stream->encodedText;
+    s32 payloadWords = code & 0xF;
+    s32 payloadPosition = *position;
+
+    code = (code << 8) | bytes[payloadPosition++];
+    *position = payloadPosition;
+    switch (code) {
+    case 0xF206:
+        stream->color[0] = bytes[payloadPosition] - 1;
+        *position = payloadPosition + 2;
+        break;
+    case 0xF202:
+        stream->color[1] = bytes[payloadPosition] - 1;
+        *position = payloadPosition + 2;
+        break;
+    case 0xF209:
+        stream->color[2] = bytes[payloadPosition] - 1;
+        *position = payloadPosition + 2;
+        break;
+    case 0xF207:
+        stream->color[3] = bytes[payloadPosition] - 1;
+        *position = payloadPosition + 2;
+        break;
+    case 0xF203:
+        if (D_003D6E20[bytes[*position] - 1] != 0) {
+            frFontCheckPendingGlyphState((FrFontCtx *)stream);
+            func_00196220((u8)(stream->encodedText[*position] - 1), stream);
+        }
+        *position += 2;
+        break;
+    case 0xF20E:
+        *position = payloadPosition + 1;
+        break;
+    case 0xF10F:
+        if (!(frFontSharedGlyphFlags & 4)) {
+            goto advanceLine;
+        }
+        break;
+    case 0xF110:
+        D_003BB15C |= 2;
+        return 1;
+    case 0xF111:
+        if (!(frFontSharedGlyphFlags & 8)) {
+            goto checkAutomaticLine;
+        }
+        /* This flagged form requests the same stop as opcode F104. */
+    case 0xF104:
+        D_003BB15C |= 1;
+        return 1;
+
+checkAutomaticLine:
+        if (!(frFontSharedGlyphFlags & 0x20)) {
+            break;
+        }
+advanceLine:
+        frFontAdvanceContextCursor((FrFontCtx *)stream);
+        break;
+    case 0xF112:
+        D_003BB15C |= 4;
+        break;
+    case 0xF413:
+        mnuSetTitleVoicePrefixIndex(itfReadEncodedTextLead(stream));
+        mnuPlayTitleVoiceFile((char *)itfReadEncodedCode(stream));
+        break;
+    case 0xF214:
+        if (stream->sub->unk34 != 0) {
+            stream->sub->unk38 = 1;
+        }
+        stream->sub->unk30 = code;
+        stream->sub->unk3C = itfReadEncodedCode(stream);
+        break;
+    case 0xF215:
+        if (stream->sub->unk34 != 0) {
+            stream->sub->unk38 = 1;
+        }
+        stream->sub->unk30 = code;
+        stream->sub->unk3C = itfReadEncodedCode(stream);
+        if (stream->sub->unk3C != 0xFFFF) {
+            s32 frame = mnuGetTitleEffectFrameCounter();
+            stream->sub->unk3C -= frame;
+        }
+        if (stream->sub->unk3C < 0) {
+            stream->sub->unk3C = 0;
+        }
+        break;
+    case 0xF416:
+        D_003BB16C = itfReadEncodedTextLead(stream);
+        D_003BB170 = itfReadEncodedTextLead(stream);
+        D_003BB15C |= 8;
+        break;
+    case 0xF117:
+        stream->sub->unk34 = code;
+        break;
+    case 0xF20A:
+    case 0xF20B:
+    case 0xF20C:
+    case 0xF20D:
+        break;
+    default:
+        stream->offset += (payloadWords - 1) << 1;
+        break;
+    }
+    if (stream->unk1C == 0) {
+        stream->unk1C = 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00196478", func_001968C0);
 
@@ -278,8 +421,8 @@ s32 itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1
     args.color[1] = channel1;
     args.color[2] = channel2;
     args.color[3] = channel3;
-    args.encodedText = encodedText;
-    args.sub = sub;
+    args.encodedText = (u8 *)(u32)encodedText;
+    args.sub = (FrFontGlyph *)(u32)sub;
     args.offset = 0;
     args.unk1C = 1;
     args.unk1D = 1;
@@ -324,8 +467,8 @@ s32 itfInitTextDrawArgs(s32 encodedText, s32 sub) {
     args.color[1] = 0;
     args.color[2] = 0;
     args.color[3] = 0;
-    args.encodedText = encodedText;
-    args.sub = sub;
+    args.encodedText = (u8 *)(u32)encodedText;
+    args.sub = (FrFontGlyph *)(u32)sub;
     args.offset = 0;
     args.unk1C = 1;
     args.unk1D = 1;

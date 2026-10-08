@@ -403,7 +403,7 @@ extern void sdfReleaseChipBlock();
 
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 
-extern void func_0033A7E8(void *, SdfLightSources, void *);
+extern void sdfBuildLightingPacket(void *, SdfLightSources, void *);
 
 extern u128 D_004584B0[];
 
@@ -6961,7 +6961,7 @@ s32 effComputeLightDirectionVU(MdlCtx *model, void *target) {
     VU0_CLEAR_W(vf10);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, D_00458470);
-    func_0033A7E8(target, D_003E9F50, D_004584A0);
+    sdfBuildLightingPacket(target, D_003E9F50, D_004584A0);
     return 1;
 }
 

@@ -55,8 +55,8 @@ EvtUnit *effObjGetTransitionWork(EffWorldNode *object) {
     return ((EffectObjectData *)object->data)->transitionWork;
 }
 
-void func_00113328(EffWorldNode *object, u32 value) {
-    ((EffectObjectData *)object->data)->word14 = value;
+void effObjSetFollowParameterIndex(EffWorldNode *object, u32 value) {
+    ((EffectObjectData *)object->data)->followParameterIndex = value;
 }
 
 /* Return the signed shortest turn from one degree angle to another.
@@ -91,7 +91,7 @@ extern f32 sdfAtan2(f32, f32);
 #define EFFECT_HEADING_DEGREES_PER_RADIAN_APPROX 57.32484055f
 #define EFFECT_HEADING_RADIANS_TO_DEGREES 57.29577637f
 
-void func_00113408(EffWorldNode *obj, const f32 *targetPosition) {
+void effObjStepFollowAngleTowardPosition(EffWorldNode *obj, const f32 *targetPosition) {
     EffectObjectData *data = obj->data;
     f32 position[4];
     f32 currentAngle = data->angle;
@@ -139,14 +139,14 @@ void func_00113408(EffWorldNode *obj, const f32 *targetPosition) {
 
 extern void dds3ClearObjectFlags(void *object, u32 mask);
 
-void func_00113560(EffWorldNode *object) {
+void effObjStepFollowAngleTowardZero(EffWorldNode *object) {
     EffectObjectData *data = object->data;
     f32 angle;
     f32 value;
     f32 step;
 
-    if (data->timer > 0) {
-        data->timer--;
+    if (data->angleReturnDelayFrames > 0) {
+        data->angleReturnDelayFrames--;
     } else {
         angle = data->angle;
         if (angle < 0.1f && -0.1f < angle) {
@@ -175,16 +175,16 @@ void evtArmEffectObjectPendingValue(EffWorldNode *object, s32 value) {
 
     data = object->data;
     dds3SetObjectFlags(object, 0x2000);
-    data->pendingValue = value;
-    data->timer = 0;
+    data->pendingTargetKey = value;
+    data->angleReturnDelayFrames = 0;
 }
 
 void evtResetObjectPendingValue(EffWorldNode *object) {
     EffectObjectData *data;
 
     data = object->data;
-    data->timer = 0x1e;
-    data->pendingValue = 0;
+    data->angleReturnDelayFrames = 0x1e;
+    data->pendingTargetKey = 0;
 }
 
 s32 effObjInitializeFollowModelData(EffWorldNode *object) {
@@ -199,9 +199,9 @@ s32 effObjInitializeFollowModelData(EffWorldNode *object) {
     data->modelHolder = dds3CreateSlotResourceState(object);
     data->transitionWork = NULL;
     data->activeId = -1;
-    data->word14 = -1;
-    data->pendingValue = 0;
-    data->timer = 0;
+    data->followParameterIndex = -1;
+    data->pendingTargetKey = 0;
+    data->angleReturnDelayFrames = 0;
     data->angle = 0.0f;
     data->limitMin2C = -45.0f;
     data->limitMax30 = 45.0f;
@@ -261,9 +261,9 @@ extern void effMiscAxisAngleToQuaternionVU(f32);
 extern void effMiscQuatMultiplyVU(void);
 extern void effObjInnerVecBackup(ObjectTransform *);
 extern void func_00113D18(EffWorldNode *);
-extern void func_00113560(EffWorldNode *);
-extern void func_00113408(EffWorldNode *, const f32 *);
-extern void *func_001178B8(EffWorldNode *node);
+extern void effObjStepFollowAngleTowardZero(EffWorldNode *);
+extern void effObjStepFollowAngleTowardPosition(EffWorldNode *, const f32 *);
+extern void *dds3GetWorldNodeData(EffWorldNode *node);
 
 /* Per-frame refresh of a model effect object: rebuild the child transform from the follow record (a tilt that wobbles with its angle), then run the timed callbacks. */
 s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
@@ -335,10 +335,12 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
         func_00113D18(obj);
     }
     if (dds3TestObjectFlags(obj, 0x2000)) {
-        if (data->pendingValue != 0) {
-            func_00113408(obj, func_001178B8(dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), data->pendingValue, 0x11)));
+        if (data->pendingTargetKey != 0) {
+            effObjStepFollowAngleTowardPosition(
+                obj, dds3GetWorldNodeData(dds3FindWorldObjectNodeByKey(
+                    dds3GetWorldSecondaryObject(), data->pendingTargetKey, 0x11)));
         } else {
-            func_00113560(obj);
+            effObjStepFollowAngleTowardZero(obj);
         }
     }
     return 1;
@@ -367,10 +369,10 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
     if (dds3TestObjectFlags(obj, 0x200) && target != NULL && !(target->owner->flags & 1)) {
         func_00120B88(obj);
     }
-    if ((s32)((EffectObjectData *)obj->data)->word14 == -1) {
+    if ((s32)((EffectObjectData *)obj->data)->followParameterIndex == -1) {
         func_00112518(D_00380788, obj);
     } else {
-        func_00112518(D_00380788 + (s32)((EffectObjectData *)obj->data)->word14 * 0x10, obj);
+        func_00112518(D_00380788 + (s32)((EffectObjectData *)obj->data)->followParameterIndex * 0x10, obj);
     }
     if (!dds3TestObjectFlags(obj, 0x400)) {
         return 1;

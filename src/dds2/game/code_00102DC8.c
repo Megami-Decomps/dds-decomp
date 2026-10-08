@@ -827,7 +827,7 @@ typedef struct KwlnFrameDrawBank {
     u8 scenePacketStorage[0x420]; /* Light and following per-frame packets. */
     SdfListHead thirdList;
     ConsMatrixPacket thirdMatrix;
-    u8 overlayLightPacket[0xE0];
+    SdfLightingPacketStorage overlayLightPacket;
 } KwlnFrameDrawBank;
 typedef char KwlnFrameDrawBank_size_check[sizeof(KwlnFrameDrawBank) == 0x1F40 ? 1 : -1];
 typedef char SceneNode_size_check[sizeof(SdfSceneNode) == 0x220 ? 1 : -1];
@@ -847,7 +847,7 @@ extern void sdfClearLinkedPacketList(SdfLinkedPacketList *);
 extern void sdfInitSceneNode(SdfSceneNode *, SdfGraphObj *);
 extern void sdfBuildCenteredViewBoundsPacket(u64 *, s32, s32, s32, s32);
 extern void sdfAppendLinkedPacketPayload(SdfListHead *, SdfLinkedPacketList *, u32 *);
-extern void func_0033A7E8(void *, SdfLightSources, f32 *);
+extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Initialize the selected frame bank's program, scene and overlay packet chains. */
 void func_00105070(s32 bufferIndex) {
@@ -871,13 +871,13 @@ void func_00105070(s32 bufferIndex) {
     sdfConsBuildMatrixPacket(&D_00380870[bufferIndex].sceneMatrix,
                              &sdfSceneProjectionParameters, sdfViewMatrix);
     sdfAppendPacket(&D_00380870[bufferIndex].sceneList, (u32)&D_00380870[bufferIndex].sceneMatrix);
-    func_0033A7E8(&D_00380870[bufferIndex].scenePacketStorage, D_0037F770, kwlnDefaultColorVector);
+    sdfBuildLightingPacket(&D_00380870[bufferIndex].scenePacketStorage, D_0037F770, kwlnDefaultColorVector);
     sdfAppendPacket(&D_00380870[bufferIndex].sceneList, (u32)&D_00380870[bufferIndex].scenePacketStorage);
 
     sdfInitPacketList(&D_00380870[bufferIndex].thirdList);
     sdfConsBuildMatrixPacket(&D_00380870[bufferIndex].thirdMatrix, &D_0037F980, D_00384790);
     sdfAppendPacket(&D_00380870[bufferIndex].thirdList, (u32)&D_00380870[bufferIndex].thirdMatrix);
-    func_0033A7E8(&D_00380870[bufferIndex].overlayLightPacket, D_0037FB10, D_0037FB20);
+    sdfBuildLightingPacket(&D_00380870[bufferIndex].overlayLightPacket, D_0037FB10, D_0037FB20);
     sdfAppendPacket(&D_00380870[bufferIndex].thirdList, (u32)&D_00380870[bufferIndex].overlayLightPacket);
 }
 
