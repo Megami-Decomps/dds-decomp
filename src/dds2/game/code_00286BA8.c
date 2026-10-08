@@ -2,6 +2,7 @@
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "dat_state.h"
+#include "dsp_name.h"
 
 #define MTR_RECORD_COUNT 32
 #define MTR_STATUS_RESOURCE_BYTES 0xC08
@@ -327,7 +328,220 @@ INCLUDE_RODATA(const s32, "game/code_00286BA8", D_00426218);
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287AF8);
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287C20);
+typedef struct DspUnitName {
+    u8 encodedText[17];
+} DspUnitName;
+
+extern DspUnitName *D_00435E48;
+extern DspMantraName *D_00435E50;
+extern s8 D_0037F510[];
+extern u32 mnuGetSelectedNodeValue(MnuStatusResource *);
+extern u16 mnuGetSelectedPanelValue(MnuStatusResource *);
+extern u32 mnuGetDefaultPanelSelector(MnuStatusResource *);
+extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
+extern s32 mnuGetMantraSourceValue(u16);
+extern u8 scrSelectScriptEntryAndInitialize(DatPartyRecord *, u32);
+extern void evtCopyEntryStringToActiveWindow(s32, s32);
+extern s32 func_0035C860(char *, const char *, ...);
+extern s32 dspStartEntry(s32);
+extern s32 evtStoreValueAndCaptureWindowPanelValue(s32);
+extern s32 evtGetMessageWindowControlState(void);
+extern s8 evtGetCapturedWindowPanelValue(void);
+extern void evtFinishMessageWindowAndNotify(void);
+extern void evtSetMessageWindowOptionWhenOpen(s32);
+extern void sndSetSequenceVolumePan(s32, s32, s32);
+extern void mnuShowMantraInfo(u32);
+extern void mnuShowMantraScrollCursor(u32);
+extern void mnuShowMantraUnitPanel(u32);
+extern void mnuToggleMantraTitleBlink(u32);
+extern void mnuToggleMantraTypeOnePanelMode(u32);
+extern void mnuSetMantraBackgroundVariant(u32, s8);
+extern void mnuShowMantraLimitLine(u32);
+extern void mnuKeepMantraBackgroundMaskVisible(u32);
+extern void sdfSetTaskItemMode(void *, s32, u32);
+/* The native call forwards only the work pointer; later callers pass all three provider inputs. */
+extern void func_0028D070();
+
+INCLUDE_SDATA(const s32, "game/code_00286BA8", D_00437918);
+
+s32 func_00287C20(void) {
+    MnuStatusResource *work;
+    MtrEquipState *equip;
+    DatPartyRecord *selectedRecord;
+    MantraNodePos *defaultSelector;
+    s32 selectedPanelFlags;
+    s32 selectedHighFlags;
+    u16 sourceEntryId;
+    s32 selectedEntryId;
+    s32 sourceAmount;
+    s32 resultKind = 0;
+    char text[16];
+
+    mnuTickPanelSoundEntries();
+    work = (MnuStatusResource *)func_00312810((struct TaskWork *)mnuMantraSelectionResource, -1);
+    equip = &work->menu.equip;
+    selectedRecord = (DatPartyRecord *)mnuGetSelectedNodeValue(work);
+    defaultSelector = (MantraNodePos *)mnuGetDefaultPanelSelector(work);
+    selectedEntryId = defaultSelector->selector.fields.index;
+    selectedPanelFlags = mnuGetSelectedPanelValue(work);
+    switch (equip->state) {
+    case 1:
+        if (D_0037F510[0x21] < 0) {
+            resultKind = 1;
+            if (scrGetSelectedScriptEntryId(selectedRecord) == (u32)selectedEntryId) {
+                if (((u32)selectedPanelFlags >> 8) & 1) {
+                    equip->state = 11;
+                } else {
+                    equip->state = 8;
+                }
+            } else {
+                selectedHighFlags = (selectedPanelFlags & 0xFF00) >> 8;
+                if (selectedHighFlags & 1) {
+                    equip->state = 10;
+                } else if (selectedHighFlags & 2) {
+                    equip->state = 3;
+                } else {
+                    sourceAmount = mnuGetMantraSourceValue((u16)selectedEntryId);
+                    if ((u32)datGameState->header.currency < (u32)sourceAmount) {
+                        equip->state = 7;
+                    } else {
+                        equip->state = 2;
+                    }
+                }
+            }
+        } else if (D_0037F510[0x23] >= 0) {
+            break;
+        } else {
+            resultKind = 2;
+            if (work->flags.fadeProgress != 0) {
+                equip->state = 12;
+            }
+        }
+        break;
+
+    case 2:
+        evtCopyEntryStringToActiveWindow(0, (s32)D_00435E48[selectedRecord->unitId].encodedText);
+        evtCopyEntryStringToActiveWindow(
+            1, (s32)D_00435E50[scrGetSelectedScriptEntryId(selectedRecord)].encodedText);
+        evtCopyEntryStringToActiveWindow(
+            2, (s32)D_00435E50[selectedEntryId].encodedText);
+        sourceAmount = mnuGetMantraSourceValue((u16)selectedEntryId);
+        func_0035C860(text, "%d", sourceAmount);
+        evtCopyEntryStringToActiveWindow(3, (s32)text);
+        evtSetMessageWindowOptionWhenOpen(0);
+        dspStartEntry(0);
+        evtStoreValueAndCaptureWindowPanelValue(8);
+        equip->state = 4;
+        break;
+
+    case 3:
+        evtCopyEntryStringToActiveWindow(0, (s32)D_00435E48[selectedRecord->unitId].encodedText);
+        evtCopyEntryStringToActiveWindow(
+            1, (s32)D_00435E50[scrGetSelectedScriptEntryId(selectedRecord)].encodedText);
+        evtCopyEntryStringToActiveWindow(
+            2, (s32)D_00435E50[selectedEntryId].encodedText);
+        sourceAmount = mnuGetMantraSourceValue((u16)selectedEntryId);
+        func_0035C860(text, "%d", sourceAmount);
+        evtCopyEntryStringToActiveWindow(3, (s32)text);
+        evtSetMessageWindowOptionWhenOpen(0);
+        dspStartEntry(1);
+        evtStoreValueAndCaptureWindowPanelValue(8);
+        equip->state = 4;
+        break;
+
+    case 4:
+        if (evtGetMessageWindowControlState() != 0) {
+            break;
+        }
+        if (evtGetCapturedWindowPanelValue() != 0) {
+            equip->state = 12;
+        } else {
+            equip->state = 6;
+        }
+        break;
+
+    case 5:
+        break;
+
+    case 6:
+        sourceEntryId = (u16)selectedEntryId;
+        evtCopyEntryStringToActiveWindow(0, (s32)D_00435E48[selectedRecord->unitId].encodedText);
+        evtCopyEntryStringToActiveWindow(
+            1, (s32)D_00435E50[scrGetSelectedScriptEntryId(selectedRecord)].encodedText);
+        evtCopyEntryStringToActiveWindow(
+            2, (s32)D_00435E50[selectedEntryId].encodedText);
+        sourceAmount = mnuGetMantraSourceValue(sourceEntryId);
+        func_0035C860(text, "%d", sourceAmount);
+        evtCopyEntryStringToActiveWindow(3, (s32)text);
+        dspStartEntry(2);
+        equip->state = 12;
+        if ((((u32)selectedPanelFlags >> 8) & 2) == 0) {
+            sourceAmount = mnuGetMantraSourceValue(sourceEntryId);
+            datGameState->header.currency -= sourceAmount;
+        }
+        work->flags.unk04 = 1;
+        scrSelectScriptEntryAndInitialize(selectedRecord, selectedEntryId);
+        break;
+
+    case 7:
+        dspStartEntry(3);
+        equip->state = 12;
+        break;
+
+    case 8:
+        dspStartEntry(4);
+        equip->state = 12;
+        break;
+
+    case 9:
+        dspStartEntry(5);
+        equip->state = 12;
+        break;
+
+    case 10:
+        dspStartEntry(6);
+        equip->state = 12;
+        break;
+
+    case 11:
+        dspStartEntry(7);
+        equip->state = 12;
+        break;
+
+    case 12:
+        if (work->flags.fadeProgress == 0 || evtGetMessageWindowControlState() != 0) {
+            break;
+        }
+        evtFinishMessageWindowAndNotify();
+        mnuShowMantraInfo(work->menu.selectionController);
+        mnuShowMantraScrollCursor(work->menu.selectionController);
+        mnuShowMantraUnitPanel(work->menu.selectionController);
+        mnuToggleMantraTitleBlink(work->menu.selectionController);
+        mnuToggleMantraTypeOnePanelMode(work->menu.selectionController);
+        mnuSetMantraBackgroundVariant(work->menu.selectionController, 0);
+        if (work->menu.drawBits.showOverlay) {
+            mnuShowMantraLimitLine(work->menu.selectionController);
+        }
+        mnuKeepMantraBackgroundMaskVisible(work->menu.selectionController);
+        func_0028D070(work);
+        sdfSetTaskItemMode((struct TaskWork *)mnuMantraSelectionResource, 2, 1);
+        return -1;
+    default:
+        break;
+    }
+
+    switch (resultKind) {
+    case 1:
+        sndSetSequenceVolumePan(8, 0x7F, 0x3F);
+        break;
+    case 2:
+        sndSetSequenceVolumePan(10, 0x7F, 0x3F);
+        break;
+    default:
+        break;
+    }
+    return 0;
+}
 
 extern void func_0026C900(void);
 extern void mnuUpdateMantraDrawPool(u32 pool);
@@ -645,10 +859,6 @@ INCLUDE_ASM(const s32, "game/code_00286BA8", func_00288BD8);
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00288DD0);
 
 INCLUDE_RODATA(const s32, "game/code_00286BA8", D_004262B0);
-
-INCLUDE_SDATA(const s32, "game/code_00286BA8", D_00437918);
-
-INCLUDE_SDATA(const s32, "game/code_00286BA8", D_00437920);
 
 INCLUDE_SDATA(const s32, "game/code_00286BA8", mnuMantraSelectionResource);
 
