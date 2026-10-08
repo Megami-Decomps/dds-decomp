@@ -43,8 +43,6 @@ typedef struct MenuList MenuList;
 
 extern void func_0027CA90();
 
-extern void mnuReleasePageHandlesAndClearSelection();
-
 extern void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *);
 
 extern void itfSetGridEntryQuantizedAndRefresh(s32, s32, s32, s32, s32, s32);
@@ -1303,7 +1301,7 @@ void mnuSetWindowResource(s32 index, MenuPageWindow *window, s32 resource, s32 o
 
 void mnuClearEntries(MenuPageWindow *menu) {
     u32 i;
-    mnuReleasePageHandlesAndClearSelection();
+    mnuReleasePageHandlesAndClearSelection(menu);
     for (i = 0; i < 5; i++) {
         if (menu->slots[i].windowSprites != NULL) {
             mnuFreeIconSprites(menu->slots[i].windowSprites);
@@ -1646,9 +1644,7 @@ void mnuSelectPage(MenuPageWindow *window, s32 selected) {
     mnuReleasePageTexturesAndSelectedResources(window);
 }
 
-void mnuReleasePageHandlesAndClearSelection(window)
-    MenuPageWindow *window;
-{
+void mnuReleasePageHandlesAndClearSelection(MenuPageWindow *window) {
     struct EffectSlotSet **resource = window->handlesC;
     u32 i;
 

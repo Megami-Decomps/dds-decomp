@@ -555,6 +555,7 @@ typedef char MenuPageWindow_handlesC_offset_check[
     ((u32)&((MenuPageWindow *)0)->handlesC == 0x64) ? 1 : -1];
 typedef char MenuPageWindow_handlesC_extent_check[
     sizeof(((MenuPageWindow *)0)->handlesC) == 0x14 ? 1 : -1];
+void mnuReleasePageHandlesAndClearSelection(MenuPageWindow *);
 #endif
 
 void mnuCopyPrimaryWindowHandles(MenuPageWindow *, struct EffectSlotSet **);
