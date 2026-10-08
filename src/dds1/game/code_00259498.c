@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "sdf_task_work.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
 #include "mnu_scene.h"
@@ -25,7 +26,6 @@ typedef s16 MnuVariantSpritePlacement[6];
 
 extern MnuVariantSpritePlacement D_0036B7F0[];
 extern s32 mnuSceneResourceContext;
-extern void *func_002CB3B8(s32, s32);
 extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *, MnuProfileProgress *);
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern void func_0024EC08(s32, s32, s32, s32, s32, s32, f32, f32, s32);
@@ -50,7 +50,7 @@ void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
         u32 flags;
         s32 display;
 
-        display = (s32)func_002CB3B8(mnuSceneResourceContext, 1);
+        display = (s32)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
         scene = (MnuMantraGridEntry *)(u32)entry->value;
         pulse = 0.0f;
         scene->frame++;
@@ -188,7 +188,7 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
     }
     selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
     states = (MantraPrerequisiteState *)(u32)grid->userData;
-    display = func_002CB3B8(mnuSceneResourceContext, 1);
+    display = (MantraPulseDisplayWork *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
     record = &D_0036AE80[scene->sceneId];
     alpha = display->alpha;
     memset(prerequisiteFlags, 0, sizeof(prerequisiteFlags));

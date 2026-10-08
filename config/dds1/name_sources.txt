@@ -5436,7 +5436,7 @@
 0x002A4DF8	effCreateRingHandle	inferred	Byte-identical dds2 twin 0x002E6E70; DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described createEffectRingHandle behavior. [names_conflicts.tsv]
 0x002A4EA0	effReleaseRingHandle	inferred	Queues ring asset release and frees its enclosing handle allocation. [names_reviewed5.tsv]
 0x002A5118	billDrawCellBlendB	inferred	same as above
-0x002A5288	effPayloadPointerSet	inferred	paired effect body: stores payload [names_R_FuncNames7.tsv]
+0x002A5288	effCreateClassWork	inferred	allocates the complete class work and copied kind-selected payload, creates its resource, and initializes it
 0x002A5378	effCreateClassWorkFromFile	inferred	File-job callback resolves primary buffer and creates class work for request kind. [names_R_FuncNames4.tsv]
 0x002A53A8	effDestroyClassWork	inferred	Calls kind-indexed resource destructor and frees class work. [names_R_FuncNames4.tsv]
 0x002A53F0	effCreateClassWorkFromRequest	inferred	Creates class work using kind and source fields in the request. [names_R_FuncNames4.tsv]
@@ -5966,6 +5966,7 @@
 0x002CB300	sdfAttachTaskItem	inferred	sdf system, device, DMA, or task infrastructure in game/code_002C97E8.c
 0x002CB358	sdfRemoveTaskItem	inferred	sdf system, device, DMA, or task infrastructure in game/code_002C97E8.c
 0x002CB390	sdfFindTaskItemValueByKey	inferred	Returns the matching task-list item's stored value or zero if the key is absent.
+0x002CB3B8	sdfGetTaskValueByKey	inferred	key -1 returns retained task-list userData address word; other keys return signed entry initResult or zero
 0x002CB3F8	sdfSetTaskItemMode	inferred	Mode 0 enables active/update/callback, 1 queues activation, 2 suspends, 3 selects callback only, and 4 selects update only.
 0x002CB4B8	sdfCreateNamedTaskWork	inferred	confidence=high; src/dds1/game/code_002C97E8.c:func_002CB4B8; Allocates task work and its header, installs destruction callbacks, and allocates primary and draw-prefixed task names. [names_qp9.tsv]
 0x002CB5A8	sdfDestroyTaskResourceWork	inferred	Destroys nested task work, frees two buffers, and releases its allocation.
