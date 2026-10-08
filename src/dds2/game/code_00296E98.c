@@ -42,7 +42,7 @@ extern void sndEnsureMidiBankResident(s32);
 
 extern void mnuAppendCampSpriteRequests(s32, StaffSlots *);
 
-extern void effRequestResourceByMode(char *, char *, s32, s32);
+extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
 extern void mnuRequestEffectResources(MenuEffectResources *);
 
