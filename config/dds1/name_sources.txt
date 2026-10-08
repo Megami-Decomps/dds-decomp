@@ -1912,12 +1912,14 @@
 0x0017BE90	effPcpCreateChargeWorkFromTable	inferred	Extracts first parameter block and creates compact charge work. [names_reviewed8.tsv]
 0x0017BEB0	effPcpChargeRespawn	inferred	rebuild of the params block from the live work (words at 0x14..0x2C, resource at 0x34), calls func_0017BE00
 0x0017BF60	effPcpReleaseCompactBlurWork	inferred	Releases the work's blur resource then frees work. [names_reviewed6.tsv]
+0x0017BF90	effPcpUpdateCompactScatterWork	inferred	Updates the compact scatter resource owner, projected center, timeline opacity and frame.
 0x0017C158	effPcpCopyCompactBlurVector	inferred	Copies vector in compact blur resource work callback group. [names_reviewed8.tsv]
 0x0017C168	effPcpCompactSetColor	inferred	Stores packed color on compact effect work; the initializer uses that field for default gray. [names_reviewed6.tsv]
 0x0017C170	effPcpCreateCompactResourceWork	inferred	Allocates compact work, creates resource handle and copies flags and parameters. [names_reviewed6.tsv]
 0x0017C200	effPcpCreateChargeResourceWorkFromTable	inferred	Extracts first parameter block and creates charge work with its own resource. [names_reviewed8.tsv]
 0x0017C220	effPcpChargeLongRespawn	inferred	sibling of effPcpChargeRespawn that calls func_0017C170
 0x0017C2D0	effPcpReleaseSecondaryBlurWork	inferred	Releases second blur resource on work then frees work allocation. [names_reviewed6.tsv]
+0x0017C300	effPcpUpdateCompactScaleWork	inferred	Updates the compact scale resource owner, projected center, timeline opacity and frame.
 0x0017C4F0	effPcpCopyShortThunderFadeVector	inferred	Copies vector for short thunder-fade effect work. [names_reviewed8.tsv]
 0x0017C500	effPcpSetChargeResourceColor	inferred	src/dds1/effect/effPCPMisc.c:func_0017C500; Writes the charge-resource work color parameter; registered in the same color callback slot as named effect color setters. Registration: asm/dds1/data/data.data.s:65349: table record 0x00354140, color slot. [names_qp9.tsv]
 0x0017C508	effPcpInitShortThunderFadeWork	inferred	Creates thunder handle from parameters for the adjacent short-fade effect. [names_reviewed6.tsv]
