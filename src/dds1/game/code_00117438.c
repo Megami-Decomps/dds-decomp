@@ -4,6 +4,7 @@
 #include "pcp_vu0.h"
 #include "btl_action.h"
 #include "dat_state.h"
+#include "dat_command.h"
 #include "sdf.h"
 
 extern u32 scrGetWorkTaskHandle(void);
@@ -13,8 +14,6 @@ extern void dds3WorkInit(void *header);
 extern void *D_003BAAAC;
 
 extern s32 datEnemyRecords;
-extern s32 datCommandSelectors;
-extern u8 *datCommandRecords;
 typedef struct EvtScaledValue {
     u32 unk0;
     u32 flags;
@@ -58,12 +57,6 @@ typedef struct SdfEnemyVitals {
     u8 pad0A[2];
     u16 maxMp;          /* 0x0C */
 } SdfEnemyVitals;
-
-/* Two-byte runtime-mode entries; the signed second byte selects script 0x18. */
-typedef struct SdfUnitMode {
-    s8 code; /* 0x00: used as a resource index by sound/UI consumers */
-    s8 kind; /* 0x01: 5 selects the alternate unit script */
-} SdfUnitMode;
 
 extern u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed);
 extern char sdfRuntimeTaskName[];
@@ -450,10 +443,10 @@ s32 sdfDispatchUnitScriptDefault5(u32 unitIndex, u32 scriptArg, u32 contextArg, 
     s32 result;
     u8 flags;
 
-    if (((SdfUnitMode *)datCommandSelectors)[unitIndex].kind == 5) {
+    if (datCommandSelectors[unitIndex].kind == 5) {
         result = evtRunContext(0x18, scriptArg, contextArg, unitIndex, mode);
     } else {
-        flags = datCommandRecords[unitIndex * 0x38];
+        flags = datCommandRecords[unitIndex].flags;
         if (flags & 0x40) {
             result = evtRunContext(0x1B, scriptArg, contextArg, unitIndex, mode);
         } else if (flags & 0x80) {
@@ -473,10 +466,10 @@ s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, 
     s32 result;
     u8 flags;
 
-    if (((SdfUnitMode *)datCommandSelectors)[unitIndex].kind == 5) {
+    if (datCommandSelectors[unitIndex].kind == 5) {
         result = evtRunContext(0x18, scriptArg, contextArg, unitIndex, mode);
     } else {
-        flags = datCommandRecords[unitIndex * 0x38];
+        flags = datCommandRecords[unitIndex].flags;
         if (flags & 0x40) {
             result = evtRunContext(0x1B, scriptArg, contextArg, unitIndex, mode);
         } else if (flags & 0x80) {
@@ -510,19 +503,6 @@ extern s32 effMiscRandMod(s32, s32);
 extern void func_003003F0(const char *, ...);
 extern char D_0039F980[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
-/* Per-slot battle record (0x38 bytes) in datCommandRecords. */
-typedef struct SdfBattleSlot {
-    u8 pad00[0x24];
-    u8 type;        /* 0x24: 1/3 = skill-scaled hit roll, 2 = bit query */
-    u8 chance;      /* 0x25: hit chance in percent, >= 100 always hits */
-    u16 mask;       /* 0x26: candidate channel bits */
-    u8 pad28[8];
-    u32 mode;       /* 0x30 */
-    u8 pad34[4];
-} SdfBattleSlot;
-
-#define SDF_BATTLE_SLOT(i) ((SdfBattleSlot *)(datCommandRecords + (i) * 0x38))
-
 /* Rolls whether the action hits: returns the surviving channel mask, or 0 on a miss. */
 u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
     u16 list[16];
@@ -535,8 +515,8 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
     s32 hit;
     u16 flag;
 
-    mask = SDF_BATTLE_SLOT(index)->mask;
-    if (SDF_BATTLE_SLOT(index)->type == 3) {
+    mask = datCommandRecords[index].attribute.parts.flagMask;
+    if (datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK) {
         count = 0;
         for (bit = 0; bit < 16; bit++) {
             if ((mask >> bit) & 1) {
@@ -546,9 +526,11 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
         }
         mask = 1 << list[effMiscRandMod(0, count)];
     }
-    if (mask != 0 && (SDF_BATTLE_SLOT(index)->type == 1 || SDF_BATTLE_SLOT(index)->type == 3)) {
+    if (mask != 0 &&
+        (datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_ELEMENT_MASK ||
+         datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK)) {
         kind = datFlagToElementIndex(mask);
-        if (!(SDF_BATTLE_SLOT(index)->mode == 4 && (packed->flagsAndValue & 0x7FFF) == 8)) {
+        if (!(datCommandRecords[index].unk30 == 4 && (packed->flagsAndValue & 0x7FFF) == 8)) {
             if (datGetEffectiveAffinity((struct DatUnitStatus *)packed, kind) & 0x170000) {
                 return 0;
             }
@@ -593,7 +575,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
         return 0;
     }
     hit = 1;
-    if (SDF_BATTLE_SLOT(index)->chance < 100) {
+    if (datCommandRecords[index].attribute.parts.hitChance < 100) {
         scaled = evtRunContext(0xC, queryArg, packed, index, mask) * ((f32)ratio / 100.0f);
         func_003003F0(D_0039F980, scaled, ratio, mask);
         hit = effMiscRandMod(0, 100) < scaled;
@@ -603,9 +585,10 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
 
 u32 sdfQueryChannelValue(s32 channel, s32 queryArg, SdfPackedValue *item) {
     u32 result;
-    u32 mode = datCommandRecords[channel * 0x38 + 0x24];
+    u32 mode = datCommandRecords[channel].attribute.parts.kind;
 
-    if (mode != 1 && mode != 3) {
+    if (mode != DAT_COMMAND_ATTRIBUTE_KIND_ELEMENT_MASK &&
+        mode != DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK) {
         return 0;
     }
     result = sdfRollActionHit(channel, queryArg, item);
@@ -618,7 +601,7 @@ u32 sdfQueryChannelValue(s32 channel, s32 queryArg, SdfPackedValue *item) {
 u32 sdfQueryChannelBits(s32 channel, s32 queryArg, SdfPackedValue *item) {
     u32 result;
 
-    if (datCommandRecords[channel * 0x38 + 0x24] != 2) {
+    if (datCommandRecords[channel].attribute.parts.kind != DAT_COMMAND_ATTRIBUTE_KIND_FLAG_MASK) {
         return 0;
     }
     result = sdfRollActionHit(channel, queryArg, item);
@@ -660,7 +643,8 @@ s32 sdfApplyCommandResults(s32 channel, s32 queryArg, SdfPackedValue *item) {
             }
         }
     }
-    switch (SDF_BATTLE_SLOT(channel)->mode) {
+    /* This dispatch compares the full row word as unsigned. */
+    switch ((u32)datCommandRecords[channel].unk30) {
     case 5:
         datGameState->world.fieldFlags |= 1;
         break;

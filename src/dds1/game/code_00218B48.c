@@ -1011,15 +1011,15 @@ typedef struct MdlNodeInfo {
 
 extern u8 sdfViewTargetVector[];
 
-extern u8 *sdfModelFindDrawNode(void *chunk, s32 id);
+extern SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id);
 
 /* vu0 routine: positionOut = p + normalize(p - sdfViewTargetVector) * scale, p = transformed node position. */
-void mdlResolveAnchorPosition(void *chunk, MdlResourceItem *anchorRecord, f32 *positionOut) {
+void mdlResolveAnchorPosition(SdfModel *model, MdlResourceItem *anchorRecord, f32 *positionOut) {
     MdlNodeInfo *nodeInfo = anchorRecord->payload.part.record;
-    u8 *drawNode = sdfModelFindDrawNode(chunk, nodeInfo->id);
+    SdfDrawNode *drawNode = sdfModelFindDrawNode(model, nodeInfo->id);
     f32 scale = anchorRecord->payload.part.value;
 
-    VU0_LOAD_MATRIX(drawNode + 0xC0);
+    VU0_LOAD_MATRIX(drawNode->worldMatrix);
         VU0_LOAD_VF(vf10, nodeInfo->pos);
     VU0_TRANSFORM_POINT(vf10, vf10);
     VU0_MOVE_VF(vf11, vf10);
@@ -1042,19 +1042,19 @@ extern void effUpdateNode(s32 handle);
 
 /* Update anchored billboard/effect positions, tracked polygons, or deferred object initialization by type. */
 void mdlDispatchViewerAnchorRecord(MdlCtx *owner, MdlResourceItem *anchorRecord) {
-    void *chunk = owner->inner;
+    SdfModel *model = owner->inner;
     f32 position[4];
     s32 resourceHandle;
 
     switch (anchorRecord->type) {
     case 0:
-        mdlResolveAnchorPosition(chunk, anchorRecord, position);
+        mdlResolveAnchorPosition(model, anchorRecord, position);
         resourceHandle = anchorRecord->payload.part.handle;
         effCopyVector(resourceHandle, position);
         billInvokeCallback(resourceHandle);
         break;
     case 1:
-        mdlResolveAnchorPosition(chunk, anchorRecord, position);
+        mdlResolveAnchorPosition(model, anchorRecord, position);
         resourceHandle = anchorRecord->payload.part.handle;
         effCopyVectorToNodeInstance((struct EffNode *)resourceHandle, position);
         effUpdateNode(resourceHandle);

@@ -995,7 +995,7 @@ s32 fldClassifyActorSceneGroup(ActionStateLink *task) {
     }
 }
 
-extern u32 func_001AB8D8();
+extern s32 func_001AB8D8(DatPartyRecord *unit, s32 statIndex);
 
 /* Sort adjacent occupied tasks by descending accessor value; null slots stay put. */
 void btlSortSceneGroupByPriorityDesc(ActionStateLink **group, s32 entryCount) {
@@ -1008,7 +1008,8 @@ void btlSortSceneGroupByPriorityDesc(ActionStateLink **group, s32 entryCount) {
             ActionStateLink *first = pairCursor[0];
             ActionStateLink *second = pairCursor[1];
             if (first != 0 && second != 0 &&
-                func_001AB8D8((s32)&first->unit->partyRecord.flags, 3) < func_001AB8D8((s32)&second->unit->partyRecord.flags, 3)) {
+                (u32)func_001AB8D8(&first->unit->partyRecord, 3) <
+                (u32)func_001AB8D8(&second->unit->partyRecord, 3)) {
                 pairCursor[0] = second;
                 swapped = 1;
                 pairCursor[1] = first;

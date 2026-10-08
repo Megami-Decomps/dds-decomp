@@ -76,8 +76,7 @@ extern void *memcpy(void *dst, const void *src, u32 n);
 extern vu8 sdfCurrentBufferIndex;
 
 /* Retail selects by nodeId when flags bit 0 is set, otherwise by array index. */
-u8 *sdfModelFindDrawNode(void *chunk, s32 id) {
-    SdfModel *model = (SdfModel *)chunk;
+SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id) {
     DevRequest *list = model->list;
     s16 count;
     SdfDrawNode **entries;
@@ -89,7 +88,7 @@ u8 *sdfModelFindDrawNode(void *chunk, s32 id) {
         for (i = 0; i < count; i++) {
             SdfDrawNode *node = entries[i];
             if (node->nodeId == id) {
-                return (u8 *)node;
+                return node;
             }
         }
         return 0;
@@ -97,7 +96,7 @@ u8 *sdfModelFindDrawNode(void *chunk, s32 id) {
     if ((u32)id >= (u32)count) {
         return 0;
     }
-    return (u8 *)entries[id];
+    return entries[id];
 }
 
 /* Append a DMA REF for eight quadwords and a VIF V4-32 UNPACK for seven vectors. */

@@ -3,6 +3,7 @@
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "pcp_vu0.h"
+#include "dat_command.h"
 
 struct SdfModel;
 
@@ -288,14 +289,7 @@ typedef struct BtlCommandEffect {
     u8 pad07;
 } BtlCommandEffect;
 
-typedef struct BtlEffectCommandRecord {
-    u8 pad00[0x28];
-    s32 requiredFlags;
-    u8 pad2C[12];
-} BtlEffectCommandRecord;
-
 extern BtlCommandEffect D_00360468[];
-extern BtlEffectCommandRecord *datCommandRecords;
 extern s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *, s32);
 
 /* Retained operand groups can suppress the command's effect. */
@@ -325,8 +319,8 @@ s16 btlGetCommandEffectId(BtlTask *task, s32 command) {
         }
     }
     if (btlCheckCommandRequiredEntryMatches(task->indexWork.indices, command) != 0) {
-        if (datCommandRecords[command].requiredFlags == 0x800 ||
-            datCommandRecords[command].requiredFlags == 0x1000) {
+        if (datCommandRecords[command].requirementBits == 0x800 ||
+            datCommandRecords[command].requirementBits == 0x1000) {
             effect = 0x6A;
         } else {
             effect = 0x84;
