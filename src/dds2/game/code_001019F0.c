@@ -8,6 +8,8 @@
 struct EffWorldNode;
 extern struct EffWorldNode *dds3ActiveWorld;
 
+extern void func_00100F48(s32, KwlnTask *, u32, s32);
+
 /* Detach a task from its parent's child list. Detached tasks are left untouched;
  * an attached task must already occur in that parent's sibling chain.
  * The hierarchy link is next, separate from scheduler listNext/listPrev. */
@@ -32,12 +34,12 @@ void kwlnUnlinkListNode(KwlnTask *task) {
 }
 
 /* Set mask bits on the object selection described by object and scope. */
-void dds3SetScopedObjectFlags(u32 object, u32 mask, u32 scope) {
+void dds3SetScopedObjectFlags(KwlnTask *object, u32 mask, s32 scope) {
     func_00100F48(1, object, mask, scope);
 }
 
 /* Clear the same scoped object mask bits without changing the selection. */
-void dds3ClearScopedObjectFlags(u32 object, u32 mask, u32 scope) {
+void dds3ClearScopedObjectFlags(KwlnTask *object, u32 mask, s32 scope) {
     func_00100F48(0, object, mask, scope);
 }
 

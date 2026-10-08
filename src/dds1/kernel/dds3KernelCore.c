@@ -227,7 +227,54 @@ void kwlnTaskUpdateFlagsRecursive(s32 setFlags, KwlnTask* task, u32 flags)
     }
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00101060);
+void func_00101060(s32 setFlags, KwlnTask *task, u32 flags, s32 mode)
+{
+    KwlnTask *node = NULL;
+    s32 state;
+
+    switch (mode) {
+    case 0:
+        if (setFlags != 0) {
+            task->flags |= flags & 0x0FFFFFF0;
+        } else {
+            task->flags &= ~(flags & 0x0FFFFFF0);
+        }
+        return;
+    case 1:
+    case 3:
+        for (state = 0; state < 3; state++) {
+            switch (state) {
+            case 0:
+                node = kwlnDelayedStartTaskHead;
+                break;
+            case 1:
+                node = kwlnActiveTaskHead;
+                break;
+            case 2:
+                node = kwlnDelayedDestroyTaskHead;
+                break;
+            }
+            if (node != NULL) {
+                u32 setMask = flags & 0x0FFFFFF0;
+
+                while (node != NULL) {
+                    if ((node != task && mode == 1) || mode == 3) {
+                        if (setFlags != 0) {
+                            node->flags |= setMask;
+                        } else {
+                            node->flags &= ~setMask;
+                        }
+                    }
+                    node = node->listNext;
+                }
+            }
+        }
+        return;
+    case 2:
+        kwlnTaskUpdateFlagsRecursive(setFlags, task, flags);
+        break;
+    }
+}
 
 void* kwlnTaskGetStateList(u32 state)
 {
