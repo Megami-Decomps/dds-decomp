@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font_context.h"
 #include "mnu.h"
 #include "dat_state.h"
 #include "mnu_result.h"
@@ -371,7 +372,8 @@ extern void frFontSetGlyphChainDimensions(struct FrFontGlyph *, s32, s32);
 
 void mnuSetFontChainDimensionsAndMeasure(u32 fontContext) {
     frFontSetGlyphChainDimensions((struct FrFontGlyph *)(u32)fontContext, 0xc, 0x10);
-    frFontSetFlagAndMeasureGlyphs(fontContext, 0xfffffffffffffffc);
+    frFontSetFlagAndMeasureGlyphs((struct FrFontGlyph *)(u32)fontContext,
+        -4);
 }
 
 extern u32 uiBlendColors(u32, u32, s32);
