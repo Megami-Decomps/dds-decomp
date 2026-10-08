@@ -431,7 +431,6 @@ extern char D_003E74C0[];
 extern char D_003E7418[];
 extern s32 evtGetMessageWindowControlState(void);
 extern void func_002C1B68(u32 *, u32);
-extern void mnuHandlePanelListPageJumpInput(u32, u32);
 extern char D_003E7434[];
 extern char D_003E74DC[];
 
@@ -641,7 +640,7 @@ s32 func_002AD118(KwlnTask *callback) {
         if (input & 0x20) {
             mnuAdvanceWindowListSelection(window);
         }
-        mnuHandlePanelListPageJumpInput((u32)window, (u32)&input);
+        mnuHandlePanelListPageJumpInput(window, &input);
         mnuClearWindowPanelTransitionFlag(window);
         mnuPlayInputSound(0, input, &window->list->stateFlags);
     }
