@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_thunder_vector.h"
 #include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "btl_sound.h"
@@ -12,11 +13,6 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "bill_object_api.h"
-
-struct EffThunderVectorWork;
-
-
-
 
 /* Shared 0x24-byte thunder ray work. The renderer places its first point
    startDistance along the muzzle direction, then advances by length. */
@@ -215,8 +211,6 @@ extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *para
 extern void effReleaseResourceTemplate(EffResourceRectWork *work);
 extern void *effPcpTripleHandleCreate(void *block0, void **blocks);
 
-extern void *effCreateThunderCellSystemWork(void *params);
-extern void effThunderReleaseVectorWork(struct EffThunderVectorWork *work);
 extern void effThunderReleaseFragmentWork(void *work);
 extern void *effThunderFragCreate(void *params);
 typedef struct {
@@ -300,7 +294,6 @@ extern void mdlStorePrimaryVectorVU(void *obj);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 extern u8 D_00325828[];
 extern void mdlBroadcastMasked(void *obj, u32 mask);
-extern u32 func_00163540(u32 value);
 extern u32 func_00165638(u32 handle);
 extern void effThunderUpdateFragments(u32 handle);
 extern void effThunderSetFragmentColor(void *work, u32 value);
@@ -1706,13 +1699,13 @@ typedef struct EffPCPFadeWork {
     f32 unk10; /* Settable input; not read by the observed fade updates. */
     u32 color;
     u32 frame;
-    u32 handle;
+    EffThunderVectorWork *handle; /* 0x1C complete vector work owner */
 } EffPCPFadeWork;
 
 void effPcpInitializeThunderHandleWork(EffPCPFadeWork *work) {
-    u32 handle;
+    EffThunderVectorWork *handle;
 
-    handle = (u32)effCreateThunderCellSystemWork(D_00355008);
+    handle = effCreateThunderCellSystemWork((EffThunderAlphaParams *)D_00355008);
     work->frame = 0;
     work->handle = handle;
 }
@@ -1726,7 +1719,7 @@ void *effPcpCreateThunderHandleWork(void) {
 }
 
 void effPcpReleaseThunderHandleWork(EffPCPFadeWork *work) {
-    effThunderReleaseVectorWork((struct EffThunderVectorWork *)work->handle);
+    effThunderReleaseVectorWork(work->handle);
     sdfReleaseChipBlock(work);
 }
 
@@ -1738,39 +1731,33 @@ void *effAllocateThunderHandleWork(void) {
     return work;
 }
 
-typedef struct EffPCPFadeTarget {
-    u8 pad00[0x1C];
-    f32 sizeX; /* animated dimension on the first axis */
-    f32 sizeY; /* animated dimension on the second axis */
-} EffPCPFadeTarget;
-
-
-extern void effThunderSetVectorTint(struct EffThunderVectorWork *work, u32 value);
 extern void func_00163508(void *destination, void *source);
-extern void effThunderUpdateVectorCells(struct EffThunderVectorWork *work);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 
 /* Scales the target over the first 22 frames, fades the colour out from frame 45. */
 void effPcpThunderExpandThenFadeUpdate(EffPCPFadeWork *work) {
-    EffPCPFadeTarget *target;
+    EffThunderParameterHead *parameterHead;
     f32 phase;
     u32 fadedColor;
+    u32 frame;
 
-    if (work->frame < 0x17) {
-        target = (EffPCPFadeTarget *)func_00163540(work->handle);
-        phase = (f32)work->frame / 22.0f;
-        target->sizeX = phase * 600.0f + 200.0f;
-        target->sizeY = phase * 300.0f + 100.0f;
+    frame = work->frame;
+    if (frame < 0x17) {
+        parameterHead = effThunderGetParameterHead(work->handle);
+        frame = work->frame;
+        phase = (f32)frame / 22.0f;
+        parameterHead->vector.radiusScale = phase * 600.0f + 200.0f;
+        parameterHead->vector.heightScale = phase * 300.0f + 100.0f;
     }
-    if (work->frame >= 0x2D) {
-        phase = (f32)(work->frame - 0x2D) / 30.0f;
+    if (frame >= 0x2D) {
+        phase = (f32)(frame - 0x2D) / 30.0f;
         fadedColor = effBlendColor(work->color, 0, phase);
     } else {
         fadedColor = work->color;
     }
-    effThunderSetVectorTint((struct EffThunderVectorWork *)work->handle, fadedColor);
+    effThunderSetVectorTint(work->handle, fadedColor);
     func_00163508((void *)work->handle, work);
-    effThunderUpdateVectorCells((struct EffThunderVectorWork *)work->handle);
+    effThunderUpdateVectorCells(work->handle);
     work->frame++;
 }
 
@@ -1884,9 +1871,9 @@ void effPcpSetDenseConeColor(EffPCPThunderGroup *work, u32 val) {
 }
 
 void effPcpInitGrowingThunderFadeWork(EffPCPFadeWork *work) {
-    u32 handle;
+    EffThunderVectorWork *handle;
 
-    handle = (u32)effCreateThunderCellSystemWork(D_003550B8);
+    handle = effCreateThunderCellSystemWork((EffThunderAlphaParams *)D_003550B8);
     work->frame = 0;
     work->handle = handle;
 }
@@ -1900,7 +1887,7 @@ void *effPcpCreateGrowingThunderFadeWork(void) {
 }
 
 void effPcpReleaseGrowingThunderFadeWork(EffPCPFadeWork *work) {
-    effThunderReleaseVectorWork((struct EffThunderVectorWork *)work->handle);
+    effThunderReleaseVectorWork(work->handle);
     sdfReleaseChipBlock(work);
 }
 
@@ -1914,7 +1901,7 @@ void *effAllocateGrowingThunderFadeWork(void) {
 
 /* Same fade with a longer scale-up; stops updating once frame 65 is reached. */
 void effPcpThunderUniformGrowFadeUpdate(EffPCPFadeWork *work) {
-    EffPCPFadeTarget *target;
+    EffThunderParameterHead *parameterHead;
     f32 phase;
     f32 value;
     u32 fadedColor;
@@ -1925,21 +1912,21 @@ void effPcpThunderUniformGrowFadeUpdate(EffPCPFadeWork *work) {
         return;
     }
     if (frame < 0x1E) {
-        target = (EffPCPFadeTarget *)func_00163540(work->handle);
+        parameterHead = effThunderGetParameterHead(work->handle);
         phase = (f32)frame / 30.0f;
         value = phase * 200.0f + 150.0f;
-        target->sizeX = value;
-        target->sizeY = value;
+        parameterHead->vector.radiusScale = value;
+        parameterHead->vector.heightScale = value;
     }
     if (frame >= 0x39) {
         phase = ((f32)frame - 57.0f) * 0.125f;
         fadedColor = effBlendColor(work->color, 0, phase);
-        effThunderSetVectorTint((struct EffThunderVectorWork *)work->handle, fadedColor);
+        effThunderSetVectorTint(work->handle, fadedColor);
     } else {
-        effThunderSetVectorTint((struct EffThunderVectorWork *)work->handle, work->color);
+        effThunderSetVectorTint(work->handle, work->color);
     }
     func_00163508((void *)work->handle, work);
-    effThunderUpdateVectorCells((struct EffThunderVectorWork *)work->handle);
+    effThunderUpdateVectorCells(work->handle);
     work->frame++;
 }
 
@@ -2698,9 +2685,9 @@ void effPcpSetChargeResourceColor(EffPCPCompactWork *work, u32 val) {
 }
 
 void effPcpInitShortThunderFadeWork(EffPCPFadeWork *work) {
-    u32 handle;
+    EffThunderVectorWork *handle;
 
-    handle = (u32)effCreateThunderCellSystemWork(D_00355108);
+    handle = effCreateThunderCellSystemWork((EffThunderAlphaParams *)D_00355108);
     work->frame = 0;
     work->handle = handle;
 }
@@ -2714,7 +2701,7 @@ void *effPcpCreateShortThunderFadeWork(void) {
 }
 
 void effPcpReleaseShortThunderFadeWork(EffPCPFadeWork *work) {
-    effThunderReleaseVectorWork((struct EffThunderVectorWork *)work->handle);
+    effThunderReleaseVectorWork(work->handle);
     sdfReleaseChipBlock(work);
 }
 
@@ -2727,33 +2714,37 @@ void *effAllocateInitializedThunderFadeWork(void) {
 }
 
 void effPcpFadeUpdateShort(EffPCPFadeWork *work) {
-    EffPCPFadeTarget *target;
+    EffThunderParameterHead *parameterHead;
     f32 phase;
     f32 value;
     u32 fadedColor;
+    u32 frame;
 
-    if (work->frame < 0x1F) {
-        target = (EffPCPFadeTarget *)func_00163540(work->handle);
-        phase = (f32)work->frame / 30.0f;
+    frame = work->frame;
+    if (frame < 0x1F) {
+        parameterHead = effThunderGetParameterHead(work->handle);
+        frame = work->frame;
+        phase = (f32)frame / 30.0f;
         value = phase * 150.0f + 100.0f;
-        target->sizeX = value;
-        target->sizeY = value;
-    } else if (work->frame - 0x2D < 0x10) {
-        target = (EffPCPFadeTarget *)func_00163540(work->handle);
-        phase = (f32)(work->frame - 0x2D) / 15.0f;
+        parameterHead->vector.radiusScale = value;
+        parameterHead->vector.heightScale = value;
+    } else if (frame - 0x2D < 0x10) {
+        parameterHead = effThunderGetParameterHead(work->handle);
+        frame = work->frame;
+        phase = (f32)(frame - 0x2D) / 15.0f;
         value = phase * 150.0f + 250.0f;
-        target->sizeX = value;
-        target->sizeY = value;
+        parameterHead->vector.radiusScale = value;
+        parameterHead->vector.heightScale = value;
     }
-    if (work->frame >= 0x2D) {
-        phase = (f32)(work->frame - 0x2D) / 35.0f;
+    if (frame >= 0x2D) {
+        phase = (f32)(frame - 0x2D) / 35.0f;
         fadedColor = effBlendColor(work->color, 0, phase);
     } else {
         fadedColor = work->color;
     }
-    effThunderSetVectorTint((struct EffThunderVectorWork *)work->handle, fadedColor);
+    effThunderSetVectorTint(work->handle, fadedColor);
     func_00163508((void *)work->handle, work);
-    effThunderUpdateVectorCells((struct EffThunderVectorWork *)work->handle);
+    effThunderUpdateVectorCells(work->handle);
     work->frame++;
 }
 
@@ -2770,9 +2761,9 @@ void effPcpSetScalingThunderFadeColor(EffPCPFadeWork *work, u32 val) {
 }
 
 void effPcpInitScalingThunderFadeWork(EffPCPFadeWork *work) {
-    u32 handle;
+    EffThunderVectorWork *handle;
 
-    handle = (u32)effCreateThunderCellSystemWork(D_00355158);
+    handle = effCreateThunderCellSystemWork((EffThunderAlphaParams *)D_00355158);
     work->frame = 0;
     work->handle = handle;
 }
@@ -2786,7 +2777,7 @@ void *effPcpCreateScalingThunderFadeWork(void) {
 }
 
 void effPcpReleaseScalingThunderFadeWork(EffPCPFadeWork *work) {
-    effThunderReleaseVectorWork((struct EffThunderVectorWork *)work->handle);
+    effThunderReleaseVectorWork(work->handle);
     sdfReleaseChipBlock(work);
 }
 
@@ -2801,28 +2792,32 @@ void *effAllocateScalingThunderFadeWork(void) {
 /* Scales the target through two frame windows and fades the colour out from
  * frame 60. */
 void effPcpThunderScaleFadeUpdate(EffPCPFadeWork *work) {
-    EffPCPFadeTarget *target;
+    EffThunderParameterHead *parameterHead;
     f32 phase;
     u32 fadedColor;
+    u32 frame;
 
-    if (work->frame < 0x2E) {
-        target = (EffPCPFadeTarget *)func_00163540(work->handle);
-        phase = (f32)work->frame / 45.0f;
-        target->sizeY = target->sizeX = phase * 950.0f + 200.0f;
-    } else if (work->frame >= 0x3C && work->frame < 0x4C) {
-        target = (EffPCPFadeTarget *)func_00163540(work->handle);
-        phase = (f32)(work->frame - 0x3C) / 15.0f;
-        target->sizeY = target->sizeX = phase * 150.0f + 1050.0f;
+    frame = work->frame;
+    if (frame < 0x2E) {
+        parameterHead = effThunderGetParameterHead(work->handle);
+        frame = work->frame;
+        phase = (f32)frame / 45.0f;
+        parameterHead->vector.heightScale = parameterHead->vector.radiusScale = phase * 950.0f + 200.0f;
+    } else if (frame >= 0x3C && frame < 0x4C) {
+        parameterHead = effThunderGetParameterHead(work->handle);
+        frame = work->frame;
+        phase = (f32)(frame - 0x3C) / 15.0f;
+        parameterHead->vector.heightScale = parameterHead->vector.radiusScale = phase * 150.0f + 1050.0f;
     }
-    if (work->frame >= 0x3C) {
-        phase = (f32)(work->frame - 0x3C) / 15.0f;
+    if (frame >= 0x3C) {
+        phase = (f32)(frame - 0x3C) / 15.0f;
         fadedColor = effBlendColor(work->color, 0, phase);
     } else {
         fadedColor = work->color;
     }
-    effThunderSetVectorTint((struct EffThunderVectorWork *)work->handle, fadedColor);
+    effThunderSetVectorTint(work->handle, fadedColor);
     func_00163508((void *)work->handle, work);
-    effThunderUpdateVectorCells((struct EffThunderVectorWork *)work->handle);
+    effThunderUpdateVectorCells(work->handle);
     work->frame++;
 }
 
@@ -3968,31 +3963,15 @@ void effPcpSetThunderBurstColor(EffPCPBurstWork *work, u32 val) {
     work->unk10 = val;
 }
 
-/* Serialized vector-thunder parameters, not the trailing live cell-system work. */
-typedef struct {
-    f32 position[4];
-    u16 systemParam;
-    u8 pad12[2];
-    u32 count;
-    u8 pad18[4];
-    f32 scaledFirst;
-    f32 scaledSecond;
-    f32 rotationScale;
-    u32 delayRange;
-    u32 activeRange;
-    u16 perCell;
-    u8 pad32[0xE];
-    void *dispatchArg;
-    u8 pad44[8];
-} EffThunderVectorParams;
 
+/* Scaled-effect source uses the game creator's alpha parameter variant. */
 typedef struct {
     s32 duration;
     s32 fadeIn;
     s32 fadeOut;
     s32 base;
     s32 target;
-    EffThunderVectorParams res;
+    EffThunderAlphaParams res;
 } EffPCPScaledThunderParams;
 
 typedef struct EffPCPGrowWork {
@@ -4005,15 +3984,15 @@ typedef struct EffPCPGrowWork {
     u32 color;
     s32 frame;
     f32 scale;
-    struct EffThunderVectorWork *handle;
+    EffThunderVectorWork *handle;
 } EffPCPGrowWork;
 
 EffPCPGrowWork *effPcpCreateScaledThunder(EffPCPScaledThunderParams *params) {
     EffPCPGrowWork *work = sdfAllocSizeClassBlock(sizeof(EffPCPGrowWork));
-    void *handle;
+    EffThunderVectorWork *handle;
 
-    params->res.scaledFirst = (f32)params->base;
-    params->res.scaledSecond = (f32)params->base;
+    params->res.radiusScale = (f32)params->base;
+    params->res.heightScale = (f32)params->base;
     handle = effCreateThunderCellSystemWork(&params->res);
     work->duration = params->duration;
     work->fadeIn = params->fadeIn;
@@ -4023,9 +4002,9 @@ EffPCPGrowWork *effPcpCreateScaledThunder(EffPCPScaledThunderParams *params) {
     work->color = 0x80808080;
     work->frame = 0;
     work->scale = 1.0f;
-    work->position[0] = params->res.position[0];
-    work->position[1] = params->res.position[1];
-    work->position[2] = params->res.position[2];
+    work->position[0] = params->res.origin[0];
+    work->position[1] = params->res.origin[1];
+    work->position[2] = params->res.origin[2];
     work->handle = handle;
     return work;
 }
@@ -4042,15 +4021,15 @@ void effPcpScaledEffectCreateFromTable(void *args) {
 
 void effPcpScaledRespawn(EffPCPGrowWork *work) {
     EffPCPScaledThunderParams params;
-    EffThunderVectorParams *res;
+    EffThunderParameterHead *res;
 
-    res = (EffThunderVectorParams *)func_00163540((u32)work->handle);
+    res = effThunderGetParameterHead(work->handle);
     params.duration = work->duration;
     params.fadeIn = work->fadeIn;
     params.fadeOut = work->fadeOut;
     params.base = work->base;
     params.target = work->target;
-    params.res = *res;
+    params.res = res->alpha;
     effPcpCreateScaledThunder(&params);
 }
 
@@ -4060,8 +4039,6 @@ void effPcpScaledEffectRelease(EffPCPGrowWork *work) {
 }
 
 
-
-extern void effThunderScaleVectorDimensions(f32 factor, struct EffThunderVectorWork *work);
 
 /* Preserve the resource query before applying its growth and fade timeline. */
 void func_00180080(EffPCPGrowWork *work) {
@@ -4075,7 +4052,7 @@ void func_00180080(EffPCPGrowWork *work) {
     f32 opacity;
     u32 color;
 
-    func_00163540((u32)work->handle);
+    effThunderGetParameterHead(work->handle);
     frame = work->frame;
     duration = work->duration;
     if (duration < frame) {
