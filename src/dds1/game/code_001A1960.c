@@ -2555,13 +2555,13 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1D28);
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A99B0);
 
 void btlClearUnitStatusMask(void) {
-    s32 node = *(s32 *)(btlGetRuntime() + 0x228);
-    for (; node != 0; node = *(s32 *)(node + 0x344)) {
-        u32 flags = *(u32 *)(node + 0x110);
+    BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
+    for (; actor != NULL; actor = actor->next) {
+        u32 flags = actor->flags;
         if ((flags & 1) != 0) {
             if ((flags & 0x200) != 0) {
-                *(u32 *)(node + 0x110) = flags & ~0x1000;
-                *(u16 *)(node + 0x120) &= ~0x1000;
+                actor->flags = flags & ~0x1000;
+                actor->partyRecord.flags &= ~0x1000;
             }
         }
     }
