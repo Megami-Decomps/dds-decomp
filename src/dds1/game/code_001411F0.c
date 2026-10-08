@@ -8,6 +8,7 @@
 #include "pcp_vu0.h"
 #include "dat_state.h"
 #include "eff.h"
+#include "kwln.h"
 
 extern u8 D_00324510[2][2][16];
 extern u8 D_003BA878[2][2];
@@ -31,7 +32,9 @@ typedef struct FldAreaWork {
     s32 area; /* 0x10 */
     s32 room; /* 0x14: the floor/room argument of fldSetSceneLocation. */
     s32 unk18;
-    u8 pad1C[0x14];
+    u8 pad1C[8];
+    s32 titleFade; /* 0x24: field transition fade, also read by the DDS2 twin. */
+    u8 pad28[8];
     f32 focusPos[3]; /* 0x30 */
     u8 pad3C[0x14];
     s32 unk50;
@@ -251,7 +254,8 @@ typedef struct {
 
 extern FldClear18 fldPendingSounds[];
 
-extern u64 kwlnTaskGetUserValue(void);
+extern u32 kwlnTaskGetUserValue(KwlnTask *task);
+extern void sdfReleaseChipBlock(void *allocation);
 
 extern void fldSelectDisplayBuffer(u32);
 
@@ -261,11 +265,73 @@ extern void fldSubmitFrameQuad(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void fldSubmitSpriteRect(s32, s32, s32, s32, s32, s32, s32, s32, s32, SdfTex *);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_001411F0);
+typedef struct FldTitleBannerMenu {
+    u16 position; /* 0x00 */
+    u16 choice;   /* 0x02 */
+    u16 pending;  /* 0x04 */
+    u16 reserved; /* 0x06 */
+} FldTitleBannerMenu;
 
-extern s32 fldGetCampSceneControlMode(void);
+extern u32 fldInputPanelTaskHandle;
+extern u32 D_0032E570[];
+extern s32 D_003BAE40;
+extern u8 fldGetCampSceneControlMode(void);
+extern u8 fldGetSceneReadyOrPendingState(void);
+extern s32 fileMenuTaskExists(void);
+extern u8 fldHasKiretaLabelProcess(void);
+extern u8 fldHasHirakenaiLabelProcess(void);
+extern u8 fldHasBadkaifukuLabelProcess(void);
+extern s32 fldIsEventPhaseAtLeastTwo(void);
+extern void fldApplyCameraFacingPoint(void);
 
-extern s32 fldGetSceneReadyOrPendingState(void);
+s32 func_001411F0(void) {
+    FldTitleBannerMenu *menu;
+    FldAreaWork *area;
+
+    if (fldGetCampSceneControlMode() != 0) {
+        return 0;
+    }
+    if (fldGetSceneReadyOrPendingState() != 0) {
+        return 0;
+    }
+    if (D_0032E570[0] != 0) {
+        return 0;
+    }
+    if (fileMenuTaskExists() != 0) {
+        return 0;
+    }
+    if (fldHasKiretaLabelProcess() != 0) {
+        return 0;
+    }
+    if (fldHasHirakenaiLabelProcess() != 0) {
+        return 0;
+    }
+    if (fldHasBadkaifukuLabelProcess() != 0) {
+        return 0;
+    }
+    if (fldIsEventPhaseAtLeastTwo() != 0) {
+        return 0;
+    }
+
+    menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue((KwlnTask *)fldInputPanelTaskHandle);
+    if (menu->pending == 0) {
+        return -1;
+    }
+
+    if (FLD_WORK->titleFade != 0 || D_003BAE40 == 1 || (s8)D_00324510[1][0][1] < 0) {
+        if ((s8)D_00324510[1][0][1] < 0) {
+            fldApplyCameraFacingPoint();
+        }
+        menu->pending = 0;
+        area = (FldAreaWork *)fldAreaState;
+        if (area->titleFade != 0) {
+            kwlnFadeStartIn(8);
+            area->titleFade = 0;
+        }
+        return 1;
+    }
+    return 0;
+}
 
 extern s32 fldTitleIsActive(void);
 
@@ -308,10 +374,10 @@ void *fldFieldTaskCreate(s32 task) {
     return fldFieldTaskUpdate;
 }
 
-void fldFieldTaskDestroy(void) {
-    u64 work;
+void fldFieldTaskDestroy(KwlnTask *task) {
+    void *work;
 
-    work = kwlnTaskGetUserValue();
+    work = (void *)kwlnTaskGetUserValue(task);
     sdfReleaseChipBlock(work);
     fldFieldTaskHandle = 0;
 }
