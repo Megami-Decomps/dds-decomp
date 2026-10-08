@@ -461,6 +461,7 @@ INCLUDE_RODATA(const s32, "game/code_001FF030", D_003A5988);
 INCLUDE_ASM(const s32, "game/code_001FF030", func_001FFE30);
 
 extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
+extern u16 btlReadUnitStatusMask(DatPartyRecord *);
 
 extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
@@ -559,8 +560,8 @@ s32 btlIsGroup200CountAtMost(s32 unused, u32 maximumCount) {
 }
 
 /* Return whether the native unit-status query intersects any requested action-mask bit. */
-s32 btlUnitHasActionMask(s32 unitAddress, s32 actionMask) {
-    return (btlReadUnitStatusMask((s32)&((BtlUnit *)unitAddress)->partyRecord, actionMask) & actionMask) != 0;
+s32 btlUnitHasAnyStatusInMask(BtlUnit *unit, s32 actionMask) {
+    return (btlReadUnitStatusMask(&unit->partyRecord) & actionMask) != 0;
 }
 
 /* Test active enemy-side units for any requested action bit; do not filter bit 0x20. */
@@ -568,7 +569,7 @@ s32 btlAnyGroup400HasActionMask(s32 unused, s32 actionMask) {
     BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
     while (unitCursor != 0) {
         if ((*(u64 *)&unitCursor->flags & BTL_ENEMY_ACTIVE_MASK) == BTL_ENEMY_ACTIVE_FLAGS) {
-            if (btlUnitHasActionMask((s32)unitCursor, actionMask) != 0) {
+            if (btlUnitHasAnyStatusInMask(unitCursor, actionMask) != 0) {
                 return 1;
             }
         }
@@ -582,7 +583,7 @@ s32 btlAnyGroup200HasActionMask(s32 unused, s32 actionMask) {
     BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
     while (unitCursor != 0) {
         if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
-            if (btlUnitHasActionMask((s32)unitCursor, actionMask) != 0) {
+            if (btlUnitHasAnyStatusInMask(unitCursor, actionMask) != 0) {
                 return 1;
             }
         }
@@ -596,7 +597,7 @@ s32 btlAllGroup200HaveActionMask(s32 unused, s32 actionMask) {
     BtlUnit *unitCursor = ((BtlState *)btlGetRuntime())->units;
     while (unitCursor != 0) {
         if ((*(u64 *)&unitCursor->flags & BTL_PARTY_QUERY_MASK) == BTL_PARTY_ACTIVE_FLAGS) {
-            if (btlUnitHasActionMask((s32)unitCursor, actionMask) == 0) {
+            if (btlUnitHasAnyStatusInMask(unitCursor, actionMask) == 0) {
                 return 0;
             }
         }
@@ -1637,7 +1638,7 @@ s32 btlSelectTargetsByActionMask(s32 actor, s32 mask) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {
-            if (btlUnitHasActionMask(btlGetIndexListEntry(list, i), mask) != 0) {
+            if (btlUnitHasAnyStatusInMask(btlGetIndexListEntry(list, i), mask) != 0) {
                 flags[i] = 1;
             }
         }
@@ -1663,7 +1664,7 @@ s32 btlSelectTargetsWithoutActionMask(s32 actor, s32 mask) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {
-            if (btlUnitHasActionMask(btlGetIndexListEntry(list, i), mask) == 0) {
+            if (btlUnitHasAnyStatusInMask(btlGetIndexListEntry(list, i), mask) == 0) {
                 flags[i] = 1;
             }
         }

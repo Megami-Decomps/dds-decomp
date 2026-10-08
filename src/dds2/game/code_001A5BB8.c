@@ -1725,8 +1725,8 @@ u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *entryAddress) {
 }
 
 /* Return the low 15 status bits; do not expose the stored high bit. */
-u16 btlReadUnitStatusMask(s32 entryAddress) {
-    return ((DatPartyRecord *)entryAddress)->status & BTL_ENTRY_STATUS_MASK;
+u16 btlReadUnitStatusMask(DatPartyRecord *entry) {
+    return entry->status & BTL_ENTRY_STATUS_MASK;
 }
 
 void func_001AA850(void) {
