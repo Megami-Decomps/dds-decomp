@@ -145,8 +145,8 @@ void func_00113560(EffWorldNode *object) {
     f32 value;
     f32 step;
 
-    if (data->timer > 0) {
-        data->timer--;
+    if (data->angleReturnDelayFrames > 0) {
+        data->angleReturnDelayFrames--;
     } else {
         angle = data->angle;
         if (angle < 0.1f && -0.1f < angle) {
@@ -175,16 +175,16 @@ void evtArmEffectObjectPendingValue(EffWorldNode *object, s32 value) {
 
     data = object->data;
     dds3SetObjectFlags(object, 0x2000);
-    data->pendingValue = value;
-    data->timer = 0;
+    data->pendingTargetKey = value;
+    data->angleReturnDelayFrames = 0;
 }
 
 void evtResetObjectPendingValue(EffWorldNode *object) {
     EffectObjectData *data;
 
     data = object->data;
-    data->timer = 0x1e;
-    data->pendingValue = 0;
+    data->angleReturnDelayFrames = 0x1e;
+    data->pendingTargetKey = 0;
 }
 
 s32 effObjInitializeFollowModelData(EffWorldNode *object) {
@@ -200,8 +200,8 @@ s32 effObjInitializeFollowModelData(EffWorldNode *object) {
     data->transitionWork = NULL;
     data->activeId = -1;
     data->followParameterIndex = -1;
-    data->pendingValue = 0;
-    data->timer = 0;
+    data->pendingTargetKey = 0;
+    data->angleReturnDelayFrames = 0;
     data->angle = 0.0f;
     data->limitMin2C = -45.0f;
     data->limitMax30 = 45.0f;
@@ -335,8 +335,8 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
         func_00113D18(obj);
     }
     if (dds3TestObjectFlags(obj, 0x2000)) {
-        if (data->pendingValue != 0) {
-            func_00113408(obj, func_001178B8(dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), data->pendingValue, 0x11)));
+        if (data->pendingTargetKey != 0) {
+            func_00113408(obj, func_001178B8(dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), data->pendingTargetKey, 0x11)));
         } else {
             func_00113560(obj);
         }

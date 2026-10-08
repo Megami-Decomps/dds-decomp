@@ -11,8 +11,8 @@ typedef struct EffectObjectData {
     s32 activeId;
     u32 followParameterIndex; /* 0x14: 16-byte follow-parameter row; all-ones selects the base record. */
     u32 word18;
-    s32 pendingValue;
-    s32 timer;
+    s32 pendingTargetKey; /* 0x1C: kind-0x11 world-node key used by the follow turn. */
+    s32 angleReturnDelayFrames; /* 0x20: holdoff before returning the follow angle to zero. */
     u32 word24;
     f32 angle;
     f32 limitMin2C;
