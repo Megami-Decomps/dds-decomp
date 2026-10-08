@@ -618,10 +618,10 @@ void evtRefreshUnitEndpointWork(EvtUnit *unit) {
     unit->value = (u32)unit->endpointWork;
 }
 
-void evtSetUnitValueTransition(EvtUnit *unit, s32 value, s32 duration) {
+void evtSetUnitValueTransition(EvtUnit *unit, EffWorldNode *target, s32 duration) {
     unit->flags |= EVT_UNIT_FLAG_TARGET_TRANSITION;
     unit->previousTransitionValue = unit->currentTransitionValue;
-    unit->currentTransitionValue = value;
+    unit->currentTransitionValue = (s32)target;
     if (duration == 0) {
         unit->previousTransitionValue = 0;
         unit->transitionElapsed = 0;

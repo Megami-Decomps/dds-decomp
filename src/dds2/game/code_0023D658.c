@@ -219,7 +219,7 @@ extern void evtConfigureUnitTransition(EvtUnit *unit, s32 arg1);
 
 extern u8 evtTestUnitStatusFlags(EvtUnit *unit);
 
-extern void evtSetUnitValueTransition(EvtUnit *unit, void *target, s32 arg2);
+extern void evtSetUnitValueTransition(EvtUnit *unit, EffWorldNode *target, s32 duration);
 
 extern void evtEndUnitValueTransition(EvtUnit *unit, s32 arg1);
 
@@ -1249,7 +1249,7 @@ u32 evtOpSetUnitPackedAlpha(void) {
 u32 evtOpSetUnitValueTransitionTarget(void) {
     s32 id;
     EvtUnit *unit;
-    void *target;
+    EffWorldNode *target;
 
     id = scrReadIntParameter(0);
     unit = evtGetWorldUnitNestedValue(id);
