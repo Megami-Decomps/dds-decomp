@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font.h"
 #include "mc_poll.h"
 #include "mc_path_api.h"
 #include "bill_object_api.h"
@@ -73,9 +74,9 @@ typedef struct EffectSurfaceNode {
     u32 pad_30;
     void *resource;
     void **jobs;
-    u32 jobHandle;
+    struct SdfMemBlock *jobAllocation;
     void **queues;
-    u32 queueHandle;
+    struct SdfMemBlock *queueAllocation;
     struct EffExpandedList *referenceHolder;
     u32 active;
     u16 unk50;
@@ -648,7 +649,7 @@ void func_002C9818(s32 x, s32 y, u32 colors, const u8 *text) {
     u32 handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     D_00439004 = handle;
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphInSelectedSlot(D_00439004);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)D_00439004);
 }
 
 void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
@@ -656,7 +657,7 @@ void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     D_00439008 = handle;
     frFontSetChainFlag(handle, 3);
     frFontDrawGlyphWithSharedFlags(D_00439008, 1);
-    frFontQueueGlyphInSelectedSlot(D_00439008);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)D_00439008);
 }
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
@@ -667,7 +668,7 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
     frFontSetContextPair(D_0043900C, x << 4, y << 3);
     frFontSetChildColors(D_0043900C, colors);
     func_0019D550(D_0043900C, 0, 0x56);
-    frFontQueueGlyphInSelectedSlot(D_0043900C);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)D_0043900C);
     frFontSetSharedRenderFlags(0x54);
 }
 
@@ -676,7 +677,7 @@ void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
 
     handle = func_0019F5E8(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
 }
 
 /* Animate the save-window highlight's alpha with a sinusoidal phase. */
@@ -5391,9 +5392,9 @@ EffectSurfaceNode *fileCreateSurfaceLoaderState(s32 capacity) {
     rec->scale = 1.0f;
     rec->resource = NULL;
     rec->jobs = NULL;
-    rec->jobHandle = 0;
+    rec->jobAllocation = 0;
     rec->queues = NULL;
-    rec->queueHandle = 0;
+    rec->queueAllocation = 0;
     rec->active = 0;
     return rec;
 }
@@ -5448,19 +5449,19 @@ void fileDestroyEffectSurfaceAndChildren(EffectSurfaceNode *node) {
     if (node->resource != NULL) {
         billDispatchByKind(node->resource);
     }
-    if (node->jobHandle != 0) {
+    if (node->jobAllocation != 0) {
         count = ((FileSlotTable *)node->active)->count;
         for (i = 0; i < count; i++) {
             fileJobDestroy(node->jobs[i]);
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->jobHandle));
+        sdfReleaseResourceAllocation(node->jobAllocation);
     }
-    if (node->queueHandle != 0) {
+    if (node->queueAllocation != 0) {
         count = ((FileSlotTable *)node->active)->count;
         for (i = 0; i < count; i++) {
             fileQueueDestroy(node->queues[i]);
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->queueHandle));
+        sdfReleaseResourceAllocation(node->queueAllocation);
     }
     if (node->referenceHolder != NULL) {
         effReleaseReferenceHolder(node->referenceHolder);
@@ -5503,20 +5504,20 @@ void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *
         if (count == 0) {
             return;
         }
-        if (dst->jobHandle != 0) {
+        if (dst->jobAllocation != 0) {
             for (i = 0; i < count; i++) {
                 fileJobDestroy(dst->jobs[i]);
             }
-            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(dst->jobHandle));
+            sdfReleaseResourceAllocation(dst->jobAllocation);
             dst->jobs = 0;
-            dst->jobHandle = 0;
+            dst->jobAllocation = 0;
         }
         size = count * 4;
         if (size == 0) {
             return;
         }
-        dst->jobHandle = (u32)sdfAllocGeneralBlock(size);
-        dst->jobs = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(dst->jobHandle));
+        dst->jobAllocation = sdfAllocGeneralBlock(size);
+        dst->jobs = (void *)sdfResourceRetainAddress(dst->jobAllocation);
         for (i = 0; i < count; i++) {
             dst->jobs[i] = fileJobCreateChild(src->jobs[0]);
         }
@@ -5526,20 +5527,20 @@ void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *
         if (count == 0) {
             return;
         }
-        if (dst->queueHandle != 0) {
+        if (dst->queueAllocation != 0) {
             for (i = 0; i < count; i++) {
                 fileQueueDestroy(dst->queues[i]);
             }
-            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(dst->queueHandle));
+            sdfReleaseResourceAllocation(dst->queueAllocation);
             dst->queues = 0;
-            dst->queueHandle = 0;
+            dst->queueAllocation = 0;
         }
         size = count * 4;
         if (size == 0) {
             return;
         }
-        dst->queueHandle = (u32)sdfAllocGeneralBlock(size);
-        dst->queues = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(dst->queueHandle));
+        dst->queueAllocation = sdfAllocGeneralBlock(size);
+        dst->queues = (void *)sdfResourceRetainAddress(dst->queueAllocation);
         for (i = 0; i < count; i++) {
             dst->queues[i] = fileQueueClone(src->queues[0]);
         }
@@ -5603,18 +5604,18 @@ void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJobPayload *job) 
     u32 i;
     s32 size;
 
-    if (node->jobHandle != 0) {
+    if (node->jobAllocation != 0) {
         for (i = 0; i < count; i++) {
             fileJobDestroy(node->jobs[i]);
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->jobHandle));
+        sdfReleaseResourceAllocation(node->jobAllocation);
         node->jobs = 0;
-        node->jobHandle = 0;
+        node->jobAllocation = 0;
     }
     size = count * 4;
     if (size != 0) {
-        node->jobHandle = (u32)sdfAllocGeneralBlock(size);
-        node->jobs = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(node->jobHandle));
+        node->jobAllocation = sdfAllocGeneralBlock(size);
+        node->jobs = (void *)sdfResourceRetainAddress(node->jobAllocation);
         node->jobs[0] = fileJobCreateFromJob(job);
         for (i = 1; i < count; i++) {
             node->jobs[i] = fileJobCreateChild(node->jobs[0]);
@@ -5627,18 +5628,18 @@ void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job) {
     u32 i;
     s32 size;
 
-    if (node->queueHandle != 0) {
+    if (node->queueAllocation != 0) {
         for (i = 0; i < count; i++) {
             fileQueueDestroy(node->queues[i]);
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->queueHandle));
+        sdfReleaseResourceAllocation(node->queueAllocation);
         node->queues = 0;
-        node->queueHandle = 0;
+        node->queueAllocation = 0;
     }
     size = count * 4;
     if (size != 0) {
-        node->queueHandle = (u32)sdfAllocGeneralBlock(size);
-        node->queues = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(node->queueHandle));
+        node->queueAllocation = sdfAllocGeneralBlock(size);
+        node->queues = (void *)sdfResourceRetainAddress(node->queueAllocation);
         node->queues[0] = fileCloneQueueEntries((FileQueue *)job);
         for (i = 1; i < count; i++) {
             node->queues[i] = fileQueueClone(node->queues[0]);

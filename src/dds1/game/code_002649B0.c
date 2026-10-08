@@ -116,7 +116,6 @@ extern s32 func_003014F0(char *, const char *, ...);
 extern FrFontGlyph *func_001979C8(s32, s32, s32, s32, char *, FrFontGlyph *);
 extern u32 frFontMeasureLines(FrFontGlyph *);
 extern s32 func_001958A0(FrFontGlyph *, s8, u32);
-extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern char D_003BC568[];
 
 /* Draw each nonempty reward icon row with its name and formatted parameter. */

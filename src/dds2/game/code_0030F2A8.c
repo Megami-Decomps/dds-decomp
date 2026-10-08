@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font.h"
 #include "sdf_resource.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -28,7 +29,7 @@ void sdfCounterDrawGlyphAtGridCell(s32 x, s32 y, u32 colors, const u8 *text) {
 
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
 }
 
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);

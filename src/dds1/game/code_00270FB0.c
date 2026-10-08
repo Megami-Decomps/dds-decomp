@@ -3,6 +3,7 @@
 #include "eff_resource_records.h"
 #include "eff_resource_list.h"
 #include "common.h"
+#include "fr_font.h"
 #include "itf_draw_grid.h"
 #include "mnu_staff.h"
 #include "kwln.h"
@@ -639,7 +640,6 @@ extern s32 func_003014F0(char *, const char *, s32);
 extern s32 func_00197A98(s32, s32, s32, u32, u32, s32);
 typedef struct FrFontGlyph FrFontGlyph;
 extern s32 func_001958A0(FrFontGlyph *, s8, u32);
-extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern char D_003BC6C0[];
 
 
