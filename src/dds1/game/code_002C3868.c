@@ -109,7 +109,7 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 
-extern void func_00108FA0(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, u32);
+extern void func_00108FA0(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, struct SdfTex *);
 
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -605,7 +605,52 @@ void mnuTickMapTimers(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C3868", func_002C57F0);
+void func_002C57F0(void) {
+    SdfCounterTimer *timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
+    f32 fade = (f32)timer->value / 10.0f;
+    s32 displacement = (s32)(fade * -32.0f);
+    f32 value;
+    s32 tick;
+
+    fade = 1.0f - fade;
+    tick = timer->mapTimerPrimary;
+    if (tick > 0) {
+        tick = abs(tick);
+        value = 60.0f;
+        value = (f32)tick / value;
+        if (value < 0.5f) {
+            value = 1.0f - value;
+        }
+    } else {
+        value = 0.0f;
+    }
+    value *= fade;
+    func_00108FA0(displacement + 11, 122, 17, 14, 204, 339, 17, 14,
+                  ((u32)(value * 128.0f) << 24) | 0x808080,
+                  ((u32)(value * 128.0f) << 24) | 0x808080,
+                  ((u32)(value * 128.0f) << 24) | 0x808080,
+                  ((u32)(value * 128.0f) << 24) | 0x808080,
+                  (struct SdfTex *)fldLocalMapTextureResource.image);
+    tick = timer->mapTimerSecondary;
+    if (tick > 0) {
+        tick = abs(tick);
+        value = 60.0f;
+        value = (f32)tick / value;
+        if (value < 0.5f) {
+            value = 1.0f - value;
+        }
+    } else {
+        value = 0.0f;
+    }
+    value *= fade;
+    func_00108FA0(displacement + 11, 257, 17, 14, 224, 339, 17, 14,
+                  ((u32)(value * 128.0f) << 24) | 0x808080,
+                  ((u32)(value * 128.0f) << 24) | 0x808080,
+                  ((u32)(value * 128.0f) << 24) | 0x808080,
+                  ((u32)(value * 128.0f) << 24) | 0x808080,
+                  (struct SdfTex *)fldLocalMapTextureResource.image);
+}
+
 
 s32 sdfCounterGetSelectionBoundaryFlags(void) {
     SdfCounterRuntime *rt = (SdfCounterRuntime *)sdfActiveCounterRuntime;
@@ -671,7 +716,7 @@ void sdfCounterDrawSelectedTimerFade(s32 unused, s32 x, f32 fade) {
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
-                  fldLocalMapTextureResource.image);
+                  (struct SdfTex *)fldLocalMapTextureResource.image);
     evtSubmitPrimaryAlphaBlendMode(0);
 }
 

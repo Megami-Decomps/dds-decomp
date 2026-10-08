@@ -275,7 +275,7 @@ extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddres
 extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
 extern void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 
-void func_00266460(u32 object, MenuEffectResources *resources) {
+void func_00266460(struct EffectSlotSet *object, MenuEffectResources *resources) {
     CampMapArguments mapArguments = D_00424DE0;
     CampEffectRows rows = D_00424E10;
     u32 dataAddress;

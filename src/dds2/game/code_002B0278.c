@@ -93,8 +93,6 @@ extern s32 D_00435E5C;
 
 extern void mnuClearListFlagsOneAndTwo();
 
-extern void mnuReleaseResourceList(MenuIconState *list);
-
 extern s32 func_002C6CE8(void);
 
 extern s32 func_002C6480();
@@ -735,10 +733,6 @@ void mnuRefreshPartyPanelSlots(s32 context) {
     mnuReleaseAndRefreshWindowSlots(&((MenuContext *)context)->partyWindow);
 }
 
-struct MenuSlotEffectHandles;
-extern void mnuLoadPanelSectionResources(struct MenuSlotEffectHandles *slot,
-                                         struct EffectSlotSet *model,
-                                         u32 firstValue, u32 secondValue, s32 thirdValue);
 s32 mnuInitializePartySelectionState(KwlnTask *task) {
     s32 contextAddress = (s32)kwlnTaskGetUserValue(task);
     MenuContext *context = (MenuContext *)contextAddress;
@@ -754,13 +748,13 @@ s32 mnuInitializePartySelectionState(KwlnTask *task) {
     mnuCreatePartySelectionWindow(context);
 
     mnuLoadPanelSectionResources(
-        (struct MenuSlotEffectHandles *)&context->partyWindow.slots[0],
+        &context->partyWindow.slots[0],
         (struct EffectSlotSet *)context->panelModel, 5, 8, 0xB);
     mnuLoadPanelSectionResources(
-        (struct MenuSlotEffectHandles *)&context->partyWindow.slots[1],
+        &context->partyWindow.slots[1],
         (struct EffectSlotSet *)context->panelModel, 5, 9, 0xB);
     mnuLoadPanelSectionResources(
-        (struct MenuSlotEffectHandles *)&context->partyWindow.slots[2],
+        &context->partyWindow.slots[2],
         (struct EffectSlotSet *)context->panelModel, 5, 0xA, 0xB);
 
     mnuClearPartySelectionAndActivateSlots(contextAddress);
@@ -1076,7 +1070,6 @@ s32 mnuStepStaffCampPageControl(KwlnTask *callback) {
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2C88);
 
-extern void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
@@ -1092,9 +1085,10 @@ s32 mnuCreatePanels(KwlnTask *callback) {
     StaffMenuRuntime *party = (StaffMenuRuntime *)menuContext->party;
     MenuProfilePanel *profile;
 
-    mnuSetWindowResource(index, window, menuContext->displayHandle,
-                         (s32)menuContext->displayResource,
-                         menuContext->alternateResource, 0, 0);
+    mnuSetWindowResource(index, window,
+                         (EffectSlotSet *)menuContext->displayHandle,
+                         (EffectSlotSet *)menuContext->displayResource,
+                         (EffectSlotSet *)menuContext->alternateResource, 0, 0);
     mnuAttachPartyIconBundle(index, window, (u32)menuContext->displayResource);
     menuContext->panelGroup = mnuCreatePanelGroup(menuContext->resourceHandle,
                                                    menuContext->displayResource, 0);
@@ -2643,7 +2637,8 @@ void mnuOrEntryFlags(u32 flags, u32 *entryFlags) {
 void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 INCLUDE_ASM(const s32, "game/code_002B0278", mnuCopyCampEffectRowData);
 
-void mnuSetCampEffectResourceHandles(u32 sheet, struct EffMappedResource *animation,
+void mnuSetCampEffectResourceHandles(struct EffectSlotSet *sheet,
+                                    struct EffMappedResource *animation,
                                     MenuEffectResources *resources) {
     resources->packet.sheets[0] = sheet;
     resources->animationHandle = animation;
@@ -2651,7 +2646,7 @@ void mnuSetCampEffectResourceHandles(u32 sheet, struct EffMappedResource *animat
 
 
 void mnuBindCampEffectAnimation(MenuEffectResources *resources) {
-    effConfigureIndexedSlotResource((struct EffectSlotSet *)resources->packet.sheets[0],
+    effConfigureIndexedSlotResource(resources->packet.sheets[0],
                    resources->packet.items[4],
                    resources->animationHandle, 0, 4);
 }
@@ -2689,7 +2684,7 @@ INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AE58);
 void mnuLoadEffectResources(MenuEffectResources *resources) {
     mnuInitializeMapPacket(0, D_003E7828, 0xb, &resources->packet);
     mnuCopyCampEffectRowData(&D_003E7858, resources);
-    resources->packet.sheets[0] = (u32)effLoadIndexedResource("/camp/spr/n_min/", D_003E7818[0], 0);
+    resources->packet.sheets[0] = effLoadIndexedResource("/camp/spr/n_min/", D_003E7818[0], 0);
     resources->animationHandle = effLoadMappedResource("/camp/mot/", D_003E7820[0]);
     mnuBindCampEffectAnimation(resources);
 }
@@ -2697,7 +2692,8 @@ void mnuLoadEffectResources(MenuEffectResources *resources) {
 void mnuRequestEffectResources(MenuEffectResources *resources) {
     mnuInitializeMapPacket(0, D_003E7828, 0xb, &resources->packet);
     mnuCopyCampEffectRowData(&D_003E7858, resources);
-    effRequestResourceByMode("/camp/spr/n_min/", D_003E7818[0], 0, &resources->packet.sheets[0]);
+    effRequestResourceByMode("/camp/spr/n_min/", D_003E7818[0], 0,
+                             (u32 *)&resources->packet.sheets[0]);
     effRequestMappedResource("/camp/mot/", D_003E7820[0], (u32 *)&resources->animationHandle);
 }
 
@@ -2715,7 +2711,7 @@ u32 mnuBindCampEffectWhenLoaded(MenuEffectResources *resources) {
 void mnuDestroyEffectResources(MenuEffectResources *resources) {
     u32 i;
     for (i = 0; i < ARRAY_COUNT(resources->packet.sheets); i++) {
-        effDestroyResourceSlotSet((struct EffectSlotSet *)resources->packet.sheets[i]);
+        effDestroyResourceSlotSet(resources->packet.sheets[i]);
     }
     effDestroyPackedBatch(resources->animationHandle);
 }
@@ -2756,7 +2752,7 @@ void mnuDrawAndAdvanceCampSparks(MenuCampEffect *fx, s32 arg) {
     s32 i;
     for (i = 0; i < 0x10; i++) {
         if (fx->direction[i] > 0) {
-            itfDrawGridWithResolvedSlot(fx->velocity[i][0], fx->velocity[i][1], 0, 0, (EffectSlotSet *)(u32)fx->resources.packet.sheets[0], fx->resources.packet.items[6], arg);
+            itfDrawGridWithResolvedSlot(fx->velocity[i][0], fx->velocity[i][1], 0, 0, fx->resources.packet.sheets[0], fx->resources.packet.items[6], arg);
             if (fx->direction[i] == 1) {
                 fx->velocity[i][0] += fx->life[i];
                 if (fx->velocity[i][0] > 0x2000) {
@@ -2809,12 +2805,12 @@ void mnuDrawBadgeFade(MenuCampEffect *set, s32 arg) {
     s32 handle;
     if (!(set->resources.packet.type & 4)) {
         handle = set->resources.packet.items[layout.place[0].slot];
-        func_00306CD0(layout.place[0].x, layout.place[0].y, 0, set->fade, 0, (EffectSlotSet *)set->resources.packet.sheets[0], handle, arg);
-        itfGridLookupValueOrDefault(set->resources.packet.sheets[0], handle);
+        func_00306CD0(layout.place[0].x, layout.place[0].y, 0, set->fade, 0, set->resources.packet.sheets[0], handle, arg);
+        itfGridLookupValueOrDefault((s32)set->resources.packet.sheets[0], handle);
         MNU_ADVANCE_FADE(set->fade, 0x10, 0x100);
     }
     if (!(set->resources.packet.type & 2)) {
-        itfDrawGridWithResolvedSlot(layout.place[1].x, layout.place[1].y, 0, 0, (EffectSlotSet *)(u32)set->resources.packet.sheets[0], set->resources.packet.items[layout.place[1].slot], arg);
+        itfDrawGridWithResolvedSlot(layout.place[1].x, layout.place[1].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[layout.place[1].slot], arg);
     }
 }
 
@@ -2830,11 +2826,11 @@ void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 arg) {
     sdfSubmitGsTestOneRegisterPacket(0x30000, arg);
     uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x80808080, arg);
     for (i = 0; i < 1; i++) {
-        itfDrawGridWithResolvedSlot(blank[i].x, blank[i].y, 0, 0, (EffectSlotSet *)(u32)set->resources.packet.sheets[0], set->resources.packet.items[blank[i].slot], arg);
+        itfDrawGridWithResolvedSlot(blank[i].x, blank[i].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[blank[i].slot], arg);
     }
     if (!(set->resources.packet.type & 2)) {
         for (i = 0; i < 2; i++) {
-            itfDrawGridWithResolvedSlot(layout.place[i].x, layout.place[i].y, 0, 0, (EffectSlotSet *)(u32)set->resources.packet.sheets[0], set->resources.packet.items[layout.place[i].slot], arg);
+            itfDrawGridWithResolvedSlot(layout.place[i].x, layout.place[i].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[layout.place[i].slot], arg);
         }
     }
     if (!(set->resources.packet.type & 4)) {
@@ -3405,8 +3401,6 @@ extern void effInitializeSlotWork();
 void mnuClearEntryFlags(MenuIconState *group);
 
 /* Destroy nonzero resource slots, retaining the native per-iteration count read, then free. */
-void mnuReleaseResourceList(MenuIconState *list);
-
 typedef struct MenuPos {
     s32 x;
     s32 y;
@@ -3536,19 +3530,6 @@ void mnuUpdateFade(s32 *list);
 void mnuResetWindowFadeParameters(MenuFadeFields *menu);
 
 
-/* Three resource-slot handles at +0xE4/+0xE8/+0xEC. */
-typedef struct MenuSlotEffectHandles {
-    u8 pad00[0xE4];
-    u32 handles[3];
-} MenuSlotEffectHandles;
-
-void mnuLoadPanelSectionResources(MenuSlotEffectHandles *slot,
-                                  EffectSlotSet *model, u32 firstValue,
-                                  u32 secondValue, s32 thirdValue
-                                    );
-
-
-
 void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused, u32 preserve);
 
 void func_002BB9C8(MenuSprites *page, u32 flags);
@@ -3566,8 +3547,6 @@ extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 
 void mnuDrawIconRow(s32 unusedA, s32 unusedB, s32 depth, s32 skip, MenuSprites *set, s32 drawArg);
-
-void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 
 void mnuSetIndexedWindowPageSpriteFlags(s32 index, MenuPageWindow *menu, u32 first, u32 second);
 
