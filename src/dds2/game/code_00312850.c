@@ -8,7 +8,6 @@
 extern s8 D_0037F510[];
 
 
-extern u32 sdfMemoryGetBlockAddress(SdfMemBlock *);
 
 extern void func_00313BA8(s32, s32);
 

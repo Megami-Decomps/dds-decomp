@@ -263,7 +263,6 @@ extern SdfMemBlock *D_003BD79C;
 extern u32 D_003BD7A0;
 extern s32 mdlFlagTest(s32 flag);
 extern s32 mnuCreateFlagEntries(void);
-extern u32 sdfMemoryGetBlockAddress(SdfMemBlock *block);
 extern void ptySaveActiveUnitsToStock(void);
 extern void mnuCollectFlagArray(u8 *flags);
 

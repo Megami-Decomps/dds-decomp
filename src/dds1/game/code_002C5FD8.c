@@ -559,13 +559,12 @@ void fldDrawCounterMapMarker(void) {
 }
 
 
-extern void *sdfMemoryGetBlockAddress(u32 handle);
 
 /* Build a ring of `count` request nodes (0x20 bytes each) behind a 0x44-byte queue header. */
 MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 arg) {
     s32 size = count * 0x20 + 0x44;
     u32 handle = (u32)sdfAllocGeneralBlock(size);
-    MapRequestRing *pool = (MapRequestRing *)sdfMemoryGetBlockAddress(handle);
+    MapRequestRing *pool = (MapRequestRing *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)handle);
     MapRequestState *state = &pool->header;
     MapRequestNode *node;
     MapRequestNode *next;
