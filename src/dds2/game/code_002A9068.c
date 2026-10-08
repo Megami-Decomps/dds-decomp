@@ -746,7 +746,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     mnuDrainPanelTransitions((MenuPopupState *)(menuBytes + 8), task);
     mnuReleaseStaffSpriteAndResourceHandles(menuBytes);
     mnuDestroyScrollPanel(((CampVisualWork *)menuBytes)->modelHandle);
-    mnuShutdownContext(menuBytes + 0x284);
+    mnuShutdownContext((MenuPageWindow *)(menuBytes + 0x284));
     dspCloseChannel();
     mnuDestroyEffectResources(menuBytes + 0x11c);
     mnuReleaseTitleEffectResourceGroups(menuBytes);
