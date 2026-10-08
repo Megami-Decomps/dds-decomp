@@ -301,9 +301,9 @@ extern u8 *sdfTexSubmitPixelsForFormat(void *, u32, u8 *, s32);
 
 extern s32 sdfTexSubmitImageCopy(u32, s16, s16, u8, u8 *, s32);
 
-extern u32 sdfTexGetPrimaryResourceWord(void *);
+extern u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 
-extern u32 sdfTexGetSecondaryResourceWord(void *);
+extern u32 sdfTexGetSecondaryResourceWord(SdfTex *texture);
 
 void effUploadModelTextures(EffModelOwner *owner) {
     s32 i = 0;
