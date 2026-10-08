@@ -155,6 +155,8 @@ typedef struct BrsProgressRow {
 
 typedef char BrsProgressRow_size_must_be_0x2C[(sizeof(BrsProgressRow) == 0x2C) ? 1 : -1];
 
+struct EffectSlotSet;
+
 /* DDS1 allocates 0x50 bytes; DDS2's expanded sprite banks and byte flags use 0x78. */
 typedef struct MenuSprites {
     u32 flags;
@@ -166,10 +168,10 @@ typedef struct MenuSprites {
     void *cursor[4];
     s32 fade;
 #else
-    s32 firstSprite;
-    s32 primarySprite;
-    s32 sprites[7];
-    s32 overlaySprites[2];
+    struct EffectSlotSet *firstSprite;
+    struct EffectSlotSet *primarySprite;
+    struct EffectSlotSet *sprites[7];
+    struct EffectSlotSet *overlaySprites[2];
     s32 profileFade;
 #endif
     s32 drawAlpha;
@@ -182,6 +184,11 @@ typedef struct MenuSprites {
 #endif
 } MenuSprites;
 
+#ifndef VERSION_DDS2
+typedef char MenuSprites_dds1_size_check[
+    sizeof(MenuSprites) == 0x50 ? 1 : -1];
+#endif
+
 /* The allocated icon bundle owns its draw fade and fade direction. */
 typedef struct MenuIconBundle {
 #ifdef VERSION_DDS2
@@ -189,7 +196,7 @@ typedef struct MenuIconBundle {
     void *sprite[3];
 #else
     u8 pad0[0xC];
-    s32 sprite[4];
+    struct EffectSlotSet *sprite[4];
 #endif
     s32 fade;
     s32 fadeOut;
@@ -201,6 +208,8 @@ typedef char MenuIconBundle_size_must_be_0x20[
 #else
 typedef char MenuIconBundle_size_must_be_0x24[
     sizeof(MenuIconBundle) == 0x24 ? 1 : -1];
+typedef char MenuIconBundle_dds1_sprites_offset_check[
+    ((u32)&((MenuIconBundle *)0)->sprite == 0xC) ? 1 : -1];
 #endif
 
 
@@ -208,8 +217,6 @@ typedef struct MenuPoint {
     s32 x;
     s32 y;
 } MenuPoint;
-
-struct EffectSlotSet;
 
 /* Native sprite-state allocation: three resource-set owners and a state word. */
 typedef struct MenuSpriteState {
