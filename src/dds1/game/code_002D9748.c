@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "sdf_pending.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 #include "sdf_chunk.h"
@@ -99,8 +100,8 @@ extern SdfSubParam *sdfSubParamCreate(void);
 extern u32 sdfForcedAssetTextureMode;
 extern f32 D_003BD358;
 extern f32 D_003BD35C;
-extern u8 sdfResourceReleaseQueue;
-extern u8 sdfAssetReleaseQueue;
+extern SdfPendingRequest sdfResourceReleaseQueue;
+extern SdfPendingRequest sdfAssetReleaseQueue;
 extern s32 sdfLiveAssetCount;
 extern void sdfReleaseChipBlock(void *);
 extern u64 sdfTexGetPrimaryTextureState(SdfTex *);
@@ -121,8 +122,6 @@ extern void sdfBuildPrimaryAlphaSubtractiveDmaPacket(void *);
 
 void *sdfAllocSizeClassBlock(s32 size);
 void *sdfAllocAndClearQuadwords(s32 size);
-void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
-void sdfPendingQueuePush(void *arg0, s32 arg1);
 void sdfResourceListReleaseAssets(DevRequest *list);
 void sdfCopyAssetParameterState(SdfAsset *, SdfAsset *);
 void sdfAssetRelease(SdfAsset *);
