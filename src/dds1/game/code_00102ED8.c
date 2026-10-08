@@ -798,7 +798,7 @@ typedef struct KwlnFrameDrawBank {
     u8 scenePacketStorage[0x420];
     SdfListHead thirdList;
     ConsMatrixPacket thirdMatrix;
-    u8 overlayLightPacket[0xE0];
+    SdfLightingPacketStorage overlayLightPacket;
 } KwlnFrameDrawBank;
 
 typedef char KwlnFrameDrawBank_size_check[(sizeof(KwlnFrameDrawBank) == 0x1F40) ? 1 : -1];

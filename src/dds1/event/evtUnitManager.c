@@ -775,7 +775,7 @@ extern const s32 D_003AC060[];
 
 EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {
     EvtUnit *work;
-    void *endpoint;
+    struct SdfLightingPacketStorage *endpoint;
     f32 defaultVector[4];
 
     memcpy(defaultVector, (const f32 *)D_003AC060, sizeof(defaultVector));
@@ -798,9 +798,9 @@ EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {
     work->color = 0x00B2B2B2;
     work->color5C = 0x80303030;
     work->color50 = 0x80303030;
-    endpoint = sdfAllocSizeClassBlock(0xE0);
+    endpoint = sdfAllocSizeClassBlock(sizeof(*endpoint));
     work->endpointWork = endpoint;
-    memset(endpoint, 0, 0xE0);
+    memset(endpoint, 0, sizeof(*endpoint));
     work->value = 0;
     *(u32 *)((u8 *)work + 0xD8) = 0;
     *(u32 *)((u8 *)work + 0xDC) = 0;
@@ -808,7 +808,7 @@ EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {
 }
 
 s32 evtReleaseUnitTransitionWork(EvtUnit *work) {
-    void *endpointWork;
+    struct SdfLightingPacketStorage *endpointWork;
 
     if (work == NULL) {
         return 1;
