@@ -1,6 +1,7 @@
 #include "common.h"
 #include "evt_world.h"
 #include "evt_unit.h"
+#include "evt_task.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
@@ -80,9 +81,7 @@ extern void evtResetObjectPendingValue(EffWorldNode *object);
 extern void evtArmEffectObjectPendingValue(EffWorldNode *object, s32 value);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern s32 evtCreateModelFromPackResource(s32 eventId, s32 resourceId);
-extern s32 evtCreateMotionSeTask(s32 arg0, s32 arg1, s32 arg2);
-extern s32 evtFindTaskById(s32 taskId);
-extern void func_00101A80(s32 arg0, s32 arg1);
+extern void func_00101A80(KwlnTask *parent, KwlnTask *child);
 extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void evtConfigureUnitMotionSlot(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern s32 func_003003F0();
@@ -432,7 +431,7 @@ u32 evtOpBindMotionSoundToModel(void) {
     s32 param0;
     s32 rid;
     s32 model;
-    s32 ret;
+    KwlnTask *task;
 
     if (scrGetCurrentContext() == 0) {
         return 1;
@@ -446,9 +445,9 @@ u32 evtOpBindMotionSoundToModel(void) {
     }
     param0 = scrReadIntParameter(0);
     rid = scrReadIntParameter(1);
-    ret = evtCreateMotionSeTask(model, param0, rid);
-    if (ret != 0) {
-        func_00101A80(evtFindTaskById(scrReadIntParameter(0)), ret);
+    task = evtCreateMotionSeTask(model, param0, rid);
+    if (task != 0) {
+        func_00101A80(evtFindTaskById(scrReadIntParameter(0)), task);
     }
     return scrSetIntegerReturnValue(model);
 }
