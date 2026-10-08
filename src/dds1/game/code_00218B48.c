@@ -167,7 +167,6 @@ void effApplyNodeScale(s32, float);
 
 s32 effCreateNodeFromDescriptor(s32);
 
-void billSetChildScaleComponents(s32, float, float);
 
 s32 billCreateIndexed(s32, s32);
 
@@ -1078,7 +1077,7 @@ void mdlSetResourceFrame(MdlCtx *owner, MdlResourceItem *item, s32 frame) {
 void mdlSetResourceAmount(MdlCtx *owner, MdlResourceItem *item, float amount) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
-        billSetChildScaleComponents(item->payload.part.handle, amount, amount);
+        billSetChildScaleComponents((struct BillObj *)item->payload.part.handle, amount, amount);
         return;
     case MDL_RESOURCE_EFFECT:
         effApplyNodeScale(item->payload.part.handle, amount);

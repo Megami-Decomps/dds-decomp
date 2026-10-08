@@ -334,7 +334,6 @@ extern f32 effComputeProjectedOffsetAngle(void *, void *);
 
 extern f32 func_0015A150(void *, void *);
 
-extern void billSetChildScaleComponents(u32, f32, f32);
 
 extern void billSetLengthExtent(u32, f32);
 
@@ -1647,7 +1646,7 @@ void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
             len = 0.3f;
         }
         len *= work->scale;
-        billSetChildScaleComponents(work->billboard, len * work->widthScale, work->heightScale * work->scale);
+        billSetChildScaleComponents((struct BillObj *)work->billboard, len * work->widthScale, work->heightScale * work->scale);
         billSetLengthExtent(work->billboard, angle);
         effCopyVector(work->billboard, work);
         billInvokeCallback(work->billboard);
