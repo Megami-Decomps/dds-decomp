@@ -3,6 +3,13 @@
 
 #include "dds3obj.h"
 
+/* The first flag enables publishing this light's ambient and secondary
+ * vectors; the second blends those vectors over the configured frame count. */
+enum EffLightFlags {
+    EFF_LIGHT_FLAG_UPDATE_COLOR_VECTORS = 1,
+    EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS = 2
+};
+
 /* Complete 0x7C-byte payload owned by kind-9 world nodes. */
 typedef struct EffLightData {
     f32 ambientColor[3];
