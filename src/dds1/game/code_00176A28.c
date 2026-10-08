@@ -21,7 +21,6 @@ typedef struct EffBillboardParams {
 } EffBillboardParams;
 
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern void billSetBillboardMode(u32 handle, s32 mode);
 
 typedef struct {
     u16 parameterCount;
@@ -267,7 +266,7 @@ EffBillboardWork *effCreateBillboardResourceWork(EffBillboardParams *params) {
 
     billboard->mode = params->mode;
     billboard->handle = (u32)effCreateBillboardSharingIndexedResource(2);
-    billSetBillboardMode(billboard->handle, 2);
+    billSetBillboardMode((struct BillObj *)billboard->handle, 2);
     billboard->color = 0x80808080;
     billboard->scale = 100.0f;
     return billboard;

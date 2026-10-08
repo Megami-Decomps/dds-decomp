@@ -423,7 +423,6 @@ extern MdlCtx *func_002DC1D0(void *, u32);
 
 extern void dds3DispatchIndexedCallback(s32, f32);
 
-extern void billSetBillboardMode(s32, s16);
 
 
 extern u8 D_00380828[];
@@ -3891,7 +3890,7 @@ void effSetSurfaceRetainedResource(s32 *object, s32 arg) {
     }
     ((EffectSlotNode54 *)work)->billResource = effCreateBillboardSharingIndexedResource(arg);
     if (((EffectSlotNode54 *)work)->record != 0) {
-        billSetBillboardMode((s32)((EffectSlotNode54 *)work)->billResource, (s16)((FileKeyBlock *)((FileSlotTable *)((EffectSlotNode54 *)work)->record)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode(((EffectSlotNode54 *)work)->billResource, (s16)((FileKeyBlock *)((FileSlotTable *)((EffectSlotNode54 *)work)->record)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -3903,7 +3902,7 @@ void effReplaceSurfacePrimaryBillboard(s32 *object, s32 *settings) {
     }
     ((EffectSlotNode54 *)work)->billResource = billCreateIndexed(0, (u32)settings);
     if (((EffectSlotNode54 *)work)->record != 0) {
-        billSetBillboardMode((s32)((EffectSlotNode54 *)work)->billResource, (s16)((FileKeyBlock *)((FileSlotTable *)((EffectSlotNode54 *)work)->record)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode(((EffectSlotNode54 *)work)->billResource, (s16)((FileKeyBlock *)((FileSlotTable *)((EffectSlotNode54 *)work)->record)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -3916,7 +3915,7 @@ void effReplaceSurfaceFlaggedBillboard(s32 *object, s32 *settings) {
     ((EffectSlotNode54 *)work)->billResource = billCreateIndexed(1, (u32)settings);
     billMarkKindOneFlag(((EffectSlotNode54 *)work)->billResource);
     if (((EffectSlotNode54 *)work)->record != 0) {
-        billSetBillboardMode((s32)((EffectSlotNode54 *)work)->billResource, (s16)((FileKeyBlock *)((FileSlotTable *)((EffectSlotNode54 *)work)->record)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode(((EffectSlotNode54 *)work)->billResource, (s16)((FileKeyBlock *)((FileSlotTable *)((EffectSlotNode54 *)work)->record)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -4230,7 +4229,7 @@ void effDuplicateRenderResourceOwner(EffQuadWork *work, const EffQuadWork *sourc
         work->billHandle = (u32)billCloneObjectRetainingSharedData(
             (struct BillObj *)source->billHandle);
         billMarkKindOneFlag((struct BillObj *)(work->billHandle));
-        billSetBillboardMode(work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
+        billSetBillboardMode((struct BillObj *)work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
     } else {
         if (work->reference != NULL) {
             effReleaseReferenceHolder(work->reference);
@@ -7956,7 +7955,7 @@ s32 *effBillboardMotionResourceCreate(s32 *context, u16 kind, s32 *source) {
         break;
     }
     billMarkKindOneFlag((struct BillObj *)(resource[0]));
-    billSetBillboardMode(resource[0], ((EffMotionResourceConfig *)context)->mode);
+    billSetBillboardMode((struct BillObj *)resource[0], ((EffMotionResourceConfig *)context)->mode);
     return resource;
 }
 
@@ -7966,7 +7965,7 @@ s32 *effBillboardMotionResourceInitialize(s32 *request) {
     s32 *resource = effCreateMotionResource(context);
     resource[0] = (s32)billCloneObjectRetainingSharedData((struct BillObj *)*source);
     billMarkKindOneFlag((struct BillObj *)(resource[0]));
-    billSetBillboardMode(resource[0], ((EffMotionResourceConfig *)context)->mode);
+    billSetBillboardMode((struct BillObj *)resource[0], ((EffMotionResourceConfig *)context)->mode);
     return resource;
 }
 
