@@ -944,23 +944,26 @@ typedef struct ShopBatch {
 } ShopBatch;
 
 void mnuInitializeShopStatusBatches(ShopScene *scene) {
+    struct EffMappedResource *batchHandle;
     ShopBatch *batchObject;
     ShopBatchGraphics *batchGraphics;
     s32 *batchParameters;
     s32 initialParameter = CAMP_STATUS_INITIAL_PARAMETER;
     scene->batchState = 0;
-    batchObject = (ShopBatch *)effCreateStatusBatch(6);
+    batchHandle = effCreateStatusBatch(6);
+    batchObject = (ShopBatch *)batchHandle;
     batchGraphics = batchObject->graphics;
-    scene->batches[0] = (u8 *)batchObject;
+    scene->batches[0] = batchHandle;
     batchParameters = batchGraphics->params;
     batchParameters[0] = initialParameter;
     batchParameters[1] = 0;
     batchParameters[2] = 0;
     batchParameters[3] = 0;
     batchParameters[4] = 0;
-    batchObject = (ShopBatch *)effCreateStatusBatch(1);
+    batchHandle = effCreateStatusBatch(1);
+    batchObject = (ShopBatch *)batchHandle;
     batchGraphics = batchObject->graphics;
-    scene->batches[1] = (u8 *)batchObject;
+    scene->batches[1] = batchHandle;
     batchParameters = batchGraphics->params;
     batchParameters[0] = initialParameter;
     batchParameters[1] = 0;
@@ -968,11 +971,11 @@ void mnuInitializeShopStatusBatches(ShopScene *scene) {
 
 /* Destroy both batches and return the second destruction result. */
 s32 mnuShopReleaseSceneObjects(ShopScene *scene) {
-    s32 *batchCursor = (s32 *)scene->batches;
+    struct EffMappedResource **batchCursor = scene->batches;
     s32 destroyResult;
     u32 batchIndex;
     for (batchIndex = 0; batchIndex < CAMP_STATUS_BATCH_COUNT; batchIndex++) {
-        destroyResult = effDestroyPackedBatch((struct EffMappedResource *)(u32)*batchCursor++);
+        destroyResult = effDestroyPackedBatch(*batchCursor++);
     }
     return destroyResult;
 }

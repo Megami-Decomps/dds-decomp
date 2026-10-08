@@ -6,6 +6,7 @@
 
 struct MenuList;
 struct EffectSlotSet;
+struct EffMappedResource;
 struct SdfMemBlock;
 
 /* Shop stock by progress row: unlock flag, row price percent, then 32 stock entries. */
@@ -140,7 +141,7 @@ typedef struct ShopScene {
     s32 batchState;
     MenuWindowContainer *sprite;
     MenuWindowContainer *window;
-    void *batches[2];
+    struct EffMappedResource *batches[2];
     s32 initialSelection;
     s32 counter;
     s32 menuMode;
