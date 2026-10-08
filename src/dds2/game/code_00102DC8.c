@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "kwln.h"
 #include "sdf.h"
 #include "sdf_projection.h"
@@ -502,7 +503,6 @@ void kwlnDebugGraphSetEnabled(s8 mode) {
     }
 }
 
-extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern void sdfAppendTexturedLinePacket(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 x1,
                                         s32 y1, s32 u1, s32 v1, s32 depth, s32 (*alloc)(s32));
 

@@ -1990,8 +1990,6 @@ void fldUpdateMenuResourceEffects(void) {
     }
 }
 
-extern void *fileQueuePlainDispatchRequest(const char *);
-
 
 extern void func_00288788(void *);
 
@@ -2035,7 +2033,7 @@ void fldParseMixLb(void) {
     s32 value;
 
     index = 0;
-    lb = fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
+    lb = (FldLbFile *)fileQueuePlainDispatchRequest("/fld/f/bin/fldmix.LB");
     func_00288C50((struct FileRequest *)lb);
     for (node = lb->nodes; node != NULL; node = node->next, index++) {
         switch (index) {

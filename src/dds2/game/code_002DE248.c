@@ -4,6 +4,7 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "sdf_dev_state.h"
 #include "bill_object_api.h"
 #include "sdf_chip.h"
@@ -384,7 +385,6 @@ extern u8 D_004386E8[];
 
 struct FileWork;
 extern u32 fileGetResourceHandle(struct FileWork *);
-extern void *fileCreateCallbackRequest(const char *, s32, s32, s32);
 
 
 
@@ -10919,7 +10919,6 @@ typedef struct EffRequest {
 
 extern void func_002C7CE8(void *);
 
-extern void *fileQueuePlainDispatchRequest(const char *path);
 
 
 u32 effAppendListEntry(EffectList *list, u32 value, u32 length,
@@ -10976,7 +10975,7 @@ s32 effPollResourceList(EffectList *list) {
                 if (list->request != NULL) {
                     func_002C7CE8(list->request);
                 }
-                list->request = fileQueuePlainDispatchRequest(node->length);
+                list->request = (EffRequest *)fileQueuePlainDispatchRequest((const char *)node->length);
                 if (list->mode == 2) {
                     func_002C81D0((struct FileRequest *)list->request);
                 }
@@ -11787,7 +11786,6 @@ extern void sdfTexSetPrimaryBufferModeBits(SdfTex *, s32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
-extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern void effSelectPresetByKind(u32, u32);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 
