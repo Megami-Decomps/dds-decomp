@@ -220,7 +220,7 @@ s32 parObjGetMode(ParObj *object) {
 
 extern ParDispatch parKindConstructorEntries[];
 
-extern BillObj *billCloneObjectRetainingSharedData(BillObj *);
+
 
 extern void billSetChildScaleComponents(BillObj *, f32, f32);
 

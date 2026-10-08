@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "eff.h"

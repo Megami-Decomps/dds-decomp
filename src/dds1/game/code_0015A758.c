@@ -108,7 +108,7 @@ extern s32 func_0015FE20(ParDrawState *);
 
 extern ParDispatch parKindConstructorEntries[];
 
-extern BillObj *billCloneObjectRetainingSharedData(BillObj *);
+
 
 extern void billSetChildScaleComponents(BillObj *, f32, f32);
 
