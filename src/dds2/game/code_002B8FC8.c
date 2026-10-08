@@ -2276,7 +2276,7 @@ void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 flag) {
     }
 }
 
-void func_002BCA98(MenuPageWindow *menu) {
+void mnuReleaseAndRefreshWindowSlots(MenuPageWindow *menu) {
     mnuRefreshWindowSlots(menu, 0);
 }
 
