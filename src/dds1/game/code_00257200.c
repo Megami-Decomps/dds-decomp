@@ -101,7 +101,7 @@ extern void func_00259498(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, S
 extern void func_00259890(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, f32, f32, SdfGridCell *, s32);
 extern void func_00259B40(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, f32, f32, SdfGridCell *, s32);
 extern void func_00257ED0(s32, s32, s32, s32, MenuSceneWork *, s32);
-extern void func_00258B90(s32, s32, s32, s32, void *, s32);
+extern void func_00258B90(s32, s32, s32, s32, MnuGridFeedbackState *, s32);
 extern u32 mnuGetSelectedNodeValue(void);
 extern s32 mnuSceneResourceContext;
 
@@ -139,7 +139,7 @@ void func_00257718(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
     func_00257ED0(0, 0, arg2, arg3, display, arg6);
     func_00258B90(arg0 + D_0036B7F0[selection->profileId][2],
                   arg1 + D_0036B7F0[selection->profileId][3],
-                  arg2, arg3, (u8 *)display + 0x488, arg6);
+                  arg2, arg3, &display->gridFeedback, arg6);
     for (row = 0; row < 0x11; row++) {
         cell = grid->cells + row * grid->width;
         n = 0xE;

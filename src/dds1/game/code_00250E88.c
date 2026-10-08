@@ -353,7 +353,7 @@ s32 func_00253640(void) {
 
 extern s8 scrSelectOperandIndex(DatPartyRecord *, s32);
 extern s8 scrGetSelectedOperandIndex(DatPartyRecord *);
-extern void func_00258AF0(u32 *, u32);
+extern void func_00258AF0(MnuGridFeedbackState *, u32);
 extern void evtFinishMessageWindowAndNotify(void);
 extern void mnuReleaseMenuVisualWorkResources(s32);
 
@@ -372,7 +372,7 @@ void func_00253778(void) {
 
         work = (MenuSceneWork *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
         mnuReinitializeSceneGrid((s32)work);
-        func_00258AF0(work->gridRefreshControl, 1);
+        func_00258AF0(&work->gridFeedback, 1);
     }
 
     evtFinishMessageWindowAndNotify();
