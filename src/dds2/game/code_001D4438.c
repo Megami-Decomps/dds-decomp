@@ -267,10 +267,12 @@ extern void mdlAddEntryFlagged(void *, s32, s32);
 extern u8 effSharedRandomState[];
 extern void func_001EC5F0(BtlLinkedCommand *);
 extern void func_001EF030(void *, void *);
-extern void mdlProcessContextNodesAndTransforms(void *, void *);
+struct MdlCtx;
+struct SdfPoolNode;
+extern void mdlProcessContextNodesAndTransforms(struct MdlCtx *, struct SdfPoolNode **);
 extern void func_001E38F0(void *, void *, s32, u8 *, u32);
 extern void dds3ClearObjectFlags(s32, s32);
-extern u8 D_00380788[];
+extern struct SdfPoolNode *D_00380788[13][4];
 extern u8 D_003B6BD0[];
 
 extern void func_001EC868(BtlLinkedCommand *, BtlCamState *, f32);

@@ -307,14 +307,15 @@ void mdlDestroyContext(MdlCtx *ctx) {
     sdfReleaseChipBlock(ctx);
 }
 
-extern void func_002174C0();
+struct SdfPoolNode;
+extern void func_002174C0(MdlCtx *, struct SdfPoolNode **);
 extern s32 sdfMotionUpdate(void *motion);
 extern void sdfModelUpdateCurrentFrameTransforms();
-extern void func_002D9238();
+extern void func_002D9238(struct SdfPoolNode **, SdfModel *);
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
 /* Per-frame update: step the active slot nodes, refresh the transforms, dispatch anchor records. */
-void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, s32 arg) {
+void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, struct SdfPoolNode **surfaces) {
     Motion **slot = ctx->slots;
     SdfModel *inner;
     MdlResourceItem *rec;
@@ -333,7 +334,7 @@ void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, s32 arg) {
     }
     inner = ctx->inner;
     sdfModelUpdateCurrentFrameTransforms(inner);
-    func_002D9238(arg, inner);
+    func_002D9238(surfaces, inner);
     if (ctx->flags & MDL_SKIP_ANCHORS) {
         return;
     }
@@ -348,7 +349,7 @@ void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, s32 arg) {
     if (ctx->devList == NULL) {
         return;
     }
-    func_002174C0(ctx, arg);
+    func_002174C0(ctx, surfaces);
 }
 
 extern void sdfSetPrimaryIdentityMatrixVU(void *);
@@ -368,8 +369,8 @@ extern void sdfRotateVuMatrixAboutY(f32 angle);
 /* Blend the selected basis towards pitch/yaw (degrees), then update transforms
  * and anchors. For abs(pitch)<25, weight is abs(pitch)/25; otherwise one;
  * -1 skips basis blending. Slot motions/blending precede the skip flags.
- * updateArg is forwarded unchanged to the remaining update routines. */
-void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, f32 pitch, f32 yaw) {
+ * surfaces is forwarded unchanged to the remaining update routines. */
+void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, struct SdfPoolNode **surfaces, s32 entryIndex, f32 pitch, f32 yaw) {
     SdfModel *inner;
     SdfDrawNode *entry = NULL;
     f32 targetRows[4][4];
@@ -419,7 +420,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, 
     }
     inner = ctx->inner;
     sdfModelUpdateCurrentFrameTransforms(inner);
-    func_002D9238(updateArg, inner);
+    func_002D9238(surfaces, inner);
     if (ctx->flags & MDL_SKIP_ANCHORS) {
         return;
     }
@@ -434,7 +435,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, 
     if (ctx->devList == NULL) {
         return;
     }
-    func_002174C0(ctx, updateArg);
+    func_002174C0(ctx, surfaces);
 }
 
 /* Enable each table entry. The signed table count governs iteration; entry

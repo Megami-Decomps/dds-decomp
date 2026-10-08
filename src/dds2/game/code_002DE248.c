@@ -427,9 +427,9 @@ extern void dds3DispatchIndexedCallback(s32, f32);
 
 
 
-extern u8 D_00380828[];
+extern struct SdfPoolNode *D_00380828[4];
 
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 
 typedef struct EffectObjectFlag {
     u32 state;
@@ -7789,7 +7789,7 @@ void effApplyModelTransform(u8 *work) {
     mdlStoreTertiaryVectorVU(modelContext->model);
     modelContext->model->first->frameStep =
         ((EffAimConfig *)animation)->modelParameter;
-    mdlProcessContextNodesAndTransforms(modelContext->model, (s32)D_00380828);
+    mdlProcessContextNodesAndTransforms(modelContext->model, D_00380828);
     effDrawClassResourceWork(modelContext->material);
 }
 

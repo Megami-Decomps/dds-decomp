@@ -554,13 +554,13 @@ typedef struct {
     f32 pos[4];
 } FldEmitter;
 
-extern u8 D_00380838[];
+extern struct SdfPoolNode *D_00380838[4];
 
 extern void sdfDrawNodeBuildMatrix();
 
 extern void sdfModelUpdateCurrentFrameTransforms();
 
-extern void func_003320E8();
+extern void func_003320E8(struct SdfPoolNode **, SdfModel *);
 
 s32 func_001442D0(void) {
     FldTitleBannerMenu *menu;
