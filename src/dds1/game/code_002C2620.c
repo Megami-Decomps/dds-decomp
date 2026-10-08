@@ -4,9 +4,9 @@
 #include "sdf.h"
 #include "itf_grid_text.h"
 #include "sdf_sif_command.h"
+#include "kwln_task_lifecycle.h"
 
 extern void fldShutdownLmapResources(void);
-extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
 extern char fldLocalMapTaskName[]; /* "LmapMain" */
 

@@ -3,6 +3,7 @@
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "evt_solar.h"
+#include "kwln_task_lifecycle.h"
 
 #define SOLAR_FADE_DRAW_ENABLED 1
 #define SOLAR_FADE_IN 2
@@ -25,7 +26,6 @@ extern s32 evtSolarOverlayFadeDuration;
 extern u32 D_003BA8EC;
 extern char D_003ACD18[]; /* "EventTest" */
 void kwlnTaskCreate(void *name, s32 priority, s32 unk2, s32 unk3, void *update, void *destroy, void *data);
-void kwlnTaskDestroyWithHierarchyByName(void *name, s32 flag);
 void evtDestroySecondaryWorldNode(void);
 
 

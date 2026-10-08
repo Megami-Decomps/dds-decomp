@@ -4,6 +4,7 @@
 #include "kwln.h"
 #include "dat_state.h"
 #include "evt_world.h"
+#include "kwln_task_lifecycle.h"
 
 struct SdfTex;
 
@@ -383,7 +384,7 @@ void evtFillQuadRecordFields(s32 firstWord, s32 secondWord, s32 thirdWord, s32 f
 s32 evtDestroyRegisteredTaskIfPresent(s32 task) {
     if (task != 0) {
         if (kwlnTaskGetRegisteredState((KwlnTask *)task)) {
-            kwlnTaskDestroyWithHierarchy(task, 0);
+            kwlnTaskDestroyWithHierarchy((KwlnTask *)task, 0);
         }
     }
 }

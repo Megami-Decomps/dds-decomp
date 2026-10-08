@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "fld_waypoint.h"
 #include "fld_inf.h"
+#include "kwln_task_lifecycle.h"
 extern FldInfTable D_00332E30;
 #include "sdf_primitive.h"
 #include "evt_unit.h"
@@ -318,7 +319,6 @@ extern void *memset(void *s, s32 c, u32 n);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task);
 extern s32 func_00213B50(void);
-extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 extern s32 fldValueRecordCount;
 extern s32 D_003BADF8;
 extern s32 D_003BADEC;
@@ -358,7 +358,6 @@ extern void fldResetZoneRecordsAndActorSlots();
 extern void fldResetPendingSounds();
 extern void fldReleaseSceneRecordChunk();
 extern void fldReleaseMenuSlotsAfterWait();
-extern void kwlnTaskDestroyWithHierarchyByName();
 extern void mnuReleaseResourceEntries();
 extern void sdfResourceListRelease();
 extern void fldReleaseBackgroundBuffer(void);
@@ -4642,7 +4641,7 @@ u32 fldDestroyTaskSlot(u32 slot) {
     u32 *task = &D_003308B0[slot];
 
     if (kwlnTaskIsRegistered((KwlnTask *)*task) != 0) {
-        kwlnTaskDestroyWithHierarchy(*task, 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)*task, 0);
     }
     *task = 0;
     return 0;

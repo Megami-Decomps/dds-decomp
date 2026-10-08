@@ -8,6 +8,7 @@
 #include "kwln.h"
 #include "eff.h"
 #include "btl_resource.h"
+#include "kwln_task_lifecycle.h"
 
 extern BtlResBlock *btlResourceBlock;
 extern void func_00306C28(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
@@ -25,7 +26,6 @@ extern s32 kwlnTaskCreate(const char *, s32, s32, s32, TaskUpdate, TaskDestroy, 
 
 extern void func_00101968(s32, s32);
 
-extern s32 kwlnTaskDestroyWithHierarchy(s32, s32);
 
 extern s32 btlGetTrackedTaskHandle(s32);
 
@@ -1026,16 +1026,16 @@ void fldCreateSceneSpriteTask(s32 sourceTask) {
     s32 task;
     kwlnTaskGetTaskByName(D_004367B8);
     if (btlIsNamedBattleTaskRegistered() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0xA), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(0xA), 0);
     }
     if (btlHasRegisteredGuidePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(9), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(9), 0);
     }
     if (btlHasRegisteredSkillNamePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(1), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(1), 0);
     }
     if (btlHasRegisteredAphNamePanelTask() != 0) {
-        kwlnTaskDestroyWithHierarchy(btlGetTrackedTaskHandle(0), 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)btlGetTrackedTaskHandle(0), 0);
     }
     scene = (BattleSceneWork *)btlGetRuntime();
     task = kwlnTaskCreate(D_004367B8, 0x2B0E, 1, 1, fldStepSceneStateMachine,

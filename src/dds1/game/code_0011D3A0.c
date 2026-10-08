@@ -10,6 +10,7 @@
 #include "evt_world.h"
 #include "dds3obj.h"
 #include "dat_state.h"
+#include "kwln_task_lifecycle.h"
 
 /* Signed selectors read signed storage; all writes retain the selected width. */
 enum {
@@ -173,7 +174,6 @@ extern u32 fldGetSceneReadyFlag(void);
 extern struct ScrData *scrFindNamedProcessNode(char *arg0);
 extern void sdfStoreMessageWordsAndNotifyConsumer(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 extern u32 fldPlayerObject;
 extern u32 fldPlayerModelResource;
 extern u32 D_0032E498[];

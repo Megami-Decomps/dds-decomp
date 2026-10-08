@@ -19,7 +19,6 @@ extern u64 func_0019F5E8(s32, s32, u64, u64, u64, u64);
 
 extern s32 kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), s32);
 extern void func_00101968(s32, s32);
-extern s32 kwlnTaskDestroyWithHierarchy(s32, s32);
 extern s32 btlGetTrackedTaskHandle(s32);
 extern s32 btlIsNamedBattleTaskRegistered(void);
 extern s32 btlHasRegisteredGuidePanelTask(void);

@@ -13,6 +13,7 @@
 #include "evt_unit.h"
 #include "dat_state.h"
 #include "mdl.h"
+#include "kwln_task_lifecycle.h"
 
 enum {
     FIELD_CAMERA_SETTING_COUNT = 8
@@ -1068,7 +1069,6 @@ extern void fldReleaseMenuSlotsAfterWait();
 
 extern void fldReleaseIndexedResourceEffect();
 
-extern void kwlnTaskDestroyWithHierarchyByName();
 
 extern void mnuReleaseResourceEntries();
 

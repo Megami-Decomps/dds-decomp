@@ -1,6 +1,7 @@
 #include "common.h"
 #include "kwln.h"
 #include "kwln_task_state.h"
+#include "kwln_task_lifecycle.h"
 
 extern void kwlnTaskRemoveFromStateQueue(KwlnTask* task);
 
@@ -23,7 +24,6 @@ extern void kwlnTaskAdvanceDestroyDelays(void);
 extern void func_00101368(KwlnTask* task, s32 arg1);
 
 
-extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask* task, s32 delayTicks);
 
 
 extern void kwlnUnlinkListNode(KwlnTask* task);
