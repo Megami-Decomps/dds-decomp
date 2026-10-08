@@ -927,6 +927,7 @@
 0x001598D8	billCopyCurrentRecordToSnapshot	inferred	M141; sources=names_pending_main.tsv; twin=0x00151CE8, input-family pairing. [names_qp10.tsv]
 0x001599F8	billCreateFromResource	inferred	Opens a billboard resource to read its header, creates the indexed billboard, and releases the temporary allocation.
 0x00159A50	billCloneObjectRetainingSharedData	inferred	src/dds2/effect/billManager.c func_00159A50: Clones entry list or child object, retaining shared child data reference and copying dispatch metadata. Twin of DDS1 func_00151E60. [names_reviewed24.tsv]
+0x00159B48	effCreateBillboardSharingIndexedResource	inferred	Creates a billboard for the catalog entry kind, shares its child payload, and increments the child reference count.
 0x00159BB8	effGetBillResourceTexture	inferred	Returns the acquired SdfTex handle from the indexed billboard child resource.
 0x00159BD8	effCopyVector	inferred	lq/sq copy of one quadword
 0x00159BE8	billSetLengthExtent	inferred	Stores billboard length extent; beam caller supplies its computed length [names_reviewed6.tsv]

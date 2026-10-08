@@ -90,7 +90,6 @@ typedef struct EffectSurfaceNode {
     u16 unk50;
 } EffectSurfaceNode;
 
-extern u32 effRetainResource(u32);
 extern void billSetBillboardMode(u32, s16);
 extern u32 fileSaveReadBuffer;
 extern u32 fileAllocateGridRecordSlots(u16, u32, void *);
@@ -5609,7 +5608,7 @@ void fileLoadObjectOpenNamedDevice(EffectSurfaceNode *node, u32 resourceId) {
     if (resource != 0) {
         billDispatchByKind((void *)resource);
     }
-    resource = effRetainResource(resourceId);
+    resource = (u32)effCreateBillboardSharingIndexedResource(resourceId);
     node->resource = (void *)resource;
     if (node->active != 0) {
         billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
