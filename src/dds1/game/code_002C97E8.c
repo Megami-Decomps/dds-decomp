@@ -774,7 +774,7 @@ SdfTaskEntry *sdfFindTaskItemValueByKey(TaskWork *work, s32 key) {
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CB3B8);
+INCLUDE_ASM(const s32, "game/code_002C97E8", sdfGetTaskValueByKey);
 
 
 void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 mode) {

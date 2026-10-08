@@ -23,7 +23,6 @@
 #define MNU_REQUIREMENT_SLOT_COUNT 2
 #define MNU_REQUIREMENT_MIN_COUNT 2
 
-extern s32 func_002CB3B8(u32, u32);
 
 extern u8 *datGameState;
 extern s8 scrGetSelectedOperandIndex(struct DatPartyRecord *);
@@ -715,20 +714,20 @@ void mnuBuildMantraPartyList(MnuResourceTask *task) {
 u32 mnuGetSelectedNodeValue(void) {
     MnuResourceTask *task;
 
-    task = (MnuResourceTask *)func_002CB3B8(mnuSceneResourceContext, 0);
+    task = (MnuResourceTask *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 0);
     return task->menuList->selectionNode->selectionAddress;
 }
 
 /* Clear the list's two animation flags and request its default retreat. */
 void mnuStopResourceAnimation(void) {
-    s32 taskAddress = func_002CB3B8(mnuSceneResourceContext, 0);
+    s32 taskAddress = sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 0);
     mnuClearListFlagsOneAndTwo(((MnuResourceTask *)taskAddress)->menuList);
     mnuRetreatListCursorDefault((struct MenuList *)((MnuResourceTask *)taskAddress)->menuList);
 }
 
 /* Clear the list's two animation flags and request its default advance. */
 void mnuResetResourceAnimation(void) {
-    s32 taskAddress = func_002CB3B8(mnuSceneResourceContext, 0);
+    s32 taskAddress = sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 0);
     mnuClearListFlagsOneAndTwo(((MnuResourceTask *)taskAddress)->menuList);
     mnuAdvanceListCursorDefault((struct MenuList *)((MnuResourceTask *)taskAddress)->menuList);
 }
@@ -768,7 +767,7 @@ typedef struct MenuCleanupOwner {
 void mnuReleaseResourceTaskData(s32 unused, s32 *taskData) {
     MenuCleanupOwner *listOwner = (MenuCleanupOwner *)taskData[3];
     MenuCleanupNode *nodeCursor = listOwner->first;
-    u8 *sceneMetadata = (u8 *)func_002CB3B8(mnuSceneResourceContext, -1);
+    u8 *sceneMetadata = (u8 *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
     while (nodeCursor != NULL) {
         sdfReleaseChipBlock(nodeCursor->resource);
@@ -810,7 +809,7 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
     f32 shadeFactor;
     f32 elapsedFrames;
     f32 fadeRatio;
-    s32 sceneMetadata = func_002CB3B8(mnuSceneResourceContext, -1);
+    s32 sceneMetadata = sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
     s32 alpha;
     s32 elapsedTicks;
 
@@ -972,7 +971,7 @@ u8 *func_00250820(u16 profileId) {
 /* Return whether the selected party row has capped both required profiles.
  * No qualifying requirement list is treated as satisfied; only its first two IDs are checked. */
 s32 func_002508D8(u16 profileId) {
-    MnuResourceTask *task = (MnuResourceTask *)func_002CB3B8(mnuSceneResourceContext, 0);
+    MnuResourceTask *task = (MnuResourceTask *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 0);
     MnuProfileProgress *progress =
         (MnuProfileProgress *)task->menuList->selectionNode->selectionAddress;
     u8 *requiredProfiles = func_00250820(profileId);
@@ -1019,7 +1018,7 @@ void mnuInitializeMantraSelectionGrid(s32 sceneAddress) {
     sdfSetShortPairValues(sceneWork->grid, 1, 1);
     sceneWork->grid->releaseCell = mnuFreeTaskData;
     sceneWork->grid->drawCell = mnuDrawMantraEntryStatus;
-    resourceTaskAddress = func_002CB3B8(mnuSceneResourceContext, 0);
+    resourceTaskAddress = sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 0);
     fieldAddress = *(s32 *)(*(s32 *)(resourceTaskAddress + 0xC) + 0x1C);
     func_00253208(sceneAddress, *(s32 *)(fieldAddress + 0x70),
                   &selectedCoordinates[0], &selectedCoordinates[1]);
