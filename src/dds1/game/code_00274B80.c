@@ -47,7 +47,6 @@ extern char D_003BC700[];
 #define MNU_STAFF_DISPLAY_OVERFLOW 4
 #define MNU_STAFF_DISPLAY_LIMIT 3
 #define MNU_STAFF_PARTY_ENTRY_BYTES 0x1A4
-#define MNU_STAFF_PARTY_HALFWORD_STRIDE 210
 #define MNU_STAFF_PARTY_BASE 0xA60
 #define MNU_STAFF_BACKUP_BYTES 0x834
 #define MNU_STAFF_PARTY_ACTIVE_BIT 1
@@ -443,11 +442,11 @@ void mnuRestorePartyEntriesAndRefresh(context)
 s32 mnuCountActiveSlots(void) {
     s32 entryCountdown;
     s32 activeCount = 0;
-    u16 *entryFlagsCursor = (u16 *)((s32)datGameState + MNU_STAFF_PARTY_BASE);
+    DatPartyRecord *partyEntry = datGameState->party;
 
     for (entryCountdown = MNU_STAFF_PARTY_LAST_SLOT; entryCountdown >= 0; entryCountdown--) {
-        activeCount += *entryFlagsCursor & MNU_STAFF_PARTY_ACTIVE_BIT;
-        entryFlagsCursor += MNU_STAFF_PARTY_HALFWORD_STRIDE;
+        activeCount += partyEntry->flags & MNU_STAFF_PARTY_ACTIVE_BIT;
+        partyEntry++;
     }
     return (activeCount < MNU_STAFF_DISPLAY_OVERFLOW) ? activeCount : MNU_STAFF_DISPLAY_LIMIT;
 }
@@ -1675,4 +1674,3 @@ INCLUDE_SDATA(const s32, "game/code_00274B80", D_003BC700);
 INCLUDE_SDATA(const s32, "game/code_00274B80", D_003BC708);
 
 INCLUDE_SDATA(const s32, "game/code_00274B80", D_003BC710);
-

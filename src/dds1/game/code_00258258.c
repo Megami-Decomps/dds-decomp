@@ -94,17 +94,75 @@ func_00258B00(SoundVoice *voice) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00258258", func_00258B90);
+void func_0024E3C0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
+                   s32 placementIndex, s32 context);
+void func_0024E470(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
+                   s32 placementIndex, s32 context, f32 rotation);
+
+void func_00258B90(s32 x, s32 y, s32 z, s32 alpha, SoundVoice *state,
+                   s32 context) {
+    f32 progress;
+
+    /* Both modes interpolate in radians and draw the ring pieces in degrees. */
+    switch (state->mode) {
+    case 0: {
+        f32 rotation;
+        f32 degrees;
+        progress = (f32)state->count / 30.0f;
+        rotation = 6.2831853f;
+        degrees = 57.29578f;
+        func_0024E3C0(x, y, z, alpha, 0x20, 0x43, context);
+        rotation = progress * rotation;
+        func_0024E470(x, y, z, alpha, 0x20, 0x42, context, rotation * degrees);
+        rotation += 3.14159265f;
+        func_0024E470(x, y, z, alpha, 0x20, 0x42, context, rotation * degrees);
+        return;
+    }
+    case 1: {
+        f32 originalAlpha;
+        f32 fade;
+        f32 secondary;
+        f32 degrees;
+        s32 count;
+        progress = (f32)state->count / 30.0f;
+        progress = 1.0f - progress;
+        originalAlpha = (f32)alpha;
+        func_0024E3C0(x, y, z, (s32)(originalAlpha * progress), 0x20, 0x41, context);
+        count = state->count;
+        if (count < 10) {
+            progress = (f32)count / 10.0f;
+            fade = 1.0f;
+        } else {
+            progress = 1.0f;
+            fade = (f32)(30 - count) / 20.0f;
+        }
+        secondary = 0.0f;
+        if (count >= 7) {
+            if (count >= 11) {
+                secondary = (f32)(30 - count) / 19.0f;
+            } else {
+                secondary = (f32)(count - 6) * 0.25f;
+            }
+        }
+        alpha = (s32)(originalAlpha * fade);
+        degrees = 57.29578f;
+        func_0024E470(x, y, z, alpha, 0x20, 0x3F, context, progress * -1.5707963f * degrees);
+        func_0024E470(x, y, z, alpha, 0x20, 0x40, context, progress * 1.5707963f * degrees);
+        func_0024E470(x, y, z, (s32)(originalAlpha * secondary), 0x20, 0x40, context,
+                      1.5707963f * 57.29578f);
+        progress = (f32)state->count / 30.0f;
+        func_0024E3C0(x, y, z, (s32)(originalAlpha * progress), 0x20, 0x43, context);
+        break;
+    }
+    }
+}
+
 
 
 
 
 INCLUDE_ASM(const s32, "game/code_00258258", func_00258EB8);
 
-void func_0024E3C0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
-                   s32 placementIndex, s32 context);
-void func_0024E470(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
-                   s32 placementIndex, s32 context, f32 rotation);
 
 void func_00258FD0(s32 x, s32 y, s32 z, s32 alpha, MnuMantraGridEntry *entry,
                    s32 context) {
