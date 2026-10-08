@@ -89,7 +89,7 @@ typedef struct PrfRequirementOperand {
 } PrfRequirementOperand;
 
 
-extern u8 frFontColoredGlyphResource[];
+extern FrFontTextBank frFontColoredGlyphResource;
 
 typedef struct PrfItemRequirement {
     s32 id;
@@ -948,14 +948,14 @@ Entry84W *prfReqGetEntryRecord(u16 index) {
 }
 
 void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
-    FrFontGlyph *handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, (FrFontTextBank *)frFontColoredGlyphResource, 0);
+    FrFontGlyph *handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, &frFontColoredGlyphResource, 0);
     frFontSetChildColors(handle, second);
     func_001958A0(handle, 1, option);
     frFontQueueGlyphInSelectedSlot(handle);
 }
 
-u8 *frFontGetColoredGlyphResource(void) {
-    return frFontColoredGlyphResource;
+FrFontTextBank *frFontGetColoredGlyphResource(void) {
+    return &frFontColoredGlyphResource;
 }
 
 

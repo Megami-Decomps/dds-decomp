@@ -2,6 +2,7 @@
 #include "common.h"
 #include "kwln.h"
 #include "dat_state.h"
+#include "itf.h"
 
 #define MNU_MANTRA_DRAW_ITEM_BYTES 0x24
 #define MNU_MANTRA_DRAW_POOL_HEADER_BYTES 0xC
@@ -34,7 +35,7 @@ extern f32 sdfSinPoly(f32);
 extern u32 frFontDrawTextVariantAAndMeasure(s32, s32, s32, u32, u8, char *, s32, s32);
 extern u32 frFontDrawTextVariantBAndMeasure(s32, s32, s32, u32, u8, char *, s32, s32);
 extern u32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const u8 *, s32, s32);
-extern u32 frFontQueueTintedGlyphChainAndMeasure(s32, s32, s32, u32, u8, u16, s32, s32, s32, s32);
+extern u32 frFontQueueTintedGlyphChainAndMeasure(s32, s32, s32, u32, u8, u16, FrFontTextBank *, s32, s32, s32);
 /* The SDK definition and its declarations use legacy K&R parameters. */
 extern void sdfSubmitGsTestOneRegisterPacket();
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
@@ -412,11 +413,11 @@ void mnuDrawOptionalMantraLabel(u32 x, u32 y, u32 depth, u32 fade, u16 entryId, 
     }
 }
 
-extern u8 *frFontGetColoredGlyphResource(void);
+extern FrFontTextBank *frFontGetColoredGlyphResource(void);
 
 /* Render a panel icon when it has an ID, or the corresponding empty art. */
 void mnuDrawMantraLabelA(u32 x, u32 y, u32 depth, s32 fade, u32 iconId, u32 drawArg) {
-    u8 *handle = frFontGetColoredGlyphResource();
+    FrFontTextBank *handle = frFontGetColoredGlyphResource();
     u32 flags = (u32)(fade * 0.6f) | 0xA09D7D00;
 
     mnuDrawMantraSprite(x, y, depth, fade, 0x4D, 0, drawArg);

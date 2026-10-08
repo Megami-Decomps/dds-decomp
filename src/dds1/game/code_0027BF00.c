@@ -4,10 +4,8 @@
 #include "mnu_shop.h"
 #include "dat_state.h"
 #include "dat_command.h"
+#include "itf.h"
 struct MenuListNode;
-struct FrFontGlyph;
-struct FrFontCtx;
-struct TextStyleNode;
 
 enum MenuPanelKind {
     MNU_PANEL_KIND_SIX_SLOTS = 0,
@@ -69,9 +67,9 @@ extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 
 extern s32 func_002CD240(s32, s32 *);
 
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
+extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 
-extern void func_00196088(s32, s32, s32);
+extern void func_00196088(s32, s32, FrFontGlyph *);
 
 extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
 
@@ -1790,7 +1788,7 @@ s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unused
 
 extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern u16 evtGetIndexedEventRecordId(s32);
-extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
+extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern s32 func_003014F0(char *, const char *, ...);
 extern u8 *D_003BAA84;
 extern char D_003BC720[];
@@ -1804,7 +1802,7 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
     s32 value;
     s32 alpha;
     s32 color;
-    s32 glyphAddress;
+    FrFontGlyph *glyph;
 
     value = mnuGetPartyEntryMenuValue(&datGameState->party[partyIndex]);
     alpha = page->drawAlpha;
@@ -1816,15 +1814,15 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
         i++;
     } while (i < 2);
     if (value != 0) {
-        glyphAddress = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BAA84 + value * 25, 0);
+        glyph = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BAA84 + value * 25, 0);
         func_003014F0(text, D_003BC720, datCommandRecords[evtGetIndexedEventRecordId(value)].hpPower);
-        glyphAddress = func_001978E8(x + 0xF70, y + 0x348, z, color, text, glyphAddress);
+        glyph = func_001978E8(x + 0xF70, y + 0x348, z, color, text, glyph);
     } else {
-        glyphAddress = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);
-        glyphAddress = func_001978E8(x + 0xF70, y + 0x348, z, color, D_003BC738, glyphAddress);
+        glyph = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);
+        glyph = func_001978E8(x + 0xF70, y + 0x348, z, color, D_003BC738, glyph);
     }
-    func_001958A0((struct FrFontGlyph *)glyphAddress, 1, param);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)glyphAddress);
+    func_001958A0(glyph, 1, param);
+    frFontQueueGlyphInSelectedSlot(glyph);
     if (page->fadeOut == 0) {
         if (page->drawAlpha < 256) {
             page->drawAlpha += 16;
@@ -1857,10 +1855,8 @@ extern void func_002CD0D8(u32 textId, s32 arg1, char *out);
 
 extern struct FrFontGlyph *func_001951C8(void *, s8, s8, s8, struct FrFontGlyph *);
 
-extern u32 frFontMeasureGlyphChain(void *);
+extern u32 frFontMeasureGlyphChain(FrFontGlyph *);
 
-extern void frFontSetContextPair(struct FrFontCtx *, u32, u32);
-extern void frFontSetChildColors(struct TextStyleNode *, u32);
 
 void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 param) {
     char text[0x40];
@@ -1869,9 +1865,9 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 p
 
     func_002CD0D8(textId & 0xFFFF, 1, text);
     glyph = func_001951C8(text, 0, 0, 0, 0);
-    frFontSetChildColors((struct TextStyleNode *)glyph, color);
+    frFontSetChildColors(glyph, color);
     width = frFontMeasureGlyphChain(glyph) + 8;
-    frFontSetContextPair((struct FrFontCtx *)glyph, x - (width * 0x10 >> 1) + 0x5F0, y);
+    frFontSetContextPair(glyph, x - (width * 0x10 >> 1) + 0x5F0, y);
     func_001958A0(glyph, 1, param);
     frFontQueueGlyphInSelectedSlot(glyph);
 }
@@ -1882,7 +1878,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     s32 profileId = ptyGetCurrentProfileId(&datGameState->party[partyIndex]);
     s32 code;
     s32 color;
-    s32 glyphAddress;
+    FrFontGlyph *glyph;
 
     color = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
     code = selectedCode != 0 ? selectedCode : profileId;
@@ -1891,10 +1887,10 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
             mnuDrawCenteredLabel(0x1120, 0x5F0, depth, color, code, param);
             return;
         }
-        glyphAddress = itfCreateConvertedTextGlyph(0, 0, depth, color, (const u8 *)outValue, 0);
-        func_00196088(0x1710, 0x5F0, glyphAddress);
-        func_001958A0((struct FrFontGlyph *)glyphAddress, 1, param);
-        frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)glyphAddress);
+        glyph = itfCreateConvertedTextGlyph(0, 0, depth, color, (const u8 *)outValue, 0);
+        func_00196088(0x1710, 0x5F0, glyph);
+        func_001958A0(glyph, 1, param);
+        frFontQueueGlyphInSelectedSlot(glyph);
     }
 }
 
@@ -1917,7 +1913,7 @@ void func_002812E8(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
         remainingExp = ptyComputeTotalExp(unit, 1) - unit->totalExp;
         if (remainingExp != 0) {
             func_003014F0(text, D_003BC740, remainingExp);
-            glyph = (struct FrFontGlyph *)func_001978E8(x + 0xDF0,
+            glyph = func_001978E8(x + 0xDF0,
                 0x160, depth, color, text, 0);
             func_001958A0(glyph, 1, surface);
             frFontQueueGlyphInSelectedSlot(glyph);
