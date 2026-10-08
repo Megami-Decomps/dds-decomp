@@ -732,7 +732,27 @@ s32 mnuPollTitleEffectsReady(MenuProgressHost *host) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00267B40);
+extern s32 mnuFindMatchingPartyEntryIndex(DatPartyRecord *);
+extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
+extern void func_002B2C88(s32, s32, s32, s32);
+
+void func_00267B40(DatPartyRecord *entry, MenuProgressHost *host) {
+    MenuPageWindow *window = &host->partyWindow;
+    s32 index;
+
+    mnuInitializeCampPanelResources(window, &host->staffSlots, 0, &host->partyPanel);
+    mnuSeekListNode(mnuFindMatchingPartyEntryIndex(entry), host->partyWindow.lists[0]);
+    index = host->partyWindow.lists[0]->cursor->index;
+    mnuSetWindowResource(index, window, (EffectSlotSet *)host->staffSlots.baseResources[0],
+                         host->staffSlots.pairResources[0], host->staffSlots.pairResources[1], 0, 0);
+    mnuAttachPartyIconBundle(index, window, (u32)host->staffSlots.pairResources[0]);
+    host->panelGroup = mnuCreatePanelGroup((EffectSlotSet *)host->staffSlots.baseResources[1],
+                                          host->staffSlots.pairResources[0], 0);
+    host->effectResource = mnuAllocateSimpleSprite((EffectSlotSet *)host->staffSlots.baseResources[1],
+                                                  host->staffSlots.pairResources[1],
+                                                  (EffectSlotSet *)host->staffSlots.baseResources[0]);
+    func_002B2C88((s32)window, 1, 1, 1);
+}
 
 INCLUDE_ASM(const s32, "game/code_002665B0", func_00267C48);
 
