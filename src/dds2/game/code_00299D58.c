@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_result.h"
@@ -15,8 +16,6 @@ extern u32 func_0029D790(DatPartyRecord *, PrfSkillList *);
 
 extern void func_0026C900(void);
 
-
-extern s32 mnuMapPadMaskToFlags(s32);
 
 extern void mnuTitleRenderFadeAndPanels(BrsSkillPackageWork *);
 

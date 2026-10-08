@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "kwln.h"
@@ -62,7 +63,6 @@ typedef struct {
     s32 values[2];
 } MenuSelectionPair;
 
-extern s32 mnuMapPadMaskToFlags(s32);
 extern s32 mnuTickExtendedCommandPhase(ShopScene *);
 extern void mnuSetPopupEntryFlagged(s32, s32);
 extern void func_00260550(struct MenuList *, u32);
