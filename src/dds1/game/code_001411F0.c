@@ -978,7 +978,7 @@ typedef struct {
 } FldProjectedSprite;
 
 extern FldProjectedSprite D_0033EBA0[];
-extern SdfTex *D_003D40A0[];
+extern SdfTex *D_003D40A0[4];
 
 void func_00142800(s32 index, u32 color, f32 x, f32 y) {
     FldProjectedSprite *sprite = &D_0033EBA0[index];
@@ -1119,7 +1119,94 @@ s32 fldGetMaxItemValue(void) {
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00142D78);
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_001447D0);
+extern f32 D_003BAF18;
+extern f32 D_00329790[4][4];
+extern f32 sdfViewMatrix[4][4];
+extern f32 sdfSinPoly(f32);
+extern void sdfInvertScaledVuTransform(void);
+extern void sdfConsCacheTransformedNode(SdfProjectionRecord *, void *);
+extern void fldSubmitGsQuadTagged(s32, s32, s32, s32, u32, u32, u32, u32);
+
+void func_001447D0(void) {
+    s32 i;
+    s32 x;
+    s32 y;
+    s32 alpha;
+    u32 color;
+
+    /* The stored single-precision phase step is just below 0.1. */
+    D_003BAF18 += 0x1.999998p-4f;
+    VU0_LOAD_MATRIX(D_00329790);
+    sdfInvertScaledVuTransform();
+    sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, D_00329790);
+
+    fldSelectDisplayBuffer(0x56);
+    fldSubmitFrameQuad(1, 0, 0x80, 1, 0, 0, 1, 1);
+    func_00129900(0);
+    fldSubmitGsQuadTagged(0, 0, 0x200, 0xE0, 0, 0, 0, 0x80);
+    fldSubmitSpriteRect(0, 0, 0x200, 0x1C0, 0, 0, 0x40, 0x40,
+                        0x80404040, D_003D40A0[2]);
+    func_00129900(1);
+
+    alpha = 0x5C - (s32)(sdfSinPoly(D_003BAF18 + 3.0f) * 32.0f + 32.0f);
+    color = ((u32)alpha << 24) | 0x00808080;
+    fldSubmitSpriteRect(0x0E, 6, 0x100, 0x100, 0, 0, 0x100, 0x100,
+                        color, D_003D40A0[3]);
+    alpha = 0x5C - (s32)(sdfSinPoly(D_003BAF18 + 1.5f) * 32.0f + 32.0f);
+    color = ((u32)alpha << 24) | 0x00808080;
+    fldSubmitSpriteRect(0x25, 0x1D, 0x100, 0x100, 0, 0, 0x100, 0x100,
+                        color, D_003D40A0[3]);
+    alpha = 0x5C - (s32)(sdfSinPoly(D_003BAF18) * 32.0f + 32.0f);
+    color = ((u32)alpha << 24) | 0x00808080;
+    fldSubmitSpriteRect(0x3C, 0x34, 0x100, 0x100, 0, 0, 0x100, 0x100,
+                        color, D_003D40A0[3]);
+    alpha = 0x5C - (s32)(sdfSinPoly(D_003BAF18) * 32.0f + 32.0f);
+    color = ((u32)alpha << 24) | 0x00808080;
+    fldSubmitSpriteRect(0xC4, 0x8C, 0x100, 0x100, 0x100, 0x100, -0x100, -0x100,
+                        color, D_003D40A0[3]);
+    alpha = 0x5C - (s32)(sdfSinPoly(D_003BAF18 + 2.0f) * 32.0f + 32.0f);
+    color = ((u32)alpha << 24) | 0x00808080;
+    fldSubmitSpriteRect(0xDB, 0xA3, 0x100, 0x100, 0x100, 0x100, -0x100, -0x100,
+                        color, D_003D40A0[3]);
+    alpha = 0x5C - (s32)(sdfSinPoly(D_003BAF18 + 3.0f) * 32.0f + 32.0f);
+    color = ((u32)alpha << 24) | 0x00808080;
+    fldSubmitSpriteRect(0xF2, 0xBA, 0x100, 0x100, 0x100, 0x100, -0x100, -0x100,
+                        color, D_003D40A0[3]);
+    func_00129900(1);
+
+    for (i = 0; i < 9; i++) {
+        x = 0x0C + i * 0x17;
+        y = -(i * 0x32);
+        fldSubmitSpriteRect(x, y, 5, 0x1A3, 3, 0x56, 5, 0x1C,
+                            0x20808080, D_003D40A0[1]);
+    }
+    for (i = 0; i < 19; i++) {
+        x = -(i * 0x0A);
+        y = 4 + i * 0x17;
+        fldSubmitSpriteRect(x, y, 0xC3, 5, 0x0B, 0x56, 0x19, 5,
+                            0x20808080, D_003D40A0[1]);
+    }
+    for (i = 0; i < 9; i++) {
+        x = 0x1EF - i * 0x17;
+        y = 0x1D + i * 0x32;
+        fldSubmitSpriteRect(x, y, 5, 0x1A3, 3, 0x72, 5, -0x1C,
+                            0x20808080, D_003D40A0[1]);
+    }
+    for (i = 0; i < 19; i++) {
+        x = 0x13D + i * 0x0A;
+        y = 0x1B7 - i * 0x17;
+        fldSubmitSpriteRect(x, y, 0xC3, 5, 0x24, 0x56, -0x19, 5,
+                            0x20808080, D_003D40A0[1]);
+    }
+
+    func_00129900(0);
+    sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+    fldSelectDisplayBuffer(0x5E);
+    fldSubmitFrameQuad(1, 5, 0x81, 1, 0, 0, 1, 2);
+    func_00129900(0);
+}
+
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00144D30);
 
