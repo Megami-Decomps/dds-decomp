@@ -104,8 +104,6 @@ extern BillObj *effBillResourceOwners[];
 extern EffBillResourceInit D_003AA880[];
 extern char D_004142B0[];
 extern char D_004142C0[];
-extern EffBillResourceArchive *fileQueuePlainDispatchRequest(const char *path);
-
 extern void func_002C7CE8(EffBillResourceArchive *archive);
 extern void func_0035B6E0(const char *format, ...);
 
@@ -121,7 +119,7 @@ void effInitializeBillResourceOwners(void) {
     u32 configOffset;
 
     D_00438EFC = 0;
-    archive = fileQueuePlainDispatchRequest(D_004142B0);
+    archive = (EffBillResourceArchive *)fileQueuePlainDispatchRequest(D_004142B0);
     func_002C81D0((struct FileRequest *)archive);
     node = archive->nodes;
     if (node != NULL) {

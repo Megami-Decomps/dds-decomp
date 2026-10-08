@@ -4276,7 +4276,6 @@ BtlRuntimeTask *btlCreateUnitFxVectorRefreshTask(BtlUnit *unit) {
 }
 
 extern s32 btlFormatUnitBedName(BtlUnit *, char *);
-extern s32 fileQueueAlternateCallbackRequest(char *);
 
 void btlStartGunFinishLoad(s32 *task) {
     char filename[0x70];
@@ -4289,7 +4288,7 @@ void btlStartGunFinishLoad(s32 *task) {
         unit->gunResource = 0;
     }
     if (btlFormatUnitBedName(unit, filename)) {
-        s32 handle = fileQueueAlternateCallbackRequest(filename);
+        s32 handle = (s32)fileQueueAlternateCallbackRequest(filename);
         task[1] = handle;
         btlBossDebugPrintf("btl:gun & finish load start[%s][%p]\n", filename, handle);
     }
@@ -9269,7 +9268,6 @@ typedef struct BtlFieldLoadArgs {
     s32 frame;
 } BtlFieldLoadArgs;
 
-extern BtlFieldArchiveRequest *fileQueuePlainDispatchRequest(const char *);
 
 u32 btlPollFieldArchiveLoad(args)
     BtlFieldLoadArgs *args;
@@ -9285,7 +9283,7 @@ u32 btlPollFieldArchiveLoad(args)
         fldFormatAreaDirectory(directory, args->stage, 1);
         func_0035C860(path, "%sf%03d_%03d.LB", directory, args->stage, args->variant);
         btlBossDebugPrintf("btl:field load[%s]\n", path);
-        args->request = fileQueuePlainDispatchRequest(path);
+        args->request = (BtlFieldArchiveRequest *)fileQueuePlainDispatchRequest(path);
         args->fieldF1 = NULL;
         args->fieldF2 = NULL;
         args->fieldTB = NULL;
@@ -10589,7 +10587,7 @@ INCLUDE_RODATA(const s32, "game/code_001DD390", D_00419170);
 
 void sndLoadSysEffLb(void) {
     const char *path = "/battle/SYSEFF.LB";
-    s32 archive = fileQueuePlainDispatchRequest(path);
+    s32 archive = (s32)fileQueuePlainDispatchRequest(path);
     s32 node;
     u32 i;
 
@@ -11092,7 +11090,7 @@ void sndLoadMotSeFiles(u32 *sound) {
             } else {
                 func_0035C860(filename, D_00419318, D_00419308, sound[2]);
             }
-            *(u32 *)(handleTable + offset) = fileQueueDefaultCallbackRequest(filename);
+            *(u32 *)(handleTable + offset) = (u32)fileQueueDefaultCallbackRequest(filename);
             btlBossDebugPrintf("btl:motSE file load start[%d][%p][%s]\n", slot, sound, filename);
         }
         slot++;
@@ -11482,7 +11480,7 @@ s32 sndPollAtrac3SELoadTask(BtlAt3LoadArgs *args) {
         }
         resource = fileGetResourceHandle((struct FileWork *)args->loadHandle);
         data = sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
-        size = fileGetResourceSize(args->loadHandle);
+        size = fileGetResourceSize((struct FileWork *)(u32)args->loadHandle);
         filePollEntryCleanup((struct FileCleanup *)args->loadHandle);
         func_002A27A8(data, size, D_003E0F60[args->index].volume);
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));

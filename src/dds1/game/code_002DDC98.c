@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "sdf_resource.h"
 #include "sdf_primitive.h"
 #include "sdf.h"

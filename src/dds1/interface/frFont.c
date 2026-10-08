@@ -234,14 +234,14 @@ FrFontGlyph *frFontAppendGlyphReference(FrFontRecord *source, FrFontGlyph *desti
     }
     glyph->link20.sourceItem = source;
     glyph->advance = D_00356470[0];
-    glyph->unk18.b[0] = frFontGetGlyphCellWidth(0);
-    glyph->unk18.b[1] = frFontGetGlyphCellHeight(0);
+    glyph->childCountOrCellDimensions.cellDimensions.cellWidth = frFontGetGlyphCellWidth(0);
+    glyph->childCountOrCellDimensions.cellDimensions.cellHeight = frFontGetGlyphCellHeight(0);
     glyph->previous = previous;
     destination->link20.linkedGlyph = glyph;
-    destination->unk18.w++;
+    destination->childCountOrCellDimensions.childCount++;
     destination->advance += glyph->advance;
-    destination->u10.half[0] = glyph->unk18.b[0];
-    destination->u10.half[1] = glyph->unk18.b[1];
+    destination->u10.half[0] = glyph->childCountOrCellDimensions.cellDimensions.cellWidth;
+    destination->u10.half[1] = glyph->childCountOrCellDimensions.cellDimensions.cellHeight;
     return destination;
 }
 
@@ -380,7 +380,7 @@ void frFontInitGlyph(FrFontGlyph *glyph) {
     glyph->chainHead = glyph;
     glyph->link1C.firstChild = NULL;
     glyph->link20.linkedGlyph = NULL;
-    glyph->unk18.w = 0;
+    glyph->childCountOrCellDimensions.childCount = 0;
     glyph->timedControlCode = 0;
     glyph->pendingLipsStopCode = 0;
     glyph->skipLipsStopWait = 0;
@@ -469,8 +469,8 @@ void frFontSetGlyphChainDimensions(FrFontGlyph *glyph, s32 cellAdvance, s32 cell
     for (; glyph != NULL; glyph = glyph->previous) {
         for (childGlyph = glyph->link1C.firstChild; childGlyph != NULL; childGlyph = childGlyph->next) {
             childGlyph->advance = cellAdvance;
-            childGlyph->unk18.b[0] = cellAdvance;
-            childGlyph->unk18.b[1] = cellHeight;
+            childGlyph->childCountOrCellDimensions.cellDimensions.cellWidth = cellAdvance;
+            childGlyph->childCountOrCellDimensions.cellDimensions.cellHeight = cellHeight;
         }
     }
     targetGlyph->advance = frFontMeasureGlyphChain(targetGlyph);
@@ -695,14 +695,16 @@ s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 flags) {
                                 enabled = 1;
                             }
                             func_00193D70(x + child->x + xOffset, y + child->y,
-                                         child->unk18.b[0], child->unk18.b[1] >> 1,
+                                         child->childCountOrCellDimensions.cellDimensions.cellWidth,
+                                         child->childCountOrCellDimensions.cellDimensions.cellHeight >> 1,
                                          child->u14.b[0], child->u10.word,
                                          glyph->u14.w, enabled,
                                          &child->link1C.cachedItem->list->uv,
                                          atlas, flags);
                         } else {
                             func_00193D70(x + child->x + xOffset, y + child->y,
-                                         child->unk18.b[0], child->unk18.b[1] >> 1,
+                                         child->childCountOrCellDimensions.cellDimensions.cellWidth,
+                                         child->childCountOrCellDimensions.cellDimensions.cellHeight >> 1,
                                          child->u14.b[0], child->u10.word,
                                          glyph->u14.w, enabled,
                                          &child->link20.sourceItem->list->uv,
@@ -743,7 +745,7 @@ s32 frFontDrawGlyphChain(FrFontGlyph *glyph, s8 mode, u32 flags) {
                         break;
                     }
                 }
-                totalGlyphCount += glyph->unk18.w;
+                totalGlyphCount += glyph->childCountOrCellDimensions.childCount;
                 glyph = glyph->next;
             } while (glyph != NULL);
         }
@@ -1016,10 +1018,10 @@ void frFontCreateContext(ctx)
     FrFontCtx *ctx;
 
 {
-    FrFontGlyph *childGlyph = frFontAppendTextToGlyphChain((const char *)&D_003BB180, 0, ctx->channel1, ctx->channel2, ctx->glyphChain);
+    FrFontGlyph *childGlyph = frFontAppendTextToGlyphChain((const char *)&D_003BB180, 0, ctx->firstOption, ctx->secondOption, ctx->glyphChain);
 
     ctx->glyphChain = childGlyph;
-    frFontSetContextEncodedByte(childGlyph, ctx->channel3);
+    frFontSetContextEncodedByte(childGlyph, ctx->contextEncodedByte);
     ctx->pendingCreate = 0;
 }
 
