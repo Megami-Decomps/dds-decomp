@@ -4,6 +4,7 @@
 #include "dat_state.h"
 #include "btl_state.h"
 #include "btl_sound.h"
+#include "evt_unit.h"
 #include "btl_task_args.h"
 #include "btl_command.h"
 #include "sdf.h"
@@ -147,7 +148,120 @@ extern char D_003A66D8[];
 
 extern char D_003A66F0[];
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_0020FC48);
+extern s32 abs(s32);
+struct SoundTask;
+extern struct SoundTask *sndCreateReleaseTask(u32 *sound);
+extern struct BtlRuntimeTask *func_001F0920(u32 value);
+extern f32 btlGetUnitModelValue1C(BtlUnit *unit);
+extern void mdlAddEntryPlain(MdlCtx *model, s32 first, s32 second);
+extern void sdfMotionSampleAtFrame(Motion *motion, f32 frame);
+extern void btlRefreshUnitEffects(void);
+extern void btlClearRuntimeFlag2000(void);
+extern void btlResetActiveUnitList(void);
+extern void btlUpdateUnitActors(void);
+extern void mdlSetListedObjectFlag(void);
+extern void effResetSlots(void);
+extern void effBTLFieldColorSetSelectors(s32 baseId, u32 variant, s32 overrideId, s32 finalId);
+extern void func_00160D88(BattleEffect *effect);
+
+void func_0020FC48(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 phase = battle->eventActive;
+
+    if ((u32)phase >= 5) {
+        return;
+    }
+
+    switch (phase) {
+    case 0:
+        if (battle->eventData != NULL) {
+            effReleaseBattleVoiceOwner((BattleEffect *)battle->eventData);
+            battle->eventData = NULL;
+        }
+        if (battle->eventRequest != NULL) {
+            sndReleaseAllVoices((SoundMixer *)battle->eventRequest);
+            battle->eventRequest = NULL;
+        }
+        battle->eventAction = -1;
+        break;
+
+    case 1:
+        if (battle->eventData != NULL) {
+            effReleaseBattleVoiceOwner((BattleEffect *)battle->eventData);
+            battle->eventData = NULL;
+        }
+        if (battle->eventRequest != NULL) {
+            sndReleaseAllVoices((SoundMixer *)battle->eventRequest);
+        }
+        battle->eventRequest = sndMixerClone((SoundMixer *)battle->eventResult);
+        battle->eventActive = 2;
+        break;
+
+    case 2:
+        if (battle->eventData != NULL) {
+            effReleaseBattleVoiceOwner((BattleEffect *)battle->eventData);
+        }
+        battle->eventData = func_00160958((SoundMixer *)battle->eventRequest, 1,
+                                          battle->eventUnit, 0);
+        battle->eventActive = 3;
+        btlStartTask(sndCreateReleaseTask((u32 *)0xC));
+        btlStartTask(func_001F0920(0xC));
+        return;
+
+    case 3: {
+        s32 frame;
+        if ((battle->scriptFlags & 2) != 0 &&
+            (battle->commandRestrictFlags & 0x800) == 0) {
+            BtlUnit *unit = battle->eventUnit;
+            if ((unit->flags & 2) != 0) {
+                frame = (s32)btlGetUnitModelValue1C(unit);
+                frame = abs(frame - 0x1A);
+                if (frame >= 6) {
+                    EvtUnit *ext = unit->ext;
+                    MdlCtx *model = ext->owner;
+                    ext->flags &= ~0xA0;
+                    ext->motionState = 0;
+                    mdlAddEntryPlain(model, 0, unit->unkEC);
+                    sdfMotionSampleAtFrame(model->first, 26.0f);
+                    unit->flags &= 0x7FFFFFFF;
+                    unit->flags &= ~0x40000000;
+                    btlBossDebugPrintf("btl:eve mot over [%d]\n", frame);
+                }
+            }
+            battle->scriptFlags &= ~2;
+        }
+
+        {
+            s32 selectedFrame = sndReadSelectedMixerBankValue(
+                (SoundMixer *)battle->eventRequest, 1);
+            frame = (s32)effBattleGetCurrentFrame((BattleEffect *)battle->eventData);
+            if (frame == 1) {
+                battle->battleFlags &= ~0x40000;
+                btlRefreshUnitEffects();
+                btlClearRuntimeFlag2000();
+                btlResetActiveUnitList();
+                btlUpdateUnitActors();
+                mdlSetListedObjectFlag();
+            }
+            if (frame >= selectedFrame) {
+                effResetSlots();
+                battle->eventActive = 4;
+            } else {
+                s32 selector = (s32)battle->eventUnit;
+                effBTLFieldColorSetSelectors(selector, (u32)selector, 0, 0);
+                func_00160D88((BattleEffect *)battle->eventData);
+                return;
+            }
+        }
+        break;
+    }
+
+    case 4:
+        battle->eventActive = 0;
+        battle->battleFlags |= 0x40000;
+        break;
+    }
+}
 
 extern char D_003A6738[]; /* "/event/e%03d/e%03d/scr/e%03d.bf" */
 extern char D_003A6758[]; /* "btl:event[%s]\n" */
