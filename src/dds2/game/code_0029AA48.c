@@ -68,7 +68,6 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
 
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 extern void itfDrawGridWithResolvedSlot(u32, u32, u32, u32, u32, u32, u32);
-extern void mnuDrawAndAdvancePanelGroup(s32, s32, s32, DatPartyRecord *, MenuPanelGroup *, s32, s32);
 extern void func_002C10F0(s32, s32, s32, DatPartyRecord *, MenuSpriteState *, s32);
 extern s8 evtStageTestUpdate(s32);
 extern char D_00380788[];
