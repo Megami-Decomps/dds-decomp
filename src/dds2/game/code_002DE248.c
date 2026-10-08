@@ -2769,15 +2769,6 @@ u32 effCreateTrackSetWithSharedReferences(u32 count, u16 kind, u32 sharedRef) {
 
 
 
-/* Render instance owns either a billboard or a reference, plus an asset slot. */
-typedef struct EffRenderResourceState {
-    u8 pad_00[0x58];
-    s16 billMode;       // 0x58
-    u8 pad_5A[0x6E];
-    u32 billHandle;     // 0xC8
-    RefObj *reference;  // 0xCC
-    u32 assetHandle;    // 0xD0
-} EffRenderResourceState;
 
 /* The ring source selects a minimum of three segments and repeats its three colors. */
 typedef struct EffRingSource {
@@ -4244,64 +4235,67 @@ void effSubmitIndexedRenderPacket(u32 index) {
     effCurrentRenderPacket = 0;
 }
 
+extern EffQuadWork *func_002EA120(FileJob *job);
+void effDuplicateRenderResourceOwner(EffQuadWork *work, const EffQuadWork *source);
+
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002EA120);
 
-void effReleaseRenderResources(u32 *p) {
-    if (((EffRenderResourceState *)p)->billHandle != 0) {
-        billDispatchByKind(((EffRenderResourceState *)p)->billHandle);
+void effReleaseRenderResources(EffQuadWork *work) {
+    if (work->billHandle != 0) {
+        billDispatchByKind(work->billHandle);
     }
-    if (((EffRenderResourceState *)p)->reference != NULL) {
-        effReleaseReferenceHolder(((EffRenderResourceState *)p)->reference);
+    if (work->reference != NULL) {
+        effReleaseReferenceHolder(work->reference);
     }
-    if (((EffRenderResourceState *)p)->assetHandle != 0) {
-        sdfQueueAssetRelease(((EffRenderResourceState *)p)->assetHandle);
+    if (work->assetHandle != 0) {
+        sdfQueueAssetRelease(work->assetHandle);
     }
-    sdfReleaseChipBlock(p);
+    sdfReleaseChipBlock(work);
 }
 
-u8 *effCloneRenderResourceWork(u8 *source) {
-    u8 *effect = func_002EA120(NULL);
-    memcpy(effect + 0x30, source + 0x30, 0x98);
+EffQuadWork *effCloneRenderResourceWork(const EffQuadWork *source) {
+    EffQuadWork *effect = func_002EA120(NULL);
+    memcpy(&effect->source, &source->source, sizeof(effect->source));
     effDuplicateRenderResourceOwner(effect, source);
     return effect;
 }
 
-void effDuplicateRenderResourceOwner(u32 *dst, u32 *src) {
-    if (((EffRenderResourceState *)src)->billHandle != 0) {
-        if (((EffRenderResourceState *)dst)->billHandle != 0) {
-            billDispatchByKind(((EffRenderResourceState *)dst)->billHandle);
+void effDuplicateRenderResourceOwner(EffQuadWork *work, const EffQuadWork *source) {
+    if (source->billHandle != 0) {
+        if (work->billHandle != 0) {
+            billDispatchByKind(work->billHandle);
         }
-        ((EffRenderResourceState *)dst)->billHandle = billCloneObjectRetainingSharedData(((EffRenderResourceState *)src)->billHandle);
-        billMarkKindOneFlag(((EffRenderResourceState *)dst)->billHandle);
-        billSetBillboardMode(((EffRenderResourceState *)dst)->billHandle, ((EffRenderResourceState *)dst)->billMode);
+        work->billHandle = billCloneObjectRetainingSharedData(source->billHandle);
+        billMarkKindOneFlag(work->billHandle);
+        billSetBillboardMode(work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
     } else {
-        if (((EffRenderResourceState *)dst)->reference != NULL) {
-            effReleaseReferenceHolder(((EffRenderResourceState *)dst)->reference);
+        if (work->reference != NULL) {
+            effReleaseReferenceHolder(work->reference);
         }
-        ((EffRenderResourceState *)dst)->reference = effReferenceObjectRetain(((EffRenderResourceState *)src)->reference);
+        work->reference = effReferenceObjectRetain(source->reference);
     }
 }
 
-void effResetRenderResourceKind(s32 work) {
-    ((EffClassWork *)work)->kind = 0;
+void effResetRenderResourceKind(EffQuadWork *work) {
+    work->frame = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002EA5D8);
 
-void effCopyRenderResourcePosition(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst, src);
+void effCopyRenderResourcePosition(EffQuadWork *work, const f32 *source) {
+    PCP_COPY_VECTOR(work->position, source);
 }
 
-void effCopyRenderResourceOrientation(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst + 1, src);
+void effCopyRenderResourceOrientation(EffQuadWork *work, const f32 *source) {
+    PCP_COPY_VECTOR(work->orientation, source);
 }
 
-void effSetRenderResourceColor(s32 work, u32 color) {
-    ((EffClassWork *)work)->color = color;
+void effSetRenderResourceColor(EffQuadWork *work, u32 color) {
+    work->color = color;
 }
 
-void effSetRenderResourceMatrixComponent(Matrix4 *mat, float value) {
-    mat->u.m[2][0] = value;
+void effSetRenderResourceMatrixComponent(EffQuadWork *work, f32 value) {
+    work->scale = value;
 }
 
 

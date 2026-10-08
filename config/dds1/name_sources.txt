@@ -1187,7 +1187,7 @@
 0x00151FF8	billSetLengthExtent	inferred	Stores billboard length extent; beam caller supplies its computed length [names_reviewed6.tsv]
 0x00152000	billSetChildScaleComponents	inferred	Stores two billboard scale components; called with equal values by billSetChildScale2 [names_reviewed6.tsv]
 0x00152010	billSetChildParameter	inferred	Stores the supplied word in billboard parameter [names_reviewed6.tsv]
-0x00152018	effCopyPosition	inferred	eff effect resources and animation in game/code_00151F58.c
+0x00152018	billSetChildTextureQuad	inferred	Copies the sixteen-byte BillTextureQuad into the child payload UV member for kind zero; renderer consumes four packed U/V corners.
 0x00152050	billSetBillboardMode	inferred	Byte-identical dds2 twin 0x00159C40; Updates kind-zero/three billboard mode directly or clears and sets mode bits 2/4 on each kind-one animation frame record. [names_conflicts.tsv]
 0x00152100	billSetAllChildVariants	inferred	Writes signed variant to kind-zero payload or every kind-one child [names_reviewed6.tsv]
 0x00152170	billGetChildValue	inferred	Returns kind-zero payload value; returns zero otherwise [names_reviewed6.tsv]

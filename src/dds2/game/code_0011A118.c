@@ -136,7 +136,7 @@ extern s32 D_00386288[];
 
 extern u32 mnuSetPartyEntryCurrentId(DatPartyRecord *, u32);
 
-extern s32 func_0011AEE0(s32);
+extern s32 ptyRebalanceFrontline(s32);
 
 extern void scrRemoveAvailableSkillFlagAndSlot(DatPartyRecord *, s32);
 
@@ -578,7 +578,7 @@ DatPartyRecord *dds3FindEntry(rosterIndex)
     return 0;
 }
 
-s32 func_0011AEE0(s32 rosterIndex) {
+s32 ptyRebalanceFrontline(s32 rosterIndex) {
     DatGameState *scanState;
     DatPartyRecord savedEntry;
     s32 selectedIndex;
@@ -1836,7 +1836,7 @@ s32 func_0011EC00(void) {
     if (scrReadIntParameter(1) == 0) {
         result = ptyIsRosterEntryPresent();
     } else {
-        result = func_0011AEE0(rosterIndex);
+        result = ptyRebalanceFrontline(rosterIndex);
     }
     scrSetIntegerReturnValue(result == 1);
     return 1;

@@ -50,6 +50,42 @@ typedef char EffectStripHeaderOffsetCheck[((u32)&((EffectStripNode *)0)->copiedH
 typedef char EffectStripRecordOffsetCheck[((u32)&((EffectStripNode *)0)->active == 0x34) ? 1 : -1];
 typedef char EffectStripCountOffsetCheck[((u32)&((EffectStripNode *)0)->count == 0x38) ? 1 : -1];
 
+/* DDS1 002A7B68 / DDS2 002EA120 allocate 0xD4 bytes and copy this
+ * 0x98-byte parameter record at +0x30. Draws 002A8020 / 002EA5D8
+ * scale the +0x64 track's result and use the +0x90 track as the angle. */
+typedef struct EffQuadParams {
+    SdfColorTrack colorTrack;
+    SdfAlphaTrack alphaTrack;
+    EffScalarTrack sizeTrack;
+    EffScalarTrack angleTrack;
+    s32 duration;
+    f32 sizeScale;
+    u8 noSetup;
+    u8 pad95[3];
+} EffQuadParams;
+
+typedef struct EffQuadWork {
+    f32 position[4];
+    f32 orientation[4];
+    f32 scale;
+    u32 color;
+    u32 sourceKind;
+    s32 frame;
+    EffQuadParams source;
+    u32 billHandle;
+    void *reference; /* Secondary file kind 7 owns an EffAnimSet through the generic refcount API. */
+    u32 assetHandle;
+} EffQuadWork;
+
+typedef char EffQuadParamsSizeCheck[(sizeof(EffQuadParams) == 0x98) ? 1 : -1];
+typedef char EffQuadWorkSizeCheck[(sizeof(EffQuadWork) == 0xD4) ? 1 : -1];
+typedef char EffQuadSourceOffsetCheck[((u32)&((EffQuadWork *)0)->source == 0x30) ? 1 : -1];
+typedef char EffQuadSizeTrackOffsetCheck[((u32)&((EffQuadWork *)0)->source.sizeTrack == 0x64) ? 1 : -1];
+typedef char EffQuadAngleTrackOffsetCheck[((u32)&((EffQuadWork *)0)->source.angleTrack == 0x90) ? 1 : -1];
+typedef char EffQuadBillOffsetCheck[((u32)&((EffQuadWork *)0)->billHandle == 0xC8) ? 1 : -1];
+typedef char EffQuadReferenceOffsetCheck[((u32)&((EffQuadWork *)0)->reference == 0xCC) ? 1 : -1];
+typedef char EffQuadAssetOffsetCheck[((u32)&((EffQuadWork *)0)->assetHandle == 0xD0) ? 1 : -1];
+
 /* Class operations select the copied parameter format and own this 0x40-byte
  * header. The resource word is the class factory's returned handle/address. */
 typedef struct EffClassWork {

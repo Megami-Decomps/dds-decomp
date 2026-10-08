@@ -209,7 +209,9 @@ typedef struct BtlState {
     void (*updateCallback)(void); /* 0x5F0 */
     u8 pad5F4[0x1C];
     s32 (*cameraStateChangePredicate)(BtlLinkedCommand *); /* 0x610 */
-    u8 pad614[0x14];
+    u8 pad614[8];
+    s32 (*actionCameraSetupHook)(BtlLinkedCommand *); /* 0x61C: nonzero handles action-camera setup. */
+    u8 pad620[8];
     s32 (*cameraPoseBlendHook)(BtlLinkedCommand *, s32, s32); /* 0x628 */
     s32 (*actionCameraStepHook)(u8 *); /* 0x62C: nonzero handles the camera step. */
     s32 (*handleActorCategoryCamera)(struct BtlLinkedCommand *, s32, s32); /* 0x630: linked-list flags 0x200 / 0x400. */
@@ -434,7 +436,7 @@ typedef struct BtlState {
     s32 (*unk648)(BtlUnit *);
     s32 (*unk64C)(BtlUnit *);
     s32 (*unk650)(BtlUnit *);
-    s32 (*unk654)(BtlUnit *);
+    s32 (*actionCameraSetupHook)(BtlLinkedCommand *); /* 0x654: same action-camera setup override. */
     s32 (*unk658)(BtlUnit *);
     u8 pad65C[4];
     s32 (*unk660)(BtlUnit *, s32, s32);

@@ -3807,3 +3807,57 @@ and the pointer at `+0x0C` selects the packed parameter table. All nine
 globals across the two billboard units now use the same complete packet
 owner and its existing members, without a second view.
 
+
+## Action-camera setup callback and legacy fallback arity
+
+DDS1 `001DEBE0` and DDS2 `001EC418` call the state callback at `+0x61C`
+and `+0x654`, respectively, with the current `BtlLinkedCommand *`; a
+nonzero result handles camera setup. DDS2 `00229728` installs
+`0021E778`, `btlSelectActionCameraByTableFlags`,
+`btlSelectRaisedCameraFromActionFlags`, and
+`btlDispatchActionByResourceFlags` in that slot. The shared owner names
+this command callback `actionCameraSetupHook`, not a unit callback.
+
+The DDS2 fallback passes the same command in both `$a0` and `$a1` to
+`001F4E30`, whose matching definition consumes only one command. An
+unprototyped `void` declaration before this two-argument call is the
+truthful legacy-arity form; the later one-parameter definition remains
+unchanged. This form still tail-calls under the unit's native flags,
+whereas retail uses `JAL` and a shared epilogue. The caller therefore
+remains assembly; an invented integer return contract is not a fix.
+
+
+## Rotating-quad parameter owner and frame
+
+DDS1 `002A7B68` and DDS2 `002EA120` allocate a `0xD4`-byte
+`EffQuadWork`, copying a `0x98`-byte `EffQuadParams` at `+0x30`.
+The signed word at `+0x2C` is its frame, not the class-dispatch kind.
+The draw callbacks `002A8020` / `002EA5D8` multiply the `+0x64`
+scalar-track result by the two scale fields; the `+0x90` track is
+the angle. The historical rotating-quad scratch names those tracks
+in reverse and is not a semantic reference for that assignment.
+
+The native constructor and owner-duplication methods narrow the
+alpha track's signed surface index at `+0x58` to `s16` for
+`billSetBillboardMode`; this is an arithmetic narrowing, not a
+second halfword view of the record. Billboard/reference/asset
+ownership remains at `+0xC8`/`+0xCC`/`+0xD0`. Secondary file kind 7
+selects the animation reference; it is distinct from the primary
+source-kind word copied to `+0x28`.
+
+
+## Mantra pulse frame and primary particle system
+
+DDS1 `mnuDrawMantraPulseFrame` (`00257C10`) gets a
+`MnuProfileProgress *`, advances the display's `SdfGrid` and frame, and
+draws the selected grid at `(-9 - scrollX, 0x45 - scrollY)`. Its inner
+grid pass uses depth 1 while preserving the caller's amount. The existing
+GS state setup and restoration are the same as its matched neighbouring
+grid renderer; no profile operand view is needed.
+
+The identical DDS1/DDS2 particle allocators append a complete `0x2C`-byte
+`ParSystem` to the point, colour and `ParCell` arrays. Its cells pointer is
+at `+0x14`, and its pending-list link is at `+0x24`. `eff.h` now owns that
+unchanged record beside `ParCell`; the allocator translation units no
+longer maintain separate definitions.
+
