@@ -981,7 +981,7 @@ MenuWindowContainer *func_002443F8(const void *unused, s32 count, ShopScene *set
     if (settings->extraOption != 0) {
         count++;
     }
-    window = (MenuWindowContainer *)mnuCreateWindowContainer(0, 0x260, 0x10, count, 0x15);
+    window = mnuCreateWindowContainer(0, 0x260, 0x10, count, 0x15);
     mnuInitializeWindowEntryPlacement(0, window, 0, 8, 0xA);
     for (i = 0; i < count; i++) {
         mnuAppendWindowListNode(window, 0);
@@ -1474,7 +1474,7 @@ s32 func_00245A40(ShopScene *scene) {
         }
         mnuDestroyWindowContainer(scene->window);
     }
-    scene->window = (MenuWindowContainer *)mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x15);
+    scene->window = mnuCreateWindowContainer(1, 0x260, 0x10, 8, 0x15);
     for (i = 0; i < 0xC0; i++) {
         scene->atLimit = 1;
         if ((u32)(i - 0xA0) >= 0x20 && datGameState->inventory.counts[i] != 0) {
