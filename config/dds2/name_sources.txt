@@ -4634,7 +4634,7 @@
 0x002C4F50	mnuGetEntryUseStatus	inferred	Returns failure when cost unavailable, separate flags-based availability otherwise. [names_reviewed5.tsv]
 0x002C4FB8	mnuIsEntryCostUnaffordable	inferred	Tests if primary or secondary available count is below entry's required amount. [names_reviewed5.tsv]
 0x002C5030	mnuConsumeEntryCost	inferred	Subtracts range-entry cost from selected primary or secondary count when affordable. [names_reviewed5.tsv]
-0x002C50C0	mnuGetAbilityByteCategory	inferred	Maps skill/ability metadata byte to category result, treating zero ID as default. [names_reviewed5.tsv]
+0x002C50C0	mnuGetAbilityTargetCategory	inferred	Maps a command's serialized targetType into the menu category used for field-action routing; command zero defaults to category one, known raw values 0/1/2 map to 1/2/3.
 0x002C5338	mnuIsAbilityValueMarked	inferred	Tests whether the ability's paired metadata byte equals one. [names_reviewed5.tsv]
 0x002C5358	ptyGetAffinityKind	inferred	Converts party affinity bit pattern to its indexed kind, with special sentinels. [names_reviewed5.tsv]
 0x002C5428	ptyGetAffinityFlagsWithoutOverride	inferred	Returns affinity flags with high override bit cleared or zero for absent slot. [names_reviewed5.tsv]

@@ -2166,10 +2166,10 @@ s32 ptySkillMenuHandleFieldUse(s32 callback) {
     }
     label = ((SkillMenuRuntime *)menu)->selectedWindow->list->cursor->sortKeyPrimary;
     code = label;
-    if (mnuGetAbilityByteCategory(code) == 2) {
+    if (mnuGetAbilityTargetCategory(code) == 2) {
         ((MenuContext *)context)->partyWindow.flags |= 0x10;
     }
-    if (mnuGetAbilityByteCategory(code) == 3) {
+    if (mnuGetAbilityTargetCategory(code) == 3) {
         ((MenuContext *)context)->partyWindow.flags |= 0x20;
     }
     window = &((MenuContext *)context)->partyWindow;

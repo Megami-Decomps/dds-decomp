@@ -7302,7 +7302,7 @@ u32 btlCanUseActorCategoryFlag2(s32 actor) {
 
 s32 btlHasSingleLinkedResource(s32 actor) {
     s32 index = *(s32 *)(actor + 0x114);
-    if (index != 0 && datCommandRecords[index].unk_08 != 0) {
+    if (index != 0 && datCommandRecords[index].targetType != 0) {
         return 0;
     }
     return btlGetIndexListCount(*(struct BtlIndexList **)(actor + 0x118)) == 1;

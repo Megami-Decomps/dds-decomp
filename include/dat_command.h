@@ -29,7 +29,7 @@ typedef struct DatCommandRecord {
     u8 costMode;                  /* 0x03 */
     u16 costPercentage;            /* 0x04 */
     u16 costBase;                  /* 0x06 */
-    u8 unk_08;
+    u8 targetType;                 /* 0x08; SKILL.TBL target_type */
     u8 options;                    /* 0x09 */
     u8 unk_0A[2];
     u16 restriction;               /* 0x0C */

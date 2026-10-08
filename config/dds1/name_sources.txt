@@ -4939,7 +4939,7 @@
 0x002864D8	mnuGetEntryUseStatus	inferred	Returns failure when cost unavailable, separate flags-based availability otherwise. [names_reviewed5.tsv]
 0x00286540	mnuIsEntryCostUnaffordable	inferred	Tests if primary or secondary available count is below entry's required amount. [names_reviewed5.tsv]
 0x002865B8	mnuConsumeEntryCost	inferred	Subtracts range-entry cost from selected primary or secondary count when affordable. [names_reviewed5.tsv]
-0x00286648	mnuGetAbilityByteCategory	inferred	Maps skill/ability metadata byte to category result, treating zero ID as default. [names_reviewed5.tsv]
+0x00286648	mnuGetAbilityTargetCategory	inferred	Maps a command's serialized targetType into the menu category used for field-action routing; command zero defaults to category one, known raw values 0/1/2 map to 1/2/3.
 0x002866D0	ptySkillApplyFieldUseEffect	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002868C0	mnuIsAbilityValueMarked	inferred	Tests ability paired metadata byte against the marker value one. [names_reviewed5.tsv]
 0x002868E0	ptyGetAffinityKind	inferred	wrong or missing short module prefix [names_audit.tsv]

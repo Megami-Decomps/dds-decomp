@@ -268,7 +268,7 @@ u32 func_00274048(void) {
 }
 
 extern s32 evtGetIndexedEventRecordId(s32);
-extern s32 mnuGetAbilityByteCategory(u16);
+extern s32 mnuGetAbilityTargetCategory(u16);
 extern s32 mnuUseStaffItem(s32, s32);
 extern s32 mnuIsStaffWindowReadyForItem(s32, s32);
 extern char D_0037C9C8[];
@@ -290,10 +290,10 @@ s32 func_00274050(KwlnTask *task) {
     if (menu->primaryObject->list->count != 0) {
         itemId = menu->primaryObject->list->cursor->sortKeySecondary;
     }
-    if (mnuGetAbilityByteCategory((u16)evtGetIndexedEventRecordId(itemId)) == 2) {
+    if (mnuGetAbilityTargetCategory((u16)evtGetIndexedEventRecordId(itemId)) == 2) {
         staff->pageWindow.flags |= 0x10;
     }
-    if (mnuGetAbilityByteCategory((u16)evtGetIndexedEventRecordId(itemId)) == 3) {
+    if (mnuGetAbilityTargetCategory((u16)evtGetIndexedEventRecordId(itemId)) == 3) {
         staff->pageWindow.flags |= 0x20;
     }
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {

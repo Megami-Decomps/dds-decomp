@@ -5795,7 +5795,7 @@ s32 btlCanUseActorCategoryFlag2(s32 actor) {
 s32 btlHasSingleLinkedResource(s32 actor) {
     s32 category = ((BtlLinkedCommand *)actor)->actionCode;
 
-    if (category != 0 && datCommandRecords[category].unk_08 != 0) {
+    if (category != 0 && datCommandRecords[category].targetType != 0) {
         return 0;
     }
     return btlGetIndexListCount(((BtlLinkedCommand *)actor)->targetList) == 1;

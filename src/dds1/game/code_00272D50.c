@@ -388,7 +388,7 @@ void mnuRefreshStaffItemSelection(s32 selection, s32 context) {
 }
 
 extern s32 evtGetMessageWindowControlState(void);
-extern s32 mnuGetAbilityByteCategory(u16);
+extern s32 mnuGetAbilityTargetCategory(u16);
 extern char D_0037CA1C[];
 extern char D_0037C9AC[];
 
@@ -420,7 +420,7 @@ s32 func_002738A0(s32 task) {
                 node = list->cursor;
                 if (node->flags48 == 0) {
                     item = node->sortKeySecondary;
-                    if (mnuGetAbilityByteCategory((u16)evtGetIndexedEventRecordId(item)) == 0) {
+                    if (mnuGetAbilityTargetCategory((u16)evtGetIndexedEventRecordId(item)) == 0) {
                         mnuRefreshStaffItemSelection(item, (s32)context);
                     } else {
                         mnuSetPopupEntry((s32)popup, (s32)D_0037CA1C);

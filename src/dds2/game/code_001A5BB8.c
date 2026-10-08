@@ -2111,7 +2111,7 @@ s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *targets) {
         } else {
             index = action->indexWork.skillId;
         }
-        if (datCommandRecords[index].unk_08 == 0 &&
+        if (datCommandRecords[index].targetType == 0 &&
             datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_FLAG_MASK &&
             datCommandRecords[index].attribute.parts.flagMask != 0) {
             for (i = 0; i < count; i++) {
@@ -4551,7 +4551,7 @@ s32 btlCanUseActorCommandForModelEntry(s32 object, s32 other, s32 offset, s32 in
     if (*(s16 *)(table + offset * 20 + 0x2c) != 2) {
         return 0;
     }
-    if (index != 0 && datCommandRecords[index].unk_08 != 0) {
+    if (index != 0 && datCommandRecords[index].targetType != 0) {
         return 0;
     }
     return 1;
