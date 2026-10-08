@@ -1,6 +1,7 @@
 #include "common.h"
 #include "eff_curve.h"
 #include "file.h"
+#include "file_slot.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
 #include "fpu.h"
@@ -113,34 +114,6 @@ extern u32 fileGetResourceSize(u32);
 extern void filePollEntryCleanup(u32);
 extern s32 fileDrawMenuFrame(s32);
 
-typedef struct FileRecordSlot {
-    f32 pos[4];       /* 0x00 */
-    s32 state;        /* 0x10: frame, -1 available, -2 disabled */
-    u32 color;        /* 0x14 */
-    f32 scale;        /* 0x18 */
-    f32 angle;        /* 0x1C */
-} FileRecordSlot;      /* 0x20, ordinary 4-byte field alignment */
-
-typedef struct FileRecordSlots {
-    u16 type;
-    u8 pad2[2];
-    u32 instances;         /* 0x04: target's primary-slot count */
-    u32 count;             /* 0x08: primary + trailing group cells */
-    u32 flags;             /* 0x0C */
-    u32 references;        /* 0x10: acquisition/frame counter */
-    f32 spawnRemainder;    /* 0x14 */
-    FileRecordSlot *slots; /* 0x18 */
-    u8 *unk1C;             /* 0x1C: per-type instance work */
-    u8 *data0;             /* 0x20 */
-    u8 *data1;             /* 0x24 */
-    u32 handle;            /* 0x28 */
-} FileRecordSlots;
-
-/* The record's signed +0x54 mode is consumed by every billboard opener. */
-typedef struct FileBillboardRecord {
-    u8 pad0[0x54];
-    s16 mode; /* 0x54 */
-} FileBillboardRecord;
 
 typedef struct FileRecordType {
     void (*acquire)(void *);
@@ -191,7 +164,7 @@ extern void *fileSlotStatusPoll(void);
 
 extern FileRecordType D_0037E550[];
 
-extern void fileResetSlotStates(FileRecordSlots *record);
+extern void fileResetSlotStates(FileSlotTable *record);
 
 extern void *fileJobCreateFromCommandState();
 
@@ -451,7 +424,7 @@ extern void *sdfAllocAndClearQuadwords(s32 size);
 
 extern void sdfReleaseChipBlock();
 
-extern void fileClearRecordReferences(FileRecordSlots *record);
+extern void fileClearRecordReferences(FileSlotTable *record);
 
 extern void mnuRecordSetVector(void *record, const u128 *vector);
 
@@ -5036,7 +5009,7 @@ void effLoadObjectDestroy(LoadObj *obj) {
         billDispatchByKind(obj->deviceHandle);
     }
     if (obj->unk3C != 0) {
-        u32 count = ((FileRecordSlots *)obj->recordWork)->count;
+        u32 count = ((FileSlotTable *)obj->recordWork)->count;
         u32 i;
         for (i = 0; i < count; i++) {
             fileJobDestroy(((FileJobPayload **)obj->unk38)[i]);
@@ -5053,9 +5026,9 @@ void effLoadObjectDestroy(LoadObj *obj) {
 }
 
 LoadObj *fileLoadObjectCreateChild(LoadObj *owner) {
-    LoadObj *source = (LoadObj *)((FileRecordSlots *)owner->recordWork)->data1;
+    LoadObj *source = (LoadObj *)((FileSlotTable *)owner->recordWork)->data1;
     LoadObj *result = fileCreateGridLoaderRecord(source);
-    fileLoadObjectSetResource(result, ((FileRecordSlots *)owner->recordWork)->type, source);
+    fileLoadObjectSetResource(result, ((FileSlotTable *)owner->recordWork)->type, source);
     fileCloneEffectSurfaceResources(result, owner);
     return result;
 }
@@ -5073,12 +5046,12 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
         dst->deviceHandle = billCloneObjectRetainingSharedData(src->deviceHandle);
         billMarkKindOneFlag(dst->deviceHandle);
         if (dst->recordWork != NULL) {
-            FileBillboardRecord *record = (FileBillboardRecord *)((FileRecordSlots *)dst->recordWork)->data0;
-            billSetBillboardMode(dst->deviceHandle, record->mode);
+            FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)dst->recordWork)->data0;
+            billSetBillboardMode(dst->deviceHandle, (s16)record->alphaTrack.surfaceIndex);
         }
         break;
     case 5: {
-        u32 count = ((FileRecordSlots *)src->recordWork)->count;
+        u32 count = ((FileSlotTable *)src->recordWork)->count;
         s32 size;
         u32 i;
 
@@ -5129,8 +5102,8 @@ void fileLoadObjectOpenNamedDevice(LoadObj *obj, void *name) {
     handle = effRetainResource(name);
     obj->deviceHandle = handle;
     if (obj->recordWork != NULL) {
-        FileBillboardRecord *record = (FileBillboardRecord *)((FileRecordSlots *)obj->recordWork)->data0;
-        billSetBillboardMode(handle, record->mode);
+        FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)obj->recordWork)->data0;
+        billSetBillboardMode(handle, (s16)record->alphaTrack.surfaceIndex);
     }
 }
 
@@ -5142,8 +5115,8 @@ void fileLoadObjectOpenDevice(LoadObj *obj, void *name) {
     handle = billCreateIndexed(0, name);
     obj->deviceHandle = handle;
     if (obj->recordWork != NULL) {
-        FileBillboardRecord *record = (FileBillboardRecord *)((FileRecordSlots *)obj->recordWork)->data0;
-        billSetBillboardMode(handle, record->mode);
+        FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)obj->recordWork)->data0;
+        billSetBillboardMode(handle, (s16)record->alphaTrack.surfaceIndex);
     }
 }
 
@@ -5154,13 +5127,13 @@ void fileLoadObjectOpenAndStartDevice(LoadObj *obj, void *name) {
     obj->deviceHandle = billCreateIndexed(1, name);
     billMarkKindOneFlag(obj->deviceHandle);
     if (obj->recordWork != NULL) {
-        FileBillboardRecord *record = (FileBillboardRecord *)((FileRecordSlots *)obj->recordWork)->data0;
-        billSetBillboardMode(obj->deviceHandle, record->mode);
+        FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)obj->recordWork)->data0;
+        billSetBillboardMode(obj->deviceHandle, (s16)record->alphaTrack.surfaceIndex);
     }
 }
 
 void fileReplaceEffectSurfaceJobs(LoadObj *obj, FileJobPayload *job) {
-    u32 count = ((FileRecordSlots *)obj->recordWork)->count;
+    u32 count = ((FileSlotTable *)obj->recordWork)->count;
     u32 i;
     s32 size;
 
@@ -5195,7 +5168,7 @@ void fileReplaceReferenceHolder(LoadObj *obj, u32 resource) {
 
 void fileClearLoadObjectReferences(LoadObj *obj) {
     if (obj->recordWork != NULL) {
-        fileClearRecordReferences((FileRecordSlots *)obj->recordWork);
+        fileClearRecordReferences((FileSlotTable *)obj->recordWork);
         return;
     }
 }
@@ -5231,10 +5204,10 @@ void fileSetLoadObjectScale(LoadObj *obj, f32 scale) {
     dds3DispatchIndexedCallback(obj->recordWork);
 }
 
-void fileResetSlotStates(FileRecordSlots *record) {
+void fileResetSlotStates(FileSlotTable *record) {
     u32 count = record->count;
     u32 index = 0;
-    FileRecordSlot *slot = record->slots;
+    FileSlot *slot = record->slots;
     if (count != 0) {
         do {
             index++;
@@ -5303,110 +5276,15 @@ f32 func_00297270(EffScalarCurve *curve, s32 frame, s32 length) {
 }
 
 
-/* Output of fileSampleKeyTracks: a view-space position, the sampled frame, colour, scale and heading. */
-typedef FileRecordSlot FileKeyOut;
-
-/* One emitter track uses +0x0C as its random multiplier; the curve sampler
- * treats the same word as reserved. */
-typedef union FileKeyScalarTrack {
-    EffScalarTrack track;
-    struct {
-        u8 mode;
-        u8 reserved01[3];
-        f32 initialValue;
-        f32 finalValue;
-        f32 randomness;
-        u8 headingMode;
-        u8 reserved11[3];
-        f32 firstValue;
-        f32 firstFraction;
-        f32 secondValue;
-        f32 secondFraction;
-        u8 reserved24[8];
-    } emitter;
-} FileKeyScalarTrack;
-
-/* Keyframe tracks of a view block (scale, heading and colour curves). */
-typedef struct FileKeyBlock {
-    f32 pos[4];             /* 0x00 */
-    f32 orientation[4];    /* 0x10: emitter quaternion */
-    s32 emissionDuration;   /* 0x20 */
-    u32 spawnRate;          /* 0x24 */
-    f32 spawnVariance;      /* 0x28 */
-    u8 unk2C[0x24];         /* 0x2C: color track */
-    u8 unk50[0x10];         /* 0x50: color data */
-    FileKeyScalarTrack scale;   /* 0x60 */
-    FileKeyScalarTrack heading; /* 0x8C */
-    s32 length;            /* 0xB8 */
-    u8 padBC;              /* 0xBC: allocator's relative-position flag */
-    u8 prewarm;            /* 0xBD */
-    u8 padBE[0x0A];         /* includes grid columns/rows at C0/C4 */
-    union {                /* 0xC8: record-type-specific emitter parameters */
-        struct {
-            f32 radius;
-            f32 radiusRandomness;
-            f32 speed;
-            f32 speedRandomness;
-            f32 acceleration;
-            f32 gravity;
-        } radial;
-        struct {
-            f32 radius;
-            f32 radiusRandomness;
-            f32 spread;
-            f32 spreadRandomness;
-            f32 speed;
-            f32 speedRandomness;
-            f32 acceleration;
-            f32 gravity;
-        } directed;
-        struct {
-            f32 initialRadius;
-            f32 axialSpeed;
-            f32 axialSpeedRandomness;
-            f32 axialDeceleration;
-            f32 initialAmplitude;
-            f32 initialAmplitudeRandomness;
-            f32 finalAmplitude;
-            f32 finalAmplitudeRandomness;
-            f32 phaseStep;
-            f32 phaseStepRandomness;
-        } wave;
-        struct {
-            f32 initialAxialExtent;
-            f32 initialRadius;
-            f32 initialRadiusRandomness;
-            f32 finalRadius;
-            f32 finalRadiusRandomness;
-            f32 angularSpeed;
-            f32 angularSpeedRandomness;
-            f32 axialSpeed;
-            f32 axialSpeedRandomness;
-            f32 angularAcceleration;
-            f32 gravity;
-        } circular;
-        struct {
-            f32 initialRadius;
-            f32 initialRadiusRandomness;
-            f32 finalRadius;
-            f32 finalRadiusRandomness;
-            f32 angularSpeed;
-            f32 angularSpeedRandomness;
-            f32 angularAcceleration;
-            f32 gravity;
-        } orientedRing;
-    } emitter;
-} FileKeyBlock;             /* record-type-dependent parameter extent */
-
 extern u32 func_00296F58(const void *, const void *, s32, s32);
 extern f32 func_00297270(EffScalarCurve *, s32, s32);
 
 /* vu0 routine: samples the colour, scale and heading tracks at frame; in mode 2 the heading is the screen-space direction from out->pos to target */
-void fileSampleKeyTracks(FileKeyOut *out, FileKeyBlock *block, s32 frame, f32 *target)
+void fileSampleKeyTracks(FileSlot *out, FileKeyBlock *block, s32 frame, f32 *target)
 {
     f32 delta[4];
 
-    out->color = func_00296F58(block->unk2C, block->unk50, frame, block->length);
+    out->color = func_00296F58(&block->colorTrack, &block->alphaTrack, frame, block->length);
     out->scale = func_00297270(&block->scale.track.curve, frame, block->length);
     if (block->heading.track.curve.headingMode != 2) {
         out->angle = func_00297270(&block->heading.track.curve, frame, block->length);
@@ -5436,33 +5314,20 @@ void fileSampleKeyTracks(FileKeyOut *out, FileKeyBlock *block, s32 frame, f32 *t
     VU0_MOVE_VF(vf31, vf23);
 }
 
-typedef struct FileGridDimensions {
-    u8 pad0[0xC0];
-    s32 columns;
-    s32 rows;
-} FileGridDimensions;
 
-typedef struct FileSlotGroup {
-    u8 pad0[4];
-    u32 first;
-    u8 pad8[0x10];
-    u8 *slots;
-    u8 pad1C[4];
-    FileGridDimensions *dims;
-} FileSlotGroup;
 
 /* Invalidates the cells x rows slots of the group that starts at `slot`. */
-void fileInvalidateSlotGroup(FileSlotGroup *group, u8 *slot) {
-    FileGridDimensions *dims = group->dims;
+void fileInvalidateSlotGroup(FileSlotTable *group, u8 *slot) {
+    FileKeyBlock *dims = (FileKeyBlock *)group->data0;
     s32 rows = dims->rows;
     s32 columns = dims->columns;
     s32 count = columns * rows;
-    FileRecordSlot *p;
+    FileSlot *p;
     s32 i;
 
     if (count != 0) {
-        u8 *base = group->slots;
-        p = (FileRecordSlot *)(base + ((group->first + ((u32)(slot - base) >> 5) * count) << 5));
+        u8 *base = (u8 *)group->slots;
+        p = (FileSlot *)(base + ((group->instances + ((u32)(slot - base) >> 5) * count) << 5));
         for (i = 0; i < count; i++) {
             p->state = -1;
             p++;
@@ -5471,17 +5336,17 @@ void fileInvalidateSlotGroup(FileSlotGroup *group, u8 *slot) {
 }
 
 /* Same, but first copies the slot at `slot` over the group's first slot. */
-void fileCopyAndInvalidateSlotGroup(FileSlotGroup *group, u8 *slot) {
-    FileGridDimensions *dims = group->dims;
+void fileCopyAndInvalidateSlotGroup(FileSlotTable *group, u8 *slot) {
+    FileKeyBlock *dims = (FileKeyBlock *)group->data0;
     s32 rows = dims->rows;
     s32 columns = dims->columns;
     s32 count = columns * rows;
-    FileRecordSlot *p;
+    FileSlot *p;
 
     if (count != 0) {
-        u8 *base = group->slots;
-        p = (FileRecordSlot *)(base + ((group->first + ((u32)(slot - base) >> 5) * count) << 5));
-        *p = *(FileRecordSlot *)slot;
+        u8 *base = (u8 *)group->slots;
+        p = (FileSlot *)(base + ((group->instances + ((u32)(slot - base) >> 5) * count) << 5));
+        *p = *(FileSlot *)slot;
         p->state = -1;
     }
 }
@@ -5493,7 +5358,7 @@ extern struct EffRandState effSharedRandomState;
 extern u32 effMiscRand(struct EffRandState *state);
 extern f32 effMiscRandUnitFloat(void *state);
 extern f32 fabsf(f32);
-extern void func_00297658(FileRecordSlots *, FileRecordSlot *);
+extern void func_00297658(FileSlotTable *, FileSlot *);
 
 typedef struct FileWaveMotion {
     f32 axis[4];             /* 0x00: xyz only */
@@ -5512,7 +5377,7 @@ typedef struct FileWaveMotion {
 extern f32 D_0037E540[4]; /* (0, -1, 0, 0), existing shared axis */
 
 /* vu0 routine: advances axial motion with a quaternion-oriented sine sway. */
-void func_00297CB0(FileRecordSlots *record) {
+void func_00297CB0(FileSlotTable *record) {
     f32 direction[4];
     f32 radiusVector[4];
     f32 previousPosition[4];
@@ -5520,7 +5385,7 @@ void func_00297CB0(FileRecordSlots *record) {
     u32 i;
     u32 count;
     u32 flags;
-    FileRecordSlot *slot;
+    FileSlot *slot;
     FileWaveMotion *motion;
     s32 duration;
     s32 prewarm;
@@ -5577,7 +5442,7 @@ void func_00297CB0(FileRecordSlots *record) {
             do {
                 if (slot->state >= length) {
                     slot->state = duration != 0 ? -2 : -1;
-                    fileInvalidateSlotGroup((FileSlotGroup *)record, (u8 *)slot);
+                    fileInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
                 }
                 frame = slot->state;
                 if (frame != -2) {
@@ -5687,7 +5552,7 @@ void func_00297CB0(FileRecordSlots *record) {
                             slot->angle *= motion->angleMultiplier;
                             slot->angle += motion->angle;
                             if (prewarm != 0) {
-                                fileCopyAndInvalidateSlotGroup((FileSlotGroup *)record, (u8 *)slot);
+                                fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
                                 slot->state++;
                             }
                             toSpawn--;
@@ -5779,7 +5644,7 @@ typedef struct FileSlotMotion {
 } FileSlotMotion;
 
 /* vu0 routine: emits and advances randomized radial slots, then samples their key tracks. */
-void func_002985D0(FileRecordSlots *record) {
+void func_002985D0(FileSlotTable *record) {
     f32 delta[4];
     f32 radiusVector[4];
     f32 previousPosition[4];
@@ -5787,7 +5652,7 @@ void func_002985D0(FileRecordSlots *record) {
     u32 i;
     u32 count;
     u32 flags;
-    FileRecordSlot *slot;
+    FileSlot *slot;
     FileSlotMotion *motion;
     s32 duration;
     s32 prewarm;
@@ -5842,7 +5707,7 @@ void func_002985D0(FileRecordSlots *record) {
             do {
                 if (slot->state >= length) {
                     slot->state = duration != 0 ? -2 : -1;
-                    fileInvalidateSlotGroup((FileSlotGroup *)record, (u8 *)slot);
+                    fileInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
                 }
                 frame = slot->state;
                 if (frame != -2) {
@@ -5920,7 +5785,7 @@ void func_002985D0(FileRecordSlots *record) {
                             slot->angle *= motion->angleMultiplier;
                             slot->angle += motion->angle;
                             if (prewarm != 0) {
-                                fileCopyAndInvalidateSlotGroup((FileSlotGroup *)record, (u8 *)slot);
+                                fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
                                 slot->state++;
                             }
                             toSpawn--;
@@ -5991,7 +5856,7 @@ typedef struct FileCircularMotion {
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
 /* vu0 routine: advances changing-radius circular motion in the saved emitter frame. */
-void func_00298D28(FileRecordSlots *record) {
+void func_00298D28(FileSlotTable *record) {
     f32 direction[4];
     f32 radiusVector[4];
     f32 orientation[4];
@@ -6003,7 +5868,7 @@ void func_00298D28(FileRecordSlots *record) {
     u32 i;
     u32 count;
     u32 flags;
-    FileRecordSlot *slot;
+    FileSlot *slot;
     FileCircularMotion *motion;
     s32 duration;
     s32 prewarm;
@@ -6062,7 +5927,7 @@ void func_00298D28(FileRecordSlots *record) {
             do {
                 if (slot->state >= length) {
                     slot->state = duration != 0 ? -2 : -1;
-                    fileInvalidateSlotGroup((FileSlotGroup *)record, (u8 *)slot);
+                    fileInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
                 }
                 frame = slot->state;
                 if (frame != -2) {
@@ -6153,7 +6018,7 @@ void func_00298D28(FileRecordSlots *record) {
                             slot->angle *= motion->angleMultiplier;
                             slot->angle += motion->angle;
                             if (prewarm != 0) {
-                                fileCopyAndInvalidateSlotGroup((FileSlotGroup *)record, (u8 *)slot);
+                                fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
                                 slot->state++;
                             }
                             toSpawn--;
@@ -6236,7 +6101,7 @@ extern void func_002DD968(f32 angle);
 extern void sdfMultiplyVuMatrixInPlace(void);
 
 /* vu0 routine: advances a ring in its sampled orientation with vertical acceleration. */
-void func_002995F8(FileRecordSlots *record) {
+void func_002995F8(FileSlotTable *record) {
     f32 direction[4];
     f32 radiusVector[4];
     f32 position[4];
@@ -6246,7 +6111,7 @@ void func_002995F8(FileRecordSlots *record) {
     u32 i;
     u32 count;
     u32 flags;
-    FileRecordSlot *slot;
+    FileSlot *slot;
     FileOrientedRingMotion *motion;
     s32 duration;
     s32 prewarm;
@@ -6306,7 +6171,7 @@ void func_002995F8(FileRecordSlots *record) {
             do {
                 if (slot->state >= length) {
                     slot->state = duration != 0 ? -2 : -1;
-                    fileInvalidateSlotGroup((FileSlotGroup *)record, (u8 *)slot);
+                    fileInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
                 }
                 frame = slot->state;
                 if (frame != -2) {
@@ -6391,7 +6256,7 @@ void func_002995F8(FileRecordSlots *record) {
                             slot->angle *= motion->angleMultiplier;
                             slot->angle += motion->angle;
                             if (prewarm != 0) {
-                                fileCopyAndInvalidateSlotGroup((FileSlotGroup *)record, (u8 *)slot);
+                                fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
                                 slot->state++;
                             }
                             toSpawn--;
@@ -6452,7 +6317,7 @@ void effScaleOwnerParametersFromSource(ScaleOwner *owner, f32 scale) {
 }
 
 /* vu0 routine: advances directed slots through the emitter quaternion frame. */
-void func_00299E58(FileRecordSlots *record) {
+void func_00299E58(FileSlotTable *record) {
     f32 delta[4];
     f32 radiusVector[4];
     f32 previousPosition[4];
@@ -6460,7 +6325,7 @@ void func_00299E58(FileRecordSlots *record) {
     u32 i;
     u32 count;
     u32 flags;
-    FileRecordSlot *slot;
+    FileSlot *slot;
     FileSlotMotion *motion;
     s32 duration;
     s32 prewarm;
@@ -6518,7 +6383,7 @@ void func_00299E58(FileRecordSlots *record) {
             do {
                 if (slot->state >= length) {
                     slot->state = duration != 0 ? -2 : -1;
-                    fileInvalidateSlotGroup((FileSlotGroup *)record, (u8 *)slot);
+                    fileInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
                 }
                 frame = slot->state;
                 if (frame != -2) {
@@ -6606,7 +6471,7 @@ void func_00299E58(FileRecordSlots *record) {
                             slot->angle *= motion->angleMultiplier;
                             slot->angle += motion->angle;
                             if (prewarm != 0) {
-                                fileCopyAndInvalidateSlotGroup((FileSlotGroup *)record, (u8 *)slot);
+                                fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, (u8 *)slot);
                                 slot->state++;
                             }
                             toSpawn--;
@@ -6662,14 +6527,14 @@ void effLoadObjScaleParamsB(ScaleOwner *owner, f32 scale) {
 }
 
 void *fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
-    FileGridDimensions *src = data;
+    FileKeyBlock *src = data;
     u32 slotCount = count * src->columns * src->rows + count;
     u32 slotBytes = slotCount << 5;
     s32 dataBytes = D_0037E550[type].dataBytes;
     u32 headerSize = 0x30;
     u32 size;
     u32 handle;
-    FileRecordSlots *rec;
+    FileSlotTable *rec;
     u8 *body;
     u8 *vec;
 
@@ -6680,7 +6545,7 @@ void *fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
     rec = sdfResourceRetainAddress(handle);
     body = (u8 *)rec + headerSize;
     rec->type = type;
-    rec->slots = (FileRecordSlot *)body;
+    rec->slots = (FileSlot *)body;
     body += slotBytes;
     rec->data0 = body;
     body += dataBytes;
@@ -6705,14 +6570,14 @@ void *fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
 }
 
 void fileReleaseGridRecordHandle(s32 record) {
-    sdfReleaseResourceAllocation(((FileRecordSlots *)record)->handle);
+    sdfReleaseResourceAllocation(((FileSlotTable *)record)->handle);
 }
 
-void fileClearRecordReferences(FileRecordSlots *record) {
+void fileClearRecordReferences(FileSlotTable *record) {
     record->references = 0;
 }
 
-void fileAcquireRecord(FileRecordSlots *record) {
+void fileAcquireRecord(FileSlotTable *record) {
     if (record->references == 0) {
         fileResetSlotStates(record);
     }
@@ -6721,19 +6586,19 @@ void fileAcquireRecord(FileRecordSlots *record) {
 }
 
 void fileReadVectorPtr20(void *record, u128 *out) {
-    PCP_COPY_VECTOR(out, ((FileRecordSlots *)record)->data0);
+    PCP_COPY_VECTOR(out, ((FileSlotTable *)record)->data0);
 }
 
 void mnuRecordSetVector(void *record, const u128 *value) {
-    PCP_COPY_VECTOR(((FileRecordSlots *)record)->data0, value);
+    PCP_COPY_VECTOR(((FileSlotTable *)record)->data0, value);
 }
 
 void fileReadRecordSecondVector(void *record, u128 *out) {
-    PCP_COPY_VECTOR(out, (u128 *)((FileRecordSlots *)record)->data0 + 1);
+    PCP_COPY_VECTOR(out, (u128 *)((FileSlotTable *)record)->data0 + 1);
 }
 
 void fileSetRecordSecondVector(void *record, const u128 *value) {
-    PCP_COPY_VECTOR((u128 *)((FileRecordSlots *)record)->data0 + 1, value);
+    PCP_COPY_VECTOR((u128 *)((FileSlotTable *)record)->data0 + 1, value);
 }
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", effModelUpdateControlFlags);

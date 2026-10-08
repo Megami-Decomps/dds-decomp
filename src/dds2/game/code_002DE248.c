@@ -1,3 +1,4 @@
+#include "eff_bill.h"
 #include "common.h"
 #include "dds3_path.h"
 #include "eff_transform.h"
@@ -5,6 +6,7 @@
 #include "eff_blur.h"
 #include "eff_curve.h"
 #include "file.h"
+#include "file_slot.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "eff_queue.h"
@@ -616,29 +618,8 @@ extern struct SdfMemBlock *sdfAllocGeneralBlock(s32);
 
 extern u8 *effCreatePointSet4(u32);
 
-/* Grid dimensions used by surface and strip instance allocators. */
-typedef struct EffGrid {
-    u8 pad00[0x20];
-    s32 width;
-    s32 height;
-    u8 pad28[0x90];
-    s32 altHeight;
-} EffGrid;
 
-typedef struct EffGridBillMode {
-    u8 pad00[0x54];
-    s16 mode;
-} EffGridBillMode;
 
-/* Record prefix shared by the file/grid allocation and billboard paths. */
-typedef struct EffGridRecord {
-    u16 kind;
-    u8 pad02[6];
-    u32 count;
-    u8 pad0C[0x14];
-    EffGridBillMode *bill;
-    EffGrid *params;
-} EffGridRecord;
 
 /* Surface parameters copied into the node: 0x1C bytes at +0x10. */
 typedef struct EffSurfaceParams {
@@ -647,8 +628,8 @@ typedef struct EffSurfaceParams {
 
 /* Slot count of an effect record, capped at max. */
 static inline u32 effSlotCount(u8 *p, u32 max) {
-    u32 a = (u32)((EffGrid *)p)->width;
-    u32 n = (a ? a : (u32)((EffGrid *)p)->height) * (a ? (u32)((EffGrid *)p)->height : (u32)((EffGrid *)p)->altHeight);
+    u32 a = (u32)((FileKeyBlock *)p)->emissionDuration;
+    u32 n = (a ? a : ((FileKeyBlock *)p)->spawnRate) * (a ? ((FileKeyBlock *)p)->spawnRate : (u32)((FileKeyBlock *)p)->length);
     return n < max + 1 ? n : max;
 }
 
@@ -1736,55 +1717,13 @@ typedef struct EffFrameState {
     u32 allocation;    // 0x08
 } EffFrameState;
 
-/* Frame-reset callbacks read the saved frame state and its configuration. */
-typedef struct EffBillFrameWork {
-    u8 pad00[0x30];
-    u8 *frameState;    // 0x30
-    u8 *config;        // 0x34
-} EffBillFrameWork;
 
-/* Billboard configuration shared by the frame builders and draw callbacks. */
-typedef struct EffBillConfig {
-    u8 pad_00[0x28];
-    u32 textureId;      // 0x28, copied into the output record
-    u8 pad_2C[8];
-    union {
-        struct {
-            u32 progress; /* 0x34, frame-animation variant */
-            union {
-                u32 count;
-                s32 signedCount;
-            } frames; /* 0x38 */
-            u8 outputMode; /* 0x3C */
-            u8 pad_3D[0x19];
-            u8 mode; /* 0x56 */
-            u8 pad_57;
-        };
-        /* The quantized-mesh resource copies a 0x98-byte configuration;
-         * its draw callback samples this scalar track at 0x34. */
-        EffScalarCurve scaleCurve;
-    };
-    u8 pad_58[0x18];
-    u32 drawProgress;    // 0x70, progress of the mesh-draw variant
-    u8 pad_74[4];
-    f32 fadeInEnd;      // 0x78, ramp-up length as a fraction of `resourceId`
-    f32 fadeOutStart;   // 0x7C, start of the ramp-down
-    u8 pad_80[8];
-    f32 rowOffset;     // 0x88, row spacing or circular radius
-    u32 resourceId;     // 0x8C
-    u8 pad_90[4];
-    u8 meshMode;        // 0x94, copied to the mesh output
-    u8 pad_95[0x24];
-    u8 alternateMode;   // 0xB9, animation variants use this instead of mode
-    u8 pad_BA[0x23];
-    u8 alternateMeshMode; // 0xDD, copied to the other mesh-draw variant
-} EffBillConfig;
 
 void effClearBillFrames(u8 *owner) {
-    u8 *source = ((EffBillFrameWork *)owner)->frameState;
+    u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *descriptor = ((EffFrameState *)source)->asset;
     u8 *entry = ((EffFrameState *)source)->entries;
-    s32 count = ((EffBillConfig *)((EffBillFrameWork *)owner)->config)->frames.signedCount;
+    s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
     memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
     if (count > 0) {
@@ -1797,8 +1736,8 @@ void effClearBillFrames(u8 *owner) {
     }
 }
 
-u8 *effCreateBillFrameNode(u8 *config, u32 handle) {
-    u32 count = ((EffBillConfig *)config)->frames.count;
+u8 *effCreateBillFrameNode(EffBillFrameConfig *config, u32 handle) {
+    u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
     u8 *base = sdfAllocGeneralBlock(count * 0x18 + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
@@ -1838,7 +1777,7 @@ typedef struct EffBillOutput {
 void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
-    u32 progress = ((EffBillConfig *)config)->progress;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = work->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -1852,7 +1791,7 @@ void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_002D7458(config, config + 0x24, limit, progress);
+    second = func_002D7458(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -1863,8 +1802,8 @@ void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
     ((EffBillOutput *)out)->color = blended[0];
-    ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
-    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->mode;
+    ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    ((EffBillOutput *)out)->mode = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
@@ -1878,10 +1817,10 @@ void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
 }
 
 void billResetCellIndices(u8 *owner) {
-    u8 *source = ((EffBillFrameWork *)owner)->frameState;
+    u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *descriptor = ((EffFrameState *)source)->asset;
     u8 *entry = ((EffFrameState *)source)->entries;
-    s32 count = ((EffBillConfig *)((EffBillFrameWork *)owner)->config)->frames.signedCount;
+    s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
     memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
     if (count > 0) {
@@ -1894,8 +1833,8 @@ void billResetCellIndices(u8 *owner) {
     }
 }
 
-u8 *billCreateCellNode(u8 *config, u32 handle) {
-    u32 count = ((EffBillConfig *)config)->frames.count;
+u8 *billCreateCellNode(EffBillCellConfig *config, u32 handle) {
+    u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
     u8 *base = sdfAllocGeneralBlock(count * 0x1C + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
@@ -1918,7 +1857,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002E11D0);
 void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
-    u32 progress = ((EffBillConfig *)config)->progress;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = work->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -1932,7 +1871,7 @@ void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_002D7458(config, config + 0x24, limit, progress);
+    second = func_002D7458(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -1943,8 +1882,8 @@ void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
     ((EffBillOutput *)out)->color = blended[0];
-    ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
-    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->mode;
+    ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    ((EffBillOutput *)out)->mode = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
@@ -1958,10 +1897,10 @@ void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
 }
 
 void billResetParticleIndices(u8 *owner) {
-    u8 *source = ((EffBillFrameWork *)owner)->frameState;
+    u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *descriptor = ((EffFrameState *)source)->asset;
     u8 *entry = ((EffFrameState *)source)->entries;
-    s32 count = ((EffBillConfig *)((EffBillFrameWork *)owner)->config)->frames.signedCount;
+    s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
     memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
     if (count > 0) {
@@ -1974,8 +1913,8 @@ void billResetParticleIndices(u8 *owner) {
     }
 }
 
-u8 *billCreateParticleNode(u8 *config, u32 handle) {
-    u32 count = ((EffBillConfig *)config)->frames.count;
+u8 *billCreateParticleNode(EffBillParticleConfig *config, u32 handle) {
+    u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
     u8 *base = sdfAllocGeneralBlock(count * 0x2C + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
@@ -1998,7 +1937,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002E1BB0);
 void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
-    u32 progress = ((EffBillConfig *)config)->progress;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = work->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -2012,7 +1951,7 @@ void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_002D7458(config, config + 0x24, limit, progress);
+    second = func_002D7458(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -2023,8 +1962,8 @@ void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
     ((EffBillOutput *)out)->color = blended[0];
-    ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
-    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->mode;
+    ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    ((EffBillOutput *)out)->mode = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
@@ -2038,10 +1977,10 @@ void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
 }
 
 void effClearAnimatedFrames(u8 *owner) {
-    u8 *source = ((EffBillFrameWork *)owner)->frameState;
+    u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *descriptor = ((EffFrameState *)source)->asset;
     u8 *entry = ((EffFrameState *)source)->entries;
-    s32 count = ((EffBillConfig *)((EffBillFrameWork *)owner)->config)->frames.signedCount;
+    s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
     memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
     if (count > 0) {
@@ -2054,22 +1993,22 @@ void effClearAnimatedFrames(u8 *owner) {
     }
 }
 
-u8 *billAllocateAnimatedTransformEntries(u8 *config) {
+u8 *billAllocateAnimatedTransformEntries(EffBillAnimatedFrameConfig *config) {
     u32 headerSize = 0x10;
-    u8 *base = sdfAllocGeneralBlock(((EffBillConfig *)config)->frames.count * 0x18 + headerSize);
+    u8 *base = sdfAllocGeneralBlock(config->frame.output.timed.count * 0x18 + headerSize);
     u8 *node = (u8 *)sdfResourceRetainAddress((u32)base);
     u8 *entries = node + headerSize;
 
     *(u8 **)(node + 8) = base;
     *(u8 **)node = entries;
-    if (((EffBillConfig *)config)->drawProgress == 0) {
-        ((EffBillConfig *)config)->drawProgress = 1;
+    if (config->drawProgress == 0) {
+        config->drawProgress = 1;
     }
     return node;
 }
 
 void effInitializeAlternatingTransformRows(u8 *work, u8 *descriptor) {
-    u32 count = ((EffBillConfig *)descriptor)->frames.count;
+    u32 count = ((EffBillTimedHeader *)descriptor)->count;
     if (count != 0) {
         f32 *row = ((EffFrameAsset *)((EffFrameState *)work)->asset)->transformRows;
         u32 index;
@@ -2099,17 +2038,17 @@ void effInitializeAlternatingTransformRows(u8 *work, u8 *descriptor) {
 
 extern u8 *billAllocateAnimatedTransformEntries();
 
-u8 *billCreateAnimatedTransform(u8 *descriptor, s32 handle) {
+u8 *billCreateAnimatedTransform(EffBillAnimatedFrameConfig *descriptor, s32 handle) {
     u8 *work = billAllocateAnimatedTransformEntries(descriptor);
 
-    ((EffBillOwnedWork *)work)->references = effCreateTrackSetWithSharedReferences(((EffBillConfig *)descriptor)->frames.count, 3, handle);
+    ((EffBillOwnedWork *)work)->references = effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 3, handle);
     effInitializeAlternatingTransformRows(work, descriptor);
     return work;
 }
 
 u8 *billCloneAnimatedTransform(u8 *owner) {
-    u8 *descriptor = ((EffBillFrameWork *)owner)->config;
-    u8 *source = ((EffBillFrameWork *)owner)->frameState;
+    u8 *descriptor = ((EffClassWork *)owner)->payload;
+    u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *work = billAllocateAnimatedTransformEntries(descriptor);
 
     ((EffBillOwnedWork *)work)->references = effDuplicateResourceRefs(((EffBillOwnedWork *)source)->references);
@@ -2127,7 +2066,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002E26A0);
 void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
-    u32 progress = ((EffBillConfig *)config)->progress;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = work->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -2141,7 +2080,7 @@ void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_002D7458(config, config + 0x24, limit, progress);
+    second = func_002D7458(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -2152,8 +2091,8 @@ void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
     ((EffBillOutput *)out)->color = blended[0];
-    ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
-    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->mode;
+    ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    ((EffBillOutput *)out)->mode = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
@@ -2167,10 +2106,10 @@ void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
 }
 
 void billResetEmitterIndices(u8 *owner) {
-    u8 *source = ((EffBillFrameWork *)owner)->frameState;
+    u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *descriptor = ((EffFrameState *)source)->asset;
     u8 *entry = ((EffFrameState *)source)->entries;
-    s32 count = ((EffBillConfig *)((EffBillFrameWork *)owner)->config)->frames.signedCount;
+    s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
     memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
     if (count > 0) {
@@ -2185,7 +2124,7 @@ void billResetEmitterIndices(u8 *owner) {
 
 u8 *billAllocEmitterNode(u8 *config) {
     u32 headerSize = 0x10;
-    u8 *base = sdfAllocGeneralBlock(((EffBillConfig *)config)->frames.count * 0x18 + headerSize);
+    u8 *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * 0x18 + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
     u8 *node = body;
 
@@ -2196,7 +2135,7 @@ u8 *billAllocEmitterNode(u8 *config) {
 }
 
 void billInitializeEmitterRows(u8 *work, u8 *descriptor) {
-    u32 count = ((EffBillConfig *)descriptor)->frames.count;
+    u32 count = ((EffBillTimedHeader *)descriptor)->count;
     if (count != 0) {
         f32 *row = ((EffFrameAsset *)((EffFrameState *)work)->asset)->transformRows;
         u32 index;
@@ -2226,17 +2165,17 @@ void billInitializeEmitterRows(u8 *work, u8 *descriptor) {
 
 extern u8 *billAllocEmitterNode();
 
-u8 *billCreateEmitterTransform(u8 *descriptor, s32 handle) {
+u8 *billCreateEmitterTransform(EffBillEmitterFrameConfig *descriptor, s32 handle) {
     u8 *work = billAllocEmitterNode(descriptor);
 
-    ((EffBillOwnedWork *)work)->references = effCreateTrackSetWithSharedReferences(((EffBillConfig *)descriptor)->frames.count, 4, handle);
+    ((EffBillOwnedWork *)work)->references = effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 4, handle);
     billInitializeEmitterRows(work, descriptor);
     return work;
 }
 
 u8 *billCloneEmitterTransform(u8 *owner) {
-    u8 *descriptor = ((EffBillFrameWork *)owner)->config;
-    u8 *source = ((EffBillFrameWork *)owner)->frameState;
+    u8 *descriptor = ((EffClassWork *)owner)->payload;
+    u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *work = billAllocEmitterNode(descriptor);
 
     ((EffBillOwnedWork *)work)->references = effDuplicateResourceRefs(((EffBillOwnedWork *)source)->references);
@@ -2254,7 +2193,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002E3008);
 void billUpdateEmitterDrawColorAndTransform(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
-    u32 progress = ((EffBillConfig *)config)->progress;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = ((BillCellDrawWork *)work)->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -2268,7 +2207,7 @@ void billUpdateEmitterDrawColorAndTransform(u8 *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_002D7458(config, config + 0x24, limit, progress);
+    second = func_002D7458(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = ((BillCellDrawWork *)work)->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -2279,8 +2218,8 @@ void billUpdateEmitterDrawColorAndTransform(u8 *work) {
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
     ((EffBillOutput *)out)->color = blended[0];
-    ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
-    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->mode;
+    ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    ((EffBillOutput *)out)->mode = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
@@ -2294,10 +2233,10 @@ void billUpdateEmitterDrawColorAndTransform(u8 *work) {
 }
 
 void effClearStripFrames(u8 *owner) {
-    u8 *source = ((EffBillFrameWork *)owner)->frameState;
+    u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *descriptor = ((EffFrameState *)source)->asset;
     u8 *entry = ((EffFrameState *)source)->entries;
-    s32 count = ((EffBillConfig *)((EffBillFrameWork *)owner)->config)->frames.signedCount;
+    s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
     memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
     if (count > 0) {
@@ -2312,7 +2251,7 @@ void effClearStripFrames(u8 *owner) {
 
 u8 *billAllocStripNode(u8 *config) {
     u32 headerSize = 0x10;
-    u8 *base = sdfAllocGeneralBlock(((EffBillConfig *)config)->frames.count * 0x28 + headerSize);
+    u8 *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * 0x28 + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
     u8 *node = body;
 
@@ -2323,7 +2262,7 @@ u8 *billAllocStripNode(u8 *config) {
 }
 
 void billInitializeStripRows(u8 *work, u8 *descriptor) {
-    u32 count = ((EffBillConfig *)descriptor)->frames.count;
+    u32 count = ((EffBillTimedHeader *)descriptor)->count;
     if (count != 0) {
         f32 *row = ((EffFrameAsset *)((EffFrameState *)work)->asset)->transformRows;
         u32 index;
@@ -2353,17 +2292,17 @@ void billInitializeStripRows(u8 *work, u8 *descriptor) {
 
 extern u8 *billAllocStripNode();
 
-u8 *billCreateStripTransform(u8 *descriptor, s32 handle) {
+u8 *billCreateStripTransform(EffBillStripFrameConfig *descriptor, s32 handle) {
     u8 *work = billAllocStripNode(descriptor);
 
-    ((EffBillOwnedWork *)work)->references = effCreateTrackSetWithSharedReferences(((EffBillConfig *)descriptor)->frames.count, 3, handle);
+    ((EffBillOwnedWork *)work)->references = effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 3, handle);
     billInitializeStripRows(work, descriptor);
     return work;
 }
 
 u8 *billCloneStripTransform(u8 *owner) {
-    u8 *descriptor = ((EffBillFrameWork *)owner)->config;
-    u8 *source = ((EffBillFrameWork *)owner)->frameState;
+    u8 *descriptor = ((EffClassWork *)owner)->payload;
+    u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *work = billAllocStripNode(descriptor);
 
     ((EffBillOwnedWork *)work)->references = effDuplicateResourceRefs(((EffBillOwnedWork *)source)->references);
@@ -2381,7 +2320,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002E39B0);
 void billUpdateStripDrawColorAndTransform(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
-    u32 progress = ((EffBillConfig *)config)->progress;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = ((BillCellDrawWork *)work)->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -2395,7 +2334,7 @@ void billUpdateStripDrawColorAndTransform(u8 *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_002D7458(config, config + 0x24, limit, progress);
+    second = func_002D7458(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = ((BillCellDrawWork *)work)->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -2406,8 +2345,8 @@ void billUpdateStripDrawColorAndTransform(u8 *work) {
         EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
     ((EffBillOutput *)out)->color = blended[0];
-    ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
-    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->mode;
+    ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    ((EffBillOutput *)out)->mode = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
@@ -2421,10 +2360,10 @@ void billUpdateStripDrawColorAndTransform(u8 *work) {
 }
 
 void billResetTrailIndices(u8 *owner) {
-    u8 *source = ((EffBillFrameWork *)owner)->frameState;
+    u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *descriptor = ((EffFrameState *)source)->asset;
     u8 *entry = ((EffFrameState *)source)->entries;
-    s32 count = ((EffBillConfig *)((EffBillFrameWork *)owner)->config)->frames.signedCount;
+    s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
     memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
     if (count > 0) {
@@ -2437,16 +2376,16 @@ void billResetTrailIndices(u8 *owner) {
     }
 }
 
-u8 *billCreateTrailNode(u8 *config, u32 handle) {
+u8 *billCreateTrailNode(EffBillTrailFrameConfig *config, u32 handle) {
     u32 headerSize = 0x10;
-    u8 *base = sdfAllocGeneralBlock(((EffBillConfig *)config)->frames.count * 0x2C + headerSize);
+    u8 *base = sdfAllocGeneralBlock(config->frame.output.timed.count * 0x2C + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
     u8 *node = body;
 
     body += headerSize;
     *(u8 **)(node + 8) = base;
     *(u8 **)node = body;
-    ((EffBillOwnedWork *)node)->references = effCreateTrackSetWithSharedReferences(*(u32 *)(config + 0x38), 0, handle);
+    ((EffBillOwnedWork *)node)->references = effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 0, handle);
     return node;
 }
 
@@ -2460,7 +2399,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002E4320);
 void billUpdateTrailDrawColorAndTransform(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
-    u32 progress = ((EffBillConfig *)config)->progress;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = ((BillCellDrawWork *)work)->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -2474,7 +2413,7 @@ void billUpdateTrailDrawColorAndTransform(u8 *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_002D7458(config, config + 0x24, limit, progress);
+    second = func_002D7458(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = ((BillCellDrawWork *)work)->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -2485,8 +2424,8 @@ void billUpdateTrailDrawColorAndTransform(u8 *work) {
         EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
     ((EffBillOutput *)out)->color = blended[0];
-    ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
-    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->mode;
+    ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    ((EffBillOutput *)out)->mode = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
@@ -2500,10 +2439,10 @@ void billUpdateTrailDrawColorAndTransform(u8 *work) {
 }
 
 void billResetQuadIndices(u8 *owner) {
-    u8 *source = ((EffBillFrameWork *)owner)->frameState;
+    u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *descriptor = ((EffFrameState *)source)->asset;
     u8 *entry = ((EffFrameState *)source)->entries;
-    s32 count = ((EffBillConfig *)((EffBillFrameWork *)owner)->config)->frames.signedCount;
+    s32 count = ((EffBillTimedHeader *)((EffClassWork *)owner)->payload)->count;
 
     memset(((EffFrameAsset *)descriptor)->frameStorage, 0, ((EffFrameAsset *)descriptor)->frameCount * 0x10);
     if (count > 0) {
@@ -2518,7 +2457,7 @@ void billResetQuadIndices(u8 *owner) {
 
 u8 *billAllocQuadNode(u8 *config) {
     u32 headerSize = 0x10;
-    u8 *base = sdfAllocGeneralBlock(((EffBillConfig *)config)->frames.count * 0x20 + headerSize);
+    u8 *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * 0x20 + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
     u8 *node = body;
 
@@ -2529,7 +2468,7 @@ u8 *billAllocQuadNode(u8 *config) {
 }
 
 void billInitializeQuadRows(u8 *work, u8 *descriptor) {
-    u32 count = ((EffBillConfig *)descriptor)->frames.count;
+    u32 count = ((EffBillTimedHeader *)descriptor)->count;
     if (count != 0) {
         f32 *row = ((EffFrameAsset *)((EffFrameState *)work)->asset)->transformRows;
         u32 index;
@@ -2559,17 +2498,17 @@ void billInitializeQuadRows(u8 *work, u8 *descriptor) {
 
 extern u8 *billAllocQuadNode();
 
-u8 *billCreateQuadTransform(u8 *descriptor, s32 handle) {
+u8 *billCreateQuadTransform(EffBillQuadFrameConfig *descriptor, s32 handle) {
     u8 *work = billAllocQuadNode(descriptor);
 
-    ((EffBillOwnedWork *)work)->references = effCreateTrackSetWithSharedReferences(((EffBillConfig *)descriptor)->frames.count, 4, handle);
+    ((EffBillOwnedWork *)work)->references = effCreateTrackSetWithSharedReferences(descriptor->frame.output.timed.count, 4, handle);
     billInitializeQuadRows(work, descriptor);
     return work;
 }
 
 u8 *billCloneQuadTransform(u8 *owner) {
-    u8 *descriptor = ((EffBillFrameWork *)owner)->config;
-    u8 *source = ((EffBillFrameWork *)owner)->frameState;
+    u8 *descriptor = ((EffClassWork *)owner)->payload;
+    u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *work = billAllocQuadNode(descriptor);
 
     ((EffBillOwnedWork *)work)->references = effDuplicateResourceRefs(((EffBillOwnedWork *)source)->references);
@@ -2587,7 +2526,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002E4E80);
 void billUpdateQuadDrawColorAndTransform(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
-    u32 progress = ((EffBillConfig *)config)->progress;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = ((BillCellDrawWork *)work)->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -2601,7 +2540,7 @@ void billUpdateQuadDrawColorAndTransform(u8 *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_002D7458(config, config + 0x24, limit, progress);
+    second = func_002D7458(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = ((BillCellDrawWork *)work)->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -2612,8 +2551,8 @@ void billUpdateQuadDrawColorAndTransform(u8 *work) {
         EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
     ((EffBillOutput *)out)->color = blended[0];
-    ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
-    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->mode;
+    ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    ((EffBillOutput *)out)->mode = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
@@ -2626,23 +2565,6 @@ void billUpdateQuadDrawColorAndTransform(u8 *work) {
     func_002E5E88(out, mtx);
 }
 
-/* Common header of class-dispatched billboard/resource work (0x40-byte prefix). */
-typedef struct EffClassWork {
-    union {
-        u8 transform[0x20];
-        struct {
-            f32 position[4];
-            f32 orientation[4];
-        } vectors;
-    };
-    f32 scale;           // 0x20
-    u32 color;           // 0x24
-    u32 frame;           // 0x28
-    s32 kind;            // 0x2C
-    u32 resource;        // 0x30
-    void *payload;       // 0x34
-    u8 pad_38[8];
-} EffClassWork;
 
 /* Four-byte owner header followed by its class-work pointer array. */
 typedef struct EffClassWorkList {
@@ -3034,7 +2956,7 @@ typedef struct EffClassDrawState {
 } EffClassDrawState;
 
 void effResetRingResourceFrame(s32 work) {
-    ((EffClassDrawState *)((EffBillFrameWork *)work)->frameState)->ring->frame = 0;
+    ((EffClassDrawState *)((EffClassWork *)work)->resource)->ring->frame = 0;
 }
 
 /* Create a point-set reference and initialize four colors per segment. */
@@ -3080,7 +3002,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002E64F0);
 void billDrawCellBlendA(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
-    u32 progress = ((EffBillConfig *)config)->progress;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = work->instances;
     u8 *out = (u8 *)list[0];
     u128 mtx[4];
@@ -3094,7 +3016,7 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_002D7458(config, config + 0x24, limit, progress);
+    second = func_002D7458(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -3106,8 +3028,8 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
     blended[0] = packed;
     ((EffBillOutput *)out)->color = blended[0];
     if ((packed & 0xFF000000) != 0) {
-        ((EffBillOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
-        ((EffBillOutput *)out)->outputMode = ((EffBillConfig *)config)->outputMode;
+        ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+        ((EffBillOutput *)out)->outputMode = ((EffBillOutputHeader *)config)->outputMode;
         VU0_LOAD_VF(vf10, work->transform);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, D_003E9100);
@@ -3124,8 +3046,8 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
 void effResetClassFrameAndFlags(s32 work) {
     u32 resource;
 
-    resource = ((EffClassDrawState *)((EffBillFrameWork *)work)->frameState)->effect;
-    ((EffCounterHeader *)((EffClassDrawState *)((EffBillFrameWork *)work)->frameState)->references)->frame = 0;
+    resource = ((EffClassDrawState *)((EffClassWork *)work)->resource)->effect;
+    ((EffCounterHeader *)((EffClassDrawState *)((EffClassWork *)work)->resource)->references)->frame = 0;
     effInitializeClassFrame(resource);
 }
 
@@ -3205,7 +3127,7 @@ extern void effAdvanceClassFrame();
 void func_002E6B68(BillCellDrawWork *work) {
     u8 *config = work->config;
     s32 limit = work->frameLimit;
-    s32 progress = ((EffBillConfig *)config)->progress;
+    s32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = work->instances;
     EffClassWork *classWork;
     f32 *scales;
@@ -3228,7 +3150,7 @@ void func_002E6B68(BillCellDrawWork *work) {
         return;
     }
     effAdvanceClassFrame(classWork);
-    count = ((EffBillConfig *)config)->frames.count;
+    count = ((EffBillTimedHeader *)config)->count;
     frames = *resource;
     lastFrame = frames->frameCount - 1;
     dst = output->rows;
@@ -3270,7 +3192,7 @@ extern void effRunClassPostFrame(s32);
 void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
-    u32 progress = ((EffBillConfig *)config)->progress;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = work->instances;
     u8 *out = (u8 *)list[2];
     u128 mtx[4];
@@ -3284,7 +3206,7 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_002D7458(config, config + 0x24, limit, progress);
+    second = func_002D7458(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -3303,8 +3225,8 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
         PCP_COPY_VECTOR(dst->transform, work);
         PCP_COPY_VECTOR(dst->transform + 0x10, work->transform);
         effRunClassPostFrame((s32)dst);
-        *(u32 *)out = ((EffBillConfig *)config)->textureId;
-        ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->outputMode;
+        *(u32 *)out = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+        ((EffBillOutput *)out)->mode = ((EffBillOutputHeader *)config)->outputMode;
         VU0_LOAD_VF(vf10, work->transform);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, D_003E9100);
@@ -3726,14 +3648,14 @@ void effDestroySurfaceNode(EffectSlotNode54 *node) {
         billDispatchByKind(node->billResource);
     }
     if (node->jobBuffer != 0) {
-        count = ((EffGridRecord *)node->record)->count;
+        count = ((FileSlotTable *)node->record)->count;
         for (i = 0; i < count; i++) {
             fileJobDestroy(node->jobs[i]);
         }
         sdfReleaseResourceAllocation(node->jobBuffer);
     }
     if (node->queueBuffer != 0) {
-        count = ((EffGridRecord *)node->record)->count;
+        count = ((FileSlotTable *)node->record)->count;
         for (i = 0; i < count; i++) {
             fileQueueDestroy(node->queues[i]);
         }
@@ -3755,12 +3677,12 @@ void effDestroySurfaceNode(EffectSlotNode54 *node) {
 }
 
 s32 effRecreateSurfaceNodeFromWork(u8 *work) {
-    EffGridRecord *config = (EffGridRecord *)((EffectSlotNode54 *)work)->record;
-    s32 arg = (s32)config->params;
+    FileSlotTable *config = (FileSlotTable *)((EffectSlotNode54 *)work)->record;
+    s32 arg = (s32)config->data1;
     s32 object = effCreateSurfaceNodeForGrid(arg);
 
-    effRebuildSurfaceHandles(object, ((EffGridRecord *)((EffectSlotNode54 *)work)->record)->kind, (s32)work + 0x10);
-    effReplaceResourceRef(object, ((EffGridRecord *)((EffectSlotNode54 *)work)->record)->kind, arg);
+    effRebuildSurfaceHandles(object, ((FileSlotTable *)((EffectSlotNode54 *)work)->record)->type, (s32)work + 0x10);
+    effReplaceResourceRef(object, ((FileSlotTable *)((EffectSlotNode54 *)work)->record)->type, arg);
     return object;
 }
 
@@ -3768,12 +3690,12 @@ s32 effRecreateSurfaceNodeFromWork(u8 *work) {
 void func_002E7F60(EffectSlotNode54 *, u8 *);
 
 u32 effCreateSurfaceGridWithConfiguration(u8 *work) {
-    EffGridRecord *config = (EffGridRecord *)((EffectSlotNode54 *)work)->record;
-    s32 arg = (s32)config->params;
+    FileSlotTable *config = (FileSlotTable *)((EffectSlotNode54 *)work)->record;
+    s32 arg = (s32)config->data1;
     s32 object = effCreateSurfaceNodeForGrid(arg);
 
-    effRebuildSurfaceHandles(object, ((EffGridRecord *)((EffectSlotNode54 *)work)->record)->kind, (s32)work + 0x10);
-    effReplaceResourceRef(object, ((EffGridRecord *)((EffectSlotNode54 *)work)->record)->kind, arg);
+    effRebuildSurfaceHandles(object, ((FileSlotTable *)((EffectSlotNode54 *)work)->record)->type, (s32)work + 0x10);
+    effReplaceResourceRef(object, ((FileSlotTable *)((EffectSlotNode54 *)work)->record)->type, arg);
     func_002E7F60(object, work);
     return object;
 }
@@ -3794,11 +3716,11 @@ void func_002E7F60(EffectSlotNode54 *dst, u8 *work) {
         dst->billResource = billCloneObjectRetainingSharedData(src->billResource);
         billMarkKindOneFlag(dst->billResource);
         if (dst->record != 0) {
-            billSetBillboardMode(dst->billResource, ((EffGridRecord *)dst->record)->bill->mode);
+            billSetBillboardMode(dst->billResource, (s16)((FileKeyBlock *)((FileSlotTable *)dst->record)->data0)->alphaTrack.surfaceIndex);
         }
         break;
     case 5:
-        count = ((EffGridRecord *)src->record)->count;
+        count = ((FileSlotTable *)src->record)->count;
         if (dst->jobBuffer != 0) {
             for (i = 0; i < count; i++) {
                 fileJobDestroy(dst->jobs[i]);
@@ -3818,7 +3740,7 @@ void func_002E7F60(EffectSlotNode54 *dst, u8 *work) {
         }
         break;
     case 6:
-        count = ((EffGridRecord *)src->record)->count;
+        count = ((FileSlotTable *)src->record)->count;
         if (dst->queueBuffer != 0) {
             for (i = 0; i < count; i++) {
                 fileQueueDestroy(dst->queues[i]);
@@ -3904,7 +3826,7 @@ void effSetSurfaceRetainedResource(s32 *object, s32 arg) {
     }
     ((EffectSlotNode54 *)work)->billResource = effRetainResource(arg);
     if (((EffectSlotNode54 *)work)->record != 0) {
-        billSetBillboardMode(((EffectSlotNode54 *)work)->billResource, ((EffGridRecord *)((EffectSlotNode54 *)work)->record)->bill->mode);
+        billSetBillboardMode(((EffectSlotNode54 *)work)->billResource, (s16)((FileKeyBlock *)((FileSlotTable *)((EffectSlotNode54 *)work)->record)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -3916,7 +3838,7 @@ void effReplaceSurfacePrimaryBillboard(s32 *object, s32 *settings) {
     }
     ((EffectSlotNode54 *)work)->billResource = billCreateIndexed(0, settings);
     if (((EffectSlotNode54 *)work)->record != 0) {
-        billSetBillboardMode(((EffectSlotNode54 *)work)->billResource, ((EffGridRecord *)((EffectSlotNode54 *)work)->record)->bill->mode);
+        billSetBillboardMode(((EffectSlotNode54 *)work)->billResource, (s16)((FileKeyBlock *)((FileSlotTable *)((EffectSlotNode54 *)work)->record)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -3929,12 +3851,12 @@ void effReplaceSurfaceFlaggedBillboard(s32 *object, s32 *settings) {
     ((EffectSlotNode54 *)work)->billResource = billCreateIndexed(1, settings);
     billMarkKindOneFlag(((EffectSlotNode54 *)work)->billResource);
     if (((EffectSlotNode54 *)work)->record != 0) {
-        billSetBillboardMode(((EffectSlotNode54 *)work)->billResource, ((EffGridRecord *)((EffectSlotNode54 *)work)->record)->bill->mode);
+        billSetBillboardMode(((EffectSlotNode54 *)work)->billResource, (s16)((FileKeyBlock *)((FileSlotTable *)((EffectSlotNode54 *)work)->record)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
 void effRebuildSurfaceJobs(EffectSlotNode54 *node, void *source) {
-    u32 count = ((EffGridRecord *)node->record)->count;
+    u32 count = ((FileSlotTable *)node->record)->count;
     u32 i;
     u32 size;
 
@@ -3960,7 +3882,7 @@ void effRebuildSurfaceJobs(EffectSlotNode54 *node, void *source) {
 extern void *fileQueueClone(void *);
 
 void effSurfaceNodeCreateQueues(EffectSlotNode54 *node, void *source) {
-    u32 count = ((EffGridRecord *)node->record)->count;
+    u32 count = ((FileSlotTable *)node->record)->count;
     u32 i;
     u32 size;
 
@@ -4274,7 +4196,7 @@ void effSetRenderResourceMatrixComponent(Matrix4 *mat, float value) {
 extern s32 effMiscRand(s32 *);
 
 void effRandomizeParticleFields(s32 *work) {
-    u32 count = ((EffBillConfig *)work[0x34 / 4])->frames.count;
+    u32 count = ((EffBillTimedHeader *)work[0x34 / 4])->count;
     s32 *entry = *(s32 **)work[0x30 / 4];
     u32 i;
     for (i = 0; i < count; i++, entry += 4) {
@@ -4282,32 +4204,14 @@ void effRandomizeParticleFields(s32 *work) {
     }
 }
 
-/* Class kinds 1 and 4 copy the complete 0x88-byte serialized record. */
-typedef struct EffPointSetTableSource {
-    SdfColorTrack colorTrack;
-    SdfAlphaTrack alphaTrack;
-    s32 duration;
-    u32 count;     /* 0x38: rows, one point set each */
-    s32 layers;    /* 0x3C: at least 3 */
-    u8 pad40[0x1C];
-    u8 drawFlag;  /* 0x5C: copied into the point set's draw flag */
-    u8 pad5D[0x0B];
-    f32 unk68;     /* 0x68: fade-in share of a set */
-    f32 unk6C;     /* 0x6C: end of the full-alpha span */
-    u32 colorA;    /* 0x70: low 24 bits kept, top byte ramped */
-    u32 colorB;    /* 0x74 */
-    u32 colorC;    /* 0x78 */
-    u8 pad7C[8];
-    f32 unk84;     /* 0x84: copied separately from the descriptor prefix */
-} EffPointSetTableSource;
 
 
 /* The factory appends the copied parameters to its real 0x40-byte header. */
 typedef struct EffPointSetClassWork {
     EffClassWork header;
-    EffPointSetTableSource parameters;
+    EffBillPointConfig parameters;
 } EffPointSetClassWork;
-typedef char EffPointSetTableSource_size[(sizeof(EffPointSetTableSource) == 0x88) ? 1 : -1];
+typedef char EffBillPointConfig_size[(sizeof(EffBillPointConfig) == 0x88) ? 1 : -1];
 typedef char EffPointSetClassWork_size[(sizeof(EffPointSetClassWork) == 0xC8) ? 1 : -1];
 
 typedef struct EffPointSetRow {
@@ -4321,8 +4225,8 @@ typedef struct EffPointSetTable {
     EffPointSetRow *rows;
 } EffPointSetTable;
 
-EffPointSetTable *effCreateAlphaRampPointSetRows(EffPointSetTableSource *src) {
-    u32 count = src->count;
+EffPointSetTable *effCreateAlphaRampPointSetRows(EffBillPointConfig *src) {
+    u32 count = src->timed.count;
     EffPointSetTable *table;
     EffPointSetRow *row;
     u32 i;
@@ -4346,8 +4250,8 @@ EffPointSetTable *effCreateAlphaRampPointSetRows(EffPointSetTableSource *src) {
     alphaA = src->colorA >> 24;
     alphaB = src->colorB >> 24;
     alphaC = src->colorC >> 24;
-    rampIn = (s32)(src->unk68 * (f32)(src->layers + 1));
-    rampOut = (s32)(src->unk6C * (f32)(src->layers + 1));
+    rampIn = (s32)(src->rangeFadeInEnd * (f32)(src->layers + 1));
+    rampOut = (s32)(src->rangeFadeOutStart * (f32)(src->layers + 1));
     row = table->rows;
     for (i = 0; i < count; i++) {
         EffPointSet *set = effCreatePointSet5(src->layers);
@@ -4385,8 +4289,8 @@ EffPointSetTable *effCreateAlphaRampPointSetRows(EffPointSetTableSource *src) {
 extern void effReleasePointSetAsset(s32);
 
 void effFreeIndexedEntries(u8 *work) {
-    u32 *header = (u32 *)((EffBillFrameWork *)work)->frameState;
-    u32 count = ((EffBillConfig *)((EffBillFrameWork *)work)->config)->frames.count;
+    u32 *header = (u32 *)((EffClassWork *)work)->resource;
+    u32 count = ((EffBillTimedHeader *)((EffClassWork *)work)->payload)->count;
     u32 *entry = (u32 *)header[0];
     u32 i;
 
@@ -4404,7 +4308,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002EB728);
 extern void effResetDispatchCounter(u8 *);
 
 void effResetBillboardFrameDispatchCounters(s32 *work) {
-    u32 count = ((EffBillConfig *)work[0x34 / 4])->frames.count;
+    u32 count = ((EffBillTimedHeader *)work[0x34 / 4])->count;
     s32 *entry = *(s32 **)work[0x30 / 4];
     u32 i;
     for (i = 0; i < count; i++) {
@@ -4415,11 +4319,11 @@ void effResetBillboardFrameDispatchCounters(s32 *work) {
 extern u8 *effCreateClassResourceWork(u16, void *);
 extern void *memcpy(void *dst, const void *src, u32 size);
 
-u8 *func_002EB968(EffPointSetTableSource *config) {
-    u32 count = config->count;
+u8 *func_002EB968(EffBillPointConfig *config) {
+    u32 count = config->timed.count;
     u8 *allocation = sdfAllocSizeClassBlock(count * 4 + 4);
     u32 *entries = (u32 *)(allocation + 4);
-    EffPointSetTableSource copy;
+    EffBillPointConfig copy;
     u32 index;
     f32 step;
     f32 position;
@@ -4433,7 +4337,7 @@ u8 *func_002EB968(EffPointSetTableSource *config) {
         return allocation;
     }
     memcpy(&copy, config, 0x84);
-    copy.count = 1;
+    copy.timed.count = 1;
     copy.unk84 = config->unk84;
     step = 6.2831852f / (f32)count;
     position = step * ((effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f);
@@ -4452,8 +4356,8 @@ u8 *func_002EB968(EffPointSetTableSource *config) {
 extern void effDestroyClassResourceWork(s32);
 
 void effReleaseBillFrameEntries(u8 *work) {
-    u32 *header = (u32 *)((EffBillFrameWork *)work)->frameState;
-    u32 count = ((EffBillConfig *)((EffBillFrameWork *)work)->config)->frames.count;
+    u32 *header = (u32 *)((EffClassWork *)work)->resource;
+    u32 count = ((EffBillTimedHeader *)((EffClassWork *)work)->payload)->count;
     u32 *entry = (u32 *)header[0];
     u32 i;
 
@@ -4466,8 +4370,8 @@ void effReleaseBillFrameEntries(u8 *work) {
 extern void effAdvanceClassResourceFrame();
 
 void effReleaseTrackEntriesA(u8 *work) {
-    u32 count = ((EffBillConfig *)((EffBillFrameWork *)work)->config)->frames.count;
-    u32 **entry = (u32 **)((EffFrameState *)((EffBillFrameWork *)work)->frameState)->entries;
+    u32 count = ((EffBillTimedHeader *)((EffClassWork *)work)->payload)->count;
+    u32 **entry = (u32 **)((EffFrameState *)((EffClassWork *)work)->resource)->entries;
     u32 i;
 
     for (i = 0; i < count; i++) {
@@ -4485,9 +4389,9 @@ extern void effDrawClassResourceWork(s32);
 
 /* vu0 routine: packed color blend and SDK vector copies. */
 void effUpdateRadialClassInstances(EffClassWork *work) {
-    EffBillConfig *config = work->payload;
+    EffBillRadialConfig *config = work->payload;
     s32 frame = work->frame;
-    s32 progress = config->progress;
+    s32 progress = config->point.timed.time.duration;
     EffClassWork **entries = ((EffClassWorkList *)work->resource)->entries;
     f32 position[4];
     f32 orientation[4];
@@ -4505,9 +4409,9 @@ void effUpdateRadialClassInstances(EffClassWork *work) {
     if (progress < frame && progress != 0) {
         return;
     }
-    count = config->frames.count;
-    radius = config->rowOffset;
-    second = func_002D7458((u8 *)config, (u8 *)config + 0x24, frame, progress);
+    count = config->point.timed.count;
+    radius = config->radius;
+    second = func_002D7458(&config->point.timed.colorTrack, &config->point.timed.alphaTrack, frame, progress);
     color1[0] = work->color;
     unit = 0x3C000000;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -4542,35 +4446,13 @@ typedef struct EffScaleRange {
     struct MemBlock *allocation;
 } EffScaleRange;
 
-typedef struct EffScaleRangeConfig {
-    u8 pad_00[0x34];
-    s32 steps;
-    u32 count;
-    u8 pad_3C[0x50];
-    f32 startBase;
-    f32 startRand;
-    f32 endBase;
-    f32 endRand;
-} EffScaleRangeConfig;
 
-/* The seed is initialized to one of eight negative sentinel values. */
-typedef struct EffScaleRangeEntry {
-    EffPointSet *set;
-    u8 pad04[0x10];
-    s32 negativeSeed;
-    u8 pad_18[0x18];
-} EffScaleRangeEntry;
 
-typedef struct EffScaleRangeWork {
-    u8 pad_00[0x30];
-    EffScaleRange *range;
-    EffScaleRangeConfig *config;
-} EffScaleRangeWork;
 
 void effSeedBillScaleRange(u8 *work) {
-    EffScaleRangeConfig *config = ((EffScaleRangeWork *)work)->config;
-    EffScaleRange *range = ((EffScaleRangeWork *)work)->range;
-    s32 steps = config->steps;
+    EffBillRangeConfig *config = ((EffClassWork *)work)->payload;
+    EffScaleRange *range = (EffScaleRange *)((EffClassWork *)work)->resource;
+    s32 steps = config->point.timed.time.duration;
     u8 *entry = range->entries;
     f32 start = config->startBase * (effMiscRandUnitFloat(effSharedRandomState) * config->startRand + (1.0f - config->startRand));
     u32 index;
@@ -4584,7 +4466,7 @@ void effSeedBillScaleRange(u8 *work) {
         range->start = start;
         range->delta = 0.0f;
     }
-    count = config->count;
+    count = config->point.timed.count;
     index = 0;
     if (count != 0) {
         do {
@@ -4595,8 +4477,8 @@ void effSeedBillScaleRange(u8 *work) {
     }
 }
 
-EffScaleRange *effCreateRetainedPointSetColorRows(EffPointSetTableSource *src) {
-    u32 count = src->count;
+EffScaleRange *effCreateRetainedPointSetColorRows(EffBillPointConfig *src) {
+    u32 count = src->timed.count;
     struct MemBlock *allocation;
     EffScaleRange *table;
     EffScaleRangeEntry *row;
@@ -4623,8 +4505,8 @@ EffScaleRange *effCreateRetainedPointSetColorRows(EffPointSetTableSource *src) {
     alphaA = src->colorA >> 24;
     alphaB = src->colorB >> 24;
     alphaC = src->colorC >> 24;
-    rampIn = (s32)(src->unk68 * (f32)(src->layers + 1));
-    rampOut = (s32)(src->unk6C * (f32)(src->layers + 1));
+    rampIn = (s32)(src->rangeFadeInEnd * (f32)(src->layers + 1));
+    rampOut = (s32)(src->rangeFadeOutStart * (f32)(src->layers + 1));
     row = (EffScaleRangeEntry *)table->entries;
     for (i = 0; i < count; i++) {
         EffPointSet *set = effCreatePointSet5(src->layers);
@@ -4658,8 +4540,8 @@ EffScaleRange *effCreateRetainedPointSetColorRows(EffPointSetTableSource *src) {
 }
 
 void effReleaseBillPointEntries(u8 *work) {
-    u32 *header = (u32 *)((EffBillFrameWork *)work)->frameState;
-    u32 count = ((EffBillConfig *)((EffBillFrameWork *)work)->config)->frames.count;
+    u32 *header = (u32 *)((EffClassWork *)work)->resource;
+    u32 count = ((EffBillTimedHeader *)((EffClassWork *)work)->payload)->count;
     u32 *entry = (u32 *)header[0];
     u32 i;
 
@@ -4675,7 +4557,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002EC370);
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002ECD10);
 
 void effSeedBillboardFrameCounters(s32 *work) {
-    u32 count = ((EffBillConfig *)work[0x34 / 4])->frames.count;
+    u32 count = ((EffBillTimedHeader *)work[0x34 / 4])->count;
     s32 *entry = *(s32 **)work[0x30 / 4];
     u32 i;
     for (i = 0; i < count; i++, entry += 3) {
@@ -4693,8 +4575,8 @@ typedef struct EffAlternatingPointSetTable {
     EffAlternatingPointSetRow *rows;
 } EffAlternatingPointSetTable;
 
-EffAlternatingPointSetTable *func_002ECF78(EffPointSetTableSource *src) {
-    u32 count = src->count;
+EffAlternatingPointSetTable *func_002ECF78(EffBillPointConfig *src) {
+    u32 count = src->timed.count;
     EffAlternatingPointSetTable *table;
     EffAlternatingPointSetRow *row;
     u32 i;
@@ -4722,8 +4604,8 @@ EffAlternatingPointSetTable *func_002ECF78(EffPointSetTableSource *src) {
     alphaA = src->colorA >> 24;
     alphaB = src->colorB >> 24;
     alphaC = src->colorC >> 24;
-    rampIn = (s32)(src->unk68 * (f32)(src->layers + 1));
-    rampOut = (s32)(src->unk6C * (f32)(src->layers + 1));
+    rampIn = (s32)(src->rangeFadeInEnd * (f32)(src->layers + 1));
+    rampOut = (s32)(src->rangeFadeOutStart * (f32)(src->layers + 1));
     previousRatio = 0.0f;
     row = table->rows;
     for (i = 0; i < count; i++) {
@@ -4764,7 +4646,7 @@ EffAlternatingPointSetTable *func_002ECF78(EffPointSetTableSource *src) {
 }
 
 void effReleaseBillboardFramePointSets(s32 *work) {
-    u32 count = ((EffBillConfig *)work[0x34 / 4])->frames.count;
+    u32 count = ((EffBillTimedHeader *)work[0x34 / 4])->count;
     s32 *entries = (s32 *)work[0x30 / 4];
     s32 *entry = (s32 *)*entries;
     u32 i;
@@ -4985,11 +4867,11 @@ void effReleaseModelResources(u32 *p) {
 }
 
 u8 *effCloneStripResourceFromOwner(u8 *work) {
-    u8 *source = (u8 *)((EffGridRecord *)((EffBillFrameWork *)work)->config)->params;
+    u8 *source = (u8 *)((FileSlotTable *)((EffClassWork *)work)->payload)->data1;
     u8 *node = (u8 *)effCreateStripNodeFromGrid(source);
 
     memcpy(node + 0xC, source, 0x20);
-    effReplaceFileResourceRef((s32)node, ((EffGridRecord *)((EffBillFrameWork *)work)->config)->kind, (s32)source);
+    effReplaceFileResourceRef((s32)node, ((FileSlotTable *)((EffClassWork *)work)->payload)->type, (s32)source);
     return node;
 }
 
@@ -5041,11 +4923,28 @@ void func_002EEDA8(u8 *p, f32 value) {
     dds3DispatchIndexedCallback(((EffectStripNode *)p)->active, value);
 }
 
+typedef struct EffRibbonWork {
+    u32 count;          // 0x00
+    u32 field_04;       // 0x04
+    u32 color;          // 0x08
+    s32 rowStride;      // 0x0C
+    s32 repeat;         // 0x10
+    u8 field_14;        // 0x14
+    u8 pad_15[3];
+    RefObj *resource; // 0x18: null selects the globally shared wind texture
+    u32 *colors;        // 0x1C
+    u8 *positions;      // 0x20
+    u8 *uvs;            // 0x24
+    u8 *extra;          // 0x28
+    s32 *handle;        // 0x2C
+    u8 *allocation;     // 0x30
+} EffRibbonWork;
+
 void effResetBillTable(u8 *p) {
-    u8 *a = ((EffBillFrameWork *)p)->frameState;
-    u8 *b = ((EffBillFrameWork *)p)->config;
-    u32 n = ((EffBillConfig *)b)->frames.count;
-    u32 *counts = (u32 *)((EffFrameAsset *)((EffFrameState *)a)->asset)->frameStorage;
+    u8 *a = (u8 *)((EffClassWork *)p)->resource;
+    u8 *b = ((EffClassWork *)p)->payload;
+    u32 n = ((EffBillEmitterCommon *)b)->header.timed.count;
+    u32 *counts = (u32 *)((EffRibbonWork *)((EffFrameState *)a)->asset)->colors;
     u8 *rec = *(u8 **)a;
     u32 i;
     for (i = 0; i < n; i++) {
@@ -5055,16 +4954,16 @@ void effResetBillTable(u8 *p) {
     }
 }
 
-u8 *effAllocateRingFadeEntries(u8 *config) {
-    u8 *base = sdfAllocGeneralBlock(((EffBillConfig *)config)->frames.count * 0x30 + 0xC);
+u8 *effAllocateRingFadeEntries(EffBillVortexConfig *config) {
+    u8 *base = sdfAllocGeneralBlock(config->common.header.timed.count * 0x30 + 0xC);
     EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((u32)base);
-    u32 count = ((EffBillConfig *)config)->resourceId;
+    u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
 
     node->entries = entries;
     node->allocation = base;
     if (count < 3) {
-        ((EffBillConfig *)config)->resourceId = 3;
+        config->common.header.segments = 3;
     }
     return (u8 *)node;
 }
@@ -5073,26 +4972,9 @@ u8 *effAllocateRingFadeEntries(u8 *config) {
  * (4 words each) and radii (8 words each). The alpha fades in over the first
  * fadeIn fraction of the entries and out from the fadeOut fraction; the table
  * is then copied for every remaining layer. */
-typedef struct EffectFadeTable {
-    u8 pad00[0x24];
-    f32 *radii;
-    u32 *colors;
-} EffectFadeTable;
-
-typedef struct EffectFadeConfig {
-    u8 pad00[0x38];
-    u32 layers;
-    u8 pad3C[0x3C];
-    f32 fadeIn;
-    f32 fadeOut;
-    u8 pad80[0xC];
-    s32 segments;
-    f32 radius;
-} EffectFadeConfig;
-
-void effFillRingFadeGradient(u8 *node, u8 *config) {
-    EffectFadeConfig *cfg = (EffectFadeConfig *)config;
-    EffectFadeTable *table;
+void effFillRingFadeGradient(u8 *node, EffBillEmitterCommon *config) {
+    EffBillEmitterCommon *cfg = config;
+    EffRibbonWork *table;
     u32 *colors;
     f32 *radii;
     u32 *colorsStart;
@@ -5111,23 +4993,23 @@ void effFillRingFadeGradient(u8 *node, u8 *config) {
     u32 color;
     u32 i;
 
-    layers = cfg->layers;
+    layers = cfg->header.timed.count;
     if (layers == 0) {
         return;
     }
-    segments = cfg->segments;
+    segments = cfg->header.segments;
     entries = segments + 1;
     words = entries * 4;
-    table = (EffectFadeTable *)((EffFrameState *)node)->asset;
-    colors = table->colors;
-    radii = table->radii;
+    table = (EffRibbonWork *)((EffFrameState *)node)->asset;
+    colors = (u32 *)table->extra;
+    radii = (f32 *)table->uvs;
     colorsStart = colors;
     radiiStart = radii;
-    fadeOut = cfg->fadeOut;
-    fadeIn = cfg->fadeIn;
+    fadeOut = cfg->header.fadeOut;
+    fadeIn = cfg->header.fadeIn;
     fadeInEnd = (s32)(fadeIn * (f32)segments);
     fadeOutStart = (s32)(fadeOut * (f32)segments);
-    radius = cfg->radius / 3.0f;
+    radius = cfg->rowRadius / 3.0f;
     for (i = 0; i < entries; i++) {
         if (i < fadeInEnd) {
             fade = (f32)i / (f32)fadeInEnd;
@@ -5158,26 +5040,26 @@ void effFillRingFadeGradient(u8 *node, u8 *config) {
     }
 }
 
-u32 *effCreateRingFadeTable(u8 *p, u32 a1) {
+u32 *effCreateRingFadeTable(EffBillVortexConfig *p, u32 a1) {
     u32 *buf = (u32 *)effAllocateRingFadeEntries(p);
-    buf[1] = effCreateRibbonWithSharedResource(((EffBillConfig *)p)->frames.count, ((EffBillConfig *)p)->resourceId, a1);
-    effFillRingFadeGradient(buf, p);
+    buf[1] = effCreateRibbonWithSharedResource(p->common.header.timed.count, p->common.header.segments, a1);
+    effFillRingFadeGradient(buf, &p->common);
     return buf;
 }
 
 u32 *effAssetPointerSet(u8 *p) {
-    u8 *dst = ((EffBillFrameWork *)p)->config;
-    u32 *src = (u32 *)((EffBillFrameWork *)p)->frameState;
+    EffBillVortexConfig *dst = ((EffClassWork *)p)->payload;
+    u32 *src = (u32 *)((EffClassWork *)p)->resource;
     u32 *buf = (u32 *)effAllocateRingFadeEntries(dst);
     buf[1] = effCloneRibbonWithSharedResource((u32 *)((EffFrameState *)src)->asset);
-    effFillRingFadeGradient(buf, dst);
+    effFillRingFadeGradient(buf, &dst->common);
     return buf;
 }
 
 void effReleaseRingFadeTable(s32 work) {
     s32 state;
 
-    state = (s32)((EffBillFrameWork *)work)->frameState;
+    state = (s32)((EffClassWork *)work)->resource;
     effSharedAssetReferenceRelease((u32)((EffFrameState *)state)->asset);
     sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
 }
@@ -5185,9 +5067,9 @@ void effReleaseRingFadeTable(s32 work) {
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002EF1C0);
 
 void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
-    u8 *config = ((BillCellDrawWork *)work)->config;
+    EffBillVortexConfig *config = (EffBillVortexConfig *)((BillCellDrawWork *)work)->config;
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
-    u32 progress = ((EffBillConfig *)config)->progress;
+    u32 progress = config->common.header.timed.time.progress;
     u32 *list = ((BillCellDrawWork *)work)->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -5201,7 +5083,7 @@ void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_002D7458(config, config + 0x24, limit, progress);
+    second = func_002D7458(&config->common.header.timed.colorTrack, &config->common.header.timed.alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = ((BillCellDrawWork *)work)->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -5212,8 +5094,8 @@ void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
     ((EffBillOutput *)out)->field_08 = blended[0];
-    ((EffBillOutput *)out)->color = ((EffBillConfig *)config)->textureId;
-    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->alternateMode;
+    ((EffBillOutput *)out)->color = config->common.header.timed.alphaTrack.surfaceIndex;
+    ((EffBillOutput *)out)->mode = config->common.drawMode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
@@ -5227,10 +5109,10 @@ void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
 }
 
 void effResetBillboardFrameInstanceCounters(u8 *p) {
-    u8 *a = ((EffBillFrameWork *)p)->frameState;
-    u8 *b = ((EffBillFrameWork *)p)->config;
-    u32 n = ((EffBillConfig *)b)->frames.count;
-    u32 *counts = (u32 *)((EffFrameAsset *)((EffFrameState *)a)->asset)->frameStorage;
+    u8 *a = (u8 *)((EffClassWork *)p)->resource;
+    u8 *b = ((EffClassWork *)p)->payload;
+    u32 n = ((EffBillEmitterCommon *)b)->header.timed.count;
+    u32 *counts = (u32 *)((EffRibbonWork *)((EffFrameState *)a)->asset)->colors;
     u8 *rec = *(u8 **)a;
     u32 i;
     for (i = 0; i < n; i++) {
@@ -5240,23 +5122,23 @@ void effResetBillboardFrameInstanceCounters(u8 *p) {
     }
 }
 
-u8 *effAllocateBillFadeFrameEntries(u8 *config) {
-    u8 *base = sdfAllocGeneralBlock(((EffBillConfig *)config)->frames.count * 0x30 + 0xC);
+u8 *effAllocateBillFadeFrameEntries(EffBillColumnConfig *config) {
+    u8 *base = sdfAllocGeneralBlock(config->common.header.timed.count * 0x30 + 0xC);
     EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((u32)base);
-    u32 count = ((EffBillConfig *)config)->resourceId;
+    u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
 
     node->entries = entries;
     node->allocation = base;
     if (count < 3) {
-        ((EffBillConfig *)config)->resourceId = 3;
+        config->common.header.segments = 3;
     }
     return (u8 *)node;
 }
 
-void effFillBillFadeGradient(u8 *node, u8 *config) {
-    EffectFadeConfig *cfg = (EffectFadeConfig *)config;
-    EffectFadeTable *table;
+void effFillBillFadeGradient(u8 *node, EffBillEmitterCommon *config) {
+    EffBillEmitterCommon *cfg = config;
+    EffRibbonWork *table;
     u32 *colors;
     f32 *radii;
     u32 *colorsStart;
@@ -5275,23 +5157,23 @@ void effFillBillFadeGradient(u8 *node, u8 *config) {
     u32 color;
     u32 i;
 
-    layers = cfg->layers;
+    layers = cfg->header.timed.count;
     if (layers == 0) {
         return;
     }
-    segments = cfg->segments;
+    segments = cfg->header.segments;
     entries = segments + 1;
     words = entries * 4;
-    table = (EffectFadeTable *)((EffFrameState *)node)->asset;
-    colors = table->colors;
-    radii = table->radii;
+    table = (EffRibbonWork *)((EffFrameState *)node)->asset;
+    colors = (u32 *)table->extra;
+    radii = (f32 *)table->uvs;
     colorsStart = colors;
     radiiStart = radii;
-    fadeOut = cfg->fadeOut;
-    fadeIn = cfg->fadeIn;
+    fadeOut = cfg->header.fadeOut;
+    fadeIn = cfg->header.fadeIn;
     fadeInEnd = (s32)(fadeIn * (f32)segments);
     fadeOutStart = (s32)(fadeOut * (f32)segments);
-    radius = cfg->radius / 3.0f;
+    radius = cfg->rowRadius / 3.0f;
     for (i = 0; i < entries; i++) {
         if (i < fadeInEnd) {
             fade = (f32)i / (f32)fadeInEnd;
@@ -5322,19 +5204,19 @@ void effFillBillFadeGradient(u8 *node, u8 *config) {
     }
 }
 
-u32 *effCreateBillFadeTable(u8 *p, u32 a1) {
+u32 *effCreateBillFadeTable(EffBillColumnConfig *p, u32 a1) {
     u32 *buf = (u32 *)effAllocateBillFadeFrameEntries(p);
-    buf[1] = effCreateRibbonWithSharedResource(((EffBillConfig *)p)->frames.count, ((EffBillConfig *)p)->resourceId, a1);
-    effFillBillFadeGradient(buf, p);
+    buf[1] = effCreateRibbonWithSharedResource(p->common.header.timed.count, p->common.header.segments, a1);
+    effFillBillFadeGradient(buf, &p->common);
     return buf;
 }
 
 u32 *effCloneBillFadeTable(u8 *p) {
-    u8 *dst = ((EffBillFrameWork *)p)->config;
-    u32 *src = (u32 *)((EffBillFrameWork *)p)->frameState;
+    EffBillColumnConfig *dst = ((EffClassWork *)p)->payload;
+    u32 *src = (u32 *)((EffClassWork *)p)->resource;
     u32 *buf = (u32 *)effAllocateBillFadeFrameEntries(dst);
     buf[1] = effCloneRibbonWithSharedResource((u32 *)((EffFrameState *)src)->asset);
-    effFillBillFadeGradient(buf, dst);
+    effFillBillFadeGradient(buf, &dst->common);
     return buf;
 }
 
@@ -5342,7 +5224,7 @@ u32 *effCloneBillFadeTable(u8 *p) {
 void effReleaseBillFadeTable(s32 work) {
     s32 state;
 
-    state = (s32)((EffBillFrameWork *)work)->frameState;
+    state = (s32)((EffClassWork *)work)->resource;
     effSharedAssetReferenceRelease((u32)((EffFrameState *)state)->asset);
     sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
 }
@@ -5350,9 +5232,9 @@ void effReleaseBillFadeTable(s32 work) {
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002EFE20);
 
 void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
-    u8 *config = work->config;
+    EffBillColumnConfig *config = (EffBillColumnConfig *)work->config;
     u32 limit = work->frameLimit;
-    u32 progress = ((EffBillConfig *)config)->progress;
+    u32 progress = config->common.header.timed.time.progress;
     u32 *list = work->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -5366,7 +5248,7 @@ void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_002D7458(config, config + 0x24, limit, progress);
+    second = func_002D7458(&config->common.header.timed.colorTrack, &config->common.header.timed.alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -5377,8 +5259,8 @@ void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
     ((EffBillOutput *)out)->field_08 = blended[0];
-    ((EffBillOutput *)out)->color = ((EffBillConfig *)config)->textureId;
-    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->alternateMode;
+    ((EffBillOutput *)out)->color = config->common.header.timed.alphaTrack.surfaceIndex;
+    ((EffBillOutput *)out)->mode = config->common.drawMode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
@@ -5392,10 +5274,10 @@ void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
 }
 
 void effResetParticleBillFrameCounters(u8 *p) {
-    u8 *a = ((EffBillFrameWork *)p)->frameState;
-    u8 *b = ((EffBillFrameWork *)p)->config;
-    u32 n = ((EffBillConfig *)b)->frames.count;
-    u32 *counts = (u32 *)((EffFrameAsset *)((EffFrameState *)a)->asset)->frameStorage;
+    u8 *a = (u8 *)((EffClassWork *)p)->resource;
+    u8 *b = ((EffClassWork *)p)->payload;
+    u32 n = ((EffBillEmitterCommon *)b)->header.timed.count;
+    u32 *counts = (u32 *)((EffRibbonWork *)((EffFrameState *)a)->asset)->colors;
     u8 *rec = *(u8 **)a;
     u32 i;
     for (i = 0; i < n; i++) {
@@ -5405,23 +5287,23 @@ void effResetParticleBillFrameCounters(u8 *p) {
     }
 }
 
-u8 *effAllocateCompactRingFadeEntries(u8 *config) {
-    u8 *base = sdfAllocGeneralBlock(((EffBillConfig *)config)->frames.count * 0x2C + 0xC);
+u8 *effAllocateCompactRingFadeEntries(EffBillSpiralConfig *config) {
+    u8 *base = sdfAllocGeneralBlock(config->common.header.timed.count * 0x2C + 0xC);
     EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((u32)base);
-    u32 count = ((EffBillConfig *)config)->resourceId;
+    u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
 
     node->entries = entries;
     node->allocation = base;
     if (count < 3) {
-        ((EffBillConfig *)config)->resourceId = 3;
+        config->common.header.segments = 3;
     }
     return (u8 *)node;
 }
 
-void effFillCompactRingFadeGradient(u8 *node, u8 *config) {
-    EffectFadeConfig *cfg = (EffectFadeConfig *)config;
-    EffectFadeTable *table;
+void effFillCompactRingFadeGradient(u8 *node, EffBillEmitterCommon *config) {
+    EffBillEmitterCommon *cfg = config;
+    EffRibbonWork *table;
     u32 *colors;
     f32 *radii;
     u32 *colorsStart;
@@ -5440,23 +5322,23 @@ void effFillCompactRingFadeGradient(u8 *node, u8 *config) {
     u32 color;
     u32 i;
 
-    layers = cfg->layers;
+    layers = cfg->header.timed.count;
     if (layers == 0) {
         return;
     }
-    segments = cfg->segments;
+    segments = cfg->header.segments;
     entries = segments + 1;
     words = entries * 4;
-    table = (EffectFadeTable *)((EffFrameState *)node)->asset;
-    colors = table->colors;
-    radii = table->radii;
+    table = (EffRibbonWork *)((EffFrameState *)node)->asset;
+    colors = (u32 *)table->extra;
+    radii = (f32 *)table->uvs;
     colorsStart = colors;
     radiiStart = radii;
-    fadeOut = cfg->fadeOut;
-    fadeIn = cfg->fadeIn;
+    fadeOut = cfg->header.fadeOut;
+    fadeIn = cfg->header.fadeIn;
     fadeInEnd = (s32)(fadeIn * (f32)segments);
     fadeOutStart = (s32)(fadeOut * (f32)segments);
-    radius = cfg->radius / 3.0f;
+    radius = cfg->rowRadius / 3.0f;
     for (i = 0; i < entries; i++) {
         if (i < fadeInEnd) {
             fade = (f32)i / (f32)fadeInEnd;
@@ -5487,26 +5369,26 @@ void effFillCompactRingFadeGradient(u8 *node, u8 *config) {
     }
 }
 
-u32 *effCreateCompactRingFadeTable(u8 *p, u32 a1) {
+u32 *effCreateCompactRingFadeTable(EffBillSpiralConfig *p, u32 a1) {
     u32 *buf = (u32 *)effAllocateCompactRingFadeEntries(p);
-    buf[1] = effCreateRibbonWithSharedResource(((EffBillConfig *)p)->frames.count, ((EffBillConfig *)p)->resourceId, a1);
-    effFillCompactRingFadeGradient(buf, p);
+    buf[1] = effCreateRibbonWithSharedResource(p->common.header.timed.count, p->common.header.segments, a1);
+    effFillCompactRingFadeGradient(buf, &p->common);
     return buf;
 }
 
 u32 *effCloneBillboardFrameAsset(u8 *p) {
-    u8 *dst = ((EffBillFrameWork *)p)->config;
-    u32 *src = (u32 *)((EffBillFrameWork *)p)->frameState;
+    EffBillSpiralConfig *dst = ((EffClassWork *)p)->payload;
+    u32 *src = (u32 *)((EffClassWork *)p)->resource;
     u32 *buf = (u32 *)effAllocateCompactRingFadeEntries(dst);
     buf[1] = effCloneRibbonWithSharedResource((u32 *)((EffFrameState *)src)->asset);
-    effFillCompactRingFadeGradient(buf, dst);
+    effFillCompactRingFadeGradient(buf, &dst->common);
     return buf;
 }
 
 void effReleaseCompactRingFadeTable(s32 work) {
     s32 state;
 
-    state = (s32)((EffBillFrameWork *)work)->frameState;
+    state = (s32)((EffClassWork *)work)->resource;
     effSharedAssetReferenceRelease((u32)((EffFrameState *)state)->asset);
     sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
 }
@@ -5514,9 +5396,9 @@ void effReleaseCompactRingFadeTable(s32 work) {
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F0A98);
 
 void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
-    u8 *config = ((BillCellDrawWork *)work)->config;
+    EffBillSpiralConfig *config = (EffBillSpiralConfig *)((BillCellDrawWork *)work)->config;
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
-    u32 progress = ((EffBillConfig *)config)->progress;
+    u32 progress = config->common.header.timed.time.progress;
     u32 *list = ((BillCellDrawWork *)work)->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -5530,7 +5412,7 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_002D7458(config, config + 0x24, limit, progress);
+    second = func_002D7458(&config->common.header.timed.colorTrack, &config->common.header.timed.alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = ((BillCellDrawWork *)work)->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -5541,8 +5423,8 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
         EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
     ((EffBillOutput *)out)->field_08 = blended[0];
-    ((EffBillOutput *)out)->color = ((EffBillConfig *)config)->textureId;
-    ((EffBillOutput *)out)->mode = ((EffBillConfig *)config)->alternateMode;
+    ((EffBillOutput *)out)->color = config->common.header.timed.alphaTrack.surfaceIndex;
+    ((EffBillOutput *)out)->mode = config->common.drawMode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
@@ -5650,22 +5532,7 @@ extern EffMotionSetup D_004584C0;
 
 extern EffMotionSetup D_00458400;
 
-typedef struct EffRibbonWork {
-    u32 count;          // 0x00
-    u32 field_04;       // 0x04
-    u32 color;          // 0x08
-    s32 rowStride;      // 0x0C
-    s32 repeat;         // 0x10
-    u8 field_14;        // 0x14
-    u8 pad_15[3];
-    RefObj *resource; // 0x18: null selects the globally shared wind texture
-    u32 *colors;        // 0x1C
-    u8 *positions;      // 0x20
-    u8 *uvs;            // 0x24
-    u8 *extra;          // 0x28
-    s32 *handle;        // 0x2C
-    u8 *allocation;     // 0x30
-} EffRibbonWork;
+
 
 extern EffMotionSetup D_004583D0;
 
@@ -5758,9 +5625,9 @@ u32 effGetWindTextureHandle(void) {
 }
 
 void effResetAnimationFrameEntries(u8 *p) {
-    u8 *a = ((EffBillFrameWork *)p)->frameState;
-    u8 *b = ((EffBillFrameWork *)p)->config;
-    u32 n = ((EffBillConfig *)b)->frames.count;
+    u8 *a = (u8 *)((EffClassWork *)p)->resource;
+    u8 *b = ((EffClassWork *)p)->payload;
+    u32 n = ((EffBillFlameConfig *)b)->header.timed.count;
     u32 *counts = ((EffFrameAsset *)((EffFrameState *)a)->asset)->animationFrames;
     u8 *rec = *(u8 **)a;
     u32 i;
@@ -5771,30 +5638,30 @@ void effResetAnimationFrameEntries(u8 *p) {
     }
 }
 
-u8 *effAllocateAnimationBuffer(u8 *config) {
-    u8 *base = sdfAllocGeneralBlock(((EffBillConfig *)config)->frames.count * 0x30 + 0xC);
+u8 *effAllocateAnimationBuffer(EffBillFlameConfig *config) {
+    u8 *base = sdfAllocGeneralBlock(config->header.timed.count * 0x30 + 0xC);
     EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((u32)base);
-    u32 count = ((EffBillConfig *)config)->resourceId;
+    u32 count = config->header.segments;
     u8 *entries = (u8 *)(node + 1);
 
     node->entries = entries;
     node->allocation = base;
     if (count < 3) {
-        ((EffBillConfig *)config)->resourceId = 3;
+        config->header.segments = 3;
     }
     return (u8 *)node;
 }
 
 void effFillFadeColorRows(u8 *work, u8 *config) {
-    EffBillConfig *cfg = (EffBillConfig *)config;
-    u32 rows = cfg->frames.count;
+    EffBillFlameConfig *cfg = (EffBillFlameConfig *)config;
+    u32 rows = cfg->header.timed.count;
     u32 i;
 
     if (rows != 0) {
-        s32 width = cfg->resourceId;
+        s32 width = cfg->header.segments;
         f32 fw = width;
-        s32 fadeInEnd = cfg->fadeInEnd * fw;
-        s32 fadeOutStart = cfg->fadeOutStart * fw;
+        s32 fadeInEnd = cfg->header.fadeIn * fw;
+        s32 fadeOutStart = cfg->header.fadeOut * fw;
         u32 cols = width + 1;
         u32 stride = cols * 4;
         u32 *color = ((EffFrameAsset *)((EffFrameState *)work)->asset)->colorRows;
@@ -5825,16 +5692,16 @@ void effFillFadeColorRows(u8 *work, u8 *config) {
     }
 }
 
-u32 *effPrepareTextureAnimation(u8 *src) {
+u32 *effPrepareTextureAnimation(EffBillFlameConfig *src) {
     u32 *buf = (u32 *)effAllocateAnimationBuffer(src);
-    buf[1] = effCreateTexturedStripWithSharedTexture(((EffBillConfig *)src)->frames.count, ((EffBillConfig *)src)->resourceId);
+    buf[1] = effCreateTexturedStripWithSharedTexture(src->header.timed.count, src->header.segments);
     effFillFadeColorRows(buf, src);
     return buf;
 }
 
 u32 *effPrepareOwnedTextureAnimation(u8 *p) {
-    u8 *dst = ((EffBillFrameWork *)p)->config;
-    u32 *src = (u32 *)((EffBillFrameWork *)p)->frameState;
+    u8 *dst = ((EffClassWork *)p)->payload;
+    u32 *src = (u32 *)((EffClassWork *)p)->resource;
     u32 *buf = (u32 *)effAllocateAnimationBuffer(dst);
     buf[1] = effAllocateStripFromWorkAndRetainTexture(((EffFrameState *)src)->asset);
     effFillFadeColorRows(buf, dst);
@@ -5844,7 +5711,7 @@ u32 *effPrepareOwnedTextureAnimation(u8 *p) {
 void effReleaseTextureAnimationWork(s32 work) {
     s32 state;
 
-    state = (s32)((EffBillFrameWork *)work)->frameState;
+    state = (s32)((EffClassWork *)work)->resource;
     effReleaseScalyStripResources((u32)((EffFrameState *)state)->asset);
     sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
 }
@@ -5862,7 +5729,7 @@ typedef struct EffMeshOutput {
 void func_002F2760(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
-    u32 progress = ((EffBillConfig *)config)->progress;
+    u32 progress = ((EffBillFlameConfig *)config)->header.timed.time.progress;
     u32 *list = work->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -5876,7 +5743,7 @@ void func_002F2760(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_002D7458(config, config + 0x24, limit, progress);
+    second = func_002D7458(&((EffBillFlameConfig *)config)->header.timed.colorTrack, &((EffBillFlameConfig *)config)->header.timed.alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -5887,8 +5754,8 @@ void func_002F2760(BillCellDrawWork *work) {
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
     ((EffMeshOutput *)out)->color = blended[0];
-    ((EffMeshOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
-    ((EffMeshOutput *)out)->mode = ((EffBillConfig *)config)->alternateMeshMode;
+    ((EffMeshOutput *)out)->textureId = ((EffBillFlameConfig *)config)->header.timed.alphaTrack.surfaceIndex;
+    ((EffMeshOutput *)out)->mode = ((EffBillFlameConfig *)config)->meshMode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
@@ -5910,10 +5777,10 @@ typedef struct EffAnimationState {
 } EffAnimationState;
 
 void effInitializeAnimationPositions(u8 *work) {
-    u8 *resource = ((EffBillFrameWork *)work)->frameState;
+    u8 *resource = (u8 *)((EffClassWork *)work)->resource;
     u8 *payload = (u8 *)((EffAnimationState *)resource)->record;
     float *positions = ((EffAnimationState *)resource)->positions;
-    u32 count = ((EffGridRecord *)payload)->count;
+    u32 count = ((FileSlotTable *)payload)->count;
     u32 i = 0;
 
     fileClearRecordReferences((s32)payload);
@@ -5940,13 +5807,13 @@ u32 *effCreateAnimationState(u32 unused, u32 count) {
 }
 
 u32 *effActivateAnimationState(s32 work) {
-    s32 owner = (s32)((EffBillFrameWork *)work)->frameState;
+    s32 owner = (s32)((EffClassWork *)work)->resource;
     s32 resource = ((EffAnimationState *)owner)->record;
-    u32 *state = effCreateAnimationState((u32)((EffBillFrameWork *)work)->config, ((EffGridRecord *)resource)->count);
+    u32 *state = effCreateAnimationState((u32)((EffClassWork *)work)->payload, ((FileSlotTable *)resource)->count);
 
     resource = ((EffAnimationState *)owner)->record;
-    ((EffAnimationState *)state)->record = fileAllocateGridRecordSlots(((EffGridRecord *)resource)->kind, ((EffGridRecord *)resource)->count,
-                               ((EffGridRecord *)resource)->params);
+    ((EffAnimationState *)state)->record = fileAllocateGridRecordSlots(((FileSlotTable *)resource)->type, ((FileSlotTable *)resource)->count,
+                               ((FileSlotTable *)resource)->data1);
     return state;
 }
 
@@ -5955,7 +5822,7 @@ extern void fileReleaseGridRecordHandle(s32);
 extern void effReleaseScalyTextureReference(u32);
 
 void effReleaseAnimationFrameResources(u8 *work) {
-    u32 *state = (u32 *)((EffBillFrameWork *)work)->frameState;
+    u32 *state = (u32 *)((EffClassWork *)work)->resource;
 
     effReleaseScalyTextureReference(((EffAnimationState *)state)->textureHandle);
     if (((EffAnimationState *)state)->record != 0) {
@@ -5965,7 +5832,7 @@ void effReleaseAnimationFrameResources(u8 *work) {
 }
 
 void effSynchronizeFileTransform(u8 *work) {
-    u32 *record = (u32 *)((EffBillFrameWork *)work)->frameState;
+    u32 *record = (u32 *)((EffClassWork *)work)->resource;
 
     if (((EffAnimationState *)record)->record != 0) {
         mnuRecordSetVector(((EffAnimationState *)record)->record, work);
@@ -5996,32 +5863,22 @@ u32 *effCreateAlternateSlotAnimationState(u8 *work) {
 }
 
 void effResetSlotAnimationRecord(s32 work) {
-    ((EffFrameAsset *)((EffFrameState *)((EffBillFrameWork *)work)->frameState)->asset)->frameCount = 0;
+    ((EffFrameAsset *)((EffFrameState *)((EffClassWork *)work)->resource)->asset)->frameCount = 0;
 }
 
-/* Quantized-texture parameters overlaid on the larger billboard configuration. */
-typedef struct EffQuantizedConfig {
-    u8 pad_00[0x74];
-    union {
-        u32 quantizedSamples; // 0x74, clamped to at least four
-        s32 signedRows;
-    } samples;
-    u8 pad_78[0x10];
-    f32 rowOffset;           // 0x88
-} EffQuantizedConfig;
 
-u32 *effAllocateQuantizedBuffer(u8 *work) {
+u32 *effAllocateQuantizedBuffer(EffBillQuantizedConfig *work) {
     void *allocation = sdfAllocGeneralBlock(0xC);
     u32 *buffer = (u32 *)sdfResourceRetainAddress((u32)allocation);
-    u32 count = ((EffQuantizedConfig *)work)->samples.quantizedSamples;
+    u32 count = work->samples.quantizedSamples;
 
     buffer[2] = (u32)allocation;
     if (count < 4) {
-        ((EffQuantizedConfig *)work)->samples.quantizedSamples = 4;
+        work->samples.quantizedSamples = 4;
         count = 4;
     }
     buffer[0] = count >> 2;
-    if ((((EffQuantizedConfig *)work)->samples.quantizedSamples & 3) != 0) {
+    if ((work->samples.quantizedSamples & 3) != 0) {
         buffer[0] = (count >> 2) + 1;
     }
     return buffer;
@@ -6029,16 +5886,16 @@ u32 *effAllocateQuantizedBuffer(u8 *work) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F3258);
 
-u32 *effPrepareQuantizedTexture(u8 *src) {
+u32 *effPrepareQuantizedTexture(EffBillQuantizedConfig *src) {
     u32 *buf = (u32 *)effAllocateQuantizedBuffer(src);
-    buf[1] = effCreateTexturedStripWithSharedTexture(buf[0], ((EffQuantizedConfig *)src)->samples.quantizedSamples);
+    buf[1] = effCreateTexturedStripWithSharedTexture(buf[0], src->samples.quantizedSamples);
     func_002F3258(buf, src);
     return buf;
 }
 
 u32 *effPrepareOwnedQuantizedTexture(u8 *p) {
-    u8 *dst = ((EffBillFrameWork *)p)->config;
-    u32 *src = (u32 *)((EffBillFrameWork *)p)->frameState;
+    u8 *dst = ((EffClassWork *)p)->payload;
+    u32 *src = (u32 *)((EffClassWork *)p)->resource;
     u32 *buf = (u32 *)effAllocateQuantizedBuffer(dst);
     buf[1] = effAllocateStripFromWorkAndRetainTexture(((EffFrameState *)src)->asset);
     func_002F3258(buf, dst);
@@ -6048,7 +5905,7 @@ u32 *effPrepareOwnedQuantizedTexture(u8 *p) {
 void effReleaseBillboardFrameAsset(s32 work) {
     s32 state;
 
-    state = (s32)((EffBillFrameWork *)work)->frameState;
+    state = (s32)((EffClassWork *)work)->resource;
     effReleaseScalyStripResources((u32)((EffFrameState *)state)->asset);
     sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
 }
@@ -6071,9 +5928,9 @@ typedef struct EffStripWork {
 } EffStripWork;
 
 void effOffsetNodeRowsVU(u8 *work) {
-    s32 *list = (s32 *)((EffBillFrameWork *)work)->frameState;
-    u8 *config = ((EffBillFrameWork *)work)->config;
-    s32 rows = ((EffQuantizedConfig *)config)->samples.signedRows + 1;
+    s32 *list = (s32 *)((EffClassWork *)work)->resource;
+    u8 *config = ((EffClassWork *)work)->payload;
+    s32 rows = ((EffBillQuantizedConfig *)config)->samples.signedRows + 1;
     s32 count = list[0];
     u8 *node = *(u8 **)&list[1];
     u8 *entry = ((EffStripWork *)node)->uvsB;
@@ -6086,7 +5943,7 @@ void effOffsetNodeRowsVU(u8 *work) {
         for (j = 0; j < rows; j++) {
             v = (f32 *)entry + 1;
             for (k = 0; k < 4; k++) {
-                *v += ((EffQuantizedConfig *)config)->rowOffset;
+                *v += ((EffBillQuantizedConfig *)config)->rowOffset;
                 v += 2;
             }
             entry += 0x20;
@@ -6098,7 +5955,7 @@ void effOffsetNodeRowsVU(u8 *work) {
 void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
     u32 limit = work->frameLimit;
-    u32 progress = ((EffBillConfig *)config)->drawProgress;
+    u32 progress = ((EffBillQuantizedConfig *)config)->drawProgress;
     u32 *list = work->instances;
     u8 *out = (u8 *)list[1];
     u128 mtx[4];
@@ -6113,7 +5970,7 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     if (progress < limit && progress != 0) {
         return;
     }
-    second = func_002D7458(config, config + 0x24, limit, progress);
+    second = func_002D7458(&((EffBillQuantizedConfig *)config)->colorTrack, &((EffBillQuantizedConfig *)config)->alphaTrack, limit, progress);
     unit = 0x3C000000;
     color1[0] = work->baseColor;
     EE_MMI_RGBA_UNPACK(color1, unit);
@@ -6124,9 +5981,9 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     ((EffMeshOutput *)out)->color = blended[0];
-    ((EffMeshOutput *)out)->textureId = ((EffBillConfig *)config)->textureId;
-    ((EffMeshOutput *)out)->mode = ((EffBillConfig *)config)->meshMode;
-    scale = func_002D7770(&((EffBillConfig *)config)->scaleCurve, limit, progress) * work->scale;
+    ((EffMeshOutput *)out)->textureId = ((EffBillQuantizedConfig *)config)->alphaTrack.surfaceIndex;
+    ((EffMeshOutput *)out)->mode = ((EffBillQuantizedConfig *)config)->meshMode;
+    scale = func_002D7770(&((EffBillQuantizedConfig *)config)->scaleCurve, limit, progress) * work->scale;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
@@ -8307,11 +8164,11 @@ void effDestroyOwnedResources(s32 *work) {
 extern s32 *func_002FA5B8(s32 *);
 
 s32 *effCloneOwnedState(u8 *owner) {
-    s32 *source = (s32 *)((EffGridRecord *)((EffectSlotNode80 *)owner)->record)->params;
+    s32 *source = (s32 *)((FileSlotTable *)((EffectSlotNode80 *)owner)->record)->data1;
     s32 *work = func_002FA5B8(source);
     memcpy(&((EffectSlotNode80 *)work)->randomDirection,
         &((EffectSlotNode80 *)owner)->randomDirection, 0x50);
-    effRebuildResourceEntries((u8 *)work, ((EffGridRecord *)((EffectSlotNode80 *)owner)->record)->kind, source);
+    effRebuildResourceEntries((u8 *)work, ((FileSlotTable *)((EffectSlotNode80 *)owner)->record)->type, source);
     func_002FA978(work, owner);
     return work;
 }
@@ -8338,7 +8195,7 @@ void func_002FA978(EffectSlotNode80 *dst, EffectSlotNode80 *src) {
         kind = src->resourceKind;
         break;
     case 6:
-        count = ((EffGridRecord *)src->record)->count;
+        count = ((FileSlotTable *)src->record)->count;
         if (count == 0) {
             return;
         }
@@ -8380,7 +8237,7 @@ void effRebuildResourceEntries(u8 *work, u32 kind, s32 *config) {
     if (allocation != 0) {
         sdfReleaseResourceAllocation(allocation);
     }
-    count = ((EffGridRecord *)((EffectSlotNode80 *)work)->record)->count;
+    count = ((FileSlotTable *)((EffectSlotNode80 *)work)->record)->count;
     ((EffectSlotNode80 *)work)->positionAllocation = sdfAllocGeneralBlock(count * 0x18);
     ((EffectSlotNode80 *)work)->positions = (u8 *)sdfResourceRetainAddress(((EffectSlotNode80 *)work)->positionAllocation);
     entries = ((EffectSlotNode80 *)work)->positions;

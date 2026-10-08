@@ -2987,3 +2987,12 @@ positions, and flame vectors contain the updated vertical position.
 Retail COP2 loads consume these lanes; restore them before comparing any
 parked source, rather than treating the remaining differences as regalloc.
 
+## Actor motion duration metadata
+
+DDS1 `001D6050` reads an unsigned frame count at status-record
+`+0x2E + index * 0x14`, which is `BtlActorMotionSlot.frameCount` at
+`+0x02` in the existing `+0x2C` motion array. It divides that count by
+the slot's `alphaFrameScale` and the singleton's `modelFrameScale`,
+then converts the result to a signed frame duration. Reuse that primary
+motion owner rather than introducing another status-table view.
+

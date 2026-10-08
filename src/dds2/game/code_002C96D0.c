@@ -1,6 +1,7 @@
 #include "common.h"
 #include "eff_curve.h"
 #include "file.h"
+#include "file_slot.h"
 #include "pcp_vu0.h"
 struct EffectSlotSet;
 extern void func_00306CD0(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
@@ -5318,34 +5319,6 @@ void camAimRotation(CamAim *obj, void *dst)
 
 extern void *sdfAllocAndClearQuadwords(s32);
 
-typedef struct FileSlot {
-    f32 pos[4];       /* 0x00 */
-    s32 state;        /* 0x10: frame, -1 available, -2 disabled */
-    u32 color;        /* 0x14 */
-    f32 scale;        /* 0x18 */
-    f32 angle;        /* 0x1C */
-} FileSlot;      /* 0x20, ordinary 4-byte field alignment */
-
-typedef struct FileSlotTable {
-    u16 type;
-    u8 pad02[2];
-    u32 instances;         /* 0x04: target's primary-slot count */
-    u32 count;             /* 0x08: primary + trailing group cells */
-    u32 flags;             /* 0x0C */
-    u32 references;        /* 0x10: acquisition/frame counter */
-    f32 spawnRemainder;    /* 0x14 */
-    FileSlot *slots; /* 0x18 */
-    u8 *unk1C;             /* 0x1C: per-type instance work */
-    u8 *data0;             /* 0x20 */
-    u8 *data1;             /* 0x24 */
-    u32 handle;            /* 0x28 */
-} FileSlotTable;
-
-/* The record's signed +0x54 mode is consumed by every billboard opener. */
-typedef struct FileBillboardRecord {
-    u8 pad0[0x54];
-    s16 mode; /* 0x54 */
-} FileBillboardRecord;
 
 EffectSurfaceNode *fileCreateSurfaceLoaderState(s32 capacity) {
     EffectSurfaceNode *rec = (EffectSurfaceNode *)sdfAllocAndClearQuadwords(sizeof(EffectSurfaceNode));
@@ -5364,17 +5337,10 @@ EffectSurfaceNode *fileCreateSurfaceLoaderState(s32 capacity) {
     return rec;
 }
 
-typedef struct FileGridHeader {
-    u8 pad00[0x20];
-    s32 rows;   /* 0x20 */
-    s32 cols;   /* 0x24 */
-    u8 pad28[0x90];
-    s32 altCols; /* 0xB8 */
-} FileGridHeader;
 
-EffectSurfaceNode *fileCreateGridLoaderRecord(FileGridHeader *hdr) {
-    u32 rows = hdr->rows;
-    u32 count = (rows != 0 ? rows : hdr->cols) * (rows != 0 ? hdr->cols : hdr->altCols);
+EffectSurfaceNode *fileCreateGridLoaderRecord(FileKeyBlock *hdr) {
+    u32 rows = hdr->emissionDuration;
+    u32 count = (rows != 0 ? rows : hdr->spawnRate) * (rows != 0 ? hdr->spawnRate : hdr->length);
 
     return fileCreateSurfaceLoaderState(count <= 0x12C ? count : 0x12C);
 }
@@ -5445,7 +5411,7 @@ void fileDestroyEffectSurfaceAndChildren(EffectSurfaceNode *node) {
 }
 
 EffectSurfaceNode *fileLoadObjectCreateChild(EffectSurfaceNode *owner) {
-    FileGridHeader *source = (FileGridHeader *)((FileSlotTable *)owner->active)->data1;
+    FileKeyBlock *source = (FileKeyBlock *)((FileSlotTable *)owner->active)->data1;
     EffectSurfaceNode *result = fileCreateGridLoaderRecord(source);
 
     fileLoadObjectSetResource(result, ((FileSlotTable *)owner->active)->type, source);
@@ -5468,7 +5434,7 @@ void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *
         dst->resource = (void *)billCloneObjectRetainingSharedData((u32)src->resource);
         billMarkKindOneFlag((u32)dst->resource);
         if (dst->active != 0) {
-            billSetBillboardMode((u32)dst->resource, ((FileBillboardRecord *)((FileSlotTable *)dst->active)->data0)->mode);
+            billSetBillboardMode((u32)dst->resource, (s16)((FileKeyBlock *)((FileSlotTable *)dst->active)->data0)->alphaTrack.surfaceIndex);
         }
         break;
     case 5:
@@ -5542,7 +5508,7 @@ void fileLoadObjectOpenNamedDevice(EffectSurfaceNode *node, u32 resourceId) {
     resource = effRetainResource(resourceId);
     node->resource = (void *)resource;
     if (node->active != 0) {
-        billSetBillboardMode(resource, ((FileBillboardRecord *)((FileSlotTable *)node->active)->data0)->mode);
+        billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -5554,7 +5520,7 @@ void fileLoadObjectOpenDevice(EffectSurfaceNode *node, u32 resourceId) {
     resource = billCreateIndexed(0, resourceId);
     node->resource = (void *)resource;
     if (node->active != 0) {
-        billSetBillboardMode(resource, ((FileBillboardRecord *)((FileSlotTable *)node->active)->data0)->mode);
+        billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -5567,7 +5533,7 @@ void fileLoadObjectOpenAndStartDevice(EffectSurfaceNode *node, u32 resourceId) {
     node->resource = (void *)resource;
     billMarkKindOneFlag(resource);
     if (node->active != 0) {
-        billSetBillboardMode(node->resource, ((FileBillboardRecord *)((FileSlotTable *)node->active)->data0)->mode);
+        billSetBillboardMode(node->resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -5681,11 +5647,6 @@ typedef struct FileRecordType {
     s32 dataBytes;
 } FileRecordType;
 
-typedef struct FileGridDimensions {
-    u8 pad0[0xC0];
-    s32 columns;
-    s32 rows;
-} FileGridDimensions;
 
 extern FileRecordType D_003E95C0[];
 
@@ -5765,144 +5726,15 @@ f32 func_002D7770(EffScalarCurve *curve, s32 frame, s32 length) {
 }
 
 
-/* Output of fileSampleKeyTracks: a view-space position, the sampled frame, colour, scale and heading. */
-typedef FileSlot FileKeyOut;
-
-/* One emitter track uses +0x0C as its random multiplier; the curve sampler
- * treats the same word as reserved. */
-typedef union FileKeyScalarTrack {
-    EffScalarTrack track;
-    struct {
-        u8 mode;
-        u8 reserved01[3];
-        f32 initialValue;
-        f32 finalValue;
-        f32 randomness;
-        u8 headingMode;
-        u8 reserved11[3];
-        f32 firstValue;
-        f32 firstFraction;
-        f32 secondValue;
-        f32 secondFraction;
-        u8 reserved24[8];
-    } emitter;
-} FileKeyScalarTrack;
-
-/* Keyframe tracks of a view block (scale, heading and colour curves). */
-typedef struct FileKeyBlock {
-    f32 pos[4];             /* 0x00 */
-    f32 orientation[4];    /* 0x10: emitter quaternion */
-    s32 emissionDuration;   /* 0x20 */
-    u32 spawnRate;          /* 0x24 */
-    f32 spawnVariance;      /* 0x28 */
-    u8 unk2C[0x24];         /* 0x2C: color track */
-    u8 unk50[0x10];         /* 0x50: color data */
-    FileKeyScalarTrack scale;   /* 0x60 */
-    FileKeyScalarTrack heading; /* 0x8C */
-    s32 length;            /* 0xB8 */
-    u8 padBC;              /* 0xBC: allocator's relative-position flag */
-    u8 prewarm;            /* 0xBD */
-    u8 padBE[0x0A];         /* includes grid columns/rows at C0/C4 */
-    union {                /* 0xC8: record-type-specific emitter parameters */
-        struct {
-            f32 radius;
-            f32 radiusRandomness;
-            f32 speed;
-            f32 speedRandomness;
-            f32 acceleration;
-            f32 gravity;
-        } radial;
-        struct {
-            f32 radius;
-            f32 radiusRandomness;
-            f32 spread;
-            f32 spreadRandomness;
-            f32 speed;
-            f32 speedRandomness;
-            f32 acceleration;
-            f32 gravity;
-        } directed;
-        struct {
-            f32 radius;
-            f32 radiusRandomness;
-            f32 spread;
-            f32 spreadRandomness;
-            f32 speed;
-            f32 speedRandomness;
-            f32 acceleration;
-            f32 gravity;
-            s32 azimuthDegrees; /* 0xE8: signed angular extent */
-        } sector;
-        struct {
-            f32 initialRadius;
-            f32 axialSpeed;
-            f32 axialSpeedRandomness;
-            f32 axialDeceleration;
-            f32 initialAmplitude;
-            f32 initialAmplitudeRandomness;
-            f32 finalAmplitude;
-            f32 finalAmplitudeRandomness;
-            f32 phaseStep;
-            f32 phaseStepRandomness;
-        } wave;
-        struct {
-            f32 initialAxialExtent;
-            f32 initialRadius;
-            f32 initialRadiusRandomness;
-            f32 finalRadius;
-            f32 finalRadiusRandomness;
-            f32 angularSpeed;
-            f32 angularSpeedRandomness;
-            f32 axialSpeed;
-            f32 axialSpeedRandomness;
-            f32 angularAcceleration;
-            f32 gravity;
-        } circular;
-        struct {
-            f32 initialRadius;
-            f32 initialRadiusRandomness;
-            f32 finalRadius;
-            f32 finalRadiusRandomness;
-            f32 angularSpeed;
-            f32 angularSpeedRandomness;
-            f32 angularAcceleration;
-            f32 gravity;
-        } orientedRing;
-        struct {
-            s16 firstPercent;       /* C8 */
-            u8 padCA[2];
-            f32 firstOffset;
-            f32 firstRandomness;
-            s16 secondPercent;      /* D4 */
-            u8 padD6[2];
-            f32 secondOffset;
-            f32 secondRandomness;
-            s16 spreadDegrees;      /* E0 */
-            u8 padE2[2];
-            f32 angularSpeed;
-            f32 angularRandomness;
-            f32 angularAcceleration;
-            f32 travelSpeed;
-            f32 travelRandomness;
-            f32 travelAcceleration;
-            f32 start[3];           /* FC */
-            f32 end[3];             /* 108 */
-            u8 reserved114[8];
-            f32 endpointRadius;     /* 11C */
-            f32 endpointDrop;
-        } curve;
-    } emitter;
-} FileKeyBlock;             /* record-type-dependent parameter extent */
-
 extern u32 func_002D7458(const void *, const void *, s32, s32);
 extern f32 func_002D7770(EffScalarCurve *, s32, s32);
 
 /* vu0 routine: samples the colour, scale and heading tracks at frame; in mode 2 the heading is the screen-space direction from out->pos to target (0 when they coincide) */
-void fileSampleKeyTracks(FileKeyOut *out, FileKeyBlock *block, s32 frame, f32 *target)
+void fileSampleKeyTracks(FileSlot *out, FileKeyBlock *block, s32 frame, f32 *target)
 {
     f32 delta[4];
 
-    out->color = func_002D7458(block->unk2C, block->unk50, frame, block->length);
+    out->color = func_002D7458(&block->colorTrack, &block->alphaTrack, frame, block->length);
     out->scale = func_002D7770(&block->scale.track.curve, frame, block->length);
     if (block->heading.track.curve.headingMode != 2) {
         out->angle = func_002D7770(&block->heading.track.curve, frame, block->length);
@@ -5935,7 +5767,7 @@ void fileSampleKeyTracks(FileKeyOut *out, FileKeyBlock *block, s32 frame, f32 *t
 }
 
 void fileInvalidateSlotGroup(FileSlotTable *table, u32 slotAddr) {
-    FileGridDimensions *grid = (FileGridDimensions *)table->data0;
+    FileKeyBlock *grid = (FileKeyBlock *)table->data0;
     s32 rows = grid->rows;
     s32 columns = grid->columns;
     s32 n = columns * rows;
@@ -5954,7 +5786,7 @@ void fileInvalidateSlotGroup(FileSlotTable *table, u32 slotAddr) {
 }
 
 void fileCopyAndInvalidateSlotGroup(FileSlotTable *table, FileSlot *source) {
-    FileGridDimensions *grid = (FileGridDimensions *)table->data0;
+    FileKeyBlock *grid = (FileKeyBlock *)table->data0;
     s32 rows = grid->rows;
     s32 columns = grid->columns;
     s32 n = columns * rows;
@@ -7683,7 +7515,7 @@ void effScaleParameterSetBase(ScaleOwner *owner, f32 scale) {
 }
 
 u32 fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
-    FileGridDimensions *src = data;
+    FileKeyBlock *src = data;
     u32 slotCount = count * src->columns * src->rows + count;
     u32 slotBytes = slotCount << 5;
     s32 dataBytes = D_003E95C0[type].dataBytes;
