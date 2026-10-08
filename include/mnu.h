@@ -481,8 +481,7 @@ typedef struct MenuPageSlot {
     struct EffectSlotSet *frame[8]; /* 0xBC */
     struct MenuSprites *windowSprites; /* 0xDC */
     MenuIconBundle *iconBundle;
-    u32 unkE4;
-    u8 padE8[8];
+    struct EffectSlotSet *panelResourceHandles[3]; /* 0xE4 */
     MenuQueuedCommand commands[2]; /* 0xF0 and 0x1114 */
 } MenuPageSlot;
 
@@ -499,7 +498,14 @@ typedef char MenuPageSlot_hp_check[((u32)&((MenuPageSlot *)0)->hp == 0x1C) ? 1 :
 typedef char MenuPageSlot_mp_check[((u32)&((MenuPageSlot *)0)->mp == 0x6C) ? 1 : -1];
 typedef char MenuPageSlot_frame_check[((u32)&((MenuPageSlot *)0)->frame == 0xBC) ? 1 : -1];
 typedef char MenuPageSlot_sprites_check[((u32)&((MenuPageSlot *)0)->windowSprites == 0xDC) ? 1 : -1];
+typedef char MenuPageSlot_panel_handles_check[
+    ((u32)&((MenuPageSlot *)0)->panelResourceHandles == 0xE4) ? 1 : -1];
 typedef char MenuPageSlot_commands_check[((u32)&((MenuPageSlot *)0)->commands == 0xF0) ? 1 : -1];
+
+void mnuLoadPanelSectionResources(MenuPageSlot *slot,
+                                  struct EffectSlotSet *model,
+                                  u32 firstValue, u32 secondValue,
+                                  s32 thirdValue);
 
 #else
 typedef struct MenuPageSlot {

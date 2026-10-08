@@ -93,8 +93,6 @@ extern s32 D_00435E5C;
 
 extern void mnuClearListFlagsOneAndTwo();
 
-extern void mnuReleaseResourceList(MenuIconState *list);
-
 extern s32 func_002C6CE8(void);
 
 extern s32 func_002C6480();
@@ -735,10 +733,6 @@ void mnuRefreshPartyPanelSlots(s32 context) {
     mnuReleaseAndRefreshWindowSlots(&((MenuContext *)context)->partyWindow);
 }
 
-struct MenuSlotEffectHandles;
-extern void mnuLoadPanelSectionResources(struct MenuSlotEffectHandles *slot,
-                                         struct EffectSlotSet *model,
-                                         u32 firstValue, u32 secondValue, s32 thirdValue);
 s32 mnuInitializePartySelectionState(KwlnTask *task) {
     s32 contextAddress = (s32)kwlnTaskGetUserValue(task);
     MenuContext *context = (MenuContext *)contextAddress;
@@ -754,13 +748,13 @@ s32 mnuInitializePartySelectionState(KwlnTask *task) {
     mnuCreatePartySelectionWindow(context);
 
     mnuLoadPanelSectionResources(
-        (struct MenuSlotEffectHandles *)&context->partyWindow.slots[0],
+        &context->partyWindow.slots[0],
         (struct EffectSlotSet *)context->panelModel, 5, 8, 0xB);
     mnuLoadPanelSectionResources(
-        (struct MenuSlotEffectHandles *)&context->partyWindow.slots[1],
+        &context->partyWindow.slots[1],
         (struct EffectSlotSet *)context->panelModel, 5, 9, 0xB);
     mnuLoadPanelSectionResources(
-        (struct MenuSlotEffectHandles *)&context->partyWindow.slots[2],
+        &context->partyWindow.slots[2],
         (struct EffectSlotSet *)context->panelModel, 5, 0xA, 0xB);
 
     mnuClearPartySelectionAndActivateSlots(contextAddress);
@@ -3407,8 +3401,6 @@ extern void effInitializeSlotWork();
 void mnuClearEntryFlags(MenuIconState *group);
 
 /* Destroy nonzero resource slots, retaining the native per-iteration count read, then free. */
-void mnuReleaseResourceList(MenuIconState *list);
-
 typedef struct MenuPos {
     s32 x;
     s32 y;
@@ -3536,19 +3528,6 @@ void mnuUpdateFade(s32 *list);
 
 
 void mnuResetWindowFadeParameters(MenuFadeFields *menu);
-
-
-/* Three resource-slot handles at +0xE4/+0xE8/+0xEC. */
-typedef struct MenuSlotEffectHandles {
-    u8 pad00[0xE4];
-    u32 handles[3];
-} MenuSlotEffectHandles;
-
-void mnuLoadPanelSectionResources(MenuSlotEffectHandles *slot,
-                                  EffectSlotSet *model, u32 firstValue,
-                                  u32 secondValue, s32 thirdValue
-                                    );
-
 
 
 void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused, u32 preserve);
