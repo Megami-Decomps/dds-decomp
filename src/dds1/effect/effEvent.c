@@ -1566,8 +1566,8 @@ extern void *effAllocSlotArray(u32);
 extern void *effParamWorkCreate(u16, void *);
 extern void *effParamWorkDuplicate(void *);
 
-void *effEventCreateChannelFromParams(void *source, u16 kind, void *params) {
-    EffChanHead *head = source;
+EffChanWork *effEventCreateChannelFromParams(const EffChanHead *source, u16 kind, void *params) {
+    const EffChanHead *head = source;
     u32 recordCount = head->count;
     SdfMemBlock *allocation = sdfAllocGeneralBlock(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
     EffChanWork *work = (EffChanWork *)sdfResourceRetainAddress(allocation);
