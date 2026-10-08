@@ -3041,10 +3041,9 @@ s32 evtIndexGroupTypeTwentyFiveChildren(EvtRuntime *runtime) {
     return index;
 }
 
-typedef struct EvtViewer EvtViewer;
-extern s32 evtEventViewerCountEntriesById(s32 id, EvtViewer *viewer);
-extern s32 evtEventViewerCountEntries(EvtViewer *viewer);
-extern s32 evtEventViewerSumNodeCounts(s32 mode, EvtViewer *viewer);
+extern s32 evtEventViewerCountEntriesById(s32 id, EvtRuntime *runtime);
+extern s32 evtEventViewerCountEntries(EvtRuntime *runtime);
+extern s32 evtEventViewerSumNodeCounts(s32 mode, EvtRuntime *runtime);
 
 /* Fixed prefix shared by PMD directory streams. */
 typedef struct EvtPmdFilePrefix {
@@ -3103,13 +3102,13 @@ void func_0023D9D8(s32 output, s32 mode, EvtRuntime *runtime) {
     if (mode == 1) {
         return;
     }
-    id0Count = evtEventViewerCountEntriesById(0, (EvtViewer *)runtime);
-    id1Count = evtEventViewerCountEntriesById(1, (EvtViewer *)runtime);
-    nodeCount = evtEventViewerSumNodeCounts(mode, (EvtViewer *)runtime);
+    id0Count = evtEventViewerCountEntriesById(0, runtime);
+    id1Count = evtEventViewerCountEntriesById(1, runtime);
+    nodeCount = evtEventViewerSumNodeCounts(mode, runtime);
     nodeBytes = nodeCount * 0x2C;
     nameCount = runtime->entryTotal;
     nameBytes = nameCount * 0x20;
-    id2Count = evtEventViewerCountEntriesById(2, (EvtViewer *)runtime);
+    id2Count = evtEventViewerCountEntriesById(2, runtime);
     id2Bytes = id2Count * 0x10;
     typeACount = evtAssignRuntimeChildSequenceAndCount(runtime);
     typeABytes = typeACount * 0x30;
@@ -3129,7 +3128,7 @@ void func_0023D9D8(s32 output, s32 mode, EvtRuntime *runtime) {
     type23Bytes = type23Count * 0x2C;
     type27Count = evtIndexGroupTypeTwentySevenChildren(runtime);
     type27Bytes = type27Count * 0x28;
-    groupCount = evtEventViewerCountEntries((EvtViewer *)runtime);
+    groupCount = evtEventViewerCountEntries(runtime);
     groupBytes = groupCount * 8;
     type25Count = evtIndexGroupTypeTwentyFiveChildren(runtime);
     type25Bytes = type25Count * 0x40;
