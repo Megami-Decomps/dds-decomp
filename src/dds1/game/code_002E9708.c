@@ -10,7 +10,6 @@
 
 #define SDF_RELOC_HEADER_BYTES 0x20
 #define SDF_STREAM_NODE_BYTES 0x8C
-#define SDF_STREAM_FRAME_HEADER_BYTES 0x10
 #define SDF_STREAM_SCRATCH_BYTES 0x10100
 #define SDF_STREAM_PREFIX_BYTES 0x100
 #define SDF_STREAM_SLOT_BYTES 0x2000
@@ -92,23 +91,6 @@ typedef struct MidiChannel {
     u32 earlierEntries[2];
     u32 entries[8];
 } MidiChannel;
-typedef struct MidiPlaybackState {
-    u8 pad00[0x13];
-    u8 completed;
-    u8 pad14;
-    u8 looping;
-    u8 pad16[3];
-    u8 bufferIndex;
-    u8 pending;
-    u8 pad1B[0xD];
-    u32 buffers[2];
-    u32 bufferSize;
-    u8 pad34[0xC];
-    s32 limit;
-    u8 pad44[4];
-    s32 processed;
-} MidiPlaybackState;
-
 extern s32 func_00312C08(void);
 extern void func_002EC230(s32);
 extern s32 func_002EC060(void *);
@@ -1022,23 +1004,15 @@ void sdfSoundInitNodeFromFormat(SdfStreamFrameNode *node, SoundFormat *format) {
     node->loopMode = format->loopMode;
     node->playbackMode = format->playbackMode;
 }
-/* Native 0x10 serialized header: dimensions and the DMA-cycle limit. */
-typedef struct SdfStreamHeader {
-    u8 pad00[8];
-    u16 width;
-    u16 height;
-    u32 cycleLength;
-} SdfStreamHeader;
-
 /* Decode the frame header, allocate its buffers, then queue the bytes after that header. */
 void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 sourceAddress, s32 sourceSize) {
     s32 interruptsEnabled;
     u8 *frameBytes = (u8 *)sourceAddress;
 
     sdfSoundInitNodeFromFormat(node, format);
-    node->width = ((SdfStreamHeader *)frameBytes)->width;
-    node->cycleLength = ((SdfStreamHeader *)frameBytes)->cycleLength;
-    node->height = ((SdfStreamHeader *)frameBytes)->height;
+    node->width = ((SdfStreamFrameHeader *)frameBytes)->width;
+    node->cycleLength = ((SdfStreamFrameHeader *)frameBytes)->cycleLength;
+    node->height = ((SdfStreamFrameHeader *)frameBytes)->height;
     sdfAllocateStreamFrameBuffers(node);
     func_002EB578(node, frameBytes + SDF_STREAM_FRAME_HEADER_BYTES, sourceSize - SDF_STREAM_FRAME_HEADER_BYTES);
     interruptsEnabled = func_00312C08();
@@ -1064,7 +1038,7 @@ extern SdfTexResource *sdfTexAllocateHeadForDimensions(s32, s32, s32, s32, s32);
  * only when larger than one GS page; smaller dimensions remain unchanged.
  */
 void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
-    SdfStreamHeader header;
+    SdfStreamFrameHeader header;
     s32 readStatus;
     s32 interruptsEnabled;
 
@@ -1381,18 +1355,18 @@ u32 sndGetSelectedChannelEntry(MidiChannel *channel) {
 }
 
 /* Consume a pending buffer when present, but always advance processed; loop only on exact equality. */
-void sdfAdvanceBufferedPlayback(MidiPlaybackState *state) {
+void sdfAdvanceBufferedPlayback(SdfStreamFrameNode *node) {
     s32 interruptsEnabled = func_00312C08();
-    s32 pendingBuffers = state->pending;
+    s32 pendingBuffers = node->unk1A;
     s32 remainingBuffers = pendingBuffers - 1;
     if (pendingBuffers > 0) {
-        state->pending = remainingBuffers;
-        state->bufferIndex ^= 1;
-        state->completed++;
+        node->unk1A = remainingBuffers;
+        node->transferPacketIndex ^= 1;
+        node->unk13++;
     }
-    state->processed++;
-    if (state->processed == state->limit && state->looping != 0) {
-        state->processed = 0;
+    node->unk48++;
+    if (node->unk48 == node->cycleLength && node->loopMode != 0) {
+        node->unk48 = 0;
     }
     if (interruptsEnabled != 0) {
         EIntr();
@@ -1401,18 +1375,17 @@ void sdfAdvanceBufferedPlayback(MidiPlaybackState *state) {
 }
 
 /* Return zero only when nothing is pending; otherwise call the zero-buffer handler if needed, queue and advance. */
-s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
+s32 sdfSubmitBufferedPlayback(SdfStreamFrameNode *node) {
     u32 *selectedBuffer;
-    if (state->pending == 0) {
+    if (node->unk1A == 0) {
         return 0;
     }
-    /* Equivalent to &state->buffers[state->bufferIndex]; index-first arithmetic matches retail. */
-    selectedBuffer = (u32 *)(state->bufferIndex * 4 + (s32)state + 0x28);
+    selectedBuffer = (u32 *)(node->transferPacketIndex * 4 + (s32)node + 0x28);
     if (*selectedBuffer == 0) {
-        sdfBuildStreamFrameTransferPackets((SdfStreamFrameNode *)state);
+        sdfBuildStreamFrameTransferPackets(node);
     }
-    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, (void *)(*selectedBuffer + state->bufferSize - SDF_STREAM_QWORD_BYTES));
-    sdfAdvanceBufferedPlayback(state);
+    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, (void *)(*selectedBuffer + node->transferPacketBytes - SDF_STREAM_QWORD_BYTES));
+    sdfAdvanceBufferedPlayback(node);
     return 1;
 }
 extern u32 D_003BD614;
@@ -1435,7 +1408,7 @@ void func_002EC5E0(s32 cadence) {
         /* The playback provider views the same 0x8C stream allocation. */
         switch (node->firstStop) {
         case 1:
-            sdfSubmitBufferedPlayback((MidiPlaybackState *)node);
+            sdfSubmitBufferedPlayback(node);
             node->firstStop = 2;
             node->pad17 = node->playbackMode;
             break;
@@ -1443,7 +1416,7 @@ void func_002EC5E0(s32 cadence) {
             if (D_003BD614 != 1) {
                 elapsed += node->playbackMode;
                 if (elapsed >= cadence) {
-                    if (sdfSubmitBufferedPlayback((MidiPlaybackState *)node) != 0) {
+                    if (sdfSubmitBufferedPlayback(node) != 0) {
                         elapsed -= cadence;
                     }
                 }
