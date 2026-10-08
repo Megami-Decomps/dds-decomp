@@ -8,6 +8,7 @@ struct ItfMesSub;
 struct MenuList;
 struct MenuListNode;
 typedef struct MantraPanelPool MantraPanelPool;
+struct MantraDrawPool;
 
 typedef struct MtrSelectionState {
     s16 state;
@@ -171,7 +172,7 @@ typedef struct MantraMenuWork {
     u8 unk9B5;
     u16 unk9B6;
     MtrEquipState equip;
-    u32 selectionController;
+    struct MantraDrawPool *selectionController;
 } MantraMenuWork;
 
 /* func_00286E98 allocates and clears exactly 0xC08 bytes. The task keeps
