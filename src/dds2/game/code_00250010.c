@@ -74,8 +74,13 @@ typedef struct EvtRuntimeChild {
  * EvtRuntime.frameGroup selects one of these entries, not a separate list. */
 typedef struct EvtRuntimeGroup {
     s32 type;
-    u8 value04;
-    u8 pad05[3];
+    union {
+        struct {
+            u8 value04;
+            u8 pad05[3];
+        };
+        s32 setterId;
+    };
     s32 value08;
     u8 pad0C[4];
     EffWorldNode *info; /* 0x10 */
@@ -108,8 +113,7 @@ typedef union EvtFrameRange {
         u16 unk02;
     } f;
 } EvtFrameRange;
-/* Native viewer runtime: dialogs, task polls and file writers consume this same
- * record. The recovered extent includes the trailing serialized metadata word. */
+/* Native 0x24BC-byte viewer runtime shared by dialogs, task polls and file writers. */
 typedef struct EvtRuntime {
     u8 pad0000[4];
     u32 flags; /* 0x04 */
@@ -158,7 +162,17 @@ typedef struct EvtRuntime {
     s32 messageField;
     s32 compareField; /* 0x2394 */
     s32 fieldIndex; /* 0x2398: selected column of the motion editor row */
-    u8 pad239C[0x2C];
+    u8 pad239C[4];
+    s32 floatSelection; /* 0x23A0 */
+    s32 floatEditMode; /* 0x23A4 */
+    f32 floatEditX; /* 0x23A8 */
+    f32 floatEditY; /* 0x23AC */
+    f32 savedFloatEditX; /* 0x23B0 */
+    f32 savedFloatEditY; /* 0x23B4 */
+    u8 savedOverlayFlag; /* 0x23B8 */
+    u8 pad23B9[3];
+    s32 horizontalOffset; /* 0x23BC */
+    u8 pad23C0[8];
     s32 tableColumn; /* 0x23C8: index within selected table row */
     u8 pad23CC[0x14];
     s32 selectedEntry; /* 0x23E0 */
@@ -178,6 +192,15 @@ typedef struct EvtRuntime {
     s32 pendingResource; /* 0x242C */
     u8 pad2430[0xC];
     s32 headerMetadata; /* 0x243C: fourth emitted header word */
+    s32 titleStreamWaitFrames; /* 0x2440 */
+    u8 pad2444[0x54];
+    s32 voicePending; /* 0x2498 */
+    s32 voiceMessage; /* 0x249C */
+    s32 unk24A0;
+    u8 pad24A4[0xC];
+    s32 commandStart; /* 0x24B0 */
+    u8 pad24B4[4];
+    s32 curveComponent; /* 0x24B8 */
 } EvtRuntime;
 extern s32 effUpdateCh72Params(void);
 extern s32 effEventAdvanceBlurTemplateSetup(void);
@@ -208,6 +231,7 @@ typedef struct EvtPad {
     s8 unk2B; /* 0x2B: coarse increase in the property editor */
     s8 apply;   /* 0x2C */
     s8 unk2D;
+    u8 pad2E[0x12]; /* Complete two-bank, two-port, 16-input backing. */
 } EvtPad;
 
 extern EvtPad D_0037F510;
@@ -2047,7 +2071,213 @@ INCLUDE_ASM(const s32, "game/code_00250010", func_00255818);
 void func_002560A8(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_002560B0);
+typedef struct EvtFloatPanelRow {
+    u16 x;
+    u16 y;
+    s32 parameter;
+    const char *format;
+} EvtFloatPanelRow;
+
+/* This coordinate table is supplied by the ordinary data segment. */
+extern const u16 D_003C98C0[];
+extern const EvtFloatPanelRow D_003C98C8[4];
+extern char D_00437728[];
+extern char D_00437750[];
+extern char D_00437758[];
+extern char D_00437760[];
+extern char D_004375D0[];
+extern u8 D_00438A34;
+extern f32 D_00438A48;
+extern f32 D_00438A4C;
+extern void func_0023E320(s32 vectorSlot, f32 x, f32 y);
+
+/* Draw the XY/overlay editor; cancel restores the captured values and flag. */
+s32 func_002560B0(s32 x, s32 y, EvtRuntime *runtime) {
+    s32 list;
+    EvtRuntimeGroup *group;
+    const EvtFloatPanelRow *row;
+    s32 i;
+    s32 status = 0;
+
+    group = runtime->frameGroup;
+    list = sdfCreateResetPacketList();
+    evtDrawMenuFrame((u32)list, x + runtime->horizontalOffset + 0x60, y,
+                     0xF, 6, 0, 1, (u8 *)runtime, NULL, func_002560A8);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface,
+                                     (SdfListHead *)list);
+
+    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+        0x8500 + (runtime->horizontalOffset << 4),
+        D_003C98C0[runtime->floatSelection], 0xFF0080, 0, D_00437728));
+    row = D_003C98C8;
+    i = 0;
+    do {
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+            0x85C0 + (runtime->horizontalOffset << 4), row->y, 0xFF0080,
+            row->parameter, row->format));
+        ++row;
+        ++i;
+    } while (i != 4);
+
+    {
+        s32 valueX = 0x8B00 + (runtime->horizontalOffset << 4);
+        s32 style = runtime->floatEditMode == 1 && runtime->floatSelection == 0 ? 6 : 0;
+
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+            valueX, 0x7A80, 0xFF0080, style, D_00437750,
+            runtime->floatEditX));
+    }
+    {
+        s32 valueX = 0x8B00 + (runtime->horizontalOffset << 4);
+        s32 style = runtime->floatEditMode == 1 && runtime->floatSelection == 1 ? 6 : 0;
+
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+            valueX, 0x7AE0, 0xFF0080, style, D_00437758,
+            runtime->floatEditY));
+    }
+    {
+        s32 valueX = 0x8B00 + (runtime->horizontalOffset << 4);
+        s32 style = runtime->floatEditMode == 1 && runtime->floatSelection == 2 ? 6 : 0;
+        const char *toggleText;
+        if (D_00438A34 == 0) {
+            toggleText = D_00437760;
+        } else {
+            toggleText = D_004375D0;
+        }
+
+        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(
+            valueX, 0x7BA0, 0xFF0080, style, toggleText));
+    }
+
+    if (runtime->actionMode != 0x13) {
+        return status;
+    }
+    {
+        if (D_0037F510.apply < 0) {
+            if (runtime->floatEditMode == 0) {
+                return 1;
+            }
+        } else if (D_0037F510.confirm < 0) {
+            if (runtime->floatEditMode == 0) {
+                runtime->floatEditMode = 1;
+            } else if (runtime->floatEditMode == 1) {
+                runtime->floatEditMode = 0;
+            }
+        } else if (D_0037F510.cancel < 0) {
+            if (runtime->floatEditMode == 1) {
+                runtime->floatEditMode = 0;
+            } else {
+                status = -1;
+            }
+        } else if (D_0037F510.incTen & 2) {
+            if (runtime->floatEditMode == 0) {
+                if (runtime->floatSelection < 2) {
+                    runtime->floatSelection++;
+                } else {
+                    runtime->floatSelection = 0;
+                }
+            } else if (runtime->floatEditMode == 1) {
+                switch (runtime->floatSelection) {
+                case 0:
+                    runtime->floatEditX += 0.1f;
+                    break;
+                case 1:
+                    runtime->floatEditY += 0.1f;
+                    break;
+                }
+            }
+        } else if (D_0037F510.decTen & 2) {
+            if (runtime->floatEditMode == 0) {
+                if (runtime->floatSelection > 0) {
+                    runtime->floatSelection--;
+                } else {
+                    runtime->floatSelection = 2;
+                }
+            } else if (runtime->floatEditMode == 1) {
+                switch (runtime->floatSelection) {
+                case 0:
+                    runtime->floatEditX -= 0.1f;
+                    break;
+                case 1:
+                    runtime->floatEditY -= 0.1f;
+                    break;
+                }
+            }
+        } else if (D_0037F510.incOne & 2) {
+            if (runtime->floatEditMode == 1) {
+                if (runtime->floatSelection == 0) {
+                    runtime->floatEditX += 0.01f;
+                } else if (runtime->floatSelection == 1) {
+                    runtime->floatEditY += 0.01f;
+                } else if (runtime->floatSelection == 2) {
+                    D_00438A34 ^= 1;
+                }
+            }
+        } else if (D_0037F510.decOne & 2) {
+            if (runtime->floatEditMode == 1) {
+                if (runtime->floatSelection == 0) {
+                    runtime->floatEditX -= 0.01f;
+                } else if (runtime->floatSelection == 1) {
+                    runtime->floatEditY -= 0.01f;
+                } else if (runtime->floatSelection == 2) {
+                    D_00438A34 ^= 1;
+                }
+            }
+        } else if (D_0037F510.unk2B != 0) {
+            runtime->horizontalOffset += 8;
+        } else if (D_0037F510.unk29 != 0) {
+            runtime->horizontalOffset -= 8;
+        }
+
+        switch (group->value1E) {
+        case 0:
+            break;
+        case 1: {
+            f32 currentX = runtime->floatEditX;
+            f32 currentY = runtime->floatEditY;
+
+            D_00438A48 = currentX;
+            D_00438A4C = currentY;
+            func_0023E320(group->setterId, currentX, currentY);
+            break;
+        }
+        case 2:
+            func_0023E320(group->setterId, runtime->floatEditX,
+                          runtime->floatEditY);
+            break;
+        case 3:
+            func_0023E320(group->setterId, runtime->floatEditX,
+                          runtime->floatEditY);
+            break;
+        }
+
+        if (status == -1) {
+            switch (group->value1E) {
+            case 0:
+                break;
+            case 1: {
+                f32 savedX = runtime->savedFloatEditX;
+                f32 savedY = runtime->savedFloatEditY;
+
+                D_00438A48 = savedX;
+                D_00438A4C = savedY;
+                func_0023E320(group->setterId, savedX, savedY);
+                break;
+            }
+            case 2:
+                func_0023E320(group->setterId, runtime->savedFloatEditX,
+                              runtime->savedFloatEditY);
+                break;
+            case 3:
+                func_0023E320(group->setterId, runtime->savedFloatEditX,
+                              runtime->savedFloatEditY);
+                break;
+            }
+            D_00438A34 = runtime->savedOverlayFlag;
+        }
+    }
+    return status;
+}
 
 /* Draw command text for row 0 or 1; null texts and other rows emit nothing. */
 void evtDrawOptionalPromptText(s32 list, s32 x, s32 y, s32 kind, EvtRuntime *ctx) {
