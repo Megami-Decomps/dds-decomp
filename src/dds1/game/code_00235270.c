@@ -169,9 +169,18 @@ typedef struct EvtRuntime {
     char **itemNames; /* 0x22C8 */
     s32 charCol; /* 0x22CC */
     s32 charRow; /* 0x22D0 */
-    char nameStorage[32]; /* 0x22D4 */
-    s32 entryCursor; /* 0x22F4 */
-    s32 entryFirst;  /* 0x22F8 */
+    /* Keyboard/list state overlaps the command event name used by 0023E7F8. */
+    union {
+        struct {
+            char nameStorage[32]; /* 0x22D4 */
+            s32 entryCursor; /* 0x22F4 */
+            s32 entryFirst; /* 0x22F8 */
+        } editor;
+        struct {
+            u8 pad00[0x14];
+            char eventName[0x14]; /* 0x22E8 */
+        } command;
+    } nameState;
     s32 frameColumn; /* 0x22FC: column cursor within the selected frame row */
     s32 frameFirst; /* 0x2300 */
     s32 frameCursor; /* 0x2304 */
@@ -811,25 +820,25 @@ s32 func_00236828(s32 x, s32 y, EvtRuntime *ctx) {
             switch (key) {
             case 'B':
             case 'S':
-                for (length = 0; ctx->nameStorage[length] != 0; length++) {
+                for (length = 0; ctx->nameState.editor.nameStorage[length] != 0; length++) {
                 }
                 if (length > 0) {
-                    ctx->nameStorage[length - 1] = 0;
+                    ctx->nameState.editor.nameStorage[length - 1] = 0;
                 }
                 break;
             case 'K':
             case 'O':
-                if (ctx->nameStorage[0] != 0) {
+                if (ctx->nameState.editor.nameStorage[0] != 0) {
                     return 1;
                 }
                 break;
             }
         } else {
-            for (length = 0; ctx->nameStorage[length] != 0; length++) {
+            for (length = 0; ctx->nameState.editor.nameStorage[length] != 0; length++) {
             }
             if (length < 8) {
-                ctx->nameStorage[length] = key;
-                ctx->nameStorage[length + 1] = 0;
+                ctx->nameState.editor.nameStorage[length] = key;
+                ctx->nameState.editor.nameStorage[length + 1] = 0;
             }
         }
     }
@@ -988,7 +997,7 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *work) {
     s32 count;
     s32 shown;
 
-    evtDrawMenuFrame(packets, x, y, 8, 0x1D, work->entryFirst, work->entryCount, (u8 *)work, 0, func_00237130);
+    evtDrawMenuFrame(packets, x, y, 8, 0x1D, work->nameState.editor.entryFirst, work->entryCount, (u8 *)work, 0, func_00237130);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)packets);
     if (work->actionMode != 4) {
         return 0;
@@ -1001,7 +1010,7 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *work) {
     if (count < 0x1D) {
         shown = count;
     }
-    return kwlnStepTwoListCursors(0, 1, count, 1, shown, 0, &work->entryFirst, 0, &work->entryCursor);
+    return kwlnStepTwoListCursors(0, 1, count, 1, shown, 0, &work->nameState.editor.entryFirst, 0, &work->nameState.editor.entryCursor);
 }
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00237428);
@@ -3098,7 +3107,140 @@ void evtEmitGroupTypeTwentyFivePayloads(s32 output, EvtRuntime *runtime) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023E7F8);
+extern char *sdfDevGetPathBuffer(void);
+extern u8 sdfPfsDebugMode;
+extern s32 func_0030E8F0(const char *path, s32 flags, ...);
+extern s32 func_0030EB78(s32 fd);
+extern s32 func_00310A68(const char *path, s32 mode);
+extern void func_0023D9D8(s32 output, s32 mode, EvtRuntime *runtime);
+extern char D_003BC350[];
+extern char D_003BC358[];
+
+s32 func_0023E7F8(s32 numberedPaths, EvtRuntime *runtime) {
+    char pm2Path[0x40];
+    char pm3Path[0x40];
+    s32 pm2File;
+    s32 pm3File;
+    s32 section;
+    EvtRuntimeGroup *group;
+
+    for (group = runtime->groups; group != NULL; group = group->next) {
+    }
+    if (numberedPaths == 0) {
+        if (sdfPfsDebugMode != 0) {
+            func_003014F0(pm2Path, "pfs0:/event/pmvtool/%s.PM2",
+                runtime->nameState.command.eventName);
+            func_003014F0(pm3Path, "pfs0:/event/pmvtool/%s.PM3",
+                runtime->nameState.command.eventName);
+        } else {
+            func_003014F0(pm2Path, "%sevent/pmvtool/%s.PM2",
+                sdfDevGetPathBuffer(), runtime->nameState.command.eventName);
+            func_003014F0(pm3Path, "%sevent/pmvtool/%s.PM3",
+                sdfDevGetPathBuffer(), runtime->nameState.command.eventName);
+        }
+    } else {
+        if (sdfPfsDebugMode != 0) {
+            func_003014F0(pm2Path,
+                "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
+                D_003BBE78 / 10U * 10U, D_003BBE78, D_003BBE78,
+                D_003BBE7A, D_003BBE78, D_003BBE7A);
+            func_003014F0(pm3Path,
+                "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
+                D_003BBE78 / 10U * 10U, D_003BBE78, D_003BBE78,
+                D_003BBE7A, D_003BBE78, D_003BBE7A);
+        } else {
+            func_003014F0(pm2Path,
+                "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2",
+                sdfDevGetPathBuffer(), D_003BBE78 / 10U * 10U,
+                D_003BBE78, D_003BBE78, D_003BBE7A,
+                D_003BBE78, D_003BBE7A);
+            func_003014F0(pm3Path,
+                "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM3",
+                sdfDevGetPathBuffer(), D_003BBE78 / 10U * 10U,
+                D_003BBE78, D_003BBE78, D_003BBE7A,
+                D_003BBE78, D_003BBE7A);
+        }
+    }
+    if (sdfPfsDebugMode != 0) {
+        func_003003F0("hdd -> %s\n", pm2Path);
+        pm2File = func_0030E8F0(pm2Path, 0x602, 0x1B6);
+        pm3File = func_0030E8F0(pm3Path, 0x602, 0x1B6);
+    } else {
+        func_003003F0("pc -> %s\n", pm2Path);
+        pm2File = func_0030E8F0(pm2Path, 0x602);
+        pm3File = func_0030E8F0(pm3Path, 0x602);
+    }
+    if (pm2File < 0 || pm3File < 0) {
+        func_003003F0(D_003BC350);
+        return 0;
+    }
+
+    func_0023D9D8(pm2File, 2, runtime);
+    for (section = 0; section < 26; section++) {
+        switch (section) {
+        case 0:
+            evtWriteRuntimeHeaderValues(pm2File, runtime);
+            break;
+        case 1:
+            evtWriteFixedSizeEntries(pm2File, runtime);
+            break;
+        case 4:
+            func_0023DFA8(pm2File, 2, runtime);
+            break;
+        case 5:
+            evtWriteGroupHeader(pm2File, runtime);
+            break;
+        case 13:
+            evtCopyRuntimeChildPayloadsToBuffer(pm2File, runtime);
+            break;
+        case 14:
+            evtEmitGroupTypeElevenPayloads(pm2File, runtime);
+            break;
+        case 15:
+            evtEmitGroupTypeThirteenPayloads(pm2File, runtime);
+            break;
+        case 16:
+            evtEmitGroupTypeFourteenPayloads(pm2File, runtime);
+            break;
+        case 17:
+            evtEmitGroupTypeFifteenPayloads(pm2File, runtime);
+            break;
+        case 18:
+            evtEmitGroupTypeSixteenPayloads(pm2File, runtime);
+            break;
+        case 19:
+            evtEmitGroupTypeSeventeenPayloads(pm2File, runtime);
+            break;
+        case 20:
+            evtEmitGroupTypeTwentyThreePayloads(pm2File, runtime);
+            break;
+        case 24:
+            evtEmitGroupTypeTwentySevenPayloads(pm2File, runtime);
+            break;
+        case 21:
+            evtWriteGroupMetadata(pm2File, runtime);
+            func_003003F0("save object table\n");
+            break;
+        case 25:
+            evtEmitGroupTypeTwentyFivePayloads(pm2File, runtime);
+            func_003003F0("save rain data\n");
+            break;
+        }
+    }
+    func_0030EB78(pm2File);
+    func_00310A68(D_003BC358, 0);
+
+    func_0023D9D8(pm3File, 3, runtime);
+    for (section = 0; section < 26; section++) {
+        if (section == 4) {
+            func_0023DFA8(pm3File, 3, runtime);
+        }
+    }
+    func_0030EB78(pm3File);
+    func_003003F0("save pm3 file\n");
+    func_00310A68(D_003BC358, 0);
+    return 1;
+}
 
 /* A row table switches between 0x10-byte and 0x2C-byte entry formats. */
 typedef struct EvtRowTable {
