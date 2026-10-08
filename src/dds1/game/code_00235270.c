@@ -42,7 +42,7 @@ extern void fldSetFadeTarget(s32 area, s32 value, s32 duration);
 extern void func_00132010(void);
 extern void fldSelectDisplayBuffer(s32 id);
 extern void func_0012AEB0(void);
-extern void sdfAppendPacket(s32 list, u32 packet);
+extern void sdfAppendPacket(SdfListHead *list, u32 packet);
 extern void sndStartTrackDefault(s32 track);
 extern void sndStartTrackExtended(s32 track);
 extern void func_002E9758(s32 sequence);
@@ -96,8 +96,13 @@ typedef struct EvtRuntimeChild {
  * EvtRuntime.frameGroup selects one of these entries, not a separate list. */
 typedef struct EvtRuntimeGroup {
     s32 type;
-    u8 metadataFlag;  /* 0x04: included in serialized group metadata */
-    u8 pad05[3];
+    union {
+        struct {
+            u8 metadataFlag; /* 0x04: included in serialized group metadata */
+            u8 pad05[3];
+        };
+        s32 setterId; /* 0x04: slot index used by the XY editor */
+    };
     union {
         s32 word;      /* 0x08: full value for group type 2 */
         u16 shortValue; /* 0x08: truncated value in metadata */
@@ -133,8 +138,7 @@ typedef union EvtFrameRange {
         u16 unk02;
     } f;
 } EvtFrameRange;
-/* Native viewer runtime: dialogs, task polls and file writers consume this same
- * record. The recovered extent includes the trailing serialized metadata word. */
+/* Native 0x2490-byte viewer runtime shared by dialogs, task polls and file writers. */
 typedef struct EvtRuntime {
     u8 pad00[4];
     u32 flags; /* 0x04 */
@@ -183,7 +187,17 @@ typedef struct EvtRuntime {
     s32 messageField;
     s32 compareField;
     s32 fieldIndex; /* 0x2398: selected column of the motion editor row */
-    u8 pad239C[0x2C];
+    u8 pad239C[4];
+    s32 floatSelection; /* 0x23A0 */
+    s32 floatEditMode; /* 0x23A4 */
+    f32 floatEditX; /* 0x23A8 */
+    f32 floatEditY; /* 0x23AC */
+    f32 savedFloatEditX; /* 0x23B0 */
+    f32 savedFloatEditY; /* 0x23B4 */
+    u8 savedOverlayFlag; /* 0x23B8 */
+    u8 pad23B9[3];
+    s32 horizontalOffset; /* 0x23BC */
+    u8 pad23C0[8];
     s32 tableColumn; /* 0x23C8 */
     u8 pad23CC[0x14];
     s32 selectedEntry; /* 0x23E0 */
@@ -199,6 +213,7 @@ typedef struct EvtRuntime {
     s32 pendingResource; /* 0x242C */
     u8 pad2430[0xC];
     s32 headerMetadata; /* 0x243C: fourth serialized header word */
+    u8 pad2440[0x50]; /* Native DDS1 allocation ends at 0x2490. */
 } EvtRuntime;
 
 typedef struct {
@@ -352,11 +367,11 @@ void evtDrawMenuFrame(u32 list, s32 x, s32 y, s32 width, s32 rows, s32 first, s3
         textY = ((y - 10) << 3) + 0x7900;
         textX = ((x + 5 * width + 6) << 4) + 0x7000;
         if (first > 0) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(textX, textY, 0xFEFFFF, 6, D_003BC048));
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(textX, textY, 0xFEFFFF, 6, D_003BC048));
         }
         textY = ((y + 12 * rows - 2) << 3) + 0x7900;
         if (index < total) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(textX, textY, 0xFEFFFF, 6, D_003BC050));
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(textX, textY, 0xFEFFFF, 6, D_003BC050));
         }
     }
     D_003BC040++;
@@ -365,7 +380,7 @@ void evtDrawMenuFrame(u32 list, s32 x, s32 y, s32 width, s32 rows, s32 first, s3
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADDE0);
 
 s32 evtAppendValueChangeDebugLabel(s32 list, s32 x, s32 y) {
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
+    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
 
@@ -388,27 +403,47 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE50);
 void func_002357B8(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     switch (index) {
     case 0:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 4, D_003ADE00,
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 4, D_003ADE00,
                                                                  ctx->floatValue));
         return;
     case 2:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE10));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE10));
         return;
     case 3:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE28));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE28));
         return;
     case 4:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
         return;
     case 5:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
         break;
     }
 }
 
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 sdfCreateResetPacketList(void);
-extern s8 D_00324510[];
+typedef struct EvtPad {
+    u8 pad00[0x20];
+    s8 syncKey; /* 0x20 */
+    s8 confirm; /* 0x21 */
+    u8 pad22;
+    s8 cancel;  /* 0x23 */
+    s8 decOne;  /* 0x24 */
+    s8 incOne;  /* 0x25 */
+    s8 decTen;  /* 0x26 */
+    s8 incTen;  /* 0x27 */
+    u8 decHun;  /* 0x28 */
+    s8 unk29; /* 0x29: coarse decrease in the property editor */
+    u8 incHun;  /* 0x2A */
+    s8 unk2B; /* 0x2B: coarse increase in the property editor */
+    s8 apply;   /* 0x2C */
+    s8 unk2D;
+    u8 pad2E[0x12]; /* Complete two-bank, two-port, 16-input backing. */
+} EvtPad;
+
+extern EvtPad D_00324510;
+
 extern void func_002357B8();
 
 /* Edit the bounded float only in mode 8. Confirm precedes cancel; coarse steps
@@ -423,21 +458,21 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->actionMode != 8) {
         return 0;
     }
-    if (D_00324510[0x21] < 0) {
+    if (D_00324510.confirm < 0) {
         return 1;
     }
-    if (D_00324510[0x23] < 0) {
+    if (D_00324510.cancel < 0) {
         return -1;
     }
     step = 0.0f;
-    if (D_00324510[0x24] & 2) {
+    if (D_00324510.decOne & 2) {
         step = -0.1f;
-    } else if (D_00324510[0x25] & 2) {
+    } else if (D_00324510.incOne & 2) {
         step = 0.1f;
     }
-    if (D_00324510[0x26] & 2) {
+    if (D_00324510.decTen & 2) {
         step = -1.0f;
-    } else if (D_00324510[0x27] & 2) {
+    } else if (D_00324510.incTen & 2) {
         step = 1.0f;
     }
     ctx->floatValue += step;
@@ -451,7 +486,7 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
 }
 
 s32 evtDrawValueChangeNoticeRow(s32 list, s32 x, s32 y) {
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
+    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
 
@@ -464,19 +499,19 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003ADE78);
 void evtDrawValueChangeInstructionRow(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     switch (index) {
     case 0:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 4, D_003BC058, ctx->value));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 4, D_003BC058, ctx->value));
         return;
     case 2:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE78));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE78));
         return;
     case 3:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " U,D = VALUE-+10"));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " U,D = VALUE-+10"));
         return;
     case 4:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
         return;
     case 5:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
         break;
     }
 }
@@ -491,22 +526,22 @@ s32 evtUpdateValueChangeDialog(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->actionMode != 7) {
         return 0;
     }
-    if (D_00324510[0x21] < 0) {
+    if (D_00324510.confirm < 0) {
         return 1;
     }
-    if (D_00324510[0x23] < 0) {
+    if (D_00324510.cancel < 0) {
         return -1;
     }
-    if (D_00324510[0x24] & 2) {
+    if (D_00324510.decOne & 2) {
         step = -1;
-    } else if (D_00324510[0x25] & 2) {
+    } else if (D_00324510.incOne & 2) {
         step = 1;
     } else {
         step = 0;
     }
-    if (D_00324510[0x26] & 2) {
+    if (D_00324510.decTen & 2) {
         step = -10;
-    } else if (D_00324510[0x27] & 2) {
+    } else if (D_00324510.incTen & 2) {
         step = 10;
     }
     ctx->value += step;
@@ -520,35 +555,35 @@ s32 evtUpdateValueChangeDialog(s32 x, s32 y, EvtRuntime *ctx) {
 }
 
 s32 mnuDrawFrameChangeLabel(s32 target, s32 x, s32 y) {
-    sdfAppendPacket(target, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "FRAME CHANGE."));
+    sdfAppendPacket((SdfListHead *)target, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "FRAME CHANGE."));
     return 2;
 }
 
 void evtViewerDrawFrameChangeRow(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx) {
     switch (index) {
     case 0:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 4, D_003BC058, ctx->value));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 4, D_003BC058, ctx->value));
         return;
     case 2:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " L,R = FRMAE-+"));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " L,R = FRMAE-+"));
         return;
     case 3:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " U,D = FRAME-+10"));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " U,D = FRAME-+10"));
         return;
     case 4:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "L1,R1= FRAME-+100"));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "L1,R1= FRAME-+100"));
         return;
     case 5:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
         return;
     case 6:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
         return;
     case 7:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " RL  = NOW FRAME"));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " RL  = NOW FRAME"));
         return;
     case 8:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " ST  = CAMERA FOCUS"));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " ST  = CAMERA FOCUS"));
         break;
     case 9:
         break;
@@ -565,30 +600,30 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->actionMode != 6) {
         return 0;
     }
-    if (D_00324510[0x21] < 0) {
+    if (D_00324510.confirm < 0) {
         return 1;
     }
-    if (D_00324510[0x23] < 0) {
+    if (D_00324510.cancel < 0) {
         return -1;
     }
-    if (D_00324510[0x24] & 2) {
+    if (D_00324510.decOne & 2) {
         step = -1;
-    } else if (D_00324510[0x25] & 2) {
+    } else if (D_00324510.incOne & 2) {
         step = 1;
     } else {
         step = 0;
     }
-    if (D_00324510[0x26] & 2) {
+    if (D_00324510.decTen & 2) {
         step = -10;
-    } else if (D_00324510[0x27] & 2) {
+    } else if (D_00324510.incTen & 2) {
         step = 10;
     }
-    if (D_00324510[0x28] & 2) {
+    if (D_00324510.decHun & 2) {
         step = -100;
-    } else if (D_00324510[0x2A] & 2) {
+    } else if (D_00324510.incHun & 2) {
         step = 100;
     }
-    if (D_00324510[0x20] < 0) {
+    if (D_00324510.syncKey < 0) {
         step = ctx->curFrame - ctx->value;
     }
     ctx->value += step;
@@ -598,7 +633,7 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->value >= ctx->valueMax) {
         ctx->value = ctx->valueMax;
     }
-    if (D_00324510[0x2C] != 0) {
+    if (D_00324510.apply != 0) {
         if (ctx->curFrame != ctx->value) {
             ctx->curFrame = ctx->value;
             evtViewerDispatchFlagMode(ctx);
@@ -648,13 +683,13 @@ void evtDrawProjectCommandRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx
             style = 0;
         }
         if (index == 9) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
                 D_003BC080, labels[index], primaryOptions[mnuCampGetPrimaryOption(ctx)]));
         } else if (index == 10) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
                 D_003BC080, labels[index], secondaryOptions[mnuCampGetSecondaryOption(ctx)]));
         } else {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
                 D_003BC088, labels[index]));
         }
     }
@@ -663,14 +698,14 @@ void evtDrawProjectCommandRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx
 extern void func_00237130();
 extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32, s32 *, s32 *, s32 *, s32 *);
 
-s32 mnuDrawInfoWindowA(s32 x, s32 y, u8 *work) {
+s32 mnuDrawInfoWindowA(s32 x, s32 y, EvtRuntime *work) {
     u32 packets = sdfCreateResetPacketList();
-    evtDrawMenuFrame(packets, x, y, 0xF, 0xB, 0, 0xB, work, 0, evtDrawProjectCommandRow);
+    evtDrawMenuFrame(packets, x, y, 0xF, 0xB, 0, 0xB, (u8 *)work, 0, evtDrawProjectCommandRow);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)packets);
-    if (((EvtRuntime *)work)->actionMode != 1) {
+    if (work->actionMode != 1) {
         return 0;
     }
-    return kwlnStepTwoListCursors(0, 1, 0xB, 1, 0xB, 0, 0, 0, (s32 *)(work + 0x22A8));
+    return kwlnStepTwoListCursors(0, 1, 0xB, 1, 0xB, 0, 0, 0, &work->inputA);
 }
 
 extern char D_003BC090[];
@@ -683,7 +718,7 @@ s32 evtDrawStringEntry(s32 output, s32 x, s32 y, EvtRuntime *work) {
     if (work->title == 0) {
         return 0;
     }
-    sdfAppendPacket(output, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, work->title));
+    sdfAppendPacket((SdfListHead *)output, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, work->title));
     return 2;
 }
 
@@ -697,7 +732,7 @@ void evtDrawSelectableTextRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *wor
         } else {
             color = 0;
         }
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC090, work->itemNames[index]));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC090, work->itemNames[index]));
     }
 }
 
@@ -723,7 +758,7 @@ s32 evtUpdateTextSelectionDialog(s32 x, s32 y, EvtRuntime *work) {
 s32 evtDrawInputValueRow(s32 list, s32 x, s32 y, u8 *ctx) {
     char text[16];
     func_003014F0(text, D_003BC098, (s32)ctx + 0x22D4, (s32)ctx + 0x22E0);
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, text));
+    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, text));
     return 2;
 }
 
@@ -746,7 +781,7 @@ void evtDrawKeyboardRow(s32 list, s32 xPosition, s32 y, s32 row, EvtRuntime *wor
         drawX = x;
         x += 0xC0;
         i++;
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(drawX, y, 0xFEFFFF, color, D_003BC0A0, ch));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(drawX, y, 0xFEFFFF, color, D_003BC0A0, ch));
     } while (i < 0xB);
 }
 
@@ -810,7 +845,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE0D8);
 s32 evtDrawEventFileNameRow(s32 list, s32 x, s32 y) {
     char text[32];
     func_003014F0(text, "[E%3d_%03d.PM1+2+3]", D_003BBE78, D_003BBE7A);
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, text));
+    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, text));
     return 2;
 }
 
@@ -822,27 +857,27 @@ void evtDrawEventCutSelectRow(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ctx
     }
     switch (index) {
     case 0:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC0A8));
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, D_003BC0B0, D_003BBE78));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC0A8));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, D_003BC0B0, D_003BBE78));
         return;
     case 1:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC0B8));
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, D_003BC0C0, D_003BBE7A));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC0B8));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, D_003BC0C0, D_003BBE7A));
         return;
     case 3:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " L,R = NO-+"));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " L,R = NO-+"));
         return;
     case 4:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " U,D = SELECT"));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " U,D = SELECT"));
         return;
     case 5:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003ADE40));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003ADE40));
         return;
     case 6:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003ADE50));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003ADE50));
         return;
     case 7:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " RL  = SET 600"));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " RL  = SET 600"));
         break;
     }
 }
@@ -857,13 +892,13 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->actionMode != 9) {
         return 0;
     }
-    if (D_00324510[0x26] < 0) {
+    if (D_00324510.decTen < 0) {
         ctx->charRow ^= 1;
     }
-    if (D_00324510[0x27] < 0) {
+    if (D_00324510.incTen < 0) {
         ctx->charRow ^= 1;
     }
-    if (D_00324510[0x24] & 2) {
+    if (D_00324510.decOne & 2) {
         switch (ctx->charRow) {
         case 0:
             if (D_003BBE78 >= 0x1F5) {
@@ -877,7 +912,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
             break;
         }
     }
-    if (D_00324510[0x25] & 2) {
+    if (D_00324510.incOne & 2) {
         switch (ctx->charRow) {
         case 0:
             if (D_003BBE78 < 0x3E7) {
@@ -891,7 +926,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
             break;
         }
     }
-    if (D_00324510[0x28] & 2) {
+    if (D_00324510.decHun & 2) {
         switch (ctx->charRow) {
         case 0:
             if (D_003BBE78 >= 0x1F5) {
@@ -915,7 +950,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
             break;
         }
     }
-    if (D_00324510[0x2A] & 2) {
+    if (D_00324510.incHun & 2) {
         switch (ctx->charRow) {
         case 0:
             D_003BBE78 += 100;
@@ -925,13 +960,13 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
             break;
         }
     }
-    if (D_00324510[0x21] < 0) {
+    if (D_00324510.confirm < 0) {
         return 1;
     }
-    if (D_00324510[0x23] < 0) {
+    if (D_00324510.cancel < 0) {
         return -1;
     }
-    if (D_00324510[0x20] < 0) {
+    if (D_00324510.syncKey < 0) {
         D_003BBE78 = 0x258;
     }
     return 0;
@@ -940,25 +975,25 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
 void evtDrawSelectedEntryLabel(s32 list, s32 *sel, s32 x, s32 unused, u8 *base) {
     x += 0x6C0;
     kwlnDrawSpriteCell(list, (x - 0x7000) >> 4, 0x3C, 0x1C, 3);
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, 0x7AE0, 0xFEFFFF, 0xE, D_003BC0C8));
+    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, 0x7AE0, 0xFEFFFF, 0xE, D_003BC0C8));
     if (sel[2] >= 0) {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x3C0, 0x7AE0, 0xFEFFFF, 0, D_003BC088, base + sel[2] * 32 + 0x24));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + 0x3C0, 0x7AE0, 0xFEFFFF, 0, D_003BC088, base + sel[2] * 32 + 0x24));
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00237130);
 
-s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, u8 *work) {
+s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *work) {
     u32 packets = sdfCreateResetPacketList();
     s32 count;
     s32 shown;
 
-    evtDrawMenuFrame(packets, x, y, 8, 0x1D, ((EvtRuntime *)work)->entryFirst, ((EvtRuntime *)work)->entryCount, work, 0, func_00237130);
+    evtDrawMenuFrame(packets, x, y, 8, 0x1D, work->entryFirst, work->entryCount, (u8 *)work, 0, func_00237130);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)packets);
-    if (((EvtRuntime *)work)->actionMode != 4) {
+    if (work->actionMode != 4) {
         return 0;
     }
-    count = ((EvtRuntime *)work)->entryCount;
+    count = work->entryCount;
     if (count == 0) {
         return 0;
     }
@@ -966,7 +1001,7 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, u8 *work) {
     if (count < 0x1D) {
         shown = count;
     }
-    return kwlnStepTwoListCursors(0, 1, count, 1, shown, 0, (s32 *)(work + 0x22F8), 0, (s32 *)(work + 0x22F4));
+    return kwlnStepTwoListCursors(0, 1, count, 1, shown, 0, &work->entryFirst, 0, &work->entryCursor);
 }
 
 INCLUDE_ASM(const s32, "game/code_00235270", func_00237428);
@@ -1013,7 +1048,7 @@ s32 evtDrawFrameListRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
         if (node != NULL) {
             func_002375D8(list, x, y, color, node, ctx);
         } else {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color ? color : 8, "----- NEW FRAME -----"));
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color ? color : 8, "----- NEW FRAME -----"));
         }
     }
 }
@@ -1046,11 +1081,11 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
         shown = group->childCount + 1;
     }
     if (evtIsMenuTableEntryEnabled(&group->type) == 1) {
-        if (D_00324510[0x26] < 0) {
+        if (D_00324510.decTen < 0) {
             if (ctx->frameCursor + ctx->frameFirst == 0) {
                 return -4;
             }
-        } else if (D_00324510[0x27] < 0) {
+        } else if (D_00324510.incTen < 0) {
             count = 0;
             for (node = group->children; node != NULL; node = node->next) {
                 count++;
@@ -1063,10 +1098,10 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     result = kwlnStepTwoListCursors(0, columns, group->childCount + 1,
                                   columns, shown, NULL, &ctx->frameCursor,
                                   &ctx->frameColumn, &ctx->frameFirst);
-    if (D_00324510[0x20] < 0) {
+    if (D_00324510.syncKey < 0) {
         result = -2;
     }
-    if (D_00324510[0x2D] < 0) {
+    if (D_00324510.unk2D < 0) {
         result = -3;
     }
     return result;
@@ -1086,7 +1121,7 @@ void evtViewerDrawWorldNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ct
         color = 0;
     }
     if (index == 0) {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " -----------------------"));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, " -----------------------"));
         return;
     }
     count = 0;
@@ -1096,7 +1131,7 @@ void evtViewerDrawWorldNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ct
                 if (((char *)node->value) != NULL) {
                     count++;
                     if (count == index) {
-                        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC090, ((char *)node->value)));
+                        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC090, ((char *)node->value)));
                         return;
                     }
                 }
@@ -1157,21 +1192,21 @@ void evtViewerDrawPendingNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *
     if (slot >= 0) {
         node = dds3FindObjectChainNodeByName(dds3GetWorldObject(), ctx->entryName[slot]);
     }
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC240, index));
+    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC240, index));
     if (node != NULL) {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC248, ((char *)node->value)));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC248, ((char *)node->value)));
     } else {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, "   -----------------------"));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, "   -----------------------"));
     }
 }
 
 extern void evtViewerDrawPendingNodeRow();
 
 /* Draw the pending-node selector for group types 20/21; other types return -1. */
-s32 mnuDrawInfoWindowB(s32 x, s32 y, u8 *work) {
+s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *work) {
     u32 packets = sdfCreateResetPacketList();
     s32 rows;
-    switch (((EvtRuntime *)work)->frameGroup->type) {
+    switch (work->frameGroup->type) {
     case 20:
         rows = 2;
         break;
@@ -1181,12 +1216,12 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, u8 *work) {
     default:
         return -1;
     }
-    evtDrawMenuFrame(packets, x, y, 0x1C, rows, 0, rows, work, 0, evtViewerDrawPendingNodeRow);
+    evtDrawMenuFrame(packets, x, y, 0x1C, rows, 0, rows, (u8 *)work, 0, evtViewerDrawPendingNodeRow);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)packets);
-    if (((EvtRuntime *)work)->actionMode != 0xC) {
+    if (work->actionMode != 0xC) {
         return 0;
     }
-    return kwlnStepTwoListCursors(0, 1, rows, 1, rows, 0, 0, 0, (s32 *)(work + 0x22B8));
+    return kwlnStepTwoListCursors(0, 1, rows, 1, rows, 0, 0, 0, &work->inputB);
 }
 
 
@@ -1195,7 +1230,7 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, u8 *work) {
  * and its entry handle, returning two rows used. */
 s32 mnuDrawMessageMenuLabel(s32 list, s32 x, s32 y, EvtRuntime *work) {
     s32 count = itfMesGetEntryCount(work->windowContext->handle);
-    sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "MESSAGE MENU (MESMAX %3d)", count));
+    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "MESSAGE MENU (MESMAX %3d)", count));
     return 2;
 }
 
@@ -1245,13 +1280,13 @@ void evtDrawMessageDataRow(s32 list, s32 x, s32 y, u32 kind, EvtRuntime *ctx) {
         if (ctx->messageField != 0) {
             color = 0;
         }
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC058, ctx->value & 0xFFF));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC058, ctx->value & 0xFFF));
         if (ctx->windowContext->handle == -1) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "NONE MESDATA!!"));
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "NONE MESDATA!!"));
         } else if (itfMesGetWindowEntryItems(ctx->windowContext->handle, ctx->value & 0xFFF) == 0) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "(NORMAL)"));
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "(NORMAL)"));
         } else {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "(BRANCH)"));
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, color, "(BRANCH)"));
         }
         break;
     }
@@ -1260,20 +1295,20 @@ void evtDrawMessageDataRow(s32 list, s32 x, s32 y, u32 kind, EvtRuntime *ctx) {
         if (ctx->messageField != 1) {
             color = 0;
         }
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC258, names[(ctx->value >> 12) & 0xF]));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC258, names[(ctx->value >> 12) & 0xF]));
         break;
     }
     case 3:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE78));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE78));
         break;
     case 4:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " U,D = SELECT "));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " U,D = SELECT "));
         break;
     case 5:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
         break;
     case 6:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
         break;
     }
 }
@@ -1299,9 +1334,9 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
     field = ctx->messageField;
     if (field != 0) {
         if (field == 1) {
-            if (D_00324510[0x24] & 2) {
+            if (D_00324510.decOne & 2) {
                 branch = branch == 0 ? 0xA : branch - 1;
-            } else if (D_00324510[0x25] & 2) {
+            } else if (D_00324510.incOne & 2) {
                 branch = branch >= 0xA ? 0 : branch + 1;
             }
             ctx->value &= 0xFFF;
@@ -1309,9 +1344,9 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
         }
     } else {
         delta = 0;
-        if (D_00324510[0x24] & 2) {
+        if (D_00324510.decOne & 2) {
             delta = -1;
-        } else if (D_00324510[0x25] & 2) {
+        } else if (D_00324510.incOne & 2) {
             delta = 1;
         }
         number += delta;
@@ -1323,10 +1358,10 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
         }
         ctx->value = number | (branch << 12);
     }
-    if ((D_00324510[0x26] & 2) || (D_00324510[0x27] & 2)) {
+    if ((D_00324510.decTen & 2) || (D_00324510.incTen & 2)) {
         ctx->messageField = !field;
     }
-    if (D_00324510[0x21] < 0) {
+    if (D_00324510.confirm < 0) {
         handle = ctx->windowContext->handle;
         if (handle != -1) {
             if (branch == 0) {
@@ -1338,13 +1373,13 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
             }
         }
     }
-    return D_00324510[0x23] >= 0 ? 0 : -1;
+    return D_00324510.cancel >= 0 ? 0 : -1;
 }
 
 
 
 s32 mnuDrawCutFlagLabel(s32 target, s32 x, s32 y) {
-    sdfAppendPacket(target, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "CUTFLAG MENU"));
+    sdfAppendPacket((SdfListHead *)target, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "CUTFLAG MENU"));
     return 2;
 }
 
@@ -1359,24 +1394,24 @@ void evtDrawComparisonValueRow(s32 list, s32 x, s32 y, u32 index, EvtRuntime *ct
     switch (index) {
     case 0:
         flag = ctx->compareField != 0 ? 0 : 4;
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, flag, D_003BC258, labels[(ctx->value >> 12) & 0xF]));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, flag, D_003BC258, labels[(ctx->value >> 12) & 0xF]));
         return;
     case 1:
         flag = ctx->compareField != 1 ? 0 : 4;
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, flag, D_003BC058, ctx->value & 0xFFF));
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, flag, "  (CMP VALUE)"));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, flag, D_003BC058, ctx->value & 0xFFF));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + 0x600, y, 0xFEFFFF, flag, "  (CMP VALUE)"));
         return;
     case 3:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE78));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE78));
         return;
     case 4:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " U,D = SELECT "));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, " U,D = SELECT "));
         return;
     case 5:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE40));
         return;
     case 6:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003ADE50));
         break;
     }
 }
@@ -1401,9 +1436,9 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
     field = ctx->compareField;
     switch (field) {
     case 0:
-        if (D_00324510[0x24] & 2) {
+        if (D_00324510.decOne & 2) {
             branch = branch == 0 ? 0xA : branch - 1;
-        } else if (D_00324510[0x25] & 2) {
+        } else if (D_00324510.incOne & 2) {
             branch = branch >= 0xA ? 0 : branch + 1;
         }
         ctx->value &= 0xFFF;
@@ -1411,9 +1446,9 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
         break;
     case 1:
         delta = 0;
-        if (D_00324510[0x24] & 2) {
+        if (D_00324510.decOne & 2) {
             delta = -1;
-        } else if (D_00324510[0x25] & 2) {
+        } else if (D_00324510.incOne & 2) {
             delta = 1;
         }
         number += delta;
@@ -1426,13 +1461,13 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
         ctx->value = number | (branch << 12);
         break;
     }
-    if ((D_00324510[0x26] & 2) || (D_00324510[0x27] & 2)) {
+    if ((D_00324510.decTen & 2) || (D_00324510.incTen & 2)) {
         ctx->compareField = !field;
     }
-    if (D_00324510[0x21] < 0) {
+    if (D_00324510.confirm < 0) {
         return 1;
     }
-    return D_00324510[0x23] >= 0 ? 0 : -1;
+    return D_00324510.cancel >= 0 ? 0 : -1;
 }
 
 s32 evtIsMenuTableEntryEnabled(s32 *index) {
@@ -1463,31 +1498,31 @@ void evtDrawGroupPropertyTable(s32 list, s32 x, s32 y, s32 hidden, EvtRuntime *r
     }
     for (i = 0; i < D_00368950[group->type].enabled; i++) {
         field = D_00368950[group->type].fields[i];
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + offset * 192, y,
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + offset * 192, y,
             0xFEFFFF, 14, D_00368AA0[field]));
         style = i == runtime->tableColumn && runtime->actionMode == 15 ? 4 : 0;
         switch (field) {
         case 0:
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
                 y + 0x80, 0xFEFFFF, style, D_003BC290, runtime->frameGroup->metadataValue));
             break;
         case 1:
             if (runtime->frameGroup->metadataByte1 < 3) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
                     y + 0x80, 0xFEFFFF, style, D_003BC088,
                     D_00368AB0[runtime->frameGroup->metadataByte1]));
             } else {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
                     y + 0x80, 0xFEFFFF, style, D_003BC088,
                     runtime->entryName[runtime->frameGroup->metadataByte2]));
             }
             break;
         case 2:
             if (runtime->frameGroup->metadataByte1 == 0) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
                     y + 0x80, 0xFEFFFF, style, D_003BC298));
             } else {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
                     y + 0x80, 0xFEFFFF, style, D_003BC2A0));
             }
             break;
@@ -1502,7 +1537,7 @@ INCLUDE_RODATA(const s32, "game/code_00235270", D_003AEA80);
 INCLUDE_ASM(const s32, "game/code_00235270", func_00239A90);
 
 s32 mnuDrawMotionChangeLabel(s32 target, s32 x, s32 y) {
-    sdfAppendPacket(target, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "MOTION CHANGE MENU"));
+    sdfAppendPacket((SdfListHead *)target, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "MOTION CHANGE MENU"));
     return 2;
 }
 
@@ -1747,27 +1782,27 @@ void func_00239E30(s32 list, s32 x, s32 y, s32 row, EvtRuntime *ctx) {
     }
     switch (row) {
     case 0:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
             "GROUP   %d  (MAX %d)", packed.bits.group, count));
         break;
     case 1:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
             "MOTNO   %d  (MAX %d)", packed.bits.motion, mdlGetNodeRefHalf(model, packed.bits.group)));
         break;
     case 2:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
             "LOOP    %s", loopNames[packed.bits.loop]));
         break;
     case 3:
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
             "HOKAN   %d", packed.bits.hokan));
         break;
     case 6:
         if (mdlFindNodeById(model, packed.bits.group)->motionTable->entries[packed.bits.motion] != NULL) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style,
                 "MAXFRAME (%d)", mdlFindNodeById(model, packed.bits.group)->motionTable->entries[packed.bits.motion]->packedHeader));
         } else {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "(DUMMY)"));
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, "(DUMMY)"));
         }
         break;
     }
@@ -1792,13 +1827,13 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
     if (ctx->actionMode != 0x10) {
         return 0;
     }
-    if (D_00324510[0x26] & 2) {
+    if (D_00324510.decTen & 2) {
         if (ctx->fieldIndex == 0) {
             ctx->fieldIndex = 3;
         } else {
             ctx->fieldIndex = ctx->fieldIndex - 1;
         }
-    } else if (D_00324510[0x27] & 2) {
+    } else if (D_00324510.incTen & 2) {
         if (ctx->fieldIndex == 3) {
             ctx->fieldIndex = 0;
         } else {
@@ -1809,7 +1844,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
     count = mdlGetNodeRefHalf((MdlCtx *)model, packed.bits.group);
     switch (ctx->fieldIndex) {
     case 0:
-        if (D_00324510[0x25] & 2) {
+        if (D_00324510.incOne & 2) {
             do {
                 if (packed.bits.group < 3) {
                     packed.bits.group = packed.bits.group + 1;
@@ -1817,7 +1852,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
                     packed.bits.group = 0;
                 }
             } while (mdlFindNodeById(model, packed.bits.group) == NULL);
-        } else if (D_00324510[0x24] & 2) {
+        } else if (D_00324510.decOne & 2) {
             do {
                 if (packed.bits.group > 0) {
                     packed.bits.group = packed.bits.group - 1;
@@ -1831,13 +1866,13 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
         }
         break;
     case 1:
-        if (D_00324510[0x25] & 2) {
+        if (D_00324510.incOne & 2) {
             if (packed.bits.motion >= count - 1) {
                 packed.bits.motion = 0;
             } else {
                 packed.bits.motion = packed.bits.motion + 1;
             }
-        } else if (D_00324510[0x24] & 2) {
+        } else if (D_00324510.decOne & 2) {
             if (packed.bits.motion > 0) {
                 packed.bits.motion = packed.bits.motion - 1;
             } else {
@@ -1846,19 +1881,19 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
         }
         break;
     case 2:
-        if ((D_00324510[0x25] & 2) || (D_00324510[0x24] & 2)) {
+        if ((D_00324510.incOne & 2) || (D_00324510.decOne & 2)) {
             packed.bits.loop = packed.bits.loop == 0;
         }
         break;
     case 3:
-        if (D_00324510[0x25] & 2) {
+        if (D_00324510.incOne & 2) {
             if (packed.bits.hokan < 0x64) {
                 packed.bits.hokan = packed.bits.hokan + 1;
             } else {
                 packed.bits.hokan = 0;
             }
         }
-        if (D_00324510[0x24] & 2) {
+        if (D_00324510.decOne & 2) {
             if (packed.bits.hokan > 0) {
                 packed.bits.hokan = packed.bits.hokan - 1;
             } else {
@@ -1868,10 +1903,10 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
         break;
     }
     ctx->value = packed.word;
-    if (D_00324510[0x21] < 0 && mdlFindNodeById(model, packed.bits.group)->motionTable->entries[packed.bits.motion] != NULL) {
+    if (D_00324510.confirm < 0 && mdlFindNodeById(model, packed.bits.group)->motionTable->entries[packed.bits.motion] != NULL) {
         return 1;
     }
-    return D_00324510[0x23] >= 0 ? 0 : -1;
+    return D_00324510.cancel >= 0 ? 0 : -1;
 }
 
 extern char D_003BC288[]; /* "DISABLE" */
@@ -1888,19 +1923,19 @@ void evtDrawGroupListRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
         color = 0;
     }
     if (index == 0) {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC288));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC288));
     } else if (index == 1) {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC280));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC280));
         return;
     } else if (index == 2) {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003AEA80));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003AEA80));
         return;
     }
     n = 3;
     for (group = ctx->groups; group != NULL; group = group->next) {
         if (group->type == 1) {
             if (n == index) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC088, ((char *)group->info->value)));
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC088, ((char *)group->info->value)));
                 return;
             }
             n++;
@@ -1935,7 +1970,6 @@ s32 func_0023A688(s32 x, s32 y, EvtRuntime *ctx) {
 void func_0023A798(void) {
 }
 
-extern s8 D_00324510[];
 extern f32 sdfViewMatrix[];
 extern void effMiscAxisAngleToQuaternionVU(f32 angle);
 extern void effMiscQuaternionToMatrixVU(void);
@@ -1943,7 +1977,7 @@ extern void effMiscQuaternionToMatrixVU(void);
 /* vu0 routine: apply the selected camera-axis rotations to a position. */
 void func_0023A7A0(f32 *position)
 {
-    if (D_00324510[0x25] != 0) {
+    if (D_00324510.incOne != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
         effMiscAxisAngleToQuaternionVU(2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
@@ -1951,7 +1985,7 @@ void func_0023A7A0(f32 *position)
         VU0_TRANSFORM_POINT(vf10, vf10);
         VU0_SET_W_ONE(vf10);
         VU0_STORE_VF(vf10, position);
-    } else if (D_00324510[0x24] != 0) {
+    } else if (D_00324510.decOne != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix + 1);
         effMiscAxisAngleToQuaternionVU(-2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
@@ -1960,7 +1994,7 @@ void func_0023A7A0(f32 *position)
         VU0_SET_W_ONE(vf10);
         VU0_STORE_VF(vf10, position);
     }
-    if (D_00324510[0x27] != 0) {
+    if (D_00324510.incTen != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
         effMiscAxisAngleToQuaternionVU(-2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
@@ -1968,7 +2002,7 @@ void func_0023A7A0(f32 *position)
         VU0_TRANSFORM_POINT(vf10, vf10);
         VU0_SET_W_ONE(vf10);
         VU0_STORE_VF(vf10, position);
-    } else if (D_00324510[0x26] != 0) {
+    } else if (D_00324510.decTen != 0) {
         EE_MMI_LOAD_MATRIX_COLUMN(vf10, sdfViewMatrix);
         effMiscAxisAngleToQuaternionVU(2.0f * 3.14159265f / 180.0f);
         effMiscQuaternionToMatrixVU();
@@ -1984,46 +2018,251 @@ INCLUDE_ASM(const s32, "game/code_00235270", func_0023A968);
 void func_0023B1F8(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023B200);
+typedef struct EvtFloatPanelRow {
+    u16 x;
+    u16 y;
+    s32 parameter;
+    const char *format;
+} EvtFloatPanelRow;
+
+/* This coordinate table is supplied by the ordinary data segment. */
+extern const u16 D_00368AE0[];
+extern const EvtFloatPanelRow D_00368AE8[4];
+extern char D_003BC2C0[];
+extern char D_003BC2E8[];
+extern char D_003BC2F0[];
+extern char D_003BC2F8[];
+extern char D_003BC188[];
+extern u8 D_003BD344;
+extern f32 D_003BD358;
+extern f32 D_003BD35C;
+extern void evtSetSlotVector(s32 vectorSlot, f32 x, f32 y);
+
+/* Draw the XY/overlay editor; cancel restores the captured values and flag. */
+s32 func_0023B200(s32 x, s32 y, EvtRuntime *runtime) {
+    s32 list;
+    EvtRuntimeGroup *group;
+    const EvtFloatPanelRow *row;
+    s32 i;
+    s32 status = 0;
+
+    group = runtime->frameGroup;
+    list = sdfCreateResetPacketList();
+    evtDrawMenuFrame((u32)list, x + runtime->horizontalOffset + 0x60, y,
+                     0xF, 6, 0, 1, (u8 *)runtime, NULL, func_0023B1F8);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface,
+                                     (SdfListHead *)list);
+
+    sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(
+        0x8500 + (runtime->horizontalOffset << 4),
+        D_00368AE0[runtime->floatSelection], 0xFF0080, 0, D_003BC2C0));
+    row = D_00368AE8;
+    i = 0;
+    do {
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(
+            0x85C0 + (runtime->horizontalOffset << 4), row->y, 0xFF0080,
+            row->parameter, row->format));
+        ++row;
+        ++i;
+    } while (i != 4);
+
+    {
+        s32 valueX = 0x8B00 + (runtime->horizontalOffset << 4);
+        s32 style = runtime->floatEditMode == 1 && runtime->floatSelection == 0 ? 6 : 0;
+
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(
+            valueX, 0x7A80, 0xFF0080, style, D_003BC2E8,
+            runtime->floatEditX));
+    }
+    {
+        s32 valueX = 0x8B00 + (runtime->horizontalOffset << 4);
+        s32 style = runtime->floatEditMode == 1 && runtime->floatSelection == 1 ? 6 : 0;
+
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(
+            valueX, 0x7AE0, 0xFF0080, style, D_003BC2F0,
+            runtime->floatEditY));
+    }
+    {
+        s32 valueX = 0x8B00 + (runtime->horizontalOffset << 4);
+        s32 style = runtime->floatEditMode == 1 && runtime->floatSelection == 2 ? 6 : 0;
+        const char *toggleText;
+        if (D_003BD344 == 0) {
+            toggleText = D_003BC2F8;
+        } else {
+            toggleText = D_003BC188;
+        }
+
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(
+            valueX, 0x7BA0, 0xFF0080, style, toggleText));
+    }
+
+    if (runtime->actionMode != 0x13) {
+        return status;
+    }
+    {
+        if (D_00324510.apply < 0) {
+            if (runtime->floatEditMode == 0) {
+                return 1;
+            }
+        } else if (D_00324510.confirm < 0) {
+            if (runtime->floatEditMode == 0) {
+                runtime->floatEditMode = 1;
+            } else if (runtime->floatEditMode == 1) {
+                runtime->floatEditMode = 0;
+            }
+        } else if (D_00324510.cancel < 0) {
+            if (runtime->floatEditMode == 1) {
+                runtime->floatEditMode = 0;
+            } else {
+                status = -1;
+            }
+        } else if (D_00324510.incTen & 2) {
+            if (runtime->floatEditMode == 0) {
+                if (runtime->floatSelection < 2) {
+                    runtime->floatSelection++;
+                } else {
+                    runtime->floatSelection = 0;
+                }
+            } else if (runtime->floatEditMode == 1) {
+                switch (runtime->floatSelection) {
+                case 0:
+                    runtime->floatEditX += 0.1f;
+                    break;
+                case 1:
+                    runtime->floatEditY += 0.1f;
+                    break;
+                }
+            }
+        } else if (D_00324510.decTen & 2) {
+            if (runtime->floatEditMode == 0) {
+                if (runtime->floatSelection > 0) {
+                    runtime->floatSelection--;
+                } else {
+                    runtime->floatSelection = 2;
+                }
+            } else if (runtime->floatEditMode == 1) {
+                switch (runtime->floatSelection) {
+                case 0:
+                    runtime->floatEditX -= 0.1f;
+                    break;
+                case 1:
+                    runtime->floatEditY -= 0.1f;
+                    break;
+                }
+            }
+        } else if (D_00324510.incOne & 2) {
+            if (runtime->floatEditMode == 1) {
+                if (runtime->floatSelection == 0) {
+                    runtime->floatEditX += 0.01f;
+                } else if (runtime->floatSelection == 1) {
+                    runtime->floatEditY += 0.01f;
+                } else if (runtime->floatSelection == 2) {
+                    D_003BD344 ^= 1;
+                }
+            }
+        } else if (D_00324510.decOne & 2) {
+            if (runtime->floatEditMode == 1) {
+                if (runtime->floatSelection == 0) {
+                    runtime->floatEditX -= 0.01f;
+                } else if (runtime->floatSelection == 1) {
+                    runtime->floatEditY -= 0.01f;
+                } else if (runtime->floatSelection == 2) {
+                    D_003BD344 ^= 1;
+                }
+            }
+        } else if (D_00324510.unk2B != 0) {
+            runtime->horizontalOffset += 8;
+        } else if (D_00324510.unk29 != 0) {
+            runtime->horizontalOffset -= 8;
+        }
+
+        switch (group->metadataByte1) {
+        case 0:
+            break;
+        case 1: {
+            f32 currentX = runtime->floatEditX;
+            f32 currentY = runtime->floatEditY;
+
+            D_003BD358 = currentX;
+            D_003BD35C = currentY;
+            evtSetSlotVector(group->setterId, currentX, currentY);
+            break;
+        }
+        case 2:
+            evtSetSlotVector(group->setterId, runtime->floatEditX,
+                          runtime->floatEditY);
+            break;
+        case 3:
+            evtSetSlotVector(group->setterId, runtime->floatEditX,
+                          runtime->floatEditY);
+            break;
+        }
+
+        if (status == -1) {
+            switch (group->metadataByte1) {
+            case 0:
+                break;
+            case 1: {
+                f32 savedX = runtime->savedFloatEditX;
+                f32 savedY = runtime->savedFloatEditY;
+
+                D_003BD358 = savedX;
+                D_003BD35C = savedY;
+                evtSetSlotVector(group->setterId, savedX, savedY);
+                break;
+            }
+            case 2:
+                evtSetSlotVector(group->setterId, runtime->savedFloatEditX,
+                              runtime->savedFloatEditY);
+                break;
+            case 3:
+                evtSetSlotVector(group->setterId, runtime->savedFloatEditX,
+                              runtime->savedFloatEditY);
+                break;
+            }
+            D_003BD344 = runtime->savedOverlayFlag;
+        }
+    }
+    return status;
+}
 
 /* Draw command text for row 0 or 1; null texts and other rows emit nothing. */
 void evtDrawOptionalPromptText(s32 list, s32 x, s32 y, s32 kind, EvtRuntime *work) {
     switch (kind) {
     case 0:
         if (work->commandSecond.text != 0) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, work->commandSecond.text));
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, work->commandSecond.text));
         }
         return;
     case 1:
         if (work->commandThird.text != 0) {
-            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, work->commandThird.text));
+            sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, D_003BC088, work->commandThird.text));
         }
         break;
     }
 }
 
-extern s8 D_00324510[];
 
 /* In mode 0x14, count down before checking input: zero expires, negative waits
  * indefinitely, and confirm takes precedence over cancel. */
-s32 mnuDrawTimedPrompt(s32 x, s32 y, u8 *work) {
+s32 mnuDrawTimedPrompt(s32 x, s32 y, EvtRuntime *work) {
     u32 packets = sdfCreateResetPacketList();
     s32 count;
-    evtDrawMenuFrame(packets, x, y, 0x19, 2, 0, 1, work, 0, evtDrawOptionalPromptText);
+    evtDrawMenuFrame(packets, x, y, 0x19, 2, 0, 1, (u8 *)work, 0, evtDrawOptionalPromptText);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)packets);
-    if (((EvtRuntime *)work)->actionMode != 0x14) {
+    if (work->actionMode != 0x14) {
         return 0;
     }
-    count = ((EvtRuntime *)work)->commandFirst;
+    count = work->commandFirst;
     if (count > 0) {
-        ((EvtRuntime *)work)->commandFirst = count - 1;
+        work->commandFirst = count - 1;
     } else if (count == 0) {
         return -1;
     }
-    if (D_00324510[0x21] < 0) {
+    if (D_00324510.confirm < 0) {
         return 1;
     }
-    return D_00324510[0x23] >= 0 ? 0 : -1;
+    return D_00324510.cancel >= 0 ? 0 : -1;
 }
 
 /* Store three command arguments. Timed prompts consume the first as a countdown
@@ -2048,18 +2287,18 @@ void evtViewerDrawGroupRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
         color = 0;
     }
     if (index == 0) {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC300));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC300));
         return;
     }
     if (index == 1) {
-        sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, "DEFFAULT"));
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, "DEFFAULT"));
         return;
     }
     n = 2;
     for (group = ctx->groups; group != NULL; group = group->next) {
         if (group->type == 0x18) {
             if (n == index) {
-                sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC088, ctx->entryName[group->entryHeader.word]));
+                sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, color, D_003BC088, ctx->entryName[group->entryHeader.word]));
                 return;
             }
             n++;
@@ -2209,15 +2448,15 @@ s32 func_0023C248(EvtRuntime *runtime) {
     key = (EvtViewKey *)evtEventViewerGetPendingNode(runtime);
 
     style = runtime->editField == 0 ? 6 : 0;
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
         0x7780, 0x82C0, 0xFEFFFF, 0, D_003BC318));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
         0x7780, 0x82C0, 0xFEFFFF, style, D_003BC290, key->p0C.sh[0]));
 
     style = runtime->editField == 1 ? 6 : 0;
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
         0x7780, 0x8320, 0xFEFFFF, 0, D_003BC320));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
         0x7780, 0x8320, 0xFEFFFF, style, D_003BC290, key->p0C.sh[1]));
 
     selectedChannel = runtime->editField - 2;
@@ -2229,65 +2468,65 @@ s32 func_0023C248(EvtRuntime *runtime) {
                            selectedChannel, color, 0);
 
     style = runtime->editField == 5 ? 6 : 0;
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
         0x7780, 0x84A0, 0xFEFFFF, 0, D_003BC328));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
         0x7780, 0x84A0, 0xFEFFFF, style, D_003BC290, key->p10.b[3]));
 
     style = runtime->editField == 6 ? 6 : 0;
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
         0x7780, 0x8500, 0xFEFFFF, 0, D_003BC330));
     switch ((s8)key->p08.b[1]) {
     case 0:
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
             0x7780, 0x8500, 0xFEFFFF, style, D_003AEC00));
         break;
     case 1:
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
             0x7780, 0x8500, 0xFEFFFF, style, D_003AEC10));
         break;
     case 2:
-        sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+        sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
             0x7780, 0x8500, 0xFEFFFF, style, D_003AEC20));
         break;
     }
 
     style = runtime->editField == 7 ? 6 : 0;
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
         0x7780, 0x8560, 0xFEFFFF, 0, D_003BC338));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
         0x7780, 0x8560, 0xFEFFFF, style, D_003AEC30,
         key->p14.f));
 
     style = runtime->editField == 8 ? 6 : 0;
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
         0x7780, 0x85C0, 0xFEFFFF, 0, D_003BC340));
-    sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
+    sdfAppendPacket((SdfListHead *)packetList, (u32)sdfCreateFormattedSifCommand(
         0x7780, 0x85C0, 0xFEFFFF, style, D_003AEC30,
         key->p18.f));
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface,
                                      (SdfListHead *)packetList);
 
     step = 0;
-    if ((D_00324510[0x27] & 2) != 0) {
+    if ((D_00324510.incTen & 2) != 0) {
         if (runtime->editField >= 8) {
             runtime->editField = 0;
         } else {
             runtime->editField++;
         }
-    } else if ((D_00324510[0x26] & 2) != 0) {
+    } else if ((D_00324510.decTen & 2) != 0) {
         if (runtime->editField <= 0) {
             runtime->editField = 8;
         } else {
             runtime->editField--;
         }
-    } else if ((D_00324510[0x24] & 2) != 0) {
+    } else if ((D_00324510.decOne & 2) != 0) {
         step = -1;
-    } else if ((D_00324510[0x25] & 2) != 0) {
+    } else if ((D_00324510.incOne & 2) != 0) {
         step = 1;
-    } else if ((D_00324510[0x29] & 2) != 0) {
+    } else if ((D_00324510.unk29 & 2) != 0) {
         step = -10;
-    } else if ((D_00324510[0x2B] & 2) != 0) {
+    } else if ((D_00324510.unk2B & 2) != 0) {
         step = 10;
     }
 
@@ -2389,7 +2628,7 @@ s32 func_0023C248(EvtRuntime *runtime) {
     }
 
 
-    if (D_00324510[0x23] < 0) {
+    if (D_00324510.cancel < 0) {
         runtime->frameGroup->unk28 = 0;
         return 0;
     }
@@ -2450,7 +2689,7 @@ s32 evtPollEffectFrameControl(s32 arg0, s32 arg1, EvtRuntime *runtime) {
         status = func_0023CA60(runtime);
         break;
     default:
-        if (D_00324510[0x2C] < 0) {
+        if (D_00324510.apply < 0) {
             status = 0;
         }
         break;
@@ -2466,7 +2705,7 @@ s32 evtPollEffectFrameControl(s32 arg0, s32 arg1, EvtRuntime *runtime) {
     return 1;
 }
 
-extern s32 (*D_00368B48[])(s32, s32, void *);
+extern s32 (*D_00368B48[])(s32, s32, EvtRuntime *);
 
 s32 evtDispatchActionByIndex(s32 index, s32 x, s32 y, EvtRuntime *runtime) {
     s32 mode = runtime->actionMode;

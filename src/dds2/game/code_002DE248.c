@@ -1,5 +1,6 @@
 #include "eff_bill.h"
 #include "common.h"
+
 #include "dds3_path.h"
 #include "eff_transform.h"
 #include "sdf_model.h"
@@ -10964,9 +10965,9 @@ void effCompleteRetainedResourceJob(void *job, u32 *outInstance) {
 }
 
 /* Clear the output first; only mode one selects the retained-allocation completion path. */
-void effRequestResourceByMode(s32 category, s32 index, s32 mode, u32 *outInstance) {
+void effRequestResourceByMode(const char *prefix, const char *name, s32 mode, u32 *outInstance) {
     char path[EFF_RESOURCE_PATH_BYTES];
-    func_0035C860(path, D_004387E8, category, index);
+    func_0035C860(path, D_004387E8, prefix, name);
     *outInstance = 0;
     if (mode == EFF_RESOURCE_KEEP_ALLOCATION) {
         fileCreateCallbackRequest(path, 0, (s32)effCompleteRetainedResourceJob, (s32)outInstance);

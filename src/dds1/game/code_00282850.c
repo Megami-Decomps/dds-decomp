@@ -16,6 +16,7 @@ struct FrFontGlyph;
 extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
 extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
 extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
+extern s32 mnuGetMatchingPartyEntryMask(DatPartyRecord *);
 extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern char D_003BC7A0[];
@@ -1613,7 +1614,7 @@ s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 select
     }
 
     if (mnuGetAbilityTargetCategory(ability) == 1) {
-        mask = mnuGetMatchingPartyEntryMask((s32)entry);
+        mask = mnuGetMatchingPartyEntryMask(entry);
 
         if (func_002111A0(ability, mask) != 0) {
             return 0;
@@ -1627,7 +1628,7 @@ s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 select
         for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
             entry = &datGameState->party[partyIndex];
             if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
-                mask = mnuGetMatchingPartyEntryMask((s32)entry);
+                mask = mnuGetMatchingPartyEntryMask(entry);
 
                 if (func_002111A0(ability, mask) == 0) {
                     func_002866B0(ability, target, entry);
@@ -1899,8 +1900,8 @@ s32 btlItemApplyDirectEffect(s32 context, u16 item, s32 mode,
 
 
 /* Return the first matching status index in native priority order, or -1. */
-s32 mnuGetSelectionFromFlags(s32 actorAddress) {
-    u16 statusFlags = ((DatPartyRecord *)actorAddress)->status;
+s32 mnuGetSelectionFromFlags(DatPartyRecord *partyRecord) {
+    u16 statusFlags = partyRecord->status;
     if (statusFlags & 0x400) return 0;
     if (statusFlags & 0x100) return 1;
     if (statusFlags & 0x80) return 2;
@@ -1910,12 +1911,12 @@ s32 mnuGetSelectionFromFlags(s32 actorAddress) {
 }
 
 /* Return one bit for the first occupied matching table ID, or zero when absent. */
-s32 mnuGetMatchingPartyEntryMask(s32 targetEntryAddress) {
+s32 mnuGetMatchingPartyEntryMask(DatPartyRecord *targetEntry) {
     s32 partyIndex;
     DatPartyRecord *partyEntry = datGameState->party;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++, partyEntry++) {
         if ((partyEntry->flags & 1) &&
-            partyEntry->unitId == ((DatPartyRecord *)targetEntryAddress)->unitId) {
+            partyEntry->unitId == targetEntry->unitId) {
             return 1 << partyIndex;
         }
     }

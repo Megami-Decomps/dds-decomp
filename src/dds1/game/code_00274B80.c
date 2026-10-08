@@ -16,7 +16,7 @@ extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32, u32);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
-extern s32 mnuGetSelectionFromFlags(s32);
+extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
 extern MenuPanelHandles *mnuCreatePanelSpriteHandles(u32, s32, s32);
 extern s32 mnuClassifyQuarterHalfPercent(s32, s32);
 extern s32 evtStageTestSelectEntry(s32, s32, s32);
@@ -737,7 +737,7 @@ void func_00276018(s32 contextAddress) {
     }
 
     record = (DatPartyRecord *)&menu->original[selectionKey];
-    statusIndex = mnuGetSelectionFromFlags((s32)record);
+    statusIndex = mnuGetSelectionFromFlags(record);
     if (statusIndex >= 0) {
         marker = *(EffectSlotSet **)((u8 *)context + 0xC4 + statusIndex * 4);
     } else {
