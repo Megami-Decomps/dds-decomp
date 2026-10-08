@@ -91,14 +91,12 @@ extern s32 func_00273220(s32 itemToInsert, s32 inventoryItem, StaffImageContext 
 
 extern void mnuSelectPage(MenuPageWindow *, s32);
 extern void mnuCreateStaffBulletItemWindow();
-extern void mnuReleaseStaffMenuResources();
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern void func_00276720();
 extern void mnuReleaseStaffExtraWindow();
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
-extern void mnuReleaseStaffMenuTextureHandles();
 
 extern void func_0027C788(MenuWindowContainer *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
@@ -337,7 +335,7 @@ s32 mnuInitializeStaffValuePage(KwlnTask *task) {
 
     mnuSelectPage(&((StaffImageContext *)context)->pageWindow, index);
     mnuCreateStaffBulletItemWindow(context);
-    mnuReleaseStaffMenuResources(context + 0x60);
+    mnuReleaseStaffMenuResources((void *)(context + 0x60));
     mnuSetWindowResource(index, &((StaffImageContext *)context)->pageWindow,
                          ((StaffImageContext *)context)->spriteScene,
                          ((StaffImageContext *)context)->windowParam);
@@ -372,7 +370,7 @@ s32 mnuReleaseStaffValuePageResources(KwlnTask *task) {
         ((StaffImageContext *)context)->spriteHandle = 0;
     }
     func_00283BF0((u32 *)(context + 0x914), 0);
-    mnuReleaseStaffMenuTextureHandles(context + 0x60);
+    mnuReleaseStaffMenuTextureHandles((void *)(context + 0x60));
     return 1;
 }
 

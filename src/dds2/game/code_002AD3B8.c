@@ -34,7 +34,6 @@ extern void func_002B2C88(s32, s32, s32, s32);
 extern void mnuClearPageSelectionHandles(MenuPageWindow *);
 extern void mnuClearEntries(MenuPageWindow *);
 extern void func_002C1B68(u32 *, u32);
-extern void mnuReleaseStaffMenuTextureHandles(s32);
 extern void func_002C2AA8(struct MenuPanelItem *, u32);
 extern char D_00437BD0[];
 extern char D_00437BD8[];
@@ -78,7 +77,6 @@ extern void mnuDrawCampIconBackdropByKind(s32, s32);
 extern void func_002AAC70(u32, u32, u32, u32, u32, u32, u32);
 extern s32 D_00435E70;
 extern void func_002BB9C8(MenuSprites *, u32);
-extern void mnuReleaseStaffMenuResources(s32 *);
 extern void mnuSetIndexedWindowPageSpriteFlags(s32, MenuPageWindow *, u32, u32);
 
 typedef struct MenuListNode MenuListNode;
@@ -462,7 +460,7 @@ s32 mnuReleaseSelectedStaffPageResources(KwlnTask *task) {
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 0);
-    mnuReleaseStaffMenuTextureHandles((s32)&((MenuStaffContext *)context)->group);
+    mnuReleaseStaffMenuTextureHandles(&((MenuStaffContext *)context)->group);
     return 1;
 }
 
@@ -727,7 +725,7 @@ s32 mnuReleaseStaffSelectionPageResources(KwlnTask *task) {
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 0);
-    mnuReleaseStaffMenuTextureHandles((s32)&((MenuStaffContext *)context)->group);
+    mnuReleaseStaffMenuTextureHandles(&((MenuStaffContext *)context)->group);
     return 1;
 }
 
@@ -1019,7 +1017,7 @@ s32 mnuReleaseStaffValuePageResources(KwlnTask *task) {
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 0);
-    mnuReleaseStaffMenuTextureHandles((s32)&((MenuStaffContext *)context)->group);
+    mnuReleaseStaffMenuTextureHandles(&((MenuStaffContext *)context)->group);
     return 1;
 }
 

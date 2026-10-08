@@ -134,6 +134,11 @@ typedef struct StaffSlots {
     struct EffectSlotSet *extraResources[5];
 } StaffSlots;
 
+/* The two pair owners follow the title-specific base resource bank.
+ * resourceBase may belong to StaffSlots or a menu context resource region. */
+void mnuReleaseStaffMenuResources(void *resourceBase);
+void mnuReleaseStaffMenuTextureHandles(void *resourceBase);
+
 #ifdef VERSION_DDS2
 typedef char StaffSlots_size_must_be_0x64[(sizeof(StaffSlots) == 0x64) ? 1 : -1];
 #else
