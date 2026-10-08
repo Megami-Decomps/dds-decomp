@@ -174,7 +174,6 @@ void mdlCleanupViewerTasksAndResources(void);
 
 void mdlDrawViewerSelectionLabel(void);
 
-extern s32 kwlnTaskGetTaskByName(void *name);
 
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
@@ -2779,7 +2778,7 @@ void mdlCleanupViewerTasksAndResources(void) {
     kwlnTaskDestroyWithHierarchyByName(D_004214F8, 0);
     def = D_003C8890;
     do {
-        if (kwlnTaskGetTaskByName((void *)def->name) == 0) {
+        if (kwlnTaskGetTaskByName(def->name) == NULL) {
             func_00103388(def->name, def->arg, 0, 0);
         }
         i++;

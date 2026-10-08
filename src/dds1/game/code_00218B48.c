@@ -186,7 +186,6 @@ void sdfAppendPacket(SdfListHead *, u32);
 
 void sdfStreamCreateWithParams(s32, s32, s32, s32, s32);
 
-extern s32 kwlnTaskGetTaskByName(void *name);
 
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
@@ -2722,7 +2721,7 @@ void mdlCleanupViewerTasksAndResources(void) {
     kwlnTaskDestroyWithHierarchyByName(D_003ABF78, 0);
     kwlnTaskDestroyWithHierarchyByName(D_003ABF88, 0);
     for (i = 0; i != 3; i++) {
-        if (kwlnTaskGetTaskByName((void *)D_00367AE0[i].name) == 0) {
+        if (kwlnTaskGetTaskByName(D_00367AE0[i].name) == NULL) {
             func_00103498(D_00367AE0[i].name, D_00367AE0[i].arg, 0, 0);
         }
     }

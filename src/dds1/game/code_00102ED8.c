@@ -134,7 +134,6 @@ typedef struct KwlnDebugWork {
 } KwlnDebugWork;
 
 extern char dds3AdminTaskName[];
-extern void *kwlnTaskGetTaskByName(const char *);
 extern void *dds3AdminPollModeCompletion(void *task);
 extern void dds3AdminReleaseTaskWork(void);
 extern void *sdfAllocSizeClassBlock(s32);

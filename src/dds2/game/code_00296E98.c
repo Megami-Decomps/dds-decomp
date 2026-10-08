@@ -72,7 +72,6 @@ extern char mnuStaffSecondaryPanelTaskName[];
 
 extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
-extern s32 kwlnTaskGetTaskByName(const char *);
 
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *unit);
@@ -757,14 +756,14 @@ u32 brsTaskTryDestroy(void) {
 }
 
 s32 func_002998D8(void) {
-    s32 task;
+    KwlnTask *task;
     BrsSkillPackageWork *work;
 
     task = kwlnTaskGetTaskByName(mnuStaffPrimaryPanelTaskName);
     if (task == 0) {
         return task;
     }
-    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue((KwlnTask *)task);
+    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
     if (256 - work->fadeProgress <= 0 && brsTaskIsUiUpdateAllowed(work) != 0) {
         if (work->opacityReady == 1) {
             return 1;
