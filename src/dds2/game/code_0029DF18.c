@@ -23,7 +23,8 @@ typedef struct TitleMenuWork {
 } TitleMenuWork;
 
 
-extern void func_00306C28(s32, s32, s32, s32, s32, s32, s32, s32);
+struct EffectSlotSet;
+extern void func_00306C28(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
 extern void *memcpy(void *, const void *, u32);
 extern u32 D_004285E0[4];
 
@@ -66,10 +67,10 @@ void func_002A0148(s32 x, s32 y, s32 z, TitleMenuWork *work,
             color[1] = packed;
             color[2] = packed;
             color[3] = packed;
-            func_00306C28(x + 0x1180, y + 0x130, z, (s32)color, 0,
-                         work->iconResource, 0x16, depth);
-            func_00306C28(x + 0x17E0, y + 0x130, z, (s32)color, 0,
-                         work->iconResource, 0x17, depth);
+            func_00306C28(x + 0x1180, y + 0x130, z, color, 0,
+                         (struct EffectSlotSet *)work->iconResource, 0x16, depth);
+            func_00306C28(x + 0x17E0, y + 0x130, z, color, 0,
+                         (struct EffectSlotSet *)work->iconResource, 0x17, depth);
         }
     }
 }
