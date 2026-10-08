@@ -200,6 +200,13 @@ void itfDrawGridOverlayPacket(GridDrawWork *work, u8 *data, SdfListHead *context
 
 extern SdfPoolNode kwlnDrawSurfaces[];
 
+typedef struct SdfDrawPacket SdfDrawPacket;
+extern s32 sdfConsCalculateDrawPacketSize(s32 registerCount, s32 loopCount);
+extern void *sdfConsInitPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags,
+                                     s32 registerCount, s64 registerList,
+                                     s32 loopCount);
+extern s32 sdfConsMeasurePacketWithHeader(s32 packet);
+
 extern s32 sdfAllocPacketAligned(s32);
 
 extern void sdfInitPacketList(SdfListHead *);
@@ -527,7 +534,7 @@ void itfGridDrawBooleanDescriptor(u8 value, s32 alternate, s32 kind) {
     SdfListHead *context;
     SdfPoolNode *entry;
 
-    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     descriptor[0] = normalized;
     if (!alternate) {
@@ -552,7 +559,7 @@ void itfSubmitToggledGridWord(s32 data, s32 alternate, s32 kind) {
     SdfListHead *context;
     SdfPoolNode *entry;
 
-    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     descriptor[0] = data;
     if (!alternate) {
@@ -580,7 +587,7 @@ void sdfSubmitGsAlphaRegisterPacket(s32 data, s32 alternate, s32 kind) {
     SdfListHead *context;
     SdfPoolNode *entry;
 
-    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     descriptor[0] = data;
     if (!alternate) {
@@ -605,7 +612,7 @@ void sdfSubmitGsPabeRegisterPacket(s32 data, s32 kind) {
     SdfListHead *context;
     SdfPoolNode *entry;
 
-    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     descriptor[1] = 0x49;
     descriptor[0] = data;
@@ -622,7 +629,7 @@ void sdfSubmitGsTexRegisterPacket(s32 data, s32 kind) {
     SdfListHead *context;
     SdfPoolNode *entry;
 
-    sdfConsInitPacketHeader(packet, 0, 1, 0xE, 1);
+    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdfConsMeasurePacketWithHeader(packet);
     descriptor[1] = 0x14;
     descriptor[0] = data;
