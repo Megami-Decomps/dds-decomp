@@ -12,10 +12,7 @@ extern BillDispatch D_0034E068[];
 void *sdfAllocSizeClassBlock(s32 size);
 struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 void sdfReleaseChipBlock(void *arg);
-void effReleaseSharedTextureRecord(void *arg);
 void billAppendChildQuad(BillObj *obj, BillChildPayload *child);
-void billReleaseSharedEntryBlock(void *arg);
-void *func_00150148(void *arg);
 BillData *billCreateAnimationDataFromResource(void *arg);
 
 extern void *memcpy(void *dst, const void *src, u32 size);
@@ -70,8 +67,8 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
         sdfInitPacketList(child->pendingLists[selected]);
         packet = sdfAllocPacketAligned(0x20);
         sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
-            (u32)sdfTexGetPrimaryBuffer((SdfTex *)child->value),
-            sdfTexGetPrimaryBufferSize((SdfTex *)child->value));
+            (u32)sdfTexGetPrimaryBuffer(child->texture),
+            sdfTexGetPrimaryBufferSize(child->texture));
         sdfAppendReferencePacket(child->pendingLists[selected], packet);
         if ((u16)(child->variant & 1) != 0) {
             VU0_LOAD_VF(vf10, sdfViewEyeVector);
@@ -265,13 +262,13 @@ void func_00150840(BillObj *obj, BillRenderPair *node) {
         sdfAppendPacket(node->packetList, (u32)state);
         packet = sdfAllocPacketAligned(0x20);
         sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
-            (u32)sdfTexGetPrimaryBuffer((SdfTex *)node->children[0]->value),
-            sdfTexGetPrimaryBufferSize((SdfTex *)node->children[0]->value));
+            (u32)sdfTexGetPrimaryBuffer(node->children[0]->texture),
+            sdfTexGetPrimaryBufferSize(node->children[0]->texture));
         sdfAppendReferencePacket(node->packetList, packet);
         packet = sdfAllocPacketAligned(0x20);
         sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
-            (u32)sdfTexGetOrInitializeSecondaryBuffer((SdfTex *)node->children[1]->value),
-            sdfTexGetSecondaryBufferSize((SdfTex *)node->children[1]->value));
+            (u32)sdfTexGetOrInitializeSecondaryBuffer(node->children[1]->texture),
+            sdfTexGetSecondaryBufferSize(node->children[1]->texture));
         sdfAppendReferencePacket(node->packetList, packet);
         geometry = (u8 *)sdfAllocPacketAligned(0x38);
         if (node->unk8 == 1) {
@@ -442,7 +439,7 @@ void billFlushPendingRenderPairs(void) {
     D_003BD7F8 = NULL;
 }
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00151178);
+INCLUDE_ASM(const s32, "effect/billManager", billInitializeCommonDrawState);
 
 BillObj *billAllocChild(void *resourceData) {
     BillObj *obj;
@@ -450,7 +447,7 @@ BillObj *billAllocChild(void *resourceData) {
     obj = sdfAllocSizeClassBlock(0x34);
     obj->child = NULL;
     if (resourceData != NULL) {
-        obj->child = func_00150148(resourceData);
+        obj->child = billCreateChildPayloadFromTextureResource(resourceData);
     }
     return obj;
 }
@@ -520,35 +517,35 @@ BillChildPayload *billStepAnimationEntryAndUpdateChild(BillObj *obj, BillOut *ou
     s32 index;
     u32 color;
 
-    if (entry->flags & 0x10000000) {
+    if (entry->flags & BILL_ANIMATION_FLAG_PLURAL_ENTRIES) {
         return NULL;
     }
     if (out->framesRemaining <= 0) {
         out->frameIndex++;
         if ((u32)out->frameIndex >= entry->frameCount) {
-            if (entry->flags & 0x10) {
+            if (entry->flags & BILL_ANIMATION_FLAG_STOP_AT_END) {
                 obj->animationActive = 0;
                 out->frameIndex = entry->frameCount - 1;
             } else {
                 out->frameIndex = 0;
             }
         }
-        out->framesRemaining = out->record[out->frameIndex].value;
+        out->framesRemaining = out->record[out->frameIndex].frameDelay;
     } else {
         out->framesRemaining--;
     }
     index = out->frameIndex;
     record = out->record + index;
-    if (entry->flags & 1) {
+    if (entry->flags & BILL_ANIMATION_FLAG_FRAME_COLORS) {
         color = ((u32 *)(data->base + entry->colorOffset))[index];
     } else {
         color = 0x80808080;
     }
     obj->childParam = color;
     child = data->children[record->childIndex];
-    if (entry->flags & 2) {
+    if (entry->flags & BILL_ANIMATION_FLAG_PACKET_LIST_2) {
         obj->requestedPacketListIndex = 2;
-    } else if (entry->flags & 4) {
+    } else if (entry->flags & BILL_ANIMATION_FLAG_PACKET_LIST_3) {
         obj->requestedPacketListIndex = 3;
     } else {
         obj->requestedPacketListIndex = 1;
@@ -597,7 +594,7 @@ u32 effBillModulateColors(u32 colorA, u32 colorB) {
 
 INCLUDE_ASM(const s32, "effect/billManager", func_001515E8);
 
-/* Resolves an indexed billboard record and caches its signed +0x12 value. */
+/* Resolve an animation entry and initialize its signed frame-delay countdown. */
 void billResolveEntry(BillData *table, s32 index, BillOut *out) {
     u8 *base;
     BillAnimationEntry *entry;
@@ -610,7 +607,7 @@ void billResolveEntry(BillData *table, s32 index, BillOut *out) {
     out->entry = entry;
     base = base + offset;
     out->frameIndex = 0;
-    value = ((BillRecord *)base)->value;
+    value = ((BillRecord *)base)->frameDelay;
     out->record = (BillRecord *)base;
     out->framesRemaining = value;
 }
@@ -626,7 +623,7 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
         obj->animationActive = 0;
         return;
     }
-    if (entry->flags & 0x10000000) {
+    if (entry->flags & BILL_ANIMATION_FLAG_PLURAL_ENTRIES) {
         BillPluralRecord *records;
         u32 i = 0;
 
@@ -681,13 +678,13 @@ BillData *billCreateAnimationDataFromResource(void *resource) {
     data->entries = (BillAnimationEntry *)(copiedBase + 8);
     data->children = (BillChildPayload **)(copiedBase + *(s32 *)copiedBase + 8);
     for (resourceIndex = 0; resourceIndex < childCount; resourceIndex++) {
-        data->children[resourceIndex] = func_00150148(sourceBytes + *childOffsetCursor++);
+        data->children[resourceIndex] = billCreateChildPayloadFromTextureResource(sourceBytes + *childOffsetCursor++);
     }
     data->entryCount = data->listRefCount = 1;
     entryCount = ((s32 *)data->base)[1];
     for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++) {
         BillAnimationEntry *entry = &data->entries[resourceIndex];
-        if (entry->flags & 0x10000000) {
+        if (entry->flags & BILL_ANIMATION_FLAG_PLURAL_ENTRIES) {
             data->entryCount = entry->frameCount;
             func_003003F0("billAnim no[%d][%d]...PLURAL\n", resourceIndex, data->entryCount);
         } else {
@@ -705,8 +702,7 @@ BillData *billCreateAnimationDataFromResource(void *resource) {
 
 
 /* Drop one reference; the last one releases every entry and the block itself. */
-void billReleaseSharedEntryBlock(void *arg) {
-    BillData *block = arg;
+void billReleaseSharedEntryBlock(BillData *block) {
     s32 i;
 
     block->listRefCount--;
@@ -742,7 +738,7 @@ void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
         return;
     }
     snapshot->x = record->x;
-    snapshot->unk10 = record->value;
+    snapshot->unk10 = (u32)record->texture;
     snapshot->y = record->y;
     snapshot->halfWidth = record->halfWidth;
     snapshot->halfHeight = record->halfHeight;
@@ -753,7 +749,7 @@ BillObj *billCreateIndexed(s32 index, u32 data) {
     BillObj *newobj;
 
     newobj = D_0034E060[index].func(data);
-    func_00151178(newobj);
+    billInitializeCommonDrawState(newobj);
     newobj->kind = index;
     newobj->callback = D_0034E060[index].callback;
     return newobj;
@@ -770,8 +766,6 @@ BillObj *billCreateFromResource(s32 kind, const char *path) {
     return billboard;
 }
 
-extern void func_00151178(BillObj *obj);
-
 /* Duplicate a billboard object: an entry list is cloned, a child shares (and refs) the source's data block. */
 BillObj *billCloneObjectRetainingSharedData(BillObj *source) {
     BillObj *copy;
@@ -781,12 +775,12 @@ BillObj *billCloneObjectRetainingSharedData(BillObj *source) {
 
     if (source->kind == 1) {
         copy = billCloneList(source);
-        func_00151178(copy);
+        billInitializeCommonDrawState(copy);
         copy->kind = source->kind;
         copy->callback = source->callback;
     } else {
         copy = billAllocChild(NULL);
-        func_00151178(copy);
+        billInitializeCommonDrawState(copy);
         sourceKind = source->kind;
         data = source->child;
         sourceCallback = source->callback;

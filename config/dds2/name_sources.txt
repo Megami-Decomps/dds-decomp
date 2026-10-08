@@ -910,10 +910,12 @@
 0x00157A50	effCloneSourceWithTypeHandler	inferred	confidence=high; src/dds2/game/code_00157A50.c:func_00157A50; Allocates an effect-source copy, copies type and metadata, and clones its argument through the type-selected handler. [names_qp9.tsv]
 0x00157BE0	effInitializeBillResourceOwners	inferred	Loads BILL.LB entries, constructs the configured billboards, scales their half extents, and fills effBillResourceOwners.
 0x00157CE0	effBillDispatchAll	inferred	Dispatches every entry in the bill-kind table; DDS1 twin. [names_qp9.tsv]
+0x00157D38	billCreateChildPayloadFromTextureResource	inferred	Allocates a billboard child payload, acquires the texture named by the supplied resource, initializes its UV and size geometry, and returns the payload.
 0x00157E50	effReleaseSharedTextureRecord	inferred	src/dds2/game/code_00157A50.c func_00157E50: Decrements reference count and releases texture reference plus allocation on final reference. Twin of DDS1 func_00150260. [names_reviewed24.tsv]
 0x00157EA0	billAppendChildQuad	inferred	appends one billboard quad to a child payload
 0x00158340	billFlushPendingChildPackets	inferred	drains pending child packet lists into pools
 0x00158C00	billFlushPendingRenderPairs	inferred	drains queued render pairs and submits batches
+0x00158D68	billInitializeCommonDrawState	inferred	Initializes the billboard's default scales, offsets, gray color, and packet-list selection; called for newly created and cloned objects.
 0x00158E00	billReleaseChild	inferred	Releases the billboard's child at offset 0x30 when present, then frees the billboard.
 0x00158E38	billProcessChild	inferred	Passes the billboard and its child at offset 0x30 to its processing routine.
 0x00158F58	billReleaseList	inferred	Releases a billboard list's shared data and then frees the list object.
@@ -925,7 +927,7 @@
 0x001598D8	billCopyCurrentRecordToSnapshot	inferred	M141; sources=names_pending_main.tsv; twin=0x00151CE8, input-family pairing. [names_qp10.tsv]
 0x001599F8	billCreateFromResource	inferred	Opens a billboard resource to read its header, creates the indexed billboard, and releases the temporary allocation.
 0x00159A50	billCloneObjectRetainingSharedData	inferred	src/dds2/effect/billManager.c func_00159A50: Clones entry list or child object, retaining shared child data reference and copying dispatch metadata. Twin of DDS1 func_00151E60. [names_reviewed24.tsv]
-0x00159BB8	effGetResourceFirstWord	inferred	Returns first word of reference-counted resource selected by index [names_reviewed6.tsv]
+0x00159BB8	effGetBillResourceTexture	inferred	Returns the acquired SdfTex handle from the indexed billboard child resource.
 0x00159BD8	effCopyVector	inferred	lq/sq copy of one quadword
 0x00159BE8	billSetLengthExtent	inferred	Stores billboard length extent; beam caller supplies its computed length [names_reviewed6.tsv]
 0x00159BF0	billSetChildScaleComponents	inferred	Stores two billboard scale components; called with equal values by billSetChildScale2 [names_reviewed6.tsv]
@@ -940,8 +942,8 @@
 0x00159DF0	billSetKind1Entry	inferred	kind-1 only; tail-calls func_001594C8 when +0x58 differs
 0x00159E30	billGetKindOneEntry	inferred	Returns the Billboard's +0x58 value only for kind-one objects, the same value compared by the corresponding setter func_00159DF0.
 0x00159E50	billGetLinkedChildValue	inferred	Follows kind-one child target link and returns its value [names_reviewed6.tsv]
-0x00159E78	billSetEntryFrameMode0	inferred	For each kind-one billboard entry sets mode zero and wraps frame by its data period.
-0x00159ED8	billSetEntryFrameMode1	inferred	Twin of mode-zero setter; sets mode one and wraps frame by data period.
+0x00159E78	billSetAnimationFrameForImmediateAdvance	inferred	Sets each entry to the requested frame with zero hold count, so the next animation update advances immediately.
+0x00159ED8	billSetAnimationFrameWithOneTickHold	inferred	Sets each entry to the requested frame with a one-update countdown before the next frame advance.
 0x00159F38	billGetFirstEntryFramePeriod	inferred	For a kind-one billboard, returns the first animation entry's nested period used to wrap frame positions.
 0x00159F60	billGetKindOneParameter	inferred	Returns kind-one billboard parameter halfword [names_reviewed6.tsv]
 0x00159F80	billGetKindOneFlags	inferred	Returns flag word only for kind-one billboards [names_reviewed6.tsv]
@@ -5044,7 +5046,7 @@
 0x002E0478	effCreateBillboardWork	inferred	Allocates and zeroes 0x68-byte billboard state, initializes scale/color and VU0 origin, optionally attaches sprite data and indexed bill resource.
 0x002E0528	effBillboardWorkRelease	inferred	body calls billDispatchByKind [names_R_FuncNames7.tsv]
 0x002E0618	effReplaceBillboardClone	inferred	Destroys destination billboard if present and clones the source billboard into its slot. [names_reviewed5.tsv]
-0x002E0668	effBillboardEntryFrameReset	inferred	body calls billSetEntryFrameMode1 [names_R_FuncNames7.tsv]
+0x002E0668	effBillboardEntryFrameReset	inferred	body calls billSetAnimationFrameWithOneTickHold [names_R_FuncNames7.tsv]
 0x002E0698	effUpdateScaledBillboardFrame	inferred	High: while the frame is live, computes projected scale and length, applies size and position, invokes the billboard callback, and advances the frame. [names_qp9.tsv]
 0x002E0790	effCopyBillboardPosition	inferred	Copies a source vector into the billboard work position. [names_reviewed5.tsv]
 0x002E07A0	effCopyBillboardOrientation	inferred	Copies a source vector into the following billboard orientation vector. [names_reviewed5.tsv]

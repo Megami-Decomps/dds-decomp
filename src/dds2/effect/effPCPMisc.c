@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff_blur.h"
@@ -203,16 +204,7 @@ typedef struct {
     EffPCPRectBounds bounds;
 } EffPCPRectParams;
 
-typedef struct {
-    u32 extent;
-    u32 color;
-    u32 blendControl;
-    f32 rotation;
-    f32 scale;
-    u32 centerX;
-    u32 centerY;
-    EffPCPRectBounds bounds;
-} EffPCPTexturedBlurParams;
+typedef EffBlurTemplateBody EffPCPTexturedBlurParams;
 
 
 
@@ -483,14 +475,7 @@ typedef struct EffPCPFadeTimerLongParams {
     s32 duration;
     s32 fadeIn;
     s32 fadeOut;
-    u32 color;
-    u8 pad10[0x0C];
-    u32 unk1C;
-    u32 unk20;
-    u32 unk24;
-    u32 unk28;
-    u32 width;
-    u32 height;
+    EffBlurQuad source;
 } EffPCPFadeTimerLongParams;
 
 typedef struct EffPCPFadeTimerLong {
@@ -1289,7 +1274,6 @@ EffPCPChargeWork *effCopyChargeResources(EffPCPChargeWork *source) {
 
 extern u16 D_003B1640[8];
 extern f32 D_003B1650[8];
-extern void billSetEntryFrameMode0(BillObj *effect, u32 startFrame);
 
 /* vu0 routine: capture staggered model points, then draw their growing history. */
 void func_001803E8(EffPCPChargeWork *work) {
@@ -1347,7 +1331,7 @@ void func_001803E8(EffPCPChargeWork *work) {
                 billSetChildScaleComponents(bill, size, size);
                 effCopyVector(bill, work->samplePositions[i][point]);
                 billInvokeCallback(bill);
-                billSetEntryFrameMode0(bill, work->animationFrames[i][point]);
+                billSetAnimationFrameForImmediateAdvance(bill, work->animationFrames[i][point]);
                 work->animationFrames[i][point]++;
             }
         }
@@ -2298,8 +2282,8 @@ EffPCPSharedTrailRef *effPcpCreateSharedTrailRef(EffPCPTrailParams *params) {
     ref->frame = 0;
     if (D_00436438 == 0) {
         effPcpSharedTrailWork = sdfAllocSizeClassBlock(sizeof(EffPCPSharedTrail));
-        effPcpSharedTrailWork->obj = effCloneBlurTemplate((EffBlurTemplateBody *)&params->res);
-        effPcpSharedTrailWork->color = params->res.color;
+        effPcpSharedTrailWork->obj = effCloneBlurTemplate(&params->res);
+        effPcpSharedTrailWork->color = params->res.source.color;
         effPcpSharedTrailWork->frame = 0;
         effPcpSharedTrailWork->flags = 0x80808080;
         effPcpSharedTrailWork->pos[0] = 0;
@@ -2397,8 +2381,8 @@ void effSetSharedScale(u32 unused, f32 value) {
 EffPCPTrailWork *effPcpTrailCreate(EffPCPTrailParams *params) {
     EffPCPTrailWork *work = sdfAllocSizeClassBlock(sizeof(EffPCPTrailWork));
 
-    work->obj = effCloneBlurTemplate((EffBlurTemplateBody *)&params->res);
-    work->color = params->res.color;
+    work->obj = effCloneBlurTemplate(&params->res);
+    work->color = params->res.source.color;
     work->frame = 0;
     work->flags = 0x80808080;
     work->pos[0] = 0.0f;
@@ -2565,7 +2549,7 @@ EffPCPCompactFadeWork *effPcpCompactLongCreate(EffPCPCompactTexturedBlurParams *
     EffPCPCompactFadeWork *work;
 
     work = sdfAllocSizeClassBlock(0x3C);
-    work->resource = (u32)effCloneBlurTemplate((EffBlurTemplateBody *)&params->res);
+    work->resource = (u32)effCloneBlurTemplate(&params->res);
     work->frame = 0;
     work->color = 0x80808080;
     work->flags = params->timeline.flags;
@@ -2574,7 +2558,7 @@ EffPCPCompactFadeWork *effPcpCompactLongCreate(EffPCPCompactTexturedBlurParams *
     work->fadeOut = params->timeline.fadeOut;
     work->startExtent = params->timeline.startExtent;
     work->endExtent = params->timeline.endExtent;
-    work->baseColor = params->res.color;
+    work->baseColor = params->res.source.color;
     return work;
 }
 
@@ -2594,7 +2578,7 @@ void effPcpCompactLongRespawn(EffPCPCompactFadeWork *work) {
     params.timeline.fadeOut = work->fadeOut;
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
-    params.res = *(EffPCPTexturedBlurParams *)&((EffBlurTemplate *)work->resource)->body;
+    params.res = ((EffBlurTemplate *)work->resource)->body;
     effPcpCompactLongCreate(&params);
 }
 
@@ -2730,7 +2714,7 @@ void *effPcpCopyWorkLong(src)
     dst->params = *src;
     dst->colorFrom = 0x80808080;
     dst->frame = 0;
-    dst->colorTo = src->color;
+    dst->colorTo = src->source.color;
     return dst;
 }
 
@@ -2764,12 +2748,12 @@ void effPcpFadeTimerLongUpdate(EffPCPFadeTimerLong *work) {
         return;
     }
     fadeIn = work->params.fadeIn;
-    work->params.unk1C = 0;
-    work->params.unk20 = 0;
-    work->params.unk24 = 0;
-    work->params.unk28 = 0;
-    work->params.width = 0x200;
-    work->params.height = 0x1C0;
+    work->params.source.x = 0;
+    work->params.source.y = 0;
+    work->params.source.left = 0;
+    work->params.source.top = 0;
+    work->params.source.right = 0x200;
+    work->params.source.bottom = 0x1C0;
     fadeOut = work->params.fadeOut;
     if (frame < fadeIn && fadeIn != 0) {
         t = (f32)frame / (f32)fadeIn;
@@ -2778,8 +2762,8 @@ void effPcpFadeTimerLongUpdate(EffPCPFadeTimerLong *work) {
     } else {
         t = 1.0f;
     }
-    work->params.color = effMultiplyPackedColors(effBlendColor(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
-    effDrawBlurRectangle(&work->params.color);
+    work->params.source.color = effMultiplyPackedColors(effBlendColor(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
+    effDrawBlurRectangle(&work->params.source.color);
     work->frame++;
 }
 
@@ -6292,4 +6276,3 @@ INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_00436438);
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_0043643C);
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", D_0043643D);
-

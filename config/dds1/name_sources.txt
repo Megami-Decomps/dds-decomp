@@ -1167,11 +1167,13 @@
 0x0014FEB0	effCloneSourceWithTypeHandler	inferred	confidence=high; src/dds1/game/code_0014FEB0.c:func_0014FEB0; Allocates an effect-source copy, copies type and metadata, and clones its argument through the type-selected handler. [names_qp9.tsv]
 0x00150040	effInitializeBillResourceOwners	inferred	Creates the fifteen configured billboard resource owners and scales each kind-zero payload's half extents
 0x001500F0	effBillDispatchAll	inferred	Dispatches every entry in the bill-kind table. [names_qp9.tsv]
+0x00150148	billCreateChildPayloadFromTextureResource	inferred	Allocates a billboard child payload, acquires the texture named by the supplied resource, initializes its UV and size geometry, and returns the payload.
 0x00150260	effReleaseSharedTextureRecord	inferred	src/dds1/game/code_0014FEB0.c func_00150260: Decrements reference count and releases texture reference plus allocation on final reference. [names_reviewed24.tsv]
 0x001502B0	billAppendChildQuad	inferred	appends one billboard quad to a child payload
 0x00150750	billFlushPendingChildPackets	inferred	drains pending child packet lists into pools
 0x00151010	billFlushPendingRenderPairs	inferred	drains queued render pairs and submits batches
-0x001511C0	billAllocChild	inferred	allocates 0x34 child, links func_00150148 result when arg given
+0x00151178	billInitializeCommonDrawState	inferred	Initializes the billboard's default scales, offsets, gray color, and packet-list selection; called for newly created and cloned objects.
+0x001511C0	billAllocChild	inferred	allocates a 0x34 billboard object and attaches a child payload from its resource argument
 0x00151260	billAllocList	inferred	allocates entry-list object from data, wires +0x30/+0x60/+0x50
 0x001512E8	billCloneList	inferred	clones entry-list object sharing child, bumps child count
 0x00151398	billStepAnimationEntryAndUpdateChild	inferred	Advances one animation entry timer, updates the selected frame, and copies its color, UVs, dimensions, and placement into the referenced child payload; plural entries are handled by the caller.
@@ -1186,7 +1188,7 @@
 0x00151F00	billDispatchByKind	inferred	runs D_0034E068 command for instance kind
 0x00151F38	billInvokeCallback	inferred	invokes instance unk28 callback
 0x00151F58	effRetainResource	inferred	eff effect resources and animation in game/code_00151F58.c
-0x00151FC8	effGetResourceFirstWord	inferred	Returns first word of reference-counted resource selected by index [names_reviewed6.tsv]
+0x00151FC8	effGetBillResourceTexture	inferred	Returns the acquired SdfTex handle from the indexed billboard child resource.
 0x00151FF8	billSetLengthExtent	inferred	Stores billboard length extent; beam caller supplies its computed length [names_reviewed6.tsv]
 0x00152000	billSetChildScaleComponents	inferred	Stores two billboard scale components; called with equal values by billSetChildScale2 [names_reviewed6.tsv]
 0x00152010	billSetChildParameter	inferred	Stores the supplied word in billboard parameter [names_reviewed6.tsv]
@@ -1198,8 +1200,8 @@
 0x00152198	billSetVariantValue	inferred	Writes the chosen variant's halfword value to its variant-specific storage.
 0x001521D0	billGetVariantValue	inferred	Reads the halfword value from storage selected by the billboard object's kind.
 0x00152260	billGetLinkedChildValue	inferred	Follows kind-one child target link and returns its value [names_reviewed6.tsv]
-0x00152288	billSetEntryFrameMode0	inferred	For each kind-one billboard entry sets mode zero and wraps frame by its data period.
-0x001522E8	billSetEntryFrameMode1	inferred	Twin of mode-zero setter; sets mode one and wraps frame by data period.
+0x00152288	billSetAnimationFrameForImmediateAdvance	inferred	Sets each entry to the requested frame with zero hold count, so the next animation update advances immediately.
+0x001522E8	billSetAnimationFrameWithOneTickHold	inferred	Sets each entry to the requested frame with a one-update countdown before the next frame advance.
 0x00152370	billGetKindOneParameter	inferred	Returns kind-one billboard parameter halfword [names_reviewed6.tsv]
 0x00152390	billGetKindOneFlags	inferred	Returns flag word only for kind-one billboards [names_reviewed6.tsv]
 0x001523B0	billMarkKindOneFlag	inferred	Sets flag bit on kind-one billboard [names_reviewed6.tsv]
@@ -5396,7 +5398,7 @@
 0x0029E4C0	effBillboardWorkRelease	inferred	paired effect body: calls billDispatchByKind [names_R_FuncNames7.tsv]
 0x0029E4F8	effDuplicateBillState	inferred	eff effect resources and animation in game/code_0029A840.c
 0x0029E5B0	effReplaceBillboardClone	inferred	Destroys destination billboard if present and clones the source billboard into its slot. [names_reviewed5.tsv]
-0x0029E600	effBillboardEntryFrameReset	inferred	paired effect body: calls billSetEntryFrameMode1 [names_R_FuncNames7.tsv]
+0x0029E600	effBillboardEntryFrameReset	inferred	paired effect body: calls billSetAnimationFrameWithOneTickHold [names_R_FuncNames7.tsv]
 0x0029E630	effUpdateScaledBillboardFrame	inferred	High: while the frame is live, computes projected scale and length, applies size and position, invokes the billboard callback, and advances the frame. [names_qp9.tsv]
 0x0029E728	effCopyBillboardPosition	inferred	Copies a source vector into the billboard work position. [names_reviewed5.tsv]
 0x0029E738	effCopyBillboardOrientation	inferred	Copies a source vector into the following billboard orientation vector. [names_reviewed5.tsv]

@@ -16,7 +16,6 @@ extern void func_002DA3F0(void *, u32);
 #include "par_kind_api.h"
 
 #define BILL_ENTRY_BYTES 0x14
-#define BILL_FRAME_MODE_BITS 6
 #define BILL_VARIANT_MASK 0xFFFF
 #define EFF_INSTANCE_BYTES 0x88
 #define EFF_MATRIX_BYTES 0x40
@@ -41,7 +40,7 @@ typedef struct EffEmitterHead {
     u8 pad9C[0x14];
     f32 matrix[16];        /* 0xB0 */
     u32 colorMask;         /* 0xF0 */
-    s32 billboard;
+    BillObj *billboard; /* 0xF4: owned billboard shared with the particle view */
     EffectBufferTail *buffer; /* 0xF8 */
     u8 padFC[0x46];
     u16 active;            /* 0x142 */
@@ -119,7 +118,6 @@ extern f32 effMiscRandUnitFloat(void *);
 
 extern EffectConfig D_0034DF54[];
 
-s32 billCreateIndexed(s32 kind, s32 index);
 
 extern s32 effBillResourceOwners[];
 
@@ -157,7 +155,7 @@ void effEmitterLookAtRingSpawn(EffLookAtRingEmitter *effect, u32 index);
 /* Create a billboard sharing the indexed entry's resource. Word two of the
  * resource stores the reference count; the BillObj payload is not an emitter. */
 u32 effRetainResource(s32 index) {
-    BillObj *effect = (BillObj *)billCreateIndexed(D_0034DF54[index].billboardKind, 0);
+    BillObj *effect = billCreateIndexed(D_0034DF54[index].billboardKind, 0);
     BillChildPayload *resource = ((BillObj *)effBillResourceOwners[index])->child;
     s32 references = resource->refCount;
 
@@ -170,8 +168,8 @@ u32 func_00151FC0(void) {
     return 0xf;
 }
 
-s32 effGetResourceFirstWord(s32 index) {
-    return ((BillObj *)effBillResourceOwners[index])->child->value;
+SdfTex *effGetBillResourceTexture(s32 index) {
+    return ((BillObj *)effBillResourceOwners[index])->child->texture;
 }
 
 void effCopyVector(void *dst, void *src) {
@@ -203,7 +201,7 @@ void billSetChildTextureQuad(BillObj *effect, const BillTextureQuad *textureQuad
 /* Each effect scene object owns a billboard and an asset reference. */
 typedef struct EffUnitObject {
     u8 matrix[0x80];
-    s32 billboard;  /* 0x80 */
+    BillObj *billboard; /* 0x80: scene-owned billboard */
     void *resource; /* 0x84 */
 } EffUnitObject;
 
@@ -225,12 +223,13 @@ void billSetBillboardMode(BillObj *effect, s32 mode) {
             frameSlotAddress = (s32)effect->resolvedEntries + 0xc;
             do {
                 s32 frameData = *(s32 *)frameSlotAddress;
-                u32 frameFlags = ((BillAnimationEntry *)frameData)->flags & ~BILL_FRAME_MODE_BITS;
+                u32 frameFlags = ((BillAnimationEntry *)frameData)->flags &
+                    ~BILL_ANIMATION_FLAG_PACKET_LIST_MASK;
                 ((BillAnimationEntry *)frameData)->flags = frameFlags;
                 if (mode == 2) {
-                    ((BillAnimationEntry *)frameData)->flags = frameFlags | 2;
+                    ((BillAnimationEntry *)frameData)->flags = frameFlags | BILL_ANIMATION_FLAG_PACKET_LIST_2;
                 } else if (mode == 3) {
-                    ((BillAnimationEntry *)frameData)->flags = frameFlags | 4;
+                    ((BillAnimationEntry *)frameData)->flags = frameFlags | BILL_ANIMATION_FLAG_PACKET_LIST_3;
                 }
                 frameSlotAddress += BILL_ENTRY_BYTES;
             } while (--remaining != 0);
@@ -276,7 +275,7 @@ void billSetAllChildVariants(BillObj *effect, s32 variant) {
 
 s32 billGetChildValue(BillObj *effect) {
     if (effect->kind == 0) {
-        return effect->child->value;
+        return (s32)effect->child->texture;
     }
     return 0;
 }
@@ -332,8 +331,8 @@ s32 billGetLinkedChildValue(s32 billboard) {
     return 0;
 }
 
-/* Start every entry's animation at the requested frame, with mode zero. */
-void billSetEntryFrameMode0(BillObj *effect, u32 startFrame) {
+/* Select the frame and make the next animation update advance immediately. */
+void billSetAnimationFrameForImmediateAdvance(BillObj *effect, u32 startFrame) {
     if (effect->kind == 1) {
         s32 entryCount = effect->entryCount;
 
@@ -353,8 +352,8 @@ void billSetEntryFrameMode0(BillObj *effect, u32 startFrame) {
     }
 }
 
-/* Start every entry's animation at the requested frame, with mode one. */
-void billSetEntryFrameMode1(BillObj *effect, u32 startFrame) {
+/* Select the frame and hold it for one animation update before advancing. */
+void billSetAnimationFrameWithOneTickHold(BillObj *effect, u32 startFrame) {
     if (effect->kind == 1) {
         s32 entryCount = effect->entryCount;
 
@@ -477,8 +476,8 @@ u8 *billCreateUnitObject(s32 entryIndex) {
 u8 *billCloneUnitObject(u8 *source) {
     u8 *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
 
-    ((EffUnitObject *)instance)->billboard = (s32)billCloneObjectRetainingSharedData(
-        (struct BillObj *)((EffUnitObject *)source)->billboard);
+    ((EffUnitObject *)instance)->billboard = billCloneObjectRetainingSharedData(
+        ((EffUnitObject *)source)->billboard);
     ((EffUnitObject *)instance)->resource = sdfCreateAssetWithDrawEntries();
     func_002DA420(((EffUnitObject *)instance)->resource, 1.0f);
     func_002DA3D8(((EffUnitObject *)instance)->resource, 0x80808080);
@@ -521,7 +520,7 @@ void effVuCopyMatrix(void *dst, void *src) {
 
 /* Kind 1 writes mode plus one/two entry values; untouched output words retain their contents. */
 void effReadBillboardModeValues(EffUnitObject *instance, s32 *modeValues) {
-    BillObj *billboard = (BillObj *)instance->billboard;
+    BillObj *billboard = instance->billboard;
 
     if (billboard->kind == 1) {
         u32 modeFlags = billboard->modeFlags;

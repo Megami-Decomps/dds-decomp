@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "eff.h"
 #include "eff_node_descriptor.h"
@@ -111,23 +112,13 @@ void effBillDispatchAll(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0014FEB0", func_00150148);
-
-/* Texture record: +0x00 is the handle the reference is dropped from, +0x08 the
- * reference count and +0x44 the allocation released when it reaches zero. */
-typedef struct TexRecord {
-    void *texture;     /* 0x00 */
-    u32 flags;         /* 0x04 */
-    s32 refCount;      /* 0x08 */
-    u8 pad0C[0x38];
-    void *allocation;  /* 0x44 */
-} TexRecord;
+INCLUDE_ASM(const s32, "game/code_0014FEB0", billCreateChildPayloadFromTextureResource);
 
 /* Drop one reference; the last one releases the texture and its allocation. */
-void effReleaseSharedTextureRecord(TexRecord *entry) {
+void effReleaseSharedTextureRecord(BillChildPayload *entry) {
     entry->refCount--;
     if (entry->refCount == 0) {
-        sdfTexReleaseReferenceViaHandler((struct SdfTex *)entry->texture);
+        sdfTexReleaseReferenceViaHandler(entry->texture);
         sdfReleaseResourceAllocation(entry->allocation);
     }
 }

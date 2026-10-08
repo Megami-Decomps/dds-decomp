@@ -1,9 +1,9 @@
+#include "bill_object_api.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "sdf_chip.h"
 #include "eff_blur.h"
 
-extern s32 effGetResourceFirstWord(s32);
 extern u32 effMiscRand(void *);
 extern f32 effMiscRandUnitFloat(void *);
 extern u8 D_003AA868[];
@@ -14,13 +14,6 @@ extern u8 D_003AA868[];
 void effReleaseBlurTemplate(EffBlurTemplate *owner) {
     sdfReleaseChipBlock(owner);
 }
-
-/* Standalone rectangle input, not either particle-array work (0x30). */
-typedef struct {
-    s32 extent;
-    EffBlurQuad quad;
-    u32 sourceHandle;
-} EffBlurRect;
 
 extern u32 func_001200E0(void);
 
@@ -41,19 +34,19 @@ void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
 }
 
 /* Fixed-point input keeps the SDK's vertical halving before drawing. */
-void effDrawBlurFixedPointRectangle(EffBlurRect *rect) {
+void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner) {
     s32 x, y, w;
 
     if (func_001200E0() == 0) {
-        x = rect->quad.x + 0x1000;
-        y = (rect->quad.y + 0xE00) >> 1;
-        w = rect->extent;
-        rect->quad.left = x - w;
-        rect->quad.right = x + w;
+        x = owner->body.source.x + 0x1000;
+        y = (owner->body.source.y + 0xE00) >> 1;
+        w = owner->body.extent;
+        owner->body.source.left = x - w;
+        owner->body.source.right = x + w;
         w >>= 1;
-        rect->quad.top = y - w;
-        rect->quad.bottom = y + w;
-        effDrawBlurSource(&rect->quad, rect->sourceHandle, 1);
+        owner->body.source.top = y - w;
+        owner->body.source.bottom = y + w;
+        effDrawBlurSource(&owner->body.source, owner->resourceWord, 1);
     }
 }
 
@@ -69,7 +62,7 @@ void effBlurSetHandle(EffBlurScatterWork *work, u32 sourceHandle) {
 
 /* Acquire the same handle through the effect resource manager. */
 void effBlurAcquireHandle(EffBlurScatterWork *work) {
-    work->sourceHandle = effGetResourceFirstWord(2);
+    work->sourceHandle = (u32)effGetBillResourceTexture(2);
 }
 
 void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *slot) {
@@ -110,7 +103,7 @@ EffBlurScatterWork *effBlurCreateScatterWork(EffBlurScatterParams *params)
     work->params = *params;
     work->allocation = allocation;
     work->slots = (EffBlurScatterSlot *)(work + 1);
-    work->sourceHandle = effGetResourceFirstWord(2);
+    work->sourceHandle = (u32)effGetBillResourceTexture(2);
     slot = work->slots;
     for (i = 0; i < 100; i++, slot++) {
         effBlurInitializeScatterSlot(work, slot);
@@ -186,7 +179,7 @@ void effBlurSetSecondSetting(EffBlurScaleWork *work, u32 sourceHandle) {
 
 /* Both acquisition callbacks request selector 2; the second factory uses 3. */
 void effBlurAcquireSecondHandle(EffBlurScaleWork *work) {
-    work->sourceHandle = effGetResourceFirstWord(2);
+    work->sourceHandle = (u32)effGetBillResourceTexture(2);
 }
 
 /* Fixed-point edges: 16 units per x pixel and 8 per y pixel.

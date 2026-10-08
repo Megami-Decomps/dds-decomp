@@ -168,7 +168,6 @@ void effApplyNodeScale(s32, float);
 s32 effCreateNodeFromDescriptor(s32);
 
 
-s32 billCreateIndexed(s32, s32);
 
 s32 mdlBuildViewerRectanglePacket(s32, s32, s32, s32, s32);
 
@@ -650,7 +649,7 @@ void mdlAddBillboardPart(DevRequest *partList, s32 descriptorIndex) {
 
     partEntry->state = 0;
     partEntry->kind = MDL_PART_BILLBOARD;
-    partEntry->object = billCreateIndexed(1, descriptorIndex);
+    partEntry->object = (s32)billCreateIndexed(1, descriptorIndex);
     partList->usedCount += 1;
 }
 
