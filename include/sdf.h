@@ -153,13 +153,13 @@ typedef struct SdfStreamFrameNode {
     u8 playbackMode;
     u8 pad17;
     u8 bufferIndex;
-    u8 pad19;
+    u8 transferPacketIndex;
     u8 unk1A;
     u8 pad1B;
     s32 bufferSize;
     void *frameBuffers[2];
     void *transferPacketBuffers[2];
-    u8 pad30[4];
+    u32 transferPacketBytes;
     s32 resourceWord;
     SdfTexResource *textureHead;
     u16 width;
@@ -190,6 +190,10 @@ typedef char SdfStreamFrameNode_frameBuffers_offset_must_be_0x20[
     ((u32)&((SdfStreamFrameNode *)0)->frameBuffers == 0x20) ? 1 : -1];
 typedef char SdfStreamFrameNode_transferPacketBuffers_offset_must_be_0x28[
     ((u32)&((SdfStreamFrameNode *)0)->transferPacketBuffers == 0x28) ? 1 : -1];
+typedef char SdfStreamFrameNode_transferPacketBytes_offset_must_be_0x30[
+    ((u32)&((SdfStreamFrameNode *)0)->transferPacketBytes == 0x30) ? 1 : -1];
+typedef char SdfStreamFrameNode_transferPacketIndex_offset_must_be_0x19[
+    ((u32)&((SdfStreamFrameNode *)0)->transferPacketIndex == 0x19) ? 1 : -1];
 typedef char SdfStreamFrameNode_inputDmaChain_offset_must_be_0x4C[
     ((u32)&((SdfStreamFrameNode *)0)->inputDmaChain == 0x4C) ? 1 : -1];
 typedef char SdfStreamFrameNode_scratchBuffer_offset_must_be_0x54[
