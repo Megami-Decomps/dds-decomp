@@ -2105,7 +2105,7 @@ void func_001DC538(void) {
 
 extern s32 btlSumOtherTargetHitAmounts(u8 *);
 extern s32 btlComputeStatusPenaltyFifth(BtlUnit *);
-extern s32 btlIsUnitDefeatTriggeredByValueDelta(u8 *, s32);
+extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
 extern BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *, u32, u32, u32, f32);
 
@@ -2144,7 +2144,7 @@ void func_001DC540(void *data) {
                     effectTask->ownerId = btlAdvanceRuntimeSequenceCounter();
                     btlStartTask(effectTask);
                 }
-                if ((unit->flags & 0x200) != 0 && btlIsUnitDefeatTriggeredByValueDelta((u8 *)unit, spec.hpDelta) != 0) {
+                if ((unit->flags & 0x200) != 0 && btlIsUnitDefeatTriggeredByValueDelta(unit, spec.hpDelta) != 0) {
                     btlStartTask(btlCreateActorModelBlendTask(unit, 0, 11, 2, 1.0f));
                     btlStartTask(btlCreateHookedUnitSoundTask(unit, 11));
                 } else {
@@ -2167,7 +2167,7 @@ void func_001DC540(void *data) {
             effectTask->ownerId = btlAdvanceRuntimeSequenceCounter();
             btlStartTask(effectTask);
         }
-        if ((unit->flags & 0x200) != 0 && btlIsUnitDefeatTriggeredByValueDelta((u8 *)unit, spec.hpDelta) != 0) {
+        if ((unit->flags & 0x200) != 0 && btlIsUnitDefeatTriggeredByValueDelta(unit, spec.hpDelta) != 0) {
             btlStartTask(btlCreateActorModelBlendTask(unit, 0, 11, 2, 1.0f));
             btlStartTask(btlCreateHookedUnitSoundTask(unit, 11));
         } else {

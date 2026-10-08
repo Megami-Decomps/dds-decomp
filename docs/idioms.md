@@ -4765,3 +4765,22 @@ even though retail's provider discards the output. Its unused formals
 match the recovered DDS2 `0020D1B0` interface; the empty body does not
 make it a zero-argument function or a variadic formatter.
 
+
+## Camera endpoint setup follows the linked-command index append
+
+DDS2 `001EC688` appends `action->link->unit` to the command's target
+index list, then forwards the unchanged command and its front/back camera
+members to `001F2E30`. The wrapper and constructor use a command pointer
+and two camera pointers; a second integer-address alias has no ownership
+or transport role.
+
+
+## Defeat queries borrow the complete battle unit
+
+DDS2 `001B2430` reads the unit's party-record status and HP with LHU at
+`+0x12E` and `+0x126`, and the battle work's flags at `+0x218`.
+Its exemption query `001B47E0` uses the same unit and its party-record
+unit ID at `+0x124`. These are `BtlUnit *` interfaces, not byte-buffer
+interfaces: their callers need neither byte-pointer casts nor a second
+UI-record projection of the party data.
+
