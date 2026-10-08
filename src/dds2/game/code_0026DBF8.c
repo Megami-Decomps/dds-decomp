@@ -62,8 +62,6 @@ void mnuFreeMantraSparkleEmitter(u32 sprite);
 void mnuReleaseMantraPanelBurstPool(u32 *obj);
 u32 mnuAllocateMantraBackgroundBurstPool(void);
 extern void mnuDrawCellScaledGrid();
-u32 mnuQueueNextMantraSelection(u32);
-u32 mnuQueuePreviousMantraSelection(u32);
 extern u32 mnuRegisterMantraDrawItem(u32, u32, s32 (*)(), void (*)(), u32 (*)(), void (*)(), s16, s16, u32);
 extern s32 mnuUpdateMantraFadeA();
 extern u32 mnuDrawMantraIconList(u32, u32);
@@ -325,6 +323,8 @@ typedef struct MantraListState {
     s16 index;
     u32 unk2C;
 } MantraListState;
+
+MantraDisplayNode *mnuAppendDisplayListNode(MantraListState *state);
 
 typedef struct MantraFileEntry {
     struct MantraFileEntry *next;
@@ -797,91 +797,91 @@ void mnuInitMantraListEntries(MantraListState *list, u32 *entries, s32 count, s3
 
 /* Queue a display-list transition from the previous selection to the chosen one.
  * A repeat selection needs no node and returns zero. */
-u32 mnuQueueMantraSelectionTransition(u32 state, s8 selection) {
-    u32 item;
+MantraDisplayNode *mnuQueueMantraSelectionTransition(MantraListState *state, s8 selection) {
+    MantraDisplayNode *item;
     u32 *entries;
-    if (((MantraListState *)state)->index == selection) {
-        return 0;
+    if (state->index == selection) {
+        return NULL;
     }
     item = mnuAppendDisplayListNode(state);
-    if (item != 0) {
+    if (item != NULL) {
         u32 *selected;
         u32 *previous;
-        entries = ((MantraListState *)state)->entries;
-        ((MantraDisplayNode *)item)->transitionKind = 2;
+        entries = state->entries;
+        item->transitionKind = 2;
         selected = entries + selection;
-        previous = entries + ((MantraListState *)state)->index;
-        ((MantraListState *)state)->index = selection;
-        ((MantraDisplayNode *)item)->fromValue = *previous;
-        ((MantraDisplayNode *)item)->toValue = *selected;
+        previous = entries + state->index;
+        state->index = selection;
+        item->fromValue = *previous;
+        item->toValue = *selected;
     }
     return item;
 }
 
 /* Queue the next selection, wrapping to the first list entry at the end. */
-u32 mnuQueueNextMantraSelection(u32 state) {
-    u32 item = mnuAppendDisplayListNode(state);
-    u32 *entries = ((MantraListState *)state)->entries;
-    if (item != 0) {
-        s16 index = ((MantraListState *)state)->index;
-        s16 count = ((MantraListState *)state)->count;
+MantraDisplayNode *mnuQueueNextMantraSelection(MantraListState *state) {
+    MantraDisplayNode *item = mnuAppendDisplayListNode(state);
+    u32 *entries = state->entries;
+    if (item != NULL) {
+        s16 index = state->index;
+        s16 count = state->count;
         s32 next = index + 1;
         u32 *current;
         u32 *upcoming;
-        ((MantraDisplayNode *)item)->transitionKind = 2;
+        item->transitionKind = 2;
         if (index >= count - 1) {
             next = 0;
         }
-        current = entries + ((MantraListState *)state)->index;
+        current = entries + state->index;
         upcoming = entries + next;
-        ((MantraListState *)state)->index = next;
-        ((MantraDisplayNode *)item)->fromValue = *current;
-        ((MantraDisplayNode *)item)->toValue = *upcoming;
+        state->index = next;
+        item->fromValue = *current;
+        item->toValue = *upcoming;
     }
     return item;
 }
 
 /* Queue the previous selection, wrapping to the last list entry at the start. */
-u32 mnuQueuePreviousMantraSelection(u32 state) {
-    u32 item = mnuAppendDisplayListNode(state);
-    u32 *entries = ((MantraListState *)state)->entries;
-    if (item != 0) {
+MantraDisplayNode *mnuQueuePreviousMantraSelection(MantraListState *state) {
+    MantraDisplayNode *item = mnuAppendDisplayListNode(state);
+    u32 *entries = state->entries;
+    if (item != NULL) {
         s32 prev;
         u32 *current;
         u32 *upcoming;
-        if (((MantraListState *)state)->index <= 0) {
-            prev = ((MantraListState *)state)->count - 1;
+        if (state->index <= 0) {
+            prev = state->count - 1;
         } else {
-            prev = ((MantraListState *)state)->index - 1;
+            prev = state->index - 1;
         }
-        ((MantraDisplayNode *)item)->transitionKind = 1;
-        current = entries + ((MantraListState *)state)->index;
+        item->transitionKind = 1;
+        current = entries + state->index;
         upcoming = entries + prev;
-        ((MantraListState *)state)->index = prev;
-        ((MantraDisplayNode *)item)->fromValue = *current;
-        ((MantraDisplayNode *)item)->toValue = *upcoming;
+        state->index = prev;
+        item->fromValue = *current;
+        item->toValue = *upcoming;
     }
     return item;
 }
 
-u32 mnuAppendDisplayListNode(u32 state) {
-    MantraDisplayNode *node = ((MantraListState *)state)->head;
-    if (node == 0) {
+MantraDisplayNode *mnuAppendDisplayListNode(MantraListState *state) {
+    MantraDisplayNode *node = state->head;
+    if (node == NULL) {
         node = mnuAllocateDisplayListNode();
-        ((MantraListState *)state)->head = node;
+        state->head = node;
     } else {
-        while (node->next != 0) {
+        while (node->next != NULL) {
             node = node->next;
         }
         node->next = mnuAllocateDisplayListNode();
         node = node->next;
     }
-    return (u32)node;
+    return node;
 }
 
-void mnuReleaseDisplayListNodes(u32 state) {
-    MantraDisplayNode *node = ((MantraListState *)state)->head;
-    while (node != 0) {
+void mnuReleaseDisplayListNodes(MantraListState *state) {
+    MantraDisplayNode *node = state->head;
+    while (node != NULL) {
         node = mnuReleaseDisplayListNodeAndGetNext(node);
     }
 }
@@ -927,8 +927,8 @@ s32 func_0026F8A0(s32 x, s32 y, s32 depth, MantraListState *state, s32 amount, s
     return 0;
 }
 
-void func_0026FAA8(s32 state) {
-    ((MantraListState *)state)->unk2C = 0x1e;
+void func_0026FAA8(MantraListState *state) {
+    state->unk2C = 0x1e;
 }
 
 u32 func_0026FAB8(void) {
@@ -2347,39 +2347,39 @@ void mnuShowMantraUnitPanel(u32 ctx) {
 
 void mnuAdvanceMantraUnitPanelListState(u32 pool) {
     s32 obj = mnuFindMantraDrawItemByKind(pool, 9);
-    mnuQueuePreviousMantraSelection((u32)&((MantraLampState *)((MantraDrawItem *)obj)->data)->list);
+    mnuQueuePreviousMantraSelection(&((MantraLampState *)((MantraDrawItem *)obj)->data)->list);
 }
 
 void mnuQueueNextUnitPanelSelection(u32 pool) {
     s32 obj = mnuFindMantraDrawItemByKind(pool, 9);
-    mnuQueueNextMantraSelection((u32)&((MantraLampState *)((MantraDrawItem *)obj)->data)->list);
+    mnuQueueNextMantraSelection(&((MantraLampState *)((MantraDrawItem *)obj)->data)->list);
 }
 
 u32 mnuQueueUnitPanelSelection(u32 pool, s8 value) {
     s32 obj = mnuFindMantraDrawItemByKind(pool, 9);
-    return mnuQueueMantraSelectionTransition((u32)&((MantraLampState *)((MantraDrawItem *)obj)->data)->list, value) != 0;
+    return mnuQueueMantraSelectionTransition(&((MantraLampState *)((MantraDrawItem *)obj)->data)->list, value) != NULL;
 }
 
 u32 func_002747F0(u32 pool) {
     MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 9);
-    func_0026FAA8((s32)&((MantraLampState *)item->data)->list);
+    func_0026FAA8(&((MantraLampState *)item->data)->list);
     return 0;
 }
 
 /* Build the unit-panel fade state and copy its initial selection list. */
 u32 mnuInitMantraUnitPanelDraw(u32 ctx, MantraPanelListInput *resources) {
-    u32 data = sdfAllocSizeClassBlock(0x40);
-    memset((void *)data, 0, 0x40);
-    ((MantraLampState *)data)->state = 1;
-    mnuInitMantraListEntries(&((MantraLampState *)data)->list, resources->entries,
+    MantraLampState *data = sdfAllocSizeClassBlock(0x40);
+    memset(data, 0, 0x40);
+    data->state = 1;
+    mnuInitMantraListEntries(&data->list, resources->entries,
                   resources->count, resources->selectedIndex);
     evtPrintDeveloperConsoleMessage("UnitPanel Draw Init\n");
-    return data;
+    return (u32)data;
 }
 
 void mnuReleaseMantraUnitPanelDraw(u32 obj) {
-    s32 data = (s32)((MantraDrawItem *)obj)->data;
-    mnuReleaseDisplayListNodes((u32)&((MantraLampState *)data)->list);
+    MantraLampState *data = ((MantraDrawItem *)obj)->data;
+    mnuReleaseDisplayListNodes(&data->list);
     sdfReleaseChipBlock(data);
     evtPrintDeveloperConsoleMessage("UnitPanel Draw Release\n");
 }
