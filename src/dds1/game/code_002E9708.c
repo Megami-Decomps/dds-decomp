@@ -1002,8 +1002,8 @@ void sdfAllocateStreamFrameBuffers(SdfStreamFrameNode *node) {
     size = node->width * node->height;
     size *= bytesPerPixel;
     node->bufferSize = size;
-    node->buffers[0] = sdfAllocateBlockBySizeThreshold(size);
-    node->buffers[1] = sdfAllocateBlockBySizeThreshold(size);
+    node->frameBuffers[0] = sdfAllocateBlockBySizeThreshold(size);
+    node->frameBuffers[1] = sdfAllocateBlockBySizeThreshold(size);
 }
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EB578);
 
@@ -1055,7 +1055,7 @@ void sdfSoundInitFormattedNode(SdfStreamFrameNode *node, SoundFormat *format, Sd
     node->read = readSource;
     node->source = source;
     node->active = 1;
-    node->scratchBuffer = sdfAllocateBlockBySizeThreshold(SDF_STREAM_SCRATCH_BYTES) + SDF_STREAM_PREFIX_BYTES;
+    node->scratchBuffer = (u8 *)sdfAllocateBlockBySizeThreshold(SDF_STREAM_SCRATCH_BYTES) + SDF_STREAM_PREFIX_BYTES;
 }
 
 extern SdfTexResource *sdfTexAllocateHeadForDimensions(s32, s32, s32, s32, s32);
@@ -1140,13 +1140,13 @@ void func_002EBB60(SdfStreamFrameNode *node) {
     if (interruptsEnabled != 0) {
         EIntr();
     }
-    sdfFreeMemoryFromEitherHeap((void *)node->unk4C);
-    sdfFreeMemoryFromEitherHeap((void *)node->buffers[0]);
-    sdfFreeMemoryFromEitherHeap((void *)node->buffers[1]);
-    sdfTexQueueResourceRelease(node->textureResources[0]);
-    sdfTexQueueResourceRelease(node->textureResources[1]);
+    sdfFreeMemoryFromEitherHeap(node->inputDmaChain);
+    sdfFreeMemoryFromEitherHeap(node->frameBuffers[0]);
+    sdfFreeMemoryFromEitherHeap(node->frameBuffers[1]);
+    sdfTexQueueResourceRelease((s32)node->transferPacketBuffers[0]);
+    sdfTexQueueResourceRelease((s32)node->transferPacketBuffers[1]);
     if (node->scratchBuffer != 0) {
-        sdfFreeMemoryFromEitherHeap((void *)(node->scratchBuffer - 0x100));
+        sdfFreeMemoryFromEitherHeap(node->scratchBuffer - 0x100);
     }
     if (node->textureHead != 0) {
         sdfTexQueuePendingWork(node->textureHead);
@@ -1174,7 +1174,7 @@ void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
         do {
             writeSlot = feed->firstSlot;
             endOfStream = 0;
-            destinationAddress = feed->scratchBuffer;
+            destinationAddress = (u32)feed->scratchBuffer;
             writeSlot += filledSlots;
             if (writeSlot >= SDF_STREAM_RING_SLOTS) {
                 writeSlot -= SDF_STREAM_RING_SLOTS;
@@ -1201,7 +1201,7 @@ void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
                 filledSlots++;
             }
             if (writeSlot == SDF_STREAM_MAX_FILLED) {
-                memcpy((void *)(((feed->scratchBuffer - SDF_STREAM_PREFIX_BYTES) & SDF_EE_PHYSICAL_MASK) | SDF_EE_UNCACHED_BASE), (void *)(destinationAddress + SDF_STREAM_TRAILER_START), SDF_STREAM_PREFIX_BYTES);
+                memcpy((void *)(((u32)(feed->scratchBuffer - SDF_STREAM_PREFIX_BYTES) & SDF_EE_PHYSICAL_MASK) | SDF_EE_UNCACHED_BASE), (void *)(destinationAddress + SDF_STREAM_TRAILER_START), SDF_STREAM_PREFIX_BYTES);
             }
             feed->filledSlots = filledSlots;
             if (feed->done != 0) {
@@ -1215,7 +1215,7 @@ void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
 void sdfSoundStartIpuInputDma(SdfStreamFrameNode *stream) {
     if (stream->active == 0) {
         D_003BDAA8 = stream;
-        *(vu32 *)SDF_IPU_INPUT_DMA_TAG_ADDRESS = stream->unk4C & SDF_EE_PHYSICAL_MASK;
+        *(vu32 *)SDF_IPU_INPUT_DMA_TAG_ADDRESS = (u32)stream->inputDmaChain & SDF_EE_PHYSICAL_MASK;
         *(vu32 *)SDF_IPU_INPUT_DMA_QWC = 0;
         *(vu32 *)SDF_IPU_INPUT_DMA_CTRL = SDF_IPU_DMA_CHAIN_START;
     } else {
@@ -1225,7 +1225,7 @@ void sdfSoundStartIpuInputDma(SdfStreamFrameNode *stream) {
         }
         D_003BDAA8 = stream;
         stream->pad64 = 1;
-        *(vu32 *)SDF_IPU_INPUT_DMA_ADDRESS = (stream->scratchBuffer +
+        *(vu32 *)SDF_IPU_INPUT_DMA_ADDRESS = ((u32)stream->scratchBuffer +
             (stream->firstSlot << SDF_STREAM_SLOT_SHIFT)) & SDF_EE_PHYSICAL_MASK;
         *(vu32 *)SDF_IPU_INPUT_DMA_QWC = SDF_STREAM_SLOT_BYTES / SDF_STREAM_QWORD_BYTES;
         *(vu32 *)SDF_IPU_INPUT_DMA_CTRL = SDF_IPU_DMA_NORMAL_START;
@@ -1239,7 +1239,7 @@ void sdfSoundQueueIpuBuffer(SdfStreamFrameNode *stream) {
     vu32 *dmaQwords = (vu32 *)SDF_IPU_OUTPUT_DMA_QWC;
     vu32 *dmaControl = (vu32 *)SDF_IPU_OUTPUT_DMA_CTRL;
     u8 bufferIndex = stream->bufferIndex;
-    *dmaAddress = stream->buffers[bufferIndex] & SDF_EE_PHYSICAL_MASK;
+    *dmaAddress = (u32)stream->frameBuffers[bufferIndex] & SDF_EE_PHYSICAL_MASK;
     *dmaQwords = stream->bufferSize / SDF_STREAM_QWORD_BYTES;
     *dmaControl = SDF_IPU_DMA_START;
     stream->bufferIndex = bufferIndex ^ 1;
