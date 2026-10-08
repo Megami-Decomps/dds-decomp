@@ -1750,12 +1750,15 @@ u16 btlReadCurrentUnitMp(DatPartyRecord *entry) {
     return entry->mp;
 }
 
-void btlComputeProfileMaxHp(void) {
-    ptyComputeMaxHp();
+extern s32 ptyComputeMaxHp(DatPartyRecord *);
+extern s32 ptyComputeMaxMp(DatPartyRecord *);
+
+void btlComputeProfileMaxHp(DatPartyRecord *unit) {
+    ptyComputeMaxHp(unit);
 }
 
-void btlComputeProfileMaxMp(void) {
-    ptyComputeMaxMp();
+void btlComputeProfileMaxMp(DatPartyRecord *unit) {
+    ptyComputeMaxMp(unit);
 }
 
 s32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *stats) {

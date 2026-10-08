@@ -405,21 +405,21 @@ void sdfResetChannels(void) {
 }
 
 /* Enemy vitals use their base record; party vitals use level growth and bonuses. */
-s32 ptyComputeMaxHp(s32 unit) {
+s32 ptyComputeMaxHp(DatPartyRecord *unit) {
     s32 level;
     s32 stat;
     s32 result;
 
-    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) != 0) {
+    if ((unit->flags & SDF_UNIT_ENEMY) != 0) {
         return ((SdfEnemyVitals *)(datEnemyRecords +
-                ((SdfPartyUnit *)unit)->unitId * 76))->maxHp;
+                unit->unitId * 76))->maxHp;
     }
-    level = ((SdfPartyUnit *)unit)->level;
+    level = unit->level;
     stat = datGetStatWithStatusOverride((struct DatUnitStatus *)unit, 1);
     result = level * 4.0f +
              stat * datBattleParameters->maxHpGrowth[level - 1] + 10.0f;
-    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) == 0) {
-        result += ((SdfPartyUnit *)unit)->hpBonus;
+    if ((unit->flags & SDF_UNIT_ENEMY) == 0) {
+        result += unit->hpBonus;
         if (result >= 1000) {
             result = 999;
         }
@@ -427,21 +427,21 @@ s32 ptyComputeMaxHp(s32 unit) {
     return result;
 }
 
-s32 ptyComputeMaxMp(s32 unit) {
+s32 ptyComputeMaxMp(DatPartyRecord *unit) {
     s32 level;
     s32 stat;
     s32 result;
 
-    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) != 0) {
+    if ((unit->flags & SDF_UNIT_ENEMY) != 0) {
         return ((SdfEnemyVitals *)(datEnemyRecords +
-                ((SdfPartyUnit *)unit)->unitId * 76))->maxMp;
+                unit->unitId * 76))->maxMp;
     }
-    level = ((SdfPartyUnit *)unit)->level;
+    level = unit->level;
     stat = datGetStatWithStatusOverride((struct DatUnitStatus *)unit, 2);
     result = level * 4.0f +
              stat * datBattleParameters->maxMpGrowth[level - 1] + 8.0f;
-    if ((((SdfPartyUnit *)unit)->flags & SDF_UNIT_ENEMY) == 0) {
-        result += ((SdfPartyUnit *)unit)->mpBonus;
+    if ((unit->flags & SDF_UNIT_ENEMY) == 0) {
+        result += unit->mpBonus;
         if (result >= 1000) {
             result = 999;
         }
