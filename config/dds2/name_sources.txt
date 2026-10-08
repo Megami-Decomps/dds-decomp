@@ -1390,6 +1390,7 @@
 0x0017D778	effScatterSetFlatInstanceColor	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x00175B20, input-family pairing. [names_qp10.tsv]
 0x0017D780	effScatterCopyFlatInstanceMatrix	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x00175B28, input-family pairing. [names_qp10.tsv]
 0x0017D7A8	effScatterCreateDrawObject	inferred	allocates a drawable owner with geometry arrays and an SDF asset for scatter effects
+0x0017DA28	effScatterDrawObject	inferred	builds scatter geometry packets and submits them to the selected render surface; paired with DDS1 0x00175DD0
 0x0017DD08	effGetScatterEntry	inferred	Returns the indexed word from a scatter object's entry table.
 0x0017DD20	effScatterStoreSourceTransformMatrix	inferred	Copies a source transform matrix into scatter effect work using VU registers. [names_reviewed14.tsv]
 0x0017DD50	effNeedleCreateWork	inferred	U3
