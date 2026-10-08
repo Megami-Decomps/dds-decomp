@@ -610,7 +610,10 @@ extern struct MenuIconState *func_002B9FF8();
 
 
 
-extern u8 D_003E56D0[], D_003E56F0[], D_003E5708[], D_003E6978[], D_003E6998[];
+extern void *const D_003E56D0[];
+extern void *const D_003E56F0[];
+extern void *const D_003E5708[];
+extern const s32 D_003E6978[], D_003E6998[];
 
 void mnuStaffInitResourceLists(u8 *work) {
     MenuFadeFields *ctx = &((MenuStaffContext *)work)->fade;
