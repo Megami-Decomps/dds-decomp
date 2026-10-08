@@ -53,7 +53,7 @@ extern u8 sdfPacDispatchPacket[];
 
 extern void *sdfDevCreateCallbackState(s32 path, void *callback, s32 context);
 extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
-extern s32 func_00302240(const char *text, s32 delimiter);
+extern char *func_00302240(const char *text, s32 delimiter);
 extern s32 func_003017A0(const char *text, const char *suffix);
 extern void sdfSoundInitFormattedAndAppendNode(void *node, u8 *format,
                                                 void *callback, void *owner, s32 source);
@@ -77,7 +77,7 @@ void func_002ED8D0(MovObj *owner, SdfMovieDescriptor *descriptor, const char *na
 
     memset(owner, 0, 0xB0);
     owner->active = 1;
-    extension = (char *)func_00302240(name, '.');
+    extension = func_00302240(name, '.');
     isPac = 0;
     if (extension != NULL) {
         isPac = func_003017A0(extension, (const char *)&D_003BD638) == 0;

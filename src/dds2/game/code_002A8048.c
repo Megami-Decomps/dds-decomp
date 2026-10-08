@@ -5,6 +5,7 @@
 #include "kwln_task_lifecycle.h"
 #include "mnu_movie_transfer.h"
 #include "mnu_movie_list.h"
+#include "sce_io.h"
 
 extern s32 scrReadIntParameter(s32);
 

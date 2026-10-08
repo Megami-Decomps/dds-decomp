@@ -110,14 +110,19 @@ typedef struct BrsProgressAnimation {
 } BrsProgressAnimation;
 
 #ifdef VERSION_DDS1
-/* DDS1 skill-icon row (0x14 B). Retail func_00264D90 reads row 0 at +0xD58 and row 1 at +0xD6C.
- * Only opacity, x, y and count are observed; the other bytes are pad [INFERENCE]. */
+/* DDS1 skill-icon row (0x14 B). Row j = &skillIconRows[j]: row 0 base +0xD50, row 1 base +0xD64.
+ * count +0x00: func_00264B08 lb/lbu/sb 0xD50 (row 0); func_00264D90 lb 0x14($5) with $5 = row 0 base
+ * reads row 1 count, which gates the row 1 draw when 0 < count < 4.
+ * opacity +0x08, x +0x0C, y +0x10 (func_00264B08 sw 0xD58/0xD5C/0xD60).
+ * unk04 +0x04 and the pad bytes are [INFERENCE]. func_00264B08's 4-step loop also reads a count
+ * at +0xDA0, past this 2-row array (unresolved). */
 typedef struct BrsSkillIconRow {
+    s8 count;
+    u8 pad01[3];
+    s32 unk04;
     u32 opacity;
     s32 x;
     s32 y;
-    s8 count;   /* row 0 gates the row 1 draw when 0 < count < 4 */
-    u8 pad0D[7];
 } BrsSkillIconRow;
 #endif
 
@@ -168,8 +173,9 @@ typedef struct BrsSkillPackageWork {
     u32 opacity;
     s8 resultPhase;
     s8 unkD4D;
-    u8 padD4E[0xA];
+    u8 padD4E[0x2];
     BrsSkillIconRow skillIconRows[2];
+    u8 padD78[0x8];
     u8 padD80[0x20];
     BrsFadeAnimation fadeAnimation[5];
     u8 padE68[0x78];
