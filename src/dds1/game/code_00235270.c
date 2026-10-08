@@ -2825,7 +2825,7 @@ extern s32 effUpdateCh72Params(void);
 extern s32 effEventAdvanceBlurTemplateSetup(void);
 extern s32 effEventAdvanceScatterBlurSetup(void);
 extern s32 effEventAdvanceScaleBlurSetup(void);
-extern s32 func_0018FC80(void);
+extern s32 effEventAdvanceScreenDrawSetup(void);
 extern s32 func_0023C248(EvtRuntime *runtime);
 extern s32 func_0023CA60(EvtRuntime *runtime);
 extern void *D_003BB0C0;
@@ -2858,7 +2858,7 @@ s32 evtPollEffectFrameControl(s32 arg0, s32 arg1, EvtRuntime *runtime) {
         }
         break;
     case 0x1B:
-        status = func_0018FC80();
+        status = effEventAdvanceScreenDrawSetup();
         break;
     case 0x10:
     case 0x11:

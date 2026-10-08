@@ -118,7 +118,6 @@ struct EffNode;
 extern u8 dds3TestObjectFlags(void *obj, s32 flags);
 extern void effUpdateNode(struct EffNode *node);
 extern void billInvokeCallback(struct BillObj *bill);
-extern void func_00190328(void *node);
 
 s32 func_00114988(EffectObj *obj) {
     EffectDependencyState *data;
@@ -148,7 +147,7 @@ s32 func_00114988(EffectObj *obj) {
         break;
     case 5:
         if (data->node != NULL) {
-            func_00190328(data->node);
+            effEventUpdateEffectParameters(data->node);
         }
         break;
     }
