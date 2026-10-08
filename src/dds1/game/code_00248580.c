@@ -102,15 +102,11 @@ typedef struct MenuTerminalWork {
 } MenuTerminalWork; /* 0x164 allocation (mnuTerminalCreateScene) */
 typedef char MenuTerminalWork_size[(sizeof(MenuTerminalWork) == 0x164) ? 1 : -1];
 
-typedef struct {
-    u8 pad00[0x6C];
-    u32 resourceHandle;
-} MenuResourceWork;
-typedef char MenuResourceWork_size[(sizeof(MenuResourceWork) == 0x70) ? 1 : -1];
+typedef struct MenuResourceWork MenuResourceWork;
 
 extern u8 mnuHasEffectResourceHandle(MenuResourceWork *);
 extern void mnuReleaseEffectResource(MenuResourceWork *);
-extern u32 mnuRequestEffectResource(u32, u32);
+extern MenuResourceWork *mnuRequestEffectResource(const char *, const char *);
 
 extern s32 mnuCreateDualPercentPanel(DatPartyRecord *, s32);
 
@@ -761,7 +757,7 @@ s32 func_00249A60(s8 closing) {
             }
         } else if (D_003BC3E1 == 0) {
             if (work->effectHandle == 0) {
-                work->effectHandle = mnuRequestEffectResource((u32)D_003AF590, (u32)D_003AF620);
+                work->effectHandle = (u32)mnuRequestEffectResource(D_003AF590, D_003AF620);
             } else if (mnuHasEffectResourceHandle((MenuResourceWork *)work->effectHandle) != 0) {
                 kwlnFadeOutStart(0, 0, 0, 15);
                 D_003BC3E1 = 1;
@@ -2382,7 +2378,7 @@ s32 func_0024CB80(KwlnTask *input) {
                 case 2:
                     if (kwlnFadeIsActive() == 0) {
                         if (context->effectHandle != 0) {
-                            mnuReleaseEffectResource((void *)context->effectHandle);
+                            mnuReleaseEffectResource((MenuResourceWork *)context->effectHandle);
                             context->effectHandle = 0;
                         }
                         mnuFadeOrPlayCloseSfx(0, (u8 *)context);
@@ -2436,7 +2432,7 @@ u32 evtBEndDispatchAndReloadEffectResource(KwlnTask *task) {
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 0);
     if (context->state7C != 0) {
-        context->effectHandle = mnuRequestEffectResource((u32)D_003AF590, (u32)D_003AF620);
+        context->effectHandle = (u32)mnuRequestEffectResource(D_003AF590, D_003AF620);
     }
     return 1;
 }
