@@ -20,6 +20,7 @@ typedef struct EffEventWork EffEventWork;
 EffEventWork *effEventCreate(struct SoundMixer *owner, u16 kind, const void *params);
 void effEventReleaseNode(EffEventWork *work);
 void effEventSetScale(EffEventWork *work, f32 scale);
+void effEventUpdateEffectParameters(EffEventWork *work);
 
 ObjBase *dds3GetResourceOwnerHandle(EffWorldNode *object);
 
