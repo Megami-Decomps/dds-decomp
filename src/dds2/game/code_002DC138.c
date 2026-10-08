@@ -534,7 +534,56 @@ extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 extern void *memcpy(void *, const void *, u32);
 
-INCLUDE_ASM(const s32, "game/code_002DC138", func_002DCCE8);
+/* Decode the type-6 configuration, load its model and clone per-position queues. */
+void *func_002DCCE8(void *input) {
+    FileJobPayload *job = input;
+    EffResourceOwner *owner;
+    void *resource;
+    u32 modelOffset;
+    u32 i;
+
+    owner = sdfAllocSizeClassBlock(sizeof(*owner));
+    memset(owner, 0, sizeof(*owner));
+    if (job != NULL) {
+        resource = fileResolvePrimaryBuffer(job);
+        switch (job->option) {
+        case 0:
+            modelOffset = 0x40;
+            memcpy(&owner->base, resource, sizeof(owner->base));
+            break;
+        case 1:
+            modelOffset = 0x80;
+            memcpy(&owner->extended, resource, sizeof(owner->extended));
+            owner->base = owner->extended.base;
+            break;
+        default:
+            modelOffset = 0;
+            break;
+        }
+        owner->model = func_002DC1D0((u8 *)resource + modelOffset, job->primary.size - modelOffset);
+        if (owner->model->first != NULL) {
+            if (owner->base.plainEntry != 0) {
+                mdlAddEntryPlain(owner->model, 0, 0);
+            } else {
+                mdlAddEntryFlagged(owner->model, 0, 0);
+            }
+        }
+        owner->count = sdfCountMapPositionRecords(owner->model->inner);
+        if (owner->count == 0) {
+            return owner;
+        }
+        resource = fileResolveSecondaryBuffer(job);
+        if (resource != NULL) {
+            owner->buffer = sdfAllocGeneralBlock(owner->count * sizeof(*owner->entries));
+            owner->entries = (FileQueue **)sdfResourceRetainAddress(owner->buffer);
+            owner->entries[0] = fileCloneQueueEntries(resource);
+            for (i = 1; i < owner->count; i++) {
+                owner->entries[i] = fileQueueClone(owner->entries[0]);
+            }
+        }
+    }
+    return owner;
+}
 
 extern void fileQueueDestroy(FileQueue *);
 
