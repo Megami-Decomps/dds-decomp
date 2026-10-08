@@ -6979,7 +6979,123 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001F1120);
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001F1290);
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001F17C8);
+extern void func_001F0C80(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
+extern void func_001F1290(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
+
+void func_001F17C8(BtlLinkedCommand *action, BtlCamState *pose,
+                  BtlUnit *target, s32 mode) {
+    BtlState *runtime;
+    BtlUnit *unit;
+    s32 actorCount;
+    struct {
+        f32 position[4];
+        f32 rotation[4];
+        f32 firstActorPosition[4];
+        f32 secondActorPosition[4];
+        f32 center[4];
+    } vectors __attribute__((aligned(16)));
+
+    if ((target->flags & 0x200) == 0) {
+        return;
+    }
+
+    runtime = (BtlState *)btlGetRuntime();
+    if (runtime->cameraArrangementHook != NULL &&
+        runtime->cameraArrangementHook(action, pose, mode) != 0) {
+        return;
+    }
+
+    actorCount = 0;
+    for (unit = runtime->units; unit != NULL; unit = unit->nextActor) {
+        s32 flags;
+
+        if ((btlUnitStatusPair(unit) & 0x300) != 0x300) {
+            flags = unit->flags;
+        } else if (runtime->unk268 != 3) {
+            flags = unit->flags;
+        } else {
+            if (unit->lookupId != 1) {
+                func_001E3108(unit, vectors.position);
+                vectors.position[2] = unit->position[2] - 45.0f;
+                btlSetUnitPosition(unit, vectors.position);
+            }
+            flags = unit->flags;
+        }
+        {
+            s32 excludedFlags = flags & 0xC0;
+
+            if ((flags & 1) != 0) {
+                if (excludedFlags == 0) {
+                    if ((flags & 0x400) != 0) {
+                        actorCount++;
+                    }
+                }
+            }
+        }
+    }
+
+    if (actorCount == 0) {
+        return;
+    }
+    if (runtime->cameraActorHighWater < actorCount) {
+        runtime->cameraActorHighWater = actorCount;
+    }
+
+    if (runtime->cameraActorConfiguration == 0x10003) {
+        func_001F0C80(action, pose, target, mode);
+    } else {
+        func_001F1290(action, pose, target, mode);
+    }
+
+    func_00208000(0x400, NULL, NULL);
+    VU0_STORE_VF_UNCLOBBERED(vf10, vectors.center);
+    for (unit = runtime->units; unit != NULL; unit = unit->nextActor) {
+        s32 flags = unit->flags;
+
+        if ((flags & 0x200) != 0) {
+            if ((flags & 0xE0) == 0) {
+                if ((flags & 0x80000) != 0) {
+                    btlUnitGetBodyPosVU(unit);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, vectors.firstActorPosition);
+                    if (btlAimHorizontalDirectionVU(vectors.firstActorPosition, vectors.center) != 0) {
+                        VU0_STORE_VF_UNCLOBBERED(vf10, vectors.rotation);
+                        btlSetUnitRotation(unit, vectors.rotation);
+                    }
+                }
+            }
+        }
+    }
+
+    func_00208000(0x200, NULL, NULL);
+    VU0_STORE_VF_UNCLOBBERED(vf10, vectors.center);
+    for (unit = runtime->units; unit != NULL; unit = unit->nextActor) {
+        s32 flags = unit->flags;
+
+        if ((flags & 0x400) != 0) {
+            if ((flags & 0x80000) != 0) {
+                btlUnitGetBodyPosVU(unit);
+                VU0_STORE_VF_UNCLOBBERED(vf10, vectors.secondActorPosition);
+                btlAimHorizontalDirectionClampedVU(vectors.secondActorPosition, vectors.center,
+                                                     0.34906585f);
+                VU0_STORE_VF_UNCLOBBERED(vf10, vectors.rotation);
+                btlSetUnitRotation(unit, vectors.rotation);
+            }
+        }
+    }
+
+    if (target != NULL && (target->flags & 2) != 0 &&
+        (runtime->unk268 == 1 ||
+         (runtime->unk268 == 3 && target->lookupId == 1))) {
+        s32 field = mdlGetNodeField2C(target->ext->owner, 0);
+
+        if (field == 0xD || field == 0x12) {
+            btlRefreshUnitEffectMotionAndEntry(target);
+        }
+    }
+
+    pose->distance += action->cameraDistanceOffset;
+    func_001E88A8(pose);
+}
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001F1B00);
 
