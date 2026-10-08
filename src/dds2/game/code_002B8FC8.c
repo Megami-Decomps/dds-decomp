@@ -100,7 +100,7 @@ extern void func_002AAE80();
 
 extern void mnuReleasePartyIconBundles();
 
-extern void mnuClearEntries();
+extern void mnuClearEntries(MenuPageWindow *);
 
 
 extern s32 D_00435E54;
@@ -482,7 +482,7 @@ s32 mnuStepStaffCampPageControl(s32 callback);
 
 
 
-extern void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
+extern void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 extern void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource);
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void mnuSetGroupProperties(s32, s32, s32, s32, s32);
@@ -1984,24 +1984,24 @@ void mnuDrawIconRow(s32 unusedA, s32 unusedB, s32 depth, s32 skip, MenuSprites *
 extern void *func_002BBA38();
 
 
-void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6) {
-    mnuSelectPage((MenuPageWindow *)menu, index);
-    ((MenuPageWindow *)menu)->slots[index].windowSprites = func_002BBA38(0, a2, a3, a4, a5, a6);
-    ((MenuPageWindow *)menu)->flags |= 0x80;
+void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6) {
+    mnuSelectPage(menu, index);
+    menu->slots[index].windowSprites = func_002BBA38(0, a2, a3, a4, a5, a6);
+    menu->flags |= 0x80;
 }
 
-void mnuSetIndexedWindowPageSpriteFlags(s32 index, u8 *menu, u32 first, u32 second) {
-    MenuSprites **slot = &((MenuPageWindow *)menu)->slots[index].windowSprites;
+void mnuSetIndexedWindowPageSpriteFlags(s32 index, MenuPageWindow *menu, u32 first, u32 second) {
+    MenuSprites **slot = &menu->slots[index].windowSprites;
     if (*slot != NULL) {
         (*slot)->unk74 = first;
         (*slot)->unk75 = second;
     }
 }
 
-void mnuClearEntries(u8 *menu) {
-    MenuSprites **entry = &((MenuPageWindow *)menu)->slots[0].windowSprites;
+void mnuClearEntries(MenuPageWindow *menu) {
+    MenuSprites **entry = &menu->slots[0].windowSprites;
     u32 i = 0;
-    mnuClearPageSelectionHandles((MenuPageWindow *)menu);
+    mnuClearPageSelectionHandles(menu);
     do {
         if (*entry != NULL) {
             mnuFreeIconSprites(*entry);
@@ -2010,7 +2010,7 @@ void mnuClearEntries(u8 *menu) {
         i++;
         entry += sizeof(MenuPageSlot) / sizeof(*entry);
     } while (i < 5);
-    ((MenuPageWindow *)menu)->flags &= ~0x80;
+    menu->flags &= ~0x80;
 }
 
 

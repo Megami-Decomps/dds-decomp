@@ -523,7 +523,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
 }
 
 extern void effDestroyResourceSlotSet(s32);
-extern void mnuClearEntries();
+extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles();
 extern void mnuShutdownContext();
 extern void mnuDestroyEffectResources(MenuEffectResources *);
@@ -535,7 +535,7 @@ void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
     s32 panelContext = (s32)&ctx->partyWindow;
 
     effDestroyResourceSlotSet(ctx->unitHandle);
-    mnuClearEntries(panelContext);
+    mnuClearEntries((MenuPageWindow *)panelContext);
     mnuReleasePartyIconBundles(panelContext);
     mnuShutdownContext(panelContext);
     mnuDestroyPanelGroup(ctx->panelHandle);
