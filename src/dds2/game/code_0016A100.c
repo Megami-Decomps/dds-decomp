@@ -17,8 +17,8 @@
 #define EFF_VIEWER_LOAD_FLAGS 0x101
 #define EFF_CELL_SYSTEM_KIND 4
 
-/* Native 0x28-byte operation row, indexed by effect kind. The optional
- * callbacks retain their existing one-payload call interface here.
+/* Native 0x28-byte operation row, indexed by effect kind.
+ * The scale operation takes a float in addition to its payload.
  * In the extended table, a duplicate callback selects raw-source creation
  * and cloning; its absence selects the kind/tableIndex fallback table. */
 typedef struct EffDispatchEntry {
@@ -26,7 +26,12 @@ typedef struct EffDispatchEntry {
     void (*dispatch)(void *);         /* 0x04 */
     void (*release)(void *);          /* 0x08 */
     void *(*duplicate)(void *);       /* 0x0C */
-    void *(*callbacks[6])(void *);    /* 0x10 */
+    void *(*callback0)(void *);       /* 0x10 */
+    void (*setScale)(void *, f32);    /* 0x14 */
+    void *(*callback2)(void *);       /* 0x18 */
+    void *(*callback3)(void *);       /* 0x1C */
+    void *(*callback4)(void *);       /* 0x20 */
+    void *(*callback5)(void *);       /* 0x24 */
 } EffDispatchEntry; /* 0x28 */
 
 /* Compact work: a halfword effect kind and an opaque callback payload. */
@@ -349,41 +354,40 @@ EffParamWork *effParamWorkDuplicate(EffParamWork *source) {
     return work;
 }
 
-/* Optional compact-work dispatches. Other callers supply additional native
- * arguments; the existing unit-local callback prototypes remain unchanged. */
+/* Optional compact-work operations, indexed by effect kind. */
 void effParamWorkCallback0(EffParamWork *work) {
-    if (effParamWorkFactories[work->kind].callbacks[0] != NULL) {
-        effParamWorkFactories[work->kind].callbacks[0](work->payload);
+    if (effParamWorkFactories[work->kind].callback0 != NULL) {
+        effParamWorkFactories[work->kind].callback0(work->payload);
     }
 }
 
-void effParamWorkCallback1(EffParamWork *work) {
-    if (effParamWorkFactories[work->kind].callbacks[1] != NULL) {
-        effParamWorkFactories[work->kind].callbacks[1](work->payload);
+void effParamWorkCallback1(EffParamWork *work, f32 scale) {
+    if (effParamWorkFactories[work->kind].setScale != NULL) {
+        effParamWorkFactories[work->kind].setScale(work->payload, scale);
     }
 }
 
 void effParamWorkCallback2(EffParamWork *work) {
-    if (effParamWorkFactories[work->kind].callbacks[2] != NULL) {
-        effParamWorkFactories[work->kind].callbacks[2](work->payload);
+    if (effParamWorkFactories[work->kind].callback2 != NULL) {
+        effParamWorkFactories[work->kind].callback2(work->payload);
     }
 }
 
 void effParamWorkCallback3(EffParamWork *work) {
-    if (effParamWorkFactories[work->kind].callbacks[3] != NULL) {
-        effParamWorkFactories[work->kind].callbacks[3](work->payload);
+    if (effParamWorkFactories[work->kind].callback3 != NULL) {
+        effParamWorkFactories[work->kind].callback3(work->payload);
     }
 }
 
 void effParamWorkCallback4(EffParamWork *work) {
-    if (effParamWorkFactories[work->kind].callbacks[4] != NULL) {
-        effParamWorkFactories[work->kind].callbacks[4](work->payload);
+    if (effParamWorkFactories[work->kind].callback4 != NULL) {
+        effParamWorkFactories[work->kind].callback4(work->payload);
     }
 }
 
 void effParamWorkCallback5(EffParamWork *work) {
-    if (effParamWorkFactories[work->kind].callbacks[5] != NULL) {
-        effParamWorkFactories[work->kind].callbacks[5](work->payload);
+    if (effParamWorkFactories[work->kind].callback5 != NULL) {
+        effParamWorkFactories[work->kind].callback5(work->payload);
     }
 }
 
@@ -545,38 +549,38 @@ EffParamWorkEx *effCloneDispatchedParameterWork(EffParamWorkEx *source) {
 /* Optional extended-work dispatches; preserve the native column order,
  * including the reversed fourth/fifth column addresses. */
 void effParamWorkExCallback0(EffParamWorkEx *work) {
-    if (effParameterWorkOperations[work->kind].callbacks[0] != NULL) {
-        effParameterWorkOperations[work->kind].callbacks[0](work->payload);
+    if (effParameterWorkOperations[work->kind].callback0 != NULL) {
+        effParameterWorkOperations[work->kind].callback0(work->payload);
     }
 }
 
-void effParamWorkExCallback1(EffParamWorkEx *work) {
-    if (effParameterWorkOperations[work->kind].callbacks[1] != NULL) {
-        effParameterWorkOperations[work->kind].callbacks[1](work->payload);
+void effParamWorkExCallback1(EffParamWorkEx *work, f32 scale) {
+    if (effParameterWorkOperations[work->kind].setScale != NULL) {
+        effParameterWorkOperations[work->kind].setScale(work->payload, scale);
     }
 }
 
 void effParamWorkExCallback2(EffParamWorkEx *work) {
-    if (effParameterWorkOperations[work->kind].callbacks[2] != NULL) {
-        effParameterWorkOperations[work->kind].callbacks[2](work->payload);
+    if (effParameterWorkOperations[work->kind].callback2 != NULL) {
+        effParameterWorkOperations[work->kind].callback2(work->payload);
     }
 }
 
 void effParamWorkExCallback3(EffParamWorkEx *work) {
-    if (effParameterWorkOperations[work->kind].callbacks[4] != NULL) {
-        effParameterWorkOperations[work->kind].callbacks[4](work->payload);
+    if (effParameterWorkOperations[work->kind].callback4 != NULL) {
+        effParameterWorkOperations[work->kind].callback4(work->payload);
     }
 }
 
 void effParamWorkExCallback4(EffParamWorkEx *work) {
-    if (effParameterWorkOperations[work->kind].callbacks[3] != NULL) {
-        effParameterWorkOperations[work->kind].callbacks[3](work->payload);
+    if (effParameterWorkOperations[work->kind].callback3 != NULL) {
+        effParameterWorkOperations[work->kind].callback3(work->payload);
     }
 }
 
 void effParamWorkExCallback5(EffParamWorkEx *work) {
-    if (effParameterWorkOperations[work->kind].callbacks[5] != NULL) {
-        effParameterWorkOperations[work->kind].callbacks[5](work->payload);
+    if (effParameterWorkOperations[work->kind].callback5 != NULL) {
+        effParameterWorkOperations[work->kind].callback5(work->payload);
     }
 }
 

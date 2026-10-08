@@ -1400,35 +1400,18 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001A5C40);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A6118);
 
-typedef struct BtlHitResult {
-    s32 amount;
-    u8 pad04[0x24];
-} BtlHitResult;
-
-typedef struct BtlTargetResult {
-    u8 hitCount;
-    u8 pad01[7];
-    u32 kind;
-    u8 pad0C[4];
-    u8 skipped;
-    u8 pad11[3];
-    u8 blocked;
-    u8 pad15[7];
-    BtlHitResult hits[64];
-} BtlTargetResult;
-
 s32 btlSumOtherTargetHitAmounts(u8 *action) {
-    BtlTargetResult *result = *(BtlTargetResult **)(action + 0x80);
+    BtlOperandGroup *result = *(BtlOperandGroup **)(action + 0x80);
     u32 count = btlGetIndexListCount(*(BtlIndexList **)(action + 0x60));
     u32 i;
     u32 j;
     s32 total = 0;
 
     for (i = 0; i < count; i++, result++) {
-        if (result->skipped != 0 || result->blocked != 0) {
+        if (result->inactive != 0 || result->reflected != 0) {
             continue;
         }
-        switch (result->kind) {
+        switch ((u32)result->kind) {
         case 2:
         case 4:
         case 0x10000:
@@ -1438,8 +1421,8 @@ s32 btlSumOtherTargetHitAmounts(u8 *action) {
         default:
             if (*(BtlUnit **)(action + 0x18) !=
                 btlGetIndexListEntry(*(BtlIndexList **)(action + 0x60), i)) {
-                for (j = 0; j < result->hitCount; j++) {
-                    total += result->hits[j].amount;
+                for (j = 0; j < result->count; j++) {
+                    total += result->entries[j].hpDelta;
                 }
             }
             break;
@@ -1734,7 +1717,7 @@ void func_001A6BE0(BtlUnit *unit, BtlIndexList *targets, s32 actionId) {
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A6EC0);
 
 void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
-                   BtlTargetResult *results, s32 command) {
+                   BtlOperandGroup *results, s32 command) {
     u8 selected[13];
     BtlIndexList *copy;
     void *previous;
@@ -1751,7 +1734,7 @@ void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
     allowConsecutiveHits = targetCount < 2;
     maximumHits = targetCount + effMiscRandMod(0, 2);
     if (allowConsecutiveHits) {
-        results[0].hitCount = maximumHits;
+        results[0].count = maximumHits;
         return;
     }
 
@@ -1774,11 +1757,11 @@ void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
             btlAppendIndexListEntry(targets, entry);
             resultIndex = btlFindListIndex(targets, entry);
             selected[index] = 1;
-            results[resultIndex].hitCount = 1;
+            results[resultIndex].count = 1;
         } else {
             resultIndex = btlFindListIndex(targets, entry);
-            if (results[resultIndex].hitCount < maximumHits) {
-                results[resultIndex].hitCount++;
+            if (results[resultIndex].count < maximumHits) {
+                results[resultIndex].count++;
             }
         }
         i++;
@@ -2104,7 +2087,7 @@ s32 btlGetSelectedUnitProperty(s32 unitAddress) {
     return D_00358514[datCommandRecords[selectedEntryIndex].unk2E * 3];
 }
 
-s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlTargetResult *results) {
+s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlOperandGroup *results) {
     s32 i = 0;
     u32 sides = 0;
     BattleController *controller = (BattleController *)btlGetRuntime();
@@ -2117,7 +2100,7 @@ s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlTargetResul
     }
     skipped = 0;
     for (i = 0; i < count; i++, results++) {
-        if (results->skipped != 0) {
+        if (results->inactive != 0) {
             skipped++;
         }
     }
