@@ -63,7 +63,9 @@ typedef struct FldAreaWork {
     s32 area; /* 0x10 */
     s32 room; /* 0x14: the room argument of fldSetSceneLocation. */
     s32 unk18;
-    u8 pad1C[0x14];
+    u8 pad1C[8];
+    s32 titleFade;       /* 0x24: enables the field-input transition fade. */
+    u8 pad28[8];
     f32 focusPos[3];      /* 0x30 */
     u8 unk3C[0x14];
     s32 focusActive;      /* 0x50 */
@@ -560,6 +562,27 @@ extern int strcmp(const char *, const char *);
 
 extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
+extern u8 fldGetCampSceneControlMode(void);
+extern u8 fldGetSceneReadyOrPendingState(void);
+extern s32 fileMenuTaskExists(void);
+extern u8 fldHasKiretaLabelProcess(void);
+extern u8 fldHasHirakenaiLabelProcess(void);
+extern u8 fldHasBadkaifukuLabelProcess(void);
+extern s32 fldIsEventPhaseAtLeastTwo(void);
+extern u32 fldInputPanelTaskHandle;
+extern void fldUpdateCameraHeadingFromXY(void);
+extern void kwlnFadeStartIn(s32 duration);
+extern u32 D_00389988[];
+extern u8 D_0037F510[2][2][16];
+extern s32 D_004361D0;
+
+typedef struct FldTitleBannerMenu {
+    u16 position;
+    u16 choice;
+    u16 pending;
+    u16 reserved;
+} FldTitleBannerMenu; /* 8-byte allocation from fldInitializeTitleBannerTask. */
+
 typedef struct {
     u8 pad0[0xC];
     s32 *drawNodeHandle;
@@ -579,13 +602,54 @@ extern void sdfModelUpdateCurrentFrameTransforms();
 
 extern void func_003320E8();
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_001442D0);
+s32 func_001442D0(void) {
+    FldTitleBannerMenu *menu;
+    FldAreaWork *area;
 
-extern u8 fldGetCampSceneControlMode(void);
+    if (fldGetCampSceneControlMode() != 0) {
+        return 0;
+    }
+    if (fldGetSceneReadyOrPendingState() != 0) {
+        return 0;
+    }
+    if (D_00389988[0] != 0) {
+        return 0;
+    }
+    if (fileMenuTaskExists() != 0) {
+        return 0;
+    }
+    if (fldHasKiretaLabelProcess() != 0) {
+        return 0;
+    }
+    if (fldHasHirakenaiLabelProcess() != 0) {
+        return 0;
+    }
+    if (fldHasBadkaifukuLabelProcess() != 0) {
+        return 0;
+    }
+    if (fldIsEventPhaseAtLeastTwo() != 0) {
+        return 0;
+    }
 
-extern u8 fldGetSceneReadyOrPendingState(void);
-
-extern s32 fileMenuTaskExists(void);
+    menu = (FldTitleBannerMenu *)kwlnTaskGetUserValue(fldInputPanelTaskHandle);
+    if (menu->pending == 0) {
+        return -1;
+    }
+    if (FLD_WORK->titleFade != 0 ||
+        D_004361D0 == 1 || (s8)D_0037F510[1][0][1] < 0) {
+        if ((s8)D_0037F510[1][0][1] < 0) {
+            fldUpdateCameraHeadingFromXY();
+        }
+        area = (FldAreaWork *)fldAreaState;
+        menu->pending = 0;
+        if (area->titleFade != 0) {
+            kwlnFadeStartIn(8);
+            area->titleFade = 0;
+        }
+        return 1;
+    }
+    return 0;
+}
 
 extern s32 D_00435EE0;
 
