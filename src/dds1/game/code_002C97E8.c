@@ -60,9 +60,6 @@ extern void sdfGridReleaseAllCells(SdfGrid *);
 
 
 
-extern s32 func_002CC738(void);
-extern void func_002CC740(s32, s32);
-extern s32 func_002CC748(s32, s32);
 
 
 extern void *sdfAllocSizeClassBlock(s32);
@@ -484,8 +481,8 @@ SdfList *sdfCreateTaskHeader(void *userData) {
     memset(obj, 0, sizeof(SdfList));
     obj->allocation = allocation;
     obj->userData = userData;
-    obj->onRemove = func_002CC740;
-    obj->onDestroy = func_002CC740;
+    obj->onRemove = sdfNoOpKeyValueCallback;
+    obj->onDestroy = sdfNoOpKeyValueCallback;
     return obj;
 }
 
@@ -805,7 +802,6 @@ void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 mode) {
 }
 
 extern s32 func_003014F0(char *buffer, const char *fmt, ...);
-extern void sdfCallbackWorkOnRemove();
 
 /* Create a task resource work block with the name copied to two formatted buffers. */
 TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, void *userData) {
@@ -842,22 +838,22 @@ SdfTaskEntry *sdfCreateTaskEntry(SdfTaskItemDesc *item) {
                   SDF_TASK_ENTRY_CALLBACK_ENABLED | SDF_TASK_ENTRY_INITIALIZE_ONCE;
     work->key = item->key;
     if (item->init == NULL) {
-        work->init = func_002CC738;
+        work->init = sdfDefaultTaskEntryInit;
     } else {
         work->init = item->init;
     }
     if (item->destroy == NULL) {
-        work->destroy = func_002CC740;
+        work->destroy = sdfNoOpKeyValueCallback;
     } else {
         work->destroy = item->destroy;
     }
     if (item->update == NULL) {
-        work->update = func_002CC748;
+        work->update = sdfDefaultTaskEntryUpdate;
     } else {
         work->update = item->update;
     }
     if (item->callback == NULL) {
-        work->callback = (void (*)(s32, s32))func_002CC748;
+        work->callback = (void (*)(s32, s32))sdfDefaultTaskEntryUpdate;
     } else {
         work->callback = item->callback;
     }
@@ -874,7 +870,7 @@ void sdfDestroyCallbackWork(SdfTaskEntry *entry) {
     }
 }
 
-void sdfCallbackWorkOnRemove(u32 unused, SdfTaskEntry *work) {
+void sdfCallbackWorkOnRemove(s32 key, SdfTaskEntry *work) {
     sdfDestroyCallbackWork(work);
 }
 
@@ -1178,14 +1174,14 @@ float sdfMultiplyAddFloat(float addend, float multiplicand, float multiplier) {
     return addend + multiplicand * multiplier;
 }
 
-s32 func_002CC738(void) {
+s32 sdfDefaultTaskEntryInit(void) {
     return 0;
 }
 
-void func_002CC740(s32 key, s32 initResult) {
+void sdfNoOpKeyValueCallback(s32 key, s32 initResult) {
 }
 
-s32 func_002CC748(s32 key, s32 initResult) {
+s32 sdfDefaultTaskEntryUpdate(s32 key, s32 initResult) {
     return 0;
 }
 
