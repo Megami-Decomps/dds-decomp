@@ -7,7 +7,7 @@
 
 extern void *memcpy(void *, const void *, u32);
 extern BillChildPayload *func_00158F88(BillObj *, BillOut *);
-extern void func_00157EA0(BillObj *, BillChildPayload *);
+extern void billAppendChildQuad(BillObj *, BillChildPayload *);
 extern void func_00158430(BillObj *, BillRenderPair *);
 
 extern BillObj *billCreateIndexed(s32 index, u32 data);
@@ -45,7 +45,7 @@ extern BillChildPayload *D_00438EFC;
 
 /* Keep each child's pending list synchronized with the instance's draw mode,
  * then append one quad to its fifteen-record streams. */
-void func_00157EA0(BillObj *obj, BillChildPayload *child) {
+void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
     f32 matrix[16];
     f32 direction[4];
     f32 dot;
@@ -157,7 +157,7 @@ void func_00157EA0(BillObj *obj, BillChildPayload *child) {
 extern BillChildPayload *D_00438EFC;
 extern SdfPoolNode *D_003AA960[5];
 
-void func_00158340(void) {
+void billFlushPendingChildPackets(void) {
     BillChildPayload *node;
 
     node = D_00438EFC;
@@ -412,7 +412,7 @@ void func_00158AA0(BillRenderPair *pair) {
 extern SdfPoolNode D_00380228;
 extern void func_0032DB78(const void *, void *, s32);
 
-void func_00158C00(void) {
+void billFlushPendingRenderPairs(void) {
     BillRenderPair *node = D_00438F00;
     SdfListHead *list;
     void *texture;
@@ -472,7 +472,7 @@ void billReleaseChild(BillObj *obj) {
 }
 
 void billProcessChild(BillObj *obj) {
-    func_00157EA0(obj, obj->entryList);
+    billAppendChildQuad(obj, obj->entryList);
 }
 
 BillObj *billAllocList(void *resourceData) {

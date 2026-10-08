@@ -15,8 +15,8 @@ INCLUDE_ASM(const s32, "effect/effManager", func_0014F860);
 u32 effManagerUpdateAndDispatch(void) {
     func_0015B420();
     func_0015D0C0();
-    func_00150750();
-    func_00151010();
+    billFlushPendingChildPackets();
+    billFlushPendingRenderPairs();
     func_001602F8();
     effDispatchActive();
     return 0;
