@@ -312,7 +312,7 @@ s32 mnuCloseSelectionAndReleasePartyPanel(s32 selection) {
     s32 context = kwlnTaskGetUserValue();
     mnuDestroySelectedPartyWindow(selection);
     mnuDestroySkillMenuWindows(context);
-    mnuReleasePageHandlesAndClearSelection(context + 0x15c);
+    mnuReleasePageHandlesAndClearSelection((MenuPageWindow *)(context + 0x15c));
     return 1;
 }
 

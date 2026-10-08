@@ -98,7 +98,7 @@ extern s32 WaitSema(s32);
 extern s32 func_003482B0(DevState *, s32, s32, s32, s32);
 
 
-extern s32 sdfCreateThreadWithAllocatedWorkspace();
+extern s32 sdfCreateThreadWithAllocatedWorkspace(void *entryAddress, s32 stackBytes, s32 priority);
 
 extern void _StartThread();
 
@@ -683,7 +683,7 @@ void func_00348540(void) {
 
 /* Start the newly created worker, then record and suspend the calling thread. */
 void sdfStartAndSuspendWorkerThread(void) {
-    s32 workerId = sdfCreateThreadWithAllocatedWorkspace(func_00348540, 0x1000, 0x4C);
+    s32 workerId = sdfCreateThreadWithAllocatedWorkspace((void *)func_00348540, 0x1000, 0x4C);
 
     _StartThread(workerId, 0);
     D_00439224 = GetThreadId();

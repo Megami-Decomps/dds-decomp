@@ -488,7 +488,7 @@ void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
     effDestroyResourceSlotSet(ctx->unitHandle);
     mnuClearEntries(panelContext);
     mnuReleasePartyIconBundles(panelContext);
-    mnuShutdownContext((s32)panelContext);
+    mnuShutdownContext(panelContext);
     mnuDestroyPanelGroup(ctx->panelHandle);
     mnuFreeSpriteStateWork(ctx->spriteHandle);
     mnuReleaseAssets(&ctx->assets);
