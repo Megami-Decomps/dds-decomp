@@ -28,10 +28,10 @@ typedef struct EffDispatchEntry {
     void (*dispatch)(void *);         /* 0x04 */
     void (*release)(void *);          /* 0x08 */
     void *(*duplicate)(void *);       /* 0x0C */
-    void *(*callback0)(void *);       /* 0x10 */
+    void (*callback0)(void *, void *);       /* 0x10 */
     void (*setScale)(void *, f32);    /* 0x14 */
-    void *(*callback2)(void *);       /* 0x18 */
-    void *(*callback3)(void *);       /* 0x1C */
+    void (*callback2)(void *, void *);       /* 0x18 */
+    void (*callback3)(void *, u32);       /* 0x1C */
     void *(*callback4)(void *);       /* 0x20 */
     void *(*callback5)(void *);       /* 0x24 */
 } EffDispatchEntry; /* 0x28 */
@@ -65,12 +65,6 @@ extern u16 mdlGetContextResourceGroup(MdlCtx *);
 
 extern u16 mdlGetContextResourceId(MdlCtx *);
 
-/* Extended work: a full-word kind, fallback-table index, and payload. */
-typedef struct EffParamWorkEx {
-    u32 kind;       /* 0x00 effect kind */
-    u32 tableIndex; /* 0x04 fallback index, retained for cloning */
-    void *payload;  /* 0x08 callback payload */
-} EffParamWorkEx; /* 0x0C */
 
 extern u32 effBattleMiscGetTableEntry(s32 index);
 extern s32 btlGetRuntime(void);
@@ -347,9 +341,9 @@ EffParamWork *effParamWorkDuplicate(EffParamWork *source) {
 }
 
 /* Optional compact-work operations, indexed by effect kind. */
-void effParamWorkCallback0(EffParamWork *work) {
+void effParamWorkCallback0(EffParamWork *work, void *source) {
     if (effParamWorkFactories[work->kind].callback0 != NULL) {
-        effParamWorkFactories[work->kind].callback0(work->payload);
+        effParamWorkFactories[work->kind].callback0(work->payload, source);
     }
 }
 
@@ -359,15 +353,15 @@ void effParamWorkCallback1(EffParamWork *work, f32 scale) {
     }
 }
 
-void effParamWorkCallback2(EffParamWork *work) {
+void effParamWorkCallback2(EffParamWork *work, void *matrix) {
     if (effParamWorkFactories[work->kind].callback2 != NULL) {
-        effParamWorkFactories[work->kind].callback2(work->payload);
+        effParamWorkFactories[work->kind].callback2(work->payload, matrix);
     }
 }
 
-void effParamWorkCallback3(EffParamWork *work) {
+void effParamWorkCallback3(EffParamWork *work, u32 value) {
     if (effParamWorkFactories[work->kind].callback3 != NULL) {
-        effParamWorkFactories[work->kind].callback3(work->payload);
+        effParamWorkFactories[work->kind].callback3(work->payload, value);
     }
 }
 
@@ -540,9 +534,9 @@ EffParamWorkEx *effCloneDispatchedParameterWork(EffParamWorkEx *source) {
 
 /* Optional extended-work dispatches; preserve the native column order,
  * including the reversed fourth/fifth column addresses. */
-void effParamWorkExCallback0(EffParamWorkEx *work) {
+void effParamWorkExCallback0(EffParamWorkEx *work, void *source) {
     if (effParameterWorkOperations[work->kind].callback0 != NULL) {
-        effParameterWorkOperations[work->kind].callback0(work->payload);
+        effParameterWorkOperations[work->kind].callback0(work->payload, source);
     }
 }
 
@@ -552,9 +546,9 @@ void effParamWorkExCallback1(EffParamWorkEx *work, f32 scale) {
     }
 }
 
-void effParamWorkExCallback2(EffParamWorkEx *work) {
+void effParamWorkExCallback2(EffParamWorkEx *work, void *matrix) {
     if (effParameterWorkOperations[work->kind].callback2 != NULL) {
-        effParameterWorkOperations[work->kind].callback2(work->payload);
+        effParameterWorkOperations[work->kind].callback2(work->payload, matrix);
     }
 }
 
@@ -564,9 +558,9 @@ void effParamWorkExCallback3(EffParamWorkEx *work) {
     }
 }
 
-void effParamWorkExCallback4(EffParamWorkEx *work) {
+void effParamWorkExCallback4(EffParamWorkEx *work, u32 value) {
     if (effParameterWorkOperations[work->kind].callback3 != NULL) {
-        effParameterWorkOperations[work->kind].callback3(work->payload);
+        effParameterWorkOperations[work->kind].callback3(work->payload, value);
     }
 }
 

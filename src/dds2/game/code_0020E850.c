@@ -60,11 +60,6 @@ extern void btlAppendCurrentUnitIdToCommandIndices(s32, s32);
 
 extern void btlSelectTargetsByMode();
 
-typedef struct EffChildCounters {
-    u8 pad00[0x338];
-    u8 firstCountdown;
-    u8 secondCountdown;
-} EffChildCounters;
 
 /* Resource-name record consumed by the overwrite prompt, not an effect task.
  * The adjacent name-record allocator reserves 0x38 bytes in both games. */
@@ -90,7 +85,7 @@ typedef struct BtlLinkedEffectArgs {
     union {
         struct {
             s32 value; /* 0x24: signed number rendered by the update callback */
-            s32 elapsedTicks; /* 0x28 */
+            u32 elapsedTicks; /* 0x28: unsigned frame threshold tests in the number callback. */
             u32 color; /* 0x2C */
             u8 kind; /* 0x30 */
             u8 offsetIndex; /* 0x31: indexes the twelve display offsets */
@@ -498,7 +493,7 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_0020F5E0);
 /* Decrement the linked-number task's unit counter without underflowing zero. */
 void effDecrementFirstCountdown(u32 *arguments) {
     BtlLinkedEffectArgs *args = (BtlLinkedEffectArgs *)arguments;
-    EffChildCounters *unit = (EffChildCounters *)args->unit;
+    BtlUnit *unit = args->unit;
     u8 count = unit->firstCountdown;
     if (count != 0) {
         unit->firstCountdown = count - 1;
@@ -538,7 +533,7 @@ INCLUDE_ASM(const s32, "game/code_0020E850", func_0020FA98);
 /* Decrement the counter-display task's unit counter without underflowing zero. */
 void effDecrementSecondCountdown(u32 *arguments) {
     BtlLinkedEffectArgs *args = (BtlLinkedEffectArgs *)arguments;
-    EffChildCounters *unit = (EffChildCounters *)args->unit;
+    BtlUnit *unit = args->unit;
     u8 count = unit->secondCountdown;
     if (count != 0) {
         unit->secondCountdown = count - 1;

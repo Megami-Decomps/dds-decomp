@@ -98,7 +98,6 @@ extern char D_003E75C4[];
 
 extern void mnuDrawWindowDecorations(s32, s32, s32, MenuWindowContainer *, s32);
 
-extern struct MenuListNode *func_002B86E8(struct MenuList *);
 
 extern void func_002AAE80();
 
@@ -969,7 +968,7 @@ MenuListNode *mnuInsertWindowListNodeRelativeToAnchor(MenuWindowContainer *menu,
 }
 
 void mnuRemoveWindowListCursorNode(MenuWindowContainer *menu) {
-    func_002B86E8(menu->list);
+    mnuRemoveListCursorNode(menu->list);
 }
 
 /* Advance selection; clear its byte and panel sprite flags only when a node is returned. */
@@ -1043,7 +1042,7 @@ void mnuReleaseWindowTextures(MenuIconSprites *menu) {
 void func_002B9A38(void) {
 }
 
-void func_002B9A40(s32 x, s32 y, s32 depth, u32 opacity, MenuList *list,
+void mnuDrawListScrollbar(s32 x, s32 y, s32 depth, u32 opacity, MenuList *list,
                    MenuIconSprites *resource, s32 drawArg) {
     s32 top;
     s32 trackExtent;
@@ -1084,7 +1083,7 @@ void func_002B9A40(s32 x, s32 y, s32 depth, u32 opacity, MenuList *list,
 }
 
 void mnuDrawWindowResourceSpriteRows(s32 x, s32 y, u32 flags, MenuWindowContainer *window, u32 option) {
-    func_002B9A40(x - 0xf0, y - 8, flags, window->fadeScale,
+    mnuDrawListScrollbar(x - 0xf0, y - 8, flags, window->fadeScale,
                   window->list, window->resource, option);
 }
 
