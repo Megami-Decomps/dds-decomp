@@ -6,7 +6,6 @@
 
 extern void kwlnFadeBackgroundStartOut(s32);
 extern void mnuStopMovieDrawTask(void);
-extern s32 sdfAllocGeneralBlock(s32);
 extern void *memset(void *, s32, u32);
 extern void mnuRecreateMenuSelectionList(void);
 extern void mnuSelectMenuListCursorByAdvance(s32);
@@ -24,7 +23,7 @@ KwlnTask *func_0026B050(s32 mode) {
 
     kwlnFadeBackgroundStartOut(0);
     mnuStopMovieDrawTask();
-    allocation = sdfAllocGeneralBlock(0x40);
+    allocation = (u32)sdfAllocGeneralBlock(0x40);
     mnuMovieMenuState = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
     memset(mnuMovieMenuState, 0, 0x40);
     mnuMovieMenuState->allocation = allocation;

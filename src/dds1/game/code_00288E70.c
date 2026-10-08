@@ -65,8 +65,6 @@ s32 WaitSema(s32 sema);
 s32 SignalSema(s32 sema);
 void *memset(void *dst, s32 val, u32 len);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
-s32 sdfAllocGeneralBlock(s32 arg0);
-s32 sdfAllocGeneralBlockHigh(s32 size);
 s32 sdfTryAllocGeneralBlock(s32 size);
 s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 s32 func_002F6990(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4);
@@ -185,7 +183,7 @@ s32 func_002890B8(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
                 break;
             }
         } else {
-            allocationHandle = sdfAllocGeneralBlockHigh(byteCount);
+            allocationHandle = (u32)sdfAllocGeneralBlockHigh(byteCount);
             job->allocationHandle = allocationHandle;
         }
         {

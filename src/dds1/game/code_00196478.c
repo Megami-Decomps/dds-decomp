@@ -34,7 +34,6 @@ typedef struct SdfDrawPacket SdfDrawPacket;
 #define ITF_LINES_PRIMITIVE_BITS 0x49
 
 
-extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 extern void sdfTexReleaseReference(SdfTex *);
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *);

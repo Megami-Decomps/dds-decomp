@@ -54,7 +54,6 @@ extern s32 mnuPreparePopupAndDispatchSelection(s32);
 extern s32 mnuAdvanceCampPopup(s32);
 extern s32 mnuFinishCampPopup(s32);
 
-extern s32 sdfAllocGeneralBlock(s32);
 extern void mnuInitializeShopStatusBatches(MenuTerminalContext *);
 extern void func_002945B8(MenuTerminalContext *);
 extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
@@ -748,7 +747,6 @@ void mnuAdvanceShopMenuState(EvtRuntime *scene) {
 
 extern SdfPoolNode D_00380708;
 extern u8 D_00380860[];
-extern void *sdfAllocGeneralBlockHigh(s32 size);
 extern s32 sdfAllocatePacketList(s32 (*alloc)(s32));
 extern void sdfClearLinkedPacketList(SdfLinkedPacketList *list);
 extern void sdfAppendPacketChainNode(SdfPacketChain *head, SdfLinkedPacketList *node);
@@ -1333,7 +1331,7 @@ MenuTerminalContext *mnuTerminalCreateContext(void) {
     s32 handle;
     MenuTerminalContext *obj;
 
-    handle = sdfAllocGeneralBlock(0x38C);
+    handle = (u32)sdfAllocGeneralBlock(0x38C);
     obj = (MenuTerminalContext *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     memset(obj, 0, 0x38C);
     obj->resourceHandle = handle;

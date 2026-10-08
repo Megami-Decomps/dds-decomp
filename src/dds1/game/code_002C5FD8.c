@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "fld_lmap_task.h"
@@ -557,14 +558,13 @@ void fldDrawCounterMapMarker(void) {
     fldDrawScaledAuxMapTexture(x, y, MAP_GREY_COLOR(opacity * 32.0f), 5.0f);
 }
 
-extern u32 sdfAllocGeneralBlock(s32 size);
 
 extern void *sdfMemoryGetBlockAddress(u32 handle);
 
 /* Build a ring of `count` request nodes (0x20 bytes each) behind a 0x44-byte queue header. */
 MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 arg) {
     s32 size = count * 0x20 + 0x44;
-    u32 handle = sdfAllocGeneralBlock(size);
+    u32 handle = (u32)sdfAllocGeneralBlock(size);
     MapRequestRing *pool = (MapRequestRing *)sdfMemoryGetBlockAddress(handle);
     MapRequestState *state = &pool->header;
     MapRequestNode *node;

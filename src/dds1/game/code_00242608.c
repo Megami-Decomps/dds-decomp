@@ -47,7 +47,6 @@
 #define CAMP_HEAP_STATS_WORD_COUNT 8
 
 
-extern s32 sdfAllocGeneralBlock(s32);
 extern void evtLoadResourcePair(const char *, u8 *);
 extern s32 evtCreateMessageWindowIfMissing(s32);
 extern s32 func_00244848();
@@ -661,7 +660,6 @@ void mnuAdvanceShopMenuState(EvtRuntime *scene) {
 
 extern SdfPoolNode D_00325708;
 extern u8 D_00325860[];
-extern void *sdfAllocGeneralBlockHigh(s32 size);
 extern s32 sdfAllocatePacketList(s32 (*alloc)(s32));
 extern void sdfClearLinkedPacketList(SdfLinkedPacketList *list);
 extern void sdfAppendPacketChainNode(SdfPacketChain *head, SdfLinkedPacketList *node);
@@ -1064,7 +1062,7 @@ ShopScene *mnuShopCreateScene(void) {
     s32 handle;
     ShopScene *obj;
 
-    handle = sdfAllocGeneralBlock(0xB4);
+    handle = (u32)sdfAllocGeneralBlock(0xB4);
     obj = (ShopScene *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     memset(obj, 0, 0xB4);
     obj->resourceHandle = handle;

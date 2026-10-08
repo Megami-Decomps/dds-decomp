@@ -616,7 +616,6 @@ extern u16 mdlGetContextResourceId(MdlCtx *);
 
 /* VU0 model helpers consume vf10 directly, as in the DDS1 counterpart. */
 struct SdfMemBlock;
-extern struct SdfMemBlock *sdfAllocGeneralBlock(s32);
 
 extern u8 *effCreatePointSet4(u32);
 
@@ -1741,7 +1740,7 @@ void effClearBillFrames(u8 *owner) {
 u8 *effCreateBillFrameNode(EffBillFrameConfig *config, u32 handle) {
     u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
-    u8 *base = sdfAllocGeneralBlock(count * 0x18 + headerSize);
+    struct SdfMemBlock *base = sdfAllocGeneralBlock(count * 0x18 + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
@@ -1831,7 +1830,7 @@ void billResetCellIndices(u8 *owner) {
 u8 *billCreateCellNode(EffBillCellConfig *config, u32 handle) {
     u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
-    u8 *base = sdfAllocGeneralBlock(count * 0x1C + headerSize);
+    struct SdfMemBlock *base = sdfAllocGeneralBlock(count * 0x1C + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
@@ -1911,7 +1910,7 @@ void billResetParticleIndices(u8 *owner) {
 u8 *billCreateParticleNode(EffBillParticleConfig *config, u32 handle) {
     u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
-    u8 *base = sdfAllocGeneralBlock(count * 0x2C + headerSize);
+    struct SdfMemBlock *base = sdfAllocGeneralBlock(count * 0x2C + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
@@ -1990,7 +1989,7 @@ void effClearAnimatedFrames(u8 *owner) {
 
 u8 *billAllocateAnimatedTransformEntries(EffBillAnimatedFrameConfig *config) {
     u32 headerSize = 0x10;
-    u8 *base = sdfAllocGeneralBlock(config->frame.output.timed.count * 0x18 + headerSize);
+    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->frame.output.timed.count * 0x18 + headerSize);
     u8 *node = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *entries = node + headerSize;
 
@@ -2119,7 +2118,7 @@ void billResetEmitterIndices(u8 *owner) {
 
 u8 *billAllocEmitterNode(u8 *config) {
     u32 headerSize = 0x10;
-    u8 *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * 0x18 + headerSize);
+    struct SdfMemBlock *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * 0x18 + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
@@ -2246,7 +2245,7 @@ void effClearStripFrames(u8 *owner) {
 
 u8 *billAllocStripNode(u8 *config) {
     u32 headerSize = 0x10;
-    u8 *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * 0x28 + headerSize);
+    struct SdfMemBlock *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * 0x28 + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
@@ -2373,7 +2372,7 @@ void billResetTrailIndices(u8 *owner) {
 
 u8 *billCreateTrailNode(EffBillTrailFrameConfig *config, u32 handle) {
     u32 headerSize = 0x10;
-    u8 *base = sdfAllocGeneralBlock(config->frame.output.timed.count * 0x2C + headerSize);
+    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->frame.output.timed.count * 0x2C + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
@@ -2452,7 +2451,7 @@ void billResetQuadIndices(u8 *owner) {
 
 u8 *billAllocQuadNode(u8 *config) {
     u32 headerSize = 0x10;
-    u8 *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * 0x20 + headerSize);
+    struct SdfMemBlock *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * 0x20 + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
@@ -2689,7 +2688,7 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
     s32 rows;
     s32 cols;
     s32 size;
-    u8 *base;
+    struct SdfMemBlock *base;
     u8 *data;
     EffTrackSet *set;
 
@@ -2722,7 +2721,7 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
     size = ((rows * 2 + cols) * 2 + rows) * 4;
     size = (((size >> 4) + ((size & 0xF) != 0)) << 4);
     base = sdfAllocGeneralBlock(size + 0x30);
-    data = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
+    data = (u8 *)sdfResourceRetainAddress(base);
     set = (EffTrackSet *)(data + size);
     set->buffer = data;
     data += rows * 16;
@@ -3544,13 +3543,13 @@ extern EffPacketParams D_004582E0[];
 u8 *effCreatePointSet4(u32 count) {
     s32 rows = count * 4 + 4;
     s32 size = rows * 20;
-    u8 *base;
+    struct SdfMemBlock *base;
     u8 *data;
     EffPointSet *set;
 
     size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
     base = sdfAllocGeneralBlock(size + 0x20);
-    data = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
+    data = (u8 *)sdfResourceRetainAddress(base);
     set = (EffPointSet *)(data + size);
     set->buffer = data;
     data += rows * 16;
@@ -4120,7 +4119,7 @@ typedef struct EffSurfaceGridNode {
 u32 effCreateSurfaceGridNode(u32 count, u32 columns) {
     s32 rows = count * columns * 3 + 6;
     s32 size = rows * 20 + 0xA0;
-    u8 *base;
+    struct SdfMemBlock *base;
     u8 *data;
     EffSurfaceGridNode *node;
 
@@ -4581,7 +4580,7 @@ typedef struct EffScaleRange {
     u8 *entries;
     f32 start;
     f32 delta;
-    struct MemBlock *allocation;
+    struct SdfMemBlock *allocation;
 } EffScaleRange;
 
 
@@ -4617,7 +4616,7 @@ void effSeedBillScaleRange(u8 *work) {
 
 EffScaleRange *effCreateRetainedPointSetColorRows(EffBillPointConfig *src) {
     u32 count = src->timed.count;
-    struct MemBlock *allocation;
+    struct SdfMemBlock *allocation;
     EffScaleRange *table;
     EffScaleRangeEntry *row;
     u32 i;
@@ -4879,13 +4878,13 @@ extern EffPacketParams D_00458430[];
 EffPointSet *effCreatePointSet5(s32 count) {
     s32 rows = count * 5 + 5;
     s32 size = rows * 20;
-    u8 *base;
+    struct SdfMemBlock *base;
     u8 *data;
     EffPointSet *set;
 
     size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
     base = sdfAllocGeneralBlock(size + 0x20);
-    data = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
+    data = (u8 *)sdfResourceRetainAddress(base);
     set = (EffPointSet *)(data + size);
     set->buffer = data;
     data += rows * 16;
@@ -5093,7 +5092,7 @@ void effResetBillTable(u8 *p) {
 }
 
 u8 *effAllocateRingFadeEntries(EffBillVortexConfig *config) {
-    u8 *base = sdfAllocGeneralBlock(config->common.header.timed.count * 0x30 + 0xC);
+    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->common.header.timed.count * 0x30 + 0xC);
     EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
@@ -5261,7 +5260,7 @@ void effResetBillboardFrameInstanceCounters(u8 *p) {
 }
 
 u8 *effAllocateBillFadeFrameEntries(EffBillColumnConfig *config) {
-    u8 *base = sdfAllocGeneralBlock(config->common.header.timed.count * 0x30 + 0xC);
+    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->common.header.timed.count * 0x30 + 0xC);
     EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
@@ -5426,7 +5425,7 @@ void effResetParticleBillFrameCounters(u8 *p) {
 }
 
 u8 *effAllocateCompactRingFadeEntries(EffBillSpiralConfig *config) {
-    u8 *base = sdfAllocGeneralBlock(config->common.header.timed.count * 0x2C + 0xC);
+    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->common.header.timed.count * 0x2C + 0xC);
     EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
@@ -5678,7 +5677,7 @@ u8 *effCreateRibbonWork(u32 count, u32 repeat) {
     u32 rowStride = repeat * 4 + 4;
     u32 size = (rowStride * 0x1C + 4) * count;
     u32 cells = rowStride * count;
-    u8 *allocation = sdfAllocGeneralBlock(size + 0x34);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size + 0x34);
     u8 *p = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
     EffRibbonWork *work = (EffRibbonWork *)(p + size);
     u32 i;
@@ -5777,7 +5776,7 @@ void effResetAnimationFrameEntries(u8 *p) {
 }
 
 u8 *effAllocateAnimationBuffer(EffBillFlameConfig *config) {
-    u8 *base = sdfAllocGeneralBlock(config->header.timed.count * 0x30 + 0xC);
+    struct SdfMemBlock *base = sdfAllocGeneralBlock(config->header.timed.count * 0x30 + 0xC);
     EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u32 count = config->header.segments;
     u8 *entries = (u8 *)(node + 1);
@@ -6240,7 +6239,7 @@ u32 repeat;
     u32 rowStride = repeat * 4 + 4;
     u32 size = (rowStride * 0x24 + 4) * count;
     u32 cells = rowStride * count;
-    u8 *allocation = sdfAllocGeneralBlock(size + 0x34);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size + 0x34);
     u8 *p = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
     EffStripWork *work = (EffStripWork *)(p + size);
     u32 i;
@@ -6559,13 +6558,13 @@ void effSetModelResourceScale(Matrix4 *mat, float value) {
 EffPointSet *effCreatePointSet3(s32 count) {
     s32 rows = count * 3 + 3;
     s32 size = rows * 20;
-    u8 *base;
+    struct SdfMemBlock *base;
     u8 *data;
     EffPointSet *set;
 
     size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
     base = sdfAllocGeneralBlock(size + 0x20);
-    data = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
+    data = (u8 *)sdfResourceRetainAddress(base);
     set = (EffPointSet *)(data + size);
     set->buffer = data;
     data += rows * 16;
@@ -8443,7 +8442,7 @@ void effRebuildResourceEntries(u8 *work, u32 kind, s32 *config) {
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     }
     count = ((FileSlotTable *)((EffectSlotNode80 *)work)->record)->count;
-    ((EffectSlotNode80 *)work)->positionAllocation = sdfAllocGeneralBlock(count * 0x18);
+    ((EffectSlotNode80 *)work)->positionAllocation = (u32)sdfAllocGeneralBlock(count * 0x18);
     ((EffectSlotNode80 *)work)->positions = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(((EffectSlotNode80 *)work)->positionAllocation));
     entries = ((EffectSlotNode80 *)work)->positions;
     for (i = 0; i < count; i++, entries += 0x18) {
@@ -10672,7 +10671,7 @@ u32 effQueueGeneratedFileJob(void) {
         command = sdfDevCreateCommandState(&fileInfo);
         dataLength = sdfDevQueueControlAndWait(command);
         totalLength = dataLength + headerBytes;
-        allocation = sdfAllocGeneralBlock(totalLength);
+        allocation = (u32)sdfAllocGeneralBlock(totalLength);
         buffer = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
         memset(buffer, 0, headerBytes);
         sdfDevQueueReadAndWait(command, buffer + headerBytes, dataLength);
@@ -11278,7 +11277,7 @@ u32 effLoadMappedStatusRecords(u8 *source, EffMappedHeader *headerOut) {
 
     memcpy(&header, source, sizeof(header));
     source += sizeof(header);
-    allocation = sdfAllocGeneralBlock(header.count * EFF_STATUS_RECORD_BYTES);
+    allocation = (u32)sdfAllocGeneralBlock(header.count * EFF_STATUS_RECORD_BYTES);
     records = (EffMappedRecord *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
     for (; recordIndex < header.count; recordIndex++) {
         EffMappedRecord *record = &records[recordIndex];
@@ -11323,7 +11322,7 @@ u32 *effCreateStatusBatch(u32 category) {
     u8 *statuses;
 
     batch->count = 1;
-    allocation = sdfAllocGeneralBlock(EFF_STATUS_RECORD_BYTES);
+    allocation = (u32)sdfAllocGeneralBlock(EFF_STATUS_RECORD_BYTES);
     batch->allocation = allocation;
     batch->records = (EffMappedRecord *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
     memset(batch->records, 0, EFF_STATUS_RECORD_BYTES);
@@ -11519,7 +11518,7 @@ u8 effHasFirstTextureHandle(s32 owner) {
 EffPayload *effCreatePayload(u32 recordCount) {
     u32 recordBytes = recordCount * EFF_PAYLOAD_RECORD_BYTES;
     EffPayload *payload = (EffPayload *)sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
-    u32 allocation = sdfAllocGeneralBlock(recordBytes);
+    u32 allocation = (u32)sdfAllocGeneralBlock(recordBytes);
     payload->count = recordCount;
     payload->allocation = allocation;
     payload->records = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
@@ -11584,9 +11583,9 @@ EffectSlotSet *effCreateResourceSlotSet(u32 *sourceHandle, u32 slot, u32 count) 
     effect->sourceAllocation = 0;
     effect->textureAllocation = 0;
     effect->count = count;
-    effect->descriptionAllocation = sdfAllocGeneralBlock(count * 0x80);
+    effect->descriptionAllocation = (u32)sdfAllocGeneralBlock(count * 0x80);
     effect->descriptions = (EffectSlotDescription *)sdfResourceRetainAddress((struct SdfMemBlock *)(effect->descriptionAllocation));
-    effect->workAllocation = sdfAllocGeneralBlock(effect->count * 0xA0);
+    effect->workAllocation = (u32)sdfAllocGeneralBlock(effect->count * 0xA0);
     effect->workEntries = (BdWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(effect->workAllocation));
     if (effect->count != 0) {
         do {

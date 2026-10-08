@@ -116,11 +116,9 @@ extern u32 D_003BC5B0[2];
 extern u32 D_003BC5B8;
 
 
-typedef struct MemBlock MemBlock;
 
-extern MemBlock *sdfAllocGeneralBlock(s32 size);
 
-extern u32 sdfMemoryGetBlockAddress(MemBlock *block);
+extern u32 sdfMemoryGetBlockAddress(struct SdfMemBlock *block);
 
 extern s32 sceSifInitIopHeap(void);
 
@@ -602,7 +600,6 @@ extern s32 fileGetResourceSize(u32);
 
 extern void filePollEntryCleanup(u32);
 
-extern MemBlock *sdfAllocGeneralBlockHigh(s32);
 
 extern void func_002F7628(u32 *);
 
@@ -616,7 +613,7 @@ s32 mnuCompleteTitleStreamFileLoad(u32 *destinationState) {
         s32 resourceHandle = fileGetResourceHandle(D_003BD8D4);
         u32 fileDataAddress = fileGetLoadedDataAddress(D_003BD8D4);
         s32 fileBytes = fileGetResourceSize(D_003BD8D4);
-        MemBlock *allocation;
+        struct SdfMemBlock *allocation;
 
         filePollEntryCleanup(D_003BD8D4);
         allocation = sdfAllocGeneralBlockHigh(fileBytes);
@@ -774,7 +771,7 @@ extern u32 D_003DA1A8[];
 void mnuInitializeTitleSoundBuffer(void) {
     u32 *streamState = mnuTitleSoundBufferState;
     u32 *decoder = D_003DA1A8;
-    MemBlock *allocation;
+    struct SdfMemBlock *allocation;
     s32 bufferAddress;
 
     WaitSema(mnuTitleStreamSemaphore);
@@ -796,7 +793,7 @@ extern char D_003AFCF0[];
 
 /* Each format reserves 600 compressed frames before loading its named stream. */
 void func_0026AA28(s32 soundEntryIndex) {
-    MemBlock *allocation = NULL;
+    struct SdfMemBlock *allocation = NULL;
     s32 bufferAddress;
     char soundPath[MNU_TITLE_SOUND_PATH_BYTES];
 
@@ -840,7 +837,7 @@ void func_0026AA28(s32 soundEntryIndex) {
  * format while holding the shared sound-buffer semaphore. The native code
  * has no default-format guard or buffer-capacity check. */
 void func_0026ABA8(void *compressedData, s32 dataBytes, s32 format) {
-    MemBlock *allocation = NULL;
+    struct SdfMemBlock *allocation = NULL;
     s32 bufferAddress;
     s32 frameCount;
 

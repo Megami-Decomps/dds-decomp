@@ -261,7 +261,6 @@ extern u8 D_0037CAB0[];
 extern u8 D_0037CA78[];
 extern void mnuStepPartyPanelListFromInput();
 extern void mnuClearListFlags();
-extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 extern void evtStageTestInit(s32);
 
 extern s32 func_002877A8(void);
@@ -1362,7 +1361,7 @@ void mnuDestroySkillMenuWindows(s32 context) {
 
 s32 mnuCampMenuInit(void) {
     s32 context = kwlnTaskGetUserValue();
-    s32 handle = sdfAllocGeneralBlock(0x38);
+    s32 handle = (u32)sdfAllocGeneralBlock(0x38);
     s32 *menu = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     CampMenuContext *work = (CampMenuContext *)context;
 

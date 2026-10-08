@@ -232,7 +232,6 @@ extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDes
 
 extern s8 effSharedRandomState[];
 
-extern s32 sdfAllocGeneralBlock(s32);
 
 
 extern void func_001C45F0(void);
@@ -3111,7 +3110,6 @@ extern char D_003A21E8[]; /* "/battle/panel/batle_02.spr" */
 
 extern char D_003A2208[]; /* "/battle/panel/battle_03.spr" */
 
-extern s32 sdfAllocGeneralBlock(s32);
 
 
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
@@ -3121,7 +3119,7 @@ void btlPanelResourcesLoad(void) {
     s32 handle;
     BtlResBlock *block;
     if (D_003BB3E4 == 0) {
-        handle = sdfAllocGeneralBlock(0x28);
+        handle = (u32)sdfAllocGeneralBlock(0x28);
         block = (BtlResBlock *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
         btlResourceBlock = block;
         block->unk0 = handle;

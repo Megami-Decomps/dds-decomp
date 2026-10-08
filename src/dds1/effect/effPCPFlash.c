@@ -577,7 +577,6 @@ void effFlashTrianglePulseUpdate(PcpFlashTrianglePulseWork *work) {
     effDrawTriangleRecordPool(handle);
 }
 
-extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern void *memcpy(void *dst, const void *src, u32 n);
 extern u32 effMiscRand(void *state);
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);

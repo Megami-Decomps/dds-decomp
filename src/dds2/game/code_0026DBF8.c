@@ -355,7 +355,6 @@ extern void mnuReleaseMantraUnitPanelDraw();
 void mnuStorePanelEntry(u32, u32);
 void effDestroyResourceSlotSet(u32);
 struct SdfMemBlock;
-extern struct SdfMemBlock *sdfAllocGeneralBlock(s32);
 extern u32 sdfMemoryGetBlockAddress(struct SdfMemBlock *);
 
 s32 mnuGetActiveMantraModelFlagState(void) {

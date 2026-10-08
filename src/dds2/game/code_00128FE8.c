@@ -223,7 +223,6 @@ extern void fldFormatAreaDirectory(char *, s32, s32);
 
 extern s32 func_0035C860(char *, const char *, ...);
 
-extern void *sdfAllocGeneralBlock(s32 size);
 
 
 extern u32 fldCachedRoomResourceData, D_00435FF4, D_00435FF8, D_00435FFC;
@@ -3474,7 +3473,7 @@ void fldLoadBattleSkyAndFilter(void) {
         D_00436104 = (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock(0x12400));
     }
     if (fldCameraSettings == 0) {
-        fldCameraSettings = sdfResourceRetainAddress(sdfAllocGeneralBlock(
+        fldCameraSettings = (FldCameraSetting *)sdfResourceRetainAddress(sdfAllocGeneralBlock(
             sizeof(FldCameraSetting) * FIELD_CAMERA_SETTING_COUNT));
         for (i = 0; i < FIELD_CAMERA_SETTING_COUNT; i++) {
             fldCameraSettings[i] = D_0038BB70;

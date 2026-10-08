@@ -59,7 +59,6 @@ extern s32 sdfDecrementAllocationReferenceCount(s32 allocation);
 void func_00117808(void);
 s32 sdfBumpTickCounters(void);
 void evtResetWorldAndProfileRuntime(void);
-extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
 
 extern void scrClearProcessGlobals(void);

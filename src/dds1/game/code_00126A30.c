@@ -343,7 +343,6 @@ extern s32 D_003BAE30;
 extern s32 D_003BAE1C;
 extern s32 fldTaskSlotCount;
 extern s16 D_003C9510[];
-extern void *sdfAllocGeneralBlock(s32 size);
 extern u32 D_003BAE4C;
 extern s32 D_003BAE50;
 extern EffWorldNode *dds3FindObjectChainNodeByName();
@@ -3324,7 +3323,7 @@ void fldLoadBattleSkyAndFilter(void) {
         D_003BAD74 = (void *)sdfResourceRetainAddress(sdfAllocGeneralBlock(0x12400));
     }
     if (fldCameraSettings == 0) {
-        fldCameraSettings = sdfResourceRetainAddress(sdfAllocGeneralBlock(
+        fldCameraSettings = (FldCameraSetting *)sdfResourceRetainAddress(sdfAllocGeneralBlock(
             sizeof(FldCameraSetting) * FIELD_CAMERA_SETTING_COUNT));
         for (i = 0; i < FIELD_CAMERA_SETTING_COUNT; i++) {
             fldCameraSettings[i] = D_003306D0;
@@ -4004,15 +4003,16 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
 /* Keep both the resource handles and retained addresses: callers use the
  * retained storage, whereas the handles are needed at release time. */
 void fldAllocateRecordStorage(void) {
-    u8 *storage = sdfAllocGeneralBlock(FIELD_VALUE_RECORD_STORAGE_SIZE);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(FIELD_VALUE_RECORD_STORAGE_SIZE);
+    void *storage;
 
-    fldValueRecordResource = (u32)storage;
-    storage = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(storage));
+    fldValueRecordResource = (u32)allocation;
+    storage = (void *)sdfResourceRetainAddress(allocation);
     fldValueRecords = (u32)storage;
     memset(storage, 0, FIELD_VALUE_RECORD_STORAGE_SIZE);
-    storage = sdfAllocGeneralBlock(FIELD_AUX_RECORD_STORAGE_SIZE);
-    fldAuxRecordResource = (u32)storage;
-    storage = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(storage));
+    allocation = sdfAllocGeneralBlock(FIELD_AUX_RECORD_STORAGE_SIZE);
+    fldAuxRecordResource = (u32)allocation;
+    storage = (void *)sdfResourceRetainAddress(allocation);
     fldAuxRecordBuffer = (u32)storage;
     memset(storage, 0, FIELD_AUX_RECORD_STORAGE_SIZE);
 }

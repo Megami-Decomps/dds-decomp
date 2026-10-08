@@ -6,7 +6,6 @@
 extern volatile u8 D_00438A1D;
 extern void sdfSleepThreadCount(s32);
 extern s32 sdfDoubleBufferAllocation;
-extern s32 sdfAllocGeneralBlock(s32);
 #include "sdf.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
@@ -535,7 +534,7 @@ void sdfResizeDoubleBuffer(s32 bufferBytes) {
     }
     bufferBytes = (bufferBytes + SDF_PACKET_BUFFER_ALIGNMENT_MASK) & ~SDF_PACKET_BUFFER_ALIGNMENT_MASK;
     sdfPacketBufferSize = bufferBytes;
-    sdfDoubleBufferAllocation = sdfAllocGeneralBlock(bufferBytes * SDF_PACKET_BUFFER_COUNT);
+    sdfDoubleBufferAllocation = (u32)sdfAllocGeneralBlock(bufferBytes * SDF_PACKET_BUFFER_COUNT);
     allocationAddress = sdfResourceRetainAddress((struct SdfMemBlock *)(sdfDoubleBufferAllocation));
     sdfPacketBuffers[0] = allocationAddress;
     sdfPacketBuffers[1] = allocationAddress + bufferBytes;

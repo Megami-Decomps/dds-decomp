@@ -214,7 +214,6 @@ extern char D_00415158[];
 extern char D_004150B0[]; /* "btl:hunt ep=%d[id=%X]\n" */
 
 extern void btlBossDebugPrintf(const char *, ...);
-extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 
 extern s8 effSharedRandomState[];
 

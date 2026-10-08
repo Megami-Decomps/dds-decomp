@@ -308,7 +308,6 @@ extern s32 sdfDevReactivate(DevState *);
 extern s32 sdfDevQueueRead(DevState *, void *, s32);
 extern s32 sdfDevQueueActiveOperation(DevState *);
 extern s32 sdfDevQueueReleaseState(DevState *);
-extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 extern void func_003417E0(s32, void *, s32);
 
 u32 *func_00342848(u32 command, SdfSoundRpcRequest *request) {

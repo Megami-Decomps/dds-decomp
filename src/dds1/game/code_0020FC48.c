@@ -1487,7 +1487,6 @@ void btlReleaseRuntimeResource(void) {
     kwlnTextureReleaseHeldReference();
 }
 
-extern void *sdfAllocGeneralBlockHigh(s32);
 
 
 extern s32 sdfAllocatePacketList(s32 (*allocator)(s32));

@@ -182,7 +182,6 @@ SdfMemBlock *sdfFindGeneralBlockContaining(s32 address) {
     }
 }
 
-extern s32 sdfAllocGeneralBlock(s32 size);
 extern s32 func_0034DE68(void *, s32, s32, void *, s32, void *, s32, s32, s32);
 typedef struct SifRpcClientData {
     u8 pad00[0x24];
