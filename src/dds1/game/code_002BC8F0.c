@@ -2,6 +2,7 @@
 #include "itf_draw_grid.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
+#include "file_request_api.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "eff.h"
@@ -245,7 +246,7 @@ void effCompleteRetainedResourceJob(u64 job, u32 *outInstance) {
 
 extern s32 func_003014F0(char *, const char *, ...);
 
-extern void fileCreateCallbackRequest(const char *, u32, void (*)(u64, u32 *), u32 *);
+extern void *fileCreateCallbackRequest(const char *, u32, void (*)(u64, u32 *), u32 *);
 
 /* Clear the output first; only mode one selects the retained-allocation completion path. */
 void effRequestResourceByMode(const char *base, const char *name, u32 mode, u32 *outInstance) {

@@ -104,8 +104,6 @@ extern BillObj *effBillResourceOwners[];
 extern EffBillResourceInit D_003AA880[];
 extern char D_004142B0[];
 extern char D_004142C0[];
-extern EffBillResourceArchive *fileQueuePlainDispatchRequest(const char *path);
-
 extern void func_002C7CE8(EffBillResourceArchive *archive);
 extern void func_0035B6E0(const char *format, ...);
 

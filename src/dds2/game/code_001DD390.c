@@ -4276,7 +4276,6 @@ BtlRuntimeTask *btlCreateUnitFxVectorRefreshTask(BtlUnit *unit) {
 }
 
 extern s32 btlFormatUnitBedName(BtlUnit *, char *);
-extern s32 fileQueueAlternateCallbackRequest(char *);
 
 void btlStartGunFinishLoad(s32 *task) {
     char filename[0x70];
@@ -4289,7 +4288,7 @@ void btlStartGunFinishLoad(s32 *task) {
         unit->gunResource = 0;
     }
     if (btlFormatUnitBedName(unit, filename)) {
-        s32 handle = fileQueueAlternateCallbackRequest(filename);
+        s32 handle = (s32)fileQueueAlternateCallbackRequest(filename);
         task[1] = handle;
         btlBossDebugPrintf("btl:gun & finish load start[%s][%p]\n", filename, handle);
     }
@@ -9271,7 +9270,6 @@ typedef struct BtlFieldLoadArgs {
     s32 frame;
 } BtlFieldLoadArgs;
 
-extern BtlFieldArchiveRequest *fileQueuePlainDispatchRequest(const char *);
 
 u32 btlPollFieldArchiveLoad(args)
     BtlFieldLoadArgs *args;
@@ -9287,7 +9285,7 @@ u32 btlPollFieldArchiveLoad(args)
         fldFormatAreaDirectory(directory, args->stage, 1);
         func_0035C860(path, "%sf%03d_%03d.LB", directory, args->stage, args->variant);
         btlBossDebugPrintf("btl:field load[%s]\n", path);
-        args->request = fileQueuePlainDispatchRequest(path);
+        args->request = (BtlFieldArchiveRequest *)fileQueuePlainDispatchRequest(path);
         args->fieldF1 = NULL;
         args->fieldF2 = NULL;
         args->fieldTB = NULL;
@@ -10591,7 +10589,7 @@ INCLUDE_RODATA(const s32, "game/code_001DD390", D_00419170);
 
 void sndLoadSysEffLb(void) {
     const char *path = "/battle/SYSEFF.LB";
-    s32 archive = fileQueuePlainDispatchRequest(path);
+    s32 archive = (s32)fileQueuePlainDispatchRequest(path);
     s32 node;
     u32 i;
 

@@ -224,8 +224,8 @@ void *fileQueueDefaultCallbackRequest(const char *requestName) {
 }
 
 /* Queue a callback-kind request with mode one and no callback/context. */
-void fileQueueAlternateCallbackRequest(const char *requestName) {
-    fileCreateCallbackRequest(requestName, 1, 0, 0);
+void *fileQueueAlternateCallbackRequest(const char *requestName) {
+    return fileCreateCallbackRequest(requestName, 1, 0, 0);
 }
 
 /* Return the stored resource handle without changing ownership. work is required. */

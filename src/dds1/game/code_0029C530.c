@@ -229,7 +229,6 @@ extern s32 effRequestResourceByMode(u32, u32, u32, void **);
 
 extern void func_00288788(void *);
 
-extern void *fileQueuePlainDispatchRequest(u32);
 
 
 extern void *func_002BD9C0(u32, u32);
@@ -9476,7 +9475,7 @@ s32 effPollResourceList(EffectList *list) {
                 if (list->request != NULL) {
                     func_00288788(list->request);
                 }
-                list->request = fileQueuePlainDispatchRequest(node->length);
+                list->request = fileQueuePlainDispatchRequest((const char *)node->length);
                 if (list->mode == 2) {
                     func_00288C50((struct FileRequest *)list->request);
                 }

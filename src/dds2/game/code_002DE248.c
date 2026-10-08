@@ -10920,7 +10920,6 @@ typedef struct EffRequest {
 
 extern void func_002C7CE8(void *);
 
-extern void *fileQueuePlainDispatchRequest(const char *path);
 
 
 u32 effAppendListEntry(EffectList *list, u32 value, u32 length,
@@ -10977,7 +10976,7 @@ s32 effPollResourceList(EffectList *list) {
                 if (list->request != NULL) {
                     func_002C7CE8(list->request);
                 }
-                list->request = fileQueuePlainDispatchRequest(node->length);
+                list->request = fileQueuePlainDispatchRequest((const char *)node->length);
                 if (list->mode == 2) {
                     func_002C81D0((struct FileRequest *)list->request);
                 }

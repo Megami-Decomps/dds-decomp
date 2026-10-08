@@ -2290,8 +2290,6 @@ void fldUpdateMenuResourceEffects(void) {
     }
 }
 
-extern void *fileQueuePlainDispatchRequest(const char *path);
-
 
 extern void func_002C7CE8(void *);
 
