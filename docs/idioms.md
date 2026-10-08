@@ -3630,7 +3630,9 @@ DDS1 `00132010` and DDS2 `00134A18` read `0x124`-byte sky records:
 a signed mode word followed by an eight-row, nine-column packed-color grid.
 The DDS1 loader allocates/reads `0x12400` bytes, or 256 records, and
 `fldSetFadeTarget` writes the selected record's mode rather than a flat
-`area * 73` word offset. Area-work `+0x38` is the signed sky-alpha adjustment.
+`area * 73` word offset. The signed sky-alpha adjustment is the separate
+`D_0032E570 + 0x38` word (`D_0032E5A8`), not `FldAreaWork + 0x38`:
+the real `fldAreaState` base is `0x0032E3B0`.
 The renderers clamp three corners' adjusted alpha but leave the bottom-left
 corner unclamped; their ordinary float-to-int C casts emit `CVT.W.S`.
 The renderer bodies remain assembly pending a genuine source-shape match.
@@ -3654,4 +3656,33 @@ vector to `001FDD20`: that helper performs `LQC2` through both pointer
 arguments, followed by two scalar radius arguments in the float registers.
 The local declarations and callers use these pointer contracts directly;
 no pointer-to-word bridge is needed.
+
+
+## Canonical grid allocation descriptors
+
+`sdf_grid.h` owns `SdfGrid` and `SdfGridCell` for both games. The grid's
+`allocation` retains a general-heap `SdfMemBlock *`, distinct from the
+represented data address returned by the memory getter. Destruction releases
+that descriptor directly. The canonical header remains `0x34` bytes and each
+cell remains eight bytes; the DDS2 units no longer declare separate grid views.
+
+
+## Event motion completion callbacks
+
+`EvtUnit.motionCallback` at `+0x94` is a function pointer, not a stored scalar.
+The DDS1/DDS2 motion drivers call it with the unit and zero in states 1 and 4;
+a return value of one completes the motion. The vector-transition providers
+retain that same callback, and normal motion setup clears it.
+
+
+## Scoped kernel task flags
+
+DDS1 `00101060` and DDS2 `00100F48` operate on the canonical `KwlnTask *`
+and admit flag bits through `0x0FFFFFF0`. Scope zero updates the supplied
+task without a null guard; scope one updates other scheduler tasks, scope two
+recurses through its children, and scope three updates every scheduler task.
+The three scheduler lists are selected with a signed counter and explicit
+start/active/destroy cases. Their traversal uses `listNext`, not hierarchy
+`next`. The DDS3 set/clear entry points preserve the task pointer and signed
+scope contract directly.
 
