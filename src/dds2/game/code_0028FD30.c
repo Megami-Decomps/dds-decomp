@@ -35,6 +35,8 @@ extern s32 func_00292478(void *, s32, s32);
 extern u32 *mnuPanelSoundEntryPool;
 
 typedef struct MantraPanelPool MantraPanelPool;
+typedef struct MantraBurstPool MantraBurstPool;
+typedef struct MantraSparkleEmitter MantraSparkleEmitter;
 
 /* Shared 48-byte animation record used by the panel pool in code_0026DBF8. */
 typedef struct MantraPanelAnimation {
@@ -58,8 +60,8 @@ typedef struct MantraPanelAnimation {
     u8 stateB;
     u8 stateC;
     u8 pad23;
-    u32 spriteHandle;
-    u32 burstPool;
+    MantraSparkleEmitter *spriteHandle;
+    MantraBurstPool *burstPool;
     s16 id;
     s16 transitionDelay;
 } MantraPanelAnimation;

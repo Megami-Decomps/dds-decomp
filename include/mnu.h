@@ -193,6 +193,15 @@ typedef struct MenuSprites {
 #endif
 } MenuSprites;
 
+#ifdef VERSION_DDS2
+MenuSprites *mnuCreatePageSpriteSet(s32 kind,
+                                    struct EffectSlotSet *mainResource,
+                                    struct EffectSlotSet *itemResource,
+                                    struct EffectSlotSet *iconResource,
+                                    struct EffectSlotSet *cursorResource,
+                                    struct EffectSlotSet *alternateResource);
+#endif
+
 #ifndef VERSION_DDS2
 typedef char MenuSprites_dds1_size_check[
     sizeof(MenuSprites) == 0x50 ? 1 : -1];
@@ -554,6 +563,11 @@ typedef struct MenuPageWindow {
     s32 scrollOffset;
     s32 fade;
 } MenuPageWindow;
+
+#ifdef VERSION_DDS2
+/* Marks the window-sprite mode toggled by page setup and entry resets. */
+#define MNU_PAGE_WINDOW_SPRITE_MODE 0x80
+#endif
 
 void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth,
                              MenuPageWindow *window, s32 mode);

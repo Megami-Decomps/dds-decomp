@@ -15,6 +15,16 @@ typedef struct MenuSceneCoordinate {
     s32 y;
 } MenuSceneCoordinate;
 
+/* Requirement groups evaluated while building the scene grid. The final bit
+ * is also set when model flag 0x908 is already active. */
+#ifndef VERSION_DDS2
+enum MenuSceneRequirementGroupFlag {
+    MENU_SCENE_REQUIREMENT_GROUP_0_MET = 0x01,
+    MENU_SCENE_REQUIREMENT_GROUP_1_MET = 0x02,
+    MENU_SCENE_REQUIREMENT_GROUP_2_MET = 0x04,
+};
+#endif
+
 typedef struct MantraPulseAnimationWork {
     s32 frame;
     u8 pad568[4];
