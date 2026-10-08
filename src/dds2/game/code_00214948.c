@@ -1031,7 +1031,6 @@ extern void func_00336538(f32);
 
 extern void btlFlagAllUnitsDefeatCandidate(void);
 
-extern void btlCopyMotionTransform();
 
 extern void btlUnitFaceTarget(BtlUnit *, BtlUnit *);
 
@@ -2975,7 +2974,6 @@ extern s32 btlAdjustPointsForCombatFlags(BtlUnit *, s32, s32, s32, s32);
 
 extern s8 btlGetCommandResultKindFromFlags(s32, s32, s32);
 
-extern void btlCopyMotionTransform(void *, f32 *);
 
 
 extern void func_003364B8(f32);
@@ -3083,7 +3081,7 @@ s32 btlInitializeEffectVectors(BtlLinkedCommand *command) {
     BtlCamState *pose = &command->frontCamera;
     command->camera.direction[0] = 1.0f;
     func_001EC868(command, pose, 25.0f);
-    btlCopyMotionTransform(&command->backCamera, pose->position);
+    btlCopyMotionTransform(&command->backCamera, pose);
     func_00336538(-0.87266463f);
         VU0_STORE_VF(vf10, pose->direction);
         VU0_ROTATE_VEC(vf10, vf10);
@@ -3179,7 +3177,7 @@ s32 func_0021C818(BtlLinkedCommand *command, s8 side, s8 targetSide) {
     }
     if (side != 1 || targetSide == side) {
         func_001EC868(command, &command->frontCamera, 25.0f);
-        btlCopyMotionTransform(&command->backCamera, command->frontCamera.position);
+        btlCopyMotionTransform(&command->backCamera, &command->frontCamera);
         if (command->frontCamera.direction[0] > 0.0f) {
             func_00336538(-0.87266463f);
         } else {

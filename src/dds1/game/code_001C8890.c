@@ -6564,8 +6564,8 @@ s32 btlStepPoseBlendHalf(BtlLinkedCommand *command) {
     if (command->state == 0) {
         command->progress = 0.0f;
         btlScalarRangeInitQuadratic(&command->quadraticRange, (f32)(command->durationFrames * 2));
-        btlCopyMotionTransform((u8 *)&command->camera,
-                               (u8 *)&command->frontCamera);
+        btlCopyMotionTransform(&command->camera,
+                               &command->frontCamera);
         return 0;
     }
     blend = btlScalarRangeStepQuadratic(&command->quadraticRange, 1.0f);
@@ -6581,7 +6581,6 @@ s32 btlStepPoseBlendHalf(BtlLinkedCommand *command) {
     return 0;
 }
 
-extern void btlCopyMotionTransform(u8 *, u8 *);
 
 extern void func_001DB370(BtlCamState *, BtlCamState *, BtlCamState *, f32);
 
@@ -6591,7 +6590,7 @@ s32 btlStepPoseBlend(BtlLinkedCommand *command) {
     f32 value;
     if (command->state == 0) {
         btlScalarRangeSetStartClearEnd(motion, command->motionParameter);
-        btlCopyMotionTransform((u8 *)&command->camera, (u8 *)from);
+        btlCopyMotionTransform(&command->camera, from);
     }
     value = btlScalarRangeStepExponential(motion);
     func_001DB370(&command->camera, from,
@@ -6605,8 +6604,8 @@ s32 btlStepPoseBlendFrame(BtlLinkedCommand *command) {
     if (command->state == 0) {
         command->progressBits = 0;
         btlScalarRangeInitQuadratic(&command->quadraticRange, (f32)command->durationFrames);
-        btlCopyMotionTransform((u8 *)&command->camera,
-                               (u8 *)&command->frontCamera);
+        btlCopyMotionTransform(&command->camera,
+                               &command->frontCamera);
         return 0;
     }
     value = btlScalarRangeStepQuadratic(&command->quadraticRange, 1.0f);
@@ -6623,8 +6622,8 @@ s32 btlStepPoseBlendRatio(BtlLinkedCommand *command) {
                       &command->backCamera, ratio);
         return 0;
     }
-    btlCopyMotionTransform((u8 *)&command->camera,
-                           (u8 *)&command->backCamera);
+    btlCopyMotionTransform(&command->camera,
+                           &command->backCamera);
     return 0;
 }
 
@@ -6900,15 +6899,15 @@ void btlClearPendingSoundList(void) {
     work->battleFlags &= ~0x10;
 }
 
-void btlCopyMotionTransform(u8 *dst, u8 *src) {
-    PCP_COPY_VECTOR(dst, src);
-    PCP_COPY_VECTOR(dst + 0x10, src + 0x10);
-    *(f32 *)(dst + 0x20) = *(f32 *)(src + 0x20);
-    *(f32 *)(dst + 0x24) = *(f32 *)(src + 0x24);
+void btlCopyMotionTransform(BtlCamState *dst, BtlCamState *src) {
+    PCP_COPY_VECTOR(dst->position, src->position);
+    PCP_COPY_VECTOR(dst->direction, src->direction);
+    dst->distance = src->distance;
+    dst->fov = src->fov;
 }
 
-void func_001DC2A0(s32 arg0, f32 arg1) {
-    *(f32 *)(arg0 + 0x24) = arg1;
+void btlSetMotionTransformFieldOfView(BtlCamState *object, f32 fovRadians) {
+    object->fov = fovRadians;
 }
 
 extern void effMiscQuaternionToMatrixVU(void);
@@ -7756,7 +7755,7 @@ void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
         }
     }
     if (action->actionKind == action->status || action->actionKind == 0xA || (action->flags & 0x40000)) {
-        btlCopyMotionTransform((u8 *)&action->frontCamera, (u8 *)&action->camera);
+        btlCopyMotionTransform(&action->frontCamera, &action->camera);
         func_001E3E58(action, (u8 *)&action->backCamera, action->task->unit, 0);
         action->motionParameter = 7.0f;
         action->flags = (action->flags | 0x1041) & 0xFFFBFFFF;
@@ -7940,7 +7939,7 @@ BtlCamState *pose;
 BtlCamState *out;
 {
     func_001DEFE0(command, pose, 20.0f);
-    btlCopyMotionTransform((u8 *)out, (u8 *)pose);
+    btlCopyMotionTransform(out, pose);
     if (pose->direction[0] > 0.0f) {
         func_002DD688(-(20.0f * 0.017453293f));
     } else {
@@ -8189,8 +8188,8 @@ void btlRefreshActionPoseBlendSnapshot(BtlLinkedCommand *action) {
     BtlCamState *saved;
     if (!(action->flags & 1) && action->motionProgress == 0) {
         saved = &action->backCamera;
-        btlCopyMotionTransform((u8 *)&action->frontCamera, (u8 *)&action->camera);
-        btlCopyMotionTransform((u8 *)saved, (u8 *)&action->camera);
+        btlCopyMotionTransform(&action->frontCamera, &action->camera);
+        btlCopyMotionTransform(saved, &action->camera);
         action->backCamera.distance += 125.0f;
         action->flags = (action->flags & ~0x14) | 0x41;
         action->state = 0;
@@ -8217,7 +8216,7 @@ void func_001DFE28(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
         count = btlGetIndexListCount(action->targetList);
         if (btlHasSingleLinkedResource(action) == 0) {
             func_001DEFE0(action, from, 17.5f);
-            btlCopyMotionTransform((u8 *)to, (u8 *)from);
+            btlCopyMotionTransform(to, from);
             btlInterpolateVectorStep(from->position);
             VU0_STORE_VF(vf10, targetPosition);
             if (func_001D6428(unit, 1) == 0) {
@@ -8255,7 +8254,7 @@ void func_001DFE28(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
             target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
             func_001E1288(action, from, 2);
             halfFov = to->fov * 0.5f * 1.3333333f;
-            btlCopyMotionTransform((u8 *)to, (u8 *)from);
+            btlCopyMotionTransform(to, from);
             minimumDistance = target->reach * target->scale / func_002FA148(halfFov);
             to->distance *= 0.6f;
             if (to->distance < minimumDistance) {
@@ -8297,7 +8296,7 @@ void btlSetupCameraPoseAimUnit(BtlLinkedCommand *action, BtlCamState *from, BtlC
     VU0_NEGATE_XYZ(vf10);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, &from->direction);
-    btlCopyMotionTransform((u8 *)to, (u8 *)from);
+    btlCopyMotionTransform(to, from);
     to->distance += 550.0f;
     action->flags = (action->flags & ~0x14) | 0x41;
     action->motionParameter = 25.0f;
@@ -8587,8 +8586,8 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
         if (idle == 0 && eligible == 0) {
             return;
         }
-        btlCopyMotionTransform((u8 *)&action->frontCamera, (u8 *)&action->camera);
-        btlCopyMotionTransform((u8 *)out, (u8 *)&action->camera);
+        btlCopyMotionTransform(&action->frontCamera, &action->camera);
+        btlCopyMotionTransform(out, &action->camera);
         action->backCamera.distance += idle != 0 ? 500.0f : 300.0f;
         action->flags = (action->flags & ~0x14) | 0x41;
         action->motionProgress = 1;
@@ -8655,7 +8654,7 @@ void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *command, Btl
         }
     }
     func_001DF358(command, out);
-    btlCopyMotionTransform((u8 *)pose, (u8 *)out);
+    btlCopyMotionTransform(pose, out);
     span = func_001F66D8(0x200, 0, 0) * 0.5f;
     pose->position[0] -= span;
     out->position[0] += span;
@@ -8731,7 +8730,7 @@ void func_001E4720(BtlCamState *source, BtlCamState *from,
     VU0_STORE_VF(vf10, from->direction);
     from->distance = length + selected->cameraRadius * selected->scale * 3.5f /
                               func_002FA148(fov * 0.5f);
-    btlCopyMotionTransform((u8 *)to, (u8 *)from);
+    btlCopyMotionTransform(to, from);
     func_002DD688(-(45.0f * 0.017453293f));
     VU0_LOAD_VF(vf10, to->direction);
     VU0_ROTATE_VEC(vf10, vf10);

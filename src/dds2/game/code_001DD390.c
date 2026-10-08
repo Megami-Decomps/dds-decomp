@@ -5303,8 +5303,8 @@ void btlCopyMotionTransform(BtlCamState *dst, BtlCamState *src) {
     dst->fov = src->fov;
 }
 
-void func_001E95C8(s32 transform, f32 value) {
-    ((BtlCamState *)transform)->fov = value;
+void btlSetMotionTransformFieldOfView(BtlCamState *object, f32 fovRadians) {
+    object->fov = fovRadians;
 }
 
 void btlInitMotionTransformFromVectors(BtlCamState *object, f32 *origin, f32 *direction) {
@@ -6727,7 +6727,7 @@ void func_001ED6C8(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
         count = btlGetIndexListCount(action->targetList);
         if (btlHasSingleLinkedResource(action) == 0) {
             func_001EC868(action, from, 17.5f);
-            btlCopyMotionTransform((u8 *)to, (u8 *)from);
+            btlCopyMotionTransform(to, from);
             btlInterpolateVectorStep(from->position);
             VU0_STORE_VF(vf10, targetPosition);
             if (func_001E3230(unit, 1) == 0) {
@@ -6765,7 +6765,7 @@ void func_001ED6C8(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
             target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
             func_001EEB78(action, from, 2);
             halfFov = to->fov * 0.5f * 1.3333333f;
-            btlCopyMotionTransform((u8 *)to, (u8 *)from);
+            btlCopyMotionTransform(to, from);
             minimumDistance = target->reach * target->scale / func_00353228(halfFov);
             to->distance *= 0.6f;
             if (to->distance < minimumDistance) {
