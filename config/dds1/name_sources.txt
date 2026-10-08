@@ -4854,6 +4854,7 @@
 0x0027C770	mnuRetreatWindowListSelection	inferred	Adapts window container to its list and retreats selection by default direction. [names_reviewed18.tsv]
 0x0027CCD0	mnuDrawWindowSelectionPanel	inferred	Draws visible panel at scrolled row and advances window transition. [names_reviewed5.tsv]
 0x0027CDD0	mnuDrawWindowContainer	inferred	Draws icon rows, selected panel and window frame then advances fade state. [names_reviewed5.tsv]
+0x0027CF28	mnuInitializeWindowSpriteGroup	inferred	Initializes all seven sprite slots, sets their grid entries, and refreshes paired corner colors for the window sprite group.
 0x0027D148	mnuCreateWindowState	inferred	Allocates 0x28-byte object, zeroes it, stores handle and initializes with four args.
 0x0027D1E8	mnuReleaseWindowTextures	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027D248	mnuConfigureWindowSpriteSlots	inferred	Applies configuration for six of the seven MenuWindowSpriteGroup sprite slots.
