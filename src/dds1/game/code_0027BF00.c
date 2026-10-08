@@ -143,7 +143,6 @@ MenuListNode *mnuListAdvanceCursor(MenuList *list, s32 noScroll, s32 keepFade);
 
 MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade);
 
-s32 mnuSeekListNode(s32 index, MenuList *list);
 
 u32 mnuTestListFlagTwo(u32 *flags);
 
