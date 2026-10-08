@@ -97,7 +97,6 @@
       "expected_symbols": 24,
       "expected_shifted_symbols": 23,
       "fallback_symbols": [
-        "fileManUpdate",
         "fileReqInit",
         "fileReqPoll"
       ],
