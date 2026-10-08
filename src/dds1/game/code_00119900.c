@@ -553,6 +553,10 @@ s32 ptyGetAverageLevel(void) {
 
 INCLUDE_ASM(const s32, "game/code_00119900", ptyAddUnit);
 
+extern s32 D_0032ACA8[128];
+extern void mdlFlagClear(s32);
+extern s32 ptyRebalanceFrontline(s32);
+
 INCLUDE_ASM(const s32, "game/code_00119900", ptyRemoveUnit);
 
 u32 func_0011B140(void) {
