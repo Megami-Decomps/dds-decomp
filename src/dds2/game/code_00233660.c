@@ -202,7 +202,7 @@ extern void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s6
 
 
 void sdfStreamCreateWithParams(SdfStreamFrameNode *, SdfStreamParams *, s32, s32, SdfTex *);
-void func_00344A08(SdfStreamFrameNode *);
+void sdfDestroyStreamFrameNode(SdfStreamFrameNode *);
 
 void effApplyNodeScale(s32, float);
 
@@ -760,7 +760,7 @@ void mdlAppendObjectPart(DevRequest *list, s32 sourceAddress, SdfMemBlock *backi
 
 void mdlObjDestroy(MdlObj *obj) {
     if (obj->initialized != 0) {
-        func_00344A08(&obj->soundNode);
+        sdfDestroyStreamFrameNode(&obj->soundNode);
     }
     sdfReleaseResourceAllocation(obj->backingAllocation);
     sdfReleaseChipBlock(obj);
