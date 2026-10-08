@@ -1,6 +1,20 @@
 #include "snd_ring.h"
 #include "common.h"
 
+#define SND_COMMAND_RING_ENTRY_COUNT 32
+#define SND_COMMAND_RING_INDEX_MASK (SND_COMMAND_RING_ENTRY_COUNT - 1)
+#define SND_COMMAND_HEADER_BYTES 0x14
+#define SND_COMMAND_QUADWORD_BYTES 16
+#define SND_COMMAND_QUADWORD_SHIFT 4
+#define SND_COMMAND_CHANNEL_MASK 0xFFFF
+#define SND_COMMAND_ID_SHIFT 16
+#define SND_COMMAND_LENGTH_SHIFT 28
+
+#define SND_CHANNEL_COUNT 16
+#define SND_IOP_BUFFER_COUNT 16
+#define SND_TRACK_SLOT_COUNT 13
+#define SND_IOP_BUFFER_ALIGNMENT 16
+
 typedef struct CmdPacket {
     /* 0x0 */ u32 trackId;
     /* 0x4 */ u32 unk4;
@@ -42,9 +56,9 @@ typedef struct SndWork {
     s32 bufferCount;           /* 0x004 */
     u32 unk008;              /* 0x008 */
     u32 unk00C;              /* 0x00C */
-    SndChannel channels[16];   /* 0x010 */
-    SndIopBuffer buffers[16];  /* 0x110 */
-    SndTrackSlot slots[13];    /* 0x190 */
+    SndChannel channels[SND_CHANNEL_COUNT];   /* 0x010 */
+    SndIopBuffer buffers[SND_IOP_BUFFER_COUNT];  /* 0x110 */
+    SndTrackSlot slots[SND_TRACK_SLOT_COUNT];    /* 0x190 */
     u32 unk1F8;              /* 0x1F8 */
     u32 unk1FC;              /* 0x1FC */
     u32 unk200;                /* 0x200 */
@@ -59,7 +73,7 @@ extern s32 sceSifInitIopHeap(void);
 extern s32 func_002E8700(void);
 extern void func_002E8938(s32, void *, s32);
 
-extern SndRingPacket D_003FB080[32];
+extern SndRingPacket D_003FB080[SND_COMMAND_RING_ENTRY_COUNT];
 extern u32 D_003BD4A0;
 /* The worker consumes entries while this producer publishes and polls cursors. */
 extern vu16 D_003BDA82;
@@ -69,32 +83,36 @@ extern s32 WakeupThread(s32 thread);
 extern s32 func_002E8640(void);
 extern void *memcpy(void *, const void *, u32);
 
-u32 func_002E87A8(u32 command, u32 channel, void *packet, s32 size) {
-    s32 next;
-    s32 retries;
+u32 func_002E87A8(u32 command, u32 channel, void *packet, s32 payloadBytes) {
+    s32 nextWriteIndex;
+    s32 wakeAttemptsRemaining;
     SndRingPacket *entry;
-    u32 packetQuadwords;
+    u32 transferQuadwords;
 
     if (++D_003BD4A0 == 0) {
         D_003BD4A0 = 1;
     }
-    next = ((s16)D_003BDA84 + 1) & 31;
-    if (next == (s16)D_003BDA82) {
-        for (retries = 8; retries != 0; retries--) {
+    nextWriteIndex = ((s16)D_003BDA84 + 1) & SND_COMMAND_RING_INDEX_MASK;
+    if (nextWriteIndex == (s16)D_003BDA82) {
+        for (wakeAttemptsRemaining = 8; wakeAttemptsRemaining != 0; wakeAttemptsRemaining--) {
             do {
                 WakeupThread(D_003BDA88);
-            } while ((s16)D_003BDA82 != next);
+            } while ((s16)D_003BDA82 != nextWriteIndex);
         }
         return 0;
     }
     entry = &D_003FB080[(s16)D_003BDA84];
     entry->sequence = D_003BD4A0;
-    if (size != 0) {
-        memcpy(entry->payload, packet, size);
+    if (payloadBytes != 0) {
+        memcpy(entry->payload, packet, payloadBytes);
     }
-    packetQuadwords = (size + 0x14 + 15) >> 4;
-    entry->command = (command << 16) | (channel & 0xffff) | (packetQuadwords << 28);
-    D_003BDA84 = next;
+    /* The SIF length includes the transport/command header and rounds up to quadwords. */
+    transferQuadwords = (payloadBytes + SND_COMMAND_HEADER_BYTES +
+                        (SND_COMMAND_QUADWORD_BYTES - 1)) >> SND_COMMAND_QUADWORD_SHIFT;
+    entry->command = (command << SND_COMMAND_ID_SHIFT) |
+                     (channel & SND_COMMAND_CHANNEL_MASK) |
+                     (transferQuadwords << SND_COMMAND_LENGTH_SHIFT);
+    D_003BDA84 = nextWriteIndex;
     if (D_003BDA80 != 0) {
         while (func_002E8640() != 0) {
         }
@@ -157,7 +175,7 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
 
     sndMidiTrackState.header = header;
     channel = sndMidiTrackState.channels;
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < SND_CHANNEL_COUNT; i++) {
         channel->index = i;
         channel->unk1 = 0x20;
         channel->unk2 = 0;
@@ -169,7 +187,7 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
     sndMidiTrackState.channels[0].unk8 = sndReserveIopWorkMemory(0x21600);
     sndMidiTrackState.unk200 = 0;
     sndMidiTrackState.unk204 = 0;
-    for (i = 0; i < 13; i++) {
+    for (i = 0; i < SND_TRACK_SLOT_COUNT; i++) {
         sndMidiTrackState.slots[i].id = -1;
         sndMidiTrackState.slots[i].flagA = 0;
         sndMidiTrackState.slots[i].flagB = 0;
@@ -177,33 +195,36 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
 }
 
 /* Allocate one aligned IOP block and distribute its address among active buffers. */
-void sndAllocateAlignedIopBuffers(s32 *sizes, s32 count) {
+void sndAllocateAlignedIopBuffers(s32 *requestedSizes, s32 bufferCount) {
     SndIopBuffer *buffer;
-    s32 total, size, i;
-    u32 address;
+    s32 totalBytes;
+    s32 alignedBytes;
+    s32 bufferIndex;
+    u32 iopAddress;
 
-    sndMidiTrackState.bufferCount = count;
+    sndMidiTrackState.bufferCount = bufferCount;
     buffer = sndMidiTrackState.buffers;
-    total = 0;
-    i = 0;
+    totalBytes = 0;
+    bufferIndex = 0;
     do {
-        size = (*sizes++ + 15) & ~15;
-        buffer->size = size;
+        alignedBytes = (*requestedSizes++ + (SND_IOP_BUFFER_ALIGNMENT - 1)) &
+                       ~(SND_IOP_BUFFER_ALIGNMENT - 1);
+        buffer->size = alignedBytes;
         buffer++;
-        total += size;
-        i++;
-    } while (i != count);
-    for (; i < 16; i++) {
-        sndMidiTrackState.buffers[i].size = 0;
-        sndMidiTrackState.buffers[i].address = 0;
+        totalBytes += alignedBytes;
+        bufferIndex++;
+    } while (bufferIndex != bufferCount);
+    for (; bufferIndex < SND_IOP_BUFFER_COUNT; bufferIndex++) {
+        sndMidiTrackState.buffers[bufferIndex].size = 0;
+        sndMidiTrackState.buffers[bufferIndex].address = 0;
     }
-    address = sndReserveIopWorkMemory(total);
-    i = 0;
+    iopAddress = sndReserveIopWorkMemory(totalBytes);
+    bufferIndex = 0;
     do {
-        sndMidiTrackState.buffers[i].address = address;
-        address += sndMidiTrackState.buffers[i].size;
-        i++;
-    } while (i != count);
+        sndMidiTrackState.buffers[bufferIndex].address = iopAddress;
+        iopAddress += sndMidiTrackState.buffers[bufferIndex].size;
+        bufferIndex++;
+    } while (bufferIndex != bufferCount);
 }
 
 void func_002E8C30(s32 arg0, s32 arg1, s32 *sizes, s32 count) {
