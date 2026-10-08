@@ -559,7 +559,7 @@ s32 sdfFormatImageSize(u32 format, s32 width, s32 height) {
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1D80);
 
-void sdfTexEnqueuePacketWithSemaphore(s32 address, s32 packet) {
+void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet) {
     SdfSemaObj *obj = &sdfTextureQueueWork;
     SdfTexPacketTail *last;
 
@@ -831,10 +831,11 @@ u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height, u32 format, u8
     return pixels + imageBytes;
 }
 
-extern u8 *sdfTexSubmitImageCopy();
+extern u8 *sdfTexSubmitImageCopy(u32 destination, s32 width, s32 height,
+    u32 format, u8 *pixels, s32 borrowPixels);
 
 /* Upload the CLUT as 16x16 for 8-bit indexed formats, otherwise 8x2; forward pixel ownership. */
-u8 *sdfTexSubmitPixelsForFormat(SdfTex *texture, s32 destination, u8 *pixels, s32 borrowPixels) {
+u8 *sdfTexSubmitPixelsForFormat(SdfTex *texture, u32 destination, u8 *pixels, s32 borrowPixels) {
     s32 paletteWidth;
     s32 paletteHeight;
 
@@ -865,7 +866,7 @@ void sdfTexListInsert(SdfTex *texture) {
     sdfResourceListHead = texture;
 }
 
-SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, s32 primary, s32 paletteFormat, s32 paletteCount, s32 secondary) {
+SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 paletteCount, SdfTexResource *secondary) {
     SdfTex *tex = sdfAllocAndClearQuadwords(0x40);
     SdfTexRef *ref = sdfAllocAndClearQuadwords(8);
 
@@ -876,8 +877,8 @@ SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 max
     tex->height = y;
     tex->pixelFormat = pixelFormat;
     tex->maxMipLevel = maxMipLevel;
-    tex->secondaryResource = (SdfTexResource *)secondary;
-    tex->primaryResource = (SdfTexResource *)primary;
+    tex->secondaryResource = secondary;
+    tex->primaryResource = primary;
     tex->reference = ref;
     sdfTexListInsert(tex);
     tex->unk38 = 0x80808080;

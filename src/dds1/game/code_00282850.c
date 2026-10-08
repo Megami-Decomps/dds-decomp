@@ -914,15 +914,16 @@ void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 value, s32 option) {
 }
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
+extern s8 scrGetSelectedOperandIndex(DatPartyRecord *);
 
 /* Create a profile panel from the selection state's current profile ID and record. */
-MenuProfilePanel *mnuCreateProfilePanel(s32 selectionState) {
+MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState) {
     MenuProfilePanel *panel = (MenuProfilePanel *)sdfAllocSizeClassBlock(sizeof(MenuProfilePanel));
     s32 profileId;
     DatProfileRecord *profileRecord;
     memset(panel, 0, sizeof(MenuProfilePanel));
     profileId = scrGetSelectedOperandIndex(selectionState);
-    profileRecord = ptyGetCurrentProfileRecord((DatPartyRecord *)selectionState);
+    profileRecord = ptyGetCurrentProfileRecord(selectionState);
     mnuSetProfilePanelValues(panel, prfGetCapValue((u16)profileId), profileRecord->value);
     panel->opacity = 0x100;
     return panel;
@@ -1366,12 +1367,12 @@ void mnuPlayDefaultInputSounds(u32 inputFlags) {
 }
 
 /* Find the first occupied slot with the same table ID; zero also serves as no-match. */
-s32 mnuFindMatchingPartyEntryIndex(s32 targetEntryAddress) {
+s32 mnuFindMatchingPartyEntryIndex(DatPartyRecord *targetEntry) {
     s32 partyIndex;
     DatPartyRecord *partyEntry = datGameState->party;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++, partyEntry++) {
         if ((partyEntry->flags & 1) &&
-            ((DatPartyRecord *)targetEntryAddress)->unitId == partyEntry->unitId) {
+            targetEntry->unitId == partyEntry->unitId) {
             return partyIndex;
         }
     }
@@ -1618,7 +1619,7 @@ s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 select
             return 0;
         }
         func_002866B0(ability, target, entry);
-        func_00281780(context, mnuFindMatchingPartyEntryIndex((s32)entry), 0, 0);
+        func_00281780(context, mnuFindMatchingPartyEntryIndex(entry), 0, 0);
     } else {
         s32 partyIndex;
         s32 queueArgument;
@@ -1643,7 +1644,7 @@ s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 select
         for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
             entry = &datGameState->party[partyIndex];
             if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
-                func_00281780(context, mnuFindMatchingPartyEntryIndex((s32)entry), 0, queueArgument);
+                func_00281780(context, mnuFindMatchingPartyEntryIndex(entry), 0, queueArgument);
             }
             queueArgument += 3;
         }
@@ -1865,7 +1866,7 @@ s32 btlItemApplyDirectEffect(s32 context, u16 item, s32 mode,
     s32 result = btlItemApplyPermanentBonus(item, unit);
     switch (result) {
     case 1:
-        func_00281780(context, mnuFindMatchingPartyEntryIndex((s32)unit), 1, 0);
+        func_00281780(context, mnuFindMatchingPartyEntryIndex(unit), 1, 0);
         sndSetSequenceVolumePan(16, 127, 63);
         return 1;
     case 2:
@@ -1891,7 +1892,7 @@ s32 btlItemApplyDirectEffect(s32 context, u16 item, s32 mode,
     default:
         return 0;
     }
-    func_00281780(context, mnuFindMatchingPartyEntryIndex((s32)unit), 2, 0);
+    func_00281780(context, mnuFindMatchingPartyEntryIndex(unit), 2, 0);
     sndSetSequenceVolumePan(7, 127, 63);
     return 1;
 }

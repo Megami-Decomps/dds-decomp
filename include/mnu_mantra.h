@@ -40,8 +40,11 @@ typedef struct MtrEquipState {
     s32 timer;
 } MtrEquipState;
 
+/* 00289CA0/00289CE8 store the ID byte; 00289CB0..00289CF8 update kind/marked as a halfword. */
 typedef struct MtrUnitMenuEntry {
-    u16 unk00 : 13;
+    u16 nodeId : 8;
+    u16 kind : 4;
+    u16 unk12 : 1;
     u16 marked : 1;
     u16 unk14 : 2;
     u8 pad02[6];

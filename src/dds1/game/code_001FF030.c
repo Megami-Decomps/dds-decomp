@@ -4118,7 +4118,7 @@ s32 btlCheckSelectedBossUnitFlag(void) {
 
 INCLUDE_ASM(const s32, "game/code_001FF030", func_00209528);
 
-extern void func_001DF358(void *, void *);
+extern void func_001DF358(BtlLinkedCommand *, BtlCamState *);
 
 /* Event entry carrying a battle task and its action kind. */
 typedef struct BtlEventEntry {
@@ -4129,8 +4129,8 @@ typedef struct BtlEventEntry {
     u32 kind;      /* 0x104 */
 } BtlEventEntry;
 
-s32 btlDispatchEligibleBossEvent(u8 *entry) {
-    BtlTask *task = ((BtlEventEntry *)entry)->task;
+s32 btlDispatchEligibleBossEvent(BtlLinkedCommand *entry) {
+    BtlTask *task = entry->task;
     u8 *data;
     u32 kind;
     if (task == 0) {
@@ -4143,11 +4143,11 @@ s32 btlDispatchEligibleBossEvent(u8 *entry) {
     if (((BtlBossEffectPayload *)data)->options & 4) {
         return 1;
     }
-    kind = ((BtlEventEntry *)entry)->kind;
+    kind = entry->status;
     if (kind < 9) {
         if (kind >= 4) {
-            func_001DF358(entry, entry);
-            ((BtlEventEntry *)entry)->flags |= 0x1000;
+            func_001DF358(entry, &entry->camera);
+            entry->flags |= 0x1000;
             return 0;
         }
     }

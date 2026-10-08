@@ -472,7 +472,7 @@ void mnuSynchronizeMantraModelFlags(s32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291038);
 
-extern void scrSetEntryLowFlags(u32 context, u16 entryId, u16 lowFlags);
+extern void scrSetEntryLowFlags(DatPartyRecord *context, u16 entryId, u16 lowFlags);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
 /* Write each panel slot's 0xB0 saved flag words back to its list node's script entries and log the slot number. */
@@ -489,7 +489,7 @@ void mnuStoreMantraPanelFlagsToScript(MnuStatusResource *object) {
     s32 slotIndex = 0;
 
     for (; node != NULL; node = node->next) {
-        u32 context = node->unk70;
+        DatPartyRecord *context = node->partyRecord;
         u16 *values = object->menu.slots[slotIndex]->flags;
         s32 i;
 
@@ -500,7 +500,7 @@ void mnuStoreMantraPanelFlagsToScript(MnuStatusResource *object) {
     }
 }
 
-extern u32 scrGetEntryLowFlags(s32 arg0, u16 index);
+extern u16 scrGetEntryLowFlags(DatPartyRecord *context, u16 entryId);
 
 /* Read each list node's 0xB0 script entry flags into its panel slot and log the slot number. */
 void mnuLoadMantraPanelFlagsFromScript(MnuStatusResource *object) {
@@ -508,7 +508,7 @@ void mnuLoadMantraPanelFlagsFromScript(MnuStatusResource *object) {
     s32 slotIndex = 0;
 
     for (; node != NULL; node = node->next) {
-        s32 context = node->unk70;
+        DatPartyRecord *context = node->partyRecord;
         u16 *values = object->menu.slots[slotIndex]->flags;
         s32 i;
 
@@ -523,13 +523,13 @@ extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
 extern u32 ptyGetProfileRecordCap(u16 scriptId);
 extern u32 ptyGetProfileRecordValue(DatPartyRecord *work, u16 scriptId);
 
-s32 mnuValidateProfileEntry(MantraFlagResource *slot, s32 arg1) {
-    u16 target = scrGetSelectedScriptEntryId((DatPartyRecord *)arg1) & 0xFFFF;
+s32 mnuValidateProfileEntry(MantraFlagResource *slot, DatPartyRecord *partyRecord) {
+    u16 target = scrGetSelectedScriptEntryId(partyRecord) & 0xFFFF;
     u16 *dst = slot->flags;
     s32 i;
 
     for (i = 0; i < 0xB0; i++) {
-        u32 flags = scrGetEntryLowFlags(arg1, i);
+        u16 flags = scrGetEntryLowFlags(partyRecord, i);
 
         *dst++ = flags;
         if (i == target) {
@@ -538,7 +538,7 @@ s32 mnuValidateProfileEntry(MantraFlagResource *slot, s32 arg1) {
             }
         }
     }
-    if (target != 0 && ptyGetProfileRecordCap(target) == ptyGetProfileRecordValue((DatPartyRecord *)arg1, target)) {
+    if (target != 0 && ptyGetProfileRecordCap(target) == ptyGetProfileRecordValue(partyRecord, target)) {
         return target;
     }
     return 0;

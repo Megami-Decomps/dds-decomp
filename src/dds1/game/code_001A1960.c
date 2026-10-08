@@ -5348,7 +5348,40 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001B9E98);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A2D28);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001BA198);
+void func_001BA198(BtlUnit *unusedUnit, BattleActorPanelWork *work, s32 slot) {
+    s32 i;
+
+    switch (work->activeEntries[slot].presentation.transitionState) {
+    case 1:
+    case 2: {
+        for (i = 0; i < 8; i++) {
+            work->activeEntries[slot].presentation.trianglePhase[i] =
+                (work->activeEntries[slot].presentation.trianglePhase[i] + 8) % 360;
+            work->activeEntries[slot].presentation.triangleAlpha[i] =
+                (u32)((sdfSinPoly((f32)((work->activeEntries[slot].presentation.trianglePhase[i] + 90) % 360) /
+                                  180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 16.0f);
+        }
+        break;
+    }
+    case 3:
+        for (i = 0; i < 8; i++) {
+            if (work->activeEntries[slot].presentation.triangleAlpha[i] != 0) {
+                work->activeEntries[slot].presentation.triangleAlpha[i]--;
+            }
+        }
+        break;
+    case 0:
+    case 4: {
+        s32 index;
+        for (i = 7, index = 0; i >= 0; i--, index++) {
+            u8 alpha = work->activeEntries[slot].presentation.triangleAlpha[index];
+            work->activeEntries[slot].presentation.triangleAlpha[index] =
+                alpha < 32 ? 0 : alpha - 32;
+        }
+        break;
+    }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001BA408);
 
