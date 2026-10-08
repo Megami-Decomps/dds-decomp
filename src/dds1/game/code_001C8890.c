@@ -12207,7 +12207,88 @@ u8 sndIsBattleBankLoaded(void) {
     return temp_v0 != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001F44C0);
+void func_001F44C0(void) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    SoundSlotOwner *owner;
+    s32 tracksReady;
+
+    for (owner = state->soundSlotOwners; owner != NULL; owner = owner->next) {
+        if ((owner->flags & 2) == 0) {
+            u32 slot;
+            s32 requestsPending = 0;
+
+            for (slot = 0; slot < 0x1D; slot++) {
+                if (owner->work.fileRequests[slot] != 0) {
+                    if (fileIsRequestReadyInCurrentMode(
+                            (struct FileRequest *)(u32)owner->work.fileRequests[slot]) != 0) {
+                        u32 resource = fileGetResourceHandle(
+                            (struct FileWork *)(u32)owner->work.fileRequests[slot]);
+
+                        struct FileCleanup *completedRequest =
+                            (struct FileCleanup *)(u32)owner->work.fileRequests[slot];
+
+                        owner->work.resourceHandles[slot] = resource;
+                        filePollEntryCleanup(completedRequest);
+                        owner->work.fileRequests[slot] = 0;
+                    } else {
+                        requestsPending = 1;
+                    }
+                }
+            }
+            if (requestsPending == 0) {
+                owner->flags = (owner->flags & ~1) | 2;
+                btlBossDebugPrintf("btl:motSE file load all end[%p]\n", owner);
+            }
+        }
+    }
+
+    if ((s32)state->motionSeLoadFrame >= 0) {
+        state->motionSeLoadFrame++;
+    }
+    if ((s32)state->skillSeLoadFrame >= 0) {
+        state->skillSeLoadFrame++;
+    }
+
+    tracksReady = 1;
+    for (owner = state->soundSlotOwners; owner != NULL; owner = owner->next) {
+        if (owner->flags & 8) {
+            u32 loaded = sndFindPackedTrackLoadStatus((u32)owner->work.pendingSoundId);
+
+            if (loaded != 0) {
+                u32 flags = owner->flags;
+
+                if (flags & 8) {
+                    tracksReady = 0;
+                }
+                owner->flags = (flags & ~8) | 0x10;
+            } else {
+                tracksReady = 0;
+            }
+        }
+    }
+
+    if (tracksReady != 0) {
+        if (sndHasFlaggedActiveNode() != 0) {
+            btlBossDebugPrintf("btl:motSE wait[skillSE]\n");
+        } else {
+            for (owner = state->soundSlotOwners; owner != NULL; owner = owner->next) {
+                if (owner->flags & 4) {
+                    SoundSlotWork *work = &owner->work;
+                    struct SdfMemBlock *block =
+                        (struct SdfMemBlock *)(u32)work->resourceHandles[owner->work.pendingSlot];
+                    s32 size = sdfMemoryGetBlockSize(block);
+                    u32 address = sdfMemoryGetBlockAddress(
+                        (struct SdfMemBlock *)(u32)work->resourceHandles[owner->work.pendingSlot]);
+
+                    func_002E9450((s32)address, size);
+                    owner->flags = (owner->flags & ~4) | 8;
+                    owner->flags &= ~0x10;
+                    break;
+                }
+            }
+        }
+    }
+}
 
 /* Return whether a not-yet-file-ready owner still has an outstanding request. */
 s32 sndHasOccupiedNodeSlots(void) {
