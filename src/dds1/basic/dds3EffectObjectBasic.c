@@ -398,8 +398,8 @@ void func_001150B0(u32 unused, void *firstVector, s32 secondVectorAddress) {
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001150F0);
 
-void func_00115298(void) {
-    func_001150F0();
+void *func_00115298(void *resource, void *position, void *scale) {
+    return func_001150F0(resource, position, scale);
 }
 
 /* Resolve the resource identifier, create from it, then release the temporary resource.
