@@ -6386,11 +6386,96 @@ void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *command, BtlCamState *
     VU0_STORE_VF(vf10, out->direction);
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001ECCB0);
-
 extern f32 func_00353228(f32);
 
-INCLUDE_RODATA(const s32, "game/code_001DD390", D_00417D70);
+typedef struct BattlePairCameraPreset {
+    f32 fromQuaternion[4];
+    f32 toQuaternion[4];
+    f32 fromDistanceScale;
+    f32 toDistanceScale;
+    f32 fromHeightScale;
+    f32 motionParameter;
+} BattlePairCameraPreset;
+
+void func_001ECCB0(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+    f32 quaternion[4];
+    BattlePairCameraPreset poses[4] = {
+        {{0.109f, -0.872f, -0.288f, 0.355f},
+         {0.01f, -0.97f, 0.03f, -0.14f},
+         2.2f, 1.5f, 0.8f, 25.0f},
+        {{-0.08f, -0.91f, 0.16f, 0.34f},
+         {-0.05f, -0.96f, -0.16f, -0.14f},
+         2.2f, 1.5f, 0.7f, 25.0f},
+        {{-0.09f, -0.88f, -0.15f, -0.43f},
+         {-0.02f, -0.98f, 0.03f, 0.11f},
+         2.2f, 1.5f, 0.8f, 25.0f},
+        {{0.04f, -0.93f, 0.12f, -0.31f},
+         {0.01f, -0.97f, -0.16f, 0.06f},
+         2.2f, 1.5f, 0.7f, 25.0f},
+    };
+    BtlUnit *unit = action->link->unit;
+    s32 pose;
+    f32 fov;
+    f32 halfFov;
+    f32 tangent;
+    f32 distance;
+
+    if (unit->flags & 2) {
+        btlClearAllUnitDefeatCandidates();
+        btlFlagMatchingUnitsDefeatCandidate(unit->flags & 0x600);
+        btlCopyUnitRotationQuaternion((u8 *)unit, (s128 *)quaternion);
+        pose = effMiscRandMod(0, 4);
+        fov = action->camera.fov;
+        from->fov = fov;
+        to->fov = fov;
+        if (!btlIsCurrentValueBelowQuarterThreshold(unit) || !(unit->flags & 0x200)) {
+            if (func_001E3230(unit, 1) == 0) {
+                btlUnitGetMuzzlePosVU(unit);
+            }
+            VU0_STORE_VF(vf10, from->position);
+            VU0_STORE_VF(vf10, to->position);
+        } else {
+            btlUnitGetMuzzlePosVU(unit);
+            VU0_STORE_VF(vf10, from->position);
+            VU0_STORE_VF(vf10, to->position);
+            from->position[1] -= unit->height * unit->scale * 0.25f;
+            to->position[1] -= unit->height * unit->scale * 0.25f;
+        }
+
+        from->position[1] *= poses[pose].fromHeightScale;
+        halfFov = fov * 0.5f;
+        tangent = func_00353228(halfFov);
+        distance = unit->unkC0 * unit->scale / tangent;
+        from->distance = distance * poses[pose].fromDistanceScale;
+        to->distance = distance * poses[pose].toDistanceScale;
+
+        VU0_LOAD_VF(vf10, poses[pose].fromQuaternion);
+        VU0_LOAD_VF(vf11, quaternion);
+        effMiscQuatMultiplyVU();
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, D_003E9130);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, from->direction);
+
+        VU0_LOAD_VF(vf10, poses[pose].toQuaternion);
+        VU0_LOAD_VF(vf11, quaternion);
+        effMiscQuatMultiplyVU();
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, D_003E9130);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF(vf10, to->direction);
+
+        func_001E88A8(from);
+        func_001E88A8(to);
+        if (btlHasMarkedEntry10((s32)action)) {
+            action->durationFrames = func_001E2E58(unit, unit->unkEC);
+            action->flags |= 0x11;
+        } else {
+            action->flags |= 0x41;
+            action->motionParameter = poses[pose].motionParameter;
+        }
+    }
+}
 
 void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
     f32 quat[4];
