@@ -1189,7 +1189,7 @@
 0x00151F38	billInvokeCallback	inferred	invokes instance unk28 callback
 0x00151F58	effCreateBillboardSharingIndexedResource	inferred	Creates a billboard for the catalog entry kind, shares its child payload, and increments the child reference count.
 0x00151FC8	effGetBillResourceTexture	inferred	Returns the acquired SdfTex handle from the indexed billboard child resource.
-0x00151FF8	billSetLengthExtent	inferred	Stores billboard length extent; beam caller supplies its computed length [names_reviewed6.tsv]
+0x00151FF8	billSetRotationAngle	inferred	Stores the radian angle used by both billboard quad corner rotations; projected atan2 and particle spin writers agree
 0x00152000	billSetChildScaleComponents	inferred	Stores two billboard scale components; called with equal values by billSetChildScale2 [names_reviewed6.tsv]
 0x00152010	billSetChildParameter	inferred	Stores the supplied word in billboard parameter [names_reviewed6.tsv]
 0x00152018	billSetChildTextureQuad	inferred	Copies the sixteen-byte BillTextureQuad into the child payload UV member for kind zero; renderer consumes four packed U/V corners.
