@@ -3,6 +3,8 @@
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "ee_mmi.h"
+#include "sdf_stream_read.h"
+#include "sdf_dev_event.h"
 
 extern s32 D_00439214;
 extern s32 iWakeupThread(s32 threadId);
@@ -254,14 +256,14 @@ extern s32 SignalSema(s32);
 /* Event 5 invalidates the EE cache before waking the waiting sound thread. */
 s32 sdfSoundHandleRpcEvent(s32 unused, u32 event) {
     switch (event) {
-    case 5:
+    case SDF_DEV_EVENT_READ_REPLY:
         FlushCache(0);
-    case 4:
+    case SDF_DEV_EVENT_SIZE_REPLY:
         SignalSema(sdfSoundRpcSemaphore);
         break;
-    case 0:
-    case 2:
-    case 7:
+    case SDF_DEV_EVENT_INACTIVE:
+    case SDF_DEV_EVENT_OPENED:
+    case SDF_DEV_EVENT_CLOSED:
         SignalSema(sdfSoundRpcSemaphore);
         break;
     }
@@ -1117,11 +1119,11 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
     if (node->headerReady != 0) {
         return;
     }
-    if (node->read(node, node->source, 0, &readStatus, 0) < sizeof(header)) {
+    if (node->read(node, node->source, SDF_STREAM_READ_QUERY, &readStatus, 0) < sizeof(header)) {
         return;
     }
     node->headerReady = 1;
-    node->read(node, node->source, 1, &header, sizeof(header));
+    node->read(node, node->source, SDF_STREAM_READ_COPY, &header, sizeof(header));
     node->width = header.width;
     node->height = header.height;
     node->cycleLength = header.cycleLength;
@@ -1226,13 +1228,13 @@ void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
             }
             destinationAddress += writeSlot << SDF_STREAM_SLOT_SHIFT;
             destinationAddress = (destinationAddress & SDF_EE_PHYSICAL_MASK) | SDF_EE_UNCACHED_BASE;
-            availableBytes = feed->read(feed, feed->source, 0, &endOfStream, 0);
+            availableBytes = feed->read(feed, feed->source, SDF_STREAM_READ_QUERY, &endOfStream, 0);
             if (availableBytes < SDF_STREAM_SLOT_BYTES) {
                 if (endOfStream == 0) {
                     return;
                 }
                 if (availableBytes > 0) {
-                    feed->read(feed, feed->source, 1, (void *)destinationAddress, availableBytes);
+                    feed->read(feed, feed->source, SDF_STREAM_READ_COPY, (void *)destinationAddress, availableBytes);
                     filledSlots++;
                 }
                 feed->done = 1;
@@ -1242,7 +1244,7 @@ void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
                         feed->done = 1;
                     }
                 }
-                feed->read(feed, feed->source, 1, (void *)destinationAddress, SDF_STREAM_SLOT_BYTES);
+                feed->read(feed, feed->source, SDF_STREAM_READ_COPY, (void *)destinationAddress, SDF_STREAM_SLOT_BYTES);
                 filledSlots++;
             }
             if (writeSlot == SDF_STREAM_MAX_FILLED) {
@@ -1510,7 +1512,7 @@ void func_00345488(s32 cadence) {
                         EIntr();
                     }
                 }
-                node->read(node, node->source, 2, NULL, 0);
+                node->read(node, node->source, SDF_STREAM_READ_RESUME, NULL, 0);
             }
         }
         node = node->next;

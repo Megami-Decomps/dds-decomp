@@ -3,6 +3,8 @@
 #include "sdf.h"
 #include "sdf_movie_stream.h"
 #include "sdf_movie_state.h"
+#include "sdf_stream_read.h"
+#include "sdf_dev_event.h"
 
 typedef struct DevState DevState;
 
@@ -72,20 +74,20 @@ s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *
 
     switch (movie->state) {
     case SDF_MOVIE_STATE_INITIAL:
-        if (operation == 2) {
+        if (operation == SDF_DEV_EVENT_OPENED) {
             movie->state = SDF_MOVIE_STATE_CONTROL_REQUEST;
             sdfDevQueueControlRequest(deviceState);
         }
         break;
     case SDF_MOVIE_STATE_CONTROL_REQUEST:
-        if (operation == 4) {
+        if (operation == SDF_DEV_EVENT_SIZE_REPLY) {
             movie->totalBytes = bytesRead;
             movie->remainingBytes = bytesRead;
             func_002ECF70(movie);
         }
         break;
     case SDF_MOVIE_STATE_DATA_READ:
-        if (operation == 5) {
+        if (operation == SDF_DEV_EVENT_READ_REPLY) {
             restoreInterrupts = func_00312C08();
             stream->bufferedBytes += bytesRead;
             movie->remainingBytes -= bytesRead;
@@ -101,7 +103,7 @@ s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *
         }
         break;
     case SDF_MOVIE_STATE_STOP_REQUESTED:
-        if (operation == 7) {
+        if (operation == SDF_DEV_EVENT_CLOSED) {
             movie->deviceState = NULL;
             movie->state = SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK;
             sdfDevQueueReleaseState(deviceState);
@@ -255,7 +257,7 @@ s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddres
     MovLinearStream *stream = movie->stream;
 
     switch (operation) {
-    case 0:
+    case SDF_STREAM_READ_QUERY:
         if (movie->stopRequested != 0) {
             *(u8 *)data = 1;
             return 0;
@@ -264,7 +266,7 @@ s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddres
             *(u8 *)data = 1;
         }
         return stream->bufferedBytes;
-    case 1:
+    case SDF_STREAM_READ_COPY:
         if (movie->stopRequested != 0) {
             return 0;
         }
@@ -287,7 +289,7 @@ s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddres
             stream->bufferedBytes -= size;
             return movie->remainingBytes;
         }
-    case 2:
+    case SDF_STREAM_READ_RESUME:
         if (movie->stopRequested != 0) {
             return 0;
         }
@@ -309,7 +311,7 @@ s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddress, 
     MovPacStream *stream = movie->stream;
 
     switch (operation) {
-    case 0:
+    case SDF_STREAM_READ_QUERY:
         if (movie->stopRequested != 0) {
             *(u8 *)data = 1;
             return 0;
@@ -318,7 +320,7 @@ s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddress, 
             *(u8 *)data = 1;
         }
         return stream->pacBufferedBytes;
-    case 1:
+    case SDF_STREAM_READ_COPY:
         if (movie->stopRequested != 0) {
             return 0;
         }
@@ -341,7 +343,7 @@ s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddress, 
             stream->pacBufferedBytes -= size;
             return movie->remainingBytes;
         }
-    case 2:
+    case SDF_STREAM_READ_RESUME:
         if (movie->stopRequested != 0) {
             return 0;
         }
