@@ -263,7 +263,7 @@ EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
 
     func_003014F0(path, D_003BD198, base, name);
     allocation = sdfReadNamedResource(path, &sourceAddress, 0);
-    mappedResource = effCreateMappedResource(sourceAddress);
+    mappedResource = effCreateMappedResource((const u8 *)sourceAddress);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     return mappedResource;
 }
@@ -276,7 +276,7 @@ void effCompleteMappedResourceJob(u64 job, u32 *outMappedResource) {
 
     allocation = fileGetResourceHandle();
     sourceAddress = sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
-    mappedResource = effCreateMappedResource(sourceAddress);
+    mappedResource = effCreateMappedResource((const u8 *)sourceAddress);
     *outMappedResource = (u32)mappedResource;
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     filePollEntryCleanup(job);
@@ -435,7 +435,7 @@ typedef struct EffMappedHeader {
  * The required-size calculation uses the first record, not the current row.
  * Returns the record-allocation handle, not its retained address.
  */
-struct SdfMemBlock *effLoadMappedStatusRecords(u8 *source, EffMappedHeader *headerOut) {
+struct SdfMemBlock *effLoadMappedStatusRecords(const u8 *source, EffMappedHeader *headerOut) {
     EffMappedHeader header;
     struct SdfMemBlock *allocation;
     EffMappedRecord *records;
@@ -471,11 +471,11 @@ struct SdfMemBlock *effLoadMappedStatusRecords(u8 *source, EffMappedHeader *head
 
 
 /* Build the live batch header from the serialized count and owned record array. */
-EffMappedResource *effCreateMappedResource(u32 sourceAddress) {
+EffMappedResource *effCreateMappedResource(const u8 *source) {
     EffMappedResource *mappedResource = (EffMappedResource *)sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
     EffMappedHeader header;
 
-    mappedResource->allocation = effLoadMappedStatusRecords((u8 *)sourceAddress, &header);
+    mappedResource->allocation = effLoadMappedStatusRecords(source, &header);
     mappedResource->records = (EffMappedRecord *)sdfResourceRetainAddress(mappedResource->allocation);
     mappedResource->count = header.count;
     return mappedResource;
