@@ -915,6 +915,7 @@
 0x00157EA0	billAppendChildQuad	inferred	appends one billboard quad to a child payload
 0x00158340	billFlushPendingChildPackets	inferred	drains pending child packet lists into pools
 0x00158C00	billFlushPendingRenderPairs	inferred	drains queued render pairs and submits batches
+0x00158D68	billInitializeCommonDrawState	inferred	Initializes the billboard's default scales, offsets, gray color, and packet-list selection; called for newly created and cloned objects.
 0x00158E00	billReleaseChild	inferred	Releases the billboard's child at offset 0x30 when present, then frees the billboard.
 0x00158E38	billProcessChild	inferred	Passes the billboard and its child at offset 0x30 to its processing routine.
 0x00158F58	billReleaseList	inferred	Releases a billboard list's shared data and then frees the list object.

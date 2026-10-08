@@ -1172,6 +1172,7 @@
 0x001502B0	billAppendChildQuad	inferred	appends one billboard quad to a child payload
 0x00150750	billFlushPendingChildPackets	inferred	drains pending child packet lists into pools
 0x00151010	billFlushPendingRenderPairs	inferred	drains queued render pairs and submits batches
+0x00151178	billInitializeCommonDrawState	inferred	Initializes the billboard's default scales, offsets, gray color, and packet-list selection; called for newly created and cloned objects.
 0x001511C0	billAllocChild	inferred	allocates a 0x34 billboard object and attaches a child payload from its resource argument
 0x00151260	billAllocList	inferred	allocates entry-list object from data, wires +0x30/+0x60/+0x50
 0x001512E8	billCloneList	inferred	clones entry-list object sharing child, bumps child count
