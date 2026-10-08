@@ -12,13 +12,11 @@ extern s8 D_0037F510[];
 
 
 
-extern void func_00313BA8(s32, s32);
 
 
 extern void sdfReleaseChipBlock();
 
 
-extern void sdfDestroyCallbackWork();
 
 
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
@@ -63,16 +61,12 @@ extern void sdfVec3ScaleInPlace(f32, f32 *);
 extern void *sdfAllocSizeClassBlock(s32);
 extern void *memset(void *, s32, u32);
 
-extern void func_00313BA8(s32, s32);
 
-extern s32 func_00313BA0(void);
-extern s32 func_00313BB0(s32, s32);
 
 extern u32 strlen(const char *);
 extern s32 func_0035C860(char *buffer, const char *fmt, ...);
 extern char D_004388D8[];
 extern char D_004388E0[];
-extern void sdfCallbackWorkOnRemove();
 
 extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
 extern s32 sdfTaskWorkRunAll(KwlnTask *task);
@@ -501,8 +495,8 @@ SdfList *sdfCreateTaskHeader(void *userData) {
     memset(obj, 0, sizeof(SdfList));
     obj->allocation = allocation;
     obj->userData = userData;
-    obj->onRemove = func_00313BA8;
-    obj->onDestroy = func_00313BA8;
+    obj->onRemove = sdfNoOpKeyValueCallback;
+    obj->onDestroy = sdfNoOpKeyValueCallback;
     return obj;
 }
 

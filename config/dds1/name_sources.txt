@@ -5994,6 +5994,9 @@
 0x002CC3A8	sdfGridSelectFilledCell	inferred	DDS2 func_00313810 [names_M49_GridSdf.tsv]
 0x002CC430	sdfGridDrawVisibleCells	inferred	confidence=high; matched-C; src/dds1/game/code_002C97E8.c:1114:func_002CC430; Traverses the visible row/column window beginning at viewportOrigin and invokes drawCell at cellWidth/cellHeight-spaced screen positions.; source=names_P5.tsv:9 [names_qp11.tsv]
 0x002CC728	sdfMultiplyAddFloat	inferred	Returns a float multiplied by a factor and added to an offset. [names_reviewed9.tsv]
+0x002CC738	sdfDefaultTaskEntryInit	inferred	Default task entry initializer returns zero.
+0x002CC740	sdfNoOpKeyValueCallback	inferred	Default list and task entry teardown callback ignores both key and value.
+0x002CC748	sdfDefaultTaskEntryUpdate	inferred	Default task entry update returns zero; reused by the legacy callback fallback.
 0x002CC750	sdfAppendFormattedDebugLogPair	inferred	Both exact C twins write a formatted value pair to debug.log. [names_reviewed13.tsv]
 0x002CC7D8	ptyClearProfileRecords	inferred	legacy PartyUnitProfileRecords_ClearAll: clears the save-backed profile-point sidecar block
 0x002CC808	ptySelectProfileStage	inferred	party/profile lane; legacy PartyUnit_SelectProfileStageAndInitCurrent: writes unit.current_profile from the 4-row stage table and initialises current_profile-related state

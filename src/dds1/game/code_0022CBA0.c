@@ -370,9 +370,114 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022EB10);
+extern Motion *mdlFindNodeById(MdlCtx *ctx, s32 id);
+extern u16 mdlGetNodeField2E(MdlCtx *ctx, s32 id);
+extern void sdfMotionInitialize(Motion *, s32, s32, f32, f32);
+extern void sdfMotionSampleAtFrame(Motion *, f32);
+extern void sdfMotionSuspend(Motion *);
+extern void sdfMotionResume(Motion *);
+extern EvtRuntimeChild *evtViewerFindLatestMatchingGlyph(EvtRuntimeGroup *, s32, s32);
 
-extern void func_0022EB10();
+/* Synchronize four motion channels, retaining their last applied timeline key. */
+void func_0022EB10(s32 frame, EffWorldNode *object, EvtRuntimeGroup *track,
+                   EvtRuntime *viewer, s32 mode) {
+    EffectObjectData *data = object->data;
+    MdlCtx *model = (MdlCtx *)data->modelHolder->resourceHandle;
+    s32 channel;
+
+    if (model->first == NULL) {
+        return;
+    }
+    for (channel = 0; channel < 4; channel++) {
+        Motion *motion = mdlFindNodeById(model, channel);
+        EvtRuntimeChild *key;
+        s32 sampleFrame;
+
+        if (motion == NULL) {
+            continue;
+        }
+        key = evtViewerFindLatestMatchingGlyph(track, frame, channel);
+        if (key == NULL) {
+            if (mode == 0 && track->cachedKey[channel] == key) {
+                continue;
+            }
+            motion = mdlFindNodeById(model, channel);
+            sdfMotionInitialize(motion, 0, 0, 0.0f, 0.0f);
+            if (mdlGetNodeField2E(model, channel) != 0) {
+                if ((s32)mdlGetNodeField2E(model, channel) - 1 < frame) {
+                    sampleFrame = (s32)mdlGetNodeField2E(model, channel) - 1;
+                } else {
+                    sampleFrame = frame;
+                }
+            } else {
+                sampleFrame = 0;
+            }
+            if (channel == 0) {
+                motion = mdlFindNodeById(model, 0);
+                sdfMotionSampleAtFrame(motion, (f32)sampleFrame);
+            } else {
+                motion = mdlFindNodeById(model, channel);
+                sdfMotionSampleAtFrame(motion, 0.0f);
+            }
+            if ((viewer->flags & 1) != 0) {
+                motion = mdlFindNodeById(model, channel);
+                sdfMotionSuspend(motion);
+            } else {
+                motion = mdlFindNodeById(model, channel);
+                sdfMotionResume(motion);
+            }
+            track->cachedKey[channel] = NULL;
+            if (channel != 0) {
+                motion = mdlFindNodeById(model, channel);
+                sdfMotionSuspend(motion);
+            }
+            continue;
+        }
+
+        {
+            s32 loopEnabled;
+            s32 count;
+
+            if (mode == 0 && track->cachedKey[channel] == key) {
+                continue;
+            }
+            loopEnabled = key->p0C.sb[2] == 0;
+            motion = mdlFindNodeById(model, channel);
+            sdfMotionInitialize(motion, key->p0C.sb[1], loopEnabled,
+                                0.0f, (f32)key->p0C.sb[3]);
+            if (mode == 1) {
+                if (loopEnabled == mode) {
+                    count = (s32)mdlGetNodeField2E(model, channel);
+                    if (count != 0) {
+                        count = (s32)mdlGetNodeField2E(model, channel);
+                        sampleFrame = (frame - key->frame) % count;
+                    } else {
+                        sampleFrame = 0;
+                    }
+                } else {
+                    s32 relativeFrame = frame - key->frame;
+                    count = (s32)mdlGetNodeField2E(model, channel);
+                    if (count < relativeFrame) {
+                        sampleFrame = (s32)mdlGetNodeField2E(model, channel);
+                    } else {
+                        sampleFrame = frame - key->frame;
+                    }
+                }
+                motion = mdlFindNodeById(model, channel);
+                sdfMotionSampleAtFrame(motion, (f32)sampleFrame);
+            }
+            if ((viewer->flags & 1) != 0) {
+                motion = mdlFindNodeById(model, channel);
+                sdfMotionSuspend(motion);
+            } else {
+                motion = mdlFindNodeById(model, channel);
+                sdfMotionResume(motion);
+            }
+            track->cachedKey[channel] = key;
+        }
+    }
+}
+
 
 /* Updates world units at position using the first track whose owner word
  * matches that unit's object-chain node. */
@@ -395,7 +500,7 @@ void evtViewerSyncWorldGroups(s32 position, EvtRuntime *viewer) {
                     node = node->next;
                 }
                 if (found != NULL) {
-                    func_0022EB10(position, object, node, viewer, 0);
+                    func_0022EB10(position, (EffWorldNode *)object, node, viewer, 0);
                 }
                 object = (s32)((EffWorldNode *)object)->next;
             } while (object != 0);
