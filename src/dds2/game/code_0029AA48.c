@@ -25,7 +25,7 @@ extern u32 uiBlendColors(u32, u32, s32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern u32 func_0019F6C8(s32, s32, s32, u32, char *, s32);
 extern void frFontSetChainFlag(struct FrFontGlyph *, u8);
-extern s32 func_0019D550(struct FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern u32 mnuKindIsSelectable(u32);
 extern char D_004379B0[];
 
@@ -53,7 +53,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
     func_0035C860(text, D_004379B0, delta);
     glyph = (struct FrFontGlyph *)func_0019F6C8(x, 0x8E8, 0, color, text, 0);
     frFontSetChainFlag(glyph, 3);
-    func_0019D550(glyph, 1, 0x53);
+    frFontDrawGlyphChain(glyph, 1, 0x53);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
     if (mnuKindIsSelectable(item->unitId) != 0) {
         if (context->iconFade < 0x100) {

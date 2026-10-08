@@ -5,6 +5,8 @@
 #include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff.h"
+#include "eff_node_descriptor.h"
+#include "eff_thunder_fragment.h"
 #include "eff_param.h"
 #include "eff_event.h"
 #include "eff_event_sound.h"
@@ -16,7 +18,6 @@ extern u32 effMiscRand(void *state);
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
-extern void effDestroyNode(u32);
 extern u32 func_0016D290(u32 handle);
 extern void effThunderSetFragmentColor(void *work, u32 value);
 extern void effThunderUpdateFragments(u32 handle);
@@ -75,7 +76,9 @@ extern u8 D_003B1A38[];
 
 extern u8 D_003B1A88[];
 
-extern struct EffPCPSpanWork *effPcpSpanCreate(void *param0, void *param1);
+extern struct EffPCPSpanWork *effPcpSpanCreate(void *param0, EffNodeDescriptor *param1);
+extern struct EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor);
+extern void effDestroyNode(struct EffNode *node);
 
 extern u32 effCloneSourceWithTypeHandler(u32 handle);
 
@@ -133,7 +136,6 @@ extern void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work);
 
 extern s8 D_0043643C;
 
-extern void *effThunderFragCreate(void *params);
 
 extern u8 D_003B1AF0[];
 
@@ -478,8 +480,6 @@ typedef struct EffPCPFadeTimerLong {
 } EffPCPFadeTimerLong;
 
 
-extern void *effPcpTripleHandleCreate(void *block0, void **blocks);
-
 /* Three view-relative offsets and stagger thresholds for seven handles per group. */
 typedef struct {
     f32 origin[4];
@@ -488,18 +488,17 @@ typedef struct {
     s32 handleDelay[7];
 } EffPCPTripleParams;
 
-typedef struct {
+typedef struct EffPCPTripleWork {
     EffPCPTripleParams head;
     s32 frame;
     u32 color;
-    u32 handles[21];
+    struct EffNode *handles[21];
 } EffPCPTripleWork;
 
 typedef char EffPCPTripleParamsSizeCheck[sizeof(EffPCPTripleParams) == 0x50 ? 1 : -1];
 typedef char EffPCPTripleWorkSizeCheck[sizeof(EffPCPTripleWork) == 0xAC ? 1 : -1];
 
-extern u32 effCreateNodeFromDescriptor(u32 param);
-
+EffPCPTripleWork *effPcpTripleHandleCreate(EffPCPTripleParams *params, EffNodeDescriptor **descriptors);
 extern EffPCPBlockSetWork *effPcpBuildBlockSet();
 
 extern EffPCPBlockSetWork *effPcpCreateBlockSetWork(void *first, void **blocks);
@@ -659,7 +658,6 @@ typedef struct EffPCPSpinWork {
 
 
 
-extern void effThunderReleaseFragmentWork(void *work);
 
 
 /* Effect initializers implemented in assembly below (effScatterCreateRadialWork lives in
@@ -667,20 +665,15 @@ extern void effThunderReleaseFragmentWork(void *work);
    are declared unchecked. */
 extern void *effPcpCreateDelayedEventEntries();
 
-/* Effect initializers implemented in assembly below (effScatterCreateRadialWork lives in
-   another unit). Each is entered with and without spawn arguments, so they
-   are declared unchecked. */
-extern void *effPcpEventWorkCreate();
-
 typedef struct EffPCPRingWork {
     f32 pos[4];
     u32 color10;
     u32 color14;
     f32 scale;
-    s32 handle;
+    BillObj *handle;
 } EffPCPRingWork;
 void effPcpDispatchKindAndRelease(EffPCPRingWork *work) {
-    billDispatchByKind((BillObj *)(u32)work->handle);
+    billDispatchByKind(work->handle);
     sdfReleaseChipBlock(work);
 }
 
@@ -698,7 +691,7 @@ void effPcpDrawViewAlignedRing(EffPCPRingWork *work) {
     f32 pos[4];
     f32 dir[4];
     f32 size[4];
-    s32 handle;
+    BillObj *handle;
     f32 scale;
     u32 color;
     s32 i;
@@ -718,15 +711,15 @@ void effPcpDrawViewAlignedRing(EffPCPRingWork *work) {
     VU0_LOAD_VF($vf11, work);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF($vf10, pos);
-    effCopyVector((void *)handle, pos);
+    effCopyVector(handle, pos);
     scale = work->scale;
     color = 0x10808080;
     for (i = 0; i < 10; i++) {
-        billSetChildScaleComponents((BillObj *)handle, scale, scale);
+        billSetChildScaleComponents(handle, scale, scale);
         scale *= 0.975f;
-        billSetChildParameter((BillObj *)handle, effMultiplyPackedColors(effMultiplyPackedColors(color, work->color14), work->color10));
+        billSetChildParameter(handle, effMultiplyPackedColors(effMultiplyPackedColors(color, work->color14), work->color10));
         color += 0x05000000;
-        billInvokeCallback((BillObj *)handle);
+        billInvokeCallback(handle);
     }
 }
 
@@ -1263,7 +1256,7 @@ extern u16 D_003B1640[8];
 extern f32 D_003B1650[8];
 
 /* vu0 routine: capture staggered model points, then draw their growing history. */
-void func_001803E8(EffPCPChargeWork *work) {
+void effPcpChargeUpdateAndDrawHistory(EffPCPChargeWork *work) {
     f32 position[4] __attribute__((aligned(16)));
     u32 i;
     u32 color;
@@ -1488,7 +1481,7 @@ void effPcpInitTwelveRadialParticles(EffPCPThunderGroup *group) {
         }
         D_003B1670->lifetime = life;
         D_003B1670->speed = speed;
-        *out = (u32)effThunderFragCreate(D_003B1670);
+        *out = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1670);
         out++;
         i++;
     } while (i < 12);
@@ -1616,7 +1609,7 @@ void effPcpSpawnConeTwelve(EffPCPThunderGroup *group) {
         }
         D_003B16D0->lifetime = life;
         D_003B16D0->speed = speed;
-        group->handles[i] = (u32)effThunderFragCreate(D_003B16D0);
+        group->handles[i] = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B16D0);
         i++;
     } while (i < 12);
 }
@@ -1711,7 +1704,7 @@ void effPcpSpawnVariableHeightParticles(EffPCPThunderGroup *group) {
         }
         D_003B1730->lifetime = life;
         D_003B1730->speed = speed;
-        group->handles[i] = (u32)effThunderFragCreate(D_003B1730);
+        group->handles[i] = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1730);
         i++;
     } while (i < 30);
 }
@@ -1807,7 +1800,7 @@ void effPcpSpawnWideConeTwelve(EffPCPThunderGroup *group) {
         }
         D_003B1790->lifetime = life;
         D_003B1790->speed = speed;
-        group->handles[i] = (u32)effThunderFragCreate(D_003B1790);
+        group->handles[i] = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1790);
         i++;
     } while (i < 12);
 }
@@ -2125,7 +2118,7 @@ void effPcpSpawnConeThirty(EffPCPThunderGroup *group) {
         }
         D_003B1990->lifetime = life;
         D_003B1990->speed = speed;
-        group->handles[i] = (u32)effThunderFragCreate(D_003B1990);
+        group->handles[i] = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1990);
         i++;
     } while (i < 30);
 }
@@ -3114,10 +3107,10 @@ typedef struct EffPCPSpanWork {
     u32 frame;
     f32 angle;
     f32 spin;
-    u32 optionalHandle;
+    struct EffNode *optionalHandle;
 } EffPCPSpanWork;
 
-EffPCPSpanWork *effPcpSpanCreate(void *params, void *handleParams) {
+EffPCPSpanWork *effPcpSpanCreate(void *params, EffNodeDescriptor *handleParams) {
     EffPCPSpanParams *src = params;
     EffPCPSpanWork *work;
     f32 size;
@@ -3132,7 +3125,7 @@ EffPCPSpanWork *effPcpSpanCreate(void *params, void *handleParams) {
     EE_MMI_UNIT_MATRIX(work->matrix);
     work->optionalHandle = 0;
     if (handleParams != NULL) {
-        work->optionalHandle = effCreateNodeFromDescriptor((u32)handleParams);
+        work->optionalHandle = effCreateNodeFromDescriptor(handleParams);
     }
     return work;
 }
@@ -3148,22 +3141,17 @@ void effPcpSpanCreateFromTable(void *args) {
 
 EffPCPSpanWork *effPcpCloneWithOptionalHandle(EffPCPSpanWork *work) {
     EffPCPSpanWork *child;
-    u32 handle;
 
     child = effPcpSpanCreate(&work->params, NULL);
-    handle = work->optionalHandle;
-    if (handle != 0) {
-        child->optionalHandle = effCloneSourceWithTypeHandler(handle);
+    if (work->optionalHandle != NULL) {
+        child->optionalHandle = (struct EffNode *)effCloneSourceWithTypeHandler((u32)work->optionalHandle);
     }
     return child;
 }
 
 void effPcpReleaseOptionalHandle(EffPCPSpanWork *work) {
-    u32 handle;
-
-    handle = work->optionalHandle;
-    if (handle != 0) {
-        effDestroyNode(handle);
+    if (work->optionalHandle != NULL) {
+        effDestroyNode(work->optionalHandle);
     }
     sdfReleaseChipBlock(work);
 }
@@ -3187,7 +3175,7 @@ extern void effUpdateNode(struct EffNode *node);
    Place the optional node around the anchor, then fade its final frames. */
 void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
     EffPCPSpanParams *params = &work->params;
-    s32 node = work->optionalHandle;
+    struct EffNode *node = work->optionalHandle;
     s32 fadeFrames = params->fadeFrames;
     u32 end = fadeFrames + params->activeFrames;
     u32 frame = work->frame;
@@ -3225,13 +3213,13 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
         VU0_LOAD_VF(vf11, params->anchor);
         VU0_ADD(vf10, vf10, vf11);
         VU0_STORE_VF_UNCLOBBERED(vf10, muzzle);
-        effCopyVectorToNodeInstance((struct EffNode *)node, muzzle);
+        effCopyVectorToNodeInstance(node, muzzle);
         if (work->frame > params->holdFrames) {
             work->angle += work->spin;
         }
         func_00336538(work->angle);
         VU0_STORE_MATRIX(mtx);
-        effApplyNodeTransformMatrix((struct EffNode *)node, mtx);
+        effApplyNodeTransformMatrix(node, mtx);
         if (fadeFrames >= remaining && fadeFrames != 0) {
             t = (f32)remaining / (f32)fadeFrames;
         } else {
@@ -3260,46 +3248,46 @@ void effPcpCopyHalfTurnMatrix(void *dst, void *src) {
 ;
 }
 
-void *effPcpTripleHandleCreate(void *block0, void **blocks) {
+EffPCPTripleWork *effPcpTripleHandleCreate(EffPCPTripleParams *params, EffNodeDescriptor **descriptors) {
     EffPCPTripleWork *work;
-    u32 *handle;
+    struct EffNode **handle;
     u32 i;
 
     work = sdfAllocSizeClassBlock(0xAC);
-    work->head = *(EffPCPTripleParams *)block0;
+    work->head = *params;
     work->frame = 0;
     work->color = 0x80808080;
     handle = work->handles;
     for (i = 0; i < 7; i++) {
-        handle[0] = effCreateNodeFromDescriptor((u32)blocks[i]);
-        handle[7] = effCloneSourceWithTypeHandler(handle[0]);
-        handle[14] = effCloneSourceWithTypeHandler(handle[0]);
+        handle[0] = effCreateNodeFromDescriptor(descriptors[i]);
+        handle[7] = (struct EffNode *)effCloneSourceWithTypeHandler((u32)handle[0]);
+        handle[14] = (struct EffNode *)effCloneSourceWithTypeHandler((u32)handle[0]);
         handle++;
     }
     return work;
 }
 
 void effPcpTripleHandleCreateFromTable(void *data) {
-    void *block0;
-    void *blocks[7];
-    void **dst;
+    EffPCPTripleParams *params;
+    EffNodeDescriptor *descriptors[7];
+    EffNodeDescriptor **dst;
     u32 i;
 
-    block0 = effParamTableGetBlock(data, 0);
-    dst = blocks;
+    params = effParamTableGetBlock(data, 0);
+    dst = descriptors;
     i = 0;
     do {
         i++;
         *dst = effParamTableGetBlock(data, i);
         dst++;
     } while (i < 7);
-    effPcpTripleHandleCreate(block0, blocks);
+    effPcpTripleHandleCreate(params, descriptors);
 }
 
 EffPCPTripleWork *effPcpTripleHandleDuplicate(EffPCPTripleWork *src) {
     EffPCPTripleWork *work;
-    u32 *sourceHandleCursor;
-    u32 *destinationHandleCursor;
+    struct EffNode **sourceHandleCursor;
+    struct EffNode **destinationHandleCursor;
     u32 slotIndex;
 
     work = sdfAllocSizeClassBlock(0xAC);
@@ -3309,9 +3297,9 @@ EffPCPTripleWork *effPcpTripleHandleDuplicate(EffPCPTripleWork *src) {
     sourceHandleCursor = (src->handles + 14);
     destinationHandleCursor = (work->handles + 14);
     for (slotIndex = 0; slotIndex < 7; slotIndex++) {
-        destinationHandleCursor[-14] = effCloneSourceWithTypeHandler(sourceHandleCursor[-14]);
-        destinationHandleCursor[-7] = effCloneSourceWithTypeHandler(sourceHandleCursor[-7]);
-        destinationHandleCursor[0] = effCloneSourceWithTypeHandler(sourceHandleCursor[0]);
+        destinationHandleCursor[-14] = (struct EffNode *)effCloneSourceWithTypeHandler((u32)sourceHandleCursor[-14]);
+        destinationHandleCursor[-7] = (struct EffNode *)effCloneSourceWithTypeHandler((u32)sourceHandleCursor[-7]);
+        destinationHandleCursor[0] = (struct EffNode *)effCloneSourceWithTypeHandler((u32)sourceHandleCursor[0]);
         sourceHandleCursor++;
         destinationHandleCursor++;
     }
@@ -3319,7 +3307,7 @@ EffPCPTripleWork *effPcpTripleHandleDuplicate(EffPCPTripleWork *src) {
 }
 
 void effPcpTripleHandleRelease(EffPCPTripleWork *work) {
-    u32 *handleCursor = work->handles;
+    struct EffNode **handleCursor = work->handles;
     u32 slotIndex;
 
     for (slotIndex = 0; slotIndex < 7; slotIndex++) {
@@ -3990,7 +3978,7 @@ EffPCPBurstWork *effAllocateThunderFragmentWork(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1AF0);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1AF0);
     return work;
 }
 
@@ -4004,7 +3992,7 @@ EffPCPBurstWork *effAllocateThunderFragmentBurstWork(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1B50);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1B50);
     return work;
 }
 
@@ -4018,7 +4006,7 @@ EffPCPBurstWork *effPcpCreateCyanBlueFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1BB0);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1BB0);
     return work;
 }
 
@@ -4032,7 +4020,7 @@ EffPCPBurstWork *effPcpCreateCyanBlueFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1C10);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1C10);
     return work;
 }
 
@@ -4046,7 +4034,7 @@ EffPCPBurstWork *effPcpCreateWhiteYellowFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1C70);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1C70);
     return work;
 }
 
@@ -4060,7 +4048,7 @@ EffPCPBurstWork *effPcpCreateWhiteYellowFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1CD0);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1CD0);
     return work;
 }
 
@@ -4074,7 +4062,7 @@ EffPCPBurstWork *effPcpCreateYellowOrangeFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1D30);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1D30);
     return work;
 }
 
@@ -4088,7 +4076,7 @@ EffPCPBurstWork *effPcpCreateYellowOrangeFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1D90);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1D90);
     return work;
 }
 
@@ -4102,7 +4090,7 @@ EffPCPBurstWork *effPcpCreateBrownRedFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1DF0);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1DF0);
     return work;
 }
 
@@ -4116,7 +4104,7 @@ EffPCPBurstWork *effPcpCreateBrownRedFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1E50);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1E50);
     return work;
 }
 
@@ -4130,7 +4118,7 @@ EffPCPBurstWork *effPcpCreateOrangeVioletFragmentPair(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 0;
     work->length = 375.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1EB0);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1EB0);
     return work;
 }
 
@@ -4144,7 +4132,7 @@ EffPCPBurstWork *effPcpCreateOrangeVioletFragmentSingle(u32 unused) {
     work = sdfAllocSizeClassBlock(0x24);
     work->startDistance = 325.0f;
     work->length = 225.0f;
-    work->handle = (u32)effThunderFragCreate(D_003B1F10);
+    work->handle = (u32)effThunderFragCreate((EffThunderFragmentParams *)D_003B1F10);
     return work;
 }
 
@@ -4819,7 +4807,7 @@ typedef struct EffPCPGroupHead {
 } EffPCPGroupHead;
 
 typedef struct EffPCPGroupEntry {
-    u32 handle;          /* 0x00 */
+    EffThunderFragmentWork *handle; /* 0x00 */
     s32 frame;            /* 0x04: negative until the start delay expires */
     f32 position;         /* 0x08: initial interpolated position */
     f32 positionStep;     /* 0x0C: change per frame */
@@ -4834,13 +4822,13 @@ typedef struct EffPCPGroupSet {
     f32 unk16C;
     u32 color;           /* 0x170 */
     EffParamWork **duplicates; /* 0x174: four groups of parameter work */
-    void *duplicateHandle;
-    void *workHandle;
+    struct SdfMemBlock *duplicateHandle;
+    struct SdfMemBlock *workHandle;
 } EffPCPGroupSet;
 
 EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *header, u32 *sourceResources) {
     u32 entryCount = header->count;
-    void *workResource = sdfAllocGeneralBlock(entryCount * 0x18 + 0x180);
+    struct SdfMemBlock *workResource = sdfAllocGeneralBlock(entryCount * 0x18 + 0x180);
     EffPCPGroupSet *groupSet = (void *)sdfResourceRetainAddress(workResource);
     EffPCPGroupEntry *groupEntryCursor;
     u32 index;
@@ -4891,7 +4879,7 @@ EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *header, u32 *sourceResourc
         }
     }
     for (index = 0; index < entryCount; index++) {
-        groupEntryCursor->handle = (u32)effThunderFragCreate(&header->spawnParams);
+        groupEntryCursor->handle = effThunderFragCreate(&header->spawnParams);
         groupEntryCursor->frame = 0;
         groupEntryCursor++;
     }
@@ -4959,10 +4947,10 @@ void effBlockSetRelease(EffPCPGroupSet *work) {
 
     if (releaseCount != 0) {
         do {
-            u32 currentHandle = fragmentEntryCursor->handle;
+            EffThunderFragmentWork *currentHandle = fragmentEntryCursor->handle;
             fragmentEntryCursor++;
             releaseIndex++;
-            effThunderReleaseFragmentWork((void *)currentHandle);
+            effThunderReleaseFragmentWork(currentHandle);
         } while (releaseIndex < releaseCount);
     }
     duplicateHandleBase = work->duplicates;
@@ -5219,7 +5207,7 @@ typedef struct EffPCPDriftEventParams {
 } EffPCPDriftEventParams;
 
 typedef struct EffPCPDriftEvent {
-    void *event;
+    EffEventWork *event;
     s32 frame;
     f32 position, positionStep, angle, angleStep;
 } EffPCPDriftEvent;
@@ -5457,7 +5445,7 @@ typedef struct EffPCPPairedEventParams {
 
 typedef struct EffPCPPairedEvent {
     u32 fragment;
-    void *eventA, *eventB;
+    EffEventWork *eventA, *eventB;
     f32 phase, radius;
     f32 tilt;
     f32 tiltStep;
@@ -5751,7 +5739,7 @@ typedef struct EffPCPSpawnRangeParams {
 } EffPCPSpawnRangeParams;
 
 typedef struct EffPCPSpawnRangeEvent {
-    void *event;
+    EffEventWork *event;
     s32 frame;
     f32 height, heightStep, angle, angularStep, position, positionStep;
 } EffPCPSpawnRangeEvent;
@@ -5991,7 +5979,7 @@ typedef struct {
     u8 pad11[3];
     s32 age;
     s32 frameLimit;
-    void *event;
+    EffEventWork *event;
 } EffPCPMapEventEntry;
 
 /* Serialized model placement and fade parameters (0x1C bytes). */
@@ -6069,7 +6057,7 @@ void effPcpEventWorkInitEntries(EffPCPMapEventWork *work) {
 
 
 /* Allocate an event work: copy the parameter head, clear the links, then create the resource and owner from the optional parameters. */
-void *effPcpEventWorkCreate(EffPCPEventParamHead *head, void *resourceParams, void *ownerParams) {
+EffPCPMapEventWork *effPcpEventWorkCreate(EffPCPEventParamHead *head, void *resourceParams, void *ownerParams) {
     EffPCPMapEventWork *work = sdfAllocSizeClassBlock(0x40);
 
     work->params = *head;
