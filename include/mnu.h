@@ -894,7 +894,7 @@ typedef struct MenuStaffContext {
     struct EffectSlotSet *spriteArg1; /* 0x68: first paired resource */
     struct EffectSlotSet *windowResource; /* 0x6C: second paired resource */
     u8 pad70[0x54];
-    s32 spriteArg2;       /* 0xC4 */
+    struct EffectSlotSet *spriteArg2; /* 0xC4: category sprite resource */
     u8 padC8[0x2C];
     struct MenuIconState *panelLayout; /* 0xF4: layout used by staff panel construction */
     struct MenuIconState *unkF8; /* 0xF8: second panel layout */
