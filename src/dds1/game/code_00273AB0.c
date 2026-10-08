@@ -34,7 +34,7 @@ extern s32 mnuMapPadMaskToFlags();
 extern void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window);
 extern void mnuClearListFlags(s32 which, MenuPageWindow *window);
 extern void func_00283BF0(u32 *out, u32 value);
-extern u32 mnuSetPartyEntryMenuValue();
+extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *, u32);
 extern void mnuSetPopupEntryFlagged();
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern void mnuSetPopupEntry(s32, s32);
@@ -518,7 +518,7 @@ s32 func_00274768(s32 task) {
                 s32 inventoryCount;
 
                 mnuSwapEquippedBullet((s32)context, party, bulletId);
-                mnuSetPartyEntryMenuValue((s32)party, bulletId);
+                mnuSetPartyEntryMenuValue(party, bulletId);
                 selectedList = menu->list->list;
                 inventoryCount = datGameState->inventory.counts[bulletId];
                 selectedList->cursor->sortKeyPrimary = inventoryCount;

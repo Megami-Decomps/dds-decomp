@@ -2,6 +2,9 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 
+struct SdfTex;
+extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
+
 extern u32 sdfCounterAnimationValue;
 
 extern s32 D_003BD97C;
@@ -669,7 +672,7 @@ s32 fldLoadMapResource(const char *name, MapResource *record) {
 
 u32 fldReleaseMapResource(s32 *image) {
     if (*image != 0) {
-        sdfTexReleaseReferenceViaHandler(*image);
+        sdfTexReleaseReferenceViaHandler((struct SdfTex *)*image);
         *image = 0;
     }
     return 1;

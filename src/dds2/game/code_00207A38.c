@@ -245,7 +245,7 @@ extern u8 D_00436C50[];
 
 extern u8 D_00436C58[];
 
-extern void sdfTexReleaseReferenceViaHandler(s32);
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 extern void sdfReleaseResourceAllocation(s32);
 
@@ -2948,7 +2948,7 @@ INCLUDE_ASM(const s32, "game/code_00207A38", func_0020DAB8);
 void btlDestroyResourceDescriptor(BtlResourceDescriptor *descriptor) {
     s32 textureHandle = descriptor->handle;
     if (textureHandle != 0 && descriptor->ownsHandle == 1) {
-        sdfTexReleaseReferenceViaHandler(textureHandle);
+        sdfTexReleaseReferenceViaHandler((SdfTex *)textureHandle);
     }
     sdfReleaseChipBlock(descriptor);
 }
@@ -3015,7 +3015,7 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *descriptor, s32 name
     s32 textureHandle = descriptor->handle;
     s32 allocationHandle;
     if (textureHandle != 0 && descriptor->ownsHandle == 1) {
-        sdfTexReleaseReferenceViaHandler(textureHandle);
+        sdfTexReleaseReferenceViaHandler((SdfTex *)textureHandle);
         descriptor->handle = 0;
     }
     allocationHandle = sdfReadNamedResource(nameAddress, &loadedResource, 0);
@@ -3027,7 +3027,7 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *descriptor, s32 name
 void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, s32 textureResource) {
     s32 textureHandle = descriptor->handle;
     if (textureHandle != 0 && descriptor->ownsHandle == 1) {
-        sdfTexReleaseReferenceViaHandler(textureHandle);
+        sdfTexReleaseReferenceViaHandler((SdfTex *)textureHandle);
         descriptor->handle = 0;
     }
     descriptor->handle = sdfTexAcquireResourceTexture(textureResource);

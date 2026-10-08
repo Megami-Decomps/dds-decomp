@@ -69,7 +69,7 @@ extern void mnuCloseCurrentProfilePanel(MenuProgressHost *);
 
 extern void mnuReleaseMantraMenuDrawResources(MnuStatusResource *);
 
-extern void dspCloseChannel(void);
+extern s32 dspCloseChannel(void);
 extern void sdfQueueNonzeroResourceId(u32);
 struct SdfTaskItemDesc;
 extern struct SdfTaskItemDesc D_003CFCD4;

@@ -187,7 +187,7 @@ extern s32 evtGetCapturedWindowPanelValue();
 
 extern s32 func_002B06A8();
 
-extern void mnuPrepareStaffValueChangeDialog();
+extern void mnuPrepareStaffValueChangeDialog(s32, DatPartyRecord *, s32, s32);
 
 extern char D_003E7530[];
 
@@ -201,7 +201,7 @@ extern u8 effHasFirstTextureHandle(s32);
 extern u32 effDestroyResourceSlotSet(u32);
 extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
 
-extern void effReleaseTextureHandlesAndResetSlots(u32);
+extern void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *);
 
 extern void func_002AAC98();
 
@@ -2229,8 +2229,8 @@ void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 flag) {
     if (flag == 0) {
         for (i = 0, res = menu->mainResources; i < 8; i++, res++) {
             if (effHasFirstTextureHandle((s32)(*res)) != 0) {
-                effReleaseTextureHandlesAndResetSlots((u32)(*res));
-                effReleaseTextureHandlesAndResetSlots((u32)res[8]);
+                effReleaseTextureHandlesAndResetSlots(*res);
+                effReleaseTextureHandlesAndResetSlots(res[8]);
             }
         }
     }
@@ -2368,8 +2368,8 @@ void mnuRefreshPageHandles(MenuPageWindow *window) {
         id = record->unk8;
         if (id >= 0) {
             if (effHasFirstTextureHandle((s32)(window->mainResources[id])) != 0) {
-                effReleaseTextureHandlesAndResetSlots((u32)(window->mainResources[id]));
-                effReleaseTextureHandlesAndResetSlots((u32)(window->mainResources[id + 8]));
+                effReleaseTextureHandlesAndResetSlots(window->mainResources[id]);
+                effReleaseTextureHandlesAndResetSlots(window->mainResources[id + 8]);
             }
         }
     }
@@ -2384,7 +2384,29 @@ void mnuRefreshPageHandles(MenuPageWindow *window) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002B8FC8", mnuSelectPage);
+void mnuSelectPage(MenuPageWindow *window, s32 selected) {
+    u32 i;
+    s32 selection;
+
+    for (i = 0; i < 5; i++) {
+        effReleaseTextureHandlesAndResetSlots(window->handlesC[i]);
+    }
+
+    selection = mnuGetSelectionFromFlags(&datGameState->party[
+        window->records->slots[selected].index]);
+    for (i = 0; i < 5; i++) {
+        if (i == selection) {
+            effResolveAndReleaseResource((u32 *)window->handlesC[i]);
+        }
+    }
+
+    if (window->selected >= 0) {
+        mnuResolveUnselectedPageHandles(window);
+    }
+    window->selected = selected;
+    mnuRefreshPageHandles(window);
+}
+
 
 void mnuClearPageSelectionHandles(MenuPageWindow *window) {
     EffectSlotSet **resource = window->handlesC;

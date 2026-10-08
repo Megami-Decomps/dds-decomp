@@ -185,7 +185,7 @@ extern s32 evtGetCapturedWindowPanelValue();
 
 extern s32 func_002B06A8();
 
-extern void mnuPrepareStaffValueChangeDialog();
+extern void mnuPrepareStaffValueChangeDialog(s32, DatPartyRecord *, s32, s32);
 
 extern char D_003E7530[];
 
@@ -374,7 +374,7 @@ extern const MenuListDefaults D_0042AE18;
 extern u8 (*D_00435E64)[17];
 extern char D_00437C00[];
 extern u8 brsGetLevelStepForValue(s32);
-extern s32 mnuGetEntryUseStatus(s32, u16);
+extern s32 mnuGetEntryUseStatus(DatPartyRecord *, u16);
 extern void func_002B3CA0(s32, s32, s32, MenuList *, MenuListNode *, s32);
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
@@ -1487,7 +1487,7 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, s32 callback) {
             node = mnuAppendWindowListNode(window, D_00435E64[skill]);
             node->sortKeySecondary = i;
             node->sortKeyPrimary = skill;
-            if (selectionMode != 0 && mnuGetEntryUseStatus((s32)entry, skill) != 0) {
+            if (selectionMode != 0 && mnuGetEntryUseStatus(entry, skill) != 0) {
                 node->flags48 |= MNU_STAFF_NODE_UNAVAILABLE;
             }
         } else {

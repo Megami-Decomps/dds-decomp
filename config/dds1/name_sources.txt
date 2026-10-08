@@ -1200,6 +1200,7 @@
 0x00152720	effDestroy	inferred	runs the +0x84/+0x80 sub-destroy callbacks then frees the object
 0x00152758	effSetInstanceBillboardVector	inferred	Copies four vector components into instance billboard [names_reviewed6.tsv]
 0x00152800	effReadBillboardModeValues	inferred	confidence=high; matched-C; src/dds1/game/code_00151F58.c:514:func_00152800; For kind-one billboard, writes output mode and one/two parameter-derived values selected by billboard flags.; twin=0x0015A3F0, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x00152E40	effDrawGeneratedTextureQuad	inferred	Allocates primary texture-state and quad geometry packets from texture dimensions, scales and optional angle.
 0x001530C0	effSubmitGeneratedTexturePacket	inferred	confidence=high; matched-C; src/dds1/game/code_00151F58.c:533:func_001530C0; Allocates a packet list, builds its textured GS payload using source, submits to effect packet sink.; source=revalidated-unapplied-names_R_Names24o.tsv:7 [names_qp12_apply.tsv]
 0x00153128	effDrawCompositeTextureQuad	inferred	Builds test/blend and texture-state packets for both GS contexts, emits the positioned two-texture quad, and restores frame/test/blend state.
 0x00153618	effSubmitCompositeGsPacket	inferred	confidence=high; matched-C; src/dds1/game/code_00151F58.c:543:func_00153618; Allocates a packet list, builds a composite GS payload from source, submits to effect packet sink.; source=revalidated-unapplied-names_R_Names24o.tsv:8 [names_qp12_apply.tsv]
@@ -5565,6 +5566,7 @@
 0x002B1170	effLoadScalyTexture	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B11A0	effGetScalyTextureHandle	inferred	Returns the handle populated when loading the scaly texture file. [names_reviewed5.tsv]
 0x002B11A8	effSeedParticleSpanParameters	inferred	Seeds each span record with randomized scale and range parameters and clears flags. [names_reviewed5.tsv]
+0x002B12D8	effCreateParticleSpanTable	inferred	Allocates per-map-position point sets, span entries and optional shared-reference track sets from the model frame count; native algorithm agrees with the verified DDS2 counterpart.
 0x002B14E8	effReleaseParticleList	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B2088	effCreateModelResourceFromFile	inferred	Resolves primary and secondary file buffers and creates model resource for requested kind. [names_reviewed5.tsv]
 0x002B20D0	effDestroyModelResource	inferred	Releases the kind-specific child resource, releases its model, then frees the effect object.

@@ -693,7 +693,7 @@ u32 effCloneSharedReferenceWithValue(u32 source, u32 value) {
     return (u32)copy;
 }
 
-extern void sdfTexReleaseReference(void *);
+extern void sdfTexReleaseReference(SdfTex *texture);
 
 void effReleaseSharedReference(RefObj *obj) {
     effSharedTextureReferenceCount--;
