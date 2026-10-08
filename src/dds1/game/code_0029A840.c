@@ -5,6 +5,7 @@
 #include "pcp_vu0.h"
 #include "mdl.h"
 #include "sdf.h"
+#include "sdf_chunk.h"
 
 extern u32 sdfResourceRetainAddress(u32);
 
@@ -493,7 +494,6 @@ typedef struct {
 
 struct FileQueue;
 extern void *sdfAllocSizeClassBlock(s32);
-extern u32 sdfCountMapPositionRecords(SdfModel *model);
 extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *);
 extern struct FileQueue *fileQueueClone(struct FileQueue *);
 

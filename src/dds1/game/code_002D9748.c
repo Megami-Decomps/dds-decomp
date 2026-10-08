@@ -2,6 +2,7 @@
 #include "sdf.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
+#include "sdf_chunk.h"
 
 #define SDF_CHUNK_NAMED_IDS 0x4D4E444E
 #define SDF_ASSET_LIST_MIN_CAPACITY 0x20
@@ -93,31 +94,6 @@ typedef struct SdfTextParam {
     void *chunkTable; /* 0x90: resource chunk searched by tag */
 } SdfTextParam;
 
-typedef struct SdfChunk {
-    u32 id;   /* 0x0: entry id, 0 terminates the list */
-    u32 size; /* 0x4: byte offset to the next entry */
-    u32 firstValue; /* 0x8: payload of single-value UNIQ/LODC chunks */
-} SdfChunk;
-
-/* A map record has separate draw-node and lookup IDs, followed by three
- * vectors consumed by the VU basis/position routines. */
-typedef struct SdfMapPositionRecord {
-    u32 nodeId;        /* 0x00: passed to the draw-node lookup */
-    s32 id;            /* 0x04: used to find this map record */
-    u8 pad08[8];
-    u128 position;     /* 0x10 */
-    u128 up;           /* 0x20 */
-    u128 direction;    /* 0x30: negated when building the basis */
-} SdfMapPositionRecord;
-
-/* Map-position chunk: 0x10 header, then the records back to back. */
-typedef struct SdfMapPositionChunk {
-    SdfChunk header;
-    u8 pad0C[4];
-    SdfMapPositionRecord records[1]; /* 0x10 */
-} SdfMapPositionChunk;
-
-
 extern SdfSubParam *sdfSubParamCreate(void);
 
 extern u32 sdfForcedAssetTextureMode;
@@ -143,12 +119,8 @@ extern void sdfBuildPrimaryAlphaAdditiveDmaPacket(void *);
 
 extern void sdfBuildPrimaryAlphaSubtractiveDmaPacket(void *);
 
-void *sdfChunkFindById(SdfChunk *chunk, s32 chunkId);
 void *sdfAllocSizeClassBlock(s32 size);
 void *sdfAllocAndClearQuadwords(s32 size);
-void *sdfChunkFindRecordById(SdfModel *, s32);
-void sdfSetLookAtBasisFromRecord(SdfModel *model, SdfMapPositionRecord *record);
-void sdfVuTransformMapRecordPosition(SdfModel *model, SdfMapPositionRecord *record);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
 void sdfPendingQueuePush(void *arg0, s32 arg1);
 void sdfResourceListReleaseAssets(DevRequest *list);
@@ -230,7 +202,7 @@ void sdfSubmitDrawPacketGroups(SdfPacketOwner **owners, u8 *memory) {
 }
 
 /* Follow chunk byte extents until the requested ID or the zero-ID terminator is reached. */
-void *sdfChunkFindById(SdfChunk *chunk, s32 chunkId) {
+SdfChunkHeader *sdfChunkFindById(SdfChunkHeader *chunk, s32 chunkId) {
     u32 currentId;
 
     if (chunk == NULL) {
@@ -239,21 +211,21 @@ void *sdfChunkFindById(SdfChunk *chunk, s32 chunkId) {
     currentId = chunk->id;
     while (currentId != 0) {
         if (currentId == chunkId) {
-            return (void *)chunk;
+            return chunk;
         }
-        chunk = (SdfChunk *)((u8 *)chunk + chunk->size);
+        chunk = (SdfChunkHeader *)((u8 *)chunk + chunk->size);
         currentId = chunk->id;
     }
     return NULL;
 }
 
-void *sdfChunkFindByTag(SdfModel *model, s32 tag) {
-    return sdfChunkFindById((SdfChunk *)model->chunkTable, tag);
+SdfChunkHeader *sdfChunkFindByTag(SdfModel *model, s32 tag) {
+    return sdfChunkFindById((SdfChunkHeader *)model->chunkTable, tag);
 }
 
 /* Names are followed by a four-byte-aligned ID word; missing chunks/names return -1. */
 s32 sdfNamedChunkFindId(SdfModel *model, const char *name) {
-    SdfChunk *namesChunk = sdfChunkFindByTag(model, SDF_CHUNK_NAMED_IDS);
+    SdfChunkHeader *namesChunk = sdfChunkFindByTag(model, SDF_CHUNK_NAMED_IDS);
     u8 *entryName;
     u8 *chunkEnd;
     u32 nameLength;
@@ -277,7 +249,7 @@ s32 sdfNamedChunkFindId(SdfModel *model, const char *name) {
 INCLUDE_ASM(const s32, "game/code_002D9748", func_002D9C28);
 
 u32 sdfCountMapPositionRecords(SdfModel *model) {
-    SdfChunk *chunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
+    SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
     if (chunk != NULL) {
         return (chunk->size - 0x10) >> 6;
     }
@@ -317,16 +289,16 @@ void sdfVuTransformMapRecordPosition(SdfModel *model, SdfMapPositionRecord *reco
 }
 
 /* Search the fixed-size map-position records within the chunk's declared byte extent. */
-void *sdfChunkFindRecordById(SdfModel *model, s32 recordId) {
-    SdfChunk *positionsChunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
-    SdfMapPositionChunk *positions;
+SdfMapPositionRecord *sdfChunkFindRecordById(SdfModel *model, s32 recordId) {
+    SdfChunkHeader *positionsChunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
+    SdfMapPositionChunkPrefix *positions;
     SdfMapPositionRecord *record;
     u8 *chunkEnd;
     if (positionsChunk == NULL) {
         return NULL;
     }
-    positions = (SdfMapPositionChunk *)positionsChunk;
-    record = positions->records;
+    positions = (SdfMapPositionChunkPrefix *)positionsChunk;
+    record = (SdfMapPositionRecord *)(positions + 1);
     chunkEnd = (u8 *)positionsChunk + positionsChunk->size;
     while ((u8 *)record < chunkEnd) {
         if (record->id == recordId) {
@@ -338,7 +310,7 @@ void *sdfChunkFindRecordById(SdfModel *model, s32 recordId) {
 }
 
 s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id) {
-    void *resource = sdfChunkFindRecordById(model, id);
+    SdfMapPositionRecord *resource = sdfChunkFindRecordById(model, id);
     if (resource != NULL) {
         sdfSetLookAtBasisFromRecord(model, resource);
         return 1;
@@ -347,7 +319,7 @@ s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id) {
 }
 
 s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id) {
-    void *resource = sdfChunkFindRecordById(model, id);
+    SdfMapPositionRecord *resource = sdfChunkFindRecordById(model, id);
     if (resource != NULL) {
         sdfVuTransformMapRecordPosition(model, resource);
         return 1;
@@ -356,17 +328,17 @@ s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id) {
 }
 
 u32 sdfGetUniqueChunkValue(SdfModel *model) {
-    SdfChunk *chunk = sdfChunkFindByTag(model, SDF_CHUNK_UNIQUE_VALUE);
+    SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_UNIQUE_VALUE);
     if (chunk != NULL) {
-        return chunk->firstValue;
+        return *(u32 *)((u8 *)chunk + sizeof(*chunk));
     }
     return 0;
 }
 
 u32 sdfGetLodChunkValue(SdfModel *model) {
-    SdfChunk *chunk = sdfChunkFindByTag(model, SDF_CHUNK_LOD_VALUE);
+    SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_LOD_VALUE);
     if (chunk != NULL) {
-        return chunk->firstValue;
+        return *(u32 *)((u8 *)chunk + sizeof(*chunk));
     }
     return 0;
 }
