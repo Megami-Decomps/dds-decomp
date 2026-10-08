@@ -72,7 +72,6 @@ extern const s32 D_0037C388[];
 extern const char D_003B2058[16];
 extern char *D_0037C380[];
 extern u32 effLoadMappedResource(char *base, char *name);
-extern u32 *effCreateStatusBatch(u32 kind);
 
 typedef struct ResourceRef8 {
     s32 index;

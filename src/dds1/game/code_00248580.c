@@ -162,7 +162,6 @@ typedef struct EffectObject {
     EffectInner *inner; /* 0x08 */
 } EffectObject;
 
-extern EffectObject *effCreateStatusBatch(s32);
 
 extern s32 effDestroyPackedBatch(s32);
 
@@ -815,31 +814,31 @@ void mnuSetWorldObjectAndMenuEnabled(s8 enabled) {
 void mnuTerminalCreateEffects(MenuTerminalWork *state) {
     EffectObject *obj;
 
-    obj = effCreateStatusBatch(1);
+    obj = (EffectObject *)effCreateStatusBatch(1);
     state->effect[0] = (s32)obj;
     obj->inner->pair->firstValue = 0x14;
     obj->inner->pair->secondValue = 1;
-    obj = effCreateStatusBatch(1);
+    obj = (EffectObject *)effCreateStatusBatch(1);
     state->effect[1] = (s32)obj;
     obj->inner->pair->firstValue = 0xF;
     obj->inner->pair->secondValue = 0;
-    obj = effCreateStatusBatch(8);
+    obj = (EffectObject *)effCreateStatusBatch(8);
     state->effect[2] = (s32)obj;
     obj->inner->pair->firstValue = 6;
     obj->inner->pair->secondValue = 1;
-    obj = effCreateStatusBatch(8);
+    obj = (EffectObject *)effCreateStatusBatch(8);
     state->effect[3] = (s32)obj;
     obj->inner->pair->firstValue = 6;
     obj->inner->pair->secondValue = 0;
-    obj = effCreateStatusBatch(1);
+    obj = (EffectObject *)effCreateStatusBatch(1);
     state->effect[4] = (s32)obj;
     obj->inner->pair->firstValue = 6;
     obj->inner->pair->secondValue = 1;
-    obj = effCreateStatusBatch(1);
+    obj = (EffectObject *)effCreateStatusBatch(1);
     state->effect[5] = (s32)obj;
     obj->inner->pair->firstValue = 6;
     obj->inner->pair->secondValue = 0;
-    obj = effCreateStatusBatch(1);
+    obj = (EffectObject *)effCreateStatusBatch(1);
     state->effect[6] = (s32)obj;
     obj->inner->pair->firstValue = 0x78;
     obj->inner->pair->secondValue = 0;

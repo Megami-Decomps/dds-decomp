@@ -130,7 +130,6 @@ extern void func_002878D8(s32 arg0);
 
 extern s32 D_003BC7B4;
 
-extern u32 effCreateStatusBatch(u32);
 
 extern s32 mnuLookupRangeEntry(u16);
 
@@ -703,7 +702,7 @@ void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,
 }
 
 void mnuCreatePairedEffects(MenuEffectPair *pair) {
-    u32 effectHandle;
+    struct EffMappedResource *effectHandle;
 
     effectHandle = effCreateStatusBatch(3);
     pair->effects[0] = (MenuEffectNode *)effectHandle;

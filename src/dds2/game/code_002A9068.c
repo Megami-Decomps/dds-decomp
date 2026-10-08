@@ -450,14 +450,14 @@ void movLoadTitleEffects(u8 *menuBytes) {
     s32 *statusWords;
 
     ((CampVisualWork *)menuBytes)->motionResource = effLoadMappedResource("/camp/mot/", D_003E6970[0]);
-    ((CampVisualWork *)menuBytes)->motion[0] = effCreateStatusBatch(6);
+    ((CampVisualWork *)menuBytes)->motion[0] = (MotRes *)effCreateStatusBatch(6);
     statusWords = ((CampVisualWork *)menuBytes)->motion[0]->sub->data;
     statusWords[0] = 0xF;
     statusWords[1] = 0;
     statusWords[2] = 0;
     statusWords[3] = 0;
     statusWords[4] = 0;
-    ((CampVisualWork *)menuBytes)->motion[1] = effCreateStatusBatch(1);
+    ((CampVisualWork *)menuBytes)->motion[1] = (MotRes *)effCreateStatusBatch(1);
     statusWords = ((CampVisualWork *)menuBytes)->motion[1]->sub->data;
     statusWords[0] = 0xF;
     statusWords[1] = 0;
