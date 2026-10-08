@@ -963,9 +963,9 @@ MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *menu, const void *val
 }
 
 
-/* Insert `value` beside anchor in the window's list (see func_002B83A0). */
-MenuListNode *func_002B9708(MenuWindowContainer *menu, MenuListNode *anchor, const void *value, s32 mode, u32 options) {
-    return func_002B83A0(menu->list, anchor, value, mode, options);
+/* Insert `value` beside anchor in the window's list (see mnuInsertListNodeRelativeToAnchor). */
+MenuListNode *mnuInsertWindowListNodeRelativeToAnchor(MenuWindowContainer *menu, MenuListNode *anchor, const void *value, s32 mode, u32 options) {
+    return mnuInsertListNodeRelativeToAnchor(menu->list, anchor, value, mode, options);
 }
 
 void mnuRemoveWindowListCursorNode(MenuWindowContainer *menu) {
