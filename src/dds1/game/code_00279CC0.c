@@ -51,7 +51,6 @@ extern void mnuSetPopupEntryFlagged(s32 *, char *);
 
 extern char D_0037CC20[];
 
-extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
 
 extern void sdfReleaseChipBlock(void *);
 
@@ -338,7 +337,7 @@ s32 mnuCampMenuDrawStatus(KwlnTask *param) {
     mnuDrawListFrames(context);
     mnuCreateStaffImageSprite(0x10);
     slots = menu + 4;
-    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, *(s32 *)(slots + ((MenuPartyRuntime *)menu)->selectedPage * 4 + 0x20), 0x53);
+    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (MenuWindowContainer *)*(s32 *)(slots + ((MenuPartyRuntime *)menu)->selectedPage * 4 + 0x20), 0x53);
     list = ((MenuWindowContainer *)*(s32 *)(slots + ((MenuPartyRuntime *)menu)->selectedPage * 4 + 0x20))->list;
     label = list->cursor->sortKeyPrimary;
     mnuDrawSkillMenuFrameIcons(context);

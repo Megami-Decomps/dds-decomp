@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "mnu_sprite_resource.h"
 
 
 typedef struct {
@@ -14,10 +15,10 @@ typedef struct {
 } SpriteSpawnNode;
 
 
-extern SpriteSpawnNode *func_0025B888(void *, SpriteSpawnNode *, s8);
+extern SpriteSpawnNode *func_0025B888(MnuSpriteResourceGroup *, SpriteSpawnNode *, s8);
 extern f32 effMiscRandUnitFloat(void *);
 
-void func_0025BA20(void *resource, SdfList *list, void *parentData, s8 mode) {
+void func_0025BA20(MnuSpriteResourceGroup *resource, SdfList *list, void *parentData, s8 mode) {
     SpriteSpawnNode *parent = parentData;
     SpriteSpawnNode *node;
     f32 chance;

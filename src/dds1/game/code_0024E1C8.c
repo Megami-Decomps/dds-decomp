@@ -4,6 +4,7 @@
 #include "eff.h"
 #include "mnu_list.h"
 #include "mnu_profile_progress.h"
+#include "mnu_sprite_resource.h"
 #include "prf_requirement.h"
 #include "sdf_grid.h"
 #include "sdf_task_work.h"
@@ -61,7 +62,7 @@ extern MnuVariantSpritePlacement D_0036B7F0[];
 extern u16 D_0036BC68[][4];
 extern s32 D_0036C6AC[];
 extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
-extern void mnuDestroyMantraDrawPool(void *);
+extern void mnuDestroyMantraDrawPool(MnuSpriteResourceGroup *);
 extern void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *);
 extern s32 dspCloseChannel(void);
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
@@ -69,7 +70,7 @@ extern void mnuMarkTitleStreamResetPending(void);
 extern void mnuResetTitleStreamLocked(void);
 extern void func_0026A5F0(s32);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
-extern void *mnuCreateSpriteResource(s32, u8, u8);
+extern MnuSpriteResourceGroup *mnuCreateSpriteResource(s32, u8, u8);
 extern MenuProgressHost *mnuCreateWorkBlock(void);
 
 typedef struct MnuResourceTaskWork {
@@ -82,7 +83,7 @@ typedef struct MnuResourceTaskWork {
     u8 pad18[0xC];
     MenuProgressHost *staffMenuContext;
     u8 pad28[0x210];
-    void *drawPool;
+    MnuSpriteResourceGroup *drawPool;
     u8 pad23C[0xC];
 } MnuResourceTaskWork;
 

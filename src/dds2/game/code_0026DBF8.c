@@ -1,5 +1,6 @@
 #include "prf_requirement.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "pcp_vu0.h"
 #include "sdf_resource.h"
 
@@ -770,10 +771,10 @@ MantraDisplayNode *mnuAllocateDisplayListNode(void) {
     return node;
 }
 
-u32 mnuReleaseDisplayListNodeAndGetNext(MantraDisplayNode *node) {
-    u32 next;
+MantraDisplayNode *mnuReleaseDisplayListNodeAndGetNext(MantraDisplayNode *node) {
+    MantraDisplayNode *next;
 
-    next = (u32)node->next;
+    next = node->next;
     sdfReleaseChipBlock(node);
     return next;
 }
@@ -881,7 +882,7 @@ u32 mnuAppendDisplayListNode(u32 state) {
 void mnuReleaseDisplayListNodes(u32 state) {
     MantraDisplayNode *node = ((MantraListState *)state)->head;
     while (node != 0) {
-        node = (MantraDisplayNode *)mnuReleaseDisplayListNodeAndGetNext(node);
+        node = mnuReleaseDisplayListNodeAndGetNext(node);
     }
 }
 
@@ -916,7 +917,7 @@ s32 func_0026F8A0(s32 x, s32 y, s32 depth, MantraListState *state, s32 amount, s
     }
     do {
         if (func_0026F1F0(x, y, depth, node, index, drawArg) != 0) {
-            node = (MantraDisplayNode *)mnuReleaseDisplayListNodeAndGetNext(node);
+            node = mnuReleaseDisplayListNodeAndGetNext(node);
             state->head = node;
         } else {
             node = node->next;

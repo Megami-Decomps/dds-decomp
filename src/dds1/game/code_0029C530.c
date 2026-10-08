@@ -1,5 +1,6 @@
 #include "eff_bill.h"
 #include "common.h"
+#include "eff_ref_obj.h"
 #include "sdf_resource.h"
 #include "dds3_path.h"
 #include "eff_transform.h"
@@ -275,14 +276,6 @@ typedef struct Matrix4 {
 extern u32 D_003BD058;
 
 extern u32 D_0038F2FC[];
-
-/* Reference-counted object header (layout inferred from field accesses). */
-typedef struct RefObj {
-    u8 pad_0x00[0x14]; // 0x00
-    s32 refCount;      // 0x14 incremented with the global reference count
-    s32 unk18;         // 0x18
-    s32 cnt1C;         // 0x1C
-} RefObj; // 0x20
 
 extern s32 D_003BC970[2];
 
@@ -934,7 +927,7 @@ void effUpdateTarget(EffKindWork *work, u32 target) {
 }
 
 u32 effCreateFixedSlotBlurWorkFromFadeOutput(void *source) {
-    return (u32)func_00186F90((u8 *)source + 0xC0);
+    return (u32)effBlurCreateScatterWork((EffBlurScatterParams *)((u8 *)source + 0xC0));
 }
 
 void effReleaseFixedSlotBlurWork(void *handle) {
@@ -996,7 +989,7 @@ void effUpdateFadeMapA(EffKindWork *work) {
     out->rateA = func_00297270(&config->blendB, limit, progress) * 0.01f;
     out->rateB = func_00297270(&config->rateA.curve, limit, progress) * 0.01f;
     out->param = work->mode;
-    func_00187098((EffBlurScatterWork *)out);
+    effBlurStepScatterSlotsAndDraw((EffBlurScatterWork *)out);
 }
 
 void effTextureReferenceRelease(EffKindWork *work, u32 target) {

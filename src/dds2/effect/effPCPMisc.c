@@ -2814,7 +2814,7 @@ EffPCPCompactWork *effPcpCreateCompactWorkFromParams(EffPCPCompactScatterParams 
     EffPCPCompactWork *work;
 
     work = sdfAllocSizeClassBlock(0x38);
-    work->resource = func_0018EBC8(&params->res);
+    work->resource = effBlurCreateScatterWork(&params->res);
     work->flags = params->timeline.flags;
     work->duration = params->timeline.duration;
     work->fadeIn = params->timeline.fadeIn;
@@ -2894,7 +2894,7 @@ void func_00183BE8(EffPCPCompactWork *work) {
     color = work->color;
     ((EffBlurScatterWork *)work->resource)->params.color = effMultiplyPackedColors(
         effBlendColor(color & 0xFFFFFF, color, opacity), work->baseColor);
-    func_0018ECD0((EffBlurScatterWork *)work->resource);
+    effBlurStepScatterSlotsAndDraw((EffBlurScatterWork *)work->resource);
     work->frame++;
 }
 
