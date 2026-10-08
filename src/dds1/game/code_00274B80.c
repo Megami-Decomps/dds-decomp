@@ -440,7 +440,7 @@ void mnuRefreshPartyPanelSlots(s32 context) {
     mnuUpdateHandleStates(&((CampMenuContext *)context)->partyWindow);
 }
 
-extern void mnuLoadPanelSectionResources(MenuPageSlot *, u32, u32,
+extern void mnuLoadPanelSectionResources(MenuPageSlot *, EffectSlotSet *, u32,
                                          u32, s32);
 
 s32 mnuInitializePartySelectionState(KwlnTask *task) {
@@ -456,11 +456,11 @@ s32 mnuInitializePartySelectionState(KwlnTask *task) {
     func_00274B80((u32)context);
     mnuCreatePartySelectionWindow(context);
     mnuLoadPanelSectionResources(&context->partyWindow.slots[0],
-                                context->panelResource, 0x11, 0x21, -1);
+                                (EffectSlotSet *)context->panelResource, 0x11, 0x21, -1);
     mnuLoadPanelSectionResources(&context->partyWindow.slots[1],
-                                context->panelResource, 0x11, 0x22, 0x23);
+                                (EffectSlotSet *)context->panelResource, 0x11, 0x22, 0x23);
     mnuLoadPanelSectionResources(&context->partyWindow.slots[2],
-                                context->panelResource, 0x11, 0x22, 0x24);
+                                (EffectSlotSet *)context->panelResource, 0x11, 0x22, 0x24);
 
     mnuClearPartySelectionAndActivateSlots((s32)context);
     for (i = 0; i < MNU_STAFF_PARTY_SLOT_COUNT; i++) {
