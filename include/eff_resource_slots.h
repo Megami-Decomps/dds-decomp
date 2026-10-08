@@ -7,6 +7,11 @@ struct EffectSlotSet;
 struct EffMappedResource;
 
 struct EffMappedResource *effCreateStatusBatch(u32 category);
+/* Serialized source addresses and callback output slots retain their word ABI. */
+struct EffMappedResource *effCreateMappedResource(u32 sourceAddress);
+struct EffMappedResource *effLoadMappedResource(const char *base, const char *name);
+void effRequestMappedResource(const char *base, const char *name, u32 *outMappedResource);
+
 
 #ifdef VERSION_DDS2
 struct EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, s32 keepAllocation);
