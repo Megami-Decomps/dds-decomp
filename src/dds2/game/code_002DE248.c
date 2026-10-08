@@ -384,7 +384,6 @@ extern u8 D_004386E8[];
 
 struct FileWork;
 extern u32 fileGetResourceHandle(struct FileWork *);
-extern void *fileCreateCallbackRequest(const char *, s32, s32, s32);
 
 extern EffectSlotSet *func_00305148(u32, u32);
 

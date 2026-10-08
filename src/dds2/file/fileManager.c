@@ -189,7 +189,8 @@ void *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchVa
     if (flags != 0) {
         sdfPacUseHighAddressAllocator(dispatchPacket);
     }
-    fileManQueueNamedRequest(requestWork, FILE_REQUEST_KIND_PAC, requestName, onComplete, userData);
+    fileManQueueNamedRequest(requestWork, FILE_REQUEST_KIND_PAC, requestName,
+                             (void *)onComplete, (void *)userData);
     return requestWork;
 }
 
@@ -214,7 +215,8 @@ void *fileCreateCallbackRequest(const char *requestName, s32 callbackMode, s32 c
     func_0035B6E0("file load %s\n", requestName);
     requestWork = sdfAllocAndClearQuadwords(FILE_CALLBACK_REQUEST_BYTES);
     requestWork[3] = callbackMode;
-    fileManQueueNamedRequest(requestWork, FILE_REQUEST_KIND_CALLBACK, requestName, callbackAddress, userData);
+    fileManQueueNamedRequest(requestWork, FILE_REQUEST_KIND_CALLBACK, requestName,
+                             (void *)callbackAddress, (void *)userData);
     return requestWork;
 }
 

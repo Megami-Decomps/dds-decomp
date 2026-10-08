@@ -778,7 +778,6 @@ void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *requestOwner, MdlDoneJob *compl
 }
 
 
-extern void *fileCreatePacLoadWork(const char *path, s32 flags, void *dispatch, s32 onComplete, s32 userData);
 
 
 extern void mdlCompleteGroupedJobAndNotify();

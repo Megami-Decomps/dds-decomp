@@ -879,8 +879,6 @@ void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *requestOwner, MdlDoneJob *compl
     }
 }
 
-extern void *fileAllocateDispatchRequest(const char *requestName, u32 flags, u32 dispatchValue, u32 onComplete, u32 userData);
-
 extern void mdlCompleteGroupedJobAndNotify();
 
 #define MDL_DONE_JOB_BYTES 0x14
@@ -888,7 +886,7 @@ extern void mdlCompleteGroupedJobAndNotify();
 /* Allocate a completion job and dispatch the request. Group/id narrow to u16.
  * Without onComplete, run the existing no-callback completion path and clean up
  * here; otherwise the completion callback path owns cleanup. Always return zero.
- * Preserve the provider's existing short-arity/unprototyped calling convention. */
+ * Preserve the provider's word-valued completion and user-data parameters. */
 s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, s32 requestHandle, void (*onComplete)(u32), u32 callbackArg) {
     MdlDoneJob *completionJob = sdfAllocAndClearQuadwords(MDL_DONE_JOB_BYTES);
     void *requestSlot;

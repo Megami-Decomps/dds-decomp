@@ -1096,7 +1096,7 @@ void fldLoadAreaPackedResources(void) {
     if (fldAreaState.area < 200) {
         fldFormatAreaResourceName(name);
         strcpy(D_003C9200, name);
-    fldAreaPackedArchive = (u32)fileQueuePlainDispatchRequest(name);
+        fldAreaPackedArchive = (u32)fileQueuePlainDispatchRequest(name);
         func_00288C50((struct FileRequest *)fldAreaPackedArchive);
         for (entry = ((FldPackedArchive *)fldAreaPackedArchive)->entries; entry != NULL;
              entry = entry->next) {
