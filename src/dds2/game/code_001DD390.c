@@ -3318,7 +3318,7 @@ BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *unit, u32 index, u32 value, 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x18;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->ownerId = unit->owner;
     task->onStart = btlRequestModelOrReuse;
     task->callback = btlPollModelLoadCompletion;
@@ -3548,7 +3548,7 @@ BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 option, s32 value08,
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x1A;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->ownerId = unit->owner;
     task->onStart = btlBeginModelChange;
     task->callback = func_001E50E0;
@@ -3937,7 +3937,7 @@ BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *unit) {
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x16;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->ownerId = unit->owner;
     task->callback = btlUpdateSelectedUnitEffect;
     task->onFinish = btlFinishSelectedUnitEffect;
@@ -3974,7 +3974,7 @@ BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void) {
     BtlRuntimeTask *task = btlAllocTask(0);
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x1C;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->onStart = 0;
     task->callback = btlUpdateCommandSoundTaskSecondary;
@@ -4237,7 +4237,7 @@ BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *unit) {
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x23;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->ownerId = unit->owner;
     task->onStart = btlStartGunFinishLoad;
     task->callback = btlPollGunLoad;
@@ -8861,7 +8861,7 @@ BtlRuntimeTask *fldCreateSceneTileTask(s32 value, s32 option) {
     SoundTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 1;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->callback = btlPollFieldArchiveLoad;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = btlGetTaskArguments(task);
@@ -8925,7 +8925,7 @@ BtlRuntimeTask *btlCreateFloorLoadTask(s32 first, s32 second) {
     SoundTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 2;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->callback = btlPollFloorLoadTask;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = btlGetTaskArguments(task);
@@ -8946,7 +8946,7 @@ BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value) {
     u8 *arguments;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 3;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->callback = func_00200FB8;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->onStart = 0;
@@ -9036,7 +9036,7 @@ BtlRuntimeTask *func_002014A8(value)
     SceneLightRestoreArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 4;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->callback = func_00201268;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->onStart = 0;
@@ -9283,7 +9283,7 @@ BtlRuntimeTask *btlCreateReferencedSoundEffectTask(SoundResourceNode *effect, Bt
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x2E;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->ownerId = actor->owner;
     task->onStart = sndAddEffectReferences;
     task->callback = sndUpdateReferencedBattleEffect;
@@ -9405,7 +9405,7 @@ BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source, BtlUnit *own
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x2F;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->ownerId = owner->owner;
     task->onStart = sndStartEffectTask;
     task->callback = func_00202100;
@@ -9505,7 +9505,7 @@ BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *effect, char *name) {
     char *copy;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x32;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->onStart = sndBeginEffectLoad;
     task->callback = sndPollEffectLoad;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -9619,7 +9619,7 @@ BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *effect, BtlUnit *ow
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x30;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->ownerId = owner->owner;
     task->onStart = sndAddSourceReferences;
     task->callback = func_00202958;
@@ -10417,7 +10417,7 @@ BtlRuntimeTask *sndCreateFileLoadTask(s32 value, s32 option, char *name) {
     char *copy;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x58;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->onStart = sndStartFileLoad;
     task->callback = sndPollMotSeFileAndSpu;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -10943,7 +10943,7 @@ BtlRuntimeTask *sndCreateAtracEffectLoadTask(s32 value) {
     SoundTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x5D;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->callback = sndPollAtrac3SELoadTask;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = btlGetTaskArguments(task);
@@ -11024,7 +11024,7 @@ BtlRuntimeTask *sndCreateEarringPlaybackTask(BtlUnit *owner) {
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x5E;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->ownerId = owner->owner;
     task->onStart = sndStartDeadAtracLoad;
     task->callback = sndDeadAtracPlaybackTask;
