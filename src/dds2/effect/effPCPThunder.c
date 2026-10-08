@@ -1129,7 +1129,7 @@ extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 /* Build the first strip from the work's own start point. Each step emits
  * two five-vector rows; later chain segments reuse the final row as a seed.
  */
-void func_0016D3B0(EffThunderFragmentWork *work, s32 index) {
+void effThunderBuildFragmentStrip(EffThunderFragmentWork *work, s32 index) {
     f32 width[4] __attribute__((aligned(16)));
     f32 outerWidth[4] __attribute__((aligned(16)));
     f32 negativeOuterWidth[4] __attribute__((aligned(16)));
@@ -1348,7 +1348,7 @@ void effThunderUpdateFragments(EffThunderFragmentWork *work) {
         do {
             if (fragment->delayFrames == 0) {
                 if (fragment->activeFrames != 0) {
-                    func_0016D3B0(work, i);
+                    effThunderBuildFragmentStrip(work, i);
                     fragment->activeFrames--;
                 } else if (fragment->color & EFF_THUNDER_ALPHA_MASK) {
                     fragment->color += EFF_THUNDER_ALPHA_WRAP_ADD;
@@ -1993,7 +1993,7 @@ EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src) {
 
 
 
-extern void func_0016D3B0(EffThunderFragmentWork *work, s32 index);
+extern void effThunderBuildFragmentStrip(EffThunderFragmentWork *work, s32 index);
 extern void func_0016F028(EffThunderFragmentWork *work, s32 index, const u128 *seed);
 extern void parPrependCellNode(void *system);
 
@@ -2257,7 +2257,7 @@ void effThunderUpdateChainSegments(EffThunderGroup *group) {
                 func_0016F028(work, j,
                     ((ParSystem *)previous->system)->cells[j].history + ((ParSystem *)previous->system)->cells[j].vertexCount - 5);
             } else {
-                func_0016D3B0(work, j);
+                effThunderBuildFragmentStrip(work, j);
             }
             cell[j].color = color;
         }
