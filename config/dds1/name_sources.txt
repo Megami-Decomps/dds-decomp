@@ -1462,6 +1462,8 @@
 0x00163188	effParamWorkExCallback3	inferred	null-guarded dispatch of Ex work data through the D_003538A0 slot
 0x001631C8	effParamWorkExCallback4	inferred	null-guarded dispatch of Ex work data through the D_0035389C slot
 0x00163208	effParamWorkExCallback5	inferred	null-guarded dispatch of Ex work data through the D_003538A4 slot
+0x00163248	effParamDescriptorGetKind	inferred	Reads the descriptor's first word as the extended-work kind.
+0x00163250	effParamDescriptorGetTableIndex	inferred	Reads the descriptor's second word as its fallback table index.
 0x00163258	effParamTableGetBlock	inferred	returns table base plus the s32 offset stored at stride-16 row word 5
 0x00163270	effParamTableGetWord	inferred	returns the u32 at stride-16 row word 4 (base +0x10)
 0x00163280	effParamTableGetWord2	inferred	returns the u32 at stride-16 row word 6 (base +0x18)
