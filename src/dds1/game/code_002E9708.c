@@ -5,6 +5,7 @@
 #include "sdf_draw.h"
 #include "sdf_stream_read.h"
 #include "sdf_dev_event.h"
+#include "sdf_dev_state.h"
 
 #define SDF_RELOC_HEADER_BYTES 0x20
 #define SDF_STREAM_NODE_BYTES 0x8C
@@ -257,28 +258,6 @@ s32 sdfSoundHandleRpcEvent(s32 unused, u32 event) {
     return 0;
 }
 
-typedef struct DevState {
-    struct DevState *next;
-    struct DevState *previous;
-    struct DevState *workerNext;
-    struct DevState *workerPrev;
-    void *resource;
-    u8 workerIndex;
-    u8 operation;
-    s8 state;
-    u8 pad17;
-    s32 operationArg;
-    s32 requestExtra;
-    void *requestData;
-    s32 options;
-    s32 resourceId;
-    s32 result;
-    s32 transferred;
-    u8 pad34[4];
-    void (*callback)(struct DevState *, s32, s32, s32, s32);
-    s32 callbackContext;
-} DevState;
-
 typedef struct SdfSoundRpcRequest {
     u8 pad00[8];
     s32 destination;
@@ -296,10 +275,7 @@ extern DevState *D_003BDA7C;
 extern SdfSoundResidentBuffer D_003FEA98;
 extern char *mnuBuildVoiceResourcePath(char *, char *);
 extern DevState *sdfDevCreateCallbackState(const char *, void *, s32);
-extern s32 sdfDevReactivate(DevState *);
-extern s32 sdfDevQueueRead(DevState *, void *, s32);
 extern s32 sdfDevQueueActiveOperation(DevState *);
-extern s32 sdfDevQueueReleaseState(DevState *);
 extern void func_002E8938(s32, void *, s32);
 
 u32 *func_002E99A0(u32 command, SdfSoundRpcRequest *request) {
@@ -805,10 +781,6 @@ void sdfPrintChipHeapInfo(void) {
     sdfPrintFormattedDevMessage(D_003BD518, first);
 }
 
-extern DevState *sdfDevCreateCommandState(const char *name);
-extern s32 sdfDevQueueControlAndWait(DevState *state);
-extern void sdfDevQueueReadAndWait(DevState *state, s32 buffer, s32 size);
-extern void sdfDevWaitThenReleaseCommandState(DevState *state);
 
 /* Read a named file through the dev RPC into a freshly allocated block; returns the block's handle.
  * outData receives the block address, outSize the file size; without outData the block is released. */
@@ -818,7 +790,7 @@ SdfMemBlock *sdfDevReadResourceWithExtraSpace(const char *name, u32 *outData, u3
     SdfMemBlock *handle = sdfAllocGeneralBlock(size + extra);
     u32 address = sdfResourceRetainAddress(handle);
 
-    sdfDevQueueReadAndWait(state, address, size);
+    sdfDevQueueReadAndWait(state, (void *)address, size);
     sdfDevWaitThenReleaseCommandState(state);
     if (outData != NULL) {
         *outData = address;
