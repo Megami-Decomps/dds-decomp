@@ -450,50 +450,50 @@ extern s32 func_00167A10(EffTrackPolyDraw *);
  * two additional vertices overlapping the next strip (18 inputs total). */
 void effTrackPolyDrawStrips(EffTrackPolyData *data) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    s32 start[4];
-    s32 len[2];
+    s32 runStart[4];
+    s32 runPointCount[2];
     EffTrackPolyDraw *draw;
-    s32 i;
-    s32 remaining;
-    s32 wrapped;
-    s32 recent;
+    s32 runIndex;
+    s32 pointsRemaining;
+    s32 wrappedStartOffset;
+    s32 activePointCount;
     SdfListHead *list2;
     u64 *packet;
 
     sdfInitPacketList(list);
     sdfConsAppendClearPacket((s32)list, 0);
     sdfConsAppendAssetPacket((s32)list, data->nodeHandle, 0);
-    recent = data->activePointCount;
-    start[0] = data->position - recent;
-    if (start[0] < 2) {
-        wrapped = start[0] - 2;
-        start[1] = 0;
-        start[0] = wrapped + data->count;
-        len[0] = -wrapped;
-        len[1] = recent - len[0] + 2;
+    activePointCount = data->activePointCount;
+    runStart[0] = data->position - activePointCount;
+    if (runStart[0] < 2) {
+        wrappedStartOffset = runStart[0] - 2;
+        runStart[1] = 0;
+        runStart[0] = wrappedStartOffset + data->count;
+        runPointCount[0] = -wrappedStartOffset;
+        runPointCount[1] = activePointCount - runPointCount[0] + 2;
     } else {
-        len[0] = recent;
-        len[1] = 0;
+        runPointCount[0] = activePointCount;
+        runPointCount[1] = 0;
     }
     D_004520E0.colors = data->colors;
-    for (i = 0; i < 2; i++) {
+    for (runIndex = 0; runIndex < 2; runIndex++) {
         draw = &D_004520E0;
-        draw->points = &data->points[start[i]];
+        draw->points = &data->points[runStart[runIndex]];
         draw->color = data->color;
         draw->width = 0x10;
         draw->height = 0x12;
-        remaining = len[i];
-        while (remaining >= 0x12) {
-            remaining -= 0x10;
+        pointsRemaining = runPointCount[runIndex];
+        while (pointsRemaining >= 0x12) {
+            pointsRemaining -= 0x10;
             sdfAppendPacket(list, func_00167A10(&D_004520E0));
             D_004520E0.points += 0x10;
             D_004520E0.colors += 0x10;
         }
-        if (remaining >= 4) {
-            draw->height = remaining;
-            draw->width = remaining - 2;
+        if (pointsRemaining >= 4) {
+            draw->height = pointsRemaining;
+            draw->width = pointsRemaining - 2;
             sdfAppendPacket(list, func_00167A10(draw));
-            draw->colors += remaining;
+            draw->colors += pointsRemaining;
         }
     }
     if (data->kind < 4) {
