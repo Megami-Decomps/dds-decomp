@@ -673,7 +673,6 @@ extern void sdfFreeMemoryFromEitherHeap(void *);
 
 extern s32 sndHasActiveFileLoad(void);
 
-extern s32 fileGetResourceSize(s32);
 
 extern void func_003422F8(s32, s32);
 
