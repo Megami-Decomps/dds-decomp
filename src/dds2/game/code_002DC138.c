@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff_anim.h"
 #include "file.h"
 #include "pcp_vu0.h"
@@ -18,7 +19,6 @@ typedef struct EffModelOwner {
 extern void sdfMotionSampleAtFrame(Motion *, f32);
 
 extern u32 sdfResourceRetainAddress(SdfMemBlock *);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 
 extern u32 effModelUpdateControlFlags;
 

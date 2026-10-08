@@ -1,4 +1,5 @@
 #include "dsp_name.h"
+#include "sdf_resource.h"
 #include "mnu.h"
 #include "dat_state.h"
 #include "mnu_profile_progress.h"
@@ -21,7 +22,6 @@ extern void sdfDestroyGridWork(s32);
 
 extern void mnuReleaseDisplayListNodes(s32);
 
-extern void sdfReleaseResourceAllocation(s32);
 
 extern void mnuResetWorkFloats(void);
 
@@ -232,7 +232,7 @@ void mnuReleaseSceneContext(s32 unused, s32 sceneAddress) {
     func_002CB3B8(mnuSceneResourceContext, -1);
     sdfDestroyGridWork((s32)((MenuSceneWork *)sceneAddress)->gridHandle);
     mnuReleaseDisplayListNodes(sceneAddress + 0x584);
-    sdfReleaseResourceAllocation(((MenuSceneWork *)sceneAddress)->allocationHandle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((MenuSceneWork *)sceneAddress)->allocationHandle));
     mnuResetWorkFloats();
 }
 
@@ -258,7 +258,7 @@ INCLUDE_ASM(const s32, "game/code_00250E88", func_00253018);
 
 extern s32 prfReqCheckWithFallback(ScrVmOperand *, u16);
 extern void *sdfAllocSizeClassBlock(s32);
-extern u16 prfGetParamWord7b6(u16);
+extern u16 prfGetRequiredProfileLevel(u16);
 extern u8 prfGetParamWord7b5(u16);
 extern void prfBuildRawSkillList(u16, void *);
 extern u32 prfGetCapValue(u16);
@@ -282,7 +282,7 @@ MenuSceneEntry *func_002530D8(s32 unused, u16 profileId, MnuProfileProgress *sel
     entry = sdfAllocSizeClassBlock(sizeof(MenuSceneEntry));
     memset(entry, 0, sizeof(MenuSceneEntry));
     entry->sceneId = profileId;
-    entry->param7b6 = prfGetParamWord7b6(entry->sceneId);
+    entry->param7b6 = prfGetRequiredProfileLevel(entry->sceneId);
     entry->param7b5 = prfGetParamWord7b5(entry->sceneId);
     prfBuildRawSkillList(entry->sceneId, entry->rawSkillList);
     entry->cap = prfGetCapValue(entry->sceneId);

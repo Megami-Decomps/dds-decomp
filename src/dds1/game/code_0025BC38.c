@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf.h"
 #include "dat_state.h"
 #include "mnu_profile_progress.h"
@@ -54,7 +55,7 @@ void mnuDestroyMantraDrawPool(MovieResourceGroup *resources) {
             sdfDestroyTaskWork(resources->tasks[i]);
         }
     }
-    sdfReleaseResourceAllocation(resources->allocation);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resources->allocation));
 }
 
 extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);

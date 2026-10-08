@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "btl_sound.h"
 #include "eff_blur.h"
@@ -157,7 +158,6 @@ extern void effResourceRectDrawPixels(EffResourceRectWork *arg);
 
 extern SdfMemBlock *sdfAllocGeneralBlock(s32);
 extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 
 /* Allocate contiguous slots followed by their count and allocation handle. */
 EffArrHdr *effCreateSlotArray(u32 count) {

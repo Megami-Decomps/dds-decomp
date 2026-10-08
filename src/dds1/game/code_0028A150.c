@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff_curve.h"
 #include "file.h"
 #include "file_slot.h"
@@ -1042,7 +1043,7 @@ void *fileReadSlotPreviewWait(void) {
         mcCloseOpenFile(fileSaveFileDescriptor);
         return fileStoreSlotHeader;
     }
-    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
     return fileBeginSlotMetadataRefresh();
 }
 
@@ -1054,10 +1055,10 @@ void *fileStoreSlotHeader(void) {
     }
     if (status == 1) {
         memcpy(&D_003DC800[fileSlotScanIndex], (void *)fileSaveReadBuffer, 0x30);
-        sdfReleaseResourceAllocation(fileSaveReadBufferResource);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
         return fileAdvanceSlotScan();
     }
-    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
     return fileBeginSlotMetadataRefresh();
 }
 
@@ -2344,7 +2345,7 @@ void *mcHandleSetupResult(void) {
         mcCloseOpenFile(fileSaveFileDescriptor);
         return mcdHandleSaveSetupDone;
     }
-    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
     fileSetMenuFlowState(0);
     D_003BC854 = 3;
     return fileAbortSlotScanOnInput;
@@ -2362,7 +2363,7 @@ void *mcdHandleSaveSetupDone(void) {
     }
     if (status == 1) {
         fileReloadSaveBuffer();
-        sdfReleaseResourceAllocation(fileSaveReadBufferResource);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
         D_003BC7ED = 1;
         fileDestroyMenuTask();
         if (fileLoadStateChanged() == 0) {
@@ -2373,7 +2374,7 @@ void *mcdHandleSaveSetupDone(void) {
         fileSetMenuFlowState(13);
         return fileSetMenuCallbackAndClearResult(-1);
     }
-    sdfReleaseResourceAllocation(fileSaveReadBufferResource);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(fileSaveReadBufferResource));
     fileSetMenuFlowState(0);
     D_003BC854 = 3;
     return fileAbortSlotScanOnInput;
@@ -4156,7 +4157,7 @@ void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, s32 state, u16 optio
         sdfDevQueueReadAndWait(command, (void *)address, size);
         sdfDevWaitThenReleaseCommandState(command);
         fileJobSetPrimaryData(job, (void *)address, size, option);
-        sdfReleaseResourceAllocation(handle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
         return;
     }
 }
@@ -4191,7 +4192,7 @@ void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, s32 state, u16 sel
         sdfDevQueueReadAndWait(command, (void *)address, size);
         sdfDevWaitThenReleaseCommandState(command);
         fileJobSetSecondaryData(job, (void *)address, size, selector);
-        sdfReleaseResourceAllocation(handle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
         return;
     }
 }
@@ -4255,7 +4256,7 @@ void *fileJobCreateFromCommandState(entry)
         sdfDevQueueReadAndWait(command, (void *)address, size);
         sdfDevWaitThenReleaseCommandState(command);
         job = fileDuplicateJob((void *)address);
-        sdfReleaseResourceAllocation(handle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
         return job;
     }
 }
@@ -5015,7 +5016,7 @@ void effLoadObjectDestroy(LoadObj *obj) {
         for (i = 0; i < count; i++) {
             fileJobDestroy(((FileJobPayload **)obj->unk38)[i]);
         }
-        sdfReleaseResourceAllocation(obj->unk3C);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(obj->unk3C));
     }
     if (obj->referenceHolder != NULL) {
         effReleaseReferenceHolder((s32)obj->referenceHolder);
@@ -5063,7 +5064,7 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
             for (i = 0; i < count; i++) {
                 fileJobDestroy(((FileJobPayload **)dst->unk38)[i]);
             }
-            sdfReleaseResourceAllocation(dst->unk3C);
+            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(dst->unk3C));
             dst->unk38 = 0;
             dst->unk3C = 0;
         }
@@ -5142,7 +5143,7 @@ void fileReplaceEffectSurfaceJobs(LoadObj *obj, FileJobPayload *job) {
         for (i = 0; i < count; i++) {
             fileJobDestroy(((FileJobPayload **)obj->unk38)[i]);
         }
-        sdfReleaseResourceAllocation(obj->unk3C);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(obj->unk3C));
         obj->unk38 = 0;
         obj->unk3C = 0;
     }
@@ -6571,7 +6572,7 @@ void *fileAllocateGridRecordSlots(u16 type, u32 count, void *data) {
 }
 
 void fileReleaseGridRecordHandle(s32 record) {
-    sdfReleaseResourceAllocation(((FileSlotTable *)record)->handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((FileSlotTable *)record)->handle));
 }
 
 void fileClearRecordReferences(FileSlotTable *record) {

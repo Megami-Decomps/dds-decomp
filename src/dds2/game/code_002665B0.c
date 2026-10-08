@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "sdf_resource.h"
 #include "mnu_staff.h"
 #include "kwln.h"
 #include "evt_world.h"
@@ -202,7 +203,7 @@ extern s32 mnuPercentOrHundred(u16, u16);
 extern void mnuDrawPanelSequenceByRow(s32, s32, s32, s32, s32, s32);
 
 extern s32 effDestroyPackedBatch(s32);
-extern void mnuFreeProfilePanelWork(void *);
+extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 
 
 typedef struct MenuListNode MenuListNode;
@@ -731,7 +732,7 @@ void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *host) {
     mnuReleaseStaffMenuTextureHandles((s32)&host->staffSlots);
     mnuReleaseTitleEffectSprites(&host->staffSlots);
     func_00303D58(host->titleEffectHandle);
-    sdfReleaseResourceAllocation(host->heapHandle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(host->heapHandle));
 }
 
 /* Return one while initialization is pending (including state zero), zero when ready.
@@ -941,7 +942,6 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
 extern void func_00266808(u32 *work);
 extern s32 dspCloseChannel(void);
 extern void evtReleaseResourcePairHandle(EvtResourcePair *record);
-extern void sdfReleaseResourceAllocation(s32 handle);
 extern s32 mnuCheckResourceTask(void);
 extern void mnuStopResourceTask(void);
 extern void func_001285E8(s32 a, s32 b);
@@ -959,7 +959,7 @@ void mnuReleaseTerminalWorkAndResumeField(s32 arg) {
         mnuDrainPanelTransitions(&work->transitionWork, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle(&work->messageResources);
-        sdfReleaseResourceAllocation(work->heapHandle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->heapHandle));
         mnuTerminalTaskState = 2;
     }
     if (mnuCheckResourceTask() != 0) {
