@@ -33,14 +33,16 @@ u32 effConfigureIndexedSlotResource(struct EffectSlotSet *owner, s32 slot,
 #ifdef VERSION_DDS2
 s32 effConfigureIndexedSlotMaterial(struct EffectSlotSet *owner, u32 slot,
                                     struct EffMappedResource *resources, u32 item,
-                                    u32 flags, u32 option, u32 color);
+                                    u32 materialFlags, u32 materialValue,
+                                    u32 stateFlags);
 #else
 u32 effConfigureIndexedSlotMaterial(struct EffectSlotSet *owner, s32 slot,
                                     struct EffMappedResource *resources, s32 item,
-                                    u32 flags, u32 color, u32 option);
+                                    u32 materialFlags, u32 materialValue,
+                                    u32 stateFlags);
 #endif
 u32 effConfigureWithDefaultSetting(struct EffectSlotSet *owner, u32 slot,
                                    struct EffMappedResource *resources, u32 item,
-                                   u32 flags, u32 color);
+                                   u32 materialFlags, u32 stateFlags);
 
 #endif /* EFF_RESOURCE_SLOTS_H */
