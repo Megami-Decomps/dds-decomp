@@ -150,8 +150,8 @@ extern u16 D_003B2F58[];
 
 /* Subtract one modulo 256 from the first byte, then advance over the whole pair. */
 u32 itfReadEncodedTextLead(FrFontCtx *stream) {
-    s32 *position = &stream->offset;
-    u8 *byte = stream->bytes + *position;
+    s32 *position = &stream->encodedTextOffset;
+    u8 *byte = stream->encodedText + *position;
     u32 value = *byte;
 
     *position += 2;
@@ -164,8 +164,8 @@ u32 itfReadEncodedCode(FrFontCtx *stream) {
     u32 first;
     u32 second;
 
-    first = (stream->bytes[stream->offset++] + ITF_BYTE_MASK) & ITF_BYTE_MASK;
-    second = stream->bytes[stream->offset++];
+    first = (stream->encodedText[stream->encodedTextOffset++] + ITF_BYTE_MASK) & ITF_BYTE_MASK;
+    second = stream->encodedText[stream->encodedTextOffset++];
     if (second == ITF_BYTE_MASK) {
         second = 0;
     } else {
@@ -187,8 +187,8 @@ extern s32 D_0043656C;
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 
 s32 func_0019E1B8(s32 code, FrFontCtx *stream) {
-    s32 *position = &stream->offset;
-    u8 *bytes = stream->bytes;
+    s32 *position = &stream->encodedTextOffset;
+    u8 *bytes = stream->encodedText;
     s32 payloadWords = code & 0xF;
     s32 payloadPosition = *position;
 
@@ -196,25 +196,25 @@ s32 func_0019E1B8(s32 code, FrFontCtx *stream) {
     *position = payloadPosition;
     switch (code) {
     case 0xF206:
-        stream->channel0 = bytes[payloadPosition] - 1;
+        stream->fontIndex = bytes[payloadPosition] - 1;
         *position = payloadPosition + 2;
         break;
     case 0xF202:
-        stream->channel1 = bytes[payloadPosition] - 1;
+        stream->firstOption = bytes[payloadPosition] - 1;
         *position = payloadPosition + 2;
         break;
     case 0xF209:
-        stream->channel2 = bytes[payloadPosition] - 1;
+        stream->secondOption = bytes[payloadPosition] - 1;
         *position = payloadPosition + 2;
         break;
     case 0xF207:
-        stream->channel3 = bytes[payloadPosition] - 1;
+        stream->contextEncodedByte = bytes[payloadPosition] - 1;
         *position = payloadPosition + 2;
         break;
     case 0xF203:
         if (D_004528C0[bytes[*position] - 1] != 0) {
             frFontCheckPendingGlyphState(stream);
-            func_0019DEE0((u8)(stream->bytes[*position] - 1), stream);
+            func_0019DEE0((u8)(stream->encodedText[*position] - 1), stream);
         }
         *position += 2;
         break;
@@ -293,7 +293,7 @@ advanceLine:
     case 0xF20D:
         break;
     default:
-        stream->offset += (payloadWords - 1) << 1;
+        stream->encodedTextOffset += (payloadWords - 1) << 1;
         break;
     }
     if (stream->pendingCreate == 0) {
@@ -307,10 +307,10 @@ extern s8 D_00436550;
 FrFontGlyph *func_0019E5D8(FrFontCtx *stream) {
     u8 encodedText[3];
     s32 value;
-    u8 *bytes = stream->bytes;
+    u8 *bytes = stream->encodedText;
 
     if ((bytes[0] & 0xF0) != 0xF0 && bytes[1] == 8) {
-        stream->offset += 4;
+        stream->encodedTextOffset += 4;
     }
     D_0043654C &= ~1;
     D_0043654C &= ~2;
@@ -318,9 +318,9 @@ FrFontGlyph *func_0019E5D8(FrFontCtx *stream) {
     D_0043654C &= ~8;
     frFontAddSharedGlyphFlags(1);
     frFontClearFlagBits(2);
-    bytes = stream->bytes;
+    bytes = stream->encodedText;
     for (;;) {
-        value = bytes[stream->offset++];
+        value = bytes[stream->encodedTextOffset++];
         if (value == 0) {
             break;
         }
@@ -338,29 +338,29 @@ FrFontGlyph *func_0019E5D8(FrFontCtx *stream) {
             if (value < 0x80) {
                 encodedText[0] = value;
                 encodedText[1] = 0;
-                stream->glyphChain = func_0019CE78((const char *)encodedText, stream->channel0,
-                    stream->channel1, stream->channel2, stream->glyphChain);
+                stream->glyphChain = func_0019CE78((const char *)encodedText, stream->fontIndex,
+                    stream->firstOption, stream->secondOption, stream->glyphChain);
             } else {
-                value = (value << 8) | stream->bytes[stream->offset++];
+                value = (value << 8) | stream->encodedText[stream->encodedTextOffset++];
                 if (value <= 0xC07F) {
                     encodedText[0] = (u32)value >> 8;
                     encodedText[1] = value;
                     encodedText[2] = 0;
-                    stream->glyphChain = func_0019CE78((const char *)encodedText, stream->channel0,
-                        stream->channel1, stream->channel2, stream->glyphChain);
+                    stream->glyphChain = func_0019CE78((const char *)encodedText, stream->fontIndex,
+                        stream->firstOption, stream->secondOption, stream->glyphChain);
                 } else {
                     value -= 0x4000;
                     encodedText[0] = (u32)value >> 8;
                     encodedText[1] = value;
                     encodedText[2] = 0;
                     stream->glyphChain = func_0019CE78((const char *)encodedText, 8,
-                        stream->channel1, stream->channel2, stream->glyphChain);
+                        stream->firstOption, stream->secondOption, stream->glyphChain);
                 }
             }
             frFontSetFlagAndMeasureGlyphs(stream->glyphChain, D_00436550);
             frFontStoreShiftedContextValue(stream->glyphChain, stream->z);
         }
-        bytes = stream->bytes;
+        bytes = stream->encodedText;
     }
     frFontClearFlagBits(1);
     frFontAddSharedGlyphFlags(2);
@@ -380,13 +380,13 @@ FrFontGlyph *itfDrawEncodedTextStream(s32 x, s32 y, s32 depth, s32 channel0, s32
     args.x = x;
     args.y = y;
     args.z = depth << 4;
-    args.channel0 = channel0;
-    args.channel1 = channel1;
-    args.channel2 = channel2;
-    args.channel3 = channel3;
-    args.bytes = encodedText;
+    args.fontIndex = channel0;
+    args.firstOption = channel1;
+    args.secondOption = channel2;
+    args.contextEncodedByte = channel3;
+    args.encodedText = encodedText;
     args.glyphChain = sub;
-    args.offset = 0;
+    args.encodedTextOffset = 0;
     args.pendingCreate = 1;
     args.pendingPosition = 1;
     return func_0019E5D8(&args);
@@ -430,13 +430,13 @@ s32 itfInitTextDrawArgs(u8 *encodedText, FrFontGlyph *sub) {
     args.x = 0;
     args.y = 0;
     args.z = 0;
-    args.channel0 = 0;
-    args.channel1 = 0;
-    args.channel2 = 0;
-    args.channel3 = 0;
-    args.bytes = encodedText;
+    args.fontIndex = 0;
+    args.firstOption = 0;
+    args.secondOption = 0;
+    args.contextEncodedByte = 0;
+    args.encodedText = encodedText;
     args.glyphChain = sub;
-    args.offset = 0;
+    args.encodedTextOffset = 0;
     args.pendingCreate = 1;
     args.pendingPosition = 1;
     return func_0019EDC0(&args);

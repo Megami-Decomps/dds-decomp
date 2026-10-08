@@ -1031,10 +1031,10 @@ void frFontCreateContext(ctx)
     FrFontCtx *ctx;
 
 {
-    FrFontGlyph *childGlyph = frFontAppendTextToGlyphChain((const char *)&D_00436578, 0, ctx->channel1, ctx->channel2, ctx->glyphChain);
+    FrFontGlyph *childGlyph = frFontAppendTextToGlyphChain((const char *)&D_00436578, 0, ctx->firstOption, ctx->secondOption, ctx->glyphChain);
 
     ctx->glyphChain = childGlyph;
-    frFontSetContextEncodedByte(childGlyph, ctx->channel3);
+    frFontSetContextEncodedByte(childGlyph, ctx->contextEncodedByte);
     ctx->pendingCreate = 0;
 }
 
