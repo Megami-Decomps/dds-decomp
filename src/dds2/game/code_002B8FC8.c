@@ -127,8 +127,6 @@ extern void mnuDrawSlotIcons();
 
 extern void frFontAddSharedGlyphFlags();
 
-extern s32 frFontAppendGlyphFromData();
-
 extern void frFontSetContextPair();
 
 extern void frFontStoreShiftedContextValue();

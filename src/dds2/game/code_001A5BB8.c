@@ -6133,7 +6133,7 @@ s32 func_001B8580(const u8 *text) {
     work->fadeLevels[3] = work->fadeLevels[1] = 0x10;
     glyph = itfCreateConvertedTextGlyph(0x1000, 0x200, 0xFF0000, 0x80808080, text, 0);
     work->width = frFontMeasureLines((struct FrFontGlyph *)glyph);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)glyph);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
     work->initial[0].x = work->width - work->width / 2 + 0x105;
     work->initial[0].y = 0x40;
     work->initial[1].x = 0x92 - work->width / 2;
@@ -6928,7 +6928,7 @@ s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
     glyph = itfCreateConvertedTextGlyph((0x100 - (width >> 1)) << 4, 0x220, 0xFF0000,
                                        work->fade | 0x80808000, work->text, 0);
     frFontDrawGlyphWithSharedFlags(glyph, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)glyph);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
     colors.values[0] = work->fadeLevels[0] | 0x80808000;
     colors.values[1] = work->fadeLevels[2] | 0x80808000;
     colors.values[2] = work->fadeLevels[1] | 0x80808000;

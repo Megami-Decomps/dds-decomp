@@ -2,6 +2,7 @@
 #define FILE_PAC_H
 
 #include "common.h"
+#include "sdf_pac_packet.h"
 
 struct FileNode;
 struct PacBuf;

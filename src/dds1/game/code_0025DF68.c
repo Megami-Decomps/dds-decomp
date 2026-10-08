@@ -199,7 +199,7 @@ void func_0025E6B0(s32 x, s32 y, s32 depth, ShopScene *scene, s32 alpha, s32 mod
         func_003014F0(text, D_003BC4F0, quantity);
         glyph = func_00197A98(0x1A70, 0xAA0, depth, style, text, 0);
         func_001958A0(glyph, 1, mode);
-        frFontQueueGlyphInSelectedSlot(glyph);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
 
@@ -257,7 +257,7 @@ void func_0025F138(s32 x, s32 y, s32 z, struct MenuList *list,
         frFontSetChainFlag(glyph, 4);
     }
     func_001958A0(glyph, 1, drawArg);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 
     if ((list->id & 1) == 0) {
         return;
@@ -273,7 +273,7 @@ void func_0025F138(s32 x, s32 y, s32 z, struct MenuList *list,
         frFontSetChainFlag(glyph, 4);
     }
     func_001958A0(glyph, 1, drawArg);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 
@@ -380,7 +380,7 @@ void func_0025F7F0(s32 x, s32 y, s32 depth, ShopScene *scene, u32 alpha, s32 opt
                               color, text, 0);
         frFontSetChainFlag(glyph, 4);
         func_001958A0(glyph, 1, option);
-        frFontQueueGlyphInSelectedSlot(glyph);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
 
@@ -433,7 +433,7 @@ void func_0025FD50(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
         glyph = func_00197A98(0x17C0, 0x380, depth, 0xA09DC380, text, 0);
         frFontSetChainFlag(glyph, 4);
         func_001958A0(glyph, 1, option);
-        frFontQueueGlyphInSelectedSlot(glyph);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
 
@@ -454,7 +454,7 @@ void mnuDrawIconFixedEntryWithBadge(s32 x, s32 y, s32 z, s32 unused, s32 scale, 
     glyph = func_00197A98(x + 0x17C0, y + 0x380, z, value, text, 0);
     frFontSetChainFlag(glyph, 4);
     func_001958A0(glyph, 1, option);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 void func_0025FFC8(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
@@ -474,7 +474,7 @@ void func_0025FFC8(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
         glyph = func_00197A98(0x17C0, 0x380, depth, 0xA09DC380, text, 0);
         frFontSetChainFlag(glyph, 4);
         func_001958A0(glyph, 1, option);
-        frFontQueueGlyphInSelectedSlot(glyph);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
 
@@ -504,7 +504,7 @@ void func_00260100(ShopScene *state, s32 style) {
         FrFontGlyph *glyph = func_00197A98(0x17C0, 0x2B8, 0, style, text, 0);
 
         func_001958A0(glyph, 1, 0x53);
-        frFontQueueGlyphInSelectedSlot(glyph);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
 

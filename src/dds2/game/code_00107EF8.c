@@ -752,7 +752,7 @@ void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors, const char *
 
     glyph = func_0019F448(width << 4, height << 3, 0, colors, text, NULL);
     frFontDrawGlyphInDefaultMode(glyph);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 /* Zero frames leaves the prior state untouched; zero countLimit selects the -1 sentinel. */

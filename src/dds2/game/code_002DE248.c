@@ -7965,7 +7965,7 @@ s32 *effBillboardMotionResourceInitialize(s32 *request) {
 
 void effDestroyBillboardAndOwnedAssetWork(s32 *work) {
     if (work[0] != 0) {
-        billDispatchByKind(work[0]);
+        billDispatchByKind((BillObj *)(u32)work[0]);
     }
     if (work[1] != 0) {
         sdfQueueAssetRelease(work[1]);

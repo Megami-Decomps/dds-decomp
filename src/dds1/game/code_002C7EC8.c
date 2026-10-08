@@ -25,7 +25,7 @@ void sdfCounterDrawGlyphAtGridCell(s32 gridX, s32 gridY, u32 style, const u8 *te
 
     glyph = itfCreateConvertedTextGlyph(gridX << 4, gridY << 3, 0, style, text, 0);
     frFontDrawGlyphWithSharedFlags(glyph, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)glyph);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
 }
 
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);

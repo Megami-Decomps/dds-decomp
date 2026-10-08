@@ -966,7 +966,7 @@ void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, s3
     object = func_0019F798((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
                            uiBlendColors(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);
     func_0019D550((FrFontGlyph *)object, 1, layer);
-    frFontQueueGlyphInSelectedSlot((FrFontGlyph *)object);
+    frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)object);
     offset = visual->titleSlide;
     magnitude = offset;
     if (offset < 0) {
@@ -1002,7 +1002,7 @@ void mnuCreateStaffImageSprite(s32 imageIndex) {
     FrFontGlyph *sprite = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x340, 0x148, 0, 0xa09dc35a,
                                       D_003E5710[imageIndex], 0);
     func_0019D550(sprite, 1, 0x54);
-    frFontQueueGlyphInSelectedSlot(sprite);
+    frFontQueueGlyphForCurrentDrawBuffer(sprite);
 }
 
 typedef struct StaffGridLabelRow {
@@ -1096,7 +1096,7 @@ void func_002AA9D8(s32 kind, u32 labelIndex, u32 textTable, u32 context,
                                              0, labelIndex, textTable, textOption);
         frFontSetChildColors((TextStyleNode *)glyph, 0xA09DC35A);
         func_0019D550((FrFontGlyph *)glyph, 1, layer);
-        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
+        frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
     }
 }
 

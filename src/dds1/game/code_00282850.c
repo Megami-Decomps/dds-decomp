@@ -894,7 +894,7 @@ void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *ite
     func_003014F0(buffer, D_003BC7A0, value);
     glyph = (struct FrFontGlyph *)func_001978E8(x + 0x340, y + 0x28, depth, color, buffer, 0);
     func_001958A0(glyph, 1, layer);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 
