@@ -215,7 +215,7 @@ extern char D_00453C50[];
 void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
     s32 eventId;
     s32 directoryId;
-    void *request;
+    struct FileRequest *request;
 
     func_0035B6E0(D_004377E0);
     eventId = state->eventId;

@@ -889,7 +889,7 @@ extern void mdlCompleteGroupedJobAndNotify();
  * Preserve the provider's word-valued completion and user-data parameters. */
 s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, s32 requestHandle, void (*onComplete)(u32), u32 callbackArg) {
     MdlDoneJob *completionJob = sdfAllocAndClearQuadwords(MDL_DONE_JOB_BYTES);
-    void *requestSlot;
+    struct FileRequest *requestSlot;
 
     completionJob->group = group;
     completionJob->id = id;
@@ -900,7 +900,7 @@ s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, s32 requestHandle,
                                               (u32)mdlCompleteGroupedJobAndNotify, (u32)completionJob);
     completionJob->owner = requestSlot;
     if (onComplete == NULL) {
-        func_00288C50((struct FileRequest *)requestSlot);
+        func_00288C50(requestSlot);
         mdlDestroyLoadRequestOwner(completionJob);
     }
     return 0;

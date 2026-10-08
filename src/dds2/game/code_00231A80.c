@@ -790,7 +790,7 @@ extern void mdlCompleteGroupedJobAndNotify();
  * Preserve the provider's existing signature and caller casts/conversions. */
 s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, s32 requestHandle, void (*onComplete)(u32), u32 callbackArg) {
     MdlDoneJob *completionJob = sdfAllocAndClearQuadwords(MDL_DONE_JOB_BYTES);
-    void *requestSlot;
+    struct FileRequest *requestSlot;
 
     completionJob->group = group;
     completionJob->id = id;
@@ -801,7 +801,7 @@ s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, s32 requestHandle,
                                       (s32)mdlCompleteGroupedJobAndNotify, (s32)completionJob);
     completionJob->owner = requestSlot;
     if (onComplete == NULL) {
-        func_002C81D0((struct FileRequest *)requestSlot);
+        func_002C81D0(requestSlot);
         mdlDestroyLoadRequestOwner(completionJob);
     }
     return 0;

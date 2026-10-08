@@ -9475,7 +9475,7 @@ s32 effPollResourceList(EffectList *list) {
                 if (list->request != NULL) {
                     func_00288788(list->request);
                 }
-                list->request = fileQueuePlainDispatchRequest((const char *)node->length);
+                list->request = (struct EffRequest *)fileQueuePlainDispatchRequest((const char *)node->length);
                 if (list->mode == 2) {
                     func_00288C50((struct FileRequest *)list->request);
                 }

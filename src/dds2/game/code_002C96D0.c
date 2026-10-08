@@ -1266,7 +1266,7 @@ extern char D_0042B6A8[];
 
 s32 fileLoadIconFileAndResetSelection(void) {
     D_00439030 = 0;
-    fileSaveIconRequest = fileQueueDefaultCallbackRequest(D_0042B6A8);
+    fileSaveIconRequest = (u32)fileQueueDefaultCallbackRequest(D_0042B6A8);
     return fileResetSelection();
 }
 
@@ -1276,7 +1276,7 @@ s32 func_002CAED0(void) {
 
 s32 fileLoadIconFileAndBeginSlotReset(void) {
     D_00439030 = 0;
-    fileSaveIconRequest = fileQueueDefaultCallbackRequest(D_0042B6A8);
+    fileSaveIconRequest = (u32)fileQueueDefaultCallbackRequest(D_0042B6A8);
     return fileBeginSlotReset();
 }
 
@@ -2714,7 +2714,7 @@ void func_002CE208(s32 mode) {
     s32 world;
 
     func_001004A0();
-    request = fileQueuePlainDispatchRequest("/mc/mcpack.LB");
+    request = (FilePacRequest *)fileQueuePlainDispatchRequest("/mc/mcpack.LB");
     func_002C81D0((struct FileRequest *)request);
     node = request->packet.queueHead;
     while (node != NULL) {

@@ -119,7 +119,7 @@ void effInitializeBillResourceOwners(void) {
     u32 configOffset;
 
     D_00438EFC = 0;
-    archive = fileQueuePlainDispatchRequest(D_004142B0);
+    archive = (EffBillResourceArchive *)fileQueuePlainDispatchRequest(D_004142B0);
     func_002C81D0((struct FileRequest *)archive);
     node = archive->nodes;
     if (node != NULL) {
