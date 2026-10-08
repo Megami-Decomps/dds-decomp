@@ -1,3 +1,4 @@
+#include "sdf_resource.h"
 #include "itf.h"
 #include "fpu.h"
 #include "itf_grid_text.h"
@@ -195,7 +196,6 @@ typedef struct ItfGridResource {
     u32 entryCount;
 } ItfGridResource;
 
-extern u8 *sdfResourceRetainAddress(u32);
 extern void sdfDecrementAllocationReferenceCount(u32);
 
 /* Return the address of entry `index` of the resource's 8-byte-stride offset table, or NULL when out of range. */
@@ -209,7 +209,7 @@ u8 *itfGetGridResourceEntryData(ItfGridResource *object, u32 index) {
     if (object->handle == 0) {
         return 0;
     }
-    cursor = sdfResourceRetainAddress(object->handle);
+    cursor = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(object->handle));
     base = cursor;
     count = object->entryCount;
     cursor += *(u32 *)(cursor + 0xC);

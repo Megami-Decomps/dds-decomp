@@ -108,7 +108,6 @@ void func_00193FD0(s32 x, s32 y, s32 depth, FrFontGlyph *glyph,
 extern volatile s32 sdfGsImageUploadSemaphore; /* semaphore handle shared with the IOP/interrupt side; declared volatile */
 extern void sceGsSetDefLoadImage(void *, s16, s16, s32, s32, s32, s16, s16);
 extern s32 sdfAllocGeneralBlock(s32);
-extern s32 sdfResourceRetainAddress(s32);
 extern void sceGsExecLoadImage(void *, s32);
 extern void sceGsSyncPath(s32, s32);
 extern void FlushCache(s32);
@@ -137,7 +136,7 @@ void frFontUploadClearedTexture(void) {
     imageSize = frFontWork.atlas.height * frFontWork.atlas.width;
     imageSize = (u32)imageSize >> 1;
     allocation = sdfAllocGeneralBlock(imageSize);
-    pixels = (void *)sdfResourceRetainAddress(allocation);
+    pixels = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
     memset(pixels, 0, imageSize);
     sceGsSetDefLoadImage(loadImage, (s16)frFontWork.atlas.bufferBase, (s16)frFontWork.atlas.bufferWidth, FR_FONT_GS_PSMT4, 0, 0,
                          (s16)frFontWork.atlas.width, (s16)frFontWork.atlas.height);
@@ -192,7 +191,7 @@ void frFontBindResourceSections(u8 slotIndex, u8 *resourceBytes, void *allocatio
 
     if (resourceBytes == NULL) {
         if (allocation != NULL) {
-            resourceBytes = (u8 *)sdfResourceRetainAddress((s32)allocation);
+            resourceBytes = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((s32)allocation));
         }
     }
     entry = &frFontWork.entries[slotIndex];

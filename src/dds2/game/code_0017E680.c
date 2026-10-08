@@ -23,7 +23,6 @@ extern void *sdfAllocSizeClassBlock(s32 size);
 extern u32 effRetainResource(s32 kind);
 extern void billSetBillboardMode(u32 handle, s32 mode);
 extern s32 sdfAllocGeneralBlock(s32 size);
-extern s32 sdfResourceRetainAddress(s32 handle);
 extern void *sdfCreateAssetWithDrawEntries(void);
 extern void func_003332D0(u32 asset, f32 value);
 typedef struct {
@@ -65,7 +64,7 @@ EffResourceWork *effCreateResourceEntryWork(s32 index) {
     u32 i;
 
     handle = sdfAllocGeneralBlock(index * 20 + 0x74);
-    work = (EffResourceWork *)sdfResourceRetainAddress(handle);
+    work = (EffResourceWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     work->mode = 2;
     work->entries = (EffResourceEntry *)(work + 1);
     work->resource70 = handle;
@@ -190,7 +189,7 @@ void effBuildRadialFanStreams(EffResourceWork *work, u32 count, u32 centerColor,
     recordCount = count * 3;
     allocation = sdfAllocGeneralBlock(recordCount * 0x24);
     work->resource68 = allocation;
-    positions = (f32 (*)[4])sdfResourceRetainAddress(allocation);
+    positions = (f32 (*)[4])sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
     unitVectors = positions + recordCount;
     colors = (u32 *)(unitVectors + recordCount);
     work->vertexCount = recordCount;

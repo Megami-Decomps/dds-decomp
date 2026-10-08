@@ -340,7 +340,6 @@ extern void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index);
 
 extern void *sdfAllocGeneralBlock(s32 size);
 
-extern void *sdfResourceRetainAddress(void *resource);
 
 extern void effPcpViewAlignedRingSetPosition();
 
@@ -1257,7 +1256,7 @@ void effPcpChargeInitTail(EffPCPChargeWork *work) {
 
 EffPCPChargeWork *effCreateChargeWork(void *source) {
     SdfMemBlock *resource = sdfAllocGeneralBlock(0x1354);
-    EffPCPChargeWork *work = sdfResourceRetainAddress(resource);
+    EffPCPChargeWork *work = (void *)sdfResourceRetainAddress(resource);
     work->allocationHandle = resource;
     work->primaryHandle = effParamCreateFromTable(source, 0);
     work->secondaryHandle = effParamCreateFromTable(source, 1);
@@ -1278,7 +1277,7 @@ void effPcpChargeReleaseResources(EffPCPChargeWork *work) {
 
 EffPCPChargeWork *effCopyChargeResources(EffPCPChargeWork *source) {
     SdfMemBlock *resource = sdfAllocGeneralBlock(0x1354);
-    EffPCPChargeWork *work = sdfResourceRetainAddress(resource);
+    EffPCPChargeWork *work = (void *)sdfResourceRetainAddress(resource);
     u32 firstHandle = source->primaryHandle;
     work->allocationHandle = resource;
     work->primaryHandle = effParamWorkDuplicate(firstHandle);
@@ -3472,7 +3471,7 @@ EffPCPBlockSetWork *effPcpCreateBlockSetWork(void *first, void **blocks) {
         if (work->params.groupSize[i] > 0) {
             n = work->count * work->params.groupSize[i];
             work->alloc[i] = (u32)sdfAllocGeneralBlock(n * 4);
-            work->list[i] = sdfResourceRetainAddress((void *)work->alloc[i]);
+            work->list[i] = (void *)sdfResourceRetainAddress((void *)work->alloc[i]);
             work->list[i][0] = effParamWorkCreate(0, blocks[6 + i]);
             for (j = 1; j < n; j++) {
                 work->list[i][j] = 0;
@@ -3529,7 +3528,7 @@ void effPcpDuplicateBlockSetHandles(EffPCPBlockSetWork *work, EffPCPBlockSetWork
         if (work->params.groupSize[j] > 0) {
             n = work->count * work->params.groupSize[j];
             work->alloc[j] = (u32)sdfAllocGeneralBlock(n * 4);
-            work->list[j] = sdfResourceRetainAddress((void *)work->alloc[j]);
+            work->list[j] = (void *)sdfResourceRetainAddress((void *)work->alloc[j]);
             work->list[j][0] = effParamWorkDuplicate(src->list[j][0]);
             for (i = 1; i < n; i++) {
                 work->list[j][i] = 0;
@@ -4428,7 +4427,7 @@ EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
     u32 count = segments * 4 + 4;
     EffPCPBeamNode *node = sdfAllocSizeClassBlock(sizeof(EffPCPBeamNode));
     SdfMemBlock *allocation = sdfAllocGeneralBlock(count * 20);
-    f32 *points = sdfResourceRetainAddress(allocation);
+    f32 *points = (void *)sdfResourceRetainAddress(allocation);
 
     memset(points, 0, count * 20);
     node->points = points;
@@ -4914,7 +4913,7 @@ typedef struct EffPCPGroupSet {
 EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *first, u32 *blocks) {
     u32 count = first->count;
     void *resource = sdfAllocGeneralBlock(count * 0x18 + 0x180);
-    EffPCPGroupSet *copy = sdfResourceRetainAddress(resource);
+    EffPCPGroupSet *copy = (void *)sdfResourceRetainAddress(resource);
     EffPCPGroupEntry *entry;
     u32 g;
     u32 i;
@@ -4939,7 +4938,7 @@ EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *first, u32 *blocks) {
         flags = first->activeGroups;
         offset = 0;
         stride = count * 4;
-        copy->duplicates = sdfResourceRetainAddress(copy->duplicateHandle);
+        copy->duplicates = (void *)sdfResourceRetainAddress(copy->duplicateHandle);
         memset(copy->duplicates, 0, size);
         for (; g < 4; g++) {
             u32 *slot = (u32 *)((u8 *)copy->duplicates + offset);
@@ -5005,7 +5004,7 @@ EffPCPGroupSet *effBlockSetCloneWithDuplicates(EffPCPGroupSet *work) {
         flags = work->head.activeGroups;
         offset = 0;
         copy->duplicateHandle = sdfAllocGeneralBlock(size);
-        copy->duplicates = sdfResourceRetainAddress(copy->duplicateHandle);
+        copy->duplicates = (void *)sdfResourceRetainAddress(copy->duplicateHandle);
         memset(copy->duplicates, 0, size);
         for (; group < 4; group++) {
             u32 *slot = (u32 *)((u8 *)copy->duplicates + offset);
@@ -5316,7 +5315,7 @@ typedef struct EffPCPDriftEventWork {
 EffPCPDriftEventWork *effPcpEntryWorkBCreate(EffPCPDriftEventParams *src, void *params) {
     u32 count = src->count;
     void *handle = sdfAllocGeneralBlock(count * 24 + 0x11C);
-    EffPCPDriftEventWork *work = sdfResourceRetainAddress(handle);
+    EffPCPDriftEventWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
     EffPCPDriftEvent *entry;
     s32 life;
@@ -5367,7 +5366,7 @@ void func_00189FF0(void *data) {
 EffPCPDriftEventWork *effPcpCloneDriftEventWork(EffPCPDriftEventWork *src) {
     u32 count = src->params.count;
     void *handle = sdfAllocGeneralBlock(count * 24 + 0x11C);
-    EffPCPDriftEventWork *work = sdfResourceRetainAddress(handle);
+    EffPCPDriftEventWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
     EffPCPDriftEvent *entry;
     s32 life;
@@ -5555,7 +5554,7 @@ typedef struct EffPCPPairedEventWork {
 EffPCPPairedEventWork *effPcpCreateDelayedDriftEntries(EffPCPPairedEventParams *src, void *paramsA, void *paramsB) {
     u32 count = src->count;
     void *handle = sdfAllocGeneralBlock(count * 32 + 0xA4);
-    EffPCPPairedEventWork *work = sdfResourceRetainAddress(handle);
+    EffPCPPairedEventWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
     EffPCPPairedEvent *entry;
     s32 life;
@@ -5609,7 +5608,7 @@ void effPcpDriftCreateFromTable(void *data) {
 EffPCPPairedEventWork *effPcpClonePairedDriftEvents(EffPCPPairedEventWork *src) {
     u32 count = src->params.count;
     void *handle = sdfAllocGeneralBlock(count * 32 + 0xA4);
-    EffPCPPairedEventWork *work = sdfResourceRetainAddress(handle);
+    EffPCPPairedEventWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
     EffPCPPairedEvent *entry;
     s32 life;
@@ -5848,7 +5847,7 @@ typedef struct EffPCPSpawnRangeWork {
 void *effPcpCreateDelayedEventEntries(EffPCPSpawnRangeParams *src, void *params) {
     u32 count = src->count;
     void *handle = sdfAllocGeneralBlock(count * 32 + 0xAC);
-    EffPCPSpawnRangeWork *work = sdfResourceRetainAddress(handle);
+    EffPCPSpawnRangeWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
     EffPCPSpawnRangeEvent *entry;
     s32 life;
@@ -5899,7 +5898,7 @@ void effPcpSlotEffectCreateFromTable(void *data) {
 EffPCPSpawnRangeWork *effPcpCloneSpawnRangeEvents(EffPCPSpawnRangeWork *src) {
     u32 count = src->params.count;
     void *handle = sdfAllocGeneralBlock(count * 32 + 0xAC);
-    EffPCPSpawnRangeWork *work = sdfResourceRetainAddress(handle);
+    EffPCPSpawnRangeWork *work = (void *)sdfResourceRetainAddress(handle);
     EffPCPEventPlace place;
     EffPCPSpawnRangeEvent *entry;
     s32 life;
@@ -6120,7 +6119,7 @@ void effPcpEventWorkInitEntries(EffPCPMapEventWork *work) {
     count = sdfCountMapPositionRecords(model->inner);
     work->count = count;
     work->entriesHandle = sdfAllocGeneralBlock(count << 5);
-    entry = sdfResourceRetainAddress(work->entriesHandle);
+    entry = (void *)sdfResourceRetainAddress(work->entriesHandle);
     work->entries = entry;
     place.pos[0] = 0;
     place.pos[1] = 0;

@@ -68,7 +68,6 @@ extern char D_003B3B88[]; /* "/tool/effect/mat/" */
 
 extern char D_003B3BA0[]; /* "/tool/effect/hlp/" */
 
-extern u32 sdfResourceRetainAddress(u32);
 
 extern void *sdfAllocGeneralBlock(u32);
 
@@ -1564,7 +1563,7 @@ u8 *effCreateBillFrameNode(EffBillFrameConfig *config, u32 resource) {
     u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
     u8 *base = sdfAllocGeneralBlock(count * 0x18 + headerSize);
-    u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -1677,7 +1676,7 @@ u8 *billCreateCellNode(EffBillCellConfig *config, u32 resource) {
     u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
     u8 *base = sdfAllocGeneralBlock(count * 0x1C + headerSize);
-    u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -1757,7 +1756,7 @@ u8 *billCreateParticleNode(EffBillParticleConfig *config, u32 resource) {
     u32 count = config->frame.output.timed.count;
     u32 headerSize = 0x10;
     u8 *base = sdfAllocGeneralBlock(count * 0x2C + headerSize);
-    u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -1836,7 +1835,7 @@ void effClearAnimatedFrames(u8 *work) {
 u8 *billAllocateAnimatedTransformEntries(EffBillAnimatedFrameConfig *config) {
     u32 headerSize = 0x10;
     u8 *base = sdfAllocGeneralBlock(config->frame.output.timed.count * 0x18 + headerSize);
-    u8 *node = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *node = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *entries = node + headerSize;
 
     *(u8 **)(node + 8) = base;
@@ -1974,7 +1973,7 @@ void billResetEmitterIndices(u8 *work) {
 u8 *billAllocEmitterNode(u8 *config) {
     u32 headerSize = 0x10;
     u8 *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * 0x18 + headerSize);
-    u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -2100,7 +2099,7 @@ void effClearStripFrames(u8 *work) {
 u8 *billAllocStripNode(u8 *config) {
     u32 headerSize = 0x10;
     u8 *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * 0x28 + headerSize);
-    u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -2229,7 +2228,7 @@ void billResetTrailIndices(u8 *work) {
 u8 *billCreateTrailNode(EffBillTrailFrameConfig *config, u32 resource) {
     u32 headerSize = 0x10;
     u8 *base = sdfAllocGeneralBlock(config->frame.output.timed.count * 0x2C + headerSize);
-    u8 *cursor = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *cursor = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *header = cursor;
     /* Read the configured count before writing the retained header. */
     u32 frameCount = config->frame.output.timed.count;
@@ -2310,7 +2309,7 @@ void billResetQuadIndices(u8 *work) {
 u8 *billAllocQuadNode(u8 *config) {
     u32 headerSize = 0x10;
     u8 *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * 0x20 + headerSize);
-    u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 
     body += headerSize;
@@ -2616,7 +2615,7 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
     size = ((rows * 2 + cols) * 2 + rows) * 4;
     size = (((size >> 4) + ((size & 0xF) != 0)) << 4);
     base = sdfAllocGeneralBlock(size + 0x30);
-    data = (u8 *)sdfResourceRetainAddress((u32)base);
+    data = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     set = (EffTrackSet *)(data + size);
     set->buffer = data;
     data += rows * 16;
@@ -3049,7 +3048,7 @@ EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
     }
     size = count * sizeof(f32);
     allocation = sdfAllocGeneralBlock(size + sizeof(EffClassDrawState));
-    scales = (f32 *)sdfResourceRetainAddress((u32)allocation);
+    scales = (f32 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
     state = (EffClassDrawState *)((u8 *)scales + size);
     state->allocation = (u32)allocation;
     state->scales = scales;
@@ -3377,7 +3376,7 @@ u8 *effCreatePointSet4(u32 count) {
 
     size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
     base = sdfAllocGeneralBlock(size + 0x20);
-    data = (u8 *)sdfResourceRetainAddress((u32)base);
+    data = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     set = (EffPointSet *)(data + size);
     set->buffer = data;
     data += rows * 16;
@@ -3664,7 +3663,7 @@ void func_002A5DE0(EffectSurfaceNode *dst, u8 *work) {
             return;
         }
         dst->jobBuffer = (u32)sdfAllocGeneralBlock(size);
-        dst->jobs = (u32 *)sdfResourceRetainAddress(dst->jobBuffer);
+        dst->jobs = (u32 *)sdfResourceRetainAddress((struct SdfMemBlock *)(dst->jobBuffer));
         for (i = 0; i < count; i++) {
             dst->jobs[i] = fileJobCreateChild(src->jobs[0]);
         }
@@ -3700,7 +3699,7 @@ void effRebuildSurfaceHandles(EffectSurfaceNode *node, u16 kind, void *source) {
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->handleBuffer));
     }
     node->handleBuffer = (u32)sdfAllocGeneralBlock(size);
-    node->index = sdfResourceRetainAddress(node->handleBuffer);
+    node->index = sdfResourceRetainAddress((struct SdfMemBlock *)(node->handleBuffer));
     for (i = 0; i < node->handleCount; i++) {
         handle = effCreateSurfaceGridNode(params[0], params[1]);
         ((u32 *)node->index)[i] = handle;
@@ -3774,7 +3773,7 @@ void effRebuildSurfaceJobs(EffectSurfaceNode *node, void *source) {
     size = count * 4;
     if (size != 0) {
         node->jobBuffer = (u32)sdfAllocGeneralBlock(size);
-        node->jobs = (u32 *)sdfResourceRetainAddress(node->jobBuffer);
+        node->jobs = (u32 *)sdfResourceRetainAddress((struct SdfMemBlock *)(node->jobBuffer));
         node->jobs[0] = fileJobCreateFromJob((u32)source);
         for (i = 1; i < count; i++) {
             node->jobs[i] = fileJobCreateChild(node->jobs[0]);
@@ -3873,7 +3872,7 @@ u32 effCreateSurfaceGridNode(u32 count, u32 columns) {
 
     size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
     base = sdfAllocGeneralBlock(size + 0x3C);
-    data = (u8 *)sdfResourceRetainAddress((u32)base);
+    data = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     node = (EffSurfaceGridNode *)(data + size);
     node->type = 2;
     node->buffer = data;
@@ -4406,7 +4405,7 @@ EffScaleRange *effCreateRetainedPointSetColorRows(EffBillPointConfig *src) {
     s32 rampOut;
 
     allocation = sdfAllocGeneralBlock(count * sizeof(EffScaleRangeEntry) + sizeof(EffScaleRange));
-    table = (EffScaleRange *)sdfResourceRetainAddress((u32)allocation);
+    table = (EffScaleRange *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
     table->allocation = allocation;
     table->entries = (u8 *)(table + 1);
     if ((u32)src->layers < 3) {
@@ -4553,7 +4552,7 @@ EffPointSet *effCreatePointSet5(s32 count) {
 
     size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
     base = sdfAllocGeneralBlock(size + 0x20);
-    data = (u8 *)sdfResourceRetainAddress((u32)base);
+    data = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     set = (EffPointSet *)(data + size);
     set->buffer = data;
     data += rows * 16;
@@ -4785,7 +4784,7 @@ typedef struct EffectNodeHeader {
 
 u8 *effAllocateRingFadeEntries(EffBillVortexConfig *config) {
     u8 *base = sdfAllocGeneralBlock(config->common.header.timed.count * 0x30 + 0xC);
-    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((u32)base);
+    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
 
@@ -4963,7 +4962,7 @@ void effResetBillboardFrameInstanceCounters(u8 *work) {
 
 u8 *effAllocateBillFadeFrameEntries(EffBillColumnConfig *config) {
     u8 *base = sdfAllocGeneralBlock(config->common.header.timed.count * 0x30 + 0xC);
-    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((u32)base);
+    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
 
@@ -5131,7 +5130,7 @@ void effResetParticleBillFrameCounters(u8 *work) {
 
 u8 *effAllocateCompactRingFadeEntries(EffBillSpiralConfig *config) {
     u8 *base = sdfAllocGeneralBlock(config->common.header.timed.count * 0x2C + 0xC);
-    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((u32)base);
+    EffectNodeHeader *node = (EffectNodeHeader *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u32 count = config->common.header.segments;
     u8 *entries = (u8 *)(node + 1);
 
@@ -5377,7 +5376,7 @@ u8 *effCreateRibbonWork(u32 count, u32 repeat) {
     u32 size = (rowStride * 0x1C + 4) * count;
     u32 cells = rowStride * count;
     u8 *allocation = sdfAllocGeneralBlock(size + 0x34);
-    u8 *p = (u8 *)sdfResourceRetainAddress((u32)allocation);
+    u8 *p = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
     EffRibbonWork *work = (EffRibbonWork *)(p + size);
     u32 i;
 
@@ -5485,7 +5484,7 @@ u32 *effAllocateAnimationBuffer(EffBillFlameConfig *work) {
     u32 *buffer;
     void *allocation = sdfAllocGeneralBlock(work->header.timed.count * 0x30 + 0xC);
 
-    buffer = (u32 *)sdfResourceRetainAddress((u32)allocation);
+    buffer = (u32 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
     age = work->header.segments;
 
     buffer[0] = (u32)(buffer + 3);
@@ -5646,7 +5645,7 @@ u32 effClampSlotCount(FileKeyBlock *grid) {
 
 u32 *effCreateAnimationState(u32 unused, u32 count) {
     u32 allocation = (u32)sdfAllocGeneralBlock(count * 8 + 0x10);
-    u32 *state = (u32 *)sdfResourceRetainAddress(allocation);
+    u32 *state = (u32 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
 
     ((EffAnimationState *)state)->allocation = allocation;
     ((EffAnimationState *)state)->positions = (f32 *)(state + 4);
@@ -5718,7 +5717,7 @@ void effResetSlotAnimationRecord(s32 work) {
 
 u32 *effAllocateQuantizedBuffer(EffBillQuantizedConfig *work) {
     void *allocation = sdfAllocGeneralBlock(0xC);
-    u32 *buffer = (u32 *)sdfResourceRetainAddress((u32)allocation);
+    u32 *buffer = (u32 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
     u32 count = work->samples.quantizedSamples;
 
     buffer[2] = (u32)allocation;
@@ -5958,7 +5957,7 @@ u32 repeat;
     u32 size = (rowStride * 0x24 + 4) * count;
     u32 cells = rowStride * count;
     u8 *allocation = sdfAllocGeneralBlock(size + 0x34);
-    u8 *p = (u8 *)sdfResourceRetainAddress((u32)allocation);
+    u8 *p = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
     EffStripWork *work = (EffStripWork *)(p + size);
     u32 i;
 
@@ -6143,7 +6142,7 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
     }
     allocation = (u8 *)sdfAllocGeneralBlock(sizeof(EffSpanTable) +
                  count * sizeof(EffSpanRecord) + count * spans * sizeof(EffSpanEntry));
-    table = (EffSpanTable *)sdfResourceRetainAddress((u32)allocation);
+    table = (EffSpanTable *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
     table->allocation = (u32)allocation;
     table->records = (EffSpanRecord *)(table + 1);
     entries = (EffSpanEntry *)(table->records + count);
@@ -6304,7 +6303,7 @@ EffPointSet *effCreatePointSet3(s32 count) {
 
     size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
     base = sdfAllocGeneralBlock(size + 0x20);
-    data = (u8 *)sdfResourceRetainAddress((u32)base);
+    data = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     set = (EffPointSet *)(data + size);
     set->buffer = data;
     data += rows * 16;
@@ -6888,7 +6887,7 @@ void effResetCopiedPayloadTargets(EffCopiedPayloadWork *work) {
 EffCopiedPayload *effAllocateCopiedEffectPayload(u32 owner, const void *source, s32 size) {
     u32 headerSize = 0x40;
     SdfMemBlock *base = sdfAllocGeneralBlock(size + headerSize);
-    u8 *body = (u8 *)sdfResourceRetainAddress((u32)base);
+    u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     EffCopiedPayload *node = (EffCopiedPayload *)body;
 
     body += headerSize;
@@ -9240,7 +9239,7 @@ u32 fileLoadEffectSlotHelp(void) {
         dataLength = sdfDevQueueControlAndWait(command);
         totalLength = dataLength + headerBytes;
         allocation = (u32)sdfAllocGeneralBlock(totalLength);
-        buffer = (u8 *)sdfResourceRetainAddress(allocation);
+        buffer = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
         memset(buffer, 0, headerBytes);
         sdfDevQueueReadAndWait(command, buffer + headerBytes, dataLength);
         sdfDevWaitThenReleaseCommandState(command);

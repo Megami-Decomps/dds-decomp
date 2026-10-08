@@ -19,7 +19,6 @@ typedef struct FlagEntry {
     s32 secondOn;
 } FlagEntry;
 
-extern s32 sdfResourceRetainAddress(s32);
 
 extern s32 mdlFlagTest(s32);
 
@@ -214,7 +213,7 @@ u32 func_00266230(void) {
 /* Snapshot four primary flag pairs and sixteen extra pairs for restoration. */
 s32 mnuCreateFlagEntries(void) {
     s32 handle = sdfAllocGeneralBlock(0x140);
-    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
+    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     u32 i;
 
     for (i = 0; i < 4; i++) {
@@ -233,7 +232,7 @@ s32 mnuCreateFlagEntries(void) {
 }
 
 void mnuApplyCampResourceFlagEntries(s32 handle) {
-    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
+    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     u32 i;
 
     for (i = 0; i < 4; i++) {

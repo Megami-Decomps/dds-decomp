@@ -297,7 +297,6 @@ extern s32 sdfDevQueueRead(DevState *, void *, s32);
 extern s32 sdfDevQueueActiveOperation(DevState *);
 extern s32 sdfDevQueueReleaseState(DevState *);
 extern SdfMemBlock *sdfAllocGeneralBlock(s32);
-extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 extern void sdfDecrementAllocationReferenceCount(SdfMemBlock *);
 extern void func_002E8938(s32, void *, s32);
 

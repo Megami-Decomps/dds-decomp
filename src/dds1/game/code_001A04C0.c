@@ -242,7 +242,6 @@ extern s8 effSharedRandomState[];
 
 extern s32 sdfAllocGeneralBlock(s32);
 
-extern u32 *sdfResourceRetainAddress(s32);
 
 extern void effMiscSeedRandom(s8 *, s32);
 
@@ -275,7 +274,7 @@ extern void func_001FB098(void);
 void func_001A0F10(void) {
     btlResetRuntimeSequenceCounter();
     D_003BB2E0 = sdfAllocGeneralBlock(0xE10);
-    btlRuntime = (s32)sdfResourceRetainAddress(D_003BB2E0);
+    btlRuntime = (s32)sdfResourceRetainAddress((struct SdfMemBlock *)(D_003BB2E0));
     memset((void *)btlRuntime, 0, 0xE10);
 
     ((BattleInitState *)btlRuntime)->tick = 0;

@@ -154,7 +154,6 @@ extern void *sdfAllocSizeClassBlock(s32 size);
 
 s32 sdfAllocGeneralBlock(s32 size);
 
-EffectBufferRecord *sdfResourceRetainAddress(s32 allocation);
 
 void effInitExpandRingPacketSchedule(EffTemplatePacketList *effect);
 
@@ -846,7 +845,7 @@ void func_001536A0(void) {
 EffectBufferTail *effAllocateBuffer(s32 recordCount) {
     s32 recordBytes = recordCount * sizeof(EffectBufferRecord);
     s32 allocationHandle = sdfAllocGeneralBlock(recordBytes + sizeof(EffectBufferTail));
-    EffectBufferRecord *recordCursor = sdfResourceRetainAddress(allocationHandle);
+    EffectBufferRecord *recordCursor = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
     EffectBufferTail *bufferTail = (EffectBufferTail *)((u8 *)recordCursor + recordBytes);
 
     bufferTail->allocation = allocationHandle;
@@ -2951,7 +2950,7 @@ s32 effCloneDiscAuxTemplate(EffTemplatePacketList *source) {
     ((EffTemplatePacketList *)clone)->auxiliaryAllocation =
         sdfAllocGeneralBlock(((EffTemplatePacketList *)clone)->packetCount << 4);
     ((EffTemplatePacketList *)clone)->auxiliaryData =
-        sdfResourceRetainAddress(((EffTemplatePacketList *)clone)->auxiliaryAllocation);
+        (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(((EffTemplatePacketList *)clone)->auxiliaryAllocation));
     func_00153740(clone);
     effResetDiscAuxPacketAges(clone);
     return clone;
@@ -3173,7 +3172,7 @@ s32 effCloneTemplateWithPacketDescriptors(EffTemplatePacketList *source) {
         listBytes = count * 12;
         ((EffTemplatePacketList *)copy)->recordsPerPacket = perRecord;
         ((EffTemplatePacketList *)copy)->listAllocation = sdfAllocGeneralBlock(listBytes + perRecord * count * 16);
-        addr = (s32 *)sdfResourceRetainAddress(((EffTemplatePacketList *)copy)->listAllocation);
+        addr = (s32 *)sdfResourceRetainAddress((struct SdfMemBlock *)(((EffTemplatePacketList *)copy)->listAllocation));
         i = 0;
         base = (s32)addr;
         ((EffTemplatePacketList *)copy)->recordList = base;
