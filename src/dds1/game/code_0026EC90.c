@@ -114,7 +114,7 @@ void mnuFinishStaffMovieAndFreeState(void) {
     do {
         pendingWork = sdfCheckPendingWorkWithInterrupts();
     } while (pendingWork != 0);
-    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)mnuMovieWork->allocation);
+    sdfQueueGeneralAllocationRelease(mnuMovieWork->allocation);
     mnuMovieWork = NULL;
 }
 
@@ -157,14 +157,14 @@ extern s32 func_0026F5E8(void);
 extern void mnuFinishStaffMovieAndFreeState(void);
 
 void mnuMovieCreateTask(void) {
-    s32 handle;
+    struct SdfMemBlock *allocation;
     MnuStaffMovieWork *movie;
 
     D_003BA8EC = 0x80000000;
-    handle = (u32)sdfAllocGeneralBlock(0x20);
-    movie = (MnuStaffMovieWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    allocation = sdfAllocGeneralBlock(0x20);
+    movie = (MnuStaffMovieWork *)sdfResourceRetainAddress(allocation);
     mnuMovieWork = movie;
-    movie->allocation = handle;
+    movie->allocation = allocation;
     movie->phase = 0;
     movie->scrollTicks = 0;
     func_0026A5F0(0x13);

@@ -797,7 +797,7 @@ struct SdfMemBlock;
 struct MnuSpriteResourceGroup;
 
 typedef struct MnuStaffMovieWork {
-    u32 allocation;      /* 0x00 */
+    struct SdfMemBlock *allocation; /* 0x00: retained general-heap descriptor */
     u32 spriteSet;       /* 0x04: resource passed to mnuDrawIconAlphaSprite */
     s32 phase;           /* 0x08 */
     s32 scrollTicks;     /* 0x0C */
