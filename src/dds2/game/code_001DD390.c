@@ -5,6 +5,7 @@
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
+#include "eff_field_color.h"
 #include "file.h"
 #include "sdf.h"
 #include "btl_action.h"
@@ -8657,7 +8658,62 @@ void sndAddEffectReferences(SoundEffectReferenceArgs *args) {
     target->effectLink.referenceCount = target->effectLink.referenceCount + 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_00201C98);
+extern void effBattleSetInputValue(BattleEffect *, s32);
+
+s32 func_00201C98(SoundEffectReferenceArgs *args) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *owner;
+    BtlUnit *source;
+
+    if ((battle->battleFlags & 0x40000) == 0) {
+        return 1;
+    }
+    owner = args->option == 2 ? args->targetOwner.unit : args->sourceOwner.unit;
+    if (args->source->flags & 2) {
+        if (args->effect == NULL) {
+            args->effect = func_00168548(args->source->resourceHandle, args->option, owner, 0);
+            args->duration = sndSetEffectNodeParameter(args->source, args->option);
+            if ((owner->effectLink.packed & 0xA) == 8) {
+                args->duration = 35;
+                effBattleSetInputValue(args->effect, 35);
+                effBattleUpdateSelectedValue(args->effect, args->duration);
+            }
+            btlExtendTaskFrameLimit(args->source, args->duration);
+            return 0;
+        }
+        if (effBattleGetCurrentFrame(args->effect) >= args->duration) {
+            return 1;
+        }
+        effBTLFieldColorSetSelectors(args->sourceOwner.selectorKey, args->targetOwner.selectorKey,
+                                    args->sourceSelector, args->targetSelector);
+        if (effBTLFieldColorTestFlags(2)) {
+            fileSetRenderFlag(1);
+        } else if (effBTLFieldColorTestFlags(1)) {
+            source = args->sourceOwner.unit;
+            if (source != NULL && args->targetOwner.unit != NULL &&
+                (((source->flags & 0x200) && !(source->effectLink.flags & 0x20)) ||
+                 ((args->targetOwner.unit->flags & 0x400) && (source->effectLink.flags & 0x20)))) {
+                fileSetRenderFlag(1);
+            } else {
+                fileClearRenderFlag(1);
+            }
+        }
+        switch (args->option) {
+        case 0:
+        case 2:
+            if (owner->flags & 4) {
+                args->effect->flags |= 8;
+            } else {
+                args->effect->flags &= ~8;
+            }
+            break;
+        }
+    }
+    if (args->effect != NULL && (owner->flags & 2)) {
+        func_00168978(args->effect);
+    }
+    return 0;
+}
 
 void sndReleaseEffectReferences(SoundEffectReferenceArgs *args) {
     SoundResourceNode *effect;
@@ -8755,7 +8811,6 @@ void sndStartEffectTask(ActorEffectTaskArgs *args) {
     unit->effectLink.referenceCount++;
 }
 
-extern void effBTLFieldColorSetSelectors(s32, u32, s32, s32);
 
 s32 func_00202100(ActorEffectTaskArgs *args) {
     BtlState *battle = (BtlState *)btlGetRuntime();

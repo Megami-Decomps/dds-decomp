@@ -4,6 +4,7 @@
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
+#include "eff_field_color.h"
 #include "dds3obj.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -10332,7 +10333,6 @@ void sndStartEffectTask(ActorEffectTaskArgs *args) {
     unit->effectLink.referenceCount++;
 }
 
-extern void effBTLFieldColorSetSelectors(s32, u32, s32, s32);
 
 s32 func_001F1470(ActorEffectTaskArgs *args) {
     BtlState *battle = (BtlState *)btlGetRuntime();
