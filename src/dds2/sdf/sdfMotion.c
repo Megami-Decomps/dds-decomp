@@ -687,13 +687,13 @@ void *sdfMotionCreateKeyFlagBinding(void *a0, s32 a1, s32 a2) {
     return r;
 }
 
-void sdfMotionUpdateKeyFlag(SdfMotionBinding *binding, f32 t) {
-    SdfMotionKeyInterval b;
+void sdfMotionUpdateKeyFlag(SdfMotionBinding *binding, f32 frame) {
+    SdfMotionKeyInterval keyInterval;
     SdfMotionTrack *track;
 
-    sdfFindMotionKeyInterval(binding, &b, t);
+    sdfFindMotionKeyInterval(binding, &keyInterval, frame);
     track = binding->track;
-    if (*(u8 *)b.firstKey == 0) {
+    if (*(u8 *)keyInterval.firstKey == 0) {
         track->value14.flags = track->value14.flags | 0x10;
     } else {
         track->value14.flags = track->value14.flags & 0xFFEF;
