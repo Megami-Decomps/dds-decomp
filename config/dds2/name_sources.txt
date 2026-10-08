@@ -1032,6 +1032,7 @@
 0x00160B58	parReleaseObject	inferred	Releases an optional particle child, its effect resources, and the particle object itself.
 0x001612D8	parInitColorRamp	inferred	Initializes color-ramp data; DDS1 twin. [names_qp9.tsv]
 0x001618C8	effParReleaseNodeResource	inferred	releases particle node resource [names_reviewed5.tsv]
+0x001618E0	parPrependHistorySample	inferred	Shifts the selected slot history backward, captures the current vector sample, and stores color and billboard scale
 0x00161958	parPopulateSlotFromHistory	inferred	copies ring-history points into the selected particle slot with origin, color, and scale
 0x00161A10	parDrawHistorySlots	inferred	submits each particle slot history as progressively fading billboard points
 0x00161EE8	effParModulateColors	inferred	multiplies particle RGBA channels using VU [names_reviewed5.tsv]
