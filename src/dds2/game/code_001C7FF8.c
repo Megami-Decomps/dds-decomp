@@ -982,7 +982,7 @@ s32 btlCreateAiWork(s32 source) {
         btlCopyIndexList(work->listB, work->listA);
         break;
     }
-    work->source = source;
+    work->source = (ActionStateLink *)source;
     work->state = 1;
     return (s32)work;
 }

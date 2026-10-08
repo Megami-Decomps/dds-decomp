@@ -6499,7 +6499,81 @@ s32 fldStepSceneStateMachine(KwlnTask *handle) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001C13E8);
+extern void func_001A30F8(s32 source, BtlIndexList *list, s32, s32, s32);
+extern u32 func_001A3360(void *source, BtlIndexList *list, s32);
+extern s32 func_001C0650(s32, SceneAiWork *);
+
+SceneAiWork *func_001C13E8(BtlTask *source) {
+    SceneAiWork *work;
+    BattleSceneObject *object;
+    BattleActorPanelWork *other;
+    s32 entry;
+    s32 count;
+    u32 i;
+    u32 listCount;
+    BtlUnit *actor;
+    BtlState *battle;
+
+    battle = (BtlState *)btlGetRuntime();
+    work = (SceneAiWork *)sdfAllocAndClearQuadwords(0xA4);
+    object = (BattleSceneObject *)kwlnTaskGetUserValue(
+        kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef));
+    work->listA = btlAllocateIndexList(0xD);
+    work->listB = btlAllocateIndexList(0xD);
+    if (object->state == 8) {
+        other = (BattleActorPanelWork *)kwlnTaskGetUserValue(
+            kwlnTaskGetTaskByName(D_003BB3B0));
+        count = btlCountFlaggedSceneActors();
+        if (count < 2 &&
+            (datGameState->party[other->partyRecordIndex].status & 0x4800)) {
+            func_001A30F8((s32)source, work->listA, 1, 4, -0x4801);
+        } else {
+            func_001A30F8((s32)source, work->listA, 1, 4, -1);
+        }
+        btlGetIndexListCount(work->listA);
+        work->result = 0;
+    } else if (source != 0) {
+        work->result = func_001A3360((void *)source, work->listA, 0);
+    }
+    work->entry = 0;
+    switch (work->result) {
+    case 0:
+        entry = btlFindEligibleTargetForMultiActorCommand((s32)source, work->listA);
+        work->entry = entry;
+        btlAppendIndexListEntry(work->listB,
+                                btlGetIndexListEntry(work->listA, entry));
+        break;
+    case 1:
+    case 2:
+        btlCopyIndexList(work->listB, work->listA);
+        break;
+    }
+    work->source = source;
+    work->state = 1;
+    if (battle->battleMode != 0x10E || work->result != 0) {
+        return work;
+    }
+    listCount = btlGetIndexListCount(work->listA);
+    i = 0;
+nextActor:
+    if (i >= listCount) {
+        goto selectTarget;
+    }
+    actor = (BtlUnit *)btlGetIndexListEntry(work->listA, i++);
+    if (!(actor->flags & 0x200)) {
+        goto nextActor;
+    }
+    return work;
+selectTarget:
+    work->cursorRow = 2;
+    work->cursorColumn = 1;
+    func_001C0650(0, work);
+    btlClearIndexList(work->listB);
+    btlAppendIndexListEntry(work->listB,
+                            btlGetIndexListEntry(work->listA, work->entry));
+    return work;
+}
+
 
 void fldReleaseSceneSpriteWork(SceneAiWork *work) {
     btlFreeIndexList(work->listB);
@@ -6535,7 +6609,7 @@ BtlIndexList *fldGetSceneScriptValue(void) {
 
 extern s32 fldStepSceneStateMachine(KwlnTask *);
 
-extern u32 func_001C13E8(s32);
+extern SceneAiWork *func_001C13E8(BtlTask *);
 
 void fldCreateSceneSpriteTask(s32 arg0) {
     BattleController *scene;
@@ -6555,7 +6629,7 @@ void fldCreateSceneSpriteTask(s32 arg0) {
     }
     scene = (BattleController *)btlGetRuntime();
     task = (s32)kwlnTaskCreate(D_003BB3A0, 0x2B0E, 1, 1, fldStepSceneStateMachine, fldReleaseSceneSprite,
-                          func_001C13E8(arg0));
+                          (u32)func_001C13E8((BtlTask *)arg0));
     func_00101A80(scene->taskParent, (KwlnTask *)task);
     scene->spriteObject = task;
 }
@@ -7354,4 +7428,3 @@ INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB5C8);
 INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB5D0);
 
 INCLUDE_SDATA(const s32, "game/code_001A1960", D_003BB5D8);
-
