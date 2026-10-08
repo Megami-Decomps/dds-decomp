@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_callback_list.h"
 
 typedef struct SdfMat4 {
     f32 m[16];
@@ -33,20 +34,6 @@ extern f64 cos(f64);
 
 extern f64 sin(f64);
 
-typedef struct ResourceNode {
-    u32 id;
-    u32 value;
-    struct ResourceNode *next;
-    u32 unk_C;
-    u32 handle;
-} ResourceNode;
-
-typedef struct ResourceList {
-    /* mnuClearResourceList clears the word; retail 0032504C serializes its low halfword. */
-    union { u32 word; u16 packed; } count;
-    ResourceNode *first;
-} ResourceList;
-
 typedef struct SdfResourceInfo {
     u32 word[4];
 } SdfResourceInfo;
@@ -71,54 +58,49 @@ typedef struct SdfResourceVectorRecord30 {
 extern u32 *func_00324D50(void);
 extern void *memcpy(void *, const void *, u32);
 
-s32 dds3RemoveListNodeAndNotify(u32 list, u32 node);
-
-ResourceNode *mnuFindResourceNodeById();
-
-ResourceNode *mnuFindResourceNodeByHandle();
-
 /* Reset the first resource list in a two-list owner. */
 void func_00324DF8(u32 *lists, u32 option) {
-    func_00320CE0(*lists, 0, option);
+    func_00320CE0((MnuCallbackList *)*lists, 0, option);
 }
 
 u32 mnuInsertResourceHandleAfterMatchingId(u32 *pair, u32 key, u32 value) {
-    u32 node = mnuFindResourceNodeById(pair[0], key);
+    SdfListNode *node = mnuFindResourceNodeById((MnuCallbackList *)pair[0], key);
     if (node) {
-        return func_00320D80(pair[0], node, 0, value);
+        return (u32)func_00320D80((MnuCallbackList *)pair[0], node, 0, value);
     }
     return 0;
 }
 
 void mnuRemoveMatchedNodesFromLinkedResourceLists(u32 *pair, u32 key) {
-    u32 node = mnuFindResourceNodeById(pair[0], key);
+    SdfListNode *node = mnuFindResourceNodeById((MnuCallbackList *)pair[0], key);
     if (node == 0) {
         return;
     }
-    dds3RemoveListNodeAndNotify(pair[1], mnuFindResourceNodeByHandle(pair[1], *(u32 *)(node + 0x10)));
-    dds3RemoveListNodeAndNotify(pair[0], node);
+    dds3RemoveListNodeAndNotify((MnuCallbackList *)pair[1],
+                                mnuFindResourceNodeByHandle((MnuCallbackList *)pair[1], (u32)node->value));
+    dds3RemoveListNodeAndNotify((MnuCallbackList *)pair[0], node);
 }
 
-extern s32 mnuClearResourceList(u32);
+extern s32 mnuClearResourceList(MnuCallbackList *);
 
 s64 mnuClearOwnedResourceListPair(u32 *pair) {
-    mnuClearResourceList(pair[0]);
-    return mnuClearResourceList(pair[1]);
+    mnuClearResourceList((MnuCallbackList *)pair[0]);
+    return mnuClearResourceList((MnuCallbackList *)pair[1]);
 }
 
-void func_00324F20(ResourceList **list) {
-    mnuFindResourceNodeByHandle(*list);
+void func_00324F20(MnuCallbackList **list, u32 handle) {
+    mnuFindResourceNodeByHandle(*list, handle);
 }
 
-void func_00324F38(ResourceList **list) {
-    mnuFindResourceNodeById(*list);
+void func_00324F38(MnuCallbackList **list, u32 id) {
+    mnuFindResourceNodeById(*list, id);
 }
 
 void *func_00324F50(u32 *owner, u32 resource) {
     void *handle;
 
     handle = func_0035A828(resource);
-    func_00320CE0(owner[1], 0, (u32)handle);
+    func_00320CE0((MnuCallbackList *)owner[1], 0, (u32)handle);
     return handle;
 }
 
@@ -149,8 +131,8 @@ typedef struct DdsNestedHeader {
 
 extern s32 dds3MeasureMenuRecord(DdsNestedGroup *);
 
-DdsNestedHeader *sdfCloneNestedResourceRecord(u32 *owner, ResourceList **list) {
-    ResourceNode *node;
+DdsNestedHeader *sdfCloneNestedResourceRecord(u32 *owner, MnuCallbackList **list) {
+    SdfListNode *node;
     DdsNestedHeader *buffer;
     DdsNestedGroup *group;
     DdsCountedPayload *entries;
@@ -159,24 +141,24 @@ DdsNestedHeader *sdfCloneNestedResourceRecord(u32 *owner, ResourceList **list) {
     s32 i;
     s32 j;
 
-    node = (*list)->first;
+    node = (*list)->head;
     if (node == NULL) {
         return NULL;
     }
     totalSize = 0;
     do {
-        totalSize += dds3MeasureMenuRecord((DdsNestedGroup *)node->handle);
+        totalSize += dds3MeasureMenuRecord((DdsNestedGroup *)node->value);
         node = node->next;
     } while (node != NULL);
     buffer = func_00324F50(owner, totalSize + sizeof(*buffer));
     memset(buffer, 0, totalSize);
-    buffer->groupCount = (*list)->count.packed;
+    buffer->groupCount = (*list)->count;
     buffer->groups = (DdsNestedGroup *)(buffer + 1);
     cursor = (u8 *)buffer->groups;
-    node = (*list)->first;
+    node = (*list)->head;
     if (node != NULL) {
         do {
-            group = (DdsNestedGroup *)node->handle;
+            group = (DdsNestedGroup *)node->value;
             memcpy(cursor, group, sizeof(*group));
             cursor += sizeof(*group);
             node = node->next;
@@ -274,7 +256,7 @@ u32 *func_00325AB8(const SdfResourceVectorRecord1C *source, s32 count) {
 
     while (count != 0) {
         SdfResourceVectorRecord1C *copy =
-            (SdfResourceVectorRecord1C *)func_00324F50((s32)owner, sizeof(*copy) + sizeof(SdfVec4));
+            (SdfResourceVectorRecord1C *)func_00324F50(owner, sizeof(*copy) + sizeof(SdfVec4));
         SdfVec4 *vector;
 
         memset(copy, 0, sizeof(*copy) + sizeof(*vector));
@@ -294,7 +276,7 @@ u32 *func_00325BB0(const SdfResourceVectorRecord30 *source, s32 count) {
 
     while (count != 0) {
         SdfResourceVectorRecord30 *copy =
-            (SdfResourceVectorRecord30 *)func_00324F50((s32)owner, sizeof(*copy) + sizeof(SdfVec4));
+            (SdfResourceVectorRecord30 *)func_00324F50(owner, sizeof(*copy) + sizeof(SdfVec4));
         SdfVec4 *vector;
 
         memset(copy, 0, sizeof(*copy) + sizeof(*vector));
@@ -318,16 +300,16 @@ typedef struct SdfRelocatedResource {
     u32 unk10;
 } SdfRelocatedResource;
 
-extern u32 *func_0031FA60(ResourceList **);
+extern u32 *func_0031FA60(MnuCallbackList **);
 extern void dds3ApplyNamedRelocations(u32 *);
 extern u32 *dds3WritePendingNamedReferenceValues(u32 *);
 extern void dds3ApplyRelocationOffsets(void *, void *, void *, u32);
 extern void func_0035A880(void *);
 
-SdfRelocatedResource *sdfCloneRelocatedResourceGroups(u32 *owner, ResourceList **source,
-                                  ResourceList **groups) {
+SdfRelocatedResource *sdfCloneRelocatedResourceGroups(u32 *owner, MnuCallbackList **source,
+                                  MnuCallbackList **groups) {
     SdfRelocatedResource *result;
-    ResourceNode *node;
+    SdfListNode *node;
     DdsCountedPayload *payload;
     DdsCountedPayload *record;
     u32 *sourceHeader;
@@ -353,24 +335,24 @@ SdfRelocatedResource *sdfCloneRelocatedResourceGroups(u32 *owner, ResourceList *
     dds3ApplyRelocationOffsets(data, data, relocations, *relocationHeader);
     func_0035A880(relocations);
     result->data = data;
-    result->firstCount = (*source)->count.packed;
-    for (node = (*groups)->first; node != NULL; node = node->next) {
-        payload = (DdsCountedPayload *)node->handle;
+    result->firstCount = (*source)->count;
+    for (node = (*groups)->head; node != NULL; node = node->next) {
+        payload = (DdsCountedPayload *)node->value;
         size += payload->count * 8 + sizeof(*payload);
     }
     result->groups = func_00324F50(owner, size);
     memset(result->groups, 0, size);
-    result->secondCount = (*groups)->count.packed;
+    result->secondCount = (*groups)->count;
     record = result->groups;
-    for (node = (*groups)->first; node != NULL; node = node->next) {
-        payload = (DdsCountedPayload *)node->handle;
+    for (node = (*groups)->head; node != NULL; node = node->next) {
+        payload = (DdsCountedPayload *)node->value;
         memcpy(record, payload, sizeof(*record));
         record++;
     }
     cursor = (u8 *)record;
     record = result->groups;
-    for (node = (*groups)->first; node != NULL; node = node->next) {
-        payload = (DdsCountedPayload *)node->handle;
+    for (node = (*groups)->head; node != NULL; node = node->next) {
+        payload = (DdsCountedPayload *)node->value;
         memcpy(cursor, payload->data, payload->count * 8);
         record->data = cursor;
         record++;
@@ -742,4 +724,3 @@ INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389BC);
 INCLUDE_SDATA(const s32, "game/code_00324DF8", D_004389C0);
 
 INCLUDE_SDATA(const s32, "game/code_00324DF8", sdfTickCallback);
-
