@@ -61,7 +61,6 @@ void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode,
 
 extern struct MenuList *mnuCreateListState(u32, u32, s32);
 
-extern u32 mnuDestroyListState(struct MenuList *);
 
 
 extern void func_002A5A78();

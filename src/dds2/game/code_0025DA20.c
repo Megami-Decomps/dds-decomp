@@ -182,7 +182,6 @@ extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
 extern s32 mnuShopRestoreMiddleVector;
-extern EffMappedResource *effCreateStatusBatch(s32 kind);
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(SdfListHead *packet);
 extern void itfSendTablePacket(SdfListHead *packet, s32 table, s32 mode);
@@ -541,7 +540,39 @@ void mnuInitializeCampListLayoutDefaults(CampListLayout *layout) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E390);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E460);
+/* Blend the display fields; control bytes always come from the lower key. */
+void func_0025E460(EvtRuntimeChild *from, EvtRuntimeChild *to,
+                   CampDisplayDefaults *display, f32 ratio) {
+    if (from == NULL) {
+        mnuCampInitializeDisplayDefaults(display);
+        return;
+    }
+    if (to == NULL || ratio == 0.0f || from->p08.sh[0] == 0) {
+        display->x = from->p0C.sh[0];
+        display->y = from->p0C.sh[1];
+        display->color[0] = from->p10.b[0];
+        display->color[1] = from->p10.b[1];
+        display->color[2] = from->p10.b[2];
+        display->color[3] = from->p10.b[3];
+        display->scaleX = from->p14.f;
+        display->scaleY = from->p18.f;
+        display->enabled = from->p08.sb[0];
+        display->variant = from->p08.sb[1];
+        goto copyExtraMetadata;
+    }
+    display->x = from->p0C.sh[0] + (to->p0C.sh[0] - from->p0C.sh[0]) * ratio;
+    display->y = from->p0C.sh[1] + (to->p0C.sh[1] - from->p0C.sh[1]) * ratio;
+    display->color[0] = (u32)(from->p10.b[0] + (to->p10.b[0] - from->p10.b[0]) * ratio);
+    display->color[1] = (u32)(from->p10.b[1] + (to->p10.b[1] - from->p10.b[1]) * ratio);
+    display->color[2] = (u32)(from->p10.b[2] + (to->p10.b[2] - from->p10.b[2]) * ratio);
+    display->color[3] = (u32)(from->p10.b[3] + (to->p10.b[3] - from->p10.b[3]) * ratio);
+    display->scaleX = from->p14.f + (to->p14.f - from->p14.f) * ratio;
+    display->scaleY = from->p18.f + (to->p18.f - from->p18.f) * ratio;
+    display->enabled = from->p08.sb[0];
+    display->variant = from->p08.sb[1];
+copyExtraMetadata:
+    display->unk1C = from->p1C.sb[0];
+}
 
 void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 value, EvtRuntimeChild **out1, EvtRuntimeChild **out2) {
     s32 base;

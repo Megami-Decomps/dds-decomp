@@ -5,6 +5,7 @@
 #include "itf_grid_text.h"
 #include "sdf.h"
 #include "mnu.h"
+#include "itf_draw_grid.h"
 
 extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
 
@@ -58,9 +59,9 @@ typedef struct GridAngleSlot {
 
 
 /* Resolve the indexed render entry before applying position, depth, and draw flags. */
-void itfDrawGridWithResolvedSlot(u32 offsetX, u32 offsetY, u32 z, u32 drawFlags, u32 object, u32 index, u32 surfaceIndex) {
-    void *renderEntry = effGetSlotWorkOrOverride((EffectSlotSet *)object, index);
-    func_00306BF0(offsetX, offsetY, z, drawFlags, object, index, (s32)renderEntry, surfaceIndex);
+void itfDrawGridWithResolvedSlot(u32 offsetX, u32 offsetY, u32 z, u32 drawFlags, EffectSlotSet *object, u32 index, u32 surfaceIndex) {
+    void *renderEntry = effGetSlotWorkOrOverride(object, index);
+    func_00306BF0(offsetX, offsetY, z, drawFlags, (u32)object, index, (s32)renderEntry, surfaceIndex);
 }
 
 /* Advance the indexed slot's timed source and carry its active state forward. */

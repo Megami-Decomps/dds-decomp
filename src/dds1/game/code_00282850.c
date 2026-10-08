@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "common.h"
 #include "sdf_dev_state.h"
@@ -130,7 +131,6 @@ extern void func_002878D8(s32 arg0);
 
 extern s32 D_003BC7B4;
 
-extern u32 effCreateStatusBatch(u32);
 
 extern s32 mnuLookupRangeEntry(u16);
 
@@ -639,7 +639,8 @@ void mnuCyclePairedEffectSetting(MenuEffectPair *pair) {
     if (settings != 0) {
         setting = settings[(s8)pair->settingIndex];
     }
-    effConfigureWithDefaultSetting((s32)pair->leftGrid, 0, (s32)pair->effects[0], 0, setting, 0);
+    effConfigureWithDefaultSetting(pair->leftGrid, 0,
+                                   (struct EffMappedResource *)pair->effects[0], 0, setting, 0);
     pair->settingIndex += 1;
     if ((s8)pair->settingIndex >= 4) {
         pair->settingIndex = 0;
@@ -703,7 +704,7 @@ void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,
 }
 
 void mnuCreatePairedEffects(MenuEffectPair *pair) {
-    u32 effectHandle;
+    struct EffMappedResource *effectHandle;
 
     effectHandle = effCreateStatusBatch(3);
     pair->effects[0] = (MenuEffectNode *)effectHandle;
@@ -928,7 +929,6 @@ void mnuCacheProfilePanelGridPositions(MenuProfilePanel *panel, u32 grid, u32 fi
     itfGridStorePosition(&panel->completed, grid, completedIndex);
 }
 
-extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern void uiDrawTexturedSurfaceAtFarDepth(s32);
 extern void func_002C1548(s32, s32);
 extern void uiDrawSurfaceAtNearDepth(u32);
@@ -959,7 +959,7 @@ void func_00285208(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 surface) {
     func_002BF4E0(x, y, z, opacity, 0, (s32)slots, index, surface);
     if (index != panel->background.index) {
         uiDrawTexturedSurfaceAtFarDepth(surface);
-        itfDrawGridWithResolvedSlot(x, y, z, 0x21, (s32)slots, index, surface);
+        itfDrawGridWithResolvedSlot(x, y, z, 0x21, slots, index, surface);
         func_002C1548(0, surface);
         slots = panel->background.set;
         index = panel->background.index;

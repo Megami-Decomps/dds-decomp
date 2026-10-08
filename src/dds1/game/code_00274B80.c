@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "mnu.h"
 #include "mnu_staff.h"
@@ -1043,18 +1044,16 @@ void mnuDrawSlotIcons(s32 x, MenuPageWindow *page) {
     itfSetTextDrawLimit(-1);
 }
 
-extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
-
 void mnuDrawStaffPanelGridBackdrop(s32 flag, StaffSlots *slots) {
     s32 y;
 
     for (y = 0x360; y < 0xE40; y += 0x38) {
-        itfDrawGridWithResolvedSlot(0xE80, y, 0, 1, (u32)slots->pairResources[1], 2, 0x53);
+        itfDrawGridWithResolvedSlot(0xE80, y, 0, 1, slots->pairResources[1], 2, 0x53);
     }
-    itfDrawGridWithResolvedSlot(0x10F0, 0x358, 0, 1, (u32)slots->pairResources[1], 4, 0x53);
-    itfDrawGridWithResolvedSlot(0x1050, 0x500, 0, 1, (u32)slots->pairResources[1], 3, 0x53);
+    itfDrawGridWithResolvedSlot(0x10F0, 0x358, 0, 1, slots->pairResources[1], 4, 0x53);
+    itfDrawGridWithResolvedSlot(0x1050, 0x500, 0, 1, slots->pairResources[1], 3, 0x53);
     if (flag == 0) {
-        itfDrawGridWithResolvedSlot(-0x140, -0xA0, 0, 1, (u32)slots->pairResources[1], 7, 0x53);
+        itfDrawGridWithResolvedSlot(-0x140, -0xA0, 0, 1, slots->pairResources[1], 7, 0x53);
     }
 }
 
@@ -1104,9 +1103,9 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param
 void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, MenuPageWindow *page, MenuPanelGroup *packedGroup, MenuSpriteState *spriteState, s32 obj, s32 spriteFlags) {
     mnuDrawAndAdvancePanelGroup(0xeb0, 0x518, 0, entry, packedGroup, spriteFlags);
     mnuDrawPartyInfoSprites(0, 0, 0, entry, spriteState, spriteFlags);
-    itfDrawGridWithResolvedSlot(0xb0, 0xa68, 0, 1, *(s32 *)(obj + 0x1c), 0x37, spriteFlags);
+    itfDrawGridWithResolvedSlot(0xb0, 0xa68, 0, 1, (EffectSlotSet *)(u32)*(s32 *)(obj + 0x1c), 0x37, spriteFlags);
     mnuDrawTextSprite(0x220, 0xa20, 0, 0xa09dc380, D_003BAA70 + entry->unitId * 17 + 0x110, spriteFlags);
-    itfDrawGridWithResolvedSlot(0x120, 0xad0, 0, 1, *(s32 *)(obj + 0x14), 0x25, spriteFlags);
+    itfDrawGridWithResolvedSlot(0x120, 0xad0, 0, 1, (EffectSlotSet *)(u32)*(s32 *)(obj + 0x14), 0x25, spriteFlags);
     mnuDrawSlotIcons(-0x16, page);
 }
 
@@ -1449,7 +1448,7 @@ void mnuDestroySkillMenuWindows(s32 context) {
         u32 i = 0;
         u32 *resource = menu + 4;
         mnuDestroyPanelState(menu[8]);
-        mnuDestroyListState(menu[3]);
+        mnuDestroyListState((struct MenuList *)menu[3]);
         do {
             mnuDestroyWindowContainer(*resource++);
             i++;

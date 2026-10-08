@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "itf_draw_grid.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_list.h"
@@ -15,7 +16,6 @@ extern void frFontSetChainFlag(FrFontGlyph *, u8);
 extern s32 func_001958A0(FrFontGlyph *, s8, u32);
 extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern s32 func_003014F0(char *, const char *, ...);
-extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern char D_003BC6C8[];
 extern const char D_003BC6D0[];
 extern char D_003BC6D8[];
@@ -179,9 +179,9 @@ void func_00272BC0(s32 x, s32 y, s32 z, struct MenuList *list,
 
         node->value = D_003BC6D8;
         itfDrawGridWithResolvedSlot(x + 0x80, y + 0x30, z, 1,
-                                   (s32)context->staffSlots.baseResources[2], selected + 9, drawArg);
+                                   (EffectSlotSet *)(u32)context->staffSlots.baseResources[2], selected + 9, drawArg);
         itfDrawGridWithResolvedSlot(x + 0x7F0, y + 0x30, z, 1,
-                                   (s32)context->staffSlots.baseResources[2], selected + 0xB, drawArg);
+                                   (EffectSlotSet *)(u32)context->staffSlots.baseResources[2], selected + 0xB, drawArg);
     }
 }
 
