@@ -2897,11 +2897,11 @@ s32 btlGetEffectTaskActorMatchCode(u8 *task) {
     return effect->owner == (u32)((BtlTask *)task)->unit ? 12 : -1;
 }
 
-extern s32 btlCreateCommandSoundUpdateTask();
+extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 
 extern s32 btlCreateSecondaryCommandSoundTask();
 
-extern s32 btlCreateCommandSoundTask();
+extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
 
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 
@@ -3059,7 +3059,146 @@ s32 btlSetLinkFlagOn(BtlUnit *requestedUnit) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001FF030", func_002072F0);
+extern u64 btlAdvanceRuntimeSequenceCounter(void);
+extern u64 btlStartTask(void *);
+extern void *btlCreateActionTask(void *, s32);
+extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
+extern BtlRuntimeTask *sndCreateCustomTask(u32, u32);
+extern void *btlScheduleRefreshTask(u8 *);
+extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
+extern BtlRuntimeTask *btlCreateFadeInTask(u32);
+extern s32 fldGetSceneGroupEntry(s32);
+
+u64 func_002072F0(BtlTask *action) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BattleEffectState *effect = battle->effect;
+    BtlUnit *unit;
+    BtlRuntimeTask *task;
+    u64 soundSequence;
+    u64 refreshSequence;
+    u64 modelSequence;
+    u64 scriptSequence;
+
+    effect->active = 0;
+    soundSequence = btlAdvanceRuntimeSequenceCounter();
+    refreshSequence = btlAdvanceRuntimeSequenceCounter();
+    modelSequence = btlAdvanceRuntimeSequenceCounter();
+    scriptSequence = btlAdvanceRuntimeSequenceCounter();
+
+    for (unit = battle->units; unit != 0; unit = unit->next) {
+        s32 flags = unit->flags;
+        s32 unitId;
+
+        if ((flags & 1) == 0) {
+            continue;
+        }
+        if ((flags & 0x400) == 0) {
+            continue;
+        }
+        unitId = unit->partyRecord.unitId;
+        if (unitId >= 0x109) {
+            continue;
+        }
+        if (unitId < 0x107) {
+            continue;
+        }
+        if (unit->species != 0x124) {
+            continue;
+        }
+
+        if ((flags & 0xE0) == 0) {
+            if (unitId != 0x107) {
+                BtlRuntimeTask *scriptTask = (BtlRuntimeTask *)btlCreateActionTask(unit, 0x50);
+                ((BtlRuntimeTask *)scriptTask)->ownerId = scriptSequence;
+                btlStartTask((void *)scriptTask);
+                task = sndCreateStationedSeTask(battle->sequenceHandle);
+                task->ownerId = soundSequence;
+                btlStartTask(task);
+            } else {
+                BtlRuntimeTask *scriptTask = (BtlRuntimeTask *)btlCreateActionTask(unit, 0x51);
+                ((BtlRuntimeTask *)scriptTask)->ownerId = scriptSequence;
+                btlStartTask((void *)scriptTask);
+                task = sndCreateStationedSeTask(battle->sequenceHandle + 1);
+                task->ownerId = soundSequence;
+                btlStartTask(task);
+            }
+
+            task = sndCreateCustomTask(0x80FFFFFF, 0xC);
+            task->startCondition.kind = BTL_TASK_CONDITION_OWNER_RUNNING_OR_ABSENT;
+            task->startCondition.value.handle = scriptSequence;
+            if (unit->partyRecord.unitId == 0x107) {
+                task->startDelay = 0x6C;
+            } else {
+                task->startDelay = 0x44;
+            }
+            task->endDelay = 0xC;
+            task->ownerId = soundSequence;
+            btlStartTask(task);
+        } else {
+            if (unitId == 0x108) {
+                effect->timer |= 4;
+            } else {
+                effect->timer |= 2;
+            }
+        }
+
+        {
+            BtlRuntimeTask *refreshTask = (BtlRuntimeTask *)btlScheduleRefreshTask((u8 *)unit);
+            refreshTask->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
+            refreshTask->startCondition.value.handle = scriptSequence;
+            refreshTask->ownerId = refreshSequence;
+            btlStartTask(refreshTask);
+        }
+
+        if ((unit->flags & 0xE0) == 0) {
+            BtlRuntimeTask *modelTask = btlCreateModelLoadPollTask(unit, unit->resourceKind,
+                unit->partyRecord.unitId, 1);
+            modelTask->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
+            modelTask->startCondition.value.handle = refreshSequence;
+            modelTask->ownerId = modelSequence;
+            btlStartTask(modelTask);
+        }
+    }
+
+    {
+        BtlTask *sceneAction;
+
+        task = btlCreateSoundUpdateTask(0);
+        task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
+        task->startCondition.value.handle = modelSequence;
+        task->ownerId = action->unit->identity;
+        btlStartTask(task);
+
+        task = btlCreateCommandSoundUpdateTask();
+        task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
+        task->startCondition.value.handle = modelSequence;
+        task->ownerId = action->unit->identity;
+        btlStartTask(task);
+
+        sceneAction = (BtlTask *)fldGetSceneGroupEntry(0);
+        if (sceneAction != 0 && (sceneAction->flags & 8) != 0 &&
+            (sceneAction->unit->flags & 0x200) != 0) {
+            task = btlCreateCommandSoundTask((s32)sceneAction, 9);
+            task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
+            task->startCondition.value.handle = modelSequence;
+            task->ownerId = action->unit->identity;
+            btlStartTask(task);
+        } else {
+            task = btlCreateCommandSoundTask(0, 3);
+            task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
+            task->startCondition.value.handle = modelSequence;
+            task->ownerId = action->unit->identity;
+            btlStartTask(task);
+        }
+
+        task = btlCreateFadeInTask(0x10);
+        task->startCondition.kind = BTL_TASK_CONDITION_OWNER_ABSENT;
+        task->startCondition.value.handle = modelSequence;
+        task->endDelay = 0x1F;
+        task->ownerId = action->unit->identity;
+        return btlStartTask(task);
+    }
+}
 
 extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
 
