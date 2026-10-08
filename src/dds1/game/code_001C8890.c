@@ -9191,7 +9191,229 @@ extern f32 D_003BB690;
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001EBE88);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001ECCA8);
+void func_001ECCA8(BtlLinkedCommand *command, BtlCamState *pose,
+                  const BtlCameraTimedInstruction *instruction, s32 *currentIndex,
+                  const BtlCameraParameterRecord *records) {
+    f32 savedPosition[4];
+    f32 focus[4];
+    f32 direction[4];
+    f32 value[4];
+    f32 length;
+    f32 blend;
+    f32 distance;
+    u32 flags;
+    s32 handled = 0;
+
+    do {
+        if (instruction->startFrame <= (f32)CURSOR->frame) {
+            if ((f32)CURSOR->frame < instruction->startFrame + instruction->duration) {
+                value[0] = records[*currentIndex].value[0];
+                value[1] = records[*currentIndex].value[1];
+                value[2] = records[*currentIndex].value[2];
+                value[3] = records[*currentIndex].value[3];
+                func_001EBE88(command, pose, instruction, currentIndex, records, value);
+                switch (instruction->kind) {
+                case 1:
+                    VU0_LOAD_VF(vf10, pose->direction);
+                    VU0_NEGATE_XYZ(vf10);
+                    VU0_SCALAR_OP(pose->distance, "vmulx.xyzw vf10, vf10, vf2x");
+                    VU0_LOAD_VF(vf11, pose->position);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, savedPosition);
+                    func_002DD608(value[0]);
+                    VU0_LOAD_VF(vf10, pose->direction);
+                    VU0_APPLY_MATRIX(vf10, vf10);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
+                    VU0_LOAD_VF(vf10, pose->direction);
+                    VU0_SCALAR_OP(pose->distance, "vmulx.xyzw vf10, vf10, vf2x");
+                    VU0_LOAD_VF(vf11, savedPosition);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+                    break;
+                case 0:
+                    VU0_LOAD_VF(vf10, pose->direction);
+                    VU0_NEGATE_XYZ(vf10);
+                    VU0_SCALAR_OP(pose->distance, "vmulx.xyzw vf10, vf10, vf2x");
+                    VU0_LOAD_VF(vf11, pose->position);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, savedPosition);
+                    if (command->flags & 0x200) value[1] = -value[1];
+                    func_002DD688(value[1]);
+                    VU0_LOAD_VF(vf10, pose->direction);
+                    VU0_APPLY_MATRIX(vf10, vf10);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
+                    VU0_LOAD_VF(vf10, pose->direction);
+                    VU0_SCALAR_OP(pose->distance, "vmulx.xyzw vf10, vf10, vf2x");
+                    VU0_LOAD_VF(vf11, savedPosition);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+                    break;
+                case 2:
+                    if (command->flags & 0x200) value[1] = -value[1];
+                    func_002DD688(value[1]);
+                    VU0_LOAD_VF(vf10, pose->direction);
+                    VU0_APPLY_MATRIX(vf10, vf10);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
+                    break;
+                case 4:
+                    pose->fov += value[0];
+                    break;
+                case 3:
+                    pose->distance += value[0];
+                    VU0_LOAD_VF(vf10, pose->direction);
+                    VU0_NEGATE_XYZ(vf10);
+                    VU0_SCALAR_OP(pose->distance, "vmulx.xyzw vf10, vf10, vf2x");
+                    VU0_LOAD_VF(vf11, pose->position);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, focus);
+                    VU0_LOAD_VF(vf10, D_0035F5A0);
+                    VU0_NEGATE_XYZ(vf10);
+                    VU0_SCALAR_OP(D_003BB690, "vmulx.xyzw vf10, vf10, vf2x");
+                    VU0_LOAD_VF(vf11, focus);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F590);
+                    break;
+                case 10:
+                case 11:
+                case 12:
+                    VU0_LOAD_VF(vf10, CURSOR->pathStart);
+                    VU0_LOAD_VF(vf11, CURSOR->pathEnd);
+                    VU0_SUB(vf10, vf10, vf11);
+                    VU0_LENGTH_VF10(length);
+                    blend = value[0];
+                    command->motionParameter = blend;
+                    if (instruction->startFrame == (f32)CURSOR->frame) {
+                        btlScalarRangeSetStartClearEnd(&command->exponentialRange, blend);
+                    }
+                    blend = btlScalarRangeStepExponential(&command->exponentialRange);
+                    if (0.9999990f <= blend) blend = 0.9999990f;
+                    distance = length * blend;
+                    if (instruction->kind == 12) distance = -distance;
+                    pose->distance = CURSOR->distance + distance;
+                    if (instruction->kind == 11) {
+                        VU0_LOAD_VF(vf10, CURSOR->direction);
+                        VU0_NEGATE_XYZ(vf10);
+                        VU0_SCALAR_OP(pose->distance, "vmulx.xyzw vf10, vf10, vf2x");
+                        VU0_LOAD_VF(vf11, pose->position);
+                        VU0_ADD(vf10, vf10, vf11);
+                        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
+                        VU0_LOAD_VF(vf10, pose->position);
+                        VU0_LOAD_VF(vf11, focus);
+                        VU0_SUB(vf10, vf10, vf11);
+                        VU0_LENGTH_VF10(pose->distance);
+                        VU0_NORMALIZE_VF10();
+                        VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
+                    } else {
+                        VU0_LOAD_VF(vf10, pose->direction);
+                        VU0_NEGATE_XYZ(vf10);
+                        VU0_SCALAR_OP(pose->distance, "vmulx.xyzw vf10, vf10, vf2x");
+                        VU0_LOAD_VF(vf11, pose->position);
+                        VU0_ADD(vf10, vf10, vf11);
+                        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
+                    }
+                    VU0_LOAD_VF(vf10, D_0035F5A0);
+                    VU0_NEGATE_XYZ(vf10);
+                    VU0_SCALAR_OP(D_003BB690, "vmulx.xyzw vf10, vf10, vf2x");
+                    VU0_LOAD_VF(vf11, focus);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F590);
+                    break;
+                case 13:
+                    VU0_LOAD_VF(vf10, CURSOR->pathStart);
+                    VU0_LOAD_VF(vf11, CURSOR->pathEnd);
+                    VU0_SUB(vf10, vf10, vf11);
+                    VU0_LENGTH_VF10(length);
+                    VU0_NORMALIZE_VF10();
+                    VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+                    blend = value[0];
+                    command->motionParameter = blend;
+                    if (instruction->startFrame == (f32)CURSOR->frame) {
+                        btlScalarRangeSetStartClearEnd(&command->exponentialRange, blend);
+                    }
+                    blend = btlScalarRangeStepExponential(&command->exponentialRange);
+                    if (blend >= 0.9999990f) blend = 0.9999990f;
+                    distance = length * blend;
+                    VU0_LOAD_VF(vf10, direction);
+                    VU0_SCALAR_OP(distance, "vmulx.xyzw vf10, vf10, vf2x");
+                    VU0_LOAD_VF(vf11, CURSOR->pathEnd);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, focus);
+                    VU0_LOAD_VF(vf10, pose->position);
+                    VU0_LOAD_VF(vf11, focus);
+                    VU0_SUB(vf10, vf10, vf11);
+                    VU0_LENGTH_VF10(pose->distance);
+                    VU0_NORMALIZE_VF10();
+                    VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
+                    VU0_LOAD_VF(vf10, D_0035F5A0);
+                    VU0_NEGATE_XYZ(vf10);
+                    VU0_SCALAR_OP(D_003BB690, "vmulx.xyzw vf10, vf10, vf2x");
+                    VU0_LOAD_VF(vf11, focus);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F590);
+                    break;
+                case 5:
+                    if (command->flags & 0x200) value[0] = -value[0];
+                    if (value[0] != 0.0f && 0.0f <= D_0035F5A0[2]) value[1] = -value[1];
+                    func_002E7F20(value[1], value[0], value[2]);
+                    effMiscQuaternionToMatrixVU();
+                    VU0_LOAD_VF(vf10, D_0035F5A0);
+                    VU0_APPLY_MATRIX(vf10, vf10);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F5A0);
+                    VU0_LOAD_VF(vf10, D_0035F5A0);
+                    VU0_SCALAR_OP(D_003BB690, "vmulx.xyzw vf10, vf10, vf2x");
+                    VU0_LOAD_VF(vf11, D_0035F590);
+                    VU0_ADD(vf10, vf10, vf11);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, D_0035F5B0);
+                    flags = records[*currentIndex].flags00;
+                    if (flags & 4) {
+                        VU0_LOAD_VF(vf10, pose->direction);
+                        VU0_SCALAR_OP(pose->distance, "vmulx.xyzw vf10, vf10, vf2x");
+                        VU0_LOAD_VF(vf11, D_0035F5B0);
+                        VU0_ADD(vf10, vf10, vf11);
+                        VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+                    } else if (flags & 1) {
+                        VU0_LOAD_VF(vf10, pose->position);
+                        VU0_LOAD_VF(vf11, D_0035F5B0);
+                        VU0_SUB(vf10, vf10, vf11);
+                        VU0_LENGTH_VF10(pose->distance);
+                        VU0_NORMALIZE_VF10();
+                        VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
+                    }
+                    break;
+                case 8:
+                    btlSetActorEffectParameterOrMuzzlePosition((u32)command->task->unit, 1);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, savedPosition);
+                    savedPosition[1] -= 200.0f;
+                    btlSetActorEffectParameterOrMuzzlePosition((u32)command->targetList->entries[0], 1);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, focus);
+                    VU0_LOAD_VF(vf10, focus);
+                    VU0_LOAD_VF(vf11, savedPosition);
+                    VU0_SUB(vf10, vf10, vf11);
+                    VU0_LENGTH_VF10(blend);
+                    blend = blend * 4.0f / 5.0f;
+                    VU0_NORMALIZE_VF10();
+                    VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+                    blend += 300.0f;
+                    VU0_LOAD_VF(vf10, focus);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+                    VU0_LOAD_VF(vf10, direction);
+                    VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
+                    pose->distance = blend;
+                    break;
+                default:
+                    break;
+                }
+                handled = 1;
+            } else if (records[*currentIndex].stop != 0) {
+                handled = 1;
+            } else {
+                ++*currentIndex;
+            }
+        } else {
+            handled = 1;
+        }
+    } while (handled != 1);
+}
 
 s32 btlFindActiveActorById(s32 id) {
     s32 node;
