@@ -4799,6 +4799,7 @@
 0x0027B368	mnuDestroyListState	inferred	Repeatedly removes list nodes, frees list and returns completion; twin 0x002B81C8. [names_R_FuncNames5.tsv]
 0x0027B440	mnuListAppendNode	inferred	Allocates 0x74-byte list node, links at tail, bumps count and refreshes scroll flags.
 0x0027B540	mnuInsertListNodeRelativeToAnchor	inferred	inserts an opaque list value before or after an anchor and updates cursor/window state
+0x0027B888	mnuRemoveListCursorNode	inferred	Removes and frees MenuList.cursor, repairs linked-node indexes and list cursor/head/last/count state, updates scroll flags, and returns the resulting cursor; paired DDS2 native provider has the same role.
 0x0027BA00	mnuSetGridSpriteSlot	inferred	stores sprite/effect into 4-wide slot grid and calls func_002BF9E0
 0x0027BA48	mnuWalkNodeList	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027BB28	mnuSelectLastListNode	inferred	DDS2 func_002B8988 twin; seeks final list node [names_R_FuncNames.tsv]
