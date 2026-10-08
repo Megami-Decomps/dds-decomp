@@ -959,7 +959,6 @@ extern const char D_003AF678[];
 
 extern s32 D_003BC3E4;
 
-extern u32 effConfigureWithDefaultSetting(u32, u32, u32, u32, u32, u32);
 
 extern s32 kwlnTaskCreate(const char *, s32, s32, s32, s32 (*)(KwlnTask *), void (*)(KwlnTask *), void *);
 extern s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *task);
@@ -1166,15 +1165,19 @@ void mnuTerminalConfigureEffects(u32 mode, MenuTerminalWork *state) {
     }
     switch (mode) {
     case 1:
-        effConfigureWithDefaultSetting((u32)state->batch, *slot, state->effect[4], 0, 5, 2);
+        effConfigureWithDefaultSetting((struct EffectSlotSet *)state->batch, *slot,
+                                       (struct EffMappedResource *)(u32)state->effect[4], 0, 5, 2);
         break;
     case 2:
-        effConfigureWithDefaultSetting((u32)state->batch, *slot, state->effect[5], 0, 0, 2);
+        effConfigureWithDefaultSetting((struct EffectSlotSet *)state->batch, *slot,
+                                       (struct EffMappedResource *)(u32)state->effect[5], 0, 0, 2);
         break;
     case 3:
-        effConfigureWithDefaultSetting((u32)state->batch, *slot, state->effect[4], 0, 0, 2);
+        effConfigureWithDefaultSetting((struct EffectSlotSet *)state->batch, *slot,
+                                       (struct EffMappedResource *)(u32)state->effect[4], 0, 0, 2);
         if (slot[1] >= 0) {
-            effConfigureWithDefaultSetting((u32)state->batch, slot[1], state->effect[5], 0, 0, 2);
+            effConfigureWithDefaultSetting((struct EffectSlotSet *)state->batch, slot[1],
+                                           (struct EffMappedResource *)(u32)state->effect[5], 0, 0, 2);
         }
         break;
     }
@@ -1312,11 +1315,15 @@ void func_0024A728(u32 mode, s32 context) {
     index = fldGetModeFrameRecordIndex((SceneFrameOwner *)context);
     switch (mode) {
     case 1:
-        effConfigureWithDefaultSetting((u32)work->batch, index, work->effect[0], 0, 0, 2);
-        effConfigureWithDefaultSetting((u32)work->batch, 4, work->effect[6], 0, 0, 14);
-        effConfigureWithDefaultSetting((u32)work->batch, 6, work->effect[0], 0, 0, 2);
+        effConfigureWithDefaultSetting((struct EffectSlotSet *)work->batch, index,
+                                       (struct EffMappedResource *)(u32)work->effect[0], 0, 0, 2);
+        effConfigureWithDefaultSetting((struct EffectSlotSet *)work->batch, 4,
+                                       (struct EffMappedResource *)(u32)work->effect[6], 0, 0, 14);
+        effConfigureWithDefaultSetting((struct EffectSlotSet *)work->batch, 6,
+                                       (struct EffMappedResource *)(u32)work->effect[0], 0, 0, 2);
         itfSetGridEntryQuantizedAndRefresh((struct EffectSlotSet *)work->batch, 7, 0, 0, -0x400, 0);
-        effConfigureWithDefaultSetting((u32)work->batch, 7, work->effect[5], 0, 5, 3);
+        effConfigureWithDefaultSetting((struct EffectSlotSet *)work->batch, 7,
+                                       (struct EffMappedResource *)(u32)work->effect[5], 0, 5, 3);
         i = 0;
         entries = work->alternateBatch->records[0].values;
         for (; i < 4; i++) {
@@ -1324,15 +1331,20 @@ void func_0024A728(u32 mode, s32 context) {
         }
         break;
     case 2:
-        effConfigureWithDefaultSetting((u32)work->batch, index, work->effect[3], 0, 0xF, 2);
-        effConfigureWithDefaultSetting((u32)work->batch, 6, work->effect[3], 0, 0xF, 2);
+        effConfigureWithDefaultSetting((struct EffectSlotSet *)work->batch, index,
+                                       (struct EffMappedResource *)(u32)work->effect[3], 0, 0xF, 2);
+        effConfigureWithDefaultSetting((struct EffectSlotSet *)work->batch, 6,
+                                       (struct EffMappedResource *)(u32)work->effect[3], 0, 0xF, 2);
         itfSetGridEntryQuantizedAndRefresh((struct EffectSlotSet *)work->batch, 7, 0, 0, 0, 0);
-        effConfigureWithDefaultSetting((u32)work->batch, 7, work->effect[3], 0, 0, 2);
+        effConfigureWithDefaultSetting((struct EffectSlotSet *)work->batch, 7,
+                                       (struct EffMappedResource *)(u32)work->effect[3], 0, 0, 2);
         return;
     case 3:
         itfSetGridEntryQuantizedAndRefresh((struct EffectSlotSet *)work->batch, 7, 0, 0, -0x400, 0);
-        effConfigureWithDefaultSetting((u32)work->batch, 7, work->effect[5], 0, 0, 3);
-        effConfigureWithDefaultSetting((u32)work->alternateBatch, 0, work->effect[5], 0, 0, 2);
+        effConfigureWithDefaultSetting((struct EffectSlotSet *)work->batch, 7,
+                                       (struct EffMappedResource *)(u32)work->effect[5], 0, 0, 3);
+        effConfigureWithDefaultSetting((struct EffectSlotSet *)work->alternateBatch, 0,
+                                       (struct EffMappedResource *)(u32)work->effect[5], 0, 0, 2);
         break;
     }
 }
@@ -1431,10 +1443,12 @@ void func_0024AB70(u32 mode, s32 context) {
     resourceOffset += (s32)((u8 *)&work->effect[0] - (u8 *)work);
     resource = (s32 *)((u8 *)work + resourceOffset);
     itfSetGridEntryQuantizedAndRefresh((struct EffectSlotSet *)work->batch, 8, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting((u32)work->batch, 8, *resource, 0, style, layer);
+    effConfigureWithDefaultSetting((struct EffectSlotSet *)work->batch, 8,
+                                   (struct EffMappedResource *)(u32)*resource, 0, style, layer);
     selected = func_0024AB28((MenuSelectorContext *)work);
     itfSetGridEntryQuantizedAndRefresh((struct EffectSlotSet *)work->batch, selected, 0, width, 0, height);
-    effConfigureWithDefaultSetting((u32)work->batch, selected, *resource, 0, style, layer);
+    effConfigureWithDefaultSetting((struct EffectSlotSet *)work->batch, selected,
+                                   (struct EffMappedResource *)(u32)*resource, 0, style, layer);
 }
 
 
@@ -1542,7 +1556,8 @@ void mnuApplyGridPanelHostSetting(u32 kind, GridPanelHost *host) {
         break;
     }
     itfSetGridEntryQuantizedAndRefresh(host->grid, 0x1A, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting(host->grid, 0x1A, host->settings[slot], 0, value, flags);
+    effConfigureWithDefaultSetting((struct EffectSlotSet *)(u32)host->grid, 0x1A,
+                                   (struct EffMappedResource *)(u32)host->settings[slot], 0, value, flags);
 }
 
 extern const MenuGridPositions D_003AF700;

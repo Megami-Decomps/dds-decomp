@@ -212,7 +212,6 @@ extern void func_002B2408();
 
 extern MenuIconBundle *mnuCreateIconBundle(u32);
 
-extern s32 effConfigureIndexedSlotMaterial(u8 *, u32, u8 *, u32, u32, u32, u32);
 
 
 extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
@@ -1232,8 +1231,8 @@ MenuIconState *mnuCreatePanelIconState(u32 mode, s32 resource, s32 material) {
         panel->sprite[3] = effCreateResourceSlotSet((EffectSlotSet *)resource, 0x0D, 1);
         panel->sprite[4] = effCreateResourceSlotSet((EffectSlotSet *)resource, 0x0E, 1);
         panel->sprite[5] = effCreateResourceSlotSet((EffectSlotSet *)resource, 0x0E, 1);
-        effConfigureIndexedSlotMaterial((u8 *)panel->sprite[2], 0, (u8 *)material, 1, 0, 0, 0x0C);
-        effConfigureIndexedSlotMaterial((u8 *)panel->sprite[4], 0, (u8 *)material, 1, 0, 0, 0x0C);
+        effConfigureIndexedSlotMaterial(panel->sprite[2], 0, (struct EffMappedResource *)material, 1, 0, 0, 0x0C);
+        effConfigureIndexedSlotMaterial(panel->sprite[4], 0, (struct EffMappedResource *)material, 1, 0, 0, 0x0C);
         break;
     case 5:
         panel->count = 2;
@@ -1797,8 +1796,8 @@ void mnuActivatePendingPanelResource(MenuScrollPanel *context) {
     context->active.index = context->pending.index;
     context->pending.set = 0;
     if (pendingHandle != 0) {
-        effConfigureWithDefaultSetting((u32)pendingHandle, context->pending.index,
-                                       context->handles[2], 0, 10, 2);
+        effConfigureWithDefaultSetting(pendingHandle, context->pending.index,
+                                       (struct EffMappedResource *)(u32)context->handles[2], 0, 10, 2);
         return;
     }
 }

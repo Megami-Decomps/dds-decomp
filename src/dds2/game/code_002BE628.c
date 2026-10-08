@@ -229,7 +229,6 @@ extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
 extern void evtCreateWorldObjectForKey(s32, s32);
 extern void itfGridSetQuantizedBounds(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern u32 effDestroyResourceSlotSet(EffectSlotSet *);
-extern u32 effConfigureWithDefaultSetting(u32, u32, u32, u32, u32, u32);
 extern s32 D_00437CB8;
 extern s32 D_00437CBC;
 extern SdfPoolNode D_00380708;
@@ -975,7 +974,8 @@ void mnuCyclePairedEffectSetting(MenuPageBar *pair) {
     if (settings != 0) {
         setting = settings[(s8)pair->settingIndex];
     }
-    effConfigureWithDefaultSetting((u32)pair->textures[3], 0, (s32)pair->effects[0], 0, setting, 0);
+    effConfigureWithDefaultSetting(pair->textures[3], 0,
+                                   (struct EffMappedResource *)pair->effects[0], 0, setting, 0);
     pair->settingIndex += 1;
     if ((s8)pair->settingIndex >= 4) {
         pair->settingIndex = 0;
