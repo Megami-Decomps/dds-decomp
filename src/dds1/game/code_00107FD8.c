@@ -1,6 +1,7 @@
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "fr_font.h"
 #include "sdf_chip.h"
 #include "sdf_primitive.h"
 
@@ -63,8 +64,6 @@ extern s32 fileMenuTaskExists(void);
 extern void fileEnterMcPackScene(s32 mode);
 
 extern s32 func_0028F5F8(void);
-
-extern u64 func_00197748(s32, s32, u64, u64, u64, u64);
 
 extern u32 kwlnDrawSurfaceIndex;
 
@@ -745,12 +744,12 @@ void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     surface->append((SdfListHead *)surface, list);
 }
 
-void evtPrepareSizedDrawResource(s32 width, s32 height, u64 first, u64 second) {
-    u64 resource;
+void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors, const char *text) {
+    struct FrFontGlyph *glyph;
 
-    resource = func_00197748(width << 4, height << 3, 0, first, second, 0);
-    frFontDrawGlyphInDefaultMode(resource);
-    frFontQueueGlyphInSelectedSlot(resource);
+    glyph = func_00197748(width << 4, height << 3, 0, colors, text, NULL);
+    frFontDrawGlyphInDefaultMode(glyph);
+    frFontQueueGlyphInSelectedSlot(glyph);
 }
 
 typedef struct EvtSelState {
