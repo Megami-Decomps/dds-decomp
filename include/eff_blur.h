@@ -21,6 +21,21 @@ typedef char EffBlurQuadSizeCheck[sizeof(EffBlurQuad) == 0x28 ? 1 : -1];
 typedef char EffBlurQuadCenterOffsetCheck[((u32)&((EffBlurQuad *)0)->x == 0x10) ? 1 : -1];
 typedef char EffBlurQuadEdgesOffsetCheck[((u32)&((EffBlurQuad *)0)->left == 0x18) ? 1 : -1];
 
+/* One ST/XYZ2 pair in the packed draw payload. */
+typedef struct BlurPacketVertex {
+    f32 s, t;
+    u8 pad08[8];
+    s32 x, y;
+    u32 depth;
+    u16 xyzControl;
+    u8 pad1E[2];
+} BlurPacketVertex;
+
+typedef struct BlurPacketQuad {
+    u32 color[4];
+    BlurPacketVertex vertices[4];
+} BlurPacketQuad;
+
 /* Random-position blur parameters and their allocated slot owner. */
 typedef struct EffBlurScatterParams {
     s32 count;
