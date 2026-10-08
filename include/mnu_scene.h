@@ -23,6 +23,20 @@ typedef struct {
 } DspParticleState;
 
 /* Mantra-scene state shared by its controller and animated display. */
+enum MenuSceneState {
+    MENU_SCENE_STATE_SELECTING = 0,
+    MENU_SCENE_STATE_PRIMARY_LABELS = 1,
+    MENU_SCENE_STATE_ALTERNATE_LABELS = 2,
+    MENU_SCENE_STATE_THIRD_LABELS = 3,
+    MENU_SCENE_STATE_SIGNAL_A = 4,
+    MENU_SCENE_STATE_SIGNAL_B = 5,
+    MENU_SCENE_STATE_SIGNAL_C = 6,
+    MENU_SCENE_STATE_SIGNAL_D = 7,
+    MENU_SCENE_STATE_SIGNAL_E = 8,
+    MENU_SCENE_STATE_WAITING_FOR_MESSAGE_WINDOW = 9,
+    MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION = 10,
+};
+
 typedef struct MenuSceneMetadata {
     u8 pad00[0x0C];
     s32 messageWindowResource;

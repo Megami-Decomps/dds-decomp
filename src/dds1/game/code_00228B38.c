@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_resource_slots.h"
 #include "evt_solar.h"
 
 typedef struct SolarNoiseDebugData {
@@ -50,8 +51,6 @@ extern s32 D_0036832C[];
 extern s32 D_00367EE0[][3];
 extern SolarOverlayShape D_00368310[];
 
-u32 effLoadIndexedResource(void *arg0, const char *arg1, s32 arg2);
-void effDestroyResourceSlotSet(u32 sprite);
 void sdfDispatchSurfaceWithPreparedTexturePacket(s32 object);
 void sdfSubmitGsAlphaOneRegisterPacket(s32 property, s32 object);
 /* The definition uses legacy K&R parameters. */

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_resource_slots.h"
 #include "eff_transform.h"
 #include "fpu.h"
 #include "gs_packet.h"
