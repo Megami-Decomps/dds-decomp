@@ -4771,6 +4771,7 @@
 0x002CB948	fileBeginReadSlotIcon	inferred	formats save slot path and requests it, returns icon.sys scan callback [names_R_FuncNames2.tsv]
 0x002CBC60	fileBeginSaveSlotIconScan	inferred	Formats BASLUS save filename, scans slot and returns icon scan continuation. [names_reviewed7.tsv]
 0x002CBDD0	fileScanSlotStatesAdvance	inferred	DDS1 0x0028C560 twin (named there already)
+0x002CC210	fileBuildMainBlobAndWrite	inferred	Builds current game-state save metadata and dispatches the main-blob write; DDS1 counterpart has the same role.
 0x002CC760	fileStartMemoryCardDetection	inferred	Sets menu flow five, closes old card handle, starts detection and returns continuation. [names_reviewed7.tsv]
 0x002CC8E0	fileLoadMainBlobBegin	inferred	DDS1 0x0028DAF8 twin (named there already)
 0x002CC9F0	mcdHandleSaveSetupDone	inferred	DDS1 has the same unprefixed symbol; game/code_002C9660 uses mcd for the already-described handleSaveSetupDone behavior.

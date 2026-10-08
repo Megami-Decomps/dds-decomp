@@ -185,7 +185,7 @@ void sdfTexRefreshResourcePackets(SdfTex *texture) {
 extern SdfTex *func_0032B968(s32, s32, u32, u32, u32, u32);
 extern u8 sdfTexGetPaletteCount(SdfTex *);
 extern void func_0032B908(SdfTex *);
-extern u8 *sdfTexSubmitPixelsForFormat(SdfTex *, s32, u8 *, s32);
+extern u8 *sdfTexSubmitPixelsForFormat(SdfTex *texture, u32 destination, u8 *pixels, s32 borrowPixels);
 extern s32 sdfTexFormatSizeHint(s32);
 extern u8 *sdfTexSubmitImageCopy(u32, s32, s32, u32, u8 *, s32);
 
