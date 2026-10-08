@@ -54,7 +54,7 @@ typedef struct PcpScatterPlainInstance {
     PcpScatterPlainParticle *particles;
     f32 scale;
     u32 color;
-    u32 scatterObject;
+    PcpScatterDraw *scatterObject;
     u32 ownedBuffer;
 } PcpScatterPlainInstance;
 
