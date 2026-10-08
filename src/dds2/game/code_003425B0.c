@@ -807,8 +807,6 @@ extern DevState *sdfDevCreateCommandState(const char *name);
 extern s32 sdfDevQueueControlAndWait(DevState *state);
 extern void sdfDevQueueReadAndWait(DevState *state, s32 buffer, s32 size);
 extern void sdfDevWaitThenReleaseCommandState(DevState *state);
-extern void sdfDecrementAllocationReferenceCount(SdfMemBlock *handle);
-
 /* Read a named file through the dev RPC into a freshly allocated block; returns the block's handle.
  * outData receives the block address, outSize the file size; without outData the block is released. */
 SdfMemBlock *sdfDevReadResourceWithExtraSpace(const char *name, u32 *outData, u32 *outSize, s32 extra) {
