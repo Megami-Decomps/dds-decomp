@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -128,7 +129,6 @@ typedef struct {
     struct SdfMemBlock *allocation; /* 0xFC */
 } PolyRotatingBand; /* 0x100, followed by 20-byte records */
 
-void parReleaseCellSystem(ParSystem *system);
 void parPrependCellNode(ParSystem *system);
 void sdfReleaseChipBlock(void *arg);
 void polyUpdateBasicRingCells(PolyNode *obj);

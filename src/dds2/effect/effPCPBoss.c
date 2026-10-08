@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "eff.h"
 #include "pcp_vu0.h"
@@ -134,7 +135,6 @@ typedef struct {
 
 extern void *effParamWorkGetData(EffParamWork *handle);
 extern void mdlAddEntryPlain(void *work, s32 arg1, s32 arg2);
-extern u32 parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void func_00164C68(u32 system, u32 value);
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 extern void *effGetIndexedEffectGroupRecord(EffRecordPool *pool, s32 index);
@@ -147,7 +147,6 @@ extern f32 D_004334C4;
 extern void effBossInitializeModelGroups(EffBossWork *work);
 extern EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src);
 extern void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool);
-extern void parReleaseCellSystem(u32 system);
 
 /* Randomize geometry and initial age; the two extents remain proportional. */
 void effBossCellRandomize(EffBossWork *work, EffBossCell *cell) {
@@ -180,7 +179,7 @@ void effBossInitializeModelGroups(EffBossWork *work)
     mdlAddEntryPlain(model, 0, 0);
     work->cellCount = model->first->frameCount;
     work->groupCount = sdfCountMapPositionRecords(model->inner);
-    work->system = parAllocateCellSystem(work->groupCount, work->cellCount, 1, PAR_CELL_TOPOLOGY_TRIANGLE);
+    work->system = (u32)parAllocateCellSystem(work->groupCount, work->cellCount, 1, PAR_CELL_TOPOLOGY_TRIANGLE);
     func_00164C68(work->system, work->head.systemParam);
     work->groupsHandle = NULL;
     if (work->head.hasCells) {
@@ -276,7 +275,7 @@ void effBossDestroy(EffBossWork *work) {
         }
         sdfReleaseResourceAllocation(work->groupsHandle);
     }
-    parReleaseCellSystem(work->system);
+    parReleaseCellSystem((ParSystem *)work->system);
     effDispatchParameterDataAndFreeWork(work->paramWork);
     sdfReleaseChipBlock(work);
 }
