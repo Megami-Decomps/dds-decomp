@@ -31,8 +31,8 @@ s32 effDestroyPackedBatch(struct EffMappedResource *batch);
 #else
 u32 effDestroyPackedBatch(struct EffMappedResource *batch);
 #endif
-/* Serialized source addresses and callback output slots retain their word ABI. */
-struct EffMappedResource *effCreateMappedResource(u32 sourceAddress);
+/* Serialized source bytes are borrowed; callback output slots retain their word ABI. */
+struct EffMappedResource *effCreateMappedResource(const u8 *source);
 struct EffMappedResource *effLoadMappedResource(const char *base, const char *name);
 void effRequestMappedResource(const char *base, const char *name, u32 *outMappedResource);
 
