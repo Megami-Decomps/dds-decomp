@@ -4401,6 +4401,7 @@
 0x002B1780	mnuCountActiveSlots	inferred	DDS1 has the same unprefixed symbol; game/code_002B0278 uses mnu for the already-described menuCountActiveSlots behavior.
 0x002B17C0	mnuClearPartySelectionAndActivateSlots	inferred	Copies party entries, zeros backup, marks five panels and clears linked list node flags. [names_reviewed5.tsv]
 0x002B18A0	mnuRefreshPartyPanelSlots	inferred	Releases panel sprite resources then initializes slot data and refreshes panel slots. [names_reviewed5.tsv]
+0x002B18E8	mnuInitializePartySelectionState	inferred	Task initializer allocating party-selection work and setting up windows, panel snapshots and fades
 0x002B1B90	mnuReleasePartySelectionResources	inferred	Releases selected party window and party handle after refreshing panel slots. [names_reviewed5.tsv]
 0x002B1BF0	mnuPreparePartyPanelTransition	inferred	Sets popup state, swaps panel textures and sets party transition field. [names_reviewed5.tsv]
 0x002B2698	mnuOpenStaffPartySelectionPanel	inferred	Creates a staff image, configures party-selection markers and enters the panel handler. [names_reviewed15.tsv]
