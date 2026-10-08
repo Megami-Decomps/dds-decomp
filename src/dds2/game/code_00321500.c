@@ -333,7 +333,22 @@ void mnuClearPackedMenuRecordBlock(MenuRuntimeList *list) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00321F18);
+MenuRuntimeRecord *func_00321F18(MenuRuntimeList *list) {
+    MenuRuntimeRecord *record;
+    s32 i;
+    u32 count;
+
+    record = list->records;
+    for (i = 0; i < list->capacity; i++, record++) {
+        if (!(record->state.word & MNU_WORK_ACTIVE)) {
+            count = list->activeCount;
+            record->state.word |= MNU_WORK_ACTIVE;
+            list->activeCount = count + 1;
+            return record;
+        }
+    }
+    return NULL;
+}
 
 void mnuDeactivateListRecord(MenuRuntimeList *list, MenuRuntimeRecord *record) {
     u32 flags = record->state.word;
