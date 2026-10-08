@@ -29,7 +29,7 @@ typedef struct MenuList {
     s32 count;
     s32 windowOffset;
     s32 rowHeight;
-    u8 pad2C[4];
+    void (*drawCallback)();
     u32 userData;
     u8 pad34[8];
     s32 scale;
@@ -493,7 +493,40 @@ void mtrDrawUnitSelectionRow(s32 unusedX, s32 unusedY, s32 drawPool, MenuList *l
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_002884C0);
+extern MenuList *mnuCreateListState(s32, s32, s32);
+extern MenuListNode *mnuListAppendNode(MenuList *list, const void *value);
+
+MenuList *func_002884C0(void) {
+    MenuList *list;
+    u16 slots[32];
+    MenuListNode *node;
+    u16 *p;
+    u16 partyIndex;
+    s32 i;
+
+    list = mnuCreateListState(0, 5, 0x16);
+    list->drawCallback = mtrDrawUnitSelectionRow;
+    memset(slots, 0, sizeof(slots));
+    for (i = 0; i < 5; i++) {
+        if (datGameState->party[i].flags & 1) {
+            if (datGameState->party[i].unitId == 8) {
+                slots[0] = i + 1;
+            } else {
+                slots[datGameState->party[i].unitId] = i + 1;
+            }
+        }
+    }
+    p = slots;
+    for (i = 31; i >= 0; i--) {
+        if (*p != 0) {
+            node = mnuListAppendNode(list, 0);
+            partyIndex = *p - 1;
+            node->items = (u8 *)&datGameState->party[partyIndex];
+        }
+        p++;
+    }
+    return list;
+}
 
 /* Create the unit list and selection state; when a marked unit exists, move to the first marked entry.
  * Preserve the two independent fade-in requests and the post-callback work-field reads. */
