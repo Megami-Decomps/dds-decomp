@@ -4,6 +4,7 @@
 #include "mnu_list.h"
 #include "eff.h"
 #include "mnu_shop.h"
+#include "mnu_scroll_panel.h"
 #include "dat_state.h"
 struct MenuListNode;
 struct StaffMenuRuntime;
@@ -762,11 +763,8 @@ void mnuRefreshPartyPanelSlots(s32 context) {
 }
 
 struct MenuSlotEffectHandles;
-typedef struct MenuScrollPanel MenuScrollPanel;
 extern void mnuLoadPanelSectionResources(struct MenuSlotEffectHandles *slot, u32 model,
                                          u32 firstValue, u32 secondValue, s32 thirdValue);
-extern void mnuConfigurePanelResource(MenuScrollPanel *menu, u32 model, u32 value, u32 color);
-
 s32 func_002B18E8(void) {
     s32 contextAddress = (s32)kwlnTaskGetUserValue();
     MenuContext *context = (MenuContext *)contextAddress;
@@ -800,7 +798,7 @@ s32 func_002B18E8(void) {
                2 * sizeof(MenuPageBar));
     }
 
-    mnuConfigurePanelResource((MenuScrollPanel *)context->panelHandle,
+    mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->panelHandle,
                               context->panelModel, 0, 0);
     mnuBeginWindowFadeTransition(menuWork->primaryWindow, &context->transition);
     menuWork->fadeA = MNU_FULL_FADE;
@@ -823,7 +821,8 @@ void mnuPreparePartyPanelTransition(s32 menu) {
 
     mnuRestorePartyEntriesAndRefresh();
     mnuSetPopupEntryFlagged(((MenuContext *)menu)->popupState, D_003E7588);
-    mnuConfigurePanelResource(((MenuContext *)menu)->panelHandle, ((MenuContext *)menu)->displayHandle, 0, 1);
+    mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)menu)->panelHandle,
+                              ((MenuContext *)menu)->displayHandle, 0, 1);
     mnuBeginWindowFadeTransition(((MenuContext *)menu)->imageHandle, &((MenuContext *)menu)->transition);
     party->freezePanel = 1;
 }
@@ -879,7 +878,8 @@ s32 func_002B1C68(s32 callback) {
                 func_002BCAB0(&context->partyWindow);
             } else {
                 mnuSetPopupEntryFlagged(popup, D_003E7588);
-                mnuConfigurePanelResource(context->panelHandle, context->displayHandle, 0, 1);
+                mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->panelHandle,
+                                          context->displayHandle, 0, 1);
                 mnuBeginWindowFadeTransition(context->imageHandle, &context->transition);
             }
         }
@@ -1010,7 +1010,8 @@ u32 mnuCreateSelectState(u32 unused, s32 flag) {
     }
     func_002B27F0(context);
     state->active = 1;
-    mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->displayResource, 0, 0);
+    mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
+                              ((MenuContext *)context)->displayResource, 0, 0);
     evtStageTestInit(0);
     return 1;
 }
@@ -1064,7 +1065,8 @@ s32 mnuStaffPopupUpdate(s32 callback) {
         }
         if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
             mnuSetPopupEntryFlagged(popupState, D_003E75A8);
-            mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->displayHandle, 0, 1);
+            mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
+                                      ((MenuContext *)context)->displayHandle, 0, 1);
             mnuClearActionFlags(0, panelWork);
         }
         mnuPlayInputSound(0, inputFlags, 0);
@@ -1239,11 +1241,13 @@ s32 mnuStaffBrowsePartyUpdate(s32 callback) {
             if (menuWork->staffMode == 0) {
                 menuWork->staffMode = 1;
                 func_002B2C88(context + MNU_STAFF_PARTY_PANEL_BASE, 3, menuWork->staffView, 1);
-                mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->alternateResource, 0, 0);
+                mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
+                                          ((MenuContext *)context)->alternateResource, 0, 0);
             } else {
                 menuWork->staffMode = 0;
                 func_002B2C88(context + MNU_STAFF_PARTY_PANEL_BASE, 2, menuWork->staffView, 0);
-                mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->displayResource, 0, 0);
+                mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
+                                          ((MenuContext *)context)->displayResource, 0, 0);
             }
             menuWork->idleFrames = 0;
         }
@@ -1740,13 +1744,16 @@ u32 mnuCreateItemState(s32 callback) {
     func_002B4270(context);
     switch (((MenuContext *)context)->imageHandle->list->cursor->index) {
     case 0:
-        mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->labelHandle, 0, 0);
+        mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
+                                  ((MenuContext *)context)->labelHandle, 0, 0);
         break;
     case 2:
-        mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->labelHandle, 0x19, 0);
+        mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
+                                  ((MenuContext *)context)->labelHandle, 0x19, 0);
         break;
     case 3:
-        mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->labelHandle, 0xa, 0);
+        mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
+                                  ((MenuContext *)context)->labelHandle, 0xa, 0);
         break;
     }
     mnuSeekListNode(0, ((MenuWindowContainer *)((MenuContext *)context)->listHandle)->list);
@@ -2522,7 +2529,8 @@ s32 mnuUpdateSkillListInput(s32 callback) {
     mnuPlayInputSound(0, buttons, &((MenuWindowContainer *)list[8 + menu[11]])->list->stateFlags);
     if (buttons & 2) {
         mnuSetPopupEntryFlagged(popup, D_003E7720);
-        mnuConfigurePanelResource(((MenuContext *)context)->panelHandle, ((MenuContext *)context)->displayHandle, 0, 1);
+        mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
+                                  ((MenuContext *)context)->displayHandle, 0, 1);
     }
     return 0;
 }
@@ -3543,54 +3551,6 @@ void mnuUpdateFade(s32 *list);
 
 
 void mnuResetWindowFadeParameters(MenuFadeFields *menu);
-
-
-typedef struct ScrollParams {
-    s32 a;
-    s32 b;
-    s32 c;
-} ScrollParams;
-
-typedef struct ScrollInner {
-    u8 unk0[0x20];
-    ScrollParams *params;
-} ScrollInner;
-
-typedef struct ScrollHandle {
-    u8 unk0[8];
-    ScrollInner *inner;
-} ScrollHandle;
-
-/* Three animation handles at the tail of the 0x48-byte scroll panel. */
-typedef struct MenuScrollPanel {
-    u8 pad00[4];
-    u32 color; /* 0x04: panel resource color */
-    u32 firstSprite;
-    u32 secondSprite;
-    u8 pad10[4];
-    MenuSpriteRef positions[3]; /* 0x14 */
-    MenuSpriteRef active;       /* 0x2C */
-    MenuSpriteRef pending;      /* 0x34 */
-    ScrollHandle *handles[3];
-} MenuScrollPanel;
-
-extern ScrollHandle *effCreateStatusBatch(s32);
-
-void mnuInitScrollHandles(MenuScrollPanel *menu);
-
-void mnuReleaseScrollPanelAnimations();
-
-MenuScrollPanel *mnuCreateScrollPanel(u32 owner);
-
-void mnuDestroyScrollPanel(MenuScrollPanel *menu);
-
-
-void mnuActivatePendingPanelResource(MenuScrollPanel *context);
-
-void mnuConfigurePanelResource(MenuScrollPanel *menu, u32 model, u32 value, u32 color);
-
-u8 mnuHasActivePanelResource(MenuScrollPanel *resources);
-
 
 
 /* Three resource-slot handles at +0xE4/+0xE8/+0xEC. */
