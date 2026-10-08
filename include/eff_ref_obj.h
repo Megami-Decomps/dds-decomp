@@ -4,6 +4,7 @@
 #include "common.h"
 
 struct SdfMemBlock;
+struct SdfTextureFileHeader;
 
 /* Reference-counted texture payload placed at the end of its allocation. */
 typedef struct RefObj {
@@ -20,5 +21,9 @@ typedef struct RefObj {
 typedef char RefObjSizeCheck[sizeof(RefObj) == 0x20 ? 1 : -1];
 typedef char RefObjAllocationOffsetCheck[
     ((u32)&((RefObj *)0)->allocationHandle == 0x1C) ? 1 : -1];
+
+RefObj *effCreateSharedTextureReference(struct SdfTextureFileHeader *source);
+RefObj *effCloneSharedReferenceWithValue(struct SdfTextureFileHeader *source, u32 textureIndex);
+void effReleaseSharedReference(RefObj *obj);
 
 #endif

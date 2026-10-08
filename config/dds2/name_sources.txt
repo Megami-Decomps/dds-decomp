@@ -4451,6 +4451,7 @@
 0x002B53B8	mnuAddPartySkillIfMissing	inferred	adds missing skill then recomputes HP/MP [names_R_FuncNames.tsv]
 0x002B5430	mnuClearPartySkillSlot	inferred	clears skill slot then recomputes HP/MP [names_R_FuncNames.tsv]
 0x002B5450	mnuCampMenuHandleInput	inferred	Handles confirm/cancel on selected skill window and advances its list cursor. [names_reviewed5.tsv]
+0x002B5580	ptySkillMenuHandleSelection	inferred	Paired DDS1 handler applies the selected skill to a party slot, rebuilds the party panel, and processes window input.
 0x002B5778	mnuSwapPartySkillSlots	inferred	swaps two 16-bit party skill entries [names_R_FuncNames.tsv]
 0x002B57A8	ptySkillMenuHandleSlotReorder	inferred	Picks two skill slots, exchanges their IDs and refreshes selected window cursor. [names_reviewed5.tsv]
 0x002B5980	ptySkillMenuUpdate	inferred	Dispatches skill list input to ordinary, transfer or reorder mode after popup polling. [names_reviewed5.tsv]
@@ -4952,6 +4953,7 @@
 0x002DDA50	effPropagateResourceModelMask	inferred	confidence=high; matched-C; src/dds2/game/code_002DC138.c:612:func_002DDA50; Propagates the resource-owner model through its masked model callback.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002DDA68	effScaleModelVec	inferred	vf10 = (0,0,0,1)*scale then func_00232B40 on ctx+0xC0
 0x002DDA98	effObjectListCountersReset	inferred	body effect work operation [names_R_FuncNames7.tsv]
+0x002DDAA8	effCreateSharedTextureReference	inferred	allocates and returns a retained shared texture reference from a serialized texture header
 0x002DDCA0	effCloneSharedReferenceWithValue	inferred	Clones a reference object then assigns the supplied value to its metadata word. [names_reviewed5.tsv]
 0x002DDD40	effRetainSharedReference	inferred	Increments the object's reference count and the global shared-reference count.
 0x002DDF08	effCountExpandedEntries	inferred	Sums one plus each entry's additional count across 16-byte effect entries.

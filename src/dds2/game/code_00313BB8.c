@@ -978,7 +978,115 @@ s32 func_00315C40(u32 index) {
 
 /* The evaluator masks its incoming requirement ID to the lower sixteen bits. */
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", func_00315C68);
+s32 func_00315C68(u32 state, u32 flags, DatPartyRecord *unit, u32 requirementId, u32 *mismatchCount) {
+    PrfRequirementOperand *rules = NULL;
+    u32 expected = 0;
+    u32 count = 0;
+    u32 result = 1;
+    u32 i;
+
+    requirementId &= 0xFFFF;
+    switch (state) {
+    case 0: {
+        MantraNodePos *node = mnuGetMantraNodePositionRecord((s16)requirementId);
+
+        if (node == NULL) {
+            return 0;
+        }
+        if ((node->selector.packed & 0xF) != 3) {
+            return mnuIsResourceCategoryAvailable(requirementId);
+        }
+        if (mnuIsResourceCategoryAvailable(requirementId) == 0) {
+            return 0;
+        }
+    }
+    /* Kind 3 also uses the serialized requirements. */
+    case 1:
+        rules = D_00402BE0[requirementId].rules;
+        if (D_00402BE0[requirementId].state & 0x10) {
+            result = 0;
+            expected = 1;
+        }
+        break;
+    }
+    if (rules == NULL) {
+        return 0;
+    }
+    for (i = 0; i < 2; i++) {
+        switch (rules[i].operation) {
+        case 1:
+            if (flags == 0 || (flags & 4)) {
+                if (ptyHasAllReqProfiles(unit, &rules[i]) == expected) {
+                    result = expected;
+                } else {
+                    count++;
+                }
+            }
+            break;
+        case 2:
+            if (flags == 0 || (flags & 4)) {
+                if (ptyReqProfileCountAtLeast(unit, &rules[i]) == expected) {
+                    result = expected;
+                } else {
+                    count++;
+                }
+            }
+            break;
+        case 4:
+            if (flags == 0 || (flags & 4)) {
+                if (ptyProfileCountAtLeast(unit, &rules[i]) == expected) {
+                    result = expected;
+                } else {
+                    count++;
+                }
+            }
+            break;
+        case 8:
+            if (flags == 0 || (flags & 4)) {
+                if (ptyAreReqProfilesInParty(&rules[i]) == expected) {
+                    result = expected;
+                } else {
+                    count++;
+                }
+            }
+            break;
+        case 16:
+            if (flags == 0) {
+                if (prfReqCheckUnitLevel(unit, &rules[i]) == expected) {
+                    result = expected;
+                } else {
+                    count++;
+                }
+            }
+            break;
+        case 32:
+            if (flags == 0 || (flags & 1)) {
+                if (prfReqCheckGlobalCounter(&rules[i]) == expected) {
+                    result = expected;
+                } else {
+                    count++;
+                }
+            }
+            break;
+        }
+    }
+    if (flags == 0) {
+        if ((D_00402BE0[requirementId].state & 0x20) == 0) {
+            if (func_00315950(requirementId, unit, D_00402BE0[requirementId].state) == 0) {
+                result = 0;
+            }
+        }
+    } else if (flags & 2) {
+        result = 1;
+        if ((D_00402BE0[requirementId].state & 0x20) == 0) {
+            result = func_00315950(requirementId, unit, D_00402BE0[requirementId].state) != 0;
+        }
+    }
+    if (mismatchCount != NULL) {
+        *mismatchCount = count;
+    }
+    return result;
+}
 
 s32 func_00315FA0(u32 mode, DatPartyRecord *unit, u16 id) {
     return func_00315C68(mode, 0, unit, id, 0);
