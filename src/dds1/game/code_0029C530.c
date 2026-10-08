@@ -842,21 +842,11 @@ void effReleaseFadeBlendWork(u32 resourceHandle) {
     effReleaseBlurTemplate((EffBlurTemplate *)resourceHandle);
 }
 
-typedef struct EffMapOutB {
-    s32 mode;   // 0x00
-    u32 color;  // 0x04
-    u32 param;  // 0x08
-    f32 rateB;  // 0x0C
-    f32 rateA;  // 0x10
-    s32 posX;   // 0x14
-    s32 posY;   // 0x18
-} EffMapOutB;
-
 /* Draw the fade in fixed subpixel units, either centered or at the projected position.
  * Projected X/Y use sixteen units per pixel; output Y is doubled. */
 void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
-    EffMapOutB *out = (EffMapOutB *)work->handle;
+    EffBlurTemplate *out = (EffBlurTemplate *)work->handle;
     s32 progress = config->progress;
     s32 limit = 0;
     f32 rate;
@@ -876,9 +866,9 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     }
     rate = func_00297270(&config->rateB.curve, limit, progress);
     if (config->fixedMode != 0) {
-        out->posX = 0;
-        out->posY = 0;
-        out->mode = (s32)(rate * 16.0f);
+        out->body.source.x = 0;
+        out->body.source.y = 0;
+        out->body.extent = (s32)(rate * 16.0f);
     } else {
         s32 mode;
         s32 px;
@@ -887,15 +877,15 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
         rate *= work->scale;
         VU0_LOAD_VF(vf10, work);
         mode = (s32)(mnuMeasureProjectedPerpendicularDistance(rate) * 16.0f);
-        out->mode = mode;
+        out->body.extent = mode;
         if (mode == 0) {
             return;
         }
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         py = (s32)(pos[1] * 16.0f) - 0x8000;
         px = (s32)(pos[0] * 16.0f) - 0x8000;
-        out->posX = px;
-        out->posY = py << 1;
+        out->body.source.x = px;
+        out->body.source.y = py << 1;
     }
     second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
     color1[0] = work->color;
@@ -907,10 +897,10 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
-    out->color = blended[0];
-    out->rateA = func_00297270(&config->blendB, limit, progress) * 0.01f + 1.0f;
-    out->rateB = func_00297270(&config->rateA.curve, limit, progress) * 0.01f;
-    out->param = work->mode;
+    out->body.source.color = blended[0];
+    out->body.source.displacement = func_00297270(&config->blendB, limit, progress) * 0.01f + 1.0f;
+    out->body.source.angle = func_00297270(&config->rateA.curve, limit, progress) * 0.01f;
+    out->body.source.blendControl = work->mode;
     effDrawBlurFixedPointRectangle(out);
 }
 
@@ -922,7 +912,7 @@ void effUpdateTarget(EffKindWork *work, u32 target) {
         }
         work->target = target;
     }
-    ((EffMapOutWide *)work->handle)->target = target;
+    ((EffBlurTemplate *)work->handle)->resourceWord = target;
 }
 
 u32 effCreateFixedSlotBlurWorkFromFadeOutput(void *source) {
