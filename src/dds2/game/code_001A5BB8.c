@@ -306,24 +306,31 @@ extern void itfMesOffsetNodeChain(FrFontGlyph *node, s32 dx, s32 dy);
 extern void itfMesSetRowItemFlag();
 extern void sndSetSequenceVolumePan();
 extern void sndStepSequenceIndex(ItfMesBlk40 *sel, s32 dir);
+/* Option IDs index the same signed-byte bank used by the named controls. */
 typedef struct SndPad {
-    u8 pad00[0x21];
-    s8 confirm;
-    u8 pad22[4];
-    s8 prev;
-    s8 next;
-    u8 pad28[9];
-    s8 unk31;
-    s8 unk32;
-    s8 cancel;
-    s8 coarseDown;
-    s8 coarseUp;
-    s8 unk36;
-    s8 unk37;
-    s8 fineDown;
-    u8 pad39;
-    s8 fineUp;
-    u8 pad3B[5];
+    u8 pad00[0x20];
+    union {
+        s8 buttons[0x20];
+        struct {
+            u8 pad20;
+            s8 confirm;
+            u8 pad22[4];
+            s8 prev;
+            s8 next;
+            u8 pad28[9];
+            s8 unk31;
+            s8 unk32;
+            s8 cancel;
+            s8 coarseDown;
+            s8 coarseUp;
+            s8 unk36;
+            s8 unk37;
+            s8 fineDown;
+            u8 pad39;
+            s8 fineUp;
+            u8 pad3B[5];
+        };
+    };
 } SndPad;
 extern SndPad D_0037F510;
 extern s32 func_001A6AB8();
@@ -902,7 +909,20 @@ s32 sndVisitQueuedResources(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A76C8);
+extern s32 func_001200E0(void);
+
+s32 func_001A76C8(void) {
+    ItfMesPoolNode *node;
+
+    if (func_001200E0() != 0) {
+        return 0;
+    }
+    for (node = itfMesWork.pool.activeHead; node != NULL; node = node->next) {
+        itfUpdateSoundSelectorPanel((ItfMesState *)node->stateAddress);
+    }
+    itfMesWork.unk8++;
+    return 0;
+}
 
 void sndFlushMessageQueue(void) {
     ItfMesPoolNode *node = itfMesWork.pool.activeHead;

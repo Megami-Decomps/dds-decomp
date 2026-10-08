@@ -164,6 +164,11 @@ typedef struct ItfMesEntryBlock {
     s16 tableCount;
 } ItfMesEntryBlock;
 
+typedef struct ItfMesOption {
+    s16 id;
+    s16 value;
+} ItfMesOption;
+
 typedef struct ItfMesBlk40 {
     u32 x;
     u32 y;
@@ -177,7 +182,7 @@ typedef struct ItfMesBlk40 {
     s32 unk1C;
     s16 unk20;
     s16 optionCount;
-    struct { s16 id; s16 value; } options[15];
+    ItfMesOption options[15];
 } ItfMesBlk40;
 
 /* The three sprite records occupy +0xA4/+0xA8/+0xAC in the window state. */
