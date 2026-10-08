@@ -172,11 +172,11 @@ extern void *memset(void *, s32, u32);
 
 /* Allocate and clear scene work before registering its grid and coordinates. */
 s32 mnuCreateSceneWork(void) {
-    s32 allocationHandle = (u32)sdfAllocGeneralBlock(MNU_SCENE_WORK_SIZE);
-    u8 *sceneWork = (u8 *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)allocationHandle);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(MNU_SCENE_WORK_SIZE);
+    u8 *sceneWork = (u8 *)sdfMemoryGetBlockAddress(allocation);
 
     memset(sceneWork, 0, MNU_SCENE_WORK_SIZE);
-    ((MenuSceneWork *)sceneWork)->allocationHandle = allocationHandle;
+    ((MenuSceneWork *)sceneWork)->allocation = allocation;
     mnuInitializeMantraSelectionGrid((s32)sceneWork);
     ((MenuSceneWork *)sceneWork)->coordinateA = 0;
     ((MenuSceneWork *)sceneWork)->coordinateB = 0;
@@ -190,7 +190,7 @@ void mnuReleaseSceneContext(s32 unused, s32 sceneAddress) {
     func_002CB3B8(mnuSceneResourceContext, -1);
     sdfDestroyGridWork(((MenuSceneWork *)sceneAddress)->gridHandle);
     mnuReleaseDisplayListNodes(sceneAddress + 0x584);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((MenuSceneWork *)sceneAddress)->allocationHandle));
+    sdfReleaseResourceAllocation(((MenuSceneWork *)sceneAddress)->allocation);
     mnuResetWorkFloats();
 }
 

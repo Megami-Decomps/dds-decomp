@@ -45,11 +45,11 @@ void evtBeginUnitValueColorTransition(EffWorldNode *object, s32 value) {
     u32 packed1;
     u32 packed2;
 
-    state->flags |= 1;
+    state->flags |= EFF_LIGHT_FLAG_UPDATE_COLOR_VECTORS;
     if (value == 0) {
-        state->flags &= ~2;
+        state->flags &= ~EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS;
     } else {
-        state->flags |= 2;
+        state->flags |= EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS;
         state->blendFrames = value;
         VU0_LOAD_VF(vf10, D_0037F770[0]);
         EE_MMI_RGBA_PACK_F128(packed1);
@@ -65,7 +65,7 @@ void evtBeginUnitValueColorTransition(EffWorldNode *object, s32 value) {
 void dds3ClearUnitObjectLowFlags(EffWorldNode *object) {
     EffLightData *data = object->data;
 
-    data->flags = data->flags & 0xfffffffc;
+    data->flags &= ~(EFF_LIGHT_FLAG_UPDATE_COLOR_VECTORS | EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS);
 }
 
 /* Kind-5 effect payloads retain transition work separately from light data. */

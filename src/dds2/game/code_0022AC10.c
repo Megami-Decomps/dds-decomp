@@ -14,6 +14,7 @@
 #include "sdf_packet_builders.h"
 #include "mdl.h"
 #include "evt_unit.h"
+#include "evt_event_pack.h"
 #include "evt_task.h"
 #include "scr.h"
 #include "dat_state.h"
@@ -248,7 +249,6 @@ extern char btlPrimaryScriptResourceName[];
 
 extern char btlSecondaryScriptResourceName[];
 
-extern void *evtFindTaskResourceEntryByKey(u32, s32);
 
 extern char D_0041B7E0[];
 

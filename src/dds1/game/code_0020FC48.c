@@ -7,6 +7,7 @@
 #include "btl_state.h"
 #include "btl_sound.h"
 #include "evt_unit.h"
+#include "evt_event_pack.h"
 #include "evt_task.h"
 #include "btl_task_args.h"
 #include "btl_command.h"
@@ -329,7 +330,7 @@ s32 btlIsEventSequenceTaskReady(void) {
         btlBossDebugPrintf(D_003A67A0);
         return 0;
     }
-    if (evtGetTaskValueWord(battle->eventTaskId) == 2) {
+    if (evtGetEventPackLoadedState(battle->eventTaskId) == 2) {
         return 1;
     }
     btlBossDebugPrintf(D_003A67B8);
@@ -362,7 +363,6 @@ void btlReleaseEventData(void) {
     btlBossDebugPrintf(D_003A67D0);
 }
 
-extern void *evtFindTaskResourceEntryByKey(u32, s32);
 
 extern void btlCreateIndexedSoundResourceNode(s32, void *);
 
