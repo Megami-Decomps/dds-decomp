@@ -1817,7 +1817,7 @@ void func_00280E08(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *page, s32 p
     } while (i < 2);
     if (value != 0) {
         glyphAddress = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BAA84 + value * 25, 0);
-        func_003014F0(text, D_003BC720, datCommandRecords[evtGetIndexedEventRecordId(value)].stat18);
+        func_003014F0(text, D_003BC720, datCommandRecords[evtGetIndexedEventRecordId(value)].hpPower);
         glyphAddress = func_001978E8(x + 0xF70, y + 0x348, z, color, text, glyphAddress);
     } else {
         glyphAddress = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);

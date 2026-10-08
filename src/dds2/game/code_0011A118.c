@@ -1318,10 +1318,10 @@ s32 evtSelectScriptStatValue(void) {
     u16 statOption = context->options;
     switch (statOption) {
     case 1:
-        statValue = datCommandRecords[context->third].stat18;
+        statValue = datCommandRecords[context->third].hpPower;
         break;
     case 2:
-        statValue = datCommandRecords[context->third].stat1C;
+        statValue = datCommandRecords[context->third].mpPower;
         break;
     default:
         statValue = 0;
@@ -1339,10 +1339,10 @@ s32 evtPushEntryIndexedStatOption(void) {
     u16 commandIndex = ((EventIndexRecord *)datItemSkillRecords)[((DatPartyRecord *)context->first)->menuValue].index;
     switch (statOption) {
     case 1:
-        statValue = datCommandRecords[commandIndex].stat18;
+        statValue = datCommandRecords[commandIndex].hpPower;
         break;
     case 2:
-        statValue = datCommandRecords[commandIndex].stat1C;
+        statValue = datCommandRecords[commandIndex].mpPower;
         break;
     default:
         statValue = 0;
