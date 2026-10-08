@@ -676,7 +676,7 @@ EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct SdfMemBlock *resour
 
     set = sdfAllocSizeClassBlock(0x30);
     memset(set, 0, 0x30);
-    set->unk04 = 0;
+    set->sharesTextureReferences = 0;
     set->sourceAllocation = keepAllocation != 0 ? resourceAllocation : 0;
     resource = (u8 *)sdfResourceRetainAddress(resourceAllocation);
     set->textureCount = *(u16 *)(resource + 0x14);
@@ -708,7 +708,7 @@ extern void effResetSlotWork(u32, u32);
 EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 count) {
     EffectSlotSet *effect = (EffectSlotSet *)sdfAllocSizeClassBlock(0x30);
     u32 index = 0;
-    effect->unk04 = 1;
+    effect->sharesTextureReferences = 1;
     {
         u32 mode = source->textureCount;
         SdfTex **textureReferences = source->textureReferences;
@@ -736,7 +736,7 @@ u32 effDestroyResourceSlotSet(EffectSlotSet *set) {
     if (set->sourceAllocation != 0) {
         sdfReleaseResourceAllocation(set->sourceAllocation);
     }
-    if (set->unk04 == 0) {
+    if (set->sharesTextureReferences == 0) {
         effReleaseTextureHandlesAndResetSlots(set);
         sdfReleaseResourceAllocation(set->textureAllocation);
     }
