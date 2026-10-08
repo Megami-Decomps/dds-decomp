@@ -5,6 +5,7 @@
 #include "eff_object.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
+#include "evt_task.h"
 #include "scr.h"
 #include "evt_solar.h"
 
@@ -52,8 +53,6 @@ void evtDisableSolarPhaseAdvance(void);
 
 
 void evtSetSolarPhase(s32 phase);
-
-void evtPolygonMovieClearFlagBits(s32 movieId, u32 bits);
 
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
@@ -122,9 +121,9 @@ u32 fldGetPlayerSceneState(void);
 EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *unit);
 
 
-s32 evtFindTaskById(s32 id);
-
 s32 evtGetTaskValueWord(s32 id);
+
+extern void func_00101A80(KwlnTask *parent, KwlnTask *child);
 
 extern char D_003AC968[]; /* "BE ok! (%d)\n" */
 
@@ -905,7 +904,7 @@ s32 evtCommandWaitForCampTask(void) {
         message = D_003AC958;
         evtPrintDeveloperConsoleMessage(message, taskId);
         sdfPrintFormattedDevMessage(message, taskId);
-        func_00101A80((s32)commandWork->task, mnuCampCreateTask(taskId));
+        func_00101A80(commandWork->task, mnuCampCreateTask(taskId));
         return 0;
     }
     if (evtGetTaskValueWord(taskId) == EVT_CAMP_TASK_READY_VALUE) {
@@ -930,7 +929,7 @@ s32 evtCommandStartCampTaskIfAbsent(void) {
         return 1;
     }
     evtPrintDeveloperConsoleMessage(D_003AC978, taskId);
-    func_00101A80((s32)commandWork->task, mnuCampCreateTask(taskId));
+    func_00101A80(commandWork->task, mnuCampCreateTask(taskId));
     return 1;
 }
 
@@ -970,7 +969,7 @@ s32 evtCommandStartPolygonMovie(void) {
     ScrData *commandWork = scrGetCurrentContext();
     s32 eventId;
     s32 sceneId;
-    s32 movieTask;
+    KwlnTask *movieTask;
 
     if (commandWork == NULL) {
         return 1;
@@ -983,9 +982,9 @@ s32 evtCommandStartPolygonMovie(void) {
     sceneId = scrReadIntParameter(1);
     movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
     evtPrintDeveloperConsoleMessage(D_003AC9E0, scrReadIntParameter(0), scrReadIntParameter(1));
-    func_00101A80((s32)commandWork->task, movieTask);
+    func_00101A80(commandWork->task, movieTask);
     evtPolygonMovieSetFlagBits(movieTask, 1);
-    scrSetIntegerReturnValue(movieTask);
+    scrSetIntegerReturnValue((s32)(u32)movieTask);
     return 1;
 }
 
@@ -995,7 +994,7 @@ s32 evtCommandClearPolygonMovieFlag(void)
     s32 movieId;
 
     movieId = scrReadIntParameter(0);
-    evtPolygonMovieClearFlagBits(movieId, 1);
+    evtPolygonMovieClearFlagBits((KwlnTask *)(u32)movieId, 1);
     scrSetIntegerReturnValue(movieId);
     return 1;
 }
@@ -1006,7 +1005,7 @@ s32 evtCommandCreatePolygonMovie(void) {
     ScrData *commandWork = scrGetCurrentContext();
     s32 eventId;
     s32 sceneId;
-    s32 movieTask;
+    KwlnTask *movieTask;
 
     if (commandWork == NULL) {
         return 1;
@@ -1018,8 +1017,8 @@ s32 evtCommandCreatePolygonMovie(void) {
     eventId = scrReadIntParameter(0);
     sceneId = scrReadIntParameter(1);
     movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
-    func_00101A80((s32)commandWork->task, movieTask);
-    scrSetIntegerReturnValue(movieTask);
+    func_00101A80(commandWork->task, movieTask);
+    scrSetIntegerReturnValue((s32)(u32)movieTask);
     return 1;
 }
 

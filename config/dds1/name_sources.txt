@@ -5177,6 +5177,7 @@
 0x002913B8	fileConsumeConfigTaskReady	inferred	DDS2 002D13F0 twin; returns one while config task state=1, clears final state=2 [names_R_FuncNames2.tsv]
 0x002913F0	fileGetConfigTaskSlot	inferred	DDS2 002D1428 candidate twin (tentative score 1.000); returns one of four slots from config task or zero [names_R_FuncNames2.tsv]
 0x00291880	fileStartQueuedLoad	inferred	file file requests and records in game/code_0028A0E0.c
+0x002918D8	fileUpdateConfigOwnerTask	inferred	Returns the signed task-update control word: zero keeps this owner callback installed; -1 requests active-task destruction when the config result is negative.
 0x00292BA8	fileManagerResetSubsystems	inferred	resets five manager globals and four subsystems
 0x00292C18	fileSetRenderFlag	inferred	legacy SetRenderFlag: file/memory-card manager in game/code_0028A0E0
 0x00292C28	fileClearRenderFlag	inferred	legacy ClearRenderFlag: file/memory-card manager in game/code_0028A0E0

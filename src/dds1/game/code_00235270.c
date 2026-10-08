@@ -10,6 +10,7 @@
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "kwln.h"
+#include "evt_task.h"
 #include "evt_unit.h"
 #include "evt_polygon_movie.h"
 #include "fld.h"
@@ -28,7 +29,6 @@ extern EvtPictureWork *evtAllocateContext(void);
 extern void evtSetConvertedContextValue(EvtPictureWork *, const char *);
 extern void evtUpdatePictureWhenFlagged(void);
 extern void evtPictureReleaseTaskTextureAndState(void);
-extern s32 evtFindTaskById();
 extern s32 func_003014F0(char *, char *, ...);
 extern void evtFormatTaskName(s32 taskId, void *buffer);
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, void *, void *, u32);
@@ -3889,20 +3889,20 @@ void evtFormatTaskName(s32 taskId, void *buffer) {
     func_003014F0(buffer, D_003BC360, taskId);
 }
 
-s32 evtFindTaskById(u32 taskId) {
+KwlnTask *evtFindTaskById(u32 taskId) {
     u8 taskName[32];
 
     evtFormatTaskName(taskId, taskName);
-    return (s32)kwlnTaskGetTaskByName((const char *)taskName);
+    return kwlnTaskGetTaskByName((const char *)taskName);
 }
 
 /* The script-visible second payload word has a task-kind-specific meaning. */
 s32 evtGetTaskValueWord(u32 taskId) {
-    s32 task;
+    KwlnTask *task;
 
     task = evtFindTaskById(taskId);
     if (task != 0) {
-        s32 *words = (s32 *)kwlnTaskGetUserValue((KwlnTask *)task);
+        s32 *words = (s32 *)kwlnTaskGetUserValue(task);
         return words[1];
     } else {
         return -1;
@@ -3910,11 +3910,11 @@ s32 evtGetTaskValueWord(u32 taskId) {
 }
 
 void *evtGetTaskData(u32 taskId) {
-    s32 task;
+    KwlnTask *task;
 
     task = evtFindTaskById(taskId);
     if (task != 0) {
-        return (void *)kwlnTaskGetUserValue((KwlnTask *)task);
+        return (void *)kwlnTaskGetUserValue(task);
     }
     return (void *)task;
 }
@@ -3923,11 +3923,11 @@ void *evtGetTaskData(u32 taskId) {
 void *evtFindTaskResourceEntryByKey(u32 taskId, s32 key) {
     s32 i;
     EvtPackLoadState *data;
-    s32 task;
+    KwlnTask *task;
 
     task = evtFindTaskById(taskId);
     if (task != 0) {
-        data = (EvtPackLoadState *)kwlnTaskGetUserValue((KwlnTask *)task);
+        data = (EvtPackLoadState *)kwlnTaskGetUserValue(task);
         if (data->loaded != 2) {
             return 0;
         }

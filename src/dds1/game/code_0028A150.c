@@ -3220,7 +3220,7 @@ extern s32 func_00290FE0();
 extern s32 func_00291418(void);
 
 extern s32 fileStartQueuedLoad(void);
-extern u32 fileGetConfigTaskFailure(void);
+extern s32 fileUpdateConfigOwnerTask(void);
 extern void *kwlnTaskCreate(const char *name, s32 id, s32 optionA, s32 optionB, void *update, void *destroy, s32 data);
 
 void mnuCreateConfigTasks(void) {
@@ -3228,7 +3228,7 @@ void mnuCreateConfigTasks(void) {
         fileConfigTaskWork = func_00290FE0();
         kwlnTaskCreate(fileConfigInputTaskName, 0x3F2, 1, 1, func_00291418, NULL, fileConfigTaskWork);
         kwlnTaskCreate(fileConfigLoadTaskName, 0x2B07, 1, 1, fileStartQueuedLoad, NULL, fileConfigTaskWork);
-        kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileGetConfigTaskFailure, fileConfigTaskDestroy, fileConfigTaskWork);
+        kwlnTaskCreate(fileConfigOwnerTaskName, 0x520B, 1, 1, fileUpdateConfigOwnerTask, fileConfigTaskDestroy, fileConfigTaskWork);
         fileConfigTaskState = 1;
     }
 }
@@ -3398,10 +3398,10 @@ s32 fileStartQueuedLoad(void) {
     return 0;
 }
 
-u32 fileGetConfigTaskFailure(void) {
-    u32 result;
+s32 fileUpdateConfigOwnerTask(void) {
+    s32 result;
 
-    result = 0xffffffff;
+    result = -1;
     if ((((FileConfigTask *)fileConfigTaskWork)->result & 0x80000000) == 0) {
         result = 0;
     }

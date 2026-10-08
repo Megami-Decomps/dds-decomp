@@ -11,6 +11,7 @@
 #include "dat_state.h"
 #include "fld.h"
 #include "evt_solar.h"
+#include "evt_task.h"
 #include "kwln_task_lifecycle.h"
 
 #define CAMP_TASK_NAME_BYTES 0x20
@@ -63,7 +64,6 @@ extern s32 ptyCountBulletItem(s32);
 extern s8 D_003BC39C;
 
 extern KwlnTask *kwlnTaskFindByPriority(u32 prio);
-extern s32 evtFindTaskById(u32 taskId);
 
 
 
@@ -76,7 +76,7 @@ extern char D_003AF428[]; /* "camp_update" */
 extern void evtFormatTaskName(s32 taskId, void *name);
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *memset(void *dst, s32 c, u32 n);
-extern s32 kwlnTaskCreate(void *name, s32 priority, s32 group, s32 flags, void *update, void *destroy, void *data);
+extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay, TaskUpdate update, TaskDestroy destroy, u32 userValue);
 extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
@@ -91,26 +91,29 @@ extern s32 effLoadIndexedResource(const char *, s32, s32);
 
 
 /* Schedule the camp task only if no task currently owns this event ID. */
-void mnuCampCreateTask(s32 taskId) {
+KwlnTask *mnuCampCreateTask(s32 taskId) {
     char taskName[CAMP_TASK_NAME_BYTES];
     EvtPackLoadState *taskData;
+    KwlnTask *task;
 
-    if (evtFindTaskById(taskId) == 0) {
+    task = evtFindTaskById(taskId);
+    if (task == 0) {
         evtFormatTaskName(taskId, taskName);
         taskData = sdfAllocSizeClassBlock(CAMP_TASK_DATA_BYTES);
         memset(taskData, 0, CAMP_TASK_DATA_BYTES);
         taskData->eventId = taskId;
         taskData->loaded = 0;
-        kwlnTaskCreate(taskName, CAMP_TASK_PRIORITY, 1, 1, evtTickPackLoad, evtReleaseEventPackResources, taskData);
+        task = kwlnTaskCreate(taskName, CAMP_TASK_PRIORITY, 1, 1, evtTickPackLoad, evtReleaseEventPackResources, (u32)taskData);
     }
+    return task;
 }
 
 void mnuCampDestroyTaskById(s32 taskId) {
-    s32 taskHandle;
+    KwlnTask *taskHandle;
 
     taskHandle = evtFindTaskById(taskId);
     if (taskHandle != 0) {
-        kwlnTaskDestroyWithHierarchy((KwlnTask *)(u32)taskHandle, 0);
+        kwlnTaskDestroyWithHierarchy(taskHandle, 0);
         return;
     }
 }
@@ -1107,9 +1110,9 @@ s32 mnuOpenShopSceneWithInitialSelection(s32 *initialSelection) {
     if (initialSelection != 0) {
         ctx->initialSelection = *initialSelection;
     }
-    kwlnTaskCreate(D_003BC3A0, 0x402, 1, 1, mnuCampRunPanel0, 0, ctx);
-    kwlnTaskCreate(D_003AF418, 0x2B12, 1, 1, mnuCampRunPanel1, 0, ctx);
-    result = kwlnTaskCreate(D_003AF428, 0x520E, 1, 1, mnuCampRunPanel2, mnuShopDestroyScene, ctx);
+    kwlnTaskCreate(D_003BC3A0, 0x402, 1, 1, mnuCampRunPanel0, 0, (u32)ctx);
+    kwlnTaskCreate(D_003AF418, 0x2B12, 1, 1, mnuCampRunPanel1, 0, (u32)ctx);
+    result = (s32)(u32)kwlnTaskCreate(D_003AF428, 0x520E, 1, 1, mnuCampRunPanel2, mnuShopDestroyScene, (u32)ctx);
     D_003BC39C = 1;
     return result;
 }
