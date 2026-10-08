@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_effect_position.h"
 #include "pcp_vu0.h"
 #include "btl.h"
 #include "eff.h"
@@ -55,14 +56,12 @@ void effBattleMiscCallByFinalSelector(u32 unused, void *arg) {
     effBattleComputeTargetPosition(effBTLFieldColorGetFinalSelector(), arg);
 }
 
-extern void btlSetActorEffectParameterOrMuzzlePosition();
-
 void effApplyOverrideActorEffectParameter(u32 unused, EffectVectorRequest *param) {
-    btlSetActorEffectParameterOrMuzzlePosition(effBTLFieldColorGetOverrideSelector(), param->count);
+    btlSetActorEffectParameterOrMuzzlePosition((BtlUnit *)effBTLFieldColorGetOverrideSelector(), param->count);
 }
 
 void effApplyFinalActorEffectParameter(u32 unused, EffectVectorRequest *param) {
-    btlSetActorEffectParameterOrMuzzlePosition(effBTLFieldColorGetFinalSelector(), param->count);
+    btlSetActorEffectParameterOrMuzzlePosition((BtlUnit *)effBTLFieldColorGetFinalSelector(), param->count);
 }
 
 /* Query a unit-relative target position; camera-facing kinds use the view basis. */
@@ -291,7 +290,7 @@ void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *para
 }
 
 void effBattleMiscApplyParamByte(u32 owner, EffectVectorRequest *param) {
-    btlSetActorEffectParameterOrMuzzlePosition(owner, param->count);
+    btlSetActorEffectParameterOrMuzzlePosition((BtlUnit *)owner, param->count);
 }
 
 f32 effBattleMiscQueryScalar(BtlUnit *unit, EffectVectorRequest *param) {
