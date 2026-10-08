@@ -19,8 +19,6 @@ void *sdfAllocSizeClassBlock(s32 size);
 
 void *func_00157D38(void *arg);
 
-void billSetAnimationEntry(BillObj *arg0, s32 arg1);
-
 BillData *billCreateAnimationDataFromResource(void *arg);
 
 extern BillDispatch D_003AA998[];

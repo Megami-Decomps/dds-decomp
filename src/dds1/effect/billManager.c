@@ -16,7 +16,6 @@ void effReleaseSharedTextureRecord(void *arg);
 void billAppendChildQuad(BillObj *obj, BillChildPayload *child);
 void billReleaseSharedEntryBlock(void *arg);
 void *func_00150148(void *arg);
-void billSetAnimationEntry(BillObj *arg0, s32 arg1);
 BillData *billCreateAnimationDataFromResource(void *arg);
 
 extern void *memcpy(void *dst, const void *src, u32 size);
