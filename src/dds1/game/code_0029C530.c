@@ -11,6 +11,7 @@
 #include "btl_state.h"
 #include "evt_unit.h"
 #include "eff_blur.h"
+#include "eff_event_draw.h"
 #include "eff_curve.h"
 #include "file.h"
 #include "file_slot.h"
@@ -706,17 +707,6 @@ void effSelectionFrameAdvance(s32 *counter) {
     *counter = frame + 1;
 }
 
-typedef struct EffFadeOut {
-    u32 color;    // 0x00
-    u32 param;    // 0x04
-    u32 unk8;     // 0x08
-    u32 unkC;     // 0x0C
-    s32 unk10;    // 0x10
-    s32 unk14;    // 0x14
-} EffFadeOut;
-
-
-
 typedef struct EffFadeConfig {
     /* Color and alpha tracks at 0x00/0x24, followed by three scalar
      * tracks at 0x34, 0x60 and 0x8C. The scalar extents differ. */
@@ -728,50 +718,8 @@ typedef struct EffFadeConfig {
     EffScalarTrack rateB;   /* 0x8C */
     s32 progress;         /* 0xB8 */
     u8 padBC[4];
-    EffFadeOut out;       /* 0xC0 */
+    EffSolidRectParams out; /* 0xC0 */
 } EffFadeConfig;
-
-typedef struct EffMapOut {
-    u8 pad_00[0xC];
-    u32 color;  // 0x0C
-    u32 param;  // 0x10
-    f32 rateB;  // 0x14
-    f32 rateA;  // 0x18
-    s32 posX;   // 0x1C
-    s32 posY;   // 0x20
-    s32 mode;   // 0x24
-} EffMapOut;
-
-/* Same as EffMapOut with one more word before the rate/position fields. */
-typedef struct EffMapOutWide {
-    u8 pad_00[0xC];
-    u32 color;  // 0x0C
-    u32 param;  // 0x10
-    f32 rateB;  // 0x14
-    u32 unk18;
-    f32 rateA;  // 0x1C
-    s32 posX;   // 0x20
-    s32 posY;   // 0x24
-    s32 mode;   // 0x28
-    u32 target; // 0x2C, retained kind-linked texture/resource
-} EffMapOutWide;
-
-
-typedef struct EffRateOut {
-    u32 color;   // 0x00
-    u32 param;   // 0x04
-    f32 rateB;   // 0x08
-    f32 rateA;   // 0x0C
-    u32 unk10;
-    u32 unk14;
-    u32 unk18;
-    u32 unk1C;
-    s32 unk20;
-    union {
-        s32 unk24;
-        u32 target;
-    };
-} EffRateOut;
 
 typedef struct EffRateConfig {
     /* Color and alpha tracks at 0x00/0x24, followed by three scalar
@@ -785,7 +733,7 @@ typedef struct EffRateConfig {
     s32 progress;         /* 0xB8 */
     u8 fixedMode;         /* 0xBC */
     u8 padBD[3];
-    EffRateOut out;       /* 0xC0 */
+    EffBlurQuad out;       /* 0xC0 */
 } EffRateConfig;
 
 /* Draw a fade rectangle when progress is zero or reaches the signed frame limit.
@@ -794,7 +742,7 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
     s32 progress = config->progress;
     s32 limit = 0;
-    EffRateOut *out = &config->out;
+    EffBlurQuad *out = &config->out;
     s32 color1[4];
     s32 color2[4];
     s32 blended[4];
@@ -808,12 +756,12 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     if (progress < limit) {
         return;
     }
-    out->unk10 = 0;
-    out->unk14 = 0;
-    out->unk18 = 0;
-    out->unk1C = 0;
-    out->unk20 = 0x200;
-    out->unk24 = 0x1C0;
+    out->x = 0;
+    out->y = 0;
+    out->left = 0;
+    out->top = 0;
+    out->right = 0x200;
+    out->bottom = 0x1C0;
     second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
     color1[0] = work->color;
     unit = 0x3C000000;
@@ -825,9 +773,9 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->color = blended[0];
-    out->rateA = func_00297270(&config->blendB, limit, progress) * 0.01f + 1.0f;
-    out->rateB = func_00297270(&config->rateA.curve, limit, progress) * 0.01f;
-    out->param = work->mode;
+    out->displacement = func_00297270(&config->blendB, limit, progress) * 0.01f + 1.0f;
+    out->angle = func_00297270(&config->rateA.curve, limit, progress) * 0.01f;
+    out->blendControl = work->mode;
     effDrawBlurRectangle(out);
 }
 
@@ -916,7 +864,7 @@ u32 effCreateFixedSlotBlurWorkFromFadeOutput(void *source) {
     return (u32)effBlurCreateScatterWork((EffBlurScatterParams *)((u8 *)source + 0xC0));
 }
 
-void effReleaseFixedSlotBlurWork(void *handle) {
+void effReleaseFixedSlotBlurWork(EffBlurScatterWork *handle) {
     effBlurReleaseFirstResource(handle);
 }
 
@@ -924,7 +872,7 @@ void effReleaseFixedSlotBlurWork(void *handle) {
  * Zero projected mode suppresses drawing; the origin and Y scaling differ from subpixels. */
 void effUpdateFadeMapA(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
-    EffMapOut *out = (EffMapOut *)work->handle;
+    EffBlurScatterWork *out = (EffBlurScatterWork *)work->handle;
     s32 progress = config->progress;
     s32 limit = 0;
     f32 rate;
@@ -944,22 +892,22 @@ void effUpdateFadeMapA(EffKindWork *work) {
     }
     rate = func_00297270(&config->rateB.curve, limit, progress);
     if (config->fixedMode != 0) {
-        out->mode = (s32)rate;
-        out->posX = 0;
-        out->posY = 0;
+        out->params.positionSpread = (s32)rate;
+        out->params.x = 0;
+        out->params.y = 0;
     } else {
         s32 mode;
 
         rate *= work->scale;
         VU0_LOAD_VF(vf10, work);
         mode = (s32)mnuMeasureProjectedPerpendicularDistance(rate);
-        out->mode = mode;
+        out->params.positionSpread = mode;
         if (mode == 0) {
             return;
         }
         VU0_STORE_VF(vf10, pos);
-        out->posX = (s32)pos[0] - 0x800;
-        out->posY = ((s32)pos[1] - 0x800) << 1;
+        out->params.x = (s32)pos[0] - 0x800;
+        out->params.y = ((s32)pos[1] - 0x800) << 1;
     }
     second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
     color1[0] = work->color;
@@ -971,11 +919,11 @@ void effUpdateFadeMapA(EffKindWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
-    out->color = blended[0];
-    out->rateA = func_00297270(&config->blendB, limit, progress) * 0.01f;
-    out->rateB = func_00297270(&config->rateA.curve, limit, progress) * 0.01f;
-    out->param = work->mode;
-    effBlurStepScatterSlotsAndDraw((EffBlurScatterWork *)out);
+    out->params.color = blended[0];
+    out->params.uvDisplacementAmplitude = func_00297270(&config->blendB, limit, progress) * 0.01f;
+    out->params.uvDisplacementAngleDegrees = func_00297270(&config->rateA.curve, limit, progress) * 0.01f;
+    out->params.blendControl = work->mode;
+    effBlurStepScatterSlotsAndDraw(out);
 }
 
 void effTextureReferenceRelease(EffKindWork *work, u32 target) {
@@ -986,22 +934,22 @@ void effTextureReferenceRelease(EffKindWork *work, u32 target) {
         }
         work->target = target;
     }
-    ((EffMapOutWide *)work->handle)->target = target;
+    ((EffBlurScatterWork *)work->handle)->sourceHandle = target;
 }
 
-void effCreateVariableSlotBlurWorkFromFadeOutput(s32 work) {
-    effCloneBlurWorkWithSlots(work + 0xc0);
+u32 effCreateVariableSlotBlurWorkFromFadeOutput(void *source) {
+    return (u32)effCloneBlurWorkWithSlots((EffBlurScaleParams *)((u8 *)source + 0xc0));
 }
 
-void effReleaseVariableSlotBlurWork(void) {
-    effBlurReleaseSecondResource();
+void effReleaseVariableSlotBlurWork(EffBlurScaleWork *work) {
+    effBlurReleaseSecondResource(work);
 }
 
 /* Draw the same pixel-unit fade into the wider renderer output record.
  * The native work header and progress gate remain shared with the other kind callbacks. */
 void effUpdateFadeMapB(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
-    EffMapOutWide *out = (EffMapOutWide *)work->handle;
+    EffBlurScaleWork *out = (EffBlurScaleWork *)work->handle;
     s32 progress = config->progress;
     s32 limit = 0;
     f32 rate;
@@ -1021,22 +969,22 @@ void effUpdateFadeMapB(EffKindWork *work) {
     }
     rate = func_00297270(&config->rateB.curve, limit, progress);
     if (config->fixedMode != 0) {
-        out->mode = (s32)rate;
-        out->posX = 0;
-        out->posY = 0;
+        out->params.size = (s32)rate;
+        out->params.x = 0;
+        out->params.y = 0;
     } else {
         s32 mode;
 
         rate *= work->scale;
         VU0_LOAD_VF(vf10, work);
         mode = (s32)mnuMeasureProjectedPerpendicularDistance(rate);
-        out->mode = mode;
+        out->params.size = mode;
         if (mode == 0) {
             return;
         }
         VU0_STORE_VF(vf10, pos);
-        out->posX = (s32)pos[0] - 0x800;
-        out->posY = ((s32)pos[1] - 0x800) << 1;
+        out->params.x = (s32)pos[0] - 0x800;
+        out->params.y = ((s32)pos[1] - 0x800) << 1;
     }
     second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
     color1[0] = work->color;
@@ -1048,10 +996,10 @@ void effUpdateFadeMapB(EffKindWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
-    out->color = blended[0];
-    out->rateA = func_00297270(&config->blendB, limit, progress) * 0.01f;
-    out->rateB = func_00297270(&config->rateA.curve, limit, progress) * 0.01f;
-    out->param = work->mode;
+    out->params.color = blended[0];
+    out->params.angleStep = func_00297270(&config->blendB, limit, progress) * 0.01f;
+    out->params.uvDisplacementAngleDegrees = func_00297270(&config->rateA.curve, limit, progress) * 0.01f;
+    out->params.blendControl = work->mode;
     effBlurStepScaleSlotsAndDraw(out);
 }
 
@@ -1063,7 +1011,7 @@ void effReplaceKindLinkedTarget(EffKindWork *work, u32 target) {
         }
         work->target = target;
     }
-    ((EffMapOutWide *)work->handle)->target = target;
+    ((EffBlurScaleWork *)work->handle)->sourceHandle = target;
 }
 
 /* Draw a framebuffer fade using raw curve rates rather than percent-scaled rates.
@@ -1072,7 +1020,7 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
     s32 progress = config->progress;
     s32 limit = 0;
-    EffRateOut *out = &config->out;
+    EffBlurQuad *out = &config->out;
     s32 color1[4];
     s32 color2[4];
     s32 blended[4];
@@ -1086,12 +1034,12 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     if (progress < limit) {
         return;
     }
-    out->unk10 = 0;
-    out->unk14 = 0;
-    out->unk18 = 0;
-    out->unk1C = 0;
-    out->unk20 = 0x200;
-    out->unk24 = 0x1C0;
+    out->x = 0;
+    out->y = 0;
+    out->left = 0;
+    out->top = 0;
+    out->right = 0x200;
+    out->bottom = 0x1C0;
     second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
     color1[0] = work->color;
     unit = 0x3C000000;
@@ -1103,9 +1051,9 @@ void effUpdateFadeBlendB(EffKindWork *work) {
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
     out->color = blended[0];
-    out->rateA = func_00297270(&config->blendB, limit, progress) + 1.0f;
-    out->rateB = func_00297270(&config->rateA.curve, limit, progress);
-    out->param = work->mode;
+    out->displacement = func_00297270(&config->blendB, limit, progress) + 1.0f;
+    out->angle = func_00297270(&config->rateA.curve, limit, progress);
+    out->blendControl = work->mode;
     effBlurDrawFramebufferQuad(out);
 }
 
@@ -1115,7 +1063,7 @@ void effUpdateFadeBlendC(EffKindWork *work) {
     EffFadeConfig *config = work->payload;
     s32 progress = config->progress;
     s32 limit = 0;
-    EffFadeOut *out = &config->out;
+    EffSolidRectParams *out = &config->out;
     s32 color1[4];
     s32 color2[4];
     s32 blended[4];
@@ -1129,10 +1077,10 @@ void effUpdateFadeBlendC(EffKindWork *work) {
     if (progress < limit) {
         return;
     }
-    out->unk8 = 0;
-    out->unkC = 0;
-    out->unk10 = 0x200;
-    out->unk14 = 0x1C0;
+    out->left = 0;
+    out->top = 0;
+    out->right = 0x200;
+    out->bottom = 0x1C0;
     second = func_00296F58(&config->blendA, &config->blendB2, limit, progress);
     color1[0] = work->color;
     unit = 0x3C000000;
@@ -1144,7 +1092,7 @@ void effUpdateFadeBlendC(EffKindWork *work) {
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
     out->color = blended[0];
-    out->param = work->mode;
+    out->blendControl = work->mode;
     func_00187C08(out);
 }
 
@@ -1155,8 +1103,8 @@ u32 effCreateFadeColorWorkFromOutput(void *work) {
     return (u32)effCloneResourceTemplate((EffResourceRectParams *)((u8 *)work + 0xc0));
 }
 
-void effReleaseFadeColorWork(u32 resourceHandle) {
-    effReleaseResourceTemplate((EffResourceRectWork *)resourceHandle);
+void effReleaseFadeColorWork(EffResourceRectWork *work) {
+    effReleaseResourceTemplate(work);
 }
 
 /* This projected fade also consumes EffKindWork: position, handle and payload. */
@@ -1170,7 +1118,7 @@ void effReplaceLinkedKindWorkTarget(EffKindWork *work, u32 target) {
         }
         work->target = target;
     }
-    ((EffRateOut *)work->handle)->target = target;
+    ((EffResourceRectWork *)work->handle)->sourceHandle = target;
 }
 
 EffKindWork *effAllocateKindWork(u16 kind, u8 *source) {

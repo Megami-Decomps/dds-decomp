@@ -265,8 +265,6 @@ typedef struct {
 } EffPCPCompactWork;
 
 
-extern EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *params);
-extern void effBlurReleaseSecondResource(EffBlurScaleWork *work);
 extern void effBlurSecondInitSlots(EffBlurScaleWork *work);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
 

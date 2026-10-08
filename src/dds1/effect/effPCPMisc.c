@@ -208,8 +208,6 @@ extern EffPCPSpanWork *effPcpSpanCreate(void *params, void *handleParams);
 extern u32 effCreateNodeFromDescriptor(u32 param);
 extern u32 effCloneSourceWithTypeHandler(u32 handle);
 extern void effDestroyNode(s32 handle);
-extern EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *params);
-extern void effBlurReleaseSecondResource(EffBlurScaleWork *work);
 extern void effBlurSecondInitSlots(EffBlurScaleWork *work);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
