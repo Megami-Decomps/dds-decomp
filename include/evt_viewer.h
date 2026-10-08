@@ -112,7 +112,7 @@ typedef struct EvtRuntime {
     s32 historyCount;
     s32 actionMode;
     s32 commandResetId;
-    u8 pad2288[4];
+    s32 unk2288; /* Cleared when committing a type-12 key option. */
     struct KwlnTask *controlState;
     s32 blurRectangleEnabled;
     s32 texturedBlurEnabled;
@@ -209,7 +209,7 @@ typedef struct EvtRuntime {
     s32 voiceFrame;
     u8 pad2484[4];
     s32 commandStart;
-    u8 pad248C[4];
+    s32 optionFrameBase;
 #else
     s32 registeredIds[20];
     s32 voicePending;
@@ -217,7 +217,7 @@ typedef struct EvtRuntime {
     s32 unk24A0;
     u8 pad24A4[0xC];
     s32 commandStart;
-    u8 pad24B4[4];
+    s32 optionFrameBase;
     s32 curveComponent;
 #endif
 } EvtRuntime;
@@ -238,5 +238,7 @@ typedef char EvtRuntime_color_at2408[((u32)&((EvtRuntime *)0)->colorSelection ==
 typedef char EvtRuntime_color_at240C[((u32)&((EvtRuntime *)0)->colorEditorActive == 0x240C) ? 1 : -1];
 
 EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *viewer);
+void evtViewerSetMinimumFromCurrent(EvtRuntime *viewer);
+void evtViewerSetMaximumFromCurrent(EvtRuntime *viewer);
 void fldApplyCameraColorKeyWords(EvtRuntime *viewer, const EvtBlendKey *source);
 #endif
