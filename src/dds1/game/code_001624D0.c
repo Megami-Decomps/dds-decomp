@@ -32,8 +32,8 @@ typedef struct EffDispatchEntry {
     void (*setScale)(void *, f32);    /* 0x14 */
     void (*callback2)(void *, void *);       /* 0x18 */
     void (*callback3)(void *, u32);       /* 0x1C */
-    void *(*callback4)(void *);       /* 0x20 */
-    void *(*callback5)(void *);       /* 0x24 */
+    void (*callback4)(void *, void *);       /* 0x20 */
+    void (*callback5)(void *, f32);       /* 0x24 */
 } EffDispatchEntry; /* 0x28 */
 
 
@@ -329,26 +329,26 @@ void effParamWorkCallback3(EffParamWork *work, u32 value) {
     }
 }
 
-void effParamWorkCallback4(EffParamWork *work) {
+void effParamWorkCallback4(EffParamWork *work, void *matrix) {
     if (effParamWorkFactories[work->kind].callback4 != NULL) {
-        effParamWorkFactories[work->kind].callback4(work->payload);
+        effParamWorkFactories[work->kind].callback4(work->payload, matrix);
     }
 }
 
-void effParamWorkCallback5(EffParamWork *work) {
+void effParamWorkCallback5(EffParamWork *work, f32 sizeInput) {
     if (effParamWorkFactories[work->kind].callback5 != NULL) {
-        effParamWorkFactories[work->kind].callback5(work->payload);
+        effParamWorkFactories[work->kind].callback5(work->payload, sizeInput);
     }
 }
 
-/* Select billboard kind zero; the index is passed through without validation. */
-void func_00162C60(u32 index) {
-    billCreateIndexed(0, index);
+/* Create a child billboard from its resource data. */
+BillObj *effParamCreateChildBillboard(void *resourceData) {
+    return billCreateIndexed(0, (u32)resourceData);
 }
 
-/* Select billboard kind one; the index is passed through without validation. */
-void func_00162C80(u32 index) {
-    billCreateIndexed(1, index);
+/* Create an animated billboard from its serialized resource data. */
+BillObj *effParamCreateAnimatedBillboard(void *resourceData) {
+    return billCreateIndexed(1, (u32)resourceData);
 }
 
 /* Use the same floating value for both billboard child-scale components. */
@@ -443,8 +443,8 @@ void func_00162ED8(void *work, u32 color) {
 }
 
 extern void **D_003536A0[];
-extern u32 func_00163248(u32 *word);
-extern u32 func_00163250(s32 address);
+extern u32 effParamDescriptorGetKind(const u32 *descriptor);
+extern u32 effParamDescriptorGetTableIndex(const u32 *descriptor);
 
 /* Create extended work from a kind/index descriptor. Kinds with a duplicate
  * callback consume the raw descriptor; other kinds use the fallback table. */
@@ -452,8 +452,8 @@ EffParamWorkEx *effCreateDispatchedParameterWork(u32 *source) {
     EffParamWorkEx *work;
 
     work = sdfAllocSizeClassBlock(EFF_PARAM_EXTENDED_WORK_BYTES);
-    work->kind = func_00163248(source);
-    work->tableIndex = func_00163250((s32)source);
+    work->kind = effParamDescriptorGetKind(source);
+    work->tableIndex = effParamDescriptorGetTableIndex(source);
     if (effParameterWorkOperations[work->kind].duplicate == NULL) {
         work->payload = effParameterWorkOperations[work->kind].create(D_003536A0[work->kind][work->tableIndex]);
     } else {
@@ -508,9 +508,9 @@ void effParamWorkExCallback2(EffParamWorkEx *work, void *matrix) {
     }
 }
 
-void effParamWorkExCallback3(EffParamWorkEx *work) {
+void effParamWorkExCallback3(EffParamWorkEx *work, void *matrix) {
     if (effParameterWorkOperations[work->kind].callback4 != NULL) {
-        effParameterWorkOperations[work->kind].callback4(work->payload);
+        effParameterWorkOperations[work->kind].callback4(work->payload, matrix);
     }
 }
 
@@ -520,20 +520,20 @@ void effParamWorkExCallback4(EffParamWorkEx *work, u32 value) {
     }
 }
 
-void effParamWorkExCallback5(EffParamWorkEx *work) {
+void effParamWorkExCallback5(EffParamWorkEx *work, f32 sizeInput) {
     if (effParameterWorkOperations[work->kind].callback5 != NULL) {
-        effParameterWorkOperations[work->kind].callback5(work->payload);
+        effParameterWorkOperations[work->kind].callback5(work->payload, sizeInput);
     }
 }
 
-/* Read the descriptor's full-word effect kind. */
-u32 func_00163248(u32 *word) {
-    return *word;
+/* Read the descriptor's first word as the extended-work kind. */
+u32 effParamDescriptorGetKind(const u32 *descriptor) {
+    return descriptor[0];
 }
 
-/* Read the descriptor's full-word fallback-table index at +4. */
-u32 func_00163250(s32 address) {
-    return *(u32 *)(address + 4);
+/* Read the descriptor's second word as its fallback table index. */
+u32 effParamDescriptorGetTableIndex(const u32 *descriptor) {
+    return descriptor[1];
 }
 
 /* Records follow a 16-byte header and have a 16-byte stride. Block offsets
@@ -609,22 +609,22 @@ typedef struct {
     f32 baseFirst;
     f32 baseSecond;
     ParSystem *system;
-    u32 handle;
+    struct SdfMemBlock *allocation;
 } ParamThunderWork;
 
 /* Allocate the copied head and its trailing cells as one block, then create
  * the cell system with native arguments groupDivisor=0 and kind=4.
  * Only three words per cell are zeroed here; vector/range storage is untouched. */
 ParamThunderWork *effCreateThunderCellSystemWork(ParamThunderHead *source) {
-    u32 allocationHandle = (u32)sdfAllocGeneralBlock(source->count * sizeof(ParamThunderCell) + sizeof(ParamThunderWork));
-    ParamThunderWork *work = (ParamThunderWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(source->count * sizeof(ParamThunderCell) + sizeof(ParamThunderWork));
+    ParamThunderWork *work = (ParamThunderWork *)sdfResourceRetainAddress(allocation);
     u32 cellIndex;
 
     work->head = *source;
     work->cells = (ParamThunderCell *)(work + 1);
     work->baseFirst = source->scaledFirst;
     work->baseSecond = source->scaledSecond;
-    work->handle = allocationHandle;
+    work->allocation = allocation;
     work->system = parAllocateCellSystem(work->head.count, work->head.perCell, 0, PAR_CELL_TOPOLOGY_FIVE_VECTOR);
     parRiseFallSymmetricCellAlpha(work->system, work->head.firstDispatchArg, work->head.secondDispatchArg, work->head.thirdDispatchArg);
     parSetCellDrawBucket(work->system, work->head.systemParam);

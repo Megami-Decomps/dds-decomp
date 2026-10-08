@@ -1441,6 +1441,8 @@
 0x00162BA0	effParamWorkCallback3	inferred	null-guarded dispatch of work data through the D_0035372C slot
 0x00162BE0	effParamWorkCallback4	inferred	null-guarded dispatch of work data through the D_00353730 slot
 0x00162C20	effParamWorkCallback5	inferred	null-guarded dispatch of work data through the D_00353734 slot
+0x00162C60	effParamCreateChildBillboard	inferred	Kind-zero compact parameter factory forwards resource data to billCreateIndexed; its provider creates a child billboard.
+0x00162C80	effParamCreateAnimatedBillboard	inferred	Kind-one compact parameter factory forwards serialized animation resource data to billCreateIndexed; its provider builds an animated billboard.
 0x00162CA0	effParamDispatchFloat	inferred	forwards one float argument twice to func_00152000 (vfpu f12/f13 pair)
 0x00162CB8	effParamInitWork	inferred	loads three vector constants to vf10 for model setup calls, sets grey 0x80808080, resets optional block word to 1.0f, clears flag bit0
 0x00162D60	effParamCreateInitWork	inferred	calls the 5-arg model setup, builds work, runs effParamInitWork, bumps the D_003BB044 counter
@@ -1459,6 +1461,8 @@
 0x00163188	effParamWorkExCallback3	inferred	null-guarded dispatch of Ex work data through the D_003538A0 slot
 0x001631C8	effParamWorkExCallback4	inferred	null-guarded dispatch of Ex work data through the D_0035389C slot
 0x00163208	effParamWorkExCallback5	inferred	null-guarded dispatch of Ex work data through the D_003538A4 slot
+0x00163248	effParamDescriptorGetKind	inferred	Reads the descriptor's first word as the extended-work kind.
+0x00163250	effParamDescriptorGetTableIndex	inferred	Reads the descriptor's second word as its fallback table index.
 0x00163258	effParamTableGetBlock	inferred	returns table base plus the s32 offset stored at stride-16 row word 5
 0x00163270	effParamTableGetWord	inferred	returns the u32 at stride-16 row word 4 (base +0x10)
 0x00163280	effParamTableGetWord2	inferred	returns the u32 at stride-16 row word 6 (base +0x18)

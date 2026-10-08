@@ -1157,11 +1157,15 @@
 0x0016A5A0	effParamWorkGetData	inferred	Returns the parameter-work data pointer from offset four.
 0x0016A5A8	effParamWorkGetId	inferred	Returns the parameter-work kind ID at offset zero.
 0x0016A668	effParamWorkInvokeCallback	inferred	Invokes the per-kind callback on the 8-byte parameter work item's data pointer.
+0x0016A890	effParamCreateChildBillboard	inferred	Kind-zero compact parameter factory forwards resource data to billCreateIndexed; its provider creates a child billboard.
+0x0016A8B0	effParamCreateAnimatedBillboard	inferred	Kind-one compact parameter factory forwards serialized animation resource data to billCreateIndexed; its provider builds an animated billboard.
 0x0016A990	effParamCreateViewerWork	inferred	readability/matching review (QP16)
 0x0016AB48	effCreateDispatchedParameterWork	inferred	src/dds2/game/code_0016A100.c func_0016AB48: Reads dispatch ID and parameter index, allocates work and creates payload from table or source. Twin of DDS1 func_00162EF0. [names_reviewed24.tsv]
 0x0016ABF8	effReleaseDispatchedParameterWork	inferred	Dispatches effect parameter cleanup and releases its work. [names_reviewed9.tsv]
 0x0016AC40	effInvokeParameterWorkDispatch	inferred	Calls a work-selected effect dispatch routine. [names_reviewed9.tsv]
 0x0016AC78	effCloneDispatchedParameterWork	inferred	src/dds2/game/code_0016A100.c func_0016AC78: Copies ID and parameter index, recreates table-backed payload or invokes alternate clone callback. Twin of DDS1 func_00163020. [names_reviewed24.tsv]
+0x0016AEA0	effParamDescriptorGetKind	inferred	Reads the descriptor's first word as the extended-work kind.
+0x0016AEA8	effParamDescriptorGetTableIndex	inferred	Reads the descriptor's second word as its fallback table index.
 0x0016AF38	effCreateThunderCellSystemWork	inferred	confidence=high; src/dds2/game/code_0016A100.c:func_0016AF38; Copies thunder head parameters, allocates/configures its cell system, initializes all cell records and sets default color. [names_qp9.tsv]
 0x0016B130	effThunderReleaseVectorWork	inferred	queued
 0x0016B170	effThunderSetVectorTint	inferred	queued

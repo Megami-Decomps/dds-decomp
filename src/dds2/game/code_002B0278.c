@@ -3323,9 +3323,6 @@ u32 mnuTestListFlagTwo(u32 *flags) {
     return *flags & 2;
 }
 
-/* Subtract the fade step only when positive, then clamp any negative result to zero. */
-void mnuDecreaseListNodeFadeCounters(u8 *menu);
-
 /* Draw one four-sprite bank; the cursor entry selects the second bank. */
 void mnuDrawFourEntries(s32 x, s32 y, s32 depth, MenuList *list, MenuListNode *node, s32 drawArg);
 
