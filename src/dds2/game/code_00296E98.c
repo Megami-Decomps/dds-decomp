@@ -807,7 +807,60 @@ s32 mnuStaffPickRollByMode(u32 mode) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00299B98);
+extern void mnuClearEntries(MenuPageWindow *window);
+extern void mnuReleasePartyIconBundles(MenuPageWindow *window);
+extern void mnuSelectPage(MenuPageWindow *window, s32 index);
+extern void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused,
+                                 u32 retainScale);
+extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32, s32, s32, s32);
+extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
+extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window, u32 resource);
+extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
+extern void evtStageTestQueueMotion(s32 kind, u32 index);
+extern void func_00341C78(u32 sequence);
+extern void sndStartTrackDefault(s32 track);
+
+void func_00299B98(BrsSkillPackageWork *work, s32 selectLevelUp) {
+    if (selectLevelUp == 0) {
+        s32 *selectedIndex = &work->selectedRow;
+        BrsRewardRow *row = &work->secondaryRewards.rows[(*selectedIndex)++];
+
+        work->pendingSkillIndex = 0;
+        work->selectedRewardRow = row;
+    } else {
+        s32 selectedRow = work->selectedRow;
+        MenuPageWindow *window = &work->partyWindow;
+        s32 page = work->primaryRewards.rows[selectedRow].values.secondaryValue;
+        s32 *selectedIndex = &work->selectedRow;
+
+        mnuClearEntries(window);
+        mnuReleasePartyIconBundles(window);
+        mnuSelectPage(window, page);
+        mnuResetPartyPanelFade(window, page, 0, 0);
+        mnuSetWindowResource(page, window, work->staffSlots.baseResources[0],
+                             (s32)work->staffSlots.pairResources[0],
+                             (s32)work->staffSlots.pairResources[1], 0, 0);
+        mnuSetPageParams(work->partyWindow.slots[page].windowSprites, 2);
+        mnuAttachPartyIconBundle(page, window, (u32)work->staffSlots.pairResources[0]);
+
+        (*(MenuIconBundle **)((u8 *)work + page * sizeof(MenuPageSlot) +
+            (u32)&((BrsSkillPackageWork *)0)->partyWindow.slots[0].iconBundle))->fade = 0x100;
+        window->flags |= 0x200;
+        work->selectedRewardRow = &work->primaryRewards.rows[(*selectedIndex)++];
+        evtStageTestSelectEntryWithoutInitialValue(
+            work->selectedRewardRow->unit->unitId, 0);
+        evtStageTestQueueMotion(1, 0);
+
+        if (*selectedIndex < work->primaryRewards.count) {
+            mnuForwardTableByte(
+                work->primaryRewards.rows[*selectedIndex].unit->unitId);
+        }
+        func_00341C78(0x50001);
+        sndStartTrackDefault(0x50001);
+    }
+
+    mnuStaffCopyPanelBlock(work->selectedRewardRow->unit, work);
+}
 
 INCLUDE_RODATA(const s32, "game/code_00296E98", mnuStaffPrimaryPanelTaskName);
 
