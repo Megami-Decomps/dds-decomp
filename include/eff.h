@@ -527,9 +527,14 @@ typedef char EffectBufferRecord_size_must_be_0x40[(sizeof(EffectBufferRecord) ==
 
 /* Buffer allocation and record array owner (0x8); DDS1/2 game/code_00151F58/00159B48.c. */
 typedef struct EffectBufferTail {
-    s32 allocation;
+    SdfMemBlock *allocation;
     EffectBufferRecord *records;
 } EffectBufferTail;
+
+typedef char EffectBufferTail_size_must_be_8[(sizeof(EffectBufferTail) == 8) ? 1 : -1];
+
+EffectBufferTail *effAllocateBuffer(s32 recordCount);
+void effReleaseBufferAllocation(EffectBufferTail *buffer);
 
 /* Resource-entry work shared by the needle constructor and its renderer. */
 typedef struct EffResourceEntry {

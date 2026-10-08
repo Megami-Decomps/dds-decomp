@@ -864,8 +864,8 @@ void func_0015B290(void) {
 /* Allocate records followed by their owner tail; clear only two native state words per record. */
 EffectBufferTail *effAllocateBuffer(s32 recordCount) {
     s32 recordBytes = recordCount * sizeof(EffectBufferRecord);
-    s32 allocationHandle = (u32)sdfAllocGeneralBlock(recordBytes + sizeof(EffectBufferTail));
-    EffectBufferRecord *recordCursor = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
+    SdfMemBlock *allocationHandle = sdfAllocGeneralBlock(recordBytes + sizeof(EffectBufferTail));
+    EffectBufferRecord *recordCursor = (void *)sdfResourceRetainAddress(allocationHandle);
     EffectBufferTail *bufferTail = (EffectBufferTail *)((u8 *)recordCursor + recordBytes);
 
     bufferTail->allocation = allocationHandle;
@@ -882,8 +882,8 @@ EffectBufferTail *effAllocateBuffer(s32 recordCount) {
     return bufferTail;
 }
 
-void effReleaseBufferAllocation(u32 *allocationSlot) {
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*allocationSlot));
+void effReleaseBufferAllocation(EffectBufferTail *buffer) {
+    sdfReleaseResourceAllocation(buffer->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_00159B48", func_0015B330);
