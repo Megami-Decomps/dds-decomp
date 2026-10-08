@@ -782,9 +782,6 @@ MenuListNode *mnuListAdvanceCursor(MenuList *list, s32 noScroll, s32 keepFade);
 
 MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade);
 
-struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
-
-struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 
 s32 mnuScrollListToEnd(MenuList *list);
 
@@ -2541,13 +2538,13 @@ void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window) {
             if (mnuTestListFlagTwo((u32 *)list) == 0) {
                 window->fade = 0x100;
             }
-            mnuRetreatListCursorDefault((u32)list);
+            mnuRetreatListCursorDefault(list);
         }
         if (input & 0x20) {
             if (mnuTestListFlagTwo((u32 *)list) == 0) {
                 window->fade = 0x100;
             }
-            mnuAdvanceListCursorDefault((u32)list);
+            mnuAdvanceListCursorDefault(list);
         }
         mnuPlayInputSound(0, input, &list->stateFlags);
     }

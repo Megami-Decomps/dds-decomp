@@ -13,8 +13,6 @@
 #include "dat_state.h"
 struct MenuListNode;
 struct StaffMenuRuntime;
-extern struct MenuListNode *mnuAdvanceListCursorDefault(u32 list);
-extern struct MenuListNode *mnuRetreatListCursorDefault(u32 list);
 #include "fpu.h"
 #include "sdf.h"
 #include "itf.h"
@@ -2321,11 +2319,11 @@ s32 ptySkillMenuBrowseCandidatePages(KwlnTask *callback) {
     }
     offset = window->list->windowOffset;
     if (buttons & 0x40) {
-        mnuRetreatListCursorDefault(menu[3]);
+        mnuRetreatListCursorDefault((MenuList *)(u32)menu[3]);
         mnuSeekSelectedWindowRow((s32)(menu + 2), offset);
     }
     if (buttons & 0x80) {
-        mnuAdvanceListCursorDefault(menu[3]);
+        mnuAdvanceListCursorDefault((MenuList *)(u32)menu[3]);
         mnuSeekSelectedWindowRow((s32)(menu + 2), offset);
     }
     mnuPlayInputSound(0, buttons, &((MenuList *)menu[3])->stateFlags);
@@ -3267,12 +3265,12 @@ MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade) {
     return cursor;
 }
 
-MenuListNode *mnuAdvanceListCursorDefault(u32 list) {
-    return mnuListAdvanceCursor((MenuList *)list, 0, 0);
+MenuListNode *mnuAdvanceListCursorDefault(MenuList *list) {
+    return mnuListAdvanceCursor(list, 0, 0);
 }
 
-MenuListNode *mnuRetreatListCursorDefault(u32 list) {
-    return mnuListRetreatCursor((MenuList *)list, 0, 0);
+MenuListNode *mnuRetreatListCursorDefault(MenuList *list) {
+    return mnuListRetreatCursor(list, 0, 0);
 }
 
 s32 mnuScrollListToEnd(MenuList *list) {

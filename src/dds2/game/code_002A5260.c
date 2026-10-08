@@ -253,8 +253,6 @@ void mnuUpdateTitlePageByMode(void) {
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A5A78);
 
 extern s8 D_0037F510[];
-extern struct MenuListNode *mnuRetreatListCursorDefault(u32);
-extern struct MenuListNode *mnuAdvanceListCursorDefault(u32);
 extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u32 func_002A3C78(void);
@@ -264,12 +262,12 @@ s32 mnuHandleMovieMenuInput(void) {
     s32 selection;
 
     if (D_0037F510[0x26] & 2) {
-        if (mnuRetreatListCursorDefault((u32)mnuMovieMenuState->selectionList) != NULL) {
+        if (mnuRetreatListCursorDefault(mnuMovieMenuState->selectionList) != NULL) {
             sndSetSequenceVolumePan(0, 127, 63);
         }
         moved = 1;
     } else if (D_0037F510[0x27] & 2) {
-        if (mnuAdvanceListCursorDefault((u32)mnuMovieMenuState->selectionList) != NULL) {
+        if (mnuAdvanceListCursorDefault(mnuMovieMenuState->selectionList) != NULL) {
             sndSetSequenceVolumePan(0, 127, 63);
         }
         moved = 1;
