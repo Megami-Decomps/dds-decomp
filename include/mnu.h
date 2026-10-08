@@ -73,11 +73,13 @@ typedef struct CampEffectRows {
     u32 values[2][4];
 } CampEffectRows;
 
+struct EffectSlotSet;
+
 /* The backdrop packet's complete resource payload, also used by shop callbacks. */
 typedef struct MapPacket {
     u32 type;
     u32 value;
-    u32 sheets[1]; /* The resource destructor iterates this one-sheet bank. */
+    struct EffectSlotSet *sheets[1]; /* The resource destructor iterates this one-sheet bank. */
     u32 items[11];
     s32 count;
 } MapPacket;
@@ -89,7 +91,7 @@ typedef struct MenuEffectResources {
 } MenuEffectResources;
 
 #ifdef VERSION_DDS2
-void mnuSetCampEffectResourceHandles(u32 sheet,
+void mnuSetCampEffectResourceHandles(struct EffectSlotSet *sheet,
                                     struct EffMappedResource *animation,
                                     MenuEffectResources *resources);
 #endif
@@ -119,8 +121,6 @@ typedef struct MenuAssets {
 } MenuAssets;
 
 typedef char MenuAssets_size_must_be_0x20[(sizeof(MenuAssets) == 0x20) ? 1 : -1];
-
-struct EffectSlotSet;
 
 /* Native staff sprite banks; DDS2 retains only two base resources. */
 typedef struct StaffSlots {

@@ -2643,7 +2643,8 @@ void mnuOrEntryFlags(u32 flags, u32 *entryFlags) {
 void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 INCLUDE_ASM(const s32, "game/code_002B0278", mnuCopyCampEffectRowData);
 
-void mnuSetCampEffectResourceHandles(u32 sheet, struct EffMappedResource *animation,
+void mnuSetCampEffectResourceHandles(struct EffectSlotSet *sheet,
+                                    struct EffMappedResource *animation,
                                     MenuEffectResources *resources) {
     resources->packet.sheets[0] = sheet;
     resources->animationHandle = animation;
@@ -2651,7 +2652,7 @@ void mnuSetCampEffectResourceHandles(u32 sheet, struct EffMappedResource *animat
 
 
 void mnuBindCampEffectAnimation(MenuEffectResources *resources) {
-    effConfigureIndexedSlotResource((struct EffectSlotSet *)resources->packet.sheets[0],
+    effConfigureIndexedSlotResource(resources->packet.sheets[0],
                    resources->packet.items[4],
                    resources->animationHandle, 0, 4);
 }
@@ -2689,7 +2690,7 @@ INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AE58);
 void mnuLoadEffectResources(MenuEffectResources *resources) {
     mnuInitializeMapPacket(0, D_003E7828, 0xb, &resources->packet);
     mnuCopyCampEffectRowData(&D_003E7858, resources);
-    resources->packet.sheets[0] = (u32)effLoadIndexedResource("/camp/spr/n_min/", D_003E7818[0], 0);
+    resources->packet.sheets[0] = effLoadIndexedResource("/camp/spr/n_min/", D_003E7818[0], 0);
     resources->animationHandle = effLoadMappedResource("/camp/mot/", D_003E7820[0]);
     mnuBindCampEffectAnimation(resources);
 }
@@ -2697,7 +2698,8 @@ void mnuLoadEffectResources(MenuEffectResources *resources) {
 void mnuRequestEffectResources(MenuEffectResources *resources) {
     mnuInitializeMapPacket(0, D_003E7828, 0xb, &resources->packet);
     mnuCopyCampEffectRowData(&D_003E7858, resources);
-    effRequestResourceByMode("/camp/spr/n_min/", D_003E7818[0], 0, &resources->packet.sheets[0]);
+    effRequestResourceByMode("/camp/spr/n_min/", D_003E7818[0], 0,
+                             (u32 *)&resources->packet.sheets[0]);
     effRequestMappedResource("/camp/mot/", D_003E7820[0], (u32 *)&resources->animationHandle);
 }
 
@@ -2715,7 +2717,7 @@ u32 mnuBindCampEffectWhenLoaded(MenuEffectResources *resources) {
 void mnuDestroyEffectResources(MenuEffectResources *resources) {
     u32 i;
     for (i = 0; i < ARRAY_COUNT(resources->packet.sheets); i++) {
-        effDestroyResourceSlotSet((struct EffectSlotSet *)resources->packet.sheets[i]);
+        effDestroyResourceSlotSet(resources->packet.sheets[i]);
     }
     effDestroyPackedBatch(resources->animationHandle);
 }
@@ -2756,7 +2758,7 @@ void mnuDrawAndAdvanceCampSparks(MenuCampEffect *fx, s32 arg) {
     s32 i;
     for (i = 0; i < 0x10; i++) {
         if (fx->direction[i] > 0) {
-            itfDrawGridWithResolvedSlot(fx->velocity[i][0], fx->velocity[i][1], 0, 0, (EffectSlotSet *)(u32)fx->resources.packet.sheets[0], fx->resources.packet.items[6], arg);
+            itfDrawGridWithResolvedSlot(fx->velocity[i][0], fx->velocity[i][1], 0, 0, fx->resources.packet.sheets[0], fx->resources.packet.items[6], arg);
             if (fx->direction[i] == 1) {
                 fx->velocity[i][0] += fx->life[i];
                 if (fx->velocity[i][0] > 0x2000) {
@@ -2809,12 +2811,12 @@ void mnuDrawBadgeFade(MenuCampEffect *set, s32 arg) {
     s32 handle;
     if (!(set->resources.packet.type & 4)) {
         handle = set->resources.packet.items[layout.place[0].slot];
-        func_00306CD0(layout.place[0].x, layout.place[0].y, 0, set->fade, 0, (EffectSlotSet *)set->resources.packet.sheets[0], handle, arg);
-        itfGridLookupValueOrDefault(set->resources.packet.sheets[0], handle);
+        func_00306CD0(layout.place[0].x, layout.place[0].y, 0, set->fade, 0, set->resources.packet.sheets[0], handle, arg);
+        itfGridLookupValueOrDefault((s32)set->resources.packet.sheets[0], handle);
         MNU_ADVANCE_FADE(set->fade, 0x10, 0x100);
     }
     if (!(set->resources.packet.type & 2)) {
-        itfDrawGridWithResolvedSlot(layout.place[1].x, layout.place[1].y, 0, 0, (EffectSlotSet *)(u32)set->resources.packet.sheets[0], set->resources.packet.items[layout.place[1].slot], arg);
+        itfDrawGridWithResolvedSlot(layout.place[1].x, layout.place[1].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[layout.place[1].slot], arg);
     }
 }
 
@@ -2830,11 +2832,11 @@ void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 arg) {
     sdfSubmitGsTestOneRegisterPacket(0x30000, arg);
     uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x80808080, arg);
     for (i = 0; i < 1; i++) {
-        itfDrawGridWithResolvedSlot(blank[i].x, blank[i].y, 0, 0, (EffectSlotSet *)(u32)set->resources.packet.sheets[0], set->resources.packet.items[blank[i].slot], arg);
+        itfDrawGridWithResolvedSlot(blank[i].x, blank[i].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[blank[i].slot], arg);
     }
     if (!(set->resources.packet.type & 2)) {
         for (i = 0; i < 2; i++) {
-            itfDrawGridWithResolvedSlot(layout.place[i].x, layout.place[i].y, 0, 0, (EffectSlotSet *)(u32)set->resources.packet.sheets[0], set->resources.packet.items[layout.place[i].slot], arg);
+            itfDrawGridWithResolvedSlot(layout.place[i].x, layout.place[i].y, 0, 0, set->resources.packet.sheets[0], set->resources.packet.items[layout.place[i].slot], arg);
         }
     }
     if (!(set->resources.packet.type & 4)) {
