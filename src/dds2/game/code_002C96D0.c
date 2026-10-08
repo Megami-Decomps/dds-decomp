@@ -5766,7 +5766,7 @@ void fileResetSlotStates(FileSlotTable *table) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D7458);
+INCLUDE_ASM(const s32, "game/code_002C96D0", effSampleColorAlphaTracks);
 
 f32 effSampleScalarCurve(const EffScalarCurve *curve, s32 frame, s32 duration) {
     f32 from, to, factor, durationFloat;
@@ -5825,14 +5825,13 @@ f32 effSampleScalarCurve(const EffScalarCurve *curve, s32 frame, s32 duration) {
 }
 
 
-extern u32 func_002D7458(const void *, const void *, s32, s32);
 
 /* vu0 routine: samples the colour, scale and heading tracks at frame; in mode 2 the heading is the screen-space direction from out->pos to target (0 when they coincide) */
 void fileSampleKeyTracks(FileSlot *out, FileKeyBlock *block, s32 frame, f32 *target)
 {
     f32 delta[4];
 
-    out->color = func_002D7458(&block->colorTrack, &block->alphaTrack, frame, block->length);
+    out->color = effSampleColorAlphaTracks(&block->colorTrack, &block->alphaTrack, frame, block->length);
     out->scale = effSampleScalarCurve(&block->scale.track.curve, frame, block->length);
     if (block->heading.track.curve.headingMode != 2) {
         out->angle = effSampleScalarCurve(&block->heading.track.curve, frame, block->length);

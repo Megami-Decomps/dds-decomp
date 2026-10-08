@@ -5293,6 +5293,7 @@
 0x00296EC0	fileSendLoadObjectRecordVector	inferred	DDS2 002D73C0 candidate twin (tentative score 1.000); calls menuRecordSetVector on load object record [names_R_FuncNames2.tsv]
 0x00296ED8	fileCopyLoadObjectRecordVector	inferred	DDS2 002D73D8 candidate twin (tentative score 1.000); calls func_002DC0F0 on load object record [names_R_FuncNames2.tsv]
 0x00296F18	fileResetSlotStates	inferred	file file requests and records in game/code_0028A0E0.c
+0x00296F58	effSampleColorAlphaTracks	inferred	Samples paired color and alpha tracks at the supplied frame over their signed duration and returns packed RGBA.
 0x00297270	effSampleScalarCurve	inferred	Samples an EffScalarCurve at the supplied frame over its signed duration; returns the interpolated scalar.
 0x002973E8	fileSampleKeyTracks	inferred	samples colour, scale and heading tracks of a view block at a frame; mode 2 derives the heading from two projected points [names_M65_VuFollowup.tsv]
 0x00297558	fileInvalidateSlotGroup	inferred	sets state=-1 on columns*rows consecutive 0x20-byte slots [names_M48_PcpMisc.tsv]
