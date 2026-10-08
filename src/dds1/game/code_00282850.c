@@ -135,7 +135,6 @@ extern s32 D_003BC7B4;
 
 extern s32 mnuLookupRangeEntry(u16);
 
-extern MenuPanelHandles *mnuCreatePanelSpriteHandles(u32, s32, s32);
 extern void mnuReleaseResourceList(MenuPanelHandles *);
 
 extern s32 sdfAllocSizeClassBlock(u32);
@@ -406,7 +405,8 @@ void func_00282CD0(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
 }
 
 void mnuInitializePanelResource(MenuPanelState *panel, s32 resource, s32 target) {
-    panel->resourceHandle = mnuCreatePanelSpriteHandles(2, resource, target);
+    panel->resourceHandle = mnuCreatePanelSpriteHandles(
+        2, (EffectSlotSet *)(u32)resource, (EffMappedResource *)(u32)target);
 }
 
 void func_00282D28(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
