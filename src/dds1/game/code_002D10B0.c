@@ -82,8 +82,6 @@ void sdfPendingQueuePush(void *arg0, s32 arg1);
 void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
 void *sdfAllocAndClearQuadwords(s32 size);
 
-SdfMemBlock *sdfFindGeneralBlockByAddress(void *address);
-
 s32 sdfChipIsInRange(s32 address);
 
 void sdfRequestDeferredGsImageCapture(u8 *destination, void (*onComplete)(void *)) {
