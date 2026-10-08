@@ -74,8 +74,8 @@ typedef struct SdfMotionDrawBinding {
     f32 capturedVector[4];
 } SdfMotionDrawBinding;
 
-f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *a0);
-void sdfFindMotionKeyInterval(void *a0, void *out, f32 t);
+f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
+void sdfFindMotionKeyInterval(void *bindingArg, void *intervalArg, f32 frame);
 extern void effMiscQuaternionNlerpVU(f32 amount);
 extern void effMiscQuaternionToMatrixVU(void);
 
@@ -430,79 +430,80 @@ void sdfSetMotionOutputValue(SdfMotionOutput *output, u32 value) {
 }
 
 /* Find the key interval containing frame and return its interpolation weight. */
-void sdfFindMotionKeyInterval(void *arg, void *outArg, f32 frame) {
+void sdfFindMotionKeyInterval(void *bindingArg, void *intervalArg, f32 frame) {
     SdfMotionKeyBinding *binding;
     SdfMotionKeyInterval *out;
     SdfMotionKeyTrack *track;
-    u16 *frames;
+    u16 *keyFrames;
     u8 *keyData;
-    u8 *firstKey;
+    u8 *firstKeyData;
     s32 frameNumber;
-    s32 first;
-    s32 last;
-    s32 middle;
+    s32 firstKeyIndex;
+    s32 lastKeyIndex;
+    s32 middleKeyIndex;
     s32 currentFrame;
     s32 nextFrame;
-    s32 nextIndex;
+    s32 nextKeyIndex;
     s32 duration;
-    u16 stride;
-    u16 count;
+    u16 keyStride;
+    u16 keyCount;
 
-    binding = arg;
-    out = outArg;
-    first = 0;
+    binding = bindingArg;
+    out = intervalArg;
+    firstKeyIndex = 0;
     track = binding->track;
-    count = track->keyCount;
-    frames = track->keyFrames;
-    stride = track->keyStride;
+    keyCount = track->keyCount;
+    keyFrames = track->keyFrames;
+    keyStride = track->keyStride;
     frameNumber = (s32)frame;
-    last = count - 1;
+    lastKeyIndex = keyCount - 1;
     do {
-        middle = (first + last + 1) >> 1;
-        currentFrame = frames[middle];
+        middleKeyIndex = (firstKeyIndex + lastKeyIndex + 1) >> 1;
+        currentFrame = keyFrames[middleKeyIndex];
         if (frameNumber < currentFrame) {
-            middle--;
-            last = middle;
+            middleKeyIndex--;
+            lastKeyIndex = middleKeyIndex;
         } else {
-            first = middle;
+            firstKeyIndex = middleKeyIndex;
         }
-    } while (first < last);
+    } while (firstKeyIndex < lastKeyIndex);
 
-    keyData = (u8 *)&frames[(count + 1) & ~1];
-    firstKey = keyData + middle * stride;
-    nextIndex = middle + 1;
-    currentFrame = frames[middle];
-    out->firstKey = (f32 *)firstKey;
-    if (nextIndex == count) {
+    keyData = (u8 *)&keyFrames[(keyCount + 1) & ~1];
+    firstKeyData = keyData + middleKeyIndex * keyStride;
+    nextKeyIndex = middleKeyIndex + 1;
+    currentFrame = keyFrames[middleKeyIndex];
+    out->firstKey = (f32 *)firstKeyData;
+    if (nextKeyIndex == keyCount) {
         if (binding->motion->loopEnabled == 0) {
-            out->secondKey = (f32 *)firstKey;
+            out->secondKey = (f32 *)firstKeyData;
             nextFrame = currentFrame;
         } else {
             out->secondKey = (f32 *)keyData;
             nextFrame = binding->motion->frameCount;
         }
     } else {
-        nextFrame = frames[nextIndex];
-        out->secondKey = (f32 *)(firstKey + stride);
+        nextFrame = keyFrames[nextKeyIndex];
+        out->secondKey = (f32 *)(firstKeyData + keyStride);
     }
 
     duration = nextFrame - currentFrame;
     if (duration == 0) {
-        out->secondKey = (f32 *)firstKey;
+        out->secondKey = (f32 *)firstKeyData;
         out->weight = 0.0f;
         return;
     }
     out->weight = (frame - currentFrame) / duration;
 }
 
-/* Linear blend of two sampled scalar keys: first + second*t - first*t. */
-f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *output) {
-    f32 first;
-    f32 weight;
+/* Linear blend of two sampled scalar keys: first + second*weight - first*weight. */
+f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval) {
+    f32 firstValue;
+    f32 interpolationWeight;
 
-    weight = output->weight;
-    first = *output->firstKey;
-    return (first + (*output->secondKey * weight)) - (first * weight);
+    interpolationWeight = interval->weight;
+    firstValue = *interval->firstKey;
+    return (firstValue + (*interval->secondKey * interpolationWeight)) -
+           (firstValue * interpolationWeight);
 }
 
 /* vu0 routine: blend the two bracketing vec3 keys by the key weight into vf10. */
