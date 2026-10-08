@@ -5,6 +5,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "btl_action.h"
+#include "btl_unit_tasks.h"
 #include "btl_state.h"
 #include "eff_transform.h"
 #include "dat_state.h"
@@ -4255,25 +4256,24 @@ BtlUnit *btlGetReadyUnitForSpecies(s32 mode, u32 species) {
 
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
-extern u32 btlCreateUnit(void);
 
 extern void func_001AA898(DatPartyRecord *, s32);
 
-extern u8 *btlCreateModelLoadPollTask(s32, s32, s32, s32);
 
 /* Create/load the unit only for an empty slot. A populated slot returns a fresh
  * sequence ID without launching a task; a nonzero prerequisite waits until
  * that task handle is gone.
  */
 s64 btlEnsureHeroUnitTask(u64 prerequisiteHandle) {
-    s32 *slot = (s32 *)((BattleWork *)btlGetRuntime())->sub;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit **slot = &battle->effect->selection.unit;
     BtlRuntimeTask *task;
     if (*slot != 0) {
         return btlAdvanceRuntimeSequenceCounter();
     }
     *slot = btlCreateUnit();
-    func_001AA898((DatPartyRecord *)(*slot + 0x120), 0x110);
-    task = (BtlRuntimeTask *)btlCreateModelLoadPollTask(*slot, 1, 0x110, 0);
+    func_001AA898(&(*slot)->partyRecord, 0x110);
+    task = btlCreateModelLoadPollTask(*slot, 1, 0x110, 0);
     if (prerequisiteHandle != 0) {
         task->startCondition.value.handle = prerequisiteHandle;
         task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;
@@ -4315,7 +4315,6 @@ typedef struct BtlEffect {
 
 
 extern BtlActionAnimationRecord *datActionAnimationRecords;
-extern BtlRuntimeTask *func_001E5FF8(s32, s32);
 extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *, s32);
 extern s32 btlAdjustPointsForCombatFlags(BtlUnit *, s32, s32, s32, s32);
 extern s8 btlGetCommandResultKindFromFlags(s32, s32, s32);
@@ -4343,7 +4342,8 @@ void btlCancelCurrentSubtask(void) {
  * prerequisite task to disappear. The fixed high-bit owner value is preserved.
  */
 u64 btlStartSubtaskWithInput(u64 prerequisiteHandle) {
-    BtlRuntimeTask *task = func_001E5FF8(((BattleWork *)btlGetRuntime())->sub->task, 0xC);
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlRuntimeTask *task = func_001E5FF8(battle->effect->selection.unit, 0xC);
     if (prerequisiteHandle != 0) {
         task->startCondition.value.handle = prerequisiteHandle;
         task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_GONE;

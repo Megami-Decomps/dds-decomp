@@ -2,6 +2,7 @@
 #include "btl_state.h"
 #include "btl_command.h"
 #include "btl_action.h"
+#include "btl_unit_tasks.h"
 #include "pcp_vu0.h"
 #include "evt_unit.h"
 #include "mdl.h"
@@ -79,7 +80,6 @@ extern u32 btlCreateScriptResourceTask(BtlUnit *unit, u32 group);
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32 value);
 extern BtlRuntimeTask *sndCreateCustomTask(s32 value, s32 option);
 extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit);
-extern BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *unit, u32 index, u32 value, s8 mode);
 extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32 value);
 extern BtlRuntimeTask *btlCreateFadeInTask(u32 value);
 extern s32 fldGetSceneGroupEntry(s32 entryIndex);

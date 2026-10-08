@@ -4,6 +4,7 @@
 #include "btl_task_args.h"
 #include "btl_command.h"
 #include "btl_action.h"
+#include "btl_unit_tasks.h"
 #include "dat_state.h"
 
 #define FLD_SCENE_INITIAL_ID 1
@@ -301,11 +302,8 @@ extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 extern BtlRuntimeTask *btlCreateCommandSoundTask(s32, s32);
-extern BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *, u32, u32, s8);
 extern BtlRuntimeTask *btlCreateActorTransparencyTask(BtlUnit *);
-extern BtlRuntimeTask *btlCreateUnitBaseLightTask(BtlUnit *);
 extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *, u32, u32);
-extern BtlRuntimeTask *func_001E5FF8(BtlUnit *, s32);
 extern BtlRuntimeTask *sndCreateActorEffectTask(struct SoundResourceNode *, BtlUnit *, u32);
 extern BtlRuntimeTask *btlCreateImmediateCompletionTask(void);
 extern BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *);

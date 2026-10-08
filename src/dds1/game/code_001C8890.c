@@ -12,6 +12,7 @@
 #include "evt_unit.h"
 #include "mdl.h"
 #include "btl_action.h"
+#include "btl_unit_tasks.h"
 #include "sdf.h"
 #include "file.h"
 #include "dat_command.h"
@@ -324,7 +325,6 @@ extern s32 mnuPollTitleStreamStateLocked(void);
 extern SoundResourceNode *sndAllocResourceNode(void);
 
 extern u32 kwlnDrawControlFlags;
-extern BtlUnit *btlCreateUnit(void);
 extern void btlDestroyUnit(u8 *);
 extern void func_001D4E60(BtlUnit *, BtlUnit *);
 extern void sdfQueueNonzeroResourceId(s32);
@@ -1373,7 +1373,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
     SoundTask *sound;
     SoundTask *change;
     SoundTask *spawned;
-    SoundTask *load;
+    BtlRuntimeTask *load;
     u16 *status;
     s32 motion;
 
@@ -1410,10 +1410,10 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
         btlStartTask(change);
         for (other = state->units; other != NULL; other = other->next) {
             if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
-                load = (SoundTask *)btlCreateModelLoadPollTask((u8 *)other, other->resourceKind, other->species, 0);
+                load = btlCreateModelLoadPollTask(other, other->resourceKind, other->species, 0);
                 load->startCondition.kind = 4;
                 load->startCondition.value.handle = change->handle;
-                load->owner = unit->identity;
+                load->ownerId = unit->identity;
                 btlStartTask(load);
                 spawned = (SoundTask *)btlCreateUnitFadeInTask((u8 *)other, 0, 0);
                 spawned->startCondition.kind = 4;
@@ -1503,7 +1503,7 @@ void func_001CE5F0(BtlTask *task) {
     SoundTask *sound;
     SoundTask *change;
     SoundTask *spawned;
-    SoundTask *load;
+    BtlRuntimeTask *load;
     u16 *status;
     s32 motion;
 
@@ -1540,10 +1540,10 @@ void func_001CE5F0(BtlTask *task) {
         btlStartTask(change);
         for (other = state->units; other != NULL; other = other->next) {
             if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
-                load = (SoundTask *)btlCreateModelLoadPollTask((u8 *)other, other->resourceKind, other->species, 0);
+                load = btlCreateModelLoadPollTask(other, other->resourceKind, other->species, 0);
                 load->startCondition.kind = 4;
                 load->startCondition.value.handle = change->handle;
-                load->owner = unit->identity;
+                load->ownerId = unit->identity;
                 btlStartTask(load);
                 spawned = (SoundTask *)btlCreateUnitFadeInTask((u8 *)other, 0, 0);
                 spawned->startCondition.kind = 4;
@@ -4765,22 +4765,22 @@ s32 btlUpdateUnitPositionInterpolationTask(BtlPosLerpTaskArgs *args) {
     args->count++;
     return 0;
 }
-SoundTask *btlCreateUnitPositionLerpTowardTargetTask(BtlUnit *unit, f32 *target, f32 scale) {
-    SoundTask *task = (SoundTask *)btlAllocTask(0x30);
-    u8 *args;
+BtlRuntimeTask *btlCreateUnitPositionLerpTowardTargetTask(BtlUnit *unit, f32 *target, f32 scale) {
+    BtlRuntimeTask *task = btlAllocTask(0x30);
+    BtlPosLerpTaskArgs *args;
     task->startCondition.kind = 1;
     task->endCondition.kind = 0;
     task->taskId = 0xC;
-    task->owner = unit->identity;
-    *(void **)((u8 *)task + 0x4C) = btlUpdateUnitPositionInterpolationTask;
+    task->ownerId = unit->identity;
+    task->callback = btlUpdateUnitPositionInterpolationTask;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    *(f32 *)(args + 0x20) = scale;
-    *(u32 *)(args + 0x2C) = (u32)unit;
-    *(u32 *)(args + 0x24) = 0;
-    *(u32 *)(args + 0x28) = 0;
-    PCP_COPY_VECTOR(args, unit->currentPosition);
-    PCP_COPY_VECTOR(args + 0x10, target);
+    args->rate = scale;
+    args->unit = unit;
+    args->t = 0.0f;
+    args->count = 0;
+    PCP_COPY_VECTOR(&args->from, unit->currentPosition);
+    PCP_COPY_VECTOR(&args->to, target);
     return task;
 }
 
@@ -4816,22 +4816,22 @@ s32 btlStepUnitRotationNlerp(BtlRotationTaskArgs *args) {
     btlSetUnitRotation((u8 *)unit, &args->to);
     return 1;
 }
-SoundTask *btlCreateUnitRotationInterpolationTask(BtlUnit *unit, f32 *target, f32 scale) {
-    SoundTask *task = (SoundTask *)btlAllocTask(0x30);
-    u8 *args;
+BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *unit, f32 *target, f32 scale) {
+    BtlRuntimeTask *task = btlAllocTask(0x30);
+    BtlRotationTaskArgs *args;
     task->startCondition.kind = 1;
     task->endCondition.kind = 0;
     task->taskId = 0xD;
-    task->owner = unit->identity;
-    *(void **)((u8 *)task + 0x4C) = btlStepUnitRotationNlerp;
+    task->ownerId = unit->identity;
+    task->callback = btlStepUnitRotationNlerp;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    *(f32 *)(args + 0x20) = scale;
-    *(u32 *)(args + 0x2C) = (u32)unit;
-    *(u32 *)(args + 0x24) = 0;
-    *(u32 *)(args + 0x28) = 0;
-    PCP_COPY_VECTOR(args, unit->orientation);
-    PCP_COPY_VECTOR(args + 0x10, target);
+    args->rate = scale;
+    args->unit = unit;
+    args->t = 0.0f;
+    args->count = 0;
+    PCP_COPY_VECTOR(&args->from, unit->orientation);
+    PCP_COPY_VECTOR(&args->to, target);
     return task;
 }
 
@@ -4887,17 +4887,17 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
     return 1;
 }
 
-u8 *btlCreateModelLoadPollTask(u8 *owner, u32 index, u32 value, s8 mode) {
-    u8 *task = btlAllocTask(16);
+BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *owner, u32 index, u32 value, s8 mode) {
+    BtlRuntimeTask *task = btlAllocTask(16);
     u32 *arguments;
 
-    task[0] = 1;
-    task[0x10] = 0;
-    *(u16 *)(task + 0x20) = 0x18;
-    *(u16 *)(task + 0x24) &= ~1;
-    *(u64 *)(task + 0x40) = *(u64 *)(owner + 0x108);
-    *(void **)(task + 0x48) = btlRequestModelOrReuse;
-    *(void **)(task + 0x4C) = btlPollModelLoadCompletion;
+    task->startCondition.kind = 1;
+    task->endCondition.kind = 0;
+    task->taskId = 0x18;
+    task->flags &= ~1;
+    task->ownerId = owner->identity;
+    task->onStart = btlRequestModelOrReuse;
+    task->callback = btlPollModelLoadCompletion;
     arguments = btlGetTaskArguments(task);
     arguments[0] = (u32)owner;
     arguments[1] = index;
@@ -5597,15 +5597,15 @@ u32 btlUnitBaseLightTask(BtlUnitBaseLightArgs *work) {
     return 0;
 }
 
-void *btlCreateUnitBaseLightTask(BtlUnit *owner) {
-    u8 *task = btlAllocTask(8);
+BtlRuntimeTask *btlCreateUnitBaseLightTask(BtlUnit *owner) {
+    BtlRuntimeTask *task = btlAllocTask(8);
     BtlUnitBaseLightArgs *arguments;
-    task[0] = 1;
-    task[0x10] = 0;
-    *(void **)(task + 0x4C) = btlUnitBaseLightTask;
-    *(u16 *)(task + 0x20) = 0x21;
-    *(u64 *)(task + 0x40) = owner->identity;
-    *(u32 *)(task + 0x48) = 0;
+    task->startCondition.kind = 1;
+    task->endCondition.kind = 0;
+    task->callback = btlUnitBaseLightTask;
+    task->taskId = 0x21;
+    task->ownerId = owner->identity;
+    task->onStart = 0;
     arguments = btlGetTaskArguments(task);
     arguments->unit = owner;
     arguments->delay = 0;

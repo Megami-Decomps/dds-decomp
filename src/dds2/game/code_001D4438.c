@@ -3,6 +3,7 @@
 #include "btl_scene_fade.h"
 #include "btl_command.h"
 #include "btl_action.h"
+#include "btl_unit_tasks.h"
 #include "btl_state.h"
 #include "btl_ui.h"
 #include "pcp_vu0.h"
@@ -1547,7 +1548,6 @@ extern u16 *btlGetSideIndexedActorStatusTable(s32 kind, s32 index);
 extern s32 func_001E2E58(BtlUnit *, s32);
 extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit);
 extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 model, s32 variant, s32 motion, s32 frames, u8 mode);
-extern BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *unit, u32 index, u32 value, s8 mode);
 extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *unit, u32 value, u32 variant);
 extern BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *unit);
 extern BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *resource, BtlUnit *unit, u64 wait);
