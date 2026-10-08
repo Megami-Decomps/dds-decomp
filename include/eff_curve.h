@@ -3,9 +3,15 @@
 
 #include "common.h"
 
+enum EffScalarCurveMode {
+    EFF_SCALAR_CURVE_MODE_ENDPOINTS = 0,
+    EFF_SCALAR_CURVE_MODE_ONE_INTERMEDIATE_KEY = 1,
+    EFF_SCALAR_CURVE_MODE_TWO_INTERMEDIATE_KEYS = 2
+};
+
 /* Piecewise-linear scalar keys. Frames and duration are signed. */
 typedef struct EffScalarCurve {
-    u8 mode; /* 0: endpoints, 1: one intermediate key, 2: two keys */
+    u8 mode; /* enum EffScalarCurveMode, stored as a byte */
     u8 reserved01[3];
     f32 initialValue;
     f32 finalValue;

@@ -47,6 +47,7 @@ extern u32 kwlnDrawSurfaceIndex;
 extern s32 func_002CE920(void);
 
 extern s32 fileMenuTaskExists(void);
+extern void func_002CE208(s32 mode);
 
 extern s32 fldIsFieldResourceWaitFinished(void);
 

@@ -60,6 +60,7 @@ extern u32 D_003BA730;
 extern s32 fldIsFieldResourceWaitFinished(void);
 
 extern s32 fileMenuTaskExists(void);
+extern void fileEnterMcPackScene(s32 mode);
 
 extern s32 func_0028F5F8(void);
 

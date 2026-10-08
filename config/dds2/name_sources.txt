@@ -10,6 +10,7 @@
 0x00100DD8	kwlnTaskRequestDestroy	inferred	Moves a live task into state three and destroys it when its delay is zero.
 0x00100E50	kwlnTaskAdvanceDestroyDelays	inferred	Counts down destruction delays and completes destruction on expiry.
 0x00100EB0	kwlnTaskUpdateFlagsRecursive	inferred	confidence=high; matched-C; src/dds2/kernel/dds3KernelCore.c:147:func_00100EB0; Sets or clears only task flag bits admitted by mask 0x0FFFFFF0, then applies the same operation recursively to each child and descendant.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x00100F48	kwlnTaskUpdateFlagsScoped	inferred	native selection 0 target, 1 other queued tasks, 2 subtree, 3 all queued tasks; updates flag bits 4..27
 0x001010A8	kwlnTaskGetStateList	inferred	Selects one of the three task-list pointers according to the low four state bits.
 0x00101198	kwlnTraverseDiagnosticTaskQueue	inferred	confidence=high; matched-C; src/dds2/kernel/dds3KernelCore.c:181:func_00101198; Traverses listNext to the end of the supplied task queue; the queue-diagnostic caller supplies all three scheduler heads. The label argument is unused and this body does not print.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x001011D0	kwlnPrintTaskQueueDiagnostics	inferred	confidence=high; src/dds2/kernel/dds3KernelCore.c:func_001011D0; Prints delayed-start, middle, and delayed-destroy task lists and queue counters. [names_qp9.tsv]
@@ -1167,6 +1168,7 @@
 0x0016AEA0	effParamDescriptorGetKind	inferred	Reads the descriptor's first word as the extended-work kind.
 0x0016AEA8	effParamDescriptorGetTableIndex	inferred	Reads the descriptor's second word as its fallback table index.
 0x0016AF38	effCreateThunderCellSystemWork	inferred	confidence=high; src/dds2/game/code_0016A100.c:func_0016AF38; Copies thunder head parameters, allocates/configures its cell system, initializes all cell records and sets default color. [names_qp9.tsv]
+0x0016B118	effThunderCloneCellSystemWork	inferred	Duplicate callback recreates the vector cell-system work from its retained parameter prefix.
 0x0016B130	effThunderReleaseVectorWork	inferred	queued
 0x0016B170	effThunderSetVectorTint	inferred	queued
 0x0016B178	effThunderScaleVectorDimensions	inferred	queued

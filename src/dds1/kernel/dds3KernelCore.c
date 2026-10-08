@@ -1,5 +1,6 @@
 #include "common.h"
 #include "kwln.h"
+#include "kwln_task_flags.h"
 #include "kwln_task_state.h"
 #include "kwln_task_lifecycle.h"
 
@@ -214,9 +215,9 @@ void kwlnTaskUpdateFlagsRecursive(s32 setFlags, KwlnTask* task, u32 flags)
     KwlnTask* child;
 
     if (setFlags != 0) {
-        task->flags |= flags & 0x0FFFFFF0;
+        task->flags |= flags & KWLN_TASK_MUTABLE_FLAGS_MASK;
     } else {
-        task->flags &= ~(flags & 0x0FFFFFF0);
+        task->flags &= ~(flags & KWLN_TASK_MUTABLE_FLAGS_MASK);
     }
     child = task->childList;
     while (child != 0) {
@@ -225,21 +226,21 @@ void kwlnTaskUpdateFlagsRecursive(s32 setFlags, KwlnTask* task, u32 flags)
     }
 }
 
-void func_00101060(s32 setFlags, KwlnTask *task, u32 flags, s32 mode)
+void kwlnTaskUpdateFlagsScoped(s32 setFlags, KwlnTask *task, u32 flags, s32 scope)
 {
     KwlnTask *node = NULL;
     s32 state;
 
-    switch (mode) {
-    case 0:
+    switch (scope) {
+    case KWLN_TASK_FLAG_SCOPE_TARGET:
         if (setFlags != 0) {
-            task->flags |= flags & 0x0FFFFFF0;
+            task->flags |= flags & KWLN_TASK_MUTABLE_FLAGS_MASK;
         } else {
-            task->flags &= ~(flags & 0x0FFFFFF0);
+            task->flags &= ~(flags & KWLN_TASK_MUTABLE_FLAGS_MASK);
         }
         return;
-    case 1:
-    case 3:
+    case KWLN_TASK_FLAG_SCOPE_OTHER_QUEUED_TASKS:
+    case KWLN_TASK_FLAG_SCOPE_ALL_QUEUED_TASKS:
         for (state = 0; state < 3; state++) {
             switch (state) {
             case 0:
@@ -253,10 +254,11 @@ void func_00101060(s32 setFlags, KwlnTask *task, u32 flags, s32 mode)
                 break;
             }
             if (node != NULL) {
-                u32 setMask = flags & 0x0FFFFFF0;
+                u32 setMask = flags & KWLN_TASK_MUTABLE_FLAGS_MASK;
 
                 while (node != NULL) {
-                    if ((node != task && mode == 1) || mode == 3) {
+                    if ((node != task && scope == KWLN_TASK_FLAG_SCOPE_OTHER_QUEUED_TASKS) ||
+                        scope == KWLN_TASK_FLAG_SCOPE_ALL_QUEUED_TASKS) {
                         if (setFlags != 0) {
                             node->flags |= setMask;
                         } else {
@@ -268,7 +270,7 @@ void func_00101060(s32 setFlags, KwlnTask *task, u32 flags, s32 mode)
             }
         }
         return;
-    case 2:
+    case KWLN_TASK_FLAG_SCOPE_SUBTREE:
         kwlnTaskUpdateFlagsRecursive(setFlags, task, flags);
         break;
     }

@@ -1881,7 +1881,7 @@ s32 evtBeginSelectionExitFade(KwlnTask *task) {
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 extern s32 fileMenuTaskExists(void);
 extern void fileSetPreviewLocation();
-extern void func_002CE208();
+extern void func_002CE208(s32 mode);
 
 /* Poll the file task after the dispatch/fade barrier, then restore the menu popup. */
 s32 func_0026A048(KwlnTask *request) {
