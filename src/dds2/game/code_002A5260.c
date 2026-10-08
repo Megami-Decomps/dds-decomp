@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font.h"
 #include "eff_resource_slots.h"
 #include "sdf_resource.h"
 #include "kwln.h"
@@ -821,8 +822,6 @@ struct FrFontGlyph;
 extern struct FrFontGlyph *frFontBuildColoredGlyphWithSharedFlags();
 extern u32 frFontMeasureLines(struct FrFontGlyph *);
 extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
-extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
-
 void func_002A6030(s32 font, u32 color, const char *text, f32 x, f32 y) {
     s32 byteAlpha = color & 0xFF;
     f32 alpha = byteAlpha;

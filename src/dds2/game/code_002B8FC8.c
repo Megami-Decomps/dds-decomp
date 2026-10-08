@@ -1,3 +1,4 @@
+#include "fr_font.h"
 #include "sdf_chip.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
@@ -314,9 +315,6 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
 extern void scrClearSecondaryScriptFlag(DatPartyRecord *unit, u16 flagId);
 
 extern void func_0019D550(s32, s32, s32);
-
-extern void frFontQueueGlyphInSelectedSlot(s32);
-
 extern void func_0035B7F8(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
 

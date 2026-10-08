@@ -76,8 +76,6 @@ void func_0026F518(void) {
 
 extern FrFontGlyph *frFontBuildColoredGlyphWithSharedFlags();
 extern u32 frFontMeasureLines(FrFontGlyph *);
-extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
-
 s32 func_0026F530(s32 alternate, u32 color, const char *source, f32 x, f32 y) {
     FrFontGlyph *glyph;
 

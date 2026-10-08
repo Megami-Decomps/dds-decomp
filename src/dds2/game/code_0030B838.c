@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "eff_transform.h"
@@ -32,9 +33,7 @@ extern void sdfDrawScaledCenteredSlotImage(f32, f32, s32, s32, s32, s32, s32, s3
 
 extern void sdfCounterDestroyRuntime();
 
-extern s32 frFontMeasureLines(u64);
-
-extern u64 func_0019F448(u64, u64, u64, u64, u64, u64);
+extern u32 frFontMeasureLines(struct FrFontGlyph *glyphChain);
 
 extern u32 sdfSelectedCounterIndex;
 
@@ -177,9 +176,10 @@ extern void mnuCallInitWide();
 
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, u32, u32, u32, u32);
 
-extern s32 frMeasureAndQueueCounterText();
+extern s32 frMeasureAndQueueCounterText(const char *text);
 
-extern void evtPrepareSizedDrawResource();
+extern void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors,
+                                       const char *text);
 
 extern void sdfCounterDrawGlyphAtGridCell(s32, s32, u32, u8 *);
 
@@ -603,10 +603,10 @@ void sdfCounterDrawChannelPlate(s32 x, s32 y, s32 unused, SdfCounterRuntime *rt,
                   PACK(base, base, base, (u32)((f32)(base + 0x10) * fade)),
                   PACK(base + 0x30, base + 0x30, base + 0x30, (u32)(fade * 64.0f)),
                   PACK(base + 0x60, base + 0x60, base + 0x60, (u32)((f32)(base + 0x70) * fade)));
-    width = frMeasureAndQueueCounterText(channel->display->word);
+    width = frMeasureAndQueueCounterText((const char *)channel->display->word);
     evtPrepareSizedDrawResource(x + (0x80 - width) / 2 + 1, y + 1,
                                 PACK((u32)(fade * 128.0f), (u32)(fade * 128.0f), (u32)((f32)(base + 0x80) * fade), (u32)(fade * 128.0f)),
-                                channel->display->word);
+                                (const char *)channel->display->word);
 }
 
 void sdfCounterIncrease(void) {
@@ -749,13 +749,13 @@ void sdfCounterDrawSelectedTimerFade(s32 unused, s32 x, f32 fade) {
     evtSubmitPrimaryAlphaBlendMode(0);
 }
 
-s32 frMeasureAndQueueCounterText(u64 arg0) {
-    u64 text;
+s32 frMeasureAndQueueCounterText(const char *text) {
+    struct FrFontGlyph *glyph;
     s32 width;
 
-    text = func_0019F448(0, 0, 0, 0, arg0, 0);
-    width = frFontMeasureLines(text);
-    frFontQueueGlyphInSelectedSlot(text);
+    glyph = func_0019F448(0, 0, 0, 0, text, NULL);
+    width = frFontMeasureLines(glyph);
+    frFontQueueGlyphInSelectedSlot(glyph);
     return width;
 }
 
@@ -839,7 +839,7 @@ void sdfDrawCounterChannelInfoLabel(s32 x, s32 y) {
 
     display = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->display;
     fade = 1.0f - (f32)((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer->value / 10.0f;
-    width = frMeasureAndQueueCounterText((u64)display->info);
+    width = frMeasureAndQueueCounterText((const char *)display->info);
     x = (f32)x - (f32)width * 0.5f;
     if (display->value == 2) {
         x -= 0x10;

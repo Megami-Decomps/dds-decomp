@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font.h"
 #include "itf_draw_grid.h"
 #include "kwln.h"
 #include "mnu_result.h"
@@ -25,7 +26,6 @@ extern s32 func_0035C860(char *, const char *, ...);
 extern u32 func_0019F6C8(s32, s32, s32, u32, char *, s32);
 extern void frFontSetChainFlag(struct FrFontGlyph *, u8);
 extern s32 func_0019D550(struct FrFontGlyph *, s8, u32);
-extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
 extern u32 mnuKindIsSelectable(u32);
 extern char D_004379B0[];
 

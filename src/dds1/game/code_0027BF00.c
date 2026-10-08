@@ -77,10 +77,6 @@ extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, 
 extern void func_00196088(s32, s32, FrFontGlyph *);
 
 extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
-
-extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
-
-
 typedef struct MenuListNode MenuListNode;
 
 extern void func_00300508(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
