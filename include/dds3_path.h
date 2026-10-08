@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-struct EffPrim;
+struct EffPrimitiveCurve;
 
 enum Dds3PathChannelFlags {
     DDS3_PATH_POSITION_CHANNEL = 1,
@@ -25,7 +25,7 @@ typedef struct Dds3PathCurveWork {
     u32 flags;
     f32 duration; /* Greatest final frame across the retained channels. */
     f32 time;
-    struct EffPrim *primitiveCurve; /* 0x10: derived from position samples. */
+    struct EffPrimitiveCurve *primitiveCurve; /* 0x10: derived from position samples. */
     Dds3PathKeyframes *positionKeys; /* 0x14 */
     Dds3PathKeyframes *rotationKeys; /* 0x18 */
     Dds3PathKeyframes *scalarKeys; /* 0x1C */

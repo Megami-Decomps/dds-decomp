@@ -205,28 +205,25 @@ typedef struct EffCntRec {
     u32 unk4;        /* +0x04: id released with its owner */
 } EffCntRec;
 
-/* Effect primitive work: owned buffers, channel-B cursor and random records (0x170).
- * Shared by DDS1/2 effect and panel units. */
-typedef struct EffPrim {
-    void *primaryResource; /* +0x00: resource released by effFreeBuffers */
-    void *secondaryResource; /* +0x04: resource released by effFreeBuffers */
-    u32 recordCount;       /* +0x08: number of keyframe records */
-    u16 unkC;              /* +0x0C: flag set during creation */
-    u8 unkE[2];
-    s32 unk10;
-    void *unk14;           /* +0x14: optional buffer */
-    void *unk18;
-    void *unk1C;
-    u32 cursorIndex;       /* +0x20: channel-B record index */
-    f32 cursorPosition;    /* +0x24: channel-B interpolation position */
-    f32 cursorStep;        /* +0x28: channel-B position increment */
-    u8 unk2C[0x18];
-    u32 randomCount;       /* +0x44: number of random records */
-    u32 randomModulus;     /* +0x48: modulus for each random slot */
-    u8 unk4C[0x11C];
-    EffCntRec *counterRecords; /* +0x168 */
-    s32 *slotLookup;       /* +0x16C: slot lookup base */
-} EffPrim;
+/* Complete 0x2C-byte primitive-curve owner allocated by effCreatePrimitiveCurve.
+ * Keys are borrowed XYZ samples; the three polynomial coefficient banks share
+ * the optional backing allocation. */
+typedef struct EffPrimitiveCurve {
+    struct SdfMemBlock *allocation;            /* 0x00: curve owner storage */
+    struct SdfMemBlock *coefficientAllocation; /* 0x04: cubic coefficient storage */
+    u32 recordCount;                          /* 0x08: number of XYZ keys */
+    u16 interpolationMode;                    /* 0x0C: zero cubic, nonzero linear */
+    u8 pad0E[2];
+    f32 *keys;                                /* 0x10: interleaved XYZ values */
+    f32 *cubicCoefficients;                   /* 0x14: null for linear interpolation */
+    f32 *quadraticCoefficients;               /* 0x18 */
+    f32 *linearCoefficients;                  /* 0x1C */
+    u32 cursorIndex;                          /* 0x20 */
+    f32 cursorPosition;                       /* 0x24: position within the segment */
+    f32 cursorStep;                           /* 0x28 */
+} EffPrimitiveCurve;
+
+typedef char EffPrimitiveCurveSizeCheck[sizeof(EffPrimitiveCurve) == 0x2C ? 1 : -1];
 
 /* Type-indexed effect work and texture handle (0x40); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct EffWork {

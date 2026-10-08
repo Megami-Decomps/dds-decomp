@@ -5431,6 +5431,7 @@
 0x00303C50	effResetFileResourceManager	inferred	Zeros manager counters and handles and sets its initial file-resource state. [names_reviewed5.tsv]
 0x00303C78	effClassifyResourceMask	inferred	Maps a recognized single-bit resource mask to its category index. [names_reviewed5.tsv]
 0x00303D00	mnuAllocateValueRecord	inferred	Creates zeroed menu work carrying initial value; callers create progress-host and staff-menu work. [names_reviewed5.tsv]
+0x00303D58	effDestroyEffectList	inferred	frees the allocated EffectList header with sdfReleaseChipBlock; entry nodes are managed separately
 0x00303D70	mnuGetValueRecordOwner	inferred	Returns the initial owner/value stored in the first word of this menu record. [names_reviewed5.tsv]
 0x00303E88	effPollResourceList	inferred	unified with DDS1 twin (was effProcessRequestList)
 0x00304030	effLoadIndexedResource	inferred	Formats an effect path with category and index, loads its handle through func_00343ED0 and imports it through func_00305148.
