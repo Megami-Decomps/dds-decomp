@@ -3746,3 +3746,16 @@ existing motion selector at `+0x5D4`. The matched DDS1 body is an exact source
 donor after these owner and provider substitutions. The falling velocity
 literal is `-0.17999998f`, not the adjacent float represented by `-0.18f`.
 
+
+## Lens-flare copied parameters and vector work
+
+DDS1 `0029C620` and DDS2 `002DE338` allocate a `0x58`-byte work object and
+copy the `0x40`-byte parameter record into its `+0x18` member. The draw
+callbacks (`0029C748` / `002DE460`) use the existing `SdfColorTrack` and
+`SdfAlphaTrack`, load strength at work `+0x4C` as a float, compare the frame
+and limit as signed words, and load the flare-set index at `+0x54` with
+`LBU`. `EffLensFlareParams` and `EffFadeVectorWork` own these fields in the
+narrow billboard header; the file wrapper forwards its work argument and
+returns the created object. The vector operations retain the existing SDK
+VU macros, with no new inline assembly.
+
