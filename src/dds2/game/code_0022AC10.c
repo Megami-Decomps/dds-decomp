@@ -2308,7 +2308,7 @@ void btlDestroyGroupNode(BattleGroupNode *groupNode) {
         sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)groupNode->requestHandle);
         for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
             if (groupNode->slots[slotIndex].resourceHandle != 0) {
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(groupNode->slots[slotIndex].resourceHandle));
+                sdfReleaseResourceAllocation(groupNode->slots[slotIndex].resourceHandle);
             }
         }
     }

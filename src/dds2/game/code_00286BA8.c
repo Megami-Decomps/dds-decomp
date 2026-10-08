@@ -850,7 +850,53 @@ s32 mnuHandleMantraSelectionInput(MnuStatusResource *resourceWork) {
     return action;
 }
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00288BD8);
+extern void mnuCallInitWide(s32, s32, s32, s32, s32);
+
+s32 func_00288BD8(s32 x, s32 y, s32 depth, s32 alpha,
+                  MnuStatusResource *resource, s32 drawArg, f32 phase) {
+    f32 scale;
+    f32 highlightProgress;
+    s32 highlightAlpha;
+
+    if (phase < 0.8f) {
+        scale = phase / 0.8f;
+        alpha = (s32)(scale * 128.0f);
+        highlightAlpha = 0;
+    } else if (phase < 1.0f) {
+        scale = 1.0f;
+        alpha = 128;
+        highlightProgress = (phase - 0.8f) / 0.2f;
+        highlightAlpha = (s32)(highlightProgress * 128.0f);
+    } else if (phase == 1.0f) {
+        scale = 1.0f;
+        alpha = 128;
+        highlightAlpha = 128;
+    } else if (phase < 1.2f) {
+        scale = 1.0f;
+        alpha = 128;
+        highlightProgress = (1.2f - phase) / 0.2f;
+        highlightAlpha = (s32)(highlightProgress * 128.0f);
+    } else {
+        scale = ((phase - 1.2f) / 0.8f) + 1.0f;
+        alpha = (s32)(((2.0f - phase) * 128.0f) / 0.8f);
+        highlightAlpha = 0;
+    }
+
+    mnuDrawMantraSprite(x, y, depth, alpha, 0x1E, 0, drawArg);
+    mnuDrawMantraSprite(x, (s32)((f32)y + (scale - 1.0f) * 32.0f), depth,
+                        alpha, 0x1F, 0, drawArg);
+
+    {
+        MenuList *list = resource->list;
+        MtrSelectionState *selection = &resource->selection;
+
+        selection->alpha = alpha;
+        selection->scale = scale;
+        selection->highlightAlpha = (f32)highlightAlpha;
+        mnuCallInitWide(0, 0, 0, (s32)list, drawArg);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00286BA8", func_00288DD0);
 
