@@ -233,11 +233,11 @@ void func_00271368(void *menuData) {
     EffMappedResource *batch;
     EffMappedRecord *record;
     u32 *statusWords;
-    u32 primaryResource;
+    EffMappedResource *primaryResource;
 
-    primaryResource = (u32)effLoadMappedResource(D_003B2058, D_0037C380[0]);
+    primaryResource = effLoadMappedResource(D_003B2058, D_0037C380[0]);
     menu->primaryImage = primaryResource;
-    menu->secondaryImage = (u32)effLoadMappedResource(D_003B2058, D_0037C380[1]);
+    menu->secondaryImage = effLoadMappedResource(D_003B2058, D_0037C380[1]);
 
     batch = effCreateStatusBatch(6);
     record = batch->records;
@@ -261,8 +261,8 @@ void func_00271368(void *menuData) {
 void mnuReleaseStaffSpriteHandles(StaffMenuWork *menu) {
     EffMappedResource **batchCursor = menu->extraImages;
     u32 batchIndex = 0;
-    effDestroyPackedBatch((struct EffMappedResource *)menu->primaryImage);
-    effDestroyPackedBatch((struct EffMappedResource *)menu->secondaryImage);
+    effDestroyPackedBatch(menu->primaryImage);
+    effDestroyPackedBatch(menu->secondaryImage);
     do {
         effDestroyPackedBatch(*batchCursor++);
         batchIndex++;
@@ -461,7 +461,7 @@ MenuWindowContainer *func_00271B50(void *const *entries, s32 count, s32 width,
 }
 
 void mnuCreateStaffPanelSet(StaffMenuWork *menu) {
-    menu->resourceList = mnuCreatePanelSpriteHandles(0, menu->staffSlots.baseResources[3], menu->secondaryImage);
+    menu->resourceList = mnuCreatePanelSpriteHandles(0, menu->staffSlots.baseResources[3], (s32)menu->secondaryImage);
     menu->images[0] = (u32)func_00271B50(D_0037B950, 8, 0x300, menu, D_0037C388);
     mnuForwardDupArg(menu->images[0], menu->staffSlots.baseResources[5], 0, 0, 0);
     menu->images[1] = (u32)func_00271B50(D_0037B970, 3, 0x2C0, menu, 0);
