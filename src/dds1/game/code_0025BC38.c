@@ -4,6 +4,7 @@
 #include "dat_state.h"
 #include "mnu_profile_progress.h"
 #include "mnu_sprite_resource.h"
+#include "mnu_scene_list.h"
 
 #define MNU_MANTRA_GRID_ROW_COUNT 0x11
 #define MNU_MANTRA_GRID_COLUMN_COUNT 15
@@ -19,19 +20,9 @@
 #define MNU_MANTRA_COST_ICON_X_OFFSET 0x19
 #define MNU_MANTRA_COST_ICON_Y_OFFSET 0x5C
 
-extern s32 sdfAllocSizeClassBlock(u32);
+extern void *sdfAllocSizeClassBlock(s32);
 
 void effDestroyResourceSlotSet(u32);
-
-typedef struct DspListNode {
-    u8 pad00[0x10];
-    struct DspListNode *next; /* 0x10 */
-} DspListNode;
-
-typedef struct {
-    u32 pad00[2];
-    DspListNode *first; /* 0x08 */
-} DspListHead;
 
 typedef struct MovieCueNode MovieCueNode;
 
@@ -169,20 +160,6 @@ u32 mnuRequestEffectResource(u32 ctx, u32 config) {
     effRequestResourceByMode(ctx, config, 0, (u32)&work->resourceHandle);
     return (u32)work;
 }
-
-typedef struct MenuListNode {
-    s32 frame;
-    u8 pad04[4];
-    s32 recordAddress;
-    s16 kind;
-    u8 pad0E[2];
-    struct MenuListNode *next; /* 0x10 */
-} MenuListNode;
-
-typedef struct {
-    u32 pad00[2];
-    MenuListNode *first; /* 0x08 */
-} MenuListHead;
 
 u8 mnuHasEffectResourceHandle(MenuResourceWork *work) {
     return work->resourceHandle != 0;
@@ -616,7 +593,7 @@ void mnuDrawMantraCostIcon(s32 x, s32 y, s32 depth, s32 recordAddress, s32 amoun
 }
 
 /* Advance and draw one transient cost/list notification; report expiry at frame 11. */
-s32 func_0025D7F8(MenuListNode *node, s32 index, s32 drawArg) {
+s32 func_0025D7F8(MnuSceneListNode *node, s32 index, s32 drawArg) {
     s32 frame = node->frame;
     s32 opening = frame < 7;
     s32 context = drawArg;
@@ -627,23 +604,23 @@ s32 func_0025D7F8(MenuListNode *node, s32 index, s32 drawArg) {
         if (progress > 1.0f) {
             progress = 1.0f;
         }
-        mnuDrawMantraCostIcon(0, 0, 0, node->recordAddress,
+        mnuDrawMantraCostIcon(0, 0, 0, node->value08,
                               (s32)(progress * 128.0f), context);
     }
 
     if (node->next == NULL) {
         if (opening == 0) {
-            mnuDrawMantraCostIcon(0, 0, 0, node->recordAddress, 0x80,
+            mnuDrawMantraCostIcon(0, 0, 0, node->value08, 0x80,
                                   context);
         }
     }
 
     if (opening != 0) {
         progress = (f32)frame / 6.0f;
-        if (node->kind == 1) {
+        if (node->value0C == 1) {
             func_0024E260((s32)(progress * -16.0f + -27.0f), 52, 1,
                           (s32)(progress * 96.0f + 32.0f), 0x18, context);
-        } else if (node->kind == 2) {
+        } else if (node->value0C == 2) {
             func_0024E260((s32)(progress * 16.0f + -27.0f), 52, 1,
                           (s32)(progress * 96.0f + 32.0f), 0x19, context);
         }
@@ -653,10 +630,10 @@ s32 func_0025D7F8(MenuListNode *node, s32 index, s32 drawArg) {
         if (frame < 9) {
             progress = (f32)(frame - 3) / 6.0f;
             progress = sdfSinPoly(progress * 3.14159265f);
-            if (node->kind == 1) {
+            if (node->value0C == 1) {
                 func_0024E260(-27, 52, 1, (s32)(progress * 128.0f),
                               0x16, context);
-            } else if (node->kind == 2) {
+            } else if (node->value0C == 2) {
                 func_0024E260(-27, 52, 1, (s32)(progress * 128.0f),
                               0x17, context);
             }
@@ -670,15 +647,15 @@ s32 func_0025D7F8(MenuListNode *node, s32 index, s32 drawArg) {
     return 1;
 }
 
-MenuListNode *mnuAllocateMenuListNode(void) {
-    MenuListNode *node = (MenuListNode *)sdfAllocSizeClassBlock(0x14);
+MnuSceneListNode *mnuAllocateMenuListNode(void) {
+    MnuSceneListNode *node = sdfAllocSizeClassBlock(0x14);
 
     memset(node, 0, 0x14);
     return node;
 }
 
-DspListNode *mnuAppendNodeToDisplayList(DspListHead *head) {
-    DspListNode *node = head->first;
+MnuSceneListNode *mnuAppendNodeToDisplayList(MnuSceneListHead *head) {
+    MnuSceneListNode *node = head->first;
     if (node == NULL) {
         node = mnuAllocateMenuListNode();
         head->first = node;
@@ -692,16 +669,16 @@ DspListNode *mnuAppendNodeToDisplayList(DspListHead *head) {
     return node;
 }
 
-MenuListNode *mnuFreeMenuListNodeAndGetNext(MenuListNode *node) {
-    MenuListNode *next;
+MnuSceneListNode *mnuFreeMenuListNodeAndGetNext(MnuSceneListNode *node) {
+    MnuSceneListNode *next;
 
     next = node->next;
-    sdfReleaseChipBlock();
+    sdfReleaseChipBlock(node);
     return next;
 }
 
-void mnuReleaseListNodes(MenuListHead *head) {
-    MenuListNode *node = head->first;
+void mnuReleaseListNodes(MnuSceneListHead *head) {
+    MnuSceneListNode *node = head->first;
 
     while (node != NULL) {
         node = mnuFreeMenuListNodeAndGetNext(node);
@@ -728,24 +705,22 @@ s32 mnuDrawMantraSineFade(s32 frame, s32 amount, s32 drawArg) {
     return 1;
 }
 
-extern s32 func_0025D7F8(MenuListNode *, s32, s32);
+extern s32 func_0025D7F8(MnuSceneListNode *, s32, s32);
 
-s32 mnuAdvanceDisplayList(s32 arg0, s32 arg1, s32 arg2) {
-    s32 *counter = (s32 *)arg0;
-    MenuListHead *head = (MenuListHead *)arg0;
-    MenuListNode *node = head->first;
+s32 mnuAdvanceDisplayList(MnuSceneListHead *head, s32 amount, s32 drawContext) {
+    MnuSceneListNode *node = head->first;
     s32 index = 0;
 
-    if (mnuDrawMantraSineFade(*counter, arg1, arg2) != 0) {
-        *counter = 0;
+    if (mnuDrawMantraSineFade(head->frameCount, amount, drawContext) != 0) {
+        head->frameCount = 0;
     } else {
-        *counter = *counter + 1;
+        head->frameCount = head->frameCount + 1;
     }
     if (node == NULL) {
         return 1;
     }
     do {
-        s32 hit = func_0025D7F8(node, index, arg2);
+        s32 hit = func_0025D7F8(node, index, drawContext);
 
         index++;
         if (hit != 0) {
@@ -758,13 +733,13 @@ s32 mnuAdvanceDisplayList(s32 arg0, s32 arg1, s32 arg2) {
     return 0;
 }
 
-extern s32 mnuAdvanceDisplayList(s32, s32, s32);
 extern void mnuDrawMantraCostIcon(s32, s32, s32, s32, s32, s32);
 
 /* Draw the selected record's cost marker once the animated list reports completion. */
-void mnuDrawMantraCostAfterListAdvance(s32 recordAddress, s32 listAddress, s32 amount, s32 drawArg) {
-    if (mnuAdvanceDisplayList(listAddress, amount, drawArg) != 0) {
-        mnuDrawMantraCostIcon(0, 0, 0, recordAddress, amount, drawArg);
+void mnuDrawMantraCostAfterListAdvance(s32 recordAddress, MnuSceneListHead *head,
+                                       s32 amount, s32 drawContext) {
+    if (mnuAdvanceDisplayList(head, amount, drawContext) != 0) {
+        mnuDrawMantraCostIcon(0, 0, 0, recordAddress, amount, drawContext);
     }
 }
 
