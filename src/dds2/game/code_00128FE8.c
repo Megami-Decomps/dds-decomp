@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
+#include "sdf_packet_append.h"
 #include "fr_font.h"
 #include "sdf_packet_list.h"
 #include "sdf_dev_state.h"
@@ -270,9 +271,7 @@ extern void *func_00348158(const f32 (*)[4], const u32 *, s32, u32);
 extern void *memset(void *s, s32 c, u32 n);
 
 
-extern void sdfConsAppendClearPacket(s32, s32 (*)(s32));
 
-extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
 
 extern void *func_0033B050(SdfPrimitiveRequest *);
 
@@ -2123,8 +2122,8 @@ void fldSubmitGsTriangle(s32 a0, s32 a1, s32 a2, f32 f0, f32 f1, f32 f2, f32 f3,
 
     command = sdfAllocPacketAligned(0x20);
     sdfInitPacketList((SdfListHead *)command);
-    sdfConsAppendClearPacket(command, 0);
-    sdfConsAppendAssetPacket(command, (void *)D_0043607C, 0);
+    sdfConsAppendClearPacket((SdfListHead *)command, 0);
+    sdfConsAppendAssetPacket((SdfListHead *)command, (void *)D_0043607C, 0);
     memset(&desc, 0, 0x2C);
     desc.color = 0x80808080;
     desc.stripWordCount = 1;

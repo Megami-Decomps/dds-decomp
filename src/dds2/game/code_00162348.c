@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_append.h"
 #include "bill_object_api.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
@@ -129,7 +130,6 @@ extern s32 sdfAllocPacketAligned(s32);
 struct SdfListHead;
 extern void sdfInitPacketList(struct SdfListHead *);
 
-extern void sdfConsAppendClearPacket(s32, s32 (*)(s32));
 
 extern void sdfAppendPacket(struct SdfListHead *, u32);
 
@@ -1450,7 +1450,6 @@ extern const u32 D_003AAD80[];
 extern const u32 D_003AAE00[];
 extern ParDrawCmd *D_003AAF50[];
 extern ParDrawCmd D_00380248;
-extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
 
 /* Batch pending cell systems by topology, then submit the five draw buckets. */
 void parDrawPendingCellSystems(void) {
@@ -1475,10 +1474,10 @@ void parDrawPendingCellSystems(void) {
         if (list == 0) {
             *slot = sdfAllocPacketAligned(0x20);
             sdfInitPacketList((struct SdfListHead *)*slot);
-            sdfConsAppendClearPacket(*slot, NULL);
+            sdfConsAppendClearPacket((SdfListHead *)*slot, NULL);
             list = *slot;
         }
-        sdfConsAppendAssetPacket(list, (void *)system->asset, NULL);
+        sdfConsAppendAssetPacket((SdfListHead *)list, (void *)system->asset, NULL);
         count = system->cellCount;
         if (system->kind == PAR_CELL_TOPOLOGY_PAIR) {
             parDrawControl.indices = D_003AAC90;
@@ -1634,7 +1633,7 @@ void parSubmitCellDrawPackets(ParDrawCmd *emitter, ParBlock *cmd) {
     ParDrawState state;
     s32 remaining;
     sdfInitPacketList(list);
-    sdfConsAppendClearPacket(list, 0);
+    sdfConsAppendClearPacket((SdfListHead *)list, 0);
     remaining = cmd->count * 3;
     memset(&state, 0, sizeof(state));
     state.width = 0x10;
