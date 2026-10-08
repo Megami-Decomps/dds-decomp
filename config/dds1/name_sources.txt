@@ -6671,7 +6671,11 @@
 0x002EC818	sdfSoundInitFormattedAndAppendNode	inferred	Initializes a formatted sound node, stores the caller value, and appends it to the active-node list.
 0x002EC900	sdfSoundShutdownIpuStreamHandlers	inferred	confidence=high; matched-C; src/dds1/game/code_002E9708.c:1192:func_002EC900; requires-symbol-registration; Removes the registered IPU DMA handlers, clears their handles and disables the completion sources.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x002ECA48	sdfSetGridScaledDrawBounds	inferred	Stores grid-scaled draw bounds and the supplied mode. [names_reviewed10.tsv]
+0x002ED008	sdfMovieHandleLinearDeviceEvent	inferred	Handles device open, size, read, and release events for a movie's linear stream.
 0x002ED198	sdfMovieProcessPendingData	inferred	Checks movie buffer space and invokes the data handler with at most 0x4000 pending units.
+0x002ED230	sdfMovieHandlePacDeviceEvent	inferred	Handles device events for movie PAC header, mask, and payload reads.
+0x002ED5C0	sdfMovieLinearStreamReadCallback	inferred	SdfStreamRead callback for linear movie buffer queries, copies, and refill requests.
+0x002ED760	sdfMoviePacStreamReadCallback	inferred	SdfStreamRead callback for movie PAC buffer queries, copies, and refill requests.
 0x002EDAE0	sdfCancelAndReleasePacWork	inferred	readability/matching review (QP16)
 0x002EDBB8	sdfPacCheckDecoderStatus	inferred	confidence=medium; matched-C; src/dds1/game/code_002ED8D0.c:99:func_002EDBB8; Checks the decoder status pair: the first byte must be nonzero and the second zero; called by movie playback status polling without claiming exact flag meanings.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002EDBD8	sdfPacInitializeDispatchPacket	inferred	confidence=high; src/dds1/game/code_002ED8D0.c:func_002EDBD8; Clears the PAC dispatch packet, sets status to minus one, and chooses a supplied dispatch callback or the default. [names_qp9.tsv]
