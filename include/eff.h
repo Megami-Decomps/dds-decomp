@@ -834,10 +834,14 @@ typedef char EffectSlotSetSizeCheck[sizeof(EffectSlotSet) == 0x30 ? 1 : -1];
 typedef struct ParCell {
     u128 *history;   /* 0x00 */
     void *vertices;  /* 0x04 */
-    s32 vertexCount; /* 0x08: processed in groups of three */
-    s32 unk0C;       /* 0x0C cleared */
+    s32 vertexCount; /* 0x08: active vectors in the topology-specific history */
+    s32 historyAdvanceCountdown; /* 0x0C: updates until the next history shift */
     u32 color;       /* 0x10 initialized to grey 0x80808080 */
 } ParCell;
+
+typedef char ParCell_size_must_be_0x14[(sizeof(ParCell) == 0x14) ? 1 : -1];
+typedef char ParCell_history_countdown_at_0x0C[
+    ((u32)&((ParCell *)0)->historyAdvanceCountdown == 0x0C) ? 1 : -1];
 
 /* The cell-system allocation ends with this complete 0x2C-byte owner. */
 typedef struct ParSystem {
