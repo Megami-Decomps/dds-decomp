@@ -102,7 +102,7 @@ extern s32 btlFindScriptResource(char *);
 
 extern u8 *btlGetSideIndexedActorStatusTable(s32, s32);
 
-extern s32 btlHasLinkedEffectNodeTrigger(void *);
+extern s32 btlHasLinkedEffectNodeTrigger(BtlLinkedCommand *);
 
 extern u32 btlAppendSelfAfterTargetScan();
 
@@ -1283,7 +1283,7 @@ typedef struct BtlActionKindTable {
     BtlActionKindRow rows[1]; /* The resource contains additional records. */
 } BtlActionKindTable;
 
-s32 btlShiftUnitUpForScriptAction(u8 *command) {
+s32 btlShiftUnitUpForScriptAction(BtlLinkedCommand *command) {
     BtlUnit *user = btlGetTargetUnitForLink(command);
     u8 *table;
     s32 kind;
@@ -1295,7 +1295,7 @@ s32 btlShiftUnitUpForScriptAction(u8 *command) {
     if (user->partyRecord.unitId == 0x5F || user->partyRecord.unitId == 0x101) {
         table = btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
-            kind = ((BtlActionKindTable *)table)->rows[((BtlLinkedCommand *)command)->link->indexWork.slot].kind;
+            kind = ((BtlActionKindTable *)table)->rows[command->link->indexWork.slot].kind;
             if (kind == 2 || kind == 7) {
                 func_001E3108(user, pos);
                 pos[2] += 350.0f;
@@ -1819,7 +1819,7 @@ s32 btlSelectSoleEligibleActor(void) {
     return -1;
 }
 
-s32 btlRaiseUnitForCommandSlot(u8 *command) {
+s32 btlRaiseUnitForCommandSlot(BtlLinkedCommand *command) {
     BtlUnit *user = btlGetTargetUnitForLink(command);
     u8 *table;
     s32 kind;
@@ -1831,7 +1831,7 @@ s32 btlRaiseUnitForCommandSlot(u8 *command) {
     if (user->partyRecord.unitId == 0x108) {
         table = btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
-            kind = ((BtlActionKindTable *)table)->rows[((BtlLinkedCommand *)command)->link->indexWork.slot].kind;
+            kind = ((BtlActionKindTable *)table)->rows[command->link->indexWork.slot].kind;
             if (kind == 2 || kind == 7) {
                 func_001E3108(user, pos);
                 pos[2] += 1250.0f;
@@ -5456,7 +5456,6 @@ void func_00224FC0(s32 actor) {
     }
 }
 
-extern s32 btlHasLinkedEffectNodeTrigger(void *);
 
 void func_002251A0(s32 actor) {
     switch (effMiscRandMod(NULL, 3)) {

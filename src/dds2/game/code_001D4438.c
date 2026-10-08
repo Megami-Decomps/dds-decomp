@@ -266,7 +266,7 @@ extern f32 effMiscRandUnitFloat(void *state);
 extern void mdlAddEntryPlain(void *, s32, s32);
 extern void mdlAddEntryFlagged(void *, s32, s32);
 extern u8 effSharedRandomState[];
-extern void func_001EC5F0(u32);
+extern void func_001EC5F0(BtlLinkedCommand *);
 extern void func_001EF030(void *, void *);
 extern s32 func_001E88A8(u8 *);
 extern void mdlProcessContextNodesAndTransforms(void *, void *);
@@ -652,13 +652,13 @@ extern s32 D_003BC0C0[];
 extern s32 D_003BC0C8[];
 
 extern void func_001F3E48(s32);
-extern void btlAdvanceCursorForUnmarkedUnit(s32, s32);
+extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 
-extern void func_001FA480(s32, s32, s32);
+extern void func_001FA480(BtlLinkedCommand *, BtlCamState *, s32);
 
-extern void func_001FBAC0(s32, s32);
+extern void func_001FBAC0(BtlLinkedCommand *, BtlCamState *);
 
-extern s32 func_001FB908(s32, s32, s32, s32);
+extern s32 func_001FB908(BtlLinkedCommand *, BtlCamState *, s8, s8);
 
 typedef struct SoundCursor {
     u16 unk_00;
@@ -701,8 +701,8 @@ extern void btlReleaseUnitResources(BtlUnit *);
 extern void btlInitUnitFxDefaults(BtlFx *);
 
 extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
-extern void func_001F5868(s32, s32, s32, s32);
-extern void func_001F5320(s32, s32, s32, s32);
+extern void func_001F5868(BtlLinkedCommand *, BtlCamState *, s16, s16);
+extern void func_001F5320(BtlLinkedCommand *, BtlCamState *, s32, s32);
 extern void mnuReleaseSoundBufferLocked(void);
 extern void evtSetUnitAlphaTransition(u32, s32, u32);
 extern void func_002A27A8(s32, s32, u8);
