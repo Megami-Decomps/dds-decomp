@@ -127,7 +127,7 @@ void mnuDrawSelectionLabel(s32 selection) {
     FrFontGlyph *item = itfDrawTextWithSelectedFontMode(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
     frFontSetChildColors(item, 0xA09DC366);
     func_001958A0(item, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot(item);
+    frFontQueueGlyphForCurrentDrawBuffer(item);
 }
 
 extern s32 ptyGetAffinityKind(s32, s32);
@@ -176,7 +176,7 @@ void func_0027A140(u16 affinityId, s32 placeholderResource, s32 rangeResource) {
 
         if (glyph != 0) {
             func_001958A0(glyph, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot(glyph);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
         }
     }
 }

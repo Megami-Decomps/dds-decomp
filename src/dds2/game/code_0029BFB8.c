@@ -135,7 +135,7 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSum
     sprite = func_0019F6C8(x, y, z, packed, name, 0);
     frFontSetChainFlag(sprite, 3);
     func_0019D550(sprite, 1, arg5);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)sprite);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)sprite);
     color[0] = alpha;
     color[1] = alpha;
     color[2] = alpha;
@@ -157,7 +157,7 @@ void func_0029CB70(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, 
         sprite = func_0019F6C8(x, y, z, packed, name, 0);
         frFontSetChainFlag(sprite, 3);
         func_0019D550(sprite, 1, arg5);
-        frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)sprite);
+        frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)sprite);
         color[0] = alpha;
         color[1] = alpha;
         color[2] = alpha;

@@ -8,6 +8,7 @@
 #include "eff_event.h"
 #include "eff_event_sound.h"
 #include "btl_sound.h"
+#include "bill_object_api.h"
 
 extern void dds3ReleaseObjectBaseResources(EffWorldNode *object);
 
@@ -830,7 +831,6 @@ void dds3RefreshStoredVec3(EffWorldNode *object) {
 }
 
 extern void effDestroyNode(struct EffNode *);
-extern void billDispatchByKind(BillObj *);
 
 /* Release each dependency according to the active state, clearing ownership
  * before releasing the next dependency. State 4 only borrows its handle. */

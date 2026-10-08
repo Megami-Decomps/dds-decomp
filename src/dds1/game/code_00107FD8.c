@@ -749,7 +749,7 @@ void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors, const char *
 
     glyph = func_00197748(width << 4, height << 3, 0, colors, text, NULL);
     frFontDrawGlyphInDefaultMode(glyph);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 typedef struct EvtSelState {

@@ -755,7 +755,7 @@ s32 frMeasureAndQueueCounterText(const char *text) {
 
     glyph = func_0019F448(0, 0, 0, 0, text, NULL);
     width = frFontMeasureLines(glyph);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
     return width;
 }
 

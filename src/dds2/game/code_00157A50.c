@@ -145,8 +145,6 @@ void effInitializeBillResourceOwners(void) {
     func_0035B6E0(D_004142C0, D_004142B0);
 }
 
-extern void billDispatchByKind(BillObj *billboard);
-
 void effBillDispatchAll(void) {
     u32 i;
 
