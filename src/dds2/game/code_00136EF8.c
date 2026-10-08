@@ -1,3 +1,4 @@
+#include "fld_area_work.h"
 #include "common.h"
 #include "sdf_dev_state.h"
 #include "kwln.h"
@@ -182,7 +183,7 @@ extern s32 D_00436188;
 extern s32 D_0043617C;
 
 
-extern s32 fldAreaState[];
+
 
 extern u32 D_00444A30[];
 
@@ -296,24 +297,7 @@ typedef struct {
 
 extern FldActorRow fldActorSlots[];
 
-typedef struct FldAreaState {
-    u8 pad0[0x10];
-    s32 area;
-    s32 floor;
-    u8 pad18[0xC];
-    s32 unk24;
-    u8 pad28[0x30];
-    s32 unk58;
-    u8 pad5C[8];
-    f32 negatedAngle;
-    u8 pad68[0x20];
-    s32 unk88;
-    u8 pad8C[0x74];
-    s32 unk100;
-    s16 unk104;
-    u8 pad106[0x24];
-    s16 colorEffectSuppressed;
-} FldAreaState;
+
 
 
 
@@ -488,9 +472,9 @@ void fldResetRecordState(void) {
         ((FldValueRecord *)fldValueRecords)[index].value = 0;
     }
     fldValueRecordCount = 0;
-    fldAreaState[40] = -1;
-    fldAreaState[41] = -1;
-    fldAreaState[43] = -1;
+    fldAreaState.unkA0 = -1;
+    fldAreaState.unkA4 = -1;
+    fldAreaState.unkAC = -1;
     D_00436188 = 0;
     D_0043617C = 0;
     if (fldValueRecords != 0) {
@@ -1111,7 +1095,7 @@ const char *func_0013F1E8(const char *eventName) {
     for (i = 0; i < 8; i++) {
         if (D_0038E2D0.packs[i].setIndex != 0) {
             for (j = 0; j < 5; j++) {
-                if (D_0038E2D0.packs[i].hits[j].area == ((FldAreaState *)fldAreaState)->floor + 1 &&
+                if (D_0038E2D0.packs[i].hits[j].area == fldAreaState.floor + 1 &&
                     strcmp(eventName, D_0038E2D0.packs[i].hits[j].eventName) == 0) {
                     s32 candidateSet = D_0038E2D0.packs[i].setIndex;
                     if (D_0038E2D0.sets[D_004361C8].kindArea.packed == 1) {
@@ -1124,7 +1108,7 @@ const char *func_0013F1E8(const char *eventName) {
     }
     for (i = 0; i < 40; i++) {
         if (D_0038E2D0.sets[i].kindArea.packed == 1 &&
-            D_0038E2D0.sets[i].action == ((FldAreaState *)fldAreaState)->floor + 1 &&
+            D_0038E2D0.sets[i].action == fldAreaState.floor + 1 &&
             strcmp(eventName, D_0038E2D0.sets[i].eventName) == 0) {
             D_004361C8 = i;
             return D_0038E290;
@@ -1141,7 +1125,7 @@ const char *func_0013F3E0(const char *eventName) {
     for (i = 0; i < 8; i++) {
         if (D_0038E2D0.packs[i].setIndex != 0) {
             for (j = 0; j < 5; j++) {
-                if (D_0038E2D0.packs[i].hits[j].area == ((FldAreaState *)fldAreaState)->floor + 1 &&
+                if (D_0038E2D0.packs[i].hits[j].area == fldAreaState.floor + 1 &&
                     strcmp(eventName, D_0038E2D0.packs[i].hits[j].eventName) == 0) {
                     s32 candidateSet = D_0038E2D0.packs[i].setIndex;
                     if (D_0038E2D0.sets[D_004361C8].kindArea.packed == 0) {
@@ -1154,7 +1138,7 @@ const char *func_0013F3E0(const char *eventName) {
     }
     for (i = 0; i < 40; i++) {
         if (D_0038E2D0.sets[i].kindArea.packed == 0 &&
-            D_0038E2D0.sets[i].action == ((FldAreaState *)fldAreaState)->floor + 1 &&
+            D_0038E2D0.sets[i].action == fldAreaState.floor + 1 &&
             strcmp(eventName, D_0038E2D0.sets[i].eventName) == 0) {
             D_004361C8 = i;
             return D_0038E290;
@@ -1171,7 +1155,7 @@ const char *func_0013F5C8(const char *eventName) {
     for (i = 0; i < 8; i++) {
         if (D_0038E2D0.packs[i].setIndex != 0) {
             for (j = 0; j < 5; j++) {
-                if (D_0038E2D0.packs[i].hits[j].area == ((FldAreaState *)fldAreaState)->floor + 1 &&
+                if (D_0038E2D0.packs[i].hits[j].area == fldAreaState.floor + 1 &&
                     strcmp(eventName, D_0038E2D0.packs[i].hits[j].eventName) == 0) {
                     D_004361C8 = D_0038E2D0.packs[i].setIndex;
                     return D_0038E290;
@@ -1181,7 +1165,7 @@ const char *func_0013F5C8(const char *eventName) {
     }
     for (i = 0; i < 40; i++) {
         if ((u16)D_0038E2D0.sets[i].kindArea.packed < 2 &&
-            D_0038E2D0.sets[i].action == ((FldAreaState *)fldAreaState)->floor + 1 &&
+            D_0038E2D0.sets[i].action == fldAreaState.floor + 1 &&
             strcmp(eventName, D_0038E2D0.sets[i].eventName) == 0) {
             D_004361C8 = i;
             return D_0038E290;
@@ -1264,11 +1248,11 @@ u8 *fldPickActorTemplateByName(const char *name) {
         entry = &fldActorWaypointRows.actors[i];
         flag = entry->requiredFlag;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
-            && entry->floor == ((FldAreaState *)fldAreaState)->floor + 1
+            && entry->floor == fldAreaState.floor + 1
             && strcmp(name, entry->name) == 0) {
             switch (entry->kind) {
             case 1:
-                if (((FldAreaState *)fldAreaState)->unk104 != 0 && (entry->flags31 & 4)) {
+                if (fldAreaState.transitionMode != 0 && (entry->flags31 & 4)) {
                     D_004361FC = 0xB;
                     return D_00391F84;
                 }
@@ -1327,12 +1311,12 @@ u8 *fldFindActorEntryByName(const char *name) {
         entry = &fldActorWaypointRows.actors[i];
         flag = entry->requiredFlag;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
-            && entry->floor == ((FldAreaState *)fldAreaState)->floor + 1
+            && entry->floor == fldAreaState.floor + 1
             && strcmp(name, entry->name) == 0) {
             fldSelectedActorEntryIndex = i;
             switch (entry->kind) {
             case 1:
-                if (((FldAreaState *)fldAreaState)->unk104 != 0 && (entry->flags31 & 4)) {
+                if (fldAreaState.transitionMode != 0 && (entry->flags31 & 4)) {
                     D_004361FC = 0xB;
                     return D_00391F84;
                 }
@@ -1437,9 +1421,9 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
             return;
         }
     } else if (kind == 2) {
-        if (entry->floor == fldAreaState[5] + 1) {
-            fldAreaState[97] = 1;
-            *(f32 *)&fldAreaState[96] = fldActorSlots[index].firstValues[0];
+        if (entry->floor == fldAreaState.floor + 1) {
+            fldAreaState.positionMode = 1;
+            fldAreaState.unk180 = fldActorSlots[index].firstValues[0];
             if (entry->motion == 1) {
                 kwlnFadeInStart(0xC0, 0xC0, 0xC0, 0xF);
                 return;
@@ -1488,7 +1472,7 @@ void func_00140A58(const char *name) {
             continue;
         }
         entryName = entry->name;
-        if (entry->floor == ((FldAreaState *)fldAreaState)->floor + 1) {
+        if (entry->floor == fldAreaState.floor + 1) {
             if (strcmp(name, entryName) == 0) {
                 if (entry->variantMode == 2) {
                     return;
@@ -1510,9 +1494,9 @@ u8 fldIsSceneStateEight(void) {
 
 void fldApplySceneRoomSelection(FldActorEntry *actorEntry) {
     if (actorEntry->unk53 != 0) {
-        ((FldAreaState *)fldAreaState)->unk88 = actorEntry->unk53 - 1;
+        fldAreaState.unk88 = actorEntry->unk53 - 1;
     }
-    ((FldAreaState *)fldAreaState)->unk58 = actorEntry->unk45;
+    fldAreaState.rowIdx = actorEntry->unk45;
 }
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00140BC8);
@@ -1900,10 +1884,10 @@ void fldApplyCurrentAreaActorEntries(void) {
 
     for (i = 0; i < 256; i++) {
         entry = &fldActorWaypointRows.actors[i];
-        if (entry->kind == 1 && entry->floor == ((FldAreaState *)fldAreaState)->floor + 1 && entry->motion != 0) {
+        if (entry->kind == 1 && entry->floor == fldAreaState.floor + 1 && entry->motion != 0) {
             fldApplyRoomObjectModeOne(0, 0, entry->motionName, 0);
         }
-        if (entry->kind == 11 && entry->floor == ((FldAreaState *)fldAreaState)->floor + 1 && entry->motion == 3) {
+        if (entry->kind == 11 && entry->floor == fldAreaState.floor + 1 && entry->motion == 3) {
             fldApplyRoomObjectModeOne(0, 0, entry->otherName, 0);
         }
     }
@@ -1916,17 +1900,17 @@ void fldDrawTitleBannerFrame(s32 mode) {
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     func_00108EC0(0x97, 0x128, 0x3A, 0x24, 1, 2, 0x3A, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
-                  fldAreaState[0x7F]);
+                  fldAreaState.fieldTextures[1].texture);
     func_00108EC0(0xD1, 0x128, 0x5E, 0x24, 0x3A, 2, 1, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
-                  fldAreaState[0x7F]);
+                  fldAreaState.fieldTextures[1].texture);
     func_00108EC0(0x12F, 0x128, 0x3A, 0x24, 0x3B, 2, -0x3A, 0x1D, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
-                  fldAreaState[0x7F]);
+                  fldAreaState.fieldTextures[1].texture);
     if (mode < 0x18) {
         evtSubmitPrimaryAlphaBlendMode(1);
         func_00108EC0(0xA0, 0x12B, 0x22, 0x24, 1, 0x21, 0x22, 0x1D, D_00399F90[mode], D_00399F90[mode],
-                      D_00399F90[mode], D_00399F90[mode], fldAreaState[0x7F]);
+                      D_00399F90[mode], D_00399F90[mode], fldAreaState.fieldTextures[1].texture);
         func_00108EC0(0x13E, 0x12B, 0x22, 0x24, 0x23, 0x21, -0x22, 0x1D, D_00399F90[mode], D_00399F90[mode],
-                      D_00399F90[mode], D_00399F90[mode], fldAreaState[0x7F]);
+                      D_00399F90[mode], D_00399F90[mode], fldAreaState.fieldTextures[1].texture);
         evtSubmitPrimaryAlphaBlendMode(0);
     }
 }

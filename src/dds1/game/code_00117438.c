@@ -447,8 +447,8 @@ s32 sdfDispatchUnitScriptDefault5(u32 unitIndex, u32 scriptArg, u32 contextArg, 
     return result;
 }
 
-void sdfDispatchCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
-    sdfDispatchUnitScriptDefault5(unitIndex, scriptArg, contextArg, (u8)mode);
+s32 sdfDispatchCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
+    return sdfDispatchUnitScriptDefault5(unitIndex, scriptArg, contextArg, (u8)mode);
 }
 
 s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
@@ -470,16 +470,16 @@ s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, 
     return result;
 }
 
-void func_00118620(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
-    evtRunContext(10, scriptArg, contextArg, unitIndex, mode);
+s32 func_00118620(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+    return evtRunContext(10, scriptArg, contextArg, unitIndex, mode);
 }
 
-void func_00118648(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
-    evtRunContext(7, scriptArg, contextArg, unitIndex, mode);
+s32 func_00118648(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+    return evtRunContext(7, scriptArg, contextArg, unitIndex, mode);
 }
 
-void sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
-    func_00118648(unitIndex, scriptArg, contextArg, (u8)mode);
+s32 sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
+    return func_00118648(unitIndex, scriptArg, contextArg, (u8)mode);
 }
 
 INCLUDE_ASM(const s32, "game/code_00117438", func_00118688);
