@@ -260,8 +260,8 @@ typedef struct SdfTex {
     s32 battleTextureSlot;
     SdfTexBuf *primaryBuffer;
     SdfTexBuf *secondaryBuffer;
-    u8 *data;
-    s32 dataSize;
+    u8 *paletteData; /* 0x30: retained copy of the texture's palette colors. */
+    s32 paletteDataSize; /* 0x34: palette byte count from sdfTexGetPaletteByteSize. */
     s32 unk38;
     u8 *intensityMap; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
 } SdfTex;
