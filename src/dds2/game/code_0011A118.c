@@ -1672,7 +1672,7 @@ typedef struct BattleAdjustmentRecord {
 
 extern BattleAdjustmentRecord *D_00435E0C;
 
-u8 func_0011E528(s32 index) {
+u8 btlSelectConditionalEncounterGroup(s32 index) {
     s8 enabled[3];
     s32 i;
     u8 code;
@@ -1737,7 +1737,7 @@ s32 func_0011E848(s32 index) {
     if (index == 0) {
         return 0;
     }
-    variant = func_0011E528(index);
+    variant = btlSelectConditionalEncounterGroup(index);
     total = 0;
     for (i = 0; i < 20; i++) {
         total += D_00435E0C[index].groups[variant].entries[i].weight;

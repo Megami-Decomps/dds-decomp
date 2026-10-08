@@ -11140,7 +11140,7 @@ extern s32 D_0035F998[];
 
 extern u32 D_003BB6A8;
 
-void func_001F3278(s32 adjustmentIndex, s32 sceneIndex) {
+void sndStartBattleSceneStream(s32 adjustmentIndex, s32 sceneIndex) {
     BtlState *runtime = (BtlState *)btlGetRuntime();
     s32 selection = 0;
 

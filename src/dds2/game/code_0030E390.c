@@ -180,7 +180,7 @@ void fldReleaseMapRequestQueues(void) {
     func_0030EF18((u32 *)D_004390B0);
 }
 
-void func_0030E910(s32 x, s32 y, s32 alpha, f32 scale) {
+void fldDrawMapRequestMarker(s32 x, s32 y, s32 alpha, f32 scale) {
     sdfDrawUniformlyScaledSlotImage(x, y, 0, alpha, 0x20, 0, 0x54, scale);
 }
 

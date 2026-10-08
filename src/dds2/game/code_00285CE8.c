@@ -51,10 +51,10 @@ typedef struct MtrGrid {
 } MtrGrid;
 
 extern void func_002860D8(MtrGrid *grid, MtrCell *source, s8 mode);
-extern void func_002862B0(MtrGrid *grid);
+extern void mtrAdvanceGridCellPropagation(MtrGrid *grid);
 extern f32 effMiscRandUnitFloat(void *state);
 
-void func_00285CE8(MtrGrid *grid) {
+void mtrUpdateGridPropagation(MtrGrid *grid) {
     if (grid->remainingDelay == 0) {
         if (grid->unk14 < grid->unk16) {
             func_002860D8(grid, NULL, 1);
@@ -63,7 +63,7 @@ void func_00285CE8(MtrGrid *grid) {
     } else {
         grid->remainingDelay--;
     }
-    func_002862B0(grid);
+    mtrAdvanceGridCellPropagation(grid);
 }
 extern f32 sdfSinPoly(f32);
 
@@ -136,7 +136,7 @@ void mnuDrawCellScaledGrid(s32 arg0, s32 arg1, s32 arg2, s32 arg3, MtrGrid *arg4
     uiDrawUniformColorRect(arg0 << 4, arg1 << 3, arg2, arg4->unk1C << 4, arg4->unk1E << 3, arg3 | 0x80808000, arg6);
 }
 
-void func_002862B0(MtrGrid *grid) {
+void mtrAdvanceGridCellPropagation(MtrGrid *grid) {
     MtrCell *cell = grid->cells;
     s32 i;
 
