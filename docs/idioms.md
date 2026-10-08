@@ -4183,3 +4183,37 @@ The dispatcher retains its existing integer context transport and casts
 once at that pointer boundary; the other option-count providers keep
 their own existing word contracts.
 
+## Target-side camera pose override
+
+DDS1 `BtlState.cameraPoseBlendHook` at +0x628 and DDS2's corresponding
+member at +0x660 receive a `BtlLinkedCommand *` and the two target-side
+presence flags, not a `BtlUnit *`. DDS2 `001EAE88` loads +0x660 and passes
+the command plus the 0x200/0x400 scan results. The existing
+`btlStartLinkedActionPoseBlendIfEligible` dispatcher uses the same
+interface; it passes its command directly without a second actor view.
+
+
+## Uniform action-camera builder interface
+
+DDS2 `001EAE88` calls `btlChooseActionPoseBlendFromActorCount`
+(`001F34F8`) with the command and its front/back camera addresses
+(+0x30/+0xC0), just as it calls the other three-input pose builders.
+Keep that three-formal interface. This provider updates the embedded
+cameras through the command and does not need its two explicit camera
+parameters; the body remains unchanged. DDS1's corresponding
+`001E5730` uses the same interface.
+
+
+## Fixed-pass SDF item command dispatch
+
+DDS1 `002D86E0` dispatches three inline command addresses or a
+zero-terminated address list through two buffered passes. Fixed counters
+terminate with `!= 3` and `!= 2`, matching the existing fixed-pass loop in
+`sdfModelResetAndInitNodes`; range comparisons instead introduce SLTI
+instructions and change the saved-register set. The list cursor reads
+and advances before testing its sentinel: `while ((address = *cursor++) != 0)`.
+Command addresses are serialized `u32` words converted to the existing
+command-list pointer type at the SDK boundary. The canonical function is
+`void`: IDA's apparent return values are incidental comparison constants.
+The live DDS1 `sdfModel.c` gate reports 18 match, 0 differ.
+
