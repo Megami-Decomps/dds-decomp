@@ -339,7 +339,7 @@ s32 func_00253640(void) {
     MnuMantraGridEntry *entry = fldGetSceneMetadataNode();
     MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
-    scene->state = 0;
+    scene->state = MENU_SCENE_STATE_SELECTING;
     scene->pendingProfileId = entry->sceneId;
     dspCloseChannel();
     evtCreateMessageWindowIfMissing(scene->messageWindowResource);
@@ -398,84 +398,84 @@ s32 func_00253830(void) {
     MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
     switch (scene->state) {
-    case 0:
+    case MENU_SCENE_STATE_SELECTING:
         if (D_00324510[0x21] < 0) {
             if (selection->profileId == scene->pendingProfileId) {
                 if (prfGetCapValue(entry->sceneId) ==
                     ptyGetProfileRecordValue(selection->partyRecord, entry->sceneId)) {
-                    scene->state = 8;
+                    scene->state = MENU_SCENE_STATE_SIGNAL_E;
                 } else {
-                    scene->state = 5;
+                    scene->state = MENU_SCENE_STATE_SIGNAL_B;
                 }
                 scene->pendingProfileId = 0;
             } else if (prfGetCapValue(entry->sceneId) ==
                        ptyGetProfileRecordValue(selection->partyRecord, entry->sceneId)) {
-                scene->state = 7;
+                scene->state = MENU_SCENE_STATE_SIGNAL_D;
                 scene->pendingProfileId = 0;
             } else if (entry->state != MNU_MANTRA_GRID_ENTRY_SECOND_CHECK_OR_PROFILE_FLAG) {
                 if (func_002508D8(entry->sceneId) == 0) {
-                    scene->state = 6;
+                    scene->state = MENU_SCENE_STATE_SIGNAL_C;
                 } else {
-                    scene->state = 4;
+                    scene->state = MENU_SCENE_STATE_SIGNAL_A;
                 }
                 scene->pendingProfileId = 0;
             } else if (entry->profileFlag != 0) {
-                scene->state = 2;
+                scene->state = MENU_SCENE_STATE_ALTERNATE_LABELS;
             } else {
                 scene->state = entry->state;
             }
         } else if (D_00324510[0x23] < 0 && scene->stageFinished != 0) {
-            scene->state = 10;
+            scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
             scene->pendingProfileId = 0;
         }
         break;
-    case 1:
+    case MENU_SCENE_STATE_PRIMARY_LABELS:
         itfDspPopulatePrimaryLabels();
-        scene->state = 9;
+        scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_WINDOW;
         break;
-    case 2:
+    case MENU_SCENE_STATE_ALTERNATE_LABELS:
         itfDspPopulateAlternateLabels();
-        scene->state = 9;
+        scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_WINDOW;
         break;
-    case 9:
+    case MENU_SCENE_STATE_WAITING_FOR_MESSAGE_WINDOW:
         if (evtGetMessageWindowControlState() == 0) {
             if (evtGetCapturedWindowPanelValue() != 0) {
-                scene->state = 10;
+                scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
                 scene->pendingProfileId = 0;
             } else {
-                scene->state = 3;
+                scene->state = MENU_SCENE_STATE_THIRD_LABELS;
             }
         }
         break;
-    case 3:
+    case MENU_SCENE_STATE_THIRD_LABELS:
         itfDspPopulateThirdLabels();
-        scene->state = 10;
+        scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
         if (entry->profileFlag != 0) {
             return 0;
         }
         datGameState->header.currency -= mnuGetMantraSourceValue(entry->sceneId);
         break;
-    case 4:
+    case MENU_SCENE_STATE_SIGNAL_A:
         itfDspSignalA();
-        scene->state = 10;
+        scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
         break;
-    case 5:
+    case MENU_SCENE_STATE_SIGNAL_B:
         itfDspSignalB();
-        scene->state = 10;
+        scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
         break;
-    case 6:
+    case MENU_SCENE_STATE_SIGNAL_C:
         itfDspSignalC();
-        scene->state = 10;
+        scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
         break;
-    case 7:
+    case MENU_SCENE_STATE_SIGNAL_D:
         itfDspSignalD();
-        scene->state = 10;
+        scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
         break;
-    case 8:
+    case MENU_SCENE_STATE_SIGNAL_E:
         itfDspSignalE();
-        scene->state = 10;
+        scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
         break;
-    case 10:
+    case MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION:
         if (scene->stageFinished != 0 && evtGetMessageWindowControlState() == 0) {
             evtFinishMessageWindowAndNotify();
             sdfSetTaskItemMode(mnuSceneResourceContext, 1,
