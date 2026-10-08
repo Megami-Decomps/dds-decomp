@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_task_work.h"
 #include "mnu_mantra_grid.h"
 #include "mnu_profile_progress.h"
 #include "sdf_grid.h"
@@ -238,7 +239,6 @@ extern s32 mnuSceneResourceContext;
 
 
 
-extern void *func_002CB3B8(s32 arg0, s32 arg1);
 extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *scene, MnuProfileProgress *target);
 extern void func_00258EB8(MnuMantraGridEntry *entry);
 
@@ -247,7 +247,7 @@ void func_002593E0(MnuProfileProgress *target, SdfGrid *grid, SdfGridCell *entry
     MnuMantraGridEntry *displayEntry;
     u32 flags;
 
-    scene = func_002CB3B8(mnuSceneResourceContext, 1);
+    scene = (void *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
     displayEntry = (MnuMantraGridEntry *)(u32)entry->value;
     displayEntry->frame += 1;
     if ((f32)displayEntry->frame > 60.0f) {

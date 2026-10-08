@@ -94,6 +94,14 @@ void sdfDestroyTaskWorkerTasks(TaskWork *);
 void sdfAttachTaskItem(TaskWork *, SdfTaskItemDesc *);
 void sdfRemoveTaskItem(TaskWork *, s32);
 SdfTaskEntry *sdfFindTaskItemValueByKey(TaskWork *, s32);
+
+#define SDF_TASK_VALUE_USER_DATA_KEY (-1)
+
+/* The reserved key returns the list user-data address word; other keys return
+ * the matching entry's initializer result, or zero when no entry exists.
+ * Both domains retain the native signed 32-bit word return. */
+s32 sdfGetTaskValueByKey(TaskWork *work, s32 key);
+
 void sdfSetTaskItemMode(TaskWork *, s32, u32);
 SdfTaskEntry *sdfCreateTaskEntry(SdfTaskItemDesc *);
 
