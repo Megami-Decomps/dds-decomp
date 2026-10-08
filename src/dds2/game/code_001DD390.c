@@ -274,7 +274,7 @@ extern s32 sndFindPackedTrackLoadStatus(u32);
 typedef struct SceneLightRestoreArgs { u32 value; } SceneLightRestoreArgs;
 extern s64 func_00201520(SceneLightRestoreArgs *);
 extern void evtSetUnitStatusFlags(EvtUnit *);
-extern void func_0023C870(EvtUnit *, s32, u32, u32);
+extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
 extern s64 func_00201718(void);
 
@@ -3339,7 +3339,7 @@ u32 func_001E50E0(BtlModelChangeArgs *args) {
             VU0_LOAD_VF(vf10, unit->colorEnd);
             EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
             secondColor = packedEnd[0];
-            func_0023C870(unit->ext, 0, firstColor, secondColor);
+            evtInitializeUnitColorTransition(unit->ext, 0, firstColor, secondColor);
         }
         unit->gunResourceFlags = (unit->gunResourceFlags & ~1) | 2;
         if (args->phase == 1) {
@@ -3461,7 +3461,7 @@ void btlApplyLinkedUnitStatusWhenActorActive(s32 taskArgs) {
 
 u32 btlApplyUnitFxWhenLoaded(u32 *taskArgs) {
     if ((btlUnitStatusPair((BtlUnit *)taskArgs[3]) & 0x1000000002) == 0x1000000002) {
-        func_0023C870(((BtlUnit *)taskArgs[3])->ext, taskArgs[2], *taskArgs, taskArgs[1]);
+        evtInitializeUnitColorTransition(((BtlUnit *)taskArgs[3])->ext, taskArgs[2], *taskArgs, taskArgs[1]);
     }
     return 1;
 }
@@ -8303,7 +8303,7 @@ s32 func_00201268(SceneLightRestoreArgs *args) {
                 VU0_LOAD_VF(vf10, unit->colorEnd);
                 EE_MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
                 secondColor = packedEnd[0];
-                func_0023C870(unit->ext, args->value, firstColor, secondColor);
+                evtInitializeUnitColorTransition(unit->ext, args->value, firstColor, secondColor);
                 VU0_LOAD_VF(vf10, unit->lightDirection);
                 evtSetUnitNormalizedDirection(unit->ext, args->value);
             }

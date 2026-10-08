@@ -38,7 +38,7 @@ extern FldUnitLightParams D_0038BB10;
 extern FldUnitLightColor D_0038BB60;
 extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *);
 extern void evtSetUnitStatusFlags(EvtUnit *);
-extern void func_0023C870(EvtUnit *, s32, u32, u32);
+extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 extern void evtSetUnitNormalizedDirection(EvtUnit *, s32);
 
 extern s32 fldCameraModelObject;
@@ -3431,7 +3431,7 @@ void func_001355D8(void) {
         green = D_0038BB60.color[1] * 128.0f;
         blue = D_0038BB60.color[2] * 128.0f;
         colorB = red | (blue << 16) | (green << 8) | 0x80000000;
-        func_0023C870(player, 0, colorA, colorB);
+        evtInitializeUnitColorTransition(player, 0, colorA, colorB);
         direction[0] = D_0038BB10.direction[0];
         direction[1] = D_0038BB10.direction[1];
         direction[2] = D_0038BB10.direction[2];
@@ -3466,9 +3466,9 @@ void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
     green = greenB * 128.0f;
     blue = blueB * 128.0f;
     colorB = red | (blue << 16) | (green << 8) | 0x80000000;
-    func_0023C870(player, duration, colorA, colorB);
+    evtInitializeUnitColorTransition(player, duration, colorA, colorB);
     if (fldSecondarySceneObject != 0) {
-        func_0023C870(secondary, duration, colorA, colorB);
+        evtInitializeUnitColorTransition(secondary, duration, colorA, colorB);
     }
     direction[0] = x;
     direction[1] = y;

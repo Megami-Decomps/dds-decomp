@@ -25,7 +25,7 @@ extern void evtComputePlanarTargetDirectionVu(EvtUnit *unit);
 s32 func_0023D030(EvtUnit *unit, f32 *dir, f32 angle);
 extern f32 evtGetValueScaleFactor(s32 path);
 extern void evtScaleValueByMultiplier(s32 path, f32 multiplier);
-void func_0023C870(EvtUnit *unit, s32 duration, u32 firstColor, u32 secondColor);
+void evtInitializeUnitColorTransition(EvtUnit *unit, s32 duration, u32 firstColor, u32 secondColor);
 
 typedef struct PcpScatterWork4 PcpScatterWork4;
 
@@ -669,7 +669,7 @@ typedef struct EvtUnitColorEndpoints {
     u32 secondTarget;  /* 0x58 */
 } EvtUnitColorEndpoints;
 
-void func_0023C870(EvtUnit *unit, s32 duration, u32 firstColor, u32 secondColor) {
+void evtInitializeUnitColorTransition(EvtUnit *unit, s32 duration, u32 firstColor, u32 secondColor) {
     s32 color1[4];
     s32 color2[4];
     u32 packed1;
@@ -755,7 +755,7 @@ void evtConfigureUnitTransition(EvtUnit *unit, s32 arg) {
         unit->flags &= ~0x5000;
         unit->flags &= ~0x2800;
     } else {
-        func_0023C870(unit, arg, 0, 0);
+        evtInitializeUnitColorTransition(unit, arg, 0, 0);
         unit->flags = (unit->flags & ~0x800) | 0x1000;
         VU0_MOVE_VF(vf10, vf0);
         evtSetUnitNormalizedDirection(unit, arg);

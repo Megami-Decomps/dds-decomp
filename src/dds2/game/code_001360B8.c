@@ -107,7 +107,7 @@ extern u32 fldPlayerObject;
 struct EffWorldNode;
 extern EvtUnit *evtUnitGetNestedValue(struct EffWorldNode *unit);
 extern void evtSetUnitStatusFlags(EvtUnit *unit);
-extern void func_0023C870(EvtUnit *unit, s32 index, u32 colorA, u32 colorB);
+extern void evtInitializeUnitColorTransition(EvtUnit *unit, s32 index, u32 colorA, u32 colorB);
 extern void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 index);
 
 /* Sky lighting also supplies the player's packed colors and VU direction. */
@@ -183,7 +183,7 @@ void fldApplySkyLightSetToPlayerVU(void) {
         green = light->unitColorB[1] * 128.0f;
         blue = light->unitColorB[2] * 128.0f;
         colorB = red | (blue << 16) | (green << 8) | 0x80000000;
-        func_0023C870(unit, 0, colorA, colorB);
+        evtInitializeUnitColorTransition(unit, 0, colorA, colorB);
         dir[0] = light->unitLightDirection[0];
         dir[1] = light->unitLightDirection[1];
         dir[2] = light->unitLightDirection[2];

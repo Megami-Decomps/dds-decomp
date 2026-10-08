@@ -31,7 +31,7 @@ extern void effObjSetInnerThirdVec(void *object, void *vector);
 extern u8 evtTestUnitStatusFlags(EvtUnit *unit);
 
 extern EvtUnit *evtGetWorldUnitNestedValue(s32 idx);
-extern void func_00221D00(EvtUnit *unit, s32 arg, u32 color1, u32 color2);
+extern void evtInitializeUnitColorTransition(EvtUnit *unit, s32 arg, u32 color1, u32 color2);
 extern void evtSetUnitRgbTransition(EvtUnit *unit, s32 arg, u32 color);
 extern void evtSetUnitAlphaTransition(EvtUnit *unit, s32 arg, u32 color);
 
@@ -1147,7 +1147,7 @@ u32 evtOpSetUnitGradientColors(void) {
     VU0_SET_W_ONE(vf10);
     EE_MMI_RGBA_PACK_UNIT(packed2, scale);
     color2[0] = packed2;
-    func_00221D00(unit, scrReadIntParameter(1), packed1, packed2);
+    evtInitializeUnitColorTransition(unit, scrReadIntParameter(1), packed1, packed2);
     return 1;
 }
 
