@@ -195,6 +195,14 @@ typedef struct MenuIconBundle {
     s32 fadeOut;
 } MenuIconBundle;
 
+#ifdef VERSION_DDS2
+typedef char MenuIconBundle_size_must_be_0x20[
+    sizeof(MenuIconBundle) == 0x20 ? 1 : -1];
+#else
+typedef char MenuIconBundle_size_must_be_0x24[
+    sizeof(MenuIconBundle) == 0x24 ? 1 : -1];
+#endif
+
 
 typedef struct MenuPoint {
     s32 x;
@@ -422,7 +430,7 @@ typedef struct MenuPageSlot {
     MenuPageBar mp;               /* 0x6C */
     struct EffectSlotSet *frame[8]; /* 0xBC */
     struct MenuSprites *windowSprites; /* 0xDC */
-    u32 iconBundle;
+    MenuIconBundle *iconBundle;
     u32 unkE4;
     u8 padE8[8];
     MenuQueuedCommand commands[2]; /* 0xF0 and 0x1114 */
@@ -458,7 +466,7 @@ typedef struct MenuPageSlot {
     s32 frame[6];
     struct MenuPageResources *resources;
     struct MenuSprites *windowSprites;
-    u32 iconBundle;
+    MenuIconBundle *iconBundle;
     u8 padE8[0x4C];
 } MenuPageSlot;
 #endif

@@ -843,7 +843,7 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
         mnuSetPageParams(work->partyWindow.slots[page].windowSprites, 2);
         mnuAttachPartyIconBundle(page, (s32)window, work->staffSlots.pairResources[0]);
 
-        ((MenuIconBundle *)work->partyWindow.slots[page].iconBundle)->fade = 0x100;
+        work->partyWindow.slots[page].iconBundle->fade = 0x100;
         window->flags |= 0x400;
         work->selectedRewardRow = &work->primaryRewards.rows[(*selectedIndex)++];
         brsSelectLevelBonusMode(work->selectedRewardRow->unit, work);
