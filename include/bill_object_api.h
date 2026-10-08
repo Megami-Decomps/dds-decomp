@@ -1,0 +1,18 @@
+#ifndef BILL_OBJECT_API_H
+#define BILL_OBJECT_API_H
+
+#include "common.h"
+
+struct BillObj;
+struct BillOut;
+struct BillChildPayload;
+
+struct BillObj *billCloneObjectRetainingSharedData(struct BillObj *source);
+void billMarkKindOneFlag(struct BillObj *billboard);
+void billSetChildHalfExtents(struct BillObj *billboard, f32 width, f32 height);
+void billSetChildScaleComponents(struct BillObj *billboard, f32 x, f32 y);
+void billSetAnimationEntry(struct BillObj *billboard, s32 entryIndex);
+struct BillChildPayload *billStepAnimationEntryAndUpdateChild(
+    struct BillObj *billboard, struct BillOut *entry);
+
+#endif

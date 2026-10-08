@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bill_object_api.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "sdf_gs_packet.h"
@@ -10,7 +11,6 @@ extern void func_003332A0(void *, u32);
 
 extern void *sdfCreateAssetWithDrawEntries();
 extern void func_003332D0(void *, f32);
-extern void billSetAnimationEntry();
 extern s32 effEmitterDelayRandomState[];
 extern void effMiscSeedRandomFromClock();
 #include "eff.h"
@@ -303,7 +303,7 @@ u16 billGetVariantValue(BillObj *effect) {
 
 /* Replace the selected list entry only when its index changes. */
 void billSetKind1Entry(BillObj *effect, u32 entryIndex) {
-    if (effect->kind == 1 && effect->unk58 != entryIndex) {
+    if (effect->kind == 1 && effect->animationEntryIndex != entryIndex) {
         billSetAnimationEntry(effect, entryIndex);
     }
 }
@@ -311,7 +311,7 @@ void billSetKind1Entry(BillObj *effect, u32 entryIndex) {
 /* Read the selected entry for list billboards; other kinds have none. */
 s32 billGetKindOneEntry(BillObj *effect) {
     if (effect->kind == 1) {
-        return effect->unk58;
+        return effect->animationEntryIndex;
     }
     return 0;
 }
@@ -336,7 +336,7 @@ void billSetEntryFrameMode0(BillObj *effect, u32 startFrame) {
         s32 entryCount = effect->entryCount;
 
         if (entryCount > 0) {
-            BillOut *entry = (BillOut *)effect->unk60;
+            BillOut *entry = effect->resolvedEntries;
             s32 remaining = entryCount;
 
             do {
@@ -357,7 +357,7 @@ void billSetEntryFrameMode1(BillObj *effect, u32 startFrame) {
         s32 entryCount = effect->entryCount;
 
         if (entryCount > 0) {
-            BillOut *entry = (BillOut *)effect->unk60;
+            BillOut *entry = effect->resolvedEntries;
             s32 remaining = entryCount;
 
             do {
@@ -375,14 +375,14 @@ void billSetEntryFrameMode1(BillObj *effect, u32 startFrame) {
 /* Read the animation modulus of the first entry, if this is a list billboard. */
 s32 billGetFirstEntryFramePeriod(BillObj *effect) {
     if (effect->kind == 1) {
-        return ((BillOut *)effect->unk60)->entry->frameCount;
+        return (effect->resolvedEntries)->entry->frameCount;
     }
     return 0;
 }
 
 u16 billGetKindOneParameter(BillObj *effect) {
     if (effect->kind == 1) {
-        return effect->unk50;
+        return effect->animationActive;
     }
     return 0;
 }
@@ -395,18 +395,18 @@ s32 billGetKindOneFlags(s32 billboard) {
     return 0;
 }
 
-void billMarkKindOneFlag(s32 billboard) {
-    if (((BillObj *)billboard)->kind == 1) {
-        ((BillObj *)billboard)->modeFlags |= 0x1000000;
+void billMarkKindOneFlag(BillObj *billboard) {
+    if (billboard->kind == 1) {
+        billboard->modeFlags |= 0x1000000;
     }
 }
 
 /* Kind 0 stores half the supplied width/height; other kinds remain unchanged. */
-void billSetChildHalfExtents(s32 billboard, float width, float height) {
-    if (((BillObj *)billboard)->kind == 0) {
-        s32 payloadAddress = (s32)((BillObj *)billboard)->child;
-        ((BillChildPayload *)payloadAddress)->halfWidth = width * 0.5f;
-        ((BillChildPayload *)payloadAddress)->halfHeight = height * 0.5f;
+void billSetChildHalfExtents(BillObj *billboard, float width, float height) {
+    if (billboard->kind == 0) {
+        BillChildPayload *child = billboard->child;
+        child->halfWidth = width * 0.5f;
+        child->halfHeight = height * 0.5f;
     }
 }
 
@@ -475,7 +475,7 @@ u8 *billCreateUnitObject(s32 entryIndex) {
 u8 *billCloneUnitObject(EffInstance *source) {
     EffInstance *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
 
-    instance->billboard = (BillObj *)billCloneObjectRetainingSharedData((s32)source->billboard);
+    instance->billboard = (s32)billCloneObjectRetainingSharedData((struct BillObj *)source->billboard);
     instance->renderState = sdfCreateAssetWithDrawEntries();
     func_003332D0(instance->renderState, 1.0f);
     func_00333288(instance->renderState, 0x80808080);
@@ -518,8 +518,6 @@ void effVuCopyMatrix(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }
 
-BillChildPayload *func_00158F88(BillObj *obj, BillOut *entries);
-
 /* Kind 1 writes mode plus one/two entry values; untouched output words retain their contents. */
 void effReadBillboardModeValues(EffInstance *instance, s32 *modeValues) {
     BillObj *billboard = instance->billboard;
@@ -529,15 +527,15 @@ void effReadBillboardModeValues(EffInstance *instance, s32 *modeValues) {
 
         if (modeFlags & 0x40) {
             modeValues[0] = 2;
-            modeValues[2] = (s32)func_00158F88(billboard, billboard->unk60);
-            modeValues[1] = (s32)func_00158F88(billboard, (BillOut *)billboard->unk60 + 1);
+            modeValues[2] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries);
+            modeValues[1] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries + 1);
         } else if (modeFlags & 0x80) {
             modeValues[0] = 3;
-            modeValues[2] = (s32)func_00158F88(billboard, billboard->unk60);
-            modeValues[1] = (s32)func_00158F88(billboard, (BillOut *)billboard->unk60 + 1);
+            modeValues[2] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries);
+            modeValues[1] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries + 1);
         } else {
             modeValues[0] = 0;
-            modeValues[1] = (s32)func_00158F88(billboard, billboard->unk60);
+            modeValues[1] = (s32)billStepAnimationEntryAndUpdateChild(billboard, billboard->resolvedEntries);
         }
     }
 }

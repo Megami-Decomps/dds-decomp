@@ -308,6 +308,8 @@ struct BillData;
 struct BillChildPayload;
 
 /* Billboard common prefix and animation-list view (max 0x64); child allocations are 0x34 bytes. */
+struct BillOut;
+
 typedef struct BillObj {
     f32 unk0;
     f32 unk4;
@@ -329,12 +331,12 @@ typedef struct BillObj {
         struct BillData *animationData; /* kind 1 */
     };
     BillRenderPair pair; /* 0x34: used by the mode-0x80 entry renderer */
-    u16 unk50;
+    u16 animationActive; /* 0x50: cleared by empty or completed nonlooping animation */
     u8 pad52[2];
     u32 modeFlags; /* 0x54: bits 0x40/0x80 select billboard entry modes */
-    u32 unk58;
+    u32 animationEntryIndex; /* 0x58: selected nonempty animation descriptor */
     s32 entryCount;
-    void *unk60;
+    struct BillOut *resolvedEntries; /* 0x60: runtime animation state array */
 } BillObj;
 
 typedef char BillObj_size_must_be_0x64[
@@ -389,7 +391,7 @@ typedef struct BillOut {
 
 /* Runtime header precedes the copied resource bytes; the child table is indirect. */
 typedef struct BillData {
-    void *allocation;
+    struct SdfMemBlock *allocation; /* Retained general-heap descriptor. */
     u8 *base;
     BillAnimationEntry *entries;
     s32 entryCount;
