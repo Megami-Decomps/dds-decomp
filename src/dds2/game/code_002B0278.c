@@ -763,7 +763,7 @@ void mnuRefreshPartyPanelSlots(s32 context) {
 struct MenuSlotEffectHandles;
 extern void mnuLoadPanelSectionResources(struct MenuSlotEffectHandles *slot, u32 model,
                                          u32 firstValue, u32 secondValue, s32 thirdValue);
-s32 func_002B18E8(KwlnTask *task) {
+s32 mnuInitializePartySelectionState(KwlnTask *task) {
     s32 contextAddress = (s32)kwlnTaskGetUserValue(task);
     MenuContext *context = (MenuContext *)contextAddress;
     s32 allocation = (u32)sdfAllocGeneralBlock(sizeof(PartyMenuData));

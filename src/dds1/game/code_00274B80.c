@@ -473,7 +473,7 @@ void mnuRefreshPartyPanelSlots(s32 context) {
 extern void mnuLoadPanelSectionResources(MenuPageSlot *, u32, u32,
                                          u32, s32);
 
-s32 func_002755E0(KwlnTask *task) {
+s32 mnuInitializePartySelectionState(KwlnTask *task) {
     CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(task);
     SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(PartyMenuData));
     PartyMenuData *menu = (PartyMenuData *)sdfResourceRetainAddress(allocation);
