@@ -33,7 +33,7 @@
 #define PTY_PROFILE_UNIT_LAST_INDEX 4
 #define PTY_PROFILE_UNIT_ID_COUNT 0x10
 #define PTY_PROFILE_UNIT_OCCUPIED_BIT 1
-/* Stride in u16 entries, not bytes; only the first eight are skill IDs. */
+/* Native table stride in u16 entries; the eight skills begin at row+0xC. */
 #define PRF_SKILL_TABLE_STRIDE 14
 #define PRF_PROFILE_COUNT 0x60
 #define PRF_REQUIRED_PROFILE_COUNT 8
@@ -121,32 +121,28 @@ extern Entry24W D_00393234[];
 
 extern void ptySetProfileFlag1(DatPartyRecord *, u16);
 
-/* 28-byte table entries (full layout unknown; stride inferred from index math). */
-typedef struct Entry28W {
-    u32 v0;             // 0x00
-    u8 pad_0x04[0x18]; // 0x04
-} Entry28W; // 0x1C
+typedef struct Dds1ProfileParamRecord {
+    u32 flags;
+    u8 value04;
+    u8 value05;
+    u16 requiredLevel;
+    u32 capacity;
+    u16 skills[PRF_SKILL_LIST_ENTRY_COUNT];
+} Dds1ProfileParamRecord;
 
-typedef struct Entry28B {
-    u8 v0;             // 0x00
-    u8 pad_0x01[0x1B]; // 0x01
-} Entry28B; // 0x1C
+typedef char Dds1ProfileParamRecordLayoutCheck[
+    (sizeof(Dds1ProfileParamRecord) == 0x1C &&
+     PRF_SKILL_TABLE_STRIDE * sizeof(u16) == sizeof(Dds1ProfileParamRecord) &&
+     (u32)&((Dds1ProfileParamRecord *)0)->flags == 0 &&
+     (u32)&((Dds1ProfileParamRecord *)0)->value04 == 4 &&
+     (u32)&((Dds1ProfileParamRecord *)0)->value05 == 5 &&
+     (u32)&((Dds1ProfileParamRecord *)0)->requiredLevel == 6 &&
+     (u32)&((Dds1ProfileParamRecord *)0)->capacity == 8 &&
+     (u32)&((Dds1ProfileParamRecord *)0)->skills == 0xC) ? 1 : -1];
 
-typedef struct Entry28H {
-    u16 v0;            // 0x00
-    u8 pad_0x02[0x1A]; // 0x02
-} Entry28H; // 0x1C
-
-
-extern Entry28W D_003907B8[];
-
-extern Entry28B D_003907B4[];
-
-extern Entry28H D_003907B6[];
-
-extern Entry28B D_003907B5[];
-
-extern Entry28W D_003907B0[];
+extern Dds1ProfileParamRecord D_003907B0[PRF_PROFILE_COUNT];
+typedef char Dds1ProfileParamTableExtentCheck[
+    (sizeof(D_003907B0) == 0xA80) ? 1 : -1];
 extern s32 func_002FE950(const char *, const char *);
 extern void func_002FE978(s32, const char *, s32, s32);
 extern void func_002FE360(s32);
@@ -156,7 +152,6 @@ extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTex
 extern s32 func_001958A0(FrFontGlyph *, s8, u32);
 extern void *fileResolvePrimaryBuffer(void *);
 extern s32 ptyTestProfileFlag0(DatPartyRecord *, u16);
-extern u16 D_003907BC[];
 DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 s32 ptyGetCurrentProfileId(DatPartyRecord *);
 
@@ -316,7 +311,7 @@ INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD240);
 
 /* Read the configured capacity for an unchecked profile ID. */
 u32 prfGetCapValue(u16 profileId) {
-    return D_003907B8[profileId].v0;
+    return D_003907B0[profileId].capacity;
 }
 
 /* Store the configured capacity in an unchecked profile record. */
@@ -625,17 +620,17 @@ s32 scrRemoveSlot(DatPartyRecord *unit, u16 skillId) {
 
 /* Read a byte parameter from the unchecked profile row. */
 u8 prfGetParamWord7b4(u16 profileId) {
-    return D_003907B4[profileId].v0;
+    return D_003907B0[profileId].value04;
 }
 
 /* Read the threshold used by the profile-level check. */
-u16 prfGetParamWord7b6(u16 profileId) {
-    return D_003907B6[profileId].v0;
+u16 prfGetRequiredProfileLevel(u16 profileId) {
+    return D_003907B0[profileId].requiredLevel;
 }
 
 /* Read a byte parameter from the unchecked profile row. */
 u8 prfGetParamWord7b5(u16 profileId) {
-    return D_003907B5[profileId].v0;
+    return D_003907B0[profileId].value05;
 }
 
 u32 func_002CDDB0(u16 profileId, s32 statIndex) {
@@ -657,7 +652,7 @@ u16 prfGetSkillAtIndex(u16 profileId, u32 skillIndex) {
     if (skillIndex >= PRF_SKILL_LIST_ENTRY_COUNT) {
         return 0;
     }
-    return D_003907BC[profileId * PRF_SKILL_TABLE_STRIDE + skillIndex];
+    return D_003907B0[profileId].skills[skillIndex];
 }
 
 u32 func_002CDE60(void) {
@@ -666,7 +661,7 @@ u32 func_002CDE60(void) {
 
 u32 ptyCheckLevelAtLeastProfileParam7b6(DatPartyRecord *operand, u16 index) {
     s32 value = operand->level;
-    if (value < (s32)prfGetParamWord7b6(index)) {
+    if (value < (s32)prfGetRequiredProfileLevel(index)) {
         return 0;
     }
     return 1;
@@ -690,7 +685,7 @@ s32 prfBuildRawSkillList(u16 profile, PrfSkillList *output) {
 
     memset(&list, 0, sizeof(PrfSkillList));
     list.count = 0;
-    skills = &D_003907BC[profile * 14];
+    skills = D_003907B0[profile].skills;
     for (i = 0; i < 8; i++) {
         skill = *skills++;
         if (skill != 0) {
@@ -720,7 +715,7 @@ s32 prfBuildSkillList(DatPartyRecord *unit, DatProfileRecord *unusedProfile, Prf
     selectedProfileId = unit->profileId;
     compactedList.count = 0;
     if (selectedProfileId != 0) {
-        profileSkillCursor = &D_003907BC[selectedProfileId * PRF_SKILL_TABLE_STRIDE];
+        profileSkillCursor = D_003907B0[selectedProfileId].skills;
         for (sourceIndex = 0; sourceIndex < PRF_SKILL_LIST_ENTRY_COUNT; sourceIndex++) {
             skillId = *profileSkillCursor++;
             if (skillId != 0) {
@@ -794,21 +789,14 @@ s32 ptyReqProfileCountAtLeast(DatPartyRecord *unit, u8 *operand) {
     return 1;
 }
 
-typedef struct PtyReqEntry {
-    u8 unk0[5];
-    u8 value5;
-    u8 pad6[0x16];
-} PtyReqEntry;
-
 /* Count flagged profile rows whose byte-five value reaches the operand's threshold. */
 s32 ptyProfileCountAtLeast(DatPartyRecord *unit, u8 *operand) {
-    PtyReqEntry *profileTable = (PtyReqEntry *)D_003907B0;
     u32 profileIndex;
     u32 matchedCount = 0;
 
     for (profileIndex = 0; profileIndex < PRF_PROFILE_COUNT; profileIndex++) {
         if (ptyTestProfileFlag0(unit, (u16)profileIndex)) {
-            if (profileTable[profileIndex].value5 >= operand[5]) {
+            if (D_003907B0[profileIndex].value05 >= operand[5]) {
                 matchedCount++;
             }
         }
@@ -871,7 +859,7 @@ void prfReq54Evaluate(u32 state, u32 operand, u16 requirementId) {
 
 /* Read requirement flags for an unchecked profile ID. */
 u32 prfIsRequirementExcluded(u16 requirementId) {
-    return D_003907B0[requirementId].v0;
+    return D_003907B0[requirementId].flags;
 }
 
 /* Read the rule-state word for an unchecked requirement ID. */

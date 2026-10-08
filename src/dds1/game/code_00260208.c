@@ -810,7 +810,7 @@ void brsSelectLevelBonusMode(DatPartyRecord *source, BrsSkillPackageWork *work) 
 extern void mnuClearEntries(MenuPageWindow *window);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *window);
 extern void mnuSelectPage(MenuPageWindow *window, s32 index);
-extern void mnuResetPartyPanelFade(s32 window, s32 index, s32 unused,
+extern void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, s32 unused,
                                    s32 retainScale);
 extern void mnuSetWindowResource(s32 index, MenuPageWindow *window, s32 resource,
                                  s32 option);
@@ -837,7 +837,7 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
         mnuClearEntries(window);
         mnuReleasePartyIconBundles(window);
         mnuSelectPage(window, page);
-        mnuResetPartyPanelFade((s32)window, page, 0, 0);
+        mnuResetPartyPanelFade(window, page, 0, 0);
         mnuSetWindowResource(page, window, (s32)work->staffSlots.pairResources[0],
                              (s32)work->staffSlots.pairResources[1]);
         mnuSetPageParams(work->partyWindow.slots[page].windowSprites, 2);

@@ -1837,16 +1837,16 @@ void mnuLoadPanelSectionResources(MenuSlotEffectHandles *slot, u32 model, u32 fi
     }
 }
 
-void mnuReleasePartyPanelTextures(s32 menu) {
+void mnuReleasePartyPanelTextures(MenuPageWindow *window) {
     u32 flags;
     u32 *slot;
     u32 *secondHandle;
     u32 *firstHandle;
     u32 index;
 
-    slot = (u32 *)(menu + 0x7c);
-    secondHandle = (u32 *)(menu + 0x164);
-    firstHandle = (u32 *)(menu + 0x160);
+    slot = (u32 *)((u8 *)window + 0x7c);
+    secondHandle = (u32 *)((u8 *)window + 0x164);
+    firstHandle = (u32 *)((u8 *)window + 0x160);
     index = 0;
     do {
         if (slot[0x38] != 0) {
@@ -1871,8 +1871,8 @@ void mnuReleasePartyPanelTextures(s32 menu) {
 }
 
 
-void mnuResetPartyPanelFade(u8 *menu, s32 index, u32 unused, u32 preserve) {
-    MenuPageSlot *entry = &((MenuPageWindow *)menu)->slots[index];
+void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused, u32 preserve) {
+    MenuPageSlot *entry = &window->slots[index];
     entry->hp.fadeOut = 0;
     entry->mp.fadeOut = 0;
     if (preserve == 0) {
@@ -2461,14 +2461,10 @@ void mnuClearPageSelectionHandles(MenuPageWindow *window) {
 }
 
 void mnuFlagActiveWindows(MenuPageWindow *window) {
-    u8 *menu = (u8 *)window;
-    u8 *kind = menu + 8;
-    u8 *flags = menu + 0xc;
     u32 i;
     for (i = 0; i < 5; i++) {
-        s32 offset = 0x70 + i * 0x2138;
-        if (*(u32 *)(kind + offset) == 2) {
-            *(u32 *)(flags + offset) |= 1;
+        if (window->slots[i].kind == 2) {
+            window->slots[i].flags |= 1;
         }
     }
 }
@@ -2477,7 +2473,7 @@ void mnuClearPartyPanelActiveFlags(MenuPageWindow *window) {
     u32 *flags;
     u32 index;
 
-    flags = (u32 *)((u8 *)window + 0x7c);
+    flags = &window->slots[0].flags;
     index = 0;
     do {
         index = index + 1;
@@ -2544,4 +2540,3 @@ void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window) {
 INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AFB8);
 
 INCLUDE_RODATA(const s32, "game/code_002B8FC8", D_0042AFD8);
-

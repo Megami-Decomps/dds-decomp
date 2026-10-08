@@ -924,7 +924,11 @@ s32 btlHasContextFlagTwo(void) {
     return (((s32)btlActionScratchWork->actor->flags & 2) > 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00211360", btlCheckCounterLimit);
+extern s32 btlCounterReachedLimit(s32 unused, u32 minimumCount);
+
+s32 btlCheckCounterLimit(s32 unused, u32 minimumCount) {
+    return btlCounterReachedLimit(unused, minimumCount);
+}
 
 /* Return whether counter query 4 has reached the requested inclusive lower bound. */
 s32 btlCounterReachedLimit(s32 unused, u32 minimumCount) {
@@ -1295,9 +1299,13 @@ s32 btlAnyUnitHasActionInSlots(mask, action)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00211360", btlAnyGroup200HasAction);
+s32 btlAnyGroup200HasAction(s32 unused, s32 action) {
+    return btlAnyUnitHasActionInSlots(0x200, action);
+}
 
-INCLUDE_ASM(const s32, "game/code_00211360", btlAnyGroup400HasAction);
+s32 btlAnyGroup400HasAction(s32 unused, s32 action) {
+    return btlAnyUnitHasActionInSlots(0x400, action);
+}
 
 s32 func_002141A8(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
@@ -1455,9 +1463,13 @@ s32 btlAnyGroupUnitHasZeroStat(void) {
 
 extern s32 btlAnyUnitHasQueuedQuery(s32, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_00211360", btlAnyGroup400HasQuery);
+s32 btlAnyGroup400HasQuery(s32 unused, s32 id) {
+    return btlAnyUnitHasQueuedQuery(unused, id, 0x400);
+}
 
-INCLUDE_ASM(const s32, "game/code_00211360", btlAnyGroup200HasQuery);
+s32 btlAnyGroup200HasQuery(s32 unused, s32 id) {
+    return btlAnyUnitHasQueuedQuery(unused, id, 0x200);
+}
 
 /* Test the full queued words, rather than the halfword IDs used by category queries. */
 s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 id, s32 mask) {
@@ -1523,7 +1535,9 @@ s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00211360", func_00214928);
+s32 func_00214928(void) {
+    return func_001B3200(0);
+}
 
 INCLUDE_RODATA(const s32, "game/code_00211360", D_00419B38);
 
