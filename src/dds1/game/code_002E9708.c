@@ -10,7 +10,6 @@
 
 #define SDF_RELOC_HEADER_BYTES 0x20
 #define SDF_STREAM_NODE_BYTES 0x8C
-#define SDF_STREAM_FRAME_HEADER_BYTES 0x10
 #define SDF_STREAM_SCRATCH_BYTES 0x10100
 #define SDF_STREAM_PREFIX_BYTES 0x100
 #define SDF_STREAM_SLOT_BYTES 0x2000
@@ -1022,23 +1021,15 @@ void sdfSoundInitNodeFromFormat(SdfStreamFrameNode *node, SoundFormat *format) {
     node->loopMode = format->loopMode;
     node->playbackMode = format->playbackMode;
 }
-/* Native 0x10 serialized header: dimensions and the DMA-cycle limit. */
-typedef struct SdfStreamHeader {
-    u8 pad00[8];
-    u16 width;
-    u16 height;
-    u32 cycleLength;
-} SdfStreamHeader;
-
 /* Decode the frame header, allocate its buffers, then queue the bytes after that header. */
 void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 sourceAddress, s32 sourceSize) {
     s32 interruptsEnabled;
     u8 *frameBytes = (u8 *)sourceAddress;
 
     sdfSoundInitNodeFromFormat(node, format);
-    node->width = ((SdfStreamHeader *)frameBytes)->width;
-    node->cycleLength = ((SdfStreamHeader *)frameBytes)->cycleLength;
-    node->height = ((SdfStreamHeader *)frameBytes)->height;
+    node->width = ((SdfStreamFrameHeader *)frameBytes)->width;
+    node->cycleLength = ((SdfStreamFrameHeader *)frameBytes)->cycleLength;
+    node->height = ((SdfStreamFrameHeader *)frameBytes)->height;
     sdfAllocateStreamFrameBuffers(node);
     func_002EB578(node, frameBytes + SDF_STREAM_FRAME_HEADER_BYTES, sourceSize - SDF_STREAM_FRAME_HEADER_BYTES);
     interruptsEnabled = func_00312C08();
@@ -1064,7 +1055,7 @@ extern SdfTexResource *sdfTexAllocateHeadForDimensions(s32, s32, s32, s32, s32);
  * only when larger than one GS page; smaller dimensions remain unchanged.
  */
 void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
-    SdfStreamHeader header;
+    SdfStreamFrameHeader header;
     s32 readStatus;
     s32 interruptsEnabled;
 
