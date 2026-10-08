@@ -1082,6 +1082,7 @@
 0x001659B8	polyStripPushPairsApart	inferred	twin of DDS1 0x0015DDC8 [names_M71_ItfBlur.tsv]
 0x00165A78	polyBlendTimedTintColor	inferred	confidence=high; matched-C; src/dds2/effect/polyManager.c:202:func_00165A78; Interpolates packed tint endpoints with elapsed/duration factor and packs RGBA output.; twin=0x0015DE88, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x00165CC0	polyReleaseBandNodeResources	inferred	Releases polygon node and allocation handles owned by band node. [names_reviewed6.tsv]
+0x00165CF0	polyInitializeBandRecordAges	inferred	initializes each poly-band record to the staggered inactive age before the first update; paired with DDS1 0x0015E100
 0x00165D38	polyRingRandomizeRecord	inferred	M141; sources=names_pending_main.tsv; twin=0x0015E148, input-family pairing. [names_qp10.tsv]
 0x00165E28	polyBandLayoutRing	inferred	DDS1 twin 0x0015E238 [names_M58_VuSweep.tsv]
 0x00165FC8	polyStripBuildScaledRing	inferred	twin of DDS1 0x0015E3D8 [names_M71_ItfBlur.tsv]
