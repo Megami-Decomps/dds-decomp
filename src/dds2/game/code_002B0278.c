@@ -196,7 +196,6 @@ extern char D_003E69B0[];
 
 extern void mnuCreateStaffImageSprite();
 
-extern void mnuDrawStaffGridLabelsForKind();
 
 
 extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
@@ -412,12 +411,12 @@ void mnuDrawStaffPartySelectionPanel(KwlnTask *task) {
     }
     if (choices->windows[4]->list->cursor != choices->windows[4]->list->first) {
         if (choices->thirdListReset == 0) {
-            mnuDrawStaffGridLabelsForKind(8, context->displayHandle);
+            mnuDrawStaffGridLabelsForKind(8, (struct EffectSlotSet *)(u32)(context->displayHandle));
         } else {
-            mnuDrawStaffGridLabelsForKind(7, context->displayHandle);
+            mnuDrawStaffGridLabelsForKind(7, (struct EffectSlotSet *)(u32)(context->displayHandle));
         }
     } else {
-        mnuDrawStaffGridLabelsForKind(1, context->displayHandle);
+        mnuDrawStaffGridLabelsForKind(1, (struct EffectSlotSet *)(u32)(context->displayHandle));
     }
 }
 
@@ -921,7 +920,7 @@ s32 mnuOpenStaffPartySelectionPanel(KwlnTask *callback) {
     if (menu->freezePanel == 0) {
         func_002B2408((MenuContext *)context);
     }
-    mnuDrawStaffGridLabelsForKind(0, ((MenuContext *)context)->displayHandle);
+    mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((MenuContext *)context)->displayHandle));
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
@@ -1057,7 +1056,7 @@ s32 mnuDrawStaffCampPageWithImage(KwlnTask *callback) {
         mnuCreateStaffImageSprite(0x15);
     }
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuContext *)context)->transition, 0x53);
-    mnuDrawStaffGridLabelsForKind(0, ((MenuContext *)context)->displayHandle);
+    mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((MenuContext *)context)->displayHandle));
     if (menu->active != 0) {
         func_002AAC98(0, ((MenuContext *)context)->imageHandle->list->cursor->index, D_003E69B0, context, 1, 0x53);
     }
@@ -1310,15 +1309,15 @@ s32 func_002B3788(KwlnTask *callback) {
         mnuDrawPartySkillAndStatusPanel(partyEntry, (s32)&context->partyWindow,
                                         context->panelGroup, (s32)context->panelRequest,
                                         (s32)&context->displayHandle, 0x53);
-        mnuDrawStaffGridLabelsForKind(5, context->displayHandle);
+        mnuDrawStaffGridLabelsForKind(5, (struct EffectSlotSet *)(u32)(context->displayHandle));
     } else {
         mnuDrawProfilePanelAndSprite(partyEntry, (u32)&context->partyWindow,
                                      context->panelEffects, context->profilePanel,
                                      (u32)&context->displayHandle, 0x53);
         if (menuWork->staffView == 0) {
-            mnuDrawStaffGridLabelsForKind(6, context->displayHandle);
+            mnuDrawStaffGridLabelsForKind(6, (struct EffectSlotSet *)(u32)(context->displayHandle));
         } else {
-            mnuDrawStaffGridLabelsForKind(4, context->displayHandle);
+            mnuDrawStaffGridLabelsForKind(4, (struct EffectSlotSet *)(u32)(context->displayHandle));
         }
     }
 
@@ -1758,7 +1757,7 @@ s32 mnuCampMenuDrawSlotLabel(KwlnTask *callback) {
     } else {
         mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuContext *)context)->transition, 0x53);
     }
-    mnuDrawStaffGridLabelsForKind(0, ((MenuContext *)context)->displayHandle);
+    mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((MenuContext *)context)->displayHandle));
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
@@ -2100,7 +2099,7 @@ s32 ptySkillMenuEnterPage(KwlnTask *callback) {
     } else {
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
-    mnuDrawStaffGridLabelsForKind(0, ((MenuContext *)context)->displayHandle);
+    mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((MenuContext *)context)->displayHandle));
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
@@ -2187,7 +2186,7 @@ s32 ptySkillMenuOpenSelectedSkillPage(KwlnTask *callback) {
     func_002AAC70(0, ((SkillMenuRuntime *)menu)->selectedWindow->list->cursor->sortKeyPrimary, D_00435E6C, context, 1, 1, 0x53);
     ((SkillMenuRuntime *)menu)->selectedWindow->list->stateFlags &= ~8;
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuContext *)context)->transition, 0x53);
-    mnuDrawStaffGridLabelsForKind(0, ((MenuContext *)context)->displayHandle);
+    mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((MenuContext *)context)->displayHandle));
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
@@ -2355,7 +2354,7 @@ s32 mnuOpenSkillDetailPanel(KwlnTask *callback) {
     }
     ((SkillMenuRuntime *)menu)->selectedWindow->list->stateFlags |= 8;
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuContext *)context)->transition, 0x53);
-    mnuDrawStaffGridLabelsForKind(3, ((MenuContext *)context)->displayHandle);
+    mnuDrawStaffGridLabelsForKind(3, (struct EffectSlotSet *)(u32)(((MenuContext *)context)->displayHandle));
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
@@ -2608,7 +2607,7 @@ s32 mnuCampMenuDrawStatus(KwlnTask *callback) {
         mnuDrawSelectionLabel(label);
         func_002B6898(label, ((MenuContext *)context)->resourceHandle, ((MenuContext *)context)->labelHandle);
     }
-    mnuDrawStaffGridLabelsForKind(2, ((MenuContext *)context)->displayHandle);
+    mnuDrawStaffGridLabelsForKind(2, (struct EffectSlotSet *)(u32)(((MenuContext *)context)->displayHandle));
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
