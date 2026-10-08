@@ -3,26 +3,9 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "eff_scatter_draw.h"
 
-
-/* Drawable allocation is 0x80 bytes; its resource and geometry arrays are
- * independent of the effect instance that supplies the transform and scale. */
-typedef struct PcpScatterDraw {
-    f32 origin[4];
-    f32 matrix[16];
-    u32 unk50;
-    u32 color;
-    u32 particleCount;
-    s32 stride;
-    f32 scale;
-    f32 *points;
-    f32 *uv;
-    u32 *vertexColors;
-    u32 *colors;
-    u32 asset;
-    u32 allocation;
-    PcpScatterRes *sharedResource;
-} PcpScatterDraw;
+extern void sdfQueueAssetRelease(struct SdfAsset *asset);
 
 typedef struct PcpScatterPlainParams {
     f32 vec[4];
@@ -111,7 +94,7 @@ void effReleaseScatterObject(PcpScatterDraw *object) {
         effPcpScatterResRelease(current->sharedResource);
     }
     sdfQueueAssetRelease(current->asset);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(current->allocation));
+    sdfReleaseResourceAllocation(current->allocation);
     sdfReleaseChipBlock(object);
 }
 
@@ -174,7 +157,7 @@ void func_00175DD0(PcpScatterDraw *object) {
     D_003D65B0.parameters = D_00354B90;
     for (index = 0; index < count; index++) {
         draw = &D_003D65B0;
-        remaining = object->stride;
+        remaining = object->vectorsPerParticle;
         draw->points = (f32 *)effGetScatterWideBlock(object, index);
         draw->uv = (f32 *)effGetScatterNarrowBlock(object, index);
         draw->colors = object->vertexColors;
@@ -218,12 +201,12 @@ void effShareScatterResource(PcpScatterDraw *object, PcpScatterDraw *source) {
 
 /* Compute the address of a 16-byte-wide block within the stride. */
 s32 effGetScatterWideBlock(PcpScatterDraw *object, s32 index) {
-    return (s32)object->points + index * object->stride * 0x10;
+    return (s32)object->points + index * object->vectorsPerParticle * 0x10;
 }
 
 /* Compute the address of an 8-byte-wide block within the stride. */
 s32 effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index) {
-    return (s32)object->uv + index * object->stride * 8;
+    return (s32)object->uv + index * object->vectorsPerParticle * 8;
 }
 
 u32 effGetScatterEntry(PcpScatterDraw *object, s32 index) {
