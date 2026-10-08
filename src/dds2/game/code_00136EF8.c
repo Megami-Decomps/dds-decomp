@@ -361,7 +361,7 @@ void fldUpdateCameraColorEffect(FldCameraSetting *setting) {
     FldColorParams *color = &setting->color;
 
     if (color->enabled != 0) {
-        fldCameraColorParameters->color.colorB = fldCameraColorParameters->color.colorA =
+        fldCameraColorParameters->color.finalColor = fldCameraColorParameters->color.initialColor =
             (color->blue << 16) | color->red | (color->green << 8) | 0x80000000;
         fldCameraColorParameters->alpha.alpha = color->vectorY;
         switch (color->mode) {
