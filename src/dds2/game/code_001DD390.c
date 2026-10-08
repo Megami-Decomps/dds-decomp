@@ -1889,7 +1889,8 @@ extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
 extern void func_001E1B80(BtlUnit *unit, BtlUnit *reused);
 
 typedef struct BtlActorMotionSlot {
-    u8 pad00[4];
+    u8 pad00[2];
+    u16 frameCount; /* 0x02 */
     s16 kind; /* 0x04 */
     s16 alphaStartFrame; /* 0x06 */
     f32 alphaFrameScale; /* 0x08 */
@@ -2452,7 +2453,14 @@ void btlResetUnitModelProgress(BtlUnit *unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E2E58);
+s32 func_001E2E58(BtlUnit *unit, s32 motionIndex) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlActorStatusRecord *status = (BtlActorStatusRecord *)
+        btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+
+    return (s32)(status->motions[motionIndex].frameCount /
+        (status->motions[motionIndex].alphaFrameScale * state->unk4C8));
+}
 
 f32 btlGetUnitModelValue1C(BtlUnit *unit) {
     f32 value = 0.0f;
