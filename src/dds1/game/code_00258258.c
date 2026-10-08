@@ -229,7 +229,7 @@ void func_00258FD0(s32 x, s32 y, s32 z, s32 alpha, MnuMantraGridEntry *entry,
     }
 }
 
-extern s32 mnuSceneResourceContext;
+extern TaskWork *mnuSceneResourceContext;
 
 
 
@@ -243,7 +243,7 @@ void func_002593E0(MnuProfileProgress *target, SdfGrid *grid, SdfGridCell *entry
     MnuMantraGridEntry *displayEntry;
     u32 flags;
 
-    scene = (MenuSceneWork *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
+    scene = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     displayEntry = (MnuMantraGridEntry *)(u32)entry->value;
     displayEntry->frame += 1;
     if ((f32)displayEntry->frame > 60.0f) {
