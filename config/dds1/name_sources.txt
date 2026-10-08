@@ -1187,7 +1187,7 @@
 0x00151E60	billCloneObjectRetainingSharedData	inferred	src/dds1/effect/billManager.c func_00151E60: Clones entry list or child object, retaining shared child data reference and copying dispatch metadata. [names_reviewed24.tsv]
 0x00151F00	billDispatchByKind	inferred	runs D_0034E068 command for instance kind
 0x00151F38	billInvokeCallback	inferred	invokes instance unk28 callback
-0x00151F58	effRetainResource	inferred	eff effect resources and animation in game/code_00151F58.c
+0x00151F58	effCreateBillboardSharingIndexedResource	inferred	Creates a billboard for the catalog entry kind, shares its child payload, and increments the child reference count.
 0x00151FC8	effGetBillResourceTexture	inferred	Returns the acquired SdfTex handle from the indexed billboard child resource.
 0x00151FF8	billSetLengthExtent	inferred	Stores billboard length extent; beam caller supplies its computed length [names_reviewed6.tsv]
 0x00152000	billSetChildScaleComponents	inferred	Stores two billboard scale components; called with equal values by billSetChildScale2 [names_reviewed6.tsv]

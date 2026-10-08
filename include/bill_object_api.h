@@ -10,6 +10,7 @@ struct BillChildPayload;
 struct SdfTex;
 
 struct SdfTex *effGetBillResourceTexture(s32 index);
+struct BillObj *effCreateBillboardSharingIndexedResource(s32 index);
 
 /* The selected kind interprets the opaque payload word. */
 struct BillObj *billCreateIndexed(s32 kind, u32 data);
@@ -19,9 +20,11 @@ struct BillChildPayload *billCreateChildPayloadFromTextureResource(void *resourc
 void billMarkKindOneFlag(struct BillObj *billboard);
 void billSetChildHalfExtents(struct BillObj *billboard, f32 width, f32 height);
 void billSetChildScaleComponents(struct BillObj *billboard, f32 x, f32 y);
+void billSetBillboardMode(struct BillObj *billboard, s32 mode);
 void billSetAnimationEntry(struct BillObj *billboard, s32 entryIndex);
 void billSetAnimationFrameForImmediateAdvance(struct BillObj *billboard, u32 frame);
 void billSetAnimationFrameWithOneTickHold(struct BillObj *billboard, u32 frame);
+s32 billGetFirstEntryFramePeriod(struct BillObj *billboard);
 void billReleaseSharedEntryBlock(struct BillData *data);
 void effReleaseSharedTextureRecord(struct BillChildPayload *child);
 struct BillChildPayload *billStepAnimationEntryAndUpdateChild(

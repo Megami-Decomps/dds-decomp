@@ -97,7 +97,7 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
     }
     work = child->work;
     index = work->count;
-    PCP_COPY_VECTOR(work->positions[index], &obj->unk0);
+    PCP_COPY_VECTOR(work->positions[index], obj->position);
     work->colors[index] = obj->childParam;
     memcpy(&work->uv[index], &child->uv, sizeof(child->uv));
     x = child->x * obj->childScaleX;
@@ -271,7 +271,7 @@ void func_00150840(BillObj *obj, BillRenderPair *node) {
             sdfTexGetSecondaryBufferSize(node->children[1]->texture));
         sdfAppendReferencePacket(node->packetList, packet);
         geometry = (u8 *)sdfAllocPacketAligned(0x38);
-        if (node->unk8 == 1) {
+        if (node->cameraFacingMode == 1) {
             VU0_LOAD_VF(vf10, sdfViewEyeVector);
             VU0_LOAD_VF(vf11, sdfViewTargetVector);
             VU0_SUB(vf10, vf10, vf11);
@@ -353,7 +353,7 @@ void func_00150840(BillObj *obj, BillRenderPair *node) {
         work->offsets[index][6] = cornerX * cosine - cornerY * sine;
         work->offsets[index][7] = cornerX * sine + cornerY * cosine;
     }
-    PCP_COPY_VECTOR(work->positions[index], &obj->unk0);
+    PCP_COPY_VECTOR(work->positions[index], obj->position);
     work->count++;
     if (work->count == 7) {
         func_00150EB0(node);
@@ -479,7 +479,7 @@ BillObj *billAllocList(void *resourceData) {
     newobj->animationActive = 1;
     newobj->pair.packetList = 0;
     newobj->pair.next = 0;
-    newobj->pair.unk8 = 0;
+    newobj->pair.cameraFacingMode = 0;
     billSetAnimationEntry(newobj, 0);
     return newobj;
 }
@@ -636,9 +636,9 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
             billResolveEntry(data, records[i].entryIndex, obj->resolvedEntries + i);
             (obj->resolvedEntries)[i].frameIndex = -records[i].delay;
         }
-    } else if (entry->unk8 & 0xC0) {
+    } else if (entry->entryModeFlags & 0xC0) {
         func_003003F0("billAnim..(A)MTEX SET\n");
-        obj->modeFlags = entry->unk8;
+        obj->modeFlags = entry->entryModeFlags;
         obj->animationEntryIndex = index;
         obj->entryCount = 2;
         billResolveEntry(data, index, obj->resolvedEntries);
@@ -649,7 +649,7 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
         obj->animationEntryIndex = index;
         billResolveEntry(data, index, obj->resolvedEntries);
     }
-    if (entry->unk8 & 0x100) {
+    if (entry->entryModeFlags & 0x100) {
         func_003003F0("billAnim..P2A POLYGON\n");
     }
     obj->animationActive = 1;
@@ -688,10 +688,10 @@ BillData *billCreateAnimationDataFromResource(void *resource) {
             data->entryCount = entry->frameCount;
             func_003003F0("billAnim no[%d][%d]...PLURAL\n", resourceIndex, data->entryCount);
         } else {
-            if (entry->unk8 & 0x40) {
+            if (entry->entryModeFlags & 0x40) {
                 data->entryCount = 2;
                 func_003003F0("billAnim no[%d][%d]...MTEX\n", resourceIndex, 2);
-            } else if (entry->unk8 & 0x80) {
+            } else if (entry->entryModeFlags & 0x80) {
                 data->entryCount = 2;
                 func_003003F0("billAnim no[%d][%d]...AMTEX\n", resourceIndex, 2);
             }

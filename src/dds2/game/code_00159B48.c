@@ -192,14 +192,14 @@ void effInitExpandRingPacketSchedule(EffTemplatePacketList *effect);
 
 /* Create a billboard sharing the indexed entry's resource. Word two of the
  * resource stores the reference count; the BillObj payload is not an emitter. */
-u32 effRetainResource(s32 index) {
+BillObj *effCreateBillboardSharingIndexedResource(s32 index) {
     BillObj *effect = billCreateIndexed(D_003AA884[index].billboardKind, 0);
     BillChildPayload *resource = ((BillObj *)effBillResourceOwners[index])->child;
     s32 references = resource->refCount;
 
     effect->child = resource;
     resource->refCount = references + 1;
-    return (u32)effect;
+    return effect;
 }
 
 u32 func_00159BB0(void) {
@@ -252,12 +252,12 @@ void billSetBillboardMode(BillObj *effect, s32 mode) {
             s32 index = 0;
             do {
                 BillAnimationEntry *entry = entries[index].entry;
-                u32 flags = entry->flags & ~6U;
+                u32 flags = entry->flags & ~BILL_ANIMATION_FLAG_PACKET_LIST_MASK;
                 entry->flags = flags;
                 if (mode == 2) {
-                    entry->flags = flags | 2;
+                    entry->flags = flags | BILL_ANIMATION_FLAG_PACKET_LIST_2;
                 } else if (mode == 3) {
-                    entry->flags = flags | 4;
+                    entry->flags = flags | BILL_ANIMATION_FLAG_PACKET_LIST_3;
                 }
                 index++;
             } while (--remaining != 0);
@@ -313,7 +313,7 @@ void billSetVariantValue(BillObj *effect, s32 value) {
         effect->child->signedVariant = variantValue;
         break;
     case 1:
-        effect->pair.unk8 = variantValue;
+        effect->pair.cameraFacingMode = variantValue;
         break;
     }
 }
@@ -323,7 +323,7 @@ u16 billGetVariantValue(BillObj *effect) {
     case 0:
         return effect->child->variant;
     case 1:
-        return effect->pair.unk8;
+        return effect->pair.cameraFacingMode;
     default:
         return 0;
     }

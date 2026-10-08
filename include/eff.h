@@ -294,7 +294,7 @@ typedef struct EffArrHdr {
 /* Two-child draw descriptor at +0x34 in animation-list objects; child allocations end before it. */
 typedef struct BillRenderPair {
     struct BillChildPayload *children[2];
-    u16 unk8;
+    u16 cameraFacingMode; /* 0x08: value 1 builds a view-facing matrix; other values use identity. */
     u16 kind;
     u32 colors[2];
     SdfListHead *packetList; /* 0x14 */
@@ -311,10 +311,7 @@ struct BillChildPayload;
 struct BillOut;
 
 typedef struct BillObj {
-    f32 unk0;
-    f32 unk4;
-    f32 unk08;
-    f32 unk0C;
+    f32 position[4]; /* 0x00: copied as a four-component position by both render paths. */
     f32 childScaleX;  /* 0x10: set by billSetChildScaleComponents */
     f32 childScaleY;  /* 0x14 */
     f32 unk18;
@@ -345,7 +342,7 @@ typedef char BillObj_payload_offset_must_be_0x30[
     ((u32)&((BillObj *)0)->payload == 0x30) ? 1 : -1];
 
 /* Serialized entry offsets are relative to BillData.base. */
-/* BillAnimationEntry.flags (not BillObj.modeFlags or entry.unk8). */
+/* BillAnimationEntry.flags bits; distinct from entryModeFlags and BillObj.modeFlags. */
 enum {
     BILL_ANIMATION_FLAG_FRAME_COLORS = 0x00000001,
     BILL_ANIMATION_FLAG_PACKET_LIST_2 = 0x00000002,
@@ -358,7 +355,7 @@ enum {
 typedef struct BillAnimationEntry {
     s32 offset;
     s32 colorOffset;
-    u32 unk8;
+    u32 entryModeFlags; /* 0x08: 0x40/0x80 select two-entry render modes; 0x100 remains unclassified. */
     u32 frameCount;
     u32 flags;
 } BillAnimationEntry;
