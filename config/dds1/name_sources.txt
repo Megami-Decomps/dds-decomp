@@ -2348,7 +2348,8 @@
 0x00193000	effSamplePrimitiveCurve	inferred	confidence=high; matched-C; src/dds1/game/code_00192488.c:337:func_00193000; Evaluates precomputed cubic xyz coefficients in Horner order or interpolates neighboring linear xyz keys by mode; leaves the sampled input vector in vf10. Linear-path W behavior is left unchanged.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00193130	effResetPrimitiveRecordCursor	inferred	confidence=high; matched-C; src/dds1/game/code_00192488.c:364:func_00193130; requires-symbol-registration; Resets the primitive curve cursor index and interpolation position.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x00193140	effSetPrimitiveRecordCursorStep	inferred	confidence=high; matched-C; src/dds1/game/code_00192488.c:369:func_00193140; requires-symbol-registration; Sets the primitive curve cursor increment.; source=reviewed-prior-QP15 [names_qp15.tsv]
-0x00193148	effBuildAndDispatch	inferred	allocs/inits work buffer via func_001931E0 then runs func_001934E8/001935B8 by flag
+0x00193148	effBuildAndDispatch	inferred	Allocates temporary coordinate-major tangents, selects standard or equal-component-flattening coefficient construction, then releases the temporary allocation.
+0x001931E0	effBuildPrimitiveCurveTangents	inferred	Reads borrowed interleaved XYZ keys and solves one cubic tangent system per coordinate into three coordinate-major float arrays.
 0x00193368	effSolveCubicTangents	inferred	U2
 0x001934E8	effBuildPrimitiveCurveCoefficients	inferred	Builds cubic, quadratic and linear Hermite power-basis XYZ coefficient banks from interleaved keys and coordinate-major tangents.
 0x001935B8	effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents	inferred	Builds the same Hermite coefficient banks but zeroes all three coefficients for each component whose adjacent endpoint values are exactly equal.

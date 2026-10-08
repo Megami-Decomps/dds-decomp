@@ -1931,6 +1931,7 @@
 0x0019AC38	effSamplePrimitiveCurve	inferred	confidence=high; matched-C; src/dds2/game/code_0019A0C0.c:349:func_0019AC38; Semantic cubic/linear curve counterpart: evaluates precomputed xyz coefficients in Horner order or neighboring linear keys, and loads vf10; linear-path W behavior remains as retail.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x0019AD68	effResetPrimitiveRecordCursor	inferred	high confidence; src/dds2/game/code_0019A0C0.c func_0019AD68: Resets the primitive record cursor index and fractional position. [names_reviewed25.tsv]
 0x0019AD78	effSetPrimitiveRecordCursorStep	inferred	high confidence; src/dds2/game/code_0019A0C0.c func_0019AD78: Sets the increment used by effAdvancePrimCursor. [names_reviewed25.tsv]
+0x0019AE18	effBuildPrimitiveCurveTangents	inferred	Reads borrowed interleaved XYZ keys and solves one cubic tangent system per coordinate into three coordinate-major float arrays.
 0x0019AFA0	effSolveCubicTangents	inferred	U2
 0x0019B120	effBuildPrimitiveCurveCoefficients	inferred	Builds cubic, quadratic and linear Hermite power-basis XYZ coefficient banks from interleaved keys and coordinate-major tangents.
 0x0019B1F0	effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents	inferred	Builds the same Hermite coefficient banks but zeroes all three coefficients for each component whose adjacent endpoint values are exactly equal.
