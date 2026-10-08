@@ -1,6 +1,7 @@
 #include "sdf_chip.h"
 #include "file.h"
 #include "sdf_pac_state.h"
+#include "file_request_api.h"
 #include "sdf_dev_state.h"
 
 /* Intrusive list node threaded through +0x4. */
@@ -247,8 +248,6 @@ u32 func_002C8120(FileWork *work) {
     return work->unk10;
 }
 
-extern s32 fileIsRequestReadyInCurrentMode(FileRequest *request);
-
 /* Kind one additionally requires readinessEnabled; other kinds only require
  * state six. The enable word is a gate, not the expected state value. */
 s32 fileIsRequestReadyInCurrentMode(FileRequest *request) {
@@ -275,18 +274,18 @@ s32 fileRequestIsReady(FileRequest *request) {
 
 /* Pump the device scheduler and file manager while the kind-specific readiness
  * predicate is zero. No timeout or NULL-request guard is introduced. */
-void fileWaitReady(u32 requestAddress) {
+void fileWaitReady(FileRequest *request) {
     s64 readyResult;
 
-    while (readyResult = fileIsRequestReadyInCurrentMode(requestAddress), readyResult == 0) {
+    while (readyResult = fileIsRequestReadyInCurrentMode(request), readyResult == 0) {
         sdfRestoreDeviceThreadPriority();
         fileManUpdate();
     }
 }
 
-/* Forward the existing request address to the readiness wait, without cleanup. */
-void func_002C81D0(u32 requestAddress) {
-    fileWaitReady(requestAddress);
+/* Forward the opaque request pointer to the readiness wait, without cleanup. */
+void func_002C81D0(FileRequest *request) {
+    fileWaitReady(request);
 }
 
 /* Pump updates while the queued head or unknown manager word is nonzero.
@@ -309,28 +308,22 @@ typedef struct FileWindowSlot {
     u8 pad2C[4];
 } FileWindowSlot; /* 0x30 */
 
-/* Create a kind-two request with two stored values and their copies.
- * requestNameAddress is passed to name duplication, not used as a numeric id;
- * callbackAddress/userDataAddress are completion fields, not window coordinates. */
-FileWindowSlot *fileWindowSlotCreate(s32 requestNameAddress, s32 firstValue, s32 secondValue, s32 callbackAddress, s32 userDataAddress) {
+/* Create a kind-two request with the caller's output buffer and byte count.
+ * The buffer address is stored in the existing value word at +0x24. */
+FileWindowSlot *fileWindowSlotCreate(const char *requestName, void *data, s32 size, s32 callbackAddress, s32 userDataAddress) {
     FileWindowSlot *requestSlot = sdfAllocAndClearQuadwords(FILE_VALUE_PAIR_REQUEST_BYTES);
 
-    requestSlot->firstValue = firstValue;
-    requestSlot->firstValueCopy = firstValue;
-    requestSlot->secondValue = secondValue;
-    requestSlot->secondValueCopy = secondValue;
-    fileManQueueNamedRequest(requestSlot, FILE_REQUEST_KIND_VALUE_PAIR, requestNameAddress, callbackAddress, userDataAddress);
+    requestSlot->firstValue = (s32)data;
+    requestSlot->firstValueCopy = (s32)data;
+    requestSlot->secondValue = size;
+    requestSlot->secondValueCopy = size;
+    fileManQueueNamedRequest(requestSlot, FILE_REQUEST_KIND_VALUE_PAIR, requestName, callbackAddress, userDataAddress);
     return requestSlot;
 }
 
-/* Queue the value-pair request without completion context. Preserve the
- * existing K&R parameter declarations and their signed integer representations. */
-void fileQueueWindowSlotRequest(requestNameAddress, firstValue, secondValue)
-s32 requestNameAddress;
-s32 firstValue;
-s32 secondValue;
-{
-    fileWindowSlotCreate(requestNameAddress, firstValue, secondValue, 0, 0);
+/* Queue the value-pair request and expose its opaque request handle. */
+struct FileRequest *fileQueueWindowSlotRequest(const char *requestName, void *data, s32 size) {
+    return (struct FileRequest *)fileWindowSlotCreate(requestName, data, size, 0, 0);
 }
 
 

@@ -6,6 +6,7 @@
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "mdl.h"
+#include "file_request_api.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -2529,7 +2530,7 @@ extern char D_003BBCD0[]; /* "%f" */
 extern char D_003BBCD8[]; /* "fog=" */
 extern MdlFogParams kwlnDrawVector;
 extern s32 sdfPathExists(char *path);
-extern void fileWaitReady(u32 requestAddress);
+
 extern s32 fileGetResourceHandle(s32 file);
 extern char *fileGetLoadedDataAddress(s32 file);
 extern s32 fileGetResourceSize(s32 file);
@@ -2563,7 +2564,7 @@ void mdlLoadViewerPresentationConfig(void) {
         return;
     }
     fileRequest = fileQueueDefaultCallbackRequest(D_00367AF8);
-    fileWaitReady(fileRequest);
+    fileWaitReady((struct FileRequest *)(u32)fileRequest);
     resourceHandle = fileGetResourceHandle(fileRequest);
     fileData = fileGetLoadedDataAddress(fileRequest);
     fileSize = fileGetResourceSize(fileRequest);
@@ -2613,13 +2614,10 @@ void mdlLoadViewerPresentationConfig(void) {
 
 const char D_003ABF18[0x60] __attribute__((aligned(8))) = "bg-color=%06x\neye-position=%f,%f,%f\ntarget-position=%f,%f,%f\nfovy=%f\nfog=%d,%f,%d,%f,%06x\n";
 extern s32 func_003014F0(char *, const char *, ...);
-struct FileWindowSlot;
-extern struct FileWindowSlot *fileQueueWindowSlotRequest(s32, s32, s32);
-
 void func_0021E068(void) {
     char buffer[0x130];
     s32 size;
-    struct FileWindowSlot *request;
+    struct FileRequest *request;
 
     size = func_003014F0(buffer, D_003ABF18, D_003BA8EC,
                         D_003D7B20.x, D_003D7B20.y, D_003D7B20.z,
@@ -2627,8 +2625,8 @@ void func_0021E068(void) {
                         sdfSceneProjectionParameters.camera.fov, (s32)kwlnDrawVector.near,
                         kwlnDrawVector.value, (s32)kwlnDrawVector.farA,
                         kwlnDrawVector.farB, kwlnDrawVector.color);
-    request = fileQueueWindowSlotRequest((s32)D_00367AF8, (s32)buffer, size);
-    fileWaitReady((u32)request);
+    request = fileQueueWindowSlotRequest(D_00367AF8, buffer, size);
+    fileWaitReady(request);
     filePollEntryCleanup((struct FileCleanup *)request);
 }
 

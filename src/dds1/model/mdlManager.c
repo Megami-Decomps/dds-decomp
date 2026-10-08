@@ -5,6 +5,7 @@
 #include "sdf_pac_work.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
+#include "file_request_api.h"
 
 extern u8 sdfViewMatrix[];
 extern u8 sdfProjectionMatrix[];
@@ -879,7 +880,7 @@ void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *requestOwner, MdlDoneJob *compl
 }
 
 extern void *fileAllocateDispatchRequest();
-extern void func_00288C50();
+
 extern void mdlCompleteGroupedJobAndNotify();
 
 #define MDL_DONE_JOB_BYTES 0x14
@@ -900,7 +901,7 @@ s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, s32 requestHandle,
     requestSlot = fileAllocateDispatchRequest(requestHandle, 0, 0, mdlCompleteGroupedJobAndNotify, completionJob);
     completionJob->owner = requestSlot;
     if (onComplete == NULL) {
-        func_00288C50(requestSlot);
+        func_00288C50((struct FileRequest *)requestSlot);
         mdlDestroyLoadRequestOwner(completionJob);
     }
     return 0;

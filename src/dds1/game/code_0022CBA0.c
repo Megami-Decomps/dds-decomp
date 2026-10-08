@@ -17,6 +17,7 @@
 #include "mdl.h"
 #include "evt_polygon_movie.h"
 #include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
 
 struct EvtRuntime;
 struct EvtRuntime;
@@ -1793,7 +1794,7 @@ void evtEventViewerDestroyTask(void) {
     kwlnTaskDestroyWithHierarchyByName(evtViewerTaskName, 1);
 }
 
-extern s32 fileIsRequestReadyInCurrentMode(void *file);
+
 extern u32 fileGetResourceHandle(void *file);
 extern s32 filePollEntryCleanup(void *file);
 
@@ -1806,7 +1807,7 @@ void func_00232E20(PolyMovieWork *assets) {
         if (assets->mainResource.request == 0) {
             return;
         }
-        if (fileIsRequestReadyInCurrentMode(assets->mainResource.request) == 0) {
+        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)assets->mainResource.request) == 0) {
             return;
         }
         assets->mainResource.handle = (SdfMemBlock *)fileGetResourceHandle(assets->mainResource.request);
@@ -1818,7 +1819,7 @@ void func_00232E20(PolyMovieWork *assets) {
         if (assets->secondaryResource.request == 0) {
             return;
         }
-        if (fileIsRequestReadyInCurrentMode(assets->secondaryResource.request) == 0) {
+        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)assets->secondaryResource.request) == 0) {
             return;
         }
         assets->secondaryResource.handle = (SdfMemBlock *)fileGetResourceHandle(assets->secondaryResource.request);
@@ -1830,7 +1831,7 @@ void func_00232E20(PolyMovieWork *assets) {
         if (assets->tertiaryResource.request == 0) {
             return;
         }
-        if (fileIsRequestReadyInCurrentMode(assets->tertiaryResource.request) == 0) {
+        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)assets->tertiaryResource.request) == 0) {
             return;
         }
         assets->tertiaryResource.handle = (SdfMemBlock *)fileGetResourceHandle(assets->tertiaryResource.request);

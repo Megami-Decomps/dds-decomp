@@ -4,6 +4,7 @@
 #include "sdf_chip.h"
 #include "pcp_vu0.h"
 #include "sdf_resource.h"
+#include "file_request_api.h"
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 #include "kwln.h"
@@ -343,7 +344,7 @@ typedef struct MantraFileRequest {
     u8 pad00[0x60];
     MantraFileEntry *entries;
 } MantraFileRequest;
-extern s32 fileRequestIsReady(void *);
+
 extern void func_002C7CE8(void *);
 extern u32 func_00305148(void *, u32);
 extern void *fileQueuePlainDispatchRequest(const char *path);
@@ -561,7 +562,7 @@ void mnuReleaseMantraSpriteSlots(void) {
 
 s32 mnuLoadMantraSpriteTask(KwlnTask *task) {
     MantraFileRequest *request = (MantraFileRequest *)kwlnTaskGetUserValue(task);
-    s32 result = fileRequestIsReady(request);
+    s32 result = fileRequestIsReady((struct FileRequest *)request);
     if (result != 0) {
         MantraFileEntry *entry = request->entries;
         s32 i;
