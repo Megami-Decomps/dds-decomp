@@ -106,10 +106,10 @@ typedef struct SdfMeasureCommand {
 /* Walk a command list and report its total packet byte size, the number of
  * kind-3 entries, and the kind 4-8 quadword total. */
 s32 sdfCommandListMeasure(u32 *list, s32 *outCount, s32 *outQuadwords) {
-    s32 count;
+    s32 remainingCommandCount;
     SdfMeasureCommand *command;
     s32 bytes;
-    s32 count3;
+    s32 kind3Count;
     s32 quadwords;
 
     if (list == 0) {
@@ -117,13 +117,13 @@ s32 sdfCommandListMeasure(u32 *list, s32 *outCount, s32 *outQuadwords) {
         *outQuadwords = 0;
         return 0;
     }
-    count = list[0];
+    remainingCommandCount = list[0];
     list++;
     bytes = 0;
-    count3 = 0;
-    count &= 0xFFFF;
+    kind3Count = 0;
+    remainingCommandCount &= 0xFFFF;
     quadwords = 0;
-    if (count != 0) {
+    if (remainingCommandCount != 0) {
         do {
             command = (SdfMeasureCommand *)*list;
             list++;
@@ -135,7 +135,7 @@ s32 sdfCommandListMeasure(u32 *list, s32 *outCount, s32 *outQuadwords) {
                 bytes += (command->quadwordCount << 4) + 0x40;
                 break;
             case 3:
-                count3++;
+                kind3Count++;
                 break;
             case 4:
             case 5:
@@ -145,10 +145,10 @@ s32 sdfCommandListMeasure(u32 *list, s32 *outCount, s32 *outQuadwords) {
                 quadwords += 0x10;
                 break;
             }
-            count--;
-        } while (count != 0);
+            remainingCommandCount--;
+        } while (remainingCommandCount != 0);
     }
-    *outCount += count3;
+    *outCount += kind3Count;
     *outQuadwords = quadwords;
     return bytes != 0 ? bytes + 0x20 : 0;
 }
