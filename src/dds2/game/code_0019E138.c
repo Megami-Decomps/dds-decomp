@@ -61,7 +61,6 @@ extern SdfTex *itfBackgroundSpriteTexture;
 extern u8 D_00436580[];
 extern u8 D_003B4378[];
 extern u8 D_003B4380[];
-extern FrFontGlyph *func_0019CE78(void *, s8, s8, s8, FrFontGlyph *);
 extern FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *, FrFontGlyph *);
 extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *, FrFontGlyph *, s32);
 
@@ -339,7 +338,7 @@ FrFontGlyph *func_0019E5D8(FrFontCtx *stream) {
             if (value < 0x80) {
                 encodedText[0] = value;
                 encodedText[1] = 0;
-                stream->glyphChain = func_0019CE78(encodedText, stream->channel0,
+                stream->glyphChain = func_0019CE78((const char *)encodedText, stream->channel0,
                     stream->channel1, stream->channel2, stream->glyphChain);
             } else {
                 value = (value << 8) | stream->bytes[stream->offset++];
@@ -347,14 +346,14 @@ FrFontGlyph *func_0019E5D8(FrFontCtx *stream) {
                     encodedText[0] = (u32)value >> 8;
                     encodedText[1] = value;
                     encodedText[2] = 0;
-                    stream->glyphChain = func_0019CE78(encodedText, stream->channel0,
+                    stream->glyphChain = func_0019CE78((const char *)encodedText, stream->channel0,
                         stream->channel1, stream->channel2, stream->glyphChain);
                 } else {
                     value -= 0x4000;
                     encodedText[0] = (u32)value >> 8;
                     encodedText[1] = value;
                     encodedText[2] = 0;
-                    stream->glyphChain = func_0019CE78(encodedText, 8,
+                    stream->glyphChain = func_0019CE78((const char *)encodedText, 8,
                         stream->channel1, stream->channel2, stream->glyphChain);
                 }
             }
@@ -454,7 +453,7 @@ FrFontGlyph *frFontBuildColoredGlyphWithSharedFlags(u32 x, u32 y, s32 depth, s32
     frFontAddSharedGlyphFlags(1);
     frFontClearFlagBits(2);
     frFontClearFlagBits(0x10);
-    glyph = frFontAppendGlyphFromData(source, kind, 0, 0, 0);
+    glyph = frFontAppendTextToGlyphChain(source, kind, 0, 0, 0);
     frFontAddSharedGlyphFlags(0x10);
     frFontAddSharedGlyphFlags(2);
     frFontClearFlagBits(1);
@@ -515,7 +514,7 @@ void itfAttachGlyph16x18(u32 x, u32 y, s32 depth, u32 colors,
                                     void *glyphSource, FrFontGlyph *parent) {
     FrFontGlyph *glyph;
 
-    glyph = frFontAppendGlyphFromData(glyphSource, 0, 0, 0, 0);
+    glyph = frFontAppendTextToGlyphChain(glyphSource, 0, 0, 0, 0);
     frFontSetGlyphChainDimensions(glyph, 0x10, 0x12);
     frFontSetContextPair(glyph, x, y);
     frFontStoreShiftedContextValue(glyph, depth << 4);
@@ -553,7 +552,7 @@ FrFontGlyph *itfAppendTextGlyphChain(s32 x, s32 y, s32 depth, u32 colors, const 
                 glyphLength = 2;
                 glyphData[2] = 0;
             }
-            glyph = frFontAppendGlyphFromData(glyphData, glyphMode, 0, 0, 0);
+            glyph = frFontAppendTextToGlyphChain(glyphData, glyphMode, 0, 0, 0);
             frFontStoreShiftedContextValue(glyph, depth << 4);
             frFontSetChildColors(glyph, colors);
             frFontSetFlagAndMeasureGlyphs(glyph, 3);
@@ -622,7 +621,7 @@ FrFontGlyph *itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth, u32 colors, co
         }
     }
     frFontAddSharedGlyphFlags(1);
-    glyph = frFontAppendGlyphFromData(buffer, 1, 0, 0, 0);
+    glyph = frFontAppendTextToGlyphChain(buffer, 1, 0, 0, 0);
     frFontAddSharedGlyphFlags(2);
     frFontClearFlagBits(1);
     frFontSetContextPair(glyph, x, y);
@@ -634,7 +633,7 @@ FrFontGlyph *itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth, u32 colors, co
 FrFontGlyph *func_0019F5E8(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFontGlyph *previousGlyph) {
     FrFontGlyph *glyph;
 
-    glyph = frFontAppendGlyphFromData(D_00436580, 0, 0, 0, previousGlyph);
+    glyph = frFontAppendTextToGlyphChain((const char *)D_00436580, 0, 0, 0, previousGlyph);
     frFontClearFlagBits(2);
     glyph = func_0019CE78(text, 2, 0, 0, glyph);
     frFontSetFlagAndMeasureGlyphs(glyph, -1);
@@ -648,7 +647,7 @@ FrFontGlyph *func_0019F5E8(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFo
 FrFontGlyph *func_0019F6C8(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFontGlyph *previousGlyph) {
     FrFontGlyph *glyph;
 
-    glyph = frFontAppendGlyphFromData(D_00436580, 0, 0, 0, previousGlyph);
+    glyph = frFontAppendTextToGlyphChain((const char *)D_00436580, 0, 0, 0, previousGlyph);
     frFontClearFlagBits(2);
     glyph = func_0019CE78(text, 3, 0, 0, glyph);
     frFontAddSharedGlyphFlags(2);
@@ -661,7 +660,7 @@ FrFontGlyph *func_0019F6C8(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFo
 FrFontGlyph *func_0019F798(s32 x, s32 y, s32 depth, u32 colors, char *text, FrFontGlyph *previousGlyph) {
     FrFontGlyph *glyph;
 
-    glyph = frFontAppendGlyphFromData(D_00436580, 0, 0, 0, previousGlyph);
+    glyph = frFontAppendTextToGlyphChain((const char *)D_00436580, 0, 0, 0, previousGlyph);
     frFontClearFlagBits(2);
     glyph = func_0019CE78(text, 3, 0, 0, glyph);
     frFontSetFlagAndMeasureGlyphs(glyph, -2);
