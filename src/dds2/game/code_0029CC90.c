@@ -220,7 +220,39 @@ s32 mnuCountAdvancingTitleAnimations(void) {
 INCLUDE_ASM(const s32, "game/code_0029CC90", func_0029D2D8);
 
 /* Build rows for active, capped profiles, excluding unit ID 9. */
-INCLUDE_ASM(const s32, "game/code_0029CC90", brsBuildProfileCapList);
+s32 brsBuildProfileCapList(BrsRewardBatch *batch) {
+    PrfSkillList skills;
+    s32 remaining;
+    s32 partyOffset = 0;
+    u8 *values = (u8 *)&batch->rows + sizeof(batch->rows[0].unit);
+
+    memset(batch, 0, sizeof(*batch));
+    batch->count = 0;
+    for (remaining = 4; remaining >= 0; remaining--) {
+        DatPartyRecord *unit = (DatPartyRecord *)
+            ((u8 *)&datGameState->party + partyOffset);
+        u16 occupied = unit->flags & 1;
+
+        partyOffset += sizeof(DatPartyRecord);
+        if (occupied != 0 && unit->unitId != 9) {
+            DatProfileRecord *profile = ptyGetCurrentProfileRecord(unit);
+
+            prfBuildSkillListState0(unit, profile, &skills);
+            if (unit->profileId != 0 &&
+                ptyGetProfileRecordCap(unit->profileId) == profile->value &&
+                func_00314990(unit, unit->profileId) == 0) {
+                s32 count = batch->count;
+                BrsRewardValues *rowValues =
+                    (BrsRewardValues *)(values + count * sizeof(BrsRewardRow));
+
+                rowValues->amount = skills.count;
+                batch->rows[count].unit = unit;
+                batch->count++;
+            }
+        }
+    }
+    return batch->count;
+}
 
 s32 mnuAdvanceTitleEntryAnimation(DatPartyRecord *entry) {
     s32 step = ptyCalcLevelUps(entry);
