@@ -793,7 +793,7 @@ FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s32 posit
 
 /* Bind the caller's font data into the reserved temporary entry. */
 void frFontLoadTemporaryEntry(u32 fontData) {
-    frFontBindResourceSections(FR_FONT_TEMPORARY_SLOT, fontData, 0);
+    frFontBindResourceSections(FR_FONT_TEMPORARY_SLOT, (u8 *)fontData, 0);
 }
 
 /* Free the reserved temporary font entry. */

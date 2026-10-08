@@ -195,7 +195,7 @@ extern s32 sdfAllocSizeClassBlock(s32);
 
 extern s32 mnuPercentOrHundred(u16, u16);
 
-extern void mnuDrawPanelSequenceByRow(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawPanelSequenceByRow(MenuPageBar *, s32, s32 *, s32, s32, EffectSlotSet *);
 
 extern s32 effDestroyPackedBatch(s32);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
@@ -399,12 +399,12 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00266C08);
  * The source is a party-vitals record; the context supplies the retained camp texture. */
 s32 mnuCreateDualPercentPanel(DatPartyRecord *unit, MenuSlotState *host) {
     s32 panel = sdfAllocSizeClassBlock(MNU_PERCENT_PAIR_BYTES);
-    mnuDrawPanelSequenceByRow(panel, 0, 0, 0x1e,
+    mnuDrawPanelSequenceByRow((MenuPageBar *)panel, 0, 0, 0x1e,
         mnuPercentOrHundred(unit->hp, unit->maxHp),
-        host->imageHandles[1]);
-    mnuDrawPanelSequenceByRow(panel + MNU_PERCENT_PANEL_BYTES, 1, 0, 0x1e,
+        (EffectSlotSet *)host->imageHandles[1]);
+    mnuDrawPanelSequenceByRow((MenuPageBar *)(panel + MNU_PERCENT_PANEL_BYTES), 1, 0, 0x1e,
         mnuPercentOrHundred(unit->mp, unit->maxMp),
-        host->imageHandles[1]);
+        (EffectSlotSet *)host->imageHandles[1]);
     return panel;
 }
 
@@ -1879,7 +1879,7 @@ s32 evtBeginSelectionExitFade(KwlnTask *task) {
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 extern s32 fileMenuTaskExists(void);
 extern void fileSetPreviewLocation();
-extern void func_002CE208();
+extern void func_002CE208(s32 mode);
 
 /* Poll the file task after the dispatch/fade barrier, then restore the menu popup. */
 s32 func_0026A048(KwlnTask *request) {
