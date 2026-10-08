@@ -366,7 +366,6 @@ extern f32 fldSecondaryQueuedEffectPosition[];
 
 extern char fldTitleTaskName[]; /* "fldTitle" */
 
-extern s32 kwlnTaskGetTaskByName(void *name);
 
 extern char D_00413C80[]; /* "fldTitleMini" */
 

@@ -29,7 +29,6 @@ typedef struct UiInputState {
 extern const char *D_004367CC;
 
 
-extern struct KwlnTask *kwlnTaskGetTaskByName(const char *name);
 
 extern s32 btlGetRuntime(void);
 

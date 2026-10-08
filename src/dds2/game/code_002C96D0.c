@@ -245,7 +245,6 @@ extern void func_002C92D0(u32 context);
 extern void *mcHandleDetectionResult(void);
 
 
-extern KwlnTask *kwlnTaskGetTaskByName(const char *name);
 
 /* Loader context at D_0037D4A0. */
 typedef struct LoadCtx374A0 {

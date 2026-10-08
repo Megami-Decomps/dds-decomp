@@ -171,9 +171,7 @@ extern const char *btlAnalyzPanelTaskNameRef;
 
 extern const char *btlMahenPanelTaskNameRef;
 
-extern KwlnTask *kwlnTaskGetTaskByName(const char *);
 
-extern s32 kwlnTaskIsRegistered(KwlnTask *);
 extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *, s32);
 extern void func_00101A80(KwlnTask *, KwlnTask *);
 
