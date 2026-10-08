@@ -388,7 +388,8 @@ extern u32 sdfCreateAssetWithDrawEntries(void);
 extern void func_003332D0(u32 res, f32 scale);
 
 /* Constructors also serve the legacy parameter-table dispatch surface. */
-extern PcpScatterRadialWork *func_001784F8();
+extern PcpScatterRadialWork *effScatterCreateRadialWork(
+    const PcpScatterRadialParams *params, u32 resource, void *particleParams);
 
 
 
@@ -405,7 +406,7 @@ void effScatterCreateFromParameterTriplet(void *parameterTable) {
     params = effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK);
     resource = (u32)effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK);
     options = effParamTableGetBlock(parameterTable, EFF_SCATTER_CHILD_BLOCK);
-    func_001784F8(params, resource, options);
+    effScatterCreateRadialWork(params, resource, options);
 }
 
 /* Return a radial clone sharing the texture owner; every group clones source group zero.
@@ -419,7 +420,7 @@ PcpScatterRadialWork *effPcpScatterSharedDuplicate(source)
     u32 *handles;
     u32 i;
 
-    work = func_001784F8(&source->params, 0, 0);
+    work = effScatterCreateRadialWork(&source->params, 0, 0);
     effPcpScatterSharePoolResource(work->childWork, source->childWork);
     if (work->params.duplicateParticles != 0) {
         work->duplicateGroupCount = work->params.particleCount / work->params.particlesPerGroup;

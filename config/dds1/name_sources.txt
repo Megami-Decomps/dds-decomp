@@ -1626,6 +1626,7 @@
 0x00170888	effSetRecordPoolDrawMode	inferred	confidence=high; matched-C; src/dds1/game/code_0016F1D0.c:682:func_00170888; Sets the record-pool submission mode used to choose the draw sink or alternate blend packet path.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00170890	effSetRecordPoolColor	inferred	confidence=high; matched-C; src/dds1/game/code_0016F1D0.c:687:func_00170890; Sets the packed color supplied to the record-pool packet builder.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00170898	effSetRecordPoolScale	inferred	confidence=high; matched-C; src/dds1/game/code_0016F1D0.c:691:func_00170898; Sets the uniform scale used by the scaled record-pool transform.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x001708A0	effScatterCreateRadialWork	inferred	allocates and initializes radial work with particles, a child pool, and optional duplicate group work
 0x00170B88	effScatterCreateFromParameterTriplet	inferred	Extracts three packed parameter blocks and creates scatter work from them. [names_reviewed6.tsv]
 0x00170BF0	effPcpScatterSharedDuplicate	inferred	duplicate of the shared-particle effect: copies the child work, then re-creates the handle array via effParamWorkDuplicate
 0x00170CE0	effPcpScatterReleaseParticleGroup	inferred	releases each particle handle in the scatter work array then frees the array and child work resources

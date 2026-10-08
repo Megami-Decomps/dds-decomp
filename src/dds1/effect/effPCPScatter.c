@@ -61,7 +61,6 @@ typedef struct PcpScatterInstanceC PcpScatterInstanceC;
 typedef struct PcpScatterPlainInstance PcpScatterPlainInstance;
 
 /* Constructors also serve the legacy parameter-table dispatch surface. */
-extern PcpScatterRadialWork *func_001708A0();
 extern PcpScatterSpinWork *effScatterCreateSpinWork();
 extern PcpScatterRibbonWork *effScatterCreateRibbonWork();
 extern PcpScatterInstanceB *effScatterCreateDampedRing();
@@ -121,6 +120,9 @@ typedef struct {
     s32 duplicateStartAge;
     u32 particlesPerGroup;
 } PcpScatterRadialParams;
+
+extern PcpScatterRadialWork *effScatterCreateRadialWork(
+    const PcpScatterRadialParams *params, u32 resource, void *particleParams);
 
 typedef struct {
     s32 age;
@@ -355,7 +357,10 @@ extern PcpScatterRes *effPcpScatterResCreate(u32 resId);
 /* Create radial work from the parameter, texture-resource and child-work blocks. */
 void effScatterCreateFromParameterTriplet(void *parameterTable)
 {
-    func_001708A0(effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK), effParamTableGetBlock(parameterTable, EFF_SCATTER_CHILD_BLOCK));
+    effScatterCreateRadialWork(
+        effParamTableGetBlock(parameterTable, EFF_SCATTER_PARAM_BLOCK),
+        (u32)effParamTableGetBlock(parameterTable, EFF_SCATTER_RESOURCE_BLOCK),
+        effParamTableGetBlock(parameterTable, EFF_SCATTER_CHILD_BLOCK));
 }
 
 /* Return a radial clone sharing the texture owner; every group clones source group zero.
@@ -369,7 +374,7 @@ PcpScatterRadialWork *effPcpScatterSharedDuplicate(source)
     u32 *handles;
     u32 i;
 
-    work = func_001708A0(&source->params, 0, 0);
+    work = effScatterCreateRadialWork(&source->params, 0, 0);
     effPcpScatterSharePoolResource(work->childWork, source->childWork);
     if (work->params.duplicateParticles != 0) {
         work->duplicateGroupCount = work->params.particleCount / work->params.particlesPerGroup;
