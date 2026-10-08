@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fld_waypoint.h"
 #include "fld_inf.h"
 extern FldInfTable D_00332E30;
 #include "sdf_primitive.h"
@@ -57,7 +58,6 @@ typedef struct {
 extern FldActorRow fldActorSlots[];
 extern s32 D_0032E530[];
 
-extern u8 D_00337D00[];
 typedef struct FldNpcMotion {
     s32 defaultMotionId;
     u8 primaryName[0x10];
@@ -280,7 +280,6 @@ extern u8 D_00324660[];
 extern void sdfPostmultiplyVuMatrixFromMemory(void *src);
 extern char D_003C9200[];
 extern u32 D_003C92E0[];
-extern s16 D_00337D12[];
 extern s16 D_003C9518[];
 extern void fldFormatAreaResourceName(char *arg0);
 extern void func_00132FD0(u32 arg0, s32 arg1);
@@ -362,18 +361,7 @@ extern void mnuReleaseResourceEntries();
 extern void sdfResourceListRelease();
 extern void fldReleaseBackgroundBuffer(void);
 
-typedef struct {
-    s16 data[12];
-} FldRowData; /* 0x18 bytes */
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 count;
-    FldRowData body;
-} FldS16Row; /* 0x20 bytes */
-extern FldS16Row fldActorWaypointRows[];
+extern FldWaypointBlock fldActorWaypointRows;
 extern u32 *D_003307B0[];
 extern void fldDrawMarkerQuad(f32 *pos);
 
@@ -4769,7 +4757,7 @@ u8 *fldPickActorTemplateByName(const char *name) {
         return 0;
     }
     do {
-        entry = (FldActorEntry *)(D_00337D00 + i * 108);
+        entry = &fldActorWaypointRows.actors[i];
         flag = entry->requiredFlag;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
             && (((FldAreaWork *)fldAreaState)->unk104 == 0 || !(entry->flags31 & 4))
@@ -4827,7 +4815,7 @@ u8 *fldFindActorEntryByName(const char *name) {
         return 0;
     }
     do {
-        entry = (FldActorEntry *)(D_00337D00 + i * 108);
+        entry = &fldActorWaypointRows.actors[i];
         flag = entry->requiredFlag;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
             && (((FldAreaWork *)fldAreaState)->unk104 == 0 || !(entry->flags31 & 4))
@@ -4880,7 +4868,7 @@ extern s32 D_0032E3C4[];
 extern u8 D_00336A30[];
 u8 *fldSelectCurrentActorOnNextFloor(void) {
     s32 index = D_003BAB40;
-    FldActorEntry *entry = (FldActorEntry *)(D_00337D00 + index * 108);
+    FldActorEntry *entry = &fldActorWaypointRows.actors[index];
     if (entry->floor == D_0032E3C4[0] + 1 && entry->kind == 10) {
         fldSelectedActorEntryIndex = index;
         D_003BAE68 = 8;
@@ -4890,11 +4878,11 @@ u8 *fldSelectCurrentActorOnNextFloor(void) {
 }
 
 s32 fldGetSelectedActorMotionId(void) {
-    return D_00337D12[fldSelectedActorEntryIndex * 54];
+    return fldActorWaypointRows.actors[fldSelectedActorEntryIndex].motion;
 }
 
 s32 fldQuerySelectedActorMotionState(s32 query) {
-    FldActorEntry *entry = (FldActorEntry *)(D_00337D00 + fldSelectedActorEntryIndex * 108);
+    FldActorEntry *entry = &fldActorWaypointRows.actors[fldSelectedActorEntryIndex];
 
     if (query == 0 && entry->kind == 1) {
         if (entry->motion == 5 || entry->secondaryMotion == 5 || entry->motion == 6
@@ -4929,7 +4917,7 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
         }
     }
     index = fldSelectedActorEntryIndex;
-    entry = (FldActorEntry *)(D_00337D00 + index * 108);
+    entry = &fldActorWaypointRows.actors[index];
     kind = entry->kind;
     if (kind == 1) {
         if (entry->floor == D_0032E3C4[0] + 1) {
@@ -4978,7 +4966,7 @@ void func_0013DDF0(const char *name) {
         return;
     }
     for (i = 0; i < 0x100; i++) {
-        entry = (FldActorEntry *)D_00337D00 + i;
+        entry = &fldActorWaypointRows.actors[i];
         if (entry->requiredFlag != 0 && mdlFlagTest(entry->requiredFlag) == 0) {
             continue;
         }
@@ -5056,7 +5044,7 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *
     }
     fldLoadActorWaypointTable(field);
     for (i = 0; i < 0x100; i++) {
-        entry = (FldActorEntry *)D_00337D00 + i;
+        entry = &fldActorWaypointRows.actors[i];
         if (entry->requiredFlag != 0 && !mdlFlagTest(entry->requiredFlag)) {
             continue;
         }
@@ -5104,7 +5092,7 @@ INCLUDE_ASM(const s32, "game/code_00126A30", func_0013F340);
 /* Read a selected actor state or a named world-object value; cases 1 and 2
  * deliberately fall through when no named object is found. */
 s32 fldGetActorStat0(s32 attribute) {
-    FldActorEntry *actor = (FldActorEntry *)(D_00337D00 + fldSelectedActorEntryIndex * 108);
+    FldActorEntry *actor = &fldActorWaypointRows.actors[fldSelectedActorEntryIndex];
     EffWorldNode *objectNode;
     s32 secondaryMotion;
 
@@ -5138,7 +5126,7 @@ INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0270);
 INCLUDE_RODATA(const s32, "game/code_00126A30", D_003A0280);
 
 s32 fldGetActorStat1(u32 attribute) {
-    FldActorEntry *actor = (FldActorEntry *)(D_00337D00 + fldSelectedActorEntryIndex * 108);
+    FldActorEntry *actor = &fldActorWaypointRows.actors[fldSelectedActorEntryIndex];
     EffWorldNode *objectNode;
 
     switch (attribute) {
@@ -5178,7 +5166,7 @@ s32 fldGetActorStat1(u32 attribute) {
 /* Look up a motion-table attribute indexed by this actor's state; named
  * object lookups fall through to the next attribute if absent. */
 s32 fldGetActorMotionEntry(u32 attribute) {
-    FldActorEntry *actor = (FldActorEntry *)(D_00337D00 + fldSelectedActorEntryIndex * 108);
+    FldActorEntry *actor = &fldActorWaypointRows.actors[fldSelectedActorEntryIndex];
     s16 motionIndex = actor->motion;
     EffWorldNode *objectNode;
     s32 flags;
@@ -5219,48 +5207,48 @@ s32 fldGetRowValue(u32 kind) {
 
     switch (kind) {
     case 0:
-        return fldActorWaypointRows[slot].count;
+        return fldActorWaypointRows.headers[slot].count;
     case 1:
-        return fldActorWaypointRows[slot].unk4;
+        return fldActorWaypointRows.headers[slot].unk4;
     case 2:
-        return fldActorWaypointRows[slot].body.data[0];
+        return fldActorWaypointRows.headers[slot].body.data[0];
     case 3:
-        return fldActorWaypointRows[slot].body.data[1];
+        return fldActorWaypointRows.headers[slot].body.data[1];
     case 4:
-        return fldActorWaypointRows[slot].body.data[2];
+        return fldActorWaypointRows.headers[slot].body.data[2];
     case 5:
-        return fldActorWaypointRows[slot].body.data[3];
+        return fldActorWaypointRows.headers[slot].body.data[3];
     case 6:
-        return fldActorWaypointRows[slot].body.data[4];
+        return fldActorWaypointRows.headers[slot].body.data[4];
     case 7:
-        return fldActorWaypointRows[slot].body.data[5];
+        return fldActorWaypointRows.headers[slot].body.data[5];
     case 8:
-        return fldActorWaypointRows[slot].body.data[6];
+        return fldActorWaypointRows.headers[slot].body.data[6];
     case 9:
-        return fldActorWaypointRows[slot].body.data[7];
+        return fldActorWaypointRows.headers[slot].body.data[7];
     case 10:
-        return fldActorWaypointRows[slot].body.data[8];
+        return fldActorWaypointRows.headers[slot].body.data[8];
     case 11:
-        return fldActorWaypointRows[slot].body.data[9];
+        return fldActorWaypointRows.headers[slot].body.data[9];
     case 12:
-        return fldActorWaypointRows[slot].body.data[10];
+        return fldActorWaypointRows.headers[slot].body.data[10];
     case 13:
-        return fldActorWaypointRows[slot].body.data[11];
+        return fldActorWaypointRows.headers[slot].body.data[11];
     case 14:
-        return fldActorWaypointRows[slot].count - D_003BAE50 - 1;
+        return fldActorWaypointRows.headers[slot].count - D_003BAE50 - 1;
     }
     return 0;
 }
 
 s32 fldFindTableEntry(s32 index) {
     s32 slot = D_003BAE4C;
-    s32 count = (slot + fldActorWaypointRows)->count;
+    s32 count = fldActorWaypointRows.headers[slot].count;
 
     if (count - 1 < index) {
         return count - D_003BAE50 - 1;
     }
     index = count - index - 1;
-    return fldActorWaypointRows[slot].body.data[index];
+    return fldActorWaypointRows.headers[slot].body.data[index];
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013FA40);
@@ -5301,18 +5289,18 @@ void fldLoadActorWaypointTable(s32 field) {
     char directory[32];
     u32 command;
     if (field >= 100) {
-        memset(fldActorWaypointRows, 0, 0x6CA0);
+        memset(&fldActorWaypointRows, 0, 0x6CA0);
     } else {
         fldFormatAreaDirectory(directory, field, 1);
         func_003014F0(path, "%sF%03d.WAP", directory, field);
         command = sdfDevCreateCommandState(path);
-        sdfDevQueueReadAndWait(command, fldActorWaypointRows, 0x6CA0);
+        sdfDevQueueReadAndWait(command, &fldActorWaypointRows, 0x6CA0);
         sdfDevWaitThenReleaseCommandState(command);
     }
 }
 
 void fldCopyActorWaypointTable(const void *source) {
-    memcpy(fldActorWaypointRows, source, 0x6CA0);
+    memcpy(&fldActorWaypointRows, source, 0x6CA0);
 }
 
 INCLUDE_ASM(const s32, "game/code_00126A30", func_0013FEC0);
@@ -5325,7 +5313,7 @@ void fldReleaseActorTasksById(s32 id) {
     if (id != 0) {
         if (id != -1) {
             for (i = 0; i < 256; i++) {
-                actor = (FldActorEntry *)(D_00337D00 + i * 108);
+                actor = &fldActorWaypointRows.actors[i];
                 task = &fldActorSlots[i];
                 if (task->kind == 1 && task->actorId == id) {
                     task->kind = 2;

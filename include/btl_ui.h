@@ -153,7 +153,7 @@ typedef struct BattleActorPanelPresentation {
     s16 pulseLevel[2];
     u32 highlightPhase[8];
     u8 highlightLevel[8];
-    u8 transitionState;
+    s8 transitionState;
     s8 secondaryPresentationValue;
     u8 pad72[0xA];
     s32 secondaryGeometry[4];
