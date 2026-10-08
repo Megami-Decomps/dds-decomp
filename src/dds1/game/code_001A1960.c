@@ -4235,7 +4235,121 @@ void func_001B0E48(BattleRegisteredPanelWork *work) {
     work->state = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001B0E68);
+extern const u32 D_003A2870[4];
+
+s32 func_001B0E68(KwlnTask *task) {
+    u32 colors[4];
+    BattleRegisteredPanelWork *work;
+    s32 sprite;
+    s32 i;
+
+    memcpy(colors, D_003A2870, sizeof(colors));
+    if ((((BtlState *)btlGetRuntime())->battleFlags & 0x200) == 0 &&
+        btlTrackedTaskHandles->status.bytes.blocked == 0) {
+        return 0;
+    }
+    if (btlResourceBlock->resC == NULL) {
+        return 0;
+    }
+    work = (BattleRegisteredPanelWork *)kwlnTaskGetUserValue(task);
+    switch (work->mode) {
+    case 1:
+        work->spriteAlpha += 32;
+        work->spriteAlpha = work->spriteAlpha <= 0 ? 0 :
+            work->spriteAlpha >= 128 ? 128 : work->spriteAlpha;
+        if (work->spriteAlpha >= 128) {
+            work->mode++;
+        }
+        work->x -= 16;
+        work->x = work->x <= 0 ? 0 : work->x >= 128 ? 128 : work->x;
+        if (work->x <= 16) {
+            work->backdropAlpha += 32;
+            work->backdropAlpha = work->backdropAlpha <= 0 ? 0 :
+                work->backdropAlpha >= 128 ? 128 : work->backdropAlpha;
+        }
+        break;
+    case 2:
+        work->x -= 16;
+        work->x = work->x <= 0 ? 0 : work->x >= 128 ? 128 : work->x;
+        if (work->x <= 16) {
+            work->backdropAlpha += 32;
+            work->backdropAlpha = work->backdropAlpha <= 0 ? 0 :
+                work->backdropAlpha >= 128 ? 128 : work->backdropAlpha;
+            work->overlayAlpha -= 8;
+            work->overlayAlpha = work->overlayAlpha <= 64 ? 64 :
+                work->overlayAlpha >= 255 ? 255 : work->overlayAlpha;
+        }
+        break;
+    case 3:
+        work->spriteAlpha -= 32;
+        work->spriteAlpha = work->spriteAlpha <= 0 ? 0 :
+            work->spriteAlpha >= 128 ? 128 : work->spriteAlpha;
+        work->backdropAlpha -= 32;
+        work->backdropAlpha = work->backdropAlpha <= 0 ? 0 :
+            work->backdropAlpha >= 128 ? 128 : work->backdropAlpha;
+        work->overlayAlpha -= 32;
+        work->overlayAlpha = work->overlayAlpha <= 0 ? 0 :
+            work->overlayAlpha >= 255 ? 255 : work->overlayAlpha;
+        break;
+    case 4:
+        work->x -= 16;
+        work->x = work->x <= 0 ? 0 : work->x >= 128 ? 128 : work->x;
+        if (work->x <= 16) {
+            work->backdropAlpha += 32;
+            work->backdropAlpha = work->backdropAlpha <= 0 ? 0 :
+                work->backdropAlpha >= 128 ? 128 : work->backdropAlpha;
+        }
+        work->spriteAlpha -= 8;
+        work->spriteAlpha = work->spriteAlpha <= 128 ? 128 :
+            work->spriteAlpha >= 255 ? 255 : work->spriteAlpha;
+        work->overlayAlpha -= 8;
+        work->overlayAlpha = work->overlayAlpha <= 64 ? 64 :
+            work->overlayAlpha >= 255 ? 255 : work->overlayAlpha;
+        if (work->spriteAlpha <= 128) {
+            work->mode = 2;
+        }
+        break;
+    }
+    if (work->mode < 5) {
+        if (work->mode > 0) {
+            sprite = work->variant == 0 ? 0x27 : 0x26;
+            for (i = 0; i < 4; i++) {
+                colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x29, i, work->backdropAlpha);
+            }
+            func_002BF438(0x19C0, -0x50, 0, colors, 0, btlResourceBlock->resC, 0x29, 0x53);
+            for (i = 0; i < 4; i++) {
+                colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x28, i, work->backdropAlpha);
+            }
+            func_002BF438(0x1AD0, 0x190, 0, colors, 0, btlResourceBlock->resC, 0x28, 0x53);
+            if (sprite == 0x26) {
+                for (i = 0; i < 4; i++) {
+                    colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x28, i, work->backdropAlpha);
+                }
+                func_002BF438(0x1AD0, 0x190, 0, colors, 0, btlResourceBlock->resC, 0x3A, 0x53);
+                for (i = 0; i < 4; i++) {
+                    colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x3D, i, work->backdropAlpha);
+                }
+                btlResourceBlock->resC->workEntries[0x3D].geometry.angleDegrees = 90.0f;
+                func_002BF438(0x1CB0, 0x70, 0, colors, 0, btlResourceBlock->resC, 0x3D, 0x53);
+                btlResourceBlock->resC->workEntries[0x3D].geometry.angleDegrees = 0.0f;
+            }
+            for (i = 0; i < 4; i++) {
+                colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, sprite, i, work->spriteAlpha);
+            }
+            func_002BF438((work->x + 0x1BB) << 4, (work->y + 0x36) << 3,
+                         0, colors, 0, btlResourceBlock->resC, sprite, 0x53);
+            if (work->mode == 4 || sprite == 0x26) {
+                for (i = 0; i < 4; i++) {
+                    colors[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, sprite, i, work->overlayAlpha);
+                }
+                func_002BF438((work->x + 0x1BB) << 4, (work->y + 0x36) << 3,
+                             0, colors, 0, btlResourceBlock->resC, 0x3B, 0x53);
+            }
+        }
+    }
+    return 0;
+}
+
 
 void btlReleaseRegisteredChildTaskWork(KwlnTask *arg0) {
     u32 temp_v0;
