@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_movie.h"
+#include "mnu_sprite_resource.h"
 #include "eff.h"
 #include "sdf.h"
 
@@ -22,7 +23,7 @@ void func_0026E160(s32 a, s32 b, s32 c, s32 d, s32 value) {
 }
 
 
-extern void func_0026DED0(void *, SdfList *, void *, s8);
+extern void func_0026DED0(MnuSpriteResourceGroup *, SdfList *, void *, s8);
 
 typedef struct SpriteSpawnNode {
     s32 x;
@@ -36,16 +37,9 @@ typedef struct SpriteSpawnNode {
 } SpriteSpawnNode;
 typedef char SpriteSpawnNode_size[(sizeof(SpriteSpawnNode) == 0x14) ? 1 : -1];
 
-typedef struct MovieResourceGroup {
-    s32 allocation;
-    SdfList *tasks[10];
-    s32 activeCount;
-    s32 spawnCountdown;
-} MovieResourceGroup;
-
 extern void func_0026DEA8();
 
-SdfList *mnuTickMovieGroup(MovieResourceGroup *owner, SdfList *group) {
+SdfList *mnuTickMovieGroup(MnuSpriteResourceGroup *owner, SdfList *group) {
     SdfListNode *list = group->head;
     SpriteSpawnNode *node;
 
@@ -68,7 +62,7 @@ SdfList *mnuTickMovieGroup(MovieResourceGroup *owner, SdfList *group) {
     return group;
 }
 
-void func_0026E240(MovieResourceGroup *resources) {
+void func_0026E240(MnuSpriteResourceGroup *resources) {
     SdfList **slot;
     s32 i;
     SdfList *group;
@@ -104,44 +98,33 @@ void func_0026E240(MovieResourceGroup *resources) {
 
 INCLUDE_ASM(const s32, "game/code_0026E160", func_0026E388);
 
-typedef struct {
-    s32 allocation;    /* 0x00 */
-    u8 pad04[0x2C];
-    s32 lifetime;      /* 0x30 */
-    s32 owner;         /* 0x34 */
-    u8 pad38[0xC];
-    u8 variant;       /* 0x44 */
-    u8 sprite;        /* 0x45 */
-    u8 pad46[2];
-} MovieSpriteResource;
-
-void *mnuCreateMovieSpriteResource(s32 owner, u8 sprite, u8 variant) {
-    s32 allocation = (u32)sdfAllocGeneralBlock(0x48);
-    MovieSpriteResource *resource = (MovieSpriteResource *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)allocation);
+MnuSpriteResourceGroup *mnuCreateMovieSpriteResource(s32 owner, u8 sprite, u8 variant) {
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x48);
+    MnuSpriteResourceGroup *resource = (MnuSpriteResourceGroup *)sdfMemoryGetBlockAddress(allocation);
     memset(resource, 0, 0x48);
     resource->allocation = allocation;
     resource->owner = owner;
     resource->sprite = sprite;
     resource->variant = variant;
-    resource->lifetime = (s32)(effMiscRandUnitFloat(0) * 30.0f + 10.0f);
+    resource->spawnCountdown = (s32)(effMiscRandUnitFloat(0) * 30.0f + 10.0f);
     return resource;
 }
 
 
-void mnuReleaseMovieResourceGroup(MovieResourceGroup *resources) {
+void mnuReleaseMovieResourceGroup(MnuSpriteResourceGroup *resources) {
     s32 i;
     for (i = 0; i < 10; i++) {
         if (resources->tasks[i] != 0) {
             sdfDestroyTaskWork(resources->tasks[i]);
         }
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resources->allocation));
+    sdfReleaseResourceAllocation(resources->allocation);
 }
 
 
 extern MovieMenuState *mnuMovieMenuState;
-extern void func_0026E240(MovieResourceGroup *);
-extern void func_0026E388(s32, s32, s32, s32, void *, s32);
+extern void func_0026E240(MnuSpriteResourceGroup *);
+extern void func_0026E388(s32, s32, s32, s32, MnuSpriteResourceGroup *, s32);
 extern void sdfSubmitGsTestOneRegisterPacket();
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
@@ -238,4 +221,3 @@ void mnuUpdateMovieRollEntry(MnuMovieRollEntry *entry) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_0026E160", mnuMovieWork);
-

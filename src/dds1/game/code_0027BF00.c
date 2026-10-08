@@ -120,7 +120,7 @@ extern s32 sdfAllocSizeClassBlock(u32);
 
 extern struct MenuWindowSpriteGroup *mnuCreateWindowState(u32, u32, u32, u32);
 
-extern s32 func_0027B888(u32);
+extern MenuListNode *func_0027B888(MenuList *);
 
 extern void func_002BF4E0(s32, s32, s32, s32, s32, s32, s32, s32);
 

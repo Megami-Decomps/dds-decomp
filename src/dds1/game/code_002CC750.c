@@ -851,7 +851,83 @@ u32 prfReqCheckGlobalCounter(u8 *operand) {
 }
 
 extern s32 prfReqEvaluateRules(u32, u32, u16, u32 *);
-INCLUDE_ASM(const s32, "game/code_002CC750", prfReqEvaluateRules);
+s32 prfReqEvaluateRules(u32 state, u32 unitAddress, u16 requirementId, u32 *mismatchCount) {
+    PrfDds1RequirementSlot *rules = NULL;
+    u32 expected = 0;
+    u32 count = 0;
+    u32 result = 1;
+    u32 i;
+
+    switch (state) {
+    case 0:
+        rules = (PrfDds1RequirementSlot *)&D_00391230[requirementId].flags04;
+        if (D_00391230[requirementId].unknown00 & 8) {
+            result = 0;
+            expected = 1;
+        }
+        break;
+    case 1:
+        rules = D_00391230[requirementId].slots;
+        if (D_00391230[requirementId].unknown00 & 0x10) {
+            result = 0;
+            expected = 1;
+        }
+        break;
+    }
+    if (rules == NULL) {
+        return 0;
+    }
+    for (i = 0; i < 2; i++) {
+        switch (rules[i].status) {
+        case 1:
+            if (ptyHasAllReqProfiles((DatPartyRecord *)unitAddress, (u8 *)&rules[i]) == expected) {
+                result = expected;
+            } else {
+                count++;
+            }
+            break;
+        case 2:
+            if (ptyReqProfileCountAtLeast((DatPartyRecord *)unitAddress, (u8 *)&rules[i]) == expected) {
+                result = expected;
+            } else {
+                count++;
+            }
+            break;
+        case 4:
+            if (ptyProfileCountAtLeast((DatPartyRecord *)unitAddress, (u8 *)&rules[i]) == expected) {
+                result = expected;
+            } else {
+                count++;
+            }
+            break;
+        case 8:
+            if (ptyAreReqProfilesInParty((u8 *)&rules[i]) == expected) {
+                result = expected;
+            } else {
+                count++;
+            }
+            break;
+        case 16:
+            if (prfReqCheckUnitLevel((DatPartyRecord *)unitAddress, (u8 *)&rules[i]) == expected) {
+                result = expected;
+            } else {
+                count++;
+            }
+            break;
+        case 32:
+            if (prfReqCheckGlobalCounter((u8 *)&rules[i]) == expected) {
+                result = expected;
+            } else {
+                count++;
+            }
+            break;
+        }
+    }
+    if (mismatchCount != NULL) {
+        *mismatchCount = count;
+    }
+    return result;
+}
 
 void prfReq54Evaluate(u32 state, u32 operand, u16 requirementId) {
     prfReqEvaluateRules(state, operand, requirementId, 0);
