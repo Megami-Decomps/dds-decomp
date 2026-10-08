@@ -1,5 +1,6 @@
 #include "kwln.h"
 #include "mnu.h"
+#include "mnu_staff.h"
 
 
 extern void mnuCampMenuHandleInput(s32);
@@ -17,7 +18,6 @@ extern u32 mnuHasSelectedListNodeId(s32);
 extern s32 D_003BAA98;
 extern s32 datGameState;
 extern s32 mnuIsEntryCostUnaffordable(u16, struct DatPartyRecord *);
-extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
 extern s32 mnuConsumeEntryCost(s32, struct DatPartyRecord *);
 extern void mnuInitPartyPanelSlots(s32);
 extern void func_00280048(s32);
@@ -207,7 +207,7 @@ s32 ptySkillMenuUseSelectedInField(id, context)
     if (mnuIsEntryCostUnaffordable(id, (struct DatPartyRecord *)slotA) != 0) {
         return 0;
     }
-    if (ptySkillApplyFieldUseEffect(window, id, slotA, slotB) != 0) {
+    if (ptySkillApplyFieldUseEffect((MenuPageWindow *)window, id, (struct DatPartyRecord *)slotA, (struct DatPartyRecord *)slotB) != 0) {
         mnuConsumeEntryCost(id, (struct DatPartyRecord *)slotA);
         mnuInitPartyPanelSlots(context + 0x7EC);
         mnuUpdateHandleStates((MenuPageWindow *)window);

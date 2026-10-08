@@ -1,5 +1,6 @@
 #include "kwln.h"
 #include "mnu.h"
+#include "mnu_staff.h"
 #include "sdf_resource.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
@@ -340,7 +341,6 @@ s32 mnuStaffRunPanel2b(KwlnTask *request) {
 }
 
 extern s32 btlItemApplyDirectEffect(s32, s32, s32, s32);
-extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern void ptyAdjustItemQuantity(s32, s32);
 extern void mnuInitPartyPanelSlots(s32);
@@ -358,7 +358,7 @@ s32 mnuUseStaffItem(s32 itemId, s32 context) {
         if (result == 2) {
             return 0;
         }
-        if (ptySkillApplyFieldUseEffect(partyPanel, evtGetIndexedEventRecordId(itemId) & 0xFFFF, targetUnit, targetUnit) == 0) {
+        if (ptySkillApplyFieldUseEffect((MenuPageWindow *)partyPanel, evtGetIndexedEventRecordId(itemId) & 0xFFFF, (DatPartyRecord *)targetUnit, (DatPartyRecord *)targetUnit) == 0) {
             return 0;
         }
     }
