@@ -224,7 +224,7 @@ extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
 
 extern void mnuUpdateWindowPanelHandleStatesKindFourFive(MenuIconState *);
 
-extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern char D_003E75E0[];
 extern char D_003E75A8[];
 
@@ -1048,11 +1048,49 @@ void mnuReleaseWindowTextures(MenuIconSprites *menu) {
 void func_002B9A38(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002B9A40);
+void func_002B9A40(s32 x, s32 y, s32 depth, u32 opacity, MenuList *list,
+                   MenuIconSprites *resource, s32 drawArg) {
+    s32 top;
+    s32 trackExtent;
+    s32 bottom;
+    s32 count;
+    s32 visible;
+    s32 rowOffset;
+    EffectSlotSet *firstSprite;
+    EffectSlotDescription *firstDescription;
+    BdWork *firstWork;
+    BdWork *lastWork;
+
+    if (resource == NULL) {
+        return;
+    }
+
+    firstSprite = resource->sprite[0];
+    firstDescription = firstSprite->descriptions;
+    firstWork = firstSprite->workEntries;
+    lastWork = resource->sprite[2]->workEntries;
+    trackExtent = firstDescription->rect[1] * 8 - 0x28;
+    top = firstWork->geometry.bounds[3];
+    top += trackExtent;
+    bottom = lastWork->geometry.bounds[3];
+    count = list->count;
+    visible = list->visibleCount;
+    if (count == 0 || visible == 0 || count <= visible) {
+        return;
+    }
+
+    rowOffset = (top - bottom) * list->head->index / (count - visible);
+    func_00306CD0(x, y, depth, opacity, 1,
+                  firstSprite, 0, drawArg);
+    func_00306CD0(x, y + top, depth, opacity, 1,
+                  resource->sprite[1], 0, drawArg);
+    func_00306CD0(x, y + rowOffset + 0x28, depth, opacity, 1,
+                  resource->sprite[2], 0, drawArg);
+}
 
 void mnuDrawWindowResourceSpriteRows(s32 x, s32 y, u32 flags, MenuWindowContainer *window, u32 option) {
     func_002B9A40(x - 0xf0, y - 8, flags, window->fadeScale,
-                                (u32)window->list, (u32)window->resource, option);
+                  window->list, window->resource, option);
 }
 
 void mnuDrawWindowIconRows(s32 x, s32 y, u32 flags, MenuWindowContainer *window, s32 count, s32 option) {
@@ -1062,11 +1100,11 @@ void mnuDrawWindowIconRows(s32 x, s32 y, u32 flags, MenuWindowContainer *window,
     s32 field = window->field1C;
     if (sprite != 0) {
         if (field == 0) {
-            func_00306CD0(x - 0xD0, y - 0xB8, flags, state, 1, sprite, window->param28, option);
+            func_00306CD0(x - 0xD0, y - 0xB8, flags, state, 1, (EffectSlotSet *)(u32)sprite, window->param28, option);
         }
         for (i = 0; i < count; i++) {
             func_00306CD0(x + window->originX, i * window->list->rowStep + y + window->originY, flags, state, 1,
-                          window->sprite20, window->param24, option);
+                          (EffectSlotSet *)(u32)window->sprite20, window->param24, option);
         }
     }
 }
@@ -1088,7 +1126,7 @@ void mnuDrawWindowDecorations(s32 x, s32 y, s32 depth, MenuWindowContainer *wind
 
         if (sprite != 0) {
             func_00306CD0(x + offset + 0xC0, y - 0xB8, depth, state,
-                         1, sprite, parameter, option);
+                         1, (EffectSlotSet *)sprite, parameter, option);
         }
     }
 }
@@ -1978,14 +2016,13 @@ void mnuFreeIconSprites(MenuSprites *menu) {
     sdfReleaseChipBlock(menu);
 }
 
-extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 
 
 void mnuDrawIconRow(s32 unusedA, s32 unusedB, s32 depth, s32 skip, MenuSprites *set, s32 drawArg) {
     u32 i;
     if (skip == 0) {
         for (i = 0; i < 5; i++) {
-            func_00306CD0(0xBC0, 0x3C8, depth, set->fade, 0, (s32)set->icon[i], 0, drawArg);
+            func_00306CD0(0xBC0, 0x3C8, depth, set->fade, 0, set->icon[i], 0, drawArg);
         }
     }
 }
@@ -2062,9 +2099,9 @@ void mnuReleaseIconBundleAndSprites(MenuIconBundle *menu) {
 void mnuDrawFadeIcons(s32 x, s32 y, s32 depth, s32 unused, MenuIconBundle *obj, s32 drawArg) {
     s32 fade = obj->fade;
     s32 next;
-    func_00306CD0(x, y, depth, fade, 0, (s32)obj->sprite[0], 0, drawArg);
-    func_00306CD0(x, y, depth, fade, 0, (s32)obj->sprite[1], 0, drawArg);
-    func_00306CD0(x, y, depth, fade, 0, (s32)obj->sprite[2], 0, drawArg);
+    func_00306CD0(x, y, depth, fade, 0, obj->sprite[0], 0, drawArg);
+    func_00306CD0(x, y, depth, fade, 0, obj->sprite[1], 0, drawArg);
+    func_00306CD0(x, y, depth, fade, 0, obj->sprite[2], 0, drawArg);
     if (obj->fadeOut == 0) {
         MNU_ADVANCE_FADE(obj->fade, 0x10, 0x100);
     } else {
