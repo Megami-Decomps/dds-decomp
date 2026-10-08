@@ -183,11 +183,221 @@ s32 kwlnPrepareFrameDrawPackets(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001019F0", func_00101D30);
+#include "sdf_projection.h"
+#include "sdf_draw.h"
+#include "pcp_vu0.h"
 
-extern u64 *sdfAllocPacketAligned(s32);
+/* Complete five-word input consumed by sdfConsBuildFrustumPacket. */
+typedef struct ConsFrustumParams {
+    f32 left, right, nearZ, farZ;
+    s32 mask;
+} ConsFrustumParams;
+struct ConsFrustumPacket;
+extern u32 kwlnTextureReferenceFlag;
+extern u32 D_00435CD0;
+extern u32 D_00435CBC;
+extern u8 D_00382500[];
+extern u8 D_00382430[];
+extern u8 D_003826D0[];
+extern u8 D_00382600[];
+extern u8 D_003820F0[];
+extern SdfLightSources D_0037F940;
+extern SdfLightSources D_0037FB10;
+extern SdfLightSources D_0037F770;
+extern f32 D_0037F950[4];
+extern f32 D_0037FB20[4];
+extern f32 kwlnDefaultColorVector[4];
+extern f32 D_0037F850[4], D_0037F860[4], D_0037F870[4];
+extern f32 D_0037FA20[4], D_0037FA30[4], D_0037FA40[4];
+extern ConsFrustumParams D_0037F960, D_0037FB30, kwlnDrawVector;
+extern u8 D_00384750[0x40];
+extern u8 D_00384790[];
+extern u8 sdfViewEyeVector[], sdfViewTargetVector[], sdfViewUpVector[];
+extern u8 D_0037F590[];
+extern u8 sdfViewMatrix[0x40];
+extern u8 D_00380788[];
+extern void kwlnAdvanceShakeOffsets(void);
+extern u32 evtCheckSelectionState(void);
+extern void func_00108318(void);
+extern void func_00126B70(void);
+extern void sdfVuBuildLookAtBasis(void *, void *, void *);
+extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
+extern s32 sdfCreateResetPacketList(void);
+extern s32 sdfAllocPacketAligned(s32);
+extern void sdfConsBuildFrustumPacket(struct ConsFrustumPacket *, ConsFrustumParams *);
+extern void sdfAppendPacket(SdfListHead *, u32);
+extern void sdfAppendPacketChainNode(SdfPacketChain *, SdfLinkedPacketList *);
+typedef struct SdfMsg {
+    s32 firstWord, work, thirdWord, fourthWord;
+} SdfMsg;
+extern void sdfStoreMessageWordsAndNotifyConsumer(SdfMsg *, s32, s32, s32, s32);
+extern void func_0033A5B8(u32);
+extern void func_0033A5C0(u32);
+extern s32 evtBuildFrameStatePacketList(s32);
+extern void evtSetDrawSurfaceIndex(u32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+
+/* Rebuild and queue the selected buffer's scene, overlay and view packets. */
+s32 func_00101D30(void) {
+    s128 eye;
+    s128 target;
+    const u32 bufferIndex = kwlnGetDrawBufferIndex();
+    u8 *messageData;
+
+    kwlnAdvanceShakeOffsets();
+    evtCheckSelectionState();
+    func_00108318();
+    if (kwlnTextureReferenceFlag != 0) {
+        sdfBuildLightingPacket(D_00382500 + bufferIndex * KWLN_FRAME_BUFFER_BYTES,
+            D_0037F940, D_0037F950);
+        *(u32 *)(D_00382500 - 0x140 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_00435CD0;
+        if (kwlnTextureReferenceFlag != 0) {
+            SdfPoolNode *sceneNode;
+            SdfListHead *sceneList;
+            u64 *sceneFrustum;
+            sdfCameraBuildProjection(&D_0037F7B0.camera);
+            sdfVuBuildLookAtBasis(D_0037F850, D_0037F860, D_0037F870);
+            VU0_STORE_MATRIX_UNCLOBBERED(D_00384750);
+            sdfConsBuildMatrixPacket((struct ConsMatrixPacket *)(D_00382430 + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
+                &D_0037F7B0, D_00384750);
+            sceneNode = &kwlnDrawSurfaces[1];
+            sceneNode->append((SdfListHead *)sceneNode,
+                (SdfListHead *)(D_00382430 - 0x190 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
+            sceneList = (SdfListHead *)sdfCreateResetPacketList();
+            sceneFrustum = (u64 *)sdfAllocPacketAligned(0x50);
+            sdfConsBuildFrustumPacket((struct ConsFrustumPacket *)sceneFrustum, &D_0037F960);
+            sdfAppendPacket(sceneList, (u32)sceneFrustum);
+            sceneNode->append((SdfListHead *)sceneNode, sceneList);
+        }
+    }
+    {
+        SdfPoolNode *overlayNode;
+        SdfListHead *overlayList;
+        u64 *overlayFrustum;
+        sdfBuildLightingPacket(D_003826D0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES,
+            D_0037FB10, D_0037FB20);
+        sdfCameraBuildProjection(&D_0037F980.camera);
+        sdfVuBuildLookAtBasis(D_0037FA20, D_0037FA30, D_0037FA40);
+        VU0_STORE_MATRIX_UNCLOBBERED(D_00384790);
+        sdfConsBuildMatrixPacket((struct ConsMatrixPacket *)(D_00382600 + bufferIndex * KWLN_FRAME_BUFFER_BYTES), &D_0037F980, D_00384790);
+        overlayNode = &kwlnDrawSurfaces[85];
+        overlayNode->append((SdfListHead *)overlayNode, (SdfListHead *)(D_00382600 - 0x20 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
+        overlayList = (SdfListHead *)sdfCreateResetPacketList();
+        overlayFrustum = (u64 *)sdfAllocPacketAligned(0x50);
+        sdfConsBuildFrustumPacket((struct ConsFrustumPacket *)overlayFrustum, &D_0037FB30);
+        sdfAppendPacket(overlayList, (u32)overlayFrustum);
+        overlayNode->append((SdfListHead *)overlayNode, overlayList);
+
+        sdfBuildLightingPacket(D_00382600 - 0x440 + bufferIndex * KWLN_FRAME_BUFFER_BYTES, D_0037F770, kwlnDefaultColorVector);
+        *(u32 *)(D_00382600 - 0x620 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_00435CBC;
+    }
+    sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
+    VU0_LOAD_VF(vf10, sdfViewEyeVector);
+    VU0_LOAD_VF(vf11, sdfViewTargetVector);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_SCALAR_OP(600.0f, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, D_0037F590);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, &eye);
+    VU0_LOAD_VF(vf10, sdfViewTargetVector);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &target);
+    sdfVuBuildLookAtBasis(&eye, &target, sdfViewUpVector);
+    VU0_STORE_MATRIX_UNCLOBBERED(sdfViewMatrix);
+    {
+        SdfPoolNode *viewNode;
+        SdfListHead *viewList;
+        u64 *viewFrustum;
+        sdfConsBuildMatrixPacket((struct ConsMatrixPacket *)(D_003820F0 + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
+            &sdfSceneProjectionParameters, sdfViewMatrix);
+        sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
+        viewNode = &kwlnDrawSurfaces[7];
+        viewNode->append((SdfListHead *)viewNode, (SdfListHead *)(D_003820F0 - 0x250 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
+        viewList = (SdfListHead *)sdfCreateResetPacketList();
+        viewFrustum = (u64 *)sdfAllocPacketAligned(0x50);
+        sdfConsBuildFrustumPacket((struct ConsFrustumPacket *)viewFrustum, &kwlnDrawVector);
+        sdfAppendPacket(viewList, (u32)viewFrustum);
+        viewNode->append((SdfListHead *)viewNode, viewList);
+
+        sdfAppendPacketChainNode((SdfPacketChain *)D_00380860,
+            (SdfLinkedPacketList *)(D_003820F0 - 0x230 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
+        messageData = (u8 *)kwlnDrawSurfaces + 7 * sizeof(SdfPoolNode);
+        sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788),
+            (s32)(messageData + 0x400), (s32)(messageData + 0x420),
+            (s32)(messageData + 0x600), (s32)(messageData + 0x620));
+        func_00126B70();
+        sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0x80),
+            (s32)(messageData + 0x6E0), (s32)(messageData + 0x700),
+            (s32)(messageData + 0x720), (s32)(messageData + 0x740));
+        sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0x90),
+            (s32)(messageData + 0x860), (s32)(messageData + 0x880),
+            (s32)(messageData + 0x8A0), (s32)(messageData + 0x8C0));
+        sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0x10),
+            (s32)(messageData + 0x20), (s32)(messageData + 0x40),
+            (s32)(messageData + 0x60), (s32)(messageData + 0x80));
+        sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0x20),
+            (s32)(messageData + 0xC0), (s32)(messageData + 0xE0),
+            (s32)(messageData + 0x100), (s32)(messageData + 0x120));
+        sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0x30),
+            (s32)(messageData + 0x160), (s32)(messageData + 0x180),
+            (s32)(messageData + 0x1A0), (s32)(messageData + 0x1C0));
+        sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0x40),
+            (s32)(messageData + 0x200), (s32)(messageData + 0x220),
+            (s32)(messageData + 0x240), (s32)(messageData + 0x260));
+        sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0x50),
+            (s32)(messageData + 0x2A0), (s32)(messageData + 0x2C0),
+            (s32)(messageData + 0x2E0), (s32)(messageData + 0x300));
+        sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0x60),
+            (s32)(messageData + 0x4A0), (s32)(messageData + 0x4C0),
+            (s32)(messageData + 0x4E0), (s32)(messageData + 0x500));
+        sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0xA0),
+            (s32)(messageData + 0x540), (s32)(messageData + 0x560),
+            (s32)(messageData + 0x5C0), (s32)(messageData + 0x5E0));
+        sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0xB0),
+            (s32)(messageData + 0x9E0), (s32)(messageData + 0xA00),
+            (s32)(messageData + 0xA20), (s32)(messageData + 0xA40));
+        sdfStoreMessageWordsAndNotifyConsumer((SdfMsg *)(D_00380788 + 0xC0),
+            (s32)(messageData - 0xA0), (s32)(messageData - 0x80),
+            (s32)(messageData - 0x60), (s32)(messageData - 0x40));
+        func_0033A5B8((u32)(D_003820F0 + bufferIndex * 0x1F40 + 0xD0));
+        func_0033A5C0((u32)viewFrustum);
+
+    }
+    {
+        SdfListHead *stateList = (SdfListHead *)evtBuildFrameStatePacketList(0);
+        SdfPoolNode *const state0 = &kwlnDrawSurfaces[81];
+        state0->append((SdfListHead *)state0, stateList);
+    }
+    {
+        SdfListHead *stateList = (SdfListHead *)evtBuildFrameStatePacketList(1);
+        SdfPoolNode *const state1 = &kwlnDrawSurfaces[93];
+        state1->append((SdfListHead *)state1, stateList);
+    }
+    {
+        SdfListHead *stateList = (SdfListHead *)evtBuildFrameStatePacketList(2);
+        SdfPoolNode *const state2 = &kwlnDrawSurfaces[95];
+        state2->append((SdfListHead *)state2, stateList);
+    }
+
+    evtSetDrawSurfaceIndex(0x2C);
+    evtSubmitPrimaryGsTest(1, 5, 0x80, 1, 0, 0, 1, 2);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSetDrawSurfaceIndex(0x2D);
+    evtSubmitPrimaryGsTest(1, 5, 0x80, 1, 0, 0, 1, 2);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSetDrawSurfaceIndex(0x2E);
+    evtSubmitPrimaryGsTest(1, 5, 0x80, 1, 0, 0, 1, 2);
+    evtSubmitPrimaryAlphaBlendMode(1);
+    evtSetDrawSurfaceIndex(0x2F);
+    evtSubmitPrimaryGsTest(1, 5, 0x80, 1, 0, 0, 1, 2);
+    evtSubmitPrimaryAlphaBlendMode(2);
+    return 0;
+}
+
 extern void sdfInitPacketList(void *);
-extern void sdfAppendPacket(void *, void *);
 extern void sdfAppendDmaPrimary(void *, u8 *, void *);
 extern void sdfSubmitDrawPacketGroups(u8 *, u8 *);
 extern s32 *sdfConsAllocateColumnPacket(s32);
@@ -244,10 +454,10 @@ s32 kwlnRenderFrame(void) {
         packetGroups += KWLN_FRAME_GROUP_BYTES;
     }
     if (kwlnDrawOverlayEnabled != 0 && func_001200E0() == 0) {
-        packetList = sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES);
+        packetList = (u64 *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES);
         sdfInitPacketList(packetList);
-        sdfAppendDmaPrimary(packetList, kwlnFrameDrawPacketRecords + bufferIndex * KWLN_FRAME_BUFFER_BYTES, sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES));
-        texturePacket = sdfAllocPacketAligned(KWLN_FRAME_GS_PACKET_BYTES);
+        sdfAppendDmaPrimary(packetList, kwlnFrameDrawPacketRecords + bufferIndex * KWLN_FRAME_BUFFER_BYTES, (void *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES));
+        texturePacket = (u64 *)sdfAllocPacketAligned(KWLN_FRAME_GS_PACKET_BYTES);
         texturePacket[0] = 3;
         /* VIF FLUSHA, then DIRECT for the three following quadwords. */
         texturePacket[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
@@ -257,8 +467,8 @@ s32 kwlnRenderFrame(void) {
         texturePacket[5] = KWLN_FRAME_GS_TEXA;
         texturePacket[6] = 0;
         texturePacket[7] = KWLN_FRAME_GS_TEXFLUSH;
-        sdfAppendPacket(packetList, texturePacket);
-        blendPacket = sdfAllocPacketAligned(KWLN_FRAME_GS_PACKET_BYTES);
+        sdfAppendPacket((SdfListHead *)packetList, (u32)texturePacket);
+        blendPacket = (u64 *)sdfAllocPacketAligned(KWLN_FRAME_GS_PACKET_BYTES);
         blendPacket[0] = 3;
         blendPacket[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
         blendPacket[2] = ((u64)KWLN_FRAME_GIF_SINGLE_REG_FIELD << 32) | KWLN_FRAME_GIF_TWO_WRITES_EOP;
@@ -267,7 +477,7 @@ s32 kwlnRenderFrame(void) {
         blendPacket[5] = KWLN_FRAME_GS_TEST_PRIMARY;
         blendPacket[6] = 0x44;
         blendPacket[7] = KWLN_FRAME_GS_ALPHA_PRIMARY;
-        sdfAppendPacket(packetList, blendPacket);
+        sdfAppendPacket((SdfListHead *)packetList, (u32)blendPacket);
         edgeDistances[0] = D_00435CE0[0] + KWLN_FRAME_HALF_WIDTH;
         edgeDistances[1] = D_00435CE0[1] + KWLN_FRAME_HALF_HEIGHT;
         edgeDistances[2] = KWLN_FRAME_HALF_WIDTH - D_00435CE0[0];
@@ -294,7 +504,7 @@ s32 kwlnRenderFrame(void) {
         vertex->corner[1].y = KWLN_FRAME_BOTTOM_BASE + edgeDistances[3] * KWLN_FRAME_Y_UNITS_PER_PIXEL;
         vertex->corner[1].mask = 0;
         vertex->corner[1].flag = 0;
-        sdfAppendPacket(packetList, spritePacket);
+        sdfAppendPacket((SdfListHead *)packetList, (u32)spritePacket);
         D_00380708.append((SdfListHead *)&D_00380708, (SdfListHead *)packetList);
     }
     poolHead = (SdfListHead *)sdfFlushPoolNodes(kwlnDrawSurfaces);

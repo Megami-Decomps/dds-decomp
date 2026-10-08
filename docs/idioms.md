@@ -3861,3 +3861,24 @@ at `+0x14`, and its pending-list link is at `+0x24`. `eff.h` now owns that
 unchanged record beside `ParCell`; the allocator translation units no
 longer maintain separate definitions.
 
+
+## Configuration creation forwards its mode
+
+DDS1 `mnuCreateConfigTasks` (`002912C8`) takes `s32 mode` and forwards it
+to its constructor, just like DDS2 `002D1300`. Its staff-menu and event
+callers deliberately pass 0 and 1. A zero-arity C definition happened to
+leave `$a0` intact but omitted this real contract; the formal, constructor
+call, and both caller declarations now express the native mode forwarding.
+The non-matching configuration constructor bodies remain assembly.
+
+
+## Action-animation effect classification
+
+The retained-operand flag mapper (`001F0CA0` / `00201828`) reads byte
+`+0x02` of each native `0x20`-byte action-animation descriptor. For
+reflected/special groups, values 3 and 4 select distinct combinations of
+the target/source effect flags. `BtlActionAnimationRecord.effectKind`
+owns this byte; it is not padding or a second descriptor view. The
+nullable companion units already belong to `BattleIndexWork`, and their
+effect flags belong to the primary `BtlUnit.effectLink`.
+
