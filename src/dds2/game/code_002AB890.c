@@ -111,7 +111,7 @@ void func_002AB8F0(MenuStaffContext *owner) {
     }
 
     resources->windows[0] = window;
-    mnuInitializeBasicWindowLayout(window, owner->spriteArg2, 0xF);
+    mnuInitializeBasicWindowLayout(window, (u32)owner->spriteArg2, 0xF);
     mnuCreateListWithDefaults(resources->windows[0], 0, 0, 0, (u32)owner->spriteArg0);
 
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
@@ -130,7 +130,7 @@ void func_002AB8F0(MenuStaffContext *owner) {
     }
 
     resources->windows[1] = window;
-    mnuInitializeBasicWindowLayout(window, owner->spriteArg2, 0x13);
+    mnuInitializeBasicWindowLayout(window, (u32)owner->spriteArg2, 0x13);
     mnuCreateListWithDefaults(resources->windows[1], 0, 0, 0, (u32)owner->spriteArg0);
 }
 
@@ -178,7 +178,7 @@ void mnuCreateStaffBulletItemWindow(MenuStaffContext *owner) {
         textOffset += 25;
     } while (itemId < 0x100);
     resources->windows[2] = window;
-    mnuInitializeBasicWindowLayout(window, owner->spriteArg2, 0x12);
+    mnuInitializeBasicWindowLayout(window, (u32)owner->spriteArg2, 0x12);
     mnuCreateListWithDefaults(resources->windows[2], 0, 0, 0, (u32)owner->spriteArg0);
 }
 
@@ -255,7 +255,7 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
         ordinal++;
     } while (itemId < 0x100);
     mnuSortItems(window->list, 2, 1);
-    frameResource = owner->spriteArg2;
+    frameResource = (u32)owner->spriteArg2;
     resources->windows[3] = window;
     mnuInitializeBasicWindowLayout(window, frameResource, 0x10);
     mnuCreateListWithDefaults(resources->windows[3], 0, 0, 0, (u32)owner->spriteArg0);
@@ -304,7 +304,7 @@ void func_002AC750(s32 x, s32 y, s32 depth, struct MenuList *list,
     }
     if (node == list->first) {
         if (selected) {
-            EffectSlotSet *resources = (EffectSlotSet *)owner->spriteArg2;
+            EffectSlotSet *resources = owner->spriteArg2;
 
             resources->workEntries[1].geometry.cornerColors[0] = 0x89FEFF80;
             resources->workEntries[1].geometry.cornerColors[1] = 0x89FEFF80;
@@ -312,7 +312,7 @@ void func_002AC750(s32 x, s32 y, s32 depth, struct MenuList *list,
             resources->workEntries[1].geometry.cornerColors[3] = 0x89FEFF80;
             func_00306CD0(x + 0x1B0, y + 0x10, 0, listScale, 0,
                           resources, 1, 0x53);
-            itfGridCopyEntryQuad((s32)(EffectSlotSet *)owner->spriteArg2, 1);
+            itfGridCopyEntryQuad((s32)owner->spriteArg2, 1);
 
             func_00306CD0(x - 0x20, y - 8, 0, 0x100, 0,
                           owner->spriteArg0, 0x1F, 0x53);
@@ -320,7 +320,7 @@ void func_002AC750(s32 x, s32 y, s32 depth, struct MenuList *list,
                           owner->spriteArg0, 0x1F, 0x53);
         } else {
             func_00306CD0(x + 0x1B0, y + 0x10, 0, listScale, 0,
-                          (EffectSlotSet *)owner->spriteArg2, 1, 0x53);
+                          owner->spriteArg2, 1, 0x53);
             func_00306CD0(x + 0x60, y, 0, 0xFF, 0,
                           owner->spriteArg0, 0xA, 0x53);
             func_00306CD0(x + 0x950, y, 0, 0xFF, 0,
@@ -363,7 +363,7 @@ void mnuCreateOwnedCatalogItemWindow(MenuStaffContext *owner) {
             node->sortKeyTertiary = ordinal;
         }
     }
-    frameResource = owner->spriteArg2;
+    frameResource = (u32)owner->spriteArg2;
     resources->windows[4] = window;
     mnuSetWindowContainerLayout(window, frameResource, 0x15, frameResource,
         0x410, 0x16, frameResource, 0x17, 0x3E0);
@@ -401,7 +401,7 @@ u32 mnuInitializeWindowOwnerResourceSet(KwlnTask *task) {
     func_002ACB18((u32)context);
     func_002AB8F0(context);
     mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->unk118,
-                              context->spriteArg2, 0, 0);
+                              (s32)context->spriteArg2, 0, 0);
     mnuBeginWindowFadeTransition(context->activeWindow, &context->fade);
     mnuSeekListNode(0, context->activeWindow->list);
     return 1;
