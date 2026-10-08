@@ -28,6 +28,8 @@ struct KwlnTask {
 };
 
 u32 kwlnTaskGetTimer(KwlnTask *task);
+/* Return the task's low scheduler state when registered, otherwise DETACHED. */
+s32 kwlnTaskGetRegisteredState(KwlnTask *task);
 void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 u32 kwlnTaskGetUserValue(KwlnTask *task);
 KwlnTask *kwlnTaskGetTaskByName(const char *name);

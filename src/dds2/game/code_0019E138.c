@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "kwln_task_state.h"
 #include "sdf_resource.h"
 #include "itf.h"
@@ -74,8 +75,6 @@ extern u32 D_0043655C;
 extern u32 D_00436560;
 
 extern u32 itfFontTestScriptTask;
-
-extern s64 kwlnTaskGetRegisteredState(u32);
 
 extern s32 func_0019EDC0(FrFontCtx *args);
 
@@ -1043,11 +1042,11 @@ void itfReleaseFontTestTaskResources(void) {
 
 /* Draw first, then report all bits set only for a task awaiting destruction. */
 u32 itfDrawBackgroundAndGetTaskReadyMask(void) {
-    s64 taskState;
+    s32 taskState;
     u32 readyMask;
 
     itfDrawBackgroundSprite();
-    taskState = kwlnTaskGetRegisteredState(itfFontTestScriptTask);
+    taskState = kwlnTaskGetRegisteredState((KwlnTask *)itfFontTestScriptTask);
     readyMask = 0xffffffff;
     if (taskState != KWLN_TASK_DESTROY_PENDING) {
         readyMask = 0;
