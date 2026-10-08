@@ -2588,6 +2588,8 @@
 0x001E8708	btlStepPoseBlend	inferred	steps a pose blend timer and blends +0x30/+0xC0 into the unit transform
 0x001E87A0	btlStepPoseBlendFrame	inferred	as btlStepPoseBlend but timer reset uses int frame count
 0x001E8840	btlStepPoseBlendRatio	inferred	sibling of btlStepPoseBlend/Half/Frame; blends by blendMode/durationFrames ratio [names_reviewed2.tsv]
+0x001E88A8	btlAdjustCameraDirectionForDefaultPlane	inferred	For camera distance greater than one, compares projected camera height with Y=-20, adjusts and normalizes the direction, and returns whether adjusted.
+0x001E89E0	btlAdjustCameraDirectionForPlane	inferred	Uses the supplied horizontal-plane height to adjust and normalize camera direction; returns whether adjusted.
 0x001E8B08	btlExecuteCommandSoundTask	inferred	Battle command-sound task callback passes stored actor, mode and options to command sound executor. [names_reviewed18.tsv]
 0x001E8B40	btlCreateCommandSoundTask	inferred	Creates task ID 0x2A and installs func_001E8B08 callback with five-argument sound command storage
 0x001E8BE0	btlCreateTargetedCommandSoundTask	inferred	Creates command sound work and attaches its target argument. [names_reviewed8.tsv]

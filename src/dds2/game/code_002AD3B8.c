@@ -1,3 +1,4 @@
+#include "fr_font.h"
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
 #include "kwln.h"
@@ -45,7 +46,6 @@ extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
 extern void frFontSetChainFlag(s32, s32);
 typedef struct FrFontGlyph FrFontGlyph;
 extern s32 func_0019D550(FrFontGlyph *, s8, u32);
-extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 D_00435E5C;
 extern s32 D_00435E48;

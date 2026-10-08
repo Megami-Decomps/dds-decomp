@@ -267,7 +267,6 @@ extern void mdlAddEntryFlagged(void *, s32, s32);
 extern u8 effSharedRandomState[];
 extern void func_001EC5F0(BtlLinkedCommand *);
 extern void func_001EF030(void *, void *);
-extern s32 func_001E88A8(u8 *);
 extern void mdlProcessContextNodesAndTransforms(void *, void *);
 extern void func_001E38F0(void *, void *, s32, u8 *, u32);
 extern void dds3ClearObjectFlags(s32, s32);

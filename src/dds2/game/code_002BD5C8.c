@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font.h"
 #include "dat_state.h"
 #include "dat_command.h"
 #include "eff.h"
@@ -57,7 +58,6 @@ extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
 extern void frFontSetChainFlag(FrFontGlyph *, u8);
 extern s32 func_0019D550(FrFontGlyph *, s8, u32);
-extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern void func_00306CD0(s32, s32, s32, s32, s32, s32, s32, s32);
 extern char D_00437C38[];
 

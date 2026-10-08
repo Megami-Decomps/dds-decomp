@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
@@ -3834,8 +3835,6 @@ typedef struct BtlPanelTransitionWork {
 extern s32 btlUpdateSkillNamePanelTask(KwlnTask *);
 extern void btlFreeRegisteredTaskData(KwlnTask *);
 extern u32 frFontMeasureLines(u32);
-extern s32 frFontQueueGlyphInSelectedSlot(u32);
-
 s32 func_001AD970(const u8 *text) {
     BattleController *battle = (BattleController *)btlGetRuntime();
     KwlnTask *task = (KwlnTask *)btlGetTrackedTaskHandle(1);
@@ -3862,7 +3861,7 @@ s32 func_001AD970(const u8 *text) {
     work->fadeLevels[3] = work->fadeLevels[1] = 0x10;
     glyph = itfCreateConvertedTextGlyph(0x1000, 0x200, 0xFF0000, 0x80808080, text, 0);
     work->width = frFontMeasureLines(glyph);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)glyph);
     work->initial[0].x = work->width - work->width / 2 + 0x105;
     work->initial[0].y = 0x40;
     work->initial[1].x = 0x92 - work->width / 2;
@@ -4702,7 +4701,7 @@ s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
     glyph = itfCreateConvertedTextGlyph((0x100 - (width >> 1)) << 4, 0x220, 0xFF0000,
                                        work->fade | 0x80808000, work->text, 0);
     frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)glyph, 1);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)glyph);
     colors.values[0] = work->fadeLevels[0] | 0x80808000;
     colors.values[1] = work->fadeLevels[2] | 0x80808000;
     colors.values[2] = work->fadeLevels[1] | 0x80808000;
@@ -5855,7 +5854,7 @@ void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u32 color, char *text) {
     itfSetTextDrawLimit(0x13);
     glyph = func_001978E8(x << 4, y << 3, 0, color, text, 0);
     func_001958A0(glyph, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)glyph);
     itfSetTextDrawLimit(-1);
 }
 
@@ -5866,7 +5865,7 @@ void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_003BAA8C + index * 17, 0);
     frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)handle, 1);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
     itfSetTextDrawLimit(-1);
 }
 
@@ -5877,7 +5876,7 @@ void btlQueueIndexedTextWithinDrawLimit(s32 x, s32 y, s32 z, s32 w, u16 index) {
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_003BAA84 + index * 25, 0);
     frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)handle, 1);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
     itfSetTextDrawLimit(-1);
 }
 
@@ -6156,7 +6155,7 @@ void btlDrawRetreatCommandLabel(s32 unused) {
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(0x1A0, 0xA60, 0xFF0010, color, text, 0);
     frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)handle, 1);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
     itfSetTextDrawLimit(-1);
 }
 

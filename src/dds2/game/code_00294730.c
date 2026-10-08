@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font.h"
 #include "dat_state.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
@@ -228,7 +229,6 @@ extern s32 func_0035C860(char *, const char *, ...);
 extern u32 func_0019F798(s32, s32, s32, u32, char *, s32);
 extern void frFontSetChainFlag(struct FrFontGlyph *, u8);
 extern s32 func_0019D550(struct FrFontGlyph *, s8, u32);
-extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
 extern char D_00437978[]; /* "%d" */
 
 /* Fade the selected row's icons and quantity while preserving its row snapshot. */

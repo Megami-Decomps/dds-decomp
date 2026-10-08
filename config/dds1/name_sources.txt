@@ -2950,6 +2950,8 @@
 0x001DAEE8	btlSwapIndexListEntries	inferred	DDS2 001E80F8 twin; swaps two entries, no change if indices equal [names_R_FuncNames2.tsv]
 0x001DB218	btlNormalizeActionCameraKeyScales	inferred	Adjusts pose vectors and resets blend weights according to action flags. [names_reviewed14.tsv]
 0x001DB300	btlInterpolateVectorStep	inferred	Twin of dds2 0x001E8510; Computes src position plus step times delta and transfers vector to VU. [names_R_FuncNames3.tsv]
+0x001DB698	btlAdjustCameraDirectionForDefaultPlane	inferred	For camera distance greater than one, compares projected camera height with Y=-20, adjusts and normalizes the direction, and returns whether adjusted.
+0x001DB7D0	btlAdjustCameraDirectionForPlane	inferred	Uses the supplied horizontal-plane height to adjust and normalize camera direction; returns whether adjusted.
 0x001DB9D0	btlCreateTargetedCommandSoundTask	inferred	Creates command sound work and attaches its target argument. [names_reviewed8.tsv]
 0x001DBA10	btlCreateCommandSoundWithArguments	inferred	Creates command sound work and fills its sound arguments. [names_reviewed8.tsv]
 0x001DBA78	btlInitializeMotionTransformFromTaskArguments	inferred	Initializes motion transform components from queued task arguments. [names_reviewed11.tsv]
