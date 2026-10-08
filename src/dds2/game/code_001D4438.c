@@ -1,3 +1,4 @@
+#include "btl_motion_transform.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "kwln.h"
@@ -541,9 +542,7 @@ extern u32 btlApplyDeferredUnitStatus(void *);
 
 extern void btlApplyScaledUnitEffectParameter(u8 *, s32, s32, f32);
 
-extern void btlInitMotionTransformFromComponents(u8 *, f32, f32, f32, f32, f32, f32, f32, f32);
 
-extern void btlInitMotionTransformFromVectors(u8 *, f32 *, f32 *);
 
 typedef struct SoundCommand {
     u32 handle;

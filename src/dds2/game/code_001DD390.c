@@ -1,3 +1,4 @@
+#include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_effect_position.h"
 #include "sdf_chip.h"
@@ -327,9 +328,7 @@ extern u32 btlApplyDeferredUnitStatus(void *);
 
 extern void btlApplyScaledUnitEffectParameter(u8 *, s32, s32, f32);
 
-extern void btlInitMotionTransformFromComponents(u8 *, f32, f32, f32, f32, f32, f32, f32, f32);
 
-extern void btlInitMotionTransformFromVectors(u8 *, f32 *, f32 *);
 
 typedef struct SoundCommand {
     u32 handle;
@@ -5139,7 +5138,7 @@ BtlRuntimeTask *btlCreateCommandSoundWithArguments(s32 actor, s32 option, s32 fl
 u32 btlInitializeMotionTransformFromTaskArguments(u8 *arguments) {
     u8 *context = (u8 *)btlGetRuntime();
     func_001E8258(1, *(u32 *)arguments, 0, 0, 0);
-    btlInitMotionTransformFromComponents(context + 0x70, ((BtlCameraTaskArgs *)arguments)->component[0], ((BtlCameraTaskArgs *)arguments)->component[1],
+    btlInitMotionTransformFromComponents(&((BtlState *)context)->cameraCommand.camera, ((BtlCameraTaskArgs *)arguments)->component[0], ((BtlCameraTaskArgs *)arguments)->component[1],
                     ((BtlCameraTaskArgs *)arguments)->component[2], ((BtlCameraTaskArgs *)arguments)->component[3],
                     ((BtlCameraTaskArgs *)arguments)->component[4], ((BtlCameraTaskArgs *)arguments)->component[5],
                     ((BtlCameraTaskArgs *)arguments)->component[6], ((BtlCameraTaskArgs *)arguments)->component[7]);
@@ -5308,25 +5307,25 @@ void func_001E95C8(s32 transform, f32 value) {
     ((BtlCamState *)transform)->fov = value;
 }
 
-void btlInitMotionTransformFromVectors(u8 *object, f32 *origin, f32 *direction) {
+void btlInitMotionTransformFromVectors(BtlCamState *object, f32 *origin, f32 *direction) {
     VU0_LOAD_VF(vf10, direction);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9130);
     VU0_ROTATE_VEC(vf10, vf10);
-    VU0_STORE_VF(vf10, object + 0x10);
+    VU0_STORE_VF(vf10, object->direction);
     VU0_SET_VF2X(1.0f);
     VU0_MUL_VF2X(vf10, vf10);
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, origin);
     VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, object);
-    ((BtlCamState *)object)->distance = 1.0f;
-    ((BtlCamState *)object)->fov = 0.6981317f;
+    VU0_STORE_VF(vf10, object->position);
+    object->distance = 1.0f;
+    object->fov = 0.6981317f;
     btlClearRuntimeFlag2000();
 }
 
-void btlInitMotionTransformFromComponents(u8 *object, f32 x, f32 y, f32 z, f32 vx, f32 vy,
-                    f32 vz, f32 vw, f32 scale) {
+void btlInitMotionTransformFromComponents(BtlCamState *object, f32 x, f32 y, f32 z, f32 vx, f32 vy,
+                    f32 vz, f32 vw, f32 fovDegrees) {
     f32 origin[4];
     f32 direction[4];
     origin[0] = x;
@@ -5338,7 +5337,7 @@ void btlInitMotionTransformFromComponents(u8 *object, f32 x, f32 y, f32 z, f32 v
     direction[3] = vw;
     origin[3] = 0.0f;
     btlInitMotionTransformFromVectors(object, origin, direction);
-    ((BtlCamState *)object)->fov = scale * 0.017453293f;
+    object->fov = fovDegrees * 0.017453293f;
 }
 
 void btlSetEffectCameraKeys(s32 fx, f32 x0, f32 y0, f32 z0, f32 vx0, f32 vy0, f32 vz0, f32 vw0, f32 x1, f32 y1, f32 z1,
@@ -7627,7 +7626,7 @@ void func_001F3C30(BtlLinkedCommand *action) {
         btlFlagMatchingUnitsDefeatCandidate(0x200);
     }
 
-    btlInitMotionTransformFromComponents((u8 *)&action->frontCamera,
+    btlInitMotionTransformFromComponents(&action->frontCamera,
                                          D_003B6E50[unitId].mode[mode].front.position[0],
                                          D_003B6E50[unitId].mode[mode].front.position[1],
                                          D_003B6E50[unitId].mode[mode].front.position[2],
@@ -7635,7 +7634,7 @@ void func_001F3C30(BtlLinkedCommand *action) {
                                          D_003B6E50[unitId].mode[mode].front.direction[1],
                                          D_003B6E50[unitId].mode[mode].front.direction[2],
                                          D_003B6E50[unitId].mode[mode].front.direction[3], 40.0f);
-    btlInitMotionTransformFromComponents((u8 *)&action->backCamera,
+    btlInitMotionTransformFromComponents(&action->backCamera,
                                          D_003B6E50[unitId].mode[mode].back.position[0],
                                          D_003B6E50[unitId].mode[mode].back.position[1],
                                          D_003B6E50[unitId].mode[mode].back.position[2],
@@ -7676,7 +7675,7 @@ void func_001F3E48(s32 argument) {
     if (action->state == triggerFrame && action->motionProgress != 0) {
         btlCopyMotionTransform(&action->frontCamera, &action->backCamera);
         btlInitMotionTransformFromComponents(
-            (u8 *)&action->backCamera,
+            &action->backCamera,
             D_003B6E50[unitId].mode[selectedMode].transition.position[0],
             D_003B6E50[unitId].mode[selectedMode].transition.position[1],
             D_003B6E50[unitId].mode[selectedMode].transition.position[2],

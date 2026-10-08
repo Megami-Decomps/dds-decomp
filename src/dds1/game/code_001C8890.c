@@ -1,3 +1,4 @@
+#include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_effect_position.h"
 #include "sdf_chip.h"
@@ -6747,12 +6748,11 @@ void *btlCreateCommandSoundWithArguments(s32 owner, s32 variant, u32 first, u32 
     return task;
 }
 
-extern void btlInitMotionTransformFromComponents(u8 *, f32, f32, f32, f32, f32, f32, f32, f32);
 
 u32 btlInitializeMotionTransformFromTaskArguments(u8 *arguments) {
     u8 *context = (u8 *)btlGetRuntime();
     func_001DB048(1, *(u32 *)arguments, 0, 0, 0);
-    btlInitMotionTransformFromComponents(context + 0x70, *(f32 *)(arguments + 4), *(f32 *)(arguments + 8),
+    btlInitMotionTransformFromComponents(&((BtlState *)context)->cameraCommand.camera, *(f32 *)(arguments + 4), *(f32 *)(arguments + 8),
                     *(f32 *)(arguments + 0xC), *(f32 *)(arguments + 0x10),
                     *(f32 *)(arguments + 0x14), *(f32 *)(arguments + 0x18),
                     *(f32 *)(arguments + 0x1C), *(f32 *)(arguments + 0x20));
@@ -6917,27 +6917,26 @@ extern void btlClearRuntimeFlag2000(void);
 
 extern u8 D_0037E110[];
 
-void btlInitMotionTransformFromVectors(u8 *object, f32 *origin, f32 *direction) {
+void btlInitMotionTransformFromVectors(BtlCamState *object, f32 *origin, f32 *direction) {
     VU0_LOAD_VF(vf10, direction);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E110);
     VU0_ROTATE_VEC(vf10, vf10);
-    VU0_STORE_VF(vf10, object + 0x10);
+    VU0_STORE_VF(vf10, object->direction);
     VU0_SET_VF2X(1.0f);
     VU0_MUL_VF2X(vf10, vf10);
     VU0_MOVE_VF(vf11, vf10);
     VU0_LOAD_VF(vf10, origin);
     VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, object);
-    *(f32 *)(object + 0x20) = 1.0f;
-    *(f32 *)(object + 0x24) = 0.6981317f;
+    VU0_STORE_VF(vf10, object->position);
+    object->distance = 1.0f;
+    object->fov = 0.6981317f;
     btlClearRuntimeFlag2000();
 }
 
-extern void btlInitMotionTransformFromVectors(u8 *, f32 *, f32 *);
 
-void btlInitMotionTransformFromComponents(u8 *object, f32 x, f32 y, f32 z, f32 vx, f32 vy,
-                    f32 vz, f32 vw, f32 scale) {
+void btlInitMotionTransformFromComponents(BtlCamState *object, f32 x, f32 y, f32 z, f32 vx, f32 vy,
+                    f32 vz, f32 vw, f32 fovDegrees) {
     f32 origin[4];
     f32 direction[4];
     origin[0] = x;
@@ -6949,14 +6948,14 @@ void btlInitMotionTransformFromComponents(u8 *object, f32 x, f32 y, f32 z, f32 v
     direction[3] = vw;
     origin[3] = 0.0f;
     btlInitMotionTransformFromVectors(object, origin, direction);
-    *(f32 *)(object + 0x24) = scale * 0.017453293f;
+    object->fov = fovDegrees * 0.017453293f;
 }
 
 void btlSetEffectCameraKeys(u8 *fx, f32 x0, f32 y0, f32 z0, f32 vx0, f32 vy0, f32 vz0, f32 vw0,
                             f32 x1, f32 y1, f32 z1, f32 vx1, f32 vy1, f32 vz1, f32 vw1,
                             f32 scale, f32 f154) {
-    btlInitMotionTransformFromComponents(fx + 0x30, x0, y0, z0, vx0, vy0, vz0, vw0, scale);
-    btlInitMotionTransformFromComponents(fx + 0xC0, x1, y1, z1, vx1, vy1, vz1, vw1, scale);
+    btlInitMotionTransformFromComponents(&((BtlLinkedCommand *)fx)->frontCamera, x0, y0, z0, vx0, vy0, vz0, vw0, scale);
+    btlInitMotionTransformFromComponents(&((BtlLinkedCommand *)fx)->backCamera, x1, y1, z1, vx1, vy1, vz1, vw1, scale);
     *(f32 *)(fx + 0x130) = f154;
     *(u32 *)(fx + 0xF0) |= 0x41;
 }
