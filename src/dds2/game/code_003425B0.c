@@ -1505,7 +1505,7 @@ typedef struct SdfStreamParams {
     u8 param3;
 } SdfStreamParams;
 
-extern s32 sdfTexGetPrimaryResourceWord();
+extern u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 
 void sdfStreamCreateWithParams(s32 state, SdfStreamParams *params, s32 source, s32 size, u8 *resource) {
     SdfStreamParams local = *params;

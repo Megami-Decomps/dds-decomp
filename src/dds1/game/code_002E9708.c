@@ -162,7 +162,7 @@ typedef struct SdfStreamParams {
     u8 param3;
 } SdfStreamParams;
 
-extern s32 sdfTexGetPrimaryResourceWord();
+extern u32 sdfTexGetPrimaryResourceWord(SdfTex *texture);
 
 void func_002E9708(void) {
     func_002E87A8(0x180, 0, 0, 0);
