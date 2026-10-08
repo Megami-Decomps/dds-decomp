@@ -983,13 +983,13 @@ INCLUDE_RODATA(const s32, "interface/itfMesManager", D_003A14B0);
 s32 itfMesRunPanelLayoutInspector(void) {
     ItfMesBlkA4 *panel;
     UiSprite *panelSprite;
-    s32 *position;
+    s32 *bounds;
     SdfListHead *packetList;
-    s32 item;
-    s32 y;
-    const char *format;
-    const char *marker;
-    const char *positionFormat;
+    s32 menuItemIndex;
+    s32 menuItemY;
+    const char *menuItemFormat;
+    const char *selectionMarker;
+    const char *coordinateFormat;
 
     if (D_00357D80.window == NULL) {
         ItfMesWindowRec *window = func_0019FA70(NULL);
@@ -1051,41 +1051,41 @@ s32 itfMesRunPanelLayoutInspector(void) {
 
     packetList = (SdfListHead *)sdfCreateResetPacketList();
     kwlnDrawSpriteCell(packetList, 0x10, 0x10, 0x1E, 9);
-    format = D_003BB218;
-    y = 0x7A00;
-    for (item = 0; item < 5; item++, y += 0x60) {
-        if (D_00357D80.selectedItem == item) {
-            marker = D_003BB200[D_00357D80.mode != 0];
+    menuItemFormat = D_003BB218;
+    menuItemY = 0x7A00;
+    for (menuItemIndex = 0; menuItemIndex < 5; menuItemIndex++, menuItemY += 0x60) {
+        if (D_00357D80.selectedItem == menuItemIndex) {
+            selectionMarker = D_003BB200[D_00357D80.mode != 0];
         } else {
-            marker = D_003BB220;
+            selectionMarker = D_003BB220;
         }
         sdfAppendPacket(packetList,
-                        (u32)sdfCreateFormattedSifCommand(0x7180, y, 0xFFFFF0, 0,
-                                                     format, marker, D_00357FA0[item]));
+                        (u32)sdfCreateFormattedSifCommand(0x7180, menuItemY, 0xFFFFF0, 0,
+                                                     menuItemFormat, selectionMarker, D_00357FA0[menuItemIndex]));
     }
 
-    positionFormat = "( %3d,%3d )";
+    coordinateFormat = "( %3d,%3d )";
     panelSprite = panel->sprite;
-    position = &panelSprite->left;
+    bounds = &panelSprite->left;
     sdfAppendPacket(packetList,
                     (u32)sdfCreateFormattedSifCommand(0x7E00, 0x7A00, 0xFFFFF0, 0,
-                                                 positionFormat, position[0] >> 4,
-                                                 position[1] >> 3));
+                                                 coordinateFormat, bounds[0] >> 4,
+                                                 bounds[1] >> 3));
     sdfAppendPacket(packetList,
                     (u32)sdfCreateFormattedSifCommand(0x7E00, 0x7A60, 0xFFFFF0, 0,
-                                                 positionFormat, position[2] >> 4,
-                                                 position[3] >> 3));
+                                                 coordinateFormat, bounds[2] >> 4,
+                                                 bounds[3] >> 3));
     sdfAppendPacket(packetList,
                     (u32)sdfCreateFormattedSifCommand(0x7E00, 0x7B20, 0xFFFFF0, 0,
                                                  D_003BB228, panel->fadeLimit));
-    position = D_00357D80.window->mes->blkA4.bounds;
+    bounds = D_00357D80.window->mes->blkA4.bounds;
     sdfAppendPacket(packetList,
                     (u32)sdfCreateFormattedSifCommand(0x7180, 0x7C40, 0xFFFFF0, 0,
                                                  "OFFSET : %3d,%3d - %3d,%3d",
-                                                 position[0] >> 4,
-                                                 position[1] >> 3,
-                                                 position[2] >> 4,
-                                                 position[3] >> 3));
+                                                 bounds[0] >> 4,
+                                                 bounds[1] >> 3,
+                                                 bounds[2] >> 4,
+                                                 bounds[3] >> 3));
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, packetList);
     return 0;
 }

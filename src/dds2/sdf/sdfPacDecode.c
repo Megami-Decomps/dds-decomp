@@ -191,20 +191,20 @@ PacWork *sdfPacRemovePacket(PacWork *work) {
     PacState *state = work->owner;
     /* Keep a node-shaped link so the queue head can be unlinked like any next pointer. */
     PacWork *unlinkLink = (PacWork *)&state->queueHead;
-    PacWork *current = state->queueHead;
-    PacWork *previous = NULL;
+    PacWork *currentWork = state->queueHead;
+    PacWork *previousWork = NULL;
     PacWork *nextWork;
-    if (current != work) {
+    if (currentWork != work) {
         do {
-            previous = current;
-            current = previous->next;
-            unlinkLink = previous;
-        } while (current != work);
+            previousWork = currentWork;
+            currentWork = previousWork->next;
+            unlinkLink = previousWork;
+        } while (currentWork != work);
     }
     nextWork = work->next;
     unlinkLink->next = nextWork;
     if (state->queueTail == work) {
-        state->queueTail = previous;
+        state->queueTail = previousWork;
     }
     sdfReleaseChipBlock(work);
     return nextWork;
