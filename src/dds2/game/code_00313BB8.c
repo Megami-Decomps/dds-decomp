@@ -200,7 +200,7 @@ void func_003140C8(s32 useCurrentProfile, DatPartyRecord *unit);
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
 
 
-extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 
 
 void sdfAppendFormattedDebugLogPair(s32 left, s32 right) {
@@ -1238,7 +1238,7 @@ u16 scrGetEntryLowFlags(DatPartyRecord *context, u16 entryId) {
 void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
     FrFontGlyph *handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, &frFontColoredGlyphResource, 0);
     frFontSetChildColors(handle, second);
-    func_0019D550(handle, 1, option);
+    frFontDrawGlyphChain(handle, 1, option);
     frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
 

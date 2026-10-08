@@ -174,7 +174,7 @@ extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, u64, u64, u64, u64);
 
 extern void frFontSetChildColors(s32, u32);
 
-extern s32 func_0019D550(s32, s32, u32);
+extern s32 frFontDrawGlyphChain(s32, s32, u32);
 
 extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
@@ -2107,7 +2107,7 @@ void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2
     if (enabled != 0) {
         handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)fontValue, enabled, fontArg);
         frFontSetChildColors(handle, 0x80808040);
-        func_0019D550(handle, 0, flags);
+        frFontDrawGlyphChain(handle, 0, flags);
         frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
     }
 }

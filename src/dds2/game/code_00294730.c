@@ -228,7 +228,7 @@ struct FrFontGlyph;
 extern s32 func_0035C860(char *, const char *, ...);
 extern u32 func_0019F798(s32, s32, s32, u32, char *, s32);
 extern void frFontSetChainFlag(struct FrFontGlyph *, u8);
-extern s32 func_0019D550(struct FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern char D_00437978[]; /* "%d" */
 
 /* Fade the selected row's icons and quantity while preserving its row snapshot. */
@@ -271,7 +271,7 @@ void func_00296430(s32 x, s32 y, s32 depth, MenuTerminalContext *scene,
         glyph = (struct FrFontGlyph *)func_0019F798(
             0xD30 + textOffset, (135 + row * 22) << 3, depth, color, text, 0);
         frFontSetChainFlag(glyph, 4);
-        func_0019D550(glyph, 1, option);
+        frFontDrawGlyphChain(glyph, 1, option);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
@@ -329,7 +329,7 @@ void func_002969D8(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 opti
         func_0035C860(text, D_00437980, 0);
         glyph = (struct FrFontGlyph *)func_0019F798(0x1910, 0x290, depth, 0xA09DC380, text, 0);
         frFontSetChainFlag(glyph, 4);
-        func_0019D550(glyph, 1, option);
+        frFontDrawGlyphChain(glyph, 1, option);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
@@ -361,7 +361,7 @@ void func_00296B48(s32 x, s32 y, s32 z, s32 unused, s32 scale, s32 option) {
     func_0035C860(text, D_00437980, 0);
     glyph = (struct FrFontGlyph *)func_0019F798(x + 0x1910, y + 0x290, z, value, text, 0);
     frFontSetChainFlag(glyph, 4);
-    func_0019D550(glyph, 1, option);
+    frFontDrawGlyphChain(glyph, 1, option);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
@@ -381,7 +381,7 @@ void func_00296C58(s32 x, s32 y, s32 depth, MenuTerminalContext *panel, s32 opti
         func_0035C860(text, D_00437980, inner->cursor->camp.value * panel->multiplier);
         glyph = (struct FrFontGlyph *)func_0019F798(0x1910, 0x290, depth, 0xA09DC380, text, 0);
         frFontSetChainFlag(glyph, 4);
-        func_0019D550(glyph, 1, option);
+        frFontDrawGlyphChain(glyph, 1, option);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
@@ -411,7 +411,7 @@ void func_00296D90(MenuTerminalContext *state, s32 style) {
     {
         struct FrFontGlyph *glyph = (struct FrFontGlyph *)func_0019F798(0x1910, 0x1D0, 0, style, text, 0);
 
-        func_0019D550(glyph, 1, 0x53);
+        frFontDrawGlyphChain(glyph, 1, 0x53);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }

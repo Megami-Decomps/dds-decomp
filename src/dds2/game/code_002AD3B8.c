@@ -44,7 +44,7 @@ extern s32 func_0035C860(char *, const char *, ...);
 extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
 extern void frFontSetChainFlag(s32, s32);
 typedef struct FrFontGlyph FrFontGlyph;
-extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 D_00435E5C;
 extern s32 D_00435E48;
@@ -625,7 +625,7 @@ void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
         func_0035C860(captionText, D_00437BD0, datCommandRecords[evtGetIndexedEventRecordId(entryId)].hpPower);
         fontHandle = func_0019F5E8(0x620, 0xA20, 0, 0xA09DC380, (s32)captionText, 0);
         frFontSetChainFlag(fontHandle, 4);
-        func_0019D550((FrFontGlyph *)fontHandle, 1, 0x53);
+        frFontDrawGlyphChain((FrFontGlyph *)fontHandle, 1, 0x53);
         frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)fontHandle);
     }
 }
@@ -942,7 +942,7 @@ s32 func_002AF5E0(KwlnTask *task) {
         func_002AF2E0(0, 0, selectionId, context);
         if (owned != 0 && mdlFlagTest(0x990) != 0) {
             glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x2B0, 0xB80, 0, 0xA09DC340, slotsCaption, 0);
-            func_0019D550(glyph, 1, 0x53);
+            frFontDrawGlyphChain(glyph, 1, 0x53);
             frFontQueueGlyphForCurrentDrawBuffer(glyph);
             func_002BDAA8(0x770, 0xB98, 0x100, selectionId, context->spriteArg0, 0x2C);
         }
