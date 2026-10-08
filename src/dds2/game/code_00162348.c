@@ -98,7 +98,7 @@ extern u16 parGetRestartFlag(ParObj *obj);
 
 extern void parUpdateCellVertexTriangle(ParSystem *, s32, const u128 *);
 
-extern s32 parObjGetMode();
+extern u8 parObjGetMode(ParObj *object);
 
 
 extern void parUpdateBillboardCrossStrip(s32 particle, s32 index, u32 color);
@@ -197,7 +197,7 @@ void parObjSetMode(ParObj *object, u8 mode) {
     object->restartFlag = 1;
 }
 
-s32 parObjGetMode(ParObj *object) {
+u8 parObjGetMode(ParObj *object) {
     switch (object->dispatchIndex) {
     case 1:
     case 5:
@@ -378,7 +378,9 @@ void parChangeInstanceMode(ParObj *work, u8 mode) {
     parObjSetMode(work, mode);
 }
 
-INCLUDE_ASM(const s32, "game/code_00162348", func_001629A0);
+u8 func_001629A0(ParObj *work) {
+    return parObjGetMode(work);
+}
 
 /* Kinds 2-4 keep the scale at +8 of their own record; copy it into the
  * shared vector and store the (vf10 - vf11) difference. */
