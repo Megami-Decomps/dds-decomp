@@ -128,7 +128,7 @@ struct SdfTextParam;
 extern void func_002DA438(struct SdfTextParam *, u32);
 
 /* Render scatter strips in batches of sixteen vertices, then submit the tail. */
-void func_00175DD0(PcpScatterDraw *object) {
+void effScatterDrawObject(PcpScatterDraw *object) {
     f32 matrix[16] __attribute__((aligned(16)));
     SdfListHead *packet;
     ScatterRenderState *draw;

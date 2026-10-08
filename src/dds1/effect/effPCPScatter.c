@@ -1567,7 +1567,7 @@ void effScatterRingUpdate(PcpScatterInstance *work, s32 index)
 extern s32 effMultiplyPackedColors(s32 color, s32 param);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 extern void effScatterStoreSourceTransformMatrix(void *draw, void *work);
-extern void func_00175DD0(void *draw);
+extern void effScatterDrawObject(PcpScatterDraw *object);
 /* Advance delayed particles and submit the ring drawable.
  * Age zero seeds geometry without writing color; expired particles clear color and freeze.
  * Per-particle fade-in takes precedence over fade-out; duration equality still processes. */
@@ -1617,7 +1617,7 @@ void effScatterUpdateLoopedParticleRing(PcpScatterInstance *work) {
     draw->scale = work->scale;
     PCP_COPY_VECTOR(draw->origin, work->params.origin);
     effScatterStoreSourceTransformMatrix(draw, work);
-    func_00175DD0(draw);
+    effScatterDrawObject(draw);
 }
 
 /* Replace the packed origin at the start of the copied parameters. */
@@ -1910,7 +1910,7 @@ void effScatterUpdateLoopedScaledRing(PcpScatterInstanceB *work) {
     draw->scale = work->scale;
     PCP_COPY_VECTOR(draw->origin, work->params.origin);
     effScatterStoreSourceTransformMatrix(draw, work);
-    func_00175DD0(draw);
+    effScatterDrawObject(draw);
 }
 
 /* Replace the radius-damped ring's packed parameter origin. */
@@ -2206,7 +2206,7 @@ void effScatterUpdateTwoColor(PcpScatterInstanceC *work) {
     draw->scale = work->scale;
     PCP_COPY_VECTOR(draw->origin, work->params.origin);
     effScatterStoreSourceTransformMatrix(draw, work);
-    func_00175DD0(draw);
+    effScatterDrawObject(draw);
 }
 
 /* Replace the two-color ring's packed parameter origin. */
@@ -2499,5 +2499,5 @@ void effScatterUpdatePlainParticleRing(PcpScatterPlainInstance *work) {
     draw->scale = work->scale;
     PCP_COPY_VECTOR(draw->origin, work->params.origin);
     effScatterStoreSourceTransformMatrix(draw, work);
-    func_00175DD0(draw);
+    effScatterDrawObject(draw);
 }
