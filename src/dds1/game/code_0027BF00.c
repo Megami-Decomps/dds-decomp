@@ -514,13 +514,13 @@ void mnuReleaseWindowTextures(MenuWindowSpriteGroup *group) {
     sdfReleaseResourceAllocation(group->allocation);
 }
 
-void mnuConfigureWindowSpriteSlots(MenuWindowSpriteGroup *group, u32 target) {
-    effConfigureWithDefaultSetting(group->sprites[1], 0, (struct EffMappedResource *)target, 0, 0x14, 0xc);
-    effConfigureWithDefaultSetting(group->sprites[2], 0, (struct EffMappedResource *)target, 1, 10, 0xc);
-    effConfigureWithDefaultSetting(group->sprites[3], 0, (struct EffMappedResource *)target, 2, 0, 0xc);
-    effConfigureWithDefaultSetting(group->sprites[4], 0, (struct EffMappedResource *)target, 2, 0, 0xc);
-    effConfigureWithDefaultSetting(group->sprites[5], 0, (struct EffMappedResource *)target, 1, 10, 0xc);
-    effConfigureWithDefaultSetting(group->sprites[6], 0, (struct EffMappedResource *)target, 0, 0x14, 0xc);
+void mnuConfigureWindowSpriteSlots(MenuWindowSpriteGroup *group, EffMappedResource *target) {
+    effConfigureWithDefaultSetting(group->sprites[1], 0, target, 0, 0x14, 0xc);
+    effConfigureWithDefaultSetting(group->sprites[2], 0, target, 1, 10, 0xc);
+    effConfigureWithDefaultSetting(group->sprites[3], 0, target, 2, 0, 0xc);
+    effConfigureWithDefaultSetting(group->sprites[4], 0, target, 2, 0, 0xc);
+    effConfigureWithDefaultSetting(group->sprites[5], 0, target, 1, 10, 0xc);
+    effConfigureWithDefaultSetting(group->sprites[6], 0, target, 0, 0x14, 0xc);
 }
 
 /* Always draw slot zero; masks one/two select the two three-slot banks.

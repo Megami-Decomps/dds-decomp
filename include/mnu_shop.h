@@ -70,6 +70,9 @@ typedef char MenuWindowContainer_size_must_be_0x98[(sizeof(MenuWindowContainer) 
 struct MenuWindowSpriteGroup;
 struct EffMappedResource;
 
+void mnuConfigureWindowSpriteSlots(struct MenuWindowSpriteGroup *group,
+                                    struct EffMappedResource *target);
+
 /* DDS1's generic window panel is embedded at +0x4C and copied as 0x38 bytes. */
 typedef struct MenuPanelHandles {
     u32 panelKind;
