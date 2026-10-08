@@ -11,9 +11,9 @@ extern void kwlnTaskActivate(KwlnTask* task);
 
 extern void kwlnTaskAdvanceStartDelays(void);
 
-extern s32 func_00100B40(KwlnTask* task);
+extern s32 kwlnTaskStep(KwlnTask* task);
 
-extern void func_00100D40(void);
+extern void kwlnTaskRunScheduledUpdates(void);
 
 extern void kwlnTaskFinalizeDestroy(KwlnTask* task);
 
@@ -46,7 +46,7 @@ extern KwlnTask* kwlnActiveTaskHead;
 
 extern void* kwlnActiveTaskCount;
 
-extern s32 D_003BA824;
+extern KwlnTask *kwlnExecutingTask;
 
 extern u8 D_003BA828[];
 
@@ -98,7 +98,7 @@ void kwlnTaskAdvanceStartDelays(void)
     }
 }
 
-s32 func_00100B40(KwlnTask *task) {
+s32 kwlnTaskStep(KwlnTask *task) {
     s32 port;
     s32 i;
     s32 nextUpdate;
@@ -106,7 +106,7 @@ s32 func_00100B40(KwlnTask *task) {
     if (task->flags & 0x20) {
         return 1;
     }
-    D_003BA824 = (s32)task;
+    kwlnExecutingTask = task;
 
     if (task->flags & 0x10) {
         for (port = 0; port < 2; port++) {
@@ -141,16 +141,16 @@ s32 func_00100B40(KwlnTask *task) {
         }
         if (nextUpdate == -1 && (task->flags & KWLN_TASK_STATE_MASK) == KWLN_TASK_ACTIVE) {
             kwlnTaskRequestDestroy(task);
-            D_003BA824 = 0;
+            kwlnExecutingTask = 0;
             return 0;
         }
     }
     task->timer++;
-    D_003BA824 = 0;
+    kwlnExecutingTask = 0;
     return 1;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100D40);
+INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskRunScheduledUpdates);
 
 void kwlnTaskFinalizeDestroy(KwlnTask* task)
 {
@@ -348,7 +348,7 @@ void kwlnVisitTaskForestRoots(void)
 s32 kwlnTaskTickScheduler(void)
 {
     kwlnTaskAdvanceStartDelays();
-    func_00100D40();
+    kwlnTaskRunScheduledUpdates();
     kwlnTaskAdvanceDestroyDelays();
     return 1;
 }
@@ -599,7 +599,7 @@ INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DEC8);
 
 INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0039DEF8);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA824);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", kwlnExecutingTask);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_003BA828);
 

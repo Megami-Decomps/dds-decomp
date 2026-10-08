@@ -55,7 +55,7 @@ void func_002ECF70(MovObj *movie) {
 }
 
 /* Consume device completions and stop requests for the linear stream; always return 0. */
-s32 func_002ED008(DevState *deviceState, s32 operation, void *data, s32 bytesRead, MovObj *movie) {
+s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *data, s32 bytesRead, MovObj *movie) {
     MovLinearStream *stream;
     s32 restoreInterrupts;
 
@@ -131,7 +131,7 @@ void sdfMovieProcessPendingData(MovObj *movie) {
 }
 
 /* Process movie-PAC header, block-mask and payload completions; always return 0. */
-s32 func_002ED230(DevState *deviceState, s32 operation, void *data, s32 bytesRead, MovObj *movie) {
+s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *data, s32 bytesRead, MovObj *movie) {
     MovPacStream *stream;
 
     movie->deviceState = deviceState;
@@ -250,17 +250,18 @@ s32 func_002ED230(DevState *deviceState, s32 operation, void *data, s32 bytesRea
 }
 
 /* Sound/IPU source operations: report available bytes/EOF, copy data, or resume reads. */
-s32 func_002ED5C0(void *unused, MovObj *movie, s32 operation, u8 *data, s32 size) {
+s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddress, s32 operation, void *data, s32 size) {
+    MovObj *movie = (MovObj *)movieAddress;
     MovLinearStream *stream = movie->stream;
 
     switch (operation) {
     case 0:
         if (movie->stopRequested != 0) {
-            *data = 1;
+            *(u8 *)data = 1;
             return 0;
         }
         if (movie->remainingBytes == 0) {
-            *data = 1;
+            *(u8 *)data = 1;
         }
         return stream->bufferedBytes;
     case 1:
@@ -276,7 +277,7 @@ s32 func_002ED5C0(void *unused, MovObj *movie, s32 operation, u8 *data, s32 size
                 s32 firstSpan = size - wrappedBytes;
                 memcpy(data, readCursor, firstSpan);
                 if (wrappedBytes > 0) {
-                    memcpy(data + firstSpan, bufferStart, wrappedBytes);
+                    memcpy((u8 *)data + firstSpan, bufferStart, wrappedBytes);
                 }
                 stream->readCursor = bufferStart + wrappedBytes;
             } else {
@@ -300,7 +301,8 @@ s32 func_002ED5C0(void *unused, MovObj *movie, s32 operation, u8 *data, s32 size
 }
 
 /* Sound/IPU source operations for the movie-PAC ring; retain the native copy helper. */
-s32 func_002ED760(void *unused, MovObj *movie, s32 operation, u8 *data, s32 size) {
+s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddress, s32 operation, void *data, s32 size) {
+    MovObj *movie = (MovObj *)movieAddress;
     void func_002ED740(void *destination, const void *source, u32 byteCount) {
         memcpy(destination, source, byteCount);
     }
@@ -309,11 +311,11 @@ s32 func_002ED760(void *unused, MovObj *movie, s32 operation, u8 *data, s32 size
     switch (operation) {
     case 0:
         if (movie->stopRequested != 0) {
-            *data = 1;
+            *(u8 *)data = 1;
             return 0;
         }
         if (movie->remainingBytes == 0) {
-            *data = 1;
+            *(u8 *)data = 1;
         }
         return stream->pacBufferedBytes;
     case 1:
@@ -329,7 +331,7 @@ s32 func_002ED760(void *unused, MovObj *movie, s32 operation, u8 *data, s32 size
                 s32 firstSpan = size - wrappedBytes;
                 func_002ED740(data, bufferStart + readOffset, firstSpan);
                 if (wrappedBytes > 0) {
-                    func_002ED740(data + firstSpan, bufferStart, wrappedBytes);
+                    func_002ED740((u8 *)data + firstSpan, bufferStart, wrappedBytes);
                 }
                 stream->pacReadOffset = wrappedBytes;
             } else {

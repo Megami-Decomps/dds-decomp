@@ -2,6 +2,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "eff_curve.h"
 #include "sdf_projection.h"
 #include "pcp_vu0.h"
 #include "itf.h"
@@ -1121,7 +1122,6 @@ void sdfReleaseFlagListResource(SdfFlagListWork *work) {
 
 extern f32 sdfViewTargetVector[4];
 extern void vuBuildLookAtBasis(void);
-extern u32 func_00296F58(const void *, const void *, s32, s32);
 extern f32 sdfAtan2Poly(f32 ratio);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u32 effMiscRand(void *state);
@@ -1161,7 +1161,7 @@ void func_002CEC40(SdfFlagListWork *work) {
     }
     spawn = 1;
     vuBuildLookAtBasis();
-    color = func_00296F58(&work->params.color, &work->params.alpha, frame, maxFrames);
+    color = effSampleColorAlphaTracks(&work->params.color, &work->params.alpha, frame, maxFrames);
     count = work->params.count;
     spawnRange = count >> 4;
     halfFov = sdfSceneProjectionParameters.camera.fov * 0.5f;
@@ -1319,7 +1319,7 @@ void scrSetOperandFloatValue(SdfFlagListWork *work, float value) {
 }
 
 void func_002CF3A0(SdfFlagListWork *work) {
-    func_00296F58(&work->params.color, &work->params.alpha, 0, 0);
+    effSampleColorAlphaTracks(&work->params.color, &work->params.alpha, 0, 0);
 }
 
 void itfSetPackedRgbAlpha(SdfFlagListWork *p, u32 color) {

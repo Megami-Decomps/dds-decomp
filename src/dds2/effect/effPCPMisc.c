@@ -4,6 +4,7 @@
 #include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff.h"
+#include "eff_param.h"
 #include "eff_event.h"
 #include "eff_event_sound.h"
 #include "mdl.h"
@@ -15,7 +16,6 @@ extern u32 effMiscRand(void *state);
 #include "ee_mmi.h"
 
 struct EffThunderVectorWork;
-extern void effDispatchParameterDataAndFreeWork(u32);
 extern void effDestroyNode(u32);
 extern u32 func_0016D290(u32 handle);
 extern void effThunderSetFragmentColor(void *work, u32 value);
@@ -37,8 +37,8 @@ typedef struct {
     u32 historyCount;       /* 0x133C cleared on init */
     u32 updateCount;       /* 0x1340 cleared on init */
     u32 baseColor;    /* 0x1344 initialised to grey 0x80808080 */
-    u32 secondaryHandle; /* 0x1348: parameter block 1 */
-    u32 primaryHandle;   /* 0x134C: parameter block 0 */
+    EffParamWork *secondaryHandle; /* 0x1348: parameter block 1 */
+    EffParamWork *primaryHandle;   /* 0x134C: parameter block 0 */
     SdfMemBlock *allocationHandle; /* 0x1350: backing allocation */
 } EffPCPChargeWork;
 
@@ -53,16 +53,14 @@ typedef struct {
     u32 unk08;    /* 0x08 cleared on init */
     u8 pad0C[0x4]; /* 0x0C */
     u32 color;    /* 0x10 initialised to grey 0x80808080 */
-    u32 primaryHandle;   /* 0x14 parameter block 0 */
-    u32 secondaryHandle; /* 0x18 parameter block 1 */
+    EffParamWork *primaryHandle;   /* 0x14 parameter block 0 */
+    EffParamWork *secondaryHandle; /* 0x18 parameter block 1 */
 } EffPCPSpawnOnceWork;
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfReleaseChipBlock();
 
-extern u32 effParamCreateFromTable(void *data, s32 index);
 
-extern u32 effParamWorkDuplicate(u32 param);
 
 extern void *effCreateThunderCellSystemWork(void *params);
 extern void effThunderReleaseVectorWork(struct EffThunderVectorWork *work);
@@ -113,11 +111,11 @@ typedef struct EffPCPBlockSetWork {
     u32 count;
     u32 color;
     u32 mode;
-    u32 headHandle;
-    u32 handleA[5];
-    u32 *list[3];
-    u32 handleB[5];
-    u32 tailHandle;
+    EffParamWork *headHandle;
+    EffParamWork *handleA[5];
+    EffParamWork **list[3];
+    EffParamWork *handleB[5];
+    EffParamWork *tailHandle;
     u32 alloc[3];
     struct EffPCPBlockSetWork *source;
 } EffPCPBlockSetWork;
@@ -308,7 +306,7 @@ typedef struct {
     u32 color;       /* 0x10 sent to the paired object's colour callback */
     f32 scale;
     f32 offset[8];
-    u32 handle[16];
+    EffParamWork *handle[16];
     u32 delay[8];
 } EffPCPStaggered;
 
@@ -323,7 +321,7 @@ typedef struct {
     u8 pad0C[4];
     u32 color;
     f32 unk14; /* Settable size input; not read by the observed update. */
-    u32 handle[12];
+    EffParamWork *handle[12];
     u32 delay[6];
 } EffPCPDelayedPairs;
 
@@ -419,15 +417,14 @@ typedef struct EffPCPTwinWork {
     u32 color;          /* 0x10 */
     u32 frame;          /* 0x14: shared callback starts after frame 24 */
     f32 scale;          /* 0x18 */
-    u32 pair[8][2];     /* 0x1C parameter handle pairs (source uses [0] and [1]) */
-    u32 shared[8];      /* 0x5C */
+    EffParamWork *pair[8][2];     /* 0x1C parameter handle pairs (source uses [0] and [1]) */
+    EffParamWork *shared[8];      /* 0x5C */
     u32 state[8];       /* 0x7C */
     u32 counter[8];     /* 0x9C */
 } EffPCPTwinWork; /* 0xBC */
 
 extern void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 index);
 
-extern void *effParamWorkGetData(u32 handle);
 
 extern void mdlAddEntryPlain(void *obj, s32 a, s32 b);
 
@@ -438,8 +435,8 @@ typedef struct EffPCPCrossWork {
     u8 pad0C[4];
     u32 color;        /* 0x10 */
     f32 scale;        /* 0x14 */
-    u32 base;         /* 0x18 handle of the anchor model */
-    u32 handle[4][3]; /* 0x1C */
+    EffParamWork *base; /* 0x18 parameter work for the anchor model */
+    EffParamWork *handle[4][3]; /* 0x1C */
     u8 pad4C[0x60];
     u32 state[4][3];  /* 0xAC */
 } EffPCPCrossWork; /* 0xDC */
@@ -630,7 +627,7 @@ typedef struct EffPCPSprayWork {
     u32 unk1C;        /* 0x1C */
     u32 id[10];       /* 0x20 */
     f32 angle[10];    /* 0x48 random start angles */
-    u32 handle[10];   /* 0x70 handle 0 is the parameter block */
+    EffParamWork *handle[10];   /* 0x70 */
 } EffPCPSprayWork; /* 0x98 */
 
 extern void mdlProcessContextNodesAndTransforms(MdlCtx *obj, s32 state);
@@ -646,7 +643,6 @@ extern void mdlBroadcastMasked(void *obj, u32 mask);
 extern void effParamWorkCallback1(u32 handle, f32 value);
 
 
-extern void effParamWorkInvokeCallback(u32 handle);
 
 extern void effParamWorkCallback0(u32 handle, void *vec);
 
@@ -662,8 +658,8 @@ typedef struct EffPCPSpinWork {
     f32 angle;       /* 0x54 random start angle */
     f32 scale;       /* 0x58 */
     u32 color;       /* 0x5C */
-    void *handle0;   /* 0x60 */
-    void *handle1;   /* 0x64 */
+    EffParamWork *handle0;   /* 0x60 */
+    EffParamWork *handle1;   /* 0x64 */
 } EffPCPSpinWork; /* 0x68 */
 
 
@@ -762,8 +758,8 @@ void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 index) {
             VU0_STORE_MATRIX_UNCLOBBERED(mtx);
 
 ;
-    effParamWorkCallback2(work->pair[index][0], mtx);
-    effParamWorkCallback2(work->pair[index][1], mtx);
+    effParamWorkCallback2((u32)work->pair[index][0], mtx);
+    effParamWorkCallback2((u32)work->pair[index][1], mtx);
     mdlAddEntryPlain(effParamWorkGetData(work->pair[index][0]), 0, 0);
     mdlAddEntryPlain(effParamWorkGetData(work->pair[index][1]), 0, 0);
     work->counter[index] = effMiscRand(D_003AA868) % 10;
@@ -802,8 +798,8 @@ EffPCPTwinWork *effTwinEffectCreateFromTable(void *src) {
 }
 
 void effTwinEffectRelease(EffPCPTwinWork *work) {
-    s32 *sharedHandleCursor = (s32 *)work->shared;
-    s32 *pairHandleCursor = (s32 *)work->pair;
+    EffParamWork **sharedHandleCursor = work->shared;
+    EffParamWork **pairHandleCursor = &work->pair[0][0];
     s32 pairIndex;
 
     for (pairIndex = 0; pairIndex < 8; pairIndex++) {
@@ -854,8 +850,8 @@ void effTwinEffectUpdate(EffPCPTwinWork *work) {
         obj[1] = effParamWorkGetData(work->pair[i][1]);
         VU0_LOAD_VF(vf10, work);
         mdlStorePrimaryVectorVU(obj[0]);
-        effParamWorkCallback1(work->pair[i][0], work->scale * 1.5f);
-        effParamWorkCallback1(work->pair[i][1], 1.75f);
+        effParamWorkCallback1((u32)work->pair[i][0], work->scale * 1.5f);
+        effParamWorkCallback1((u32)work->pair[i][1], 1.75f);
         mdlBroadcastMasked(obj[1], work->color);
         mdlProcessContextNodesAndTransforms(obj[0], (s32)D_00380828);
         sdfLoadMapRecordPositionVector(obj[0]->inner, 1);
@@ -864,7 +860,7 @@ void effTwinEffectUpdate(EffPCPTwinWork *work) {
         mdlStorePrimaryVectorVU(obj[1]);
         mdlProcessContextNodesAndTransforms(obj[1], (s32)D_00380828);
         if (work->frame > 0x18) {
-            effParamWorkCallback0(work->shared[i], posp);
+            effParamWorkCallback0((u32)work->shared[i], posp);
             effParamWorkInvokeCallback(work->shared[i]);
         }
     }
@@ -892,8 +888,8 @@ void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index) {
             VU0_STORE_MATRIX_UNCLOBBERED(mtx);
 
 ;
-    effParamWorkCallback2(work->handle[index * 2], mtx);
-    effParamWorkCallback2(work->handle[index * 2 + 1], mtx);
+    effParamWorkCallback2((u32)work->handle[index * 2], mtx);
+    effParamWorkCallback2((u32)work->handle[index * 2 + 1], mtx);
     mdlAddEntryPlain(effParamWorkGetData(work->handle[index * 2]), 0, 0);
     mdlAddEntryPlain(effParamWorkGetData(work->handle[index * 2 + 1]), 0, 0);
     work->offset[index] = effMiscRandUnitFloat(D_003AA868) * 150.0f;
@@ -903,7 +899,7 @@ void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index) {
 
 EffPCPStaggered *effPcpStaggerCreate(void *args) {
     EffPCPStaggered *work = sdfAllocSizeClassBlock(0x98);
-    u32 *handle = &work->handle[1];
+    EffParamWork **handle = &work->handle[1];
     s32 i = 0;
 
     do {
@@ -926,7 +922,7 @@ EffPCPStaggered *effPcpStaggerCreate(void *args) {
 }
 
 void effPcpStaggerRelease(EffPCPStaggered *work) {
-    s32 *p = (s32 *)&work->handle[1];
+    EffParamWork **p = &work->handle[1];
     s32 i;
 
     for (i = 0; i < 8; i++) {
@@ -939,7 +935,7 @@ void effPcpStaggerRelease(EffPCPStaggered *work) {
 
 EffPCPStaggered *effCreatePairedResourceWork(EffPCPStaggered *source) {
     EffPCPStaggered *work = sdfAllocSizeClassBlock(0x98);
-    u32 *handle = &work->handle[1];
+    EffParamWork **handle = &work->handle[1];
     s32 i = 0;
 
     do {
@@ -973,8 +969,8 @@ void effPcpStaggerUpdate(EffPCPStaggered *work) {
             pos[1] = (work->y - work->offset[i] + 100.0f) * work->scale;
                         VU0_LOAD_VF(vf10, pos);
             mdlStorePrimaryVectorVU(obj[0]);
-            effParamWorkCallback1(work->handle[i * 2], work->scale * 1.5f);
-            effParamWorkCallback1(work->handle[i * 2 + 1], 1.5f);
+            effParamWorkCallback1((u32)work->handle[i * 2], work->scale * 1.5f);
+            effParamWorkCallback1((u32)work->handle[i * 2 + 1], 1.5f);
             mdlBroadcastMasked(obj[1], work->color);
             mdlProcessContextNodesAndTransforms(obj[0], (s32)D_00380828);
             sdfLoadMapRecordPositionVector(obj[0]->inner, 1);
@@ -1014,7 +1010,7 @@ void effCrossArmSpawn(EffPCPCrossWork *work, u32 i, u32 j) {
     }
         VU0_STORE_MATRIX(mtx);
 ;
-    effParamWorkCallback2(work->handle[i][j], mtx);
+    effParamWorkCallback2((u32)work->handle[i][j], mtx);
     if ((j + 1) & 1) {
         work->state[i][j] = 0;
     } else {
@@ -1095,7 +1091,7 @@ void effCrossEffectUpdate(EffPCPCrossWork *work) {
     anchor = effParamWorkGetData(work->base);
     VU0_LOAD_VF(vf10, work);
     mdlStorePrimaryVectorVU(anchor);
-    effParamWorkCallback1(work->base, work->scale);
+    effParamWorkCallback1((u32)work->base, work->scale);
     mdlProcessContextNodesAndTransforms(anchor, (s32)D_00380828);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
@@ -1137,7 +1133,7 @@ void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index) {
 
 EffPCPDelayedPairs *effCreateIndexedResourceWork(void *source) {
     EffPCPDelayedPairs *work = sdfAllocSizeClassBlock(0x60);
-    u32 *handle = &work->handle[1];
+    EffParamWork **handle = &work->handle[1];
     s32 i;
 
     for (i = 0; i < 6; i++) {
@@ -1158,7 +1154,7 @@ EffPCPDelayedPairs *effCreateIndexedResourceWork(void *source) {
 }
 
 void effPcpDelayedPairsRelease(EffPCPDelayedPairs *work) {
-    s32 *p = (s32 *)&work->handle[1];
+    EffParamWork **p = &work->handle[1];
     s32 i;
 
     for (i = 0; i < 6; i++) {
@@ -1170,8 +1166,8 @@ void effPcpDelayedPairsRelease(EffPCPDelayedPairs *work) {
 }
 
 EffPCPDelayedPairs *effCopyIndexedResourceWork(EffPCPDelayedPairs *source) {
-    u32 *sourceHandle;
-    u32 *workHandle;
+    EffParamWork **sourceHandle;
+    EffParamWork **workHandle;
     s32 i;
     EffPCPDelayedPairs *work = sdfAllocSizeClassBlock(0x60);
     sourceHandle = &source->handle[1];
@@ -1257,7 +1253,7 @@ void effPcpChargeReleaseResources(EffPCPChargeWork *work) {
 EffPCPChargeWork *effCopyChargeResources(EffPCPChargeWork *source) {
     SdfMemBlock *resource = sdfAllocGeneralBlock(0x1354);
     EffPCPChargeWork *work = (void *)sdfResourceRetainAddress(resource);
-    u32 firstHandle = source->primaryHandle;
+    EffParamWork *firstHandle = source->primaryHandle;
     work->allocationHandle = resource;
     work->primaryHandle = effParamWorkDuplicate(firstHandle);
     work->secondaryHandle = effParamWorkDuplicate(source->secondaryHandle);
@@ -1295,8 +1291,8 @@ void func_001803E8(EffPCPChargeWork *work) {
     bill = effParamWorkGetData(work->primaryHandle);
     model = effParamWorkGetData(work->secondaryHandle);
     scale = work->scale * 1.5f;
-    effParamWorkCallback1(work->secondaryHandle, scale);
-    effParamWorkCallback0(work->secondaryHandle, work->vectorWords);
+    effParamWorkCallback1((u32)work->secondaryHandle, scale);
+    effParamWorkCallback0((u32)work->secondaryHandle, work->vectorWords);
     mdlProcessContextNodesAndTransforms(model, (s32)D_00380828);
     captureRow = work->historyCount;
     if (captureRow < 25) {
@@ -1350,7 +1346,7 @@ void effPcpChargeSetColor(EffPCPChargeWork *work, u32 value) {
 
 EffPCPSpawnOnceWork *effPcpSpawnOnceCreate(void *src) {
     EffPCPSpawnOnceWork *dst;
-    u32 handle;
+    EffParamWork *handle;
 
     dst = sdfAllocSizeClassBlock(0x1C);
     dst->primaryHandle = effParamCreateFromTable(src, 0);
@@ -1371,7 +1367,7 @@ void effPcpSpawnOnceRelease(EffPCPSpawnOnceWork *work) {
 
 EffPCPSpawnOnceWork *effPcpSpawnOnceClone(EffPCPSpawnOnceWork *src) {
     EffPCPSpawnOnceWork *dst;
-    u32 handle;
+    EffParamWork *handle;
 
     dst = sdfAllocSizeClassBlock(0x1C);
     dst->primaryHandle = effParamWorkDuplicate(src->primaryHandle);
@@ -1391,11 +1387,11 @@ void effPcpSpawnOnce(EffPCPSpawnOnceWork *work) {
     obj = effParamWorkGetData(work->primaryHandle);
         VU0_LOAD_VF_MEMORY(vf10, work);
     mdlStorePrimaryVectorVU(obj);
-    effParamWorkCallback3(work->secondaryHandle, work->color);
+    effParamWorkCallback3((u32)work->secondaryHandle, work->color);
     mdlProcessContextNodesAndTransforms(obj, (s32)D_00380828);
     sdfLoadMapRecordPositionVector(obj->inner, 1);
         VU0_STORE_VF_TO_MEMORY(vf10, vec);
-    effParamWorkCallback0(work->secondaryHandle, &vec);
+    effParamWorkCallback0((u32)work->secondaryHandle, &vec);
     effParamWorkInvokeCallback(work->secondaryHandle);
 }
 
@@ -3388,7 +3384,6 @@ void effPcpTripleHandleSetColor(EffPCPTripleWork *work, u32 value) {
     work->color = value;
 }
 
-extern u32 effParamWorkCreate(s32 kind, void *params);
 
 typedef struct EffPCPBlockModelInfo {
     u8 pad00[0x2E];
@@ -3427,7 +3422,7 @@ EffPCPBlockSetWork *effPcpCreateBlockSetWork(void *first, void **blocks) {
         if (work->params.groupSize[i] > 0) {
             n = work->count * work->params.groupSize[i];
             work->alloc[i] = (u32)sdfAllocGeneralBlock(n * 4);
-            work->list[i] = (void *)sdfResourceRetainAddress((void *)work->alloc[i]);
+            work->list[i] = (EffParamWork **)sdfResourceRetainAddress((void *)work->alloc[i]);
             work->list[i][0] = effParamWorkCreate(0, blocks[6 + i]);
             for (j = 1; j < n; j++) {
                 work->list[i][j] = 0;
@@ -3484,7 +3479,7 @@ void effPcpDuplicateBlockSetHandles(EffPCPBlockSetWork *work, EffPCPBlockSetWork
         if (work->params.groupSize[groupIndex] > 0) {
             groupHandleCount = work->count * work->params.groupSize[groupIndex];
             work->alloc[groupIndex] = (u32)sdfAllocGeneralBlock(groupHandleCount * 4);
-            work->list[groupIndex] = (void *)sdfResourceRetainAddress((void *)work->alloc[groupIndex]);
+            work->list[groupIndex] = (EffParamWork **)sdfResourceRetainAddress((void *)work->alloc[groupIndex]);
             work->list[groupIndex][0] = effParamWorkDuplicate(src->list[groupIndex][0]);
             for (handleIndex = 1; handleIndex < groupHandleCount; handleIndex++) {
                 work->list[groupIndex][handleIndex] = 0;
@@ -3751,7 +3746,7 @@ EffPCPSpinWork *effSpinSingleCreateFromTable(void *src) {
     work->frame = 0;
     work->scale = 1.0f;
     work->color = 0x80808080;
-    work->handle0 = (void *)effParamCreateFromTable(src, 0);
+    work->handle0 = effParamCreateFromTable(src, 0);
     EE_MMI_UNIT_MATRIX(work->matrix);
     work->angle = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 0.87266457f;
     if (effMiscRand(D_003AA868) & 1) {
@@ -3772,29 +3767,29 @@ EffPCPSpinWork *effSpinSingleClone(EffPCPSpinWork *src) {
     if (effMiscRand(D_003AA868) & 1) {
         work->angle += 3.14159265f;
     }
-    work->handle0 = (void *)effParamWorkDuplicate((u32)src->handle0);
+    work->handle0 = effParamWorkDuplicate(src->handle0);
     return work;
 }
 
 void effSpinSingleRelease(EffPCPSpinWork *work) {
-    effDispatchParameterDataAndFreeWork((u32)work->handle0);
+    effDispatchParameterDataAndFreeWork(work->handle0);
     sdfReleaseChipBlock(work);
 }
 
 void effSpinEffectUpdate(EffPCPSpinWork *work) {
-    u32 handle = (u32)work->handle0;
+    EffParamWork *handle = work->handle0;
     u128 mtx[4];
 
-    effParamWorkCallback0(handle, work);
-    effParamWorkCallback1(handle, work->scale);
-    effParamWorkCallback3(handle, work->color);
+    effParamWorkCallback0((u32)handle, work);
+    effParamWorkCallback1((u32)handle, work->scale);
+    effParamWorkCallback3((u32)handle, work->color);
     func_00336538(work->angle);
         VU0_LOAD_MATRIX_B(work->matrix);
 ;
     sdfComposeVuMatrixFromRegisters();
         VU0_STORE_MATRIX(mtx);
 ;
-    effParamWorkCallback2(handle, mtx);
+    effParamWorkCallback2((u32)handle, mtx);
     effParamWorkInvokeCallback(handle);
     work->frame++;
 }
@@ -3823,8 +3818,8 @@ EffPCPSpinWork *effSpinEffectCreateFromTable(void *table) {
     work->frame = 0;
     work->scale = 1.0f;
     work->color = 0x80808080;
-    work->handle0 = (void *)effParamCreateFromTable(table, 0);
-    work->handle1 = (void *)effParamCreateFromTable(table, 1);
+    work->handle0 = effParamCreateFromTable(table, 0);
+    work->handle1 = effParamCreateFromTable(table, 1);
     EE_MMI_UNIT_MATRIX(work->matrix);
     work->angle = 2.0f * (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 0.87266457f;
     return work;
@@ -3836,16 +3831,16 @@ EffPCPSpinWork *effSpinEffectClone(EffPCPSpinWork *src) {
     work->scale = 1.0f;
     work->frame = 0;
     work->color = 0x80808080;
-    work->handle0 = (void *)effParamWorkDuplicate((u32)src->handle0);
-    work->handle1 = (void *)effParamWorkDuplicate((u32)src->handle1);
+    work->handle0 = effParamWorkDuplicate(src->handle0);
+    work->handle1 = effParamWorkDuplicate(src->handle1);
     EE_MMI_UNIT_MATRIX(work->matrix);
     work->angle = 2.0f * (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 0.87266457f;
     return work;
 }
 
 void effSpinPairRelease(EffPCPSpinWork *work) {
-    effDispatchParameterDataAndFreeWork((u32)work->handle1);
-    effDispatchParameterDataAndFreeWork((u32)work->handle0);
+    effDispatchParameterDataAndFreeWork(work->handle1);
+    effDispatchParameterDataAndFreeWork(work->handle0);
     sdfReleaseChipBlock(work);
 }
 
@@ -3853,25 +3848,25 @@ void effSpinPairRelease(EffPCPSpinWork *work) {
  * handles, rebuilds the rotation matrix from the angle and hands it over. The
  * VU0 blocks are bare asm (no "memory" clobber), as the original macros were. */
 void effSpinPairUpdateDelayed(EffPCPSpinWork *work) {
-    u32 handle[2];
+    EffParamWork *handle[2];
     u128 mtx[4];
 
-    handle[0] = (u32)work->handle0;
-    handle[1] = (u32)work->handle1;
-    effParamWorkCallback0(handle[0], work);
-    effParamWorkCallback0(handle[1], work);
-    effParamWorkCallback1(handle[0], work->scale);
-    effParamWorkCallback1(handle[1], work->scale);
-    effParamWorkCallback3(handle[0], work->color);
-    effParamWorkCallback3(handle[1], work->color);
+    handle[0] = work->handle0;
+    handle[1] = work->handle1;
+    effParamWorkCallback0((u32)handle[0], work);
+    effParamWorkCallback0((u32)handle[1], work);
+    effParamWorkCallback1((u32)handle[0], work->scale);
+    effParamWorkCallback1((u32)handle[1], work->scale);
+    effParamWorkCallback3((u32)handle[0], work->color);
+    effParamWorkCallback3((u32)handle[1], work->color);
     func_00336538(work->angle);
             VU0_LOAD_MATRIX_B(work->matrix);
 
     sdfComposeVuMatrixFromRegisters();
             VU0_STORE_MATRIX_UNCLOBBERED(mtx);
 
-    effParamWorkCallback2(handle[0], mtx);
-    effParamWorkCallback2(handle[1], mtx);
+    effParamWorkCallback2((u32)handle[0], mtx);
+    effParamWorkCallback2((u32)handle[1], mtx);
     effParamWorkInvokeCallback(handle[0]);
     if (work->frame >= 0x1F) {
         effParamWorkInvokeCallback(handle[1]);
@@ -3903,8 +3898,8 @@ EffPCPSpinWork *effPcpCreateSpinningPair(void *table) {
     work->frame = 0;
     work->scale = 1.0f;
     work->color = 0x80808080;
-    work->handle0 = (void *)effParamCreateFromTable(table, 0);
-    work->handle1 = (void *)effParamCreateFromTable(table, 1);
+    work->handle0 = effParamCreateFromTable(table, 0);
+    work->handle1 = effParamCreateFromTable(table, 1);
     EE_MMI_UNIT_MATRIX(work->matrix);
     work->angle = 2.0f * (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 0.87266457f;
     return work;
@@ -3916,40 +3911,40 @@ EffPCPSpinWork *effPcpCloneSpinningPair(EffPCPSpinWork *src) {
     work->scale = 1.0f;
     work->frame = 0;
     work->color = 0x80808080;
-    work->handle0 = (void *)effParamWorkDuplicate((u32)src->handle0);
-    work->handle1 = (void *)effParamWorkDuplicate((u32)src->handle1);
+    work->handle0 = effParamWorkDuplicate(src->handle0);
+    work->handle1 = effParamWorkDuplicate(src->handle1);
     EE_MMI_UNIT_MATRIX(work->matrix);
     work->angle = 2.0f * (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 0.87266457f;
     return work;
 }
 
 void effPcpReleaseSpinningPair(EffPCPSpinWork *work) {
-    effDispatchParameterDataAndFreeWork((u32)work->handle1);
-    effDispatchParameterDataAndFreeWork((u32)work->handle0);
+    effDispatchParameterDataAndFreeWork(work->handle1);
+    effDispatchParameterDataAndFreeWork(work->handle0);
     sdfReleaseChipBlock(work);
 }
 
 /* Identical update for the second spin effect. */
 void effPcpUpdateSpinningPair(EffPCPSpinWork *work) {
-    u32 handle[2];
+    EffParamWork *handle[2];
     u128 mtx[4];
 
-    handle[0] = (u32)work->handle0;
-    handle[1] = (u32)work->handle1;
-    effParamWorkCallback0(handle[0], work);
-    effParamWorkCallback0(handle[1], work);
-    effParamWorkCallback1(handle[0], work->scale);
-    effParamWorkCallback1(handle[1], work->scale);
-    effParamWorkCallback3(handle[0], work->color);
-    effParamWorkCallback3(handle[1], work->color);
+    handle[0] = work->handle0;
+    handle[1] = work->handle1;
+    effParamWorkCallback0((u32)handle[0], work);
+    effParamWorkCallback0((u32)handle[1], work);
+    effParamWorkCallback1((u32)handle[0], work->scale);
+    effParamWorkCallback1((u32)handle[1], work->scale);
+    effParamWorkCallback3((u32)handle[0], work->color);
+    effParamWorkCallback3((u32)handle[1], work->color);
     func_00336538(work->angle);
             VU0_LOAD_MATRIX_B(work->matrix);
 
     sdfComposeVuMatrixFromRegisters();
             VU0_STORE_MATRIX_UNCLOBBERED(mtx);
 
-    effParamWorkCallback2(handle[0], mtx);
-    effParamWorkCallback2(handle[1], mtx);
+    effParamWorkCallback2((u32)handle[0], mtx);
+    effParamWorkCallback2((u32)handle[1], mtx);
     effParamWorkInvokeCallback(handle[0]);
     if (work->frame >= 0x1F) {
         effParamWorkInvokeCallback(handle[1]);
@@ -4861,7 +4856,7 @@ typedef struct EffPCPGroupSet {
     f32 scale;            /* 0x168: multiplies start/end positions */
     f32 unk16C;
     u32 color;           /* 0x170 */
-    u32 *duplicates;     /* 0x174: four groups of handles */
+    EffParamWork **duplicates; /* 0x174: four groups of parameter work */
     void *duplicateHandle;
     void *workHandle;
 } EffPCPGroupSet;
@@ -4894,13 +4889,13 @@ EffPCPGroupSet *effPcpGroupSetCreate(EffPCPGroupHead *header, u32 *sourceResourc
         activeGroupFlags = header->activeGroups;
         groupByteOffset = 0;
         groupByteWidth = entryCount * 4;
-        groupSet->duplicates = (void *)sdfResourceRetainAddress(groupSet->duplicateHandle);
+        groupSet->duplicates = (EffParamWork **)sdfResourceRetainAddress(groupSet->duplicateHandle);
         memset(groupSet->duplicates, 0, allocationBytes);
         for (; index < 4; index++) {
-            u32 *destinationHandles = (u32 *)((u8 *)groupSet->duplicates + groupByteOffset);
+            EffParamWork **destinationHandles = (EffParamWork **)((u8 *)groupSet->duplicates + groupByteOffset);
 
             if (*activeGroupFlags != 0) {
-                u32 firstCreatedHandle;
+                EffParamWork *firstCreatedHandle;
 
                 if (index < 2) {
                     *destinationHandles = effParamWorkCreate(0, (void *)*sourceResourceCursor);
@@ -4960,13 +4955,13 @@ EffPCPGroupSet *effBlockSetCloneWithDuplicates(EffPCPGroupSet *work) {
         activeGroupFlags = work->head.activeGroups;
         groupByteOffset = 0;
         groupSet->duplicateHandle = sdfAllocGeneralBlock(allocationBytes);
-        groupSet->duplicates = (void *)sdfResourceRetainAddress(groupSet->duplicateHandle);
+        groupSet->duplicates = (EffParamWork **)sdfResourceRetainAddress(groupSet->duplicateHandle);
         memset(groupSet->duplicates, 0, allocationBytes);
         for (; groupIndex < 4; groupIndex++) {
-            u32 *destinationHandles = (u32 *)((u8 *)groupSet->duplicates + groupByteOffset);
+            EffParamWork **destinationHandles = (EffParamWork **)((u8 *)groupSet->duplicates + groupByteOffset);
 
             if (*activeGroupFlags != 0) {
-                u32 sourceHandle = *(u32 *)(groupByteOffset + (u32)work->duplicates);
+                EffParamWork *sourceHandle = *(EffParamWork **)(groupByteOffset + (u32)work->duplicates);
                 for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
                     *destinationHandles++ = effParamWorkDuplicate(sourceHandle);
                 }
@@ -4982,8 +4977,8 @@ void effBlockSetRelease(EffPCPGroupSet *work) {
     u32 releaseIndex = 0;
     u32 releaseCount = work->head.count;
     EffPCPGroupEntry *fragmentEntryCursor = work->entries;
-    u32 *duplicateHandleBase;
-    u32 *duplicate;
+    EffParamWork **duplicateHandleBase;
+    EffParamWork **duplicate;
 
     if (releaseCount != 0) {
         do {
@@ -5000,7 +4995,7 @@ void effBlockSetRelease(EffPCPGroupSet *work) {
         releaseIndex = 0;
         if (releaseCount != 0) {
             do {
-                u32 currentHandle = *duplicate++;
+                EffParamWork *currentHandle = *duplicate++;
                 if (currentHandle != 0) {
                     effDispatchParameterDataAndFreeWork(currentHandle);
                 }
@@ -5085,7 +5080,7 @@ void effDestroyIndexedResources(s32 *obj) {
 
     for (i = 0; i < (u32)obj[6]; i++) {
         if (obj[0x1C + i] != 0) {
-            effDispatchParameterDataAndFreeWork(obj[0x1C + i]);
+            effDispatchParameterDataAndFreeWork((EffParamWork *)obj[0x1C + i]);
         }
     }
     sdfReleaseChipBlock(obj);
@@ -5112,7 +5107,7 @@ typedef struct EffPCPPulseWork {
     s32 frame;              /* 0x1C */
     s32 startFrame[10];     /* 0x20 */
     f32 rotY[10];           /* 0x48 */
-    u32 handle[10];         /* 0x70 */
+    EffParamWork *handle[10];   /* 0x70 */
 } EffPCPPulseWork;
 
 typedef struct EffPCPPulseHead {
@@ -6036,7 +6031,7 @@ typedef struct {
     EffPCPMapEventEntry *entries;
     SdfMemBlock *entriesHandle;
     SoundMixer *owner;
-    u32 modelResource;
+    EffParamWork *modelResource;
     f32 scale;
     s32 frame;
     s32 frameLimit;
