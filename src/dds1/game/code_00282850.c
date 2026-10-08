@@ -1,6 +1,7 @@
 #include "mnu_input.h"
 #include "eff_resource_slots.h"
 #include "common.h"
+#include "sdf_dev_state.h"
 #include "dds3obj.h"
 #include "sdf.h"
 #include "sdf_projection.h"
@@ -2592,7 +2593,7 @@ s32 btlDestroyStageTask(taskWork)
     if (taskWork->kind == EVT_STAGE_RESOURCE_TASK_KIND) {
         s32 resource = taskWork->resource;
         if (resource != 0) {
-            sdfDevQueueReleaseState(resource);
+            sdfDevQueueReleaseState((DevState *)resource);
         }
         func_002EDC50(taskWork->payload);
         sdfReleaseChipBlock(taskWork->allocation);

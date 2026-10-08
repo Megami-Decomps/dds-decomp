@@ -7,6 +7,7 @@
 #include "sdf_chip.h"
 #include "eff_curve.h"
 #include "file.h"
+#include "sdf_dev_state.h"
 #include "file_slot.h"
 #include "dat_state.h"
 #include "pcp_vu0.h"
@@ -140,12 +141,7 @@ extern void *fileDuplicateJob(void *);
 struct SdfMemBlock;
 
 
-typedef struct DevState DevState;
-extern DevState *sdfDevCreateCommandState(s32);
 
-extern u32 sdfDevQueueControlAndWait(DevState *);
-extern void sdfDevQueueReadAndWait(DevState *, void *, s32);
-extern void sdfDevWaitThenReleaseCommandState(DevState *);
 
 extern u32 effModelUpdateControlFlags;
 
@@ -4104,7 +4100,7 @@ void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, s32 state, u16 optio
     s32 handle;
     s32 address;
 
-    command = sdfDevCreateCommandState(state);
+    command = sdfDevCreateCommandState((const char *)state);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
         handle = (u32)sdfAllocGeneralBlock(size);
@@ -4139,7 +4135,7 @@ void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, s32 state, u16 sel
     s32 handle;
     s32 address;
 
-    command = sdfDevCreateCommandState(state);
+    command = sdfDevCreateCommandState((const char *)state);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
         handle = (u32)sdfAllocGeneralBlock(size);
@@ -4203,7 +4199,7 @@ void *fileJobCreateFromCommandState(entry)
     s32 address;
     void *job;
 
-    command = sdfDevCreateCommandState(entry);
+    command = sdfDevCreateCommandState((const char *)entry);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
         handle = (u32)sdfAllocGeneralBlock(size);

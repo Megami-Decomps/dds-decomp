@@ -676,7 +676,69 @@ void func_003232A0(MenuWorkEntry *entry, MenuByteRecordList *list) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_003233E8);
+extern f32 sdfVectorLength(const f32 *vector);
+
+s32 func_003233E8(s32 context) {
+    MenuRuntimeList *runtimeList = func_00321EC8();
+    MenuProgressParameters *parameters = mnuGetResourceProgressParameters();
+    s32 entryIndex;
+
+    for (entryIndex = 0; entryIndex < mnuWorkEntryPoolCount; entryIndex++) {
+        MenuWorkEntry *entry = (MenuWorkEntry *)mnuWorkEntryPool + entryIndex;
+
+        if (entry->flags & MNU_WORK_ACTIVE) {
+            f32 vector[4];
+            f32 value;
+            f32 previousY;
+            f32 currentX;
+            f32 currentY;
+            s32 currentYInteger;
+            u8 alpha;
+
+            memset(vector, 0, sizeof(vector));
+            /* Save X across advancement, then reuse the scalar for step length. */
+            value = entry->x0;
+            previousY = mnuEvaluateTimedValue(entry);
+            if (mnuAdvanceRegistryWorkEntry(entry) != 0) {
+                continue;
+            }
+
+            currentX = entry->x0;
+            vector[0] = currentX;
+            currentY = (f32)(s32)mnuEvaluateTimedValue(entry);
+            currentYInteger = (s32)currentY;
+            vector[0] -= value;
+            vector[1] = currentY - previousY;
+            value = sdfVectorLength(vector);
+            if (value * 10.0f >= 255.0f) {
+                alpha = 255;
+            } else {
+                alpha = (u8)((u8)value * 10.0f);
+            }
+            /* The high byte stores the movement alpha. */
+            ((u8 *)&entry->unk38)[1] = alpha;
+
+            if (entry->x0 < -50.0f || (f32)parameters->width + 50.0f < entry->x0 ||
+                (f32)currentYInteger < -200.0f ||
+                (f32)parameters->height + 64.0f < (f32)currentYInteger) {
+                entry->flagsBits.pendingDeactivate = 1;
+            }
+
+            if (context == 0) {
+                func_00321688(entry->callback, (u32)runtimeList,
+                              (s32)entry->x0, currentYInteger, entry->scale0);
+            }
+
+            if (entry->flagsBits.unk5) {
+                entry->flagsBits.unk6++;
+                if (entry->flagsBits.unk6 >= 11) {
+                    entry->flagsBits.unk6 = 0;
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 void mnuVisitActiveWorkAndEffectEntry(s32 context) {
     s32 entryIndex;
