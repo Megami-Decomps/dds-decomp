@@ -11,6 +11,20 @@ typedef struct BtlCamState {
     f32 fov;          /* 0x24 */
 } BtlCamState;
 
+/* Exponential interpolation also supplies the actor-panel expansion scale. */
+typedef struct BtlExponentialRange {
+    f32 start; /* 0x00: span */
+    f32 end;   /* 0x04: current progress */
+} BtlExponentialRange;
+
+typedef struct BtlScalarRange {
+    f32 start;       /* 0x00: initial span */
+    f32 end;         /* 0x04: remaining span */
+    f32 inverseSpan; /* 0x08: quadratic acceleration */
+    f32 velocity;    /* 0x0C */
+    f32 value;       /* 0x10: accumulated progress */
+} BtlScalarRange;
+
 /* Linked motion command shared by actor selection, action cameras and aim.
  * It is not a BtlUnit or its owner. All three camera offsets are common to
  * both games; DDS2 inserts 0x20 bytes before the control fields. */
@@ -35,11 +49,15 @@ typedef struct BtlLinkedCommand {
     s32 actionCode;          /* 0x114 */
     BtlIndexList *targetList; /* 0x118: indexed target list */
     s32 motionProgress;      /* 0x11C: one-shot aim latch */
-    u8 pad120[0xC];
+    u8 pad120[8];
+    union {
+        s32 progressBits;
+        f32 progress;
+    };                      /* 0x128: initialized as bits, interpolated as float */
     s32 durationFrames;       /* 0x12C */
     f32 motionParameter;     /* 0x130: aim setup stores 10 */
-    u8 pad134[4];
-    f32 panelScale;          /* 0x138: corner-frame expansion follows camera transition scale. */
+    BtlExponentialRange exponentialRange; /* 0x134 */
+    BtlScalarRange quadraticRange;        /* 0x13C */
 } BtlLinkedCommand;
 
 BtlTask *btlCreateActionSeq(void);
@@ -83,9 +101,21 @@ typedef struct BtlLinkedCommand {
     };                      /* 0x14C: initialized as bits, interpolated as float */
     s32 durationFrames;      /* 0x150 */
     f32 motionParameter;     /* 0x154: aim setup stores 10 */
-    u8 pad158[4];
-    f32 panelScale;          /* 0x15C: corner-frame expansion follows camera transition scale. */
+    BtlExponentialRange exponentialRange; /* 0x158 */
+    BtlScalarRange quadraticRange;        /* 0x160 */
 } BtlLinkedCommand;
 #endif /* VERSION_DDS2 */
+
+void btlScalarRangeSetStartClearEnd(BtlExponentialRange *state, f32 start);
+f32 btlScalarRangeStepExponential(BtlExponentialRange *state);
+void btlScalarRangeInitQuadratic(BtlScalarRange *state, f32 start);
+f32 btlScalarRangeStepQuadratic(BtlScalarRange *state, f32 timeStep);
+
+#if defined(VERSION_DDS1) || defined(VERSION_DDS2)
+s32 btlStepPoseBlendHalf(BtlLinkedCommand *command);
+s32 btlStepPoseBlend(BtlLinkedCommand *command);
+s32 btlStepPoseBlendFrame(BtlLinkedCommand *command);
+s32 btlStepPoseBlendRatio(BtlLinkedCommand *command);
+#endif
 
 #endif /* BTL_COMMAND_H */

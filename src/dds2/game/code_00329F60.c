@@ -210,7 +210,66 @@ void sdfSetBufferSlot(s32 updateSingleSlot, s32 bufferIndex, s32 slotIndex) {
     sdfBusyBufferIndex = SDF_NO_BUSY_BUFFER;
 }
 
-INCLUDE_ASM(const s32, "game/code_00329F60", func_0032A230);
+extern s8 D_0043913C;
+extern s8 D_0043913D;
+extern volatile s32 sdfGsImageUploadSemaphore;
+extern volatile u8 D_00438A1D;
+extern volatile u8 D_00438A1C;
+extern u16 D_00438A1E;
+extern s32 sdfAddHandler(s32, s32, s32 (*)(s32), s32, s32);
+extern s32 func_003668B8(s32);
+extern s32 GetThreadId(void);
+extern s32 CancelWakeupThread(s32);
+extern s32 SleepThread(void);
+extern s32 WaitSema(s32);
+extern s32 SignalSema(s32);
+extern u32 func_003287E0(void);
+extern u32 sdfGetElapsedTimerTicks(u32);
+extern void sdfGraphRecreateBuffers(SdfGraphObj *);
+extern void func_00329ED0(void);
+extern void func_0032DEC8(void);
+extern s32 func_00329F30(s32);
+extern void sceGsResetPath(void);
+
+void func_0032A230(void) {
+    u32 startTicks;
+
+    D_004389E1 = 0;
+    sdfAddHandler(1, 1, func_00329F30, -1, 0);
+    func_003668B8(1);
+    for (;;) {
+        CancelWakeupThread(GetThreadId());
+        D_004389E1 = 1;
+        SleepThread();
+        startTicks = func_003287E0();
+        WaitSema(sdfGsImageUploadSemaphore);
+        if (D_0043913C != 0) {
+            D_0043913C = 0;
+            sdfGraphRecreateBuffers(&D_0040B290);
+        }
+        if (D_0043913D != 0) {
+            D_0043913D = 0;
+            func_00329ED0();
+        }
+        D_00438A1D = 1;
+        func_0032DEC8();
+        D_00438A1D = 0;
+        if (D_00438A1C != 0) {
+            /* Preserve the controller enable state while stopping VIF1. */
+            u32 enabledChannels = *(volatile u32 *)0x1000F520;
+            *(volatile u32 *)0x1000F590 = 0x10000;
+            *(volatile u32 *)0x10009000 = 0;
+            *(volatile u32 *)0x1000F590 = enabledChannels;
+            sceGsResetPath();
+            *(volatile u64 *)0x12001040 = 0;
+            D_00438A1C = 1;
+        } else {
+            sdfCaptureDeferredGsImage();
+        }
+        SignalSema(sdfGsImageUploadSemaphore);
+        D_00438A1E = sdfGetElapsedTimerTicks(startTicks);
+    }
+}
 
 extern u8 D_004389D1;
 extern s32 D_00439138;
@@ -636,7 +695,7 @@ extern s32 func_003659C0(s32 channel, s32 (*handler)(s32), s32 arg, s32 threadId
 extern void *sceDmaGetChan(s32 channel);
 extern void FlushCache(s32 mode);
 extern void sceDmaSend(void *channel, void *packet);
-extern void SleepThread(void);
+extern s32 SleepThread(void);
 extern s32 RemoveDmacHandler(s32 channel, s32 handlerId);
 extern u8 D_0040B2B0[];
 
