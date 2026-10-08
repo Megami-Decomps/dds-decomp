@@ -1436,8 +1436,8 @@ EffEventBillSet *effEventBillSetCreate(EffEventBillParams *src) {
 void effEventReleaseSharedResources(EffEventBillSet *work) {
     D_003BB140 = D_003BB140 - 1;
     if (D_003BB140 == 0) {
-        billDispatchByKind(D_003BB144);
-        billDispatchByKind(D_003BB148);
+        billDispatchByKind((BillObj *)D_003BB144);
+        billDispatchByKind((BillObj *)D_003BB148);
     }
     sdfReleaseResourceAllocation(work->allocationHandle);
 }

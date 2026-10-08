@@ -430,10 +430,6 @@ extern s32 fileBuildMainBlobAndWrite(void);
 /* 0x40-byte backing region; the browser uses the first ten slot states. */
 extern u32 fileSlotDisplayStates[16];
 
-extern void billDispatchByKind(void *handle);
-
-
-
 
 
 extern void *fileAllocateGridRecordSlots(u16 type, u32 count, void *src);

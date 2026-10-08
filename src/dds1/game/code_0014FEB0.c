@@ -23,7 +23,6 @@ extern void *sdfAllocSizeClassBlock(s32);
 extern s32 D_003BD7F4;
 extern BillObj *effBillResourceOwners[];
 extern BillObj *billCreateFromResource(s32 kind, const char *path);
-extern void billDispatchByKind(BillObj *billboard);
 
 typedef struct EffBillResourceInit {
     s32 resource;
