@@ -35,7 +35,6 @@ extern void func_00272778(s32);
 
 extern void mnuCreateStaffImageSprite(s32);
 
-extern void mnuDrawStaffGridLabelsForKind(s32, s32);
 
 extern void ptySkillMenuCopyPageState(s32);
 
@@ -115,7 +114,7 @@ s32 mnuOpenSkillDetailPanel(KwlnTask *callback) {
     window = menu[9];
     ((MenuWindowContainer *)window)->list->stateFlags |= 8;
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, window, 0x53);
-    mnuDrawStaffGridLabelsForKind(3, *(s32 *)(context + 0x78));
+    mnuDrawStaffGridLabelsForKind(3, (struct EffectSlotSet *)(u32)(*(s32 *)(context + 0x78)));
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
@@ -345,7 +344,7 @@ s32 mnuCampMenuDrawStatus(KwlnTask *param) {
             func_0027A140(label, ((MenuContextSprites *)context)->label68, ((MenuContextSprites *)context)->spriteE0);
         }
     }
-    mnuDrawStaffGridLabelsForKind(2, ((MenuContextSprites *)context)->sprite78);
+    mnuDrawStaffGridLabelsForKind(2, (struct EffectSlotSet *)(u32)(((MenuContextSprites *)context)->sprite78));
     return menuRunPanel((void *)context, 1, (void *)param);
 }
 
