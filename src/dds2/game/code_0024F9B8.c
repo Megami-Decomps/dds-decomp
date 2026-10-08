@@ -7,7 +7,6 @@
 #include "evt_polygon_movie.h"
 #include "file.h"
 
-extern u32 kwlnTaskGetUserValue(KwlnTask *);
 
 extern SdfTex *itfLoadTextureFromAsset(const char *);
 

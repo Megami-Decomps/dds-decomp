@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf.h"
 #include "btl.h"
 #include "btl_state.h"
@@ -27,7 +28,6 @@ typedef struct UiInputState {
 
 extern const char *D_004367CC;
 
-extern u32 kwlnTaskGetUserValue(struct KwlnTask *);
 
 extern struct KwlnTask *kwlnTaskGetTaskByName(const char *name);
 

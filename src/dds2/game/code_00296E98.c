@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 #include "mnu_result.h"
 #include "mnu_list.h"
@@ -680,7 +681,6 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     return work;
 }
 
-extern u32 kwlnTaskGetUserValue();
 extern void effDestroyResourceSlotSet(s32);
 extern s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *);
 extern void brsCloseSkillPackagePanel(BrsSkillPackageWork *);
@@ -688,8 +688,8 @@ extern void func_00303D58(s32);
 extern s32 dspCloseChannel(void);
 
 /* Release the panel and task resources, then mark the result task finished. */
-void brsStaffTaskDestroy(s32 taskArg) {
-    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue();
+void brsStaffTaskDestroy(KwlnTask *taskArg) {
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(taskArg);
 
     if (context->teardownHandle != 0) {
         effDestroyResourceSlotSet(context->teardownHandle);
@@ -709,7 +709,7 @@ extern BrsSkillPackageWork *brsCreateRewardTaskWork(void);
 extern s32 brsMessageInputStep(void *);
 extern s32 mnuStaffRunPanel1(s32);
 extern s32 mnuStaffRunPanel2(s32);
-extern void brsStaffTaskDestroy(s32);
+extern void brsStaffTaskDestroy(KwlnTask *task);
 
 s32 mnuStaffCreateTasks(void) {
     s32 result;
@@ -765,7 +765,7 @@ s32 func_002998D8(void) {
     if (task == 0) {
         return task;
     }
-    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);
+    work = (BrsSkillPackageWork *)kwlnTaskGetUserValue((KwlnTask *)task);
     if (256 - work->fadeProgress <= 0 && brsTaskIsUiUpdateAllowed(work) != 0) {
         if (work->opacityReady == 1) {
             return 1;

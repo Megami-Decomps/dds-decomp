@@ -48,7 +48,6 @@ extern char *btlCommandPanelTaskNameRef;
 
 extern void func_001C7DB8(s32, s32);
 
-extern u32 kwlnTaskGetUserValue();
 
 typedef struct RosterAvailability {
     u8 flags;
@@ -492,10 +491,10 @@ s32 btlUpdateBattleSceneCommands(KwlnTask *task) {
         btlUpdateSceneCommandSelection(object);
         if (btlAreLinkedSceneCountersAtThreshold()) {
             object->commandData->phase = 9;
-            panel = (BattleActorPanelWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC));
+            panel = (BattleActorPanelWork *)kwlnTaskGetUserValue((KwlnTask *)kwlnTaskGetTaskByName(D_004367CC));
             object->commandData->unk18 = panel->partyRecordIndex;
             object->state = 3;
-            ((SceneScriptState *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367B8)))->state = 3;
+            ((SceneScriptState *)kwlnTaskGetUserValue((KwlnTask *)kwlnTaskGetTaskByName(D_004367B8)))->state = 3;
             slot = object->commandData->linkedUnit->lookupId;
             panel->activeEntries[slot].presentation.unkF0 = 0;
             panel->activeEntries[slot].presentation.pendingSceneState = 5;
@@ -534,7 +533,7 @@ BattleSceneObject *fldGetSceneObjectTaskUserData(void) {
     if (handle == 0) {
         return (BattleSceneObject *)handle;
     }
-    return (BattleSceneObject *)kwlnTaskGetUserValue(handle);
+    return (BattleSceneObject *)kwlnTaskGetUserValue((KwlnTask *)handle);
 }
 
 s32 fldGetSceneObjectState(void) {
@@ -957,11 +956,11 @@ s32 btlCreateAiWork(s32 source) {
     s32 count;
     btlGetRuntime();
     work = (SceneAiWork *)sdfAllocAndClearQuadwords(0xA4);
-    object = (BattleSceneObject *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef));
+    object = (BattleSceneObject *)kwlnTaskGetUserValue((KwlnTask *)kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef));
     work->listA = btlAllocateIndexList(0xD);
     work->listB = btlAllocateIndexList(0xD);
     if (object->state == 8) {
-        other = (BattleActorPanelWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_004367CC));
+        other = (BattleActorPanelWork *)kwlnTaskGetUserValue((KwlnTask *)kwlnTaskGetTaskByName(D_004367CC));
         count = btlCountFlaggedSceneActors();
         if (count < 2 && (datGameState->party[other->partyRecordIndex].status & 0x4800)) {
             func_001AC0F8(source, work->listA, 1, 4, -0x4801);
@@ -1006,7 +1005,7 @@ u32 fldGetSceneScriptTaskUserData(void) {
     if (handle == 0) {
         return handle;
     }
-    return kwlnTaskGetUserValue(handle);
+    return kwlnTaskGetUserValue((KwlnTask *)handle);
 }
 
 u32 fldGetSceneScriptState(void) {

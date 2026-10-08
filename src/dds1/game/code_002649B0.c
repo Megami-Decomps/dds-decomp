@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln.h"
 #include "eff.h"
 #include "mnu_result.h"
 #include "itf.h"
@@ -12,8 +13,8 @@ extern void func_00263B78(BrsSkillPackageWork *, s32);
 
 /* The dispatcher consumes the inline work area and its adjacent status word. */
 
-s32 itfRunPanelMode1(void *request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 itfRunPanelMode1(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
     mnuDrawItemPanelBackdrop(panel);
@@ -21,12 +22,11 @@ s32 itfRunPanelMode1(void *request) {
     return func_00285670(&panel->transition, &panel->transition.state, 1, request);
 }
 
-extern s32 kwlnTaskGetUserValue();
 
 extern void func_0024DC98(s32);
 
-s32 itfRunPanelMode2(void *request) {
-    s32 context = kwlnTaskGetUserValue();
+s32 itfRunPanelMode2(KwlnTask *request) {
+    s32 context = kwlnTaskGetUserValue(request);
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
     func_0024DC98(0);
