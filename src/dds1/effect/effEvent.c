@@ -4,6 +4,7 @@
 #include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff.h"
+#include "eff_math.h"
 #include "eff_channel.h"
 #include "eff_event.h"
 #include "pcp_vu0.h"
@@ -1185,9 +1186,7 @@ void effEventSetState(EffEventWork *work, void *actor) {
     work->actor = actor;
 }
 
-extern void func_00190328(EffEventWork *work);
-
-INCLUDE_ASM(const s32, "effect/effEvent", func_00190328);
+INCLUDE_ASM(const s32, "effect/effEvent", effEventUpdateEffectParameters);
 
 /* 0x3C-byte event holder: a handle, the event it owns, an init block copied to the event. */
 typedef struct EffEventLight {
@@ -1244,7 +1243,7 @@ EffEventLight *effEventLightClone(EffEventLight *src) {
 
 /* Apply the native owner operation to the pointer stored in the record prefix. */
 void func_00190810(EffEventLight *work) {
-    func_00190328(work->owner);
+    effEventUpdateEffectParameters(work->owner);
 }
 
 /* Copy xyz, lower y by half the aim height, clear w and publish the record. */
@@ -1562,12 +1561,11 @@ void effEventInstallBillParticleSet(void) {
     effEventBillSetCreate(D_003563F0);
 }
 
-extern void *effAllocSlotArray(u32);
 extern void *effParamWorkCreate(u16, void *);
 extern void *effParamWorkDuplicate(void *);
 
-void *effEventCreateChannelFromParams(void *source, u16 kind, void *params) {
-    EffChanHead *head = source;
+EffChanWork *effEventCreateChannelFromParams(const EffChanHead *source, u16 kind, void *params) {
+    const EffChanHead *head = source;
     u32 recordCount = head->count;
     SdfMemBlock *allocation = sdfAllocGeneralBlock(recordCount * sizeof(EffChanRecord) + sizeof(EffChanWork));
     EffChanWork *work = (EffChanWork *)sdfResourceRetainAddress(allocation);

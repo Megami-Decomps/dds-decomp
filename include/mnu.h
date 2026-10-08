@@ -193,6 +193,15 @@ typedef struct MenuSprites {
 #endif
 } MenuSprites;
 
+#ifdef VERSION_DDS2
+MenuSprites *mnuCreatePageSpriteSet(s32 kind,
+                                    struct EffectSlotSet *mainResource,
+                                    struct EffectSlotSet *itemResource,
+                                    struct EffectSlotSet *iconResource,
+                                    struct EffectSlotSet *cursorResource,
+                                    struct EffectSlotSet *alternateResource);
+#endif
+
 #ifndef VERSION_DDS2
 typedef char MenuSprites_dds1_size_check[
     sizeof(MenuSprites) == 0x50 ? 1 : -1];

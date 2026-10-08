@@ -105,7 +105,6 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 
 extern s32 func_002C6CE8(void);
 
-extern struct MenuIconState *func_002B9FF8();
 extern void mnuReleaseResourceList(struct MenuIconState *list);
 
 extern u32 effCreateStatusBatch(u32);
@@ -722,7 +721,7 @@ void mnuSetPanelCornerGeometry(MenuPanelState *panel, s32 x, s32 y, EffectSlotSe
 }
 
 void mnuInitializePanelResource(MenuPanelState *panel, s32 resource) {
-    panel->resourceHandle = func_002B9FF8(5, resource);
+    panel->resourceHandle = mnuCreatePanelIconState(5, resource);
 }
 
 void func_002C08E0(MenuPanelState *panel, u32 valueA, u32 valueB, EffectSlotSet *resource,
