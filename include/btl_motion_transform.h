@@ -8,6 +8,11 @@ void btlCopyMotionTransform(BtlCamState *destination, BtlCamState *source);
 /* Field of view is stored in radians. */
 void btlSetMotionTransformFieldOfView(BtlCamState *object, f32 fovRadians);
 
+/* Adjusts the direction using a horizontal plane at the supplied Y coordinate.
+ * Returns one when the direction changes; the default plane is Y = -20. */
+s32 btlAdjustCameraDirectionForPlane(BtlCamState *state, f32 height);
+s32 btlAdjustCameraDirectionForDefaultPlane(BtlCamState *state);
+
 /* Both vector inputs contain four floats; direction supplies a quaternion.
  * Initializes the camera pose and clears the runtime motion-update flag. */
 void btlInitMotionTransformFromVectors(BtlCamState *object, f32 *origin,

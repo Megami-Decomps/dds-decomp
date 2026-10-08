@@ -5011,8 +5011,8 @@ s32 btlStepPoseBlendRatio(BtlLinkedCommand *command) {
     return 0;
 }
 
-/* VU0 math: constrain the pose direction at the fixed -20 height plane. */
-s32 func_001E88A8(BtlCamState *state) {
+/* Adjust the pose direction when projected camera height is above Y = -20. */
+s32 btlAdjustCameraDirectionForDefaultPlane(BtlCamState *state) {
     f32 vector[4];
     f32 direction[4];
     f32 length = state->distance;
@@ -5051,8 +5051,8 @@ s32 func_001E88A8(BtlCamState *state) {
     return changed;
 }
 
-/* VU0 math: constrain the pose direction using a horizontal height plane. */
-s32 func_001E89E0(BtlCamState *state, f32 height) {
+/* Adjust the pose direction using the supplied horizontal height plane. */
+s32 btlAdjustCameraDirectionForPlane(BtlCamState *state, f32 height) {
     f32 vector[4];
     f32 direction[4];
     f32 length = state->distance;
@@ -6233,7 +6233,7 @@ void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
             action->state = 0;
             action->motionParameter = 30.0f;
         }
-        func_001E88A8((BtlCamState *)out);
+        btlAdjustCameraDirectionForDefaultPlane((BtlCamState *)out);
         return;
     }
     if (action->stepKind == 0xD) {
@@ -6544,8 +6544,8 @@ void func_001ECCB0(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to)
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, to->direction);
 
-        func_001E88A8(from);
-        func_001E88A8(to);
+        btlAdjustCameraDirectionForDefaultPlane(from);
+        btlAdjustCameraDirectionForDefaultPlane(to);
         if (btlHasMarkedEntry10((s32)action)) {
             action->durationFrames = func_001E2E58(unit, unit->unkEC);
             action->flags |= 0x11;
@@ -6610,8 +6610,8 @@ void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *action, BtlCamState 
         VU0_LOAD_VF(vf10, D_003E9130);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, to->direction);
-        func_001E88A8(from);
-        func_001E88A8(to);
+        btlAdjustCameraDirectionForDefaultPlane(from);
+        btlAdjustCameraDirectionForDefaultPlane(to);
         action->motionParameter = poses[pose][9];
         action->flags |= 0x41;
     }
@@ -6624,7 +6624,7 @@ void btlAimEffectPoseAtUnit(u8 *fx) {
             btlUnitGetMuzzlePosVU(unit);
         }
         VU0_STORE_VF_UNCLOBBERED(vf10, &((BtlLinkedCommand *)fx)->backCamera);
-        func_001E88A8(&((BtlLinkedCommand *)fx)->backCamera);
+        btlAdjustCameraDirectionForDefaultPlane(&((BtlLinkedCommand *)fx)->backCamera);
     }
 }
 
@@ -6687,7 +6687,7 @@ void func_001ED380(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
         VU0_LOAD_VF(vf10, D_003E9130);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, to->direction);
-        func_001E88A8(to);
+        btlAdjustCameraDirectionForDefaultPlane(to);
         action->durationFrames = func_001E2E58(unit, unit->unkEC);
         action->flags |= 0x815;
         action->motionProgress = 0;
@@ -6705,7 +6705,7 @@ void btlRefreshActionPoseBlendSnapshot(BtlLinkedCommand *action) {
         action->state = 0;
         action->motionProgress = 1;
         action->motionParameter = 40.0f;
-        func_001E88A8(saved);
+        btlAdjustCameraDirectionForDefaultPlane(saved);
     }
 }
 
@@ -6773,8 +6773,8 @@ void func_001ED6C8(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
             }
             from->distance += 75.0f;
         }
-        func_001E88A8(to);
-        func_001E88A8(from);
+        btlAdjustCameraDirectionForDefaultPlane(to);
+        btlAdjustCameraDirectionForDefaultPlane(from);
         action->motionParameter = 20.0f;
         action->flags |= 0x845;
         action->motionProgress = 0;
@@ -6807,8 +6807,8 @@ void btlSetupCameraPoseAimUnit(BtlLinkedCommand *action, BtlCamState *from, BtlC
     to->distance += 550.0f;
     action->flags = (action->flags & ~0x14) | 0x41;
     action->motionParameter = 25.0f;
-    func_001E88A8(from);
-    func_001E88A8(to);
+    btlAdjustCameraDirectionForDefaultPlane(from);
+    btlAdjustCameraDirectionForDefaultPlane(to);
 }
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001EDC38);
@@ -7018,7 +7018,7 @@ void btlBuildApproachCamera(BtlLinkedCommand *action, BtlCamState *out) {
     VU0_LOAD_VF(vf10, dir);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, out->direction);
-    func_001E89E0(out, -10.0f);
+    btlAdjustCameraDirectionForPlane(out, -10.0f);
 }
 
 void btlSetupActionCameraPair(BtlLinkedCommand *command) {
@@ -7102,7 +7102,7 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
         action->motionProgress = 1;
         action->motionParameter = 10.0f;
         action->state = 0;
-        func_001E88A8(out);
+        btlAdjustCameraDirectionForDefaultPlane(out);
     } else {
         extent = target->reach * target->scale * 2.25f;
         out->fov = action->camera.fov;
@@ -7131,7 +7131,7 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
         VU0_LOAD_VF(vf10, dir);
         VU0_APPLY_MATRIX(vf10, vf10);
         VU0_STORE_VF(vf10, out->direction);
-        func_001E88A8(out);
+        btlAdjustCameraDirectionForDefaultPlane(out);
     }
 }
 
@@ -7258,7 +7258,7 @@ void func_001F17C8(BtlLinkedCommand *action, BtlCamState *pose,
     }
 
     pose->distance += action->cameraDistanceOffset;
-    func_001E88A8(pose);
+    btlAdjustCameraDirectionForDefaultPlane(pose);
 }
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001F1B00);
@@ -7360,8 +7360,8 @@ void func_001F20C8(BtlCamState *source, BtlCamState *from, BtlCamState *to) {
     VU0_STORE_VF(vf10, to->direction);
     to->distance = length + selected->unkC0 * selected->scale * 3.0f /
                             func_00353228(fov * 0.5f);
-    func_001E88A8(from);
-    func_001E88A8(to);
+    btlAdjustCameraDirectionForDefaultPlane(from);
+    btlAdjustCameraDirectionForDefaultPlane(to);
 }
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001F2308);
@@ -7397,7 +7397,7 @@ void btlBuildGroupFramingCameraPose(BtlCamState *source, BtlCamState *out) {
         span = 250.0f;
     }
     out->distance = span / func_00353228(fov * 0.5f);
-    func_001E88A8(out);
+    btlAdjustCameraDirectionForDefaultPlane(out);
 }
 
 void btlResetUnitEffectVector(BtlLinkedCommand *command, BtlCamState *pose) {
@@ -7480,7 +7480,7 @@ void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *action, BtlCamState *
     VU0_LOAD_VF(vf10, dir);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, out->direction);
-    func_001E88A8(out);
+    btlAdjustCameraDirectionForDefaultPlane(out);
 }
 
 void func_001F34C8(BtlLinkedCommand *action, BtlCamState *camera) {
@@ -7559,8 +7559,8 @@ void func_001F35C8(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to)
         VU0_LOAD_VF(vf10, D_003E9130);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, to->direction);
-        func_001E88A8(from);
-        func_001E88A8(to);
+        btlAdjustCameraDirectionForDefaultPlane(from);
+        btlAdjustCameraDirectionForDefaultPlane(to);
         motionParameter = presets.poses[pose].motionParameter;
         action->motionProgress = 0;
         action->flags |= 0x41;
@@ -7735,7 +7735,7 @@ void func_001F3E48(s32 argument) {
         action->camera.distance = savedDistance * ratio;
         base = D_003B6E50[unitId].mode[selectedMode].distanceOffset + savedDistance * (1.0f - ratio);
         action->camera.distance += base * progress;
-        func_001E88A8(&action->camera);
+        btlAdjustCameraDirectionForDefaultPlane(&action->camera);
         action->flags &= ~1;
         action->flags &= ~0x80000;
     } else {

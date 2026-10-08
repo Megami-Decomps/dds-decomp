@@ -134,6 +134,18 @@ typedef struct FrFontSpritePacket {
 extern FrFontSystem frFontWork;
 extern FntList frFontResourceList;
 
+/* Retain a glyph in the slot selected by the active draw-buffer index. */
+s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *glyph);
+
+#ifdef VERSION_DDS1
+struct FrFontGlyph *func_00197748(s32 x, s32 y, s32 depth, s32 colors,
+    const char *text, struct FrFontGlyph *parent);
+#endif
+#ifdef VERSION_DDS2
+struct FrFontGlyph *func_0019F448(s32 x, s32 y, s32 depth, s32 colors,
+    const char *text, struct FrFontGlyph *parent);
+#endif
+
 void frFontBindResourceSections(u8 slotIndex, u8 *resourceBytes,
     struct SdfMemBlock *allocation);
 

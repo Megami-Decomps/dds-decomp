@@ -40,7 +40,6 @@ extern void *btlCreateUnitFadeOutTask(void *, s32, s32);
 
 extern u64 btlStartTask(void *);
 
-extern s32 func_001DB698(BtlCamState *);
 
 extern s8 D_003BB880[];
 
@@ -505,7 +504,6 @@ void btlSelectRandomDefeatCamera(BtlLinkedCommand *command) {
 
 extern void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *, s8, s8, f32, f32, f32);
 
-extern s32 func_001DB698(BtlCamState *);
 
 /* Frame the linked units, extend both camera distances by 500 and mirror origins.
  * The old coordinate50/coordinateE0 names described distance scalars, not height. */
@@ -517,8 +515,8 @@ void btlRaiseLinkedActionPose(BtlLinkedCommand *command) {
     command->flags |= 0x41;
     command->frontCamera.distance += 500.0f;
     command->backCamera.distance += 500.0f;
-    func_001DB698(frontCamera);
-    func_001DB698(backCamera);
+    btlAdjustCameraDirectionForDefaultPlane(frontCamera);
+    btlAdjustCameraDirectionForDefaultPlane(backCamera);
 }
 
 extern BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *);
@@ -771,8 +769,8 @@ s32 func_0020E170(BtlLinkedCommand *command, s8 firstSide, s8 secondSide) {
         command->backCamera.distance += 500.0f;
         command->motionParameter = 30.0f;
         command->flags |= 0x41;
-        func_001DB698(&command->frontCamera);
-        func_001DB698(&command->backCamera);
+        btlAdjustCameraDirectionForDefaultPlane(&command->frontCamera);
+        btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
         return 1;
     }
     if (count >= 2 && firstSide == 1 && secondSide == 0) {
