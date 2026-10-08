@@ -185,7 +185,6 @@ extern s32 D_00435E6C;
 
 extern void mnuDrawCampIconBackdropByKind(s32 kind, KwlnTask *task);
 
-extern s32 effHasFirstTextureHandle();
 
 
 extern void mnuSelectPage(MenuPageWindow *, s32);
@@ -1044,7 +1043,7 @@ s32 mnuStaffPopupUpdate(KwlnTask *callback) {
 s32 mnuDrawStaffCampPageWithImage(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
     StaffMenuRuntime *menu = (StaffMenuRuntime *)((MenuContext *)context)->party;
-    if (effHasFirstTextureHandle(((MenuContext *)context)->resourceHandle)) {
+    if (effHasFirstTextureHandle((EffectSlotSet *)(u32)((MenuContext *)context)->resourceHandle)) {
         mnuDrawCampIconBackdropByKind(0, callback);
     } else {
         mnuDrawCampIconBackdropByKind(1, callback);

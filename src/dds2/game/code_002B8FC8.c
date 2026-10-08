@@ -185,7 +185,6 @@ extern s32 D_00435E6C;
 
 extern void mnuDrawCampIconBackdropByKind();
 
-extern u8 effHasFirstTextureHandle(s32);
 extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
 
 
@@ -2208,7 +2207,7 @@ void func_002BC690(MenuPageWindow *menu, s32 index, s32 kind) {
     }
     resourceIndex = menu->records->slots[index].unk8;
     if (resourceIndex >= 0) {
-        if (effHasFirstTextureHandle((s32)menu->mainResources[resourceIndex]) == 0) {
+        if (effHasFirstTextureHandle(menu->mainResources[resourceIndex]) == 0) {
             effResolveAndReleaseResource((EffectSlotSet *)menu->mainResources[resourceIndex]);
             effResolveAndReleaseResource((EffectSlotSet *)menu->mainResources[resourceIndex + 8]);
         }
@@ -2243,7 +2242,7 @@ void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 preserveResourceHandles) {
     EffectSlotSet **res;
     if (preserveResourceHandles == MNU_WINDOW_SLOT_REFRESH_RELEASE_HANDLES) {
         for (i = 0, res = menu->mainResources; i < 8; i++, res++) {
-            if (effHasFirstTextureHandle((s32)(*res)) != 0) {
+            if (effHasFirstTextureHandle(*res) != 0) {
                 effReleaseTextureHandlesAndResetSlots(*res);
                 effReleaseTextureHandlesAndResetSlots(res[8]);
             }
@@ -2363,7 +2362,7 @@ void mnuResolveUnselectedPageHandles(MenuPageWindow *window) {
             s32 id = window->records->slots[i].unk8;
 
             if (id >= 0) {
-                if (effHasFirstTextureHandle((s32)(window->mainResources[id])) == 0) {
+                if (effHasFirstTextureHandle(window->mainResources[id]) == 0) {
                     effResolveAndReleaseResource((EffectSlotSet *)(window->mainResources[id]));
                     effResolveAndReleaseResource((EffectSlotSet *)(window->mainResources[id + 8]));
                 }
@@ -2382,7 +2381,7 @@ void mnuRefreshPageHandles(MenuPageWindow *window) {
         record = &window->records->slots[i];
         id = record->unk8;
         if (id >= 0) {
-            if (effHasFirstTextureHandle((s32)(window->mainResources[id])) != 0) {
+            if (effHasFirstTextureHandle(window->mainResources[id]) != 0) {
                 effReleaseTextureHandlesAndResetSlots(window->mainResources[id]);
                 effReleaseTextureHandlesAndResetSlots(window->mainResources[id + 8]);
             }
@@ -2391,7 +2390,7 @@ void mnuRefreshPageHandles(MenuPageWindow *window) {
     record = &window->records->slots[selected];
     id = record->unk8;
     if (id >= 0) {
-        if (effHasFirstTextureHandle((s32)(window->mainResources[id])) == 0) {
+        if (effHasFirstTextureHandle(window->mainResources[id]) == 0) {
             effResolveAndReleaseResource((EffectSlotSet *)(window->mainResources[id]));
             effResolveAndReleaseResource((EffectSlotSet *)(window->mainResources[id + 8]));
         }
