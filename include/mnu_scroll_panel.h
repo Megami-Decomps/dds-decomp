@@ -3,7 +3,7 @@
 
 #include "mnu.h"
 
-struct ScrollHandle;
+struct EffMappedResource;
 
 #ifndef VERSION_DDS2
 typedef struct MenuSpriteRef {
@@ -23,7 +23,7 @@ typedef struct MenuScrollPanel {
     MenuGridSlot positions[3]; /* 0x14 */
     MenuGridSlot active; /* 0x2C */
     MenuGridSlot pending; /* 0x34 */
-    struct ScrollHandle *handles[3]; /* 0x3C */
+    struct EffMappedResource *handles[3]; /* 0x3C */
 } MenuScrollPanel;
 
 typedef char MenuScrollPanel_dds2_size_check[
@@ -45,7 +45,7 @@ void mnuConfigurePanelResource(MenuScrollPanel *menu, u32 model, u32 value,
     MenuSpriteRef positions[2]; /* 0x10 */
     MenuSpriteRef active[2]; /* 0x20 */
     MenuSpriteRef pending[2]; /* 0x30 */
-    struct ScrollHandle *handles[3]; /* 0x40 */
+    struct EffMappedResource *handles[3]; /* 0x40 */
 } MenuScrollPanel;
 
 typedef char MenuScrollPanel_dds1_size_check[

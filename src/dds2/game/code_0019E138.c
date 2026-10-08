@@ -3,6 +3,7 @@
 #include "kwln_task_state.h"
 #include "sdf_resource.h"
 #include "itf.h"
+#include "itf_mem_node.h"
 #include "sdf.h"
 #include "itf_panel_draw.h"
 
@@ -100,12 +101,6 @@ typedef struct ItfBitRange {
     u32 end;
 } ItfBitRange;
 
-
-/* 8-byte node header; payload follows (func_00198248/itfEnqueueMemNode). */
-typedef struct MemNode {
-    u32 slotIndex;         /* 0x0: zero identifies the ring's sentinel */
-    struct MemNode *next;  /* 0x4 */
-} MemNode;
 
 /* Allocation handle precedes the first queue node by four bytes. */
 typedef struct MemRingHeader {
@@ -999,7 +994,7 @@ extern void *memcpy(void *, const void *, u32);
 
 /* Build count usable nodes plus index-zero sentinel, retaining each payload gap.
  * The allocation handle is stored four bytes before the returned ring base. */
-u8 *itfCreateMemNodeRing(s32 payloadBytes, s32 count) {
+MemNode *itfCreateMemNodeRing(s32 payloadBytes, s32 count) {
     SdfMemBlock *handle = sdfAllocGeneralBlock((payloadBytes + ITF_NODE_HEADER_BYTES) * (count + 1) + ITF_ALLOCATION_HANDLE_BYTES);
     u8 *list = (u8 *)sdfResourceRetainAddress(handle);
     MemNode *node;
@@ -1019,7 +1014,7 @@ u8 *itfCreateMemNodeRing(s32 payloadBytes, s32 count) {
     }
     node->slotIndex = count;
     node->next = (MemNode *)list;
-    return list;
+    return (MemNode *)list;
 }
 
 /* Remove the next free node, or return NULL at the index-zero sentinel. */
@@ -1050,8 +1045,8 @@ s32 itfEnqueueMemNode(void *payload, MemNode *queue) {
 }
 
 /* Release the handle preceding the original ring base, not an acquired payload. */
-u32 itfReleaseMemNodeBuffer(u8 *ringBase) {
-    sdfReleaseResourceAllocation(((MemRingHeader *)(ringBase - ITF_ALLOCATION_HANDLE_BYTES))->allocation);
+u32 itfReleaseMemNodeBuffer(MemNode *ringBase) {
+    sdfReleaseResourceAllocation(((MemRingHeader *)((u8 *)ringBase - ITF_ALLOCATION_HANDLE_BYTES))->allocation);
     return 1;
 }
 
@@ -1669,4 +1664,3 @@ INCLUDE_SDATA(const s32, "game/code_0019E138", itfFontTestScriptTask);
 INCLUDE_SDATA(const s32, "game/code_0019E138", D_00436598);
 
 INCLUDE_SDATA(const s32, "game/code_0019E138", D_004365A0);
-

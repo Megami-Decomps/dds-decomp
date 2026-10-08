@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "file.h"
+#include "file_slot_flags.h"
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
 

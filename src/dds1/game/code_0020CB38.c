@@ -1,3 +1,4 @@
+#include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_task_condition.h"
 #include "btl_state.h"
@@ -112,7 +113,88 @@ void func_0020CCA8(void) {
 
 INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020CCC0);
 
-INCLUDE_ASM(const s32, "game/code_0020CB38", func_0020D168);
+/* Mode 0x10E allocates this 0x24-byte transition, distinct from the
+ * common BattleEffectState payload used by other modes. */
+typedef struct BtlUnitScaleTransition {
+    u32 unitId;
+    s32 modelValue;
+    u16 active;
+    u8 pad0A[2];
+    f32 scale;
+    BtlScalarRange range;
+} BtlUnitScaleTransition;
+
+typedef char BtlUnitScaleTransitionLayout[
+    (sizeof(BtlUnitScaleTransition) == 0x24 &&
+     (u32)&((BtlUnitScaleTransition *)0)->range == 0x10) ? 1 : -1];
+
+extern f32 btlGetUnitModelValue1C(BtlUnit *);
+extern void evtSetUnitAlphaTransition(struct EvtUnit *, s32, u32);
+
+void func_0020D168(BtlUnit *unit) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *actor;
+    BtlUnitScaleTransition *payload;
+    s32 unitId;
+    u32 transitionUnitId;
+
+    if ((unit->flags & 0x400) == 0 || battle->currentScene == 5 ||
+        (unit->flags & 2) == 0) {
+        goto done;
+    }
+    unitId = unit->partyRecord.unitId;
+    payload = (BtlUnitScaleTransition *)battle->effect;
+    if (unitId >= 0x143) {
+        goto done;
+    }
+    if (unitId < 0x13D) {
+        goto done;
+    }
+
+    actor = battle->units;
+    while (actor != 0) {
+        if ((actor->flags & 1) == 0) {
+            goto next_actor;
+        }
+        if ((actor->flags & 0x400) == 0) {
+            goto next_actor;
+        }
+        if (actor->partyRecord.unitId == 0x11B) {
+            break;
+        }
+next_actor:
+        actor = actor->next;
+    }
+    if (actor == 0) {
+        goto done;
+    }
+
+    evtSetUnitAlphaTransition(unit->ext, 0, 0);
+    unit->overlayColor = unit->baseColor & 0xFFFFFF;
+    transitionUnitId = unit->partyRecord.unitId;
+    switch (transitionUnitId) {
+    case 0x13D:
+    case 0x13E:
+        unit->scale = 1.3333333f;
+        break;
+    case 0x13F:
+    case 0x140:
+        unit->scale = 1.0f;
+        break;
+    case 0x141:
+    case 0x142:
+        unit->scale = 0.7142857f;
+        break;
+    }
+
+    payload->active = 1;
+    payload->unitId = transitionUnitId;
+    payload->scale = unit->scale;
+    payload->modelValue = (s32)btlGetUnitModelValue1C(actor);
+    btlScalarRangeInitQuadratic(&payload->range, 80.0f);
+done:
+    return;
+}
 
 extern s8 btlGetActorIndexedSignedValue(s32, s32);
 extern s32 btlMapCommandToSkill(u32);
@@ -440,7 +522,6 @@ void btlRaiseLinkedActionPose(BtlLinkedCommand *command) {
 }
 
 extern BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *);
-extern void btlInitMotionTransformFromComponents(BtlCamState *, f32, f32, f32, f32, f32, f32, f32, f32);
 extern void func_002DD608(f32);
 extern void func_002DD968(f32);
 extern void sdfComposeVuMatrixFromRegisters(void);

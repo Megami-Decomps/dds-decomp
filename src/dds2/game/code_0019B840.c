@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "itf.h"
+#include "itf_mem_node.h"
 
 #define FR_FONT_BYTE_MASK 0xFF
 #define FR_FONT_ENTRY_ENABLED 1
@@ -23,7 +24,6 @@ extern void frFontFreeAllEntries(void);
 
 extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
 
-extern u32 itfReleaseMemNodeBuffer(u8 *ringBase);
 
 extern void fmGslReleaseActiveResourceBuffers(void);
 
@@ -196,8 +196,8 @@ void frFontReleaseAll(void) {
     frFontFreeAllEntries();
     frFontReleaseGlyphChain(frFontWork.glyphSlots[0]);
     frFontReleaseGlyphChain(frFontWork.glyphSlots[1]);
-    itfReleaseMemNodeBuffer((u8 *)frFontWork.itemPool);
-    itfReleaseMemNodeBuffer((u8 *)frFontWork.glyphPool);
+    itfReleaseMemNodeBuffer(frFontWork.itemPool);
+    itfReleaseMemNodeBuffer(frFontWork.glyphPool);
     fmGslReleaseActiveResourceBuffers();
     sdfUpdateTextureHeadsWithInterruptsMasked(frFontWork.textureHead0);
     sdfUpdateTextureHeadsWithInterruptsMasked(frFontWork.textureHead1);

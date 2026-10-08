@@ -100,6 +100,8 @@ typedef struct BtlLinkedEffectArgs {
 
 extern s8 D_0037F510[];
 
+extern u32 btlRequestAnalysisPanelClose(void);
+
 typedef struct BtlWaitTask {
     s32 value;
     u32 ticks;
@@ -889,7 +891,7 @@ s32 btlWaitEffectTask(void *arguments) {
         if (btlGetRegisteredTaskValueOrDefault() == 1) {
             if (D_0037F510[0x21] < 0 || D_0037F510[0x23] < 0) {
                 func_001C7DB8(1, 8);
-                func_001B8038();
+                btlRequestAnalysisPanelClose();
                 return 1;
             }
         }
