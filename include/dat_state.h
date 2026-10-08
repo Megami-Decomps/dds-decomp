@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "dat_affinity.h"
+#include "dat_stat.h"
 
 /* The first 0x30 bytes also form compact save metadata; GBWK retains the
  * runtime scene handle at +0x30. */
@@ -64,7 +65,7 @@ typedef struct DatPartyRecord {
     u16 status;
     u32 totalExp;
     u16 level;
-    s8 baseStats[5];
+    s8 baseStats[DAT_BASE_STAT_COUNT];
     u8 pad1B;
     u16 hpBonus;
     u16 mpBonus;
@@ -223,7 +224,7 @@ typedef struct DatGameState {
     u8 pad1E65C[4];
     u32 highScore;                        /* 0x1E660 */
     u8 pad1E664[0xC];
-    u8 itemStatBonuses[64][5];             /* 0x1E670; item IDs 0xC0..0xFF */
+    u8 itemStatBonuses[64][DAT_BASE_STAT_COUNT]; /* 0x1E670; item IDs 0xC0..0xFF */
     u8 itemRequirementCounts[64];          /* 0x1E7B0 */
     u8 itemBlockedFlags[64];               /* 0x1E7F0 */
     u8 pad1E830[0x10];
@@ -258,7 +259,7 @@ typedef struct DatEnemyRecord {
 #else
     u8 pad0E[2];
 #endif
-    u8 baseStats[5];      /* 0x10 */
+    u8 baseStats[DAT_BASE_STAT_COUNT]; /* 0x10 */
     u8 unk15;            /* Copied to the command actor's actionNumber on model change. */
     u8 pad16[2];
     u16 skills[8];        /* 0x18 */

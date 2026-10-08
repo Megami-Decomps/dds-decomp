@@ -6,6 +6,7 @@
 #include "btl_task_args.h"
 #include "pcp_vu0.h"
 #include "dat_command.h"
+#include "eff.h"
 
 extern u32 btlRandomState;
 
@@ -305,7 +306,66 @@ void func_0020EC20(BtlUnit *unit) {
     VU0_LOAD_VF(vf10, baseline);
 }
 
-INCLUDE_ASM(const s32, "game/code_0020E850", func_0020F048);
+extern s32 btlGetRuntime(void);
+extern void func_00306C28(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+
+void func_0020F048(s32 x, s32 y, u32 number, u32 color, s32 *offsets) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    EffectSlotSet *set;
+    BdWork *work;
+    u32 digits[16];
+    u32 colors[4];
+    s32 digitCount = 0;
+    s32 width;
+    s32 height;
+    s32 drawX;
+    s32 baseY;
+    u32 drawColor;
+
+    while (number != 0) {
+        digits[digitCount++] = number % 10;
+        number /= 10;
+    }
+    if (digitCount == 0) {
+        digits[0] = 0;
+        digitCount = 1;
+    }
+
+    set = battle->resB;
+    work = set->workEntries;
+    width = work[4].geometry.bounds[2];
+    height = work[4].geometry.bounds[3];
+
+    drawColor = (color >> 24) | (color << 24);
+    drawColor |= ((color << 8) & 0x00FF0000) |
+                 ((color >> 8) & 0x0000FF00);
+    colors[0] = drawColor;
+    colors[1] = drawColor;
+    colors[2] = drawColor;
+    colors[3] = drawColor;
+    drawX = x - (s32)((u32)(width * digitCount) >> 1);
+
+    if (digitCount != 0) {
+        s32 offsetIndex = -1;
+
+        baseY = y - (height >> 1);
+        do {
+            offsetIndex++;
+            digitCount--;
+            if (offsets != NULL) {
+                s32 yOffset = offsets[offsetIndex];
+                if (yOffset >= 0) {
+                    func_00306C28(drawX, baseY + yOffset, -0x10, colors, 0,
+                                  battle->resB, digits[digitCount] + 4, 0x5E);
+                }
+            } else {
+                func_00306C28(drawX, y - (height >> 1), -0x10, colors, 0,
+                              battle->resB, digits[digitCount] + 4, 0x5E);
+            }
+            drawX += width;
+        } while (digitCount != 0);
+    }
+}
 
 extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
 

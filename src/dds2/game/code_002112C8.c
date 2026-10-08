@@ -7181,7 +7181,7 @@ f32 func_00226308(BattleActionUnit *unit, s32 actor, s32 command, s32 mode) {
 
     if (mode == 1) {
         if ((unit->flags & 0x400) != 0 && unit->kind == 0x127) {
-            switch (datCommandRecords[command].primaryLimitKind) {
+            switch (datCommandRecords[command].hpType) {
             case 3:
             case 4:
             case 5:
@@ -7230,7 +7230,7 @@ s32 btlSelectLowestStatTarget(BattleActor *actor) {
     }
     battle = (BattleActionContext *)btlGetRuntime();
     statIndex = &battle->effect->statIndex;
-    if (*statIndex >= 5) {
+    if (*statIndex >= DAT_BASE_STAT_COUNT) {
         return 0;
     }
     target = NULL;

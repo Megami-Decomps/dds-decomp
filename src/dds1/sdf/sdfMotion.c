@@ -220,7 +220,6 @@ void *sdfAllocAndClearQuadwords(s32 size);
 void sdfReleaseChipBlock(void *a0);
 void *sdfAllocSizeClassBlock(s32 size);
 s32 sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
-SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id);
 void func_002DA3C0(void *a0, s32 a1);
 void func_002DA3D8(void *a0, s32 a1);
 void func_002DA3F0(void *a0, s32 a1);

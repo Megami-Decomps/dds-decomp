@@ -17,7 +17,47 @@ extern BrsIconRecord D_0036C728[];
 extern u32 D_003BC520;
 extern void func_002BF4E0(s32, s32, s32, s32, s32, u32, s32, s32);
 
-INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025DF68);
+/* Fade the fixed dispatch frame, then its five-tick-delayed foreground icon. */
+void func_0025DF68(s32 contextAddress, s32 progress) {
+    u32 texture = D_003BC520;
+    s32 ticks;
+    s32 scale;
+    f32 fraction;
+
+    if (progress < 0) {
+        progress = 0;
+    }
+    ticks = progress;
+    if (ticks < 0) {
+        ticks = 0;
+    }
+    fraction = (f32)ticks / 15.0f;
+    if (fraction > 1.0f) {
+        fraction = 1.0f;
+    }
+    scale = (s32)(fraction * 256.0f);
+    func_002BF4E0(D_0036C728[32][BRS_ICON_X] << 4,
+                  D_0036C728[32][BRS_ICON_Y] << 3,
+                  0, scale, 0, texture, D_0036C728[32][BRS_ICON_ID], 0x53);
+    func_002BF4E0(D_0036C728[27][BRS_ICON_X] << 4,
+                  D_0036C728[27][BRS_ICON_Y] << 3,
+                  0, scale, 0, texture, D_0036C728[27][BRS_ICON_ID], 0x53);
+    func_002BF4E0(D_0036C728[28][BRS_ICON_X] << 4,
+                  D_0036C728[28][BRS_ICON_Y] << 3,
+                  0, scale, 0, texture, D_0036C728[28][BRS_ICON_ID], 0x53);
+    ticks = progress - 5;
+    if (ticks < 0) {
+        ticks = 0;
+    }
+    fraction = (f32)ticks / 15.0f;
+    if (fraction > 1.0f) {
+        fraction = 1.0f;
+    }
+    scale = (s32)(fraction * 256.0f);
+    func_002BF4E0(D_0036C728[0][BRS_ICON_X] << 4,
+                  D_0036C728[0][BRS_ICON_Y] << 3,
+                  0, scale, 0, texture, D_0036C728[0][BRS_ICON_ID], 0x53);
+}
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E108);
 

@@ -901,7 +901,7 @@ u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, BtlInd
     s32 eligibility = BTL_COUNTER_ELIGIBILITY_UNSET;
     if (datCommandRecords[commandId].options & 1) {
         if (datCommandRecords[commandId].requirementBits == 0) {
-            switch (datCommandRecords[commandId].primaryLimitKind) {
+            switch (datCommandRecords[commandId].hpType) {
             case 2:
             case 5:
             case 7:
@@ -914,7 +914,7 @@ u16 btlDetermineCommandCounterEligibility(u8 **entryList, s32 entryCount, BtlInd
         }
         if (eligibility != BTL_COUNTER_ELIGIBILITY_NOT_MET) {
             if (datCommandRecords[commandId].requirementBits == 0) {
-                switch (datCommandRecords[commandId].secondaryLimitKind) {
+                switch (datCommandRecords[commandId].mpType) {
                 case 2:
                 case 5:
                 case 7:
@@ -1005,7 +1005,7 @@ s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
     for (i = 0; i < count; i++) {
         entryList[i] = (u8 *)btlGetIndexListEntry(indexList, i) + 0x120;
     }
-    if (datCommandRecords[commandId].kind == 2 ||
+    if (datCommandRecords[commandId].effectType == 2 ||
         (datCommandRecords[commandId].flags & 0x20)) {
         for (i = 0; i < count; i++) {
             flags = btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)btlGetIndexListEntry(indexList, i))->partyRecord);

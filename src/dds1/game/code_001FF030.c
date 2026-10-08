@@ -2199,7 +2199,7 @@ s32 btlClassifyLinkedSkillRequest(s32 unused, s32 unit, s32 index) {
     if (!(((BtlUnit *)unit)->flags & 0x400)) {
         return result;
     }
-    if (datCommandRecords[index].kind == 2) {
+    if (datCommandRecords[index].effectType == 2) {
         if (btlWouldUiValueFallBelowQuarter(unit, 0) != 0 && mdlFlagTest(0x802) != 0) {
             return 1;
         }

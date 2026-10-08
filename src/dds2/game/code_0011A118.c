@@ -33,8 +33,7 @@ enum {
 
 enum {
     PTY_TEMPLATE_KEEP_BASE_LEVEL = 1,
-    PTY_TEMPLATE_USE_PARTY_MAX_LEVEL = 4,
-    PTY_ENTRY_STAT_COUNT = 5
+    PTY_TEMPLATE_USE_PARTY_MAX_LEVEL = 4
 };
 
 extern u8 D_00386350[];
@@ -638,7 +637,7 @@ void ptyAssignRosterItemAndMarkOwned(DatPartyRecord *entry);
 /* Clone an entry template and raise it to the maximum occupied party level. */
 void ptyCloneTemplateAtPartyMaxLevel(DatPartyRecord *entry, s32 templateIndex) {
     s32 targetLevel = dds3EntryMax();
-    s32 statGains[PTY_ENTRY_STAT_COUNT];
+    s32 statGains[DAT_BASE_STAT_COUNT];
     s8 *stat;
     s32 *gain;
     s32 remaining;
@@ -648,7 +647,7 @@ void ptyCloneTemplateAtPartyMaxLevel(DatPartyRecord *entry, s32 templateIndex) {
         ptyAccumulateStatGains(statGains, targetLevel - entry->level, entry);
         stat = entry->baseStats;
         gain = statGains;
-        for (remaining = PTY_ENTRY_STAT_COUNT - 1; remaining >= 0; remaining--) {
+        for (remaining = DAT_BASE_STAT_COUNT - 1; remaining >= 0; remaining--) {
             *stat++ += *gain++;
         }
         entry->level = targetLevel;
@@ -666,7 +665,7 @@ void func_0011B4B0(DatPartyRecord *entry, s32 templateIndex, s32 initFlags) {
     s32 targetLevel = 0;
     s32 maxPartyLevel = dds3EntryMax();
     s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
-    s32 statGains[PTY_ENTRY_STAT_COUNT];
+    s32 statGains[DAT_BASE_STAT_COUNT];
     s8 *stat;
     s32 *gain;
     s32 remaining;
@@ -684,7 +683,7 @@ void func_0011B4B0(DatPartyRecord *entry, s32 templateIndex, s32 initFlags) {
         ptyAccumulateStatGains(statGains, targetLevel - entry->level, entry);
         stat = entry->baseStats;
         gain = statGains;
-        for (remaining = PTY_ENTRY_STAT_COUNT - 1; remaining >= 0; remaining--) {
+        for (remaining = DAT_BASE_STAT_COUNT - 1; remaining >= 0; remaining--) {
             *stat++ += *gain++;
         }
         entry->level = targetLevel;
@@ -709,7 +708,7 @@ void ptyInitRosterAndClearItem(DatPartyRecord *entry, s32 initFlags) {
     s32 targetLevel = 0;
     s32 maxPartyLevel = dds3EntryMax();
     s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
-    s32 statGains[PTY_ENTRY_STAT_COUNT];
+    s32 statGains[DAT_BASE_STAT_COUNT];
     s32 statIndex;
     DatGameState *gameState;
 
@@ -724,7 +723,7 @@ void ptyInitRosterAndClearItem(DatPartyRecord *entry, s32 initFlags) {
     }
     if (entry->level < targetLevel) {
         ptyAccumulateStatGains(statGains, targetLevel - entry->level, entry);
-        for (statIndex = 0; statIndex < PTY_ENTRY_STAT_COUNT; statIndex++) {
+        for (statIndex = 0; statIndex < DAT_BASE_STAT_COUNT; statIndex++) {
             entry->baseStats[statIndex] += statGains[statIndex];
         }
         entry->level = targetLevel;
@@ -746,7 +745,7 @@ void func_0011B9A0(DatPartyRecord *entry, s32 initFlags) {
     s32 targetLevel = 0;
     s32 maxPartyLevel = dds3EntryMax();
     s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
-    s32 statGains[PTY_ENTRY_STAT_COUNT];
+    s32 statGains[DAT_BASE_STAT_COUNT];
     s32 statIndex;
     DatGameState *gameState;
 
@@ -761,7 +760,7 @@ void func_0011B9A0(DatPartyRecord *entry, s32 initFlags) {
     }
     if (entry->level < targetLevel) {
         ptyAccumulateStatGains(statGains, targetLevel - entry->level, entry);
-        for (statIndex = 0; statIndex < PTY_ENTRY_STAT_COUNT; statIndex++) {
+        for (statIndex = 0; statIndex < DAT_BASE_STAT_COUNT; statIndex++) {
             entry->baseStats[statIndex] += statGains[statIndex];
         }
         entry->level = targetLevel;
@@ -812,7 +811,7 @@ void ptyMergeSavedUnitTemplates(DatPartyRecord *entry) {
     } else {
         entry->level = second.level;
     }
-    for (index = 0; index < PTY_ENTRY_STAT_COUNT; index++) {
+    for (index = 0; index < DAT_BASE_STAT_COUNT; index++) {
         if (first.baseStats[index] > second.baseStats[index]) {
             entry->baseStats[index] = first.baseStats[index];
         } else {
@@ -1319,10 +1318,10 @@ s32 evtSelectScriptStatValue(void) {
     u16 statOption = context->options;
     switch (statOption) {
     case 1:
-        statValue = datCommandRecords[context->third].stat18;
+        statValue = datCommandRecords[context->third].hpPower;
         break;
     case 2:
-        statValue = datCommandRecords[context->third].stat1C;
+        statValue = datCommandRecords[context->third].mpPower;
         break;
     default:
         statValue = 0;
@@ -1340,10 +1339,10 @@ s32 evtPushEntryIndexedStatOption(void) {
     u16 commandIndex = ((EventIndexRecord *)datItemSkillRecords)[((DatPartyRecord *)context->first)->menuValue].index;
     switch (statOption) {
     case 1:
-        statValue = datCommandRecords[commandIndex].stat18;
+        statValue = datCommandRecords[commandIndex].hpPower;
         break;
     case 2:
-        statValue = datCommandRecords[commandIndex].stat1C;
+        statValue = datCommandRecords[commandIndex].mpPower;
         break;
     default:
         statValue = 0;

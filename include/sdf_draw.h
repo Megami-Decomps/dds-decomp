@@ -86,6 +86,11 @@ typedef char SdfSlotPair_size_must_be_8[(sizeof(SdfSlotPair) == 8) ? 1 : -1];
 typedef char SdfSlotEntry_size_must_be_0x10[(sizeof(SdfSlotEntry) == 0x10) ? 1 : -1];
 
 
+/* SdfModel.flags controls indexed draw-node lookup and alternate item setup. */
+#define SDF_MODEL_FIND_DRAW_NODE_BY_ID 0x01
+#define SDF_MODEL_ALTERNATE_ITEM_SETUP 0x04
+
+
 /* The buffered-transform constructor allocates and clears all 0x9C bytes. */
 typedef struct SdfModel {
     DevRequest *list;
@@ -112,6 +117,8 @@ typedef struct SdfModel {
 } SdfModel;
 
 typedef char SdfModel_size_must_be_0x9C[(sizeof(SdfModel) == 0x9C) ? 1 : -1];
+
+SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id);
 
 
 /* Serialized clip duration/reserved remain halfwords (tools/fld.py).
