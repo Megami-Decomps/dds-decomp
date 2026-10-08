@@ -8770,8 +8770,8 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001E4E50);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E5198);
 
-void func_001E5460(BtlLinkedCommand *arg0) {
-    btlFlagUserAndTargetDefeat(arg0, arg0);
+void func_001E5460(BtlLinkedCommand *action, BtlCamState *camera) {
+    btlFlagUserAndTargetDefeat(action, action);
 }
 
 
@@ -8843,8 +8843,8 @@ void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *action, BtlCamState *
     func_001DB698(out);
 }
 
-void func_001E5700(u32 arg0) {
-    func_001E5460(arg0);
+void func_001E5700(BtlLinkedCommand *action, BtlCamState *camera) {
+    func_001E5460(action, camera);
 }
 
 void func_001E5718(BtlLinkedCommand *action, BtlCamState *out) {
@@ -8853,15 +8853,15 @@ void func_001E5718(BtlLinkedCommand *action, BtlCamState *out) {
 
 extern void func_001E0718(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
-void btlChooseActionPoseBlendFromActorCount(BtlLinkedCommand *action) {
-    BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
+void btlChooseActionPoseBlendFromActorCount(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+    BtlState *work = (BtlState *)btlGetRuntime();
     u32 count;
     u32 mask;
     BtlUnit *unit;
 
     mask = ((BtlUnit *)btlGetIndexListEntry(action->targetList, 0))->flags & 0x600;
     count = 0;
-    for (unit = work->actorList; unit != 0; unit = unit->next) {
+    for (unit = work->units; unit != 0; unit = unit->next) {
         if (unit->flags & 1) {
             if (unit->flags & mask) {
                 count++;
