@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
@@ -1106,16 +1107,16 @@ void sdfWaitSlotReady(void) {
 }
 
 /* Allocate and initialize an empty packet list using the selected allocator. */
-s32 sdfAllocatePacketList(s32 (*allocatorArgument)(s32)) {
+SdfListHead *sdfAllocatePacketList(s32 (*allocatorArgument)(s32)) {
     s32 (*allocator)(s32) = allocatorArgument;
-    s32 listAddress;
+    SdfListHead *list;
 
     if (allocator == NULL) {
         allocator = sdfAllocPacketAligned;
     }
-    listAddress = allocator(SDF_PACKET_LIST_BYTES);
-    sdfInitPacketList((SdfListHead *)listAddress);
-    return listAddress;
+    list = (SdfListHead *)(u32)allocator(SDF_PACKET_LIST_BYTES);
+    sdfInitPacketList(list);
+    return list;
 }
 
 /* Allocate the requested packet bytes, initialize through the callback, and append. */
