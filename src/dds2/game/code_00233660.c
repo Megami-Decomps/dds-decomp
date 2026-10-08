@@ -6,6 +6,7 @@
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "mdl.h"
+#include "file_request_api.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -2573,7 +2574,7 @@ extern char D_00437110[]; /* "%f" */
 extern char D_00437118[]; /* "fog=" */
 extern MdlFogParams kwlnDrawVector;
 extern s32 sdfPathExists(char *path);
-extern void fileWaitReady(s32 file);
+
 extern s32 fileGetResourceHandle(s32 file);
 extern char *fileGetLoadedDataAddress(s32 file);
 extern s32 fileGetResourceSize(s32 file);
@@ -2606,7 +2607,7 @@ void mdlLoadViewerPresentationConfig(void) {
         return;
     }
     fileRequest = fileQueueDefaultCallbackRequest(D_003C88A8);
-    fileWaitReady(fileRequest);
+    fileWaitReady((struct FileRequest *)(u32)fileRequest);
     resourceHandle = fileGetResourceHandle(fileRequest);
     fileData = fileGetLoadedDataAddress(fileRequest);
     fileSize = fileGetResourceSize(fileRequest);
@@ -2656,12 +2657,11 @@ void mdlLoadViewerPresentationConfig(void) {
 
 const char D_00421488[] = "bg-color=%06x\neye-position=%f,%f,%f\ntarget-position=%f,%f,%f\nfovy=%f\nfog=%d,%f,%d,%f,%06x\n";
 extern s32 func_0035C860(char *, const char *, ...);
-extern s32 fileQueueWindowSlotRequest(char *, char *, s32);
 
 void func_00238BD8(void) {
     char buffer[0x130];
     s32 size;
-    s32 request;
+    struct FileRequest *request;
 
     size = func_0035C860(buffer, D_00421488, D_00435CBC,
                         D_00453620[0], D_00453620[1], D_00453620[2],
@@ -2671,7 +2671,7 @@ void func_00238BD8(void) {
                         kwlnDrawVector.farB, kwlnDrawVector.color);
     request = fileQueueWindowSlotRequest(D_003C88A8, buffer, size);
     fileWaitReady(request);
-    filePollEntryCleanup(request);
+    filePollEntryCleanup((s32)request);
 }
 
 typedef struct MdlTaskDef {

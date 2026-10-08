@@ -20,6 +20,7 @@
 #include "mnu_list.h"
 #include "kwln_task_lifecycle.h"
 #include "eff_expanded_list.h"
+#include "file_request_api.h"
 typedef struct MenuResourceWork MenuResourceWork;
 struct SdfTex;
 struct MenuListNode;
@@ -72,7 +73,7 @@ extern s32 D_003BC87C;
 extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
 extern s32 dds3GetWorldObject();
 extern void dds3SetWorldObjectDataValue();
-extern void fileWaitReady();
+
 extern void sdfReleaseMemorySlot();
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
@@ -107,7 +108,7 @@ extern s32 fileAdvanceSlotScan(void);
 
 extern s32 (*fileMenuStateHandler)();
 extern s32 D_003BC814;
-extern s32 fileIsRequestReadyInCurrentMode(u32, void *);
+
 extern u32 fileGetResourceHandle(u32);
 extern u32 fileGetLoadedDataAddress(u32);
 extern u32 fileGetResourceSize(u32);
@@ -2684,7 +2685,7 @@ s32 fileRunMenuState(KwlnTask *task) {
         cur = (s32 (*)())next;
     }
     fileMenuStateHandler = cur;
-    if (job != 0 && fileIsRequestReadyInCurrentMode(job, (void *)next) != 0) {
+    if (job != 0 && fileIsRequestReadyInCurrentMode((struct FileRequest *)job) != 0) {
         fileSaveIconRequest = 0;
         D_003BD910 = fileGetResourceHandle(job);
         D_003BD914 = fileGetLoadedDataAddress(job);
@@ -2780,7 +2781,7 @@ void fileReleaseMenuResources(void) {
             dds3SetWorldObjectDataValue(world, 1);
         }
         if (fileSaveIconRequest != 0) {
-            fileWaitReady(fileSaveIconRequest);
+            fileWaitReady((struct FileRequest *)fileSaveIconRequest);
             D_003BD910 = fileGetResourceHandle(fileSaveIconRequest);
             filePollEntryCleanup(fileSaveIconRequest);
             fileSaveIconRequest = 0;

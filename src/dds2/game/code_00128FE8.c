@@ -9,6 +9,7 @@
 #include "sdf_primitive.h"
 #include "dds3obj.h"
 #include "fld.h"
+#include "file_request_api.h"
 
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -110,7 +111,6 @@ extern u32 fldSkyDrawState;
 
 extern u32 fldAreaLoadRequest;
 
-extern u32 fileRequestIsReady(u32 request);
 
 extern u8 D_00435BB4;
 
@@ -1014,7 +1014,7 @@ u32 fldPollAreaResourceLoad(void) {
 
     if (resourceFlag != 0) {
         if (resourceFlag == 1) {
-            if (fileRequestIsReady(fldAreaLoadRequest) != 0) {
+            if (fileRequestIsReady((struct FileRequest *)fldAreaLoadRequest) != 0) {
                 fldAreaState.resourceFlag = 0;
                 D_00435BB4 = 0;
             }
@@ -1029,7 +1029,7 @@ u32 fldGetResourceReadyFlag(void) {
 
 u8 fldIsAreaResourceReady(void) {
     if (fldAreaLoadRequest != 0) {
-        if (fileRequestIsReady(fldAreaLoadRequest) != 0) {
+        if (fileRequestIsReady((struct FileRequest *)fldAreaLoadRequest) != 0) {
             return 1;
         }
     }
@@ -1040,7 +1040,7 @@ s32 fldIsAreaFloorResourceReady(s32 area, s32 room) {
     if (fldAreaState.resourceArea != area || fldAreaState.resourceFloor != room) {
         return 0;
     }
-    if (fldAreaLoadRequest != 0 && fileRequestIsReady(fldAreaLoadRequest) != 0) {
+    if (fldAreaLoadRequest != 0 && fileRequestIsReady((struct FileRequest *)fldAreaLoadRequest) != 0) {
         return 1;
     }
     return fldAreaState.resourceFlag != 0;
@@ -1149,7 +1149,6 @@ typedef struct FldPackedArchive {
     FldPackedEntry *entries;
 } FldPackedArchive;
 
-extern void func_002C81D0(u32);
 
 extern void fldCopyInfoTable(FldInfTable *);
 
@@ -1173,7 +1172,7 @@ void fldLoadAreaPackedResources(void) {
         fldFormatAreaResourceName(name);
         strcpy(D_00444950, name);
         fldAreaPackedArchive = fileQueuePlainDispatchRequest(name);
-        func_002C81D0(fldAreaPackedArchive);
+        func_002C81D0((struct FileRequest *)fldAreaPackedArchive);
         for (entry = ((FldPackedArchive *)fldAreaPackedArchive)->entries; entry != NULL;
              entry = entry->next) {
             switch (entry->kind) {
