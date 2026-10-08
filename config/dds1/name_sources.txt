@@ -4215,6 +4215,7 @@
 0x00244320	mnuShopLoadSpriteAssets	inferred	mnu menu, title, shop, or movie UI in game/code_00242608.c
 0x00244360	mnuReleaseShopSceneSpriteResources	inferred	confidence=high; src/dds1/game/code_00242608.c:func_00244360; Releases the sprite resource slot set belonging to the shop scene. [names_qp9.tsv]
 0x00244380	mnuShopHasPendingFlag	inferred	scans 0xC0 flag bytes for an active entry
+0x002443F8	mnuCreateShopListWindow	inferred	Creates the ShopScene list window, its rows and shop-list context
 0x00244508	campFlagRowValue	inferred	DDS1 twin of DDS2 func_00260138: value of the highest set flag in a 26-byte row. [names_M44_Mid3.tsv]
 0x002445E0	mnuCampFindActiveSlot	inferred	mnu camp returns the highest slot index whose flag id is set
 0x00244740	mnuShopReleaseSprites	inferred	frees sprite buffers and releases sprite handles
