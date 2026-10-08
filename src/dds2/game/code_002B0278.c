@@ -2645,16 +2645,17 @@ void mnuOrEntryFlags(u32 flags, u32 *entryFlags) {
 void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 INCLUDE_ASM(const s32, "game/code_002B0278", mnuCopyCampEffectRowData);
 
-void mnuSetCampEffectResourceHandles(u32 first, u32 second, MenuEffectResources *resources) {
-    resources->packet.sheets[0] = first;
-    resources->animationHandle = second;
+void mnuSetCampEffectResourceHandles(u32 sheet, struct EffMappedResource *animation,
+                                    MenuEffectResources *resources) {
+    resources->packet.sheets[0] = sheet;
+    resources->animationHandle = animation;
 }
 
 
 void mnuBindCampEffectAnimation(MenuEffectResources *resources) {
     effConfigureIndexedSlotResource((struct EffectSlotSet *)resources->packet.sheets[0],
                    resources->packet.items[4],
-                   (struct EffMappedResource *)resources->animationHandle, 0, 4);
+                   resources->animationHandle, 0, 4);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AD38);
@@ -2691,7 +2692,7 @@ void mnuLoadEffectResources(MenuEffectResources *resources) {
     mnuInitializeMapPacket(0, D_003E7828, 0xb, &resources->packet);
     mnuCopyCampEffectRowData(&D_003E7858, resources);
     resources->packet.sheets[0] = (u32)effLoadIndexedResource("/camp/spr/n_min/", D_003E7818[0], 0);
-    resources->animationHandle = (u32)effLoadMappedResource("/camp/mot/", D_003E7820[0]);
+    resources->animationHandle = effLoadMappedResource("/camp/mot/", D_003E7820[0]);
     mnuBindCampEffectAnimation(resources);
 }
 
@@ -2699,7 +2700,7 @@ void mnuRequestEffectResources(MenuEffectResources *resources) {
     mnuInitializeMapPacket(0, D_003E7828, 0xb, &resources->packet);
     mnuCopyCampEffectRowData(&D_003E7858, resources);
     effRequestResourceByMode("/camp/spr/n_min/", D_003E7818[0], 0, &resources->packet.sheets[0]);
-    effRequestMappedResource("/camp/mot/", D_003E7820[0], &resources->animationHandle);
+    effRequestMappedResource("/camp/mot/", D_003E7820[0], (u32 *)&resources->animationHandle);
 }
 
 u32 mnuBindCampEffectWhenLoaded(MenuEffectResources *resources) {
@@ -2718,7 +2719,7 @@ void mnuDestroyEffectResources(MenuEffectResources *resources) {
     for (i = 0; i < ARRAY_COUNT(resources->packet.sheets); i++) {
         effDestroyResourceSlotSet((struct EffectSlotSet *)resources->packet.sheets[i]);
     }
-    effDestroyPackedBatch(resources->animationHandle);
+    effDestroyPackedBatch((s32)resources->animationHandle);
 }
 
 
