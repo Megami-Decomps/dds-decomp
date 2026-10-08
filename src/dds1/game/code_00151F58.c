@@ -205,36 +205,34 @@ typedef struct EffUnitObject {
     void *resource; /* 0x84 */
 } EffUnitObject;
 
-/* Narrow mode to s16; kinds 0/3 store it, while kind 1 replaces only frame bits 1..2. */
+/* Narrow mode for the child kinds, or update each resolved animation entry. */
 void billSetBillboardMode(BillObj *effect, s32 mode) {
-    s32 entryCount;
-    s32 remaining;
-    s32 frameSlotAddress;
     mode = (s16)mode;
     switch (effect->kind) {
     case 0:
     case 3:
         effect->requestedPacketListIndex = mode;
         break;
-    case 1:
-        entryCount = effect->entryCount;
+    case 1: {
+        s32 entryCount = effect->entryCount;
         if (entryCount > 0) {
-            remaining = entryCount;
-            frameSlotAddress = (s32)effect->resolvedEntries + 0xc;
+            s32 remaining = entryCount;
+            BillOut *entries = effect->resolvedEntries;
+            s32 index = 0;
             do {
-                s32 frameData = *(s32 *)frameSlotAddress;
-                u32 frameFlags = ((BillAnimationEntry *)frameData)->flags &
-                    ~BILL_ANIMATION_FLAG_PACKET_LIST_MASK;
-                ((BillAnimationEntry *)frameData)->flags = frameFlags;
+                BillAnimationEntry *entry = entries[index].entry;
+                u32 flags = entry->flags & ~BILL_ANIMATION_FLAG_PACKET_LIST_MASK;
+                entry->flags = flags;
                 if (mode == 2) {
-                    ((BillAnimationEntry *)frameData)->flags = frameFlags | BILL_ANIMATION_FLAG_PACKET_LIST_2;
+                    entry->flags = flags | BILL_ANIMATION_FLAG_PACKET_LIST_2;
                 } else if (mode == 3) {
-                    ((BillAnimationEntry *)frameData)->flags = frameFlags | BILL_ANIMATION_FLAG_PACKET_LIST_3;
+                    entry->flags = flags | BILL_ANIMATION_FLAG_PACKET_LIST_3;
                 }
-                frameSlotAddress += BILL_ENTRY_BYTES;
+                index++;
             } while (--remaining != 0);
         }
         break;
+    }
     }
 }
 
