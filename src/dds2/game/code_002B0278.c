@@ -106,7 +106,7 @@ extern void func_002AAE80();
 
 extern void mnuReleasePartyIconBundles();
 
-extern void mnuClearEntries();
+extern void mnuClearEntries(MenuPageWindow *);
 
 extern FrFontGlyph *itfDrawUnderscoreTextSegment(s32, s32, s32, u32, const u8 *, s32);
 extern FrFontGlyph *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
@@ -1104,7 +1104,7 @@ s32 mnuStepStaffCampPageControl(s32 callback) {
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2C88);
 
-extern void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
+extern void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 extern void mnuAttachPartyIconBundle(s32 index, s32 menu, u32 resource);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
@@ -1120,7 +1120,7 @@ s32 mnuCreatePanels(s32 callback) {
     StaffMenuRuntime *party = (StaffMenuRuntime *)menuContext->party;
     MenuProfilePanel *profile;
 
-    mnuSetWindowResource(index, (u32 *)window, menuContext->displayHandle,
+    mnuSetWindowResource(index, window, menuContext->displayHandle,
                          (s32)menuContext->displayResource,
                          menuContext->alternateResource, 0, 0);
     mnuAttachPartyIconBundle(index, window, (u32)menuContext->displayResource);
@@ -1157,7 +1157,7 @@ s32 mnuDestroyPanels(s32 callback) {
     window = context + 0x284;
     func_002B2C88(window, 0, menu->staffView, menu->staffMode);
     evtStageTestStop();
-    mnuClearEntries(window);
+    mnuClearEntries((MenuPageWindow *)window);
     mnuReleasePartyIconBundles(window);
     if (((MenuContext *)context)->panelGroup != 0) {
         mnuDestroyPanelGroup(((MenuContext *)context)->panelGroup);
@@ -3640,11 +3640,11 @@ void mnuDrawIconRow(s32 unusedA, s32 unusedB, s32 depth, s32 skip, MenuSprites *
 extern void *func_002BBA38();
 
 
-void mnuSetWindowResource(s32 index, u32 *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
+void mnuSetWindowResource(s32 index, MenuPageWindow *menu, s32 a2, s32 a3, s32 a4, s32 a5, s32 a6);
 
-void mnuSetIndexedWindowPageSpriteFlags(s32 index, u8 *menu, u32 first, u32 second);
+void mnuSetIndexedWindowPageSpriteFlags(s32 index, MenuPageWindow *menu, u32 first, u32 second);
 
-void mnuClearEntries(u8 *menu);
+void mnuClearEntries(MenuPageWindow *menu);
 
 extern void itfSetGridEntryQuantizedAndRefresh();
 
