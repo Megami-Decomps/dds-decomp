@@ -4109,7 +4109,7 @@
 0x00241E18	evtCreateModelFromPackResource	inferred	Called by evtOpBindMotionSoundToModel to load the requested kind-5 pack payload and return its spawned model handle, or -1 when absent.
 0x00241F78	evtTryCreateWorldObjectFromPackResourceSet	inferred	collects kind-1 base and kind-2/3/4 entries for the requested resource, creates the world object only when all four payloads are present, then sets relocation/draw state and returns success
 0x002420B8	evtUpdateMotionSeTask	inferred	registered motion-SE task callback; matches its resource's motion and frame cues, updates the event sound sequence, logs EVE_SE
-0x00242278	evtFreeEventPackState	inferred	Frees the state returned by func_00101A70.
+0x00242278	evtFreeMotionSeTaskParams	inferred	Frees the three-word parameter block allocated and published by evtCreateMotionSeTask.
 0x00242298	evtCreateMotionSeTask	inferred	creates the named mse task and retains its three arguments
 0x00242340	evtBeginEventPackScriptLoad	inferred	confidence=high; matched-C; src/dds1/event/evtEventPack.c:51:func_00242340; Formats grouped event .be script path, requests resource, saves handle and sets loading state.; twin=0x0025D758, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x002423C8	evtCompleteEventPackScriptLoad	inferred	readability/matching review (QP16)

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "kwln.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "evt_unit.h"
@@ -24,7 +25,6 @@ enum {
 extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32, s32, s32);
 extern void fldSetRelocateOnRelease(u32);
 extern u32 kwlnDrawControlFlags;
-extern void sdfReleaseChipBlock(s32);
 
 extern s32 D_004377D8;
 extern s32 func_0035B6E0(const char *, ...);
@@ -179,12 +179,11 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
     return 0;
 }
 
-/* Free the current task's user-value block. */
-void evtFreeEventPackState(KwlnTask *task) {
-    s32 stateHandle;
+/* Free the three-word parameter block owned by the motion-SE task. */
+void evtFreeMotionSeTaskParams(KwlnTask *task) {
+    void *params = (void *)(u32)kwlnTaskGetUserValue(task);
 
-    stateHandle = kwlnTaskGetUserValue(task);
-    sdfReleaseChipBlock(stateHandle);
+    sdfReleaseChipBlock(params);
 }
 
 extern void func_0035C860(char *, const char *, ...);
@@ -204,7 +203,7 @@ KwlnTask *evtCreateMotionSeTask(s32 modelKey, s32 eventTaskId, s32 resourceId) {
     params->modelKey = modelKey;
     params->eventTaskId = eventTaskId;
     params->resourceId = resourceId;
-    return kwlnTaskCreate(taskName, 0x3EC, 0, 0, evtUpdateMotionSeTask, evtFreeEventPackState, (u32)params);
+    return kwlnTaskCreate(taskName, 0x3EC, 0, 0, evtUpdateMotionSeTask, evtFreeMotionSeTaskParams, (u32)params);
 }
 
 const char D_004248A0[0x20] __attribute__((aligned(8))) = "/event/e%03d/e%03d/scr/e%03d.be";
@@ -288,7 +287,6 @@ extern void effInitCh71Id(void);
 extern void effInitCh76Id(void);
 extern void effInitCh75Id(void);
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
-extern void sdfReleaseChipBlock(s32);
 
 
 /* Release the event task's owned handles, then free its state.
@@ -336,4 +334,3 @@ INCLUDE_SDATA(const s32, "event/evtEventPack", D_004377D8);
 INCLUDE_SDATA(const s32, "event/evtEventPack", D_004377E0);
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", D_004377E8);
-
