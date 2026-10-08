@@ -888,10 +888,11 @@ u32 effConfigureSlotResource(s32 work, s32 index, u32 value, u32 flags) {
     return 1;
 }
 
-u32 effConfigureIndexedSlotResource(s32 work, s32 index, s32 data, s32 item, u32 flags) {
-    BdWork *effect = &((EffectSlotSet *)work)->workEntries[index];
-    effSetSlotResourceAndFlags(&effect->states[0], (u32)&((EffMappedResource *)data)->records[item], flags);
-    effUpdateTimedStates((EffectSlotSet *)work, index, effect);
+u32 effConfigureIndexedSlotResource(EffectSlotSet *work, s32 index,
+                                    EffMappedResource *data, s32 item, u32 flags) {
+    BdWork *effect = &work->workEntries[index];
+    effSetSlotResourceAndFlags(&effect->states[0], (u32)&data->records[item], flags);
+    effUpdateTimedStates(work, index, effect);
     return 1;
 }
 

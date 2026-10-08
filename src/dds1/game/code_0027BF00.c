@@ -1004,7 +1004,7 @@ void mnuActivatePanelAndConfigureGridResources(MenuScrollPanel *menu, s32 x, s32
     menu->pending[1].sprite = x;
     menu->pending[1].effect = color;
     itfSetGridEntryQuantizedAndRefresh(x, y, 0, 0, -0x400, 0);
-    effConfigureIndexedSlotResource(x, y, menu->handles[0], 0, 3);
+    effConfigureIndexedSlotResource((struct EffectSlotSet *)(u32)x, y, menu->handles[0], 0, 3);
     itfSetGridEntryQuantizedAndRefresh(x, color, 0, 0, 0, 0);
     effConfigureWithDefaultSetting((struct EffectSlotSet *)(u32)x, color,
                                    menu->handles[1], 0, 10, 0);

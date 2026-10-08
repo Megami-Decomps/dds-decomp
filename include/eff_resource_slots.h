@@ -21,6 +21,16 @@ void effReleaseTextureHandlesAndResetSlots(struct EffectSlotSet *owner);
 u32 effDestroyResourceSlotSet(struct EffectSlotSet *owner);
 
 #ifdef VERSION_DDS2
+s32 effConfigureIndexedSlotResource(struct EffectSlotSet *owner, u32 slot,
+                                    struct EffMappedResource *resources, u32 item,
+                                    u32 flags);
+#else
+u32 effConfigureIndexedSlotResource(struct EffectSlotSet *owner, s32 slot,
+                                    struct EffMappedResource *resources, s32 item,
+                                    u32 flags);
+#endif
+
+#ifdef VERSION_DDS2
 s32 effConfigureIndexedSlotMaterial(struct EffectSlotSet *owner, u32 slot,
                                     struct EffMappedResource *resources, u32 item,
                                     u32 flags, u32 option, u32 color);

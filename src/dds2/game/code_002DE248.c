@@ -11713,11 +11713,12 @@ s32 effConfigureSlotResource(u8 *effect, u32 slot, u32 resource, u32 flags) {
     return 1;
 }
 
-s32 effConfigureIndexedSlotResource(u8 *effect, u32 slot, u8 *resources, u32 index, u32 flags) {
-    BdWork *entry = &((EffectSlotSet *)effect)->workEntries[slot];
-    u32 resource = (u32)&((EffMappedResource *)resources)->records[index];
+s32 effConfigureIndexedSlotResource(EffectSlotSet *effect, u32 slot,
+                                    EffMappedResource *resources, u32 index, u32 flags) {
+    BdWork *entry = &effect->workEntries[slot];
+    u32 resource = (u32)&resources->records[index];
     effSetSlotResourceAndFlags(&entry->states[0], resource, flags);
-    effUpdateTimedStates((EffectSlotSet *)effect, slot, entry);
+    effUpdateTimedStates(effect, slot, entry);
     return 1;
 }
 
