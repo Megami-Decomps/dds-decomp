@@ -4699,8 +4699,8 @@ typedef struct EffRibbonWork {
     u8 *positions;  // 0x20
     u8 *uvs;        // 0x24
     u8 *extra;      // 0x28
-    s32 *handle;    // 0x2C
-    u8 *allocation; // 0x30
+    SdfAsset *handle; // 0x2C
+    struct SdfMemBlock *allocation; // 0x30
 } EffRibbonWork;
 
 void effResetBillTable(u8 *work) {
@@ -5341,7 +5341,7 @@ u8 *effCreateRibbonWork(u32 count, u32 repeat) {
     for (i = 0; i < count; i++) {
         ((u32 *)p)[i] = 0x80808080;
     }
-    work->handle = (s32 *)sdfCreateAssetWithDrawEntries();
+    work->handle = sdfCreateAssetWithDrawEntries();
     func_002DA420(work->handle, 1.0f);
     memset(&D_003DCB00, 0, sizeof(EffPacketParams));
     D_003DCB00.primitive = 0x4000;
@@ -5379,8 +5379,8 @@ void effSharedAssetReferenceRelease(s32 work) {
     else {
         effReleaseSharedReference(((EffRibbonWork *)work)->resource);
     }
-    sdfQueueAssetRelease((SdfAsset *)((EffRibbonWork *)work)->handle);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(((EffRibbonWork *)work)->allocation));
+    sdfQueueAssetRelease(((EffRibbonWork *)work)->handle);
+    sdfReleaseResourceAllocation(((EffRibbonWork *)work)->allocation);
 }
 
 u32 effCloneRibbonWithSharedResource(u32 work) {
@@ -5719,8 +5719,8 @@ typedef struct EffStripWork {
     u8 *uvsA;           // 0x20
     u8 *uvsB;           // 0x24
     u8 *extra;          // 0x28
-    s32 *handle;        // 0x2C
-    u8 *allocation;     // 0x30
+    SdfAsset *handle;        // 0x2C
+    struct SdfMemBlock *allocation;     // 0x30
 } EffStripWork;
 
 void effOffsetNodeRowsVU(u8 *work) {
@@ -5924,7 +5924,7 @@ u32 repeat;
     for (i = 0; i < count; i++) {
         ((u32 *)p)[i] = 0x80808080;
     }
-    work->handle = (s32 *)sdfCreateAssetWithDrawEntries();
+    work->handle = sdfCreateAssetWithDrawEntries();
     func_002DA420(work->handle, 1.0f);
     memset(&D_003DCB30, 0, sizeof(EffPacketParams));
     D_003DCB30.primitive = 0x4000;
@@ -5940,8 +5940,8 @@ u32 effCreateTexturedStripWithSharedTexture(u32 count, u32 repeat) {
 
 void effReleaseScalyStripResources(s32 work) {
     effReleaseScalyTextureReference(effSharedScalyStripResource);
-    sdfQueueAssetRelease((SdfAsset *)((EffStripWork *)work)->handle);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(((EffStripWork *)work)->allocation));
+    sdfQueueAssetRelease(((EffStripWork *)work)->handle);
+    sdfReleaseResourceAllocation(((EffStripWork *)work)->allocation);
 }
 
 /* Recreate the source strip's dimensions and retain another shared texture reference. */
