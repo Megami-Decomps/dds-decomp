@@ -4581,6 +4581,7 @@
 0x002BB8D8	mnuReleasePartyPanelTextures	inferred	Releases three texture slots for each party panel and clears panel flags. [names_reviewed5.tsv]
 0x002BB998	mnuResetPartyPanelFade	inferred	Clears both party-panel fades and optionally restores their scales to full. [names_reviewed5.tsv]
 0x002BB9D0	mnuSetPageParams	inferred	DDS1 has the same unprefixed symbol; game/code_002B0278 uses mnu for the already-described menuSetPageParams behavior.
+0x002BBA38	mnuCreatePageSpriteSet	inferred	allocates a MenuSprites owner and fills its icon, item, and cursor EffectSlotSet arrays
 0x002BBE78	mnuFreeIconSprites	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002BBF38	mnuDrawIconRow	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002BBFC8	mnuSetWindowResource	inferred	wrong or missing short module prefix [names_audit.tsv]
