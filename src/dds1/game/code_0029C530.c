@@ -3806,10 +3806,10 @@ typedef struct EffSurfaceGridNode {
     u32 type;       // 0x20
     u8 *buffer;     // 0x24
     u8 *tail;       // 0x28
-    s32 *handle;    // 0x2C
+    SdfAsset *handle; // 0x2C
     u8 *queueA;     // 0x30
     u8 *queueB;     // 0x34
-    u8 *allocation; // 0x38
+    struct SdfMemBlock *allocation; // 0x38
 } EffSurfaceGridNode;
 
 /* vu0 routine: grid surface node with rows of three vertex columns */
@@ -3837,7 +3837,7 @@ u32 effCreateSurfaceGridNode(u32 count, u32 columns) {
     node->allocation = base;
     node->tail = data;
     node->field_14 = 0;
-    node->handle = (s32 *)sdfCreateAssetWithDrawEntries();
+    node->handle = sdfCreateAssetWithDrawEntries();
     func_002DA420(node->handle, 1.0f);
     memset(&D_003DCA40, 0, sizeof(EffPacketParams));
     D_003DCA40.primitive = 0x4000;
@@ -3906,8 +3906,8 @@ void effFillSurfaceGridColorGradient(u32 nodeAddr, u32 *colors) {
 }
 
 void effReleaseSurfaceGridBuffers(s32 work) {
-    sdfQueueAssetRelease((SdfAsset *)((EffSurfaceGridNode *)work)->handle);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)((EffSurfaceGridNode *)work)->allocation));
+    sdfQueueAssetRelease(((EffSurfaceGridNode *)work)->handle);
+    sdfReleaseResourceAllocation(((EffSurfaceGridNode *)work)->allocation);
 }
 
 void effResetSurfaceGridFrame(s32 work) {
