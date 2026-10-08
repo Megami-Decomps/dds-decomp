@@ -1991,7 +1991,28 @@ s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *battler, s32 slot) {
     return value;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001ABA40);
+s32 func_001ABA40(BtlUnit *unit, s32 command) {
+    s32 result = 0;
+    u32 cost = btlApplyCommandAbilityMultiplier(&unit->partyRecord, command);
+
+    switch (datCommandRecords[command].costMode) {
+    case DAT_COMMAND_COST_MODE_HP:
+        if ((datCommandRecords[command].flags & 8) == 0) {
+            if (unit->partyRecord.hp <= cost) {
+                result = 1;
+            }
+        } else if (unit->partyRecord.hp < cost) {
+            result = 1;
+        }
+        break;
+    case DAT_COMMAND_COST_MODE_MP:
+        if (unit->partyRecord.mp < cost) {
+            result = 2;
+        }
+        break;
+    }
+    return result;
+}
 
 s32 func_001ABB10(BtlUnit *unit, s32 command) {
     u32 availableSlots;
