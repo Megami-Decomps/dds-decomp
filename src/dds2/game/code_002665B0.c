@@ -40,7 +40,7 @@ extern void evtSetBoundedDisplayValue(s32, s32);
 extern s8 D_00437859;
 
 typedef struct MenuSlotState {
-    s32 heapHandle;
+    struct SdfMemBlock *heapHandle;
     u8 pad04[4];
     MenuPopupState transitionWork; /* 0x08 */
     s32 dispatchStatus; /* 0x54 */
@@ -909,14 +909,14 @@ void mnuApplyFadeTrackMode(s32 mode, MenuSlotState *host) {
 /* Allocate the terminal scene and its lists/effects/message resource.
  * Both cursor slots start at -1; DDS2 also initializes its gradient indicator. */
 u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
-    s32 handle;
+    struct SdfMemBlock *allocation;
     u8 *obj;
     u32 i;
 
-    handle = (u32)sdfAllocGeneralBlock(MNU_TERMINAL_SCENE_BYTES);
-    obj = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    allocation = sdfAllocGeneralBlock(MNU_TERMINAL_SCENE_BYTES);
+    obj = (u8 *)sdfResourceRetainAddress(allocation);
     memset(obj, 0, MNU_TERMINAL_SCENE_BYTES);
-    *(s32 *)obj = handle;
+    ((MenuSlotState *)obj)->heapHandle = allocation;
     mnuClearPanelTransitionState(&((MenuSlotState *)obj)->transitionWork);
     mnuTerminalCreateEffects((MenuSlotState *)obj);
     ((MenuSlotState *)obj)->reduced = reduced;
@@ -956,7 +956,7 @@ void mnuReleaseTerminalWorkAndResumeField(KwlnTask *arg) {
         mnuDrainPanelTransitions(&work->transitionWork, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle(&work->messageResources);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->heapHandle));
+        sdfReleaseResourceAllocation(work->heapHandle);
         mnuTerminalTaskState = 2;
     }
     if (mnuCheckResourceTask() != 0) {
