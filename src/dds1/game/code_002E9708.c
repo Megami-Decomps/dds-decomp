@@ -151,7 +151,7 @@ extern SdfStreamFrameNode *sdfStreamNodeListHead;
 
 extern SdfStreamFrameNode *sdfStreamNodeListTail;
 
-extern void sdfTexEnqueuePacketWithSemaphore(s32, s32);
+extern void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet);
 
 extern void func_002EB650();
 
@@ -1424,7 +1424,7 @@ s32 sdfSubmitBufferedPlayback(MidiPlaybackState *state) {
     if (*selectedBuffer == 0) {
         func_002EB650();
     }
-    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, *selectedBuffer + state->bufferSize - SDF_STREAM_QWORD_BYTES);
+    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, (void *)(*selectedBuffer + state->bufferSize - SDF_STREAM_QWORD_BYTES));
     sdfAdvanceBufferedPlayback(state);
     return 1;
 }

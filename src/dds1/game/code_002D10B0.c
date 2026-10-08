@@ -559,7 +559,7 @@ s32 sdfFormatImageSize(u32 format, s32 width, s32 height) {
 
 INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D1D80);
 
-void sdfTexEnqueuePacketWithSemaphore(s32 address, s32 packet) {
+void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet) {
     SdfSemaObj *obj = &sdfTextureQueueWork;
     SdfTexPacketTail *last;
 
