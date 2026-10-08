@@ -866,7 +866,7 @@ void sdfTexListInsert(SdfTex *texture) {
     sdfResourceListHead = texture;
 }
 
-SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, s32 primary, s32 paletteFormat, s32 paletteCount, s32 secondary) {
+SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, SdfTexResource *primary, s32 paletteFormat, s32 paletteCount, SdfTexResource *secondary) {
     SdfTex *tex = sdfAllocAndClearQuadwords(0x40);
     SdfTexRef *ref = sdfAllocAndClearQuadwords(8);
 
@@ -877,8 +877,8 @@ SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 max
     tex->height = y;
     tex->pixelFormat = pixelFormat;
     tex->maxMipLevel = maxMipLevel;
-    tex->secondaryResource = (SdfTexResource *)secondary;
-    tex->primaryResource = (SdfTexResource *)primary;
+    tex->secondaryResource = secondary;
+    tex->primaryResource = primary;
     tex->reference = ref;
     sdfTexListInsert(tex);
     tex->unk38 = 0x80808080;
