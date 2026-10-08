@@ -382,7 +382,7 @@ void evtFillQuadRecordFields(s32 firstWord, s32 secondWord, s32 thirdWord, s32 f
 /* Destroy a nonzero, registered task. The declared return value is not set. */
 s32 evtDestroyRegisteredTaskIfPresent(s32 task) {
     if (task != 0) {
-        if (kwlnTaskGetRegisteredState(task)) {
+        if (kwlnTaskGetRegisteredState((KwlnTask *)task)) {
             kwlnTaskDestroyWithHierarchy(task, 0);
         }
     }
@@ -643,13 +643,13 @@ void evtMoveMessageWindowWithPanelOffset(s32 x, s32 y) {
 
 /* Recognize all three scheduler queues. Preserve the repeated queries. */
 s32 evtIsTaskInActiveStates(s32 task) {
-    if (kwlnTaskGetRegisteredState(task) == KWLN_TASK_DELAYED_START) {
+    if (kwlnTaskGetRegisteredState((KwlnTask *)task) == KWLN_TASK_DELAYED_START) {
         return 1;
     }
-    if (kwlnTaskGetRegisteredState(task) == KWLN_TASK_ACTIVE) {
+    if (kwlnTaskGetRegisteredState((KwlnTask *)task) == KWLN_TASK_ACTIVE) {
         return 1;
     }
-    return kwlnTaskGetRegisteredState(task) == KWLN_TASK_DESTROY_PENDING;
+    return kwlnTaskGetRegisteredState((KwlnTask *)task) == KWLN_TASK_DESTROY_PENDING;
 }
 
 /* Clear one active-entry flag; the caller supplies a valid index. */
