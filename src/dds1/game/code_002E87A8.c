@@ -10,6 +10,11 @@
 #define SND_COMMAND_ID_SHIFT 16
 #define SND_COMMAND_LENGTH_SHIFT 28
 
+#define SND_CHANNEL_COUNT 16
+#define SND_IOP_BUFFER_COUNT 16
+#define SND_TRACK_SLOT_COUNT 13
+#define SND_IOP_BUFFER_ALIGNMENT 16
+
 typedef struct CmdPacket {
     /* 0x0 */ u32 trackId;
     /* 0x4 */ u32 unk4;
@@ -51,9 +56,9 @@ typedef struct SndWork {
     s32 bufferCount;           /* 0x004 */
     u32 unk008;              /* 0x008 */
     u32 unk00C;              /* 0x00C */
-    SndChannel channels[16];   /* 0x010 */
-    SndIopBuffer buffers[16];  /* 0x110 */
-    SndTrackSlot slots[13];    /* 0x190 */
+    SndChannel channels[SND_CHANNEL_COUNT];   /* 0x010 */
+    SndIopBuffer buffers[SND_IOP_BUFFER_COUNT];  /* 0x110 */
+    SndTrackSlot slots[SND_TRACK_SLOT_COUNT];    /* 0x190 */
     u32 unk1F8;              /* 0x1F8 */
     u32 unk1FC;              /* 0x1FC */
     u32 unk200;                /* 0x200 */
@@ -170,7 +175,7 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
 
     sndMidiTrackState.header = header;
     channel = sndMidiTrackState.channels;
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < SND_CHANNEL_COUNT; i++) {
         channel->index = i;
         channel->unk1 = 0x20;
         channel->unk2 = 0;
@@ -182,7 +187,7 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
     sndMidiTrackState.channels[0].unk8 = sndReserveIopWorkMemory(0x21600);
     sndMidiTrackState.unk200 = 0;
     sndMidiTrackState.unk204 = 0;
-    for (i = 0; i < 13; i++) {
+    for (i = 0; i < SND_TRACK_SLOT_COUNT; i++) {
         sndMidiTrackState.slots[i].id = -1;
         sndMidiTrackState.slots[i].flagA = 0;
         sndMidiTrackState.slots[i].flagB = 0;
@@ -190,33 +195,36 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
 }
 
 /* Allocate one aligned IOP block and distribute its address among active buffers. */
-void sndAllocateAlignedIopBuffers(s32 *sizes, s32 count) {
+void sndAllocateAlignedIopBuffers(s32 *requestedSizes, s32 bufferCount) {
     SndIopBuffer *buffer;
-    s32 total, size, i;
-    u32 address;
+    s32 totalBytes;
+    s32 alignedBytes;
+    s32 bufferIndex;
+    u32 iopAddress;
 
-    sndMidiTrackState.bufferCount = count;
+    sndMidiTrackState.bufferCount = bufferCount;
     buffer = sndMidiTrackState.buffers;
-    total = 0;
-    i = 0;
+    totalBytes = 0;
+    bufferIndex = 0;
     do {
-        size = (*sizes++ + 15) & ~15;
-        buffer->size = size;
+        alignedBytes = (*requestedSizes++ + (SND_IOP_BUFFER_ALIGNMENT - 1)) &
+                       ~(SND_IOP_BUFFER_ALIGNMENT - 1);
+        buffer->size = alignedBytes;
         buffer++;
-        total += size;
-        i++;
-    } while (i != count);
-    for (; i < 16; i++) {
-        sndMidiTrackState.buffers[i].size = 0;
-        sndMidiTrackState.buffers[i].address = 0;
+        totalBytes += alignedBytes;
+        bufferIndex++;
+    } while (bufferIndex != bufferCount);
+    for (; bufferIndex < SND_IOP_BUFFER_COUNT; bufferIndex++) {
+        sndMidiTrackState.buffers[bufferIndex].size = 0;
+        sndMidiTrackState.buffers[bufferIndex].address = 0;
     }
-    address = sndReserveIopWorkMemory(total);
-    i = 0;
+    iopAddress = sndReserveIopWorkMemory(totalBytes);
+    bufferIndex = 0;
     do {
-        sndMidiTrackState.buffers[i].address = address;
-        address += sndMidiTrackState.buffers[i].size;
-        i++;
-    } while (i != count);
+        sndMidiTrackState.buffers[bufferIndex].address = iopAddress;
+        iopAddress += sndMidiTrackState.buffers[bufferIndex].size;
+        bufferIndex++;
+    } while (bufferIndex != bufferCount);
 }
 
 void func_002E8C30(s32 arg0, s32 arg1, s32 *sizes, s32 count) {
