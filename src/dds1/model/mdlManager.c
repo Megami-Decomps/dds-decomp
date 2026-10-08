@@ -564,7 +564,7 @@ s32 mdlCheckNodeByte30(MdlCtx *ctx, s32 searchId) {
 }
 
 /* Read the stored float, defaulting to zero when the searched node is absent. */
-f32 mdlGetNodeFloat20(MdlCtx *ctx, s32 searchId) {
+f32 mdlGetNodeFrameStep(MdlCtx *ctx, s32 searchId) {
     Motion *matchedNode = mdlFindNodeById(ctx, searchId);
     f32 result = 0.0f;
 
@@ -575,7 +575,7 @@ f32 mdlGetNodeFloat20(MdlCtx *ctx, s32 searchId) {
 }
 
 /* Replace the stored float only when the searched node exists. */
-void mdlSetNodeFloat20(MdlCtx *ctx, s32 searchId, f32 value) {
+void mdlSetNodeFrameStep(MdlCtx *ctx, s32 searchId, f32 value) {
     Motion *matchedNode = mdlFindNodeById(ctx, searchId);
 
     if (matchedNode != NULL) {

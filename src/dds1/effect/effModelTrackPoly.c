@@ -45,7 +45,7 @@ void effTrackPolyReset(EffTrackPolyWork *work) {
     effTrackPolyInitData(work->data);
 }
 
-extern s32 sdfLoadMapRecordPositionVector(void *param, s32 id);
+extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
 void effTrackPolyResampleHistory(EffTrackPolyData *data, u128 *src);
 
 void effSampleTrackPolyEndpoints(EffTrackPolyWork *work) {

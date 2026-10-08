@@ -51,7 +51,7 @@ typedef struct EvtLipsLink {
     EvtLipsMh *mh;      /* 0x0C */
 } EvtLipsLink;
 
-extern u32 sdfGetUniqueChunkValue();
+extern u32 sdfGetUniqueChunkValue(SdfModel *model);
 
 extern s32 scrReadIntParameter(s32 idx);
 extern s32 mdlSpawnLinkedCameraSlotViewerObject(s32 arg0, s32 arg1);
@@ -121,7 +121,7 @@ extern u8 D_003AC550[];
 extern u8 D_003AC5B0[];
 extern u8 D_003AC600[];
 
-extern s32 sdfGetLodChunkValue();
+extern u32 sdfGetLodChunkValue(SdfModel *model);
 extern s32 scrGetWindow(void);
 extern void itfMesSetWindowCallbackAddress(s32 window, void (*callback)(void));
 extern void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 arg1, s32 arg2);
@@ -580,7 +580,7 @@ u32 evtOpModelLodChg(void) {
         func_003003F0("warning!! MODEL_LOD_CHG(int,int) root pointer null\n");
         return 1;
     }
-    max = sdfGetLodChunkValue(model);
+    max = (s32)sdfGetLodChunkValue(model);
     if (max < lod) {
         func_003003F0("warning!! MODEL_LOD_CHG(int,int) lodno over!! max=%d setval=%d\n", max, lod);
         return 1;

@@ -14,7 +14,7 @@ extern void effDestroyNode(u32);
 extern u32 func_0016D290(u32 handle);
 extern void effThunderSetFragmentColor(void *work, u32 value);
 extern void func_0016D9D8(u32 handle);
-extern u32 sdfCountMapPositionRecords(void *model);
+extern u32 sdfCountMapPositionRecords(SdfModel *model);
 extern u32 effEventCreate(void *owner, s32 kind, void *place);
 
 
@@ -654,8 +654,7 @@ extern void mdlProcessContextNodesAndTransforms(MdlCtx *obj, s32 state);
 
 extern void mdlStorePrimaryVectorVU(void *obj);
 
-struct SdfTextParam;
-extern s32 sdfLoadMapRecordPositionVector(struct SdfTextParam *param, s32 value);
+extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 
 extern u8 D_00380828[];
 
@@ -880,7 +879,7 @@ void effTwinEffectUpdate(EffPCPTwinWork *work) {
         effParamWorkCallback1(work->pair[i][1], 1.75f);
         mdlBroadcastMasked(obj[1], work->color);
         mdlProcessContextNodesAndTransforms(obj[0], (s32)D_00380828);
-        sdfLoadMapRecordPositionVector((struct SdfTextParam *)obj[0]->inner, 1);
+        sdfLoadMapRecordPositionVector(obj[0]->inner, 1);
         posp = &pos;
         VU0_STORE_VF_UNCLOBBERED(vf10, posp);
         mdlStorePrimaryVectorVU(obj[1]);
@@ -999,7 +998,7 @@ void effPcpStaggerUpdate(EffPCPStaggered *work) {
             effParamWorkCallback1(work->handle[i * 2 + 1], 1.5f);
             mdlBroadcastMasked(obj[1], work->color);
             mdlProcessContextNodesAndTransforms(obj[0], (s32)D_00380828);
-            sdfLoadMapRecordPositionVector((struct SdfTextParam *)obj[0]->inner, 1);
+            sdfLoadMapRecordPositionVector(obj[0]->inner, 1);
             mdlStorePrimaryVectorVU(obj[1]);
             mdlProcessContextNodesAndTransforms(obj[1], (s32)D_00380828);
         }
@@ -1127,7 +1126,7 @@ void effCrossEffectUpdate(EffPCPCrossWork *work) {
             }
             obj = effParamWorkGetData(work->handle[i][j]);
             mdlBroadcastMasked(obj, work->color);
-            sdfLoadMapRecordPositionVector((struct SdfTextParam *)anchor->inner, i * 4 + j + 1);
+            sdfLoadMapRecordPositionVector(anchor->inner, i * 4 + j + 1);
             mdlStorePrimaryVectorVU(obj);
             mdlProcessContextNodesAndTransforms(obj, (s32)D_00380828);
         }
@@ -1229,7 +1228,7 @@ void effPcpDelayedPairsUpdate(EffPCPDelayedPairs *work) {
             mdlStorePrimaryVectorVU(obj[0]);
             mdlBroadcastMasked(obj[1], work->color);
             mdlProcessContextNodesAndTransforms(obj[0], (s32)D_00380828);
-            sdfLoadMapRecordPositionVector((struct SdfTextParam *)obj[0]->inner, 1);
+            sdfLoadMapRecordPositionVector(obj[0]->inner, 1);
                         VU0_STORE_VF_UNCLOBBERED(vf10, &vec);
             mdlStorePrimaryVectorVU(obj[1]);
             mdlProcessContextNodesAndTransforms(obj[1], (s32)D_00380828);
@@ -1325,7 +1324,7 @@ void func_001803E8(EffPCPChargeWork *work) {
     if (captureRow < 25) {
         for (point = 0; point < 7; point++) {
             if (captureRow % D_003B1640[point] == 0) {
-                sdfLoadMapRecordPositionVector((struct SdfTextParam *)model->inner, point + 1);
+                sdfLoadMapRecordPositionVector(model->inner, point + 1);
                 VU0_STORE_VF(vf10, position);
                 PCP_COPY_VECTOR(work->samplePositions[captureRow][point], position);
                 work->animationFrames[captureRow][point] = effMiscRand(D_003AA868);
@@ -1416,7 +1415,7 @@ void effPcpSpawnOnce(EffPCPSpawnOnceWork *work) {
     mdlStorePrimaryVectorVU(obj);
     effParamWorkCallback3(work->secondaryHandle, work->color);
     mdlProcessContextNodesAndTransforms(obj, (s32)D_00380828);
-    sdfLoadMapRecordPositionVector((struct SdfTextParam *)obj->inner, 1);
+    sdfLoadMapRecordPositionVector(obj->inner, 1);
         VU0_STORE_VF_TO_MEMORY(vf10, vec);
     effParamWorkCallback0(work->secondaryHandle, &vec);
     effParamWorkInvokeCallback(work->secondaryHandle);
@@ -6265,7 +6264,7 @@ void effPcpUpdateMapMotionEvents(EffPCPMapEventWork *work) {
                 effEventSetScale(entry->event, work->scale);
             }
             if (frame >= 0) {
-                sdfLoadMapRecordPositionVector((struct SdfTextParam *)mapModel, i);
+                sdfLoadMapRecordPositionVector(mapModel, i);
                 VU0_STORE_VF(vf10, position);
                 if (frame == 0) {
                     entry->initialPosition[0] = position[0];

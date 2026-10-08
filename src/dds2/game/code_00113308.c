@@ -348,8 +348,7 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
 
 extern void func_00112518(void *, EffWorldNode *);
 extern void func_00120B88(EffWorldNode *);
-typedef struct SdfTextParam SdfTextParam;
-extern s32 sdfLoadMapRecordPositionVector(SdfTextParam *param, s32 id);
+extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 id);
 extern void func_001200E8(s32, f32, f32, f32, f32);
 extern u8 D_00380788[];
 
@@ -390,7 +389,7 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
         level = config->inner->color >> 24;
     }
     pickMode = dds3TestObjectFlags(obj, 0x8000) != 0;
-    if (sdfLoadMapRecordPositionVector((SdfTextParam *)target->owner->inner, 0)) {
+    if (sdfLoadMapRecordPositionVector(target->owner->inner, 0)) {
         VU0_STORE_VF(vf10, vec);
         vec[1] = pickMode == 1 ? target->unkD4 : obj->inner->position[1];
         func_001200E8(level, vec[0], vec[1], vec[2], obj->inner->radius);

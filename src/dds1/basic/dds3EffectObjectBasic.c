@@ -3,6 +3,7 @@
 #include "pcp_vu0.h"
 #include "dds3obj.h"
 #include "eff.h"
+#include "sdf_draw.h"
 
 #define EFF_OBJ_KIND 7
 #define EFF_OBJ_STATE_BOUND_BILL 1
@@ -79,7 +80,7 @@ extern void *billCreateIndexed(s32 kind, u32 billId);
 
 extern void *billCloneObjectRetainingSharedData(void *arg);
 
-extern s32 sdfLoadMapRecordLookAtBasis(void *param, s32 id);
+extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
 
 extern void effEventReleaseNode(void *node);
 
