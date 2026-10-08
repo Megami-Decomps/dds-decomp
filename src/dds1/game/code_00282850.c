@@ -1533,18 +1533,18 @@ s32 mnuGetEntryUseStatus(s32 actorAddress, u16 commandId) {
 }
 
 /* Report insufficient raw HP/MP cost; equality and unhandled kinds return zero. */
-s32 mnuIsEntryCostUnaffordable(u16 commandId, s32 actorAddress) {
+s32 mnuIsEntryCostUnaffordable(u16 commandId, DatPartyRecord *actor) {
     s32 costKind = datCommandRecords[commandId].costMode;
     u16 cost = datCommandRecords[commandId].costPercentage;
 
     switch (costKind) {
     case DAT_COMMAND_COST_MODE_HP:
-        if (((DatPartyRecord *)actorAddress)->hp < cost) {
+        if (actor->hp < cost) {
             return 1;
         }
         break;
     case DAT_COMMAND_COST_MODE_MP:
-        if (((DatPartyRecord *)actorAddress)->mp < cost) {
+        if (actor->mp < cost) {
             return 1;
         }
         break;
