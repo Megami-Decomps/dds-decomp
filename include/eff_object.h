@@ -9,7 +9,7 @@ typedef struct EffectObjectData {
     struct EvtUnit *transitionWork; /* 0x08: object transition work */
     ObjBase *modelHolder; /* 0x0C: owned base retains the model resource. */
     s32 activeId;
-    u32 word14;
+    u32 followParameterIndex; /* 0x14: 16-byte follow-parameter row; all-ones selects the base record. */
     u32 word18;
     s32 pendingValue;
     s32 timer;
