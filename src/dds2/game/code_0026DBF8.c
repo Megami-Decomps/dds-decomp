@@ -49,15 +49,16 @@ extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 
 typedef struct MantraBurstPool MantraBurstPool;
+typedef struct MantraSparkleEmitter MantraSparkleEmitter;
 
 extern MantraBurstPool *mnuAllocateMantraPanelBurstPool(void);
 
-extern u32 mnuAllocateMantraSparkleEmitter(s16);
+extern MantraSparkleEmitter *mnuAllocateMantraSparkleEmitter(s16);
 
 extern void *sdfAllocSizeClassBlock(s32);
 
 
-void mnuFreeMantraSparkleEmitter(u32 sprite);
+void mnuFreeMantraSparkleEmitter(MantraSparkleEmitter *sprite);
 
 void mnuReleaseMantraPanelBurstPool(MantraBurstPool *obj);
 MantraBurstPool *mnuAllocateMantraBackgroundBurstPool(void);
@@ -175,7 +176,7 @@ typedef struct MantraPanelAnimation {
     u8 stateB;
     u8 stateC;
     u8 pad23;
-    u32 spriteHandle;
+    MantraSparkleEmitter *spriteHandle;
     MantraBurstPool *burstPool;
     s16 id;
     s16 transitionDelay;
@@ -349,7 +350,7 @@ extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate,
 s32 mnuLoadMantraSpriteTask(KwlnTask *task);
 extern char D_004250B0[];
 extern void mnuDrawMantraSprite(s32, s32, s32, s32, s32, s32, s32);
-void func_00284508(s32 x, s32 y, s32 z, s32 amount, u32 handle, s32 packet);
+void func_00284508(s32 x, s32 y, s32 z, s32 amount, MantraSparkleEmitter *handle, s32 packet);
 extern char mnuMantraSpriteTaskName[];
 extern s32 mnuUpdateMantraUnitPanelFade();
 extern void func_00274A70();
@@ -3864,7 +3865,7 @@ s32 mnuDrawMantraPulseIconWithFadeState(s32 x, s32 y, s32 z, s32 amount, s32 unu
 }
 
 void btlInitPanelASprite(u32 unused, s32 view) {
-    u32 spriteHandle;
+    MantraSparkleEmitter *spriteHandle;
 
     spriteHandle = mnuAllocateMantraSparkleEmitter(1);
     ((MantraPanelAnimation *)view)->spriteHandle = spriteHandle;
@@ -3889,7 +3890,7 @@ s32 btlDrawPanelA(s32 x, s32 y, u32 z, u32 amount, u32 unused, u32 object, u32 p
 INCLUDE_ASM(const s32, "game/code_0026DBF8", func_0027C558);
 
 void mnuInitMantraPanelSpriteView(u32 unused, s32 view) {
-    u32 spriteHandle;
+    MantraSparkleEmitter *spriteHandle;
 
     spriteHandle = mnuAllocateMantraSparkleEmitter(2);
     ((MantraPanelAnimation *)view)->spriteHandle = spriteHandle;
@@ -4006,7 +4007,7 @@ s32 mnuDrawMantraPanelSpriteTransition(s32 x, s32 y, s32 z, s32 amount, s32 unus
 }
 
 void btlInitPanelBSprites(u32 unused, s32 view) {
-    u32 resource;
+    MantraSparkleEmitter *resource;
 
     resource = mnuAllocateMantraSparkleEmitter(0);
     ((MantraPanelAnimation *)view)->spriteHandle = resource;
@@ -4291,7 +4292,7 @@ s32 mnuDrawFadedMantraSingleCyclePanel(s32 x, s32 y, s32 z, s32 amount, s32 unus
 }
 
 void mnuInitMantraPanelAccentSprite(u32 unused, s32 view) {
-    u32 spriteHandle;
+    MantraSparkleEmitter *spriteHandle;
 
     spriteHandle = mnuAllocateMantraSparkleEmitter(1);
     ((MantraPanelAnimation *)view)->spriteHandle = spriteHandle;
@@ -4447,16 +4448,16 @@ typedef struct MantraSparkle {
     f32 vy;
 } MantraSparkle;
 
-typedef struct MantraSparkleEmitter {
+struct MantraSparkleEmitter {
     MantraSparkle sparkle[10];
     s16 duration;
     s16 kind;
     s32 count;
-} MantraSparkleEmitter;
+};
 
 MantraSparkle *func_00284818(MantraSparkleEmitter *);
 
-u32 mnuAllocateMantraSparkleEmitter(s16 kind) {
+MantraSparkleEmitter *mnuAllocateMantraSparkleEmitter(s16 kind) {
     MantraSparkleEmitter *emitter = (MantraSparkleEmitter *)sdfAllocSizeClassBlock(0xA8);
     MantraSparkle *spark;
 
@@ -4469,11 +4470,11 @@ u32 mnuAllocateMantraSparkleEmitter(s16 kind) {
     spark->age = spark->life * effMiscRandUnitFloat(0) + 0.0f;
     spark = func_00284818(emitter);
     spark->age = spark->life * effMiscRandUnitFloat(0) + 0.0f;
-    return (u32)emitter;
+    return emitter;
 }
 
 
-void mnuFreeMantraSparkleEmitter(u32 sprite) {
+void mnuFreeMantraSparkleEmitter(MantraSparkleEmitter *sprite) {
     if (sprite != 0) {
         sdfReleaseChipBlock(sprite);
     }
@@ -4481,8 +4482,7 @@ void mnuFreeMantraSparkleEmitter(u32 sprite) {
 
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-void func_00284508(s32 x, s32 y, s32 z, s32 amount, u32 handle, s32 packet) {
-    MantraSparkleEmitter *emitter = (MantraSparkleEmitter *)handle;
+void func_00284508(s32 x, s32 y, s32 z, s32 amount, MantraSparkleEmitter *emitter, s32 packet) {
     MantraSparkle *spark;
     u32 i;
     f32 progress;
