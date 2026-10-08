@@ -4846,39 +4846,39 @@ void effPcpGroupSetCreateFromTable(void *args) {
 }
 
 EffPCPGroupSet *effBlockSetCloneWithDuplicates(EffPCPGroupSet *work) {
-    EffPCPGroupSet *copy = effPcpGroupSetCreate(&work->head, 0);
-    u32 group;
-    u32 offset;
-    u32 count;
-    u32 size;
-    u32 stride;
-    u8 *flags;
-    u32 i;
+    EffPCPGroupSet *groupSet = effPcpGroupSetCreate(&work->head, 0);
+    u32 groupIndex;
+    u32 groupByteOffset;
+    u32 entryCount;
+    u32 allocationBytes;
+    u32 groupByteWidth;
+    u8 *activeGroupFlags;
+    u32 entryIndex;
 
     if (work->duplicates != 0) {
-        count = work->head.count;
-        size = count * 16;
-        stride = count * 4;
-        group = 0;
-        flags = work->head.activeGroups;
-        offset = 0;
-        copy->duplicateHandle = sdfAllocGeneralBlock(size);
-        copy->duplicates = (void *)sdfResourceRetainAddress(copy->duplicateHandle);
-        memset(copy->duplicates, 0, size);
-        for (; group < 4; group++) {
-            u32 *slot = (u32 *)((u8 *)copy->duplicates + offset);
+        entryCount = work->head.count;
+        allocationBytes = entryCount * 16;
+        groupByteWidth = entryCount * 4;
+        groupIndex = 0;
+        activeGroupFlags = work->head.activeGroups;
+        groupByteOffset = 0;
+        groupSet->duplicateHandle = sdfAllocGeneralBlock(allocationBytes);
+        groupSet->duplicates = (void *)sdfResourceRetainAddress(groupSet->duplicateHandle);
+        memset(groupSet->duplicates, 0, allocationBytes);
+        for (; groupIndex < 4; groupIndex++) {
+            u32 *destinationHandles = (u32 *)((u8 *)groupSet->duplicates + groupByteOffset);
 
-            if (*flags != 0) {
-                u32 first = *(u32 *)(offset + (u32)work->duplicates);
-                for (i = 0; i < count; i++) {
-                    *slot++ = effParamWorkDuplicate(first);
+            if (*activeGroupFlags != 0) {
+                u32 sourceHandle = *(u32 *)(groupByteOffset + (u32)work->duplicates);
+                for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
+                    *destinationHandles++ = effParamWorkDuplicate(sourceHandle);
                 }
             }
-            flags++;
-            offset += stride;
+            activeGroupFlags++;
+            groupByteOffset += groupByteWidth;
         }
     }
-    return copy;
+    return groupSet;
 }
 
 void effBlockSetRelease(EffPCPGroupSet *work) {
