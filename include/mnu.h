@@ -905,7 +905,7 @@ typedef struct MenuStaffContext {
 
 /* Five owned windows and their selection/transition state share one 0x54 allocation. */
 typedef struct MenuStaffChoices {
-    s32 allocation;
+    struct SdfMemBlock *allocation; /* 0x00: retained descriptor for this 0x54-byte owner. */
     u8 pad04[4];
     MenuWindowContainer *windows[5];
     s32 currentSelection;
