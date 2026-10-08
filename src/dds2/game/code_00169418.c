@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl.h"
+#include "eff_field_color.h"
 
 extern u32 effFieldColorOriginalSelector;
 
