@@ -623,7 +623,7 @@ u8 prfGetParamWord7b4(u16 profileId) {
 }
 
 /* Read the threshold used by the profile-level check. */
-u16 prfGetParamWord7b6(u16 profileId) {
+u16 prfGetRequiredProfileLevel(u16 profileId) {
     return D_003907B0[profileId].requiredLevel;
 }
 
@@ -660,7 +660,7 @@ u32 func_002CDE60(void) {
 
 u32 ptyCheckLevelAtLeastProfileParam7b6(DatPartyRecord *operand, u16 index) {
     s32 value = operand->level;
-    if (value < (s32)prfGetParamWord7b6(index)) {
+    if (value < (s32)prfGetRequiredProfileLevel(index)) {
         return 0;
     }
     return 1;
