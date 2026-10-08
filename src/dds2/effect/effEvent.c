@@ -7,6 +7,7 @@
 #include "eff_math.h"
 #include "eff_channel.h"
 #include "eff_event.h"
+#include "eff_event_setup.h"
 #include "pcp_vu0.h"
 
 #define EFF_EVENT_VECTOR_COMPONENTS 4
@@ -789,23 +790,10 @@ void effDispatchActive(void) {
     }
 }
 
-/* Optional callback/copy preparation shared by the seven setup paths below.
- * callbackResult must be valid whenever callback is present. */
-typedef struct EffLoader {
-    u8 pad00[0x1C];
-    void *source;
-    void *destination;
-    u32 copyBytes;
-    u8 pad28[4];
-    s32 (*callback)(void *);
-    u8 pad30[8];
-    s32 *callbackResult;
-} EffLoader;
-
-extern EffLoader D_003B23E8;
+/* callbackResult must be valid whenever callback is present. */
+extern EffEventSetupRecord D_003B23E8;
 extern s8 D_004364AD;
 extern s8 D_0040B7DB[];
-extern void func_00194A08();
 extern void func_00194A28();
 extern void func_00194A30();
 extern void func_00194A38();
@@ -823,7 +811,7 @@ s8 effUpdateCh72Params(void) {
         D_004364AD = 1;
     }
     if ((u8)D_004364AD != 0) {
-        func_00194A08(&D_003B23E8);
+        func_00194A08((u32)&D_003B23E8);
         func_00194A30();
         func_00194A28(&D_003B23E8);
         func_00194A38();
@@ -844,7 +832,7 @@ void func_001975F8(void *parameters) {
     memcpy(&D_003B22D0, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
-extern EffLoader D_003B2560;
+extern EffEventSetupRecord D_003B2560;
 extern s8 D_004364BD;
 
 /* Prepare the blur-template callback from its explicit parameter block,
@@ -860,7 +848,7 @@ s8 effEventAdvanceBlurTemplateSetup(void) {
         D_004364BD = 1;
     }
     if ((u8)D_004364BD != 0) {
-        func_00194A08(&D_003B2560);
+        func_00194A08((u32)&D_003B2560);
         func_00194A30();
         func_00194A28(&D_003B2560);
         func_00194A38();
@@ -881,7 +869,7 @@ void effEventSetBlurTemplateParameters(EffBlurTemplateBody *parameters) {
     D_003B2428 = *parameters;
 }
 
-extern EffLoader D_003B2738;
+extern EffEventSetupRecord D_003B2738;
 extern s8 D_004364EF;
 
 /* Prepare scatter setup from its explicit parameters, then process the channel. */
@@ -896,7 +884,7 @@ s8 effEventAdvanceScatterBlurSetup(void) {
         D_004364EF = 1;
     }
     if ((u8)D_004364EF != 0) {
-        func_00194A08(&D_003B2738);
+        func_00194A08((u32)&D_003B2738);
         func_00194A30();
         func_00194A28(&D_003B2738);
         func_00194A38();
@@ -917,11 +905,11 @@ void effEventSetScatterBlurParameters(EffBlurScatterParams *parameters) {
     D_003B25A0 = *parameters;
 }
 
-extern EffLoader D_003B2878;
+extern EffEventSetupRecord D_003B2878;
 extern s8 D_00436504;
 
 /* Prepare from the channel's source, process it, then honor the control-byte reset. */
-s8 func_001978B8(void) {
+s8 effEventAdvanceScreenDrawSetup(void) {
     if (D_00436504 == 0) {
         if (D_003B2878.callback != 0) {
             *D_003B2878.callbackResult = D_003B2878.callback(D_003B2878.source);
@@ -932,7 +920,7 @@ s8 func_001978B8(void) {
         D_00436504 = 1;
     }
     if ((u8)D_00436504 != 0) {
-        func_00194A08(&D_003B2878);
+        func_00194A08((u32)&D_003B2878);
         func_00194A30();
         func_00194A28(&D_003B2878);
         func_00194A38();
@@ -953,7 +941,7 @@ void func_00197980(void *parameters) {
     memcpy(&D_003B2778, parameters, EFF_EVENT_BLUR_SOURCE_BYTES);
 }
 
-extern EffLoader D_003B2978;
+extern EffEventSetupRecord D_003B2978;
 extern s8 D_00436517;
 
 /* Prepare solid-rectangle setup from the channel source, then process it. */
@@ -968,7 +956,7 @@ s8 effEventAdvanceSolidRectangleSetup(void) {
         D_00436517 = 1;
     }
     if ((u8)D_00436517 != 0) {
-        func_00194A08(&D_003B2978);
+        func_00194A08((u32)&D_003B2978);
         func_00194A30();
         func_00194A28(&D_003B2978);
         func_00194A38();
@@ -989,7 +977,7 @@ void effEventSetSolidRectangleParameters(EffSolidRectParams *parameters) {
     D_003B28B8 = *parameters;
 }
 
-extern EffLoader D_003B2AB8;
+extern EffEventSetupRecord D_003B2AB8;
 extern s8 D_0043651C;
 
 /* Prepare resource-template setup from its explicit body, then process the channel. */
@@ -1004,7 +992,7 @@ s8 effEventAdvanceResourceTemplateSetup(void) {
         D_0043651C = 1;
     }
     if ((u8)D_0043651C != 0) {
-        func_00194A08(&D_003B2AB8);
+        func_00194A08((u32)&D_003B2AB8);
         func_00194A30();
         func_00194A28(&D_003B2AB8);
         func_00194A38();
@@ -1025,7 +1013,7 @@ void effEventSetResourceTemplateParameters(EffResourceRectParams *parameters) {
     D_003B29B8 = *parameters;
 }
 
-extern EffLoader D_003B2C90;
+extern EffEventSetupRecord D_003B2C90;
 extern s8 D_0043652F;
 
 /* Prepare scale-blur setup from its explicit parameters, then process the channel. */
@@ -1040,7 +1028,7 @@ s8 effEventAdvanceScaleBlurSetup(void) {
         D_0043652F = 1;
     }
     if ((u8)D_0043652F != 0) {
-        func_00194A08(&D_003B2C90);
+        func_00194A08((u32)&D_003B2C90);
         func_00194A30();
         func_00194A28(&D_003B2C90);
         func_00194A38();
@@ -1195,7 +1183,7 @@ EffEventLight *effEventLightClone(EffEventLight *src) {
 }
 
 /* Apply the native owner operation to the pointer stored in the record prefix. */
-void func_00198448(EffEventLight *work) {
+void effEventLightUpdateEffectParameters(EffEventLight *work) {
     effEventUpdateEffectParameters(work->owner);
 }
 
