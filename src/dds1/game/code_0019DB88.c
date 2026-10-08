@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "itf.h"
 #include "pcp_vu0.h"
 #include "scr.h"

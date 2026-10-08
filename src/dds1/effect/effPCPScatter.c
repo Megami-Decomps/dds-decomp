@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "eff.h"
@@ -46,7 +47,6 @@ extern void sdfReleaseChipBlock(void *ptr);
 
 extern void effReleaseScatterObject(u32 res);
 extern void sdfQueueAssetRelease(u32 res);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern void effPcpScatterResRelease(PcpScatterRes *res);

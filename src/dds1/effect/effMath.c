@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff.h"
 
 void effMathReleaseWorkResource(EffArrHdr *work) {

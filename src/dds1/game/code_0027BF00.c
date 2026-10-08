@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "sdf_resource.h"
 #include "mnu_list.h"
 #include "eff.h"
 #include "mnu_shop.h"
@@ -503,7 +504,7 @@ void mnuReleaseWindowTextures(MenuWindowSpriteGroup *group) {
     for (spriteIndex = 0; spriteIndex < MNU_WINDOW_RESOURCE_SPRITES; spriteIndex++) {
         effDestroyResourceSlotSet(group->sprites[spriteIndex]);
     }
-    sdfReleaseResourceAllocation(group->resourceHandle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(group->resourceHandle));
 }
 
 void mnuConfigureWindowSpriteSlots(MenuWindowSpriteGroup *group, u32 target) {
@@ -861,7 +862,7 @@ void mnuSortItems(s32 menu, s32 keyIndex, s32 ascending) {
     mnuRebuildListFirstFromCursor(menu);
     mnuRebuildListLastFromCursor(menu);
     mnuResetNodeLinks((s32 *)menu, 0);
-    sdfReleaseResourceAllocation(allocationHandle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocationHandle));
 }
 
 /* Allocate four native fade records into pointer slots after the list header. */

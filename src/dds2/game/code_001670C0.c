@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "btl_sound.h"
 #include "kwln_sprite.h"
 
@@ -32,7 +33,6 @@ extern void *sdfAllocPacketAligned(s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(void *, s32, s32, s64, s32);
 extern void effBattleReleaseParameterBanks(void *);
-extern void sdfReleaseResourceAllocation(void *);
 extern void func_00168280();
 extern const char D_00414430[];
 extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);

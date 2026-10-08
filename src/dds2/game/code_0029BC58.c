@@ -1,7 +1,75 @@
 #include "common.h"
 #include "mnu_result.h"
 
-INCLUDE_ASM(const s32, "game/code_0029BC58", func_0029BC58);
+extern const char *D_003D62F0[6];
+extern char (*D_00435E48)[17];
+extern char (*D_00435E5C)[25];
+struct EffRandState;
+extern u32 effMiscRand(struct EffRandState *state);
+extern void evtCopyEntryStringToActiveWindow(s32, s32);
+extern s32 mnuSelectEventFlagCode(void);
+extern s32 dspStartEntry(s32);
+extern void evtStageTestQueueMotion(s32, u32);
+extern void evtStageTestSetPendingEffect(u32);
+
+void func_0029BC58(BrsSkillPackageWork *work) {
+    DatPartyRecord *unit = work->selectedRewardRow->unit;
+    s32 mode = work->rewardMode;
+    s32 rewardIndex;
+
+    switch (mode) {
+    case 4: {
+        rewardIndex = work->rewardIndex;
+        work->statGains[rewardIndex]++;
+        evtCopyEntryStringToActiveWindow(1, (s32)D_003D62F0[rewardIndex]);
+    }
+        /* Fall through to display the rewarded unit. */
+    case 1:
+    case 2:
+    case 3:
+        evtCopyEntryStringToActiveWindow(0, (s32)D_00435E48[unit->unitId]);
+        dspStartEntry(work->rewardMode + 25);
+        break;
+    case 5: {
+        s32 roll;
+        rewardIndex = unit->unitId * 4 - 4;
+        roll = effMiscRand(NULL) & 3;
+
+        evtCopyEntryStringToActiveWindow(0, (s32)D_00435E48[unit->unitId]);
+        evtCopyEntryStringToActiveWindow(1, (s32)D_00435E5C[work->earnedItem]);
+        switch (mnuSelectEventFlagCode()) {
+        case 1:
+            dspStartEntry(rewardIndex + roll + 30);
+            break;
+        case 5:
+            dspStartEntry(rewardIndex + roll + 62);
+            break;
+        case 2:
+            dspStartEntry(rewardIndex + roll + 94);
+            break;
+        case 8:
+            dspStartEntry(rewardIndex + roll + 126);
+            break;
+        }
+        break;
+    }
+    }
+
+    switch (work->rewardMode) {
+    case 1:
+    case 2:
+    case 3:
+        evtStageTestQueueMotion(2, 1);
+        evtStageTestSetPendingEffect(0);
+        return;
+    case 4:
+        evtStageTestQueueMotion(2, 1);
+        return;
+    case 5:
+        evtStageTestQueueMotion(2, 2);
+        break;
+    }
+}
 
 
 extern void mnuRefreshSelectedUnitPanels(DatPartyRecord *, BrsSkillPackageWork *);

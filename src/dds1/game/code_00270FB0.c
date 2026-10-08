@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "dat_state.h"
 #include "mnu.h"
 #include "eff.h"
@@ -472,7 +473,6 @@ extern s32 kwlnTaskGetUserValue();
 
 extern s8 mnuCampTaskState;
 
-extern void sdfReleaseResourceAllocation(u32);
 
 /* Ignore null task userdata; otherwise drain transitions and release owned
  * resources in shutdown order before marking camp cleanup complete. */
@@ -490,7 +490,7 @@ void mnuDestroyStaffMenuTask(u32 task) {
     mnuReleaseStaffResourceSlotGroups(menu);
     mnuReleaseStaffSpriteHandles(menu);
     func_002BC618(menu->resourceQueue);
-    sdfReleaseResourceAllocation(menu->resource);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(menu->resource));
     mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
     func_002E9730();
 }

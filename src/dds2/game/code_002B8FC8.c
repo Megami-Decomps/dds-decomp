@@ -1,4 +1,5 @@
 #include "mnu_list.h"
+#include "sdf_resource.h"
 #include "mnu_staff.h"
 #include "fpu.h"
 #include "dat_state.h"
@@ -1054,7 +1055,7 @@ void mnuReleaseWindowTextures(MenuIconSprites *menu) {
         effDestroyResourceSlotSet((u32)menu->sprite[spriteIndex]);
         spriteIndex++;
     } while (spriteIndex < MNU_WINDOW_RESOURCE_SPRITES);
-    sdfReleaseResourceAllocation(menu->handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(menu->handle));
 }
 
 void func_002B9A38(void) {
@@ -1549,7 +1550,7 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
     mnuRebuildListFirstFromCursor(menu);
     mnuRebuildListLastFromCursor(menu);
     mnuResetNodeLinks((s32 *)menu, 0);
-    sdfReleaseResourceAllocation(allocationHandle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocationHandle));
 }
 
 /* Allocate four native fade records into pointer slots after the list header. */

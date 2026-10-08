@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "dat_state.h"
 #include "btl_state.h"
@@ -369,7 +370,7 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
     effResetSlots();
     evtSetSolarOverlayFullyTransparent();
     itfMesClearFlags(1);
-    sdfReleaseResourceAllocation(D_003BB2E0);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(D_003BB2E0));
     D_003BB2E0 = 0;
     btlRuntime = 0;
     btlBossDebugPrintf("** btlExit ***************\n");

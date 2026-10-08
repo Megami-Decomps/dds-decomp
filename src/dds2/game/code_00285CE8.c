@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "dat_state.h"
 extern s32 sdfAllocGeneralBlock(s32 size);
 extern s8 *sdfMemoryGetBlockAddress();
@@ -180,7 +181,6 @@ s32 mtrMantraEventBitPush(void) {
 }
 
 extern s8 *sdfMemoryGetBlockAddress(void);
-extern void sdfReleaseResourceAllocation(s32 arg);
 
 void mtrMantraEventBitPop(s32 arg) {
     s32 i;
@@ -202,7 +202,7 @@ void mtrMantraEventBitPop(s32 arg) {
         }
         data++;
     }
-    sdfReleaseResourceAllocation(arg);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(arg));
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitPop()]*****************\n");
 }
 

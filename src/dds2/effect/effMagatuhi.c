@@ -1,4 +1,5 @@
 #include "eff.h"
+#include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 

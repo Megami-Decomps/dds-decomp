@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "mnu_result.h"
 #include "mnu_list.h"
 #include "mnu_staff.h"
@@ -686,7 +687,6 @@ extern s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *);
 extern void brsCloseSkillPackagePanel(BrsSkillPackageWork *);
 extern void func_00303D58(s32);
 extern s32 dspCloseChannel(void);
-extern void sdfReleaseResourceAllocation(s32);
 
 /* Release the panel and task resources, then mark the result task finished. */
 void brsStaffTaskDestroy(s32 taskArg) {
@@ -701,7 +701,7 @@ void brsStaffTaskDestroy(s32 taskArg) {
     }
     func_00303D58(context->fadeTarget);
     dspCloseChannel();
-    sdfReleaseResourceAllocation(context->handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(context->handle));
     brsTaskState = 2;
 }
 

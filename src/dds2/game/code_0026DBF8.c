@@ -1,5 +1,6 @@
 #include "prf_requirement.h"
 #include "common.h"
+#include "sdf_resource.h"
 
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 #include "kwln.h"
@@ -53,7 +54,6 @@ extern s32 mnuFindMantraDrawItemByKind(u32, u32);
 
 extern void *sdfAllocSizeClassBlock(s32);
 
-void sdfReleaseResourceAllocation(u32 sprite);
 
 void mnuFreeMantraSparkleEmitter(u32 sprite);
 
@@ -565,7 +565,7 @@ s32 mnuLoadMantraSpriteTask(KwlnTask *task) {
         for (i = 4; entry != 0; entry = entry->next, i++) {
             if (entry->kind == 1) {
                 mnuMantraSpriteSlots[i] = func_00305148(entry->handle, 0);
-                sdfReleaseResourceAllocation((u32)entry->handle);
+                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)entry->handle));
             }
         }
         func_002C7CE8(request);
@@ -968,7 +968,7 @@ void mnuDestroyMantraDrawPool(u32 address) {
             mnuMantraSetupSlot((u32)item);
         }
     }
-    sdfReleaseResourceAllocation(pool->handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(pool->handle));
 }
 
 void mnuMantraSetupSlot(u32 item) {
@@ -2396,7 +2396,7 @@ u32 mnuAllocateMantraIconPool(u32 count) {
 }
 
 void mnuReleaseMantraIconSprite(u32 *sprite) {
-    sdfReleaseResourceAllocation(*sprite);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*sprite));
 }
 
 u32 mnuClaimMantraIconEntry(u32 *pool, u32 flags) {
@@ -3065,7 +3065,7 @@ MantraPanelPool *func_002799D8(s32 count, s32 userValue) {
 
 void mnuReleaseMantraIconSpriteHandle(u32 *sprite) {
     if (sprite != 0) {
-        sdfReleaseResourceAllocation(*sprite);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*sprite));
     }
 }
 
@@ -4303,7 +4303,7 @@ u32 mnuAllocateMantraPanelBurstPool(void) {
 
 void mnuReleaseMantraPanelBurstPool(u32 *obj) {
     if (*obj != 0) {
-        sdfReleaseResourceAllocation(*obj);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*obj));
     }
 }
 
@@ -4354,7 +4354,7 @@ u32 mnuAllocateMantraBackgroundBurstPool(void) {
 
 void mnuReleaseMantraBackgroundBurstPool(u32 *obj) {
     if (*obj != 0) {
-        sdfReleaseResourceAllocation(*obj);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(*obj));
     }
 }
 
