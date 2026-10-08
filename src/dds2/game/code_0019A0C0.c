@@ -72,9 +72,9 @@ extern void effSampleChannelBezier(EffVert *arg0, EffChan *arg1, s32 arg2, f32 a
 
 extern void func_0019AE18(void *arg0, f32 *keys, u32 recordCount);
 
-extern void func_0019B120(EffPrimitiveCurve *arg0, f32 *arg1);
+extern void effBuildPrimitiveCurveCoefficients(EffPrimitiveCurve *arg0, f32 *arg1);
 
-extern void func_0019B1F0(EffPrimitiveCurve *arg0, void *arg1);
+extern void effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(EffPrimitiveCurve *primitive, f32 *tangents);
 
 typedef struct EffChanSourceOwner {
     u8 pad00[4];
@@ -489,9 +489,9 @@ void effBuildAndDispatch(EffPrimitiveCurve *primitive, s32 flattenEqualComponent
 
     func_0019AE18(tangentData, primitive->keys, primitive->recordCount);
     if (flattenEqualComponents == 0) {
-        func_0019B120(primitive, tangentData);
+        effBuildPrimitiveCurveCoefficients(primitive, tangentData);
     } else {
-        func_0019B1F0(primitive, tangentData);
+        effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(primitive, tangentData);
     }
     sdfReleaseResourceAllocation(allocation);
 }
@@ -532,7 +532,7 @@ void effSolveCubicTangents(f32 *solution, f32 *rhs, s32 count) {
 }
 
 /* Build Hermite power-basis XYZ coefficients from interleaved points and coordinate-major tangents. */
-void func_0019B120(EffPrimitiveCurve *primitive, f32 *tangents) {
+void effBuildPrimitiveCurveCoefficients(EffPrimitiveCurve *primitive, f32 *tangents) {
     f32 *cubic = primitive->cubicCoefficients;
     f32 *quadratic = primitive->quadraticCoefficients;
     f32 *linear = primitive->linearCoefficients;
@@ -556,8 +556,7 @@ void func_0019B120(EffPrimitiveCurve *primitive, f32 *tangents) {
 }
 
 /* Build Hermite coefficients, but flatten exactly equal endpoint components even when tangents are nonzero. */
-void func_0019B1F0(EffPrimitiveCurve *primitive, void *tangentData) {
-    f32 *tangents = tangentData;
+void effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(EffPrimitiveCurve *primitive, f32 *tangents) {
     f32 *cubic = primitive->cubicCoefficients;
     f32 *quadratic = primitive->quadraticCoefficients;
     f32 *linear = primitive->linearCoefficients;

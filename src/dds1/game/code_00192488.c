@@ -62,8 +62,8 @@ extern u32 effMiscRand(void *state);
 extern u8 D_0034DF38[];
 extern void effJitterChannelControlPoints(EffChanWork *arg0, u32 arg1);
 extern void func_001931E0(void *arg0, f32 *keys, u32 recordCount);
-extern void func_001934E8(EffPrimitiveCurve *arg0, f32 *arg1);
-extern void func_001935B8(EffPrimitiveCurve *arg0, void *arg1);
+extern void effBuildPrimitiveCurveCoefficients(EffPrimitiveCurve *arg0, f32 *arg1);
+extern void effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(EffPrimitiveCurve *primitive, f32 *tangents);
 
 typedef struct EffChanSourceOwner {
     u8 pad00[4];
@@ -478,9 +478,9 @@ void effBuildAndDispatch(EffPrimitiveCurve *primitive, s32 flattenEqualComponent
 
     func_001931E0(tangentData, primitive->keys, primitive->recordCount);
     if (flattenEqualComponents == 0) {
-        func_001934E8(primitive, tangentData);
+        effBuildPrimitiveCurveCoefficients(primitive, tangentData);
     } else {
-        func_001935B8(primitive, tangentData);
+        effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(primitive, tangentData);
     }
     sdfReleaseResourceAllocation(allocation);
 }
@@ -522,7 +522,7 @@ void effSolveCubicTangents(f32 *solution, f32 *rhs, s32 count) {
 }
 
 /* Build Hermite power-basis XYZ coefficients from interleaved points and coordinate-major tangents. */
-void func_001934E8(EffPrimitiveCurve *primitive, f32 *tangents) {
+void effBuildPrimitiveCurveCoefficients(EffPrimitiveCurve *primitive, f32 *tangents) {
     f32 *cubic = primitive->cubicCoefficients;
     f32 *quadratic = primitive->quadraticCoefficients;
     f32 *linear = primitive->linearCoefficients;
@@ -546,8 +546,7 @@ void func_001934E8(EffPrimitiveCurve *primitive, f32 *tangents) {
 }
 
 /* Build Hermite coefficients, but flatten exactly equal endpoint components even when tangents are nonzero. */
-void func_001935B8(EffPrimitiveCurve *primitive, void *tangentData) {
-    f32 *tangents = tangentData;
+void effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(EffPrimitiveCurve *primitive, f32 *tangents) {
     f32 *cubic = primitive->cubicCoefficients;
     f32 *quadratic = primitive->quadraticCoefficients;
     f32 *linear = primitive->linearCoefficients;
