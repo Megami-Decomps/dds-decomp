@@ -1152,7 +1152,7 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
 extern u32 D_003BDAA4;
 extern void sdfFreeMemoryFromEitherHeap(void *);
 extern void sdfTexQueueResourceRelease(s32);
-extern void sdfTexQueuePendingWork(s32);
+extern void sdfTexQueuePendingWork(SdfTexResource *texture);
 
 void func_002EBB60(SdfStreamFrameNode *node) {
     s32 interruptsEnabled;
@@ -1187,7 +1187,7 @@ void func_002EBB60(SdfStreamFrameNode *node) {
         sdfFreeMemoryFromEitherHeap((void *)(node->scratchBuffer - 0x100));
     }
     if (node->textureHead != 0) {
-        sdfTexQueuePendingWork((s32)node->textureHead);
+        sdfTexQueuePendingWork(node->textureHead);
     }
     if (wasActive != 0) {
         func_002EC230(0);
