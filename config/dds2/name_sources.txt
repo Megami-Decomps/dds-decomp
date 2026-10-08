@@ -1185,6 +1185,7 @@
 0x0016FAD0	effApplyParamBlockPair	inferred	Obtains blocks zero and one from the effect parameter table and passes the pair to the handler.
 0x0016FD90	effReleaseGroupSlotsAndResources	inferred	Walks group slots releasing resource arrays and effect nodes before group cleanup. [names_reviewed21.tsv]
 0x00171580	effCopyResourceGroupVector	inferred	high confidence; src/dds2/game/code_0016EDD0.c func_00171580: Copies one 16-byte vector in the effect resource-group unit. [names_reviewed25.tsv]
+0x00171598	effCreateFragmentResources	inferred	Paired DDS1 factory allocates and initializes EffFragmentResources history buffers and SDF draw descriptors; constructors retain its result in slot->resources.
 0x00171798	effReleaseEffectResources	inferred	Releases the work's resource handle and frees its separately owned allocation.
 0x001717C8	effInitializeColorState	inferred	Sets the effect state to mode three, initializes its packed color to 0x80808080, and clears the additional word at offset 0xC.
 0x00171A68	effThunderDrawHistoryAndEndCap	inferred	L13
