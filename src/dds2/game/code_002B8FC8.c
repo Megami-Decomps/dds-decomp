@@ -1790,7 +1790,7 @@ void mnuConfigurePanelResource(MenuScrollPanel *menu, u32 model, u32 value, u32 
     menu->color = color;
     menu->pending.set = (EffectSlotSet *)model;
     menu->pending.index = value;
-    effConfigureIndexedSlotResource(model, value, menu->handles[0], 0, 3);
+    effConfigureIndexedSlotResource((struct EffectSlotSet *)model, value, menu->handles[0], 0, 3);
 }
 
 u8 mnuHasActivePanelResource(MenuScrollPanel *resources) {
