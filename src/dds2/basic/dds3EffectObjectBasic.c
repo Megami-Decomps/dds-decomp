@@ -435,8 +435,8 @@ EffectObj *func_00115358(source, firstVector, secondVector)
     return obj;
 }
 
-void func_00115500(void) {
-    func_00115358();
+void *func_00115500(void *resource, void *position, void *scale) {
+    return func_00115358(resource, position, scale);
 }
 
 /* Resolve the resource identifier, create from it, then release the temporary resource.
