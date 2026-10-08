@@ -35,7 +35,6 @@ typedef struct SdfDrawPacket SdfDrawPacket;
 
 
 extern SdfMemBlock *sdfAllocGeneralBlock(s32);
-extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 extern void sdfTexReleaseReference(SdfTex *);
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *);

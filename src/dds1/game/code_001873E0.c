@@ -37,7 +37,6 @@ typedef struct {
 
 
 extern void *sdfAllocGeneralBlock(s32 size);
-extern void *sdfResourceRetainAddress(void *allocation);
 extern u32 effGetResourceFirstWord(s32 index);
 
 extern void effBlurResetScaleSlot(EffBlurScaleWork *work, EffBlurScaleSlot *slot);

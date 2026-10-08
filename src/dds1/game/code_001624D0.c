@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "btl_state.h"
 #include "eff.h"
 #include "ee_mmi.h"
@@ -620,7 +621,6 @@ typedef struct {
 } ParamThunderWork;
 
 extern u32 sdfAllocGeneralBlock(s32 size);
-extern u8 *sdfResourceRetainAddress(u32 handle);
 extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void parRiseFallSymmetricCellAlpha(void *system, u32 arg1, u32 arg2, u32 arg3);
 extern void func_0015D078(void *system, u32 value);
@@ -630,7 +630,7 @@ extern void func_0015D078(void *system, u32 value);
  * Only three words per cell are zeroed here; vector/range storage is untouched. */
 ParamThunderWork *effCreateThunderCellSystemWork(ParamThunderHead *source) {
     u32 allocationHandle = sdfAllocGeneralBlock(source->count * sizeof(ParamThunderCell) + sizeof(ParamThunderWork));
-    ParamThunderWork *work = (ParamThunderWork *)sdfResourceRetainAddress(allocationHandle);
+    ParamThunderWork *work = (ParamThunderWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
     u32 cellIndex;
 
     work->head = *source;

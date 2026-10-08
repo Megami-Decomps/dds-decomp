@@ -162,7 +162,6 @@ extern void mnuReleaseStaffMenuResources(s32);
 
 extern s32 sdfAllocGeneralBlock(s32);
 
-extern s32 sdfResourceRetainAddress(s32);
 
 extern EffectList *mnuAllocateValueRecord(u32);
 
@@ -717,7 +716,7 @@ void mnuResetProgressModeFromOwner(u8 *work) {
 /* Allocate/zero the progress host, retain its allocation, and begin resource setup. */
 MenuProgressHost *mnuCreateProgressHost(void) {
     s32 heap = sdfAllocGeneralBlock(MNU_MENU_HOST_BYTES);
-    MenuProgressHost *host = (MenuProgressHost *)sdfResourceRetainAddress(heap);
+    MenuProgressHost *host = (MenuProgressHost *)sdfResourceRetainAddress((struct SdfMemBlock *)(heap));
     memset((void *)host, 0, MNU_MENU_HOST_BYTES);
     host->heapHandle = heap;
     host->titleEffectHandle = mnuAllocateValueRecord(1);
@@ -917,7 +916,7 @@ u8 *mnuTerminalCreateScene(s32 reduced, s32 slot) {
     u32 i;
 
     handle = sdfAllocGeneralBlock(MNU_TERMINAL_SCENE_BYTES);
-    obj = (u8 *)sdfResourceRetainAddress(handle);
+    obj = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     memset(obj, 0, MNU_TERMINAL_SCENE_BYTES);
     *(s32 *)obj = handle;
     mnuClearPanelTransitionState(&((MenuSlotState *)obj)->transitionWork);

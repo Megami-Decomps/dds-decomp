@@ -391,14 +391,13 @@ void func_00160690(void) {
 }
 
 extern u32 sdfAllocGeneralBlock(s32 size);
-extern void *sdfResourceRetainAddress(u32 handle);
 extern void *memcpy(void *dst, const void *src, u32 size);
 extern void effBattleRebuildClonedParameterBanks(SoundMixer *dst, SoundMixer *src);
 
 /* Clone a mixer: copy its banks, rebuild the voice state from the original and start with no voices. */
 SoundMixer *sndMixerClone(SoundMixer *src) {
     u32 handle = sdfAllocGeneralBlock(sizeof(SoundMixer));
-    SoundMixer *mixer = sdfResourceRetainAddress(handle);
+    SoundMixer *mixer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
 
     mixer->resource = (void *)handle;
     memcpy(mixer, src, 0xC38);

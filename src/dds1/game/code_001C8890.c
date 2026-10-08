@@ -342,7 +342,6 @@ extern s8 effSharedRandomState[];
 
 extern s32 sdfAllocGeneralBlock(s32);
 
-extern void *sdfResourceRetainAddress(u32);
 
 extern void sndResetTransition(void);
 
@@ -374,7 +373,6 @@ extern void sndSetStationedSeVolume(u32);
 
 extern s32 sdfAllocGeneralBlock(s32);
 
-extern void *sdfResourceRetainAddress(u32);
 
 extern void btlResetTitleStreamOnBattleFlag(void);
 
@@ -2559,7 +2557,7 @@ void btlInitBattleIndexWork(BattleIndexWork *object) {
     u32 value;
     object->indices = btlAllocateIndexList(13);
     handle = sdfAllocGeneralBlock(0x836C);
-    value = sdfResourceRetainAddress(handle);
+    value = sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     object->allocationHandle = handle;
     object->groups = (BtlOperandGroup *)value;
     object->ownerId = 0;
@@ -6005,7 +6003,7 @@ u32 btlPollGunLoad(u32 *arg) {
         return 0;
     }
     btlBossDebugPrintf("btl:gun & finish load end[%p]\n", args->handle);
-    unit->gunResource = sdfResourceRetainAddress(fileGetResourceHandle(args->handle));
+    unit->gunResource = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle(args->handle)));
     filePollEntryCleanup(args->handle);
     unit->gunResourceFlags = (unit->gunResourceFlags & ~4) | 8;
     return 1;
@@ -6219,7 +6217,7 @@ void btlResetUnitLinks(BtlUnit *actor) {
 
 BtlUnit *btlCreateUnit(void) {
     u32 handle = sdfAllocGeneralBlock(0x348);
-    BtlUnit *unit = (BtlUnit *)sdfResourceRetainAddress(handle);
+    BtlUnit *unit = (BtlUnit *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     BtlActorWork *work;
     memset(unit, 0, 0x348);
     unit->handle = handle;
@@ -10217,7 +10215,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
         if (args->frontHandle != 0) {
             if (fileIsRequestReadyInCurrentMode(args->frontHandle) != 0) {
                 work->primaryBuffer =
-                    (void *)sdfResourceRetainAddress(fileGetResourceHandle(args->frontHandle));
+                    (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle(args->frontHandle)));
                 filePollEntryCleanup(args->frontHandle);
                 args->frontHandle = 0;
                 btlBossDebugPrintf(D_003A4BF8);
@@ -10228,7 +10226,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
         if (args->sideHandle != 0) {
             if (fileIsRequestReadyInCurrentMode(args->sideHandle) != 0) {
                 work->secondaryBuffer =
-                    (void *)sdfResourceRetainAddress(fileGetResourceHandle(args->sideHandle));
+                    (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle(args->sideHandle)));
                 filePollEntryCleanup(args->sideHandle);
                 args->sideHandle = 0;
                 btlBossDebugPrintf(D_003A4C10);
@@ -10789,7 +10787,7 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
     btlBossDebugPrintf(D_003A4C88, args->name);
     resource = fileGetResourceHandle(args->loadHandle);
     effect->resourceHandle =
-        sndMixerClone(sdfResourceRetainAddress(resource));
+        sndMixerClone((void *)sdfResourceRetainAddress((struct SdfMemBlock *)(resource)));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
     filePollEntryCleanup(args->loadHandle);
     effect->flags = (effect->flags & ~1) | 2;
@@ -11722,7 +11720,7 @@ u32 sndPollMotSeFileAndSpu(SoundFileRequest *request) {
             btlBossDebugPrintf(D_003A50F0, request->name);
             request->resourceHandle = fileGetResourceHandle(request->handle);
             size = fileGetResourceSize(request->handle);
-            data = sdfResourceRetainAddress(request->resourceHandle);
+            data = sdfResourceRetainAddress((struct SdfMemBlock *)(request->resourceHandle));
             if (sndFindPackedTrackLoadStatus(node->position) == 0) {
                 func_002E9450(data, size);
                 node->flags |= 8;
@@ -12280,7 +12278,7 @@ s32 sndPollAtrac3SELoadTask(BattleVoiceLoad *args) {
             mnuReleaseSoundBufferLocked();
         }
         resource = fileGetResourceHandle(args->request);
-        data = (u32)sdfResourceRetainAddress(resource);
+        data = (u32)sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
         size = fileGetResourceSize(args->request);
         filePollEntryCleanup(args->request);
         func_0026ABA8(data, size, D_00377650[args->index].volume);
@@ -12360,7 +12358,7 @@ u32 sndUpdateEarringDeadPlayback(u32 *args) {
         if (fileIsRequestReadyInCurrentMode(args[1]) != 0) {
             resource = fileGetResourceHandle(args[1]);
             args[2] = resource;
-            data = sdfResourceRetainAddress(resource);
+            data = sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
             size = fileGetResourceSize(args[1]);
             filePollEntryCleanup(args[1]);
             func_0026ABA8(data, size, 2);

@@ -234,7 +234,6 @@ extern s8 effSharedRandomState[];
 
 extern s32 sdfAllocGeneralBlock(s32);
 
-extern u32 *sdfResourceRetainAddress(s32);
 
 extern void func_001C45F0(void);
 
@@ -3114,7 +3113,6 @@ extern char D_003A2208[]; /* "/battle/panel/battle_03.spr" */
 
 extern s32 sdfAllocGeneralBlock(s32);
 
-extern u32 *sdfResourceRetainAddress(s32);
 
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
@@ -3124,7 +3122,7 @@ void btlPanelResourcesLoad(void) {
     BtlResBlock *block;
     if (D_003BB3E4 == 0) {
         handle = sdfAllocGeneralBlock(0x28);
-        block = (BtlResBlock *)sdfResourceRetainAddress(handle);
+        block = (BtlResBlock *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
         btlResourceBlock = block;
         block->unk0 = handle;
         block->resA = 0;

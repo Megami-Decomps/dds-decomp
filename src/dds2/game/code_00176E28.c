@@ -77,7 +77,6 @@ typedef struct EffRingBlock {
 
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 
-extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
 
 extern EffRecordPool *effAllocateIdentityMatrixWork(u32 count);
 
