@@ -163,7 +163,13 @@ typedef struct BattleActorPanelPresentation {
     s32 secondaryPulseTimer[2];
     s32 secondaryPulseOffsets[2][2];
     s16 secondaryPulseLevel[2];
-    u8 padB4[0x28];
+    union {
+        u8 padB4[0x28];
+        struct {
+            u32 trianglePhase[8];
+            u8 triangleAlpha[8];
+        };
+    };
     s8 pendingSceneState;
     u8 padDD[0x13];
     u8 unkF0;
@@ -218,6 +224,11 @@ typedef struct BattleActorPanelWork {
 } BattleActorPanelWork;
 
 typedef char BattleActorPanelPresentationSizeCheck[sizeof(BattleActorPanelPresentation) == 0x280 ? 1 : -1];
+typedef char BattleActorPanelTriangleOffsetCheck[
+    ((u32)&((BattleActorPanelPresentation *)0)->trianglePhase == 0xB4 &&
+     (u32)&((BattleActorPanelPresentation *)0)->triangleAlpha == 0xD4 &&
+     sizeof(((BattleActorPanelPresentation *)0)->trianglePhase) == 0x20 &&
+     sizeof(((BattleActorPanelPresentation *)0)->triangleAlpha) == 8) ? 1 : -1];
 typedef char BattleActorPanelPresentationOffsetCheck[((u32)&((BattleActorPanelEntry *)0)->presentation == 0x10) ? 1 : -1];
 
 typedef char BattleActorPanelEntrySizeCheck[sizeof(BattleActorPanelEntry) == 0x290 ? 1 : -1];
