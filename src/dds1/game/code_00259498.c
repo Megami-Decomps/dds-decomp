@@ -70,7 +70,7 @@ void func_00259890(s32 x, s32 y, s32 depth, s32 alpha,
                                    context);
         }
         {
-            s32 displayFlags = display->boundsFlags;
+            s32 displayFlags = (u8)display->boundsFlags;
 
             if (displayFlags & 1) {
                 func_0024EC08(x, y, depth, alpha, scene->sceneId, 0x20,

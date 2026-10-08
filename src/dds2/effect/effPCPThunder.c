@@ -2503,7 +2503,6 @@ extern void effAppendFragmentHistoryPoints(EffFragmentResources *, u128 *);
 extern f32 sdfAtan2(f32, f32);
 extern void func_00340DC8(f32, f32, f32);
 extern void effEventCopyFileRecordHeader(void *, const void *);
-extern void func_00197F60(void *);
 void effThunderDrawHistoryAndEndCap(EffFragmentResources *);
 
 /* Each slot owns two joined cubic segments, a ribbon history and an end cap.
@@ -2930,7 +2929,7 @@ void func_0016FE18(EffGroup *group) {
                 func_00340DC8(0.0f, sdfAtan2(delta[0], delta[2]), 0.0f);
                 VU0_STORE_VF_UNCLOBBERED(vf10, &place.unk00[4]);
                 effEventCopyFileRecordHeader((FileRecordHeader *)slot->node, (const FileRecordHeader *)&place);
-                func_00197F60(slot->node);
+                effEventUpdateEffectParameters(slot->node);
             }
             effThunderDrawHistoryAndEndCap(slot->resources);
         }
