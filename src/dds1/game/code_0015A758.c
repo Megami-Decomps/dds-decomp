@@ -158,7 +158,6 @@ extern u16 parGetRestartFlag(ParObj *obj);
 
 
 
-extern void parUpdateCellVertexPair(ParSystem *, s32, const u128 *);
 extern void parUpdateCellVertexTriangle(ParSystem *, s32, const u128 *);
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
@@ -464,7 +463,6 @@ void parDispatchKindInit(ParKindState *work, s32 index) {
 
 extern void effBillSetEntryValue(s32, s32, u32);
 
-extern void parFadeAlphaCell(s32, s32);
 
 void parUpdateBillboardCrossStrip(s32 particle, s32 index, u32 color) {
     u128 axis[2];
@@ -485,7 +483,7 @@ void parUpdateBillboardCrossStrip(s32 particle, s32 index, u32 color) {
     VU0_SUB(vf11, vf11, vf10);
     VU0_STORE_VF(vf11, &axis[1]);
     parUpdateCellVertexPair((ParSystem *)particle, index, axis);
-    parFadeAlphaCell(particle, index);
+    parFadeAlphaCell((ParSystem *)particle, index);
     effBillSetEntryValue(particle, index, (color & 0xFF000000) | 0x808080);
 }
 
@@ -750,8 +748,7 @@ void parTranslateCellTriangleVertices(ParSystem *system, s32 index, const u128 *
     }
 }
 
-void parFadeAlphaCell(s32 particle, s32 index) {
-    ParSystem *system = (ParSystem *)particle;
+void parFadeAlphaCell(ParSystem *system, s32 index) {
     u32 count = system->cells[index].vertexCount >> 1;
     u32 *vertex = system->cells[index].colors;
     u32 word = vertex[0];
