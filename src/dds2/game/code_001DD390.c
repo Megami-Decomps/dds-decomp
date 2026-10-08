@@ -924,14 +924,13 @@ void btlResetIndexWork(BattleIndexWork *work) {
 
 extern u32 sdfAllocGeneralBlock(s32);
 
-extern void *sdfResourceRetainAddress(u32);
 
 /* Allocate the index list and retained groups, then initialize their headers. */
 void btlInitBattleIndexWork(BattleIndexWork *work) {
     u32 handle;
     work->indices = btlAllocateIndexList(13);
     handle = sdfAllocGeneralBlock(0x48EC);
-    work->groups = (BtlOperandGroup *)sdfResourceRetainAddress(handle);
+    work->groups = (BtlOperandGroup *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     work->allocationHandle = handle;
     work->ownerId = 0;
     btlResetIndexWork(work);
@@ -3319,7 +3318,7 @@ BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *unit, u32 index, u32 value, 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x18;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->ownerId = unit->owner;
     task->onStart = btlRequestModelOrReuse;
     task->callback = btlPollModelLoadCompletion;
@@ -3549,7 +3548,7 @@ BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 option, s32 value08,
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x1A;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->ownerId = unit->owner;
     task->onStart = btlBeginModelChange;
     task->callback = func_001E50E0;
@@ -3938,7 +3937,7 @@ BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *unit) {
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x16;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->ownerId = unit->owner;
     task->callback = btlUpdateSelectedUnitEffect;
     task->onFinish = btlFinishSelectedUnitEffect;
@@ -3975,7 +3974,7 @@ BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void) {
     BtlRuntimeTask *task = btlAllocTask(0);
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x1C;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->onStart = 0;
     task->callback = btlUpdateCommandSoundTaskSecondary;
@@ -4226,7 +4225,7 @@ u32 btlPollGunLoad(s32 arg) {
         return 0;
     }
     btlBossDebugPrintf("btl:gun & finish load end[%p]\n", args->handle);
-    unit->gunResource = sdfResourceRetainAddress(fileGetResourceHandle(args->handle));
+    unit->gunResource = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle(args->handle)));
     filePollEntryCleanup(args->handle);
     unit->gunResourceFlags = (unit->gunResourceFlags & ~4) | 8;
     return 1;
@@ -4238,7 +4237,7 @@ BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *unit) {
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x23;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->ownerId = unit->owner;
     task->onStart = btlStartGunFinishLoad;
     task->callback = btlPollGunLoad;
@@ -4538,7 +4537,7 @@ extern void *memset(void *, s32, u32);
 
 BtlUnit *btlCreateUnit(void) {
     u32 handle = sdfAllocGeneralBlock(0x368);
-    BtlUnit *unit = (BtlUnit *)sdfResourceRetainAddress(handle);
+    BtlUnit *unit = (BtlUnit *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     BtlState *work;
     memset(unit, 0, 0x368);
     unit->handle35C = handle;
@@ -8862,7 +8861,7 @@ BtlRuntimeTask *fldCreateSceneTileTask(s32 value, s32 option) {
     SoundTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 1;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->callback = btlPollFieldArchiveLoad;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = btlGetTaskArguments(task);
@@ -8898,7 +8897,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     } else {
         if (args->frontHandle != 0) {
             if (fileIsRequestReadyInCurrentMode(args->frontHandle) != 0) {
-                work->primaryBuffer = (void *)sdfResourceRetainAddress(fileGetResourceHandle(args->frontHandle));
+                work->primaryBuffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle(args->frontHandle)));
                 filePollEntryCleanup(args->frontHandle);
                 args->frontHandle = 0;
                 btlBossDebugPrintf("btl:floor load end 0\n");
@@ -8908,7 +8907,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
         }
         if (args->sideHandle != 0) {
             if (fileIsRequestReadyInCurrentMode(args->sideHandle) != 0) {
-                work->secondaryBuffer = (void *)sdfResourceRetainAddress(fileGetResourceHandle(args->sideHandle));
+                work->secondaryBuffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(fileGetResourceHandle(args->sideHandle)));
                 filePollEntryCleanup(args->sideHandle);
                 args->sideHandle = 0;
                 btlBossDebugPrintf("btl:floor load end 1\n");
@@ -8926,7 +8925,7 @@ BtlRuntimeTask *btlCreateFloorLoadTask(s32 first, s32 second) {
     SoundTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 2;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->callback = btlPollFloorLoadTask;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = btlGetTaskArguments(task);
@@ -8947,7 +8946,7 @@ BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value) {
     u8 *arguments;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 3;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->callback = func_00200FB8;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->onStart = 0;
@@ -9037,7 +9036,7 @@ BtlRuntimeTask *func_002014A8(value)
     SceneLightRestoreArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 4;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->callback = func_00201268;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->onStart = 0;
@@ -9284,7 +9283,7 @@ BtlRuntimeTask *btlCreateReferencedSoundEffectTask(SoundResourceNode *effect, Bt
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x2E;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->ownerId = actor->owner;
     task->onStart = sndAddEffectReferences;
     task->callback = sndUpdateReferencedBattleEffect;
@@ -9406,7 +9405,7 @@ BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source, BtlUnit *own
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x2F;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->ownerId = owner->owner;
     task->onStart = sndStartEffectTask;
     task->callback = func_00202100;
@@ -9492,7 +9491,7 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
     }
     btlBossDebugPrintf("btl:effect load end[%s]\n", args->name);
     resource = fileGetResourceHandle(args->loadHandle);
-    effect->resourceHandle = sndMixerClone(sdfResourceRetainAddress(resource));
+    effect->resourceHandle = sndMixerClone((void *)sdfResourceRetainAddress((struct SdfMemBlock *)(resource)));
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
     filePollEntryCleanup(args->loadHandle);
     effect->flags = (effect->flags & ~1) | 2;
@@ -9506,7 +9505,7 @@ BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *effect, char *name) {
     char *copy;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x32;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->onStart = sndBeginEffectLoad;
     task->callback = sndPollEffectLoad;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -9620,7 +9619,7 @@ BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *effect, BtlUnit *ow
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x30;
-    task->flags |= 2;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->ownerId = owner->owner;
     task->onStart = sndAddSourceReferences;
     task->callback = func_00202958;
@@ -10394,7 +10393,7 @@ u32 sndPollMotSeFileAndSpu(FileLoadArgs *request) {
             btlBossDebugPrintf("btl:sound file load end[%s]\n", request->name);
             request->resourceHandle = fileGetResourceHandle((s32)request->loadHandle);
             size = fileGetResourceSize((s32)request->loadHandle);
-            data = sdfResourceRetainAddress(request->resourceHandle);
+            data = sdfResourceRetainAddress((struct SdfMemBlock *)(request->resourceHandle));
             if (sndFindPackedTrackLoadStatus(node->position) == 0) {
                 func_003422F8(data, size);
                 node->flags |= 8;
@@ -10418,7 +10417,7 @@ BtlRuntimeTask *sndCreateFileLoadTask(s32 value, s32 option, char *name) {
     char *copy;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x58;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->onStart = sndStartFileLoad;
     task->callback = sndPollMotSeFileAndSpu;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -10927,7 +10926,7 @@ s32 sndPollAtrac3SELoadTask(BtlAt3LoadArgs *args) {
             mnuReleaseSoundBufferLocked();
         }
         resource = fileGetResourceHandle(args->loadHandle);
-        data = sdfResourceRetainAddress(resource);
+        data = sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
         size = fileGetResourceSize(args->loadHandle);
         filePollEntryCleanup(args->loadHandle);
         func_002A27A8(data, size, D_003E0F60[args->index].volume);
@@ -10944,7 +10943,7 @@ BtlRuntimeTask *sndCreateAtracEffectLoadTask(s32 value) {
     SoundTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x5D;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->callback = sndPollAtrac3SELoadTask;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = btlGetTaskArguments(task);
@@ -10995,7 +10994,7 @@ s32 sndDeadAtracPlaybackTask(u32 *args) {
     if (args[2] == 0) {
         if (fileIsRequestReadyInCurrentMode(args[1]) != 0) {
             args[2] = fileGetResourceHandle(args[1]);
-            data = sdfResourceRetainAddress(args[2]);
+            data = sdfResourceRetainAddress((struct SdfMemBlock *)(args[2]));
             size = fileGetResourceSize(args[1]);
             filePollEntryCleanup(args[1]);
             func_002A27A8(data, size, 2);
@@ -11025,7 +11024,7 @@ BtlRuntimeTask *sndCreateEarringPlaybackTask(BtlUnit *owner) {
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x5E;
-    task->flags &= ~1;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
     task->ownerId = owner->owner;
     task->onStart = sndStartDeadAtracLoad;
     task->callback = sndDeadAtracPlaybackTask;

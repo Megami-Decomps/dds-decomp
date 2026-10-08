@@ -18,7 +18,6 @@ typedef struct EffModelOwner {
 
 extern void sdfMotionSampleAtFrame(Motion *, f32);
 
-extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 
 extern u32 effModelUpdateControlFlags;
 
@@ -771,7 +770,7 @@ RefObj *func_002DDAA8(SdfTextureFileHeader *source) {
     payloadBytes = imageBytes + paletteBytes;
     textureOffset = payloadBytes + 0x40;
     allocationHandle = (u32)sdfAllocGeneralBlock(payloadBytes + 0x60);
-    cursor = (u8 *)sdfResourceRetainAddress((SdfMemBlock *)allocationHandle);
+    cursor = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)allocationHandle);
     texture = (RefObj *)(cursor + textureOffset);
     texture->base = cursor;
     cursor += 0x40;
@@ -817,7 +816,7 @@ void effReleaseSharedReference(RefObj *obj) {
         sdfTexReleaseReference((struct SdfTex *)texture);
     }
     if (--obj->refCount == 0) {
-        sdfReleaseResourceAllocation((SdfMemBlock *)obj->allocationHandle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)obj->allocationHandle);
     }
 }
 
@@ -871,7 +870,7 @@ void effReleaseReferenceHolder(u32 *holder) {
         for (i = 0; i < ((EffExpandedList *)holder)->count; i++) {
             effReleaseSharedReference(((EffExpandedList *)holder)->handles[i]);
         }
-        sdfReleaseResourceAllocation((SdfMemBlock *)((EffExpandedList *)holder)->buffer);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)((EffExpandedList *)holder)->buffer);
     }
 }
 

@@ -81,7 +81,6 @@ typedef struct EffectRingBlock {
 } EffectRingBlock;
 
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
-extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
 extern EffRecordPool *effAllocateIdentityMatrixWork(u32 count);
 extern u32 effMiscRand(void *state);
 extern u8 D_0034DF38[];

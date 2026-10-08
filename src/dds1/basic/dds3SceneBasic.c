@@ -6,7 +6,6 @@
 
 struct SdfMemBlock;
 
-extern u32 sdfResourceRetainAddress(struct SdfMemBlock *allocation);
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern s32 bfFindScriptIndexByName(void *, const char *);
 extern KwlnTask *kwlnTaskGetTaskByName(const char *name);

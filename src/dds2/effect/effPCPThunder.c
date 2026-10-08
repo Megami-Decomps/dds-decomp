@@ -150,7 +150,6 @@ u32 func_0016B198(u32 value) {
 
 /* The descriptor owns the allocation; retention returns its 32-bit address. */
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
-extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
 extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void func_00164C68(void *system, u32 value);
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);

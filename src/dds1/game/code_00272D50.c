@@ -10,7 +10,6 @@ extern s32 mnuUseStaffItem(s32, s32);
 extern u32 kwlnTaskGetUserValue();
 
 extern s32 sdfAllocGeneralBlock(s32);
-extern void *sdfResourceRetainAddress(s32);
 extern void *memset(void *, s32, u32);
 typedef struct StaffDisplayContext StaffDisplayContext;
 extern void func_00272D50(StaffDisplayContext *);
@@ -222,7 +221,7 @@ s32 mnuInitializeStaffDisplayResources(void) {
 
     context = (StaffDisplayContext *)kwlnTaskGetUserValue();
     handle = sdfAllocGeneralBlock(0x2C);
-    resources = sdfResourceRetainAddress(handle);
+    resources = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     context->resources = resources;
     memset(resources, 0, 0x2C);
     resources->allocation = handle;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "evt_viewer.h"
 #include "kwln.h"
 #include "sdf.h"
@@ -12,7 +13,6 @@ extern SdfTex *itfLoadTextureFromAsset(const char *);
 
 extern void *sdfAllocSizeClassBlock(s32);
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
-extern u32 sdfResourceRetainAddress(SdfMemBlock *handle);
 
 
 extern char D_004373B8[];

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "file.h"
 
 /* File request entry: fileRequestEntries table, 0x64 bytes per entry. */
@@ -67,7 +68,6 @@ s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 s32 sdfAllocGeneralBlock(s32 arg0);
 s32 sdfAllocGeneralBlockHigh(s32 size);
 s32 sdfTryAllocGeneralBlock(s32 size);
-s32 sdfResourceRetainAddress(s32 arg0);
 s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 s32 func_002F6990(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4);
 s32 func_002F6858(s32 arg0, void *arg1, s32 *arg2);
@@ -189,7 +189,7 @@ s32 func_002890B8(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
             job->allocationHandle = allocationHandle;
         }
         {
-            u32 address = sdfResourceRetainAddress(allocationHandle);
+            u32 address = sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
 
             job->transferAddress = address;
             job->retainedAddress = address;
@@ -346,7 +346,7 @@ void func_00289540(void) {
                                             ((DevStatePathView *)job->deviceRequest)->path);
                 job->retryCount--;
             } else {
-                u32 address = sdfResourceRetainAddress(job->allocationHandle);
+                u32 address = sdfResourceRetainAddress((struct SdfMemBlock *)(job->allocationHandle));
 
                 job->transferAddress = address;
                 job->retainedAddress = address;
@@ -411,7 +411,7 @@ void fileManInit(void) {
     memset(&fileManagerWork, 0, 0x40);
     fileManagerWork.freeSlots = 4;
     fileManagerWork.sema = sdfCreateSemaphore(1, 0x7F, 0);
-    fileManagerWork.buffer = sdfResourceRetainAddress(sdfAllocGeneralBlock(0x40000));
+    fileManagerWork.buffer = sdfResourceRetainAddress((struct SdfMemBlock *)(sdfAllocGeneralBlock(0x40000)));
     kwlnTaskCreate((s32)&D_003BC7E0, 0x384, 1, 0, (s32)&fileMan, 0, 0);
     fileIdleUpdateCallback = fileManUpdate;
 }

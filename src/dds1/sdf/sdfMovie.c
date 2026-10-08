@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf.h"
 
 typedef struct DevState DevState;
@@ -42,7 +43,6 @@ s32 sdfDevQueueControlRequest(DevState *state);
 s32 sdfDevQueueActiveOperation(DevState *state);
 s32 sdfDevQueueReleaseState(DevState *state);
 s32 sdfAllocGeneralBlock(s32 size);
-u8 *sdfResourceRetainAddress(MemBlock *block);
 s32 WaitSema(s32 semaphore);
 s32 SignalSema(s32 semaphore);
 void *memcpy(void *destination, const void *source, u32 size);
@@ -193,7 +193,7 @@ s32 func_002ED230(DevState *deviceState, s32 operation, void *data, s32 bytesRea
         if (operation == 5) {
             s32 payloadBytes = stream->packetBytes - 0x40;
             stream->payloadAllocation = (MemBlock *)sdfAllocGeneralBlock(payloadBytes);
-            stream->blockMask = sdfResourceRetainAddress(stream->payloadAllocation);
+            stream->blockMask = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(stream->payloadAllocation));
             movie->state = 3;
             sdfDevQueueRead(deviceState, stream->blockMask, payloadBytes);
             movie->remainingBytes -= stream->packetBytes;
