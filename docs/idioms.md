@@ -4347,3 +4347,62 @@ matching address and also permits the terminator itself to match.
 Its movie-stream constructor consumers now receive that pointer directly,
 instead of declaring an integer result and casting it. Keep the current
 linker symbols until the normal names pass; no alias or adapter is needed.
+
+## A reused byte extent can preserve a constant-size `memcpy` call
+
+ee-gcc 2.96 expands memory builtins before propagating ordinary local
+constants. A literal `memcpy(dst, src, 48)` inlines at normal `-O2`, but
+a named byte extent reused for clearing and copying retains `jal memcpy`,
+even though the final call loads the constant 48 into `$6`.
+
+The poly arc constructors at DDS1 `0015E760` / DDS2 `00166350` copy a
+class-specific tail after a variable-sized template header. Computing
+`tailBytes = sizeof(PolyArc) - sizeof(PolyRingHead)` and using it for both
+the allocation extent and tail copy restores the retail 48-byte call
+without changing compiler flags or library prototypes. A diagnostic
+normal-flags probe produces the same 292-byte body and remaining ten-word
+diff as `-fno-builtin`; the call alone does not establish a TU flag.
+
+The already-C resource header constructor at DDS1 `00234C18` similarly
+reuses `size = 0x20` for clearing, allocation, and copying: its four-byte
+literal copy inlines while its final 32-byte copy calls `memcpy`.
+Use a size local only when it represents a genuine reused extent, not a
+dummy temporary introduced solely to inhibit builtin expansion.
+
+## DDS2 result fade rows own both background and portrait state
+
+DDS2 `0029DF18` writes the background state/opacity at `AF20`/`AF28`;
+`0029E478` writes the portrait state/opacity at `AF34`/`AF3C` and its
+position at `AF40`/`AF44`. Their shared 0x28-byte `BrsFadeAnimation` rows
+therefore begin at `BrsSkillPackageWork + AF20`, not `AF10`. Complete the
+single primary row with both sets of fields; preserve the `B060` level
+animation bank and the `B704` allocation extent by adjusting only padding.
+The DDS1 branch is intentionally unchanged pending its claimed five-row
+skill-icon completion. All 17 actual result-header includers gated
+595 match/0 differ after this DDS2-only correction.
+
+## DDS2 named state records own the copied initial tag
+
+`mnuCreateNamedRecord` allocates and clears 0x22 bytes, then copies one
+eight-byte initial-parameter group into `MenuStateRecord.tag` at +0x0A.
+The mode byte and signed duration are members of that group, rather than
+independent scalar aliases. The +0x18 halfword and direction nibble at
+flags bits 5..8 are also native state-record fields. Whole-record assignment
+reproduces the four unaligned eight-byte transfers and final halfword in
+`003242D0`; do not replace them with invented 64-bit owner views.
+Retail initializes only bytes 1..7 of the temporary initial tag in these
+effect builders; its copied first byte is unused by those consumers.
+
+## Linked-number tasks use the primary battle-unit counters and health record
+
+DDS2 `0020F5E0` selects a twelve-entry display offset from the byte at
+`BtlUnit +338` and increments it; the linked-number destruction callback
+decrements that same byte. The counter-display callback owns the byte at
+`+339`. These are the existing DDS1 `firstCountdown`/`secondCountdown`
+fields at `+318`/`+319`, not a second unit view. The number payload's
+`elapsedTicks` uses unsigned threshold tests at 5, 24 and 36 frames.
+
+The color-threshold getter takes `BtlUnit *` and reads `partyRecord.hp`
+and `partyRecord.maxHp` at `+126`/`+128`, as the already-C DDS1 getter
+does. Its remaining legacy integer-address callers convert only at that
+API boundary; no `UiObject` view is needed by the getter.

@@ -520,8 +520,8 @@ void effDestroy(EffInstance *instance) {
     sdfReleaseChipBlock(instance);
 }
 
-void effSetInstanceBillboardVector(EffInstance *instance) {
-    effCopyVector((u32)instance->billboard);
+void effSetInstanceBillboardVector(EffInstance *instance, void *position) {
+    effCopyVector(instance->billboard, position);
 }
 
 void billSetChildScale2(EffInstance *instance, f32 scale) {

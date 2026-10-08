@@ -357,7 +357,25 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001A1D48);
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2258);
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A2608);
+extern void btlCopyUnitStats(s32 actorAddress, s32 recordAddress);
+
+/* Swap complete records while keeping the actor in its original party slot. */
+void func_001A2608(BtlUnit *actor, u8 targetIndex) {
+    DatPartyRecord previous;
+
+    if (actor->unk2C4 != targetIndex) {
+        memcpy(&previous, &datGameState->party[actor->unk2C4], sizeof(previous));
+        memcpy(&datGameState->party[actor->unk2C4], &datGameState->party[targetIndex], sizeof(previous));
+        memcpy(&datGameState->party[targetIndex], &previous, sizeof(previous));
+        btlCopyUnitStats((s32)actor, (s32)&datGameState->party[actor->unk2C4]);
+        actor->partyRecord.flags |= 2;
+        datGameState->party[actor->unk2C4].flags |= 2;
+        datGameState->party[targetIndex].flags &= ~2;
+        func_001A1CD0();
+        btlBossDebugPrintf("btl:party change %d<->%d[%d<->%d]\n",
+            actor->unk2C4, targetIndex, previous.unitId, actor->partyRecord.unitId);
+    }
+}
 
 s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *record) {
     if ((record->flags & 4) != 0) {
