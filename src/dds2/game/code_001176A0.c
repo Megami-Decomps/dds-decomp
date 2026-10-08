@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_resource.h"
+#include "mnu_flag_snapshot.h"
 #include "dds3_path.h"
 #include "eff_transform.h"
 #include "sdf.h"
@@ -266,7 +267,7 @@ extern s32 D_00435DBC;
 extern s32 D_00435DC0;
 extern s8 D_00435DC4;
 extern s8 D_00435DC5;
-extern s32 D_00438E90;
+extern SdfMemBlock *D_00438E90;
 extern void *D_00438E94;
 extern void *D_00438E98;
 extern void *D_00438E9C;
@@ -275,7 +276,6 @@ extern void *D_00438EA4;
 extern s32 D_00438EA8;
 extern u32 D_00438EAC;
 extern s32 mdlFlagTest(s32 flag);
-extern s32 mnuCreateFlagEntries(void);
 extern void func_0011D130(void);
 extern s32 mtrMantraEventBitPush(void);
 

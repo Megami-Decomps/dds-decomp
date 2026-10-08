@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_effect_position.h"
 #include "pcp_vu0.h"
 #include "btl.h"
 #include "eff.h"
@@ -51,18 +52,16 @@ void effBattleMiscCallByOwnerA(u32 unused, void *arg) {
     effBattleComputeTargetPosition(effBTLFieldColorGetOverrideSelector(), arg);
 }
 
-void func_00161B10(u32 unused, void *arg) {
+void effBattleMiscCallByFinalSelector(u32 unused, void *arg) {
     effBattleComputeTargetPosition(effBTLFieldColorGetFinalSelector(), arg);
 }
 
-extern void btlSetActorEffectParameterOrMuzzlePosition();
-
 void effApplyOverrideActorEffectParameter(u32 unused, EffectVectorRequest *param) {
-    btlSetActorEffectParameterOrMuzzlePosition(effBTLFieldColorGetOverrideSelector(), param->count);
+    btlSetActorEffectParameterOrMuzzlePosition((BtlUnit *)effBTLFieldColorGetOverrideSelector(), param->count);
 }
 
 void effApplyFinalActorEffectParameter(u32 unused, EffectVectorRequest *param) {
-    btlSetActorEffectParameterOrMuzzlePosition(effBTLFieldColorGetFinalSelector(), param->count);
+    btlSetActorEffectParameterOrMuzzlePosition((BtlUnit *)effBTLFieldColorGetFinalSelector(), param->count);
 }
 
 /* Query a unit-relative target position; camera-facing kinds use the view basis. */
@@ -147,7 +146,7 @@ void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *param) {
     }
 }
 
-void func_00161E48(u32 mask, EffectVectorRequest *param) {
+void effBattleMiscQueryMaskedTargetPosition(u32 mask, EffectVectorRequest *param) {
     f32 out[4];
     f32 direction[4];
     f32 position[4];
@@ -218,18 +217,18 @@ void func_00161E48(u32 mask, EffectVectorRequest *param) {
     VU0_LOAD_VF(vf10, out);
 }
 
-void func_00162028(u32 unused, EffectVectorRequest *value) {
+void effBattleMiscQueryOriginalTargetPosition(u32 unused, EffectVectorRequest *value) {
     BtlUnit *ctx = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
 
     (void)unused;
-    func_00161E48(ctx->flags & 0xE00, value);
+    effBattleMiscQueryMaskedTargetPosition(ctx->flags & 0xE00, value);
 }
 
-void func_00162058(u32 unused, EffectVectorRequest *value) {
+void effBattleMiscQueryVariantTargetPosition(u32 unused, EffectVectorRequest *value) {
     BtlUnit *ctx = (BtlUnit *)effBTLFieldColorGetVariantSelector();
 
     (void)unused;
-    func_00161E48(ctx->flags & 0xE00, value);
+    effBattleMiscQueryMaskedTargetPosition(ctx->flags & 0xE00, value);
 }
 
 
@@ -291,7 +290,7 @@ void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *para
 }
 
 void effBattleMiscApplyParamByte(u32 owner, EffectVectorRequest *param) {
-    btlSetActorEffectParameterOrMuzzlePosition(owner, param->count);
+    btlSetActorEffectParameterOrMuzzlePosition((BtlUnit *)owner, param->count);
 }
 
 f32 effBattleMiscQueryScalar(BtlUnit *unit, EffectVectorRequest *param) {

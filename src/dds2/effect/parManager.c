@@ -414,11 +414,11 @@ void parUpdateAndDrawObject(ParObj *effect) {
     if (particleCount > 0) {
         step = particleCount;
         do {
-            s32 age = record->unk20;
+            s32 age = record->age;
 
             if (age < lifetime && age >= 0) {
                 PCP_COPY_VECTOR(billboard, record->position);
-                billboard->childParam = record->unk24;
+                billboard->childParam = record->color;
                 billInvokeCallback(billboard);
             }
             step--;

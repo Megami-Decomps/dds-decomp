@@ -2,6 +2,8 @@
 #include "dds3_path.h"
 #include "dds3obj.h"
 #include "evt_world.h"
+#include "kwln_task_lifecycle.h"
+#include "kwln_task_state.h"
 
 struct EvtScaledValue;
 extern void sdfSetFloatCounterDirection(u32 *destination, u32 value);
@@ -16,6 +18,10 @@ extern Dds3PathCurveWork *dds3GetSlot1Data(void *object);
 
 extern void *dds3GetWorldSecondaryObject(void);
 extern void dds3DestroyWorldNode(EffWorldNode *worldNode);
+
+const char D_00421578[0x10] = "%sf%03d_%03d";
+
+const char D_00421588[0x20] = "/event/e%03d/e%03d/scr/e%03d.bf";
 
 void evtDestroySecondaryWorldNode(void) {
     EffWorldNode *secondary;
@@ -43,7 +49,6 @@ void evtDrainSecondaryWorldNodes(void) {
     }
 }
 
-extern char D_00421578[];
 extern char D_003C8BA0[];
 extern char D_003C8C60[];
 extern char D_003C8C80[];
@@ -58,7 +63,7 @@ extern void sdfSetViewFieldOfView(f32);
 extern void dds3DrawSetIndexedWord(u32, s32);
 extern void kwlnDrawCopyWords20(void *);
 extern void kwlnDrawCopyRow128(void *);
-extern void func_0035C860(char *, char *, ...);
+extern void func_0035C860(char *, const char *, ...);
 
 s32 evtCreateWorldObjectForKey(s32 area, s32 room)
 {
@@ -115,10 +120,12 @@ s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 arg2, s32 arg3, s32
     return 1;
 }
 
-extern void func_0035C860(char *, char *, ...);
+extern void func_0035C860(char *, const char *, ...);
 extern char evtScriptResourcePathBuffer[];
-extern char D_00421588[];
 extern s32 scrCreateProcessTaskFromResource(s32, const char *, s32);
+extern KwlnTask *func_00101100(u32 state, s32 index);
+extern s32 kwlnTaskGetStateList(u32 state);
+extern void func_0035B6E0(const char *format, ...);
 
 /* DDS2 twin of DDS1 func_00220110: start the event BF script by id. */
 void evtCreateEventScriptProcess(s32 eventId) {
@@ -126,11 +133,26 @@ void evtCreateEventScriptProcess(s32 eventId) {
     scrCreateProcessTaskFromResource(0x3EB, evtScriptResourcePathBuffer, 0);
 }
 
-INCLUDE_RODATA(const s32, "event/evtStage", D_00421578);
+const char D_004215A8[0x28] = "kill field script -> [%s]\n";
 
-INCLUDE_RODATA(const s32, "event/evtStage", D_00421588);
+void func_0023ACE8(void) {
+    s32 state;
+    s32 taskIndex;
+    KwlnTask *task;
 
-INCLUDE_ASM(const s32, "event/evtStage", func_0023ACE8);
+    for (state = KWLN_TASK_DELAYED_START; state < KWLN_TASK_DESTROY_PENDING; state++) {
+    restartStateScan:
+        for (taskIndex = 0; taskIndex < kwlnTaskGetStateList(state); taskIndex++) {
+            task = func_00101100(state, taskIndex);
+            if (task->priority == 0x3EA) {
+                func_0035B6E0(D_004215A8, task->name);
+                kwlnTaskDestroyWithHierarchy(task, 0);
+                /* Destruction changes the queue, so restart the current scan. */
+                goto restartStateScan;
+            }
+        }
+    }
+}
 
 void evtSetWorldSlotStatusFlag(void *object) {
     Dds3PathCurveWork *slotData;

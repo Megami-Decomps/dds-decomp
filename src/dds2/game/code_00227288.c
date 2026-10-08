@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_effect_position.h"
 #include "btl_task_condition.h"
 #include "btl_state.h"
 #include "btl_command.h"
@@ -9,8 +10,6 @@
 #include "mdl.h"
 #include "eff_transform.h"
 #include "dat_state.h"
-
-extern void btlSetActorEffectParameterOrMuzzlePosition();
 
 extern void btlInterpolateVectorStep();
 
@@ -631,7 +630,7 @@ s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
     command->motionParameter = 10.0f;
     command->motionProgress = 1;
     command->state = 0;
-    btlSetActorEffectParameterOrMuzzlePosition(target, 0);
+    btlSetActorEffectParameterOrMuzzlePosition((BtlUnit *)target, 0);
     VU0_STORE_VF_UNCLOBBERED(vf10, command->backCamera.position);
     command->backCamera.position[1] += 150.0f;
     btlInterpolateVectorStep(&command->frontCamera);

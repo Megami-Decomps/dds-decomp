@@ -1,4 +1,5 @@
 #include "eff_bill.h"
+#include "itf_draw_grid.h"
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
@@ -11188,7 +11189,7 @@ s32 effDispatchRecordBuckets(s32 refresh, EffectOwnerRecord *list, s32 drawOptio
     for (bucketCountdown = EFF_RECORD_LAST_BUCKET; bucketCountdown >= 0; bucketCountdown--, bucketHead++) {
         EffectRecord *record = *bucketHead;
         while (record != 0) {
-            itfDrawGridWithResolvedSlot(0, 0, 0, 0, (u32)list->owner, record->slot, drawOption);
+            itfDrawGridWithResolvedSlot(0, 0, 0, 0, (EffectSlotSet *)(u32)list->owner, record->slot, drawOption);
             if (refresh != 0) {
                 itfGridLookupValueOrDefault((u32)list->owner, record->slot);
             }
@@ -11278,7 +11279,7 @@ u32 effCreateMappedResource(u32 sourceAddress) {
 }
 
 /* Build one zeroed status record and allocate the category's required status storage. */
-u32 *effCreateStatusBatch(u32 category) {
+EffMappedResource *effCreateStatusBatch(u32 category) {
     EffMappedResource *batch = (EffMappedResource *)sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
     struct SdfMemBlock *allocation;
     u32 statusBytes;
@@ -11298,7 +11299,7 @@ u32 *effCreateStatusBatch(u32 category) {
     batch->records->status = statuses;
     memset(statuses, 0, statusBytes);
     batch->records->statusBytes = statusBytes;
-    return (u32 *)batch;
+    return batch;
 }
 
 /* Release each record's status storage, then the record allocation and batch header. */
@@ -11720,19 +11721,22 @@ s32 effConfigureIndexedSlotResource(u8 *effect, u32 slot, u8 *resources, u32 ind
     return 1;
 }
 
-s32 effConfigureIndexedSlotMaterial(u8 *effect, u32 slot, u8 *resources, u32 index,
+s32 effConfigureIndexedSlotMaterial(EffectSlotSet *effect, u32 slot,
+                  EffMappedResource *resources, u32 index,
                   u32 flags, u32 option, u32 color) {
-    BdWork *entry = &((EffectSlotSet *)effect)->workEntries[slot];
-    u32 resource = (u32)&((EffMappedResource *)resources)->records[index];
+    BdWork *entry = &effect->workEntries[slot];
+    u32 resource = (u32)&resources->records[index];
     effSetSlotResourceAndFlags(&entry->states[0], resource, color);
-    effUpdateTimedStates((EffectSlotSet *)effect, slot, entry);
+    effUpdateTimedStates(effect, slot, entry);
     entry->states[0].materialFlags = flags;
     entry->states[0].materialValue = option;
     return 1;
 }
 
-u32 effConfigureWithDefaultSetting(u32 effect, u32 slot, u32 kind, u32 value, u32 flags, u32 color) {
-    effConfigureIndexedSlotMaterial(effect, slot, kind, value, flags, 0, color);
+u32 effConfigureWithDefaultSetting(EffectSlotSet *effect, u32 slot,
+                                   EffMappedResource *resources, u32 item,
+                                   u32 flags, u32 color) {
+    effConfigureIndexedSlotMaterial(effect, slot, resources, item, flags, 0, color);
     return 1;
 }
 
