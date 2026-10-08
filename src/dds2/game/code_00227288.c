@@ -821,7 +821,7 @@ void func_002292D8(void) {
         entry++;
     } while (index < 5);
     if (((activeCount < 4) && (markedCount < 3)) && (hasKindTwo)) {
-        func_0011AEE0(2);
+        ptyRebalanceFrontline(2);
         return;
     }
 }
@@ -859,17 +859,17 @@ u32 func_00229470(void) {
 }
 
 void func_00229478(void) {
-    func_0011AEE0(7);
+    ptyRebalanceFrontline(7);
 }
 
 void func_00229490(void) {
-    func_0011AEE0(1);
-    func_0011AEE0(4);
-    func_0011AEE0(5);
+    ptyRebalanceFrontline(1);
+    ptyRebalanceFrontline(4);
+    ptyRebalanceFrontline(5);
 }
 
 void func_002294B8(void) {
-    func_0011AEE0(8);
+    ptyRebalanceFrontline(8);
 }
 
 INCLUDE_ASM(const s32, "game/code_00227288", btlRemapListedUnitAction);

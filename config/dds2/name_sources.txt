@@ -482,6 +482,7 @@
 0x0011AA58	datCalculateCommandBaseValue	inferred	R_Names31 B92
 0x0011AB38	ptyInitRuntime	inferred	U1
 0x0011AE60	evtGetIndexedEventRecordId	inferred	Returns index field from selected EventIndexRecord. [names_reviewed7.tsv]
+0x0011AEE0	ptyRebalanceFrontline	inferred	DDS1 counterpart and complete party-record promotion/demotion/swap flow
 0x0011B260	ptyIsRosterEntryPresent	inferred	Returns whether the specified roster entry exists. [names_reviewed10.tsv]
 0x0011B2C0	ptyGetRoundedAveragePartyLevel	inferred	Averages levels of occupied party entries, rounding fractional results up and returning zero if empty. [names_reviewed15.tsv]
 0x0011B328	ptyCloneTemplateAtPartyMaxLevel	inferred	U1
