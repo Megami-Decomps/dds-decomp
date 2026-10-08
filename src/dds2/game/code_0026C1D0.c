@@ -1,3 +1,4 @@
+#include "kwln.h"
 #include "kwln_task_state.h"
 #include "evt_world.h"
 #include "sdf_resource.h"
@@ -109,7 +110,7 @@ void evtFillQuadRecordFields(u32 firstWord, u32 secondWord, u32 thirdWord, s16 f
 /* Destroy a nonzero, registered task. The declared return value is not set. */
 s32 evtDestroyRegisteredTaskIfPresent(s32 task) {
     if (task != 0) {
-        if (kwlnTaskGetRegisteredState(task) != 0) {
+        if (kwlnTaskGetRegisteredState((KwlnTask *)task) != 0) {
             kwlnTaskDestroyWithHierarchy(task, 0);
         }
     }
@@ -389,13 +390,13 @@ void evtMoveMessageWindowWithPanelOffset(s32 x, s32 y) {
 
 /* Recognize all three scheduler queues. Preserve the repeated queries. */
 s32 evtIsTaskInActiveStates(s32 task) {
-    if (kwlnTaskGetRegisteredState(task) == KWLN_TASK_DELAYED_START) {
+    if (kwlnTaskGetRegisteredState((KwlnTask *)task) == KWLN_TASK_DELAYED_START) {
         return 1;
     }
-    if (kwlnTaskGetRegisteredState(task) == KWLN_TASK_ACTIVE) {
+    if (kwlnTaskGetRegisteredState((KwlnTask *)task) == KWLN_TASK_ACTIVE) {
         return 1;
     }
-    return kwlnTaskGetRegisteredState(task) == KWLN_TASK_DESTROY_PENDING;
+    return kwlnTaskGetRegisteredState((KwlnTask *)task) == KWLN_TASK_DESTROY_PENDING;
 }
 
 extern s8 evtActiveEntryFlags[8];
