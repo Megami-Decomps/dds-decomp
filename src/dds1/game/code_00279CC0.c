@@ -365,19 +365,21 @@ void mnuBindAssetEffectPayloads(MenuAssets *assets) {
     second = effCreatePayload(2);
     packet = (s32)second->records;
     assets->layerB = second;
-    effSetSlotIndexedResource(packet + 0x28, assets->material, 0, 0xc);
-    effSetSlotIndexedResource((s32)assets->layerB->records + 0x94, assets->material, 1, 0xc);
+    effSetSlotIndexedResource((EffTimedState *)(packet + 0x28), assets->material, 0, 0xc);
+    effSetSlotIndexedResource((EffTimedState *)((s32)assets->layerB->records + 0x94),
+                              assets->material, 1, 0xc);
     effSetMaterialSlots(assets->sprites[4], 0, 0, (u32)assets->layerB->records);
     effSetMaterialSlots(assets->sprites[4], 1, 0, (s32)assets->layerB->records + 0x6c);
     effSetMaterialSlots(assets->sprites[4], 2, 0, (s32)assets->layerB->records + 0x6c);
     effSetMaterialSlots(assets->sprites[4], 3, 0, (u32)assets->layerB->records);
     effSetMaterialSlots(assets->sprites[4], 4, 0, (u32)assets->layerB->records);
-    effSetSlotIndexedResource((s32)assets->layerA->records + 0x28, assets->material, 2, 0xd);
+    effSetSlotIndexedResource((EffTimedState *)((s32)assets->layerA->records + 0x28),
+                              assets->material, 2, 0xd);
     effSetSlotOverrideWork(assets->sprites[1], 0, (u32)assets->layerA->records);
     effConfigureIndexedSlotResource((struct EffectSlotSet *)(u32)assets->sprites[2], 0,
-                                    (struct EffMappedResource *)(u32)assets->material, 3, 4);
+                                    assets->material, 3, 4);
     effConfigureIndexedSlotResource((struct EffectSlotSet *)(u32)assets->sprites[3], 0,
-                                    (struct EffMappedResource *)(u32)assets->material, 4, 4);
+                                    assets->material, 4, 4);
 }
 
 INCLUDE_ASM(const s32, "game/code_00279CC0", func_0027AD80);
@@ -393,7 +395,7 @@ extern u32 D_0037CD20[];
 void mnuRequestBaseAssets(MenuAssets *assets) {
     effRequestResourceByMode(D_003B2330, D_0037CD18[1], 0, &assets->sprites[0]);
     effRequestResourceByMode(D_003B2330, D_0037CD18[0], 0, &assets->sprites[4]);
-    effRequestMappedResource(D_003B2348, D_0037CD20[0], &assets->material);
+    effRequestMappedResource(D_003B2348, D_0037CD20[0], (u32 *)&assets->material);
 }
 
 extern s32 mnuInitializeCampAssetSprites(MenuAssets *);

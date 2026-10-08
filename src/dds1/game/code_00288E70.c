@@ -2,25 +2,10 @@
 #include "sdf_resource.h"
 #include "file.h"
 #include "file_slot_flags.h"
+#include "file_request_entry.h"
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
 
-/* File request entry: fileRequestEntries table, 0x64 bytes per entry. */
-typedef struct FileReqEntry {
-    u32 unk0;      /* 0x00 */
-    u32 unk4;      /* 0x04 */
-    u32 sizeKiB;   /* 0x08: converted to bytes by fileReqGetSize */
-    u32 unkC;      /* 0x0C */
-    u8 unk10;      /* 0x10 */
-    u8 status;     /* 0x11: inspected by memory-card file request polling */
-    u8 slotMetadataDirty; /* 0x12: checked before rebuilding slot metadata */
-    s8 selectedSlot; /* 0x13: used to select a memory-card save directory */
-    u32 slotFlags[20]; /* 0x14: save-slot flag words, aliased by fileRequestSlotFlags */
-} FileReqEntry;
-
-extern FileReqEntry fileRequestEntries[];
-/* Flag words of the entry table: entry arg0 occupies 0x19 words. */
-extern u32 fileRequestSlotFlags[];
 extern s32 D_003BD8E8;
 
 /* A 0x6C-byte async device transfer, distinct from an effect/file-queue FileJob. */
@@ -460,7 +445,7 @@ s8 fileReqGetSelectedSlot(s32 request) {
     return fileRequestEntries[request].selectedSlot;
 }
 
-void fileReqSetSelectedSlot(s32 request, s8 selectedSlot) {
+void fileReqSetSelectedSlot(s32 request, s32 selectedSlot) {
     fileRequestEntries[request].selectedSlot = selectedSlot;
 }
 

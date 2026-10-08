@@ -113,7 +113,7 @@ struct EffPayload;
 /* DDS1's complete two-layer backdrop asset set. */
 typedef struct MenuAssets {
     u32 sprites[5];
-    u32 material;
+    struct EffMappedResource *material;
     struct EffPayload *layerA;
     struct EffPayload *layerB;
 } MenuAssets;
