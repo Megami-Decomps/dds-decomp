@@ -372,7 +372,7 @@ typedef struct BillRecord {
     u16 v1;
     s16 childIndex;
     s16 frameDelay; /* 0x12: signed countdown loaded when selecting a frame */
-    f32 scale;
+    f32 rotationAngle; /* 0x14: copied into the runtime quad rotation in radians. */
 } BillRecord;
 
 /* The 0x10000000 animation format is a list of positioned, delayed entry
