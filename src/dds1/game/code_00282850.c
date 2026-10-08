@@ -567,8 +567,8 @@ void mnuDrawAndStepGradientFade(MenuGradientFade *state, s32 surface) {
 
 /* Set both effect positions; only the first Y comes from the active menu entry. */
 void mnuSetPairedEffectPositions(MenuEffectPair *pair) {
-    MenuEffectNode *first = pair->first;
-    MenuEffectNode *second = pair->second;
+    MenuEffectNode *first = pair->effects[0];
+    MenuEffectNode *second = pair->effects[1];
     MenuEffectPosition *firstPosition = first->position;
     MenuEffectPosition *secondPosition = second->position;
     s32 *coordinates = firstPosition->coordinates;
@@ -582,27 +582,7 @@ void mnuSetPairedEffectPositions(MenuEffectPair *pair) {
     coordinates[2] = 10;
 }
 
-typedef struct MenuEffectBoundsOwner {
-    s32 initialValue;
-    u8 pad04[0x0C];
-    s32 quantizedSpan;
-    s32 *settings;
-    u8 settingIndex;
-    s8 positionY;
-    u8 pad1A[2];
-    EffectSlotSet *resourceSets[7];
-    EffectSlotSet *leftGrid;
-    EffectSlotSet *rightGrid;
-    MenuEffectNode *effects[2];
-    s32 updateState;
-    s32 opacity;
-    s32 pad50;
-} MenuEffectBoundsOwner;
-
-typedef char MenuEffectBoundsOwner_size_check[
-    (sizeof(MenuEffectBoundsOwner) == 0x54) ? 1 : -1];
-
-s32 mnuRateByThreshold(MenuEffectBoundsOwner *owner) {
+s32 mnuRateByThreshold(MenuEffectPair *owner) {
     s32 value = owner->quantizedSpan;
 
     if (value < 0x32) {
@@ -614,7 +594,7 @@ s32 mnuRateByThreshold(MenuEffectBoundsOwner *owner) {
 extern void itfGridSetQuantizedBounds(EffectSlotSet *, s32, s32, s32, s32, s32);
 
 /* Split the scaled grid width by its rate category and clear the paired grid. */
-void func_00283D10(MenuEffectBoundsOwner *owner) {
+void func_00283D10(MenuEffectPair *owner) {
     s32 span = (owner->resourceSets[1]->workEntries[0].geometry.bounds[2]
                 * owner->quantizedSpan) / 100;
     s32 rate = mnuRateByThreshold(owner);
@@ -642,12 +622,12 @@ void func_00283D10(MenuEffectBoundsOwner *owner) {
 }
 
 /* Cycle through four indexed settings while refreshing the paired effects. */
-void mnuCyclePairedEffectSetting(MenuEffectBoundsOwner *pair) {
+void mnuCyclePairedEffectSetting(MenuEffectPair *pair) {
     s32 *settings;
     s32 setting;
 
     func_00283D10(pair);
-    mnuSetPairedEffectPositions((MenuEffectPair *)pair);
+    mnuSetPairedEffectPositions(pair);
     settings = pair->settings;
     setting = 0;
     if (settings != 0) {
@@ -665,7 +645,7 @@ extern void effInitializeSlotWork(s32, s32);
 extern u32 effConfigureIndexedSlotResource(s32, s32, s32, s32, u32);
 
 /* Draw the paired effect at its current rate and initialize its alternate on demand. */
-void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectBoundsOwner *owner,
+void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,
                    s32 surface) {
     s32 rate = mnuRateByThreshold(owner);
     u32 scale;
@@ -720,9 +700,9 @@ void mnuCreatePairedEffects(MenuEffectPair *pair) {
     u32 effectHandle;
 
     effectHandle = effCreateStatusBatch(3);
-    pair->first = (MenuEffectNode *)effectHandle;
+    pair->effects[0] = (MenuEffectNode *)effectHandle;
     effectHandle = effCreateStatusBatch(3);
-    pair->second = (MenuEffectNode *)effectHandle;
+    pair->effects[1] = (MenuEffectNode *)effectHandle;
 }
 
 /* Release the two effect-batch handles in the native object-word layout. */

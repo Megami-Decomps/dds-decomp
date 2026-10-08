@@ -1132,25 +1132,16 @@ void mnuReleaseSlotResources(MenuPageWindow *context) {
     }
 }
 
-typedef struct MenuPanelResources {
-    u8 pad00[0x10];
-    s32 primary;            /* 0x10 */
-    u8 pad14[0xD4];
-    u32 leftHandle;          /* 0xE8 */
-    u32 centerHandle;        /* 0xEC */
-    u32 rightHandle;         /* 0xF0 */
-} MenuPanelResources;
-
-void mnuLoadPanelSectionResources(MenuPanelResources *panel, u32 resource, u32 left, u32 center, s32 right
+void mnuLoadPanelSectionResources(MenuPageSlot *panel, u32 resource, u32 left, u32 center, s32 right
                                     ) {
-    u32 handle;
+    EffectSlotSet *handle;
 
-    handle = (u32)effCreateResourceSlotSet((u32 *)resource, left, 1);
+    handle = effCreateResourceSlotSet((u32 *)resource, left, 1);
     panel->leftHandle = handle;
-    handle = (u32)effCreateResourceSlotSet((u32 *)resource, center, 1);
+    handle = effCreateResourceSlotSet((u32 *)resource, center, 1);
     panel->centerHandle = handle;
     if (-1 < right) {
-        handle = (u32)effCreateResourceSlotSet((u32 *)resource, right, 1);
+        handle = effCreateResourceSlotSet((u32 *)resource, right, 1);
         panel->rightHandle = handle;
     }
 }
@@ -1191,13 +1182,13 @@ void mnuReleasePartyPanelTextures(s32 menu) {
 void mnuResetPartyPanelFade(s32 menu, s32 index, s32 unused, s32 retainScale) {
     MenuPageSlot *page = &((MenuPageWindow *)menu)->slots[index];
 
-    page->offsetA = 0;
-    page->offsetB = 0;
+    page->hp.fadeOut = 0;
+    page->mp.fadeOut = 0;
     if (retainScale != 0) {
         return;
     }
-    page->scaleA = 0x100;
-    page->scaleB = 0x100;
+    page->hp.opacity = 0x100;
+    page->mp.opacity = 0x100;
 }
 
 void mnuSetPageParams(MenuSprites *page, s32 mode) {
@@ -1525,9 +1516,9 @@ void mnuClearPageSelection(MenuPageWindow *window) {
         u32 bankAddress = (u32)&window->unk20;
 
         *(s32 *)(bankAddress + selected * (s32)sizeof(MenuPageSlot)
-                 + (u32)&((MenuWindowResourceBank *)0)->slots[0].scaleA) = 0x100;
+                 + (u32)&((MenuWindowResourceBank *)0)->slots[0].hp.opacity) = 0x100;
         *(s32 *)(bankAddress + window->selected * (s32)sizeof(MenuPageSlot)
-                 + (u32)&((MenuWindowResourceBank *)0)->slots[0].scaleB) = 0x100;
+                 + (u32)&((MenuWindowResourceBank *)0)->slots[0].mp.opacity) = 0x100;
         window->selected = -1;
     }
     window->flags &= ~0x400;
@@ -1957,19 +1948,19 @@ INCLUDE_SDATA(const s32, "game/code_0027BF00", D_003BC738);
 
 INCLUDE_SDATA(const s32, "game/code_0027BF00", D_003BC740);
 
-void mnuDrawPartyPanelResourceIcons(s32 x, s32 y, s32 z, s32 obj, s32 mode, s32 param) {
+void mnuDrawPartyPanelResourceIcons(s32 x, s32 y, s32 z, MenuPageSlot *panel, s32 mode, s32 param) {
     s32 pos[2] = {0x180, 0xE0};
 
     if (mode == 0) {
-        func_002BF4E0(x, y, z, 0x100, 1, ((MenuPanelResources *)obj)->primary, 0, param);
+        func_002BF4E0(x, y, z, 0x100, 1, panel->icon[0], 0, param);
         x += pos[0];
         y += pos[1];
-        func_002BF4E0(x, y, z, 0x100, 1, ((MenuPanelResources *)obj)->leftHandle, 0, param);
-        if (((MenuPanelResources *)obj)->rightHandle == 0) {
-            func_002BF4E0(x + 0x360, y + 0x68, z, 0x100, 1, ((MenuPanelResources *)obj)->centerHandle, 0, param);
+        func_002BF4E0(x, y, z, 0x100, 1, panel->leftHandle, 0, param);
+        if (panel->rightHandle == 0) {
+            func_002BF4E0(x + 0x360, y + 0x68, z, 0x100, 1, panel->centerHandle, 0, param);
         } else {
-            func_002BF4E0(x + 0x360, y + 0x68, z, 0x100, 1, ((MenuPanelResources *)obj)->centerHandle, 0, param);
-            func_002BF4E0(x + 0x790, y + 0x70, z, 0x100, 1, ((MenuPanelResources *)obj)->rightHandle, 0, param);
+            func_002BF4E0(x + 0x360, y + 0x68, z, 0x100, 1, panel->centerHandle, 0, param);
+            func_002BF4E0(x + 0x790, y + 0x70, z, 0x100, 1, panel->rightHandle, 0, param);
         }
     }
 }

@@ -360,23 +360,41 @@ typedef struct MenuEffectNode {
     MenuEffectPosition *position;
 } MenuEffectNode;
 
-/* DDS1 paired numeric-bar effects; callers also set the draw opacity. */
+/* Complete DDS1 0x54-byte numeric-bar texture/effect owner. */
 typedef struct MenuEffectPair {
-    u8 pad00[0x14];
+    s32 initialValue;
+    u8 pad04[0x0C];
+    s32 quantizedSpan;
     s32 *settings;
     u8 settingIndex;
     s8 positionY;
-    u8 pad1A[0x1E];
-    s32 configurationHandle;
-    u8 pad3C[4];
-    MenuEffectNode *first;
-    MenuEffectNode *second;
-    u8 pad48[4];
-    u32 opacity;
+    u8 pad1A[2];
+    struct EffectSlotSet *resourceSets[7];
+    struct EffectSlotSet *leftGrid;
+    struct EffectSlotSet *rightGrid;
+    MenuEffectNode *effects[2];
+    s32 updateState;
+    s32 opacity;
+    s32 fadeOut;
 } MenuEffectPair;
 
+typedef char MenuEffectPair_size_check[(sizeof(MenuEffectPair) == 0x54) ? 1 : -1];
 typedef char MenuEffectPair_opacity_offset_check[
     ((u32)&((MenuEffectPair *)0)->opacity == 0x4C) ? 1 : -1];
+
+/* Two 0x20-byte gradient states are embedded in each DDS1 page slot. */
+typedef struct MenuPanelFade {
+    s32 unk0;
+    s32 kind;
+    s32 compact;
+    s32 unkC;
+    s32 highBlendStep;
+    s32 lowBlendStep;
+    s32 blend;
+    s32 delay;
+} MenuPanelFade;
+
+typedef char MenuPanelFade_size_check[(sizeof(MenuPanelFade) == 0x20) ? 1 : -1];
 
 #ifdef VERSION_DDS2
 /* Complete 0x50-byte texture/effect owner embedded in each page bank. */
@@ -464,23 +482,26 @@ typedef struct MenuPageSlot {
     u32 flags;
     u8 pad08[8];
     struct EffectSlotSet *icon[3];
-    u8 pad1C[0x4C];
-    s32 scaleA;
-    s32 offsetA;
-    u8 pad70[0x4C];
-    s32 scaleB;
-    s32 offsetB;
+    MenuEffectPair hp; /* 0x1C */
+    MenuEffectPair mp; /* 0x70 */
     struct EffectSlotSet *frame[6];
     struct MenuPageResources *resources;
     struct MenuSprites *windowSprites;
     MenuIconBundle *iconBundle;
-    u8 padE8[0x4C];
+    struct EffectSlotSet *leftHandle; /* 0xE8 */
+    struct EffectSlotSet *centerHandle;
+    struct EffectSlotSet *rightHandle;
+    MenuPanelFade work[2]; /* 0xF4 and 0x114 */
 } MenuPageSlot;
+
 typedef char MenuPageSlot_size_check_dds1[(sizeof(MenuPageSlot) == 0x134) ? 1 : -1];
 typedef char MenuPageSlot_icon_check_dds1[
     ((u32)&((MenuPageSlot *)0)->icon == 0x10) ? 1 : -1];
 typedef char MenuPageSlot_frame_check_dds1[
     ((u32)&((MenuPageSlot *)0)->frame == 0xC4) ? 1 : -1];
+typedef char MenuPageSlot_hp_check[((u32)&((MenuPageSlot *)0)->hp == 0x1C) ? 1 : -1];
+typedef char MenuPageSlot_mp_check[((u32)&((MenuPageSlot *)0)->mp == 0x70) ? 1 : -1];
+typedef char MenuPageSlot_work_check[((u32)&((MenuPageSlot *)0)->work == 0xF4) ? 1 : -1];
 #endif
 
 typedef struct MenuPageWindow {
