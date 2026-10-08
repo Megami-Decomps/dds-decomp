@@ -1,5 +1,6 @@
 #include "common.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_list.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "mnu_result.h"
@@ -681,7 +682,6 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
 
 extern s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *);
 extern void brsCloseSkillPackagePanel(BrsSkillPackageWork *);
-extern void func_00303D58(s32);
 extern s32 dspCloseChannel(void);
 
 /* Release the panel and task resources, then mark the result task finished. */
@@ -695,7 +695,7 @@ void brsStaffTaskDestroy(KwlnTask *taskArg) {
     if (brsAdvanceSkillPackagePanel(context) == 0) {
         brsCloseSkillPackagePanel(context);
     }
-    func_00303D58(context->fadeTarget);
+    effDestroyEffectList((struct EffectList *)(u32)context->fadeTarget);
     dspCloseChannel();
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(context->handle));
     brsTaskState = 2;

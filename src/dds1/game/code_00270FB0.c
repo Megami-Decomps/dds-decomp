@@ -1,6 +1,7 @@
 #include "mnu_input.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
+#include "eff_resource_list.h"
 #include "common.h"
 #include "itf_draw_grid.h"
 #include "mnu_staff.h"
@@ -24,7 +25,6 @@ extern u32 mnuGetValueRecordOwner(const EffectList *);
 
 extern s32 effAppendListEntry(EffectList *, u32, u32, u32, u32);
 extern s32 effPollResourceList(EffectList *);
-extern void func_002BC618(EffectList *);
 
 extern u32 D_0037C248[][2];
 
@@ -537,7 +537,7 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     mnuReleaseAssets(menu->background);
     mnuReleaseStaffResourceSlotGroups(menu);
     mnuReleaseStaffSpriteHandles(menu);
-    func_002BC618(menu->resourceQueue);
+    effDestroyEffectList(menu->resourceQueue);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(menu->resource));
     mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
     func_002E9730();

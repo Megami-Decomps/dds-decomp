@@ -2,6 +2,7 @@
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
+#include "eff_resource_list.h"
 #include "common.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -49,7 +50,6 @@ extern void kwlnFadeOutStart(s8, s8, s8, s32);
 extern s32 dds3AdminReadPreviousSignedSample(void);
 
 extern struct EffectList *mnuAllocateValueRecord(u32);
-extern void func_00303D58(struct EffectList *list);
 
 
 extern void mnuLoadEffectResources(u8 *);
@@ -850,7 +850,7 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     mnuDestroyEffectResources(menuBytes + 0x11c);
     mnuReleaseTitleEffectResourceGroups(menuBytes);
     movReleaseTitleEffects(menuBytes);
-    func_00303D58(((CampVisualWork *)menuBytes)->menuResource);
+    effDestroyEffectList(((CampVisualWork *)menuBytes)->menuResource);
     sdfReleaseResourceAllocation(((CampVisualWork *)menuBytes)->allocationHandle);
     mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
     func_003425D8();

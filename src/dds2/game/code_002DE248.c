@@ -26,6 +26,7 @@
 #include "evt_unit.h"
 #include "mdl.h"
 #include "eff.h"
+#include "eff_resource_list.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "eff_record_bucket.h"
@@ -10893,7 +10894,7 @@ EffectList *mnuAllocateValueRecord(u32 mode) {
     return list;
 }
 
-void func_00303D58(EffectList *list) {
+void effDestroyEffectList(EffectList *list) {
     sdfReleaseChipBlock(list);
 }
 
