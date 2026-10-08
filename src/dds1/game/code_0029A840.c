@@ -165,16 +165,18 @@ void effDestroyModelOwner(EffModelOwner *owner) {
     sdfReleaseChipBlock(owner);
 }
 
-u32 *effDuplicateEffectHeader(u32 *source) {
-    u32 *effect = (u32 *)effCreateModelOwner(0);
-    effect[0] = source[0];
-    effRecreateModelFromSource(effect, (u8 *)source);
+extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
+
+EffModelOwner *effDuplicateEffectHeader(EffModelOwner *source) {
+    EffModelOwner *effect = effCreateModelOwner(0);
+    *(u32 *)effect = *(u32 *)source;
+    effRecreateModelFromSource(effect, source);
     return effect;
 }
 
-void effRecreateModelFromSource(u32 *work, u8 *source) {
-    EffModelOwner *owner = (EffModelOwner *)work;
-    EffModelOwner *original = (EffModelOwner *)source;
+void effRecreateModelFromSource(EffModelOwner *work, EffModelOwner *source) {
+    EffModelOwner *owner = work;
+    EffModelOwner *original = source;
     MdlCtx *model;
 
     if (owner->model != 0) {
@@ -298,7 +300,7 @@ void effMarkFloorModelForDestruction(u8 *work) {
     }
 }
 
-extern void effRecreateModelFromSource(u32 *, u8 *);
+extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
 
 u32 *effDuplicateFloorModelOwner(u8 *source) {
     u32 *owner = (u32 *)effCreateModelOwner(0);
