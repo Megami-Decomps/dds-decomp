@@ -86,7 +86,7 @@ extern BtlLightParams D_0037FB20;
 
 extern s32 btlGetRuntime(void);
 
-extern s32 btlCountTasksByKind(u32);
+extern s32 btlCountTasksByKind(u16);
 
 extern void *sdfAllocAndClearQuadwords(s32);
 
@@ -333,7 +333,132 @@ extern void sdfResourceListRelease(DevRequest *, s32);
 
 extern void sdfReleaseChipBlock(void *);
 
-INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022AC10);
+extern s32 abs(s32);
+extern f32 btlGetUnitModelValue1C(BtlUnit *);
+extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
+extern void sdfMotionSampleAtFrame(Motion *, f32);
+extern void btlClearRuntimeFlag2000(void);
+extern void btlResetActiveUnitList(void);
+extern void btlUpdateUnitActors(void);
+extern void mdlSetListedObjectFlag(void);
+extern void effResetSlots(void);
+extern void func_00209078(void);
+extern struct BtlRuntimeTask *func_002014A8(u32);
+extern struct BtlRuntimeTask *sndCreateReleaseTask(u32);
+extern void func_00168978(BattleEffect *);
+
+void func_0022AC10(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 phase = battle->eventActive;
+
+    if ((u32)phase >= 5) {
+        return;
+    }
+
+    switch (phase) {
+    case 0:
+        if (battle->eventData != NULL) {
+            effReleaseBattleVoiceOwner((BattleEffect *)battle->eventData);
+            battle->eventData = NULL;
+        }
+        if (battle->eventRequest != NULL) {
+            sndReleaseAllVoices((SoundMixer *)battle->eventRequest);
+            battle->eventRequest = NULL;
+        }
+        battle->eventAction = -1;
+        break;
+
+    case 1:
+        if ((battle->commandRestrictFlags & 0x200000) != 0 &&
+            btlCountTasksByKind(0x2E) != 0) {
+            btlBossDebugPrintf("btl:event effect wait\n");
+            battle->battleFlags &= ~0x40000;
+            return;
+        }
+        if (battle->eventData != NULL) {
+            effReleaseBattleVoiceOwner((BattleEffect *)battle->eventData);
+            battle->eventData = NULL;
+        }
+        if (battle->eventRequest != NULL) {
+            sndReleaseAllVoices((SoundMixer *)battle->eventRequest);
+        }
+        battle->eventRequest = sndMixerClone((SoundMixer *)battle->eventResult);
+        battle->eventActive = 2;
+        break;
+
+    case 2:
+        if (battle->eventData != NULL) {
+            effReleaseBattleVoiceOwner((BattleEffect *)battle->eventData);
+        }
+        battle->eventData = func_00168548((SoundMixer *)battle->eventRequest, 1,
+                                          battle->eventUnit, 0);
+        battle->eventActive = 3;
+        if ((battle->commandRestrictFlags & 0x40000) != 0) {
+            return;
+        }
+        btlStartTask(sndCreateReleaseTask(0xC));
+        btlStartTask(func_002014A8(0xC));
+        return;
+
+    case 3: {
+        s32 frame;
+        if ((battle->scriptFlags & 2) != 0 &&
+            (battle->commandRestrictFlags & 0x800) == 0) {
+            BtlUnit *unit = battle->eventUnit;
+            if ((unit->flags & 2) != 0) {
+                frame = (s32)btlGetUnitModelValue1C(unit);
+                frame = abs(frame - 0x1A);
+                if (frame >= 6) {
+                    EvtUnit *ext = unit->ext;
+                    MdlCtx *model = ext->owner;
+                    ext->flags &= ~0xA0;
+                    ext->motionState = 0;
+                    mdlAddEntryPlain(model, 0, unit->unkEC);
+                    sdfMotionSampleAtFrame(model->first, 26.0f);
+                    unit->flags &= 0x7FFFFFFF;
+                    unit->flags &= ~0x40000000;
+                    btlBossDebugPrintf("btl:eve mot over [%d]\n", frame);
+                }
+            }
+            battle->scriptFlags &= ~2;
+        }
+
+        {
+            s32 selectedFrame = sndReadSelectedMixerBankValue(
+                (SoundMixer *)battle->eventRequest, 1);
+            frame = (s32)effBattleGetCurrentFrame(
+                (BattleEffect *)battle->eventData);
+            if (frame == 1) {
+                battle->battleFlags &= ~0x40000;
+                if ((battle->commandRestrictFlags & 0x40000) == 0) {
+                    func_00209078();
+                }
+                btlClearRuntimeFlag2000();
+                btlResetActiveUnitList();
+                if ((battle->commandRestrictFlags & 0x40000) == 0) {
+                    btlUpdateUnitActors();
+                }
+                mdlSetListedObjectFlag();
+            }
+            if (frame >= selectedFrame) {
+                effResetSlots();
+                battle->eventActive = 4;
+            } else {
+                s32 selector = (s32)battle->eventUnit;
+                effBTLFieldColorSetSelectors(selector, (u32)selector, 0, 0);
+                func_00168978((BattleEffect *)battle->eventData);
+                return;
+            }
+        }
+        break;
+    }
+
+    case 4:
+        battle->eventActive = 0;
+        battle->battleFlags |= 0x40000;
+        break;
+    }
+}
 
 extern char D_0041B6A8[]; /* "/event/e%03d/e%03d/scr/e%03d.bf" */
 extern char D_0041B6C8[]; /* "btl:event[%s]\n" */

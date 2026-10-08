@@ -1391,7 +1391,7 @@ extern s32 btlSweepFloorModelLists(void);
 
 extern s32 btlUpdateActorModelColorAndLinks(void);
 
-extern s32 func_0022AC10(void);
+extern void func_0022AC10(void);
 
 extern s32 func_0020D110(void);
 
