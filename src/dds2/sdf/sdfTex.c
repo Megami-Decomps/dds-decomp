@@ -2,6 +2,7 @@
 
 #include "sdf_texture_file.h"
 #include "sdf.h"
+#include "sdf_pending.h"
 #include "ee_mmi.h"
 
 /* PlayStation 2 GS pixel storage formats used to size indexed palettes. */
@@ -9,7 +10,7 @@ enum { SDF_PSMCT32 = 0, SDF_PSMT8 = 0x13, SDF_PSMT8H = 0x1B };
 
 extern SdfTex *sdfResourceListHead;
 
-void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
+void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 
 void sdfReleaseChipBlock(void *arg0);
 
@@ -30,9 +31,8 @@ void sdfBuildTextureStatePacket(SdfTexBuf *packet, s32 width, s32 height,
     s32 clutFormat, s32 textureColorComponents, s32 maxMipLevel,
     s32 lodParameters, s32 clampMode, s32 variant);
 
-extern u8 sdfTextureReleaseQueue;
+extern SdfPendingRequest sdfTextureReleaseQueue;
 
-void sdfPendingQueuePush(void *arg0, void *arg1);
 
 /* Return palette bytes: 8-bit indices use 256 colors, other indices 16. */
 s32 sdfTexGetPaletteByteSize(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
@@ -110,7 +110,7 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture) {
         ref->refCount = count;
         if (count == 0) {
             texture->resourceKey = 0;
-            sdfPendingQueuePush(&sdfTextureReleaseQueue, texture);
+            sdfPendingQueuePush(&sdfTextureReleaseQueue, (u32)texture);
         }
     }
 }

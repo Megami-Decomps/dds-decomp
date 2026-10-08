@@ -27,7 +27,7 @@ extern u32 itfReleaseMemNodeBuffer(u8 *ringBase);
 
 extern void fmGslReleaseActiveResourceBuffers(void);
 
-extern void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
+extern void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 
 extern u32 frFontSlotLoadedFlags[];
 

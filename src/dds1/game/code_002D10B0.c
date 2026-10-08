@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "sdf_pending.h"
 
 /* GS pixel-storage modes, using the same private names as sdfTex.c. */
 enum {
@@ -63,7 +64,7 @@ extern s8 sdfBufferSlotIndices[2];
  * volatile prevents the wait loop from reusing an earlier read. */
 extern volatile s8 sdfBusyBufferIndex;
 extern SdfTex *sdfResourceListHead;
-extern u8 sdfTextureUpdateQueue;
+extern SdfPendingRequest sdfTextureUpdateQueue;
 extern SdfSemaObj sdfTextureQueueWork;
 extern u8 D_003BD2F0;
 extern u8 *D_003BD2F4;
@@ -78,8 +79,6 @@ struct SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 arg1);
 void sdfUpdateTextureHeadsWithInterruptsMasked(void *block);
 void sdfTexCreateSecondPacket(SdfTex *texture);
 void sdfTexRefreshResourcePackets(SdfTex *texture);
-void sdfPendingQueuePush(void *arg0, s32 arg1);
-void sdfInitializeSynchronizedRequest(void *arg0, void (*arg1)(void *));
 void *sdfAllocAndClearQuadwords(s32 size);
 
 s32 sdfChipIsInRange(s32 address);
@@ -529,7 +528,7 @@ void sdfUpdateTextureHeadsWithInterruptsMasked(void *block) {
 }
 
 void sdfTexQueuePendingWork(SdfTexResource *texture) {
-    sdfPendingQueuePush(&sdfTextureUpdateQueue, (s32)texture);
+    sdfPendingQueuePush(&sdfTextureUpdateQueue, (u32)texture);
 }
 
 void sdfTexInitializeLists(void) {
