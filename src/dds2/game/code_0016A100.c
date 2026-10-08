@@ -80,9 +80,9 @@ typedef struct EffBattleUnitRgbCommand {
 } EffBattleUnitRgbCommand;
 
 
-extern u8 D_00380828[];
+extern struct SdfPoolNode *D_00380828[4];
 
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 
 extern void sdfReleaseChipBlock(void *p);
 
@@ -394,7 +394,7 @@ void *effParamCreateViewerWork(s32 *package) {
 
 /* Run the context/node update with this game's fixed global argument. */
 void effParamInitFromGlobal(void *work) {
-    mdlProcessContextNodesAndTransforms(work, (s32)D_00380828);
+    mdlProcessContextNodesAndTransforms(work, D_00380828);
 }
 
 void func_0016AA38(void *work) {

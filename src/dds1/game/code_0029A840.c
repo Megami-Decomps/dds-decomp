@@ -194,11 +194,11 @@ void effModelAnimationStop(EffModelOwner *owner) {
     sdfMotionSampleAtFrame(owner->model->first, 0.0f);
 }
 
-extern u8 D_00325828[];
+extern struct SdfPoolNode *D_00325828[4];
 
 extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(SdfListHead *list);
 extern void sdfAppendPacket(SdfListHead *list, u32 packetAddress);
@@ -215,7 +215,7 @@ void effRefreshModelLighting(EffModelOwner *work) {
     } else {
         model = work->model;
     }
-    mdlProcessContextNodesAndTransforms(model, (s32)D_00325828);
+    mdlProcessContextNodesAndTransforms(model, D_00325828);
 }
 
 /* Pass a vector to the VU0 model helpers via vf10 (gcc cannot do this from plain C). */
@@ -346,7 +346,7 @@ void func_0029AE88(EffModelOwner *owner) {
         owner->model->inner->lighting = owner->ownedBuffer;
     }
 
-    mdlProcessContextNodesAndTransforms(owner->model, (s32)D_00325788[1]);
+    mdlProcessContextNodesAndTransforms(owner->model, D_00325788[1]);
 
     for (index = 1; index != 4; index++) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
