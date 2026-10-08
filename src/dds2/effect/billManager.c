@@ -20,7 +20,7 @@ void *func_00157D38(void *arg);
 
 void billSetAnimationEntry(BillObj *arg0, s32 arg1);
 
-void *func_00159678(void *arg);
+BillData *billCreateAnimationDataFromResource(void *arg);
 
 extern BillDispatch D_003AA998[];
 
@@ -482,7 +482,7 @@ BillObj *billAllocList(void *resourceData) {
 
     data = NULL;
     if (resourceData != NULL) {
-        data = func_00159678(resourceData);
+        data = billCreateAnimationDataFromResource(resourceData);
     }
     n = data->entryCount;
     newobj = sdfAllocSizeClassBlock(n * 20 + 0x6C);
@@ -669,7 +669,7 @@ void billSetAnimationEntry(BillObj *obj, s32 index) {
 
 extern s32 func_0035B6E0(const char *format, ...);
 
-void *func_00159678(void *resource) {
+BillData *billCreateAnimationDataFromResource(void *resource) {
     u8 *sourceBytes = resource;
     s32 *resourceHeader = resource;
     s32 *childOffsetCursor = (s32 *)(sourceBytes + resourceHeader[0]);
