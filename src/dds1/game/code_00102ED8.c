@@ -360,6 +360,24 @@ extern u8 D_003BA870[2][2][2];
 extern u8 D_003BA878[2][2];
 extern u8 D_003BD698[2];
 
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA850);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA854);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA858);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA85C);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA85F);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA860);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA861);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA868);
+
+INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA86F);
+
 void func_001039E0(void) {
     s32 port;
     s32 bank;
@@ -1288,24 +1306,6 @@ void kwlnFadeBackgroundStartIn(s32 duration) {
 
 /* Direction flags take precedence; idle visibility uses alpha in mode zero,
  * otherwise it tests whether the first ramp differs from its inactive maximum. */
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA850);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA854);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA858);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA85C);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA85F);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA860);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA861);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA868);
-
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA86F);
-
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA870);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA871);
