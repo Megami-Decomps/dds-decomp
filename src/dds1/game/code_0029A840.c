@@ -165,16 +165,18 @@ void effDestroyModelOwner(EffModelOwner *owner) {
     sdfReleaseChipBlock(owner);
 }
 
-u32 *effDuplicateEffectHeader(u32 *source) {
-    u32 *effect = (u32 *)effCreateModelOwner(0);
-    effect[0] = source[0];
-    effRecreateModelFromSource(effect, (u8 *)source);
+extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
+
+EffModelOwner *effDuplicateEffectHeader(EffModelOwner *source) {
+    EffModelOwner *effect = effCreateModelOwner(0);
+    *(u32 *)effect = *(u32 *)source;
+    effRecreateModelFromSource(effect, source);
     return effect;
 }
 
-void effRecreateModelFromSource(u32 *work, u8 *source) {
-    EffModelOwner *owner = (EffModelOwner *)work;
-    EffModelOwner *original = (EffModelOwner *)source;
+void effRecreateModelFromSource(EffModelOwner *work, EffModelOwner *source) {
+    EffModelOwner *owner = work;
+    EffModelOwner *original = source;
     MdlCtx *model;
 
     if (owner->model != 0) {
@@ -290,20 +292,20 @@ EffModelOwner *effCreateFloorModelOwner(u8 *source) {
     return owner;
 }
 
-void effMarkFloorModelForDestruction(u8 *work) {
-    u32 flags = ((EffModelOwner *)work)->flags | 2;
-    ((EffModelOwner *)work)->flags = flags;
+void effMarkFloorModelForDestruction(EffModelOwner *work) {
+    u32 flags = work->flags | 2;
+    work->flags = flags;
     if ((flags & 4) == 0) {
         effDestroyModelOwner(work);
     }
 }
 
-extern void effRecreateModelFromSource(u32 *, u8 *);
+extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
 
-u32 *effDuplicateFloorModelOwner(u8 *source) {
-    u32 *owner = (u32 *)effCreateModelOwner(0);
+EffModelOwner *effDuplicateFloorModelOwner(EffModelOwner *source) {
+    EffModelOwner *owner = effCreateModelOwner(0);
 
-    owner[0] = *(u32 *)source;
+    *(u32 *)owner = *(u32 *)source;
     effRecreateModelFromSource(owner, source);
     effUploadModelTextures(owner);
     if (btlIsRuntimeAllocated() != 0 && btlIsCurrentActorFullyMarked() == 0) {
@@ -364,16 +366,16 @@ void func_0029AE88(EffModelOwner *owner) {
 
 extern u32 effModelUpdateControlFlags;
 
-void effMarkFloorModelForUpdate(u8 *work) {
-    u32 previous = ((EffModelOwner *)work)->flags;
+void effMarkFloorModelForUpdate(EffModelOwner *work) {
+    u32 previous = work->flags;
     u32 flags = previous | 1;
-    ((EffModelOwner *)work)->flags = flags;
+    work->flags = flags;
     if ((flags & 4) == 0) {
         if ((effModelUpdateControlFlags & 1) == 0) {
-            func_0029AE88((EffModelOwner *)work);
+            func_0029AE88(work);
         }
     } else if ((effModelUpdateControlFlags & 1) != 0) {
-        ((EffModelOwner *)work)->flags = previous | 0x31;
+        work->flags = previous | 0x31;
     }
 }
 
@@ -786,7 +788,7 @@ void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
     if (count == 1) {
         segment = 0;
     } else {
-        if (set->flags & 1) {
+        if (set->flags & EFF_ANIM_SET_LOOP) {
             local = frame % set->length;
         } else if (frame >= set->length) {
             segment = count - 1;
@@ -811,7 +813,7 @@ void effSampleAnimSet(EffAnimSet *set, u32 frame, EffAnimSample *out) {
     {
         f32 scaleY = 2.0f;
 
-        if (!(set->flags & 4)) {
+        if (!(set->flags & EFF_ANIM_SET_DOUBLE_Y_SCALE)) {
             scaleY = 1.0f;
         }
         out->segment = segment;
