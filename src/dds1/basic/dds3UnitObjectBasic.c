@@ -1,7 +1,8 @@
 #include "common.h"
+#include "eff_transform.h"
 
-void dds3RemoveWorldObjectNode(void);
+void dds3RemoveWorldObjectNode(EffWorldNode *node);
 
-void ddsReleaseUnitObject(void) {
-    dds3RemoveWorldObjectNode();
+void ddsReleaseUnitObject(EffWorldNode *node) {
+    dds3RemoveWorldObjectNode(node);
 }
