@@ -1,5 +1,6 @@
 #include "common.h"
 #include "fr_font.h"
+#include "fr_font_context.h"
 #include "mc_poll.h"
 #include "mc_path_api.h"
 #include "bill_object_api.h"
@@ -18,6 +19,7 @@
 #include "pcp_vu0.h"
 #include "kwln_task_lifecycle.h"
 #include "eff_expanded_list.h"
+#include "file_request_api.h"
 struct EffectSlotSet;
 extern void func_00306CD0(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
 
@@ -169,8 +171,7 @@ extern u8 (*D_00437D58)[32];
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern s32 dds3GetWorldObject(void);
 extern void dds3SetWorldObjectDataValue(s32, s32);
-extern void fileWaitReady(u32);
-extern void sdfReleaseMemorySlot(void *);
+
 extern void sdfFreeMemoryFromEitherHeap(void *);
 
 extern s32 D_00437D38;
@@ -404,7 +405,6 @@ extern s32 fileScanSlotStates(void);
 
 extern s32 fileLoadMainBlobBegin(void);
 
-extern s32 fileIsRequestReadyInCurrentMode(u32, void *);
 
 extern u32 fileGetResourceHandle(u32);
 
@@ -664,8 +664,8 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
     frFontAddSharedGlyphFlags(1);
     D_0043900C = (u32)func_0019CE78((const char *)(u32)glyphSource, 0, 0, 0, 0);
     frFontClearFlagBits(1);
-    frFontSetFlagAndMeasureGlyphs(D_0043900C, 1);
-    frFontSetContextPair(D_0043900C, x << 4, y << 3);
+    frFontSetFlagAndMeasureGlyphs((struct FrFontGlyph *)(u32)D_0043900C, 1);
+    frFontSetContextPair((struct FrFontGlyph *)(u32)D_0043900C, x << 4, y << 3);
     frFontSetChildColors((struct FrFontGlyph *)(u32)D_0043900C, colors);
     frFontDrawGlyphChain(D_0043900C, 0, 0x56);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_0043900C);
@@ -2626,7 +2626,7 @@ s32 fileRunMenuState(KwlnTask *task) {
         cur = (s32 (*)())next;
     }
     fileMenuStateHandler = cur;
-    if (job != 0 && fileIsRequestReadyInCurrentMode(job, (void *)next) != 0) {
+    if (job != 0 && fileIsRequestReadyInCurrentMode((struct FileRequest *)job) != 0) {
         fileSaveIconRequest = 0;
         D_00439030 = fileGetResourceHandle(job);
         D_00439034 = fileGetLoadedDataAddress(job);
@@ -2699,7 +2699,7 @@ struct SdfMemBlock;
 struct SdfTex;
 extern void func_001004A0(void);
 extern void *fileQueuePlainDispatchRequest(const char *);
-extern void func_002C81D0(u32);
+
 extern void func_002C7CE8(void *);
 extern struct SdfTex *sdfTexAcquireResourceTexture(void *);
 extern struct SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
@@ -2718,7 +2718,7 @@ void func_002CE208(s32 mode) {
 
     func_001004A0();
     request = fileQueuePlainDispatchRequest("/mc/mcpack.LB");
-    func_002C81D0((u32)request);
+    func_002C81D0((struct FileRequest *)request);
     node = request->packet.queueHead;
     while (node != NULL) {
         switch (index) {
@@ -2900,12 +2900,12 @@ void fileReleaseMenuResources(void) {
             dds3SetWorldObjectDataValue(world, 1);
         }
         if (fileSaveIconRequest != 0) {
-            fileWaitReady(fileSaveIconRequest);
+            fileWaitReady((struct FileRequest *)fileSaveIconRequest);
             D_00439030 = fileGetResourceHandle(fileSaveIconRequest);
             filePollEntryCleanup(fileSaveIconRequest);
             fileSaveIconRequest = 0;
         }
-        sdfReleaseMemorySlot(&D_00439030);
+        sdfReleaseMemorySlot((s32 *)&D_00439030);
         kwlnTaskDestroyWithHierarchyByName("FileMentCalc", 1);
         func_00100498();
     }

@@ -3,6 +3,7 @@
 #include "sdf_pac_work.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
+#include "file_request_api.h"
 
 extern u8 sdfViewMatrix[];
 
@@ -780,7 +781,6 @@ void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *requestOwner, MdlDoneJob *compl
 
 extern void *fileCreatePacLoadWork(const char *path, s32 flags, void *dispatch, s32 onComplete, s32 userData);
 
-extern void func_002C81D0();
 
 extern void mdlCompleteGroupedJobAndNotify();
 
@@ -803,7 +803,7 @@ s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, s32 requestHandle,
                                       (s32)mdlCompleteGroupedJobAndNotify, (s32)completionJob);
     completionJob->owner = requestSlot;
     if (onComplete == NULL) {
-        func_002C81D0(requestSlot);
+        func_002C81D0((struct FileRequest *)requestSlot);
         mdlDestroyLoadRequestOwner(completionJob);
     }
     return 0;

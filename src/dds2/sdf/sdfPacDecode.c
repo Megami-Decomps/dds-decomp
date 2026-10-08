@@ -64,7 +64,6 @@ void sdfPacFinalizeRelocatedPayload(PacState *state);
 
 SdfTex *sdfTexAcquireResourceTexture(void *resource);
 
-void sdfReleaseMemorySlot(void *slot);
 
 SdfTex *sdfTexAcquireAlternateResourceTexture(void *resource);
 

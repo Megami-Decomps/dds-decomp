@@ -27,10 +27,11 @@
 #include "sdf.h"
 #include "file.h"
 #include "dat_command.h"
+#include "file_request_api.h"
 
 struct FileWork;
 struct FileCleanup;
-extern s32 fileIsRequestReadyInCurrentMode(struct FileRequest *request);
+
 extern u32 fileGetResourceHandle(struct FileWork *work);
 extern s32 filePollEntryCleanup(struct FileCleanup *entry);
 
@@ -10100,7 +10101,7 @@ typedef struct BtlFieldLoadArgs {
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
 extern s32 fileQueuePlainDispatchRequest(const char *);
-extern u32 fileRequestIsReady(u32);
+
 extern void func_00288788(s32);
 extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32, s32, s32);
 
@@ -10125,7 +10126,7 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
         args->fieldF2 = NULL;
         args->fieldTB = NULL;
     } else {
-        if (args->request != NULL && fileRequestIsReady((u32)args->request)) {
+        if (args->request != NULL && fileRequestIsReady((struct FileRequest *)args->request)) {
             BtlFieldArchiveRequest *request = args->request;
             node = request->resources;
             i = 0;
@@ -11347,7 +11348,6 @@ SoundTask *sndCreateSetStateTask(void) {
 
 extern s32 fileQueuePlainDispatchRequest(const char *path);
 
-extern void func_00288C50(s32 archive);
 
 extern void func_00288788(s32 archive);
 
@@ -11360,7 +11360,7 @@ void sndLoadSysEffLb(void) {
     s32 node;
     u32 i;
 
-    func_00288C50(archive);
+    func_00288C50((struct FileRequest *)archive);
     btlBossDebugPrintf(D_003A5020, path);
     node = *(s32 *)(archive + 0x60);
     i = 0;

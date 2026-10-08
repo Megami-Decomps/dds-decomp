@@ -9,6 +9,7 @@
 #include "sdf_chip.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
+#include "file_request_api.h"
 
 #include "dds3_path.h"
 #include "eff_transform.h"
@@ -69,7 +70,7 @@ static inline void effSubmitSurfacePacket(SdfPoolNode *surface, void *list) {
     surface->append((SdfListHead *)surface, list);
 }
 
-extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
 extern void sdfAppendPacket(void *, void *);
 extern void sdfConsAppendVuPacket();
@@ -2810,7 +2811,7 @@ void func_002E5E88(u8 *work, void *matrix) {
     }
 
     surface = D_003E9B60[track->type];
-    list = sdfAllocPacketAligned(0x20);
+    list = (void *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
     if (matrix == NULL) {
         VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
@@ -2845,7 +2846,7 @@ setTexture:
     sdfConsAppendAssetPacket(list, track->handle, 0);
 
     if (track->flag == 0) {
-        packet = sdfAllocPacketAligned(0x30);
+        packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
         packet->dmaTag = 2;
         packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
         packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
@@ -2933,7 +2934,7 @@ setTexture:
     }
 
     if (track->flag == 0) {
-        packet = sdfAllocPacketAligned(0x30);
+        packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
         packet->dmaTag = 2;
         packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
         packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
@@ -3462,7 +3463,7 @@ void effDrawFourPointGroups(u8 *work, void *matrix) {
     s32 surfaceId;
 
     if (set->color & 0xFF000000) {
-        list = sdfAllocPacketAligned(0x20);
+        list = (void *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         if (matrix == NULL) {
             VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
@@ -3472,7 +3473,7 @@ void effDrawFourPointGroups(u8 *work, void *matrix) {
         sdfConsAppendVuPacket(list, 0);
         sdfConsAppendAssetPacket(list, set->handle, 0);
         if (set->flag == 0) {
-            packet = sdfAllocPacketAligned(0x30);
+            packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
             packet->dmaTag = 2;
             packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
             packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
@@ -3500,7 +3501,7 @@ void effDrawFourPointGroups(u8 *work, void *matrix) {
             sdfAppendPacket(list, func_00167A10(D_004582E0));
         }
         if (set->flag == 0) {
-            packet = sdfAllocPacketAligned(0x30);
+            packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
             packet->dmaTag = 2;
             packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
             packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
@@ -3515,9 +3516,9 @@ void effDrawFourPointGroups(u8 *work, void *matrix) {
             EffGsPacket *blendPacket;
 
             surfaceId = set->type == 5 ? 51 : 56;
-            setup = sdfAllocPacketAligned(0x20);
+            setup = (void *)sdfAllocPacketAligned(0x20);
             sdfInitPacketList(setup);
-            blendPacket = sdfAllocPacketAligned(0x30);
+            blendPacket = (EffGsPacket *)sdfAllocPacketAligned(0x30);
             blendPacket->registerValue = 6;
             blendPacket->dmaTag = 2;
             blendPacket->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
@@ -3526,7 +3527,7 @@ void effDrawFourPointGroups(u8 *work, void *matrix) {
             blendPacket->registerAddress = 0x42;
             sdfAppendPacket(setup, blendPacket);
             effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], setup);
-            blendPacket = sdfAllocPacketAligned(0x30);
+            blendPacket = (EffGsPacket *)sdfAllocPacketAligned(0x30);
             blendPacket->dmaTag = 2;
             blendPacket->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
             blendPacket->gifTag = ((u64)0x10000000 << 32) | 0x8001;
@@ -4119,7 +4120,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002E9B20);
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E9BC8);
 
 void effBeginMatrixVuDrawPacket(const Matrix4 *matrix) {
-    void *work = sdfAllocPacketAligned(0x20);
+    void *work = (void *)sdfAllocPacketAligned(0x20);
     effCurrentRenderPacket = (u32)work;
     sdfInitPacketList(work);
     VU0_LOAD_MATRIX(matrix);
@@ -4839,7 +4840,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
     s32 remaining;
 
     if (set->color & 0xFF000000) {
-        list = sdfAllocPacketAligned(0x20);
+        list = (void *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         if (matrix == NULL) {
             VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
@@ -4849,7 +4850,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
         sdfConsAppendVuPacket(list, 0);
         sdfConsAppendAssetPacket(list, set->handle, 0);
         if (set->flag == 0) {
-            packet = sdfAllocPacketAligned(0x30);
+            packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
             packet->dmaTag = 2;
             packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
             packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
@@ -4877,7 +4878,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
             sdfAppendPacket(list, func_00167A10(D_004583A0));
         }
         if (set->flag == 0) {
-            packet = sdfAllocPacketAligned(0x30);
+            packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
             packet->dmaTag = 2;
             packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
             packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
@@ -6520,7 +6521,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
     s32 remaining;
 
     if (set->color & 0xFF000000) {
-        list = sdfAllocPacketAligned(0x20);
+        list = (void *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         if (matrix == NULL) {
             VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
@@ -6530,7 +6531,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
         sdfConsAppendVuPacket(list, 0);
         sdfConsAppendAssetPacket(list, set->handle, 0);
         if (set->flag == 0) {
-            packet = sdfAllocPacketAligned(0x30);
+            packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
             packet->dmaTag = 2;
             packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
             packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
@@ -6558,7 +6559,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
             sdfAppendPacket(list, func_00167A10(D_00458430));
         }
         if (set->flag == 0) {
-            packet = sdfAllocPacketAligned(0x30);
+            packet = (EffGsPacket *)sdfAllocPacketAligned(0x30);
             packet->dmaTag = 2;
             packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
             packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
@@ -10916,13 +10917,11 @@ typedef struct EffRequest {
 } EffRequest;
 
 
-extern s32 fileRequestIsReady(void *);
 
 extern void func_002C7CE8(void *);
 
 extern void *fileQueuePlainDispatchRequest(const char *path);
 
-extern void func_002C81D0(void *);
 
 u32 effAppendListEntry(EffectList *list, u32 value, u32 length,
                           u32 kind, u32 reference) {
@@ -10980,10 +10979,10 @@ s32 effPollResourceList(EffectList *list) {
                 }
                 list->request = fileQueuePlainDispatchRequest(node->length);
                 if (list->mode == 2) {
-                    func_002C81D0(list->request);
+                    func_002C81D0((struct FileRequest *)list->request);
                 }
                 node->state = 1;
-            } else if (fileRequestIsReady(list->request) != 0) {
+            } else if (fileRequestIsReady((struct FileRequest *)list->request) != 0) {
                 for (item = list->request->items; item != NULL; item = item->next) {
                     if (item->kind == 1) {
                         node = list->first;
@@ -11811,7 +11810,7 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     } else {
         sdfTexSetPrimaryBufferModeBits(texture, 1, 1);
     }
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, 1));
+    packet = (void *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(5, 1));
     sdfConsInitPacketHeader(packet, 0x156, 5, 0x43431, 1);
     /* The SDK size helper also skips the packet's two header quadwords. */
     packetWords = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
@@ -11849,7 +11848,7 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     packetWords[5] = depth;
     packetWords[9] = depth;
     effSelectPresetByKind(blendKind, surfaceId);
-    packetList = sdfAllocPacketAligned(0x20);
+    packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packetList);
     sdfConsCreateDrawPacket(packetList, texture, 0);
     sdfAppendPacket(packetList, packet);

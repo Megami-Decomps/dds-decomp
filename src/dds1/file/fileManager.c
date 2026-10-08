@@ -1,6 +1,7 @@
 #include "sdf_chip.h"
 #include "file.h"
 #include "sdf_pac_state.h"
+#include "file_request_api.h"
 #include "sdf_dev_state.h"
 
 /* Intrusive list node threaded through +0x4. */
@@ -60,8 +61,6 @@ extern s32 btlDestroyStageTask(void *);
 extern s32 WaitSema(s32);
 extern s32 SignalSema(s32);
 
-
-extern s32 fileIsRequestReadyInCurrentMode(FileRequest *request);
 
 #define FILE_REQUEST_KIND_CALLBACK 0
 #define FILE_REQUEST_KIND_PAC 1
@@ -179,7 +178,7 @@ void fileUnlinkNode(FileWork *list, FileNode *node) {
     *incomingLink = node->next;
 }
 
-extern void func_002EDC40(void *);
+extern void sdfPacUseHighAddressAllocator(void *);
 /* Clear a PAC request, initialize its embedded dispatch packet and optionally
  * apply extra packet setup for any nonzero flags. Queue its copied name and
  * completion context as kind one, returning the allocated work. No failure guard. */
@@ -189,7 +188,7 @@ void *fileAllocateDispatchRequest(u32 requestName, u32 flags, u32 dispatchValue,
 
     sdfPacInitializeDispatchPacket(dispatchPacket, (void *)dispatchValue);
     if (flags != 0) {
-        func_002EDC40(dispatchPacket);
+        sdfPacUseHighAddressAllocator(dispatchPacket);
     }
     fileManQueueNamedRequest(requestWork, FILE_REQUEST_KIND_PAC, requestName, onComplete, userData);
     return requestWork;
@@ -278,16 +277,16 @@ s32 fileRequestIsReady(FileRequest *request) {
 
 /* Pump the device scheduler and file manager while the kind-specific readiness
  * predicate is zero. No timeout or NULL-request guard is introduced. */
-void fileWaitReady(u32 requestAddress) {
-    while (fileIsRequestReadyInCurrentMode(requestAddress) == 0) {
+void fileWaitReady(FileRequest *request) {
+    while (fileIsRequestReadyInCurrentMode(request) == 0) {
         sdfRestoreDeviceThreadPriority();
         fileManUpdate();
     }
 }
 
-/* Forward the existing request address to the readiness wait, without cleanup. */
-void func_00288C50(u32 requestAddress) {
-    fileWaitReady(requestAddress);
+/* Forward the opaque request pointer to the readiness wait, without cleanup. */
+void func_00288C50(FileRequest *request) {
+    fileWaitReady(request);
 }
 
 
@@ -310,28 +309,22 @@ typedef struct FileWindowSlot {
     u8 pad2C[4];
 } FileWindowSlot; /* 0x30 */
 
-/* Create a kind-two request with two stored values and their copies.
- * requestNameAddress is passed to name duplication, not used as a numeric id;
- * callbackAddress/userDataAddress are completion fields, not window coordinates. */
-FileWindowSlot *fileWindowSlotCreate(s32 requestNameAddress, s32 firstValue, s32 secondValue, s32 callbackAddress, s32 userDataAddress) {
+/* Create a kind-two request with the caller's output buffer and byte count.
+ * The buffer address is stored in the existing value word at +0x24. */
+FileWindowSlot *fileWindowSlotCreate(const char *requestName, void *data, s32 size, s32 callbackAddress, s32 userDataAddress) {
     FileWindowSlot *requestSlot = sdfAllocAndClearQuadwords(FILE_VALUE_PAIR_REQUEST_BYTES);
 
-    requestSlot->firstValue = firstValue;
-    requestSlot->firstValueCopy = firstValue;
-    requestSlot->secondValue = secondValue;
-    requestSlot->secondValueCopy = secondValue;
-    fileManQueueNamedRequest(requestSlot, FILE_REQUEST_KIND_VALUE_PAIR, requestNameAddress, callbackAddress, userDataAddress);
+    requestSlot->firstValue = (s32)data;
+    requestSlot->firstValueCopy = (s32)data;
+    requestSlot->secondValue = size;
+    requestSlot->secondValueCopy = size;
+    fileManQueueNamedRequest(requestSlot, FILE_REQUEST_KIND_VALUE_PAIR, requestName, callbackAddress, userDataAddress);
     return requestSlot;
 }
 
-/* Queue the value-pair request without completion context. Preserve the
- * existing K&R parameter declarations and their signed integer representations. */
-FileWindowSlot *fileQueueWindowSlotRequest(requestNameAddress, firstValue, secondValue)
-s32 requestNameAddress;
-s32 firstValue;
-s32 secondValue;
-{
-    return fileWindowSlotCreate(requestNameAddress, firstValue, secondValue, 0, 0);
+/* Queue the value-pair request and expose its opaque request handle. */
+struct FileRequest *fileQueueWindowSlotRequest(const char *requestName, void *data, s32 size) {
+    return (struct FileRequest *)fileWindowSlotCreate(requestName, data, size, 0, 0);
 }
 
 

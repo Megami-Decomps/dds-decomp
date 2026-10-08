@@ -27,6 +27,7 @@ s32 sdfMemoryGetBlockSize(struct SdfMemBlock *block);
 u32 sdfResourceRetainAddress(struct SdfMemBlock *allocation);
 void sdfDecrementAllocationReferenceCount(struct SdfMemBlock *allocation);
 void sdfReleaseResourceAllocation(struct SdfMemBlock *allocation);
+void sdfReleaseMemorySlot(s32 *slot);
 
 /* Queue the two heap owners separately: the general heap stores descriptors,
  * while the chip heap stores the address of the cell to release. */
