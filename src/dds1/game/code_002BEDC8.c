@@ -112,6 +112,19 @@ void func_002BF438(s32 x, s32 y, s32 z, u32 *palette, s32 flags, EffectSlotSet *
 
 
 
-INCLUDE_ASM(const s32, "game/code_002BEDC8", func_002BF4E0);
+extern u32 uiBlendColors(u32, u32, u32);
+
+void func_002BF4E0(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
+                   EffectSlotSet *set, s32 slotIndex, s32 layer) {
+    u32 colors[4];
+    BdWork *work = effGetSlotWorkOrOverride(set, slotIndex);
+    s32 i;
+
+    for (i = 0; i < 4; i++) {
+        colors[i] = uiBlendColors(work->geometry.cornerColors[i],
+                                  work->geometry.cornerColors[i] & 0xFFFFFF00, blend);
+    }
+    effDrawTextureSlot(x, y, depth, (s32)colors, (u32)flags, set, slotIndex, work, layer);
+}
 
 INCLUDE_ASM(const s32, "game/code_002BEDC8", func_002BF5D8);
