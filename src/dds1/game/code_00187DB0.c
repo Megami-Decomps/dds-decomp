@@ -1,6 +1,7 @@
 #include "common.h"
 #include "eff.h"
 #include "eff_blur.h"
+#include "sdf_chip.h"
 
 extern void effResourceQuadDraw(EffResourceRectDrawParams *params, u32 resource, u8 gsCoordinates);
 
@@ -88,8 +89,8 @@ EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *src) {
     return dst;
 }
 
-void func_00188050(void) {
-    sdfReleaseChipBlock();
+void effReleaseResourceTemplate(EffResourceRectWork *work) {
+    sdfReleaseChipBlock(work);
 }
 
 

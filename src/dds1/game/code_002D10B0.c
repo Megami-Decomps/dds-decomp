@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_pending.h"
@@ -73,8 +74,6 @@ void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 void sdfTexCreateSecondPacket(SdfTex *texture);
 void sdfTexRefreshResourcePackets(SdfTex *texture);
 void *sdfAllocAndClearQuadwords(s32 size);
-
-s32 sdfChipIsInRange(s32 address);
 
 void sdfRequestDeferredGsImageCapture(u8 *destination, void (*onComplete)(void *)) {
     D_003BD2F4 = destination;
