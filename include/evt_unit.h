@@ -42,6 +42,10 @@ typedef struct EvtTargetInfo {
 
 typedef char EvtTargetInfoSizeCheck[sizeof(EvtTargetInfo) == 0x68 ? 1 : -1];
 
+enum EvtTargetInfoFlags {
+    EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR = 0x8
+};
+
 typedef enum EvtUnitVectorSlotState {
     EVT_UNIT_VECTOR_SLOT_EMPTY = 0,
     EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK = 2,

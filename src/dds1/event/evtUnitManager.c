@@ -209,7 +209,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
                 }
             }
             VU0_LOAD_VF(vf10, targetDirection);
-            if (target->flags & 8) {
+            if (target->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
                 VU0_STORE_VF_UNCLOBBERED(vf10, target->direction);
                 flags = unit->flags;
                 ownVector = 1;
@@ -502,7 +502,7 @@ void evtLoadUnitFirstColorVectorVU(EvtUnit *unit) {
 
     if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
         info = ((EffWorldNode *)unit->currentTransitionValue)->data;
-        if (info->flags & 0x8) {
+        if (info->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
     }
@@ -526,7 +526,7 @@ void evtLoadUnitSecondColorVectorVU(EvtUnit *unit) {
 
     if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
         info = ((EffWorldNode *)unit->currentTransitionValue)->data;
-        if (info->flags & 0x8) {
+        if (info->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
     }
@@ -546,7 +546,7 @@ void evtLoadUnitDirectionVectorVU(EvtUnit *unit) {
     s32 ownVector = 0;
 
     if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        if (((EvtTargetInfo *)((EffWorldNode *)unit->currentTransitionValue)->data)->flags & 0x8) {
+        if (((EvtTargetInfo *)((EffWorldNode *)unit->currentTransitionValue)->data)->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
     }
