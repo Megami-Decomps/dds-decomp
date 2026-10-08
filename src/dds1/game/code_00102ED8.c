@@ -229,7 +229,7 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00103540);
 void func_001035F0(void) {
 }
 
-extern s8 D_00324510[];
+extern s8 D_00324510[64];
 
 /* Fresh presses wrap; repeat-bit input stops at the implemented end bounds.
  * Without scrolling, forward motion is bounded by visibleRows, not itemCount. */
@@ -351,7 +351,46 @@ s32 kwlnDebugPulseColors(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_001039E0);
+extern s32 D_003243C0[4][16];
+extern s32 D_003244C0[2][2];
+extern u8 D_003244D0[2][2][16];
+extern u8 D_003BA860[2][2][2];
+extern u8 D_003BA868[2][2];
+extern u8 D_003BA870[2][2][2];
+extern u8 D_003BA878[2][2];
+extern u8 D_003BD698[2];
+
+void func_001039E0(void) {
+    s32 port;
+    s32 bank;
+    s32 i;
+    s32 (*inputTimers)[16] = D_003243C0;
+
+    for (port = 0; port < 2; port++) {
+        for (bank = 0; bank < 2; bank++) {
+            for (i = 0; i < 16; i++) {
+                D_003244D0[bank][port][i] = 0;
+                D_00324510[bank * 32 + port * 16 + i] = 0;
+                inputTimers[bank * 2 + port][i] = 0;
+            }
+        }
+        for (i = 0; i < 2; i++) {
+            D_003244C0[port][i] = 0;
+            D_003BA860[port][i][0] = 0;
+            D_003BA860[port][i][1] = 0;
+            D_003BA868[port][i] = 0;
+            D_003BA870[port][i][0] = 0;
+            D_003BA870[port][i][1] = 0;
+            D_003BA878[port][i] = 0;
+        }
+    }
+    kwlnPadMotorLevels[KWLN_PAD_SMALL_MOTOR] = 0;
+    D_003BD698[KWLN_PAD_SMALL_MOTOR] = 0;
+    D_003BD6A0[KWLN_PAD_SMALL_MOTOR] = 0;
+    kwlnPadMotorLevels[KWLN_PAD_LARGE_MOTOR] = 0;
+    D_003BD698[KWLN_PAD_LARGE_MOTOR] = 0;
+    D_003BD6A0[KWLN_PAD_LARGE_MOTOR] = 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00102ED8", func_00103B10);
 
@@ -375,7 +414,6 @@ void kwlnPadStepLargeMotorLevel(void) {
     }
 }
 
-extern u8 D_003BD698[2];
 extern s32 fileTestSavedSlotFlags(u32 kind);
 extern void sdfPadSetSmallMotor(s32 padIndex, u16 strength);
 extern void sdfPadSetLargeMotor(s32 padIndex, u8 strength);
