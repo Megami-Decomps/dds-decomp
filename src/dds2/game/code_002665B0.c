@@ -156,7 +156,7 @@ extern void mnuAppendCampSpriteRequests(s32, s32);
 
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 
-extern void mnuSetGroupProperties(MenuProfilePanel *, u32, u32, u32, u32);
+extern void mnuSetGroupProperties(MenuProfilePanel *, EffectSlotSet *, EffectSlotSet *, s32, s32);
 
 extern void mnuDrawListPanels(s32, s32, s32, s32, s32, s32);
 
@@ -742,7 +742,8 @@ void mnuEnsureProfilePanelEffect(DatPartyRecord *selectionState, MenuProgressHos
     if (host->currentEffect == 0) {
         MenuProfilePanel *effect = mnuCreateProfilePanel(selectionState);
         host->currentEffect = effect;
-        mnuSetGroupProperties(effect, host->staffSlots.baseResources[0], (u32)host->staffSlots.pairResources[1], 1, 2);
+        mnuSetGroupProperties(effect, (EffectSlotSet *)host->staffSlots.baseResources[0],
+                              host->staffSlots.pairResources[1], 1, 2);
     }
 }
 
