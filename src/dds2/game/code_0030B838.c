@@ -538,15 +538,15 @@ s32 sdfCounterGetDisplayValue(void) {
     return ((SdfCounterRuntime *)sdfActiveCounterRuntime)->channel->display->value;
 }
 
-s16 sdfGetCounterChannelValueAtIndex(s32 remaining) {
-    SdfCounterChannel *task = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->first;
-    if (remaining > 0) {
+s16 sdfGetCounterChannelValueAtIndex(s32 channelIndex) {
+    SdfCounterChannel *channelCursor = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->first;
+    if (channelIndex > 0) {
         do {
-            remaining--;
-            task = task->next;
-        } while (remaining != 0);
+            channelIndex--;
+            channelCursor = channelCursor->next;
+        } while (channelIndex != 0);
     }
-    return task->display->value;
+    return channelCursor->display->value;
 }
 
 float sdfCounterGetScaledValue(void) {
