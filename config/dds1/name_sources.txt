@@ -1626,6 +1626,7 @@
 0x00170888	effSetRecordPoolDrawMode	inferred	confidence=high; matched-C; src/dds1/game/code_0016F1D0.c:682:func_00170888; Sets the record-pool submission mode used to choose the draw sink or alternate blend packet path.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00170890	effSetRecordPoolColor	inferred	confidence=high; matched-C; src/dds1/game/code_0016F1D0.c:687:func_00170890; Sets the packed color supplied to the record-pool packet builder.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00170898	effSetRecordPoolScale	inferred	confidence=high; matched-C; src/dds1/game/code_0016F1D0.c:691:func_00170898; Sets the uniform scale used by the scaled record-pool transform.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x001708A0	effScatterCreateRadialWork	inferred	allocates and initializes radial work with particles, a child pool, and optional duplicate group work
 0x00170B88	effScatterCreateFromParameterTriplet	inferred	Extracts three packed parameter blocks and creates scatter work from them. [names_reviewed6.tsv]
 0x00170BF0	effPcpScatterSharedDuplicate	inferred	duplicate of the shared-particle effect: copies the child work, then re-creates the handle array via effParamWorkDuplicate
 0x00170CE0	effPcpScatterReleaseParticleGroup	inferred	releases each particle handle in the scatter work array then frees the array and child work resources
@@ -1696,6 +1697,7 @@
 0x00175B18	effScatterSetFlatInstanceScale	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x0017D770, input-family pairing. [names_qp10.tsv]
 0x00175B20	effScatterSetFlatInstanceColor	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x0017D778, input-family pairing. [names_qp10.tsv]
 0x00175B28	effScatterCopyFlatInstanceMatrix	inferred	R_Structs54; sources=names_pending_main.tsv; twin=0x0017D780, input-family pairing. [names_qp10.tsv]
+0x00175B50	effScatterCreateDrawObject	inferred	allocates a drawable owner with geometry arrays and an SDF asset for scatter effects
 0x00175D88	effReleaseScatterObject	inferred	Releases the optional scatter resource and two owned handles before freeing the object.
 0x00176020	effCreateScatterResource	inferred	Creates a scatter resource and stores its handle at offset 0x7C.
 0x00176050	effShareScatterResource	inferred	Increments a source object's scatter resource reference and stores the resulting handle.
