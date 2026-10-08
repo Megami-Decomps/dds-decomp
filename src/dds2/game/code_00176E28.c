@@ -29,6 +29,7 @@
 #define EFF_RGB_MASK 0xFFFFFF
 #define EFF_DIRECT_SURFACE_COUNT 4
 
+extern void sdfQueueAssetRelease(s32 assetAddress);
 extern void *effParamTableGetBlock(void *table, s32 index);
 
 
@@ -379,7 +380,7 @@ INCLUDE_ASM(const s32, "game/code_00176E28", effRecordPoolCreateFiveVertexGroups
 
 /* Queue asset release, then free the pool allocation; neither handle is cleared. */
 void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool) {
-    sdfQueueAssetRelease(pool->resource);
+    sdfQueueAssetRelease((s32)pool->resource);
     sdfReleaseResourceAllocation(pool->buffer);
 }
 
@@ -405,7 +406,7 @@ void effDrawScaledRecordPool(EffRecordPool *work)
     matrix[14] = work->origin[2];
     VU0_LOAD_MATRIX(matrix);
     sdfConsAppendVuPacket((s32)list, 0);
-    sdfConsAppendAssetPacket((s32)list, (void *)work->resource, 0);
+    sdfConsAppendAssetPacket((s32)list, work->resource, 0);
     remaining = work->vertexCount;
     D_00451FF0->colors = (u32 *)work->auxRecordBase;
     D_00451FF0->positions = (u128 *)work->recordBase;
@@ -477,7 +478,7 @@ void func_00177BA0(u8 *work, f32 scale) {
 }
 
 extern void *memset(void *dst, s32 value, u32 size);
-extern u32 sdfCreateAssetWithDrawEntries(void);
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 extern void func_003332D0(u32 asset, f32 value);
 
 /* Allocate three positions and three colors per triangle, then the header.
@@ -507,7 +508,7 @@ EffRecordPool *effRecordPoolCreateTriple(s32 triangleCount) {
     pool->buffer = handle;
     pool->scale = 1.0f;
     pool->resource = sdfCreateAssetWithDrawEntries();
-    func_003332D0(pool->resource, 1.0f);
+    func_003332D0((u32)pool->resource, 1.0f);
     memset(D_00451FF0, 0, EFF_PACKET_PARAMS_BYTES);
     D_00451FF0->primitive = 0x4000;
     return pool;
@@ -515,7 +516,7 @@ EffRecordPool *effRecordPoolCreateTriple(s32 triangleCount) {
 
 /* Release the asset and backing allocation; the header points into that block. */
 void effReleaseRecordPoolResourceAndBuffer(EffRecordPool *pool) {
-    sdfQueueAssetRelease(pool->resource);
+    sdfQueueAssetRelease((s32)pool->resource);
     sdfReleaseResourceAllocation(pool->buffer);
 }
 
@@ -537,7 +538,7 @@ void effDrawTriangleRecordPool(EffRecordPool *pool)
     matrix[14] = pool->origin[2];
     VU0_LOAD_MATRIX(matrix);
     sdfConsAppendVuPacket((s32)packet, 0);
-    sdfConsAppendAssetPacket((s32)packet, (void *)pool->resource, 0);
+    sdfConsAppendAssetPacket((s32)packet, pool->resource, 0);
     remainingVertices = pool->vertexCount;
     D_00451FF0->colors = (u32 *)pool->auxRecordBase;
     D_00451FF0->positions = (u128 *)pool->recordBase;
@@ -595,7 +596,7 @@ EffRecordPool *effRecordPoolCreate(s32 quadCount) {
     pool->scale = 1.0f;
     pool->color = EFF_NEUTRAL_COLOR;
     pool->resource = sdfCreateAssetWithDrawEntries();
-    func_003332D0(pool->resource, 1.0f);
+    func_003332D0((u32)pool->resource, 1.0f);
     memset(D_00451FF0, 0, EFF_PACKET_PARAMS_BYTES);
     D_00451FF0->primitive = 0x4000;
     return pool;
@@ -603,7 +604,7 @@ EffRecordPool *effRecordPoolCreate(s32 quadCount) {
 
 /* Queue the asset before releasing the allocation containing this header. */
 void effReleaseRecordGroupResources(EffRecordPool *pool) {
-    sdfQueueAssetRelease(pool->resource);
+    sdfQueueAssetRelease((s32)pool->resource);
     sdfReleaseResourceAllocation(pool->buffer);
 }
 
@@ -625,7 +626,7 @@ void effDrawQuadRecordPool(EffRecordPool *pool)
     matrix[14] = pool->origin[2];
     VU0_LOAD_MATRIX(matrix);
     sdfConsAppendVuPacket((s32)packet, 0);
-    sdfConsAppendAssetPacket((s32)packet, (void *)pool->resource, 0);
+    sdfConsAppendAssetPacket((s32)packet, pool->resource, 0);
     remainingVertices = pool->vertexCount;
     D_00451FF0->colors = (u32 *)pool->auxRecordBase;
     D_00451FF0->positions = (u128 *)pool->recordBase;
@@ -690,7 +691,7 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
     matrix[14] = work->origin[2];
     VU0_LOAD_MATRIX(matrix);
     sdfConsAppendVuPacket((s32)list, 0);
-    sdfConsAppendAssetPacket((s32)list, (void *)work->resource, 0);
+    sdfConsAppendAssetPacket((s32)list, work->resource, 0);
     remaining = work->vertexCount;
     D_00451FF0->colors = (u32 *)work->auxRecordBase;
     D_00451FF0->positions = (u128 *)work->recordBase;
