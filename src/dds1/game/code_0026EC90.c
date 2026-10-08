@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_resource_slots.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "mnu.h"
@@ -120,7 +121,7 @@ void mnuFinishStaffMovieAndFreeState(void) {
 }
 
 void mnuReleaseMovieResourceAfterPendingWork(void) {
-    effDestroyResourceSlotSet(mnuMovieWork->spriteSet);
+    effDestroyResourceSlotSet((struct EffectSlotSet *)mnuMovieWork->spriteSet);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     func_002ECA40(0);

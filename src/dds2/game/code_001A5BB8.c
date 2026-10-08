@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_resource_slots.h"
 #include "sdf_chip.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -5453,7 +5454,6 @@ void btlLoadResourceBlock(void) {
     }
 }
 
-extern s32 effDestroyResourceSlotSet(EffectSlotSet *);
 
 void btlReleaseResourceBlock(void) {
     BtlWorkRes *work = (BtlWorkRes *)btlGetRuntime();
