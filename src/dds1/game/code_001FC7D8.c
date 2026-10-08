@@ -66,7 +66,7 @@ typedef struct BtlLinkedEffectArgs {
     union {
         struct {
             s32 value; /* 0x24: signed number rendered by the update callback */
-            s32 elapsedTicks; /* 0x28 */
+            u32 elapsedTicks; /* 0x28: unsigned frame threshold tests in the number callback. */
             u32 color; /* 0x2C */
             u8 kind; /* 0x30 */
             u8 offsetIndex; /* 0x31: indexes the twelve display offsets */
@@ -411,8 +411,113 @@ s32 effOffsetIfOwnerFlagClear(BtlUnit *owner, s32 base) {
     return base + (((owner->flags >> 9) ^ 1U) & 1);
 }
 
-/* Number display: initializes both anchor vectors, then adds the offset before projection. */
-INCLUDE_ASM(const s32, "game/code_001FC7D8", func_001FD5C8);
+/* Number display: initialize its saved anchor, then project it with the
+ * DDS1-specific display gate and twelve fixed screen offsets. */
+extern f32 D_003603C8[12][2];
+extern s32 btlWouldUiValueFallBelowQuarter(BtlUnit *, s32);
+
+s32 func_001FD5C8(BtlLinkedEffectArgs *args) {
+    s32 screen[4] __attribute__((aligned(16)));
+    s32 bounce[16];
+    s32 value = args->payload.linked.value;
+    u32 color;
+    s32 rise;
+    s32 *offsets;
+    BtlUnit *unit = args->unit;
+    u32 ticks;
+    f32 phase;
+    f32 displacement;
+
+    if (args->payload.linked.elapsedTicks == 0) {
+        args->payload.linked.offsetIndex = unit->firstCountdown % 12;
+        unit->firstCountdown++;
+        func_001FCBA0(args->unit);
+        VU0_STORE_VF_UNCLOBBERED(vf10, args->anchorOffset);
+        btlUnitGetMuzzlePosVU(args->unit);
+        VU0_STORE_VF_UNCLOBBERED(vf10, args->referencePosition);
+        VU0_MOVE_VF(vf11, vf10);
+        VU0_LOAD_VF(vf10, args->anchorOffset);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, args->anchorOffset);
+
+        switch (args->payload.linked.kind) {
+        case 0:
+            if (value <= 0) {
+                if ((args->unit->flags & 0x400) &&
+                    btlWouldUiValueFallBelowQuarter(args->unit, 0)) {
+                    args->payload.linked.color = 0x805050B0;
+                } else {
+                    args->payload.linked.color = 0x80808080;
+                }
+            } else {
+                args->payload.linked.color = 0x8050A050;
+            }
+            break;
+        case 1:
+            args->payload.linked.color = value <= 0 ? 0x80B030B0 : 0x80A08020;
+            break;
+        default:
+            args->payload.linked.color = 0;
+            break;
+        }
+    }
+
+    if (value < 0) {
+        value = -value;
+    }
+    color = args->payload.linked.color;
+    rise = 0;
+    offsets = NULL;
+    ticks = args->payload.linked.elapsedTicks;
+    if (ticks < 5) {
+        s32 remaining = ticks;
+        u32 i = 0;
+
+        if (remaining >= 0) {
+            do {
+                f32 fraction = (f32)remaining / 5.0f;
+                phase = 1.0f - fraction;
+                phase *= phase;
+                displacement = phase * 34.0f;
+                bounce[i] = (s32)(displacement * 8.0f);
+                remaining--;
+                i++;
+                if (i >= 16) {
+                    break;
+                }
+            } while (remaining >= 0);
+        }
+        for (; i < 16; i++) {
+            bounce[i] = -1;
+        }
+        offsets = bounce;
+    } else if (ticks >= 24) {
+        phase = (f32)(s32)(ticks - 23) / 12.0f;
+        phase *= phase;
+        displacement = phase * 30.0f;
+        rise = (s32)(displacement * 8.0f);
+        color = (color & 0xFFFFFF) | ((u32)((1.0f - phase) * 128.0f) << 24);
+    }
+
+    rise += 128;
+    if (args->unit->flags & 4) {
+        if ((btlUnitStatusPair(args->unit) & 0x21) == 1) {
+            btlUnitGetMuzzlePosVU(args->unit);
+        } else {
+            VU0_LOAD_VF(vf10, args->referencePosition);
+        }
+        VU0_LOAD_VF(vf11, args->anchorOffset);
+        VU0_ADD(vf10, vf10, vf11);
+        if (btlProjectForwardPositionToPackedScreen(screen) != 0) {
+            screen[0] += (s32)(D_003603C8[args->payload.linked.offsetIndex][0] * 32.0f) << 4;
+            screen[1] += ((s32)(D_003603C8[args->payload.linked.offsetIndex][1] * 32.0f) << 3) + 256;
+            func_001FCFB8(screen[0], screen[1] - rise, value, color, offsets);
+        }
+    }
+
+    args->payload.linked.elapsedTicks++;
+    return args->payload.linked.elapsedTicks >= 36;
+}
 
 /* Decrement the linked-number task's unit counter without underflowing zero. */
 void effDecrementFirstCountdown(BtlLinkedEffectArgs *args) {
@@ -433,8 +538,6 @@ typedef struct BtlObjLink {
 } BtlObjLink;
 
 extern void *btlAllocTask(s32);
-extern s32 func_001FD5C8();
-
 /* Create the selected numbered-display task with its frame count starting at zero. */
 BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind) {
     BtlRuntimeTask *task = btlAllocTask(0x34);
