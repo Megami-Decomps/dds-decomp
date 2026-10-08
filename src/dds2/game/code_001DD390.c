@@ -4330,24 +4330,29 @@ BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *unit, u32 target, u32 inde
     return task;
 }
 
-u32 btlRotateUnitTowardOtherBody(s32 taskArgs) {
+typedef struct BtlFaceBodyTaskArgs {
+    BtlUnit *actor;
+    BtlUnit *target;
+} BtlFaceBodyTaskArgs;
+
+u32 btlRotateUnitTowardOtherBody(BtlFaceBodyTaskArgs *taskArgs) {
     s128 hit[1];
     s128 from;
     s128 to;
-    btlUnitGetBodyPosVU(*(BtlUnit **)taskArgs);
+    btlUnitGetBodyPosVU(taskArgs->actor);
     VU0_STORE_VF_UNCLOBBERED(vf10, &from);
-    btlUnitGetBodyPosVU(*(BtlUnit **)(taskArgs + 4));
+    btlUnitGetBodyPosVU(taskArgs->target);
     VU0_STORE_VF_UNCLOBBERED(vf10, &to);
     if (btlAimHorizontalDirectionVU(&from, &to) != 0) {
         VU0_STORE_VF_UNCLOBBERED(vf10, hit);
-        btlSetUnitRotation(*(BtlUnit **)taskArgs, hit);
+        btlSetUnitRotation(taskArgs->actor, hit);
     }
     return 1;
 }
 
-BtlRuntimeTask *btlCreateUnitFaceBodyTask(BtlUnit *actor, s32 option) {
-    BtlRuntimeTask *task = btlAllocTask(8);
-    SoundTaskArgs *args;
+BtlRuntimeTask *btlCreateUnitFaceBodyTask(BtlUnit *actor, BtlUnit *target) {
+    BtlRuntimeTask *task = btlAllocTask(sizeof(BtlFaceBodyTaskArgs));
+    BtlFaceBodyTaskArgs *args;
     task->endCondition.kind = 0;
     task->startCondition.kind = 1;
     task->taskId = 0x27;
@@ -4356,7 +4361,7 @@ BtlRuntimeTask *btlCreateUnitFaceBodyTask(BtlUnit *actor, s32 option) {
     task->onStart = 0;
     args = btlGetTaskArguments(task);
     args->actor = actor;
-    args->option = option;
+    args->target = target;
     return task;
 }
 
@@ -4531,7 +4536,7 @@ void btlResetUnitLinks(BtlUnit *unit) {
     unit->link320 = sndAllocLink(unit);
 }
 
-extern s64 btlAdvanceRuntimeSequenceCounter(void);
+extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
 extern void *memset(void *, s32, u32);
 
@@ -8922,7 +8927,7 @@ void sndAddSourceReferences(SoundEffectSourceArgs *args) {
     args->effect = 0;
     sndCreateSystemEffect(args->source);
     effect = args->source;
-    unit = args->unit;
+    unit = args->owner.unit;
     effect->referenceCount = effect->referenceCount + 1;
     unit->effectLink.referenceCount = unit->effectLink.referenceCount + 1;
 }
@@ -8937,7 +8942,7 @@ void sndFinishEffectSourceTask(SoundEffectSourceArgs *args) {
         effReleaseBattleVoiceOwner(args->effect);
     }
     effect = args->source;
-    unit = args->unit;
+    unit = args->owner.unit;
     effect->referenceCount = effect->referenceCount - 1;
     unit->effectLink.referenceCount = unit->effectLink.referenceCount - 1;
     sndDeleteSystemEffect(effect);
@@ -8958,11 +8963,11 @@ BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *effect, BtlUnit *ow
     task->onFinish = sndFinishEffectSourceTask;
     args = btlGetTaskArguments(task);
     args->source = effect;
-    args->unit = owner;
+    args->owner.unit = owner;
     args->resource = resource;
     args->effect = 0;
-    args->duration = 0;
-    args->counter = 0;
+    args->frameCount = 0;
+    args->fadeOutFrame = 0;
     return task;
 }
 

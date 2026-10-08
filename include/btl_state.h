@@ -209,7 +209,8 @@ typedef struct BtlState {
     u8 pad614[0x14];
     s32 (*cameraPoseBlendHook)(BtlLinkedCommand *, s32, s32); /* 0x628 */
     s32 (*actionCameraStepHook)(u8 *); /* 0x62C: nonzero handles the camera step. */
-    u8 pad630[0x24];
+    s32 (*handleActorCategoryCamera)(struct BtlLinkedCommand *, s32, s32); /* 0x630: linked-list flags 0x200 / 0x400. */
+    u8 pad634[0x20];
     s32 (*allowDefeatCandidate)(BtlUnit *); /* 0x654 */
     s32 (*unk658)(BtlUnit *);
     u8 pad65C[0x10];
@@ -427,7 +428,7 @@ typedef struct BtlState {
     u8 pad65C[4];
     s32 (*unk660)(BtlUnit *, s32, s32);
     s32 (*actionCameraStepHook)(struct BtlLinkedCommand *); /* 0x664: nonzero handles the camera step. */
-    s32 (*unk668)(BtlUnit *);
+    s32 (*handleActorCategoryCamera)(struct BtlLinkedCommand *, s32, s32); /* 0x668: same category camera override. */
     s32 (*unk66C)(BtlUnit *);
     s32 (*unk670)(struct BtlLinkedCommand *);
     u8 pad674[0x10];

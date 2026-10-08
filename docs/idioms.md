@@ -3093,3 +3093,44 @@ saves the current glyph position in the viewer's signed word at
 additional views. The dispatcher's calls into claimed `0022FB30`
 retain its existing address-word interface at that single boundary.
 
+## Source-effect frame counters and category-camera overrides
+
+The source-effect task's `+0x18` word is a signed elapsed-frame counter,
+not an unsigned duration. DDS1 `001F1CC8` and DDS2 `00202958` use signed
+`slti < 12` and direct `cvt.s.w`, then increment it every update. The
+signed word at `+0x1C` counts the twelve fade-out updates. Its owner
+at `+8` is both a unit pointer and the encoded field-color selector key,
+so it uses the existing documented `ActorEffectOwner` union.
+
+The category-camera override at battle state `+0x630` (DDS1) /
+`+0x668` (DDS2) receives the linked command and two presence flags.
+Native `001DDF20` / `001EB5B0` derives them from the linked index
+list's actors (`flags & 0x200`, `flags & 0x400`); a nonzero callback
+result handles the camera selection and skips its fallback.
+
+
+## Mantra-scene scroll coordinates
+
+DDS1 `00251260` clamps the selected scene's scroll position through
+`00250E88`. The primary `MenuSceneWork` owns signed halfword coordinates
+at `+0x5A4` / `+0x5A6` and an unsigned bounds-flag byte at `+0x5AC`;
+the completed tail still fits the existing `0x5B0` allocation.
+The two widened coordinates form a local `s32 position[2]` passed by
+axis to the clamp routine, then stored back to the signed halfwords.
+Bounds flags select maximum X in priority order 4, 2, 1; maximum Y is
+`0x38E`. The grid cell's generic value word supplies the selected
+`MenuSceneEntry *`, whose unsigned scene ID indexes the placement table.
+
+## Face-body task pointers and runtime sequence handles
+
+DDS2 `001E74A0` allocates an eight-byte task packet. Its callback
+`001E7438` reads both words as `BtlUnit *` to obtain their body positions;
+the second word is a target actor, not an integer option. The dedicated
+`BtlFaceBodyTaskArgs` owns those two pointers.
+
+`btlAdvanceRuntimeSequenceCounter` returns `u64` in both providers.
+Its internal signed overflow test keeps the returned handle positive,
+but callers retain the full eight-byte value: `0021C1FC` stores it with
+`sd` into the runtime task's `ownerId`. Extern declarations follow the
+provider rather than narrowing or adapting this opaque handle.
+

@@ -80,11 +80,11 @@ typedef struct SoundEffectReferenceArgs {
 typedef struct SoundEffectSourceArgs {
     SoundResourceNode *source;
     BattleEffect *effect;
-    struct BtlUnit *unit;
+    ActorEffectOwner owner;
     u8 pad0C[4];
     u64 resource;
-    u32 duration;
-    s32 counter;
+    s32 frameCount;
+    s32 fadeOutFrame;
 } SoundEffectSourceArgs;
 
 typedef struct TimedUnitEffectArgs {

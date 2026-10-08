@@ -10308,7 +10308,7 @@ void sndAddSourceReferences(SoundEffectSourceArgs *args) {
     args->effect = 0;
     sndCreateSystemEffect(args->source);
     effect = args->source;
-    source = args->unit;
+    source = args->owner.unit;
     ++effect->referenceCount;
     ++source->effectLink.referenceCount;
 }
@@ -10325,7 +10325,7 @@ void sndFinishEffectSourceTask(SoundEffectSourceArgs *args) {
         effReleaseBattleVoiceOwner(args->effect);
     }
     effect = args->source;
-    unit = args->unit;
+    unit = args->owner.unit;
     effect->referenceCount = effect->referenceCount - 1;
     unit->effectLink.referenceCount = unit->effectLink.referenceCount - 1;
     sndDeleteSystemEffect(effect);
@@ -10345,11 +10345,11 @@ BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *effect, BtlUnit *ow
     task->onFinish = sndFinishEffectSourceTask;
     arguments = btlGetTaskArguments(task);
     arguments->source = effect;
-    arguments->unit = owner;
+    arguments->owner.unit = owner;
     arguments->resource = resource;
     arguments->effect = 0;
-    arguments->duration = 0;
-    arguments->counter = 0;
+    arguments->frameCount = 0;
+    arguments->fadeOutFrame = 0;
     return task;
 }
 
