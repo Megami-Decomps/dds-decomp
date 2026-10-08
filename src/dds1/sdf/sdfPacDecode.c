@@ -3,6 +3,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_pac_packet.h"
+#include "sdf_pac_state.h"
 #include "sdf_pac_work.h"
 
 enum {
@@ -42,32 +43,6 @@ typedef struct PacAlloc {
     PacBuf buffer; /* 0x20: decoder state; result is the completed resource */
 } PacAlloc;
 
-
-/* Event 0 supplies a payload-size word; event 1 omits it. Keep the
- * packet callback's native short-arity interface unprototyped. */
-typedef struct PacState {
-    s8 phase; /* 0x0: -1 complete, 0 boundary, 1 skip, 2 input handler */
-    u8 flags; /* 0x1 */
-    u16 packetCounter; /* 0x2: wraps from the initial 0xFFFF */
-    s32 (*packetCallback)(); /* 0x4 */
-    void (*onInput)(struct PacState *); /* 0x8 */
-    void (*onComplete)(struct PacState *); /* 0xC */
-    u8 *inputCursor; /* 0x10 */
-    s32 inputAvailable; /* 0x14 */
-    s32 consumedBytes; /* 0x18 */
-    u8 *outputCursor; /* 0x1C */
-    s32 pendingBytes; /* 0x20 */
-    PacBuf *decoder; /* 0x24 */
-    PacBuf *resourceBuffer; /* 0x28 */
-    /* sdfPacStartAllocationList stores a resource decoder here;
-     * sdfPacStartNextAllocationEntry reads allocation-list state here. */
-    union {
-        PacBuf *resource;
-        PacAlloc *list;
-    } slot; /* 0x2C */
-    PacWork *queueHead; /* 0x30 */
-    PacWork *queueTail; /* 0x34 */
-} PacState;
 
 void sdfPacStartPacketPayload(PacState *state, SdfPacStreamPacketHeader *packet);
 void sdfDecodePacNodeAndAdvanceTail(PacState *state);

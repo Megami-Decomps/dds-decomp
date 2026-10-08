@@ -150,7 +150,7 @@ extern void func_002FE360(s32);
 extern char sdfDebugLogAppendMode[];
 extern char sdfDebugLogPairFormat[];
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
-extern s32 func_001958A0(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern void *fileResolvePrimaryBuffer(void *);
 extern s32 ptyTestProfileFlag0(DatPartyRecord *, u16);
 DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
@@ -1058,7 +1058,7 @@ PrfDds1RequirementRecord *prfReqGetEntryRecord(u16 index) {
 void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
     FrFontGlyph *handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, &frFontColoredGlyphResource, 0);
     frFontSetChildColors(handle, second);
-    func_001958A0(handle, 1, option);
+    frFontDrawGlyphChain(handle, 1, option);
     frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
 

@@ -127,6 +127,8 @@ void frFontSetFlagAndMeasureGlyphs(FrFontGlyph *glyph, s32 requestedFlag);
 void frFontSetContextPair(FrFontGlyph *glyph, u32 first, u32 second);
 void frFontStoreShiftedContextValue(FrFontGlyph *glyph, u32 unshiftedValue);
 void frFontSetChildColors(FrFontGlyph *parentGlyph, u32 colorWord);
+void frFontSetChainFlag(FrFontGlyph *glyph, u8 flagValue);
+void frFontSetGlyphChainDimensions(FrFontGlyph *glyph, s32 cellAdvance, s32 cellHeight);
 
 /* Message tables contain relocated encoded-text addresses. */
 typedef struct ItfMesTable {
