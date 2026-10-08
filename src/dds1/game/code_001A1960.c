@@ -2079,7 +2079,7 @@ s32 btlGetActionRecordLookupValue(s32 actionRecordIndex) {
 }
 
 s32 btlTestSelectedItemCategoryMask(s32 unitAddress, s32 actorIndex) {
-    s32 selectedEntryIndex = *(s32 *)(unitAddress + 0x2F0);
+    s32 selectedEntryIndex = ((BtlUnit *)unitAddress)->selectedEntryIndex;
     u16 maskTableIndex;
     if (selectedEntryIndex == -1) {
         return 0;
@@ -2088,20 +2088,20 @@ s32 btlTestSelectedItemCategoryMask(s32 unitAddress, s32 actorIndex) {
     return (D_00358518[maskTableIndex * 3] & btlEncodeActorIndexAsSelectionMask(actorIndex)) != 0;
 }
 
-s32 fldGetSelectedUnitStat(s32 object) {
-    s32 item = *(s32 *)(object + 0x2F0);
-    if (item == -1) {
+s32 fldGetSelectedUnitStat(s32 unitAddress) {
+    s32 selectedEntryIndex = ((BtlUnit *)unitAddress)->selectedEntryIndex;
+    if (selectedEntryIndex == -1) {
         return 0;
     }
-    return btlGetActionRecordLookupValue(item);
+    return btlGetActionRecordLookupValue(selectedEntryIndex);
 }
 
-s32 btlGetSelectedUnitProperty(s32 object) {
-    s32 index = *(s32 *)(object + 0x2F0);
-    if (index == -1) {
+s32 btlGetSelectedUnitProperty(s32 unitAddress) {
+    s32 selectedEntryIndex = ((BtlUnit *)unitAddress)->selectedEntryIndex;
+    if (selectedEntryIndex == -1) {
         return 0;
     }
-    return D_00358514[datCommandRecords[index].unk2E * 3];
+    return D_00358514[datCommandRecords[selectedEntryIndex].unk2E * 3];
 }
 
 s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlTargetResult *results) {

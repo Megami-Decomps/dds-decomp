@@ -32,6 +32,24 @@ typedef char EffLensFlareSetOffsetCheck[((u32)&((EffLensFlareParams *)0)->flareS
 typedef char EffFadeVectorWorkSizeCheck[(sizeof(EffFadeVectorWork) == 0x58) ? 1 : -1];
 typedef char EffFadeVectorSourceOffsetCheck[((u32)&((EffFadeVectorWork *)0)->source == 0x18) ? 1 : -1];
 
+/* DDS1 002AAF70 / DDS2 002EE348 allocate this 0x3C-byte strip owner.
+ * File constructors copy a 0x20-byte source header into its +0x0C member. */
+typedef struct EffectStripNode {
+    u32 percent;
+    u32 color;
+    f32 opacity;
+    u8 copiedHeader[0x20];
+    u32 transform;
+    u32 resource;
+    u32 active;
+    u16 count;
+} EffectStripNode;
+
+typedef char EffectStripNodeSizeCheck[(sizeof(EffectStripNode) == 0x3C) ? 1 : -1];
+typedef char EffectStripHeaderOffsetCheck[((u32)&((EffectStripNode *)0)->copiedHeader == 0x0C) ? 1 : -1];
+typedef char EffectStripRecordOffsetCheck[((u32)&((EffectStripNode *)0)->active == 0x34) ? 1 : -1];
+typedef char EffectStripCountOffsetCheck[((u32)&((EffectStripNode *)0)->count == 0x38) ? 1 : -1];
+
 /* Class operations select the copied parameter format and own this 0x40-byte
  * header. The resource word is the class factory's returned handle/address. */
 typedef struct EffClassWork {
