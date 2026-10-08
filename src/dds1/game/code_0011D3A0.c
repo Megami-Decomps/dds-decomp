@@ -2361,24 +2361,6 @@ s32 fldDispatchPendingSceneResource(void) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FC40);
-
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FC50);
-
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FC60);
-
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FC70);
-
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FC80);
-
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FC90);
-
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FCA0);
-
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FCB0);
-
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FCC8);
-
 extern void dds3SetWorldObject(void *);
 extern void evtEnableSolarPhaseAdvance(void);
 extern s32 fileMenuTaskExists(void);
@@ -2425,6 +2407,24 @@ extern u32 D_003BA8EC;
 extern u32 D_003BAD58;
 extern u32 D_003BAC08[2];
 extern EffBlurScatterWork *D_003BABE4;
+
+INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FC40);
+
+INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FC50);
+
+INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FC60);
+
+INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FC70);
+
+INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FC80);
+
+INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FC90);
+
+INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FCA0);
+
+INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FCB0);
+
+INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FCC8);
 
 s32 fldProcSequence(void) {
     EffBlurScatterParams blur;
