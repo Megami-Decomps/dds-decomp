@@ -4,6 +4,11 @@
 #include "common.h"
 #include "sdf_grid.h"
 
+typedef struct MenuScenePoint {
+    s16 x;
+    s16 y;
+} MenuScenePoint;
+
 typedef struct MenuSceneWork {
     s32 allocationHandle; /* 0x000 */
     u8 pad004[0x480];
@@ -15,12 +20,15 @@ typedef struct MenuSceneWork {
     s32 coordinateA; /* 0x540 */
     s32 coordinateB; /* 0x544 */
     u32 unk548; /* 0x548 */
-    u8 pad54C[0x58];
+    u8 pad54C[0x50];
+    MenuScenePoint entryPosition; /* 0x59C */
+    MenuScenePoint cursorPosition; /* 0x5A0 */
     s16 scrollX; /* 0x5A4 */
     s16 scrollY; /* 0x5A6 */
     u8 pad5A8[4];
     u8 boundsFlags; /* 0x5AC */
-    u8 pad5AD[3];
+    u8 cursorMoving; /* 0x5AD */
+    u8 pad5AE[2];
 } MenuSceneWork;
 
 typedef char MenuSceneWorkLayoutAssert[
