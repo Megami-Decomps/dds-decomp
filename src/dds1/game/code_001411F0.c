@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_dev_state.h"
 #include "sdf_resource.h"
 #include "eff_transform.h"
 #include "sdf_model.h"
@@ -2586,16 +2587,13 @@ extern void fldFormatAreaDirectory(char *, s32, s32);
 
 extern s32 func_003014F0(char *, const char *, ...);
 
-extern u32 sdfDevCreateCommandState(const char *);
 
-extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
 
-extern void sdfDevWaitThenReleaseCommandState(u32);
 
 void fldLoadNpcPalette(s32 field) {
     char path[64];
     char directory[32];
-    u32 command;
+    DevState *command;
 
     if (field < 100) {
         fldFormatAreaDirectory(directory, field, 1);

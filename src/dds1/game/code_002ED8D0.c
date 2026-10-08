@@ -5,8 +5,8 @@
 #include "file_pac.h"
 #include "sdf_movie_stream.h"
 #include "sdf_movie_state.h"
+#include "sdf_dev_state.h"
 
-typedef struct DevState DevState;
 typedef struct SoundFormat SoundFormat;
 
 enum {
@@ -52,7 +52,7 @@ typedef struct PacBuf {
 extern u8 sdfPacDispatchPacket[];
 
 
-extern void *sdfDevCreateCallbackState(s32 path, void *callback, s32 context);
+extern DevState *sdfDevCreateCallbackState(const char *path, void *callback, s32 context);
 extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
 extern char *func_00302240(const char *text, s32 delimiter);
 extern s32 func_003017A0(const char *text, const char *suffix);
@@ -108,7 +108,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
             stream->writeCursor = buffer;
         }
         owner->state = SDF_MOVIE_STATE_INITIAL;
-        owner->deviceState = sdfDevCreateCallbackState((s32)name,
+        owner->deviceState = sdfDevCreateCallbackState(name,
                                                         (void *)sdfMovieHandleLinearDeviceEvent, (s32)owner);
         sdfSoundInitFormattedAndAppendNode(&owner->soundNode, (SoundFormat *)soundFormat,
                                             sdfMovieLinearStreamReadCallback, (u32)owner, descriptor->source);
@@ -133,7 +133,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
     pacWork->scratchSize = 0x20;
     pacWork->scratch = pacWork->scratchBuffer;
     owner->state = SDF_MOVIE_STATE_INITIAL;
-    owner->deviceState = sdfDevCreateCallbackState((s32)name,
+    owner->deviceState = sdfDevCreateCallbackState(name,
                                                     (void *)sdfMovieHandlePacDeviceEvent, (s32)owner);
     owner->pacEnabled = 1;
     owner->packetLimit = 0x7F;
@@ -141,7 +141,7 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
                                         sdfMoviePacStreamReadCallback, (u32)owner, descriptor->source);
 }
 
-extern s32 sdfDevQueueActiveOperation(void *);
+extern s32 sdfDevQueueActiveOperation(DevState *);
 extern void sdfCreateSemaphoreFromOptions(void);
 extern void func_002EBB60(void *);
 extern void func_002E98F0(void);

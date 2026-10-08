@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_dev_state.h"
 #include "sdf_resource.h"
 #include "mdl.h"
 #include "field_stage.h"
@@ -1053,14 +1054,11 @@ extern FieldActivationRecord D_003A8EB0[];
 extern u8 D_0039A1D0[], D_003A41A8[], D_003A47E8[], D_003A55F0[], D_0038A3B8[], D_0038A480[], D_0038A9B0[], fldCameraFollowRows[], D_00389A70[], D_00391FA0[];
 extern u32 D_003899F0[];
 extern void *fldCameraSettings;
-extern u32 sdfDevCreateCommandState(const char *);
-extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
-extern void sdfDevWaitThenReleaseCommandState(u32);
 
 /* Load the field tables and index each stage by the coordinate-row count
  * preceding its first record. */
 void fldLoadFieldTablesAndIndexStages(void) {
-    u32 command = sdfDevCreateCommandState("/fld/f/bin/FLDALL.TBL");
+    DevState *command = sdfDevCreateCommandState("/fld/f/bin/FLDALL.TBL");
     s32 sum;
     s16 previous;
     s32 i;

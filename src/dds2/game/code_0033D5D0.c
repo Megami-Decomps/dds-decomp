@@ -5,6 +5,7 @@
 #include "sdf_sif_command.h"
 #include "sdf_dev_event.h"
 #include "sdf_dev_protocol.h"
+#include "sdf_dev_state.h"
 
 #define SDF_DEV_WORKER_COUNT 4
 #define SDF_DEV_DEFAULT_PRIORITY 0x48
@@ -68,28 +69,6 @@ extern u32 sdfDevOperationReplyValue;
 extern u32 D_0040B990[];
 
 extern char D_0040B9D0[];
-
-typedef struct DevState {
-    struct DevState *next; /* 0x0 */
-    struct DevState *previous; /* 0x4 */
-    struct DevState *workerNext; /* 0x8 */
-    struct DevState *workerPrev; /* 0xC */
-    void *resource; /* 0x10 */
-    u8 workerIndex; /* 0x14 */
-    u8 operation; /* 0x15 */
-    s8 state; /* 0x16 */
-    u8 pad17; /* 0x17 */
-    s32 operationArg; /* 0x18 */
-    s32 requestExtra; /* 0x1C */
-    void *requestData; /* 0x20 */
-    s32 options; /* 0x24 */
-    s32 resourceId; /* 0x28 */
-    s32 result; /* 0x2C */
-    s32 transferred; /* 0x30 */
-    u8 pad34[4]; /* 0x34 */
-    void (*callback)(struct DevState *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4); /* 0x38 */
-    s32 callbackContext; /* 0x3C */
-} DevState;
 
 /* Native 0x18 worker record; semaphore-only addresses point inside this array,
  * not at a separately allocated table. */
@@ -168,7 +147,6 @@ extern void func_0034D038(u32 arg0);
 
 extern s32 sdfDevReplySemaphore;
 
-s32 sdfDevReactivate(DevState *);
 
 extern char D_0042E3A0[]; /* "cdrom0:\\IRX\\DEV9.IRX;1 resident fail.\n", followed by padding no C emits */
 
@@ -194,7 +172,7 @@ extern s32 sceSifAllocIopHeap(s32);
 
 extern void func_0034D400(s32, s32, s32);
 
-extern void sdfDevLoadWholeFile(s32);
+extern void sdfDevLoadWholeFile(const char *);
 
 typedef struct Bytes7 {
     s8 b[7];
@@ -695,13 +673,13 @@ extern s32 func_0036A1B0(s32, s32, s32);
 extern s32 func_00369DF8(s32);
 
 /* Read a whole named file into the loader's allocated EE buffer, then close it. */
-void sdfDevLoadWholeFile(s32 fileNameAddress) {
-    s32 fileHandle = func_00369B70(fileNameAddress, SDF_DEV_FILE_OPEN_READ);
+void sdfDevLoadWholeFile(const char *fileName) {
+    s32 fileHandle = func_00369B70(fileName, SDF_DEV_FILE_OPEN_READ);
     s32 fileBytes;
     s32 bufferAddress;
 
     if (fileHandle < 0) {
-        sdfPanicHaltPrintf(D_0042E288, fileNameAddress);
+        sdfPanicHaltPrintf(D_0042E288, fileName);
     }
     fileBytes = func_00369F78(fileHandle, 0, SDF_DEV_SEEK_END);
     func_00369F78(fileHandle, 0, SDF_DEV_SEEK_START);
@@ -712,14 +690,14 @@ void sdfDevLoadWholeFile(s32 fileNameAddress) {
 }
 
 /* Record the disc search path, preload a separate file, and initialize an aligned IOP buffer. */
-void sdfDevStartLoad(s32 discFileNameAddress, s32 preloadFileNameAddress) {
+void sdfDevStartLoad(const char *discFileName, const char *preloadFileName) {
     u32 discFileRecord[SDF_DEV_DISC_FILE_WORDS];
     s32 iopHeapAddress;
 
-    sdfDiscLoadFilename = discFileNameAddress;
-    sdfDevLoadWholeFile(preloadFileNameAddress);
-    if (sceCdSearchFile(discFileRecord, discFileNameAddress) == 0) {
-        sdfPanicHaltPrintf(D_0042E288, discFileNameAddress);
+    sdfDiscLoadFilename = (u32)discFileName;
+    sdfDevLoadWholeFile(preloadFileName);
+    if (sceCdSearchFile(discFileRecord, (s32)discFileName) == 0) {
+        sdfPanicHaltPrintf(D_0042E288, discFileName);
     }
     D_004391A0 = discFileRecord[0];
     iopHeapAddress = sceSifAllocIopHeap(SDF_DEV_IOP_BUFFER_BYTES);
@@ -989,7 +967,7 @@ void sdfDevUnlinkAndFreeState(DevState *state) {
     if (interrupts != 0) {
         EIntr();
     }
-    sdfReleaseChipBlock(state->resource);
+    sdfReleaseChipBlock(state->resolvedPath);
     sdfReleaseChipBlock(state);
 }
 
@@ -1098,7 +1076,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
         switch (operationIndex) {
         case SDF_DEV_OPERATION_OPEN_READ - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
-            fileHandle = func_00369B70(state->resource, SDF_DEV_FILE_OPEN_READ, 0);
+            fileHandle = func_00369B70(state->resolvedPath, SDF_DEV_FILE_OPEN_READ, 0);
             if (fileHandle < 0) {
                 sdfDevDeactivate(state, fileHandle);
                 continue;
@@ -1114,7 +1092,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_OPEN_WRITE - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
-            fileHandle = func_00369B70(state->resource, SDF_DEV_FILE_OPEN_WRITE, state->options);
+            fileHandle = func_00369B70(state->resolvedPath, SDF_DEV_FILE_OPEN_WRITE, state->options);
             if (fileHandle < 0) {
                 sdfDevDeactivate(state, fileHandle);
                 continue;
@@ -1220,7 +1198,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_READ_BUFFER - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
-            fileHandle = func_00369B70(state->resource, SDF_DEV_FILE_OPEN_READ, 0);
+            fileHandle = func_00369B70(state->resolvedPath, SDF_DEV_FILE_OPEN_READ, 0);
             if (fileHandle < 0) {
                 sdfDevDeactivate(state, fileHandle);
                 continue;
@@ -1269,7 +1247,7 @@ void sdfDevWorkerThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_WRITE_BUFFER - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
-            fileHandle = func_00369B70(state->resource, SDF_DEV_FILE_OPEN_WRITE, state->options);
+            fileHandle = func_00369B70(state->resolvedPath, SDF_DEV_FILE_OPEN_WRITE, state->options);
             if (fileHandle < 0) {
                 sdfDevDeactivate(state, fileHandle);
                 continue;
@@ -1319,12 +1297,12 @@ void D_0033F3E0(DevWorkerEntry *worker) {
             continue;
         }
 
-        operation = state->operation - 1;
+        operation = state->operation - SDF_DEV_OPERATION_OPEN_READ;
         state->operation = SDF_DEV_OPERATION_NONE;
         switch (operation) {
         case SDF_DEV_OPERATION_OPEN_READ - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
-            result = sdfDevOpenDiscFileAndGetSize(state->resource);
+            result = sdfDevOpenDiscFileAndGetSize(state->resolvedPath);
             if (result < 0) {
                 sdfDevDeactivate(state, 0);
                 continue;
@@ -1375,7 +1353,7 @@ void D_0033F3E0(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_READ_BUFFER - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
-            result = sdfDevOpenDiscFileAndGetSize(state->resource);
+            result = sdfDevOpenDiscFileAndGetSize(state->resolvedPath);
             if (result < 0) {
                 sdfDevDeactivate(state, 0);
                 continue;
@@ -1486,7 +1464,7 @@ INCLUDE_ASM(const s32, "game/code_0033D5D0", func_0033F898);
 DevState *sdfDevAllocState(void *resource, s32 workerIndex, s32 operation,
                         void (*callback)(DevState *, s32, s32, s32, s32), s32 callbackContext) {
     DevState *state = (DevState *)sdfAllocAndClearQuadwords(SDF_DEV_STATE_BYTES);
-    state->resource = resource;
+    state->resolvedPath = resource;
     state->workerIndex = workerIndex;
     state->operation = operation;
     state->state = 0;
