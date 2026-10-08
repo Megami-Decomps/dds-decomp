@@ -341,9 +341,9 @@ void effParamWorkCallback5(EffParamWork *work) {
     }
 }
 
-/* Select billboard kind zero; the index is passed through without validation. */
-void func_00162C60(u32 index) {
-    billCreateIndexed(0, index);
+/* Create a child billboard from its resource data. */
+BillObj *effParamCreateChildBillboard(void *resourceData) {
+    return billCreateIndexed(0, (u32)resourceData);
 }
 
 /* Select billboard kind one; the index is passed through without validation. */
