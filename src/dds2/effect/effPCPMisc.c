@@ -5022,33 +5022,33 @@ EffPCPGroupSet *effBlockSetCloneWithDuplicates(EffPCPGroupSet *work) {
 }
 
 void effBlockSetRelease(EffPCPGroupSet *work) {
-    u32 i = 0;
-    u32 count = work->head.count;
-    EffPCPGroupEntry *entry = work->entries;
-    u32 *list;
+    u32 releaseIndex = 0;
+    u32 releaseCount = work->head.count;
+    EffPCPGroupEntry *fragmentEntryCursor = work->entries;
+    u32 *duplicateHandleBase;
     u32 *duplicate;
 
-    if (count != 0) {
+    if (releaseCount != 0) {
         do {
-            u32 handle = entry->handle;
-            entry++;
-            i++;
-            effThunderReleaseFragmentWork((void *)handle);
-        } while (i < count);
+            u32 currentHandle = fragmentEntryCursor->handle;
+            fragmentEntryCursor++;
+            releaseIndex++;
+            effThunderReleaseFragmentWork((void *)currentHandle);
+        } while (releaseIndex < releaseCount);
     }
-    list = work->duplicates;
-    count = count * 4;
-    if (list != NULL) {
-        duplicate = list;
-        i = 0;
-        if (count != 0) {
+    duplicateHandleBase = work->duplicates;
+    releaseCount = releaseCount * 4;
+    if (duplicateHandleBase != NULL) {
+        duplicate = duplicateHandleBase;
+        releaseIndex = 0;
+        if (releaseCount != 0) {
             do {
-                u32 handle = *duplicate++;
-                if (handle != 0) {
-                    effDispatchParameterDataAndFreeWork(handle);
+                u32 currentHandle = *duplicate++;
+                if (currentHandle != 0) {
+                    effDispatchParameterDataAndFreeWork(currentHandle);
                 }
-                i++;
-            } while (i < count);
+                releaseIndex++;
+            } while (releaseIndex < releaseCount);
         }
         sdfReleaseResourceAllocation(work->duplicateHandle);
     }
