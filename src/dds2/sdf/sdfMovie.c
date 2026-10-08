@@ -3,6 +3,7 @@
 #include "sdf.h"
 #include "sdf_movie_stream.h"
 #include "sdf_movie_state.h"
+#include "sdf_stream_read.h"
 
 typedef struct DevState DevState;
 
@@ -255,7 +256,7 @@ s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddres
     MovLinearStream *stream = movie->stream;
 
     switch (operation) {
-    case 0:
+    case SDF_STREAM_READ_QUERY:
         if (movie->stopRequested != 0) {
             *(u8 *)data = 1;
             return 0;
@@ -264,7 +265,7 @@ s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddres
             *(u8 *)data = 1;
         }
         return stream->bufferedBytes;
-    case 1:
+    case SDF_STREAM_READ_COPY:
         if (movie->stopRequested != 0) {
             return 0;
         }
@@ -287,7 +288,7 @@ s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddres
             stream->bufferedBytes -= size;
             return movie->remainingBytes;
         }
-    case 2:
+    case SDF_STREAM_READ_RESUME:
         if (movie->stopRequested != 0) {
             return 0;
         }
@@ -309,7 +310,7 @@ s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddress, 
     MovPacStream *stream = movie->stream;
 
     switch (operation) {
-    case 0:
+    case SDF_STREAM_READ_QUERY:
         if (movie->stopRequested != 0) {
             *(u8 *)data = 1;
             return 0;
@@ -318,7 +319,7 @@ s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddress, 
             *(u8 *)data = 1;
         }
         return stream->pacBufferedBytes;
-    case 1:
+    case SDF_STREAM_READ_COPY:
         if (movie->stopRequested != 0) {
             return 0;
         }
@@ -341,7 +342,7 @@ s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddress, 
             stream->pacBufferedBytes -= size;
             return movie->remainingBytes;
         }
-    case 2:
+    case SDF_STREAM_READ_RESUME:
         if (movie->stopRequested != 0) {
             return 0;
         }
