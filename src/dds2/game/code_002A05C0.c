@@ -467,9 +467,20 @@ void mnuInitTitleSoundRemoteRequest(u32 wordCount) {
     D_00437A2C = 0;
 }
 
-extern u64 func_0034E820();
+extern s32 func_0034E820(s32, s32, ...);
+extern u64 D_00438FD0;
 
-INCLUDE_ASM(const s32, "game/code_002A05C0", func_002A1790);
+s32 func_002A1790(u32 source, u32 words) {
+    u64 status = func_0034E820(1, 0x8100, 0);
+
+    if ((D_00438FD0 & 0x1000000) == (status & 0x1000000)) {
+        return 0;
+    }
+    sndCopyWordsToIopSynchronously(source, D_00437A20[D_00437A2C & 1], words);
+    D_00438FD0 = status;
+    D_00437A2C ^= 1;
+    return 1;
+}
 
 /* The argument is a word count, not a source address; both use the EE buffer. */
 void sndUploadStreamToBothIopBuffers(u32 wordCount) {

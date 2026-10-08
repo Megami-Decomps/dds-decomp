@@ -4297,3 +4297,34 @@ The resource-handle result remains its genuine `u32` API representation.
 Both complete consumer units remain byte exact, with providers and `file.h`
 unchanged. This contract closure does not enable either motion-SE updater.
 
+
+## Remote sound status uses a signed word and a wide cache
+
+DDS2 `func_002A1790` is the native-identical twin of DDS1 `func_00269B80`.
+The remote SDK entry returns a signed word (`0034EA00` loads with `lw`,
+then `0034EA04` moves that word to `v0`), despite the stream-status cache
+being read and written with `ld`/`sd` at `002A17B8`/`002A17F8`.
+Declare the variadic SDK interface as `s32 (s32, s32, ...)`, promoting
+its result into the real `u64` status/cache, as the matched DDS1 twin does.
+Do not widen the SDK return or narrow the cache to force scheduling.
+
+## Native SCE filesystem records share one SDK owner
+
+`sce_io.h` owns the 0x40-byte `SceIoStat` and 0x144-byte `SceDirent`.
+These are project spellings for the SCE iox field layout: the directory
+record embeds its stat, followed by the 256-byte name at +0x40 and the
+private pointer at +0x140. Retail completion copies 0x140 bytes and one
+trailing word. Keep ordinary word alignment; do not import the modern
+[PS2SDK iox alignment attributes](https://github.com/ps2dev/ps2sdk/blob/master/common/include/iox_stat.h).
+
+The paired battle directory readers now use that complete record, rather
+than a short 64-character name view. Forward both directory and record to
+the SDK reader, and forward the directory to its closer. Each native
+scanner deliberately passes the saved directory in `$a0` when closing;
+the apparent no-argument SDK close reaches a descriptor lookup that
+consumes that input. Preserve built-in iteration and partial-list failures.
+
+The four stat providers, two movie units, and two battle-reader units
+remain exact. PiM's claimed effect-directory record copies are intentionally
+unchanged until that owner scope releases; this note does not claim that
+the movie scanners themselves have matching C.
