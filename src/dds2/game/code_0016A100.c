@@ -1,5 +1,6 @@
 #include "common.h"
 #include "eff_param.h"
+#include "eff_thunder_vector.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "btl_state.h"
@@ -88,45 +89,8 @@ extern void sdfReleaseChipBlock(void *p);
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
 
 /* Parameter head (0x4C bytes) copied verbatim into the work. */
-typedef struct {
-    u8 pad00[0x10];
-    u16 systemParam;    /* 0x10 */
-    u8 pad12[2];
-    u32 count;          /* 0x14 number of cells */
-    u8 pad18[4];
-    f32 scaledFirst;    /* 0x1C */
-    f32 scaledSecond;   /* 0x20 */
-    f32 rangeF24;       /* 0x24 */
-    u32 spreadA;        /* 0x28 modulus of the first cell counter */
-    u32 spreadB;        /* 0x2C modulus of the second cell counter */
-    u16 perCell;        /* 0x30 */
-    u8 pad32[0x04];
-    void *firstDispatchArg;  /* 0x38 first dispatch argument */
-    u32 pad3C;
-    void *secondDispatchArg; /* 0x40 second dispatch argument */
-    u32 pad44;
-    void *thirdDispatchArg;  /* 0x48 third dispatch argument */
-} EffThunderHead4C;
 
-typedef struct {
-    u32 unk00;
-    u32 unk04;
-    f32 dirA[3];        /* 0x08 */
-    f32 dirB[3];        /* 0x14 */
-    f32 f20;            /* 0x20 */
-    f32 f24;            /* 0x24 */
-    u32 unk28;
-} EffThunderCell2C; /* 0x2C */
 
-typedef struct {
-    EffThunderHead4C head;
-    EffThunderCell2C *cells; /* 0x4C */
-    u32 color;          /* 0x50 */
-    f32 baseFirst;      /* 0x54 */
-    f32 baseSecond;     /* 0x58 */
-    ParSystem *system;  /* 0x5C: allocated cell system */
-    struct SdfMemBlock *allocation; /* 0x60: containing work allocation */
-} EffThunderWork4C; /* 0x64 */
 
 typedef struct EffBattleUnitColorCommand {
     EffectVectorRequest request;
@@ -619,25 +583,25 @@ EffParamWork *effParamCreateFromTable(void *table, s32 index) {
 /* Allocate the copied head and its trailing cells as one block, then create
  * the cell system with native arguments groupDivisor=0 and kind=4.
  * Only three words per cell are zeroed here; vector/range storage is untouched. */
-EffThunderWork4C *effCreateThunderCellSystemWork(EffThunderHead4C *source) {
-    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(source->count * sizeof(EffThunderCell2C) + sizeof(EffThunderWork4C));
-    EffThunderWork4C *work = (EffThunderWork4C *)sdfResourceRetainAddress(allocation);
+EffThunderVectorWork *effCreateThunderCellSystemWork(EffThunderAlphaParams *source) {
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(source->cellCount * sizeof(EffThunderVectorCell) + sizeof(EffThunderVectorWork));
+    EffThunderVectorWork *work = (EffThunderVectorWork *)sdfResourceRetainAddress(allocation);
     u32 cellIndex;
 
-    work->head = *source;
-    work->cells = (EffThunderCell2C *)(work + 1);
-    work->baseFirst = source->scaledFirst;
-    work->baseSecond = source->scaledSecond;
-    work->allocation = allocation;
-    work->system = parAllocateCellSystem(work->head.count, work->head.perCell, 0, PAR_CELL_TOPOLOGY_FIVE_VECTOR);
-    parRiseFallSymmetricCellAlpha(work->system, work->head.firstDispatchArg, work->head.secondDispatchArg, work->head.thirdDispatchArg);
-    parSetCellDrawBucket(work->system, work->head.systemParam);
-    for (cellIndex = 0; cellIndex < work->head.count; cellIndex++) {
-        work->cells[cellIndex].unk00 = 0;
-        work->cells[cellIndex].unk04 = 0;
-        work->cells[cellIndex].unk28 = 0;
+    work->head.alpha = *source;
+    work->cells = (EffThunderVectorCell *)(work + 1);
+    work->baseRadiusScale = source->radiusScale;
+    work->baseHeightScale = source->heightScale;
+    work->allocationHandle = allocation;
+    work->cellSystem = parAllocateCellSystem(work->head.alpha.cellCount, work->head.alpha.perCell, 0, PAR_CELL_TOPOLOGY_FIVE_VECTOR);
+    parRiseFallSymmetricCellAlpha(work->cellSystem, work->head.alpha.centerAlphaWord, work->head.alpha.middleAlphaWord, work->head.alpha.edgeAlphaWord);
+    parSetCellDrawBucket(work->cellSystem, work->head.alpha.systemParam);
+    for (cellIndex = 0; cellIndex < work->head.alpha.cellCount; cellIndex++) {
+        work->cells[cellIndex].delayFrames = 0;
+        work->cells[cellIndex].activeFrames = 0;
+        work->cells[cellIndex].color = 0;
     }
-    work->color = 0x80808080;
+    work->tintColor = 0x80808080;
     return work;
 }
 

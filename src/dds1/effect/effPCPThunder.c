@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_thunder_vector.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "btl_sound.h"
@@ -10,7 +11,6 @@
 
 /* Packed effect parameter-set accessor shared with the effect constructors. */
 extern void *effParamTableGetBlock(void *data, s32 index);
-extern void *effCreateThunderCellSystemWork(void *work);
 
 extern void parFillSymmetricCellColors(u32 param0, u32 param1, void *cells, u32 param3);
 extern void parDecreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
@@ -37,49 +37,6 @@ extern u8 D_0034DF38[];
 #define EFF_THUNDER_SINGLE_CELL 1
 #define EFF_THUNDER_ENDPOINT_VECTOR_BYTES 0x10
 #define EFF_THUNDER_MIN_ACTIVE_FRAMES 1
-
-/* Parameter head (0x4C bytes) copied verbatim into the work. */
-typedef struct {
-    f32 origin[4];     /* 0x00 complete origin quadword */
-    u16 systemParam;    /* 0x10 */
-    u8 pad12[2];
-    u32 cellCount;      /* 0x14 number of cells */
-    u8 pad18[4];
-    f32 radiusScale;    /* 0x1C halves and jitters the initial X/Z radius */
-    f32 heightScale;    /* 0x20 scales the separately sampled Y component */
-    f32 rotationScale;  /* 0x24 randomized before constructing the rotation */
-    u32 startDelayRange; /* 0x28 modulus of delayFrames */
-    u32 activeFrameRange; /* 0x2C modulus of activeFrames before adding one */
-    u16 perCell;        /* 0x30 */
-    u8 pad32[0xA];
-    f32 bandWidth;     /* 0x3C */
-    void *dispatchArg;  /* 0x40 */
-    f32 edgeWidth;     /* 0x44 */
-    u8 pad48[4];
-} EffThunderVectorParams;
-typedef char EffThunderVectorParamsSizeCheck[sizeof(EffThunderVectorParams) == 0x4C ? 1 : -1];
-
-typedef struct {
-    u32 delayFrames;
-    u32 activeFrames;
-    f32 placementVector[3]; /* 0x08 unit X/Z direction, with a separate Y height */
-    f32 rotationAxis[3]; /* 0x14 normalized axis */
-    f32 rotationScale;  /* 0x20 scales the per-update random rotation angle */
-    f32 radius;         /* 0x24 scales the X/Z direction during placement */
-    u32 color;         /* 0x28 */
-} EffThunderVectorCell; /* 0x2C */
-
-/* Both vector-based variants allocate this 0x64-byte work followed by cells.
-   Their scale, tint and teardown callbacks use the same constructor layout. */
-typedef struct EffThunderVectorWork {
-    EffThunderVectorParams head;
-    EffThunderVectorCell *cells; /* 0x4C */
-    u32 tintColor;      /* 0x50 multiplies each cell's sampled/faded color */
-    f32 baseRadiusScale; /* 0x54 retained for absolute scale callbacks */
-    f32 baseHeightScale; /* 0x58 retained for absolute scale callbacks */
-    ParSystem *cellSystem; /* 0x5C: allocated cell system */
-    SdfMemBlock *allocationHandle; /* 0x60: allocation descriptor */
-} EffThunderVectorWork; /* 0x64 */
 
 /* Delay and active countdowns, followed by an alpha fade of the sampled color. */
 typedef struct {
@@ -141,13 +98,13 @@ void effThunderSetVectorTint(EffThunderVectorWork *work, u32 tintColor) {
 
 /* Absolute radius/height scaling from the retained constructor values. */
 void effThunderScaleVectorDimensions(f32 factor, EffThunderVectorWork *work) {
-    work->head.radiusScale = work->baseRadiusScale * factor;
-    work->head.heightScale = work->baseHeightScale * factor;
+    work->head.vector.radiusScale = work->baseRadiusScale * factor;
+    work->head.vector.heightScale = work->baseHeightScale * factor;
 }
 
-/* Preserve the caller's word unchanged; its wider callback role is unknown. */
-u32 func_00163540(u32 value) {
-    return value;
+/* The copied parameter head starts at the beginning of the full work. */
+EffThunderParameterHead *effThunderGetParameterHead(EffThunderVectorWork *work) {
+    return &work->head;
 }
 
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
@@ -160,15 +117,15 @@ void effThunderCellRestart(EffThunderVectorWork *work, s32 index) {
     EffThunderVectorCell *cell = work->cells + index;
     f32 scratchVector[EFF_THUNDER_VECTOR_COMPONENTS];
 
-    cell->delayFrames = effMiscRand(D_0034DF38) % work->head.startDelayRange;
-    cell->activeFrames = effMiscRand(D_0034DF38) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    cell->delayFrames = effMiscRand(D_0034DF38) % work->head.vector.startDelayRange;
+    cell->activeFrames = effMiscRand(D_0034DF38) % work->head.vector.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
     scratchVector[0] = (effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
     scratchVector[1] = 0;
     scratchVector[2] = (effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
     VU0_LOAD_VF(vf10, scratchVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, scratchVector);
-    scratchVector[1] = work->head.heightScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN);
+    scratchVector[1] = work->head.vector.heightScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN);
     cell->placementVector[0] = scratchVector[0];
     cell->placementVector[1] = scratchVector[1];
     cell->placementVector[2] = scratchVector[2];
@@ -181,8 +138,8 @@ void effThunderCellRestart(EffThunderVectorWork *work, s32 index) {
     cell->rotationAxis[0] = scratchVector[0];
     cell->rotationAxis[1] = scratchVector[1];
     cell->rotationAxis[2] = scratchVector[2];
-    cell->rotationScale = work->head.rotationScale * ((effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_ROTATION_JITTER + 1.0f);
-    cell->radius = work->head.radiusScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_RADIUS_JITTER + 1.0f);
+    cell->rotationScale = work->head.vector.rotationScale * ((effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_ROTATION_JITTER + 1.0f);
+    cell->radius = work->head.vector.radiusScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_RADIUS_JITTER + 1.0f);
     cell->color = EFF_THUNDER_NEUTRAL_COLOR;
 }
 
@@ -220,8 +177,8 @@ void effThunderBuildVectorHistory(EffThunderVectorWork *work, s32 index) {
     source = &work->cells[index];
     vertices = cell->history;
     widthScale = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.2f + 1.0f;
-    VEC3_SPLAT(width, work->head.bandWidth * widthScale);
-    VEC3_SPLAT(outerWidth, width[0] + work->head.edgeWidth * widthScale);
+    VEC3_SPLAT(width, work->head.vector.bandWidth * widthScale);
+    VEC3_SPLAT(outerWidth, width[0] + work->head.vector.edgeWidth * widthScale);
     originalAxis[0] = source->rotationAxis[0];
     originalAxis[1] = source->rotationAxis[1];
     originalAxis[2] = source->rotationAxis[2];
@@ -235,7 +192,7 @@ void effThunderBuildVectorHistory(EffThunderVectorWork *work, s32 index) {
     placement[0] = source->placementVector[0];
     placement[1] = 0.0f;
     placement[2] = source->placementVector[2];
-    PCP_COPY_VECTOR(origin, work->head.origin);
+    PCP_COPY_VECTOR(origin, work->head.vector.origin);
     origin[1] += source->placementVector[1];
 
     for (i = 0; i < count; i++) {
@@ -317,7 +274,7 @@ void effThunderRotateVectorPlacementAndHistory(EffThunderVectorWork *work, s32 i
     VU0_STORE_VF_UNCLOBBERED(vf10, direction);
     source->placementVector[0] = direction[0];
     source->placementVector[2] = direction[2];
-    VU0_LOAD_VF(vf11, work->head.origin);
+    VU0_LOAD_VF(vf11, work->head.vector.origin);
     for (i = 0; i < rows; i++) {
         VU0_LOAD_VF(vf10, vertices);
         VU0_SUB_EXTENDED(vf10, vf10, vf11);
@@ -357,7 +314,7 @@ extern void effThunderRotateVectorPlacementAndHistory(EffThunderVectorWork *, s3
 void effThunderUpdateVectorCells(EffThunderVectorWork *work) {
     s32 i = 0;
     ParSystem *renderSystem = work->cellSystem;
-    s32 cellCount = work->head.cellCount;
+    s32 cellCount = work->head.vector.cellCount;
     u32 tintColor = work->tintColor;
     EffThunderVectorCell *cell = work->cells;
     ParCell *renderCells = renderSystem->cells;
@@ -397,15 +354,15 @@ EffThunderVectorWork *effThunderWorkCreate(EffThunderVectorParams *parameters) {
     EffThunderVectorWork *work = (EffThunderVectorWork *)sdfResourceRetainAddress(allocationHandle);
     u32 i;
 
-    work->head = *parameters;
+    work->head.vector = *parameters;
     work->cells = (EffThunderVectorCell *)(work + 1);
     work->baseRadiusScale = parameters->radiusScale;
     work->baseHeightScale = parameters->heightScale;
     work->allocationHandle = allocationHandle;
-    work->cellSystem = parAllocateCellSystem(work->head.cellCount, work->head.perCell, 0, PAR_CELL_TOPOLOGY_PAIR);
-    parDispatchSub(work->cellSystem, 2, work->head.dispatchArg, work->head.dispatchArg);
-    parSetCellDrawBucket(work->cellSystem, work->head.systemParam);
-    for (i = 0; i < work->head.cellCount; i++) {
+    work->cellSystem = parAllocateCellSystem(work->head.vector.cellCount, work->head.vector.perCell, 0, PAR_CELL_TOPOLOGY_PAIR);
+    parDispatchSub(work->cellSystem, 2, work->head.vector.dispatchArg, work->head.vector.dispatchArg);
+    parSetCellDrawBucket(work->cellSystem, work->head.vector.systemParam);
+    for (i = 0; i < work->head.vector.cellCount; i++) {
         work->cells[i].delayFrames = 0;
         work->cells[i].activeFrames = 0;
         work->cells[i].color = 0;
@@ -445,8 +402,8 @@ void effThunderSetIndexedVectorTint(EffThunderVectorWork *work, u32 tintColor) {
 
 /* Absolute radius/height scaling for the indexed variant; repeated calls do not compound. */
 void effThunderScaleIndexedVectorDimensions(f32 factor, EffThunderVectorWork *work) {
-    work->head.radiusScale = work->baseRadiusScale * factor;
-    work->head.heightScale = work->baseHeightScale * factor;
+    work->head.vector.radiusScale = work->baseRadiusScale * factor;
+    work->head.vector.heightScale = work->baseHeightScale * factor;
 }
 
 /* Preserve the caller's word unchanged; its wider callback role is unknown. */
@@ -460,15 +417,15 @@ void effThunderRestartIndexedCell(EffThunderVectorWork *work, s32 index) {
     EffThunderVectorCell *cell = work->cells + index;
     f32 scratchVector[EFF_THUNDER_VECTOR_COMPONENTS];
 
-    cell->delayFrames = effMiscRand(D_0034DF38) % work->head.startDelayRange;
-    cell->activeFrames = effMiscRand(D_0034DF38) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    cell->delayFrames = effMiscRand(D_0034DF38) % work->head.vector.startDelayRange;
+    cell->activeFrames = effMiscRand(D_0034DF38) % work->head.vector.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
     scratchVector[0] = (effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
     scratchVector[1] = 0;
     scratchVector[2] = (effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
     VU0_LOAD_VF(vf10, scratchVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, scratchVector);
-    scratchVector[1] = work->head.heightScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN);
+    scratchVector[1] = work->head.vector.heightScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN);
     cell->placementVector[0] = scratchVector[0];
     cell->placementVector[1] = scratchVector[1];
     cell->placementVector[2] = scratchVector[2];
@@ -481,8 +438,8 @@ void effThunderRestartIndexedCell(EffThunderVectorWork *work, s32 index) {
     cell->rotationAxis[0] = scratchVector[0];
     cell->rotationAxis[1] = scratchVector[1];
     cell->rotationAxis[2] = scratchVector[2];
-    cell->rotationScale = work->head.rotationScale * ((effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_ROTATION_JITTER + 1.0f);
-    cell->radius = work->head.radiusScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_RADIUS_JITTER + 1.0f);
+    cell->rotationScale = work->head.vector.rotationScale * ((effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_ROTATION_JITTER + 1.0f);
+    cell->radius = work->head.vector.radiusScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(D_0034DF38) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_RADIUS_JITTER + 1.0f);
     cell->color = EFF_THUNDER_NEUTRAL_COLOR;
 }
 
@@ -514,7 +471,7 @@ void effThunderBuildIndexedVectorHistory(EffThunderVectorWork *work, s32 index) 
     source = &work->cells[index];
     vertices = cell->history;
     widthScale = (effMiscRandUnitFloat(D_0034DF38) - 0.5f) * 2.0f * 0.3f + 1.0f;
-    VEC3_SPLAT(width, work->head.bandWidth * widthScale);
+    VEC3_SPLAT(width, work->head.vector.bandWidth * widthScale);
     originalAxis[0] = source->rotationAxis[0];
     originalAxis[1] = source->rotationAxis[1];
     originalAxis[2] = source->rotationAxis[2];
@@ -527,7 +484,7 @@ void effThunderBuildIndexedVectorHistory(EffThunderVectorWork *work, s32 index) 
     placement[0] = source->placementVector[0];
     placement[1] = 0.0f;
     placement[2] = source->placementVector[2];
-    PCP_COPY_VECTOR(origin, work->head.origin);
+    PCP_COPY_VECTOR(origin, work->head.vector.origin);
     origin[1] += source->placementVector[1];
 
     for (i = 0; i < count; i++) {
@@ -598,7 +555,7 @@ void effThunderRotateIndexedPlacementAndHistory(EffThunderVectorWork *work, s32 
     VU0_STORE_VF_UNCLOBBERED(vf10, direction);
     source->placementVector[0] = direction[0];
     source->placementVector[2] = direction[2];
-    VU0_LOAD_VF(vf11, work->head.origin);
+    VU0_LOAD_VF(vf11, work->head.vector.origin);
     for (i = 0; i < rows; i++) {
         VU0_LOAD_VF(vf10, vertices);
         VU0_SUB_EXTENDED(vf10, vf10, vf11);
@@ -623,7 +580,7 @@ extern void effThunderRotateIndexedPlacementAndHistory(EffThunderVectorWork *, s
 void effThunderUpdateIndexedVectorCells(EffThunderVectorWork *work) {
     s32 i = 0;
     ParSystem *renderSystem = work->cellSystem;
-    s32 cellCount = work->head.cellCount;
+    s32 cellCount = work->head.vector.cellCount;
     u32 tintColor = work->tintColor;
     EffThunderVectorCell *cell = work->cells;
     ParCell *renderCells = renderSystem->cells;
