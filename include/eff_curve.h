@@ -24,4 +24,13 @@ typedef struct EffScalarTrack {
     u8 reserved24[8];
 } EffScalarTrack; /* 0x2C */
 
+f32 effSampleScalarCurve(const EffScalarCurve *curve, s32 frame, s32 duration);
+
+struct SdfColorTrack;
+struct SdfAlphaTrack;
+
+u32 effSampleColorAlphaTracks(const struct SdfColorTrack *colorTrack,
+                              const struct SdfAlphaTrack *alphaTrack,
+                              s32 frame, s32 duration);
+
 #endif
