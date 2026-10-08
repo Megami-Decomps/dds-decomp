@@ -99,8 +99,7 @@ typedef struct SdfPartyUnit {
 } SdfPartyUnit;
 
 
-struct DatUnitStatus;
-extern s32 datGetStatWithStatusOverride(struct DatUnitStatus *, s32 statIndex);
+extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32 statIndex);
 
 extern u32 sdfRollActionHit(s32 channel, s32 arg1, SdfPackedValue *item);
 
@@ -415,7 +414,7 @@ s32 ptyComputeMaxHp(DatPartyRecord *unit) {
                 unit->unitId * 76))->maxHp;
     }
     level = unit->level;
-    stat = datGetStatWithStatusOverride((struct DatUnitStatus *)unit, 1);
+    stat = datGetStatWithStatusOverride(unit, 1);
     result = level * 4.0f +
              stat * datBattleParameters->maxHpGrowth[level - 1] + 10.0f;
     if ((unit->flags & SDF_UNIT_ENEMY) == 0) {
@@ -437,7 +436,7 @@ s32 ptyComputeMaxMp(DatPartyRecord *unit) {
                 unit->unitId * 76))->maxMp;
     }
     level = unit->level;
-    stat = datGetStatWithStatusOverride((struct DatUnitStatus *)unit, 2);
+    stat = datGetStatWithStatusOverride(unit, 2);
     result = level * 4.0f +
              stat * datBattleParameters->maxMpGrowth[level - 1] + 8.0f;
     if ((unit->flags & SDF_UNIT_ENEMY) == 0) {

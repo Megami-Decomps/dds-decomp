@@ -110,7 +110,7 @@ extern s32 scrSetIntegerReturnValue();
 
 extern s32 scrReadIntParameter(s32 idx);
 
-extern s32 datGetStatWithStatusOverride(s32 arg0, s32 arg1);
+extern s32 datGetStatWithStatusOverride(DatPartyRecord *unit, s32 statIndex);
 
 
 extern s32 datRosterDetails;
@@ -1276,7 +1276,7 @@ s32 evtPushSecondRosterOptionStat(void) {
 s32 evtPushFirstRosterStatEligibility(void) {
     s32 statIndex = scrReadIntParameter(0);
 
-    scrSetIntegerReturnValue(datGetStatWithStatusOverride(D_0043E5C0.first, statIndex));
+    scrSetIntegerReturnValue(datGetStatWithStatusOverride((DatPartyRecord *)D_0043E5C0.first, statIndex));
     return 1;
 }
 
@@ -1284,7 +1284,7 @@ s32 evtPushFirstRosterStatEligibility(void) {
 s32 evtPushSecondRosterStatEligibility(void) {
     s32 statIndex = scrReadIntParameter(0);
 
-    scrSetIntegerReturnValue(datGetStatWithStatusOverride(D_0043E5C0.second, statIndex));
+    scrSetIntegerReturnValue(datGetStatWithStatusOverride((DatPartyRecord *)D_0043E5C0.second, statIndex));
     return 1;
 }
 

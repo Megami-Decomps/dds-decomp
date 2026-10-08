@@ -134,7 +134,7 @@ extern void fldClearSceneSlotsAndGroups(void);
 
 u32 btlHasRegisteredGuidePanelTask(void);
 
-u32 func_001A29D0(s32 arg0, s32 arg1);
+s32 func_001A29D0(DatPartyRecord *unit, s32 statIndex);
 
 void btlRequestGuidePanelClose(void);
 
@@ -798,7 +798,8 @@ void btlSortSceneGroupByPriorityDesc(BtlTask **group, s32 entryCount) {
             BtlTask *first = pairCursor[0];
             BtlTask *second = pairCursor[1];
             if (first != 0 && second != 0 &&
-                func_001A29D0((s32)&first->unit->partyRecord, 3) < func_001A29D0((s32)&second->unit->partyRecord, 3)) {
+                (u32)func_001A29D0(&first->unit->partyRecord, 3) <
+                (u32)func_001A29D0(&second->unit->partyRecord, 3)) {
                 pairCursor[0] = second;
                 swapped = 1;
                 pairCursor[1] = first;
