@@ -149,7 +149,6 @@ typedef struct {
     s32 unkC;
 } TmpBuf;
 
-SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id);
 
 void sdfMotionBindDrawNode(void *tmp, void *src, void *tbl, s32 x);
 
