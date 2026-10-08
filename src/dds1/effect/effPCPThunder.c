@@ -576,7 +576,7 @@ void effThunderBuildIndexedVectorHistory(EffThunderVectorWork *work, s32 index) 
 /* Rotate the live placement direction and every two-vector history row
  * around the effect origin. The separate placement height is preserved.
  */
-void func_001645A0(EffThunderVectorWork *work, s32 index) {
+void effThunderRotateIndexedPlacementAndHistory(EffThunderVectorWork *work, s32 index) {
     f32 axis[4] __attribute__((aligned(16)));
     f32 direction[4] __attribute__((aligned(16)));
     ParSystem *system = work->cellSystem;
@@ -620,7 +620,7 @@ void func_001645A0(EffThunderVectorWork *work, s32 index) {
 
 
 extern void effThunderBuildIndexedVectorHistory(EffThunderVectorWork *, s32);
-extern void func_001645A0(EffThunderVectorWork *, s32);
+extern void effThunderRotateIndexedPlacementAndHistory(EffThunderVectorWork *, s32);
 
 /* Indexed vector countdown/fade/restart with shared tint and native render-cell stride.
    Fade is unsigned wrap-add; submission is unconditional after the signed-count loop. */
@@ -639,11 +639,11 @@ void effThunderUpdateIndexedVectorCells(EffThunderVectorWork *work) {
             if (cell->delayFrames == 0) {
                 if (cell->activeFrames != 0) {
                     effThunderBuildIndexedVectorHistory(work, i);
-                    func_001645A0(work, i);
+                    effThunderRotateIndexedPlacementAndHistory(work, i);
                     cell->activeFrames--;
                 } else if (cell->color & EFF_THUNDER_ALPHA_MASK) {
                     cell->color += EFF_THUNDER_ALPHA_WRAP_ADD;
-                    func_001645A0(work, i);
+                    effThunderRotateIndexedPlacementAndHistory(work, i);
                 } else {
                     effThunderRestartIndexedCell(work, i);
                     parCellInit(work->cellSystem, i);
