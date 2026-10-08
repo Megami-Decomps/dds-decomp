@@ -155,11 +155,52 @@ s32 brsCalcExpGain(DatPartyRecord *unit, s32 exp) {
     return result;
 }
 
-u32 func_0029D000(void) {
+s32 func_0029D000(DatPartyRecord *unit) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029CC90", func_0029D008);
+s32 func_0029D008(BrsRewardBatch *batch, BrsRewardSummary *summary) {
+    s32 i;
+    /* Value blocks are interleaved with each row's party-record pointer. */
+    u8 *values = (u8 *)&batch->rows + sizeof(batch->rows[0].unit);
+
+    memset(batch, 0, sizeof(*batch));
+    for (i = 0; i < 5; i++) {
+        DatPartyRecord *unit = &datGameState->party[i];
+        u16 occupied = unit->flags & 1;
+        if (occupied != 0 && (unit->status & 0x4000) == 0 && unit->unitId != 9) {
+            DatProfileRecord *profile;
+            s32 ap;
+            s32 exp;
+
+            batch->rows[batch->count].unit = unit;
+            ((BrsRewardValues *)(values +
+                batch->count * sizeof(BrsRewardRow)))->partySlot = i;
+            profile = ptyGetCurrentProfileRecord(unit);
+            ap = func_0029CF00(unit, summary->totalAp, summary->unitApBonus[i]);
+            exp = brsCalcExpGain(unit, summary->totalExp);
+            if (unit->profileId == 0) {
+                ap = 0;
+            }
+            if (func_0029D000(unit) != 0) {
+                ap = 0;
+            }
+            {
+                BrsRewardValues *currentValues = (BrsRewardValues *)(values +
+                    batch->count * sizeof(BrsRewardRow));
+                currentValues->amount = ap;
+            }
+            ((BrsRewardValues *)(values +
+                batch->count * sizeof(BrsRewardRow)))->secondaryValue = exp;
+            ((BrsRewardValues *)(values +
+                batch->count * sizeof(BrsRewardRow)))->profileValue = profile->value;
+            ((BrsRewardValues *)(values +
+                batch->count * sizeof(BrsRewardRow)))->totalExp = unit->totalExp;
+            batch->count++;
+        }
+    }
+    return batch->count;
+}
 
 
 INCLUDE_ASM(const s32, "game/code_0029CC90", ptyCalcLevelUps);
