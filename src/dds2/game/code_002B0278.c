@@ -3315,9 +3315,6 @@ u32 mnuTestListFlagTwo(u32 *flags) {
 /* Return the stored row step times the visible row count, in native units. */
 s32 mnuGetListViewportHeight(MenuList *list);
 
-/* Cancel the pending animation on every node in this list. */
-void mnuResetListNodeFadeCounters(MenuList *list);
-
 /* Subtract the fade step only when positive, then clamp any negative result to zero. */
 void mnuDecreaseListNodeFadeCounters(u8 *menu);
 

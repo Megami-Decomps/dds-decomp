@@ -72,6 +72,8 @@ struct MenuList {
 
 /* Select the indexed node and report whether the index exists. */
 s32 mnuSeekListNode(s32 index, struct MenuList *list);
+/* Clear the animation timer on every node in the list. */
+void mnuResetListNodeFadeCounters(struct MenuList *list);
 
 struct MenuWindowContainer;
 struct MenuListNode *mnuListAppendNode(struct MenuList *list, const void *value);
