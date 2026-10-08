@@ -316,7 +316,6 @@ extern u32 D_003308B0[];
 extern u32 fileRequestIsReady(u32 arg0);
 extern void *memset(void *s, s32 c, u32 n);
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 extern s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task);
 extern s32 kwlnTaskIsRegistered(u32 arg0);
 extern s32 func_00213B50(void);

@@ -3,8 +3,6 @@
 #include "scr.h"
 #include "dat_state.h"
 
-extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
-
 
 void scrSetCurrentActor(KwlnTask *task, void *actor) {
     ScrData *context;
