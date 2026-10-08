@@ -7,6 +7,7 @@
 #include "mnu_mantra_grid.h"
 #include "mnu_sprite_resource.h"
 #include "sdf_grid.h"
+#include "mnu_scene_work.h"
 
 extern void sdfReleaseChipBlock(void *);
 /* Retail retains a jal and epilogue; default TU -O2 changes the shape. */
@@ -109,54 +110,6 @@ typedef struct MantraPrerequisiteRecord {
     u8 flags[4];
 } MantraPrerequisiteRecord;
 
-typedef struct MantraPulseAnimationWork {
-    s32 frame;
-    u8 pad568[4];
-    s16 alpha[4];
-} MantraPulseAnimationWork;
-
-typedef struct MantraSceneCoordinates {
-    s32 x;
-    s32 y;
-} MantraSceneCoordinates;
-
-typedef struct MantraSceneTransitionList {
-    u8 pad00[8];
-    struct MnuTransRec *first;
-} MantraSceneTransitionList;
-
-/* Same display-work owner as the grid callback producer. */
-typedef struct MantraPulseDisplayWork {
-    s32 allocationHandle;
-    u8 pad004[0x480];
-    struct MenuGrid *gridHandle;
-    u32 gridRefreshControl[2];
-    s32 gridFrame;
-    u8 pad494[8];
-    MantraSceneCoordinates coordinates[10];
-    s32 pendingMantras[8];
-    u8 pad50C[0x34];
-    s32 coordinateA;
-    s32 coordinateB;
-    u8 pad548[8];
-    s32 transitionState;
-    u8 pad554[0xC];
-    s32 alpha;
-    MantraPulseAnimationWork pulse;
-    u8 pad574[0x10];
-    MantraSceneTransitionList transitions[2];
-    s16 cursorX;
-    s16 cursorY;
-    s16 scrollX;
-    s16 scrollY;
-    s16 targetX;
-    s16 targetY;
-    u8 pad5A8[4];
-    u8 flags;
-    u8 cursorMoving;
-    u8 pad5AE[2];
-} MantraPulseDisplayWork;
-
 extern MantraPrerequisiteRecord D_0036AE80[];
 extern char D_003BC458[];
 extern char D_003BC488[];
@@ -176,7 +129,7 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
     MnuProfileProgress *selection;
     MantraPrerequisiteState *states;
     MantraPrerequisiteRecord *record;
-    MantraPulseDisplayWork *display;
+    MenuSceneWork *display;
     s8 i;
     s32 alpha;
     u32 flags;
@@ -188,9 +141,9 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
     }
     selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
     states = (MantraPrerequisiteState *)(u32)grid->userData;
-    display = (MantraPulseDisplayWork *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
+    display = (MenuSceneWork *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
     record = &D_0036AE80[scene->sceneId];
-    alpha = display->alpha;
+    alpha = display->displayAlpha;
     memset(prerequisiteFlags, 0, sizeof(prerequisiteFlags));
     if (record->unk00 == 0) {
         for (i = 0; i < 4 && record->ids[i] != 0; i++) {
@@ -284,7 +237,7 @@ void func_0025AD68(s32 frame, s32 size, s32 param) {
     func_0024E260(0, 0, 0, (s32)(scale * t), 3, param);
 }
 
-void func_0025AE80(MantraPulseDisplayWork *display, s32 inputScale, s32 param) {
+void func_0025AE80(MenuSceneWork *display, s32 inputScale, s32 param) {
     s8 enabled[4] __attribute__((aligned(4)));
     const u32 clearWord = 0;
     MantraPulseAnimationWork *pulse = &display->pulse;
@@ -292,26 +245,26 @@ void func_0025AE80(MantraPulseDisplayWork *display, s32 inputScale, s32 param) {
     s32 i;
 
     memcpy(enabled, &clearWord, sizeof(enabled));
-    if (display->scrollY != 0) {
+    if (display->cursorPosition.y != 0) {
         enabled[0] = 1;
     }
-    if (display->scrollY < 0x38E) {
+    if (display->cursorPosition.y < 0x38E) {
         enabled[1] = 1;
     }
-    if (display->scrollX != 0) {
+    if (display->cursorPosition.x != 0) {
         enabled[2] = 1;
     }
 
-    if (display->flags & 4) {
+    if (display->boundsFlags & 4) {
         threshold = 0x307;
-    } else if (display->flags & 2) {
+    } else if (display->boundsFlags & 2) {
         threshold = 0x2C8;
-    } else if (display->flags & 1) {
+    } else if (display->boundsFlags & 1) {
         threshold = 0x24C;
     } else {
         threshold = 0x1BE;
     }
-    if (display->scrollX < threshold) {
+    if (display->cursorPosition.x < threshold) {
         enabled[3] = 1;
     }
 
@@ -445,4 +398,3 @@ INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4C0);
 INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4C8);
 
 INCLUDE_SDATA(const s32, "game/code_00259498", mnuSceneResourceContext);
-
