@@ -13,9 +13,6 @@
 /* Packed effect parameter-set accessor shared with the effect constructors. */
 extern void *effParamTableGetBlock(void *data, s32 index);
 
-extern void parFillSymmetricCellColors(u32 param0, u32 param1, void *cells, u32 param3);
-extern void parDecreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
-extern void parIncreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
 extern u32 effMiscRand(void *state);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_003AA868[];
@@ -1049,17 +1046,17 @@ EffThunderFragmentParams *effThunderGetFragmentParameters(EffThunderFragmentWork
 
 /* Forward the system and its opaque fragment configuration through the native call. */
 void func_0016D298(EffThunderFragmentWork *work) {
-    parDecreaseSymmetricCellAlpha((u32)work->system, work->head.arg40, (void *)work->head.arg48, work->head.arg50);
+    parDecreaseSymmetricCellAlpha(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
 }
 
 /* Alternate native operation on the same system and opaque fragment configuration. */
 void func_0016D2C0(EffThunderFragmentWork *work) {
-    parIncreaseSymmetricCellAlpha((u32)work->system, work->head.arg40, (void *)work->head.arg48, work->head.arg50);
+    parIncreaseSymmetricCellAlpha(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
 }
 
 /* Apply symmetric cell-color bands using the fragment configuration's native arguments. */
 void effThunderApplyFragmentColorBands(EffThunderFragmentWork *work) {
-    parFillSymmetricCellColors((u32)work->system, work->head.arg40, (void *)work->head.arg48, work->head.arg50);
+    parFillSymmetricCellColors(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
 }
 
 /* Resample delay/active countdowns and restore the fixed fragment grey.
