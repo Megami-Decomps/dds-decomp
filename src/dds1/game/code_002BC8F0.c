@@ -896,18 +896,21 @@ u32 effConfigureIndexedSlotResource(s32 work, s32 index, s32 data, s32 item, u32
     return 1;
 }
 
-u32 effConfigureIndexedSlotMaterial(s32 work, s32 index, s32 data, s32 item,
+u32 effConfigureIndexedSlotMaterial(EffectSlotSet *work, s32 index,
+                  EffMappedResource *data, s32 item,
                   u32 flags, u32 color, u32 option) {
-    BdWork *effect = &((EffectSlotSet *)work)->workEntries[index];
-    effSetSlotResourceAndFlags(&effect->states[0], (u32)&((EffMappedResource *)data)->records[item], option);
-    effUpdateTimedStates((EffectSlotSet *)work, index, effect);
+    BdWork *effect = &work->workEntries[index];
+    effSetSlotResourceAndFlags(&effect->states[0], (u32)&data->records[item], option);
+    effUpdateTimedStates(work, index, effect);
     effect->states[0].materialFlags = flags;
     effect->states[0].materialValue = color;
     return 1;
 }
 
-u32 effConfigureWithDefaultSetting(u32 effect, u32 slot, u32 kind, u32 value, u32 flags, u32 color) {
-    effConfigureIndexedSlotMaterial(effect, slot, kind, value, flags, 0, color);
+u32 effConfigureWithDefaultSetting(EffectSlotSet *effect, u32 slot,
+                                   EffMappedResource *resources, u32 item,
+                                   u32 flags, u32 color) {
+    effConfigureIndexedSlotMaterial(effect, slot, resources, item, flags, 0, color);
     return 1;
 }
 
