@@ -14,7 +14,7 @@ extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
 extern void func_0028D070(MnuStatusResource *, s32, s32);
 extern void mnuStoreMantraPanelFlagsToScript(MnuStatusResource *);
 extern void mnuReleaseMiddleMantraSpriteSlots(void);
-extern void kwlnFadeOutStart(s32, s32, s32, s32);
+extern void kwlnFadeOutStart(s8, s8, s8, s32);
 extern void mnuMarkTitleStreamResetPending(void);
 extern void mnuResetTitleStreamLocked(void);
 extern void mdlFlagSet(u16);
@@ -280,10 +280,44 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_00289BA0);
 
 extern void func_0028E858(s32 object);
 
-/* Opens the mantra menu: collects the list's node ids and starts the AT3 load. */
+/* Opens mantra selection, saving party record addresses and starting the AT3 load. */
 extern void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *);
 
-INCLUDE_ASM(const s32, "game/code_00289058", mnuOpenMantraSelectionAndLoadTitleStream);
+extern void evtStageTestInit(s32);
+extern void func_002A2200(s32);
+extern void mnuResetTitleStreamAfterFileIdle(void);
+const char D_00426360[16] = "AT3 LOAD!!\n";
+
+void mnuOpenMantraSelectionAndLoadTitleStream(MnuStatusResource *object) {
+    MantraMenuWork *work = &object->menu;
+    struct MenuListNode *node;
+    DatPartyRecord *selectedValue = object->list->cursor->partyRecord;
+    s32 count;
+
+    work->drawBits.drawEnabled = 0;
+    work->drawBits.mode = 1;
+    work->defaultSelector = mnuGetMantraNodePositionRecord(
+        (s16)scrGetSelectedScriptEntryId(selectedValue));
+    func_0028E858((s32)object);
+
+    node = object->list->first;
+    count = 0;
+    while (node != 0) {
+        work->collectedValues[count++] = node->unk70;
+        node = node->next;
+    }
+    work->collectedCount = count;
+    work->savedSelection = object->list->cursor->index;
+    func_0028D070(object, 5, 0);
+    evtStageTestInit(0);
+    kwlnFadeOutStart(0, 0, 0, 0);
+    evtPrintDeveloperConsoleMessage(D_00426360);
+    mnuMarkTitleStreamResetPending();
+    mnuResetTitleStreamLocked();
+    func_002A2200(16);
+    mnuResetTitleStreamAfterFileIdle();
+}
+
 
 extern void mnuDestroyMantraDrawPool(struct MantraDrawPool *pool);
 extern void evtReleaseMantraSelectionWork(u32 *p);

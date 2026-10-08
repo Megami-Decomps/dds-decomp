@@ -844,6 +844,8 @@ BtlRuntimeTask *btlCreateEffectWaitTask(BtlUnit *owner, u16 mode) {
     return task;
 }
 
+extern u32 btlRequestAnalysisPanelClose(void);
+
 typedef struct BtlWaitTask {
     s32 value;
     u32 ticks;
@@ -860,7 +862,7 @@ s32 btlWaitEffectTask(BtlWaitTask *task) {
         if (btlGetRegisteredTaskValueOrDefault() == 1) {
             if (D_00324510[0x21] < 0 || D_00324510[0x23] < 0) {
                 func_001BCB88(1, 8);
-                func_001AD428();
+                btlRequestAnalysisPanelClose();
                 return 1;
             }
         }
