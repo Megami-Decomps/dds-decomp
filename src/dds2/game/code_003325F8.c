@@ -285,11 +285,11 @@ u32 sdfCountMapPositionRecords(SdfModel *model) {
 }
 
 extern void sdfPostmultiplyVuMatrixFromMemory(void *);
-extern u8 *sdfModelFindDrawNode(void *chunk, s32 id);
+extern SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id);
 /* vu0 routine: build basis rows in vf28-vf31 from the map record, then
  * postmultiply using its draw-node matrix. */
 void sdfSetLookAtBasisFromRecord(SdfModel *model, SdfMapPositionRecord *record) {
-    u8 *matrix = sdfModelFindDrawNode(model, record->nodeId);
+    SdfDrawNode *drawNode = sdfModelFindDrawNode(model, record->nodeId);
     u8 *vector;
 
     vector = (u8 *)&record->up;
@@ -305,15 +305,15 @@ void sdfSetLookAtBasisFromRecord(SdfModel *model, SdfMapPositionRecord *record) 
     VU0_MOVE_VF(vf28, vf10);
     VU0_LOAD_VF(vf31, &record->position);
     VU0_SET_W_ONE(vf31);
-    sdfPostmultiplyVuMatrixFromMemory(matrix + 0xC0);
+    sdfPostmultiplyVuMatrixFromMemory(drawNode->worldMatrix);
 }
 
 /* vu0 routine: transform the map-record position by its draw-node matrix;
  * the transformed position is left in vf10. */
 void sdfVuTransformMapRecordPosition(SdfModel *model, SdfMapPositionRecord *record) {
-    u8 *matrix = sdfModelFindDrawNode(model, record->nodeId) + 0xC0;
+    SdfDrawNode *drawNode = sdfModelFindDrawNode(model, record->nodeId);
 
-    VU0_LOAD_MATRIX(matrix);
+    VU0_LOAD_MATRIX(drawNode->worldMatrix);
     VU0_LOAD_VF(vf10, &record->position);
     VU0_TRANSFORM_POINT(vf10, vf10);
 }

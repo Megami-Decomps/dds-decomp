@@ -149,12 +149,7 @@ typedef struct {
     s32 unkC;
 } TmpBuf;
 
-typedef struct {
-    s32 unk0;
-    void *unk4;
-} HasPtr4;
-
-s32 sdfModelFindDrawNode(void *a0, s32 a1);
+SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id);
 
 void sdfMotionBindDrawNode(void *tmp, void *src, void *tbl, s32 x);
 
@@ -546,8 +541,11 @@ s32 sdfDispatchMotionBySelector(void *object, s32 selector) {
 }
 
 void sdfMotionBindDrawNode(void *tmp, void *src, void *tbl, s32 x) {
+    SdfDrawNode *drawNode;
+
     sdfSetMotionPointerPair(tmp, src, tbl);
-    ((TmpBuf *)tmp)->unkC = sdfModelFindDrawNode(((HasPtr4 *)src)->unk4, x);
+    drawNode = sdfModelFindDrawNode(((Motion *)src)->owner, x);
+    ((TmpBuf *)tmp)->unkC = (s32)drawNode;
 }
 
 void *sdfMotionCreateDrawVectorBinding(void *a0, s32 a1, s32 a2) {
