@@ -1746,8 +1746,8 @@ s32 ptyCountBulletItem(s32 bulletId) {
     return totalCount;
 }
 
-u32 mnuSetPartyEntryMenuValue(s32 entry, u16 value) {
-    ((DatPartyRecord *)entry)->menuValue = value;
+u32 mnuSetPartyEntryMenuValue(DatPartyRecord *entry, u32 value) {
+    entry->menuValue = value;
     return 1;
 }
 

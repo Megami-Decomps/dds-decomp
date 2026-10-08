@@ -49,7 +49,7 @@ extern char D_00437C38[];
 extern char D_00437C40[];
 extern u32 uiBlendColors(u32, u32, u32);
 extern s32 mdlFlagTest(u32);
-extern s32 mnuGetPartyEntryMenuValue(DatPartyRecord *);
+extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 func_0035C860(char *, const char *, ...);
