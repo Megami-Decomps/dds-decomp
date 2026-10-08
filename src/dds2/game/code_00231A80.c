@@ -653,7 +653,7 @@ void mdlReleaseInnerResourceHandle(MdlCtx *ctx, s32 value, f32 scalar) {
 }
 
 /* Copy a resource path's basename without its extension into destination. */
-void func_00232F78(s32 selectionListIndex, s32 selectionIndex, char *destination, s32 capacity) {
+void mdlCopyResourceBasename(s32 selectionListIndex, s32 selectionIndex, char *destination, s32 capacity) {
     MdlResourceSelection *selection;
     MdlResourcePath *pathEntry;
     const char *path;

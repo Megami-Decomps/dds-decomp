@@ -3232,6 +3232,7 @@
 0x00232EE8	mdlGetContextResourceGroup	inferred	confidence=high; matched-C; src/dds2/game/code_00231A80.c:646:func_00232EE8; Returns the linked grouped asset key group; the group-node constructor stores this halfword and model cloning passes it back to the asset request path.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00232EF8	mdlGetContextResourceId	inferred	confidence=high; matched-C; src/dds2/game/code_00231A80.c:650:func_00232EF8; Returns the linked grouped asset key ID, compared by btlFindGroupedEntity and passed back to the asset request path by model cloning.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00232F58	mdlReleaseInnerResourceHandle	inferred	Byte-identical DDS1 counterpart: Releases the inner model context's resource handle.
+0x00232F78	mdlCopyResourceBasename	inferred	Copies the selected resource path basename up to its first dot, clamps to capacity minus one and NUL-terminates.
 0x002330C8	mdlApplyQueuedGroupPackets	inferred	readability/matching review (QP16)
 0x002334F0	mdlDestroyLoadRequestOwner	inferred	src/dds2/game/code_00231A80.c func_002334F0: Invokes task-request destruction on attached pointer, then releases model load owner block. Twin of DDS1 func_002189D8. [names_reviewed24.tsv]
 0x00233520	mdlCompleteGroupedJobAndNotify	inferred	Removes job group under a semaphore then invokes completion callback if present. [names_reviewed21.tsv]
