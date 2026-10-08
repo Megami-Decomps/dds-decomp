@@ -59,7 +59,8 @@ remain available to inspect that difference.
    providers. Every other function must have an actual assembly include in
    that compilation. Together they must exactly partition the report's
    functions and sizes, and all linked game-code units must be present in
-   the report. The existing `check_unit` ASMBODY policy and documented
+   the report. Configured games are supplied by the build separately from the
+   raw report, so omitting an entire game also fails validation. The existing `check_unit` ASMBODY policy and documented
    `libvu0`/`vu0 routine` exceptions also apply.
 3. Each production object's function span must match the unit's link-map
    contribution, retail symbol address, size, and linked ELF symbol. Nested

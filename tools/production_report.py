@@ -27,18 +27,19 @@ def percent(numerator: int, denominator: int) -> float:
     return round(100.0 * numerator / denominator, 6) if denominator else 0.0
 
 
-def apply_delta(measures: dict, code: int, functions: int, fuzzy_points: float) -> None:
-    total_code = int(measures["total_code"])
-    total_functions = int(measures["total_functions"])
-    measures["matched_code"] = str(int(measures.get("matched_code", "0")) + code)
-    measures["matched_code_percent"] = percent(int(measures["matched_code"]), total_code)
-    measures["matched_functions"] = int(measures.get("matched_functions", 0)) + functions
-    measures["matched_functions_percent"] = percent(
-        measures["matched_functions"], total_functions
-    )
-    measures["fuzzy_match_percent"] = round(
-        float(measures.get("fuzzy_match_percent", 0.0)) + fuzzy_points / total_code,
-        6,
+def set_code_measures(measures: dict, code: int, functions: int,
+                      fuzzy_points: float | None = None) -> None:
+    """Replace code measures with totals derived from the verified providers."""
+    total_code = int(measures.get("total_code", 0))
+    total_functions = int(measures.get("total_functions", 0))
+    fuzzy_percent = percent(code, total_code)
+    if fuzzy_points is not None:
+        fuzzy_percent = round(fuzzy_points / total_code, 6) if total_code else 0.0
+    measures.update(
+        matched_code=str(code), matched_code_percent=percent(code, total_code),
+        matched_functions=functions,
+        matched_functions_percent=percent(functions, total_functions),
+        fuzzy_match_percent=fuzzy_percent,
     )
 
 
@@ -400,8 +401,7 @@ class Production:
         fallback = set(report) - c_names
         validate_partition(report, canonical, c_names, fallback)
         evidence = []
-        code_delta = function_delta = 0
-        fuzzy_delta = 0.0
+        matched_code = matched_functions = 0
         for target, entry in report.items():
             emitted = providers[target]
             offset, size = canonical[target]
@@ -409,30 +409,44 @@ class Production:
             eligible = target in c_names and not blocked.intersection(emitted)
             previous = float(entry.get("fuzzy_match_percent", 0.0))
             score = 100.0 if eligible else 0.0
-            code_delta += size * (int(eligible) - int(previous == 100.0))
-            function_delta += int(eligible) - int(previous == 100.0)
-            fuzzy_delta += size * (score - previous)
+            if eligible:
+                matched_code += size
+                matched_functions += 1
             entry["fuzzy_match_percent"] = score
             evidence.append({"name": target, "production_symbols": emitted,
                              "address": start + offset, "size": size,
                              "owner": "c" if eligible else "asm_body" if target in c_names else "include_asm",
                              "raw_fuzzy_match_percent": previous,
                              "production_exact": eligible})
-        apply_delta(unit["measures"], code_delta, function_delta, fuzzy_delta)
-        unit["measures"]["fuzzy_match_percent"] = unit["measures"]["matched_code_percent"]
+        set_code_measures(unit["measures"], matched_code, matched_functions)
         for section in unit.get("sections", []):
             if section["name"] == ".text":
                 section["fuzzy_match_percent"] = unit["measures"]["fuzzy_match_percent"]
-        return {"unit": name, "version": self.version, "functions": evidence,
-                "delta": (code_delta, function_delta, fuzzy_delta)}
+        return {"unit": name, "version": self.version, "functions": evidence}
 
 
-def reconcile(report: dict, scope: str, root: Path = ROOT) -> dict:
+def reconcile(report: dict, scope: str, root: Path = ROOT, *,
+              expected_versions: list[str] | None = None) -> dict:
+    if expected_versions is None:
+        if scope == "all":
+            raise ValueError("combined report requires configured versions")
+        expected_versions = [scope]
+    expected = set(expected_versions)
+    if not expected or len(expected) != len(expected_versions) or not expected <= VERSIONS.keys():
+        raise ValueError("invalid configured report versions")
+    if scope != "all" and expected != {scope}:
+        raise ValueError("configured versions do not match report scope")
+    if scope == "all":
+        observed = {unit["name"].split("/", 1)[0] for unit in report["units"]
+                    if "game" in unit.get("metadata", {}).get("progress_categories", [])
+                    and int(unit["measures"].get("total_code", 0))}
+        if observed != expected:
+            raise ValueError("report versions do not match configured versions")
     names = [unit["name"] for unit in report["units"]]
     if len(set(names)) != len(names):
         raise ValueError("duplicate report units")
     proofs = {}
-    changes = []
+    proven = set()
     evidence = {"schema": 1, "metric": "production_exact_source", "units": []}
     for unit in report["units"]:
         if "game" not in unit.get("metadata", {}).get("progress_categories", []):
@@ -457,9 +471,9 @@ def reconcile(report: dict, scope: str, root: Path = ROOT) -> dict:
         if version not in proofs:
             proofs[version] = Production(root, version)
         item = proofs[version].unit(unit, name)
-        changes.append((unit, item.pop("delta")))
+        proven.add(unit["name"])
         evidence["units"].append(item)
-    if not changes:
+    if not proven:
         raise ValueError("report contains no game-code production evidence")
     for version, production in proofs.items():
         prefix = f"build/{version}/src/{version}/"
@@ -468,7 +482,6 @@ def reconcile(report: dict, scope: str, root: Path = ROOT) -> dict:
         if actual != expected:
             missing = ", ".join(sorted(expected - actual))
             raise ValueError(f"{version}: report/production unit inventory differs; missing: {missing}")
-    proven = {unit["name"] for unit, _ in changes}
     def aggregate(measures: dict, units: list[dict]) -> None:
         code = sum(int(u["measures"].get("total_code", 0)) for u in units)
         functions = sum(int(u["measures"].get("total_functions", 0)) for u in units)
@@ -480,10 +493,7 @@ def reconcile(report: dict, scope: str, root: Path = ROOT) -> dict:
         points = sum(100 * int(u["measures"].get("matched_code", 0)) if u["name"] in proven
                      else int(u["measures"].get("total_code", 0)) * float(u["measures"].get("fuzzy_match_percent", 0))
                      for u in units if int(u["measures"].get("total_code", 0)))
-        measures.update(matched_code=str(matched), matched_code_percent=percent(matched, code),
-                        matched_functions=matched_functions,
-                        matched_functions_percent=percent(matched_functions, functions),
-                        fuzzy_match_percent=round(points / code, 6) if code else 0.0)
+        set_code_measures(measures, matched, matched_functions, points)
     for category in report["categories"]:
         units = [u for u in report["units"] if category["id"] in u.get("metadata", {}).get("progress_categories", [])]
         aggregate(category["measures"], units)
@@ -506,6 +516,8 @@ def main() -> None:
     report.add_argument("input", type=Path)
     report.add_argument("output", type=Path)
     report.add_argument("--scope", choices=("all", *VERSIONS), required=True)
+    report.add_argument("--version", action="append", choices=tuple(VERSIONS), required=True,
+                        help="Configured game; repeat for a combined report")
     args = parser.parse_args()
     try:
         if args.command == "record-object":
@@ -514,7 +526,7 @@ def main() -> None:
             record_link(ROOT, args.elf, args.map, args.objects)
         else:
             value = json.loads(args.input.read_text())
-            proof = reconcile(value, args.scope)
+            proof = reconcile(value, args.scope, expected_versions=args.version)
             args.output.write_text(json.dumps(value, indent=2) + "\n")
             Path(str(args.output) + ".proof.json").write_text(json.dumps(proof, indent=2) + "\n")
     except (ValueError, KeyError, OSError, struct.error) as error:
