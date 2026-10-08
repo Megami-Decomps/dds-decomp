@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_append.h"
 #include "eff_thunder_vector.h"
 #include "bill_object_api.h"
 #include "sdf_resource.h"
@@ -4203,8 +4204,6 @@ extern SdfPoolNode *D_00355688[];
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(SdfListHead *list);
 extern void sdfComposeVuMatrixFromRegisters(void);
-extern void sdfConsAppendVuPacket(s32 list, s32 (*alloc)(s32));
-extern void sdfConsAppendAssetPacket(s32 list, void *asset, s32 (*alloc)(s32));
 extern s32 func_0015FE20(EffPCPBeamDrawParams *params);
 extern void sdfAppendPacket(SdfListHead *list, u32 packet);
 
@@ -4229,8 +4228,8 @@ void effPcpDrawBeamGeometryNode(EffPCPBeamNode *node) {
     VU0_ADD_XYZ(vf31, vf31, vf10);
     VU0_LOAD_MATRIX_B(scaleMatrix);
     sdfComposeVuMatrixFromRegisters();
-    sdfConsAppendVuPacket((s32)list, 0);
-    sdfConsAppendAssetPacket((s32)list, node->assetHandle, 0);
+    sdfConsAppendVuPacket(list, 0);
+    sdfConsAppendAssetPacket(list, node->assetHandle, 0);
     count = node->vertexCount;
     D_003D6610.colors = node->colors;
     D_003D6610.points = node->points;

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
+#include "sdf_packet_append.h"
 #include "fr_font.h"
 #include "sdf_chip.h"
 #include "kwln.h"
@@ -606,8 +607,6 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109538);
 
 
 extern u64 D_0037F5A0[]; /* index table; only the first 8 bytes are used */
-extern void sdfConsAppendClearPacket(void *, s32);
-extern void sdfConsAppendAssetPacket(void *, void *, s32);
 extern void *func_0033B050(SdfPrimitiveRequest *);
 extern void func_003332E8(void *, u32);
 extern void sdfQueueAssetRelease(void *);
