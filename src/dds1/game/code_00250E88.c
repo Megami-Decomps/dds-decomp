@@ -1,6 +1,7 @@
 #include "dsp_name.h"
 #include "mnu.h"
 #include "dat_state.h"
+#include "mnu_profile_progress.h"
 
 #define MNU_SCENE_WORK_SIZE 0x5B0
 #define MNU_SCENE_SHADE_FRAME_LIMIT 10
@@ -61,14 +62,6 @@ typedef struct MenuSceneWork {
 
 
 typedef struct ScrVmOperand ScrVmOperand;
-
-typedef struct MnuProfileProgress {
-    ScrVmOperand *operand; /* 0x00 */
-    s32 profileId;         /* 0x04 */
-    u32 value;             /* 0x08 */
-    u32 cap;               /* 0x0C */
-} MnuProfileProgress;
-
 
 typedef struct MenuGridCell {
     u32 index;
@@ -281,9 +274,9 @@ extern u16 prfGetParamWord7b6(u16);
 extern u32 prfGetParamWord7b5(u16);
 extern void prfBuildRawSkillList(u16, void *);
 extern u32 prfGetCapValue(u16);
-extern s32 ptyTestProfileFlag1(ScrVmOperand *, u16);
+extern s32 ptyTestProfileFlag1(DatPartyRecord *, u16);
 extern s32 prfReq54Evaluate(s32, ScrVmOperand *, u16);
-extern u32 ptyGetProfileRecordValue(void *, u16);
+extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
 extern s32 mdlFlagTest(s32);
 
 /* Build the 0x58-byte list entry for one profile, or NULL when it is not available (profile 0x4E is still
@@ -292,7 +285,7 @@ extern s32 mdlFlagTest(s32);
 MenuSceneEntry *func_002530D8(s32 unused, u16 profileId, MnuProfileProgress *selection) {
     MenuSceneEntry *entry;
 
-    if (prfReqCheckWithFallback(selection->operand, profileId) == 0) {
+    if (prfReqCheckWithFallback((ScrVmOperand *)selection->partyRecord, profileId) == 0) {
         if (profileId != 0x4E || mdlFlagTest(0x908) == 0) {
             return NULL;
         }
@@ -306,10 +299,11 @@ MenuSceneEntry *func_002530D8(s32 unused, u16 profileId, MnuProfileProgress *sel
     prfBuildRawSkillList(entry->sceneId, entry->rawSkillList);
     entry->cap = prfGetCapValue(entry->sceneId);
     entry->initialValue = 0x3C;
-    entry->profileFlag = ptyTestProfileFlag1(selection->operand, entry->sceneId);
+    entry->profileFlag = ptyTestProfileFlag1(selection->partyRecord, entry->sceneId);
 
-    if (prfReq54Evaluate(0, selection->operand, entry->sceneId) != 0 || entry->sceneId == 0x4E) {
-        if (prfReq54Evaluate(1, selection->operand, entry->sceneId) != 0) {
+    if (prfReq54Evaluate(0, (ScrVmOperand *)selection->partyRecord, entry->sceneId) != 0 ||
+        entry->sceneId == 0x4E) {
+        if (prfReq54Evaluate(1, (ScrVmOperand *)selection->partyRecord, entry->sceneId) != 0) {
             entry->state = 1;
         } else if (entry->profileFlag != 0) {
             entry->state = 1;
@@ -319,7 +313,7 @@ MenuSceneEntry *func_002530D8(s32 unused, u16 profileId, MnuProfileProgress *sel
     } else {
         entry->state = 3;
     }
-    entry->value = ptyGetProfileRecordValue(selection->operand, entry->sceneId);
+    entry->value = ptyGetProfileRecordValue(selection->partyRecord, entry->sceneId);
     return entry;
 }
 
@@ -396,8 +390,8 @@ s32 func_00253640(void) {
     return 0;
 }
 
-extern s8 scrSelectOperandIndex(ScrVmOperand *, s32);
-extern s8 scrGetSelectedOperandIndex(ScrVmOperand *);
+extern s8 scrSelectOperandIndex(DatPartyRecord *, s32);
+extern s8 scrGetSelectedOperandIndex(DatPartyRecord *);
 extern void func_00258AF0(u32 *, u32);
 extern void evtFinishMessageWindowAndNotify(void);
 extern void mnuReleaseMenuVisualWorkResources(s32);
@@ -410,9 +404,9 @@ void func_00253778(void) {
         MnuProfileProgress *selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
         MenuSceneWork *work;
 
-        scrSelectOperandIndex(selection->operand, scene->pendingProfileId);
-        selection->profileId = scrGetSelectedOperandIndex(selection->operand);
-        selection->value = ptyGetProfileRecordValue(selection->operand, (u16)selection->profileId);
+        scrSelectOperandIndex(selection->partyRecord, scene->pendingProfileId);
+        selection->profileId = scrGetSelectedOperandIndex(selection->partyRecord);
+        selection->value = ptyGetProfileRecordValue(selection->partyRecord, (u16)selection->profileId);
         selection->cap = prfGetCapValue((u16)selection->profileId);
 
         work = (MenuSceneWork *)func_002CB3B8(mnuSceneResourceContext, 1);
@@ -449,14 +443,14 @@ s32 func_00253830(void) {
         if (D_00324510[0x21] < 0) {
             if (selection->profileId == scene->pendingProfileId) {
                 if (prfGetCapValue(entry->sceneId) ==
-                    ptyGetProfileRecordValue(selection->operand, entry->sceneId)) {
+                    ptyGetProfileRecordValue(selection->partyRecord, entry->sceneId)) {
                     scene->state = 8;
                 } else {
                     scene->state = 5;
                 }
                 scene->pendingProfileId = 0;
             } else if (prfGetCapValue(entry->sceneId) ==
-                       ptyGetProfileRecordValue(selection->operand, entry->sceneId)) {
+                       ptyGetProfileRecordValue(selection->partyRecord, entry->sceneId)) {
                 scene->state = 7;
                 scene->pendingProfileId = 0;
             } else if (entry->state != 1) {
