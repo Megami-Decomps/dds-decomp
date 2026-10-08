@@ -811,7 +811,6 @@ extern void mnuReleasePartyIconBundles(MenuPageWindow *window);
 extern void mnuSelectPage(MenuPageWindow *window, s32 index);
 extern void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused,
                                  u32 retainScale);
-extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32, s32, s32, s32);
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
 extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window, u32 resource);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
@@ -836,9 +835,11 @@ void func_00299B98(BrsSkillPackageWork *work, s32 selectLevelUp) {
         mnuReleasePartyIconBundles(window);
         mnuSelectPage(window, page);
         mnuResetPartyPanelFade(window, page, 0, 0);
-        mnuSetWindowResource(page, window, work->staffSlots.baseResources[0],
-                             (s32)work->staffSlots.pairResources[0],
-                             (s32)work->staffSlots.pairResources[1], 0, 0);
+        mnuSetWindowResource(page, window,
+                             (struct EffectSlotSet *)work->staffSlots.baseResources[0],
+                             (struct EffectSlotSet *)work->staffSlots.pairResources[0],
+                             (struct EffectSlotSet *)work->staffSlots.pairResources[1],
+                             0, 0);
         mnuSetPageParams(work->partyWindow.slots[page].windowSprites, 2);
         mnuAttachPartyIconBundle(page, window, (u32)work->staffSlots.pairResources[0]);
 

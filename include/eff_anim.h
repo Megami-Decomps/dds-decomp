@@ -5,6 +5,12 @@
 
 struct RefObj;
 
+/* Observed EffAnimSet.flags masks; other bits remain uninterpreted. */
+enum EffAnimSetFlag {
+    EFF_ANIM_SET_LOOP = 0x1,
+    EFF_ANIM_SET_DOUBLE_Y_SCALE = 0x4,
+};
+
 /* Animation segments contribute length frames plus one boundary frame. */
 typedef struct EffAnimSegment {
     u32 length;     // 0x00
@@ -14,7 +20,7 @@ typedef struct EffAnimSegment {
 typedef struct EffAnimSet {
     u8 pad_00[4];
     u32 count;                 // 0x04
-    u32 flags;                 // 0x08: 1 loop, 4 double Y scale
+    u32 flags;                 // 0x08: EffAnimSetFlag masks
     u8 pad_0C[4];
     EffAnimSegment *segments;  // 0x10
     struct RefObj **handles;   // 0x14
