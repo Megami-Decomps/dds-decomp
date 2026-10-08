@@ -10,6 +10,7 @@
 #include "evt_unit.h"
 #include "eff_transform.h"
 #include "eff_blur.h"
+#include "eff_event_draw.h"
 #include "dat_state.h"
 #include "eff.h"
 #include "eff_object.h"
@@ -181,22 +182,6 @@ void evtViewerApplyParameterKeyTracks(EvtRuntime *viewer) {
 }
 
 
-typedef struct EffScreenDrawParams {
-    EffBlurQuad source;
-    u8 pad28[8];
-} EffScreenDrawParams;
-
-typedef struct EffSolidRectParams {
-    u32 color;
-    s32 blendControl;
-    s32 left;
-    s32 top;
-    s32 right;
-    s32 bottom;
-} EffSolidRectParams;
-
-extern EffScreenDrawParams *effGetLoadDescA(void);
-
 /* Native five-word draw-vector parameters; the timeline swaps x and y. */
 typedef struct EvtViewerDrawVector {
     f32 x, y, z, w;
@@ -210,9 +195,7 @@ extern f32 D_00438A4C;
 extern EffBlurTemplateBody *effEventGetBlurTemplateSetupParams(void);
 extern EffBlurScatterParams *effEventGetScatterBlurSetupParams(void);
 extern EffBlurScaleParams *effEventGetScaleBlurSetupParams(void);
-extern EffSolidRectParams *effEventGetSolidRectangleSetupParams(void);
 extern EffResourceRectParams *effEventGetResourceTemplateSetupParams(void);
-extern EffScreenDrawParams *effGetLoadDescD(void);
 extern void *memcpy(void *destination, const void *source, u32 size);
 
 
