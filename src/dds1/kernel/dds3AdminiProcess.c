@@ -77,7 +77,7 @@ typedef struct AdminDispatch {
 } AdminDispatch;
 
 extern AdminDispatch ddsAdminModeCallbacks[];
-extern void *dds3AdminPollModeCompletion(void *task);
+extern s32 dds3AdminPollModeCompletion(KwlnTask *task);
 
 /* Configure administrative state from three caller-supplied parameters. */
 void dds3AdminSubmitMarkedRequest(s32 value, void *data, u32 size)
@@ -127,7 +127,7 @@ u8 dds3AdminReadPreviousUnsignedSample(void)
 }
 
 /* Activate a pending mode request and continue through the mode dispatcher. */
-void *dds3AdminActivateRequestedMode(void *task) {
+s32 dds3AdminActivateRequestedMode(KwlnTask *task) {
     AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
     u32 flags = work->flags;
     s32 restoring;
@@ -136,7 +136,7 @@ void *dds3AdminActivateRequestedMode(void *task) {
     if ((flags & 1) != 0 && work->unk09 >= 0) {
         if (work->unk21 != 0) {
             work->unk21--;
-            return NULL;
+            return 0;
         }
         work->unk08 = work->unk09;
         work->unk09 = -1;
@@ -166,12 +166,12 @@ void *dds3AdminActivateRequestedMode(void *task) {
             entry(restoring, work->unk1C);
         }
     }
-    return dds3AdminPollModeCompletion;
+    return (s32)dds3AdminPollModeCompletion;
 }
 
 /* Run the mode's destroy callback; a non-negative result is stored (+1) in unk21 and the mode
-   cleared. Returns the next step function, or NULL if the callback failed. */
-void *dds3AdminPollModeDestruction(void *task) {
+   cleared. Return the next update address as a signed scheduler control word, or zero on failure. */
+s32 dds3AdminPollModeDestruction(KwlnTask *task) {
     AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
     s32 mode = work->unk08;
     s32 (*destroy)(void);
@@ -182,16 +182,16 @@ void *dds3AdminPollModeDestruction(void *task) {
         if (destroy != NULL) {
             result = destroy();
             if (result < 0) {
-                return NULL;
+                return 0;
             }
             work->unk21 = result + 1;
             work->unk08 = -1;
         }
     }
-    return dds3AdminActivateRequestedMode;
+    return (s32)dds3AdminActivateRequestedMode;
 }
 
-void *dds3AdminPollModeCompletion(void *task) {
+s32 dds3AdminPollModeCompletion(KwlnTask *task) {
     AdminWork *work = (AdminWork *)kwlnTaskGetUserValue(task);
     u32 flags = work->flags;
     s32 (*cleanup)(void);
@@ -228,19 +228,19 @@ void *dds3AdminPollModeCompletion(void *task) {
         work->flags &= ~2;
     }
     if ((work->flags & 1) != 0 && work->unk09 >= 0) {
-        return dds3AdminPollModeDestruction;
+        return (s32)dds3AdminPollModeDestruction;
     }
-    return NULL;
+    return 0;
 }
 
-/* Run the mode's destroy callback (the row's second pointer), then free the
- * attached data block and the task itself. */
-void dds3AdminReleaseTaskWork(void* task) {
+/* Run the mode's destroy callback (the row's second pointer), then release the
+ * attached data block and the task's AdminWork block. */
+void dds3AdminReleaseTaskWork(KwlnTask *task) {
     AdminWork* work = (AdminWork*)kwlnTaskGetUserValue(task);
     s32 mode = work->unk08;
 
     if (mode >= 0) {
-        void (*destroy)(void) = ddsAdminModeCallbacks[mode].destroy;
+        s32 (*destroy)(void) = ddsAdminModeCallbacks[mode].destroy;
 
         if (destroy != NULL) {
             destroy();
