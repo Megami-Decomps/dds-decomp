@@ -3,6 +3,8 @@
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "evt_solar.h"
+#include "eff.h"
+#include "eff_blur.h"
 #include "kwln_task_lifecycle.h"
 
 #define SOLAR_FADE_DRAW_ENABLED 1
@@ -323,7 +325,246 @@ void evtReorderListNodes(EvtRuntimeGroup *list) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0022A248", func_0022B7A0);
+typedef struct CampDisplayDefaults {
+    s32 x, y;
+    u8 color[4];
+    f32 scaleY, scaleX;
+    s32 enabled, variant;
+} CampDisplayDefaults;
+
+typedef struct CampListLayout {
+    s32 width0, width1, width2;
+    s32 unkC, unk10, unk14;
+    u8 pad18[8];
+    union {
+        struct { s32 unk20, unk24, unk28; };
+        s32 firstValues[3];
+    };
+    union {
+        struct { s32 unk2C, unk30, unk34; };
+        s32 secondValues[3];
+    };
+} CampListLayout;
+
+typedef struct EvtViewerDrawVector {
+    f32 x, y, z, w;
+    s32 mode;
+} EvtViewerDrawVector;
+typedef struct EvtViewerDrawPayload {
+    f32 x, y, z, w;
+    s32 mode;
+    u8 unknown14[0xC];
+} EvtViewerDrawPayload;
+
+typedef struct EffScreenDrawParams {
+    EffBlurQuad source;
+    u8 pad28[8];
+} EffScreenDrawParams;
+typedef struct EffSolidRectParams {
+    u32 color;
+    s32 blendControl;
+    s32 left, top, right, bottom;
+} EffSolidRectParams;
+extern void *sdfAllocSizeClassBlock(s32);
+extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
+extern void func_00242C30(EvtRuntime *, EvtRuntimeGroup *, s32, f32 (*)[4], f32 *, f32 *);
+extern void func_00242E70(EvtRuntime *, EvtRuntimeGroup *, s32, CampDisplayDefaults *);
+extern void func_00242F78(EvtRuntime *, EvtRuntimeGroup *, CampListLayout *);
+extern EffScreenDrawParams *effGetLoadDescA(void);
+typedef struct EffBlurTemplateBody {
+    s32 extent;
+    EffBlurQuad source;
+} EffBlurTemplateBody;
+typedef struct EffBlurTemplate {
+    EffBlurTemplateBody body;
+    u32 resourceWord;
+} EffBlurTemplate;
+extern EffBlurTemplate *effGetCh71Work(void);
+extern EffBlurScatterWork *effGetCh72Work(void);
+extern EffBlurScaleWork *effGetCh76Work(void);
+extern EffScreenDrawParams *effGetCh73Params(void);
+extern EffSolidRectParams *effGetCh74Params(void);
+extern EffResourceRectWork *effGetCh75Work(void);
+extern EvtViewerDrawVector kwlnDrawVector;
+
+/* Capture kind-specific defaults before adding a new key to its track. */
+EvtRuntimeChild *func_0022B7A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer) {
+    CampDisplayDefaults display;
+    CampListLayout layout;
+    f32 first, second;
+    f32 (*vectors)[4] = NULL;
+    EvtRuntimeChild *key;
+
+    switch (group->type) {
+    case 10:
+        vectors = sdfAllocSizeClassBlock(0x30);
+        func_00242C30(viewer, group, frame, vectors, &first, &second);
+        break;
+    case 24:
+        func_00242E70(viewer, viewer->frameGroup, viewer->curFrame, &display);
+        break;
+    case 25:
+        func_00242F78(viewer, viewer->frameGroup, &layout);
+        break;
+    }
+    key = sdfAllocSizeClassBlock(sizeof(*key));
+    memset(key, 0, sizeof(*key));
+    key->frame = frame;
+    key->interpolationMode = -1;
+    evtInsertListNodeByOrderKey(group, key);
+
+    switch (group->type) {
+    case 2:
+        key->p08.f = 0.5235987306f;
+        key->interpolationMode = evtEventViewerAddName(viewer->entryName[group->entryHeader.word], viewer);
+        break;
+    case 1:
+        key->interpolationMode = evtEventViewerAddName(viewer->entryName[group->entryHeader.word], viewer);
+        key->p08.sb[0] = 0;
+        key->p0C.sb[2] = 1;
+        key->p0C.sb[3] = 20;
+        break;
+    case 18:
+        key->interpolationMode = evtEventViewerAddName(viewer->entryName[group->entryHeader.word], viewer);
+        key->p08.h[0] = 0;
+        key->p08.h[1] = -1;
+        key->p08.sb[0] = 0;
+        break;
+    case 20: case 21:
+        key->interpolationMode = evtEventViewerAddName(viewer->entryName[group->entryHeader.word], viewer);
+        key->p08.sb[0] = -1;
+        key->p08.sb[1] = 0;
+        key->p08.h[1] = 0;
+        key->p0C.sb[0] = -1;
+        key->p0C.sb[1] = -1;
+        key->p0C.sb[2] = -1;
+        key->p0C.sb[3] = -1;
+        break;
+    case 3: case 26:
+        key->interpolationMode = evtEventViewerAddName(viewer->entryName[group->entryHeader.word], viewer);
+        key->p08.sb[0] = -1;
+        key->p08.h[1] = 0;
+        key->p0C.sb[0] = 0;
+        key->p0C.sb[1] = -1;
+        key->p0C.h[1] = -1;
+        break;
+    case 9:
+        key->interpolationMode = evtEventViewerAddName(viewer->entryName[group->entryHeader.word], viewer);
+        key->p08.h[0] = -1;
+        key->p08.h[1] = 1;
+        break;
+    case 12:
+        key->p08.h[0] = 1;
+        key->p08.h[1] = 128;
+        key->p0C.i = 0;
+        break;
+    case 22:
+        key->p08.h[0] = 1;
+        break;
+    case 10:
+        key->p08.f = first;
+        key->payload = vectors;
+        key->p0C.f = second;
+        key->p10.h[0] = (u16)group->setterId;
+        key->interpolationMode = 0;
+        break;
+    case 11: {
+        EvtViewerDrawPayload *draw = sdfAllocSizeClassBlock(0x20);
+        draw->x = kwlnDrawVector.y;
+        draw->mode = kwlnDrawVector.mode;
+        key->payload = draw;
+        draw->y = kwlnDrawVector.x;
+        draw->z = kwlnDrawVector.z;
+        draw->w = kwlnDrawVector.w;
+        key->p08.h[0] = 1;
+        break;
+    }
+    case 13: {
+        void *payload = sdfAllocSizeClassBlock(0x28);
+        key->payload = payload;
+        memcpy(payload, effGetLoadDescA(), 0x28);
+        key->p08.h[0] = 1;
+        break;
+    }
+    case 14: {
+        void *payload = sdfAllocSizeClassBlock(0x2C);
+        key->payload = payload;
+        memcpy(payload, effGetCh71Work(), 0x2C);
+        key->p08.h[0] = 1;
+        key->p10.h[0] = 0;
+        break;
+    }
+    case 15: {
+        void *payload = sdfAllocSizeClassBlock(0x2C);
+        key->payload = payload;
+        memcpy(payload, effGetCh72Work(), 0x2C);
+        key->p08.h[0] = 1;
+        break;
+    }
+    case 23: {
+        void *payload = sdfAllocSizeClassBlock(0x2C);
+        key->payload = payload;
+        memcpy(payload, effGetCh76Work(), 0x2C);
+        key->p08.h[0] = 1;
+        break;
+    }
+    case 27: {
+        void *payload = sdfAllocSizeClassBlock(0x28);
+        key->payload = payload;
+        memcpy(payload, effGetCh73Params(), 0x28);
+        key->p08.h[0] = 1;
+        break;
+    }
+    case 16: {
+        void *payload = sdfAllocSizeClassBlock(0x18);
+        key->payload = payload;
+        memcpy(payload, effGetCh74Params(), 0x18);
+        key->p08.h[0] = 1;
+        break;
+    }
+    case 17: {
+        void *payload = sdfAllocSizeClassBlock(0x24);
+        key->payload = payload;
+        memcpy(payload, effGetCh75Work(), 0x24);
+        key->p08.h[0] = 1;
+        break;
+    }
+    case 24:
+        key->interpolationMode = evtEventViewerAddName(viewer->entryName[group->entryHeader.word], viewer);
+        key->p08.sb[0] = display.enabled;
+        key->p08.sb[1] = display.variant;
+        key->p0C.h[0] = display.x;
+        key->p0C.h[1] = display.y;
+        key->p10.sb[0] = display.color[0];
+        key->p10.sb[1] = display.color[1];
+        key->p10.sb[2] = display.color[2];
+        key->p10.sb[3] = display.color[3];
+        key->p14.f = display.scaleX;
+        key->p18.f = display.scaleY;
+        break;
+    case 25: {
+        EvtCameraColorPayload *payload = sdfAllocSizeClassBlock(0x40);
+        s32 i;
+        key->payload = payload;
+        payload->parameters.x = layout.unk10;
+        payload->parameters.w[0] = layout.width0;
+        payload->parameters.w[1] = layout.width1;
+        payload->parameters.w[2] = layout.width2;
+        payload->parameters.w[3] = layout.unkC;
+        payload->parameters.flagWord = layout.unk14;
+        for (i = 0; i < 3; i++) {
+            payload->parameters.y[i] = layout.firstValues[i];
+            payload->parameters.z[i] = layout.secondValues[i];
+        }
+        break;
+    }
+    case 0: case 4: case 5: case 6: case 7: case 8: case 19:
+    case 28: case 29: case 30: case 31: case 32:
+    default:
+        break;
+    }
+    return key;
+}
 
 INCLUDE_SDATA(const s32, "game/code_0022A248", D_003BBDEC);
 
