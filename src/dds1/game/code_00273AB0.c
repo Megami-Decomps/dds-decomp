@@ -103,7 +103,6 @@ extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
 extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
 extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
 extern void func_0027C788(MenuWindowContainer *);
-extern void mnuResetListNodeFadeCounters(s32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuClearListFlagsOneAndTwo();
 
@@ -467,7 +466,7 @@ s32 mnuHandleStaffValuePageInput(KwlnTask *task) {
                 mnuAdvanceWindowListSelection(menu->list);
             }
         }
-        mnuResetListNodeFadeCounters((s32)menu->list->list);
+        mnuResetListNodeFadeCounters(menu->list->list);
     }
     sndSetSequenceVolumePan(4, 0x7F, 0x3F);
     return 1;

@@ -72,7 +72,6 @@ extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
 extern void mnuRetreatListCursorDefault(struct MenuList *);
 extern void mnuAdvanceListCursorDefault(struct MenuList *);
 extern void mnuClearListFlagsOneAndTwo(u32 *);
-extern void mnuResetListNodeFadeCounters(struct MenuList *);
 extern void sndSetSequenceVolumePan();
 extern void mnuSelectPage(MenuPageWindow *, s32);
 extern void mnuCreateStaffBulletItemWindow(MenuStaffContext *);
