@@ -191,8 +191,20 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_00330E60);
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00330FE0);
 
-extern SdfCommandNode *func_00331238(SdfDrawNode *drawNode, s32 packetSelector, s32 listIndex);
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331238);
+/* Prepend a chip-allocated command node to one buffered draw list. */
+SdfCommandNode *func_00331238(SdfDrawNode *drawNode, s32 packetSelector, s32 listIndex) {
+    SdfCommandNode *node = sdfAllocSizeClassBlock(sizeof(*node));
+    SdfCommandNode **head = (SdfCommandNode **)((u32)listIndex * sizeof(*drawNode->lists) + (u32)drawNode +
+                                               (u32)&((SdfDrawNode *)0)->lists);
+    SdfCommandNode *next = *head;
+
+    node->packetSelector = packetSelector;
+    *head = node;
+    node->quadwordCount = 1;
+    node->allocation = NULL;
+    node->next = next;
+    return node;
+}
 
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_003312A8);
 

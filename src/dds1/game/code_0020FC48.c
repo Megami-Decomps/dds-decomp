@@ -1127,7 +1127,28 @@ s32 btlReleaseEntryIfReady(s32 kind, s32 id) {
     return entry;
 }
 
-INCLUDE_ASM(const s32, "game/code_0020FC48", func_002118D8);
+extern void func_00211740(s32, s32);
+
+s32 func_002118D8(s32 kind, s32 id) {
+    s32 entry;
+
+    if (mdlRequestAsset(kind, id, 0) != 0 && mdlRequestAsset(kind, id, 0) != -1 &&
+        sndFindListNodeForChannel(kind, id) != 0) {
+        return 1;
+    }
+    entry = btlFindModelEntry(kind, id);
+    if (entry != 0) {
+        if (btlIsModelPackEntryReady((BattleModelEntry *)entry) != 0) {
+            if (((BattleModelEntry *)entry)->state == 0) {
+                func_00211740(kind, id);
+            }
+            return 1;
+        }
+    } else {
+        btlLoadModelPack(kind, id);
+    }
+    return 0;
+}
 
 /* vu0 routine: modulate two RGBA8888 colours, (a/128 * b/128) * 128 per channel */
 u32 btlMulColor(u32 colorA, u32 colorB) {
