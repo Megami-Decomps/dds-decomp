@@ -374,7 +374,6 @@ void mnuCopyPartyEntries(context)
 }
 
 extern void func_00285960(DatPartyRecord *, s32, u32, PartyPanel *);
-extern void mnuUpdateHandleStates(MenuPageWindow *);
 extern void func_00280048(s32);
 
 /* Transfer one current party record and refresh the selected panel slot. */

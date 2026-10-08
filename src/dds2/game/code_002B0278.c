@@ -3603,7 +3603,7 @@ void mnuLoadPanelSectionResources(MenuSlotEffectHandles *slot, u32 model, u32 fi
 
 
 
-void mnuResetPartyPanelFade(u8 *menu, s32 index, u32 unused, u32 preserve);
+void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused, u32 preserve);
 
 void func_002BB9C8(MenuSprites *page, u32 flags);
 
