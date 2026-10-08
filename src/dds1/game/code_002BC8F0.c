@@ -21,7 +21,6 @@ extern void effResetSlotWork(u32, u32);
 
 extern u32 fileGetResourceHandle(void);
 
-extern EffectSlotSet *func_002BD9C0(u32, u32);
 
 extern u32 D_003BD11C;
 
@@ -215,7 +214,7 @@ EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, u32 ke
 
     func_003014F0(path, D_003BD198, base, name);
     allocation = sdfReadNamedResource(path, &sourceAddress, 0);
-    instance = func_002BD9C0(allocation, keepAllocation);
+    instance = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)allocation, keepAllocation);
     if (keepAllocation == EFF_RESOURCE_TRANSIENT) {
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     }
@@ -228,7 +227,7 @@ void effCompleteTransientResourceJob(u64 job, u32 *outInstance) {
     EffectSlotSet *instance;
 
     allocation = fileGetResourceHandle();
-    instance = func_002BD9C0(allocation, EFF_RESOURCE_TRANSIENT);
+    instance = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)allocation, EFF_RESOURCE_TRANSIENT);
     *outInstance = (u32)instance;
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     filePollEntryCleanup(job);
@@ -240,7 +239,7 @@ void effCompleteRetainedResourceJob(u64 job, u32 *outInstance) {
     EffectSlotSet *instance;
 
     allocation = fileGetResourceHandle();
-    instance = func_002BD9C0(allocation, EFF_RESOURCE_KEEP_ALLOCATION);
+    instance = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)allocation, EFF_RESOURCE_KEEP_ALLOCATION);
     *outInstance = (u32)instance;
     filePollEntryCleanup(job);
 }
@@ -668,7 +667,7 @@ u32 effDestroyPayload(EffPayload *payload) {
     return 1;
 }
 
-EffectSlotSet *func_002BD9C0(u32 allocationHandle, u32 keepAllocation) {
+EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct SdfMemBlock *resourceAllocation, u32 keepAllocation) {
     EffectSlotSet *set;
     u8 *resource;
     u32 *entries;
@@ -677,9 +676,9 @@ EffectSlotSet *func_002BD9C0(u32 allocationHandle, u32 keepAllocation) {
 
     set = sdfAllocSizeClassBlock(0x30);
     memset(set, 0, 0x30);
-    set->unk04 = 0;
-    set->sourceAllocation = keepAllocation != 0 ? (struct SdfMemBlock *)allocationHandle : 0;
-    resource = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
+    set->sharesTextureReferences = 0;
+    set->sourceAllocation = keepAllocation != 0 ? resourceAllocation : 0;
+    resource = (u8 *)sdfResourceRetainAddress(resourceAllocation);
     set->textureCount = *(u16 *)(resource + 0x14);
     set->textureAllocation =
         sdfAllocGeneralBlock(set->textureCount * 4);
@@ -709,7 +708,7 @@ extern void effResetSlotWork(u32, u32);
 EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 count) {
     EffectSlotSet *effect = (EffectSlotSet *)sdfAllocSizeClassBlock(0x30);
     u32 index = 0;
-    effect->unk04 = 1;
+    effect->sharesTextureReferences = 1;
     {
         u32 mode = source->textureCount;
         SdfTex **textureReferences = source->textureReferences;
@@ -737,7 +736,7 @@ u32 effDestroyResourceSlotSet(EffectSlotSet *set) {
     if (set->sourceAllocation != 0) {
         sdfReleaseResourceAllocation(set->sourceAllocation);
     }
-    if (set->unk04 == 0) {
+    if (set->sharesTextureReferences == 0) {
         effReleaseTextureHandlesAndResetSlots(set);
         sdfReleaseResourceAllocation(set->textureAllocation);
     }

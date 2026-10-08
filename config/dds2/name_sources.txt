@@ -1580,11 +1580,13 @@
 0x00183A58	effPcpCreateCompactWorkFromParams	inferred	Allocates compact work, copies flags and parameters, and initializes its resource. [names_reviewed6.tsv]
 0x00183AE8	effPcpCreateChargeWorkFromTable	inferred	Extracts first parameter block and creates compact charge work. [names_reviewed8.tsv]
 0x00183BB8	effPcpReleaseCompactBlurWork	inferred	Releases the work's blur resource then frees work. [names_reviewed6.tsv]
+0x00183BE8	effPcpUpdateCompactScatterWork	inferred	Updates the compact scatter resource owner, projected center, timeline opacity and frame.
 0x00183DB0	effPcpCopyCompactBlurVector	inferred	Copies vector in compact blur resource work callback group. [names_reviewed8.tsv]
 0x00183DC0	effPcpCompactSetColor	inferred	Stores packed color on compact effect work; the initializer uses that field for default gray. [names_reviewed6.tsv]
 0x00183DC8	effPcpCreateCompactResourceWork	inferred	Allocates compact work, creates resource handle and copies flags and parameters. [names_reviewed6.tsv]
 0x00183E58	effPcpCreateChargeResourceWorkFromTable	inferred	Extracts first parameter block and creates charge work with its own resource. [names_reviewed8.tsv]
 0x00183F28	effPcpReleaseSecondaryBlurWork	inferred	Releases second blur resource on work then frees work allocation. [names_reviewed6.tsv]
+0x00183F58	effPcpUpdateCompactScaleWork	inferred	Updates the compact scale resource owner, projected center, timeline opacity and frame.
 0x00184148	effPcpCopyShortThunderFadeVector	inferred	Copies vector for short thunder-fade effect work. [names_reviewed8.tsv]
 0x00184158	effPcpSetChargeResourceColor	inferred	src/dds2/effect/effPCPMisc.c:func_00184158; Writes the charge-resource work color parameter; registered in the same color callback slot as named effect color setters. Registration: asm/dds2/data/data.data.s:63879: table record 0x003B0A70, color slot. [names_qp9.tsv]
 0x00184160	effPcpInitShortThunderFadeWork	inferred	Creates thunder handle from parameters for the adjacent short-fade effect. [names_reviewed6.tsv]
@@ -5483,6 +5485,7 @@
 0x00305068	effReleaseTextureHandlesAndResetSlots	inferred	Releases and clears all texture handles then resets slots; DDS2 counterpart delegates to helper. [names_R_FuncNames4.tsv]
 0x00305080	effHasFirstTextureHandle	inferred	Returns whether the first handle pointed to by offset 0x24 is nonzero. [names_R_FuncNames4.tsv]
 0x00305110	effDestroyPayload	inferred	Releases allocation at header offset 0 then frees 0x0c-byte payload header. [names_R_FuncNames4.tsv]
+0x00305148	effCreateResourceSlotSetFromAllocation	inferred	Builds the slot owner and its descriptor, work and texture arrays from an allocation descriptor.
 0x003054E8	effDestroyResourceSlotSet	inferred	Releases owned file/texture and slot buffers, then frees resource slot set. [names_R_FuncNames4.tsv]
 0x00305558	effSetSlotResourceAndFlags	inferred	Stores slot flags and resource pointer, initializes flagged phase, increments attachment count. [names_R_FuncNames4.tsv]
 0x003055A0	effSetSlotIndexedResource	inferred	Attaches indexed 0x24-byte resource record to slot with selected flags. [names_R_FuncNames4.tsv]

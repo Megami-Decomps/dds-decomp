@@ -3293,14 +3293,16 @@ void btlPanelResourcesLoad(void) {
 }
 
 
-extern u32 func_002BD9C0(u32, u32);
 
 void btlLoadResourceBlock(void) {
     BattleController *work = (BattleController *)btlGetRuntime();
     if (btlResourceBlockLoaded == 0) {
-        btlResourceBlock->resA = (EffectSlotSet *)func_002BD9C0(btlResourceBlock->nameA, 0);
-        btlResourceBlock->resB = (EffectSlotSet *)func_002BD9C0(btlResourceBlock->nameB, 0);
-        btlResourceBlock->resC = (EffectSlotSet *)func_002BD9C0(btlResourceBlock->nameC, 0);
+        btlResourceBlock->resA = effCreateResourceSlotSetFromAllocation(
+            (struct SdfMemBlock *)(u32)btlResourceBlock->nameA, 0);
+        btlResourceBlock->resB = effCreateResourceSlotSetFromAllocation(
+            (struct SdfMemBlock *)(u32)btlResourceBlock->nameB, 0);
+        btlResourceBlock->resC = effCreateResourceSlotSetFromAllocation(
+            (struct SdfMemBlock *)(u32)btlResourceBlock->nameC, 0);
         work->resA = btlResourceBlock->resA;
         work->resB = btlResourceBlock->resB;
         btlResourceBlockLoaded = 1;
