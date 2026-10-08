@@ -3583,6 +3583,7 @@
 0x002183F8	mdlGetTableWord	inferred	returns first word of 8-byte table entry D_00367904[idx]
 0x00218410	mdlGetNodeRefHalf	inferred	finds node by id, returns u16 behind its +0x8 pointer, else 0
 0x00218440	mdlReleaseInnerResourceHandle	inferred	Releases the inner model context's resource handle.
+0x00218460	mdlCopyResourceBasename	inferred	Copies the selected resource path basename up to its first dot, clamps to capacity minus one and NUL-terminates.
 0x00218580	mdlIsInnerSentinel	inferred	returns whether ctx+0x10 mode byte is 1 and inner pointer equals 0x30424950
 0x002185B0	mdlApplyQueuedGroupPackets	inferred	readability/matching review (QP16)
 0x002189D8	mdlDestroyLoadRequestOwner	inferred	src/dds1/model/mdlManager.c func_002189D8: Invokes task-request destruction on attached pointer, then releases model load owner block. [names_reviewed24.tsv]

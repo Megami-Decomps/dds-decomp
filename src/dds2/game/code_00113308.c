@@ -366,7 +366,7 @@ s32 dds3UpdateEffectObjectFollowParameters(EffWorldNode *obj) {
         return 1;
     }
     target = effObjGetTransitionWork(obj);
-    if (dds3TestObjectFlags(obj, 0x200) && target != NULL && !(target->owner->flags & 1)) {
+    if (dds3TestObjectFlags(obj, 0x200) && target != NULL && !(target->owner->flags & MDL_SKIP_TRANSFORMS)) {
         func_00120B88(obj);
     }
     if ((s32)((EffectObjectData *)obj->data)->followParameterIndex == -1) {

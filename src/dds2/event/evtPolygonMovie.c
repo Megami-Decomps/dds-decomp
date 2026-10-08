@@ -440,10 +440,10 @@ void evtBlendParamsH(s32 enable, f32 t, EvtBlendKey *a, EvtBlendKey *b, EvtBlend
 void evtPolygonMovieSetObjectMode(PolyMovieObject *obj, u32 mode, s32 setFlags, s32 clearFlags) {
     switch (mode) {
     case 0:
-        effObjGetTransitionWork((EffWorldNode *)obj)->owner->flags &= ~1;
+        effObjGetTransitionWork((EffWorldNode *)obj)->owner->flags &= ~MDL_SKIP_TRANSFORMS;
         break;
     case 1:
-        effObjGetTransitionWork((EffWorldNode *)obj)->owner->flags |= 1;
+        effObjGetTransitionWork((EffWorldNode *)obj)->owner->flags |= MDL_SKIP_TRANSFORMS;
         break;
     case 2:
         dds3ClearObjectFlags(obj, 0x400);

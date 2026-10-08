@@ -202,7 +202,7 @@ extern s32 mnuPercentOrHundred(u16, u16);
 extern void mnuDrawPanelSequenceByRow(s32, s32, s32, s32, s32, s32);
 
 extern s32 effDestroyPackedBatch(s32);
-extern void mnuFreeProfilePanelWork(s32);
+extern void mnuFreeProfilePanelWork(void *);
 
 
 typedef struct MenuListNode MenuListNode;
@@ -768,7 +768,7 @@ void mnuEnsureProfilePanelEffect(s32 unused, MenuProgressHost *host) {
 
 /* Release the retained profile panel and clear its handle. */
 void mnuCloseCurrentProfilePanel(MenuProgressHost *host) {
-    mnuFreeProfilePanelWork(host->currentEffect);
+    mnuFreeProfilePanelWork((void *)(u32)host->currentEffect);
     host->currentEffect = 0;
 }
 

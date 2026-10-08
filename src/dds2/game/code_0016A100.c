@@ -417,7 +417,7 @@ void effParamInitWork(MdlCtx *work) {
         mdlAddEntryFlagged(work, 0, 0);
         work->first->frameStep = 1.0f;
     }
-    work->flags &= ~1u;
+    work->flags &= ~MDL_SKIP_TRANSFORMS;
 }
 
 extern u16 D_00436434;

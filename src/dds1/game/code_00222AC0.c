@@ -5,6 +5,7 @@
 #include "pcp_vu0.h"
 #include "mdl.h"
 #include "sdf_draw.h"
+#include "eff_object.h"
 #include "scr.h"
 
 
@@ -119,26 +120,6 @@ extern u8 D_003AC2A0[];
 extern u8 D_003AC550[];
 extern u8 D_003AC5B0[];
 extern u8 D_003AC600[];
-
-typedef struct EvtLodRoot {
-    u8 pad00[0x98];
-    s8 lodIndex;        /* 0x98 */
-} EvtLodRoot;
-
-typedef struct EvtLodMh {
-    u8 pad00[0x18];
-    EvtLodRoot *root;   /* 0x18 */
-} EvtLodMh;
-
-typedef struct EvtLodWork {
-    u8 pad00[0x0C];
-    EvtLodMh *mh;       /* 0x0C */
-} EvtLodWork;
-
-typedef struct EvtLodModel {
-    u8 pad00[0x0C];
-    EvtLodWork *workbase; /* 0x0C */
-} EvtLodModel;
 
 extern s32 sdfGetLodChunkValue();
 extern s32 scrGetWindow(void);
@@ -569,8 +550,10 @@ u32 evtOpModelLodChg(void) {
     s32 lod;
     void *world;
     EffWorldNode *unit;
-    EvtLodModel *model;
-    EvtLodRoot *root;
+    EffectObjectData *data;
+    ObjBase *modelHolder;
+    MdlCtx *context;
+    SdfModel *model;
     s32 max;
 
     lod = scrReadIntParameter(1);
@@ -581,26 +564,28 @@ u32 evtOpModelLodChg(void) {
         func_003003F0("warning!! MODEL_LOD_CHG(int,int) unit pointer null\n");
         return 1;
     }
-    model = unit->data;
-    if (model->workbase == NULL) {
+    data = unit->data;
+    if (data->modelHolder == NULL) {
         func_003003F0("warning!! MODEL_LOD_CHG(int,int) workbase pointer null\n");
         return 1;
     }
-    if (model->workbase->mh == NULL) {
+    modelHolder = data->modelHolder;
+    if (modelHolder->resourceHandle == 0) {
         func_003003F0("warning!! MODEL_LOD_CHG(int,int) mh pointer null\n");
         return 1;
     }
-    root = model->workbase->mh->root;
-    if (root == NULL) {
+    context = (MdlCtx *)modelHolder->resourceHandle;
+    model = context->inner;
+    if (model == NULL) {
         func_003003F0("warning!! MODEL_LOD_CHG(int,int) root pointer null\n");
         return 1;
     }
-    max = sdfGetLodChunkValue(root);
+    max = sdfGetLodChunkValue(model);
     if (max < lod) {
         func_003003F0("warning!! MODEL_LOD_CHG(int,int) lodno over!! max=%d setval=%d\n", max, lod);
         return 1;
     }
-    root->lodIndex = lod;
+    model->lodIndex = lod;
     func_003003F0("success: MODEL_LOD_CHG(int,int)\n");
     return 1;
 }
@@ -1116,7 +1101,7 @@ u32 evtUnitClearFlagBit(void) {
     id = scrReadIntParameter(0);
     unit = evtGetWorldUnitNestedValue(id);
     if (unit != NULL) {
-        unit->owner->flags &= ~1;
+        unit->owner->flags &= ~MDL_SKIP_TRANSFORMS;
     }
     return 1;
 }
@@ -1128,7 +1113,7 @@ u32 evtUnitSetFlagBit(void) {
     id = scrReadIntParameter(0);
     unit = evtGetWorldUnitNestedValue(id);
     if (unit != NULL) {
-        unit->owner->flags |= 1;
+        unit->owner->flags |= MDL_SKIP_TRANSFORMS;
     }
     return 1;
 }
