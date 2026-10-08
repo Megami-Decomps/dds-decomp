@@ -1166,12 +1166,16 @@
 0x00150040	effInitializeBillResourceOwners	inferred	Creates the fifteen configured billboard resource owners and scales each kind-zero payload's half extents
 0x001500F0	effBillDispatchAll	inferred	Dispatches every entry in the bill-kind table. [names_qp9.tsv]
 0x00150260	effReleaseSharedTextureRecord	inferred	src/dds1/game/code_0014FEB0.c func_00150260: Decrements reference count and releases texture reference plus allocation on final reference. [names_reviewed24.tsv]
+0x001502B0	billAppendChildQuad	inferred	appends one billboard quad to a child payload
+0x00150750	billFlushPendingChildPackets	inferred	drains pending child packet lists into pools
+0x00151010	billFlushPendingRenderPairs	inferred	drains queued render pairs and submits batches
 0x001511C0	billAllocChild	inferred	allocates 0x34 child, links func_00150148 result when arg given
 0x00151260	billAllocList	inferred	allocates entry-list object from data, wires +0x30/+0x60/+0x50
 0x001512E8	billCloneList	inferred	clones entry-list object sharing child, bumps child count
 0x00151568	effBillModulateColors	inferred	multiplies RGBA channels using VU and repacks result [names_reviewed5.tsv]
 0x001518A0	billResolveEntry	inferred	Resolves a billboard table entry's offset against its base and copies its 0x12 halfword into the output.
 0x001518D8	billSetAnimationEntry	inferred	LeverAudit
+0x00151A88	billCreateAnimationDataFromResource	inferred	Copies serialized animation data, resolves child payloads and initializes the BillData consumed by billAllocList.
 0x00151C58	billReleaseSharedEntryBlock	inferred	Decrements billboard block reference count; on zero releases entries and block. [names_reviewed21.tsv]
 0x00151CE8	billCopyCurrentRecordToSnapshot	inferred	M141; sources=names_pending_main.tsv; twin=0x001598D8, input-family pairing. [names_qp10.tsv]
 0x00151D88	billCreateIndexed	inferred	creates instance via D_0034E060 table, inits params/kind/draw
@@ -4635,6 +4639,7 @@
 0x00272260	mnuIsFadeIdle	inferred	Returns true when the kernel fade task is inactive.
 0x00272280	mnuDrawStaffCampSlotsAndCurrency	inferred	confidence=high; src/dds1/game/code_00270FB0.c:func_00272280; Draws two resolved grid slots at fixed positions and queues formatted task status text with draw flags. CORRECTED: caller func_002728F8 is the staff/camp screen; the third draw is D_003BAA00+0x3C, which datCalc.c names currency, not a task status. [names_qp9.tsv]
 0x00272350	mnuCreateStaffImageSprite	inferred	Creates and configures a drawable sprite from the indexed staff image resource.
+0x002723B0	mnuDrawStaffGridLabelsForKind	inferred	uses kind-indexed StaffGridLabelRow positions and grid IDs to draw configured labels from the supplied resource slot
 0x00272688	mnuDrawStaffCampScreen	inferred	draws backdrop and staff frame, three func_002BF790 icons when arg==0
 0x00272798	mnuHandleCampFieldSkillInput	inferred	L12_Donors
 0x00272A00	mnuStartStaffDisplay	inferred	mnu menu, title, shop, or movie UI in game/code_00272798.c

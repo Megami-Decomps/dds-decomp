@@ -3,8 +3,13 @@
 
 #include "mnu.h"
 
-#ifdef VERSION_DDS2
 struct DatPartyRecord;
+/* Field-use skills operate on the selected party records and their page. */
+s32 ptySkillApplyFieldUseEffect(MenuPageWindow *page, u16 ability,
+                               struct DatPartyRecord *target,
+                               struct DatPartyRecord *selected);
+
+#ifdef VERSION_DDS2
 struct MenuPanelState;
 
 /* Native staff components: page 0x284, party 0xA928 and fade 0xB10C. */
@@ -22,9 +27,6 @@ s32 mnuIsStaffWindowReadyForItem(s32 itemId, MenuStaffContext *context);
 s32 mnuGetAbilityTargetCategory(u16 commandId);
 s32 mnuGetMatchingPartyEntryMask(struct DatPartyRecord *entry);
 s32 mnuFindMatchingPartyEntryIndex(struct DatPartyRecord *entry);
-s32 ptySkillApplyFieldUseEffect(MenuPageWindow *page, u16 ability,
-                               struct DatPartyRecord *target,
-                               struct DatPartyRecord *selected);
 s32 func_002C5A28(MenuPageWindow *page, u16 ability,
                   struct DatPartyRecord *target, struct DatPartyRecord *selected);
 s32 mnuTryUseFieldSkill(PartyPanel *party, MenuPageWindow *page,

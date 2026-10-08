@@ -1,5 +1,7 @@
 #include "kwln.h"
 #include "mnu.h"
+#include "mnu_staff.h"
+#include "dat_state.h"
 
 
 extern void mnuCampMenuHandleInput(s32);
@@ -7,7 +9,7 @@ extern void ptySkillMenuHandleSelection(s32);
 extern void ptySkillMenuHandleSlotReorder(s32);
 extern void func_00272778(s32);
 extern void mnuCreateStaffImageSprite(s32);
-extern void func_002723B0(s32, s32);
+extern void mnuDrawStaffGridLabelsForKind(s32, s32);
 extern void ptySkillMenuCopyPageState(s32);
 extern void mnuDrawStaffCampScreen(s32, s32);
 extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
@@ -15,10 +17,6 @@ extern void func_00272668(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawWindowContainer(s32, s32, s32, s32, s32);
 extern u32 mnuHasSelectedListNodeId(s32);
 extern s32 D_003BAA98;
-extern s32 datGameState;
-extern s32 mnuIsEntryCostUnaffordable(u16, struct DatPartyRecord *);
-extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
-extern s32 mnuConsumeEntryCost(s32, struct DatPartyRecord *);
 extern void mnuInitPartyPanelSlots(s32);
 extern void func_00280048(s32);
 extern u32 mnuMapPadMaskToFlags(u32);
@@ -188,7 +186,7 @@ s32 ptySkillMenuEnterPage(KwlnTask *callback) {
     } else {
         func_00272668(1, 0, 0, context, 1, 0x53);
     }
-    func_002723B0(0, work->actor);
+    mnuDrawStaffGridLabelsForKind(0, work->actor);
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
@@ -202,13 +200,16 @@ s32 ptySkillMenuUseSelectedInField(id, context)
     s32 context;
 {
     s32 window = context + 0x15C;
-    s32 slotA = datGameState + ((SkillMenuContext *)context)->selection->cursor->index * 0x1A4 + 0xA60;
-    s32 slotB = datGameState + ((SkillMenuContext *)context)->target->cursor->index * 0x1A4 + 0xA60;
-    if (mnuIsEntryCostUnaffordable(id, (struct DatPartyRecord *)slotA) != 0) {
+    DatPartyRecord *selectedEntry =
+        &datGameState->party[((SkillMenuContext *)context)->selection->cursor->index];
+    DatPartyRecord *targetEntry =
+        &datGameState->party[((SkillMenuContext *)context)->target->cursor->index];
+    if (mnuIsEntryCostUnaffordable(id, selectedEntry) != 0) {
         return 0;
     }
-    if (ptySkillApplyFieldUseEffect(window, id, slotA, slotB) != 0) {
-        mnuConsumeEntryCost(id, (struct DatPartyRecord *)slotA);
+    if (ptySkillApplyFieldUseEffect((MenuPageWindow *)window, id,
+                                    selectedEntry, targetEntry) != 0) {
+        mnuConsumeEntryCost(id, selectedEntry);
         mnuInitPartyPanelSlots(context + 0x7EC);
         mnuUpdateHandleStates((MenuPageWindow *)window);
         func_00280048(window);
@@ -228,11 +229,12 @@ typedef struct SkillLink {
 } SkillLink;
 
 void mnuFlagMatchingEntries(s32 context) {
-    s32 slot = datGameState + ((SkillMenuContext *)context)->selection->cursor->index * 0x1A4 + 0xA60;
+    DatPartyRecord *selectedEntry =
+        &datGameState->party[((SkillMenuContext *)context)->selection->cursor->index];
     SkillLink *link = (SkillLink *)((SkillMenuContext *)context)->menu->selected->list->first;
     if (link != NULL) {
         do {
-            if (mnuIsEntryCostUnaffordable(link->id, (struct DatPartyRecord *)slot)) {
+            if (mnuIsEntryCostUnaffordable(link->id, selectedEntry)) {
                 link->flags |= 1;
             }
             link = link->next;
@@ -283,7 +285,7 @@ s32 ptySkillMenuEnterConfirm(KwlnTask *callback) {
     func_00272518(1, menu->selected->list->cursor->sortKey, D_003BAA98, context, 1, 1, 0x53);
     menu->selected->list->flags &= ~8;
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->selected, 0x53);
-    func_002723B0(0, ((SkillMenuContext *)context)->actor);
+    mnuDrawStaffGridLabelsForKind(0, ((SkillMenuContext *)context)->actor);
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 

@@ -908,11 +908,15 @@
 0x00157BE0	effInitializeBillResourceOwners	inferred	Loads BILL.LB entries, constructs the configured billboards, scales their half extents, and fills effBillResourceOwners.
 0x00157CE0	effBillDispatchAll	inferred	Dispatches every entry in the bill-kind table; DDS1 twin. [names_qp9.tsv]
 0x00157E50	effReleaseSharedTextureRecord	inferred	src/dds2/game/code_00157A50.c func_00157E50: Decrements reference count and releases texture reference plus allocation on final reference. Twin of DDS1 func_00150260. [names_reviewed24.tsv]
+0x00157EA0	billAppendChildQuad	inferred	appends one billboard quad to a child payload
+0x00158340	billFlushPendingChildPackets	inferred	drains pending child packet lists into pools
+0x00158C00	billFlushPendingRenderPairs	inferred	drains queued render pairs and submits batches
 0x00158E00	billReleaseChild	inferred	Releases the billboard's child at offset 0x30 when present, then frees the billboard.
 0x00158E38	billProcessChild	inferred	Passes the billboard and its child at offset 0x30 to its processing routine.
 0x00158F58	billReleaseList	inferred	Releases a billboard list's shared data and then frees the list object.
 0x00159158	effBillModulateColors	inferred	multiplies RGBA channels using VU and repacks result [names_reviewed5.tsv]
 0x001594C8	billSetAnimationEntry	inferred	LeverAudit
+0x00159678	billCreateAnimationDataFromResource	inferred	Copies serialized animation data, resolves child payloads and initializes the BillData consumed by billAllocList; DDS1 counterpart.
 0x00159848	billReleaseSharedEntryBlock	inferred	Decrements billboard block reference count; on zero releases entries and block. [names_reviewed21.tsv]
 0x001598D8	billCopyCurrentRecordToSnapshot	inferred	M141; sources=names_pending_main.tsv; twin=0x00151CE8, input-family pairing. [names_qp10.tsv]
 0x001599F8	billCreateFromResource	inferred	Opens a billboard resource to read its header, creates the indexed billboard, and releases the temporary allocation.
@@ -4311,6 +4315,7 @@
 0x002AA0D8	mnuCreateStaffMenuWork	inferred	allocates/zeroes the 0xB1E0 staff-menu work block, loads effect resources, builds the id->slot tables; called from func_002AA360 that creates the "camp" tasks [names_M51_FieldMenu.tsv]
 0x002AA360	mnuCreateCampTasks	inferred	creates the camp, camp_draw, camp_update, camp_fade, camp_all_cancel tasks [names_M51_FieldMenu.tsv]
 0x002AA530	mnuDrawCampTitleCurrencyAndFade	inferred	Draws sliding camp title and formatted currency using title opacity and model flag. [names_reviewed21.tsv]
+0x002AA7A0	mnuDrawStaffGridLabelsForKind	inferred	DDS1 role twin; uses kind-indexed StaffGridLabelRow positions and grid IDs to draw configured labels from the supplied resource slot
 0x002AACB8	mnuDrawCampIconBackdropByKind	inferred	Draws camp icon backdrop, adjusting overlay and fixed-point position per kind. [names_reviewed21.tsv]
 0x002AAEA0	mnuPrepareCampFieldSkillDisplay	inferred	Tests party field skill, toggles skill flag and initializes camp title opacity, slide and fade state. [names_reviewed21.tsv]
 0x002AAF40	mnuStartCampTitleFadeOut	inferred	Sets camp visual titleFadingOut flag on current task work. [names_reviewed21.tsv]
