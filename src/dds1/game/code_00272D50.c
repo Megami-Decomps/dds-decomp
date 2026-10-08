@@ -1,5 +1,6 @@
 #include "kwln.h"
 #include "mnu.h"
+#include "mnu_staff.h"
 #include "sdf_resource.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
@@ -319,7 +320,7 @@ extern void mnuCreateStaffImageSprite(s32);
 extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 extern void func_00272668(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
-extern void func_002723B0(s32, s32);
+extern void mnuDrawStaffGridLabelsForKind(s32, s32);
 extern u8 D_0037C860[];
 extern s32 D_003BAA9C;
 
@@ -329,7 +330,7 @@ s32 mnuStaffDrawImagePanelA(KwlnTask *callback) {
     mnuCreateStaffImageSprite(4);
     func_00272668(1, ((StaffDisplayContext *)context)->activeWindow->list->cursor->index, (s32)D_0037C860, context, 1, 0x53);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, ((StaffDisplayContext *)context)->activeWindow, 0x53);
-    func_002723B0(0, ((StaffDisplayContext *)context)->group);
+    mnuDrawStaffGridLabelsForKind(0, ((StaffDisplayContext *)context)->group);
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
@@ -340,7 +341,6 @@ s32 mnuStaffRunPanel2b(KwlnTask *request) {
 }
 
 extern s32 btlItemApplyDirectEffect(s32, s32, s32, s32);
-extern s32 ptySkillApplyFieldUseEffect(s32, s32, s32, s32);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern void ptyAdjustItemQuantity(s32, s32);
 extern void mnuInitPartyPanelSlots(s32);
@@ -358,7 +358,7 @@ s32 mnuUseStaffItem(s32 itemId, s32 context) {
         if (result == 2) {
             return 0;
         }
-        if (ptySkillApplyFieldUseEffect(partyPanel, evtGetIndexedEventRecordId(itemId) & 0xFFFF, targetUnit, targetUnit) == 0) {
+        if (ptySkillApplyFieldUseEffect((MenuPageWindow *)partyPanel, evtGetIndexedEventRecordId(itemId) & 0xFFFF, (DatPartyRecord *)targetUnit, (DatPartyRecord *)targetUnit) == 0) {
             return 0;
         }
     }
