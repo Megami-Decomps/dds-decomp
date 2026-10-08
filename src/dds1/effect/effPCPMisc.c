@@ -221,7 +221,7 @@ extern void effBlurReleaseSecondResource(EffBlurScaleWork *work);
 extern void effBlurSecondInitSlots(EffBlurScaleWork *work);
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
-extern void func_00188050(EffResourceRectWork *work);
+extern void effReleaseResourceTemplate(EffResourceRectWork *work);
 extern void *effCloneBlurTemplate(void *params);
 extern void *effPcpTripleHandleCreate(void *block0, void **blocks);
 
@@ -2206,7 +2206,7 @@ void effPcpCompactRespawn(EffPCPCompactFadeWork *work) {
 }
 
 void effPcpCompactEffectRelease(EffPCPCompactFadeWork *work) {
-    func_00188050((EffResourceRectWork *)work->resource);
+    effReleaseResourceTemplate((EffResourceRectWork *)work->resource);
     sdfReleaseChipBlock(work);
 }
 

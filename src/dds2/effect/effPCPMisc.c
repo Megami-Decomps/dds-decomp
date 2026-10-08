@@ -253,7 +253,7 @@ typedef struct {
 } EffPCPCompactFadeWork;
 
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
-extern void func_0018FC88(EffResourceRectWork *work);
+extern void effReleaseResourceTemplate(EffResourceRectWork *work);
 
 extern void *effCloneBlurTemplate(void *params);
 
@@ -2510,7 +2510,7 @@ void effPcpCompactRespawn(EffPCPCompactFadeWork *work) {
 }
 
 void effPcpCompactEffectRelease(EffPCPCompactFadeWork *work) {
-    func_0018FC88((EffResourceRectWork *)work->resource);
+    effReleaseResourceTemplate((EffResourceRectWork *)work->resource);
     sdfReleaseChipBlock(work);
 }
 
