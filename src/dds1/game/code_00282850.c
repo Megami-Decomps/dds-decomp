@@ -3,6 +3,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "common.h"
+#include "fr_font.h"
 #include "sdf_dev_state.h"
 #include "dds3obj.h"
 #include "sdf.h"
@@ -23,7 +24,6 @@
 struct FrFontGlyph;
 extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
 extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
-extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
 extern s32 mnuGetMatchingPartyEntryMask(DatPartyRecord *);
 extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);

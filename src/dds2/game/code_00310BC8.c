@@ -27,7 +27,6 @@ extern FrFontGlyph *func_0019CE78(void *, s8, s8, s8, FrFontGlyph *);
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
 extern u32 frFontMeasureGlyphChain(FrFontGlyph *);
 extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
-extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern s32 func_0019D550(FrFontGlyph *, s8, u32);
 extern void frFontSetChainFlag(FrFontGlyph *, u8);
 

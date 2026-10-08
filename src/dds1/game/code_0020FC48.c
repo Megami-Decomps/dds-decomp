@@ -1,5 +1,6 @@
 #include "pcp_vu0.h"
 #include "common.h"
+#include "fr_font.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
@@ -1892,15 +1893,11 @@ s32 mnuListMoveCursor(BtlDebugMenuCursor *menuList) {
     return 0;
 }
 
-extern void *func_00197748(s32, s32, u32, u32, s32, s32);
-
 extern void func_001958A0(void *, s32, s32);
-
-extern s32 frFontQueueGlyphInSelectedSlot(void *);
-
 /* Queue text at pixel coordinates, using the font's native X/Y scaling. */
 s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
-    void *textGlyph = func_00197748(x << 4, y << 3, MNU_LIST_TEXT_DEPTH, MNU_LIST_NORMAL_COLOR, text, 0);
+    struct FrFontGlyph *textGlyph = func_00197748(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
+        MNU_LIST_NORMAL_COLOR, (const char *)(u32)text, NULL);
     func_001958A0(textGlyph, 0, 0x60);
     return frFontQueueGlyphInSelectedSlot(textGlyph);
 }
@@ -1921,7 +1918,10 @@ s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 unusedMode, BtlDebugMenuCursor *
     selectedIndex = selectionState->cursor;
     rowY = (s32)y;
     for (; itemIndex < endIndex; itemIndex++) {
-        void *textGlyph = func_00197748((s32)x << 4, rowY << 3, MNU_LIST_TEXT_DEPTH, itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR, rowTexts[itemIndex], 0);
+        struct FrFontGlyph *textGlyph = func_00197748((s32)x << 4, rowY << 3,
+            MNU_LIST_TEXT_DEPTH,
+            itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
+            (const char *)(u32)rowTexts[itemIndex], NULL);
         func_001958A0(textGlyph, 0, 0x60);
         frFontQueueGlyphInSelectedSlot(textGlyph);
         rowY += MNU_LIST_ROW_HEIGHT;

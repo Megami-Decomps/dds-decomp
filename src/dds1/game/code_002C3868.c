@@ -115,7 +115,8 @@ extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32,
 
 extern s32 sdfCounterMeasureLabelWidth(u32);
 
-extern void evtPrepareSizedDrawResource();
+extern void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors,
+                                        const char *text);
 
 typedef struct MapResource {
     u32 image;
@@ -529,7 +530,7 @@ void sdfCounterDrawChannelPlate(s32 x, s32 y, s32 unused, SdfCounterRuntime *rt,
     width = sdfCounterMeasureLabelWidth((u32)channel->display->word);
     evtPrepareSizedDrawResource(x + (0x80 - width) / 2 + 1, y + 1,
                                 PACK((u32)(fade * 128.0f), (u32)(fade * 128.0f), (u32)((f32)(base + 0x80) * fade), (u32)(fade * 128.0f)),
-                                channel->display->word);
+                                (const char *)channel->display->word);
 }
 
 /* The display counter saturates at ten rather than wrapping. */

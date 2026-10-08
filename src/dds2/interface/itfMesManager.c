@@ -77,9 +77,6 @@ void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
 void itfMesResetWindow(s32 window);
 
 void itfMesDestroyWindow(s32 window);
-
-s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *glyph);
-
 void itfMesResetCursorState(void *, s32);
 
 void itfResetCursorPositionAndState(void *, s32);
