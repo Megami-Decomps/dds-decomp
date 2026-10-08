@@ -5347,14 +5347,15 @@ void func_001B70B8(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
     }
 }
 
-void btlInitializeActionRecordWithScale(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, f32 arg5) {
-    *(u8 *)(arg0 + 0) = 1;
-    *(u8 *)(arg0 + 0x28) = arg4 * 8 + 0x18;
-    *(u16 *)(arg0 + 2) = arg1;
-    *(f32 *)(arg0 + 4) = arg5;
-    *(u32 *)(arg0 + 0x18) = arg2;
-    *(u32 *)(arg0 + 0x1c) = arg3;
-    *(u32 *)(arg0 + 0x24) = 0;
+void btlInitializeActionRecordWithScale(BattleMirroredSpriteRecord *record, s16 slot,
+                                      s32 x, s32 y, s32 index, f32 scale) {
+    record->active = 1;
+    record->alpha = index * 8 + 0x18;
+    record->slot = slot;
+    record->scale = scale;
+    record->x = x;
+    record->y = y;
+    record->frame = 0;
 }
 
 extern u8 D_00436800;

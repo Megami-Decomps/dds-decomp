@@ -306,7 +306,8 @@ typedef struct DatBattleSceneRecord {
     u16 unk1C;           /* 0x1C: copied into the battle state with unk1E when both are set */
     u16 unk1E;           /* 0x1E */
     u16 flags;           /* 0x20: 0x8000, 0x800 and 0x400 are tested */
-    u8 pad22[2];
+    u8 maxActiveEnemies; /* 0x22: zero defaults to five; six or more blocks spawning. */
+    u8 maxEnemySpawns; /* 0x23: zero removes the cumulative spawn limit. */
     u16 unk24;           /* 0x24: overrides the scene's sound selection when nonzero */
     u16 eventId;         /* 0x26: signed event number; zero disables */
 } DatBattleSceneRecord;

@@ -307,7 +307,19 @@ void func_002CD0D8(u16 scriptId, s32 mode, char *destination) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002CC750", func_002CD240);
+extern u8 *D_0037CDF8 __attribute__((section(".data")));
+
+s32 func_002CD240(u16 profileId, u8 **out) {
+    u8 *text;
+
+    if (mdlFlagTest(0x902)) {
+        text = D_003BAA78[profileId].encodedText;
+        *out = text;
+        return 1;
+    }
+    *out = D_0037CDF8;
+    return 0;
+}
 
 /* Read the configured capacity for an unchecked profile ID. */
 u32 prfGetCapValue(u16 profileId) {
