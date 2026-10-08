@@ -33,6 +33,7 @@ extern f32 func_003532B8(f32);
 extern f64 cos(f64);
 
 extern f64 sin(f64);
+extern f64 func_003532A0(f64);
 
 typedef struct SdfResourceInfo {
     u32 word[4];
@@ -465,7 +466,9 @@ f32 sdfVec3Normalize(f32 *vector) {
     return length;
 }
 
-INCLUDE_ASM(const s32, "game/code_00324DF8", sdfVectorLength);
+f32 sdfVectorLength(const f32 *vector) {
+    return func_003532A0(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
+}
 
 /* Dot product of two normalized 3D directions (w is ignored). */
 f32 sdfVec3DotNormalized(void *first, void *second) {
@@ -595,8 +598,6 @@ f32 *sdfVectorTransformByMatrix(f32 *vec, f32 *mat) {
     memcpy(vec, out, 16);
     return vec;
 }
-
-extern f64 func_003532A0(f64);
 
 /* Convert a rotation basis to quaternion components, choosing the largest
  * diagonal when the trace branch is ill-conditioned. */
