@@ -193,7 +193,7 @@ s32 mnuMovieDraw(void) {
 
 void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *descriptor) {
     if (mnuMovieDrawTask == 0) {
-        func_002ED8D0(&mnuMovieDrawContext, descriptor, fileName);
+        sdfMovieInitializeStreamWork(&mnuMovieDrawContext, descriptor, fileName);
         mnuMovieDrawTask = kwlnTaskCreate(D_003B1A78, 0x2afb, 1, 1, mnuMovieDraw, 0, 0);
     }
 }
