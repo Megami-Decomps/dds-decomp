@@ -136,7 +136,7 @@ extern char D_00437CB0[];
 
 extern void mnuFreePanelItemWork(MenuPanelItem *);
 
-extern void sdfReleaseChipBlock();
+extern void sdfReleaseChipBlock(void *);
 
 extern u32 effMiscRand(s32);
 
@@ -1113,8 +1113,8 @@ u32 *mnuCreateProfilePanel(s32 selectionState) {
     return (u32 *)panel;
 }
 
-void mnuFreeProfilePanelWork(void) {
-    sdfReleaseChipBlock();
+void mnuFreeProfilePanelWork(void *work) {
+    sdfReleaseChipBlock(work);
 }
 
 void mnuSetGroupProperties(u32 *entry, u32 first, u32 second, u32 third, u32 fourth) {
