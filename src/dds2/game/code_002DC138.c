@@ -45,7 +45,7 @@ extern void mdlLoadViewerPackage(s32, u16, s32, void *, u32);
 
 extern u16 D_00437E2C;
 
-extern void *effCreateModelOwner(void *);
+extern EffModelOwner *effCreateModelOwner(void *);
 
 extern void effRecreateModelFromSource(EffModelOwner *, EffModelOwner *);
 
@@ -150,7 +150,7 @@ MdlCtx *effCloneModelWithVUState(MdlCtx *sourceModel) {
 }
 
 
-void *effCreateModelOwner(void *input) {
+EffModelOwner *effCreateModelOwner(void *input) {
     FileJobPayload *source = input;
     EffModelOwner *owner = sdfAllocAndClearQuadwords(0x10);
     owner->ownedBuffer = sdfAllocAndClearQuadwords(sizeof(*owner->ownedBuffer));
