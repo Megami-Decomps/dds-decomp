@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ee_mmi.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_draw.h"
@@ -130,6 +131,7 @@ typedef struct SoundFormat {
 
 extern SdfStreamFrameNode *sdfSoundNodeHead;
 extern SdfStreamFrameNode *D_003BDAA8;
+extern s32 D_003BDA94;
 extern s32 sceIpuSync(s32, s32);
 extern void *sdfAllocateBlockBySizeThreshold(s32);
 extern void sdfStreamOpen(SdfStreamFrameNode *, SoundFormat *, s32, s32);
@@ -1370,7 +1372,28 @@ void sdfIpuDmaCompletionWorker(void) {
 
 INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC3C0);
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC3F0);
+s32 func_002EC3F0(void) {
+    SdfStreamFrameNode *stream = D_003BDAA8;
+
+    if (stream != NULL) {
+        D_003BDA94 = stream->unk48;
+        D_003BDAA8 = NULL;
+        if (stream->unk11 != 0 && stream->active == 1) {
+            if (stream->pad64 != 0) {
+                stream->pad64 = 0;
+                stream->firstSlot++;
+                if (stream->firstSlot == SDF_STREAM_RING_SLOTS) {
+                    stream->firstSlot = 0;
+                }
+                stream->filledSlots--;
+            }
+            sndFillStreamFeedRing(stream);
+            sdfSoundStartIpuInputDma(stream);
+        }
+    }
+    EE_ENABLE_INTERRUPTS_SYNC();
+    return 0;
+}
 
 /* Return the indexed earlier entry only when enabled; the byte index is unchecked. */
 u32 sdfMidiPreviousEntry(MidiChannel *channel) {
@@ -1513,7 +1536,6 @@ extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, 
 extern void _StartThread();
 extern u8 sdfIpuStreamThreadStack[];
 extern s32 func_002EC3C0();
-extern s32 func_002EC3F0();
 extern void sdfIpuDmaCompletionWorker();
 void sdfSoundInitIpuStream(void) {
     s32 thread;
