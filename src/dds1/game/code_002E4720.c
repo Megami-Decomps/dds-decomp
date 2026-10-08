@@ -157,7 +157,7 @@ extern void sdfPanicHaltPrintf(const char *arg0, ...) __attribute__((noreturn));
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfReleaseChipBlock(void *ptr);
 extern void *sdfAllocAndClearQuadwords(s32 size);
-extern void func_002D0750(s32 arg0, s32 arg1);
+extern void func_002D0750(struct SdfMemBlock *allocation, s32 size);
 extern u32 strlen(const char *s);
 extern void func_002F4190(u32 arg0);
 extern u32 sdfDiscType;
@@ -1822,10 +1822,10 @@ DevRequest *sdfDevCreateBufferedRequest(s32 elementCount, s32 elementStride, s32
     request->capacity = elementCount;
     request->stride = elementStride;
     if (elementCount != 0) {
-        request->handle = (u32)sdfAllocGeneralBlock(elementStride * elementCount);
-        request->buffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(request->handle));
+        request->backingAllocation = sdfAllocGeneralBlock(elementStride * elementCount);
+        request->buffer = (void *)sdfResourceRetainAddress(request->backingAllocation);
     } else {
-        request->handle = 0;
+        request->backingAllocation = 0;
         request->buffer = 0;
     }
     return request;
@@ -1833,7 +1833,7 @@ DevRequest *sdfDevCreateBufferedRequest(s32 elementCount, s32 elementStride, s32
 
 /* Release the backing allocation and the request object. */
 void sdfDestroyDevRequest(DevRequest *request) {
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(request->handle));
+    sdfReleaseResourceAllocation(request->backingAllocation);
     sdfReleaseChipBlock(request);
 }
 
@@ -1841,35 +1841,35 @@ void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
 
 /* Grow capacity, preserving the SDK's signed 16-bit allocation-size arithmetic. */
 void sdfDevBufferedRequestGrow(DevRequest *request) {
-    if (request->handle == 0) {
+    if (request->backingAllocation == 0) {
         sdfDevResizeBufferedRequest(request, request->growStep);
         return;
     }
-    sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)(u32)request->handle);
+    sdfDecrementAllocationReferenceCount(request->backingAllocation);
     request->capacity = request->capacity + request->growStep;
-    func_002D0750(request->handle, (s16)request->capacity * request->stride);
-    request->buffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(request->handle));
+    func_002D0750(request->backingAllocation, (s16)request->capacity * request->stride);
+    request->buffer = (void *)sdfResourceRetainAddress(request->backingAllocation);
 }
 
 /* Resize storage and clamp the live entry count to the new capacity. */
 void sdfDevResizeBufferedRequest(DevRequest *request, s32 elementCount) {
-    if (request->handle == 0) {
+    if (request->backingAllocation == 0) {
         if (elementCount > 0) {
             request->capacity = elementCount;
-            request->handle = (u32)sdfAllocGeneralBlock(request->stride * elementCount);
-            request->buffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(request->handle));
+            request->backingAllocation = sdfAllocGeneralBlock(request->stride * elementCount);
+            request->buffer = (void *)sdfResourceRetainAddress(request->backingAllocation);
         }
     } else if (elementCount <= 0) {
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(request->handle));
-        request->handle = 0;
+        sdfReleaseResourceAllocation(request->backingAllocation);
+        request->backingAllocation = 0;
         request->usedCount = 0;
         request->capacity = 0;
         request->buffer = 0;
     } else {
-        sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)(u32)request->handle);
+        sdfDecrementAllocationReferenceCount(request->backingAllocation);
         request->capacity = elementCount;
-        func_002D0750(request->handle, request->stride * elementCount);
-        request->buffer = (void *)sdfResourceRetainAddress((struct SdfMemBlock *)(request->handle));
+        func_002D0750(request->backingAllocation, request->stride * elementCount);
+        request->buffer = (void *)sdfResourceRetainAddress(request->backingAllocation);
         if (elementCount < request->usedCount) {
             request->usedCount = elementCount;
         }

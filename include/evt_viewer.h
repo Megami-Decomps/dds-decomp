@@ -5,6 +5,8 @@
 #include "evt_polygon_movie.h"
 #include "fld.h"
 
+struct KwlnTask;
+
 /* A timeline key's scalar formats are selected by its track kind. */
 typedef union EvtViewParam {
     f32 f; s32 i; u32 u; u16 h[2]; s16 sh[2]; u8 b[4]; s8 sb[4];
@@ -219,6 +221,10 @@ typedef struct EvtRuntime {
     s32 curveComponent;
 #endif
 } EvtRuntime;
+
+/* Returns the next update function as the scheduler's signed callback word. */
+s32 evtViewerStartUpdate(struct KwlnTask *task);
+struct KwlnTask *evtViewerCreateTask(s32 taskId, s32 event, s32 id);
 
 typedef char EvtRuntimeChild_size[(sizeof(EvtRuntimeChild) == 0x38) ? 1 : -1];
 typedef char EvtRuntimeGroup_size[(sizeof(EvtRuntimeGroup) == 0x84) ? 1 : -1];

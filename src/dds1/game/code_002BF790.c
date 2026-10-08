@@ -1,6 +1,7 @@
 #include "common.h"
 #include "fpu.h"
 #include "eff.h"
+#include "eff_resource_records.h"
 #include "itf_grid_text.h"
 #include "sdf.h"
 

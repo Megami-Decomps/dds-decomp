@@ -50,21 +50,20 @@ INCLUDE_ASM(const s32, "game/code_00234C18", func_00234DA8);
 extern u32 D_003BA8EC;
 extern void *memset(void *dst, s32 value, u32 size);
 extern s32 sdfPathExists(char *path);
-extern s32 kwlnTaskCreate(const char *name, s32 id, s32 arg2, s32 arg3, void *update, void *destroy, void *data);
-extern void evtViewerStartUpdate(void);
-extern void func_00232D28(void);
+extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay, TaskUpdate update, TaskDestroy destroy, u32 userValue);
+extern void func_00232D28(KwlnTask *task);
 extern void func_00232D48(EvtRuntime *viewer);
 extern char D_003ADDB0[]; /* "(ZikkiPlayMode)EventViewer" */
 
 /* Create the event viewer task `taskId` for event `event`/scene `id` and request its movie files. */
-s32 evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
+KwlnTask *evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
     char path0[0x40];
     char path1[0x40];
     char path2[0x40];
     SdfMemBlock *viewerHandle;
     EvtRuntime *viewer;
     PolyMovieWork *work;
-    s32 task;
+    KwlnTask *task;
 
     D_003BA8EC = 0x80000000;
     viewerHandle = sdfAllocGeneralBlock(0x2490);
@@ -86,9 +85,9 @@ s32 evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
         work->tertiaryResource.request = 0;
         work->tertiaryResource.address = 0;
     }
-    task = kwlnTaskCreate(D_003ADDB0, taskId, 1, 1, evtViewerStartUpdate, func_00232D28, viewer);
+    task = kwlnTaskCreate(D_003ADDB0, taskId, 1, 1, evtViewerStartUpdate, func_00232D28, (u32)viewer);
     viewer->windowContext = work;
-    work->unk108 = task;
+    work->task = task;
     func_00232D48(viewer);
     return task;
 }

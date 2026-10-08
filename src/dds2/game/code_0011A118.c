@@ -241,7 +241,7 @@ s32 dds3FindEntryIndex(rosterIndex)
     s32 slotIndex = 0;
     DatPartyRecord *entry = datGameState->party;
     do {
-        if (entry->flags & 1) {
+        if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             if (entry->unitId == rosterIndex) {
                 return slotIndex;
             }
@@ -324,7 +324,7 @@ void func_0011A510(s32 mode) {
         DatPartyRecord *entry = datGameState->party;
         slotIndex = 0;
         do {
-            if ((entry->flags & 2) && (entry->status & 0x80)) {
+            if ((entry->flags & DAT_PARTY_FLAG_FRONTLINE) && (entry->status & 0x80)) {
                 if (entry->hp != 0) {
                     nextHp = entry->hp;
                     loss = nextHp * 3 / 100;
@@ -342,7 +342,7 @@ void func_0011A510(s32 mode) {
         DatPartyRecord *entry = datGameState->party;
         slotIndex = 0;
         do {
-            if (entry->flags & 2) {
+            if (entry->flags & DAT_PARTY_FLAG_FRONTLINE) {
                 if (entry->hp != 0) {
                     nextHp = entry->hp;
                     loss = nextHp / 10;
@@ -360,7 +360,7 @@ void func_0011A510(s32 mode) {
         DatPartyRecord *entry = datGameState->party;
         slotIndex = 0;
         do {
-            if (entry->flags & 2) {
+            if (entry->flags & DAT_PARTY_FLAG_FRONTLINE) {
                 if (entry->hp != 0) {
                     nextHp = entry->hp;
                     loss = (u32)nextHp / 2;
@@ -378,7 +378,7 @@ void func_0011A510(s32 mode) {
         DatPartyRecord *entry = datGameState->party;
         slotIndex = 0;
         do {
-            if (entry->flags & 2) {
+            if (entry->flags & DAT_PARTY_FLAG_FRONTLINE) {
                 if (entry->hp != 0) {
                     nextHp = entry->hp;
                     loss = nextHp * 30 / 100;
@@ -400,7 +400,7 @@ void ptyRecoverAllUnits(void) {
     s32 index;
     for (index = 0; index < PTY_ACTIVE_ROSTER_COUNT; index++) {
         DatPartyRecord *entry = &datGameState->party[index];
-        if (entry->flags & 1) {
+        if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             datAdjustCurrentHp(entry, PTY_RECOVERY_DELTA);
             datAdjustCurrentMp(entry, PTY_RECOVERY_DELTA);
             entry->status &= 0x8000;
@@ -408,14 +408,14 @@ void ptyRecoverAllUnits(void) {
     }
 }
 
-/* Test occupied entries with nonzero HP; mode 1 additionally requires flag bit 1. */
+/* Test occupied entries with nonzero HP; mode 1 additionally requires a frontline member. */
 s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode) {
     s32 slotIndex = 0;
     DatPartyRecord *entry = datGameState->party;
     do {
-        if (entry->flags & 1) {
+        if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             if (entry->hp != 0) {
-                if (flagMode != 1 || (entry->flags & 2)) {
+                if (flagMode != 1 || (entry->flags & DAT_PARTY_FLAG_FRONTLINE)) {
                     if (entry->status & statusMask) {
                         return 1;
                     }
@@ -467,13 +467,13 @@ void ptyApplySkillRecovery(DatPartyRecord *entry, u32 skillId) {
     }
 }
 
-/* Apply the two selected recovery skills to occupied entries carrying flag bit 1. */
+/* Apply the two selected recovery skills to occupied frontline entries. */
 void evtUpdateFlaggedStats(void) {
     s32 index;
     for (index = 0; index < PTY_ACTIVE_ROSTER_COUNT; index++) {
         DatPartyRecord *entry = &datGameState->party[index];
-        if (entry->flags & 1) {
-            if (entry->flags & 2) {
+        if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
+            if (entry->flags & DAT_PARTY_FLAG_FRONTLINE) {
                 ptyApplySkillRecovery(entry, 0x24C);
                 ptyApplySkillRecovery(entry, 0x270);
             }
@@ -481,12 +481,12 @@ void evtUpdateFlaggedStats(void) {
     }
 }
 
-/* Return whether an occupied, flag-bit-1 entry owns the requested skill. */
+/* Return whether an occupied frontline entry owns the requested skill. */
 s32 evtHasMatchingFlaggedEntry(s32 skillId) {
     s32 slotIndex = 0;
     do {
         DatPartyRecord *entry = &datGameState->party[slotIndex];
-        if ((entry->flags & 1) && (entry->flags & 2)) {
+        if ((entry->flags & DAT_PARTY_FLAG_OCCUPIED) && (entry->flags & DAT_PARTY_FLAG_FRONTLINE)) {
             if (datUnitHasSkill(entry, skillId)) {
                 return 1;
             }
@@ -569,7 +569,7 @@ DatPartyRecord *dds3FindEntry(rosterIndex)
     s32 slotIndex = 0;
     DatPartyRecord *entry = datGameState->party;
     do {
-        if (entry->unitId == rosterIndex && (entry->flags & 1)) {
+        if (entry->unitId == rosterIndex && (entry->flags & DAT_PARTY_FLAG_OCCUPIED)) {
             return entry;
         }
         slotIndex++;
@@ -592,7 +592,7 @@ s32 ptyRebalanceFrontline(s32 rosterIndex) {
 
     {
         DatPartyRecord *const selectedEntry = &datGameState->party[selectedIndex];
-        if ((selectedEntry->flags & 2) != 0) {
+        if ((selectedEntry->flags & DAT_PARTY_FLAG_FRONTLINE) != 0) {
             return 0;
         }
     }
@@ -604,8 +604,8 @@ s32 ptyRebalanceFrontline(s32 rosterIndex) {
         DatPartyRecord *const currentEntry = &scanState->party[scanIndex];
         u16 flags = currentEntry->flags;
 
-        if ((u16)(flags & 1) != 0) {
-            if ((flags & 2) == 0) {
+        if ((u16)(flags & DAT_PARTY_FLAG_OCCUPIED) != 0) {
+            if ((flags & DAT_PARTY_FLAG_FRONTLINE) == 0) {
                 break;
             }
             frontlineCount++;
@@ -614,10 +614,10 @@ s32 ptyRebalanceFrontline(s32 rosterIndex) {
 
     if (frontlineCount >= 3) {
         frontlineCount--;
-        scanState->party[frontlineCount].flags &= (u16)~2;
+        scanState->party[frontlineCount].flags &= (u16)~DAT_PARTY_FLAG_FRONTLINE;
     }
 
-    datGameState->party[selectedIndex].flags |= 2;
+    datGameState->party[selectedIndex].flags |= DAT_PARTY_FLAG_FRONTLINE;
     memcpy(&savedEntry, &datGameState->party[selectedIndex], sizeof(savedEntry));
     memcpy(&datGameState->party[selectedIndex], &datGameState->party[frontlineCount], sizeof(savedEntry));
     memcpy(&datGameState->party[frontlineCount], &savedEntry, sizeof(savedEntry));
@@ -638,7 +638,7 @@ s32 dds3EntryMax(void) {
     DatPartyRecord *entry = datGameState->party;
     do {
         remaining--;
-        if (entry->flags & 1) {
+        if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             s32 level = entry->level;
             if (maximumLevel < level) {
                 maximumLevel = level;
@@ -657,7 +657,7 @@ s32 ptyGetRoundedAveragePartyLevel(void) {
     DatPartyRecord *entry = datGameState->party;
     do {
         remaining--;
-        if ((entry->flags & 1) != 0) {
+        if ((entry->flags & DAT_PARTY_FLAG_OCCUPIED) != 0) {
             activeCount++;
             levelSum += entry->level;
         }
@@ -963,7 +963,7 @@ void evtUpdateFlaggedEntries(void) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
         DatPartyRecord *entry = &datGameState->party[slotIndex];
-        if (entry->flags & 1) {
+        if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             s32 rosterIndex = 0;
             do {
                 if (entry->unitId == rosterIndex) {
@@ -1028,7 +1028,7 @@ void func_0011CA88(DatPartyRecord *entry) {
             break;
         }
         stock = &datGameState->templates[stockId];
-        occupied = stock->flags & 1;
+        occupied = stock->flags & DAT_PARTY_FLAG_OCCUPIED;
         if (occupied != 0) {
             for (i = 0; i < 85; i++)
                 entry->skillFlags[i] |= stock->skillFlags[i];
@@ -1055,7 +1055,7 @@ void dds3ForEachFlagged(void) {
     for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
         DatPartyRecord *entry = &datGameState->party[slotIndex];
 
-        if (entry->flags & 1) {
+        if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             func_0011CA88(entry);
         }
     }
@@ -1065,7 +1065,7 @@ void ptyClearSelectedSkillFlagsFromActiveEntries(void) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
         DatPartyRecord *entry = &datGameState->party[slotIndex];
-        if ((entry->flags & 1) != 0) {
+        if ((entry->flags & DAT_PARTY_FLAG_OCCUPIED) != 0) {
             scrRemoveAvailableSkillFlagAndSlot(entry, 0x5B);
             scrRemoveAvailableSkillFlagAndSlot(entry, 0x5C);
             scrRemoveAvailableSkillFlagAndSlot(entry, 0x5D);
@@ -1100,7 +1100,7 @@ s32 evtClearRandomStatusFlags(void) {
     remaining = 4;
     entry = datGameState->party;
     do {
-        if ((entry->flags & 1) != 0 && entry->hp != 0) {
+        if ((entry->flags & DAT_PARTY_FLAG_OCCUPIED) != 0 && entry->hp != 0) {
             u16 statusFlags = entry->status;
             if ((statusFlags & 0x5D0) != 0) {
                 entry->status = statusFlags & ~0x5D0;
@@ -1144,7 +1144,7 @@ void ptyAssignPartyRosterItemsAndMarkOwned(void) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
         DatPartyRecord *entry = &datGameState->party[slotIndex];
-        if (entry->flags & 1) {
+        if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             s32 index = 0;
             do {
                 if (entry->unitId == index) {

@@ -14,6 +14,7 @@
 #include "sdf_packet_builders.h"
 #include "mdl.h"
 #include "evt_unit.h"
+#include "evt_task.h"
 #include "scr.h"
 #include "dat_state.h"
 #include "dat_command.h"
@@ -464,8 +465,7 @@ extern char D_0041B6D8[]; /* "btl:event BE load[e%03d]\n" */
 extern char D_0041B6F8[]; /* "btl:event SMG free[%X]\n" */
 extern char D_0041B710[]; /* "btl:BSE free\n" */
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
-extern s32 mnuCampCreateTask(s32);
-extern void func_00101968(s32, s32);
+extern void func_00101968(KwlnTask *parent, KwlnTask *child);
 extern s32 sndFindPackedTrackLoadStatus(s32);
 extern void sndReleaseMidiTrack(s32);
 
@@ -477,7 +477,7 @@ void func_0022AF90(void) {
     u32 battleMode = battleState->battleMode;
     u16 rawEventId;
     s16 eventId;
-    s32 eventTask;
+    KwlnTask *eventTask;
     char scriptPath[0x80];
 
     battleState->eventTaskId = BTL_EVENT_TASK_NONE;
@@ -503,7 +503,7 @@ void func_0022AF90(void) {
     btlBossDebugPrintf(D_0041B6C8, scriptPath);
     eventTask = mnuCampCreateTask(battleState->eventTaskId);
     btlBossDebugPrintf(D_0041B6D8, battleState->eventTaskId);
-    func_00101968((s32)battleState->scriptOwner, eventTask);
+    func_00101968(battleState->scriptOwner, eventTask);
     battleState->sequenceHandle = BTL_EVENT_SEQUENCE_BASE + ((battleState->eventTaskId - BTL_EVENT_SEQUENCE_ID_BIAS) << 16);
     if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) != 0) {
         sndReleaseMidiTrack(battleState->sequenceHandle);

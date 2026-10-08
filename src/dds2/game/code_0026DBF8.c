@@ -97,7 +97,7 @@ extern u32 mnuCreateMantraIconListB();
 extern u32 mnuCreateMantraIconListC();
 extern void mnuReleaseMantraFadeData(s32);
 s32 mnuUpdateMantraLimitLineFade();
-void func_00271510();
+s32 func_00271510();
 u32 func_002712E0(u32 list);
 void mnuMantraSetupSlot(u32);
 void mnuReleaseMantraFadeDrawData();
@@ -659,8 +659,7 @@ void mnuDrawMantraScaledRotatedCenteredSprite(s32 x, s32 y, s32 z, s32 alpha, s3
             ->sprites[D_003CE9D0[placementIndex][1]].nativeHeight << 3;
 }
 
-void mnuDrawMantraScaledCenteredSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
-                   s32 flags, s32 context, f32 scale) {
+void mnuDrawMantraScaledCenteredSprite(s32 x, s32 y, s32 z, s32 alpha, f32 scale, s32 placementIndex, s32 flags, s32 context) {
     s32 width;
     s32 height;
 
@@ -1572,7 +1571,267 @@ s32 mnuUpdateMantraLimitLineFade(s32 unused, s32 item) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0026DBF8", func_00271510);
+s32 func_00271510(s32 unused, MantraDrawItem *item) {
+    s16 framePositions[][2] = {
+        {158, 84}, {118, 289}, {421, 445}, {541, 367}
+    };
+    u16 frameSprites[] = {0x11D, 0x11E};
+    s16 glowPositions[][2] = {
+        {330, 122}, {230, 83}, {170, 122}, {151, 241}, {111, 319},
+        {376, 536}, {476, 575}, {536, 536}, {576, 398}, {614, 340}
+    };
+    u16 glowSprites[] = {0x11F, 0x11F, 0x11F, 0x121, 0x121};
+    s16 linePositions[][2] = {
+        {309, 80}, {209, 41}, {149, 80}, {107, 234}, {67, 312},
+        {387, 552}, {487, 591}, {547, 552}, {597, 389}, {637, 311}
+    };
+    u16 lineSprites[] = {0x12B, 0x12A, 0x12A, 0x12C, 0x12C};
+    s16 borderPositions[][2] = {
+        {260, 88}, {237, 99}, {200, 127}, {176, 138}, {360, 126},
+        {300, 140}, {240, 179}, {180, 218}, {157, 243}, {118, 286},
+        {458, 529}, {479, 519}, {518, 490}, {540, 479}, {379, 559},
+        {419, 522}, {479, 483}, {539, 444}, {578, 442}, {540, 365}
+    };
+    u16 borderSprites[] = {
+        0x124, 0x125, 0x124, 0x125, 0x126, 0x127, 0x127, 0x127, 0x128, 0x129
+    };
+    s16 maskPositions[][2] = {
+        {317, 87}, {217, 48}, {157, 87}, {117, 243}, {77, 321},
+        {396, 556}, {496, 595}, {556, 556}, {596, 398}, {636, 320}
+    };
+    u16 maskSprites[] = {0x12D, 0x12D, 0x12D, 0x12E, 0x12E};
+    s16 fixedMarkerPositions[][2] = {
+        {343, 102}, {257, 64}, {284, 107}, {218, 144}, {162, 170},
+        {168, 214}, {121, 287}, {353, 534}, {439, 679}, {412, 529},
+        {478, 492}, {534, 466}, {528, 422}, {575, 349}
+    };
+    s16 markerPositions[][2] = {
+        {318, 55}, {197, 20}, {131, 60}, {92, 212}, {40, 315}, {138, 112},
+        {378, 621}, {499, 656}, {565, 616}, {604, 464}, {656, 361}, {558, 564}
+    };
+    MantraFadeState *fade = item->data;
+    s32 alpha = fade->value * 128.0f;
+    f32 pulse = (f32)fade->clock / 120.0f;
+    f32 factor;
+    s32 i;
+    s32 markerAlpha;
+    s32 x;
+    s32 y;
+
+    pulse = (sdfSinPoly(pulse * (3.14159265f * 2.0f) + (-3.14159265f / 2.0f)) + 1.0f) * 0.5f;
+    for (i = 0; i < 2; i++) {
+        mnuDrawMantraSprite(fade->x + framePositions[i][0], fade->y + framePositions[i][1], 0, alpha, frameSprites[i], 0, 0x4A);
+        mnuDrawMantraSprite(fade->x + framePositions[i + 2][0], fade->y + framePositions[i][1], 0, alpha, frameSprites[i], 0x10000, 0x4A);
+        mnuDrawMantraSprite(fade->x + framePositions[i][0], fade->y + framePositions[i + 2][1], 0, alpha, frameSprites[i], 0x20000, 0x4A);
+        mnuDrawMantraSprite(fade->x + framePositions[i + 2][0], fade->y + framePositions[i + 2][1], 0, alpha, frameSprites[i], 0x30000, 0x4A);
+    }
+    for (i = 0; i < 5; i++) {
+        if ((((s32)fade->activeFlags >> i) & 1) || (((s32)fade->pendingFlags >> i) & 1)) {
+            if (((s32)fade->pendingFlags >> i) & 1) {
+                factor = (f32)(10 - (s32)(fade->countdownWord >> 1)) / 10.0f;
+            } else {
+                factor = 1.0f;
+            }
+            mnuDrawMantraSprite(fade->x + linePositions[i][0], fade->y + linePositions[i][1], 0, (s32)((f32)alpha * factor), lineSprites[i], 0, 0x4A);
+        }
+        if ((((s32)fade->activeFlags >> (i + 5)) & 1) || (((s32)fade->pendingFlags >> (i + 5)) & 1)) {
+            if (((s32)fade->pendingFlags >> (i + 5)) & 1) {
+                factor = (f32)(10 - (s32)(fade->countdownWord >> 1)) / 10.0f;
+            } else {
+                factor = 1.0f;
+            }
+            mnuDrawMantraSprite(fade->x + linePositions[i + 5][0], fade->y + linePositions[i][1], 0, (s32)((f32)alpha * factor), lineSprites[i], 0x10000, 0x4A);
+        }
+        if (i != 4) {
+            if ((((s32)fade->activeFlags >> (i + 10)) & 1) || (((s32)fade->pendingFlags >> (i + 10)) & 1)) {
+                if (((s32)fade->pendingFlags >> (i + 10)) & 1) {
+                    factor = (f32)(10 - (s32)(fade->countdownWord >> 1)) / 10.0f;
+                } else {
+                    factor = 1.0f;
+                }
+                mnuDrawMantraSprite(fade->x + linePositions[i][0], fade->y + linePositions[i + 5][1], 0, (s32)((f32)alpha * factor), lineSprites[i], 0x20000, 0x4A);
+            }
+            if ((((s32)fade->activeFlags >> (i + 14)) & 1) || (((s32)fade->pendingFlags >> (i + 14)) & 1)) {
+                if (((s32)fade->pendingFlags >> (i + 14)) & 1) {
+                    factor = (f32)(10 - (s32)(fade->countdownWord >> 1)) / 10.0f;
+                } else {
+                    factor = 1.0f;
+                }
+                mnuDrawMantraSprite(fade->x + linePositions[i + 5][0], fade->y + linePositions[i + 5][1], 0, (s32)((f32)alpha * factor), lineSprites[i], 0x30000, 0x4A);
+            }
+        }
+    }
+    sdfSubmitGsTestOneRegisterPacket(0x30000, 0x4A);
+    uiDrawUniformColorRect(0, 0, 0xFF, 0x2000, 0xE00, 0, 0x4A);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, 0x4A);
+    for (i = 0; i < 10; i++) {
+        mnuDrawMantraSprite(fade->x + borderPositions[i][0], fade->y + borderPositions[i][1], 0, alpha, borderSprites[i], 0x20, 0x4A);
+        mnuDrawMantraSprite(fade->x + borderPositions[i + 10][0], fade->y + borderPositions[i][1], 0, alpha, borderSprites[i], 0x10020, 0x4A);
+        mnuDrawMantraSprite(fade->x + borderPositions[i][0], fade->y + borderPositions[i + 10][1], 0, alpha, borderSprites[i], 0x20020, 0x4A);
+        mnuDrawMantraSprite(fade->x + borderPositions[i + 10][0], fade->y + borderPositions[i + 10][1], 0, alpha, borderSprites[i], 0x30020, 0x4A);
+    }
+    for (i = 0; i < 5; i++) {
+        if ((((s32)fade->activeFlags >> i) & 1) || (((s32)fade->pendingFlags >> i) & 1)) {
+            if (((s32)fade->pendingFlags >> i) & 1) {
+                factor = (f32)(10 - (s32)(fade->countdownWord >> 1)) / 10.0f;
+            } else {
+                factor = 1.0f;
+            }
+            mnuDrawMantraSprite(fade->x + maskPositions[i][0], fade->y + maskPositions[i][1], 0, (s32)((f32)alpha * factor), maskSprites[i], 0x20, 0x4A);
+        }
+        if ((((s32)fade->activeFlags >> (i + 5)) & 1) || (((s32)fade->pendingFlags >> (i + 5)) & 1)) {
+            if (((s32)fade->pendingFlags >> (i + 5)) & 1) {
+                factor = (f32)(10 - (s32)(fade->countdownWord >> 1)) / 10.0f;
+            } else {
+                factor = 1.0f;
+            }
+            mnuDrawMantraSprite(fade->x + maskPositions[i + 5][0], fade->y + maskPositions[i][1], 0, (s32)((f32)alpha * factor), maskSprites[i], 0x10020, 0x4A);
+        }
+        if (i != 4) {
+            if ((((s32)fade->activeFlags >> (i + 10)) & 1) || (((s32)fade->pendingFlags >> (i + 10)) & 1)) {
+                if (((s32)fade->pendingFlags >> (i + 10)) & 1) {
+                    factor = (f32)(10 - (s32)(fade->countdownWord >> 1)) / 10.0f;
+                } else {
+                    factor = 1.0f;
+                }
+                mnuDrawMantraSprite(fade->x + maskPositions[i][0], fade->y + maskPositions[i + 5][1], 0, (s32)((f32)alpha * factor), maskSprites[i], 0x20020, 0x4A);
+            }
+            if ((((s32)fade->activeFlags >> (i + 14)) & 1) || (((s32)fade->pendingFlags >> (i + 14)) & 1)) {
+                if (((s32)fade->pendingFlags >> (i + 14)) & 1) {
+                    factor = (f32)(10 - (s32)(fade->countdownWord >> 1)) / 10.0f;
+                } else {
+                    factor = 1.0f;
+                }
+                mnuDrawMantraSprite(fade->x + maskPositions[i + 5][0], fade->y + maskPositions[i + 5][1], 0, (s32)((f32)alpha * factor), maskSprites[i], 0x30020, 0x4A);
+            }
+        }
+    }
+    alpha = (pulse * 0.3f + 0.2f) * (f32)alpha;
+    factor = pulse * 0.5f + 1.0f;
+    for (i = 0; i < 7; i++) {
+        mnuDrawMantraScaledCenteredSprite(fade->x + fixedMarkerPositions[i][0], fade->y + fixedMarkerPositions[i][1], 0, alpha, factor, 0x123, 0, 0x4A);
+        mnuDrawMantraScaledCenteredSprite(fade->x + fixedMarkerPositions[i][0], fade->y + fixedMarkerPositions[i + 7][1], 0, alpha, factor, 0x123, 0, 0x4A);
+        if (i != 0) {
+            mnuDrawMantraScaledCenteredSprite(fade->x + fixedMarkerPositions[i + 7][0], fade->y + fixedMarkerPositions[i][1], 0, alpha, factor, 0x123, 0, 0x4A);
+            mnuDrawMantraScaledCenteredSprite(fade->x + fixedMarkerPositions[i + 7][0], fade->y + fixedMarkerPositions[i + 7][1], 0, alpha, factor, 0x123, 0, 0x4A);
+        }
+    }
+    alpha = (pulse * 0.3f + 0.2f) * (f32)alpha;
+    for (i = 0; i < 5; i++) {
+        if ((((s32)fade->activeFlags >> i) & 1) || (((s32)fade->pendingFlags >> i) & 1)) {
+            if (((s32)fade->pendingFlags >> i) & 1) {
+                factor = (f32)(10 - (s32)(fade->countdownWord >> 1)) / 10.0f;
+            } else {
+                factor = 1.0f;
+            }
+            markerAlpha = (f32)alpha * factor;
+            factor = pulse * 0.5f + 1.0f;
+            mnuDrawMantraScaledCenteredSprite(fade->x + markerPositions[i][0], fade->y + markerPositions[i][1], 0, markerAlpha, factor, 0x123, 0, 0x4A);
+            if (i == 2) {
+                mnuDrawMantraScaledCenteredSprite(fade->x + markerPositions[5][0], fade->y + markerPositions[5][1], 0, markerAlpha, factor, 0x123, 0, 0x4A);
+            }
+        }
+        if ((((s32)fade->activeFlags >> (i + 5)) & 1) || (((s32)fade->pendingFlags >> (i + 5)) & 1)) {
+            if (((s32)fade->pendingFlags >> (i + 5)) & 1) {
+                factor = (f32)(10 - (s32)(fade->countdownWord >> 1)) / 10.0f;
+            } else {
+                factor = 1.0f;
+            }
+            markerAlpha = (f32)alpha * factor;
+            factor = pulse * 0.5f + 1.0f;
+            mnuDrawMantraScaledCenteredSprite(fade->x + markerPositions[i][0], fade->y + markerPositions[i + 6][1], 0, markerAlpha, factor, 0x123, 0, 0x4A);
+            if (i == 2) {
+                mnuDrawMantraScaledCenteredSprite(fade->x + markerPositions[5][0], fade->y + markerPositions[11][1], 0, markerAlpha, factor, 0x123, 0, 0x4A);
+            }
+        }
+        if (i != 4) {
+            if ((((s32)fade->activeFlags >> (i + 10)) & 1) || (((s32)fade->pendingFlags >> (i + 10)) & 1)) {
+                if (((s32)fade->pendingFlags >> (i + 10)) & 1) {
+                    factor = (f32)(10 - (s32)(fade->countdownWord >> 1)) / 10.0f;
+                } else {
+                    factor = 1.0f;
+                }
+                markerAlpha = (f32)alpha * factor;
+                factor = pulse * 0.5f + 1.0f;
+                mnuDrawMantraScaledCenteredSprite(fade->x + markerPositions[i + 6][0], fade->y + markerPositions[i][1], 0, markerAlpha, factor, 0x123, 0, 0x4A);
+                if (i == 2) {
+                    mnuDrawMantraScaledCenteredSprite(fade->x + markerPositions[11][0], fade->y + markerPositions[5][1], 0, markerAlpha, factor, 0x123, 0, 0x4A);
+                }
+            }
+            if ((((s32)fade->activeFlags >> (i + 14)) & 1) || (((s32)fade->pendingFlags >> (i + 14)) & 1)) {
+                if (((s32)fade->pendingFlags >> (i + 14)) & 1) {
+                    factor = (f32)(10 - (s32)(fade->countdownWord >> 1)) / 10.0f;
+                } else {
+                    factor = 1.0f;
+                }
+                markerAlpha = (f32)alpha * factor;
+                factor = pulse * 0.5f + 1.0f;
+                mnuDrawMantraScaledCenteredSprite(fade->x + markerPositions[i + 6][0], fade->y + markerPositions[i + 6][1], 0, markerAlpha, factor, 0x123, 0, 0x4A);
+                if (i == 2) {
+                    mnuDrawMantraScaledCenteredSprite(fade->x + markerPositions[11][0], fade->y + markerPositions[11][1], 0, markerAlpha, factor, 0x123, 0, 0x4A);
+                }
+            }
+        }
+    }
+    sdfSubmitGsTestOneRegisterPacket(0x30000, 0x52);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, 0x52);
+    alpha = (f32)alpha * 0.4f;
+    for (i = 0; i < 10; i++) {
+        mnuDrawMantraSprite(fade->x + borderPositions[i][0], fade->y + borderPositions[i][1], 0, alpha, borderSprites[i], 0x20, 0x52);
+        mnuDrawMantraSprite(fade->x + borderPositions[i + 10][0], fade->y + borderPositions[i][1], 0, alpha, borderSprites[i], 0x10020, 0x52);
+        mnuDrawMantraSprite(fade->x + borderPositions[i][0], fade->y + borderPositions[i + 10][1], 0, alpha, borderSprites[i], 0x20020, 0x52);
+        mnuDrawMantraSprite(fade->x + borderPositions[i + 10][0], fade->y + borderPositions[i + 10][1], 0, alpha, borderSprites[i], 0x30020, 0x52);
+    }
+    for (i = 0; i < 5; i++) {
+        if (!(((s32)fade->activeFlags >> i) & 1)) {
+            if (((s32)fade->pendingFlags >> i) & 1) {
+                factor = (f32)(s32)(fade->countdownWord >> 1) / 10.0f;
+            } else {
+                factor = 1.0f;
+            }
+            x = fade->x + glowPositions[i][0];
+            y = fade->y + glowPositions[i][1];
+            mnuDrawMantraSprite(x, y, 0, (s32)(fade->value * 128.0f * 0.3f * factor), glowSprites[i], 0, 0x52);
+            mnuDrawMantraSprite(x, y, 0, (s32)((pulse * 0.6f + 0.2f) * 128.0f * fade->value * factor), glowSprites[i] + 1, 0, 0x52);
+        }
+        if (!(((s32)fade->activeFlags >> (i + 5)) & 1)) {
+            if (((s32)fade->pendingFlags >> (i + 5)) & 1) {
+                factor = (f32)(s32)(fade->countdownWord >> 1) / 10.0f;
+            } else {
+                factor = 1.0f;
+            }
+            x = fade->x + glowPositions[i + 5][0];
+            y = fade->y + glowPositions[i][1];
+            mnuDrawMantraSprite(x, y, 0, (s32)(fade->value * 128.0f * 0.3f * factor), glowSprites[i], 0x10000, 0x52);
+            mnuDrawMantraSprite(x, y, 0, (s32)((pulse * 0.6f + 0.2f) * 128.0f * fade->value * factor), glowSprites[i] + 1, 0x10000, 0x52);
+        }
+        if (i != 4) {
+            if (!(((s32)fade->activeFlags >> (i + 10)) & 1)) {
+                if (((s32)fade->pendingFlags >> (i + 10)) & 1) {
+                    factor = (f32)(s32)(fade->countdownWord >> 1) / 10.0f;
+                } else {
+                    factor = 1.0f;
+                }
+                x = fade->x + glowPositions[i][0];
+                y = fade->y + glowPositions[i + 5][1];
+                mnuDrawMantraSprite(x, y, 0, (s32)(fade->value * 128.0f * 0.3f * factor), glowSprites[i], 0x20000, 0x52);
+                mnuDrawMantraSprite(x, y, 0, (s32)((pulse * 0.6f + 0.2f) * 128.0f * fade->value * factor), glowSprites[i] + 1, 0x20000, 0x52);
+            }
+            if (!(((s32)fade->activeFlags >> (i + 14)) & 1)) {
+                if (((s32)fade->pendingFlags >> (i + 14)) & 1) {
+                    factor = (f32)(s32)(fade->countdownWord >> 1) / 10.0f;
+                } else {
+                    factor = 1.0f;
+                }
+                x = fade->x + glowPositions[i + 5][0];
+                y = fade->y + glowPositions[i + 5][1];
+                mnuDrawMantraSprite(x, y, 0, (s32)(fade->value * 128.0f * 0.3f * factor), glowSprites[i], 0x30000, 0x52);
+                mnuDrawMantraSprite(x, y, 0, (s32)((pulse * 0.6f + 0.2f) * 128.0f * fade->value * factor), glowSprites[i] + 1, 0x30000, 0x52);
+            }
+        }
+    }
+    return 0;
+}
 
 u32 mnuRegisterMantraTitleDraw(u32 pool) {
     return mnuRegisterMantraDrawItem(pool, 6, mnuUpdateMantraTitleBlinkFade, func_00272F08,
@@ -1594,27 +1853,16 @@ typedef struct MantraBlinkState {
     u16 variant; /* 0x0E: second title toggle */
 } MantraBlinkState;
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425338);
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425348);
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425370);
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425380);
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004253A8);
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_004253B8);
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425408);
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425420);
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425448);
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425458);
 
-INCLUDE_RODATA(const s32, "game/code_0026DBF8", D_00425490);
 
 void mnuHideMantraTitle(u32 pool) {
     MantraDrawItem *item = (MantraDrawItem *)mnuFindMantraDrawItemByKind(pool, 6);
@@ -3443,8 +3691,6 @@ s32 mnuDrawMantraPanelCTransition(s32 x, s32 y, s32 z, s32 amount, s32 unused, u
 
 extern f32 effMiscRandUnitFloat(void *state);
 
-INCLUDE_SDATA(const s32, "game/code_0026DBF8", D_004378C0);
-
 INCLUDE_SDATA(const s32, "game/code_0026DBF8", D_004378C8);
 
 void mnuResetMantraPulsePhase(s32 unused, u8 *object) {
@@ -3518,7 +3764,7 @@ s32 func_0027AFE0(s32 x, s32 y, s32 z, s32 alpha, MantraPanelPool *unused, Mantr
         drawX = (s32)((f32)(x + offsets[i][0]) + scaled[0] * phases[i]);
         drawY = (s32)((f32)(y + offsets[i][1]) + scaled[1] * phases[i]);
         sdfSubmitGsAlphaOneRegisterPacket(0x58, packet);
-        mnuDrawMantraScaledCenteredSprite(drawX, drawY, 10, (s32)((f32)alpha * 0.35f), 0x7E, 0x40, packet, 2.5f);
+        mnuDrawMantraScaledCenteredSprite(drawX, drawY, 10, (s32)((f32)alpha * 0.35f), 2.5f, 0x7E, 0x40, packet);
     }
     sdfSubmitGsTestOneRegisterPacket(0x30000, packet);
     uiDrawUniformColorRect((u32)(x - 128) << 4, (u32)(y - 128) << 3, 0xFFFFFF, 0x1000, 0x800, 0, packet);
@@ -3716,10 +3962,7 @@ s32 mnuDrawMantraNeighborMarkers(s32 x, s32 y, s32 z, s32 alpha, s32 menuAddress
     }
     for (i = 0; i < 6; i++) {
         if ((mask >> i) & 1) {
-            mnuDrawMantraScaledCenteredSprite(
-                x + offsets[i][0], y + offsets[i][1], 0,
-                alpha * (weight * 0.1f + 0.3f), 0x92, 0, packet,
-                weight * 0.3f + 1.0f);
+            mnuDrawMantraScaledCenteredSprite(x + offsets[i][0], y + offsets[i][1], 0, alpha * (weight * 0.1f + 0.3f), weight * 0.3f + 1.0f, 0x92, 0, packet);
         }
     }
     return 0;

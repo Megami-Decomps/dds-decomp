@@ -2332,8 +2332,8 @@ typedef struct EffGroup {
 } EffGroup;
 
 extern SoundMixer *func_00190100(SoundMixer *);
-extern EffFragmentResources *func_00169940(s32, s32);
-extern void func_00169B90(EffFragmentResources *, u32 *);
+extern EffFragmentResources *effCreateFragmentResources(s32, s32);
+extern void effInitializeFragmentHistoryColors(EffFragmentResources *, u32 *);
 extern void *effEventCreate(SoundMixer *, u16, EffPCPEventPlace *);
 
 EffGroup *func_00167BF8(src, eventParams)
@@ -2385,8 +2385,8 @@ void *eventParams;
     place.unk28 = 1.0f;
     place.color = 0x80808080;
     for (i = 0; i < count; i++, slot++) {
-        slot->resources = func_00169940(a, b);
-        func_00169B90(slot->resources, palette);
+        slot->resources = effCreateFragmentResources(a, b);
+        effInitializeFragmentHistoryColors(slot->resources, palette);
         slot->age = 0;
         slot->scale = 1.0f;
         slot->curve.pointIndex = 0;
@@ -2453,8 +2453,8 @@ EffGroup *func_00167EC0(EffGroup *src) {
     place.unk28 = 1.0f;
     place.color = 0x80808080;
     for (i = 0; i < count; i++, slot++) {
-        slot->resources = func_00169940(a, b);
-        func_00169B90(slot->resources, palette);
+        slot->resources = effCreateFragmentResources(a, b);
+        effInitializeFragmentHistoryColors(slot->resources, palette);
         slot->age = 0;
         slot->scale = 1.0f;
         slot->curve.pointIndex = 0;
@@ -2505,7 +2505,7 @@ extern void btlUnitGetMuzzlePosVU(struct BtlUnit *);
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
 extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
 extern void effInitializeColorState(struct EffectColorState *);
-extern void func_00169D78(EffFragmentResources *, u128 *);
+extern void effAppendFragmentHistoryPoints(EffFragmentResources *, u128 *);
 extern f32 sdfAtan2(f32, f32);
 extern void func_002E7F20(f32, f32, f32);
 extern void effEventCopyFileRecordHeader(void *, const void *);
@@ -2850,7 +2850,7 @@ void func_001681C0(EffGroup *group) {
                     VU0_SUB_EXTENDED(vf11, vf11, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf11, ribbon[2]);
                     PCP_COPY_VECTOR(previous, point);
-                    func_00169D78(slot->resources, (u128 *)ribbon);
+                    effAppendFragmentHistoryPoints(slot->resources, (u128 *)ribbon);
                 }
                 effStepBezierSlotSegment(&slot->curve, point);
                 VU0_LOAD_VF(vf10, point);
@@ -2875,7 +2875,7 @@ void func_001681C0(EffGroup *group) {
                 VU0_MOVE_VF_EXTENDED(vf10, vf12);
                 VU0_SUB_EXTENDED(vf11, vf11, vf10);
                 VU0_STORE_VF_UNCLOBBERED(vf11, ribbon[2]);
-                func_00169D78(slot->resources, (u128 *)ribbon);
+                effAppendFragmentHistoryPoints(slot->resources, (u128 *)ribbon);
                 cap = (f32 (*)[4])slot->resources->endPoints;
                 slot->position[0] = point[0];
                 slot->position[1] = point[1];
@@ -2979,7 +2979,7 @@ extern void *memcpy(void *, const void *, u32);
 /* Lay out history vertices/colors, eight cap vertices/colors, then the owner.
  * The two global draw descriptors are reset through their native 0x2C prefix.
  */
-EffFragmentResources *func_00169940(s32 historyLength, s32 subdivisions) {
+EffFragmentResources *effCreateFragmentResources(s32 historyLength, s32 subdivisions) {
     s32 count = historyLength * subdivisions * 3 + 6;
     u32 colorBytes = count * sizeof(u32);
     u32 bufferBytes = count * (sizeof(u128) + sizeof(u32)) + 8 * (sizeof(u128) + sizeof(u32));
@@ -3040,7 +3040,7 @@ void effInitializeColorState(EffectColorState *state) {
 
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 
-void func_00169B90(EffFragmentResources *history, u32 *gradientColors) {
+void effInitializeFragmentHistoryColors(EffFragmentResources *history, u32 *gradientColors) {
     f32 t = 0.0f;
     u32 count = history->count / 3;
     u32 alphaCount = count >> 1;
@@ -3071,7 +3071,7 @@ void func_00169B90(EffFragmentResources *history, u32 *gradientColors) {
     }
 }
 
-void func_00169D78(EffFragmentResources *history, u128 *source) {
+void effAppendFragmentHistoryPoints(EffFragmentResources *history, u128 *source) {
     s32 position = history->position;
     u128 *points = history->points;
     s32 count;

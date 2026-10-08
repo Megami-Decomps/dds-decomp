@@ -53,6 +53,13 @@ typedef struct DatWorldState {
     u32 updateMode;
 } DatWorldState;
 
+/* Occupied records participate in roster lookup; frontline records occupy
+ * the active battle formation. Other record flag bits remain unresolved. */
+typedef enum DatPartyFlags {
+    DAT_PARTY_FLAG_OCCUPIED = 1,
+    DAT_PARTY_FLAG_FRONTLINE = 2
+} DatPartyFlags;
+
 /* The active roster and saved template bank share this complete record type. */
 typedef struct DatPartyRecord {
     u16 flags;
