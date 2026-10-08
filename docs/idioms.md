@@ -3785,3 +3785,14 @@ declarations of the same runtime object. The release boundary takes that
 owner pointer; the final retain-count transition releases both arrays
 before unlinking and freeing the owner.
 
+
+## Effect-work scale callback ABI
+
+DDS1 `00161A88` and DDS2 `001696B8` return the actor-scale float. Operation
+rows are `0x28` bytes; the callback at `+0x14` takes `(payload, f32 scale)`,
+not merely a payload. The compact tables route kinds 4 and 6 to the
+extended-work scale dispatcher (`00163108` / `0016AD60`), so both dispatch
+layers forward the float through a named `setScale` member. Existing PCP
+callers already supply the float; their separate legacy handle ownership
+is intentionally outside this narrow ABI correction.
+
