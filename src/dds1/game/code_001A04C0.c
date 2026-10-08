@@ -106,16 +106,17 @@ u64 btlAdvanceRuntimeSequenceCounter(void) {
     return value;
 }
 
+/* Clear the battle model flags; the exclusive upper limit differs by title. */
 void btlClearModelFlagRange(void) {
-    s32 temp_v0;
-    s32 temp_v1;
+    s32 nextFlagIndex;
+    s32 flagIndex;
 
-    temp_v1 = 0xbe0;
+    flagIndex = 0xBE0;
     do {
-        temp_v0 = temp_v1 + 1;
-        mdlFlagClear(temp_v1);
-        temp_v1 = temp_v0;
-    } while (temp_v0 < 0xbff);
+        nextFlagIndex = flagIndex + 1;
+        mdlFlagClear(flagIndex);
+        flagIndex = nextFlagIndex;
+    } while (nextFlagIndex < 0xBFF);
 }
 
 s32 btlUpdateActiveBattleFrame(void) {
