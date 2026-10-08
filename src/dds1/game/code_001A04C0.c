@@ -120,11 +120,11 @@ void btlClearModelFlagRange(void) {
 }
 
 s32 btlUpdateActiveBattleFrame(void) {
-    s32 state = btlRuntime;
-    if (state == 0) {
+    BtlState *battle = (BtlState *)btlRuntime;
+    if (battle == NULL) {
         return 0;
     }
-    if ((*(u32 *)(state + 0x1F4) & 1) != 0) {
+    if ((battle->battleFlags & 1) != 0) {
         btlUpdateFadeColor();
         btlUpdateAutoMusic();
         btlUpdateTintAndWorldLight();
@@ -136,7 +136,8 @@ s32 btlUpdateActiveBattleFrame(void) {
         func_001FB088();
         btlSweepFinishedTasks();
         func_001DBE68();
-        ++*(s32 *)(btlRuntime + 0x1F0);
+        /* The callbacks above may replace the runtime; advance its current frame. */
+        ++((BtlState *)btlRuntime)->frame;
     } else {
         btlExitWhenAudioAndTasksIdle();
     }
@@ -144,11 +145,11 @@ s32 btlUpdateActiveBattleFrame(void) {
 }
 
 s32 btlUpdateBattleFieldPresentation(void) {
-    s32 state = btlRuntime;
-    if (state == 0) {
+    BtlState *battle = (BtlState *)btlRuntime;
+    if (battle == NULL) {
         return 0;
     }
-    if ((*(u32 *)(state + 0x1F4) & 1) != 0) {
+    if ((battle->battleFlags & 1) != 0) {
         btlTickFieldSwayAndTint();
         btlDispatchLinkedEffectWhenBattleGatesClear();
         btlSweepFloorModelLists();
@@ -392,22 +393,22 @@ s32 btlIsCurrentActorFullyMarked(void) {
     if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
-    return (*(s32 *)(btlRuntime + 0x1f4) & 0x6000000) == 0x6000000;
+    return (((BtlState *)btlRuntime)->battleFlags & 0x6000000) == 0x6000000;
 }
 
 s32 btlHasPendingRuntimeActivity(void) {
-    s32 state;
+    BtlState *battle;
     if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
-    state = btlRuntime;
-    if (*(s32 *)(state + 0x224) != 0) {
+    battle = (BtlState *)btlRuntime;
+    if (battle->tasks != NULL) {
         return 1;
     }
-    if ((*(s32 *)(state + 0x1C8) & 2) != 0) {
+    if ((battle->eventFlags & 2) != 0) {
         return 1;
     }
-    return *(u32 *)(state + 0x694) != 0;
+    return battle->effect != NULL;
 }
 
 void btlResetActorEntryState(void) {

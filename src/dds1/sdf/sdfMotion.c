@@ -605,7 +605,7 @@ void *sdfMotionCreateDrawVectorBinding(void *a0, s32 a1, s32 a2) {
     return r;
 }
 
-/* vu0 routine: blend the two vec3 keys by the segment weight, store to sub+0x60 */
+/* vu0 routine: interpolate the sampled translation keys into the draw node. */
 void sdfMotionBlendDrawVector(SdfMotionDrawBinding *binding, f32 frame) {
     SdfMotionKeyInterval keyInterval;
 
@@ -616,7 +616,7 @@ void sdfMotionBlendDrawVector(SdfMotionDrawBinding *binding, f32 frame) {
     VU0_STORE_VF_UNCLOBBERED(vf10, binding->node->translation);
 }
 
-/* vu0 routine: blend the two vec3 keys by the segment weight, then blend that with sub->vec by t2 into sub+0x60 */
+/* vu0 routine: interpolate translation keys, then blend with captured translation. */
 void sdfMotionBlendDrawVectorWithCurrent(SdfMotionDrawBinding *binding, f32 frame, f32 blendWeight) {
     SdfMotionKeyInterval keyInterval;
 
@@ -649,7 +649,7 @@ void *sdfMotionCreateScaleVectorBinding(void *a0, s32 a1, s32 a2) {
     return r;
 }
 
-/* vu0 routine: blend the two vec3 keys by the segment weight, store to sub+0x70 */
+/* vu0 routine: interpolate the sampled scale keys into the draw node. */
 void sdfMotionBlendScaleVector(SdfMotionDrawBinding *binding, f32 frame) {
     SdfMotionKeyInterval keyInterval;
 
@@ -660,7 +660,7 @@ void sdfMotionBlendScaleVector(SdfMotionDrawBinding *binding, f32 frame) {
     VU0_STORE_VF(vf10, binding->node->scale);
 }
 
-/* vu0 routine: as sdfMotionBlendDrawVectorWithCurrent, stored to sub+0x70 */
+/* vu0 routine: interpolate scale keys, then blend with captured scale. */
 void sdfMotionBlendScaleVectorWithCurrent(SdfMotionDrawBinding *binding, f32 frame, f32 blendWeight) {
     SdfMotionKeyInterval keyInterval;
 
@@ -681,7 +681,7 @@ void *sdfMotionCreateQuaternionBinding(void *a0, s32 a1, s32 a2) {
     return r;
 }
 
-/* vu0 routine: nlerp the two quaternion keys by the segment weight, store quaternion and matrix rows */
+/* vu0 routine: nlerp sampled quaternion keys, then store the quaternion and matrix. */
 void sdfMotionBlendQuaternionToMatrix(SdfMotionDrawBinding *binding, f32 frame) {
     SdfMotionKeyInterval keyInterval;
     SdfDrawNode *drawNode;
@@ -703,7 +703,7 @@ void sdfMotionBlendQuaternionToMatrix(SdfMotionDrawBinding *binding, f32 frame) 
     VU0_STORE_VF_UNCLOBBERED(vf30, matrix[2]);
 }
 
-/* vu0 routine: nlerp the two quaternion keys by the segment weight, nlerp that toward the quaternion at +0x10 by t2, store quaternion and matrix rows */
+/* vu0 routine: nlerp sampled keys with the captured quaternion, then build the matrix. */
 void sdfMotionBlendKeyQuaternionWithBase(SdfMotionDrawBinding *binding, f32 frame, f32 blendWeight) {
     SdfMotionKeyInterval keyInterval;
     SdfDrawNode *drawNode;
