@@ -11323,8 +11323,8 @@ typedef struct EffPackedResourceEntry {
 
 
 
-u32 effReleaseSlotWorkAllocation(s32 owner) {
-    sdfReleaseResourceAllocation(((EffectSlotSet *)owner)->workAllocation);
+u32 effReleaseSlotWorkAllocation(EffectSlotSet *owner) {
+    sdfReleaseResourceAllocation(owner->workAllocation);
     return 1;
 }
 
@@ -11357,32 +11357,30 @@ void effInitializeSlotWork(s32 owner, s32 slotIndex) {
     func_00304B18(owner, slotIndex, &((EffectSlotSet *)owner)->workEntries[slotIndex]);
 }
 
-extern void effResetSlotWork(u32, u32);
-
 /* Reset every normal work slot in source order. */
-void effInitializeAllSlotWork(u8 *owner) {
+void effInitializeAllSlotWork(EffectSlotSet *owner) {
     u32 slotIndex = 0;
-    if (((EffectSlotSet *)owner)->count != 0) {
+    if (owner->count != 0) {
         do {
-            effResetSlotWork((u32)owner, slotIndex++);
-        } while (slotIndex < ((EffectSlotSet *)owner)->count);
+            effResetSlotWork(owner, slotIndex++);
+        } while (slotIndex < owner->count);
     }
 }
 
 /* Store the owner and slot index before invoking the work initializer. */
-void effAttachSlotWorkOwner(void *owner, s32 slotIndex, BdWork *entry) {
+void effAttachSlotWorkOwner(EffectSlotSet *owner, s32 slotIndex, BdWork *entry) {
     entry->owner = owner;
     entry->slotIndex = slotIndex;
     func_00304B18(owner, slotIndex, entry);
 }
 
 /* Clear the complete normal slot, then restore owner/index and initialize it. */
-void effResetSlotWork(u32 owner, u32 slotIndex) {
+void effResetSlotWork(EffectSlotSet *owner, u32 slotIndex) {
     BdWork *entry;
 
-    entry = &((EffectSlotSet *)owner)->workEntries[slotIndex];
+    entry = &owner->workEntries[slotIndex];
     memset(entry, 0, EFF_SLOT_WORK_BYTES);
-    effAttachSlotWorkOwner((void *)owner, slotIndex, entry);
+    effAttachSlotWorkOwner(owner, slotIndex, entry);
 }
 
 
@@ -11457,7 +11455,7 @@ void effReleaseSlotTextureReferencesAndResetWork(u8 *owner, s32 preserve) {
         } while (i < count);
     }
     if (!preserve) {
-        effInitializeAllSlotWork(owner);
+        effInitializeAllSlotWork((EffectSlotSet *)owner);
     }
 }
 
@@ -11518,7 +11516,7 @@ EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct SdfMemBlock *resour
         sourceOffset = *(u32 *)(entries + 4);
         memcpy(&set->descriptions[index],
             resource + sourceOffset, 0x80);
-        effResetSlotWork((u32)set, index);
+        effResetSlotWork(set, index);
         entries += 8;
     }
     return set;
@@ -11544,7 +11542,7 @@ EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 cou
     if (effect->count != 0) {
         do {
             memcpy(&effect->descriptions[index], &source->descriptions[slot], 0x80);
-            effResetSlotWork((u32)effect, index);
+            effResetSlotWork(effect, index);
             index++;
         } while (index < effect->count);
     }
@@ -11560,7 +11558,7 @@ u32 effDestroyResourceSlotSet(EffectSlotSet *set) {
         sdfReleaseResourceAllocation(set->textureAllocation);
     }
     sdfReleaseResourceAllocation(set->descriptionAllocation);
-    effReleaseSlotWorkAllocation((s32)set);
+    effReleaseSlotWorkAllocation(set);
     sdfReleaseChipBlock(set);
     return 1;
 }
@@ -11683,7 +11681,7 @@ u32 effSetMaterialSlots(s32 work, s32 index, u32 value, BdWork *asset) {
     u32 i;
     EffTimedState *states;
     if (((EffectSlotSet *)work)->workEntries[index].alternate.asset == NULL) {
-        effAttachSlotWorkOwner((void *)work, index, asset);
+        effAttachSlotWorkOwner((EffectSlotSet *)work, index, asset);
     }
     ((EffectSlotSet *)work)->workEntries[index].alternate.asset = asset;
     states = asset->states;
