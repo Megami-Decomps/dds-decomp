@@ -1,6 +1,7 @@
 #include "common.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
+#include "fld_lmap_task.h"
 
 struct SdfTex;
 extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
@@ -44,39 +45,12 @@ extern struct SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
 extern s32 D_003BD984;
 
-typedef struct MapRequestNode {
-    u32 value;
-    u32 argument1;
-    u32 argument2;
-    s32 active;
-    struct MapRequestNode *next;
-    struct MapRequestNode *prev;
-    u8 pad18[8];
-} MapRequestNode;
-
-typedef struct MapRequestState {
-    u32 handle;           /* 0x00 */
-    MapRequestNode *first; /* 0x04 */
-    MapRequestNode *next; /* 0x08 */
-    MapRequestNode *third; /* 0x0C */
-    s16 count;            /* 0x10 */
-    s16 arg;              /* 0x12 */
-    s16 interval;         /* 0x14 */
-    s16 elapsed;          /* 0x16 */
-    void (*callback)(s32, s32, s32, struct MapRequestState *, MapRequestNode *, f32); /* 0x18 */
-} MapRequestState;
-
-/* The ring of nodes lives inside the same block, 0x2C past the header. */
-typedef struct MapRequestRing {
-    MapRequestState header;
-    u8 pad1C[0x28];
-    MapRequestNode nodes[1]; /* 0x44 */
-} MapRequestRing;
 
 
 extern MapRequestState *D_003BD988;
 
 extern MapRequestState *D_003BD98C;
+void func_002C7B38(MapRequestState *);
 extern void func_002C7C58(MapRequestState *);
 extern f32 sdfCounterGetScaledValue(void);
 extern f32 D_0038FE30[][4];
@@ -435,13 +409,11 @@ INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C6948);
 
 INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C6EC8);
 
-extern MapRequestState *sdfCreateLinkedRequestRing(s16, s16);
 
 extern void fldDrawMapRequestHalo(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
 
 extern void fldDrawMapRequestPulse(s32, s32, s32, MapRequestState *, MapRequestNode *, f32);
 
-void fldSetMapRequestInterval(MapRequestState *state, u16 interval);
 
 /* Allocate the two map request queues and install their dispatch callbacks. */
 void fldCreateMapRequestQueues(void) {
@@ -531,7 +503,6 @@ void sdfCommitPendingVectorAndMarkChanged(void) {
 }
 
 extern s8 D_003BD281;
-extern void fldAdvanceMapRequest(MapRequestState *, u32, u32, u32);
 extern void func_002C7BB0(MapRequestState *);
 
 void fldUpdateMapRequestQueues(s32 enabled) {
@@ -622,9 +593,9 @@ MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 arg) {
     return state;
 }
 
-void func_002C7B38(u32 *sprite) {
-    if (sprite != NULL) {
-        sdfQueueNonzeroResourceId(*sprite);
+void func_002C7B38(MapRequestState *state) {
+    if (state != NULL) {
+        sdfQueueNonzeroResourceId(state->handle);
     }
 }
 

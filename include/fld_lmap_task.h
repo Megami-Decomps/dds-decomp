@@ -4,6 +4,44 @@
 #include "common.h"
 #include "sdf.h"
 
+typedef struct MapRequestNode {
+    u32 value;
+    u32 argument1;
+    u32 argument2;
+    s32 active;
+    struct MapRequestNode *next;
+    struct MapRequestNode *prev;
+    u8 pad18[8];
+} MapRequestNode;
+
+typedef struct MapRequestState {
+    u32 handle;
+    MapRequestNode *first;
+    MapRequestNode *next;
+    MapRequestNode *third;
+    s16 count;
+    s16 arg;
+    s16 interval;
+    s16 elapsed;
+    void (*callback)(s32, s32, s32, struct MapRequestState *, MapRequestNode *, f32);
+} MapRequestState;
+
+/* Both constructors put the 0x20-byte nodes after a 0x44-byte queue prefix. */
+typedef struct MapRequestRing {
+    MapRequestState header;
+    u8 pad1C[0x28];
+    MapRequestNode nodes[1];
+} MapRequestRing;
+
+typedef char MapRequestNode_size_must_be_0x20[(sizeof(MapRequestNode) == 0x20) ? 1 : -1];
+typedef char MapRequestState_size_must_be_0x1C[(sizeof(MapRequestState) == 0x1C) ? 1 : -1];
+typedef char MapRequestRing_nodes_offset_check[
+    ((u32)&((MapRequestRing *)0)->nodes == 0x44) ? 1 : -1];
+
+MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 arg);
+void fldAdvanceMapRequest(MapRequestState *, u32, u32, u32);
+void fldSetMapRequestInterval(MapRequestState *, u16);
+
 /* User data allocated by fldStartLmapTask and passed to the LmapMain task. */
 typedef struct LmapTaskState {
     u32 unknown00;                /* 0x00 */
