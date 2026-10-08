@@ -12,6 +12,7 @@
 #include "kwln.h"
 #include "dat_state.h"
 #include "dat_command.h"
+#include "kwln_task_lifecycle.h"
 
 extern SceneSlotFadeWork *D_003BD83C;
 extern ActorSlotOrder *D_003BD840[2];
@@ -172,7 +173,6 @@ extern const char *btlAnalyzPanelTaskNameRef;
 extern const char *btlMahenPanelTaskNameRef;
 
 
-extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *, s32);
 extern void func_00101A80(KwlnTask *, KwlnTask *);
 
 extern s32 btlGetTrackedTaskHandle(s32);

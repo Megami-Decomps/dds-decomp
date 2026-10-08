@@ -2,6 +2,7 @@
 #define SDF_H
 
 #include "common.h"
+#include "sdf_list_node.h"
 
 /* Native battle-parameter blobs: DDS1 0xA6C bytes, DDS2 0xC14 bytes.
  * Level tables begin at level one; seven-entry scales use index three for zero. */
@@ -313,14 +314,6 @@ typedef char SdfPoolNode_size_must_be_0x20[(sizeof(SdfPoolNode) == 0x20) ? 1 : -
 /* Callback-list hooks also accept the shared task-entry no-op. */
 typedef void (*SdfListCallback)();
 
-typedef struct SdfListNode {
-    u32 index;
-    s32 key;
-    struct SdfListNode *next;
-    struct SdfListNode *prev;
-    void *value;
-} SdfListNode;
-
 struct SdfMemBlock;
 
 typedef struct SdfList {
@@ -333,7 +326,6 @@ typedef struct SdfList {
     SdfListCallback onDestroy;
 } SdfList;
 
-typedef char SdfListNode_size_must_be_0x14[(sizeof(SdfListNode) == 0x14) ? 1 : -1];
 typedef char SdfList_size_must_be_0x1C[(sizeof(SdfList) == 0x1C) ? 1 : -1];
 
 SdfList *sdfCreateTaskHeader(void *);

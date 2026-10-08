@@ -14,6 +14,7 @@
 #include "sdf_sif_command.h"
 #include "eff_transform.h"
 #include "file.h"
+#include "kwln_task_lifecycle.h"
 
 
 extern void sdfReleaseChipBlock();
@@ -23,7 +24,6 @@ extern s32 D_003C88C0[];
 
 extern s32 D_003C88C8[];
 
-extern s32 kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
 extern void func_00103388(s32, s32, s32, s32);
 
@@ -175,7 +175,6 @@ void mdlCleanupViewerTasksAndResources(void);
 void mdlDrawViewerSelectionLabel(void);
 
 
-extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
 void sdfPacInitializeDispatchPacket(void *buffer, s32);
 
@@ -2527,7 +2526,7 @@ void mdlSubmitViewerResourceDrawPacket(void) {
 
 void mdlViewerTaskDestroy(void) {
     if (mdlViewerState.viewerTask != 0) {
-        kwlnTaskDestroyWithHierarchy(mdlViewerState.viewerTask, 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)mdlViewerState.viewerTask, 0);
         mdlViewerState.viewerTask = 0;
     }
 }

@@ -18,7 +18,6 @@ void sdfUnfreezeFloatCounter(struct EvtScaledValue *ctx);
 extern char D_003AC038[];
 extern void *func_00101218(s32, s32);
 extern void func_003003F0(char *, void *);
-extern void kwlnTaskDestroyWithHierarchy(void *, s32);
 
 extern EffWorldNode *dds3AppendWorldNode(void);
 extern void dds3SetWorldSecondaryObject(void *);

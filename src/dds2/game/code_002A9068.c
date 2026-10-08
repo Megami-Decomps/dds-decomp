@@ -5,6 +5,7 @@
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "mnu_scroll_panel.h"
+#include "kwln_task_lifecycle.h"
 
 extern void itfDrawGridWithResolvedSlot(u32, u32, u32, u32, u32, u32, u32);
 

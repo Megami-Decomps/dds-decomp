@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf.h"
 
 SdfChipPage *sdfChipPages __attribute__((section(".sbss"), aligned(8)));
@@ -12,7 +13,7 @@ SdfChipClassTable sdfChipClassTable __attribute__((section(".bss"), aligned(8)))
 
 void *sdfAllocSizeClassBlock(s32 arg0);
 void *sdfClearQuadwords(void *arg0, s32 arg1);
-void sdfPendingQueuePush(void *arg0, s32 arg1);
+void sdfPendingQueuePush(void *arg0, u32 arg1);
 s32 func_00312C08(void);
 s32 EIntr(void);
 void sdfSelectNextChipPage(SdfChipClass *sizeClass);
@@ -68,8 +69,8 @@ void sdfReleaseChipBlock(void *memory) {
     }
 }
 
-void sdfQueuePendingChipValue(s32 value) {
-    sdfPendingQueuePush(&sdfChipReleaseRequest, value);
+void sdfQueuePendingChipRelease(void *memory) {
+    sdfPendingQueuePush(&sdfChipReleaseRequest, (u32)memory);
 }
 
 s32 sdfChipIsInRange(s32 address) {

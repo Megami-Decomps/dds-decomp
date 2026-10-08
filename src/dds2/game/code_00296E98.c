@@ -4,6 +4,7 @@
 #include "mnu_result.h"
 #include "mnu_list.h"
 #include "mnu_staff.h"
+#include "kwln_task_lifecycle.h"
 
 
 extern u8 brsUiUpdateAllowed;
@@ -70,7 +71,6 @@ extern char mnuStaffPrimaryPanelTaskName[];
 
 extern char mnuStaffSecondaryPanelTaskName[];
 
-extern void kwlnTaskDestroyWithHierarchyByName(char *, s32);
 
 
 

@@ -303,7 +303,6 @@ extern SoundResourceNode *sndAllocResourceNode(void);
 extern u32 kwlnDrawControlFlags;
 extern void btlDestroyUnit(u8 *);
 extern void func_001D4E60(BtlUnit *, BtlUnit *);
-extern void sdfQueueNonzeroResourceId(s32);
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
@@ -5217,7 +5216,7 @@ u32 func_001D8190(BtlModelChangeArgs *args) {
             btlDestroyUnit((u8 *)unit->mirror);
             unit->mirror = NULL;
             if (unit->unk330 != 0) {
-                sdfQueueNonzeroResourceId(unit->unk330);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)unit->unk330);
                 unit->unk330 = 0;
                 unit->unk32C = 0;
             }
@@ -6278,7 +6277,7 @@ void btlReleaseUnitResources(BtlUnit *unit) {
     }
     btlReleaseActorModelResources((u8 *)unit);
     if (unit->unk330 != 0) {
-        sdfQueueNonzeroResourceId(unit->unk330);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)unit->unk330);
         unit->unk330 = 0;
         unit->unk32C = 0;
     }
@@ -9692,24 +9691,23 @@ extern char D_003A4AF0[]; /* "btl:free field F2\n" */
 
 extern char D_003A4B08[]; /* "btl:free field F1\n" */
 
-extern void sdfQueueNonzeroResourceId(s32);
 
 
 void btlFreeFieldBlocks(void) {
     BtlState *context = (BtlState *)btlGetRuntime();
     btlWaitForPendingWorkAndReleaseBuffers();
     if (context->fieldTBResourceId != 0) {
-        sdfQueueNonzeroResourceId(context->fieldTBResourceId);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)context->fieldTBResourceId);
         context->fieldTBResourceId = 0;
         btlBossDebugPrintf(D_003A4AD8);
     }
     if (context->fieldF2ResourceId != 0) {
-        sdfQueueNonzeroResourceId(context->fieldF2ResourceId);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)context->fieldF2ResourceId);
         context->fieldF2ResourceId = 0;
         btlBossDebugPrintf(D_003A4AF0);
     }
     if (context->fieldF1ResourceId != 0) {
-        sdfQueueNonzeroResourceId(context->fieldF1ResourceId);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)context->fieldF1ResourceId);
         context->fieldF1ResourceId = 0;
         btlBossDebugPrintf(D_003A4B08);
     }
@@ -10149,7 +10147,7 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
                                              (s32)args->fieldTB, 0);
             btlInitializeSceneLightingAndTint();
             if (blocks->fieldTBResourceId != 0) {
-                sdfQueueNonzeroResourceId(blocks->fieldTBResourceId);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTBResourceId);
                 blocks->fieldTBResourceId = 0;
                 btlBossDebugPrintf(D_003A4AD8);
             }

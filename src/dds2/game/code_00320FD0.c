@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_callback_list.h"
 #include "mnu_work.h"
 
 extern MenuResourceRecord *mnuResourceRecords;
@@ -31,51 +32,33 @@ extern MenuProgressState mnuStepCounterState;
 
 extern u16 mnuStepCounterThreshold[];
 
-typedef struct ResourceNode {
-    u32 id;
-    u32 value;
-    struct ResourceNode *next;
-    u32 unk_C;
-    u32 handle;
-} ResourceNode;
+extern void func_0035A880(SdfListNode *);
 
-typedef struct ResourceList {
-    u32 count;
-    ResourceNode *first;
-    ResourceNode *last;
-    u32 unk_C;
-    void (*onRemove)(u32, u32); /* 0x10: called with each node's id and handle */
-} ResourceList;
-
-extern void func_0035A880(ResourceNode *);
-
-u32 dds3RemoveListNodeAndNotify(u32 list, u32 node);
-
-/* Retain the one-argument call to the old-style lookup declaration: it matches retail. */
-u32 mnuRemoveResourceNodeById(u32 list) {
-    u32 selectedNode = mnuFindResourceNodeById(list);
+/* Remove the matching ID entry and invoke its list listener. */
+SdfListNode *mnuRemoveResourceNodeById(MnuCallbackList *list, u32 id) {
+    SdfListNode *selectedNode = mnuFindResourceNodeById(list, id);
     if (selectedNode != 0) {
         return dds3RemoveListNodeAndNotify(list, selectedNode);
     }
-    return 0;
+    return NULL;
 }
 
 /* Notify and free every node, then reset the list. */
-void mnuClearResourceList(ResourceList *list) {
-    ResourceNode *node;
+void mnuClearResourceList(MnuCallbackList *list) {
+    SdfListNode *node;
 
     if (list != NULL) {
-        node = list->first;
+        node = list->head;
         if (node != NULL) {
             do {
-                ResourceNode *current = node;
+                SdfListNode *current = node;
                 node = node->next;
-                list->onRemove(current->id, current->handle);
+                list->onRemove(current->index, (u32)current->value);
                 func_0035A880(current);
             } while (node != NULL);
         }
-        list->last = NULL;
-        list->first = NULL;
+        list->tail = NULL;
+        list->head = NULL;
         list->count = 0;
     }
 }
@@ -131,16 +114,13 @@ void sdfLinkListExchangeNodes(SdfLinkList *list, SdfLink *firstNode, SdfLink *se
     }
 }
 
-ResourceNode *mnuFindResourceNodeByValue(list, value)
-    ResourceList *list;
-    u32 value;
-{
-    ResourceNode *node = list->first;
+SdfListNode *mnuFindResourceNodeByValue(MnuCallbackList *list, u32 value) {
+    SdfListNode *node = list->head;
     if (node == NULL) {
         return NULL;
     }
     do {
-        if (node->value == value) {
+        if (node->key == value) {
             break;
         }
         node = node->next;
@@ -148,16 +128,13 @@ ResourceNode *mnuFindResourceNodeByValue(list, value)
     return node;
 }
 
-ResourceNode *mnuFindResourceNodeById(list, id)
-    ResourceList *list;
-    u32 id;
-{
-    ResourceNode *node = list->first;
+SdfListNode *mnuFindResourceNodeById(MnuCallbackList *list, u32 id) {
+    SdfListNode *node = list->head;
     if (node == NULL) {
         return NULL;
     }
     do {
-        if (node->id == id) {
+        if (node->index == id) {
             break;
         }
         node = node->next;
@@ -165,16 +142,13 @@ ResourceNode *mnuFindResourceNodeById(list, id)
     return node;
 }
 
-ResourceNode *mnuFindResourceNodeByHandle(list, handle)
-    ResourceList *list;
-    u32 handle;
-{
-    ResourceNode *node = list->first;
+SdfListNode *mnuFindResourceNodeByHandle(MnuCallbackList *list, u32 handle) {
+    SdfListNode *node = list->head;
     if (node == NULL) {
         return NULL;
     }
     do {
-        if (node->handle == handle) {
+        if ((u32)node->value == handle) {
             break;
         }
         node = node->next;
@@ -255,4 +229,3 @@ void func_003214D0(u32 unused, s32 resource) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00320FD0", D_0043899C);
-

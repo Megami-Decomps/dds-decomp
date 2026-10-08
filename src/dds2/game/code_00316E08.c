@@ -6,6 +6,7 @@
 #include "mdl.h"
 #include "itf.h"
 #include "mnu_shooting.h"
+#include "kwln_task_lifecycle.h"
 
 
 
@@ -68,7 +69,6 @@ extern s32 (*D_0040ABE0[])(u8 *work);
 
 extern void mdlLoadViewerPackage(s32 source, s32 destination, s32 flags, s32 packageId, s32 variant);
 
-extern void kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
 extern s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 

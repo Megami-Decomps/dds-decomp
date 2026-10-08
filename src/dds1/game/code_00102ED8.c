@@ -5,6 +5,7 @@
 #include "sdf_linked_packet.h"
 #include "sdf_draw.h"
 #include "pcp_vu0.h"
+#include "kwln_task_lifecycle.h"
 
 typedef struct {
     s8 r;
@@ -89,7 +90,6 @@ extern s32 func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 extern s32 effMiscRandMod(s32, s32);
 extern void kwlnPadStartMotor(u32, u8, s32);
 extern void *kwlnTaskCreate(const char *, s32, s32, s32, void (*)(void), void (*)(void), void *);
-extern void kwlnTaskDestroyWithHierarchy(void *, s32);
 extern void func_00104290(void);
 extern void *D_003BD6A8;
 extern s32 kwlnTextureCountIncompleteResources(void);

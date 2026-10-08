@@ -3,6 +3,7 @@
 #include "sdf_resource.h"
 #include "fld_waypoint.h"
 #include "fld_inf.h"
+#include "kwln_task_lifecycle.h"
 extern FldInfTable D_0038E2D0;
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -61,7 +62,6 @@ extern u32 fldValueRecordResource;
 
 extern s32 D_004361F8;
 
-extern void sdfQueueNonzeroResourceId(u32 resource);
 
 extern void *memset(void *s, s32 c, u32 n);
 
@@ -74,7 +74,6 @@ extern ScrData *scrFindNamedProcessNode(char *name);
 extern void evtDestroyNamedTask(void *unusedContext, const char *taskName);
 
 
-extern void kwlnTaskDestroyWithHierarchy(s32 task, s32 flag);
 
 extern s32 fldTaskSlotCount;
 
@@ -327,7 +326,7 @@ void fldInitializeCameraColorResource(void) {
     fldRainTextureReference = sdfTexAcquireResourceTexture((void *)fldRainTextureData);
     fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
     if (fldRainTextureResource != 0) {
-        sdfQueueNonzeroResourceId(fldRainTextureResource);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldRainTextureResource);
         fldRainTextureResource = 0;
     }
     fldUpdateCameraColorEffect(fldCameraSettings);
@@ -403,10 +402,10 @@ void fldAllocateRecordStorage(void) {
 /* Release both retained resources and clear the usable buffer addresses. */
 void fldReleaseRecordStorage(void) {
     sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)fldValueRecordResource);
-    sdfQueueNonzeroResourceId(fldValueRecordResource);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldValueRecordResource);
     fldValueRecords = 0;
     sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)fldAuxRecordResource);
-    sdfQueueNonzeroResourceId(fldAuxRecordResource);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldAuxRecordResource);
     fldAuxRecordBuffer = 0;
 }
 
@@ -966,7 +965,7 @@ u32 fldDestroyTaskSlot(u32 index) {
     u32 *taskSlot = &D_0038BD50[index];
 
     if (kwlnTaskIsRegistered((KwlnTask *)*taskSlot) != 0) {
-        kwlnTaskDestroyWithHierarchy(*taskSlot, 0);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)*taskSlot, 0);
     }
     *taskSlot = 0;
     return 0;
