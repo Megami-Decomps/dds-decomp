@@ -850,7 +850,6 @@ extern void mnuDrawStaffCampScreen(s32 kind, KwlnTask *task);
 extern void mnuCreateStaffImageSprite();
 extern void mnuDrawStaffGridLabelsForKind();
 extern void func_00272668();
-extern void mnuDrawWindowContainer();
 
 s32 mnuDrawStaffCampPageWithImage(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);

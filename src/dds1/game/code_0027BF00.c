@@ -108,7 +108,6 @@ extern ScrollHandle *effCreateStatusBatch(s32);
 
 extern void func_0027FCA0(s32, s32, s32);
 
-extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
 
 extern void sdfReleaseChipBlock(void *);
 
@@ -926,7 +925,7 @@ void mnuDrawFadingWindows(s32 depth, s32 *list, s32 drawArg) {
     u32 slotIndex;
     for (slotIndex = 0; slotIndex < (u32)list[0]; slotIndex++) {
         s32 *entry = (s32 *)list[slotIndex + 1];
-        mnuDrawWindowContainer(entry[2], entry[3], depth, entry[4], drawArg);
+        mnuDrawWindowContainer(entry[2], entry[3], depth, (MenuWindowContainer *)entry[4], drawArg);
     }
 }
 

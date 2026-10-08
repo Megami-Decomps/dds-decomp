@@ -321,7 +321,6 @@ extern void func_00272778(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 extern void func_00272668(s32, s32, s32, s32, s32, s32);
-extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
 extern void mnuDrawStaffGridLabelsForKind(s32, s32);
 extern u8 D_0037C860[];
 extern s32 D_003BAA9C;

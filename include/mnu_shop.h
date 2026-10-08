@@ -154,4 +154,7 @@ typedef char MenuWindowContainer_size_must_be_0x8C[(sizeof(MenuWindowContainer) 
 typedef char ShopScene_size_must_be_0xB4[(sizeof(ShopScene) == 0xB4) ? 1 : -1];
 #endif
 
+/* Draw a window container owned by the menu window subsystem. */
+void mnuDrawWindowContainer(s32 x, s32 y, s32 depth, MenuWindowContainer *menu, s32 drawArg);
+
 #endif
