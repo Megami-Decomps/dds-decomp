@@ -2122,7 +2122,24 @@ s32 mnuPercentOrHundred(s32 value, s32 total) {
     return 100;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BC498);
+typedef struct MenuPanelSequenceSettings {
+    s32 rows[5][4];
+    const char *captions[2];
+} MenuPanelSequenceSettings;
+
+extern MenuPanelSequenceSettings D_003E7878;
+extern void mnuDrawPanelSequenceByRow(s32, s32, s32, s32, s32, s32);
+
+void func_002BC498(MenuPageWindow *window, s32 texture) {
+    u32 i;
+
+    for (i = 0; i < 5; i++) {
+        mnuDrawPanelSequenceByRow((s32)&window->slots[i].hp, 0, (s32)D_003E7878.rows[i], 0x3C,
+            mnuPercentOrHundred(window->records->slots[i].hp, window->records->slots[i].maxHp), texture);
+        mnuDrawPanelSequenceByRow((s32)&window->slots[i].mp, 1, (s32)D_003E7878.rows[i], 0x3C,
+            mnuPercentOrHundred(window->records->slots[i].mp, window->records->slots[i].maxMp), texture);
+    }
+}
 
 void mnuReleasePartyPanelSpriteTextures(MenuPageWindow *window) {
     u32 i;

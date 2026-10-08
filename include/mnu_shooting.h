@@ -11,6 +11,41 @@ struct FileQueue;
 struct WideSlotPool;
 struct CompactSlotPool;
 
+/* Records are 0x34 bytes; bit 0 of flags marks a claimed slot. */
+typedef struct ModelInstance {
+    f32 position[3];
+    u32 valueC;
+    f32 positionStep[3];
+    u8 pad1C[4];
+    u32 flags;
+    u16 remainingLifetime; /* decremented by each unpaused timed update */
+    u16 initialLifetime; /* retained as the draw ratio denominator; zero disables timed motion */
+    s16 animationFrame;
+    s16 animationLength;
+    u8 pad2C[4];
+    f32 scale;
+} ModelInstance;
+
+typedef struct ModelInstanceList {
+    ModelInstance *items;
+    s32 count;
+} ModelInstanceList;
+
+typedef struct ModelInstanceWork {
+    u32 handle;
+    s32 count;
+    ModelInstanceList *lists;
+    u32 unkC;
+} ModelInstanceWork;
+
+typedef char ModelInstanceLayoutsAssert[
+    (sizeof(ModelInstance) == 0x34 &&
+     sizeof(ModelInstanceList) == 0x08 &&
+     sizeof(ModelInstanceWork) == 0x10 &&
+     (unsigned long)&((ModelInstance *)0)->flags == 0x20 &&
+     (unsigned long)&((ModelInstance *)0)->scale == 0x30 &&
+     (unsigned long)&((ModelInstanceWork *)0)->lists == 0x08) ? 1 : -1];
+
 /* Nodes passed to the menu model helpers are complete 0x50-byte records. */
 typedef struct MnuModelNode {
     f32 primary[4];
@@ -104,7 +139,7 @@ typedef struct MnuShootingWork {
     struct MnuSectionObjectList *alternateProgressWork;
     struct MnuSectionModelWork *modelWork;
     struct MnuEffectWork *effectWork;
-    struct MnuSectionObjectList *work24;
+    struct ModelInstanceWork *work24;
     struct WideSlotPool *spriteWork;
     struct CompactSlotPool *tintWork;
     union {
