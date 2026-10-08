@@ -784,7 +784,6 @@ void mnuSetGridSpriteSlot(MenuListNode *node, s32 row, s32 col, s32 x, s32 y, s3
 
 void *mnuWalkNodeList(s32 index, MenuList *list);
 
-s32 mnuSeekListNode(s32 index, MenuList *list);
 
 void mnuSelectFirstListNode(MenuList *list);
 

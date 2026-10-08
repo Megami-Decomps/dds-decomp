@@ -70,6 +70,9 @@ struct MenuList {
     s32 scale;          /* 0x3C: 8.8 fixed-point default */
 };
 
+/* Select the indexed node and report whether the index exists. */
+s32 mnuSeekListNode(s32 index, struct MenuList *list);
+
 struct MenuWindowContainer;
 struct MenuListNode *mnuListAppendNode(struct MenuList *list, const void *value);
 struct MenuListNode *mnuAppendWindowListNode(struct MenuWindowContainer *window, const void *value);

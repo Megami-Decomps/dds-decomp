@@ -218,7 +218,6 @@ typedef struct MenuInputNode {
 } MenuInputNode;
 
 extern void mnuForwardDupArg(MenuWindowContainer *, s32, s32, s32, s32);
-extern void mnuSeekListNode(s32, s32);
 
 
 
@@ -1254,7 +1253,7 @@ void mnuSeekFirstAvailableStaffListNode(KwlnTask *task) {
         listNode = listNode->next;
     }
     if (listNode != NULL) {
-        mnuSeekListNode(listNode->index, (s32)((MenuSelectionState *)menuWork->selectedList)->list);
+        mnuSeekListNode(listNode->index, ((MenuSelectionState *)menuWork->selectedList)->list);
     }
 }
 
@@ -1265,7 +1264,7 @@ u32 ptySkillMenuRebuildAfterMutation(s32 actor, KwlnTask *contextArg) {
 
     mnuDestroySelectedPartyWindow(contextArg);
     ptySkillMenuBuildEquippedSlots(actor, contextArg);
-    mnuSeekListNode(selected, (s32)((MenuSelectionState *)menu->selectedList)->list);
+    mnuSeekListNode(selected, ((MenuSelectionState *)menu->selectedList)->list);
     state = menu->selectedList;
     *(s32 *)(state + 0x44) = 0x200;
     *(s32 *)(state + 0x48) = 0x100;

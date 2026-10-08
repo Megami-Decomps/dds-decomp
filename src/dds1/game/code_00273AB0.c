@@ -99,7 +99,6 @@ extern void mnuReleaseStaffExtraWindow();
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 extern void mnuReleaseStaffMenuTextureHandles();
-extern void mnuSeekListNode(s32, s32);
 extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
 extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
 extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
@@ -462,7 +461,7 @@ s32 mnuHandleStaffValuePageInput(KwlnTask *task) {
     }
     mnuInitializeStaffValuePage(task);
     if (savedNodeIndex != 0 || savedRowCount != 0) {
-        mnuSeekListNode(savedNodeIndex, (s32)menu->list->list);
+        mnuSeekListNode(savedNodeIndex, menu->list->list);
         if (savedRowCount > 0) {
             for (i = savedRowCount; i != 0; i--) {
                 mnuAdvanceWindowListSelection(menu->list);
