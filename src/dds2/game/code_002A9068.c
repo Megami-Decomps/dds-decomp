@@ -5,6 +5,7 @@
 #include "sdf_resource.h"
 #include "dat_state.h"
 #include "mnu.h"
+#include "mnu_list.h"
 #include "mnu_staff.h"
 #include "mnu_scroll_panel.h"
 #include "kwln_task_lifecycle.h"
@@ -596,7 +597,102 @@ void mnuDrawCampGridResourceSlot(s32 drawWork, u32 y, u32 z, s32 record, u32 unu
                   layer);
 }
 
-INCLUDE_ASM(const s32, "game/code_002A9068", mnuCreateStaffResourceListWindow);
+extern void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *window,
+                                        u32 second, u32 third, u32 fourth);
+extern void mnuSetWindowPanelBounds(MenuWindowContainer *window, const void *layout,
+                                    u32 left, u32 top, u32 right, u32 bottom);
+
+/* Filter staff entries, size the window and preserve each entry's original ordinal. */
+MenuWindowContainer *mnuCreateStaffResourceListWindow(void *const *entries, s32 count,
+                                                      s32 width, s32 rowHeight,
+                                                      u8 *work, const s32 *flagIds) {
+    MenuWindowContainer *window;
+    s32 visibleCount = 0;
+    s32 index;
+    s32 style;
+    void *const *entryCursor;
+    u32 entryOffset;
+
+    if (flagIds != NULL) {
+        index = 0;
+        if (count > 0) {
+            const s32 *flagCursor = flagIds;
+            do {
+                s32 flag = *flagCursor;
+                if (flag == 0 || mdlFlagTest(flag) != 0) {
+                    visibleCount++;
+                }
+                index++;
+                flagCursor++;
+            } while (index < count);
+        }
+    } else {
+        visibleCount = count;
+    }
+
+    window = mnuCreateWindowContainer(0, width, rowHeight, visibleCount, 0x16);
+    window->list->drawCallback = mnuDrawCampGridResourceSlot;
+    window->list->context = work;
+
+    switch ((u32)(visibleCount - 2)) {
+    case 0:
+        style = 1;
+        break;
+    case 1:
+        style = 2;
+        break;
+    case 2:
+        style = 3;
+        break;
+    case 3:
+        style = 4;
+        break;
+    case 4:
+        style = 5;
+        break;
+    case 5:
+        style = 6;
+        break;
+    default:
+        style = 7;
+        break;
+    }
+    mnuSetWindowEntryParameters(0, window, ((MenuStaffContext *)work)->spriteArg0, 0xC, style);
+
+    index = 0;
+    if (count > 0) {
+        /* Flags and entry handles use parallel word offsets. */
+        entryCursor = entries;
+        entryOffset = 0;
+        do {
+            struct MenuListNode *node = NULL;
+
+            if (flagIds != NULL) {
+                s32 flag = *(const s32 *)(entryOffset + (u32)flagIds);
+                if (flag != 0) {
+                    if (mdlFlagTest(flag) != 0) {
+                        node = mnuAppendWindowListNode(window, *entryCursor);
+                    }
+                } else {
+                    node = mnuAppendWindowListNode(window,
+                        *(void *const *)(entryOffset + (u32)entries));
+                }
+            } else {
+                node = mnuAppendWindowListNode(window, *entryCursor);
+            }
+            if (node != NULL) {
+                node->sortKeyPrimary = index;
+            }
+            index++;
+            entryCursor++;
+            entryOffset += sizeof(*entries);
+        } while (index < count);
+    }
+
+    mnuSetWindowPanelBounds(window, ((MenuStaffContext *)work)->panelLayout,
+                            0, 0, 0, 0);
+    return window;
+}
 
 
 extern void *const D_003E56D0[];

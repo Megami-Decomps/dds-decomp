@@ -4,6 +4,7 @@
 #include "sdf.h"
 #include "file_pac.h"
 #include "sdf_movie_stream.h"
+#include "sdf_movie_state.h"
 
 typedef struct DevState DevState;
 
@@ -106,7 +107,7 @@ void func_00346778(MovObj *owner, SdfMovieDescriptor *descriptor, const char *na
             stream->readCursor = buffer;
             stream->writeCursor = buffer;
         }
-        owner->state = 0;
+        owner->state = SDF_MOVIE_STATE_INITIAL;
         owner->deviceState = sdfDevCreateCallbackState((s32)name,
                                                         (void *)func_00345EB0, (s32)owner);
         sdfSoundInitFormattedAndAppendNode(&owner->soundNode, soundFormat,
@@ -129,7 +130,7 @@ void func_00346778(MovObj *owner, SdfMovieDescriptor *descriptor, const char *na
     pacWork->ringBuffer = (u8 *)((u32)resource + 0x14000);
     pacWork->scratchSize = 0x20;
     pacWork->scratch = pacWork->scratchBuffer;
-    owner->state = 0;
+    owner->state = SDF_MOVIE_STATE_INITIAL;
     owner->deviceState = sdfDevCreateCallbackState((s32)name,
                                                     (void *)func_003460D8, (s32)owner);
     owner->pacEnabled = 1;
@@ -150,11 +151,11 @@ void sdfCancelAndReleasePacWork(MovObj *job) {
     if (job->active != 0) {
         job->stopRequested = 1;
         /* Queue phase 5 as phase 7; phase 6 is the release gate below. */
-        if (job->state == 5) {
-            job->state = 7;
+        if (job->state == SDF_MOVIE_STATE_WAITING_FOR_BUFFER_SPACE) {
+            job->state = SDF_MOVIE_STATE_STOP_REQUESTED;
             sdfDevQueueActiveOperation(job->deviceState);
         }
-        while (job->state != 6) {
+        while (job->state != SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK) {
             sdfCreateSemaphoreFromOptions();
         }
         ownedBuffers = job->stream;

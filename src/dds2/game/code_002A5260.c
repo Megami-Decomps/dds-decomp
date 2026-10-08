@@ -6,6 +6,7 @@
 #include "mnu.h"
 #include "eff.h"
 #include "mnu_list.h"
+#include "mnu_movie_resource.h"
 #include "kwln_task_lifecycle.h"
 
 extern KwlnTask *kwlnTaskCreate();
@@ -1147,17 +1148,13 @@ void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *
     }
 }
 
-extern struct {
-    u32 handle;
-    u8 data[20];
-} D_003E4C48[];
+extern MnuMovieResourceEntry D_003E4C48[];
 
 void mnuRequestIndexedMovieResource(index)
 s32 index;
 {
-    u32 *entry = (u32 *)&D_003E4C48[index];
-    mnuStartMovieDrawTaskForResource((const char *)*entry,
-                                     (SdfMovieDescriptor *)(entry + 1));
+    MnuMovieResourceEntry *entry = &D_003E4C48[index];
+    mnuStartMovieDrawTaskForResource(entry->fileName, &entry->descriptor);
 }
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A7B28);
@@ -1244,8 +1241,8 @@ KwlnTask *mnuRequestMoviePlayback(const char *file, const SdfMovieDescriptor *pa
 }
 
 void func_002A7F98(s32 index) {
-    u32 *entry = (u32 *)&D_003E4C48[index];
-    mnuRequestMoviePlayback((const char *)*entry, (const SdfMovieDescriptor *)(entry + 1));
+    MnuMovieResourceEntry *entry = &D_003E4C48[index];
+    mnuRequestMoviePlayback(entry->fileName, &entry->descriptor);
 }
 
 void mnuStopMovieDrawTask(void) {
