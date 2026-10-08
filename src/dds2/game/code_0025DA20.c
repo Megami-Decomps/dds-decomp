@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_resource_slots.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
 #include "mnu.h"
@@ -129,7 +130,6 @@ extern void sdfReleaseChipBlock();
 
 extern void mnuShopReleaseWindowAndEffectResources();
 
-extern void effDestroyResourceSlotSet();
 
 extern s32 mnuShopReleaseSceneObjects(MenuTerminalContext *);
 
@@ -1054,7 +1054,6 @@ void mnuShopDestroyNestedEffectBatch(MenuEffectResources *resources) {
 }
 
 extern s32 mnuFirstPresentMainCharacterIndex(void);
-extern u32 effLoadIndexedResource(s32 category, s32 index, s32 keepAllocation);
 extern const char *D_003CE470[4];
 extern const char *D_003CE480[]; /* Two entries in external .data, not small data. */
 extern const char *D_003CE488[4];
@@ -1089,25 +1088,25 @@ void func_0025FA28(MenuTerminalContext *scene) {
     DspScrollingStripState *firstPanel = &scene->panelWork[0];
     DspScrollingStripState *secondPanel = &scene->panelWork[1];
 
-    scene->effectSlots[0] = (struct EffectSlotSet *)effLoadIndexedResource(
-        (s32)"/facility/spr/shop/", (s32)D_003CE470[0], 0);
+    scene->effectSlots[0] = effLoadIndexedResource(
+        "/facility/spr/shop/", D_003CE470[0], 0);
     switch (scene->type) {
     case 0:
     case 2:
-        scene->effectSlots[1] = (struct EffectSlotSet *)effLoadIndexedResource(
-            (s32)"/facility/spr/shop/", (s32)D_003CE470[1], 0);
+        scene->effectSlots[1] = effLoadIndexedResource(
+            "/facility/spr/shop/", D_003CE470[1], 0);
         break;
     case 1:
     case 3:
-        scene->effectSlots[1] = (struct EffectSlotSet *)effLoadIndexedResource(
-            (s32)"/facility/spr/shop/", (s32)D_003CE470[2], 0);
+        scene->effectSlots[1] = effLoadIndexedResource(
+            "/facility/spr/shop/", D_003CE470[2], 0);
         func_0025F8B8((u32)scene->effectSlots[1], &scene->campEffect.resources);
         break;
     }
-    scene->effectSlots[2] = (struct EffectSlotSet *)effLoadIndexedResource(
-        (s32)"/facility/spr/shop/", (s32)D_003CE480[0], 0);
-    scene->effectSlots[3] = (struct EffectSlotSet *)effLoadIndexedResource(
-        (s32)"/facility/spr/shop/", (s32)D_003CE488[mnuFirstPresentMainCharacterIndex()], 0);
+    scene->effectSlots[2] = effLoadIndexedResource(
+        "/facility/spr/shop/", D_003CE480[0], 0);
+    scene->effectSlots[3] = effLoadIndexedResource(
+        "/facility/spr/shop/", D_003CE488[mnuFirstPresentMainCharacterIndex()], 0);
     mnuInitScrollingStripState(firstPanel, 0, scene->effectSlots[0], 0x46, 0x43);
     func_0026BE28(firstPanel, 1, 0x10, 0x20);
     mnuInitScrollingStripState(secondPanel, 0, scene->effectSlots[0], 0x46, 0x43);

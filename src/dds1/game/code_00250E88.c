@@ -24,7 +24,7 @@ extern void sdfDestroyGridWork(SdfGrid *);
 extern void mnuResetWorkFloats(void);
 
 
-extern u32 mnuSceneResourceContext;
+extern TaskWork *mnuSceneResourceContext;
 
 typedef struct {
     u32 unk0;
@@ -176,14 +176,14 @@ s32 mnuCreateSceneWork(void) {
     mnuInitializeMantraSelectionGrid((MenuSceneWork *)sceneWork);
     ((MenuSceneWork *)sceneWork)->scenePhase = 0;
     ((MenuSceneWork *)sceneWork)->phaseFrame = 0;
-    ((MenuSceneMetadata *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY))->displayedCurrency = datGameState->header.currency;
+    ((MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY))->displayedCurrency = datGameState->header.currency;
     mnuCopySceneCoordinates((MenuSceneWork *)sceneWork);
     return (s32)sceneWork;
 }
 
 /* Retain the native metadata lookup, then release grid/list/allocation resources and reset projection state. */
 void mnuReleaseSceneContext(s32 unused, s32 sceneAddress) {
-    sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
+    sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
     sdfDestroyGridWork(((MenuSceneWork *)sceneAddress)->gridHandle);
     mnuReleaseDisplayListNodes(
         &((MenuSceneWork *)(u32)sceneAddress)->sceneTransitionList);
@@ -215,7 +215,7 @@ extern SdfGridCell *func_002CC238(SdfGrid *);
 
 s32 func_00253018(SdfGrid *grid) {
     MenuSceneWork *scene = (MenuSceneWork *)sdfGetTaskValueByKey(
-        (TaskWork *)mnuSceneResourceContext, 1);
+        mnuSceneResourceContext, 1);
     MnuMantraGridEntry *entry = (MnuMantraGridEntry *)grid->cursor->value;
     MenuGridCoordinate *coordinates = (MenuGridCoordinate *)grid->userData;
     s32 x = coordinates[entry->sceneId].x;
@@ -270,14 +270,14 @@ MnuMantraGridEntry *func_002530D8(s32 unused, u16 profileId, MnuProfileProgress 
     if (prfReq54Evaluate(0, (ScrVmOperand *)selection->partyRecord, entry->sceneId) != 0 ||
         entry->sceneId == 0x4E) {
         if (prfReq54Evaluate(1, (ScrVmOperand *)selection->partyRecord, entry->sceneId) != 0) {
-            entry->state = 1;
+            entry->state = MNU_MANTRA_GRID_ENTRY_SECOND_CHECK_OR_PROFILE_FLAG;
         } else if (entry->profileFlag != 0) {
-            entry->state = 1;
+            entry->state = MNU_MANTRA_GRID_ENTRY_SECOND_CHECK_OR_PROFILE_FLAG;
         } else {
-            entry->state = 2;
+            entry->state = MNU_MANTRA_GRID_ENTRY_FIRST_CHECK_OR_SPECIAL_PROFILE;
         }
     } else {
-        entry->state = 3;
+        entry->state = MNU_MANTRA_GRID_ENTRY_FIRST_PATH_REJECTED;
     }
     entry->value = ptyGetProfileRecordValue(selection->partyRecord, entry->sceneId);
     return entry;
@@ -310,7 +310,7 @@ void func_00253558(s32 context) {
     s32 field;
 
     func_002CBB48(grid);
-    scene = sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 0);
+    scene = sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
     field = *(s32 *)(*(s32 *)(scene + 0xC) + 0x1C);
     func_00253208(context, *(s32 *)(field + 0x70), NULL, NULL);
     if (sdfGridSelectFilledCell(
@@ -321,7 +321,7 @@ void func_00253558(s32 context) {
 
 /* Return the selected entry address through the scene-work/grid/slot chain, or zero when scene work is absent. */
 MnuMantraGridEntry *fldGetSceneMetadataNode(void) {
-    MenuSceneWork *scene = (MenuSceneWork *)(u32)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
+    MenuSceneWork *scene = (MenuSceneWork *)(u32)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
 
     if (scene == NULL) {
         return 0;
@@ -337,9 +337,9 @@ extern void *memcpy(void *, const void *, u32);
 
 s32 func_00253640(void) {
     MnuMantraGridEntry *entry = fldGetSceneMetadataNode();
-    MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
+    MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
-    scene->state = 0;
+    scene->state = MENU_SCENE_STATE_SELECTING;
     scene->pendingProfileId = entry->sceneId;
     dspCloseChannel();
     evtCreateMessageWindowIfMissing(scene->messageWindowResource);
@@ -358,7 +358,7 @@ extern void evtFinishMessageWindowAndNotify(void);
 extern void mnuReleaseMenuVisualWorkResources(s32);
 
 void func_00253778(void) {
-    MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
+    MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
     scene->messageShadeFrames = 0;
     if (scene->pendingProfileId != 0) {
@@ -370,7 +370,7 @@ void func_00253778(void) {
         selection->value = ptyGetProfileRecordValue(selection->partyRecord, (u16)selection->profileId);
         selection->cap = prfGetCapValue((u16)selection->profileId);
 
-        work = (MenuSceneWork *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
+        work = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
         mnuReinitializeSceneGrid((s32)work);
         func_00258AF0(&work->gridFeedback, 1);
     }
@@ -395,90 +395,90 @@ extern s8 evtGetCapturedWindowPanelValue(void);
 s32 func_00253830(void) {
     MnuMantraGridEntry *entry = fldGetSceneMetadataNode();
     MnuProfileProgress *selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
-    MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
+    MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
     switch (scene->state) {
-    case 0:
+    case MENU_SCENE_STATE_SELECTING:
         if (D_00324510[0x21] < 0) {
             if (selection->profileId == scene->pendingProfileId) {
                 if (prfGetCapValue(entry->sceneId) ==
                     ptyGetProfileRecordValue(selection->partyRecord, entry->sceneId)) {
-                    scene->state = 8;
+                    scene->state = MENU_SCENE_STATE_SIGNAL_E;
                 } else {
-                    scene->state = 5;
+                    scene->state = MENU_SCENE_STATE_SIGNAL_B;
                 }
                 scene->pendingProfileId = 0;
             } else if (prfGetCapValue(entry->sceneId) ==
                        ptyGetProfileRecordValue(selection->partyRecord, entry->sceneId)) {
-                scene->state = 7;
+                scene->state = MENU_SCENE_STATE_SIGNAL_D;
                 scene->pendingProfileId = 0;
-            } else if (entry->state != 1) {
+            } else if (entry->state != MNU_MANTRA_GRID_ENTRY_SECOND_CHECK_OR_PROFILE_FLAG) {
                 if (func_002508D8(entry->sceneId) == 0) {
-                    scene->state = 6;
+                    scene->state = MENU_SCENE_STATE_SIGNAL_C;
                 } else {
-                    scene->state = 4;
+                    scene->state = MENU_SCENE_STATE_SIGNAL_A;
                 }
                 scene->pendingProfileId = 0;
             } else if (entry->profileFlag != 0) {
-                scene->state = 2;
+                scene->state = MENU_SCENE_STATE_ALTERNATE_LABELS;
             } else {
                 scene->state = entry->state;
             }
         } else if (D_00324510[0x23] < 0 && scene->stageFinished != 0) {
-            scene->state = 10;
+            scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
             scene->pendingProfileId = 0;
         }
         break;
-    case 1:
+    case MENU_SCENE_STATE_PRIMARY_LABELS:
         itfDspPopulatePrimaryLabels();
-        scene->state = 9;
+        scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_WINDOW;
         break;
-    case 2:
+    case MENU_SCENE_STATE_ALTERNATE_LABELS:
         itfDspPopulateAlternateLabels();
-        scene->state = 9;
+        scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_WINDOW;
         break;
-    case 9:
+    case MENU_SCENE_STATE_WAITING_FOR_MESSAGE_WINDOW:
         if (evtGetMessageWindowControlState() == 0) {
             if (evtGetCapturedWindowPanelValue() != 0) {
-                scene->state = 10;
+                scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
                 scene->pendingProfileId = 0;
             } else {
-                scene->state = 3;
+                scene->state = MENU_SCENE_STATE_THIRD_LABELS;
             }
         }
         break;
-    case 3:
+    case MENU_SCENE_STATE_THIRD_LABELS:
         itfDspPopulateThirdLabels();
-        scene->state = 10;
+        scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
         if (entry->profileFlag != 0) {
             return 0;
         }
         datGameState->header.currency -= mnuGetMantraSourceValue(entry->sceneId);
         break;
-    case 4:
+    case MENU_SCENE_STATE_SIGNAL_A:
         itfDspSignalA();
-        scene->state = 10;
+        scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
         break;
-    case 5:
+    case MENU_SCENE_STATE_SIGNAL_B:
         itfDspSignalB();
-        scene->state = 10;
+        scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
         break;
-    case 6:
+    case MENU_SCENE_STATE_SIGNAL_C:
         itfDspSignalC();
-        scene->state = 10;
+        scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
         break;
-    case 7:
+    case MENU_SCENE_STATE_SIGNAL_D:
         itfDspSignalD();
-        scene->state = 10;
+        scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
         break;
-    case 8:
+    case MENU_SCENE_STATE_SIGNAL_E:
         itfDspSignalE();
-        scene->state = 10;
+        scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
         break;
-    case 10:
+    case MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION:
         if (scene->stageFinished != 0 && evtGetMessageWindowControlState() == 0) {
             evtFinishMessageWindowAndNotify();
-            sdfSetTaskItemMode((TaskWork *)mnuSceneResourceContext, 1,
+            sdfSetTaskItemMode(mnuSceneResourceContext, 1,
                                SDF_TASK_ITEM_MODE_PENDING_ACTIVATION);
             return -1;
         }
@@ -504,7 +504,7 @@ extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 /* Update attached visuals and stage completion, then ramp the message-window shade over ten frames.
  * Only the final two rectangle colors receive alpha; preserve both native selection lookups and the zero return. */
 s32 mnuUpdateMantraSceneDisplay(void) {
-    MenuSceneMetadata *sceneMetadata = (MenuSceneMetadata *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
+    MenuSceneMetadata *sceneMetadata = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
     u32 shadeColors[4];
 
     mnuGetSelectedNodeValue();
@@ -550,13 +550,13 @@ void fldUpdateSceneEntryMetadata(MenuSceneWork *scene) {
 
 /* Refresh the active scene-work entry coordinates and return zero. */
 s32 fldResetSceneState(void) {
-    fldUpdateSceneEntryMetadata((MenuSceneWork *)(u32)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1));
+    fldUpdateSceneEntryMetadata((MenuSceneWork *)(u32)sdfGetTaskValueByKey(mnuSceneResourceContext, 1));
     return 0;
 }
 
 /* Update and copy scene coordinates before releasing its node list; retain the native call order. */
 void mnuCopySceneCoordinatesAndReleaseNodeList(void) {
-    s32 sceneAddress = sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
+    s32 sceneAddress = sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     func_002512F0(sceneAddress, 1);
     mnuCopySceneCoordinates((MenuSceneWork *)(u32)sceneAddress);
     mnuReleaseListNodes(
@@ -572,3 +572,4 @@ INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC428);
 INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC430);
 
 INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC438);
+

@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "eff_resource_slots.h"
 #include "common.h"
 #include "dds3obj.h"
 #include "sdf.h"

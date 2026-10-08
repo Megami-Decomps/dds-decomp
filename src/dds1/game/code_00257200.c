@@ -77,14 +77,14 @@ void mnuDrawMantraPulseGridPasses(MenuSceneWork *work, s32 surface) {
 }
 
 extern void func_002593E0(MnuProfileProgress *, SdfGrid *, SdfGridCell *);
-extern s32 mnuSceneResourceContext;
+extern TaskWork *mnuSceneResourceContext;
 
 void mnuAdvanceMantraPulseGridEntries(MnuProfileProgress *selection, SdfGrid *grid) {
     SdfGridCell *cell;
     s32 row;
     s32 col;
 
-    sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
+    sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     for (row = 0; row < 0x11; row++) {
         cell = grid->cells + row * grid->width;
         for (col = 0; col < 15; col++) {
@@ -103,7 +103,7 @@ extern void func_00259B40(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, f
 extern void func_00257ED0(s32, s32, s32, s32, MenuSceneWork *, s32);
 extern void func_00258B90(s32, s32, s32, s32, MnuGridFeedbackState *, s32);
 extern u32 mnuGetSelectedNodeValue(void);
-extern s32 mnuSceneResourceContext;
+extern TaskWork *mnuSceneResourceContext;
 
 /* Draw the mantra pulse band and both entry passes at unit scale, placing the
  * selected entry with its offsets from the display table. */
@@ -115,7 +115,7 @@ void func_00257718(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
     s32 row;
     s32 n;
 
-    display = (MenuSceneWork *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
+    display = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     for (row = 0; row < 0xD; row++) {
         func_0024EDC0(arg0, arg1, arg2, arg3, row + 0x1F, 0x20, 1.0f, 1.0f, arg6);
     }
@@ -165,7 +165,7 @@ void func_002579B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3,
     s32 row;
     s32 n;
 
-    display = (MenuSceneWork *)sdfGetTaskValueByKey((TaskWork *)mnuSceneResourceContext, 1);
+    display = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
     for (row = 0; row < 0xD; row++) {
         func_0024EDC0(arg0, arg1, arg2, arg3, row + 0x1F, 0x20, scaleX, scaleY, arg6);
     }
@@ -271,3 +271,4 @@ void mnuAdvanceWrappingFrame(s32 *frame) {
 INCLUDE_ASM(const s32, "game/code_00257200", func_00257ED0);
 
 INCLUDE_RODATA(const s32, "game/code_00257200", D_003AF950);
+

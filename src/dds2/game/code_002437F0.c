@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_resource_slots.h"
 #include "evt_solar.h"
 
 
@@ -37,11 +38,9 @@ typedef struct SolarOverlayShape {
 extern f32 sdfSinPoly(f32 angle);
 extern void func_00243AD8(s32, s32, s32, s32, s32, s32, s32, s32, f32);
 
-u32 effLoadIndexedResource(void *resourceTable, const char *fileName, s32 index);
 
 extern u32 D_00437210[];
 
-void effDestroyResourceSlotSet(u32 sprite);
 
 /* The definition uses legacy K&R parameters. */
 void sdfSubmitGsTestOneRegisterPacket();
@@ -77,11 +76,11 @@ f32 effMiscRandUnitFloat(s32 seed);
 u32 effMiscRand(s32 seed);
 
 void evtLoadSolarNoiseSprite(u32 *sprite) {
-    *sprite = effLoadIndexedResource(D_00437210, "solarnoise.spr", 0);
+    *sprite = (u32)effLoadIndexedResource((const char *)D_00437210, "solarnoise.spr", 0);
 }
 
 void evtReleaseSolarNoiseSprite(u32 *sprite) {
-    effDestroyResourceSlotSet(*sprite);
+    effDestroyResourceSlotSet((struct EffectSlotSet *)*sprite);
 }
 
 void evtInitializeSolarOverlay(s32 object) {

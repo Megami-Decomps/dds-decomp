@@ -6,6 +6,7 @@
 #include "dds3obj.h"
 #include "eff.h"
 #include "eff_event.h"
+#include "eff_event_sound.h"
 #include "sdf_draw.h"
 #include "btl_sound.h"
 
@@ -79,7 +80,6 @@ extern void dds3EnsureWorldNodeInSlot(void *id, void *owner);
 
 extern BillObj *billCreateFromResource(s32 kind, const char *path);
 
-extern void *billCreateIndexed(s32 kind, u32 billId);
 
 
 extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
@@ -225,7 +225,7 @@ void effObjSpawnSharedBillClone(EffectObj *obj, void *firstVector, s32 secondVec
 
 /* Create a kind-one indexed bill; the native constructor result is discarded. */
 void effObjCreateIndexedKindOne(u32 billId, void *firstVector, s32 secondVectorAddress) {
-    void *bill;
+    struct BillObj *bill;
 
     bill = billCreateIndexed(1, billId);
     effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
@@ -288,7 +288,7 @@ void effObjSpawnSharedBillNodeClone(EffectObj *obj, void *firstVector, s32 secon
 
 /* Create a kind-zero indexed bill for the state-three constructor. */
 void effObjCreateIndexedKindZero(u32 billId, void *firstVector, s32 secondVectorAddress) {
-    void *bill;
+    struct BillObj *bill;
 
     bill = billCreateIndexed(0, billId);
     effObjCreateBillNode(bill, firstVector, secondVectorAddress);
@@ -403,7 +403,6 @@ typedef struct EffectEventVectorParameters {
 } EffectEventVectorParameters;
 
 extern const EffectEventVectorParameters D_0039F7D0;
-extern SoundMixer *func_00190100(SoundMixer *source);
 
 EffectObj *func_001150F0(source, firstVector, secondVector)
     SoundMixer *source;
@@ -423,7 +422,7 @@ EffectObj *func_001150F0(source, firstVector, secondVector)
     }
     PCP_COPY_VECTOR(parameters.firstVector, firstVector);
     PCP_COPY_VECTOR(parameters.secondVector, secondVector);
-    mixer = func_00190100(source);
+    mixer = effEventCloneSoundMixer(source);
     data = obj->data;
     data->state = EFF_OBJ_STATE_EVENT_NODE;
     data->handle = mixer;

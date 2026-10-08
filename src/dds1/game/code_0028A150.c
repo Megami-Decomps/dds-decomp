@@ -1,5 +1,6 @@
 #include "common.h"
 #include "bill_object_api.h"
+#include "eff_resource_slots.h"
 #include "sdf_resource.h"
 #include "sdf_chip.h"
 #include "eff_curve.h"
@@ -476,7 +477,6 @@ extern void billDispatchByKind(void *handle);
 
 extern void *effRetainResource(void *name);
 
-extern void *billCreateIndexed(s32 mode, void *name);
 
 
 extern void billSetBillboardMode(void *handle, s16 index);
@@ -3205,7 +3205,7 @@ void fileConfigTaskDestroy(void) {
         ((FileConfigTask *)fileConfigTaskWork)->frame = 0;
         for (i = 0; i < 4; i++) {
             if (((FileConfigTask *)fileConfigTaskWork)->slots[i] != 0) {
-                effDestroyResourceSlotSet(((FileConfigTask *)fileConfigTaskWork)->slots[i]);
+                effDestroyResourceSlotSet((struct EffectSlotSet *)((FileConfigTask *)fileConfigTaskWork)->slots[i]);
                 ((FileConfigTask *)fileConfigTaskWork)->slots[i] = 0;
             }
         }
@@ -5083,7 +5083,7 @@ void fileLoadObjectOpenDevice(LoadObj *obj, void *name) {
     if (obj->deviceHandle != NULL) {
         billDispatchByKind(obj->deviceHandle);
     }
-    handle = billCreateIndexed(0, name);
+    handle = billCreateIndexed(0, (u32)name);
     obj->deviceHandle = handle;
     if (obj->recordWork != NULL) {
         FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)obj->recordWork)->data0;
@@ -5095,7 +5095,7 @@ void fileLoadObjectOpenAndStartDevice(LoadObj *obj, void *name) {
     if (obj->deviceHandle != NULL) {
         billDispatchByKind(obj->deviceHandle);
     }
-    obj->deviceHandle = billCreateIndexed(1, name);
+    obj->deviceHandle = billCreateIndexed(1, (u32)name);
     billMarkKindOneFlag((struct BillObj *)(obj->deviceHandle));
     if (obj->recordWork != NULL) {
         FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)obj->recordWork)->data0;

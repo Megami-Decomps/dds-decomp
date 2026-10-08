@@ -234,7 +234,6 @@ typedef struct ParKindResource {
     u8 pad08[8];
 } ParKindResource;
 
-extern BillObj *billCreateIndexed(s32, u32);
 
 ParObj *parCreateResourceKindObject(s32 kind, ParKindResource *resource) {
     ParObj *object = (ParObj *)((u8 *)resource + resource->offset + 0x10);

@@ -1,3 +1,4 @@
+#include "bill_object_api.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "eff.h"
@@ -105,7 +106,6 @@ extern char D_004142C0[];
 extern EffBillResourceArchive *fileQueuePlainDispatchRequest(const char *path);
 extern void func_002C81D0(EffBillResourceArchive *archive);
 extern void func_002C7CE8(EffBillResourceArchive *archive);
-extern BillObj *billCreateIndexed(s32 kind, u32 data);
 extern void func_0035B6E0(const char *format, ...);
 
 void effInitializeBillResourceOwners(void) {
@@ -130,7 +130,7 @@ void effInitializeBillResourceOwners(void) {
         configOffset = 0;
         do {
             billboard = billCreateIndexed(((EffBillResourceInit *)(configOffset + (u32)configTable))->billboardKind,
-                                          (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)node->blockHandle));
+                                          (u32)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)node->blockHandle));
             scale = (f32 *)(configOffset + (u32)scaleTable);
             configOffset += sizeof(EffBillResourceInit);
             payload = billboard->child;
@@ -156,7 +156,7 @@ void effBillDispatchAll(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00157A50", func_00157D38);
+INCLUDE_ASM(const s32, "game/code_00157A50", billCreateChildPayloadFromTextureResource);
 
 /* Texture record: +0x00 is the handle the reference is dropped from, +0x08 the
  * reference count and +0x44 the allocation released when it reaches zero. */
