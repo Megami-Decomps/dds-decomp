@@ -1,9 +1,9 @@
+#include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "eff.h"
 
 
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern s32 effGetResourceFirstWord(s32 index);
 extern s16 D_00452110[];
 
 EffMagatuhiOwner *effCloneMagatuhiWithColorResource(const u32 *source) {
@@ -82,7 +82,7 @@ EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 para
     resource->validCounts = (u16 *)validCounts;
     resource->angleRows = (f32 (*)[4])angleValues;
     resource->allocationHandle = allocation;
-    resource->texture = (SdfTex *)effGetResourceFirstWord(0);
+    resource->texture = effGetBillResourceTexture(0);
 
     defaults = D_00452110;
     i = 0;

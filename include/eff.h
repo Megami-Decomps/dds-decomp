@@ -446,7 +446,7 @@ typedef char BillPacketWork_size_must_be_0x400[
 
 /* Child manager at retained allocation +0x400; shared by resource and draw owners. */
 typedef struct BillChildPayload {
-    s32 value; /* 0x00: acquired SdfTex address; preserve the existing word-access contract. */
+    SdfTex *texture; /* 0x00: acquired texture reference. */
     union {
         s16 signedVariant;
         u16 variant;
@@ -461,7 +461,7 @@ typedef struct BillChildPayload {
     SdfListHead *pendingLists[5]; /* 0x2C */
     u16 packetListIndex; /* 0x40 */
     u8 pad42[2];
-    void *allocation; /* 0x44: original allocation handle */
+    struct SdfMemBlock *allocation; /* 0x44: allocation descriptor released with this child. */
     BillPacketWork *work; /* 0x48: retained packet-buffer address */
     struct BillChildPayload *next; /* 0x4C */
 } BillChildPayload;

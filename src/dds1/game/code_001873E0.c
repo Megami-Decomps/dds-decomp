@@ -1,3 +1,4 @@
+#include "bill_object_api.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -25,7 +26,6 @@ typedef struct EffBlurDrawData {
 extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 
-extern u32 effGetResourceFirstWord(s32 index);
 
 extern void effBlurResetScaleSlot(EffBlurScaleWork *work, EffBlurScaleSlot *slot);
 
@@ -54,7 +54,7 @@ EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *src) {
     memcpy(work, src, 0x2C);
     work->allocation = allocation;
     work->slots = (EffBlurScaleSlot *)(work + 1);
-    work->sourceHandle = effGetResourceFirstWord(3);
+    work->sourceHandle = (u32)effGetBillResourceTexture(3);
     slot = work->slots;
     while (i < count) {
         effBlurResetScaleSlot(work, slot);
