@@ -10206,10 +10206,10 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     if (args->state == 0) {
         func_003014F0(path, D_003A4B98, stage, stage, variant);
         result = 0;
-        args->frontHandle = fileQueueDefaultCallbackRequest(path);
+        args->frontHandle = (s32)fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A4BB8, path);
         func_003014F0(path, D_003A4BC8, stage, stage, variant);
-        args->sideHandle = fileQueueDefaultCallbackRequest(path);
+        args->sideHandle = (s32)fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A4BE8, path);
     } else {
         if (args->frontHandle != 0) {
@@ -11946,7 +11946,7 @@ void sndLoadMotSeFiles(u32 *sound) {
             } else {
                 func_003014F0(filename, D_003A5198, D_003A5188, sound[2]);
             }
-            *(u32 *)(handleTable + offset) = fileQueueDefaultCallbackRequest(filename);
+            *(u32 *)(handleTable + offset) = (u32)fileQueueDefaultCallbackRequest(filename);
             btlBossDebugPrintf(D_003A51A8, slot, sound, filename);
         }
         slot++;
@@ -12348,7 +12348,7 @@ s32 sndPollAtrac3SELoadTask(BattleVoiceLoad *args) {
 
     if (args->state == 0) {
         func_003014F0(path, D_003A5328, D_00377650[args->index].fileName);
-        args->request = fileQueueDefaultCallbackRequest(path);
+        args->request = (u32)fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A5340, path);
     } else if (fileIsRequestReadyInCurrentMode((struct FileRequest *)args->request) != 0) {
         if (mnuGetSoundBufferStateLocked() != 0) {
@@ -12356,7 +12356,7 @@ s32 sndPollAtrac3SELoadTask(BattleVoiceLoad *args) {
         }
         resource = fileGetResourceHandle((struct FileWork *)args->request);
         data = (u32)sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
-        size = fileGetResourceSize(args->request);
+        size = fileGetResourceSize((struct FileWork *)(u32)args->request);
         filePollEntryCleanup((struct FileCleanup *)args->request);
         func_0026ABA8(data, size, D_00377650[args->index].volume);
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
@@ -12411,7 +12411,7 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
         } else {
             func_003014F0(path, D_003A5198, D_003A5188, unit->partyRecord.unitId);
         }
-        args->request = fileQueueDefaultCallbackRequest(path);
+        args->request = (u32)fileQueueDefaultCallbackRequest(path);
         btlBossDebugPrintf(D_003A5370, path);
     }
     ++*(u16 *)(work + 0x260);

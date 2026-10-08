@@ -213,7 +213,7 @@ extern char D_003D8090[];
 void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
     s32 eventId;
     s32 directoryId;
-    void *request;
+    struct FileRequest *request;
 
     func_003003F0(D_003BC370);
     eventId = state->eventId;

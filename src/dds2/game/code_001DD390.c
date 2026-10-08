@@ -11092,7 +11092,7 @@ void sndLoadMotSeFiles(u32 *sound) {
             } else {
                 func_0035C860(filename, D_00419318, D_00419308, sound[2]);
             }
-            *(u32 *)(handleTable + offset) = fileQueueDefaultCallbackRequest(filename);
+            *(u32 *)(handleTable + offset) = (u32)fileQueueDefaultCallbackRequest(filename);
             btlBossDebugPrintf("btl:motSE file load start[%d][%p][%s]\n", slot, sound, filename);
         }
         slot++;
@@ -11482,7 +11482,7 @@ s32 sndPollAtrac3SELoadTask(BtlAt3LoadArgs *args) {
         }
         resource = fileGetResourceHandle((struct FileWork *)args->loadHandle);
         data = sdfResourceRetainAddress((struct SdfMemBlock *)(resource));
-        size = fileGetResourceSize(args->loadHandle);
+        size = fileGetResourceSize((struct FileWork *)(u32)args->loadHandle);
         filePollEntryCleanup((struct FileCleanup *)args->loadHandle);
         func_002A27A8(data, size, D_003E0F60[args->index].volume);
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));

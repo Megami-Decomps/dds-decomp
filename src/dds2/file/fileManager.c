@@ -178,7 +178,7 @@ void fileUnlinkNode(FileWork *list, FileNode *node) {
 /* Clear a PAC request, initialize its embedded dispatch packet and optionally
  * apply extra packet setup for any nonzero flags. Queue its copied name and
  * completion context as kind one, returning the allocated work. No failure guard. */
-void *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue, s32 onComplete, s32 userData) {
+struct FileRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue, s32 onComplete, s32 userData) {
     u8 *requestWork;
     PacState *dispatchPacket;
 
@@ -191,11 +191,11 @@ void *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchVa
     }
     fileManQueueNamedRequest(requestWork, FILE_REQUEST_KIND_PAC, requestName,
                              (void *)onComplete, (void *)userData);
-    return requestWork;
+    return (struct FileRequest *)requestWork;
 }
 
 /* Queue PAC work without extra packet setup or completion context. */
-void *fileQueuePlainDispatchRequest(const char *requestName) {
+struct FileRequest *fileQueuePlainDispatchRequest(const char *requestName) {
     return fileCreatePacLoadWork(requestName, 0, 0, 0, 0);
 }
 
@@ -209,24 +209,24 @@ void fileQueueFlaggedDispatchRequest(const char *requestName) {
 /* Clear kind-zero request work and narrow callbackMode into byte three.
  * callbackAddress is the queue callback; userData is its context, not another
  * callback. Keep the raw byte store and existing provider parameter types. */
-void *fileCreateCallbackRequest(const char *requestName, s32 callbackMode, s32 callbackAddress, s32 userData) {
+struct FileRequest *fileCreateCallbackRequest(const char *requestName, s32 callbackMode, s32 callbackAddress, s32 userData) {
     u8 *requestWork;
 
     func_0035B6E0("file load %s\n", requestName);
     requestWork = sdfAllocAndClearQuadwords(FILE_CALLBACK_REQUEST_BYTES);
     requestWork[3] = callbackMode;
-    fileManQueueNamedRequest(requestWork, FILE_REQUEST_KIND_CALLBACK, requestName,
+    fileManQueueNamedRequest((FileQueueEntry *)requestWork, FILE_REQUEST_KIND_CALLBACK, requestName,
                              (void *)callbackAddress, (void *)userData);
-    return requestWork;
+    return (struct FileRequest *)requestWork;
 }
 
 /* Queue a callback-kind request with mode zero and no callback/context. */
-void *fileQueueDefaultCallbackRequest(const char *requestName) {
+struct FileRequest *fileQueueDefaultCallbackRequest(const char *requestName) {
     return fileCreateCallbackRequest(requestName, 0, 0, 0);
 }
 
 /* Queue a callback-kind request with mode one and no callback/context. */
-void *fileQueueAlternateCallbackRequest(const char *requestName) {
+struct FileRequest *fileQueueAlternateCallbackRequest(const char *requestName) {
     return fileCreateCallbackRequest(requestName, 1, 0, 0);
 }
 
