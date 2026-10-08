@@ -4393,6 +4393,7 @@
 0x002B0B90	mnuPartySlotConfirmClearUpdate	inferred	After popup completion clears selected party values, starts display entry and rebuilds slot panels. [names_reviewed5.tsv]
 0x002B0CB0	mnuAdvancePartyClearPopup	inferred	medium confidence; src/dds2/game/code_002B0278.c func_002B0CB0: Prepares the page and runs popup advance mode for the sequence following party-slot clear confirmation. [names_reviewed25.tsv]
 0x002B0D00	mnuFinishPartyClearPopup	inferred	medium confidence; src/dds2/game/code_002B0278.c func_002B0D00: Performs shared menu cleanup and runs popup completion mode for the sequence following party-slot clear confirmation. [names_reviewed25.tsv]
+0x002B0FA0	mnuCreatePartySelectionWindow	inferred	Creates the party-selection window and occupied-member list, then retains the primary window
 0x002B1150	mnuDestroyPartySelectionWindow	inferred	Destroys party selection window stored in menu work; twin 0x00274EE0. [names_R_FuncNames5.tsv]
 0x002B1178	mnuCopyPartyEntries	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x002B12B0	mnuAssignSelectedPartyEntry	inferred	U1

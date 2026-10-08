@@ -4675,6 +4675,7 @@
 0x00274978	mnuDrawStaffPartyValuePage	inferred	U1
 0x00274B30	mnuExitStaffValuePage	inferred	R_Names31 B91
 0x00274BA8	mnuIsFinalItemIndex	inferred	Tests whether an item index has reached the last index given the count at offset 0x20.
+0x00274D48	mnuCreatePartySelectionWindow	inferred	Creates the party-selection window and occupied-member list, then retains the primary window
 0x00274EE0	mnuDestroyPartySelectionWindow	inferred	Destroys party selection window stored in menu work; twin 0x002B1150. [names_R_FuncNames5.tsv]
 0x00274F00	mnuCopyPartyEntries	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x00275328	mnuRestorePartyEntriesAndRefresh	inferred	Closes flagged current party entries, restores five backed-up entries and refreshes party panels.
