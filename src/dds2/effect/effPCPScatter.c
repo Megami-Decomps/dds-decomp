@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_append.h"
 #include "sdf_resource.h"
 
 #include "pcp_vu0.h"
@@ -377,8 +378,6 @@ extern SdfPoolNode *D_003B14B0[];
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
 extern void sdfAppendPacket(SdfListHead *, u32);
-extern void sdfConsAppendVuPacket(s32, s32 (*)(s32));
-extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
 extern void func_003332E8(u32, u32);
 extern s32 func_00167A10(EffPacketParams *);
 
@@ -1223,14 +1222,14 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
     matrix[13] = pool->origin[1];
     matrix[14] = pool->origin[2];
     VU0_LOAD_MATRIX(matrix);
-    sdfConsAppendVuPacket((s32)packet, 0);
+    sdfConsAppendVuPacket(packet, 0);
     if (pool->sharedResource != NULL) {
         func_003332E8(pool->drawAsset, (u32)pool->sharedResource->textureHandle);
         D_00452020->texcoords = D_003B13F0;
     } else {
         D_00452020->texcoords = NULL;
     }
-    sdfConsAppendAssetPacket((s32)packet, (void *)pool->drawAsset, 0);
+    sdfConsAppendAssetPacket(packet, (void *)pool->drawAsset, 0);
     remainingVertices = pool->secondWordCount;
     D_00452020->colors = (u32 *)pool->auxRecordBase;
     D_00452020->positions = (u128 *)pool->recordBase;
