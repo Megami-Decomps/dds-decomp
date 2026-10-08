@@ -609,22 +609,22 @@ typedef struct {
     f32 baseFirst;
     f32 baseSecond;
     ParSystem *system;
-    u32 handle;
+    struct SdfMemBlock *allocation;
 } ParamThunderWork;
 
 /* Allocate the copied head and its trailing cells as one block, then create
  * the cell system with native arguments groupDivisor=0 and kind=4.
  * Only three words per cell are zeroed here; vector/range storage is untouched. */
 ParamThunderWork *effCreateThunderCellSystemWork(ParamThunderHead *source) {
-    u32 allocationHandle = (u32)sdfAllocGeneralBlock(source->count * sizeof(ParamThunderCell) + sizeof(ParamThunderWork));
-    ParamThunderWork *work = (ParamThunderWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(source->count * sizeof(ParamThunderCell) + sizeof(ParamThunderWork));
+    ParamThunderWork *work = (ParamThunderWork *)sdfResourceRetainAddress(allocation);
     u32 cellIndex;
 
     work->head = *source;
     work->cells = (ParamThunderCell *)(work + 1);
     work->baseFirst = source->scaledFirst;
     work->baseSecond = source->scaledSecond;
-    work->handle = allocationHandle;
+    work->allocation = allocation;
     work->system = parAllocateCellSystem(work->head.count, work->head.perCell, 0, PAR_CELL_TOPOLOGY_FIVE_VECTOR);
     parRiseFallSymmetricCellAlpha(work->system, work->head.firstDispatchArg, work->head.secondDispatchArg, work->head.thirdDispatchArg);
     parSetCellDrawBucket(work->system, work->head.systemParam);

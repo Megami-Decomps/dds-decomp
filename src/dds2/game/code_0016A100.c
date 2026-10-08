@@ -125,7 +125,7 @@ typedef struct {
     f32 baseFirst;      /* 0x54 */
     f32 baseSecond;     /* 0x58 */
     ParSystem *system;  /* 0x5C: allocated cell system */
-    u32 handle;         /* 0x60 */
+    struct SdfMemBlock *allocation; /* 0x60: containing work allocation */
 } EffThunderWork4C; /* 0x64 */
 
 typedef struct EffBattleUnitColorCommand {
@@ -620,15 +620,15 @@ EffParamWork *effParamCreateFromTable(void *table, s32 index) {
  * the cell system with native arguments groupDivisor=0 and kind=4.
  * Only three words per cell are zeroed here; vector/range storage is untouched. */
 EffThunderWork4C *effCreateThunderCellSystemWork(EffThunderHead4C *source) {
-    u32 allocationHandle = (u32)sdfAllocGeneralBlock(source->count * sizeof(EffThunderCell2C) + sizeof(EffThunderWork4C));
-    EffThunderWork4C *work = (EffThunderWork4C *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(source->count * sizeof(EffThunderCell2C) + sizeof(EffThunderWork4C));
+    EffThunderWork4C *work = (EffThunderWork4C *)sdfResourceRetainAddress(allocation);
     u32 cellIndex;
 
     work->head = *source;
     work->cells = (EffThunderCell2C *)(work + 1);
     work->baseFirst = source->scaledFirst;
     work->baseSecond = source->scaledSecond;
-    work->handle = allocationHandle;
+    work->allocation = allocation;
     work->system = parAllocateCellSystem(work->head.count, work->head.perCell, 0, PAR_CELL_TOPOLOGY_FIVE_VECTOR);
     parRiseFallSymmetricCellAlpha(work->system, work->head.firstDispatchArg, work->head.secondDispatchArg, work->head.thirdDispatchArg);
     parSetCellDrawBucket(work->system, work->head.systemParam);
