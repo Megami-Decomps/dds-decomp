@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
 #include "eff_anim.h"
@@ -376,7 +377,6 @@ void effMarkFloorModelForUpdate(u8 *work) {
     }
 }
 
-extern void *sdfAllocAndClearQuadwords(u32);
 
 
 void effFloorModelListPush(EffModelOwner *obj) {

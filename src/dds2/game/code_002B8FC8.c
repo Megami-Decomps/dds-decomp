@@ -1,3 +1,4 @@
+#include "sdf_chip.h"
 #include "mnu_input.h"
 #include "kwln.h"
 #include "mnu_list.h"
@@ -76,7 +77,6 @@ typedef struct MenuList MenuList;
 typedef struct MenuIconState MenuIconState;
 
 
-extern void *sdfAllocAndClearQuadwords(s32);
 extern void *sdfAllocSizeClassBlock(s32);
 extern s32 mdlFlagTest(s32);
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
@@ -1554,7 +1554,6 @@ void mnuAllocateListEntries(s32 *list) {
     }
 }
 
-extern void sdfReleaseChipBlock();
 
 /* Free the four record blocks, not their nested window pointers. */
 void mnuFreeListEntries(s32 *list) {
@@ -1965,7 +1964,6 @@ void *func_002BBA38(s32 kind, s32 mainResource, s32 itemResource,
 
 
 
-extern void sdfReleaseChipBlock();
 
 
 void mnuFreeIconSprites(MenuSprites *menu) {

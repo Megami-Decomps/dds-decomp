@@ -1,5 +1,6 @@
 #include "kwln.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_projection.h"
@@ -17,8 +18,6 @@
 #include "kwln_task_lifecycle.h"
 
 
-extern void sdfReleaseChipBlock();
-extern void *sdfAllocAndClearQuadwords(s32 size);
 
 extern s32 D_003C88C0[];
 
@@ -330,8 +329,8 @@ void mdlLoadViewerPackage(s32 first, s32 second, s32 flags, s32 requestFirst, s3
     func_00346AF8(&request);
 }
 
-void func_00233700(void) {
-    sdfReleaseChipBlock();
+void func_00233700(void *memory) {
+    sdfReleaseChipBlock(memory);
 }
 
 /* Three separately allocated resources per slot; their roles are not yet known. */
@@ -368,9 +367,9 @@ void mdlReleaseViewerSlotResources(void) {
         entryIndex = 0;
         do {
             entryIndex++;
-            sdfReleaseChipBlock(slotEntry->secondHandle);
-            sdfReleaseChipBlock(slotEntry->firstHandle);
-            sdfReleaseChipBlock(slotEntry->thirdHandle);
+            sdfReleaseChipBlock((void *)slotEntry->secondHandle);
+            sdfReleaseChipBlock((void *)slotEntry->firstHandle);
+            sdfReleaseChipBlock((void *)slotEntry->thirdHandle);
             slotEntry++;
         } while (entryIndex < entryCount);
     }

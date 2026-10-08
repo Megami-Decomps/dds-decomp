@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "btl_task_condition.h"
 #include "eff_transform.h"
 #include "btl_state.h"
@@ -70,9 +71,7 @@ typedef struct AiSpecies {
 
 extern AiSpecies *datEnemyAiRecords;
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
-extern void sdfReleaseChipBlock(void *);
 
 extern s32 btlRunAiAction();
 

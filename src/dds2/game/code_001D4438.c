@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "kwln.h"
 #include "btl_task_condition.h"
 #include "dat_command.h"
@@ -229,7 +230,6 @@ extern void func_001CC438();
 
 
 extern char *D_004367CC;
-extern void *sdfAllocAndClearQuadwords(s32);
 
 
 extern char *D_004368B0;

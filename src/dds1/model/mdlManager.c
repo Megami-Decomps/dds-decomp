@@ -1,5 +1,6 @@
 #include "ee_mmi.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
@@ -884,7 +885,6 @@ void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *requestOwner, MdlDoneJob *compl
     }
 }
 
-extern void *sdfAllocAndClearQuadwords();
 extern void *fileAllocateDispatchRequest();
 extern void func_00288C50();
 extern void mdlCompleteGroupedJobAndNotify();

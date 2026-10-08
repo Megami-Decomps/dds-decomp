@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 
@@ -78,11 +79,9 @@ typedef struct PacState {
 
 PacWork *sdfPacEnqueuePacket(PacState *state, PacHead *packet);
 
-void *sdfAllocAndClearQuadwords(s32 size);
 
 extern void *memcpy(void *dst, const void *src, u32 n);
 
-void sdfReleaseChipBlock(void *allocation);
 
 void sdfPacStartRegularPacket(PacState *state, PacHead *packet);
 

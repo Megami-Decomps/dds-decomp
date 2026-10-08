@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
@@ -4962,7 +4963,6 @@ s32 btlCountFlaggedSceneActors(void) {
 }
 
 
-extern void *sdfAllocAndClearQuadwords(s32);
 extern s16 btlGetActorIdForClass(s8);
 extern void btlGetActorClassPair(s8, u32 *, u32 *);
 
@@ -6010,7 +6010,6 @@ extern const BattlePanelColors D_004165C0;
 extern s32 itfMesMeasureEntryItem(s32, s32, s32);
 extern void itfMesBlk24MoveTo(s32, s32, s32);
 
-extern void *sdfAllocAndClearQuadwords(s32);
 extern s32 btlDrawTimedDialogTask(KwlnTask *task);
 extern void btlReleaseDialogTaskData(KwlnTask *task);
 extern s32 btlGetTrackedTaskHandle(s32);
@@ -6379,7 +6378,6 @@ extern s32 func_001BBA80(KwlnTask *task);
 
 extern void btlReleaseRegisteredChildTaskWork(KwlnTask *task);
 
-extern void *sdfAllocAndClearQuadwords(s32);
 
 void btlStartRegisteredChildTask(void) {
     BattleController *work = (BattleController *)btlGetRuntime();
@@ -6695,8 +6693,8 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004164C8);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BD6E8);
 
 void btlReleaseBattleScratchBlocks(void) {
-    sdfReleaseChipBlock(D_00438F4C);
-    sdfReleaseChipBlock(D_00438F50);
+    sdfReleaseChipBlock((void *)D_00438F4C);
+    sdfReleaseChipBlock((void *)D_00438F50);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00416520);
@@ -6963,7 +6961,7 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BFB58);
 
 void btlReleaseRegisteredTaskBuffer(void) {
     btlGetRuntime();
-    sdfReleaseChipBlock(D_004367F8);
+    sdfReleaseChipBlock((void *)D_004367F8);
     D_004367F8 = 0;
     btlSetTrackedTaskHandle(4, 0);
 }

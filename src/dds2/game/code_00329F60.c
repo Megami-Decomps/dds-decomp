@@ -961,7 +961,6 @@ void sdfTexListInsert(SdfTex *texture) {
     sdfResourceListHead = texture;
 }
 
-extern void *sdfAllocAndClearQuadwords(s32 size);
 extern void sdfTexAllocatePaletteData(SdfTex *texture);
 extern void sdfTexCopyImageData(SdfTex *texture, void *source);
 extern void sdfTexCreateFirstPacket(SdfTex *texture);
