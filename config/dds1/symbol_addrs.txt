@@ -18,6 +18,8 @@ scrCommand_SCR_EXISTS = 0x0010EEA8; // type:func size:0x48
 effMiscQuatMultiplyVU = 0x002E7C20; // type:func size:0x2C
 effMiscNormalizeVU = 0x002E7C80; // type:func size:0x24
 effMiscRand = 0x002E8340; // type:func size:0x54
+// Saved DebugTimeGrph task handle.
+kwlnDebugGraphTask = 0x003BD6A8;
 // Names from tools/names.py (provenance: name_sources.txt)
 kwlnGetDrawBufferIndex = 0x00100518; // type:func
 kwlnTaskRemoveFromStateQueue = 0x001006E0; // type:func
@@ -64,6 +66,8 @@ kwlnPadStepLargeMotorLevel = 0x00104008; // type:func
 kwlnPadStartMotor = 0x00104068; // type:func
 kwlnPadResetMotorLevelsAndOutput = 0x00104130; // type:func
 kwlnInitMagicState = 0x00104268; // type:func
+kwlnDebugGraphUpdate = 0x00104290; // type:func
+kwlnDebugGraphTaskDestroy = 0x001045F8; // type:func
 kwlnDebugGraphSetEnabled = 0x00104600; // type:func
 kwlnDrawImageOutline = 0x00104678; // type:func
 kwlnTextureDrawPageCounter = 0x00104798; // type:func
@@ -7897,8 +7901,6 @@ func_001039E0 = 0x001039E0; // type:func
 func_00103B10 = 0x00103B10; // type:func
 func_00104168 = 0x00104168; // type:func
 func_00104260 = 0x00104260; // type:func
-func_00104290 = 0x00104290; // type:func
-func_001045F8 = 0x001045F8; // type:func
 func_00104810 = 0x00104810; // type:func
 func_00104A18 = 0x00104A18; // type:func
 func_00104B88 = 0x00104B88; // type:func
