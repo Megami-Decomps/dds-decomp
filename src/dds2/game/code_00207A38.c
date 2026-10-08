@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_ref_obj.h"
 #include "btl_task_condition.h"
 #include "sdf_resource.h"
 #include "btl_state.h"
@@ -85,7 +86,6 @@ extern s32 btlGetRuntime(void);
 
 extern u32 btlButtonIconTexture;
 
-extern u32 effCloneSharedReferenceWithValue(u32, u32);
 
 
 extern u16 scrReadIntParameter(u32);
@@ -1113,7 +1113,7 @@ void btlRetainButtonTexture(void) {
     u32 handle;
 
     state = (BtlState *)btlGetRuntime();
-    handle = effCloneSharedReferenceWithValue(btlButtonIconTexture, 0x10000);
+    handle = (u32)effCloneSharedReferenceWithValue((struct SdfTextureFileHeader *)btlButtonIconTexture, 0x10000);
     state->buttonTextureHandle = handle;
 }
 
@@ -1121,7 +1121,7 @@ void btlReleaseButtonTexture(void) {
     BtlState *state;
 
     state = (BtlState *)btlGetRuntime();
-    effReleaseSharedReference(state->buttonTextureHandle);
+    effReleaseSharedReference((RefObj *)state->buttonTextureHandle);
     state->buttonTextureHandle = 0;
 }
 

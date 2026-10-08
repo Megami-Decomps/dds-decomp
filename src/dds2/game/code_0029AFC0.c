@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_result.h"
@@ -51,7 +52,6 @@ s32 mnuCheckTableSums(DatPartyRecord *bytes, BrsSkillPackageWork *table) {
     return 1;
 }
 
-extern s32 mnuMapPadMaskToFlags(s32);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern char D_003D6490[];
 

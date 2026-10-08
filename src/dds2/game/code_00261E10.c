@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "common.h"
 #include "mnu.h"
 #include "dat_state.h"
@@ -93,7 +94,6 @@ extern u8 D_003CE690[];
 extern void mnuStorePendingMenuCommandValue(struct MenuList *, u32);
 
 extern void func_002958B0();
-extern s32 mnuMapPadMaskToFlags(s32);
 extern void func_002971E0(struct MenuList *, u32);
 extern void func_002B9808(MenuWindowContainer *);
 extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
@@ -648,7 +648,6 @@ s32 evtAdvanceStateStage(KwlnTask *task) {
     return 1;
 }
 
-extern s32 mnuMapPadMaskToFlags(s32);
 extern s32 mnuTickCommandWaitPhase(MenuTerminalContext *);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern u8 D_003CE594[];

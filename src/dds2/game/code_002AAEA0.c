@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_staff.h"
@@ -16,7 +17,6 @@ extern u8 D_003E7200[];
 
 extern u8 D_003E73F8[];
 
-extern u32 mnuMapPadMaskToFlags(s32);
 extern s32 func_002A9AB8(s32);
 extern void func_002B9808(MenuWindowContainer *);
 extern void mnuRetreatWindowListSelection(MenuWindowContainer *);

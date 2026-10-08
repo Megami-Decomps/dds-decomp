@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_staff.h"
@@ -244,7 +245,6 @@ s32 mnuStaffFreeDisplayResources(KwlnTask *task) {
     return 1;
 }
 
-extern s32 mnuMapPadMaskToFlags(s32);
 extern void mnuSetPopupEntry(s32, s32);
 extern void mnuSetPopupEntryFlagged(s32, s32);
 extern void func_0027C788(MenuWindowContainer *);
