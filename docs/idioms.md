@@ -4492,3 +4492,64 @@ callback draft still differs in frame/register/control-flow lifetime and
 remains assembly. All 17 actual `mnu_result.h` clients gate 596 match,
 0 differ with no context, rodata or undefined-symbol rows after resplit.
 
+
+## Effect constructors use the canonical world-node owner
+
+The effect constructors' retired `EffectObj` prefixes describe the same
+0x44-byte `EffWorldNode` returned by `dds3AppendWorldObjectNode`. Its identity
+is `key` at +04, its kind-7 payload is `EffectDependencyState` at +18,
+and its separately allocated vectors belong to `ObjectTransform` at +1C.
+Use those owners instead of prefix casts or local parameter projections.
+
+The constructor writes `kindTag` as a word at +0C, while effect providers
+read the kind byte at +0F. Their documented word/byte union preserves both
+real accesses. Replacing the byte member with `kindTag >> 24` still emits
+an `lbu`, but changes alias analysis and reorders four stores in
+`effObjBindValidatedOwner`; using the actual byte member restores the
+native source contract without a scheduling cast or control-flow reshape.
+
+
+## DDS2 stat gauge span is signed; pulse division is still unresolved
+
+The unit-private `MenuPanelItem.value10` at +10 is a signed pixel span.
+`func_002C2AE8` combines it with signed stat differences and uses retail
+`mult` followed by signed `div` at 2C2B3C/2C2B50, 2C2CEC/2C2D0C and
+2C2DB0/2C2DD0. Keep that primary field `s32`, not an unsigned owner plus
+a renderer-only signed view. Its existing word store and all 175 matched
+functions in `code_002BE628` are unchanged.
+
+The renderer is not thereby matched. Its pulse still has real hardware
+division by constant 64, while ordinary C cancels `phase * 256 / 64`
+during the first compiler pass. Division by 170 remains hardware division.
+The released complete owner-based attempt already checked signed math;
+there is no evidence for a dynamic divisor, fake qualifier or flag change.
+A real original inline may explain the late constant, but no such helper
+has been identified, so the body stays assembly.
+
+## DDS2 local-map loader retains a real subrecord and forwards task work
+
+`func_0030AC10` retains `LmapTaskState + 0x78` throughout the loader switch:
+file request at +00, PAC request at +04, signed phase/index at +08/+0A,
+and an unknown word at +0C. Keep this as the primary `LmapLoadState`, with
+the shared `FilePacRequest` owning the PAC queue rather than another view.
+
+`func_0030A8A8` forwards `kwlnTaskGetUserValue` in `$4` through the matched
+`func_0030ABF0` wrapper to the loader. Both receive `LmapTaskState *`;
+the wrapper compares the loader's actual `s32` result directly. The former
+void/no-argument declarations and `s64` comparison local were unnecessary.
+This contract correction does not match the loader body: its honest park
+still differs in phase-request flow and register/scheduling details.
+
+## Camp stock-window setup receives its actual menu owner
+
+DDS2 `00261B98` operates on `MenuTerminalContext`; its caller at
+`00262E98` transports the task's word-valued user data into that
+pointer interface. Keep the conversion at this real task boundary,
+not a wrong integer prototype on the setup method.
+
+The existing eight-byte `ShopItemPriceRecord` owns a flags byte at
+zero (native `00261C6C` masks its low two bits) and price at four.
+Completing its padding removes the need for another item-record view.
+The body remains parked: `+154..15C` still has a three-store schedule
+rotation, which does not justify store-order search.
+
