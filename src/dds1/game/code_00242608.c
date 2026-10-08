@@ -1017,7 +1017,7 @@ s32 mnuShopHasPendingFlag(ShopScene *unused) {
 
 extern void func_0025E820();
 
-MenuWindowContainer *func_002443F8(const void *unused, s32 count, ShopScene *settings) {
+MenuWindowContainer *mnuCreateShopListWindow(const void *unused, s32 count, ShopScene *settings) {
     MenuWindowContainer *window;
     MnuShopListContext *buffer;
     s32 i;
@@ -1040,7 +1040,7 @@ MenuWindowContainer *func_002443F8(const void *unused, s32 count, ShopScene *set
 
 
 void func_002444D0(ShopScene *scene) {
-    scene->sprite = func_002443F8(D_00368C40, 3, scene);
+    scene->sprite = mnuCreateShopListWindow(D_00368C40, 3, scene);
 }
 
 typedef struct CampFlagRow {
