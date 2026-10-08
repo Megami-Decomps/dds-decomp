@@ -1,5 +1,6 @@
 #include "dsp_name.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "dat_state.h"
 #include "mnu_scene.h"
 #include "mnu_profile_progress.h"
@@ -552,7 +553,7 @@ DspListNode *mnuReleaseDisplayListNodeAndGetNext(DspListNode *node) {
     DspListNode *next;
 
     next = node->next;
-    sdfReleaseChipBlock();
+    sdfReleaseChipBlock(node);
     return next;
 }
 
