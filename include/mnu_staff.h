@@ -25,6 +25,8 @@ void mnuClearListFlags(s32 which, MenuPageWindow *page);
 
 #ifdef VERSION_DDS2
 struct MenuPanelState;
+/* Initialize the camp menu after its task-owned effect handles are ready. */
+s32 mnuInitializeCampMenuWhenResourcesReady(struct KwlnTask *task);
 
 /* Native staff components: page 0x284, party 0xA928 and fade 0xB10C. */
 void mnuInitializeWindowFadeState(MenuFadeFields *fade);

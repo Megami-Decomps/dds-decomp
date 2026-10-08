@@ -15,7 +15,6 @@
 #define EFF_PARAM_KIND_WORD_OFFSET 0x18
 #define EFF_VIEWER_RESOURCE_GROUP 7
 #define EFF_VIEWER_LOAD_FLAGS 0x101
-#define EFF_CELL_SYSTEM_KIND 4
 
 /* Native 0x28-byte operation row, indexed by effect kind.
  * The scale operation takes a float in addition to its payload.
@@ -641,7 +640,7 @@ ParamThunderWork *effCreateThunderCellSystemWork(ParamThunderHead *source) {
     work->baseFirst = source->scaledFirst;
     work->baseSecond = source->scaledSecond;
     work->handle = allocationHandle;
-    work->system = parAllocateCellSystem(work->head.count, work->head.perCell, 0, EFF_CELL_SYSTEM_KIND);
+    work->system = parAllocateCellSystem(work->head.count, work->head.perCell, 0, PAR_CELL_TOPOLOGY_FIVE_VECTOR);
     parRiseFallSymmetricCellAlpha(work->system, work->head.firstDispatchArg, work->head.secondDispatchArg, work->head.thirdDispatchArg);
     func_0015D078(work->system, work->head.systemParam);
     for (cellIndex = 0; cellIndex < work->head.count; cellIndex++) {
