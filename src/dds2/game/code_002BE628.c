@@ -70,7 +70,7 @@ extern s32 func_002B8E30();
 extern s32 mnuScrollListToEnd();
 extern void mnuClearWindowPanelTransitionFlag();
 extern void func_002BE730();
-extern void func_002BED10();
+extern void func_002BED10(MenuQueuedCommand *entry);
 
 extern s32 mnuLookupRangeEntry(u16);
 
@@ -138,7 +138,8 @@ extern void mnuFreePanelItemWork(MenuPanelItem *);
 
 extern void sdfReleaseChipBlock(void *);
 
-extern u32 effMiscRand(s32);
+struct EffRandState;
+extern u32 effMiscRand(struct EffRandState *state);
 
 
 extern u16 D_003E78D8[];
@@ -230,7 +231,49 @@ void mnuSetPanelSlotValues(MenuPageWindow *menu, struct EffectSlotSet *value) {
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE730);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002BED10);
+/* Initialize both particle arrays for a queued menu command. */
+void func_002BED10(MenuQueuedCommand *entry) {
+    enum {
+        MOTION_ROWS = (s32)&((MenuQueuedCommand *)0)->motion,
+        POSITION_X = (s32)&((MenuQueuedCommand *)0)->positions[0].x - MOTION_ROWS,
+        POSITION_Y = (s32)&((MenuQueuedCommand *)0)->positions[0].y - MOTION_ROWS,
+        TARGET_X = (s32)&((MenuQueuedCommand *)0)->positions[0].targetX - MOTION_ROWS,
+        TARGET_Y = (s32)&((MenuQueuedCommand *)0)->positions[0].targetY - MOTION_ROWS
+    };
+    u8 *row = (u8 *)entry + MOTION_ROWS;
+    s32 index;
+
+    entry->unkC = 0x30;
+    entry->unk10 = 0x10;
+    entry->particleCount = 0x80;
+    entry->unk0 = 0;
+
+    index = 0;
+    do {
+        s32 x = (s32)(effMiscRand(0) & 0x3F) * 4;
+        s32 startY;
+        s32 endY;
+        s32 alpha;
+
+        if (entry->option == 0) {
+            startY = (s32)(effMiscRand(0) & 7) + 8;
+            endY = startY + (s32)(effMiscRand(0) & 0x1F) + 0x20;
+        } else {
+            startY = (s32)(effMiscRand(0) & 7) + 8;
+            endY = startY + (s32)(effMiscRand(0) & 0x1F) + 0x10;
+        }
+        alpha = (s32)(effMiscRand(0) & 0x7F) + 0x80;
+
+        /* Walk the complete allocation: each motion row has a paired position row. */
+        *(s32 *)(row + POSITION_X) = x * 16;
+        *(s32 *)(row + POSITION_Y) = -startY * 8;
+        *(s32 *)(row + TARGET_X) = x * 16;
+        *(s32 *)(row + TARGET_Y) = -endY * 8;
+        ((MenuCommandMotion *)row)->value = alpha;
+        row += sizeof(MenuCommandMotion);
+        index++;
+    } while (index < entry->particleCount);
+}
 
 void func_002BEE38(MenuQueuedCommand *entry) {
     entry->unkC = 0x18;
