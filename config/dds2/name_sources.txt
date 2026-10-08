@@ -1188,6 +1188,7 @@
 0x00171598	effCreateFragmentResources	inferred	Paired DDS1 factory allocates and initializes EffFragmentResources history buffers and SDF draw descriptors; constructors retain its result in slot->resources.
 0x00171798	effReleaseEffectResources	inferred	Releases the work's resource handle and frees its separately owned allocation.
 0x001717C8	effInitializeColorState	inferred	Sets the effect state to mode three, initializes its packed color to 0x80808080, and clears the additional word at offset 0xC.
+0x001717E8	effInitializeFragmentHistoryColors	inferred	Paired DDS1 helper maps four supplied gradient colors into the fragment history's three per-point color lanes with a rising alpha ramp.
 0x00171A68	effThunderDrawHistoryAndEndCap	inferred	L13
 0x00171CE0	effFlashRecordCreate	inferred	readability/matching review (QP16)
 0x00171E00	effFlashTrianglePulseSpawnFromTable	inferred	Takes parameter block zero from the supplied table for the triangular flash initializer. [names_reviewed5.tsv]

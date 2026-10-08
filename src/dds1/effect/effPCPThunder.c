@@ -2333,7 +2333,7 @@ typedef struct EffGroup {
 
 extern SoundMixer *func_00190100(SoundMixer *);
 extern EffFragmentResources *effCreateFragmentResources(s32, s32);
-extern void func_00169B90(EffFragmentResources *, u32 *);
+extern void effInitializeFragmentHistoryColors(EffFragmentResources *, u32 *);
 extern void *effEventCreate(SoundMixer *, u16, EffPCPEventPlace *);
 
 EffGroup *func_00167BF8(src, eventParams)
@@ -2386,7 +2386,7 @@ void *eventParams;
     place.color = 0x80808080;
     for (i = 0; i < count; i++, slot++) {
         slot->resources = effCreateFragmentResources(a, b);
-        func_00169B90(slot->resources, palette);
+        effInitializeFragmentHistoryColors(slot->resources, palette);
         slot->age = 0;
         slot->scale = 1.0f;
         slot->curve.pointIndex = 0;
@@ -2454,7 +2454,7 @@ EffGroup *func_00167EC0(EffGroup *src) {
     place.color = 0x80808080;
     for (i = 0; i < count; i++, slot++) {
         slot->resources = effCreateFragmentResources(a, b);
-        func_00169B90(slot->resources, palette);
+        effInitializeFragmentHistoryColors(slot->resources, palette);
         slot->age = 0;
         slot->scale = 1.0f;
         slot->curve.pointIndex = 0;
@@ -3040,7 +3040,7 @@ void effInitializeColorState(EffectColorState *state) {
 
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 
-void func_00169B90(EffFragmentResources *history, u32 *gradientColors) {
+void effInitializeFragmentHistoryColors(EffFragmentResources *history, u32 *gradientColors) {
     f32 t = 0.0f;
     u32 count = history->count / 3;
     u32 alphaCount = count >> 1;
