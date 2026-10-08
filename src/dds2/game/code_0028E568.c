@@ -3,6 +3,7 @@
 #include "mnu_list.h"
 
 struct MnuStatusResource;
+struct MantraDrawPool;
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
@@ -52,7 +53,7 @@ typedef struct MantraMenuWork {
     u8 pad998[0x14];
     u32 displaySprite;
     u8 pad9B0[0x10];
-    u32 drawPool;
+    struct MantraDrawPool *drawPool;
 } MantraMenuWork;
 
 typedef struct MenuSearchObject {
@@ -319,7 +320,7 @@ void mnuSelectMantraLimitLine(MenuSearchObject *object, u16 id) {
     evtPrintDeveloperConsoleMessage(
         "-----------------------LimitLineSetting!!!!!!!!![%x]\n", flags);
     if (flags != 0) {
-        mnuArmMantraLimitLineFlags(object->work.drawPool, flags);
+        mnuArmMantraLimitLineFlags((u32)object->work.drawPool, flags);
     }
 }
 
@@ -351,8 +352,8 @@ void func_0028F8A8(u8 *object) {
         }
     }
 
-    mnuQueueMantraLimitLineFlags(menu->work.drawPool, flags);
-    mnuSetMantraBackgroundSelection(menu->work.drawPool, flags);
+    mnuQueueMantraLimitLineFlags((u32)menu->work.drawPool, flags);
+    mnuSetMantraBackgroundSelection((u32)menu->work.drawPool, flags);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0028E568", D_004274B0);
