@@ -29,13 +29,6 @@ typedef struct EvtGroupRec {
 /* The name table and entry list have the same offsets in both games. */
 
 
-/* Bounds are reset from the currently observed value. */
-typedef struct EvtRange {
-    u8 pad00[0x10];
-    s32 min;
-    s32 max;
-    s32 value;
-} EvtRange;
 
 void evtUnlinkListNode(EvtRuntimeGroup *entry, EvtRuntimeChild *node);
 void sdfReleaseChipBlock(void *ptr);
@@ -293,23 +286,23 @@ void evtEventViewerDestroyEntry(EvtRuntimeGroup *entry, EvtRuntime *viewer) {
     sdfReleaseChipBlock(entry);
 }
 
-void evtViewerSetMinimumFromCurrent(EvtRange *range) {
+void evtViewerSetMinimumFromCurrent(EvtRuntime *range) {
     s32 current;
 
-    current = range->value;
-    range->min = current;
-    if (range->max < current) {
-        range->max = current;
+    current = range->curFrame;
+    range->headerFirst = current;
+    if (range->frameRange.word < current) {
+        range->frameRange.word = current;
     }
 }
 
-void evtViewerSetMaximumFromCurrent(EvtRange *range) {
+void evtViewerSetMaximumFromCurrent(EvtRuntime *range) {
     s32 current;
 
-    current = range->value;
-    range->max = current;
-    if (current < range->min) {
-        range->min = current;
+    current = range->curFrame;
+    range->frameRange.word = current;
+    if (current < range->headerFirst) {
+        range->headerFirst = current;
     }
 }
 
