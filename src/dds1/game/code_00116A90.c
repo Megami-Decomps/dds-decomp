@@ -97,7 +97,7 @@ typedef struct Dds3PathCurveTable {
 
 extern void *sdfAllocSizeClassBlock(s32 bytes);
 extern void *memset(void *destination, s32 value, u32 bytes);
-extern EffPrim *effCreatePrimitiveCurve(f32 *data, u32 count, s32 mode);
+extern EffPrimitiveCurve *effCreatePrimitiveCurve(f32 *data, u32 count, s32 mode);
 
 Dds3PathCurveWork *dds3CreatePathCurveWork(EffWorldNode *object) {
     Dds3PathCurveTable *table = object->data;

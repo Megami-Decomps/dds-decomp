@@ -1,6 +1,7 @@
 #include "mnu_input.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
+#include "eff_resource_list.h"
 #include "common.h"
 #include "fr_font.h"
 #include "itf_draw_grid.h"
@@ -25,7 +26,6 @@ extern u32 mnuGetValueRecordOwner(const EffectList *);
 
 extern s32 effAppendListEntry(EffectList *, u32, u32, u32, u32);
 extern s32 effPollResourceList(EffectList *);
-extern void func_002BC618(EffectList *);
 
 extern u32 D_0037C248[][2];
 
@@ -379,7 +379,7 @@ extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 
 /* Filter staff entries, size the window and preserve each entry's original ordinal. */
-MenuWindowContainer *func_00271B50(void *const *entries, s32 count, s32 width,
+MenuWindowContainer *mnuCreateFilteredStaffEntryWindow(void *const *entries, s32 count, s32 width,
                                      StaffMenuWork *work, const s32 *flagIds) {
     MenuWindowContainer *window;
     s32 visibleCount = 0;
@@ -465,11 +465,11 @@ MenuWindowContainer *func_00271B50(void *const *entries, s32 count, s32 width,
 void mnuCreateStaffPanelSet(StaffMenuWork *menu) {
     menu->resourceList = mnuCreatePanelSpriteHandles(
         0, (EffectSlotSet *)menu->staffSlots.baseResources[3], menu->secondaryImage);
-    menu->images[0] = (u32)func_00271B50(D_0037B950, 8, 0x300, menu, D_0037C388);
+    menu->images[0] = (u32)mnuCreateFilteredStaffEntryWindow(D_0037B950, 8, 0x300, menu, D_0037C388);
     mnuForwardDupArg(menu->images[0], menu->staffSlots.baseResources[5], 0, 0, 0);
-    menu->images[1] = (u32)func_00271B50(D_0037B970, 3, 0x2C0, menu, 0);
+    menu->images[1] = (u32)mnuCreateFilteredStaffEntryWindow(D_0037B970, 3, 0x2C0, menu, 0);
     mnuSetWindowFadeScale(menu->images[1], 0x100);
-    menu->images[2] = (u32)func_00271B50(D_0037B980, 2, 0x200, menu, 0);
+    menu->images[2] = (u32)mnuCreateFilteredStaffEntryWindow(D_0037B980, 2, 0x200, menu, 0);
     mnuSetWindowFadeScale(menu->images[2], 0x100);
 }
 
@@ -538,7 +538,7 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     mnuReleaseAssets(menu->background);
     mnuReleaseStaffResourceSlotGroups(menu);
     mnuReleaseStaffSpriteHandles(menu);
-    func_002BC618(menu->resourceQueue);
+    effDestroyEffectList(menu->resourceQueue);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(menu->resource));
     mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
     func_002E9730();

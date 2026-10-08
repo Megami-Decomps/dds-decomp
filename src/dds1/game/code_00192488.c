@@ -43,10 +43,10 @@ typedef struct EffChan {
 
 /* Interpolation output vector; the cubic path writes W while the linear path writes only XYZ. */
 typedef struct EffVert {
-    f32 unk0; /* 0x0 */
-    f32 unk4; /* 0x4 */
-    f32 unk8; /* 0x8 */
-    f32 unkC; /* 0xC */
+    f32 x; /* 0x0 */
+    f32 y; /* 0x4 */
+    f32 z; /* 0x8 */
+    f32 w; /* 0xC */
 } EffVert;
 
 /* Emitter handle for effFillRandRecords: target primitive at +0x8. */
@@ -56,14 +56,14 @@ typedef struct EffEmit {
 } EffEmit;
 
 typedef struct SdfMemBlock SdfMemBlock;
-extern void func_00192ED0(EffVert *arg0, EffPrim *arg1, s32 arg2, f32 arg3);
+extern void effSamplePrimitiveCurveVertex(EffVert *arg0, EffPrimitiveCurve *arg1, s32 arg2, f32 arg3);
 extern void effSampleChannelBezier(EffVert *arg0, EffChan *arg1, s32 arg2, f32 arg3);
 extern u32 effMiscRand(void *state);
 extern u8 D_0034DF38[];
 extern void effJitterChannelControlPoints(EffChanWork *arg0, u32 arg1);
-extern void func_001931E0(void *arg0, s32 arg1, u32 arg2);
-extern void func_001934E8(EffPrim *arg0, f32 *arg1);
-extern void func_001935B8(EffPrim *arg0, void *arg1);
+extern void effBuildPrimitiveCurveTangents(f32 *tangents, f32 *keys, u32 recordCount);
+extern void effBuildPrimitiveCurveCoefficients(EffPrimitiveCurve *arg0, f32 *arg1);
+extern void effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(EffPrimitiveCurve *primitive, f32 *tangents);
 
 typedef struct EffChanSourceOwner {
     u8 pad00[4];
@@ -336,35 +336,35 @@ void effFillRandRecords(EffEmit *emitter) {
     } while (recordIndex < recordCount);
 }
 
-extern void effBuildAndDispatch(EffPrim *, s32);
+extern void effBuildAndDispatch(EffPrimitiveCurve *, s32);
 
-EffPrim *effCreatePrimitiveCurve(f32 *keys, u32 recordCount, s32 flattenEqualComponents) {
+EffPrimitiveCurve *effCreatePrimitiveCurve(f32 *keys, u32 recordCount, s32 flattenEqualComponents) {
     SdfMemBlock *primaryResource = sdfAllocGeneralBlock(0x2C);
     f32 step = EFF_CHANNEL_DEFAULT_STEP;
-    EffPrim *primitive = (EffPrim *)sdfResourceRetainAddress(primaryResource);
+    EffPrimitiveCurve *primitive = (EffPrimitiveCurve *)sdfResourceRetainAddress(primaryResource);
     SdfMemBlock *coefficientResource;
     f32 (*coefficients)[EFF_CURVE_COMPONENT_COUNT];
 
-    primitive->primaryResource = primaryResource;
+    primitive->allocation = primaryResource;
     primitive->recordCount = recordCount;
-    primitive->unk10 = (s32)keys;
+    primitive->keys = keys;
     primitive->cursorIndex = 0;
     primitive->cursorPosition = 0.0f;
     primitive->cursorStep = step;
     if (recordCount < 3) {
-        primitive->unk14 = NULL;
-        primitive->unkC = 1;
+        primitive->cubicCoefficients = NULL;
+        primitive->interpolationMode = 1;
     } else {
         coefficientResource = sdfAllocGeneralBlock(recordCount * 36);
         coefficients = (f32 (*)[EFF_CURVE_COMPONENT_COUNT])sdfResourceRetainAddress(coefficientResource);
-        primitive->primaryResource = primaryResource;
-        primitive->secondaryResource = coefficientResource;
-        primitive->unkC = EFF_PRIMITIVE_CUBIC_MODE;
+        primitive->allocation = primaryResource;
+        primitive->coefficientAllocation = coefficientResource;
+        primitive->interpolationMode = EFF_PRIMITIVE_CUBIC_MODE;
         primitive->recordCount = recordCount;
-        primitive->unk10 = (s32)keys;
-        primitive->unk14 = coefficients;
-        primitive->unk18 = coefficients + recordCount;
-        primitive->unk1C = coefficients + recordCount * 2;
+        primitive->keys = keys;
+        primitive->cubicCoefficients = (f32 *)coefficients;
+        primitive->quadraticCoefficients = (f32 *)(coefficients + recordCount);
+        primitive->linearCoefficients = (f32 *)(coefficients + recordCount * 2);
         primitive->cursorIndex = 0;
         primitive->cursorPosition = 0.0f;
         primitive->cursorStep = step;
@@ -374,22 +374,22 @@ EffPrim *effCreatePrimitiveCurve(f32 *keys, u32 recordCount, s32 flattenEqualCom
 }
 
 /* Release the optional coefficient allocation, then the primary buffer; do not free or clear the object. */
-void effFreeBuffers(EffPrim *primitive) {
+void effFreeBuffers(EffPrimitiveCurve *primitive) {
     if (primitive != NULL) {
-        if (primitive->unk14 != NULL) {
-            sdfReleaseResourceAllocation(primitive->secondaryResource);
+        if (primitive->cubicCoefficients != NULL) {
+            sdfReleaseResourceAllocation(primitive->coefficientAllocation);
         }
-        sdfReleaseResourceAllocation(primitive->primaryResource);
+        sdfReleaseResourceAllocation(primitive->allocation);
     }
 }
 
 /* Sample before stepping. Wrap at >1 only, subtract once, and return zero when the record cursor resets. */
-s32 effAdvancePrimCursor(void *vertex, EffPrim *primitive) {
+s32 effAdvancePrimCursor(void *vertex, EffPrimitiveCurve *primitive) {
     s32 continuing = 1;
     f32 position = primitive->cursorPosition;
     u32 recordIndex = primitive->cursorIndex;
 
-    func_00192ED0(vertex, primitive, recordIndex, position);
+    effSamplePrimitiveCurveVertex(vertex, primitive, recordIndex, position);
     position += primitive->cursorStep;
     if (position > 1.0f) {
         position -= 1.0f;
@@ -407,33 +407,33 @@ s32 effAdvancePrimCursor(void *vertex, EffPrim *primitive) {
 
 /* Evaluate packed XYZ cubic coefficients or adjacent linear keys at t.
  * a/b serve as coefficients or endpoints; only the cubic path writes output W. */
-void func_00192ED0(EffVert *vertex, EffPrim *primitive, s32 recordIndex, f32 t) {
+void effSamplePrimitiveCurveVertex(EffVert *vertex, EffPrimitiveCurve *primitive, s32 recordIndex, f32 t) {
     f32 *a;
     f32 *b;
     f32 *c;
     f32 *d;
 
-    if (primitive->unkC == EFF_PRIMITIVE_CUBIC_MODE) {
-        a = (f32 *)primitive->unk14 + recordIndex * EFF_CURVE_COMPONENT_COUNT;
-        b = (f32 *)primitive->unk18 + recordIndex * EFF_CURVE_COMPONENT_COUNT;
-        c = (f32 *)primitive->unk1C + recordIndex * EFF_CURVE_COMPONENT_COUNT;
-        d = (f32 *)primitive->unk10 + recordIndex * EFF_CURVE_COMPONENT_COUNT;
-        vertex->unk0 = ((a[0] * t + b[0]) * t + c[0]) * t + d[0];
-        vertex->unk4 = ((a[1] * t + b[1]) * t + c[1]) * t + d[1];
-        vertex->unk8 = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
-        vertex->unkC = 1.0f;
+    if (primitive->interpolationMode == EFF_PRIMITIVE_CUBIC_MODE) {
+        a = primitive->cubicCoefficients + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        b = primitive->quadraticCoefficients + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        c = primitive->linearCoefficients + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        d = primitive->keys + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        vertex->x = ((a[0] * t + b[0]) * t + c[0]) * t + d[0];
+        vertex->y = ((a[1] * t + b[1]) * t + c[1]) * t + d[1];
+        vertex->z = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
+        vertex->w = 1.0f;
     } else {
-        a = (f32 *)primitive->unk10 + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        a = primitive->keys + recordIndex * EFF_CURVE_COMPONENT_COUNT;
         b = a + EFF_CURVE_COMPONENT_COUNT;
-        vertex->unk0 = a[0] + (b[0] - a[0]) * t;
-        vertex->unk4 = a[1] + (b[1] - a[1]) * t;
-        vertex->unk8 = a[2] + (b[2] - a[2]) * t;
+        vertex->x = a[0] + (b[0] - a[0]) * t;
+        vertex->y = a[1] + (b[1] - a[1]) * t;
+        vertex->z = a[2] + (b[2] - a[2]) * t;
     }
 }
 
 /* Evaluate packed XYZ cubic coefficients or adjacent linear keys into vf10.
  * The linear path leaves local W untouched before the native full-vector load. */
-void effSamplePrimitiveCurve(EffPrim *primitive, s32 recordIndex, f32 t)
+void effSamplePrimitiveCurve(EffPrimitiveCurve *primitive, s32 recordIndex, f32 t)
 {
     f32 vertex[4];
     f32 *a;
@@ -441,17 +441,17 @@ void effSamplePrimitiveCurve(EffPrim *primitive, s32 recordIndex, f32 t)
     f32 *c;
     f32 *d;
 
-    if (primitive->unkC == EFF_PRIMITIVE_CUBIC_MODE) {
-        a = (f32 *)primitive->unk14 + recordIndex * EFF_CURVE_COMPONENT_COUNT;
-        b = (f32 *)primitive->unk18 + recordIndex * EFF_CURVE_COMPONENT_COUNT;
-        c = (f32 *)primitive->unk1C + recordIndex * EFF_CURVE_COMPONENT_COUNT;
-        d = (f32 *)primitive->unk10 + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+    if (primitive->interpolationMode == EFF_PRIMITIVE_CUBIC_MODE) {
+        a = primitive->cubicCoefficients + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        b = primitive->quadraticCoefficients + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        c = primitive->linearCoefficients + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        d = primitive->keys + recordIndex * EFF_CURVE_COMPONENT_COUNT;
         vertex[0] = ((a[0] * t + b[0]) * t + c[0]) * t + d[0];
         vertex[1] = ((a[1] * t + b[1]) * t + c[1]) * t + d[1];
         vertex[2] = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
         vertex[3] = 1.0f;
     } else {
-        a = (f32 *)primitive->unk10 + recordIndex * EFF_CURVE_COMPONENT_COUNT;
+        a = primitive->keys + recordIndex * EFF_CURVE_COMPONENT_COUNT;
         b = a + EFF_CURVE_COMPONENT_COUNT;
         vertex[0] = a[0] + (b[0] - a[0]) * t;
         vertex[1] = a[1] + (b[1] - a[1]) * t;
@@ -461,32 +461,32 @@ void effSamplePrimitiveCurve(EffPrim *primitive, s32 recordIndex, f32 t)
 }
 
 /* Reset the primitive's record index and within-record position without changing its step. */
-void effResetPrimitiveRecordCursor(EffPrim *primitive) {
+void effResetPrimitiveRecordCursor(EffPrimitiveCurve *primitive) {
     primitive->cursorIndex = 0;
     primitive->cursorPosition = 0;
 }
 
 /* Set the per-call cursor increment; sampling and wrapping are performed by the advance routine. */
-void effSetPrimitiveRecordCursorStep(EffPrim *primitive, f32 step) {
+void effSetPrimitiveRecordCursorStep(EffPrimitiveCurve *primitive, f32 step) {
     primitive->cursorStep = step;
 }
 
 /* Build temporary coordinate-major tangents, select a coefficient policy, then release the temporary buffer. */
-void effBuildAndDispatch(EffPrim *primitive, s32 flattenEqualComponents) {
-    void *allocation = sdfAllocGeneralBlock(primitive->recordCount * EFF_CURVE_POINT_BYTES);
-    void *tangentData = (void *)sdfResourceRetainAddress(allocation);
+void effBuildAndDispatch(EffPrimitiveCurve *primitive, s32 flattenEqualComponents) {
+    SdfMemBlock *allocation = sdfAllocGeneralBlock(primitive->recordCount * EFF_CURVE_POINT_BYTES);
+    f32 *tangentData = (f32 *)sdfResourceRetainAddress(allocation);
 
-    func_001931E0(tangentData, primitive->unk10, primitive->recordCount);
+    effBuildPrimitiveCurveTangents(tangentData, primitive->keys, primitive->recordCount);
     if (flattenEqualComponents == 0) {
-        func_001934E8(primitive, tangentData);
+        effBuildPrimitiveCurveCoefficients(primitive, tangentData);
     } else {
-        func_001935B8(primitive, tangentData);
+        effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(primitive, tangentData);
     }
     sdfReleaseResourceAllocation(allocation);
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00192488", func_001931E0);
+INCLUDE_ASM(const s32, "game/code_00192488", effBuildPrimitiveCurveTangents);
 
 /* Solve the cubic tangent system: endpoint diagonal 2, interior diagonal 4. */
 void effSolveCubicTangents(f32 *solution, f32 *rhs, s32 count) {
@@ -522,11 +522,11 @@ void effSolveCubicTangents(f32 *solution, f32 *rhs, s32 count) {
 }
 
 /* Build Hermite power-basis XYZ coefficients from interleaved points and coordinate-major tangents. */
-void func_001934E8(EffPrim *primitive, f32 *tangents) {
-    f32 *cubic = primitive->unk14;
-    f32 *quadratic = primitive->unk18;
-    f32 *linear = primitive->unk1C;
-    f32 *points = (f32 *)primitive->unk10;
+void effBuildPrimitiveCurveCoefficients(EffPrimitiveCurve *primitive, f32 *tangents) {
+    f32 *cubic = primitive->cubicCoefficients;
+    f32 *quadratic = primitive->quadraticCoefficients;
+    f32 *linear = primitive->linearCoefficients;
+    f32 *points = primitive->keys;
     s32 recordCount = primitive->recordCount;
     s32 segment;
     for (segment = 0; segment < recordCount - 1; segment++) {
@@ -546,12 +546,11 @@ void func_001934E8(EffPrim *primitive, f32 *tangents) {
 }
 
 /* Build Hermite coefficients, but flatten exactly equal endpoint components even when tangents are nonzero. */
-void func_001935B8(EffPrim *primitive, void *tangentData) {
-    f32 *tangents = tangentData;
-    f32 *cubic = primitive->unk14;
-    f32 *quadratic = primitive->unk18;
-    f32 *linear = primitive->unk1C;
-    f32 *points = (f32 *)primitive->unk10;
+void effBuildPrimitiveCurveCoefficientsFlatteningEqualComponents(EffPrimitiveCurve *primitive, f32 *tangents) {
+    f32 *cubic = primitive->cubicCoefficients;
+    f32 *quadratic = primitive->quadraticCoefficients;
+    f32 *linear = primitive->linearCoefficients;
+    f32 *points = primitive->keys;
     s32 recordCount = primitive->recordCount;
     s32 segment;
     s32 component;
@@ -643,10 +642,10 @@ void effSampleChannelBezier(EffVert *vertex, EffChan *channel, s32 recordIndex, 
     weights[1] = t * (oneMinusT * oneMinusT) * 3.0f;
     weights[2] = t * t * oneMinusT * 3.0f;
     weights[3] = t * t * t;
-    vertex->unk0 = p0[0] * weights[0] + p1[0] * weights[1] + p2[0] * weights[2] + p3[0] * weights[3];
-    vertex->unk4 = p0[1] * weights[0] + p1[1] * weights[1] + p2[1] * weights[2] + p3[1] * weights[3];
-    vertex->unk8 = p0[2] * weights[0] + p1[2] * weights[1] + p2[2] * weights[2] + p3[2] * weights[3];
-    vertex->unkC = 1.0f;
+    vertex->x = p0[0] * weights[0] + p1[0] * weights[1] + p2[0] * weights[2] + p3[0] * weights[3];
+    vertex->y = p0[1] * weights[0] + p1[1] * weights[1] + p2[1] * weights[2] + p3[1] * weights[3];
+    vertex->z = p0[2] * weights[0] + p1[2] * weights[1] + p2[2] * weights[2] + p3[2] * weights[3];
+    vertex->w = 1.0f;
 }
 
 /* Reset the channel's record index and within-record position without changing its step. */
