@@ -252,7 +252,7 @@ typedef struct MenuSpriteArguments {
 extern u32 mnuMapPadMaskToFlags(u32);
 extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern void sndSetSequenceVolumePan();
-extern s32 func_00276898(KwlnTask *);
+extern s32 mnuInitializeStaffPartyScene(KwlnTask *);
 extern void mnuSetPopupEntry();
 extern void mnuSetPopupEntryFlagged(s32, void *);
 extern void func_0027C788(s32);
@@ -905,7 +905,7 @@ s32 mnuStepStaffCampPageControl(s32 callback) {
 INCLUDE_ASM(const s32, "game/code_00274B80", func_00276720);
 
 
-s32 func_00276898(KwlnTask *task) {
+s32 mnuInitializeStaffPartyScene(KwlnTask *task) {
     CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(task);
     MenuPageWindow *page = &context->partyWindow;
     StaffMenuWork *menu = (StaffMenuWork *)context->menu;
@@ -1007,7 +1007,7 @@ s32 mnuStaffSwitchPartyPage(s32 requestArgument) {
     }
     mnuClearListFlagsOneAndTwo(&((CampMenuContext *)context)->partyWindow.lists[0]->stateFlags);
     if (pageChanged != 0) {
-        func_00276898((KwlnTask *)requestArgument);
+        mnuInitializeStaffPartyScene((KwlnTask *)requestArgument);
         sndSetSequenceVolumePan(4, 0x7F, 0x3F);
         menuWork->activeMark = 0;
         if (menuWork->staffMode == 1) {

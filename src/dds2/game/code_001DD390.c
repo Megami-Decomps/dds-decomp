@@ -6791,7 +6791,7 @@ void btlFlagUserAndTargetDefeat(BtlLinkedCommand *command, BtlLinkedCommand *unu
     }
 }
 
-extern f32 func_001ADBD0(ActionStateLink *);
+extern f32 btlGetActorStateScale(ActionStateLink *);
 extern f32 func_00353140(f32);
 extern f32 func_00353040(f32);
 
@@ -6819,7 +6819,7 @@ void btlBuildApproachCamera(BtlLinkedCommand *action, BtlCamState *out) {
     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
     extent = user->reach * user->scale;
     span = func_001E2E58(user, user->unkEC);
-    span /= func_001ADBD0(action->link);
+    span /= btlGetActorStateScale(action->link);
     ratio = (f32)action->state / span;
     if (ratio > 1.0f) {
         ratio = 1.0f;
@@ -6924,7 +6924,7 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
         return;
     }
     frames = func_001E2E58(user, user->unkEC);
-    frames = (s32)((f32)frames / func_001ADBD0(action->link));
+    frames = (s32)((f32)frames / btlGetActorStateScale(action->link));
     if (action->state == frames && (target->flags & 0x200)) {
         idle = btlHasIdleLinkedSlotKindTwo((u8 *)action);
         eligible = btlHasEligibleLinkedEntryTypeTwo((u8 *)action);
@@ -7155,7 +7155,7 @@ void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *action, BtlCamState *
     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
     extent = user->reach * user->scale;
     span = func_001E2E58(user, user->unkEC);
-    span /= func_001ADBD0(action->link);
+    span /= btlGetActorStateScale(action->link);
     ratio = (f32)action->state / span;
     if (ratio > 1.0f) {
         ratio = 1.0f;
@@ -8661,7 +8661,7 @@ void sndAddEffectReferences(SoundEffectReferenceArgs *args) {
 
 extern void effBattleSetInputValue(BattleEffect *, s32);
 
-s32 func_00201C98(SoundEffectReferenceArgs *args) {
+s32 sndUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *owner;
     BtlUnit *source;
@@ -8732,7 +8732,7 @@ void sndReleaseEffectReferences(SoundEffectReferenceArgs *args) {
     sndDeleteSystemEffect(effect);
 }
 
-extern s32 func_00201C98(SoundEffectReferenceArgs *);
+extern s32 sndUpdateReferencedBattleEffect(SoundEffectReferenceArgs *);
 
 BtlRuntimeTask *btlCreateReferencedSoundEffectTask(SoundResourceNode *effect, BtlUnit *source,
                                                  BtlUnit *actor, u16 frames) {
@@ -8749,7 +8749,7 @@ BtlRuntimeTask *btlCreateReferencedSoundEffectTask(SoundResourceNode *effect, Bt
     task->flags |= 2;
     task->ownerId = actor->owner;
     task->onStart = sndAddEffectReferences;
-    task->callback = func_00201C98;
+    task->callback = sndUpdateReferencedBattleEffect;
     task->onFinish = sndReleaseEffectReferences;
     work = (BtlState *)btlGetRuntime();
     if (work->unk6E4 != 0) {

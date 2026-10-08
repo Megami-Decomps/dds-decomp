@@ -5699,7 +5699,7 @@ void btlResetActionScale(void) {
 extern f32 D_003BF910[4] __attribute__((aligned(16)));
 extern f32 D_003BF920[4] __attribute__((aligned(16)));
 
-u64 func_00221568(u64 prerequisiteHandle) {
+u64 btlCreateLinkedActorTransformTasks(u64 prerequisiteHandle) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BattleLinkedEffectState *effect = &battle->effect->linked;
     BtlRuntimeTask *load;
@@ -5753,7 +5753,7 @@ u64 func_00221568(u64 prerequisiteHandle) {
 extern f32 *D_0037F770[];
 extern void evtSetUnitRgbTransition(struct EvtUnit *unit, s32 duration, u32 color);
 
-void func_00221760(void) {
+void btlRestoreLinkedActorSceneColor(void) {
     BattleEffectPayload *effect = ((BtlState *)btlGetRuntime())->effect;
     BtlUnit *actor;
     u32 packed[4];
