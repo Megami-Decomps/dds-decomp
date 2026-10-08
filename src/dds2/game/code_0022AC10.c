@@ -22,6 +22,7 @@
 #include "scr.h"
 #include "dat_state.h"
 #include "dat_command.h"
+#include "file_request_api.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 #define BTL_LIST_FLAG_MASK 0x7FFF
@@ -283,7 +284,6 @@ typedef struct BattleListEntry {
 
 extern s32 mdlRequestAsset(s32, s32, s32);
 
-extern s32 fileRequestIsReady(void *);
 
 extern void sdfBuildPacketE(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -1301,7 +1301,7 @@ s8 btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
     if (cacheEntry->packRequest == 0) {
         return 1;
     }
-    requestReady = fileRequestIsReady(cacheEntry->packRequest);
+    requestReady = fileRequestIsReady((struct FileRequest *)cacheEntry->packRequest);
     return requestReady;
 }
 
