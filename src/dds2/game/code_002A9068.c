@@ -49,6 +49,7 @@ extern void kwlnFadeOutStart(s8, s8, s8, s32);
 extern s32 dds3AdminReadPreviousSignedSample(void);
 
 extern struct EffectList *mnuAllocateValueRecord(u32);
+extern void func_00303D58(struct EffectList *list);
 
 
 extern void mnuLoadEffectResources(u8 *);
@@ -402,9 +403,9 @@ void mnuReleaseStaffCategoryTextureHandles(s32 category, u8 *menuBytes) {
 /* Camp work's drawing parameters; the intervening regions belong to the
  * resource lists and party-panel state initialized elsewhere in this unit. */
 typedef struct CampVisualWork {
-    u32 allocationHandle;  /* 0x0000 */
+    struct SdfMemBlock *allocationHandle;  /* 0x0000 */
     u8 pad04[0x58];
-    u32 menuResource;      /* 0x005C */
+    struct EffectList *menuResource;      /* 0x005C */
     s32 drawContext;        /* 0x0060 */
     s32 titleContext;       /* 0x0064 */
     u8 pad68[0x98];
@@ -799,22 +800,22 @@ void mnuBuildSkillSlotTable(ListSlotWork *work) {
 /* Allocate and clear menu work, select its image-table owner word from the
  * previous sample, then initialize the owned UI and resource state. */
 u8 *mnuCreateStaffMenuWork(void) {
-    s32 allocation;
+    struct SdfMemBlock *allocation;
     u8 *menuBytes;
     u8 *effectBytes;
 
-    allocation = (u32)sdfAllocGeneralBlock(MNU_STAFF_WORK_BYTES);
-    menuBytes = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
+    allocation = sdfAllocGeneralBlock(MNU_STAFF_WORK_BYTES);
+    menuBytes = (u8 *)sdfResourceRetainAddress(allocation);
     memset(menuBytes, 0, MNU_STAFF_WORK_BYTES);
     ((CampVisualWork *)menuBytes)->allocationHandle = allocation;
     effectBytes = menuBytes + 0x11C;
     mnuClearPanelTransitionState((MenuPopupState *)(menuBytes + 8));
     if (dds3AdminReadPreviousSignedSample() != 0) {
         ((CampVisualWork *)menuBytes)->menuResource =
-            (u32)mnuAllocateValueRecord(1);
+            mnuAllocateValueRecord(1);
     } else {
         ((CampVisualWork *)menuBytes)->menuResource =
-            (u32)mnuAllocateValueRecord(0);
+            mnuAllocateValueRecord(0);
     }
     mnuInitPartyPanelSlots(&((MenuStaffContext *)menuBytes)->partyPanel);
     mnuLoadEffectResources(effectBytes);
@@ -846,7 +847,7 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     mnuReleaseTitleEffectResourceGroups(menuBytes);
     movReleaseTitleEffects(menuBytes);
     func_00303D58(((CampVisualWork *)menuBytes)->menuResource);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((CampVisualWork *)menuBytes)->allocationHandle));
+    sdfReleaseResourceAllocation(((CampVisualWork *)menuBytes)->allocationHandle);
     mnuCampTaskState = MNU_CAMP_STATE_CLEANED_UP;
     func_003425D8();
 }
