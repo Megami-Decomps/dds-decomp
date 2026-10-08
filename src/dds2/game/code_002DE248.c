@@ -500,7 +500,6 @@ extern u32 D_00438774;
 
 extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
-extern void *func_002DDAA8(void *);
 
 extern u32 effSharedTextureReferenceCount;
 
@@ -2749,7 +2748,7 @@ u32 effCreateTrackSetWithSharedReferences(u32 count, u16 kind, u32 sharedRef) {
                 break;
             }
         } else {
-            effect->shared = func_002DDAA8((void *)sharedRef);
+            effect->shared = func_002DDAA8((struct SdfTextureFileHeader *)sharedRef);
         }
     }
     return (u32)effect;
@@ -5678,7 +5677,7 @@ u32 effCreateRibbonWithSharedResource(u32 count, u32 repeat, u32 resource) {
         references++;
         effSharedRibbonReferenceCount = references;
     } else {
-        ((EffRibbonWork *)node)->resource = func_002DDAA8((void *)resource);
+        ((EffRibbonWork *)node)->resource = func_002DDAA8((struct SdfTextureFileHeader *)resource);
     }
     return (u32)node;
 }

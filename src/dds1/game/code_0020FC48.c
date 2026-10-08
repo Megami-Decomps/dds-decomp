@@ -2,6 +2,7 @@
 #include "common.h"
 #include "snd_slot.h"
 #include "sdf_resource.h"
+#include "eff_ref_obj.h"
 #include "file_pac.h"
 #include "dat_state.h"
 #include "btl_state.h"
@@ -1258,7 +1259,6 @@ void btlBuildOverlayQuadPacket(s32 packet, s32 first, s32 second, s32 color) {
 INCLUDE_ASM(const s32, "game/code_0020FC48", func_00211D40);
 
 extern u32 effGetWindTextureHandle(void);
-extern void *func_0029BD90(void *);
 extern void func_002D4C80(const void *, void *, s32);
 extern void func_002D4CC8(const void *, void *, s32);
 extern void sdfAppendDmaTagToList(s32, void *);
@@ -1273,7 +1273,7 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
     u32 tint;
 
     if (btlRuntimeState.resource == NULL) {
-        btlRuntimeState.resource = func_0029BD90((void *)effGetWindTextureHandle());
+        btlRuntimeState.resource = func_0029BD90((struct SdfTextureFileHeader *)effGetWindTextureHandle());
         btlCopyPaletteLowByteToAlpha(btlRuntimeState.resource->palette);
     }
     tag = sdfAllocPacketAligned(0x40);

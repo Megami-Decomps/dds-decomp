@@ -4,6 +4,10 @@
 #include "common.h"
 
 struct SdfMemBlock;
+struct SdfTextureFileHeader;
+
+struct RefObj *func_0029BD90(struct SdfTextureFileHeader *source);
+struct RefObj *func_002DDAA8(struct SdfTextureFileHeader *source);
 
 /* Reference-counted texture payload placed at the end of its allocation. */
 typedef struct RefObj {
