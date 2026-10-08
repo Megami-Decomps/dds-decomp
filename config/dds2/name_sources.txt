@@ -5089,7 +5089,7 @@
 0x002E6E60	effResetClassRingFrame	inferred	confidence=high; matched-C; src/dds2/game/code_002DE248.c:3317:func_002E6E60; Clears the linked ring frame counter reached through the class draw state.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002E6E70	effCreateRingHandle	inferred	DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described createEffectRingHandle behavior.
 0x002E6F18	effReleaseRingHandle	inferred	Queues ring asset release and frees its enclosing handle allocation. [names_reviewed5.tsv]
-0x002E7300	effPayloadPointerSet	inferred	body stores payload [names_R_FuncNames7.tsv]
+0x002E7300	effCreateClassWork	inferred	allocates the complete class work and copied kind-selected payload, creates its resource, and initializes it
 0x002E73F0	effCreateClassWorkFromFile	inferred	File-job callback resolves primary buffer and creates class work for request kind. [names_R_FuncNames4.tsv]
 0x002E7420	effDestroyClassWork	inferred	Calls kind-indexed resource destructor and frees class work. [names_R_FuncNames4.tsv]
 0x002E7468	effCreateClassWorkFromRequest	inferred	Creates class work using kind and source fields in the request. [names_R_FuncNames4.tsv]
@@ -5594,6 +5594,9 @@
 0x00313898	sdfGridDrawVisibleCells	inferred	confidence=high; matched-C; src/dds2/game/code_00310BC8.c:1134:func_00313898; Traverses the visible row/column window beginning at viewportOrigin and invokes drawCell at cellWidth/cellHeight-spaced screen positions.; source=names_P5.tsv:9 [names_qp11.tsv]
 0x003139D8	sdfGridReleaseAllCells	inferred	re-indexes every cell and calls releaseCell on nonzero values [names_M49_GridSdf.tsv]
 0x00313B90	sdfMultiplyAddFloat	inferred	Returns a float multiplied by a factor and added to an offset. [names_reviewed9.tsv]
+0x00313BA0	sdfDefaultTaskEntryInit	inferred	Default task entry initializer returns zero.
+0x00313BA8	sdfNoOpKeyValueCallback	inferred	Default list and task entry teardown callback ignores both key and value.
+0x00313BB0	sdfDefaultTaskEntryUpdate	inferred	Default task entry update returns zero; reused by the legacy callback fallback.
 0x00313BB8	sdfAppendFormattedDebugLogPair	inferred	Opens debug.log, writes a formatted pair and closes the file. [names_reviewed13.tsv]
 0x00313F88	ptyLoadPresetSkillSlots	inferred	Loads eight preset skill IDs, marks each nonzero flag and saves it in a skill slot; exact DDS1 twin. [names_reviewed13.tsv]
 0x00314020	ptyMarkPresetSkillPool	inferred	Marks forty preset skill IDs and conditionally merges stock skills; exact DDS1 twin. [names_reviewed13.tsv]

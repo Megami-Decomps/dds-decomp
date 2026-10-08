@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ee_mmi.h"
+extern s32 iWakeupThread(s32 threadId);
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -685,10 +687,13 @@ void sdfResetSemaphoreState(SdfSemaObj *semaphore) {
     semaphore->packetTail = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002D10B0", func_002D2140);
+s32 func_002D2140(s32 channel, s32 threadId) {
+    iWakeupThread(threadId);
+    EE_ENABLE_INTERRUPTS_SYNC();
+    return -1;
+}
 
-extern s32 func_002D2140(s32 threadId);
-extern s32 func_0030A740(s32 channel, s32 (*handler)(s32), s32 arg, s32 threadId);
+extern s32 func_0030A740(s32 channel, s32 (*handler)(s32, s32), s32 arg, s32 threadId);
 extern void *sceDmaGetChan(s32 channel);
 extern void FlushCache(s32 mode);
 extern void sceDmaSend(void *channel, void *packet);
