@@ -9,6 +9,7 @@
 #include "fld.h"
 #include "evt_world.h"
 #include "dds3obj.h"
+#include "mdl.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 
@@ -1865,7 +1866,7 @@ void fldResetPlayerSceneObjectState(void) {
 }
 
 extern void dds3ClearObjectFlags(void *, s32);
-extern EffWorldNode * dds3SetWorldPlayerObject(EffWorldNode *object, EffWorldNode *value);
+extern EffWorldNode *dds3SetWorldPlayerObject(EffWorldNode *object, EffWorldNode *value);
 extern void func_00111E30(u32, s32, s32);
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32, void *, void *);
 extern s32 D_0032F1DC[];
@@ -1892,8 +1893,6 @@ void fldCreatePlayerObject(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00123FB8);
-
 typedef struct FieldVec4 {
     f32 x;
     f32 y;
@@ -1901,12 +1900,109 @@ typedef struct FieldVec4 {
     f32 w;
 } FieldVec4;
 
+extern FieldVec4 D_0039FC60;
+extern FieldVec4 D_0039FC70;
+extern u128 D_0032F170[3];
+extern char D_003BABB8[];
+extern void effMiscAxisAngleToQuaternionVU(f32);
+extern void effMiscQuatMultiplyVU(void);
+extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
+extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
+extern void effObjSetInnerThirdVec(EffWorldNode *, u128 *);
+extern u32 dds3GetObjectBaseResourceHandle(void *);
+extern void effObjSetInnerFloat(EffWorldNode *, f32);
+extern void mdlAddEntryFlagged(struct MdlCtx *, s32, s32);
+extern void fldResetCameraModelHandles(void);
+extern void sdfSetTextFloatPairOverride(void *, f32, f32);
+extern void dds3SetObjectFlags(void *, s32);
+extern void func_00133640(s16, s32);
+extern void func_00132FD0(u32, s32);
+extern void fldBeginSelectedValueTransition(u32);
+s32 fldGetSceneCommandState(void);
+void fldEnterSceneCommand(void);
+extern void fldSetCameraObjectActiveFlag(s32);
+extern void func_001312D8(void);
+extern EffWorldNode *evtSpawnActionObj11(s32, void *, s32);
+
+/* Install the two supplied homogeneous transform vectors and prepare field
+ * model, scene commands and the borrowed action transform. */
+void func_00123FB8(u128 *transform) {
+    FieldVec4 quaternion;
+    FieldVec4 axis;
+    FieldVec4 scale;
+    u128 *rotation;
+    EffWorldNode *object;
+
+    memset(&quaternion, 0, sizeof(quaternion));
+    quaternion.w = 1.0f;
+    axis = D_0039FC60;
+    scale = D_0039FC70;
+    VU0_LOAD_VF(vf10, &axis);
+    rotation = transform + 1;
+    effMiscAxisAngleToQuaternionVU(3.1415926f);
+    VU0_LOAD_VF(vf11, rotation);
+    effMiscQuatMultiplyVU();
+    VU0_STORE_VF(vf10, &quaternion);
+    object = (EffWorldNode *)fldPlayerObject;
+    if (object == 0) {
+        object = dds3SpawnCameraSlotObj5(dds3AdvanceWorldCounter(), transform, &quaternion);
+        fldPlayerObject = (u32)object;
+        dds3SetWorldNodeValue(object, (u32)D_0039FC50);
+        dds3SetWorldPlayerObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)fldPlayerObject);
+        if (D_003BAB50 != 0) {
+            dds3ClearObjectFlags((void *)fldPlayerObject, 0x20);
+        }
+        fldPrepareResourceBuffer();
+        func_00111E30(fldPlayerObject, 2, D_0032F1DC[0]);
+        object = (EffWorldNode *)fldPlayerObject;
+    } else {
+        ObjectTransform *inner = object->inner;
+        PCP_COPY_VECTOR(inner->position, transform);
+        PCP_COPY_VECTOR(inner->smoothedPosition, transform);
+        PCP_COPY_VECTOR(inner->rotation, rotation);
+    }
+    effObjSetInnerFirstVec(object, transform);
+    effObjSetInnerSecondVec((EffWorldNode *)fldPlayerObject, (u128 *)&quaternion);
+    effObjSetInnerThirdVec((EffWorldNode *)fldPlayerObject, (u128 *)&scale);
+    fldCameraModelObject = dds3GetObjectBaseResourceHandle((void *)fldPlayerObject);
+    effObjSetInnerFloat((EffWorldNode *)fldPlayerObject, 90.0f);
+    if (fldAreaState.unk118 == 0) {
+        mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 0, 2);
+    } else {
+        mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 0, 2);
+        mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 1, 2);
+        fldResetCameraModelHandles();
+    }
+    sdfSetTextFloatPairOverride(((MdlCtx *)fldCameraModelObject)->inner, 15.0f, 0.0f);
+    dds3SetObjectFlags((void *)fldPlayerObject, 0x200);
+    if (fldAreaState.area < 200) {
+        func_00133640(0, 0);
+        func_00132FD0(D_0032E570[11], 0);
+        fldBeginSelectedValueTransition(D_0032E570[12]);
+        if (fldGetSceneCommandState() == 1) {
+            if (fldAreaState.commandEnabled != 0) {
+                fldEnterSceneCommand();
+            } else {
+                fldAreaState.sceneCommand = 0;
+                func_00133640(0, 0);
+                func_00132FD0(D_0032E570[11], 0);
+                fldBeginSelectedValueTransition(D_0032E570[12]);
+            }
+        } else if (fldAreaState.commandEnabled == 0) {
+            fldAreaState.sceneCommand = 0;
+        }
+        fldSetCameraObjectActiveFlag(fldAreaState.commandEnabled);
+    }
+    func_001312D8();
+    evtSpawnActionObj11(dds3AdvanceWorldCounter(), D_0032F170, (s32)D_003BABB8);
+}
+
 extern FieldVec4 D_0039FC80;
 extern FieldVec4 D_0039FC90;
 extern char D_003BABC0[];
 extern u32 dds3CreateConfiguredCameraObject(s32, FieldVec4 *, FieldVec4 *, FieldVec4 *);
 extern void dds3SetCameraVector(struct EffWorldNode *camera, u128 *worldEye);
-extern void effObjSetInnerFloat(u32, f32);
+extern void effObjSetInnerFloat(EffWorldNode *, f32);
 extern EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *, EffWorldNode *);
 
 /* Create the secondary camera at target origin with the stored eye/up vectors. */
@@ -1923,7 +2019,7 @@ void fldCreateSecondaryWorldCamera(void) {
     *cameraObjectSlot = cameraObject;
     dds3SetWorldNodeValue((struct EffWorldNode *)cameraObject, (u32)D_003BABC0);
     dds3SetCameraVector((struct EffWorldNode *)*cameraObjectSlot, (u128 *)&worldEye);
-    effObjSetInnerFloat(*cameraObjectSlot, 2.0f);
+    effObjSetInnerFloat((EffWorldNode *)*cameraObjectSlot, 2.0f);
     dds3SetWorldCameraObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)*cameraObjectSlot);
 }
 
