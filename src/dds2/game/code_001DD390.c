@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf_model.h"
 #include "btl.h"
 #include "btl_model_record.h"
@@ -931,7 +932,7 @@ void btlInitBattleIndexWork(BattleIndexWork *work) {
 /* Release each owned buffer once. The cached group address is deliberately not cleared. */
 void btlReleaseObjectBuffers(BattleIndexWork *object) {
     if (object->allocationHandle != 0) {
-        sdfReleaseResourceAllocation(object->allocationHandle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(object->allocationHandle));
         object->allocationHandle = 0;
     }
     if (object->indices != 0) {
@@ -2502,7 +2503,7 @@ s32 btlIsUnitModelStateFive(BtlUnit *unit) {
     return unit->ext->owner->first->state == 5;
 }
 
-extern void effObjSetInnerFirstVec(s32, f32 *);
+extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
 
 void btlSetUnitPosition(BtlUnit *unit, f32 *vec) {
     f32 pos[4];
@@ -2515,7 +2516,7 @@ void btlSetUnitPosition(BtlUnit *unit, f32 *vec) {
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         if (unit->flags & 2) {
             pos[2] += unit->positionZOffset;
-            effObjSetInnerFirstVec(unit->effectObject, pos);
+            effObjSetInnerFirstVec(unit->effectObject, (u128 *)pos);
         }
     }
 }
@@ -2631,7 +2632,7 @@ extern u8 D_004179E0[];
 
 extern void effMiscQuatMultiplyVU(void);
 
-extern void effObjSetInnerSecondVec(EffWorldNode *, void *);
+extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
 
 void btlSetUnitRotation(BtlUnit *unit, s128 *quat) {
     f32 result[4];
@@ -2646,7 +2647,7 @@ void btlSetUnitRotation(BtlUnit *unit, s128 *quat) {
         effMiscQuatMultiplyVU();
         VU0_STORE_VF_UNCLOBBERED(vf10, result);
         if (unit->flags & 2) {
-            effObjSetInnerSecondVec(unit->effectObject, result);
+            effObjSetInnerSecondVec(unit->effectObject, (u128 *)result);
         }
     }
 }
@@ -4081,7 +4082,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
             pos[0] += scale;
             pos[2] += args->unit->positionZOffset;
         }
-        effObjSetInnerFirstVec(args->unit->effectObject, pos);
+        effObjSetInnerFirstVec(args->unit->effectObject, (u128 *)pos);
         args->scale *= 0.85f;
     } else {
         if (btlUnitStatusPair(args->unit) & 0x808000000000) {
@@ -4091,7 +4092,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
             func_001E3108(args->unit, pos);
             pos[2] += args->unit->positionZOffset;
         }
-        effObjSetInnerFirstVec(args->unit->effectObject, pos);
+        effObjSetInnerFirstVec(args->unit->effectObject, (u128 *)pos);
         return 1;
     }
     args->count += 1;
@@ -4605,7 +4606,6 @@ void btlReleaseUnitResources(BtlUnit *unit) {
     }
 }
 
-extern void sdfReleaseResourceAllocation(u32);
 
 void btlDestroyUnit(BtlUnit *unit) {
     btlBossDebugPrintf("btl:unit delete[%p]\n", unit);
@@ -4618,7 +4618,7 @@ void btlDestroyUnit(BtlUnit *unit) {
     } else {
         ((BtlState *)btlGetRuntime())->units = unit->nextActor;
     }
-    sdfReleaseResourceAllocation(unit->handle35C);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(unit->handle35C));
 }
 
 void btlDestroyAllUnits(void) {
@@ -5173,8 +5173,8 @@ void func_001E9410(void) {
     VU0_STORE_VF(vf10, position);
     camera = dds3GetWorldCameraObject(dds3GetWorldObject());
     if (camera != NULL) {
-        effObjSetInnerFirstVec(camera, position);
-        effObjSetInnerSecondVec(camera, D_003B6D80);
+        effObjSetInnerFirstVec(camera, (u128 *)position);
+        effObjSetInnerSecondVec(camera, (u128 *)D_003B6D80);
         data = camera->data;
         dds3SetCameraFieldOfView(camera, 0.6981317f);
         data->fovUpdatePending |= 1;
@@ -9227,7 +9227,7 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
     btlBossDebugPrintf("btl:effect load end[%s]\n", args->name);
     resource = fileGetResourceHandle(args->loadHandle);
     effect->resourceHandle = sndMixerClone(sdfResourceRetainAddress(resource));
-    sdfReleaseResourceAllocation(resource);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
     filePollEntryCleanup(args->loadHandle);
     effect->flags = (effect->flags & ~1) | 2;
     return 0;
@@ -10138,7 +10138,7 @@ u32 sndPollMotSeFileAndSpu(FileLoadArgs *request) {
         }
     } else if (sndFindPackedTrackLoadStatus(node->position) != 0) {
         btlBossDebugPrintf("btl:sound SPU load end[%X]\n", (u16)(node->position >> 16));
-        sdfReleaseResourceAllocation(request->resourceHandle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(request->resourceHandle));
         filePollEntryCleanup((s32)request->loadHandle);
         node->flags = (node->flags & ~8) | 0x10;
         return 1;
@@ -10404,7 +10404,6 @@ SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id) {
 
 extern s32 filePollEntryCleanup(s32);
 
-extern void sdfReleaseResourceAllocation(u32);
 
 /* The last reference cleans queued files and resource handles, then unlinks/frees. */
 void sndReleaseSlotOwner(SoundSlotOwner *owner) {
@@ -10415,7 +10414,7 @@ void sndReleaseSlotOwner(SoundSlotOwner *owner) {
                 filePollEntryCleanup(owner->work.fileRequests[i]);
             }
             if (owner->work.resourceHandles[i] != 0) {
-                sdfReleaseResourceAllocation(owner->work.resourceHandles[i]);
+                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(owner->work.resourceHandles[i]));
             }
         }
         if (owner->next != 0) {
@@ -10666,7 +10665,7 @@ s32 sndPollAtrac3SELoadTask(BtlAt3LoadArgs *args) {
         size = fileGetResourceSize(args->loadHandle);
         filePollEntryCleanup(args->loadHandle);
         func_002A27A8(data, size, D_003E0F60[args->index].volume);
-        sdfReleaseResourceAllocation(resource);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resource));
         btlBossDebugPrintf("btl:atrac3 SE load end\n");
         return 1;
     }
@@ -10749,7 +10748,7 @@ s32 sndDeadAtracPlaybackTask(u32 *args) {
 void sndFinishEarringPlaybackTask(s32 *taskArgs) {
     u8 *work = (u8 *)btlGetRuntime();
     if (taskArgs[2] != 0) {
-        sdfReleaseResourceAllocation(taskArgs[2]);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(taskArgs[2]));
     }
     ((BtlState *)work)->earringPlaybackCount += 0xFFFF;
 }
@@ -10823,7 +10822,7 @@ void btlMoveOtherUnitsAway(ActionStateLink *link) {
                 func_001E3108(other, pos);
                 pos[1] += 1000000.0f;
                 pos[0] = 0;
-                effObjSetInnerFirstVec(other->effectObject, pos);
+                effObjSetInnerFirstVec(other->effectObject, (u128 *)pos);
                 btlSetUnitPosition(other, pos);
             }
         }
@@ -11179,7 +11178,7 @@ void func_00206C18(ActionStateLink *link, BtlUnit *other) {
                     if ((btlUnitStatusPair(unit) & 0x102) == 0x102) {
                         PCP_COPY_VECTOR(pos, &D_003BE0A0);
                         pos[1] += 1000000.0f;
-                        effObjSetInnerFirstVec(unit->effectObject, pos);
+                        effObjSetInnerFirstVec(unit->effectObject, (u128 *)pos);
                     }
                 }
             }

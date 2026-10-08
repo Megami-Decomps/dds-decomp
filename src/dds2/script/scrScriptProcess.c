@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 
 #include "scr.h"
 #include "sdf.h"
@@ -91,7 +92,6 @@ ScrData *scrCreateProcessAtFirstProcedure(void *header, ScrSection *procedureSec
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern void sdfReleaseChipBlock(void *);
 extern void itfMesDestroyWindowIfPresent(s32);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 extern void evtUnlinkWorkNode(ScrData *process);
 
 /* Release the process's VM buffers, resource and named-list allocation. */

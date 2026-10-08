@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "itf.h"
 
 #define FR_FONT_BYTE_MASK 0xFF
@@ -20,7 +21,6 @@ extern void frFontFreeAllEntries(void);
 extern FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph);
 extern u32 itfReleaseMemNodeBuffer(u8 *ringBase);
 extern void fmGslReleaseActiveResourceBuffers(void);
-extern void sdfReleaseResourceAllocation(void *arg0);
 extern void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
 
 /* Insert after the list's fixed anchor and update the entry count. */

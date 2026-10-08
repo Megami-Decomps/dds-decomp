@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf_draw.h"
 #include "sdf_sif_command.h"
 
@@ -1835,7 +1836,7 @@ DevRequest *sdfDevCreateBufferedRequest(s32 elementCount, s32 elementStride, s32
 
 /* Release the backing allocation and the request object. */
 void sdfDestroyDevRequest(DevRequest *request) {
-    sdfReleaseResourceAllocation(request->handle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(request->handle));
     sdfReleaseChipBlock(request);
 }
 
@@ -1862,7 +1863,7 @@ void sdfDevResizeBufferedRequest(DevRequest *request, s32 elementCount) {
             request->buffer = (void *)sdfResourceRetainAddress(request->handle);
         }
     } else if (elementCount <= 0) {
-        sdfReleaseResourceAllocation(request->handle);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(request->handle));
         request->handle = 0;
         request->usedCount = 0;
         request->capacity = 0;

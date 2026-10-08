@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -77,7 +78,6 @@ typedef struct EffRingBlock {
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 size);
 
 extern u32 sdfResourceRetainAddress(SdfMemBlock *allocation);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 
 extern EffRecordPool *effAllocateIdentityMatrixWork(u32 count);
 

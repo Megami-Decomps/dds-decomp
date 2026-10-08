@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "btl_state.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -2703,7 +2704,6 @@ u32 btlGetResourcePathVariant(BtlResourceDescriptor *resource) {
     return resource->selectedEntry->value;
 }
 
-extern void sdfReleaseResourceAllocation(s32);
 void btlReplaceResourceHandle(BtlResourceDescriptor *, s32);
 
 /* Replace an owned old texture, acquire the named resource's texture,
@@ -2718,7 +2718,7 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *descriptor, s32 name
     }
     allocationHandle = sdfReadNamedResource((const char *)(u32)nameAddress, &loadedResource, 0);
     btlReplaceResourceHandle(descriptor, loadedResource);
-    sdfReleaseResourceAllocation(allocationHandle);
+    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocationHandle));
 }
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);

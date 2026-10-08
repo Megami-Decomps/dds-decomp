@@ -1,8 +1,8 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "mnu_shooting.h"
 #include "sdf.h"
 
-void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 
 enum { SLOT_IN_USE = 1 };
 

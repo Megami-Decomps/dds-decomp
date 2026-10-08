@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff.h"
 #include "pcp_vu0.h"
 
@@ -8,7 +9,6 @@
 
 extern void *effParamTableGetBlock(void *table, s32 index);
 extern PcpFlashTrianglePulseWork *effFlashRecordCreate();
-extern void sdfReleaseResourceAllocation(SdfMemBlock *allocation);
 extern void effReleaseRecordPoolResourceAndBuffer(EffRecordPool *pool);
 extern void effReleaseRecordGroupAssetAndHandle(EffRecordPool *pool);
 extern void effReleaseRecordGroupResources(EffRecordPool *pool);

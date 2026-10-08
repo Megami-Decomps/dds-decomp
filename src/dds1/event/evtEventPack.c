@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "evt_unit.h"
 #include "file.h"
 #include "evt_motion_se.h"
@@ -283,7 +284,6 @@ extern void effInitCh76Id(void);
 extern void effInitCh75Id(void);
 extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *);
 extern void sdfQueueNonzeroResourceId(s32);
-extern void sdfReleaseResourceAllocation(s32);
 
 
 /* Release the event task's owned handles, then free its state.
@@ -317,10 +317,10 @@ void evtReleaseEventPackResources(void) {
             sdfQueueNonzeroResourceId(state->resourceHandle);
         }
         if (state->sceneAllocation1 != 0) {
-            sdfReleaseResourceAllocation(state->sceneAllocation1);
+            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(state->sceneAllocation1));
         }
         if (state->sceneAllocation2 != 0) {
-            sdfReleaseResourceAllocation(state->sceneAllocation2);
+            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(state->sceneAllocation2));
         }
     }
     sdfReleaseChipBlock(stateHandle);

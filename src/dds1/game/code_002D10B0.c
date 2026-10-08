@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "sdf.h"
 
 /* GS pixel-storage modes, using the same private names as sdfTex.c. */
@@ -100,7 +101,6 @@ extern volatile u8 D_003BD2F1;
 extern s32 sceGsSetDefStoreImage(sceGsStoreImage *, s16, s16, s16, s16, s16, s16, s16);
 extern s32 sceGsExecStoreImage(sceGsStoreImage *, void *);
 extern s32 sceGsSyncPath(s32, s32);
-extern void sdfReleaseResourceAllocation(SdfMemBlock *);
 
 /* Interleave rows from both color buffers into the queued destination. */
 void sdfCaptureDeferredGsImage(void) {

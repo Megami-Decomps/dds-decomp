@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "eff.h"
 #include "eff_channel.h"
 #include "pcp_vu0.h"
@@ -61,7 +62,6 @@ typedef struct EffEmit {
 extern s32 D_003D68D8[];
 /* List header defined in game/code_00193C08 (unsized: keeps absolute access). */
 extern u8 frFontResourceList[];
-extern void sdfReleaseResourceAllocation(void *arg0);
 typedef struct SdfMemBlock SdfMemBlock;
 extern SdfMemBlock *sdfAllocGeneralBlock(s32 arg0);
 extern u32 sdfResourceRetainAddress(SdfMemBlock *arg0);

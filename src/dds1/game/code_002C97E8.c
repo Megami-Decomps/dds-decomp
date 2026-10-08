@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 
 #include "fpu.h"
 #include "sdf.h"
@@ -512,7 +513,7 @@ void sdfDestroyTaskWork(SdfList *work) {
     if (work != NULL) {
         sdfClearTaskList(work);
         work->onDestroy(-1, work->userData);
-        sdfReleaseResourceAllocation(work->allocation);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->allocation));
     }
 }
 
@@ -855,7 +856,7 @@ void sdfDestroyTaskResourceWork(TaskWork *work) {
         sdfDestroyTaskWork(work->list);
         sdfReleaseChipBlock(work->primaryTaskName);
         sdfReleaseChipBlock(work->secondaryTaskName);
-        sdfReleaseResourceAllocation(work->allocation);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->allocation));
     }
 }
 
@@ -1039,7 +1040,7 @@ void sdfDestroyGridWork(SdfGrid *work) {
     if (work != NULL) {
         sdfGridReleaseAllCells();
         work->onDestroy(0, work->userData);
-        sdfReleaseResourceAllocation(work->allocation);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->allocation));
     }
 }
 

@@ -3512,3 +3512,34 @@ The condition is therefore `current <= best`, not a strict comparison:
 an equally healthy later eligible unit replaces the earlier candidate.
 Keep the unsigned 32-bit bound and the 16-bit current HP; exchanging the
 operands of the equivalent inclusive comparison does not change tie-breaking.
+
+## Inner-transform SDK vector boundary
+
+The matched `effObjSetInnerFirstVec` and `effObjSetInnerSecondVec` providers
+take `(EffWorldNode *, u128 *)` (DDS1 `0010F6E0`/`0010F710`, DDS2
+`0010F908`/`0010F938`). They copy the packed vector through `PCP_COPY_VECTOR`
+into the primary `ObjectTransform.position`/`rotation` float arrays.
+The battle callers' float-vector scratch arrays remain float arrays; the
+`u128 *` conversion belongs at this SDK boundary, not in a second owner view.
+
+## General-heap descriptor and represented-address boundary
+
+The matched `sdfMemory.c` providers in both games distinguish the descriptor
+from its represented data address: `sdfAllocGeneralBlock(s32)` returns a
+`SdfMemBlock *`, while `sdfMemoryGetBlockAddress(SdfMemBlock *)` returns a
+`u32` address word. Task-resource and grid `allocation` fields retain the
+descriptor pointer for destruction; they are not integer allocation indices.
+Convert the returned address word once at the accessor boundary to the
+appropriate work pointer. Do not declare the accessor as returning `void *`
+or the allocator as returning `s32` to suppress that real SDK boundary.
+
+
+## Mantra icon-pool allocation boundary
+
+DDS2 `mnuAllocateMantraIconPool` (`00275510`) allocates a `0x14`-byte
+`MantraIconPool` header followed by `count` twelve-byte `MantraIconEntry`
+records, clears that entire allocation, and returns the represented pool
+pointer. Keep the heap descriptor pointer until the SDK address accessor,
+then convert that address word once. Express the allocation and first-entry
+address using the actual owner types; the three icon-list constructors consume
+the returned `MantraIconPool *` without integer-to-pointer casts.
