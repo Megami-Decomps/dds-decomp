@@ -18,7 +18,7 @@ extern s32 D_00438D08;
 
 /* Queue up to 0x4000 bytes into the linear ring; state 5 means insufficient room. */
 void func_00345E18(MovObj *movie) {
-    MovLinearStream *stream = movie->stream;
+    MovLinearStream *stream = movie->stream.linear;
     s32 remaining = movie->remainingBytes;
     s32 readSize;
     u8 *bufferPosition;
@@ -59,7 +59,7 @@ s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *
     s32 restoreInterrupts;
 
     movie->deviceState = deviceState;
-    stream = movie->stream;
+    stream = movie->stream.linear;
 
     if (movie->stopRequested != 0 &&
         (movie->state < SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK ||
@@ -116,7 +116,7 @@ void sdfMovieProcessPendingData(MovObj *movie) {
     MovPacStream *stream;
     s32 remaining;
 
-    stream = movie->stream;
+    stream = movie->stream.pac;
     remaining = movie->remainingBytes;
     if (remaining == 0) {
         return;
@@ -134,7 +134,7 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *dat
     MovPacStream *stream;
 
     movie->deviceState = deviceState;
-    stream = movie->stream;
+    stream = movie->stream.pac;
 
     if (movie->stopRequested != 0 &&
         (movie->state < SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK ||
@@ -251,7 +251,7 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *dat
 /* Sound/IPU source operations: report available bytes/EOF, copy data, or resume reads. */
 s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddress, s32 operation, void *data, s32 size) {
     MovObj *movie = (MovObj *)movieAddress;
-    MovLinearStream *stream = movie->stream;
+    MovLinearStream *stream = movie->stream.linear;
 
     switch (operation) {
     case SDF_STREAM_READ_QUERY:
@@ -305,7 +305,7 @@ s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddress, 
     void func_003465E8(void *destination, const void *source, u32 byteCount) {
         memcpy(destination, source, byteCount);
     }
-    MovPacStream *stream = movie->stream;
+    MovPacStream *stream = movie->stream.pac;
 
     switch (operation) {
     case SDF_STREAM_READ_QUERY:
