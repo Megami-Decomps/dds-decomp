@@ -17,9 +17,25 @@ typedef struct EffBlurQuad {
     s32 bottom;
 } EffBlurQuad;
 
+/* The textured blur allocation stores this copied body followed by a
+ * separately acquired resource word. */
+typedef struct EffBlurTemplateBody {
+    s32 extent;
+    EffBlurQuad source;
+} EffBlurTemplateBody;
+
+typedef struct EffBlurTemplate {
+    EffBlurTemplateBody body;
+    u32 resourceWord;
+} EffBlurTemplate;
+
 typedef char EffBlurQuadSizeCheck[sizeof(EffBlurQuad) == 0x28 ? 1 : -1];
 typedef char EffBlurQuadCenterOffsetCheck[((u32)&((EffBlurQuad *)0)->x == 0x10) ? 1 : -1];
 typedef char EffBlurQuadEdgesOffsetCheck[((u32)&((EffBlurQuad *)0)->left == 0x18) ? 1 : -1];
+typedef char EffBlurTemplateBodySizeCheck[sizeof(EffBlurTemplateBody) == 0x2C ? 1 : -1];
+typedef char EffBlurTemplateSourceOffsetCheck[((u32)&((EffBlurTemplateBody *)0)->source == 0x04) ? 1 : -1];
+typedef char EffBlurTemplateSizeCheck[sizeof(EffBlurTemplate) == 0x30 ? 1 : -1];
+typedef char EffBlurTemplateResourceOffsetCheck[((u32)&((EffBlurTemplate *)0)->resourceWord == 0x2C) ? 1 : -1];
 
 /* One ST/XYZ2 pair in the packed draw payload. */
 typedef struct BlurPacketVertex {
@@ -112,5 +128,8 @@ void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work);
 
 void effAppendBlurRectanglePackets(void *list, EffBlurQuad *source, u8 fixedPointCoordinates);
 void effDrawBlurSource(EffBlurQuad *source, s32 resource, u8 fixedPointCoordinates);
+EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplateBody *body);
+void effReleaseBlurTemplate(EffBlurTemplate *owner);
+void effDrawBlurPixelRectWithResource(EffBlurTemplate *owner);
 
 #endif
