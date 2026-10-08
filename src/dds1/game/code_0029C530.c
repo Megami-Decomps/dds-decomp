@@ -173,7 +173,7 @@ extern u32 effCreateModelResourceWithInlineData(u16, void *, void *, u32);
 
 extern u32 effCreateResourceInstance(u16, void *, void *, u32);
 
-extern void sdfTexReleaseReferenceViaHandler(u32);
+extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 extern u32 effCreateSurfaceGridNode(u32, u32);
 
@@ -943,7 +943,7 @@ void effUpdateTarget(EffKindWork *work, u32 target) {
     u32 previous = work->target;
     if (previous != 0 && previous != target) {
         if (work->sourceKind != 4) {
-            sdfTexReleaseReferenceViaHandler(previous);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)previous);
         }
         work->target = target;
     }
@@ -1020,7 +1020,7 @@ void effTextureReferenceRelease(EffKindWork *work, u32 target) {
     u32 previous = work->target;
     if (previous != 0 && previous != target) {
         if (work->sourceKind != 4) {
-            sdfTexReleaseReferenceViaHandler(previous);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)previous);
         }
         work->target = target;
     }
@@ -1097,7 +1097,7 @@ void effReplaceKindLinkedTarget(EffKindWork *work, u32 target) {
     u32 previous = work->target;
     if (previous != 0 && previous != target) {
         if (work->sourceKind != 4) {
-            sdfTexReleaseReferenceViaHandler(previous);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)previous);
         }
         work->target = target;
     }
@@ -1201,7 +1201,7 @@ void effReplaceLinkedKindWorkTarget(EffKindWork *work, u32 target) {
     u32 previous = work->target;
     if (previous != 0 && previous != target) {
         if (work->sourceKind != 4) {
-            sdfTexReleaseReferenceViaHandler(previous);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)previous);
         }
         work->target = target;
     }
@@ -1271,7 +1271,7 @@ void effReleaseLinkedTarget(EffKindWork *work) {
         D_0037E770[work->kind].destroy(handle);
     }
     if (work->target != 0 && work->sourceKind != 4) {
-        sdfTexReleaseReferenceViaHandler(work->target);
+        sdfTexReleaseReferenceViaHandler((SdfTex *)work->target);
     }
     sdfReleaseChipBlock(work);
 }
@@ -1366,7 +1366,7 @@ void effReleaseAlternateKindWork(EffKindWork *work) {
         D_0037E7E8[work->kind].destroy(handle);
     }
     if (work->target != 0 && work->sourceKind != 4) {
-        sdfTexReleaseReferenceViaHandler(work->target);
+        sdfTexReleaseReferenceViaHandler((SdfTex *)work->target);
     }
     sdfReleaseChipBlock(work);
 }

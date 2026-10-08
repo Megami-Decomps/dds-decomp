@@ -3,6 +3,9 @@
 #include "pcp_vu0.h"
 #include "fld_lmap_task.h"
 
+struct SdfTex;
+extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
+
 extern s32 D_004390A4;
 
 extern u32 D_0045C7A0[];
@@ -361,7 +364,7 @@ s32 fldLoadMapResource(const char *name, MapResource *record) {
 
 u32 fldReleaseMapResource(s32 *image) {
     if (*image != 0) {
-        sdfTexReleaseReferenceViaHandler(*image);
+        sdfTexReleaseReferenceViaHandler((struct SdfTex *)*image);
         *image = 0;
     }
     return 1;
