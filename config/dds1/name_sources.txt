@@ -2067,12 +2067,14 @@
 0x00182CF8	effPcpClonePairedDriftEvents	inferred	readability/matching review (QP16)
 0x00182F20	effPcpPairedEventGroupRelease	inferred	releases each entry's paired event objects and handle then stops both owners
 0x00182FC8	effPcpRandomizeSlot	inferred	Computes evenly spaced phase and randomized speed and signed spin for one particle slot.
+0x001830F8	effPcpUpdatePairedDriftEvents	inferred	updates paired drift entries, their fragment geometry and fading, both endpoint events, and repeat-frame state
 0x001834C0	effPcpCopyRandomizedVector	inferred	Copies the particle effect vector in the randomized-slot group. [names_reviewed21.tsv]
 0x001834D8	effPcpCreateDelayedEventEntries	inferred	confidence=high; src/dds1/effect/effPCPMisc.c:func_001834D8; Copies framed parameters into retained work and creates event entries with randomized nonnegative-lifetime delays. [names_qp9.tsv]
 0x001836F8	effPcpSlotEffectCreateFromTable	inferred	extracts two parameter blocks before creating randomized-slot effect work [names_reviewed5.tsv]
 0x00183740	effPcpCloneSpawnRangeEvents	inferred	readability/matching review (QP16)
 0x00183950	effPcpEventBatchRelease	inferred	releases a batch of event objects then stops the associated owner and frees its handle
 0x001839D0	effPcpRandomizeSpawnSlot	inferred	randomises one 0x20-byte spawn slot inside the work ranges (sibling of effPcpRandomizeSlot) [names_reviewed2.tsv]
+0x00183B20	effPcpUpdateSpawnRangeEvents	inferred	updates radial event positions, damping, fade, and per-entry frame state
 0x00183DA0	effPcpCopySpawnRangeVector	inferred	Copies a vector of the randomized spawn-range effect group. [names_reviewed21.tsv]
 0x00183DB0	effPcpSpawnRangeSetScale	inferred	Stores scale on randomized spawning range work. [names_reviewed6.tsv]
 0x00183DB8	effPcpSetSpawnRangeColor	inferred	src/dds1/effect/effPCPMisc.c:func_00183DB8; Writes the spawn-range slot work color parameter; registered in the same color callback slot as named effect color setters. Registration: asm/dds1/data/data.data.s:65569: table record 0x003544B0, color slot. [names_qp9.tsv]
@@ -2950,6 +2952,8 @@
 0x001DAEE8	btlSwapIndexListEntries	inferred	DDS2 001E80F8 twin; swaps two entries, no change if indices equal [names_R_FuncNames2.tsv]
 0x001DB218	btlNormalizeActionCameraKeyScales	inferred	Adjusts pose vectors and resets blend weights according to action flags. [names_reviewed14.tsv]
 0x001DB300	btlInterpolateVectorStep	inferred	Twin of dds2 0x001E8510; Computes src position plus step times delta and transfers vector to VU. [names_R_FuncNames3.tsv]
+0x001DB698	btlAdjustCameraDirectionForDefaultPlane	inferred	For camera distance greater than one, compares projected camera height with Y=-20, adjusts and normalizes the direction, and returns whether adjusted.
+0x001DB7D0	btlAdjustCameraDirectionForPlane	inferred	Uses the supplied horizontal-plane height to adjust and normalize camera direction; returns whether adjusted.
 0x001DB9D0	btlCreateTargetedCommandSoundTask	inferred	Creates command sound work and attaches its target argument. [names_reviewed8.tsv]
 0x001DBA10	btlCreateCommandSoundWithArguments	inferred	Creates command sound work and fills its sound arguments. [names_reviewed8.tsv]
 0x001DBA78	btlInitializeMotionTransformFromTaskArguments	inferred	Initializes motion transform components from queued task arguments. [names_reviewed11.tsv]

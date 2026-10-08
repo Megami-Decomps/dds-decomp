@@ -816,7 +816,6 @@ extern f32 func_002FA148(f32);
 
 extern void func_002DD688(f32);
 
-extern s32 func_001DB698(BtlCamState *);
 
 /* Frame one unit approaching its target (DDS2 func_00217470 without the explicit angle): the pull-back and the
    swing angle interpolate with how far the command's state has advanced (ratio, capped at 1). */
@@ -872,7 +871,7 @@ void func_002045E8(BtlLinkedCommand *command, BtlCamState *out, f32 frontLift, f
     VU0_LOAD_VF(vf10, dir);
     VU0_APPLY_MATRIX(vf10, vf10);
     VU0_STORE_VF(vf10, out->direction);
-    func_001DB698(out);
+    btlAdjustCameraDirectionForDefaultPlane(out);
 }
 
 extern void btlFlagAllUnitsDefeatCandidate(void);
@@ -931,8 +930,8 @@ void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     btlCopyMotionTransform(back, front);
     back->distance += 250.0f;
     if (mirror != 0) {
-        func_001DB698(front);
-        func_001DB698(back);
+        btlAdjustCameraDirectionForDefaultPlane(front);
+        btlAdjustCameraDirectionForDefaultPlane(back);
     }
     btlUnitFaceTarget(user, target);
     btlUnitFaceTarget(target, user);
@@ -2039,7 +2038,7 @@ s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command) {
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, command->backCamera.direction);
     command->backCamera.distance += 45.0f;
-    func_001DB698(&command->backCamera);
+    btlAdjustCameraDirectionForDefaultPlane(&command->backCamera);
     return 1;
 }
 

@@ -1,3 +1,4 @@
+#include "fr_font.h"
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
 #include "kwln.h"
@@ -45,7 +46,6 @@ extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
 extern void frFontSetChainFlag(s32, s32);
 typedef struct FrFontGlyph FrFontGlyph;
 extern s32 func_0019D550(FrFontGlyph *, s8, u32);
-extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 D_00435E5C;
 extern s32 D_00435E48;
@@ -79,7 +79,6 @@ extern void func_002AAC70(u32, u32, u32, u32, u32, u32, u32);
 extern s32 D_00435E70;
 extern void func_002BB9C8(MenuSprites *, u32);
 extern void mnuReleaseStaffMenuResources(s32 *);
-extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32, s32, s32, s32);
 extern void mnuSetIndexedWindowPageSpriteFlags(s32, MenuPageWindow *, u32, u32);
 
 typedef struct MenuListNode MenuListNode;
@@ -428,7 +427,10 @@ s32 mnuInitializeSelectedStaffPage(KwlnTask *task) {
     mnuSelectPage(window, index);
     mnuCreateStaffBulletItemWindow(context);
     mnuReleaseStaffMenuResources(&context->group);
-    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, 0, 0);
+    mnuSetWindowResource(index, window,
+                         (struct EffectSlotSet *)context->group,
+                         (struct EffectSlotSet *)context->spriteArg1,
+                         (struct EffectSlotSet *)context->windowResource, 0, 0);
     mnuSetIndexedWindowPageSpriteFlags(index, (MenuPageWindow *)window, 1, 0);
     context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, (struct EffectSlotSet *)context->spriteArg1, 0);
     context->spriteHandle = mnuCreateSpriteState((struct EffectSlotSet *)context->spriteArg0,
@@ -685,8 +687,12 @@ s32 mnuInitializeStaffPageWithSlotAsset(KwlnTask *task) {
     mnuSelectPage(window, index);
     mnuCreateOrderedStaffItemWindow(context);
     mnuReleaseStaffMenuResources(&context->group);
-    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, context->spriteArg0,
-                         context->spriteArg2);
+    mnuSetWindowResource(index, window,
+                         (struct EffectSlotSet *)context->group,
+                         (struct EffectSlotSet *)context->spriteArg1,
+                         (struct EffectSlotSet *)context->windowResource,
+                         (struct EffectSlotSet *)context->spriteArg0,
+                         (struct EffectSlotSet *)context->spriteArg2);
     mnuSetIndexedWindowPageSpriteFlags(index, (MenuPageWindow *)window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {
         func_002BB9C8(slot->windowSprites, 1);
@@ -970,8 +976,12 @@ s32 mnuInitializeStaffValuePage(KwlnTask *task) {
     mnuSelectPage(window, index);
     mnuCreateOwnedCatalogItemWindow(context);
     mnuReleaseStaffMenuResources(&context->group);
-    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, context->spriteArg0,
-                         context->spriteArg2);
+    mnuSetWindowResource(index, window,
+                         (struct EffectSlotSet *)context->group,
+                         (struct EffectSlotSet *)context->spriteArg1,
+                         (struct EffectSlotSet *)context->windowResource,
+                         (struct EffectSlotSet *)context->spriteArg0,
+                         (struct EffectSlotSet *)context->spriteArg2);
     mnuSetIndexedWindowPageSpriteFlags(index, (MenuPageWindow *)window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {
         func_002BB9C8(slot->windowSprites, 1);

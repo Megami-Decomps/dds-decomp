@@ -6089,8 +6089,6 @@ extern s32 btlUpdateSkillNamePanelTask(KwlnTask *);
 extern void btlFreeRegisteredTaskData(KwlnTask *);
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 extern u32 frFontMeasureLines(struct FrFontGlyph *);
-extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
-
 typedef struct BtlPanelTransitionWork {
     KwlnTask *task;
     const u8 *text;

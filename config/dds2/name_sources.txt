@@ -1709,10 +1709,12 @@
 0x0018A8E8	effPcpDriftCreateFromTable	inferred	fetches three effect parameter blocks to construct the drift work [names_reviewed5.tsv]
 0x0018A950	effPcpClonePairedDriftEvents	inferred	readability/matching review (QP16)
 0x0018AC20	effPcpRandomizeSlot	inferred	Computes evenly spaced phase and randomized speed and signed spin for one particle slot.
+0x0018AD50	effPcpUpdatePairedDriftEvents	inferred	updates paired drift entries, their fragment geometry and fading, both endpoint events, and repeat-frame state
 0x0018B118	effPcpCopyRandomizedVector	inferred	Copies the particle effect vector in the randomized-slot group. [names_reviewed21.tsv]
 0x0018B350	effPcpSlotEffectCreateFromTable	inferred	extracts two parameter blocks before creating randomized-slot effect work [names_reviewed5.tsv]
 0x0018B398	effPcpCloneSpawnRangeEvents	inferred	readability/matching review (QP16)
 0x0018B628	effPcpRandomizeSpawnSlot	inferred	dds1 func_001839D0 twin [names_reviewed2.tsv]
+0x0018B778	effPcpUpdateSpawnRangeEvents	inferred	updates radial event positions, damping, fade, and per-entry frame state
 0x0018B9F8	effPcpCopySpawnRangeVector	inferred	Copies a vector of the randomized spawn-range effect group. [names_reviewed21.tsv]
 0x0018BA08	effPcpSpawnRangeSetScale	inferred	Stores scale on randomized spawning range work. [names_reviewed6.tsv]
 0x0018BA10	effPcpSetSpawnRangeColor	inferred	src/dds2/effect/effPCPMisc.c:func_0018BA10; Writes the spawn-range slot work color parameter; registered in the same color callback slot as named effect color setters. Registration: asm/dds2/data/data.data.s:64099: table record 0x003B0DE0, color slot. [names_qp9.tsv]
@@ -2588,6 +2590,8 @@
 0x001E8708	btlStepPoseBlend	inferred	steps a pose blend timer and blends +0x30/+0xC0 into the unit transform
 0x001E87A0	btlStepPoseBlendFrame	inferred	as btlStepPoseBlend but timer reset uses int frame count
 0x001E8840	btlStepPoseBlendRatio	inferred	sibling of btlStepPoseBlend/Half/Frame; blends by blendMode/durationFrames ratio [names_reviewed2.tsv]
+0x001E88A8	btlAdjustCameraDirectionForDefaultPlane	inferred	For camera distance greater than one, compares projected camera height with Y=-20, adjusts and normalizes the direction, and returns whether adjusted.
+0x001E89E0	btlAdjustCameraDirectionForPlane	inferred	Uses the supplied horizontal-plane height to adjust and normalize camera direction; returns whether adjusted.
 0x001E8B08	btlExecuteCommandSoundTask	inferred	Battle command-sound task callback passes stored actor, mode and options to command sound executor. [names_reviewed18.tsv]
 0x001E8B40	btlCreateCommandSoundTask	inferred	Creates task ID 0x2A and installs func_001E8B08 callback with five-argument sound command storage
 0x001E8BE0	btlCreateTargetedCommandSoundTask	inferred	Creates command sound work and attaches its target argument. [names_reviewed8.tsv]

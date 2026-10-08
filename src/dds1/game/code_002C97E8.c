@@ -15,9 +15,6 @@ extern s8 D_00324510[];
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 
 extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
-
-extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
-
 extern u32 frFontMeasureGlyphChain(FrFontGlyph *);
 
 extern s32 func_001958A0(FrFontGlyph *, s8, u32);

@@ -242,6 +242,17 @@ typedef struct SdfMovieDescriptor {
 typedef char SdfMovieDescriptor_size_must_be_0x14[
     (sizeof(SdfMovieDescriptor) == 0x14) ? 1 : -1];
 
+/* The +0x1C movie work pointer selects one of two separately allocated records.
+ * isPac at +3 chooses the active arm; the variant payload types live in
+ * sdf_movie_stream.h. */
+struct MovLinearStream;
+struct MovPacStream;
+
+typedef union MovObjStream {
+    struct MovLinearStream *linear;
+    struct MovPacStream *pac;
+} MovObjStream;
+
 typedef struct MovObj {
     u8 active;
     u8 state;
@@ -255,7 +266,7 @@ typedef struct MovObj {
     struct DevState *deviceState;
     s32 totalBytes;
     s32 remainingBytes;
-    void *stream;
+    MovObjStream stream;
     u8 pacEnabled;
     u8 pad21;
     u8 packetLimit;
@@ -265,6 +276,8 @@ typedef struct MovObj {
 
 typedef char MovObj_size_must_be_0xB0[
     (sizeof(MovObj) == 0xB0) ? 1 : -1];
+typedef char MovObj_stream_offset_must_be_0x1C[
+    ((u32)&((MovObj *)0)->stream == 0x1C) ? 1 : -1];
 
 void sdfMovieInitializeStreamWork(MovObj *, SdfMovieDescriptor *, const char *);
 
