@@ -92,8 +92,6 @@ extern u32 mdlGetBroadcastValue(MdlCtx *model);
 extern SdfPoolNode *D_00380788[13][4];
 extern u64 D_003E9640[];
 
-extern RefObj *func_002DDAA8(SdfTextureFileHeader *);
-
 extern u32 effSharedTextureReferenceCount;
 extern SdfTex *D_00437E40;
 
@@ -731,7 +729,7 @@ extern s32 sdfFormatImageSize(u32 format, s32 width, s32 height);
 extern SdfTex *sdfTexCreateWithAllocatedResources(s32, s32, u32, u32, u32, u32);
 extern void sdfTexCreateFirstPacket(SdfTex *texture);
 
-RefObj *func_002DDAA8(SdfTextureFileHeader *source) {
+RefObj *effCreateSharedTextureReference(SdfTextureFileHeader *source) {
     u32 paletteWidth;
     u32 paletteHeight;
     s32 paletteBytes;
@@ -786,7 +784,7 @@ RefObj *func_002DDAA8(SdfTextureFileHeader *source) {
 RefObj *effCloneSharedReferenceWithValue(SdfTextureFileHeader *source, u32 textureIndex) {
     RefObj *copy;
 
-    copy = func_002DDAA8(source);
+    copy = effCreateSharedTextureReference(source);
     copy->index = textureIndex;
     return copy;
 }

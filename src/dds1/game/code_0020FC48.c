@@ -1266,7 +1266,7 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
     u32 tint;
 
     if (btlRuntimeState.resource == NULL) {
-        btlRuntimeState.resource = func_0029BD90((struct SdfTextureFileHeader *)effGetWindTextureHandle());
+        btlRuntimeState.resource = effCreateSharedTextureReference((struct SdfTextureFileHeader *)effGetWindTextureHandle());
         btlCopyPaletteLowByteToAlpha((s32 *)btlRuntimeState.resource->palette);
     }
     tag = sdfAllocPacketAligned(0x40);
