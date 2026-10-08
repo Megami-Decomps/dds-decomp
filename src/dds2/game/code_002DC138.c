@@ -306,7 +306,7 @@ void effUploadModelTextures(EffModelOwner *owner) {
 extern void effFloorModelListPush(EffModelOwner *);
 
 /* Track floor models only while battle is active and the current actor is not fully marked. */
-void *effCreateFloorModelOwner(void *source) {
+EffModelOwner *effCreateFloorModelOwner(void *source) {
     EffModelOwner *owner;
     s32 battleActive;
 
@@ -319,10 +319,10 @@ void *effCreateFloorModelOwner(void *source) {
     return owner;
 }
 
-void effMarkFloorModelForDestruction(u32 *p) {
-    ((EffModelOwner *)p)->flags |= 2;
-    if (!(((EffModelOwner *)p)->flags & 4)) {
-        effDestroyModelOwner((EffModelOwner *)p);
+void effMarkFloorModelForDestruction(EffModelOwner *p) {
+    p->flags |= 2;
+    if (!(p->flags & 4)) {
+        effDestroyModelOwner(p);
     }
 }
 
@@ -390,14 +390,14 @@ void func_002DC808(EffModelOwner *owner) {
     }
 }
 
-void effMarkFloorModelForUpdate(u32 *p) {
-    ((EffModelOwner *)p)->flags |= 1;
-    if (!(((EffModelOwner *)p)->flags & 4)) {
+void effMarkFloorModelForUpdate(EffModelOwner *p) {
+    p->flags |= 1;
+    if (!(p->flags & 4)) {
         if (!(effModelUpdateControlFlags & 1)) {
-            func_002DC808((EffModelOwner *)p);
+            func_002DC808(p);
         }
     } else if (effModelUpdateControlFlags & 1) {
-        ((EffModelOwner *)p)->flags |= 0x30;
+        p->flags |= 0x30;
     }
 }
 
