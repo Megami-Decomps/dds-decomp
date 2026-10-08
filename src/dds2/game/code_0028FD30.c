@@ -1004,7 +1004,28 @@ s32 func_00293148(MnuStatusResource *object) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_002932B0);
+/* Set up the three tutorial party records and their display order. */
+void func_002932B0(MnuStatusResource *object) {
+    MantraMenuWork *state = &object->menu;
+    s32 index;
+
+    memset(state->tutorialParty, 0, sizeof(state->tutorialParty));
+    state->tutorialParty[0].unitId = 1;
+    state->tutorialParty[0].level = 1;
+    state->tutorialParty[1].unitId = 4;
+    state->tutorialParty[1].level = 1;
+    state->tutorialParty[2].unitId = 5;
+    state->tutorialParty[2].level = 1;
+
+    for (index = 2; index >= 0; index--) {
+        state->collectedValues[index] = (u32)&state->tutorialParty[index];
+    }
+
+    state->flags &= 0xF0FFFFFF;
+    state->flags &= 0xEFFFFFFF;
+    state->collectedCount = 3;
+    state->savedSelection = 0;
+}
 
 void mnuCollectPanelNodeValues(MnuStatusResource *object) {
     struct MenuListNode *node = object->list->first;
