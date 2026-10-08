@@ -49,8 +49,9 @@ void func_002BCA98(MenuPageWindow *page);
 void func_002BCAB0(MenuPageWindow *page);
 s32 func_002C6008(PartyPanel *party, MenuPageWindow *page,
                  struct DatPartyRecord *entry, s32 commit);
-MenuWindowContainer *func_002A9BF8(void *labels, s32 count, s32 width,
-                                 s32 rowHeight, u8 *work, void *options);
+MenuWindowContainer *mnuCreateStaffResourceListWindow(
+    void *entries, s32 entryCount, s32 width, s32 rowHeight, u8 *work,
+    void *requiredFlags);
 void mnuSetWindowContainerState(MenuWindowContainer *window, u32 state);
 void mnuDestroyWindowContainer(MenuWindowContainer *window);
 void mnuDestroyPanelState(struct MenuPanelState *panel);
