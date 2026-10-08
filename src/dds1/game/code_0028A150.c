@@ -7,6 +7,7 @@
 #include "sdf_chip.h"
 #include "eff_curve.h"
 #include "file.h"
+#include "file_request_entry.h"
 #include "file_slot_flags.h"
 #include "sdf_dev_state.h"
 #include "file_slot.h"
@@ -102,7 +103,6 @@ extern s32 D_003BC880;
 
 extern s32 fileReadSlotPreviewBegin(void);
 extern s32 fileAdvanceSlotScan(void);
-extern void fileReqSetSelectedSlot(u32 ctx, s32 arg);
 
 extern s32 (*fileMenuStateHandler)();
 extern s32 D_003BC814;
@@ -214,7 +214,6 @@ typedef struct LoadMirror {
     u32 previous;
 } LoadMirror;
 
-extern s8 fileReqGetSelectedSlot(s32 request);
 extern s32 mdlFlagTest(s32 flag);
 extern u32 D_003BD8F4;
 extern u32 D_003BD8F8;
@@ -331,11 +330,6 @@ extern s32 mcdFinishFileDetection(void);
 
 extern s32 fileSlotSelectionPollCount;
 
-extern s32 fileReqPoll(void);
-
-extern u8 fileReqGetStatus(s32 request);
-
-extern void fileReqBegin(s32 request);
 
 extern s32 func_0028B508(void);
 
@@ -347,7 +341,6 @@ extern s32 fileIsCardSpaceAboveMinimum(void);
 
 extern s32 fileSelectedSlotIndex;
 
-extern void fileReqMarkSlotMetadataDirty(s32);
 
 extern s32 fileBeginDetectionRequest(u32 callback);
 
@@ -355,7 +348,6 @@ extern s32 fileScanSlotStates(void);
 
 extern s32 filePollSlotRequestAndResumeFlow(void);
 
-extern s32 fileReqGetSize(s32 request);
 
 extern u32 D_003BC804;
 
@@ -433,8 +425,6 @@ extern s32 mcHandleSearchResult(void);
 
 
 extern s32 fileBuildMainBlobAndWrite(void);
-
-extern u8 fileReqIsSlotMetadataDirty(s32 request);
 
 /* 0x40-byte backing region; the browser uses the first ten slot states. */
 extern u32 fileSlotDisplayStates[16];
