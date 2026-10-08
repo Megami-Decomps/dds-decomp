@@ -56,7 +56,7 @@ typedef struct MenuWindowContainer {
     s32 param24;           /* 0x24 */
     s32 param28;           /* 0x28 */
     struct {
-        u32 sprite;
+        struct EffectSlotSet *sprite;
         u32 parameter;
     } decorations[3];      /* 0x2C: optional window decoration sprites */
     u32 decorationX[3];    /* 0x44 */
@@ -66,6 +66,22 @@ typedef struct MenuWindowContainer {
     struct MenuIconSprites *resource; /* 0x90: owned sprite-resource bundle */
     u32 fadeScale;         /* 0x94: window/list opacity scale; full fade is 0x100 */
 } MenuWindowContainer;
+
+/* Sprite slots are resource-set owners; parameters and offsets stay words. */
+void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu,
+                                    struct EffectSlotSet *firstSprite,
+                                    u32 firstParameter);
+void mnuSetWindowContainerLayout(MenuWindowContainer *menu,
+                                 struct EffectSlotSet *firstSprite,
+                                 u32 firstParameter,
+                                 struct EffectSlotSet *secondSprite,
+                                 u32 secondX,
+                                 u32 secondParameter,
+                                 struct EffectSlotSet *thirdSprite,
+                                 u32 thirdParameter,
+                                 u32 thirdX);
+void mnuSetWindowOverlaySprite(MenuWindowContainer *menu,
+                               struct EffectSlotSet *sprite);
 
 typedef char MenuIconState_size_must_be_0x38[(sizeof(struct MenuIconState) == 0x38) ? 1 : -1];
 typedef char MenuWindowContainer_size_must_be_0x98[(sizeof(MenuWindowContainer) == 0x98) ? 1 : -1];

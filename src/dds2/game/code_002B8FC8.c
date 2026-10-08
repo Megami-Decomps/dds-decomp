@@ -195,7 +195,6 @@ extern char D_003E69B0[];
 
 extern void mnuCreateStaffImageSprite();
 
-extern void mnuDrawStaffGridLabelsForKind();
 
 
 extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
@@ -877,16 +876,16 @@ void mnuDestroyWindowContainer(MenuWindowContainer *menu) {
     sdfReleaseChipBlock(menu);
 }
 
-void mnuSetWindowOverlaySprite(MenuWindowContainer *menu, u32 layout) {
-    menu->decorations[2].sprite = layout;
+void mnuSetWindowOverlaySprite(MenuWindowContainer *menu, struct EffectSlotSet *sprite) {
+    menu->decorations[2].sprite = sprite;
 }
 
 void mnuSetWindowFadeScale(MenuWindowContainer *menu, u32 fadeScale) {
     menu->fadeScale = fadeScale;
 }
 
-void mnuSetWindowContainerLayout(MenuWindowContainer *menu, u32 layout2C, u32 layout30, u32 layout34,
-                                    u32 layout48, u32 layout38, u32 layout3C, u32 layout40,
+void mnuSetWindowContainerLayout(MenuWindowContainer *menu, struct EffectSlotSet *layout2C, u32 layout30, struct EffectSlotSet *layout34,
+                                    u32 layout48, u32 layout38, struct EffectSlotSet *layout3C, u32 layout40,
                                     u32 layout4C) {
     menu->decorations[0].sprite = layout2C;
     menu->decorationX[2] = layout4C;
@@ -899,7 +898,7 @@ void mnuSetWindowContainerLayout(MenuWindowContainer *menu, u32 layout2C, u32 la
     menu->decorationX[0] = 0;
 }
 
-void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu, u32 first, u32 second) {
+void mnuInitializeBasicWindowLayout(MenuWindowContainer *menu, struct EffectSlotSet *first, u32 second) {
     mnuSetWindowContainerLayout(menu, first, second, 0, 0, 0, 0, 0, 0);
 }
 
@@ -1092,13 +1091,13 @@ void mnuDrawWindowDecorations(s32 x, s32 y, s32 depth, MenuWindowContainer *wind
     u32 state = window->fadeScale;
 
     for (i = 0; i < 3; i++) {
-        u32 sprite = window->decorations[i].sprite;
+        struct EffectSlotSet *sprite = window->decorations[i].sprite;
         u32 parameter = window->decorations[i].parameter;
         u32 offset = window->decorationX[i];
 
-        if (sprite != 0) {
+        if (sprite != NULL) {
             func_00306CD0(x + offset + 0xC0, y - 0xB8, depth, state,
-                         1, (EffectSlotSet *)sprite, parameter, option);
+                         1, sprite, parameter, option);
         }
     }
 }

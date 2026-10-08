@@ -14,6 +14,9 @@
 /* Set the window/list opacity scale without clamping. */
 void mnuSetWindowFadeScale(struct MenuWindowContainer *window, u32 fadeScale);
 
+/* Draw the configured grid labels using this resource slot set. */
+void mnuDrawStaffGridLabelsForKind(s32 kind, struct EffectSlotSet *resources);
+
 struct DatPartyRecord;
 /* Field-use skills operate on the selected party records and their page. */
 s32 ptySkillApplyFieldUseEffect(MenuPageWindow *page, u16 ability,
