@@ -186,7 +186,7 @@ typedef struct EffTrackSet {
 typedef struct EffBillFrameState {
     u8 *entries;
     EffTrackSet *asset;
-    u32 allocation;
+    struct SdfMemBlock *allocation;
     u32 unk0C;
 } EffBillFrameState;
 

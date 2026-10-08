@@ -1714,7 +1714,7 @@ u8 *effCreateBillFrameNode(EffBillFrameConfig *config, u32 handle) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffBillFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->allocation = base;
     ((EffBillFrameState *)node)->entries = body;
     ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(count, 0, handle);
     return node;
@@ -1723,7 +1723,7 @@ u8 *effCreateBillFrameNode(EffBillFrameConfig *config, u32 handle) {
 /* Release the frame node's shared tracks and backing allocation. */
 void effReleaseBillFrameNode(s32 work) {
     effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillFrameState *)work)->allocation));
+    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E0900);
@@ -1804,7 +1804,7 @@ u8 *billCreateCellNode(EffBillCellConfig *config, u32 handle) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffBillFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->allocation = base;
     *(u8 **)node = body;
     ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(count, 1, handle);
     return node;
@@ -1812,7 +1812,7 @@ u8 *billCreateCellNode(EffBillCellConfig *config, u32 handle) {
 
 void billReleaseCellNode(s32 work) {
     effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillFrameState *)work)->allocation));
+    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E11D0);
@@ -1884,7 +1884,7 @@ u8 *billCreateParticleNode(EffBillParticleConfig *config, u32 handle) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffBillFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->allocation = base;
     *(u8 **)node = body;
     ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(count, 1, handle);
     return node;
@@ -1892,7 +1892,7 @@ u8 *billCreateParticleNode(EffBillParticleConfig *config, u32 handle) {
 
 void billReleaseParticleNode(s32 work) {
     effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillFrameState *)work)->allocation));
+    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E1BB0);
@@ -1962,7 +1962,7 @@ u8 *billAllocateAnimatedTransformEntries(EffBillAnimatedFrameConfig *config) {
     u8 *node = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *entries = node + headerSize;
 
-    *(u8 **)(node + 8) = base;
+    ((EffBillFrameState *)node)->allocation = base;
     *(u8 **)node = entries;
     if (config->drawProgress == 0) {
         config->drawProgress = 1;
@@ -2021,7 +2021,7 @@ u8 *billCloneAnimatedTransform(u8 *owner) {
 
 void billReleaseAlternatingTransformNode(s32 work) {
     effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillFrameState *)work)->allocation));
+    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E26A0);
@@ -2092,7 +2092,7 @@ u8 *billAllocEmitterNode(u8 *config) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffBillFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->allocation = base;
     *(u8 **)node = body;
     return node;
 }
@@ -2148,7 +2148,7 @@ u8 *billCloneEmitterTransform(u8 *owner) {
 
 void billReleaseEmitterNode(s32 work) {
     effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillFrameState *)work)->allocation));
+    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E3008);
@@ -2219,7 +2219,7 @@ u8 *billAllocStripNode(u8 *config) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffBillFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->allocation = base;
     *(u8 **)node = body;
     return node;
 }
@@ -2275,7 +2275,7 @@ u8 *billCloneStripTransform(u8 *owner) {
 
 void billReleaseStripNode(s32 work) {
     effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillFrameState *)work)->allocation));
+    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E39B0);
@@ -2346,7 +2346,7 @@ u8 *billCreateTrailNode(EffBillTrailFrameConfig *config, u32 handle) {
     u8 *node = body;
 
     body += headerSize;
-    *(u8 **)(node + 8) = base;
+    ((EffBillFrameState *)node)->allocation = base;
     *(u8 **)node = body;
     ((EffBillFrameState *)node)->asset = (EffTrackSet *)effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 0, handle);
     return node;
@@ -2354,7 +2354,7 @@ u8 *billCreateTrailNode(EffBillTrailFrameConfig *config, u32 handle) {
 
 void billReleaseTrailNode(s32 work) {
     effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillFrameState *)work)->allocation));
+    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E4320);
@@ -2425,7 +2425,7 @@ u8 *billAllocQuadNode(u8 *config) {
     u8 *node = body;
 
     body += headerSize;
-    ((EffBillFrameState *)node)->allocation = (u32)base;
+    ((EffBillFrameState *)node)->allocation = base;
     *(u8 **)node = body;
     return node;
 }
@@ -2481,7 +2481,7 @@ u8 *billCloneQuadTransform(u8 *owner) {
 
 void billReleaseQuadNode(s32 work) {
     effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffBillFrameState *)work)->allocation));
+    sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002E4E80);
