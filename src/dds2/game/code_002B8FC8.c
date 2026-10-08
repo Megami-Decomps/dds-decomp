@@ -2251,10 +2251,10 @@ void func_002BC690(MenuPageWindow *menu, s32 index, s32 kind) {
 
 
 
-void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 flag) {
+void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 preserveResourceHandles) {
     u32 i;
     EffectSlotSet **res;
-    if (flag == 0) {
+    if (preserveResourceHandles == MNU_WINDOW_SLOT_REFRESH_RELEASE_HANDLES) {
         for (i = 0, res = menu->mainResources; i < 8; i++, res++) {
             if (effHasFirstTextureHandle((s32)(*res)) != 0) {
                 effReleaseTextureHandlesAndResetSlots(*res);
@@ -2277,7 +2277,7 @@ void mnuRefreshWindowSlots(MenuPageWindow *menu, s32 flag) {
 }
 
 void mnuReleaseAndRefreshWindowSlots(MenuPageWindow *menu) {
-    mnuRefreshWindowSlots(menu, 0);
+    mnuRefreshWindowSlots(menu, MNU_WINDOW_SLOT_REFRESH_RELEASE_HANDLES);
 }
 
 INCLUDE_ASM(const s32, "game/code_002B8FC8", mnuRefreshPartyPanelBars);
