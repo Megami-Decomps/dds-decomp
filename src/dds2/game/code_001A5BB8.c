@@ -1117,7 +1117,7 @@ s32 sndUpdateTestMsgTask(KwlnTask *task) {
     return 0;
 }
 
-extern s32 func_0035B6E0();
+extern s32 func_0035B6E0(const char *, ...);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00414EB0);
 
@@ -3142,6 +3142,18 @@ void *btlGetIndexedUiResource(UiObject *object) {
     return D_003B4E88[object->index];
 }
 
+typedef struct BattleSavedActorState {
+    BtlUnitEntrySlot entrySlots[7];
+    u8 pad2A[2];
+    s32 flags;
+    u8 pad30[4];
+    u16 status;
+    u16 unitId;
+} BattleSavedActorState;
+
+typedef char BattleSavedActorStateSize[(sizeof(BattleSavedActorState) == 0x38) ? 1 : -1];
+extern BattleSavedActorState D_00452EA0[3];
+
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004152F8);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415308);
@@ -3150,7 +3162,46 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415318);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AED98);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AEEA8);
+
+extern const char D_00415340[];
+
+void func_001AEEA8(void) {
+    u32 index;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
+
+    for (index = 0; index < 3; index++) {
+        if (D_00452EA0[index].unitId == 0) {
+            continue;
+        }
+        for (unit = battle->units; unit != NULL; unit = unit->nextActor) {
+            if (unit->flags & 1) {
+                if (unit->flags & 0x200) {
+                    if (unit->partyRecord.unitId == D_00452EA0[index].unitId) {
+                        if (D_00452EA0[index].flags & 0x1000) {
+                            unit->flags |= 0x1000;
+                            unit->partyRecord.flags |= 0x1000;
+                        } else {
+                            unit->flags &= ~0x1000;
+                            unit->partyRecord.flags &= ~0x1000;
+                        }
+                        memcpy(unit->entrySlots, D_00452EA0[index].entrySlots,
+                               sizeof(unit->entrySlots));
+                        unit->partyRecord.status = D_00452EA0[index].status;
+                        if ((unit->partyRecord.status & 0x7FFF) == 0x4000) {
+                            unit->partyRecord.hp = 0;
+                            unit->flags |= 0x20;
+                        }
+                        func_0035B6E0(D_00415340, index,
+                                      unit->partyRecord.unitId);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 void btlSyncModelFlagFromEventThresholds(void) {
     if (evtCheckValueThreshold(0x53, 1) || evtCheckValueThreshold(0x54, 1)) {
@@ -3159,6 +3210,8 @@ void btlSyncModelFlagFromEventThresholds(void) {
         mdlFlagClear(0xa20);
     }
 }
+
+INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415340);
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AF0B0);
 
