@@ -2,6 +2,7 @@
 #include "eff_resource_slots.h"
 #include "common.h"
 #include "sdf_resource.h"
+#include "mnu_flag_snapshot.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_list.h"
@@ -821,9 +822,9 @@ extern FlagSource mnuSceneFlagEventEntries[];
 extern FlagPair mnuPartyFlagEventEntries[];
 
 /* Snapshot four primary flag pairs and sixteen extra pairs for restoration. */
-s32 mnuCreateFlagEntries(void) {
-    s32 snapshotHandle = (u32)sdfAllocGeneralBlock(MNU_FLAG_SNAPSHOT_BYTES);
-    FlagEntry *snapshot = (FlagEntry *)sdfResourceRetainAddress((struct SdfMemBlock *)(snapshotHandle));
+struct SdfMemBlock *mnuCreateFlagEntries(void) {
+    struct SdfMemBlock *snapshotHandle = sdfAllocGeneralBlock(MNU_FLAG_SNAPSHOT_BYTES);
+    FlagEntry *snapshot = (FlagEntry *)sdfResourceRetainAddress(snapshotHandle);
     u32 pairIndex;
 
     for (pairIndex = 0; pairIndex < MNU_SCENE_FLAG_PAIR_COUNT; pairIndex++) {
@@ -842,8 +843,8 @@ s32 mnuCreateFlagEntries(void) {
 }
 
 /* Restore only those flags that were enabled in the saved snapshot. */
-void mnuApplyFlagEntries(s32 snapshotHandle) {
-    FlagEntry *snapshot = (FlagEntry *)sdfResourceRetainAddress((struct SdfMemBlock *)(snapshotHandle));
+void mnuApplyFlagEntries(struct SdfMemBlock *snapshotHandle) {
+    FlagEntry *snapshot = (FlagEntry *)sdfResourceRetainAddress(snapshotHandle);
     u32 pairIndex;
 
     /* Scene pairs restore only their second flag; party pairs restore both. */

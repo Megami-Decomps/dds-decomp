@@ -1,6 +1,8 @@
+#include "eff_resource_slots.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "sdf_resource.h"
+#include "mnu_flag_snapshot.h"
 
 
 
@@ -210,9 +212,9 @@ u32 func_00266230(void) {
 }
 
 /* Snapshot four primary flag pairs and sixteen extra pairs for restoration. */
-s32 mnuCreateFlagEntries(void) {
-    s32 handle = (u32)sdfAllocGeneralBlock(0x140);
-    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+struct SdfMemBlock *mnuCreateFlagEntries(void) {
+    struct SdfMemBlock *handle = sdfAllocGeneralBlock(0x140);
+    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
     u32 i;
 
     for (i = 0; i < 4; i++) {
@@ -230,8 +232,8 @@ s32 mnuCreateFlagEntries(void) {
     return handle;
 }
 
-void mnuApplyCampResourceFlagEntries(s32 handle) {
-    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+void mnuApplyCampResourceFlagEntries(struct SdfMemBlock *handle) {
+    FlagEntry *entries = (FlagEntry *)sdfResourceRetainAddress(handle);
     u32 i;
 
     for (i = 0; i < 4; i++) {
@@ -270,9 +272,7 @@ extern const CampMapArguments D_00424DE0;
 extern const CampEffectRows D_00424E10;
 extern const char D_00424E30[];
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
-extern u32 effCreateMappedResource(u32);
 extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
-extern void mnuSetCampEffectResourceHandles(u32, u32, MenuEffectResources *);
 extern void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 
 void func_00266460(u32 object, MenuEffectResources *resources) {
@@ -280,7 +280,7 @@ void func_00266460(u32 object, MenuEffectResources *resources) {
     CampEffectRows rows = D_00424E10;
     u32 dataAddress;
     struct SdfMemBlock *allocation;
-    u32 mappedResource;
+    struct EffMappedResource *mappedResource;
 
     allocation = sdfReadNamedResource(D_00424E30, &dataAddress, 0);
     mappedResource = effCreateMappedResource(dataAddress);

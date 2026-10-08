@@ -67,7 +67,6 @@ typedef struct SdfCounterRuntime {
 
 extern void sdfReleaseChipBlock(void *);
 
-extern void mnuDestroyListState(SdfCounterRuntime *);
 
 extern s32 sdfActiveCounterRuntime;
 
@@ -386,7 +385,7 @@ void sdfCounterDestroyRuntime(SdfCounterRuntime *rt) {
         }
         sdfReleaseChipBlock(rt->timer);
         rt->timer = NULL;
-        mnuDestroyListState(rt);
+        mnuDestroyListState((struct MenuList *)rt);
     }
 }
 

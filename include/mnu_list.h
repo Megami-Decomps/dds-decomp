@@ -80,6 +80,8 @@ void mnuResetListNodeFadeCounters(struct MenuList *list);
 void mnuDecreaseListNodeFadeCounters(struct MenuList *list);
 /* Remove and free the cursor node, returning the updated cursor or NULL. */
 struct MenuListNode *mnuRemoveListCursorNode(struct MenuList *list);
+/* Remove the list's nodes and release its allocation; returns one when complete. */
+u32 mnuDestroyListState(struct MenuList *list);
 
 #ifdef VERSION_DDS2
 /* Draw the track and thumb for a list that exceeds its visible row count. */

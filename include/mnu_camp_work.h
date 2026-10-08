@@ -6,6 +6,7 @@
 #include "mnu_scroll_panel.h"
 
 struct EffectList;
+struct EffMappedResource;
 
 #ifndef VERSION_DDS2
 /* The camp task userdata owner allocated and shared by the input, draw, and
@@ -22,11 +23,11 @@ typedef struct StaffMenuWork {
     u32 categoryGroup[4];
     u32 partyModels[9];
     u32 singleResource;
-    u32 primaryImage;
+    struct EffMappedResource *primaryImage;
     MenuPanelHandles *resourceList;
-    u32 secondaryImage;
+    struct EffMappedResource *secondaryImage;
     u32 images[3];
-    u32 extraImages[2];
+    struct EffMappedResource *extraImages[2];
     MenuScrollPanel *scrollPanel;
     u8 background[0x6B0];
     PartyPanel partyPanel; /* 0x7EC: initialized by mnuInitPartyPanelSlots */

@@ -110,7 +110,7 @@ extern void evtViewerDispatchFlagMode();
 extern KwlnTask *func_00101820(u32 priority);
 
 
-extern s32 func_00261B98(s32);
+extern s32 func_00261B98(MenuTerminalContext *);
 
 
 extern char D_00437838[]; /* "camp" */
@@ -182,7 +182,6 @@ extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
 extern s32 mnuShopRestoreMiddleVector;
-extern EffMappedResource *effCreateStatusBatch(s32 kind);
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(SdfListHead *packet);
 extern void itfSendTablePacket(SdfListHead *packet, s32 table, s32 mode);
@@ -194,7 +193,6 @@ extern s32 D_003C9988[4];
 extern s32 D_003C9998[4];
 extern s32 D_003C99A8[4];
 extern SdfPoolNode kwlnDrawSurfaces[];
-extern s32 effDestroyPackedBatch(s32);
 
 
 extern ShopRankPriceRow D_003CBB70[];
@@ -541,7 +539,39 @@ void mnuInitializeCampListLayoutDefaults(CampListLayout *layout) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E390);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025E460);
+/* Blend the display fields; control bytes always come from the lower key. */
+void func_0025E460(EvtRuntimeChild *from, EvtRuntimeChild *to,
+                   CampDisplayDefaults *display, f32 ratio) {
+    if (from == NULL) {
+        mnuCampInitializeDisplayDefaults(display);
+        return;
+    }
+    if (to == NULL || ratio == 0.0f || from->p08.sh[0] == 0) {
+        display->x = from->p0C.sh[0];
+        display->y = from->p0C.sh[1];
+        display->color[0] = from->p10.b[0];
+        display->color[1] = from->p10.b[1];
+        display->color[2] = from->p10.b[2];
+        display->color[3] = from->p10.b[3];
+        display->scaleX = from->p14.f;
+        display->scaleY = from->p18.f;
+        display->enabled = from->p08.sb[0];
+        display->variant = from->p08.sb[1];
+        goto copyExtraMetadata;
+    }
+    display->x = from->p0C.sh[0] + (to->p0C.sh[0] - from->p0C.sh[0]) * ratio;
+    display->y = from->p0C.sh[1] + (to->p0C.sh[1] - from->p0C.sh[1]) * ratio;
+    display->color[0] = (u32)(from->p10.b[0] + (to->p10.b[0] - from->p10.b[0]) * ratio);
+    display->color[1] = (u32)(from->p10.b[1] + (to->p10.b[1] - from->p10.b[1]) * ratio);
+    display->color[2] = (u32)(from->p10.b[2] + (to->p10.b[2] - from->p10.b[2]) * ratio);
+    display->color[3] = (u32)(from->p10.b[3] + (to->p10.b[3] - from->p10.b[3]) * ratio);
+    display->scaleX = from->p14.f + (to->p14.f - from->p14.f) * ratio;
+    display->scaleY = from->p18.f + (to->p18.f - from->p18.f) * ratio;
+    display->enabled = from->p08.sb[0];
+    display->variant = from->p08.sb[1];
+copyExtraMetadata:
+    display->unk1C = from->p1C.sb[0];
+}
 
 void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 value, EvtRuntimeChild **out1, EvtRuntimeChild **out2) {
     s32 base;
@@ -1045,7 +1075,7 @@ s32 mnuShopReleaseSceneObjects(MenuTerminalContext *scene) {
     s32 destroyResult;
     u32 batchIndex;
     for (batchIndex = 0; batchIndex < CAMP_STATUS_BATCH_COUNT; batchIndex++) {
-        destroyResult = effDestroyPackedBatch((s32)*batchCursor++);
+        destroyResult = effDestroyPackedBatch(*batchCursor++);
     }
     return destroyResult;
 }
@@ -1055,9 +1085,7 @@ extern const CampMapArguments D_00424A90;
 extern const CampEffectRows D_00424AC0;
 extern const char D_00424AE0[];
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
-extern u32 effCreateMappedResource(u32);
 extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
-extern void mnuSetCampEffectResourceHandles(u32, u32, MenuEffectResources *);
 extern void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 extern void mnuOrEntryFlags(u32, u32 *);
 
@@ -1066,7 +1094,7 @@ void func_0025F8B8(u32 object, MenuEffectResources *resources) {
     CampEffectRows rows = D_00424AC0;
     u32 dataAddress;
     struct SdfMemBlock *allocation;
-    u32 mappedResource;
+    struct EffMappedResource *mappedResource;
 
     allocation = sdfReadNamedResource(D_00424AE0, &dataAddress, 0);
     mappedResource = effCreateMappedResource(dataAddress);
@@ -1538,7 +1566,8 @@ typedef struct ShopSourcePriceRow {
 } ShopSourcePriceRow;
 
 typedef struct ShopItemPriceRecord {
-    u8 pad00[4];
+    u8 flags; /* Low two bits select fixed versus solar-phase price. */
+    u8 pad01[3];
     s32 price;
 } ShopItemPriceRecord;
 

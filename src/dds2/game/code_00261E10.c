@@ -86,7 +86,7 @@ extern u8 D_003CE4D0[];
 
 extern u8 D_003CE508[];
 
-extern s32 func_00261B98(s32);
+extern s32 func_00261B98(MenuTerminalContext *);
 
 extern u8 D_003CE690[];
 
@@ -390,7 +390,7 @@ void evtInstallStateTableD(MenuTerminalContext *state) {
 
 s32 evtEnableStateFlag(KwlnTask *task) {
     s32 stateAddress = kwlnTaskGetUserValue(task);
-    if (((MenuTerminalContext *)stateAddress)->phase == 1 && !func_00261B98(stateAddress)) {
+    if (((MenuTerminalContext *)stateAddress)->phase == 1 && !func_00261B98((MenuTerminalContext *)stateAddress)) {
         ((MenuTerminalContext *)stateAddress)->dispatchMode = 2;
     }
     return 1;

@@ -2453,7 +2453,59 @@ s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *targets) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC648);
+s32 func_001AC648(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *eligible[16];
+    BtlUnit *unit;
+    BtlUnit *selected;
+    BtlUnit **read;
+    s32 count;
+    s32 remaining;
+    s32 lowestId;
+
+    unit = battle->units;
+    count = 0;
+    if (unit != NULL) {
+        do {
+            s32 flags = unit->flags;
+            if ((flags & 0x200) == 0) {
+                goto next_actor;
+            }
+            if ((flags & 1) != 0) {
+                goto next_actor;
+            }
+            eligible[count] = unit;
+            unit->flags = flags & ~0x100;
+            count++;
+next_actor:
+            unit = unit->nextActor;
+        } while (unit != NULL);
+    }
+    if (count == 0) {
+        return 0;
+    }
+    if (battle->unk268 == 3 && count == 2) {
+        eligible[0]->flags |= 0x100;
+        eligible[1]->flags |= 0x100;
+    } else {
+        lowestId = 4;
+        unit = NULL;
+        if (count > 0) {
+            remaining = count;
+            read = eligible;
+            do {
+                BtlUnit *candidate = *read++;
+                s32 lookupId = candidate->lookupId;
+                if (lookupId < lowestId) {
+                    unit = candidate;
+                    lowestId = lookupId;
+                }
+            } while (--remaining != 0);
+        }
+        unit->flags |= 0x100;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AC750);
 
@@ -5497,8 +5549,6 @@ void btlReleaseResourceBlock(void) {
 
 extern SceneSlotFadeWork *D_00438F54;
 extern ActorSlotOrder *D_00438F58[2];
-extern s32 func_001B76F0(void);
-extern void func_001B75F8(s32, s32);
 extern void btlClearTaskActorSlots(void);
 extern s32 func_001B8368(s32);
 
@@ -5514,7 +5564,7 @@ s32 btlResetSceneSlotFades(void) {
     memset(D_00438F58[0], 0, sizeof(*D_00438F58[0]));
     memset(D_00438F58[1], 0, sizeof(*D_00438F58[1]));
     btlTrackedTaskHandles->fadeKindsCached = 0;
-    func_001B76F0();
+    btlCountSceneSlots();
     if (battle->mode == 1) {
         kind = 0;
         count = btlTrackedTaskHandles->fadeKindACount;
@@ -5539,7 +5589,7 @@ s32 btlResetSceneSlotFades(void) {
         (*bank)->unk6C[i] = 30.0f;
         (*bank)->unk8C[i] = 130;
     }
-    func_001B75F8(kind, count);
+    btlInitializeActorSlotOrder(kind, count);
     btlClearTaskActorSlots();
     return func_001B8368(kind);
 }
@@ -5585,7 +5635,7 @@ extern ActorSlotOrder *D_00438F58[2];
 extern const ActorOrder12 D_00415D58;
 extern const ActorOrder6 D_00415D88;
 
-void func_001B75F8(s32 selector, s32 count) {
+void btlInitializeActorSlotOrder(s32 selector, s32 count) {
     ActorOrder12 primaryOrder = D_00415D58;
     ActorOrder6 secondaryOrder = D_00415D88;
     s32 *order = selector != 0 ? primaryOrder.entries : secondaryOrder.entries;
@@ -5602,12 +5652,12 @@ void func_001B75F8(s32 selector, s32 count) {
     }
 }
 
-s32 func_001B76F0(void) {
-    s32 runtime;
+s32 btlCountSceneSlots(void) {
+    struct BattleSceneWork *scene;
     s32 fadeCounts[4];
 
-    runtime = btlGetRuntime();
-    return fldCountSceneFadeKinds(runtime, fadeCounts);
+    scene = (struct BattleSceneWork *)btlGetRuntime();
+    return fldCountSceneFadeKinds(scene, fadeCounts);
 }
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7718);
@@ -5679,7 +5729,7 @@ s32 btlSetTaskPhase2(void) {
 
 extern void btlUpdateActorSlotPresentationState(BtlUnit *, s8, s8);
 
-void func_001B7B20(BtlUnit *unit, s8 side) {
+void btlHighlightActorStatPanel(BtlUnit *unit, s8 side) {
     KwlnTask *task;
     BattleActorPanelWork *work;
     u32 index;
@@ -5784,14 +5834,14 @@ u32 btlIsNamedBattleTaskRegistered(void) {
     return 0;
 }
 
-void func_001B7E08(void) {
-    u8 *puVar1;
-    KwlnTask *temp_v0;
+void btlRequestMahenPanelClose(void) {
+    MesWindowSet *work;
+    KwlnTask *task;
 
-    temp_v0 = kwlnTaskGetTaskByName(btlMahenPanelTaskNameRef);
-    if (temp_v0 != 0) {
-        puVar1 = (u8 *)kwlnTaskGetUserValue(temp_v0);
-        *puVar1 = 2;
+    task = kwlnTaskGetTaskByName(btlMahenPanelTaskNameRef);
+    if (task != 0) {
+        work = (MesWindowSet *)kwlnTaskGetUserValue(task);
+        work->state = 2;
     }
 }
 
@@ -5874,14 +5924,14 @@ s32 btlGetRegisteredTaskValueOrDefault(void) {
     return *(s8 *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(btlAnalyzPanelTaskNameRef));
 }
 
-u32 func_001B8038(void) {
-    u8 *puVar1;
-    KwlnTask *temp_v0;
+u32 btlRequestAnalysisPanelClose(void) {
+    BtlAnalysisPanelWork *work;
+    KwlnTask *task;
 
-    temp_v0 = kwlnTaskGetTaskByName(btlAnalyzPanelTaskNameRef);
-    if (temp_v0 != 0) {
-        puVar1 = (u8 *)kwlnTaskGetUserValue(temp_v0);
-        *puVar1 = 2;
+    task = kwlnTaskGetTaskByName(btlAnalyzPanelTaskNameRef);
+    if (task != 0) {
+        work = (BtlAnalysisPanelWork *)kwlnTaskGetUserValue(task);
+        work->state = 2;
     }
     return 1;
 }

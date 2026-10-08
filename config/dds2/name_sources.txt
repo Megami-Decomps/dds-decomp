@@ -1147,9 +1147,13 @@
 0x00169608	effBTLFieldColorResetFlags	inferred	Clears all field-color state bits.
 0x00169610	effBTLFieldColorGetActorScale	inferred	readability/matching review (QP16)
 0x001696D0	effBattleMiscQueryPosition	inferred	dispatch table D_003528D8 by param type, stores vf10 to out [names_M61_EffVu.tsv]
+0x00169740	effBattleMiscCallByFinalSelector	inferred	Forwards the final selector and EffectVectorRequest to the shared target-position query; data table entry 7 is the final-selector counterpart to entry 6's override-selector adapter.
 0x00169770	effBattleMiscQueryOverrideAttachment	inferred	medium confidence; src/dds2/effect/effBattleMisc.c func_00169770: Uses the override-aware actor selector and parameter byte to load its effect attachment vector, falling back to the muzzle vector. [names_reviewed25.tsv]
 0x001697A0	effBattleMiscQueryFinalAttachment	inferred	medium confidence; src/dds2/effect/effBattleMisc.c func_001697A0: Uses the final actor selector and parameter byte to load its effect attachment vector, falling back to the muzzle vector. [names_reviewed25.tsv]
 0x001697D0	effBattleComputeTargetPosition	inferred	confidence=high; matched-C; src/dds2/effect/effBattleMisc.c:92:func_001697D0; Semantic counterpart of DDS1 0x00161BA0: computes unit-relative/camera-facing target position into VU vf10. DDS2 uses field-color flag bit 4 where DDS1 uses bit 1; both implement the same target-position role.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x00169A78	effBattleMiscQueryMaskedTargetPosition	inferred	Computes the battle-mask target position for an EffectVectorRequest and leaves the vector in vf10; paired adapter table and body support the mask domain.
+0x00169C58	effBattleMiscQueryOriginalTargetPosition	inferred	Uses the original selector's 0xE00 battle flags as the mask for the target-position query; registered as request kind 1.
+0x00169C88	effBattleMiscQueryVariantTargetPosition	inferred	Uses the variant selector's 0xE00 battle flags as the mask for the target-position query; registered as request kind 2.
 0x00169CB8	effBattleMiscBuildUnitPartOffsetVU	inferred	Uses unit part kind and subpart to build target offset direction in VU register. [names_reviewed6.tsv]
 0x00169EA0	effBattleMiscQueryScalar	inferred	switch on param type -> unit height scale / func_001F6970 [names_M61_EffVu.tsv]
 0x00169F68	effBattleMiscDirectionTo	inferred	normalized (muzzle|effect pos - queried pos) [names_M61_EffVu.tsv]
@@ -2238,12 +2242,17 @@
 0x001B7208	btlInitializeActionRecordWithScale	inferred	Initializes an action record with owner arguments, scale and a derived slot value. [names_reviewed17.tsv]
 0x001B7238	btlPanelResourcesLoad	inferred	loads /battle/panel/batle_01.spr, batle_02.spr, battle_03.spr into the block at D_00436804; DDS1 twin func_001AC628
 0x001B73E8	btlResetSceneSlotFades	inferred	Near95b
+0x001B75F8	btlInitializeActorSlotOrder	inferred	copies selected fixed order into actor slot bank
+0x001B76F0	btlCountSceneSlots	inferred	returns occupied scene slot count while refreshing fade-kind cache
 0x001B7900	btlClearSharedBattleStateWords	inferred	Clears the consecutive state words in the shared battle work region. [names_reviewed17.tsv]
+0x001B7B20	btlHighlightActorStatPanel	inferred	selects actor HP or MP highlight state and refreshes presentation
 0x001B7BF0	btlCreateMahenPanelTask	inferred	LeverAudit
 0x001B7DC0	btlIsNamedBattleTaskRegistered	inferred	Requires the indexed battle task to be registered and its named task to exist. [names_reviewed17.tsv]
+0x001B7E08	btlRequestMahenPanelClose	inferred	sets registered Mahen panel to its closing state
 0x001B7E40	btlCreateAnalysisPanelTask	inferred	U1
 0x001B7FB8	btlHasRegisteredAnalysisPanelTask	inferred	confidence=high; matched-C; src/dds2/game/code_001A5BB8.c:2949:func_001B7FB8; Requires tracked analysis-panel handle to remain registered and named analysis task to exist.; twin=0x001AD3A8, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x001B8000	btlGetRegisteredTaskValueOrDefault	inferred	Returns a registered task value or a fixed default when unavailable. [names_reviewed9.tsv]
+0x001B8038	btlRequestAnalysisPanelClose	inferred	sets registered analysis panel to its closing state and returns one
 0x001B8078	btlCreateGuidePanelTask	inferred	U0
 0x001B81B0	btlRequestGuidePanelClose	inferred	Guide task constructor and registration check use the same task name; dialog release caller requests state 2 before its close transition; paired native function is a relocation twin.
 0x001B81E8	btlHasRegisteredGuidePanelTask	inferred	confidence=high; src/dds2/game/code_001A5BB8.c:func_001B81E8; Requires tracked task slot nine to remain registered and the retail bpnl_guide_nm named task to exist. [names_qp9.tsv]
@@ -2886,7 +2895,7 @@
 0x0020C3C0	btlCmdRememberLowerElementBlock	inferred	medium confidence; src/dds2/game/code_00207A38.c func_0020C3C0: Action type 71 tests whether any eligible group-0x200 unit blocks the selected element query; records choice. [names_reviewed25.tsv]
 0x0020C450	btlCmdReportPartyEmptyMp	inferred	R_Names31 B93
 0x0020C4A0	btlCommandReportLinkedActionScene	inferred	confidence=high; src/dds2/game/code_00207A38.c:func_0020C4A0; Writes the linked-action-scene active predicate to the script integer return channel. [names_qp9.tsv]
-0x0020C4E0	btlScriptReturnBattleValue	inferred	Twin of dds1 0x001FA4B0; Returns result of the battle value accessor to script VM. [names_R_FuncNames3.tsv]
+0x0020C4E0	btlScriptReturnSceneSlotCount	inferred	writes occupied scene slot count to script integer return
 0x0020C508	btlScriptReturnWorkParameter	inferred	Twin of dds1 0x001FA4D8; Returns a battle-work parameter to script VM: DDS1 +0x250 and DDS2 +0x274. [names_R_FuncNames3.tsv]
 0x0020C530	btlCmdReturnActorActionTime	inferred	confidence=high; matched-C; src/dds2/game/code_00207A38.c:2043:func_0020C530; Reads the command actor u16 actionTime member and writes it into the script integer return slot.; source=revalidated-unapplied-names_R_Names31.tsv:23 [names_qp12_apply.tsv]
 0x0020C570	btlScriptReturnEffectActive	inferred	Twin of dds1 0x001FA580; Returns btlGetEffectActive result to script VM. [names_R_FuncNames3.tsv]
@@ -6308,6 +6317,7 @@
 0x003447D8	sdfStreamOpen	inferred	init params, allocates frame buffers, appends to stream list
 0x00344870	sdfSoundInitFormattedNode	inferred	Byte-identical DDS1 counterpart: Initializes a sound node using format and callback values and allocates its sample buffer.
 0x003448D0	sdfStreamInitializeFromHeader	inferred	confidence=high; matched-C; src/dds2/game/code_003425B0.c:756:func_003448D0; Peer-matched C proposal: P7; Waits for a complete streamed frame header, captures dimensions and format metadata, creates a texture when absent, allocates frame buffers and links the stream node.; source=names_pending_main.tsv:146 [names_qp13.tsv]
+0x00344A08	sdfDestroyStreamFrameNode	inferred	Duplicated DDS1 stream-node teardown: unlink both queues, stop active IPU DMA, release owned buffers and enqueue its texture resource
 0x00344B40	sndFillStreamFeedRing	inferred	confidence=high; src/dds2/game/code_003425B0.c:func_00344B40; Fills uncached stream-ring slots up to its reserve limit, handles partial EOF, preserves wrap history and updates occupancy. [names_qp9.tsv]
 0x00344D60	sdfSoundStartIpuInputDma	inferred	Fam_Mid3
 0x00345198	sdfIpuDmaCompletionWorker	inferred	confidence=high; src/dds2/game/code_003425B0.c:func_00345198; Waits for IPU worker wakeups, stops DMA, updates completion/loop state, requeues unfinished work with interrupt protection, and resumes processing. [names_qp9.tsv]
@@ -6620,8 +6630,10 @@
 0x00437AE8	mnuMovieShutdownCounter	inferred	confidence=high; data D_00437AE8; matched-C-users=3; src/dds2/game/code_002A8048.c:92:mnuScriptRequestMovieByIndex; src/dds2/game/code_002A8048.c:101:mnuScriptStopMovieAndResetDraw; src/dds2/game/code_002A8048.c:116:mnuUpdateMovieDrawShutdownCountdown; Movie request/stop commands clear counter; movie draw shutdown update advances/tests it; data-twin=D_003BC630, supported by 3 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_002A8048.sdata.s:9.; naming-boundary: Movie request/stop commands clear counter; shutdown update increments it until the 30-frame stop boundary.; seed-placeholder=D_00437AE8; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x00437B72	mnuCampTaskState	inferred	confidence=high; data D_00437B72; matched-C-users=3; src/dds2/game/code_002A9068.c:712:mnuDestroyStaffMenuTask; src/dds2/game/code_002A9068.c:782:mnuCreateCampTasks; src/dds2/game/code_002A9068.c:802:mnuAcknowledgeCampState; Camp task creation stores active state one; destructor stores completion state two and acknowledgement reads it; data-twin=D_003BC6B4, supported by 3 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_002A8048.sdata.s:179.; seed-placeholder=D_00437B72; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x00437B78	mnuCampInputTaskName	inferred	confidence=high; data D_00437B78; matched-C-users=2; src/dds2/game/code_002A9068.c:782:mnuCreateCampTasks; src/dds2/game/code_002A9068.c:796:mnuDestroyCampTasks; Camp task create/destroy pair uses this name for input-priority task; data-twin=D_003BC6B8, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_002A9068.sdata.s:10.; seed-placeholder=D_00437B78; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
+0x00437CD0	fileMemoryCardRequestIndex	inferred	u32 index selecting the current memory-card request-table entry
 0x00437CD4	fileMenuTaskAlive	inferred	confidence=high; data D_00437CD4; matched-C-users=2; src/dds2/game/code_002C96D0.c:590:fileDestroyMenuTask; src/dds2/game/code_002C96D0.c:598:fileMenuTaskIsAlive; File menu teardown clears flag; menu-alive query returns it; data-twin=D_003BC7EC, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_002C96D0.sdata.s:15.; seed-placeholder=D_00437CD4; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x00437CE8	fileWaitTicksRemaining	inferred	confidence=high; src/dds2/game/code_002C96D0.c:D_00437CE8; type=s32; refs=fileBeginWait,fileUpdateWait; Set to twenty when the wait begins, decremented each update and tested before invoking the continuation. [names_qp9.tsv]
+0x00437D2C	fileSelectedSlotIndex	inferred	current save slot used by browser navigation, selected-slot APIs, and preview indexing
 0x00437D34	fileSelectionPending	inferred	confidence=high; src/dds2/game/code_002C96D0.c:D_00437D34; type=u32; refs=mcdEnterSelectedFileFlow,fileResetMenuFlowState; Set when entering the selected-file flow and returned by the selection-pending query. [names_qp9.tsv]
 0x00437D7C	mcdOriginalTitleFileMode	inferred	confidence=high; src/dds2/game/code_002C96D0.c:mcdEnterDefaultFileFlow; Nonzero selects the original-title file flow; mcdFormatSaveSlotName also uses it to select SLUS_209.74 filenames. [names_qp9.tsv]
 0x00437D84	fileLoadSelectionWork	inferred	confidence=medium; src/dds2/game/code_002C96D0.c:fileBeginLoadOrAbortDialog; MenuWork pointer used by load-selection transitions and their choice flags. [names_qp9.tsv]
@@ -6818,6 +6830,8 @@
 0x00457F28	fileManagerWork	inferred	confidence=high; matched_users=src/dds2/game/code_002C83F0.c:fileManInit, src/dds2/file/fileManager.c:fileQueuePendingRequestInFreeSlot; Shared manager work is initialized with semaphore/buffer and governs synchronized pending-request ring slots. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x00457F68	fileRequestEntries	inferred	confidence=high; src/dds2/game/code_002C83F0.c:D_00457F68; type=FileReqEntry[]; refs=fileReqBegin,fileReqGetStatus; Request-indexed records expose status, byte size, selected slot and metadata-dirty flags. [names_qp9.tsv]
 0x00457F7C	fileRequestSlotFlags	inferred	confidence=high; data D_00457F7C; matched-C-users=3; src/dds2/game/code_002C83F0.c:160:fileReqClearSlotFlags; src/dds2/game/code_002C83F0.c:165:fileReqSetSlotFlags; src/dds2/game/code_002C83F0.c:170:fileReqGetSlotFlags; Per-request slot flag words are cleared, ORed and returned by file request slot APIs; data-twin=D_003DC6AC, supported by 3 independently paired matched functions.; retail-data-start=asm/dds2/data/bss.bss.s:1704.; seed-placeholder=D_00457F7C; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
+0x00458080	fileSlotDisplayStates	inferred	ten active save-slot scan/display state words in this sixteen-word backing region
+0x004580C0	fileSavePreviewRecords	inferred	ten 0x30-byte serialized save-preview records
 0x0045C7C0	sdfInstalledSpriteSlots	inferred	confidence=high; src/dds2/game/code_0030B838.c:sdfInstallNonzeroSpriteSlots; Twenty-five sprite slots updated for nonzero incoming values and released together. [names_qp9.tsv]
 0x0045C866	mnuStepCounterThreshold	inferred	confidence=high; src/dds2/game/code_00320FD0.c:func_003212A8; Threshold byte compared with accumulated step total; aliases byte +6 of the opaque sixteen-byte parameter block. [names_qp9.tsv]
 0x0045F0A0	sdfChipClassTable	inferred	confidence=high; seven power-of-two size classes are initialized here and used by exact allocation, release, and statistics paths; the final four bytes are alignment tail; paired with DDS1.
