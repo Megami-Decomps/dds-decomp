@@ -25,6 +25,8 @@ void mnuClearListFlags(s32 which, MenuPageWindow *page);
 
 #ifdef VERSION_DDS2
 struct MenuPanelState;
+/* Initialize the camp menu after its task-owned effect handles are ready. */
+s32 mnuInitializeCampMenuWhenResourcesReady(struct KwlnTask *task);
 
 /* Native staff components: page 0x284, party 0xA928 and fade 0xB10C. */
 void mnuInitializeWindowFadeState(MenuFadeFields *fade);
@@ -49,8 +51,10 @@ void func_002BCA98(MenuPageWindow *page);
 void func_002BCAB0(MenuPageWindow *page);
 s32 func_002C6008(PartyPanel *party, MenuPageWindow *page,
                  struct DatPartyRecord *entry, s32 commit);
-MenuWindowContainer *func_002A9BF8(void *labels, s32 count, s32 width,
-                                 s32 rowHeight, u8 *work, void *options);
+/* Append entry pointers whose optional model-flag requirements are met. */
+MenuWindowContainer *mnuCreateStaffResourceListWindow(
+    void *const *entries, s32 entryCount, s32 width, s32 rowHeight,
+    u8 *work, const s32 *requiredFlags);
 void mnuSetWindowContainerState(MenuWindowContainer *window, u32 state);
 void mnuDestroyWindowContainer(MenuWindowContainer *window);
 void mnuDestroyPanelState(struct MenuPanelState *panel);

@@ -7,6 +7,7 @@
 #include "mdl.h"
 #include "sdf_draw.h"
 #include "eff_object.h"
+#include "eff_event.h"
 #include "scr.h"
 
 
@@ -1324,7 +1325,6 @@ f32 evtComputeClampedModelScale(s32 index) {
 }
 
 extern f32 evtComputeClampedModelScale(s32);
-extern void effEventSetScale(void *, f32);
 
 u32 evtOpSetModelCutAndScale(void) {
     void *unit;

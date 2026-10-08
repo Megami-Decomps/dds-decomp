@@ -1285,6 +1285,7 @@
 0x00158FA8	parInitializeRadialParticle	inferred	confidence=high; src/dds1/effect/parManager.c:func_00158FA8; Initializes delayed particle age, independently jittered radial offset, rotation axis, radial step, billboard scale and initial phase. [names_qp9.tsv]
 0x001596E8	parInitColorRamp	inferred	Initializes color-ramp data. [names_qp9.tsv]
 0x00159CD8	effParReleaseNodeResource	inferred	releases particle node resource [names_reviewed5.tsv]
+0x00159CF0	parPrependHistorySample	inferred	Shifts the selected slot history backward, captures the current vector sample, and stores color and billboard scale
 0x00159D68	parPopulateSlotFromHistory	inferred	copies ring-history points into the selected particle slot with origin, color, and scale
 0x00159E20	parDrawHistorySlots	inferred	submits each particle slot history as progressively fading billboard points
 0x00159F30	parClearSlotFlag	inferred	Clears the halfword flag of the indexed particle-table slot.
@@ -1461,6 +1462,8 @@
 0x00163518	effThunderSetVectorTint	inferred	queued
 0x00163520	effThunderScaleVectorDimensions	inferred	queued
 0x00163548	effThunderCellRestart	inferred	random counters, two unit vectors, two ranges (twin 0x164078) [names_M61_EffVu.tsv]
+0x00163780	effThunderBuildVectorHistory	inferred	writes the vector variant's five-vector cell-history rows while rotating its placement around a perturbed axis
+0x00163AF8	effThunderRotateVectorPlacementAndHistory	inferred	rotates the live XZ placement vector and each five-vector history row around the effect origin
 0x00163CD0	effThunderUpdateVectorCells	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:182:func_00163CD0; Peer-matched C proposal; P7; source=names_pending_main.tsv:136 [names_qp12_apply.tsv]
 0x00163E10	effThunderWorkCreate	inferred	0x4C head copy, particle system, cells zeroed [names_M61_EffVu.tsv]
 0x00163FD0	effThunderReleaseIndexedVectorWork	inferred	queued
@@ -1468,6 +1471,8 @@
 0x00164048	effThunderSetIndexedVectorTint	inferred	queued
 0x00164050	effThunderScaleIndexedVectorDimensions	inferred	queued
 0x00164078	effThunderRestartIndexedCell	inferred	Selects a cell by index and reinitializes its random parameters and direction vectors. [names_reviewed6.tsv]
+0x001642B0	effThunderBuildIndexedVectorHistory	inferred	writes each indexed cell's kind-0 history as two-vector rows from its current placement, radius and axis
+0x001645A0	effThunderRotateIndexedPlacementAndHistory	inferred	rotates the live XZ placement direction and each two-vector history row around the effect origin
 0x001646F8	effThunderUpdateIndexedVectorCells	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:311:func_001646F8; Peer-matched C proposal; P7; source=names_pending_main.tsv:137 [names_qp12_apply.tsv]
 0x00164838	effThunderSparkCreate	inferred	0xA4 head copy, one particle system per spark [names_M61_EffVu.tsv]
 0x00164A30	effThunderReleaseSparkWork	inferred	queued
@@ -1480,10 +1485,13 @@
 0x00165630	effThunderSetFragmentColor	inferred	queued
 0x00165690	effThunderApplyFragmentColorBands	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:542:func_00165690; Applies the three stored fragment color parameters to the particle system using its symmetric five-vertex color layout.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x001656B8	effThunderRandomizeFrag	inferred	fills a 12-byte fragment with two rand-modulo values and grey 0x80808080
+0x00165758	effThunderBuildFragmentStrip	inferred	builds a fragment's one-system strip by writing paired five-vector rows into its cell history
+0x00165D80	effThunderUpdateFragments	inferred	updates fragment countdowns, geometry, fade/restart state, colors and submits cells
 0x001660C8	effThunderReleaseDualFragmentWork	inferred	queued
 0x00166100	effThunderShiftEndpointsWithAnchor	inferred	Moves an effect origin by the same delta as its replacement anchor vector. [names_reviewed14.tsv]
 0x00166130	effThunderSetDualFragmentColor	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:600:func_00166130; Stores the packed color in the dual-fragment thunder work callback family.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00166138	effThunderRandomizeFrag2	inferred	byte-identical twin of effThunderRandomizeFrag for the second thunder effect
+0x001661D8	effThunderBuildCoreAndEdgeFragmentStrips	inferred	builds synchronized core and outer-edge strips in the primary and secondary particle systems
 0x00166810	effThunderUpdateDualFragments	inferred	confidence=high; matched-C; src/dds1/effect/effPCPThunder.c:542:func_00166810; Runs fragment delay/activity/fade/reset transitions and writes identical multiplied colors into both particle systems before queueing their cells.; source=names_P5.tsv:11 [names_qp11.tsv]
 0x00166960	effThunderCellCreate	inferred	0x48 head copy, kind-2 system, cells randomized [names_M61_EffVu.tsv]
 0x00166AF0	effThunderReleaseCellWork	inferred	queued
