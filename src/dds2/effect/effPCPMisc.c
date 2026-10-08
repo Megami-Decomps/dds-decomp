@@ -822,16 +822,16 @@ EffPCPTwinWork *effTwinEffectCreateFromTable(void *src) {
 }
 
 void effTwinEffectRelease(EffPCPTwinWork *work) {
-    s32 *a = (s32 *)work->shared;
-    s32 *b = (s32 *)work->pair;
-    s32 i;
+    s32 *sharedHandleCursor = (s32 *)work->shared;
+    s32 *pairHandleCursor = (s32 *)work->pair;
+    s32 pairIndex;
 
-    for (i = 0; i < 8; i++) {
-        effDispatchParameterDataAndFreeWork(a[0]);
-        effDispatchParameterDataAndFreeWork(b[1]);
-        effDispatchParameterDataAndFreeWork(b[0]);
-        a++;
-        b += 2;
+    for (pairIndex = 0; pairIndex < 8; pairIndex++) {
+        effDispatchParameterDataAndFreeWork(sharedHandleCursor[0]);
+        effDispatchParameterDataAndFreeWork(pairHandleCursor[1]);
+        effDispatchParameterDataAndFreeWork(pairHandleCursor[0]);
+        sharedHandleCursor++;
+        pairHandleCursor += 2;
     }
     sdfReleaseChipBlock(work);
 }
