@@ -56,7 +56,7 @@ EffectObj *effObjCreateBillNode(void *bill, void *vec, s32 extra);
 EffectObj *effObjCreateWithBoundBill(void *bill, void *vec, s32 extra);
 EffectObj *effObjCreateBillboardInWorld(void *bill, void *vec, s32 extra);
 EffectObj *func_001150F0();
-void func_00115398(void);
+EffectObj *func_00115398(const char *name, void *firstVector, void *secondVector, f32 scale);
 /* Old-style (K&R) callee: callers pass (kind, value) positionally. */
 EffectObj *effObjCreateMagatuhiForKind();
 extern const f32 D_0039F800[10];
@@ -215,12 +215,12 @@ EffectObj *effObjCreateKindTwo(void *bill, void *vec, s32 extra) {
     return obj;
 }
 
-/* Clone the shared bill and forward both vector arguments; discard constructor failure. */
-void effObjSpawnSharedBillClone(EffectObj *obj, void *firstVector, s32 secondVectorAddress) {
+/* Clone the shared bill and return the newly constructed effect object. */
+EffectObj *effObjSpawnSharedBillClone(EffectObj *obj, void *firstVector, s32 secondVectorAddress) {
     struct BillObj *bill;
 
     bill = billCloneObjectRetainingSharedData((struct BillObj *)obj->data->handle);
-    effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
+    return effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
 }
 
 /* Create a kind-one indexed bill; the native constructor result is discarded. */
@@ -231,12 +231,12 @@ void effObjCreateIndexedKindOne(u32 billId, void *firstVector, s32 secondVectorA
     effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
 }
 
-/* Create a kind-one resource bill; the native constructor result is discarded. */
-void effObjCreateResourceKindOne(const char *path, void *firstVector, s32 secondVectorAddress) {
+/* Create a kind-one resource bill and return its effect object. */
+EffectObj *effObjCreateResourceKindOne(const char *path, void *firstVector, s32 secondVectorAddress) {
     void *bill;
 
     bill = billCreateFromResource(1, path);
-    effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
+    return effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
 }
 
 /* Select the stored bill's kind-one entry; no object/data/bill checks are made. */
@@ -278,12 +278,12 @@ EffectObj *effObjCreateBillNode(void *bill, void *firstVector, s32 secondVectorA
     return obj;
 }
 
-/* Clone the shared bill for the state-three constructor; ignore its return value. */
-void effObjSpawnSharedBillNodeClone(EffectObj *obj, void *firstVector, s32 secondVectorAddress) {
+/* Clone the shared bill and return its state-three effect object. */
+EffectObj *effObjSpawnSharedBillNodeClone(EffectObj *obj, void *firstVector, s32 secondVectorAddress) {
     struct BillObj *bill;
 
     bill = billCloneObjectRetainingSharedData((struct BillObj *)obj->data->handle);
-    effObjCreateBillNode(bill, firstVector, secondVectorAddress);
+    return effObjCreateBillNode(bill, firstVector, secondVectorAddress);
 }
 
 /* Create a kind-zero indexed bill for the state-three constructor. */
@@ -295,11 +295,11 @@ void effObjCreateIndexedKindZero(u32 billId, void *firstVector, s32 secondVector
 }
 
 /* Create a kind-zero resource bill for the state-three constructor. */
-void effObjCreateResourceKindZero(const char *path, void *firstVector, s32 secondVectorAddress) {
+EffectObj *effObjCreateResourceKindZero(const char *path, void *firstVector, s32 secondVectorAddress) {
     void *bill;
 
     bill = billCreateFromResource(0, path);
-    effObjCreateBillNode(bill, firstVector, secondVectorAddress);
+    return effObjCreateBillNode(bill, firstVector, secondVectorAddress);
 }
 
 /* Bind the supplied bill through its node-instance vector copy, selecting state one.
@@ -485,8 +485,8 @@ void effObjReplaceActiveEventNode(EffectObj *obj, u32 entryId) {
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115398);
 
-void func_00115460(void) {
-    func_00115398();
+EffectObj *func_00115460(const char *name, void *firstVector, void *secondVector, f32 scale) {
+    return func_00115398(name, firstVector, secondVector, scale);
 }
 
 EffectObj *effObjCreateMagatuhiForKind(kind, descriptor)

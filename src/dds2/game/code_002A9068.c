@@ -1039,8 +1039,7 @@ void mnuDrawStaffGridLabelsForKind(s32 kind, u32 slot) {
 }
 
 
-typedef struct TextStyleNode TextStyleNode;
-extern void frFontSetChildColors(TextStyleNode *, u32);
+extern void frFontSetChildColors(struct FrFontGlyph *, u32);
 extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
 
 typedef struct StaffFramePiece {
@@ -1095,7 +1094,7 @@ void func_002AA9D8(s32 kind, u32 labelIndex, u32 textTable, u32 context,
         }
         glyph = itfDrawBankTextWithLayoutFlags(textPosition[0], textPosition[1] + 0x918,
                                              0, labelIndex, textTable, textOption);
-        frFontSetChildColors((TextStyleNode *)glyph, 0xA09DC35A);
+        frFontSetChildColors((struct FrFontGlyph *)(u32)glyph, 0xA09DC35A);
         frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, layer);
         frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
     }
