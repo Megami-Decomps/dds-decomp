@@ -57,10 +57,10 @@ extern void mdlAddEntryFlagged(void *, s32, s32);
 extern u8 effSharedRandomState[];
 extern void func_001EC5F0(BtlLinkedCommand *);
 extern void func_001EF030(void *, void *);
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 extern void func_001E38F0(BtlUnit *, MdlCtx *, SdfModel *, SdfPoolNode **, u32);
 extern void dds3ClearObjectFlags(void *, u32);
-extern u8 D_00380788[];
+extern struct SdfPoolNode *D_00380788[13][4];
 extern SdfPoolNode *D_003B6BD0[];
 
 
@@ -2834,7 +2834,7 @@ void func_001E38F0(BtlUnit *unit, MdlCtx *model, SdfModel *overlay,
     savedFlags = model->inner->unk1A;
     model->flags |= MDL_SKIP_ANCHORS;
     model->inner->unk1A = 0x2000;
-    mdlProcessContextNodesAndTransforms(model, (s32)surfaces);
+    mdlProcessContextNodesAndTransforms(model, surfaces);
     model->flags &= ~MDL_SKIP_ANCHORS;
     model->inner->unk1A = savedFlags;
     for (i = 0; i != 4; i++) {
@@ -2916,7 +2916,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
                         info->inner->lighting = 0;
                     }
                     mdlBroadcastMasked(info, color);
-                    mdlProcessContextNodesAndTransforms(info, (s32)D_00380788);
+                    mdlProcessContextNodesAndTransforms(info, D_00380788[0]);
                     dds3ClearObjectFlags(unit->effectObject, 1);
                     btlBossDebugPrintf(D_00417940, unit);
                 }

@@ -4714,3 +4714,30 @@ The reveal and neighbour-selection helpers take the whole typed owner.
 The unchanged rank-pass address-word interface decodes its argument at
 the three calls into these helpers; no alternate workspace layout is needed.
 
+## Model update arguments are draw-surface tables, not frame counters
+
+DDS2 `0033251C..00332544` reloads the original renderer argument, indexes
+four `SdfPoolNode *` entries, and calls each selected pool's `append` at +10.
+`mdlProcessContextNodesAndTransforms`, `mdlBlendEntryPitchYawAndUpdate`, and
+`evtStageTestUpdate` therefore forward `SdfPoolNode **surfaces` unchanged.
+The stage viewer's +08 model is `MdlCtx *`; its motion-state check is
+`model->first->state`, not an address-word view. Existing encoded-word
+transport and the SDK pool-to-list-head callback boundary are unchanged.
+
+## Basic object drawing uses the complete model owners
+
+DDS1 `00112100` and DDS2 `00112328` obtain `MdlCtx *` from the basic
+object's resource handle and operate on `context->inner->flags` in the
+complete `SdfModel`. Their old context/inner prefix typedefs are unnecessary.
+The draw-surface pointer table is forwarded unchanged through the model
+update API; no auxiliary flags view or SDK address-word conversion is needed.
+
+
+## Marked-actor camera dispatch forwards two owned camera records
+
+DDS1 `001DEE18` forwards its linked-command pointer unchanged, then forms
+the front/back camera arguments at +30/+C0 for `001E4AC0`. DDS2's
+`001F2758` has the same three-pointer contract. These are `BtlCamState *`
+members of `BtlLinkedCommand`, not integer-address parameters; the dispatch
+callback therefore accepts the command pointer directly.
+

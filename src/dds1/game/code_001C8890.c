@@ -4518,7 +4518,7 @@ extern void func_002D9748(SdfModel *, SdfModel *);
 extern void func_002D9238(SdfPoolNode **, SdfModel *);
 extern u64 D_00359CF0[4];
 extern void mdlBroadcastMasked(MdlCtx *, u32);
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 
 /* Draw the model into four surfaces in three GS TEST passes, then update its anchors. */
 void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode **surfaces, u32 frame) {
@@ -4548,7 +4548,7 @@ void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode 
     savedFlags = model->inner->unk1A;
     model->flags |= MDL_SKIP_ANCHORS;
     model->inner->unk1A = 0x2000;
-    mdlProcessContextNodesAndTransforms(model, (s32)surfaces);
+    mdlProcessContextNodesAndTransforms(model, surfaces);
     model->flags &= ~MDL_SKIP_ANCHORS;
     model->inner->unk1A = savedFlags;
     for (i = 0; i != 4; i++) {
@@ -4611,8 +4611,8 @@ void btlCreateUnitTransparency(BtlUnit *unit) {
 
 extern void sdfReleaseDevSlot(s32, s32, s32);
 extern void mdlBroadcastMasked(MdlCtx *, u32);
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
-extern s32 D_00325788[];
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
+extern struct SdfPoolNode *D_00325788[13][4];
 extern SdfPoolNode *D_00359D10[];
 
 void btlUpdateUnitTransparency(BtlUnit *unit) {
@@ -4636,7 +4636,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
                         info->inner->lighting = 0;
                     }
                     mdlBroadcastMasked(info, color);
-                    mdlProcessContextNodesAndTransforms(info, (s32)D_00325788);
+                    mdlProcessContextNodesAndTransforms(info, D_00325788[0]);
                     dds3ClearObjectFlags(unit->effectObject, 1);
                     btlBossDebugPrintf(D_003A3AD0, unit);
                 }
@@ -7857,9 +7857,10 @@ void btlAdvanceCommandCursorTask(BtlLinkedCommand *action) {
     btlAdvanceCommandCursor(action, &action->camera);
 }
 
-void func_001DEE18(u32 arg0) {
-    func_001E4AC0(arg0, (s32)&((BtlLinkedCommand *)arg0)->frontCamera,
-                 (s32)&((BtlLinkedCommand *)arg0)->backCamera);
+extern void func_001E4AC0(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
+
+void func_001DEE18(BtlLinkedCommand *action) {
+    func_001E4AC0(action, &action->frontCamera, &action->backCamera);
 }
 
 void func_001DEE38(void) {
