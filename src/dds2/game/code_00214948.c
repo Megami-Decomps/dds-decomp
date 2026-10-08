@@ -2320,7 +2320,31 @@ s32 btlStartLinkedActionMotionPrimary(BtlLinkedCommand *command) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00219BD0);
+s32 func_00219BD0(BtlLinkedCommand *command, s32 unusedGroup200, s32 unusedGroup400) {
+    ActionStateLink *link = command->link;
+
+    if (btlIsActorCategoryMarked((s32)command)) {
+        goto rejected;
+    }
+    if (link->unit->flags & 0x200) {
+        goto rejected;
+    }
+    if (command->actionCode != 0x17E) {
+        goto rejected;
+    }
+    func_00217B20(command, &command->frontCamera, &command->backCamera,
+                  0, 0, 1.0f, 2.5f, 0.5f, 0.075f);
+    command->frontCamera.distance += 100.0f;
+    command->backCamera.distance += 150.0f;
+    command->motionParameter = 30.0f;
+    command->flags |= 0x841;
+    func_001E88A8(&command->frontCamera);
+    func_001E88A8(&command->backCamera);
+    return 1;
+
+rejected:
+    return 0;
+}
 
 extern s32 btlHasMarkedEntry14();
 
