@@ -23,7 +23,6 @@ extern void func_0026C900(void);
 extern void func_002AAE80(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void func_002AAC98(s32, s32, s32, s32, s32, s32);
-extern void mnuDrawStaffGridLabelsForKind(s32, s32);
 extern u8 D_003E7050[];
 extern char D_003E7207[20];
 extern char D_003E7202[];
@@ -100,7 +99,7 @@ s32 mnuStaffImageEnterA(KwlnTask *task) {
         }
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
-    mnuDrawStaffGridLabelsForKind(0, (u32)((MenuStaffContext *)context)->group);
+    mnuDrawStaffGridLabelsForKind(0, ((MenuStaffContext *)context)->group);
     return menuSetHandler((void *)context, 1, (void *)task);
 }
 
@@ -154,7 +153,7 @@ s32 mnuPrepareStaffImageAndSelectionLabel(KwlnTask *task) {
         ((MenuStaffContext *)context)->activeWindow->list->cursor->sortKeyPrimary,
         (s32)D_003E7050, context, 1, 0x53);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuStaffContext *)context)->fade, 0x53);
-    mnuDrawStaffGridLabelsForKind(0, (u32)((MenuStaffContext *)context)->group);
+    mnuDrawStaffGridLabelsForKind(0, ((MenuStaffContext *)context)->group);
     return menuSetHandler((void *)context, 1, (void *)task);
 }
 
@@ -205,7 +204,7 @@ s32 func_002AD808(KwlnTask *task) {
         ((MenuStaffContext *)context)->activeWindow->list->cursor->sortKeyPrimary,
         (s32)D_003E7050, context, 1, 0x53);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuStaffContext *)context)->fade, 0x53);
-    mnuDrawStaffGridLabelsForKind(0, (u32)((MenuStaffContext *)context)->group);
+    mnuDrawStaffGridLabelsForKind(0, ((MenuStaffContext *)context)->group);
     return menuSetHandler((void *)context, 1, (void *)task);
 }
 
@@ -255,7 +254,7 @@ s32 func_002AD9F8(KwlnTask *task) {
         ((MenuStaffContext *)context)->activeWindow->list->cursor->sortKeyPrimary,
         (s32)D_003E7050, context, 1, 0x53);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuStaffContext *)context)->fade, 0x53);
-    mnuDrawStaffGridLabelsForKind(0, (u32)((MenuStaffContext *)context)->group);
+    mnuDrawStaffGridLabelsForKind(0, ((MenuStaffContext *)context)->group);
     return menuSetHandler((void *)context, 1, (void *)task);
 }
 
@@ -333,7 +332,7 @@ s32 mnuStaffImageEnterD(KwlnTask *task) {
         func_00306CD0(0x390, 0x570, 0, object->fadeScale, 1, (struct EffectSlotSet *)((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
-    mnuDrawStaffGridLabelsForKind(2, (u32)((MenuStaffContext *)context)->group);
+    mnuDrawStaffGridLabelsForKind(2, ((MenuStaffContext *)context)->group);
     return menuSetHandler((void *)context, 1, (void *)task);
 }
 
@@ -406,7 +405,7 @@ s32 mnuStaffImageEnterB(KwlnTask *task) {
             ((MenuStaffContext *)context)->activeWindow->list->cursor->sortKeyPrimary,
             (s32)D_003E7050, context, 1, 0x53);
     }
-    mnuDrawStaffGridLabelsForKind(0, (u32)((MenuStaffContext *)context)->group);
+    mnuDrawStaffGridLabelsForKind(0, ((MenuStaffContext *)context)->group);
     return menuSetHandler((void *)context, 1, (void *)task);
 }
 
@@ -663,7 +662,7 @@ s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
         func_002AAC98(1, 0, 0, context, 1, 0x53);
         mnuDrawStaffCaption(0, (u8 *)context);
     }
-    mnuDrawStaffGridLabelsForKind(1, (u32)((MenuStaffContext *)context)->group);
+    mnuDrawStaffGridLabelsForKind(1, ((MenuStaffContext *)context)->group);
     return menuSetHandler((void *)context, 1, (void *)task);
 }
 
@@ -952,7 +951,7 @@ s32 func_002AF5E0(KwlnTask *task) {
         func_002AAC98(1, 0, 0, (s32)context, 1, 0x53);
         func_002AF2E0(0, 0, 0, context);
     }
-    mnuDrawStaffGridLabelsForKind(1, (u32)context->group);
+    mnuDrawStaffGridLabelsForKind(1, context->group);
     return menuSetHandler(context, 1, task);
 }
 

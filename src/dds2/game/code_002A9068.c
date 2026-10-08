@@ -1017,7 +1017,7 @@ typedef char StaffGridLabelRow_gridIds_offset_check[
     ((u32)&((StaffGridLabelRow *)0)->gridIds == 0x2C) ? 1 : -1];
 extern const StaffGridLabelRow D_0042AA48[];
 
-void mnuDrawStaffGridLabelsForKind(s32 kind, u32 slot) {
+void mnuDrawStaffGridLabelsForKind(s32 kind, struct EffectSlotSet *resources) {
     StaffGridLabelRow rows[9];
     s32 i;
     s32 y = 0x1A1;
@@ -1026,13 +1026,13 @@ void mnuDrawStaffGridLabelsForKind(s32 kind, u32 slot) {
         if (rows[kind].x[i] != 0) {
             if (rows[kind].gridIds[i] == 0x1F) {
                 itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, (y - 2) << 3, 0, 1,
-                                           (struct EffectSlotSet *)(u32)slot, 0x1F, 0x53);
+                                           resources, 0x1F, 0x53);
             } else if (rows[kind].gridIds[i] == 8) {
                 itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, (y + 2) << 3, 0, 1,
-                                           (struct EffectSlotSet *)(u32)slot, 8, 0x53);
+                                           resources, 8, 0x53);
             } else {
                 itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, y << 3, 0, 1,
-                                           (struct EffectSlotSet *)(u32)slot, rows[kind].gridIds[i], 0x53);
+                                           resources, rows[kind].gridIds[i], 0x53);
             }
         }
     }
