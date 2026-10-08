@@ -232,11 +232,11 @@ void func_002BE240(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
     s32 remainingExp;
     FrFontGlyph *glyph;
 
-    if (slot->iconBundle != 0) {
+    if (slot->iconBundle != NULL) {
         mnuDrawFadeIcons(x, y, depth, slot->kind,
-            (MenuIconBundle *)slot->iconBundle, surface);
+            slot->iconBundle, surface);
         color = uiBlendColors(0xA09DC380, 0xA09DC300,
-            ((MenuIconBundle *)slot->iconBundle)->fade);
+            slot->iconBundle->fade);
         remainingExp = ptyComputeTotalExp(unit, 1) - unit->totalExp;
         if (remainingExp != 0) {
             func_0035C860(text, D_00437C48, remainingExp);
