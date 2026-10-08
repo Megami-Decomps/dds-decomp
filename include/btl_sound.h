@@ -16,11 +16,12 @@ typedef struct SoundBank {
 typedef struct BattleEffect BattleEffect;
 struct EffBattleEntryList;
 struct EffParamWork;
+struct SdfMemBlock;
 
 typedef struct SoundMixer {
     SoundBank banks[2];
     u8 pad0C30[8];
-    void *resource;
+    struct SdfMemBlock *resource; /* 0xC38: owns the mixer allocation. */
     u32 active;
     BattleEffect *voiceList;
 } SoundMixer;
