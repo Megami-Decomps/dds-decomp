@@ -8,12 +8,6 @@
 
 
 
-typedef struct EvtTarget {
-    u8 pad0[0x18];
-    EvtTargetInfo *info; /* 0x18 */
-    EvtEffData *data;
-} EvtTarget;
-
 extern f32 *D_00324770[];
 extern u8 kwlnDefaultColorVector[];
 
@@ -178,15 +172,15 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
         flags = unit->flags;
         if (flags & EVT_UNIT_FLAG_TARGET_TRANSITION) {
             f32 distance;
-            target = ((EvtTarget *)unit->currentTransitionValue)->info;
+            target = ((EffWorldNode *)unit->currentTransitionValue)->data;
             if (unit->previousTransitionValue) {
-                previous = ((EvtTarget *)unit->previousTransitionValue)->info;
+                previous = ((EffWorldNode *)unit->previousTransitionValue)->data;
             }
             if (!sdfLoadMapRecordPositionVector(unit->owner->inner, 0)) {
                 mdlLoadPrimaryVectorVU(unit->owner);
             }
             VU0_STORE_VF_UNCLOBBERED(vf10, position);
-            VU0_LOAD_VF(vf11, ((EvtTarget *)unit->currentTransitionValue)->data->position);
+            VU0_LOAD_VF(vf11, ((EffWorldNode *)unit->currentTransitionValue)->inner->position);
             VU0_SUB(vf10, vf10, vf11);
             VU0_STORE_VF_UNCLOBBERED(vf10, targetDirection);
             VU0_LENGTH_VF10(distance);
@@ -201,7 +195,7 @@ void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {
             if (previous) {
                 f32 previousDistance;
                 VU0_LOAD_VF(vf10, position);
-                VU0_LOAD_VF(vf11, ((EvtTarget *)unit->previousTransitionValue)->data->position);
+                VU0_LOAD_VF(vf11, ((EffWorldNode *)unit->previousTransitionValue)->inner->position);
                 VU0_SUB(vf10, vf10, vf11);
                 VU0_STORE_VF_UNCLOBBERED(vf10, previousDirection);
                 VU0_LENGTH_VF10(previousDistance);
@@ -507,7 +501,7 @@ void evtLoadUnitFirstColorVectorVU(EvtUnit *unit) {
     f32 scale;
 
     if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        info = ((EvtTarget *)unit->currentTransitionValue)->info;
+        info = ((EffWorldNode *)unit->currentTransitionValue)->data;
         if (info->flags & 0x8) {
             ownVector = 1;
         }
@@ -531,7 +525,7 @@ void evtLoadUnitSecondColorVectorVU(EvtUnit *unit) {
     f32 scale;
 
     if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        info = ((EvtTarget *)unit->currentTransitionValue)->info;
+        info = ((EffWorldNode *)unit->currentTransitionValue)->data;
         if (info->flags & 0x8) {
             ownVector = 1;
         }
@@ -552,7 +546,7 @@ void evtLoadUnitDirectionVectorVU(EvtUnit *unit) {
     s32 ownVector = 0;
 
     if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        if (((EvtTarget *)unit->currentTransitionValue)->info->flags & 0x8) {
+        if (((EvtTargetInfo *)((EffWorldNode *)unit->currentTransitionValue)->data)->flags & 0x8) {
             ownVector = 1;
         }
     }
