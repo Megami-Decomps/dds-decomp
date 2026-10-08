@@ -214,14 +214,14 @@ extern char D_00453C50[];
 void evtBeginEventPackScriptLoad(EvtPackLoadState *state) {
     s32 eventId;
     s32 directoryId;
-    s32 fileHandle;
+    void *request;
 
     func_0035B6E0(D_004377E0);
     eventId = state->eventId;
     directoryId = eventId - eventId % 10;
     func_0035C860(D_00453C50, D_004248A0, directoryId, eventId, eventId);
-    fileHandle = fileQueueDefaultCallbackRequest(D_00453C50);
-    state->fileHandle = fileHandle;
+    request = fileQueueDefaultCallbackRequest(D_00453C50);
+    state->pendingRequest = request;
     state->loaded = 1;
 }
 
@@ -240,13 +240,12 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
     EvtPackHeader *header;
     s32 entryIndex;
 
-    if (state->fileHandle != 0) {
-        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)state->fileHandle) != 0) {
-            state->resourceHandle = fileGetResourceHandle((struct FileWork *)state->fileHandle);
-            filePollEntryCleanup((struct FileCleanup *)state->fileHandle);
-            state->fileHandle = 0;
-            header = (EvtPackHeader *)sdfResourceRetainAddress(
-                (SdfMemBlock *)state->resourceHandle);
+    if (state->pendingRequest != NULL) {
+        if (fileIsRequestReadyInCurrentMode(state->pendingRequest) != 0) {
+            state->resourceAllocation = (struct SdfMemBlock *)(u32)fileGetResourceHandle(state->pendingRequest);
+            filePollEntryCleanup(state->pendingRequest);
+            state->pendingRequest = NULL;
+            header = (EvtPackHeader *)sdfResourceRetainAddress(state->resourceAllocation);
             state->data = (u8 *)header;
             state->header = header;
             state->entries = header->entries;
@@ -313,11 +312,11 @@ void evtReleaseEventPackResources(KwlnTask *task) {
             effInitCh75Id();
             sdfTexReleaseReferenceViaHandler((SdfTex *)state->effect75);
         }
-        if (state->fileHandle != 0) {
-            filePollEntryCleanup((struct FileCleanup *)state->fileHandle);
+        if (state->pendingRequest != NULL) {
+            filePollEntryCleanup(state->pendingRequest);
         }
-        if (state->resourceHandle != 0) {
-            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)state->resourceHandle);
+        if (state->resourceAllocation != NULL) {
+            sdfQueueGeneralAllocationRelease(state->resourceAllocation);
         }
         if (state->sceneAllocation1 != 0) {
             sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(state->sceneAllocation1));
