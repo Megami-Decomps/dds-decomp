@@ -128,6 +128,36 @@ extern void fldReleaseCameraModel(s32 arg0);
 
 extern void evtSetSolarOverlayFullyVisible(void);
 
+struct FileRequest;
+struct FileWork;
+struct FileCleanup;
+struct SdfMemBlock;
+extern s8 D_00324530[];
+extern s32 D_0032E4C0[];
+extern s32 D_0032E4E8[];
+extern s32 D_003BAFE8;
+extern s32 D_003BAFEC;
+extern s32 D_003BAFF0;
+extern void func_0012EA40(u32, u32);
+extern void kwlnFadeInStart(s32, s32, s32, s32);
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
+extern s32 evtGetMessageWindowControlState(void);
+extern void evtFinishMessageWindowAndNotify(void);
+extern s32 dspCloseChannel(void);
+extern void mnuAdvanceTitleStateUnderSemaphore(void);
+extern u32 fileGetLoadedDataAddress(struct FileWork *);
+extern u32 fileGetResourceHandle(struct FileWork *);
+extern s32 filePollEntryCleanup(struct FileCleanup *);
+extern void *func_00115298(void *, f32 *, f32 *);
+extern void effObjClearFlags(void *, s32);
+extern void effObjSetFlags(void *, s32);
+extern void effObjReplaceActiveEventNode(void *, u32);
+extern void dds3RemoveWorldObjectNode(void *);
+extern void mnuMarkTitleStreamResetPending(void);
+extern void fldSetCameraNodeModeWithTen(void);
+extern u8 D_003A0978[];
+extern void sdfQueueGeneralAllocationRelease(struct SdfMemBlock *);
+
 extern s32 D_0032E5C4[];
 
 extern s32 D_0032E4C4[];
@@ -2936,7 +2966,27 @@ s32 fldSetSparkVectors(s32 index, const u128 *pos, const u128 *vel) {
     return 1;
 }
 
-extern s32 fldSparkControlState[];
+/* Complete 0x40-byte field spark controller, including the weather timer. */
+typedef struct FldSparkController {
+    void *object;              /* 0x00 */
+    void *entry;               /* 0x04 */
+    s32 phase;                 /* 0x08 */
+    s32 countdown;             /* 0x0C */
+    s32 terminated;            /* 0x10 */
+    s32 mode;                  /* 0x14 */
+    s32 modeCountdown;         /* 0x18 */
+    s32 pendingMode;           /* 0x1C */
+    s32 frame;                 /* 0x20 */
+    s32 pulse;                 /* 0x24 */
+    s32 dialogPhase;           /* 0x28 */
+    s32 unk2C;                 /* 0x2C */
+    s32 entryCount;            /* 0x30 */
+    s32 unk34;                 /* 0x34 */
+    s32 unk38;                 /* 0x38 */
+    s32 cursor;                /* 0x3C */
+} FldSparkController;
+
+extern FldSparkController fldSparkControlState;
 extern s32 D_003D62DC[];
 struct EffWorldNode;
 extern void effObjSetInnerFirstVec(struct EffWorldNode *, u128 *);
@@ -2952,7 +3002,7 @@ s32 func_0014BA50(s32 index, s32 reserved) {
     if (reserved == 0) {
         slot = -1;
         for (i = 0; i < 16; i++) {
-            candidate = (fldSparkControlState[15] + i) % 16;
+            candidate = (fldSparkControlState.cursor + i) % 16;
             if (fldSparkObjectEntries[candidate].unk4 == -1) {
                 slot = candidate;
                 break;
@@ -3007,7 +3057,7 @@ void fldFreeSparkSlot(s32 index) {
     }
 }
 
-extern s32 fldSparkControlState[];
+extern FldSparkController fldSparkControlState;
 
 extern void func_0014B688();
 
@@ -3017,7 +3067,7 @@ void fldUpdateSparkSlots(void) {
     s32 i;
 
     func_0014B688();
-    for (i = 0; i < 64 && i < fldSparkControlState[12]; i++) {
+    for (i = 0; i < 64 && i < fldSparkControlState.entryCount; i++) {
         if (fldSparkSlots[i].hasVectors != 0 && fldSparkSlots[i].active != 0) {
             func_0014BA50(i, fldSparkSlots[i].unk28);
         }
@@ -3026,12 +3076,12 @@ void fldUpdateSparkSlots(void) {
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_0014BDF8);
 
-extern s32 fldSparkControlState[];
+extern FldSparkController fldSparkControlState;
 
 s32 fldIsNearSpark(f32 x, f32 y, f32 z) {
     s32 i;
 
-    for (i = 0; i < 64 && i < fldSparkControlState[12]; i++) {
+    for (i = 0; i < 64 && i < fldSparkControlState.entryCount; i++) {
         if (fldSparkSlots[i].active == 1 && fldSparkSlots[i].objectSlot != -1) {
             f32 dx = x - fldSparkSlots[i].pos[0];
             f32 dy = y - fldSparkSlots[i].pos[1];
@@ -3045,9 +3095,44 @@ s32 fldIsNearSpark(f32 x, f32 y, f32 z) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014C210);
+/* Ten atlas origins for digits 0-9, each stored as a U/V atlas coordinate pair. */
+extern const s32 D_003A0928[10][2];
+extern void evtSetDrawSurfaceIndex(u32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+extern void func_00108FA0(s32, s32, s32, s32, s32, s32, s32, s32,
+                         u32, u32, u32, u32, SdfTex *);
 
-extern s32 fldSparkControlState[];
+void func_0014C210(void) {
+    s32 digitOrigins[10][2];
+    s32 remainingFrames;
+    s32 remainingSeconds;
+    s32 digit;
+    u32 vertexColor;
+
+    memcpy(digitOrigins, D_003A0928, sizeof(digitOrigins));
+    remainingFrames = fldSparkControlState.countdown;
+    vertexColor = 0x80808080;
+    evtSetDrawSurfaceIndex(0x53);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    func_00108FA0(20, 20, 113, 31, 1, 0, 113, 31,
+                  vertexColor, vertexColor, vertexColor, vertexColor, fldWeatherLimitTexture);
+    remainingSeconds = remainingFrames / 30;
+    if (remainingSeconds >= 100) {
+        remainingSeconds = 99;
+    }
+    digit = remainingSeconds / 10;
+    if (digit > 0) {
+        func_00108FA0(92, 37, 15, 16, digitOrigins[digit][0], digitOrigins[digit][1], 15, 16,
+                      vertexColor, vertexColor, vertexColor, vertexColor, fldWeatherLimitTexture);
+    }
+    digit = remainingSeconds % 10;
+    func_00108FA0(105, 37, 15, 16, digitOrigins[digit][0], digitOrigins[digit][1], 15, 16,
+                  vertexColor, vertexColor, vertexColor, vertexColor, fldWeatherLimitTexture);
+}
+
+extern FldSparkController fldSparkControlState;
 
 extern void evtStoreValueAndCaptureWindowPanelValue(s32);
 
@@ -3059,7 +3144,7 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_0014C468);
 
 extern s32 D_0032E5C4[];
 
-extern s32 fldSparkControlState[];
+extern FldSparkController fldSparkControlState;
 
 extern void func_001239C8(void);
 
@@ -3086,8 +3171,8 @@ void fldFinishEventFieldState(void) {
         fldStartSceneBgmAlternate();
         fldPreparePlayerSceneCameraTarget();
         state->transitionMode = 0;
-        fldSparkControlState[2] = 0;
-        fldSparkControlState[3] = 0;
+        fldSparkControlState.phase = 0;
+        fldSparkControlState.countdown = 0;
         evtSetSolarOverlayFullyVisible();
     }
 }
@@ -3104,7 +3189,154 @@ s32 func_0014CAF8(void) {
     return D_003D62C8[0];
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014CB08);
+void func_0014CB08(void) {
+    f32 firstVector[4];
+    f32 secondVector[4];
+    s32 phase;
+    s32 value;
+    void *node;
+    FldAreaWork *area;
+
+    memset(firstVector, 0, sizeof(firstVector));
+    firstVector[3] = 1.0f;
+    memset(secondVector, 0, sizeof(secondVector));
+    secondVector[3] = 1.0f;
+
+    phase = fldSparkControlState.phase;
+    if (phase == 1) {
+        if (fldSparkControlState.mode == 0) {
+            if (D_00324530[0] < 0) {
+                func_0012EA40(6, 20);
+                sndSetSequenceVolumePan(0x670012, 0x7F, 0x3F);
+                fldSparkControlState.mode = 1;
+                fldSparkControlState.pulse = 1;
+                fldSparkControlState.modeCountdown = 20;
+                fldSparkControlState.pendingMode = 0;
+            }
+        } else if (fldSparkControlState.modeCountdown > 0) {
+            value = fldSparkControlState.modeCountdown - 1;
+            fldSparkControlState.modeCountdown = value;
+            if (value == 0) {
+                if (fldSparkControlState.pendingMode == 0) {
+                    s32 pendingMode;
+                    func_0012EA40(1, 0);
+                    pendingMode = fldSparkControlState.pendingMode;
+                    fldSparkControlState.mode = pendingMode;
+                    fldSparkControlState.modeCountdown = 0;
+                    fldSparkControlState.pendingMode = 0;
+                }
+            } else if (fldSparkControlState.mode == 1 && fldSparkControlState.pendingMode == 0 && value < 14 && D_00324530[0] < 0) {
+                func_0012EA40(6, 20);
+                sndSetSequenceVolumePan(0x670012, 0x7F, 0x3F);
+                fldSparkControlState.mode = 1;
+                fldSparkControlState.pulse = 1;
+                fldSparkControlState.modeCountdown = 20;
+            }
+        }
+
+        if (func_0014CAF8() == 0 && fldTestSceneControlFlags(0x40) != 0) {
+            if (fldSparkControlState.countdown == 300) {
+                sndSetSequenceVolumePan(0x670017, 0x7F, 0x3F);
+            }
+            if (fldSparkControlState.countdown > 0) {
+                fldSparkControlState.countdown--;
+            }
+        }
+
+        func_0014C210();
+        if (fldSparkControlState.countdown < 31) {
+            fldSparkControlState.countdown = 0;
+            func_002E8DD0(0x670017);
+            sndSetSequenceVolumePan(0x670016, 0x7F, 0x3F);
+            fldReleaseCameraModel(0);
+            func_0012EA40(2, 0);
+            fldSetCameraNodeModeWithTen();
+            fldSparkControlState.phase = 3;
+            evtCreateMessageWindowIfMissing(D_0034D8F0);
+            dspStartEntry(4);
+            fldResetPlayerSceneObjectState();
+            fldClearObjectEntryHandles();
+            fldReleaseWeatherEffects();
+        } else {
+            func_0014BDF8();
+        }
+
+        if (fldSparkControlState.terminated != 0) {
+            func_002E8DD0(0x670017);
+            mnuMarkTitleStreamResetPending();
+            D_0032E4C0[0] = 1;
+            fldResetPlayerSceneObjectState();
+            fldSparkControlState.phase = 7;
+            mdlFlagSet(0x819);
+        }
+        return;
+    } else if (phase == 3) {
+        func_0024DD78();
+        if (evtGetMessageWindowControlState() != 0) {
+            return;
+        }
+        evtFinishMessageWindowAndNotify();
+        dspCloseChannel();
+        fldSparkControlState.frame = 0;
+        fldSparkControlState.phase = 6;
+        mnuAdvanceTitleStateUnderSemaphore();
+        D_003BAFE8 = (s32)fileQueueDefaultCallbackRequest(D_003A0978);
+    } else if (phase == 6) {
+        if (fileIsRequestReadyInCurrentMode((struct FileRequest *)D_003BAFE8) == 0) {
+            return;
+        }
+        D_003BAFF0 = fileGetLoadedDataAddress((struct FileWork *)D_003BAFE8);
+        D_003BAFEC = fileGetResourceHandle((struct FileWork *)D_003BAFE8);
+        area = &fldAreaState;
+        firstVector[0] = area->x;
+        firstVector[1] = area->y;
+        firstVector[2] = area->z;
+        node = func_00115298((void *)D_003BAFF0, firstVector, secondVector);
+        fldSparkControlState.object = node;
+        effObjClearFlags(node, 1);
+        filePollEntryCleanup((struct FileCleanup *)D_003BAFE8);
+        func_0012EA40(5, 0);
+        effObjSetFlags(fldSparkControlState.object, 1);
+        effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
+        fldSparkControlState.phase = 7;
+    } else if (phase == 7) {
+        fldSparkControlState.frame++;
+        if (fldSparkControlState.frame == 40) {
+            kwlnFadeInStart(255, 255, 255, 4);
+        }
+        if (fldSparkControlState.frame < 45) {
+            return;
+        }
+        fldSparkControlState.phase = 8;
+    } else if (phase == 8) {
+        sndSetSequenceVolumePan(0x670011, 0x7F, 0x3F);
+        func_001239C8();
+        fldStartSceneBgmAlternate();
+        evtSetSolarOverlayFullyVisible();
+        D_0032E4E8[0] = 1;
+        fldSparkControlState.phase = 9;
+        fldSparkControlState.frame = 0;
+    } else if (phase == 9) {
+        fldSparkControlState.frame++;
+        if (fldSparkControlState.frame == 1) {
+            kwlnFadeOutStart(255, 255, 255, 4);
+        }
+        if (fldSparkControlState.frame == 6) {
+            node = fldSparkControlState.object;
+            effObjClearFlags(node, 1);
+            dds3RemoveWorldObjectNode(fldSparkControlState.object);
+            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)(u32)D_003BAFEC);
+        }
+        if (fldSparkControlState.frame >= 11) {
+            D_0032E5C4[0] = 0;
+            fldPreparePlayerSceneCameraTarget();
+            fldSparkControlState.phase = 0;
+            D_0032E4B4[0] = 0;
+        }
+    } else {
+        return;
+    }
+}
 
 /* Releases scene presentation and camera resources before clearing the event
  * latch and installing the existing field-state values. */
