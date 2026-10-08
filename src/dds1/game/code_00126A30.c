@@ -4928,7 +4928,18 @@ void fldCopyInfoTable(const void *source) {
 extern s32 D_003BAE40;
 extern u8 *fldFindActorEntryByName(const char *);
 
-INCLUDE_ASM(const s32, "game/code_00126A30", func_0013D650);
+void func_0013D650(void) {
+    s32 slot;
+    char *actor;
+
+    D_003BAE40 = 1;
+    slot = D_003BAE3C;
+    actor = (char *)fldFindActorEntryByName(D_003307B0[slot]->name);
+    if (scrFindNamedProcessNode(actor) != NULL) {
+        return;
+    }
+    D_003308B0[slot] = evtStartSceneResourceTask(dds3GetWorldObject(), actor);
+}
 
 extern s32 mdlFlagTest(s32);
 extern u8 D_003369B0[];

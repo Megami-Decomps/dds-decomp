@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_slot.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "sdf_resource.h"
@@ -2001,7 +2002,6 @@ void func_001E1BB8(u8 *unitAddress, u32 kind, u32 index) {
 }
 
 
-extern void sndReleaseSlotOwner(struct SoundSlotOwner *);
 extern void sdfReleaseDevSlot(s32, s32, s32);
 extern char D_00417940[]; /* "btl:unit transparency delete[%p]\n" */
 
@@ -10701,24 +10701,6 @@ typedef struct SoundSlotTableEntry {
     u16 fileId;
 } SoundSlotTableEntry;
 
-/* Retain and per-slot loading state, embedded after the category/id key. */
-typedef struct SoundSlotWork {
-    u32 refCount; /* Shared retain count; release frees only on the zero transition. */
-    s32 pendingSoundId; /* Packed-track key consumed by the load-status poll. */
-    s32 pendingSlot;    /* Index into resourceHandles for the pending track. */
-    s32 fileRequests[0x1D];
-    s32 resourceHandles[0x1D];
-} SoundSlotWork;
-
-/* Shared motion-SE owner: queued files become resource handles before playback. */
-typedef struct SoundSlotOwner {
-    u32 flags; /* 1 files queued, 2 files ready; 4 track pending, 8 loading, 0x10 ready. */
-    s32 category;
-    s32 id;
-    SoundSlotWork work;
-    struct SoundSlotOwner *prev;
-    struct SoundSlotOwner *next;
-} SoundSlotOwner;
 
 extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32, s32);
 
