@@ -202,7 +202,7 @@ extern s32 *sdfCreateAssetWithDrawEntries(void);
 
 extern void func_002DA420(void *, f32);
 
-extern u16 D_003DC9E0[];
+extern EffPacketParams D_003DC9E0;
 
 extern u32 effCreateTrackSetWithSharedReferences(u32, u32, u32);
 
@@ -2637,8 +2637,8 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
     set->shared = 0;
     set->handle = sdfCreateAssetWithDrawEntries();
     func_002DA420(set->handle, 1.0f);
-    memset(D_003DC9E0, 0, 0x2C);
-    D_003DC9E0[2] = 0x4000;
+    memset(&D_003DC9E0, 0, 0x2C);
+    D_003DC9E0.primitive = 0x4000;
     return set;
 }
 
@@ -2730,7 +2730,167 @@ u32 effDuplicateResourceRefs(u32 source) {
     return (u32)effect;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002A3E10);
+extern SdfPoolNode *D_0037EAB0[8];
+extern u32 D_0037E9A0[20];
+extern u32 D_0037E9F0[12];
+extern u32 D_0037EA20[20];
+extern u32 D_0037EA70[16];
+extern SdfTex *func_0029C048(void *, RefObj *);
+struct SdfTextParam;
+extern void func_002DA438(struct SdfTextParam *, u32);
+
+void func_002A3E10(u8 *work, void *matrix) {
+    EffTrackSet *track = (EffTrackSet *)work;
+    SdfPoolNode *surface;
+    void *list;
+    EffGsPacket *packet;
+    s32 remaining;
+    u32 kind;
+    u32 *colors;
+    u128 *positions;
+    u32 *texcoords;
+    u32 color;
+
+    if ((track->color & 0xFF000000) == 0) {
+        return;
+    }
+
+    surface = D_0037EAB0[track->type];
+    list = sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    if (matrix == NULL) {
+        VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+    } else {
+        VU0_LOAD_MATRIX(matrix);
+    }
+    sdfConsAppendVuPacket(list, 0);
+
+    if (track->columns != NULL) {
+        RefObj *reference = (RefObj *)track->shared;
+        SdfTex *texture;
+
+        if (reference == NULL) {
+            switch (track->kind) {
+            case 3:
+                reference = D_003BC978[0];
+                break;
+            case 4:
+                reference = D_003BC978[1];
+                break;
+            default:
+                texture = NULL;
+                goto setTexture;
+            }
+            texture = func_0029C048(surface, reference);
+        } else {
+            texture = func_0029C048(surface, reference);
+        }
+setTexture:
+        func_002DA438((struct SdfTextParam *)track->handle, (u32)texture);
+    }
+    sdfConsAppendAssetPacket(list, track->handle, 0);
+
+    if (track->flag == 0) {
+        packet = sdfAllocPacketAligned(0x30);
+        packet->dmaTag = 2;
+        packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+        packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+        packet->registerList = 0xE;
+        packet->registerValue = 0x31801;
+        packet->registerAddress = 0x47;
+        sdfAppendPacket(list, packet);
+    }
+
+    kind = track->kind;
+    colors = (u32 *)track->tail;
+    positions = (u128 *)track->buffer;
+    texcoords = (u32 *)track->columns;
+    color = track->color;
+    remaining = track->rows;
+    D_003DC9E0.colors = colors;
+    D_003DC9E0.positions = positions;
+    D_003DC9E0.texcoords = texcoords;
+    D_003DC9E0.unk08 = color;
+
+    switch (kind) {
+    case 0:
+        D_003DC9E0.parameterCount = 15;
+        D_003DC9E0.vertexCount = 25;
+        D_003DC9E0.parameters = D_0037E9A0;
+        while (remaining >= 25) {
+            remaining -= 25;
+            sdfAppendPacket(list, func_0015FE20(&D_003DC9E0));
+            D_003DC9E0.positions += 25;
+            D_003DC9E0.colors += 25;
+        }
+        if (remaining >= 5) {
+            D_003DC9E0.parameterCount = (s16)((remaining / 5) * 3);
+            D_003DC9E0.vertexCount = (s16)remaining;
+            sdfAppendPacket(list, func_0015FE20(&D_003DC9E0));
+        }
+        break;
+    case 1:
+        D_003DC9E0.parameterCount = 12;
+        D_003DC9E0.vertexCount = 13;
+        D_003DC9E0.parameters = D_0037E9F0;
+        while (remaining >= 13) {
+            remaining -= 13;
+            sdfAppendPacket(list, func_0015FE20(&D_003DC9E0));
+            D_003DC9E0.positions += 13;
+            D_003DC9E0.colors += 13;
+        }
+        break;
+    case 2:
+        D_003DC9E0.parameterCount = 16;
+        D_003DC9E0.vertexCount = 32;
+        D_003DC9E0.parameters = D_0037EA20;
+        while (remaining >= 32) {
+            remaining -= 32;
+            sdfAppendPacket(list, func_0015FE20(&D_003DC9E0));
+            D_003DC9E0.positions += 32;
+            D_003DC9E0.colors += 32;
+        }
+        if (remaining >= 4) {
+            D_003DC9E0.parameterCount = (s16)((remaining / 4) * 2);
+            D_003DC9E0.vertexCount = (s16)remaining;
+            sdfAppendPacket(list, func_0015FE20(&D_003DC9E0));
+        }
+        break;
+    case 3:
+    case 4:
+        D_003DC9E0.parameterCount = 16;
+        D_003DC9E0.vertexCount = 32;
+        D_003DC9E0.parameters = D_0037EA70;
+        while (remaining >= 32) {
+            remaining -= 32;
+            sdfAppendPacket(list, func_0015FE20(&D_003DC9E0));
+            D_003DC9E0.positions += 32;
+            D_003DC9E0.texcoords += 64;
+            D_003DC9E0.colors += 32;
+        }
+        if (remaining >= 4) {
+            D_003DC9E0.parameterCount = (s16)((remaining / 4) * 2);
+            D_003DC9E0.vertexCount = (s16)remaining;
+            sdfAppendPacket(list, func_0015FE20(&D_003DC9E0));
+        }
+        break;
+    default:
+        break;
+    }
+
+    if (track->flag == 0) {
+        packet = sdfAllocPacketAligned(0x30);
+        packet->dmaTag = 2;
+        packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+        packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+        packet->registerList = 0xE;
+        packet->registerValue = 0x51801;
+        packet->registerAddress = 0x47;
+        sdfAppendPacket(list, packet);
+    }
+    effSubmitSurfacePacket(surface, list);
+}
+
 
 extern u32 D_003BC960[2];
 
