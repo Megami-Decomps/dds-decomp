@@ -5099,7 +5099,7 @@ typedef struct EffPCPDriftEventParams {
 } EffPCPDriftEventParams;
 
 typedef struct EffPCPDriftEvent {
-    void *event;
+    EffEventWork *event;
     s32 frame;
     f32 position, positionStep, angle, angleStep;
 } EffPCPDriftEvent;
@@ -5339,7 +5339,7 @@ typedef struct EffPCPPairedEventParams {
 
 typedef struct EffPCPPairedEvent {
     u32 fragment;
-    void *eventA, *eventB;
+    EffEventWork *eventA, *eventB;
     f32 phase, radius;
     f32 tilt;
     f32 tiltStep;
@@ -5634,7 +5634,7 @@ typedef struct EffPCPSpawnRangeParams {
 } EffPCPSpawnRangeParams;
 
 typedef struct EffPCPSpawnRangeEvent {
-    void *event;
+    EffEventWork *event;
     s32 frame;
     f32 height, heightStep, angle, angularStep, position, positionStep;
 } EffPCPSpawnRangeEvent;
@@ -5873,7 +5873,7 @@ typedef struct {
     u8 pad11[3];
     s32 age;
     s32 frameLimit;
-    void *event;
+    EffEventWork *event;
 } EffPCPMapEventEntry;
 
 /* Serialized model placement and fade parameters (0x1C bytes). */
