@@ -238,7 +238,9 @@ typedef struct EffBillQuantizedConfig {
     SdfColorTrack colorTrack;
     SdfAlphaTrack alphaTrack;
     EffScalarCurve scaleCurve;
-    u8 pad58[0x18];
+    u8 pad58[0x10];
+    f32 alphaFadeInFraction;
+    f32 alphaFadeOutFraction;
     u32 drawProgress;
     union {
         u32 quantizedSamples;
@@ -246,9 +248,11 @@ typedef struct EffBillQuantizedConfig {
     } samples;
     f32 fadeInEnd;
     f32 fadeOutStart;
-    u8 pad80[8];
+    f32 uvARowScale;
+    f32 uvBVertexScale;
     f32 rowOffset;
-    u8 pad8C[8];
+    f32 radius;
+    f32 angularSpanDegrees;
     u8 meshMode;
     u8 pad95[3];
 } EffBillQuantizedConfig;
