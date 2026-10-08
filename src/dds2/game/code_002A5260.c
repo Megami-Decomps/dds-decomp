@@ -1168,7 +1168,7 @@ extern char D_0042A380[];
 
 extern u32 D_00437AD0;
 extern u32 sdfSoundGetCommandStatus(void);
-extern s32 sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *);
+extern void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 extern SdfMovieDescriptor D_00457DB0;
 extern char D_00457DC8[];
 extern char D_0042A3B0[];

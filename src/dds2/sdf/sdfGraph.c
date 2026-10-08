@@ -15,7 +15,7 @@ void func_00329CE0(void *arg0, s32 arg1, s32 arg2);
 
 extern SdfGraphObj D_0040B290;
 
-void sdfUpdateTextureHeadsWithInterruptsMasked(void *arg0);
+void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 
 SdfTexResource *sdfAllocImageBuffer(s32 width, s32 height, s32 format);
 

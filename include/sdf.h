@@ -548,9 +548,13 @@ struct SdfChipPage {
     s16 bumpCellsRemaining;
 };
 
+/* Deferred handlers share one address-word argument at the native dispatch
+ * boundary, while their C consumers interpret that word as different owners. */
+typedef void (*SdfPendingCallback)();
+
 /* Interrupt-synchronized deferred callback owner (0x08). */
 typedef struct SdfPendingRequest {
-    void (*handler)(u32);
+    SdfPendingCallback handler;
     SdfPendingNode *pending;
 } SdfPendingRequest;
 
