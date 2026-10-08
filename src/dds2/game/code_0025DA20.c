@@ -128,8 +128,6 @@ extern void sdfReleaseChipBlock();
 
 extern void mnuShopReleaseWindowAndEffectResources();
 
-extern void mnuReleaseWindowTextures();
-
 extern void effDestroyResourceSlotSet();
 
 extern s32 mnuShopReleaseSceneObjects(MenuTerminalContext *);
@@ -1069,8 +1067,6 @@ void mnuShopDestroyNestedEffectBatch(MenuEffectResources *resources) {
 
 extern s32 mnuFirstPresentMainCharacterIndex(void);
 extern u32 effLoadIndexedResource(s32 category, s32 index, s32 keepAllocation);
-extern MenuIconSprites *mnuCreateWindowSpriteResources(u32 width, u32 height, u32 value,
-                    u32 resourceHandle, s32 *indices, u32 unused);
 extern const char *D_003CE470[4];
 extern const char *D_003CE480[]; /* Two entries in external .data, not small data. */
 extern const char *D_003CE488[4];
@@ -1129,7 +1125,7 @@ void func_0025FA28(MenuTerminalContext *scene) {
     mnuInitScrollingStripState(secondPanel, 0, scene->effectSlots[0], 0x46, 0x43);
     func_0026BE28(secondPanel, 0, 0x10, 0x20);
     func_0026BEB0(secondPanel, 0x1150, 0xCB8, 0);
-    scene->windowResource = (u32)mnuCreateWindowSpriteResources(
+    scene->windowResource = mnuCreateWindowSpriteResources(
         0, 0, 0, (u32)scene->effectSlots[0], indices, 3);
 }
 

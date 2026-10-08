@@ -605,6 +605,8 @@ void func_0026BE28(DspScrollingStripState *state, s32 negate, s32 minimum, s32 m
 void func_0026BEB0(DspScrollingStripState *state, s32 vertical, s32 horizontal, s32 unused);
 void func_0026BEC0(s32 x, s32 y, s32 flags, s32 scale, DspScrollingStripState *state, s32 option);
 
+struct MenuIconSprites;
+
 /* Terminal/shop modes share this complete 0x38C-byte scene allocation. */
 typedef struct MenuTerminalContext {
     s32 resourceHandle;
@@ -656,7 +658,7 @@ typedef struct MenuTerminalContext {
     s32 delayFrames;
     DspScrollingStripState panelWork[2];
     MenuCampEffect campEffect; /* 0x210: resources, sixteen sparks and badge fade; DDS2 0025FE58. */
-    u32 windowResource;
+    struct MenuIconSprites *windowResource;
     MenuGradientFade gradientFade;
     u8 rewardGranted;
     s8 sceneReady;
@@ -667,6 +669,8 @@ typedef char MenuTerminalContext_size_must_be_0x38C[(sizeof(MenuTerminalContext)
 typedef char MenuTerminalContext_firstPanel_offset[((u32)&((MenuTerminalContext *)0)->panelWork[0] == 0xE8) ? 1 : -1];
 typedef char MenuTerminalContext_secondPanel_offset[((u32)&((MenuTerminalContext *)0)->panelWork[1] == 0x17C) ? 1 : -1];
 typedef char MenuTerminalContext_campEffect_offset[((u32)&((MenuTerminalContext *)0)->campEffect == 0x210) ? 1 : -1];
+typedef char MenuTerminalContext_windowResource_offset[
+    ((u32)&((MenuTerminalContext *)0)->windowResource == 0x378) ? 1 : -1];
 
 extern MenuTerminalContext *D_00438FC8;
 void func_0025FD78(MenuTerminalContext *scene);
@@ -678,6 +682,10 @@ typedef struct MenuIconSprites {
     u32 unk8;
     struct EffectSlotSet *sprite[3];
 } MenuIconSprites;
+
+MenuIconSprites *mnuCreateWindowSpriteResources(u32 width, u32 height, u32 value,
+                    u32 resourceHandle, s32 *indices, u32 unused);
+void mnuReleaseWindowTextures(MenuIconSprites *menu);
 
 typedef struct MenuFadeFields {
     MenuWindowContainer previousWindow;
@@ -706,7 +714,7 @@ typedef struct MenuProgressHost {
     MenuPanelGroup *panelGroup;
 #ifdef VERSION_DDS2
     MenuSpriteState *effectResource;
-    s32 currentEffect;
+    MenuProfilePanel *currentEffect;
 #else
     MenuSimpleSpriteState *effectResource;
     MenuProfilePanel *currentEffect;

@@ -332,8 +332,8 @@ void mnuStopTitleVoicePlayback(void) {
     sdfSoundStopNamedPlayback();
 }
 
-void mnuQueryTitleSoundBusy(void) {
-    sdfSoundIsCommandBusy();
+s32 mnuQueryTitleSoundBusy(void) {
+    return sdfSoundIsCommandBusy();
 }
 
 void func_002A1338(void) {
