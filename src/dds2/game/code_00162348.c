@@ -596,11 +596,11 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
     ParSystem *system;
     s32 i;
 
-    if (kind == 4) {
+    if (kind == PAR_CELL_TOPOLOGY_FIVE_VECTOR) {
         perCell = perCell * 5 + 5;
-    } else if (kind == 3) {
+    } else if (kind == PAR_CELL_TOPOLOGY_FOUR_VECTOR) {
         perCell = perCell * 4 + 4;
-    } else if (kind == 2) {
+    } else if (kind == PAR_CELL_TOPOLOGY_SIX_VECTOR) {
         perCell = perCell * 6 + 6;
     } else {
         perCell = perCell * 2;
@@ -613,7 +613,7 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
         }
         perCell &= ~1;
         perCell += 2;
-        if (kind == 1) {
+        if (kind == PAR_CELL_TOPOLOGY_TRIANGLE) {
             perCell += perCell >> 1;
         }
     }
@@ -623,15 +623,15 @@ ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 k
     base = sdfResourceRetainAddress(allocation);
     system = (ParSystem *)(base + cellsSize);
     memset(system, 0, 0x2C);
-    system->vertices = (void *)base;
+    system->vertices = (u128 *)base;
     base += total * 0x10;
-    system->colors = (void *)base;
+    system->colors = (u32 *)base;
     base += total * 4;
     system->cells = (ParCell *)base;
     for (i = 0; i < count; i++) {
         ParCell *cell = (ParCell *)(i * sizeof(ParCell) + (s32)system->cells);
         cell->history = (u128 *)((u8 *)system->vertices + i * perCell * 0x10);
-        cell->vertices = (u8 *)system->colors + i * perCell * 4;
+        cell->colors = system->colors + i * perCell;
         parCellInit(system, i);
     }
     system->asset = sdfCreateAssetWithDrawEntries();
@@ -656,7 +656,7 @@ void parCellInit(ParSystem *system, s32 index) {
     ParCell *cell = (ParCell *)(index * sizeof(ParCell) + (s32)system->cells);
 
     cell->color = 0x80808080;
-    cell->unk0C = 0;
+    cell->historyAdvanceCountdown = 0;
     cell->vertexCount = 0;
 }
 
@@ -671,19 +671,19 @@ void parUpdateCellVertexPair(ParSystem *system, s32 index, const u128 *vertices)
     s32 shiftCount;
     s32 i;
 
-    if (cell->unk0C == 0) {
+    if (cell->historyAdvanceCountdown == 0) {
         shiftCount = system->vertexWordCount - 2;
         vertex = cell->history + shiftCount;
         for (i = 0; i < shiftCount; i++) {
             vertex--;
             PCP_COPY_VECTOR(vertex + 2, vertex);
         }
-        cell->unk0C = system->groupDivisor;
+        cell->historyAdvanceCountdown = system->groupDivisor;
         if (cell->vertexCount < shiftCount + 2) {
             cell->vertexCount += 2;
         }
     } else {
-        cell->unk0C--;
+        cell->historyAdvanceCountdown--;
         vertex = cell->history;
     }
     PCP_COPY_VECTOR(vertex, vertices);
@@ -718,19 +718,19 @@ void parUpdateCellVertexTriangle(ParSystem *system, s32 index, const u128 *verti
     s32 shiftCount;
     s32 i;
 
-    if (cell->unk0C == 0) {
+    if (cell->historyAdvanceCountdown == 0) {
         shiftCount = system->vertexWordCount - 3;
         vertex = cell->history + shiftCount;
         for (i = 0; i < shiftCount; i++) {
             vertex--;
             PCP_COPY_VECTOR(vertex + 3, vertex);
         }
-        cell->unk0C = system->groupDivisor;
+        cell->historyAdvanceCountdown = system->groupDivisor;
         if (cell->vertexCount < shiftCount + 3) {
             cell->vertexCount += 3;
         }
     } else {
-        cell->unk0C--;
+        cell->historyAdvanceCountdown--;
         vertex = cell->history;
     }
     PCP_COPY_VECTOR(vertex, vertices);
@@ -775,7 +775,7 @@ void parTranslateCellTriangleVertices(ParSystem *system, s32 index, void *delta)
 void parFadeAlphaCell(s32 particle, s32 index) {
     ParSystem *system = (ParSystem *)particle;
     u32 count = system->cells[index].vertexCount >> 1;
-    u32 *vertex = system->cells[index].vertices;
+    u32 *vertex = system->cells[index].colors;
     u32 word = vertex[0];
     u32 i;
     s32 alpha[4];
@@ -1497,7 +1497,7 @@ void func_00164CB0(void) {
         }
         sdfConsAppendAssetPacket(list, (void *)system->asset, NULL);
         count = system->cellCount;
-        if (system->kind == 0) {
+        if (system->kind == PAR_CELL_TOPOLOGY_PAIR) {
             parDrawControl.indices = D_003AAC90;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
@@ -1505,7 +1505,7 @@ void func_00164CB0(void) {
                 parDrawControl.height = 18;
                 remaining = cell->vertexCount;
                 parDrawControl.positions = cell->history;
-                parDrawControl.colors = cell->vertices;
+                parDrawControl.colors = cell->colors;
                 parDrawControl.color = cell->color;
                 while (remaining >= 18) {
                     remaining -= 16;
@@ -1519,7 +1519,7 @@ void func_00164CB0(void) {
                     sdfAppendPacket((struct SdfListHead *)list, func_00167A10(&parDrawControl));
                 }
             }
-        } else if (system->kind == 1) {
+        } else if (system->kind == PAR_CELL_TOPOLOGY_TRIANGLE) {
             parDrawControl.indices = D_003AAD10;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
@@ -1527,7 +1527,7 @@ void func_00164CB0(void) {
                 parDrawControl.height = 15;
                 remaining = cell->vertexCount;
                 parDrawControl.positions = cell->history;
-                parDrawControl.colors = cell->vertices;
+                parDrawControl.colors = cell->colors;
                 parDrawControl.color = cell->color;
                 while (remaining >= 15) {
                     remaining -= 12;
@@ -1541,7 +1541,7 @@ void func_00164CB0(void) {
                     sdfAppendPacket((struct SdfListHead *)list, func_00167A10(&parDrawControl));
                 }
             }
-        } else if (system->kind == 4) {
+        } else if (system->kind == PAR_CELL_TOPOLOGY_FIVE_VECTOR) {
             parDrawControl.indices = D_003AAE50;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
@@ -1549,7 +1549,7 @@ void func_00164CB0(void) {
                 parDrawControl.height = 10;
                 remaining = cell->vertexCount;
                 parDrawControl.positions = cell->history;
-                parDrawControl.colors = cell->vertices;
+                parDrawControl.colors = cell->colors;
                 parDrawControl.color = cell->color;
                 while (remaining >= 10) {
                     remaining -= 5;
@@ -1558,7 +1558,7 @@ void func_00164CB0(void) {
                     parDrawControl.colors += 5;
                 }
             }
-        } else if (system->kind == 2) {
+        } else if (system->kind == PAR_CELL_TOPOLOGY_SIX_VECTOR) {
             parDrawControl.indices = D_003AAD80;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
@@ -1566,7 +1566,7 @@ void func_00164CB0(void) {
                 parDrawControl.height = 12;
                 remaining = cell->vertexCount;
                 parDrawControl.positions = cell->history;
-                parDrawControl.colors = cell->vertices;
+                parDrawControl.colors = cell->colors;
                 parDrawControl.color = cell->color;
                 while (remaining >= 12) {
                     remaining -= 6;
@@ -1583,7 +1583,7 @@ void func_00164CB0(void) {
                 parDrawControl.height = 16;
                 remaining = cell->vertexCount;
                 parDrawControl.positions = cell->history;
-                parDrawControl.colors = cell->vertices;
+                parDrawControl.colors = cell->colors;
                 parDrawControl.color = cell->color;
                 while (remaining >= 16) {
                     remaining -= 12;
@@ -1684,7 +1684,7 @@ ParEmitDesc *parCloneEmitterAndInitCells(ParEmitDesc *src) {
     if (desc->cells.verticesPerCell < 3) {
         desc->cells.verticesPerCell = 3;
     }
-    desc->cells.cellSystem = parAllocateCellSystem(desc->count, desc->cells.verticesPerCell, 1, 0);
+    desc->cells.cellSystem = parAllocateCellSystem(desc->count, desc->cells.verticesPerCell, 1, PAR_CELL_TOPOLOGY_PAIR);
     parDispatchSub(desc->cells.cellSystem, 0, desc->cells.unk14, desc->cells.unk18);
     func_00165600(desc);
     return desc;
