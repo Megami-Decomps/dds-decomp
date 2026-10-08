@@ -16,11 +16,12 @@
 
 extern u32 kwlnTaskGetUserValue(KwlnTask *task);
 struct EvtViewer;
+struct EventViewerState;
 struct CampScene;
 
 extern char evtViewerTaskName[]; /* "EventViewer" */
 extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
-s32 evtViewerHasUpdateFlag(s32 viewerAddr);
+s32 evtViewerHasUpdateFlag(struct EventViewerState *viewer);
 s32 evtViewerUpdateFrame(KwlnTask *task);
 void fldInitializeCameraColorResource(void);
 void func_00101A80(s32 arg0, s32 arg1);
@@ -184,7 +185,9 @@ typedef struct EventViewerState {
     s32 voicePending; /* 0x2470 */
     s32 voiceMessage; /* 0x2474 */
     s32 unk2478;
-    u8 pad247C[0xC];
+    u8 pad247C[4];
+    s32 voiceFrame; /* 0x2480: glyph position saved when voice playback conflicts. */
+    u8 pad2484[4];
     s32 commandStart; /* 0x2488 */
     u8 pad248C[4]; /* allocated as 0x2490 bytes */
 } EventViewerState;
@@ -248,7 +251,8 @@ typedef struct EvtViewTrack {
         s32 transitionValue;
         u32 handle;
     } owner;                  /* 0x10: payload role is selected by kind */
-    u8 pad14[8];
+    s32 argument14; /* Kind-18 resource argument. */
+    u8 pad18[4];
     s16 frameOffset; /* 0x1C: added to relative key frames. */
     s8 playbackTimeMode; /* 0x1E */
     u8 pad1F[5];
@@ -732,7 +736,7 @@ void evtViewerActivateWindowForGlyphEntry(s32 id, EventViewerState *viewer) {
 void evtViewerCountFlaggedUpdates(EventViewerState *viewer) {
     s64 active;
 
-    active = evtViewerHasUpdateFlag((s32)viewer);
+    active = evtViewerHasUpdateFlag(viewer);
     if (active != 0) {
         viewer->updateCount = viewer->updateCount + 1;
     }
@@ -783,8 +787,8 @@ void func_0022F2E0(EventViewerState *viewer) {
 }
 
 /* Test the viewer's update flag. */
-s32 evtViewerHasUpdateFlag(s32 viewerAddr) {
-    return (((EventViewerState *)viewerAddr)->flags & 0x10) > 0;
+s32 evtViewerHasUpdateFlag(EventViewerState *viewer) {
+    return (viewer->flags & 0x10) > 0;
 }
 
 /* Fades the viewer's background colour over its update countdown. */
@@ -799,7 +803,7 @@ void func_0022F418(EventViewerState *viewer) {
     if (fade < 0) {
         fade = 0;
     }
-    if (fade < 0x80 && evtViewerHasUpdateFlag((s32)viewer) != 0) {
+    if (fade < 0x80 && evtViewerHasUpdateFlag(viewer) != 0) {
         s32 option = (s32)mnuCampGetSecondaryOption(viewer);
 
         switch (option) {
@@ -1064,15 +1068,12 @@ updateMovie:
 
 
 /* Dispatch one of two viewer modes based on its lowest flag bit. */
-void evtViewerDispatchFlagMode(u32 viewerAddr) {
-    s32 viewer;
-
-    viewer = (s32)viewerAddr;
-    if ((((EventViewerState *)viewer)->flags & 1) != 0) {
-        func_0022FB30(0, ((EventViewerState *)viewer)->glyphAdvancePosition, viewerAddr);
+void evtViewerDispatchFlagMode(EventViewerState *viewer) {
+    if ((viewer->flags & 1) != 0) {
+        func_0022FB30(0, viewer->glyphAdvancePosition, (u32)viewer);
         return;
     }
-    func_0022FB30(1, ((EventViewerState *)viewer)->glyphAdvancePosition, viewerAddr);
+    func_0022FB30(1, viewer->glyphAdvancePosition, (u32)viewer);
 }
 
 /* Returns the address word of the nearest kind-2 key strictly after the current
@@ -1640,7 +1641,6 @@ extern s16 D_003BBE7C;
 extern s8 D_00324510[];
 extern s32 itfMesStartEntry(s32, s32, s32);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
-extern void func_0022FFC8(EventViewerState *);
 extern void mnuAdvanceShopMenuState(struct CampScene *);
 extern s32 func_00270088(void);
 extern s32 evtViewerPickNextHandler(KwlnTask *);
@@ -1674,11 +1674,11 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
             evtViewerDispatchFlagMode(viewer);
         }
         if (D_00324510[0x22] >= 0 && D_00324510[0x2C] < 0 &&
-            evtViewerHasUpdateFlag((s32)viewer) == 0) {
+            evtViewerHasUpdateFlag(viewer) == 0) {
             func_0022F2E0(viewer);
         }
     }
-    if (viewer->voicePending == 1 && evtViewerHasUpdateFlag((s32)viewer) == 0 &&
+    if (viewer->voicePending == 1 && evtViewerHasUpdateFlag(viewer) == 0 &&
         mnuQueryTitleSoundBusy() == 0) {
         itfMesStartEntry(viewer->windowContext->handle,
             viewer->voiceMessage, 0);
@@ -1700,7 +1700,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
         if (viewer->glyphAdvancePosition >= viewer->glyphAdvanceLimit) {
             return -1;
         }
-        if (evtViewerHasUpdateFlag((s32)viewer) == 1 && viewer->updateCount >= 25) {
+        if (evtViewerHasUpdateFlag(viewer) == 1 && viewer->updateCount >= 25) {
             return -1;
         }
     }
