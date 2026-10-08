@@ -9,6 +9,7 @@
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "bill_object_api.h"
 
 struct EffThunderVectorWork;
 
@@ -357,7 +358,6 @@ extern u8 sdfViewEyeVector[];
 extern u8 sdfViewTargetVector[];
 extern void effCopyVector(void *dst, void *src);
 extern void billInvokeCallback(BillObj *effect);
-extern void billSetChildScaleComponents(BillObj *effect, f32 sx, f32 sy);
 extern void billSetChildParameter(BillObj *effect, u32 color);
 extern u32 effMultiplyPackedColors(u32 flags, u32 color);
 

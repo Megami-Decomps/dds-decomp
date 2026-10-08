@@ -2,6 +2,7 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "bill_object_api.h"
 #include "sdf_chip.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
@@ -333,7 +334,6 @@ extern f32 effComputeProjectedOffsetAngle(void *, void *);
 
 extern f32 func_0015A150(void *, void *);
 
-extern void billSetChildScaleComponents(u32, f32, f32);
 
 extern void billSetLengthExtent(u32, f32);
 
@@ -428,7 +428,6 @@ extern void dds3DispatchIndexedCallback(s32, f32);
 
 extern void billSetBillboardMode(s32, s16);
 
-extern void billMarkKindOneFlag(s32);
 
 extern u8 D_00380828[];
 
@@ -452,7 +451,6 @@ extern u32 D_00437E38;
 
 extern u32 D_00437E3C;
 
-extern u32 billCloneObjectRetainingSharedData(u32);
 
 extern struct EffExpandedList *func_002DDF48(u32);
 
@@ -1618,7 +1616,8 @@ void effReplaceBillboardClone(s32 dst, s32 src) {
     if (((EffBillboardWork *)dst)->billboard != 0) {
         billDispatchByKind(((EffBillboardWork *)dst)->billboard);
     }
-    billboard = billCloneObjectRetainingSharedData(((EffBillboardWork *)src)->billboard);
+    billboard = (u32)billCloneObjectRetainingSharedData(
+        (struct BillObj *)((EffBillboardWork *)src)->billboard);
     ((EffBillboardWork *)dst)->billboard = billboard;
 }
 
@@ -1647,7 +1646,7 @@ void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
             len = 0.3f;
         }
         len *= work->scale;
-        billSetChildScaleComponents(work->billboard, len * work->widthScale, work->heightScale * work->scale);
+        billSetChildScaleComponents((struct BillObj *)work->billboard, len * work->widthScale, work->heightScale * work->scale);
         billSetLengthExtent(work->billboard, angle);
         effCopyVector(work->billboard, work);
         billInvokeCallback(work->billboard);
@@ -3803,8 +3802,9 @@ void func_002E7F60(EffectSlotNode54 *dst, u8 *work) {
         if (dst->billResource != 0) {
             billDispatchByKind(dst->billResource);
         }
-        dst->billResource = billCloneObjectRetainingSharedData(src->billResource);
-        billMarkKindOneFlag(dst->billResource);
+        dst->billResource = (u32)billCloneObjectRetainingSharedData(
+            (struct BillObj *)src->billResource);
+        billMarkKindOneFlag((struct BillObj *)(dst->billResource));
         if (dst->record != 0) {
             billSetBillboardMode(dst->billResource, (s16)((FileKeyBlock *)((FileSlotTable *)dst->record)->data0)->alphaTrack.surfaceIndex);
         }
@@ -3931,7 +3931,7 @@ void effReplaceSurfaceFlaggedBillboard(s32 *object, s32 *settings) {
         billDispatchByKind(((EffectSlotNode54 *)work)->billResource);
     }
     ((EffectSlotNode54 *)work)->billResource = billCreateIndexed(1, settings);
-    billMarkKindOneFlag(((EffectSlotNode54 *)work)->billResource);
+    billMarkKindOneFlag((struct BillObj *)(((EffectSlotNode54 *)work)->billResource));
     if (((EffectSlotNode54 *)work)->record != 0) {
         billSetBillboardMode(((EffectSlotNode54 *)work)->billResource, (s16)((FileKeyBlock *)((FileSlotTable *)((EffectSlotNode54 *)work)->record)->data0)->alphaTrack.surfaceIndex);
     }
@@ -4244,8 +4244,9 @@ void effDuplicateRenderResourceOwner(EffQuadWork *work, const EffQuadWork *sourc
         if (work->billHandle != 0) {
             billDispatchByKind(work->billHandle);
         }
-        work->billHandle = billCloneObjectRetainingSharedData(source->billHandle);
-        billMarkKindOneFlag(work->billHandle);
+        work->billHandle = (u32)billCloneObjectRetainingSharedData(
+            (struct BillObj *)source->billHandle);
+        billMarkKindOneFlag((struct BillObj *)(work->billHandle));
         billSetBillboardMode(work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
     } else {
         if (work->reference != NULL) {
@@ -7971,7 +7972,7 @@ s32 *effBillboardMotionResourceCreate(s32 *context, u16 kind, s32 *source) {
         resource[0] = effRetainResource(source[0]);
         break;
     }
-    billMarkKindOneFlag(resource[0]);
+    billMarkKindOneFlag((struct BillObj *)(resource[0]));
     billSetBillboardMode(resource[0], ((EffMotionResourceConfig *)context)->mode);
     return resource;
 }
@@ -7980,8 +7981,8 @@ s32 *effBillboardMotionResourceInitialize(s32 *request) {
     s32 *source = (s32 *)request[0x30 / 4];
     s32 *context = (s32 *)request[0x38 / 4];
     s32 *resource = effCreateMotionResource(context);
-    resource[0] = billCloneObjectRetainingSharedData(*source);
-    billMarkKindOneFlag(resource[0]);
+    resource[0] = (s32)billCloneObjectRetainingSharedData((struct BillObj *)*source);
+    billMarkKindOneFlag((struct BillObj *)(resource[0]));
     billSetBillboardMode(resource[0], ((EffMotionResourceConfig *)context)->mode);
     return resource;
 }
@@ -8150,9 +8151,10 @@ void effReplaceSharedResource(u8 *dst, u8 *src) {
         if (((EffParticleShared *)dst)->billHandle != 0) {
             billDispatchByKind(((EffParticleShared *)dst)->billHandle);
         }
-        handle = billCloneObjectRetainingSharedData(((EffParticleShared *)src)->billHandle);
+        handle = (u32)billCloneObjectRetainingSharedData(
+            (struct BillObj *)((EffParticleShared *)src)->billHandle);
         ((EffParticleShared *)dst)->billHandle = handle;
-        billMarkKindOneFlag(handle);
+        billMarkKindOneFlag((struct BillObj *)(handle));
     } else {
         if (((EffParticleShared *)dst)->reference != 0) {
             effReleaseReferenceHolder(((EffParticleShared *)dst)->reference);

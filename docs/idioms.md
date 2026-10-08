@@ -4216,3 +4216,26 @@ Command addresses are serialized `u32` words converted to the existing
 command-list pointer type at the SDK boundary. The canonical function is
 `void`: IDA's apparent return values are incidental comparison constants.
 The live DDS1 `sdfModel.c` gate reports 18 match, 0 differ.
+
+## Packed two-vertex GS lines
+
+DDS1 `002C10C0` uses a 32-byte packed vertex: two 64-bit color-channel
+pairs, packed 32-bit X/Y coordinates, then a 64-bit zero-extended depth.
+These widths come from the retail SD stores, not widened C temporaries.
+The packet header's register list is `0x5151` (RGBAQ/XYZ2 twice).
+Its local constructor prototype follows the C provider's `SdfDrawPacket *`
+and `s64` register-list contract. Encoded allocator addresses convert to
+packet/list pointers at SDK boundaries. The final pool-node-to-list-head
+callback conversion reuses `sdfFlushPoolNodes`' shared first/last prefix;
+embedding the list header in the pool node remains a dedicated SDK type debt.
+
+## DDS2 progress-icon fields belong to the existing row
+
+Retail `0029FA98` indexes the `0x68`-byte `levelAnimation` bank at
+work offset `0xB060`. Its signed enable byte is row `+0x38`, followed by
+32-bit opacity, X and Y at `+0x40`, `+0x44` and `+0x48`. The existing
+icon state at `+0x4C` gates a separate packed-color word at `+0x54`.
+Those fields complete `BrsProgressAnimation` without changing its size or
+either game's work layout. A purported second bank at `0xB080` would
+instead begin at this row's existing `applied` member (`+0x20`).
+

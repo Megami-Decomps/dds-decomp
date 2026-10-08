@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "eff_dependency.h"
 #include "pcp_vu0.h"
@@ -81,7 +82,6 @@ extern BillObj *billCreateFromResource(s32 kind, const char *path);
 
 extern void *billCreateIndexed(s32 kind, u32 billId);
 
-extern void *billCloneObjectRetainingSharedData(void *arg);
 
 extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
 
@@ -218,9 +218,9 @@ EffectObj *effObjCreateKindTwo(void *bill, void *vec, s32 extra) {
 
 /* Clone the shared bill and forward both vector arguments; discard constructor failure. */
 void effObjSpawnSharedBillClone(EffectObj *obj, void *firstVector, s32 secondVectorAddress) {
-    void *bill;
+    struct BillObj *bill;
 
-    bill = billCloneObjectRetainingSharedData(obj->data->handle);
+    bill = billCloneObjectRetainingSharedData((struct BillObj *)obj->data->handle);
     effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
 }
 
@@ -281,9 +281,9 @@ EffectObj *effObjCreateBillNode(void *bill, void *firstVector, s32 secondVectorA
 
 /* Clone the shared bill for the state-three constructor; ignore its return value. */
 void effObjSpawnSharedBillNodeClone(EffectObj *obj, void *firstVector, s32 secondVectorAddress) {
-    void *bill;
+    struct BillObj *bill;
 
-    bill = billCloneObjectRetainingSharedData(obj->data->handle);
+    bill = billCloneObjectRetainingSharedData((struct BillObj *)obj->data->handle);
     effObjCreateBillNode(bill, firstVector, secondVectorAddress);
 }
 
