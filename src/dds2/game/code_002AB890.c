@@ -62,7 +62,7 @@ void func_002AB8F0(MenuStaffContext *owner) {
     u32 catalogItemId;
 
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
-    mnuSetWindowContainerState(window, 0x100);
+    mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, owner->unkF8, 0, 0, 0, 0);
     mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xD, 7);
     window->list->context = owner;
@@ -115,7 +115,7 @@ void func_002AB8F0(MenuStaffContext *owner) {
     mnuCreateListWithDefaults(resources->windows[0], 0, 0, 0, owner->spriteArg0);
 
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
-    mnuSetWindowContainerState(window, 0x100);
+    mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
     mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
     window->list->context = owner;
@@ -162,7 +162,7 @@ void mnuCreateStaffBulletItemWindow(MenuStaffContext *owner) {
     u32 quantity;
 
     window = mnuCreateWindowContainer(0, 0x160, 0x10, 8, 0x16);
-    mnuSetWindowContainerState(window, 0x100);
+    mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
     mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
     window->list->context = owner;
@@ -210,7 +210,7 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
     u32 frameResource;
 
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
-    mnuSetWindowContainerState(window, 0x100);
+    mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
     mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
     window->list->context = owner;
@@ -343,7 +343,7 @@ void mnuCreateOwnedCatalogItemWindow(MenuStaffContext *owner) {
     u32 frameResource;
 
     window = mnuCreateWindowContainer(0, 0x160, 0x10, 8, 0x16);
-    mnuSetWindowContainerState(window, 0x100);
+    mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, owner->panelLayout, 0, 0, 0, 0);
     mnuSetWindowEntryParameters(0, window, owner->spriteArg0, 0xC, 7);
     window->list->context = owner;

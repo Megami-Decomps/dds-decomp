@@ -607,7 +607,7 @@ void mnuCreatePartySelectionWindow(MenuContext *context) {
     s32 placement;
 
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 6, 0x16);
-    mnuSetWindowContainerState(window, 0x100);
+    mnuSetWindowFadeScale(window, 0x100);
     mnuInitializeBasicWindowLayout(window, context->panelModel, 0xC);
     mnuSetWindowPanelBounds(window, context->partySelectionLayout, 0, 0, 0, 0);
     window->list->context = context;
@@ -1459,7 +1459,7 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *callback) {
         break;
     }
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, skillCount, 0x16);
-    mnuSetWindowContainerState(window, MNU_FULL_FADE);
+    mnuSetWindowFadeScale(window, MNU_FULL_FADE);
     mnuInitializeBasicWindowLayout(window, context->labelHandle, 0x1A);
     mnuSetWindowPanelBounds(window, context->equippedSkillLayout, 0, 0, 0, 0);
     mnuSetWindowEntryParameters(0, window, context->resourceHandle, 0xD, placement);
