@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
+#include "eff.h"
 
 struct SdfMemBlock;
 
@@ -10,30 +11,6 @@ enum {
     POLY_RESET_ENTRY_AGE = 0xFFFFFF0,
     POLY_RESET_DURATION = 0xFFFFFFF
 };
-
-/* A cell's coordinate vectors and packed colors are separate owned arrays. */
-typedef struct {
-    f32 *points;
-    u32 *colors;
-    s32 count;
-    u32 unk0C;
-    u32 color;
-} PolyStripEntry; /* 0x14 */
-
-typedef struct PolyStrip {
-    s16 kind;
-    s16 unk02;
-    s32 entryCount;
-    s32 count;
-    s32 groupDivisor;
-    struct SdfMemBlock *allocation;
-    PolyStripEntry *entries;
-    f32 *points;
-    u32 *colors;
-    u32 asset;
-    struct PolyStrip *next;
-    u32 unk28;
-} PolyStrip; /* 0x2C: parAllocateCellSystem's header */
 
 /* Basic node: +0xDC is a cell-system pointer, not the band's float step. */
 typedef struct {
@@ -54,7 +31,7 @@ typedef struct {
     f32 radius;
     f32 pairDisplacement;
     u8 padD4[8];
-    PolyStrip *strip;
+    ParSystem *strip;
     s32 *ages;
 } PolyNode;
 
@@ -99,7 +76,7 @@ typedef struct {
     void *unkE4;
     u8 padE8[4];
     void *unkEC;
-    PolyStrip *strip;              /* 0xF0 */
+    ParSystem *strip;              /* 0xF0 */
     PolyBandRecord *records;       /* 0xF4 */
     struct SdfMemBlock *allocation; /* 0xF8 */
     u8 padFC[4];
@@ -118,7 +95,7 @@ typedef struct {
     f32 radius;
     f32 radiusJitter;
     u8 padD4[0xC];
-    PolyStrip *strip;              /* 0xE0 */
+    ParSystem *strip;              /* 0xE0 */
     PolyArcRecord *records;        /* 0xE4 */
     struct SdfMemBlock *allocation; /* 0xE8 */
     u8 padEC[4];
@@ -146,13 +123,13 @@ typedef struct {
     f32 rotationXDegrees;
     f32 rotationStepDegrees;
     u8 padE8[0xC];
-    PolyStrip *strip;              /* 0xF4 */
+    ParSystem *strip;              /* 0xF4 */
     PolyRotatingBandRecord *records; /* 0xF8 */
     struct SdfMemBlock *allocation; /* 0xFC */
 } PolyRotatingBand; /* 0x100, followed by 20-byte records */
 
-void parReleaseCellSystem(PolyStrip *strip);
-void parPrependCellNode(PolyStrip *strip);
+void parReleaseCellSystem(ParSystem *system);
+void parPrependCellNode(ParSystem *system);
 void polyUpdateBasicRingCells(PolyNode *obj);
 void func_0015DC70(PolyNode *node, s32 index);
 void polyStripPushPairsApart(PolyNode *node, s32 index);
@@ -175,8 +152,8 @@ void func_0015DA10(PolyNode *node) {
     s32 age;
     s32 *ages;
     u16 i;
-    PolyStrip *system;
-    PolyStripEntry *cells;
+    ParSystem *system;
+    ParCell *cells;
 
     count = node->entryCount;
     age = POLY_INACTIVE_ENTRY_AGE;
@@ -184,10 +161,10 @@ void func_0015DA10(PolyNode *node) {
     system = node->strip;
     i = 0;
     if (node->entryCount != 0) {
-        cells = system->entries;
+        cells = system->cells;
         do {
             cells[i].unk0C = 0;
-            cells[i].count = 0;
+            cells[i].vertexCount = 0;
             cells[i].color = 0x00808080;
             *ages = age;
             ages++;
@@ -211,14 +188,14 @@ void polyUpdateBasicRingCells(PolyNode *obj) {
     u8 loop;
     s32 duration;
     f32 alphaStep;
-    PolyStripEntry *entry;
+    ParCell *entry;
     s32 *ages;
 
     if (obj->active != 0) {
         duration = obj->duration;
         completed = 0;
         count = obj->entryCount;
-        entry = obj->strip->entries;
+        entry = obj->strip->cells;
         alphaStep = 128.0f / (f32)duration;
         ages = obj->ages;
         loop = obj->loop;
@@ -262,15 +239,15 @@ INCLUDE_ASM(const s32, "effect/polyManager", func_0015DC70);
 
 /* Apply the same displacement to both points of each pair along their separation direction. */
 void polyStripPushPairsApart(PolyNode *node, s32 index) {
-    PolyStrip *strip = node->strip;
-    PolyStripEntry *entry = &strip->entries[index];
+    ParSystem *strip = node->strip;
+    ParCell *entry = &strip->cells[index];
     f32 scale[4];
     f32 *p;
     s32 pairs;
     s32 i;
 
-    p = entry->points;
-    pairs = strip->count / 2;
+    p = (f32 *)entry->history;
+    pairs = strip->vertexWordCount / 2;
     scale[0] = scale[1] = scale[2] = node->pairDisplacement;
     VU0_LOAD_VF(vf12, scale);
     for (i = 0; i < pairs; i++) {
@@ -326,7 +303,7 @@ void polyReleaseBandNodeResources(PolyBand *obj) {
 }
 
 /* Seed band records with staggered inactive ages. */
-void func_0015E100(PolyBand *obj) {
+void polyInitializeBandRecordAges(PolyBand *obj) {
     u32 count = obj->head.entryCount;
     PolyBandRecord *record = obj->records;
     u32 delayStep = obj->spawnDelayStep;
@@ -375,8 +352,8 @@ void polyRingRandomizeRecord(PolyBand *spawner, s32 index) {
 /* Write radii radius and radius + radialWidth, then close the strip with its first pair. */
 void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius)
 {
-    PolyStrip *strip = band->strip;
-    PolyStripEntry *entry = &strip->entries[index];
+    ParSystem *strip = band->strip;
+    ParCell *entry = &strip->cells[index];
     f32 radialDirection[4];
     f32 baseRadiusVector[4];
     f32 offsetRadiusVector[4];
@@ -387,9 +364,9 @@ void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius)
     s32 pairs;
     s32 i;
 
-    entry->count = strip->count;
-    pointCursor = entry->points;
-    pairs = strip->count / 2;
+    entry->vertexCount = strip->vertexWordCount;
+    pointCursor = (f32 *)entry->history;
+    pairs = strip->vertexWordCount / 2;
     VEC3_SPLAT(baseRadiusVector, radius);
     VEC3_SPLAT(offsetRadiusVector, radius + band->radialWidth);
     angleStep = 3.14159265f * 2.0f / (f32)band->segments;
@@ -415,16 +392,16 @@ void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius)
         pointCursor += 8;
         angle += angleStep;
     }
-    firstPointPair = entry->points;
+    firstPointPair = (f32 *)entry->history;
     PCP_COPY_VECTOR(pointCursor, firstPointPair);
     PCP_COPY_VECTOR(pointCursor + 4, firstPointPair + 4);
 }
 
 /* Add one radius step and local-y lift step to existing point pairs, then close the strip. */
 void polyStripBuildScaledRing(PolyBand *band, s32 index) {
-    PolyStrip *strip = band->strip;
+    ParSystem *strip = band->strip;
     PolyBandRecord *rec = &band->records[index];
-    PolyStripEntry *entry = &strip->entries[index];
+    ParCell *entry = &strip->cells[index];
     f32 radialDirection[4];
     f32 radiusStepVector[4];
     f32 liftVector[4];
@@ -435,9 +412,9 @@ void polyStripBuildScaledRing(PolyBand *band, s32 index) {
     s32 pairs;
     s32 i;
 
-    entry->count = strip->count;
-    pointCursor = entry->points;
-    pairs = strip->count >> 1;
+    entry->vertexCount = strip->vertexWordCount;
+    pointCursor = (f32 *)entry->history;
+    pairs = strip->vertexWordCount >> 1;
     radiusStepVector[2] = radiusStepVector[1] = radiusStepVector[0] = rec->radiusStep;
     liftVector[1] = band->liftStep;
     liftVector[2] = liftVector[0] = 0;
@@ -466,7 +443,7 @@ void polyStripBuildScaledRing(PolyBand *band, s32 index) {
         pointCursor += 8;
         angle += angleStep;
     }
-    firstPointPair = entry->points;
+    firstPointPair = (f32 *)entry->history;
     PCP_COPY_VECTOR(pointCursor, firstPointPair);
     PCP_COPY_VECTOR(pointCursor + 4, firstPointPair + 4);
 }
@@ -484,12 +461,12 @@ void func_0015E5D8(PolyBand *obj) {
     s32 index = 0;
     u32 completed = 0;
     u8 loop;
-    PolyStrip *strip;
+    ParSystem *strip;
     s32 count;
     PolyBandRecord *record;
     s32 duration;
     u32 color;
-    PolyStripEntry *entry;
+    ParCell *entry;
 
     strip = obj->strip;
     count = obj->head.entryCount;
@@ -497,7 +474,7 @@ void func_0015E5D8(PolyBand *obj) {
     duration = obj->head.duration;
     loop = obj->head.loop;
     color = obj->head.color;
-    entry = strip->entries;
+    entry = strip->cells;
 
     if (count > 0) {
         do {
@@ -521,7 +498,7 @@ void func_0015E5D8(PolyBand *obj) {
                     polyStripBuildScaledRing(obj, index);
                     age++;
                 } else {
-                    entry->count = 0;
+                    entry->vertexCount = 0;
                     age++;
                 }
             }
@@ -535,7 +512,7 @@ void func_0015E5D8(PolyBand *obj) {
                         obj->head.active = 0;
                     }
                 }
-                entry->count = 0;
+                entry->vertexCount = 0;
             }
 
             record->age = age;
@@ -588,9 +565,9 @@ void func_0015E900(PolyArc *obj, s32 index) {
 /* Lay an arc ring's inner and outer point rows at the projected radius and
  * radial offset for this record's age. */
 void polyUpdateArcRingStripPoints(PolyArc *arc, s32 index) {
-    PolyStrip *strip = arc->strip;
+    ParSystem *strip = arc->strip;
     PolyArcRecord *record = &arc->records[index];
-    PolyStripEntry *stripEntry = &strip->entries[index];
+    ParCell *stripEntry = &strip->cells[index];
     f32 innerPointVector[4];
     f32 outerPointVector[4];
     f32 recordRadius;
@@ -604,9 +581,9 @@ void polyUpdateArcRingStripPoints(PolyArc *arc, s32 index) {
     s32 pairs;
     s32 i;
 
-    stripEntry->count = strip->count;
-    pointCursor = stripEntry->points;
-    pairs = strip->count >> 1;
+    stripEntry->vertexCount = strip->vertexWordCount;
+    pointCursor = (f32 *)stripEntry->history;
+    pairs = strip->vertexWordCount >> 1;
     recordRadius = record->radius;
     angle = (f32)record->age / (f32)arc->head.duration * 3.14159265f;
     projectedInnerRadius = recordRadius * sdfSinPoly(angle);
@@ -638,7 +615,7 @@ void polyUpdateArcRingStripPoints(PolyArc *arc, s32 index) {
         pointCursor += 8;
         angle += angleStep;
     }
-    firstPointPair = stripEntry->points;
+    firstPointPair = (f32 *)stripEntry->history;
     PCP_COPY_VECTOR(pointCursor, firstPointPair);
     PCP_COPY_VECTOR(pointCursor + 4, firstPointPair + 4);
 }
@@ -652,12 +629,12 @@ void func_0015EC08(PolyArc *obj) {
     s32 index = 0;
     u32 completed = 0;
     u8 loop;
-    PolyStrip *strip;
+    ParSystem *strip;
     s32 count;
     PolyArcRecord *record;
     s32 duration;
     u32 color;
-    PolyStripEntry *entry;
+    ParCell *entry;
 
     strip = obj->strip;
     count = obj->head.entryCount;
@@ -665,7 +642,7 @@ void func_0015EC08(PolyArc *obj) {
     duration = obj->head.duration;
     loop = obj->head.loop;
     color = obj->head.color;
-    entry = strip->entries;
+    entry = strip->cells;
 
     if (count > 0) {
         do {
@@ -689,7 +666,7 @@ void func_0015EC08(PolyArc *obj) {
                     polyUpdateArcRingStripPoints(obj, index);
                     age++;
                 } else {
-                    entry->count = 0;
+                    entry->vertexCount = 0;
                     age++;
                 }
             }
@@ -703,7 +680,7 @@ void func_0015EC08(PolyArc *obj) {
                         obj->head.active = 0;
                     }
                 }
-                entry->count = 0;
+                entry->vertexCount = 0;
             }
 
             record->age = age;
@@ -764,9 +741,9 @@ void polyRotatingRandomizeRecord(PolyRotatingBand *spawner, u32 index) {
 /* Build the paired ring using current radius/rotation, then retain their next-step values. */
 void polyBandLayoutRingRotated(PolyRotatingBand *obj, s32 index)
 {
-    PolyStrip *strip = obj->strip;
+    ParSystem *strip = obj->strip;
     PolyRotatingBandRecord *rec = &obj->records[index];
-    PolyStripEntry *entry = &strip->entries[index];
+    ParCell *entry = &strip->cells[index];
     f32 dir[4];
     f32 baseRadiusVector[4];
     f32 offsetRadiusVector[4];
@@ -777,9 +754,9 @@ void polyBandLayoutRingRotated(PolyRotatingBand *obj, s32 index)
     s32 pairs;
     s32 i;
 
-    entry->count = strip->count;
-    out = entry->points;
-    pairs = strip->count >> 1;
+    entry->vertexCount = strip->vertexWordCount;
+    out = (f32 *)entry->history;
+    pairs = strip->vertexWordCount >> 1;
     func_002DD608(rec->rotationXRadians);
     func_002DD968(rec->rotationYRadians);
     sdfMultiplyVuMatrixInPlace();
@@ -812,7 +789,7 @@ void polyBandLayoutRingRotated(PolyRotatingBand *obj, s32 index)
         out += 8;
         value += step;
     }
-    first = entry->points;
+    first = (f32 *)entry->history;
     PCP_COPY_VECTOR(out, first);
     PCP_COPY_VECTOR(out + 4, first + 4);
 }
@@ -826,12 +803,12 @@ void func_0015F2D0(PolyRotatingBand *obj) {
     s32 index = 0;
     u32 completed = 0;
     u8 loop;
-    PolyStrip *strip;
+    ParSystem *strip;
     s32 count;
     PolyRotatingBandRecord *record;
     s32 duration;
     u32 color;
-    PolyStripEntry *entry;
+    ParCell *entry;
 
     strip = obj->strip;
     count = obj->head.entryCount;
@@ -839,7 +816,7 @@ void func_0015F2D0(PolyRotatingBand *obj) {
     duration = obj->head.duration;
     loop = obj->head.loop;
     color = obj->head.color;
-    entry = strip->entries;
+    entry = strip->cells;
 
     if (count > 0) {
         s32 inactiveAge = POLY_INACTIVE_ENTRY_AGE;
@@ -867,7 +844,7 @@ void func_0015F2D0(PolyRotatingBand *obj) {
                 if (entry->color & 0xFF000000) {
                     polyBandLayoutRingRotated(obj, index);
                 } else {
-                    entry->count = 0;
+                    entry->vertexCount = 0;
                 }
                 age++;
             }
@@ -881,7 +858,7 @@ void func_0015F2D0(PolyRotatingBand *obj) {
                         obj->head.active = 0;
                     }
                 }
-                entry->count = 0;
+                entry->vertexCount = 0;
             }
 
             record->age = age;
