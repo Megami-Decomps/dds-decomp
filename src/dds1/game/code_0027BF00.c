@@ -1119,7 +1119,7 @@ INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027E8D8);
 /* Ten resource handles occupy offsets 0x0c through 0x30 in each page bundle. */
 typedef struct MenuPageResources {
     u8 pad0[0xC];
-    s32 sprites[10]; /* 0x0c */
+    struct EffectSlotSet *sprites[10]; /* 0x0c */
     u8 pad34[8];
 } MenuPageResources;
 
@@ -1129,31 +1129,31 @@ MenuPageResources *mnuCreatePartyPageSpriteBundle(s32 mainResource, s32 secondar
     MenuPageResources *item = (MenuPageResources *)sdfAllocSizeClassBlock(0x3C);
 
     memset(item, 0, 0x3C);
-    item->sprites[0] = (s32)effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0, 1);
-    item->sprites[1] = (s32)effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 1, 1);
-    item->sprites[2] = (s32)effCreateResourceSlotSet((EffectSlotSet *)mainResource, 2, 1);
-    item->sprites[3] = (s32)effCreateResourceSlotSet((EffectSlotSet *)mainResource, 5, 1);
-    item->sprites[4] = (s32)effCreateResourceSlotSet((EffectSlotSet *)mainResource, 6, 1);
-    item->sprites[5] = (s32)effCreateResourceSlotSet((EffectSlotSet *)mainResource, 7, 1);
-    item->sprites[6] = (s32)effCreateResourceSlotSet((EffectSlotSet *)mainResource, 8, 1);
-    item->sprites[7] = (s32)effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0xA, 1);
-    item->sprites[9] = (s32)effCreateResourceSlotSet((EffectSlotSet *)extraResource, extraIndex, 1);
-    item->sprites[8] = (s32)effCreateResourceSlotSet((EffectSlotSet *)finalResource, finalIndex, 1);
+    item->sprites[0] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0, 1);
+    item->sprites[1] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 1, 1);
+    item->sprites[2] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 2, 1);
+    item->sprites[3] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 5, 1);
+    item->sprites[4] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 6, 1);
+    item->sprites[5] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 7, 1);
+    item->sprites[6] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 8, 1);
+    item->sprites[7] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0xA, 1);
+    item->sprites[9] = effCreateResourceSlotSet((EffectSlotSet *)extraResource, extraIndex, 1);
+    item->sprites[8] = effCreateResourceSlotSet((EffectSlotSet *)finalResource, finalIndex, 1);
     return item;
 }
 
-/* Keep the original word walk: structured indexing exceeds the retail body. */
+/* Preserve the native resource-slot release order. */
 void mnuDestroyResources(MenuPageResources *resources) {
-    s32 *object = (s32 *)resources;
+    struct EffectSlotSet **object = (struct EffectSlotSet **)resources;
     u32 i;
     for (i = 0; i < 2; i++) {
-        effDestroyResourceSlotSet((struct EffectSlotSet *)object[i + 3]);
+        effDestroyResourceSlotSet(object[i + 3]);
     }
     for (i = 0; i < 6; i++) {
-        effDestroyResourceSlotSet((struct EffectSlotSet *)object[i + 5]);
+        effDestroyResourceSlotSet(object[i + 5]);
     }
-    effDestroyResourceSlotSet((struct EffectSlotSet *)object[12]);
-    effDestroyResourceSlotSet((struct EffectSlotSet *)object[11]);
+    effDestroyResourceSlotSet(object[12]);
+    effDestroyResourceSlotSet(object[11]);
     sdfReleaseChipBlock(resources);
 }
 
