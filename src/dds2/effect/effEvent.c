@@ -84,7 +84,6 @@ extern u8 D_003B22A0[];
 
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
 
-extern EffBlurScaleWork *effCloneBlurWorkWithSlots(void *arg);
 
 extern EffScreenDrawParams D_003B22D0;
 
@@ -116,11 +115,7 @@ extern s8 effTexturedBlurEnabled;
 
 extern s8 effRectangleBlurEnabled;
 
-extern void effDrawBlurRectangle(EffScreenDrawParams *arg);
-
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
-
-extern void effBlurDrawFramebufferQuad(EffScreenDrawParams *arg);
 
 extern void func_0018F840(EffSolidRectParams *arg);
 
@@ -749,14 +744,14 @@ void effInitWorks(void) {
     effBlurPixelWork = effCloneBlurTemplate((EffBlurTemplateBody *)D_003B2208);
     effFilterBlurWork = effBlurCreateScatterWork((EffBlurScatterParams *)D_003B21D8);
     effTexturedSquareWork = effCloneResourceTemplate((EffResourceRectParams *)D_003B2278);
-    effStaggeredBlurWork = effCloneBlurWorkWithSlots(D_003B22A0);
+    effStaggeredBlurWork = effCloneBlurWorkWithSlots((EffBlurScaleParams *)D_003B22A0);
     effGetCh76Work()->params.count = EFF_EVENT_STAGGERED_SLOT_COUNT;
 }
 
 /* Dispatch enabled draw families independently, in their native order. */
 void effDispatchActive(void) {
     if (effRectangleBlurEnabled) {
-        effDrawBlurRectangle(&effBlurRectangleParameters);
+        effDrawBlurRectangle(&effBlurRectangleParameters.source);
     }
     if (effTexturedBlurEnabled) {
         effDrawBlurPixelRectWithResource(effBlurPixelWork);
@@ -768,7 +763,7 @@ void effDispatchActive(void) {
         effBlurStepScaleSlotsAndDraw(effStaggeredBlurWork);
     }
     if (D_00436463) {
-        effBlurDrawFramebufferQuad(&D_003B2238);
+        effBlurDrawFramebufferQuad(&D_003B2238.source);
     }
     if (effColorRectangleEnabled) {
         func_0018F840(&effColorRectangleParameters);
