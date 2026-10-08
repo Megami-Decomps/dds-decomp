@@ -18,6 +18,25 @@ typedef union MenuWorkControl {
     } bits;
 } MenuWorkControl;
 
+typedef struct MenuWorkFlagBits {
+    u32 active : 1;
+    u32 updated : 1;
+    u32 finished : 1;
+    u32 pendingDeactivate : 1; /* bit 3: dispatch then deactivate */
+    u32 pendingStart : 1; /* bit 4: set by mnuCreateAnimatedEffect */
+    u32 unk5 : 1;
+    u32 unk6 : 8;
+    u32 inputDisabled : 1;
+    u32 mode : 4;
+    u32 modelMotionStarted : 1;
+    u32 unk20 : 12;
+} MenuWorkFlagBits;
+
+typedef union MenuWorkFlags {
+    u32 word;
+    MenuWorkFlagBits bits;
+} MenuWorkFlags;
+
 /* Primary work pool: 100 records occupy the constructor's 0x1C20 allocation. */
 typedef struct MenuWorkEntry {
     MenuWorkControl control;
@@ -44,20 +63,15 @@ typedef struct MenuWorkEntry {
      * 0x0031A3F8..0x0031A404 extracts bit 5 and compares it with one. */
     union {
         u32 flags;
-        struct {
-            u32 active : 1;
-            u32 updated : 1;
-            u32 finished : 1;
-            u32 pendingDeactivate : 1; /* bit 3: dispatch then deactivate */
-            u32 pendingStart : 1; /* bit 4: set by mnuCreateAnimatedEffect */
-            u32 unk5 : 1;
-            u32 unk6 : 8;
-            u32 unk14 : 5;
-            u32 modelMotionStarted : 1;
-            u32 unk20 : 12;
-        } flagsBits;
+        MenuWorkFlagBits flagsBits;
     };
-    u8 pad44[4];
+    union {
+        u8 pad44[4];
+        struct {
+            s16 inputCountdown; /* 0x44: decremented by the active-effect updater */
+            u8 pad46[2];
+        };
+    };
 } MenuWorkEntry;
 
 typedef union MenuRuntimeState {
@@ -83,7 +97,7 @@ typedef struct MenuRuntimeRecord {
     s16 remaining;
 } MenuRuntimeRecord;
 
-typedef char MenuWorkLayoutAssert[(sizeof(MenuWorkControl)==4 && sizeof(MenuWorkEntry)==0x48 &&
+typedef char MenuWorkLayoutAssert[(sizeof(MenuWorkControl)==4 && sizeof(MenuWorkFlags)==4 && sizeof(MenuWorkEntry)==0x48 &&
     (unsigned long)&((MenuWorkEntry*)0)->control==0 &&
     (unsigned long)&((MenuWorkEntry*)0)->tag==4 &&
     (unsigned long)&((MenuWorkEntry*)0)->unk08==8 &&
@@ -108,7 +122,9 @@ typedef char MenuWorkLayoutAssert[(sizeof(MenuWorkControl)==4 && sizeof(MenuWork
     (unsigned long)&((MenuWorkEntry*)0)->callback==0x3C &&
     (unsigned long)&((MenuWorkEntry*)0)->flags==0x40 &&
     (unsigned long)&((MenuWorkEntry*)0)->pad44==0x44 &&
-    sizeof(((MenuWorkEntry*)0)->pad44)==4)?1:-1];
+    sizeof(((MenuWorkEntry*)0)->pad44)==4 &&
+    (unsigned long)&((MenuWorkEntry*)0)->inputCountdown==0x44 &&
+    (unsigned long)&((MenuWorkEntry*)0)->pad46==0x46)?1:-1];
 typedef char MenuRuntimeLayoutAssert[(sizeof(MenuRuntimeRecord)==0x24 && sizeof(MenuRuntimeState)==4 &&
     (unsigned long)&((MenuRuntimeState*)0)->flags==0 &&
     (unsigned long)&((MenuRuntimeState*)0)->kind==1 &&
