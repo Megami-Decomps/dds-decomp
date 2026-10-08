@@ -7,6 +7,7 @@
 struct EffNode;
 
 struct EffRequest;
+struct SdfMemBlock;
 
 /* Packed position/basis query; the final word is a signed extent override. */
 typedef struct EffectVectorRequest {
@@ -56,7 +57,7 @@ typedef struct EffMagatuhiValueWork {
     u16 *validCounts;
     f32 (*angleRows)[4];
     SdfTex *texture;
-    void *allocationHandle;
+    struct SdfMemBlock *allocationHandle;
 } EffMagatuhiValueWork;
 
 /* Seven copied words; the parent appends its independently allocated history. */
