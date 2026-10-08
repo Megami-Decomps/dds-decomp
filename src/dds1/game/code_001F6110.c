@@ -5,6 +5,7 @@
 #include "kwln.h"
 #include "scr.h"
 #include "sdf.h"
+#include "dat_command.h"
 
 enum {
     BTL_RESOURCE_DESCRIPTOR_BYTES = 0x48,
@@ -1064,7 +1065,6 @@ typedef struct BtlActionProbe {
     void *actionProbeSecond;   /* 0x08 */
 } BtlActionProbe;
 
-extern s8 *datCommandSelectors;
 extern s32 func_001A8A30(void *, s32);
 extern s32 func_001A3CE0(void *, s32, BtlActionProbe *);
 
@@ -1076,7 +1076,7 @@ u32 btlScriptSelectActionEntry(void) {
 
     context = (BtlCmdCtx *)scrGetCurrentCommandWork();
     commandId = scrReadIntParameter(0);
-    if (datCommandSelectors[commandId * 2 + 1] == 1) {
+    if (datCommandSelectors[commandId].kind == 1) {
         if (func_001A8A30(context->unit, commandId) != 0 &&
             func_001A3CE0(context->unit, commandId, &probe) != 0) {
             context->actionProbeFirst = probe.actionProbeFirst;
