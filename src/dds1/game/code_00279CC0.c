@@ -575,7 +575,7 @@ MenuListNode *mnuInsertListNodeRelativeToAnchor(MenuList *list, MenuListNode *an
 
     node = sdfAllocAndClearQuadwords(sizeof(MenuListNode));
     node->value = value;
-    if (options & 2) {
+    if (options & MNU_LIST_INSERT_AFTER_ANCHOR) {
         node->prev = anchor;
         node->index = anchor->index;
         node->next = anchor->next;

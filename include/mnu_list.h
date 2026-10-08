@@ -81,7 +81,9 @@ struct MenuWindowContainer;
 struct MenuListNode *mnuListAppendNode(struct MenuList *list, const void *value);
 struct MenuListNode *mnuAppendWindowListNode(struct MenuWindowContainer *window, const void *value);
 
-/* Insert before anchor, or after it when options bit 1 is set; update list navigation state. */
+#define MNU_LIST_INSERT_AFTER_ANCHOR 0x2
+
+/* Anchored insertion defaults before; empty/null/last anchors append regardless of this option. */
 struct MenuListNode *mnuInsertListNodeRelativeToAnchor(struct MenuList *list,
                                                        struct MenuListNode *anchor,
                                                        const void *value, s32 mode,
