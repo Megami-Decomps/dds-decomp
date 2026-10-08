@@ -4107,3 +4107,12 @@ them as independent compiler operations. Exact consumers are DDS1
 Their callback results and actual argument contracts remain ordinary C;
 the only assembly is the evidenced SDK operation that C cannot express.
 
+## Linked-defeat query payload
+
+DDS2 `00229F14` requests four bytes for the mode that installs
+`func_00221158`; `0022A41C` allocates and clears those four bytes.
+Its payload has an enabled byte at +0 and a counter halfword at +2.
+Use `BattleEffectPayload.query`, not a cast of the linked-actor member:
+the separate Brahma mode allocates sixteen bytes and reads +0 as an actor
+pointer. The mode-selected payload union owns both interpretations.
+
