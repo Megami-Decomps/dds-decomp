@@ -173,7 +173,7 @@ void func_00272BC0(s32 x, s32 y, s32 z, struct MenuList *list,
         count = (FrFontGlyph *)func_001978E8(x + 0x910, y + 0x20, z, color,
                                           buffer, (s32)label);
         func_001958A0(count, 1, drawArg);
-        frFontQueueGlyphInSelectedSlot(count);
+        frFontQueueGlyphForCurrentDrawBuffer(count);
     } else {
         s32 selected = (list->cursor == node);
 

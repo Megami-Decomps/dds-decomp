@@ -9,8 +9,6 @@ extern u32 func_0011B140();
 extern u32 func_0011B148();
 extern u32 func_0011B150();
 
-extern struct FrFontGlyph *func_001951C8(void *text, s8 fontIndex,
-    s8 firstOption, s8 secondOption, struct FrFontGlyph *previousGlyph);
 extern void frFontSetContextPair(struct FrFontGlyph *glyph, u32 x, u32 y);
 extern s32 frFontDrawGlyphInDefaultMode(struct FrFontGlyph *glyph);
 extern void frFontSetChainFlag(struct FrFontGlyph *glyph, u8 value);
@@ -129,7 +127,7 @@ void dds3UpdateLinkedNodes(void) {
 void frFontSubmitAndFreeGlyphOwner(void *owner) {
     Dds3FontNode *node = owner;
 
-    frFontQueueGlyphInSelectedSlot(node->glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(node->glyph);
     sdfReleaseChipBlock(node);
 }
 

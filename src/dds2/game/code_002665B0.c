@@ -319,7 +319,7 @@ void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32
     }
     handle = (FrFontGlyph *)itfCreateConvertedTextGlyph(gridX - 0x120, gridY, depth, value, text, 0);
     func_0019D550(handle, 1, MNU_TEXT_DRAW_PRIORITY);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
 
 
@@ -373,7 +373,7 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
     func_0035C860(text, mnuNumberSpriteFormat, number);
     sprite = (FrFontGlyph *)func_0019F5E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
     func_0019D550(sprite, 1, priority);
-    frFontQueueGlyphInSelectedSlot(sprite);
+    frFontQueueGlyphForCurrentDrawBuffer(sprite);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002665B0", D_00424E60);
@@ -462,7 +462,7 @@ void func_00267238(s32 x, s32 y, s32 unused, MenuList *list, MenuListNode *node,
     glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(x + 0xF0, y, 0, color, (const u8 *)node->title, 0);
     frFontSetChainFlag(glyph, chainFlags);
     func_0019D550(glyph, 1, priority);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 
@@ -2082,7 +2082,7 @@ void mnuQueueTerminalCurrencyLabel(s32 fading, s32 context) {
     }
     font = (FrFontGlyph *)func_0019F6C8(0x1810, 0x1C8, 0, color, text, 0);
     func_0019D550(font, 1, 0x52);
-    frFontQueueGlyphInSelectedSlot(font);
+    frFontQueueGlyphForCurrentDrawBuffer(font);
 }
 
 s32 mnuInitializeSelectionDispatchWhenModeUnset(KwlnTask *request) {

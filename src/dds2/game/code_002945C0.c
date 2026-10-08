@@ -29,7 +29,7 @@ void itfEmitSelectedGlyph(MenuTerminalContext *context, s32 unused, s32 layoutFl
         glyph = itfDrawBankTextWithLayoutFlags(0x600, y, 1, code, (FrFontTextBank *)D_00435E70, layoutFlags);
         frFontSetChildColors(glyph, color);
         func_0019D550(glyph, 1, renderFlags);
-        frFontQueueGlyphInSelectedSlot(glyph);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
         return;
     }
 }
