@@ -271,7 +271,7 @@ void func_00150840(BillObj *obj, BillRenderPair *node) {
             sdfTexGetSecondaryBufferSize(node->children[1]->texture));
         sdfAppendReferencePacket(node->packetList, packet);
         geometry = (u8 *)sdfAllocPacketAligned(0x38);
-        if (node->unk8 == 1) {
+        if (node->cameraFacingMode == 1) {
             VU0_LOAD_VF(vf10, sdfViewEyeVector);
             VU0_LOAD_VF(vf11, sdfViewTargetVector);
             VU0_SUB(vf10, vf10, vf11);
@@ -479,7 +479,7 @@ BillObj *billAllocList(void *resourceData) {
     newobj->animationActive = 1;
     newobj->pair.packetList = 0;
     newobj->pair.next = 0;
-    newobj->pair.unk8 = 0;
+    newobj->pair.cameraFacingMode = 0;
     billSetAnimationEntry(newobj, 0);
     return newobj;
 }

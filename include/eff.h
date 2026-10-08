@@ -294,7 +294,7 @@ typedef struct EffArrHdr {
 /* Two-child draw descriptor at +0x34 in animation-list objects; child allocations end before it. */
 typedef struct BillRenderPair {
     struct BillChildPayload *children[2];
-    u16 unk8;
+    u16 cameraFacingMode; /* 0x08: value 1 builds a view-facing matrix; other values use identity. */
     u16 kind;
     u32 colors[2];
     SdfListHead *packetList; /* 0x14 */
