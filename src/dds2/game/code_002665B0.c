@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "mnu.h"
 #include "sdf_resource.h"
 #include "mnu_staff.h"
@@ -1695,7 +1696,6 @@ u32 func_00269C48(void) {
     return 1;
 }
 
-extern u32 mnuMapPadMaskToFlags(s32 mask);
 extern s32 func_002685F0(s32 action, s32 context);
 extern void kwlnFadeInStart(s8, s8, s8, s32);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);

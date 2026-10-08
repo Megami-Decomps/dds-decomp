@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_list.h"
@@ -33,7 +34,6 @@ extern void func_0027E8D8(s32, s32, s32, u32, s32);
 extern void mnuCreateStaffImageSprite(s32);
 
 extern void mnuDrawStaffGridLabelsForKind(s32, u32);
-extern u32 mnuMapPadMaskToFlags(s32);
 extern s32 func_002719F0(s32);
 extern void mnuSetPopupEntry(s32, s32);
 extern void func_0027C788(MenuWindowContainer *);

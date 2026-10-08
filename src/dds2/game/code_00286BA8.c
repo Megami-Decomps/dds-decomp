@@ -110,7 +110,7 @@ MnuStatusResource *func_00286E98(void) {
     MnuStatusResource *resourceWork = (MnuStatusResource *)sdfMemoryGetBlockAddress(allocation);
 
     memset(resourceWork, 0, MTR_STATUS_RESOURCE_BYTES);
-    resourceWork->allocationHandle = (u32)allocation;
+    resourceWork->allocation = allocation;
     resourceWork->progressHost = mnuCreateProgressHost();
     evtPrintDeveloperConsoleMessage("trmLoadStartStatusResource()!!!! \n");
     evtPrintDeveloperConsoleMessage("mtrInit\n");
@@ -128,7 +128,7 @@ void func_00286F18(s32 unused, MnuStatusResource *resourceWork) {
         mnuReleaseFirstMantraSpriteSlots();
         mnuReleaseStaffAndTitleVisualResources(resourceWork->progressHost);
         evtPrintDeveloperConsoleMessage("trmDestroyStatusResource()!!!! \n");
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resourceWork->allocationHandle));
+        sdfReleaseResourceAllocation(resourceWork->allocation);
         mnuReleasePanelEntryPool();
     }
     evtPrintDeveloperConsoleMessage("mtrRelease\n");

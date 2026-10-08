@@ -1,3 +1,4 @@
+#include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_list.h"
@@ -16,10 +17,8 @@ extern void ptySkillMenuCopyPageState(s32);
 extern void mnuDrawStaffCampScreen(s32, s32);
 extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 extern void func_00272668(s32, s32, s32, s32, s32, s32);
-extern u32 mnuHasSelectedListNodeId(s32);
 extern s32 D_003BAA98;
 extern void func_00280048(s32);
-extern u32 mnuMapPadMaskToFlags(u32);
 extern s32 mnuGetAbilityTargetCategory(u16);
 extern void mnuSetPopupEntry(s32 *, char *);
 extern char D_0037CC58[];
@@ -196,7 +195,7 @@ void mnuFlagMatchingEntries(s32 context) {
         do {
             u16 skillId = (u16)node->sortKeyPrimary;
             if (mnuIsEntryCostUnaffordable(skillId, selectedEntry)) {
-                node->flags48 |= 1;
+                node->flags48 |= MNU_STAFF_NODE_UNAVAILABLE;
             }
             node = node->next;
         } while (node != NULL);
