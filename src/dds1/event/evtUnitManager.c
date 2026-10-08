@@ -773,7 +773,7 @@ extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfReleaseChipBlock(void *block);
 extern const s32 D_003AC060[];
 
-EvtUnit *evtCreateUnitTransitionWork(EvtEffObj *effObj, MdlCtx *owner) {
+EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {
     EvtUnit *work;
     void *endpoint;
     f32 defaultVector[4];
@@ -926,7 +926,7 @@ s32 evtAimUnitFromFlatQuaternion(EvtUnit *unit, f32 *quat, f32 angle) {
     VU0_SET_AXIS_CLEAR_W(0.0f, y);
     VU0_NORMALIZE_VF10();
     VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
-    VU0_LOAD_VF(vf11, unit->effObj->data->position);
+    VU0_LOAD_VF(vf11, unit->effObj->inner->position);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, v);
     return func_00222498(unit, v, angle);
@@ -935,7 +935,7 @@ s32 evtAimUnitFromFlatQuaternion(EvtUnit *unit, f32 *quat, f32 angle) {
 s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
     f32 v[4];
     f32 scale;
-    EvtEffObj *obj;
+    EffWorldNode *obj;
 
     func_00222498(unit, unit->targetVector, unit->directionOffset * 0.01f);
     if (unit->directionOffset != 0) {
@@ -944,7 +944,7 @@ s32 evtApplyUnitDirectionOffset(EvtUnit *unit) {
     } else {
         VU0_LOAD_VF(vf10, unit->targetVector);
         obj = unit->effObj;
-        VU0_LOAD_VF(vf11, obj->data->position);
+        VU0_LOAD_VF(vf11, obj->inner->position);
         VU0_SUB(vf10, vf10, vf11);
         VU0_NORMALIZE_VF10();
     }
@@ -974,8 +974,8 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
     s32 count = 0;
     s32 i;
     for (i = 0; i < 4; i++) {
-        savedA[i] = unit->effObj->data->position[i];
-        savedB[i] = unit->effObj->data->orientation[i];
+        savedA[i] = unit->effObj->inner->position[i];
+        savedB[i] = unit->effObj->inner->rotation[i];
     }
     copy = *unit;
     while (func_00220678(&copy) == 0) {
@@ -983,8 +983,8 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
         evtApplyUnitDirectionOffset(&copy);
     }
     for (i = 0; i < 4; i++) {
-        unit->effObj->data->position[i] = savedA[i];
-        unit->effObj->data->orientation[i] = savedB[i];
+        unit->effObj->inner->position[i] = savedA[i];
+        unit->effObj->inner->rotation[i] = savedB[i];
     }
     if (count == 0) {
         func_003003F0("ymove frameno = 0\n");
@@ -993,7 +993,7 @@ s32 evtUnitPrepareVerticalMoveSteps(EvtUnit *unit) {
         return 0;
     }
     VU0_LOAD_VF(vf10, unit->targetVector);
-    VU0_LOAD_VF(vf11, unit->effObj->data->position);
+    VU0_LOAD_VF(vf11, unit->effObj->inner->position);
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, delta);
     unit->stepCount = count;
