@@ -1,3 +1,4 @@
+#include "kwln_task_state.h"
 #include "evt_world.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
@@ -386,15 +387,15 @@ void evtMoveMessageWindowWithPanelOffset(s32 x, s32 y) {
     itfPanelEmitRecord(dspWindowHandle, -((DSP_WINDOW_PANEL_BASE_Y - y) * 8));
 }
 
-/* Recognize registered states one through three. Preserve the repeated queries. */
+/* Recognize all three scheduler queues. Preserve the repeated queries. */
 s32 evtIsTaskInActiveStates(s32 task) {
-    if (kwlnTaskGetRegisteredState(task) == 1) {
+    if (kwlnTaskGetRegisteredState(task) == KWLN_TASK_DELAYED_START) {
         return 1;
     }
-    if (kwlnTaskGetRegisteredState(task) == 2) {
+    if (kwlnTaskGetRegisteredState(task) == KWLN_TASK_ACTIVE) {
         return 1;
     }
-    return kwlnTaskGetRegisteredState(task) == 3;
+    return kwlnTaskGetRegisteredState(task) == KWLN_TASK_DESTROY_PENDING;
 }
 
 extern s8 evtActiveEntryFlags[8];

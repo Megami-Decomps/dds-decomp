@@ -1,10 +1,10 @@
 #include "common.h"
 
 #include "kwln.h"
+#include "kwln_task_state.h"
 
 extern void *sdfAllocSizeClassBlock(s32);
 
-#define KWLN_TASK_STATE_MASK 0xF
 
 extern KwlnTask* kwlnActiveTaskHead;
 
@@ -59,7 +59,7 @@ extern KwlnTask* kwlnTaskGetTaskByName(const char* name);
 void kwlnTaskActivate(KwlnTask* task)
 {
     kwlnTaskRemoveFromStateQueue(task);
-    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 2;
+    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | KWLN_TASK_ACTIVE;
     kwlnTaskInsertIntoOrderedStateQueue(task);
     task->unk24 = 0;
     task->timer = 0;
@@ -132,7 +132,7 @@ s32 func_00100A28(KwlnTask *task) {
         if (nextUpdate != 0) {
             task->update = (TaskUpdate)nextUpdate;
         }
-        if (nextUpdate == -1 && (task->flags & KWLN_TASK_STATE_MASK) == 2) {
+        if (nextUpdate == -1 && (task->flags & KWLN_TASK_STATE_MASK) == KWLN_TASK_ACTIVE) {
             kwlnTaskRequestDestroy(task);
             D_00435BF4 = 0;
             return 0;
@@ -170,14 +170,14 @@ void kwlnTaskRequestDestroy(KwlnTask* task)
     u32 state;
 
     state = task->flags & KWLN_TASK_STATE_MASK;
-    if (state >= 3) {
+    if (state >= KWLN_TASK_DESTROY_PENDING) {
         return;
     }
-    if (state == 0) {
+    if (state == KWLN_TASK_DETACHED) {
         return;
     }
     kwlnTaskRemoveFromStateQueue(task);
-    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 3;
+    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | KWLN_TASK_DESTROY_PENDING;
     kwlnTaskInsertIntoOrderedStateQueue(task);
     if (task->unk2E == 0) {
         kwlnTaskFinalizeDestroy(task);
@@ -223,11 +223,11 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", func_00100F48);
 void* kwlnTaskGetStateList(u32 state)
 {
     switch (state & KWLN_TASK_STATE_MASK) {
-    case 1:
+    case KWLN_TASK_DELAYED_START:
         return kwlnDelayedStartTaskCount;
-    case 2:
+    case KWLN_TASK_ACTIVE:
         return kwlnActiveTaskCount;
-    case 3:
+    case KWLN_TASK_DESTROY_PENDING:
         return kwlnDelayedDestroyTaskCount;
     default:
         return 0;
@@ -318,7 +318,7 @@ KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 des
         i++;
     }
     task->priority = priority;
-    task->flags = 1;
+    task->flags = KWLN_TASK_DELAYED_START;
     task->unk2C = startDelay;
     task->unk2E = destroyDelay;
     task->update = update;
@@ -354,11 +354,11 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", kwlnTaskDestroyWithHierarchy);
 
 void kwlnTaskMarkDestroyPending(KwlnTask* task)
 {
-    if ((task->flags & KWLN_TASK_STATE_MASK) != 2) {
+    if ((task->flags & KWLN_TASK_STATE_MASK) != KWLN_TASK_ACTIVE) {
         return;
     }
     kwlnTaskRemoveFromStateQueue(task);
-    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | 3;
+    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | KWLN_TASK_DESTROY_PENDING;
     kwlnTaskInsertIntoOrderedStateQueue(task);
 }
 
@@ -367,10 +367,10 @@ void kwlnTaskSetDestroyDelay(KwlnTask* task, s32 delayTicks)
     u32 state;
 
     state = task->flags & KWLN_TASK_STATE_MASK;
-    if (state == 0) {
+    if (state == KWLN_TASK_DETACHED) {
         return;
     }
-    if (state < 4) {
+    if (state < KWLN_TASK_STATE_LIMIT) {
         task->unk2E = delayTicks;
     }
 }
@@ -380,10 +380,10 @@ s32 kwlnTaskGetRegisteredState(KwlnTask* task)
     u32 state;
 
     if (kwlnTaskIsRegistered(task) == 0) {
-        return 0;
+        return KWLN_TASK_DETACHED;
     }
     state = task->flags & KWLN_TASK_STATE_MASK;
-    return (state < 4) ? state : 0;
+    return (state < KWLN_TASK_STATE_LIMIT) ? state : KWLN_TASK_DETACHED;
 }
 
 KwlnTask* kwlnTaskGetTaskByName(const char* name)

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "kwln_task_state.h"
 #include "sdf_resource.h"
 #include "itf.h"
 #include "sdf.h"
@@ -986,7 +987,7 @@ void itfReleaseFontTestTaskResources(void) {
     itfReleaseBackgroundSpriteTexture();
 }
 
-/* Draw first, then report all bits set only for registered task state three. */
+/* Draw first, then report all bits set only for a task awaiting destruction. */
 u32 itfDrawBackgroundAndGetTaskReadyMask(void) {
     s64 taskState;
     u32 readyMask;
@@ -994,7 +995,7 @@ u32 itfDrawBackgroundAndGetTaskReadyMask(void) {
     itfDrawBackgroundSprite();
     taskState = kwlnTaskGetRegisteredState(itfFontTestScriptTask);
     readyMask = 0xffffffff;
-    if (taskState != 3) {
+    if (taskState != KWLN_TASK_DESTROY_PENDING) {
         readyMask = 0;
     }
     return readyMask;
