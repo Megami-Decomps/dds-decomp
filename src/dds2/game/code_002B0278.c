@@ -739,7 +739,8 @@ void mnuRefreshPartyPanelSlots(s32 context) {
 }
 
 struct MenuSlotEffectHandles;
-extern void mnuLoadPanelSectionResources(struct MenuSlotEffectHandles *slot, u32 model,
+extern void mnuLoadPanelSectionResources(struct MenuSlotEffectHandles *slot,
+                                         struct EffectSlotSet *model,
                                          u32 firstValue, u32 secondValue, s32 thirdValue);
 s32 mnuInitializePartySelectionState(KwlnTask *task) {
     s32 contextAddress = (s32)kwlnTaskGetUserValue(task);
@@ -757,13 +758,13 @@ s32 mnuInitializePartySelectionState(KwlnTask *task) {
 
     mnuLoadPanelSectionResources(
         (struct MenuSlotEffectHandles *)&context->partyWindow.slots[0],
-        context->panelModel, 5, 8, 0xB);
+        (struct EffectSlotSet *)context->panelModel, 5, 8, 0xB);
     mnuLoadPanelSectionResources(
         (struct MenuSlotEffectHandles *)&context->partyWindow.slots[1],
-        context->panelModel, 5, 9, 0xB);
+        (struct EffectSlotSet *)context->panelModel, 5, 9, 0xB);
     mnuLoadPanelSectionResources(
         (struct MenuSlotEffectHandles *)&context->partyWindow.slots[2],
-        context->panelModel, 5, 0xA, 0xB);
+        (struct EffectSlotSet *)context->panelModel, 5, 0xA, 0xB);
 
     mnuClearPartySelectionAndActivateSlots(contextAddress);
     for (slotIndex = 0; slotIndex < 5; slotIndex++) {
@@ -3544,7 +3545,9 @@ typedef struct MenuSlotEffectHandles {
     u32 handles[3];
 } MenuSlotEffectHandles;
 
-void mnuLoadPanelSectionResources(MenuSlotEffectHandles *slot, u32 model, u32 firstValue, u32 secondValue, s32 thirdValue
+void mnuLoadPanelSectionResources(MenuSlotEffectHandles *slot,
+                                  EffectSlotSet *model, u32 firstValue,
+                                  u32 secondValue, s32 thirdValue
                                     );
 
 
