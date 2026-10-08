@@ -8,7 +8,7 @@ struct MemNode;
 struct FrFontRecord;
 struct SdfMemBlock;
 
-/* The cached node owns the four GS UV coordinates following its first word. */
+/* Atlas-list nodes use a flattened index; index zero is the sentinel. */
 typedef struct FrFontUvRect {
     s32 u0;
     s32 v0;
@@ -17,7 +17,7 @@ typedef struct FrFontUvRect {
 } FrFontUvRect;
 
 typedef struct FntNode {
-    void *unk0;
+    u32 nodeIndex;
     FrFontUvRect uv;
     struct FrFontRecord *item;
     struct FntNode *prev;
@@ -33,8 +33,8 @@ typedef struct FrFontRecord {
 } FrFontRecord;
 
 typedef struct FntList {
-    struct SdfMemBlock *firstAllocation;
-    struct SdfMemBlock *secondAllocation;
+    struct SdfMemBlock *nodeAllocation;
+    struct SdfMemBlock *recordStorageAllocation;
     u8 unk08[0x10];
     s32 count;
     FntNode *head;
@@ -150,8 +150,8 @@ void func_0019BA00(s32 x, s32 y, s32 width, s32 halfHeight, u8 style,
 
 typedef char FntNodeSizeCheck[sizeof(FntNode) == 0x20 ? 1 : -1];
 typedef char FntListSizeCheck[sizeof(FntList) == 0x20 ? 1 : -1];
-typedef char FntListFirstAllocationOffsetCheck[((u32)&((FntList *)0)->firstAllocation == 0x00) ? 1 : -1];
-typedef char FntListSecondAllocationOffsetCheck[((u32)&((FntList *)0)->secondAllocation == 0x04) ? 1 : -1];
+typedef char FntListNodeAllocationOffsetCheck[((u32)&((FntList *)0)->nodeAllocation == 0x00) ? 1 : -1];
+typedef char FntListRecordStorageAllocationOffsetCheck[((u32)&((FntList *)0)->recordStorageAllocation == 0x04) ? 1 : -1];
 typedef char FntListUnknownSetupOffsetCheck[((u32)&((FntList *)0)->unk08 == 0x08) ? 1 : -1];
 typedef char FntListCountOffsetCheck[((u32)&((FntList *)0)->count == 0x18) ? 1 : -1];
 typedef char FntListHeadOffsetCheck[((u32)&((FntList *)0)->head == 0x1C) ? 1 : -1];
