@@ -126,11 +126,11 @@ extern s32 fldGetSelectedUnitStat();
 
 extern void func_002152D8(s32, s32);
 
-extern void func_00215C70(s32, s32);
+extern s32 func_00215C70(s32, s32);
 
 extern void *memset(void *, s32, u32);
 
-extern void func_00216888(s32, s32);
+extern s32 func_00216888(s32, s32);
 
 extern void *func_00215118(BtlIndexList *, u16 *, u16);
 

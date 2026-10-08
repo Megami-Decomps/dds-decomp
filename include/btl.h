@@ -7,12 +7,13 @@
 #include "dat_state.h"
 #endif
 
-/* Battle effect actor, flags and timing (0x18); DDS1/2 identical views. */
+/* Mode-dependent first word; actor/flags/timing view is 0x18 bytes in both games. */
 typedef struct BattleEffectState {
     union {
         u32 owner;
         struct BtlUnit *actor;
         u8 statIndex;
+        u16 formCount; /* DDS1 HARI1 reads and advances only this halfword. */
     };
     u32 flags, value;        /* +0x04/+0x08 */
     u16 timer;               /* +0x0C */

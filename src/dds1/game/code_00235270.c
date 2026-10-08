@@ -1908,7 +1908,29 @@ void evtDrawGroupListRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023A688);
+s32 func_0023A688(s32 x, s32 y, EvtRuntime *ctx) {
+    EvtRuntimeGroup *group;
+    s32 count = 0;
+    u32 packets;
+    s32 shown = 15;
+
+    for (group = ctx->groups; group != NULL; group = group->next) {
+        if (group->type == 1) {
+            count++;
+        }
+    }
+    count += 3;
+    packets = sdfCreateResetPacketList();
+    evtDrawMenuFrame(packets, x, y, 20, 15, ctx->groupFirst, count, (u8 *)ctx, NULL, evtDrawGroupListRow);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)packets);
+    if (ctx->actionMode != 17) {
+        return 0;
+    }
+    if (count < shown) {
+        shown = count;
+    }
+    return kwlnStepTwoListCursors(0, 1, count, 1, shown, 0, &ctx->groupFirst, 0, &ctx->groupCursor);
+}
 
 void func_0023A798(void) {
 }

@@ -3230,7 +3230,7 @@ typedef struct EffPCPAimBattle {
 
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern u32 func_001695C8(void);
-extern f32 func_00208000(u32 mask, f32 *maxTop, f32 *minTop);
+extern f32 func_00208000(s32 mask, f32 *maxTop, f32 *minTop);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern void btlUnitGetMuzzlePosVU(void *unit);
 extern f32 sdfAtan2(f32 y, f32 x);

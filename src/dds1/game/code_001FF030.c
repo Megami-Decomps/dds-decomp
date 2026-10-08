@@ -4396,7 +4396,7 @@ s32 btlQueueHariFormChangeOrPartyCommand(void) {
     BtlTask *candidates[16];
     BtlTask *task;
     BtlUnit *unit;
-    u16 *formCount;
+    BattleEffectState *effectState;
     DatPartyRecord *stats;
     u16 mode;
     s32 count;
@@ -4440,9 +4440,9 @@ s32 btlQueueHariFormChangeOrPartyCommand(void) {
             }
         }
         if (unit != 0) {
-            formCount = (u16 *)state->effect;
+            effectState = state->effect;
             if (mode == 0x11A) {
-                if (*formCount >= 3) {
+                if (effectState->formCount >= 3) {
                     return -1;
                 }
             }
@@ -4452,12 +4452,12 @@ s32 btlQueueHariFormChangeOrPartyCommand(void) {
             stats = &unit->partyRecord;
             func_001A1990(stats, mode == 0x119 ? 0x11A : 0x119);
             stats->flags |= 0x23;
-            (*formCount)++;
+            effectState->formCount++;
             task = (BtlTask *)btlFindUnitByActor((s32)unit);
             fldAppendSceneGroupHandle(task);
             task->indexWork.phase = 0x11;
             btlAppendIndexListEntry(task->indexWork.indices, task->unit);
-            btlBossDebugPrintf("btl:HARI1 form = %d\n", *formCount);
+            btlBossDebugPrintf("btl:HARI1 form = %d\n", effectState->formCount);
         }
     }
     return -1;
@@ -4469,7 +4469,7 @@ u32 btlGetEventEffectValue(void) {
     s32 battle;
 
     battle = btlGetRuntime();
-    return *(u16 *)((BtlState *)battle)->effect;
+    return ((BtlState *)battle)->effect->formCount;
 }
 
 s32 btlHasFirstSpecialEnemySpecies(void) {
@@ -4494,15 +4494,15 @@ s32 btlHasFirstSpecialEnemySpecies(void) {
 }
 
 void btlDispatchSpecialEnemyActionWhenPhaseAllows(u8 *unit, s32 action) {
-    u8 *data;
+    BattleEffectState *effectState;
     if ((((BtlUnit *)unit)->flags & 0x400) == 0) {
         return;
     }
     if ((u16)(((BtlUnit *)unit)->partyRecord.unitId - 0x119) >= 2) {
         return;
     }
-    data = (u8 *)((BtlState *)btlGetRuntime())->effect;
-    if (((BtlUnit *)unit)->partyRecord.unitId == 0x11a && *(u16 *)data >= 3) {
+    effectState = ((BtlState *)btlGetRuntime())->effect;
+    if (((BtlUnit *)unit)->partyRecord.unitId == 0x11a && effectState->formCount >= 3) {
         return;
     }
     btlRestoreUnitMinimumValueAndClearStatus(unit, action);
