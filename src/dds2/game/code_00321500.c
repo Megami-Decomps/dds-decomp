@@ -904,7 +904,86 @@ MenuRuntimeRecord *func_00323988(MenuWorkEntry *work, struct MnuShootingWork *co
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00323BB8);
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00323DF0);
+/* Test active runtime records against the fixed work pool and its hit bounds. */
+s32 func_00323DF0(MenuRuntimeList *list, struct MnuShootingWork *context) {
+    s32 entryIndex;
+
+    for (entryIndex = 0; entryIndex < 100; entryIndex++) {
+        MenuWorkEntry *entry = (MenuWorkEntry *)(entryIndex * sizeof(MenuWorkEntry) + mnuWorkEntryPool);
+
+        if (entry->flagsBits.active) {
+            s32 entryX;
+            s32 entryY;
+            MenuRegistry *registry;
+            MenuRegistryParameters *parameters;
+
+            if (entry->flagsBits.finished || entry->control.bits.countdownEnabled) {
+                continue;
+            }
+            entryX = (s32)entry->x0;
+            entryY = (s32)mnuEvaluateTimedValue(entry);
+            registry = mnuGetMenuRecordRegistryEntry(entry->tag);
+            parameters = func_00322550(registry->parameterIndex);
+
+            if (parameters->hitWidth != 0) {
+                s32 left = entryX + parameters->hitOffsetX;
+                s32 top = entryY + parameters->unk26;
+                s32 right = left + parameters->hitWidth;
+                s32 bottom = top + parameters->unk2A;
+                MenuRuntimeRecord *record = list->records;
+                s32 recordCount = list->capacity;
+                s32 recordIndex = 0;
+
+                while (recordIndex < recordCount) {
+                    if (record->state.word & MNU_WORK_ACTIVE) {
+                        s32 kind = record->state.kind & 0xF;
+                        s32 radiusX = D_0040B248[kind][0];
+                        s32 centerX = (s32)((record->unk0C + record->unk18) + record->unk04);
+                        s32 centerY = (s32)((record->unk10 + record->unk1C) + record->unk08);
+
+                        if (right >= centerX - radiusX && centerX + radiusX >= left) {
+                            s32 radiusY = D_0040B248[kind][1];
+
+                            if (bottom >= centerY - radiusY && centerY + radiusY >= top) {
+                                s32 advanceMode;
+                                s32 status = 0;
+
+                                switch (kind) {
+                                case 1:
+                                case 2:
+                                case 3:
+                                    advanceMode = 1;
+                                    mnuDeactivateListRecord(list, record);
+                                    break;
+                                case 4:
+                                    advanceMode = 2;
+                                    break;
+                                default:
+                                    advanceMode = 1;
+                                    mnuDeactivateListRecord(list, record);
+                                    break;
+                                }
+                                if (entry->remaining == 0) {
+                                    status = 2;
+                                } else {
+                                    status = mnuAdvanceWorkEntry(entry, advanceMode) != 0;
+                                }
+                                D_004389AC(record, entry, context);
+                                if (status != 0) {
+                                    break;
+                                }
+                                recordCount = list->capacity;
+                            }
+                        }
+                    }
+                    record++;
+                    recordIndex++;
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_00324070);
 
