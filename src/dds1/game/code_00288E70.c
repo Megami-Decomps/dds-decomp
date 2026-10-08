@@ -65,7 +65,6 @@ s32 WaitSema(s32 sema);
 s32 SignalSema(s32 sema);
 void *memset(void *dst, s32 val, u32 len);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
-s32 sdfTryAllocGeneralBlock(s32 size);
 s32 kwlnTaskCreate(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 s32 func_002F6990(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4);
 s32 func_002F6858(s32 arg0, void *arg1, s32 *arg2);
@@ -170,24 +169,24 @@ s32 func_002890B8(void *deviceRequest, s32 event, s32 unused, s32 byteCount, Fil
         sdfDevQueueControlRequest(deviceRequest);
         break;
     case 4: {
-        s32 allocationHandle;
+        struct SdfMemBlock *allocationHandle;
 
         job->transferBytes = byteCount;
         job->totalBytes = byteCount;
         if (job->allocationMode == 0) {
             allocationHandle = sdfTryAllocGeneralBlock(byteCount);
-            job->allocationHandle = allocationHandle;
-            if (allocationHandle == 0) {
+            job->allocationHandle = (s32)allocationHandle;
+            if (allocationHandle == NULL) {
                 job->retryCount = 10;
                 job->state = 7;
                 break;
             }
         } else {
-            allocationHandle = (u32)sdfAllocGeneralBlockHigh(byteCount);
-            job->allocationHandle = allocationHandle;
+            allocationHandle = sdfAllocGeneralBlockHigh(byteCount);
+            job->allocationHandle = (s32)allocationHandle;
         }
         {
-            u32 address = sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
+            u32 address = sdfResourceRetainAddress(allocationHandle);
 
             job->transferAddress = address;
             job->retainedAddress = address;
@@ -338,13 +337,13 @@ void func_00289540(void) {
             job->deviceRequest = sdfDevCreateCallbackState((s32)job->name, func_002890B8, job);
             break;
         case 7:
-            job->allocationHandle = sdfTryAllocGeneralBlock(job->totalBytes);
+            job->allocationHandle = (s32)sdfTryAllocGeneralBlock(job->totalBytes);
             if (job->allocationHandle == 0) {
                 sdfPrintFormattedDevMessage("alloc retry for %s\n",
                                             ((DevStatePathView *)job->deviceRequest)->path);
                 job->retryCount--;
             } else {
-                u32 address = sdfResourceRetainAddress((struct SdfMemBlock *)(job->allocationHandle));
+                u32 address = sdfResourceRetainAddress((struct SdfMemBlock *)(u32)(job->allocationHandle));
 
                 job->transferAddress = address;
                 job->retainedAddress = address;

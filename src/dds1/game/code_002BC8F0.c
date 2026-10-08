@@ -626,7 +626,7 @@ void effResolveAndReleaseResource(u32 *handle) {
     if (*handle != 0) {
         u32 data = sdfResourceRetainAddress((struct SdfMemBlock *)(*handle));
         effResolveResourceSlots(handle, data, 0, -1);
-        sdfDecrementAllocationReferenceCount(*handle);
+        sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)*handle);
     }
 }
 
@@ -634,7 +634,7 @@ void effResolveAndReleaseSelectedResource(u32 *handle, s32 slot) {
     if (*handle != 0) {
         u32 data = sdfResourceRetainAddress((struct SdfMemBlock *)(*handle));
         effResolveResourceSlots(handle, data, 0, slot);
-        sdfDecrementAllocationReferenceCount(*handle);
+        sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)*handle);
     }
 }
 

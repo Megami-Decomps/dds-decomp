@@ -17,7 +17,6 @@ extern s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contex
 extern char sdfRuntimeTaskName[]; /* "GBWK" */
 extern void kwlnTaskDestroyWithHierarchyByName(char *name, s32 flag);
 extern void func_00117A80(void);
-extern void sdfDecrementAllocationReferenceCount(u32 allocation);
 extern struct EffWorldNode *dds3AppendWorldObjectNode();
 
 
@@ -226,7 +225,7 @@ void sdfDestroyRuntimeTask(void) {
     kwlnTaskDestroyWithHierarchyByName(sdfRuntimeTaskName, 0);
     func_00117A80();
     allocation = datGameState->header.backingAllocation;
-    sdfDecrementAllocationReferenceCount(allocation);
+    sdfDecrementAllocationReferenceCount((struct SdfMemBlock *)allocation);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     datGameState = 0;
 }
