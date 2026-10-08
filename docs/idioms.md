@@ -3408,6 +3408,16 @@ in DDS2. The flag-0x100, type-two and flag-0x40 providers are
 `001DD488`/`001EA940` and `001DD498`/`001EAA08` use the same owner.
 Keep these pointer contracts at every call, without integer transports.
 
+DDS1's preset constructor `001E6BB0` sign-extends its two table coordinates
+at `001E6BB4/001E6BD8` and `001E6BF4/001E6C40`: use `s16` formals.
+The adjacent entry constructor `001E6668` multiplies the full incoming
+index and compares the full kind instead; its coordinates remain `s32`.
+Both receive the primary command and camera pointers. The height clamp
+`001EB1B0` retains the unused command cookie and its two `s8` bypass flags.
+Transitively typed cursor callers pass `&command->camera`; the linked-unit
+initializer retains the actual state-owned command at `state + 0x70`,
+not an integer address or a second command view.
+
 DDS2 `btlUpdateActionPoseForLinkedTarget` deliberately leaves the target
 unit in `$a2`: native `001EBD6C` loads it there before the tail call at
 `001EBD88`. The fallback `001ECBF8` only consumes `$a0/$a1`, forwarding
@@ -3624,4 +3634,24 @@ The DDS1 loader allocates/reads `0x12400` bytes, or 256 records, and
 The renderers clamp three corners' adjusted alpha but leave the bottom-left
 corner unclamped; their ordinary float-to-int C casts emit `CVT.W.S`.
 The renderer bodies remain assembly pending a genuine source-shape match.
+
+## Lowest-stat command selection
+
+DDS2 `btlSelectLowestStatTarget` (`002263D8`) receives the primary
+`ActionStateLink`: its pending flags, command ID, owning unit and retained
+target list are `pendingFlags`, `indexWork.skillId`, `unit` and
+`indexWork.indices`. The callback traverses `BtlState.units` directly and
+reads the mode-795 byte through `BattleEffectPayload.statIndex`; it does not
+need an alternate action or battle-state view.
+
+## Unit position and extent pointer contracts
+
+`btlUnitGetPosVU` receives the primary `BtlUnit *` in both games; its selector
+is a byte (`ANDI 0xff` in the native entry). DDS2 `001F5780` likewise reads
+the unit's scale, height, reach and `unkC0`, with a byte selector and two
+floating-point offsets. `btlGetUnitTargetDistance` passes an actual target
+vector to `001FDD20`: that helper performs `LQC2` through both pointer
+arguments, followed by two scalar radius arguments in the float registers.
+The local declarations and callers use these pointer contracts directly;
+no pointer-to-word bridge is needed.
 

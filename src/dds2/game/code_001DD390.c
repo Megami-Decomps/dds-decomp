@@ -246,9 +246,9 @@ extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 extern void mdlSetAmountOnAllContextResources(MdlCtx *, f32);
 
-extern f32 func_001F5780(u32, u8, f32, f32);
+extern f32 func_001F5780(BtlUnit *, u8, f32, f32);
 
-extern f32 func_001FDD20(f32 *, f32, f32, s32);
+extern f32 func_001FDD20(f32 *, f32, f32, f32 *);
 
 extern struct BtlRuntimeTask *btlDeferredTaskTail;
 
@@ -7776,7 +7776,7 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001F5320);
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001F5780);
 
-void btlUnitGetPosVU(u32 unit, u8 mode) {
+void btlUnitGetPosVU(BtlUnit *unit, u8 mode) {
     s128 pos;
     switch (mode) {
     case 1:
@@ -8140,7 +8140,7 @@ BtlUnit *btlFindActiveActorById(s32 id) {
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001FDD20);
 
-f32 btlGetUnitTargetDistance(u32 unit, u8 mode, s32 target, f32 scale) {
+f32 btlGetUnitTargetDistance(BtlUnit *unit, u8 mode, f32 *target, f32 radius) {
     f32 saved[4];
     f32 pos[4];
     f32 result;
@@ -8150,7 +8150,7 @@ f32 btlGetUnitTargetDistance(u32 unit, u8 mode, s32 target, f32 scale) {
     result = func_001F5780(unit, mode, 1.0f, 1.0f);
     btlUnitGetPosVU(unit, mode);
     VU0_STORE_VF_UNCLOBBERED(vf10, pos);
-    result = func_001FDD20(pos, result, scale, target);
+    result = func_001FDD20(pos, result, radius, target);
     VU0_STORE_VF(vf10, saved);
     VU0_LOAD_VF(vf10, saved);
     return result;
@@ -8376,7 +8376,7 @@ void btlInitTargetCursorAndFacing(BtlLinkedCommand *action, void *state) {
     btlFlagMatchingUnitsDefeatCandidate(0x600);
     unit = action->link->unit;
     if (unit->flags & 0x80000) {
-        btlUnitGetPosVU((u32)unit, 0);
+        btlUnitGetPosVU(unit, 0);
         VU0_STORE_VF_UNCLOBBERED(vf10, position);
         btlCopyUnitRotationQuaternion((u8 *)unit, (s128 *)quaternion);
         VU0_LOAD_VF(vf10, quaternion);
