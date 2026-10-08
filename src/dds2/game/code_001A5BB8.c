@@ -2217,12 +2217,56 @@ BtlUnit *btlFindActiveActorByKind(s32 kind) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AAC50);
+extern void btlCopyUnitStats(BtlUnit *, DatPartyRecord *);
+
+void func_001AAC50(BtlUnit *unit, u8 sourceIndex, u8 priority) {
+    DatPartyRecord saved;
+    s32 insertion = 0;
+    s32 i;
+
+    if (datGameState->party[0].flags & 2) {
+        do {
+            if ((u16)(datGameState->party[insertion].flags & 1) == 0) {
+                break;
+            }
+            if (priority < btlFindActiveActorByKind(insertion)->lookupId) {
+                break;
+            }
+            insertion++;
+            if (insertion >= 5) {
+                break;
+            }
+        } while (datGameState->party[insertion].flags & 2);
+    }
+
+    memcpy(&saved, &datGameState->party[sourceIndex], sizeof(saved));
+    for (i = sourceIndex; i < 4; i++) {
+        memcpy(&datGameState->party[i], &datGameState->party[i + 1], sizeof(saved));
+        if (datGameState->party[i + 1].flags & 2) {
+            btlFindActiveActorByKind(i + 1)->unk2E4 = i;
+        }
+    }
+
+    for (i = 4; i > insertion; i--) {
+        memcpy(&datGameState->party[i], &datGameState->party[i - 1], sizeof(saved));
+        if (datGameState->party[i - 1].flags & 2) {
+            btlFindActiveActorByKind(i - 1)->unk2E4 = i;
+        }
+    }
+
+    memcpy(&datGameState->party[i], &saved, sizeof(saved));
+    btlCopyUnitStats(unit, &saved);
+    unit->partyRecord.flags |= 2;
+    datGameState->party[i].flags |= 2;
+    unit->unk2E4 = i;
+    func_001AABD8();
+    btlBossDebugPrintf("btl:party in %d->%d[%d]\n", sourceIndex, i, saved.unitId);
+}
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AB160);
 
 extern const char D_00415130[];
-extern void btlCopyUnitStats(BtlUnit *, DatPartyRecord *);
+
 
 /* Swap the actor's roster entry, refresh its stats, and mark the active entry. */
 void func_001AB510(BtlUnit *actor, u8 targetIndex) {
