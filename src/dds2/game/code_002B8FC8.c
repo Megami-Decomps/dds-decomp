@@ -1022,10 +1022,10 @@ void mnuInitIconSprites(MenuIconSprites *obj, s32 w, s32 h, u32 value, s32 res, 
 /* Create an owned three-sprite bundle using the caller's slot-index array. */
 MenuIconSprites *mnuCreateWindowSpriteResources(u32 width, u32 height, u32 value,
                     u32 resourceHandle, s32 *indices, u32 unused) {
-    u32 allocationHandle = (u32)sdfAllocGeneralBlock(0x18);
-    MenuIconSprites *bundle = (MenuIconSprites *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(0x18);
+    MenuIconSprites *bundle = (void *)sdfResourceRetainAddress(allocation);
     memset(bundle, 0, 0x18);
-    bundle->handle = allocationHandle;
+    bundle->allocation = allocation;
     mnuInitIconSprites(bundle, width, height, value, resourceHandle, indices, unused);
     return bundle;
 }
@@ -1037,7 +1037,7 @@ void mnuReleaseWindowTextures(MenuIconSprites *menu) {
         effDestroyResourceSlotSet(menu->sprite[spriteIndex]);
         spriteIndex++;
     } while (spriteIndex < MNU_WINDOW_RESOURCE_SPRITES);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(menu->handle));
+    sdfReleaseResourceAllocation(menu->allocation);
 }
 
 void func_002B9A38(void) {
