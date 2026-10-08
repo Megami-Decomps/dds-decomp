@@ -49,7 +49,7 @@ typedef struct BattleGroupSlot {
     s16 slot;
     s16 motionIndex;
     void *data;
-    s32 resourceHandle;
+    struct SdfMemBlock *resourceHandle;
 } BattleGroupSlot;
 
 /* Group owners allocate 0xB4 bytes and retain eight resource records. */
@@ -77,7 +77,7 @@ typedef struct MdlLoadPayload {
     void *itemList;
     s32 requestHandle;
     void *motionData;
-    s32 motionResource;
+    struct SdfMemBlock *motionResource;
     void *partInfo;
     s32 resourceHandle;
     DevRequest *partList;

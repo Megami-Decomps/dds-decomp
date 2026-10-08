@@ -13,6 +13,7 @@
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
+#include "mnu_shop.h"
 #include "mnu_list.h"
 #include "mnu_panel_state.h"
 #include "mnu_staff.h"
@@ -108,8 +109,6 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 
 
 extern s32 func_002C6CE8(void);
-
-extern void mnuReleaseResourceList(struct MenuIconState *list);
 
 
 
@@ -471,7 +470,7 @@ void func_002BFEA0(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     }
     iconX = x + positions[0];
     iconY = y + positions[1];
-    if (panel->unkE4 != 0 && (panel->flags & 0x40)) {
+    if (panel->panelResourceHandles[0] != 0 && (panel->flags & 0x40)) {
         func_002BE438(x, y, z, (struct MenuPageSpriteSlot *)panel,
                       panelIndex, 1, surface);
         return;

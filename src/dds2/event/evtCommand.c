@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "fld_resource_resolver.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
 #include "eff_dependency.h"
@@ -88,7 +89,6 @@ void dds3RemoveWorldObjectNode(void *unit);
 
 void dds3RefreshStoredVec3(EffWorldNode *object);
 
-void *func_001287B8(u32 id);
 
 void evtToggleWorldSlotScaledValueFlag(void *unit, s32 enabled);
 
@@ -716,7 +716,7 @@ s32 func_00241F10(void) {
 
     unit = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             func_0035B6E0(D_00421E58, scrReadIntParameter(0));
             func_0035B6E0(D_00421E68, scrReadIntParameter(1));
@@ -774,7 +774,7 @@ s32 func_00242100(void) {
 
     unit = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             func_0035B6E0(D_00421E58, scrReadIntParameter(0));
             targetId = scrReadIntParameter(1);
@@ -1004,7 +1004,7 @@ s32 evtCommandSetWorldSlotStatusFlag(void) {
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == 0);
     if (unit == 0) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == 0) {
             return 1;
         }
@@ -1023,7 +1023,7 @@ s32 evtCommandClearWorldSlotStatusFlag(void) {
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == 0);
     if (unit == 0) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == 0) {
             return 1;
         }
@@ -1045,7 +1045,7 @@ s32 evtCommandSetUnitRoomFloatState(void) {
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             return 1;
         }
@@ -1079,7 +1079,7 @@ s32 evtCommandSetUnitRoomIntegerState(void) {
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             return 1;
         }
@@ -1112,7 +1112,7 @@ s32 evtCommandSetUnitScaledValueFlag(void)
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             return 1;
         }
@@ -1133,7 +1133,7 @@ s32 evtCommandClearUnitScaledValueFlag(void)
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             return 1;
         }
