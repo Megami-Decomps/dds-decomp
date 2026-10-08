@@ -5769,47 +5769,47 @@ void fileResetSlotStates(FileSlotTable *table) {
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D7458);
 
-f32 func_002D7770(EffScalarCurve *curve, s32 frame, s32 length) {
-    f32 from, to, factor, duration;
+f32 effSampleScalarCurve(const EffScalarCurve *curve, s32 frame, s32 duration) {
+    f32 from, to, factor, durationFloat;
     s32 firstFrame, secondFrame;
-    if (length == 0) {
+    if (duration == 0) {
         return curve->initialValue;
     }
-    duration = length;
+    durationFloat = duration;
     switch (curve->mode) {
     case 0:
-        factor = (f32)frame / duration;
+        factor = (f32)frame / durationFloat;
         from = curve->initialValue;
         to = curve->finalValue;
         break;
     case 1:
-        firstFrame = (s32)(curve->firstFraction * duration);
+        firstFrame = (s32)(curve->firstFraction * durationFloat);
         if (frame < firstFrame) {
             factor = (f32)frame / firstFrame;
             from = curve->initialValue;
             to = curve->firstValue;
         } else {
-            f32 span = length - firstFrame;
+            f32 span = duration - firstFrame;
             factor = (f32)(frame - firstFrame) / span;
             from = curve->firstValue;
             to = curve->finalValue;
         }
         break;
     case 2:
-        firstFrame = (s32)(curve->firstFraction * duration);
+        firstFrame = (s32)(curve->firstFraction * durationFloat);
         if (frame < firstFrame) {
             factor = (f32)frame / firstFrame;
             from = curve->initialValue;
             to = curve->firstValue;
         } else {
-            secondFrame = (s32)(curve->secondFraction * duration);
+            secondFrame = (s32)(curve->secondFraction * durationFloat);
             if (frame < secondFrame) {
                 f32 span = secondFrame - firstFrame;
                 factor = (f32)(frame - firstFrame) / span;
                 from = curve->firstValue;
                 to = curve->secondValue;
             } else {
-                f32 span = length - secondFrame;
+                f32 span = duration - secondFrame;
                 factor = (f32)(frame - secondFrame) / span;
                 from = curve->secondValue;
                 to = curve->finalValue;
@@ -5827,7 +5827,6 @@ f32 func_002D7770(EffScalarCurve *curve, s32 frame, s32 length) {
 
 
 extern u32 func_002D7458(const void *, const void *, s32, s32);
-extern f32 func_002D7770(EffScalarCurve *, s32, s32);
 
 /* vu0 routine: samples the colour, scale and heading tracks at frame; in mode 2 the heading is the screen-space direction from out->pos to target (0 when they coincide) */
 void fileSampleKeyTracks(FileSlot *out, FileKeyBlock *block, s32 frame, f32 *target)
@@ -5835,9 +5834,9 @@ void fileSampleKeyTracks(FileSlot *out, FileKeyBlock *block, s32 frame, f32 *tar
     f32 delta[4];
 
     out->color = func_002D7458(&block->colorTrack, &block->alphaTrack, frame, block->length);
-    out->scale = func_002D7770(&block->scale.track.curve, frame, block->length);
+    out->scale = effSampleScalarCurve(&block->scale.track.curve, frame, block->length);
     if (block->heading.track.curve.headingMode != 2) {
-        out->angle = func_002D7770(&block->heading.track.curve, frame, block->length);
+        out->angle = effSampleScalarCurve(&block->heading.track.curve, frame, block->length);
         return;
     }
     VU0_MOVE_VF(vf20, vf28);
