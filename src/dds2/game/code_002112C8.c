@@ -3507,7 +3507,41 @@ void func_002195E0(ActionStateLink *record) {
     record->flags = flags & ~8;
 }
 
-INCLUDE_ASM(const s32, "game/code_002112C8", func_00219760);
+extern f32 D_003BF6A0[];
+extern void btlSetUnitRotation(BtlUnit *, s128 *);
+
+/* Reset the special actor groups to their fixed facing and battle position. */
+void func_00219760(void) {
+    BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
+
+    for (; unit != NULL; unit = unit->nextActor) {
+        u32 flags = unit->flags;
+        if (flags & 1) {
+            if (flags & 0x400) {
+                s32 id = (u16)unit->partyRecord.unitId;
+                if (id < 0x109) {
+                    continue;
+                }
+                if (id >= 0x10B) {
+                    if (id >= 0x137) {
+                        continue;
+                    }
+                    if (id < 0x131) {
+                        continue;
+                    }
+                }
+                btlSetUnitRotation(unit, (s128 *)D_003BF6A0);
+                /* Stop automatic facing before installing the reset pose. */
+                unit->flags &= ~0x80000;
+                unit->position[0] = 0.0f;
+                unit->position[1] = 0.0f;
+                unit->position[2] = 250.0f;
+                unit->position[3] = 0.0f;
+                btlSetUnitPosition(unit, unit->position);
+            }
+        }
+    }
+}
 
 s32 btlGetSubtaskActorMotionClass(void) {
     s32 *slot = (s32 *)((BattleWork *)btlGetRuntime())->sub;
@@ -4147,7 +4181,7 @@ typedef struct BtlActorStatusRecord {
     u8 pad100[0x170];
 } BtlActorStatusRecord;
 
-extern void btlSetUnitRotation(BtlUnit *, f32 *);
+extern void btlSetUnitRotation(BtlUnit *, s128 *);
 extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 extern void btlUpdateSpecialActorFormation(void);
 extern f32 D_003BF6B0[4];
@@ -4823,7 +4857,7 @@ extern void func_00224F88(u32);
 
 extern void func_001ADFE0(u32, u32, u32);
 
-extern void btlSetUnitRotation(BtlUnit *, f32 *);
+extern void btlSetUnitRotation(BtlUnit *, s128 *);
 
 extern void func_002218C8(void);
 
