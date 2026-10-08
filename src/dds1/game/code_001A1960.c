@@ -3982,15 +3982,20 @@ void btlReleaseTaskAndRefreshCursorIfFlagged(KwlnTask *handle) {
 }
 
 typedef struct BattlePanelEdgeWork {
-    u8 pad00[0x31];
+    u8 pad00[0x30];
+    s8 phase;
     s8 edgePhase;
-    u8 pad32[0x1E];
+    u8 pad32[2];
+    s32 timer;
+    u8 pad38[8];
+    f32 anchor[4];
     f32 corners[4][4];
+    s16 alpha;
 } BattlePanelEdgeWork;
 extern f32 D_003A2450[4];
 
 /* Advance one corner toward the panel boundary before moving to the next edge. */
-s32 btlAdvancePanelCornerPhase(s32 task, BattlePanelEdgeWork *work) {
+s32 btlAdvancePanelCornerPhase(BtlLinkedCommand *command, BattlePanelEdgeWork *work) {
     f32 center[4];
 
     memcpy(center, D_003A2450, sizeof(center));
