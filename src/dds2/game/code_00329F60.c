@@ -886,7 +886,7 @@ void sdfTexListInsert(SdfTex *texture) {
 }
 
 extern void *sdfAllocAndClearQuadwords(s32 size);
-extern void func_0032B908(SdfTex *texture);
+extern void sdfTexAllocatePaletteData(SdfTex *texture);
 extern void sdfTexCopyImageData(SdfTex *texture, void *source);
 extern void sdfTexCreateFirstPacket(SdfTex *texture);
 
@@ -910,7 +910,7 @@ SdfTex *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 max
 }
 
 extern SdfTexResource *sdfTexAllocHead(s32, s32, s32);
-extern void func_0032B908(SdfTex *);
+extern void sdfTexAllocatePaletteData(SdfTex *);
 extern void sdfTexCopyImageData(SdfTex *, void *);
 extern void sdfTexCreateFirstPacket(SdfTex *);
 SdfTex *func_0032B6B0(SdfTex *source) {
@@ -936,7 +936,7 @@ SdfTex *func_0032B6B0(SdfTex *source) {
     if (texture->secondaryResource != NULL) {
         texture->secondaryResource = sdfTexAllocHead(
             texture->pixelFormat, texture->clutFormat, texture->paletteCount);
-        func_0032B908(texture);
+        sdfTexAllocatePaletteData(texture);
         sdfTexCopyImageData(texture, original->paletteData);
         texture->unk38 = 0x80808080;
     }
