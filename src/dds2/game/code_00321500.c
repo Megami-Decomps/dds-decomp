@@ -985,7 +985,71 @@ s32 func_00323DF0(MenuRuntimeList *list, struct MnuShootingWork *context) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00324070);
+/* Advance work entries whose hit rectangles overlap the input. */
+s32 func_00324070(MenuWorkEntry *input) {
+    s32 entryIndex;
+
+    if (input->remaining == 0) {
+        return 0;
+    }
+    for (entryIndex = 0; entryIndex < 100; entryIndex++) {
+        MenuWorkEntry *entry =
+            (MenuWorkEntry *)(entryIndex * sizeof(MenuWorkEntry) + mnuWorkEntryPool);
+        MenuRegistry *registry;
+        MenuRegistryParameters *parameters;
+        MenuMovementRecord18 *inputRecord;
+        s32 entryX;
+        s32 entryY;
+        s32 left;
+        s32 top;
+        s32 right;
+        s32 bottom;
+        s32 inputLeft;
+        s32 inputTop;
+        s32 inputRight;
+        s32 inputBottom;
+
+        if ((entry->flags & MNU_WORK_ACTIVE) == 0) {
+            continue;
+        }
+        /* Finished entries and pending deactivations do not take hits. */
+        if ((entry->flags & 0xC) != 0) {
+            continue;
+        }
+
+        entryX = (s32)entry->x0;
+        entryY = (s32)mnuEvaluateTimedValue(entry);
+        registry = mnuGetMenuRecordRegistryEntry(entry->tag);
+        parameters = func_00322550(registry->parameterIndex);
+        if (parameters->hitWidth == 0) {
+            continue;
+        }
+        left = entryX + parameters->hitOffsetX;
+        top = entryY + parameters->unk26;
+
+        right = left + parameters->hitWidth;
+        bottom = top + parameters->unk2A;
+        inputRecord = (MenuMovementRecord18 *)func_00322520(input->tag);
+        parameters = func_00322550(inputRecord->parameterTag);
+        inputLeft = (s32)(input->x0 + (f32)parameters->hitOffsetX);
+        inputTop = (s32)(input->y0 + (f32)parameters->unk26);
+        inputRight = inputLeft + parameters->hitWidth;
+        inputBottom = inputTop + parameters->unk2A;
+
+        if (right < inputLeft || inputRight < left ||
+            bottom < inputTop || inputBottom < top) {
+            continue;
+        }
+
+        if (entry->remaining != 0 && mnuAdvanceWorkEntry(entry, 3) != 0) {
+            entry->flags |= 0x100000;
+        }
+        if (input->remaining != 0 && mnuAdvanceWorkEntry(input, 1) != 0) {
+            return 0;
+        }
+    }
+    return 0;
+}
 
 extern char D_0045C890[12];
 
