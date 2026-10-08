@@ -3220,8 +3220,8 @@
 0x00232A58	mdlSetNodeFrameStep	inferred	Writes Motion.frameStep at +0x20 when the searched node exists; the motion updater adds it to currentFrame.
 0x00232A88	mdlLoadPrimaryVectorVU	inferred	Loads the model inner vector at offset 0x50 into VU0 vf10.
 0x00232AA0	mdlStorePrimaryVectorVU	inferred	Sets the vf10 W component to zero and stores vf10 into the model inner vector at offset 0x50.
-0x00232AB8	mdlLoadSecondaryVectorVU	inferred	Loads the model inner vector at offset 0x60 into VU0 vf10.
-0x00232AD0	mdlUpdateContextRotationBasisFromQuaternion	inferred	Converts the context quaternion to rotation basis vectors. [names_reviewed11.tsv]
+0x00232AB8	mdlLoadRotationQuaternionVU	inferred	Loads SdfModel.rotationQuaternion at +0x60 into vf10; viewer and actor callers use it as the stored rotation quaternion.
+0x00232AD0	mdlUpdateContextRotationBasisFromQuaternion	inferred	Stores vf10 as SdfModel.rotationQuaternion at +0x60, then converts it to rotation basis vectors.
 0x00232B28	mdlLoadTertiaryVectorVU	inferred	Loads the model inner vector at offset 0x70 into VU0 vf10.
 0x00232B40	mdlStoreTertiaryVectorVU	inferred	Stores VU0 vf10 into the model inner vector at offset 0x70.
 0x00232B58	mdlGetBroadcastValue	inferred	Returns the model inner value stored by mdlBroadcastMasked and mdlBroadcastValue.

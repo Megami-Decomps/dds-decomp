@@ -1582,7 +1582,7 @@ u32 mdlRunViewerIndexedLabelTask(void) {
 
 extern void mdlLoadPrimaryVectorVU(MdlCtx *context);
 extern void mdlStorePrimaryVectorVU(MdlCtx *context);
-extern void mdlLoadSecondaryVectorVU(MdlCtx *context);
+extern void mdlLoadRotationQuaternionVU(MdlCtx *context);
 extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *context);
 extern f32 D_0040B530[4];
 extern f32 D_0040B540[4];
@@ -1607,7 +1607,7 @@ void mdlUpdateViewerSelectedModelFromPad(void) {
         return;
     }
     if (mdlViewerState.yawStepMode != 0) {
-        mdlLoadSecondaryVectorVU(mdlViewerState.resources[0]);
+        mdlLoadRotationQuaternionVU(mdlViewerState.resources[0]);
         if (sdfPadButtonStates[5] < 0) {
             VU0_LOAD_VF(vf11, D_0040B540);
             angle = 5.0f * 3.14159265f / 180.0f;
@@ -1659,7 +1659,7 @@ void mdlUpdateViewerSelectedModelFromPad(void) {
                 speed = 2.0f * 3.14159265f / 180.0f;
             }
         }
-        mdlLoadSecondaryVectorVU(mdlViewerState.resources[0]);
+        mdlLoadRotationQuaternionVU(mdlViewerState.resources[0]);
         if (sdfPadButtonStates[5] != 0) {
             VU0_LOAD_VF(vf11, D_0040B540);
             effMiscAxisAngleToQuaternionVf11(speed);
