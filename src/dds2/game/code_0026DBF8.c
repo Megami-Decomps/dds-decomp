@@ -940,8 +940,8 @@ u32 func_0026FAC0(void) {
 void func_0026FAC8(void) {
 }
 
-/* Allocate one header followed by fixed-size draw items; return the pool address word. */
-u32 mnuCreateMantraDrawPool(u32 itemCount) {
+/* Allocate one header followed by fixed-size draw items; return the pool base. */
+MantraDrawPool *mnuCreateMantraDrawPool(u32 itemCount) {
     u32 poolBytes = itemCount * MNU_MANTRA_DRAW_ITEM_BYTES + MNU_MANTRA_DRAW_POOL_HEADER_BYTES;
     u32 allocationHandle = (u32)sdfAllocGeneralBlock((s32)poolBytes);
     MantraDrawPool *pool = (MantraDrawPool *)sdfMemoryGetBlockAddress(
@@ -951,11 +951,10 @@ u32 mnuCreateMantraDrawPool(u32 itemCount) {
     pool->count = itemCount;
     pool->items = (MantraDrawItem *)((u8 *)pool + MNU_MANTRA_DRAW_POOL_HEADER_BYTES);
     evtPrintDeveloperConsoleMessage("mtrDrawProcessCreate!! num[%d]\n", itemCount);
-    return (u32)pool;
+    return pool;
 }
 
-void mnuDestroyMantraDrawPool(u32 address) {
-    MantraDrawPool *pool = (MantraDrawPool *)address;
+void mnuDestroyMantraDrawPool(MantraDrawPool *pool) {
     s32 count = pool->count;
     MantraDrawItem *item = pool->items;
     s32 i;
