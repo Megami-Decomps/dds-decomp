@@ -1001,7 +1001,335 @@ void func_002933A8(MnuStatusResource *object) {
 
 
 
-INCLUDE_ASM(const s32, "game/code_0028FD30", func_002933F0);
+s32 func_002933F0(MnuStatusResource *object) {
+    MantraMenuWork *state = &object->menu;
+    MantraNodePos *position;
+    s32 finished = 0;
+
+    switch (state->flagBytes[0]) {
+    case 3:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_MODE_CHANGE_NORMAL_OUT\n");
+        mnuSetMantraBackgroundVariant(object->menu.selectionController, 2);
+        mnuDisableMantraBackground(object->menu.selectionController);
+        if (state->drawBits.showOverlay) {
+            mnuHideMantraLimitLine(object->menu.selectionController);
+        }
+        mnuBeginMantraBackgroundMaskFadeOut(object->menu.selectionController);
+        mnuToggleMantraTitleVariant(object->menu.selectionController);
+        mnuHideMantraInfo(object->menu.selectionController);
+        mnuHideMantraScrollCursor(object->menu.selectionController);
+        mnuBeginMantraUnitPanelExit(object->menu.selectionController);
+        func_00278EE0(object->menu.selectionController);
+        func_002790B8(object->menu.selectionController);
+        mnuTransitionActivePanelAnimations(state->resource, 1);
+        state->tutorialNextState = 5;
+        state->tutorialWaitFrames = 30;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_MODE_CHANGE_NORMAL_OUT ...->MTR_MSL_TUTORIAL_INIT\n");
+        break;
+    case 4:
+        mnuSetMantraBackgroundVariant(object->menu.selectionController, 0);
+        if (state->drawBits.showOverlay) {
+            mnuShowMantraLimitLine(object->menu.selectionController);
+            mnuEnableMantraBackground(object->menu.selectionController);
+        }
+        mnuBeginMantraBackgroundMaskFadeIn(object->menu.selectionController);
+        mnuShowMantraInfo(object->menu.selectionController);
+        mnuShowMantraScrollCursor(object->menu.selectionController);
+        mnuRegisterMantraUnitPanelDraw(object->menu.selectionController, (u32)state->collectedValues);
+        func_0028D070(object, 2, 0);
+        position = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId((DatPartyRecord *)mnuGetSelectedNodeValue(object)));
+        mnuSpawnMantraShortLoopIconAtPosition((s32)((f32)position->x / 10.0f * 40.0f),
+            (s32)((f32)position->y / 10.0f * 39.0f), object->menu.selectionController);
+        state->defaultSelector = state->savedSelector;
+        position = state->defaultSelector;
+        mnuSpawnMantraIconAtPosition((s32)((f32)position->x / 10.0f * 40.0f),
+            (s32)((f32)position->y / 10.0f * 39.0f), object->menu.selectionController);
+        finished = 1;
+        break;
+    case 1:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_MODE_CHANGE_TUTORIAL_OUT\n");
+        mnuBeginMantraBackgroundMaskFadeOut(object->menu.selectionController);
+        mnuToggleMantraTitleVariant(object->menu.selectionController);
+        mnuHideMantraInfo(object->menu.selectionController);
+        mnuBeginMantraUnitPanelExit(object->menu.selectionController);
+        func_00278EE0(object->menu.selectionController);
+        func_002790B8(object->menu.selectionController);
+        mnuTransitionActivePanelAnimations(state->resource, 1);
+        state->tutorialNextState = 6;
+        state->tutorialWaitFrames = 30;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_MODE_CHANGE_TUTORIAL_OUT ...->MTR_MSL_TUTORIAL_MODE_CHANGE_NORMAL_IN\n");
+        break;
+    case 2:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_MODE_CHANGE_TUTORIAL_IN\n");
+        mnuBeginMantraBackgroundMaskFadeIn(object->menu.selectionController);
+        mnuShowMantraInfo(object->menu.selectionController);
+        mnuRegisterMantraUnitPanelDraw(object->menu.selectionController, (u32)state->collectedValues);
+        func_00291590(object, 0, 0, 0, 0, 0);
+        state->tutorialNextState = 7;
+        state->tutorialWaitFrames = 30;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_MODE_CHANGE_TUTORIAL_IN ...->MTR_MSL_TUTORIAL_000_RUN\n");
+        break;
+    case 5:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_INIT\n");
+        func_002932B0(object);
+        object->menu.scrollX = 124;
+        object->menu.scrollY = 160;
+        dspCloseChannel();
+        evtCreateMessageWindowIfMissing(object->messageDefinition);
+        state->tutorialNextState = 2;
+        state->tutorialWaitFrames = 0;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_INIT ...->MTR_MSL_TUTORIAL_MODE_CHANGE_TUTORIAL_IN\n");
+        break;
+    case 6:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_EXIT\n");
+        mnuCollectPanelNodeValues(object);
+        state->flags &= ~0x20000000;
+        mnuMoveNodeCursorToTargetIndex(object, state->selectionIndex);
+        state->tutorialNextState = 4;
+        state->tutorialWaitFrames = 0;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_EXIT ...->MTR_MSL_TUTORIAL_MODE_CHANGE_NORMAL_IN\n");
+        break;
+    case 7:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_000_RUN\n");
+        state->tutorialNextState = 8;
+        state->tutorialWaitFrames = 0;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_000_RUN ...->MTR_MSL_TUTORIAL_000\n");
+        break;
+    case 8:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_000\n");
+        dspStartEntry(6);
+        state->tutorialNextState = 9;
+        state->tutorialWaitFrames = 0;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_000 ...->MTR_MSL_TUTORIAL_000_WAIT\n");
+        break;
+    case 9:
+        if (evtGetMessageWindowControlState() == 0) {
+            state->tutorialNextState = 10;
+            state->tutorialWaitFrames = 0;
+            state->flagBytes[0] = 37;
+            itfClearSelectionFlags(object);
+            evtFinishMessageWindowAndNotify();
+            evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_000_WAIT\n");
+        }
+        break;
+    case 10:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001_RUN\n");
+        func_00292998(object);
+        state->tutorialNextState = 11;
+        state->tutorialWaitFrames = 30;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001_RUN ...->MTR_MSL_TUTORIAL_001_RUN2\n");
+        break;
+    case 11:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001_RUN2\n");
+        func_00292A60(object);
+        state->tutorialNextState = 12;
+        state->tutorialWaitFrames = 30;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001_RUN2 ...->MTR_MSL_TUTORIAL_001\n");
+        break;
+    case 12:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001\n");
+        dspStartEntry(7);
+        state->tutorialNextState = 13;
+        state->tutorialWaitFrames = 0;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001 ...->MTR_MSL_TUTORIAL_001_WAIT\n");
+        break;
+    case 13:
+        if (evtGetMessageWindowControlState() == 0) {
+            state->tutorialNextState = 14;
+            state->tutorialWaitFrames = 0;
+            state->flagBytes[0] = 37;
+            itfClearSelectionFlags(object);
+            evtFinishMessageWindowAndNotify();
+            evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001_WAIT\n");
+        }
+        break;
+    case 14:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002_RUN\n");
+        func_00292B90(object);
+        state->tutorialNextState = 15;
+        state->tutorialWaitFrames = 60;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002_RUN ...->MTR_MSL_TUTORIAL_002_RUN2\n");
+        break;
+    case 15:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002_RUN2\n");
+        itfPositionMantraSelectionController(object);
+        state->tutorialNextState = 16;
+        state->tutorialWaitFrames = 30;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002_RUN2 ...->MTR_MSL_TUTORIAL_002\n");
+        break;
+    case 16:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002\n");
+        dspStartEntry(8);
+        state->tutorialNextState = 17;
+        state->tutorialWaitFrames = 0;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002 ...->MTR_MSL_TUTORIAL_003_WAIT\n");
+        break;
+    case 17:
+        if (evtGetMessageWindowControlState() == 0) {
+            state->tutorialNextState = 18;
+            state->tutorialWaitFrames = 0;
+            state->flagBytes[0] = 37;
+            itfClearSelectionFlags(object);
+            evtFinishMessageWindowAndNotify();
+            evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002_WAIT\n");
+        }
+        break;
+    case 18:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_003_RUN\n");
+        itfInstallDefaultMantraSelector(object);
+        state->tutorialNextState = 19;
+        state->tutorialWaitFrames = 0;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_003_RUN ...->MTR_MSL_TUTORIAL_003\n");
+        break;
+    case 19:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_003\n");
+        dspStartEntry(9);
+        state->tutorialNextState = 20;
+        state->tutorialWaitFrames = 0;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_003 ...->MTR_MSL_TUTORIAL_004_WAIT\n");
+        break;
+    case 20:
+        if (evtGetMessageWindowControlState() == 0) {
+            state->tutorialNextState = 21;
+            state->tutorialWaitFrames = 0;
+            state->flagBytes[0] = 37;
+            itfClearSelectionFlags(object);
+            evtFinishMessageWindowAndNotify();
+            evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_003_WAIT\n");
+        }
+        break;
+    case 21:
+        if (func_00292CF0(object)) {
+            state->tutorialNextState = 22;
+            state->tutorialWaitFrames = 0;
+            state->flagBytes[0] = 37;
+            evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_004_RUN ...->MTR_MSL_TUTORIAL_004\n");
+        }
+        break;
+    case 22:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_004\n");
+        dspStartEntry(10);
+        state->tutorialNextState = 23;
+        state->tutorialWaitFrames = 0;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_004 ...->MTR_MSL_TUTORIAL_004_WAIT\n");
+        break;
+    case 23:
+        if (evtGetMessageWindowControlState() == 0) {
+            state->tutorialNextState = 24;
+            state->tutorialWaitFrames = 0;
+            state->flagBytes[0] = 37;
+            itfClearSelectionFlags(object);
+            evtFinishMessageWindowAndNotify();
+            evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_004_WAIT\n");
+        }
+        break;
+    case 24:
+        if (func_00292EA8(object)) {
+            state->tutorialNextState = 25;
+            state->tutorialWaitFrames = 0;
+            state->flagBytes[0] = 37;
+            evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_005_RUN ...->MTR_MSL_TUTORIAL_005\n");
+        }
+        break;
+    case 25:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_005\n");
+        dspStartEntry(11);
+        state->tutorialNextState = 26;
+        state->tutorialWaitFrames = 0;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_005 ...->MTR_MSL_TUTORIAL_005_WAIT\n");
+        break;
+    case 26:
+        if (evtGetMessageWindowControlState() == 0) {
+            state->tutorialNextState = 27;
+            state->tutorialWaitFrames = 0;
+            state->flagBytes[0] = 37;
+            itfClearSelectionFlags(object);
+            evtFinishMessageWindowAndNotify();
+            evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_005_WAIT\n");
+        }
+        break;
+    case 27:
+        if (func_00292FF0(object)) {
+            state->tutorialNextState = 28;
+            state->tutorialWaitFrames = 0;
+            state->flagBytes[0] = 37;
+            evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_006_RUN ...->MTR_MSL_TUTORIAL_006\n");
+        }
+        break;
+    case 28:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_006\n");
+        dspStartEntry(12);
+        state->tutorialNextState = 29;
+        state->tutorialWaitFrames = 0;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_006 ...->MTR_MSL_TUTORIAL_006_WAIT\n");
+        break;
+    case 29:
+        if (evtGetMessageWindowControlState() == 0) {
+            state->tutorialNextState = 30;
+            state->tutorialWaitFrames = 0;
+            state->flagBytes[0] = 37;
+            itfClearSelectionFlags(object);
+            evtFinishMessageWindowAndNotify();
+            evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_006_WAIT\n");
+        }
+        break;
+    case 30:
+        if (func_00293148(object)) {
+            state->tutorialNextState = 31;
+            state->tutorialWaitFrames = 0;
+            state->flagBytes[0] = 37;
+            evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_007_RUN ...->MTR_MSL_TUTORIAL_007\n");
+        }
+        break;
+    case 31:
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_007\n");
+        dspStartEntry(13);
+        state->tutorialNextState = 32;
+        state->tutorialWaitFrames = 0;
+        state->flagBytes[0] = 37;
+        evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_007 ...->MTR_MSL_TUTORIAL_007_WAIT\n");
+        break;
+    case 32:
+        if (evtGetMessageWindowControlState() == 0) {
+            state->tutorialNextState = 1;
+            state->tutorialWaitFrames = 0;
+            state->flagBytes[0] = 37;
+            itfClearSelectionFlags(object);
+            evtFinishMessageWindowAndNotify();
+            evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_007_WAIT\n");
+        }
+        break;
+    case 37:
+        if (state->tutorialWaitFrames > 0) {
+            state->tutorialWaitFrames--;
+        }
+        if (state->tutorialWaitFrames == 0) {
+            state->flagBytes[0] = state->tutorialNextState;
+        }
+        break;
+    }
+    func_00294060(object);
+    return finished;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00293DB0);
 
