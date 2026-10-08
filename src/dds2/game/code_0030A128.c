@@ -466,7 +466,126 @@ void fldInitializeLocalMapScene(void) {
     sdfCounterInitializeDisplayAnimation();
 }
 
-INCLUDE_ASM(const s32, "game/code_0030A128", func_0030B1E8);
+extern s32 func_0030C690(void);
+extern void sdfCounterTickCountdownAndMapTimers(void);
+extern void fldUpdateMapRequestQueues(s32);
+extern void sdfCounterStepDownAnimationValue(void);
+extern void sdfLatchBaseVectorsForSelection(void);
+extern void evtBeginSolarOverlayFadeOut(s32);
+extern s32 sdfStepSelectedMapCameraTransition(void);
+extern s32 func_0030C0C0(void);
+extern s8 D_0037F510[];
+extern s32 D_00439094;
+extern void sdfCounterAdvanceBoundedAnimationValue(void);
+extern s32 fldLmapToggleOverlay(void);
+extern void fldDisplayLocalMapCounterMessage(void);
+extern s32 func_0030BD10(void);
+extern s8 evtGetCapturedWindowPanelValue(void);
+extern void evtBeginSolarOverlayFadeIn(s32);
+/* Legacy calls pass the RGB bytes as promoted integer arguments. */
+extern void kwlnFadeInStart();
+extern void sdfClearCounterDisplayFlags(void);
+extern s32 sdfCounterGetDisplayValue(void);
+extern void fldSetPendingSceneAction(u32);
+extern void sdfInitInnerVectors(void);
+extern void func_001355D8(void);
+extern void fldUpdateSwayOffset(void);
+
+s32 func_0030B1E8(void) {
+    s32 result = 0;
+
+    switch (D_004388AC) {
+    case 1:
+        result = func_0030C690();
+        sdfCounterTickCountdownAndMapTimers();
+        fldUpdateMapRequestQueues(1);
+        sdfCounterStepDownAnimationValue();
+        if (result == -2) {
+            D_00439094 = 0;
+            D_004388AC = 3;
+            sdfLatchBaseVectorsForSelection();
+            sdfCounterInitializeDisplayAnimation();
+            evtBeginSolarOverlayFadeOut(10);
+        }
+        sdfStepSelectedMapCameraTransition();
+        if (result == 1) {
+            D_004388AC = 2;
+            sdfLatchBaseVectorsForSelection();
+        }
+        break;
+    case 2:
+        result = func_0030C690();
+        sdfCounterTickCountdownAndMapTimers();
+        fldUpdateMapRequestQueues(1);
+        sdfCounterStepDownAnimationValue();
+        if (result == -2) {
+            D_00439094 = 0;
+            D_004388AC = 3;
+            sdfLatchBaseVectorsForSelection();
+            sdfCounterInitializeDisplayAnimation();
+        }
+        func_0030C0C0();
+        if (result == 0) {
+            D_004388AC = 1;
+            sdfLatchBaseVectorsForSelection();
+        }
+        break;
+    case 3:
+        sdfCounterTickCountdownAndMapTimers();
+        fldUpdateMapRequestQueues(0);
+        if (D_0037F510[0x21] < 0) {
+            D_00439094 = 55;
+        }
+        D_00439094++;
+        if (D_00439094 >= 35) {
+            sdfCounterAdvanceBoundedAnimationValue();
+        }
+        if (D_00439094 >= 55 && fldLmapToggleOverlay()) {
+            if (D_0043908C == 0) {
+                fldDisplayLocalMapCounterMessage();
+                D_0043908C = 1;
+            } else {
+                D_0043908C = 0;
+                D_004388AC = 4;
+                sdfLatchBaseVectorsForSelection();
+            }
+        }
+        func_0030BD10();
+        break;
+    case 4:
+        result = evtGetCapturedWindowPanelValue();
+        if (result == 1) {
+            D_004388AC = result;
+            evtBeginSolarOverlayFadeIn(30);
+            D_00439094 = 0;
+        } else {
+            D_004388AC = 5;
+            if (mdlFlagTest(0x13)) {
+                kwlnFadeInStart(0, 0, 0, 30);
+            } else {
+                kwlnFadeInStart(255, 255, 255, 30);
+            }
+            D_00439094 = 0;
+        }
+        break;
+    case 5:
+        D_00439090++;
+        if (D_00439090 >= 31) {
+            D_004388AC = 6;
+        }
+        break;
+    case 6:
+        result = -1;
+        sdfClearCounterDisplayFlags();
+        fldSetPendingSceneAction(sdfCounterGetDisplayValue());
+        break;
+    }
+
+    sdfInitInnerVectors();
+    func_001355D8();
+    fldUpdateSwayOffset();
+    return result;
+}
 
 void fldDrawLocalMapOverlay(void) {
     func_00134A18();
