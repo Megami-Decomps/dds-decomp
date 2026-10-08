@@ -1512,7 +1512,7 @@ extern s32 D_003BDAB4;
 extern void sceIpuInit(void);
 extern s32 sdfAddHandler(s32, s32, void *, s32, s32);
 extern void func_0030B638(s32);
-extern s32 sdfCreateThread(void *, void *, s32, s32);
+extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 extern void _StartThread();
 extern u8 sdfIpuStreamThreadStack[];
 extern s32 func_002EC3C0();
@@ -1529,7 +1529,7 @@ void sdfSoundInitIpuStream(void) {
     func_0030B638(3);
     D_003BDAA0 = sdfAddHandler(1, 4, func_002EC3F0, -1, 0);
     func_0030B638(4);
-    thread = sdfCreateThread(sdfIpuDmaCompletionWorker, sdfIpuStreamThreadStack, 0x800, 0x46);
+    thread = sdfCreateThread((void *)sdfIpuDmaCompletionWorker, sdfIpuStreamThreadStack, 0x800, 0x46);
     D_003BDAB4 = thread;
     _StartThread(thread, 0);
 }

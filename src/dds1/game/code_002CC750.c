@@ -70,7 +70,8 @@ extern void ptyMergeStockSkills(DatPartyRecord *);
 
 extern void (*sdfTickCallback)(void);
 
-extern u64 sdfAllocateBlockBySizeThreshold(u64);
+extern void *sdfAllocateBlockBySizeThreshold(s32 stackBytes);
+extern s32 sdfCreateThread(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 
 extern u32 D_003BD2C8;
 
@@ -1266,11 +1267,11 @@ s32 sdfCreateSemaphore(u32 initial, u32 option, u32 maximum) {
 
 INCLUDE_ASM(const s32, "game/code_002CC750", sdfCreateThread);
 
-void sdfCreateThreadWithAllocatedWorkspace(u64 destination, u64 encoded, u64 option) {
-    u64 decoded;
+s32 sdfCreateThreadWithAllocatedWorkspace(void *entryAddress, s32 stackBytes, s32 priority) {
+    void *workspace;
 
-    decoded = sdfAllocateBlockBySizeThreshold(encoded);
-    sdfCreateThread(destination, decoded, encoded, option);
+    workspace = sdfAllocateBlockBySizeThreshold(stackBytes);
+    return sdfCreateThread(entryAddress, workspace, stackBytes, priority);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002CC750", sdfDebugLogAppendMode);
