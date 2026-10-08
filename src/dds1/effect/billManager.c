@@ -14,7 +14,6 @@ struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 
 void sdfReleaseChipBlock(void *arg);
 void effReleaseSharedTextureRecord(void *arg);
 void billAppendChildQuad(BillObj *obj, BillChildPayload *child);
-void *func_00150148(void *arg);
 BillData *billCreateAnimationDataFromResource(void *arg);
 
 extern void *memcpy(void *dst, const void *src, u32 size);
@@ -449,7 +448,7 @@ BillObj *billAllocChild(void *resourceData) {
     obj = sdfAllocSizeClassBlock(0x34);
     obj->child = NULL;
     if (resourceData != NULL) {
-        obj->child = func_00150148(resourceData);
+        obj->child = billCreateChildPayloadFromTextureResource(resourceData);
     }
     return obj;
 }
@@ -680,7 +679,7 @@ BillData *billCreateAnimationDataFromResource(void *resource) {
     data->entries = (BillAnimationEntry *)(copiedBase + 8);
     data->children = (BillChildPayload **)(copiedBase + *(s32 *)copiedBase + 8);
     for (resourceIndex = 0; resourceIndex < childCount; resourceIndex++) {
-        data->children[resourceIndex] = func_00150148(sourceBytes + *childOffsetCursor++);
+        data->children[resourceIndex] = billCreateChildPayloadFromTextureResource(sourceBytes + *childOffsetCursor++);
     }
     data->entryCount = data->listRefCount = 1;
     entryCount = ((s32 *)data->base)[1];

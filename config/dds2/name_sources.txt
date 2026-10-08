@@ -910,6 +910,7 @@
 0x00157A50	effCloneSourceWithTypeHandler	inferred	confidence=high; src/dds2/game/code_00157A50.c:func_00157A50; Allocates an effect-source copy, copies type and metadata, and clones its argument through the type-selected handler. [names_qp9.tsv]
 0x00157BE0	effInitializeBillResourceOwners	inferred	Loads BILL.LB entries, constructs the configured billboards, scales their half extents, and fills effBillResourceOwners.
 0x00157CE0	effBillDispatchAll	inferred	Dispatches every entry in the bill-kind table; DDS1 twin. [names_qp9.tsv]
+0x00157D38	billCreateChildPayloadFromTextureResource	inferred	Allocates a billboard child payload, acquires the texture named by the supplied resource, initializes its UV and size geometry, and returns the payload.
 0x00157E50	effReleaseSharedTextureRecord	inferred	src/dds2/game/code_00157A50.c func_00157E50: Decrements reference count and releases texture reference plus allocation on final reference. Twin of DDS1 func_00150260. [names_reviewed24.tsv]
 0x00157EA0	billAppendChildQuad	inferred	appends one billboard quad to a child payload
 0x00158340	billFlushPendingChildPackets	inferred	drains pending child packet lists into pools
