@@ -147,7 +147,7 @@ void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *param) {
     }
 }
 
-void func_00161E48(u32 mask, EffectVectorRequest *param) {
+void effBattleMiscQueryMaskedTargetPosition(u32 mask, EffectVectorRequest *param) {
     f32 out[4];
     f32 direction[4];
     f32 position[4];
@@ -218,18 +218,18 @@ void func_00161E48(u32 mask, EffectVectorRequest *param) {
     VU0_LOAD_VF(vf10, out);
 }
 
-void func_00162028(u32 unused, EffectVectorRequest *value) {
+void effBattleMiscQueryOriginalTargetPosition(u32 unused, EffectVectorRequest *value) {
     BtlUnit *ctx = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
 
     (void)unused;
-    func_00161E48(ctx->flags & 0xE00, value);
+    effBattleMiscQueryMaskedTargetPosition(ctx->flags & 0xE00, value);
 }
 
-void func_00162058(u32 unused, EffectVectorRequest *value) {
+void effBattleMiscQueryVariantTargetPosition(u32 unused, EffectVectorRequest *value) {
     BtlUnit *ctx = (BtlUnit *)effBTLFieldColorGetVariantSelector();
 
     (void)unused;
-    func_00161E48(ctx->flags & 0xE00, value);
+    effBattleMiscQueryMaskedTargetPosition(ctx->flags & 0xE00, value);
 }
 
 
