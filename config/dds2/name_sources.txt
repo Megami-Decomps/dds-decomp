@@ -3216,6 +3216,8 @@
 0x00232390	mdlProcessContextNodesAndTransforms	inferred	confidence=high; src/dds2/game/code_00231A80.c:func_00232390; Processes nonnull slot nodes, updates frame transforms, dispatches anchor records, and processes the development list under context flags. [names_qp9.tsv]
 0x002324C0	mdlBlendEntryPitchYawAndUpdate	inferred	confidence=high; src/dds2/game/code_00231A80.c:func_002324C0; Blends an indexed entry basis toward degree-based pitch/yaw, advances child slots and conditionally updates model/draw resources. [names_qp9.tsv]
 0x002327C0	mdlFindOrCreateMotionRecordNode	inferred	Traverses nodes by search ID and creates a node if absent before recording its slot. [names_reviewed21.tsv]
+0x00232A30	mdlGetNodeFrameStep	inferred	Reads Motion.frameStep at +0x20 or zero for a missing node; the motion updater adds it to currentFrame.
+0x00232A58	mdlSetNodeFrameStep	inferred	Writes Motion.frameStep at +0x20 when the searched node exists; the motion updater adds it to currentFrame.
 0x00232A88	mdlLoadPrimaryVectorVU	inferred	Loads the model inner vector at offset 0x50 into VU0 vf10.
 0x00232AA0	mdlStorePrimaryVectorVU	inferred	Sets the vf10 W component to zero and stores vf10 into the model inner vector at offset 0x50.
 0x00232AB8	mdlLoadSecondaryVectorVU	inferred	Loads the model inner vector at offset 0x60 into VU0 vf10.
