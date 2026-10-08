@@ -68,7 +68,6 @@ extern void mnuDestroyWindowContainer(MenuWindowContainer *);
 
 
 typedef struct MenuWindowSpriteGroup MenuWindowSpriteGroup;
-extern void mnuSetWindowContainerState(MenuWindowContainer *, u32);
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s32, s32);
 extern void func_00272BC0(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
@@ -90,7 +89,7 @@ void func_00272D50(StaffDisplayContext *context) {
     s32 minimumQuantity;
 
     window = mnuCreateWindowContainer(0, 0x60, 0x10, 8, 0x15);
-    mnuSetWindowContainerState(window, 0x100);
+    mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, context->panelLayout, 0x30, 0x530, -0x90, 0xA10);
     mnuInitializeWindowEntryPlacement(0, window, context->unk74, 10, 0x10);
     window->list->context = context;
@@ -127,7 +126,7 @@ void func_00272D50(StaffDisplayContext *context) {
     mnuConfigureWindowSpriteSlots(resources->windows[0]->textures, context->spriteResource);
 
     window = mnuCreateWindowContainer(0, 0x1B0, 0x10, 8, 0x15);
-    mnuSetWindowContainerState(window, 0x100);
+    mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, context->panelLayout, 0x30, 0x530, -0x90, 0xA10);
     mnuInitializeWindowEntryPlacement(0, window, context->unk74, 10, 0x10);
 
@@ -181,7 +180,7 @@ void mnuCreateStaffBulletItemWindow(StaffDisplayContext *context) {
     u32 quantity;
 
     window = mnuCreateWindowContainer(0, 0x60, 0x10, 8, 0x15);
-    mnuSetWindowContainerState(window, 0x100);
+    mnuSetWindowFadeScale(window, 0x100);
     mnuSetWindowPanelBounds(window, context->panelLayout, 0x30, 0x530, -0x90, 0xA10);
     mnuInitializeWindowEntryPlacement(0, window, context->unk74, 10, 16);
     window->list->context = context;
