@@ -11,9 +11,6 @@
 
 #define MNU_MANTRA_GRID_ROW_COUNT 0x11
 #define MNU_MANTRA_GRID_COLUMN_COUNT 15
-#define MNU_MANTRA_PROFILE_MATCH_FLAG 1
-#define MNU_MANTRA_PROFILE_CAP_FLAG 2
-#define MNU_MANTRA_ENTRY_STATE_PAIR_MASK 0xC
 #define MNU_MANTRA_SELECTED_DRAW_CODE 0x34
 #define MNU_MANTRA_CAP_DRAW_CODE 0x32
 #define MNU_MANTRA_STATE_DRAW_CODE 0x33
@@ -300,18 +297,19 @@ extern void func_0025C278(s32, s32, s32, s32, s32, s32, s32, s32);
 void func_0025C8D0(s32 x, s32 y, s32 depth, s32 amount, MnuProfileProgress *profileAddress, MnuMantraGridEntry *entry, s32 drawArg) {
     u32 flags = mnuGetMantraDisplayFlags(entry, profileAddress);
 
-    if (flags & MNU_MANTRA_PROFILE_MATCH_FLAG) {
+    if (flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) {
         func_0025C278(x, y, depth, amount, entry->sceneId, MNU_MANTRA_SELECTED_DRAW_CODE, 0, drawArg);
-    } else if (flags & MNU_MANTRA_PROFILE_CAP_FLAG) {
+    } else if (flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP) {
         func_0025C278(x, y, depth, amount, entry->sceneId, MNU_MANTRA_CAP_DRAW_CODE, 0, drawArg);
-    } else if (flags & MNU_MANTRA_ENTRY_STATE_PAIR_MASK) {
+    } else if (flags & (MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_1 |
+                        MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_2)) {
         func_0025C278(x, y, depth, amount, entry->sceneId, MNU_MANTRA_STATE_DRAW_CODE, 0, drawArg);
     }
-    if (flags & MNU_MANTRA_PROFILE_CAP_FLAG) {
+    if (flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP) {
         func_0025C278(x, y, depth, (s32)((f32)amount * 0.5f),
                       entry->sceneId, MNU_MANTRA_CAP_OVERLAY_CODE, 0, drawArg);
     }
-    if (flags & MNU_MANTRA_PROFILE_MATCH_FLAG) {
+    if (flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) {
         func_0025C278(x, y, depth, amount, entry->sceneId, MNU_MANTRA_SELECTED_OVERLAY_CODE, 0, drawArg);
     }
 }
