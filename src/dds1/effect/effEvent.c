@@ -1,3 +1,4 @@
+#include "bill_object_api.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
@@ -95,7 +96,6 @@ extern EffBlurTemplate *effBlurPixelWork;
 extern s8 effTexturedBlurEnabled;
 
 extern s8 effRectangleBlurEnabled;
-extern u32 effGetResourceFirstWord(s32 arg);
 extern u8 D_003558D8[];
 extern u8 D_003558A8[];
 extern u8 D_00355948[];
@@ -617,7 +617,7 @@ void effSetCh71Id(u32 resourceWord) {
 
 /* Select the same resource-table entry used by the filter-blur initializer. */
 void effInitCh71Id(void) {
-    effBlurPixelWork->resourceWord = effGetResourceFirstWord(EFF_EVENT_BLUR_RESOURCE_INDEX);
+    effBlurPixelWork->resourceWord = (u32)effGetBillResourceTexture(EFF_EVENT_BLUR_RESOURCE_INDEX);
 }
 
 void effEnableFilterBlur(void) {
@@ -644,7 +644,7 @@ void effSetCh72Id(u32 sourceHandle) {
 
 /* Install the filter-blur resource-table word without changing its slots. */
 void effInitCh72Id(void) {
-    effFilterBlurWork->sourceHandle = effGetResourceFirstWord(EFF_EVENT_BLUR_RESOURCE_INDEX);
+    effFilterBlurWork->sourceHandle = (u32)effGetBillResourceTexture(EFF_EVENT_BLUR_RESOURCE_INDEX);
 }
 
 void effEnableStaggeredBlur(void) {
@@ -671,7 +671,7 @@ void effSetCh76Id(u32 sourceHandle) {
 
 /* Install the staggered-blur resource-table word without changing its slots. */
 void effInitCh76Id(void) {
-    effStaggeredBlurWork->sourceHandle = effGetResourceFirstWord(EFF_EVENT_STAGGERED_RESOURCE_INDEX);
+    effStaggeredBlurWork->sourceHandle = (u32)effGetBillResourceTexture(EFF_EVENT_STAGGERED_RESOURCE_INDEX);
 }
 
 void effEnableFramebufferQuad(void) {
@@ -734,7 +734,7 @@ void effSetCh75Id(u32 resourceWord) {
 
 /* Install the textured-square resource-table word while retaining its body. */
 void effInitCh75Id(void) {
-    effTexturedSquareWork->sourceHandle = effGetResourceFirstWord(EFF_EVENT_SQUARE_RESOURCE_INDEX);
+    effTexturedSquareWork->sourceHandle = (u32)effGetBillResourceTexture(EFF_EVENT_SQUARE_RESOURCE_INDEX);
 }
 
 /* Clone the four default work templates; only the staggered slot count is overridden. */

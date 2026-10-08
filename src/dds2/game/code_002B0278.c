@@ -1808,7 +1808,34 @@ void mnuHighlightSelectedListNode(KwlnTask *task) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B5240);
+s32 func_002B5240(KwlnTask *callback) {
+    MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(callback);
+    SkillMenuRuntime *work = (SkillMenuRuntime *)context->party;
+    s32 index = -1;
+    MenuListNode *node;
+
+    if (work->unk30 != 0) {
+        mnuSeekListNode(0, work->selectedWindow->list);
+        mnuClearSelectedListNodeId(callback);
+    } else if (((MenuWindowContainer *)context->imageHandle)->list->cursor->index != 0) {
+        MenuWindowContainer **categoryWindows = work->skillWindows;
+        if (categoryWindows[work->categoryList->cursor->index]->list->cursor->index != 0) {
+            for (node = work->selectedWindow->list->first; node != 0; node = node->next) {
+                if (node->sortKeyPrimary == 0) {
+                    index = node->index;
+                    break;
+                }
+            }
+            if (index >= 0) {
+                mnuSeekListNode(index, work->selectedWindow->list);
+            }
+        }
+    }
+    if (((MenuWindowContainer *)context->imageHandle)->list->cursor->index == 0) {
+        mnuBeginWindowFadeTransition(work->selectedWindow, &context->transition);
+    }
+    return 1;
+}
 
 u32 mnuClearSkillSelectionImageState(KwlnTask *task) {
     s32 context = kwlnTaskGetUserValue(task);

@@ -12,7 +12,6 @@ extern BillDispatch D_0034E068[];
 void *sdfAllocSizeClassBlock(s32 size);
 struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 void sdfReleaseChipBlock(void *arg);
-void effReleaseSharedTextureRecord(void *arg);
 void billAppendChildQuad(BillObj *obj, BillChildPayload *child);
 BillData *billCreateAnimationDataFromResource(void *arg);
 
@@ -68,8 +67,8 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
         sdfInitPacketList(child->pendingLists[selected]);
         packet = sdfAllocPacketAligned(0x20);
         sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
-            (u32)sdfTexGetPrimaryBuffer((SdfTex *)child->value),
-            sdfTexGetPrimaryBufferSize((SdfTex *)child->value));
+            (u32)sdfTexGetPrimaryBuffer(child->texture),
+            sdfTexGetPrimaryBufferSize(child->texture));
         sdfAppendReferencePacket(child->pendingLists[selected], packet);
         if ((u16)(child->variant & 1) != 0) {
             VU0_LOAD_VF(vf10, sdfViewEyeVector);
@@ -263,13 +262,13 @@ void func_00150840(BillObj *obj, BillRenderPair *node) {
         sdfAppendPacket(node->packetList, (u32)state);
         packet = sdfAllocPacketAligned(0x20);
         sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
-            (u32)sdfTexGetPrimaryBuffer((SdfTex *)node->children[0]->value),
-            sdfTexGetPrimaryBufferSize((SdfTex *)node->children[0]->value));
+            (u32)sdfTexGetPrimaryBuffer(node->children[0]->texture),
+            sdfTexGetPrimaryBufferSize(node->children[0]->texture));
         sdfAppendReferencePacket(node->packetList, packet);
         packet = sdfAllocPacketAligned(0x20);
         sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
-            (u32)sdfTexGetOrInitializeSecondaryBuffer((SdfTex *)node->children[1]->value),
-            sdfTexGetSecondaryBufferSize((SdfTex *)node->children[1]->value));
+            (u32)sdfTexGetOrInitializeSecondaryBuffer(node->children[1]->texture),
+            sdfTexGetSecondaryBufferSize(node->children[1]->texture));
         sdfAppendReferencePacket(node->packetList, packet);
         geometry = (u8 *)sdfAllocPacketAligned(0x38);
         if (node->unk8 == 1) {
@@ -440,7 +439,7 @@ void billFlushPendingRenderPairs(void) {
     D_003BD7F8 = NULL;
 }
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00151178);
+INCLUDE_ASM(const s32, "effect/billManager", billInitializeCommonDrawState);
 
 BillObj *billAllocChild(void *resourceData) {
     BillObj *obj;
@@ -739,7 +738,7 @@ void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
         return;
     }
     snapshot->x = record->x;
-    snapshot->unk10 = record->value;
+    snapshot->unk10 = (u32)record->texture;
     snapshot->y = record->y;
     snapshot->halfWidth = record->halfWidth;
     snapshot->halfHeight = record->halfHeight;
@@ -750,7 +749,7 @@ BillObj *billCreateIndexed(s32 index, u32 data) {
     BillObj *newobj;
 
     newobj = D_0034E060[index].func(data);
-    func_00151178(newobj);
+    billInitializeCommonDrawState(newobj);
     newobj->kind = index;
     newobj->callback = D_0034E060[index].callback;
     return newobj;
@@ -767,8 +766,6 @@ BillObj *billCreateFromResource(s32 kind, const char *path) {
     return billboard;
 }
 
-extern void func_00151178(BillObj *obj);
-
 /* Duplicate a billboard object: an entry list is cloned, a child shares (and refs) the source's data block. */
 BillObj *billCloneObjectRetainingSharedData(BillObj *source) {
     BillObj *copy;
@@ -778,12 +775,12 @@ BillObj *billCloneObjectRetainingSharedData(BillObj *source) {
 
     if (source->kind == 1) {
         copy = billCloneList(source);
-        func_00151178(copy);
+        billInitializeCommonDrawState(copy);
         copy->kind = source->kind;
         copy->callback = source->callback;
     } else {
         copy = billAllocChild(NULL);
-        func_00151178(copy);
+        billInitializeCommonDrawState(copy);
         sourceKind = source->kind;
         data = source->child;
         sourceCallback = source->callback;

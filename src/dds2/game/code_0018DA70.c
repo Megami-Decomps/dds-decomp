@@ -1,3 +1,4 @@
+#include "bill_object_api.h"
 #include "common.h"
 #include "sdf.h"
 #include "eff_blur.h"
@@ -443,13 +444,12 @@ void effDrawBlurPixelRectangle(EffBlurTemplateBody *work) {
 }
 
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern s32 effGetResourceFirstWord(s32 index);
 
 /* Clone a blur template into a fresh allocation. */
 EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplateBody *src) {
     EffBlurTemplate *dst = sdfAllocSizeClassBlock(sizeof(EffBlurTemplate));
 
-    dst->resourceWord = effGetResourceFirstWord(2);
+    dst->resourceWord = (u32)effGetBillResourceTexture(2);
     dst->body = *src;
     return dst;
 }

@@ -42,7 +42,7 @@ typedef struct EffEmitterHead {
     u8 pad9C[0x14];
     f32 matrix[16];        /* 0xB0 */
     u32 colorMask;         /* 0xF0 */
-    s32 billboard;
+    BillObj *billboard; /* 0xF4: owned billboard shared with the particle view */
     EffectBufferTail *buffer; /* 0xF8 */
     u8 padFC[0x46];
     u16 active;            /* 0x142 */
@@ -206,8 +206,8 @@ u32 func_00159BB0(void) {
     return 0xf;
 }
 
-s32 effGetResourceFirstWord(s32 index) {
-    return ((BillObj *)effBillResourceOwners[index])->child->value;
+SdfTex *effGetBillResourceTexture(s32 index) {
+    return ((BillObj *)effBillResourceOwners[index])->child->texture;
 }
 
 void effCopyVector(dst, src)
@@ -295,7 +295,7 @@ void billSetAllChildVariants(BillObj *effect, s16 variant) {
 
 s32 billGetChildValue(BillObj *effect) {
     if (effect->kind == 0) {
-        return effect->child->value;
+        return (s32)effect->child->texture;
     }
     return 0;
 }
@@ -358,8 +358,8 @@ s32 billGetLinkedChildValue(s32 billboard) {
     return 0;
 }
 
-/* Start every entry's animation at the requested frame, with mode zero. */
-void billSetEntryFrameMode0(BillObj *effect, u32 startFrame) {
+/* Select the frame and make the next animation update advance immediately. */
+void billSetAnimationFrameForImmediateAdvance(BillObj *effect, u32 startFrame) {
     if (effect->kind == 1) {
         s32 entryCount = effect->entryCount;
 
@@ -379,8 +379,8 @@ void billSetEntryFrameMode0(BillObj *effect, u32 startFrame) {
     }
 }
 
-/* Start every entry's animation at the requested frame, with mode one. */
-void billSetEntryFrameMode1(BillObj *effect, u32 startFrame) {
+/* Select the frame and hold it for one animation update before advancing. */
+void billSetAnimationFrameWithOneTickHold(BillObj *effect, u32 startFrame) {
     if (effect->kind == 1) {
         s32 entryCount = effect->entryCount;
 
@@ -503,7 +503,7 @@ u8 *billCreateUnitObject(s32 entryIndex) {
 u8 *billCloneUnitObject(EffInstance *source) {
     EffInstance *instance = sdfAllocSizeClassBlock(EFF_INSTANCE_BYTES);
 
-    instance->billboard = (s32)billCloneObjectRetainingSharedData((struct BillObj *)source->billboard);
+    instance->billboard = billCloneObjectRetainingSharedData(source->billboard);
     instance->renderState = sdfCreateAssetWithDrawEntries();
     func_003332D0(instance->renderState, 1.0f);
     func_00333288(instance->renderState, 0x80808080);

@@ -70,8 +70,8 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
         sdfInitPacketList(child->pendingLists[selected]);
         packet = sdfAllocPacketAligned(0x20);
         sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
-            (u32)sdfTexGetPrimaryBuffer((SdfTex *)child->value),
-            sdfTexGetPrimaryBufferSize((SdfTex *)child->value));
+            (u32)sdfTexGetPrimaryBuffer(child->texture),
+            sdfTexGetPrimaryBufferSize(child->texture));
         sdfAppendReferencePacket(child->pendingLists[selected], packet);
         if ((u16)(child->variant & 1) != 0) {
             VU0_LOAD_VF(vf10, sdfViewEyeVector);
@@ -266,13 +266,13 @@ void func_00158430(BillObj *obj, BillRenderPair *node) {
         sdfAppendPacket(node->packetList, (u32)state);
         packet = sdfAllocPacketAligned(0x20);
         sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
-            (u32)sdfTexGetPrimaryBuffer((SdfTex *)node->children[0]->value),
-            sdfTexGetPrimaryBufferSize((SdfTex *)node->children[0]->value));
+            (u32)sdfTexGetPrimaryBuffer(node->children[0]->texture),
+            sdfTexGetPrimaryBufferSize(node->children[0]->texture));
         sdfAppendReferencePacket(node->packetList, packet);
         packet = sdfAllocPacketAligned(0x20);
         sdfConsInitDmaPacketHeader((DmaPacketHeader *)packet,
-            (u32)sdfTexGetOrInitializeSecondaryBuffer((SdfTex *)node->children[1]->value),
-            sdfTexGetSecondaryBufferSize((SdfTex *)node->children[1]->value));
+            (u32)sdfTexGetOrInitializeSecondaryBuffer(node->children[1]->texture),
+            sdfTexGetSecondaryBufferSize(node->children[1]->texture));
         sdfAppendReferencePacket(node->packetList, packet);
         geometry = (u8 *)sdfAllocPacketAligned(0x38);
         if (node->unk8 == 1) {
@@ -443,7 +443,7 @@ void billFlushPendingRenderPairs(void) {
     D_00438F00 = NULL;
 }
 
-INCLUDE_ASM(const s32, "effect/billManager", func_00158D68);
+INCLUDE_ASM(const s32, "effect/billManager", billInitializeCommonDrawState);
 
 BillObj *billAllocChild(void *resourceData) {
     BillObj *obj;
@@ -708,8 +708,6 @@ BillData *billCreateAnimationDataFromResource(void *resource) {
 }
 
 
-extern void effReleaseSharedTextureRecord(void *arg);
-
 /* Drop one reference; the last one releases every entry and the block itself. */
 void billReleaseSharedEntryBlock(BillData *block) {
     s32 i;
@@ -748,7 +746,7 @@ void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
         return;
     }
     snapshot->x = record->x;
-    snapshot->unk10 = record->value;
+    snapshot->unk10 = (u32)record->texture;
     snapshot->y = record->y;
     snapshot->halfWidth = record->halfWidth;
     snapshot->halfHeight = record->halfHeight;
@@ -757,13 +755,11 @@ void billCopyCurrentRecordToSnapshot(BillObj *obj, BillSnapshot *snapshot) {
 
 extern BillDispatch D_003AA990[];
 
-extern void func_00158D68(void *);
-
 BillObj *billCreateIndexed(s32 index, u32 data) {
     BillObj *newobj;
 
     newobj = D_003AA990[index].func(data);
-    func_00158D68(newobj);
+    billInitializeCommonDrawState(newobj);
     newobj->kind = index;
     newobj->callback = D_003AA990[index].callback;
     return newobj;
@@ -789,12 +785,12 @@ BillObj *billCloneObjectRetainingSharedData(BillObj *source) {
 
     if (source->kind == 1) {
         copy = billCloneList(source);
-        func_00158D68(copy);
+        billInitializeCommonDrawState(copy);
         copy->kind = source->kind;
         copy->callback = source->callback;
     } else {
         copy = billAllocChild(NULL);
-        func_00158D68(copy);
+        billInitializeCommonDrawState(copy);
         sourceKind = source->kind;
         data = source->child;
         sourceCallback = source->callback;
