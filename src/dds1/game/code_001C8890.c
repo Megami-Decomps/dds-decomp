@@ -325,7 +325,7 @@ extern s32 btlQueueTintTransitionWhenEnabled(u32 *);
 
 extern void *sdfAllocAndClearQuadwords(s32);
 
-extern s32 btlCreateMoveOtherUnitsTask();
+extern void *btlCreateMoveOtherUnitsTask(u8 *, u32);
 
 extern s32 mnuPollTitleStreamStateLocked(void);
 
@@ -852,7 +852,9 @@ void func_001C9090(void) {
 void *btlCreateActorParameterDeltaTask(BtlUnit *owner, BtlOperandEntry *spec);
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 extern s32 btlRollAiBucket(void);
-extern BtlRuntimeTask *btlCreateEffObjB();
+extern BtlRuntimeTask *btlCreateEffObjA(BtlUnit *, s32);
+extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
+extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *, s32);
 
 /* Try to clear the unit's condition: 2 and 4 always clear, 1 needs battle mode 2, and the
  * others roll a script-supplied chance (capped at 70, scaled by ability 0x232). */
@@ -1000,7 +1002,7 @@ void btlStartCommandSoundAndEffectTasks(u8 *arg0) {
     }
     count = func_001FD170(arg0);
     if (count > 0) {
-        task = btlCreateEffObjB(ctx, count);
+        task = (u8 *)btlCreateEffObjB((BtlUnit *)ctx, count);
         *(u64 *)(task + 0x40) = value;
         btlStartTask(task);
     }
@@ -1072,22 +1074,22 @@ void btlCommandResultEffectSelect(u8 *task) {
         reason = btlGetCommandBlockReason(task, sel);
         switch (reason) {
         case 2:
-            btlStartTask(btlCreateEffObjB(*(s32 *)(task + 0x18), 0x82));
+            btlStartTask(btlCreateEffObjB(*(BtlUnit **)(task + 0x18), 0x82));
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
             return;
         case 6:
-            btlStartTask(btlCreateEffObjB(*(s32 *)(task + 0x18), 0xB0));
+            btlStartTask(btlCreateEffObjB(*(BtlUnit **)(task + 0x18), 0xB0));
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
             return;
         case 7:
-            btlStartTask(btlCreateEffObjB(*(s32 *)(task + 0x18), 0xB2));
+            btlStartTask(btlCreateEffObjB(*(BtlUnit **)(task + 0x18), 0xB2));
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
             return;
         case 9:
-            btlStartTask(btlCreateEffObjB(*(s32 *)(task + 0x18), 0xD0));
+            btlStartTask(btlCreateEffObjB(*(BtlUnit **)(task + 0x18), 0xD0));
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
             return;
@@ -1295,7 +1297,7 @@ void btlCommandStartSoundTasks(u8 *task) {
         }
         effect = func_001FD170(task);
         if (effect > 0) {
-            object = (u8 *)btlCreateEffObjB(unit, effect);
+            object = (u8 *)btlCreateEffObjB((BtlUnit *)unit, effect);
             *(s64 *)(object + 0x40) = ownerId;
             btlStartTask(object);
         }
@@ -1337,7 +1339,7 @@ void btlDispatchEffectCommandWhenActorReady(u8 *command) {
         return;
     }
     if (*(u16 *)(command + 0x50) == 2) {
-        btlStartTask(btlCreateEffObjB(actor, *(u32 *)(command + 0x54)));
+        btlStartTask(btlCreateEffObjB((BtlUnit *)actor, *(u32 *)(command + 0x54)));
     }
     func_001F0CA0(command, command + 0x20);
     btlDispatchCommandViaHookOrDefault(command, command + 0x20);
@@ -1399,7 +1401,7 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
     if (!(unit->flags & 0x400020)) {
         unit->flags &= ~0x1000;
         unit->partyRecord.flags &= ~0x1000;
-        sound = (SoundTask *)btlCreateMoveOtherUnitsTask(unit, 0x11);
+        sound = (SoundTask *)btlCreateMoveOtherUnitsTask((u8 *)unit, 0x11);
         btlStartTask(sound);
         for (other = state->units; other != NULL; other = other->next) {
             if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
@@ -1529,7 +1531,7 @@ void func_001CE5F0(BtlTask *task) {
     if (!(unit->flags & 0x20000020)) {
         unit->flags |= 0x1000;
         unit->partyRecord.flags |= 0x1000;
-        sound = (SoundTask *)btlCreateMoveOtherUnitsTask(unit, 0x10);
+        sound = (SoundTask *)btlCreateMoveOtherUnitsTask((u8 *)unit, 0x10);
         btlStartTask(sound);
         for (other = state->units; other != NULL; other = other->next) {
             if (other != unit && (btlUnitStatusPair(other) & 0x202) == 0x202) {
@@ -1654,7 +1656,7 @@ void func_001CEA70(u8 *task) {
     statusTable = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
         *(s32 *)(actor + 0xC4), *(s32 *)(actor + 0xC8));
     model = statusTable->model;
-    effectTask = (u8 *)btlCreateEffObjB(actor, 0x7E);
+    effectTask = (u8 *)btlCreateEffObjB((BtlUnit *)actor, 0x7E);
     btlStartTask(effectTask);
     modelTask = btlCreateModelChangeTask(actor, 0, 0x1F, model, 0x12, 1);
     btlStartTask(modelTask);
@@ -1742,10 +1744,10 @@ u64 btlCommandTaskReturnStart(u8 *task) {
     }
     if (*(u32 *)(actor + 0x110) & 0x200) {
         btlStartTask(btlCreateCommandSoundTask((s32)task, 9));
-        btlStartTask(btlCreateEffObjA(actor, *(u32 *)(task + 0x20)));
+        btlStartTask(btlCreateEffObjA((BtlUnit *)actor, *(u32 *)(task + 0x20)));
     } else if ((*(u32 *)(task + 8) & 0x200) == 0) {
         btlStartTask(btlCreateCommandSoundTask((s32)task, 0x10));
-        btlStartTask(btlCreateEffObjB(actor, 0xF));
+        btlStartTask(btlCreateEffObjB((BtlUnit *)actor, 0xF));
     }
     if (*(u32 *)(actor + 0x110) & 0x200) {
         btlSyncPlayerWork((BtlUnit *)actor);
@@ -1801,11 +1803,11 @@ void btlCommandTaskReturnUpdate(s32 task) {
 
 void btlStartLinkedActorEffectTask(s32 task) {
     s32 unit = *(s32 *)(task + 0x18);
-    s32 entry;
+    BtlRuntimeTask *entry;
     if ((*(u32 *)(unit + 0x110) & 0x200) == 0 && func_001A8CE0(unit) == 0) {
-        entry = (s32)btlCreateEffObjB(*(s32 *)(task + 0x18), 0x67);
-        *(u8 *)(entry + 0) = 0xA;
-        *(u16 *)(entry + 8) = 0x40;
+        entry = btlCreateEffObjB(*(BtlUnit **)(task + 0x18), 0x67);
+        entry->startCondition.kind = 0xA;
+        entry->startCondition.value.taskKind = 0x40;
         btlStartTask(entry);
         if ((*(u16 *)(*(s32 *)(task + 0x18) + 0x12E) & 0x480) != 0) {
             btlDispatchStateHandler(task, 0x18);
@@ -1818,11 +1820,11 @@ void btlStartLinkedActorEffectTask(s32 task) {
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001CF050);
 
 void btlStartOwnerEffectTasks(s32 *arguments) {
-    s32 owner = arguments[0x34 / 4];
-    s32 value = btlCreateEffObjA(owner, arguments[0x20 / 4]);
+    BtlUnit *owner = (BtlUnit *)arguments[0x34 / 4];
+    BtlRuntimeTask *value = btlCreateEffObjA(owner, arguments[0x20 / 4]);
     btlStartTask(value);
-    value = func_001D9468(owner, 1);
-    *(s32 *)(value + 0x28) = 7;
+    value = (BtlRuntimeTask *)func_001D9468((u8 *)owner, 1);
+    value->startDelay = 7;
     btlStartTask(value);
 }
 
@@ -1845,6 +1847,13 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001CFB10);
 
 void func_001CFD70(void) {
 }
+
+extern s32 btlCountTasksForOwner(s64);
+extern s32 btlSumOtherTargetHitAmounts(u8 *);
+extern s32 btlComputeStatusPenaltyFifth(BtlUnit *);
+extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
+extern SoundTask *sndCreateStationedSeTask(u32);
+extern u8 *btlCreateActorModelBlendTask(u8 *, u32, u32, u32, f32);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001CFD78);
 
@@ -11659,8 +11668,8 @@ void sndReleaseAllSlotOwners(void) {
     }
 }
 
-void btlStartMoveOtherUnitsTask(void) {
-    s32 task = btlCreateMoveOtherUnitsTask();
+void btlStartMoveOtherUnitsTask(void *owner, s32 soundId) {
+    void *task = btlCreateMoveOtherUnitsTask(owner, soundId);
     btlStartTask(task);
 }
 
@@ -11779,7 +11788,7 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
     return 0;
 }
 
-s32 btlCreateMoveOtherUnitsTask(u8 *owner, u32 soundId) {
+void *btlCreateMoveOtherUnitsTask(u8 *owner, u32 soundId) {
     u8 *task = btlAllocTask(16);
     SoundTaskArgs *arguments;
 
@@ -11794,7 +11803,7 @@ s32 btlCreateMoveOtherUnitsTask(u8 *owner, u32 soundId) {
     arguments->slot = soundId;
     arguments->option = 0;
     arguments->waitFrames = 0;
-    return (s32)task;
+    return task;
 }
 
 void func_001F4430(void) {
