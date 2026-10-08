@@ -11888,10 +11888,12 @@ void itfDrawRotatedTexturedRect(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f, u32 g,
     func_00306030(a, b, c, d, e, f, g, h, rotation, x, y, 1, width, height);
 }
 
+extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
+
 void effSelectPresetAndDispatch(u32 arg0, u32 arg1, u32 arg2, u32 arg3,
                                     u32 arg4, u32 arg5, u32 arg6, u32 arg7) {
     effSelectPresetByKind(arg6, arg7);
-    uiDrawGradientColorRect(arg0, arg1, arg2, arg3, arg4, arg5, arg7);
+    uiDrawGradientColorRect(arg0, arg1, arg2, arg3, arg4, (const u32 *)arg5, arg7);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, arg7);
 }
 

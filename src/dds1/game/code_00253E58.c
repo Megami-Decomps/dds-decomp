@@ -14,8 +14,10 @@ extern void func_00254758(s32, s32, s32, s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_00253E58", func_00253E58);
 
+extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
+
 void mnuDrawPanelWithPackedColorPattern(s32 a0, s32 a1, s32 a2, s32 a3, s32 t0) {
-    s32 arr[4];
+    u32 arr[4];
     s32 v;
 
     v = (s32)(((f32)(a3 << 4)) * 0.0078125f);
