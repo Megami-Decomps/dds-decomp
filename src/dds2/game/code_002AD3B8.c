@@ -30,7 +30,7 @@ extern void func_002AC660(s32);
 extern void func_002ACA98(s32);
 extern void func_002B2C88(s32, s32, s32, s32);
 extern void mnuClearPageSelectionHandles(MenuPageWindow *);
-extern void mnuClearEntries(u8 *);
+extern void mnuClearEntries(MenuPageWindow *);
 extern void func_002C1B68(u32 *, u32);
 extern void mnuReleaseStaffMenuTextureHandles(s32);
 extern void func_002C2AA8(struct MenuPanelItem *, u32);
@@ -87,8 +87,8 @@ extern void func_002AAC70(u32, u32, u32, u32, u32, u32, u32);
 extern s32 D_00435E70;
 extern void func_002BB9C8(MenuSprites *, u32);
 extern void mnuReleaseStaffMenuResources(s32 *);
-extern void mnuSetWindowResource(s32, u32 *, s32, s32, s32, s32, s32);
-extern void mnuSetIndexedWindowPageSpriteFlags(s32, u32 *, s32, s32);
+extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32, s32, s32, s32);
+extern void mnuSetIndexedWindowPageSpriteFlags(s32, MenuPageWindow *, u32, u32);
 
 typedef struct MenuListNode MenuListNode;
 typedef struct MenuList MenuList;
@@ -436,8 +436,8 @@ s32 mnuInitializeSelectedStaffPage(s32 unused) {
     mnuSelectPage(window, index);
     mnuCreateStaffBulletItemWindow(context);
     mnuReleaseStaffMenuResources(&context->group);
-    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, 0, 0);
-    mnuSetIndexedWindowPageSpriteFlags(index, window, 1, 0);
+    mnuSetWindowResource(index, (MenuPageWindow *)window, context->group, context->spriteArg1, context->windowResource, 0, 0);
+    mnuSetIndexedWindowPageSpriteFlags(index, (MenuPageWindow *)window, 1, 0);
     context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, context->spriteArg1, 0);
     context->spriteHandle = mnuCreateSpriteState((struct EffectSlotSet *)context->spriteArg0,
                                                  (struct EffectSlotSet *)context->spriteArg1,
@@ -458,7 +458,7 @@ s32 mnuReleaseSelectedStaffPageResources(s32 unused) {
     func_002ABEB0(context);
     func_002B2C88((s32)entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
-    mnuClearEntries((u8 *)entryList);
+    mnuClearEntries(entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {
         mnuDestroyPanelGroup(((MenuStaffContext *)context)->panelHandle);
         ((MenuStaffContext *)context)->panelHandle = 0;
@@ -695,9 +695,9 @@ s32 mnuInitializeStaffPageWithSlotAsset(s32 unused) {
     mnuSelectPage(window, index);
     mnuCreateOrderedStaffItemWindow(context);
     mnuReleaseStaffMenuResources(&context->group);
-    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, context->spriteArg0,
+    mnuSetWindowResource(index, (MenuPageWindow *)window, context->group, context->spriteArg1, context->windowResource, context->spriteArg0,
                          context->spriteArg2);
-    mnuSetIndexedWindowPageSpriteFlags(index, window, 0, 2);
+    mnuSetIndexedWindowPageSpriteFlags(index, (MenuPageWindow *)window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {
         func_002BB9C8(slot->windowSprites, 1);
     }
@@ -721,7 +721,7 @@ s32 mnuReleaseStaffSelectionPageResources(s32 unused) {
     func_002AC660(context);
     func_002B2C88((s32)entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
-    mnuClearEntries((u8 *)entryList);
+    mnuClearEntries(entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {
         mnuDestroyPanelGroup(((MenuStaffContext *)context)->panelHandle);
         ((MenuStaffContext *)context)->panelHandle = 0;
@@ -983,9 +983,9 @@ s32 mnuInitializeStaffValuePage(s32 unused) {
     mnuSelectPage(window, index);
     mnuCreateOwnedCatalogItemWindow(context);
     mnuReleaseStaffMenuResources(&context->group);
-    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, context->spriteArg0,
+    mnuSetWindowResource(index, (MenuPageWindow *)window, context->group, context->spriteArg1, context->windowResource, context->spriteArg0,
                          context->spriteArg2);
-    mnuSetIndexedWindowPageSpriteFlags(index, window, 0, 2);
+    mnuSetIndexedWindowPageSpriteFlags(index, (MenuPageWindow *)window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {
         func_002BB9C8(slot->windowSprites, 1);
     }
@@ -1012,7 +1012,7 @@ s32 mnuReleaseStaffValuePageResources(s32 unused) {
     func_002ACA98(context);
     func_002B2C88((s32)entryList, 0, 0, 0);
     mnuClearPageSelectionHandles(entryList);
-    mnuClearEntries((u8 *)entryList);
+    mnuClearEntries(entryList);
     if (((MenuStaffContext *)context)->panelHandle != 0) {
         mnuDestroyPanelGroup(((MenuStaffContext *)context)->panelHandle);
         ((MenuStaffContext *)context)->panelHandle = 0;

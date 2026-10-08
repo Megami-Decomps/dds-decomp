@@ -157,18 +157,6 @@ void mnuFreeTaskData(s32 unused, void *taskData) {
 
 INCLUDE_ASM(const s32, "game/code_00250E88", func_002515F0);
 
-typedef struct DspEntry {
-    u8 pad0[4];
-    u16 unitId;
-    u8 pad06[0xE];
-    u16 level;
-} DspEntry;
-
-typedef struct DspSelection {
-    DspEntry *entry;
-    s32 mantraId;
-} DspSelection;
-
 typedef struct DspUnitName {
     u8 encodedText[17];
 } DspUnitName;
@@ -189,7 +177,7 @@ extern void *sdfGridSelectFilledCell(MenuGrid *, s32, s32);
 s32 mnuDisplayNextPendingMantra(s32 context) {
     s16 mantraIds[8];
     s32 coordinates[8][2];
-    DspSelection *selection;
+    MnuProfileProgress *selection;
     s32 *pendingFlags;
     s32 i;
     MenuGrid *grid;
@@ -198,13 +186,13 @@ s32 mnuDisplayNextPendingMantra(s32 context) {
 
     memcpy(mantraIds, D_003AF840, sizeof(mantraIds));
     memcpy(coordinates, D_003AF850, sizeof(coordinates));
-    selection = (DspSelection *)mnuGetSelectedNodeValue();
+    selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
     fldGetSceneMetadataNode();
     pendingFlags = ((MenuSceneWork *)context)->pendingMantras;
     for (i = 0; i < 8; i++) {
         if (pendingFlags[i] != 0) {
             evtCopyEntryStringToActiveWindow(
-                0, (s32)D_003BAA70[selection->entry->unitId].encodedText);
+                0, (s32)D_003BAA70[selection->partyRecord->unitId].encodedText);
             evtCopyEntryStringToActiveWindow(
                 1, (s32)D_003BAA78[mantraIds[i]].encodedText);
             dspStartEntry(1);
