@@ -1549,7 +1549,7 @@ extern s32 btlUpdateAutoMusic(void);
 
 extern s32 btlUpdateTintAndWorldLight(void);
 
-extern s32 func_00205160(void);
+extern void func_00205160(void);
 
 extern s32 btlUpdateScene(void);
 
