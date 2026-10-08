@@ -37,12 +37,21 @@ extern s32 fldDeferredCommand;
 
 extern u32 fldSceneControlFlags;
 
-extern u32 fldSceneLifecycleFlags;
+/* The native controller keeps the flags base and accesses its stage at +4.
+ * Both original four-byte SDATA labels retain their storage. */
+typedef struct FldSequenceController {
+    u32 flags;
+    s32 stage;
+} FldSequenceController;
+
+typedef char FldSequenceController_size_check[
+    sizeof(FldSequenceController) == 8 ? 1 : -1];
+extern FldSequenceController fldSceneLifecycleFlags;
 extern s32 D_003BABF0;
 
 extern u32 D_003BABD0;
 
-extern EffWorldNode *dds3GetWorldSecondaryObject(void);
+extern void *dds3GetWorldSecondaryObject(void);
 extern u16 dds3GetWorldValueCount(WorldValueIndices *object);
 extern u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
 extern u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
@@ -72,7 +81,8 @@ typedef struct FldAreaWork {
     s32 floor; /* Zero-based; coordinate lookups use floor + 1. */
     u8 pad18[8];
     s32 unk20; /* Sequence initializers set this when reusing the current area. */
-    u8 pad24[0x2C];
+    s32 unk24;
+    u8 pad28[0x28];
     s32 mode;
     u8 pad54[4];
     s32 rowIdx;
@@ -89,20 +99,29 @@ typedef struct FldAreaWork {
     s32 unk94;
     u8 pad98[0x28];
     s32 unkC0;
-    u8 padC4[0x24];
+    u8 padC4[8];
+    s32 overlayMode;
+    s32 overlayCounter;
+    u8 padD4[0x10];
+    s32 encounterMode;
     s32 unkE8;
-    u8 padEC[4];
+    u32 transitionCount; /* 0xEC */
     s32 nextArea;
     s32 nextFloor; /* Both queued values at -1 mean no request. */
     u8 padF8[8];
     s32 unk100; /* Consumed before pending-resource selection. */
-    u8 pad104[0x14];
+    s16 transitionMode; /* 0x104 */
+    u8 pad106[0xA];
+    u32 pendingSceneRequest; /* 0x110: pending scene request, cleared on exit */
+    s32 deferredExit; /* 0x114 */
     s32 unk118;
     u8 pad11C[0xC];
     s16 sceneCommand;
     u8 pad12A[2];
     s32 commandEnabled;
-    u8 pad130[0xC];
+    s32 unk130;
+    s32 skipFade; /* 0x134 */
+    u8 pad138[4];
     s32 playerModelVariant; /* Cached 0/1 player variant, or 2 for the location override. */
     f32 x;
     f32 y;
@@ -128,6 +147,12 @@ typedef struct FldAreaWork {
     u32 angleState;
     f32 overrideAngle;
 } FldAreaWork;
+typedef char FldAreaWork_transitionMode_offset_check[
+    (u32)&((FldAreaWork *)0)->transitionMode == 0x104 ? 1 : -1];
+typedef char FldAreaWork_pendingSceneRequest_offset_check[
+    (u32)&((FldAreaWork *)0)->pendingSceneRequest == 0x110 ? 1 : -1];
+typedef char FldAreaWork_skipFade_offset_check[
+    (u32)&((FldAreaWork *)0)->skipFade == 0x134 ? 1 : -1];
 extern FldAreaWork fldAreaState;
 extern s32 D_0032E4DC[];
 extern u8 D_00324F88[];
@@ -156,13 +181,13 @@ extern u32 D_003BABE8;
 extern u32 fldCameraModelObject;
 extern void effObjFetchInnerFirstVec(u32);
 extern void effObjFetchInnerSecondVecNorm(u32);
-extern void fldSetPendingAreaAndFloor(s32, s32);
+extern void fldSetPendingAreaAndFloor(u32, u32);
 extern s32 fldIsAreaResourceReady(void);
-extern void fldPollAreaResourceLoad(void);
-extern s32 fldGetResourceReadyFlag(void);
+extern u32 fldPollAreaResourceLoad(void);
+extern u32 fldGetResourceReadyFlag(void);
 extern void fldFreeDisplayObjects(void);
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
-extern s32 dds3AdminGetRequestedMode(void);
+extern s8 dds3AdminGetRequestedMode(void);
 extern s32 dds3AdminReadPreviousUnsignedSample(void);
 extern void func_0013F100(s32, u32);
 extern u32 D_0032E4EC[];
@@ -189,7 +214,9 @@ typedef struct FieldPlayerSceneWork {
     u32 primaryState;
     u8 pad38[0x24];
     u32 secondaryState;
-    u8 pad60[0x20];
+    u8 pad60[2];
+    s16 sequenceMode; /* 0x62: copied by the sequence initializer */
+    u8 pad64[0x1C];
     s8 resourceName[0x20];
 } FieldPlayerSceneWork;
 
@@ -1433,7 +1460,7 @@ extern s32 fileLoadStateChanged(void);
 extern void fileCacheSlotFlagsFromState(void);
 extern void fileRestoreSlotFlagsToState(void);
 void fldSetDeferredFieldCommand(u32, u32);
-extern void dds3AdminSubmitModeRequest(s32, void *, s32, s32);
+extern void dds3AdminSubmitModeRequest(s32, void *, u32, s32);
 
 void fldPrepareDeferredSceneTransition(void) {
     if (datGameState->header.transition != 0) {
@@ -1817,7 +1844,7 @@ void fldResetPlayerSceneObjectState(void) {
     D_0032E498[0] = 4;
 }
 
-extern void dds3ClearObjectFlags(u32, s32);
+extern void dds3ClearObjectFlags(void *, s32);
 extern void dds3SetWorldPlayerObject(EffWorldNode *object, EffWorldNode *value);
 extern void func_00111E30(u32, s32, s32);
 extern EffWorldNode *dds3SpawnCameraSlotObj5(s32, void *, void *);
@@ -1838,7 +1865,7 @@ void fldCreatePlayerObject(void) {
         dds3SetWorldNodeValue((struct EffWorldNode *)fldPlayerObject, (u32)D_0039FC50);
         dds3SetWorldPlayerObject(dds3GetWorldSecondaryObject(), (EffWorldNode *)fldPlayerObject);
         if (D_003BAB50 != 0) {
-            dds3ClearObjectFlags(fldPlayerObject, 0x20);
+            dds3ClearObjectFlags((void *)fldPlayerObject, 0x20);
         }
         fldPrepareResourceBuffer();
         func_00111E30(fldPlayerObject, 2, D_0032F1DC[0]);
@@ -2352,24 +2379,71 @@ INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FCB0);
 
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FCC8);
 
+extern void dds3SetWorldObject(void *);
+extern void evtEnableSolarPhaseAdvance(void);
+extern s32 fileMenuTaskExists(void);
+extern void fldBeginSelectedValueTransition(u32);
+extern void fldCheckSceneReady(void);
+extern void fldCreateInputPanelTask(void);
+extern void fldEnsureTask(void);
+extern void fldFinishDeferredExit(void);
+extern void fldFlushQueuedEffectPositions(void);
+extern u32 fldGetArchiveLoadPending(void);
+extern void fldLoadSceneModelsAndCamera(void);
+extern void fldPrepareSceneBgmArchive(void);
+extern void fldRequestMiniTitleDismiss(void);
+extern s32 fldRestartSceneResourceTask(void);
+extern s32 fldSetEncounterMode(s32);
+extern void fldStartDeferredFieldExit(void);
+extern void fldStartSceneBgm(void);
+extern void fldStartSceneBgmAlternate(void);
+extern void fldStartTitleBgmIfSelected(void);
+extern s32 fldStepSceneBgmArchive(void);
+extern s32 fldUpdateCameraFollow(void);
+extern s32 fldUpdateCameraFrame(void);
+extern void fldUpdateObjectActivation(void);
+extern void fldUpdateSwayOffset(void);
+extern void func_00120EC8(void);
+extern void func_001233D0(void);
+extern void func_001249E0(void);
+extern void func_00132BD0(void);
+extern void func_00132FD0(u32, s32);
+extern void func_0013B1D8(EffWorldNode *);
+extern void func_001415F8(void);
+extern void func_0014C648(void);
+extern s32 func_0014CAF8(void);
+extern void func_0014CB08(void);
+extern void func_0014DAF0(s32);
+extern s32 kwlnFadeIsActive(void);
+struct KwlnTask;
+extern struct KwlnTask *kwlnTaskFindByPriority(u32);
+extern void mnuMarkTitleStreamResetPending(void);
+extern s32 mnuPollTitleStreamStateLocked(void);
+extern void mnuResetTitleStreamLocked(void);
+extern u32 D_003BABE8;
+extern u32 D_003BA8EC;
+extern u32 D_003BAD58;
+extern u32 D_003BAC08[2];
+extern EffBlurScatterWork *D_003BABE4;
+
 INCLUDE_ASM(const s32, "game/code_0011D3A0", fldProcSequence);
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", fldProcDraw);
 
-/* Independent flag words: fldSceneLifecycleFlags and fldSceneControlFlags each have
- * their own set, clear and test operations. */
+/* Lifecycle flags and the separate scene-control flags have independent
+ * set, clear and test operations. */
 void fldSetSceneLifecycleFlags(u32 mask) {
-    u32 *flags = &fldSceneLifecycleFlags;
+    u32 *flags = &fldSceneLifecycleFlags.flags;
     *flags |= mask;
 }
 
 void fldClearSceneLifecycleFlags(u32 mask) {
-    u32 *flags = &fldSceneLifecycleFlags;
+    u32 *flags = &fldSceneLifecycleFlags.flags;
     *flags &= ~mask;
 }
 
 u8 fldTestSceneLifecycleFlags(u32 mask) {
-    return (fldSceneLifecycleFlags & mask) != 0;
+    return (fldSceneLifecycleFlags.flags & mask) != 0;
 }
 
 void fldSetSceneControlFlags(u32 mask) {
@@ -2386,7 +2460,8 @@ u8 fldTestSceneControlFlags(u32 mask) {
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00125E08);
 
-extern s32 D_003BABF4, D_003BABE4;
+extern s32 D_003BABF4;
+extern EffBlurScatterWork *D_003BABE4;
 extern char D_0039FD30[], D_0039FD40[];
 extern void kwlnFadeResetBackground(void);
 extern void fldDestroyPanelTaskIfPresent(void), evtSetSolarOverlayFullyTransparent(void), fldDestroyTask(void);
@@ -2407,7 +2482,7 @@ void fldReleaseCampSceneTasks(void) {
     evtSetSolarOverlayFullyTransparent();
     fldDestroyTask();
     if (D_003BABE4 != 0) {
-        effBlurReleaseFirstResource((EffBlurScatterWork *)D_003BABE4);
+        effBlurReleaseFirstResource(D_003BABE4);
         D_003BABE4 = 0;
     }
     mnuDestroyCampTasks();
