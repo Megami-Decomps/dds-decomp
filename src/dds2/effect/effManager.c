@@ -1,7 +1,9 @@
 #include "common.h"
+#include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "eff.h"
+
 
 /* Per-effect-type operations act on the instance returned by create. */
 typedef struct EffTypeOps {
@@ -38,7 +40,7 @@ INCLUDE_ASM(const s32, "effect/effManager", func_00157400);
 
 u32 effManagerUpdateAndDispatch(void) {
     func_00163010();
-    func_00164CB0();
+    parDrawPendingCellSystems();
     billFlushPendingChildPackets();
     billFlushPendingRenderPairs();
     func_00167EE8();

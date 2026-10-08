@@ -118,7 +118,7 @@ void ptySkillMenuCopyPageState(s32 context) {
         if (i != index) {
             memcpy(&windows[i]->panel, &(*getSkillPageSlot(windows, index))->panel,
                    sizeof(MenuPanelHandles));
-            windows[i]->fade = (*getSkillPageSlot(windows, index))->fade;
+            windows[i]->fadeScale = (*getSkillPageSlot(windows, index))->fadeScale;
             windows[i]->flags = (*getSkillPageSlot(windows, index))->flags;
         }
     }

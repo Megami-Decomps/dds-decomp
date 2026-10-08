@@ -618,7 +618,7 @@ void mnuDrawPanelWithTemporaryOverride(s32 x, s32 y, s32 z, s32 overrideValue, M
     x += menu->scrollOffset * 0x10;
     menu->scrollOffset = (s32)((f32)menu->scrollOffset / 1.19999993f);
     /* Both arms are identical in retail; kept as written. */
-    if (menu->flags & 0x80) {
+    if (menu->flags & MNU_PAGE_WINDOW_SPRITE_MODE) {
         mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, param);
     } else {
         mnuDispatchListPanel(x + positionOffset[0], y + positionOffset[1], z, menu, menu->selected, param);
@@ -2371,8 +2371,8 @@ s32 mnuTryUseFieldSkill(PartyPanel *partyPanel, MenuPageWindow *page, DatPartyRe
             ptySkillApplyFieldUseEffect(page, id & 0xFFFF, target, entry);
             mnuConsumeEntryCost(id & 0xFFFF, target);
             mnuInitPartyPanelSlots(partyPanel);
-            func_002BCA98(page);
-            func_002BCAB0(page);
+            mnuReleaseAndRefreshWindowSlots(page);
+            mnuRefreshPartyPanelBars(page);
         }
         return 2;
     }

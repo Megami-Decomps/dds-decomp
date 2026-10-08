@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "btl_state.h"
 #include "eff.h"
@@ -619,13 +620,11 @@ typedef struct {
     u32 color;
     f32 baseFirst;
     f32 baseSecond;
-    void *system;
+    ParSystem *system;
     u32 handle;
 } ParamThunderWork;
 
-extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void parRiseFallSymmetricCellAlpha(void *system, u32 arg1, u32 arg2, u32 arg3);
-extern void func_0015D078(void *system, u32 value);
 
 /* Allocate the copied head and its trailing cells as one block, then create
  * the cell system with native arguments groupDivisor=0 and kind=4.
@@ -642,7 +641,7 @@ ParamThunderWork *effCreateThunderCellSystemWork(ParamThunderHead *source) {
     work->handle = allocationHandle;
     work->system = parAllocateCellSystem(work->head.count, work->head.perCell, 0, PAR_CELL_TOPOLOGY_FIVE_VECTOR);
     parRiseFallSymmetricCellAlpha(work->system, work->head.firstDispatchArg, work->head.secondDispatchArg, work->head.thirdDispatchArg);
-    func_0015D078(work->system, work->head.systemParam);
+    parSetCellDrawBucket(work->system, work->head.systemParam);
     for (cellIndex = 0; cellIndex < work->head.count; cellIndex++) {
         work->cells[cellIndex].unk00 = 0;
         work->cells[cellIndex].unk04 = 0;

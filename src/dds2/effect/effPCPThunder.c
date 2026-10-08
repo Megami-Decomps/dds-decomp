@@ -1,4 +1,5 @@
 #include "common.h"
+#include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff.h"
@@ -10,7 +11,6 @@
 extern void *effParamTableGetBlock(void *data, s32 index);
 extern void *effCreateThunderCellSystemWork(void *work);
 
-extern void parReleaseCellSystem(ParSystem *system);
 extern void parFillSymmetricCellColors(u32 param0, u32 param1, void *cells, u32 param3);
 extern void parDecreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
 extern void parIncreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
@@ -151,11 +151,7 @@ u32 func_0016B198(u32 value) {
 }
 
 /* The descriptor owns the allocation; retention returns its 32-bit address. */
-extern ParSystem *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
-extern void func_00164C68(void *system, u32 value);
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
-extern void parPrependCellNode(void *system);
-extern void parCellInit(void *system, s32 index);
 extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
 
 
@@ -409,7 +405,7 @@ EffThunderVectorWork *effThunderWorkCreate(EffThunderVectorParams *parameters) {
     work->allocationHandle = allocationHandle;
     work->cellSystem = parAllocateCellSystem(work->head.cellCount, work->head.perCell, 0, PAR_CELL_TOPOLOGY_PAIR);
     parDispatchSub(work->cellSystem, 2, work->head.dispatchArg, work->head.dispatchArg);
-    func_00164C68(work->cellSystem, work->head.systemParam);
+    parSetCellDrawBucket(work->cellSystem, work->head.systemParam);
     for (i = 0; i < work->head.cellCount; i++) {
         work->cells[i].delayFrames = 0;
         work->cells[i].activeFrames = 0;
@@ -725,7 +721,7 @@ EffThunderSparkWork *effThunderSparkCreate(EffThunderSparkParams *parameters) {
     for (sparkIndex = 0; sparkIndex < work->head.sparkCount; sparkIndex++) {
         work->sparks[sparkIndex].system = parAllocateCellSystem(EFF_THUNDER_SINGLE_CELL, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_PAIR);
         parDispatchSub(work->sparks[sparkIndex].system, 2, work->head.dispatchArg, work->head.dispatchArg);
-        func_00164C68(work->sparks[sparkIndex].system, work->head.systemParam);
+        parSetCellDrawBucket(work->sparks[sparkIndex].system, work->head.systemParam);
         effThunderSparkInit(work, sparkIndex);
         work->sparks[sparkIndex].age = -(effMiscRand(D_003AA868) % delaySpread);
     }
@@ -1059,7 +1055,7 @@ EffThunderFragmentWork *effThunderFragCreate(EffThunderFragmentParams *parameter
     work->allocationHandle = allocationHandle;
     work->system = parAllocateCellSystem(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_FIVE_VECTOR);
     parRiseFallSymmetricCellAlpha(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
-    func_00164C68(work->system, work->head.systemParam);
+    parSetCellDrawBucket(work->system, work->head.systemParam);
     for (i = 0; i < work->head.fragmentCount; i++) {
         effThunderRandomizeFrag(work, i);
     }
@@ -1385,10 +1381,10 @@ EffThunderFragmentWork *func_0016DB28(EffThunderFragmentParams *parameters) {
     work->allocationHandle = allocationHandle;
     work->state.secondarySystem = parAllocateCellSystem(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_TRIANGLE);
     parDispatchSub(work->state.secondarySystem, 2, work->head.arg48, work->head.arg50);
-    func_00164C68(work->state.secondarySystem, work->head.systemParam);
+    parSetCellDrawBucket(work->state.secondarySystem, work->head.systemParam);
     work->system = parAllocateCellSystem(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_PAIR);
     parDispatchSub(work->system, 2, work->head.arg40, work->head.arg40);
-    func_00164C68(work->system, work->head.systemParam);
+    parSetCellDrawBucket(work->system, work->head.systemParam);
     for (i = 0; i < work->head.fragmentCount; i++) {
         effThunderRandomizeFrag2(work, i);
     }
@@ -1727,7 +1723,7 @@ EffThunderCellWork *effThunderCellCreate(EffThunderCellParams *parameters) {
     work->allocationHandle = allocationHandle;
     work->system = parAllocateCellSystem(work->head.cellCount, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_SIX_VECTOR);
     parDecreaseStripCellAlpha(work->system, work->head.arg34, work->head.arg3C, work->head.arg44);
-    func_00164C68(work->system, work->head.systemParam);
+    parSetCellDrawBucket(work->system, work->head.systemParam);
     for (i = 0; i < work->head.cellCount; i++) {
         effThunderRandomizeCell(work, i);
     }
@@ -1995,7 +1991,6 @@ EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src) {
 
 extern void effThunderBuildFragmentStrip(EffThunderFragmentWork *work, s32 index);
 extern void func_0016F028(EffThunderFragmentWork *work, s32 index, const u128 *seed);
-extern void parPrependCellNode(void *system);
 
 extern void sdfReleaseChipBlock(void *block);
 
