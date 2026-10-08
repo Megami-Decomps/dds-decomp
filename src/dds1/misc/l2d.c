@@ -1,23 +1,10 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf.h"
+#include "sdf_packet_list.h"
 #include "dds3_owned_node.h"
 
-/* Rectangle in object space: origin, extent, depth and 15-bit colour. */
-typedef struct L2dRect {
-    Dds3IntrusiveNode owner;
-    s32 left;   /* 0x10 */
-    s32 top;    /* 0x14 */
-    s32 width;  /* 0x18 */
-    s32 height; /* 0x1C */
-    s32 depth;  /* 0x20 */
-    s32 color;  /* 0x24 */
-} L2dRect;
-
-
 extern SdfPoolNode D_003255A8;
-
-extern s32 sdfAllocatePacketList(s32 (*alloc)(s32));
 
 extern void sdfAppendClosedRectanglePacket(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top,
                           s32 right, s32 bottom, s32 depth, s32 (*alloc)(s32));
@@ -25,7 +12,7 @@ extern void sdfAppendClosedRectanglePacket(SdfListHead *list, s32 color, s32 pri
 /* Emit one filled rectangle into a fresh packet list. */
 void l2dDrawColoredRect(void *owner)
 {
-    L2dRect *rect = owner;
+    Dds3L2dRectangle *rect = owner;
     SdfListHead *list;
 
     list = (SdfListHead *)sdfAllocatePacketList(0);
@@ -38,8 +25,8 @@ void l2dDrawColoredRect(void *owner)
 extern Dds3IntrusiveNodeCallbacks D_003BAAD8;
 
 /* Allocate a rectangle record and register it with its owner list. */
-L2dRect *l2dCreateOwnedColoredRectangle(s32 left, s32 top, s32 depth, s32 width, s32 height, s32 color) {
-    L2dRect *rect = sdfAllocAndClearQuadwords(0x28);
+Dds3L2dRectangle *l2dCreateOwnedColoredRectangle(s32 left, s32 top, s32 depth, s32 width, s32 height, s32 color) {
+    Dds3L2dRectangle *rect = sdfAllocAndClearQuadwords(0x28);
 
     rect->left = left;
     rect->top = top;

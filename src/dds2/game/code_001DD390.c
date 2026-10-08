@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "btl_effect_position.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
@@ -2934,7 +2935,6 @@ extern SdfGraphObj D_0040B290;
 extern SdfPoolNode *D_003B6BE0[];
 extern SdfPoolNode *D_003B6BF0[];
 extern s32 sdfAllocPacketAligned(s32);
-extern s32 sdfAllocatePacketList(s32 (*)(s32));
 extern void sdfCreateResourcePacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 extern void sdfCreateDescriptorPacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 
@@ -2949,7 +2949,7 @@ void func_001E3E20(BtlUnit *unit) {
         return;
     }
     unit->mirror->unk34C = sdfAllocPacketAligned(0x70000);
-    packet = sdfAllocatePacketList(0);
+    packet = (s32)(u32)sdfAllocatePacketList(0);
     sdfCreateResourcePacket((SdfListHead *)packet, (s32)D_0040B290.buffers[2], 0, 0, 0x200, 0xE0, unit->mirror->unk34C, 0, 0, 0);
     D_003B6BE0[0]->append((SdfListHead *)D_003B6BE0[0], (SdfListHead *)packet);
     info = unit->ext->owner;
@@ -2965,7 +2965,7 @@ void func_001E3E20(BtlUnit *unit) {
         dds3SetObjectFlags(unit->mirror->effectObject, 1);
         return;
     }
-    packet = sdfAllocatePacketList(0);
+    packet = (s32)(u32)sdfAllocatePacketList(0);
     sdfCreateDescriptorPacket((SdfListHead *)packet, (s32)D_0040B290.buffers[2], 0, 0, 0x200, 0xE0, unit->mirror->unk34C, 0);
     D_003B6BF0[0]->append((SdfListHead *)D_003B6BF0[0], (SdfListHead *)packet);
     func_001E38F0(unit->mirror, info, (SdfModel *)unit->mirror->unk344, D_003B6BF0, unit->mirror->overlayColor);
@@ -5303,8 +5303,8 @@ void btlCopyMotionTransform(BtlCamState *dst, BtlCamState *src) {
     dst->fov = src->fov;
 }
 
-void func_001E95C8(s32 transform, f32 value) {
-    ((BtlCamState *)transform)->fov = value;
+void btlSetMotionTransformFieldOfView(BtlCamState *object, f32 fovRadians) {
+    object->fov = fovRadians;
 }
 
 void btlInitMotionTransformFromVectors(BtlCamState *object, f32 *origin, f32 *direction) {
@@ -6727,7 +6727,7 @@ void func_001ED6C8(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
         count = btlGetIndexListCount(action->targetList);
         if (btlHasSingleLinkedResource(action) == 0) {
             func_001EC868(action, from, 17.5f);
-            btlCopyMotionTransform((u8 *)to, (u8 *)from);
+            btlCopyMotionTransform(to, from);
             btlInterpolateVectorStep(from->position);
             VU0_STORE_VF(vf10, targetPosition);
             if (func_001E3230(unit, 1) == 0) {
@@ -6765,7 +6765,7 @@ void func_001ED6C8(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
             target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
             func_001EEB78(action, from, 2);
             halfFov = to->fov * 0.5f * 1.3333333f;
-            btlCopyMotionTransform((u8 *)to, (u8 *)from);
+            btlCopyMotionTransform(to, from);
             minimumDistance = target->reach * target->scale / func_00353228(halfFov);
             to->distance *= 0.6f;
             if (to->distance < minimumDistance) {

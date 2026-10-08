@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
 #include "kwln.h"
@@ -276,8 +277,6 @@ extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
 extern void *func_0033B050(SdfPrimitiveRequest *);
 
 extern u32 D_0040B2A0[];
-
-extern s32 sdfAllocatePacketList(s32 (*allocatorArgument)(s32));
 
 extern void sdfCreateResourcePacket(u32, u32, s32, s32, s32, s32, u32, s32, s32, s32);
 
@@ -2489,7 +2488,7 @@ void fldReleaseBackgroundBuffer(void) {
 
 void fldSubmitBackgroundResourcePacket(void) {
     if (fldBackgroundBuffer != 0) {
-        u32 packet = sdfAllocatePacketList(0);
+        u32 packet = (u32)sdfAllocatePacketList(0);
         SdfPoolNode *descriptor;
         sdfCreateResourcePacket(packet, D_0040B2A0[0], 0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0, 0, 0);
         descriptor = &kwlnDrawSurfaces[fldDisplayRow];
@@ -2499,7 +2498,7 @@ void fldSubmitBackgroundResourcePacket(void) {
 
 void fldSubmitBackgroundDescriptorPacket(void) {
     if (fldBackgroundBuffer != 0) {
-        u32 packet = sdfAllocatePacketList(0);
+        u32 packet = (u32)sdfAllocatePacketList(0);
         SdfPoolNode *descriptor;
         sdfCreateDescriptorPacket(packet, D_0040B2A0[0], 0, 0, 0x200, 0xE0, fldBackgroundBuffer, 0);
         descriptor = &kwlnDrawSurfaces[fldDisplayRow];
