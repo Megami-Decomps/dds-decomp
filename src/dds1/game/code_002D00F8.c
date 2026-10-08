@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "sdf_pending.h"
 
 #define SDF_CHIP_BLOCK_SHIFT 12
 #define SDF_CHIP_BLOCK_BYTES (1 << SDF_CHIP_BLOCK_SHIFT)
@@ -11,7 +12,6 @@
 extern u32 D_003E274C[];
 
 extern void *func_002FF538(u32 size);
-extern void sdfInitializeSynchronizedRequest(void *request, void (*callback)(void *));
 extern void sdfReleaseChipBlock(void *memory);
 
 void func_002D00F8(u32 heapSize) {
@@ -123,8 +123,7 @@ void sdfGetChipHeapStats(SdfChipStats *stats) {
 extern void *func_002FF538(u32 size);
 extern void *sdfAllocSizeClassBlock(u32 size);
 extern s32 D_003BD2DC;
-extern u8 D_003BD9C8[4];
-extern void sdfInitializeSynchronizedRequest();
+extern SdfPendingRequest D_003BD9C8;
 
 /* Align the usable span to 128 bytes and link one free block between sentinels. */
 void sdfInitGeneralHeap(u32 heapSize) {
@@ -154,7 +153,7 @@ void sdfInitGeneralHeap(u32 heapSize) {
     freeBlock->address = alignedStart;
     freeBlock->referenceCount = 0;
     D_003BD2DC = 0;
-    sdfInitializeSynchronizedRequest(D_003BD9C8, sdfReleaseResourceAllocation);
+    sdfInitializeSynchronizedRequest(&D_003BD9C8, sdfReleaseResourceAllocation);
 }
 
 u16 sdfGetMemoryBlockState(SdfMemBlock *block) {

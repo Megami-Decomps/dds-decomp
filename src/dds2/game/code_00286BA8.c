@@ -75,7 +75,6 @@ extern s32 dspCloseChannel(void);
 struct SdfTaskItemDesc;
 extern struct SdfTaskItemDesc D_003CFCD4;
 extern void sdfAttachTaskItem(struct TaskWork *, struct SdfTaskItemDesc *);
-extern void sdfSetTaskItemMode(void *, s32, u32);
 extern void mnuReleaseFirstMantraSpriteSlots(void);
 extern void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
