@@ -92,7 +92,7 @@ typedef char MenuSlotState_reduced_check[((u32)&((MenuSlotState *)0)->reducedMod
 extern void func_002665E8(MenuSlotState *);
 /* Historical callers intentionally omit the second reset argument. */
 extern void effReleaseSlotTextureReferencesAndResetWork();
-extern void func_00266460(u32, MenuEffectResources *);
+extern void func_00266460(EffectSlotSet *, MenuEffectResources *);
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
@@ -237,7 +237,7 @@ void func_002665E8(MenuSlotState *scene) {
             scene->resourceBank[0], 0x46, 0x43);
         func_0026BE28(&scene->panels[1], 0, 0x10, 0x20);
         func_0026BEB0(&scene->panels[1], 0x1470, 0xCB8, 0);
-        func_00266460((u32)scene->resourceBank[2], &scene->campEffect.resources);
+        func_00266460(scene->resourceBank[2], &scene->campEffect.resources);
     } else {
         for (i = 0; i < 2; i++) {
             scene->resourceBank[i] = effLoadIndexedResource(
