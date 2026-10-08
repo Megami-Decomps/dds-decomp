@@ -8,7 +8,7 @@ extern void ptySkillMenuHandleSelection(s32);
 extern void ptySkillMenuHandleSlotReorder(s32);
 extern void func_00272778(s32);
 extern void mnuCreateStaffImageSprite(s32);
-extern void func_002723B0(s32, s32);
+extern void mnuDrawStaffGridLabelsForKind(s32, s32);
 extern void ptySkillMenuCopyPageState(s32);
 extern void mnuDrawStaffCampScreen(s32, s32);
 extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
@@ -188,7 +188,7 @@ s32 ptySkillMenuEnterPage(KwlnTask *callback) {
     } else {
         func_00272668(1, 0, 0, context, 1, 0x53);
     }
-    func_002723B0(0, work->actor);
+    mnuDrawStaffGridLabelsForKind(0, work->actor);
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
@@ -283,7 +283,7 @@ s32 ptySkillMenuEnterConfirm(KwlnTask *callback) {
     func_00272518(1, menu->selected->list->cursor->sortKey, D_003BAA98, context, 1, 1, 0x53);
     menu->selected->list->flags &= ~8;
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->selected, 0x53);
-    func_002723B0(0, ((SkillMenuContext *)context)->actor);
+    mnuDrawStaffGridLabelsForKind(0, ((SkillMenuContext *)context)->actor);
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 

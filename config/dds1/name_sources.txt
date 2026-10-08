@@ -4639,6 +4639,7 @@
 0x00272260	mnuIsFadeIdle	inferred	Returns true when the kernel fade task is inactive.
 0x00272280	mnuDrawStaffCampSlotsAndCurrency	inferred	confidence=high; src/dds1/game/code_00270FB0.c:func_00272280; Draws two resolved grid slots at fixed positions and queues formatted task status text with draw flags. CORRECTED: caller func_002728F8 is the staff/camp screen; the third draw is D_003BAA00+0x3C, which datCalc.c names currency, not a task status. [names_qp9.tsv]
 0x00272350	mnuCreateStaffImageSprite	inferred	Creates and configures a drawable sprite from the indexed staff image resource.
+0x002723B0	mnuDrawStaffGridLabelsForKind	inferred	uses kind-indexed StaffGridLabelRow positions and grid IDs to draw configured labels from the supplied resource slot
 0x00272688	mnuDrawStaffCampScreen	inferred	draws backdrop and staff frame, three func_002BF790 icons when arg==0
 0x00272798	mnuHandleCampFieldSkillInput	inferred	L12_Donors
 0x00272A00	mnuStartStaffDisplay	inferred	mnu menu, title, shop, or movie UI in game/code_00272798.c
