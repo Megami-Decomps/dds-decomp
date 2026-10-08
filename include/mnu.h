@@ -544,6 +544,9 @@ typedef struct MenuPageWindow {
     s32 fade;
 } MenuPageWindow;
 
+void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth,
+                             MenuPageWindow *window, s32 mode);
+
 #ifdef VERSION_DDS2
 typedef char MenuPageWindow_size_must_be_0xA6A4[
     sizeof(MenuPageWindow) == 0xA6A4 ? 1 : -1];
