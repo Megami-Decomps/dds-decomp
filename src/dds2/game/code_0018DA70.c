@@ -458,24 +458,14 @@ void effDrawBlurPixelRectangle(EffBlurPixelRect *work) {
     effDrawBlurRectangle((BlurSource *)&work->color);
 }
 
-typedef struct EffBlurTemplateBody {
-    s32 extent;        /* 0x00 */
-    BlurSource source; /* 0x04: same source view used for draw packet construction */
-} EffBlurTemplateBody;
-
-typedef struct EffBlurTemplate {
-    EffBlurTemplateBody body;  /* 0x00: copied from the source template */
-    u32 resourceWord;          /* 0x2C */
-} EffBlurTemplate;
-
 extern void *sdfAllocSizeClassBlock(s32 size);
 extern s32 effGetResourceFirstWord(s32 index);
 
 /* Clone a blur template into a fresh allocation. */
-EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplate *src) {
+EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplateBody *src) {
     EffBlurTemplate *dst = sdfAllocSizeClassBlock(sizeof(EffBlurTemplate));
 
     dst->resourceWord = effGetResourceFirstWord(2);
-    dst->body = src->body;
+    dst->body = *src;
     return dst;
 }

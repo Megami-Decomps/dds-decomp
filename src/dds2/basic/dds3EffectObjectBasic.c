@@ -5,6 +5,7 @@
 #include "dds3obj.h"
 #include "eff.h"
 #include "sdf_draw.h"
+#include "btl_sound.h"
 
 #define EFF_OBJ_KIND 7
 #define EFF_OBJ_STATE_BOUND_BILL 1
@@ -388,7 +389,56 @@ void func_00115318(u64 unused, u64 firstVectorAddress, u64 secondVectorAddress) 
     effObjCreateBillboardInWorld(bill, firstVectorAddress, secondVectorAddress);
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_00115358);
+/* This 48-byte event record has ordinary word alignment. Its first two
+ * vectors use the SDK quadword-copy primitive; the full record uses memcpy. */
+typedef struct EffectEventVectorParameters {
+    f32 firstVector[4];
+    f32 secondVector[4];
+    f32 parameters[3];
+    u32 color;
+} EffectEventVectorParameters;
+
+extern const EffectEventVectorParameters D_00412950;
+extern SoundMixer *func_00197D38(SoundMixer *source);
+
+EffectObj *func_00115358(source, firstVector, secondVector)
+    SoundMixer *source;
+    const u128 *firstVector;
+    const u128 *secondVector;
+{
+    EffectEventVectorParameters parameters = D_00412950;
+    EffectObj *obj;
+    SoundMixer *mixer;
+    EffectDependencyState *data;
+    ObjBase *objectHandle;
+    EffWorldNode *worldNode;
+
+    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, secondVector);
+    if (obj == NULL) {
+        return NULL;
+    }
+    PCP_COPY_VECTOR(parameters.firstVector, firstVector);
+    PCP_COPY_VECTOR(parameters.secondVector, secondVector);
+    mixer = func_00197D38(source);
+    data = obj->data;
+    data->state = EFF_OBJ_STATE_EVENT_NODE;
+    data->handle = mixer;
+    data->flags = 0;
+    data->node = NULL;
+    data->owner = NULL;
+    data->entryId = 0;
+    data->ownerKind = 0;
+    data->vector = sdfAllocSizeClassBlock(sizeof(parameters));
+    memcpy(data->vector, &parameters, sizeof(parameters));
+    objectHandle = effObjGetObjectHandle((EffWorldNode *)obj);
+    objectHandle->resourceState = 2;
+    worldNode = dds3GetFirstWorldObjectNodeOfKind2();
+    if (worldNode != NULL) {
+        objectHandle->slots[5] = worldNode;
+        dds3EnsureWorldNodeInSlot(worldNode, obj);
+    }
+    return obj;
+}
 
 void func_00115500(void) {
     func_00115358();
