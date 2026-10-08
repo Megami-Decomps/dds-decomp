@@ -13,7 +13,9 @@
 #include "dat_state.h"
 #include "mnu_list.h"
 #include "eff.h"
+#include "eff_resource_records.h"
 #include "fld.h"
+#include "evt_task.h"
 #include "kwln_task_lifecycle.h"
 
 #define CAMP_TASK_NAME_BYTES 0x20
@@ -103,7 +105,6 @@ extern void evtViewerCleanupMessageWindow();
 
 extern void evtViewerDispatchFlagMode();
 
-extern s32 evtFindTaskById(u32 taskId);
 extern KwlnTask *func_00101820(u32 priority);
 
 
@@ -160,7 +161,7 @@ extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern void *memset(void *dst, s32 c, u32 n);
 
-extern KwlnTask *kwlnTaskCreate();
+extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay, TaskUpdate update, TaskDestroy destroy, u32 userValue);
 
 
 extern s32 func_002C54B0(s32);
@@ -198,26 +199,29 @@ extern s32 effDestroyPackedBatch(s32);
 extern ShopRankPriceRow D_003CBB70[];
 
 /* Schedule the camp task only if no task currently owns this event ID. */
-void mnuCampCreateTask(s32 taskId) {
+KwlnTask *mnuCampCreateTask(s32 taskId) {
     char taskName[CAMP_TASK_NAME_BYTES];
     EvtPackLoadState *taskData;
+    KwlnTask *task;
 
-    if (evtFindTaskById(taskId) == 0) {
+    task = evtFindTaskById(taskId);
+    if (task == 0) {
         evtFormatTaskName(taskId, taskName);
         taskData = sdfAllocSizeClassBlock(CAMP_TASK_DATA_BYTES);
         memset(taskData, 0, CAMP_TASK_DATA_BYTES);
         taskData->eventId = taskId;
         taskData->loaded = 0;
-        kwlnTaskCreate(taskName, CAMP_TASK_PRIORITY, 1, 1, evtTickPackLoad, evtReleaseEventPackResources, taskData);
+        task = kwlnTaskCreate(taskName, CAMP_TASK_PRIORITY, 1, 1, evtTickPackLoad, evtReleaseEventPackResources, (u32)taskData);
     }
+    return task;
 }
 
 void mnuCampDestroyTaskById(s32 taskId) {
-    s32 taskHandle;
+    KwlnTask *taskHandle;
 
     taskHandle = evtFindTaskById(taskId);
     if (taskHandle != 0) {
-        kwlnTaskDestroyWithHierarchy((KwlnTask *)(u32)taskHandle, 0);
+        kwlnTaskDestroyWithHierarchy(taskHandle, 0);
         return;
     }
 }

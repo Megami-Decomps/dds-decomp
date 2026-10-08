@@ -7,6 +7,7 @@
 #include "btl_state.h"
 #include "btl_sound.h"
 #include "evt_unit.h"
+#include "evt_task.h"
 #include "btl_task_args.h"
 #include "btl_command.h"
 #include "btl_model_record.h"
@@ -271,8 +272,7 @@ extern char D_003A6758[]; /* "btl:event[%s]\n" */
 extern char D_003A6768[]; /* "btl:event BE load[e%03d]\n" */
 extern char D_003A6788[]; /* "btl:event SMG load[%X]\n" */
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
-extern s32 mnuCampCreateTask(s32);
-extern void func_00101A80(s32, s32);
+extern void func_00101A80(KwlnTask *parent, KwlnTask *child);
 
 /* Reset event state and request the scene's script/task resources.
  * The raw unsigned event word is deliberately converted to signed 16-bit.
@@ -283,7 +283,7 @@ void func_0020FF50(void) {
     u16 rawEventId;
     s16 eventId;
     char scriptPath[0x80];
-    s32 eventTask;
+    KwlnTask *eventTask;
 
     battleState->eventTaskId = BTL_EVENT_TASK_NONE;
     battleState->eventAction = BTL_EVENT_ACTION_NONE;
@@ -308,7 +308,7 @@ void func_0020FF50(void) {
     btlBossDebugPrintf(D_003A6758, scriptPath);
     eventTask = mnuCampCreateTask(battleState->eventTaskId);
     btlBossDebugPrintf(D_003A6768, battleState->eventTaskId);
-    func_00101A80((s32)battleState->scriptOwner, eventTask);
+    func_00101A80(battleState->scriptOwner, eventTask);
     battleState->sequenceHandle =
         ((battleState->eventTaskId - BTL_EVENT_SEQUENCE_ID_BIAS) << 16) + BTL_EVENT_SEQUENCE_BASE;
     if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) == 0) {
