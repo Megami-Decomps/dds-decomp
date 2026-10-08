@@ -724,7 +724,7 @@ struct MenuIconSprites;
 
 /* Terminal/shop modes share this complete 0x38C-byte scene allocation. */
 typedef struct MenuTerminalContext {
-    s32 resourceHandle;
+    struct SdfMemBlock *resourceHandle;
     u8 pad04[4];
     s32 type;
     MenuPopupState transitionWork;
@@ -889,10 +889,10 @@ typedef struct MenuStaffContext {
     MenuPopupState transitionWork; /* +0x08: native saved-entry transition state */
     s32 popupState;       /* 0x54 */
     u8 pad58[8];
-    s32 group;            /* 0x60 */
-    s32 spriteArg0;       /* 0x64 */
-    s32 spriteArg1;       /* 0x68 */
-    s32 windowResource; /* Source resource for the window's fixed sprite slots. */
+    struct EffectSlotSet *group; /* 0x60: first base resource */
+    struct EffectSlotSet *spriteArg0; /* 0x64: second base resource */
+    struct EffectSlotSet *spriteArg1; /* 0x68: first paired resource */
+    struct EffectSlotSet *windowResource; /* 0x6C: second paired resource */
     u8 pad70[0x54];
     s32 spriteArg2;       /* 0xC4 */
     u8 padC8[0x2C];
