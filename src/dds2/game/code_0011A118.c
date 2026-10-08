@@ -1506,11 +1506,11 @@ s32 func_0011E018(void) {
     return 1;
 }
 
-extern s32 datComputeSkillBoostedMaxHp(s32);
+extern u32 datComputeSkillBoostedMaxHp(DatPartyRecord *);
 
 /* Push the coarse HP-percentage table value; only exactly 100 percent uses index zero. */
 s32 evtSelectStatGrade(void) {
-    s32 maximumHp = datComputeSkillBoostedMaxHp(D_0043E5C0.second);
+    s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)D_0043E5C0.second);
     s32 currentHp = ((DatPartyRecord *)D_0043E5C0.second)->hp;
     s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
     s32 gradeIndex = 0;
@@ -1584,7 +1584,7 @@ s32 evtPushRosterBaseValue(void) {
 
 /* Push the finer HP-percentage table value; only exactly 100 percent uses index zero. */
 s32 evtSelectFineStatGrade(void) {
-    s32 maximumHp = datComputeSkillBoostedMaxHp(D_0043E5C0.second);
+    s32 maximumHp = datComputeSkillBoostedMaxHp((DatPartyRecord *)D_0043E5C0.second);
     s32 currentHp = ((DatPartyRecord *)D_0043E5C0.second)->hp;
     s32 hpPercent = (s32)((f32)currentHp / (f32)maximumHp * 100.0f);
     s32 gradeIndex = 0;
