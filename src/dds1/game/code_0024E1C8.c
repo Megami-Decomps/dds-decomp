@@ -73,11 +73,11 @@ extern void *mnuCreateSpriteResource(s32, u8, u8);
 extern MenuProgressHost *mnuCreateWorkBlock(void);
 
 typedef struct MnuResourceTaskWork {
-    s32 allocation;
+    struct SdfMemBlock *allocation;
     u8 pad04[4];
-    s32 messageResource1;
+    struct SdfMemBlock *messageResource1;
     u32 messageResourceInfo1;
-    s32 messageResource2;
+    struct SdfMemBlock *messageResource2;
     u32 messageResourceInfo2;
     u8 pad18[0xC];
     MenuProgressHost *staffMenuContext;
@@ -552,14 +552,14 @@ void mnuReleaseResourceSlots(MnuResourceTaskWork *unusedWork) {
 
 /* Allocate and clear resource-task work, load both message resources and prepare the mantra visuals. */
 MnuResourceTaskWork *func_0024F608(void) {
-    s32 allocationHandle = (u32)sdfAllocGeneralBlock(sizeof(MnuResourceTaskWork));
-    MnuResourceTaskWork *resourceWork = (MnuResourceTaskWork *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)allocationHandle);
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(sizeof(MnuResourceTaskWork));
+    MnuResourceTaskWork *resourceWork = (MnuResourceTaskWork *)sdfMemoryGetBlockAddress(allocation);
 
     memset(resourceWork, 0, sizeof(MnuResourceTaskWork));
-    resourceWork->allocation = allocationHandle;
-    resourceWork->messageResource1 = (s32)(u32)sdfReadNamedResource(D_003AF758,
+    resourceWork->allocation = allocation;
+    resourceWork->messageResource1 = sdfReadNamedResource(D_003AF758,
                                                   &resourceWork->messageResourceInfo1, 0);
-    resourceWork->messageResource2 = (s32)(u32)sdfReadNamedResource(D_003AF780,
+    resourceWork->messageResource2 = sdfReadNamedResource(D_003AF780,
                                                   &resourceWork->messageResourceInfo2, 0);
     mnuMarkTitleStreamResetPending();
     mnuResetTitleStreamLocked();
@@ -585,9 +585,9 @@ void func_0024F6F0(s32 unused, MnuResourceTaskWork *resourceWork) {
         mnuReleaseStaffMenuContextAndResources(resourceWork->staffMenuContext);
     }
     dspCloseChannel();
-    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)resourceWork->messageResource1);
-    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)resourceWork->messageResource2);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resourceWork->allocation));
+    sdfQueueGeneralAllocationRelease(resourceWork->messageResource1);
+    sdfQueueGeneralAllocationRelease(resourceWork->messageResource2);
+    sdfReleaseResourceAllocation(resourceWork->allocation);
 }
 
 /* The task handle is shared by the existence probe and explicit stop;
