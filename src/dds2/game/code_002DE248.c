@@ -1,4 +1,5 @@
 #include "eff_bill.h"
+#include "eff_point_set.h"
 #include "common.h"
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
@@ -2769,18 +2770,7 @@ typedef struct EffRingSource {
     u32 lastColor;      // 0x4C
 } EffRingSource;
 
-/* Point-set node: `rows` 16-byte entries in `buffer`, then `tail`. */
-typedef struct EffPointSet {
-    u32 type;       // 0x00
-    u32 color;      // 0x04
-    s32 rows;       // 0x08
-    u8 flag;        // 0x0C
-    u8 pad_0D[3];
-    u8 *buffer;     // 0x10
-    u8 *tail;       // 0x14
-    s32 *handle;    // 0x18
-    u8 *allocation; // 0x1C
-} EffPointSet;
+
 
 /* Class kind 3 copies this complete 0x68-byte serialized parameter record.
  * The color/alpha prefix is the existing interpolation provider's layout;
@@ -3532,7 +3522,7 @@ u8 *effCreatePointSet4(u32 count) {
 /* Queue the draw asset for release and return the backing allocation. */
 void effAssetQueueRelease(s32 work) {
     sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)((EffPointSet *)work)->allocation));
+    sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
 }
 
 /* vu0 routine: SDK loads the supplied transform or constructs identity. */
@@ -4862,7 +4852,7 @@ EffPointSet *effCreatePointSet5(s32 count) {
 /* Queue the draw asset for release and return the backing allocation. */
 void effReleasePointSetAsset(s32 work) {
     sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)((EffPointSet *)work)->allocation));
+    sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
 }
 
 void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
@@ -6543,7 +6533,7 @@ EffPointSet *effCreatePointSet3(s32 count) {
 /* Queue the draw asset for release and return the backing allocation. */
 void effReleaseModelPointSetAsset(s32 work) {
     sdfQueueAssetRelease((u32)((EffPointSet *)work)->handle);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)((EffPointSet *)work)->allocation));
+    sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
 }
 
 void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
