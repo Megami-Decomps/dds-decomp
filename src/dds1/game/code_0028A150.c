@@ -477,7 +477,6 @@ extern void billDispatchByKind(void *handle);
 
 extern void *effRetainResource(void *name);
 
-extern void *billCreateIndexed(s32 mode, void *name);
 
 
 extern void billSetBillboardMode(void *handle, s16 index);
@@ -5084,7 +5083,7 @@ void fileLoadObjectOpenDevice(LoadObj *obj, void *name) {
     if (obj->deviceHandle != NULL) {
         billDispatchByKind(obj->deviceHandle);
     }
-    handle = billCreateIndexed(0, name);
+    handle = billCreateIndexed(0, (u32)name);
     obj->deviceHandle = handle;
     if (obj->recordWork != NULL) {
         FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)obj->recordWork)->data0;
@@ -5096,7 +5095,7 @@ void fileLoadObjectOpenAndStartDevice(LoadObj *obj, void *name) {
     if (obj->deviceHandle != NULL) {
         billDispatchByKind(obj->deviceHandle);
     }
-    obj->deviceHandle = billCreateIndexed(1, name);
+    obj->deviceHandle = billCreateIndexed(1, (u32)name);
     billMarkKindOneFlag((struct BillObj *)(obj->deviceHandle));
     if (obj->recordWork != NULL) {
         FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)obj->recordWork)->data0;

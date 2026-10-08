@@ -1399,7 +1399,7 @@ u8 *effCreateBillboardWork(u8 *source) {
     memcpy(work + 0x2C, fileResolvePrimaryBuffer(source),
            ((FileJob *)source)->slots[0].size);
     ((EffBillboardWork *)work)->billboard =
-        billCreateIndexed(1, fileResolveSecondaryBuffer(source));
+        billCreateIndexed(1, (u32)fileResolveSecondaryBuffer(source));
     return work;
 }
 
@@ -3678,14 +3678,13 @@ void effSetSurfaceRetainedResource(EffectSurfaceNode *node, u32 resourceId) {
     }
 }
 
-extern u32 billCreateIndexed(u32, u32);
 
 void effReplaceSurfacePrimaryBillboard(EffectSurfaceNode *node, u32 resourceId) {
     u32 resource = node->resource;
     if (resource != 0) {
         billDispatchByKind((void *)resource);
     }
-    resource = billCreateIndexed(0, resourceId);
+    resource = (u32)billCreateIndexed(0, resourceId);
     node->resource = (void *)resource;
     if (node->record != 0) {
         billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->record)->data0)->alphaTrack.surfaceIndex);
@@ -3697,7 +3696,7 @@ void effReplaceSurfaceFlaggedBillboard(EffectSurfaceNode *node, u32 resourceId) 
     if (resource != 0) {
         billDispatchByKind((void *)resource);
     }
-    resource = billCreateIndexed(1, resourceId);
+    resource = (u32)billCreateIndexed(1, resourceId);
     node->resource = (void *)resource;
     billMarkKindOneFlag((struct BillObj *)(resource));
     if (node->record != 0) {

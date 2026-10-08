@@ -36,7 +36,6 @@ extern struct EffNode *effCreateNodeFromDescriptor(struct EffNodeDescriptor *des
 
 extern BillObj *billCreateFromResource(s32 kind, const char *path);
 
-extern u64 billCreateIndexed(u64, u64);
 
 
 extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
@@ -206,8 +205,8 @@ void effObjSpawnSharedBillClone(EffectObj *obj, u64 firstVectorAddress, u64 seco
     effObjCreateKindTwo(bill, firstVectorAddress, secondVectorAddress);
 }
 /* Create a kind-one indexed bill; the native constructor result is discarded. */
-void effObjCreateIndexedKindOne(u64 billId, u64 firstVectorAddress, u64 secondVectorAddress) {
-    u64 bill;
+void effObjCreateIndexedKindOne(u32 billId, u64 firstVectorAddress, u64 secondVectorAddress) {
+    struct BillObj *bill;
 
     bill = billCreateIndexed(1, billId);
     effObjCreateKindTwo(bill, firstVectorAddress, secondVectorAddress);
@@ -272,8 +271,8 @@ void effObjSpawnSharedBillNodeClone(EffectObj *obj, u64 firstVectorAddress, u64 
 }
 
 /* Create a kind-zero indexed bill for the state-three constructor. */
-void effObjCreateIndexedKindZero(u64 billId, u64 firstVectorAddress, u64 secondVectorAddress) {
-    u64 bill;
+void effObjCreateIndexedKindZero(u32 billId, u64 firstVectorAddress, u64 secondVectorAddress) {
+    struct BillObj *bill;
 
     bill = billCreateIndexed(0, billId);
     effObjCreateBillNode(bill, firstVectorAddress, secondVectorAddress);

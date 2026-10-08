@@ -80,7 +80,6 @@ extern void dds3EnsureWorldNodeInSlot(void *id, void *owner);
 
 extern BillObj *billCreateFromResource(s32 kind, const char *path);
 
-extern void *billCreateIndexed(s32 kind, u32 billId);
 
 
 extern s32 sdfLoadMapRecordLookAtBasis(SdfModel *model, s32 id);
@@ -226,7 +225,7 @@ void effObjSpawnSharedBillClone(EffectObj *obj, void *firstVector, s32 secondVec
 
 /* Create a kind-one indexed bill; the native constructor result is discarded. */
 void effObjCreateIndexedKindOne(u32 billId, void *firstVector, s32 secondVectorAddress) {
-    void *bill;
+    struct BillObj *bill;
 
     bill = billCreateIndexed(1, billId);
     effObjCreateKindTwo(bill, firstVector, secondVectorAddress);
@@ -289,7 +288,7 @@ void effObjSpawnSharedBillNodeClone(EffectObj *obj, void *firstVector, s32 secon
 
 /* Create a kind-zero indexed bill for the state-three constructor. */
 void effObjCreateIndexedKindZero(u32 billId, void *firstVector, s32 secondVectorAddress) {
-    void *bill;
+    struct BillObj *bill;
 
     bill = billCreateIndexed(0, billId);
     effObjCreateBillNode(bill, firstVector, secondVectorAddress);

@@ -111,7 +111,7 @@ void effBillDispatchAll(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0014FEB0", func_00150148);
+INCLUDE_ASM(const s32, "game/code_0014FEB0", billCreateChildPayloadFromTextureResource);
 
 /* Texture record: +0x00 is the handle the reference is dropped from, +0x08 the
  * reference count and +0x44 the allocation released when it reaches zero. */

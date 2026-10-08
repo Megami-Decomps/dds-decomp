@@ -1580,7 +1580,7 @@ u8 *effCreateBillboardWork(u8 *source) {
     memcpy(work + 0x2C, fileResolvePrimaryBuffer(source),
            ((FileJob *)source)->slots[0].size);
     ((EffBillboardWork *)work)->billboard =
-        billCreateIndexed(1, fileResolveSecondaryBuffer((FileJobPayload *)source));
+        billCreateIndexed(1, (u32)fileResolveSecondaryBuffer((FileJobPayload *)source));
     return work;
 }
 
@@ -3909,7 +3909,7 @@ void effReplaceSurfacePrimaryBillboard(s32 *object, s32 *settings) {
     if (((EffectSlotNode54 *)work)->billResource != 0) {
         billDispatchByKind(((EffectSlotNode54 *)work)->billResource);
     }
-    ((EffectSlotNode54 *)work)->billResource = billCreateIndexed(0, settings);
+    ((EffectSlotNode54 *)work)->billResource = (u32)billCreateIndexed(0, (u32)settings);
     if (((EffectSlotNode54 *)work)->record != 0) {
         billSetBillboardMode(((EffectSlotNode54 *)work)->billResource, (s16)((FileKeyBlock *)((FileSlotTable *)((EffectSlotNode54 *)work)->record)->data0)->alphaTrack.surfaceIndex);
     }
@@ -3921,7 +3921,7 @@ void effReplaceSurfaceFlaggedBillboard(s32 *object, s32 *settings) {
     if (((EffectSlotNode54 *)work)->billResource != 0) {
         billDispatchByKind(((EffectSlotNode54 *)work)->billResource);
     }
-    ((EffectSlotNode54 *)work)->billResource = billCreateIndexed(1, settings);
+    ((EffectSlotNode54 *)work)->billResource = (u32)billCreateIndexed(1, (u32)settings);
     billMarkKindOneFlag((struct BillObj *)(((EffectSlotNode54 *)work)->billResource));
     if (((EffectSlotNode54 *)work)->record != 0) {
         billSetBillboardMode(((EffectSlotNode54 *)work)->billResource, (s16)((FileKeyBlock *)((FileSlotTable *)((EffectSlotNode54 *)work)->record)->data0)->alphaTrack.surfaceIndex);
@@ -7954,10 +7954,10 @@ s32 *effBillboardMotionResourceCreate(s32 *context, u16 kind, s32 *source) {
 
     switch (kind) {
     case 1:
-        resource[0] = billCreateIndexed(0, source);
+        resource[0] = (s32)billCreateIndexed(0, (u32)source);
         break;
     case 2:
-        resource[0] = billCreateIndexed(1, source);
+        resource[0] = (s32)billCreateIndexed(1, (u32)source);
         break;
     case 4:
         resource[0] = effRetainResource(source[0]);
