@@ -129,7 +129,7 @@ void sdfAssetRelease(SdfAsset *);
 void sdfDestroyDevRequest(DevRequest *request);
 void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
 void sdfDevBufferedRequestGrow(DevRequest *request);
-void sdfTexReleaseReferenceViaHandler(u32);
+void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 SdfAsset *sdfCreateAssetWithDrawEntries(void);
 u8 *sdfParseAssetParameterFlags(SdfAsset *, DevRequest *, u8 *);
 void sdfAppendAssetToResourceList(DevRequest *, SdfAsset *);
@@ -392,7 +392,7 @@ void sdfResourceListRelease(DevRequest *list, s32 releaseItems) {
     if (releaseItems != 0) {
         itemCount = list->usedCount;
         for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-            sdfTexReleaseReferenceViaHandler(((u32 *)list->buffer)[itemIndex]);
+            sdfTexReleaseReferenceViaHandler((SdfTex *)((u32 *)list->buffer)[itemIndex]);
         }
     }
     sdfDestroyDevRequest(list);

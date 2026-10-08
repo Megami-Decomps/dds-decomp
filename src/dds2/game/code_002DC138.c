@@ -29,7 +29,7 @@ extern void *sdfAllocAndClearQuadwords(s32);
 
 extern void sdfReleaseChipBlock();
 
-extern void sdfTexReleaseReference();
+extern void sdfTexReleaseReference(struct SdfTex *texture);
 
 extern void effReleaseSharedReference();
 
@@ -777,7 +777,7 @@ void effReleaseSharedReference(RefObj *obj) {
         texture->width = 0x100;
         texture->height = 0x100;
         D_00437E38 = 0xffffffff;
-        sdfTexReleaseReference(texture);
+        sdfTexReleaseReference((struct SdfTex *)texture);
     }
     if (--obj->refCount == 0) {
         sdfReleaseResourceAllocation((SdfMemBlock *)obj->allocationHandle);
