@@ -612,7 +612,7 @@ s32 btlFindEligibleTargetForMultiActorCommand(s32 arg0, BtlIndexList *targets) {
         } else {
             index = action->indexWork.skillId;
         }
-        if (datCommandRecords[index].unk_08 == 0 &&
+        if (datCommandRecords[index].targetType == 0 &&
             datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_FLAG_MASK &&
             datCommandRecords[index].attribute.parts.flagMask != 0) {
             for (i = 0; i < count; i++) {
@@ -2692,7 +2692,7 @@ s32 btlIsBattleRecordEligible(u8 *actor, u8 *target, s32 recordIndex, s32 specie
         return 0;
     }
     if (speciesIndex != 0 &&
-        datCommandRecords[speciesIndex].unk_08 != 0) {
+        datCommandRecords[speciesIndex].targetType != 0) {
         return 0;
     }
     return 1;

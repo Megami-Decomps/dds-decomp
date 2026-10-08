@@ -23,7 +23,7 @@ extern void mnuInitPartyPanelSlots(s32);
 extern void mnuUpdateHandleStates(s32);
 extern void func_00280048(s32);
 extern u32 mnuMapPadMaskToFlags(u32);
-extern s32 mnuGetAbilityByteCategory(u16);
+extern s32 mnuGetAbilityTargetCategory(u16);
 extern void mnuStepPartyPanelListFromInput();
 extern void mnuSetPopupEntry(s32 *, char *);
 extern char D_0037CC58[];
@@ -256,10 +256,10 @@ s32 ptySkillMenuHandleFieldUse(s32 callback) {
     }
     label = menu->selected->list->cursor->sortKey;
     code = label;
-    if (mnuGetAbilityByteCategory(code) == 2) {
+    if (mnuGetAbilityTargetCategory(code) == 2) {
         ((SkillMenuContext *)context)->actionFlags |= 0x10;
     }
-    if (mnuGetAbilityByteCategory(code) == 3) {
+    if (mnuGetAbilityTargetCategory(code) == 3) {
         ((SkillMenuContext *)context)->actionFlags |= 0x20;
     }
     window = context + 0x15C;
