@@ -638,7 +638,8 @@ void mnuCyclePairedEffectSetting(MenuEffectPair *pair) {
     if (settings != 0) {
         setting = settings[(s8)pair->settingIndex];
     }
-    effConfigureWithDefaultSetting((s32)pair->leftGrid, 0, (s32)pair->effects[0], 0, setting, 0);
+    effConfigureWithDefaultSetting(pair->leftGrid, 0,
+                                   (struct EffMappedResource *)pair->effects[0], 0, setting, 0);
     pair->settingIndex += 1;
     if ((s8)pair->settingIndex >= 4) {
         pair->settingIndex = 0;

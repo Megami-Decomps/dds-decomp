@@ -89,7 +89,6 @@ extern void func_002665E8(MenuSlotState *);
 /* Historical callers intentionally omit the second reset argument. */
 extern void effReleaseSlotTextureReferencesAndResetWork();
 extern void func_00266460(u32, MenuEffectResources *);
-extern u32 effConfigureWithDefaultSetting(u32, u32, u32, u32, u32, u32);
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
@@ -1192,15 +1191,15 @@ void mnuTerminalConfigureEffects(u32 mode, MenuSlotState *state) {
     }
     switch (mode) {
     case 1:
-        effConfigureWithDefaultSetting((u32)state->resourceBank[0], *slot, state->effect[4], 0, 5, 2);
+        effConfigureWithDefaultSetting(state->resourceBank[0], *slot, (struct EffMappedResource *)(u32)state->effect[4], 0, 5, 2);
         break;
     case 2:
-        effConfigureWithDefaultSetting((u32)state->resourceBank[0], *slot, state->effect[5], 0, 0, 2);
+        effConfigureWithDefaultSetting(state->resourceBank[0], *slot, (struct EffMappedResource *)(u32)state->effect[5], 0, 0, 2);
         break;
     case 3:
-        effConfigureWithDefaultSetting((u32)state->resourceBank[0], *slot, state->effect[4], 0, 0, 2);
+        effConfigureWithDefaultSetting(state->resourceBank[0], *slot, (struct EffMappedResource *)(u32)state->effect[4], 0, 0, 2);
         if (slot[1] >= 0) {
-            effConfigureWithDefaultSetting((u32)state->resourceBank[0], slot[1], state->effect[5], 0, 0, 2);
+            effConfigureWithDefaultSetting(state->resourceBank[0], slot[1], (struct EffMappedResource *)(u32)state->effect[5], 0, 0, 2);
         }
         break;
     }
@@ -1265,10 +1264,10 @@ u8 func_00268C08(MenuSlotState *scene) {
 void mnuConfigureSelectedSceneModeEffect(s32 mode, MenuSlotState *host) {
     switch (mode) {
     case 1:
-        effConfigureWithDefaultSetting((u32)host->resourceBank[0], 6, host->effect[0], 0, 0, 2);
+        effConfigureWithDefaultSetting(host->resourceBank[0], 6, (struct EffMappedResource *)(u32)host->effect[0], 0, 0, 2);
         return;
     case 2:
-        effConfigureWithDefaultSetting((u32)host->resourceBank[0], 6, host->effect[3], 0, 0, 2);
+        effConfigureWithDefaultSetting(host->resourceBank[0], 6, (struct EffMappedResource *)(u32)host->effect[3], 0, 0, 2);
         break;
     }
 }
@@ -1283,11 +1282,11 @@ void func_00268CC0(u32 mode, s32 context) {
     index = fldGetModeFrameRecordIndex(context);
     switch (mode) {
     case 1:
-        effConfigureWithDefaultSetting((u32)state->resourceBank[0], index, state->effect[0], 0, 0, 2);
-        effConfigureWithDefaultSetting((u32)state->resourceBank[0], 4, state->effect[6], 0, 0, 14);
-        effConfigureWithDefaultSetting((u32)state->resourceBank[0], 6, state->effect[0], 0, 0, 2);
+        effConfigureWithDefaultSetting(state->resourceBank[0], index, (struct EffMappedResource *)(u32)state->effect[0], 0, 0, 2);
+        effConfigureWithDefaultSetting(state->resourceBank[0], 4, (struct EffMappedResource *)(u32)state->effect[6], 0, 0, 14);
+        effConfigureWithDefaultSetting(state->resourceBank[0], 6, (struct EffMappedResource *)(u32)state->effect[0], 0, 0, 2);
         itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0], 7, 0, 0, -0x400, 0);
-        effConfigureWithDefaultSetting((u32)state->resourceBank[0], 7, state->effect[5], 0, 5, 3);
+        effConfigureWithDefaultSetting(state->resourceBank[0], 7, (struct EffMappedResource *)(u32)state->effect[5], 0, 5, 3);
         i = 0;
         entries = state->alternateBatch->workEntries[0].geometry.cornerColors;
         for (; i < 4; i++) {
@@ -1295,15 +1294,15 @@ void func_00268CC0(u32 mode, s32 context) {
         }
         break;
     case 2:
-        effConfigureWithDefaultSetting((u32)state->resourceBank[0], index, state->effect[3], 0, 0xF, 2);
-        effConfigureWithDefaultSetting((u32)state->resourceBank[0], 6, state->effect[3], 0, 0xF, 2);
+        effConfigureWithDefaultSetting(state->resourceBank[0], index, (struct EffMappedResource *)(u32)state->effect[3], 0, 0xF, 2);
+        effConfigureWithDefaultSetting(state->resourceBank[0], 6, (struct EffMappedResource *)(u32)state->effect[3], 0, 0xF, 2);
         itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0], 7, 0, 0, 0, 0);
-        effConfigureWithDefaultSetting((u32)state->resourceBank[0], 7, state->effect[3], 0, 0, 2);
+        effConfigureWithDefaultSetting(state->resourceBank[0], 7, (struct EffMappedResource *)(u32)state->effect[3], 0, 0, 2);
         return;
     case 3:
         itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0], 7, 0, 0, -0x400, 0);
-        effConfigureWithDefaultSetting((u32)state->resourceBank[0], 7, state->effect[5], 0, 0, 3);
-        effConfigureWithDefaultSetting((u32)state->alternateBatch, 0, state->effect[5], 0, 0, 2);
+        effConfigureWithDefaultSetting(state->resourceBank[0], 7, (struct EffMappedResource *)(u32)state->effect[5], 0, 0, 3);
+        effConfigureWithDefaultSetting(state->alternateBatch, 0, (struct EffMappedResource *)(u32)state->effect[5], 0, 0, 2);
         break;
     }
 }
@@ -1389,11 +1388,11 @@ void func_002690A8(u32 mode, s32 context) {
     effectAddress += (u32)((u8 *)&state->effect[0] - (u8 *)state);
     effect = (s32 *)effectAddress;
     itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0], 8, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting((u32)state->resourceBank[0], 8, *effect, 0, setting, kind);
+    effConfigureWithDefaultSetting(state->resourceBank[0], 8, (struct EffMappedResource *)(u32)*effect, 0, setting, kind);
     itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0], 0x38, 0, y, 0, z);
-    effConfigureWithDefaultSetting((u32)state->resourceBank[0], 0x38, *effect, 0, setting, kind);
+    effConfigureWithDefaultSetting(state->resourceBank[0], 0x38, (struct EffMappedResource *)(u32)*effect, 0, setting, kind);
     itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0], 0x39, 0, y, 0, z);
-    effConfigureWithDefaultSetting((u32)state->resourceBank[0], 0x39, *effect, 0, setting, kind);
+    effConfigureWithDefaultSetting(state->resourceBank[0], 0x39, (struct EffMappedResource *)(u32)*effect, 0, setting, kind);
 }
 
 
@@ -1510,19 +1509,23 @@ void func_00269478(u32 mode, s32 context) {
         (u32)&((MenuSlotState *)0)->effect);
     itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0],
         slot, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting((u32)state->resourceBank[0], slot, *effect,
+    effConfigureWithDefaultSetting(state->resourceBank[0], slot,
+        (struct EffMappedResource *)(u32)*effect,
         0, materialFlags, color);
     itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0],
         0x40, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting((u32)state->resourceBank[0], 0x40, *effect,
+    effConfigureWithDefaultSetting(state->resourceBank[0], 0x40,
+        (struct EffMappedResource *)(u32)*effect,
         0, materialFlags, color);
     itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0],
         0x41, 0, yOffset, 0, height);
-    effConfigureWithDefaultSetting((u32)state->resourceBank[0], 0x41, *effect,
+    effConfigureWithDefaultSetting(state->resourceBank[0], 0x41,
+        (struct EffMappedResource *)(u32)*effect,
         0, materialFlags, color);
     itfSetGridEntryQuantizedAndRefresh(state->resourceBank[0],
         0x42, 0, yOffset, 0, height);
-    effConfigureWithDefaultSetting((u32)state->resourceBank[0], 0x42, *effect,
+    effConfigureWithDefaultSetting(state->resourceBank[0], 0x42,
+        (struct EffMappedResource *)(u32)*effect,
         0, materialFlags, color);
 }
 
@@ -1612,7 +1615,7 @@ void mnuApplyGridPanelHostSetting(u32 kind, MenuSlotState *host) {
         break;
     }
     itfSetGridEntryQuantizedAndRefresh(host->resourceBank[0], 0x1A, 0, 0, 0, 0);
-    effConfigureWithDefaultSetting((u32)host->resourceBank[0], 0x1A, host->effect[slot], 0, value, flags);
+    effConfigureWithDefaultSetting(host->resourceBank[0], 0x1A, (struct EffMappedResource *)(u32)host->effect[slot], 0, value, flags);
 }
 
 
