@@ -587,7 +587,7 @@ void btlReleaseEventAssets(void) {
     btlReleaseEventData();
     eventAssets = battleState->eventAssets;
     if (eventAssets != 0) {
-        sdfReleaseResourceAllocation(eventAssets);
+        sdfReleaseResourceAllocation((struct SdfMemBlock *)eventAssets);
         battleState->eventAssets = 0;
     }
     btlBossDebugPrintf(D_0041B7D0);

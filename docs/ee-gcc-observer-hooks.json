@@ -1,0 +1,342 @@
+{
+  "compiler_sha256": "d11ca9e2086edf122df8580c00fd9024f036d0b6c9d782fe986ad1d881d0c8f1",
+  "rtx_union_stride_bytes": 8,
+  "insn_pattern_offset": 28,
+  "qty_size_bytes": 40,
+  "haifa_insn_data_size_bytes": 40,
+  "hooks": [
+    {
+      "address": "0x813d048",
+      "purpose": "local_alloc entry",
+      "symbol": "local_alloc",
+      "stabs_source": "../../src/gcc/local-alloc.c",
+      "nearest_stabs_line": 309,
+      "stabs_pc": "0x813d048",
+      "line_caveat": "Line is from the executable STABS table; corresponding vendor C source is not available.",
+      "first_eight_bytes": "5589e583ec105756"
+    },
+    {
+      "address": "0x813e96c",
+      "purpose": "qty_compare_1 entry",
+      "symbol": "qty_compare_1",
+      "stabs_source": "../../src/gcc/local-alloc.c",
+      "nearest_stabs_line": 1501,
+      "stabs_pc": "0x813e96c",
+      "line_caveat": "Line is from the executable STABS table; corresponding vendor C source is not available.",
+      "first_eight_bytes": "5589e583ec185756"
+    },
+    {
+      "address": "0x813ea52",
+      "purpose": "qty_compare_1 result",
+      "symbol": "qty_compare_1",
+      "stabs_source": "../../src/gcc/local-alloc.c",
+      "nearest_stabs_line": 1513,
+      "stabs_pc": "0x813ea52",
+      "line_caveat": "Line is from the executable STABS table; corresponding vendor C source is not available.",
+      "first_eight_bytes": "8d65dc5b5e5f89ec"
+    },
+    {
+      "address": "0x813eccc",
+      "purpose": "combine_regs entry",
+      "symbol": "combine_regs",
+      "stabs_source": "../../src/gcc/local-alloc.c",
+      "nearest_stabs_line": 1586,
+      "stabs_pc": "0x813eccc",
+      "line_caveat": "Line is from the executable STABS table; corresponding vendor C source is not available.",
+      "first_eight_bytes": "5589e583ec645756"
+    },
+    {
+      "address": "0x813f1e7",
+      "purpose": "combine_regs REG_DEAD lookup result",
+      "symbol": "combine_regs",
+      "stabs_source": "../../src/gcc/local-alloc.c",
+      "nearest_stabs_line": 1718,
+      "stabs_pc": "0x813f1cf",
+      "line_caveat": "Line is from the executable STABS table; corresponding vendor C source is not available.",
+      "first_eight_bytes": "85c00f84f7000000"
+    },
+    {
+      "address": "0x813f214",
+      "purpose": "combine_regs class check result",
+      "symbol": "combine_regs",
+      "stabs_source": "../../src/gcc/local-alloc.c",
+      "nearest_stabs_line": 1718,
+      "stabs_pc": "0x813f1cf",
+      "line_caveat": "Line is from the executable STABS table; corresponding vendor C source is not available.",
+      "first_eight_bytes": "85c00f84ca000000"
+    },
+    {
+      "address": "0x813f2f5",
+      "purpose": "combine_regs result",
+      "symbol": "combine_regs",
+      "stabs_source": "../../src/gcc/local-alloc.c",
+      "nearest_stabs_line": 1749,
+      "stabs_pc": "0x813f2f5",
+      "line_caveat": "Line is from the executable STABS table; corresponding vendor C source is not available.",
+      "first_eight_bytes": "8d65905b5e5f89ec"
+    },
+    {
+      "address": "0x813f614",
+      "purpose": "find_free_reg entry",
+      "symbol": "find_free_reg",
+      "stabs_source": "../../src/gcc/local-alloc.c",
+      "nearest_stabs_line": 1923,
+      "stabs_pc": "0x813f614",
+      "line_caveat": "Line is from the executable STABS table; corresponding vendor C source is not available.",
+      "first_eight_bytes": "5589e583ec5c5756"
+    },
+    {
+      "address": "0x813f930",
+      "purpose": "find_free_reg masks",
+      "symbol": "find_free_reg",
+      "stabs_source": "../../src/gcc/local-alloc.c",
+      "nearest_stabs_line": 2006,
+      "stabs_pc": "0x813f930",
+      "line_caveat": "Line is from the executable STABS table; corresponding vendor C source is not available.",
+      "first_eight_bytes": "8b45e08b55e48b5d"
+    },
+    {
+      "address": "0x813f9ed",
+      "purpose": "find_free_reg used-bit test",
+      "symbol": "find_free_reg",
+      "stabs_source": "../../src/gcc/local-alloc.c",
+      "nearest_stabs_line": 2017,
+      "stabs_pc": "0x813f9ce",
+      "line_caveat": "Line is from the executable STABS table; corresponding vendor C source is not available.",
+      "first_eight_bytes": "a8010f8526010000"
+    },
+    {
+      "address": "0x813fbfd",
+      "purpose": "find_free_reg result",
+      "symbol": "find_free_reg",
+      "stabs_source": "../../src/gcc/local-alloc.c",
+      "nearest_stabs_line": 2073,
+      "stabs_pc": "0x813fbfd",
+      "line_caveat": "Line is from the executable STABS table; corresponding vendor C source is not available.",
+      "first_eight_bytes": "8d65985b5e5f89ec"
+    },
+    {
+      "address": "0x8140060",
+      "purpose": "global_alloc entry",
+      "symbol": "global_alloc",
+      "stabs_source": "../../src/gcc/global.c",
+      "nearest_stabs_line": 350,
+      "stabs_pc": "0x8140060",
+      "line_caveat": "Line is from the executable STABS table; corresponding vendor C source is not available.",
+      "first_eight_bytes": "5589e583ec0c5756"
+    },
+    {
+      "address": "0x816c6ac",
+      "purpose": "rank_for_schedule entry",
+      "symbol": "rank_for_schedule",
+      "stabs_source": "../../src/gcc/haifa-sched.c",
+      "nearest_stabs_line": 4468,
+      "stabs_pc": "0x816c6ac",
+      "line_caveat": "Line is from the executable STABS table; corresponding vendor C source is not available.",
+      "first_eight_bytes": "5589e583ec205756"
+    },
+    {
+      "address": "0x816cac1",
+      "purpose": "rank_for_schedule result",
+      "symbol": "rank_for_schedule",
+      "stabs_source": "../../src/gcc/haifa-sched.c",
+      "nearest_stabs_line": 4555,
+      "stabs_pc": "0x816cac1",
+      "line_caveat": "Line is from the executable STABS table; corresponding vendor C source is not available.",
+      "first_eight_bytes": "8d65d45b5e5f89ec"
+    },
+    {
+      "address": "0x816cacc",
+      "purpose": "schedule_insn selected/ready",
+      "symbol": "schedule_insn",
+      "stabs_source": "../../src/gcc/haifa-sched.c",
+      "nearest_stabs_line": 4639,
+      "stabs_pc": "0x816cacc",
+      "line_caveat": "Line is from the executable STABS table; corresponding vendor C source is not available.",
+      "first_eight_bytes": "5589e583ec2c5756"
+    },
+    {
+      "address": "0x817160c",
+      "purpose": "schedule_insns entry",
+      "symbol": "schedule_insns",
+      "stabs_source": "../../src/gcc/haifa-sched.c",
+      "nearest_stabs_line": 7989,
+      "stabs_pc": "0x817160c",
+      "line_caveat": "Line is from the executable STABS table; corresponding vendor C source is not available.",
+      "first_eight_bytes": "5589e583ec405756"
+    },
+    {
+      "address": "0x8075764",
+      "purpose": "whole-function trace gate",
+      "symbol": "rest_of_compilation",
+      "stabs_source": "../../src/gcc/toplev.c",
+      "nearest_stabs_line": 2780,
+      "stabs_pc": "0x8075764",
+      "first_eight_bytes": "5589e583ec285756"
+    },
+    {
+      "address": "0x8098840",
+      "purpose": "expand_function_start gate",
+      "symbol": "expand_function_start",
+      "stabs_source": "../../src/gcc/function.c",
+      "nearest_stabs_line": 6143,
+      "stabs_pc": "0x8098840",
+      "first_eight_bytes": "5589e583ec045756"
+    },
+    {
+      "address": "0x8098e10",
+      "purpose": "expand_function_end gate",
+      "symbol": "expand_function_end",
+      "stabs_source": "../../src/gcc/function.c",
+      "nearest_stabs_line": 6485,
+      "stabs_pc": "0x8098e10",
+      "first_eight_bytes": "5589e583ec085756"
+    },
+    {
+      "address": "0x80c3650",
+      "purpose": "expand_binop entry",
+      "symbol": "expand_binop",
+      "stabs_source": "../../src/gcc/optabs.c",
+      "nearest_stabs_line": 616,
+      "stabs_pc": "0x80c3650",
+      "first_eight_bytes": "5589e581ecc80000"
+    },
+    {
+      "address": "0x80c38a2",
+      "purpose": "expand_binop actual operand swap",
+      "symbol": "expand_binop",
+      "stabs_source": "../../src/gcc/optabs.c",
+      "nearest_stabs_line": 692,
+      "stabs_pc": "0x80c38a2",
+      "first_eight_bytes": "8b75148b55108955"
+    },
+    {
+      "address": "0x80c38ae",
+      "purpose": "expand_binop after canonicalization",
+      "symbol": "expand_binop",
+      "stabs_source": "../../src/gcc/optabs.c",
+      "nearest_stabs_line": 700,
+      "stabs_pc": "0x80c38ae",
+      "first_eight_bytes": "837d20040f84e701"
+    },
+    {
+      "address": "0x80c5806",
+      "purpose": "expand_binop result",
+      "symbol": "expand_binop",
+      "stabs_source": "../../src/gcc/optabs.c",
+      "nearest_stabs_line": 1818,
+      "stabs_pc": "0x80c5806",
+      "first_eight_bytes": "8da52cffffff5b5e"
+    },
+    {
+      "address": "0x8141e54",
+      "purpose": "expand_preferences entry",
+      "symbol": "expand_preferences",
+      "stabs_source": "../../src/gcc/global.c",
+      "nearest_stabs_line": 1224,
+      "stabs_pc": "0x8141e54",
+      "first_eight_bytes": "5589e583ec305756"
+    },
+    {
+      "address": "0x81420c4",
+      "purpose": "expand_preferences exit",
+      "symbol": "expand_preferences",
+      "stabs_source": "../../src/gcc/global.c",
+      "nearest_stabs_line": 1264,
+      "stabs_pc": "0x81420c4",
+      "first_eight_bytes": "8d65c45b5e5f89ec"
+    },
+    {
+      "address": "0x81420d0",
+      "purpose": "prune_preferences entry",
+      "symbol": "prune_preferences",
+      "stabs_source": "../../src/gcc/global.c",
+      "nearest_stabs_line": 1275,
+      "stabs_pc": "0x81420d0",
+      "first_eight_bytes": "5589e581ec800000"
+    },
+    {
+      "address": "0x81424ce",
+      "purpose": "prune_preferences exit",
+      "symbol": "prune_preferences",
+      "stabs_source": "../../src/gcc/global.c",
+      "nearest_stabs_line": 1341,
+      "stabs_pc": "0x81424ce",
+      "first_eight_bytes": "8da574ffffff5b5e"
+    },
+    {
+      "address": "0x81424dc",
+      "purpose": "global find_reg entry",
+      "symbol": "find_reg",
+      "stabs_source": "../../src/gcc/global.c",
+      "nearest_stabs_line": 1363,
+      "stabs_pc": "0x81424dc",
+      "first_eight_bytes": "5589e581ec240100"
+    },
+    {
+      "address": "0x814296e",
+      "purpose": "global first-fit used-mask test",
+      "symbol": "find_reg",
+      "stabs_source": "../../src/gcc/global.c",
+      "nearest_stabs_line": 1447,
+      "stabs_pc": "0x814294f",
+      "first_eight_bytes": "a8010f852d010000"
+    },
+    {
+      "address": "0x8142bb3",
+      "purpose": "global copy-preference membership",
+      "symbol": "find_reg",
+      "stabs_source": "../../src/gcc/global.c",
+      "nearest_stabs_line": 1489,
+      "stabs_pc": "0x8142b81",
+      "first_eight_bytes": "a8010f84eb010000"
+    },
+    {
+      "address": "0x8142ea3",
+      "purpose": "global normal-preference membership",
+      "symbol": "find_reg",
+      "stabs_source": "../../src/gcc/global.c",
+      "nearest_stabs_line": 1525,
+      "stabs_pc": "0x8142e71",
+      "first_eight_bytes": "a8010f8401020000"
+    },
+    {
+      "address": "0x8143517",
+      "purpose": "global hard-register commit",
+      "symbol": "find_reg",
+      "stabs_source": "../../src/gcc/global.c",
+      "nearest_stabs_line": 1651,
+      "stabs_pc": "0x81434f3",
+      "first_eight_bytes": "66890c428b15fc95"
+    },
+    {
+      "address": "0x8143846",
+      "purpose": "global find_reg exit",
+      "symbol": "find_reg",
+      "stabs_source": "../../src/gcc/global.c",
+      "nearest_stabs_line": 1686,
+      "stabs_pc": "0x8143846",
+      "first_eight_bytes": "8da5d0feffff5b5e"
+    },
+    {
+      "address": "0x8144144",
+      "purpose": "set_preference entry",
+      "symbol": "set_preference",
+      "stabs_source": "../../src/gcc/global.c",
+      "nearest_stabs_line": 2008,
+      "stabs_pc": "0x8144144",
+      "first_eight_bytes": "5589e583ec345756"
+    },
+    {
+      "address": "0x814461b",
+      "purpose": "set_preference exit",
+      "symbol": "set_preference",
+      "stabs_source": "../../src/gcc/global.c",
+      "nearest_stabs_line": 2091,
+      "stabs_pc": "0x814461b",
+      "first_eight_bytes": "5b5e5f89ec5dc389"
+    }
+  ],
+  "allocno_record_bytes": 100,
+  "caveat": "Executable symbols, STABS records and disassembly identify these pinned addresses. Corresponding vendor C source is unavailable."
+}
