@@ -38,6 +38,8 @@ typedef struct BtlLinkedCommand {
     u8 pad120[0xC];
     s32 durationFrames;       /* 0x12C */
     f32 motionParameter;     /* 0x130: aim setup stores 10 */
+    u8 pad134[4];
+    f32 panelScale;          /* 0x138: corner-frame expansion follows camera transition scale. */
 } BtlLinkedCommand;
 
 BtlTask *btlCreateActionSeq(void);
@@ -81,6 +83,8 @@ typedef struct BtlLinkedCommand {
     };                      /* 0x14C: initialized as bits, interpolated as float */
     s32 durationFrames;      /* 0x150 */
     f32 motionParameter;     /* 0x154: aim setup stores 10 */
+    u8 pad158[4];
+    f32 panelScale;          /* 0x15C: corner-frame expansion follows camera transition scale. */
 } BtlLinkedCommand;
 #endif /* VERSION_DDS2 */
 
