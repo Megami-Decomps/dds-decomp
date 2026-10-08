@@ -346,9 +346,9 @@ BillObj *effParamCreateChildBillboard(void *resourceData) {
     return billCreateIndexed(0, (u32)resourceData);
 }
 
-/* Select billboard kind one; the index is passed through without validation. */
-void func_00162C80(u32 index) {
-    billCreateIndexed(1, index);
+/* Create an animated billboard from its serialized resource data. */
+BillObj *effParamCreateAnimatedBillboard(void *resourceData) {
+    return billCreateIndexed(1, (u32)resourceData);
 }
 
 /* Use the same floating value for both billboard child-scale components. */
