@@ -673,7 +673,7 @@ f32 effPointToLineDistance(f32 *direction, f32 *origin, f32 *point) {
    Only the two native slot defaults are initialized; count/allocation validity is unchecked. */
 void *effAllocSlotArray(s32 count) {
     void *allocation = sdfAllocGeneralBlock(count * EFF_SLOT_BYTES + EFF_SLOT_HEADER_BYTES);
-    void *retainedAddress = sdfResourceRetainAddress(allocation);
+    void *retainedAddress = (void *)sdfResourceRetainAddress(allocation);
     u32 slotIndex = 0;
     EffSlot38 *slot = retainedAddress;
     u8 *headerAddress = (u8 *)(slot + count);

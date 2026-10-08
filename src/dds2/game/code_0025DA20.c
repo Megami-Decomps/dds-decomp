@@ -55,7 +55,6 @@ extern s32 mnuAdvanceCampPopup(s32);
 extern s32 mnuFinishCampPopup(s32);
 
 extern s32 sdfAllocGeneralBlock(s32);
-extern u8 *sdfResourceRetainAddress(s32);
 extern void mnuInitializeShopStatusBatches(MenuTerminalContext *);
 extern void func_002945B8(MenuTerminalContext *);
 extern void mnuResetGradientFadeColor(MenuGradientFade *, s32);
@@ -762,7 +761,7 @@ void func_0025EFD8(EvtRuntime *scene) {
     if (scene->pendingResource == 0) {
         handle = (s32)sdfAllocGeneralBlockHigh(0x70000);
         scene->pendingResource = handle;
-        scene->pendingWork = (s32)sdfResourceRetainAddress(handle);
+        scene->pendingWork = (s32)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     }
     memset((void *)scene->pendingWork, 0x40, 0x70000);
     surface = sdfAllocatePacketList(0);
@@ -1335,7 +1334,7 @@ MenuTerminalContext *mnuTerminalCreateContext(void) {
     MenuTerminalContext *obj;
 
     handle = sdfAllocGeneralBlock(0x38C);
-    obj = (MenuTerminalContext *)sdfResourceRetainAddress(handle);
+    obj = (MenuTerminalContext *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     memset(obj, 0, 0x38C);
     obj->resourceHandle = handle;
     mnuClearPanelTransitionState(&obj->transitionWork);

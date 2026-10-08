@@ -39,7 +39,6 @@ typedef struct SdfImageUploadRequest {
 } SdfImageUploadRequest;
 
 extern SdfMemBlock *sdfAllocGeneralBlock(s32);
-extern u32 sdfResourceRetainAddress(SdfMemBlock *);
 extern void func_002D1D80(SdfImageUploadRequest *);
 
 

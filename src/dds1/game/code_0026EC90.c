@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_movie.h"
 #include "sdf.h"
@@ -147,7 +148,6 @@ extern char D_003B1168[];
 
 extern s32 sdfAllocGeneralBlock(s32);
 
-extern s32 sdfResourceRetainAddress(s32);
 
 extern void func_0026A5F0(s32);
 
@@ -161,7 +161,7 @@ void mnuMovieCreateTask(void) {
 
     D_003BA8EC = 0x80000000;
     handle = sdfAllocGeneralBlock(0x20);
-    movie = (MnuStaffMovieWork *)sdfResourceRetainAddress(handle);
+    movie = (MnuStaffMovieWork *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     mnuMovieWork = movie;
     movie->allocation = handle;
     movie->phase = 0;

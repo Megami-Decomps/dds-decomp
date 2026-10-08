@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_resource.h"
 #include "btl_state.h"
 #include "eff.h"
 #include "ee_mmi.h"
@@ -91,7 +92,6 @@ extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
 extern void sdfReleaseChipBlock(void *p);
 
 extern u32 sdfAllocGeneralBlock(s32 size);
-extern u8 *sdfResourceRetainAddress(u32 handle);
 extern void *parAllocateCellSystem(s32 count, s32 perCell, s32 groupDivisor, u32 kind);
 extern void parDispatchSub(void *work, s32 sub, void *a2, void *a3);
 extern void func_00164C68(void *system, u32 value);
@@ -633,7 +633,7 @@ EffParamWork *effParamCreateFromTable(EffParamWork *table, s32 index) {
  * Only three words per cell are zeroed here; vector/range storage is untouched. */
 EffThunderWork4C *effCreateThunderCellSystemWork(EffThunderHead4C *source) {
     u32 allocationHandle = sdfAllocGeneralBlock(source->count * sizeof(EffThunderCell2C) + sizeof(EffThunderWork4C));
-    EffThunderWork4C *work = (EffThunderWork4C *)sdfResourceRetainAddress(allocationHandle);
+    EffThunderWork4C *work = (EffThunderWork4C *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
     u32 cellIndex;
 
     work->head = *source;
