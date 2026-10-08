@@ -941,7 +941,7 @@ extern s32 mnuGetSelectionFromFlags(s32);
 extern u32 *mnuCreateProfilePanel(s32);
 extern void mnuSetGroupProperties(u32 *, u32, u32, u32, u32);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, u32 *, s32);
-extern void mnuFreeProfilePanelWork();
+extern void mnuFreeProfilePanelWork(void *);
 
 extern void func_002B2408(MenuContext *);
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2408);
