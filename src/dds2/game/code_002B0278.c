@@ -2719,7 +2719,7 @@ void mnuDestroyEffectResources(MenuEffectResources *resources) {
     for (i = 0; i < ARRAY_COUNT(resources->packet.sheets); i++) {
         effDestroyResourceSlotSet((struct EffectSlotSet *)resources->packet.sheets[i]);
     }
-    effDestroyPackedBatch((s32)resources->animationHandle);
+    effDestroyPackedBatch(resources->animationHandle);
 }
 
 

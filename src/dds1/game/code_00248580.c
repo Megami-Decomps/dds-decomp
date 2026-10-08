@@ -163,7 +163,6 @@ typedef struct EffectObject {
 } EffectObject;
 
 
-extern s32 effDestroyPackedBatch(s32);
 
 /* Release both visual resources in order; the work object itself is retained. */
 void mnuReleaseVisualResources(MenuTerminalWork *work) {
@@ -850,7 +849,7 @@ void mnuDestroyAllMenuSlotEffectBatches(s32 object) {
     u32 i;
 
     for (i = 0; i < MNU_EFFECT_BATCH_COUNT; i++) {
-        effDestroyPackedBatch(batch[i]);
+        effDestroyPackedBatch((struct EffMappedResource *)(u32)batch[i]);
     }
 }
 
