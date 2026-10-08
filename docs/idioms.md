@@ -4229,3 +4229,13 @@ packet/list pointers at SDK boundaries. The final pool-node-to-list-head
 callback conversion reuses `sdfFlushPoolNodes`' shared first/last prefix;
 embedding the list header in the pool node remains a dedicated SDK type debt.
 
+## DDS2 progress-icon fields belong to the existing row
+
+Retail `0029FA98` indexes the `0x68`-byte `levelAnimation` bank at
+work offset `0xB060`. Its signed enable byte is row `+0x38`, followed by
+32-bit opacity, X and Y at `+0x40`, `+0x44` and `+0x48`. The existing
+icon state at `+0x4C` gates a separate packed-color word at `+0x54`.
+Those fields complete `BrsProgressAnimation` without changing its size or
+either game's work layout. A purported second bank at `0xB080` would
+instead begin at this row's existing `applied` member (`+0x20`).
+
