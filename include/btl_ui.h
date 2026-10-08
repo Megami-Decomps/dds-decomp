@@ -172,9 +172,18 @@ typedef struct BattleActorPanelPresentation {
         };
     };
     s8 pendingSceneState;
-    u8 padDD[0x13];
+    s8 cursorSelection; /* +0xDD: signed selection among three option IDs. */
+    u8 pendingCursorSelection; /* +0xDE: pending scene-group index. */
+    u8 padDF;
+    s16 cursorOption; /* +0xE0 */
+    u8 padE2[2];
+    s32 cursorOffsetX; /* +0xE4 */
+    s32 cursorOffsetY; /* +0xE8 */
+    u32 cursorPhase; /* +0xEC: unsigned pulse/fade counter. */
     u8 unkF0;
-    u8 padF1[7];
+    u8 padF1[3];
+    s8 cursorEchoCount; /* +0xF4: counts the four records beginning at +0xF8. */
+    u8 padF5[3];
     BattleMirroredSpriteRecord mirroredSprites[4];
     u8 pad1A8[4];
     s32 hpLevel;
@@ -238,5 +247,7 @@ typedef char BattleActorPanelActiveOffsetCheck[((u32)&((BattleActorPanelWork *)0
 typedef char BattleActorPanelReserveOffsetCheck[((u32)&((BattleActorPanelWork *)0)->reserveEntries == 0x7C0) ? 1 : -1];
 
 void btlSlotBankPromoteStates(BattleActorPanelWork *bank);
+void btlInitializeActionRecordWithScale(BattleMirroredSpriteRecord *record, s16 slot,
+                                      s32 x, s32 y, s32 index, f32 scale);
 
 #endif /* BTL_UI_H */

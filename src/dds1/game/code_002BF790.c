@@ -545,6 +545,8 @@ void uiDrawUniformRgbRange(u32 xCoordinates, u32 yCoordinates, u32 z, u32 color,
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0C20);
 
+extern void func_002C0DF8(u32, u32, u32, u32, u32, const u32 *, u32, u32);
+
 /* Draw a rectangle as a four-vertex triangle strip with one packed color. */
 void uiDrawUniformRgbaRange(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 gsContext, u32 surfaceIndex) {
     u32 vertexColors[4] = {color, color, color, color};
@@ -557,7 +559,7 @@ void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 colo
 
 INCLUDE_ASM(const s32, "game/code_002BF790", func_002C0DF8);
 
-void uiDrawGradientColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 vertexColors, u32 surfaceIndex) {
+void uiDrawGradientColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *vertexColors, u32 surfaceIndex) {
     func_002C0DF8(x, y, z, width, height, vertexColors, 0, surfaceIndex);
 }
 
