@@ -7,9 +7,9 @@ extern char *scrReadStringParameter(s32 idx);
 
 extern void scrSetIntegerReturnValue(s32 value);
 
-extern s32 fldGetTaskRecordValue(u32 key);
+extern const char *fldGetTaskRecordValue(u32 key);
 
-extern void func_0013DDF0(void *entry);
+extern void func_0013DDF0(const char *entry);
 
 extern s32 func_0013CBA8(s32 index);
 
@@ -179,7 +179,7 @@ s32 fldCmdSetDefaultEncounterId(void) {
 /* Look up the command's task record before applying its associated entry. */
 s32 fldCmdApplyTaskRecordEntry(void) {
     ScrData *command = scrGetCurrentContext();
-    void *record = fldGetTaskRecordValue((u32)command->task);
+    const char *record = fldGetTaskRecordValue((u32)command->task);
 
     if (record != NULL) {
         func_0013DDF0(record);
