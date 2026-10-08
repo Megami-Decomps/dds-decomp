@@ -301,7 +301,7 @@ void parPopulateSlotFromHistory(ParTable *table, s32 slotIndex, const f32 *origi
     slot->billboardScale = scale;
 }
 
-void func_00159E20(ParTable *table) {
+void parDrawHistorySlots(ParTable *table) {
     BillObj *billboard;
     ParSlot *slot;
     s32 remainingSlots;

@@ -3,11 +3,7 @@
 
 #include "eff.h"
 
-#ifdef VERSION_DDS2
-void func_00161A10(struct ParTable *table);
-#else
-void func_00159E20(struct ParTable *table);
-#endif
+void parDrawHistorySlots(struct ParTable *table);
 void parPrependCellNode(struct ParSystem *system);
 void effTrackPolyDrawModelWorkList(struct EffTrackPolyList *list);
 
@@ -15,11 +11,7 @@ void effTrackPolyDrawModelWorkList(struct EffTrackPolyList *list);
 static __inline__ void parSubmitKindDrawing(ParKindState *kind) {
     switch (kind->kind) {
     case 1:
-#ifdef VERSION_DDS2
-        func_00161A10(kind->value.table);
-#else
-        func_00159E20(kind->value.table);
-#endif
+        parDrawHistorySlots(kind->value.table);
         break;
     case 2:
         parPrependCellNode(kind->primaryDrawSystem);
