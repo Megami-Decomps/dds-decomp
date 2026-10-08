@@ -87,7 +87,7 @@ extern void func_00300508(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, Me
 
 extern void mnuSelectPage(MenuPageWindow *window, s32 selected);
 
-extern void func_0027FCA0(s32, s32, s32);
+extern void func_0027FCA0(MenuPageWindow *, s32, s32);
 
 
 
@@ -1501,6 +1501,9 @@ void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSe
         destination->handlesC[i] = source[i];
     }
 }
+
+extern u8 effHasFirstTextureHandle(s32);
+extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
 
 INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027FCA0);
 
