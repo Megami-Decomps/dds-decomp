@@ -31,7 +31,7 @@ extern u8 mnuGetRangeEntryKind(u32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
 extern void frFontSetChainFlag(FrFontGlyph *, u8);
-extern s32 func_001958A0(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern void func_002BF4E0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, u32);
 extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 extern s32 func_002CD240(u16, u8 **);
@@ -594,7 +594,7 @@ void func_00275B40(EffectSlotSet **sets, MenuEffectPair *hpBar, MenuEffectPair *
             glyph = itfCreateConvertedTextGlyph(
                 0x640, 0xBE8, 0, color, name, 0);
             func_00196088(0xD20, 0xBE8, glyph);
-            func_001958A0(glyph, 1, 0x53);
+            frFontDrawGlyphChain(glyph, 1, 0x53);
             frFontQueueGlyphForCurrentDrawBuffer(glyph);
         }
     } else {
@@ -602,7 +602,7 @@ void func_00275B40(EffectSlotSet **sets, MenuEffectPair *hpBar, MenuEffectPair *
             0x640, 0xBE8, 0, color, (const u8 *)D_003BC6F0, 0);
         glyph = itfCreateConvertedTextGlyph(
             0xB50, 0xBF0, 0, color, (const u8 *)D_003BC6F8, glyph);
-        func_001958A0(glyph, 1, 0x53);
+        frFontDrawGlyphChain(glyph, 1, 0x53);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
     if (marker) {
@@ -1041,7 +1041,7 @@ void mnuDrawSlotIcons(s32 x, MenuPageWindow *page) {
     for (i = 0; i < 3; i++, y += 0xa8) {
         handle = itfDrawUnderscoreTextSegment(0x190, y, 0, 0xa09dc359, (const u8 *)(D_003BAA7C + slot->unitId * 45), i);
         if (handle != 0) {
-            func_001958A0(handle, 1, 0x53);
+            frFontDrawGlyphChain(handle, 1, 0x53);
             frFontQueueGlyphForCurrentDrawBuffer(handle);
         }
     }
@@ -1100,7 +1100,7 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param
     frFontStoreShiftedContextValue(item, scale * 0x10);
     frFontSetChildColors(item, color);
     frFontClearFlagBits(1);
-    func_001958A0(item, 1, param);
+    frFontDrawGlyphChain(item, 1, param);
     frFontQueueGlyphForCurrentDrawBuffer(item);
 }
 
@@ -1241,7 +1241,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     glyph = func_001978E8(x - 0x90, y, depth, color, text, 0);
     x += 0x140;
     frFontSetChainFlag(glyph, chainFlag);
-    func_001958A0(glyph, 1, texture);
+    frFontDrawGlyphChain(glyph, 1, texture);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
     switch (mnuGetRangeEntryKind(rangeId)) {
     case 1:

@@ -171,7 +171,7 @@ void mnuDrawIconTriple(s32 x, s32 y, s32 z, s32 a, s32 b, s32 c) {
 extern s32 ptyCountBulletItem(s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern FrFontGlyph *func_00197A98(s32, s32, s32, s32, char *, FrFontGlyph *);
-extern s32 func_001958A0(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern char D_003BC4F0[];
 
 /* Draw the selected item quantity; bullets include matching party slot values. */
@@ -198,7 +198,7 @@ void func_0025E6B0(s32 x, s32 y, s32 depth, ShopScene *scene, s32 alpha, s32 mod
         }
         func_003014F0(text, D_003BC4F0, quantity);
         glyph = func_00197A98(0x1A70, 0xAA0, depth, style, text, 0);
-        func_001958A0(glyph, 1, mode);
+        frFontDrawGlyphChain(glyph, 1, mode);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
@@ -256,7 +256,7 @@ void func_0025F138(s32 x, s32 y, s32 z, struct MenuList *list,
     if (selected) {
         frFontSetChainFlag(glyph, 4);
     }
-    func_001958A0(glyph, 1, drawArg);
+    frFontDrawGlyphChain(glyph, 1, drawArg);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 
     if ((list->id & 1) == 0) {
@@ -272,7 +272,7 @@ void func_0025F138(s32 x, s32 y, s32 z, struct MenuList *list,
     if (selected) {
         frFontSetChainFlag(glyph, 4);
     }
-    func_001958A0(glyph, 1, drawArg);
+    frFontDrawGlyphChain(glyph, 1, drawArg);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
@@ -379,7 +379,7 @@ void func_0025F7F0(s32 x, s32 y, s32 depth, ShopScene *scene, u32 alpha, s32 opt
         glyph = func_00197A98(0xDD0, (155 + row * 21) << 3, depth,
                               color, text, 0);
         frFontSetChainFlag(glyph, 4);
-        func_001958A0(glyph, 1, option);
+        frFontDrawGlyphChain(glyph, 1, option);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
@@ -432,7 +432,7 @@ void func_0025FD50(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
         func_003014F0(text, D_003BC508, 0);
         glyph = func_00197A98(0x17C0, 0x380, depth, 0xA09DC380, text, 0);
         frFontSetChainFlag(glyph, 4);
-        func_001958A0(glyph, 1, option);
+        frFontDrawGlyphChain(glyph, 1, option);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
@@ -453,7 +453,7 @@ void mnuDrawIconFixedEntryWithBadge(s32 x, s32 y, s32 z, s32 unused, s32 scale, 
     func_003014F0(text, D_003BC508, 0);
     glyph = func_00197A98(x + 0x17C0, y + 0x380, z, value, text, 0);
     frFontSetChainFlag(glyph, 4);
-    func_001958A0(glyph, 1, option);
+    frFontDrawGlyphChain(glyph, 1, option);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
@@ -473,7 +473,7 @@ void func_0025FFC8(s32 x, s32 y, s32 depth, ShopScene *panel, s32 option) {
         func_003014F0(text, D_003BC508, inner->cursor->camp.value * panel->counter);
         glyph = func_00197A98(0x17C0, 0x380, depth, 0xA09DC380, text, 0);
         frFontSetChainFlag(glyph, 4);
-        func_001958A0(glyph, 1, option);
+        frFontDrawGlyphChain(glyph, 1, option);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }
@@ -503,7 +503,7 @@ void func_00260100(ShopScene *state, s32 style) {
     {
         FrFontGlyph *glyph = func_00197A98(0x17C0, 0x2B8, 0, style, text, 0);
 
-        func_001958A0(glyph, 1, 0x53);
+        frFontDrawGlyphChain(glyph, 1, 0x53);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
     }
 }

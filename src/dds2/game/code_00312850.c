@@ -47,7 +47,7 @@ extern void func_0030F8D0(f32 *);
 extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
 extern void sdfVec3ScaleInPlace(f32, f32 *);
 
-extern void func_0019D550(u64, s32, s32);
+extern void frFontDrawGlyphChain(u64, s32, s32);
 extern void frFontSetChildColors(u64, u64);
 extern void frFontSetContextPair(u64, s32, s32);
 extern void frFontStoreShiftedContextValue(u64, u64);

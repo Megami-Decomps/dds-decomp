@@ -312,7 +312,7 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *unit);
 
 extern void scrClearSecondaryScriptFlag(DatPartyRecord *unit, u16 flagId);
 
-extern void func_0019D550(s32, s32, s32);
+extern void frFontDrawGlyphChain(s32, s32, s32);
 extern void func_0035B7F8(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
 
 

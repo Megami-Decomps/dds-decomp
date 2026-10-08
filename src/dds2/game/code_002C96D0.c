@@ -665,7 +665,7 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, u32 glyphSource) {
     frFontSetFlagAndMeasureGlyphs(D_0043900C, 1);
     frFontSetContextPair(D_0043900C, x << 4, y << 3);
     frFontSetChildColors(D_0043900C, colors);
-    func_0019D550(D_0043900C, 0, 0x56);
+    frFontDrawGlyphChain(D_0043900C, 0, 0x56);
     frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_0043900C);
     frFontSetSharedRenderFlags(0x54);
 }
