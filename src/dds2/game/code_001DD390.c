@@ -308,7 +308,7 @@ extern u16 mdlGetContextResourceId(MdlCtx *);
 extern f32 func_00208000(s32, f32 *, f32 *);
 extern s32 func_001E3230(BtlUnit *, s32);
 
-extern s32 func_0035C860();
+extern s32 func_0035C860(char *, const char *, ...);
 
 extern char D_004192E8[]; /* "MDD_%03X.ADB" */
 
@@ -9711,7 +9711,22 @@ BtlRuntimeTask *sndCreateClearBattleFlagTask(void) {
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_00202EA8);
+extern const char D_00436AE0[];
+const char D_00418E28[16] __attribute__((aligned(8))) = "%s%03X.BED";
+const char D_00418E38[32] __attribute__((aligned(8))) = "/efftool/bed/BTL_TEST.BED";
+
+s32 func_00202EA8(s32 index, char *output) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    if ((state->battleFlags & 0x10000000) == 0) {
+        u16 assetId = ((BtlActionAnimationRecord *)datActionAnimationRecords)[index].displayCode;
+        if (assetId == 0) return 0;
+        func_0035C860(output, D_00418E28, D_00436AE0, assetId);
+    } else {
+        func_0035C860(output, D_00418E38);
+    }
+    return 1;
+}
+
 
 s32 sndSetEffectNodeParameter(SoundResourceNode *effect, u16 option) {
     return sndReadSelectedMixerBankValue(effect->resourceHandle, option);
