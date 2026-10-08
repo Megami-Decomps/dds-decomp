@@ -42,9 +42,9 @@ typedef struct EffBlurScatterParams {
     s32 delaySpread;
     f32 angleStep;
     u32 color;
-    s32 unk10;
-    f32 unk14;
-    f32 unk18;
+    s32 blendControl;
+    f32 uvDisplacementAngleDegrees;
+    f32 uvDisplacementAmplitude;
     s32 x;
     s32 y;
     s32 positionSpread;
@@ -77,9 +77,9 @@ typedef struct EffBlurScaleParams {
     f32 phaseStep;
     f32 spacing;
     u32 color;
-    s32 unk10; /* Copied to the slot quad blend control. */
-    f32 unk14; /* Copied to the slot quad angle. */
-    f32 unk18; /* Displacement amplitude used by the native update. */
+    s32 blendControl; /* Copied to the slot quad blend control. */
+    f32 uvDisplacementAngleDegrees; /* Copied to the slot quad angle. */
+    f32 uvDisplacementAmplitude; /* Displacement amplitude used by the native update. */
     f32 angleStep;
     s32 x;
     s32 y;
@@ -106,11 +106,9 @@ typedef char EffBlurScaleAllocationOffsetCheck[((u32)&((EffBlurScaleWork *)0)->a
 typedef char EffBlurScaleSlotsOffsetCheck[((u32)&((EffBlurScaleWork *)0)->slots == 0x34) ? 1 : -1];
 
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
-EffBlurScatterWork *func_00186F90(void *params);
-EffBlurScatterWork *func_0018EBC8(void *params);
+EffBlurScatterWork *effBlurCreateScatterWork(EffBlurScatterParams *params);
 void effBlurReleaseFirstResource(EffBlurScatterWork *work);
-void func_00187098(EffBlurScatterWork *work);
-void func_0018ECD0(EffBlurScatterWork *work);
+void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work);
 
 void effAppendBlurRectanglePackets(void *list, EffBlurQuad *source, u8 fixedPointCoordinates);
 void effDrawBlurSource(EffBlurQuad *source, s32 resource, u8 fixedPointCoordinates);

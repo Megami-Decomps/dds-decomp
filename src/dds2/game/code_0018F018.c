@@ -102,13 +102,13 @@ void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
     if (func_001200E0() == 0) {
         list = sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
-        effAppendBlurRenderState(list, work->params.unk10, work->sourceHandle);
+        effAppendBlurRenderState(list, work->params.blendControl, work->sourceHandle);
         slot = work->slots;
         if (work->params.count > 0) {
             count = work->params.count;
             do {
                 if (slot->phase >= 0.0f) {
-                    slot->quad.displacement = work->params.unk18 * sdfSinPoly(slot->angle) *
+                    slot->quad.displacement = work->params.uvDisplacementAmplitude * sdfSinPoly(slot->angle) *
                                               (1.0f - slot->phase) + 1.0f;
                     sourceColor = work->params.color;
                     alpha = (u32)((f32)(sourceColor >> 24) * (1.0f - slot->phase));

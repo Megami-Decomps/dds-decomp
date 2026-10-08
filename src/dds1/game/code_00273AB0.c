@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "mnu_staff.h"
 #include "mnu_shop.h"
 #include "mnu_list.h"
 #include "kwln.h"
@@ -20,7 +21,6 @@ extern s32 evtGetMessageWindowControlState(void);
 extern void func_00272778(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void func_00272668(s32, s32, s32, s32, s32, s32);
-extern void mnuDrawWindowContainer(s32, s32, s32, s32, s32);
 extern void func_002BF4E0(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawStaffGridLabelsForKind(s32, s32);
 extern void func_00273A30(s32, s32);
@@ -30,8 +30,6 @@ extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 extern s32 mdlFlagTest(s32);
 extern s32 D_003BAA9C;
 extern s32 mnuMapPadMaskToFlags();
-extern void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window);
-extern void mnuClearListFlags(s32 which, MenuPageWindow *window);
 extern void func_00283BF0(u32 *out, u32 value);
 extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *, u32);
 extern void mnuSetPopupEntryFlagged();
@@ -101,7 +99,6 @@ extern void mnuReleaseStaffExtraWindow();
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
 extern void mnuReleaseStaffMenuTextureHandles();
-extern void mnuSeekListNode(s32, s32);
 extern void mnuAdvanceWindowListSelection(MenuWindowContainer *);
 extern void mnuRetreatWindowListSelection(MenuWindowContainer *);
 extern void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *);
@@ -116,7 +113,7 @@ s32 mnuStaffImageEnterA(KwlnTask *task) {
 
     func_00272778(task);
     mnuCreateStaffImageSprite(5);
-    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->primaryObject, 0x53);
+    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->primaryObject, 0x53);
     if (menu->primaryObject->list->count != 0) {
         func_00273A30(context, 0);
     } else {
@@ -188,7 +185,7 @@ s32 mnuPrepareStaffImageAndSelectionLabel(KwlnTask *task) {
     func_00272778(task);
     mnuCreateStaffImageSprite(7);
     func_00272668(1, ((StaffImageContext *)context)->activeWindow->list->cursor->index, (s32)D_0037C860, context, 1, 0x53);
-    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)((StaffImageContext *)context)->activeWindow, 0x53);
+    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, ((StaffImageContext *)context)->activeWindow, 0x53);
     mnuDrawStaffGridLabelsForKind(0, ((StaffImageContext *)context)->group);
     return menuRunPanel((void *)context, 1, (void *)task);
 }
@@ -240,7 +237,7 @@ s32 mnuStaffImageEnterD(KwlnTask *task) {
 
     func_00272778(task);
     mnuCreateStaffImageSprite(9);
-    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->secondaryObject, 0x53);
+    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->secondaryObject, 0x53);
     if (menu->secondaryObject->list->count != 0) {
         func_00273A30(context, 1);
     } else {
@@ -318,7 +315,7 @@ s32 mnuStaffImageEnterB(KwlnTask *task) {
 
     func_00272778(task);
     mnuCreateStaffImageSprite(6);
-    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->primaryObject, 0x53);
+    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->primaryObject, 0x53);
     if (menu->primaryObject->list->count != 0) {
         func_00273A30(context, 0);
     } else {
@@ -464,7 +461,7 @@ s32 mnuHandleStaffValuePageInput(KwlnTask *task) {
     }
     mnuInitializeStaffValuePage(task);
     if (savedNodeIndex != 0 || savedRowCount != 0) {
-        mnuSeekListNode(savedNodeIndex, (s32)menu->list->list);
+        mnuSeekListNode(savedNodeIndex, menu->list->list);
         if (savedRowCount > 0) {
             for (i = savedRowCount; i != 0; i--) {
                 mnuAdvanceWindowListSelection(menu->list);
@@ -562,7 +559,7 @@ s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
         mnuDrawPartyInfoSprites(0, 0, 0, partyEntry,
                       ((StaffImageContext *)context)->spriteHandle, 0x53);
     }
-    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->list, 0x53);
+    mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->list, 0x53);
     list = menu->list;
     window = list->list;
     if (window->count != 0) {

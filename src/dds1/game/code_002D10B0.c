@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_pending.h"
+#include "sdf_texture_release.h"
 
 /* GS pixel-storage modes, using the same private names as sdfTex.c. */
 enum {
@@ -48,14 +49,6 @@ typedef struct SdfTexPacketTail {
     u64 next;     /* 0x08 */
 } SdfTexPacketTail;
 
-typedef struct SdfTexReleaseEntry {
-    struct SdfTexReleaseEntry *next; /* 0x00 */
-    s32 address;                     /* 0x04 */
-    SdfMemBlock *handle;              /* 0x08 */
-    u8 mode;                         /* 0x0C: 1 = handle, 2 = chip memory address */
-    u8 pad0D[0x93];
-} SdfTexReleaseEntry; /* 0xA0 */
-
 extern SdfTexResource *sdfTextureBlockListHead;
 extern SdfTexResource *sdfTextureListHead;
 extern s8 sdfBufferSlotIndices[2];
@@ -76,7 +69,7 @@ extern void EIntr(void);
 extern void (*D_003BD304)(s32 size, s32 allocationMode);
 s32 sdfCreateSemaphore(s32 arg0, s32 arg1, s32 arg2);
 struct SdfTexResource *sdfTexAllocHeadLow(s32 size, s32 arg1);
-void sdfUpdateTextureHeadsWithInterruptsMasked(void *block);
+void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 void sdfTexCreateSecondPacket(SdfTex *texture);
 void sdfTexRefreshResourcePackets(SdfTex *texture);
 void *sdfAllocAndClearQuadwords(s32 size);
@@ -543,8 +536,7 @@ void func_002D1B28(void) {
 }
 
 /* Mark a range free and coalesce its neighbors while interrupts are masked. */
-void sdfUpdateTextureHeadsWithInterruptsMasked(void *block) {
-    SdfTexResource *textureBlock = block;
+void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock) {
     s32 restoreInterrupts;
 
     if (textureBlock == NULL) {
@@ -671,11 +663,11 @@ void sdfTexQueueResourceRelease(s32 address) {
     if (address != 0) {
         entry = sdfAllocAndClearQuadwords(0xA0);
         if (sdfChipIsInRange(address) != 0) {
-            entry->address = address;
-            entry->mode = 2;
+            entry->chipAddress = address;
+            entry->releaseMode = SDF_TEX_RELEASE_CHIP_ADDRESS;
         } else {
-            entry->mode = 1;
-            entry->handle = sdfFindGeneralBlockByAddress((void *)address);
+            entry->releaseMode = SDF_TEX_RELEASE_GENERAL_ALLOCATION;
+            entry->allocation = sdfFindGeneralBlockByAddress((void *)address);
         }
         WaitSema(obj->semaphoreId);
         if (obj->releaseTail != NULL) {
@@ -737,12 +729,12 @@ void func_002D2168(void) {
     while (entry != NULL) {
         SdfTexReleaseEntry *next = entry->next;
 
-        switch (entry->mode) {
-        case 1:
-            sdfReleaseResourceAllocation(entry->handle);
+        switch (entry->releaseMode) {
+        case SDF_TEX_RELEASE_GENERAL_ALLOCATION:
+            sdfReleaseResourceAllocation(entry->allocation);
             break;
-        case 2:
-            sdfReleaseChipBlock((void *)entry->address);
+        case SDF_TEX_RELEASE_CHIP_ADDRESS:
+            sdfReleaseChipBlock((void *)entry->chipAddress);
             break;
         }
         sdfReleaseChipBlock(entry);

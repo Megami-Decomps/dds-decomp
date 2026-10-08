@@ -14,7 +14,6 @@ extern void *memset(void *, s32, u32);
 typedef struct StaffDisplayContext StaffDisplayContext;
 extern void func_00272D50(StaffDisplayContext *);
 extern void mnuForwardDupArg(MenuWindowContainer *, s32, s32, s32, s32);
-extern s32 mnuSeekListNode(s32, s32);
 
 
 typedef struct {
@@ -232,7 +231,7 @@ s32 mnuInitializeStaffDisplayResources(KwlnTask *task) {
     mnuForwardDupArg(context->activeWindow, context->unk74, 0, 0, 0);
     mnuActivatePanelAndConfigureGridResources(
         (MenuScrollPanel *)(u32)context->unk138, context->unkD8, 0, 1);
-    mnuSeekListNode(0, (s32)context->activeWindow->list);
+    mnuSeekListNode(0, context->activeWindow->list);
     return 1;
 }
 
@@ -291,8 +290,8 @@ s32 func_002734C0(KwlnTask *callback) {
                 mnuSetPopupEntry((s32)popup, (s32)D_0037CA00);
                 break;
             }
-            mnuSeekListNode(0, (s32)resources->windows[0]->list);
-            mnuSeekListNode(0, (s32)resources->windows[1]->list);
+            mnuSeekListNode(0, resources->windows[0]->list);
+            mnuSeekListNode(0, resources->windows[1]->list);
         }
         if (input & 2) {
             mnuSetPopupEntryFlagged((s32)popup, (s32)D_0037C990);
@@ -321,7 +320,6 @@ extern void func_00272778(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void func_00272518(s32, s32, s32, s32, s32, s32, s32);
 extern void func_00272668(s32, s32, s32, s32, s32, s32);
-extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
 extern void mnuDrawStaffGridLabelsForKind(s32, s32);
 extern u8 D_0037C860[];
 extern s32 D_003BAA9C;

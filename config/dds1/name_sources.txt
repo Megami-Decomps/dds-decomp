@@ -2093,7 +2093,9 @@
 0x00186DC8	effBlurCopyParams	inferred	0x2C byte struct copy [names_M67_Named.tsv]
 0x00186E28	effBlurSetHandle	inferred	Byte-identical dds2 twin 0x0018EA60; Stores a handle at offset 0x2c of the blur filter. [names_conflicts.tsv]
 0x00186E60	effBlurInitializeScatterSlot	inferred	confidence=high; matched-C; src/dds1/effect/effBlur_Filter.c:97:func_00186E60; Randomizes the scatter slot delay and center, initializes its angle/color/options, and builds the screen-centered rectangle from the configured size.; source=fresh-R_Names31-today [names_qp11.tsv]
+0x00186F90	effBlurCreateScatterWork	inferred	Allocates EffBlurScatterWork and initializes its 100 scatter slots from EffBlurScatterParams.
 0x00187080	effBlurReleaseFirstResource	inferred	Releases the 0x30 resource of the first blur-filter variant.
+0x00187098	effBlurStepScatterSlotsAndDraw	inferred	Updates delay and angle state, computes UV displacement and alpha, appends active rectangle packets, and submits the list.
 0x001872A0	effBlurCopyParamsKeepHeader	inferred	copies the 0x2C-byte parameter block but preserves the destination's first word [names_M71_ItfBlur.tsv]
 0x00187308	effBlurSetSecondSetting	inferred	Sets the 0x2c work setting for the second blur-filter variant.
 0x00187310	effBlurAcquireSecondHandle	inferred	Acquires the second variant's 0x2c handle from func_00151FC8(2).
