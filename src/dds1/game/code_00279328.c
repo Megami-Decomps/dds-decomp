@@ -1,5 +1,7 @@
 #include "kwln.h"
 #include "mnu.h"
+#include "mnu_list.h"
+#include "mnu_shop.h"
 #include "mnu_staff.h"
 #include "dat_state.h"
 
@@ -26,37 +28,25 @@ extern char D_0037CC58[];
 extern void mnuClearListFlags();
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
-typedef struct SkillListNode {
-    s32 index;                   /* 0x00 */
-    u8 pad04[0x44];
-    u32 flags;                   /* 0x48 */
-    u8 pad4C[0xC];
-    struct SkillListNode *next;  /* 0x58 */
-    u8 pad5C[4];
-    u32 sortKey;                 /* 0x60 */
-} SkillListNode;
+/* These context pointers lack a proven allocator path; retain only their
+ * observed cursor/list views until their owners are established. */
+typedef struct SkillListView {
+    u8 pad00[0x1C];
+    struct MenuListNode *cursor;
+} SkillListView;
 
-typedef struct SkillList {
-    u32 flags;                   /* 0x00 */
-    u8 pad04[0xC];
-    SkillListNode *first;        /* 0x10 */
-    u8 pad14[8];
-    SkillListNode *cursor;       /* 0x1C */
-} SkillList;
-
-typedef struct SkillListWindow {
+typedef struct SkillListWindowView {
     u8 pad00[0x14];
-    SkillList *list;             /* 0x14 */
-} SkillListWindow;
+    SkillListView *list;
+} SkillListWindowView;
 
-/* Skill menu work: the party list, one window per page and the active one. */
+/* Native construction makes four standard windows for the skill pages. */
 typedef struct SkillMenuState {
     u8 pad00[0xC];
-    SkillList *partyList;        /* 0x0C */
-    SkillListWindow *window[3];  /* 0x10 */
-    u8 pad1C[4];
+    struct MenuList *partyList;             /* 0x0C */
+    MenuWindowContainer *window[4];  /* 0x10 */
     s32 panelState;              /* 0x20 */
-    SkillListWindow *selected;   /* 0x24 */
+    MenuWindowContainer *selected;   /* 0x24 */
     u8 pad28[8];
     u32 selectionFlags;          /* 0x30 */
 } SkillMenuState;
@@ -69,32 +59,17 @@ typedef struct SkillMenuContext {
     u8 padE4[4];
     s32 pageLabels;              /* 0xE8 */
     u8 padEC[0x38];
-    SkillListWindow *panel;      /* 0x124 */
+    SkillListWindowView *panel;  /* 0x124: producer not yet identified */
     u8 pad128[0x34];
     u32 actionFlags;             /* 0x15C */
     u8 pad160[0x678];
-    SkillList *selection;        /* 0x7D8 */
-    SkillList *target;           /* 0x7DC */
+    SkillListView *selection;    /* 0x7D8 */
+    SkillListView *target;       /* 0x7DC */
     u8 pad7E0[0xC];
     PartyPanel partyPanel;       /* 0x7EC: five party display rows */
     u8 pad8F8[0x14];
     SkillMenuState *menu;        /* 0x90C */
 } SkillMenuContext;
-
-typedef struct SkillPageBlock {
-    u32 word[14];
-} SkillPageBlock;
-
-typedef struct SkillPageWindow {
-    u8 pad00[4];
-    s32 field04;
-    u8 pad08[0xC];
-    SkillList *list;             /* 0x14 */
-    u8 pad18[0x34];
-    SkillPageBlock block;        /* 0x4C */
-    u8 pad84[4];
-    s32 field88;
-} SkillPageWindow;
 
 extern void itfDrawGridWithResolvedSlot(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuSetPanelState(s32, s32);
@@ -117,15 +92,15 @@ s32 ptySkillMenuUpdate(KwlnTask *callback) {
     return 0;
 }
 
-static inline SkillPageWindow **getSkillPageSlot(SkillPageWindow **windows,
-                                                  s32 index) {
+static inline MenuWindowContainer **getSkillPageSlot(MenuWindowContainer **windows,
+                                                    s32 index) {
     return windows + index;
 }
 
 void ptySkillMenuCopyPageState(s32 context) {
     SkillMenuContext *work = (SkillMenuContext *)context;
     SkillMenuState *menu = work->menu;
-    SkillPageWindow **windows = (SkillPageWindow **)menu->window;
+    MenuWindowContainer **windows = menu->window;
     s32 index = menu->partyList->cursor->index;
     s32 pageGrid;
     u32 i;
@@ -145,13 +120,10 @@ void ptySkillMenuCopyPageState(s32 context) {
                            (s32)*getSkillPageSlot(windows, index), 0x53);
     for (i = 0; i < 4; i++) {
         if (i != index) {
-            memcpy(&windows[i]->block,
-                   &(*getSkillPageSlot(windows, index))->block,
-                   sizeof(SkillPageBlock));
-            windows[i]->field88 =
-                (*getSkillPageSlot(windows, index))->field88;
-            windows[i]->field04 =
-                (*getSkillPageSlot(windows, index))->field04;
+            memcpy(&windows[i]->panel, &(*getSkillPageSlot(windows, index))->panel,
+                   sizeof(MenuPanelHandles));
+            windows[i]->fade = (*getSkillPageSlot(windows, index))->fade;
+            windows[i]->flags = (*getSkillPageSlot(windows, index))->flags;
         }
     }
 }
@@ -176,12 +148,12 @@ s32 ptySkillMenuEnterPage(KwlnTask *callback) {
         } else {
             mnuCreateStaffImageSprite(0xF);
         }
-    } else if (((SkillListWindow *)*(s32 *)((s32)menu + 0x10 + (menu->partyList->cursor->index << 2)))->list->cursor->index == 0) {
+    } else if (((MenuWindowContainer *)*(s32 *)((s32)menu + 0x10 + (menu->partyList->cursor->index << 2)))->list->cursor->index == 0) {
         mnuCreateStaffImageSprite(0xD);
     } else {
         mnuCreateStaffImageSprite(0xC);
     }
-    label = menu->selected->list->cursor->sortKey;
+    label = menu->selected->list->cursor->sortKeyPrimary;
     if (label != 0xFFFF && label != 0) {
         func_00272518(1, label, D_003BAA98, context, 1, 1, 0x53);
     } else {
@@ -219,27 +191,18 @@ s32 ptySkillMenuUseSelectedInField(id, context)
     return 0;
 }
 
-/* Same node as SkillListNode, read through its low halfword id. */
-typedef struct SkillLink {
-    u8 unk0[0x48];
-    u32 flags;
-    u8 unk4C[0xC];
-    struct SkillLink *next;
-    u8 unk5C[4];
-    u16 id;
-} SkillLink;
-
 void mnuFlagMatchingEntries(s32 context) {
     DatPartyRecord *selectedEntry =
         &datGameState->party[((SkillMenuContext *)context)->selection->cursor->index];
-    SkillLink *link = (SkillLink *)((SkillMenuContext *)context)->menu->selected->list->first;
-    if (link != NULL) {
+    struct MenuListNode *node = ((SkillMenuContext *)context)->menu->selected->list->first;
+    if (node != NULL) {
         do {
-            if (mnuIsEntryCostUnaffordable(link->id, selectedEntry)) {
-                link->flags |= 1;
+            u16 skillId = (u16)node->sortKeyPrimary;
+            if (mnuIsEntryCostUnaffordable(skillId, selectedEntry)) {
+                node->flags48 |= 1;
             }
-            link = link->next;
-        } while (link != NULL);
+            node = node->next;
+        } while (node != NULL);
     }
 }
 
@@ -256,7 +219,7 @@ s32 ptySkillMenuHandleFieldUse(KwlnTask *callback) {
     if (state != 0) {
         return state;
     }
-    label = menu->selected->list->cursor->sortKey;
+    label = menu->selected->list->cursor->sortKeyPrimary;
     code = label;
     if (mnuGetAbilityTargetCategory(code) == 2) {
         ((SkillMenuContext *)context)->actionFlags |= 0x10;
@@ -283,8 +246,8 @@ s32 ptySkillMenuEnterConfirm(KwlnTask *callback) {
     SkillMenuState *menu = ((SkillMenuContext *)context)->menu;
     func_00272778(callback);
     mnuCreateStaffImageSprite(3);
-    func_00272518(1, menu->selected->list->cursor->sortKey, D_003BAA98, context, 1, 1, 0x53);
-    menu->selected->list->flags &= ~8;
+    func_00272518(1, menu->selected->list->cursor->sortKeyPrimary, D_003BAA98, context, 1, 1, 0x53);
+    menu->selected->list->stateFlags &= ~8;
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, (s32)menu->selected, 0x53);
     mnuDrawStaffGridLabelsForKind(0, ((SkillMenuContext *)context)->actor);
     return menuRunPanel((void *)context, 1, (void *)callback);

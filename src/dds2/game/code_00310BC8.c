@@ -76,13 +76,8 @@ extern void sdfCallbackWorkOnRemove();
 
 extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
 extern s32 sdfTaskWorkRunAll(KwlnTask *task);
-extern void kwlnTaskCreate();
-
 extern void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task);
-extern s32 sdfTaskWorkRunAllEntries(KwlnTask *task);
-extern s32 sdfTaskWorkRunAll(KwlnTask *task);
-extern void sdfReleaseCurrentTaskOwnedResources(KwlnTask *task);
-extern void kwlnTaskCreate();
+extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 
 extern void func_00312E20(void);
 
@@ -737,8 +732,8 @@ TaskWork *sdfCreateTaskWorker(char *name, s32 first, s32 second, SdfTaskItemDesc
 
     work = sdfCreateNamedTaskWork(name, destroyCallback, userData);
     sdfAttachTaskItem(work, item);
-    kwlnTaskCreate(work->primaryTaskName, first, 1, 1, sdfTaskWorkRunAllEntries, sdfReleaseCurrentTaskOwnedResources, work);
-    kwlnTaskCreate(work->secondaryTaskName, second, 1, 0, sdfTaskWorkRunAll, NULL, work);
+    kwlnTaskCreate(work->primaryTaskName, first, 1, 1, sdfTaskWorkRunAllEntries, sdfReleaseCurrentTaskOwnedResources, (u32)work);
+    kwlnTaskCreate(work->secondaryTaskName, second, 1, 0, sdfTaskWorkRunAll, NULL, (u32)work);
     return work;
 }
 
