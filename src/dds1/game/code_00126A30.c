@@ -129,7 +129,9 @@ typedef struct FldAreaWork {
     s32 floor;
     u8 pad18[0xC];
     s32 unk24;
-    u8 pad28[0x28];
+    u8 pad28[0x10];
+    s32 skyAlphaOffset;
+    u8 pad3C[0x14];
     s32 mode;
     u8 pad54[4];
     s32 rowIdx;
@@ -3297,7 +3299,12 @@ extern FldCameraSetting *fldCameraSettings;
 extern FldCameraSetting D_003306D0;
 extern void *fldSkyLightSetBuffer;
 extern void *D_003BAD60;
-extern s32 *D_003BAD74;
+/* The sky file has 256 records of 0x124 bytes: mode and an 8-by-9 color grid. */
+typedef struct FldSkyGradientRecord {
+    s32 mode;
+    s32 colors[8][9];
+} FldSkyGradientRecord;
+extern FldSkyGradientRecord *D_003BAD74;
 extern u32 sdfDevCreateCommandState(const char *);
 extern u32 sdfDevQueueReadAndWait(u32, void *, u32);
 extern void sdfDevWaitThenReleaseCommandState(u32);
@@ -3448,7 +3455,7 @@ void fldSetFadeTarget(s32 area, s32 value, s32 duration) {
         D_003BAD94 = (f32)duration;
     }
     D_003BAD88 = area;
-    D_003BAD74[area * 73] = value;
+    D_003BAD74[area].mode = value;
 }
 
 void fldSetSwayMode(u32 mode) {
