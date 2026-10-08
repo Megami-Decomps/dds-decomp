@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "eff.h"
+#include "eff_pcp_flash.h"
 #include "pcp_vu0.h"
 
 /* Work records keep SDF allocation ownership separate from drawable records.
@@ -33,8 +34,7 @@ extern f32 sdfSinPoly(f32 angle);
 extern void sdfBuildVuRotationFromAxisAngle(f32 angle, void *orientation);
 
 
-/* Initializers are also entered without spawn arguments by effect callbacks. */
-extern PcpFlashTrianglePulseWork *effFlashRecordCreate();
+/* The callback-table entry forwards its parameter block to the factory. */
 extern void *effFlashOrbitArcCreate();
 
 
@@ -417,12 +417,12 @@ extern void effFlashOffsetRadialWriteCorners(PcpFlashOffsetRadialWork *, s32, vo
 
 void effFlashTrianglePulseSpawnFromTable(void *data)
 {
-    effFlashRecordCreate(effParamTableGetBlock(data, 0));
+    effFlashRecordCreate((PcpFlashTrianglePulseParams *)effParamTableGetBlock(data, 0));
 }
 
-void func_0016A1C8(void)
+PcpFlashTrianglePulseWork *func_0016A1C8(PcpFlashTrianglePulseParams *params)
 {
-    effFlashRecordCreate();
+    return effFlashRecordCreate(params);
 }
 
 void effFlashTrianglePulseDestroy(PcpFlashTrianglePulseWork *work)
