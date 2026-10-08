@@ -2383,12 +2383,16 @@
 0x00194800	frFontAdvanceOrRetainFadingGlyph	inferred	retains glyph while fade advances otherwise advances chain [names_reviewed5.tsv]
 0x00194840	frFontReleaseGlyphChain	inferred	confidence=high; matched-C; src/dds1/interface/frFont.c:217:func_00194840; Peer-matched C proposal; M141; source=names_pending_main.tsv:142 [names_qp12_apply.tsv]
 0x00194920	frFontQueueGlyphForCurrentDrawBuffer	inferred	Links a glyph chain into the current draw-buffer slot using the selector low byte directly; returns signed zero. The runtime alternates selectors 0/1.
+0x00194978	frFontGetCachedItemCount	inferred	Loads the retained font-cache record count at FrFontSystem+0x144.
+0x00194988	frFontGetChildGlyphCount	inferred	Loads the live pooled child-glyph count at FrFontSystem+0x148.
+0x00194998	frFontGetParentGlyphCount	inferred	Loads the live pooled parent-glyph count at FrFontSystem+0x14C.
 0x00194CD0	frFontAppendClonedGlyph	inferred	Clones a glyph; if cloning succeeds, links it after the destination. [names_reviewed6.tsv]
 0x00194D20	frFontCreateAtlasItem	inferred	readability/matching review (QP16)
 0x00194E00	frFontCloneEntryResource	inferred	allocates 0x120 bytes, itfSplitRelativeSegments on the slot resource, then func_00198088 [names_M33_SmallSweep2.tsv]
 0x00194E80	frFontRetainOrCreateCachedItem	inferred	src/dds1/interface/frFont.c func_00194E80: Retains cached item or clones font resource, creates item and caches it by slot and ID. [names_reviewed24.tsv]
 0x00194F78	frFontSetupGlyph	inferred	initializes glyph record fields from parameters
 0x00194FC0	frFontInitGlyph	inferred	zero-initializes glyph record with defaults and self link
+0x00195010	frFontCreateGlyphFromCode	inferred	Dequeues a child glyph, maps its encoded 16-bit code into a cached item, initializes metrics and returns the glyph pointer.
 0x00195160	frFontAppendTextToGlyphChain	inferred	Decodes an encoded text string into a glyph chain and optionally attaches it after the supplied prior glyph.
 0x00195360	frFontSetContextEncodedByte	inferred	doubles low byte and clamps to sentinel in context [names_reviewed5.tsv]
 0x001953D8	frFontSetGlyphChainDimensions	inferred	propagates advance and height to child glyphs then measures chain [names_reviewed5.tsv]
