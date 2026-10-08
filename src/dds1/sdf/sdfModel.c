@@ -9,7 +9,7 @@ extern void sdfInstallPoolNodeReleaseCallbacks(s32 arg0);
 extern void *memcpy(void *dst, const void *src, u32 n);
 extern void sdfFreeNodeLists(SdfDrawNode *node);
 extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *node);
-extern void func_002D83F8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern void func_002D83F8(SdfDrawNode *node, u32 *commandList, s32 packetSelector, s32 alternateSelector, s32 listIndex);
 extern void func_002D86E0(SdfDrawNode *node, SdfItem *item);
 extern void sdfMultiplyVuMatrixInPlace(void);
 extern void sdfWriteVuLightingPacket(u32 arg0);
@@ -217,10 +217,10 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item) {
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_002D86E0);
 
 /* Reset a draw node's command lists and initialize both buffered passes. */
-void sdfModelResetAndInitNodes(SdfDrawNode *node, s32 commandList, s32 packetSelector) {
+void sdfModelResetAndInitNodes(SdfDrawNode *node, u32 *commandList, s32 packetSelector) {
     s32 i;
 
-    node->sourceItem = (void *)commandList;
+    node->sourceItem = commandList;
     sdfFreeNodeLists(node);
     sdfEnsureFreeRootWorkspace(node);
     sdfDrawNodeBuildMatrix(node);

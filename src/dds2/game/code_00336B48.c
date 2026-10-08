@@ -136,7 +136,7 @@ extern ConsNode *D_00438AB0;
 
 extern void *sdfAllocSizeClassBlock(s32 size);
 
-extern void *sdfEnsureFreeRootWorkspace(void *object);
+extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *object);
 
 extern void sdfSetPacketCursorAligned(s32);
 extern s32 sdfGetPacketCursor(void);
@@ -803,27 +803,15 @@ INCLUDE_ASM(const s32, "game/code_00336B48", func_003395A0);
 
 INCLUDE_ASM(const s32, "game/code_00336B48", func_003396D0);
 
-typedef struct VuObjectContext {
-    u8 pad00[0x0C];
-    u32 *objects; /* 0x0C: indexed object handles */
-} VuObjectContext;
-
-typedef struct VuObjectRefCommand {
-    u8 pad00[0x16];
-    u16 flags; /* 0x16 */
-    u16 count; /* 0x18 */
-    u16 objectIndices[1]; /* 0x1A */
-} VuObjectRefCommand;
-
-void sdfProcessReferencedObjects(VuObjectContext **context, VuObjectRefCommand *source) {
-    u32 *objects = (*context)->objects;
+void sdfProcessReferencedObjects(SdfModel *model, SdfObjectRefCommand *source) {
+    SdfDrawNode **objects = model->list->buffer;
     u16 *indices = &source->count;
     if ((source->flags & 0x800) != 0) {
         s32 count = *indices;
         if (count != 0) {
             indices++;
             do {
-                sdfEnsureFreeRootWorkspace((void *)objects[*indices++]);
+                sdfEnsureFreeRootWorkspace(objects[*indices++]);
             } while (--count != 0);
         }
     }

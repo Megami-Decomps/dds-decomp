@@ -32,7 +32,7 @@ extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *node);
 extern void *sdfAllocSizeClassBlock(s32 size);
 
 
-extern void func_003312A8(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+extern void func_003312A8(SdfDrawNode *node, u32 *commandList, s32 packetSelector, s32 alternateSelector, s32 listIndex);
 
 extern void func_00331590(SdfDrawNode *node, SdfItem *item);
 
@@ -220,10 +220,10 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item) {
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00331590);
 
 /* Reset a draw node's command lists and initialize both buffered passes. */
-void sdfModelResetAndInitNodes(SdfDrawNode *node, s32 commandList, s32 packetSelector) {
+void sdfModelResetAndInitNodes(SdfDrawNode *node, u32 *commandList, s32 packetSelector) {
     s32 i;
 
-    node->sourceItem = (void *)commandList;
+    node->sourceItem = commandList;
     sdfFreeNodeLists(node);
     sdfEnsureFreeRootWorkspace(node);
     sdfDrawNodeBuildMatrix(node);
