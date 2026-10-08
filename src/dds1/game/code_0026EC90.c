@@ -2,6 +2,7 @@
 #include "mnu.h"
 #include "mnu_movie.h"
 #include "sdf.h"
+#include "itf.h"
 
 extern u8 D_0037B8BC[];
 
@@ -67,21 +68,18 @@ void func_0026F518(void) {
     mnuUnloadStaffFonts();
 }
 
-struct FrFontCtx;
-struct FrFontGlyph;
-extern struct FrFontCtx *frFontBuildColoredGlyphWithSharedFlags();
-extern u32 frFontMeasureLines(struct FrFontGlyph *);
-extern void frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
+extern FrFontGlyph *frFontBuildColoredGlyphWithSharedFlags();
+extern u32 frFontMeasureLines(FrFontGlyph *);
 extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
 
 s32 func_0026F530(s32 alternate, u32 color, const char *source, f32 x, f32 y) {
-    struct FrFontGlyph *glyph;
+    FrFontGlyph *glyph;
 
     if (alternate == 0) {
-        glyph = (struct FrFontGlyph *)frFontBuildColoredGlyphWithSharedFlags(
+        glyph = frFontBuildColoredGlyphWithSharedFlags(
             (s32)(x * 16.0f), (s32)(y * 8.0f), 0, 1, 1, 10, color, source, 0);
     } else {
-        glyph = (struct FrFontGlyph *)frFontBuildColoredGlyphWithSharedFlags(
+        glyph = frFontBuildColoredGlyphWithSharedFlags(
             (s32)(x * 16.0f), (s32)(y * 8.0f), 0, 0, 1, 8, color, source, 0);
     }
     frFontMeasureLines(glyph);
