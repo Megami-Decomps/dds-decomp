@@ -7451,11 +7451,14 @@ typedef struct BtlActionCameraPose {
 } BtlActionCameraPose;
 
 typedef struct BtlActionCameraMode {
-    BtlActionCameraPose front;
-    BtlActionCameraPose back;
-    u8 pad40[0x24];
+    BtlActionCameraPose front; /* 0x00 */
+    BtlActionCameraPose back; /* 0x20 */
+    BtlActionCameraPose transition; /* 0x40 */
+    s32 triggerFrame; /* 0x60 */
     f32 motionParameter; /* 0x64 */
-    u8 pad68[0xC];
+    f32 blendDuration; /* 0x68 */
+    f32 distanceRatio; /* 0x6C */
+    f32 distanceOffset; /* 0x70 */
 } BtlActionCameraMode;
 
 typedef struct BtlActionCameraSettings {
@@ -7521,7 +7524,101 @@ void func_001F3C30(BtlLinkedCommand *action) {
     *(s32 *)action->pad140 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001F3E48);
+/* Advance the configured actor camera transition and blend its distance. */
+void func_001F3E48(s32 argument) {
+    BtlLinkedCommand *action = (BtlLinkedCommand *)argument;
+    BtlUnit *user = action->link->unit;
+    u16 unitId = user->partyRecord.unitId;
+    u32 selectedMode;
+    s32 motionFrame;
+    s32 triggerFrame;
+    u32 aggregateFlags;
+    u32 count;
+    u32 i;
+    f32 savedDistance;
+    f32 progress;
+    f32 ratio;
+    f32 base;
+
+    if (D_003B6E50[unitId].mode[0].motionParameter == 0.0f) {
+        btlBuildApproachCamera(action, &action->camera);
+        return;
+    }
+
+    selectedMode = ((s32)action->flags >> 9) & 1;
+    motionFrame = func_001E2E58(user, user->unkEC);
+    triggerFrame = D_003B6E50[unitId].mode[selectedMode].triggerFrame;
+    if (action->state == triggerFrame && action->motionProgress != 0) {
+        btlCopyMotionTransform(&action->frontCamera, &action->backCamera);
+        btlInitMotionTransformFromComponents(
+            (u8 *)&action->backCamera,
+            D_003B6E50[unitId].mode[selectedMode].transition.position[0],
+            D_003B6E50[unitId].mode[selectedMode].transition.position[1],
+            D_003B6E50[unitId].mode[selectedMode].transition.position[2],
+            D_003B6E50[unitId].mode[selectedMode].transition.direction[0],
+            D_003B6E50[unitId].mode[selectedMode].transition.direction[1],
+            D_003B6E50[unitId].mode[selectedMode].transition.direction[2],
+            D_003B6E50[unitId].mode[selectedMode].transition.direction[3], 40.0f);
+        {
+            f32 blendDuration = D_003B6E50[unitId].mode[selectedMode].blendDuration;
+            action->state = 0;
+            action->motionParameter = blendDuration;
+        }
+        action->motionProgress = 0;
+    }
+
+    if (*(s32 *)action->pad140 >= motionFrame) {
+        if (*(s32 *)action->pad140 == motionFrame) {
+            btlClearAllUnitDefeatCandidates();
+            btlFlagUnitDefeatCandidate(user);
+            count = btlGetIndexListCount(action->targetList);
+            aggregateFlags = 0;
+            for (i = 0; i < count; i++) {
+                BtlUnit *target = (BtlUnit *)btlGetIndexListEntry(action->targetList, i);
+                aggregateFlags |= target->flags & 0x600;
+            }
+            if (aggregateFlags == 0x200) {
+                for (i = 0; i < count; i++) {
+                    btlFlagUnitDefeatCandidate(
+                        (BtlUnit *)btlGetIndexListEntry(action->targetList, i));
+                }
+            } else {
+                btlFlagMatchingUnitsDefeatCandidate(aggregateFlags);
+            }
+            action->state = 0;
+            action->motionParameter = 15.0f;
+        }
+
+        if (btlStepPoseBlend((u8 *)action) != 0) {
+            action->progress = 1.0f;
+        }
+        btlBuildApproachCamera(action, &action->camera);
+
+        if (selectedMode != 0) {
+            func_00336538((1.0f - action->progress) * 0.27925268f);
+        } else {
+            func_00336538((1.0f - action->progress) * -0.27925268f);
+        }
+        VU0_LOAD_VF(vf10, action->camera.direction);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF(vf10, action->camera.direction);
+
+        savedDistance = action->camera.distance;
+        progress = action->progress;
+        ratio = D_003B6E50[unitId].mode[selectedMode].distanceRatio;
+        action->camera.distance = savedDistance * ratio;
+        base = D_003B6E50[unitId].mode[selectedMode].distanceOffset + savedDistance * (1.0f - ratio);
+        action->camera.distance += base * progress;
+        func_001E88A8(&action->camera);
+        action->flags &= ~1;
+        action->flags &= ~0x80000;
+    } else {
+        func_001E3108(user, action->translation);
+        btlCopyUnitRotationQuaternion((u8 *)user, (s128 *)action->rotation);
+    }
+
+    (*(s32 *)action->pad140)++;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001F41F0);
 
