@@ -146,7 +146,7 @@ typedef char PrfProfileParametersTableExtentCheck[
     (sizeof(D_00401320) == 0x18C0) ? 1 : -1];
 
 
-extern s32 func_00314C10(DatPartyRecord *);
+extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 extern s32 scrSetFlag(DatPartyRecord *, u16);
@@ -297,7 +297,7 @@ void func_003140C8(s32 mode, DatPartyRecord *unit) {
         unit->mp = unit->maxMp;
         break;
     case 1:
-        profile = func_00314C10(unit);
+        profile = ptyGetCurrentProfileId(unit);
         profileId = profile;
         if (profile != 0 && func_00314990(unit, profileId) == 0) {
             func_00314868(unit, profileId);
@@ -403,7 +403,7 @@ u32 ptyAddProfileRecordValueClamped(DatPartyRecord *unit, u32 increment) {
     DatProfileRecord *record;
     u32 recordCap;
     u8 selectedProfile;
-    if (func_00314C10(unit) == 0) return 0;
+    if (ptyGetCurrentProfileId(unit) == 0) return 0;
     record = ptyGetCurrentProfileRecord(unit);
     selectedProfile = unit->profileId;
     record->value += increment;
@@ -500,7 +500,7 @@ DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *unit) {
     return ptyGetProfileRecordPointer(unit, scrGetSelectedScriptEntryId(unit));
 }
 
-s32 func_00314C10(DatPartyRecord *work) {
+s32 ptyGetCurrentProfileId(DatPartyRecord *work) {
     return work->profileId;
 }
 
@@ -709,9 +709,9 @@ u32 prfGetIndexedProfileByte(u16 profileId, s32 byteIndex) {
 /* Read the selected profile's indexed byte when a selection is present.
  * Retain both selection reads and the no-selection fall-through. */
 u32 scrCallIfOperandReady(DatPartyRecord *operand, s32 byteIndex) {
-    s32 selectedProfileId = func_00314C10(operand);
+    s32 selectedProfileId = ptyGetCurrentProfileId(operand);
 
-    if (func_00314C10(operand)) {
+    if (ptyGetCurrentProfileId(operand)) {
         return prfGetIndexedProfileByte((u16)selectedProfileId, byteIndex);
     }
 }

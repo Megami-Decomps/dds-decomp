@@ -248,7 +248,7 @@ extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
 
 extern u32 ptyAddProfileRecordValueClamped(DatPartyRecord *, u32);
 
-extern s32 func_00314C10(DatPartyRecord *);
+extern s32 ptyGetCurrentProfileId(DatPartyRecord *);
 
 extern u32 ptyGetProfileRecordCap(u16);
 
@@ -266,11 +266,11 @@ void brsBuildUnitProgressRow(BrsProgressRow *state, DatPartyRecord *entry) {
         ptyComputeTotalExp(entry, levelDelta + 1) - ptyComputeTotalExp(entry, levelDelta));
     profilePoints = ptyAddProfileRecordValueClamped(entry, 0);
     mnuTitleInitFourParameters(state->profileProgress, 0x3C0, 0x50, profilePoints,
-        ptyGetProfileRecordCap(func_00314C10(entry) & 0xFFFF));
+        ptyGetProfileRecordCap(ptyGetCurrentProfileId(entry) & 0xFFFF));
 }
 
 u32 mnuBlendNeutralColorAlpha(u32 a, u32 b, u32 c, s32 blend, BrsProgressRow *resource, s32 context) {
-    func_00314C10(resource->unit);
+    ptyGetCurrentProfileId(resource->unit);
     return uiBlendColors(0x80808080, 0x80808000, blend);
 }
 
