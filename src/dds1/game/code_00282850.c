@@ -649,7 +649,6 @@ void mnuCyclePairedEffectSetting(MenuEffectPair *pair) {
 }
 
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
-extern void effInitializeSlotWork(s32, s32);
 
 /* Draw the paired effect at its current rate and initialize its alternate on demand. */
 void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,
@@ -675,7 +674,7 @@ void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,
         func_002BF4E0(x, y - 8, z, scale, 0, (s32)owner->leftGrid, 0, surface);
         itfGridLookupValueOrDefault(owner->leftGrid, 0);
         if (owner->leftGrid->workEntries[0].states[0].source == NULL) {
-            effInitializeSlotWork((s32)owner->rightGrid, 0);
+            effInitializeSlotWork(owner->rightGrid, 0);
             effConfigureIndexedSlotResource(owner->rightGrid, 0,
                                             owner->effects[1], 0, 0);
             owner->updateState = 1;
@@ -693,7 +692,7 @@ void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,
                      y - 0x40, z, scale, 0, (s32)owner->rightGrid, 0, surface);
         itfGridLookupValueOrDefault(owner->rightGrid, 0);
         if (owner->rightGrid->workEntries[0].states[0].source == NULL) {
-            effInitializeSlotWork((s32)owner->leftGrid, 0);
+            effInitializeSlotWork(owner->leftGrid, 0);
             effConfigureIndexedSlotResource(owner->leftGrid, 0,
                                             owner->effects[0], 0, 0);
             owner->updateState = 0;

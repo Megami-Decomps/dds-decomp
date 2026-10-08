@@ -549,8 +549,8 @@ void effInitializeSlotPhase(EffTimedState *effect) {
 INCLUDE_ASM(const s32, "game/code_002BC8F0", func_002BD3D8);
 
 /* Initialize the normal slot entry at the unchanged 0xA0-byte stride. */
-void effInitializeSlotWork(s32 work, s32 slotIndex) {
-    func_002BD3D8((void *)work, slotIndex, &((EffectSlotSet *)work)->workEntries[slotIndex]);
+void effInitializeSlotWork(EffectSlotSet *owner, s32 slotIndex) {
+    func_002BD3D8(owner, slotIndex, &owner->workEntries[slotIndex]);
 }
 
 /* Reset every normal work slot in source order. */
@@ -770,7 +770,7 @@ u32 effClampSlotPhaseAtEnd(s32 work, s32 index, EffTimedState *effect) {
             if (flags & EFF_TIMED_STATE_PING_PONG) {
                 effect->flags = flags & ~EFF_TIMED_STATE_DIRECTION_FORWARD;
             } else {
-                effInitializeSlotWork(work, index);
+                effInitializeSlotWork((EffectSlotSet *)work, index);
             }
             return 0;
         }
@@ -786,7 +786,7 @@ u32 effClampSlotPhaseAtStart(s32 work, s32 index, EffTimedState *effect) {
             if (flags & EFF_TIMED_STATE_PING_PONG) {
                 effect->flags = flags | EFF_TIMED_STATE_DIRECTION_FORWARD;
             } else {
-                effInitializeSlotWork(work, index);
+                effInitializeSlotWork((EffectSlotSet *)work, index);
             }
             return 0;
         }

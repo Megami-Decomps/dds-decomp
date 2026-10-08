@@ -3386,7 +3386,6 @@ void func_002B9FB8(MenuWindowContainer *window);
 
 
 
-extern void effInitializeSlotWork();
 
 
 /* Reset low sprite flags only for a present first sprite and a supported panel kind. */

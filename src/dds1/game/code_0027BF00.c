@@ -587,7 +587,6 @@ MenuPanelHandles *mnuCreatePanelSpriteHandles(u32 panelKind, EffectSlotSet *reso
     return panel;
 }
 
-extern void effInitializeSlotWork(s32, s32);
 
 /* Reset low sprite flags only for a present first handle and a supported panel kind. */
 void mnuClearEntryFlags(MenuPanelHandles *group) {
@@ -599,7 +598,7 @@ void mnuClearEntryFlags(MenuPanelHandles *group) {
             u32 *flags = &entry->workEntries->states[0].flags;
 
             *flags &= ~1;
-            effInitializeSlotWork((s32)entry, 0);
+            effInitializeSlotWork(entry, 0);
         }
     }
 }
