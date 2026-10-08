@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_resource_slots.h"
 #include "fpu.h"
 #include "mnu.h"
 #include "mnu_list.h"
@@ -113,7 +114,6 @@ s32 mnuIsAnyMenuInputPressed(void) {
 extern u8 D_00437A48[];
 
 extern u8 D_003E3760[];
-extern u32 effLoadIndexedResource(const char *path, const char *name, u32 mode);
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
 
 
@@ -122,7 +122,7 @@ void func_002A3D70(void) {
     u32 resource;
 
     if (state[1] == 0) {
-        resource = effLoadIndexedResource((const char *)D_00437A48,
+        resource = (u32)effLoadIndexedResource((const char *)D_00437A48,
             (const char *)D_003E3760, 0);
         state = (u32 *)mnuMovieMenuState;
         state[1] = resource;
@@ -130,7 +130,7 @@ void func_002A3D70(void) {
     if (state[3] == 0) {
         const char *name = (const char *)D_003E3760;
         name += 0x20;
-        resource = effLoadIndexedResource((const char *)D_00437A48, name, 0);
+        resource = (u32)effLoadIndexedResource((const char *)D_00437A48, name, 0);
         state = (u32 *)mnuMovieMenuState;
         state[3] = resource;
     }
@@ -139,12 +139,12 @@ void func_002A3D70(void) {
 void mnuReleaseMenuResourceSlots(void) {
     u32 *state = (u32 *)mnuMovieMenuState;
     if (state[1] != 0) {
-        effDestroyResourceSlotSet(state[1]);
+        effDestroyResourceSlotSet((struct EffectSlotSet *)state[1]);
         state = (u32 *)mnuMovieMenuState;
         state[1] = 0;
     }
     if (state[3] != 0) {
-        effDestroyResourceSlotSet(state[3]);
+        effDestroyResourceSlotSet((struct EffectSlotSet *)state[3]);
         state = (u32 *)mnuMovieMenuState;
         state[3] = 0;
     }
@@ -158,7 +158,7 @@ void func_002A3E38(s32 mode) {
             const char *name = (const char *)D_003E3760;
             name += 0x10;
             ((SpriteMenuState *)mnuMovieMenuState)->spriteHandle =
-                effLoadIndexedResource((const char *)D_00437A48, name, 0);
+                (u32)effLoadIndexedResource((const char *)D_00437A48, name, 0);
         } else {
             const char *name = (const char *)D_003E3760;
             name += 0x10;
@@ -174,7 +174,7 @@ u8 mnuHasSpriteHandle(void) {
 
 void mnuReleaseSpriteHandle(void) {
     if (((SpriteMenuState *)mnuMovieMenuState)->spriteHandle != 0) {
-        effDestroyResourceSlotSet(((SpriteMenuState *)mnuMovieMenuState)->spriteHandle);
+        effDestroyResourceSlotSet((struct EffectSlotSet *)((SpriteMenuState *)mnuMovieMenuState)->spriteHandle);
         ((SpriteMenuState *)mnuMovieMenuState)->spriteHandle = 0;
     }
 }

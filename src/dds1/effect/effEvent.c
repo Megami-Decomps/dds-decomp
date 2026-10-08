@@ -3,10 +3,12 @@
 #include "ee_mmi.h"
 #include "btl_sound.h"
 #include "eff_blur.h"
+#include "eff_event_draw.h"
 #include "eff.h"
 #include "eff_math.h"
 #include "eff_channel.h"
 #include "eff_event.h"
+#include "eff_event_sound.h"
 #include "eff_event_setup.h"
 #include "pcp_vu0.h"
 
@@ -49,20 +51,6 @@
 
 /* Packet-source layouts and concrete blur owners mirror their constructors.
  * Equal-sized parameter prefixes do not make the blur variants interchangeable. */
-
-typedef struct EffScreenDrawParams {
-    EffBlurQuad source;
-    u8 pad28[8];
-} EffScreenDrawParams;
-
-typedef struct EffSolidRectParams {
-    u32 color;
-    s32 blendControl;
-    s32 left;
-    s32 top;
-    s32 right;
-    s32 bottom;
-} EffSolidRectParams;
 
 /* EffBlurTemplate and its copied body are declared in eff_blur.h. */
 
@@ -1093,18 +1081,17 @@ void effEventSetScaleBlurParameters(EffBlurScaleParams *parameters) {
     D_003561C8 = *parameters;
 }
 
-SoundMixer *func_00190100(SoundMixer *source) {
+SoundMixer *effEventCloneSoundMixer(SoundMixer *source) {
     return sndMixerClone(source);
 }
 
-void func_00190118(SoundMixer *mixer) {
+void effEventReleaseSoundMixerVoices(SoundMixer *mixer) {
     sndReleaseAllVoices(mixer);
 }
 
 
 extern u8 D_003563F0[];
 
-extern void func_00190118();
 extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern s32 D_003BB140;
@@ -1202,7 +1189,7 @@ EffEventLight *effEventLightCreate(SoundMixer *arg, f32 param) {
     work->init.position[0] = 0;
     work->init.position[2] = 0;
     work->init.position[3] = 0;
-    work->handle = func_00190100(arg);
+    work->handle = effEventCloneSoundMixer(arg);
     work->owner = effEventCreate(work->handle, 0, &work->init);
     work->active = 1;
     return work;
@@ -1212,7 +1199,7 @@ EffEventLight *effEventLightCreate(SoundMixer *arg, f32 param) {
 void effEventLightDestroy(EffEventLight *work) {
     effEventReleaseNode(work->owner);
     if (work->active != 0) {
-        func_00190118(work->handle);
+        effEventReleaseSoundMixerVoices(work->handle);
     }
     sdfReleaseChipBlock(work);
 }

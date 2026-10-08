@@ -1,4 +1,5 @@
 #include "common.h"
+#include "eff_resource_slots.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "btl_scene_fade.h"
@@ -3193,16 +3194,15 @@ void btlLoadResourceBlock(void) {
     }
 }
 
-extern u32 effDestroyResourceSlotSet(u32);
 
 void btlReleaseResourceBlock(void) {
     BattleController *work = (BattleController *)btlGetRuntime();
     if (btlResourceBlockLoaded != 0) {
-        effDestroyResourceSlotSet((u32)btlResourceBlock->resA);
+        effDestroyResourceSlotSet(btlResourceBlock->resA);
         btlResourceBlock->resA = 0;
-        effDestroyResourceSlotSet((u32)btlResourceBlock->resB);
+        effDestroyResourceSlotSet(btlResourceBlock->resB);
         btlResourceBlock->resB = 0;
-        effDestroyResourceSlotSet((u32)btlResourceBlock->resC);
+        effDestroyResourceSlotSet(btlResourceBlock->resC);
         btlResourceBlock->resC = 0;
         work->resA = 0;
         work->resB = 0;
