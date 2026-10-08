@@ -85,12 +85,6 @@ extern void btlBossDebugPrintf(const char *format, ...);
 
 extern s8 D_003D7588[];
 
-/* Wind texture clone kept by the overlay; +8 is its 256-entry palette. */
-typedef struct BtlWindTexture {
-    u8 pad00[8];
-    s32 *palette;
-} BtlWindTexture;
-
 typedef struct BattleRuntimeState {
     s32 counter;
     u16 state;
@@ -111,7 +105,7 @@ typedef struct BattleRuntimeState {
     s32 cellHeight;
     void *ownedData;
     u8 unk_3C[4];
-    BtlWindTexture *resource;
+    RefObj *resource;
     void *request;
     void *handle;
 } BattleRuntimeState;
@@ -1274,7 +1268,7 @@ void func_002121E8(s32 list, u32 color, s32 depth) {
 
     if (btlRuntimeState.resource == NULL) {
         btlRuntimeState.resource = func_0029BD90((struct SdfTextureFileHeader *)effGetWindTextureHandle());
-        btlCopyPaletteLowByteToAlpha(btlRuntimeState.resource->palette);
+        btlCopyPaletteLowByteToAlpha((s32 *)btlRuntimeState.resource->palette);
     }
     tag = sdfAllocPacketAligned(0x40);
     func_002D4C80(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40, tag, 1);
