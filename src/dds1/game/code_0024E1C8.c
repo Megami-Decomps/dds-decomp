@@ -913,7 +913,7 @@ s32 func_002501E0(s32 unused, MenuFadeWork *work) {
     return 0;
 }
 
-/* Summarize two requirement slots: bit 0 marks a qualifying list of at least two IDs;
+/* Summarize two requirement slots: bit 0 marks a qualifying list of at least three IDs;
  * bit 1 reflects the conjunction of the two native record flags. */
 s32 func_00250758(u16 profileId) {
     s32 resultFlags = 0;
