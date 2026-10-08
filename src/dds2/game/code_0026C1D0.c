@@ -33,7 +33,7 @@ extern s32 func_0026CD50(u32);
 
 extern s32 evtGetMessageWindowControlState(void);
 
-extern u32 sdfReadNamedResource(u32, u32 *, u32);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern s32 dspWindowHandle;
 
@@ -195,7 +195,7 @@ void evtRandomSwapBytes(u8 *buffer, u32 length, s32 swapCount) {
 void evtLoadResourcePair(u32 resourceId, EvtResourcePair *record) {
     u32 handle;
 
-    handle = sdfReadNamedResource(resourceId, &record->unk04, 0);
+    handle = (u32)sdfReadNamedResource((const char *)(u32)resourceId, &record->unk04, 0);
     record->handle = handle;
 }
 
@@ -451,7 +451,7 @@ s32 evtLoadTextureFromResourcePath(u32 path) {
     u32 allocation;
     s32 texture;
 
-    allocation = sdfReadNamedResource(path, &info[0], (u32)&info[1]);
+    allocation = sdfReadNamedResource((const char *)(u32)path, &info[0], (u32 *)&info[1]);
     texture = (s32)sdfTexAcquireResourceTexture((void *)info[0]);
     sdfReleaseResourceAllocation(allocation);
     return texture;
@@ -854,7 +854,7 @@ void func_0026D988(EvtMantraWork **selectionWorks) {
     } while (remaining != 0);
 }
 
-extern s32 prfGetIndexedProfileByte(s32, s32);
+extern u32 prfGetIndexedProfileByte(u16, s32);
 /* Scan the low-halfword entry id's five attributes into caller-owned summary words.
  * A nonzero summary[0] makes the next nonzero attribute report sentinel five.
  * Zero is treated as empty even after storing attribute index zero; neither

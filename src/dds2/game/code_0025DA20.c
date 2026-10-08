@@ -966,7 +966,7 @@ s32 mnuShopReleaseSceneObjects(MenuTerminalContext *scene) {
 extern const CampMapArguments D_00424A90;
 extern const CampEffectRows D_00424AC0;
 extern const char D_00424AE0[];
-extern u64 sdfReadNamedResource();
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern u32 effCreateMappedResource(u32);
 extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
 extern void mnuSetCampEffectResourceHandles(u32, u32, MenuEffectResources *);

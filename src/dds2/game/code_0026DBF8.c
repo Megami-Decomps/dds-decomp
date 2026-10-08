@@ -430,7 +430,7 @@ void mnuDrawMantraLabelA(u32 x, u32 y, u32 depth, s32 fade, u32 iconId, u32 draw
     }
 }
 
-extern u32 func_003151D0(u16);
+extern u8 func_003151D0(u16);
 
 /* Print the entry's count and draw one repeated marker per count unit. */
 void mnuDrawMantraDigitRow(u32 x, u32 y, u32 depth, u32 fade, u32 entryId, u32 drawArg) {

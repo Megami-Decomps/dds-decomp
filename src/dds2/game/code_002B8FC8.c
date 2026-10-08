@@ -267,8 +267,6 @@ typedef struct MenuContext {
     s32 resourceList;      /* 0xAA5C */
 } MenuContext;
 
-extern void mnuReleaseSpriteTextures(s32);
-
 extern s32 kwlnTaskGetUserValue();
 
 extern void mnuDrawWindowContainer(s32, s32, s32, MenuWindowContainer *, s32);
@@ -2139,14 +2137,12 @@ s32 mnuPercentOrHundred(s32 value, s32 total) {
 
 INCLUDE_ASM(const s32, "game/code_002B8FC8", func_002BC498);
 
-void mnuReleasePartyPanelSpriteTextures(u8 *menu) {
-    u32 i = 0;
-    do {
-        mnuReleaseSpriteTextures((s32)(menu + 0x94));
-        mnuReleaseSpriteTextures((s32)(menu + 0xe4));
-        menu += 0x2138;
-        i++;
-    } while (i < 5);
+void mnuReleasePartyPanelSpriteTextures(MenuPageWindow *window) {
+    u32 i;
+    for (i = 0; i < 5; i++) {
+        mnuReleaseSpriteTextures((u32 *)&window->slots[i].hp);
+        mnuReleaseSpriteTextures((u32 *)&window->slots[i].mp);
+    }
 }
 
 
@@ -2370,14 +2366,14 @@ void mnuFreeWindowSprites(MenuPageSlot *win) {
     }
 }
 
-void mnuShutdownContext(u8 *ctx) {
-    MenuPageSlot *slot = ((MenuPageWindow *)ctx)->slots;
+void mnuShutdownContext(MenuPageWindow *window) {
+    MenuPageSlot *slot = window->slots;
     u32 i;
     for (i = 0; i < 5; i++, slot++) {
         mnuFreeWindowSprites(slot);
     }
-    mnuReleasePartyPanelSpriteTextures(ctx);
-    mnuDestroyWindowOwnedLists(ctx);
+    mnuReleasePartyPanelSpriteTextures(window);
+    mnuDestroyWindowOwnedLists(window);
 }
 
 

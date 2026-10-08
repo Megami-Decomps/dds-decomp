@@ -29,7 +29,7 @@ struct EffNode;
 struct EffNodeDescriptor;
 extern struct EffNode *effCreateNodeFromDescriptor(struct EffNodeDescriptor *descriptor);
 
-extern u64 billCreateFromResource(u64, u64);
+extern BillObj *billCreateFromResource(s32 kind, const char *path);
 
 extern u64 billCreateIndexed(u64, u64);
 
@@ -53,7 +53,7 @@ extern void effObjInnerVecBackup(void *params);
 extern void effMagatuhiCopyFloatBlock(void *, const void *);
 extern void effMagatuhiSetControlPointParams(void *, const void *);
 
-extern void *sdfReadNamedResource(void *resource, u32 *resolvedId, s32 options);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern void *sdfReleaseResourceAllocation(void *arg);
 
@@ -215,10 +215,10 @@ void effObjCreateIndexedKindOne(u64 billId, u64 firstVectorAddress, u64 secondVe
     effObjCreateKindTwo(bill, firstVectorAddress, secondVectorAddress);
 }
 /* Create a kind-one resource bill; the native constructor result is discarded. */
-void effObjCreateResourceKindOne(u64 resourceId, u64 firstVectorAddress, u64 secondVectorAddress) {
-    u64 bill;
+void effObjCreateResourceKindOne(const char *path, u64 firstVectorAddress, u64 secondVectorAddress) {
+    BillObj *bill;
 
-    bill = billCreateFromResource(1, resourceId);
+    bill = billCreateFromResource(1, path);
     effObjCreateKindTwo(bill, firstVectorAddress, secondVectorAddress);
 }
 
@@ -282,10 +282,10 @@ void effObjCreateIndexedKindZero(u64 billId, u64 firstVectorAddress, u64 secondV
 }
 
 /* Create a kind-zero resource bill for the state-three constructor. */
-void effObjCreateResourceKindZero(u64 resourceId, u64 firstVectorAddress, u64 secondVectorAddress) {
-    u64 bill;
+void effObjCreateResourceKindZero(const char *path, u64 firstVectorAddress, u64 secondVectorAddress) {
+    BillObj *bill;
 
-    bill = billCreateFromResource(0, resourceId);
+    bill = billCreateFromResource(0, path);
     effObjCreateBillNode(bill, firstVectorAddress, secondVectorAddress);
 }
 

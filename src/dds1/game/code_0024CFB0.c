@@ -56,7 +56,7 @@ typedef struct {
 
 extern EvtActiveFlagTable evtActiveEntryFlags;
 
-extern u32 sdfReadNamedResource(u32, u32 *, u32 *);
+extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern struct SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
@@ -460,7 +460,7 @@ void evtRandomSwapBytes(u8 *buffer, u32 length, s32 swapCount) {
 void evtLoadResourcePair(u32 resourceId, u32 *record) {
     u32 handle;
 
-    handle = sdfReadNamedResource(resourceId, record + 1, 0);
+    handle = (u32)sdfReadNamedResource((const char *)(u32)resourceId, record + 1, 0);
     *record = handle;
 }
 
@@ -700,7 +700,7 @@ s32 evtOpReadDisplayValue(void) {
  * DDS1 passes the size output as a pointer, unlike DDS2's address-valued slot. */
 u32 evtLoadTextureFromResourcePath(u32 path) {
     u32 info[2];
-    u32 allocation = sdfReadNamedResource(path, info, &info[1]);
+    u32 allocation = (u32)sdfReadNamedResource((const char *)(u32)path, info, &info[1]);
     u32 texture = (u32)sdfTexAcquireResourceTexture((void *)info[0]);
 
     sdfReleaseResourceAllocation(allocation);
