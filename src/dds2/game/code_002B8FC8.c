@@ -1552,8 +1552,8 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
         mnuComparePrimaryKeyAscending, mnuCompareSecondaryKeyAscending, mnuCompareTertiaryKeyAscending
     };
     s32 nodeCount = 0;
-    s32 allocationHandle = (u32)sdfAllocGeneralBlock(menu->count * MNU_LIST_POINTER_BYTES);
-    MenuListNode **items = (MenuListNode **)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(menu->count * MNU_LIST_POINTER_BYTES);
+    MenuListNode **items = (MenuListNode **)sdfResourceRetainAddress(allocation);
     MenuListNode **writeCursor = items;
     MenuListNode *node;
 
@@ -1569,7 +1569,7 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
     mnuRebuildListFirstFromCursor(menu);
     mnuRebuildListLastFromCursor(menu);
     mnuResetNodeLinks((s32 *)menu, 0);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocationHandle));
+    sdfReleaseResourceAllocation(allocation);
 }
 
 /* Allocate four native fade records into pointer slots after the list header. */
