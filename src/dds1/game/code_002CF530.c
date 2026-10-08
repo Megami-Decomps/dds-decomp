@@ -1,8 +1,6 @@
 #include "common.h"
 #include "sdf_resource.h"
 
-extern void sdfQueuePendingChipValue(void *);
-extern void sdfQueueNonzeroResourceId(s32);
 
 extern s32 sdfChipIsInRange(void *);
 extern void sdfReleaseChipBlock(void *);
@@ -49,10 +47,10 @@ void sdfFreeMemoryFromEitherHeap(void *data) {
 void sdfReleaseChipOrRetainedResource(void *data) {
     if (data != NULL) {
         if (sdfChipIsInRange(data)) {
-            sdfQueuePendingChipValue(data);
+            sdfQueuePendingChipRelease(data);
             return;
         }
-        sdfQueueNonzeroResourceId((s32)sdfFindGeneralBlockByAddress(data));
+        sdfQueueGeneralAllocationRelease(sdfFindGeneralBlockByAddress(data));
     }
 }
 

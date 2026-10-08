@@ -4,10 +4,10 @@
 #include "kwln.h"
 #include "evt_world.h"
 #include "evt_solar.h"
+#include "kwln_task_lifecycle.h"
 
 
 
-extern s32 kwlnTaskDestroyWithHierarchy(KwlnTask *task, s32 delayTicks);
 
 void *sdfAllocSizeClassBlock(s32 size);
 void sdfReleaseChipBlock(void *memory);

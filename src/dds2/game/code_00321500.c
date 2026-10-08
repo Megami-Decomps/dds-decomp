@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_callback_list.h"
 #include "mnu_work.h"
 
 #define MNU_WORK_ACTIVE   1
@@ -43,7 +44,7 @@ extern u8 D_0045C870[];
 
 extern u8 D_0045C880[];
 
-extern void dds3DestroyCallbackNodeAfterLastNotification(u32);
+extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 
 extern void mnuFreeOptionalBlock(u32);
 extern u32 func_0035A828(s32 bytes);
@@ -104,11 +105,6 @@ typedef struct MenuLengthData {
     s32 *secondRecords;
 } MenuLengthData;
 
-typedef struct MenuCallbackNode {
-    u8 pad00[0x10];
-    void (*callback)(u32, s32);
-} MenuCallbackNode;
-
 typedef struct MenuRuntimeList {
     MenuRuntimeRecord *records;
     s32 capacity;
@@ -152,51 +148,34 @@ typedef struct MenuStateRecord {
     s16 effect;    /* 0x20: positive values select an animated effect */
 } MenuStateRecord; /* Native named-record allocation is 0x22 bytes. */
 
-typedef struct MenuTimedStateNode {
-    u32 id;
-    u32 key;
-    struct MenuTimedStateNode *next;
-    struct MenuTimedStateNode *previous;
-    MenuStateRecord *record;
-} MenuTimedStateNode;
-
-typedef struct MenuTimedStateList {
-    u32 count;
-    MenuTimedStateNode *first;
-    MenuTimedStateNode *last;
-    u32 userData;
-    void (*onRemove)(u32, u32);
-    void (*onDestroy)(s32, u32);
-} MenuTimedStateList; /* Native callback-list allocation is 0x18 bytes. */
-
 s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record);
 extern MenuRuntimeRecord *func_00321A30(MenuStateRecord *record,
                                         MenuRuntimeList *runtimeList,
                                         s32 x, s32 y, f32 angle);
 
 u32 mnuCreateReleaseCallbackNode(void) {
-    MenuCallbackNode *node = (MenuCallbackNode *)mnuCreateCallbackNode(0);
-    node->callback = func_003214D0;
+    MnuCallbackList *node = mnuCreateCallbackNode(0);
+    node->onRemove = func_003214D0;
     return (u32)node;
 }
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321528);
 
-void func_003216A8(MenuTimedStateList *, MenuRuntimeList *, s32, s32, s32, f32);
+void func_003216A8(MnuCallbackList *, MenuRuntimeList *, s32, s32, s32, f32);
 
 void func_00321688(u32 left, u32 right, u32 value, u32 count, f32 angle) {
-    func_003216A8((MenuTimedStateList *)left, (MenuRuntimeList *)right,
+    func_003216A8((MnuCallbackList *)left, (MenuRuntimeList *)right,
                   value, count, 1, angle);
 }
 
 
-void func_003216A8(MenuTimedStateList *list, MenuRuntimeList *runtimeList,
+void func_003216A8(MnuCallbackList *list, MenuRuntimeList *runtimeList,
                    s32 x, s32 y, s32 enabled, f32 angle) {
-    MenuTimedStateNode *node = list->first;
+    SdfListNode *node = list->head;
     MenuStateRecord *record;
 
     if (node != NULL) {
         do {
-            record = node->record;
+            record = (MenuStateRecord *)node->value;
             if (mnuAdvanceTimedStateRecord(record) != 0 && enabled != 0) {
                 record->flags.word &= 0xFFFE;
                 /* The native dispatcher retains separate kind paths even
@@ -212,14 +191,14 @@ void func_003216A8(MenuTimedStateList *list, MenuRuntimeList *runtimeList,
     }
 }
 
-void func_00321798(MenuTimedStateList *list, MenuRuntimeList *runtimeList,
+void func_00321798(MnuCallbackList *list, MenuRuntimeList *runtimeList,
                    s32 kindMask, s32 x, s32 y, s32 enabled, f32 angle) {
-    MenuTimedStateNode *node = list->first;
+    SdfListNode *node = list->head;
     MenuStateRecord *record;
 
     if (node != NULL) {
         do {
-            record = node->record;
+            record = (MenuStateRecord *)node->value;
             if (mnuAdvanceTimedStateRecord(record) != 0 && enabled != 0) {
                 u32 kind = record->mode & 0xF;
                 if ((kindMask >> kind) & 1) {
@@ -638,7 +617,7 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_00322E18);
 void mnuDeactivateWorkEntry(MenuWorkEntry *entry) {
     entry->flags = entry->flags & 0xfffffffe;
     if (entry->callback != 0) {
-        dds3DestroyCallbackNodeAfterLastNotification(entry->callback);
+        dds3DestroyCallbackNodeAfterLastNotification((MnuCallbackList *)entry->callback);
         entry->callback = 0;
     }
 }
@@ -984,7 +963,7 @@ s32 func_00324840(void) {
         }
     }
 
-    func_00321798((MenuTimedStateList *)work->callback,
+    func_00321798((MnuCallbackList *)work->callback,
                   func_00321ED8(), kindMask,
                   (s32)work->x0, (s32)work->y0, kindMask, work->scale0);
 
@@ -1022,7 +1001,7 @@ void mnuInitializeEffectContext(MenuWorkEntry *context) {
     initialTag.index = 0;
     memset(context, 0, 0x48);
     context->callback = mnuCreateReleaseCallbackNode();
-    func_00320CE0(context->callback, 0,
+    func_00320CE0((MnuCallbackList *)context->callback, 0,
                    (u32)mnuCreateNamedRecord((u8 *)&initialTag));
 }
 
@@ -1049,8 +1028,8 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_00324D50);
 
 void mnuReleaseEffectPairAndNode(u32 node) {
     if (node != 0) {
-        dds3DestroyCallbackNodeAfterLastNotification(*(u32 *)node);
-        dds3DestroyCallbackNodeAfterLastNotification(*(u32 *)(node + 4));
+        dds3DestroyCallbackNodeAfterLastNotification((MnuCallbackList *)*(u32 *)node);
+        dds3DestroyCallbackNodeAfterLastNotification((MnuCallbackList *)*(u32 *)(node + 4));
         func_0035A880(node);
     }
 }

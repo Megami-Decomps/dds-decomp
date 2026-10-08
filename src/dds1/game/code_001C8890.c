@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_slot.h"
 #include "kwln.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
@@ -303,7 +304,6 @@ extern SoundResourceNode *sndAllocResourceNode(void);
 extern u32 kwlnDrawControlFlags;
 extern void btlDestroyUnit(u8 *);
 extern void func_001D4E60(BtlUnit *, BtlUnit *);
-extern void sdfQueueNonzeroResourceId(s32);
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
@@ -3728,16 +3728,16 @@ void func_001D4E98(BtlUnit *unit, u32 kind, u32 id) {
 extern const char D_003A3AD0[];
 
 void btlReleaseActorModelResources(u8 *object) {
-    s32 sound;
+    SoundSlotOwner *sound;
     s32 load;
     EffWorldNode *model;
     u32 state;
     u32 flags;
     if (object[0xCC] == 0) {
-        sound = *(s32 *)(object + 0x308);
+        sound = *(SoundSlotOwner **)(object + 0x308);
         if (sound != 0) {
             sndReleaseSlotOwner(sound);
-            *(s32 *)(object + 0x308) = 0;
+            *(SoundSlotOwner **)(object + 0x308) = 0;
         }
         load = *(s32 *)(object + 0x324);
         if (load != 0) {
@@ -5217,7 +5217,7 @@ u32 func_001D8190(BtlModelChangeArgs *args) {
             btlDestroyUnit((u8 *)unit->mirror);
             unit->mirror = NULL;
             if (unit->unk330 != 0) {
-                sdfQueueNonzeroResourceId(unit->unk330);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)unit->unk330);
                 unit->unk330 = 0;
                 unit->unk32C = 0;
             }
@@ -6278,7 +6278,7 @@ void btlReleaseUnitResources(BtlUnit *unit) {
     }
     btlReleaseActorModelResources((u8 *)unit);
     if (unit->unk330 != 0) {
-        sdfQueueNonzeroResourceId(unit->unk330);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)unit->unk330);
         unit->unk330 = 0;
         unit->unk32C = 0;
     }
@@ -9692,24 +9692,23 @@ extern char D_003A4AF0[]; /* "btl:free field F2\n" */
 
 extern char D_003A4B08[]; /* "btl:free field F1\n" */
 
-extern void sdfQueueNonzeroResourceId(s32);
 
 
 void btlFreeFieldBlocks(void) {
     BtlState *context = (BtlState *)btlGetRuntime();
     btlWaitForPendingWorkAndReleaseBuffers();
     if (context->fieldTBResourceId != 0) {
-        sdfQueueNonzeroResourceId(context->fieldTBResourceId);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)context->fieldTBResourceId);
         context->fieldTBResourceId = 0;
         btlBossDebugPrintf(D_003A4AD8);
     }
     if (context->fieldF2ResourceId != 0) {
-        sdfQueueNonzeroResourceId(context->fieldF2ResourceId);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)context->fieldF2ResourceId);
         context->fieldF2ResourceId = 0;
         btlBossDebugPrintf(D_003A4AF0);
     }
     if (context->fieldF1ResourceId != 0) {
-        sdfQueueNonzeroResourceId(context->fieldF1ResourceId);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)context->fieldF1ResourceId);
         context->fieldF1ResourceId = 0;
         btlBossDebugPrintf(D_003A4B08);
     }
@@ -10149,7 +10148,7 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
                                              (s32)args->fieldTB, 0);
             btlInitializeSceneLightingAndTint();
             if (blocks->fieldTBResourceId != 0) {
-                sdfQueueNonzeroResourceId(blocks->fieldTBResourceId);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTBResourceId);
                 blocks->fieldTBResourceId = 0;
                 btlBossDebugPrintf(D_003A4AD8);
             }
@@ -11886,24 +11885,6 @@ typedef struct SoundSlotTableEntry {
     u16 fileId;
 } SoundSlotTableEntry;
 
-/* Retain and per-slot loading state, embedded after the category/id key. */
-typedef struct SoundSlotWork {
-    u32 refCount; /* Shared retain count; release frees only on the zero transition. */
-    s32 pendingSoundId; /* Packed-track key consumed by the load-status poll. */
-    s32 pendingSlot;    /* Index into resourceHandles for the pending track. */
-    s32 fileRequests[0x1D];
-    s32 resourceHandles[0x1D];
-} SoundSlotWork;
-
-/* Shared motion-SE owner: queued files become resource handles before playback. */
-typedef struct SoundSlotOwner {
-    u32 flags; /* 1 files queued, 2 files ready; 4 track pending, 8 loading, 0x10 ready. */
-    s32 category;
-    s32 id;
-    SoundSlotWork work;
-    struct SoundSlotOwner *prev;
-    struct SoundSlotOwner *next;
-} SoundSlotOwner;
 
 typedef struct SoundTaskArgs {
     BtlUnit *actor;
@@ -12021,8 +12002,7 @@ SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id) {
 }
 
 /* The last reference cleans queued files and resource handles, then unlinks/frees. */
-void sndReleaseSlotOwner(u8 *ownerAddress) {
-    SoundSlotOwner *node = (SoundSlotOwner *)ownerAddress;
+void sndReleaseSlotOwner(SoundSlotOwner *node) {
     u32 count = node->work.refCount - 1;
     node->work.refCount = count;
     if (count == 0) {
@@ -12056,7 +12036,7 @@ void sndReleaseAllSlotOwners(void) {
     while (node != 0) {
         SoundSlotOwner *next = node->next;
 
-        sndReleaseSlotOwner((u8 *)node);
+        sndReleaseSlotOwner(node);
         node = next;
     }
 }

@@ -5,10 +5,10 @@
 #include "mnu.h"
 #include "eff.h"
 #include "mnu_list.h"
+#include "kwln_task_lifecycle.h"
 
 extern KwlnTask *kwlnTaskCreate();
 extern void sdfCancelAndReleasePacWork(void *);
-extern void sdfQueueNonzeroResourceId(s32);
 extern u32 effLoadIndexedResource(const char *, const char *, s32);
 extern u32 effDestroyResourceSlotSet(u32);
 
@@ -1084,7 +1084,7 @@ void mnuFinishStaffMovieAndFreeState(void) {
     do {
         pending = sdfCheckPendingWorkWithInterrupts();
     } while (pending != 0);
-    sdfQueueNonzeroResourceId((s32)mnuMovieWork->handle);
+    sdfQueueGeneralAllocationRelease(mnuMovieWork->handle);
     mnuMovieWork = NULL;
 }
 
@@ -1169,7 +1169,7 @@ extern char D_0042A380[];
 
 extern u32 D_00437AD0;
 extern u32 sdfSoundGetCommandStatus(void);
-extern s32 sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *);
+extern void sdfUpdateTextureHeadsWithInterruptsMasked(SdfTexResource *textureBlock);
 extern SdfMovieDescriptor D_00457DB0;
 extern char D_00457DC8[];
 extern char D_0042A3B0[];
@@ -1254,7 +1254,7 @@ void mnuStopMovieDrawTask(void) {
         return;
     }
     sdfCancelAndReleasePacWork(&mnuMovieDrawContext);
-    kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
+    kwlnTaskDestroyWithHierarchy((KwlnTask *)mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }
 

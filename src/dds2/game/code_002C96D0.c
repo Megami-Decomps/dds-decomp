@@ -5,6 +5,7 @@
 #include "file_slot.h"
 #include "dat_state.h"
 #include "pcp_vu0.h"
+#include "kwln_task_lifecycle.h"
 struct EffectSlotSet;
 extern void func_00306CD0(s32, s32, s32, u32, u32, struct EffectSlotSet *, s32, s32);
 
@@ -438,7 +439,6 @@ extern char fileConfigLoadTaskName[]; /* "config_draw" */
 
 extern char fileConfigOwnerTaskName[]; /* "config_update" */
 
-extern void kwlnTaskDestroyWithHierarchyByName(const char *name, s32 hierarchy);
 
 typedef struct LoadMirror {
     u32 current;
@@ -621,7 +621,7 @@ extern s32 func_0036BCD0(const char *path, s32 arg1);
 
 void fileDestroyMenuTask(void) {
     if (D_00437CD8 != 0) {
-        kwlnTaskDestroyWithHierarchy(D_00437CD8, 1);
+        kwlnTaskDestroyWithHierarchy((KwlnTask *)D_00437CD8, 1);
         D_00437CD8 = 0;
         fileMenuTaskAlive = 0;
     }
@@ -3391,7 +3391,7 @@ void fileMenuWorkCreate(u32 startBranchFlag) {
 
 void fileReleaseMenuFlowResource(void) {
     if (fileLoadSelectionWork != 0) {
-        sdfQueueNonzeroResourceId(((MenuWork *)fileLoadSelectionWork)->unk3C);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)((MenuWork *)fileLoadSelectionWork)->unk3C);
         fileLoadSelectionWork = 0;
     }
 }

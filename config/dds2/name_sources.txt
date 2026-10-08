@@ -5558,7 +5558,9 @@
 0x003126D0	sdfDestroyTaskWorkerTasks	inferred	Byte-identical dds1 twin 0x002CB278; Destroys both tasks named by the task-work object's primary and secondary task names. [names_conflicts.tsv]
 0x00312710	sdfIsPrimaryTaskRegistered	inferred	Byte-identical DDS1 counterpart: Returns whether a task with the task-work object's primary task name exists.
 0x003127E8	sdfFindTaskItemValueByKey	inferred	Byte-identical DDS1 counterpart: Returns the matching task-list item's stored value or zero if the key is absent.
+0x00312850	sdfSetTaskItemMode	inferred	Twin of DDS1 0x002CB3F8; mode 0 enables active/update/callback, 1 queues activation, 2 suspends, 3 selects callback only, and 4 selects update only.
 0x00312A00	sdfDestroyTaskResourceWork	inferred	Byte-identical dds1 twin 0x002CB5A8; Destroys nested task work, frees two buffers, and releases its allocation. [names_conflicts.tsv]
+0x00312A48	sdfCreateTaskEntry	inferred	confidence=high; matched-C; Allocates and initializes the complete task entry from its descriptor, including default callbacks; twin=0x002CB5F0.
 0x00312B50	sdfCallbackWorkOnRemove	inferred	confidence=high; matched-C; src/dds2/game/code_00310BC8.c:886:func_00312B50; Secondary-list removal callback: ignores the node key and destroys the callback-work payload through its owned destructor and storage release.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x00312B70	sdfTaskWorkStepEntry	inferred	twin of sdfTaskWorkStep; runs init (flag 4), removes item on flag 0x8000, else update callback (flag 1) and marks 0x8000 when it returns -1 [names_M49_GridSdf.tsv]
 0x00312C78	sdfTaskWorkStep	inferred	twin of DDS1 0x002CB850 (extra case 0x100000 rewrites flags to 0x10000) [names_M34_SmallSweep3.tsv]
@@ -5823,7 +5825,7 @@
 0x00328D68	sdfAllocSizeClassBlock	inferred	confidence=high; matched-C; src/dds2/game/code_00328AC8.c:174:func_00328D68; Allocates a byte-sized block from power-of-two size classes through cursor slots while preserving interrupt state; widely used core allocator.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00328E18	sdfAllocAndClearQuadwords	inferred	Allocates requested bytes and zeroes rounded-up quadwords. [names_reviewed6.tsv]
 0x00328E48	sdfReleaseChipBlock	inferred	Retires block from slot, updates owner links or free list with interrupts preserved. [names_reviewed6.tsv]
-0x00328F68	sdfQueuePendingChipValue	inferred	confidence=high; matched-C; src/dds2/sdf/sdfChip.c:93:func_00328F68; Pushes given value to chip pending queue.; source=revalidated-unapplied-names_R_Names23.tsv:74 [names_qp13.tsv]
+0x00328F68	sdfQueuePendingChipRelease	inferred	queues a checked chip-heap cell for the sdfReleaseChipBlock callback
 0x003290A0	sdfGetChipHeapStats	inferred	confidence=high; matched-C; src/dds2/game/code_00328FA8.c:38:func_003290A0; Counts chip-heap blocks, free bytes and per-size-class used cells into the supplied statistics record.; source=names_pending_main.tsv:118 [names_qp11.tsv]
 0x00329170	sdfInitGeneralHeap	inferred	confidence=high; matched-C; src/dds2/game/code_00328FA8.c:101:func_00329170; Allocates the general heap and creates its aligned free block between two end sentinels, then initializes its synchronized release request.; source=names_pending_main.tsv:121 [names_qp11.tsv]
 0x00329228	sdfGetMemoryBlockState	inferred	Returns the allocator block state halfword at +0x0C.
@@ -5833,7 +5835,7 @@
 0x003297B0	sdfSkipNextListNode	inferred	Bypasses the immediate next node and reconnects the following node to the current one. [names_reviewed8.tsv]
 0x003297C8	sdfReleaseResourceAllocation	inferred	confidence=high; matched-C; src/dds2/game/code_00329600.c:37:func_003297C8; Releases an allocation under the interrupt lock: coalesces adjacent unused blocks or marks the released block unused and clears its reference count; restores interrupts only when previously enabled.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00329868	sdfReleaseCurrentResourceHandle	inferred	Obtains the active resource handle and releases it. [names_reviewed21.tsv]
-0x003298C0	sdfQueueNonzeroResourceId	inferred	Pushes only nonzero resource IDs to the pending queue; release timing is not established. [names_reviewed10.tsv]
+0x003298C0	sdfQueueGeneralAllocationRelease	inferred	installed general-heap callback releases each nonzero queued SdfMemBlock descriptor
 0x00329910	sdfDecrementAllocationReferenceCount	inferred	Decrements the allocation reference count unless it is already zero. [names_reviewed8.tsv]
 0x00329930	sdfFindGeneralBlockByAddress	inferred	confidence=high; matched-C; src/dds2/game/code_00329600.c:111:func_00329930; Scans used general-heap blocks for an exact data-address match under the interrupt lock; does not promise NULL on a missing address.; source=names_pending_main.tsv:129 [names_qp11.tsv]
 0x00329A00	sdfGetGeneralHeapStats	inferred	confidence=high; matched-C; src/dds2/game/code_00329600.c:136:func_00329A00; Peer-matched C proposal; M141; source=names_pending_main.tsv:131 [names_qp12_apply.tsv]

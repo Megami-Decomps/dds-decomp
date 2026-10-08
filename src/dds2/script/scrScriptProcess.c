@@ -1,8 +1,10 @@
 #include "common.h"
+#include "kwln.h"
 #include "sdf_resource.h"
 
 #include "scr.h"
 #include "sdf.h"
+#include "kwln_task_lifecycle.h"
 
 SdfMemBlock *sdfReadNamedResource(const char *path, u32 *outAddress, u32 *outSize);
 
@@ -116,7 +118,6 @@ void scrProcDestroyTask(ScrData *process) {
 extern s32 strcmp(const char *a, const char *b);
 
 extern u8 scrIsCurrentWorkTask(u32);
-extern void kwlnTaskDestroyWithHierarchy(KwlnTask *task, s32 flag);
 
 
 /* Walk the script-name table, releasing each node's task or process. */

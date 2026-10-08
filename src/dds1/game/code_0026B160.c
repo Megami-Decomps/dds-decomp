@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_resource.h"
+#include "kwln_task_lifecycle.h"
 
 extern u8 D_003DC1C0[];
 

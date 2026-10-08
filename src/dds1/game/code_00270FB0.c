@@ -6,6 +6,7 @@
 #include "eff.h"
 #include "mnu_shop.h"
 #include "mnu_camp_work.h"
+#include "kwln_task_lifecycle.h"
 
 extern void mnuDestroyWindowContainer(u32);
 

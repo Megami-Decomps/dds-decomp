@@ -8,6 +8,7 @@
 #include "sdf_resource.h"
 #include "sdf_sif_command.h"
 #include "scr.h"
+#include "kwln_task_lifecycle.h"
 
 enum {
     EVT_PACKET_LIST_BYTES = 0x20,
@@ -65,7 +66,6 @@ extern u32 kwlnDrawSurfaceIndex;
 
 extern u32 kwlnDrawControlFlags;
 
-extern s32 kwlnTaskDestroyWithHierarchyByName(const char *name, s32 arg1);
 
 
 extern KwlnTask *kwlnTaskFindByPriority(u32 prio);
@@ -169,7 +169,6 @@ extern s8 D_0032453B[];
 
 extern void evtDrawHeapUsageOverlay(SdfPoolNode *);
 
-extern void kwlnTaskDestroyWithHierarchy(void *, s32);
 
 extern void func_0010AC98(void);
 

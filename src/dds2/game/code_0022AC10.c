@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_slot.h"
 #include "sdf_resource.h"
 #include "file_pac.h"
 #include "btl_state.h"
@@ -94,7 +95,6 @@ extern void *sdfAllocAndClearQuadwords(s32);
 
 extern void func_002C7CE8(void *);
 
-extern void sndReleaseSlotOwner(void *);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
@@ -322,7 +322,6 @@ extern SdfPoolNode kwlnPositionedTextSurface;
 
 extern void sdfReleaseChipBlock(void *);
 
-extern void sdfQueueNonzeroResourceId(void *);
 
 extern void mdlDestroyContext(MdlCtx *);
 
@@ -1198,18 +1197,6 @@ s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *list, s32 row) {
 
 INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022C600);
 
-/* 0x108-byte sound cache owner, with 29 file/handle slots; not a battler. */
-typedef struct SoundSlotOwner {
-    u32 flags;
-    s32 category;
-    s32 id;
-    s32 refCount;
-    s32 load[2];
-    s32 slot[0x1D];
-    s32 handle[0x1D];
-    struct SoundSlotOwner *prev;
-    struct SoundSlotOwner *next;
-} SoundSlotOwner;
 
 /* 0x20-byte model cache entry owns a file/PAC request and a sound-cache reference. */
 typedef struct BattleModelEntry {
@@ -1539,7 +1526,7 @@ void btlSubmitFrameAndQueueRuntimeHandle(void) {
     sdfCreateDescriptorPacket(packetList, (s32)kwlnHeldTextureReference->primaryResource,
                               0, 0, 0x200, 0xe0, (s32)runtime->resource, 0);
     D_00380608.append((SdfListHead *)&D_00380608, packetList);
-    sdfQueueNonzeroResourceId(runtime->handle);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)runtime->handle);
     runtime->handle = 0;
     runtime->resource = 0;
     runtime->options |= 1;
@@ -1652,7 +1639,7 @@ void btlClearRuntimeState(void) {
 void btlResetAsyncState(void) {
     void *handle = btlRuntimeState.handle;
     if (handle != 0) {
-        sdfQueueNonzeroResourceId(handle);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)handle);
         btlRuntimeState.handle = 0;
         btlRuntimeState.resource = 0;
     }
@@ -2280,7 +2267,7 @@ void btlDestroyGroupNode(BattleGroupNode *groupNode) {
     }
     if (ownsResources != 0) {
         sdfResourceListRelease(groupNode->resourceList, 1);
-        sdfQueueNonzeroResourceId((void *)groupNode->requestHandle);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)groupNode->requestHandle);
         for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
             if (groupNode->slots[slotIndex].resourceHandle != 0) {
                 sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(groupNode->slots[slotIndex].resourceHandle));

@@ -2,6 +2,7 @@
 #include "kwln.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
+#include "kwln_task_lifecycle.h"
 
 extern s32 scrReadIntParameter(s32);
 
@@ -229,7 +230,7 @@ void mnuCreateMovieViewerTask(void) {
 void mnuDestroyMovieViewerTask(void) {
     KwlnTask *movieTask = kwlnTaskGetTaskByName(mnuMovieViewerTaskName);
     if (movieTask != NULL) {
-        kwlnTaskDestroyWithHierarchy((s32)movieTask, 0);
+        kwlnTaskDestroyWithHierarchy(movieTask, 0);
         mnuMovieList.task = 0;
         mnuStopMovieDrawTask();
     }

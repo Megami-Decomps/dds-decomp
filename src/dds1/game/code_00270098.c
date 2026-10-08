@@ -2,6 +2,7 @@
 #include "kwln.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
+#include "kwln_task_lifecycle.h"
 
 extern MovObj mnuMovieDrawContext;
 
@@ -246,7 +247,7 @@ void mnuCreateMovieViewerTask(void) {
 void mnuDestroyMovieViewerTask(void) {
     KwlnTask *task = kwlnTaskGetTaskByName(mnuMovieViewerTaskName);
     if (task != NULL) {
-        kwlnTaskDestroyWithHierarchy((s32)task, 0);
+        kwlnTaskDestroyWithHierarchy(task, 0);
         mnuMovieList.task = 0;
         mnuStopMovieDrawTask();
     }

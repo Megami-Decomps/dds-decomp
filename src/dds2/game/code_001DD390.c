@@ -1,4 +1,5 @@
 #include "common.h"
+#include "snd_slot.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "sdf_resource.h"
@@ -500,7 +501,6 @@ extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *);
 extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 extern u32 mdlGetBroadcastValue(MdlCtx *);
-extern void sdfQueueNonzeroResourceId(s32);
 extern s32 btlGetEntryFlagsUnlessDisabled(DatPartyRecord *);
 extern u16 btlRefreshUnitMaximumHpAndClampCurrentHp(DatPartyRecord *);
 extern u16 btlRefreshUnitMaximumMpAndClampCurrentMp(DatPartyRecord *);
@@ -2002,7 +2002,6 @@ void func_001E1BB8(u8 *unitAddress, u32 kind, u32 index) {
 }
 
 
-extern void sndReleaseSlotOwner(struct SoundSlotOwner *);
 extern void sdfReleaseDevSlot(s32, s32, s32);
 extern char D_00417940[]; /* "btl:unit transparency delete[%p]\n" */
 
@@ -3536,7 +3535,7 @@ u32 func_001E50E0(BtlModelChangeArgs *args) {
             btlDestroyUnit(unit->mirror);
             unit->mirror = NULL;
             if (unit->unk350 != 0) {
-                sdfQueueNonzeroResourceId(unit->unk350);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)unit->unk350);
                 unit->unk350 = 0;
                 unit->unk34C = 0;
             }
@@ -4688,7 +4687,7 @@ void btlReleaseUnitResources(BtlUnit *unit) {
     }
     btlReleaseActorModelResources(unit);
     if (unit->unk350 != 0) {
-        sdfQueueNonzeroResourceId(unit->unk350);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)unit->unk350);
         unit->unk350 = 0;
         unit->unk34C = 0;
     }
@@ -8614,17 +8613,17 @@ void btlFreeFieldBlocks(void) {
     BattleFieldBlocks *blocks = (BattleFieldBlocks *)btlGetRuntime();
     btlWaitForPendingWorkAndReleaseBuffers();
     if (blocks->fieldTB != 0) {
-        sdfQueueNonzeroResourceId(blocks->fieldTB);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTB);
         blocks->fieldTB = 0;
         btlBossDebugPrintf(D_00418C58);
     }
     if (blocks->fieldF2 != 0) {
-        sdfQueueNonzeroResourceId(blocks->fieldF2);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldF2);
         blocks->fieldF2 = 0;
         btlBossDebugPrintf("btl:free field F2\n");
     }
     if (blocks->fieldF1 != 0) {
-        sdfQueueNonzeroResourceId(blocks->fieldF1);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldF1);
         blocks->fieldF1 = 0;
         btlBossDebugPrintf("btl:free field F1\n");
     }
@@ -8988,7 +8987,7 @@ u32 btlPollFieldArchiveLoad(args)
                                              args->fieldF1, args->fieldF2, args->fieldTB, 0);
             btlInitializeSceneLightingAndTint();
             if (blocks->fieldTB != 0) {
-                sdfQueueNonzeroResourceId(blocks->fieldTB);
+                sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)blocks->fieldTB);
                 blocks->fieldTB = 0;
                 btlBossDebugPrintf(D_00418C58);
             }
@@ -10702,24 +10701,6 @@ typedef struct SoundSlotTableEntry {
     u16 fileId;
 } SoundSlotTableEntry;
 
-/* Retain and per-slot loading state, embedded after the category/id key. */
-typedef struct SoundSlotWork {
-    u32 refCount; /* Shared retain count; release frees only on the zero transition. */
-    s32 pendingSoundId; /* Packed-track key consumed by the load-status poll. */
-    s32 pendingSlot;    /* Index into resourceHandles for the pending track. */
-    s32 fileRequests[0x1D];
-    s32 resourceHandles[0x1D];
-} SoundSlotWork;
-
-/* Shared motion-SE owner: queued files become resource handles before playback. */
-typedef struct SoundSlotOwner {
-    u32 flags; /* 1 files queued, 2 files ready; 4 track pending, 8 loading, 0x10 ready. */
-    s32 category;
-    s32 id;
-    SoundSlotWork work;
-    struct SoundSlotOwner *prev;
-    struct SoundSlotOwner *next;
-} SoundSlotOwner;
 
 extern SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32, s32);
 
