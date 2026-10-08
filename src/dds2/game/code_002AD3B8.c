@@ -437,7 +437,7 @@ s32 mnuInitializeSelectedStaffPage(KwlnTask *task) {
                                                  (struct EffectSlotSet *)context->spriteArg1,
                                                  (struct EffectSlotSet *)context->group);
     context->partyWindow.flags |= 0x200;
-    context->partyWindow.flags &= ~0x80;
+    context->partyWindow.flags &= ~MNU_PAGE_WINDOW_SPRITE_MODE;
     func_002B2C88((s32)window, 1, 0, 0);
     menu->firstListState = 0;
     mnuBeginWindowFadeTransition(menu->windows[2], &context->fade);
@@ -698,7 +698,7 @@ s32 mnuInitializeStaffPageWithSlotAsset(KwlnTask *task) {
                                                  (struct EffectSlotSet *)context->spriteArg1,
                                                  (struct EffectSlotSet *)context->group);
     context->partyWindow.flags |= 0x200;
-    context->partyWindow.flags &= ~0x80;
+    context->partyWindow.flags &= ~MNU_PAGE_WINDOW_SPRITE_MODE;
     func_002B2C88((s32)window, 1, 0, 0);
     menu->secondListReset = 0;
     mnuBeginWindowFadeTransition(menu->windows[3], &context->fade);
@@ -983,7 +983,7 @@ s32 mnuInitializeStaffValuePage(KwlnTask *task) {
                                                  (struct EffectSlotSet *)context->spriteArg1,
                                                  (struct EffectSlotSet *)context->group);
     context->partyWindow.flags |= 0x200;
-    context->partyWindow.flags &= ~0x80;
+    context->partyWindow.flags &= ~MNU_PAGE_WINDOW_SPRITE_MODE;
     func_002B2C88((s32)window, 1, 0, 0);
     menu->thirdListState = 0;
     if (menu->thirdListEnabled != 0) {
