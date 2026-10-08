@@ -858,6 +858,25 @@ typedef struct ParCell {
     u32 color;       /* 0x10 initialized to grey 0x80808080 */
 } ParCell;
 
+/* The cell-system allocation ends with this complete 0x2C-byte owner. */
+typedef struct ParSystem {
+    u16 kind;            /* 0x00: topology selector */
+    u16 bucket;          /* 0x02: packet submission bucket */
+    s32 cellCount;       /* 0x04 */
+    s32 vertexWordCount; /* 0x08 */
+    s32 groupDivisor;   /* 0x0C: cell-system allocator input */
+    s32 handle;          /* 0x10 */
+    ParCell *cells;      /* 0x14 */
+    void *vertices;      /* 0x18 */
+    void *colors;        /* 0x1C */
+    s32 object;          /* 0x20 */
+    struct ParSystem *next; /* 0x24: pending cell-system list */
+    s32 unk28;           /* 0x28 */
+} ParSystem;
+
+typedef char ParSystem_size_must_be_0x2C[(sizeof(ParSystem) == 0x2C) ? 1 : -1];
+typedef char ParSystem_cells_at_0x14[((u32)&((ParSystem *)0)->cells == 0x14) ? 1 : -1];
+
 /* Ring-effect geometry: starting angle (-pi/2) and one full turn. */
 #define EFFECT_RING_START_ANGLE (-1.5707963f)
 #define EFFECT_RING_FULL_TURN (6.2831853f)
