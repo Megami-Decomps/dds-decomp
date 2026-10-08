@@ -568,7 +568,7 @@ extern u8 D_003AA868[];
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 cellCount);
 
 PcpFlashStreakWork *effFlashRotatingStreakCreate(src)
-    PcpFlashStreakWork *src;
+    PcpFlashStreakParams *src;
 {
     SdfMemBlock *handle = sdfAllocGeneralBlock(src->particleCount * sizeof(PcpFlashRotatingParticle) + sizeof(PcpFlashStreakWork));
     PcpFlashStreakWork *work = (PcpFlashStreakWork *)sdfResourceRetainAddress(handle);
@@ -602,8 +602,8 @@ void effFlashRotatingStreakSpawnFromTable(void *table) {
     effFlashRotatingStreakCreate(effectParams);
 }
 
-void func_001724D0(PcpFlashStreakWork *src) {
-    effFlashRotatingStreakCreate(src);
+PcpFlashStreakWork *func_001724D0(PcpFlashStreakParams *src) {
+    return effFlashRotatingStreakCreate(src);
 }
 
 void effFlashRotatingStreakDestroy(PcpFlashStreakWork *work) {
