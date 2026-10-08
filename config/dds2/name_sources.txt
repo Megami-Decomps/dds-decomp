@@ -4528,6 +4528,7 @@
 0x002B8208	mnuUpdateListScrollFlags	inferred	sets list flag bits 0/1 when there are entries before/after the visible window
 0x002B8350	mnuListContainsFinalNode	inferred	Tests whether a bounded linked-list walk reaches the list's final node.
 0x002B83A0	mnuInsertListNodeRelativeToAnchor	inferred	inserts an opaque list value before or after an anchor and updates cursor/window state
+0x002B86E8	mnuRemoveListCursorNode	inferred	Removes and frees MenuList.cursor, repairs linked-node indexes and list cursor/head/last/count state, updates scroll flags; paired DDS1 native provider has the same role.
 0x002B88F0	mnuSeekListNode	inferred	resets list cursor and steps forward N nodes, tracking visible index window
 0x002B8968	mnuSelectFirstListNode	inferred	Seeks to index zero in the linked menu list, restoring both displayed window and cursor to the first entry.
 0x002B8988	mnuSelectLastListNode	inferred	seeks last node using list count [names_R_FuncNames.tsv]
