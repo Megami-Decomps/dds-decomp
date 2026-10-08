@@ -3989,3 +3989,13 @@ This suggests an original integer-address calculation or differently typed
 index. The pointer closure remains private; no steering cast, byte view,
 unsupported unsigned formal, or regression of the matched builders is kept.
 
+## Event-vector record copying
+
+DDS2 `func_00115358` builds a 48-byte, word-aligned parameter record from
+`D_00412950`, replacing its first two vectors with the established SDK
+`PCP_COPY_VECTOR` primitive. Retail's two fixed-scratch-register `lq`/`sq`
+pairs support that macro use. The full record copy is `memcpy`, not typed
+structure assignment: the byte-copy alias contract preserves the dependency
+record's vector-pointer store before the unaligned eight-byte transfers.
+No packing, additional owner view, or compiler flag override is required.
+
