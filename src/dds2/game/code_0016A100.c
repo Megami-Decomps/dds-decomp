@@ -136,7 +136,7 @@ typedef struct {
     u32 color;          /* 0x50 */
     f32 baseFirst;      /* 0x54 */
     f32 baseSecond;     /* 0x58 */
-    void *system;       /* 0x5C */
+    ParSystem *system;  /* 0x5C: allocated cell system */
     u32 handle;         /* 0x60 */
 } EffThunderWork4C; /* 0x64 */
 
@@ -644,7 +644,7 @@ EffThunderWork4C *effCreateThunderCellSystemWork(EffThunderHead4C *source) {
     work->handle = allocationHandle;
     work->system = parAllocateCellSystem(work->head.count, work->head.perCell, 0, PAR_CELL_TOPOLOGY_FIVE_VECTOR);
     parRiseFallSymmetricCellAlpha(work->system, work->head.firstDispatchArg, work->head.secondDispatchArg, work->head.thirdDispatchArg);
-    parSetCellDrawBucket((ParSystem *)work->system, work->head.systemParam);
+    parSetCellDrawBucket(work->system, work->head.systemParam);
     for (cellIndex = 0; cellIndex < work->head.count; cellIndex++) {
         work->cells[cellIndex].unk00 = 0;
         work->cells[cellIndex].unk04 = 0;

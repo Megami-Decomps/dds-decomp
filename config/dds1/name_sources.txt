@@ -4809,7 +4809,7 @@
 0x0027C3A0	mnuCreateWindowContainer	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027C430	mnuDestroyWindowContainer	inferred	DDS2 func_002B9520 twin; frees list, optional resource, container [names_R_FuncNames.tsv]
 0x0027C470	mnuSetWindowOverlaySprite	inferred	Sets window container's overlay sprite handle. [names_reviewed5.tsv]
-0x0027C478	mnuSetWindowContainerState	inferred	DDS2 func_002B9568 twin; writes state at +0x94 [names_R_FuncNames.tsv]
+0x0027C478	mnuSetWindowFadeScale	inferred	Stores the window opacity scale used by list, decoration and resource drawing and fade transitions
 0x0027C480	mnuConfigureWindowSpriteAndGrid	inferred	Sets window position, grid bounds, primary sprite and tinted overlay. [names_reviewed14.tsv]
 0x0027C558	mnuForwardDupArg	inferred	mnu menu, title, shop, or movie UI in game/code_00279CC0.c
 0x0027C570	mnuInitializeWindowEntryPlacement	inferred	Stores the entry value, x and y coordinates, a y-offset of three and the draw option. [names_reviewed18.tsv]

@@ -607,7 +607,7 @@ void mnuCreatePartySelectionWindow(MenuContext *context) {
     s32 placement;
 
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 6, 0x16);
-    mnuSetWindowContainerState(window, 0x100);
+    mnuSetWindowFadeScale(window, 0x100);
     mnuInitializeBasicWindowLayout(window, context->panelModel, 0xC);
     mnuSetWindowPanelBounds(window, context->partySelectionLayout, 0, 0, 0, 0);
     window->list->context = context;
@@ -1318,9 +1318,10 @@ s32 func_002B3788(KwlnTask *callback) {
                                     (StaffSlots *)&context->displayHandle);
 
     if (menuWork->staffMode == 0) {
-        context->partyWindow.flags = (context->partyWindow.flags | 0x200) & ~0x80;
+        context->partyWindow.flags =
+            (context->partyWindow.flags | 0x200) & ~MNU_PAGE_WINDOW_SPRITE_MODE;
     } else {
-        context->partyWindow.flags |= 0x280;
+        context->partyWindow.flags |= 0x200 | MNU_PAGE_WINDOW_SPRITE_MODE;
     }
 
     if (menuWork->staffMode == 0) {
@@ -1459,7 +1460,7 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *callback) {
         break;
     }
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, skillCount, 0x16);
-    mnuSetWindowContainerState(window, MNU_FULL_FADE);
+    mnuSetWindowFadeScale(window, MNU_FULL_FADE);
     mnuInitializeBasicWindowLayout(window, context->labelHandle, 0x1A);
     mnuSetWindowPanelBounds(window, context->equippedSkillLayout, 0, 0, 0, 0);
     mnuSetWindowEntryParameters(0, window, context->resourceHandle, 0xD, placement);
@@ -3667,4 +3668,3 @@ INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C20);
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C28);
 
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C30);
-

@@ -122,7 +122,7 @@ typedef struct {
     u8 pad9A[2];
     u32 frame;
     u32 color;        /* 0xA0 */
-    u32 system;       /* 0xA4 */
+    ParSystem *system; /* 0xA4: allocated cell system */
     EffParamWork *paramWork; /* 0xA8 */
 } EffBossWork;
 
@@ -178,8 +178,8 @@ void effBossInitializeModelGroups(EffBossWork *work)
     mdlAddEntryPlain(model, 0, 0);
     work->cellCount = model->first->frameCount;
     work->groupCount = sdfCountMapPositionRecords(model->inner);
-    work->system = (u32)parAllocateCellSystem(work->groupCount, work->cellCount, 1, PAR_CELL_TOPOLOGY_TRIANGLE);
-    parSetCellDrawBucket((ParSystem *)work->system, work->head.systemParam);
+    work->system = parAllocateCellSystem(work->groupCount, work->cellCount, 1, PAR_CELL_TOPOLOGY_TRIANGLE);
+    parSetCellDrawBucket(work->system, work->head.systemParam);
     work->groupsHandle = NULL;
     if (work->head.hasCells) {
         work->groupsHandle = sdfAllocGeneralBlock(work->groupCount * sizeof(EffBossGroup)
@@ -274,7 +274,7 @@ void effBossDestroy(EffBossWork *work) {
         }
         sdfReleaseResourceAllocation(work->groupsHandle);
     }
-    parReleaseCellSystem((ParSystem *)work->system);
+    parReleaseCellSystem(work->system);
     effDispatchParameterDataAndFreeWork(work->paramWork);
     sdfReleaseChipBlock(work);
 }
