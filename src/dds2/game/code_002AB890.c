@@ -501,7 +501,6 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
 }
 
 extern void func_002AAC98(s32, s32, s32, s32, s32, s32);
-extern void mnuDrawStaffGridLabelsForKind(s32, s32);
 extern u8 D_003E7050[];
 
 s32 func_002ACE58(KwlnTask *callback) {
@@ -512,7 +511,7 @@ s32 func_002ACE58(KwlnTask *callback) {
         ((MenuStaffContext *)context)->activeWindow->list->cursor->sortKeyPrimary,
         (s32)D_003E7050, context, 1, 0x53);
     mnuUpdateAndDrawWindowTransition(0x1e0, 0x350, 0, &((MenuStaffContext *)context)->fade, 0x53);
-    mnuDrawStaffGridLabelsForKind(0, (u32)((MenuStaffContext *)context)->group);
+    mnuDrawStaffGridLabelsForKind(0, ((MenuStaffContext *)context)->group);
     return menuSetHandler((void *)context, 1, (void *)callback);
 }
 
