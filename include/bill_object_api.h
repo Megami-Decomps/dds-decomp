@@ -7,6 +7,8 @@ struct BillObj;
 struct BillOut;
 struct BillChildPayload;
 
+/* The selected kind interprets the opaque payload word. */
+struct BillObj *billCreateIndexed(s32 kind, u32 data);
 struct BillObj *billCloneObjectRetainingSharedData(struct BillObj *source);
 void billMarkKindOneFlag(struct BillObj *billboard);
 void billSetChildHalfExtents(struct BillObj *billboard, f32 width, f32 height);
