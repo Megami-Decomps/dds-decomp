@@ -210,7 +210,7 @@ typedef struct BattleWork {
 
 
 typedef struct SoundTask SoundTask;
-extern SoundTask *sndCreateStationedSeTask(u32);
+extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 extern u32 btlCreateScriptResourceTask(BtlUnit *, u32);
 
 
@@ -2665,7 +2665,7 @@ void func_00217EB8(ActionStateLink *action) {
                     task->ownerId = action->unit->owner;
                     task->startDelay = 0xE;
                     btlStartTask(task);
-                    sound = (BtlRuntimeTask *)sndCreateStationedSeTask(scene->soundSequence);
+                    sound = sndCreateStationedSeTask(scene->soundSequence);
                     sound->startCondition.kind = BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE;
                     sound->startCondition.value.handle = task->handle;
                     btlStartTask(sound);
@@ -3489,7 +3489,7 @@ void func_002195E0(ActionStateLink *record) {
     task = (BtlRuntimeTask *)btlCreateScriptResourceTask(ctrl->prevUnit, resource);
     task->startDelay = 0xE;
     btlStartTask(task);
-    follow = (BtlRuntimeTask *)sndCreateStationedSeTask(work->soundTaskBase + variant);
+    follow = sndCreateStationedSeTask(work->soundTaskBase + variant);
     follow->startDelay = 0xE;
     btlStartTask(follow);
     follow = btlCreateImmediateCompletionTask();
@@ -5501,7 +5501,7 @@ void btlQueueSelectedActorResourceAndSound(ActionUnit *unit) {
         task->ownerId = ((ActionUnit *)unit->parentUnit)->ownerId;
         task->startDelay = 0xE;
         btlStartTask(task);
-        sound = (BtlRuntimeTask *)sndCreateStationedSeTask(scene->soundSequence + ((*slot)->mode == 0x10E ? 3 : 2));
+        sound = sndCreateStationedSeTask(scene->soundSequence + ((*slot)->mode == 0x10E ? 3 : 2));
         sound->startCondition.kind = BTL_TASK_CONDITION_HANDLE_RUNNING_OR_GONE;
         sound->startCondition.value.handle = task->handle;
         btlStartTask(sound);

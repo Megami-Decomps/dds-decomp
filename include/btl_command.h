@@ -76,7 +76,7 @@ typedef struct BtlLinkedCommand {
     s32 motionProgress;      /* 0x13C: timed-action count or one-shot aim latch */
     u8 pad140[4];
     s32 stageCount;          /* 0x144 */
-    u8 pad148[4];
+    f32 cameraDistanceOffset; /* 0x148: added after actor camera arrangement. */
     union {
         s32 progressBits;
         f32 progress;
