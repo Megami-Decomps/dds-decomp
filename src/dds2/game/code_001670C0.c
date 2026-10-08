@@ -414,8 +414,8 @@ SoundMixer *sndMixerClone(SoundMixer *src) {
 }
 
 void sndReleaseAllVoices(SoundMixer *mixer) {
-    SoundVoice *voice = mixer->voiceList;
-    SoundVoice *next;
+    BattleEffect *voice = mixer->voiceList;
+    BattleEffect *next;
 
     while (voice != NULL) {
         next = voice->next;
@@ -444,9 +444,9 @@ s32 sndReadSelectedMixerBankValue(SoundMixer *mixer, u16 kind) {
     return mixer->banks[bank].value78;
 }
 
-void sndUnlinkVoice(SoundVoice *voice) {
-    SoundVoice **link = &voice->mixer->voiceList;
-    SoundVoice *cur;
+void sndUnlinkVoice(BattleEffect *voice) {
+    BattleEffect **link = &voice->state->voiceList;
+    BattleEffect *cur;
 
     while ((cur = *link) != NULL) {
         if (cur == voice) {

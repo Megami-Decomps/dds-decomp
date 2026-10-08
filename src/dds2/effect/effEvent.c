@@ -1103,11 +1103,10 @@ typedef struct EffEventInit {
 typedef struct EffEventWork {
     EffEventInit init;
     void *actor;          /* Linked model/event owner; concrete identity is unknown. */
-    void *effect;
+    BattleEffect *effect;
 } EffEventWork;
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern void *func_00168548(u32, u16, s32, s32);
-extern void func_00169168(void *, f32);
+extern void func_00169168(BattleEffect *, f32);
 
 /* Allocate the compact record, copy its init prefix, then attach the new effect. */
 EffEventWork *effEventCreate(SoundMixer *owner, u16 kind, const EffEventInit *params) {

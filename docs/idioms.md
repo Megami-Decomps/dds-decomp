@@ -2995,4 +2995,35 @@ DDS1 `001D6050` reads an unsigned frame count at status-record
 the slot's `alphaFrameScale` and the singleton's `modelFrameScale`,
 then converts the result to a signed frame duration. Reuse that primary
 motion owner rather than introducing another status-table view.
+DDS2 `001E2E58` uses the same slot metadata and calculation, with the
+singleton scale at `+0x4C8` instead of DDS1's `+0x494`.
+
+
+## Actor-panel reserve initializer fields
+
+DDS2 `001C2450` and DDS1 `001B7238` initialize the four reserve entries
+at `BattleActorPanelWork + 0x7C0`, not the three active entries at `+0x0C`.
+The presentation words at `+0x08` and `+0x0C` are cleared and set to 180
+respectively. Their meaning is not established, so they remain `unk08`
+and `unk0C` in the existing presentation owner.
+
+The selected reserve index at work `+0x7BC` is a signed halfword:
+DDS2 `001C269C` loads it with `LH` before indexing the reserve row.
+Keep that cursor distinct from the party-record index at `+0x7BE`.
+
+## Battle effect allocation and shared sound ownership
+
+DDS1 `00160958` and DDS2 `00168548` allocate and clear `0x128` bytes.
+Their object is the same owner that `sndUnlinkVoice` follows through
+`next` at `+0x124` and that the frame helpers update at `+0x10`:
+one `BattleEffect`, not a sound-list prefix cast to a separate effect.
+The pointer at `+0x04` is its real `SoundMixer`; release decrements that
+mixer's active count at `+0xC3C`. The allocator narrows its second
+argument with `ANDI 0xFFFF` before bank selection and the `SH +0x1C`,
+so its formal is `u16 kind` in both games.
+
+`btlReleaseEventData` legitimately reuses one `void *` temporary for
+two different owned allocations, the effect and then its mixer. Keep
+that generic release local rather than adding casts between unrelated
+owners; the public release prototypes retain their concrete types.
 

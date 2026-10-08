@@ -1149,7 +1149,7 @@ typedef struct EffEventInit {
 typedef struct EffEventWork {
     EffEventInit init;
     void *actor;          /* Linked model/event owner; concrete identity is unknown. */
-    void *effect;
+    BattleEffect *effect;
 } EffEventWork;
 
 typedef struct {
@@ -1157,8 +1157,7 @@ typedef struct {
 } __attribute__((packed)) FileRecordHeader;
 
 
-extern SoundVoice *func_00160958(SoundMixer *, u16, void *, s32);
-extern void func_00161588(void *, f32);
+extern void func_00161588(BattleEffect *, f32);
 
 /* Allocate the compact record, copy its init prefix, then attach the new effect. */
 EffEventWork *effEventCreate(SoundMixer *owner, u16 kind, const EffEventInit *params) {
