@@ -738,51 +738,43 @@ void effFadeFrameAdvance(s32 *counter) {
     *counter = frame + 1;
 }
 
-/* 0x18-byte effect header followed by a copied 0x40-byte fade payload. */
-typedef struct EffFadeVectorWork {
-    u8 vector[0x10];
-    u32 frame;
-    u32 color;
-    u8 source[0x40];
-} EffFadeVectorWork;
-
-u8 *effCreateFadeVectorWork(source)
-const u8 *source;
+EffFadeVectorWork *effCreateFadeVectorWork(source)
+const EffLensFlareParams *source;
 {
-    u8 *effect = (u8 *)sdfAllocSizeClassBlock(0x58);
-    memset(effect, 0, 0x58);
-    VU0_STORE_VF(vf0, effect);
-    memcpy(effect + 0x18, source, 0x40);
+    EffFadeVectorWork *effect = sdfAllocSizeClassBlock(sizeof(EffFadeVectorWork));
+    memset(effect, 0, sizeof(EffFadeVectorWork));
+    VU0_STORE_VF(vf0, effect->vector);
+    memcpy(&effect->source, source, sizeof(effect->source));
     return effect;
 }
 
-void effCreateFadeVectorFromFile(void) {
-    u64 resource;
+EffFadeVectorWork *effCreateFadeVectorFromFile(void *work) {
+    const EffLensFlareParams *resource;
 
-    resource = fileResolvePrimaryBuffer();
-    effCreateFadeVectorWork(resource);
+    resource = fileResolvePrimaryBuffer(work);
+    return effCreateFadeVectorWork(resource);
 }
 
-void effFreeFadeVectorWork(void) {
-    sdfReleaseChipBlock();
+void effFreeFadeVectorWork(EffFadeVectorWork *work) {
+    sdfReleaseChipBlock(work);
 }
 
-void effCloneFadeVectorWork(s32 work) {
-    effCreateFadeVectorWork(((EffFadeVectorWork *)work)->source);
+void effCloneFadeVectorWork(EffFadeVectorWork *work) {
+    effCreateFadeVectorWork(&work->source);
 }
 
-void effResetFadeVectorFrame(s32 work) {
-    ((EffFadeVectorWork *)work)->frame = 0;
+void effResetFadeVectorFrame(EffFadeVectorWork *work) {
+    work->frame = 0;
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002DE460);
 
-void effCopyFadeWorkVector(s128 *dst, s128 *src) {
+void effCopyFadeWorkVector(f32 *dst, const f32 *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void effSetFadeVectorColor(s32 work, u32 value) {
-    ((EffFadeVectorWork *)work)->color = value;
+void effSetFadeVectorColor(EffFadeVectorWork *work, u32 value) {
+    work->color = value;
 }
 
 

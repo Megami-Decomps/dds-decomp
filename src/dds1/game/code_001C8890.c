@@ -7593,7 +7593,7 @@ void func_001DD698(void) {
 
 extern void btlFlagUserAndTargetDefeat(BtlLinkedCommand *, BtlLinkedCommand *);
 extern void btlInitTargetCursorAndFacing(BtlLinkedCommand *, BtlCamState *);
-extern void func_001EEAE0(BtlLinkedCommand *, BtlLinkedCommand *);
+extern void func_001EEAE0(BtlLinkedCommand *, BtlCamState *);
 extern void func_001E2FF8(BtlLinkedCommand *);
 extern void btlSetupActionCameraPair(BtlLinkedCommand *);
 
@@ -7616,7 +7616,7 @@ void btlInitializeLinkedActionCamera(BtlLinkedCommand *action) {
             }
         } else {
             action->stepKind = 11;
-            func_001EEAE0(action, action);
+            func_001EEAE0(action, &action->camera);
         }
     } else {
         if (btlMatchLinkedActorFlags((s32)action)) {
