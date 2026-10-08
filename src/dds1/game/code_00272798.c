@@ -113,7 +113,7 @@ s32 mnuStartStaffDisplay(KwlnTask *task) {
 u32 mnuConfigureCampDrawContextPanel(KwlnTask *task) {
     StaffMenuWork *context = (StaffMenuWork *)kwlnTaskGetUserValue(task);
     mnuActivatePanelAndConfigureGridResources(context->scrollPanel,
-                                               context->staffSlots.baseResources[3], 0, 1);
+                                               (s32)context->staffSlots.baseResources[3], 0, 1);
     return 1;
 }
 
@@ -136,7 +136,7 @@ s32 mnuDrawStaffImageScreen(KwlnTask *callback) {
     mnuDrawBackdrop((s32)(context->background), 0x20);
     func_0027E8D8(-0x10, -8, 0, context->scrollPanel, 0x54);
     mnuCreateStaffImageSprite(0x14);
-    mnuDrawStaffGridLabelsForKind(2, context->staffSlots.baseResources[6]);
+    mnuDrawStaffGridLabelsForKind(2, (u32)context->staffSlots.baseResources[6]);
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
 
@@ -173,15 +173,15 @@ void func_00272BC0(s32 x, s32 y, s32 z, struct MenuList *list,
         count = (FrFontGlyph *)func_001978E8(x + 0x910, y + 0x20, z, color,
                                           buffer, (s32)label);
         func_001958A0(count, 1, drawArg);
-        frFontQueueGlyphInSelectedSlot(count);
+        frFontQueueGlyphForCurrentDrawBuffer(count);
     } else {
         s32 selected = (list->cursor == node);
 
         node->value = D_003BC6D8;
         itfDrawGridWithResolvedSlot(x + 0x80, y + 0x30, z, 1,
-                                   (EffectSlotSet *)(u32)context->staffSlots.baseResources[2], selected + 9, drawArg);
+                                   context->staffSlots.baseResources[2], selected + 9, drawArg);
         itfDrawGridWithResolvedSlot(x + 0x7F0, y + 0x30, z, 1,
-                                   (EffectSlotSet *)(u32)context->staffSlots.baseResources[2], selected + 0xB, drawArg);
+                                   context->staffSlots.baseResources[2], selected + 0xB, drawArg);
     }
 }
 

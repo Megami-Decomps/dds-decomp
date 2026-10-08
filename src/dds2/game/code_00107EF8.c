@@ -752,7 +752,7 @@ void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors, const char *
 
     glyph = func_0019F448(width << 4, height << 3, 0, colors, text, NULL);
     frFontDrawGlyphInDefaultMode(glyph);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 /* Zero frames leaves the prior state untouched; zero countLimit selects the -1 sentinel. */
@@ -1541,8 +1541,8 @@ s32 evtDrawConditionalHeapUsageOverlay(void) {
 }
 
 extern void *func_0011F250(s32, s32, s32, s32, s32, u32, u32);
-extern s32 func_0019C628(void);
-extern s32 func_0019C618(void);
+extern s32 frFontGetParentGlyphCount(void);
+extern s32 frFontGetChildGlyphCount(void);
 extern s32 effGetFontListCount(void);
 extern const char D_004113A0[];
 
@@ -1565,8 +1565,8 @@ s32 func_0010B7B8(KwlnTask *task) {
     sdfAppendPacket(list, (u32)packet);
     sdfAppendPacket(list, (u32)func_0011F250(0x70d0, 0x7968, 0xffff7f,
                                           0xf70, 0x98, 0x20000000, 0x40806040));
-    fontCount = func_0019C628();
-    textCount = func_0019C618();
+    fontCount = frFontGetParentGlyphCount();
+    textCount = frFontGetChildGlyphCount();
     gsCount = effGetFontListCount();
     sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(0x7100, 0x7980,
                     0xffff80, 0, D_004113A0, fontCount, textCount, gsCount));

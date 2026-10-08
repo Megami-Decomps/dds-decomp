@@ -822,6 +822,8 @@
 0x00126110	fldRunPendingSceneAction	inferred	Invokes the stored scene action when nonzero and resets it afterwards. [names_reviewed5.tsv]
 0x00126140	fldConsumeNextSceneRequest	inferred	Copies pending scene identifiers to outputs with the world base applied and clears both source slots. [names_reviewed5.tsv]
 0x00126198	fldCreateDummyMatter	inferred	fld field scene and resources in game/code_0011D3A0.c
+0x00126200	fldResolveWorldObjectByResourceId	inferred	Resolves a resource ID through its named kind-6 world objects, or lazily creates and caches dummy matter for resources without a name-entry list; returns NULL when unresolved.
+0x00126310	fldResolveWorldObjectByResourceEntryName	inferred	Matches the supplied string against resource name entries, then resolves a kind-11 world object using the enclosing resource name; returns NULL when unresolved.
 0x001270A8	fldCreateResourceScriptObjects	inferred	L13
 0x00127588	fldLoadSceneRequestFiles	inferred	copies four file-name pointers from the request record, then formats area directory + name and loads each file (func_002EB028) when scene state < 500 [names_M72_FieldLarge.tsv]
 0x00127708	fldProcessFieldRequest	inferred	Uses request words to invoke the field setup routine and creates the player for non-special scene states; DDS2 twin 00129CC0.
@@ -1786,6 +1788,7 @@
 0x00178620	effCreateChargeWork	inferred	eff effect resources and animation in effect/effPCPMisc.c
 0x001786C0	effPcpChargeReleaseResources	inferred	releases both param handles and backing allocation [names_R_FuncNames.tsv]
 0x001786F8	effCopyChargeResources	inferred	eff effect resources and animation in effect/effPCPMisc.c
+0x00178790	effPcpChargeUpdateAndDrawHistory	inferred	registered charge callback captures up to 25 rows of seven model positions, ages and scales active samples, and draws billboard history with saved animation frames
 0x00178B08	effPcpChargeSetScale	inferred	Sets the charge effect work scale parameter. [names_reviewed6.tsv]
 0x00178B10	effPcpChargeSetColor	inferred	Sets the charge effect work packed color parameter. [names_reviewed6.tsv]
 0x00178B18	effPcpSpawnOnceCreate	inferred	allocates compact work with two table parameter handles [names_R_FuncNames.tsv]
@@ -2379,14 +2382,18 @@
 0x00194788	frFontReleaseUnreferencedGlyphItem	inferred	clears glyph item table and recycles node when references reach zero [names_reviewed5.tsv]
 0x00194800	frFontAdvanceOrRetainFadingGlyph	inferred	retains glyph while fade advances otherwise advances chain [names_reviewed5.tsv]
 0x00194840	frFontReleaseGlyphChain	inferred	confidence=high; matched-C; src/dds1/interface/frFont.c:217:func_00194840; Peer-matched C proposal; M141; source=names_pending_main.tsv:142 [names_qp12_apply.tsv]
-0x00194920	frFontQueueGlyphInSelectedSlot	inferred	links glyph into slot selected by current font index [names_reviewed5.tsv]
+0x00194920	frFontQueueGlyphForCurrentDrawBuffer	inferred	Links a glyph chain into the current draw-buffer slot using the selector low byte directly; returns signed zero. The runtime alternates selectors 0/1.
+0x00194978	frFontGetCachedItemCount	inferred	Loads the retained font-cache record count at FrFontSystem+0x144.
+0x00194988	frFontGetChildGlyphCount	inferred	Loads the live pooled child-glyph count at FrFontSystem+0x148.
+0x00194998	frFontGetParentGlyphCount	inferred	Loads the live pooled parent-glyph count at FrFontSystem+0x14C.
 0x00194CD0	frFontAppendClonedGlyph	inferred	Clones a glyph; if cloning succeeds, links it after the destination. [names_reviewed6.tsv]
 0x00194D20	frFontCreateAtlasItem	inferred	readability/matching review (QP16)
 0x00194E00	frFontCloneEntryResource	inferred	allocates 0x120 bytes, itfSplitRelativeSegments on the slot resource, then func_00198088 [names_M33_SmallSweep2.tsv]
 0x00194E80	frFontRetainOrCreateCachedItem	inferred	src/dds1/interface/frFont.c func_00194E80: Retains cached item or clones font resource, creates item and caches it by slot and ID. [names_reviewed24.tsv]
 0x00194F78	frFontSetupGlyph	inferred	initializes glyph record fields from parameters
 0x00194FC0	frFontInitGlyph	inferred	zero-initializes glyph record with defaults and self link
-0x00195160	frFontAppendGlyphFromData	inferred	Builds a glyph from data and three byte attributes, then links it after previous glyph. [names_reviewed6.tsv]
+0x00195010	frFontCreateGlyphFromCode	inferred	Dequeues a child glyph, maps its encoded 16-bit code into a cached item, initializes metrics and returns the glyph pointer.
+0x00195160	frFontAppendTextToGlyphChain	inferred	Decodes an encoded text string into a glyph chain and optionally attaches it after the supplied prior glyph.
 0x00195360	frFontSetContextEncodedByte	inferred	doubles low byte and clamps to sentinel in context [names_reviewed5.tsv]
 0x001953D8	frFontSetGlyphChainDimensions	inferred	propagates advance and height to child glyphs then measures chain [names_reviewed5.tsv]
 0x00195450	frFontSetContextPair	inferred	Assigns the two supplied words to context fields. [names_reviewed6.tsv]
@@ -2398,7 +2405,7 @@
 0x00195550	frFontAdvanceGlyphFade	inferred	reduces alpha and advances vertical position of fading glyph children [names_reviewed5.tsv]
 0x00195868	frFontDrawGlyphInDefaultMode	inferred	confidence=high; matched-C; src/dds1/interface/frFont.c:488:func_00195868; Uses shared font render flags with draw mode zero, not an override flag mask.; source=revalidated-unapplied-names_R_Names31.tsv:19 [names_qp12_apply.tsv]
 0x00195880	frFontDrawGlyphWithSharedFlags	inferred	forwards glyph and mode with shared render flags to drawing routine [names_reviewed5.tsv]
-0x00195B10	frFontAdvanceSelectedGlyphSlot	inferred	Advances one of the two font system glyph slots using func_00194840.
+0x00195B10	frFontReleaseOppositeDrawBufferGlyphs	inferred	Releases slot 1 when the current draw-buffer selector low byte is zero, otherwise slot 0; returns signed zero.
 0x00195B60	frFontLinkGlyphAfterPrevious	inferred	Links a glyph with position-next set so its horizontal position follows the preceding glyph.
 0x00195B78	frFontLinkGlyph	inferred	splices a glyph record into another's list with optional pos copy
 0x00195BD8	frFontLoadTemporaryEntry	inferred	loads font resource into temporary entry [names_reviewed5.tsv]

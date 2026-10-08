@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_chip.h"
+#include "sdf_pac_work.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
 
@@ -80,7 +81,7 @@ extern s32 sdfRelocatePackedResourceWordsFromHeader();
 /* Retain the handle and relocated motion data, retire the file entry, then run
  * the group job. This callback completes the additional file request. */
 void mdlFinishLoadJob(struct FileWork *resource, MdlLoadRequest *request) {
-    request->payload.motionResource = fileGetResourceHandle(resource);
+    request->payload.motionResource = (struct SdfMemBlock *)(u32)fileGetResourceHandle(resource);
     request->payload.motionData = (void *)sdfRelocatePackedResourceWordsFromHeader(fileGetLoadedDataAddress(resource));
     filePollEntryCleanup(resource);
     mdlExecuteAndFreeJob(request);
@@ -702,14 +703,6 @@ void mdlCopyResourceBasename(s32 selectionListIndex, s32 selectionIndex, char *d
     memcpy(destination, basename, copyLength);
     destination[copyLength] = '\0';
 }
-
-typedef struct PacWork {
-    struct PacWork *next;
-    struct PacState *owner;
-    s32 resourceHandle;
-    u8 *dataCursor;
-    u8 packet[1];
-} PacWork;
 
 typedef struct PacHead {
     u8 command;

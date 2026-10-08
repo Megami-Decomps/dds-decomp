@@ -93,8 +93,6 @@ extern s32 D_00435E5C;
 
 extern void mnuClearListFlagsOneAndTwo();
 
-extern void mnuReleaseResourceList(MenuIconState *list);
-
 extern s32 func_002C6CE8(void);
 
 extern s32 func_002C6480();
@@ -401,7 +399,7 @@ void mnuDrawStaffPartySelectionPanel(KwlnTask *task) {
             glyph = itfCreateConvertedTextGlyph(0x2B0, 0xA20, 0, 0xA09DC380, (const u8 *)D_003E78D0[0], 0);
             frFontSetChainFlag(glyph, 4);
             func_0019D550(glyph, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot(glyph);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
             selection = mnuGetPartyEntryCurrentId(unit);
             if (selection != 0) {
                 func_002AAC70(3, selection, D_00435E70, context, 1, 1, 0x53);
@@ -735,10 +733,6 @@ void mnuRefreshPartyPanelSlots(s32 context) {
     mnuReleaseAndRefreshWindowSlots(&((MenuContext *)context)->partyWindow);
 }
 
-struct MenuSlotEffectHandles;
-extern void mnuLoadPanelSectionResources(struct MenuSlotEffectHandles *slot,
-                                         struct EffectSlotSet *model,
-                                         u32 firstValue, u32 secondValue, s32 thirdValue);
 s32 mnuInitializePartySelectionState(KwlnTask *task) {
     s32 contextAddress = (s32)kwlnTaskGetUserValue(task);
     MenuContext *context = (MenuContext *)contextAddress;
@@ -754,13 +748,13 @@ s32 mnuInitializePartySelectionState(KwlnTask *task) {
     mnuCreatePartySelectionWindow(context);
 
     mnuLoadPanelSectionResources(
-        (struct MenuSlotEffectHandles *)&context->partyWindow.slots[0],
+        &context->partyWindow.slots[0],
         (struct EffectSlotSet *)context->panelModel, 5, 8, 0xB);
     mnuLoadPanelSectionResources(
-        (struct MenuSlotEffectHandles *)&context->partyWindow.slots[1],
+        &context->partyWindow.slots[1],
         (struct EffectSlotSet *)context->panelModel, 5, 9, 0xB);
     mnuLoadPanelSectionResources(
-        (struct MenuSlotEffectHandles *)&context->partyWindow.slots[2],
+        &context->partyWindow.slots[2],
         (struct EffectSlotSet *)context->panelModel, 5, 0xA, 0xB);
 
     mnuClearPartySelectionAndActivateSlots(contextAddress);
@@ -952,20 +946,22 @@ void mnuReleaseMenuWindowHandles(s32 context) {
 }
 
 /* Release both staff resource slots; their menu indices differ between games. */
-void mnuReleaseStaffMenuResources(s32 menuWork) {
-    u32 *resourceCursor = (u32 *)(menuWork + 8);
+void mnuReleaseStaffMenuResources(void *resourceBase) {
+    struct EffectSlotSet **resourceCursor = (struct EffectSlotSet **)(
+        (u8 *)resourceBase + sizeof(((StaffSlots *)0)->baseResources));
     s32 resourceCountdown = 1;
     do {
-        effResolveAndReleaseResource((struct EffectSlotSet *)*resourceCursor++);
+        effResolveAndReleaseResource(*resourceCursor++);
     } while (--resourceCountdown >= 0);
 }
 
 /* Reset texture handles for the same two resource slots. */
-void mnuReleaseStaffMenuTextureHandles(s32 menuWork) {
-    u32 *resourceCursor = (u32 *)(menuWork + 8);
+void mnuReleaseStaffMenuTextureHandles(void *resourceBase) {
+    struct EffectSlotSet **resourceCursor = (struct EffectSlotSet **)(
+        (u8 *)resourceBase + sizeof(((StaffSlots *)0)->baseResources));
     s32 resourceCountdown = 1;
     do {
-        effReleaseTextureHandlesAndResetSlots((struct EffectSlotSet *)*resourceCursor++);
+        effReleaseTextureHandlesAndResetSlots(*resourceCursor++);
     } while (--resourceCountdown >= 0);
 }
 
@@ -1249,7 +1245,7 @@ void mnuDrawSlotIcons(s32 x, s32 context) {
         handle = itfDrawUnderscoreTextSegment(0x3c0, y, 0, 0xa09dc359, (const u8 *)(D_00435E54 + slot->unitId * 45), i);
         if (handle != 0) {
             func_0019D550(handle, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot(handle);
+            frFontQueueGlyphForCurrentDrawBuffer(handle);
         }
     }
 }
@@ -1258,21 +1254,21 @@ void mnuDrawSelectedPartySlotMarkers(s32 context, StaffSlots *resources) {
     s32 alpha;
 
     alpha = 0x100 - ((MenuPageWindow *)context)->slots[((MenuPageWindow *)context)->lists[0]->cursor->index].windowSprites->fade;
-    func_00306CD0(0xa0, 0xa30, 0, alpha, 1, (EffectSlotSet *)resources->baseResources[1], 0x55, 0x53);
-    func_00306CD0(0x30, 0xaf8, 0, alpha, 1, (EffectSlotSet *)resources->baseResources[0], 0x1a, 0x53);
+    func_00306CD0(0xa0, 0xa30, 0, alpha, 1, resources->baseResources[1], 0x55, 0x53);
+    func_00306CD0(0x30, 0xaf8, 0, alpha, 1, resources->baseResources[0], 0x1a, 0x53);
 }
 
 void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, s32 model, s32 flags) {
     s32 top = y - 0x10;
     FrFontGlyph *handle;
     frFontAddSharedGlyphFlags(1);
-    handle = frFontAppendGlyphFromData((void *)model, 0, 0, 0, 0);
+    handle = frFontAppendTextToGlyphChain((const char *)(u32)model, 0, 0, 0, 0);
     frFontSetContextPair(handle, x, top);
     frFontStoreShiftedContextValue(handle, width << 4);
     frFontSetChildColors(handle, color);
     frFontClearFlagBits(1);
     func_0019D550(handle, 1, flags);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
 
 void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, MenuPanelGroup *packedGroup, s32 group, s32 unused, s32 spriteFlags) {
@@ -1404,7 +1400,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
         glyph = func_0019F5E8(x + hpOffset, y - 8, depth, color, text, 0);
         frFontSetChainFlag(glyph, chainFlag);
         func_0019D550(glyph, 1, texture);
-        frFontQueueGlyphInSelectedSlot(glyph);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
     } else {
         mnuDrawRepeatedPanelSprites(x, y, depth, 0x100, 3, costResource, 0x1B, texture);
         return;
@@ -2374,7 +2370,7 @@ void mnuDrawSelectionLabel(u16 id) {
 
     frFontSetChildColors(label, 0xA09DC35A);
     func_0019D550(label, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot(label);
+    frFontQueueGlyphForCurrentDrawBuffer(label);
 }
 
 extern MenuPoint D_00437C08[];
@@ -2425,7 +2421,7 @@ void func_002B6898(u16 affinity, s32 resource, s32 labels) {
         }
         if (glyph != 0) {
             func_0019D550(glyph, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot(glyph);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
         }
     }
 }
@@ -3407,8 +3403,6 @@ extern void effInitializeSlotWork();
 void mnuClearEntryFlags(MenuIconState *group);
 
 /* Destroy nonzero resource slots, retaining the native per-iteration count read, then free. */
-void mnuReleaseResourceList(MenuIconState *list);
-
 typedef struct MenuPos {
     s32 x;
     s32 y;
@@ -3536,19 +3530,6 @@ void mnuUpdateFade(s32 *list);
 
 
 void mnuResetWindowFadeParameters(MenuFadeFields *menu);
-
-
-/* Three resource-slot handles at +0xE4/+0xE8/+0xEC. */
-typedef struct MenuSlotEffectHandles {
-    u8 pad00[0xE4];
-    u32 handles[3];
-} MenuSlotEffectHandles;
-
-void mnuLoadPanelSectionResources(MenuSlotEffectHandles *slot,
-                                  EffectSlotSet *model, u32 firstValue,
-                                  u32 secondValue, s32 thirdValue
-                                    );
-
 
 
 void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused, u32 preserve);

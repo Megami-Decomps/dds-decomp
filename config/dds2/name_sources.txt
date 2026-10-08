@@ -644,6 +644,8 @@
 0x001286C0	fldSetPendingSceneAction	inferred	Stores the supplied scene action for later execution. [names_reviewed5.tsv]
 0x001286C8	fldRunPendingSceneAction	inferred	Invokes the stored scene action when nonzero and resets it afterwards. [names_reviewed5.tsv]
 0x001286F8	fldConsumeNextSceneRequest	inferred	Copies pending scene identifiers to outputs with the world base applied and clears both source slots. [names_reviewed5.tsv]
+0x001287B8	fldResolveWorldObjectByResourceId	inferred	Resolves a resource ID through its named kind-6 world objects, or lazily creates and caches dummy matter for resources without a name-entry list; returns NULL when unresolved.
+0x001288C8	fldResolveWorldObjectByResourceEntryName	inferred	Matches the supplied string against resource name entries, then resolves a kind-11 world object using the enclosing resource name; returns NULL when unresolved.
 0x001295E0	fldSpawnActionObjects	inferred	Spawns count action objects from 12-byte entries; first handle goes to D_00389770[0]
 0x00129B40	fldLoadSceneRequestFiles	inferred	DDS2 twin of DDS1 0x00127588 [names_M72_FieldLarge.tsv]
 0x00129CC0	fldProcessFieldRequest	inferred	Uses request words to invoke the field setup routine and creates the player for non-special scene states; DDS1 twin 00127708.
@@ -1461,6 +1463,7 @@
 0x00180258	effPcpSetDelayedPairColor	inferred	Delayed pair work initializes offset 0x10 to packed gray and broadcasts it. [names_reviewed21.tsv]
 0x00180260	effPcpChargeInitTail	inferred	DDS1 func_00178608 twin; resets tail and gray color [names_R_FuncNames.tsv]
 0x00180318	effPcpChargeReleaseResources	inferred	DDS1 func_001786C0 twin; releases handles and backing allocation [names_R_FuncNames.tsv]
+0x001803E8	effPcpChargeUpdateAndDrawHistory	inferred	registered charge callback captures up to 25 rows of seven model positions, ages and scales active samples, and draws billboard history with saved animation frames
 0x00180748	effPcpCopyVectorAF0	inferred	PCP_COPY_VECTOR to work+0xAF0
 0x00180760	effPcpChargeSetScale	inferred	Sets the charge effect work scale parameter. [names_reviewed6.tsv]
 0x00180768	effPcpChargeSetColor	inferred	Sets the charge effect work packed color parameter. [names_reviewed6.tsv]
@@ -1954,12 +1957,16 @@
 0x0019C418	frFontReleaseUnreferencedGlyphItem	inferred	clears glyph item table and recycles node when references reach zero [names_reviewed5.tsv]
 0x0019C490	frFontAdvanceOrRetainFadingGlyph	inferred	retains glyph while fade advances otherwise advances chain [names_reviewed5.tsv]
 0x0019C4D0	frFontReleaseGlyphChain	inferred	confidence=high; matched-C; src/dds2/interface/frFont.c:232:func_0019C4D0; Peer-matched C proposal; M141; source=names_pending_main.tsv:144 [names_qp12_apply.tsv]
-0x0019C5B0	frFontQueueGlyphInSelectedSlot	inferred	links glyph into slot selected by current font index [names_reviewed5.tsv]
+0x0019C5B0	frFontQueueGlyphForCurrentDrawBuffer	inferred	Links a glyph chain into the current draw-buffer slot using the selector low byte directly; returns signed zero. The runtime alternates selectors 0/1.
+0x0019C608	frFontGetCachedItemCount	inferred	Loads the retained font-cache record count at FrFontSystem+0x144.
+0x0019C618	frFontGetChildGlyphCount	inferred	Loads the live pooled child-glyph count at FrFontSystem+0x148.
+0x0019C628	frFontGetParentGlyphCount	inferred	Loads the live pooled parent-glyph count at FrFontSystem+0x14C.
 0x0019C850	frFontAppendGlyphReference	inferred	readability/matching review (QP16)
 0x0019C980	frFontAppendClonedGlyph	inferred	Clones a glyph; if cloning succeeds, links it after the destination. [names_reviewed6.tsv]
 0x0019C9D0	frFontCreateAtlasItem	inferred	readability/matching review (QP16)
 0x0019CB30	frFontRetainOrCreateCachedItem	inferred	src/dds2/interface/frFont.c func_0019CB30: Retains cached item or clones font resource, creates item and caches it by slot and ID. Twin of DDS1 func_00194E80. [names_reviewed24.tsv]
-0x0019CE10	frFontAppendGlyphFromData	inferred	Builds a glyph from data and three byte attributes, then links it after previous glyph. [names_reviewed6.tsv]
+0x0019CCC0	frFontCreateGlyphFromCode	inferred	Dequeues a child glyph, maps its encoded 16-bit code into a cached item, initializes metrics and returns the glyph pointer.
+0x0019CE10	frFontAppendTextToGlyphChain	inferred	Decodes an encoded text string into a glyph chain and optionally attaches it after the supplied prior glyph.
 0x0019D010	frFontSetContextEncodedByte	inferred	doubles low byte and clamps to sentinel in context [names_reviewed5.tsv]
 0x0019D038	frFontEnableContextMode	inferred	Sets the font context's mode at offset 0x40 and configures it with argument 0x80.
 0x0019D058	frFontSetFlagAndMeasureGlyphs	inferred	Sets a font context byte flag and caches frFontMeasureGlyphChain's result.
@@ -1973,6 +1980,7 @@
 0x0019D200	frFontAdvanceGlyphFade	inferred	reduces alpha and advances vertical position of fading glyph children [names_reviewed5.tsv]
 0x0019D518	frFontDrawGlyphInDefaultMode	inferred	confidence=high; matched-C; src/dds2/interface/frFont.c:496:func_0019D518; Uses shared font render flags with draw mode zero, not an override flag mask.; source=revalidated-unapplied-names_R_Names31.tsv:19 [names_qp12_apply.tsv]
 0x0019D530	frFontDrawGlyphWithSharedFlags	inferred	forwards glyph and mode with shared render flags to drawing routine [names_reviewed5.tsv]
+0x0019D7E0	frFontReleaseOppositeDrawBufferGlyphs	inferred	Releases slot 1 when the current draw-buffer selector low byte is zero, otherwise slot 0; returns signed zero.
 0x0019D830	frFontLinkGlyphAfterPrevious	inferred	Byte-identical DDS1 counterpart: Links a glyph with position-next set so its horizontal position follows the preceding glyph.
 0x0019D8A8	frFontLoadTemporaryEntry	inferred	loads font resource into temporary entry [names_reviewed5.tsv]
 0x0019D8C8	frFontFreeTemporaryEntry	inferred	releases temporary font entry [names_reviewed5.tsv]

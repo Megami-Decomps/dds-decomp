@@ -41,9 +41,6 @@ extern FrFontGlyph *frFontLinkGlyph(FrFontGlyph *previous, FrFontGlyph *next, s3
 extern s32 func_001958A0(FrFontGlyph *glyph, s8 mode, u32 flags);
 
 
-extern FrFontGlyph *func_001951C8(void *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *existingGlyph);
-
-
 FrFontGlyph *frFontLinkGlyphAfterPrevious(FrFontGlyph *previous, FrFontGlyph *next);
 
 
@@ -184,7 +181,7 @@ FrFontGlyph *frFontReleaseGlyphChain(FrFontGlyph *glyph) {
 
 /* Link without repositioning into the draw-buffer-indexed queue; return 0.
  * The low-byte buffer index is used directly, without a two-slot bounds check. */
-s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *glyph) {
+s32 frFontQueueGlyphForCurrentDrawBuffer(FrFontGlyph *glyph) {
     FrFontGlyph **queueSlot = &frFontWork.glyphSlots[kwlnGetDrawBufferIndex() & 0xFF];
 
     *queueSlot = frFontLinkGlyph(*queueSlot, glyph, 0);
@@ -192,17 +189,17 @@ s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *glyph) {
 }
 
 /* Return the live count of retained font-cache records. */
-s32 func_00194978(void) {
+s32 frFontGetCachedItemCount(void) {
     return frFontWork.cachedItemCount;
 }
 
 /* Return the live pooled child-glyph count. */
-s32 func_00194988(void) {
+s32 frFontGetChildGlyphCount(void) {
     return frFontWork.itemCount;
 }
 
 /* Return the live pooled parent-glyph count. */
-s32 func_00194998(void) {
+s32 frFontGetParentGlyphCount(void) {
     return frFontWork.glyphCount;
 }
 
@@ -389,7 +386,7 @@ void frFontInitGlyph(FrFontGlyph *glyph) {
 
 extern void func_001949B0(void *, s32);
 
-FrFontGlyph *func_00195010(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption) {
+FrFontGlyph *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption) {
     FrFontGlyph *glyph;
     s32 glyphIndex;
     s32 fontIndex = fontIndexArg & 0xFF;
@@ -422,7 +419,7 @@ FrFontGlyph *func_00195010(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 sec
 
 /* Build text and position its chain after the previous glyph. A NULL build
  * preserves the previous chain. */
-FrFontGlyph *frFontAppendGlyphFromData(void *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *previousGlyph) {
+FrFontGlyph *frFontAppendTextToGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, FrFontGlyph *previousGlyph) {
     FrFontGlyph *newGlyphChain = func_001951C8(text, fontIndex, firstOption, secondOption, 0);
 
     if (newGlyphChain == NULL) {
@@ -756,7 +753,7 @@ s32 func_001958A0(FrFontGlyph *glyph, s8 mode, u32 flags) {
 
 /* Release queue slot 1 when the draw-buffer index's low byte is zero, otherwise
  * slot 0; return 0. This is buffer selection, not a current-font selection. */
-s32 frFontAdvanceSelectedGlyphSlot(void) {
+s32 frFontReleaseOppositeDrawBufferGlyphs(void) {
     s32 queueIndex = (kwlnGetDrawBufferIndex() & FR_FONT_BYTE_MASK) == 0;
 
     frFontWork.glyphSlots[queueIndex] = frFontReleaseGlyphChain(frFontWork.glyphSlots[queueIndex]);
@@ -1015,7 +1012,7 @@ void frFontCreateContext(ctx)
     FrFontCtx *ctx;
 
 {
-    FrFontGlyph *childGlyph = frFontAppendGlyphFromData(&D_003BB180, 0, ctx->channel1, ctx->channel2, ctx->glyphChain);
+    FrFontGlyph *childGlyph = frFontAppendTextToGlyphChain((const char *)&D_003BB180, 0, ctx->channel1, ctx->channel2, ctx->glyphChain);
 
     ctx->glyphChain = childGlyph;
     frFontSetContextEncodedByte(childGlyph, ctx->channel3);

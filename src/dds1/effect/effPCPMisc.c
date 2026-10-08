@@ -262,7 +262,7 @@ typedef struct EffPCPBlockSetWork {
     EffParamWork **list[3];
     EffParamWork *handleB[5];
     EffParamWork *tailHandle;
-    u32 alloc[3];
+    struct SdfMemBlock *alloc[3];
     struct EffPCPBlockSetWork *source;
 } EffPCPBlockSetWork;
 
@@ -274,7 +274,7 @@ typedef struct EffPCPRotateParams {
 
 typedef struct EffPCPRotateWork {
     EffPCPRotateParams params;
-    s32 ids[3];
+    EffPCPBlockSetWork *blockSets[3];
     s32 frame;
 } EffPCPRotateWork;
 
@@ -324,10 +324,10 @@ typedef struct EffPCPRingWork {
     u32 color10;
     u32 color14;
     f32 scale;
-    s32 handle;
+    BillObj *handle;
 } EffPCPRingWork;
 void effPcpDispatchKindAndRelease(EffPCPRingWork *work) {
-    billDispatchByKind((u32)work->handle);
+    billDispatchByKind(work->handle);
     sdfReleaseChipBlock(work);
 }
 
@@ -345,7 +345,7 @@ void effPcpDrawViewAlignedRing(EffPCPRingWork *work) {
     f32 pos[4];
     f32 dir[4];
     f32 size[4];
-    s32 handle;
+    BillObj *handle;
     f32 scale;
     u32 color;
     s32 i;
@@ -365,15 +365,15 @@ void effPcpDrawViewAlignedRing(EffPCPRingWork *work) {
     VU0_LOAD_VF($vf11, work);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF($vf10, pos);
-    effCopyVector((void *)handle, pos);
+    effCopyVector(handle, pos);
     scale = work->scale;
     color = 0x10808080;
     for (i = 0; i < 10; i++) {
-        billSetChildScaleComponents((BillObj *)handle, scale, scale);
+        billSetChildScaleComponents(handle, scale, scale);
         scale *= 0.975f;
-        billSetChildParameter((BillObj *)handle, effMultiplyPackedColors(effMultiplyPackedColors(color, work->color14), work->color10));
+        billSetChildParameter(handle, effMultiplyPackedColors(effMultiplyPackedColors(color, work->color14), work->color10));
         color += 0x05000000;
-        billInvokeCallback((BillObj *)handle);
+        billInvokeCallback(handle);
     }
 }
 
@@ -947,7 +947,7 @@ extern u16 D_00354D10[8];
 extern f32 D_00354D20[8];
 
 /* vu0 routine: capture staggered model points, then draw their growing history. */
-void func_00178790(EffPCPChargeWork *work) {
+void effPcpChargeUpdateAndDrawHistory(EffPCPChargeWork *work) {
     f32 position[4] __attribute__((aligned(16)));
     u32 i;
     u32 color;
@@ -3147,14 +3147,14 @@ EffPCPBlockSetWork *effPcpCreateBlockSetWork(void *first, void **blocks) {
     for (i = 0; i < 3; i++) {
         if (work->params.groupSize[i] > 0) {
             n = work->count * work->params.groupSize[i];
-            work->alloc[i] = (u32)sdfAllocGeneralBlock(n * 4);
-            work->list[i] = (EffParamWork **)sdfResourceRetainAddress((void *)work->alloc[i]);
+            work->alloc[i] = sdfAllocGeneralBlock(n * 4);
+            work->list[i] = (EffParamWork **)sdfResourceRetainAddress(work->alloc[i]);
             work->list[i][0] = effParamWorkCreate(0, blocks[6 + i]);
             for (j = 1; j < n; j++) {
                 work->list[i][j] = 0;
             }
         } else {
-            work->alloc[i] = 0;
+            work->alloc[i] = NULL;
         }
     }
     work->handleB[0] = effParamWorkCreate(0, blocks[9]);
@@ -3215,14 +3215,14 @@ void effPcpDuplicateBlockSetHandles(EffPCPBlockSetWork *work, EffPCPBlockSetWork
     for (groupIndex = 0; groupIndex < ARRAY_COUNT(work->list); groupIndex++) {
         if (work->params.groupSize[groupIndex] > 0) {
             groupHandleCount = work->count * work->params.groupSize[groupIndex];
-            work->alloc[groupIndex] = (u32)sdfAllocGeneralBlock(groupHandleCount * 4);
-            work->list[groupIndex] = (EffParamWork **)sdfResourceRetainAddress((void *)work->alloc[groupIndex]);
+            work->alloc[groupIndex] = sdfAllocGeneralBlock(groupHandleCount * 4);
+            work->list[groupIndex] = (EffParamWork **)sdfResourceRetainAddress(work->alloc[groupIndex]);
             work->list[groupIndex][0] = effParamWorkDuplicate(src->list[groupIndex][0]);
             for (handleIndex = 1; handleIndex < groupHandleCount; handleIndex++) {
                 work->list[groupIndex][handleIndex] = 0;
             }
         } else {
-            work->alloc[groupIndex] = 0;
+            work->alloc[groupIndex] = NULL;
         }
     }
     for (handleIndex = 0; handleIndex < ARRAY_COUNT(work->handleB); handleIndex++) {
@@ -3270,7 +3270,7 @@ void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work) {
                         effDispatchParameterDataAndFreeWork(work->list[groupIndex][handleIndex]);
                     }
                 }
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(work->alloc[groupIndex]));
+                sdfReleaseResourceAllocation(work->alloc[groupIndex]);
             }
         }
         for (handleIndex = 0; handleIndex < 5; handleIndex++) {
@@ -3351,7 +3351,7 @@ EffPCPRotateWork *effPcpRotateCreate(EffPCPRotateParams *src, u32 *blocks) {
     work->frame = 0;
     for (i = 0; i < 3; i++) {
         blocks[3] = blocks[i];
-        work->ids[i] = (s32)effPcpCreateBlockSetWork(sub, (void **)&blocks[3]);
+        work->blockSets[i] = effPcpCreateBlockSetWork(sub, (void **)&blocks[3]);
         sub += 0x50;
     }
     return work;
@@ -3408,26 +3408,27 @@ EffPCPRotateWork *effPcpRotateClone(EffPCPRotateWork *src) {
     work->params = src->params;
     work->frame = 0;
     for (i = 0; i < 3; i++) {
-        work->ids[i] = (s32)sdfAllocSizeClassBlock(0x10C);
-        memset((void *)work->ids[i], 0, 0x10C);
-        ((EffPCPBlockSetWork *)work->ids[i])->params = ((EffPCPBlockSetWork *)src->ids[i])->params;
-        sub = (EffPCPBlockSetWork *)work->ids[i];
+        work->blockSets[i] = sdfAllocSizeClassBlock(0x10C);
+        memset(work->blockSets[i], 0, 0x10C);
+        memcpy(&work->blockSets[i]->params, &src->blockSets[i]->params,
+               sizeof(work->blockSets[i]->params));
+        sub = work->blockSets[i];
         sub->unkB0 = 0;
         sub->color = 0x80808080;
         sub->mode = 0;
         EE_MMI_UNIT_MATRIX(sub->matrix);
-        sub->source = (void *)src->ids[i];
+        sub->source = src->blockSets[i];
     }
     return work;
 }
 
 void effPcpRotateRelease(EffPCPRotateWork *work) {
     u32 i;
-    s32 *id;
+    EffPCPBlockSetWork **blockSets;
 
-    id = work->ids;
+    blockSets = work->blockSets;
     for (i = 0; i < 3; i++) {
-        effPcpBlockSetWorkRelease((EffPCPBlockSetWork *)id[i]);
+        effPcpBlockSetWorkRelease(blockSets[i]);
     }
     sdfReleaseChipBlock(work);
 }
@@ -3442,7 +3443,7 @@ void effPcpRotateFireIds(EffPCPRotateWork *work) {
     frame = work->frame;
     do {
         if (work->params.startFrame[i] <= frame) {
-            func_0017DCF8(work->ids[i]);
+            func_0017DCF8((u32)work->blockSets[i]);
             frame = work->frame;
         }
         i = i + 1;
@@ -3452,31 +3453,31 @@ void effPcpRotateFireIds(EffPCPRotateWork *work) {
 
 void effPcpRotateSetChildVectors(EffPCPRotateWork *work, void *src) {
     u32 i;
-    s32 *id;
+    EffPCPBlockSetWork **blockSets;
 
-    id = work->ids;
+    blockSets = work->blockSets;
     for (i = 0; i < 3; i++) {
-        effPcpCopyVector60((void *)id[i], src);
+        effPcpCopyVector60((void *)blockSets[i], src);
     }
 }
 
 void effPcpRotateSetChildValues(EffPCPRotateWork *work, u32 val) {
     u32 i;
-    s32 *id;
+    EffPCPBlockSetWork **blockSets;
 
-    id = work->ids;
+    blockSets = work->blockSets;
     for (i = 0; i < 3; i++) {
-        effPcpBlockSetSetColor((EffPCPBlockSetWork *)id[i], val);
+        effPcpBlockSetSetColor(blockSets[i], val);
     }
 }
 
 void effPcpRotateSetChildMatrices(EffPCPRotateWork *work, void *src) {
     u32 i;
-    s32 *id;
+    EffPCPBlockSetWork **blockSets;
 
-    id = work->ids;
+    blockSets = work->blockSets;
     for (i = 0; i < 3; i++) {
-        effPcpCopyBlockMatrix((void *)id[i], src);
+        effPcpCopyBlockMatrix((void *)blockSets[i], src);
     }
 }
 
@@ -5098,7 +5099,7 @@ typedef struct EffPCPDriftEventParams {
 } EffPCPDriftEventParams;
 
 typedef struct EffPCPDriftEvent {
-    void *event;
+    EffEventWork *event;
     s32 frame;
     f32 position, positionStep, angle, angleStep;
 } EffPCPDriftEvent;
@@ -5338,7 +5339,7 @@ typedef struct EffPCPPairedEventParams {
 
 typedef struct EffPCPPairedEvent {
     u32 fragment;
-    void *eventA, *eventB;
+    EffEventWork *eventA, *eventB;
     f32 phase, radius;
     f32 tilt;
     f32 tiltStep;
@@ -5633,7 +5634,7 @@ typedef struct EffPCPSpawnRangeParams {
 } EffPCPSpawnRangeParams;
 
 typedef struct EffPCPSpawnRangeEvent {
-    void *event;
+    EffEventWork *event;
     s32 frame;
     f32 height, heightStep, angle, angularStep, position, positionStep;
 } EffPCPSpawnRangeEvent;
@@ -5872,7 +5873,7 @@ typedef struct {
     u8 pad11[3];
     s32 age;
     s32 frameLimit;
-    void *event;
+    EffEventWork *event;
 } EffPCPMapEventEntry;
 
 /* Serialized model placement and fade parameters (0x1C bytes). */

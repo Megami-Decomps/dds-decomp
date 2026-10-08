@@ -125,14 +125,19 @@ typedef char MenuAssets_size_must_be_0x20[(sizeof(MenuAssets) == 0x20) ? 1 : -1]
 /* Native staff sprite banks; DDS2 retains only two base resources. */
 typedef struct StaffSlots {
 #ifdef VERSION_DDS2
-    u32 baseResources[2];
+    struct EffectSlotSet *baseResources[2];
 #else
-    u32 baseResources[7];
+    struct EffectSlotSet *baseResources[7];
 #endif
     struct EffectSlotSet *pairResources[2];
     struct EffectSlotSet *mainResources[16];
     struct EffectSlotSet *extraResources[5];
 } StaffSlots;
+
+/* The two pair owners follow the title-specific base resource bank.
+ * resourceBase may belong to StaffSlots or a menu context resource region. */
+void mnuReleaseStaffMenuResources(void *resourceBase);
+void mnuReleaseStaffMenuTextureHandles(void *resourceBase);
 
 #ifdef VERSION_DDS2
 typedef char StaffSlots_size_must_be_0x64[(sizeof(StaffSlots) == 0x64) ? 1 : -1];
@@ -481,8 +486,7 @@ typedef struct MenuPageSlot {
     struct EffectSlotSet *frame[8]; /* 0xBC */
     struct MenuSprites *windowSprites; /* 0xDC */
     MenuIconBundle *iconBundle;
-    u32 unkE4;
-    u8 padE8[8];
+    struct EffectSlotSet *panelResourceHandles[3]; /* 0xE4 */
     MenuQueuedCommand commands[2]; /* 0xF0 and 0x1114 */
 } MenuPageSlot;
 
@@ -499,7 +503,14 @@ typedef char MenuPageSlot_hp_check[((u32)&((MenuPageSlot *)0)->hp == 0x1C) ? 1 :
 typedef char MenuPageSlot_mp_check[((u32)&((MenuPageSlot *)0)->mp == 0x6C) ? 1 : -1];
 typedef char MenuPageSlot_frame_check[((u32)&((MenuPageSlot *)0)->frame == 0xBC) ? 1 : -1];
 typedef char MenuPageSlot_sprites_check[((u32)&((MenuPageSlot *)0)->windowSprites == 0xDC) ? 1 : -1];
+typedef char MenuPageSlot_panel_handles_check[
+    ((u32)&((MenuPageSlot *)0)->panelResourceHandles == 0xE4) ? 1 : -1];
 typedef char MenuPageSlot_commands_check[((u32)&((MenuPageSlot *)0)->commands == 0xF0) ? 1 : -1];
+
+void mnuLoadPanelSectionResources(MenuPageSlot *slot,
+                                  struct EffectSlotSet *model,
+                                  u32 firstValue, u32 secondValue,
+                                  s32 thirdValue);
 
 #else
 typedef struct MenuPageSlot {

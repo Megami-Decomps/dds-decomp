@@ -67,7 +67,7 @@ extern s32 func_00101E40(void);
 extern s32 kwlnRenderFrame(void);
 extern u32 func_00102850(void);
 extern u32 func_00102878(void);
-extern s32 frFontAdvanceSelectedGlyphSlot(void);
+extern s32 frFontReleaseOppositeDrawBufferGlyphs(void);
 extern void frFontReleaseAll(void);
 extern s32 func_001997E0(void);
 
@@ -89,7 +89,7 @@ s32 func_001001D8(void) {
     kwlnTaskCreate("basic_draw", 0x2B09, 1, 1, func_00102878, 0, 0);
     func_003003F0(D_003BA780);
     func_00194228(0x100, 0x200);
-    kwlnTaskCreate("font_sys", 0x4E1F, 0, 0, frFontAdvanceSelectedGlyphSlot, frFontReleaseAll, 0);
+    kwlnTaskCreate("font_sys", 0x4E1F, 0, 0, frFontReleaseOppositeDrawBufferGlyphs, frFontReleaseAll, 0);
     func_003003F0(D_003BA788);
     fileManInit();
     func_003003F0(D_003BA790);

@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "fld_resource_resolver.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
 #include "eff_dependency.h"
@@ -30,6 +31,9 @@ void *evtFindWorldObjectByIdAndKind(s32 type, s32 id);
 
 struct EffectObj;
 s32 effObjBindValidatedOwner(struct EffectObj *obj, struct EffectObj *owner);
+s32 effObjCopyMagatuhiSourceParameters(struct EffectObj *obj, struct EffectObj *first,
+                                     struct EffectObj *second, struct EffectObj *third,
+                                     struct EffectObj *fourth);
 s32 effObjBindOwnerBillEntry(struct EffectObj *obj, struct EffectObj *owner, s32 entryId);
 
 
@@ -88,7 +92,6 @@ void dds3RemoveWorldObjectNode(void *unit);
 
 void dds3RefreshStoredVec3(EffWorldNode *object);
 
-void *func_001287B8(u32 id);
 
 void evtToggleWorldSlotScaledValueFlag(void *unit, s32 enabled);
 
@@ -152,9 +155,60 @@ extern char D_00421FB0[]; /* "LIGHT_PATH_MOVE error!\n" */
 
 extern char D_00421FC8[]; /* "error: LIGHT_PATH_MOVE.\n" */
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00240D20);
+/* Copy two source points into the primary effect object. */
+s32 func_00240D20(void) {
+    struct EffectObj *primary;
+    struct EffectObj *point0;
+    struct EffectObj *point1;
 
-INCLUDE_ASM(const s32, "event/evtCommand", func_00240DE0);
+    primary = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    if (primary == NULL) {
+        evtPrintDeveloperConsoleMessage("EFFMG1_POS mg1 ID error!\n");
+        return 1;
+    }
+
+    point0 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(1));
+    point1 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(2));
+    if (point0 == NULL || point1 == NULL) {
+        evtPrintDeveloperConsoleMessage("EFFMG1_POS point ID not found!\n");
+        return 1;
+    }
+    if (effObjCopyMagatuhiSourceParameters(primary, point0, point1, NULL, NULL) == 0) {
+        evtPrintDeveloperConsoleMessage("EFFMG1_POS set error!\n");
+        return 1;
+    }
+    return 1;
+}
+
+/* Apply four effect parameters after resolving every input object. */
+s32 func_00240DE0(void) {
+    struct EffectObj *primary;
+    struct EffectObj *point0;
+    struct EffectObj *point1;
+    struct EffectObj *point2;
+    struct EffectObj *point3;
+
+    primary = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
+    if (primary == NULL) {
+        evtPrintDeveloperConsoleMessage("EFFMG2_POS mg2 ID error!\n");
+        return 1;
+    }
+
+    point0 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(1));
+    point1 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(2));
+    point2 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(3));
+    point3 = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(4));
+
+    if (point0 == NULL || point1 == NULL || point2 == NULL || point3 == NULL) {
+        evtPrintDeveloperConsoleMessage("EFFMG2_POS point ID not found!\n");
+        return 1;
+    }
+    if (effObjCopyMagatuhiSourceParameters(primary, point0, point1, point2, point3) == 0) {
+        evtPrintDeveloperConsoleMessage("EFFMG2_POS set error!\n");
+        return 1;
+    }
+    return 1;
+}
 
 s32 evtCommandEnablePathUnit(void)
 {
@@ -716,7 +770,7 @@ s32 func_00241F10(void) {
 
     unit = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             func_0035B6E0(D_00421E58, scrReadIntParameter(0));
             func_0035B6E0(D_00421E68, scrReadIntParameter(1));
@@ -774,7 +828,7 @@ s32 func_00242100(void) {
 
     unit = evtFindWorldObjectByIdAndKind(6, scrReadIntParameter(0));
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             func_0035B6E0(D_00421E58, scrReadIntParameter(0));
             targetId = scrReadIntParameter(1);
@@ -1004,7 +1058,7 @@ s32 evtCommandSetWorldSlotStatusFlag(void) {
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == 0);
     if (unit == 0) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == 0) {
             return 1;
         }
@@ -1023,7 +1077,7 @@ s32 evtCommandClearWorldSlotStatusFlag(void) {
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == 0);
     if (unit == 0) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == 0) {
             return 1;
         }
@@ -1045,7 +1099,7 @@ s32 evtCommandSetUnitRoomFloatState(void) {
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             return 1;
         }
@@ -1079,7 +1133,7 @@ s32 evtCommandSetUnitRoomIntegerState(void) {
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             return 1;
         }
@@ -1112,7 +1166,7 @@ s32 evtCommandSetUnitScaledValueFlag(void)
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             return 1;
         }
@@ -1133,7 +1187,7 @@ s32 evtCommandClearUnitScaledValueFlag(void)
         objectKind++;
     } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && unit == NULL);
     if (unit == NULL) {
-        unit = func_001287B8(scrReadIntParameter(0));
+        unit = fldResolveWorldObjectByResourceId(scrReadIntParameter(0));
         if (unit == NULL) {
             return 1;
         }

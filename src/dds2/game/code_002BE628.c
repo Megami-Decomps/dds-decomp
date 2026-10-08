@@ -13,6 +13,7 @@
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
+#include "mnu_shop.h"
 #include "mnu_list.h"
 #include "mnu_panel_state.h"
 #include "mnu_staff.h"
@@ -108,8 +109,6 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 
 
 extern s32 func_002C6CE8(void);
-
-extern void mnuReleaseResourceList(struct MenuIconState *list);
 
 
 
@@ -471,7 +470,7 @@ void func_002BFEA0(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     }
     iconX = x + positions[0];
     iconY = y + positions[1];
-    if (panel->unkE4 != 0 && (panel->flags & 0x40)) {
+    if (panel->panelResourceHandles[0] != 0 && (panel->flags & 0x40)) {
         func_002BE438(x, y, z, (struct MenuPageSpriteSlot *)panel,
                       panelIndex, 1, surface);
         return;
@@ -505,7 +504,7 @@ void func_002BFEA0(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     glyph = func_0019F5E8(labelX + 0x140, labelY - 8,
                                        z, textColor, text, 0);
     func_0019D550(glyph, 1, surface);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
     if (panel->frame[7] == NULL) {
         func_00306CD0(x + framePositions[0], y + framePositions[1], z,
                       alpha, 1, panel->frame[6], 0, surface);
@@ -1248,7 +1247,7 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
     glyph = func_0019F5E8(x + 0x2D0, y, depth, color, text, 0);
     frFontSetChainFlag(glyph, fontFlags);
     func_0019D550(glyph, 1, flags);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
     item->phase += 24;
     if (item->phase > 512) {
         item->phase -= 512;

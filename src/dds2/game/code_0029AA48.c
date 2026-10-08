@@ -54,7 +54,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
     glyph = (struct FrFontGlyph *)func_0019F6C8(x, 0x8E8, 0, color, text, 0);
     frFontSetChainFlag(glyph, 3);
     func_0019D550(glyph, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
     if (mnuKindIsSelectable(item->unitId) != 0) {
         if (context->iconFade < 0x100) {
             context->iconFade += 0x20;
