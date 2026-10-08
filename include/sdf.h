@@ -81,14 +81,23 @@ typedef struct SdfTexRef {
 /* Texture buffer GPU command words (0x40); DDS1/2 game/code_002D10B0/00329F60.c. */
 typedef struct SdfTexBuf {
     s32 gifTagWord; /* Low GIFtag word; NLOOP occupies bits 0-14. */
-    u8 pad4[0xC];
+    u32 gifTagControl; /* High GIFtag control word; one packed register. */
+    u64 gifTagRegisters; /* Packed register list: A+D. */
     u64 samplingState; /* GS TEX1 data, including minification/magnification filters. */
-    u64 unk18;
+    u64 samplingRegister; /* GS TEX1_1/TEX1_2 register selector. */
     u64 textureState; /* GS TEX0 data. */
-    u64 unk28;
+    u64 textureRegister; /* GS TEX0_1/TEX0_2 register selector. */
     u64 clampState; /* GS CLAMP data. */
     u64 clampRegister; /* GS CLAMP_1/CLAMP_2 register selector. */
 } SdfTexBuf;
+
+typedef char SdfTexBuf_size_must_be_0x40[(sizeof(SdfTexBuf) == 0x40) ? 1 : -1];
+typedef char SdfTexBuf_registers_offset_must_be_8[
+    ((u32)&((SdfTexBuf *)0)->gifTagRegisters == 8) ? 1 : -1];
+typedef char SdfTexBuf_sampling_register_offset_must_be_0x18[
+    ((u32)&((SdfTexBuf *)0)->samplingRegister == 0x18) ? 1 : -1];
+typedef char SdfTexBuf_texture_register_offset_must_be_0x28[
+    ((u32)&((SdfTexBuf *)0)->textureRegister == 0x28) ? 1 : -1];
 
 /* Native VRAM range descriptor (0x1C), shared by textures, graph buffers and streams.
  * Allocation mode is an unsigned classification: zero is a free range. */
@@ -260,10 +269,10 @@ typedef struct SdfTex {
     s32 battleTextureSlot;
     SdfTexBuf *primaryBuffer;
     SdfTexBuf *secondaryBuffer;
-    u8 *data;
-    s32 dataSize;
+    u8 *paletteData; /* 0x30: retained copy of the texture's palette colors. */
+    s32 paletteDataSize; /* 0x34: palette byte count from sdfTexGetPaletteByteSize. */
     s32 unk38;
-    void *auxiliaryAllocation; /* Owned heap allocation released alongside data. */
+    u8 *intensityMap; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
 } SdfTex;
 
 /* Semaphore ID and attached work pointers (0x14); DDS1/2 game/code_002D10B0/00329F60.c. */

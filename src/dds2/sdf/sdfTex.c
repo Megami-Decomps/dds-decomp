@@ -47,14 +47,14 @@ s32 sdfTexGetPaletteByteSize(s32 textureFormat, s32 paletteFormat, s32 paletteCo
     return colorsPerPalette * bytesPerColor * paletteCount;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032B908);
+INCLUDE_ASM(const s32, "sdf/sdfTex", sdfTexAllocatePaletteData);
 
-/* Copy the texture's backing image without changing the resource metadata. */
+/* Copy retained palette bytes without changing the texture resource metadata. */
 void sdfTexCopyImageData(SdfTex *texture, void *source) {
-    memcpy(texture->data, source, texture->dataSize);
+    memcpy(texture->paletteData, source, texture->paletteDataSize);
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfTex", func_0032B968);
+INCLUDE_ASM(const s32, "sdf/sdfTex", sdfTexCreateWithAllocatedResources);
 
 /* Release both GPU resources and unlink the texture from the active list. */
 void sdfTexRelease(SdfTex *texture) {
@@ -77,8 +77,8 @@ void sdfTexRelease(SdfTex *texture) {
     } else {
         sdfResourceListHead = prev;
     }
-    sdfFreeMemoryFromEitherHeap(texture->data);
-    sdfFreeMemoryFromEitherHeap(texture->auxiliaryAllocation);
+    sdfFreeMemoryFromEitherHeap(texture->paletteData);
+    sdfFreeMemoryFromEitherHeap(texture->intensityMap);
     sdfReleaseChipBlock(texture->reference);
     sdfReleaseChipBlock(texture);
 }
@@ -165,9 +165,9 @@ void sdfTexRefreshResourcePackets(SdfTex *texture) {
     }
 }
 
-extern SdfTex *func_0032B968(s32, s32, u32, u32, u32, u32);
+extern SdfTex *sdfTexCreateWithAllocatedResources(s32, s32, u32, u32, u32, u32);
 extern u8 sdfTexGetPaletteCount(SdfTex *);
-extern void func_0032B908(SdfTex *);
+extern void sdfTexAllocatePaletteData(SdfTex *);
 extern u8 *sdfTexSubmitPixelsForFormat(SdfTex *texture, u32 destination, u8 *pixels, s32 borrowPixels);
 extern s32 sdfTexFormatSizeHint(s32);
 extern u8 *sdfTexSubmitImageCopy(u32, s32, s32, u32, u8 *, s32);
@@ -193,7 +193,7 @@ SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {
             existing = existing->prev;
         }
     }
-    texture = func_0032B968(header->width, header->height, header->pixelFormat, header->clutFormat, header->unk11, header->unk10);
+    texture = sdfTexCreateWithAllocatedResources(header->width, header->height, header->pixelFormat, header->clutFormat, header->unk11, header->unk10);
     texture->lodParameters = header->lodParameters;
     texture->unk1E = header->unk1A;
     texture->clampMode = header->clampMode;
@@ -201,7 +201,7 @@ SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {
     texture->battleTextureSlot = header->unk20;
     pixels = (u8 *)header + (header->flags & 0xF0) + sizeof(*header);
     if (sdfTexGetPaletteCount(texture) != 0) {
-        func_0032B908(texture);
+        sdfTexAllocatePaletteData(texture);
         sdfTexCopyImageData(texture, pixels);
         pixels = sdfTexSubmitPixelsForFormat(texture, sdfTexGetSecondaryResourceWord(texture), pixels, mode);
     }
@@ -232,7 +232,7 @@ SdfTex *sdfTexAcquireAlternateResourceTexture(void *resourceAddress) {
     return sdfTexCreateFromFileHeader(resourceAddress, 1);
 }
 
-/* Build one intensity byte for every source pixel. */
+/* Build weighted-RGB intensity bytes from retained palette color data. */
 void sdfTexBuildIntensityMap(SdfTex *texture) {
     s32 stride;
     s32 count;
@@ -245,17 +245,17 @@ void sdfTexBuildIntensityMap(SdfTex *texture) {
 
     if (texture->clutFormat == 0) {
         stride = 4;
-        count = (u32)texture->dataSize >> 2;
+        count = (u32)texture->paletteDataSize >> 2;
     } else {
         stride = 2;
-        count = (u32)texture->dataSize >> 1;
+        count = (u32)texture->paletteDataSize >> 1;
     }
-    output = texture->auxiliaryAllocation;
+    output = texture->intensityMap;
     if (output == NULL) {
         output = sdfAllocateBlockBySizeThreshold(count);
-        texture->auxiliaryAllocation = output;
+        texture->intensityMap = output;
     }
-    source = texture->data;
+    source = texture->paletteData;
     do {
         if (stride == 4) {
             color = *(u32 *)source;

@@ -600,7 +600,7 @@ INCLUDE_ASM(const s32, "game/code_002A9068", func_002A9BF8);
 
 
 
-extern s32 func_002B9FF8(s32, s32, s32);
+extern struct MenuIconState *func_002B9FF8();
 
 
 
@@ -614,9 +614,9 @@ void mnuStaffInitResourceLists(u8 *work) {
     MenuFadeFields *ctx = &((MenuStaffContext *)work)->fade;
     MenuWindowContainer *list;
 
-    ((StaffResourceHeader *)work)->baseHandles[0] = func_002B9FF8(0, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
-    ((StaffResourceHeader *)work)->baseHandles[1] = func_002B9FF8(1, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
-    ((StaffResourceHeader *)work)->baseHandles[2] = func_002B9FF8(3, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
+    ((StaffResourceHeader *)work)->baseHandles[0] = (u32)func_002B9FF8(0, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
+    ((StaffResourceHeader *)work)->baseHandles[1] = (u32)func_002B9FF8(1, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
+    ((StaffResourceHeader *)work)->baseHandles[2] = (u32)func_002B9FF8(3, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
     ((StaffResourceHeader *)work)->resourceLists[0] = func_002A9BF8(D_003E56D0, 8, 0x1C0, 0x10, work, D_003E6978);
     list = func_002A9BF8(D_003E56F0, 5, 0x1C0, 0x10, work, D_003E6998);
     ((StaffResourceHeader *)work)->resourceLists[1] = list;

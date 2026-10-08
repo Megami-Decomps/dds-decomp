@@ -34,16 +34,95 @@ void sdfCopyCornerWordsWithEdgeByte(u32 *source, u32 *destination, u8 *edgeValue
 }
 
 
-INCLUDE_ASM(const s32, "game/code_002BEDC8", func_002BEEA0);
+extern void func_002BE8A8(s32, s32, s32, s32, s32, const u32 *, const u32 *, u32,
+                          f32, u32, u32, u32, u32);
+
+/* Draw enabled border strips and restore the temporary texture-coordinate changes. */
+void func_002BEEA0(s32 x, s32 y, s32 depth, s32 width, s32 height,
+                  const u32 *edgeExtents, u8 *edgeColorBytes,
+                  u32 *textureCoordinates, u32 *sourceCornerColors, u32 kind,
+                  u32 mode, u32 flip, u32 texture, u32 buffer) {
+    s32 position[2];
+    s32 dimensions[2];
+    u32 savedTextureCoordinates[4];
+    u32 cornerColors[4];
+    s32 i;
+
+    for (i = 0; i < 4; i++) {
+        savedTextureCoordinates[i] = textureCoordinates[i];
+    }
+
+    if (edgeExtents[0] != 0) {
+        position[0] = x;
+        position[1] = y - (edgeExtents[0] << 3);
+        dimensions[0] = width;
+        dimensions[1] = edgeExtents[0] << 3;
+        textureCoordinates[3] = textureCoordinates[1] + 1;
+        sdfCopyCornerWordsWithEdgeByte(sourceCornerColors, cornerColors,
+                                       edgeColorBytes, 0);
+        func_002BE8A8(position[0], position[1], depth,
+                      dimensions[0], dimensions[1],
+                      textureCoordinates, cornerColors,
+                      kind, 0.0f, mode, flip,
+                      texture, buffer);
+        textureCoordinates[3] = savedTextureCoordinates[3];
+    }
+
+    if (edgeExtents[1] != 0) {
+        position[0] = x;
+        position[1] = y + height;
+        dimensions[0] = width;
+        dimensions[1] = edgeExtents[1] << 3;
+        textureCoordinates[1] = textureCoordinates[3] - 1;
+        sdfCopyCornerWordsWithEdgeByte(sourceCornerColors, cornerColors,
+                                       edgeColorBytes, 1);
+        func_002BE8A8(position[0], position[1], depth,
+                      dimensions[0], dimensions[1],
+                      textureCoordinates, cornerColors,
+                      kind, 0.0f, mode, flip,
+                      texture, buffer);
+        textureCoordinates[1] = savedTextureCoordinates[1];
+    }
+
+    if (edgeExtents[2] != 0) {
+        position[0] = x - (edgeExtents[2] << 4);
+        position[1] = y;
+        dimensions[0] = edgeExtents[2] << 4;
+        dimensions[1] = height;
+        textureCoordinates[2] = textureCoordinates[0] + 1;
+        sdfCopyCornerWordsWithEdgeByte(sourceCornerColors, cornerColors,
+                                       edgeColorBytes, 2);
+        func_002BE8A8(position[0], position[1], depth,
+                      dimensions[0], dimensions[1],
+                      textureCoordinates, cornerColors,
+                      kind, 0.0f, mode, flip,
+                      texture, buffer);
+        textureCoordinates[2] = savedTextureCoordinates[2];
+    }
+
+    if (edgeExtents[3] != 0) {
+        position[0] = x + width;
+        position[1] = y;
+        dimensions[0] = edgeExtents[3] << 4;
+        dimensions[1] = height;
+        textureCoordinates[0] = textureCoordinates[2] - 1;
+        sdfCopyCornerWordsWithEdgeByte(sourceCornerColors, cornerColors,
+                                       edgeColorBytes, 3);
+        func_002BE8A8(position[0], position[1], depth,
+                      dimensions[0], dimensions[1],
+                      textureCoordinates, cornerColors,
+                      kind, 0.0f, mode, flip,
+                      texture, buffer);
+        textureCoordinates[0] = savedTextureCoordinates[0];
+    }
+}
+
 
 
 extern void sdfSubmitGsTestOneRegisterPacket();
 extern void effSelectPresetAndDispatch(u32, u32, u32, u32, u32, u32, u32, u32);
 extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, void *);
-extern void func_002BEEA0(s32, s32, s32, s32, s32, u32 *, u32 *,
-                        s32 *, s32, s32, s32, s32, u32, s32);
-extern void func_002BE8A8(s32, s32, s32, s32, s32, s32 *, s32,
-                        s32, f32, s32, s32, u32, s32);
+
 
 void effDrawTextureSlot(s32 x, s32 y, s32 z, s32 color, u32 flags,
                   EffectSlotSet *set, s32 slotIndex, BdWork *draw, s32 buffer) {
@@ -94,8 +173,10 @@ void effDrawTextureSlot(s32 x, s32 y, s32 z, s32 color, u32 flags,
             colors[i] = description->colors[i] + draw->parameters[i];
         }
         func_002BEEA0(x, y, z, draw->geometry.bounds[2], draw->geometry.bounds[3], description->rect,
-                     draw->bounds.texture.rect, colors, color, kind, mode, flip, texture, buffer);
-        func_002BE8A8(x, y, z, draw->geometry.bounds[2], draw->geometry.bounds[3], colors, color,
+                     (u8 *)draw->bounds.texture.rect, (u32 *)colors, (u32 *)color,
+                     kind, mode, flip, texture, buffer);
+        func_002BE8A8(x, y, z, draw->geometry.bounds[2], draw->geometry.bounds[3],
+                     (const u32 *)colors, (const u32 *)color,
                      kind, draw->geometry.angleDegrees, mode, flip, texture, buffer);
     }
     if (flags & 0x80) {
