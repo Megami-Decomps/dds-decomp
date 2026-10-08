@@ -109,14 +109,50 @@ void mnuClearTitleState(BrsSkillPackageWork *work) {
 void func_002650C0(void *work) {
 }
 
-INCLUDE_ASM(const s32, "game/code_002649B0", func_002650C8);
-
-extern char D_003BC568[];
-extern void func_003014F0(char *, char *, s32);
+extern u8 *D_003BAA84;
+extern char D_003BC560[];
+extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
+extern s32 func_003014F0(char *, const char *, ...);
 extern FrFontGlyph *func_001979C8(s32, s32, s32, s32, char *, FrFontGlyph *);
 extern u32 frFontMeasureLines(FrFontGlyph *);
 extern s32 func_001958A0(FrFontGlyph *, s8, u32);
 extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
+extern char D_003BC568[];
+
+/* Draw each nonempty reward icon row with its name and formatted parameter. */
+void func_002650C8(s32 x, s32 y, s32 depth, u32 color, BrsRewardSummary *summary,
+                  u32 textStyle, BrsSkillPackageWork *work) {
+    char formatted[32];
+    u32 colors[4];
+    MenuIconRef *icon = summary->icons;
+    u32 i;
+
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = color;
+    colors[3] = color;
+    for (i = 0; i < 3; i++) {
+        u16 id = icon->id;
+        u8 parameter = icon->param;
+        FrFontGlyph *iconGlyph;
+        FrFontGlyph *valueGlyph;
+
+        icon++;
+        if (id != 0) {
+            const u8 *name = D_003BAA84 + id * 25;
+
+            iconGlyph = itfCreateConvertedTextGlyph(x + 0x300, y, depth, color, name, NULL);
+            func_002BF438(x + 0xB20, y + 0x28, 0, colors, 0,
+                          (EffectSlotSet *)work->teardownHandle, 0x1C, 0x53);
+            func_003014F0(formatted, D_003BC560, parameter);
+            valueGlyph = func_001979C8(x + 0xC60, y + 0x18, depth, color,
+                                       formatted, iconGlyph);
+            func_001958A0(valueGlyph, 1, textStyle);
+            frFontQueueGlyphInSelectedSlot(valueGlyph);
+            y += 0xB0;
+        }
+    }
+}
 
 void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 color) {
     char text[32];
@@ -143,4 +179,3 @@ void mnuQueueRightAlignedFormattedInfoText(s32 x, s32 y, s32 z, s32 w, const Brs
 INCLUDE_SDATA(const s32, "game/code_002649B0", D_003BC560);
 
 INCLUDE_SDATA(const s32, "game/code_002649B0", D_003BC568);
-
