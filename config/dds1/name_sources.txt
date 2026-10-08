@@ -1201,6 +1201,7 @@
 0x00152758	effSetInstanceBillboardVector	inferred	Copies four vector components into instance billboard [names_reviewed6.tsv]
 0x00152800	effReadBillboardModeValues	inferred	confidence=high; matched-C; src/dds1/game/code_00151F58.c:514:func_00152800; For kind-one billboard, writes output mode and one/two parameter-derived values selected by billboard flags.; twin=0x0015A3F0, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
 0x001530C0	effSubmitGeneratedTexturePacket	inferred	confidence=high; matched-C; src/dds1/game/code_00151F58.c:533:func_001530C0; Allocates a packet list, builds its textured GS payload using source, submits to effect packet sink.; source=revalidated-unapplied-names_R_Names24o.tsv:7 [names_qp12_apply.tsv]
+0x00153128	effDrawCompositeTextureQuad	inferred	Builds test/blend and texture-state packets for both GS contexts, emits the positioned two-texture quad, and restores frame/test/blend state.
 0x00153618	effSubmitCompositeGsPacket	inferred	confidence=high; matched-C; src/dds1/game/code_00151F58.c:543:func_00153618; Allocates a packet list, builds a composite GS payload from source, submits to effect packet sink.; source=revalidated-unapplied-names_R_Names24o.tsv:8 [names_qp12_apply.tsv]
 0x001536A8	effAllocateBuffer	inferred	eff effect resources and animation in game/code_00151F58.c
 0x00153728	effReleaseBufferAllocation	inferred	Releases allocation handle stored in buffer allocation slot [names_reviewed6.tsv]
