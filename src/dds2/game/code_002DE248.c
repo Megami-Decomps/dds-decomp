@@ -385,7 +385,6 @@ extern u8 D_004386E8[];
 struct FileWork;
 extern u32 fileGetResourceHandle(struct FileWork *);
 
-extern EffectSlotSet *func_00305148(u32, u32);
 
 
 
@@ -10985,7 +10984,7 @@ s32 effPollResourceList(EffectList *list) {
                     if (item->kind == 1) {
                         node = list->first;
                         buffer = item->buffer;
-                        *node->reference = func_00305148(buffer, node->kind);
+                        *node->reference = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)buffer, node->kind);
                         if (node->kind == 0) {
                             sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(buffer));
                         }
@@ -11029,7 +11028,7 @@ EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, s32 ke
     EffectSlotSet *instance;
     func_0035C860(path, D_004387E8, base, name);
     allocation = sdfReadNamedResource(path, &sourceAddress, 0);
-    instance = func_00305148(allocation, keepAllocation);
+    instance = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)allocation, keepAllocation);
     if (keepAllocation == EFF_RESOURCE_TRANSIENT) {
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     }
@@ -11042,7 +11041,7 @@ void effCompleteTransientResourceJob(void *job, u32 *outInstance) {
     EffectSlotSet *instance;
 
     allocation = fileGetResourceHandle(job);
-    instance = func_00305148(allocation, EFF_RESOURCE_TRANSIENT);
+    instance = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)allocation, EFF_RESOURCE_TRANSIENT);
     *outInstance = (u32)instance;
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     filePollEntryCleanup(job);
@@ -11054,7 +11053,7 @@ void effCompleteRetainedResourceJob(void *job, u32 *outInstance) {
     EffectSlotSet *instance;
 
     allocation = fileGetResourceHandle(job);
-    instance = func_00305148(allocation, EFF_RESOURCE_KEEP_ALLOCATION);
+    instance = effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)allocation, EFF_RESOURCE_KEEP_ALLOCATION);
     *outInstance = (u32)instance;
     filePollEntryCleanup(job);
 }
@@ -11488,7 +11487,7 @@ u32 effDestroyPayload(EffPayload *payload) {
     return 1;
 }
 
-EffectSlotSet *func_00305148(u32 allocationHandle, u32 keepAllocation) {
+EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct SdfMemBlock *resourceAllocation, u32 keepAllocation) {
     EffectSlotSet *set;
     u8 *resource;
     u8 *entries;
@@ -11497,9 +11496,9 @@ EffectSlotSet *func_00305148(u32 allocationHandle, u32 keepAllocation) {
 
     set = (EffectSlotSet *)sdfAllocSizeClassBlock(0x30);
     memset(set, 0, 0x30);
-    set->unk04 = 0;
-    set->sourceAllocation = keepAllocation != 0 ? (struct SdfMemBlock *)allocationHandle : 0;
-    resource = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocationHandle));
+    set->sharesTextureReferences = 0;
+    set->sourceAllocation = keepAllocation != 0 ? resourceAllocation : 0;
+    resource = (u8 *)sdfResourceRetainAddress(resourceAllocation);
     set->textureCount = *(u16 *)(resource + 0x14);
     set->textureAllocation = sdfAllocGeneralBlock(
         set->textureCount * 4);
@@ -11527,7 +11526,7 @@ EffectSlotSet *func_00305148(u32 allocationHandle, u32 keepAllocation) {
 EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 count) {
     EffectSlotSet *effect = (EffectSlotSet *)sdfAllocSizeClassBlock(0x30);
     u32 index = 0;
-    effect->unk04 = 1;
+    effect->sharesTextureReferences = 1;
     {
         u32 mode = source->textureCount;
         SdfTex **textureReferences = source->textureReferences;
@@ -11555,7 +11554,7 @@ u32 effDestroyResourceSlotSet(EffectSlotSet *set) {
     if (set->sourceAllocation != 0) {
         sdfReleaseResourceAllocation(set->sourceAllocation);
     }
-    if (set->unk04 == 0) {
+    if (set->sharesTextureReferences == 0) {
         effReleaseTextureHandlesAndResetSlots(set);
         sdfReleaseResourceAllocation(set->textureAllocation);
     }

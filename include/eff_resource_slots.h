@@ -4,6 +4,7 @@
 #include "common.h"
 
 struct EffectSlotSet;
+struct SdfMemBlock;
 struct EffMappedResource;
 struct EffTimedState;
 
@@ -40,6 +41,10 @@ struct EffectSlotSet *effLoadIndexedResource(const char *base, const char *name,
 #else
 struct EffectSlotSet *effLoadIndexedResource(const char *base, const char *name, u32 keepAllocation);
 #endif
+
+/* Nonzero keepAllocation transfers the source descriptor to the returned owner. */
+struct EffectSlotSet *effCreateResourceSlotSetFromAllocation(
+    struct SdfMemBlock *resourceAllocation, u32 keepAllocation);
 
 struct EffectSlotSet *effCreateResourceSlotSet(struct EffectSlotSet *source, u32 slot, u32 count);
 void effResolveAndReleaseResource(struct EffectSlotSet *owner);

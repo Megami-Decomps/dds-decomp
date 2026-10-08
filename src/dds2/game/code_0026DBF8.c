@@ -346,7 +346,6 @@ typedef struct MantraFileRequest {
 } MantraFileRequest;
 
 extern void func_002C7CE8(void *);
-extern u32 func_00305148(void *, u32);
 extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate,
                                 TaskDestroy, u32);
 s32 mnuLoadMantraSpriteTask(KwlnTask *task);
@@ -567,7 +566,7 @@ s32 mnuLoadMantraSpriteTask(KwlnTask *task) {
         s32 i;
         for (i = 4; entry != 0; entry = entry->next, i++) {
             if (entry->kind == 1) {
-                mnuMantraSpriteSlots[i] = func_00305148(entry->handle, 0);
+                mnuMantraSpriteSlots[i] = (u32)effCreateResourceSlotSetFromAllocation((struct SdfMemBlock *)entry->handle, 0);
                 sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)((u32)entry->handle));
             }
         }
