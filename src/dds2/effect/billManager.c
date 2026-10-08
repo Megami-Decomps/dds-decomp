@@ -100,7 +100,7 @@ void billAppendChildQuad(BillObj *obj, BillChildPayload *child) {
     }
     work = child->work;
     index = work->count;
-    PCP_COPY_VECTOR(work->positions[index], &obj->unk0);
+    PCP_COPY_VECTOR(work->positions[index], obj->position);
     work->colors[index] = obj->childParam;
     memcpy(&work->uv[index], &child->uv, sizeof(child->uv));
     x = child->x * obj->childScaleX;
@@ -357,7 +357,7 @@ void func_00158430(BillObj *obj, BillRenderPair *node) {
         work->offsets[index][6] = cornerX * cosine - cornerY * sine;
         work->offsets[index][7] = cornerX * sine + cornerY * cosine;
     }
-    PCP_COPY_VECTOR(work->positions[index], &obj->unk0);
+    PCP_COPY_VECTOR(work->positions[index], obj->position);
     work->count++;
     if (work->count == 7) {
         func_00158AA0(node);
