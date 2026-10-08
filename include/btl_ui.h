@@ -19,7 +19,8 @@ typedef struct BattleSceneSelection {
 typedef struct BattleSceneObject {
     s32 state;
     BattleSceneSelection selections[7]; /* +0x04: indexed by scene kind 0..6. */
-    u8 pad20[8];
+    BattleSceneSelection auxiliarySelection; /* +0x20: additional command selection. */
+    u8 pad24[4];
     struct BattleIndexWork *commandData; /* +0x28: owning actor's complete +0x20 work. */
 #ifdef VERSION_DDS1
     struct BtlTask *owner; /* +0x2C: the 0x170-byte DDS1 actor */
