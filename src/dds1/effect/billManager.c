@@ -533,7 +533,7 @@ BillChildPayload *billStepAnimationEntryAndUpdateChild(BillObj *obj, BillOut *ou
                 out->frameIndex = 0;
             }
         }
-        out->framesRemaining = out->record[out->frameIndex].value;
+        out->framesRemaining = out->record[out->frameIndex].frameDelay;
     } else {
         out->framesRemaining--;
     }
@@ -597,7 +597,7 @@ u32 effBillModulateColors(u32 colorA, u32 colorB) {
 
 INCLUDE_ASM(const s32, "effect/billManager", func_001515E8);
 
-/* Resolves an indexed billboard record and caches its signed +0x12 value. */
+/* Resolve an animation entry and initialize its signed frame-delay countdown. */
 void billResolveEntry(BillData *table, s32 index, BillOut *out) {
     u8 *base;
     BillAnimationEntry *entry;
@@ -610,7 +610,7 @@ void billResolveEntry(BillData *table, s32 index, BillOut *out) {
     out->entry = entry;
     base = base + offset;
     out->frameIndex = 0;
-    value = ((BillRecord *)base)->value;
+    value = ((BillRecord *)base)->frameDelay;
     out->record = (BillRecord *)base;
     out->framesRemaining = value;
 }
