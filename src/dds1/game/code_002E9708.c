@@ -92,8 +92,8 @@ typedef struct MidiChannel {
     u32 entries[8];
 } MidiChannel;
 extern s32 func_00312C08(void);
-extern void func_002EC230(s32);
-extern s32 func_002EC060(void *);
+extern void sdfDispatchNextStreamNode(s32);
+extern s32 sdfStartStreamNodeIpuTransfer(SdfStreamFrameNode *);
 
 typedef void *(*SdfSoundReadCallback)(s32);
 typedef union SdfSoundCommand {
@@ -1018,7 +1018,7 @@ void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 sourceAddr
     if (interruptsEnabled != 0) {
         EIntr();
     }
-    func_002EC230(0);
+    sdfDispatchNextStreamNode(0);
 }
 
 /* Store the callback/source token and allocate an eight-slot feed ring plus its leading mirror bytes. */
@@ -1083,7 +1083,7 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
     }
 }
 
-extern u32 D_003BDAA4;
+extern SdfStreamFrameNode *D_003BDAA4;
 extern void sdfFreeMemoryFromEitherHeap(void *);
 extern void sdfTexQueueResourceRelease(s32);
 extern void sdfTexQueuePendingWork(SdfTexResource *texture);
@@ -1098,7 +1098,7 @@ void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
     node->drained = 1;
     sdfSoundRemoveNode(node);
     sdfStreamNodeUnlink(node, 1);
-    if (D_003BDAA4 == (u32)node) {
+    if (D_003BDAA4 == node) {
         *(volatile u32 *)0x10002010 = 0x40000000;
         sceIpuSync(0, 0);
         dmaEnable = *(volatile u32 *)0x1000F520;
@@ -1106,7 +1106,7 @@ void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
         *(volatile u32 *)0x1000B400 = 1;
         *(volatile u32 *)0x1000B000 = 0;
         *(volatile u32 *)0x1000F520 = dmaEnable;
-        D_003BDAA4 = 0;
+        D_003BDAA4 = NULL;
         wasActive = 1;
     }
     if (interruptsEnabled != 0) {
@@ -1124,7 +1124,7 @@ void sdfDestroyStreamFrameNode(SdfStreamFrameNode *node) {
         sdfTexQueuePendingWork(node->textureHead);
     }
     if (wasActive != 0) {
-        func_002EC230(0);
+        sdfDispatchNextStreamNode(0);
     }
 }
 
@@ -1230,14 +1230,14 @@ s32 sdfSoundSyncIpu(void) {
     return decodedBits;
 }
 
-INCLUDE_ASM(const s32, "game/code_002E9708", func_002EC060);
+INCLUDE_ASM(const s32, "game/code_002E9708", sdfStartStreamNodeIpuTransfer);
 
 /* Remove and advance the first list item matching the IPU cleanup test. */
-void func_002EC230(s32 skipInterruptGuard) {
+void sdfDispatchNextStreamNode(s32 skipInterruptGuard) {
     SdfStreamFrameNode *node;
     s32 interruptsEnabled = 0;
 
-    if (D_003BDAA4 != 0) {
+    if (D_003BDAA4 != NULL) {
         return;
     }
     if (skipInterruptGuard == 0) {
@@ -1249,7 +1249,7 @@ void func_002EC230(s32 skipInterruptGuard) {
         if (node->unk1A + node->unk13 < 2 &&
             (node->active != 1 || node->filledSlots != 0)) {
             sdfStreamNodeUnlink(node, 1);
-            func_002EC060(node);
+            sdfStartStreamNodeIpuTransfer(node);
             break;
         }
         node = node->streamNext;
@@ -1271,7 +1271,7 @@ void sdfIpuDmaCompletionWorker(void) {
 
     for (;;) {
         SleepThread();
-        work = (SdfStreamFrameNode *)D_003BDAA4;
+        work = D_003BDAA4;
         if (work == NULL) {
             continue;
         }
@@ -1283,7 +1283,7 @@ void sdfIpuDmaCompletionWorker(void) {
             work->playbackPhase = SDF_STREAM_PLAYBACK_FIRST_COMPLETION;
         }
         work->unk1A++;
-        D_003BDAA4 = 0;
+        D_003BDAA4 = NULL;
         work->tickCount++;
         if (work->tickCount == work->cycleLength) {
             if (work->loopMode != 0) {
@@ -1301,17 +1301,17 @@ void sdfIpuDmaCompletionWorker(void) {
                 EIntr();
             }
         }
-        func_002EC230(0);
+        sdfDispatchNextStreamNode(0);
     }
 }
 
-s32 func_002EC3C0(void) {
+s32 sdfWakeIpuCompletionWorker(void) {
     iWakeupThread(D_003BDAB4);
     EE_ENABLE_INTERRUPTS_SYNC();
     return 0;
 }
 
-s32 func_002EC3F0(void) {
+s32 sdfCompleteIpuInputFeedDma(void) {
     SdfStreamFrameNode *stream = D_003BDAA8;
 
     if (stream != NULL) {
@@ -1369,7 +1369,7 @@ void sdfAdvanceBufferedPlayback(SdfStreamFrameNode *node) {
     if (interruptsEnabled != 0) {
         EIntr();
     }
-    func_002EC230(0);
+    sdfDispatchNextStreamNode(0);
 }
 
 /* Return zero only when nothing is pending; otherwise call the zero-buffer handler if needed, queue and advance. */
@@ -1390,7 +1390,7 @@ extern u32 D_003BD614;
 
 /* Advance playback cadence, refill active feeds and retry a deferred IPU input. */
 void sdfAdvanceStreamPlayback(s32 cadence) {
-    SdfStreamFrameNode *node = (SdfStreamFrameNode *)D_003BDAA4;
+    SdfStreamFrameNode *node = D_003BDAA4;
     s32 elapsed;
     s32 interruptsEnabled;
 
@@ -1437,7 +1437,7 @@ void sdfAdvanceStreamPlayback(s32 cadence) {
         }
         node = node->next;
     }
-    func_002EC230(0);
+    sdfDispatchNextStreamNode(0);
 }
 
 void sdfSoundInitAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, s32 source, s32 sourceSize, s32 value) {
@@ -1465,7 +1465,6 @@ void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *f
     sdfSoundAppendNode(node);
 }
 
-extern u32 D_003BDAA4;
 extern void sceIpuInit(void);
 extern s32 sdfAddHandler(s32, s32, void *, s32, s32);
 extern void func_0030B638(s32);
@@ -1479,10 +1478,10 @@ void sdfSoundInitIpuStream(void) {
     sceIpuInit();
     *(volatile s32 *)0x10002000 = 0x90000000;
     sdfSoundNodeHead = 0;
-    D_003BDAA4 = 0;
-    D_003BDA9C = sdfAddHandler(1, 3, func_002EC3C0, -1, 0);
+    D_003BDAA4 = NULL;
+    D_003BDA9C = sdfAddHandler(1, 3, sdfWakeIpuCompletionWorker, -1, 0);
     func_0030B638(3);
-    D_003BDAA0 = sdfAddHandler(1, 4, func_002EC3F0, -1, 0);
+    D_003BDAA0 = sdfAddHandler(1, 4, sdfCompleteIpuInputFeedDma, -1, 0);
     func_0030B638(4);
     thread = sdfCreateThread((void *)sdfIpuDmaCompletionWorker, sdfIpuStreamThreadStack, 0x800, 0x46);
     D_003BDAB4 = thread;
