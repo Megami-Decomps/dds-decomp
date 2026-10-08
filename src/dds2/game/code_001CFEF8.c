@@ -1169,7 +1169,116 @@ s32 fldGetSceneGroupIndexByActorFlags(u8 *task) {
     return groupId;
 }
 
-INCLUDE_ASM(const s32, "game/code_001CFEF8", func_001D30E0);
+struct EffRandState;
+extern struct EffRandState effSharedRandomState;
+extern u32 effMiscRand(struct EffRandState *);
+extern u32 effMiscRandMod(void *, u32);
+extern s32 mdlFlagTest(s32);
+extern void fldInitSceneFadeRecords(void);
+
+/* Initialize scene slots from selected actors and mode-specific modifiers. */
+void func_001D30E0(void) {
+    ActionStateLink *selected[13];
+    BtlState *scene = (BtlState *)btlGetRuntime();
+    ActionStateLink *task;
+    u32 count;
+    u32 i;
+    u32 repeat;
+    s32 actionTotal;
+    s32 bonus;
+    s32 group;
+    u32 flags;
+
+    switch (scene->mode) {
+    case 0:
+    case 1:
+        count = 0;
+        for (i = 0; scene->groupPrimary[i] != NULL; i++) {
+            /* The group producer appends the allocated action-sequence owner. */
+            task = scene->groupPrimary[i];
+            if ((task->pendingFlags & 8) != 0) {
+                flags = task->unit->flags;
+                if ((flags & 0x200) != 0) {
+                    if ((flags & 0xE0) == 0) {
+                        if ((flags & 1) != 0) {
+                            selected[count++] = task;
+                        }
+                    }
+                }
+            }
+        }
+        for (i = count; i < 13; i++) {
+            selected[i] = NULL;
+        }
+        break;
+    case 2:
+        count = 0;
+        for (i = 0; scene->groupSecondary[i] != NULL; i++) {
+            task = scene->groupSecondary[i];
+            if ((task->pendingFlags & 8) != 0) {
+                flags = task->unit->flags;
+                if ((flags & 0x400) != 0) {
+                    if ((flags & 0xE0) == 0) {
+                        if ((flags & 1) != 0) {
+                            selected[count++] = task;
+                        }
+                    }
+                }
+            }
+        }
+        for (i = count; i < 13; i++) {
+            selected[i] = NULL;
+        }
+        break;
+    }
+    group = 0;
+    actionTotal = 0;
+    for (i = 0; i < 13 && selected[i] != NULL; i++) {
+        group = fldGetSceneGroupIndexByActorFlags((u8 *)selected[i]);
+        actionTotal += selected[i]->actionNumber;
+    }
+    if (scene->mode == 1) {
+        bonus = 0;
+        for (task = scene->tasks; task != NULL; task = task->next) {
+            if ((task->pendingFlags & 8) != 0 && (task->unit->flags & 0x200) != 0) {
+                if (btlDoesEnabledStatusMatchCurrentId(&task->unit->partyRecord, 0xED) != 0) {
+                    bonus++;
+                }
+                if (btlDoesEnabledStatusMatchCurrentId(&task->unit->partyRecord, 0xEA) != 0) {
+                    if (effMiscRand(&effSharedRandomState) & 1) {
+                        actionTotal += effMiscRandMod(NULL, 2);
+                    } else {
+                        actionTotal -= effMiscRandMod(NULL, 2);
+                    }
+                }
+            }
+        }
+        if (mdlFlagTest(0x81F) != 0) {
+            bonus--;
+        }
+        actionTotal += bonus;
+    }
+    count = 0;
+    if (actionTotal > 0) {
+        for (repeat = 0; repeat < (u32)actionTotal; repeat++) {
+            scene->slots[count].group = group;
+            scene->slots[count].remaining = 100;
+            scene->slots[count].id = count + 1;
+            count++;
+        }
+    } else {
+        scene->slots[0].group = group;
+        scene->slots[0].remaining = 50;
+        scene->slots[0].id = 1;
+        count = 1;
+    }
+    for (i = count; i < 8; i++) {
+        scene->slots[i].group = 0;
+        scene->slots[i].remaining = 0;
+        scene->slots[i].id = 0;
+    }
+    fldInitSceneFadeRecords();
+}
 
 /* Pop the front slot only when its remaining counter is zero. */
 void fldCompactSceneSlots(void) {
