@@ -128,6 +128,7 @@ void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work);
 
 void effAppendBlurRectanglePackets(void *list, EffBlurQuad *source, u8 fixedPointCoordinates);
 void effDrawBlurSource(EffBlurQuad *source, s32 resource, u8 fixedPointCoordinates);
+void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner);
 EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplateBody *body);
 void effReleaseBlurTemplate(EffBlurTemplate *owner);
 void effDrawBlurPixelRectWithResource(EffBlurTemplate *owner);
