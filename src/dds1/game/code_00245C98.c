@@ -7,6 +7,8 @@
 #include "mnu_shop.h"
 #include "dat_state.h"
 
+typedef struct MenuResourceWork MenuResourceWork;
+
 /* The dispatcher passes its last argument to entry callbacks as opaque data,
  * not as a function address. Modes select polling, primary and secondary actions. */
 #define EVT_DISPATCH_OPERATION_POLL 0
@@ -879,7 +881,7 @@ void mnuLoadResourceHandles(u32 *menuWork) {
 }
 
 extern void effDestroyResourceSlotSet(u32);
-extern void mnuReleaseEffectResource(u32);
+extern void mnuReleaseEffectResource(MenuResourceWork *);
 
 /* Destroy the stored slot sets, then release and clear any optional effect handle. */
 void mnuReleaseResourceHandles(u32 *menuWork) {
@@ -890,7 +892,7 @@ void mnuReleaseResourceHandles(u32 *menuWork) {
     }
     effDestroyResourceSlotSet(menuWork[0x1B]);
     if (menuWork[0x56] != 0) {
-        mnuReleaseEffectResource(menuWork[0x56]);
+        mnuReleaseEffectResource((MenuResourceWork *)menuWork[0x56]);
         menuWork[0x56] = 0;
     }
 }
