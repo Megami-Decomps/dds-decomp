@@ -9,7 +9,7 @@ typedef union DatCommandAttribute {
     struct {
         u8 kind;
         u8 hitChance;
-        u16 flagMask;
+        u16 valueMask; /* Element mask for kinds 1/3; flag mask for kind 2. */
     } parts;
 } DatCommandAttribute;
 
