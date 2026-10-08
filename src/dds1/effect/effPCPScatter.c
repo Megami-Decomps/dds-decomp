@@ -1370,7 +1370,9 @@ struct PcpScatterInstance {
     SdfMemBlock *allocationHandle;
 };
 
-extern void *func_00175B50();
+/* The allocator stores 2 * segmentsPerParticle + 2 vectors for each particle. */
+extern PcpScatterDraw *effScatterCreateDrawObject(
+    u32 particleCount, u32 segmentsPerParticle);
 extern void effCreateScatterResource(void *object, u32 resource);
 
 extern void *memcpy(void *, const void *, u32);
@@ -1398,7 +1400,7 @@ PcpScatterInstance *effPcpScatterCreateParticleInstance(src, resource)
     inst->allocationHandle = allocation;
     inst->particles = particle;
     VU0_COPY_MATRIX(inst->matrix, src->matrix);
-    object = func_00175B50(src->particleCount, src->unk60);
+    object = effScatterCreateDrawObject(src->particleCount, src->unk60);
     drawWord = src->unk50;
     inst->scatterObject = (u32)object;
     object->unk50 = drawWord;
@@ -1672,7 +1674,7 @@ PcpScatterInstanceB *effScatterCreateDampedRing(src, resource)
     inst->particles = particle;
     inst->age = 0;
     VU0_COPY_MATRIX(inst->matrix, src->matrix);
-    object = func_00175B50(src->particleCount, src->unk60);
+    object = effScatterCreateDrawObject(src->particleCount, src->unk60);
     drawWord = src->unk50;
     inst->scatterObject = (u32)object;
     object->unk50 = drawWord;
@@ -1962,7 +1964,7 @@ PcpScatterInstanceC *effScatterCreateTwoColorRing(src, resource)
     inst->particles = particle;
     inst->age = 0;
     VU0_COPY_MATRIX(inst->matrix, src->matrix);
-    object = func_00175B50(src->particleCount, src->unk60);
+    object = effScatterCreateDrawObject(src->particleCount, src->unk60);
     drawWord = src->unk50;
     inst->scatterObject = (u32)object;
     object->unk50 = drawWord;
@@ -2310,7 +2312,7 @@ PcpScatterPlainInstance *effPcpScatterCreatePlainInstance(src, resource)
     inst->allocationHandle = allocation;
     inst->particles = particle;
     EE_MMI_UNIT_MATRIX(inst->matrix);
-    object = func_00175B50(src->particleCount, src->unk20);
+    object = effScatterCreateDrawObject(src->particleCount, src->unk20);
     drawWord = src->unk10;
     inst->scatterObject = (u32)object;
     object->unk50 = drawWord;

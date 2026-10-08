@@ -81,7 +81,7 @@ void effScatterCopyFlatInstanceMatrix(PcpScatterPlainInstance *work, void *src) 
     VU0_COPY_MATRIX(work->matrix, src);
 }
 
-INCLUDE_ASM(const s32, "game/code_0017D758", func_0017D7A8);
+INCLUDE_ASM(const s32, "game/code_0017D758", effScatterCreateDrawObject);
 
 /* Release the shared scatter resource before the object's private assets. */
 void effReleaseScatterObject(PcpScatterDraw *object) {
