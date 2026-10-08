@@ -422,36 +422,36 @@ void parUpdateSharedScaleAndDelta(ParScaleObj *obj) {
     VU0_STORE_VF($vf10, D_00451F30);
 }
 
-void parDispatchKindUpdate(ParSystem *work) {
+void parDispatchKindUpdate(ParKindState *work) {
     switch ((u16)work->kind) {
     case 1:
-        func_001618E0(work->vertexWordCount);
+        func_001618E0((s32)work->value.table);
         return;
     case 2:
-        parUpdateBillboardCrossStrip(work->handle);
+        parUpdateBillboardCrossStrip((s32)work->primaryDrawSystem);
         return;
     case 3:
-        parUpdateBillboardCrossTriangle((s32)work->cells);
+        parUpdateBillboardCrossTriangle((s32)work->secondaryDraw.system);
         return;
     case 4:
-        parUpdateTrackPolygonCrossAxes((s32)work->cells);
+        parUpdateTrackPolygonCrossAxes((s32)work->secondaryDraw.modelList);
         break;
     }
 }
 
-void parDispatchKindInit(ParSystem *work, s32 index) {
+void parDispatchKindInit(ParKindState *work, s32 index) {
     switch ((u16)work->kind) {
     case 1:
-        parClearSlotFlag(work->vertexWordCount);
+        parClearSlotFlag((s32)work->value.table);
         return;
     case 2:
-        parCellInit((void *)work->handle, index);
+        parCellInit(work->primaryDrawSystem, index);
         return;
     case 3:
-        parCellInit((void *)work->cells, index);
+        parCellInit(work->secondaryDraw.system, index);
         return;
     case 4:
-        effTrackPolyResetIndexedWork((s32)work->cells);
+        effTrackPolyResetIndexedWork((s32)work->secondaryDraw.modelList);
         break;
     }
 }
