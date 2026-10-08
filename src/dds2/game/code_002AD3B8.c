@@ -49,7 +49,7 @@ extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 D_00435E5C;
 extern s32 D_00435E48;
-extern s32 mnuGetPartyEntryMenuValue();
+extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 extern u16 mnuGetPartyEntryCurrentId(DatPartyRecord *);
 extern void evtCopyEntryStringToActiveWindow(s32, s32);
 extern s32 dspStartEntry(s32);
@@ -472,13 +472,13 @@ s32 mnuReleaseSelectedStaffPageResources(s32 unused) {
     return 1;
 }
 
-void mnuPrepareStaffSelectionChangeDialog(s32 context, u8 *entry, s32 target) {
+void mnuPrepareStaffSelectionChangeDialog(s32 context, DatPartyRecord *entry, s32 target) {
     u8 *menu = ((MenuStaffContext *)context)->menu;
     s32 current = mnuGetPartyEntryMenuValue(entry);
 
     func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 1);
     if (current != target) {
-        evtCopyEntryStringToActiveWindow(0, D_00435E48 + *(u16 *)(entry + 4) * 0x11);
+        evtCopyEntryStringToActiveWindow(0, D_00435E48 + entry->unitId * 0x11);
         evtCopyEntryStringToActiveWindow(1, D_00435E5C + current * 0x19);
         evtCopyEntryStringToActiveWindow(2, D_00435E5C + target * 0x19);
         dspStartEntry(0);
@@ -548,7 +548,7 @@ s32 func_002AE580(KwlnTask *task) {
     extern u32 kwlnTaskGetUserValue(KwlnTask *);
     extern void mnuHandlePanelListPageJumpInput(u32, u32);
     extern s32 func_002ABED8(s32, s32, MenuStaffContext *);
-    extern u32 mnuSetPartyEntryMenuValue(s32, u32);
+    extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *, u32);
     extern char D_003E7434[];
     extern char D_003E746C[];
 
@@ -594,8 +594,8 @@ s32 func_002AE580(KwlnTask *task) {
                     u32 itemId = menu->windows[2]->list->cursor->sortKeySecondary;
 
                     mnuPrepareStaffSelectionChangeDialog(
-                        (s32)context, (u8 *)party, itemId);
-                    mnuSetPartyEntryMenuValue((s32)party, itemId);
+                        (s32)context, party, itemId);
+                    mnuSetPartyEntryMenuValue(party, itemId);
                     countWindow = menu->windows[2];
                     /* Snapshot input before publishing the remaining item count. */
                     input = buttons;

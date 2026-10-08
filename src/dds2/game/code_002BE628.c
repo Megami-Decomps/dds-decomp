@@ -1988,7 +1988,7 @@ s32 func_002C54B0(s32 id) {
 }
 
 
-extern u16 mnuGetPartyEntryMenuValue(s32);
+extern u16 mnuGetPartyEntryMenuValue(DatPartyRecord *);
 
 /* Count inventory plus one for every matching slot value, without an occupancy test.
  * This counter still rejects 0xBF, although DDS2's bullet-ID predicate accepts it. */
@@ -2000,20 +2000,20 @@ u32 ptyCountBulletItem(s32 bulletId) {
     totalCount = datGameState->inventory.counts[bulletId];
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
         DatPartyRecord *partyEntry = &datGameState->party[partyIndex];
-        if (bulletId == mnuGetPartyEntryMenuValue((s32)partyEntry)) {
+        if (bulletId == mnuGetPartyEntryMenuValue(partyEntry)) {
             totalCount++;
         }
     }
     return totalCount;
 }
 
-u32 mnuSetPartyEntryMenuValue(s32 entry, u32 value) {
-    ((DatPartyRecord *)entry)->menuValue = value;
+u32 mnuSetPartyEntryMenuValue(DatPartyRecord *entry, u32 value) {
+    entry->menuValue = value;
     return 1;
 }
 
-u16 mnuGetPartyEntryMenuValue(s32 entry) {
-    return ((DatPartyRecord *)entry)->menuValue;
+u16 mnuGetPartyEntryMenuValue(DatPartyRecord *entry) {
+    return entry->menuValue;
 }
 
 u32 mnuSetPartyEntryCurrentId(u32 entry, u32 id) {
