@@ -43,7 +43,7 @@ EffMagatuhiValueWork *effCreateMagatuhiValueWork(s32 count, s32 frames, f32 para
     s32 frameTerm;
     s32 countTerm;
     s32 allocationSize;
-    void *allocation;
+    struct SdfMemBlock *allocation;
     s32 positions;
     s32 colorTable;
     s32 unknownValues;

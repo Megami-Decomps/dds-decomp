@@ -7,6 +7,7 @@
 struct EffNode;
 
 struct EffRequest;
+struct SdfMemBlock;
 
 /* Packed position/basis query; the final word is a signed extent override. */
 typedef struct EffectVectorRequest {
@@ -56,7 +57,7 @@ typedef struct EffMagatuhiValueWork {
     u16 *validCounts;
     f32 (*angleRows)[4];
     SdfTex *texture;
-    void *allocationHandle;
+    struct SdfMemBlock *allocationHandle;
 } EffMagatuhiValueWork;
 
 /* Seven copied words; the parent appends its independently allocated history. */
@@ -286,9 +287,9 @@ typedef struct EffMsg {
 
 /* Effect slot array owner and allocation handle (0xC); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct EffArrHdr {
-    void *slots; /* Slot array base, read by effMathGetSlotAt. */
+    void *slots; /* Slot-array base; effMath and effEvent use different slot types. */
     u32 unk4;   /* Slot count. */
-    void *allocation; /* Allocation handle. */
+    struct SdfMemBlock *allocation; /* Retained allocation descriptor. */
 } EffArrHdr;
 
 /* Two-child draw descriptor at +0x34 in animation-list objects; child allocations end before it. */
@@ -819,15 +820,15 @@ typedef struct EffectSlotDescription {
 
 /* Native 0x30-byte resource-slot owner: source descriptors and live work arrays. */
 typedef struct EffectSlotSet {
-    u32 sourceAllocation;
+    struct SdfMemBlock *sourceAllocation;
     u32 unk04;
     u32 count;
-    u32 descriptionAllocation;
+    struct SdfMemBlock *descriptionAllocation;
     EffectSlotDescription *descriptions;
-    u32 workAllocation;
+    struct SdfMemBlock *workAllocation;
     BdWork *workEntries;
     u32 textureCount;
-    u32 textureAllocation;
+    struct SdfMemBlock *textureAllocation;
     void **handles;
     s32 defaultValue;
     u8 pad2C[4];
