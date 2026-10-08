@@ -1804,16 +1804,18 @@ typedef struct MenuSlotEffectHandles {
     u32 handles[3];
 } MenuSlotEffectHandles;
 
-void mnuLoadPanelSectionResources(MenuSlotEffectHandles *slot, u32 model, u32 firstValue, u32 secondValue, s32 thirdValue
+void mnuLoadPanelSectionResources(MenuSlotEffectHandles *slot,
+                                  EffectSlotSet *model, u32 firstValue,
+                                  u32 secondValue, s32 thirdValue
                                     ) {
     u32 handle;
 
-    handle = (u32)effCreateResourceSlotSet((EffectSlotSet *)model, firstValue, 1);
+    handle = (u32)effCreateResourceSlotSet(model, firstValue, 1);
     slot->handles[0] = handle;
-    handle = (u32)effCreateResourceSlotSet((EffectSlotSet *)model, secondValue, 1);
+    handle = (u32)effCreateResourceSlotSet(model, secondValue, 1);
     slot->handles[1] = handle;
     if (-1 < thirdValue) {
-        handle = (u32)effCreateResourceSlotSet((EffectSlotSet *)model, thirdValue, 1);
+        handle = (u32)effCreateResourceSlotSet(model, thirdValue, 1);
         slot->handles[2] = handle;
     }
 }
