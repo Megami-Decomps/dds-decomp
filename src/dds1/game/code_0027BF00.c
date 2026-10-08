@@ -268,8 +268,8 @@ void mnuSetWindowOverlaySprite(MenuWindowContainer *window, u32 sprite) {
     window->overlaySprite = sprite;
 }
 
-void mnuSetWindowContainerState(MenuWindowContainer *window, u32 fade) {
-    window->fadeScale = fade;
+void mnuSetWindowFadeScale(MenuWindowContainer *window, u32 fadeScale) {
+    window->fadeScale = fadeScale;
 }
 
 void mnuConfigureWindowSpriteAndGrid(MenuWindowContainer *window, s32 x, s32 y, u32 sprite,

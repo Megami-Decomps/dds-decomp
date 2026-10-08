@@ -911,8 +911,8 @@ void mnuSetWindowOverlaySprite(MenuWindowContainer *menu, u32 layout) {
     menu->decorations[2].sprite = layout;
 }
 
-void mnuSetWindowContainerState(MenuWindowContainer *menu, u32 state) {
-    menu->fadeScale = state;
+void mnuSetWindowFadeScale(MenuWindowContainer *menu, u32 fadeScale) {
+    menu->fadeScale = fadeScale;
 }
 
 void mnuSetWindowContainerLayout(MenuWindowContainer *menu, u32 layout2C, u32 layout30, u32 layout34,
@@ -1675,7 +1675,7 @@ void mnuUpdateAndDrawWindowTransition(s32 x, s32 y, s32 depth, MenuFadeFields *m
 
     if (menu->previousProgress < 0x200) {
         menu->previousWindow.originY = 160 * menu->previousProgress / 512;
-        mnuSetWindowContainerState(&menu->previousWindow, 256 - menu->previousProgress / 2);
+        mnuSetWindowFadeScale(&menu->previousWindow, 256 - menu->previousProgress / 2);
         if (menu->hasResourceCopy != 0) {
             menu->previousWindow.resource = &menu->savedResource;
         }
@@ -1684,7 +1684,7 @@ void mnuUpdateAndDrawWindowTransition(s32 x, s32 y, s32 depth, MenuFadeFields *m
     if (menu->currentWindow != NULL) {
         t = fsqrtf(40.0f) * (512 - menu->currentProgress) / 512.0f;
         menu->currentWindow->originY = -8 * (s32)(t * t);
-        mnuSetWindowContainerState(menu->currentWindow, menu->currentProgress / 2);
+        mnuSetWindowFadeScale(menu->currentWindow, menu->currentProgress / 2);
         if (menu->currentWindow->panel.fade == 0) {
             menu->currentWindow->flags &= ~4;
         }
