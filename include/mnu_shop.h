@@ -161,6 +161,8 @@ typedef struct ShopScene {
     s8 atLimit;
 } ShopScene;
 
+s32 mnuShopHasPendingFlag(ShopScene *unused);
+
 typedef char MnuShopListContext_size_must_be_0x10[(sizeof(MnuShopListContext) == 0x10) ? 1 : -1];
 
 typedef char MenuPanelHandles_size_must_be_0x38[(sizeof(MenuPanelHandles) == 0x38) ? 1 : -1];

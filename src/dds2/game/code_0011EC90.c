@@ -24,7 +24,6 @@ extern void scrSetSecondaryScriptFlag(DatPartyRecord *work, u16 index);
 extern s32 scrSetIntegerReturnValue(s32 arg0);
 
 extern s32 frFontDrawGlyphInDefaultMode(struct FrFontGlyph *glyph);
-extern void frFontSetChainFlag(struct FrFontGlyph *glyph, u8 value);
 
 s32 ptyScriptRemoveUnitAndReturnResult(void) {
     s32 unitId = scrReadIntParameter(0);

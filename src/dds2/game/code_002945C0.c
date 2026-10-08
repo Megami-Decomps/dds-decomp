@@ -6,7 +6,7 @@
 
 extern s32 D_00435E70;
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
-extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 
 
 void itfEmitSelectedGlyph(MenuTerminalContext *context, s32 unused, s32 layoutFlags,
@@ -28,7 +28,7 @@ void itfEmitSelectedGlyph(MenuTerminalContext *context, s32 unused, s32 layoutFl
         }
         glyph = itfDrawBankTextWithLayoutFlags(0x600, y, 1, code, (FrFontTextBank *)D_00435E70, layoutFlags);
         frFontSetChildColors(glyph, color);
-        func_0019D550(glyph, 1, renderFlags);
+        frFontDrawGlyphChain(glyph, 1, renderFlags);
         frFontQueueGlyphForCurrentDrawBuffer(glyph);
         return;
     }

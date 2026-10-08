@@ -293,7 +293,7 @@ extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 typedef struct FrFontGlyph FrFontGlyph;
 extern u32 func_0019F6C8(s32, s32, s32, u32, char *, s32);
 extern void frFontSetChainFlag(FrFontGlyph *, u8);
-extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern u32 mnuGetPanelRatioColor(s32, s32, s32);
 extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
 extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
@@ -318,7 +318,7 @@ void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32
         text = D_003A47E8[slot].encodedText;
     }
     handle = (FrFontGlyph *)itfCreateConvertedTextGlyph(gridX - 0x120, gridY, depth, value, text, 0);
-    func_0019D550(handle, 1, MNU_TEXT_DRAW_PRIORITY);
+    frFontDrawGlyphChain(handle, 1, MNU_TEXT_DRAW_PRIORITY);
     frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
 
@@ -372,7 +372,7 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
 
     func_0035C860(text, mnuNumberSpriteFormat, number);
     sprite = (FrFontGlyph *)func_0019F5E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
-    func_0019D550(sprite, 1, priority);
+    frFontDrawGlyphChain(sprite, 1, priority);
     frFontQueueGlyphForCurrentDrawBuffer(sprite);
 }
 
@@ -461,7 +461,7 @@ void func_00267238(s32 x, s32 y, s32 unused, MenuList *list, MenuListNode *node,
     color = uiBlendColors(color, color & ~0xFF, width);
     glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(x + 0xF0, y, 0, color, (const u8 *)node->title, 0);
     frFontSetChainFlag(glyph, chainFlags);
-    func_0019D550(glyph, 1, priority);
+    frFontDrawGlyphChain(glyph, 1, priority);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
@@ -2101,7 +2101,7 @@ void mnuQueueTerminalCurrencyLabel(s32 fading, s32 context) {
         color = uiBlendColors(0xA09DC380, 0xA09DC300, state->thresholdOwner->scale);
     }
     font = (FrFontGlyph *)func_0019F6C8(0x1810, 0x1C8, 0, color, text, 0);
-    func_0019D550(font, 1, 0x52);
+    frFontDrawGlyphChain(font, 1, 0x52);
     frFontQueueGlyphForCurrentDrawBuffer(font);
 }
 

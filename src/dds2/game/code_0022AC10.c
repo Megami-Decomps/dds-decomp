@@ -321,7 +321,7 @@ extern char D_0041B7A8[];
 extern char D_0041B7D0[];
 
 
-extern void func_0019D550(void *, s32, s32);
+extern void frFontDrawGlyphChain(void *, s32, s32);
 extern void func_0020D1C0(u8 *, u8 *, s32, s32, u32, u32);
 
 extern void *sdfAllocPacketAligned(s32);
@@ -1937,7 +1937,7 @@ s32 mnuListMoveCursor(MenuList *menuList) {
 s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
     struct FrFontGlyph *textGlyph = func_0019F448(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
         MNU_LIST_NORMAL_COLOR, (const char *)(u32)text, NULL);
-    func_0019D550(textGlyph, 0, 0x60);
+    frFontDrawGlyphChain(textGlyph, 0, 0x60);
     return frFontQueueGlyphForCurrentDrawBuffer(textGlyph);
 }
 
@@ -1961,7 +1961,7 @@ s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 unusedMode, u8 *selectionState, 
             MNU_LIST_TEXT_DEPTH,
             itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
             (const char *)(u32)rowTexts[itemIndex], NULL);
-        func_0019D550(textGlyph, 0, 0x60);
+        frFontDrawGlyphChain(textGlyph, 0, 0x60);
         frFontQueueGlyphForCurrentDrawBuffer(textGlyph);
         rowY += MNU_LIST_ROW_HEIGHT;
     }
