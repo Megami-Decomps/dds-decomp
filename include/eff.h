@@ -708,7 +708,7 @@ typedef struct EffPCPNeedleWork {
     EffPCPNeedleSlot *slots;
     u32 color;
     u32 count;
-    u32 system;
+    struct ParSystem *system;
     EffResourceWork *resource;
     SdfMemBlock *allocationHandle; /* Descriptor, not the retained data address. */
 } EffPCPNeedleWork; /* 0x74, followed by count slots */
