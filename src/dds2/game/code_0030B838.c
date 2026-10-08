@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font_measure.h"
 #include "fr_font.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
@@ -32,8 +33,6 @@ extern void effObjSetInnerSecondVec(s32, void *);
 extern void sdfDrawScaledCenteredSlotImage(f32, f32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void sdfCounterDestroyRuntime();
-
-extern u32 frFontMeasureLines(struct FrFontGlyph *glyphChain);
 
 extern u32 sdfSelectedCounterIndex;
 
