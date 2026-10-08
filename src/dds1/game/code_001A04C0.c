@@ -289,7 +289,7 @@ void func_001A0F10(void) {
     ((BattleInitState *)btlRuntime)->listHeads[4] = 0;
     ((BattleInitState *)btlRuntime)->listHeads[5] = 0;
     mnuMovieTaskState = 2;
-    ((BattleInitState *)btlRuntime)->unk490 = 0x1E;
+    ((BtlState *)btlRuntime)->timingRate = 0x1E;
     {
         BattleInitState *state = (BattleInitState *)btlRuntime;
         state->endCode = 0;
