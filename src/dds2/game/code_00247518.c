@@ -195,13 +195,6 @@ typedef struct EffSolidRectParams {
     s32 bottom;
 } EffSolidRectParams;
 
-typedef struct EffBlurTemplateBody {
-    s32 extent;
-    EffBlurQuad source;
-} EffBlurTemplateBody;
-
-
-
 extern EffScreenDrawParams *effGetLoadDescA(void);
 
 /* Native five-word draw-vector parameters; the timeline swaps x and y. */
