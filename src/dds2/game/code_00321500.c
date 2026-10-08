@@ -835,7 +835,106 @@ void mnuInitializeActiveEffectWorkEntry(u32 entry) {
 
 INCLUDE_ASM(const s32, "game/code_00321500", func_003242D0);
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00324840);
+extern f32 sdfVec3Normalize(f32 *vector);
+extern void sdfVectorScale(f32 factor, f32 *vector);
+
+typedef struct MenuMovementRecord18 {
+    u8 pad00[0xA];
+    u16 movementScale;
+    u8 pad0C[0xC];
+} MenuMovementRecord18;
+
+typedef char MenuMovementRecordLayoutAssert[
+    (sizeof(MenuMovementRecord18) == 0x18 &&
+     (unsigned long)&((MenuMovementRecord18 *)0)->movementScale == 0xA) ? 1 : -1];
+
+s32 func_00324840(void) {
+    MenuWorkEntry *work = (MenuWorkEntry *)mnuActiveEffectEntry;
+    u32 kindMask = 0;
+    s8 *input = (s8 *)D_0045C890;
+    MenuProgressParameters *parameters = mnuGetResourceProgressParameters();
+    MenuMovementRecord18 *progress = (MenuMovementRecord18 *)func_00322520((u16)work->tag);
+
+    if (work->inputCountdown > 0) {
+        work->inputCountdown--;
+        if (work->inputCountdown <= 0) {
+            work->inputCountdown = 0;
+            work->remaining = 1;
+        }
+    }
+
+    if (((work->flags >> 14) & 1) == 0) {
+        f32 movement[4];
+        f32 length;
+
+        memset(movement, 0, sizeof(movement));
+        if (input[0] != 0) {
+            movement[1] = -1.0f;
+        } else if (input[1] != 0) {
+            movement[1] = 1.0f;
+        }
+        if (input[2] != 0) {
+            movement[0] = -1.0f;
+        } else if (input[3] != 0) {
+            movement[0] = 1.0f;
+        }
+
+        length = sdfVec3Normalize(movement);
+        if (length != 0.0f) {
+            sdfVectorScale((f32)progress->movementScale, movement);
+            work->x0 += movement[0];
+            work->y0 += movement[1];
+            if (work->x0 < 16.0f) {
+                work->x0 = 16.0f;
+            }
+            if (work->y0 < 16.0f) {
+                work->y0 = 16.0f;
+            }
+            if (work->x0 > (f32)(parameters->width - 16)) {
+                work->x0 = (f32)(parameters->width - 16);
+            }
+            if (work->y0 > (f32)(parameters->height - 16)) {
+                work->y0 = (f32)(parameters->height - 16);
+            }
+        }
+
+        kindMask = 0;
+        if (input[4] != 0) {
+            kindMask = 0x21;
+        }
+        if (input[5] != 0) {
+            kindMask |= 0x10;
+        }
+    }
+
+    func_00321798((MenuTimedStateList *)work->callback,
+                  func_00321ED8(), kindMask,
+                  (s32)work->x0, (s32)work->y0, kindMask, work->scale0);
+
+    func_00322418();
+
+    {
+        MenuWorkFlags flags;
+        flags.word = work->flags;
+        if (flags.bits.unk5) {
+            MenuWorkFlags updated = flags;
+            updated.bits.unk6++;
+            work->flags = updated.word;
+            if (updated.bits.unk6 >= 11) {
+                MenuWorkFlags cleared = updated;
+                cleared.bits.unk6 = 0;
+                work->flags = cleared.word;
+                flags = cleared;
+            } else {
+                flags = updated;
+            }
+        }
+        if (flags.bits.inputDisabled) {
+            return 0;
+        }
+        return 1;
+    }
+}
 
 void mnuInitializeEffectContext(MenuWorkEntry *context) {
     MenuInitialTag initialTag;
