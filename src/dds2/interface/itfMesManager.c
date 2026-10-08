@@ -68,7 +68,7 @@ void itfMesBlk24MoveTo(s32 window, s32 x, s32 y);
 
 void itfMesSetWindowPageAndRefresh(s32 window, s32 firstValue, s32 secondValue);
 
-void func_001A4A10(s32 window, s32 first, s32 second);
+s32 func_001A4A10(s32 window, s32 first, s32 second);
 
 void itfMesFinishWindowAndClearStatus();
 

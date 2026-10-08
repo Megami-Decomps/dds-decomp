@@ -1,3 +1,4 @@
+#include "btl_motion_transform.h"
 #include "eff_bill.h"
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
@@ -7088,9 +7089,8 @@ void effUpdateSlotTimerPair(u8 *work) {
 
 extern f32 D_003BC9A8;
 
-extern void func_001DC2A0(u8 *, f32);
 
-/* Eases D_003BC9A8 (a rotation in radians) along the span's [start, end] degrees. */
+/* Interpolates camera field of view in degrees and stores it in radians. */
 void effApplyKeyframeAngle(u8 *work) {
     u8 *state = (u8 *)btlGetRuntime();
     f32 *span = ((EffActiveResource *)work)->payload;
@@ -7100,7 +7100,7 @@ void effApplyKeyframeAngle(u8 *work) {
     if (count != 0 && count >= ((EffActiveResource *)work)->frame) {
         f32 t = (f32)(s32)((EffActiveResource *)work)->frame / (f32)count;
         value = ((span[2] - span[1]) * t + span[1]) * 0.017453293f;
-        func_001DC2A0(state + 0x70, value);
+        btlSetMotionTransformFieldOfView(&((BtlState *)state)->cameraCommand.camera, value);
         D_003BC9A8 = value;
     }
 }

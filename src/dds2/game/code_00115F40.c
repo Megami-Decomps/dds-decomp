@@ -3,6 +3,9 @@
 #include "dds3obj.h"
 #include "eff_event.h"
 #include "eff_dependency.h"
+#include "fld.h"
+#include "fpu.h"
+#include "pcp_vu0.h"
 
 
 extern void *sdfAllocSizeClassBlock(s32 size);
@@ -26,15 +29,26 @@ extern void effObjSetFlags(struct EffectObj *object, u32 flags);
 extern void billSetKind1Entry(struct BillObj *billboard, u32 entry);
 extern void billSetVariantValue(struct BillObj *billboard, s32 value);
 
+/* Complete 0x30-byte FLD1 type-11 effect descriptor. The field resolver
+ * passes its resource data pointer directly to the billboard binder. */
 typedef struct BillConfig {
     u32 flags;   /* 0x00: bit 0 / bit 1 select the billboard mode */
     u32 kind;    /* 0x04 */
-    u8 pad08[4];
+    u32 resourceIndex; /* 0x08 */
     f32 width;   /* 0x0C */
     f32 height;  /* 0x10 */
-    u8 pad14[0xC];
-    u32 entry;   /* 0x20 */
+    f32 depth;   /* 0x14 */
+    u32 projectionDistance; /* 0x18 */
+    s32 mapSelector;        /* 0x1C: flag test and map-slot byte offset */
+    union {
+        u32 entry;          /* 0x20: kind-1 entry */
+        u32 fadeStart;      /* 0x20: kind-0/3 lower fade distance */
+    };
+    u32 fadeEnd;            /* 0x24: kind-0/3 upper fade distance */
+    u32 parameters28[2];   /* 0x28..0x2C: unconsumed parameters */
 } BillConfig;
+
+typedef char BillConfig_size_must_be_0x30[(sizeof(BillConfig) == 0x30) ? 1 : -1];
 
 /* Bind a billboard config to the owner's resource, copy the source vector and set up the billboard by config kind. */
 void billCopySourceVectorAndSetConfig(EffWorldNode *owner, BillConfig *config) {
@@ -71,7 +85,114 @@ void billCopySourceVectorAndSetConfig(EffWorldNode *owner, BillConfig *config) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00115F40", effUpdateConfiguredBillboard);
+extern s32 fldTestMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueOffset);
+extern void billSetChildParameter(struct BillObj *billboard, u32 parameter);
+struct FldAreaWork;
+extern struct FldAreaWork fldAreaState;
+extern f32 sdfViewTargetVector[4];
+
+void effUpdateConfiguredBillboard(EffWorldNode *object) {
+    EffectDependencyState *resource = object->data;
+    BillConfig *config;
+    f32 direction[4] __attribute__((aligned(16)));
+    f32 normalizedDirection[4] __attribute__((aligned(16)));
+    f32 dx;
+    f32 dy;
+    f32 value; /* z delta, then projection distance */
+    f32 distance;
+    u32 projectionDistanceWord;
+
+    if ((resource->flags & 0x10) == 0) {
+        return;
+    }
+
+    config = resource->config;
+    if (config->mapSelector != 0) {
+        s32 *areaWords = (s32 *)&fldAreaState;
+        s32 mapId = areaWords[4];
+        u32 slotIndex = areaWords[5] + 1;
+
+        if (fldTestMapTargetFlag(mapId, slotIndex, config->mapSelector)) {
+            resource->flags &= ~1;
+        } else {
+            resource->flags |= 1;
+        }
+    }
+
+    dx = sdfViewTargetVector[0] - resource->sourcePosition[0];
+    dy = sdfViewTargetVector[1] - resource->sourcePosition[1];
+    value = sdfViewTargetVector[2] - resource->sourcePosition[2];
+    projectionDistanceWord = config->projectionDistance;
+    distance = fsqrtf(dx * dx + dy * dy + value * value);
+
+    if (projectionDistanceWord != 0) {
+        direction[0] = -dx;
+        direction[1] = -dy;
+        direction[2] = -value;
+        direction[3] = 1.0f;
+        VU0_LOAD_VF(vf10, direction);
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF(vf10, normalizedDirection);
+        {
+            ObjectTransform *inner;
+
+            value = (f32)projectionDistanceWord;
+            inner = object->inner;
+
+            inner->position[0] = resource->sourcePosition[0] - normalizedDirection[0] * value;
+            inner->position[1] = resource->sourcePosition[1] - normalizedDirection[1] * value;
+            inner->position[2] = resource->sourcePosition[2] - normalizedDirection[2] * value;
+        }
+    }
+
+    switch (config->kind) {
+    case 0:
+    case 3:
+        if (config->fadeStart == 0 && config->fadeEnd == 0) {
+            return;
+        }
+        {
+            f32 start = (f32)config->fadeStart;
+            f32 end = (f32)config->fadeEnd;
+            s32 alpha;
+            u32 parameter;
+
+            if (distance < start) {
+                parameter = 0x00808080;
+            } else if (end < distance) {
+                parameter = 0x80808080;
+            } else {
+                alpha = (s32)(((distance - start) * 128.0f) / (end - start));
+                if (alpha >= 129) {
+                    alpha = 128;
+                }
+                if (alpha < 0) {
+                    alpha = 0;
+                }
+                parameter = ((u32)alpha << 24) | 0x00808080;
+            }
+            billSetChildParameter((struct BillObj *)resource->handle, parameter);
+        }
+        break;
+    case 2:
+        break;
+    case 1:
+        if (config->mapSelector != 0) {
+            s32 *areaWords = (s32 *)&fldAreaState;
+            s32 entry = fldGetMapSlotByte(areaWords[4], (u32)areaWords[5] + 1,
+                                          config->mapSelector);
+
+            if (entry != -1) {
+                billSetKind1Entry((struct BillObj *)resource->handle, (u32)entry);
+            }
+        }
+        break;
+
+    default:
+        break;
+    }
+}
 
 /* Attach a 16-byte slot block, then publish its newly created state handle.
  * The block is attached before the state constructor sees the object. Returns 1. */

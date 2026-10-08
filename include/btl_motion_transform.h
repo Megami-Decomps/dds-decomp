@@ -3,6 +3,11 @@
 
 #include "btl_command.h"
 
+/* Copies both vectors, distance and field of view. */
+void btlCopyMotionTransform(BtlCamState *destination, BtlCamState *source);
+/* Field of view is stored in radians. */
+void btlSetMotionTransformFieldOfView(BtlCamState *object, f32 fovRadians);
+
 /* Both vector inputs contain four floats; direction supplies a quaternion.
  * Initializes the camera pose and clears the runtime motion-update flag. */
 void btlInitMotionTransformFromVectors(BtlCamState *object, f32 *origin,

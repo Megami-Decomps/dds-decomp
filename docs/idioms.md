@@ -4481,7 +4481,7 @@ without changing either runtime's size or inventing a second layout.
 
 The profile callback at `00268AB8` indexes the existing 0x68-byte
 `BrsProgressAnimation` bank at work `+1220`. It reads the signed progress
-at row `+30` and opacity at `+1C`; completion writes frame `+44 = 0`,
+at row `+30` and publishes opacity at `+1C`; completion writes frame `+44 = 0`,
 icon opacity `+48 = 0x80`, icon state `+4C = 1`, and flags `+60/+61 = 1`.
 These fields complete the primary DDS1 owner without moving either bank,
 changing its extent, or applying the different DDS2 counter origin.
@@ -4565,4 +4565,38 @@ owners replace the two render-only prefix views without changing code.
 `mdlProcessContextNodesAndTransforms` receives the actual `s32` SDK
 update argument; the surface-table pointer crosses that address-word
 boundary explicitly, rather than through a false pointer prototype.
+
+## Kind-5 room-mode selector is signed
+
+The object-base dispatcher reads `EffectObjectData + 04` with `lw` and
+tests it with `blez` before passing the positive selector to
+`fldTestRoomObjectModeFlag(area, floor + 1, selector)`. Keep the primary
+field `s32`; an unsigned owner plus a renderer-only signed view or cast
+would hide the real contract. Its existing zero initialization is unchanged.
+
+## Message-option setters return status without narrowing their arguments
+
+DDS1 `0019C9F0` / DDS2 `001A4A10` return zero on rejected keys/capacity
+and one after storing the option pair. Their unit-local forwards therefore
+return `s32`, with the existing three `s32` arguments; the script wrappers
+ignore the result. A narrow key formal would incorrectly admit truncated
+out-of-range input. The setter bodies remain assembly pending their store
+scheduling residual; this prototype closure does not claim a body landing.
+
+
+## Linked defeat-candidate cameras use their primary action and pose owners
+
+DDS1 `001E5198` takes a `BtlLinkedCommand *` and two `BtlCamState *`
+outputs. Its sole C caller, `btlStartLinkedDefeatCandidateAction`, uses the
+existing action task, target list, embedded front/back camera states,
+motion parameter and flags directly. The task pointer is reloaded after
+the candidate-clear call, preserving the native lifetime boundary.
+The already-C DDS2 counterpart `001F35C8` has the same three-pointer API
+but a different camera algorithm and preset data.
+
+The callback/formal closure gates DDS1 `code_001C8890` 585 match, 0 differ;
+the unchanged DDS2 twin unit gates 537 match, 0 differ. The DDS1 camera
+body remains assembly: a donor-backed private bank-copy draft has 28/178
+word differences, including scalar operand roles and the second muzzle
+buffer-address materialization. No extra asm/barrier is added to force it.
 

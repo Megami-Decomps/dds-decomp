@@ -2954,6 +2954,7 @@
 0x001DBCB0	btlCreateFloatTask29	inferred	task type 0x29 with 16 float args
 0x001DBE20	btlScheduleContextReset	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001DC270	btlCopyMotionTransform	inferred	copies both vectors and two scalar values of a motion transform [names_R_FuncNames8.tsv]
+0x001DC2A0	btlSetMotionTransformFieldOfView	inferred	Stores radians at camera pose field-of-view offset 0x24; keyframe caller converts degrees to radians.
 0x001DC2A8	btlInitMotionTransformFromVectors	inferred	uses origin and quaternion to initialize transform vectors and angle [names_R_FuncNames8.tsv]
 0x001DC338	btlInitMotionTransformFromComponents	inferred	packs position and quaternion then initializes transform with degree angle [names_R_FuncNames8.tsv]
 0x001DC470	btlGetActiveUnitId	inferred	DDS2 001E9798 twin; returns BtlWork.activeUnitId [names_R_FuncNames2.tsv]
@@ -6678,6 +6679,7 @@
 0x002EB490	sdfSoundAppendNode	inferred	appends a node to the D_003BDA98 intrusive list
 0x002EB4D0	sdfSoundRemoveNode	inferred	unlinks a node from the D_003BDA98 intrusive list
 0x002EB510	sdfAllocateStreamFrameBuffers	inferred	Allocates two width-by-height frame buffers with two or four bytes per pixel depending on the node flag.
+0x002EB578	sdfBuildStreamInputDmaChain	inferred	Consumes the bytes after the parsed frame header, builds max-0xFFF00-byte input DMA chain tags, and stores their chain under the SdfStreamFrameNode owner for sdfSoundStartIpuInputDma.
 0x002EB650	sdfBuildStreamFrameTransferPackets	inferred	builds and stores both transfer packet buffers for a full SdfStreamFrameNode before submission
 0x002EB8C0	sdfSoundInitNodeFromFormat	inferred	memset node, translate hasAudio/stereo into twoChannel 0/1/2
 0x002EB9C8	sdfSoundInitFormattedNode	inferred	Initializes a sound node using format and callback values and allocates its sample buffer.
@@ -6691,6 +6693,7 @@
 0x002EC488	sdfMidiPreviousEntry	inferred	reads the prior entry slot while channel enabled
 0x002EC4B0	sndGetSelectedChannelEntry	inferred	snd sound tasks and playback in game/code_002E9708.c
 0x002EC4D8	sdfAdvanceBufferedPlayback	inferred	Consumes a pending buffer, flips its buffer index and advances the looping playback counter.
+0x002EC5E0	sdfAdvanceStreamPlayback	inferred	Called by the movie scheduler with a cadence; retries deferred input DMA, submits buffered frames on phase transitions, advances playback cadence, and refills active feeds.
 0x002EC748	sdfSoundInitAndAppendNode	inferred	Initializes a sound node, stores the caller value, and appends it to the active-node list.
 0x002EC818	sdfSoundInitFormattedAndAppendNode	inferred	Initializes a formatted sound node, stores the caller value, and appends it to the active-node list.
 0x002EC900	sdfSoundShutdownIpuStreamHandlers	inferred	confidence=high; matched-C; src/dds1/game/code_002E9708.c:1192:func_002EC900; requires-symbol-registration; Removes the registered IPU DMA handlers, clears their handles and disables the completion sources.; source=reviewed-prior-QP15 [names_qp15.tsv]

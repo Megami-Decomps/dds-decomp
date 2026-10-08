@@ -5,7 +5,7 @@ struct EvtUnit;
 /* Kind-5 constructors allocate and clear the complete 0x40-byte payload. */
 typedef struct EffectObjectData {
     ObjBase *handle;
-    u32 word04;
+    s32 word04; /* 0x04: room-mode flag selector; nonpositive bypasses room gating. */
     struct EvtUnit *transitionWork; /* 0x08: object transition work */
     ObjBase *modelHolder; /* 0x0C: owned base retains the model resource. */
     s32 activeId;
