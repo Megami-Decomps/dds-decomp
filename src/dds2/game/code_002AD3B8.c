@@ -77,7 +77,6 @@ extern void mnuCreateOrderedStaffItemWindow(void *);
 extern void mnuCreateOwnedCatalogItemWindow(void *);
 extern s32 mdlFlagTest();
 extern void mnuDrawCampIconBackdropByKind(s32, s32);
-extern void mnuDrawAndAdvancePanelGroup(s32, s32, s32, DatPartyRecord *, MenuPanelGroup *, s32, s32);
 extern void func_002AAC70(u32, u32, u32, u32, u32, u32, u32);
 extern s32 D_00435E70;
 extern void func_002BB9C8(MenuSprites *, u32);
