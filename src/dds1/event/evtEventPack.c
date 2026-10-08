@@ -9,6 +9,7 @@
 #include "evt_task.h"
 #include "eff_transform.h"
 #include "mdl.h"
+#include "file_request_api.h"
 
 s32 evtTickPackLoad(KwlnTask *task);
 void evtReleaseEventPackResources(KwlnTask *task);
@@ -227,7 +228,7 @@ struct SdfResource;
 struct FileRequest;
 struct FileWork;
 struct FileCleanup;
-extern s32 fileIsRequestReadyInCurrentMode(struct FileRequest *);
+
 extern u32 fileGetResourceHandle(struct FileWork *);
 extern s32 filePollEntryCleanup(struct FileCleanup *);
 extern char D_003BC378[];

@@ -2597,7 +2597,7 @@ s32 btlDestroyStageTask(taskWork)
         if (resource != 0) {
             sdfDevQueueReleaseState((DevState *)resource);
         }
-        func_002EDC50(taskWork->payload);
+        sdfPacReleasePacketQueueNodes(taskWork->payload);
         sdfReleaseChipBlock(taskWork->allocation);
         sdfReleaseChipBlock((void *)taskWork);
         return 0;

@@ -3,6 +3,7 @@
 #include "kwln.h"
 #include "mnu_title_effect.h"
 #include "file.h"
+#include "file_request_api.h"
 
 #define BRS_RESULT_COUNTER_PAIR_COUNT 5
 #define BRS_RESULT_SETTLED_POLL_LIMIT 6
@@ -596,7 +597,6 @@ void mnuStoreTaskResult(char *audioPath) {
 
 extern u32 D_003D9168[];
 
-extern s32 fileIsRequestReadyInCurrentMode(u32);
 
 extern s32 fileGetResourceHandle(u32);
 
@@ -613,7 +613,7 @@ extern void func_002F7628(u32 *);
  * and frame counts. Keep those distinct accesses and the cleanup-before-copy
  * ordering; return 1 after a ready file is copied, otherwise its ready result. */
 s32 mnuCompleteTitleStreamFileLoad(u32 *destinationState) {
-    s32 ready = fileIsRequestReadyInCurrentMode(D_003BD8D4);
+    s32 ready = fileIsRequestReadyInCurrentMode((struct FileRequest *)D_003BD8D4);
 
     if (ready != 0) {
         s32 resourceHandle = fileGetResourceHandle(D_003BD8D4);
