@@ -5,6 +5,7 @@
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
+#include "mnu_staff.h"
 #include "eff.h"
 #include "mnu_shop.h"
 #include "mdl.h"
@@ -1584,13 +1585,13 @@ u32 func_002866C8(s32 context, s32 ability, s32 target, DatPartyRecord *entry) {
     return 0;
 }
 
-s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 selectedEntry) {
-    DatPartyRecord *entry = (DatPartyRecord *)selectedEntry;
+s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, DatPartyRecord *target, DatPartyRecord *selectedEntry) {
+    DatPartyRecord *entry = selectedEntry;
     s32 multiTarget = 0;
     s32 applied = 0;
     s32 mask;
 
-    if (func_002866C8(context, ability, target, entry) != 0) {
+    if (func_002866C8((s32)context, ability, (s32)target, entry) != 0) {
         return 1;
     }
 
@@ -1600,8 +1601,8 @@ s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 select
         if (func_002111A0(ability, mask) != 0) {
             return 0;
         }
-        func_002866B0(ability, target, entry);
-        func_00281780(context, mnuFindMatchingPartyEntryIndex(entry), 0, 0);
+        func_002866B0(ability, (s32)target, entry);
+        func_00281780((s32)context, mnuFindMatchingPartyEntryIndex(entry), 0, 0);
     } else {
         s32 partyIndex;
         s32 queueArgument;
@@ -1612,7 +1613,7 @@ s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 select
                 mask = mnuGetMatchingPartyEntryMask(entry);
 
                 if (func_002111A0(ability, mask) == 0) {
-                    func_002866B0(ability, target, entry);
+                    func_002866B0(ability, (s32)target, entry);
                     applied = 1;
                 }
             }
@@ -1626,7 +1627,7 @@ s32 ptySkillApplyFieldUseEffect(s32 context, u16 ability, s32 target, s32 select
         for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
             entry = &datGameState->party[partyIndex];
             if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
-                func_00281780(context, mnuFindMatchingPartyEntryIndex(entry), 0, queueArgument);
+                func_00281780((s32)context, mnuFindMatchingPartyEntryIndex(entry), 0, queueArgument);
             }
             queueArgument += 3;
         }
