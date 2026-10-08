@@ -844,7 +844,7 @@ void func_002A6030(s32 font, u32 color, const char *text, f32 x, f32 y) {
     }
     frFontMeasureLines(glyph);
     frFontDrawGlyphWithSharedFlags(glyph, 1);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 

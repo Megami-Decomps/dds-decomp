@@ -626,7 +626,7 @@ void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
         fontHandle = func_0019F5E8(0x620, 0xA20, 0, 0xA09DC380, (s32)captionText, 0);
         frFontSetChainFlag(fontHandle, 4);
         func_0019D550((FrFontGlyph *)fontHandle, 1, 0x53);
-        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)fontHandle);
+        frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)fontHandle);
     }
 }
 
@@ -943,7 +943,7 @@ s32 func_002AF5E0(KwlnTask *task) {
         if (owned != 0 && mdlFlagTest(0x990) != 0) {
             glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x2B0, 0xB80, 0, 0xA09DC340, slotsCaption, 0);
             func_0019D550(glyph, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot(glyph);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
             func_002BDAA8(0x770, 0xB98, 0x100, selectionId, context->spriteArg0, 0x2C);
         }
     } else {

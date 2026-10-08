@@ -2,6 +2,7 @@
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "sdf_pac_packet.h"
 
 enum {
     PAC_COMMAND_PAYLOAD = 1,
@@ -16,16 +17,6 @@ enum {
     PAC_STATE_USE_PACKET_MEMORY = 1,
     PAC_STATE_ALLOCATE_HIGH = 2
 };
-
-typedef struct PacHead {
-    u8 command; /* 0x0 */
-    u8 flags; /* 0x1: high nibble extension length, low nibble encoding */
-    u8 pad2[2]; /* 0x2 */
-    s32 payloadSize; /* 0x4 */
-    u8 pad8[4]; /* 0x8 */
-    s32 decodedSize; /* 0xC */
-    u8 payload[0]; /* 0x10: variable-length packet data */
-} PacHead;
 
 /* Relocation record embedded in the work item's data stream. */
 typedef struct PacReloc {
@@ -54,7 +45,7 @@ typedef struct PacAlloc {
     s32 entryCount; /* 0x0 */
     s32 entryIndex; /* 0x4 */
     u8 pad8[8]; /* 0x8 */
-    PacHead entry; /* 0x10: current serialized entry header */
+    SdfPacStreamPacketHeader entry; /* 0x10: current serialized entry header */
     PacBuf buffer; /* 0x20: decoder state; result is the completed resource */
 } PacAlloc;
 
@@ -85,23 +76,23 @@ typedef struct PacState {
     PacWork *queueTail; /* 0x34 */
 } PacState;
 
-void sdfPacStartPacketPayload(PacState *state, PacHead *packet);
+void sdfPacStartPacketPayload(PacState *state, SdfPacStreamPacketHeader *packet);
 void sdfDecodePacNodeAndAdvanceTail(PacState *state);
 void sdfRelocatePackedResourceWords(void *words, void *base, void *table, s32 size);
 void sdfPacAdvanceInput(PacState *state, s32 consumedBytes);
 void sdfPacAdvanceCallbackBoundary(PacState *state);
-PacWork *sdfPacEnqueuePacket(PacState *state, PacHead *packet);
+PacWork *sdfPacEnqueuePacket(PacState *state, SdfPacStreamPacketHeader *packet);
 void *sdfAllocSizeClassBlock(s32 size);
-void func_002EE6F8(PacState *state, PacHead *packet, PacBuf *buffer);
+void func_002EE6F8(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer);
 void sdfPacRelocateQueuedPayload(PacState *state);
 void sdfPacFinalizeRelocatedPayload(PacState *state);
 void sdfPacCompleteResourcePacket(PacState *state);
 void sdfPacResetOutputToAllocationEntry(PacState *state);
 void sdfPacAdvanceAllocationEntry(PacState *state);
-void sdfPacStartRegularPacket(PacState *state, PacHead *packet);
-void sdfPacStartRelocatingPacket(PacState *state, PacHead *packet);
-void sdfPacBeginRelocatedPayload(PacState *state, PacHead *packet);
-void sdfPacStartAllocationList(PacState *state, PacHead *packet);
+void sdfPacStartRegularPacket(PacState *state, SdfPacStreamPacketHeader *packet);
+void sdfPacStartRelocatingPacket(PacState *state, SdfPacStreamPacketHeader *packet);
+void sdfPacBeginRelocatedPayload(PacState *state, SdfPacStreamPacketHeader *packet);
+void sdfPacStartAllocationList(PacState *state, SdfPacStreamPacketHeader *packet);
 void sdfQueueAndResetPacketWork(PacState *state, void *packet);
 void sdfAppendResourceListItem(s32 handle, s32 resource);
 SdfTex *sdfTexAcquireAlternateResourceTexture(void *resource);
@@ -145,7 +136,7 @@ s32 sdfPacFeedInput(PacState *state, void *input, s32 available) {
 }
 
 /* Queue a private copy of the packet header and any extension bytes. */
-PacWork *sdfPacEnqueuePacket(PacState *state, PacHead *packet) {
+PacWork *sdfPacEnqueuePacket(PacState *state, SdfPacStreamPacketHeader *packet) {
     s32 extensionBytes = packet->flags & PAC_EXTENSION_BYTES_MASK;
     PacWork *node = sdfAllocAndClearQuadwords(extensionBytes + PAC_WORK_BASE_BYTES);
     node->owner = state;
@@ -184,7 +175,7 @@ PacWork *sdfPacRemovePacket(PacWork *work) {
 }
 
 /* Dispatch recognized PAC commands; one marks end-of-stream. */
-s32 sdfPacDispatchPacket(PacState *state, s32 status, PacHead *packet) {
+s32 sdfPacDispatchPacket(PacState *state, s32 status, SdfPacStreamPacketHeader *packet) {
     if (status == 0) {
         switch (packet->command) {
         case PAC_COMMAND_PAYLOAD:
@@ -211,8 +202,8 @@ s32 sdfPacDispatchPacket(PacState *state, s32 status, PacHead *packet) {
     return 0;
 }
 /* Return the second header's payload when its extension-length nibble is nonzero. */
-void *sdfPacGetExtensionData(PacHead *header) {
-    PacHead *extension = (PacHead *)header->payload;
+void *sdfPacGetExtensionData(SdfPacStreamPacketHeader *header) {
+    SdfPacStreamPacketHeader *extension = (SdfPacStreamPacketHeader *)header->payload;
     s32 extensionBytes = extension->flags & PAC_EXTENSION_BYTES_MASK;
     if (extensionBytes <= 0) {
         return NULL;
@@ -275,7 +266,7 @@ void sdfPacSkipPendingBytes(PacState *state) {
 }
 
 /* Allocate or skip a payload and select its raw/compressed input handler. */
-void sdfPacStartPacketPayload(PacState *state, PacHead *packet) {
+void sdfPacStartPacketPayload(PacState *state, SdfPacStreamPacketHeader *packet) {
     s32 allocationSize = packet->decodedSize;
     if (allocationSize == 0) {
         allocationSize = packet->payloadSize + (packet->flags & PAC_EXTENSION_BYTES_MASK) - PAC_HEADER_BYTES;
@@ -312,7 +303,7 @@ void sdfPacStartPacketPayload(PacState *state, PacHead *packet) {
 }
 
 /* Begin a regular payload; completion is the normal packet finalizer. */
-void sdfPacStartRegularPacket(PacState *state, PacHead *packet) {
+void sdfPacStartRegularPacket(PacState *state, SdfPacStreamPacketHeader *packet) {
     sdfPacStartPacketPayload(state, packet);
     state->onComplete = sdfDecodePacNodeAndAdvanceTail;
 }
@@ -332,7 +323,7 @@ void sdfPacRelocateQueuedPayload(PacState *state) {
 }
 
 /* Begin a payload that must be relocated before normal finalization. */
-void sdfPacStartRelocatingPacket(PacState *state, PacHead *packet) {
+void sdfPacStartRelocatingPacket(PacState *state, SdfPacStreamPacketHeader *packet) {
     sdfPacStartPacketPayload(state, packet);
     state->onComplete = sdfPacRelocateQueuedPayload;
 }
@@ -352,7 +343,7 @@ void sdfPacFinalizeRelocatedPayload(PacState *state) {
 }
 
 /* Begin the second relocation-command variant. */
-void sdfPacBeginRelocatedPayload(PacState *state, PacHead *packet) {
+void sdfPacBeginRelocatedPayload(PacState *state, SdfPacStreamPacketHeader *packet) {
     sdfPacStartPacketPayload(state, packet);
     state->onComplete = sdfPacFinalizeRelocatedPayload;
 }
@@ -429,7 +420,7 @@ void sdfPacCompleteResourcePacket(PacState *state) {
 }
 
 /* Allocate decoder state for a complete resource packet. */
-void sdfPacStartAllocationList(PacState *state, PacHead *packet) {
+void sdfPacStartAllocationList(PacState *state, SdfPacStreamPacketHeader *packet) {
     sdfPacEnqueuePacket(state, packet);
     {
         void *allocation = sdfAllocSizeClassBlock(0x10);
