@@ -36,7 +36,7 @@ extern s32 btlHasRegisteredGuidePanelTask(void);
 
 extern s32 btlHasRegisteredSkillNamePanelTask(void);
 
-extern s32 btlHasRegisteredAphNamePanelTask(void);
+extern u32 btlHasRegisteredAphNamePanelTask(void);
 
 extern s32 btlCreateAiWork(s32);
 
@@ -54,11 +54,6 @@ typedef struct RosterAvailability {
     u8 flags;
     u8 pad[7];
 } RosterAvailability;
-
-typedef struct SceneControl {
-    u8 mode;
-    s8 kind;
-} SceneControl;
 
 
 extern BattleSceneObject *fldGetSceneObjectTaskUserData(void);
@@ -133,7 +128,7 @@ typedef struct BattleSceneWork {
     s32 (*sceneCallback)();
 } BattleSceneWork;
 
-extern SceneControl *btlCommandPanelWork;
+extern BattleCmdPanel *btlCommandPanelWork;
 
 extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 
@@ -331,7 +326,7 @@ extern void func_001C98E8(s32);
 extern void btlDrawRetreatCommandLabel(s32);
 
 void fldDispatchSceneKindHandler(s32 sceneContext) {
-    switch (func_001C82D8(sceneContext, btlCommandPanelWork->kind)) {
+    switch (func_001C82D8(sceneContext, btlCommandPanelWork->classIndex)) {
     case 0:
         func_001C92A0(sceneContext, 0, 2, 3);
         return;
@@ -442,7 +437,7 @@ extern char *D_004367CC;
 /* The same native command-selection sequence occurs in four switch paths. */
 static inline void btlUpdateSceneCommandSelection(BattleSceneObject *object) {
     fldDispatchSceneKindHandler((s32)object);
-    func_001BD9A0(object, func_001C82D8((s32)object, btlCommandPanelWork->kind));
+    func_001BD9A0(object, func_001C82D8((s32)object, btlCommandPanelWork->classIndex));
 }
 
 INCLUDE_RODATA(const s32, "game/code_001C7FF8", D_004169F0);
@@ -803,23 +798,23 @@ void func_001CAB60(ActionStateLink *task) {
     }
     object = fldGetSceneObjectTaskUserData();
     if (object->state == 3) {
-        btlCommandPanelWork->mode = 2;
+        btlCommandPanelWork->state = 2;
         object->state = 1;
     } else if (object->state == 8) {
         object->state = 6;
-        btlCommandPanelWork->mode = 2;
+        btlCommandPanelWork->state = 2;
     } else if (object->state != 0xB) {
-        btlCommandPanelWork->mode = 1;
+        btlCommandPanelWork->state = 1;
         object->state = 1;
     }
-    btlLinkedSelectionTaskBuffer->selectedRow = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->kind, 0);
+    btlLinkedSelectionTaskBuffer->selectedRow = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->classIndex, 0);
 }
 
 void fldSetSceneObjectAndGroupStates(void) {
     BattleSceneObject *object = fldGetSceneObjectTaskUserData();
     if (object != 0) {
         object->state = 5;
-        btlCommandPanelWork->mode = 3;
+        btlCommandPanelWork->state = 3;
     }
 }
 
