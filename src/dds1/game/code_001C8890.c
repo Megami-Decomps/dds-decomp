@@ -7113,9 +7113,11 @@ void btlAimLinkedUnitAtMuzzle(u8 *action) {
 }
 INCLUDE_ASM(const s32, "game/code_001C8890", btlMatchFirstLinkedActorFlags);
 
+extern s32 btlIsActorCategoryMarked(BtlLinkedCommand *);
+
 /* Check actor status, linked-group marks, and owner restrictions before use. */
-s32 btlCanUseLinkedActor(s32 actor) {
-    u32 status = *(u32 *)(actor + 0x104);
+s32 btlCanUseLinkedActor(BtlLinkedCommand *actor) {
+    u32 status = actor->status;
     BtlTask *linked;
     s32 category;
     u32 count;
@@ -7131,7 +7133,7 @@ s32 btlCanUseLinkedActor(s32 actor) {
     default:
         return 1;
     }
-    linked = ((BtlLinkedCommand *)actor)->task;
+    linked = actor->task;
     if (linked == 0) {
         return 1;
     }
@@ -7142,10 +7144,10 @@ s32 btlCanUseLinkedActor(s32 actor) {
             return 0;
         }
     }
-    if (((BtlUnit *)linked->unit)->partyRecord.status & 0x480) {
+    if (linked->unit->partyRecord.status & 0x480) {
         return 0;
     }
-    category = *(s32 *)(actor + 0x114);
+    category = actor->actionCode;
     if (category != 0 && (*(u16 *)(datActionAnimationRecords + category * 32 + 0x1C) & 1)) {
         return 0;
     }
@@ -7282,7 +7284,7 @@ s32 btlIsActorCategoryTypeTwo(s32 arg0) {
     return ((datCommandRecords[temp_v1].unk30 ^ 2) < 1U);
 }
 
-u32 btlCanUseActorCategoryFlag2(s32 actor) {
+u32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *actor) {
     s32 index;
     if (btlIsActorCategoryMarked(actor) != 0) {
         return 1;
@@ -7290,7 +7292,7 @@ u32 btlCanUseActorCategoryFlag2(s32 actor) {
     if (btlCanUseLinkedActor(actor) == 0) {
         return 0;
     }
-    index = *(s32 *)(actor + 0x114);
+    index = actor->actionCode;
     if (index == 0) {
         return 0;
     }
@@ -7308,12 +7310,12 @@ s32 btlHasSingleLinkedResource(s32 actor) {
     return btlGetIndexListCount(*(struct BtlIndexList **)(actor + 0x118)) == 1;
 }
 
-u32 func_001DD2C0(s32 actor) {
+u32 func_001DD2C0(BtlLinkedCommand *actor) {
     s32 index;
     if (btlCanUseLinkedActor(actor) == 0) {
         return 0;
     }
-    index = *(s32 *)(actor + 0x114);
+    index = actor->actionCode;
     if (index == 0) {
         return 0;
     }
@@ -7323,8 +7325,8 @@ u32 func_001DD2C0(s32 actor) {
     return 0;
 }
 
-s32 btlIsActorCategoryMarked(s32 actor) {
-    s32 index = *(s32 *)(actor + 0x114);
+s32 btlIsActorCategoryMarked(BtlLinkedCommand *actor) {
+    s32 index = actor->actionCode;
     if (index == 0) {
         return 0;
     }
