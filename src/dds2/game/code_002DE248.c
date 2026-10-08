@@ -1304,14 +1304,14 @@ void effUpdateFadeBlendC(EffKindWork *work) {
 }
 
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);
-extern void func_0018FC88(EffResourceRectWork *work);
+extern void effReleaseResourceTemplate(EffResourceRectWork *work);
 
 u32 effCreateFadeColorWorkFromOutput(void *work) {
     return (u32)effCloneResourceTemplate((EffResourceRectParams *)((u8 *)work + 0xc0));
 }
 
 void effReleaseFadeColorWork(u32 resourceHandle) {
-    func_0018FC88((EffResourceRectWork *)resourceHandle);
+    effReleaseResourceTemplate((EffResourceRectWork *)resourceHandle);
 }
 
 /* This projected fade also consumes EffKindWork: position, handle and payload. */
@@ -12615,3 +12615,4 @@ INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438850);
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438858);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438860);
+

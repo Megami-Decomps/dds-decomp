@@ -89,7 +89,7 @@ EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *src) {
     return dst;
 }
 
-void func_00188050(EffResourceRectWork *work) {
+void effReleaseResourceTemplate(EffResourceRectWork *work) {
     sdfReleaseChipBlock(work);
 }
 
