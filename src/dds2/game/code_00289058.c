@@ -690,7 +690,72 @@ void func_0028DFA0(s32 object) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_0028E0E8);
+typedef struct MantraPanelAnimation MantraPanelAnimation;
+extern MantraPanelAnimation *mnuSpawnPanelSlotA(MantraPanelPool *, s32, s8, s16, s16, u32);
+extern void mnuOffsetPanelAndSetVisualParams(MantraPanelAnimation *, s32, s32, u32, u32, u32, u8, u8);
+
+const char D_004271E0[] = "Mantra Hiding[%x]!!!\n";
+const char D_004271F8[] = "Mantra !!!\n";
+const char D_00427208[] = "Mantra Map!!!\n";
+
+/* Show the selection panels, then eligible nodes outside that selection. */
+void func_0028E0E8(MenuContainer *object, u16 nodeId, u16 panelX) {
+    EvtMantraNodePositionRecord *position;
+    MantraPanelAnimation *panel;
+    MantraFlagResource *resource;
+    u16 visibleIds[7];
+    u32 selectedIndex;
+    u8 modelFlagState;
+    s32 i;
+    s32 recordIndex;
+
+    position = (EvtMantraNodePositionRecord *)mnuGetMantraNodePositionRecord((s16)nodeId);
+    selectedIndex = func_002890A8(object);
+    resource = (MantraFlagResource *)object->work.spriteHandles[selectedIndex];
+    modelFlagState = mnuGetActiveMantraModelFlagState();
+
+    visibleIds[6] = nodeId;
+    for (recordIndex = 0; recordIndex < 6; recordIndex++) {
+        visibleIds[recordIndex] = position->neighbors[recordIndex]->id;
+    }
+
+    evtPrintDeveloperConsoleMessage(D_004271E0, nodeId);
+    panel = mnuSpawnPanelSlotA((MantraPanelPool *)object->work.displaySprite,
+                               nodeId, 6, (s16)panelX, 0, 0);
+    mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
+    evtPrintDeveloperConsoleMessage(D_004271F8);
+
+    for (i = 0; i < 6; i++) {
+        mnuGetMantraNodePositionRecord((s16)visibleIds[i]);
+        panel = mnuSpawnPanelSlotA((MantraPanelPool *)object->work.displaySprite,
+                                   visibleIds[i], 2, (s16)panelX, 0, 0);
+        mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
+    }
+
+    evtPrintDeveloperConsoleMessage(D_00427208);
+    position = (EvtMantraNodePositionRecord *)mnuGetMantraNodePositionRecord(0);
+    recordIndex = 175;
+    do {
+        if (position->id != 0 && position->modelFlagState <= modelFlagState) {
+            s32 hidden = 1;
+            for (i = 0; i < 7; i++) {
+                if (position->id == visibleIds[i]) {
+                    hidden = 0;
+                    break;
+                }
+            }
+            if (hidden) {
+                u16 *nodeFlags = resource->flags + position->id;
+                if ((*nodeFlags & 0xF) != 3) {
+                    panel = mnuSpawnPanelSlotA((MantraPanelPool *)object->work.displaySprite,
+                                               position->id, 13, (s16)panelX, 0, 0);
+                    mnuOffsetPanelAndSetVisualParams(panel, 0, 0, 0, 0x80, 0x53, 0, 0);
+                }
+            }
+        }
+        position++;
+    } while (--recordIndex >= 0);
+}
 
 INCLUDE_SDATA(const s32, "game/code_00289058", D_00437930);
 
