@@ -145,7 +145,8 @@ extern void mnuReleaseMantraRecordPanelData();
 extern u32 mnuMantraSpriteSlots[12];
 
 
-/* The panel pool allocates 48-byte records shared by animation and sprite controls. */
+/* The panel pool allocates 48-byte records shared by animation and sprite controls.
+ * The phase-only renderer also uses these state bytes and the same selected id. */
 typedef struct MantraPanelAnimation {
     /* Packed control word: mnuSpawnPanelSlotA uses LW/SW at 0x279CAC/0x279CE8
      * and SB at 0x279CF0; mnuStepAndDrawTimedMantraPanels dispatches the kind with LBU at 0x27A254. */
@@ -3231,7 +3232,7 @@ extern s32 func_0027D3D8(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 mnuDrawMantraPanelSpriteTransition(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 func_0027E360(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 mnuDrawMantraPanelBackdropTransition(s32, s32, s32, s32, s32, u8 *, s32);
-extern s32 func_002805E0(s32, s32, s32, s32, s32, u8 *, s32);
+extern s32 func_002805E0(s32, s32, u32, s32, MantraPanelPool *, MantraPanelAnimation *, u32);
 extern s32 mnuDrawFadedMantraSingleCyclePanel(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 func_00281DC0(s32, s32, s32, s32, s32, u8 *, s32);
 extern s32 func_00283090(s32, s32, s32, s32, s32, u8 *, s32);
@@ -3279,7 +3280,7 @@ MantraPanelPool *func_002799D8(s32 count, s32 userValue) {
         (MantraPanelDraw)mnuDrawMantraPanelSpriteTransition,
         (MantraPanelDraw)func_0027E360,
         (MantraPanelDraw)mnuDrawMantraPanelBackdropTransition,
-        (MantraPanelDraw)func_002805E0,
+        func_002805E0,
         (MantraPanelDraw)mnuDrawFadedMantraSingleCyclePanel,
         (MantraPanelDraw)func_00281DC0,
         (MantraPanelDraw)func_00283090,
@@ -4192,41 +4193,32 @@ void mnuResetMantraPanelAnimationStates(u32 unused, s32 view) {
 void func_002803A0(void) {
 }
 
-typedef struct MantraSpinState {
-    u8 pad00[0x20];
-    u8 phaseA;
-    u8 phaseB;
-    u8 phaseC;
-    u8 pad23[9];
-    s16 selected;
-} MantraSpinState;
-
-s32 func_002803A8(u32 x, u32 y, u32 z, u32 amount, u32 unused, MantraSpinState *state, u32 packet) {
+s32 func_002803A8(s32 x, s32 y, u32 z, s32 amount, MantraPanelPool *unused, MantraPanelAnimation *state, u32 packet) {
     u8 slots[14] = {68, 14, 35, 7, 21, 28, 83, 94, 59, 90, 84, 92, 91, 64};
     f32 spinA;
     f32 spinB;
     u32 i;
 
-    state->phaseA += 1;
-    if (state->phaseA >= 0xB5) {
-        state->phaseA = 0;
+    state->stateA += 1;
+    if (state->stateA >= 0xB5) {
+        state->stateA = 0;
     }
-    state->phaseB += 1;
-    if (state->phaseB >= 0xC9) {
-        state->phaseB = 0;
+    state->stateB += 1;
+    if (state->stateB >= 0xC9) {
+        state->stateB = 0;
     }
-    state->phaseC += 1;
-    if (state->phaseC >= 0xFB) {
-        state->phaseC = 0;
+    state->stateC += 1;
+    if (state->stateC >= 0xFB) {
+        state->stateC = 0;
     }
-    spinA = state->phaseC / 250.0f;
-    spinB = state->phaseB / 200.0f;
+    spinA = state->stateC / 250.0f;
+    spinB = state->stateB / 200.0f;
     mnuDrawMantraSprite(x, y, z, amount, 0x77, 0, packet);
     mnuDrawMantraSprite(x, y, z, amount, 0xC1, 0, packet);
     mnuDrawMantraRotatedSprite(x, y, z, amount, 0xC2, 0, packet, spinA * 360.0f);
     mnuDrawMantraRotatedSprite(x, y, z, amount, 0xC3, 0, packet, spinB * 360.0f);
     for (i = 0; i < 14; i++) {
-        if (state->selected == slots[i]) {
+        if (state->id == slots[i]) {
             mnuDrawMantraSprite(x, y, z, amount, 0xCA + i, 0, packet);
             i = -1;
             break;
