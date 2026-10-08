@@ -398,7 +398,7 @@ u32 mnuInitializeWindowOwnerResourceSet(KwlnTask *task) {
     resource->allocation = allocation;
     func_002ACB18((u32)context);
     func_002AB8F0(context);
-    mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->unk118,
+    mnuConfigurePanelResource(context->scrollPanel,
                               (s32)context->spriteArg2, 0, 0);
     mnuBeginWindowFadeTransition(context->activeWindow, &context->fade);
     mnuSeekListNode(0, context->activeWindow->list);
@@ -476,7 +476,7 @@ s32 mnuHandleStaffPopupSelection(KwlnTask *callback) {
         }
         if (input & 2) {
             mnuSetPopupEntryFlagged(popup, D_003E7418);
-            mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->unk118,
+            mnuConfigurePanelResource(context->scrollPanel,
                                       (s32)context->group, 0, 1);
             mnuBeginWindowFadeTransition(context->skillWindow, &context->fade);
         }
