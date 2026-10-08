@@ -4226,10 +4226,9 @@ void effDuplicateRenderResourceOwner(EffQuadWork *work, const EffQuadWork *sourc
         if (work->billHandle != 0) {
             billDispatchByKind(work->billHandle);
         }
-        work->billHandle = (u32)billCloneObjectRetainingSharedData(
-            (struct BillObj *)source->billHandle);
-        billMarkKindOneFlag((struct BillObj *)(work->billHandle));
-        billSetBillboardMode((struct BillObj *)work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
+        work->billHandle = billCloneObjectRetainingSharedData(source->billHandle);
+        billMarkKindOneFlag(work->billHandle);
+        billSetBillboardMode(work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
     } else {
         if (work->reference != NULL) {
             effReleaseReferenceHolder(work->reference);

@@ -3956,7 +3956,7 @@ INCLUDE_ASM(const s32, "game/code_0029C530", func_002A7B68);
 
 void effReleaseRenderResources(EffQuadWork *work) {
     if (work->billHandle != 0) {
-        billDispatchByKind((void *)work->billHandle);
+        billDispatchByKind(work->billHandle);
     }
     if (work->reference != NULL) {
         effReleaseReferenceHolder(work->reference);
@@ -3977,16 +3977,16 @@ EffQuadWork *effCloneRenderResourceWork(const EffQuadWork *source) {
 
 
 void effDuplicateRenderResourceOwner(EffQuadWork *work, const EffQuadWork *source) {
-    u32 resource;
+    struct BillObj *resource;
 
     if (source->billHandle != 0) {
         if (work->billHandle != 0) {
-            billDispatchByKind((void *)work->billHandle);
+            billDispatchByKind(work->billHandle);
         }
-        resource = (u32)billCloneObjectRetainingSharedData((struct BillObj *)source->billHandle);
+        resource = billCloneObjectRetainingSharedData(source->billHandle);
         work->billHandle = resource;
-        billMarkKindOneFlag((struct BillObj *)(resource));
-        billSetBillboardMode((struct BillObj *)work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
+        billMarkKindOneFlag(resource);
+        billSetBillboardMode(work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
         return;
     }
     if (work->reference != NULL) {

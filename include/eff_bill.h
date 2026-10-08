@@ -75,7 +75,7 @@ typedef struct EffQuadWork {
     u32 sourceKind;
     s32 frame;
     EffQuadParams source;
-    u32 billHandle;
+    struct BillObj *billHandle;
     struct EffExpandedList *reference; /* Kind-7 retained resource wrapper. */
     u32 assetHandle;
 } EffQuadWork;
