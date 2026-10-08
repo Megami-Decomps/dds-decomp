@@ -1,3 +1,4 @@
+#include "bill_object_api.h"
 #include "common.h"
 #include "eff.h"
 #include "eff_blur.h"
@@ -77,13 +78,12 @@ void effResourceQuadDraw(EffResourceRectDrawParams *params, u32 resource, u8 gsC
 }
 
 extern void *sdfAllocSizeClassBlock(s32 size);
-extern s32 effGetResourceFirstWord(s32 index);
 
 /* Clone rectangle parameters and select a fresh source handle. */
 EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *src) {
     EffResourceRectWork *dst = sdfAllocSizeClassBlock(sizeof(EffResourceRectWork));
 
-    dst->sourceHandle = effGetResourceFirstWord(0);
+    dst->sourceHandle = (u32)effGetBillResourceTexture(0);
     dst->params = *src;
     return dst;
 }

@@ -8,7 +8,6 @@ extern u8 D_003BC590[];
 
 extern u8 D_003BC598[];
 
-extern s32 mnuTitleSoundTask;
 
 extern s32 evtDestroySecondaryWorldNode(void);
 

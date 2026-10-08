@@ -329,7 +329,6 @@ extern void func_002DB2C0(s32, void *);
 
 extern s32 billGetFirstEntryFramePeriod(u32);
 
-extern void billSetEntryFrameMode1(u32, s32);
 
 extern f32 effComputeProjectedOffsetAngle(void *, void *);
 
@@ -1000,21 +999,11 @@ void effReleaseFadeBlendWork(u32 resourceHandle) {
     effReleaseBlurTemplate((EffBlurTemplate *)resourceHandle);
 }
 
-typedef struct EffFadeMapOut {
-    s32 mode;
-    u32 color;
-    u32 param;
-    f32 rateB;
-    f32 rateA;
-    s32 posX;
-    s32 posY;
-} EffFadeMapOut;
-
 /* Draw the fade in fixed subpixel units, either centered or at the projected position.
  * Projected X/Y use sixteen units per pixel; output Y is doubled. */
 void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     EffRateConfig *config = (EffRateConfig *)work->payload;
-    EffFadeMapOut *out = (EffFadeMapOut *)work->handle;
+    EffBlurTemplate *out = (EffBlurTemplate *)work->handle;
     s32 progress = config->progress;
     s32 limit = 0;
     f32 rate;
@@ -1034,9 +1023,9 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     }
     rate = func_002D7770(&config->rateB.curve, limit, progress);
     if (config->fixedMode != 0) {
-        out->posX = 0;
-        out->posY = 0;
-        out->mode = (s32)(rate * 16.0f);
+        out->body.source.x = 0;
+        out->body.source.y = 0;
+        out->body.extent = (s32)(rate * 16.0f);
     } else {
         s32 mode;
         s32 px;
@@ -1045,15 +1034,15 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
         rate *= work->scale;
         VU0_LOAD_VF(vf10, work);
         mode = (s32)(mnuMeasureProjectedPerpendicularDistance(rate) * 16.0f);
-        out->mode = mode;
+        out->body.extent = mode;
         if (mode == 0) {
             return;
         }
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         py = (s32)(pos[1] * 16.0f) - 0x8000;
         px = (s32)(pos[0] * 16.0f) - 0x8000;
-        out->posX = px;
-        out->posY = py << 1;
+        out->body.source.x = px;
+        out->body.source.y = py << 1;
     }
     second = func_002D7458(&config->blendA, &config->blendB2, limit, progress);
     color1[0] = work->color;
@@ -1065,15 +1054,15 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK(packed);
     blended[0] = packed;
-    out->color = blended[0];
-    out->rateA = func_002D7770(&config->blendB, limit, progress) * 0.01f + 1.0f;
-    out->rateB = func_002D7770(&config->rateA.curve, limit, progress) * 0.01f;
-    out->param = work->mode;
+    out->body.source.color = blended[0];
+    out->body.source.displacement = func_002D7770(&config->blendB, limit, progress) * 0.01f + 1.0f;
+    out->body.source.angle = func_002D7770(&config->rateA.curve, limit, progress) * 0.01f;
+    out->body.source.blendControl = work->mode;
     effDrawBlurFixedPointRectangle(out);
 }
 
 void effSetFadeMapParameter(EffKindWork *work, u32 value) {
-    ((EffMapOutWide *)work->handle)->target = value;
+    ((EffBlurTemplate *)work->handle)->resourceWord = value;
 }
 
 u32 effCreateFixedSlotBlurWorkFromFadeOutput(void *source) {
@@ -1521,7 +1510,6 @@ void effSetAlternateKindScale(EffKindWork *object, f32 scale) {
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
-extern s32 effGetResourceFirstWord(s32);
 
 typedef struct EffKindAssetHolder {
     s32 kind;
@@ -1538,7 +1526,7 @@ s32 *effCreateResourceHolderFromSelectedKind(s32 *source, u16 kind) {
         object[2] = (s32)sdfTexAcquireResourceTexture(source);
         break;
     case 4:
-        object[2] = effGetResourceFirstWord(*source);
+        object[2] = (s32)effGetBillResourceTexture(*source);
         break;
     }
     return object;
@@ -1590,7 +1578,7 @@ u8 *effCreateBillboardWork(u8 *source) {
     memcpy(work + 0x2C, fileResolvePrimaryBuffer(source),
            ((FileJob *)source)->slots[0].size);
     ((EffBillboardWork *)work)->billboard =
-        billCreateIndexed(1, fileResolveSecondaryBuffer((FileJobPayload *)source));
+        billCreateIndexed(1, (u32)fileResolveSecondaryBuffer((FileJobPayload *)source));
     return work;
 }
 
@@ -1623,7 +1611,7 @@ void effReplaceBillboardClone(s32 dst, s32 src) {
 }
 
 void effBillboardEntryFrameReset(s32 work) {
-    billSetEntryFrameMode1(((EffBillboardWork *)work)->billboard, 0);
+    billSetAnimationFrameWithOneTickHold(((EffBillboardWork *)work)->billboard, 0);
     ((EffBillboardWork *)work)->frame = 0;
 }
 
@@ -1635,7 +1623,7 @@ void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
     f32 len;
 
     if (work->frame < billGetFirstEntryFramePeriod(work->billboard)) {
-        billSetEntryFrameMode1(work->billboard, work->frame);
+        billSetAnimationFrameWithOneTickHold(work->billboard, work->frame);
         VU0_LOAD_VF(vf10, work->rotation);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, D_0042BC10);
@@ -3919,7 +3907,7 @@ void effReplaceSurfacePrimaryBillboard(s32 *object, s32 *settings) {
     if (((EffectSlotNode54 *)work)->billResource != 0) {
         billDispatchByKind(((EffectSlotNode54 *)work)->billResource);
     }
-    ((EffectSlotNode54 *)work)->billResource = billCreateIndexed(0, settings);
+    ((EffectSlotNode54 *)work)->billResource = (u32)billCreateIndexed(0, (u32)settings);
     if (((EffectSlotNode54 *)work)->record != 0) {
         billSetBillboardMode(((EffectSlotNode54 *)work)->billResource, (s16)((FileKeyBlock *)((FileSlotTable *)((EffectSlotNode54 *)work)->record)->data0)->alphaTrack.surfaceIndex);
     }
@@ -3931,7 +3919,7 @@ void effReplaceSurfaceFlaggedBillboard(s32 *object, s32 *settings) {
     if (((EffectSlotNode54 *)work)->billResource != 0) {
         billDispatchByKind(((EffectSlotNode54 *)work)->billResource);
     }
-    ((EffectSlotNode54 *)work)->billResource = billCreateIndexed(1, settings);
+    ((EffectSlotNode54 *)work)->billResource = (u32)billCreateIndexed(1, (u32)settings);
     billMarkKindOneFlag((struct BillObj *)(((EffectSlotNode54 *)work)->billResource));
     if (((EffectSlotNode54 *)work)->record != 0) {
         billSetBillboardMode(((EffectSlotNode54 *)work)->billResource, (s16)((FileKeyBlock *)((FileSlotTable *)((EffectSlotNode54 *)work)->record)->data0)->alphaTrack.surfaceIndex);
@@ -7964,10 +7952,10 @@ s32 *effBillboardMotionResourceCreate(s32 *context, u16 kind, s32 *source) {
 
     switch (kind) {
     case 1:
-        resource[0] = billCreateIndexed(0, source);
+        resource[0] = (s32)billCreateIndexed(0, (u32)source);
         break;
     case 2:
-        resource[0] = billCreateIndexed(1, source);
+        resource[0] = (s32)billCreateIndexed(1, (u32)source);
         break;
     case 4:
         resource[0] = effRetainResource(source[0]);

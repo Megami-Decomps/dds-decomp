@@ -234,7 +234,6 @@ typedef struct ParKindResource {
     u8 pad08[8];
 } ParKindResource;
 
-extern BillObj *billCreateIndexed(s32, u32);
 
 ParObj *parCreateResourceKindObject(s32 kind, ParKindResource *resource) {
     ParObj *object = (ParObj *)((u8 *)resource + resource->offset + 0x10);
@@ -275,7 +274,6 @@ void parObjDispatch(ParObj *object) {
     D_003AAB88[object->dispatchIndex].func();
 }
 
-extern void billSetEntryFrameMode0(BillObj *, u32);
 extern void billInvokeCallback(BillObj *);
 
 void func_00162590(ParObj *effect) {
@@ -341,7 +339,7 @@ void func_00162590(ParObj *effect) {
                     record->scale = 0;
                 }
                 record->spin += spinStep * spinDirection;
-                billSetEntryFrameMode0(billboard, age);
+                billSetAnimationFrameForImmediateAdvance(billboard, age);
                 billInvokeCallback(billboard);
             }
             spinDirection *= alternate;
