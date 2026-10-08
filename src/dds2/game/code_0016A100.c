@@ -31,7 +31,7 @@ typedef struct EffDispatchEntry {
     void (*callback0)(void *, void *);       /* 0x10 */
     void (*setScale)(void *, f32);    /* 0x14 */
     void (*callback2)(void *, void *);       /* 0x18 */
-    void *(*callback3)(void *);       /* 0x1C */
+    void (*callback3)(void *, u32);       /* 0x1C */
     void *(*callback4)(void *);       /* 0x20 */
     void *(*callback5)(void *);       /* 0x24 */
 } EffDispatchEntry; /* 0x28 */
@@ -359,9 +359,9 @@ void effParamWorkCallback2(EffParamWork *work, void *matrix) {
     }
 }
 
-void effParamWorkCallback3(EffParamWork *work) {
+void effParamWorkCallback3(EffParamWork *work, u32 value) {
     if (effParamWorkFactories[work->kind].callback3 != NULL) {
-        effParamWorkFactories[work->kind].callback3(work->payload);
+        effParamWorkFactories[work->kind].callback3(work->payload, value);
     }
 }
 
@@ -558,9 +558,9 @@ void effParamWorkExCallback3(EffParamWorkEx *work) {
     }
 }
 
-void effParamWorkExCallback4(EffParamWorkEx *work) {
+void effParamWorkExCallback4(EffParamWorkEx *work, u32 value) {
     if (effParameterWorkOperations[work->kind].callback3 != NULL) {
-        effParameterWorkOperations[work->kind].callback3(work->payload);
+        effParameterWorkOperations[work->kind].callback3(work->payload, value);
     }
 }
 
