@@ -1180,7 +1180,6 @@ void func_002CEC40(SdfFlagListWork *work) {
 
 
 extern SdfPoolNode *D_00398098[];
-extern void *sdfMemoryGetBlockAddress(s32);
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
 extern void sdfAppendPacket(SdfListHead *, u32);
@@ -1193,7 +1192,7 @@ void func_002CF248(SdfFlagListWork *work) {
     f32 (*copiedVertices)[4];
     u32 count;
     u32 vertexIndex;
-    s32 vertexAllocation;
+    struct SdfMemBlock *vertexAllocation;
     SdfListHead *packetList;
     SdfPoolNode *surface;
 
@@ -1202,9 +1201,9 @@ void func_002CF248(SdfFlagListWork *work) {
     }
     count = work->params.count;
     sourceVertices = work->vertices;
-    vertexAllocation = (u32)sdfAllocGeneralBlock(count * SDF_FLAG_LIST_ENTRY_VERTEX_BYTES);
+    vertexAllocation = sdfAllocGeneralBlock(count * SDF_FLAG_LIST_ENTRY_VERTEX_BYTES);
     count *= SDF_FLAG_LIST_VERTICES_PER_ENTRY;
-    copiedVertices = sdfMemoryGetBlockAddress(vertexAllocation);
+    copiedVertices = (f32 (*)[4])sdfMemoryGetBlockAddress(vertexAllocation);
     for (vertexIndex = 0; vertexIndex < count; vertexIndex++) {
         VU0_LOAD_VF(vf10, &sourceVertices[vertexIndex]);
         if (D_003BD2C8 != 0) {
@@ -1218,7 +1217,7 @@ void func_002CF248(SdfFlagListWork *work) {
     sdfAppendPacket(packetList, (u32)func_002EF2B0(copiedVertices, work->colors, work->params.count * SDF_FLAG_LIST_VERTICES_PER_ENTRY, 0x40));
     surface = D_00398098[work->params.alpha.surfaceIndex];
     surface->append((SdfListHead *)surface, packetList);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(vertexAllocation));
+    sdfReleaseResourceAllocation(vertexAllocation);
 }
 
 /* Read the camera color effect's stored float. */

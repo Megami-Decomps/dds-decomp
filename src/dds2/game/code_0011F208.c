@@ -210,7 +210,6 @@ extern u32 D_00435F40;
 extern u32 D_00435F3C;
 
 
-extern void *sdfMemoryGetBlockAddress(u32);
 
 extern void mdlLoadViewerPackage(s32, s32, s32, void *, u32);
 
@@ -2053,8 +2052,8 @@ void fldPrepareResourceBuffer(void) {
     func_001258B8();
     D_00435F40 = D_00435F44;
     D_00435F38 = (u32)sdfAllocGeneralBlock(D_00435F44);
-    source = sdfMemoryGetBlockAddress(fldPlayerModelResource);
-    buffer = sdfMemoryGetBlockAddress(D_00435F38);
+    source = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)fldPlayerModelResource);
+    buffer = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)D_00435F38);
     memcpy(buffer, source, D_00435F40);
     D_00435F3C = (u32)buffer;
     mdlLoadViewerPackage(2, 0, 0x101, buffer, D_00435F40);
