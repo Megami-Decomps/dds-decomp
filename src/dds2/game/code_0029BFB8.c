@@ -1,5 +1,7 @@
 #include "common.h"
 #include "mnu_result.h"
+struct EffectSlotSet;
+extern void func_00306C28(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
 extern void frFontSetChainFlag();
 extern s32 frFontQueueGlyphInSelectedSlot();
 extern s32 func_0019D550();
@@ -138,7 +140,7 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSum
     color[1] = alpha;
     color[2] = alpha;
     color[3] = alpha;
-    func_00306C28(x + 0x180, y + 0x78, 0, color, 0, work->teardownHandle, 0x1B, 0x53);
+    func_00306C28(x + 0x180, y + 0x78, 0, color, 0, (struct EffectSlotSet *)work->teardownHandle, 0x1B, 0x53);
 }
 
 extern s32 mdlFlagTest();
@@ -160,7 +162,7 @@ void func_0029CB70(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSummary *res, 
         color[1] = alpha;
         color[2] = alpha;
         color[3] = alpha;
-        func_00306C28(x + 0x180, y + 0x78, 0, color, 0, work->teardownHandle, 0x1B, 0x53);
+        func_00306C28(x + 0x180, y + 0x78, 0, color, 0, (struct EffectSlotSet *)work->teardownHandle, 0x1B, 0x53);
     }
 }
 
