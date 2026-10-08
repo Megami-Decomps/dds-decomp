@@ -85,7 +85,7 @@ extern DspEntrySpriteLookup D_003BC480[];
 extern char D_003BC450[];
 extern void func_0024E310(s32, s32, s32, s32, s32, s32, s32);
 extern void func_003014F0(char *, const char *, ...);
-extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, u32, s32, u32);
+extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, char *, s32, u32);
 
 /* Draw the selection strip from the last row back to the first. */
 void itfDspDrawSelectionStrip(s32 x, s32 y, s32 z, s32 alpha, DspWindowContext *windowContext, s32 drawContext) {
@@ -133,7 +133,7 @@ void func_00254C68(s32 x, s32 y, s32 layer, DspMenuList *list, DspMenuListNode *
         textColor |= MNU_DISPLAY_TEXT_RGB;
         itfDrawGlyphChainWithWidthQuery((x >> MNU_DISPLAY_FIXED_X_SHIFT) + 0xD5, (y >> MNU_DISPLAY_FIXED_Y_SHIFT) + 0x7D, layer,
                                        textColor,
-                                       4, (u32)levelText, 0, drawContext);
+                                       4, levelText, 0, drawContext);
     } else {
         func_0024E310(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x58,
                       spriteLookup.spriteIndices[profileProgress->entry->unitId], drawContext);
@@ -143,7 +143,7 @@ void func_00254C68(s32 x, s32 y, s32 layer, DspMenuList *list, DspMenuListNode *
         textColor |= MNU_DISPLAY_TEXT_RGB;
         itfDrawGlyphChainWithWidthQuery((x >> MNU_DISPLAY_FIXED_X_SHIFT) + 0xD5, (y >> MNU_DISPLAY_FIXED_Y_SHIFT) + 0x7D, layer,
                                        textColor,
-                                       0, (u32)levelText, 0, drawContext);
+                                       0, levelText, 0, drawContext);
     }
 }
 

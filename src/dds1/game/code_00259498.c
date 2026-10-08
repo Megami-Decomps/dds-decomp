@@ -394,7 +394,7 @@ extern char D_003BC4C8[];
 extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
-extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, u32, s32, u32);
+extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, char *, s32, u32);
 
 /* Interpolate currency changes over twenty draws, with the native ticking sound. */
 void mnuDrawAnimatedCurrencyCounter(s32 x, s32 y, s32 depth, s32 alpha,
@@ -430,7 +430,7 @@ void mnuDrawAnimatedCurrencyCounter(s32 x, s32 y, s32 depth, s32 alpha,
         func_003014F0(currencyText, D_003BC4C8, datGameState->header.currency);
     }
     itfDrawGlyphChainWithWidthQuery(x + 0x191, y + 0x39, depth, color,
-                                    0, (u32)currencyText, 0, context);
+                                    0, currencyText, 0, context);
 }
 
 INCLUDE_ASM(const s32, "game/code_00259498", func_0025B350);

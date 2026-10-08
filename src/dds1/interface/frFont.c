@@ -15,7 +15,7 @@ extern u8 D_003BB180[];
 extern s32 frFontDefaultGlyphCellSize;
 
 
-extern u32 frFontMeasureGlyphChain(void *chain);
+extern u32 frFontMeasureGlyphChain(FrFontGlyph *parentGlyph);
 
 
 void frFontCreateContext();
@@ -819,8 +819,7 @@ s32 frFontCountChars(s8 *text) {
 
 /* Sum one parent's child advances and signed spacing after every child, even
  * the last. Require a non-NULL parent; preserve the existing unsigned result. */
-u32 frFontMeasureGlyphChain(void *chain) {
-    FrFontGlyph *parentGlyph = chain;
+u32 frFontMeasureGlyphChain(FrFontGlyph *parentGlyph) {
     FrFontGlyph *childGlyph = parentGlyph->link1C.firstChild;
     s32 totalAdvance = 0;
 
