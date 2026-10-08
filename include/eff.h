@@ -345,7 +345,7 @@ typedef char BillObj_payload_offset_must_be_0x30[
     ((u32)&((BillObj *)0)->payload == 0x30) ? 1 : -1];
 
 /* Serialized entry offsets are relative to BillData.base. */
-/* BillAnimationEntry.flags (not BillObj.modeFlags or entry.unk8). */
+/* BillAnimationEntry.flags bits; distinct from entryModeFlags and BillObj.modeFlags. */
 enum {
     BILL_ANIMATION_FLAG_FRAME_COLORS = 0x00000001,
     BILL_ANIMATION_FLAG_PACKET_LIST_2 = 0x00000002,
@@ -358,7 +358,7 @@ enum {
 typedef struct BillAnimationEntry {
     s32 offset;
     s32 colorOffset;
-    u32 unk8;
+    u32 entryModeFlags; /* 0x08: 0x40/0x80 select two-entry render modes; 0x100 remains unclassified. */
     u32 frameCount;
     u32 flags;
 } BillAnimationEntry;
