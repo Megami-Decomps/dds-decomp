@@ -932,9 +932,9 @@ void mnuUpdateStaffFade(s32 opening, PartyMenuData *menuWork) {
 
 
 extern s32 mnuGetSelectionFromFlags(s32);
-extern u32 *mnuCreateProfilePanel(DatPartyRecord *selectionState);
+extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 extern void mnuSetGroupProperties(u32 *, u32, u32, u32, u32);
-extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, u32 *, s32);
+extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
 extern void mnuFreeProfilePanelWork(void *);
 
 extern void func_002B2408(MenuContext *);
@@ -1118,7 +1118,7 @@ s32 mnuCreatePanels(s32 callback) {
     DatPartyRecord *data = &datGameState->party[index];
     MenuPageWindow *window = &((MenuContext *)context)->partyWindow;
     StaffMenuRuntime *party = (StaffMenuRuntime *)menuContext->party;
-    u32 *profile;
+    MenuProfilePanel *profile;
 
     mnuSetWindowResource(index, (u32 *)window, menuContext->displayHandle,
                          (s32)menuContext->displayResource,
@@ -1134,8 +1134,8 @@ s32 mnuCreatePanels(s32 callback) {
         (struct EffectSlotSet *)menuContext->alternateResource,
         (struct EffectSlotSet *)menuContext->displayHandle);
     profile = mnuCreateProfilePanel(data);
-    menuContext->resourceList = profile;
-    mnuSetGroupProperties(profile, menuContext->displayHandle,
+    menuContext->resourceList = (u32 *)profile;
+    mnuSetGroupProperties((u32 *)profile, menuContext->displayHandle,
                           menuContext->alternateResource, 1, 2);
     party->iconPanel = func_002B9FF8(4, menuContext->displayHandle, menuContext->skillPanelResource);
     if (mnuClassifyQuarterHalfPercent(data->hp, data->maxHp) < 2) {
@@ -1310,10 +1310,11 @@ void mnuDrawPartySkillAndStatusPanel(DatPartyRecord *entry, s32 id, MenuPanelGro
     mnuDrawSlotIcons(0x14a, id);
 }
 
-void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSpriteState *spriteState, u32 resource,
+void mnuDrawProfilePanelAndSprite(DatPartyRecord *entry, u32 unused1, MenuSpriteState *spriteState,
+                                    MenuProfilePanel *resource,
                                     u32 unused4, u32 spriteFlags) {
     func_002C16F0(0, 0, 0, entry, entry->profileId, (s32)spriteState, spriteFlags);
-    mnuDrawAndAdvanceProfilePanel(0xe80, 0x5b8, 0, (u32 *)resource, spriteFlags);
+    mnuDrawAndAdvanceProfilePanel(0xe80, 0x5b8, 0, resource, spriteFlags);
 }
 
 void mnuDrawIconPanelFullFade(u32 x, u32 y, u32 depth, MenuIconState *panel, s32 drawArg);
@@ -1343,7 +1344,7 @@ s32 func_002B3788(s32 callback) {
         func_002AA7A0(5, context->displayHandle);
     } else {
         mnuDrawProfilePanelAndSprite(partyEntry, (u32)&context->partyWindow,
-                                     context->panelEffects, (u32)context->resourceList,
+                                     context->panelEffects, (MenuProfilePanel *)context->resourceList,
                                      (u32)&context->displayHandle, 0x53);
         if (menuWork->staffView == 0) {
             func_002AA7A0(6, context->displayHandle);

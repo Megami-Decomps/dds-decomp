@@ -148,7 +148,7 @@ extern s8 mnuTerminalTaskState;
 
 extern u32 kwlnTaskGetUserValue();
 
-extern s32 mnuDrawAndAdvanceProfilePanel(s32, s32, s32, s32);
+extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
 
 extern void mnuDrawAndStepGradientFade(MenuGradientFade *, s32);
 
@@ -168,7 +168,7 @@ extern s32 mnuAllocateValueRecord(s32);
 
 extern void mnuAppendCampSpriteRequests(s32, s32);
 
-extern u32 *mnuCreateProfilePanel(DatPartyRecord *selectionState);
+extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 
 extern void mnuSetGroupProperties(s32, s32, s32, s32, s32);
 
@@ -772,9 +772,10 @@ void mnuCloseCurrentProfilePanel(MenuProgressHost *host) {
     host->currentEffect = 0;
 }
 
-/* Draw/advance only the retained profile panel with the caller's coordinates/mode. */
-s32 mnuDrawCurrentProfilePanel(s32 x, s32 y, s32 mode, MenuProgressHost *host) {
-    return mnuDrawAndAdvanceProfilePanel(x, y, mode, host->currentEffect);
+/* Draw/advance the retained profile panel with the caller's coordinates, mode, and option. */
+void mnuDrawCurrentProfilePanel(s32 x, s32 y, s32 mode, MenuProgressHost *host, s32 option) {
+    mnuDrawAndAdvanceProfilePanel(x, y, mode,
+                                  (MenuProfilePanel *)(u32)host->currentEffect, option);
 }
 
 /* Draw loaded progress panels only in state two; preserve the accumulated draw flags. */
