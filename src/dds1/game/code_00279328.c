@@ -75,7 +75,9 @@ typedef struct SkillMenuContext {
     u8 pad160[0x678];
     SkillList *selection;        /* 0x7D8 */
     SkillList *target;           /* 0x7DC */
-    u8 pad7E0[0x12C];
+    u8 pad7E0[0xC];
+    PartyPanel partyPanel;       /* 0x7EC: five party display rows */
+    u8 pad8F8[0x14];
     SkillMenuState *menu;        /* 0x90C */
 } SkillMenuContext;
 
@@ -209,7 +211,7 @@ s32 ptySkillMenuUseSelectedInField(id, context)
     if (ptySkillApplyFieldUseEffect((MenuPageWindow *)window, id,
                                     selectedEntry, targetEntry) != 0) {
         mnuConsumeEntryCost(id, selectedEntry);
-        mnuInitPartyPanelSlots((PartyPanel *)(context + 0x7EC));
+        mnuInitPartyPanelSlots(&((SkillMenuContext *)context)->partyPanel);
         mnuUpdateHandleStates((MenuPageWindow *)window);
         func_00280048(window);
         return 1;
