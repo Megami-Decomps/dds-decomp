@@ -1,7 +1,9 @@
 #include "common.h"
+#include "dat_state.h"
+#include "mnu.h"
 
 extern void mnuCloseCurrentProfilePanel(s32 effect);
-extern void mnuEnsureProfilePanelEffect(s32 unused, s32 effect);
+extern void mnuEnsureProfilePanelEffect(DatPartyRecord *selectionState, MenuProgressHost *effect);
 
 typedef struct MenuRenderListNode {
     u8 pad00[0x70];
@@ -27,5 +29,5 @@ typedef struct MenuRenderState {
 void mnuRebuildProfilePanelFromRenderSnapshot(MenuRenderState *state) {
     mnuCloseCurrentProfilePanel(state->effect);
     memcpy(state->snapshot, state->context->node->items, 0x1C4);
-    mnuEnsureProfilePanelEffect((s32)state->snapshot, state->effect);
+    mnuEnsureProfilePanelEffect((DatPartyRecord *)state->snapshot, (MenuProgressHost *)(u32)state->effect);
 }
