@@ -5,6 +5,7 @@
 #include "mnu_profile_progress.h"
 #include "mnu_mantra_grid.h"
 #include "mnu_scene_work.h"
+#include "sdf_task_work.h"
 
 #define MNU_SCENE_WORK_SIZE 0x5B0
 #define MNU_SCENE_SHADE_FRAME_LIMIT 10
@@ -376,8 +377,6 @@ extern void itfDspSignalD(void);
 extern void itfDspSignalE(void);
 extern s64 evtGetMessageWindowControlState(void);
 extern s8 evtGetCapturedWindowPanelValue(void);
-extern void sdfSetTaskItemMode(void *, s32, u32);
-
 s32 func_00253830(void) {
     MnuMantraGridEntry *entry = (MnuMantraGridEntry *)fldGetSceneMetadataNode();
     MnuProfileProgress *selection = (MnuProfileProgress *)mnuGetSelectedNodeValue();
@@ -464,7 +463,7 @@ s32 func_00253830(void) {
     case 10:
         if (scene->stageFinished != 0 && evtGetMessageWindowControlState() == 0) {
             evtFinishMessageWindowAndNotify();
-            sdfSetTaskItemMode((void *)mnuSceneResourceContext, 1, 1);
+            sdfSetTaskItemMode((TaskWork *)mnuSceneResourceContext, 1, 1);
             return -1;
         }
         break;

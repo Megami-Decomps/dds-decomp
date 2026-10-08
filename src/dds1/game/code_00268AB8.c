@@ -3,8 +3,6 @@
 #include "kwln.h"
 #include "file.h"
 
-extern void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
-
 #define BRS_RESULT_COUNTER_PAIR_COUNT 5
 #define BRS_RESULT_SETTLED_POLL_LIMIT 6
 #define BRS_RESULT_SETTLED_POLL_CLAMP 7

@@ -40,7 +40,6 @@ void *sdfAllocSizeClassBlock(s32 size);
 void sdfReleaseChipBlock(void *memory);
 
 
-void kwlnTaskSetUserValue(KwlnTask *task, u32 value);
 
 
 void evtBeginSolarOverlayFadeIn(s32 arg0);

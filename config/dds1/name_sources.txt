@@ -39,7 +39,7 @@
 0x001037C0	kwlnStepTwoListCursors	inferred	confidence=high; matched-C; src/dds1/game/code_00102ED8.c:289:func_001037C0; Updates two list cursor/scroll pairs with the directional inputs and returns positive/negative confirmation/cancellation, otherwise zero.; source=names_pending_main.tsv:124 [names_qp11.tsv]
 0x001038A0	kwlnDrawSpriteCell	inferred	builds a sprite packet via func_0011D3E8 and appends it (0xC0/0x60 cell grid) [names_L5_LiteSweep.tsv]
 0x00103908	kwlnDrawSpriteCellZ	inferred	same as kwlnDrawSpriteCell with an explicit depth argument [names_L5_LiteSweep.tsv]
-0x00103970	kwlnDebugPulseColors	inferred	periodically writes two random debug color channels from task timer
+0x00103970	kwlnDebugPulsePadMotors	inferred	Starts the small and large pad motors when the task timer reaches the pulse interval; varies the large-motor level.
 0x00104008	kwlnPadStepLargeMotorLevel	inferred	steps the byte at D_003BD691 toward D_003BD699 by at most 0x20 per call with wrap-around [names_reviewed2.tsv]
 0x00104068	kwlnPadStartMotor	inferred	confidence=high; matched-C; src/dds1/game/code_00102ED8.c:362:func_00104068; Peer-matched C proposal; M141; source=names_pending_main.tsv:134 [names_qp12_apply.tsv]
 0x00104130	kwlnPadResetMotorLevelsAndOutput	inferred	Zeroes both pad motor levels and queued outputs and clears the motor command pair. [names_reviewed11.tsv]
