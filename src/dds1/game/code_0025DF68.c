@@ -208,7 +208,75 @@ INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025E820);
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025ECD0);
 
-INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025F138);
+extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
+extern FrFontGlyph *func_001978E8(s32, s32, s32, u32, char *, FrFontGlyph *);
+extern void frFontSetChainFlag(FrFontGlyph *, u8);
+extern char D_003BC500[];
+
+/* Draw the row label, and draw its numeric value when the list enables it. */
+void func_0025F138(s32 x, s32 y, s32 z, struct MenuList *list,
+                   struct MenuListNode *node, s32 drawArg) {
+    MnuShopListContext *context = (MnuShopListContext *)list->context;
+    s32 row = node->index - list->head->index;
+    s32 rowOffset;
+    s32 mode = context->mode;
+    f32 fade = 0.0f;
+    u32 style = 0xA09DC300;
+    s32 selected = 0;
+    s32 value;
+    FrFontGlyph *glyph;
+    char text[16];
+
+    switch (mode) {
+    case 1:
+        fade = (f32)context->countdown / 15.0f;
+        break;
+    case 2:
+        fade = (f32)context->countdown / 15.0f;
+        fade = 1.0f - fade;
+        break;
+    }
+
+    if (node->flags48 & 1) {
+        style = 0xA09DC340;
+    } else {
+        struct MenuListNode *cursor = list->cursor;
+        s32 opacity = (s32)(fade * 64.0f + 64.0f);
+
+        if (cursor == node) {
+            style = 0xA09DC380;
+            selected = 1;
+        } else {
+            style |= opacity;
+        }
+    }
+
+    rowOffset = row * 21;
+    glyph = itfCreateConvertedTextGlyph(0x570, (rowOffset + 0x99) << 3, z,
+                                        style, (const u8 *)node->value, NULL);
+    if (selected) {
+        frFontSetChainFlag(glyph, 4);
+    }
+    func_001958A0(glyph, 1, drawArg);
+    frFontQueueGlyphInSelectedSlot(glyph);
+
+    if ((list->id & 1) == 0) {
+        return;
+    }
+
+    if (list->cursor == node) {
+        style = (s32)(fade * 64.0f + 64.0f) | 0xA09DC300;
+    }
+    value = (s32)node->sortKeyPrimary;
+    func_003014F0(text, D_003BC500, value);
+    glyph = func_001978E8(0xFF0, (rowOffset + 0x9D) << 3, z, style, text, NULL);
+    if (selected) {
+        frFontSetChainFlag(glyph, 4);
+    }
+    func_001958A0(glyph, 1, drawArg);
+    frFontQueueGlyphInSelectedSlot(glyph);
+}
+
 
 extern void mnuDrawListChildrenWithCountdown(s32, s32, s32, struct MenuList *, s32);
 extern void func_0025F4E0(s32, s32, s32, s32, MenuWindowContainer *, s32);
@@ -278,8 +346,6 @@ void func_0025F4E0(s32 x, s32 y, s32 z, s32 unused, MenuWindowContainer *object,
 }
 
 INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025F680);
-
-extern void frFontSetChainFlag(FrFontGlyph *, u8);
 
 void func_0025F7F0(s32 x, s32 y, s32 depth, ShopScene *scene, u32 alpha, s32 option) {
     char text[16];
