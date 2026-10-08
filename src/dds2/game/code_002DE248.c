@@ -11435,32 +11435,32 @@ void effResolveAndReleaseSelectedResource(EffectSlotSet *owner, s32 mapping) {
 
 extern void sdfTexReleaseReference(SdfTex *texture);
 
-void effReleaseSlotTextureReferencesAndResetWork(u8 *owner, s32 preserve) {
+void effReleaseSlotTextureReferencesAndResetWork(EffectSlotSet *owner, s32 preserveWork) {
     u32 i = 0;
-    u32 count = ((EffectSlotSet *)owner)->textureCount;
+    u32 count = owner->textureCount;
     u32 *resources;
 
     if (count != 0) {
-        resources = (u32 *)((EffectSlotSet *)owner)->textureReferences;
+        resources = (u32 *)owner->textureReferences;
         do {
             if (resources[i] != 0) {
                 u32 *current;
                 sdfTexReleaseReference((SdfTex *)resources[i]);
-                current = (u32 *)((EffectSlotSet *)owner)->textureReferences;
-                count = ((EffectSlotSet *)owner)->textureCount;
+                current = (u32 *)owner->textureReferences;
+                count = owner->textureCount;
                 resources = current;
                 current[i] = 0;
             }
             i++;
         } while (i < count);
     }
-    if (!preserve) {
-        effInitializeAllSlotWork((EffectSlotSet *)owner);
+    if (!preserveWork) {
+        effInitializeAllSlotWork(owner);
     }
 }
 
 void effReleaseTextureHandlesAndResetSlots(EffectSlotSet *owner) {
-    effReleaseSlotTextureReferencesAndResetWork((u8 *)owner, 0);
+    effReleaseSlotTextureReferencesAndResetWork(owner, 0);
 }
 
 u8 effHasFirstTextureHandle(EffectSlotSet *owner) {

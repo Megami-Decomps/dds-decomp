@@ -90,8 +90,6 @@ typedef char MenuSlotState_gradient_check[((u32)&((MenuSlotState *)0)->gradientF
 typedef char MenuSlotState_reduced_check[((u32)&((MenuSlotState *)0)->reducedMode == 0x3F4) ? 1 : -1];
 
 extern void func_002665E8(MenuSlotState *);
-/* Historical callers intentionally omit the second reset argument. */
-extern void effReleaseSlotTextureReferencesAndResetWork();
 extern void func_00266460(EffectSlotSet *, MenuEffectResources *);
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
@@ -270,21 +268,21 @@ void mnuReleaseResourceGroup(s32 address) {
     effResolveAndReleaseResource(group->resourceBank[1]);
 }
 
-/* Release/reset the mode-dependent texture sets, preserving the first short-arity call. */
-void mnuReleaseMenuResourceGroup(s32 address, u32 value) {
+/* Release textures from the active banks; preserveWork skips slot initialization. */
+void mnuReleaseMenuResourceGroup(s32 address, u32 preserveWork) {
     MenuSlotState *group = (MenuSlotState *)address;
     if (group->reducedMode == 0) {
-        effReleaseSlotTextureReferencesAndResetWork((u8 *)group->resourceBank[0]);
-        effReleaseSlotTextureReferencesAndResetWork((u8 *)group->resourceBank[1], value);
-        effReleaseSlotTextureReferencesAndResetWork((u8 *)group->resourceBank[2], value);
-        effReleaseSlotTextureReferencesAndResetWork((u8 *)group->resourceBank[3], value);
+        effReleaseSlotTextureReferencesAndResetWork(group->resourceBank[0], preserveWork);
+        effReleaseSlotTextureReferencesAndResetWork(group->resourceBank[1], preserveWork);
+        effReleaseSlotTextureReferencesAndResetWork(group->resourceBank[2], preserveWork);
+        effReleaseSlotTextureReferencesAndResetWork(group->resourceBank[3], preserveWork);
         return;
     }
-    effReleaseSlotTextureReferencesAndResetWork((u8 *)group->resourceBank[0]);
-    effReleaseSlotTextureReferencesAndResetWork((u8 *)group->resourceBank[1], value);
+    effReleaseSlotTextureReferencesAndResetWork(group->resourceBank[0], preserveWork);
+    effReleaseSlotTextureReferencesAndResetWork(group->resourceBank[1], preserveWork);
 }
 
-/* Request the existing resource-group texture release with its extra value zero. */
+/* Release resource-group textures and reinitialize their slot work. */
 void mnuReleaseResourceGroupTextureHandles(u32 address) {
     mnuReleaseMenuResourceGroup(address, 0);
 }
