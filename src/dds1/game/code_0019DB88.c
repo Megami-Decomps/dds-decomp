@@ -28,26 +28,33 @@ extern void itfSetPanelLayoutAndNotify();
 
 extern void itfPanelUpdateValuesAndNotify();
 
+/* Option IDs index the same signed-byte bank used by the named controls. */
 typedef struct SndPad {
-    u8 pad00[0x21];
-    s8 confirm;
-    s8 edge22;
-    s8 edge23;
-    u8 pad24[2];
-    s8 prev;
-    s8 next;
-    u8 pad28[9];
-    s8 unk31;
-    u8 unk32;
-    s8 cancel;
-    s8 coarseDown;
-    s8 coarseUp;
-    s8 unk36;
-    s8 unk37;
-    s8 fineDown;
-    u8 pad39;
-    s8 fineUp;
-    u8 pad3B[5]; /* Complete two-port current/edge byte storage. */
+    u8 pad00[0x20];
+    union {
+        s8 buttons[0x20];
+        struct {
+            u8 pad20;
+            s8 confirm;
+            s8 edge22;
+            s8 edge23;
+            u8 pad24[2];
+            s8 prev;
+            s8 next;
+            u8 pad28[9];
+            s8 unk31;
+            u8 unk32;
+            s8 cancel;
+            s8 coarseDown;
+            s8 coarseUp;
+            s8 unk36;
+            s8 unk37;
+            s8 fineDown;
+            u8 pad39;
+            s8 fineUp;
+            u8 pad3B[5]; /* Complete two-port current/edge byte storage. */
+        };
+    };
 } SndPad;
 
 
@@ -480,7 +487,33 @@ void sndStepSequenceIndex(ItfMesBlk40 *obj, s32 dir) {
     sndSetSequenceVolumePan(1, 0x7F, 0x3F);
 }
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019EA88);
+s32 func_0019EA88(ItfMesBlk40 *selection) {
+    s32 i;
+
+    for (i = 0; i < selection->optionCount; i++) {
+        ItfMesOption *option = &selection->options[i];
+
+        if (D_00324510.buttons[option->id] < 0) {
+            s32 prefixLength = option->value;
+            s32 rank = 0;
+            u32 mask = selection->panelValue;
+
+            if (prefixLength > 0) {
+                s32 remaining = prefixLength;
+                do {
+                    if ((mask & 1) == 0) {
+                        rank++;
+                    }
+                    mask >>= 1;
+                } while (--remaining != 0);
+            }
+            if ((mask & 1) == 0) {
+                return rank;
+            }
+        }
+    }
+    return -1;
+}
 
 
 void btlUpdateFadeIndicator(ItfMesState *panel) {
