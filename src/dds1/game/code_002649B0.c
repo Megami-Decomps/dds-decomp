@@ -1,6 +1,7 @@
 #include "common.h"
 #include "eff.h"
 #include "mnu_result.h"
+#include "itf.h"
 
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_002649B0);
@@ -112,33 +113,31 @@ INCLUDE_ASM(const s32, "game/code_002649B0", func_002650C8);
 
 extern char D_003BC568[];
 extern void func_003014F0(char *, char *, s32);
-extern u32 func_001979C8(s32, s32, s32, s32, char *, s32);
-extern s32 frFontMeasureLines(u32);
-extern void frFontSetContextPair(u32, s32, s32);
-struct FrFontGlyph;
-extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
-extern s32 frFontQueueGlyphInSelectedSlot(struct FrFontGlyph *);
+extern FrFontGlyph *func_001979C8(s32, s32, s32, s32, char *, FrFontGlyph *);
+extern u32 frFontMeasureLines(FrFontGlyph *);
+extern s32 func_001958A0(FrFontGlyph *, s8, u32);
+extern s32 frFontQueueGlyphInSelectedSlot(FrFontGlyph *);
 
 void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 color) {
     char text[32];
-    u32 handle;
+    FrFontGlyph *glyph;
 
     func_003014F0(text, D_003BC568, info->totalExp);
-    handle = func_001979C8(x, y, z, w, text, 0);
-    frFontSetContextPair(handle, x + ((0xBE - frFontMeasureLines(handle)) << 4), y);
-    func_001958A0((struct FrFontGlyph *)handle, 1, color);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)handle);
+    glyph = func_001979C8(x, y, z, w, text, 0);
+    frFontSetContextPair(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
+    func_001958A0(glyph, 1, color);
+    frFontQueueGlyphInSelectedSlot(glyph);
 }
 
 void mnuQueueRightAlignedFormattedInfoText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, s32 color) {
     char text[32];
-    u32 handle;
+    FrFontGlyph *glyph;
 
     func_003014F0(text, D_003BC568, info->macca);
-    handle = func_001979C8(x, y, z, w, text, 0);
-    frFontSetContextPair(handle, x + ((0xBE - frFontMeasureLines(handle)) << 4), y);
-    func_001958A0((struct FrFontGlyph *)handle, 1, color);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)handle);
+    glyph = func_001979C8(x, y, z, w, text, 0);
+    frFontSetContextPair(glyph, x + ((0xBE - frFontMeasureLines(glyph)) << 4), y);
+    func_001958A0(glyph, 1, color);
+    frFontQueueGlyphInSelectedSlot(glyph);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002649B0", D_003BC560);
