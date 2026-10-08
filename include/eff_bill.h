@@ -2,6 +2,7 @@
 #define EFF_BILL_H
 
 #include "common.h"
+#include "eff_expanded_list.h"
 #include "sdf.h"
 
 #include "eff_curve.h"
@@ -73,7 +74,7 @@ typedef struct EffQuadWork {
     s32 frame;
     EffQuadParams source;
     u32 billHandle;
-    void *reference; /* Secondary file kind 7 owns an EffAnimSet through the generic refcount API. */
+    struct EffExpandedList *reference; /* Kind-7 retained resource wrapper. */
     u32 assetHandle;
 } EffQuadWork;
 

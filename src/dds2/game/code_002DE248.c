@@ -453,7 +453,7 @@ extern u32 D_00437E3C;
 
 extern u32 billCloneObjectRetainingSharedData(u32);
 
-extern u32 func_002DDF48(u32);
+extern struct EffExpandedList *func_002DDF48(u32);
 
 extern u32 effWindTextureHandle;
 
@@ -682,10 +682,6 @@ MdlCtx *effCloneModelWithVUState(MdlCtx *sourceModel);
 void effDestroyModelContext(MdlCtx *owner);
 
 void effInitModelVUState(MdlCtx *model);
-
-RefObj *effReferenceObjectRetain(RefObj *obj);
-
-void effReleaseReferenceHolder(u32 *holder);
 
 RefObj *effRetainSharedReference(RefObj *obj);
 
@@ -3653,7 +3649,7 @@ typedef struct EffectSlotNode54 {
     u32 jobBuffer;         // 0x3C
     u32 *queues;           // 0x40
     u32 queueBuffer;       // 0x44
-    RefObj *resourceHolder; // 0x48
+    struct EffExpandedList *resourceHolder; // 0x48
     u32 record;            // 0x4C
     u16 active;            // 0x50
 } EffectSlotNode54;
@@ -3779,7 +3775,7 @@ void effDestroySurfaceNode(EffectSlotNode54 *node) {
         sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->handleBuffer));
     }
     if (node->resourceHolder != 0) {
-        effReleaseReferenceHolder((u32 *)node->resourceHolder);
+        effReleaseReferenceHolder(node->resourceHolder);
     }
     if (node->record != 0) {
         fileReleaseGridRecordHandle(node->record);
@@ -3872,7 +3868,7 @@ void func_002E7F60(EffectSlotNode54 *dst, u8 *work) {
         break;
     case 7:
         if (dst->resourceHolder != 0) {
-            effReleaseReferenceHolder((u32 *)dst->resourceHolder);
+            effReleaseReferenceHolder(dst->resourceHolder);
         }
         dst->resourceHolder = effReferenceObjectRetain(src->resourceHolder);
         break;
@@ -4009,7 +4005,7 @@ void effSurfaceNodeCreateQueues(EffectSlotNode54 *node, void *source) {
 }
 
 void effReplaceSurfaceResourceHolder(s32 node, u32 resource) {
-    u32 holder;
+    struct EffExpandedList *holder;
 
     if (((EffectSlotNode54 *)node)->resourceHolder != 0) {
         effReleaseReferenceHolder(((EffectSlotNode54 *)node)->resourceHolder);
@@ -8144,7 +8140,7 @@ typedef struct EffParticleShared {
     u32 state;
     u8 pad0C[0x98];
     u32 billHandle;       // 0xA4
-    RefObj *reference;    // 0xA8
+    struct EffExpandedList *reference; // 0xA8
 } EffParticleShared;
 
 void effReleaseParticleResources(u32 *p) {
@@ -8152,7 +8148,7 @@ void effReleaseParticleResources(u32 *p) {
         billDispatchByKind(p[0xA4 / 4]);
     }
     if (p[0xA8 / 4] != 0) {
-        effReleaseReferenceHolder(p[0xA8 / 4]);
+        effReleaseReferenceHolder((struct EffExpandedList *)p[0xA8 / 4]);
     }
     sdfReleaseChipBlock(p);
 }
