@@ -1,25 +1,6 @@
 #include "common.h"
+#include "mnu_mantra_grid.h"
 #include "mnu_profile_progress.h"
-
-typedef struct MantraPulseState {
-    u16 timer;
-    s16 duration;
-    u32 mode;
-} MantraPulseState;
-
-typedef struct DspScene {
-    s32 frame;
-    s32 value;
-    s32 cap;
-    u16 sceneId;
-    u16 param7b6;
-    u32 param7b5;
-    s32 state;
-    u8 rawSkillList[0x34];
-    MantraPulseState pulse;
-    s8 profileFlag;
-    u8 pad55[3];
-} DspScene;
 
 typedef struct MantraNeighborRecord {
     s32 kind;
@@ -43,7 +24,7 @@ extern u32 D_003E274C[];
 
 INCLUDE_ASM(const s32, "game/code_00258258", func_00258258);
 
-u32 func_00258508(s32 direction, DspScene *scene, MantraNeighborState *states, MnuProfileProgress *target) {
+u32 func_00258508(s32 direction, MnuMantraGridEntry *scene, MantraNeighborState *states, MnuProfileProgress *target) {
     MantraNeighborRecord *record = &D_0036AE80[scene->sceneId];
     u32 flags = 0x100;
     if (prfGetCapValue(scene->sceneId) == ptyGetProfileRecordValue(target->partyRecord, scene->sceneId)) {
@@ -124,9 +105,9 @@ void func_0024E3C0(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
 void func_0024E470(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
                    s32 placementIndex, s32 context, f32 rotation);
 
-void func_00258FD0(s32 x, s32 y, s32 z, s32 alpha, DspScene *entry,
+void func_00258FD0(s32 x, s32 y, s32 z, s32 alpha, MnuMantraGridEntry *entry,
                    s32 context) {
-    MantraPulseState *pulse = &entry->pulse;
+    MnuMantraGridPulse *pulse = &entry->pulse;
     u32 mode = pulse->mode;
     f32 progress;
 
@@ -197,7 +178,7 @@ typedef struct MantraPulseGrid MantraPulseGrid;
 
 typedef struct MantraPulseEntry {
     s32 unk_0;
-    struct DspScene *scene;
+    MnuMantraGridEntry *scene;
 } MantraPulseEntry;
 
 
@@ -205,12 +186,12 @@ typedef struct MantraPulseEntry {
 
 
 extern void *func_002CB3B8(s32 arg0, s32 arg1);
-extern u32 mnuGetMantraDisplayFlags(DspScene *scene, MnuProfileProgress *target);
-extern void func_00258EB8(DspScene *entry);
+extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *scene, MnuProfileProgress *target);
+extern void func_00258EB8(MnuMantraGridEntry *entry);
 
 void func_002593E0(MnuProfileProgress *target, MantraPulseGrid *grid, MantraPulseEntry *entry) {
     void *scene;
-    DspScene *displayEntry;
+    MnuMantraGridEntry *displayEntry;
     u32 flags;
 
     scene = func_002CB3B8(mnuSceneResourceContext, 1);
