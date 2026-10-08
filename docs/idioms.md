@@ -3068,6 +3068,13 @@ and four-word `DrawColorRec` values use the existing packet interfaces.
 DDS1's textured row ends at `y + 0x88`, but its outline ends at
 `y + 0x78`; unlike DDS2, those corners do not share a cached bottom.
 
+DDS1 `0019E4F8` reads the selection phase as a signed halfword and stores
+`-1` when the closing motion finishes. Its entry Y coordinate is also
+signed: the closing arm compares it with `0xAF8` before scrolling.
+The current entry bottom uses `entryBlock.unk16`, not the table count
+at `+0x1A`; the selection countdown is initialized before phase 3.
+All 30 current `itf.h` includers remain exact with these two signed fields.
+
 ## Solar overlay state and kernel value boundary
 
 DDS1 `00228A00` and DDS2 `002436A8` allocate `0x104` bytes: a sprite

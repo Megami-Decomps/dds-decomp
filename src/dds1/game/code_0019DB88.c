@@ -12,6 +12,12 @@ extern ItfMesGlobals itfMesWork;
 
 
 
+extern void itfMesShiftPanelVertically(ItfMesState *, s32);
+extern void itfMesSetChildChainFlags(FrFontGlyph *, u8);
+extern s32 itfMesNthClearBit(s32, u32);
+extern s32 sndSeqSelectPoll(ItfMesState *);
+extern void func_0019E4F8(ItfMesState *);
+
 extern s32 func_00195ED8();
 
 extern UiSprite *func_00199828(s32, u32);
@@ -328,7 +334,72 @@ void itfMesUpdatePanelFades(ItfMesState *panel) {
 
 INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019E320);
 
-INCLUDE_ASM(const s32, "game/code_0019DB88", func_0019E4F8);
+void func_0019E4F8(ItfMesState *panel) {
+    ItfMesBlk40 *selection = &panel->blk40;
+    ItfMesEntryBlock *entry = &panel->entryBlock;
+    u32 flags = panel->flags;
+    s32 top;
+    s32 bottom;
+    s32 entryY;
+
+    switch (selection->unk10) {
+    case 1:
+        if (panel->unk12 == 3) {
+            selection->unk10 = 2;
+            panel->flags = (flags & ~0x38) | 0x18;
+            break;
+        }
+        entryY = entry->y;
+        bottom = entryY + entry->unk16 * (21 << 3);
+        top = selection->y - ((selection->rowCount * 21 - 21) << 3);
+        if (entryY == 0xAF8 && panel->blkA4.sprite != NULL) {
+            panel->blkA4.sprite->scrollSpan = ((bottom - top) / 64) * 64 + 64;
+        }
+        if (entry->glyphChain != NULL && top < bottom) {
+            itfMesShiftPanelVertically(panel, -64);
+            return;
+        }
+        if ((flags & 0xC00) != 0x400) {
+            if (entry->glyphChain != NULL) {
+                itfMesSetChildChainFlags(entry->glyphChain, 3);
+            }
+            selection->unk10 = 2;
+            panel->flags = (panel->flags & ~0x38) | 0x18;
+        }
+        break;
+    case 2:
+        if ((flags & 0x38) == 0x20 && sndSeqSelectPoll(panel) == 1) {
+            selection->glyphChain = itfMesTrimGlyphChainToRow(selection->glyphChain,
+                selection->selectedIndex, selection->rowCount);
+            if ((flags & 0xC00) == 0x800) {
+                panel->flags |= 0xC00;
+            }
+            selection->selectedIndex = itfMesNthClearBit(selection->selectedIndex, selection->panelValue);
+            selection->optionCount = 0;
+            btlSetFadePhaseAlphaTimer(&panel->fade, 1, 0x7F, 0);
+            panel->flags = (panel->flags & ~0x38) | 0x28;
+            selection->unk20 = 0x80;
+            selection->unk10 = 3;
+        }
+        break;
+    case 3:
+        selection->unk20 -= 16;
+        if (selection->unk20 <= 0) {
+            selection->unk20 = 0;
+            selection->unk10 = 4;
+            itfResetBattleFadeState(&panel->fade, 0);
+        }
+        itfMesRecolorNodeChildren(selection->glyphChain, selection->unk20);
+        return;
+    case 4:
+        if (entry->glyphChain != NULL && entry->y < 0xAF8) {
+            itfMesShiftPanelVertically(panel, 64);
+            return;
+        }
+        selection->unk10 = -1;
+        break;
+    }
+}
 
 void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy) {
     ItfMesBlk14 *origin = &panel->blk14;
