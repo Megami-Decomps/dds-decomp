@@ -3567,8 +3567,8 @@
 0x00217E88	mdlGetNodeField2E	inferred	finds node by id, returns u16 at +0x2E or 0 when missing
 0x00217EB0	mdlGetNodeInt1C	inferred	finds node by id, returns float at +0x1C converted to int, else 0
 0x00217EE0	mdlCheckNodeByte30	inferred	finds node by id, returns 2 when missing else whether byte at +0x30 equals 5
-0x00217F18	mdlGetNodeFloat20	inferred	finds node by id, returns float at +0x20 else 0.0f
-0x00217F40	mdlSetNodeFloat20	inferred	finds node by id, stores float arg at +0x20 when present
+0x00217F18	mdlGetNodeFrameStep	inferred	Reads Motion.frameStep at +0x20 or zero for a missing node; the motion updater adds it to currentFrame.
+0x00217F40	mdlSetNodeFrameStep	inferred	Writes Motion.frameStep at +0x20 when the searched node exists; the motion updater adds it to currentFrame.
 0x00217FB8	mdlUpdateContextRotationBasisFromQuaternion	inferred	Converts the context quaternion to rotation basis vectors. [names_reviewed11.tsv]
 0x002180A8	mdlBroadcastMasked	inferred	stores arg to inner +0x1C then walks list14 with (arg & 0xFF000000)|0x808080
 0x002180E0	mdlBroadcastValue	inferred	stores arg to inner +0x1C then walks list14 with arg
