@@ -56,7 +56,7 @@ extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s
 
 extern void func_0027D850(s32, s32, s32, s32, MenuPanelHandles *, s32, s32);
 
-extern MenuSprites *func_0027F230(s32, s32, s32);
+extern MenuSprites *func_0027F230(s32, EffectSlotSet *, EffectSlotSet *);
 
 extern void mnuDrawFourPanelIconsAtOffsets(s32, s32, s32, s32, MenuPanelHandles *, s32);
 
@@ -450,7 +450,7 @@ typedef struct MenuWindowSpriteGroup {
 
 extern u8 D_0037CD28[];
 
-void func_0027CF28(MenuWindowSpriteGroup *group, u32 source, u32 mode, u32 variant, u32 option) {
+void mnuInitializeWindowSpriteGroup(MenuWindowSpriteGroup *group, u32 source, u32 mode, u32 variant, u32 option) {
     s32 resourcePair;
 
     group->variant = variant;
@@ -492,7 +492,7 @@ void func_0027CF28(MenuWindowSpriteGroup *group, u32 source, u32 mode, u32 varia
     } while (resourcePair < 3);
 }
 
-extern void func_0027CF28(struct MenuWindowSpriteGroup *, u32, u32, u32, u32);
+extern void mnuInitializeWindowSpriteGroup(struct MenuWindowSpriteGroup *, u32, u32, u32, u32);
 
 /* Allocate/clear the native seven-sprite resource group before its initializer runs. */
 MenuWindowSpriteGroup *mnuCreateWindowState(u32 source, u32 mode, u32 variant, u32 option) {
@@ -501,7 +501,7 @@ MenuWindowSpriteGroup *mnuCreateWindowState(u32 source, u32 mode, u32 variant, u
 
     memset(group, 0, sizeof(MenuWindowSpriteGroup));
     group->allocation = allocation;
-    func_0027CF28(group, source, mode, variant, option);
+    mnuInitializeWindowSpriteGroup(group, source, mode, variant, option);
     return group;
 }
 
@@ -1119,7 +1119,7 @@ INCLUDE_ASM(const s32, "game/code_0027BF00", func_0027E8D8);
 /* Ten resource handles occupy offsets 0x0c through 0x30 in each page bundle. */
 typedef struct MenuPageResources {
     u8 pad0[0xC];
-    s32 sprites[10]; /* 0x0c */
+    struct EffectSlotSet *sprites[10]; /* 0x0c */
     u8 pad34[8];
 } MenuPageResources;
 
@@ -1129,31 +1129,31 @@ MenuPageResources *mnuCreatePartyPageSpriteBundle(s32 mainResource, s32 secondar
     MenuPageResources *item = (MenuPageResources *)sdfAllocSizeClassBlock(0x3C);
 
     memset(item, 0, 0x3C);
-    item->sprites[0] = (s32)effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0, 1);
-    item->sprites[1] = (s32)effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 1, 1);
-    item->sprites[2] = (s32)effCreateResourceSlotSet((EffectSlotSet *)mainResource, 2, 1);
-    item->sprites[3] = (s32)effCreateResourceSlotSet((EffectSlotSet *)mainResource, 5, 1);
-    item->sprites[4] = (s32)effCreateResourceSlotSet((EffectSlotSet *)mainResource, 6, 1);
-    item->sprites[5] = (s32)effCreateResourceSlotSet((EffectSlotSet *)mainResource, 7, 1);
-    item->sprites[6] = (s32)effCreateResourceSlotSet((EffectSlotSet *)mainResource, 8, 1);
-    item->sprites[7] = (s32)effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0xA, 1);
-    item->sprites[9] = (s32)effCreateResourceSlotSet((EffectSlotSet *)extraResource, extraIndex, 1);
-    item->sprites[8] = (s32)effCreateResourceSlotSet((EffectSlotSet *)finalResource, finalIndex, 1);
+    item->sprites[0] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0, 1);
+    item->sprites[1] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 1, 1);
+    item->sprites[2] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 2, 1);
+    item->sprites[3] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 5, 1);
+    item->sprites[4] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 6, 1);
+    item->sprites[5] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 7, 1);
+    item->sprites[6] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 8, 1);
+    item->sprites[7] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0xA, 1);
+    item->sprites[9] = effCreateResourceSlotSet((EffectSlotSet *)extraResource, extraIndex, 1);
+    item->sprites[8] = effCreateResourceSlotSet((EffectSlotSet *)finalResource, finalIndex, 1);
     return item;
 }
 
-/* Keep the original word walk: structured indexing exceeds the retail body. */
+/* Preserve the native resource-slot release order. */
 void mnuDestroyResources(MenuPageResources *resources) {
-    s32 *object = (s32 *)resources;
+    struct EffectSlotSet **object = (struct EffectSlotSet **)resources;
     u32 i;
     for (i = 0; i < 2; i++) {
-        effDestroyResourceSlotSet((struct EffectSlotSet *)object[i + 3]);
+        effDestroyResourceSlotSet(object[i + 3]);
     }
     for (i = 0; i < 6; i++) {
-        effDestroyResourceSlotSet((struct EffectSlotSet *)object[i + 5]);
+        effDestroyResourceSlotSet(object[i + 5]);
     }
-    effDestroyResourceSlotSet((struct EffectSlotSet *)object[12]);
-    effDestroyResourceSlotSet((struct EffectSlotSet *)object[11]);
+    effDestroyResourceSlotSet(object[12]);
+    effDestroyResourceSlotSet(object[11]);
     sdfReleaseChipBlock(resources);
 }
 
@@ -1263,32 +1263,33 @@ void mnuSetPageParams(MenuSprites *page, s32 mode) {
     }
 }
 
-MenuSprites *func_0027F230(s32 value, s32 mainResource, s32 secondaryResource) {
+MenuSprites *func_0027F230(s32 value, EffectSlotSet *mainResource,
+                            EffectSlotSet *secondaryResource) {
     MenuSprites *page = (MenuSprites *)sdfAllocSizeClassBlock(0x50);
 
     memset(page, 0, 0x50);
     page->unkC = value;
-    page->firstSprite = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 6, 1);
+    page->firstSprite = effCreateResourceSlotSet(secondaryResource, 6, 1);
     itfSetGridEntryQuantizedAndRefresh(page->firstSprite, 0, 0xE60, 0x430, 0, 0);
-    page->sprites[0] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 8, 1);
+    page->sprites[0] = effCreateResourceSlotSet(secondaryResource, 8, 1);
     itfSetGridEntryQuantizedAndRefresh(page->sprites[0], 0, 0xF50, 0x648, 0, 0);
-    page->sprites[1] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0x3B, 1);
+    page->sprites[1] = effCreateResourceSlotSet(mainResource, 0x3B, 1);
     itfSetGridEntryQuantizedAndRefresh(page->sprites[1], 0, 0x1C20, 0x6D0, 0, 0);
-    page->sprites[2] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 9, 1);
+    page->sprites[2] = effCreateResourceSlotSet(secondaryResource, 9, 1);
     itfSetGridEntryQuantizedAndRefresh(page->sprites[2], 0, 0x1120, 0x708, 0, 0);
-    page->sprites[3] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0xA, 1);
+    page->sprites[3] = effCreateResourceSlotSet(secondaryResource, 0xA, 1);
     itfSetGridEntryQuantizedAndRefresh(page->sprites[3], 0, 0x1BB0, 0x708, 0, 0);
-    page->sprites[4] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0xD, 1);
+    page->sprites[4] = effCreateResourceSlotSet(secondaryResource, 0xD, 1);
     itfSetGridEntryQuantizedAndRefresh(page->sprites[4], 0, 0x1450, 0x640, 0, 0);
-    page->sprites[5] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0xB, 1);
+    page->sprites[5] = effCreateResourceSlotSet(secondaryResource, 0xB, 1);
     itfSetGridEntryQuantizedAndRefresh(page->sprites[5], 0, 0x1540, 0x5E0, 0, 0);
-    page->sprites[6] = effCreateResourceSlotSet((EffectSlotSet *)secondaryResource, 0xC, 1);
+    page->sprites[6] = effCreateResourceSlotSet(secondaryResource, 0xC, 1);
     itfSetGridEntryQuantizedAndRefresh(page->sprites[6], 0, 0x1980, 0x660, 0, 0);
-    page->primarySprite = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0x3C, 1);
+    page->primarySprite = effCreateResourceSlotSet(mainResource, 0x3C, 1);
     itfSetGridEntryQuantizedAndRefresh(page->primarySprite, 0, 0x110, 0x280, 0, 0);
-    page->overlaySprites[0] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0x35, 1);
+    page->overlaySprites[0] = effCreateResourceSlotSet(mainResource, 0x35, 1);
     itfSetGridEntryQuantizedAndRefresh(page->overlaySprites[0], 0, 0x8E0, 0x288, 0, 0);
-    page->overlaySprites[1] = effCreateResourceSlotSet((EffectSlotSet *)mainResource, 0x36, 1);
+    page->overlaySprites[1] = effCreateResourceSlotSet(mainResource, 0x36, 1);
     itfSetGridEntryQuantizedAndRefresh(page->overlaySprites[1], 0, 0xEE0, 0x288, 0, 0);
     mnuSetPageParams(page, 0);
     return page;
@@ -1333,7 +1334,8 @@ void mnuDrawIconSpriteGroup(s32 unusedX, s32 unusedY, s32 depth, s32 skip, MenuS
 
 void mnuSetWindowResource(s32 index, MenuPageWindow *window, s32 resource, s32 option) {
     mnuSelectPage(window, index);
-    window->slots[index].windowSprites = func_0027F230(0, resource, option);
+    window->slots[index].windowSprites =
+        func_0027F230(0, (EffectSlotSet *)resource, (EffectSlotSet *)option);
     window->flags |= 0x100;
 }
 
