@@ -3,6 +3,7 @@
 #include "mnu_list.h"
 #include "eff.h"
 #include "mnu_shop.h"
+#include "mnu_scroll_panel.h"
 #include "dat_state.h"
 #include "dat_command.h"
 #include "itf.h"
@@ -130,13 +131,6 @@ extern void itfGridLookupValueOrDefault(s32, s32);
 
 
 extern MenuListNode *sdfAllocAndClearQuadwords(s32);
-
-typedef struct MenuSpriteRef {
-    s32 sprite;
-    s32 effect;
-} MenuSpriteRef;
-
-
 
 void mnuClearListFlagsOneAndTwo(u32 *flags);
 
@@ -950,18 +944,6 @@ void mnuUpdateFade(s32 *list) {
         }
     }
 }
-
-/* 0x4C-byte scroll panel with three linked animation handles. */
-typedef struct MenuScrollPanel {
-    u8 pad00[4];
-    u32 selection;            /* 0x04 */
-    u32 firstSprite;          /* 0x08 */
-    u32 secondSprite;         /* 0x0C */
-    MenuSpriteRef positions[2]; /* 0x10: leading value pairs */
-    MenuSpriteRef active[2];    /* 0x20 */
-    MenuSpriteRef pending[2];   /* 0x30 */
-    ScrollHandle *handles[3]; /* 0x40 */
-} MenuScrollPanel;
 
 void mnuInitScrollHandles(MenuScrollPanel *menu) {
     ScrollHandle *handle;

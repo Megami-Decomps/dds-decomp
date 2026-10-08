@@ -2,6 +2,7 @@
 #include "sdf_resource.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
+#include "mnu_scroll_panel.h"
 #include "dat_state.h"
 
 extern s32 mnuUseStaffItem(s32, s32);
@@ -14,7 +15,6 @@ extern void *memset(void *, s32, u32);
 typedef struct StaffDisplayContext StaffDisplayContext;
 extern void func_00272D50(StaffDisplayContext *);
 extern void mnuForwardDupArg(MenuWindowContainer *, s32, s32, s32, s32);
-extern void mnuActivatePanelAndConfigureGridResources(s32, s32, s32, s32);
 extern s32 mnuSeekListNode(s32, s32);
 
 
@@ -229,7 +229,8 @@ s32 mnuInitializeStaffDisplayResources(void) {
     func_00273390((u32)context);
     func_00272D50(context);
     mnuForwardDupArg(context->activeWindow, context->unk74, 0, 0, 0);
-    mnuActivatePanelAndConfigureGridResources(context->unk138, context->unkD8, 0, 1);
+    mnuActivatePanelAndConfigureGridResources(
+        (MenuScrollPanel *)(u32)context->unk138, context->unkD8, 0, 1);
     mnuSeekListNode(0, (s32)context->activeWindow->list);
     return 1;
 }
@@ -294,7 +295,7 @@ s32 func_002734C0(s32 callback) {
         }
         if (input & 2) {
             mnuSetPopupEntryFlagged((s32)popup, (s32)D_0037C990);
-            mnuActivatePanelAndConfigureGridResources((s32)context->unk138,
+            mnuActivatePanelAndConfigureGridResources((MenuScrollPanel *)(u32)context->unk138,
                                                       context->unk6C, 0, 1);
         }
         window = context->activeWindow;

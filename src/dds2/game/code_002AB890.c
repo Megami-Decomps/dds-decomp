@@ -4,6 +4,7 @@
 #include "mnu_list.h"
 #include "dat_state.h"
 #include "eff.h"
+#include "mnu_scroll_panel.h"
 
 
 extern u32 kwlnTaskGetUserValue();
@@ -399,7 +400,8 @@ u32 mnuInitializeWindowOwnerResourceSet(void) {
     resource->allocation = handle;
     func_002ACB18((u32)context);
     func_002AB8F0(context);
-    mnuConfigurePanelResource(context->unk118, context->spriteArg2, 0, 0);
+    mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->unk118,
+                              context->spriteArg2, 0, 0);
     mnuBeginWindowFadeTransition(context->activeWindow, &context->fade);
     mnuSeekListNode(0, context->activeWindow->list);
     return 1;
@@ -419,7 +421,6 @@ s32 mnuDestroyWindowOwnerResourceSet(void) {
 }
 
 extern s32 mnuMapPadMaskToFlags(s32);
-extern void mnuConfigurePanelResource(s32, s32, s32, s32);
 extern void func_002B9808(s32);
 extern void mnuRetreatWindowListSelection(s32);
 extern void mnuAdvanceWindowListSelection(s32);
@@ -481,7 +482,8 @@ s32 mnuHandleStaffPopupSelection(void *callback) {
         }
         if (input & 2) {
             mnuSetPopupEntryFlagged(popup, D_003E7418);
-            mnuConfigurePanelResource(context->unk118, context->group, 0, 1);
+            mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->unk118,
+                                      context->group, 0, 1);
             mnuBeginWindowFadeTransition(context->skillWindow, &context->fade);
         }
         window = context->activeWindow;
