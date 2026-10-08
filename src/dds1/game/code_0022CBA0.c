@@ -1621,7 +1621,6 @@ extern void kwlnCancelConfiguredFadeFrames();
 extern void mnuStopMovieDrawTask();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
-extern void sdfQueueNonzeroResourceId();
 extern void kwlnTextureReleaseHeldReference();
 extern void evtEventViewerReleaseGroups();
 extern void evtEventViewerShutdown();
@@ -1647,7 +1646,7 @@ void evtViewerReleaseResources(EvtRuntime *viewer) {
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     if (viewer->pendingResource != 0) {
-        sdfQueueNonzeroResourceId(viewer->pendingResource);
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)viewer->pendingResource);
         viewer->pendingResource = 0;
         viewer->pendingWork = 0;
     }

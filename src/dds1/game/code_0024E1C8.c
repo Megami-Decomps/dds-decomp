@@ -64,7 +64,6 @@ extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 extern void mnuDestroyMantraDrawPool(void *);
 extern void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *);
 extern s32 dspCloseChannel(void);
-extern void sdfQueueNonzeroResourceId(s32);
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void mnuMarkTitleStreamResetPending(void);
 extern void mnuResetTitleStreamLocked(void);
@@ -586,8 +585,8 @@ void func_0024F6F0(s32 unused, MnuResourceTaskWork *resourceWork) {
         mnuReleaseStaffMenuContextAndResources(resourceWork->staffMenuContext);
     }
     dspCloseChannel();
-    sdfQueueNonzeroResourceId(resourceWork->messageResource1);
-    sdfQueueNonzeroResourceId(resourceWork->messageResource2);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)resourceWork->messageResource1);
+    sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)resourceWork->messageResource2);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(resourceWork->allocation));
 }
 

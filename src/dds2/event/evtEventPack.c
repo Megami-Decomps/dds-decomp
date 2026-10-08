@@ -287,7 +287,6 @@ extern void effInitCh71Id(void);
 extern void effInitCh76Id(void);
 extern void effInitCh75Id(void);
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
-extern void sdfQueueNonzeroResourceId(s32);
 extern void sdfReleaseChipBlock(s32);
 
 
@@ -319,7 +318,7 @@ void evtReleaseEventPackResources(KwlnTask *task) {
             filePollEntryCleanup((struct FileCleanup *)state->fileHandle);
         }
         if (state->resourceHandle != 0) {
-            sdfQueueNonzeroResourceId(state->resourceHandle);
+            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)state->resourceHandle);
         }
         if (state->sceneAllocation1 != 0) {
             sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(state->sceneAllocation1));
