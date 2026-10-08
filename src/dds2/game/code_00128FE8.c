@@ -2611,7 +2611,38 @@ void fldUpdateCameraProjectionEndpoints(void) {
     D_0038BB00[3] = 1.0f;
 }
 
-INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012F908);
+extern f32 D_0038BAD0[];
+extern s32 D_004360B4;
+extern s32 D_004360B8;
+extern s32 D_003897C0[];
+extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
+
+void func_0012F908(void) {
+    union {
+        u128 q;
+        f32 f[4];
+    } nearPoint, farPoint;
+    u32 *world = fldGetPlayerSceneStateAddress();
+    f32 ratio = (f32)D_004360B4 / (f32)D_004360B8;
+    f32 remaining = 1.0f - ratio;
+    EffWorldNode *node;
+
+    nearPoint.f[0] = D_0038BAF0[0] * ratio + D_0038BAD0[0] * remaining;
+    nearPoint.f[1] = D_0038BAF0[1] * ratio + D_0038BAD0[1] * remaining;
+    nearPoint.f[2] = D_0038BAF0[2] * ratio + D_0038BAD0[2] * remaining;
+    farPoint.f[0] = D_0038BB00[0] * ratio + D_0038BB00[0] * remaining;
+    farPoint.f[1] = D_0038BB00[1] * ratio + D_0038BB00[1] * remaining;
+    farPoint.f[2] = D_0038BB00[2] * ratio + D_0038BB00[2] * remaining;
+    PCP_COPY_VECTOR(fldLookAtNearPoint, &nearPoint);
+    PCP_COPY_VECTOR(fldLookAtFarPoint, &farPoint);
+    effObjSetInnerFirstVec((EffWorldNode *)(u32)*world, &farPoint.q);
+    node = (EffWorldNode *)(u32)*world;
+    node->ops->update(node);
+    D_004360B4++;
+    if (D_004360B8 < D_004360B4) {
+        D_003897C0[0] = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00128FE8", func_0012FA58);
 
