@@ -7,6 +7,7 @@
 #include "evt_unit.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
+#include "bill_object_api.h"
 
 #define EFF_PARAM_WORK_BYTES 8
 #define EFF_PARAM_EXTENDED_WORK_BYTES 0xC
@@ -70,7 +71,6 @@ extern void sdfReleaseChipBlock(void *p);
 
 extern void mdlBroadcastMasked(MdlCtx *, u32);
 
-extern void billSetChildScaleComponents(f32 arg0, f32 arg1);
 
 extern void mdlProcessContextNodesAndTransforms(MdlCtx *, s32);
 
@@ -363,8 +363,8 @@ void func_00162C80(u32 index) {
 }
 
 /* Use the same floating value for both billboard child-scale components. */
-void effParamDispatchFloat(f32 value) {
-    billSetChildScaleComponents(value, value);
+void effParamDispatchFloat(void *payload, f32 value) {
+    billSetChildScaleComponents((BillObj *)payload, value, value);
 }
 
 /* Load the default primary/rotation/tertiary vectors and packed broadcast value.

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bill_object_api.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "par_draw.h"
@@ -23,7 +24,7 @@ typedef struct ParObj {
     u8 pad18[8];
     s32 particleCount; /* 0x20 */
     s32 lifetimeFrames; /* 0x24 */
-    s32 unk28;          /* 0x28 */
+    s32 billboardCloneMarker; /* 0x28: PAR_BILLBOARD_CLONE_FROM_RESOURCE */
     s16 billboardMode;  /* 0x2C */
     u8 pad2E[2];
     ParKindState kindState; /* 0x30 */
@@ -36,7 +37,7 @@ typedef struct ParObj {
     u32 unkA4;         /* 0xA4 */
     u8 padA8[0x48];    /* 0xA8 */
     u32 valueF0;       /* 0xF0 settable param */
-    s32 billId;         /* 0xF4 */
+    BillObj *billboard;         /* 0xF4 */
     EffectBufferTail *buffer;       /* 0xF8 */
     u32 pendingRestartSteps;       /* 0xFC */
     u8 pad100[0x40];   /* 0x100 */
@@ -219,13 +220,13 @@ s32 parObjGetMode(ParObj *object) {
 
 extern ParDispatch parKindConstructorEntries[];
 
-extern s32 billCloneObjectRetainingSharedData(s32 id);
 
-extern void billSetChildScaleComponents(s32 id, f32 a, f32 b);
 
-extern void billSetBillboardMode(s32 id, s16 mode);
 
-extern void billMarkKindOneFlag(s32 id);
+
+extern void billSetBillboardMode(BillObj *, s32);
+
+
 
 typedef struct ParKindResource {
     s32 type;
@@ -237,16 +238,16 @@ extern BillObj *billCreateIndexed(s32, u32);
 
 ParObj *parCreateResourceKindObject(s32 kind, ParKindResource *resource) {
     ParObj *object = (ParObj *)((u8 *)resource + resource->offset + 0x10);
-    s32 billboard;
+    BillObj *billboard;
 
     if (resource->type != 3 || resource->offset != 0) {
-        object->unk28 = -1;
+        object->billboardCloneMarker = PAR_BILLBOARD_CLONE_FROM_RESOURCE;
         object = parKindConstructorEntries[kind].func(object);
-        billboard = (s32)billCreateIndexed(resource->type, (u32)(resource + 1));
+        billboard = billCreateIndexed(resource->type, (u32)(resource + 1));
         billSetChildScaleComponents(billboard, object->scaleX, object->scaleY);
         billSetBillboardMode(billboard, object->billboardMode);
         billMarkKindOneFlag(billboard);
-        object->billId = billboard;
+        object->billboard = billboard;
     } else {
         object = parKindConstructorEntries[kind].func(object);
     }
@@ -256,16 +257,16 @@ ParObj *parCreateResourceKindObject(s32 kind, ParKindResource *resource) {
 
 ParObj *parInstantiateKind(ParObj *source) {
     ParObj *particle;
-    s32 billboard;
+    BillObj *billboard;
 
     particle = parKindConstructorEntries[source->dispatchIndex].func();
     particle->dispatchIndex = source->dispatchIndex;
-    if (source->unk28 == -1) {
-        billboard = billCloneObjectRetainingSharedData(source->billId);
+    if (source->billboardCloneMarker == PAR_BILLBOARD_CLONE_FROM_RESOURCE) {
+        billboard = billCloneObjectRetainingSharedData(source->billboard);
         billSetChildScaleComponents(billboard, particle->scaleX, particle->scaleY);
         billSetBillboardMode(billboard, particle->billboardMode);
         billMarkKindOneFlag(billboard);
-        particle->billId = billboard;
+        particle->billboard = billboard;
     }
     return particle;
 }
@@ -318,7 +319,7 @@ void func_00162590(ParObj *effect) {
     }
     /* Capture the draw owners before deriving this frame's scale/spin steps. */
     record = effect->buffer->records;
-    billboard = (BillObj *)effect->billId;
+    billboard = effect->billboard;
     particleCount = effect->particleCount;
     scaleStep = (effect->scale8C - effect->scaleX) / effect->lifetimeFrames;
     lifetime = effect->lifetimeFrames;

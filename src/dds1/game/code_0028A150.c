@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "sdf_chip.h"
 #include "eff_curve.h"
@@ -477,13 +478,11 @@ extern void *effRetainResource(void *name);
 
 extern void *billCreateIndexed(s32 mode, void *name);
 
-extern void billMarkKindOneFlag(void *handle);
 
 extern void billSetBillboardMode(void *handle, s16 index);
 
 extern void *fileAllocateGridRecordSlots(u16 type, u32 count, void *src);
 
-extern void *billCloneObjectRetainingSharedData(void *handle);
 
 
 /* Init record at fileCursorPulseState. */
@@ -5015,8 +5014,8 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
         if (dst->deviceHandle != NULL) {
             billDispatchByKind(dst->deviceHandle);
         }
-        dst->deviceHandle = billCloneObjectRetainingSharedData(src->deviceHandle);
-        billMarkKindOneFlag(dst->deviceHandle);
+        dst->deviceHandle = billCloneObjectRetainingSharedData((struct BillObj *)src->deviceHandle);
+        billMarkKindOneFlag((struct BillObj *)(dst->deviceHandle));
         if (dst->recordWork != NULL) {
             FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)dst->recordWork)->data0;
             billSetBillboardMode(dst->deviceHandle, (s16)record->alphaTrack.surfaceIndex);
@@ -5097,7 +5096,7 @@ void fileLoadObjectOpenAndStartDevice(LoadObj *obj, void *name) {
         billDispatchByKind(obj->deviceHandle);
     }
     obj->deviceHandle = billCreateIndexed(1, name);
-    billMarkKindOneFlag(obj->deviceHandle);
+    billMarkKindOneFlag((struct BillObj *)(obj->deviceHandle));
     if (obj->recordWork != NULL) {
         FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)obj->recordWork)->data0;
         billSetBillboardMode(obj->deviceHandle, (s16)record->alphaTrack.surfaceIndex);
