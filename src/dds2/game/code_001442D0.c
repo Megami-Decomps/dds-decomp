@@ -534,9 +534,9 @@ typedef struct FldVec4 {
     f32 v[4];
 } FldVec4;
 
-extern void effObjSetInnerFirstVec();
+extern void effObjSetInnerFirstVec(EffWorldNode *node, u128 *vector);
 
-extern s32 *dds3GetObjectBaseResourceHandle();
+extern u32 dds3GetObjectBaseResourceHandle(void *object);
 
 extern void dds3ClearObjectFlags();
 
@@ -3029,7 +3029,41 @@ s32 fldSetSparkVectors(s32 index, const u128 *pos, const u128 *vel) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_0014F980);
+s32 func_0014F980(s32 index, s32 reserved) {
+    s32 slot;
+    s32 i;
+    s32 candidate;
+    MdlCtx *model;
+    u128 position;
+
+    if (reserved == 0) {
+        slot = -1;
+        for (i = 0; i < 16; i++) {
+            candidate = (fldSparkControlState[16] + i) % 16;
+            if (fldSparkObjectEntries[candidate].unk4 == -1) {
+                slot = candidate;
+                break;
+            }
+        }
+    } else {
+        slot = 16;
+    }
+    if (slot < 0) {
+        return 0;
+    }
+    fldSparkControlState[16] = (slot + 1) % 16;
+    if (fldSparkSlots[index].hasVectors == 1) {
+        PCP_COPY_VECTOR(&position, fldSparkSlots[index].pos);
+        effObjSetInnerFirstVec((EffWorldNode *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].pos);
+        effObjSetInnerSecondVec((EffWorldNode *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].vel);
+        model = (MdlCtx *)dds3GetObjectBaseResourceHandle((void *)fldSparkObjectEntries[slot].objectHandle);
+        model->flags &= ~1;
+        fldSparkSlots[index].objectSlot = slot;
+        fldSparkObjectEntries[slot].unk4 = index;
+        return 1;
+    }
+    return 0;
+}
 
 void fldFreeSparkSlot(s32 index) {
     FldVec4 vec;
@@ -3041,9 +3075,9 @@ void fldFreeSparkSlot(s32 index) {
     if (fldSparkSlots[index].hasVectors == 1 && fldSparkSlots[index].active != 0 && fldSparkSlots[index].objectSlot != -1) {
         vec.v[0] = fldSparkSlots[index].pos[0];
         vec.v[2] = fldSparkSlots[index].pos[2];
-        effObjSetInnerFirstVec(fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle, &vec);
+        effObjSetInnerFirstVec((EffWorldNode *)fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle, (u128 *)&vec);
         obj = fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle;
-        flags = dds3GetObjectBaseResourceHandle(obj);
+        flags = (s32 *)dds3GetObjectBaseResourceHandle((void *)obj);
         *flags |= 1;
         dds3ClearObjectFlags(obj, 0x400);
         slot = fldSparkSlots[index].objectSlot;
@@ -3824,7 +3858,7 @@ void func_001540E8(void) {
     PCP_COPY_VECTOR_F32(inner->position, position);
     PCP_COPY_VECTOR_F32(inner->smoothedPosition, position);
     PCP_COPY_VECTOR_F32(inner->rotation, rotation);
-    effObjSetInnerFirstVec(object, position);
+    effObjSetInnerFirstVec(object, (u128 *)position);
     effObjSetInnerSecondVec(D_00435F1C, (u128 *)rotation);
     effObjSetInnerThirdVec(D_00435F1C, (u128 *)scale);
     D_00435F20 = (MdlCtx *)dds3GetObjectBaseResourceHandle(D_00435F1C);
