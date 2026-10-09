@@ -455,13 +455,13 @@ u8 *func_00322520(u32 taggedIndex) {
     return (u8 *)D_004390DC + index * 24;
 }
 
-void func_00322540(MenuRegistryParameters *records, u32 count) {
+void mnuBindMenuRegistryParameters(MenuRegistryParameters *records, u32 count) {
     D_004390E4 = records;
     D_004390E8 = count;
 }
 
-MenuRegistryParameters *func_00322550(u32 taggedIndex) {
-    u8 index = taggedIndex;
+MenuRegistryParameters *mnuGetMenuRegistryParametersByIndex(u32 parameterIndex) {
+    u8 index = parameterIndex;
     return &D_004390E4[index];
 }
 
@@ -841,7 +841,7 @@ MenuRuntimeRecord *func_00323988(MenuWorkEntry *work, struct MnuShootingWork *co
     switch (tag & 0xFFFF0000) {
     case 0x01000000: {
         MenuMovementRecord18 *fixed = (MenuMovementRecord18 *)func_00322520(tag);
-        parameters = func_00322550(fixed->parameterTag);
+        parameters = mnuGetMenuRegistryParametersByIndex(fixed->parameterTag);
         break;
     }
     case 0x02010000: {
@@ -853,7 +853,7 @@ MenuRuntimeRecord *func_00323988(MenuWorkEntry *work, struct MnuShootingWork *co
             return NULL;
         }
         registry = mnuGetMenuRecordRegistryEntry(tag);
-        parameters = func_00322550(registry->parameterIndex);
+        parameters = mnuGetMenuRegistryParametersByIndex(registry->parameterIndex);
         break;
     }
     }
@@ -914,7 +914,7 @@ s32 func_00323DF0(MenuRuntimeList *list, struct MnuShootingWork *context) {
             entryX = (s32)entry->x0;
             entryY = (s32)mnuEvaluateTimedValue(entry);
             registry = mnuGetMenuRecordRegistryEntry(entry->tag);
-            parameters = func_00322550(registry->parameterIndex);
+            parameters = mnuGetMenuRegistryParametersByIndex(registry->parameterIndex);
 
             if (parameters->hitWidth != 0) {
                 s32 left = entryX + parameters->hitOffsetX;
@@ -1011,7 +1011,7 @@ s32 func_00324070(MenuWorkEntry *input) {
         entryX = (s32)entry->x0;
         entryY = (s32)mnuEvaluateTimedValue(entry);
         registry = mnuGetMenuRecordRegistryEntry(entry->tag);
-        parameters = func_00322550(registry->parameterIndex);
+        parameters = mnuGetMenuRegistryParametersByIndex(registry->parameterIndex);
         if (parameters->hitWidth == 0) {
             continue;
         }
@@ -1021,7 +1021,7 @@ s32 func_00324070(MenuWorkEntry *input) {
         right = left + parameters->hitWidth;
         bottom = top + parameters->hitHeight;
         inputRecord = (MenuMovementRecord18 *)func_00322520(input->tag);
-        parameters = func_00322550(inputRecord->parameterTag);
+        parameters = mnuGetMenuRegistryParametersByIndex(inputRecord->parameterTag);
         inputLeft = (s32)(input->x0 + (f32)parameters->hitOffsetX);
         inputTop = (s32)(input->y0 + (f32)parameters->hitOffsetY);
         inputRight = inputLeft + parameters->hitWidth;

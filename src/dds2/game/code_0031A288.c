@@ -44,7 +44,7 @@ void func_0031A288(MenuRuntimeRecord *record, MenuWorkEntry *entry, MnuShootingW
     }
 
     registry = mnuGetMenuRecordRegistryEntry(entry->tag);
-    func_00322550(registry->parameterIndex);
+    mnuGetMenuRegistryParametersByIndex(registry->parameterIndex);
     if (registry->parameterIndex == 0x22) {
         if (entry->flagsBits.modelMotionStarted == 0) {
             if (entry->flagsBits.unk5 == 1) {
@@ -65,7 +65,7 @@ void func_0031A288(MenuRuntimeRecord *record, MenuWorkEntry *entry, MnuShootingW
     switch (record->state.kind & 0xF) {
     case 0:
     case 5:
-        parameters = func_00322550(registry->parameterIndex);
+        parameters = mnuGetMenuRegistryParametersByIndex(registry->parameterIndex);
         x = (s32)(record->rotatedOffsetX + record->displacementX + record->baseX);
         y = mnuEvaluateTimedValue(entry);
         y += parameters->hitOffsetY;
