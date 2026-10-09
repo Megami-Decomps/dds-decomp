@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "eff.h"
 #include "mdl.h"
@@ -441,8 +442,6 @@ extern SdfPoolNode *D_003B2040[];
 extern SdfPoolNode D_00380248;
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfConsAppendClearPacket(s32, s32 (*)(s32));
-extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
 extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 func_00167A10(EffTrackPolyDraw *);
 
@@ -461,8 +460,8 @@ void effTrackPolyDrawStrips(EffTrackPolyData *data) {
     u64 *packet;
 
     sdfInitPacketList(list);
-    sdfConsAppendClearPacket((s32)list, 0);
-    sdfConsAppendAssetPacket((s32)list, data->nodeHandle, 0);
+    sdfConsAppendClearPacket(list, 0);
+    sdfConsAppendAssetPacket(list, data->nodeHandle, 0);
     activePointCount = data->activePointCount;
     runStart[0] = data->position - activePointCount;
     if (runStart[0] < 2) {
