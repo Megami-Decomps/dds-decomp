@@ -27,7 +27,7 @@ typedef struct SdfItem {
     u8 pad1C[4];
     u128 translation; /* 0x20 */
     u128 scale;       /* 0x30 */
-    s32 boundsAddress; /* 0x40: optional local-box corners used by clipping */
+    const f32 *boundsCorners; /* 0x40: optional two xyz corners used by clipping */
     union {
         u32 *inlineCommandLists[3]; /* mode 0 */
         struct {
@@ -39,6 +39,8 @@ typedef struct SdfItem {
 } SdfItem;
 
 typedef char SdfItem_size_must_be_0x50[(sizeof(SdfItem) == 0x50) ? 1 : -1];
+typedef char SdfItem_boundsCorners_at_40[
+    ((u32)&((SdfItem *)0)->boundsCorners == 0x40) ? 1 : -1];
 typedef char SdfItem_commandData_at_44[
     ((u32)&((SdfItem *)0)->commandData == 0x44) ? 1 : -1];
 

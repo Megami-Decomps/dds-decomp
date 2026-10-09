@@ -232,7 +232,22 @@ extern s32 D_00437CBC;
 extern SdfPoolNode D_00380708;
 extern s8 D_0037F510[];
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002BE628);
+extern s32 func_002BD5C8(MenuPageWindow *window, s32 mode);
+extern void mnuBlendPanelSlots(EffectSlotSet *dst, EffectSlotSet *src, s32 amount);
+
+/* Draw the window surface; while the window is in selection state 1, blend its second resource in. */
+void func_002BE628(s32 x, s32 y, s32 z, MenuPageWindow *window, s32 mode, EffectSlotSet **resources, u32 alpha, s32 surface) {
+    EffectSlotSet *resource;
+    s32 blendState = 1;
+
+    if (func_002BD5C8(window, mode) == blendState) {
+        mnuBlendPanelSlots(resources[1], resources[0], window->fade);
+        resource = resources[1];
+    } else {
+        resource = resources[0];
+    }
+    func_00306CD0(x, y, z, alpha, 1, resource, 0, surface);
+}
 
 
 
