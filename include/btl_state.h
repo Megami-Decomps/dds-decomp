@@ -252,7 +252,8 @@ typedef struct BtlState {
     s32 (*chooseMotion)(BtlUnit *, s32, s32); /* 0x5A0 */
     u8 pad5A4[8];
     void (*actorParameterDeltaCallback)(BtlUnit *, s32 *); /* 0x5AC */
-    u8 pad5B0[8];
+    u8 pad5B0[4];
+    s32 (*unk5B4)(void); /* 0x5B4: -1 falls through to the unit scan; any other value is stored in eventReady (func_001A8188). */
     void (*postPlacementCallback)(void); /* 0x5B8: runs after actor positions and rotations. */
     s32 (*effectParameterCallback)(BtlUnit *, s32); /* 0x5BC: actor record-index override, DDS1 001D645C. */
     u8 pad5C0[4];

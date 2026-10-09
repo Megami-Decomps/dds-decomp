@@ -3,6 +3,20 @@
 
 #include "common.h"
 
+/* Inventory metadata maps item IDs to commands and base prices. */
+typedef struct DatItemSkillRecord {
+    u8 flags;
+    u8 unk01;
+    u16 commandIndex;
+    s32 price;
+} DatItemSkillRecord;
+
+typedef char DatItemSkillRecordSizeCheck[sizeof(DatItemSkillRecord) == 8 ? 1 : -1];
+typedef char DatItemSkillCommandOffsetCheck[((u32)&((DatItemSkillRecord *)0)->commandIndex == 2) ? 1 : -1];
+typedef char DatItemSkillPriceOffsetCheck[((u32)&((DatItemSkillRecord *)0)->price == 4) ? 1 : -1];
+
+extern DatItemSkillRecord *datItemSkillRecords;
+
 /* DDS2 SKILL.TBL command rows. The resource contains 544 records. */
 typedef union DatCommandAttribute {
     u32 bits;
