@@ -4,6 +4,7 @@
 #include "evt_viewer.h"
 
 #include "evt_world.h"
+#include "evt_picture.h"
 #include "eff_object.h"
 #include "eff_event.h"
 #include "pcp_vu0.h"
@@ -28,13 +29,9 @@ extern s32 effEventAdvanceSolidRectangleSetup(void);
 extern s32 sndFindPackedTrackLoadStatus(s32 sequence);
 extern void sndEnsureMidiBankResident(s32 sequence);
 extern s32 evtUpdateFrameVariableTask(KwlnTask *task);
-extern EvtPictureWork *evtAllocateContext(void);
-extern void evtSetConvertedContextValue(EvtPictureWork *, const char *);
-extern void evtUpdatePictureWhenFlagged(void);
-extern void evtPictureReleaseTaskTextureAndState(void);
 extern s32 func_003014F0(char *, char *, ...);
 extern void evtFormatTaskName(s32 taskId, void *buffer);
-extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, void *, void *, u32);
+extern KwlnTask *kwlnTaskCreate(const char *, u32, s32, s32, TaskUpdate, TaskDestroy, u32);
 extern void *memset(void *, s32, u32);
 extern void effObjSetFlags(void *object, s32 flags);
 extern void *func_00115298(void *obj, void *vecA, void *vecB);
@@ -56,7 +53,6 @@ extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
 extern u32 itfMesGetEntryCount(s32 window);
 extern void evtViewerDispatchFlagMode();
 extern void func_0022E5A0();
-extern char evtPictureTaskName[];
 extern char evtSkyTaskName[];
 extern u8 D_003BC360[];
 extern char D_003BC058[]; /* "     %d" */
@@ -164,7 +160,7 @@ void evtAdvanceSkyTransition(void) {
     }
 }
 
-s32 evtUpdateSkyTask(void) {
+s32 evtUpdateSkyTask(KwlnTask *task) {
     evtAdvanceSkyTransition();
     func_00132010();
     if (evtSkyOverlayEnabled != 0) {
@@ -174,7 +170,7 @@ s32 evtUpdateSkyTask(void) {
     return 0;
 }
 
-void evtResetSkyTaskFlags(void) {
+void evtResetSkyTaskFlags(KwlnTask *task) {
     evtSkyTransitionActive = 0;
     evtSkyOverlayEnabled = 0;
 }
@@ -4211,4 +4207,3 @@ INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC350);
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC358);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC360);
-

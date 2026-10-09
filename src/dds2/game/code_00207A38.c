@@ -233,27 +233,7 @@ typedef struct BtlResourceEntryList {
     BtlResourceEntry *head;
 } BtlResourceEntryList;
 
-/* Browser viewport/selection and texture ownership; the entry list is borrowed. */
-typedef struct BtlResourceDescriptor {
-    s32 word00;             // 0x00
-    s32 word04;             // 0x04
-    u32 selectionStatus;    // 0x08: pending, accepted, or canceled
-    s32 entryCount;         // 0x0C
-    u32 word10;             // 0x10
-    u32 selectedIndex;      // 0x14
-    u32 visibleIndex;       // 0x18
-    u32 previewActive;      // 0x1C
-    u32 repeatDelay;        // 0x20
-    u32 word24;             // 0x24
-    u32 word28;             // 0x28
-    u32 word2C;             // 0x2C
-    BtlResourceEntry *firstVisibleEntry; /* 0x30 */
-    BtlResourceEntry *selectedEntry; /* 0x34 */
-    BtlResourceEntry *cachedEntry; // 0x38: last entry whose preview was updated
-    SdfTex *texture;        // 0x3C: owned or borrowed preview texture
-    s32 textureCategory;    /* 0x40: TMX is owned; GENERAL is borrowed. */
-    BtlResourceEntryList *entryList; /* 0x44 */
-} BtlResourceDescriptor;
+
 
 extern u8 D_00436C50[];
 
@@ -2913,8 +2893,8 @@ void btlAppendEntry(BtlResourceEntryList *list, const char *name, s32 category, 
 BtlResourceDescriptor *btlCreateResourceDescriptor(BtlResourceEntryList *list) {
     BtlResourceDescriptor *descriptor = sdfAllocSizeClassBlock(BTL_RESOURCE_DESCRIPTOR_BYTES);
 
-    descriptor->word00 = 8;
-    descriptor->word04 = 8;
+    descriptor->originX = 8;
+    descriptor->originY = 8;
     descriptor->selectionStatus = BTL_RESOURCE_SELECTION_PENDING;
     descriptor->entryCount = list->count;
     descriptor->word10 = 0;
@@ -2922,9 +2902,9 @@ BtlResourceDescriptor *btlCreateResourceDescriptor(BtlResourceEntryList *list) {
     descriptor->visibleIndex = 0;
     descriptor->previewActive = 0;
     descriptor->repeatDelay = 0;
-    descriptor->word24 = 0x60;
-    descriptor->word28 = 0x80806020;
-    descriptor->word2C = 0x60000000;
+    descriptor->drawSurfaceIndex = 0x60;
+    descriptor->borderColor = 0x80806020;
+    descriptor->fillColor = 0x60000000;
     descriptor->firstVisibleEntry = list->head;
     descriptor->selectedEntry = list->head;
     descriptor->cachedEntry = NULL;
@@ -3069,23 +3049,23 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
     packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packetList);
     sdfAppendPacket(packetList, (u32)func_0011F250(
-        (descriptor->word00 << 4) + 0x7000,
-        (descriptor->word04 << 3) + 0x7900,
-        0xFEFFFF, 0xCC0, 0x740, descriptor->word2C, descriptor->word28));
+        (descriptor->originX << 4) + 0x7000,
+        (descriptor->originY << 3) + 0x7900,
+        0xFEFFFF, 0xCC0, 0x740, descriptor->fillColor, descriptor->borderColor));
 
     if (descriptor->previewActive != 0) {
         sdfAppendPacket(packetList, (u32)func_0011F250(
-            (descriptor->word00 << 4) + 0x7000,
-            (descriptor->word04 << 3) + 0x8050,
-            0xFEFFFF, 0x800, 0x400, 0, descriptor->word28));
+            (descriptor->originX << 4) + 0x7000,
+            (descriptor->originY << 3) + 0x8050,
+            0xFEFFFF, 0x800, 0x400, 0, descriptor->borderColor));
     }
 
     drawnRows = 0;
-    topRow = descriptor->word04;
+    topRow = descriptor->originY;
     contentRow = topRow + 2;
     if (descriptor->entryList->pathPrefix != NULL) {
         sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
-            (descriptor->word00 << 4) + 0x7020,
+            (descriptor->originX << 4) + 0x7020,
             (contentRow << 3) + 0x7900, 0xFF0000, 5,
             descriptor->entryList->pathPrefix));
         contentRow = topRow + 0xE;
@@ -3095,7 +3075,7 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
     while (visibleEntry != NULL) {
         s32 selectionFlags = visibleEntry == descriptor->selectedEntry ? 4 : 0;
         sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(
-            (descriptor->word00 << 4) + 0x7020,
+            (descriptor->originX << 4) + 0x7020,
             packedY, 0xFF0000, selectionFlags, visibleEntry->name));
         drawnRows++;
         packedY += 0x60;
@@ -3105,7 +3085,7 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
         visibleEntry = visibleEntry->next;
     }
 
-    surface = &kwlnDrawSurfaces[descriptor->word24];
+    surface = &kwlnDrawSurfaces[descriptor->drawSurfaceIndex];
     surface->append((SdfListHead *)surface, packetList);
     return descriptor->selectionStatus;
 }
@@ -3120,10 +3100,9 @@ void btlDestroyResourceDescriptor(BtlResourceDescriptor *descriptor) {
     sdfReleaseChipBlock(descriptor);
 }
 
-void btlSetResourceNameHeaderPair(void *owner, s32 firstWord, s32 secondWord) {
-    s32 *headerWords = owner;
-    headerWords[0] = firstWord;
-    headerWords[1] = secondWord;
+void btlSetResourceBrowserPosition(BtlResourceDescriptor *descriptor, s32 x, s32 y) {
+    descriptor->originX = x;
+    descriptor->originY = y;
 }
 
 u32 func_0020DFC0(s32 recordAddress) {
@@ -3131,9 +3110,8 @@ u32 func_0020DFC0(s32 recordAddress) {
     return recordWords[5];
 }
 
-u32 func_0020DFC8(const void *owner) {
-    const u32 *headerWords = owner;
-    return headerWords[2];
+u32 btlGetResourceBrowserSelectionStatus(const BtlResourceDescriptor *descriptor) {
+    return descriptor->selectionStatus;
 }
 
 /* Format prefix + selected name; return its resource category, not its id. */
