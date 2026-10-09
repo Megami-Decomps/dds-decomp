@@ -32,23 +32,24 @@ EffWorldNode *evtSpawnActionObj2(s32 firstValue, s32 secondValue) {
     return obj;
 }
 
-extern WorldValueIndices *dds3GetWorldSlotValue(u8 *object, s32 index);
+void dds3EnsureWorldNodeInSlot(EffWorldNode *object, EffWorldNode *node) {
+    WorldIndexNode *slot = dds3GetWorldSlotValue(object, func_00111160(((u8 *)node)[0xF]));
 
-void dds3EnsureWorldNodeInSlot(s32 object, u8 *node) {
-    WorldValueIndices *slot = dds3GetWorldSlotValue((u8 *)object, func_00111160(node[0xF]));
-
-    dds3ResetObjectValueCursor(slot);
-    if (dds3SeekWorldNode(slot, (u32)node) != 1) {
-        dds3GrowWorldValueChain(slot, 1);
-        dds3WriteIndexedWorldObjectWord(slot, (u32)node);
+    dds3ResetObjectValueCursor((WorldValueIndices *)slot);
+    if (dds3SeekWorldNode((WorldValueIndices *)slot, (u32)node) != 1) {
+        dds3GrowWorldValueChain((WorldValueIndices *)slot, 1);
+        dds3WriteIndexedWorldObjectWord((WorldValueIndices *)slot, (u32)node);
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_00111160", func_00111258);
 
-/* Read a 32-bit value from the object's array of world slots. */
-WorldValueIndices *dds3GetWorldSlotValue(u8 *object, s32 index) {
-    return (WorldValueIndices *)(u32)(*(s32 *)(*(u8 **)(object + 0x18) + (index << 2)));
+/* Select one of the kind-2 owner's two world index nodes. */
+WorldIndexNode *dds3GetWorldSlotValue(EffWorldNode *object, s32 index) {
+    WorldIndexNode **slot = object->data;
+
+    slot += index;
+    return *slot;
 }
 
 extern WorldIndexNode *dds3AppendWorldIndexNode(s32 initialCount);
@@ -57,23 +58,23 @@ extern void *dds3GetWorldSecondaryObject(void);
 extern WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 
 /* Copy the slot's world-object words (optionally filtered) into a fresh index node. */
-WorldIndexNode *dds3CopyFilteredWorldSlot(s32 object, s32 index, s32 (*filter)(u32)) {
-    WorldValueIndices *slot = dds3GetWorldSlotValue((u8 *)object, index);
+WorldIndexNode *dds3CopyFilteredWorldSlot(EffWorldNode *object, s32 index, s32 (*filter)(u32)) {
+    WorldIndexNode *slot = dds3GetWorldSlotValue(object, index);
     WorldIndexNode *result;
     u32 word;
 
-    if (dds3GetWorldValueCount(slot) == 0) {
+    if (dds3GetWorldValueCount((WorldValueIndices *)slot) == 0) {
         return NULL;
     }
     result = dds3AppendWorldIndexNode(0);
-    dds3ResetObjectValueCursor(slot);
+    dds3ResetObjectValueCursor((WorldValueIndices *)slot);
     do {
-        word = dds3ReadIndexedWorldObjectWord(slot);
+        word = dds3ReadIndexedWorldObjectWord((WorldValueIndices *)slot);
         if (filter == NULL || filter(word) != 0) {
             dds3GrowWorldValueChain((WorldValueIndices *)result, 1);
             dds3WriteIndexedWorldObjectWord((WorldValueIndices *)result, word);
         }
-    } while (dds3AdvanceObjectValueCursor(slot) != 0);
+    } while (dds3AdvanceObjectValueCursor((WorldValueIndices *)slot) != 0);
     if (dds3GetWorldValueCount((WorldValueIndices *)result) == 0) {
         dds3DestroyWorldIndexNode(result);
         return NULL;

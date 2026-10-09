@@ -73,6 +73,9 @@ typedef char WorldIndexNodeLayoutAssert[
      (unsigned long)&((WorldIndexNode *)0)->next == 8 &&
      (unsigned long)&((WorldIndexNode *)0)->previous == 0xC) ? 1 : -1];
 
+void dds3EnsureWorldNodeInSlot(EffWorldNode *indexOwner, EffWorldNode *node);
+WorldIndexNode *dds3GetWorldSlotValue(EffWorldNode *object, s32 index);
+
 /* Eight-byte entries link both allocated and free world value chains. */
 typedef struct WorldValueEntry {
     s32 value;

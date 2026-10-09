@@ -2,6 +2,7 @@
 #define ITF_H
 
 #include "common.h"
+#include "itf_mes_resource.h"
 #include "eff.h"
 #include "sdf.h"
 #include "fr_font.h"
@@ -158,28 +159,6 @@ void frFontStoreShiftedRenderValue(FrFontGlyph *glyph, u32 unshiftedValue);
 void frFontSetChildColors(FrFontGlyph *parentGlyph, u32 colorWord);
 void frFontSetChildChainFirstOption(FrFontGlyph *glyph, u8 firstOption);
 void frFontSetGlyphChainDimensions(FrFontGlyph *glyph, s32 cellAdvance, s32 cellHeight);
-
-/* Message tables contain relocated encoded-text addresses. */
-typedef struct ItfMesTable {
-    u8 unk0[0x18];
-    s16 count;
-    s16 bitCount;
-    u32 items[1];
-} ItfMesTable;
-
-typedef struct ItfMesEntry {
-    u32 itemList;
-    ItfMesTable *table;
-} ItfMesEntry;
-
-typedef struct ItfMesSub {
-    u8 unk0[8];
-    u32 magic;
-    u8 unkC[0xC];
-    u32 entryCount;
-    u8 unk1C[4];
-    ItfMesEntry entries[1];
-} ItfMesSub;
 
 typedef struct ItfMesBlk14 {
     u32 x;
