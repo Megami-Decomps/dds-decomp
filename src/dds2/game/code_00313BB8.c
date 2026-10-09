@@ -3,6 +3,7 @@
 #include "dsp_name.h"
 #include "common.h"
 #include "sdf_resource.h"
+#include "file.h"
 #include "sdf.h"
 #include "eff_curve.h"
 #include "sdf_projection.h"
@@ -59,9 +60,6 @@ extern void mdlFlagSet(s32);
 #define SDF_FLAG_LIST_PACKET_BYTES 0x20
 #define SDF_FLAG_SLOT_TABLE_SHIFT 7
 #define SDF_FLAG_SLOT_COUNT 16
-
-
-extern void *fileResolvePrimaryBuffer(void *);
 
 
 extern DspMantraName *D_00435E50;
