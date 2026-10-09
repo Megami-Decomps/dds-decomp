@@ -397,12 +397,6 @@ extern u32 effFlashTextureHandles;
 
 extern u32 effModelUpdateControlFlags;
 
-extern void *fileResolvePrimaryBuffer();
-
-extern void *fileResolveSecondaryBuffer(FileJobPayload *);
-
-
-
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 
 extern void sdfBuildLightingPacket(void *, SdfLightSources, void *);
@@ -1294,7 +1288,7 @@ EffKindWork *effAllocateKindWork(u16 kind, u8 *source) {
 extern s32 *effCreateResourceHolderFromSelectedKind(s32 *, u16);
 
 EffKindWork *func_002DFDB8(FileJob *work) {
-    void *source = fileResolvePrimaryBuffer(work);
+    void *source = fileResolvePrimaryBuffer((FileJobPayload *)work);
     EffKindWork *effect = effAllocateKindWork(work->option, source);
     s32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
 
@@ -1392,7 +1386,7 @@ EffKindWork *effAllocateAlternateKindWork(u16 kind, u8 *source) {
 
 /* Create alternate-kind work from a primary file payload and a supported secondary asset. */
 EffKindWork *effCreateAlternateKindWorkFromFile(FileJob *work) {
-    void *source = fileResolvePrimaryBuffer(work);
+    void *source = fileResolvePrimaryBuffer((FileJobPayload *)work);
     EffKindWork *effect = effAllocateAlternateKindWork(work->option, source);
     s32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
 
@@ -1525,7 +1519,7 @@ u8 *effCreateBillboardWork(u8 *source) {
     if (source == NULL) {
         return work;
     }
-    memcpy(work + 0x2C, fileResolvePrimaryBuffer(source),
+    memcpy(work + 0x2C, fileResolvePrimaryBuffer((FileJobPayload *)source),
            ((FileJob *)source)->slots[0].size);
     ((EffBillboardWork *)work)->billboard =
         billCreateIndexed(1, (u32)fileResolveSecondaryBuffer((FileJobPayload *)source));
@@ -2507,7 +2501,7 @@ u8 *effCreateFileResourceInstance(u8 *work) {
         secondary = NULL;
         break;
     }
-    source = fileResolvePrimaryBuffer(work);
+    source = fileResolvePrimaryBuffer((FileJobPayload *)work);
     return (u8 *)effCreateResourceInstanceA(((FileJob *)work)->option, source, (u32)secondary);
 }
 
@@ -4904,7 +4898,7 @@ EffectStripNode *effCreateStripNodeFromGrid(u8 *source) {
 extern void effReplaceFileResourceRef(EffectStripNode *, u32, void *);
 
 EffectStripNode *effFileResourceReferenceReplace(FileJob *work) {
-    u8 *primary = fileResolvePrimaryBuffer(work);
+    u8 *primary = fileResolvePrimaryBuffer((FileJobPayload *)work);
     u8 *source = primary + 0x20;
     EffectStripNode *node = effCreateStripNodeFromGrid(source);
 
@@ -5532,7 +5526,7 @@ u8 *effCreateFileResourceInstanceB(u8 *work) {
         secondary = NULL;
         break;
     }
-    source = fileResolvePrimaryBuffer(work);
+    source = fileResolvePrimaryBuffer((FileJobPayload *)work);
     return (u8 *)effCreateResourceInstanceB(((FileJob *)work)->option, source, (u32)secondary);
 }
 
@@ -6410,7 +6404,7 @@ EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, v
 }
 
 u32 effCreateModelResourceFromFile(u8 *work) {
-    void *first = fileResolvePrimaryBuffer(work);
+    void *first = fileResolvePrimaryBuffer((FileJobPayload *)work);
     void *second = fileResolveSecondaryBuffer((FileJobPayload *)work);
     return (u32)effCreateModelResourceWithInlineData(((FileJob *)work)->option, first, second, ((FileJob *)work)->slots[1].size);
 }
@@ -7966,27 +7960,27 @@ void effDestroyBillboardAndOwnedAssetWork(s32 *work) {
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F91D0);
 
 
-u8 *effAllocateResourcePayload(u16 kind, void *source) {
+EffActiveResource *effAllocateResourcePayload(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = effRuntimeResourceOperations[kind].payloadSize;
-    u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
-    ((EffActiveResource *)effect)->payload = effect + headerSize;
-    ((EffActiveResource *)effect)->color = 0x80808080;
-    ((EffActiveResource *)effect)->scale = 1.0f;
-    ((EffActiveResource *)effect)->kind.index = kind;
-    ((EffActiveResource *)effect)->frame = 0;
+    EffActiveResource *effect = sdfAllocSizeClassBlock(size + headerSize);
+    effect->payload = (u8 *)effect + headerSize;
+    effect->color = 0x80808080;
+    effect->scale = 1.0f;
+    effect->kind.index = kind;
+    effect->frame = 0;
     VU0_STORE_VF(vf0, effect);
-    VU0_STORE_VF(vf0, effect + 0x10);
-    memcpy(((EffActiveResource *)effect)->payload, source, size);
+    VU0_STORE_VF(vf0, (u8 *)effect + 0x10);
+    memcpy(effect->payload, source, size);
     return effect;
 }
 
-u8 *func_002F9608(u16 kind, void *source, u16 secondaryKind, void *secondary, u32 param) {
-    u8 *effect = effAllocateResourcePayload(kind, source);
+EffActiveResource *effCreateResourceInstance(u16 kind, void *source, u16 secondaryKind, void *secondary, u32 param) {
+    EffActiveResource *effect = effAllocateResourcePayload(kind, source);
 
     if (btlIsRuntimeAllocated() != 0) {
         if (effRuntimeResourceOperations[kind].createResource != NULL) {
-            ((EffActiveResource *)effect)->resource = (u32)effRuntimeResourceOperations[kind].createResource(source, secondaryKind, secondary, param);
+            effect->resource = (u32)effRuntimeResourceOperations[kind].createResource(source, secondaryKind, secondary, param);
         }
         if (effRuntimeResourceOperations[kind].initialize != NULL) {
             effRuntimeResourceOperations[kind].initialize(effect);
@@ -7995,35 +7989,35 @@ u8 *func_002F9608(u16 kind, void *source, u16 secondaryKind, void *secondary, u3
     return effect;
 }
 
-void effCreateActiveResourceFromFile(FileJobPayload *source) {
+EffActiveResource *effCreateActiveResourceFromFile(FileJobPayload *source) {
     void *primary = fileResolvePrimaryBuffer(source);
     void *secondary = fileResolveSecondaryBuffer(source);
-    func_002F9608(source->option, primary,
-                  source->primary.selector, secondary, source->secondary.size);
+    return effCreateResourceInstance(source->option, primary,
+                         source->primary.selector, secondary, source->secondary.size);
 }
 
-void effDestroyResourceInstance(u32 *obj) {
+void effDestroyResourceInstance(EffActiveResource *obj) {
     if (btlIsRuntimeAllocated()) {
-        if (effRuntimeResourceOperations[obj[0x2C / 4]].destroyResource != NULL) {
-            effRuntimeResourceOperations[obj[0x2C / 4]].destroyResource(obj[0x30 / 4]);
+        if (effRuntimeResourceOperations[obj->kind.index].destroyResource != NULL) {
+            effRuntimeResourceOperations[obj->kind.index].destroyResource(obj->resource);
         }
     }
     sdfReleaseChipBlock(obj);
 }
 
-u8 *effDuplicateActiveResource(u8 *source) {
-    u8 *effect;
-    u32 kind = ((EffActiveResource *)source)->kind.index;
+EffActiveResource *effDuplicateActiveResource(EffActiveResource *source) {
+    EffActiveResource *effect;
+    u32 kind = source->kind.index;
 
     if (effRuntimeResourceOperations[kind].cloneResource == NULL) {
-        effect = func_002F9608(((EffActiveResource *)source)->kind.shortIndex, ((EffActiveResource *)source)->payload, 0, 0, 0);
+        effect = effCreateResourceInstance(source->kind.shortIndex, source->payload, 0, 0, 0);
     } else {
         u32 resource;
         u32 activeKind;
-        effect = effAllocateResourcePayload(((EffActiveResource *)source)->kind.shortIndex, ((EffActiveResource *)source)->payload);
-        resource = (u32)effRuntimeResourceOperations[((EffActiveResource *)source)->kind.signedIndex].cloneResource(source);
-        activeKind = ((EffActiveResource *)source)->kind.index;
-        ((EffActiveResource *)effect)->resource = resource;
+        effect = effAllocateResourcePayload(source->kind.shortIndex, source->payload);
+        resource = (u32)effRuntimeResourceOperations[source->kind.signedIndex].cloneResource(source);
+        activeKind = source->kind.index;
+        effect->resource = resource;
         if (effRuntimeResourceOperations[activeKind].initialize != NULL) {
             effRuntimeResourceOperations[activeKind].initialize(effect);
         }
@@ -8031,56 +8025,56 @@ u8 *effDuplicateActiveResource(u8 *source) {
     return effect;
 }
 
-void effClearCallbackFrame(u32 *obj) {
+void effClearCallbackFrame(EffActiveResource *obj) {
     if (btlIsRuntimeAllocated()) {
-        if (effRuntimeResourceOperations[obj[0x2C / 4]].initialize != NULL) {
-            effRuntimeResourceOperations[obj[0x2C / 4]].initialize(obj);
+        if (effRuntimeResourceOperations[obj->kind.index].initialize != NULL) {
+            effRuntimeResourceOperations[obj->kind.index].initialize(obj);
         }
-        obj[0x28 / 4] = 0;
+        obj->frame = 0;
     }
 }
 
-void effAdvanceCallbackFrame(u8 *work) {
+void effAdvanceCallbackFrame(EffActiveResource *work) {
     if (btlIsRuntimeAllocated() != 0 &&
         (effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        s32 kind = ((EffActiveResource *)work)->kind.signedIndex;
+        s32 kind = work->kind.signedIndex;
         EffResourceOps *entry = &effRuntimeResourceOperations[kind];
         void (*callback)(void *) = entry->update;
         if (callback != NULL) {
             callback(work);
         }
-        ((EffActiveResource *)work)->frame++;
+        work->frame++;
     }
 }
 
-void effDispatchEnabledCallback(u8 *work) {
+void effDispatchEnabledCallback(EffActiveResource *work) {
     if (btlIsRuntimeAllocated() != 0) {
-        void (*callback)(void *) = effRuntimeResourceOperations[((EffActiveResource *)work)->kind.signedIndex].draw;
+        void (*callback)(void *) = effRuntimeResourceOperations[work->kind.signedIndex].draw;
         if (callback != NULL) {
             callback(work);
         }
     }
 }
 
-void effAdvanceActiveResourceCallbacks(u8 *work) {
+void effAdvanceActiveResourceCallbacks(EffActiveResource *work) {
     effAdvanceCallbackFrame(work);
     effDispatchEnabledCallback(work);
 }
 
-void effCopyActiveResourceVector(s128 *dst, s128 *src) {
+void effCopyActiveResourceVector(EffActiveResource *dst, const void *src) {
     PCP_COPY_VECTOR(dst, src);
 }
 
-void effCopyActiveResourceSecondaryVector(s128 *dst, s128 *src) {
-    PCP_COPY_VECTOR(dst + 1, src);
+void effCopyActiveResourceSecondaryVector(EffActiveResource *dst, const void *src) {
+    PCP_COPY_VECTOR((u8 *)dst + 0x10, src);
 }
 
-void effSetActiveResourceColor(s32 work, u32 color) {
-    ((EffActiveResource *)work)->color = color;
+void effSetActiveResourceColor(EffActiveResource *work, u32 color) {
+    work->color = color;
 }
 
-void func_002F99E0(Matrix4 *mat, float value) {
-    mat->u.m[2][0] = value;
+void effSetActiveResourceScale(EffActiveResource *work, f32 value) {
+    work->scale = value;
 }
 
 /* Alternate particle handles share a header but occupy distinct slots. */
@@ -8776,7 +8770,7 @@ s32 effLoadFileJobPayload(EffFileJobRequest *descriptor, s32 source) {
     if (source != 0) {
         void *sourceBuffer;
         job = fileJobCreateFromCommandState(source);
-        sourceBuffer = fileResolvePrimaryBuffer((void *)job);
+        sourceBuffer = fileResolvePrimaryBuffer((FileJobPayload *)job);
         memcpy(descriptor->output, sourceBuffer, descriptor->size);
     } else {
         job = fileCreateJob(descriptor->fileKind);
@@ -10567,7 +10561,7 @@ u32 fileLoadEffectSlotA(void) {
         effQueuedFileHandle = ((FileJob *)entry)->id;
         resource = (u8 *)effFindAssetData(entry);
         strcpy(((FileJob *)entry)->name, ((EffFileJobRequest *)resource)->name);
-        fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
+        fileData = fileResolvePrimaryBuffer((FileJobPayload *)effQueuedFileHandle);
         memcpy(((EffFileJobRequest *)resource)->output, fileData,
                ((EffFileJobRequest *)resource)->size);
         D_004386BC = effQueueEffectFileJob(resource);
@@ -10688,7 +10682,7 @@ u32 effPollAndQueueCopiedFileResource(void) {
         effQueuedFileHandle = entry->id;
         resource = (EffFileJobRequest *)effFindAssetData(entry);
         strcpy(entry->name, resource->name);
-        fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
+        fileData = fileResolvePrimaryBuffer((FileJobPayload *)effQueuedFileHandle);
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
@@ -10746,7 +10740,7 @@ u32 effLoadFileSlotF2(void) {
         effQueuedFileHandle = entry->id;
         resource = (EffFileJobRequest *)effFindAssetData(entry);
         strcpy(entry->name, resource->name);
-        fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
+        fileData = fileResolvePrimaryBuffer((FileJobPayload *)effQueuedFileHandle);
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
@@ -10788,7 +10782,7 @@ u32 effLoadMaterialFile(void) {
         effQueuedFileHandle = entry->id;
         resource = (EffFileJobRequest *)effFindAssetData(entry);
         strcpy(entry->name, resource->name);
-        fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
+        fileData = fileResolvePrimaryBuffer((FileJobPayload *)effQueuedFileHandle);
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
@@ -10836,7 +10830,7 @@ u32 effPollAndQueueFileResourceWithUnitFloats(void) {
         effQueuedFileHandle = entry->id;
         resource = (EffFileJobRequest *)effFindAssetData(entry);
         strcpy(entry->name, resource->name);
-        fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
+        fileData = fileResolvePrimaryBuffer((FileJobPayload *)effQueuedFileHandle);
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
