@@ -6453,25 +6453,25 @@ EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
     return effect;
 }
 
-void effResetModelResourceUpdateCount(u8 *work) {
-    effModelResourceOperations[((EffModelResource *)work)->kind].initialize(work);
-    ((EffModelResource *)work)->updateCount = 0;
+void effResetModelResourceUpdateCount(EffModelResource *effect) {
+    effModelResourceOperations[effect->kind].initialize(effect);
+    effect->updateCount = 0;
 }
 
-void effDispatchModelResourceUpdate(s32 *work) {
+void effDispatchModelResourceUpdate(EffModelResource *effect) {
     if ((effModelUpdateControlFlags & 2) == 0) {
-        effModelResourceOperations[((EffModelResource *)work)->kind].update(work);
-        ((EffModelResource *)work)->updateCount++;
+        effModelResourceOperations[effect->kind].update(effect);
+        effect->updateCount++;
     }
 }
 
-void effDispatchModelResourceCallback(s32 work) {
-    effModelResourceOperations[((EffModelResource *)work)->kind].draw((void *)work);
+void effDispatchModelResourceCallback(EffModelResource *effect) {
+    effModelResourceOperations[effect->kind].draw(effect);
 }
 
-void effStepModelResourceCallbacks(s32 *work) {
-    effDispatchModelResourceUpdate(work);
-    effDispatchModelResourceCallback((s32)work);
+void effStepModelResourceCallbacks(EffModelResource *effect) {
+    effDispatchModelResourceUpdate(effect);
+    effDispatchModelResourceCallback(effect);
 }
 
 void effSetModelResourcePrimaryTransformVector(EffModelResource *effect, const f32 *position) {
