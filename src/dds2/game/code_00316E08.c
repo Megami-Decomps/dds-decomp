@@ -1,4 +1,5 @@
 #include "common.h"
+#include "file.h"
 #include "eff_resource_slots.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -244,7 +245,6 @@ const char D_0042D6C8[] __attribute__((aligned(8))) = "FileHandle Free... OK!! \
 
 /* The native wrapper tail-forwards the request through its legacy ABI. */
 extern void func_002C7CE8();
-extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *source);
 extern void fileQueueNotifyAllJobsComplete(u8 *queue);
 extern s32 sndFindPackedTrackLoadStatus(s32 sound);
 extern void sndEnsureMidiBankResident(s32 sound);

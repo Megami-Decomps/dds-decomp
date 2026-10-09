@@ -40,7 +40,6 @@ typedef struct FileQueue {
     FileJob *first;
 } FileQueue;
 
-extern FileQueue *fileCloneQueueEntries(FileQueue *queue);
 
 
 typedef struct SdfMat4 {
@@ -305,7 +304,6 @@ void mnuDestroyNodeJobQueues(s32 *listAddress) {
     }
 }
 
-extern FileQueue *fileQueueClone(FileQueue *source);
 extern char D_0040AD50[][64];
 extern const char D_00438950[]; /* "%d:%s\n"; shared sdata in current build. */
 

@@ -511,8 +511,6 @@ typedef struct {
 
 struct FileQueue;
 extern void *sdfAllocSizeClassBlock(s32);
-extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *);
-extern struct FileQueue *fileQueueClone(struct FileQueue *);
 
 u8 *func_0029B368(void *source) {
     EffResourceOwner *owner = sdfAllocSizeClassBlock(sizeof(EffResourceOwner));
@@ -549,7 +547,6 @@ u8 *func_0029B368(void *source) {
     return (u8 *)owner;
 }
 
-extern void fileQueueDestroy(u32);
 
 
 void effDestroyResourceOwner(EffResourceOwner *owner) {
@@ -560,7 +557,7 @@ void effDestroyResourceOwner(EffResourceOwner *owner) {
     }
     if (owner->buffer != 0) {
         for (i = 0; i < owner->count; i++) {
-            fileQueueDestroy((u32)owner->entries[i]);
+            fileQueueDestroy(owner->entries[i]);
         }
         sdfReleaseResourceAllocation(owner->buffer);
     }
@@ -599,7 +596,7 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
     if (src->buffer != 0) {
         if (dst->buffer != 0) {
             for (i = 0; i < dst->count; i++) {
-                fileQueueDestroy((u32)dst->entries[i]);
+                fileQueueDestroy(dst->entries[i]);
             }
             sdfReleaseResourceAllocation(dst->buffer);
         }

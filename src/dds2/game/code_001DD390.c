@@ -509,7 +509,6 @@ extern f32 *D_0037F770[];
 
 
 struct FileQueue;
-extern struct FileQueue *fileCloneQueueEntries(struct FileQueue *);
 
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(DatPartyRecord *, u32);
@@ -10759,7 +10758,7 @@ void btlUpdateJobPositionFromModel(s32 *args) {
 }
 
 void sndDestroyFileQueueWrapper(u32 queue) {
-    fileQueueDestroy(*(u32 *)queue);
+    fileQueueDestroy((struct FileQueue *)*(u32 *)queue);
     sdfReleaseChipBlock((void *)queue);
 }
 
