@@ -6337,7 +6337,18 @@ Independent ownership evidence is the adjacent Nocturne-mapped release
 at `0022CB68` and the preceding voice-conflict diagnostic `D_003ACFE8`,
 whose consumer is this dispatcher. DDS2 mirrors that ownership with
 `D_004224A8`. The recovered DDS1 leading region ends at `0022D420`;
-the following jump table starts at `003AD0C0`. No flags or attributes change.
+the following jump table starts at `003AD0C0`. The recovered DDS2 region
+ends at `00247DE0`; its dispatcher's two tables end at `00422580`, where
+the following unit's rodata begins. Both complete dispatchers match with
+their resource providers in the viewer unit. No flags or attributes change.
+
+Declare the nibble unpacker's actual `void` return before calling it. In
+the DDS2 combined unit, an implicit integer-return declaration creates a
+`call_value` RTL and assigns the following key-frame load to `v1`, rather
+than retail's `v0`. The existing provider writes two signed 32-bit outputs.
+Native zeroes and passes adjacent slots at `sp+0` and `sp+4`; a two-element
+`s32 nibbles[2]` array expresses those outputs directly. Keep the preceding
+voice-conflict diagnostic before the generated switch tables in rodata.
 
 Writing the source fields in pending/message/frame order emits the native
 loads and pending/frame/message stores without artificial temporaries.
