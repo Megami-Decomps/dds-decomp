@@ -893,7 +893,60 @@ void evtResetDisplayProjectionAndVectorState(void) {
     evtEnsureDrawVectorState();
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00105370);
+/* Scene-draw packet built by sdfBuildTextureScenePacket (0x170 bytes). */
+typedef struct KwlnTextureScenePacket {
+    SdfPacket header;
+    u64 draw[8];
+    SdfPacket contextOne[2];
+    SdfPacket contextTwo[2];
+    u64 limits[10];
+    u64 regs[8];
+} KwlnTextureScenePacket;
+
+/* One 0x1F40-byte draw bank of the held-texture render target. */
+typedef struct KwlnTextureBank {
+    SdfListHead list;
+    KwlnTextureScenePacket scene;
+    ConsMatrixPacket matrix;
+    SdfLightingPacketStorage lighting;
+    u8 pad[0x1F40 - 0x260 - sizeof(SdfLightingPacketStorage)];
+} KwlnTextureBank;
+
+extern KwlnTextureBank D_003272A0[2];
+extern SdfGraphObj D_00329730;
+extern u16 D_003BA8FC;
+extern u16 D_003BA8FE;
+extern u32 D_003BA900;
+extern u32 D_003980F0[];
+extern SdfLightSources D_00324940;
+extern f32 D_00324950[4];
+extern u8 D_00329750[0x40];
+extern void sdfBuildTextureScenePacket(KwlnTextureScenePacket *, SdfGraphObj *, s32);
+
+/* Rebuild the held-texture render target's view and both frame banks. */
+void func_00105370(void) {
+    s32 i;
+
+    D_00329730.width = D_003BA8FC;
+    D_00329730.unk2 = D_003BA8FE;
+    D_00329730.height = D_003BA8FE;
+    D_00329730.bufferFormat = 0;
+    D_00329730.auxiliaryFormat = 0x30;
+    D_00329730.buffers[0] = D_003BA8F4;
+    D_00329730.buffers[1] = 0;
+    D_00329730.buffers[2] = (SdfTexResource *)D_003980F0[0];
+    sdfCameraBuildProjection(&D_003247B0.camera);
+    for (i = 0; i != 2; i++) {
+        sdfInitPacketList(&D_003272A0[i].list);
+        sdfBuildTextureScenePacket(&D_003272A0[i].scene, &D_00329730, 0);
+        *(u32 *)&D_003272A0[i].scene.limits[4] = D_003BA900;
+        sdfAppendPacket(&D_003272A0[i].list, (u32)&D_003272A0[i].scene);
+        sdfConsBuildMatrixPacket(&D_003272A0[i].matrix, &D_003247B0, D_00329750);
+        sdfAppendPacket(&D_003272A0[i].list, (u32)&D_003272A0[i].matrix);
+        sdfBuildLightingPacket(&D_003272A0[i].lighting, D_00324940, D_00324950);
+        sdfAppendPacket(&D_003272A0[i].list, (u32)&D_003272A0[i].lighting);
+    }
+}
 
 extern u16 D_003BA8FC;
 extern u16 D_003BA8FE;
