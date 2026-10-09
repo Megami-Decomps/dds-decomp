@@ -32,7 +32,6 @@ extern void sdfSetViewFieldOfView(f32);
 extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
 extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
 extern void effObjFetchInnerFirstVec(EffWorldNode *);
-extern EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *, const u8 *);
 extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 extern s32 evtViewerHasUpdateFlag(s32);
@@ -2061,4 +2060,3 @@ INCLUDE_SDATA(const s32, "game/code_00247518", D_004373A0);
 INCLUDE_SDATA(const s32, "game/code_00247518", D_004373A8);
 
 INCLUDE_SDATA(const s32, "game/code_00247518", D_004373B0);
-

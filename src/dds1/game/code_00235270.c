@@ -1055,7 +1055,6 @@ s32 func_00238A88(s32 x, s32 y, EvtRuntime *ctx) {
 extern char D_003BC240[]; /* "P%d:" */
 extern char D_003BC248[]; /* "   %s" */
 extern EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *runtime);
-extern EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, char *name);
 
 void evtViewerDrawPendingNodeRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     EffWorldNode *node;
@@ -4015,4 +4014,3 @@ INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC350);
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC358);
 
 INCLUDE_SDATA(const s32, "game/code_00235270", D_003BC360);
-
