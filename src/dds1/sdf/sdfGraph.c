@@ -82,7 +82,7 @@ extern u8 D_003BD2E9;
 extern void sceGsResetGraph(s32 mode, s32 inter, s32 omode, s32 ffmode);
 
 /* Reset the GS with the interlace setting of the current display mode. */
-void func_002D1020(void) {
+void sdfGraphResetDeviceForCurrentMode(void) {
     s32 inter;
     s32 ffmode;
     u16 interlace = D_003980BA[D_003BD2E8].interlace;

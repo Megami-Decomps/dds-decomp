@@ -191,7 +191,7 @@ extern s32 SignalSema(s32);
 extern u32 func_002CF930(void);
 extern u32 sdfGetElapsedTimerTicks(u32);
 extern void sdfGraphRecreateBuffers(SdfGraphObj *);
-extern void func_002D1020(void);
+extern void sdfGraphResetDeviceForCurrentMode(void);
 extern void func_002D5018(void);
 extern s32 func_002D1080(s32);
 extern void sceGsResetPath(void);
@@ -214,7 +214,7 @@ void func_002D1380(void) {
         }
         if (D_003BD9DD != 0) {
             D_003BD9DD = 0;
-            func_002D1020();
+            sdfGraphResetDeviceForCurrentMode();
         }
         D_003BD32D = 1;
         func_002D5018();

@@ -6013,6 +6013,7 @@
 0x00329D70	sdfGraphReleaseBuffers	inferred	Byte-identical dds1 twin 0x002D0EC0; Releases and clears three graph buffer pointers. [names_conflicts.tsv]
 0x00329DB8	sdfGraphRecreateBuffers	inferred	Byte-identical dds1 twin 0x002D0F08; Releases existing graph buffers and allocates three using dimensions and modes from the graph. [names_conflicts.tsv]
 0x00329E40	sdfGraphSelectDisplayBuffer	inferred	M143; sources=names_M143.tsv; twin=0x002D0F90, input-family pairing. [names_qp10.tsv]
+0x00329ED0	sdfGraphResetDeviceForCurrentMode	inferred	Resets the GS using interlace settings from the current display mode and marks graph state for reset.
 0x00329F60	sdfRequestDeferredGsImageCapture	inferred	Stores capture parameters and marks a GS image capture request pending. [names_reviewed19.tsv]
 0x00329F78	sdfCaptureDeferredGsImage	inferred	U0
 0x0032A378	sdfServiceGraphicsBuffers	inferred	R_Names32
