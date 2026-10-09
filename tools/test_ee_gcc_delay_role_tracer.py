@@ -206,9 +206,14 @@ class TracerTests(unittest.TestCase):
         self.assertIsNone(self.tracer.fill)
         self.assertEqual([], self.rsp.breakpoints)
 
-    def test_ungated_live_hook_fails(self):
+    def test_unrelated_live_entry_ignores_target(self):
+        self.tracer.handle("live_enter", {"eip": 0x081d23e4, "ebp": 0, "esp": 0x2000})
+        self.assertIsNone(self.tracer.population)
+        self.assertEqual([], self.tracer.live)
+
+    def test_ungated_live_body_hook_fails(self):
         with self.assertRaisesRegex(RuntimeError, "ungated"):
-            self.tracer.handle("live_enter", {"eip": 0x081d23e4, "ebp": 0, "esp": 0x2000})
+            self.tracer.handle("live_scan", {"eip": 0x081d29e0, "ebp": 0, "esp": 0x2000})
 
     def test_missing_trial_coverage_fails(self):
         with self.assertRaisesRegex(RuntimeError, "coverage"):
@@ -237,6 +242,64 @@ class TracerTests(unittest.TestCase):
         fake.write_bytes(b"not a compiler")
         with self.assertRaisesRegex(ValueError, "pinned"):
             delay.verify_hook_specs(fake)
+
+    def sequence(self, member_uids=(11, 10)):
+        self.rsp.put(0x1000, struct.pack("<I", 0x2b))
+        self.rsp.put(0x1004, struct.pack("<I", 99))
+        self.rsp.put(0x101c, struct.pack("<I", 0x1100))
+        self.rsp.put(0x1100, struct.pack("<II", 0x21, 0x1200))
+        self.rsp.put(0x1200, struct.pack("<III", 2, 0x1300, 0x1400))
+        for pointer, uid in zip((0x1300, 0x1400), member_uids):
+            self.rsp.put(pointer + 4, struct.pack("<I", uid))
+        states = {
+            0x1300: {"kind": "jump_insn", "pattern": {"code": "set", "fields": [
+                {"code": "pc"}, {"code": "label_ref", "uid": 12}]}},
+            0x1400: {"kind": "insn", "pattern": {"code": "set", "fields": [
+                {"code": "reg", "mode": "SI", "regno": 17},
+                {"code": "plus", "mode": "SI", "fields": [
+                    {"code": "reg", "mode": "SI", "regno": 17},
+                    {"code": "const_int", "value": 16}]}]}}}
+        self.tracer.instruction = lambda pointer: states[pointer]
+        return states
+
+    def test_shared_sequence_is_selected_by_members_and_patterns(self):
+        states = self.sequence()
+        self.assertEqual({"representation": "delay_sequence", "member_uids": [11, 10]},
+                         self.tracer.shared_tail_sequence(0x1000))
+        states[0x1400]["pattern"]["fields"][1]["fields"][1]["value"] = 32
+        self.assertIsNone(self.tracer.shared_tail_sequence(0x1000))
+
+    def test_unrelated_sequence_cannot_own_population(self):
+        self.sequence((11, 999))
+        self.assertIsNone(self.tracer.shared_tail_sequence(0x1000))
+
+    def test_original_plain_donor_is_not_the_new_sequence_cache_key(self):
+        self.sequence()
+        self.rsp.put(0x1100, struct.pack("<I", 0x39))
+        self.assertIsNone(self.tracer.shared_tail_sequence(0x1000))
+
+    def test_population_entry_has_narrow_explicit_owner(self):
+        self.sequence()
+        self.rsp.put(0x2000, struct.pack("<IIII", 0x08166619, 0x3000, 0x1000, 0x4000))
+        self.rsp.put(0x2808, struct.pack("<I", 0x5000))
+        self.rsp.put(0x5004, struct.pack("<I", 666))
+        self.tracer.handle("live_enter", {"eip": 0x081d23e4, "ebp": 0x2800, "esp": 0x2000})
+        self.assertEqual(99, self.tracer.population["target_uid"])
+        self.assertEqual("shared_tail_population", self.tracer.live[-1]["owner_kind"])
+        self.assertIsNone(self.tracer.live[-1]["call_id"])
+
+    def test_completed_population_does_not_collect_another(self):
+        self.sequence()
+        self.rsp.put(0x2000, struct.pack("<IIII", 0x08166619, 0x3000, 0x1000, 0x4000))
+        self.tracer.population_complete = True
+        self.tracer.handle("live_enter", {"eip": 0x081d23e4, "ebp": 0x2800, "esp": 0x2000})
+        self.assertIsNone(self.tracer.population)
+
+    def test_already_cached_population_fails_as_missing_origin(self):
+        self.tracer.population = {"root_frame": 0x2000}
+        self.tracer.live = [{"frame": 0x2000, "live_id": 1}]
+        with self.assertRaisesRegex(RuntimeError, "already cached"):
+            self.tracer.handle("live_cache_hit", {"eip": 0x081d252a, "ebp": 0x2000})
 
 
 class SummaryTests(unittest.TestCase):
@@ -304,6 +367,65 @@ class SummaryTests(unittest.TestCase):
                     event["live_id"] = 99
             self.write(root, events)
             with self.assertRaisesRegex(ValueError, "active calculation"):
+                delay.summarize_decisions(root)
+
+    def population_events(self, events):
+        events[1]["target_chain_uids"] = [10, 11]
+        events[-2]["first_shared_tail_population_complete"] = True
+        cache = {"present": True, "target_uid": 99, "basic_block": 37,
+                 "cached_tick": 7, "current_tick": 7, "argument_register_live": True,
+                 "private_pointer": "SECRET_POINTER"}
+        population = [
+            {"event": "population_enter", "owner_kind": "shared_tail_population", "population_id": 1,
+             "target_uid": 99, "target_identity": {"representation": "delay_sequence", "member_uids": [11, 10]},
+             "caller": "fill_slots_opposite", "caller_branch_uid": 666},
+            {"event": "live_enter", "owner_kind": "shared_tail_population", "population_id": 1,
+             "live_id": 2, "call_id": None, "target_uid": 99, "parent_live_id": None},
+            {"event": "live_recompute", "live_id": 2},
+            {"event": "live_exit", "live_id": 2, "call_id": None,
+             "resources": {"registers": [4]}, "cache": cache},
+            {"event": "population_exit", "owner_kind": "shared_tail_population", "population_id": 1,
+             "uncached_population_complete": True, "cache": cache}]
+        events[2:2] = population
+        return events
+
+    def test_qualified_population_summary_keeps_cache_identity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            events = self.population_events(self.archive(root))
+            self.write(root, events)
+            summary = delay.summarize_decisions(root)
+        result = summary["first_shared_tail_population"]
+        self.assertEqual(99, result["cache"]["target_uid"])
+        self.assertEqual(7, result["cache"]["cached_tick"])
+        self.assertNotIn("SECRET", json.dumps(summary))
+
+    def test_unqualified_population_cannot_authorize_live_log(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            events = self.population_events(self.archive(root))
+            events = [e for e in events if e["event"] != "population_enter"]
+            self.write(root, events)
+            with self.assertRaisesRegex(ValueError, "unowned"):
+                delay.summarize_decisions(root)
+
+    def test_unrelated_population_members_fail(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            events = self.population_events(self.archive(root))
+            for event in events:
+                if event["event"] == "population_enter":
+                    event["target_identity"]["member_uids"] = [11, 999]
+            self.write(root, events)
+            with self.assertRaisesRegex(ValueError, "unqualified"):
+                delay.summarize_decisions(root)
+
+    def test_claimed_population_completion_requires_return(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            events = self.population_events(self.archive(root))
+            self.write(root, [e for e in events if e["event"] != "population_exit"])
+            with self.assertRaisesRegex(ValueError, "coverage"):
                 delay.summarize_decisions(root)
 
     def test_unequal_artifacts_rejected(self):
