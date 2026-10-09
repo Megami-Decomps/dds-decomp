@@ -1,6 +1,7 @@
 #include "kwln.h"
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
+#include "file_request_api.h"
 #include "bill_object_api.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
@@ -2531,9 +2532,6 @@ extern char D_003BBCD8[]; /* "fog=" */
 extern MdlFogParams kwlnDrawVector;
 extern s32 sdfPathExists(char *path);
 
-extern s32 fileGetResourceHandle(s32 file);
-extern char *fileGetLoadedDataAddress(s32 file);
-extern s32 fileGetResourceSize(s32 file);
 struct FileCleanup;
 extern s32 filePollEntryCleanup(struct FileCleanup *);
 extern s32 func_00301588();
@@ -2565,9 +2563,9 @@ void mdlLoadViewerPresentationConfig(void) {
     }
     fileRequest = (s32)fileQueueDefaultCallbackRequest(D_00367AF8);
     fileWaitReady((struct FileRequest *)(u32)fileRequest);
-    resourceHandle = fileGetResourceHandle((struct FileWork *)(u32)fileRequest);
-    fileData = fileGetLoadedDataAddress((struct FileWork *)(u32)fileRequest);
-    fileSize = fileGetResourceSize((struct FileWork *)(u32)fileRequest);
+    resourceHandle = (s32)fileGetResourceHandle((struct FileRequest *)(u32)fileRequest);
+    fileData = (char *)(u32)fileGetLoadedDataAddress((struct FileRequest *)(u32)fileRequest);
+    fileSize = (s32)fileGetResourceSize((struct FileRequest *)(u32)fileRequest);
     filePollEntryCleanup((struct FileCleanup *)(u32)fileRequest);
     lineOffset = 0;
     while (lineOffset < fileSize) {
