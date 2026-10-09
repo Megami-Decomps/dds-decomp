@@ -238,10 +238,39 @@ typedef struct EffBillTrailFrameConfig {
     u8 unk58[0x50];
 } EffBillTrailFrameConfig; /* kind 7, 0xA8 */
 
+/* Kind-8 quad updates (DDS1 002A2E18 / DDS2 002E4E80) read these
+ * parameters from the copied 0x98-byte record and advance 0x20-byte entries. */
 typedef struct EffBillQuadFrameConfig {
     EffBillFrameHeader frame;
-    u8 unk58[0x40];
+    u32 colorA;
+    u32 colorB;
+    f32 width;
+    f32 widthJitter;
+    f32 radius;
+    f32 radiusJitter;
+    f32 heightStart;
+    f32 heightStartJitter;
+    f32 heightEnd;
+    f32 heightEndJitter;
+    f32 tilt;
+    f32 tiltJitter;
+    f32 velocity;
+    f32 velocityJitter;
+    f32 acceleration;
+    u8 reverse;
+    u8 pad95[3];
 } EffBillQuadFrameConfig; /* kind 8, 0x98 */
+
+typedef struct EffBillQuadEntry {
+    s32 timer;
+    f32 velocity;
+    f32 angle;
+    f32 radius;
+    f32 height;
+    f32 heightStep;
+    f32 tilt;
+    f32 width;
+} EffBillQuadEntry;
 
 typedef struct EffBillPointConfig {
     EffBillTimedHeader timed;
@@ -485,5 +514,7 @@ typedef char EffBillVortexSpinOffsetCheck[((u32)&((EffBillVortexConfig *)0)->spi
 typedef char EffBillFlameGravityOffsetCheck[((u32)&((EffBillFlameConfig *)0)->gravity == 0x108) ? 1 : -1];
 typedef char EffBillConfigSizeCheck[(sizeof(EffBillConfig) == 0x10C) ? 1 : -1];
 typedef char EffScaleRangeEntrySizeCheck[(sizeof(EffScaleRangeEntry) == 0x30) ? 1 : -1];
+typedef char EffBillQuadEntrySizeCheck[(sizeof(EffBillQuadEntry) == 0x20) ? 1 : -1];
+typedef char EffBillQuadReverseOffsetCheck[((u32)&((EffBillQuadFrameConfig *)0)->reverse == 0x94) ? 1 : -1];
 
 #endif

@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "dds3_path.h"
 extern void func_00140BC8(const char *name);
 #include "pcp_vu0.h"
 #include "fpu.h"
@@ -522,13 +523,13 @@ s32 fldCmdRestoreCameraNodeMode(void) {
 
 extern s32 D_003898B0[];
 
-extern void dds3InvokeSlot1Handler(s32, s32);
+extern s32 dds3InvokeSlot1Handler(void *object, Dds3MoverUpdate update);
 
 s32 fldCmdReleaseCurrentObject(void) {
     if (fldPlayerObject == 0) {
         return 1;
     }
-    dds3InvokeSlot1Handler(fldPlayerObject, 0);
+    dds3InvokeSlot1Handler((void *)fldPlayerObject, 0);
     fldSetCameraNodeModeWithTen();
     fldPreparePlayerSceneCameraTarget();
     D_003898B0[0] = 0;
