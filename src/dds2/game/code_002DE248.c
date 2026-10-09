@@ -680,10 +680,10 @@ u32 *effDuplicateSmallHeader(src)
     return p;
 }
 
-void effCreateSmallHeaderFromFile(void) {
+void effCreateSmallHeaderFromFile(void *work) {
     u64 resource;
 
-    resource = fileResolvePrimaryBuffer();
+    resource = fileResolvePrimaryBuffer((FileJobPayload *)work);
     effDuplicateSmallHeader(resource);
 }
 
@@ -819,10 +819,10 @@ u32 *effDuplicatePayloadHeader(src)
     return p;
 }
 
-void effCreateSelectionHeaderFromFile(void) {
+void effCreateSelectionHeaderFromFile(void *work) {
     u64 resource;
 
-    resource = fileResolvePrimaryBuffer();
+    resource = fileResolvePrimaryBuffer((FileJobPayload *)work);
     effDuplicatePayloadHeader(resource);
 }
 
@@ -3568,7 +3568,7 @@ s32 effCreateSurfaceNodeForGrid(s32 source) {
 }
 
 s32 effResourceReferenceReplaceFromFile(u8 *source) {
-    s32 primary = (s32)fileResolvePrimaryBuffer();
+    s32 primary = (s32)fileResolvePrimaryBuffer((FileJobPayload *)source);
     s32 next = primary + 0x1C;
     s32 object = effCreateSurfaceNodeForGrid(next);
 
