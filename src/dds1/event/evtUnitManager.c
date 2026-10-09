@@ -800,8 +800,8 @@ EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {
     work->endpointWork = endpoint;
     memset(endpoint, 0, sizeof(*endpoint));
     work->value = 0;
-    *(u32 *)((u8 *)work + 0xD8) = 0;
-    *(u32 *)((u8 *)work + 0xDC) = 0;
+    work->referenceAngleCacheFlags = 0;
+    work->cachedReferenceAngleDegrees = 0;
     return work;
 }
 
