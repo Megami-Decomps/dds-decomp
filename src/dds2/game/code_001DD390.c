@@ -188,7 +188,6 @@ extern s32 btlGetRuntime(void);
 
 extern void func_001AA850(void *, s32);
 
-extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 extern void mdlSetAmountOnAllContextResources(MdlCtx *, f32);
 
@@ -2290,13 +2289,9 @@ void btlGetUnitWorldPos(BtlUnit *unit, f32 *dst) {
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 
-extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 
-extern void mdlLoadRotationQuaternionVU(MdlCtx *);
 
-extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
-extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 
 extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
 

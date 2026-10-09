@@ -67,9 +67,6 @@ extern struct EffExpandedList *func_002DDF48(u32);
 
 extern s32 btlGetRuntime(void);
 
-extern void mdlStoreTertiaryVectorVU(MdlCtx *);
-extern void mdlStorePrimaryVectorVU(MdlCtx *);
-extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 
 extern void effFloorModelListRemove(EffectObjectNode *);

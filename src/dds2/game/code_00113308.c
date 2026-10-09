@@ -253,9 +253,6 @@ extern s32 func_0023DA70(EffLocalNode *, EffWorldNode *);
 
 extern void effObjClearNodeFlags(ObjectTransform *, u32);
 extern f32 sdfSinPoly(f32);
-extern void mdlStoreTertiaryVectorVU(void *);
-extern void mdlStorePrimaryVectorVU(void *);
-extern void mdlUpdateContextRotationBasisFromQuaternion(void *);
 extern void effMiscNormalizeVU(void);
 extern void effMiscAxisAngleToQuaternionVU(f32);
 extern void effMiscQuatMultiplyVU(void);

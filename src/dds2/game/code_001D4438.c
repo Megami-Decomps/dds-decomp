@@ -436,8 +436,6 @@ extern s32 func_0022F180(void);
 
 extern s32 btlGetRuntime(void);
 
-extern void mdlStoreTertiaryVectorVU(s32);
-
 extern void mdlSetAmountOnAllContextResources(f32, s32);
 
 extern f32 func_001F5780(BtlUnit *, u8, f32, f32);
