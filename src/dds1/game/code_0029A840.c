@@ -12,6 +12,7 @@
 #include "sdf_texture_file.h"
 #include "sdf_chunk.h"
 #include "eff_expanded_list.h"
+#include "eff_update_flags.h"
 
 
 
@@ -370,10 +371,10 @@ void effMarkFloorModelForUpdate(EffModelOwner *work) {
     u32 flags = previous | 1;
     work->flags = flags;
     if ((flags & 4) == 0) {
-        if ((effModelUpdateControlFlags & 1) == 0) {
+        if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_DEFER_FLOOR_REFRESH) == 0) {
             func_0029AE88(work);
         }
-    } else if ((effModelUpdateControlFlags & 1) != 0) {
+    } else if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_DEFER_FLOOR_REFRESH) != 0) {
         work->flags = previous | 0x31;
     }
 }
