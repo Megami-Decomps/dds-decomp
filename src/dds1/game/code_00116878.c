@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
 #include "sdf_model.h"
@@ -8,7 +9,6 @@
 
 
 extern Motion *func_002DB230(SdfModel *, MotionTable *);
-extern void sdfMotionInitializeAtZeroTime(Motion *, s32, s32);
 
 /* Script object work area (0x18). */
 typedef struct ObjWork {

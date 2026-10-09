@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_motion.h"
 #include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
 #include "sdf_packet_list.h"
@@ -50,7 +51,6 @@ extern BattleGroupNode *btlGroupNodeHeads[];
 
 extern BattleGroupIdEntry *btlGroupIdHeads[];
 
-extern void mdlDestroyContext(MdlCtx *);
 
 extern void mdlDestroyPartList(DevRequest *);
 
@@ -615,7 +615,6 @@ void mdlDestroyContext(MdlCtx *ctx) {
 
 struct SdfPoolNode;
 extern void func_00231FD8(MdlCtx *, struct SdfPoolNode **);
-extern s32 sdfMotionUpdate(Motion *);
 extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *);
 extern void func_003320E8(struct SdfPoolNode **, SdfModel *);
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
@@ -629,7 +628,7 @@ void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, struct SdfPoolNode **surfa
 
     for (i = 0; i != 4; i++) {
         if (*slot != NULL) {
-            if ((*slot)->state != 0) {
+            if ((*slot)->state != SDF_MOTION_STATE_UNINITIALIZED) {
                 sdfMotionUpdate(*slot);
             }
         }
@@ -696,7 +695,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, struct SdfPoolNode **surfaces, 
     }
     for (slotIndex = 0; slotIndex != MDL_MOTION_SLOT_COUNT; slotIndex++) {
         if (ctx->slots[slotIndex] != NULL) {
-            if (ctx->slots[slotIndex]->state != 0) {
+            if (ctx->slots[slotIndex]->state != SDF_MOTION_STATE_UNINITIALIZED) {
                 sdfMotionUpdate(ctx->slots[slotIndex]);
             }
         }

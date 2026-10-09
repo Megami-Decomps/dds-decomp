@@ -16,7 +16,6 @@ void dds3SetSlotValue(EffWorldNode *object, Dds3MoverUpdate update);
 void dds3SetSlotKey(EffWorldNode *object, EffWorldNode *sourceObject);
 void dds3ReplaceObjectResource(EffWorldNode *object);
 void dds3ReleaseObjectResource(EffWorldNode *object);
-void mdlDestroyContext(MdlCtx *model);
 void evtReleaseUnitTransitionWork(void *arg0);
 void sdfReleaseDevSlot(s32 arg0, s32 arg1, s32 arg2);
 void sdfDestroyMotion(void *arg);
@@ -333,7 +332,6 @@ extern void func_00108E60(void);
 extern void func_00108F00(void);
 extern void evtSubmitGradientRectAtDepth();
 struct SdfPoolNode;
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 extern struct SdfPoolNode *D_00325818[4];
 
 

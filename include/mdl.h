@@ -156,6 +156,13 @@ typedef char MdlLoadRequest_size_must_be_0x2C[(sizeof(MdlLoadRequest) == 0x2C) ?
 typedef char MdlResourceItem_size_must_be_0x20[(sizeof(MdlResourceItem) == 0x20) ? 1 : -1];
 typedef char MdlObjectAttachment_size_must_be_0x18[(sizeof(MdlObjectAttachment) == 0x18) ? 1 : -1];
 
+/* Model-context lifetime, per-frame update, and broadcast accessors. */
+void mdlDestroyContext(MdlCtx *ctx);
+void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, struct SdfPoolNode **surfaces);
+u32 mdlGetBroadcastValue(MdlCtx *ctx);
+void mdlSetAllResourceFrames(MdlCtx *ctx, u32 value);
+void mdlBroadcastMasked(MdlCtx *ctx, u32 value);
+
 /* The referenced halfword is promoted to a word-sized SDK result. */
 s32 mdlGetNodeRefHalf(MdlCtx *ctx, s32 searchId);
 

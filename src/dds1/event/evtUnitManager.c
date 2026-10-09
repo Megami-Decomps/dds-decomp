@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
@@ -57,8 +58,6 @@ f32 evtMeasurePathTrajectoryLength(s32 path) {
     return length;
 }
 
-extern u32 mdlGetBroadcastValue(MdlCtx *);
-extern void mdlBroadcastMasked(MdlCtx *, u32);
 extern f32 D_003BD358, D_003BD35C;
 extern void *dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *, s32, EffWorldNode *);
@@ -853,7 +852,7 @@ s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit) {
         return 1;
     }
     if (state == EVT_UNIT_MOTION_STATE_MOTION && unit->motionTicks > 0 &&
-        unit->owner->first->state == 5) {
+        unit->owner->first->state == SDF_MOTION_STATE_TERMINAL) {
         return 1;
     }
     return 0;

@@ -87,10 +87,8 @@ extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
 extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
-extern void mdlBroadcastMasked(MdlCtx *, u32);
 extern void mdlAddEntryPlain(MdlCtx *, s32, s32);
 extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
-extern void mdlDestroyContext(MdlCtx *);
 extern u16 mdlGetContextResourceGroup(MdlCtx *);
 extern u16 mdlGetContextResourceId(MdlCtx *);
 
@@ -195,9 +193,7 @@ extern struct SdfPoolNode *D_00325828[4];
 
 extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 extern s32 sdfAllocPacketAligned(s32 size);
-extern u32 mdlGetBroadcastValue(MdlCtx *model);
 extern SdfPoolNode *D_00325788[13][4];
 extern u64 D_0037E5B0[];
 

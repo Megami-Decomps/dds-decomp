@@ -1181,7 +1181,6 @@ u16 evtViewerPopHistory(EvtRuntime *viewer) {
 extern s16 itfPanelGetPairFirst(s32);
 extern void itfPanelSetPairFirst(s32,s16);
 extern void itfMesCleanupWindow(s32,s32);
-extern void itfMesFinishWindowAndClearStatus(s32);
 extern void itfMesResetWindow(s32);
 void evtViewerMarkWindowInactive(EvtRuntime *);
 void func_00230140(EvtRuntime *);

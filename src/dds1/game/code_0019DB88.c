@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf_mes_window.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -928,7 +929,6 @@ extern s32 D_003BA8EC;
 
 extern s32 scrCreateTaskForProcessId(s32, u8 *, s32);
 
-extern void itfMesSetWindowCallbackAddress(s32, void (*)(void));
 
 extern void sndCycleTestMessageResource(void);
 

@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_motion.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "btl_effect_position.h"
@@ -48,7 +49,6 @@ void func_001D3FE8(BtlTask *, BattleIndexWork *);
 
 extern s32 mdlGetNodeMotionIndex(MdlCtx *, s32);
 extern void effObjSetOpacityPassEnabled(u32 enabled);
-extern u32 mdlGetBroadcastValue(MdlCtx *);
 
 extern s32 btlIsUnitInActiveList(void *unit);
 
@@ -4343,7 +4343,7 @@ u32 btlIsUnitModelStateFive(BtlUnit *object) {
     if (object->effectState != 2) {
         return 1;
     }
-    return object->ext->owner->first->state == 5;
+    return object->ext->owner->first->state == SDF_MOTION_STATE_TERMINAL;
 }
 
 extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
@@ -4604,14 +4604,11 @@ void btlCopyUnitStats(s32 arg0, s32 arg1) {
     btlRefreshUnitMaximumMpAndClampCurrentMp(record);
 }
 
-extern void mdlSetAllResourceFrames(MdlCtx *, u32);
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void func_002D9748(SdfModel *, SdfModel *);
 extern void func_002D9238(SdfPoolNode **, SdfModel *);
 extern u64 D_00359CF0[4];
-extern void mdlBroadcastMasked(MdlCtx *, u32);
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 
 /* Draw the model into four surfaces in three GS TEST passes, then update its anchors. */
 void func_001D6A80(BtlUnit *unit, MdlCtx *model, SdfModel *overlay, SdfPoolNode **surfaces, u32 frame) {
@@ -4703,8 +4700,6 @@ void btlCreateUnitTransparency(BtlUnit *unit) {
 }
 
 extern void sdfReleaseDevSlot(s32, s32, s32);
-extern void mdlBroadcastMasked(MdlCtx *, u32);
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 extern struct SdfPoolNode *D_00325788[13][4];
 extern SdfPoolNode *D_00359D10[];
 

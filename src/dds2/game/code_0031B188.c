@@ -47,14 +47,12 @@ static inline void mnuSetBasisRow(f32 *row, f32 x, f32 y, f32 z, f32 w) {
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
-extern void mdlBroadcastMasked(MdlCtx *, u32);
 extern void mdlStorePrimaryVectorVU(MdlCtx *);
 extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 extern u32 *dds3SoundSlotPool;
 extern u32 fileClearRenderFlag(u32 mask);
 
-extern u32 mdlGetBroadcastValue(MdlCtx *);
 
 extern void func_00328160(f32 *out);
 
@@ -69,7 +67,6 @@ void mnuDeactivateModelNode(s32 nodeAddress);
 
 extern MdlCtx *func_00232198(s32 resourceGroup, s32 resourceId);
 extern void mdlAddEntryFlaggedEx(MdlCtx *model, s32 searchId, s32 motionIndex, f32 blendLeadFrames, f32 blendDurationFrames);
-extern void mdlDestroyContext(MdlCtx *);
 
 extern u8 D_0040ABD0[];
 extern u8 D_0040ABC0[];

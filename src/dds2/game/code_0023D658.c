@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf_mes_window.h"
 #include "dds3obj.h"
 #include "evt_world.h"
 #include "evt_unit.h"
@@ -172,7 +173,6 @@ extern void evtConfigureUnitMotionSlot(EvtUnit *, s32, s32, s32, s32, s32);
 
 extern s32 scrGetWindow(void);
 
-extern void itfMesSetWindowCallbackAddress(s32 window, void (*callback)(void));
 
 extern void evtStoreUnitMotionSlotSelection(EvtUnit *unit, s32 arg1, s32 arg2);
 

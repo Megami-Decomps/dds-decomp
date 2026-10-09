@@ -215,9 +215,90 @@ s32 func_001A2DE8(BtlUnit *base, BtlUnit *first, BtlUnit *second, BtlUnit *third
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001A9780);
 
+extern const f32 D_003A1D28[9];
+extern const char D_003A1D50[];
+extern void func_0011CE48(s32 chance);
+
+s32 func_001A99B0(void) {
+    extern u32 btlRollAiBucket(void);
+    f32 levelScale[9];
+    BtlState *state;
+    u32 partyLevel;
+    u32 count;
+    u32 enemyLevel;
+    u32 i;
+    s32 difference;
+    s32 chance;
+    f32 ratio;
+
+    memcpy(levelScale, D_003A1D28, sizeof(levelScale));
+    state = (BtlState *)btlGetRuntime();
+    if (datBattleSceneRecords[state->battleMode].flags & 0x200) {
+        return 1;
+    }
+    if (datBattleSceneRecords[state->battleMode].flags & 0x100) {
+        return 0;
+    }
+    partyLevel = 0;
+    count = 0;
+    /* The ordering bytes select the first three active members of five slots. */
+    for (i = 0; i < 5 && count < 3; i++) {
+        u8 slot = datGameState->partyOrder[i];
+        if (datGameState->party[slot].flags & 1) {
+            if (datGameState->party[slot].flags & 2) {
+                count++;
+                partyLevel += datGameState->party[slot].level;
+            }
+        }
+    }
+    if (count >= 2) {
+        partyLevel /= count;
+    }
+    enemyLevel = 0;
+    count = 0;
+    for (i = 0; i < 9; i++) {
+        u16 enemy = datBattleSceneRecords[state->battleMode].unitModes[i];
+        if (enemy != 0 && i < 8) {
+            count++;
+            enemyLevel += datEnemyRecords[enemy].level;
+        }
+    }
+    if (count >= 2) {
+        enemyLevel /= count;
+    }
+    difference = partyLevel - enemyLevel;
+    if (difference < 0) {
+        difference = 0;
+    } else if (difference >= 9) {
+        difference = 8;
+    }
+    if (datBattleSceneRecords[state->battleMode].flags & 0x2000) {
+        chance = 75;
+    } else if (datBattleSceneRecords[state->battleMode].flags & 0x1000) {
+        chance = 50;
+    } else {
+        chance = 10;
+    }
+    chance = (s32)((f32)chance * levelScale[difference]);
+    ratio = 1.0f;
+    for (i = 0; i < 5; i++) {
+        if (datGameState->party[i].flags & 1) {
+            if (datGameState->party[i].flags & 2) {
+                if (btlCheckSpecialAbility(&datGameState->party[i], 0x22D)) {
+                    ratio *= datAbilityParameters[0x22D - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+                }
+            }
+        }
+    }
+    chance = (s32)((f32)chance * ratio);
+    btlBossDebugPrintf(D_003A1D50, chance, difference, ratio);
+    func_0011CE48(chance);
+    return (s32)btlRollAiBucket() < chance;
+}
+
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1D28);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001A99B0);
+const char D_003A1D50[] = "btl:surprise=%d%%[level=%d,ratio=%.2f]\n";
 
 void btlClearUnitStatusMask(void) {
     BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
