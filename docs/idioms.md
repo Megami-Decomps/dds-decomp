@@ -2739,12 +2739,17 @@ offsets. Grid easing walks the first two bound coordinates and then the
 geometry's actual `cornerColors` member; it does not walk beyond a scalar
 or reach colors through a second record view.
 
+Easing parameters come from `EffTimedState.source->status`: the full mapped
+record retains the address of its allocated, decoded table bytes. Reading
+that buffer as the existing table does not require a `GridAngleSlot` prefix
+projection or a redundant cast of the already-typed source record.
+
 DDS2 `itfGridApplySqrtBoundsAndColorScale` (`0x003075D8`, 312 bytes) and
 `func_00307EF8` (`0x00307EF8`, 296 bytes) match using this grouped owner and
 the mapped record's real `status` pointer. `func_00307A68` (`0x00307A68`,
 320 bytes) ports the same owner's threshold-alpha easing from the matched
 DDS1 `func_002C0038`, including its destination/source palette cursors.
-The complete DDS2 grid unit now checks `68 match, 0 differ`.
+The complete grid units check DDS1 `62 match, 0 differ` and DDS2 `70 match, 0 differ`.
 
 ## Battle ability queries receive the party record
 
@@ -4962,6 +4967,8 @@ DDS1 `00250B60` samples the low byte of the word-sized `cursorInputMask`
 into a signed direction local and reads `cursorMoving` with `lb`.
 The primary scene-work flag is therefore `s8`; its existing cursor-position
 producer still stores the real 0/1 movement result.
+The generic up/down navigation helpers return the selected `SdfGridCell *`
+or NULL; the scene's custom left/right helpers instead normalize success to 0/1.
 
 The only retail caller (`00251A38`) ignores this dispatcher's result, and
 the sound provider `sndSetSequenceVolumePan` returns `void`. The four
@@ -4980,3 +4987,35 @@ from `fileQueuePlainDispatchRequest`, whose matched provider also returns
 opaque owner, rather than `void *` or an invented `FilePacRequest` view.
 This does not expose the provider's private PAC layout; the sixteen-byte
 load record and its offset `+0x78` inside the `0x88`-byte task stay unchanged.
+
+## Selected-item category queries borrow the actor
+
+`btlTestSelectedItemCategoryMask` (`001A8448` / `001B2900`) reads the
+actor's `selectedEntryIndex` and indexes the canonical command record.
+Its first input is `BtlUnit *`, not an integer unit address. DDS1 now
+uses the same provider contract as DDS2, including both split battle
+caller units. The action/category index and returned predicate stay `s32`;
+the caller's existing generic pointer forwarding needs no integer adapter.
+
+
+## Quarter-threshold queries consume the copied party record
+
+`btlIsCurrentValueBelowQuarterThreshold` takes `BtlUnit *`. Retail reads
+the HP/max-HP halfwords at `+0x126/+0x128`, which are
+`partyRecord.hp` and `partyRecord.maxHp`, not a separate UI-object owner.
+The DDS2 provider (`001B24C0`) keeps its `< 26` percentage test; the
+DDS1 counterpart (`001A8018`) keeps `< 25`. Their common owner does not
+make those thresholds interchangeable. Local callers use the actor
+pointer directly, without a byte-pointer adapter.
+
+## Rotated rectangles borrow their UV and corner-color words
+
+The sixth and seventh inputs to `itfDrawRotatedTexturedRect` and its
+DDS2 primitive (`00306030`) are read-only four-word arrays. The matched
+border renderer (`00306678`) temporarily edits its UV words and supplies
+its local corner-color words directly, just as the DDS1 counterpart
+(`002BEEA0`) does. Keep these inputs as `const u32 *` through the wrapper,
+without pointer-to-word transport casts. DDS2's additional rotation-mode
+input remains in its original forwarding position; this contract change
+does not replace either primitive's assembly body.
+

@@ -2204,8 +2204,8 @@ s32 btlGetActionRecordLookupValue(s32 actionRecordIndex) {
     return D_00358510[lookupTableIndex * 3];
 }
 
-s32 btlTestSelectedItemCategoryMask(s32 unitAddress, s32 actorIndex) {
-    s32 selectedEntryIndex = ((BtlUnit *)unitAddress)->selectedEntryIndex;
+s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex) {
+    s32 selectedEntryIndex = unit->selectedEntryIndex;
     u16 maskTableIndex;
     if (selectedEntryIndex == -1) {
         return 0;

@@ -54,10 +54,6 @@ typedef struct GridAngleTable {
     s32 cycleDivisor; /* 0x08 */
 } GridAngleTable;
 
-typedef struct GridAngleSlot {
-    u8 pad00[0x20];
-    GridAngleTable *table; /* 0x20 */
-} GridAngleSlot;
 
 
 /* Resolve the indexed render entry before applying position, depth, and draw flags. */
@@ -283,7 +279,7 @@ s32 itfGridApplySqrtBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTimed
     s32 factor;
     s32 i = 0;
 
-    table = (GridAngleTable *)((EffMappedRecord *)owner->source)->status;
+    table = (GridAngleTable *)owner->source->status;
     deltas[0] = (rectangle->bounds.grid.quantizedBounds[2] - rectangle->bounds.grid.quantizedBounds[0]) << 4;
     deltas[1] = (rectangle->bounds.grid.quantizedBounds[3] - rectangle->bounds.grid.quantizedBounds[1]) << 3;
     for (; i < 2; i++) {
@@ -326,7 +322,7 @@ s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, 
     s32 fractionalMask;
     s32 i;
 
-    table = ((GridAngleSlot *)owner->source)->table;
+    table = (GridAngleTable *)owner->source->status;
     colorMask = -0x100;
     fractionalMask = 0xFFFF;
     deltas[0] = table->divisor << 4;
@@ -375,7 +371,7 @@ s32 func_00307A68(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     s32 factor;
     s32 i = 0;
 
-    table = (GridAngleTable *)((EffMappedRecord *)owner->source)->status;
+    table = (GridAngleTable *)owner->source->status;
     deltas[0] = (rectangle->bounds.grid.quantizedBounds[2] - rectangle->bounds.grid.quantizedBounds[0]) << 4;
     deltas[1] = (rectangle->bounds.grid.quantizedBounds[3] - rectangle->bounds.grid.quantizedBounds[1]) << 3;
     for (; i < 2; i++) {
@@ -405,7 +401,7 @@ s32 func_00307A68(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
 
 /* Convert the owner's fixed-point angle to degrees and return its angular step. */
 s32 itfUpdateAngleAndGetCycleStep(BdWork *unused, BdWork *out, EffTimedState *owner) {
-    GridAngleTable *table = ((GridAngleSlot *)owner->source)->table;
+    GridAngleTable *table = (GridAngleTable *)owner->source->status;
     s32 repetitions = 3;
 
     do {
@@ -437,7 +433,7 @@ s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, Eff
     s32 fractionalMask;
     s32 i;
 
-    table = ((GridAngleSlot *)owner->source)->table;
+    table = (GridAngleTable *)owner->source->status;
     colorMask = -0x100;
     fractionalMask = 0xFFFF;
     deltas[0] = table->divisor << 4;
@@ -490,7 +486,7 @@ s32 func_00307EF8(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     s32 factor;
     s32 i = 0;
 
-    table = (GridAngleTable *)((EffMappedRecord *)owner->source)->status;
+    table = (GridAngleTable *)owner->source->status;
     deltas[0] = (rectangle->bounds.grid.quantizedBounds[2] - rectangle->bounds.grid.quantizedBounds[0]) << 4;
     deltas[1] = (rectangle->bounds.grid.quantizedBounds[3] - rectangle->bounds.grid.quantizedBounds[1]) << 3;
     for (; i < 2; i++) {
