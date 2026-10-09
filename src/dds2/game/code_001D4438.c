@@ -155,10 +155,6 @@ extern void btlRequestGuidePanelClose();
 extern void fldEnableSceneGroupAdvancement(void);
 extern s8 D_0037F531[];
 
-typedef struct SceneKindTable {
-    u8 pad00[0x14];
-    u32 value[8];
-} SceneKindTable;
 
 extern SceneKindTable *D_00438F4C;
 extern void func_001C8518();

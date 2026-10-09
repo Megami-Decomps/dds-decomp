@@ -5165,3 +5165,25 @@ explicitly. Their unchanged surface callback's legacy first-formal
 contract is separate SDF primary-owner debt; this local cutover does not
 introduce or certify a new surface view or claim new matching bodies.
 
+
+## Panel selection opacity has signed clamp arithmetic
+
+DDS1 `00284C48` reads `MenuPanelItem.selectionRamp` at `+0x8C` after
+its draw callback. The native `BLEZ` at `00284D80` and `BLTZL` at
+`00284D90` implement positive decay followed by a negative clamp to zero;
+the rolling branch also uses signed `SLTI` at `00284DC8`. The primary
+unit-local field is therefore `s32`, not an unsigned color word. Its
+constructor and setter still store the same nonnegative initial values.
+This owner correction does not certify the still-nonmatching renderer.
+
+
+## Camera support selection is a signed primary-owner field
+
+`0012C880` / `0012EDB0` read the signed word at `FldAreaWork +0xA8`
+first; only `-1` selects the default record at `+0xA4`, whose negative
+values suppress the height probes. Both routines reload the override
+after their two triangle-height calls. This completes the existing
+primary owner without an address-named scalar alias or another view.
+The support-height routines themselves remain assembly: selector
+lifetimes, control scheduling and triangle-call setup are not matched.
+

@@ -419,7 +419,7 @@ MenuShortRecord *mnuFindFirstFixedKindShortRecord(MenuShortRecordList *list) {
     s32 i;
     MenuShortRecord *record = list->records;
     for (i = 0; i < list->count; i++, record++) {
-        if (record->kind == 0x40) {
+        if (record->kind == MENU_SHORT_RECORD_KIND_FIXED) {
             return record;
         }
     }
@@ -430,7 +430,7 @@ MenuShortRecord *func_003225C0(MenuShortRecordList *list) {
     s32 i;
     MenuShortRecord *record = list->records;
     for (i = 0; i < list->count; i++, record++) {
-        if (record->kind == 0x40) {
+        if (record->kind == MENU_SHORT_RECORD_KIND_FIXED) {
             return record;
         }
     }
@@ -467,7 +467,8 @@ u8 *mnuFindMarkedShortListRecord(MenuByteRecordList *list) {
             return NULL;
         }
         for (recordIndex = 0; recordIndex < list->count; recordIndex++) {
-            if ((*record & 0xF0) == 0x10) {
+            if ((*record & MENU_REPEAT_DIRECTIVE_KIND_MASK) ==
+                MENU_REPEAT_DIRECTIVE_KIND_TAG) {
                 return record;
             }
             record += 8;
@@ -581,35 +582,47 @@ INCLUDE_ASM(const s32, "game/code_00321500", func_003230A0);
 void func_003232A0(MenuWorkEntry *entry, MenuByteRecordList *list) {
     MenuShortRecord *record;
 
-    entry->control.bits.loopMode = 0;
+    entry->control.bits.loopMode = MENU_REPEAT_LOOP_MODE_NONE;
     record = (MenuShortRecord *)mnuFindMarkedShortListRecord(list);
     if (record != NULL) {
         switch (record->kind) {
-        case 0x11:
-            entry->control.bits.loopMode = 1;
-            if (record->parameters[1] == 0) {
-                entry->control.bits.repeatMode = 1;
+        case MENU_REPEAT_DIRECTIVE_KIND_REPEAT:
+            entry->control.bits.loopMode = MENU_REPEAT_LOOP_MODE_RESTART_OR_ADVANCE;
+            if (record->parameters[1] ==
+                MENU_REPEAT_SELECTOR_DECREMENT_COUNT) {
+                entry->control.bits.repeatMode =
+                    MENU_REPEAT_POLICY_DECREMENT_COUNT;
                 entry->repeatCount = record->parameters[0];
-            } else if (record->parameters[1] == 1) {
-                entry->control.bits.repeatMode = 2;
+            } else if (record->parameters[1] ==
+                       MENU_REPEAT_SELECTOR_REPEAT_COUNT_LT_REMAINING) {
+                entry->control.bits.repeatMode =
+                    MENU_REPEAT_POLICY_REPEAT_COUNT_LT_REMAINING;
                 entry->repeatCount = record->parameters[0];
-            } else if (record->parameters[1] == 2) {
-                entry->control.bits.repeatMode = 3;
+            } else if (record->parameters[1] ==
+                       MENU_REPEAT_SELECTOR_REMAINING_LT_REPEAT_COUNT) {
+                entry->control.bits.repeatMode =
+                    MENU_REPEAT_POLICY_REMAINING_LT_REPEAT_COUNT;
                 entry->repeatCount = record->parameters[0];
             }
             break;
-        case 0x12:
-            entry->control.bits.loopMode = 2;
-            if (record->parameters[1] == 0) {
-                entry->control.bits.repeatMode = 1;
+        case MENU_REPEAT_DIRECTIVE_KIND_REPEAT_TO_TARGET:
+            entry->control.bits.loopMode = MENU_REPEAT_LOOP_MODE_TARGET_CAPABLE;
+            if (record->parameters[1] ==
+                MENU_REPEAT_SELECTOR_DECREMENT_COUNT) {
+                entry->control.bits.repeatMode =
+                    MENU_REPEAT_POLICY_DECREMENT_COUNT;
                 entry->repeatCount = record->parameters[0];
                 entry->repeatTargetRecordIndex = record->parameters[2];
-            } else if (record->parameters[1] == 1) {
-                entry->control.bits.repeatMode = 2;
+            } else if (record->parameters[1] ==
+                       MENU_REPEAT_SELECTOR_REPEAT_COUNT_LT_REMAINING) {
+                entry->control.bits.repeatMode =
+                    MENU_REPEAT_POLICY_REPEAT_COUNT_LT_REMAINING;
                 entry->repeatCount = record->parameters[0];
                 entry->repeatTargetRecordIndex = record->parameters[2];
-            } else if (record->parameters[1] == 2) {
-                entry->control.bits.repeatMode = 3;
+            } else if (record->parameters[1] ==
+                       MENU_REPEAT_SELECTOR_REMAINING_LT_REPEAT_COUNT) {
+                entry->control.bits.repeatMode =
+                    MENU_REPEAT_POLICY_REMAINING_LT_REPEAT_COUNT;
                 entry->repeatCount = record->parameters[0];
                 entry->repeatTargetRecordIndex = record->parameters[2];
             }
