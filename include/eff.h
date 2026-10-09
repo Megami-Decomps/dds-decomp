@@ -486,7 +486,9 @@ struct EffTrackPolyList;
  * floating-point scale. Only those scaled kinds reach the scale accessor. */
 typedef struct ParKindState {
     u16 kind;
-    u8 pad02[6];
+    u8 pad02[2];
+    u16 templateEntryCount; /* 0x04: subrecords per particle in template clones */
+    u8 pad06[2];
     union {
         struct ParTable *table;
         f32 scale;
