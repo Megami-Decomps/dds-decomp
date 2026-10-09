@@ -564,7 +564,7 @@ s32 func_00275920(s32 callback) {
 }
 
 
-void func_00275B40(EffectSlotSet **sets, MenuEffectPair *hpBar, MenuEffectPair *mpBar,
+void mnuDrawPartyVitalsAndProfile(EffectSlotSet **sets, MenuEffectPair *hpBar, MenuEffectPair *mpBar,
                    DatPartyRecord *entry, EffectSlotSet *marker, u32 opacity,
                    u32 iconOpacity, s32 dim) {
     u8 *name;
@@ -658,7 +658,7 @@ void mnuUpdateStaffFade(s32 opening, PartyMenuData *menuWork) {
     }
 }
 
-void func_00276018(s32 contextAddress) {
+void mnuDrawPartySelectionPreview(s32 contextAddress) {
     CampMenuContext *context = (CampMenuContext *)contextAddress;
     PartyMenuData *menu = (PartyMenuData *)context->menu;
     struct MenuList *list;
@@ -703,7 +703,7 @@ void func_00276018(s32 contextAddress) {
     }
     sets = (EffectSlotSet **)((u8 *)context + 0xF0);
 
-    func_00275B40(sets,
+    mnuDrawPartyVitalsAndProfile(sets,
                   (MenuEffectPair *)&menu->panelSnapshots[selectionKey][0],
                   (MenuEffectPair *)&menu->panelSnapshots[selectionKey][0x54],
                   record, marker,
@@ -726,7 +726,7 @@ s32 mnuDrawPartySelectionPanelAndStep(KwlnTask *callback) {
     func_00272778(callback);
     mnuCreateStaffImageSprite(0x13);
     mnuDrawWindowContainer(0x1C0, 0x3D0, 0, menu->primaryWindow, 0x53);
-    func_00276018(context);
+    mnuDrawPartySelectionPreview(context);
     mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)(((CampMenuContext *)context)->actor));
     return menuRunPanel((void *)context, 1, (void *)callback);
 }
@@ -1112,7 +1112,7 @@ typedef struct StaffPanelIconPositions {
 extern const StaffPanelIconIndices D_003B21E0;
 extern const StaffPanelIconPositions D_003B2208;
 
-void func_00276F70(MenuPageWindow *window, StaffSlots *slots) {
+void mnuDrawStaffPageMarkerIcons(MenuPageWindow *window, StaffSlots *slots) {
     MenuPageSlot *page = &window->slots[window->lists[0]->cursor->index];
     EffectSlotSet *resource = slots->pairResources[0];
     StaffPanelIconIndices indices = D_003B21E0;
@@ -1165,7 +1165,7 @@ struct SdfPoolNode;
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 extern struct SdfPoolNode *D_00325788[13][4];
 
-s32 func_00277390(KwlnTask *task) {
+s32 mnuDrawAndStepStaffPartyScene(KwlnTask *task) {
     CampMenuContext *context = (CampMenuContext *)kwlnTaskGetUserValue(task);
     DatGameState *gameState = datGameState;
     StaffMenuWork *menu = (StaffMenuWork *)context->menu;
@@ -1174,7 +1174,7 @@ s32 func_00277390(KwlnTask *task) {
     s32 partyIndex = context->partyWindow.lists[0]->cursor->index;
     DatPartyRecord *partyEntry = &gameState->party[partyIndex];
 
-    func_00276F70(page, slots);
+    mnuDrawStaffPageMarkerIcons(page, slots);
     mnuDrawStaffPanelGridBackdrop(0, slots);
 
     if (menu->staffMode == 0) {

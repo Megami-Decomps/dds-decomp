@@ -23,7 +23,7 @@ extern s32 itfMesNthClearBit(s32, u32);
 extern s32 sndSeqSelectPoll(ItfMesState *);
 extern void itfUpdateSoundSelectionTransition(ItfMesState *);
 
-extern s32 func_00195ED8();
+extern s32 frFontMeasureGlyphStripWidth();
 
 extern UiSprite *func_00199828(s32, u32);
 
@@ -104,7 +104,7 @@ void itfMesInitializePanelPlacementSprite(ItfMesState *panel) {
     if (place->sprite == 0) {
         place->sprite = func_00199828(6, (u32)itfMesWork.windowTexture);
         if (place->frame != 0) {
-            place->sprite->unk20 = panel->blk14.glyphChain->x + func_00195ED8(0, panel->blk14.glyphChain);
+            place->sprite->unk20 = panel->blk14.glyphChain->x + frFontMeasureGlyphStripWidth(0, panel->blk14.glyphChain);
         }
     }
     spriteTop = pos->y + place->bounds[1];
@@ -647,7 +647,7 @@ void itfDrawSelectedSoundRow(ItfMesState *panel) {
     y = (s32)selection->y - ((selection->rowCount * 21 - 21) << 3) + selected * 0xA0;
     bounds[0].x = x - 0x1D0;
     bounds[0].y = y + 0x10;
-    bounds[1].x = x + func_00195ED8(selected, selection->glyphChain) + 0x1D0;
+    bounds[1].x = x + frFontMeasureGlyphStripWidth(selected, selection->glyphChain) + 0x1D0;
     bounds[1].y = bounds[0].y + 0x80;
     func_00198990(bounds, D_00357FC8, panel->renderValue, 0x1D0, list);
 

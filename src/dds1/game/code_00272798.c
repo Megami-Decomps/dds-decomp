@@ -95,7 +95,7 @@ extern void func_00272668(s32, s32, const void *, StaffMenuWork *, s32, s32);
 extern void mnuDrawStaffCampSlotsAndCurrency(s32, s32, s32, struct EffectSlotSet *, struct EffectSlotSet *, s32);
 extern const u8 D_0037C3A8[];
 
-s32 func_002728F8(KwlnTask *task) {
+s32 mnuDrawStaffCampImageScreen(KwlnTask *task) {
     StaffMenuWork *context = (StaffMenuWork *)kwlnTaskGetUserValue(task);
     s32 state;
 
@@ -167,7 +167,7 @@ u32 func_00272BB8(void) {
 }
 
 /* Draw the item quantity when present, otherwise show both staff-item slots. */
-void func_00272BC0(s32 x, s32 y, s32 z, struct MenuList *list,
+void mnuDrawStaffBulletItemQuantity(s32 x, s32 y, s32 z, struct MenuList *list,
                   struct MenuListNode *node, s32 drawArg) {
     StaffMenuWork *context = (StaffMenuWork *)list->context;
     u32 itemId = node->sortKeySecondary;

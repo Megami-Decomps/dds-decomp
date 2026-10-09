@@ -371,7 +371,7 @@ extern void evtPolygonMovieSetObjectMode(struct PolyMovieObject *obj, u32 mode, 
 /* At time, applies the track's latest enabled mode keys, then interpolates the
  * unit's byte and float parameters from the active kind-3/4 key to the next
  * enabled key of the same kind. */
-void func_00248D70(EvtRuntimeGroup *track, s32 time) {
+void evtStepPolygonMovieConditionalKeys(EvtRuntimeGroup *track, s32 time) {
     u32 objectMode = 0;
     u32 unitMode = 2;
     s32 pass;
@@ -1283,7 +1283,7 @@ extern void itfMesResetWindow(s32);
 void evtViewerMarkWindowInactive(EvtRuntime *);
 void func_0024AD48(EvtRuntime *);
 
-void func_0024ABD0(EvtRuntime *viewer) {
+void evtUpdateViewerMessageWindow(EvtRuntime *viewer) {
     if (viewer->windowContext == 0) {
         return;
     }
@@ -1756,7 +1756,7 @@ extern s16 D_004372B4;
 extern s8 D_0037F510[];
 extern void itfMesStartEntry(s32, s32, s32);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
-extern void func_0024ABD0(EvtRuntime *);
+extern void evtUpdateViewerMessageWindow(EvtRuntime *);
 extern void mnuAdvanceShopMenuState();
 extern u8 func_002A8028(void);
 extern s32 evtViewerPickNextHandler(KwlnTask *);
@@ -1809,7 +1809,7 @@ s32 evtViewerUpdateFrame(KwlnTask *task) {
     if (viewer->flags & 8) {
         evtViewerApplySelectedEntry(viewer);
     }
-    func_0024ABD0(viewer);
+    evtUpdateViewerMessageWindow(viewer);
     func_0024A020(viewer);
     mnuAdvanceShopMenuState(viewer);
     if (viewer->flags & 8) {

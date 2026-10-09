@@ -282,7 +282,7 @@ extern u8 fldHasBadkaifukuLabelProcess(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
 extern void fldApplyCameraFacingPoint(void);
 
-s32 func_001411F0(void) {
+s32 fldResolvePendingTitleBanner(void) {
     FldTitleBannerMenu *menu;
     FldAreaWork *area;
 

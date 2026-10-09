@@ -45,7 +45,7 @@ void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer);
 void evtEventViewerFreeBuffer(EvtRuntimeChild *node);
 
 void func_002467A0(void) {
-    func_00246108();
+    evtCreateViewerTimelineKey();
 }
 
 /* Return the pending node at position (count A + count B) in the queue entry, or NULL. */

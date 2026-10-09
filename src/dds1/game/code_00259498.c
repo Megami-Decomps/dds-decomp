@@ -462,7 +462,7 @@ extern char D_003AF9F0[];
 
 
 /* Spawn a cue at a random cell, or one hex step from its parent in the turned direction. */
-SpriteSpawnNode *func_0025B888(MnuSpriteResourceGroup *group, SpriteSpawnNode *parent, s8 turn) {
+SpriteSpawnNode *mnuCreateSpriteSpawnNode(MnuSpriteResourceGroup *group, SpriteSpawnNode *parent, s8 turn) {
     HexStepTable steps = *(HexStepTable *)D_003AF9F0;
     SpriteSpawnNode *node = sdfAllocSizeClassBlock(sizeof(SpriteSpawnNode));
 

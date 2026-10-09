@@ -3624,7 +3624,7 @@ extern void btlSetUnitPosition(BtlUnit *object, void *position);
 extern void btlSetUnitRotation(BtlUnit *object, void *rotation);
 
 /* vu0 routine: initialize the actor world transform with the SDK unit vector. */
-void func_001D4E98(BtlUnit *unit, u32 kind, u32 id) {
+void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
     BtlUnit *reused = NULL;
     BtlState *battle = (BtlState *)btlGetRuntime();
     MdlCtx *model;
@@ -4683,7 +4683,7 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3BA8);
 
 const char D_003A3BB8[16] = "btl:warp[%p]\n";
 
-void func_001D7258(BtlUnit *unit, BtlUnit *target, s32 index) {
+void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
     f32 bodyPos[4] __attribute__((aligned(16)));
     f32 muzzlePos[4] __attribute__((aligned(16)));
     f32 world[4] __attribute__((aligned(16)));
@@ -5047,7 +5047,7 @@ void btlRequestModelOrReuse(u32 *arguments) {
         return;
     }
     if (btlHasMatchingModel(effect, model)) {
-        func_001D4E98(object, effect, model);
+        btlBindActorModel(object, effect, model);
         if (*(char *)(arguments + 3) == 0) {
             btlClearUnitDefeatCandidate(object);
             evtSetUnitAlphaTransition((EvtUnit *)*(u32 *)((u8 *)object + 0x320), 0, 0);
@@ -5073,7 +5073,7 @@ u32 btlPollModelLoadCompletion(u32 *arguments) {
         if (!btlCheckModelAssetByMode(object, effect, model)) {
             return 0;
         }
-        func_001D4E98(object, effect, model);
+        btlBindActorModel(object, effect, model);
         btlReleaseModelAssetByMode(object, effect, model);
         btlBossDebugPrintf(D_003A3C08, effect, model, object);
     }
@@ -5185,7 +5185,7 @@ u32 func_001D8190(BtlModelChangeArgs *args) {
         btlReleaseActorModelResources(unit);
         btlRefreshUnitMaximumHpAndClampCurrentHp(&unit->partyRecord);
         btlRefreshUnitMaximumMpAndClampCurrentMp(&unit->partyRecord);
-        func_001D4E98(unit, resourceKind, resourceId);
+        btlBindActorModel(unit, resourceKind, resourceId);
         btlReleaseModelAssetByMode((u32)unit, resourceKind, resourceId);
         if (args->duration == 0) {
             kwlnDrawControlFlags |= 0x2000000;

@@ -260,7 +260,7 @@ extern s32 mnuUseStaffItem(s32, s32);
 extern s32 mnuIsStaffWindowReadyForItem(s32, s32);
 extern char D_0037C9C8[];
 
-s32 func_00274050(KwlnTask *task) {
+s32 mnuHandleStaffItemUseInput(KwlnTask *task) {
     u32 userValue = kwlnTaskGetUserValue(task);
     StaffImageContext *staff = (StaffImageContext *)userValue;
     StaffImageChoices *menu = staff->menu;

@@ -42,7 +42,7 @@ extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
 
 extern void sdfVec3ScaleInPlace(f32, f32 *);
 
-extern void func_002CC5F0(SdfGrid *);
+extern void sdfGridFollowCursorWithinMargins(SdfGrid *);
 
 extern f32 sdfQuatDot(f32 *, f32 *);
 
@@ -1034,7 +1034,7 @@ SdfGridCell *sdfGridCursorUp(SdfGrid *grid) {
         return NULL;
     }
     grid->cursor = cell;
-    func_002CC5F0(grid);
+    sdfGridFollowCursorWithinMargins(grid);
     return cell;
 }
 
@@ -1047,7 +1047,7 @@ SdfGridCell *sdfGridCursorDown(SdfGrid *grid) {
     }
     cell += width;
     grid->cursor = cell;
-    func_002CC5F0(grid);
+    sdfGridFollowCursorWithinMargins(grid);
     return cell;
 }
 
@@ -1061,7 +1061,7 @@ SdfGridCell *sdfGridCursorLeft(SdfGrid *grid) {
         return NULL;
     }
     grid->cursor = cell;
-    func_002CC5F0(grid);
+    sdfGridFollowCursorWithinMargins(grid);
     return cell;
 }
 
@@ -1074,7 +1074,7 @@ SdfGridCell *sdfGridCursorRight(SdfGrid *grid) {
         return NULL;
     }
     grid->cursor = cell;
-    func_002CC5F0(grid);
+    sdfGridFollowCursorWithinMargins(grid);
     return cell;
 }
 
@@ -1088,7 +1088,7 @@ SdfGridCell *sdfGridSetCursorCell(SdfGrid *grid, u32 column, u32 row) {
         return result;
     }
     grid->cursor = sdfGridGetCell(grid, column, row);
-    func_002CC5F0(grid);
+    sdfGridFollowCursorWithinMargins(grid);
     return grid->cursor;
 }
 
@@ -1115,7 +1115,7 @@ SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, u32 column, u32 row) {
         return NULL;
     }
     grid->cursor = cell;
-    func_002CC5F0(grid);
+    sdfGridFollowCursorWithinMargins(grid);
     return cell;
 }
 
@@ -1160,7 +1160,7 @@ void sdfGridReleaseAllCells(SdfGrid *grid) {
     }
 }
 
-void func_002CC5F0(SdfGrid *grid) {
+void sdfGridFollowCursorWithinMargins(SdfGrid *grid) {
     SdfGridCell *origin = grid->viewportOrigin;
     SdfGridCell *cursor = grid->cursor;
     u32 width = grid->width;

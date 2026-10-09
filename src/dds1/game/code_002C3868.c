@@ -619,7 +619,7 @@ void mnuTickMapTimers(void) {
     }
 }
 
-void func_002C57F0(void) {
+void mnuDrawMapCounterTimerHints(void) {
     SdfCounterTimer *timer = ((SdfCounterRuntime *)sdfActiveCounterRuntime)->timer;
     f32 fade = (f32)timer->value / 10.0f;
     s32 displacement = (s32)(fade * -32.0f);

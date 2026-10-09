@@ -597,7 +597,7 @@ s32 dspCaptureWindowSecondPanelValue(void) {
 }
 
 extern s8 itfPanelGetStatus(s32 index);
-extern s32 func_0019C9F0(s32 window, s32 first, s32 second);
+extern s32 itfMesSetOptionValue(s32 window, s32 first, s32 second);
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
 
 /* Advance the singleton window through its active, gated and cleanup phases. */
@@ -616,7 +616,7 @@ void dspAdvanceMessageWindowControl(s32 notify) {
         return;
     case DSP_WINDOW_CONTROL_GATED:
         if (D_003BC410 >= 0) {
-            func_0019C9F0(handle, 3, 1);
+            itfMesSetOptionValue(handle, 3, 1);
             itfMesCountClearBits(dspWindowHandle, evtMessageWindowOption);
             itfMesBuildOptionList(dspWindowHandle, D_003BC410);
             D_003BC410 = -1;

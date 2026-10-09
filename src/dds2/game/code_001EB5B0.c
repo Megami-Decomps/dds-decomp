@@ -293,7 +293,7 @@ extern void func_001FA480(BtlLinkedCommand *, BtlCamState *, const BtlCameraTime
 
 extern void func_001FBAC0(BtlLinkedCommand *, BtlCamState *);
 
-extern s32 func_001FB908(BtlLinkedCommand *, BtlCamState *, s8, s8);
+extern s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *, BtlCamState *, s8, s8);
 
 typedef struct SoundCursor {
     u16 unk_00;
@@ -602,7 +602,7 @@ void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
     }
 }
 
-extern void func_001F17C8(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
+extern void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
 void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
     BtlUnit *target;
@@ -615,11 +615,11 @@ void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *action) {
     }
     if (action->actionKind == action->status || action->actionKind == 0xA || (action->flags & 0x40000)) {
         btlCopyMotionTransform(&action->frontCamera, &action->camera);
-        func_001F17C8(action, &action->backCamera, action->link->unit, 0);
+        btlApplyMarkedUnitActionCamera(action, &action->backCamera, action->link->unit, 0);
         action->motionParameter = 7.0f;
         action->flags = (action->flags | 0x1041) & 0xFFFBFFFF;
     } else {
-        func_001F17C8(action, &action->camera, action->link->unit, 0);
+        btlApplyMarkedUnitActionCamera(action, &action->camera, action->link->unit, 0);
     }
 }
 
@@ -642,7 +642,7 @@ void func_001EC198(BtlLinkedCommand *action) {
     }
     target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
     if (action->link->unit->status.flags & 0x200) {
-        func_001F17C8(action, &action->camera, target, 0);
+        btlApplyMarkedUnitActionCamera(action, &action->camera, target, 0);
         return;
     }
     if (btlHasActorCategoryFlag100(action) != 0) {
@@ -664,7 +664,7 @@ void func_001EC198(BtlLinkedCommand *action) {
 void func_001EC2A0(void) {
 }
 
-extern void func_001F41F0(BtlLinkedCommand *, BtlCamState *);
+extern void btlInitSkillCommandCursor(BtlLinkedCommand *, BtlCamState *);
 
 void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action) {
     BtlState *work = (BtlState *)btlGetRuntime();
@@ -692,7 +692,7 @@ void btlStartLinkedActionPoseBlendIfEligible(BtlLinkedCommand *action) {
         action->motionParameter = 200.0f;
         action->flags |= 0x10041;
     } else {
-        func_001F41F0(action, &action->camera);
+        btlInitSkillCommandCursor(action, &action->camera);
     }
 }
 
@@ -836,7 +836,7 @@ typedef struct BattlePairCameraPresetSet {
 
 extern const BattlePairCameraPresetSet D_004183D8;
 
-void func_001ECCB0(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
+void btlPrepareHeightScaledActionCameraPose(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
     f32 quaternion[4];
     BattlePairCameraPreset poses[4] = {
         {{0.109f, -0.872f, -0.288f, 0.355f},
@@ -1697,7 +1697,7 @@ extern f32 func_00353040(f32);
 
 /* Frame the camera for a two-actor command: place the eye so the actor, the farthest
    and the nearest actors fit the view, then store the resulting distance. */
-void func_001F1290(BtlLinkedCommand *action, BtlCamState *pose, BtlUnit *unit, s32 mode) {
+void btlBuildShoulderActionCamera(BtlLinkedCommand *action, BtlCamState *pose, BtlUnit *unit, s32 mode) {
     f32 focus[4];
     f32 eye[4];
     f32 mirror[4];
@@ -1877,9 +1877,9 @@ void func_001F1290(BtlLinkedCommand *action, BtlCamState *pose, BtlUnit *unit, s
 
 extern void func_001F0C80(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
-extern void func_001F1290(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
+extern void btlBuildShoulderActionCamera(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 
-void func_001F17C8(BtlLinkedCommand *action, BtlCamState *pose,
+void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
                   BtlUnit *target, s32 mode) {
     BtlState *runtime;
     BtlUnit *unit;
@@ -1941,7 +1941,7 @@ void func_001F17C8(BtlLinkedCommand *action, BtlCamState *pose,
     if (runtime->cameraActorConfiguration == 0x10003) {
         func_001F0C80(action, pose, target, mode);
     } else {
-        func_001F1290(action, pose, target, mode);
+        btlBuildShoulderActionCamera(action, pose, target, mode);
     }
 
     func_00208000(0x400, NULL, NULL);
@@ -2489,7 +2489,7 @@ extern s16 D_00436AC0[];
 
 extern u32 btlNextScaledRandom(u32);
 
-void func_001F41F0(BtlLinkedCommand *command, BtlCamState *pose) {
+void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
     s16 groupChoices[2];
     s16 pathChoices[4];
     s16 sideChoices[2];
@@ -2820,7 +2820,7 @@ void btlAdvancePlayerCursorAnimation(BtlLinkedCommand *action, BtlCamState *stat
     if (!(action->link->unit->status.flags & 0x400)) {
         func_001FA480(action, state, D_003BBFA8[CURSOR->unk_0A]);
         func_001FBAC0(action, state);
-        func_001FB908(action, state, 0, 0);
+        btlConstrainCameraEndpointHeight(action, state, 0, 0);
         CURSOR->frame++;
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     }
@@ -2894,7 +2894,7 @@ void func_001F4F10(BtlLinkedCommand *action, BtlCamState *state) {
     if (!(action->link->unit->status.flags & 0x400)) {
         func_001FA480(action, state, D_003BBFC8[CURSOR->unk_0C]);
         func_001FBAC0(action, state);
-        func_001FB908(action, state, 0, 0);
+        btlConstrainCameraEndpointHeight(action, state, 0, 0);
         CURSOR->frame++;
         CURSOR->frame = CURSOR->frame <= 0 ? 0 :
             CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
@@ -2907,7 +2907,7 @@ void func_001F4F10(BtlLinkedCommand *action, BtlCamState *state) {
         case 0x1C3:
             func_001FA480(action, state, D_003BBFC8[CURSOR->unk_0C]);
             func_001FBAC0(action, state);
-            func_001FB908(action, state, 0, 0);
+            btlConstrainCameraEndpointHeight(action, state, 0, 0);
             CURSOR->frame++;
             CURSOR->frame = CURSOR->frame <= 0 ? 0 :
                 CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
@@ -3023,7 +3023,7 @@ INCLUDE_ASM(const s32, "game/code_001EB5B0", func_001F5868);
 INCLUDE_ASM(const s32, "game/code_001EB5B0", func_001FA480);
 
 /* vu0 routine: constrain a camera pose endpoint to the enabled height planes. */
-s32 func_001FB908(BtlLinkedCommand *action, BtlCamState *pose, s8 bypassUpper, s8 bypassLower) {
+s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *action, BtlCamState *pose, s8 bypassUpper, s8 bypassLower) {
     union {
         u128 q;
         f32 f[4];
@@ -3116,7 +3116,7 @@ extern f32 D_003BDC80[4];
 extern f32 D_00436AD0;
 
 /* vu0 routine: retail camera vector operations use the SDK macro interface. */
-void func_001FD400(BtlLinkedCommand *command, BtlCamState *pose,
+void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                   const BtlCameraTimedInstruction *instruction, s32 *currentIndex,
                   const BtlCameraParameterRecord *records) {
     f32 savedPosition[4];
@@ -3536,7 +3536,7 @@ void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *action, BtlCamState *stat
         if (!(action->link->unit->status.flags & 0x400)) {
             func_001FA480(action, state, D_003BC0A0[CURSOR->unk_0C]);
             func_001FBAC0(action, state);
-            func_001FB908(action, state, 0, 1);
+            btlConstrainCameraEndpointHeight(action, state, 0, 1);
             CURSOR->frame++;
             CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
         }
@@ -3555,7 +3555,7 @@ void btlAdvanceCommandCursorOrAction(BtlLinkedCommand *action, BtlCamState *stat
         }
         func_001FA480(action, state, D_003BC0C0[CURSOR->unk_0C]);
         func_001FBAC0(action, state);
-        func_001FB908(action, state, 0, 1);
+        btlConstrainCameraEndpointHeight(action, state, 0, 1);
         CURSOR->frame++;
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     } else {
@@ -3605,7 +3605,7 @@ void func_001FFAD8(BtlLinkedCommand *action, BtlCamState *state) {
         }
         func_001FA480(action, state, D_003BC0C8[CURSOR->unk_0C]);
         func_001FBAC0(action, state);
-        func_001FB908(action, state, 0, 1);
+        btlConstrainCameraEndpointHeight(action, state, 0, 1);
         CURSOR->frame++;
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     } else {
@@ -3632,7 +3632,7 @@ void btlAdvanceTargetCursorAnimation(BtlLinkedCommand *action, BtlCamState *stat
     if (!(action->link->unit->status.flags & 0x400)) {
         func_001FA480(action, state, D_003BC090[CURSOR->unk_0C]);
         func_001FBAC0(action, state);
-        func_001FB908(action, state, 0, 1);
+        btlConstrainCameraEndpointHeight(action, state, 0, 1);
         CURSOR->frame++;
         CURSOR->frame = CURSOR->frame <= 0 ? 0 : CURSOR->frame >= 0x7FFF ? 0x7FFE : CURSOR->frame;
     }
@@ -3669,7 +3669,7 @@ void btlInitTargetCursorAndFacing(BtlLinkedCommand *action, BtlCamState *state) 
     memset(D_003BD7D0, 0, 0x130);
     func_001F5868(action, state, 2, 3);
     func_001F5320(action, state, 0, 0);
-    func_001FB908(action, state, 0, 1);
+    btlConstrainCameraEndpointHeight(action, state, 0, 1);
     btlFlagMatchingUnitsDefeatCandidate(0x600);
     unit = action->link->unit;
     if (unit->status.flags & 0x80000) {
@@ -3702,7 +3702,7 @@ s32 btlInitCursorAndApplyAction(BtlLinkedCommand *action, BtlCamState *state) {
     memset(D_003BD7D0, 0, 0x130);
     func_001F5868(action, state, 2, 6);
     func_001F5320(action, state, 0, 0);
-    result = func_001FB908(action, state, 0, 1);
+    result = btlConstrainCameraEndpointHeight(action, state, 0, 1);
     CURSOR->unk_0C = 2;
     return result;
 }
@@ -4258,7 +4258,7 @@ BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value) {
     return task;
 }
 
-s32 func_00201268(SceneLightRestoreArgs *args) {
+s32 btlRestoreSceneTransformLighting(SceneLightRestoreArgs *args) {
     BtlState *work;
     BtlUnit *unit;
     s32 listener;
@@ -4333,7 +4333,7 @@ BtlRuntimeTask *func_002014A8(value)
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 4;
     task->flags |= BTL_TASK_FLAG_DEFERRED;
-    task->callback = func_00201268;
+    task->callback = btlRestoreSceneTransformLighting;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
@@ -4343,7 +4343,7 @@ BtlRuntimeTask *func_002014A8(value)
 
 s64 func_00201520(SceneLightRestoreArgs *args) {
     D_00436AD4 = 1;
-    return func_00201268(args);
+    return btlRestoreSceneTransformLighting(args);
 }
 
 BtlRuntimeTask *btlCreateSoundUpdateTask(u32 value) {
@@ -4641,7 +4641,7 @@ void sndStartEffectTask(ActorEffectTaskArgs *args) {
     unit->effectLink.referenceCount++;
 }
 
-s32 func_00202100(ActorEffectTaskArgs *args) {
+s32 btlUpdateActorSystemEffect(ActorEffectTaskArgs *args) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     ActorEffectOwner owner = args->owner;
     BtlUnit *unit = owner.unit;
@@ -4698,7 +4698,7 @@ BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source, BtlUnit *own
     task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->ownerId = owner->owner;
     task->onStart = sndStartEffectTask;
-    task->callback = func_00202100;
+    task->callback = btlUpdateActorSystemEffect;
     task->onFinish = sndFinishActorEffectTask;
     args = btlGetTaskArguments(task);
     args->source = source;
@@ -4881,7 +4881,7 @@ void sndAddSourceReferences(SoundEffectSourceArgs *args) {
     unit->effectLink.referenceCount = unit->effectLink.referenceCount + 1;
 }
 
-s32 func_00202958(SoundEffectSourceArgs *args) {
+s32 sndUpdateEffectSourceFade(SoundEffectSourceArgs *args) {
     BtlUnit *owner;
     u32 flags;
 
@@ -4932,7 +4932,7 @@ void sndFinishEffectSourceTask(SoundEffectSourceArgs *args) {
     sndDeleteSystemEffect(effect);
 }
 
-extern s32 func_00202958(SoundEffectSourceArgs *);
+extern s32 sndUpdateEffectSourceFade(SoundEffectSourceArgs *);
 
 BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *effect, BtlUnit *owner, u64 resource) {
     BtlRuntimeTask *task = btlAllocTask(sizeof(SoundEffectSourceArgs));
@@ -4943,7 +4943,7 @@ BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *effect, BtlUnit *ow
     task->flags |= BTL_TASK_FLAG_DEFERRED;
     task->ownerId = owner->owner;
     task->onStart = sndAddSourceReferences;
-    task->callback = func_00202958;
+    task->callback = sndUpdateEffectSourceFade;
     task->onFinish = sndFinishEffectSourceTask;
     args = btlGetTaskArguments(task);
     args->source = effect;
@@ -5038,7 +5038,7 @@ const char D_00418E28[16] __attribute__((aligned(8))) = "%s%03X.BED";
 
 const char D_00418E38[32] __attribute__((aligned(8))) = "/efftool/bed/BTL_TEST.BED";
 
-s32 func_00202EA8(s32 index, char *output) {
+s32 btlFormatActionEventFilename(s32 index, char *output) {
     BtlState *state = (BtlState *)btlGetRuntime();
     if ((state->battleFlags & 0x10000000) == 0) {
         u16 assetId = ((BtlActionAnimationRecord *)datActionAnimationRecords)[index].displayCode;
@@ -6163,7 +6163,7 @@ u8 sndIsBattleBankLoaded(void) {
 
 INCLUDE_RODATA(const s32, "game/code_001EB5B0", D_00419408);
 
-void func_00205160(void) {
+void btlUpdateMotionSoundLoading(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     SoundSlotOwner *owner;
     s32 tracksReady;

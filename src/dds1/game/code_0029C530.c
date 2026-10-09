@@ -165,7 +165,7 @@ extern s32 effSharedRibbonReferenceCount;
 
 extern u32 D_003BC990;
 
-extern struct EffExpandedList *func_0029C230(u32);
+extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
 
 extern u32 effFlashTextureHandles;
 
@@ -3310,7 +3310,7 @@ void effReleaseRingHandle(EffRingResource *handle) {
     sdfReleaseChipBlock(handle);
 }
 
-void func_002A4ED0(EffClassWork *work) {
+void effUpdateCenteredRadialRingVertices(EffClassWork *work) {
     EffRadialRingParams *config = work->payload;
     EffPointSet *points = ((EffRingResource *)work->resource)->pointSet;
     f32 direction[4];
@@ -3915,7 +3915,7 @@ void effReplaceSurfaceResourceHolder(s32 node, u32 resource) {
     if (((EffectSurfaceNode *)node)->resourceHolder != 0) {
         effReleaseReferenceHolder(((EffectSurfaceNode *)node)->resourceHolder);
     }
-    holder = func_0029C230(resource);
+    holder = effCreateTextureAnimationSet(resource);
     ((EffectSurfaceNode *)node)->resourceHolder = holder;
 }
 
@@ -4182,7 +4182,7 @@ EffQuadWork *effCreateQuadWork(FileJobPayload *job) {
             work->billHandle = effCreateBillboardSharingIndexedResource(*(s32 *)buffer);
             break;
         case 7:
-            work->reference = func_0029C230((u32)buffer);
+            work->reference = effCreateTextureAnimationSet((u32)buffer);
             break;
         }
         if (work->billHandle != NULL) {
@@ -6962,7 +6962,7 @@ typedef struct EffActorTintConfig {
 typedef char EffActorTintConfigSizeCheck[sizeof(EffActorTintConfig) == 0x14 ? 1 : -1];
 
 /* Apply a temporary tint to eligible actors, then restore their original RGB. */
-void func_002B2F20(EffActiveResource *work) {
+void effTransitionSelectedActorRgbColors(EffActiveResource *work) {
     BtlUnit *actors[16];
     EffActorTintConfig *config = work->payload;
     u32 frame = work->frame;
@@ -7610,7 +7610,7 @@ EffParticleShared *effCreateParticleSharedResourceFromFile(FileJobPayload *sourc
             work->billHandle = effCreateBillboardSharingIndexedResource(*(s32 *)buffer);
             break;
         case 7:
-            work->reference = func_0029C230((u32)buffer);
+            work->reference = effCreateTextureAnimationSet((u32)buffer);
             break;
         }
         if (work->billHandle != NULL) {
@@ -8575,7 +8575,7 @@ INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3A90);
 
 INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3AA8);
 
-s32 func_002B7B78(void) {
+s32 effHandleDebugOrbitInput(void) {
     f32 vector[4];
     f32 step;
     f32 length;

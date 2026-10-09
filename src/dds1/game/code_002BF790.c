@@ -267,7 +267,7 @@ typedef struct GridFlushTable {
 } GridFlushTable;
 
 /* Shrink the grid bounds and apply the three-phase flush envelope to corner alpha. */
-s32 func_002BFE78(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridApplyTimedBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridFlushTable *table;
     s32 phases[3];
     s32 deltas[2];
@@ -344,7 +344,7 @@ s32 func_002BFE78(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     return 0x10000 / totalDuration;
 }
 
-s32 func_002C0038(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridApplyThresholdBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridAngleTable *table;
     s32 deltas[2];
     EffectSlotGeometry *geometry = &out->geometry;
@@ -459,7 +459,7 @@ s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, Eff
     return 0x10000 / table->cycleDivisor;
 }
 
-s32 func_002C04C8(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+s32 itfGridApplyLinearBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridAngleTable *table;
     s32 deltas[2];
     EffectSlotGeometry *geometry = &out->geometry;
@@ -545,7 +545,7 @@ extern void sdfConsAppendProgramReferencePacket(SdfListHead *, DmaPacketHeader *
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Rebuild the view matrix and both frame banks' matrix and lighting packet lists. */
-void func_002C0628(void) {
+void itfInitDoubleBufferedScenePackets(void) {
     s32 i;
 
     sdfCameraBuildProjection(&sdfSceneProjectionParameters.camera);
@@ -686,7 +686,7 @@ void uiFillQuadColorWords(UiQuadWords *quad, u32 value) {
 /* Draw a triangle with the same packed color at all three vertices. */
 void uiDrawUniformRgbRange(u32 xCoordinates, u32 yCoordinates, u32 z, u32 color, u32 surfaceIndex, u32 extraA, u32 extraB, u32 extraC) {
     u32 vertexColors[3] = {color, color, color};
-    func_002C0C20(xCoordinates, yCoordinates, z, vertexColors, surfaceIndex, extraA, extraB, extraC);
+    itfDrawColoredTriangle(xCoordinates, yCoordinates, z, vertexColors, surfaceIndex, extraA, extraB, extraC);
 }
 
 typedef struct GridPackedTriangleVertex {
@@ -695,7 +695,7 @@ typedef struct GridPackedTriangleVertex {
     u64 depth;
 } GridPackedTriangleVertex;
 
-void func_002C0C20(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 surfaceIndex)
+void itfDrawColoredTriangle(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 surfaceIndex)
 {
     s32 packet;
     GridPackedTriangleVertex *vertices;
@@ -721,12 +721,12 @@ void func_002C0C20(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 s
     surface->append(surface, list);
 }
 
-extern void func_002C0DF8(u32, u32, u32, u32, u32, const u32 *, u32, u32);
+extern void itfDrawColoredRectangle(u32, u32, u32, u32, u32, const u32 *, u32, u32);
 
 /* Draw a rectangle as a four-vertex triangle strip with one packed color. */
 void uiDrawUniformRgbaRange(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 gsContext, u32 surfaceIndex) {
     u32 vertexColors[4] = {color, color, color, color};
-    func_002C0DF8(x, y, z, width, height, vertexColors, gsContext, surfaceIndex);
+    itfDrawColoredRectangle(x, y, z, width, height, vertexColors, gsContext, surfaceIndex);
 }
 
 void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 surfaceIndex) {
@@ -739,7 +739,7 @@ typedef struct GridPackedStripVertex {
     u64 depth;
 } GridPackedStripVertex;
 
-void func_002C0DF8(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *colors, u32 gsContext, u32 surfaceIndex) {
+void itfDrawColoredRectangle(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *colors, u32 gsContext, u32 surfaceIndex) {
     u32 left = x + 0x7000;
     u32 top = y + 0x7900;
     u64 topWord = (u64)top << 32;
@@ -774,7 +774,7 @@ void func_002C0DF8(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *colors
 }
 
 void uiDrawGradientColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *vertexColors, u32 surfaceIndex) {
-    func_002C0DF8(x, y, z, width, height, vertexColors, 0, surfaceIndex);
+    itfDrawColoredRectangle(x, y, z, width, height, vertexColors, 0, surfaceIndex);
 }
 
 /* Draw four frame edges; the bottom edge extends 16 units beyond the right side. */
@@ -785,12 +785,12 @@ void uiDrawFrameEdges(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32
     uiDrawUniformColorLine(x, y + height, z, x + width + 0x10, y + height, z, color, context);
 }
 
-void func_002C10C0(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
+void itfDrawGradientLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
                   const u32 *colors, u32 surfaceIndex);
 
 void uiDrawUniformColorLine(u32 startX, u32 startY, u32 startZ, u32 endX, u32 endY, u32 endZ, u32 color, u32 surfaceIndex) {
     u32 vertexColors[2] = {color, color};
-    func_002C10C0(startX, startY, startZ, endX, endY, endZ, vertexColors, surfaceIndex);
+    itfDrawGradientLine(startX, startY, startZ, endX, endY, endZ, vertexColors, surfaceIndex);
 }
 
 typedef struct GridPackedLineVertex {
@@ -799,7 +799,7 @@ typedef struct GridPackedLineVertex {
     u64 depth;
 } GridPackedLineVertex;
 
-void func_002C10C0(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
+void itfDrawGradientLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
                   const u32 *colors, u32 surfaceIndex)
 {
     s32 packet;

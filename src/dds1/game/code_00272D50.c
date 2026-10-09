@@ -14,7 +14,7 @@ extern s32 mnuUseStaffItem(s32, s32);
 
 extern void *memset(void *, s32, u32);
 typedef struct StaffDisplayContext StaffDisplayContext;
-extern void func_00272D50(StaffDisplayContext *);
+extern void mnuCreateStaffItemWindow(StaffDisplayContext *);
 
 
 typedef struct {
@@ -70,14 +70,14 @@ extern void mnuDestroyWindowContainer(MenuWindowContainer *);
 typedef struct MenuWindowSpriteGroup MenuWindowSpriteGroup;
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
 extern void mnuInitializeWindowEntryPlacement(s32, MenuWindowContainer *, s32, s32, s32);
-extern void func_00272BC0(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
+extern void mnuDrawStaffBulletItemQuantity(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
 extern s32 mnuIsBulletItemId(s32);
 extern char *D_003BAA84;
 extern s32 func_00286A00(s32);
 extern s32 evtCheckValueThreshold(s32, s32);
 extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
 
-void func_00272D50(StaffDisplayContext *context) {
+void mnuCreateStaffItemWindow(StaffDisplayContext *context) {
     StaffWindowResources *resources = context->resources;
     MenuWindowContainer *window;
     struct MenuListNode *node;
@@ -91,7 +91,7 @@ void func_00272D50(StaffDisplayContext *context) {
     mnuSetWindowPanelBounds(window, context->panelLayout, 0x30, 0x530, -0x90, 0xA10);
     mnuInitializeWindowEntryPlacement(0, window, context->unk74, 10, 0x10);
     window->list->context = context;
-    window->list->drawCallback = func_00272BC0;
+    window->list->drawCallback = mnuDrawStaffBulletItemQuantity;
 
     itemId = 1;
     textOffset = 0x19;
@@ -186,7 +186,7 @@ void mnuCreateStaffBulletItemWindow(StaffDisplayContext *context) {
     mnuSetWindowPanelBounds(window, context->panelLayout, 0x30, 0x530, -0x90, 0xA10);
     mnuInitializeWindowEntryPlacement(0, window, context->unk74, 10, 16);
     window->list->context = context;
-    window->list->drawCallback = func_00272BC0;
+    window->list->drawCallback = mnuDrawStaffBulletItemQuantity;
     do {
         if (((SaveItemCounts *)datGameState)->counts[itemId] != 0 && mnuIsBulletItemId(itemId)) {
             node = mnuAppendWindowListNode(window, D_003BAA84 + textOffset);
@@ -230,7 +230,7 @@ s32 mnuInitializeStaffDisplayResources(KwlnTask *task) {
     memset(resources, 0, 0x2C);
     resources->allocation = handle;
     func_00273390((u32)context);
-    func_00272D50(context);
+    mnuCreateStaffItemWindow(context);
     mnuForwardDupArg(context->activeWindow, (struct EffectSlotSet *)context->unk74, 0, 0, 0);
     mnuActivatePanelAndConfigureGridResources(
         (MenuScrollPanel *)(u32)context->unk138,

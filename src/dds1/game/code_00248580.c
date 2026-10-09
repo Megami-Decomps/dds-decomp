@@ -133,7 +133,7 @@ extern s32 func_003014F0(char *, const char *, ...);
 
 extern u32 uiBlendColors(u32, u32, s32);
 
-extern void func_00276F70(MenuPageWindow *window, StaffSlots *work);
+extern void mnuDrawStaffPageMarkerIcons(MenuPageWindow *window, StaffSlots *work);
 extern void mnuDrawStaffPanelGridBackdrop(s32 flag, StaffSlots *work);
 extern void mnuDrawStageTestList(s32 x, s32 y, s32 z, s32 overrideValue, void *menu, s32 param);
 extern void func_00283838(s32, s32, s32, s32, s32, s32, s32);
@@ -708,7 +708,7 @@ s32 func_00249998(u8 *control, MenuProgressHost *work, s32 context) {
         return 0;
     }
 
-    func_00276F70(&work->partyWindow, &work->staffSlots);
+    mnuDrawStaffPageMarkerIcons(&work->partyWindow, &work->staffSlots);
     mnuDrawStaffPanelGridBackdrop(0, &work->staffSlots);
     work->partyWindow.flags |= 0x500;
     mnuDrawStageTestList(0, 0, 0, ((s8 *)control)[0x55],

@@ -55,7 +55,7 @@ extern void func_0027CA90(s32, s32, s32, MenuWindowContainer *, s32);
 
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s32, s32);
 
-extern void func_0027D850(s32, s32, s32, s32, MenuPanelHandles *, s32, s32);
+extern void mnuDrawSlidingPartyPanel(s32, s32, s32, s32, MenuPanelHandles *, s32, s32);
 
 extern MenuSprites *func_0027F230(s32, EffectSlotSet *, EffectSlotSet *);
 
@@ -84,7 +84,7 @@ extern void func_00300508(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, Me
 
 extern void mnuSelectPage(MenuPageWindow *window, s32 selected);
 
-extern void func_0027FCA0(MenuPageWindow *, s32, s32);
+extern void mnuRebuildPartySlotResources(MenuPageWindow *, s32, s32);
 
 
 
@@ -729,7 +729,7 @@ void mnuReleaseResourceList(MenuPanelHandles *panel) {
 }
 
 /* Draw and fade the six resources that make up the selected panel. */
-void func_0027D850(s32 x, s32 originY, s32 depth, s32 fade,
+void mnuDrawSlidingPartyPanel(s32 x, s32 originY, s32 depth, s32 fade,
                    MenuPanelHandles *panel, s32 selectionMode, s32 drawArg) {
     EffectSlotSet *firstHandle = panel->handles[0];
     BdWork *firstWork = firstHandle->workEntries;
@@ -814,7 +814,7 @@ void mnuDrawPanelIconPairsAtFixedPositions(s32 x, s32 y, s32 depth, s32 alpha, M
 void mnuDrawIconPanel(s32 x, s32 y, s32 depth, s32 fade, MenuPanelHandles *panel, s32 selectionMode, s32 drawArg) {
     switch (panel->panelKind) {
     case MNU_PANEL_KIND_SIX_SLOTS:
-        func_0027D850(x, y, depth, fade, panel, selectionMode, drawArg);
+        mnuDrawSlidingPartyPanel(x, y, depth, fade, panel, selectionMode, drawArg);
         return;
     case MNU_PANEL_KIND_FOUR_OFFSET_ICONS:
         mnuDrawFourPanelIconsAtOffsets(x, y, depth, MNU_FULL_FADE, panel, drawArg);
@@ -1553,7 +1553,7 @@ s32 mnuPercentOrHundred(s32 value, s32 total) {
 extern s32 D_0037CD30[][4];
 extern void mnuDrawPanelSequenceByRow(s32, s32, s32, s32, s32, s32);
 
-void func_0027FAA8(MenuPageWindow *window, s32 texture) {
+void mnuDrawPartyPageGauges(MenuPageWindow *window, s32 texture) {
     u32 i;
 
     for (i = 0; i < 5; i++) {
@@ -1618,7 +1618,7 @@ void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSe
 extern s32 mnuGetSelectionFromFlags(DatPartyRecord *);
 
 /* Rebuild one party row's icon and frame resources from its current selectors. */
-void func_0027FCA0(MenuPageWindow *window, s32 index, s32 kind) {
+void mnuRebuildPartySlotResources(MenuPageWindow *window, s32 index, s32 kind) {
     MenuPageSlot *slot = &window->slots[index];
     PartyPanelEntry *entry = &window->records->slots[index];
     DatPartyRecord *actor = &datGameState->party[entry->index];
@@ -1718,12 +1718,12 @@ void mnuUpdateHandleStates(MenuPageWindow *obj) {
 
         if (entry->unk8 >= 0) {
             if (i < obj->records->unk0) {
-                func_0027FCA0(obj, i, 1);
+                mnuRebuildPartySlotResources(obj, i, 1);
             } else {
-                func_0027FCA0(obj, i, 2);
+                mnuRebuildPartySlotResources(obj, i, 2);
             }
         } else {
-            func_0027FCA0(obj, i, 0);
+            mnuRebuildPartySlotResources(obj, i, 0);
         }
     }
 }
@@ -2134,7 +2134,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
 extern u32 ptyComputeTotalExp(DatPartyRecord *, s32);
 extern char D_003BC740[];
 
-void func_002812E8(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
+void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
                    s32 partyIndex, u32 flags, s32 surface) {
     char text[0x40];
     DatPartyRecord *unit = &datGameState->party[partyIndex];

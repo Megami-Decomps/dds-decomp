@@ -445,7 +445,7 @@ extern void func_0025F680(s32, s32, s32, ShopScene *, s32);
 extern void func_0025FB30(s32, s32, s32, ShopScene *, s32);
 
 /* Draw the selected shop page through its entry, change and exit phases. */
-s32 func_00261760(ShopScene *scene) {
+s32 mnuDrawCommandClosePhase(ShopScene *scene) {
     s32 categoryMap[2] = {0, 2};
     s32 category;
     f32 progress;

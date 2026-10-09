@@ -25,7 +25,7 @@ extern char D_003AFEC8[];
 extern u32 effMiscRandMod(void *, u32);
 
 /* Spawn a cue at a random cell, or one hex step from its parent in the turned direction. */
-SpriteSpawnNode *func_0026DD30(MnuSpriteResourceGroup *group, SpriteSpawnNode *parent, s8 turn) {
+SpriteSpawnNode *mnuCreateMovieParticleNode(MnuSpriteResourceGroup *group, SpriteSpawnNode *parent, s8 turn) {
     HexStepTable steps = *(HexStepTable *)D_003AFEC8;
     SpriteSpawnNode *node = sdfAllocSizeClassBlock(sizeof(SpriteSpawnNode));
 

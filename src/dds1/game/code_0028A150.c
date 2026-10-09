@@ -123,7 +123,7 @@ typedef struct FileRecordType {
     s32 dataBytes;
 } FileRecordType;
 
-extern struct EffExpandedList *func_0029C230(u32);
+extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
 
 struct SdfMemBlock;
 
@@ -5264,7 +5264,7 @@ void fileReplaceReferenceHolder(LoadObj *obj, u32 resource) {
     if (obj->referenceHolder != NULL) {
         effReleaseReferenceHolder(obj->referenceHolder);
     }
-    holder = func_0029C230(resource);
+    holder = effCreateTextureAnimationSet(resource);
     obj->referenceHolder = holder;
 }
 

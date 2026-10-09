@@ -45,7 +45,7 @@ INCLUDE_ASM(const s32, "game/code_0026EC90", func_0026EC90);
 extern void func_0026E798(s32 x, s32 y, s32 z, s32 alpha, EffectSlotSet *set, s32 index, f32 scaleX, f32 scaleY, s32 option, s32 texture);
 
 /* Draw an active roll entry with its sprite-specific slot index; alpha follows the staff movie's scroll fade. */
-void func_0026F118(MnuMovieRollEntry *entry, EffectSlotSet *set, s32 texture) {
+void mnuDrawMovieRollEntry(MnuMovieRollEntry *entry, EffectSlotSet *set, s32 texture) {
     s32 x;
     s32 y;
     s32 alpha;
@@ -127,7 +127,7 @@ extern void mnuRequestIndexedMovieResource(s32 index);
 
 INCLUDE_RODATA(const s32, "game/code_0026EC90", D_003B1140);
 
-void func_0026F918(void) {
+void mnuAdvanceStaffImageSequence(void) {
     s32 x = D_0037AFC0[D_003BC614].x;
     s32 y = D_0037AFC0[D_003BC614].y;
     s32 width = D_0037AFC0[D_003BC614].width;
@@ -223,7 +223,7 @@ s32 mnuStaffImageProc(void) {
     mnuDrawIconAlphaSprite(-10, -10, 0, 0x80, mnuMovieWork->spriteSet, 0x10, 0, 0x27);
     mnuDrawIconAlphaSprite(D_0037AFC0[D_003BC614].x - 5, D_0037AFC0[D_003BC614].y - 5, 0, 0x80, mnuMovieWork->spriteSet, D_0037AF70[mnuMovieWork->imageIndex], 0, 0x53);
     func_0026F230(0x53);
-    func_0026F918();
+    mnuAdvanceStaffImageSequence();
     return 0;
 }
 

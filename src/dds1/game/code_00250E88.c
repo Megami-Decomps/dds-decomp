@@ -43,7 +43,7 @@ typedef struct ScrVmOperand ScrVmOperand;
 
 
 
-void func_00250E88(s32 *xCoordinate, s32 *yCoordinate, u16 index,
+void mnuScrollSceneViewportToEntry(s32 *xCoordinate, s32 *yCoordinate, u16 index,
                    s32 maximumX, s32 maximumY) {
     s32 x = *xCoordinate;
     s32 deltaX = D_0036B7F0[index][2] - x;
@@ -92,7 +92,7 @@ void func_00251260(MenuSceneWork *work) {
     }
     position[0] = work->scrollX;
     position[1] = work->scrollY;
-    func_00250E88(&position[0], &position[1], entry->sceneId, maximumX, 0x38E);
+    mnuScrollSceneViewportToEntry(&position[0], &position[1], entry->sceneId, maximumX, 0x38E);
     work->scrollX = position[0];
     work->scrollY = position[1];
 }
