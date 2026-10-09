@@ -71,8 +71,8 @@ typedef struct EvtRuntimeGroup {
     u8 pad20[4];
     SdfTex *texture; /* Retained kind-0x18 texture; released with the group. */
     s32 unk28;
-    f32 savedFirstVector[4];
-    f32 savedSecondVector[4];
+    f32 savedPosition[4];
+    f32 savedRotation[4];
     s32 objectAttached;
     s32 childCount;
     EvtRuntimeChild *children;
