@@ -269,10 +269,10 @@ void effUploadModelTextures(EffModelOwner *owner) {
         u8 format;
 
         switch (tex->battleTextureSlot) {
-        case 1:
+        case SDF_TEXTURE_BATTLE_SLOT_ONE:
             header = battle->slot1;
             break;
-        case 2:
+        case SDF_TEXTURE_BATTLE_SLOT_TWO:
             header = battle->slot2;
             break;
         default:
@@ -745,7 +745,7 @@ RefObj *effCreateSharedTextureReference(SdfTextureFileHeader *source) {
     texture->allocationHandle = allocationHandle;
 
     memcpy(texture->base, source, 0x40);
-    cursor = (u8 *)source + 0x40 + (source->flags & 0xF0);
+    cursor = (u8 *)source + 0x40 + (source->payloadOffsetFlags & SDF_TEXTURE_PAYLOAD_EXTRA_OFFSET_MASK);
     memcpy(texture->palette, cursor, paletteBytes);
     cursor += paletteBytes;
     memcpy(texture->pixels, cursor, imageBytes);

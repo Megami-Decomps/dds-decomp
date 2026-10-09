@@ -513,9 +513,9 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
 
     mnuReleaseStaffMenuResources(group);
     mnuInitializeCampPanelResources(&work->partyWindow, &work->staffSlots, 0, &work->partyPanel);
-    panel = mnuCreatePanelGroup((s32)work->staffSlots.baseResources[1], work->staffSlots.pairResources[0], 0);
+    panel = mnuCreatePanelGroup(work->staffSlots.baseResources[1], work->staffSlots.pairResources[0], 0);
     work->panelHandle = panel;
-    mnuUpdateFiveListEntries(panel, work->unitHandle);
+    mnuUpdateFiveListEntries(panel, (struct EffectSlotSet *)work->unitHandle);
     work->spriteHandle =
         mnuCreateSpriteState(work->staffSlots.baseResources[1],
                              work->staffSlots.pairResources[0],
@@ -810,7 +810,6 @@ extern void mnuSelectPage(MenuPageWindow *window, s32 index);
 extern void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused,
                                  u32 retainScale);
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
-extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window, u32 resource);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16 id, u32 option);
 extern void evtStageTestQueueMotion(s32 kind, u32 index);
 extern void func_00341C78(u32 sequence);
@@ -839,7 +838,7 @@ void func_00299B98(BrsSkillPackageWork *work, s32 selectLevelUp) {
                              (struct EffectSlotSet *)work->staffSlots.pairResources[1],
                              0, 0);
         mnuSetPageParams(work->partyWindow.slots[page].windowSprites, 2);
-        mnuAttachPartyIconBundle(page, window, (u32)work->staffSlots.pairResources[0]);
+        mnuAttachPartyIconBundle(page, window, work->staffSlots.pairResources[0]);
 
         (*(MenuIconBundle **)((u8 *)work + page * sizeof(MenuPageSlot) +
             (u32)&((BrsSkillPackageWork *)0)->partyWindow.slots[0].iconBundle))->fade = 0x100;

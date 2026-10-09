@@ -6,6 +6,9 @@
 struct SdfAsset;
 union SdfSubParam;
 
+/* Refresh one of the two draw entries and retain the other entry's dirty bits. */
+void sdfAssetApplyEntryChanges(struct SdfAsset *asset, s32 entryIndex);
+
 void sdfSetPrimaryStateWordFirst(struct SdfAsset *asset, u32 value);
 void sdfSetPrimaryStateWordSecond(struct SdfAsset *asset, u32 value);
 void sdfSetPrimaryStateWordThird(struct SdfAsset *asset, u32 value);

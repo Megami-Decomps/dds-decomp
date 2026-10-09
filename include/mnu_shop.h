@@ -52,7 +52,7 @@ typedef struct MenuWindowContainer {
     s32 height;            /* 0x14 */
     struct MenuList *list; /* 0x18 */
     s32 field1C;           /* 0x1C */
-    s32 sprite20;          /* 0x20 */
+    struct EffectSlotSet *spriteResource; /* 0x20 */
     s32 param24;           /* 0x24 */
     s32 param28;           /* 0x28 */
     struct {
@@ -82,6 +82,9 @@ void mnuSetWindowContainerLayout(MenuWindowContainer *menu,
                                  u32 thirdX);
 void mnuSetWindowOverlaySprite(MenuWindowContainer *menu,
                                struct EffectSlotSet *sprite);
+void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *menu,
+                                 struct EffectSlotSet *spriteResource,
+                                 u32 third, u32 fourth);
 
 typedef char MenuIconState_size_must_be_0x38[(sizeof(struct MenuIconState) == 0x38) ? 1 : -1];
 typedef char MenuWindowContainer_size_must_be_0x98[(sizeof(MenuWindowContainer) == 0x98) ? 1 : -1];

@@ -1547,7 +1547,7 @@ void parDrawPendingCellSystems(void) {
             sdfConsAppendClearPacket((SdfListHead *)*slot, NULL);
             list = *slot;
         }
-        sdfConsAppendAssetPacket((SdfListHead *)list, (void *)system->asset, NULL);
+        sdfConsAppendAssetPacket((SdfListHead *)list, (SdfAsset *)system->asset, NULL);
         count = system->cellCount;
         if (system->kind == PAR_CELL_TOPOLOGY_PAIR) {
             parDrawControl.indices = D_0034E360;

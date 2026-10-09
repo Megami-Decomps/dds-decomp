@@ -101,7 +101,7 @@ void effScatterDrawObject(PcpScatterDraw *object) {
     if (object->sharedResource != NULL) {
         sdfSetAssetPrimaryTextureAddress((struct SdfAsset *)object->asset, (u32)object->sharedResource->textureHandle);
     }
-    sdfConsAppendAssetPacket(packet, (void *)object->asset, 0);
+    sdfConsAppendAssetPacket(packet, (SdfAsset *)object->asset, 0);
     count = (s32)object->particleCount;
     D_00452050.parameters = D_003B14C0;
     for (index = 0; index < count; index++) {

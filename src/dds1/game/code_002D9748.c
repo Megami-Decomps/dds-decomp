@@ -631,8 +631,8 @@ SdfAsset *sdfCreateAssetWithDrawEntries(void) {
         entryWords[0x18 / 4] = 0x6005C005;
         entryWords[0x30 / 4] = 0;
         entryWords[0x34 / 4] = 0x640CC00A;
-        entryWords[0x98 / 4] = 0x400000C;
-        entryWords[0x9C / 4] = 0x14000000;
+        ((SdfAssetEntry *)entryWords)->vifItopCommand = 0x0400000C;
+        ((SdfAssetEntry *)entryWords)->vifMscalCommand = 0x14000000;
     }
     asset->scalarPairFirst = 0;
     asset->scalarPairSecond = 0;
@@ -809,10 +809,10 @@ void sdfApplyAssetSecondaryEntry(SdfAsset *asset, SdfAssetEntry *drawEntry) {
     SdfTex *texture = asset->secondaryTexture;
     u32 packetMode;
 
-    drawEntry->unk0C = asset->secondaryColor;
+    drawEntry->secondaryColor = asset->secondaryColor;
     packetMode = asset->secondaryMode;
-    drawEntry->mode = packetMode;
-    drawEntry->unk20 = D_00398198[packetMode];
+    drawEntry->secondaryMode = packetMode;
+    drawEntry->alphaState = D_00398198[packetMode];
     if (texture != NULL) {
         drawEntry->secondaryTextureState.sampling = sdfTexGetPrimarySamplingState(texture);
         drawEntry->secondaryTextureState.texture = sdfTexGetPrimaryTextureState(texture);

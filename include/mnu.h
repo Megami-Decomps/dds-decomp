@@ -222,7 +222,7 @@ typedef char MenuSprites_dds1_size_check[
 typedef struct MenuIconBundle {
 #ifdef VERSION_DDS2
     u32 unk0[3];
-    void *sprite[3];
+    struct EffectSlotSet *sprite[3];
 #else
     u8 pad0[0xC];
     struct EffectSlotSet *sprite[4];
@@ -327,12 +327,15 @@ typedef char MenuPanelGroup_initialValue_offset[((u32)&((MenuPanelGroup *)0)->in
 #endif
 
 #ifdef VERSION_DDS2
-extern MenuPanelGroup *mnuCreatePanelGroup(s32 owner, struct EffectSlotSet *texture, s32 mode);
+extern MenuPanelGroup *mnuCreatePanelGroup(struct EffectSlotSet *owner,
+                                           struct EffectSlotSet *texture,
+                                           struct EffectSlotSet *extraGrid);
 #else
-extern MenuPanelGroup *mnuCreatePanelGroup(s32 parent);
+extern MenuPanelGroup *mnuCreatePanelGroup(struct EffectSlotSet *parent);
 #endif
 extern void mnuDestroyPanelGroup(MenuPanelGroup *group);
-extern void mnuUpdateFiveListEntries(MenuPanelGroup *group, s32 gridObject);
+extern void mnuUpdateFiveListEntries(MenuPanelGroup *group,
+                                    struct EffectSlotSet *gridObject);
 extern void mnuSetPanelGroupSelection(MenuPanelGroup *group, u32 selection);
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *group);
 extern u32 mnuGetPanelGroupSelection(MenuPanelGroup *group);
@@ -565,6 +568,12 @@ typedef struct MenuPageWindow {
     s32 scrollOffset;
     s32 fade;
 } MenuPageWindow;
+
+#ifdef VERSION_DDS2
+MenuIconBundle *mnuCreateIconBundle(struct EffectSlotSet *resource);
+void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window,
+                              struct EffectSlotSet *resource);
+#endif
 
 #ifdef VERSION_DDS2
 /* Marks the window-sprite mode toggled by page setup and entry resets. */

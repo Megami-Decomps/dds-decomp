@@ -620,8 +620,6 @@ void mnuDrawCampGridResourceSlot(s32 drawWork, u32 y, u32 z, s32 record, u32 unu
                   layer);
 }
 
-extern void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *window,
-                                        u32 second, u32 third, u32 fourth);
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *window, const void *layout,
                                     u32 left, u32 top, u32 right, u32 bottom);
 
@@ -680,7 +678,7 @@ MenuWindowContainer *mnuCreateStaffResourceListWindow(void *const *entries, s32 
         style = 7;
         break;
     }
-    mnuSetWindowEntryParameters(0, window, (u32)((MenuStaffContext *)work)->spriteArg0, 0xC, style);
+    mnuSetWindowEntryParameters(0, window, ((MenuStaffContext *)work)->spriteArg0, 0xC, style);
 
     index = 0;
     if (count > 0) {

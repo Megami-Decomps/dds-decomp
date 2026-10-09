@@ -474,9 +474,9 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
 
     mnuReleaseStaffMenuResources(group);
     mnuInitializeStaffPageWindows(&work->partyWindow, &work->staffSlots, 0, &work->partyPanel);
-    panel = mnuCreatePanelGroup((s32)work->staffSlots.pairResources[0]);
+    panel = mnuCreatePanelGroup(work->staffSlots.pairResources[0]);
     work->panelHandle = panel;
-    mnuUpdateFiveListEntries(panel, work->unitHandle);
+    mnuUpdateFiveListEntries(panel, (struct EffectSlotSet *)work->unitHandle);
     work->spriteHandle =
         mnuCreateSpriteState(work->staffSlots.baseResources[5],
                              work->staffSlots.baseResources[2],

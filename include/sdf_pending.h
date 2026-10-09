@@ -27,5 +27,6 @@ typedef char SdfPendingBuffer_size_must_be_0x100[(sizeof(SdfPendingBuffer) == 0x
 
 void sdfInitializeSynchronizedRequest(SdfPendingRequest *request, SdfPendingCallback callback);
 void sdfPendingQueuePush(SdfPendingRequest *owner, u32 entry);
+SdfPendingNode *sdfDetachQueue(void);
 
 #endif

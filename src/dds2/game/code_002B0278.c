@@ -202,7 +202,6 @@ extern void mnuCreateStaffImageSprite();
 extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
 
-extern MenuIconBundle *mnuCreateIconBundle(u32);
 
 extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
 
@@ -350,7 +349,6 @@ extern s32 mnuGetEntryUseStatus(DatPartyRecord *, u16);
 extern void func_002B3CA0(s32, s32, s32, MenuList *, MenuListNode *, s32);
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
-void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *menu, u32 second, u32 third, u32 fourth);
 /* Copy the native panel layout, override its bounds, and mark its transition flag. */
 void mnuSetWindowPanelBounds(MenuWindowContainer *panel, const void *layout, u32 left, u32 top,
                    u32 right, u32 bottom);
@@ -630,7 +628,7 @@ void mnuCreatePartySelectionWindow(MenuContext *context) {
         placement = 6;
         break;
     }
-    mnuSetWindowEntryParameters(0, window, context->resourceHandle, 0xC, placement);
+    mnuSetWindowEntryParameters(0, window, (struct EffectSlotSet *)(u32)context->resourceHandle, 0xC, placement);
     party->primaryWindow = window;
 }
 
@@ -1121,7 +1119,6 @@ s32 mnuStepStaffCampPageControl(KwlnTask *callback) {
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2C88);
 
-extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
 extern void func_002B2C88(s32, s32, s32, s32);
@@ -1140,9 +1137,9 @@ s32 mnuCreatePanels(KwlnTask *callback) {
                          (EffectSlotSet *)menuContext->displayHandle,
                          (EffectSlotSet *)menuContext->displayResource,
                          (EffectSlotSet *)menuContext->alternateResource, 0, 0);
-    mnuAttachPartyIconBundle(index, window, (u32)menuContext->displayResource);
-    menuContext->panelGroup = mnuCreatePanelGroup(menuContext->resourceHandle,
-                                                   menuContext->displayResource, 0);
+    mnuAttachPartyIconBundle(index, window, (EffectSlotSet *)menuContext->displayResource);
+    menuContext->panelGroup = mnuCreatePanelGroup((EffectSlotSet *)menuContext->resourceHandle,
+                                                   (EffectSlotSet *)menuContext->displayResource, 0);
     menuContext->panelRequest = mnuCreateSpriteState((struct EffectSlotSet *)menuContext->resourceHandle,
                                                     (struct EffectSlotSet *)menuContext->displayResource,
                                                     (struct EffectSlotSet *)menuContext->displayHandle);
@@ -1495,7 +1492,7 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, KwlnTask *callback) {
     mnuSetWindowFadeScale(window, MNU_FULL_FADE);
     mnuInitializeBasicWindowLayout(window, (struct EffectSlotSet *)context->labelHandle, 0x1A);
     mnuSetWindowPanelBounds(window, context->equippedSkillLayout, 0, 0, 0, 0);
-    mnuSetWindowEntryParameters(0, window, context->resourceHandle, 0xD, placement);
+    mnuSetWindowEntryParameters(0, window, (struct EffectSlotSet *)(u32)context->resourceHandle, 0xD, placement);
     window->list->context = context;
     window->list->drawCallback = func_002B3CA0;
     for (i = 0; i < skillCount; i++) {
@@ -3799,7 +3796,6 @@ typedef struct MenuIconLayout {
 
 extern MenuIconLayout D_0042AFD8;
 
-MenuIconBundle *mnuCreateIconBundle(u32 resource);
 
 void mnuReleaseIconBundleAndSprites(MenuIconBundle *menu);
 
@@ -3807,7 +3803,6 @@ void mnuReleaseIconBundleAndSprites(MenuIconBundle *menu);
 void mnuDrawFadeIcons(s32 x, s32 y, s32 depth, s32 unused, MenuIconBundle *obj, s32 drawArg);
 
 
-void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource);
 
 void mnuReleasePartyIconBundles(MenuPageWindow *menu);
 
