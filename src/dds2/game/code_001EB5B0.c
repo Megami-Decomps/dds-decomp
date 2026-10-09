@@ -5928,7 +5928,7 @@ void sndLoadMotSeFiles(SoundSlotOwner *sound) {
         slot++;
         offset += 4;
     } while (slot < 0x1D);
-    sound->flags |= 1;
+    sound->flags |= SOUND_SLOT_FILE_LOAD_PENDING;
 }
 
 /* Find the newest registered owner with both keys equal; return null if absent. */
@@ -6016,7 +6016,7 @@ void btlStartMoveOtherUnitsTask(void) {
 s32 sndHasActiveFileLoad(void) {
     SoundSlotOwner *node = ((BtlState *)btlGetRuntime())->soundSlotOwners;
     while (node != 0) {
-        if ((node->flags & 8) != 0) {
+        if ((node->flags & SOUND_SLOT_TRACK_LOADING) != 0) {
             return 1;
         }
         node = node->next;
@@ -6032,10 +6032,10 @@ void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *args) {
     if (owner == 0) {
         return;
     }
-    if (owner->flags & 1) {
+    if (owner->flags & SOUND_SLOT_FILE_LOAD_PENDING) {
         return;
     }
-    if (!(owner->flags & 2)) {
+    if (!(owner->flags & SOUND_SLOT_FILES_READY)) {
         return;
     }
     if (owner->work.resourceHandles[args->unk_08] == 0) {
@@ -6047,9 +6047,9 @@ void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *args) {
     if (args->unk_08 != 0xB) {
         owner->work.pendingSoundId = sndBuildMotSeResourceKey(owner, args->unk_08);
         owner->work.pendingSlot = args->unk_08;
-        owner->flags |= 4;
-        owner->flags &= ~8;
-        owner->flags &= ~0x10;
+        owner->flags |= SOUND_SLOT_TRACK_LOAD_REQUESTED;
+        owner->flags &= ~SOUND_SLOT_TRACK_LOADING;
+        owner->flags &= ~SOUND_SLOT_TRACK_READY;
     }
 }
 
@@ -6068,10 +6068,10 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
     if (owner == 0) {
         return 1;
     }
-    if (owner->flags & 1) {
+    if (owner->flags & SOUND_SLOT_FILE_LOAD_PENDING) {
         return 1;
     }
-    if (!(owner->flags & 2)) {
+    if (!(owner->flags & SOUND_SLOT_FILES_READY)) {
         return 1;
     }
     soundWork = &owner->work;
@@ -6080,7 +6080,7 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
     }
     if (args->unk_08 != 0xB) {
         key = sndBuildMotSeResourceKey(owner, args->unk_08);
-        if (owner->flags & 0x10) {
+        if (owner->flags & SOUND_SLOT_TRACK_READY) {
             sndSetStationedSeHighVolume(key);
             btlBossDebugPrintf("btl:motSE play[%X-%X]\n", key >> 16, key & 0xFFFF);
             return 1;
@@ -6105,8 +6105,8 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
         return 1;
     }
     if ((s32)args->unk_0C > 90) {
-        owner->flags &= ~8;
-        owner->flags |= 0x10;
+        owner->flags &= ~SOUND_SLOT_TRACK_LOADING;
+        owner->flags |= SOUND_SLOT_TRACK_READY;
         btlBossDebugPrintf("btl:motSE load time out[%X]\n", key);
         return 1;
     }
@@ -6169,7 +6169,7 @@ void func_00205160(void) {
     s32 tracksReady;
 
     for (owner = state->soundSlotOwners; owner != NULL; owner = owner->next) {
-        if ((owner->flags & 2) == 0) {
+        if ((owner->flags & SOUND_SLOT_FILES_READY) == 0) {
             u32 slot;
             s32 requestsPending = 0;
 
@@ -6191,7 +6191,7 @@ void func_00205160(void) {
                 }
             }
             if (requestsPending == 0) {
-                owner->flags = (owner->flags & ~1) | 2;
+                owner->flags = (owner->flags & ~SOUND_SLOT_FILE_LOAD_PENDING) | SOUND_SLOT_FILES_READY;
                 btlBossDebugPrintf("btl:motSE file load all end[%p]\n", owner);
             }
         }
@@ -6206,16 +6206,16 @@ void func_00205160(void) {
 
     tracksReady = 1;
     for (owner = state->soundSlotOwners; owner != NULL; owner = owner->next) {
-        if (owner->flags & 8) {
+        if (owner->flags & SOUND_SLOT_TRACK_LOADING) {
             u32 loaded = sndFindPackedTrackLoadStatus((u32)owner->work.pendingSoundId);
 
             if (loaded != 0) {
                 u32 flags = owner->flags;
 
-                if (flags & 8) {
+                if (flags & SOUND_SLOT_TRACK_LOADING) {
                     tracksReady = 0;
                 }
-                owner->flags = (flags & ~8) | 0x10;
+                owner->flags = (flags & ~SOUND_SLOT_TRACK_LOADING) | SOUND_SLOT_TRACK_READY;
             } else {
                 tracksReady = 0;
             }
@@ -6227,7 +6227,7 @@ void func_00205160(void) {
             btlBossDebugPrintf("btl:motSE wait[skillSE]\n");
         } else {
             for (owner = state->soundSlotOwners; owner != NULL; owner = owner->next) {
-                if (owner->flags & 4) {
+                if (owner->flags & SOUND_SLOT_TRACK_LOAD_REQUESTED) {
                     SoundSlotWork *work = &owner->work;
                     struct SdfMemBlock *block = work->resourceHandles[owner->work.pendingSlot];
                     s32 size = sdfMemoryGetBlockSize(block);
@@ -6235,8 +6235,8 @@ void func_00205160(void) {
                         work->resourceHandles[owner->work.pendingSlot]);
 
                     func_003422F8((s32)address, size);
-                    owner->flags = (owner->flags & ~4) | 8;
-                    owner->flags &= ~0x10;
+                    owner->flags = (owner->flags & ~SOUND_SLOT_TRACK_LOAD_REQUESTED) | SOUND_SLOT_TRACK_LOADING;
+                    owner->flags &= ~SOUND_SLOT_TRACK_READY;
                     break;
                 }
             }
