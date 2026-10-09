@@ -91,7 +91,7 @@ extern void fileJobCopyCommandIntoSecondaryData(u32, u32, u32);
 
 extern void effResetFileResourceManager(void);
 
-extern s32 effClassifyResourceMask(s32);
+extern u16 effClassifyResourceMask(s32);
 
 extern u32 D_004386BC;
 
@@ -10847,7 +10847,7 @@ void effResetFileResourceManager(void) {
     D_004387B0 = 0;
 }
 
-s32 effClassifyResourceMask(s32 mask) {
+u16 effClassifyResourceMask(s32 mask) {
     switch (mask) {
     case 1: return 1;
     case 2: return 2;
