@@ -1,6 +1,7 @@
 #include "common.h"
 #include "fpu.h"
 #include "eff.h"
+#include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "itf_grid_text.h"
 #include "itf_draw_grid.h"
@@ -48,10 +49,8 @@ void itfDrawGridWithResolvedSlot(s32 offsetX, s32 offsetY, s32 z, s32 drawFlags,
                   surfaceIndex);
 }
 
-extern void func_002BD3D8(void *, s32, void *);
-
-/* Advance the indexed slot's timed source and carry its active state forward. */
-void func_002BF828(EffectSlotSet *owner, s32 index) {
+/* Update the indexed slot's description countdown and carry its active state forward. */
+void itfUpdateGridSlotDescription(EffectSlotSet *owner, s32 index) {
     BdWork *base = &owner->workEntries[index];
     const u32 timedByteOffset = (index + base->slotOffset) * sizeof(BdWork);
     BdWork *timed = (BdWork *)(timedByteOffset + (u32)owner->workEntries);
@@ -59,10 +58,12 @@ void func_002BF828(EffectSlotSet *owner, s32 index) {
     BdWork *next;
     u32 advance = 0;
 
-    if (timed->unk98 == 0) {
-        timed->unk98 = owner->descriptions[index + base->slotOffset].unk7E;
+    if (timed->remainingDescriptionUpdates == 0) {
+        timed->remainingDescriptionUpdates =
+            owner->descriptions[index + base->slotOffset].descriptionUpdateDelay;
         if ((u32)(index + timed->slotOffset + 1) < owner->count) {
-            const s32 nextFlags = owner->descriptions[index + base->slotOffset + 1].flags & 0x20;
+            const s32 nextFlags = owner->descriptions[index + base->slotOffset + 1].flags &
+                                  EFF_SLOT_DESCRIPTION_SEQUENCE_CONTINUATION;
             const u32 shouldAdvance = nextFlags > 0;
             advance = shouldAdvance;
         }
@@ -74,13 +75,13 @@ void func_002BF828(EffectSlotSet *owner, s32 index) {
             }
             base->slotOffset = 0;
         }
-        func_002BD3D8(owner, index + base->slotOffset, previous);
+        effInitializeSlotWorkFromDescription(owner, index + base->slotOffset, previous);
         next = (BdWork *)effGetSlotWorkOrOverride(owner, index + base->slotOffset);
         next->states[0].flags = previous->states[0].flags;
         next->states[0].source = previous->states[0].source;
         next->states[0].value = previous->states[0].value;
     } else {
-        timed->unk98--;
+        timed->remainingDescriptionUpdates--;
     }
 }
 
@@ -90,7 +91,7 @@ s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key) {
     s32 result;
 
     if (entry->states[0].delay == 0) {
-        func_002BF828(object, key);
+        itfUpdateGridSlotDescription(object, key);
     }
     result = (s32)effUpdateTimedStates(object, (u32)key, entry);
     if (result == 0) {
@@ -107,7 +108,7 @@ void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *object, s32 index, s32 x,
     entry->yOffset = y >> 3;
     entry->width = width >> 4;
     entry->height = height >> 3;
-    func_002BD3D8(object, index, record);
+    effInitializeSlotWorkFromDescription(object, index, record);
 }
 
 /* Store pixel bounds quantized to the widget's 16x8 grid, then copy all four words. */
