@@ -11738,7 +11738,7 @@ u32 effResetRecordRun(u8 *table, u32 first, u32 arg) {
                                     (s32)((EffectSlotSet *)table)->workEntries + 0x28), arg);
         i++;
         index = first + i;
-    } while (index < ((EffectSlotSet *)table)->count && (((EffectSlotSet *)table)->descriptions[index].flags & 0x20));
+    } while (index < ((EffectSlotSet *)table)->count && (((EffectSlotSet *)table)->descriptions[index].flags & EFF_SLOT_DESCRIPTION_SEQUENCE_CONTINUATION));
     return 1;
 }
 

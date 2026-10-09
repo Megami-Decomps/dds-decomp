@@ -913,7 +913,7 @@ u32 effResetRecordRun(u8 *work, u32 first, u32 unused) {
                                     (s32)((EffectSlotSet *)work)->workEntries + 0x28), unused);
         i++;
         index = first + i;
-    } while (index < ((EffectSlotSet *)work)->count && (((EffectSlotSet *)work)->descriptions[index].flags & 0x20));
+    } while (index < ((EffectSlotSet *)work)->count && (((EffectSlotSet *)work)->descriptions[index].flags & EFF_SLOT_DESCRIPTION_SEQUENCE_CONTINUATION));
     return 1;
 }
 

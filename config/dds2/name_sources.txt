@@ -5505,6 +5505,7 @@
 0x00306500	effSelectPresetAndDispatch	inferred	Selects preset by supplied kind then invokes effect dispatch and restores preset 0x44. [names_R_FuncNames4.tsv]
 0x003065A0	sdfCopyCornerWordsWithEdgeByte	inferred	readability/matching review (QP16)
 0x00306F80	itfDrawGridWithResolvedSlot	inferred	Resolves a slot before submitting a grid drawing request. [names_reviewed8.tsv]
+0x00307018	itfUpdateGridSlotDescription	inferred	Decrements the current entry's update-call delay or advances its continued description sequence; paired DDS1/DDS2 native wrappers agree.
 0x003071D0	itfSetGridEntryQuantizedAndRefresh	inferred	Quantizes grid bounds then refreshes the corresponding entry. [names_reviewed8.tsv]
 0x00307270	itfGridSetQuantizedBounds	inferred	Stores x and width shifted by four and y and height shifted by three, then copies all four quantized coordinates into its draw entry.
 0x003072E8	itfGridSetBounds	inferred	Writes the grid widget's x, y, width, and height fields.
