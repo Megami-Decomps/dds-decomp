@@ -4044,12 +4044,7 @@ void fileDispatchJobTypeCallback(FileJobPayload *job, u32 color) {
     }
 }
 
-void fileJobSetPrimaryData(job, src, size, option)
-    FileJobPayload *job;
-    void *src;
-    s32 size;
-    u16 option;
-{
+void fileJobSetPrimaryData(FileJobPayload *job, const void *src, s32 size, u16 option) {
     fileJobFreePrimaryBuffer(job);
     if (src != NULL && size > 0) {
         job->primary.allocation = sdfAllocGeneralBlock(size);
@@ -4079,12 +4074,7 @@ void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, s32 state, u16 optio
     }
 }
 
-void fileJobSetSecondaryData(job, src, size, selector)
-    FileJobPayload *job;
-    void *src;
-    s32 size;
-    u16 selector;
-{
+void fileJobSetSecondaryData(FileJobPayload *job, const void *src, s32 size, u16 selector) {
     fileJobFreeSecondaryBuffer(job);
     if (src != NULL && size > 0) {
         job->secondary.allocation = sdfAllocGeneralBlock(size);
