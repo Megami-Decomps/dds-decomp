@@ -2371,7 +2371,77 @@ s32 func_0011E848(s32 index) {
     return D_00435E8C;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", func_0011E930);
+extern s32 D_00435E90;
+extern s32 D_00435E94;
+extern s32 btlCheckScenePartyLevelThreshold(u32 scene);
+extern void dds3WorkClear(void);
+
+s32 func_0011E930(s32 index, f32 step) {
+    s32 group;
+    s32 interval;
+    s32 count;
+    s32 i;
+    s32 total;
+    s32 roll;
+    u32 scene;
+    s32 packed;
+    f32 counter;
+
+    if (index == 0 || step == 0.0f) {
+        return 0;
+    }
+    group = btlSelectConditionalEncounterGroup(index);
+    interval = func_0011E848(index);
+    if (interval == 0) {
+        return interval;
+    }
+    counter = datGameState->unk1440 + step;
+    datGameState->unk1440 = counter;
+    if (counter < 100.0f) {
+        return 0;
+    }
+    count = (s32)(counter / 100.0f);
+    datGameState->unk1440 = counter - (f32)count * 100.0f;
+    for (i = 0; i < count; i++) {
+        if (datGameState->world.fieldFlags & 2) {
+            datGameState->unk1444 = datGameState->unk1444 + effMiscRandMod(0, 7) + 6;
+        } else {
+            datGameState->unk1444 = datGameState->unk1444 + effMiscRandMod(0, 3) + 2;
+        }
+    }
+    if (datGameState->unk1444 > 0xFDE8) {
+        datGameState->unk1444 = -0x218;
+    }
+    if (datGameState->unk1444 < interval) {
+        return 0;
+    }
+    total = 0;
+    for (i = 0; i < 20; i++) {
+        if (D_00435E0C[index].groups[group].entries[i].sceneIndex != 0) {
+            total += D_00435E0C[index].groups[group].entries[i].weight;
+        }
+    }
+    count = 0;
+    roll = effMiscRandMod(0, total);
+    for (i = 0; i < 20; i++) {
+        if (D_00435E0C[index].groups[group].entries[i].sceneIndex != 0) {
+            if (roll < count + D_00435E0C[index].groups[group].entries[i].weight) {
+                scene = D_00435E0C[index].groups[group].entries[i].sceneIndex;
+                if ((datGameState->world.fieldFlags & 1) == 0 || btlCheckScenePartyLevelThreshold(scene) != 0) {
+                    packed = (group << 24) | (i << 16) | scene;
+                    D_00435E90 = index;
+                    D_00435E8C = 0;
+                    D_00435E94 = packed;
+                    return packed;
+                }
+                dds3WorkClear();
+                return 0;
+            }
+            count += D_00435E0C[index].groups[group].entries[i].weight;
+        }
+    }
+    return 0;
+}
 
 void dds3WorkClear(void) {
     DatGameState *state = datGameState;
