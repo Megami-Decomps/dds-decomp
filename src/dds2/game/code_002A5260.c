@@ -899,7 +899,7 @@ void mnuFadeSetState(SlideBar *state, u32 mode) {
     state->active = mode;
 }
 
-extern void func_00306CD0(s32, s32, s32, u32, s32, void *, s32, s32);
+extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 void mnuAdvanceSpriteSlideBar(SlideBar *bar) {
     u32 sprite = mnuMovieWork->sprite;
@@ -907,7 +907,7 @@ void mnuAdvanceSpriteSlideBar(SlideBar *bar) {
     if (bar->active == 0 && bar->pos == 0) {
         return;
     }
-    func_00306CD0(0, 0, 0, bar->pos / 2, 0, (void *)sprite, 9, 0x53);
+    func_00306CD0(0, 0, 0, bar->pos / 2, 0, (EffectSlotSet *)sprite, 9, 0x53);
     if (bar->active == 0) {
         bar->pos -= 8;
     } else {
@@ -931,7 +931,73 @@ void mnuFadeSetStateOff(u32 *state, u32 mode) {
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6D68);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6F88);
+extern void uiDrawActiveSurfaceWithTestMode(u32 context);
+extern void uiConfigureSurfaceAlphaState(s32 context);
+extern void uiDrawSurfaceAtNearDepth(u32 context);
+extern void func_002A6D68(u32 *state);
+
+void func_002A6F88(u32 *state) {
+    EffectSlotSet *sprites = (EffectSlotSet *)mnuMovieWork->sprite;
+    s32 lowerClip;
+    s32 alpha;
+    s32 phase;
+    s32 y;
+
+    if (state[0] == 0 && state[1] == 0) {
+        return;
+    }
+
+    lowerClip = -sprites->workEntries[5].sourceHeight;
+    alpha = (s32)state[1] / 2;
+    phase = (s32)((f32)mnuMovieWork->frame * 2.5f);
+    phase %= 800;
+
+    y = -phase - 800;
+    if (lowerClip < y && y < 448) {
+        func_00306CD0(-0x130, y * 8, 0, alpha, 0, sprites, 5, 0x53);
+    }
+    y = -phase;
+    if (lowerClip < y && y < 448) {
+        func_00306CD0(-0x130, y * 8, 0, alpha, 0, sprites, 5, 0x53);
+    }
+    y = 800 - phase;
+    if (lowerClip < y && y < 448) {
+        func_00306CD0(-0x130, y * 8, 0, alpha, 0, sprites, 5, 0x53);
+    }
+
+    phase = (s32)((f32)mnuMovieWork->frame * 0.3f);
+    phase %= 800;
+    uiDrawActiveSurfaceWithTestMode(0x53);
+
+    y = -phase - 800;
+    if (lowerClip < y && y < 448) {
+        func_00306CD0(-0x130, y * 8, 0, alpha, 0x60, sprites, 6, 0x53);
+    }
+    y = -phase;
+    if (lowerClip < y && y < 448) {
+        func_00306CD0(-0x130, y * 8, 0, alpha, 0x60, sprites, 6, 0x53);
+    }
+    y = 800 - phase;
+    if (lowerClip < y && y < 448) {
+        func_00306CD0(-0x130, y * 8, 0, alpha, 0x60, sprites, 6, 0x53);
+    }
+
+    uiConfigureSurfaceAlphaState(0x53);
+    func_002A6D68(state);
+    uiDrawSurfaceAtNearDepth(0x53);
+
+    if (state[0] == 0) {
+        state[1] -= 8;
+    } else {
+        state[1] += 8;
+    }
+    if ((s32)state[1] < 0) {
+        state[1] = 0;
+    }
+    if ((s32)state[1] > 0x200) {
+        state[1] = 0x200;
+    }
+}
 
 extern void func_002A7260(MnuTitlePaletteTransition *transition, s32 randomize);
 struct EffRandState;
