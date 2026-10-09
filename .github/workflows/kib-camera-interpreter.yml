@@ -66,6 +66,10 @@ jobs:
         if: steps.orig.outputs.available == 'true'
         run: python3 experiments/kib-camera-interpreter/peer_probe.py
 
+      - name: Compare bounded peer call interval
+        if: steps.orig.outputs.available == 'true'
+        run: python3 experiments/kib-camera-interpreter/profile.py
+
       - name: Prepare official user-mode debugger
         id: debugger
         if: steps.orig.outputs.available == 'true'

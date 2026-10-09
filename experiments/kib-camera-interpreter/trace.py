@@ -209,7 +209,7 @@ def live_cse_observation(temp, watch_path, ordinary_identity, qemu):
                     native_qemu_baseline_target_equal=True, native_qemu_observed_target_equal=True,
                     target_bytes=len(native_identity[0]), relocations=len(native_identity[1])))
         d.STAGE = "cse_bounded_decisions"
-        summary = cse.summarize_decisions(output, limit_per_uid=12)
+        summary = cse.summarize_decisions(output, limit_per_uid=32)
         d.emit(dict(scope="camera_cse_decisions", **summary))
         d.require(summary["coverage_complete"], "cse_summary_incomplete")
     finally:
@@ -276,7 +276,7 @@ def main(qemu=None):
             role_report, watch = Path(temp) / "roles.json", Path(temp) / "watch.json"
             role_result = d.run("source_role_lineage", [sys.executable, "tools/ee_gcc_role_lineage.py",
                   str(probe), "--roles", str(Path(__file__).with_name("roles.json")),
-                  "--json", str(role_report), "--watch", str(watch)], allowed=(0, 2))
+                  "--json", str(role_report), "--watch", str(watch), "--watch-limit", "64"], allowed=(0, 2))
             if role_result.returncode:
                 prefixes = ("unrecognized executable RTL header", "no complete linked RTL inventory",
                     "incomplete final RTL inventory", "empty or incomplete target RTL",
