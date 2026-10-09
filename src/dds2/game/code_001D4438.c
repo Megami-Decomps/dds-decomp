@@ -58,10 +58,6 @@ typedef struct {
     s32 flags;
 } SceneInitializer;
 
-typedef struct RosterAvailability {
-    u8 flags;
-    u8 pad[7];
-} RosterAvailability;
 
 typedef struct SceneControl {
     u8 mode;
@@ -124,7 +120,6 @@ extern u32 D_00435E5C;
 extern SceneSlotFadeWork *D_00438F54;
 
 
-extern s32 datItemSkillRecords;
 
 extern s32 func_00206090();
 extern void btlRepositionPartyAroundBattleCenter();
