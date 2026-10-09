@@ -5947,19 +5947,21 @@ u32 *effAllocateQuantizedBuffer(EffBillQuantizedConfig *work) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F3258);
 
+extern void func_002F3258(u32 *, EffBillQuantizedConfig *);
+
 u32 *effPrepareQuantizedTexture(EffBillQuantizedConfig *src) {
-    u32 *buf = (u32 *)effAllocateQuantizedBuffer(src);
+    u32 *buf = effAllocateQuantizedBuffer(src);
     buf[1] = effCreateTexturedStripWithSharedTexture(buf[0], src->samples.quantizedSamples);
     func_002F3258(buf, src);
     return buf;
 }
 
 u32 *effPrepareOwnedQuantizedTexture(u8 *p) {
-    u8 *dst = ((EffClassWork *)p)->payload;
+    EffBillQuantizedConfig *config = (EffBillQuantizedConfig *)((EffClassWork *)p)->payload;
     u32 *src = (u32 *)((EffClassWork *)p)->resource;
-    u32 *buf = (u32 *)effAllocateQuantizedBuffer(dst);
+    u32 *buf = effAllocateQuantizedBuffer(config);
     buf[1] = effAllocateStripFromWorkAndRetainTexture(((EffFrameState *)src)->asset);
-    func_002F3258(buf, dst);
+    func_002F3258(buf, config);
     return buf;
 }
 

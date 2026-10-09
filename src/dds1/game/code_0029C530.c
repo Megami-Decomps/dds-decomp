@@ -5648,7 +5648,7 @@ u32 *effAllocateQuantizedBuffer(EffBillQuantizedConfig *work) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002AFE68);
 
-extern void func_002AFE68(u32 *, u8 *);
+extern void func_002AFE68(u32 *, EffBillQuantizedConfig *);
 
 u32 *effPrepareQuantizedTexture(EffBillQuantizedConfig *work) {
     u32 *buffer = effAllocateQuantizedBuffer(work);
@@ -5659,7 +5659,7 @@ u32 *effPrepareQuantizedTexture(EffBillQuantizedConfig *work) {
 }
 
 u32 *effPrepareOwnedQuantizedTexture(u8 *work) {
-    u8 *anim = ((EffClassWork *)work)->payload;
+    EffBillQuantizedConfig *anim = (EffBillQuantizedConfig *)((EffClassWork *)work)->payload;
     u8 *owner = (u8 *)((EffClassWork *)work)->resource;
     u32 *buffer = effAllocateQuantizedBuffer(anim);
 
