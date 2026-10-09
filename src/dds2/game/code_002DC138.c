@@ -12,6 +12,7 @@
 #include "sdf_texture_file.h"
 #include "sdf_chunk.h"
 #include "eff_expanded_list.h"
+#include "eff_update_flags.h"
 
 typedef struct EffModelOwner {
     f32 scale;
@@ -392,10 +393,10 @@ void func_002DC808(EffModelOwner *owner) {
 void effMarkFloorModelForUpdate(EffModelOwner *p) {
     p->flags |= 1;
     if (!(p->flags & 4)) {
-        if (!(effModelUpdateControlFlags & 1)) {
+        if (!(effModelUpdateControlFlags & EFF_MODEL_UPDATE_DEFER_FLOOR_REFRESH)) {
             func_002DC808(p);
         }
-    } else if (effModelUpdateControlFlags & 1) {
+    } else if (effModelUpdateControlFlags & EFF_MODEL_UPDATE_DEFER_FLOOR_REFRESH) {
         p->flags |= 0x30;
     }
 }
