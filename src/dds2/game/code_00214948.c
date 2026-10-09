@@ -4300,7 +4300,41 @@ u32 btlActivateMarkedActionFromCommand(u32 unused1, u32 unused2, u32 action) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", func_00220DD8);
+extern u32 btlIsLinkedActionSceneStateActive(void);
+
+s32 func_00220DD8(BtlUnit *unit, s32 command) {
+    if (!(unit->flags & 0x400)) {
+        return command;
+    }
+    if (!(unit->flags & 2)) {
+        return command;
+    }
+    if (unit->partyRecord.unitId == 0x116) {
+        switch (command) {
+        case 2:
+        case 9:
+            return btlIsLinkedActionSceneStateActive() ? 0x10 : 0;
+        case 13:
+            return btlIsLinkedActionSceneStateActive() ? 0x11 : -1;
+        default:
+            if (btlIsLinkedActionSceneStateActive()) {
+                switch (command) {
+                case 3:
+                    return 0x12;
+                case 4:
+                    return 0x13;
+                case 7:
+                    return 0x14;
+                case 14:
+                    return 0x15;
+                }
+            }
+            break;
+        }
+    }
+    return command;
+}
+
 
 f32 btlGetActionScaleFactor(ActionUnit *unit, ActionUnit *other) {
     f32 factor = 1.0f;
