@@ -1207,8 +1207,8 @@ void itfScaleVectors(TextVector *output, s32 scaleX, s32 scaleY, s32 scaleZ,
 /* Replace each child color; parent color words are not modified. */
 void itfSetStyleColor(FrFontGlyph *entry, u32 color) {
     for (; entry != NULL; entry = entry->previous) {
-        FrFontGlyph *child;
-        for (child = entry->link1C.firstChild; child != NULL; child = child->next) {
+        FrFontChildGlyph *child;
+        for (child = entry->firstChild; child != NULL; child = child->next) {
             child->parentDimensionsOrRenderWord.renderWord = color;
         }
     }
@@ -1217,8 +1217,8 @@ void itfSetStyleColor(FrFontGlyph *entry, u32 color) {
 /* Clear each child's low byte, then OR unmasked bits into the full color word. */
 void itfSetStyleColorBits(FrFontGlyph *entry, u32 colorBits) {
     for (; entry != NULL; entry = entry->previous) {
-        FrFontGlyph *child;
-        for (child = entry->link1C.firstChild; child != NULL; child = child->next) {
+        FrFontChildGlyph *child;
+        for (child = entry->firstChild; child != NULL; child = child->next) {
             child->parentDimensionsOrRenderWord.renderWord = (child->parentDimensionsOrRenderWord.renderWord & ~ITF_BYTE_MASK) | colorBits;
         }
     }

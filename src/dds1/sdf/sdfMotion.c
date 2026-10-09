@@ -1,3 +1,4 @@
+#include "sdf_request.h"
 #include "common.h"
 #include "sdf_asset_state.h"
 #include "sdf_chip.h"
@@ -42,7 +43,6 @@ typedef struct FuncTab {
 } FuncTab;
 
 void *sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
-void sdfDestroyDevRequest(void *a0);
 void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, void *source, void *dispatch);
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
 s32 sdfMotionInterpolateKeyColor(SdfMotionKeyInterval *a0);

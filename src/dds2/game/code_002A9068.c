@@ -611,7 +611,7 @@ typedef struct StaffResourceHeader {
     u8 pad68[0x8C];
     struct MenuIconState *baseHandles[3]; /* 0x0F4 */
     s32 resourceOptions;        /* 0x100 */
-    MenuWindowContainer *resourceLists[3];      /* 0x104 */
+    MenuWindowContainer *resourceLists[3]; /* 0x104: three adjacent staff windows */
 } StaffResourceHeader;
 
 void mnuDrawCampGridResourceSlot(s32 drawWork, u32 y, u32 z, s32 record, u32 unused,
@@ -722,7 +722,8 @@ extern void *const D_003E5708[];
 extern const s32 D_003E6978[], D_003E6998[];
 
 void mnuStaffInitResourceLists(u8 *work) {
-    MenuFadeFields *ctx = &((MenuStaffContext *)work)->fade;
+    MenuStaffContext *context = (MenuStaffContext *)work;
+    MenuFadeFields *ctx = &context->fade;
     MenuWindowContainer *list;
 
     ((StaffResourceHeader *)work)->baseHandles[0] = mnuCreatePanelIconState(0, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
@@ -733,7 +734,7 @@ void mnuStaffInitResourceLists(u8 *work) {
     ((StaffResourceHeader *)work)->resourceLists[1] = list;
     mnuSetWindowFadeScale(list, 0x100);
     list = mnuCreateStaffResourceListWindow(D_003E5708, 2, 0x1C0, 0x10, work, 0);
-    ((StaffResourceHeader *)work)->resourceLists[2] = list;
+    context->resourceListWindow = list;
     mnuSetWindowFadeScale(list, 0x100);
     mnuInitializeWindowFadeState(ctx);
     mnuBeginWindowFadeTransition(((StaffResourceHeader *)work)->resourceLists[0], ctx);
