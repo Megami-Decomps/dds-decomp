@@ -3542,8 +3542,8 @@ typedef struct EffectSlotNode54 {
     BillObj *billResource; // 0x34
     FileJobPayload **jobs;             // 0x38
     struct SdfMemBlock *jobAllocation;         // 0x3C
-    u32 *queues;           // 0x40
-    u32 queueBuffer;       // 0x44
+    FileQueue **queues;    // 0x40: cloned queues, one per active record
+    struct SdfMemBlock *queueBuffer; // 0x44: backing allocation descriptor
     struct EffExpandedList *resourceHolder; // 0x48
     FileSlotTable *record; // 0x4C
     u16 active;            // 0x50
@@ -3653,9 +3653,9 @@ void effDestroySurfaceNode(EffectSlotNode54 *node) {
     if (node->queueBuffer != 0) {
         count = node->record->count;
         for (i = 0; i < count; i++) {
-            fileQueueDestroy((struct FileQueue *)node->queues[i]);
+            fileQueueDestroy(node->queues[i]);
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->queueBuffer));
+        sdfReleaseResourceAllocation(node->queueBuffer);
     }
     if (node->index != 0) {
         for (i = 0; i < node->count; i++) {
@@ -3739,9 +3739,9 @@ void func_002E7F60(EffectSlotNode54 *dst, u8 *work) {
         count = src->record->count;
         if (dst->queueBuffer != 0) {
             for (i = 0; i < count; i++) {
-                fileQueueDestroy((struct FileQueue *)dst->queues[i]);
+                fileQueueDestroy(dst->queues[i]);
             }
-            sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(dst->queueBuffer));
+            sdfReleaseResourceAllocation(dst->queueBuffer);
             dst->queues = 0;
             dst->queueBuffer = 0;
         }
@@ -3749,10 +3749,10 @@ void func_002E7F60(EffectSlotNode54 *dst, u8 *work) {
         if (size == 0) {
             return;
         }
-        dst->queueBuffer = (u32)sdfAllocGeneralBlock(size);
-        dst->queues = (u32 *)sdfResourceRetainAddress((struct SdfMemBlock *)(dst->queueBuffer));
+        dst->queueBuffer = sdfAllocGeneralBlock(size);
+        dst->queues = sdfResourceRetainAddress(dst->queueBuffer);
         for (i = 0; i < count; i++) {
-            dst->queues[i] = (u32)fileQueueClone((struct FileQueue *)src->queues[0]);
+            dst->queues[i] = fileQueueClone(src->queues[0]);
         }
         break;
     case 7:
@@ -3875,19 +3875,19 @@ void effSurfaceNodeCreateQueues(EffectSlotNode54 *node, void *source) {
 
     if (node->queueBuffer != 0) {
         for (i = 0; i < count; i++) {
-            fileQueueDestroy((struct FileQueue *)node->queues[i]);
+            fileQueueDestroy(node->queues[i]);
         }
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(node->queueBuffer));
+        sdfReleaseResourceAllocation(node->queueBuffer);
         node->queues = 0;
         node->queueBuffer = 0;
     }
     size = count * 4;
     if (size != 0) {
-        node->queueBuffer = (u32)sdfAllocGeneralBlock(size);
-        node->queues = (u32 *)sdfResourceRetainAddress((struct SdfMemBlock *)(node->queueBuffer));
-        node->queues[0] = (u32)fileCloneQueueEntries((FileQueue *)source);
+        node->queueBuffer = sdfAllocGeneralBlock(size);
+        node->queues = sdfResourceRetainAddress(node->queueBuffer);
+        node->queues[0] = fileCloneQueueEntries((FileQueue *)source);
         for (i = 1; i < count; i++) {
-            node->queues[i] = (u32)fileQueueClone((struct FileQueue *)node->queues[0]);
+            node->queues[i] = fileQueueClone(node->queues[0]);
         }
     }
 }
