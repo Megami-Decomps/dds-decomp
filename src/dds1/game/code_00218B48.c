@@ -439,7 +439,7 @@ s32 mdlRecordMatchesId(MdlRecord *record, s32 wantedId) {
     return record->kind == wantedId;
 }
 
-u16 func_002193E8(MdlRecord *record) {
+u16 mdlGetRecordPartIndex(MdlRecord *record) {
     return record->parameter.part.partIndex;
 }
 
