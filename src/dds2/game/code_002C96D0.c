@@ -4984,8 +4984,8 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", fileQueueSetColor);
 
-void fileReadVector40(void *work, void *dst) {
-    PCP_COPY_VECTOR(dst, ((FileQueue *)work)->position);
+void fileQueueReadPosition(const FileQueue *queue, f32 position[4]) {
+    PCP_COPY_VECTOR(position, queue->position);
 }
 
 void fileReadStoredQuaternion(void *work, void *dst) {

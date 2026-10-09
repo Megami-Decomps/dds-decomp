@@ -151,6 +151,7 @@ typedef char FileQueue_first_offset_must_be_0x8C[
 
 FileQueue *fileQueueCreate(void);
 void fileQueueSetColor(FileQueue *queue, u32 color);
+void fileQueueReadPosition(const FileQueue *queue, f32 position[4]);
 FileQueue *fileQueueCreateFromCommandState(const char *entry);
 void fileQueueCopyRotationFromSource(FileQueue *queue, f32 matrix[4][4]);
 void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath);
