@@ -6,6 +6,7 @@ extern void func_00140BC8(const char *name);
 #include "pcp_vu0.h"
 #include "fpu.h"
 #include "dds3obj.h"
+#include "eff_object.h"
 #include "scr.h"
 
 struct EvtUnit;
@@ -799,11 +800,6 @@ extern NodeB *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 extern void dds3DestroyWorldIndexNode(NodeB *node);
 extern u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
 
-typedef struct FldWorldItem {
-    u8 pad0[0x18];
-    s32 *data;
-} FldWorldItem;
-
 extern u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
 
 extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
@@ -815,7 +811,7 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
     char *name;
     s32 room;
     NodeB *list;
-    FldWorldItem *item;
+    EffWorldNode *node;
 
     world = scrReadIntParameter(0);
     if (world == 0) {
@@ -840,17 +836,17 @@ s32 fldCmdApplyRoomModeGroupZero(void) {
         if (dds3GetWorldValueCount((WorldValueIndices *)list) != 0) {
             dds3ResetObjectValueCursor((WorldValueIndices *)list);
             do {
-                item = (FldWorldItem *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)list);
-                if (item->data[1] == room) {
+                node = (EffWorldNode *)(u32)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)list);
+                if (((EffectTransformData *)node->data)->roomNumber == (u32)room) {
                     switch (mode) {
                     case 0:
-                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 1);
+                        dds3SetObjectPayloadWord8(node, 1);
                         break;
                     case 1:
-                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 5);
+                        dds3SetObjectPayloadWord8(node, 5);
                         break;
                     case 2:
-                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 7);
+                        dds3SetObjectPayloadWord8(node, 7);
                         break;
                     }
                 }
@@ -872,7 +868,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
     char *name;
     s32 room;
     NodeB *list;
-    FldWorldItem *item;
+    EffWorldNode *node;
 
     world = scrReadIntParameter(0);
     if (world == 0) {
@@ -900,17 +896,17 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
         if (dds3GetWorldValueCount((WorldValueIndices *)list) != 0) {
             dds3ResetObjectValueCursor((WorldValueIndices *)list);
             do {
-                item = (FldWorldItem *)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)list);
-                if (item->data[1] == room) {
+                node = (EffWorldNode *)(u32)dds3ReadIndexedWorldObjectWord((WorldValueIndices *)list);
+                if (((EffectTransformData *)node->data)->roomNumber == (u32)room) {
                     switch (mode) {
                     case 0:
-                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 2);
+                        dds3SetObjectPayloadWord8(node, 2);
                         break;
                     case 1:
-                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 6);
+                        dds3SetObjectPayloadWord8(node, 6);
                         break;
                     case 2:
-                        dds3SetObjectPayloadWord8((EffWorldNode *)item, 8);
+                        dds3SetObjectPayloadWord8(node, 8);
                         break;
                     }
                 }
