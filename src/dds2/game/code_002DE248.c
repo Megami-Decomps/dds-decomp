@@ -1985,7 +1985,7 @@ void billReleaseAlternatingTransformNode(s32 work) {
     sdfReleaseResourceAllocation(((EffBillFrameState *)work)->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002E26A0);
+INCLUDE_ASM(const s32, "game/code_002DE248", billAdvanceAnimatedFrameTransforms);
 
 void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     u8 *config = work->config;
