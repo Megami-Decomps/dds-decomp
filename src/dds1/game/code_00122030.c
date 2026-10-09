@@ -47,7 +47,7 @@ extern u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
 
 extern u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 
-extern NodeB *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
+extern WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 
 extern u32 dds3GetObjectPayloadWord8(EffWorldNode *object);
 
@@ -207,7 +207,7 @@ extern u32 D_0032E570[];
 
 extern u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
 
-extern void dds3DestroyWorldIndexNode(NodeB *node);
+extern void dds3DestroyWorldIndexNode(WorldIndexNode *node);
 
 extern u32 D_0032E570[];
 
@@ -488,7 +488,7 @@ f32 fldPointDistance(f32 ax, f32 ay, f32 az, f32 bx, f32 by, f32 bz) {
 /* For kind-6 objects in mode 4, set mode 3 or clear it to 0.
  * status covers the count, payload mode word and cursor result. */
 void fldToggleWorldNodeState(s64 clearMode) {
-    NodeB *valueChain;
+    WorldIndexNode *valueChain;
     u32 status;
     EffWorldNode *worldObject;
 

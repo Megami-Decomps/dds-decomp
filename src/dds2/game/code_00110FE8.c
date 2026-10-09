@@ -2,7 +2,7 @@
 #include "dds3obj.h"
 #include "evt_world.h"
 
-struct NodeB;
+struct WorldIndexNode;
 
 s32 dds3InvokeAreaCallback(void *arg);
 
@@ -112,7 +112,7 @@ EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *object, const u8 *name
 
 void *sdfAllocSizeClassBlock(s32 size);
 
-struct NodeB *dds3AppendWorldIndexNode(s32 initialCount);
+struct WorldIndexNode *dds3AppendWorldIndexNode(s32 initialCount);
 
 s32 dds3CreatePairedWorldIndexNodes(EffWorldNode *object) {
     u32 *p;
@@ -129,7 +129,7 @@ s32 dds3CreatePairedWorldIndexNodes(EffWorldNode *object) {
 
 s32 dds3ExchangeAreaSlot(void *arg);
 
-void dds3DestroyWorldIndexNode(struct NodeB *node);
+void dds3DestroyWorldIndexNode(struct WorldIndexNode *node);
 
 void sdfReleaseChipBlock(void *arg);
 
@@ -141,7 +141,7 @@ void dds3DestroyObjectPointerChains(EffWorldNode *object) {
     dds3VisitWorldObjectValues((WorldValueIndices *)(u32)p[0], (s32 (*)(u32))dds3ExchangeAreaSlot);
     dds3VisitWorldObjectValues((WorldValueIndices *)(u32)p[1], (s32 (*)(u32))dds3ExchangeAreaSlot);
     for (i = 0; i < 2; i++) {
-        dds3DestroyWorldIndexNode((struct NodeB *)p[i]);
+        dds3DestroyWorldIndexNode((struct WorldIndexNode *)p[i]);
     }
     sdfReleaseChipBlock(p);
 }
