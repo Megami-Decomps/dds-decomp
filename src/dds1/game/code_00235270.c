@@ -2236,7 +2236,115 @@ void func_0023BC30(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_0023BE40);
+/* Shadow-configuration menu: draw it, move the row cursor, and step the
+ * selected row's mode, alpha or Y offset; confirm returns 1, cancel -1. */
+s32 func_0023BE40(s32 x, s32 y, EvtRuntime *ctx) {
+    EvtRuntimeChild *node = evtEventViewerGetPendingNode(ctx);
+    s32 list = (s32)sdfCreateResetPacketList();
+    s32 lastRow = 0;
+    s32 lastMode = 0;
+
+    evtDrawMenuFrame(list, x, y, 0x16, 6, 0, 0, (u8 *)ctx, 0, func_0023BC30);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
+    if (ctx->actionMode != 0x16) {
+        return 0;
+    }
+    switch (node->parameterBytes[0]) {
+    case 3:
+        lastRow = 2;
+        lastMode = 3;
+        break;
+    case 4:
+        lastRow = 1;
+        lastMode = 1;
+        break;
+    }
+    if (D_00324510.incTen & 2) {
+        if (ctx->groupCursor < lastRow) {
+            ctx->groupCursor++;
+        } else {
+            ctx->groupCursor = 0;
+        }
+    } else if (D_00324510.decTen & 2) {
+        if (ctx->groupCursor == 0) {
+            ctx->groupCursor = lastRow;
+        } else {
+            ctx->groupCursor--;
+        }
+    } else if (D_00324510.incOne & 2) {
+        switch (ctx->groupCursor) {
+        case 0:
+            if (ctx->shadowMode < lastMode) {
+                ctx->shadowMode++;
+            } else {
+                ctx->shadowMode = 0;
+            }
+            break;
+        case 1:
+            ctx->shadowAlpha++;
+            break;
+        case 2:
+            ctx->shadowY += 0.1f;
+            break;
+        }
+    } else if (D_00324510.unk2B & 2) {
+        switch (ctx->groupCursor) {
+        case 0:
+            if (ctx->shadowMode < lastMode) {
+                ctx->shadowMode++;
+            } else {
+                ctx->shadowMode = 0;
+            }
+            break;
+        case 1:
+            ctx->shadowAlpha += 10;
+            break;
+        case 2:
+            ctx->shadowY += 1.0f;
+            break;
+        }
+    } else if (D_00324510.decOne & 2) {
+        switch (ctx->groupCursor) {
+        case 0:
+            if (ctx->shadowMode == 0) {
+                ctx->shadowMode = lastMode;
+            } else {
+                ctx->shadowMode--;
+            }
+            break;
+        case 1:
+            ctx->shadowAlpha--;
+            break;
+        case 2:
+            ctx->shadowY -= 0.1f;
+            break;
+        }
+    } else if (D_00324510.unk29 & 2) {
+        switch (ctx->groupCursor) {
+        case 0:
+            if (ctx->shadowMode == 0) {
+                ctx->shadowMode = lastMode;
+            } else {
+                ctx->shadowMode--;
+            }
+            break;
+        case 1:
+            ctx->shadowAlpha -= 10;
+            break;
+        case 2:
+            ctx->shadowY -= 1.0f;
+            break;
+        }
+    } else {
+        if (D_00324510.confirm < 0) {
+            return 1;
+        }
+        if (D_00324510.cancel < 0) {
+            return -1;
+        }
+    }
+    return 0;
+}
 
 extern s32 effEventAdvanceResourceTemplateSetup();
 typedef struct EvtSelectionCache {
