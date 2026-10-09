@@ -1270,7 +1270,63 @@ void effReleaseFadeColorWork(EffResourceRectWork *work) {
 }
 
 /* This projected fade also consumes EffKindWork: position, handle and payload. */
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002DFAB0);
+extern void effResourceRectDrawGsCoords(EffResourceRectWork *work);
+
+void func_002DFAB0(EffKindWork *work) {
+    EffRateConfig *config = (EffRateConfig *)work->payload;
+    EffResourceRectWork *out = (EffResourceRectWork *)work->handle;
+    s32 duration = config->duration;
+    s32 frame = 0;
+    f32 rate;
+    f32 pos[4];
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
+    u32 second;
+
+    if (duration != 0) {
+        frame = work->frame;
+    }
+    if (duration < frame) {
+        return;
+    }
+    rate = effSampleScalarCurve(&config->rateB.curve, frame, duration);
+    if (config->fixedMode != 0) {
+        out->params.centerX = 0;
+        out->params.centerY = 0;
+        out->params.extent = (s32)(rate * 16.0f);
+    } else {
+        s32 mode;
+        s32 px;
+        s32 py;
+
+        rate *= work->scale;
+        VU0_LOAD_VF(vf10, work);
+        mode = (s32)(mnuMeasureProjectedPerpendicularDistance(rate) * 16.0f);
+        out->params.extent = mode;
+        if (mode == 0) {
+            return;
+        }
+        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        py = (s32)(pos[1] * 16.0f) - 0x8000;
+        px = (s32)(pos[0] * 16.0f) - 0x8000;
+        out->params.centerX = px;
+        out->params.centerY = py << 1;
+    }
+    second = effSampleColorAlphaTracks(&config->blendA, &config->blendB2, frame, duration);
+    color1[0] = work->color;
+    EE_MMI_RGBA_UNPACK(color1, 1.0f / 128.0f);
+    VU0_MOVE_VF(vf11, vf10);
+    color2[0] = second;
+    EE_MMI_RGBA_UNPACK(color2, 1.0f / 128.0f);
+    VU0_MUL(vf10, vf10, vf11);
+    EE_MMI_RGBA_PACK_F128(packed);
+    blended[0] = packed;
+    *(u32 *)out->params.draw.color = blended[0];
+    out->params.draw.blendControl = work->mode;
+    effResourceRectDrawGsCoords(out);
+}
 
 void func_002DFC78(EffKindWork *work, u32 value) {
     ((EffResourceRectWork *)work->handle)->sourceHandle = value;
