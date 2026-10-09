@@ -4416,7 +4416,67 @@ s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlTargetResul
     return skipped == count;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B2AF8);
+/* Solar-phase bias table and special-ability scale inside the battle parameter block. */
+typedef struct BattleEscapeParameters {
+    u8 pad000[0xB50];
+    s16 solarPhaseBias[12]; /* 0xB50 */
+    f32 specialScale;       /* 0xB68 */
+} BattleEscapeParameters;
+
+const char D_004156B0[] = "btl:escape=%d%%[ratio=%.2f,sn=%d]\n";
+
+s32 func_001B2AF8(BtlUnit *actor) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *enemy;
+    s32 noEligibleEnemy;
+    s32 chance;
+    f32 ratio;
+    DatPartyRecord *record;
+    s32 phase;
+
+    if (datBattleSceneRecords[battle->battleMode].unk00 != 0) {
+        return 0;
+    }
+    if (datBattleSceneRecords[battle->battleMode].flags & 0x20) {
+        return 1;
+    }
+    if (battle->encounterKind == 3) {
+        return 1;
+    }
+    noEligibleEnemy = 1;
+    for (enemy = battle->units; enemy != NULL; enemy = enemy->nextActor) {
+        if ((enemy->flags & 1) != 0) {
+            if ((enemy->flags & 0x400) != 0) {
+                if ((enemy->partyRecord.status & 0x2A0F) == 0) {
+                    noEligibleEnemy = 0;
+                    break;
+                }
+            }
+        }
+    }
+    if (noEligibleEnemy) {
+        return 1;
+    }
+    record = &actor->partyRecord;
+    chance = evtRunContext(0x15, (s32)record, 0, 0, 0);
+    ratio = 1.0f;
+    if (btlCheckSpecialAbility(record, 0x250)) {
+        ratio = datAbilityParameters[0x250 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+    }
+    if (mdlFlagTest(0x80E)) {
+        ratio *= ((BattleEscapeParameters *)datBattleParameters)->specialScale;
+    }
+    chance = chance * ratio;
+    phase = evtGetMirroredSolarPhase();
+    chance += ((BattleEscapeParameters *)datBattleParameters)->solarPhaseBias[phase];
+    if (chance > 95) {
+        chance = 95;
+    } else if (chance < 40) {
+        chance = 40;
+    }
+    btlBossDebugPrintf(D_004156B0, chance, ratio, ((BattleEscapeParameters *)datBattleParameters)->solarPhaseBias[phase]);
+    return btlRollAiBucket() < chance;
+}
 
 s32 btlIsSelectedActorStatusAndRecordClear(u8 *unit) {
     s32 work = btlGetRuntime();
