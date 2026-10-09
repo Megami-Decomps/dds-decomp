@@ -330,7 +330,8 @@ typedef struct BattleAdjustmentGroup {
 } BattleAdjustmentGroup;
 
 typedef struct BattleAdjustmentRecord {
-    u8 pad00[4];
+    u16 encounterParamA; /* 0x00: copied to BtlState.encounterParamA by 001A11F0. */
+    u16 encounterParamB; /* 0x02 */
     u16 streamSelection; /* 0x04: default stream selector used by 001F3278. */
     u8 pad06[2];
     u32 conditions[3];
