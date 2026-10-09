@@ -294,7 +294,67 @@ s32 mnuChooseWeightedItem(s32 index) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0029AFC0", func_0029B950);
+extern s32 scrFindSlot(DatPartyRecord *, u16);
+extern s32 mnuStaffPickRollByMode(u32);
+extern void ptyAdjustItemQuantity(s32, s32);
+
+typedef struct StaffItemRow {
+    u8 minLevel;
+    u8 pad01;
+    u16 entries[16];
+} StaffItemRow;
+
+
+extern StaffItemRow D_003D6330[7];
+
+/* Roll a staff reward: a chance-gated stat raise (mode 4) or an item grant (mode 5). */
+void func_0029B950(DatPartyRecord *unit, BrsSkillPackageWork *work) {
+    u32 modulus;
+    s32 threshold;
+    s32 rollMode;
+    s32 candidates[DAT_BASE_STAT_COUNT];
+    s32 count;
+    s32 i;
+
+    if (scrFindSlot(unit, 0x27D) == -1) {
+        threshold = 1;
+        modulus = 2;
+        rollMode = 0;
+    } else {
+        threshold = 7;
+        modulus = 8;
+        rollMode = 1;
+    }
+    work->rewardMode = 0;
+    if ((s32)(effMiscRand(NULL) % modulus) < threshold) {
+        work->rewardMode = mnuStaffPickRollByMode(rollMode);
+        work->rewardIndex = -1;
+        switch (work->rewardMode) {
+        case 4:
+            count = 0;
+            for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
+                if (unit->baseStats[i] + 1 < 99) {
+                    candidates[count++] = i;
+                }
+            }
+            if (count == 0) {
+                work->rewardMode = 2;
+            } else {
+                work->rewardIndex = candidates[effMiscRand(NULL) % count];
+            }
+            break;
+        case 5:
+            for (i = 0; i < sizeof(D_003D6330) / sizeof(D_003D6330[0]); i++) {
+                if (D_003D6330[i].minLevel >= unit->level) {
+                    work->earnedItem = mnuChooseWeightedItem(i);
+                    ptyAdjustItemQuantity(work->earnedItem, 1);
+                    break;
+                }
+            }
+            break;
+        }
+    }
+}
 
 u32 func_0029BB28(KwlnTask *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)kwlnTaskGetUserValue(task);

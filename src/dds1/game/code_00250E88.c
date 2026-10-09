@@ -14,7 +14,7 @@
 #define MNU_SCENE_SHADE_ALPHA_SCALE 112.0f
 #define MNU_SCENE_DRAW_CONTEXT 0x53
 
-extern void func_002512F0(s32, s32);
+extern void func_002512F0(MenuSceneWork *, s32);
 
 extern void mnuInitializeMantraSelectionGrid(MenuSceneWork *);
 
@@ -97,7 +97,97 @@ void func_00251260(MenuSceneWork *work) {
     work->scrollY = position[1];
 }
 
-INCLUDE_ASM(const s32, "game/code_00250E88", func_002512F0);
+extern f32 func_002C84F0(f32 *vector);
+extern s32 D_003BC424;
+
+void func_002512F0(MenuSceneWork *work, s32 mode) {
+    SdfGrid *grid = work->gridHandle;
+    MnuMantraGridEntry *entry;
+    f32 vector[4];
+    s32 targetX;
+    s32 targetY;
+    s32 deltaX;
+    s32 deltaY;
+    s32 candidate;
+    s32 step;
+    s32 moving = 0;
+
+    func_00251260(work);
+    targetX = work->scrollX;
+    targetY = work->scrollY;
+
+    if (mode == 1) {
+        work->cursorPosition.y = targetY;
+        work->cursorPosition.x = targetX;
+        entry = (MnuMantraGridEntry *)(u32)grid->cursor->value;
+        targetX = D_0036B7F0[entry->sceneId][2];
+        targetY = D_0036B7F0[entry->sceneId][3];
+        work->entryPosition.x = targetX;
+        work->entryPosition.y = targetY;
+        return;
+    }
+
+    step = D_003BC424 * 10 + 4;
+    if (step >= 0x2D) {
+        step = 0x2C;
+    }
+
+    memset(vector, 0, sizeof(vector));
+    vector[0] = (f32)(targetX - work->cursorPosition.x);
+    vector[1] = (f32)(targetY - work->cursorPosition.y);
+    func_002C84F0(vector);
+
+    deltaX = targetX - work->cursorPosition.x;
+    if (deltaX != 0) {
+        candidate = (s32)((f32)work->cursorPosition.x + vector[0] * (f32)step);
+        work->cursorPosition.x = candidate;
+        if (deltaX * (targetX - work->cursorPosition.x) < 0) {
+            work->cursorPosition.x = targetX;
+        }
+    }
+    deltaY = targetY - work->cursorPosition.y;
+    if (deltaY != 0) {
+        candidate = (s32)((f32)work->cursorPosition.y + vector[1] * (f32)step);
+        work->cursorPosition.y = candidate;
+        if (deltaY * (targetY - work->cursorPosition.y) < 0) {
+            work->cursorPosition.y = targetY;
+        }
+    }
+
+    entry = (MnuMantraGridEntry *)(u32)grid->cursor->value;
+    targetX = D_0036B7F0[entry->sceneId][2];
+    targetY = D_0036B7F0[entry->sceneId][3];
+    memset(vector, 0, sizeof(vector));
+    vector[0] = (f32)(targetX - work->entryPosition.x);
+    vector[1] = (f32)(targetY - work->entryPosition.y);
+    func_002C84F0(vector);
+
+    deltaX = targetX - work->entryPosition.x;
+    if (deltaX != 0) {
+        moving = 1;
+        candidate = (s32)((f32)work->entryPosition.x + vector[0] * 40.0f);
+        work->entryPosition.x = candidate;
+        if (deltaX * (targetX - work->entryPosition.x) < 0) {
+            work->entryPosition.x = targetX;
+        }
+    }
+    deltaY = targetY - work->entryPosition.y;
+    if (deltaY != 0) {
+        moving = 1;
+        candidate = (s32)((f32)work->entryPosition.y + vector[1] * 40.0f);
+        work->entryPosition.y = candidate;
+        if (deltaY * (targetY - work->entryPosition.y) < 0) {
+            work->entryPosition.y = targetY;
+        }
+    }
+
+    if (moving != 0) {
+        D_003BC424++;
+    } else {
+        D_003BC424 = 0;
+    }
+    work->cursorMoving = moving;
+}
 
 /* Release a nonnull grid-cell payload; the cell index is unused. */
 void mnuFreeTaskData(u32 unused, u32 taskData) {
@@ -552,7 +642,7 @@ s32 fldResetSceneState(void) {
 /* Update and copy scene coordinates before releasing its node list; retain the native call order. */
 void mnuCopySceneCoordinatesAndReleaseNodeList(void) {
     s32 sceneAddress = sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
-    func_002512F0(sceneAddress, 1);
+    func_002512F0((MenuSceneWork *)(u32)sceneAddress, 1);
     mnuCopySceneCoordinates((MenuSceneWork *)(u32)sceneAddress);
     mnuReleaseListNodes(
         &((MenuSceneWork *)(u32)sceneAddress)->costTransitionList);

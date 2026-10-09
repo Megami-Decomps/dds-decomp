@@ -189,7 +189,6 @@ segments:
       - [0x136270, c, game/code_00235270]
       - [0x142E18, c, event/evtEventPack]  # Nocturne __FILE__
       - [0x143608, c, game/code_00242608]
-      - [0x146C98, c, game/code_00245C98]
       - [0x149580, c, game/code_00248580]
       - [0x14DFB0, c, game/code_0024CFB0]
       - [0x14F1C8, c, game/code_0024E1C8]
@@ -373,7 +372,6 @@ segments:
       - [0x2AEDD0, .rodata, game/code_00235270]
       - [0x2B0200, .rodata, event/evtEventPack]
       - [0x2B0290, .rodata, game/code_00242608]
-      - [0x2B0440, .rodata, game/code_00245C98]
       - [0x2B05A8, .rodata, game/code_00248580]
       - [0x2B0720, .rodata, game/code_0024E1C8]
       - [0x2B0810, .rodata, game/code_00250E88]
@@ -577,7 +575,6 @@ segments:
       - [0x2BCF80, .sdata, game/code_00235270]
       - [0x2BD368, .sdata, event/evtEventPack]
       - [0x2BD380, .sdata, game/code_00242608]
-      - [0x2BD3B0, .sdata, game/code_00245C98]
       - [0x2BD3E0, .sdata, game/code_00248580]
       - [0x2BD408, .sdata, game/code_0024CFB0]
       - [0x2BD420, .sdata, game/code_00250E88]

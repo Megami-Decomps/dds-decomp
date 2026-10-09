@@ -9,6 +9,7 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "sdf.h"
+#include "sdf_dev_state.h"
 #include "kwln_task_lifecycle.h"
 
 extern u32 scrGetWorkTaskHandle(void);
@@ -354,12 +355,68 @@ u8 scrIsCurrentWorkTask(u32 expectedValue) {
     return currentValue == expectedValue;
 }
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00118170);
+extern void func_003003F0(const char *, ...);
+extern void *sdfAllocateBlockBySizeThreshold(s32);
+extern void sdfFreeMemoryFromEitherHeap(void *);
 
-INCLUDE_ASM(const s32, "game/code_00117438", func_00118210);
+/* Channel table row: a file name, then {destination slot, unused} pairs ending with a null slot. */
+typedef struct SdfResourceTable {
+    const char *path;
+    struct {
+        void **slot;
+        u32 unused;
+    } entries[1];
+} SdfResourceTable;
+
+const char D_0039F930[] = "sys:[%s]\n";
+
+/* Load a table's file and copy each size-prefixed segment into its own block. */
+void func_00118210(SdfResourceTable *table) {
+    DevState *command;
+    struct SdfMemBlock *block;
+    s32 size;
+    u8 *address;
+    u32 segmentBytes;
+    u32 alignedBytes;
+    s32 i;
+
+    /* Copy one segment into *slot and report its length rounded up to 16 bytes. */
+    s32 func_00118170(void **slot, u32 unused) {
+        u32 blocks;
+        u32 advance;
+
+        size = *(s32 *)address;
+        if (*slot != 0) {
+            sdfFreeMemoryFromEitherHeap(*slot);
+        }
+        *slot = sdfAllocateBlockBySizeThreshold(size);
+        memcpy(*slot, address + 4, size);
+        segmentBytes = size + 4;
+        blocks = segmentBytes >> 4;
+        if ((segmentBytes & 0xF) != 0) {
+            advance = (blocks + 1) << 4;
+        } else {
+            advance = blocks << 4;
+        }
+        alignedBytes = advance;
+        return advance;
+    }
+
+    command = sdfDevCreateCommandState(table->path);
+    size = sdfDevQueueControlAndWait(command);
+    block = sdfAllocGeneralBlockHigh(size);
+    address = (u8 *)sdfResourceRetainAddress(block);
+    sdfDevQueueReadAndWait(command, address, size);
+    sdfDevWaitThenReleaseCommandState(command);
+    for (i = 0; table->entries[i].slot != 0; i++) {
+        address += func_00118170(table->entries[i].slot, table->entries[i].unused);
+    }
+    sdfReleaseResourceAllocation(block);
+    func_003003F0(D_0039F930, table->path);
+}
 
 extern u8 D_0032A6F0[];
-extern void func_00118210();
+
 
 void sdfResetChannels(void) {
     u8 *entry;
@@ -368,7 +425,7 @@ void sdfResetChannels(void) {
     sdfFirePendingCallback();
     entry = D_0032A6F0;
     for (i = 0; i < 8; i++) {
-        func_00118210(entry);
+        func_00118210((SdfResourceTable *)entry);
         entry += 0xA4;
     }
     func_001180F8();
