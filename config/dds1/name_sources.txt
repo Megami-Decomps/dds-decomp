@@ -5670,6 +5670,8 @@
 0x002B11A8	effSeedParticleSpanParameters	inferred	Seeds each span entry with randomized geometry factors and initializes its reference age to zero. [names_reviewed5.tsv]
 0x002B12D8	effCreateParticleSpanTable	inferred	Allocates per-map-position point sets, span entries and optional shared-reference track sets from the model frame count; native algorithm agrees with the verified DDS2 counterpart.
 0x002B14E8	effReleaseParticleList	inferred	eff effect resources and animation in game/code_0029A840.c
+0x002B1560	effUpdateParticleSpanGeometry	inferred	Model-operation update callback; updates point geometry using the parent model context, child span table at +0x38, and span configuration at +0x3C.
+0x002B1D68	effDrawParticleSpanPointsAndReferences	inferred	Model-operation draw callback; draws point groups and reference geometry from the child span table at +0x38 and configuration at +0x3C.
 0x002B2088	effCreateModelResourceFromFile	inferred	Resolves primary and secondary file buffers and creates model resource for requested kind. [names_reviewed5.tsv]
 0x002B20D0	effDestroyModelResource	inferred	Releases the kind-specific child resource, releases its model, then frees the effect object.
 0x002B2120	effCreateModelResource	inferred	Byte-identical dds2 twin 0x002F5520; DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described createEffectModelResource behavior. [names_conflicts.tsv]

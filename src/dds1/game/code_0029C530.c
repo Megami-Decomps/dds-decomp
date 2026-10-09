@@ -6106,9 +6106,9 @@ void effReleaseParticleList(EffSpanTable *list) {
     sdfReleaseResourceAllocation(list->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B1560);
+INCLUDE_ASM(const s32, "game/code_0029C530", effUpdateParticleSpanGeometry);
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B1D68);
+INCLUDE_ASM(const s32, "game/code_0029C530", effDrawParticleSpanPointsAndReferences);
 
 
 EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary, u32 param) {
