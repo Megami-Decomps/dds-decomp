@@ -418,12 +418,12 @@ void sdfMotionBindDrawNode(SdfMotionDrawTargetBinding *binding, Motion *motion,
     binding->node = drawNode;
 }
 
-void *sdfMotionCreateDrawVectorBinding(void *a0, s32 a1, s32 a2) {
-    void *r;
+SdfMotionDrawBinding *sdfMotionCreateDrawVectorBinding(Motion *motion, s32 a1, s32 nodeIndex) {
+    SdfMotionDrawBinding *binding;
 
-    r = sdfAllocSizeClassBlock(0x20);
-    sdfMotionBindDrawNode(r, a0, D_003981D0, a2);
-    return r;
+    binding = sdfAllocSizeClassBlock(0x20);
+    sdfMotionBindDrawNode((SdfMotionDrawTargetBinding *)binding, motion, D_003981D0, nodeIndex);
+    return binding;
 }
 
 /* vu0 routine: interpolate the sampled translation keys into the draw node. */
