@@ -963,7 +963,7 @@ typedef struct {
 extern FldProjectedSprite D_0033EBA0[];
 extern SdfTex *D_003D40A0[4];
 
-void func_00142800(s32 index, u32 color, f32 x, f32 y) {
+void func_00142800(f32 x, f32 y, s32 index, u32 color) {
     FldProjectedSprite *sprite = &D_0033EBA0[index];
     s32 anchorY = sprite->anchorY;
     s16 u = sprite->u;
@@ -1100,7 +1100,604 @@ s32 fldGetMaxItemValue(void) {
     return max + 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_00142D78);
+#include "field_stage.h"
+typedef struct FrFontGlyph FrFontGlyph;
+extern FrFontGlyph *D_003BD7CC;
+extern s32 D_003BAEAC, D_003BAEB8, D_003BAEBC, D_003BAEC0;
+extern s32 D_003BAEF0, D_003BAEF4, D_003BAF00, D_003BAF04, D_003BAF08;
+extern f32 D_003BAEF8, D_003BAEFC, D_003BAF0C, D_003BAF10, D_003BAF14;
+extern u8 D_00324510[2][2][16];
+extern f32 D_00329790[4][4], sdfViewMatrix[4][4];
+extern f32 D_00324A20[4] __attribute__((aligned(16)));
+extern SdfModel *D_00348F30[];
+extern void frFontSetSharedRenderFlags(u32);
+extern void sdfInvertScaledVuTransform(void);
+extern s32 fldFindNextMarkedValue(s32), fldFindPreviousMarkedValue(s32);
+extern void fldSubmitGsQuadTagged(s32, s32, s32, s32, u32, u32, u32, u32);
+extern void evtSetDrawSurfaceIndex(u32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+extern void evtSubmitQuadFromVertices(f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,u32,u32,u32,u32);
+extern s32 func_00121ED8(s32, f32, f32);
+extern s32 fldGetFloorFlag(s32, s32, s32);
+extern void fldSubmitPrimaryFramePacket(void), fldSubmitAlternateFramePacket(void);
+extern void fldGetSceneEntryPosition(s32, f32 *, f32 *);
+extern void fldProjectPointSetupAlt(f32 *, f32 *, f32, f32, f32);
+extern void func_001428C0(s32, f32, f32, f32);
+extern void fldGetVisibleSceneBounds(f32 *, f32 *, f32 *, f32 *);
+extern s32 fldFindMapCoordinateIndex(s32, s32);
+extern f32 sdfSinPoly(f32);
+extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
+extern void frFontStoreShiftedRenderValue(FrFontGlyph *, u32);
+extern s32 frFontDrawGlyphInDefaultMode(FrFontGlyph *);
+extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
+extern s32 frFontQueueGlyphForCurrentDrawBuffer(FrFontGlyph *);
+
+
+void func_00142D78(void) {
+    s32 proposed;
+    s32 selectedFloor;
+    s32 itemVisible;
+    s32 i, j, k;
+    FldSceneRecord *record;
+    FldItem *item;
+    FieldStageCoordinate *stage;
+    f32 left = 0.0f, top = 0.0f, right = 0.0f, bottom = 0.0f;
+    f32 sceneX, sceneZ;
+    f32 playerX, playerY;
+    f32 minX, maxZ, maxX, minZ;
+    f32 focus[4] __attribute__((aligned(16)));
+    s32 labelAlpha;
+    u32 labelColor;
+
+    proposed = fldGetMaxItemValue();
+    frFontSetSharedRenderFlags(0x5E);
+    VU0_LOAD_MATRIX(D_00329790);
+    sdfInvertScaledVuTransform();
+    D_003BAEF0 = D_003BAEB8;
+    if ((s8)D_00324510[1][0][8] < 0 && D_003BAEF0 < proposed) {
+        proposed = D_003BAEF0 + 1;
+        if (!D_003BAEAC) proposed = fldFindNextMarkedValue(D_003BAEF0);
+        if (D_003BAEF0 != proposed) {
+            sndSetSequenceVolumePan(2, 127, 63);
+            D_003BAEF4 = D_003BAEF0;
+            D_003BAEF0 = proposed;
+            D_003BAEF8 = -2500.0f;
+            D_003BAF04 = -24;
+            D_003BAEFC = 0.0f;
+            D_003BAF00 = 0;
+            D_003BAF08 = 0;
+        }
+    }
+    if ((s8)D_00324510[1][0][10] < 0 && D_003BAEF0 >= 2) {
+        proposed = D_003BAEF0 - 1;
+        if (!D_003BAEAC) proposed = fldFindPreviousMarkedValue(D_003BAEF0);
+        if (D_003BAEF0 != proposed) {
+            sndSetSequenceVolumePan(2, 127, 63);
+            D_003BAEF4 = D_003BAEF0;
+            D_003BAEF0 = proposed;
+            D_003BAEF8 = 2500.0f;
+            D_003BAF04 = 24;
+            D_003BAEFC = 0.0f;
+            D_003BAF00 = 0;
+            D_003BAF08 = 0;
+        }
+    }
+    if (D_003BAF00 < 128) D_003BAF00 += 16;
+    if (D_003BAF04 < 0) { D_003BAF04 += 4; D_003BAF08 += 4; }
+    if (D_003BAF04 > 0) { D_003BAF04 -= 4; D_003BAF08 -= 4; }
+    if (D_003BAEF8 < 1000.0f && D_003BAEF8 > -1000.0f) {
+        D_003BAEF8 = 0.0f;
+    } else if (D_003BAEF8 > 0.0f) {
+        D_003BAEF8 -= 500.0f; D_003BAEFC -= 500.0f;
+    } else if (D_003BAEF8 < 0.0f) {
+        D_003BAEF8 += 500.0f; D_003BAEFC += 500.0f;
+    } else { D_003BAEF8 = 0.0f; }
+    D_003BAEB8 = D_003BAEF0;
+    sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, D_00329790);
+    fldSelectDisplayBuffer(0x56);
+    func_00129900(0);
+    fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
+    fldSubmitGsQuadTagged(0, 0, 512, 224, 0, 0, 0, 0);
+    fldSelectDisplayBuffer(0x57);
+    fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
+    fldSelectDisplayBuffer(0x56);
+    fldSubmitFrameQuad(1, 1, 128, 1, 0, 0, 1, 1);
+    stage = fldFindStageCoordinateRecord(fldAreaState.area, D_003BAEF0);
+    if (stage != NULL) {
+        s32 run;
+        f32 step = (f32)stage->cellSize;
+        u32 color;
+        evtSetDrawSurfaceIndex(0x56);
+        evtSubmitPrimaryGsTest(1, 0, 128, 1, 0, 0, 1, 1);
+        evtSubmitPrimaryAlphaBlendMode(1);
+        color = D_003BAEAC ? 0x80000080 : 0x80000000;
+        for (j = 0, sceneZ = stage->originZ; j < stage->rows;
+             j++, sceneZ -= step) {
+            if (sceneZ > (f32)D_003BAEC0 + 8400.0f) continue;
+            if (sceneZ < (f32)D_003BAEC0 - 8400.0f) break;
+            run = 0;
+            for (i = 0, sceneX = stage->originX; i < stage->cols;
+                 i++, sceneX += step) {
+                if (sceneX < (f32)D_003BAEBC - 11400.0f) continue;
+                if (sceneX > (f32)D_003BAEBC + 11400.0f) break;
+                if (func_00121ED8(D_003BAEF0, sceneX, sceneZ)) {
+                    if (run == 0) { left = sceneX - 50.0f; top = sceneZ + 50.0f; }
+                    bottom = sceneZ - step - 50.0f;
+                    right = sceneX + step + 50.0f;
+                    run++;
+                } else {
+                    if (run > 0) evtSubmitQuadFromVertices(left, D_003BAEF8 - 10.0f, top,
+                    right, D_003BAEF8 - 10.0f, top,
+                    left, D_003BAEF8 - 10.0f, bottom,
+                    right, D_003BAEF8 - 10.0f, bottom, color, color, 0x80000000, 0x80000000);
+                    run = 0;
+                }
+            }
+            if (run > 0) evtSubmitQuadFromVertices(left, D_003BAEF8 - 10.0f, top,
+                    right, D_003BAEF8 - 10.0f, top,
+                    left, D_003BAEF8 - 10.0f, bottom,
+                    right, D_003BAEF8 - 10.0f, bottom, color, color, 0x80000000, 0x80000000);
+            run = 0;
+        }
+        evtSubmitPrimaryGsTest(1, 0, 128, 1, 1, 1, 1, 1);
+        evtSubmitPrimaryAlphaBlendMode(0);
+    }
+
+
+    if (D_003BAEAC != 0) {
+        fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
+    }
+
+    selectedFloor = D_003BAEF0 - 1;
+    record = (FldSceneRecord *)fldSceneRecords;
+    for (i = 0; i < fldSceneRecordCount; i++, record++) {
+        item = record->items;
+        for (j = 0; j < record->count; j++, item++) {
+            itemVisible = 0;
+            if (selectedFloor == item->floor) {
+                if (fldGetFloorFlag(fldAreaFlagIndex, i, j) != 0) {
+                    itemVisible = 1;
+                }
+                if (D_003BAEAC != 0) {
+                    itemVisible = 1;
+                }
+            }
+            func_00142C78(D_00348F30[i], item->nodeIndex, itemVisible);
+        }
+    }
+    for (i = 0; i < fldSceneRecordCount; i++) {
+        D_00348F30[i]->color = 0x80808080;
+        fldSetEmitterPosition(D_00348F30[i], 0.0f, D_003BAEF8, 0.0f);
+    }
+
+    fldSelectDisplayBuffer(0x56);
+    func_00129900(0);
+    fldSubmitPrimaryFramePacket();
+    fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
+    fldSubmitGsQuadTagged(0, 0, 512, 224, 0, 0, 0, 0);
+
+    record = (FldSceneRecord *)fldSceneRecords;
+    selectedFloor = D_003BAEF0 - 1;
+    for (i = 0; i < fldSceneRecordCount; i++, record++) {
+        item = record->items;
+        for (j = 0; j < record->count; j++, item++) {
+            itemVisible = 0;
+            if (selectedFloor == item->floor) {
+                if (fldGetFloorFlag(fldAreaFlagIndex, i, j) != 0) {
+                    itemVisible = 1;
+                }
+                if (D_003BAEAC != 0) {
+                    itemVisible = 1;
+                }
+            }
+            func_00142C78(D_00348F30[i], item->nodeIndex, itemVisible);
+        }
+        D_00348F30[i]->color = 0x80808080;
+        fldSetEmitterPosition(D_00348F30[i], -50.0f, D_003BAEF8, 50.0f);
+        fldSetEmitterPosition(D_00348F30[i], 50.0f, D_003BAEF8, 50.0f);
+        fldSetEmitterPosition(D_00348F30[i], -50.0f, D_003BAEF8, -50.0f);
+        fldSetEmitterPosition(D_00348F30[i], 50.0f, D_003BAEF8, -50.0f);
+
+        item = record->items;
+        for (j = 0; j < record->count; j++, item++) {
+            func_00142C78(D_00348F30[i], item->nodeIndex,
+                          selectedFloor == item->floor);
+        }
+        D_00348F30[i]->color = 0x10101010;
+        fldSetEmitterPosition(D_00348F30[i], 0.0f, D_003BAEF8, 0.0f);
+        D_00348F30[i]->color = 0x80808080;
+    }
+
+    fldSelectDisplayBuffer(0x5A);
+    fldSubmitAlternateFramePacket();
+    if (stage != NULL) {
+        f32 step;
+        s32 run;
+
+        evtSetDrawSurfaceIndex(0x5A);
+        evtSubmitPrimaryGsTest(1, 0, 128, 1, 1, 1, 1, 1);
+        evtSubmitPrimaryAlphaBlendMode(0);
+        step = stage->cellSize;
+        sceneZ = stage->originZ;
+        for (j = 0; j < stage->rows; j++, sceneZ -= step) {
+            if ((f32)D_003BAEC0 + 8400.0f < sceneZ) {
+                continue;
+            }
+            if (sceneZ < (f32)D_003BAEC0 - 8400.0f) {
+                break;
+            }
+            run = 0;
+            sceneX = stage->originX;
+            for (i = 0; i < stage->cols; i++, sceneX += step) {
+                if (sceneX < (f32)D_003BAEBC - 11400.0f) {
+                    continue;
+                }
+                if ((f32)D_003BAEBC + 11400.0f < sceneX) {
+                    break;
+                }
+                if (func_00121ED8(D_003BAEF0, sceneX, sceneZ) != 0) {
+                    if (run == 0) {
+                        left = sceneX - 50.0f;
+                        top = sceneZ + 50.0f;
+                    }
+                    bottom = sceneZ - step - 50.0f;
+                    right = sceneX + step + 50.0f;
+                    run++;
+                } else {
+                    if (run > 0) {
+                        evtSubmitQuadFromVertices(
+                            left, D_003BAEF8 - 10.0f, top,
+                            right, D_003BAEF8 - 10.0f, top,
+                            left, D_003BAEF8 - 10.0f, bottom,
+                            right, D_003BAEF8 - 10.0f, bottom,
+                            0x80867173, 0x80867173, 0x80867173, 0x80867173);
+                    }
+                    run = 0;
+                }
+            }
+            if (run > 0) {
+                evtSubmitQuadFromVertices(
+                    left, D_003BAEF8 - 10.0f, top,
+                    right, D_003BAEF8 - 10.0f, top,
+                    left, D_003BAEF8 - 10.0f, bottom,
+                    right, D_003BAEF8 - 10.0f, bottom,
+                    0x80867173, 0x80867173, 0x80867173, 0x80867173);
+            }
+            run = 0;
+        }
+        evtSubmitPrimaryAlphaBlendMode(0);
+    }
+
+    func_00129900(0);
+    fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
+    sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
+    D_003BAF10 += 0.4f;
+    D_003BAF14 += 0.2f;
+    PCP_COPY_VECTOR_F32(focus, D_00324A20);
+
+    if (D_003BAF00 >= 128) {
+        selectedFloor = D_003BAEF0 - 1;
+        record = (FldSceneRecord *)fldSceneRecords;
+        for (i = 0; i < fldSceneRecordCount; i++, record++) {
+            sceneX = 0.0f;
+            sceneZ = 0.0f;
+            item = record->items;
+            for (j = 0; j < record->count; j++, item++) {
+                itemVisible = 0;
+                if (selectedFloor == item->floor) {
+                    if (fldGetFloorFlag(fldAreaFlagIndex, i, j) != 0) {
+                    itemVisible = 1;
+                }
+                    if (D_003BAEAC != 0) {
+                        itemVisible = 1;
+                    }
+                }
+                if (itemVisible != 0) {
+                    FldIcon *icon = item->icons;
+
+                    if (icon != NULL) {
+                        for (k = 0; k < item->iconCount; k++, icon++) {
+                            s32 spriteIndex = 0;
+                            s32 iconVisible;
+                            f32 offsetX = 0.0f;
+                            f32 offsetZ = 0.0f;
+                            f32 projectedX;
+                            f32 projectedY;
+
+                            iconVisible = 0;
+                            switch (icon->kind) {
+                            case 1:
+                                if (D_003BAEAC != 0 ||
+                                    func_00121ED8(D_003BAEF0,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 8;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 2:
+                                if (D_003BAEAC != 0 ||
+                                    func_00121ED8(D_003BAEF0,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 9;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 3:
+                                if (D_003BAEAC != 0 ||
+                                    func_00121ED8(D_003BAEF0,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 10;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 4:
+                                if (D_003BAEAC != 0 ||
+                                    func_00121ED8(D_003BAEF0,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 5;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 5:
+                                if (D_003BAEAC != 0 ||
+                                    func_00121ED8(D_003BAEF0,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 2;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 6:
+                                if (D_003BAEAC != 0 ||
+                                    func_00121ED8(D_003BAEF0,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 4;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 7:
+                                if (D_003BAEAC != 0 ||
+                                    func_00121ED8(D_003BAEF0,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 6;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 8:
+                                if (D_003BAEAC != 0 ||
+                                    func_00121ED8(D_003BAEF0,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 7;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 9:
+                                spriteIndex = 3;
+                                iconVisible = 1;
+                                break;
+                            case 10:
+                                if (D_003BAEAC != 0 ||
+                                    func_00121ED8(D_003BAEF0,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 12;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 11:
+                                spriteIndex = 11;
+                                iconVisible = 1;
+                                offsetZ = sdfSinPoly(D_003BAF14 + (i + k) * 3.3f) * 30.0f;
+                                break;
+                            case 12:
+                                if (D_003BAEAC != 0 ||
+                                    func_00121ED8(D_003BAEF0,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 13;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            case 13:
+                                if (D_003BAEAC != 0 ||
+                                    func_00121ED8(D_003BAEF0,
+                                        icon->position->x + sceneX + offsetX,
+                                        icon->position->z + sceneZ + offsetZ) != 0) {
+                                    spriteIndex = 14;
+                                    iconVisible = 1;
+                                }
+                                break;
+                            default:
+                                spriteIndex = 11;
+                                break;
+                            }
+                            if (iconVisible != 0) {
+                                f32 x;
+                                f32 z;
+
+                                x = icon->position->x + sceneX + offsetX;
+                                offsetX = focus[0] - x;
+                                if (offsetX < 0.0f) {
+                                    offsetX = -offsetX;
+                                }
+                                z = icon->position->z + sceneZ + offsetZ;
+                                offsetZ = focus[2] - z;
+                                if (offsetZ < 0.0f) {
+                                    offsetZ = -offsetZ;
+                                }
+                                if (offsetX < 80000.0f && offsetZ < 80000.0f) {
+                                    fldProjectPointSetupAlt(&projectedX, &projectedY,
+                                                            x, D_003BAEF8, z);
+                                    func_00142800(projectedX, projectedY,
+                                                  spriteIndex, 0x80808080);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        /* The fade gate deliberately stays open for the player-marker tail. */
+
+/* Source-only reconstruction of func_00142D78, starting at 0x00143EC0.
+ * Continues inside the D_003BAF00 >= 128 block after the icon loops.
+ * Function-scope locals and declarations are supplied by the prefix. */
+
+        if (D_003BAEF0 == fldAreaState.unkC0) {
+            f32 worldX;
+            f32 worldZ;
+            f32 distanceX;
+            f32 distanceZ;
+
+            fldGetSceneEntryPosition(D_003BAEB4, &sceneX, &sceneZ);
+            fldSubmitFrameQuad(1, 0, 128, 3, 0, 0, 1, 1);
+            func_00129900(1);
+            worldX = fldAreaState.x + sceneX;
+            distanceX = focus[0] - worldX;
+            if (distanceX < 0.0f) {
+                distanceX = -distanceX;
+            }
+            worldZ = fldAreaState.z + sceneZ;
+            distanceZ = focus[2] - worldZ;
+            if (distanceZ < 0.0f) {
+                distanceZ = -distanceZ;
+            }
+            fldProjectPointSetupAlt(&playerX, &playerY,
+                                    worldX, D_003BAEF8, worldZ);
+            if (distanceX < 80000.0f && distanceZ < 80000.0f) {
+                func_00129900(1);
+                func_001428C0(1, playerX, playerY, -fldAreaState.negatedAngle);
+                func_00129900(0);
+                func_001428C0(0, playerX, playerY, fldAreaState.angle);
+            }
+        }
+    }
+
+    fldSelectDisplayBuffer(0x5E);
+    func_00129900(0);
+    func_00129900(1);
+    fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
+    fldSubmitSpriteRect(0, 0, 512, 448, 32, 59, 22, 22,
+                        0x40808080, D_003D40A0[1]);
+    func_00129900(0);
+    func_00129900(0);
+    fldSubmitSpriteRect(332, 410, 156, 27, 2, 83, 156, 27,
+                        0x80808080, D_003D40A0[0]);
+
+    top = sdfSinPoly(D_003BAF0C);
+    i = (s32)(top * 32.0f) + 96;
+    D_003BAF0C += 0.2f;
+    i = i + (i << 8) + (i << 16)
+                 + 0x80000000U;
+    fldGetVisibleSceneBounds(&minX, &maxZ, &maxX, &minZ);
+    minX = (s32)((minX - 600.0f) / 600.0f) * 600;
+    maxX = (s32)((maxX + 600.0f) / 600.0f) * 600;
+    maxZ = (s32)((maxZ - 600.0f) / 600.0f) * 600;
+    minZ = (s32)((minZ + 600.0f) / 600.0f) * 600;
+    fldSubmitFrameQuad(1, 0, 128, 1, 0, 0, 1, 1);
+    func_00129900(0);
+
+    fldSubmitSpriteRect(242, 63, 28, 27, 172, 61, 28, 27,
+                        0x80808080, D_003D40A0[0]);
+    fldSubmitSpriteRect(20, 222, 28, 27, 201, 89, 28, 27,
+                        0x80808080, D_003D40A0[0]);
+    fldSubmitSpriteRect(242, 386, 28, 27, 172, 89, 28, 27,
+                        0x80808080, D_003D40A0[0]);
+    fldSubmitSpriteRect(464, 222, 28, 27, 201, 61, 28, 27,
+                        0x80808080, D_003D40A0[0]);
+
+    if ((f32)D_003BAEC0 < maxZ) {
+        fldSubmitSpriteRect(242, 53, 28, 40, 2, 2, 28, 40,
+                            i, D_003D40A0[1]);
+    }
+    if (minZ < (f32)D_003BAEC0) {
+        fldSubmitSpriteRect(242, 383, 28, 40, 2, 43, 28, 40,
+                            i, D_003D40A0[1]);
+    }
+    if (minX < (f32)D_003BAEBC) {
+        fldSubmitSpriteRect(11, 222, 39, 27, 31, 30, 39, 27,
+                            i, D_003D40A0[1]);
+    }
+    if ((f32)D_003BAEBC < maxX) {
+        fldSubmitSpriteRect(462, 222, 39, 27, 31, 2, 39, 27,
+                            i, D_003D40A0[1]);
+    }
+    fldSubmitSpriteRect(173, 0, 166, 80, 2, 2, 166, 80,
+                        0x80808080, D_003D40A0[0]);
+    fldSubmitSpriteRect(339, 0, 190, 80, 167, 2, 1, 80,
+                        0x80808080, D_003D40A0[0]);
+
+    {
+        const u8 *title = (const u8 *)D_0033EC90[fldAreaState.area % 100];
+
+        D_003BD7CC = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+            (450 - D_003BD7D0 * 6) << 4, 112, 0, 0xA09DC380,
+            title, 0);
+        frFontStoreShiftedRenderValue(D_003BD7CC, 0xFFFFFF);
+        frFontDrawGlyphInDefaultMode(D_003BD7CC);
+        frFontQueueGlyphForCurrentDrawBuffer(D_003BD7CC);
+    }
+
+    fldSelectDisplayBuffer(0x5E);
+    func_00129900(0);
+    fldSubmitFrameQuad(1, 0, 128, 2, 0, 0, 1, 2);
+    fldSubmitFrameQuad(1, 5, 128, 3, 0, 0, 1, 2);
+
+    if (D_003BAF04 != 0 && (u32)D_003BAEF4 - 1U < 40U
+        && D_003D4408[D_003BAEF4] >= 2) {
+        s32 labelIndex;
+
+        labelAlpha = D_003BAF08;
+        if (labelAlpha < 0) {
+            labelAlpha = -labelAlpha;
+        }
+        labelAlpha = 128 - (labelAlpha << 3);
+        if (labelAlpha < 0) {
+            labelAlpha = 0;
+        }
+        labelColor = labelAlpha | 0x78759B00;
+        labelIndex = fldFindMapCoordinateIndex(fldAreaState.area % 100, D_003BAEF4);
+        D_003BD7CC = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+            (450 - (D_003D4408[D_003BAEF4] / 2) * 12) << 4,
+            (D_003BAF08 + 42) << 3, 0, labelColor,
+            (const u8 *)D_0034606C[labelIndex], 0);
+        frFontStoreShiftedRenderValue(D_003BD7CC, 0xFFFFFF);
+        frFontDrawGlyphWithSharedFlags(D_003BD7CC, 1);
+        frFontQueueGlyphForCurrentDrawBuffer(D_003BD7CC);
+    }
+
+    if ((u32)D_003BAEF0 - 1U < 40U && D_003D4408[D_003BAEF0] >= 2) {
+        s32 labelIndex;
+
+        labelAlpha = D_003BAF04;
+        if (labelAlpha < 0) {
+            labelAlpha = -labelAlpha;
+        }
+        labelAlpha = 128 - (labelAlpha << 3);
+        if (labelAlpha < 0) {
+            labelAlpha = 0;
+        }
+        labelColor = labelAlpha | 0x78759B00;
+        labelIndex = fldFindMapCoordinateIndex(fldAreaState.area % 100, D_003BAEF0);
+        D_003BD7CC = (FrFontGlyph *)itfCreateConvertedTextGlyph(
+            (450 - (D_003D4408[D_003BAEF0] / 2) * 12) << 4,
+            (D_003BAF04 << 3) + 332, 0, labelColor,
+            (const u8 *)D_0034606C[labelIndex], 0);
+        frFontStoreShiftedRenderValue(D_003BD7CC, 0xFFFFFF);
+        frFontDrawGlyphWithSharedFlags(D_003BD7CC, 1);
+        frFontQueueGlyphForCurrentDrawBuffer(D_003BD7CC);
+    }
+
+    VU0_LOAD_MATRIX(sdfViewMatrix);
+}
 
 extern f32 D_003BAF18;
 extern f32 D_00329790[4][4];
@@ -1205,7 +1802,7 @@ typedef struct FldFogParams {
 
 extern FldFogParams D_00324B30;
 
-extern u128 D_00324A20;
+
 
 extern u128 D_00324A30;
 

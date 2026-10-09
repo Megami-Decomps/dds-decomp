@@ -502,7 +502,7 @@ void btlSelectRandomDefeatCamera(BtlLinkedCommand *command) {
     }
 }
 
-extern void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *, s8, s8, f32, f32, f32);
+extern void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *, BtlCamState *, BtlCamState *, f32, f32, f32, s8, s8);
 
 
 /* Frame the linked units, extend both camera distances by 500 and mirror origins.
@@ -510,7 +510,7 @@ extern void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *, BtlCamState *, B
 void btlRaiseLinkedActionPose(BtlLinkedCommand *command) {
     BtlCamState *frontCamera = &command->frontCamera;
     BtlCamState *backCamera = &command->backCamera;
-    btlBuildLinkedCommandCameraPair(command, frontCamera, backCamera, 0, 1, 0.25f, 0.0f, 0.5f);
+    btlBuildLinkedCommandCameraPair(command, frontCamera, backCamera, 0.25f, 0.0f, 0.5f, 0, 1);
     command->motionParameter = 30.0f;
     command->flags |= 0x41;
     command->frontCamera.distance += 500.0f;
@@ -764,7 +764,7 @@ s32 func_0020E170(BtlLinkedCommand *command, s8 firstSide, s8 secondSide) {
             command->flags |= 0x41;
             return 1;
         }
-        btlBuildLinkedCommandCameraPair(command, &command->frontCamera, &command->backCamera, 0, 0, 0.25f, 0.0f, 0.5f);
+        btlBuildLinkedCommandCameraPair(command, &command->frontCamera, &command->backCamera, 0.25f, 0.0f, 0.5f, 0, 0);
         command->frontCamera.distance += 500.0f;
         command->backCamera.distance += 500.0f;
         command->motionParameter = 30.0f;
