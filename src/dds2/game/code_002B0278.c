@@ -202,7 +202,6 @@ extern void mnuCreateStaffImageSprite();
 extern void mnuIdleVoiceTimer(struct StaffMenuRuntime *object);
 
 
-extern MenuIconBundle *mnuCreateIconBundle(u32);
 
 extern void mnuDrawIconPanel(s32, s32, s32, s32, MenuIconState *, s32, s32);
 
@@ -1121,7 +1120,6 @@ s32 mnuStepStaffCampPageControl(KwlnTask *callback) {
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2C88);
 
-extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource);
 extern s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 extern void evtStageTestSelectEntry(s32, s32, s32);
 extern void func_002B2C88(s32, s32, s32, s32);
@@ -1140,7 +1138,7 @@ s32 mnuCreatePanels(KwlnTask *callback) {
                          (EffectSlotSet *)menuContext->displayHandle,
                          (EffectSlotSet *)menuContext->displayResource,
                          (EffectSlotSet *)menuContext->alternateResource, 0, 0);
-    mnuAttachPartyIconBundle(index, window, (u32)menuContext->displayResource);
+    mnuAttachPartyIconBundle(index, window, (EffectSlotSet *)menuContext->displayResource);
     menuContext->panelGroup = mnuCreatePanelGroup(menuContext->resourceHandle,
                                                    menuContext->displayResource, 0);
     menuContext->panelRequest = mnuCreateSpriteState((struct EffectSlotSet *)menuContext->resourceHandle,
@@ -3799,7 +3797,6 @@ typedef struct MenuIconLayout {
 
 extern MenuIconLayout D_0042AFD8;
 
-MenuIconBundle *mnuCreateIconBundle(u32 resource);
 
 void mnuReleaseIconBundleAndSprites(MenuIconBundle *menu);
 
@@ -3807,7 +3804,6 @@ void mnuReleaseIconBundleAndSprites(MenuIconBundle *menu);
 void mnuDrawFadeIcons(s32 x, s32 y, s32 depth, s32 unused, MenuIconBundle *obj, s32 drawArg);
 
 
-void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *menu, u32 resource);
 
 void mnuReleasePartyIconBundles(MenuPageWindow *menu);
 
