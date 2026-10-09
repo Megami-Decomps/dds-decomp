@@ -7994,12 +7994,20 @@ extern u8 D_003E9FF0[];
 
 extern void func_003332D0(void *, f32);
 
-s32 *effCreateMotionResource(s32 *context) {
-    s32 *work = (s32 *)sdfAllocSizeClassBlock(8);
+typedef struct EffMotionResource {
+    BillObj *billboard; /* 0x00 */
+    SdfAsset *asset;    /* 0x04 */
+} EffMotionResource;
+typedef char EffMotionResourceSizeCheck[(sizeof(EffMotionResource) == 8) ? 1 : -1];
+typedef char EffMotionResourceAssetOffsetCheck[
+    ((u32)&((EffMotionResource *)0)->asset == 4) ? 1 : -1];
 
-    work[0] = 0;
-    work[1] = (s32)sdfCreateAssetWithDrawEntries();
-    func_003332D0((void *)work[1], 1.0f);
+EffMotionResource *effCreateMotionResource(EffMotionResourceConfig *unusedConfig) {
+    EffMotionResource *work = sdfAllocSizeClassBlock(sizeof(*work));
+
+    work->billboard = NULL;
+    work->asset = sdfCreateAssetWithDrawEntries();
+    func_003332D0(work->asset, 1.0f);
     memset(&D_004584C0, 0, sizeof(EffPacketParams));
     D_004584C0.primitive = 0x4000;
     D_004584C0.parameters = (u32 *)D_003E9FF0;
@@ -8008,41 +8016,42 @@ s32 *effCreateMotionResource(s32 *context) {
     return work;
 }
 
-s32 *effBillboardMotionResourceCreate(s32 *context, u16 kind, s32 *source) {
-    s32 *resource = effCreateMotionResource(context);
+EffMotionResource *effBillboardMotionResourceCreate(EffMotionResourceConfig *config, u16 kind,
+                                                     s32 *source) {
+    EffMotionResource *resource = effCreateMotionResource(config);
 
     switch (kind) {
     case 1:
-        resource[0] = (s32)billCreateIndexed(0, (u32)source);
+        resource->billboard = billCreateIndexed(0, (u32)source);
         break;
     case 2:
-        resource[0] = (s32)billCreateIndexed(1, (u32)source);
+        resource->billboard = billCreateIndexed(1, (u32)source);
         break;
     case 4:
-        resource[0] = (s32)effCreateBillboardSharingIndexedResource(source[0]);
+        resource->billboard = effCreateBillboardSharingIndexedResource(source[0]);
         break;
     }
-    billMarkKindOneFlag((struct BillObj *)(resource[0]));
-    billSetBillboardMode((struct BillObj *)resource[0], ((EffMotionResourceConfig *)context)->mode);
+    billMarkKindOneFlag(resource->billboard);
+    billSetBillboardMode(resource->billboard, config->mode);
     return resource;
 }
 
-s32 *effBillboardMotionResourceInitialize(s32 *request) {
-    s32 *source = (s32 *)request[0x30 / 4];
-    s32 *context = (s32 *)request[0x38 / 4];
-    s32 *resource = effCreateMotionResource(context);
-    resource[0] = (s32)billCloneObjectRetainingSharedData((struct BillObj *)*source);
-    billMarkKindOneFlag((struct BillObj *)(resource[0]));
-    billSetBillboardMode((struct BillObj *)resource[0], ((EffMotionResourceConfig *)context)->mode);
+EffMotionResource *effBillboardMotionResourceInitialize(EffActiveResource *request) {
+    EffMotionResource *source = request->resource;
+    EffMotionResourceConfig *config = request->payload;
+    EffMotionResource *resource = effCreateMotionResource(config);
+    resource->billboard = billCloneObjectRetainingSharedData(source->billboard);
+    billMarkKindOneFlag(resource->billboard);
+    billSetBillboardMode(resource->billboard, config->mode);
     return resource;
 }
 
-void effDestroyBillboardAndOwnedAssetWork(s32 *work) {
-    if (work[0] != 0) {
-        billDispatchByKind((BillObj *)(u32)work[0]);
+void effDestroyBillboardAndOwnedAssetWork(EffMotionResource *work) {
+    if (work->billboard != NULL) {
+        billDispatchByKind(work->billboard);
     }
-    if (work[1] != 0) {
-        sdfQueueAssetRelease(work[1]);
+    if (work->asset != NULL) {
+        sdfQueueAssetRelease((s32)work->asset);
     }
     sdfReleaseChipBlock(work);
 }
