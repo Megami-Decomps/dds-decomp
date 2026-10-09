@@ -289,7 +289,7 @@ void sdfMotionResume(Motion *motion) {
     }
 }
 
-void func_002DB7A8(void *a0) {
+void sdfMotionReleaseBindingStorage(void *a0) {
     sdfReleaseChipBlock(a0);
 }
 
