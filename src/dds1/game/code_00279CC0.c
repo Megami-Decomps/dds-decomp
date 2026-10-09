@@ -366,14 +366,14 @@ void mnuBindAssetEffectPayloads(MenuAssets *assets) {
     effSetSlotIndexedResource((EffTimedState *)(packet + 0x28), assets->material, 0, 0xc);
     effSetSlotIndexedResource((EffTimedState *)((s32)assets->layerB->records + 0x94),
                               assets->material, 1, 0xc);
-    effSetMaterialSlots((s32)assets->sprites[4], 0, 0, (u32)assets->layerB->records);
-    effSetMaterialSlots((s32)assets->sprites[4], 1, 0, (s32)assets->layerB->records + 0x6c);
-    effSetMaterialSlots((s32)assets->sprites[4], 2, 0, (s32)assets->layerB->records + 0x6c);
-    effSetMaterialSlots((s32)assets->sprites[4], 3, 0, (u32)assets->layerB->records);
-    effSetMaterialSlots((s32)assets->sprites[4], 4, 0, (u32)assets->layerB->records);
+    effSetMaterialSlots(assets->sprites[4], 0, 0, assets->layerB->records);
+    effSetMaterialSlots(assets->sprites[4], 1, 0, assets->layerB->records + 0x6C);
+    effSetMaterialSlots(assets->sprites[4], 2, 0, assets->layerB->records + 0x6C);
+    effSetMaterialSlots(assets->sprites[4], 3, 0, assets->layerB->records);
+    effSetMaterialSlots(assets->sprites[4], 4, 0, assets->layerB->records);
     effSetSlotIndexedResource((EffTimedState *)((s32)assets->layerA->records + 0x28),
                               assets->material, 2, 0xd);
-    effSetSlotOverrideWork((s32)assets->sprites[1], 0, (u32)assets->layerA->records);
+    effSetSlotOverrideWork(assets->sprites[1], 0, assets->layerA->records);
     effConfigureIndexedSlotResource(assets->sprites[2], 0, assets->material, 3, 4);
     effConfigureIndexedSlotResource(assets->sprites[3], 0, assets->material, 4, 4);
 }
