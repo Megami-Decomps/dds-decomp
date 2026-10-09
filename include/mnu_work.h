@@ -262,7 +262,46 @@ typedef struct MenuRegistryParameters {
     u8 pad2C[4];
 } MenuRegistryParameters;
 
-typedef struct MenuRegistryTable MenuRegistryTable;
+typedef struct MenuShortRecord {
+    u8 kind;
+    u8 pad01;
+    s16 parameters[3];
+} MenuShortRecord;
+
+typedef struct MenuShortRecordList {
+    s32 count;
+    MenuShortRecord *records;
+} MenuShortRecordList;
+
+/* A registry row contains two separately traversed short-record lists. */
+typedef struct MenuRegistryRecord {
+    u8 pad00[4];
+    u16 firstCount;
+    u16 secondCount;
+    MenuShortRecordList *lists;
+    MenuShortRecordList *secondLists;
+} MenuRegistryRecord;
+
+typedef char MenuRegistryRecordLayoutAssert[
+    (sizeof(MenuShortRecord) == 8 &&
+     sizeof(MenuShortRecordList) == 8 &&
+     sizeof(MenuRegistryRecord) == 0x10 &&
+     (unsigned long)&((MenuRegistryRecord *)0)->firstCount == 4 &&
+     (unsigned long)&((MenuRegistryRecord *)0)->secondCount == 6 &&
+     (unsigned long)&((MenuRegistryRecord *)0)->lists == 8 &&
+     (unsigned long)&((MenuRegistryRecord *)0)->secondLists == 0xC) ? 1 : -1];
+
+/* Accessed registry-table prefix; the backing object's total extent is unknown. */
+typedef struct MenuRegistryTable {
+    u32 flags;
+    u8 pad04[0xA];
+    u16 recordCount;
+    MenuRegistryRecord *recordBase;
+} MenuRegistryTable;
+
+typedef char MenuRegistryTablePrefixLayoutAssert[
+    ((unsigned long)&((MenuRegistryTable *)0)->recordCount == 0xE &&
+     (unsigned long)&((MenuRegistryTable *)0)->recordBase == 0x10) ? 1 : -1];
 
 /* Registry entries are addressed with a 0x1C-byte stride. */
 typedef struct MenuRegistry {
@@ -317,6 +356,9 @@ MenuProgressParameters *mnuGetResourceProgressParameters(void);
 void mnuCopyResourceProgressParameters(MenuProgressParameters *);
 void mnuBindMenuRecordRegistry(MenuRegistry *, u32);
 MenuRegistry *mnuGetMenuRecordRegistryEntry(u32);
+MenuRegistryRecord *mnuResolveTaggedRegistryRecord(MenuWorkEntry *work);
+MenuShortRecord *mnuFindFirstFixedKindShortRecord(MenuShortRecordList *list);
+MenuShortRecord *func_003225C0(MenuShortRecordList *list);
 void mnuBindMenuRegistryParameters(MenuRegistryParameters *records, u32 count);
 /* The native selector uses the low byte; the stored count is not checked. */
 MenuRegistryParameters *mnuGetMenuRegistryParametersByIndex(u32 parameterIndex);

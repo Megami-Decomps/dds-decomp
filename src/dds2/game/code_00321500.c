@@ -50,27 +50,6 @@ extern void *func_0035A828(u32 bytes);
 extern u8 *mnuGetResourceProgressStepState(void);
 extern u32 mnuGetActiveEffectWorkEntry(void);
 
-typedef struct ShortRecord {
-    u8 kind;
-    u8 pad01;
-    s16 parameters[3];
-} ShortRecord;
-
-typedef struct ShortRecordList {
-    s32 count;
-    ShortRecord *records;
-} ShortRecordList;
-
-typedef struct MenuRegistryRecord {
-    u8 pad00[4];
-    u16 listCount; /* 0x04: short lists in this record */
-    u8 pad06[2];
-    ShortRecordList *lists;
-    u8 pad0C[4];
-} MenuRegistryRecord;
-
-
-
 typedef struct MenuLengthData {
     u8 pad0[4];
     u16 firstCount;
@@ -78,13 +57,6 @@ typedef struct MenuLengthData {
     s32 *firstRecords;
     s32 *secondRecords;
 } MenuLengthData;
-
-struct MenuRegistryTable {
-    u32 flags;
-    u8 pad04[0xA];
-    u16 recordCount; /* 0x0E */
-    MenuRegistryRecord *recordBase; /* 0x10 */
-};
 
 void func_003214D0(u32, s32);
 s32 dds3MeasureRecordBlock(s32 *entries, s32 count);
@@ -447,9 +419,9 @@ MenuRegistryParameters *mnuGetMenuRegistryParametersByIndex(u32 parameterIndex) 
     return &D_004390E4[index];
 }
 
-ShortRecord *mnuFindFirstFixedKindShortRecord(ShortRecordList *list) {
+MenuShortRecord *mnuFindFirstFixedKindShortRecord(MenuShortRecordList *list) {
     s32 i;
-    ShortRecord *record = list->records;
+    MenuShortRecord *record = list->records;
     for (i = 0; i < list->count; i++, record++) {
         if (record->kind == 0x40) {
             return record;
@@ -458,9 +430,9 @@ ShortRecord *mnuFindFirstFixedKindShortRecord(ShortRecordList *list) {
     return NULL;
 }
 
-ShortRecord *func_003225C0(ShortRecordList *list) {
+MenuShortRecord *func_003225C0(MenuShortRecordList *list) {
     s32 i;
-    ShortRecord *record = list->records;
+    MenuShortRecord *record = list->records;
     for (i = 0; i < list->count; i++, record++) {
         if (record->kind == 0x40) {
             return record;
@@ -469,19 +441,19 @@ ShortRecord *func_003225C0(ShortRecordList *list) {
     return NULL;
 }
 
-u32 mnuResolveTaggedRegistryRecord(u32 taggedRecord) {
+MenuRegistryRecord *mnuResolveTaggedRegistryRecord(MenuWorkEntry *work) {
     MenuRegistry *registryEntry;
     MenuRegistryTable *registryTable;
-    if ((((MenuWorkEntry *)taggedRecord)->tag & MNU_WORK_TAG_CLASS_MASK) !=
+    if ((work->tag & MNU_WORK_TAG_CLASS_MASK) !=
         MNU_WORK_TAG_REGISTRY_TABLE) {
         return 0;
     }
-    registryEntry = mnuGetMenuRecordRegistryEntry(((MenuWorkEntry *)taggedRecord)->tag);
+    registryEntry = mnuGetMenuRecordRegistryEntry(work->tag);
     if (registryEntry == 0) {
         return 0;
     }
     registryTable = registryEntry->table;
-    return (u32)&registryTable->recordBase[((MenuWorkEntry *)taggedRecord)->recordIndex];
+    return &registryTable->recordBase[work->recordIndex];
 }
 
 typedef struct MenuByteRecordList {
@@ -566,17 +538,17 @@ void mnuDeactivateWorkEntry(MenuWorkEntry *entry) {
     }
 }
 
-extern void func_003226D8(MenuWorkEntry *, ShortRecordList *, ShortRecord *);
-extern s32 func_003230A0(MenuWorkEntry *, MenuRegistryTable *, MenuRegistryRecord *, ShortRecord *);
+extern void func_003226D8(MenuWorkEntry *, MenuShortRecordList *, MenuShortRecord *);
+extern s32 func_003230A0(MenuWorkEntry *, MenuRegistryTable *, MenuRegistryRecord *, MenuShortRecord *);
 extern void func_00321528(u32, MenuRegistryRecord *);
 
 /* Tick the packed countdown and dispatch the row's fixed-kind record. */
 s32 mnuAdvanceRegistryWorkEntry(MenuWorkEntry *entry) {
     MenuRegistryTable *table;
     MenuRegistryRecord *row;
-    ShortRecordList *list;
-    ShortRecord *record;
-    ShortRecord empty;
+    MenuShortRecordList *list;
+    MenuShortRecord *record;
+    MenuShortRecord empty;
 
     table = mnuGetMenuRecordRegistryEntry(entry->tag)->table;
     row = &table->recordBase[entry->recordIndex];
@@ -611,10 +583,10 @@ s32 mnuAdvanceRegistryWorkEntry(MenuWorkEntry *entry) {
 INCLUDE_ASM(const s32, "game/code_00321500", func_003230A0);
 
 void func_003232A0(MenuWorkEntry *entry, MenuByteRecordList *list) {
-    ShortRecord *record;
+    MenuShortRecord *record;
 
     entry->control.bits.loopMode = 0;
-    record = (ShortRecord *)mnuFindMarkedShortListRecord(list);
+    record = (MenuShortRecord *)mnuFindMarkedShortListRecord(list);
     if (record != NULL) {
         switch (record->kind) {
         case 0x11:
