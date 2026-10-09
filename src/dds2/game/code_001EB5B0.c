@@ -202,14 +202,14 @@ extern SoundCommand D_003BDC90;
 
 extern u8 D_003BDCA0[];
 
-typedef struct SoundTransition {
-    u32 currentResource;
+typedef struct BtlTintTransition {
+    u32 currentColor;
     u8 unk_04[0x14];
-    u32 previousResource;
-    u32 queuedResource;
-    u16 soundId;
-    u16 queuedId;
-} SoundTransition;
+    u32 sourceColor;
+    u32 targetColor;
+    u16 framesRemaining;
+    u16 durationFrames;
+} BtlTintTransition;
 
 
 extern u32 btlTintTransitionHoldCount;
@@ -3902,65 +3902,65 @@ void btlStepTintTransition(void) {
     }
 }
 
-void btlQueueTintTransition(u32 resource, u16 soundId) {
-    SoundTransition *transition;
-    if (soundId == 0) {
-        transition = (SoundTransition *)D_003BDCA0;
-        transition->soundId = 0;
-        transition->currentResource = resource;
-        transition->queuedResource = resource;
+void btlQueueTintTransition(u32 color, u16 frames) {
+    BtlTintTransition *transition;
+    if (frames == 0) {
+        transition = (BtlTintTransition *)D_003BDCA0;
+        transition->framesRemaining = 0;
+        transition->currentColor = color;
+        transition->targetColor = color;
         return;
     }
-    transition = (SoundTransition *)D_003BDCA0;
-    transition->soundId = soundId;
-    transition->queuedId = soundId;
-    transition->previousResource = transition->currentResource;
-    transition->queuedResource = resource;
+    transition = (BtlTintTransition *)D_003BDCA0;
+    transition->framesRemaining = frames;
+    transition->durationFrames = frames;
+    transition->sourceColor = transition->currentColor;
+    transition->targetColor = color;
 }
 
-void btlQueueTintTransitionToZero(u16 soundId) {
-    SoundTransition *transition;
-    if (soundId == 0) {
-        transition = (SoundTransition *)D_003BDCA0;
-        transition->soundId = 0;
-        transition->currentResource = 0;
-        transition->queuedResource = 0;
+void btlQueueTintTransitionToZero(u16 frames) {
+    BtlTintTransition *transition;
+    if (frames == 0) {
+        transition = (BtlTintTransition *)D_003BDCA0;
+        transition->framesRemaining = 0;
+        transition->currentColor = 0;
+        transition->targetColor = 0;
         return;
     }
-    transition = (SoundTransition *)D_003BDCA0;
-    transition->previousResource = transition->currentResource;
-    transition->queuedResource = 0;
-    transition->soundId = soundId;
-    transition->queuedId = soundId;
+    transition = (BtlTintTransition *)D_003BDCA0;
+    transition->sourceColor = transition->currentColor;
+    transition->targetColor = 0;
+    transition->framesRemaining = frames;
+    transition->durationFrames = frames;
 }
 
 extern u32 btlBlendColor(u32, u32, f32);
 
 void btlStepBlendColor(void) {
-    SoundTransition *transition = (SoundTransition *)D_003BDCA0;
-    if (transition->soundId != 0) {
-        transition->currentResource = btlBlendColor(transition->queuedResource, transition->previousResource,
-                                                    (f32)transition->soundId / (f32)transition->queuedId);
-        transition->soundId += 0xFFFF;
+    BtlTintTransition *transition = (BtlTintTransition *)D_003BDCA0;
+    if (transition->framesRemaining != 0) {
+        transition->currentColor = btlBlendColor(transition->targetColor, transition->sourceColor,
+                                                    (f32)transition->framesRemaining / (f32)transition->durationFrames);
+        transition->framesRemaining += 0xFFFF;
     } else {
-        transition->currentResource = transition->queuedResource;
+        transition->currentColor = transition->targetColor;
     }
     btlStepTintTransition();
 }
 
 void btlDrawTintIfVisible(void) {
-    SoundTransition *transition = (SoundTransition *)D_003BDCA0;
-    if (transition->currentResource & 0xFF000000) {
+    BtlTintTransition *transition = (BtlTintTransition *)D_003BDCA0;
+    if (transition->currentColor & 0xFF000000) {
         func_0018F840(transition);
     }
 }
 
 void sndResetTransition(void) {
-    SoundTransition *transition = (SoundTransition *)D_003BDCA0;
+    BtlTintTransition *transition = (BtlTintTransition *)D_003BDCA0;
     D_00436AD4 = 0;
     btlTintTransitionHoldCount = 0;
-    transition->soundId = 0;
-    transition->currentResource = 0;
+    transition->framesRemaining = 0;
+    transition->currentColor = 0;
 }
 
 void btlClearTintAndEnableCamera(void) {

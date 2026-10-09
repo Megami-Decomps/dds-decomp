@@ -523,18 +523,6 @@ typedef struct SoundCommand {
 
 extern SoundCommand D_003BDC90;
 
-extern u8 D_003BDCA0[];
-
-typedef struct SoundTransition {
-    u32 currentResource;
-    u8 unk_04[0x14];
-    u32 previousResource;
-    u32 queuedResource;
-    u16 soundId;
-    u16 queuedId;
-} SoundTransition;
-
-
 extern u32 btlTintTransitionHoldCount;
 
 typedef struct {
