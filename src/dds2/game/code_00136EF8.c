@@ -187,6 +187,7 @@ extern u32 D_00444A30[];
 extern s32 D_004361AC;
 
 extern void *dds3GetWorldSecondaryObject(void);
+extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 
 extern s32 D_004361A8;
 
@@ -290,6 +291,7 @@ extern u32 D_004361DC;
 extern s32 D_004361E0;
 
 extern FldWaypointBlock fldActorWaypointRows;
+extern FldActorEntry fldActorEntries[256];
 
 /* Actor slots use three transition keys, signed frame counters and two float
    triples with per-frame increments; func_00142B70 initializes the motion data. */
@@ -1587,7 +1589,7 @@ u8 *fldPickActorTemplateByName(const char *name) {
         return 0;
     }
     do {
-        entry = &fldActorWaypointRows.actors[i];
+        entry = &fldActorEntries[i];
         flag = entry->requiredFlag;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
             && entry->floor == fldAreaState.floor + 1
@@ -1650,7 +1652,7 @@ u8 *fldFindActorEntryByName(const char *name) {
         return 0;
     }
     do {
-        entry = &fldActorWaypointRows.actors[i];
+        entry = &fldActorEntries[i];
         flag = entry->requiredFlag;
         if ((flag == 0 || mdlFlagTest(flag) != 0)
             && entry->floor == fldAreaState.floor + 1
@@ -1704,7 +1706,7 @@ u8 *fldFindActorEntryByName(const char *name) {
 /* Use the selected actor slot only when it belongs to this area and kind 10. */
 u8 *fldSelectCurrentActorOnNextFloor(void) {
     s32 index = D_00435F28;
-    FldActorEntry *entry = &fldActorWaypointRows.actors[index];
+    FldActorEntry *entry = &fldActorEntries[index];
     if (entry->floor == D_00389784[0] + 1 && entry->kind == 10) {
         fldSelectedActorEntryIndex = index;
         D_004361F8 = 8;
@@ -1714,13 +1716,13 @@ u8 *fldSelectCurrentActorOnNextFloor(void) {
 }
 
 s32 fldGetSelectedActorMotionId(void) {
-    return fldActorWaypointRows.actors[fldSelectedActorEntryIndex].motion;
+    return fldActorEntries[fldSelectedActorEntryIndex].motion;
 }
 
 /* Inspect two independent properties of the selected actor, depending on mode:
  * mode 0 derives a size from the first two states; mode 1 tests a flag. */
 s32 fldQuerySelectedActorMotionState(s32 mode) {
-    FldActorEntry *entry = &fldActorWaypointRows.actors[fldSelectedActorEntryIndex];
+    FldActorEntry *entry = &fldActorEntries[fldSelectedActorEntryIndex];
     s16 a;
     u32 result;
     if (mode == 0 && entry->kind == 1) {
@@ -1754,7 +1756,7 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
         }
     }
     index = fldSelectedActorEntryIndex;
-    entry = &fldActorWaypointRows.actors[index];
+    entry = &fldActorEntries[index];
     kind = entry->kind;
     if (kind == 1) {
         if (entry->floor == D_00389784[0] + 1) {
@@ -1806,7 +1808,7 @@ void func_00140A58(const char *name) {
         return;
     }
     for (i = 0; i < 0x100; i++) {
-        entry = &fldActorWaypointRows.actors[i];
+        entry = &fldActorEntries[i];
         if (entry->requiredFlag != 0 && mdlFlagTest(entry->requiredFlag) == 0) {
             continue;
         }
@@ -1883,7 +1885,7 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, FieldSequenceRecord *
     }
     fldLoadActorWaypointTable(field);
     for (i = 0; i < 0x100; i++) {
-        entry = &fldActorWaypointRows.actors[i];
+        entry = &fldActorEntries[i];
         if (entry->requiredFlag != 0 && !mdlFlagTest(entry->requiredFlag)) {
             continue;
         }
@@ -1927,7 +1929,7 @@ INCLUDE_ASM(const s32, "game/code_00136EF8", func_00141F58);
 /* Read a selected actor state or a named world-object value; cases 1 and 2
  * deliberately fall through when no named object is found. */
 s32 fldGetActorStat0(s32 attribute) {
-    FldActorEntry *actor = &fldActorWaypointRows.actors[fldSelectedActorEntryIndex];
+    FldActorEntry *actor = &fldActorEntries[fldSelectedActorEntryIndex];
     EffWorldNode *objectNode;
     s32 secondaryMotion;
 
@@ -1963,7 +1965,7 @@ INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004134C0);
 INCLUDE_RODATA(const s32, "game/code_00136EF8", D_004134D0);
 
 s32 fldGetMappedActorStateAttribute(u32 attribute) {
-    FldActorEntry *actor = &fldActorWaypointRows.actors[fldSelectedActorEntryIndex];
+    FldActorEntry *actor = &fldActorEntries[fldSelectedActorEntryIndex];
     EffWorldNode *objectNode;
 
     switch (attribute) {
@@ -2005,7 +2007,7 @@ s32 fldGetMappedActorStateAttribute(u32 attribute) {
 /* Look up a motion-table attribute indexed by this actor's state; named
  * object lookups fall through to the next attribute if absent. */
 s32 fldGetActorMotionEntry(u32 attribute) {
-    FldActorEntry *actor = &fldActorWaypointRows.actors[fldSelectedActorEntryIndex];
+    FldActorEntry *actor = &fldActorEntries[fldSelectedActorEntryIndex];
     s16 motionIndex = actor->motion;
     EffWorldNode *objectNode;
     s32 flags;
@@ -2157,7 +2159,7 @@ void fldBeginNpcInteractionById(s32 id) {
     }
     if (D_00389780[0] == 0x1D || D_00389780[0] == 0x1E) {
         for (i = 0; i < 0x100; i++) {
-            actor = &fldActorWaypointRows.actors[i];
+            actor = &fldActorEntries[i];
             npc = &fldActorSlots[i];
             if (npc->kind == 1 && npc->actorId == id) {
                 fldApplyRoomObjectModeZero(0, 0, actor->motionName, 0);
@@ -2166,7 +2168,7 @@ void fldBeginNpcInteractionById(s32 id) {
         }
     } else {
         for (i = 0; i < 256; i++) {
-            actor = &fldActorWaypointRows.actors[i];
+            actor = &fldActorEntries[i];
             npc = &fldActorSlots[i];
             if (npc->kind == 1 && npc->actorId == id) {
                 npc->kind = 2;
@@ -2282,7 +2284,7 @@ void fldApplyCurrentAreaActorEntries(void) {
     s32 i;
 
     for (i = 0; i < 256; i++) {
-        entry = &fldActorWaypointRows.actors[i];
+        entry = &fldActorEntries[i];
         if (entry->kind == 1 && entry->floor == fldAreaState.floor + 1 && entry->motion != 0) {
             fldApplyRoomObjectModeOne(0, 0, entry->motionName, 0);
         }

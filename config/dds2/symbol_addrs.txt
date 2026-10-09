@@ -6503,6 +6503,7 @@ fldCameraFollowRows = 0x0038AEB0;
 fldLookAtNearPoint = 0x0038BAB0;
 fldLookAtFarPoint = 0x0038BAC0;
 fldActorWaypointRows = 0x003931A0;
+fldActorEntries = 0x003932A0;
 fldStageSoundBaseTable = 0x00399FF0;
 fldEffectTextureLoadHandles = 0x003A8E30;
 fldEffectTextureData = 0x003A8E40;
