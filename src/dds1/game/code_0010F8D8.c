@@ -90,7 +90,7 @@ u32 dds3AdvanceWorldCounter(void) {
 
 void dds3SetWorldNodeValue(EffWorldNode *node, u32 value) {
     if (node != NULL) {
-        node->value = value;
+        node->value = (const char *)value;
     }
 }
 
@@ -99,7 +99,7 @@ u32 dds3GetWorldNodeValue(EffWorldNode *node) {
 
     value = 0;
     if (node != NULL) {
-        value = node->value;
+        value = (u32)node->value;
     }
     return value;
 }

@@ -27,7 +27,7 @@ typedef struct ActionSub {
 EffWorldNode *evtSpawnActionObjB(s32 a, s32 b, s32 c, s32 d) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(0xB);
 
-    obj->value = d;
+    obj->value = (const char *)d;
     ((ActionSub *)obj->data)->unk10 = 0;
     obj->key = a;
     return obj;
@@ -51,7 +51,7 @@ EffWorldNode *evtSpawnActionObjD(s32 a, void *work, s32 c) {
 
     obj->data = work;
     obj->key = a;
-    obj->value = c;
+    obj->value = (const char *)c;
     return obj;
 }
 
@@ -80,7 +80,7 @@ EffWorldNode *evtSpawnActionObj10(s32 a, void *work, s32 c) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(0x10);
 
     obj->key = a;
-    obj->value = c;
+    obj->value = (const char *)c;
     obj->data = work;
     return obj;
 }
