@@ -1157,7 +1157,30 @@ void fldReleaseSceneRecordChunk(void) {
     fldSceneRecordCount = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00145818);
+void func_00145818(void) {
+    s32 i;
+
+    fldAreaState.unkC4 = -1;
+    fldAreaState.unkC8 = -1;
+    fldSceneRecordResource = 0;
+    fldSceneRecords = 0;
+    fldSceneRecordCount = 0;
+    D_0044F7F0[0] = 0;
+    D_0044F7F0[1] = 0;
+    D_0044F7F0[2] = 0;
+    D_0044F7F0[3] = 0;
+    D_0044F7F0[4] = 0;
+    D_0044F7F0[5] = 0;
+    D_0044F7F0[6] = 0;
+    D_0044F7F0[7] = 0;
+    D_0044F7F0[8] = 0;
+    for (i = 0; i < 96; i++) {
+        D_003A5470[i] = 0;
+        D_0044F818[i].unk0 = 0;
+        D_0044F818[i].unk4 = 0;
+        D_0044F818[i].unk8 = 0;
+    }
+}
 
 void fldSetEmitterPosition(SdfModel *emitter, f32 x, f32 y, f32 z) {
     f32 pos[4];
@@ -2273,10 +2296,10 @@ void fldLoadSceneModelsAndCamera(void) {
         ((FldPoint *)D_0044F818)[i].z = rec->pos->z;
     }
     cam = &fldAreaState;
-    D_0044F7F0[5] = sdfTexAcquireResourceTexture((void *)cam->mapResources[3].block);
-    D_0044F7F0[7] = sdfTexAcquireResourceTexture((void *)cam->mapResources[5].block);
-    D_0044F7F0[8] = sdfTexAcquireResourceTexture((void *)cam->mapResources[6].block);
-    D_0044F7F0[9] = sdfTexAcquireResourceTexture((void *)cam->mapResources[7].block);
+    D_0044F7F0[5] = sdfTexAcquireResourceTexture((void *)cam->mapResources[3].resourceAddress);
+    D_0044F7F0[7] = sdfTexAcquireResourceTexture((void *)cam->mapResources[5].resourceAddress);
+    D_0044F7F0[8] = sdfTexAcquireResourceTexture((void *)cam->mapResources[6].resourceAddress);
+    D_0044F7F0[9] = sdfTexAcquireResourceTexture((void *)cam->mapResources[7].resourceAddress);
     D_00436268 = 0;
     D_00436248 = cam->floor;
     D_0043624C = cam->unkC0;
@@ -2960,18 +2983,18 @@ void fldParseMixLb(void) {
     FldLbNode *node;
     u32 index;
 
-    fldAreaState.fieldTextures[0].unk0 = sdfReadNamedResource("/fld/f/bin/d2_fild1.tmx", &fldAreaState.fieldTextures[0].block, 0);
-    fldAreaState.fieldTextures[1].unk0 = sdfReadNamedResource("/fld/f/bin/d2_fild2.tmx", &fldAreaState.fieldTextures[1].block, 0);
-    fldAreaState.fieldTextures[2].unk0 = sdfReadNamedResource("/fld/f/bin/d2_fild3.tmx", &fldAreaState.fieldTextures[2].block, 0);
-    fldAreaState.fieldTextures[3].unk0 = sdfReadNamedResource("/fld/f/bin/d2_fild4.tmx", &fldAreaState.fieldTextures[3].block, 0);
-    fldAreaState.mapResources[0].unk0 = sdfReadNamedResource("/fld/f/bin/autmap_1.tmx", &fldAreaState.mapResources[0].block, 0);
-    fldAreaState.mapResources[1].unk0 = sdfReadNamedResource("/fld/f/bin/autmap_2.tmx", &fldAreaState.mapResources[1].block, 0);
-    fldAreaState.mapResources[2].unk0 = sdfReadNamedResource("/fld/f/bin/autmap_3.tmx", &fldAreaState.mapResources[2].block, 0);
-    fldAreaState.mapResources[3].unk0 = sdfReadNamedResource("/fld/f/bin/autmap_5.tmx", &fldAreaState.mapResources[3].block, 0);
-    fldAreaState.mapResources[4].unk0 = sdfReadNamedResource("/fld/f/bin/autmap_6.tmx", &fldAreaState.mapResources[4].block, 0);
-    fldAreaState.mapResources[5].unk0 = sdfReadNamedResource("/fld/f/bin/autmap_7.tmx", &fldAreaState.mapResources[5].block, 0);
-    fldAreaState.mapResources[6].unk0 = sdfReadNamedResource("/fld/f/bin/autmap_8.tmx", &fldAreaState.mapResources[6].block, 0);
-    fldAreaState.mapResources[7].unk0 = sdfReadNamedResource("/fld/f/bin/autmap_9.tmx", &fldAreaState.mapResources[7].block, 0);
+    fldAreaState.fieldTextures[0].allocation = sdfReadNamedResource("/fld/f/bin/d2_fild1.tmx", &fldAreaState.fieldTextures[0].resourceAddress, 0);
+    fldAreaState.fieldTextures[1].allocation = sdfReadNamedResource("/fld/f/bin/d2_fild2.tmx", &fldAreaState.fieldTextures[1].resourceAddress, 0);
+    fldAreaState.fieldTextures[2].allocation = sdfReadNamedResource("/fld/f/bin/d2_fild3.tmx", &fldAreaState.fieldTextures[2].resourceAddress, 0);
+    fldAreaState.fieldTextures[3].allocation = sdfReadNamedResource("/fld/f/bin/d2_fild4.tmx", &fldAreaState.fieldTextures[3].resourceAddress, 0);
+    fldAreaState.mapResources[0].allocation = sdfReadNamedResource("/fld/f/bin/autmap_1.tmx", &fldAreaState.mapResources[0].resourceAddress, 0);
+    fldAreaState.mapResources[1].allocation = sdfReadNamedResource("/fld/f/bin/autmap_2.tmx", &fldAreaState.mapResources[1].resourceAddress, 0);
+    fldAreaState.mapResources[2].allocation = sdfReadNamedResource("/fld/f/bin/autmap_3.tmx", &fldAreaState.mapResources[2].resourceAddress, 0);
+    fldAreaState.mapResources[3].allocation = sdfReadNamedResource("/fld/f/bin/autmap_5.tmx", &fldAreaState.mapResources[3].resourceAddress, 0);
+    fldAreaState.mapResources[4].allocation = sdfReadNamedResource("/fld/f/bin/autmap_6.tmx", &fldAreaState.mapResources[4].resourceAddress, 0);
+    fldAreaState.mapResources[5].allocation = sdfReadNamedResource("/fld/f/bin/autmap_7.tmx", &fldAreaState.mapResources[5].resourceAddress, 0);
+    fldAreaState.mapResources[6].allocation = sdfReadNamedResource("/fld/f/bin/autmap_8.tmx", &fldAreaState.mapResources[6].resourceAddress, 0);
+    fldAreaState.mapResources[7].allocation = sdfReadNamedResource("/fld/f/bin/autmap_9.tmx", &fldAreaState.mapResources[7].resourceAddress, 0);
     index = 0;
     D_004362E0 = sdfReadNamedResource("/fld/f/bin/TOPEN.D3P", &D_004362E4, 0);
     D_00436304 = sdfReadNamedResource("/fld/f/bin/TAKARA2.D3P", &D_00436308, 0);
@@ -3041,10 +3064,10 @@ void fldInitializeMenuResources(void) {
             fldAreaDamageEffect = 0;
         }
         fldAreaDamageEffectPlaced = 0;
-        fldAreaState.fieldTextures[0].texture = sdfTexAcquireResourceTexture((void *)fldAreaState.fieldTextures[0].block);
-        fldAreaState.fieldTextures[1].texture = sdfTexAcquireResourceTexture((void *)fldAreaState.fieldTextures[1].block);
-        fldAreaState.fieldTextures[2].texture = sdfTexAcquireResourceTexture((void *)fldAreaState.fieldTextures[2].block);
-        fldAreaState.fieldTextures[3].texture = sdfTexAcquireResourceTexture((void *)fldAreaState.fieldTextures[3].block);
+        fldAreaState.fieldTextures[0].texture = sdfTexAcquireResourceTexture((void *)fldAreaState.fieldTextures[0].resourceAddress);
+        fldAreaState.fieldTextures[1].texture = sdfTexAcquireResourceTexture((void *)fldAreaState.fieldTextures[1].resourceAddress);
+        fldAreaState.fieldTextures[2].texture = sdfTexAcquireResourceTexture((void *)fldAreaState.fieldTextures[2].resourceAddress);
+        fldAreaState.fieldTextures[3].texture = sdfTexAcquireResourceTexture((void *)fldAreaState.fieldTextures[3].resourceAddress);
     }
 }
 

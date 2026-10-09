@@ -4,16 +4,17 @@
 #include "common.h"
 
 struct SdfTex;
+struct SdfMemBlock;
 
-/* Field loaders retain allocation/address words in these resource records. */
+/* Field loaders retain the allocation owner and its resource address. */
 typedef struct FldResourceBlock {
-    s32 unk0;
-    s32 block;
+    struct SdfMemBlock *allocation;
+    u32 resourceAddress;
 } FldResourceBlock;
 
 typedef struct FldTextureResource {
-    s32 unk0;
-    s32 block;
+    struct SdfMemBlock *allocation;
+    u32 resourceAddress;
     struct SdfTex *texture;
 } FldTextureResource;
 
