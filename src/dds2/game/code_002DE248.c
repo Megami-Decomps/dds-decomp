@@ -4238,12 +4238,23 @@ void effSetRenderResourceMatrixComponent(EffQuadWork *work, f32 value) {
 
 extern s32 effMiscRand(s32 *);
 
-void effRandomizeParticleFields(s32 *work) {
-    u32 count = ((EffBillTimedHeader *)work[0x34 / 4])->count;
-    s32 *entry = *(s32 **)work[0x30 / 4];
+typedef struct EffPointSetRow {
+    EffPointSet *set; /* 0x00 */
+    s32 key;          /* 0x04 */
+    u32 color;        /* 0x08: packed color written by the class updater */
+    f32 angle;        /* 0x0C: phase of the radial class instance */
+} EffPointSetRow;
+
+typedef struct EffPointSetTable {
+    EffPointSetRow *rows;
+} EffPointSetTable;
+
+void effRandomizeParticleFields(EffClassWork *work) {
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffPointSetRow *entry = ((EffPointSetTable *)work->resource)->rows;
     u32 i;
-    for (i = 0; i < count; i++, entry += 4) {
-        entry[1] = -1 - (effMiscRand(effSharedRandomState) & 3);
+    for (i = 0; i < count; i++, entry++) {
+        entry->key = -1 - (effMiscRand(effSharedRandomState) & 3);
     }
 }
 
@@ -4257,16 +4268,7 @@ typedef struct EffPointSetClassWork {
 typedef char EffBillPointConfig_size[(sizeof(EffBillPointConfig) == 0x88) ? 1 : -1];
 typedef char EffPointSetClassWork_size[(sizeof(EffPointSetClassWork) == 0xC8) ? 1 : -1];
 
-typedef struct EffPointSetRow {
-    EffPointSet *set; /* 0x00 */
-    s32 key;          /* 0x04 */
-    u32 color;        /* 0x08: packed color written by the class updater */
-    f32 angle;        /* 0x0C: phase of the radial class instance */
-} EffPointSetRow;
 
-typedef struct EffPointSetTable {
-    EffPointSetRow *rows;
-} EffPointSetTable;
 
 EffPointSetTable *effCreateAlphaRampPointSetRows(EffBillPointConfig *src) {
     u32 count = src->timed.count;
@@ -4490,9 +4492,9 @@ typedef struct EffScaleRange {
 
 
 
-void effSeedBillScaleRange(u8 *work) {
-    EffBillRangeConfig *config = ((EffClassWork *)work)->payload;
-    EffScaleRange *range = (EffScaleRange *)((EffClassWork *)work)->resource;
+void effSeedBillScaleRange(EffClassWork *work) {
+    EffBillRangeConfig *config = work->payload;
+    EffScaleRange *range = (EffScaleRange *)work->resource;
     s32 steps = config->point.timed.time.duration;
     EffScaleRangeEntry *entry = (EffScaleRangeEntry *)range->entries;
     f32 start = config->startBase * (effMiscRandUnitFloat(effSharedRandomState) * config->startRand + (1.0f - config->startRand));
@@ -4597,15 +4599,6 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002EC370);
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002ECD10);
 
-void effSeedBillboardFrameCounters(s32 *work) {
-    u32 count = ((EffBillTimedHeader *)work[0x34 / 4])->count;
-    s32 *entry = *(s32 **)work[0x30 / 4];
-    u32 i;
-    for (i = 0; i < count; i++, entry += 3) {
-        entry[1] = -1 - (effMiscRand(effSharedRandomState) & 3);
-    }
-}
-
 typedef struct EffAlternatingPointSetRow {
     EffPointSet *set;
     s32 key;
@@ -4615,6 +4608,17 @@ typedef struct EffAlternatingPointSetRow {
 typedef struct EffAlternatingPointSetTable {
     EffAlternatingPointSetRow *rows;
 } EffAlternatingPointSetTable;
+
+void effSeedBillboardFrameCounters(EffClassWork *work) {
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffAlternatingPointSetRow *entry = ((EffAlternatingPointSetTable *)work->resource)->rows;
+    u32 i;
+    for (i = 0; i < count; i++, entry++) {
+        entry->key = -1 - (effMiscRand(effSharedRandomState) & 3);
+    }
+}
+
+
 
 EffAlternatingPointSetTable *func_002ECF78(EffBillPointConfig *src) {
     u32 count = src->timed.count;
