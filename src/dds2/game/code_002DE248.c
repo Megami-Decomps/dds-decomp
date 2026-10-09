@@ -30,6 +30,7 @@
 #include "evt_unit.h"
 #include "mdl.h"
 #include "eff.h"
+#include "eff_update_flags.h"
 #include "eff_resource_list.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
@@ -623,6 +624,7 @@ extern void sndLoadAndPlayStationedSe(u32);
 
 extern EffTrackSet *effCreateTrackSetWithSharedReferences(u32, u16, u32);
 extern void effReleaseResourceRefs(EffTrackSet *);
+extern EffTrackSet *effDuplicateResourceRefs(const EffTrackSet *);
 
 
 
@@ -789,7 +791,7 @@ void effResetSelectionEntriesAndState(SdfFlagListWork *p) {
 }
 
 void func_002DEC08(SdfFlagListWork *work) {
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         func_00316680(work);
         return;
     }
@@ -1326,7 +1328,7 @@ void effKindWorkFrameReset(EffKindWork *work) {
 
 void effKindWorkFrameUpdate(EffKindWork *work) {
     D_003E9810[work->kind].update();
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         work->frame++;
     }
 }
@@ -1426,7 +1428,7 @@ void effAlternateKindWorkFrameReset(EffKindWork *work) {
 
 void effAlternateKindWorkFrameUpdate(EffKindWork *work) {
     D_003E98A0[work->kind].update();
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         work->frame++;
     }
 }
@@ -1943,7 +1945,7 @@ u8 *billCloneAnimatedTransform(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *work = billAllocateAnimatedTransformEntries(descriptor);
 
-    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)source)->asset);
+    ((EffBillFrameState *)work)->asset = effDuplicateResourceRefs(((EffBillFrameState *)source)->asset);
     effInitializeAlternatingTransformRows(work, descriptor);
     return work;
 }
@@ -2070,7 +2072,7 @@ u8 *billCloneEmitterTransform(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *work = billAllocEmitterNode(descriptor);
 
-    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)source)->asset);
+    ((EffBillFrameState *)work)->asset = effDuplicateResourceRefs(((EffBillFrameState *)source)->asset);
     billInitializeEmitterRows(work, descriptor);
     return work;
 }
@@ -2197,7 +2199,7 @@ u8 *billCloneStripTransform(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *work = billAllocStripNode(descriptor);
 
-    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)source)->asset);
+    ((EffBillFrameState *)work)->asset = effDuplicateResourceRefs(((EffBillFrameState *)source)->asset);
     billInitializeStripRows(work, descriptor);
     return work;
 }
@@ -2403,7 +2405,7 @@ u8 *billCloneQuadTransform(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *work = billAllocQuadNode(descriptor);
 
-    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)source)->asset);
+    ((EffBillFrameState *)work)->asset = effDuplicateResourceRefs(((EffBillFrameState *)source)->asset);
     billInitializeQuadRows(work, descriptor);
     return work;
 }
@@ -2539,7 +2541,7 @@ void effResetActiveInstanceFrame(EffClassWork *work) {
 void effAdvanceActiveInstanceFrame(work)
 s32 *work;
 {
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         D_003E9950[work[0x2C / 4]].update();
         work[0x28 / 4]++;
     }
@@ -2761,8 +2763,7 @@ void effReleaseResourceRefs(EffTrackSet *work) {
 }
 
 /* Copy a track set: same size and kind, retaining the source's shared reference (or counting one more user of the built-in one). */
-u32 effDuplicateResourceRefs(u32 source) {
-    EffTrackSet *original = (EffTrackSet *)source;
+EffTrackSet *effDuplicateResourceRefs(const EffTrackSet *original) {
     EffTrackSet *effect = effCreateTrackSet(original->count, original->kind);
 
     if (effect->columns != 0) {
@@ -2779,7 +2780,7 @@ u32 effDuplicateResourceRefs(u32 source) {
             }
         }
     }
-    return (u32)effect;
+    return effect;
 }
 
 extern SdfPoolNode *D_003E9B60[8];
@@ -3384,7 +3385,7 @@ void effInitializeClassFrame(EffClassWork *work) {
 void effAdvanceClassFrame(work)
 s32 *work;
 {
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         D_003E9B80[work[0x2C / 4]].update();
         work[0x28 / 4]++;
     }
@@ -3930,7 +3931,7 @@ void effClearSurfaceNodeRecordReferences(s32 node) {
 }
 
 void effAcquireSurfaceRecord(s32 node) {
-    if (effModelUpdateControlFlags & 2) {
+    if (effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) {
         return;
     }
     if (((EffectSlotNode54 *)node)->record != 0) {
@@ -4764,7 +4765,7 @@ void effResetDispatchCounter(u8 *work) {
 void effAdvanceClassResourceFrame(work)
 s32 *work;
 {
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         D_003E9D00[work[0x2C / 4]].update(work);
         work[0x28 / 4]++;
     }
@@ -4953,7 +4954,7 @@ void effClearStripRecordReferences(EffectStripNode *node) {
 }
 
 void effAcquireStripRecord(EffectStripNode *node) {
-    if (effModelUpdateControlFlags & 2) {
+    if (effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) {
         return;
     }
     if (node->active != 0) {
@@ -5559,7 +5560,7 @@ void effResetBlockResourceFrame(u8 *work) {
 void effAdvanceBlockResourceFrame(work)
 s32 *work;
 {
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         D_003E9DD8[work[0x2C / 4]].update();
         work[0x28 / 4]++;
     }
@@ -6109,7 +6110,7 @@ void effResetModelBlockFrame(u8 *work) {
 void effAdvanceModelBlockFrame(work)
 s32 *work;
 {
-    if ((effModelUpdateControlFlags & 2) == 0) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         D_003E9E60[work[0x2C / 4]].update();
         work[0x28 / 4]++;
     }
@@ -6452,25 +6453,25 @@ EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
     return effect;
 }
 
-void effResetModelResourceUpdateCount(u8 *work) {
-    effModelResourceOperations[((EffModelResource *)work)->kind].initialize(work);
-    ((EffModelResource *)work)->updateCount = 0;
+void effResetModelResourceUpdateCount(EffModelResource *effect) {
+    effModelResourceOperations[effect->kind].initialize(effect);
+    effect->updateCount = 0;
 }
 
-void effDispatchModelResourceUpdate(s32 *work) {
-    if ((effModelUpdateControlFlags & 2) == 0) {
-        effModelResourceOperations[((EffModelResource *)work)->kind].update(work);
-        ((EffModelResource *)work)->updateCount++;
+void effDispatchModelResourceUpdate(EffModelResource *effect) {
+    if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
+        effModelResourceOperations[effect->kind].update(effect);
+        effect->updateCount++;
     }
 }
 
-void effDispatchModelResourceCallback(s32 work) {
-    effModelResourceOperations[((EffModelResource *)work)->kind].draw((void *)work);
+void effDispatchModelResourceCallback(EffModelResource *effect) {
+    effModelResourceOperations[effect->kind].draw(effect);
 }
 
-void effStepModelResourceCallbacks(s32 *work) {
-    effDispatchModelResourceUpdate(work);
-    effDispatchModelResourceCallback((s32)work);
+void effStepModelResourceCallbacks(EffModelResource *effect) {
+    effDispatchModelResourceUpdate(effect);
+    effDispatchModelResourceCallback(effect);
 }
 
 void effSetModelResourcePrimaryTransformVector(EffModelResource *effect, const f32 *position) {
@@ -8058,7 +8059,8 @@ void effClearCallbackFrame(u32 *obj) {
 }
 
 void effAdvanceCallbackFrame(u8 *work) {
-    if (btlIsRuntimeAllocated() != 0 && (effModelUpdateControlFlags & 2) == 0) {
+    if (btlIsRuntimeAllocated() != 0 &&
+        (effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         s32 kind = ((EffActiveResource *)work)->kind.signedIndex;
         EffResourceOps *entry = &D_003EA018[kind];
         void (*callback)(void *) = entry->update;
@@ -8474,7 +8476,7 @@ void effClearSurfaceRecordReferences(s32 node) {
 }
 
 void effAcquireSlotRecordWhenRuntimeFlagClear(s32 node) {
-    if (effModelUpdateControlFlags & 2) {
+    if (effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) {
         return;
     }
     if (((EffectSlotNode80 *)node)->record != 0) {
