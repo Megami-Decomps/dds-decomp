@@ -1744,8 +1744,6 @@ SdfModel *sdfCreateBufferedTransformSlot(void) {
     return slot;
 }
 
-extern void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
-extern void sdfDevBufferedRequestGrow(DevRequest *request);
 
 /* Release each element root, then the buffered request and its owner allocation. */
 void sdfDestroyObjectList(SdfModel *owner) {

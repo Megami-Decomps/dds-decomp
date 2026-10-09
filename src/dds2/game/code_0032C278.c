@@ -147,8 +147,6 @@ void sdfDestroyObjectList(SdfModel *owner);
 
 
 
-extern void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
-extern void sdfDevBufferedRequestGrow(DevRequest *request);
 
 
 extern void sdfBuildQuadPacket(s32, s32, s32, s32, s32, s32, s32, s32);
