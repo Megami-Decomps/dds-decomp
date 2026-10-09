@@ -7,18 +7,15 @@
 #include "pcp_vu0.h"
 #include "mdl.h"
 
-extern void *dds3GetSlot(void *arg0, s32 index);
 extern Dds3PathCurveWork *dds3GetObjectResourceHandle(EffWorldNode *);
 
 void dds3EnsureWorldNodeInSlot(void *arg0, void *arg1);
 
 void dds3SetSlotValue(EffWorldNode *object, Dds3MoverUpdate update);
 
-s32 dds3SelectSlotForObjectKind(u8 arg);
+s32 dds3SelectSlotForObjectKind(u32 kind);
 
-void *dds3SetSlotByKind(ObjBase *object, ObjData *data);
 
-void *dds3ExchangeSlot(void *arg0, void *arg1, s32 index);
 
 extern EffWorldNode *dds3SpawnSlotRingObj3(EffWorldNode *object);
 
@@ -118,15 +115,15 @@ void *dds3GetExtData(void *object) {
 }
 
 /* Exchange the slot selected by the data kind; NULL data leaves every slot alone. */
-void *dds3SetSlotByKind(ObjBase *object, ObjData *slotData) {
+void *dds3SetSlotByKind(EffWorldNode *object, EffWorldNode *slotData) {
     if (slotData == NULL) {
         return NULL;
     }
-    return dds3ExchangeSlot(object, slotData, dds3SelectSlotForObjectKind(slotData->kind));
+    return dds3ExchangeSlot(object, slotData, dds3SelectSlotForObjectKind(slotData->kindTag >> 24));
 }
 
 /* Replace one caller-selected slot and return its previous pointer; no release. */
-void *dds3ExchangeSlot(void *object, void *slotData, s32 slotIndex) {
+void *dds3ExchangeSlot(EffWorldNode *object, void *slotData, s32 slotIndex) {
     void *previousData;
 
     previousData = dds3GetSlot(object, slotIndex);
@@ -135,7 +132,7 @@ void *dds3ExchangeSlot(void *object, void *slotData, s32 slotIndex) {
 }
 
 /* Read an indexed slot; the caller supplies a valid index. */
-void *dds3GetSlot(void *object, s32 slotIndex) {
+void *dds3GetSlot(EffWorldNode *object, s32 slotIndex) {
     return dds3GetObjectOwnedHandle(object)->slots[slotIndex];
 }
 
@@ -395,7 +392,7 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112518);
  * Existing data is retained; attachment still uses the new object's kind. */
 void dds3EnsureSlotData(void *object) {
     void *existingData;
-    void *newData;
+    EffWorldNode *newData;
 
     existingData = dds3GetSlot(object, DDS3_OBJECT_DATA_SLOT);
     if (existingData == NULL) {

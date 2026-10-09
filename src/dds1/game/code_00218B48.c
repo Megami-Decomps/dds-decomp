@@ -3195,7 +3195,7 @@ INCLUDE_ASM(const s32, "game/code_00218B48", func_0021F630);
 
 extern u32 dds3AdvanceWorldCounter(void);
 
-extern s32 dds3CreateCameraObject(s32 counter, f32 *position, f32 *rotation);
+extern EffWorldNode *dds3CreateCameraObject(s32 counter, f32 *position, f32 *rotation);
 
 extern void effObjSetInnerFloat(EffWorldNode *object, f32 value);
 
@@ -3204,14 +3204,14 @@ extern void dds3EnsureSlotData();
 extern void *dds3GetWorldSecondaryObject(void);
 
 
-extern void func_001127A0(s32 object, s32 arg);
+extern void func_001127A0(EffWorldNode *object, s32 arg);
 
 extern void *memset(void *dst, s32 value, u32 size);
 
 void mdlSpawnViewerWorldObject(void) {
     f32 position[4] = { 0.0f, -100.0f, -600.0f, 0.0f };
     f32 rotation[4];
-    s32 object;
+    EffWorldNode *object;
 
     memset(rotation, 0, 0x10);
     rotation[3] = 1.0f;
@@ -3252,7 +3252,6 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     return counter;
 }
 
-extern void *dds3SetSlotByKind(void *object, void *slot);
 
 extern void dds3RegisterObjectInHandlerIndex(void *object);
 
@@ -3260,7 +3259,7 @@ s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     f32 position[4];
     f32 rotation[4];
     s32 counter;
-    s32 object;
+    EffWorldNode *object;
 
     memset(position, 0, 0x10);
     position[3] = 1.0f;

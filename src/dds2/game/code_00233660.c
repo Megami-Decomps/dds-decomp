@@ -3299,7 +3299,6 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     return world;
 }
 
-extern void *dds3SetSlotByKind(s32 obj, void *slot);
 
 extern void dds3RegisterObjectInHandlerIndex(void *obj);
 
@@ -3319,7 +3318,7 @@ s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     effObjSetInnerFloat(obj, 10.0f);
     func_00112058(obj, slotKind, resource);
     mdlAddEntryFlagged(dds3GetObjectBaseResourceHandle((s32)obj), 0, 0);
-    dds3SetSlotByKind((s32)obj, dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), 0x10000, 2));
+    dds3SetSlotByKind(obj, dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), 0x10000, 2));
     dds3RegisterObjectInHandlerIndex(obj);
     func_001129C8(obj, 0);
     dds3SetObjectFlags((u32)obj, 0x400);
