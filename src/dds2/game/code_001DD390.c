@@ -1209,7 +1209,129 @@ void btlUpdateAutoMusic(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E0CE0);
+extern s32 fileTestSavedSlotFlags(u32);
+extern s32 btlCheckSpecialAbility(DatPartyRecord *, s32);
+extern s32 func_001ABB10(BtlUnit *, s32);
+extern u32 func_001AC360(ActionStateLink *, BtlIndexList *, s32);
+extern s32 btlGetCommandTargetEligibility(BtlIndexList *, s32);
+extern BtlUnit *btlFindActorForOwner(u64);
+extern BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *, BtlIndexList *);
+
+/* Retail 0x001E107C calls btlGetIndexListCount even though its result is discarded. */
+void func_001E0CE0(ActionStateLink *task, BattleIndexWork *work) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *unit = task->unit;
+    BtlIndexList *list;
+    u32 kind;
+    u32 count;
+    u32 i;
+    u32 sides;
+    BtlUnit *target;
+    s32 reason;
+
+    if (fileTestSavedSlotFlags(2)) {
+        if ((s16)unit->partyRecord.unk1AC == 10) {
+            work->phase = (s16)unit->partyRecord.unk1AC;
+            return;
+        }
+        if (((s16)unit->partyRecord.unk1AC == 2 ||
+             (s16)unit->partyRecord.unk1AC == 7) &&
+            ((btlUnitStatusPair(unit) & 0x1400) || (unit->partyRecord.flags & 0x10))) {
+            if ((s16)unit->partyRecord.actionSlot == 0) {
+                work->phase = 1;
+            } else if ((unit->status.flags & 0x400) || (battle->battleFlags & 0x1000000) ||
+                       btlCheckSpecialAbility(&unit->partyRecord, (s16)unit->partyRecord.actionSlot)) {
+                work->phase = (s16)unit->partyRecord.unk1AC;
+                work->skillId = (s16)unit->partyRecord.actionSlot;
+            } else {
+                work->skillId = 0;
+                work->phase = 1;
+            }
+        } else {
+            work->skillId = 0;
+            work->phase = 1;
+        }
+        if (datCommandSelectors[work->skillId].kind == 1) {
+            work->phase = 1;
+            work->skillId = 0;
+        }
+        if (work->skillId < 0xAD) {
+            if (work->skillId >= 0xAB) {
+                work->phase = 1;
+                work->skillId = 0;
+            }
+        }
+        if ((u32)work->skillId >= 0x2A0) {
+            work->skillId = 0;
+            work->phase = 1;
+        }
+        if (func_001ABB10(unit, work->skillId)) {
+            work->skillId = 0;
+            work->phase = 1;
+        }
+        unit->partyRecord.unk1AC = work->phase;
+        unit->partyRecord.actionSlot = work->skillId;
+        list = btlAllocateIndexList(13);
+        kind = func_001AC360(task, list, 0);
+        reason = btlGetCommandTargetEligibility(list, work->skillId);
+        switch (reason) {
+        case 5:
+        case 7:
+        case 9:
+            work->skillId = 0;
+            work->phase = 1;
+            unit->partyRecord.actionSlot = work->skillId;
+            unit->partyRecord.unk1AC = work->phase;
+            btlClearIndexList(list);
+            kind = func_001AC360(task, list, 0);
+            break;
+        }
+        count = btlGetIndexListCount(list);
+        sides = 0;
+        for (i = 0; i < count;) {
+            target = btlGetIndexListEntry(list, i++);
+            sides |= target->status.flags & 0x600;
+        }
+        btlClearIndexList(work->indices);
+        switch (kind) {
+        case 0:
+            target = btlFindActorForOwner(work->ownerId);
+            if (target == NULL || !(target->status.flags & sides) ||
+                (btlUnitStatusPair(target) & 0xE1) != 1) {
+                target = unit;
+                if ((u8)(datCommandRecords[work->skillId].options & 1) == 0) {
+                    target = btlSelectUnitAtExtremeX(task->unit, list);
+                }
+            }
+            btlAppendIndexListEntry(work->indices, target);
+            break;
+        case 1:
+        case 2:
+            btlCopyIndexList(work->indices, list);
+            break;
+        }
+        btlFreeIndexList(list);
+        return;
+    } else {
+        work->skillId = 0;
+        work->phase = 1;
+        list = btlAllocateIndexList(13);
+        kind = func_001AC360(task, list, 0);
+        btlGetIndexListCount(list);
+        btlClearIndexList(work->indices);
+        switch (kind) {
+        case 0:
+            btlAppendIndexListEntry(work->indices, btlSelectUnitAtExtremeX(task->unit, list));
+            break;
+        case 1:
+        case 2:
+            btlCopyIndexList(work->indices, list);
+            break;
+        }
+        btlFreeIndexList(list);
+        return;
+    }
+}
 
 void btlFindSoundTaskByWorkValue(void) {
 }

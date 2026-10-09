@@ -142,7 +142,6 @@ extern void mnuDrawAndStepGradientFade(MenuGradientFade *, s32);
 
 extern void func_002C1B68(u32 *, u32);
 
-extern s32 movAreTitleEffectsReady(s32, s32);
 
 
 
@@ -151,7 +150,6 @@ extern s32 movAreTitleEffectsReady(s32, s32);
 extern EffectList *mnuAllocateValueRecord(u32);
 
 
-extern void mnuAppendCampSpriteRequests(s32, s32);
 
 extern MenuProfilePanel *mnuCreateProfilePanel(DatPartyRecord *selectionState);
 
@@ -163,7 +161,6 @@ extern void func_002C16F0(s32, s32, s32, DatPartyRecord *, s32, s32, s32);
 
 extern void mnuTerminalSetTrack(s8, s8);
 
-extern void *mnuWalkNodeList(s32, struct MenuList *);
 
 
 extern const char D_00424F00[];
@@ -751,7 +748,7 @@ MenuProgressHost *mnuCreateProgressHost(void) {
     host->allocation = allocation;
     host->titleEffectHandle = mnuAllocateValueRecord(1);
     mnuInitPartyPanelSlots(&host->partyPanel);
-    mnuAppendCampSpriteRequests(host->titleEffectHandle, (s32)host + 8);
+    mnuAppendCampSpriteRequests(host->titleEffectHandle, (StaffSlots *)((s32)host + 8));
     host->loadState = 1;
     return host;
 }
@@ -774,7 +771,7 @@ s32 mnuPollTitleEffectsReady(MenuProgressHost *host) {
     if (state == 2) {
         return 0;
     }
-    if (movAreTitleEffectsReady(host->titleEffectHandle, (s32)host + 8) == 0) {
+    if (movAreTitleEffectsReady(host->titleEffectHandle, (StaffSlots *)((s32)host + 8)) == 0) {
         return 1;
     }
     mnuReleaseStaffMenuResources(&host->staffSlots);

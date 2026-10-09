@@ -94,7 +94,10 @@ extern void *D_00436520;
 
 
 typedef struct EvtPad {
-    u8 pad00[0x20];
+    u8 pad00[6];
+    s8 frameEnd; /* +6: jump from group properties to the last key. */
+    s8 frameStart; /* +7: jump from group properties to the first key. */
+    u8 pad08[0x18];
     s8 syncKey; /* 0x20 */
     s8 confirm; /* 0x21 */
     u8 pad22;
@@ -1953,11 +1956,104 @@ void evtDrawGroupPropertyTable(s32 list, s32 x, s32 y, s32 hidden, EvtRuntime *r
     }
 }
 
+extern char *D_003C98A0[];
+
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00424080);
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_00424090);
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_00254940);
+s32 func_00254940(s32 x, s32 y, EvtRuntime *runtime) {
+    SdfListHead *packets;
+    EvtRuntimeGroup *group;
+    EvtRuntimeChild *child;
+    s32 column;
+    s32 field;
+    s32 count;
+
+    packets = sdfCreateResetPacketList();
+    group = runtime->frameGroup;
+    if (group == NULL) {
+        return 0;
+    }
+    if (D_003C9730[group->type].columnCount == 0) {
+        return 0;
+    }
+    evtDrawMenuFrame((u32)packets, x, y, 28, 3, 0, 1, (u8 *)runtime, NULL, evtDrawGroupPropertyTable);
+    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, packets);
+    if (runtime->actionMode != 15) {
+        return 0;
+    }
+    column = runtime->tableColumn;
+    if (column >= D_003C9730[group->type].columnCount && D_003C9730[group->type].columnCount > 0) {
+        column = runtime->tableColumn = D_003C9730[group->type].columnCount - 1;
+    }
+    field = D_003C9730[group->type].columns[column];
+    if (D_0037F510.incOne < 0) {
+        if (column < D_003C9730[group->type].columnCount - 1) {
+            runtime->tableColumn = column + 1;
+        } else {
+            runtime->tableColumn = 0;
+        }
+    } else if (D_0037F510.decOne < 0) {
+        if (column > 0) {
+            runtime->tableColumn = column - 1;
+        } else {
+            runtime->tableColumn = D_003C9730[group->type].columnCount == 0 ? 0 : D_003C9730[group->type].columnCount - 1;
+        }
+    } else if (D_0037F510.confirm < 0) {
+        switch (field) {
+        case 0:
+            runtime->value = runtime->frameGroup->metadata.value;
+            runtime->valueMin = 0;
+            runtime->valueMax = runtime->headerThird - 1;
+            func_00249088(runtime->curFrame, runtime);
+            evtViewerPushCommandHistory(7, 180, 120, runtime);
+            break;
+        case 1:
+            runtime->groupFirst = 0;
+            runtime->groupCursor = 0;
+            func_00249088(runtime->curFrame, runtime);
+            evtViewerPushCommandHistory(17, 180, 120, runtime);
+            break;
+        case 2:
+            runtime->cursor = runtime->frameGroup->metadata.extra1;
+            runtime->itemCount = field;
+            runtime->title = "PATH APPLY MODE";
+            runtime->itemNames = D_003C98A0;
+            evtViewerPushCommandHistory(2, 216, 120, runtime);
+            break;
+        }
+        return 1;
+    } else if (D_0037F510.frameEnd < 0) {
+        if (column == 0) {
+            runtime->frameColumn = 0;
+        } else {
+            runtime->frameColumn = 1;
+        }
+        count = 0;
+        for (child = group->children; child != NULL; child = child->next) {
+            count++;
+        }
+        if (count - 20 >= 0) {
+            runtime->frameCursor = count - 19;
+            runtime->frameFirst = 19;
+        } else {
+            runtime->frameFirst = count;
+            runtime->frameCursor = 0;
+        }
+        return -1;
+    } else if (D_0037F510.frameStart < 0) {
+        if (column == 0) {
+            runtime->frameColumn = 0;
+        } else {
+            runtime->frameColumn = 1;
+        }
+        runtime->frameCursor = 0;
+        runtime->frameFirst = 0;
+        return -1;
+    }
+    return D_0037F510.cancel >= 0 ? 0 : -1;
+}
 
 s32 mnuDrawMotionChangeLabel(s32 target, s32 x, s32 y) {
     sdfAppendPacket((SdfListHead *)target, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0, "MOTION CHANGE MENU"));

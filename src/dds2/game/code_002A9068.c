@@ -104,10 +104,6 @@ extern s32 func_0019F798(s32, s32, s32, s32, char *, s32);
 
 extern char D_00437B80[];
 
-extern u32 mnuGetValueRecordOwner(u32 *);
-
-extern u32 effAppendListEntry(u32 *, char *, u32, u32, u32 *);
-
 extern u32 D_003E6858[][2];
 
 extern u32 D_003E68D8[][2];
@@ -499,20 +495,20 @@ void mnuInitializeCampPanelResources(MenuPageWindow *container, StaffSlots *reso
 
 /* Snapshot base handles, then queue the main, extra and paired sprite groups.
  * Only owner word 1 selects the second column of each image table. */
-void mnuAppendCampSpriteRequests(u32 *resourceList, StaffSlots *resourceSlots) {
+void mnuAppendCampSpriteRequests(struct EffectList *resourceList, StaffSlots *resourceSlots) {
     s32 resourceIndex;
     s32 tableColumn;
 
     mnuSnapshotCampTextureHandles((u32 *)resourceSlots->baseResources);
     tableColumn = mnuGetValueRecordOwner(resourceList) == 1;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, D_0042A950, D_003E6858[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32 *)&resourceSlots->mainResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)D_0042A950, D_003E6858[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->mainResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_EXTRA_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, D_0042A950, D_003E68D8[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32 *)&resourceSlots->extraResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)D_0042A950, D_003E68D8[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->extraResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_PAIR_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, "/camp/spr/n_sta/", D_003E6900[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32 *)&resourceSlots->pairResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)"/camp/spr/n_sta/", D_003E6900[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->pairResources[resourceIndex]);
     }
 }
 
@@ -540,11 +536,11 @@ void mnuReleaseTitleEffectSprites(StaffSlots *resourceSlots) {
 }
 
 /* Poll the supplied resource list, then require nonzero handles in every group. */
-s32 movAreTitleEffectsReady(s32 resourceListAddress, StaffSlots *resourceSlots) {
+s32 movAreTitleEffectsReady(struct EffectList *resourceList, StaffSlots *resourceSlots) {
     struct EffectSlotSet **resourceSlot;
     struct EffectSlotSet **pairSlot;
     s32 resourceIndex;
-    effPollResourceList(resourceListAddress);
+    effPollResourceList(resourceList);
     resourceIndex = 0;
     resourceSlot = resourceSlots->baseResources;
     for (; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {

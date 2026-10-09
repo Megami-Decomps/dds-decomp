@@ -2464,13 +2464,7 @@ typedef struct EffRadialRingParams {
     u8 pad65[3];
 } EffRadialRingParams;
 
-/* Class kind 3 owns a separately allocated four-byte point-set reference. */
-typedef struct EffRingResource {
-    EffPointSet *pointSet;
-} EffRingResource;
-
 typedef char EffRadialRingParams_size_must_be_0x68[(sizeof(EffRadialRingParams) == 0x68) ? 1 : -1];
-typedef char EffRingResource_size_must_be_0x04[(sizeof(EffRingResource) == 0x04) ? 1 : -1];
 
 EffClassWork *effCreateResourceInstanceA(u16 kind, void *source, u32 option) {
     EffClassWork *effect = effAllocateActiveInstanceWork(kind, source);
@@ -2909,7 +2903,7 @@ u32 *effSegmentPointerSet(u8 *work) {
         ((EffRingSource *)work)->segments = 3;
         segments = 3;
     }
-    pointSet = (EffPointSet *)effCreatePointSet4(segments);
+    pointSet = effCreatePointSet4(segments);
     first = ((EffRingSource *)work)->firstColor;
     groups = pointSet->rows / 4;
     *pointSetRef = (u32)pointSet;
@@ -2926,8 +2920,10 @@ u32 *effSegmentPointerSet(u8 *work) {
     return pointSetRef;
 }
 
+extern void effAssetQueueRelease(EffPointSet *);
+
 void effReleaseRingResourceHandle(u32 handle) {
-    effAssetQueueRelease(*(u32 *)handle);
+    effAssetQueueRelease((EffPointSet *)(u32)*(u32 *)handle);
     sdfReleaseChipBlock((void *)handle);
 }
 
@@ -3030,7 +3026,7 @@ void func_002A4478(EffClassWork *work) {
     }
 }
 
-extern void effDrawFourPointGroups(u8 *, void *);
+extern void effDrawFourPointGroups(EffPointSet *, Matrix4 *);
 
 void billDrawCellBlendA(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -3072,7 +3068,7 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
         VU0_STORE_MATRIX(mtx);
-        effDrawFourPointGroups(out, mtx);
+        effDrawFourPointGroups((EffPointSet *)out, (Matrix4 *)mtx);
     }
 }
 
@@ -3277,8 +3273,6 @@ void effResetClassRingFrame(EffClassWork *work) {
     ((EffRingResource *)work->resource)->pointSet->color = 0;
 }
 
-extern u8 *effCreatePointSet4(u32);
-
 /* Create a point-set reference and initialize four colors per segment. */
 EffRingResource *effCreateRingHandle(EffRadialRingParams *work) {
     EffRingResource *pointSetRef = sdfAllocSizeClassBlock(sizeof(EffRingResource));
@@ -3295,7 +3289,7 @@ EffRingResource *effCreateRingHandle(EffRadialRingParams *work) {
         work->segments = 3;
         segments = 3;
     }
-    pointSet = (EffPointSet *)effCreatePointSet4(segments);
+    pointSet = effCreatePointSet4(segments);
     first = work->firstColor;
     groups = pointSet->rows / 4;
     pointSetRef->pointSet = pointSet;
@@ -3313,7 +3307,7 @@ EffRingResource *effCreateRingHandle(EffRadialRingParams *work) {
 }
 
 void effReleaseRingHandle(EffRingResource *handle) {
-    effAssetQueueRelease((u32)handle->pointSet);
+    effAssetQueueRelease(handle->pointSet);
     sdfReleaseChipBlock(handle);
 }
 
@@ -3431,7 +3425,7 @@ void billDrawCellBlendB(EffClassWork *work) {
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
         VU0_STORE_MATRIX(mtx);
-        effDrawFourPointGroups((u8 *)out, mtx);
+        effDrawFourPointGroups(out, (Matrix4 *)mtx);
     }
 }
 
@@ -3506,7 +3500,7 @@ void effSetClassWorkScale(EffClassWork *work, float value) {
 
 extern EffPacketParams D_003DCA10[];
 
-u8 *effCreatePointSet4(u32 count) {
+EffPointSet *effCreatePointSet4(u32 count) {
     s32 rows = count * 4 + 4;
     s32 size = rows * 20;
     struct SdfMemBlock *base;
@@ -3529,18 +3523,17 @@ u8 *effCreatePointSet4(u32 count) {
     sdfSetPrimaryStateFloat(set->handle, 1.0f);
     memset(D_003DCA10, 0, 0x2C);
     D_003DCA10[0].primitive = 0x4000;
-    return (u8 *)set;
+    return set;
 }
 
 /* Queue the draw asset for release and return the backing allocation. */
-void effAssetQueueRelease(s32 work) {
-    sdfQueueAssetRelease(((EffPointSet *)work)->handle);
-    sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
+void effAssetQueueRelease(EffPointSet *set) {
+    sdfQueueAssetRelease(set->handle);
+    sdfReleaseResourceAllocation(set->allocation);
 }
 
 /* vu0 routine: SDK loads the supplied transform or constructs identity. */
-void effDrawFourPointGroups(u8 *work, void *matrix) {
-    EffPointSet *set = (EffPointSet *)work;
+void effDrawFourPointGroups(EffPointSet *set, Matrix4 *matrix) {
     void *list;
     void *setup;
     EffGsPacket *packet;

@@ -5,6 +5,7 @@
 #include "kwln.h"
 #include "kwln_task_flags.h"
 #include "sdf.h"
+#include "sdf_thread.h"
 #include "sdf_linked_packet.h"
 
 struct EffWorldNode;
@@ -65,7 +66,6 @@ extern void func_0033EC28(s8);
 extern void sdfEnsureDeviceWorkerThreadStarted(s32);
 extern void func_00329C20(const char *, const char *);
 extern void sdfStartAndSuspendWorkerThread(void);
-extern void sdfStartTrackedThread(SdfThreadNode *, s32, s32, s64, s32, s32);
 extern s32 sdfThreadSleepSelf(void);
 extern void func_001004B0(void);
 
@@ -116,7 +116,7 @@ s32 func_00101AC0(void) {
     func_00329C20(D_00411158, D_00411178);
     sdfStartAndSuspendWorkerThread();
     sdfStartTrackedThread((SdfThreadNode *)((u8 *)&D_00438D80 + 8),
-                         (s32)func_001004B0, (s32)D_00439410, 0x4000, 0x60, 0);
+                         func_001004B0, D_00439410, 0x4000, 0x60, 0);
     sdfThreadSleepSelf();
     return 0;
 }

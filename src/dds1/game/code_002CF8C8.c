@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "sdf_thread.h"
 
 extern u8 D_003BD39C;
 
@@ -26,7 +27,6 @@ extern s32 sdfStartQueuedThreadWakeWorker(void);
 extern void sdfInitializeResourceQueuesAndTextureWords();
 extern void sdfConsUploadDmaProgram(s32 size);
 extern void effMiscSeedRandomFromClock(void *state);
-extern void sdfStartTrackedThread(SdfThreadNode *node, s32 entry, s32 stack, s64 stackSize, s32 priority, s32 arg);
 extern void sdfRunTickWorkerThread(void);
 extern SdfThreadNode D_003BD990;
 extern u8 D_003DFEF0[0x2000];
@@ -99,12 +99,12 @@ void func_002CF9A8(u32 heapSize, u32 initialHeapSize, u32 resourceAddress) {
     sdfInitializeResourceQueuesAndTextureWords(0x40);
     sdfConsUploadDmaProgram(D_003BD2D0);
     effMiscSeedRandomFromClock(NULL);
-    sdfStartTrackedThread(&D_003BD990, (s32)sdfRunTickWorkerThread, (s32)&D_003DFEF0, 0x2000, 0x4C, 0);
+    sdfStartTrackedThread(&D_003BD990, sdfRunTickWorkerThread, D_003DFEF0, 0x2000, 0x4C, 0);
 }
 
 /* Register the thread under the list semaphore before starting it. */
-void sdfStartTrackedThread(SdfThreadNode *node, s32 entry, s32 stack, s64 stackSize, s32 priority, s32 arg) {
-    node->threadId = sdfCreateThread((void *)(u32)entry, (void *)(u32)stack, (s32)stackSize, priority);
+void sdfStartTrackedThread(SdfThreadNode *node, void (*entry)(void), void *stack, s64 stackSize, s32 priority, s32 arg) {
+    node->threadId = sdfCreateThread((void *)entry, stack, (s32)stackSize, priority);
     WaitSema(sdfTrackedThreadSemaphore);
     node->next = sdfTrackedThreadHead;
     sdfTrackedThreadHead = node;

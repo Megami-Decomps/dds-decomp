@@ -6,6 +6,16 @@
 /* Staff-list nodes with unavailable entries carry this lifecycle flag. */
 #define MNU_STAFF_NODE_UNAVAILABLE 1
 
+struct EffectList;
+void mnuAppendCampSpriteRequests(struct EffectList *resourceList,
+                                 StaffSlots *resourceSlots);
+#ifdef VERSION_DDS2
+s32 movAreTitleEffectsReady(struct EffectList *resourceList,
+                            StaffSlots *resourceSlots);
+#else
+s32 mnuStaffSlotsAllFilled(struct EffectList *resourceList, StaffSlots *slots);
+#endif
+
 #ifdef VERSION_DDS2
 #define MNU_WINDOW_SLOT_REFRESH_RELEASE_HANDLES 0
 #define MNU_WINDOW_SLOT_REFRESH_PRESERVE_HANDLES 1

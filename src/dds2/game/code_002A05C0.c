@@ -7,6 +7,7 @@
 #include "file.h"
 #include "kwln_task_lifecycle.h"
 #include "file_request_api.h"
+#include "sdf_thread.h"
 
 /* The two title-audio states own the complete ten-word frame/decoder record. */
 typedef struct TitleAudioStreamState {
@@ -534,7 +535,7 @@ void mnuRunTitleStreamThread(void) {
     }
 }
 
-extern s32 mnuTitleStreamThread;
+extern SdfThreadNode mnuTitleStreamThread __attribute__((section(".sbss")));
 
 extern u8 mnuTitleStreamThreadStack[];
 

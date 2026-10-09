@@ -3363,7 +3363,7 @@ void mnuSetGridSpriteSlot(MenuListNode *node, s32 row, s32 col, s32 x, s32 y, s3
     itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)sprite, effect, x, y, x, y);
 }
 
-void *mnuWalkNodeList(s32 index, MenuList *list) {
+MenuListNode *mnuWalkNodeList(s32 index, MenuList *list) {
     MenuListNode *node = list->first;
     s32 currentIndex = 0;
 
@@ -3753,10 +3753,6 @@ void mnuRebuildListFirstFromCursor(MenuList *list);
 
 /* Rebuild the last-node pointer by walking forward from the cursor. */
 void mnuRebuildListLastFromCursor(MenuList *list);
-
-/* Reset the viewport/cursor to the first node; exactly one requests replay
- * toward the saved cursor, rather than treating every nonzero value as true. */
-void mnuResetNodeLinks(s32 *menu, s32 restoreCursor);
 
 /* Relink and reindex the pointer array. Native endpoint writes require at
  * least two entries; zero/one-entry calls are not guarded here. */

@@ -226,21 +226,15 @@ typedef struct EffPrimitiveCurve {
 
 typedef char EffPrimitiveCurveSizeCheck[sizeof(EffPrimitiveCurve) == 0x2C ? 1 : -1];
 
-/* Type-indexed effect work and texture handle (0x40); DDS1/2 game/code_0018CAC8/00194700.c. */
+/* The creation callback's returned payload is retained in this 8-byte dispatch owner. */
 typedef struct EffWork {
     u32 type;
-    void *payload; /* Type-specific callback argument; also owned by list roots. */
-    u32 listHead;  /* First node when this work owns a list. */
-    u8 unkC[8];
-    u32 unk14;
-    u8 unk18[8];
-    u32 unk20;
-    u32 unk24;
-    u8 unk28[0xC];
-    struct EffWork *prev; /* Previous node in the file-resource chain (+0x34). */
-    void *next;
-    SdfTex *textureHandle; /* Retained texture reference. */
+    void *payload;
 } EffWork;
+typedef char EffWork_size_must_be_8[sizeof(EffWork) == 8 ? 1 : -1];
+
+EffWork *effAllocDispatch(s32 type, void *params);
+void *effGetHandlerArg(EffWork *work);
 
 /* Effect callback dispatch entry (0x18); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct EffHandler {
@@ -248,17 +242,13 @@ typedef struct EffHandler {
     u8 unk4[0x14];
 } EffHandler;
 
-/* Integer-returning effect callback entry (0x18); DDS1/2 game/code_0018CAC8/00194700.c. */
-typedef struct EffHandler32 {
-    s32 (*handler)(s32);
+/* Creation-table entries return the newly allocated type-specific work. */
+typedef struct EffCreateHandler {
+    void *(*handler)(void *);
     u8 unk4[0x14];
-} EffHandler32;
-
-/* Input selector and callback result (0x8); DDS1/2 game/code_0018CAC8/00194700.c. */
-typedef struct EffResult {
-    s32 unk0; /* Input selector. */
-    s32 unk4; /* Handler result. */
-} EffResult;
+} EffCreateHandler;
+typedef char EffCreateHandler_size_must_be_0x18[
+    sizeof(EffCreateHandler) == 0x18 ? 1 : -1];
 
 /* Effect subrecord with byte fields at +0x20/+0x40/+0x50 (0x51); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct EffSub {
@@ -269,19 +259,6 @@ typedef struct EffSub {
     u8 unk41[0xF];
     u8 unk50;
 } EffSub;
-
-/* Message resource with prefixed name records (0x44); DDS1/2 game/code_0018CAC8/00194700.c. */
-typedef struct EffMsg {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8[0x20];
-    u32 unk28;
-    u32 unk2C;
-    u8 unk30[4];
-    u32 *nameRecord; /* Name text starts at +4; the formatter returns the first word. */
-    u8 unk38[8];
-    u32 *prefixRecord; /* Prefix string pointer is stored in the second word. */
-} EffMsg;
 
 /* Effect slot array owner and allocation handle (0xC); DDS1/2 game/code_0018CAC8/00194700.c. */
 typedef struct EffArrHdr {

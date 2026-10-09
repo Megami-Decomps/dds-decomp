@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf.h"
+#include "sdf_thread.h"
 
 s32 sdfTrackedThreadSemaphore __attribute__((section(".sbss")));
 SdfThreadNode *sdfTrackedThreadHead __attribute__((section(".sbss")));

@@ -4,6 +4,7 @@
 #include "common.h"
 #include "sdf_list_node.h"
 #include "sdf_gs_packet.h"
+#include "sdf_thread.h"
 
 /* Native battle-parameter blobs: DDS1 0xA6C bytes, DDS2 0xC14 bytes.
  * Level tables begin at level one; seven-entry scales use index three for zero. */
@@ -507,14 +508,6 @@ void sdfPrepareFrameDepthPacket(SdfPacketBuilder *packet, s32 bufferIndex);
 void sdfInitPacketBuilder(SdfPacketBuilder *packet, SdfGraphObj *source,
     u32 frameMask, s32 region, s32 mode);
 
-/* Linked named resource (0x24); DDS1/2 game/code_002D33C8/0032C278.c. */
-typedef struct SdfResource {
-    u32 unk00;
-    struct SdfResource *next;
-    u8 pad08[0x18];
-    s32 id;
-} SdfResource;
-
 /* Optional packed or five-float state block owned by an SdfAsset. */
 typedef union SdfSubParam {
     struct {
@@ -633,12 +626,6 @@ typedef char SdfAssetEntry_vifItopCommand_offset_must_be_0x98[
     ((u32)&((SdfAssetEntry *)0)->vifItopCommand == 0x98) ? 1 : -1];
 typedef char SdfAssetEntry_vifMscalCommand_offset_must_be_0x9C[
     ((u32)&((SdfAssetEntry *)0)->vifMscalCommand == 0x9C) ? 1 : -1];
-
-/* Linked thread registry entry (0x8); DDS1/2 sdfThread and thread-control units. */
-typedef struct SdfThreadNode {
-    struct SdfThreadNode *next; /* 0x00 */
-    s32 threadId;               /* 0x04 */
-} SdfThreadNode;
 
 extern s32 sdfTrackedThreadSemaphore;
 extern SdfThreadNode *sdfTrackedThreadHead;

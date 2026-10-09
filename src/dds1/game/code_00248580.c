@@ -128,7 +128,6 @@ extern void func_002491B8(s32, s32, s32, struct MenuList *, struct MenuListNode 
 
 extern u8 D_003BC3F8[];
 
-extern s32 mnuWalkNodeList(s32, s32);
 
 extern s32 func_003014F0(char *, const char *, ...);
 
@@ -486,8 +485,8 @@ void mnuHighlightProgressNodeFromOwnerSelection(s32 object) {
             return;
         }
         if (((MenuTerminalWork *)object)->owner->selectionState == 0) {
-            s32 selected = mnuWalkNodeList(2 - func_00249198(),
-                                              (s32)((MenuTerminalWork *)object)->listResource);
+            struct MenuListNode *selected = mnuWalkNodeList(2 - func_00249198(),
+                                                              ((MenuTerminalWork *)object)->listResource);
             ((MenuProgressNode *)selected)->flags |= 1;
         }
     }
@@ -507,7 +506,8 @@ void mnuHighlightProgressNodeByMode(s32 object) {
         selectedIndex = 3 - func_00249198();
     }
     if (((MenuTerminalWork *)object)->list->selectionState == 0) {
-        s32 node = mnuWalkNodeList(selectedIndex, (s32)((MenuTerminalWork *)object)->listResource);
+        struct MenuListNode *node = mnuWalkNodeList(selectedIndex,
+                                                    ((MenuTerminalWork *)object)->listResource);
         ((MenuProgressNode *)node)->flags |= 1;
     }
 }
@@ -614,7 +614,6 @@ void mnuResetProgressModeFromOwner(u8 *work) {
 extern void *memset(void *, s32, u32);
 
 extern struct EffectList *mnuAllocateValueRecord(u32);
-extern void mnuAppendCampSpriteRequests(struct EffectList *, StaffSlots *);
 extern void mnuReleaseStaffResourceGroups(StaffSlots *);
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
@@ -642,7 +641,6 @@ void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *work) {
     sdfReleaseResourceAllocation(work->allocation);
 }
 
-extern s32 mnuStaffSlotsAllFilled(struct EffectList *, StaffSlots *);
 
 
 extern void mnuInitializeStaffPageWindows(MenuPageWindow *, StaffSlots *, u32, PartyPanel *);
