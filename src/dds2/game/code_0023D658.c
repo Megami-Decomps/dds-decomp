@@ -315,7 +315,7 @@ void evtResetUnitVectorSlots(void) {
     s32 i;
 
     for (i = 0; i < 10; i++) {
-        mnuInitializeCampPanelVisualDefaults(&evtUnitVectorSlots[i].vec[0], &evtUnitVectorSlots[i].vec[4], &evtUnitVectorSlots[i].vec[8], &evtUnitVectorSlots[i].vec[12], &evtUnitVectorSlots[i].vec[13]);
+        mnuInitializeCampPanelVisualDefaults(&evtUnitVectorSlots[i].vec[0], &evtUnitVectorSlots[i].vec[4], &evtUnitVectorSlots[i].vec[8], &evtUnitVectorSlots[i].auxX, &evtUnitVectorSlots[i].auxY);
         evtUnitVectorSlots[i].state = EVT_UNIT_VECTOR_SLOT_EMPTY;
         evtUnitVectorSlots[i].id = 0;
     }
@@ -344,7 +344,12 @@ void evtSetSlotVectors(s32 slotIndex, s32 slotState, s32 unitId, f32 *firstEndpo
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0023D658", func_0023E320);
+void func_0023E320(s32 slotIndex, f32 x, f32 y) {
+    if (slotIndex < 10) {
+        evtUnitVectorSlots[slotIndex].auxX = x;
+        evtUnitVectorSlots[slotIndex].auxY = y;
+    }
+}
 
 /* Copy the second vector of the slot bound to `id` (else the first state-2 slot). */
 s32 func_0023E350(s32 id, f32 *out) {
@@ -426,15 +431,15 @@ s32 evtFindUnitSlotAuxCoordinates(EvtUnit *unit, f32 *outX, f32 *outY) {
 
     for (i = 0; i < 10; i++) {
         if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && evtUnitVectorSlots[i].id == (s32)unit) {
-            *outX = evtUnitVectorSlots[i].vec[12];
-            *outY = evtUnitVectorSlots[i].vec[13];
+            *outX = evtUnitVectorSlots[i].auxX;
+            *outY = evtUnitVectorSlots[i].auxY;
             return 1;
         }
     }
     for (i = 0; i < 10; i++) {
         if (evtUnitVectorSlots[i].state == EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK) {
-            *outX = evtUnitVectorSlots[i].vec[12];
-            *outY = evtUnitVectorSlots[i].vec[13];
+            *outX = evtUnitVectorSlots[i].auxX;
+            *outY = evtUnitVectorSlots[i].auxY;
             return 1;
         }
     }
