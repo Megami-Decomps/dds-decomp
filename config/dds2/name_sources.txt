@@ -5246,9 +5246,9 @@
 0x002EABA8	effSetRenderResourceMatrixComponent	inferred	Sets render resource matrix component. [names_reviewed5.tsv]
 0x002EABB0	effRandomizeParticleFields	inferred	DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described randomizeEffectParticleFields behavior.
 0x002EAC38	effCreateAlphaRampPointSetRows	inferred	confidence=high; matched-C; src/dds2/game/code_002DE248.c:4162:func_002EAC38; Allocates a chip-backed point-set row table and fills each five-color slot with symmetric, piecewise alpha ramps.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
-0x002EB908	effResetBillboardFrameDispatchCounters	inferred	Walks every billboard frame entry and resets its dispatch counter. [names_reviewed16.tsv]
-0x002EBB88	effReleaseBillFrameEntries	inferred	Iterates billboard frame entries, releases each effect work and frees their header. [names_reviewed5.tsv]
-0x002EBBF8	effReleaseTrackEntriesA	inferred	loop over header entries calling func_002EDEC0 (siblings EBB88, EC300, EB4xx)
+0x002EB908	effResetRadialClassResourceFrames	inferred	Resets dispatch counters for every class-resource child in the radial entry list.
+0x002EBB88	effDestroyRadialClassResourceEntries	inferred	Destroys each class-resource child and releases the radial entry-list allocation.
+0x002EBBF8	effAdvanceRadialClassResourceFrames	inferred	Advances the frame state of each class-resource child in the radial entry list.
 0x002EBC58	effUpdateRadialClassInstances	inferred	Fam_Tail
 0x002EBE28	effSeedBillScaleRange	inferred	Randomizes start and end scale and seeds each billboard frame with negative random start. [names_reviewed5.tsv]
 0x002EBF40	effCreateRetainedPointSetColorRows	inferred	confidence=high; matched-C; src/dds2/game/code_002DE248.c:4343:func_002EBF40; Allocates and retains a row table, constructs its point sets and fills each five-color slot with symmetric, piecewise alpha ramps.; source=fresh-R_Names31-QP13 [names_qp13.tsv]

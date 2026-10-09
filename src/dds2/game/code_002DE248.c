@@ -4337,12 +4337,12 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002EB728);
 
 extern void effResetDispatchCounter(EffClassWork *);
 
-void effResetBillboardFrameDispatchCounters(s32 *work) {
-    u32 count = ((EffBillTimedHeader *)work[0x34 / 4])->count;
-    s32 *entry = *(s32 **)work[0x30 / 4];
+void effResetRadialClassResourceFrames(EffClassWork *work) {
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffClassWork **entry = ((EffClassWorkList *)work->resource)->entries;
     u32 i;
     for (i = 0; i < count; i++) {
-        effResetDispatchCounter((EffClassWork *)*entry++);
+        effResetDispatchCounter(*entry++);
     }
 }
 
@@ -4385,27 +4385,27 @@ EffClassWorkList *effCreateRadialClassResourceEntries(EffBillPointConfig *config
 
 extern void effDestroyClassResourceWork(EffClassWork *);
 
-void effReleaseBillFrameEntries(u8 *work) {
-    u32 *header = (u32 *)((EffClassWork *)work)->resource;
-    u32 count = ((EffBillTimedHeader *)((EffClassWork *)work)->payload)->count;
-    u32 *entry = (u32 *)header[0];
+void effDestroyRadialClassResourceEntries(EffClassWork *work) {
+    EffClassWorkList *header = (EffClassWorkList *)work->resource;
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffClassWork **entry = header->entries;
     u32 i;
 
     for (i = 0; i < count; i++) {
-        effDestroyClassResourceWork((EffClassWork *)*entry++);
+        effDestroyClassResourceWork(*entry++);
     }
     sdfReleaseChipBlock(header);
 }
 
 extern void effAdvanceClassResourceFrame(EffClassWork *);
 
-void effReleaseTrackEntriesA(u8 *work) {
-    u32 count = ((EffBillTimedHeader *)((EffClassWork *)work)->payload)->count;
-    u32 **entry = (u32 **)((EffFrameState *)((EffClassWork *)work)->resource)->entries;
+void effAdvanceRadialClassResourceFrames(EffClassWork *work) {
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffClassWork **entry = ((EffClassWorkList *)work->resource)->entries;
     u32 i;
 
     for (i = 0; i < count; i++) {
-        effAdvanceClassResourceFrame((EffClassWork *)*entry++);
+        effAdvanceClassResourceFrame(*entry++);
     }
 }
 
