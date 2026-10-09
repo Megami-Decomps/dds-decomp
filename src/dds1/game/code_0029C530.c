@@ -8198,7 +8198,6 @@ typedef struct EffectBlock128 {
 
 extern EffectBlock128 D_003DF920;
 
-extern s32 func_002959E8(void *);
 
 u32 effPollNamedFileJob(void) {
     u8 record[0x110];
@@ -8214,7 +8213,7 @@ u32 effPollNamedFileJob(void) {
             fileQueueDestroy((struct FileQueue *)effFileQueue);
         }
         strcpy((char *)D_003DF8D0, ((EffResourceBankSlot *)record)->name);
-        effFileQueue = func_002959E8(record);
+        effFileQueue = fileQueueCreateFromCommandState((const char *)record);
         D_003DF920 = *(EffectBlock128 *)effFileQueue;
         D_003BD058 = 0;
         D_0038F2FC[0] = 0;

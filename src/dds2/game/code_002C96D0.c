@@ -5343,7 +5343,7 @@ void func_002D55B0(FileQueue *queue, s32 slot) {
     func_0036BCD0(D_00437E20, 0);
 }
 
-FileQueue *func_002D5AA8(s32 entry) {
+FileQueue *fileQueueCreateFromCommandState(const char *entry) {
     DevState *command = sdfDevCreateCommandState(entry);
     s32 size;
     struct SdfMemBlock *allocation;
