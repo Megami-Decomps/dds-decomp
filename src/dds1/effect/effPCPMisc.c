@@ -399,7 +399,7 @@ void effPcpViewAlignedRingSetScale(EffPCPRingWork *work, f32 val) {
 extern f32 effMiscRandUnitFloat(void *state);
 extern u32 effMiscRand(void *state);
 extern u8 effDefaultRandomState[];
-extern void mdlAddEntryPlain(void *obj, s32 a, s32 b);
+extern void mdlAddEntryPlain(MdlCtx *ctx, s32 searchId, s32 motionIndex);
 
 typedef struct EffPCPTwinWork {
     u32 unk00;
