@@ -3539,14 +3539,6 @@ typedef struct FileConfigListNode {
     FileConfigCountdown *resource;   /* 0x70: separately allocated countdown */
 } FileConfigListNode;
 
-typedef struct FileConfigList {
-    u8 pad00[0x10];
-    FileConfigListNode *head; /* 0x10 */
-    u8 pad14[8];
-    FileConfigListNode *cursor; /* 0x1C */
-    s32 count;                /* 0x20 */
-} FileConfigList;
-
 /* Save/config task context: DDS2 places the status four bytes later. */
 typedef struct FileConfigTask {
     struct SdfMemBlock *backingAllocation; /* 0x00: descriptor owning this task */
@@ -3564,7 +3556,7 @@ typedef struct FileConfigTask {
 } FileConfigTask;
 
 extern struct MenuList *mnuCreateListState(s32, s32, s32);
-extern void func_002D1930(s32 x, s32 y, s32 depth, FileConfigList *list, FileConfigListNode *node, s32 drawArg);
+extern void func_002D1930(s32 x, s32 y, s32 depth, struct MenuList *list, FileConfigListNode *node, s32 drawArg);
 extern void mnuResetTitleStreamLocked(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
 extern void func_002A2200(s32);
@@ -3628,8 +3620,8 @@ void fileConfigTaskDestroy(void) {
             dds3AdminSubmitModeRequest(2, &request, 4, 0);
             mnuAdvanceTitleStateUnderSemaphore();
         }
-        node = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->head;
-        for (i = 0; i < ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->count; i++) {
+        node = (FileConfigListNode *)((FileConfigTask *)fileConfigTaskWork)->frame->first;
+        for (i = 0; i < ((FileConfigTask *)fileConfigTaskWork)->frame->count; i++) {
             sdfReleaseChipBlock(node->resource);
             node = node->next;
         }
@@ -3768,7 +3760,7 @@ s32 func_002D1450(void) {
         return -1;
     }
 
-    oldIndex = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index;
+    oldIndex = ((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index;
     if ((u8)D_0037F510[0x26] & 2) {
         if (mnuRetreatListCursorDefault(((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
             sndSetSequenceVolumePan(0, 0x7F, 0x3F);
@@ -3783,19 +3775,19 @@ s32 func_002D1450(void) {
             ((FileConfigTask *)fileConfigTaskWork)->transitionTicks = 8;
         }
     }
-    index = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index;
+    index = ((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index;
     if (index < 4) {
         if (D_0037F510[0x24] < 0 && fileTestSlotFlagsBit(index, (s32 *)&datGameState->world.slotFlags) == 0) {
-            fileToggleSlotFlagsBit(((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index, (s32 *)&datGameState->world.slotFlags);
+            fileToggleSlotFlagsBit(((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index, (s32 *)&datGameState->world.slotFlags);
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
-            cursor = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor;
+            cursor = (FileConfigListNode *)((FileConfigTask *)fileConfigTaskWork)->frame->cursor;
             cursor->resource->ticks = 8;
         }
         if (D_0037F510[0x25] < 0) {
-            if (fileTestSlotFlagsBit(((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index, (s32 *)&datGameState->world.slotFlags) != 0) {
-                fileToggleSlotFlagsBit(((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index, (s32 *)&datGameState->world.slotFlags);
+            if (fileTestSlotFlagsBit(((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index, (s32 *)&datGameState->world.slotFlags) != 0) {
+                fileToggleSlotFlagsBit(((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index, (s32 *)&datGameState->world.slotFlags);
                 sndSetSequenceVolumePan(8, 0x7F, 0x3F);
-                cursor = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor;
+                cursor = (FileConfigListNode *)((FileConfigTask *)fileConfigTaskWork)->frame->cursor;
                 cursor->resource->ticks = 8;
             }
         }
@@ -3804,7 +3796,7 @@ s32 func_002D1450(void) {
         mnuClearListFlagsOneAndTwo((u32 *)((FileConfigTask *)fileConfigTaskWork)->frame);
     }
     if (D_0037F510[0x21] < 0) {
-        if (((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index == 4) {
+        if (((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index == 4) {
             ((FileConfigTask *)fileConfigTaskWork)->result = 3;
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         }
@@ -3968,7 +3960,7 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437DF0);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", fileConfigInputTaskName);
 
-void func_002D1930(s32 x, s32 y, s32 depth, FileConfigList *list,
+void func_002D1930(s32 x, s32 y, s32 depth, struct MenuList *list,
                    FileConfigListNode *node, s32 drawArg) {
     s8 labelFrames[5] = {0, 1, 2, 3, 4};
     s32 index = node->index;

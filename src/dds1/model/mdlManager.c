@@ -285,8 +285,6 @@ Motion *mdlFindNodeById(MdlCtx *ctx, s32 id);
 void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 searchId, s32 motionIndex, s32 loopEnabled,
                                      f32 blendLeadFrames, f32 blendDurationFrames);
 
-extern void mdlSetResourceAmount(MdlCtx *ctx, MdlResourceItem *node, f32 amount);
-
 extern u32 mdlGroupJobSemaphore;
 
 extern BattleGroupNode *btlFindGroupedEntity(s32 group, s32 id);
@@ -598,7 +596,7 @@ MdlCtx *mdlCreateContextFromResourceKey(u32 group, u32 id) {
     PCP_COPY_VECTOR(inner->scaleVector, scale);
     ctx->unk34 = node->unk_B0;
     ctx->current.h.id = -1;
-    ctx->current.h.arg = -1;
+    ctx->current.h.motionIndex = -1;
     for (i = 0; i != 8; i++) {
         if (node->slots[i].data != NULL && (node->slots[i].flags & 1)) {
             motionOwnerCreateObjectForRecord(ctx, i);
@@ -610,7 +608,7 @@ MdlCtx *mdlCreateContextFromResourceKey(u32 group, u32 id) {
         }
     }
     ctx->resourceItems = NULL;
-    mdlApplyResourceEntries(ctx, -1, -1);
+    mdlApplyResourceEntries(ctx, -1, MDL_CONTEXT_WIDE_MOTION_SLOT);
     return ctx;
 }
 
@@ -782,8 +780,6 @@ void mdlEnableAllEntries(MdlCtx *ctx) {
 }
 
 extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
-extern void mdlRemoveResourceSubtype(MdlCtx *, s32);
-
 /* Select the first matching searchId, or create it, and make it current in its
  * signed slot index. Allocation success/slot bounds are assumed. Slot zero
  * also becomes ctx->first; id and motionIndex narrow into the current pair. */
@@ -807,8 +803,8 @@ void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 searchId, s32 motionIndex,
     }
     sdfMotionInitialize(node, motionIndex, loopEnabled, blendLeadFrames, blendDurationFrames);
     ctx->current.h.id = searchId;
-    ctx->current.h.arg = motionIndex;
-    mdlRemoveResourceSubtype(ctx, slotIndex);
+    ctx->current.h.motionIndex = motionIndex;
+    mdlRemoveResourcesForMotionSlot(ctx, slotIndex);
     mdlApplyResourceEntries(ctx, motionIndex, slotIndex);
 }
 

@@ -7,6 +7,7 @@
 #include "sdf_texture_draw_packet.h"
 #include "kwln.h"
 #include "sdf.h"
+#include "sdf_texture_registry.h"
 #include "sdf_projection.h"
 #include "sdf_linked_packet.h"
 #include "sdf_draw.h"
@@ -19,12 +20,6 @@ typedef struct {
     s8 b;
     s8 a;
 } KwlnFadeColor;
-
-typedef struct KwlnResourceNode {
-    s32 unk0;
-    struct KwlnResourceNode *next;
-    s32 *ready;
-} KwlnResourceNode;
 
 extern u32 kwlnDrawControlFlags;
 
@@ -72,7 +67,6 @@ extern u16 kwlnFadeDuration;
 extern u16 kwlnBackgroundFadeCounter;
 extern u16 kwlnBackgroundFadeDuration;
 
-extern s32 sdfResourceListHead;
 extern s32 kwlnCurrentIncompleteResource;
 extern u8 effSharedRandomState[];
 extern void effMiscSeedRandom(void *data, u32 tag);
@@ -622,21 +616,21 @@ INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104810);
 #define KWLN_MAP_CYAN 0x80808000
 #define KWLN_HELD_TEXTURE_CLAMP_MODE 5
 
-/* Count nodes with a null readiness pointer or a zero readiness word. */
+/* Count texture entries without a reference clone source. */
 s32 kwlnTextureCountIncompleteResources(void) {
-    KwlnResourceNode *resourceNode = (KwlnResourceNode *)sdfResourceListHead;
-    KwlnResourceNode *nextNode;
+    SdfTex *texture = sdfResourceListHead;
+    SdfTex *previousTexture;
     s32 incompleteCount = 0;
-    while (resourceNode != NULL) {
-        while (resourceNode->ready != NULL && *resourceNode->ready != 0) {
-            nextNode = resourceNode->next;
-            if (nextNode == NULL) {
+    while (texture != NULL) {
+        while (texture->reference != NULL && texture->reference->cloneSource != NULL) {
+            previousTexture = texture->prev;
+            if (previousTexture == NULL) {
                 return incompleteCount;
             }
-            resourceNode = nextNode;
+            texture = previousTexture;
         }
         incompleteCount++;
-        resourceNode = resourceNode->next;
+        texture = texture->prev;
     }
     return incompleteCount;
 }
@@ -646,32 +640,32 @@ u32 kwlnTextureGetPageIndex(void) {
 }
 
 /* Clamp a negative request and return the reached index. DDS1 index zero
- * selects the head without scanning readiness; tail exits retain prior writes. */
+ * selects the head without scanning clone-source links; tail exits retain prior writes. */
 s32 func_00104A18(s32 requestedIndex) {
-    KwlnResourceNode *resourceNode = (KwlnResourceNode *)sdfResourceListHead;
-    KwlnResourceNode *nextNode;
+    SdfTex *texture = sdfResourceListHead;
+    SdfTex *previousTexture;
     s32 visitedIndex = 0;
 
     if (requestedIndex < 0) {
         requestedIndex = 0;
     }
-    while (resourceNode != NULL && visitedIndex != requestedIndex) {
-        kwlnCurrentIncompleteResource = (s32)resourceNode;
-        while (resourceNode->ready != NULL && *resourceNode->ready != 0) {
-            nextNode = resourceNode->next;
-            if (nextNode == NULL) {
+    while (texture != NULL && visitedIndex != requestedIndex) {
+        kwlnCurrentIncompleteResource = (s32)texture;
+        while (texture->reference != NULL && texture->reference->cloneSource != NULL) {
+            previousTexture = texture->prev;
+            if (previousTexture == NULL) {
                 return visitedIndex;
             }
-            resourceNode = nextNode;
+            texture = previousTexture;
         }
-        nextNode = resourceNode->next;
-        if (nextNode == NULL) {
+        previousTexture = texture->prev;
+        if (previousTexture == NULL) {
             return visitedIndex;
         }
         visitedIndex++;
-        resourceNode = nextNode;
+        texture = previousTexture;
     }
-    kwlnCurrentIncompleteResource = (s32)resourceNode;
+    kwlnCurrentIncompleteResource = (s32)texture;
     return visitedIndex;
 }
 
@@ -727,19 +721,19 @@ s32 kwlnLoadDefaultResource(void) {
 /* Initialize viewer state and return its default renderer for the first eligible
  * node. Exhausting a nonempty list returns NULL after the initial state writes. */
 s32 (*kwlnTextureFindIncompleteResource(void))(void) {
-    KwlnResourceNode *resourceNode = (KwlnResourceNode *)sdfResourceListHead;
-    if (resourceNode == NULL) {
+    SdfTex *texture = sdfResourceListHead;
+    if (texture == NULL) {
         return NULL;
     }
-    kwlnCurrentIncompleteResource = (s32)resourceNode;
+    kwlnCurrentIncompleteResource = (s32)texture;
     D_003BA890 = 1;
     kwlnTextureViewerPageIndex = 0;
-    while (resourceNode->ready != NULL && *resourceNode->ready != 0) {
-        resourceNode = ((KwlnResourceNode *)kwlnCurrentIncompleteResource)->next;
-        if (resourceNode == NULL) {
+    while (texture->reference != NULL && texture->reference->cloneSource != NULL) {
+        texture = ((SdfTex *)(u32)kwlnCurrentIncompleteResource)->prev;
+        if (texture == NULL) {
             return NULL;
         }
-        kwlnCurrentIncompleteResource = (s32)resourceNode;
+        kwlnCurrentIncompleteResource = (s32)texture;
     }
     return kwlnLoadDefaultResource;
 }

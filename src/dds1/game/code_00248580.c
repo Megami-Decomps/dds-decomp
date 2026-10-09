@@ -614,7 +614,6 @@ void mnuResetProgressModeFromOwner(u8 *work) {
 extern void *memset(void *, s32, u32);
 
 extern struct EffectList *mnuAllocateValueRecord(u32);
-extern void mnuAppendCampSpriteRequests(struct EffectList *, StaffSlots *);
 extern void mnuReleaseStaffResourceGroups(StaffSlots *);
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
@@ -642,7 +641,6 @@ void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *work) {
     sdfReleaseResourceAllocation(work->allocation);
 }
 
-extern s32 mnuStaffSlotsAllFilled(struct EffectList *, StaffSlots *);
 
 
 extern void mnuInitializeStaffPageWindows(MenuPageWindow *, StaffSlots *, u32, PartyPanel *);

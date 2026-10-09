@@ -6761,13 +6761,13 @@ void sndLoadMotSeFiles(u32 *sound) {
     sound[0] |= 1;
 }
 
-/* Find the shared category/id owner, returning its address or zero. */
-s32 sndFindListNodeForChannel(s32 category, s32 id) {
+/* Find the shared category/id owner, returning null if absent. */
+SoundSlotOwner *sndFindListNodeForChannel(s32 category, s32 id) {
     s32 context = btlGetRuntime();
     SoundSlotOwner *node = ((BtlActorWork *)context)->soundSlotOwners;
     while (node != 0) {
         if (node->category == category && node->id == id) {
-            return (s32)node;
+            return node;
         }
         node = node->next;
     }
@@ -6778,7 +6778,7 @@ extern char D_003A51D0[];
 
 /* Retain or register an owner; model flag 0xC0F suppresses initial file queuing. */
 SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id) {
-    SoundSlotOwner *node = (SoundSlotOwner *)sndFindListNodeForChannel(category, id);
+    SoundSlotOwner *node = sndFindListNodeForChannel(category, id);
     BtlActorWork *context;
     SoundSlotOwner *head;
 

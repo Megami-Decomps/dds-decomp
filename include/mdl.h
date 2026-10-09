@@ -38,7 +38,7 @@ typedef struct MdlObjectAttachment {
 typedef struct MdlResourceItem {
     struct MdlResourceItem *next;
     u16 type; /* MdlResourceKind value, with native halfword storage. */
-    s16 subtype;
+    s16 motionSlotIndex; /* Owning Motion.slotIndex; -1 tags context-wide entries. */
     union {
         struct {
             /* Type 2 stores a track; other part kinds store their created instance. */
@@ -134,7 +134,7 @@ struct MdlCtx {
         u32 word;
         struct {
             s16 id;
-            s16 arg;
+            s16 motionIndex; /* Entry index passed to sdfMotionInitialize. */
         } h;
     } current;
     MdlResourceItem *resourceItems;
@@ -167,6 +167,8 @@ u16 mdlGetContextResourceGroup(MdlCtx *ctx);
 u16 mdlGetContextResourceId(MdlCtx *ctx);
 u32 mdlGetBroadcastValue(MdlCtx *ctx);
 void mdlSetAllResourceFrames(MdlCtx *ctx, u32 value);
+void mdlSetResourceFrame(MdlCtx *ctx, MdlResourceItem *item, s32 frame);
+void mdlSetResourceAmount(MdlCtx *ctx, MdlResourceItem *item, f32 amount);
 void mdlBroadcastMasked(MdlCtx *ctx, u32 value);
 
 /* Motion-record selection and lookup. */

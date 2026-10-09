@@ -3054,14 +3054,6 @@ typedef struct FileConfigListNode {
     FileConfigCountdown *resource;   /* 0x70 */
 } FileConfigListNode;
 
-typedef struct FileConfigList {
-    u8 pad00[0x10];
-    FileConfigListNode *head; /* 0x10 */
-    u8 pad14[8];
-    FileConfigListNode *cursor; /* 0x1C */
-    s32 count;                /* 0x20 */
-} FileConfigList;
-
 /* Save/config task context: its four resource slots start at +0x10. */
 typedef struct FileConfigTask {
     struct SdfMemBlock *backingAllocation; /* 0x00: descriptor owning this task */
@@ -3155,8 +3147,8 @@ void fileConfigTaskDestroy(void) {
             mnuReleaseEffectResource(((FileConfigTask *)fileConfigTaskWork)->effect);
             mnuAdvanceTitleStateUnderSemaphore();
         }
-        node = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->head;
-        for (i = 0; i < ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->count; i++) {
+        node = (FileConfigListNode *)((FileConfigTask *)fileConfigTaskWork)->frame->first;
+        for (i = 0; i < ((FileConfigTask *)fileConfigTaskWork)->frame->count; i++) {
             sdfReleaseChipBlock(node->resource);
             node = node->next;
         }
@@ -3295,7 +3287,7 @@ s32 func_00291418(void) {
         return -1;
     }
 
-    oldIndex = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index;
+    oldIndex = ((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index;
     if ((u8)D_00324510[0x26] & 2) {
         if (mnuRetreatListCursorDefault(((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
             sndSetSequenceVolumePan(0, 0x7F, 0x3F);
@@ -3310,19 +3302,19 @@ s32 func_00291418(void) {
             ((FileConfigTask *)fileConfigTaskWork)->transitionTicks = 8;
         }
     }
-    index = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index;
+    index = ((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index;
     if (index < 4) {
         if (D_00324510[0x24] < 0 && fileTestSlotFlagsBit(index, (s32 *)&datGameState->world.slotFlags) == 0) {
-            fileToggleSlotFlagsBit(((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index, (s32 *)&datGameState->world.slotFlags);
+            fileToggleSlotFlagsBit(((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index, (s32 *)&datGameState->world.slotFlags);
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
-            cursor = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor;
+            cursor = (FileConfigListNode *)((FileConfigTask *)fileConfigTaskWork)->frame->cursor;
             cursor->resource->ticks = 8;
         }
         if (D_00324510[0x25] < 0) {
-            if (fileTestSlotFlagsBit(((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index, (s32 *)&datGameState->world.slotFlags) != 0) {
-                fileToggleSlotFlagsBit(((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index, (s32 *)&datGameState->world.slotFlags);
+            if (fileTestSlotFlagsBit(((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index, (s32 *)&datGameState->world.slotFlags) != 0) {
+                fileToggleSlotFlagsBit(((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index, (s32 *)&datGameState->world.slotFlags);
                 sndSetSequenceVolumePan(8, 0x7F, 0x3F);
-                cursor = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor;
+                cursor = (FileConfigListNode *)((FileConfigTask *)fileConfigTaskWork)->frame->cursor;
                 cursor->resource->ticks = 8;
             }
         }
@@ -3331,7 +3323,7 @@ s32 func_00291418(void) {
         mnuClearListFlagsOneAndTwo((u32 *)((FileConfigTask *)fileConfigTaskWork)->frame);
     }
     if (D_00324510[0x21] < 0) {
-        if (((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index == 4) {
+        if (((FileConfigTask *)fileConfigTaskWork)->frame->cursor->index == 4) {
             ((FileConfigTask *)fileConfigTaskWork)->result = 3;
             sndSetSequenceVolumePan(8, 0x7F, 0x3F);
         }
@@ -3478,7 +3470,7 @@ INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC8E0);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", fileConfigInputTaskName);
 
-void func_002918F8(s32 x, s32 y, s32 depth, FileConfigList *list,
+void func_002918F8(s32 x, s32 y, s32 depth, struct MenuList *list,
                    FileConfigListNode *node, s32 drawArg) {
     s8 labelFrames[5] = {0, 1, 2, 3, 4};
     s32 index = node->index;

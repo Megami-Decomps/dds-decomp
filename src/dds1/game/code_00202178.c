@@ -79,6 +79,7 @@ extern s32 btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 
 extern void btlBossDebugPrintf(const char *, ...);
+extern const char D_003A5D60[];
 
 extern s32 btlFindUnitByActor(s32);
 
@@ -1326,9 +1327,36 @@ s32 btlInitializeResources(s32 unused, s32 resource) {
 
 INCLUDE_ASM(const s32, "game/code_00202178", btlInitResourcesWrap);
 
-extern void btlBindEffectUnitAndClearStateFlags(BtlUnit *);
+/* Mode 0x108 uses the same 0x18-byte linked actor payload as the callback
+ * below. Its +4 word is the companion-unit pointer in this mode. */
+typedef struct BattleLinkedEffectState {
+    BtlUnit *actor;
+    BtlUnit *linkedUnit;
+    u32 value;
+    u16 timer;
+    u8 active;
+    u8 phase;
+    union {
+        u32 effect;
+        f32 height;
+    };
+    f32 speed;
+} BattleLinkedEffectState;
+typedef char BattleLinkedEffectStateSizeCheck[
+    (sizeof(BattleLinkedEffectState) == 0x18) ? 1 : -1];
 
-INCLUDE_ASM(const s32, "game/code_00202178", btlBindEffectUnitAndClearStateFlags);
+void btlBindEffectUnitAndClearStateFlags(BtlUnit *unit) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    s32 flags = unit->status.flags;
+    BattleLinkedEffectState *effect;
+
+    flags &= ~0x100;
+    flags &= ~8;
+    effect = (BattleLinkedEffectState *)battle->effect;
+    effect->actor = unit;
+    unit->status.flags = flags;
+    unit->partyRecord.status &= 0x4000;
+}
 
 /* Synchronize the bound actor pose and its offset effect vectors. */
 void func_00205730(BtlUnit *source) {
@@ -1404,9 +1432,84 @@ void btlResetEffectState(void) {
     data->header.owner = 0;
 }
 
+extern void btlRestoreUnitMinimumValueAndClearStatus(BtlUnit *, s32);
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5D50);
 
-INCLUDE_ASM(const s32, "game/code_00202178", func_00205918);
+const char D_003A5D60[] = "btl:RAHU damage = %d\n";
+
+void func_00205918(BtlUnit *actor, BtlOperandEntry *operand) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BattleLinkedEffectState *effect =
+        (BattleLinkedEffectState *)battle->effect;
+    BtlUnit *unit;
+    BtlUnit *twin;
+    BtlUnit *mainUnit;
+
+    if (actor->status.flags & 0x400) {
+        effect->linkedUnit = actor;
+    }
+
+    twin = NULL;
+    mainUnit = NULL;
+    for (unit = battle->units; unit != NULL; unit = unit->next) {
+        s32 flags = unit->status.flags;
+        if (flags & 1) {
+            if (flags & 0x400) {
+                switch (unit->partyRecord.unitId) {
+                case 0x107:
+                    twin = unit;
+                    break;
+                case 0x108:
+                    mainUnit = unit;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (operand->flags & 0x40) {
+        btlBindEffectUnitAndClearStateFlags(actor);
+        effect->active = 0;
+        effect->value = 0;
+        effect->phase = 1;
+    } else if (operand->flags & 0x80) {
+        btlBeginEffectActorFadeOut();
+        if (mainUnit->status.flags & 0xE0) {
+            effect->active = 0;
+        } else {
+            effect->active = 1;
+        }
+    }
+
+    if ((actor->status.flags & 0x400) && actor->partyRecord.unitId == 0x107) {
+        effect->value -= operand->hpDelta;
+        btlBossDebugPrintf(D_003A5D60, effect->value);
+    }
+
+    if (actor == mainUnit && !(actor->gunResourceFlags & 4)) {
+        if (twin->status.flags & 0xE0) {
+            if (!(effect->timer & 2)) {
+                btlRestoreUnitMinimumValueAndClearStatus(actor, (s32)operand);
+            }
+            effect->timer |= 2;
+        } else {
+            effect->timer &= ~2;
+        }
+    }
+
+    if (actor == twin) {
+        if (!(effect->timer & 2)) {
+            if (mainUnit->status.flags & 0xE0) {
+                if (!(effect->timer & 4)) {
+                    btlRestoreUnitMinimumValueAndClearStatus(actor, (s32)operand);
+                }
+                effect->timer |= 4;
+            } else {
+                effect->timer &= ~4;
+            }
+        }
+    }
+}
 
 s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 command, s32 bits) {
     BattleEffectState *effect;

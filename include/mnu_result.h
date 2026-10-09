@@ -148,19 +148,19 @@ typedef struct BrsSkillIconRow {
 
 /* Allocation/zeroing: DDS1 00262684/0026269C; DDS2 0029959C/002995B4. */
 typedef struct BrsSkillPackageWork {
-    s32 handle;
+    struct SdfMemBlock *allocation;
     u32 overlayFlags;
     BrsResultTransition transition;
-    s32 fadeTarget;
+    struct EffectList *resourceList;
     BrsRewardSummary rewards;
 #ifdef VERSION_DDS1
     u8 pad88[8];
-    s32 unitHandle;
+    struct EffectSlotSet *unitResource;
     u8 pad94[4];
     BrsRewardRow *selectedRewardRow;
 #else
     u8 pad8C[8];
-    s32 unitHandle;
+    struct EffectSlotSet *unitResource;
     u8 pad98[4];
     BrsRewardRow *selectedRewardRow;
 #endif
@@ -190,7 +190,7 @@ typedef struct BrsSkillPackageWork {
     struct {
         s8 opacityReady;
         u8 padD3D[7];
-        s32 teardownHandle;
+        struct EffectSlotSet *teardownResource;
         u32 opacity;
         s8 resultPhase;
         s8 unkD4D;
@@ -208,7 +208,7 @@ typedef struct BrsSkillPackageWork {
     struct {
         s8 opacityReady;
         u8 padAEA9[7];
-        s32 teardownHandle;
+        struct EffectSlotSet *teardownResource;
         u32 opacity;
         s8 resultPhase; /* 0xAEB8: 1 -> 2 once the result counters finish (func_0029DB58) */
         s8 unkAEB9;     /* 0xAEB9: set when the confirm input lands at full opacity */

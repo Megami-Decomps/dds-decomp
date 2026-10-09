@@ -1184,7 +1184,7 @@ INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAB30);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", fldPlayerObject);
 
-INCLUDE_SDATA(const s32, "game/code_0011D3A0", fldCameraModelObject);
+INCLUDE_SDATA(const s32, "game/code_0011D3A0", fldPlayerModelContext);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAB3C);
 

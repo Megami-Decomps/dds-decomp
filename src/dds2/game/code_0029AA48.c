@@ -39,7 +39,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
     u32 color;
 
     func_00306CD0(0x1710, 0x8C0, 0, iconFade, 1,
-                  context->unitHandle, 8, 0x53);
+                  (s32)context->unitResource, 8, 0x53);
     delta = context->commitComplete != 0 ? 0 : context->availableStatPoints - context->assignedStatPoints;
     x = 0x19C0;
     if (delta / 100 <= 0) {
@@ -78,7 +78,7 @@ void func_0029AC20(BrsSkillPackageWork *context, s32 copyOptions) {
     s32 i;
 
     uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0x19, 0x53);
-    itfDrawGridWithResolvedSlot(0x1740, 0x510, 0, 1, (struct EffectSlotSet *)(u32)context->unitHandle, 0xA, 0x53);
+    itfDrawGridWithResolvedSlot(0x1740, 0x510, 0, 1, context->unitResource, 0xA, 0x53);
     context->partyWindow.flags |= 0x200;
     mnuDrawPanelListDefault(0, 0, 0, &context->partyWindow, 0x53);
 

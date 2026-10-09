@@ -2626,7 +2626,7 @@ extern void btlUpdatePanelTransitionGradients(BtlPanelTransitionWork *);
 
 struct FrFontGlyph;
 
-extern void frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
+extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
 
 s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
     BattlePanelColors colors = D_003A2A80;
@@ -4945,7 +4945,7 @@ void fldGetSceneDirectionStepOffset(s32 *outX, s32 *outY, s32 dir, s32 step) {
     *outY = offsets[dir][step][1];
 }
 
-void func_001BF8B0(SceneAiWork *work) {
+void func_001BF8B0(SceneAiWork *work, s32 mode) {
     s32 i;
     switch (work->animationPhase) {
     case 0:
@@ -4996,7 +4996,85 @@ INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A3030);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001C08B8);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001C0DF8);
+extern const u8 *D_003BAA70;
+extern const u8 *D_003BAA74;
+extern const u8 *D_003BAA88;
+extern void func_001BFAD0(SceneAiWork *work, s32 mode);
+extern void func_001BFDE0(BtlUnit *unit, SceneAiWork *work, u32 index);
+extern s32 btlIsUnitInfoFlagOneEligible(BtlUnit *unit);
+extern void btlDrawCenteredPanelSegments(s32 width);
+
+/* Draw selected actor names and advance the battle scene's actor panels. */
+void func_001C0DF8(SceneAiWork *work) {
+    BtlUnit *unit;
+    u32 glyph;
+    u32 categoryGlyph;
+    s32 width;
+    s32 categoryWidth;
+    s32 totalWidth;
+    u32 count;
+    u32 i;
+    s32 scene;
+    KwlnTask *panelTask = NULL;
+
+    count = btlGetIndexListCount(work->listB);
+    if (count == 1 && btlHasRegisteredAphNamePanelTask() == 0 && work->state != 4) {
+        unit = btlGetIndexListEntry(work->listB, 0);
+        if (unit->status.flags & 1) {
+            if (unit->status.flags & 0x200) {
+                glyph = itfCreateConvertedTextGlyph(0x640, 0x200, 0, 0xA09DC380,
+                    D_003BAA70 + unit->partyRecord.unitId * 17, 0);
+                width = frFontMeasureLines((struct FrFontGlyph *)glyph);
+                btlDrawCenteredPanelSegments(width);
+                frFontSetGlyphPosition((struct FrFontGlyph *)glyph, (0x100 - (width >> 1)) << 4, 0x220);
+                frFontDrawGlyphChain(glyph, 1, 0x53);
+                frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
+            } else {
+                glyph = itfCreateConvertedTextGlyph(0x640, 0x200, 0, 0xA09DC380,
+                    D_003BAA74 + unit->partyRecord.unitId * 17, 0);
+                width = frFontMeasureLines((struct FrFontGlyph *)glyph);
+                categoryGlyph = itfCreateConvertedTextGlyph(0x640, 0x200, 0, 0xA09DC380,
+                    D_003BAA88 + datEnemyRecords[unit->partyRecord.unitId].pad04 * 7, 0);
+                categoryWidth = frFontMeasureLines((struct FrFontGlyph *)categoryGlyph);
+                totalWidth = width + categoryWidth;
+                btlDrawCenteredPanelSegments(totalWidth);
+                frFontSetGlyphPosition((struct FrFontGlyph *)categoryGlyph, (0x100 - (totalWidth >> 1)) << 4, 0x220);
+                frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)categoryGlyph, 1);
+                frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)categoryGlyph);
+                if (categoryWidth == 0) {
+                    s32 centeredNameX = -(width >> 1);
+                    frFontSetGlyphPosition((struct FrFontGlyph *)glyph, (centeredNameX + 0x100) << 4, 0x220);
+                } else {
+                    frFontSetGlyphPosition((struct FrFontGlyph *)glyph, (categoryWidth - (width >> 1) + 0xF8) << 4, 0x220);
+                }
+                frFontDrawGlyphChain(glyph, 1, 0x53);
+                frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
+            }
+        }
+    }
+    scene = fldGetSceneObjectState();
+    if (work->state != 3 && scene != 8) {
+        unit = btlGetIndexListEntry(work->listB, 0);
+        if (unit->status.flags & 0x200) {
+            panelTask = kwlnTaskGetTaskByName(D_003BB3B0);
+            if (panelTask != NULL) {
+                btlUpdateActorSlotStates((u8 *)kwlnTaskGetUserValue(panelTask), 0);
+            }
+        }
+    }
+    func_001BF8B0(work, 0);
+    func_001BFAD0(work, 0);
+    for (i = 0; i < count; i++) {
+        unit = btlGetIndexListEntry(work->listB, i);
+        if (btlIsUnitInfoFlagOneEligible(unit) == 0) {
+            func_001BFDE0(unit, work, i);
+        }
+        if ((u32)(work->state - 3) >= 2 && scene != 8 && scene != 9 &&
+            (unit->status.flags & 0x200) && panelTask != NULL) {
+            func_001B8650(unit, 0, 1);
+        }
+    }
+}
 
 void btlDrawCenteredPanelSegments(s32 width) {
     u32 color[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};

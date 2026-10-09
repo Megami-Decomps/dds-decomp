@@ -348,7 +348,7 @@ void sdfPacCopyResourceChunk(PacState *state) {
                 return;
             }
         }
-        resourceBuffer->result = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)sdfResourceRetainAddress(resourceBuffer->resourceSlot));
+        resourceBuffer->texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)sdfResourceRetainAddress(resourceBuffer->resourceSlot));
         sdfReleaseMemorySlot((s32 *)&resourceBuffer->resourceSlot);
         state->onComplete(state);
     }
@@ -365,7 +365,7 @@ void sdfPacDecodeResourceChunk(PacState *state) {
     }
     {
         PacBuf *resourceBuffer = state->resourceBuffer;
-        resourceBuffer->result = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)sdfResourceRetainAddress(resourceBuffer->resourceSlot));
+        resourceBuffer->texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)sdfResourceRetainAddress(resourceBuffer->resourceSlot));
         sdfReleaseMemorySlot((s32 *)&resourceBuffer->resourceSlot);
     }
     sdfReleaseChipBlock(state->decoder);
@@ -388,7 +388,7 @@ void sdfPacSkipResourceChunk(PacState *state) {
                 return;
             }
         }
-        resourceBuffer->result = (s32)sdfTexAcquireAlternateResourceTexture((SdfTextureFileHeader *)resourceBuffer->cursor);
+        resourceBuffer->texture = sdfTexAcquireAlternateResourceTexture((SdfTextureFileHeader *)resourceBuffer->cursor);
         state->onComplete(state);
     }
 }
@@ -426,7 +426,7 @@ void func_003475A0(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *bu
 }
 
 void sdfPacCompleteResourcePacket(PacState *state) {
-    state->queueTail->resourceHandle = state->slot.resource->result;
+    state->queueTail->resourceHandle = (s32)state->slot.resource->texture;
     sdfReleaseChipBlock(state->slot.resource);
     sdfDecodePacNodeAndAdvanceTail(state);
 }
@@ -460,7 +460,7 @@ void sdfPacResetOutputToAllocationEntry(PacState *state) {
 /* Advance the entry index and complete or request the next entry. */
 void sdfPacAdvanceAllocationEntry(PacState *state) {
     PacAlloc *allocation = state->slot.list;
-    sdfAppendResourceListItem(state->queueTail->resourceHandle, allocation->buffer.result);
+    sdfAppendResourceListItem(state->queueTail->resourceHandle, (s32)allocation->buffer.texture);
     {
         s32 nextIndex = allocation->entryIndex + 1;
         allocation->entryIndex = nextIndex;
