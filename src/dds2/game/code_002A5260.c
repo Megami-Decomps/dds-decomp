@@ -106,7 +106,7 @@ extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
 extern void *memset(void *, s32, u32);
 extern void func_00345BA0(void *, SdfPoolNode *);
-extern void func_002A7B28(void *, SdfPoolNode *);
+extern void func_002A7B28(MovObj *, SdfPoolNode *);
 extern s32 mnuIsAnyMenuInputPressed(void);
 extern void sndSetSequenceVolumePan(s32, s32, s32);
 extern void mnuDrawSprite(s32, s32, s32, s32, s32, s32, s32);
@@ -894,9 +894,110 @@ extern s32 func_002A6580(void);
 
 INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6580);
 
+typedef struct StaffImage {
+    s32 startFrame;
+    s32 movieIndex;
+    s32 x;
+    s32 y;
+    s32 width;
+    s32 height;
+} StaffImage;
+
+extern StaffImage D_003E4A80[19];
+extern s32 D_00437AB4;
+extern s32 mnuCheckMovieDecoderStatus(void);
+
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_00429938);
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6858);
+void func_002A6858(void) {
+    s32 x = D_003E4A80[D_00437AB4].x;
+    s32 y = D_003E4A80[D_00437AB4].y;
+    s32 width = D_003E4A80[D_00437AB4].width;
+    s32 height = D_003E4A80[D_00437AB4].height;
+    s32 alpha = 128;
+    s32 i;
+
+    switch (D_00437AB8) {
+    case 1:
+        if (mnuCheckMovieDecoderStatus() != 0) {
+            mnuMovieWork->fadeFrame = 0;
+            D_00437AB8 = 2;
+        } else {
+            if (mnuMovieDrawContext.soundNode.playbackFrameIndex < 32) {
+                alpha = mnuMovieDrawContext.soundNode.playbackFrameIndex * 4;
+                if (alpha > 128) {
+                    alpha = 128;
+                }
+            }
+            sdfSetGridScaledDrawBounds(x, y, width, height, ((u32)alpha << 24) | 0x808080);
+            return;
+        }
+        break;
+    case 2:
+        mnuMovieWork->fadeFrame++;
+        if (mnuMovieWork->fadeFrame >= 0) {
+            if (mnuMovieWork->fadeFrame >= 128) {
+                mnuMovieWork->movieFrame = 0;
+                D_00437AB8 = 3;
+            } else {
+                sdfSetGridScaledDrawBounds(x, y, width, height, 0x80808080);
+                return;
+            }
+        }
+        break;
+    case 3:
+        mnuMovieWork->movieFrame++;
+        if (mnuMovieWork->movieFrame >= 230) {
+            mnuStopMovieDrawTask();
+            i = ++D_00437AB4;
+            if (i == 19) {
+                D_00437AB8 = 5;
+            } else {
+                D_00437AB8 = 4;
+            }
+        } else {
+            alpha = 128.0f - mnuMovieWork->movieFrame * 0.5f;
+            if (alpha < 0) {
+                alpha = 0;
+            }
+            sdfSetGridScaledDrawBounds(x, y, width, height, ((u32)alpha << 24) | 0x808080);
+            return;
+        }
+        break;
+    case 4:
+        if (mnuMovieWork->frame < D_003E4A80[D_00437AB4].startFrame) {
+            break;
+        }
+        if (mnuMovieWork->frame / 60 > D_003E4A7C / 60 - 4) {
+            break;
+        }
+        if (mnuMovieWork->streamPhase == 1 || mnuMovieWork->streamPhase == 2) {
+            break;
+        }
+        for (i = 18; i >= D_00437AB4; i--) {
+            if (mnuMovieWork->frame >= D_003E4A80[i].startFrame) {
+                if (mnuCheckMovieDecoderStatus() != 0 || D_00437AB4 == 0) {
+                    sdfSetGridScaledDrawBounds(D_003E4A80[D_00437AB4].x,
+                        D_003E4A80[D_00437AB4].y,
+                        D_003E4A80[D_00437AB4].width,
+                        D_003E4A80[D_00437AB4].height, 0);
+                    if (D_00437AB4 == 0) {
+                        mnuRequestIndexedMovieResource(D_003E4A80[0].movieIndex);
+                        D_00437AB4 = 0;
+                    } else {
+                        mnuRequestIndexedMovieResource(D_003E4A80[i].movieIndex);
+                        D_00437AB4 = i;
+                    }
+                    D_00437AB8 = 1;
+                }
+                break;
+            }
+        }
+        break;
+    case 5:
+        break;
+    }
+}
 
 void mnuFadeSetState(SlideBar *state, u32 mode) {
     switch (mode) {
@@ -1196,7 +1297,7 @@ void mnuReleaseMovieResourceAfterPendingWork(void) {
     func_003458E8(0);
 }
 
-extern u32 D_00437AB4;
+extern s32 D_00437AB4;
 
 void mnuInitializeMovieRollViewport(void) {
     D_00437AB8 = 4;

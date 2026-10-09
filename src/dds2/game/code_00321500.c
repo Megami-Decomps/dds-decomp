@@ -47,7 +47,7 @@ extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 extern void mnuFreeOptionalBlock(u32);
 extern void *func_0035A828(u32 bytes);
 extern u8 *mnuGetResourceProgressStepState(void);
-void func_003214D0(u32, s32);
+void func_003214D0(u32, u32);
 s32 dds3MeasureRecordBlock(DdsCountedPayload *entries, s32 count);
 
 
@@ -56,15 +56,15 @@ extern MenuRuntimeRecord *func_00321A30(MenuStateRecord *record,
                                         MenuRuntimeList *runtimeList,
                                         s32 x, s32 y, f32 angle);
 
-u32 mnuCreateReleaseCallbackNode(void) {
+MnuCallbackList *mnuCreateReleaseCallbackNode(void) {
     MnuCallbackList *node = mnuCreateCallbackNode(0);
     node->onRemove = func_003214D0;
-    return (u32)node;
+    return node;
 }
 extern void mnuClearResourceList(MnuCallbackList *list);
 
 /* Rebuild the row's named states and attach its tagged parameter groups. */
-void func_00321528(u32 callbackList, MenuRegistryRecord *row) {
+void func_00321528(MnuCallbackList *callbackList, MenuRegistryRecord *row) {
     s32 groupIndex;
     s32 recordIndex;
     MenuShortRecordList *group;
@@ -72,7 +72,7 @@ void func_00321528(u32 callbackList, MenuRegistryRecord *row) {
     MenuStateRecord *state;
 
     if (callbackList != 0) {
-        mnuClearResourceList((MnuCallbackList *)callbackList);
+        mnuClearResourceList(callbackList);
         group = row->secondLists;
         for (groupIndex = 0; groupIndex < row->secondCount; groupIndex++, group++) {
             state = NULL;
@@ -80,7 +80,7 @@ void func_00321528(u32 callbackList, MenuRegistryRecord *row) {
             for (recordIndex = 0; recordIndex < group->count; recordIndex++, tag++) {
                 if (tag->kind == 0x20) {
                     state = mnuCreateNamedRecord(tag);
-                    func_00320CE0((MnuCallbackList *)callbackList, 0, (u32)state);
+                    func_00320CE0(callbackList, 0, (u32)state);
                 } else if (tag->kind == 0x10) {
                     if (state != NULL) {
                         memcpy(&state->pad12, tag, sizeof(*tag));
@@ -99,9 +99,9 @@ void func_00321528(u32 callbackList, MenuRegistryRecord *row) {
 
 void func_003216A8(MnuCallbackList *, MenuRuntimeList *, s32, s32, s32, f32);
 
-void func_00321688(u32 left, u32 right, u32 value, u32 count, f32 angle) {
-    func_003216A8((MnuCallbackList *)left, (MenuRuntimeList *)right,
-                  value, count, 1, angle);
+void func_00321688(MnuCallbackList *left, MenuRuntimeList *right,
+                   u32 value, u32 count, f32 angle) {
+    func_003216A8(left, right, value, count, 1, angle);
 }
 
 
