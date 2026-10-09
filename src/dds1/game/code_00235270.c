@@ -4231,39 +4231,26 @@ u8 * evtGetRowPayloadAddress(PolyMovieWork *work, s32 row) {
     return ((EvtExtendedRow *)work->subEntry4OtherData)[row].payload;
 }
 
-typedef struct EvtLinkSource {
-    u8 pad00[0x7C];
-    char *names; /* 0x7C: 0x20-byte entries */
-    u8 pad80[0x78];
-    s32 count;   /* 0xF8 */
-} EvtLinkSource;
-
-typedef struct EvtLink {
-    u8 pad00[6];
-    s8 type;  /* 0x06 */
-    s8 index; /* 0x07 */
-} EvtLink;
-
 extern s32 strcmp(const char *a, const char *b);
 
-void evtResolveLinkGroupIndex(EvtLinkSource *src, EvtRuntime *runtime, EvtLink *link) {
+void evtResolveLinkGroupIndex(PolyMovieWork *src, EvtRuntime *runtime, EvtGroupMetadata *link) {
     s32 i;
     EvtRuntimeGroup *group;
 
-    if (link->type != 3) {
-        link->index = 0;
+    if (link->extra1 != 3) {
+        link->extra2 = 0;
     } else {
-        for (i = 0; i < src->count; i++) {
+        for (i = 0; i < (s32)src->unk_F8; i++) {
             for (group = runtime->groups; group != NULL; group = group->next) {
-                if (strcmp(runtime->entryName[group->entryHeader], src->names + link->index * 32) == 0) {
-                    link->index = group->entryHeader;
+                if (strcmp(runtime->entryName[group->entryHeader], (char *)src->subEntry1Data + link->extra2 * 32) == 0) {
+                    link->extra2 = group->entryHeader;
                     return;
                 }
             }
         }
-        func_003003F0("not found linkslight obj index %s\n", src->names + link->index * 32);
-        link->type = 0;
-        link->index = 0;
+        func_003003F0("not found linkslight obj index %s\n", (char *)src->subEntry1Data + link->extra2 * 32);
+        link->extra1 = 0;
+        link->extra2 = 0;
     }
 }
 
@@ -4292,18 +4279,8 @@ typedef struct EvtViewerResourceRecord {
 } EvtViewerResourceRecord;
 
 /* The section-21 wire record is also the group's link subobject at +0x18. */
-typedef struct EvtViewerLinkRecord {
-    u8 groupType;
-    u8 setterId;
-    s16 nameIndex;
-    s16 value;
-    s8 type;
-    s8 index;
-} EvtViewerLinkRecord;
-
 typedef char EvtViewerPackageRecord_size[(sizeof(EvtViewerPackageRecord) == 0x20) ? 1 : -1];
 typedef char EvtViewerResourceRecord_size[(sizeof(EvtViewerResourceRecord) == 0x10) ? 1 : -1];
-typedef char EvtViewerLinkRecord_size[(sizeof(EvtViewerLinkRecord) == 8) ? 1 : -1];
 
 
 extern s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 resource0, s32 resource1,
@@ -5100,33 +5077,33 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
     /* Continue with native .L002413F0: work->subEntry21Data link metadata. */
     if (work->subEntry21Data != NULL) {
         for (row = 0; row < (s32)work->unk_F8; row++) {
-            if (((EvtViewerLinkRecord *)work->subEntry21Data)[row].nameIndex != -1) {
+            if (((EvtGroupMetadata *)work->subEntry21Data)[row].entry != -1) {
                 for (group = runtime->groups; group != NULL; group = group->next) {
                     if (strcmp(runtime->entryName[group->entryHeader],
-                        (char *)work->subEntry1Data + ((EvtViewerLinkRecord *)work->subEntry21Data)[row].nameIndex * 32) == 0) {
-                        group->metadata.type = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].groupType;
-                        group->metadata.entry = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].nameIndex;
+                        (char *)work->subEntry1Data + ((EvtGroupMetadata *)work->subEntry21Data)[row].entry * 32) == 0) {
+                        group->metadata.type = ((EvtGroupMetadata *)work->subEntry21Data)[row].type;
+                        group->metadata.entry = ((EvtGroupMetadata *)work->subEntry21Data)[row].entry;
                         if (group->type == 2) {
                             group->metadata.value = 0;
                         } else {
-                            group->metadata.value = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].value;
+                            group->metadata.value = ((EvtGroupMetadata *)work->subEntry21Data)[row].value;
                         }
-                        group->metadata.extra1 = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].type;
-                        group->metadata.extra2 = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].index;
+                        group->metadata.extra1 = ((EvtGroupMetadata *)work->subEntry21Data)[row].extra1;
+                        group->metadata.extra2 = ((EvtGroupMetadata *)work->subEntry21Data)[row].extra2;
                     }
                 }
             } else {
                 for (group = runtime->groups; group != NULL; group = group->next) {
                     s32 groupType = group->type;
-                    if (groupType == ((EvtViewerLinkRecord *)work->subEntry21Data)[row].groupType &&
-                        group->setterId == ((EvtViewerLinkRecord *)work->subEntry21Data)[row].setterId) {
+                    if (groupType == ((EvtGroupMetadata *)work->subEntry21Data)[row].type &&
+                        group->setterId == ((EvtGroupMetadata *)work->subEntry21Data)[row].flag) {
                         group->metadata.type = groupType;
-                        group->metadata.flag = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].setterId;
-                        group->metadata.entry = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].nameIndex;
-                        group->metadata.value = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].value;
-                        group->metadata.extra1 = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].type;
-                        group->metadata.extra2 = ((EvtViewerLinkRecord *)work->subEntry21Data)[row].index;
-                        evtResolveLinkGroupIndex((EvtLinkSource *)work, runtime, (EvtLink *)&group->metadata);
+                        group->metadata.flag = ((EvtGroupMetadata *)work->subEntry21Data)[row].flag;
+                        group->metadata.entry = ((EvtGroupMetadata *)work->subEntry21Data)[row].entry;
+                        group->metadata.value = ((EvtGroupMetadata *)work->subEntry21Data)[row].value;
+                        group->metadata.extra1 = ((EvtGroupMetadata *)work->subEntry21Data)[row].extra1;
+                        group->metadata.extra2 = ((EvtGroupMetadata *)work->subEntry21Data)[row].extra2;
+                        evtResolveLinkGroupIndex(work, runtime, &group->metadata);
                         break;
                     }
                 }
