@@ -254,7 +254,6 @@ extern s64 func_001F0B90(void);
 
 extern s32 sndPlaySkillSeTask(u32 *);
 
-extern void sndFormatResourceNameFromUnitMode(s32, s32);
 
 extern u32 sndFinishEarringPlayback(void);
 
@@ -6586,7 +6585,7 @@ s32 sndLoadDataFile(s32 *data) {
     if (sndIsCommandBusySigned()) {
         return 1;
     }
-    sndFormatResourceNameFromUnitMode(data[0], (s32)filename);
+    sndFormatResourceNameFromUnitMode((BtlUnit *)data[0], filename);
     sdfSoundSendNamedCommand(filename, 0x34);
     return 1;
 }
@@ -6617,8 +6616,8 @@ s32 sndHasResourceFlagsOneOrEight(ActiveSoundNode *node) {
     return (temp_v0 & 8) > 0;
 }
 
-void sndFormatResourceNameFromIndex(s32 arg0, s32 arg1) {
-    func_003014F0(arg1, D_003A5158, D_003BB6B0, (arg0 + 0x200) & 0xffff);
+void sndFormatResourceNameFromIndex(s32 index, char *output) {
+    func_003014F0(output, D_003A5158, D_003BB6B0, (index + 0x200) & 0xffff);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A50D8);
@@ -6631,8 +6630,8 @@ INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5138);
 
 INCLUDE_RODATA(const s32, "game/code_001DDF20", D_003A5158);
 
-void sndFormatResourceNameFromUnitMode(s32 arg0, s32 arg1) {
-    func_003014F0(arg1, "MDD_%03X.ADB", *(u16 *)(arg0 + 0x124));
+void sndFormatResourceNameFromUnitMode(const BtlUnit *unit, char *output) {
+    func_003014F0(output, "MDD_%03X.ADB", unit->partyRecord.unitId);
 }
 
 s32 sndMapResourceType(s32 sound, s32 index) {

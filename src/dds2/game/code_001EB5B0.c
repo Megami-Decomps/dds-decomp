@@ -165,7 +165,6 @@ extern s32 sndPlaySkillSeTask(u32 *);
 
 extern SoundResourceNode *sndAllocResourceNode(void);
 
-extern void sndFormatResourceNameFromUnitMode(s32, s32);
 
 extern s32 datActionAnimationRecords;
 
@@ -5772,7 +5771,7 @@ s32 sndLoadDataFile(s32 *data) {
     if (sndIsCommandBusySigned()) {
         return 1;
     }
-    sndFormatResourceNameFromUnitMode(data[0], (s32)filename);
+    sndFormatResourceNameFromUnitMode((BtlUnit *)data[0], filename);
     sdfSoundSendNamedCommand(filename, 0x34);
     return 1;
 }
@@ -5805,12 +5804,12 @@ s32 sndHasResourceFlagsOneOrEight(ActiveSoundNode *resource) {
     return (flags & 8) > 0;
 }
 
-void sndFormatResourceNameFromIndex(s32 source, s32 output) {
+void sndFormatResourceNameFromIndex(s32 source, char *output) {
     func_0035C860(output, D_004192D8, D_00436AE8, (u16)(source + 0x200));
 }
 
-void sndFormatResourceNameFromUnitMode(s32 unit, s32 output) {
-    func_0035C860(output, D_004192E8, ((BtlUnit *)unit)->partyRecord.unitId);
+void sndFormatResourceNameFromUnitMode(const BtlUnit *unit, char *output) {
+    func_0035C860(output, D_004192E8, unit->partyRecord.unitId);
 }
 
 s32 sndResolveResourceId(s32 category, s32 id) {
