@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_textured_rect.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"

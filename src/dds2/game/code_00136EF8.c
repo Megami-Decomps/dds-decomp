@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "sdf_textured_rect.h"
 #include "sdf_chip.h"
 #include "sdf_dev_state.h"
 #include "kwln.h"
@@ -45,7 +46,6 @@ extern int strcmp(const char *, const char *);
 extern void evtSetDrawSurfaceIndex();
 extern void evtSubmitPrimaryGsTest();
 extern void evtSubmitPrimaryAlphaBlendMode();
-extern void func_00108EC0();
 
 extern SdfFlagListWork *fldCameraColorEffect;
 
@@ -1991,7 +1991,7 @@ void fldDrawTitleBannerCursor(s32 x, s32 y) {
     evtSetDrawSurfaceIndex(0x53);
     evtSubmitPrimaryAlphaBlendMode(0);
     evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-    func_00108EC0(x, y, 0x12, 0x13, 1, 0x25, 0x12, 0x13, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_00389978[0]);
+    func_00108EC0(x, y, 0x12, 0x13, 1, 0x25, 0x12, 0x13, 0x80808080, 0x80808080, 0x80808080, 0x80808080, (struct SdfTex *)(u32)(D_00389978[0]));
     evtSubmitPrimaryAlphaBlendMode(0);
 }
 
