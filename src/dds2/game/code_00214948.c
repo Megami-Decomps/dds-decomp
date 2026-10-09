@@ -1137,7 +1137,7 @@ void func_00217650(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *b
 }
 
 /* Frame a two-unit exchange: place the camera pair between the units' muzzle positions and push it out far enough to see both. */
-void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back, s8 mirror, s8 swapRoles, f32 sideScale, f32 backLift, f32 frontLift) {
+void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *front, BtlCamState *back, f32 sideScale, f32 backLift, f32 frontLift, s8 mirror, s8 swapRoles) {
     BtlUnit *user;
     BtlUnit *target;
     f32 userPos[4];
@@ -4820,8 +4820,7 @@ INCLUDE_ASM(const s32, "game/code_00214948", func_00222450);
 INCLUDE_ASM(const s32, "game/code_00214948", btlUnitWrapA);
 
 void btlUnitSetCameraOffset(u32 unit) {
-    btlBuildLinkedCommandCameraPair(unit, unit + 0x30, unit + 0xc0, 0, 1,
-                  0.8f, -0.65f, 0.5f);
+    btlBuildLinkedCommandCameraPair(unit, unit + 0x30, unit + 0xc0, 0.8f, -0.65f, 0.5f, 0, 1);
     ((ActionUnit *)unit)->cameraPointAHeight += 650.0f;
     ((ActionUnit *)unit)->cameraPointBHeight += 650.0f;
     ((ActionUnit *)unit)->cameraOffset = 30.0f;
@@ -5247,8 +5246,7 @@ u32 func_00224010(u32 unused, s32 motion) {
 }
 
 void btlRaiseActionCameraPoints(u32 unit) {
-    btlBuildLinkedCommandCameraPair(unit, unit + 0x30, unit + 0xc0, 0, 1,
-                  0.8f, 1.5f, 0.25f);
+    btlBuildLinkedCommandCameraPair(unit, unit + 0x30, unit + 0xc0, 0.8f, 1.5f, 0.25f, 0, 1);
     ((ActionUnit *)unit)->cameraPointAHeight += 650.0f;
     ((ActionUnit *)unit)->cameraPointBHeight += 650.0f;
     ((ActionUnit *)unit)->flags |= 0x41;
@@ -5531,8 +5529,7 @@ s32 func_00224DF0(BtlLinkedCommand *unit) {
 }
 
 void func_00224EE8(u32 unit) {
-    btlBuildLinkedCommandCameraPair(unit, unit + 0x30, unit + 0xc0, 0, 1,
-                  0.8f, 1.0f, 0.3f);
+    btlBuildLinkedCommandCameraPair(unit, unit + 0x30, unit + 0xc0, 0.8f, 1.0f, 0.3f, 0, 1);
     ((ActionUnit *)unit)->cameraPointAHeight += 750.0f;
     ((ActionUnit *)unit)->cameraPointBHeight += 750.0f;
     ((ActionUnit *)unit)->flags |= 0x41;
