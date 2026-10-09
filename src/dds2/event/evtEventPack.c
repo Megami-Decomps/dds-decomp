@@ -9,11 +9,11 @@
 #include "evt_motion_se.h"
 #include "evt_task.h"
 #include "eff_transform.h"
+#include "dds3obj.h"
 #include "mdl.h"
 #include "file_request_api.h"
 
 extern EffWorldNode *dds3GetWorldObject(void);
-extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *, s32, s32);
 extern Motion *mdlFindNodeById(MdlCtx *, s32);
 extern s32 evtSetBgmVolumePan(s32, s32);
 
