@@ -11,6 +11,7 @@
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "mdl.h"
+#include "mdl_resource_entries.h"
 #include "mdl_resource_table.h"
 #include "file_request_api.h"
 
@@ -959,7 +960,7 @@ extern s32 mdlBindViewerPartRecords(MdlCtx *object, MdlPartRec *record, s32 opti
 extern s32 mdlClaimViewerObjectPart(MdlCtx *object, MdlEntryRec *record, s32 option);
 
 /* Dispatch the five record kinds; resource application ignores any callee return value. */
-void mdlDispatchResourceEntry(s32 owner, MdlRecord *record, s32 subtype) {
+void mdlDispatchResourceEntry(MdlCtx *owner, MdlRecord *record, s32 subtype) {
     switch (record->kind) {
     case 1:
         mdlBindViewerPartRecords(owner, (MdlPartRec *)record, subtype, MDL_RESOURCE_BILLBOARD, mdlAdvanceBillboardPart);
@@ -980,12 +981,12 @@ void mdlDispatchResourceEntry(s32 owner, MdlRecord *record, s32 subtype) {
 }
 
 /* Find the requested record list and apply each relative-linked entry with the supplied subtype. */
-void mdlApplyResourceEntries(s32 resourceAddress, s32 recordId, s32 subtype) {
-    MdlRecord *recordList = mdlFindViewerRecord((MdlCtx *)resourceAddress, recordId);
+void mdlApplyResourceEntries(MdlCtx *owner, s32 recordId, s32 subtype) {
+    MdlRecord *recordList = mdlFindViewerRecord(owner, recordId);
     if (recordList != NULL) {
         MdlRecord *recordCursor = mdlGetFirstRecord((s32)recordList);
         while (recordCursor != NULL) {
-            mdlDispatchResourceEntry(resourceAddress, recordCursor, subtype);
+            mdlDispatchResourceEntry(owner, recordCursor, subtype);
             recordCursor = mdlGetNextRecord(recordCursor);
         }
     }

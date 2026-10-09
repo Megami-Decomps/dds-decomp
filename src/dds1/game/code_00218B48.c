@@ -12,6 +12,7 @@
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "mdl.h"
+#include "mdl_resource_entries.h"
 #include "mdl_resource_table.h"
 
 #include "pcp_vu0.h"
@@ -905,12 +906,12 @@ void mdlDispatchResourceEntry(MdlCtx *owner, MdlRecord *record, s32 subtype) {
 }
 
 /* Find the requested record list and apply each relative-linked entry with the supplied subtype. */
-void mdlApplyResourceEntries(s32 resourceAddress, s32 recordId, s32 subtype) {
-    MdlRecord *recordList = mdlFindViewerRecord((MdlCtx *)resourceAddress, recordId);
+void mdlApplyResourceEntries(MdlCtx *owner, s32 recordId, s32 subtype) {
+    MdlRecord *recordList = mdlFindViewerRecord(owner, recordId);
     if (recordList != NULL) {
         MdlRecord *recordCursor = mdlGetFirstRecord((s32)recordList);
         while (recordCursor != NULL) {
-            mdlDispatchResourceEntry(resourceAddress, recordCursor, subtype);
+            mdlDispatchResourceEntry(owner, recordCursor, subtype);
             recordCursor = mdlGetNextRecord(recordCursor);
         }
     }
