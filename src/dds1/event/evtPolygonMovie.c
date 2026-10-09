@@ -807,7 +807,7 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work)
 }
 
 /* Allocate a resource block holding a fresh "PMD2" header; returns the handle. */
-s32 evtPolygonMovieCreateHeader(void **out)
+SdfMemBlock *evtPolygonMovieCreateHeader(void **out)
 {
     s32 header[16] = {0, 0, 0x32444D50, 0, 1, 9, 0, 0, 0, 0x10, 1, 0x30, 0, 999, 1000, 0};
     s32 size;
@@ -819,6 +819,6 @@ s32 evtPolygonMovieCreateHeader(void **out)
     block = (void *)sdfResourceRetainAddress(handle);
     memcpy(block, header, size);
     *out = block;
-    return (s32)handle;
+    return handle;
 }
 
