@@ -217,16 +217,6 @@ typedef struct ActiveSoundNode {
     struct ActiveSoundNode *next;
 } ActiveSoundNode;
 
-typedef struct SoundLink {
-    BtlUnit *owner;
-    BattleEffect *effectHandle;
-    SoundResourceNode *effect;
-    u16 variant;
-    u16 unk_0E;
-} SoundLink;
-
-extern void btlUpdateUnitCommandEffect(SoundLink *);
-
 typedef struct SoundResourceLink {
     BtlUnit *owner;
     BattleEffect *effectHandle;
@@ -6034,7 +6024,7 @@ SoundLink *sndAllocLink(BtlUnit *owner) {
     SoundLink *node = sdfAllocAndClearQuadwords(sizeof(SoundLink));
     node->owner = owner;
     node->effectHandle = 0;
-    node->variant = 0;
+    node->commandEffectId = 0;
     node->effect = 0;
     return node;
 }
@@ -6067,7 +6057,7 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
             link->effect->referenceCount++;
             link->effectHandle->flags = (link->effectHandle->flags | 1) & ~6;
         }
-        link->variant = effectId;
+        link->commandEffectId = effectId;
     } else if (link->effectHandle != 0) {
         effReleaseBattleVoiceOwner(link->effectHandle);
         link->effect->referenceCount--;
