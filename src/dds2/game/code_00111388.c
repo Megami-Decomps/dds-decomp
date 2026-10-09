@@ -16,7 +16,7 @@ s32 func_00111388(u32 kind) {
 }
 
 EffWorldNode *evtSpawnActionObj2(s32 firstValue, s32 secondValue) {
-    EffWorldNode *obj = dds3AppendWorldObjectNode(2);
+    EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_WORLD_INDEX_OWNER);
 
     obj->key = firstValue;
     obj->value = secondValue;

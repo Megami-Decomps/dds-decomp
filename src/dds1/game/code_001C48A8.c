@@ -115,7 +115,7 @@ extern u64 btlStartTask(void *);
 extern s32 fldCreateSceneTileTask(u32 soundId, u32 variant);
 extern void btlDispatchStateHandler(void *, s32);
 
-extern void func_001BCB88(s8, s32);
+extern void btlSetCommandPanelFadeMode(s8, s32);
 
 extern void btlUpdateScene(void);
 
@@ -184,7 +184,7 @@ void fldMarkGridTiles(u8 *context) {
 
 extern void btlResetTitleStreamOnBattleFlag(void);
 
-extern void func_001DC0E8(void);
+extern void btlInitializeWorldCamera(void);
 
 extern void btlAdvanceWorldCounterAndSpawnActionObject(void);
 
@@ -193,7 +193,7 @@ extern void btlCreateRainEffect(s16, s16);
 s32 btlStartOwnerTaskIfClear(u8 *object) {
     if (btlCountTasksForOwner(0x8000000000000001ULL) == 0) {
         btlResetTitleStreamOnBattleFlag();
-        func_001DC0E8();
+        btlInitializeWorldCamera();
         btlAdvanceWorldCounterAndSpawnActionObject();
         btlCreateRainEffect(*(s16 *)(object + 0x288), *(s16 *)(object + 0x28A));
         return 4;
@@ -714,7 +714,7 @@ void func_001C5B90(BattleSceneWork *scene) {
                 btlStartTask(btlCreateCommandSoundTask((s32)task, 3));
             }
         }
-        func_001BCB88(0, 20);
+        btlSetCommandPanelFadeMode(0, 20);
         return;
     }
     default:
@@ -752,7 +752,7 @@ s32 fldSceneStateWaitScriptRelease(u8 *arg0) {
             if (btlHasRegisteredGuidePanelTask() != 0) {
                 if (D_00324530[1] < 0) {
                     btlRequestGuidePanelClose();
-                    func_001BCB88(1, 0x14);
+                    btlSetCommandPanelFadeMode(1, 0x14);
                 }
             } else {
                 finished = 1;
@@ -816,7 +816,7 @@ void func_001C5F80(BtlState *scene) {
 
     func_001A5690();
     if (scene->eventReady != 5) {
-        func_001BCB88(0, 8);
+        btlSetCommandPanelFadeMode(0, 8);
         btlSetTaskPhase5();
         func_001ACC20();
         btlDestroyTaskC();
@@ -1135,7 +1135,7 @@ extern void ptyApplySkillRecovery(DatPartyRecord *entry, u32 skillId);
 extern void dds3WorkClear(void);
 extern s32 btlCountRegisteredTasks(void);
 
-s32 func_001C7028(s32 sceneAddress) {
+s32 btlFinishScenePartyRecovery(s32 sceneAddress) {
     BtlState *scene = (BtlState *)sceneAddress;
     u32 i;
 

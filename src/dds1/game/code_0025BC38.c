@@ -171,7 +171,7 @@ void mnuReleaseEffectResource(MenuResourceWork *work) {
 }
 extern void func_0024E1C8(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void mnuTickMantraSparkParticles(DspParticleState *);
-extern void func_00255B78(DspParticleState *, s32, s32);
+extern void mnuDrawMantraSparkBackdrop(DspParticleState *, s32, s32);
 
 /* Sparkle state followed by the sprite resource handle it draws with. */
 typedef struct MnuSparkleSpriteWork {
@@ -179,7 +179,7 @@ typedef struct MnuSparkleSpriteWork {
     s32 sprite; /* 0x6C */
 } MnuSparkleSpriteWork;
 
-void func_0025C0D8(MnuSparkleSpriteWork *work, s32 alpha, s32 context) {
+void mnuDrawMantraPulseAndSparks(MnuSparkleSpriteWork *work, s32 alpha, s32 context) {
     DspParticleState *sparkles;
     f32 factor;
 
@@ -190,7 +190,7 @@ void func_0025C0D8(MnuSparkleSpriteWork *work, s32 alpha, s32 context) {
     func_0024E1C8(0, 0, 0, (f32)alpha * factor, work->sprite, 0x2B, 0, context);
     sparkles = &work->sparkles;
     mnuTickMantraSparkParticles(sparkles);
-    func_00255B78(sparkles, work->sprite, context);
+    mnuDrawMantraSparkBackdrop(sparkles, work->sprite, context);
 }
 
 

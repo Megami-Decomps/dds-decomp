@@ -242,7 +242,7 @@ void mnuFinishStaffMovieAndFreeState(void) {
 }
 
 void mnuReleaseMovieResourceAfterPendingWork(void) {
-    effDestroyResourceSlotSet((struct EffectSlotSet *)mnuMovieWork->spriteSet);
+    effDestroyResourceSlotSet(mnuMovieWork->spriteSet);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     func_002ECA40(0);
