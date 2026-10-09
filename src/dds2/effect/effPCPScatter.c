@@ -379,7 +379,7 @@ extern s32 sdfAllocPacketAligned(s32);
 extern void func_003332E8(u32, u32);
 extern s32 func_00167A10(EffPacketParams *);
 
-extern u32 sdfCreateAssetWithDrawEntries(void);
+extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
 
 extern void func_003332D0(u32 res, f32 scale);
 
@@ -1192,7 +1192,7 @@ PcpScatterPool *effPcpScatterPoolCreate(s32 groups) {
     pool->color = EFF_SCATTER_NEUTRAL_COLOR;
     pool->sharedResource = 0;
     pool->drawAsset = sdfCreateAssetWithDrawEntries();
-    func_003332D0(pool->drawAsset, 1.0f);
+    func_003332D0((u32)pool->drawAsset, 1.0f);
     memset(D_00452020, 0, EFF_SCATTER_DRAW_TEMPLATE_BYTES);
     D_00452020->primitive = 0x4000;
     return pool;
@@ -1203,7 +1203,7 @@ void effPcpScatterReleasePoolResources(PcpScatterPool *pool) {
     if (pool->sharedResource != NULL) {
         effPcpScatterResRelease(pool->sharedResource);
     }
-    sdfQueueAssetRelease(pool->drawAsset);
+    sdfQueueAssetRelease((s32)pool->drawAsset);
     sdfReleaseResourceAllocation(pool->allocation);
 }
 
@@ -1222,12 +1222,12 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
     VU0_LOAD_MATRIX(matrix);
     sdfConsAppendVuPacket(packet, 0);
     if (pool->sharedResource != NULL) {
-        func_003332E8(pool->drawAsset, (u32)pool->sharedResource->textureHandle);
+        func_003332E8((u32)pool->drawAsset, (u32)pool->sharedResource->textureHandle);
         D_00452020->texcoords = D_003B13F0;
     } else {
         D_00452020->texcoords = NULL;
     }
-    sdfConsAppendAssetPacket(packet, (void *)pool->drawAsset, 0);
+    sdfConsAppendAssetPacket(packet, pool->drawAsset, 0);
     remainingVertices = pool->secondWordCount;
     D_00452020->colors = (u32 *)pool->auxRecordBase;
     D_00452020->positions = (u128 *)pool->recordBase;

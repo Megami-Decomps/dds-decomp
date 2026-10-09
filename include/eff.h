@@ -672,7 +672,7 @@ typedef struct PcpScatterPool {
     f32 unk1C;
     s32 recordBase;
     s32 auxRecordBase;
-    u32 drawAsset;
+    SdfAsset *drawAsset;
     SdfMemBlock *allocation;
     PcpScatterRes *sharedResource;
 } PcpScatterPool; /* 0x34 */
