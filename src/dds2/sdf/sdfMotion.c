@@ -4,6 +4,7 @@
 #include "ee_mmi.h"
 #include "sdf.h"
 #include "sdf_draw.h"
+#include "sdf_motion_bindings.h"
 
 typedef struct VTab {
     void (*invoke)(void);
@@ -17,12 +18,7 @@ typedef struct VObj {
     VTab *vtable;
 } VObj;
 
-typedef struct {
-    void *dispatch; /* 0x00: binding callback table */
-    void *source;   /* 0x04: source supplied during binding */
-} Pair;
-
-void sdfSetMotionPointerPair(Pair *binding, void *source, void *dispatch);
+void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, void *source, void *dispatch);
 
 
 typedef struct SdfMotionTrack {
@@ -46,34 +42,6 @@ typedef struct SdfMotionBinding {
         u8 lowByte;
     } current;
 } SdfMotionBinding;
-
-typedef struct SdfMotionKeyInterval {
-    f32 *firstKey;
-    f32 *secondKey;
-    f32 weight;
-} SdfMotionKeyInterval;
-
-typedef struct SdfMotionKeyTrack {
-    u16 u0;
-    u16 u2;
-    u16 keyCount;
-    u16 keyStride;
-    u16 keyFrames[1];
-} SdfMotionKeyTrack;
-
-
-typedef struct SdfMotionKeyBinding {
-    void *dispatch;
-    Motion *motion;
-    SdfMotionKeyTrack *track;
-} SdfMotionKeyBinding;
-
-/* Draw bindings retain a four-component snapshot after their key header. */
-typedef struct SdfMotionDrawBinding {
-    SdfMotionKeyBinding keys;
-    SdfDrawNode *node;
-    f32 capturedVector[4];
-} SdfMotionDrawBinding;
 
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
 void sdfFindMotionKeyInterval(void *bindingArg, void *intervalArg, f32 frame);
@@ -109,7 +77,7 @@ typedef struct SdfMotionTarget {
 } SdfMotionTarget;
 
 typedef struct SdfMotionOutput {
-    Pair pair;
+    SdfMotionBindingHead pair;
     u32 value;
     SdfMotionTarget *target;
     u32 capturedValue; /* 0x10: first word of the saved target state */
@@ -144,7 +112,7 @@ void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 b
                          f32 blendDurationFrames);
 
 typedef struct {
-    Pair pair;
+    SdfMotionBindingHead pair;
     s32 unk8;
     s32 unkC;
 } TmpBuf;
@@ -208,7 +176,7 @@ void sdfInvokeMotionObjectCallback(VObj *object) {
 }
 
 /* Install the binding's dispatch table and source without touching its payload. */
-void sdfSetMotionPointerPair(Pair *binding, void *source, void *dispatch) {
+void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, void *source, void *dispatch) {
     binding->dispatch = dispatch;
     binding->source = source;
 }
@@ -685,34 +653,34 @@ void *sdfMotionCreateKeyFlagBinding(void *a0, s32 a1, s32 a2) {
     return r;
 }
 
-void sdfMotionUpdateKeyFlag(SdfMotionBinding *binding, f32 frame) {
+void sdfMotionUpdateKeyFlag(SdfMotionKeyFlagBinding *binding, f32 frame) {
     SdfMotionKeyInterval keyInterval;
-    SdfMotionTrack *track;
+    SdfDrawNode *node;
 
     sdfFindMotionKeyInterval(binding, &keyInterval, frame);
-    track = binding->track;
+    node = binding->node;
     if (*(u8 *)keyInterval.firstKey == 0) {
-        track->value14.flags = track->value14.flags | 0x10;
+        node->flags = node->flags | SDF_MOTION_KEY_SAMPLE_BYTE_ZERO;
     } else {
-        track->value14.flags = track->value14.flags & 0xFFEF;
+        node->flags = node->flags & ~SDF_MOTION_KEY_SAMPLE_BYTE_ZERO;
     }
 }
 
-void func_00335108(SdfMotionBinding *binding, f32 t) {
+void func_00335108(SdfMotionKeyFlagBinding *binding, f32 t) {
     SdfMotionKeyInterval b;
-    SdfMotionTrack *track;
+    SdfDrawNode *node;
 
     sdfFindMotionKeyInterval(binding, &b, t);
-    track = binding->track;
+    node = binding->node;
     if (*(u8 *)b.firstKey == 0) {
-        track->value14.flags = track->value14.flags | 0x10;
+        node->flags = node->flags | SDF_MOTION_KEY_SAMPLE_BYTE_ZERO;
     } else {
-        track->value14.flags = track->value14.flags & 0xFFEF;
+        node->flags = node->flags & ~SDF_MOTION_KEY_SAMPLE_BYTE_ZERO;
     }
 }
 
-void sdfMotionReadKeyFlag(SdfMotionBinding *binding) {
-    binding->current.lowByte = ((u8)(binding->track->value14.flags >> 4) ^ 1) & 1;
+void sdfMotionReadKeyFlag(SdfMotionKeyFlagBinding *binding) {
+    binding->keyFlagClear = ((u8)(binding->node->flags >> 4) ^ 1) & 1;
 }
 
 void sdfMotionCaptureDrawVector(void *work) {
