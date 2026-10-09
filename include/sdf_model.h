@@ -7,6 +7,10 @@
  * four-word subrecord. The item list has a variable-length body of SdfItem
  * records beginning at the firstItem marker. */
 typedef struct SdfItemList SdfItemList;
+/* Values understood by sdfDrawNodeBuildFromItemAndCommands. */
+#define SDF_ITEM_COMMAND_SETUP_INLINE_LISTS 0
+#define SDF_ITEM_COMMAND_SETUP_NULL_TERMINATED_LIST_TABLE 1
+
 struct SdfItemList {
     s32 count;           /* 0x00: item count */
     u8 pad_0x04[0x0C];   /* 0x04 */
@@ -29,9 +33,9 @@ typedef struct SdfItem {
     u128 scale;       /* 0x30 */
     const f32 *boundsCorners; /* 0x40: optional two xyz corners used by clipping */
     union {
-        u32 *inlineCommandLists[3]; /* mode 0 */
+        u32 *inlineCommandLists[3]; /* SDF_ITEM_COMMAND_SETUP_INLINE_LISTS */
         struct {
-            u32 **commandLists; /* mode 1: null-terminated pointer table */
+            u32 **commandLists; /* SDF_ITEM_COMMAND_SETUP_NULL_TERMINATED_LIST_TABLE */
             u32 unk48;
             u32 unk4C;
         } commandList;
