@@ -18,6 +18,7 @@
 #include "sdf_chunk.h"
 #include "sdf_pac_state.h"
 #include "eff.h"
+#include "eff_node_descriptor.h"
 #include "sdf_sif_command.h"
 #include "eff_transform.h"
 #include "file.h"
@@ -42,7 +43,6 @@ extern void mdlAddEntryPlainEx(s32, s16, s16, f32, f32);
 
 
 
-s32 effCreateNodeFromDescriptor(s32);
 
 #define MDL_VIEWER_RESOURCE_SLOTS 12
 #define MDL_VIEWER_TABLE_SLOT 5
@@ -733,12 +733,12 @@ void mdlAddBillboardPart(DevRequest *partList, s32 descriptorIndex) {
 }
 
 /* Append a newly created effect to the next part-list slot. */
-void mdlAddEffectPart(DevRequest *partList, s32 descriptorIndex) {
+void mdlAddEffectPart(DevRequest *partList, EffNodeDescriptor *descriptor) {
     MdlPartEntry *partEntry = &((MdlPartEntry *)partList->buffer)[partList->usedCount];
 
     partEntry->kind = MDL_PART_EFFECT;
     partEntry->state = 0;
-    partEntry->object = effCreateNodeFromDescriptor(descriptorIndex);
+    partEntry->object = (s32)effCreateNodeFromDescriptor(descriptor);
     partList->usedCount += 1;
 }
 

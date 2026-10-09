@@ -5,6 +5,7 @@
 #include "pcp_vu0.h"
 #include "dds3obj.h"
 #include "eff.h"
+#include "eff_node_descriptor.h"
 #include "eff_event.h"
 #include "eff_event_sound.h"
 #include "sdf_draw.h"
@@ -28,12 +29,8 @@
 
 extern u64 func_001579C8(void);
 
-extern u64 effLoadResourceNode(void);
 
 struct EffNode;
-struct EffNodeDescriptor;
-extern struct EffNode *effCreateNodeFromDescriptor(struct EffNodeDescriptor *descriptor);
-
 extern BillObj *billCreateFromResource(s32 kind, const char *path);
 
 
@@ -475,12 +472,12 @@ EffectObj *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor
     return effObjCreateWithBoundBill(bill, firstVector, secondVectorAddress);
 }
 
-/* Create the loaded-resource node, then bind it; constructor failure is not returned. */
-void effObjSpawnLoadedResourceEffect(u64 unused, u64 firstVectorAddress, u64 secondVectorAddress) {
-    u64 bill;
+/* Load and bind the named resource, returning the created object. */
+void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *firstVector, void *secondVector) {
+    struct EffNode *bill;
 
-    bill = effLoadResourceNode();
-    effObjCreateWithBoundBill(bill, firstVectorAddress, secondVectorAddress);
+    bill = effLoadResourceNode(resourceName);
+    return effObjCreateWithBoundBill(bill, firstVector, (s32)(u32)secondVector);
 }
 
 /* The world-bill entry uses the same state-one/node-instance initialization as binding. */

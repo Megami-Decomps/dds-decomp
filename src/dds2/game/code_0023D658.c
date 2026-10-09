@@ -131,7 +131,7 @@ extern s32 scrReadStringParameter(s32 idx);
 
 extern void effObjSetFlags(void *object, s32 flags);
 
-extern void *effObjSpawnLoadedResourceEffect(s32 arg0, void *arg1, void *arg2);
+extern void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *arg1, void *arg2);
 
 extern u8 D_00421A90[];
 
@@ -1350,7 +1350,7 @@ u32 evtOpResolveAndFlagObjectFromName(void) {
     memset(buf1, 0, 0x10);
     memset(buf2, 0, 0x10);
     param0 = scrReadStringParameter(0);
-    unit = effObjSpawnLoadedResourceEffect(param0, buf1, buf2);
+    unit = effObjSpawnLoadedResourceEffect((const char *)(u32)param0, buf1, buf2);
     if (unit == NULL) {
         func_0035B6E0(D_00421A90, 1);
         func_0035B6E0(D_00421AC0, scrReadStringParameter(0));

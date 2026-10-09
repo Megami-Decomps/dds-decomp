@@ -3,6 +3,7 @@
 #include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "eff_node_descriptor.h"
 
 
 /* Per-effect-type operations act on the instance returned by create. */
@@ -123,15 +124,6 @@ s32 effInvokeOptionalNodeInstanceCallback(EffNode *node) {
 
 extern void func_0035B6E0(const char *fmt, ...);
 
-typedef struct EffNodeDescriptor {
-    u16 type;      /* 0x00 */
-    u8 pad02[2];
-    u16 arg;       /* 0x04 */
-    u8 pad06[6];
-    f32 version;   /* 0x0C */
-    u8 payload[1]; /* 0x10 */
-} EffNodeDescriptor;
-
 typedef struct EffNodeInstance {
     u8 pad00[0x20];
     u8 matrix20[0x40]; /* 0x20 */
@@ -150,7 +142,7 @@ EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor) {
         func_0035B6E0("old version!![%f]\n", descriptor->version);
         func_00157AC8(descriptor);
     }
-    node = effCreateNode(descriptor->type, descriptor->arg, (s32)descriptor->payload);
+    node = effCreateNode((u16)descriptor->type, (u16)descriptor->arg, (s32)descriptor->payload);
     if (descriptor->version <= 1.02f) {
         switch (node->type) {
         case 0:
@@ -172,14 +164,14 @@ void func_001579C8(u32 parameter) {
     effCreateNode(5, 0, parameter);
 }
 
-void *effLoadResourceNode(void *resource) {
+struct EffNode *effLoadResourceNode(const char *resource) {
     u32 resolvedId;
-    void *resourceHandle;
-    void *node;
+    struct SdfMemBlock *resourceHandle;
+    struct EffNode *node;
 
     func_0035B6E0("d3p file read...[%s]\n", resource);
     resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
-    node = effCreateNodeFromDescriptor(resolvedId);
+    node = effCreateNodeFromDescriptor((EffNodeDescriptor *)resolvedId);
     sdfReleaseResourceAllocation(resourceHandle);
     return node;
 }

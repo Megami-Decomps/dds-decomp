@@ -76,7 +76,6 @@ extern u8 D_003B1A38[];
 extern u8 D_003B1A88[];
 
 extern struct EffPCPSpanWork *effPcpSpanCreate(void *param0, EffNodeDescriptor *param1);
-extern struct EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor);
 extern void effDestroyNode(struct EffNode *node);
 
 extern u32 effCloneSourceWithTypeHandler(u32 handle);

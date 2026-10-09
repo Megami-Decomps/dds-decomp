@@ -163,14 +163,14 @@ void func_0014FE28(u32 parameter) {
     effCreateNode(5, 0, parameter);
 }
 
-void *effLoadResourceNode(void *resource) {
+struct EffNode *effLoadResourceNode(const char *resource) {
     u32 resolvedId;
-    void *resourceHandle;
-    void *node;
+    struct SdfMemBlock *resourceHandle;
+    struct EffNode *node;
 
     func_003003F0("d3p file read...[%s]\n", resource);
     resourceHandle = sdfReadNamedResource(resource, &resolvedId, 0);
-    node = effCreateNodeFromDescriptor(resolvedId);
+    node = effCreateNodeFromDescriptor((EffNodeDescriptor *)resolvedId);
     sdfReleaseResourceAllocation(resourceHandle);
     return node;
 }
