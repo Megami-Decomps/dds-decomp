@@ -343,7 +343,32 @@ void func_0025F4E0(s32 x, s32 y, s32 z, s32 unused, MenuWindowContainer *object,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DF68", func_0025F680);
+/* Draw the selected shop row's two markers, its icon and its count text. */
+void func_0025F680(s32 x, s32 y, s32 depth, ShopScene *scene, s32 option) {
+    char text[16];
+    struct EffectSlotSet *texture = D_003BC520;
+    struct MenuList *list = scene->window->list;
+    s32 row;
+    s32 firstIndex;
+    FrFontGlyph *glyph;
+
+    if (list->count != 0) {
+        firstIndex = list->head->index;
+        row = list->cursor->index - firstIndex;
+        func_002BF4E0(0x3D0, (152 + row * 21) << 3, 0, 0x80, 0, texture, 0x20, option);
+        func_002BF4E0(0xC90, (152 + row * 21) << 3, 0, 0x80, 0, texture, 0x21, option);
+        func_002BF4E0(D_0036C728[29][BRS_ICON_X] << 4,
+                      (D_0036C728[29][BRS_ICON_Y] + row * 21) << 3,
+                      0, 0x100, 0, texture,
+                      D_0036C728[29][BRS_ICON_ID], option);
+        func_003014F0(text, D_003BC4F0, scene->counter);
+        glyph = func_00197A98(0xDD0, (155 + row * 21) << 3, depth,
+                              0xA09DC380, text, 0);
+        frFontSetChildChainFirstOption(glyph, 4);
+        frFontDrawGlyphChain(glyph, 1, option);
+        frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    }
+}
 
 void func_0025F7F0(s32 x, s32 y, s32 depth, ShopScene *scene, u32 alpha, s32 option) {
     char text[16];
