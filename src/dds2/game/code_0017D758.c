@@ -8,66 +8,19 @@
 #include "ee_mmi.h"
 #include "eff.h"
 #include "eff_scatter_draw.h"
+#include "eff_pcp_scatter_rings.h"
 
 
 extern PcpScatterRes *effPcpScatterResCreate(u32);
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *);
 extern void effPcpScatterResRelease(PcpScatterRes *);
 
-typedef struct PcpScatterPlainParams {
-    f32 vec[4];
-    u32 unk10;
-    u8 loop;
-    u8 pad15[3];
-    s32 duration;
-    u32 particleCount;
-    u32 unk20;
-    u32 randomDelayRange;
-    s32 fadeIn;
-    s32 fadeRange;
-    f32 angleStepBase;
-    f32 angleStepJitter;
-    f32 heightBase;
-    f32 heightJitter;
-    f32 angularSpeed;
-    f32 angularDamping;
-    f32 radiusBase;
-    f32 radiusJitter;
-    f32 radialSpeed;
-    f32 radialDamping;
-    s32 radialDecayStart;
-    s32 colorParam;
-    u32 vCount;
-    u32 vTail;
-    u8 pad68[0x80];
-} PcpScatterPlainParams;
-
-typedef struct PcpScatterPlainParticle {
-    f32 rot[3];
-    s32 age;
-    f32 angle;
-    f32 angularSpeed;
-    f32 angleStep;
-    f32 radius;
-    f32 radialSpeed;
-    f32 height;
-} PcpScatterPlainParticle;
-
-/* The four setter callbacks belong to the flat-ring effect's 0x13C-byte
+/* The four setters below belong to the flat-ring effect's 0x13C-byte
  * instance, not to the drawable used by the resource helpers below. */
-typedef struct PcpScatterPlainInstance {
-    f32 matrix[16];
-    PcpScatterPlainParams params;
-    PcpScatterPlainParticle *particles;
-    f32 scale;
-    u32 color;
-    PcpScatterDraw *scatterObject;
-    u32 ownedBuffer;
-} PcpScatterPlainInstance;
 
 /* Copy the flat effect's source vector; the renderer reads the embedded copy. */
 void effScatterCopyFlatParameterVector(PcpScatterPlainInstance *work, void *src) {
-    PCP_COPY_VECTOR(work->params.vec, src);
+    PCP_COPY_VECTOR(work->params.origin, src);
 }
 
 /* Set the instance scale that its update forwards to the drawable. */
