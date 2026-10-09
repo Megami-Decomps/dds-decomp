@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_sound.h"
 #include "btl_task_condition.h"
 #include "btl.h"
 #include "btl_state.h"

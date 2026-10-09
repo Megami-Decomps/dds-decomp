@@ -323,7 +323,6 @@ extern void func_00209078(void);
 
 extern struct BtlRuntimeTask *func_002014A8(u32);
 
-extern struct BtlRuntimeTask *sndCreateReleaseTask(u32);
 
 extern void func_00168978(BattleEffect *);
 
