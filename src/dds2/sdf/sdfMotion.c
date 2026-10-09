@@ -288,7 +288,7 @@ void sdfMotionResume(Motion *state) {
     }
 }
 
-void func_00334658(void *a0) {
+void sdfMotionReleaseBindingStorage(void *a0) {
     sdfReleaseChipBlock(a0);
 }
 

@@ -6210,6 +6210,7 @@
 0x00334510	sdfMotionUpdate	inferred	Dispatches the current motion state, applies the initial or next frame, wraps looping motions, and reports completion or wrap; paired with DDS1 0x002DB660.
 0x00334618	sdfMotionSuspend	inferred	Saves the previous motion mode before switching to mode six.
 0x00334638	sdfMotionResume	inferred	Restores the saved motion mode when currently in mode six.
+0x00334658	sdfMotionReleaseBindingStorage	inferred	Releases storage for a motion-owned binding through its common callback slot.
 0x00334670	sdfMotionBindKeyTrack	inferred	Stores the current motion-entry key-track record in the binding's key-track pointer.
 0x00334678	sdfFindMotionKeyInterval	inferred	Finds the bracketing key records for a motion frame and computes their interpolation weight; paired with DDS1 0x002DB7C8.
 0x00334788	sdfInterpolateMotionKeys	inferred	Interpolates two float key values according to the supplied weight.
