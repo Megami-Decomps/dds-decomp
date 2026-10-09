@@ -98,6 +98,7 @@ INCLUDE_ASM(const s32, "field/fldFileResolver", func_001289A8);
 
 #include "fld_area_work.h"
 #include "evt_world.h"
+#include "evt_world_source_transform.h"
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
@@ -564,7 +565,6 @@ extern EffWorldNode *evtSpawnActionObjB(s32, s32, s32, s32);
 extern void dds3SetPathStateValue(EffWorldNode *, u32);
 extern EffWorldNode *evtSpawnActionObjD(s32, void *, s32);
 extern EffWorldNode *evtSpawnActionObj10(s32, void *, s32);
-extern EffWorldNode *evtSpawnActionObj11(s32, void *, s32);
 extern s32 fldPushDisplayValue(u32, EffWorldNode *);
 extern s32 func_0013BAB8(FldFileResource *, EffWorldNode *);
 extern void func_0014D380(s32, u32, f32 *, f32, f32, f32);
@@ -699,10 +699,10 @@ void func_00128FE8(u32 batchAddress, u32 batchCount, s32 appended) {
                     }
                     break;
                 case 0:
-                    evtSpawnActionObj11(resource->id, transform, (s32)resource->name);
+                    evtSpawnActionObj11(resource->id, (EvtWorldSourceTransformPrefix *)transform, (s32)resource->name);
                     break;
                 case 1:
-                    object = evtSpawnActionObj11(resource->id, transform, (s32)resource->name);
+                    object = evtSpawnActionObj11(resource->id, (EvtWorldSourceTransformPrefix *)transform, (s32)resource->name);
                     func_0013BAB8(resource, object);
                     break;
                 case 2:

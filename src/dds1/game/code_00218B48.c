@@ -29,6 +29,7 @@
 #include "eff_node.h"
 #include "sdf_sif_command.h"
 #include "eff_transform.h"
+#include "evt_world_source_transform.h"
 #include "file.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_object_stream.h"
@@ -3377,18 +3378,17 @@ void mdlAttachWorldObjectToSourceVector(s32 targetId, s32 sourceId) {
     f32 quaternion[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
     EffWorldNode *target;
     EffWorldNode *source;
-    f32 *base;
+    EvtWorldSourceTransformPrefix *sourceTransform;
 
     target = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), targetId, 5);
     if (target != NULL) {
         source = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), sourceId, 0x11);
         if (source != NULL) {
-            base = source->data;
-            effObjSetInnerPosition(target, (u128 *)base);
+            sourceTransform = source->data;
+            effObjSetInnerPosition(target, (u128 *)&sourceTransform->position);
                         VU0_LOAD_VF(vf10, quaternion);
             effMiscAxisAngleToQuaternionVU(3.14159265f);
-            base += 4;
-                        VU0_LOAD_VF(vf11, base);
+                        VU0_LOAD_VF(vf11, sourceTransform->rotation);
             effMiscQuatMultiplyVU();
                         VU0_STORE_VF(vf10, quaternion);
             effObjSetInnerRotation(target, (u128 *)quaternion);

@@ -11,6 +11,7 @@
 #include "eff_node_descriptor.h"
 #include "eff_event.h"
 #include "eff_event_sound.h"
+#include "evt_world_source_transform.h"
 #include "sdf_draw.h"
 #include "btl_sound.h"
 
@@ -97,12 +98,6 @@ extern void effMiscQuaternionToMatrixVU(void);
 extern void effMiscNormalizeVU(void);
 extern void sdfMultiplyVuMatrixInPlace(void);
 
-/* Position and orientation vectors of a kind-0x11 owner's payload. */
-typedef struct EffOwnerVectors {
-    f32 position[4];
-    f32 rotation[4];
-} EffOwnerVectors;
-
 /* Refresh the world position and orientation from the owner link (or the object's own
    inner transform), then forward them to the bound node according to the state. */
 s32 effUpdateLinkedWorldObjectConsumers(EffectObj *obj) {
@@ -127,7 +122,7 @@ s32 effUpdateLinkedWorldObjectConsumers(EffectObj *obj) {
                     effMiscQuaternionToMatrixVU();
                     break;
                 case EFF_OBJ_OWNER_KIND_EXTRA:
-                    VU0_LOAD_VF(vf10, ((EffOwnerVectors *)((EffWorldNode *)data->owner)->data)->rotation);
+                    VU0_LOAD_VF(vf10, ((EvtWorldSourceTransformPrefix *)((EffWorldNode *)data->owner)->data)->rotation);
                     VU0_STORE_VF(vf10, rotation);
                     effMiscQuaternionToMatrixVU();
                     break;
@@ -151,7 +146,7 @@ s32 effUpdateLinkedWorldObjectConsumers(EffectObj *obj) {
                     VU0_ADD(vf10, vf10, vf11);
                     break;
                 case EFF_OBJ_OWNER_KIND_EXTRA:
-                    VU0_LOAD_VF(vf11, ((EffOwnerVectors *)((EffWorldNode *)data->owner)->data)->position);
+                    VU0_LOAD_VF(vf11, &((EvtWorldSourceTransformPrefix *)((EffWorldNode *)data->owner)->data)->position);
                     VU0_ADD(vf10, vf10, vf11);
                     break;
                 }

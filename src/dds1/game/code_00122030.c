@@ -13,6 +13,7 @@
 #include "fpu.h"
 #include "fld.h"
 #include "evt_world.h"
+#include "evt_world_source_transform.h"
 #include "dds3obj.h"
 #include "mdl.h"
 #include "dat_state.h"
@@ -991,7 +992,6 @@ extern void fldSetCameraObjectActiveFlag(s32);
 
 extern void func_001312D8(void);
 
-extern EffWorldNode *evtSpawnActionObj11(s32, void *, s32);
 
 /* Install the two supplied homogeneous transform vectors and prepare field
  * model, scene commands and the borrowed action transform. */
@@ -1063,7 +1063,7 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
         fldSetCameraObjectActiveFlag(fldAreaState.commandEnabled);
     }
     func_001312D8();
-    evtSpawnActionObj11(dds3AdvanceWorldCounter(), D_0032F170, (s32)D_003BABB8);
+    evtSpawnActionObj11(dds3AdvanceWorldCounter(), (EvtWorldSourceTransformPrefix *)D_0032F170, (s32)D_003BABB8);
 }
 
 extern FieldVec4 D_0039FC80;

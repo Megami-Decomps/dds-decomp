@@ -5,6 +5,7 @@
 #include "mnu_flag_snapshot.h"
 #include "dds3_path.h"
 #include "eff_transform.h"
+#include "evt_world_source_transform.h"
 #include "sdf.h"
 #include "pcp_vu0.h"
 #include "btl_action.h"
@@ -164,10 +165,10 @@ void sdfDisableFloatCounterWrap(EvtScaledValue *value) {
     value->flags = value->flags & ~SDF_FLOAT_COUNTER_WRAP_FLAG;
 }
 
-EffWorldNode *evtSpawnActionObj11(s32 key, void *data, s32 value) {
+EffWorldNode *evtSpawnActionObj11(s32 key, EvtWorldSourceTransformPrefix *source, s32 value) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(0x11);
 
-    obj->data = data;
+    obj->data = source;
     obj->key = key;
     obj->value = value;
     return obj;

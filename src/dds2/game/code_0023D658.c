@@ -5,6 +5,7 @@
 #include "itf_mes_window.h"
 #include "dds3obj.h"
 #include "evt_world.h"
+#include "evt_world_source_transform.h"
 #include "evt_unit.h"
 #include "evt_task.h"
 #include "ee_mmi.h"
@@ -90,17 +91,6 @@ typedef struct EvtModelHeader {
     u8 pad1C[0x10];
     void *target2C;     /* 0x2C: scaled by the model-cut opcode */
 } EvtModelHeader;
-
-typedef struct EvtSourceVec {
-    f32 positionX;      /* 0x00: copied into model position */
-    f32 positionY;      /* 0x04 */
-    f32 positionZ;      /* 0x08 */
-    u8 pad0C[0x04];
-    f32 rotationX;      /* 0x10: copied into model rotation */
-    f32 rotationY;      /* 0x14 */
-    f32 rotationZ;      /* 0x18 */
-    f32 rotationW;      /* 0x1C */
-} EvtSourceVec;
 
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
 extern void effMiscQuatMultiplyVU();
@@ -190,10 +180,12 @@ void evtBeginVectorTransition(EvtUnit *work, s128 *vector, s32 frames) {
 /* Track a secondary-world unit and copy the vector in its subobject at +0x10. */
 void evtAttachSecondaryWorldUnit(EvtUnit *work, s32 objectId, s32 frames) {
     EffWorldNode *worldUnit;
+    EvtWorldSourceTransformPrefix *source;
 
     worldUnit = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (worldUnit != NULL) {
-        evtBeginVectorTransition(work, (s128 *)worldUnit->data + 1, frames);
+        source = worldUnit->data;
+        evtBeginVectorTransition(work, (s128 *)&source->rotation, frames);
         work->linkedUnit = worldUnit;
     }
 }
@@ -216,10 +208,12 @@ void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unu
 /* Configure the same transition from a secondary-world object's vector. */
 void evtBeginUnitTransitionTowardWorldObject(EvtUnit *work, s32 mode, s32 objectId, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(EvtUnit *, s32), s32 unusedLast) {
     EffWorldNode *worldUnit;
+    EvtWorldSourceTransformPrefix *source;
 
     worldUnit = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (worldUnit != NULL) {
-        evtBeginUnitVectorTransition(work, mode, (s128 *)worldUnit->data, unused, frames, valueB6, callback, unusedLast);
+        source = worldUnit->data;
+        evtBeginUnitVectorTransition(work, mode, (s128 *)&source->position, unused, frames, valueB6, callback, unusedLast);
         work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE;
         work->linkedUnit = worldUnit;
     }
@@ -1059,7 +1053,7 @@ u32 evtOpTurnUnitRelativeToWorldNode(void) {
     EvtUnit *unit;
     EffWorldNode *actor;
     EffWorldNode *source;
-    f32 *sourceVector;
+    EvtWorldSourceTransformPrefix *sourceTransform;
     f32 rotation[4] __attribute__((aligned(16)));
     f32 actorPosition[4] __attribute__((aligned(16)));
     f32 sourcePosition[4] __attribute__((aligned(16)));
@@ -1085,10 +1079,10 @@ u32 evtOpTurnUnitRelativeToWorldNode(void) {
         return 1;
     }
 
-    sourceVector = (f32 *)source->data;
+    sourceTransform = source->data;
     effObjFetchInnerPosition(actor);
     VU0_STORE_VF(vf10, actorPosition);
-    PCP_COPY_VECTOR_F32(sourcePosition, sourceVector);
+    PCP_COPY_VECTOR(sourcePosition, &sourceTransform->position);
 
     if ((unit->referenceAngleCacheFlags & EVT_UNIT_REFERENCE_ANGLE_CACHE_VALID) == 0) {
         effObjFetchInnerRotationNormalized(actor);
@@ -1585,7 +1579,7 @@ u32 evtOpSetModelObjectRotationFromAngles(void) {
 u32 evtOpCopyModelTransformFromSource(void) {
     EffWorldNode *obj;
     EffWorldNode *source;
-    EvtSourceVec *vec;
+    EvtWorldSourceTransformPrefix *vec;
     ObjectTransform *params;
 
     obj = evtFindWorldObjectByIdAndKind(7, scrReadIntParameter(0));
@@ -1599,13 +1593,13 @@ u32 evtOpCopyModelTransformFromSource(void) {
     vec = source->data;
     if (!(((EvtModelHeader *)obj->data)->flags & 4)) {
         params = obj->inner;
-        params->position[0] = vec->positionX;
-        params->position[1] = vec->positionY;
-        params->position[2] = vec->positionZ;
-        params->rotation[0] = vec->rotationX;
-        params->rotation[1] = vec->rotationY;
-        params->rotation[2] = vec->rotationZ;
-        params->rotation[3] = vec->rotationW;
+        params->position[0] = vec->position.x;
+        params->position[1] = vec->position.y;
+        params->position[2] = vec->position.z;
+        params->rotation[0] = vec->rotation[0];
+        params->rotation[1] = vec->rotation[1];
+        params->rotation[2] = vec->rotation[2];
+        params->rotation[3] = vec->rotation[3];
     }
     obj->inner->flags = (obj->inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) & ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     return 1;
