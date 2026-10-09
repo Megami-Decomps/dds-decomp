@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_asset_packets.h"
+#include "sdf_asset_state.h"
 #include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -268,7 +269,6 @@ extern SdfTex *D_00438A80;
 
 extern vu8 sdfCurrentBufferIndex;
 
-extern void sdfAssetApplyEntryChanges(void *, s32);
 
 
 /* vu0 routine: vf28-vf31 = vf20-vf23 * vf28-vf31 (4x4 product) */

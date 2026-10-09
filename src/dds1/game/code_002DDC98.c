@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_asset_packets.h"
+#include "sdf_asset_state.h"
 #include "sdf_vu_lighting.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -1147,7 +1148,6 @@ void sdfConsAppendVuPacket(SdfListHead *packetList,
 }
 
 extern vu8 sdfCurrentBufferIndex;
-extern void sdfAssetApplyEntryChanges(void *, s32);
 
 /* Apply current-buffer changes and append the asset reference; keep both index reads. */
 void sdfConsAppendAssetPacket(SdfListHead *packetList, void *asset,
