@@ -789,14 +789,16 @@ MdlResourceItem *mdlInsertResourceItem(MdlCtx *owner, s32 type, s32 subtype) {
     return item;
 }
 
-void mdlAdvanceBillboardPart(MdlPartEntry *entry) {
-    billCloneObjectRetainingSharedData((struct BillObj *)entry->object);
+void *mdlAdvanceBillboardPart(MdlPartEntry *entry) {
+    struct BillObj *clone = billCloneObjectRetainingSharedData((struct BillObj *)entry->object);
     entry->state = entry->state + 1;
+    return clone;
 }
 
-void mdlAdvanceEffectPart(MdlPartEntry *entry) {
-    effCloneSourceWithTypeHandler((EffNode *)entry->object);
+void *mdlAdvanceEffectPart(MdlPartEntry *entry) {
+    EffNode *clone = effCloneSourceWithTypeHandler((EffNode *)entry->object);
     entry->state = entry->state + 1;
+    return clone;
 }
 
 /* Resolve a native fixed-size slot when its table exists and index is below the upper bound; no lower-bound check. */
@@ -824,7 +826,7 @@ typedef struct MdlPartRec {
 
 
 /* Bind each consecutive record ID to a newly created part when the chunk contains it. */
-s32 mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype, s32 type, s32 (*createPart)(MdlPartEntry *)) {
+s32 mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype, s32 type, void *(*createPart)(MdlPartEntry *)) {
     MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, partRecord->partIndex);
 
     if (partSlot != NULL) {
@@ -843,7 +845,7 @@ s32 mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype,
             if (chunkRecord != NULL) {
                 MdlResourceItem *resourceItem = mdlInsertResourceItem(owner, type, subtype);
 
-                resourceItem->payload.part.handle = createPart(partSlot);
+                resourceItem->payload.part.handle = (s32)(u32)createPart(partSlot);
                 resourceItem->payload.part.slot = partSlot;
                 resourceItem->payload.part.mapPositionRecord = chunkRecord;
                 resourceItem->payload.part.anchorScale = optionalAnchorScale;
@@ -949,7 +951,7 @@ void mdlCondInitEntry(MdlResourceItem *item) {
     }
 }
 
-extern s32 mdlBindViewerPartRecords(MdlCtx *object, MdlPartRec *record, s32 option, s32 type, s32 (*advance)(MdlPartEntry *));
+extern s32 mdlBindViewerPartRecords(MdlCtx *object, MdlPartRec *record, s32 option, s32 type, void *(*advance)(MdlPartEntry *));
 
 extern s32 mdlClaimViewerObjectPart(MdlCtx *object, MdlEntryRec *record, s32 option);
 
