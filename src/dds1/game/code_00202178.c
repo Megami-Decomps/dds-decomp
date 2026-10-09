@@ -141,7 +141,7 @@ extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
 
 extern u32 btlComputeSkillAdjustedMaxHp(DatPartyRecord *);
 
-extern s32 btlTestSelectedItemCategoryMask(void *, s32);
+extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
 extern u16 btlReadCurrentUnitMp(DatPartyRecord *);
 
@@ -161,7 +161,7 @@ s32 btlElementToBitIndex(s32 mask, s32 index);
 
 /* Return whether the native unit-status query intersects any requested action-mask bit. */ s32 btlUnitHasAnyStatusInMask(BtlUnit *unit, s32 actionMask);
 
-extern s32 btlTestSelectedItemCategoryMask(void *, s32);
+extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
 extern s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *, u32);
 
