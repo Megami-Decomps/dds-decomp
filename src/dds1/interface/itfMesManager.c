@@ -1372,7 +1372,7 @@ FrFontGlyph *itfMesGetLastNode(FrFontGlyph *node) {
 
 /* Copy the auxiliary glyph's shade bytes; its encoded intensity is unsigned. */
 void itfMesCopyGlyphShade(FrFontGlyph *glyph, ItfMesEntryBlock *entryBlock) {
-    FrFontGlyph *shade = glyph->link20.linkedGlyph;
+    FrFontChildGlyph *shade = glyph->lastChild;
     u8 encodedIntensity = glyph->glyphCodeOrContext.byteRoles.encodedContextByte;
 
     entryBlock->color[3] = encodedIntensity >> 1;
@@ -1415,7 +1415,7 @@ void itfMesSetRowItemFlag(FrFontGlyph *node, s32 first, s32 last, s32 requestedF
     s32 rowsToSkip = last - first - 1;
     s32 rowY = node->y;
     s32 currentY = rowY;
-    FrFontGlyph *child;
+    FrFontChildGlyph *child;
     u8 flagValue;
 
     while (rowsToSkip > 0) {
@@ -1431,7 +1431,7 @@ void itfMesSetRowItemFlag(FrFontGlyph *node, s32 first, s32 last, s32 requestedF
     }
     flagValue = requestedFlags;
     do {
-        for (child = node->link1C.firstChild; child != NULL; child = child->next) {
+        for (child = node->firstChild; child != NULL; child = child->next) {
             child->renderValueOrSetupOrShade.setupBytes.firstOption = flagValue;
         }
         node = node->previous;
@@ -1440,10 +1440,10 @@ void itfMesSetRowItemFlag(FrFontGlyph *node, s32 first, s32 last, s32 requestedF
 
 /* Set every child's flag byte across the parent chain; NULL is a no-op. */
 void itfMesSetChildChainFlags(FrFontGlyph *node, u8 flagValue) {
-    FrFontGlyph *child;
+    FrFontChildGlyph *child;
 
     for (; node != NULL; node = node->previous) {
-        for (child = node->link1C.firstChild; child != NULL; child = child->next) {
+        for (child = node->firstChild; child != NULL; child = child->next) {
             child->renderValueOrSetupOrShade.setupBytes.firstOption = flagValue;
         }
     }
@@ -1452,10 +1452,10 @@ void itfMesSetChildChainFlags(FrFontGlyph *node, u8 flagValue) {
 /* Clear each child's low color byte, then OR the unmasked input word.
  * High input bits can therefore also change the upper bytes. */
 void itfMesRecolorNodeChildren(FrFontGlyph *node, u32 color) {
-    FrFontGlyph *child;
+    FrFontChildGlyph *child;
 
     for (; node != NULL; node = node->previous) {
-        for (child = node->link1C.firstChild; child != NULL; child = child->next) {
+        for (child = node->firstChild; child != NULL; child = child->next) {
             child->parentDimensionsOrRenderWord.renderWord = child->parentDimensionsOrRenderWord.renderWord & ITF_MES_COLOR_BYTE_CLEAR_MASK | color;
         }
     }
@@ -1501,7 +1501,7 @@ s32 itfMesNthClearBit(s32 clearBitsToSkip, u32 mask) {
  * NULL chain is allowed, but every visited node must have a first child. */
 void itfMesEnableUnflaggedNodeContexts(FrFontGlyph *node) {
     for (; node != NULL; node = node->previous) {
-        if (node->link1C.firstChild->renderValueOrSetupOrShade.setupBytes.secondOption == 0) {
+        if (node->firstChild->renderValueOrSetupOrShade.setupBytes.secondOption == 0) {
             frFontEnableContextMode(node);
         }
     }
