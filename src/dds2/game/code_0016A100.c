@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "eff_param.h"
+#include "eff_param_operations.h"
 #include "eff_thunder_vector.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
@@ -20,28 +21,6 @@
 #define EFF_PARAM_KIND_WORD_OFFSET 0x18
 #define EFF_VIEWER_RESOURCE_GROUP 7
 #define EFF_VIEWER_LOAD_FLAGS 0x101
-
-/* Native 0x28-byte operation row, indexed by effect kind.
- * The scale operation takes a float in addition to its payload.
- * In the extended table, a duplicate callback selects raw-source creation
- * and cloning; its absence selects the kind/tableIndex fallback table. */
-typedef struct EffDispatchEntry {
-    void *(*create)(void *);          /* 0x00 */
-    void (*dispatch)(void *);         /* 0x04 */
-    void (*release)(void *);          /* 0x08 */
-    void *(*duplicate)(void *);       /* 0x0C */
-    void (*callback0)(void *, void *);       /* 0x10 */
-    void (*setScale)(void *, f32);    /* 0x14 */
-    void (*callback2)(void *, void *);       /* 0x18 */
-    void (*callback3)(void *, u32);       /* 0x1C */
-    void (*callback4)(void *, void *);       /* 0x20 */
-    void (*callback5)(void *, f32);       /* 0x24 */
-} EffDispatchEntry; /* 0x28 */
-
-
-extern EffDispatchEntry effParamWorkFactories[];
-
-
 
 extern u8 D_003B0180[];
 
@@ -449,7 +428,6 @@ void func_0016AB30(void *work, u32 color) {
     mdlBroadcastMasked(work, color);
 }
 
-extern EffDispatchEntry effParameterWorkOperations[];
 extern void **D_003AFFD0[];
 extern u32 effParamDescriptorGetKind(const u32 *descriptor);
 extern u32 effParamDescriptorGetTableIndex(const u32 *descriptor);
