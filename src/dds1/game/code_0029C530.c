@@ -155,7 +155,7 @@ extern u8 *D_0037EBF8[];
 
 extern FileJobPayload *effQueuedFileHandle;
 
-extern u32 effCurrentRenderPacket;
+extern struct SdfListHead *effCurrentRenderPacket;
 
 extern s32 effSharedRibbonReferenceCount;
 
@@ -3876,11 +3876,11 @@ INCLUDE_ASM(const s32, "game/code_0029C530", func_002A7568);
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A7610);
 
 void effBeginMatrixVuDrawPacket(const Matrix4 *matrix) {
-    void *work = (void *)sdfAllocPacketAligned(0x20);
-    effCurrentRenderPacket = (u32)work;
+    struct SdfListHead *work = (struct SdfListHead *)sdfAllocPacketAligned(0x20);
+    effCurrentRenderPacket = work;
     sdfInitPacketList(work);
     VU0_LOAD_MATRIX(matrix);
-    sdfConsAppendVuPacket((SdfListHead *)effCurrentRenderPacket, 0);
+    sdfConsAppendVuPacket(effCurrentRenderPacket, 0);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A78E0);
@@ -3889,13 +3889,13 @@ typedef struct EffDrawEntry {
     u32 handle;
     s32 frame;
     u8 pad08[8];
-    void (*draw)(u8 *, u32);
+    void (*draw)(u8 *, struct SdfListHead *);
 } EffDrawEntry;
 
 void effSubmitIndexedRenderPacket(u32 index) {
     u8 *entry = D_0037EBF8[index];
     ((EffDrawEntry *)entry)->draw(entry, effCurrentRenderPacket);
-    effCurrentRenderPacket = 0;
+    effCurrentRenderPacket = NULL;
 }
 
 extern EffQuadWork *func_002A7B68(FileJobPayload *job);
