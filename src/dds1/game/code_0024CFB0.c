@@ -6,6 +6,7 @@
 #include "dat_state.h"
 #include "evt_world.h"
 #include "kwln_task_lifecycle.h"
+#include "dds3obj.h"
 
 struct SdfTex;
 
@@ -75,7 +76,6 @@ extern void func_0024A2D8(s32 arg0);
 extern void func_0024DD78(void);
 extern void *dds3GetWorldSecondaryObject(void);
 extern s32 dds3GetWorldObjectValue(EffWorldNode *world);
-extern EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 index, const u8 *name);
 extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void dspSetActive();
 extern void itfMesSetWindowHighFlags(s32, s32);

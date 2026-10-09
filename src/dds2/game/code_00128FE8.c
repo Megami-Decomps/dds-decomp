@@ -732,7 +732,6 @@ extern void effObjSetRoomNumber(struct EffWorldNode *, u32);
 extern void *dds3SetSlotByKind(ObjBase *, ObjData *);
 extern void func_00112168(void *);
 extern void fldSetRecordValueById(s32, s32);
-extern struct EffWorldNode *dds3FindIndexedObjectChainNodeByName(struct EffWorldNode *, s32, const u8 *);
 extern s32 dds3RegisterObjectInHandlerIndex(void *);
 
 void fldCreateResourceScriptObjects(void) {
