@@ -271,7 +271,6 @@ void mnuClearCampResourceFlagEntries(void) {
 extern const CampMapArguments D_00424DE0;
 extern const CampEffectRows D_00424E10;
 extern const char D_00424E30[];
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void mnuInitializeMapPacket(u32, u32 *, s32, MapPacket *);
 extern void mnuCopyCampEffectRowData(const CampEffectRows *, MenuEffectResources *);
 

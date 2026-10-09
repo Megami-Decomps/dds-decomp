@@ -4977,11 +4977,13 @@
 0x002D46F0	fileQueueSetPosition	inferred	DDS1 twin func_00294670 [names_M68_VuRest.tsv]
 0x002D4818	fileQueueSetRotation	inferred	DDS1 twin func_00294798 [names_M68_VuRest.tsv]
 0x002D48D0	fileQueueSetScale	inferred	DDS1 twin func_00294850 [names_M68_VuRest.tsv]
+0x002D49B8	fileQueueSetColor	inferred	Stores the packed queue color and modulates each queued job color before dispatching its color callback.
 0x002D4A98	fileReadVector40	inferred	vector read from work+0x40 into dst
 0x002D4AB0	fileReadStoredQuaternion	inferred	Copies the stored job or queue quaternion vector into caller-provided storage. [names_reviewed15.tsv]
 0x002D4AC8	fileGetQueueScale	inferred	Returns the current scale from the effect job queue. [names_reviewed15.tsv]
 0x002D4AD0	fileGetQueueColor	inferred	Returns the current color modulation from the effect job queue. [names_reviewed15.tsv]
 0x002D4AD8	fileQueueCopyRotationFromSource	inferred	Extracts rotation vector from source and stores it on destination queue. [names_reviewed7.tsv]
+0x002D4B90	fileAppendJobFromCommandPath	inferred	Creates a payload from the borrowed command path and appends its address as a job in the destination queue.
 0x002D4CF0	fileQueueLinkJobToSectorLeader	inferred	Links job sector to reference, propagates secondary buffer and rechains followers if order differs. [names_reviewed7.tsv]
 0x002D4E60	fileQueueDetachSectorFollower	inferred	Clears follower flag and sector, rechaining former dependents when present. [names_reviewed7.tsv]
 0x002D4F10	fileQueueRemoveAndDestroyJob	inferred	Removes job, recursively removes flagged children, rechains dependents then frees child and job. [names_reviewed7.tsv]

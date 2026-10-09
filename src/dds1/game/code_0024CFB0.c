@@ -61,7 +61,6 @@ typedef struct {
 
 extern EvtActiveFlagTable evtActiveEntryFlags;
 
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern struct SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 

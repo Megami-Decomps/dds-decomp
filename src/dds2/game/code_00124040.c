@@ -910,7 +910,6 @@ INCLUDE_ASM(const s32, "game/code_00124040", func_00125380);
 
 struct SdfMemBlock;
 
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 /* Reload only when the field-selected variant changes or its handle is absent. */
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412D50);

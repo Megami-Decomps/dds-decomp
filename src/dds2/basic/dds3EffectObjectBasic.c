@@ -51,7 +51,6 @@ extern void effObjInnerVecBackup(void *params);
 extern void effMagatuhiCopyFloatBlock(void *, const void *);
 extern void effMagatuhiSetControlPointParams(void *, const void *);
 
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 
 

@@ -525,12 +525,6 @@ extern u8 D_0037F660[];
 
 extern void sdfPostmultiplyVuMatrixFromMemory(void *);
 
-extern void fileQueueSetPosition(FileQueue *queue, void *vec);
-extern void fileQueueSetRotation(FileQueue *queue, void *rot);
-
-extern void fileQueueSetScale(FileQueue *queue, f32 scale);
-
-extern void func_002D49B8(FileQueue *queue, u32 color);
 
 extern FileJob *fileQueueFindById(FileQueue *queue, u32 id);
 extern s32 fileFindQueuedJobIndex(FileQueue *queue, FileJob *target);
@@ -2667,7 +2661,6 @@ struct SdfTex;
 extern void func_001004A0(void);
 extern void func_002C7CE8(void *);
 extern struct SdfTex *sdfTexAcquireResourceTexture(void *);
-extern struct SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 extern void *sdfAllocateBlockBySizeThreshold(s32);
 extern s32 D_00437D80;
 extern void func_002CE738(void);
@@ -4786,10 +4779,10 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
         }
     }
     VU0_STORE_VF(vf0, &vec);
-    fileQueueSetPosition(queue, &vec);
-    fileQueueSetRotation(queue, &vec);
+    fileQueueSetPosition(queue, (const f32 *)&vec);
+    fileQueueSetRotation(queue, (const f32 *)&vec);
     fileQueueSetScale(queue, 1.0f);
-    func_002D49B8(queue, 0x80808080);
+    fileQueueSetColor(queue, 0x80808080);
     return queue;
 }
 
@@ -4885,10 +4878,10 @@ FileQueue *fileQueueClone(FileQueue *source) {
         fileQueueAppend(queue, job);
     }
     VU0_STORE_VF(vf0, &vec);
-    fileQueueSetPosition(queue, &vec);
-    fileQueueSetRotation(queue, &vec);
+    fileQueueSetPosition(queue, (const f32 *)&vec);
+    fileQueueSetRotation(queue, (const f32 *)&vec);
     fileQueueSetScale(queue, 1.0f);
-    func_002D49B8(queue, 0x80808080);
+    fileQueueSetColor(queue, 0x80808080);
     return queue;
 }
 
@@ -4901,7 +4894,7 @@ void fileQueueNotifyAllJobsComplete(u8 *owner) {
     ((FileQueue *)owner)->updateFrame = 0;
 }
 
-void fileQueueSetPosition(FileQueue *queue, void *vec)
+void fileQueueSetPosition(FileQueue *queue, const f32 vec[4])
 {
     f32 rot[16];
     f32 base[4];
@@ -4935,7 +4928,7 @@ void fileQueueSetPosition(FileQueue *queue, void *vec)
     }
 }
 
-void fileQueueSetRotation(FileQueue *queue, void *rot)
+void fileQueueSetRotation(FileQueue *queue, const f32 rot[4])
 {
     f32 quat[4];
     f32 pos[4];
@@ -4989,7 +4982,7 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D49B8);
+INCLUDE_ASM(const s32, "game/code_002C96D0", fileQueueSetColor);
 
 void fileReadVector40(void *work, void *dst) {
     PCP_COPY_VECTOR(dst, ((FileQueue *)work)->position);
@@ -5007,11 +5000,11 @@ u32 fileGetQueueColor(FileQueue *queue) {
     return queue->color;
 }
 
-void fileQueueCopyRotationFromSource(void *dst, void *src) {
+void fileQueueCopyRotationFromSource(FileQueue *queue, f32 matrix[4][4]) {
     s128 vec;
-    sdfVuMatrixToQuaternion(src);
+    sdfVuMatrixToQuaternion(matrix);
     VU0_STORE_VF(vf10, &vec);
-    fileQueueSetRotation(dst, &vec);
+    fileQueueSetRotation(queue, (const f32 *)&vec);
 }
 
 extern void fileQueueAppend(FileQueue *queue, FileJob *job);
@@ -5031,9 +5024,9 @@ FileJob *fileDuplicateAndAppendJob(FileQueue *queue, FileJobPayload *source) {
 
 extern u8 D_00437E28[];
 
-FileJob *fileAppendJobFromEntry(FileQueue *queue, void *entry) {
+FileJob *fileAppendJobFromCommandPath(FileQueue *queue, const char *commandPath) {
     func_0035B6E0(D_00437E28);
-    return fileAppendJob(queue, (u32)fileJobCreateFromCommandState(entry));
+    return fileAppendJob(queue, (u32)fileJobCreateFromCommandState(commandPath));
 }
 
 FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *src) {

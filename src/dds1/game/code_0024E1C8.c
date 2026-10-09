@@ -66,7 +66,6 @@ extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 extern void mnuDestroyMantraDrawPool(MnuSpriteResourceGroup *);
 extern void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *);
 extern s32 dspCloseChannel(void);
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void mnuMarkTitleStreamResetPending(void);
 extern void mnuResetTitleStreamLocked(void);
 extern void func_0026A5F0(s32);

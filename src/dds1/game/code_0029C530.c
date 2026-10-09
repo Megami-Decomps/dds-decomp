@@ -145,7 +145,6 @@ extern u32 D_003BC984;
 
 extern u32 D_003BC994;
 
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern u8 D_0038E000[];
 
@@ -8153,7 +8152,6 @@ typedef struct EffResourceBankSlot {
 
 extern void effPollResourceBankSlot(char *, u32, void *);
 
-extern FileJob *fileAppendJobFromEntry(FileQueue *queue, void *entry);
 
 u32 effPollPartResource(void) {
     u8 record[0x110];
@@ -8166,7 +8164,7 @@ u32 effPollPartResource(void) {
         result = 0x400000;
     } else if (state == 1) {
         if (effFileQueue != 0) {
-            FileJob *job = fileAppendJobFromEntry(effFileQueue, record);
+            FileJob *job = fileAppendJobFromCommandPath(effFileQueue, (const char *)record);
             u8 *asset = effFindAssetData(job);
             strcpy(job->name, *(char **)asset);
         }

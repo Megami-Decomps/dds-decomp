@@ -518,7 +518,6 @@ extern u32 effCurrentRenderPacket;
 
 extern u32 D_00437E6C;
 
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 
 extern u8 *effAllocateTexturedStripWork();
@@ -9655,7 +9654,6 @@ void effCreateObjectParticleTask(void) {
 
 extern char D_0042CF58[];
 
-extern FileJob *fileAppendJobFromEntry(FileQueue *queue, void *entry);
 
 s32 effPollPartResource(void) {
     u8 request[0x110];
@@ -9669,7 +9667,7 @@ s32 effPollPartResource(void) {
         result = 0x400000;
     } else if (state == 1) {
         if (effFileQueue != 0) {
-            entry = fileAppendJobFromEntry(effFileQueue, request);
+            entry = fileAppendJobFromCommandPath(effFileQueue, (const char *)request);
             strcpy(entry->name, *(char **)effFindAssetData(entry));
         }
         result = 0x400002;

@@ -3345,7 +3345,6 @@ extern char D_003A2208[]; /* "/battle/panel/battle_03.spr" */
 
 
 
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 void btlPanelResourcesLoad(void) {
     u8 params[16];

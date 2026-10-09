@@ -792,7 +792,6 @@ void fldCacheMapLabelLengths(s32 map) {
 extern s32 mdlFlagTest(s32);
 extern s32 func_003014F0(char *, const char *, ...);
 extern void fldFormatAreaDirectory(char *, s32, s32);
-extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 
 /* The base format occupies the first 16-byte-aligned AMB format record. */
 const char D_003A04B0[16] __attribute__((aligned(16))) = "%sf%03d.amb";
@@ -2436,7 +2435,6 @@ extern s32 fldEffectTextureNodes[];
 
 extern s32 D_0034C8A0[];
 
-extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 
 extern s32 func_0014FE28();
 
@@ -3207,7 +3205,6 @@ extern u32 D_003BAFAC;
 
 extern u32 D_003BAF9C;
 
-extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 
 extern char D_003A0810[]; /* "/fld/f/pnl/df%03d.tmx" */
 
@@ -3364,7 +3361,6 @@ void fldRequestMiniTitleDismiss(void) {
     }
 }
 
-extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 
 extern s32 func_0014FE28();
 

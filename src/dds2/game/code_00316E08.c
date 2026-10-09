@@ -44,7 +44,6 @@ extern void mnuDeactivateWorkEntry(MenuWorkEntry *);
 extern void mnuDestroyAllModelNodeContexts(MnuNodeList *);
 extern f32 mnuEvaluateTimedValue(MenuWorkEntry *);
 extern void func_0031CAE8(f32 *, s32, s32);
-extern void fileQueueSetPosition(struct FileQueue *, void *);
 extern void mnuUpdateTimedEffectPosition(void);
 
 typedef struct SoundSlot SoundSlot;
