@@ -1,3 +1,4 @@
+#include "sdf_texture_flush.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
 #include "sdf_packet_list.h"
@@ -1152,17 +1153,17 @@ void sdfBuildSecondaryAlphaSubtractiveDmaPacket(SdfGsBlendPacket *packet) {
     packet->header.gifRegisters = 0xE;
 }
 
-void sdfInitializeTextureFlushRegister(u64 *packet) {
-    *packet = 0;
-    packet[1] = 0x3f;
+void sdfInitializeTextureFlushRegister(SdfGsRegisterWrite *write) {
+    write->value = 0;
+    write->registerId = SDF_GS_TEXFLUSH;
 }
 
-void sdfInitializeTextureFlushPacket(SdfPacket *packet) {
-    sdfInitializeTextureFlushRegister((u64 *)(packet + 1));
-    packet->unk0 = 2;
-    packet->unk8 = (((u64)0x50000002 << 16 | 0x1000) << 16);
-    packet->unk10 = (((u64)0x10000000 << 32) | 0x8001);
-    packet->unk18 = 0xE;
+void sdfInitializeTextureFlushPacket(SdfGsTextureFlushPacket *packet) {
+    sdfInitializeTextureFlushRegister(&packet->textureFlush);
+    packet->header.dmaTag = 2;
+    packet->header.vifCommands = (((u64)0x50000002 << 16 | 0x1000) << 16);
+    packet->header.gifTag = (((u64)0x10000000 << 32) | 0x8001);
+    packet->header.gifRegisters = 0xE;
 }
 
 /* Emit the four A+D registers controlling an image transfer. */
