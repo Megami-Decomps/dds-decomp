@@ -21,7 +21,7 @@ extern void *memset(void *, s32, u32);
 
 /* Bind the owner, select a 16-byte ring entry, and advance the ten-entry cursor. */
 EffWorldNode *dds3SpawnSlotRingObj3(EffWorldNode *owner) {
-    EffWorldNode *object = dds3AppendWorldObjectNode(3);
+    EffWorldNode *object = dds3AppendWorldObjectNode(EFF_WORLD_KIND_SLOT_RING);
     Dds3SlotResource *resource = object->data;
     u32 sequence = dds3AdvanceWorldCounter();
     s32 slotIndex;

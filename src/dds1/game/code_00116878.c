@@ -19,7 +19,7 @@ typedef struct ObjWork {
 
 /* Instantiate a script object of kind 10 and fill in its parameters. */
 EffWorldNode *evtCreateScriptObject(s32 a, void *b, MotionTable *c, EffWorldNode *d, const char *e) {
-    EffWorldNode *object = dds3AppendWorldObjectNode(10);
+    EffWorldNode *object = dds3AppendWorldObjectNode(EFF_WORLD_KIND_SCRIPT_OBJECT);
     ObjWork *work = object->data;
 
     work->unk8 = c;
@@ -33,7 +33,7 @@ EffWorldNode *evtCreateScriptObject(s32 a, void *b, MotionTable *c, EffWorldNode
 
 /* Create a script object with its loaded resource already supplied. */
 EffWorldNode *evtCreateScriptObjectWithResource(s32 a, void *b, MotionTable *c, void *d, const char *e) {
-    EffWorldNode *object = dds3AppendWorldObjectNode(10);
+    EffWorldNode *object = dds3AppendWorldObjectNode(EFF_WORLD_KIND_SCRIPT_OBJECT);
     ObjWork *work = object->data;
 
     object->key = a;
