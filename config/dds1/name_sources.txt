@@ -5582,8 +5582,8 @@
 0x002A85E8	effRandomizeParticleFields	inferred	Byte-identical dds2 twin 0x002EABB0; DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described randomizeEffectParticleFields behavior. [names_conflicts.tsv]
 0x002A8670	effCreateAlphaRampPointSetRows	inferred	confidence=high; matched-C; src/dds1/game/code_0029C530.c:3898:func_002A8670; Allocates a chip-backed point-set row table and fills each five-color slot with symmetric, piecewise alpha ramps.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002A8A20	effFreeIndexedEntries	inferred	Calls func_002AACD0 for each 0x10-byte entry in the pool and then frees the pool through func_002CFF98
-0x002A9340	effResetIndexedInstanceFrames	inferred	Iterates each configured effect instance and resets its dispatch counter. [names_reviewed5.tsv]
-0x002A95C0	effReleaseBillFrameEntries	inferred	Iterates billboard frame entries, releases each effect work and frees their header. [names_reviewed5.tsv]
+0x002A9340	effResetRadialClassResourceFrames	inferred	Resets dispatch counters for every class-resource child in the radial entry list.
+0x002A95C0	effDestroyRadialClassResourceEntries	inferred	Destroys each class-resource child and releases the radial entry-list allocation.
 0x002A9690	effUpdateRadialClassInstances	inferred	Fam_Tail
 0x002A9860	effSeedBillScaleRange	inferred	Randomizes start and end scale and seeds each billboard frame with negative random start. [names_reviewed5.tsv]
 0x002A9978	effCreateRetainedPointSetColorRows	inferred	confidence=high; matched-C; src/dds1/game/code_0029C530.c:4097:func_002A9978; Allocates and retains a row table, constructs its point sets and fills each five-color slot with symmetric, piecewise alpha ramps.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
@@ -7320,3 +7320,4 @@
 0x001FBF30	btlSetResourceBrowserPosition	inferred	Sets the browser descriptor origin used by list and preview rendering.
 0x001FBF48	btlGetResourceBrowserSelectionStatus	inferred	Returns the current selection result from the browser descriptor without modifying it.
 0x002A93A0	effCreateRadialClassResourceEntries	inferred	Creates a class-work list of child class resources with randomized radial angle spacing.
+0x002A9630	effAdvanceRadialClassResourceFrames	inferred	Advances the frame state of each class-resource child in the radial entry list.
