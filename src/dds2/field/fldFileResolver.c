@@ -3010,7 +3010,62 @@ void fldUpdateLookAtSegmentDistance(void) {
     *distance = fsqrtf(dx * dx + dy * dy + dz * dz) - 50.0f;
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012EDB0);
+extern u32 fldValueRecords;
+extern f32 func_00124A10(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
+
+/* Probe the support surface under the camera's focus and its mirrored heading. */
+void func_0012EDB0(void) {
+    FldAreaWork *cam;
+    f32 xs[4];
+    f32 ys[4];
+    f32 zs[4];
+    f32 offset[3];
+    f32 x;
+    s32 index;
+    EffWorldNode *node;
+
+    fldAreaState.unk5C = 0.0f;
+    fldAreaState.unk17C = 0.0f;
+    if (fldAreaState.overrideSupportRecordIndex != -1) {
+        index = fldAreaState.overrideSupportRecordIndex;
+    } else if (fldAreaState.unkA4 >= 0) {
+        index = fldAreaState.unkA4;
+    } else {
+        return;
+    }
+    if (fldValueRecords == 0) {
+        return;
+    }
+    node = (EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value;
+    if (node != NULL) {
+        offset[0] = node->inner->position[0];
+        offset[1] = node->inner->position[1];
+        offset[2] = node->inner->position[2];
+    } else {
+        offset[0] = 0.0f;
+        offset[1] = 0.0f;
+        offset[2] = 0.0f;
+    }
+    cam = &fldAreaState;
+    xs[0] = ((FldValueRecord *)fldValueRecords)[index].vertices[0][0] + offset[0];
+    ys[0] = ((FldValueRecord *)fldValueRecords)[index].vertices[0][1] + offset[1];
+    zs[0] = ((FldValueRecord *)fldValueRecords)[index].vertices[0][2] + offset[2];
+    xs[1] = ((FldValueRecord *)fldValueRecords)[index].vertices[1][0] + offset[0];
+    ys[1] = ((FldValueRecord *)fldValueRecords)[index].vertices[1][1] + offset[1];
+    zs[1] = ((FldValueRecord *)fldValueRecords)[index].vertices[1][2] + offset[2];
+    xs[2] = ((FldValueRecord *)fldValueRecords)[index].vertices[2][0] + offset[0];
+    ys[2] = ((FldValueRecord *)fldValueRecords)[index].vertices[2][1] + offset[1];
+    zs[2] = ((FldValueRecord *)fldValueRecords)[index].vertices[2][2] + offset[2];
+    x = cam->x - sdfSinPoly(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist;
+    cam->unk5C = cam->y - func_00124A10(x,
+        cam->z - sdfEvaluateCosineViaSinePhaseShift(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist, xs, ys, zs);
+    x = cam->x - sdfSinPoly(-cam->angle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist;
+    cam->unk17C = cam->y - func_00124A10(x,
+        cam->z - sdfEvaluateCosineViaSinePhaseShift(-cam->angle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist, xs, ys, zs);
+    if (cam->overrideSupportRecordIndex == -1) {
+        cam->unk5C = 0.0f;
+    }
+}
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012F078);
 

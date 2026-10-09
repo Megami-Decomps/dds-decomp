@@ -7011,7 +7011,6 @@ void func_002B2F20(EffActiveResource *work) {
     }
 }
 
-extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 
 extern u128 D_003DCBD0[];
 

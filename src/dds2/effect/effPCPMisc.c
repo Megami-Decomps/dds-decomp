@@ -427,7 +427,6 @@ typedef char EffPCPSprayWork_size_must_be_0x98[
     (sizeof(EffPCPSprayWork) == 0x98) ? 1 : -1];
 
 
-extern void mdlStorePrimaryVectorVU(MdlCtx *ctx);
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 
@@ -4811,8 +4810,6 @@ void effPcpCaptureNodeVectors(SdfDrawNode *node) {
 extern const f32 D_00414610[4] __attribute__((aligned(16)));
 extern void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z);
 extern void effMiscQuatMultiplyVU(void);
-extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *ctx);
-extern void mdlStoreTertiaryVectorVU(MdlCtx *ctx);
 extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *model);
 extern void func_003320E8(struct SdfPoolNode **, SdfModel *);
 
