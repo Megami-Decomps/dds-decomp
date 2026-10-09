@@ -5964,9 +5964,8 @@ typedef struct EffSpanTable {
 } EffSpanTable;
 
 typedef struct EffSpanConfig {
-    u8 pad00[0x28];
-    u32 pointSetType;
-    u8 pad2C[8];
+    SdfColorTrack pointColorTrack;
+    SdfAlphaTrack pointAlphaTrack;
     u32 progress;
     u8 drawPoints;
     u8 pad39[3];
@@ -5974,9 +5973,10 @@ typedef struct EffSpanConfig {
     u32 edgeColor;
     u8 pad44[4];
     f32 drawScale;
-    u8 pad4C[0x2C];
-    u32 referenceType;
-    u8 pad7C[0x0C];
+    u8 pad4C[4];
+    SdfColorTrack referenceColorTrack;
+    SdfAlphaTrack referenceAlphaTrack;
+    u8 pad84[4];
     u8 drawReferences;
     u8 pad89[0x17];
     f32 firstRand;
@@ -6064,7 +6064,7 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
     table->count = count;
     for (i = 0, record = table->records; i < count; i++, record++) {
         record->pointSet = effCreatePointSet3(total);
-        record->pointSet->type = config->pointSetType;
+        record->pointSet->type = (u32)config->pointAlphaTrack.surfaceIndex;
         record->pointSet->flag = config->pointSetFlag;
         if (config->drawPoints) {
             triplets = record->pointSet->rows / 3;
@@ -6082,7 +6082,7 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
         if (config->drawReferences) {
             tracks = (EffTrackSet *)effCreateTrackSetWithSharedReferences(spans, 0, 0);
             record->references = tracks;
-            tracks->type = config->referenceType;
+            tracks->type = (u32)config->referenceAlphaTrack.surfaceIndex;
             tracks->flag = config->pointSetFlag;
         } else {
             record->references = 0;
