@@ -681,8 +681,8 @@ void func_00339188(u32 workAddress) {
                   (u8 *)work->asset + 0x80);
     sdfVuBlendNodeXY(work->blend);
     asset = work->asset;
-    mode = asset->mode;
-    paramC = asset->unk0C;
+    mode = asset->secondaryMode;
+    paramC = asset->secondaryColor;
     param8 = asset->unk08;
     switch (mode) {
         case 0:
