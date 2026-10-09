@@ -1222,9 +1222,6 @@ void btlCopyPaletteLowByteToAlpha(s32 *colors) {
 }
 
 extern SdfTex *kwlnHeldTextureReference;
-extern void sdfQueueTexturedQuad(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
-                                 s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
-
 void func_00211A60(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
     s32 halfWidth;
     s32 halfHeight;
@@ -1250,7 +1247,7 @@ void func_00211A60(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
     top = vertical[0] + 0x7900;
     right = horizontal[1] + 0x7000;
     bottom = vertical[1] + 0x7900;
-    sdfQueueTexturedQuad(list, color, primitive,
+    sdfQueueTexturedQuad((SdfListHead *)(u32)list, color, primitive,
                          left, top, 0, 0,
                          right, top, 0x2000, 0,
                          left, bottom, 0, 0xE00,
@@ -1291,7 +1288,7 @@ void func_00211B88(s32 list, s32 primitive, s32 color, f32 scale, s32 depth) {
     top = vertical[0] + 0x7900;
     right = horizontal[1] + 0x7000;
     bottom = vertical[1] + 0x7900;
-    sdfQueueTexturedQuad(list, color, primitive,
+    sdfQueueTexturedQuad((SdfListHead *)(u32)list, color, primitive,
                          left, top, 0, 0,
                          right, top, 0x2000, 0,
                          left, bottom, 0, 0xE00,
@@ -1299,10 +1296,8 @@ void func_00211B88(s32 list, s32 primitive, s32 color, f32 scale, s32 depth) {
                          depth, 0);
 }
 
-extern void sdfBuildPacketE(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
 void btlBuildOverlayQuadPacket(s32 packet, s32 first, s32 second, s32 color) {
-    sdfBuildPacketE(packet, second, first, 0x7000, 0x7900, 0x9000, 0x7900, 0x7000,
+    sdfBuildPacketE((SdfListHead *)(u32)packet, second, first, 0x7000, 0x7900, 0x9000, 0x7900, 0x7000,
                   0x8700, 0x9000, 0x8700, color, 0);
 }
 
@@ -1396,9 +1391,6 @@ void btlReleaseOwnedData(void) {
 }
 
 extern f32 D_00360F30[];
-extern void sdfQueueFlatTriangle(s32, s32, s32, s32, s32, s32,
-                                s32, s32, s32, s32, s32 (*)(s32));
-
 void func_00212680(s32 packets, s32 primitive, s32 x, s32 y, s32 depth, s32 color, f32 scale) {
     f32 widthScale = scale * 16.0f;
     f32 heightScale = scale * 8.0f;
@@ -1407,7 +1399,7 @@ void func_00212680(s32 packets, s32 primitive, s32 x, s32 y, s32 depth, s32 colo
     x += 0x7000;
     y += 0x7900;
     for (i = 0; i < 6; i++) {
-        sdfQueueFlatTriangle(packets, color, primitive, x, y,
+        sdfQueueFlatTriangle((SdfListHead *)(u32)packets, color, primitive, x, y,
             x + (s32)(D_00360F30[i * 2] * widthScale), y + (s32)(D_00360F30[i * 2 + 1] * heightScale),
             x + (s32)(D_00360F30[i * 2 + 2] * widthScale), y + (s32)(D_00360F30[i * 2 + 3] * heightScale),
             depth, NULL);

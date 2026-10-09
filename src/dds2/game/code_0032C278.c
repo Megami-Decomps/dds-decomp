@@ -1347,7 +1347,7 @@ void sdfBuildTriPacket104(s32 address, s32 color, s32 primitive, s32 x0, s32 y0,
     packet[6] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
-void sdfQueueFlatTriangle(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
+void sdfQueueFlatTriangle(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
                    s32 y1, s32 x2, s32 y2, s32 depth, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
@@ -1375,7 +1375,7 @@ void sdfBuildPacket104x4(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, 
     packet[7] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-void sdfBuildPacketE(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
+void sdfBuildPacketE(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
                    s32 y1, s32 x2, s32 y2, s32 x3, s32 y3, s32 depth, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
@@ -1501,7 +1501,7 @@ void sdfWriteTexturedQuadPacket(s32 address, s32 color, s32 primitive, s32 x0, s
     packet[11] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-void sdfQueueTexturedQuad(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
+void sdfQueueTexturedQuad(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
                    s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2,
                    s32 u2, s32 v2, s32 x3, s32 y3, s32 u3, s32 v3, s32 depth,
                    s32 (*alloc)(s32)) {
@@ -1576,7 +1576,7 @@ void sdfWriteGouraudTexturedQuadPacket(s32 address, s32 primitive, s32 x0, s32 y
     packet[14] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-void sdfQueueGouraudTexturedQuad(s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
+void sdfQueueGouraudTexturedQuad(SdfListHead *list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
                    s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
                    s32 x2, s32 y2, s32 u2, s32 v2, s32 color2, s32 x3, s32 y3,
                    s32 u3, s32 v3, s32 color3, s32 depth, s32 (*alloc)(s32)) {

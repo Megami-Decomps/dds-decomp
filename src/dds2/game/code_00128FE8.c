@@ -1463,13 +1463,6 @@ void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 v
     descriptor->append((SdfListHead *)descriptor, command);
 }
 
-extern void sdfQueueGouraudTexturedQuad(
-    s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
-    s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
-    s32 x2, s32 y2, s32 u2, s32 v2, s32 color2,
-    s32 x3, s32 y3, s32 u3, s32 v3, s32 color3,
-    s32 depth, s32 (*allocate)(s32));
-
 void func_0012B690(s32 x, s32 y, s32 width, s32 height,
                    s32 u, s32 v, s32 textureWidth, s32 textureHeight,
                    u32 color0, u32 color1, u32 color2, u32 color3, SdfTex *texture) {
@@ -1489,7 +1482,7 @@ void func_0012B690(s32 x, s32 y, s32 width, s32 height,
     vTop = (v << 4);
     uRight = uLeft + (textureWidth << 4);
     vBottom = vTop + (textureHeight << 4);
-    sdfQueueGouraudTexturedQuad((s32)list, 0x40,
+    sdfQueueGouraudTexturedQuad(list, 0x40,
         left, top, uLeft, vTop, color0,
         right, top, uRight, vTop, color1,
         left, bottom, uLeft, vBottom, color3,
