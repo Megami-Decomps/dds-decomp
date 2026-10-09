@@ -150,9 +150,6 @@ void sdfDestroyObjectList(SdfModel *owner);
 
 
 
-extern void sdfBuildQuadPacket(s32, s32, s32, s32, s32, s32, s32, s32);
-
-
 extern void sdfBuildPacket104x4(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void sdfBuildPacket10C(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -1653,32 +1650,31 @@ void sdfAppendFillRectanglePacket(SdfListHead *list, s32 color, s32 primitive, s
 }
 
 /* Close the rectangle by repeating its first GS XYZ vertex. */
-void sdfBuildQuadPacket(s32 address, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth) {
-    u64 *packet = (u64 *)address;
+void sdfBuildQuadPacket(SdfGsClosedRectanglePayload *packet, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth) {
     u64 depthHigh = (u64)depth << 32;
 
-    packet[0] = 0x8400000000008001ULL;
-    packet[1] = 0xFFFFFFFFF5555510ULL;
-    packet[2] = (u32)(primitive | 0x102);
-    packet[3] = (u32)color | ((u64)0xFE00 << 46);
-    packet[4] = (u32)((left & 0xFFFF) | (top << 16)) | depthHigh;
-    packet[5] = (u32)((right & 0xFFFF) | (top << 16)) | depthHigh;
-    packet[6] = (u32)((right & 0xFFFF) | (bottom << 16)) | depthHigh;
-    packet[7] = (u32)((left & 0xFFFF) | (bottom << 16)) | depthHigh;
-    packet[8] = (u32)((left & 0xFFFF) | (top << 16)) | depthHigh;
+    packet->gifTag = 0x8400000000008001ULL;
+    packet->gifRegisterList = 0xFFFFFFFFF5555510ULL;
+    packet->primitive = (u32)(primitive | 0x102);
+    packet->rgbaq = (u32)color | ((u64)0xFE00 << 46);
+    packet->xyz2[0] = (u32)((left & 0xFFFF) | (top << 16)) | depthHigh;
+    packet->xyz2[1] = (u32)((right & 0xFFFF) | (top << 16)) | depthHigh;
+    packet->xyz2[2] = (u32)((right & 0xFFFF) | (bottom << 16)) | depthHigh;
+    packet->xyz2[3] = (u32)((left & 0xFFFF) | (bottom << 16)) | depthHigh;
+    packet->xyz2[4] = (u32)((left & 0xFFFF) | (top << 16)) | depthHigh;
 }
 
 void sdfAppendClosedRectanglePacket(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth, s32 (*alloc)(s32)) {
-    s32 buffer;
+    SdfGsClosedRectanglePacket *packet;
 
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    buffer = alloc(0x60);
-    *(u64 *)buffer = 0x20000005ULL;
-    *(u64 *)(buffer + 8) = 0x5000000510000000ULL;
-    sdfBuildQuadPacket(buffer + 0x10, color, primitive, left, top, right, bottom, depth);
-    sdfAppendPacket(list, buffer);
+    packet = (SdfGsClosedRectanglePacket *)alloc(0x60);
+    packet->dmaTag = 0x20000005ULL;
+    packet->vifCommands = 0x5000000510000000ULL;
+    sdfBuildQuadPacket(&packet->drawing, color, primitive, left, top, right, bottom, depth);
+    sdfAppendPacket(list, (s32)packet);
 }
 
 extern SdfPendingRequest sdfObjectListReleaseQueue;
