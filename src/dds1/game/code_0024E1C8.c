@@ -746,8 +746,6 @@ u32 *mnuAllocateEmptyResourceListState(void) {
     return taskWords;
 }
 
-extern void mnuReleaseMenuVisualWorkResources(s32);
-
 typedef struct MenuCleanupNode {
     u8 pad00[0x58];
     struct MenuCleanupNode *next;
@@ -766,7 +764,7 @@ typedef struct MenuCleanupOwner {
 void mnuReleaseResourceTaskData(s32 unused, s32 *taskData) {
     MenuCleanupOwner *listOwner = (MenuCleanupOwner *)taskData[3];
     MenuCleanupNode *nodeCursor = listOwner->first;
-    u8 *sceneMetadata = (u8 *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
+    MenuSceneMetadata *sceneMetadata = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
     while (nodeCursor != NULL) {
         sdfReleaseChipBlock(nodeCursor->resource);
@@ -774,7 +772,7 @@ void mnuReleaseResourceTaskData(s32 unused, s32 *taskData) {
     }
     sdfReleaseChipBlock(listOwner->resource);
     mnuDestroyListState((struct MenuList *)listOwner);
-    mnuReleaseMenuVisualWorkResources(*(s32 *)(sceneMetadata + 0x24));
+    mnuReleaseMenuVisualWorkResources(sceneMetadata->attachedEffect);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(taskData[0]));
 }
 
