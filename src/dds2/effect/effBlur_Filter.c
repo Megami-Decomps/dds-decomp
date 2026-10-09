@@ -7,7 +7,7 @@
 
 extern u32 effMiscRand(void *);
 extern f32 effMiscRandUnitFloat(void *);
-extern u8 D_003AA868[];
+extern u8 effDefaultRandomState[];
 
 
 
@@ -72,7 +72,7 @@ void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *
     s32 halfSize;
     s32 centerX;
     s32 centerY;
-    slot->delay = effMiscRand(D_003AA868) % (work->params.delaySpread + 1);
+    slot->delay = effMiscRand(effDefaultRandomState) % (work->params.delaySpread + 1);
     slot->angle = -3.14159265f;
     quad->angle = work->params.uvDisplacementAngleDegrees;
     quad->color = work->params.color;
@@ -80,10 +80,10 @@ void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *
     spread = work->params.positionSpread;
     halfSize = work->params.size;
     quad->x = work->params.x +
-        (s32)(spread * ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f));
+        (s32)(spread * ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f));
     halfSize >>= 1;
     quad->y = work->params.y +
-        (s32)(spread * ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f));
+        (s32)(spread * ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f));
     centerX = quad->x + 256;
     quad->left = centerX - halfSize;
     quad->right = centerX + halfSize;

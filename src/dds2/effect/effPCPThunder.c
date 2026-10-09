@@ -18,7 +18,7 @@ extern void *effParamTableGetBlock(void *data, s32 index);
 
 extern u32 effMiscRand(void *state);
 extern f32 effMiscRandUnitFloat(void *state);
-extern u8 D_003AA868[];
+extern u8 effDefaultRandomState[];
 
 /* Keep literal types and arithmetic associations identical to the native code. */
 #define EFF_THUNDER_PARAMETER_BLOCK 0
@@ -119,29 +119,29 @@ void effThunderCellRestart(EffThunderVectorWork *work, s32 index) {
     EffThunderVectorCell *cell = work->cells + index;
     f32 scratchVector[EFF_THUNDER_VECTOR_COMPONENTS];
 
-    cell->delayFrames = effMiscRand(D_003AA868) % work->head.vector.startDelayRange;
-    cell->activeFrames = effMiscRand(D_003AA868) % work->head.vector.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
-    scratchVector[0] = (effMiscRandUnitFloat(D_003AA868) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
+    cell->delayFrames = effMiscRand(effDefaultRandomState) % work->head.vector.startDelayRange;
+    cell->activeFrames = effMiscRand(effDefaultRandomState) % work->head.vector.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    scratchVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
     scratchVector[1] = 0;
-    scratchVector[2] = (effMiscRandUnitFloat(D_003AA868) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
+    scratchVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
     VU0_LOAD_VF(vf10, scratchVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, scratchVector);
-    scratchVector[1] = work->head.vector.heightScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(D_003AA868) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN);
+    scratchVector[1] = work->head.vector.heightScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN);
     cell->placementVector[0] = scratchVector[0];
     cell->placementVector[1] = scratchVector[1];
     cell->placementVector[2] = scratchVector[2];
-    scratchVector[0] = (effMiscRandUnitFloat(D_003AA868) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
+    scratchVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
     scratchVector[1] = 1.0f;
-    scratchVector[2] = (effMiscRandUnitFloat(D_003AA868) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
+    scratchVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
     VU0_LOAD_VF(vf10, scratchVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, scratchVector);
     cell->rotationAxis[0] = scratchVector[0];
     cell->rotationAxis[1] = scratchVector[1];
     cell->rotationAxis[2] = scratchVector[2];
-    cell->rotationScale = work->head.vector.rotationScale * ((effMiscRandUnitFloat(D_003AA868) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_ROTATION_JITTER + 1.0f);
-    cell->radius = work->head.vector.radiusScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(D_003AA868) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_RADIUS_JITTER + 1.0f);
+    cell->rotationScale = work->head.vector.rotationScale * ((effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_ROTATION_JITTER + 1.0f);
+    cell->radius = work->head.vector.radiusScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_RADIUS_JITTER + 1.0f);
     cell->color = EFF_THUNDER_NEUTRAL_COLOR;
 }
 
@@ -178,7 +178,7 @@ void effThunderBuildVectorHistory(EffThunderVectorWork *work, s32 index) {
     cell->vertexCount = system->vertexWordCount;
     source = &work->cells[index];
     vertices = cell->history;
-    widthScale = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 0.2f + 1.0f;
+    widthScale = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 0.2f + 1.0f;
     VEC3_SPLAT(width, work->head.vector.bandWidth * widthScale);
     VEC3_SPLAT(outerWidth, width[0] + work->head.vector.edgeWidth * widthScale);
     originalAxis[0] = source->rotationAxis[0];
@@ -202,15 +202,15 @@ void effThunderBuildVectorHistory(EffThunderVectorWork *work, s32 index) {
         position[1] = origin[1] + placement[1] * radius;
         position[2] = origin[2] + placement[2] * radius;
         PCP_COPY_VECTOR(axis, originalAxis);
-        rotation[0] = effMiscRandUnitFloat(D_003AA868) * (75.0f * (EFF_THUNDER_HALF_TURN / 180.0f));
-        rotation[1] = effMiscRandUnitFloat(D_003AA868) * (75.0f * (EFF_THUNDER_HALF_TURN / 180.0f));
-        rotation[2] = effMiscRandUnitFloat(D_003AA868) * (75.0f * (EFF_THUNDER_HALF_TURN / 180.0f));
+        rotation[0] = effMiscRandUnitFloat(effDefaultRandomState) * (75.0f * (EFF_THUNDER_HALF_TURN / 180.0f));
+        rotation[1] = effMiscRandUnitFloat(effDefaultRandomState) * (75.0f * (EFF_THUNDER_HALF_TURN / 180.0f));
+        rotation[2] = effMiscRandUnitFloat(effDefaultRandomState) * (75.0f * (EFF_THUNDER_HALF_TURN / 180.0f));
         vu0RotMatrixXYZFromVec3((const struct RwV3d *)rotation);
         VU0_LOAD_VF(vf10, axis);
         VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
         VU0_STORE_VF_UNCLOBBERED(vf10, axis);
         sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis,
-            ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 0.7f) * rotationScale + rotationScale);
+            ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 0.7f) * rotationScale + rotationScale);
         VU0_LOAD_VF(vf10, placement);
         VU0_MOVE_VF_EXTENDED(vf11, vf10);
         VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
@@ -262,7 +262,7 @@ void effThunderRotateVectorPlacementAndHistory(EffThunderVectorWork *work, s32 i
     f32 sample;
     f32 angle;
 
-    sample = effMiscRandUnitFloat(D_003AA868);
+    sample = effMiscRandUnitFloat(effDefaultRandomState);
     angle = source->rotationScale * sample * 3.0f;
     direction[0] = source->placementVector[0];
     direction[1] = 0.0f;
@@ -419,29 +419,29 @@ void effThunderRestartIndexedCell(EffThunderVectorWork *work, s32 index) {
     EffThunderVectorCell *cell = work->cells + index;
     f32 scratchVector[EFF_THUNDER_VECTOR_COMPONENTS];
 
-    cell->delayFrames = effMiscRand(D_003AA868) % work->head.vector.startDelayRange;
-    cell->activeFrames = effMiscRand(D_003AA868) % work->head.vector.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
-    scratchVector[0] = (effMiscRandUnitFloat(D_003AA868) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
+    cell->delayFrames = effMiscRand(effDefaultRandomState) % work->head.vector.startDelayRange;
+    cell->activeFrames = effMiscRand(effDefaultRandomState) % work->head.vector.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    scratchVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
     scratchVector[1] = 0;
-    scratchVector[2] = (effMiscRandUnitFloat(D_003AA868) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
+    scratchVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
     VU0_LOAD_VF(vf10, scratchVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, scratchVector);
-    scratchVector[1] = work->head.vector.heightScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(D_003AA868) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN);
+    scratchVector[1] = work->head.vector.heightScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN);
     cell->placementVector[0] = scratchVector[0];
     cell->placementVector[1] = scratchVector[1];
     cell->placementVector[2] = scratchVector[2];
-    scratchVector[0] = (effMiscRandUnitFloat(D_003AA868) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
+    scratchVector[0] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
     scratchVector[1] = 1.0f;
-    scratchVector[2] = (effMiscRandUnitFloat(D_003AA868) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
+    scratchVector[2] = (effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
     VU0_LOAD_VF(vf10, scratchVector);
     VU0_NORMALIZE_VF10();
     VU0_STORE_VF(vf10, scratchVector);
     cell->rotationAxis[0] = scratchVector[0];
     cell->rotationAxis[1] = scratchVector[1];
     cell->rotationAxis[2] = scratchVector[2];
-    cell->rotationScale = work->head.vector.rotationScale * ((effMiscRandUnitFloat(D_003AA868) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_ROTATION_JITTER + 1.0f);
-    cell->radius = work->head.vector.radiusScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(D_003AA868) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_RADIUS_JITTER + 1.0f);
+    cell->rotationScale = work->head.vector.rotationScale * ((effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_ROTATION_JITTER + 1.0f);
+    cell->radius = work->head.vector.radiusScale * EFF_THUNDER_HALF_SCALE * ((effMiscRandUnitFloat(effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_RADIUS_JITTER + 1.0f);
     cell->color = EFF_THUNDER_NEUTRAL_COLOR;
 }
 
@@ -472,7 +472,7 @@ void effThunderBuildIndexedVectorHistory(EffThunderVectorWork *work, s32 index) 
     cell->vertexCount = system->vertexWordCount;
     source = &work->cells[index];
     vertices = cell->history;
-    widthScale = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f * 0.3f + 1.0f;
+    widthScale = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f * 0.3f + 1.0f;
     VEC3_SPLAT(width, work->head.vector.bandWidth * widthScale);
     originalAxis[0] = source->rotationAxis[0];
     originalAxis[1] = source->rotationAxis[1];
@@ -494,14 +494,14 @@ void effThunderBuildIndexedVectorHistory(EffThunderVectorWork *work, s32 index) 
         position[1] = origin[1] + placement[1] * radius;
         position[2] = origin[2] + placement[2] * radius;
         PCP_COPY_VECTOR(axis, originalAxis);
-        rotation[0] = effMiscRandUnitFloat(D_003AA868) * (EFF_THUNDER_HALF_TURN * 0.5f);
-        rotation[1] = effMiscRandUnitFloat(D_003AA868) * (EFF_THUNDER_HALF_TURN * 0.5f);
-        rotation[2] = effMiscRandUnitFloat(D_003AA868) * (EFF_THUNDER_HALF_TURN * 0.5f);
+        rotation[0] = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_THUNDER_HALF_TURN * 0.5f);
+        rotation[1] = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_THUNDER_HALF_TURN * 0.5f);
+        rotation[2] = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_THUNDER_HALF_TURN * 0.5f);
         vu0RotMatrixXYZFromVec3((const struct RwV3d *)rotation);
         VU0_LOAD_VF(vf10, axis);
         VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
         VU0_STORE_VF_UNCLOBBERED(vf10, axis);
-        angleJitter = effMiscRandUnitFloat(D_003AA868);
+        angleJitter = effMiscRandUnitFloat(effDefaultRandomState);
         rotationScale = -source->rotationScale;
         sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)axis,
             ((angleJitter - 0.5f) * 2.0f * 0.8f) * rotationScale + rotationScale);
@@ -543,7 +543,7 @@ void effThunderRotateIndexedPlacementAndHistory(EffThunderVectorWork *work, s32 
     f32 sample;
     f32 angle;
 
-    sample = effMiscRandUnitFloat(D_003AA868);
+    sample = effMiscRandUnitFloat(effDefaultRandomState);
     angle = source->rotationScale * sample * 3.0f;
     direction[0] = source->placementVector[0];
     direction[1] = 0.0f;
@@ -681,7 +681,7 @@ EffThunderSparkWork *effThunderSparkCreate(EffThunderSparkParams *parameters) {
         parDispatchSub(work->sparks[sparkIndex].system, 2, work->head.dispatchArg, work->head.dispatchArg);
         parSetCellDrawBucket(work->sparks[sparkIndex].system, work->head.systemParam);
         effThunderSparkInit(work, sparkIndex);
-        work->sparks[sparkIndex].age = -(effMiscRand(D_003AA868) % delaySpread);
+        work->sparks[sparkIndex].age = -(effMiscRand(effDefaultRandomState) % delaySpread);
     }
     return work;
 }
@@ -718,13 +718,13 @@ void effThunderSparkInit(EffThunderSparkWork *work, s32 index) {
 
     spark->verticalOffset = 0;
     randomness = work->head.verticalSpeedRandomness;
-    spark->verticalSpeed = work->head.verticalSpeed * (effMiscRandUnitFloat(D_003AA868) * randomness + (1.0f - randomness));
-    spark->heightOffset = work->head.heightOffsetRange * effMiscRandUnitFloat(D_003AA868);
-    spark->orbitAngle = effMiscRandUnitFloat(D_003AA868) * (EFF_THUNDER_HALF_TURN * 2.0f);
+    spark->verticalSpeed = work->head.verticalSpeed * (effMiscRandUnitFloat(effDefaultRandomState) * randomness + (1.0f - randomness));
+    spark->heightOffset = work->head.heightOffsetRange * effMiscRandUnitFloat(effDefaultRandomState);
+    spark->orbitAngle = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_THUNDER_HALF_TURN * 2.0f);
     randomness = work->head.angularSpeedRandomness;
-    spark->angularSpeed = work->head.angularSpeed * (effMiscRandUnitFloat(D_003AA868) * randomness + (1.0f - randomness));
+    spark->angularSpeed = work->head.angularSpeed * (effMiscRandUnitFloat(effDefaultRandomState) * randomness + (1.0f - randomness));
     randomness = work->head.radiusRandomness;
-    spark->orbitRadius = work->head.orbitRadius * (effMiscRandUnitFloat(D_003AA868) * randomness + (1.0f - randomness));
+    spark->orbitRadius = work->head.orbitRadius * (effMiscRandUnitFloat(effDefaultRandomState) * randomness + (1.0f - randomness));
 }
 
 struct RwV3d;
@@ -786,7 +786,7 @@ void func_0016C800(EffThunderSparkWork *work, s32 index) {
     VU0_CROSS_XYZ_EXTENDED(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10_EXTENDED();
     VU0_STORE_VF_UNCLOBBERED(vf10, side);
-    phase = effMiscRandUnitFloat(D_003AA868) * (EFF_THUNDER_HALF_TURN * 2.0f);
+    phase = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_THUNDER_HALF_TURN * 2.0f);
     cycle = phase - (EFF_THUNDER_HALF_TURN * 2.0f);
     PCP_COPY_VECTOR(position, work->head.loweredPosition);
     currentWave = amplitude * sdfSinPoly(phase);
@@ -853,7 +853,7 @@ void func_0016C800(EffThunderSparkWork *work, s32 index) {
         phase += phaseStep;
         if (cycle > EFF_THUNDER_HALF_TURN) {
             cycle -= EFF_THUNDER_HALF_TURN;
-            amplitude = work->head.waveAmplitude * (1.0f - effMiscRandUnitFloat(D_003AA868) * 0.95f);
+            amplitude = work->head.waveAmplitude * (1.0f - effMiscRandUnitFloat(effDefaultRandomState) * 0.95f);
         }
         previousWave = currentWave;
         currentWave = amplitude * sdfSinPoly(phase);
@@ -868,7 +868,7 @@ void func_0016C800(EffThunderSparkWork *work, s32 index) {
         VU0_ADD_EXTENDED(vf10, vf10, vf12);
         VU0_STORE_VF_UNCLOBBERED(vf10, delta);
         sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)cameraDirection,
-            ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)));
+            ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)));
         VU0_LOAD_VF(vf10, delta);
         VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
         VU0_MOVE_VF_EXTENDED(vf12, vf10);
@@ -974,7 +974,7 @@ void func_0016CD68(EffThunderSparkWork *work) {
             parPrependCellNode(spark->system);
         }
         if (age >= duration && loop) {
-            spark->age = -(effMiscRand(D_003AA868) % delaySpread);
+            spark->age = -(effMiscRand(effDefaultRandomState) % delaySpread);
         } else {
             spark->age++;
         }
@@ -1067,8 +1067,8 @@ void effThunderApplyFragmentColorBands(EffThunderFragmentWork *work) {
 void effThunderRandomizeFrag(EffThunderFragmentWork *work, s32 index) {
     EffThunderFrag *fragment = &work->fragments[index];
 
-    fragment->delayFrames = effMiscRand(&D_003AA868) % work->head.startDelayRange;
-    fragment->activeFrames = effMiscRand(&D_003AA868) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    fragment->delayFrames = effMiscRand(&effDefaultRandomState) % work->head.startDelayRange;
+    fragment->activeFrames = effMiscRand(&effDefaultRandomState) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
     fragment->color = EFF_THUNDER_FRAGMENT_GREY;
 }
 
@@ -1131,7 +1131,7 @@ void effThunderBuildFragmentStrip(EffThunderFragmentWork *work, s32 index) {
     VU0_CROSS_XYZ_EXTENDED(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10_EXTENDED();
     VU0_STORE_VF_UNCLOBBERED(vf10, side);
-    phase = effMiscRandUnitFloat(D_003AA868) * (EFF_THUNDER_HALF_TURN * 2.0f);
+    phase = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_THUNDER_HALF_TURN * 2.0f);
     cycle = phase - (EFF_THUNDER_HALF_TURN * 2.0f);
     PCP_COPY_VECTOR(position, work->head.start);
     currentWave = amplitude * sdfSinPoly(phase);
@@ -1226,7 +1226,7 @@ void effThunderBuildFragmentStrip(EffThunderFragmentWork *work, s32 index) {
         phase += phaseStep;
         if (cycle > EFF_THUNDER_HALF_TURN) {
             cycle -= EFF_THUNDER_HALF_TURN;
-            amplitude = work->head.waveAmplitude * (1.0f - effMiscRandUnitFloat(D_003AA868) * 0.95f);
+            amplitude = work->head.waveAmplitude * (1.0f - effMiscRandUnitFloat(effDefaultRandomState) * 0.95f);
         }
         previousWave = currentWave;
         currentWave = amplitude * sdfSinPoly(phase);
@@ -1241,7 +1241,7 @@ void effThunderBuildFragmentStrip(EffThunderFragmentWork *work, s32 index) {
         VU0_ADD_EXTENDED(vf10, vf10, vf12);
         VU0_STORE_VF_UNCLOBBERED(vf10, delta);
         sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)cameraDirection,
-            ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)));
+            ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)));
         VU0_LOAD_VF(vf10, delta);
         VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
         VU0_MOVE_VF_EXTENDED(vf12, vf10);
@@ -1375,8 +1375,8 @@ void effThunderSetDualFragmentColor(EffThunderFragmentWork *work, u32 color) {
 void effThunderRandomizeFrag2(EffThunderFragmentWork *work, s32 index) {
     EffThunderFrag *fragment = &work->fragments[index];
 
-    fragment->delayFrames = effMiscRand(&D_003AA868) % work->head.startDelayRange;
-    fragment->activeFrames = effMiscRand(&D_003AA868) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    fragment->delayFrames = effMiscRand(&effDefaultRandomState) % work->head.startDelayRange;
+    fragment->activeFrames = effMiscRand(&effDefaultRandomState) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
     fragment->color = EFF_THUNDER_FRAGMENT_GREY;
 }
 
@@ -1444,7 +1444,7 @@ void effThunderBuildCoreAndEdgeFragmentStrips(EffThunderFragmentWork *work, s32 
     VU0_CROSS_XYZ_EXTENDED(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10_EXTENDED();
     VU0_STORE_VF_UNCLOBBERED(vf10, side);
-    phase = effMiscRandUnitFloat(D_003AA868) * (EFF_THUNDER_HALF_TURN * 2.0f);
+    phase = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_THUNDER_HALF_TURN * 2.0f);
     cycle = phase - (EFF_THUNDER_HALF_TURN * 2.0f);
     PCP_COPY_VECTOR(position, work->head.start);
     currentWave = amplitude * sdfSinPoly(phase);
@@ -1537,7 +1537,7 @@ void effThunderBuildCoreAndEdgeFragmentStrips(EffThunderFragmentWork *work, s32 
         phase += phaseStep;
         if (cycle > EFF_THUNDER_HALF_TURN) {
             cycle -= EFF_THUNDER_HALF_TURN;
-            amplitude = work->head.waveAmplitude * (1.0f - effMiscRandUnitFloat(D_003AA868) * 0.95f);
+            amplitude = work->head.waveAmplitude * (1.0f - effMiscRandUnitFloat(effDefaultRandomState) * 0.95f);
         }
         previousWave = currentWave;
         currentWave = amplitude * sdfSinPoly(phase);
@@ -1552,7 +1552,7 @@ void effThunderBuildCoreAndEdgeFragmentStrips(EffThunderFragmentWork *work, s32 
         VU0_ADD_EXTENDED(vf10, vf10, vf12);
         VU0_STORE_VF_UNCLOBBERED(vf10, delta);
         sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)cameraDirection,
-            ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)));
+            ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)));
         VU0_LOAD_VF(vf10, delta);
         VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
         VU0_MOVE_VF_EXTENDED(vf12, vf10);
@@ -1705,14 +1705,14 @@ void effThunderRandomizeCell(EffThunderCellWork *work, s32 index) {
     EffThunderCell *cell = work->cells + index;
     f32 centeredRandom;
 
-    centeredRandom = effMiscRandUnitFloat(&D_003AA868) - EFF_THUNDER_RANDOM_MIDPOINT;
+    centeredRandom = effMiscRandUnitFloat(&effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT;
     cell->directionX = centeredRandom + centeredRandom;
-    centeredRandom = effMiscRandUnitFloat(&D_003AA868) - EFF_THUNDER_RANDOM_MIDPOINT;
+    centeredRandom = effMiscRandUnitFloat(&effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT;
     cell->directionY = centeredRandom + centeredRandom;
-    centeredRandom = effMiscRandUnitFloat(&D_003AA868) - EFF_THUNDER_RANDOM_MIDPOINT;
+    centeredRandom = effMiscRandUnitFloat(&effDefaultRandomState) - EFF_THUNDER_RANDOM_MIDPOINT;
     cell->directionZ = centeredRandom + centeredRandom;
-    cell->delayFrames = effMiscRand(&D_003AA868) % work->head.startDelayRange;
-    cell->activeFrames = effMiscRand(&D_003AA868) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    cell->delayFrames = effMiscRand(&effDefaultRandomState) % work->head.startDelayRange;
+    cell->activeFrames = effMiscRand(&effDefaultRandomState) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
 }
 
 /* Build a kind-2 cell with three nested width bands. Each randomized step
@@ -1800,7 +1800,7 @@ void func_0016E870(EffThunderCellWork *work, s32 index) {
         VU0_SUB_EXTENDED(vf11, vf11, vf10);
         VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 5);
         vertices += 6;
-        stepLength = distance * (1.0f - effMiscRandUnitFloat(D_003AA868) * 0.9f);
+        stepLength = distance * (1.0f - effMiscRandUnitFloat(effDefaultRandomState) * 0.9f);
         VEC3_SPLAT(stepScale, stepLength);
         VU0_LOAD_VF(vf10, direction);
         VU0_LOAD_VF(vf11, stepScale);
@@ -1843,7 +1843,7 @@ void func_0016E870(EffThunderCellWork *work, s32 index) {
         VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 5);
         vertices += 6;
         sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)cameraDirection,
-            ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f) * (70.0f * (EFF_THUNDER_HALF_TURN / 180.0f)));
+            ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * (70.0f * (EFF_THUNDER_HALF_TURN / 180.0f)));
         VU0_LOAD_VF(vf10, direction);
         VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
@@ -2022,7 +2022,7 @@ void func_0016F028(EffThunderFragmentWork *work, s32 index, const u128 *seed) {
     VU0_CROSS_XYZ_EXTENDED(vf10, vf10, vf11);
     VU0_NORMALIZE_VF10_EXTENDED();
     VU0_STORE_VF_UNCLOBBERED(vf10, side);
-    phase = effMiscRandUnitFloat(D_003AA868) * (EFF_THUNDER_HALF_TURN * 2.0f);
+    phase = effMiscRandUnitFloat(effDefaultRandomState) * (EFF_THUNDER_HALF_TURN * 2.0f);
     cycle = phase - (EFF_THUNDER_HALF_TURN * 2.0f);
     PCP_COPY_VECTOR(position, seed + 3);
     currentWave = amplitude * sdfSinPoly(phase);
@@ -2126,7 +2126,7 @@ void func_0016F028(EffThunderFragmentWork *work, s32 index, const u128 *seed) {
         phase += phaseStep;
         if (cycle > EFF_THUNDER_HALF_TURN) {
             cycle -= EFF_THUNDER_HALF_TURN;
-            amplitude = work->head.waveAmplitude * (1.0f - effMiscRandUnitFloat(D_003AA868) * 0.95f);
+            amplitude = work->head.waveAmplitude * (1.0f - effMiscRandUnitFloat(effDefaultRandomState) * 0.95f);
         }
         previousWave = currentWave;
         currentWave = amplitude * sdfSinPoly(phase);
@@ -2141,7 +2141,7 @@ void func_0016F028(EffThunderFragmentWork *work, s32 index, const u128 *seed) {
         VU0_ADD_EXTENDED(vf10, vf10, vf12);
         VU0_STORE_VF_UNCLOBBERED(vf10, delta);
         sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)cameraDirection,
-            ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)));
+            ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)));
         VU0_LOAD_VF(vf10, delta);
         VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
         VU0_MOVE_VF_EXTENDED(vf12, vf10);
@@ -2526,9 +2526,9 @@ void func_0016FE18(EffGroup *group) {
     VEC3_SPLAT(width, group->params.width * 0.5f);
     for (i = 0; i < count; i++, slot++) {
         if (slot->curve.parameterStep == 0.0f) {
-            yOffset = -group->params.height * effMiscRandUnitFloat(D_003AA868);
-            zOffset = group->params.spreadZ * ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f);
-            xOffset = group->params.spreadX * ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f);
+            yOffset = -group->params.height * effMiscRandUnitFloat(effDefaultRandomState);
+            zOffset = group->params.spreadZ * ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f);
+            xOffset = group->params.spreadX * ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f);
             end[0] = origin[0] + xOffset;
             end[1] = origin[1] - yOffset;
             end[2] = origin[2] + zOffset;
@@ -2540,13 +2540,13 @@ void func_0016FE18(EffGroup *group) {
             VU0_STORE_VF_UNCLOBBERED(vf10, direction);
             switch (mode) {
             case 0:
-                offset[0] = ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f);
-                offset[1] = -effMiscRandUnitFloat(D_003AA868);
+                offset[0] = ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f);
+                offset[1] = -effMiscRandUnitFloat(effDefaultRandomState);
                 offset[2] = 0.0f;
                 VU0_LOAD_VF(vf10, offset);
                 VU0_NORMALIZE_VF10_EXTENDED();
                 VU0_STORE_VF_UNCLOBBERED(vf10, offset);
-                sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)direction, ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f) * 0.5235987f);
+                sdfBuildVuRotationFromAxisAngle((const struct RwV3d *)direction, ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * 0.5235987f);
                 spread = 50.0f;
                 slot->curve.controlPoints[0].x = offset[0] * spread + start[0];
                 slot->curve.controlPoints[0].y = offset[1] * spread + start[1];
@@ -2597,8 +2597,8 @@ void func_0016FE18(EffGroup *group) {
                 if (slot->curve.controlPoints[6].y > -10.0f) slot->curve.controlPoints[6].y = -10.0f;
                 break;
             case 1:
-                offset[0] = ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f) * 0.5f;
-                offset[1] = -effMiscRandUnitFloat(D_003AA868);
+                offset[0] = ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f) * 0.5f;
+                offset[1] = -effMiscRandUnitFloat(effDefaultRandomState);
                 offset[2] = 0.0f;
                 VU0_LOAD_VF(vf10, offset);
                 VU0_NORMALIZE_VF10_EXTENDED();
@@ -2637,8 +2637,8 @@ void func_0016FE18(EffGroup *group) {
                 slot->curve.controlPoints[6].z = along * direction[2] + start[2];
                 break;
             case 2:
-                offset[0] = ((effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f);
-                offset[1] = -effMiscRandUnitFloat(D_003AA868);
+                offset[0] = ((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f);
+                offset[1] = -effMiscRandUnitFloat(effDefaultRandomState);
                 offset[2] = 0.0f;
                 VU0_LOAD_VF(vf10, offset);
                 VU0_NORMALIZE_VF10_EXTENDED();
@@ -2678,8 +2678,8 @@ void func_0016FE18(EffGroup *group) {
                 slot->curve.controlPoints[6].z = along * direction[2] + start[2];
                 break;
             case 3:
-                offset[0] = (effMiscRandUnitFloat(D_003AA868) - 0.5f) * 2.0f;
-                offset[1] = -(effMiscRandUnitFloat(D_003AA868) * 0.3f + 0.7f);
+                offset[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+                offset[1] = -(effMiscRandUnitFloat(effDefaultRandomState) * 0.3f + 0.7f);
                 offset[2] = 0.0f;
                 VU0_LOAD_VF(vf10, offset);
                 VU0_NORMALIZE_VF10_EXTENDED();
@@ -2755,7 +2755,7 @@ void func_0016FE18(EffGroup *group) {
             slot->position[0] = point[0];
             slot->position[1] = point[1];
             slot->position[2] = point[2];
-            slot->age = -(effMiscRand(D_003AA868) % delayRange);
+            slot->age = -(effMiscRand(effDefaultRandomState) % delayRange);
             effInitializeColorState((struct EffectColorState *)slot->resources);
         } else if (slot->age++ >= 0) {
             if (slot->curve.t >= 1.0f && slot->curve.pointIndex >= 3) {

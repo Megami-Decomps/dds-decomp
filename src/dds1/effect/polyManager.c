@@ -324,7 +324,7 @@ void polyInitializeBandRecordAges(PolyBand *obj) {
 void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius);
 
 
-extern u8 D_0034DF38[];
+extern u8 effDefaultRandomState[];
 extern f32 effMiscRandUnitFloat(void *state);
 
 /* Randomize record `index`: pick jittered start and end radii, derive the per-frame radius step, and lay the ring out. */
@@ -336,9 +336,9 @@ void polyRingRandomizeRecord(PolyBand *spawner, s32 index) {
 
     record += index;
     spread = spawner->initialRadiusJitter;
-    start = spawner->initialRadius * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
+    start = spawner->initialRadius * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread));
     spread = spawner->targetRadiusJitter;
-    end = spawner->targetRadius * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
+    end = spawner->targetRadius * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread));
     record->age = 0;
     if (spawner->head.duration > 0) {
         record->radiusStep = (end - start) / (f32)spawner->head.duration;
@@ -557,7 +557,7 @@ void func_0015E900(PolyArc *obj, s32 index) {
 
     record += index;
     record->age = 0;
-    record->radius = obj->radius * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
+    record->radius = obj->radius * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread));
 }
 
 
@@ -729,9 +729,9 @@ void polyRotatingRandomizeRecord(PolyRotatingBand *spawner, u32 index) {
     record += index;
     spread = spawner->initialRadiusJitter;
     record->age = 0;
-    record->radius = spawner->initialRadius * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread));
+    record->radius = spawner->initialRadius * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread));
     spread = spawner->targetRadiusJitter;
-    record->radiusStep = (spawner->targetRadius * (effMiscRandUnitFloat(D_0034DF38) * spread + (1.0f - spread)) - record->radius) / (f32)spawner->head.duration;
+    record->radiusStep = (spawner->targetRadius * (effMiscRandUnitFloat(effDefaultRandomState) * spread + (1.0f - spread)) - record->radius) / (f32)spawner->head.duration;
     record->rotationXRadians = spawner->rotationXDegrees * 0.017453292f;
     record->rotationYRadians = 6.2831852f / (f32)spawner->spawnDelayGroupSize * (f32)(index % spawner->spawnDelayGroupSize);
 }

@@ -139,12 +139,12 @@ extern void effInitWorks(void);
 
 extern void effBTLFieldColorResetFlags(void);
 
-extern u8 D_0034DF38[];
+extern u8 effDefaultRandomState[];
 
 extern char D_003BB008[];
 
 void fldCreateFieldEffectTask(void) {
-    effMiscSeedRandomFromClock(D_0034DF38);
+    effMiscSeedRandomFromClock(effDefaultRandomState);
     fileManagerResetSubsystems();
     effInitializeBillResourceOwners();
     parSysReset();

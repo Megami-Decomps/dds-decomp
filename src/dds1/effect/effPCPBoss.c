@@ -131,7 +131,7 @@ extern void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *pool, s32 index);
 extern void effSetVectorIncrementBits(EffRecordPool *pool, u32 bits);
 extern u32 effMiscRand(void *state);
 extern f32 effMiscRandUnitFloat(void *state);
-extern u8 D_0034DF38[];
+extern u8 effDefaultRandomState[];
 extern f32 D_003B9308;
 extern void effBossInitializeModelGroups(EffBossWork *work);
 extern EffBossWork *effBossCloneWorkAndParameters(EffBossWork *src);
@@ -143,13 +143,13 @@ void effBossCellRandomize(EffBossWork *work, EffBossCell *cell) {
     f32 scale = work->head.scale;
     f32 t;
 
-    cell->offsetDistance = work->head.offsetDistance * (effMiscRandUnitFloat(D_0034DF38) * blend + (1.0f - blend)) * scale;
+    cell->offsetDistance = work->head.offsetDistance * (effMiscRandUnitFloat(effDefaultRandomState) * blend + (1.0f - blend)) * scale;
     blend = work->head.extentRandomness;
-    t = effMiscRandUnitFloat(D_0034DF38) * blend + (1.0f - blend);
+    t = effMiscRandUnitFloat(effDefaultRandomState) * blend + (1.0f - blend);
     cell->baseExtent = work->head.baseExtent * t * scale;
     cell->tipExtent = work->head.tipExtent * t * scale;
-    cell->flip = effMiscRand(D_0034DF38) & 1;
-    cell->age = -(effMiscRand(D_0034DF38) % work->head.delaySpread);
+    cell->flip = effMiscRand(effDefaultRandomState) & 1;
+    cell->age = -(effMiscRand(effDefaultRandomState) % work->head.delaySpread);
 }
 
 /* Create a draw pool and delayed cells for each model map-position group. */

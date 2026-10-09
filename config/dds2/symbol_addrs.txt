@@ -6448,6 +6448,7 @@ litodp = 0x00357708; // type:func
 dptofp = 0x00357890; // type:func
 D_0037F510 = 0x0037F510;
 effSharedRandomState = 0x0037F550;
+effDefaultRandomState = 0x003AA868;   // dds1 0x0034DF38
 sdfSceneProjectionParameters = 0x0037F5E0;
 sdfProjectionMatrix = 0x0037F610;
 sdfViewEyeVector = 0x0037F680;
