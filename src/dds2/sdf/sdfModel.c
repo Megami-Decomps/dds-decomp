@@ -192,7 +192,7 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_00330E60);
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00330FE0);
 
 /* Prepend a chip-allocated command node to one buffered draw list. */
-SdfCommandNode *func_00331238(SdfDrawNode *drawNode, s32 packetSelector, s32 listIndex) {
+SdfCommandNode *sdfDrawNodePrependCommandNode(SdfDrawNode *drawNode, s32 packetSelector, s32 listIndex) {
     SdfCommandNode *node = sdfAllocSizeClassBlock(sizeof(*node));
     SdfCommandNode **head = (SdfCommandNode **)((u32)listIndex * sizeof(*drawNode->lists) + (u32)drawNode +
                                                (u32)&((SdfDrawNode *)0)->lists);
