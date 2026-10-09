@@ -362,9 +362,9 @@ MenuShortRecord *func_003225C0(MenuShortRecordList *list);
 void mnuBindMenuRegistryParameters(MenuRegistryParameters *records, u32 count);
 /* The native selector uses the low byte; the stored count is not checked. */
 MenuRegistryParameters *mnuGetMenuRegistryParametersByIndex(u32 parameterIndex);
-void func_00322510(MenuMovementRecord18 *records, u32 count);
+void mnuBindMovementRecordTable(MenuMovementRecord18 *records, u32 count);
 /* The native getter narrows the u32 tag to a low-16-bit movement index. */
-MenuMovementRecord18 *func_00322520(u32 movementRecordIndex);
+MenuMovementRecord18 *mnuGetMovementRecordByIndex(u32 movementRecordIndex);
 
 void mnuSetWorkEntryStartCallback(MenuWorkCallback callback);
 void mnuSetWorkEntryFinishOrDeactivateCallback(MenuWorkCallback callback);

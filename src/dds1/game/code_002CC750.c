@@ -8,6 +8,7 @@
 #include "pcp_vu0.h"
 #include "itf.h"
 #include "dat_state.h"
+#include "file.h"
 #include "prf_requirement.h"
 
 #define SCR_FLAG_ID_MASK 0xFFFF
@@ -152,7 +153,6 @@ extern char sdfDebugLogAppendMode[];
 extern char sdfDebugLogPairFormat[];
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
-extern void *fileResolvePrimaryBuffer(void *);
 extern s32 ptyTestProfileFlag0(DatPartyRecord *, u16);
 DatProfileRecord *ptyGetCurrentProfileRecord(DatPartyRecord *);
 s32 ptyGetCurrentProfileId(DatPartyRecord *);

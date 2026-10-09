@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "fld_scene_record.h"
 #include "dds3_path.h"
 extern const char *fldGetTaskRecordValue(u32 task);
 extern void func_0013DF60(const char *name);
@@ -63,12 +64,6 @@ extern u32 D_003BAFA8;
 extern u32 D_003BAFB0;
 
 extern u32 fldSceneReady;
-
-extern u32 fldSceneRecords;
-
-extern s32 fldSceneRecordCount;
-
-extern s32 fldSceneRecordResource;
 
 extern u32 fldFixedArchiveLoadPhase;
 
