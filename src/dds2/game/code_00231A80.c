@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_chip.h"
+#include "sdf_packed_resource.h"
 #include "sdf_pac_work.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
@@ -56,30 +57,26 @@ void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 searchId, s32 motionIndex,
 
 
 extern void btlDestroyGroupNode(BattleGroupNode *);
-extern s32 sdfRelocatePackedResourcePayload();
-
-
 extern void mdlExecuteAndFreeJob(MdlLoadRequest *);
 
 /* Retain the resource handle, relocate the loaded payload and retire the file
  * entry. Execute the group job now only when the command is not deferred. */
 void mdlFinishLoadCmd(struct FileRequest *resource, MdlLoadRequest *request) {
     request->payload.requestHandle = fileGetResourceHandle(resource);
-    request->payload.itemList = (void *)sdfRelocatePackedResourcePayload(fileGetLoadedDataAddress(resource));
+    request->payload.itemList = sdfRelocatePackedResourcePayload(
+        (SdfPackedRelocationHeader *)(u32)fileGetLoadedDataAddress(resource));
     filePollEntryCleanup(resource);
     if (request->deferred == 0) {
         mdlExecuteAndFreeJob(request);
     }
 }
 
-extern s32 sdfRelocatePackedResourceWordsFromHeader();
-
-
 /* Retain the handle and relocated motion data, retire the file entry, then run
  * the group job. This callback completes the additional file request. */
 void mdlFinishLoadJob(struct FileRequest *resource, MdlLoadRequest *request) {
     request->payload.motionResource = (struct SdfMemBlock *)(u32)fileGetResourceHandle(resource);
-    request->payload.motionData = (void *)sdfRelocatePackedResourceWordsFromHeader(fileGetLoadedDataAddress(resource));
+    request->payload.motionData = sdfRelocatePackedResourceWordsFromHeader(
+        (SdfPackedRelocationHeader *)(u32)fileGetLoadedDataAddress(resource));
     filePollEntryCleanup(resource);
     mdlExecuteAndFreeJob(request);
 }

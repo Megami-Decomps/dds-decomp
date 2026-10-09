@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_resource.h"
+#include "sdf_packed_resource.h"
 #include "sdf.h"
 #include "sdf_draw.h"
 #include "ee_mmi.h"
@@ -123,16 +124,6 @@ extern SdfStreamFrameNode *sdfStreamNodeListHead;
 extern SdfStreamFrameNode *sdfStreamNodeListTail;
 
 extern s32 sceIpuSync(s32, s32);
-
-/* The relocation command stream begins at payload + relocationOffset.
- * Its byte-coded entries in sdfRelocatePackedResourceWords add payload to selected words. */
-typedef struct SdfRelocResource {
-    u8 pad00[0x10];
-    s32 relocationOffset;
-    u32 relocationBytes;
-    u8 pad18[8];
-    u8 payload[1];
-} SdfRelocResource;
 
 typedef struct SdfResourceList {
     u8 pad00[0x10];
@@ -828,11 +819,11 @@ DevRequest *sndLoadNamedOffsetResourceList(const char *name) {
 }
 
 /* Relocate words in the payload and return its address. */
-s32 sdfRelocatePackedResourcePayload(SdfRelocResource *resource) {
-    s32 payload;
+void *sdfRelocatePackedResourcePayload(SdfPackedRelocationHeader *resource) {
+    u8 *payload = (u8 *)resource + SDF_PACKED_RESOURCE_HEADER_BYTES;
 
-    payload = (s32)resource->payload;
-    sdfRelocatePackedResourceWords(payload, payload, payload + resource->relocationOffset, resource->relocationBytes);
+    sdfRelocatePackedResourceWords((s32 *)payload, (s32)payload,
+                                   payload + resource->relocationOffset, resource->relocationByteCount);
     return payload;
 }
 
@@ -840,16 +831,16 @@ s32 sdfRelocatePackedResourcePayload(SdfRelocResource *resource) {
 SdfMemBlock *sdfLoadPackedResourceWithRelocatedPayload(const char *name, s32 *outPayload) {
     u32 info[4];
     SdfMemBlock *buffer = sdfReadNamedResource(name, info, 0);
-    *outPayload = sdfRelocatePackedResourcePayload((SdfRelocResource *)info[0]);
+    *outPayload = (s32)sdfRelocatePackedResourcePayload((SdfPackedRelocationHeader *)(u32)info[0]);
     return buffer;
 }
 
 /* This entry point uses the same payload-relative relocation table. */
-s32 sdfRelocatePackedResourceWordsFromHeader(SdfRelocResource *resource) {
-    s32 payload;
+void *sdfRelocatePackedResourceWordsFromHeader(SdfPackedRelocationHeader *resource) {
+    u8 *payload = (u8 *)resource + SDF_PACKED_RESOURCE_HEADER_BYTES;
 
-    payload = (s32)resource->payload;
-    sdfRelocatePackedResourceWords(payload, payload, payload + resource->relocationOffset, resource->relocationBytes);
+    sdfRelocatePackedResourceWords((s32 *)payload, (s32)payload,
+                                   payload + resource->relocationOffset, resource->relocationByteCount);
     return payload;
 }
 
@@ -857,7 +848,7 @@ s32 sdfRelocatePackedResourceWordsFromHeader(SdfRelocResource *resource) {
 SdfMemBlock *sdfReadPackedResourceAndRelocateHeader(const char *name, s32 *outPayload) {
     u32 info[4];
     SdfMemBlock *buffer = sdfReadNamedResource(name, info, 0);
-    *outPayload = sdfRelocatePackedResourceWordsFromHeader((SdfRelocResource *)info[0]);
+    *outPayload = (s32)sdfRelocatePackedResourceWordsFromHeader((SdfPackedRelocationHeader *)(u32)info[0]);
     return buffer;
 }
 
