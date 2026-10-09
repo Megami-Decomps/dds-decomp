@@ -87,7 +87,7 @@ typedef struct SdfDrawNode {
     u8 pad20[8];
     SdfCommandNode *lists[2];     /* 0x28: command lists for both buffered frames */
     u8 *workspace; /* Two 0x80-byte frame packets, allocated on first use. */                  /* 0x30 */
-    s32 boundsAddress;            /* 0x34: optional address of two local xyz box corners */
+    const f32 *boundsCorners;     /* 0x34: optional two xyz corners used by clipping */
     void *sourceItem;             /* 0x38: item this node was built from */
     u8 pad3C[0x14];
     f32 quaternion[4];           /* 0x50 */
@@ -110,6 +110,8 @@ typedef struct SdfSlotEntry {
     SdfSlotPair pair[2];
 } SdfSlotEntry;
 
+typedef char SdfDrawNode_boundsCorners_at_34[
+    ((u32)&((SdfDrawNode *)0)->boundsCorners == 0x34) ? 1 : -1];
 typedef char SdfSlotPair_size_must_be_8[(sizeof(SdfSlotPair) == 8) ? 1 : -1];
 typedef char SdfSlotEntry_size_must_be_0x10[(sizeof(SdfSlotEntry) == 0x10) ? 1 : -1];
 
