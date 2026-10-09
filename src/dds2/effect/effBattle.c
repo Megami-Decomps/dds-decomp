@@ -244,7 +244,7 @@ void effBattleRebuildClonedParameterBanks(void *destination, void *source) {
                     } else {
                         entry->value.work = effParamWorkCreate(entry->kind, sourceBytes + entry->value.sourceOffset);
                     }
-                    if (entry->kind == 0) {
+                    if (entry->kind == EFF_PARAM_WORK_KIND_EFFECT_NODE) {
                         entry->zeroKindCount++;
                     }
                 }

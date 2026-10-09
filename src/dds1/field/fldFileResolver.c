@@ -248,7 +248,7 @@ extern s8 D_0032C9A0[];
 extern void fldReleaseSkyResources(void);
 extern void fldCreatePlayerObject(void);
 extern u8 *fldSelectCurrentActorOnNextFloor(void);
-extern s32 evtStartSceneResourceTask(u64, u8 *);
+extern s32 evtStartSceneResourceTask(EffWorldNode *, const char *);
 extern void func_00126A30(u32, u32, s32);
 
 extern s32 D_003BAE68;
@@ -4793,9 +4793,37 @@ void fldResetZoneRecordsAndActorSlots(void) {
 extern s32 D_003BAE18;
 extern s32 D_003BAE20;
 extern s32 D_003BAE2C;
+typedef struct FldTriggerSphere {
+    u32 kind;
+    f32 radius;
+} FldTriggerSphere;
+
+typedef struct FldTriggerPlane {
+    u32 kind;
+    f32 width;
+    f32 height;
+} FldTriggerPlane;
+
+typedef struct FldTriggerBox {
+    u32 kind;
+    f32 size[3];
+} FldTriggerBox;
+
+/* Serialized kind0/1/2 records occupy8/12/16 bytes. The action constructor
+ * embeds only the real8-byte sphere prefix, followed by its task descriptor;
+ * shape pointers inspect the member selected by kind, not a padded view. */
+typedef union FldTriggerShape {
+    u32 kind;
+    FldTriggerSphere sphere;
+    FldTriggerPlane plane;
+    FldTriggerBox box;
+} FldTriggerShape;
+
 typedef struct FldTaskInfo {
     s32 unk0;
     s32 slot;
+    u32 unk08;
+    FldTriggerShape *shape;
 } FldTaskInfo;
 extern void *dds3GetWorldObjectPayload(EffWorldNode *object);
 /* Clear slot handles and destroy named tasks reached through linked display values. */
@@ -4837,10 +4865,6 @@ u32 fldPushDisplayValue(u32 value, EffWorldNode *object) {
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_00138ED0);
 
-typedef struct FldProbeKind {
-    u8 pad00[0xC];
-    u32 *kind; /* 0x0C */
-} FldProbeKind;
 
 extern void effMiscQuaternionToMatrixVU(void);
 /* vu0 routine: actor-facing probe for the world kind-0x11 position payload. */
@@ -4858,7 +4882,7 @@ s32 fldTestRoomProbeFacingAndRange(EffWorldNode *actor, EffWorldNode *entry) {
     position[3] = 1.0f;
     for (i = 0; i < fldTaskSlotCount; i++) {
         if (fldRoomRecords[i].unk108 == entry->key) {
-            kind = *((FldProbeKind *)D_003307B0[i]->data)->kind;
+            kind = ((FldTaskInfo *)D_003307B0[i]->data)->shape->kind;
             switch (kind) {
             case 0:
                 source = entry->data;
@@ -4924,7 +4948,7 @@ s32 fldTestRoomProbeFacing(EffWorldNode *actor, EffWorldNode *entry) {
     position[3] = 1.0f;
     for (i = 0; i < fldTaskSlotCount; i++) {
         if (fldRoomRecords[i].unk108 == entry->key) {
-            kind = *((FldProbeKind *)D_003307B0[i]->data)->kind;
+            kind = ((FldTaskInfo *)D_003307B0[i]->data)->shape->kind;
             switch (kind) {
             case 0:
                 PCP_COPY_VECTOR(position, entry->data);
@@ -4979,7 +5003,7 @@ s32 fldTestActorRoomProbeCondition(s32 index, EffWorldNode *actor, f32 *position
     f32 angle;
     u32 kind;
 
-    kind = *((FldProbeKind *)D_003307B0[index]->data)->kind;
+    kind = ((FldTaskInfo *)D_003307B0[index]->data)->shape->kind;
     switch (kind) {
     case 0:
         VU0_LOAD_VF(vf10, actor->inner->rotation);
@@ -5104,7 +5128,7 @@ s32 fldRestartSceneResourceTask(void) {
     D_003BAB3C = 0;
     object = fldSelectCurrentActorOnNextFloor();
     if (scrFindNamedProcessNode((char *)object) == 0) {
-        evtStartSceneResourceTask((s32)dds3GetWorldObject(), object);
+        evtStartSceneResourceTask(dds3GetWorldObject(), (const char *)object);
     }
     return 1;
 }
