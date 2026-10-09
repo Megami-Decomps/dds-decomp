@@ -5934,7 +5934,7 @@ u32 effGetScalyTextureHandle(void) {
 typedef struct EffSpanEntry {
     f32 first;
     f32 second;
-    u32 pad_08;
+    u32 referenceAge;
 } EffSpanEntry;
 
 typedef struct EffModelResource {
@@ -5964,9 +5964,8 @@ typedef struct EffSpanTable {
 } EffSpanTable;
 
 typedef struct EffSpanConfig {
-    u8 pad00[0x28];
-    u32 pointSetType;
-    u8 pad2C[8];
+    SdfColorTrack pointColorTrack;
+    SdfAlphaTrack pointAlphaTrack;
     u32 progress;
     u8 drawPoints;
     u8 pad39[3];
@@ -5974,17 +5973,25 @@ typedef struct EffSpanConfig {
     u32 edgeColor;
     u8 pad44[4];
     f32 drawScale;
-    u8 pad4C[0x2C];
-    u32 referenceType;
-    u8 pad7C[0x0C];
+    u8 pad4C[4];
+    SdfColorTrack referenceColorTrack;
+    SdfAlphaTrack referenceAlphaTrack;
+    s32 referenceLifetime;
     u8 drawReferences;
-    u8 pad89[0x17];
+    u8 allowMultipleReferenceStarts;
+    u8 pad8A[2];
+    s32 geometryStartUpdateCount;
+    u32 referenceColorA;
+    u32 referenceColorB;
+    f32 positionScaleA;
+    f32 positionScaleB;
     f32 firstRand;
     f32 secondBase;
     f32 rangeRand;
-    u32 unkAC;
+    s32 referenceRampDuration;
     u32 perSpan;
-    u8 padB4[8];
+    f32 rotationAngularVelocity;
+    f32 rotationAngularAcceleration;
     u8 pointSetFlag;
 } EffSpanConfig;
 
@@ -6013,7 +6020,7 @@ void effSeedParticleSpanParameters(EffModelResource *work) {
                     span++;
                     entry->first = effMiscRandUnitFloat(effSharedRandomState) * config->firstRand + (1.0f - config->firstRand);
                     entry->second = config->secondBase * (effMiscRandUnitFloat(effSharedRandomState) * config->rangeRand + (1.0f - config->rangeRand));
-                    entry->pad_08 = 0;
+                    entry->referenceAge = 0;
                     entry++;
                 } while (span < spans);
             }
@@ -6051,8 +6058,8 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
     }
     partialSpan = total % config->perSpan != 0;
     spans = partialSpan + total / config->perSpan;
-    if (config->unkAC == 0) {
-        config->unkAC = 1;
+    if (config->referenceRampDuration == 0) {
+        config->referenceRampDuration = 1;
     }
     allocation = sdfAllocGeneralBlock(sizeof(EffSpanTable) +
                  count * sizeof(EffSpanRecord) + count * spans * sizeof(EffSpanEntry));
@@ -6064,7 +6071,7 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
     table->count = count;
     for (i = 0, record = table->records; i < count; i++, record++) {
         record->pointSet = effCreatePointSet3(total);
-        record->pointSet->type = config->pointSetType;
+        record->pointSet->type = (u32)config->pointAlphaTrack.surfaceIndex;
         record->pointSet->flag = config->pointSetFlag;
         if (config->drawPoints) {
             triplets = record->pointSet->rows / 3;
@@ -6082,7 +6089,7 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
         if (config->drawReferences) {
             tracks = (EffTrackSet *)effCreateTrackSetWithSharedReferences(spans, 0, 0);
             record->references = tracks;
-            tracks->type = config->referenceType;
+            tracks->type = (u32)config->referenceAlphaTrack.surfaceIndex;
             tracks->flag = config->pointSetFlag;
         } else {
             record->references = 0;
@@ -6106,9 +6113,9 @@ void effReleaseParticleList(EffSpanTable *list) {
     sdfReleaseResourceAllocation(list->allocation);
 }
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B1560);
+INCLUDE_ASM(const s32, "game/code_0029C530", effUpdateParticleSpanGeometry);
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002B1D68);
+INCLUDE_ASM(const s32, "game/code_0029C530", effDrawParticleSpanPointsAndReferences);
 
 
 EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary, u32 param) {
