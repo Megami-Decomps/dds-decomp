@@ -2757,7 +2757,23 @@ void func_0021A778(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00214948", btlReturnUnitToGroup);
+void btlReturnUnitToGroup(ActionStateLink *task) {
+    BtlUnit *unit;
+
+    if (task->pendingFlags & 8) {
+        unit = task->unit;
+        if (unit->partyRecord.status & 0x4000) {
+            return;
+        }
+        unit->flags &= ~0x20;
+        unit->flags &= ~0x08000000;
+        unit->flags |= 1;
+        btlRefreshUnitMotionSelection(unit);
+        fldAppendTaskToGroup(task);
+        btlDispatchStateHandler(task, 2);
+    }
+}
+
 
 INCLUDE_ASM(const s32, "game/code_00214948", func_0021A978);
 
