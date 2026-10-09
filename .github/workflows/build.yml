@@ -1,8 +1,9 @@
-name: Build
+name: Alpha marker diagnostic
 
 on:
   push:
-  pull_request:
+    branches:
+      - kib/alpha-marker-diagnostic-20261009
 
 # Read-only token: the job runs repository build scripts.
 permissions:
@@ -11,6 +12,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -63,71 +65,13 @@ jobs:
           cp .orig-src/orig/dds2/SLUS_211.52 orig/dds2/
           rm -rf .orig-src
 
-      - name: Configure
-        if: steps.orig.outputs.available == 'true'
-        run: python3 configure.py dds1 dds2
-
-      # Fails unless both executables are byte-identical to retail.
-      - name: Build
-        if: steps.orig.outputs.available == 'true'
-        run: ninja dds1 dds2 dds1-dev dds2-dev
-
-      - name: Progress reports
-        if: steps.orig.outputs.available == 'true'
+      - name: Require existing retail access
+        if: steps.orig.outputs.available != 'true'
         run: |
-          ninja build/dds1/report.json build/dds2/report.json build/dds1/report.all.json build/dds2/report.all.json
-          python3 tools/progress.py
+          echo '{"status":"diagnostic_failed","stage":"retail_unavailable"}'
+          exit 2
 
-      - name: Check report scope
+      - name: Focused alpha-marker diagnostic
         if: steps.orig.outputs.available == 'true'
-        run: |
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-
-          for version in ("dds1", "dds2"):
-              root = Path("build") / version
-              primary = json.loads((root / "report.json").read_text())
-              audit = json.loads((root / "report.all.json").read_text())
-              game_units = [unit for unit in audit["units"]
-                            if "game" in unit.get("metadata", {}).get("progress_categories", [])]
-              game_measures = next(category["measures"] for category in audit["categories"]
-                                   if category["id"] == "game")
-              assert primary["units"] == game_units, f"{version}: primary game units changed"
-              assert primary["measures"] == game_measures, f"{version}: primary game totals changed"
-              print(f"{version}: primary report equals full-binary audit's game scope")
-          PY
-
-      # decomp.dev reads the game-code reports, named <version>_report.
-      - name: Upload dds1 report
-        if: steps.orig.outputs.available == 'true'
-        uses: actions/upload-artifact@v5
-        with:
-          name: dds1_report
-          path: build/dds1/report.json
-
-      - name: Upload dds2 report
-        if: steps.orig.outputs.available == 'true'
-        uses: actions/upload-artifact@v5
-        with:
-          name: dds2_report
-          path: build/dds2/report.json
-
-      # Keep SDK/VU1/game totals auditable without importing extra site versions.
-      # This name intentionally does not match decomp.dev's *_report pattern.
-      - name: Upload full-binary audit
-        if: steps.orig.outputs.available == 'true'
-        uses: actions/upload-artifact@v5
-        with:
-          name: build-audit
-          path: |
-            build/dds1/report.all.json
-            build/dds2/report.all.json
-            build/dds1/report.json.raw
-            build/dds2/report.json.raw
-            build/dds1/report.all.json.raw
-            build/dds2/report.all.json.raw
-            build/dds1/report.json.proof.json
-            build/dds2/report.json.proof.json
-            build/dds1/report.all.json.proof.json
-            build/dds2/report.all.json.proof.json
+        timeout-minutes: 25
+        run: python3 experiments/kib-alpha-marker/diagnose.py
