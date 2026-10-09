@@ -6180,6 +6180,7 @@
 0x00333340	sdfEnsurePrimaryTextSubParam	inferred	Allocates the asset primary scalar subparameter at +0x38 only if it is absent.
 0x00333378	sdfSetPrimaryTextScalars	inferred	Stores five scalar values in the primary text subparameter and marks it dirty. [names_reviewed8.tsv]
 0x003333F8	sdfCopyPrimaryTextScalars	inferred	Copies five input scalars into the primary text subparameter. [names_reviewed8.tsv]
+0x00333490	sdfSetAssetSecondaryTextureAddress	inferred	Stores a texture-address word in the secondary texture field and marks secondary state dirty.
 0x003334A8	sdfEnsureSecondaryTextSubParam	inferred	Allocates the asset secondary scalar subparameter at +0x3C only if it is absent.
 0x003334E0	sdfSetSecondaryTextScalars	inferred	Stores five scalars in the secondary text subparameter and marks it dirty. [names_reviewed8.tsv]
 0x00333560	sdfCopySecondaryTextScalars	inferred	Copies five input scalars into the secondary text subparameter. [names_reviewed8.tsv]

@@ -6461,6 +6461,7 @@
 0x002DA450	sdfSubParamCreate	inferred	allocates and inits 0x18 sub-param block with defaults
 0x002DA4C8	sdfSetPrimaryTextScalars	inferred	Stores five scalar values in the primary text subparameter and marks it dirty. [names_reviewed8.tsv]
 0x002DA548	sdfCopyPrimaryTextScalars	inferred	Copies five input scalars into the primary text subparameter. [names_reviewed8.tsv]
+0x002DA5E0	sdfSetAssetSecondaryTextureAddress	inferred	Stores a texture-address word in the secondary texture field and marks secondary state dirty.
 0x002DA630	sdfSetSecondaryTextScalars	inferred	Stores five scalars in the secondary text subparameter and marks it dirty. [names_reviewed8.tsv]
 0x002DA6B0	sdfCopySecondaryTextScalars	inferred	Copies five input scalars into the secondary text subparameter. [names_reviewed8.tsv]
 0x002DA718	sdfSetTextScalarPair	inferred	Stores the paired floats and marks their dirty flag. [names_reviewed8.tsv]
