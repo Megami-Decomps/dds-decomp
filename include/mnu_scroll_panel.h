@@ -7,7 +7,7 @@ struct EffMappedResource;
 
 #ifndef VERSION_DDS2
 typedef struct MenuSpriteRef {
-    s32 sprite;
+    struct EffectSlotSet *sprite;
     s32 effect;
 } MenuSpriteRef;
 #endif
@@ -36,7 +36,8 @@ typedef char MenuScrollPanel_dds2_handles_check[
 MenuScrollPanel *mnuCreateScrollPanel(struct EffectSlotSet *owner);
 void mnuDestroyScrollPanel(MenuScrollPanel *menu);
 void mnuReleaseScrollPanelAnimations(MenuScrollPanel *menu);
-void mnuConfigurePanelResource(MenuScrollPanel *menu, u32 model, u32 value,
+void mnuConfigurePanelResource(MenuScrollPanel *menu,
+                               struct EffectSlotSet *model, u32 value,
                                u32 color);
 #else
     u32 selection; /* 0x04 */
@@ -61,7 +62,8 @@ void mnuDestroyScrollPanel(MenuScrollPanel *panel);
 void mnuStoreScrollPanelSelectionAndGridPosition(MenuScrollPanel *panel,
                                                   u32 unused0, u32 unused1,
                                                   u32 selection);
-void mnuActivatePanelAndConfigureGridResources(MenuScrollPanel *menu, s32 x,
+void mnuActivatePanelAndConfigureGridResources(MenuScrollPanel *menu,
+                                               struct EffectSlotSet *sprite,
                                                s32 y, s32 color);
 #endif
 

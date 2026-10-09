@@ -278,7 +278,7 @@ s32 mnuUpdateSkillListInput(KwlnTask *callback) {
             mnuSetPopupEntryFlagged(popup, D_0037CC20);
             mnuActivatePanelAndConfigureGridResources(
                 (MenuScrollPanel *)*(u32 *)(context + 0x138),
-                *(s32 *)(context + 0x6C), 0, 1);
+                (struct EffectSlotSet *)(u32)*(s32 *)(context + 0x6C), 0, 1);
         }
         return 0;
     }

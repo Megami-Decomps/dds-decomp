@@ -814,7 +814,7 @@ s32 mnuInitializePartySelectionState(KwlnTask *task) {
     }
 
     mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->panelHandle,
-                              context->panelModel, 0, 0);
+                              (struct EffectSlotSet *)(u32)context->panelModel, 0, 0);
     mnuBeginWindowFadeTransition(menuWork->primaryWindow, &context->transition);
     menuWork->fadeA = MNU_FULL_FADE;
     menuWork->fadeB = MNU_FULL_FADE;
@@ -837,7 +837,7 @@ void mnuPreparePartyPanelTransition(s32 menu) {
     mnuRestorePartyEntriesAndRefresh();
     mnuSetPopupEntryFlagged(((MenuContext *)menu)->popupState, D_003E7588);
     mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)menu)->panelHandle,
-                              ((MenuContext *)menu)->displayHandle, 0, 1);
+                              (struct EffectSlotSet *)(u32)((MenuContext *)menu)->displayHandle, 0, 1);
     mnuBeginWindowFadeTransition(((MenuContext *)menu)->imageHandle, &((MenuContext *)menu)->transition);
     party->freezePanel = 1;
 }
@@ -894,7 +894,7 @@ s32 func_002B1C68(KwlnTask *callback) {
             } else {
                 mnuSetPopupEntryFlagged(popup, D_003E7588);
                 mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->panelHandle,
-                                          context->displayHandle, 0, 1);
+                                          (struct EffectSlotSet *)(u32)context->displayHandle, 0, 1);
                 mnuBeginWindowFadeTransition(context->imageHandle, &context->transition);
             }
         }
@@ -1083,7 +1083,7 @@ s32 mnuStaffPopupUpdate(KwlnTask *callback) {
         if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
             mnuSetPopupEntryFlagged(popupState, D_003E75A8);
             mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
-                                      ((MenuContext *)context)->displayHandle, 0, 1);
+                                      (struct EffectSlotSet *)(u32)((MenuContext *)context)->displayHandle, 0, 1);
             mnuClearActionFlags(0, panelWork);
         }
         mnuPlayInputSound(0, inputFlags, 0);
@@ -1258,7 +1258,7 @@ s32 mnuStaffBrowsePartyUpdate(KwlnTask *callback) {
                 menuWork->staffMode = 1;
                 func_002B2C88(context + MNU_STAFF_PARTY_PANEL_BASE, 3, menuWork->staffView, 1);
                 mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
-                                          ((MenuContext *)context)->alternateResource, 0, 0);
+                                          (struct EffectSlotSet *)(u32)((MenuContext *)context)->alternateResource, 0, 0);
             } else {
                 menuWork->staffMode = 0;
                 func_002B2C88(context + MNU_STAFF_PARTY_PANEL_BASE, 2, menuWork->staffView, 0);
@@ -1762,15 +1762,15 @@ u32 mnuCreateItemState(KwlnTask *callback) {
     switch (((MenuContext *)context)->imageHandle->list->cursor->index) {
     case 0:
         mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
-                                  ((MenuContext *)context)->labelHandle, 0, 0);
+                                  (struct EffectSlotSet *)(u32)((MenuContext *)context)->labelHandle, 0, 0);
         break;
     case 2:
         mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
-                                  ((MenuContext *)context)->labelHandle, 0x19, 0);
+                                  (struct EffectSlotSet *)(u32)((MenuContext *)context)->labelHandle, 0x19, 0);
         break;
     case 3:
         mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
-                                  ((MenuContext *)context)->labelHandle, 0xa, 0);
+                                  (struct EffectSlotSet *)(u32)((MenuContext *)context)->labelHandle, 0xa, 0);
         break;
     }
     mnuSeekListNode(0, ((MenuWindowContainer *)((MenuContext *)context)->listHandle)->list);
@@ -1835,7 +1835,7 @@ s32 func_002B4E58(KwlnTask *callback) {
             mnuSetPopupEntryFlagged(popup, D_003E7720);
         }
         mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->panelHandle,
-                                  context->displayHandle, 0, 1);
+                                  (struct EffectSlotSet *)(u32)context->displayHandle, 0, 1);
     }
 
     mnuPlayInputSound(0, inputFlags, 0);
@@ -2625,7 +2625,7 @@ s32 mnuUpdateSkillListInput(KwlnTask *callback) {
     if (buttons & 2) {
         mnuSetPopupEntryFlagged(popup, D_003E7720);
         mnuConfigurePanelResource((MenuScrollPanel *)(u32)((MenuContext *)context)->panelHandle,
-                                  ((MenuContext *)context)->displayHandle, 0, 1);
+                                  (struct EffectSlotSet *)(u32)((MenuContext *)context)->displayHandle, 0, 1);
     }
     return 0;
 }
