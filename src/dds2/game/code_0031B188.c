@@ -305,8 +305,8 @@ extern void func_0031BC10(MnuEffectRecord *record, f32 xAngle, f32 yAngle, f32 z
 
 /* Position-step vectors are copied verbatim; a missing queue aborts the claim. */
 MnuEffectRecord *mnuClaimPositionedEffectRecord(MnuEffectList *list,
-                  MnuEffectPositionStep *step, s32 delay,
-                  f32 x, f32 y, f32 z, f32 scale) {
+                  f32 x, f32 y, f32 z,
+                  MnuEffectPositionStep *step, f32 scale, s32 delay) {
     f32 position[4];
     MnuEffectRecord *record;
     s32 index = 0;
