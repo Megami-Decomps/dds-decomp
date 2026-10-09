@@ -226,7 +226,9 @@ typedef struct EvtRuntime {
     s32 voicePending;
     s32 voiceMessage;
     s32 unk24A0;
-    u8 pad24A4[0xC];
+    u8 pad24A4[4];
+    s32 voiceFrame;
+    u8 pad24AC[4];
     s32 commandStart;
     s32 optionFrameBase;
     s32 curveComponent;
@@ -245,6 +247,7 @@ typedef char EvtRuntimeGroup_size[(sizeof(EvtRuntimeGroup) == 0x84) ? 1 : -1];
 typedef char EvtRuntime_size[(sizeof(EvtRuntime) == 0x2490) ? 1 : -1];
 #else
 typedef char EvtRuntime_size[(sizeof(EvtRuntime) == 0x24BC) ? 1 : -1];
+typedef char EvtRuntime_voiceFrame_at24A8[((u32)&((EvtRuntime *)0)->voiceFrame == 0x24A8) ? 1 : -1];
 #endif
 typedef char EvtRuntime_camera_at23CC[((u32)&((EvtRuntime *)0)->cameraColorActive == 0x23CC) ? 1 : -1];
 typedef char EvtRuntime_color_at2408[((u32)&((EvtRuntime *)0)->colorSelection == 0x2408) ? 1 : -1];
