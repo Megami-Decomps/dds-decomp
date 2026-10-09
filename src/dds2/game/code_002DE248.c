@@ -11076,7 +11076,7 @@ EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
     EffMappedResource *mappedResource;
     func_0035C860(path, D_004387E8, base, name);
     allocation = sdfReadNamedResource(path, &sourceAddress, 0);
-    mappedResource = effCreateMappedResource(sourceAddress);
+    mappedResource = effCreateMappedResource((const u8 *)sourceAddress);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     return mappedResource;
 }
@@ -11089,7 +11089,7 @@ void effCompleteMappedResourceJob(struct FileRequest *job, u32 *outMappedResourc
 
     allocation = fileGetResourceHandle(job);
     sourceAddress = sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
-    mappedResource = effCreateMappedResource(sourceAddress);
+    mappedResource = effCreateMappedResource((const u8 *)sourceAddress);
     *outMappedResource = (u32)mappedResource;
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(allocation));
     filePollEntryCleanup(job);
@@ -11203,8 +11203,8 @@ INCLUDE_ASM(const s32, "game/code_002DE248", effConvertParamValue);
 
 
 /* Sum the status-storage byte requirements for the selected record category. */
-u32 effSumRecordStatuses(u8 *recordBytes) {
-    EffRecordBucket *group = &D_00400508[((EffMappedRecord *)recordBytes)->category];
+u32 effSumRecordStatuses(const EffMappedRecord *record) {
+    EffRecordBucket *group = &D_00400508[record->category];
     u32 statusBytes = 0;
     u32 recordIndex;
 
@@ -11225,7 +11225,7 @@ typedef struct EffMappedHeader {
  * The required-size calculation uses the first record, not the current row.
  * Returns the record-allocation handle, not its retained address.
  */
-struct SdfMemBlock *effLoadMappedStatusRecords(u8 *source, EffMappedHeader *headerOut) {
+struct SdfMemBlock *effLoadMappedStatusRecords(const u8 *source, EffMappedHeader *headerOut) {
     EffMappedHeader header;
     struct SdfMemBlock *allocation;
     EffMappedRecord *records;
@@ -11241,7 +11241,7 @@ struct SdfMemBlock *effLoadMappedStatusRecords(u8 *source, EffMappedHeader *head
 
         memcpy(record, source, EFF_PACKED_STATUS_HEADER_BYTES);
         source += EFF_PACKED_STATUS_HEADER_BYTES;
-        statusBytes = effSumRecordStatuses((u8 *)records);
+        statusBytes = effSumRecordStatuses(records);
         if (statusBytes < record->statusBytes) {
             statusBytes = record->statusBytes;
         }
@@ -11261,11 +11261,11 @@ struct SdfMemBlock *effLoadMappedStatusRecords(u8 *source, EffMappedHeader *head
 
 
 /* Build the live batch header from the serialized count and owned record array. */
-EffMappedResource *effCreateMappedResource(u32 sourceAddress) {
+EffMappedResource *effCreateMappedResource(const u8 *source) {
     EffMappedResource *mappedResource = (EffMappedResource *)sdfAllocSizeClassBlock(EFF_BATCH_HEADER_BYTES);
     EffMappedHeader header;
 
-    mappedResource->allocation = effLoadMappedStatusRecords((u8 *)sourceAddress, &header);
+    mappedResource->allocation = effLoadMappedStatusRecords(source, &header);
     mappedResource->records = (EffMappedRecord *)sdfResourceRetainAddress(mappedResource->allocation);
     mappedResource->count = header.count;
     return mappedResource;
@@ -11286,7 +11286,7 @@ EffMappedResource *effCreateStatusBatch(u32 category) {
     {
         EffMappedRecord *record = batch->records;
         record->category = category;
-        statusBytes = effSumRecordStatuses((u8 *)record);
+        statusBytes = effSumRecordStatuses(record);
     }
     statuses = (u8 *)sdfAllocSizeClassBlock(statusBytes);
     batch->records->status = statuses;
@@ -11347,11 +11347,11 @@ void effInitializeSlotPhase(EffTimedState *state) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_00304B18);
+INCLUDE_ASM(const s32, "game/code_002DE248", effInitializeSlotWorkFromDescription);
 
 /* Initialize the normal slot entry at the unchanged 0xA0-byte stride. */
 void effInitializeSlotWork(EffectSlotSet *owner, s32 slotIndex) {
-    func_00304B18(owner, slotIndex, &owner->workEntries[slotIndex]);
+    effInitializeSlotWorkFromDescription(owner, slotIndex, &owner->workEntries[slotIndex]);
 }
 
 /* Reset every normal work slot in source order. */
@@ -11368,7 +11368,7 @@ void effInitializeAllSlotWork(EffectSlotSet *owner) {
 void effAttachSlotWorkOwner(EffectSlotSet *owner, s32 slotIndex, BdWork *entry) {
     entry->owner = owner;
     entry->slotIndex = slotIndex;
-    func_00304B18(owner, slotIndex, entry);
+    effInitializeSlotWorkFromDescription(owner, slotIndex, entry);
 }
 
 /* Clear the complete normal slot, then restore owner/index and initialize it. */
@@ -11560,9 +11560,9 @@ u32 effDestroyResourceSlotSet(EffectSlotSet *set) {
     return 1;
 }
 
-u32 effSetSlotResourceAndFlags(EffTimedState *effect, u32 resource, u32 flags) {
+u32 effSetSlotResourceAndFlags(EffTimedState *effect, EffMappedRecord *resource, u32 flags) {
     effect->flags = flags;
-    effect->source = (u8 *)resource;
+    effect->source = resource;
     if ((flags & EFF_TIMED_STATE_INITIALIZE_PHASE_ON_BIND) != 0) {
         effInitializeSlotPhase(effect);
     }
@@ -11572,17 +11572,17 @@ u32 effSetSlotResourceAndFlags(EffTimedState *effect, u32 resource, u32 flags) {
 
 u32 effSetSlotIndexedResource(EffTimedState *target, EffMappedResource *resources, s32 index,
                               u32 flags) {
-    effSetSlotResourceAndFlags(target, (u32)&resources->records[index], flags);
+    effSetSlotResourceAndFlags(target, &resources->records[index], flags);
     return 1;
 }
 
 
-u32 effSlotTransitionClearTarget(s32 work, u32 unused) {
-    ((EffTimedState *)work)->source = NULL;
+u32 effSlotTransitionClearTarget(EffTimedState *work, u32 unused) {
+    work->source = NULL;
     return 1;
 }
 
-s32 effClampSlotPhaseAtEnd(u32 effect, u32 slot, EffTimedState *state) {
+s32 effClampSlotPhaseAtEnd(EffectSlotSet *owner, u32 slot, EffTimedState *state) {
     if (0x10000 < state->value) {
         u32 flags = state->flags;
         state->value = 0x10000;
@@ -11590,7 +11590,7 @@ s32 effClampSlotPhaseAtEnd(u32 effect, u32 slot, EffTimedState *state) {
             if (flags & EFF_TIMED_STATE_PING_PONG) {
                 state->flags = flags & ~EFF_TIMED_STATE_DIRECTION_FORWARD;
             } else {
-                effInitializeSlotWork((EffectSlotSet *)effect, slot);
+                effInitializeSlotWork(owner, slot);
             }
             return 0;
         }
@@ -11598,7 +11598,7 @@ s32 effClampSlotPhaseAtEnd(u32 effect, u32 slot, EffTimedState *state) {
     return 1;
 }
 
-s32 effClampSlotPhaseAtStart(u32 effect, u32 slot, EffTimedState *state) {
+s32 effClampSlotPhaseAtStart(EffectSlotSet *owner, u32 slot, EffTimedState *state) {
     if (state->value < 0) {
         u32 flags = state->flags;
         state->value = 0;
@@ -11606,7 +11606,7 @@ s32 effClampSlotPhaseAtStart(u32 effect, u32 slot, EffTimedState *state) {
             if (flags & EFF_TIMED_STATE_PING_PONG) {
                 state->flags = flags | EFF_TIMED_STATE_DIRECTION_FORWARD;
             } else {
-                effInitializeSlotWork((EffectSlotSet *)effect, slot);
+                effInitializeSlotWork(owner, slot);
             }
             return 0;
         }
@@ -11628,7 +11628,7 @@ EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entry
 
     for (i = 0; i < 2; i++) {
         EffTimedState *state = &states[i];
-        EffMappedRecord *source = (EffMappedRecord *)state->source;
+        EffMappedRecord *source = state->source;
 
         if (source != 0 && source->category != 0) {
             EffRecordBucket *bucket = &D_00400508[source->category];
@@ -11643,7 +11643,7 @@ EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entry
                     if (state->value != 0x10000) {
                         state->value += step;
                         idle = 0;
-                        if (effClampSlotPhaseAtEnd((u32)effect, slot, state) == 0) {
+                        if (effClampSlotPhaseAtEnd(effect, slot, state) == 0) {
                             state->delay = state->delayMax;
                             return 0;
                         }
@@ -11651,7 +11651,7 @@ EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entry
                 } else if (state->value != 0) {
                     state->value -= step;
                     idle = 0;
-                    if (effClampSlotPhaseAtStart((u32)effect, slot, state) == 0) {
+                    if (effClampSlotPhaseAtStart(effect, slot, state) == 0) {
                         state->delay = state->delayMax;
                         return 0;
                     }
@@ -11695,7 +11695,7 @@ u32 effClearSlotOverrideWork(s32 effect, s32 slot) {
 
 s32 effConfigureSlotResource(u8 *effect, u32 slot, u32 resource, u32 flags) {
     BdWork *entry = &((EffectSlotSet *)effect)->workEntries[slot];
-    effSetSlotResourceAndFlags(&entry->states[0], resource, flags);
+    effSetSlotResourceAndFlags(&entry->states[0], (EffMappedRecord *)(u32)resource, flags);
     effUpdateTimedStates((EffectSlotSet *)effect, slot, entry);
     return 1;
 }
@@ -11703,8 +11703,7 @@ s32 effConfigureSlotResource(u8 *effect, u32 slot, u32 resource, u32 flags) {
 s32 effConfigureIndexedSlotResource(EffectSlotSet *effect, u32 slot,
                                     EffMappedResource *resources, u32 index, u32 flags) {
     BdWork *entry = &effect->workEntries[slot];
-    u32 resource = (u32)&resources->records[index];
-    effSetSlotResourceAndFlags(&entry->states[0], resource, flags);
+    effSetSlotResourceAndFlags(&entry->states[0], &resources->records[index], flags);
     effUpdateTimedStates(effect, slot, entry);
     return 1;
 }
@@ -11713,8 +11712,7 @@ s32 effConfigureIndexedSlotMaterial(EffectSlotSet *effect, u32 slot,
                   EffMappedResource *resources, u32 index,
                   u32 materialFlags, u32 materialValue, u32 stateFlags) {
     BdWork *entry = &effect->workEntries[slot];
-    u32 resource = (u32)&resources->records[index];
-    effSetSlotResourceAndFlags(&entry->states[0], resource, stateFlags);
+    effSetSlotResourceAndFlags(&entry->states[0], &resources->records[index], stateFlags);
     effUpdateTimedStates(effect, slot, entry);
     entry->states[0].materialFlags = materialFlags;
     entry->states[0].materialValue = materialValue;
@@ -11734,10 +11732,11 @@ u32 effResetRecordRun(u8 *table, u32 first, u32 arg) {
     u32 index;
 
     do {
-        effSlotTransitionClearTarget((first + i) * 0xA0 + (s32)((EffectSlotSet *)table)->workEntries + 0x28, arg);
+        effSlotTransitionClearTarget((EffTimedState *)((first + i) * 0xA0 +
+                                    (s32)((EffectSlotSet *)table)->workEntries + 0x28), arg);
         i++;
         index = first + i;
-    } while (index < ((EffectSlotSet *)table)->count && (((EffectSlotSet *)table)->descriptions[index].flags & 0x20));
+    } while (index < ((EffectSlotSet *)table)->count && (((EffectSlotSet *)table)->descriptions[index].flags & EFF_SLOT_DESCRIPTION_SEQUENCE_CONTINUATION));
     return 1;
 }
 

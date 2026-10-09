@@ -7,6 +7,7 @@ struct EffectSlotSet;
 struct BdWork;
 struct SdfMemBlock;
 struct EffMappedResource;
+struct EffMappedRecord;
 struct EffTimedState;
 
 /* EffTimedState.flags bits used by phase initialization and endpoint handling. */
@@ -24,6 +25,8 @@ enum EffTimedStateFlag {
 u32 effSetSlotIndexedResource(struct EffTimedState *target,
                               struct EffMappedResource *resources, s32 item,
                               u32 flags);
+u32 effSetSlotResourceAndFlags(struct EffTimedState *target,
+                               struct EffMappedRecord *resource, u32 flags);
 
 struct EffMappedResource *effCreateStatusBatch(u32 category);
 #ifdef VERSION_DDS2
@@ -31,8 +34,8 @@ s32 effDestroyPackedBatch(struct EffMappedResource *batch);
 #else
 u32 effDestroyPackedBatch(struct EffMappedResource *batch);
 #endif
-/* Serialized source addresses and callback output slots retain their word ABI. */
-struct EffMappedResource *effCreateMappedResource(u32 sourceAddress);
+/* Serialized source bytes are borrowed; callback output slots retain their word ABI. */
+struct EffMappedResource *effCreateMappedResource(const u8 *source);
 struct EffMappedResource *effLoadMappedResource(const char *base, const char *name);
 void effRequestMappedResource(const char *base, const char *name, u32 *outMappedResource);
 
@@ -56,6 +59,8 @@ void effResetSlotWork(struct EffectSlotSet *owner, u32 slotIndex);
 void effResolveAndReleaseResource(struct EffectSlotSet *owner);
 void effResolveAndReleaseSelectedResource(struct EffectSlotSet *owner, s32 slot);
 void effInitializeSlotWork(struct EffectSlotSet *owner, s32 slotIndex);
+void effInitializeSlotWorkFromDescription(struct EffectSlotSet *owner, s32 slotIndex,
+                                          void *payload);
 #ifdef VERSION_DDS2
 void effReleaseSlotTextureReferencesAndResetWork(struct EffectSlotSet *owner, s32 preserveWork);
 #endif
