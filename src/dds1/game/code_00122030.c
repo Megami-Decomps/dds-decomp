@@ -4,6 +4,7 @@
 #include "kwln.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_model_scalars.h"
 #include "dds3_path.h"
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
@@ -983,7 +984,6 @@ extern void effObjSetInnerFloat(EffWorldNode *, f32);
 
 extern void fldResetCameraModelHandles(void);
 
-extern void sdfSetTextFloatPairOverride(void *, f32, f32);
 
 extern void dds3SetObjectFlags(void *, s32);
 

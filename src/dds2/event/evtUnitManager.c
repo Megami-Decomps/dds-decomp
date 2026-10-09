@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_model_scalars.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "dds3_path.h"
@@ -76,8 +77,6 @@ extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 extern void func_00107D08(void);
 extern void effMiscQuaternionNlerpVU(f32);
 extern s32 evtFindUnitSlotAuxCoordinates(EvtUnit *, f32 *, f32 *);
-extern void sdfSetTextFloatPairOverride(void *, f32, f32);
-extern void sdfClearTextFloatPairOverride(void *);
 
 /* Advance the model, light-colour and directional transitions for one event unit. */
 void evtAdvanceUnitVisualTransitions(EvtUnit *unit) {

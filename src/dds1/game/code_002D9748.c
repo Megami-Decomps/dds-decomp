@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_model_scalars.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
 #include "sdf.h"
@@ -23,7 +24,6 @@
 #define SDF_ASSET_PAIR_STATE_DIRTY 0xC0
 #define SDF_ASSET_ALL_STATE_DIRTY 0xFF
 #define SDF_ASSET_ENTRY_COUNT 2
-#define SDF_TEXT_PAIR_OVERRIDE_BIT 2
 #define SDF_SUBPARAM_BYTES 0x18
 #define SDF_ASSET_BYTES 0x48
 #define SDF_ASSET_DRAW_ENTRY_BYTES 0xA0
@@ -354,29 +354,29 @@ u32 sdfGetLodChunkValue(SdfModel *model) {
 
 
 /* Store the override pair and select it instead of the shared defaults. */
-void sdfSetTextFloatPairOverride(SdfTextParam *param, f32 first, f32 second) {
-    param->overrideFirst = first;
-    param->overrideSecond = second;
-    param->overrideFlags = param->overrideFlags | SDF_TEXT_PAIR_OVERRIDE_BIT;
+void sdfSetTextFloatPairOverride(SdfModel *model, f32 first, f32 second) {
+    model->scalarOverrideFirst = first;
+    model->scalarOverrideSecond = second;
+    model->flags = model->flags | SDF_MODEL_USE_SCALAR_OVERRIDES;
 }
 
 /* Clear only the pair-override selection bit. */
-void sdfClearTextFloatPairOverride(SdfTextParam *param) {
-    param->overrideFlags = param->overrideFlags & ~SDF_TEXT_PAIR_OVERRIDE_BIT;
+void sdfClearTextFloatPairOverride(SdfModel *model) {
+    model->flags = model->flags & ~SDF_MODEL_USE_SCALAR_OVERRIDES;
 }
 
 /* Return the first override value when selected, otherwise its shared default. */
-f32 sdfGetFirstTextOverrideOrDefault(SdfTextParam *param) {
-    if ((param->overrideFlags & SDF_TEXT_PAIR_OVERRIDE_BIT) != 0) {
-        return param->overrideFirst;
+f32 sdfGetFirstTextOverrideOrDefault(SdfModel *model) {
+    if ((model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) != 0) {
+        return model->scalarOverrideFirst;
     }
     return D_003BD358;
 }
 
 /* Return the second override value when selected, otherwise its shared default. */
-f32 sdfGetSecondTextOverrideOrDefault(SdfTextParam *param) {
-    if ((param->overrideFlags & SDF_TEXT_PAIR_OVERRIDE_BIT) != 0) {
-        return param->overrideSecond;
+f32 sdfGetSecondTextOverrideOrDefault(SdfModel *model) {
+    if ((model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) != 0) {
+        return model->scalarOverrideSecond;
     }
     return D_003BD35C;
 }

@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_model_scalars.h"
 #include "dds3_path.h"
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
@@ -1116,7 +1117,6 @@ extern void fldResetCameraModelHandles(void);
 
 extern void mdlFlagClear(s32);
 
-extern void sdfSetTextFloatPairOverride(void *, f32, f32);
 
 extern void fldActivatePendingSceneCommand(void);
 

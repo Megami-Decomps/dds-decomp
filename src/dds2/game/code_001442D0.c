@@ -2,6 +2,7 @@
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "sdf_model_scalars.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "sdf_dev_state.h"
@@ -32,7 +33,6 @@ extern void func_00112058(EffWorldNode *node, s32 kind, s32 resource);
 extern void effObjSetInnerFloat(EffWorldNode *node, f32 value);
 extern void effObjSetInnerSecondVec(EffWorldNode *node, u128 *vector);
 extern void effObjSetInnerThirdVec(EffWorldNode *node, u128 *vector);
-extern void sdfSetTextFloatPairOverride(void *param, f32 first, f32 second);
 extern void func_00136718(void);
 extern void func_001526B8(void);
 extern void func_00153FA0(void);
