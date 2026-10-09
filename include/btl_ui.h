@@ -189,19 +189,20 @@ typedef struct BattleActorPanelPresentation {
             u8 triangleAlpha[8];
         };
     };
-    s8 pendingSceneState;
-    s8 cursorSelection; /* +0xDD: signed selection among three option IDs. */
-    u8 pendingCursorSelection; /* +0xDE: pending scene-group index. */
-    u8 padDF;
-    s16 cursorOption; /* +0xE0 */
-    u8 padE2[2];
-    s32 cursorOffsetX; /* +0xE4 */
-    s32 cursorOffsetY; /* +0xE8 */
-    u32 cursorPhase; /* +0xEC: unsigned pulse/fade counter. */
-    u8 unkF0;
-    u8 padF1[3];
-    s8 cursorEchoCount; /* +0xF4: counts the four records beginning at +0xF8. */
-    u8 padF5[3];
+    struct {
+        s8 pendingSceneState;
+        s8 cursorSelection; /* +0xDD: signed selection among three option IDs. */
+        u8 pendingCursorSelection; /* +0xDE: pending scene-group index. */
+        u8 padDF;
+        s16 cursorOption; /* +0xE0 */
+        u8 padE2[2];
+        s32 cursorOffset[2]; /* +0xE4: x, y */
+        u32 cursorPhase; /* +0xEC: unsigned pulse/fade counter. */
+        u8 unkF0;
+        u8 padF1[3];
+        s8 cursorEchoCount; /* +0xF4: counts the four records beginning at +0xF8. */
+        u8 padF5[3];
+    };
     BattleMirroredSpriteRecord mirroredSprites[4];
     u8 pad1A8[4];
     s32 hpLevel;
@@ -233,8 +234,7 @@ typedef struct BattleActorPanelPresentation {
 } BattleActorPanelPresentation;
 
 typedef struct BattleActorPanelEntry {
-    s32 x;
-    s32 y;
+    s32 position[2]; /* x, y */
     s32 baseX;
     s32 baseY;
     BattleActorPanelPresentation presentation;
