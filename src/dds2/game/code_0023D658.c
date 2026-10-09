@@ -211,7 +211,7 @@ void evtBeginUnitVectorTransition(EvtUnit *work, s32 mode, s128 *vector, s32 unu
 
     work->motionSubmode = mode;
     work->motionState = EVT_UNIT_MOTION_STATE_SOURCE;
-    work->transitionSourceKind = 0;
+    work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_COPIED_VECTOR;
     work->linkedUnit = NULL;
     PCP_COPY_VECTOR(destination, vector);
     work->motionParameter = frames;
@@ -227,7 +227,7 @@ void evtBeginUnitTransitionTowardWorldObject(EvtUnit *work, s32 mode, s32 object
     worldUnit = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), objectId, 0x11);
     if (worldUnit != NULL) {
         evtBeginUnitVectorTransition(work, mode, (s128 *)worldUnit->data, unused, frames, valueB6, callback, unusedLast);
-        work->transitionSourceKind = 1;
+        work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE;
         work->linkedUnit = worldUnit;
     }
 }
@@ -287,7 +287,7 @@ void evtSetUnitPathFollow(EvtUnit *work, s32 objectId, s32 frames, s32 valueB6, 
         break;
     }
     work->motionState = EVT_UNIT_MOTION_STATE_SOURCE;
-    work->transitionSourceKind = 2;
+    work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE;
     work->linkedUnit = pathSource;
     dds3InterpolatePathVectorVU(path);
     VU0_STORE_VF($vf10, work->targetVector);
