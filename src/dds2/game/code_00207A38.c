@@ -115,7 +115,6 @@ extern s32 D_00436AF0;
 
 extern s32 D_00438F6C;
 
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 

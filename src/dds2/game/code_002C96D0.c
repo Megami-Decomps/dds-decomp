@@ -2667,7 +2667,6 @@ struct SdfTex;
 extern void func_001004A0(void);
 extern void func_002C7CE8(void *);
 extern struct SdfTex *sdfTexAcquireResourceTexture(void *);
-extern struct SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 extern void *sdfAllocateBlockBySizeThreshold(s32);
 extern s32 D_00437D80;
 extern void func_002CE738(void);

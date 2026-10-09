@@ -65,7 +65,6 @@ extern s32 func_002C38B0(s32);
 extern void sdfInitializeMapCounterSelection(s32, s32);
 extern s32 fldLoadLocalMapResources();
 extern void fldCreateMapRequestQueues(void);
-extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 extern void fldApplyLightSetIndex(s32);
 extern void fldInitializeCameraColorResource(void);
 extern void func_002CF420(void);

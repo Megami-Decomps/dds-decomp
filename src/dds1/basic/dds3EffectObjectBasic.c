@@ -51,7 +51,6 @@ extern const f32 D_0039F800[10];
 extern const f32 D_0039F828[20];
 extern void *sdfAllocSizeClassBlock(s32 size);
 EffectDependencyState *effObjGetReadyData(EffectObj *obj);
-struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern void *func_0014FE28(void);
 

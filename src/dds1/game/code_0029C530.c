@@ -145,7 +145,6 @@ extern u32 D_003BC984;
 
 extern u32 D_003BC994;
 
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern u8 D_0038E000[];
 

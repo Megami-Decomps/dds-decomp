@@ -54,7 +54,6 @@ extern u32 sdfSoundCommandStatus;
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *);
 
-extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 
 extern DevRequest *sndBuildResourceHandleListFromOffsets(const void *);
 

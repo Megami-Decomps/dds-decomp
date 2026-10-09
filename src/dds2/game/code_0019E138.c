@@ -114,7 +114,6 @@ extern u32 strlen(const char *str);
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *);
 
-extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 extern void sdfTexReleaseReference(SdfTex *);
 
 typedef struct TextPoolNode {

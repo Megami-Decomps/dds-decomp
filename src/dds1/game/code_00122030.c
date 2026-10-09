@@ -780,7 +780,6 @@ INCLUDE_ASM(const s32, "game/code_00122030", func_001233D0);
 
 void fldUnloadPlayerModel(void);
 
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 /* Load the coordinate/field-selected player variant only when it changes or its
  * resource is absent; the cached variant is part of native area work. */

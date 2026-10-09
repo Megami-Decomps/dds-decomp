@@ -29,6 +29,13 @@ void sdfDecrementAllocationReferenceCount(struct SdfMemBlock *allocation);
 void sdfReleaseResourceAllocation(struct SdfMemBlock *allocation);
 void sdfReleaseMemorySlot(s32 *slot);
 
+/* The optional outputs contain a data address and file size, not a descriptor.
+ * A null outAddress releases the allocation before returning its descriptor. */
+struct SdfMemBlock *sdfDevReadResourceWithExtraSpace(
+    const char *name, u32 *outAddress, u32 *outSize, s32 extraBytes);
+struct SdfMemBlock *sdfReadNamedResource(
+    const char *name, u32 *outAddress, u32 *outSize);
+
 /* Queue the two heap owners separately: the general heap stores descriptors,
  * while the chip heap stores the address of the cell to release. */
 void sdfQueueGeneralAllocationRelease(struct SdfMemBlock *allocation);

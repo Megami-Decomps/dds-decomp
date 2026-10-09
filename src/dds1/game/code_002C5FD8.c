@@ -40,7 +40,6 @@ extern s32 func_003014F0(char *, const char *, ...);
 
 extern u32 fldReleaseMapResource(s32 *);
 
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern struct SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 

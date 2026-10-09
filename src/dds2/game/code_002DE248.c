@@ -518,7 +518,6 @@ extern u32 effCurrentRenderPacket;
 
 extern u32 D_00437E6C;
 
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 
 extern u8 *effAllocateTexturedStripWork();

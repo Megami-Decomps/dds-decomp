@@ -468,7 +468,6 @@ extern char D_0041B6C8[]; /* "btl:event[%s]\n" */
 extern char D_0041B6D8[]; /* "btl:event BE load[e%03d]\n" */
 extern char D_0041B6F8[]; /* "btl:event SMG free[%X]\n" */
 extern char D_0041B710[]; /* "btl:BSE free\n" */
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void func_00101968(KwlnTask *parent, KwlnTask *child);
 extern s32 sndFindPackedTrackLoadStatus(s32);
 extern void sndReleaseMidiTrack(s32);

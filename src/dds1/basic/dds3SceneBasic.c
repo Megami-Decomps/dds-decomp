@@ -7,7 +7,6 @@
 
 struct SdfMemBlock;
 
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern s32 bfFindScriptIndexByName(void *, const char *);
 extern s32 scrCreateTaskForProcessId(s32, void *, s32);
 extern void evtReleaseSceneResource(EffWorldNode *worldNode);

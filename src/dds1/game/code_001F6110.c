@@ -46,7 +46,6 @@ extern s32 D_00360348[];
 extern s32 D_0035FFE0[];
 extern s32 D_003BB6B8;
 extern s32 D_003BD854;
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 extern void btlCmdSimpleB(s32, u16);
 extern void btlCmdSimpleA(s32, u16);
 extern void btlCmdSimpleE(s32, u16);
