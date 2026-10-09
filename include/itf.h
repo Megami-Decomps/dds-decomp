@@ -241,6 +241,9 @@ typedef struct ItfMesSlot {
     u8 unk4[0x10];
 } ItfMesSlot;
 
+void itfResetCursorPositionAndState(ItfMesBlk14 *cursor, s32 resetPosition);
+void itfMesResetCursorState(ItfMesEntryBlock *cursor, s32 resetPosition);
+
 FrFontGlyph *itfMesBuildNodeRows(u32 *items, s32 itemCount, u32 mask,
     s32 x, s32 y, s32 renderValue);
 FrFontGlyph *itfMesTrimGlyphChainToRow(FrFontGlyph *node, s32 from, s32 to);
