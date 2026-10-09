@@ -4514,9 +4514,9 @@ FileJob *fileDuplicateAndAppendJob(FileQueue *queue, FileJobPayload *source) {
     return fileAppendJob(queue, (u32)job);
 }
 
-FileJob *fileAppendJobFromEntry(FileQueue *queue, void *entry) {
+FileJob *fileAppendJobFromCommandPath(FileQueue *queue, const char *commandPath) {
     func_003003F0(D_003BC940);
-    return fileAppendJob(queue, (u32)fileJobCreateFromCommandState(entry));
+    return fileAppendJob(queue, (u32)fileJobCreateFromCommandState(commandPath));
 }
 
 FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *src) {

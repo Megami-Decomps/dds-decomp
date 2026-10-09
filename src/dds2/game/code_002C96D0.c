@@ -5029,9 +5029,9 @@ FileJob *fileDuplicateAndAppendJob(FileQueue *queue, FileJobPayload *source) {
 
 extern u8 D_00437E28[];
 
-FileJob *fileAppendJobFromEntry(FileQueue *queue, void *entry) {
+FileJob *fileAppendJobFromCommandPath(FileQueue *queue, const char *commandPath) {
     func_0035B6E0(D_00437E28);
-    return fileAppendJob(queue, (u32)fileJobCreateFromCommandState(entry));
+    return fileAppendJob(queue, (u32)fileJobCreateFromCommandState(commandPath));
 }
 
 FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *src) {

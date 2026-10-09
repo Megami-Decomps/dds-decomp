@@ -151,6 +151,7 @@ FileQueue *fileQueueCreateFromCommandState(const char *entry);
 void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath);
 void fileQueueSaveImage(FileQueue *queue, const char *filePath);
 FileJob *fileQueueGetAt(FileQueue *queue, s32 index);
+FileJob *fileAppendJobFromCommandPath(FileQueue *queue, const char *commandPath);
 FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *source);
 void fileJobCopyHeader(FileJob *destination, FileJob *source);
 void fileQueueRemoveAndDestroyJob(FileQueue *queue, FileJob *job);
