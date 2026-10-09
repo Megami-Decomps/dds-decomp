@@ -1,0 +1,214 @@
+#!/usr/bin/env python3
+"""Synthetic tests; no game, compiler binary, or private dump inputs."""
+import copy
+import hashlib
+import json
+from pathlib import Path
+import sys
+import tempfile
+import unittest
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import ee_gcc_role_lineage as lineage
+import ee_gcc_cse_role_tracer as cse
+
+SOURCE = """void target(void) {
+    /* begin */
+    consume();
+    advance();
+    /* end */
+}
+"""
+SPEC = {"schema": 1, "function": "target",
+        "roles": [{"name": "sample", "begin": "    /* begin */",
+                   "end": "    /* end */"}]}
+HEADER = ";; Function target\n"
+DUMP = HEADER + """
+(note 1 0 2 ".ci/dds2/game/unit.c" 3)
+(insn 2 1 3 (set (reg:SI 84) (const_int 1)) -1 (nil) (nil))
+(jump_insn 3 2 4 (set (pc) (if_then_else (ltu:SI (reg:SI 84) (const_int 2)) (label_ref 4) (pc))) -1 (nil) (nil))
+(code_label 4 3 0 27 "" "" [1 uses])
+"""
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def probe_fixture(root):
+    (root / "functions/target").mkdir(parents=True)
+    (root / "input.c").write_text(SOURCE)
+    (root / "candidate.o").write_bytes(b"synthetic object")
+    artifacts = []
+    for name in lineage.REQUIRED:
+        text = DUMP if name not in ("17.sched", "25.sched2") else HEADER + ";; synthetic scheduler commentary\n"
+        raw = text.encode()
+        (root / ("rtl." + name)).write_bytes(raw)
+        extracted = lineage.extract_dump_function(text, "target")
+        (root / "functions/target" / name).write_text(extracted)
+        artifacts.append({"name": "rtl." + name, "sha256": sha(raw)})
+    manifest = {"wrapper_returncode": 0, "cc1_succeeded": True, "assembled": True,
+                "compiler": {"sha256": lineage.COMPILER}, "function": "target",
+                "source": "/example/src/dds2/game/unit.c", "replacements": [],
+                "compiled_source_sha256": sha(SOURCE.encode()),
+                "object": {"path": "candidate.o", "sha256": sha(b"synthetic object")},
+                "artifacts": artifacts}
+    (root / "manifest.json").write_text(json.dumps(manifest))
+    return manifest
+
+
+class LineageTests(unittest.TestCase):
+    def test_uid_deletion_is_not_guessed_replacement(self):
+        before, _ = lineage.parse_dump(DUMP, "target")
+        after, _ = lineage.parse_dump(DUMP.replace(
+            "(insn 2 1 3 (set (reg:SI 84) (const_int 1)) -1 (nil) (nil))",
+            "(note 2 1 3 NOTE_INSN_DELETED 0)"), "target")
+        rows = lineage.role_transitions({"02.jump": before, "03.cse": after}, {2, 3}, 12)
+        self.assertEqual(1, rows[0]["change_count"])
+        self.assertEqual("deleted_or_absent", rows[0]["changes"][0]["change"])
+        self.assertIsNone(rows[0]["changes"][0]["after"])
+
+    def test_changed_branch_target_is_preserved(self):
+        before, _ = lineage.parse_dump(DUMP, "target")
+        after, _ = lineage.parse_dump(DUMP.replace("(label_ref 4)", "(label_ref 99)"), "target")
+        result = lineage.role_transitions({"02.jump": before, "03.cse": after}, {3}, 12)
+        change = result[0]["changes"][0]
+        self.assertEqual([4], change["before"]["branch_targets"])
+        self.assertEqual([99], change["after"]["branch_targets"])
+        self.assertNotEqual(change["before"]["pattern_sha256"], change["after"]["pattern_sha256"])
+
+    def test_source_anchor_and_note_coordinates(self):
+        span = lineage.role_spans(SOURCE, SPEC)[0]
+        self.assertEqual((2, 5), (span["first_line"], span["end_line_exclusive"]))
+        records, _ = lineage.parse_dump(DUMP, "target")
+        self.assertEqual(3, records[2]["source"]["line"])
+        self.assertTrue(lineage.same_source(records[2]["source"]["file"],
+                                           "/repo/src/dds2/game/unit.c"))
+        self.assertFalse(lineage.same_source(records[2]["source"]["file"],
+                                            "/repo/src/dds1/game/unit.c"))
+
+    def test_ambiguous_anchor_fails(self):
+        with self.assertRaisesRegex(ValueError, "ambiguous"):
+            lineage.role_spans(SOURCE.replace("    consume();", "    /* begin */"), SPEC)
+
+    def test_missing_anchor_fails(self):
+        with self.assertRaisesRegex(ValueError, "missing"):
+            lineage.role_spans(SOURCE.replace("/* end */", "/* finish */"), SPEC)
+
+    def test_two_gcse_inventories_select_final_chain(self):
+        twice = DUMP + "\n" + DUMP[len(HEADER):].replace("(const_int 1)", "(const_int 7)")
+        records, meta = lineage.parse_dump(twice, "target", "08.gcse")
+        self.assertEqual(2, meta["complete_inventories"])
+        self.assertEqual([7], records[2]["features"]["constants"])
+        self.assertEqual(4, meta["selected_nodes"])
+
+    def test_incomplete_final_inventory_fails(self):
+        text = DUMP + '\n(note 9 0 10 "unit.c" 8)\n(insn 10 9 11 (set (reg:SI 90) (const_int 9)))\n'
+        with self.assertRaisesRegex(ValueError, "incomplete final"):
+            lineage.parse_dump(text, "target", "08.gcse")
+
+    def test_broken_link_chain_fails(self):
+        with self.assertRaisesRegex(ValueError, "complete linked"):
+            lineage.parse_dump(DUMP.replace("(insn 2 1 3", "(insn 2 99 3"), "target")
+
+    def test_unterminated_form_fails(self):
+        with self.assertRaisesRegex(ValueError, "unterminated"):
+            lineage.parse_dump(DUMP + "\n(insn 9 0 0 (set", "target")
+
+    def test_scheduler_commentary_never_means_deletion(self):
+        original, _ = lineage.parse_dump(DUMP, "target")
+        commentary, meta = lineage.parse_dump(HEADER + ";; dependencies only\n",
+                                              "target", "17.sched")
+        self.assertEqual({}, commentary)
+        self.assertEqual("commentary_only", meta["kind"])
+        result = lineage.role_transitions(
+            {"16.regmove": original, "17.sched": commentary, "19.lreg": original}, {2, 3}, 12)
+        self.assertEqual(0, result[0]["change_count"])
+        self.assertEqual(["17.sched"], result[0]["unobserved_intervening_stages"])
+
+    def test_unexpected_empty_dump_fails(self):
+        with self.assertRaisesRegex(ValueError, "empty or incomplete"):
+            lineage.parse_dump(HEADER + ";; no RTL\n", "target", "03.cse")
+
+    def test_missing_target_fails(self):
+        with self.assertRaisesRegex(ValueError, "target missing"):
+            lineage.parse_dump(DUMP, "other")
+
+    def test_complete_synthetic_probe(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            probe_fixture(root)
+            report, watch = lineage.analyze(root, SPEC)
+            self.assertEqual([2, 3], report["roles"][0]["seed_uids"])
+            self.assertIsNone(report["roles"][0]["first_observed_candidate_transformation"])
+            self.assertEqual([], watch["uids"])
+            self.assertEqual("commentary_only", report["stages"]["17.sched"]["kind"])
+
+    def test_missing_required_dump_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            probe_fixture(root)
+            (root / "functions/target/08.gcse").unlink()
+            with self.assertRaisesRegex(ValueError, "missing required"):
+                lineage.analyze(root, SPEC)
+
+    def test_stale_extracted_dump_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            probe_fixture(root)
+            (root / "functions/target/03.cse").write_text(HEADER)
+            with self.assertRaisesRegex(ValueError, "stale or incomplete"):
+                lineage.analyze(root, SPEC)
+
+    def test_source_hash_mismatch_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            probe_fixture(root)
+            (root / "input.c").write_text(SOURCE + "\n")
+            with self.assertRaisesRegex(ValueError, "source snapshot hash"):
+                lineage.analyze(root, SPEC)
+
+    def test_no_raw_pattern_excerpt_in_report(self):
+        records, _ = lineage.parse_dump(DUMP, "target")
+        self.assertNotIn("pattern_excerpt", lineage.describe(records[2]))
+
+
+class CseTests(unittest.TestCase):
+    def test_live_and_dump_feature_identity(self):
+        pattern = '(set (reg:SI 84) (plus:SI (symbol_ref:SI ("object")) (const_int -128)))'
+        decoded = {"code": "set", "fields": [
+            {"code": "reg", "mode": "SI", "regno": 84},
+            {"code": "plus", "mode": "SI", "fields": [
+                {"code": "symbol_ref", "mode": "SI", "symbol": "object"},
+                {"code": "const_int", "value": -128}]}]}
+        self.assertEqual(lineage.features(pattern), cse.decoded_features(decoded))
+
+    def test_label_uid_does_not_follow_rtl_chain(self):
+        self.assertEqual({"codes": ["label_ref"], "expression_modes": [["label_ref", "VOID"]], "registers": [], "symbols": [],
+                          "constants": [], "targets": [14]},
+                         cse.decoded_features({"code": "label_ref", "uid": 14}))
+
+    def test_asm_string_parentheses_are_not_rtl_codes(self):
+        value = '(asm_operands ("comment (reg:SI 999) (const_int 73)") ("=r") 0 [] [])'
+        feature = lineage.features(value)
+        self.assertEqual(["asm_operands"], feature["codes"])
+        self.assertEqual([], feature["registers"])
+        self.assertEqual([], feature["constants"])
+
+    def test_extension_modes_remain_distinct(self):
+        a = lineage.features("(zero_extend:SI (mem:QI (reg:SI 95)))")
+        b = lineage.features("(zero_extend:DI (mem:QI (reg:SI 95)))")
+        self.assertNotEqual(a["expression_modes"], b["expression_modes"])
+        self.assertEqual([["zero_extend", "SI"], ["mem", "QI"], ["reg", "SI"]],
+                         a["expression_modes"])
+
+    def test_ambiguous_watch_uid_fails(self):
+        row = {"uid": 2, "roles": ["sample"], "input_features": {}}
+        watch = {"schema": 1, "function": "target", "compiler_sha256": lineage.COMPILER,
+                 "stage": "first_cse", "input_stage": "02.jump", "uids": [row, copy.deepcopy(row)]}
+        with self.assertRaisesRegex(ValueError, "unique"):
+            cse.validate_watch(watch, "target")
+
+
+if __name__ == "__main__":
+    unittest.main()
