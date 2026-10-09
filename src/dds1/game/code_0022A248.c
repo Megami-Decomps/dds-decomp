@@ -400,28 +400,28 @@ EvtRuntimeChild *func_0022B7A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *vi
     key = sdfAllocSizeClassBlock(sizeof(*key));
     memset(key, 0, sizeof(*key));
     key->frame = frame;
-    key->interpolationMode = -1;
+    key->serializedValue = -1;
     evtInsertListNodeByOrderKey(group, key);
 
     switch (group->type) {
     case 2:
         key->p08.f = 0.5235987306f;
-        key->interpolationMode = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
+        key->serializedValue = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
         break;
     case 1:
-        key->interpolationMode = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
+        key->serializedValue = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
         key->p08.sb[0] = 0;
         key->p0C.sb[2] = 1;
         key->p0C.sb[3] = 20;
         break;
     case 18:
-        key->interpolationMode = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
+        key->serializedValue = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
         key->p08.h[0] = 0;
         key->p08.h[1] = -1;
         key->p08.sb[0] = 0;
         break;
     case 20: case 21:
-        key->interpolationMode = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
+        key->serializedValue = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
         key->p08.sb[0] = -1;
         key->p08.sb[1] = 0;
         key->p08.h[1] = 0;
@@ -431,7 +431,7 @@ EvtRuntimeChild *func_0022B7A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *vi
         key->p0C.sb[3] = -1;
         break;
     case 3: case 26:
-        key->interpolationMode = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
+        key->serializedValue = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
         key->p08.sb[0] = -1;
         key->p08.h[1] = 0;
         key->p0C.sb[0] = 0;
@@ -439,7 +439,7 @@ EvtRuntimeChild *func_0022B7A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *vi
         key->p0C.h[1] = -1;
         break;
     case 9:
-        key->interpolationMode = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
+        key->serializedValue = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
         key->p08.h[0] = -1;
         key->p08.h[1] = 1;
         break;
@@ -456,7 +456,7 @@ EvtRuntimeChild *func_0022B7A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *vi
         key->payload = vectors;
         key->p0C.f = second;
         key->p10.h[0] = (u16)group->setterId;
-        key->interpolationMode = 0;
+        key->serializedValue = 0;
         break;
     case 11: {
         EvtViewerDrawPayload *draw = sdfAllocSizeClassBlock(0x20);
@@ -520,7 +520,7 @@ EvtRuntimeChild *func_0022B7A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *vi
         break;
     }
     case 24:
-        key->interpolationMode = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
+        key->serializedValue = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
         key->p08.sb[0] = display.enabled;
         key->p08.sb[1] = display.variant;
         key->p0C.h[0] = display.x;
