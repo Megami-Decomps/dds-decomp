@@ -953,8 +953,8 @@ s32 fldIsAreaFloorResourceReady(s32 area, s32 room) {
     return fldAreaState.resourceFlag != 0;
 }
 
-extern u32 fldCachedRoomResourceData, D_003BAC64, D_003BAC68, D_003BAC6C;
-extern u32 fldCachedRoomResourceSize, D_003BAC74, D_003BAC78, D_003BAC7C;
+extern u32 fldCachedRoomResourceData, fldCachedRoomF1ResourceData, fldCachedRoomF2ResourceData, fldCachedRoomKF2ResourceData;
+extern u32 fldCachedRoomResourceSize, fldCachedRoomF1ResourceSize, fldCachedRoomF2ResourceSize, fldCachedRoomKF2ResourceSize;
 
 struct SdfMemBlock *fldLoadCachedRoomResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     if (fldAreaState.resourceArea == area) {
@@ -972,10 +972,10 @@ struct SdfMemBlock *fldLoadCachedRoomResourceIfLocationMatches(void **destinatio
 struct SdfMemBlock *fldLoadCachedRoomF1ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     if (fldAreaState.resourceArea == area) {
         if (fldAreaState.resourceFloor == room) {
-            struct SdfMemBlock *allocation = sdfAllocGeneralBlock(D_003BAC74);
+            struct SdfMemBlock *allocation = sdfAllocGeneralBlock(fldCachedRoomF1ResourceSize);
             void *data = (void *)sdfResourceRetainAddress(allocation);
             *destination = data;
-            memcpy(data, (void *)D_003BAC64, D_003BAC74);
+            memcpy(data, (void *)fldCachedRoomF1ResourceData, fldCachedRoomF1ResourceSize);
             return allocation;
         }
     }
@@ -985,10 +985,10 @@ struct SdfMemBlock *fldLoadCachedRoomF1ResourceIfLocationMatches(void **destinat
 struct SdfMemBlock *fldLoadCachedRoomF2ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     if (fldAreaState.resourceArea == area) {
         if (fldAreaState.resourceFloor == room) {
-            struct SdfMemBlock *allocation = sdfAllocGeneralBlock(D_003BAC78);
+            struct SdfMemBlock *allocation = sdfAllocGeneralBlock(fldCachedRoomF2ResourceSize);
             void *data = (void *)sdfResourceRetainAddress(allocation);
             *destination = data;
-            memcpy(data, (void *)D_003BAC68, D_003BAC78);
+            memcpy(data, (void *)fldCachedRoomF2ResourceData, fldCachedRoomF2ResourceSize);
             return allocation;
         }
     }
@@ -998,10 +998,10 @@ struct SdfMemBlock *fldLoadCachedRoomF2ResourceIfLocationMatches(void **destinat
 struct SdfMemBlock *fldLoadCachedRoomKF2ResourceIfLocationMatches(void **destination, s32 area, s32 room) {
     if (fldAreaState.resourceArea == area) {
         if (fldAreaState.resourceFloor == room) {
-            struct SdfMemBlock *allocation = sdfAllocGeneralBlock(D_003BAC7C);
+            struct SdfMemBlock *allocation = sdfAllocGeneralBlock(fldCachedRoomKF2ResourceSize);
             void *data = (void *)sdfResourceRetainAddress(allocation);
             *destination = data;
-            memcpy(data, (void *)D_003BAC6C, D_003BAC7C);
+            memcpy(data, (void *)fldCachedRoomKF2ResourceData, fldCachedRoomKF2ResourceSize);
             return allocation;
         }
     }
@@ -1161,10 +1161,10 @@ extern FldTransferChunk *D_003BAC28;
 extern u32 D_003BAC2C;
 extern FldAreaResource *D_003BAC38;
 extern s32 D_003BAC4C;
-extern u32 D_003BAC50;
-extern u32 D_003BAC54;
-extern u32 D_003BAC58;
-extern u32 D_003BAC5C;
+extern u32 fldCachedRoomResourceAllocation;
+extern u32 fldCachedRoomF1ResourceAllocation;
+extern u32 fldCachedRoomF2ResourceAllocation;
+extern u32 fldCachedRoomKF2ResourceAllocation;
 
 void fldReleaseFieldResources(void) {
     s32 i;
@@ -1229,21 +1229,21 @@ void fldReleaseFieldResources(void) {
     }
     D_003BAC10 = 0;
     D_003BAC4C = 0;
-    if (D_003BAC50 != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003BAC50);
-        D_003BAC50 = 0;
+    if (fldCachedRoomResourceAllocation != 0) {
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldCachedRoomResourceAllocation);
+        fldCachedRoomResourceAllocation = 0;
     }
-    if (D_003BAC54 != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003BAC54);
-        D_003BAC54 = 0;
+    if (fldCachedRoomF1ResourceAllocation != 0) {
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldCachedRoomF1ResourceAllocation);
+        fldCachedRoomF1ResourceAllocation = 0;
     }
-    if (D_003BAC58 != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003BAC58);
-        D_003BAC58 = 0;
+    if (fldCachedRoomF2ResourceAllocation != 0) {
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldCachedRoomF2ResourceAllocation);
+        fldCachedRoomF2ResourceAllocation = 0;
     }
-    if (D_003BAC5C != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_003BAC5C);
-        D_003BAC5C = 0;
+    if (fldCachedRoomKF2ResourceAllocation != 0) {
+        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)fldCachedRoomKF2ResourceAllocation);
+        fldCachedRoomKF2ResourceAllocation = 0;
     }
     if (fldAreaState.area < 0xC8 && fldAreaState.cachedArea != fldAreaState.area) {
         fldAreaState.cachedArea = fldAreaState.area;
@@ -6348,29 +6348,29 @@ INCLUDE_SDATA(const s32, "game/code_00126A30", fldAreaCachedResource);
 
 INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAC4C);
 
-INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAC50);
+INCLUDE_SDATA(const s32, "game/code_00126A30", fldCachedRoomResourceAllocation);
 
-INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAC54);
+INCLUDE_SDATA(const s32, "game/code_00126A30", fldCachedRoomF1ResourceAllocation);
 
-INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAC58);
+INCLUDE_SDATA(const s32, "game/code_00126A30", fldCachedRoomF2ResourceAllocation);
 
-INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAC5C);
+INCLUDE_SDATA(const s32, "game/code_00126A30", fldCachedRoomKF2ResourceAllocation);
 
 INCLUDE_SDATA(const s32, "game/code_00126A30", fldCachedRoomResourceData);
 
-INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAC64);
+INCLUDE_SDATA(const s32, "game/code_00126A30", fldCachedRoomF1ResourceData);
 
-INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAC68);
+INCLUDE_SDATA(const s32, "game/code_00126A30", fldCachedRoomF2ResourceData);
 
-INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAC6C);
+INCLUDE_SDATA(const s32, "game/code_00126A30", fldCachedRoomKF2ResourceData);
 
 INCLUDE_SDATA(const s32, "game/code_00126A30", fldCachedRoomResourceSize);
 
-INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAC74);
+INCLUDE_SDATA(const s32, "game/code_00126A30", fldCachedRoomF1ResourceSize);
 
-INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAC78);
+INCLUDE_SDATA(const s32, "game/code_00126A30", fldCachedRoomF2ResourceSize);
 
-INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAC7C);
+INCLUDE_SDATA(const s32, "game/code_00126A30", fldCachedRoomKF2ResourceSize);
 
 INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAC80);
 
