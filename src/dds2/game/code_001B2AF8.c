@@ -2999,11 +2999,99 @@ void btlDrawThreePanelSpriteStrips(s32 unused, s32 x, s32 y, s32 delta) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416138);
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004162F8);
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BB1E8);
+void func_001BB1E8(void *unused, s32 x, s32 y, u32 alpha) {
+    s32 strips[37][3] = {
+        { 0, -16, 0x5E },
+        { 186, -16, 0x5F },
+        { 0, -23, 0x64 },
+        { 186, -23, 0x65 },
+        { 0, 68, 0x66 },
+        { 186, 68, 0x67 },
+        { 0, 82, 0x60 },
+        { 222, 82, 0x61 },
+        { 0, 75, 0x68 },
+        { 222, 75, 0x69 },
+        { 0, 177, 0x6A },
+        { 222, 177, 0x6B },
+        { 0, 191, 0x62 },
+        { 222, 191, 0x63 },
+        { 0, 184, 0x6C },
+        { 222, 184, 0x6D },
+        { 0, 277, 0x6E },
+        { 222, 277, 0x6F },
+        { 20, -22, 0x3A },
+        { 27, -22, 0x3B },
+        { 292, -22, 0x3C },
+        { 86, 82, 0x3D },
+        { 93, 82, 0x3E },
+        { 249, 82, 0x3F },
+        { 77, 194, 0x58 },
+        { 84, 194, 0x59 },
+        { 249, 194, 0x5A },
+        { 20, 276, 0x5B },
+        { 27, 276, 0x5C },
+        { 302, 276, 0x5D },
+        { 37, -1, 0x2B },
+        { 101, 19, 0x2C },
+        { 169, 18, 0x2D },
+        { 101, 43, 0x32 },
+        { 169, 42, 0x33 },
+        { 42, 76, 0x38 },
+        { 42, 186, 0x39 },
+    };
+    u32 colors[4] = { 0x80808080, 0x80808080, 0x80808080, 0x80808080 };
+    s32 i, j;
+    s32 xOffset, yOffset;
+
+    for (i = 0; i < 37; i++) {
+        for (j = 0; j < 4; j++) {
+            colors[j] = btlSetSlotLowByteClamped(btlResourceBlock->resA,
+                                               strips[i][2], j, alpha);
+            xOffset = strips[i][0];
+            yOffset = strips[i][1];
+            switch (strips[i][2]) {
+            case 0x3A:
+            case 0x3D:
+            case 0x58:
+            case 0x5B:
+                /* Retail 0x001BB3B4 retains the identical corner 1/3 alpha-clear arms. */
+                if (j == 1 || j == 3) {
+                    colors[j] &= ~0xFF;
+                } else {
+                    colors[j] &= ~0xFF;
+                }
+                xOffset += (alpha >> 4) - 8;
+                break;
+            case 0x3C:
+            case 0x3F:
+            case 0x5A:
+            case 0x5D:
+                if (j == 0 || j == 2) {
+                    colors[j] = (colors[j] & ~0xFF) | alpha;
+                } else {
+                    colors[j] &= ~0xFF;
+                }
+                xOffset += (alpha >> 4) - 8;
+                btlResourceBlock->resA->workEntries[strips[i][2]].geometry.bounds[2] =
+                    (btlResourceBlock->resA->workEntries[strips[i][2]].sourceWidth << 4) + 0x140;
+                break;
+            case 0x3B:
+            case 0x3E:
+            case 0x59:
+            case 0x5C:
+                colors[j] = (colors[j] & ~0xFF) | alpha;
+                xOffset += (alpha >> 4) - 8;
+                break;
+            }
+        }
+        func_00306C28((x + xOffset) << 4, (y + yOffset) << 3,
+                     0, colors, 0, btlResourceBlock->resA, strips[i][2], 0x53);
+        btlResourceBlock->resA->workEntries[strips[i][2]].geometry.bounds[2] =
+            btlResourceBlock->resA->workEntries[strips[i][2]].sourceWidth << 4;
+    }
+}
 
 u32 btlSetSlotLowByteClamped(EffectSlotSet *owner, s32 group, s32 slot, s32 delta) {
     u32 word = owner->workEntries[group].savedColors[slot];
