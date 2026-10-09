@@ -4452,9 +4452,9 @@ void fileJobDestroy(FileJobPayload *job) {
 }
 
 void fileJobFreePrimaryBuffer(FileJobPayload *job) {
-    void *buffer = job->primary.allocation;
-    if (buffer != NULL) {
-        sdfReleaseResourceAllocation(buffer);
+    struct SdfMemBlock *allocation = job->primary.allocation;
+    if (allocation != NULL) {
+        sdfReleaseResourceAllocation(allocation);
         job->primary.offset = 0;
         job->primary.size = 0;
         job->primary.allocation = NULL;
@@ -4462,9 +4462,9 @@ void fileJobFreePrimaryBuffer(FileJobPayload *job) {
 }
 
 void fileJobFreeSecondaryBuffer(FileJobPayload *job) {
-    void *buffer = job->secondary.allocation;
-    if (buffer != NULL) {
-        sdfReleaseResourceAllocation(buffer);
+    struct SdfMemBlock *allocation = job->secondary.allocation;
+    if (allocation != NULL) {
+        sdfReleaseResourceAllocation(allocation);
         job->secondary.offset = 0;
         job->secondary.size = 0;
         job->secondary.allocation = NULL;
@@ -4544,7 +4544,7 @@ void fileJobSetPrimaryData(job, src, size, option)
 {
     fileJobFreePrimaryBuffer(job);
     if (src != NULL && size > 0) {
-        job->primary.allocation = (void *)sdfAllocGeneralBlock(size);
+        job->primary.allocation = sdfAllocGeneralBlock(size);
         job->primary.offset = sdfResourceRetainAddress(job->primary.allocation);
         job->primary.size = size;
         job->option = option;
@@ -4579,7 +4579,7 @@ void fileJobSetSecondaryData(job, src, size, selector)
 {
     fileJobFreeSecondaryBuffer(job);
     if (src != NULL && size > 0) {
-        job->secondary.allocation = (void *)sdfAllocGeneralBlock(size);
+        job->secondary.allocation = sdfAllocGeneralBlock(size);
         job->secondary.offset = sdfResourceRetainAddress(job->secondary.allocation);
         job->secondary.size = size;
         job->primary.selector = selector;
