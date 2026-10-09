@@ -2450,7 +2450,6 @@ extern f32 D_003C8A00[][4];
 
 extern u32 D_003C8A60[];
 
-extern s32 sdfCreateResetPacketList(void);
 
 extern void *func_00348188(const f32 (*)[4], const u32 *, s32, u32);
 
@@ -2464,7 +2463,7 @@ void mdlSubmitViewerIntermediateDrawPacket(void) {
 
     if (mdlViewerState.taskPhase < 4) {
         if (mdlViewerState.taskPhase >= 2) {
-            packetList = sdfCreateResetPacketList();
+            packetList = (s32)sdfCreateResetPacketList();
             VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
             sdfAppendPacket((SdfListHead *)packetList, (u32)func_00348188(D_003C8930, D_003C8990, 6, 0x80));
             D_00380048.submit(&D_00380048, packetList);
@@ -2487,7 +2486,7 @@ void mdlSubmitViewerResourceDrawPacket(void) {
     MdlCtx *resource;
 
     if (mdlViewerState.taskPhase == 3) {
-        packetList = sdfCreateResetPacketList();
+        packetList = (s32)sdfCreateResetPacketList();
         resource = mdlViewerState.resources[0];
         VU0_LOAD_MATRIX(resource->inner->matrix);
         drawPacket = (s32)func_00348188(D_003C89B0, D_003C89F0, 4, 0x80);
@@ -2536,7 +2535,7 @@ void mdlDrawMapPositionRecords(MdlCtx *resource) {
 
     if (recordCount > 0) {
         s32 recordIndex = 0;
-        s32 packetList = sdfCreateResetPacketList();
+        s32 packetList = (s32)sdfCreateResetPacketList();
         SdfMapPositionRecord *recordCursor = (SdfMapPositionRecord *)(
             (SdfMapPositionChunkPrefix *)sdfChunkFindByTag(resource->inner, MDL_MAP_POSITION_TAG) + 1);
 
@@ -2979,7 +2978,7 @@ s32 func_00239C08(KwlnTask *task) {
     state->pad = pad;
     D_00453660.value = value;
     D_00453660.adjustment = adjustment;
-    D_00453660.packetList = sdfCreateResetPacketList();
+    D_00453660.packetList = (s32)sdfCreateResetPacketList();
     D_00453660.control.fields.blink++;
     if (D_00453660.control.fields.blink == 30) {
         D_00453660.control.fields.blink = 0;
@@ -3392,3 +3391,4 @@ INCLUDE_SDATA(const s32, "game/code_00233660", D_004371D8);
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004371E0);
 
 INCLUDE_SDATA(const s32, "game/code_00233660", evtPendingEventSelection);
+

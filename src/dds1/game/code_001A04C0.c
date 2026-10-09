@@ -21,7 +21,6 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 extern s32 D_003BD824;
 extern UiQuadColor D_00358390;
 extern f32 sdfSinPoly(f32);
-extern s32 sdfCreateResetPacketList(void);
 extern u64 *func_001A0910(s32, s32, s32, s32, s32, u32, u32);
 
 extern void btlBossDebugPrintf(const char *format, ...);
@@ -84,7 +83,7 @@ void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
         color |= *component << (i * 8);
     }
     color |= (u32)alpha << 24;
-    list = sdfCreateResetPacketList();
+    list = (s32)sdfCreateResetPacketList();
     sdfAppendPacket(list, (u32)btlCreateGsTestRegisterPacket(0x33001, 0));
     sdfAppendPacket(list, (u32)btlCreateGsAlphaRegisterPacket(6, 0));
     sdfAppendPacket(list, (u32)func_001A0910(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
