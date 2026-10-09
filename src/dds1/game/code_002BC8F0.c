@@ -57,8 +57,6 @@ extern u32 D_003BC994;
 
 extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
-extern u32 effQueuedFileHandle;
-
 extern u32 effCurrentRenderPacket;
 
 extern s32 effSharedRibbonReferenceCount;
