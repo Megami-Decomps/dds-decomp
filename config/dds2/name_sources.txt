@@ -5129,6 +5129,7 @@
 0x002E07C0	effSetBillboardMatrixComponent	inferred	Writes the matrix component used by this billboard work. [names_reviewed5.tsv]
 0x002E0840	effCreateBillFrameNode	inferred	vtable creator next to effClearBillFrames/func_002E08D0: allocates 0x18-byte entries + 0x10 header, refs via func_002E5C50(count, 0, handle) [names_M84_AllocNode.tsv]
 0x002E08D0	effReleaseBillFrameNode	inferred	Bill frame node destructor releases shared references and its backing allocation. [names_reviewed21.tsv]
+0x002E0900	billAdvanceFrameInstances	inferred	Kind-1 active update advances bill-frame instances using its EffBillFrameConfig, parent frame and child state.
 0x002E0F30	billUpdateFrameDrawColorAndTransform	inferred	Blends frame draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002E1098	billResetCellIndices	inferred	Clears 16-byte per-cell buffer and resets each 28-byte cell entry index to -1.
 0x002E1110	billCreateCellNode	inferred	vtable creator next to billResetCellIndices/func_002E11A0: 0x1C-byte entries, kind 1 [names_M84_AllocNode.tsv]
@@ -5137,11 +5138,13 @@
 0x002E1A70	billResetParticleIndices	inferred	Clears per-particle 16-byte data and resets each 44-byte particle entry index to -1; same source shape as billResetCellIndices.
 0x002E1AE8	billCreateParticleNode	inferred	vtable creator next to billResetParticleIndices/func_002E1B80: 0x2C-byte entries, kind 1 [names_M84_AllocNode.tsv]
 0x002E1B80	billReleaseParticleNode	inferred	Particle node destructor releases reference set and backing allocation. [names_reviewed21.tsv]
+0x002E1BB0	billAdvanceParticleInstances	inferred	Kind-3 active update advances particle instances from EffBillParticleConfig and the parent frame/resource state.
 0x002E22C8	billUpdateParticleDrawColorAndTransform	inferred	Blends particle draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002E24A8	billAllocateAnimatedTransformEntries	inferred	Allocates and retains the entry buffer used by both animated-transform creation and cloning. [names_reviewed5.tsv]
 0x002E25B0	billCreateAnimatedTransform	inferred	Allocates 24-byte animated-effect entries from descriptor, creates resource handle, then initializes alternating transform rows.
 0x002E2610	billCloneAnimatedTransform	inferred	Allocates animated-effect entries from owner descriptor, clones source resource, then initializes alternating transform rows.
 0x002E2670	billReleaseAlternatingTransformNode	inferred	Following alternating transform-row initializer, releases owned references and allocation. [names_reviewed21.tsv]
+0x002E26A0	billAdvanceAnimatedFrameTransforms	inferred	Kind-4 active update advances animated billboard transforms using EffBillAnimatedFrameConfig and parent frame/resource state.
 0x002E2C48	billUpdateAlternatingDrawColorAndTransform	inferred	Blends alternating-node draw colors and stores a quaternion-derived scaled transform matrix. [names_reviewed21.tsv]
 0x002E2DB0	billResetEmitterIndices	inferred	Clears emitter buffer and resets each 24-byte entry index to -1; shared verified billboard reset source.
 0x002E2E28	billAllocEmitterNode	inferred	allocator called by billCreateEmitterTransform/billCloneEmitterTransform: 0x18-byte entries + 0x10 header [names_M84_AllocNode.tsv]
@@ -5169,6 +5172,7 @@
 0x002E5540	billUpdateQuadDrawColorAndTransform	inferred	Blends quad draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002E56A8	effAllocateActiveInstanceWork	inferred	Allocates kind-sized resource instance work with default VU vectors, frame, color and copied source. [names_reviewed5.tsv]
 0x002E5760	effCreateResourceInstanceA	inferred	twin of effCreateResourceInstanceB/C: allocate block, table[kind].init(source, extra) -> +0x30, table[kind].fn(block)
+0x002E5800	effCreateActiveInstanceFromFile	inferred	Type 10 callback constructs active-instance EffClassWork from a FileJobPayload; paired table destroy callback is effDestroyActiveInstanceWork.
 0x002E5860	effDestroyActiveInstanceWork	inferred	Destroys the active-instance child resource through its kind operations and frees the complete effect owner.
 0x002E58A8	effCreateActiveResource	inferred	DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described createActiveEffectResource behavior.
 0x002E5978	effResetActiveInstanceFrame	inferred	Calls the active-kind callback and clears its work frame. [names_reviewed5.tsv]
@@ -5304,6 +5308,7 @@
 0x002F0A68	effReleaseCompactRingFadeTable	inferred	Releases shared ribbon resource and frees compact ring fade allocation. [names_reviewed5.tsv]
 0x002F10C0	effUpdateCompactRingDrawColorAndTransform	inferred	Blends compact-ring fade colors and writes quaternion-scaled draw matrix and alternate mode. [names_reviewed21.tsv]
 0x002F1228	effAllocateBlock	inferred	DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described allocateEffectBlock behavior.
+0x002F1380	effCreateBlockResourceFromFile	inferred	Type 16 callback constructs block-resource EffClassWork from a FileJobPayload; paired table destroy callback is effDestroyBlockResourceWork.
 0x002F13E0	effDestroyBlockResourceWork	inferred	Calls the kind-specific cleanup callback and frees a resource block. [names_reviewed5.tsv]
 0x002F14B8	effResetBlockResourceFrame	inferred	Calls the block-kind callback and clears the work frame. [names_reviewed5.tsv]
 0x002F1500	effAdvanceBlockResourceFrame	inferred	Calls block kind callback and advances frame only while effects are enabled. [names_reviewed5.tsv]
@@ -5328,7 +5333,7 @@
 0x002F31D0	effResetSlotAnimationRecord	inferred	Clears the nested animation record's state field. [names_reviewed5.tsv]
 0x002F3750	effReleaseBillboardFrameAsset	inferred	Releases frame asset and frees frame state allocation. [names_reviewed7.tsv]
 0x002F3988	effAllocateBlockWithModel	inferred	DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described allocateEffectBlockWithModel behavior.
-0x002F3AD0	effResourceInstanceCreateFromFile	inferred	body calls fileResolvePrimaryBuffer, effCreateResourceInstanceC [names_R_FuncNames7.tsv]
+0x002F3AD0	effCreateModelBlockFromFile	inferred	Type 17 callback constructs model-block EffClassWork from a FileJobPayload; paired table destroy callback is effDestroyModelBlockWork.
 0x002F3B00	effDestroyModelBlockWork	inferred	Dispatches model-block resource destruction through its kind operations and frees the complete effect owner.
 0x002F3BD8	effResetModelBlockFrame	inferred	Invokes model block's kind callback then zeroes its frame counter. [names_reviewed5.tsv]
 0x002F3C20	effAdvanceModelBlockFrame	inferred	Calls model block callback and increments frame while effect processing is enabled. [names_reviewed5.tsv]
@@ -6182,7 +6187,7 @@
 0x00334510	sdfMotionUpdate	inferred	Dispatches the current motion state, applies the initial or next frame, wraps looping motions, and reports completion or wrap; paired with DDS1 0x002DB660.
 0x00334618	sdfMotionSuspend	inferred	Saves the previous motion mode before switching to mode six.
 0x00334638	sdfMotionResume	inferred	Restores the saved motion mode when currently in mode six.
-0x00334670	sdfSetMotionOutputValue	inferred	Writes the supplied word into the motion output at offset 0x08.
+0x00334670	sdfMotionBindKeyTrack	inferred	Stores the current motion-entry key-track record in the binding's key-track pointer.
 0x00334678	sdfFindMotionKeyInterval	inferred	Finds the bracketing key records for a motion frame and computes their interpolation weight; paired with DDS1 0x002DB7C8.
 0x00334788	sdfInterpolateMotionKeys	inferred	Interpolates two float key values according to the supplied weight.
 0x003347B0	sdfMotionBlendVectorKeys	inferred	confidence=high; matched-C; src/dds2/sdf/sdfMotion.c:367:func_003347B0; Interpolates the two bracketing vec3 key pointers by their stored key weight, leaving the vector result in vf10.; source=fresh-R_Names31-today [names_qp11.tsv]

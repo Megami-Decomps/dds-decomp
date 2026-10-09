@@ -5478,17 +5478,20 @@
 0x0029E760	effClearBillFrames	inferred	eff effect resources and animation in game/code_0029A840.c
 0x0029E7D8	effCreateBillFrameNode	inferred	DDS2 twin func_002E0840: 0x18-byte entries + 0x10 header, refs via func_002A3BD8(count, 0, resource) [names_M84_AllocNode.tsv]
 0x0029E868	effReleaseBillFrameNode	inferred	Bill frame node destructor releases shared references and its backing allocation. [names_reviewed21.tsv]
+0x0029E898	billAdvanceFrameInstances	inferred	Kind-1 active update advances bill-frame instances using its EffBillFrameConfig, parent frame and child state.
 0x0029EEC8	billUpdateFrameDrawColorAndTransform	inferred	Blends frame draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x0029F0A8	billCreateCellNode	inferred	DDS2 twin func_002E1110: 0x1C-byte entries, kind 1 [names_M84_AllocNode.tsv]
 0x0029F138	billReleaseCellNode	inferred	Cell node destructor releases reference set and backing allocation. [names_reviewed21.tsv]
 0x0029F8A0	billUpdateCellDrawColorAndTransform	inferred	Blends cell draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x0029FA80	billCreateParticleNode	inferred	DDS2 twin func_002E1AE8: 0x2C-byte entries, kind 1 [names_M84_AllocNode.tsv]
 0x0029FB18	billReleaseParticleNode	inferred	Particle node destructor releases reference set and backing allocation. [names_reviewed21.tsv]
+0x0029FB48	billAdvanceParticleInstances	inferred	Kind-3 active update advances particle instances from EffBillParticleConfig and the parent frame/resource state.
 0x002A0260	billUpdateParticleDrawColorAndTransform	inferred	Blends particle draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002A03C8	effClearAnimatedFrames	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002A0440	billAllocateAnimatedTransformEntries	inferred	Allocates and retains the entry buffer used by both animated-transform creation and cloning. [names_reviewed5.tsv]
 0x002A04B8	effInitializeAlternatingTransformRows	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002A0608	billReleaseAlternatingTransformNode	inferred	Following alternating transform-row initializer, releases owned references and allocation. [names_reviewed21.tsv]
+0x002A0638	billAdvanceAnimatedFrameTransforms	inferred	Kind-4 active update advances animated billboard transforms using EffBillAnimatedFrameConfig and parent frame/resource state.
 0x002A0BE0	billUpdateAlternatingDrawColorAndTransform	inferred	Blends alternating-node draw colors and stores a quaternion-derived scaled transform matrix. [names_reviewed21.tsv]
 0x002A0DC0	billAllocEmitterNode	inferred	DDS2 twin func_002E2E28 [names_M84_AllocNode.tsv]
 0x002A0F70	billReleaseEmitterNode	inferred	Following emitter-row initializer, releases owned references and allocation. [names_reviewed21.tsv]
@@ -5504,7 +5507,7 @@
 0x002A2DE8	billReleaseQuadNode	inferred	Following quad-row initializer, releases owned references and allocation. [names_reviewed21.tsv]
 0x002A34D8	billUpdateQuadDrawColorAndTransform	inferred	Blends quad draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002A3640	effAllocateActiveInstanceWork	inferred	Allocates kind-sized resource instance work with default VU vectors, frame, color and copied source. [names_reviewed5.tsv]
-0x002A3798	effCreateFileResourceInstance	inferred	eff resolves primary/secondary file buffers by type at work+0x1C (1 or 4) then creates the resource via func_002A36F8
+0x002A3798	effCreateActiveInstanceFromFile	inferred	Type 10 callback constructs active-instance EffClassWork from a FileJobPayload; paired table destroy callback is effDestroyActiveInstanceWork.
 0x002A37F8	effDestroyActiveInstanceWork	inferred	Destroys the active-instance child resource through its kind operations and frees the complete effect owner.
 0x002A3840	effCreateActiveResource	inferred	Byte-identical dds2 twin 0x002E58A8; DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described createActiveEffectResource behavior. [names_conflicts.tsv]
 0x002A3910	effResetActiveInstanceFrame	inferred	Calls the active-kind callback and clears its work frame. [names_reviewed5.tsv]
@@ -5633,7 +5636,7 @@
 0x002ADCE0	effUpdateCompactRingDrawColorAndTransform	inferred	Blends compact-ring fade colors and writes quaternion-scaled draw matrix and alternate mode. [names_reviewed21.tsv]
 0x002ADE48	effAllocateBlock	inferred	Byte-identical dds2 twin 0x002F1228; DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described allocateEffectBlock behavior. [names_conflicts.tsv]
 0x002ADF00	effCreateResourceInstanceB	inferred	eff twin of func_002A36F8 over table D_0037ED08
-0x002ADFA0	effCreateFileResourceInstanceB	inferred	eff twin of func_002A3798 over table D_0037ED08
+0x002ADFA0	effCreateBlockResourceFromFile	inferred	Type 16 callback constructs block-resource EffClassWork from a FileJobPayload; paired table destroy callback is effDestroyBlockResourceWork.
 0x002AE048	effDuplicateActiveResourceB	inferred	eff twin of createActiveEffectResource over table D_0037ED08
 0x002AE0D8	effResetBlockResourceFrame	inferred	Calls the block-kind callback and clears the work frame. [names_reviewed5.tsv]
 0x002AE120	effAdvanceBlockResourceFrame	inferred	Invokes the kind-specific callback and advances its frame counter. [names_reviewed5.tsv]
@@ -5669,7 +5672,7 @@
 0x002B0408	effUpdateFadedMeshTransform	inferred	Combines a color fade, selected texture and scaled VU transform for a mesh draw record. [names_reviewed18.tsv]
 0x002B0598	effAllocateBlockWithModel	inferred	Byte-identical dds2 twin 0x002F3988; DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described allocateEffectBlockWithModel behavior. [names_conflicts.tsv]
 0x002B0650	effCreateResourceInstanceC	inferred	eff twin of func_002ADF00 over table D_0037ED90 and allocateEffectBlockWithModel; one-argument createResource
-0x002B06E0	effResourceInstanceCreateFromFile	inferred	paired effect body: calls fileResolvePrimaryBuffer, effCreateResourceInstanceC [names_R_FuncNames7.tsv]
+0x002B06E0	effCreateModelBlockFromFile	inferred	Type 17 callback constructs model-block EffClassWork from a FileJobPayload; paired table destroy callback is effDestroyModelBlockWork.
 0x002B0710	effDestroyModelBlockWork	inferred	Dispatches model-block resource destruction through its kind operations and frees the complete effect owner.
 0x002B0758	effRecreateActiveByClass	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B07E8	effResetModelBlockFrame	inferred	Invokes model block's kind callback then zeroes its frame counter. [names_reviewed5.tsv]
@@ -6468,6 +6471,7 @@
 0x002DB518	sdfMotionInitializeAtZeroTime	inferred	Passes two zero time values to motion initializer; rest pose is not established. [names_reviewed6.tsv]
 0x002DB538	sdfMotionSampleAtFrame	inferred	confidence=high; matched-C; src/dds1/sdf/sdfMotion.c:370:func_002DB538; Sets the current motion frame/state and calls each object blend callback with a lead-in-clamped weight until the blend interval ends; calls sample callbacks afterward.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x002DB660	sdfMotionUpdate	inferred	Dispatches the current motion state, applies the initial or next frame, wraps looping motions, and reports completion or wrap.
+0x002DB7C0	sdfMotionBindKeyTrack	inferred	Stores the current motion-entry key-track record in the binding's key-track pointer.
 0x002DB7C8	sdfFindMotionKeyInterval	inferred	Finds the bracketing key records for a motion frame and computes their interpolation weight; paired with DDS2 0x00334678.
 0x002DB900	sdfMotionBlendVectorKeys	inferred	confidence=high; matched-C; src/dds1/sdf/sdfMotion.c:443:func_002DB900; Interpolates the two bracketing vec3 key pointers by their stored key weight, leaving the vector result in vf10.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x002DB958	sdfMotionInterpolateKeyColor	inferred	confidence=high; matched-C; src/dds1/sdf/sdfMotion.c:641:func_002DB958; Interpolates packed RGBA values from the first and second key using their sample weight.; source=revalidated-unapplied-names_R_Names31.tsv:46 [names_qp12_apply.tsv]

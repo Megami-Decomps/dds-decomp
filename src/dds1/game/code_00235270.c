@@ -1,4 +1,5 @@
 #include "common.h"
+#include "itf_mes_window.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
@@ -50,7 +51,6 @@ extern void func_003003F0(char *fmt, ...);
 extern void func_002E96D8(u32 sequence);
 extern void func_002E8DD0(u32 sequence);
 extern void sndSetSequenceVolumePan(s32 sequence, s32 volume, s32 pan);
-extern u32 itfMesGetEntryCount(s32 window);
 extern void evtViewerDispatchFlagMode();
 extern void func_0022E5A0();
 extern char evtSkyTaskName[];
@@ -1186,7 +1186,6 @@ extern char D_003AE930[];
 extern char D_003AE940[];
 extern char D_003AE950[];
 extern char D_003AE960[];
-extern s32 itfMesGetWindowEntryItems(s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_00235270", D_003AE8D0);
 

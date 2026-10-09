@@ -597,7 +597,6 @@ void evtReleaseEffectObjectHandleAndData(EffWorldNode *object) {
     sdfReleaseChipBlock(data);
 }
 
-extern u32 dds3GetObjectBaseResourceHandle(EffWorldNode *);
 extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
 extern s32 func_00140BE8(u32 key, f32 *x, f32 *y, f32 *z);
 extern void sdfModelUpdateCurrentFrameTransforms(SdfModel *model);
