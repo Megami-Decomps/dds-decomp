@@ -4784,3 +4784,54 @@ unit ID at `+0x124`. These are `BtlUnit *` interfaces, not byte-buffer
 interfaces: their callers need neither byte-pointer casts nor a second
 UI-record projection of the party data.
 
+
+## Ring pulse rendering narrows the timer, not the unsigned mode
+
+DDS1 `00258FD0` guards its `u32` pulse mode with `sltiu ...,6`; no second
+unsigned cast is needed. The same renderer reads the stored `u16` timer
+with `lh` before progress conversion and the mode-five threshold test.
+Its explicit `s16` narrowing therefore preserves real signed consumption,
+while duration is already an `s16` field.
+
+## Solar indexed packets borrow point and packed-color buffers
+
+DDS2 `00311F20` reads `s32` XY pairs and `u32` RGBA words; its second
+argument is an unsigned XYZ2 tail word, followed by count, first-color
+selection and surface index. The four C callers in `002437F0` now use
+that real pointer/color contract rather than an integer point prototype.
+The `003C90DC` interior table origin remains unchanged: its preceding
+word holds the point-buffer address, decoded at the provider boundary.
+Changing that iterator to the primary table origin is separately parked
+because the equivalent DDS1 change regresses two existing exact bodies.
+
+
+## Room resource registration returns its slot index
+
+DDS1 `00138ED0` and DDS2 `0013BAB8` return the old `fldTaskSlotCount`
+before incrementing it (`0013A6A8` / `0013D290` move that value to `v0`).
+The paired action constructors immediately multiply the result by `0x140`
+to update the corresponding room record. Their `FldFileResource *`,
+`EffWorldNode *` interface therefore returns `s32`, even though the general
+file-resource dispatchers ignore it. Correcting the caller declarations
+does not change either still-ASM provider's body.
+
+
+## Linked-defeat camera dispatch has its own override
+
+DDS1 `001E4180` and DDS2 `001F1B00` read runtime callback slots at
+`+60C` and `+644`, respectively. Both deliberately pass the linked command,
+the destination camera pose, and integer `1`, then skip their default
+framing when the callback returns nonzero. `BtlState.defeatCameraHook`
+therefore has the shared `s32 (BtlLinkedCommand *, BtlCamState *, s32)`
+contract; it is distinct from the adjacent ordinary arrangement hook.
+The two dispatch bodies remain ASM.
+
+## Terminal glyph constructors preserve chain pointers
+
+DDS2 `0019F5E8` and `0019F6C8` return `FrFontGlyph *` and take a previous
+`FrFontGlyph *` as their sixth argument. Both native-matching definitions
+append text, update the resulting chain and return it. The terminal
+numeric/currency callers in `002665B0` now use that actual contract,
+with null previous chains and no integer-return reconstruction casts.
+The existing glyph typedef is declared before the first pointer import.
+
