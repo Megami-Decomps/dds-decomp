@@ -334,7 +334,7 @@ void sdfClearModelScalarOverrides(SdfModel *model) {
 }
 
 /* Return the first override value when selected, otherwise its shared default. */
-f32 sdfGetFirstTextOverrideOrDefault(SdfModel *model) {
+f32 sdfGetFirstModelScalar(SdfModel *model) {
     if ((model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) != 0) {
         return model->scalarOverrideFirst;
     }
@@ -342,7 +342,7 @@ f32 sdfGetFirstTextOverrideOrDefault(SdfModel *model) {
 }
 
 /* Return the second override value when selected, otherwise its shared default. */
-f32 sdfGetSecondTextOverrideOrDefault(SdfModel *model) {
+f32 sdfGetSecondModelScalar(SdfModel *model) {
     if ((model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) != 0) {
         return model->scalarOverrideSecond;
     }
