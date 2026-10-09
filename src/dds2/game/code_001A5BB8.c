@@ -882,7 +882,7 @@ extern s32 D_003B4A08[];
 void itfDrawSoundSelectorFadeLayers(ItfMesState *object) {
     s32 bounds[4];
     BtlFade *fade = &object->fade;
-    s32 packet;
+    SdfListHead *packet;
     s32 expansion;
     SdfPoolNode *surface;
 
@@ -890,14 +890,14 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *object) {
     bounds[1] = 0xC60;
     bounds[2] = 0x1BD0;
     bounds[3] = 0xD58;
-    packet = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList((SdfListHead *)packet);
+    packet = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(packet);
     D_003B4A08[3] = 0xFF;
     itfQueueTextureBoundQuadPacket(bounds, D_003B49F8, D_003B4A08, object->renderValue,
-                                  itfMesWork.windowTexture, 0, (SdfListHead *)packet);
+                                  itfMesWork.windowTexture, 0, packet);
     D_003B4A08[3] = fade->alpha;
     itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->renderValue,
-                                  itfMesWork.windowTexture, 0, (SdfListHead *)packet);
+                                  itfMesWork.windowTexture, 0, packet);
     if (fade->timer > 0) {
         expansion = 0x80 - fade->timer;
         bounds[0] -= expansion * 2;
@@ -905,13 +905,13 @@ void itfDrawSoundSelectorFadeLayers(ItfMesState *object) {
         bounds[2] += expansion * 2;
         bounds[3] += expansion;
         D_003B4A08[3] = fade->timer;
-        itfSendTablePacket((SdfListHead *)packet, 1, 0);
+        itfSendTablePacket(packet, 1, 0);
         itfQueueTextureBoundQuadPacket(bounds, D_003B49E8, D_003B4A08, object->renderValue,
-                                      itfMesWork.windowTexture, 0, (SdfListHead *)packet);
-        itfSendTablePacket((SdfListHead *)packet, 0, 0);
+                                      itfMesWork.windowTexture, 0, packet);
+        itfSendTablePacket(packet, 0, 0);
     }
     surface = &kwlnDrawSurfaces[object->unk10];
-    surface->append(surface, (SdfListHead *)packet);
+    surface->append(surface, packet);
 }
 
 s32 sndVisitQueuedResources(void) {
@@ -1153,13 +1153,13 @@ s32 itfUpdateTestMessageResourceInput(KwlnTask *task) {
 }
 
 s32 sndUpdateTestMsgTask(KwlnTask *task) {
-    s32 mem;
+    SdfListHead *mem;
     if ((sndTestMessageTexture != 0) && (sndTestMessageResourceIndex != 3)) {
-        mem = sdfAllocPacketAligned(0x20);
-        sdfInitPacketList((SdfListHead *)mem);
-        itfSendTablePacket((SdfListHead *)mem, 0, 0);
-        itfQueueTextureBoundQuadPacket(D_003B4D08, D_003B4D18, D_003B4D28, 0xFFF, sndTestMessageTexture, 0, (SdfListHead *)mem);
-        D_003805A8.append(&D_003805A8, (SdfListHead *)mem);
+        mem = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(mem);
+        itfSendTablePacket(mem, 0, 0);
+        itfQueueTextureBoundQuadPacket(D_003B4D08, D_003B4D18, D_003B4D28, 0xFFF, sndTestMessageTexture, 0, mem);
+        D_003805A8.append(&D_003805A8, mem);
         return 0;
     }
     return 0;

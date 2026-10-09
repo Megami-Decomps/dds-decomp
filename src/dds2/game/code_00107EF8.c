@@ -634,8 +634,8 @@ void evtSubmitDefaultDepthGradientRect(s32 x, s32 y, s32 width, s32 height, s32 
 
 void evtSubmitGradientTriangle(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 color1, s32 color2) {
     s32 coords[3][2];
-    s32 command;
-    s32 packet;
+    SdfListHead *command;
+    SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
     SdfPoolNode *descriptor;
@@ -658,11 +658,11 @@ void evtSubmitGradientTriangle(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s
     coords[1][1] = y1 * 8;
     coords[2][0] = x2 * 16;
     coords[2][1] = y2 * 8;
-    command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList((SdfListHead *)command);
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 3));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4D, 2, 0x41, 3);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 3));
+    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 3);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     for (i = 0; i < 3; i++) {
         if (i == 0) {
             dst[0] = (u64)r0 | ((u64)g0 << 32);
@@ -680,9 +680,9 @@ void evtSubmitGradientTriangle(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s
             ((u64)(coords[i][1] + 0x7900) << 32);
         dst += 2;
     }
-    sdfAppendPacket((SdfListHead *)command, (u32)packet);
+    sdfAppendPacket(command, (u32)packet);
     descriptor = &kwlnDrawSurfaces[kwlnDrawSurfaceIndex];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 
