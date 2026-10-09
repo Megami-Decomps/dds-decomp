@@ -14,7 +14,7 @@
 #include "sdf_draw.h"
 #include "btl_sound.h"
 
-#define EFF_OBJ_KIND 7
+#define EFF_OBJ_KIND EFF_WORLD_KIND_EFFECT_OBJECT
 #define EFF_OBJ_STATE_BOUND_BILL 1
 #define EFF_OBJ_STATE_BILL_NODE 3
 #define EFF_OBJ_STATE_EVENT_NODE 5
@@ -267,7 +267,7 @@ EffectObj *effObjCreateWithVectors(u32 worldCounter, void *firstVec, void *secon
     EffectObj *obj;
     EffectDependencyState *data;
 
-    obj = (EffectObj *)dds3AppendWorldObjectNode(7);
+    obj = (EffectObj *)dds3AppendWorldObjectNode(EFF_WORLD_KIND_EFFECT_OBJECT);
     if (obj == NULL) {
         return NULL;
     }
