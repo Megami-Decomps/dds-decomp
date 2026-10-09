@@ -377,7 +377,7 @@ extern u32 D_003B13A0[];
 extern u32 D_003B13F0[];
 extern SdfPoolNode *D_003B14B0[];
 extern s32 sdfAllocPacketAligned(s32);
-extern void func_003332E8(u32, u32);
+extern void func_003332E8(struct SdfAsset *, u32);
 extern s32 func_00167A10(EffPacketParams *);
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
@@ -1222,7 +1222,7 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
     VU0_LOAD_MATRIX(matrix);
     sdfConsAppendVuPacket(packet, 0);
     if (pool->sharedResource != NULL) {
-        func_003332E8((u32)pool->drawAsset, (u32)pool->sharedResource->textureHandle);
+        func_003332E8(pool->drawAsset, (u32)pool->sharedResource->textureHandle);
         D_00452020->texcoords = D_003B13F0;
     } else {
         D_00452020->texcoords = NULL;

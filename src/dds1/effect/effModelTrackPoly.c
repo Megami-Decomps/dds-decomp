@@ -214,7 +214,6 @@ void effTrackPolyInterpolateCatmullRomPoint(f32 (*p)[4], f32 t)
 extern EffTrackPolyDraw D_003D6640;
 extern const u32 D_003556D0[];
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
-struct SdfTextParam;
 
 EffTrackPolyData *effTrackPolyAllocateHistoryData(s32 historyLength, s32 steps) {
     s32 count = historyLength * steps * 2 + 4;

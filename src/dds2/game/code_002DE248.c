@@ -2864,8 +2864,8 @@ extern u32 D_003E9AA0[12];
 extern u32 D_003E9AD0[20];
 extern u32 D_003E9B20[16];
 extern SdfTex *func_002DDD60(void *, RefObj *);
-struct SdfTextParam;
-extern void func_003332E8(struct SdfTextParam *, u32);
+struct SdfAsset;
+extern void func_003332E8(struct SdfAsset *, u32);
 
 void func_002E5E88(u8 *work, void *matrix) {
     EffTrackSet *track = (EffTrackSet *)work;
@@ -2914,7 +2914,7 @@ void func_002E5E88(u8 *work, void *matrix) {
             texture = func_002DDD60(surface, reference);
         }
 setTexture:
-        func_003332E8((struct SdfTextParam *)track->handle, (u32)texture);
+        func_003332E8((struct SdfAsset *)track->handle, (u32)texture);
     }
     sdfConsAppendAssetPacket(list, track->handle, 0);
 

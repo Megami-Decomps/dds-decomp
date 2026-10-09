@@ -4090,7 +4090,6 @@ typedef struct EffPCPBeamDrawParams {
 
 extern EffPCPBeamDrawParams D_003D6610;
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
-struct SdfTextParam;
 
 /* vu0 routine: initialize both transforms with the libvu0 identity primitive. */
 EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {

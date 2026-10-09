@@ -6176,10 +6176,10 @@
 0x003332A0	sdfSetPrimaryStateWordThird	inferred	Stores the third primary-state u32 at SdfAsset+0x20 and marks the primary state dirty.
 0x003332B8	sdfSetPrimaryStateWordFourth	inferred	Stores the fourth primary-state raw word at SdfAsset+0x28 and marks the primary state dirty.
 0x003332D0	sdfSetPrimaryStateFloat	inferred	Stores the primary-state float at SdfAsset+0x1C and marks the primary state dirty.
-0x00333340	sdfEnsurePrimaryTextSubParam	inferred	Allocates the first SdfTextParam subparameter at +0x38 only if it is absent.
+0x00333340	sdfEnsurePrimaryTextSubParam	inferred	Allocates the asset primary scalar subparameter at +0x38 only if it is absent.
 0x00333378	sdfSetPrimaryTextScalars	inferred	Stores five scalar values in the primary text subparameter and marks it dirty. [names_reviewed8.tsv]
 0x003333F8	sdfCopyPrimaryTextScalars	inferred	Copies five input scalars into the primary text subparameter. [names_reviewed8.tsv]
-0x003334A8	sdfEnsureSecondaryTextSubParam	inferred	Allocates the second SdfTextParam subparameter at +0x3C only if it is absent.
+0x003334A8	sdfEnsureSecondaryTextSubParam	inferred	Allocates the asset secondary scalar subparameter at +0x3C only if it is absent.
 0x003334E0	sdfSetSecondaryTextScalars	inferred	Stores five scalars in the secondary text subparameter and marks it dirty. [names_reviewed8.tsv]
 0x00333560	sdfCopySecondaryTextScalars	inferred	Copies five input scalars into the secondary text subparameter. [names_reviewed8.tsv]
 0x003335C8	sdfSetTextScalarPair	inferred	Stores the paired floats and marks their dirty flag. [names_reviewed8.tsv]
