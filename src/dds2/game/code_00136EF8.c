@@ -208,7 +208,6 @@ typedef struct FldTaskInfo {
 
 
 
-extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *object, u32 key, s32 kind);
 
 extern void *dds3GetWorldObjectPayload(EffWorldNode *object);
 
