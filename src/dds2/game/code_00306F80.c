@@ -212,7 +212,6 @@ extern s32 sdfConsMeasurePacketWithHeader(s32 packet);
 
 extern s32 sdfAllocPacketAligned(s32);
 
-extern void sdfInitPacketList(SdfListHead *);
 
 /* Build the optional overlay and main packet, then dispatch their draw callback. */
 GridDrawWork *itfSubmitGridPacketsAndDraw(GridDrawWork *object, u8 *data, s32 kind) {

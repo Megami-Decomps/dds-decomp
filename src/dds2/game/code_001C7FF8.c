@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dat_command.h"
 #include "fr_font.h"
 #include "sdf_chip.h"
 #include "btl_scene_fade.h"
@@ -50,10 +51,6 @@ extern char *btlCommandPanelTaskNameRef;
 extern void func_001C7DB8(s32, s32);
 
 
-typedef struct RosterAvailability {
-    u8 flags;
-    u8 pad[7];
-} RosterAvailability;
 
 
 extern BattleSceneObject *fldGetSceneObjectTaskUserData(void);
@@ -155,7 +152,6 @@ extern u8 *D_00435E5C;
 
 
 
-extern s32 datItemSkillRecords;
 
 void fldInitializeBattleSceneFlow(void) {
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
@@ -280,13 +276,13 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C8768);
 /* Pack available roster IDs and their values into consecutive byte pairs. */
 void fldCollectAvailableRosterEntries(s32 unused, s16 *count) {
     u8 *roster;
-    RosterAvailability *availability;
+    DatItemSkillRecord *availability;
     u8 *output;
     s32 found = 0;
     s32 i = 0;
     btlGetRuntime();
     roster = datGameState->inventory.counts;
-    availability = (RosterAvailability *)datItemSkillRecords;
+    availability = datItemSkillRecords;
     output = D_003B5B10;
     do {
         if (*roster != 0 && (availability->flags & 2) != 0) {

@@ -9,7 +9,6 @@
 #include "ee_mmi.h"
 #include "eff.h"
 
-extern void sdfInitPacketList(SdfListHead *);
 extern void *sdfConsAllocateColumnPacket(s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern s32 kwlnGetDrawBufferIndex(void);
