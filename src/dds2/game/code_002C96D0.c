@@ -3552,7 +3552,7 @@ typedef struct FileConfigTask {
     void *memory;   /* 0x00 */
     u32 state;      /* 0x04 */
     s32 ticks;
-    u32 frame;      /* 0x0C: FileConfigList, passed to menu window drawing */
+    struct MenuList *frame; /* 0x0C: owned save/config list */
     u32 slots[5];   /* 0x10 */
     u8 pad24[4];
     s32 result;     /* 0x28: negative when the queued load failed */
@@ -3588,10 +3588,10 @@ s32 func_002D1058(s32 mode) {
     task->ticks = 0;
     task->result = 0;
     list = mnuCreateListState(0, 5, 0x23);
-    task->frame = (u32)list;
+    task->frame = list;
     list->drawCallback = func_002D1930;
     for (i = 0; i < 5; i++) {
-        node = (FileConfigListNode *)mnuListAppendNode((struct MenuList *)task->frame, NULL);
+        node = (FileConfigListNode *)mnuListAppendNode(task->frame, NULL);
         node->resource = sdfAllocSizeClassBlock(4);
         memset(node->resource, 0, 4);
     }
@@ -3633,7 +3633,7 @@ void fileConfigTaskDestroy(void) {
             sdfReleaseChipBlock(node->resource);
             node = node->next;
         }
-        mnuDestroyListState((struct MenuList *)(u32)((FileConfigTask *)fileConfigTaskWork)->frame);
+        mnuDestroyListState(((FileConfigTask *)fileConfigTaskWork)->frame);
         ((FileConfigTask *)fileConfigTaskWork)->frame = 0;
         for (i = 0; i < 5; i++) {
             if (((FileConfigTask *)fileConfigTaskWork)->slots[i] != 0) {
@@ -3770,14 +3770,14 @@ s32 func_002D1450(void) {
 
     oldIndex = ((FileConfigList *)((FileConfigTask *)fileConfigTaskWork)->frame)->cursor->index;
     if ((u8)D_0037F510[0x26] & 2) {
-        if (mnuRetreatListCursorDefault((struct MenuList *)(u32)((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
+        if (mnuRetreatListCursorDefault(((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
             sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             ((FileConfigTask *)fileConfigTaskWork)->transitionTicks = 8;
             ((FileConfigTask *)fileConfigTaskWork)->previousIndex = oldIndex;
         }
     }
     if ((u8)D_0037F510[0x27] & 2) {
-        if (mnuAdvanceListCursorDefault((struct MenuList *)(u32)((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
+        if (mnuAdvanceListCursorDefault(((FileConfigTask *)fileConfigTaskWork)->frame) != NULL) {
             sndSetSequenceVolumePan(0, 0x7F, 0x3F);
             ((FileConfigTask *)fileConfigTaskWork)->previousIndex = oldIndex;
             ((FileConfigTask *)fileConfigTaskWork)->transitionTicks = 8;
@@ -3826,7 +3826,7 @@ s32 fileStartQueuedLoad(void) {
         return -1;
     }
     func_002D27A0((void *)fileConfigTaskWork);
-    mnuCallInitWide(0x400, 0x400, 0, ((FileConfigTask *)fileConfigTaskWork)->frame, 0x53);
+    mnuCallInitWide(0x400, 0x400, 0, (u32)((FileConfigTask *)fileConfigTaskWork)->frame, 0x53);
     return 0;
 }
 
