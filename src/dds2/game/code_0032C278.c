@@ -873,10 +873,10 @@ void sdfInitDrawPacket(SdfGsDrawDefaultsRegisters *packet) {
 }
 
 /* Build the common header and FRAME/ZBUF/XYOFFSET/SCISSOR state for one GS context. */
-void sdfBuildSceneDrawHeader(SdfPacket *packet, s32 frameAddress, s32 width, s32 height,
+void sdfBuildSceneDrawHeader(SdfGsContextPacket *packet, s32 frameAddress, s32 width, s32 height,
                            s32 frameFormat, s32 depthAddress, s32 depthFormat, s32 gsContext) {
-    sdfInitializeDmaReferenceTag((SdfGsPacketHeader *)packet, SDF_SCENE_DRAW_PAYLOAD_QWORDS);
-    sdfBuildFrameDepthScissorPacket((SdfGsContextRegisters *)(packet + 1), frameAddress, width, height, frameFormat, depthAddress, depthFormat, 0, gsContext);
+    sdfInitializeDmaReferenceTag(&packet->header, SDF_SCENE_DRAW_PAYLOAD_QWORDS);
+    sdfBuildFrameDepthScissorPacket(&packet->registers, frameAddress, width, height, frameFormat, depthAddress, depthFormat, 0, gsContext);
 }
 
 

@@ -20,6 +20,21 @@ typedef char SdfGsContextRegisters_xyoffset_at_0x20[
 typedef char SdfGsContextRegisters_scissor_at_0x30[
     ((u32)&((SdfGsContextRegisters *)0)->scissor == 0x30) ? 1 : -1];
 
+/* Accessed output span of the common scene-context builder. */
+typedef struct SdfGsContextPacket {
+    SdfGsPacketHeader header;
+    SdfGsContextRegisters registers;
+} SdfGsContextPacket;
+
+typedef char SdfGsContextPacket_size_must_be_0x60[
+    (sizeof(SdfGsContextPacket) == 0x60) ? 1 : -1];
+typedef char SdfGsContextPacket_registers_at_0x20[
+    ((u32)&((SdfGsContextPacket *)0)->registers == 0x20) ? 1 : -1];
+
+void sdfBuildSceneDrawHeader(SdfGsContextPacket *packet, s32 frameAddress,
+    s32 width, s32 height, s32 frameFormat, s32 depthAddress,
+    s32 depthFormat, s32 gsContext);
+
 void sdfBuildFrameDepthScissorPacket(SdfGsContextRegisters *packet,
     s32 frameAddress, s32 width, s32 height, s32 frameFormat,
     s32 depthAddress, s32 depthFormat, s32 fieldOffset, s32 gsContext);
