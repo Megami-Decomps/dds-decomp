@@ -31,9 +31,7 @@ extern s32 mdlFlagTest(s32);
 extern s32 D_003BAA9C;
 extern void func_00283BF0(u32 *out, u32 value);
 extern u32 mnuSetPartyEntryMenuValue(DatPartyRecord *, u32);
-extern void mnuSetPopupEntryFlagged();
 extern void mnuPlayInputSound(s32, s32, u32 *);
-extern void mnuSetPopupEntry(s32, s32);
 extern u8 D_0037C860[];
 extern char D_0037CA38[];
 extern char D_0037C9AC[];
@@ -131,7 +129,7 @@ s32 mnuStaffImageExitA(KwlnTask *task) {
         if (item != 0) {
             menu->pendingItem = 0;
             if (mnuIsStaffWindowReadyForItem((u16)item, (s32)context) == 0) {
-                mnuSetPopupEntry((s32)&context->popupState, (s32)D_0037C9AC);
+                mnuSetPopupEntry(&context->popupState, (void *)D_0037C9AC);
             }
         }
     }
@@ -206,7 +204,7 @@ s32 mnuHandleSecondaryStaffObjectInput(s32 task) {
         buttons = 0;
     }
     if (buttons & MNU_STAFF_INPUT_CANCEL) {
-        mnuSetPopupEntry((s32)popup, (s32)D_0037C9AC);
+        mnuSetPopupEntry(popup, (void *)D_0037C9AC);
     }
     window = menu->secondaryObject;
     if (window != NULL) {
@@ -522,13 +520,13 @@ s32 func_00274768(KwlnTask *task) {
         }
         if (buttons & MNU_STAFF_INPUT_CANCEL) {
             menu->inputState = 1;
-            mnuSetPopupEntryFlagged((s32)&context->popupState, (s32)D_0037C9E4);
+            mnuSetPopupEntryFlagged(&context->popupState, (void *)D_0037C9E4);
         }
         mnuPlayInputSound(0, buttons, (u32 *)list->list);
     } else {
         if (func_00273220(menu->itemToInsert, menu->inventoryItem, context) == 0) {
             mnuClearListFlags(0, &context->pageWindow);
-            mnuSetPopupEntryFlagged((s32)&context->popupState, (s32)D_0037C9AC);
+            mnuSetPopupEntryFlagged(&context->popupState, (void *)D_0037C9AC);
         } else {
             menu->listState = 0;
         }

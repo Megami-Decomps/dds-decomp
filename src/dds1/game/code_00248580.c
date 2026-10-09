@@ -991,8 +991,6 @@ s32 fldPollSceneState(void) {
 
 extern char D_0036ADF4[];
 
-extern void mnuSetPopupEntry(s32 *, char *);
-
 /* Seed the task's popup slot before running panel mode zero with the supplied request. */
 s32 mnuPrepareTerminalPopupAndDispatch(KwlnTask *value) {
     s32 context = kwlnTaskGetUserValue(value);
@@ -1656,7 +1654,6 @@ u32 func_0024B470(void) {
 
 extern s32 func_0024A1D8(s32 action, s32 context);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
-extern void mnuSetPopupEntryFlagged(s32 *state, void *entry);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 extern void mnuPlayInputSound(s32 mode, s32 buttons, u32 *flags);
 extern s32 D_0036AC80[];
@@ -2049,7 +2046,7 @@ s32 evtOpenTerminalFollowupPopupWhenIdle(KwlnTask *request) {
     if (*panel == 0) {
         if (evtGetMessageWindowControlState() == 0) {
             if (fldClassifyRemainingFrames(state) == 0) {
-                mnuSetPopupEntry((s32)panel, (s32)D_0036AE2C);
+                mnuSetPopupEntry(panel, (void *)D_0036AE2C);
             }
         }
     }

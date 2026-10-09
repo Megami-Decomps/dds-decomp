@@ -26,8 +26,6 @@ extern s64 fileConsumeConfigTaskReady(void);
 
 extern u8 D_0037C844[];
 
-extern void mnuSetPopupEntryFlagged();
-
 extern void mnuDrawBackdrop(s32, s32);
 
 extern void func_0027E8D8(s32, s32, s32, u32, s32);
@@ -35,7 +33,6 @@ extern void func_0027E8D8(s32, s32, s32, u32, s32);
 extern void mnuCreateStaffImageSprite(s32);
 
 extern s32 func_002719F0(s32);
-extern void mnuSetPopupEntry(s32, s32);
 extern void func_0027C788(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
@@ -70,13 +67,13 @@ s32 mnuHandleCampFieldSkillInput(KwlnTask *callback) {
             if ((entry->flags48 & 1) == 0) {
                 u32 index = entry->sortKeyPrimary + 1;
 
-                mnuSetPopupEntry((s32)popup, (s32)(D_0037C748 + index * 0x1C));
+                mnuSetPopupEntry(popup, (void *)(D_0037C748 + index * 0x1C));
             } else {
                 input = 0x8000;
             }
         }
         if (input & 2) {
-            mnuSetPopupEntry((s32)popup, (s32)D_0037C748);
+            mnuSetPopupEntry(popup, (void *)D_0037C748);
         }
     }
     if ((input & 0x300000) == 0) {
