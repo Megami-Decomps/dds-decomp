@@ -1204,12 +1204,12 @@ PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res)
 typedef struct PcpScatterParams {
     f32 origin[4];
     f32 matrix[16];
-    u32 unk50;
+    u32 packetQueueIndex;
     u8 loop;
     u8 pad55[3];
     s32 duration;
     u32 particleCount;
-    u32 unk60;
+    u32 segmentsPerParticle;
     u32 randomDelayRange;
     s32 fadeIn;
     s32 fadeRange;
@@ -1277,10 +1277,10 @@ PcpScatterInstance *effPcpScatterCreateParticleInstance(src, resource)
     inst->allocationHandle = allocation;
     inst->particles = particle;
     VU0_COPY_MATRIX(inst->matrix, src->matrix);
-    object = effScatterCreateDrawObject(src->particleCount, src->unk60);
-    drawWord = src->unk50;
+    object = effScatterCreateDrawObject(src->particleCount, src->segmentsPerParticle);
+    drawWord = src->packetQueueIndex;
     inst->scatterObject = object;
-    object->unk50 = drawWord;
+    object->packetQueueIndex = drawWord;
     if (resource != 0) {
         effCreateScatterResource(object, resource);
     }
@@ -1551,10 +1551,10 @@ PcpScatterInstanceB *effScatterCreateDampedRing(src, resource)
     inst->particles = particle;
     inst->age = 0;
     VU0_COPY_MATRIX(inst->matrix, src->matrix);
-    object = effScatterCreateDrawObject(src->particleCount, src->unk60);
-    drawWord = src->unk50;
+    object = effScatterCreateDrawObject(src->particleCount, src->segmentsPerParticle);
+    drawWord = src->packetQueueIndex;
     inst->scatterObject = object;
-    object->unk50 = drawWord;
+    object->packetQueueIndex = drawWord;
     if (resource != 0) {
         effCreateScatterResource(object, resource);
     }
@@ -1841,10 +1841,10 @@ PcpScatterInstanceC *effScatterCreateTwoColorRing(src, resource)
     inst->particles = particle;
     inst->age = 0;
     VU0_COPY_MATRIX(inst->matrix, src->matrix);
-    object = effScatterCreateDrawObject(src->particleCount, src->unk60);
-    drawWord = src->unk50;
+    object = effScatterCreateDrawObject(src->particleCount, src->segmentsPerParticle);
+    drawWord = src->packetQueueIndex;
     inst->scatterObject = object;
-    object->unk50 = drawWord;
+    object->packetQueueIndex = drawWord;
     if (resource != 0) {
         effCreateScatterResource(object, resource);
     }
@@ -2137,10 +2137,10 @@ PcpScatterPlainInstance *effPcpScatterCreatePlainInstance(src, resource)
     inst->allocationHandle = allocation;
     inst->particles = particle;
     EE_MMI_UNIT_MATRIX(inst->matrix);
-    object = effScatterCreateDrawObject(src->particleCount, src->unk20);
-    drawWord = src->unk10;
+    object = effScatterCreateDrawObject(src->particleCount, src->segmentsPerParticle);
+    drawWord = src->packetQueueIndex;
     inst->scatterObject = object;
-    object->unk50 = drawWord;
+    object->packetQueueIndex = drawWord;
     if (resource != 0) {
         effCreateScatterResource(object, resource);
     }

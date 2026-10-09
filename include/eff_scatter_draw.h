@@ -12,7 +12,7 @@ struct PcpScatterRes;
 typedef struct PcpScatterDraw {
     f32 origin[4];             // 0x00
     f32 matrix[16];            // 0x10
-    u32 unk50;                // 0x50
+    u32 packetQueueIndex;     // 0x50
     u32 color;                // 0x54
     u32 particleCount;        // 0x58
     s32 vectorsPerParticle;   // 0x5C: two coordinate vectors per vertex pair

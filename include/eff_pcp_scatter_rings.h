@@ -24,12 +24,12 @@ typedef struct PcpScatterParticle {
 typedef struct PcpScatterParamsB {
     f32 origin[4];
     f32 matrix[16];
-    u32 unk50;
+    u32 packetQueueIndex;
     u8 loop;
     u8 pad55[3];
     s32 duration;
     u32 particleCount;
-    u32 unk60;
+    u32 segmentsPerParticle;
     u32 randomDelayRange;
     s32 fadeIn;
     s32 fadeRange;
@@ -70,12 +70,12 @@ typedef struct PcpScatterInstanceB {
 typedef struct PcpScatterParamsC {
     f32 origin[4];
     f32 matrix[16];
-    u32 unk50;
+    u32 packetQueueIndex;
     u8 loop;
     u8 pad55[3];
     s32 duration;
     u32 particleCount;
-    u32 unk60;
+    u32 segmentsPerParticle;
     u32 randomDelayRange;
     s32 fadeIn;
     s32 fadeRange;
@@ -117,12 +117,12 @@ typedef struct PcpScatterInstanceC {
 /* Plain is a distinct 0xE8-byte parameter and 0x28-byte particle variant. */
 typedef struct PcpScatterPlainParams {
     f32 origin[4];
-    u32 unk10;
+    u32 packetQueueIndex;
     u8 loop;
     u8 pad15[3];
     s32 duration;
     u32 particleCount;
-    u32 unk20;
+    u32 segmentsPerParticle;
     u32 randomDelayRange;
     s32 fadeIn;
     s32 fadeRange;
