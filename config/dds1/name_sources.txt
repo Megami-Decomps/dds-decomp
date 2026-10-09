@@ -3332,6 +3332,8 @@
 0x001FC088	btlLoadAndReplaceResourceHandle	inferred	Loads a named temporary resource, replaces the descriptor's handle, then releases the temporary file buffer.
 0x001FC100	btlReplaceResourceHandle	inferred	Conditionally releases the old owned handle and replaces it with the handle loaded from the supplied resource name.
 0x001FC738	btlResourceRecordSetName	inferred	Copies name into resource record and stores strlen as nameLength. [names_R_FuncNames3.tsv]
+0x001FC778	btlFormatResourceNameWithExtension	inferred	Formats resource name followed by its extension using the record's two name fields.
+0x001FC7A8	btlFormatResourceNameWithoutExtension	inferred	Formats the resource name without its extension.
 0x001FD3C0	btlGetCommandEffectId	inferred	U0
 0x001FD5B0	effOffsetIfOwnerFlagClear	inferred	Adds one to the requested offset if bit nine of the owner's status word is clear.
 0x001FD990	effDecrementFirstCountdown	inferred	Decrements the first nonzero effect-child countdown at offset 0x318.

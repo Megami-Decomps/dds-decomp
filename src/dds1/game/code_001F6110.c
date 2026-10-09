@@ -2939,11 +2939,11 @@ void btlResourceRecordSetName(struct BtlResourceNameRecord *record, const char *
     record->nameLength = strlen(name);
 }
 
-void btlFormatResourceNameWithPrefix(struct BtlResourceNameRecord *record, char *output) {
+void btlFormatResourceNameWithExtension(struct BtlResourceNameRecord *record, char *output) {
     func_003014F0(output, D_003BB818, record->resourceName, record->extension);
 }
 
-void btlFormatResourceNameWithoutPrefix(struct BtlResourceNameRecord *record, char *output) {
+void btlFormatResourceNameWithoutExtension(struct BtlResourceNameRecord *record, char *output) {
     func_003014F0(output, D_003BB820, record->resourceName);
 }
 
