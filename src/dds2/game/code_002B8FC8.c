@@ -747,17 +747,11 @@ void mnuSelectFirstListNode(MenuList *list);
 
 void mnuSelectLastListNode(MenuList *list);
 
-s32 mnuAdvanceListWindowStart(MenuList *list);
-
-/* Step the visible head back one node when a full window follows it. */
-s32 mnuRetreatListWindowStart(MenuList *list);
-
 MenuListNode *mnuListAdvanceCursor(MenuList *list, s32 noScroll, s32 keepFade);
 
 MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade);
 
 
-s32 mnuScrollListToEnd(MenuList *list);
 
 
 

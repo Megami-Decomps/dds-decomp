@@ -1523,7 +1523,7 @@ extern char D_003ADA98[]; /* "E%3d_%03d" */
 extern u16 D_003BBE78;
 extern u16 D_003BBE7A;
 extern s32 func_003014F0(char *buffer, const char *format, ...);
-extern s32 func_0023E7F8(s32 mode, EvtRuntime *runtime);
+extern s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime);
 extern void evtReloadEventViewer(s32 slot, EvtRuntime *viewer);
 
 /* Apply one of three viewer selection modes to the selected slots. */
@@ -1535,8 +1535,8 @@ s32 evtViewCmdSelectMode(u32 unused0, u32 unused1, EvtRuntime *viewer) {
         if (mode >= 0) {
             func_003014F0(viewer->eventName, D_003ADA98, D_003BBE78, D_003BBE7A);
             if (viewer->inputA == 0) {
-                func_0023E7F8(0, viewer);
-                func_0023E7F8(1, viewer);
+                evtViewerSaveTrackFiles(0, viewer);
+                evtViewerSaveTrackFiles(1, viewer);
             } else if (viewer->inputA == 1) {
                 evtReloadEventViewer(0, viewer);
             } else if (viewer->inputA == 2) {

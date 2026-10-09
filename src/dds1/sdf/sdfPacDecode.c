@@ -29,19 +29,12 @@ typedef struct PacReloc {
     u8 payload[1]; /* 0x10 */
 } PacReloc;
 
-typedef struct PacBuf {
-    s32 result; /* 0x0: decoded result word, including completed resource addresses */
-    s32 resourceSlot; /* 0x4 */
-    u8 *cursor; /* 0x8 */
-    s32 remainingBytes; /* 0xC */
-} PacBuf;
-
 typedef struct PacAlloc {
     s32 entryCount; /* 0x0 */
     s32 entryIndex; /* 0x4 */
     u8 pad8[8]; /* 0x8 */
     SdfPacStreamPacketHeader entry; /* 0x10: current serialized entry header */
-    PacBuf buffer; /* 0x20: decoder state; result is the completed resource */
+    PacBuf buffer; /* 0x20: resource-buffer work record */
 } PacAlloc;
 
 
@@ -330,8 +323,8 @@ void sdfPacCopyResourceChunk(PacState *state) {
                 return;
             }
         }
-        resourceBuffer->result = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfResourceRetainAddress((struct SdfMemBlock *)(resourceBuffer->resourceSlot))));
-        sdfReleaseMemorySlot(&resourceBuffer->resourceSlot);
+        resourceBuffer->result = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)sdfResourceRetainAddress(resourceBuffer->resourceSlot));
+        sdfReleaseMemorySlot((s32 *)&resourceBuffer->resourceSlot);
         state->onComplete(state);
     }
 }
@@ -347,8 +340,8 @@ void sdfPacDecodeResourceChunk(PacState *state) {
     }
     {
         PacBuf *resourceBuffer = state->resourceBuffer;
-        resourceBuffer->result = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(sdfResourceRetainAddress((struct SdfMemBlock *)(resourceBuffer->resourceSlot))));
-        sdfReleaseMemorySlot(&resourceBuffer->resourceSlot);
+        resourceBuffer->result = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)sdfResourceRetainAddress(resourceBuffer->resourceSlot));
+        sdfReleaseMemorySlot((s32 *)&resourceBuffer->resourceSlot);
     }
     sdfReleaseChipBlock(state->decoder);
     state->onComplete(state);
@@ -386,11 +379,11 @@ void func_002EE6F8(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *bu
         return;
     }
     if (state->flags & PAC_STATE_ALLOCATE_HIGH) {
-        buffer->resourceSlot = (s32)sdfAllocGeneralBlockHigh(packet->payloadSize);
+        buffer->resourceSlot = sdfAllocGeneralBlockHigh(packet->payloadSize);
     } else {
-        buffer->resourceSlot = (s32)sdfAllocGeneralBlock(packet->payloadSize);
+        buffer->resourceSlot = sdfAllocGeneralBlock(packet->payloadSize);
     }
-    buffer->cursor = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)buffer->resourceSlot);
+    buffer->cursor = (u8 *)sdfResourceRetainAddress(buffer->resourceSlot);
     memcpy(buffer->cursor, packet, PAC_HEADER_BYTES);
     buffer->cursor += PAC_HEADER_BYTES;
     switch (packet->flags) {

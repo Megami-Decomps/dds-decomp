@@ -1299,7 +1299,7 @@ s32 mnuCampHasEligibleOwnedItems(void *context) {
 
 extern void func_00295400(void);
 
-s32 mnuCreateEnabledCampEntryWindow(s32 count, s32 *enabled, MenuTerminalContext *settings) {
+MenuWindowContainer *mnuCreateEnabledCampEntryWindow(s32 count, s32 *enabled, MenuTerminalContext *settings) {
     MenuWindowContainer *window;
     MenuTerminalWindowState *storage;
     s32 i;
@@ -1318,7 +1318,7 @@ s32 mnuCreateEnabledCampEntryWindow(s32 count, s32 *enabled, MenuTerminalContext
     storage->unk0C = settings->unkA0;
     storage->unk0E = settings->unkA2;
     storage->unk10 = settings->unkA4;
-    return (s32)window;
+    return window;
 }
 
 typedef struct CampEntryEnableSet {
@@ -1353,7 +1353,7 @@ void func_00260020(MenuTerminalContext *scene) {
     if (scene->unkA4 != 0) {
         options.enabled[5] = 1;
     }
-    scene->ownedWindows[0] = (MenuWindowContainer *)mnuCreateEnabledCampEntryWindow(7, options.enabled, scene);
+    scene->ownedWindows[0] = mnuCreateEnabledCampEntryWindow(7, options.enabled, scene);
 }
 
 s32 mnuCampResolveFlagRowValue(s32 row) {

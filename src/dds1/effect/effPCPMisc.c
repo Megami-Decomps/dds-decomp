@@ -19,6 +19,7 @@
 #include "eff_event.h"
 #include "eff_event_sound.h"
 #include "eff_pcp_group_set.h"
+#include "eff_pcp_block_set.h"
 #include "eff_pcp_cross.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
@@ -172,8 +173,6 @@ typedef char EffPCPChargeWork_size_must_be_0x1354[(sizeof(EffPCPChargeWork) == 0
 extern s8 D_003BB04C;
 extern s32 D_003BB048;
 
-extern struct EffPCPBlockSetWork *effPcpBuildBlockSet();
-
 /* Block `index` of a packed effect parameter set: data + offset table entry. */
 extern void *effParamTableGetBlock(void *data, s32 index);
 
@@ -250,39 +249,6 @@ typedef struct {
 } EffPCPDelayedPairs;
 
 extern void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index);
-/* The 0x50-byte parameter block copied by all block-set clones. */
-typedef struct EffPCPBlockSetParams {
-    f32 position[4];
-    s32 fadeInFrames;
-    s32 fadeOutFrames;
-    f32 scale;
-    s32 groupSize[3];
-    f32 groupScale[3];
-    f32 groupRandomScale[3];
-    f32 groupScatter[3];
-    s32 tailStartFrame;
-} EffPCPBlockSetParams;
-
-/* One 0x10C record for construction, cloning, setters and teardown.
-   A non-NULL source borrows its resources; NULL owns the listed handles. */
-typedef struct EffPCPBlockSetWork {
-    f32 matrix[16];
-    f32 previousPosition[4];
-    f32 currentPosition[4];
-    EffPCPBlockSetParams params;
-    u32 frame;
-    u32 count;
-    u32 color;
-    u32 mode;
-    EffParamWork *headHandle;
-    EffParamWork *handleA[5];
-    EffParamWork **list[3];
-    EffParamWork *handleB[5];
-    EffParamWork *tailHandle;
-    struct SdfMemBlock *alloc[3];
-    struct EffPCPBlockSetWork *source;
-} EffPCPBlockSetWork;
-
 /* Three frame thresholds and their block-set inputs form the copied prefix. */
 typedef struct EffPCPRotateParams {
     s32 startFrame[3];
@@ -295,9 +261,6 @@ typedef struct EffPCPRotateWork {
     s32 frame;
 } EffPCPRotateWork;
 
-extern void effPcpBlockSetWorkRelease(EffPCPBlockSetWork *work);
-extern void effPcpCopyVector60(EffPCPBlockSetWork *work, void *src);
-extern void effPcpCopyBlockMatrix(EffPCPBlockSetWork *work, void *src);
 extern void sdfComposeVuMatrixFromRegisters(void);
 struct EffPCPBeamWork;
 extern void effPcpBuildConcentricBeamVertices(f32 value, struct EffPCPBeamWork *work);
@@ -3158,25 +3121,23 @@ typedef struct {
     void *block15;
 } EffPCPBlockSet;
 
-EffPCPBlockSetWork *effPcpBuildBlockSet(args)
-    void *args;
-{
+EffPCPBlockSetWork *effPcpBuildBlockSet(void *parameterTable) {
     EffPCPBlockSet set;
     EffPCPBlockSetParams *first;
     u32 i;
 
-    first = effParamTableGetBlock(args, 0);
-    set.block1 = effParamTableGetBlock(args, 1);
+    first = effParamTableGetBlock(parameterTable, 0);
+    set.block1 = effParamTableGetBlock(parameterTable, 1);
     for (i = 0; i < 5; i++) {
-        set.group[i] = effParamTableGetBlock(args, 2 + i);
+        set.group[i] = effParamTableGetBlock(parameterTable, 2 + i);
     }
-    set.block7 = effParamTableGetBlock(args, 7);
-    set.block8 = effParamTableGetBlock(args, 8);
-    set.block9 = effParamTableGetBlock(args, 9);
+    set.block7 = effParamTableGetBlock(parameterTable, 7);
+    set.block8 = effParamTableGetBlock(parameterTable, 8);
+    set.block9 = effParamTableGetBlock(parameterTable, 9);
     for (i = 0; i < 5; i++) {
-        set.tail[i] = effParamTableGetBlock(args, 10 + i);
+        set.tail[i] = effParamTableGetBlock(parameterTable, 10 + i);
     }
-    set.block15 = effParamTableGetBlock(args, 15);
+    set.block15 = effParamTableGetBlock(parameterTable, 15);
     return effPcpCreateBlockSetWork(first, &set);
 }
 
@@ -3277,11 +3238,12 @@ void effPcpCopyBlockMatrix(EffPCPBlockSetWork *work, void *src) {
     VU0_COPY_MATRIX(work->matrix, src);
 }
 
-void func_0017E4F0(void) {
+EffPCPBlockSetWork *func_0017E4F0(void *parameterTable) {
     EffPCPBlockSetWork *work;
 
-    work = effPcpBuildBlockSet();
+    work = effPcpBuildBlockSet(parameterTable);
     work->mode = 1;
+    return work;
 }
 
 EffPCPBlockSetWork *effPcpCloneBlockWithUnitMatrix(EffPCPBlockSetWork *src) {
@@ -3298,11 +3260,12 @@ EffPCPBlockSetWork *effPcpCloneBlockWithUnitMatrix(EffPCPBlockSetWork *src) {
     return work;
 }
 
-void func_0017E668(void) {
+EffPCPBlockSetWork *func_0017E668(void *parameterTable) {
     EffPCPBlockSetWork *work;
 
-    work = effPcpBuildBlockSet();
+    work = effPcpBuildBlockSet(parameterTable);
     work->mode = 2;
+    return work;
 }
 
 EffPCPBlockSetWork *effCloneBlockWorkFromSource(EffPCPBlockSetWork *src) {

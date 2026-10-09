@@ -30,13 +30,6 @@ typedef struct PacAlloc {
     s32 resource;
 } PacAlloc;
 
-typedef struct PacBuf {
-    s32 result;
-    s32 resourceSlot;
-    u8 *cursor;
-    s32 remainingBytes;
-} PacBuf;
-
 extern DevState *sdfDevCreateCallbackState(const char *path, void *callback, s32 context);
 extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
 extern char *func_0035D5B0(const char *text, s32 delimiter);

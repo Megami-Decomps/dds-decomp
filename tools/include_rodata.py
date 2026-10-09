@@ -48,8 +48,8 @@ def place(version):
         unit = c.relative_to(ROOT / "src" / version).with_suffix("").as_posix()
         nonmatchings = ROOT / "asm" / version / "nonmatchings" / unit
         matchings = ROOT / "asm" / version / "matchings" / unit
-        if not nonmatchings.is_dir():
-            # Nothing of the unit is asm (its lines may be left over from a split).
+        if not nonmatchings.is_dir() and not matchings.is_dir():
+            # Nothing of the unit was split (its lines are left over from a split).
             text = c.read_text()
             stripped = re.sub(r'^INCLUDE_RODATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?', "", text, flags=re.M)
             if stripped != text:
@@ -139,6 +139,8 @@ def place(version):
                     continue
                 out = nonmatchings / f"{sym}.s"
                 if not out.exists():
+                    # A unit whose functions are all C still includes the rodata they name.
+                    nonmatchings.mkdir(parents=True, exist_ok=True)
                     out.write_text(".section .rodata\n\n" + block.group(0))
                 # Placed by address like any other included symbol: a function may
                 # use rodata the compiler emitted after later functions.

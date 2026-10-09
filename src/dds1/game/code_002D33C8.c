@@ -1,3 +1,5 @@
+#include "sdf_gs_gouraud_textured.h"
+#include "sdf_gs_scene_state.h"
 #include "sdf_gs_textured_shapes.h"
 #include "sdf_request.h"
 #include "sdf_gs_context.h"
@@ -810,32 +812,32 @@ void sdfBuildFrameDepthScissorPacket(SdfGsContextRegisters *packet, s32 frameAdd
 }
 
 /* Encode centered viewport bounds in GS coordinate words; the last two arguments are unused. */
-void sdfBuildCenteredViewBoundsPacket(u64 *packet, s32 width, s32 height, s32 unused0, s32 unused1) {
+void sdfBuildCenteredViewBoundsPacket(SdfGsCenteredBoundsRegisters *packet, s32 width, s32 height, s32 unused0, s32 unused1) {
     u32 lowerBounds = ((SDF_GS_CENTER_BIAS - height) << 19) | ((SDF_GS_CENTER_BIAS - width) << 3);
     u32 upperBounds = ((height + SDF_GS_CENTER_BIAS) << 19) | ((width + SDF_GS_CENTER_BIAS) << 3);
 
-    packet[3] = SDF_GS_PRIM;
-    packet[7] = SDF_GS_XYZ2;
-    packet[0] = SDF_GS_CENTERED_VIEW_BOUNDS_TEST;
-    packet[1] = SDF_GS_TEST_1;
-    packet[2] = SDF_GS_PRIMITIVE_SPRITE;
-    packet[4] = (u64)0xFE00 << 46;
-    packet[5] = SDF_GS_RGBAQ;
-    packet[6] = lowerBounds;
-    packet[8] = upperBounds;
-    packet[9] = SDF_GS_XYZ2;
+    packet->primitive.registerId = SDF_GS_PRIM;
+    packet->xyz2[0].registerId = SDF_GS_XYZ2;
+    packet->test.value = SDF_GS_CENTERED_VIEW_BOUNDS_TEST;
+    packet->test.registerId = SDF_GS_TEST_1;
+    packet->primitive.value = SDF_GS_PRIMITIVE_SPRITE;
+    packet->rgbaq.value = (u64)0xFE00 << 46;
+    packet->rgbaq.registerId = SDF_GS_RGBAQ;
+    packet->xyz2[0].value = lowerBounds;
+    packet->xyz2[1].value = upperBounds;
+    packet->xyz2[1].registerId = SDF_GS_XYZ2;
 }
 
 /* Seed PRMODECONT, COLCLAMP, DTHE and TEXA drawing registers. */
-void sdfInitDrawPacket(u64 *packet) {
-    packet[0] = 1;
-    packet[1] = SDF_GS_PRMODECONT;
-    packet[2] = 1;
-    packet[3] = SDF_GS_COLCLAMP;
-    packet[4] = 0;
-    packet[5] = SDF_GS_DTHE;
-    packet[6] = SDF_GS_DEFAULT_TEXA;
-    packet[7] = SDF_GS_TEXA;
+void sdfInitDrawPacket(SdfGsDrawDefaultsRegisters *packet) {
+    packet->prmodecont.value = 1;
+    packet->prmodecont.registerId = SDF_GS_PRMODECONT;
+    packet->colclamp.value = 1;
+    packet->colclamp.registerId = SDF_GS_COLCLAMP;
+    packet->dthe.value = 0;
+    packet->dthe.registerId = SDF_GS_DTHE;
+    packet->texa.value = SDF_GS_DEFAULT_TEXA;
+    packet->texa.registerId = SDF_GS_TEXA;
 }
 
 
@@ -848,11 +850,11 @@ void sdfBuildSceneDrawHeader(SdfPacket *packet, s32 frameAddress, s32 width, s32
 
 typedef struct SdfSceneDrawPacket {
     SdfGsPacketHeader header; /* 0x00 */
-    u64 draw[8];         /* 0x20 */
+    SdfGsDrawDefaultsRegisters drawDefaults;         /* 0x20 */
     SdfGsContextRegisters contextOne; /* 0x60 */
     SdfGsContextRegisters contextTwo; /* 0xA0 */
-    u64 limits[10];      /* 0xE0 */
-    u64 regs[8];         /* 0x130 */
+    SdfGsCenteredBoundsRegisters centeredBounds;      /* 0xE0 */
+    SdfGsSceneBlendRegisters blendState;         /* 0x130 */
 } SdfSceneDrawPacket;
 
 extern u8 D_003BD332;
@@ -875,16 +877,16 @@ void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfGraphObj *view, s
     depthFormat = view->auxiliaryFormat;
     sdfBuildFrameDepthScissorPacket(&packet->contextOne, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_003BD332, 0);
     sdfBuildFrameDepthScissorPacket(&packet->contextTwo, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_003BD332, 1);
-    sdfBuildCenteredViewBoundsPacket(packet->limits, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
-    packet->regs[0] = SDF_GS_SCENE_TEST;
-    packet->regs[1] = SDF_GS_TEST_1;
-    packet->regs[2] = SDF_GS_DEFAULT_ALPHA;
-    packet->regs[3] = SDF_GS_ALPHA_1;
-    packet->regs[4] = SDF_GS_SCENE_TEST;
-    packet->regs[5] = SDF_GS_TEST_2;
-    packet->regs[6] = SDF_GS_DEFAULT_ALPHA;
-    packet->regs[7] = SDF_GS_ALPHA_2;
-    sdfInitDrawPacket(packet->draw);
+    sdfBuildCenteredViewBoundsPacket(&packet->centeredBounds, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
+    packet->blendState.contextOne.test.value = SDF_GS_SCENE_TEST;
+    packet->blendState.contextOne.test.registerId = SDF_GS_TEST_1;
+    packet->blendState.contextOne.alpha.value = SDF_GS_DEFAULT_ALPHA;
+    packet->blendState.contextOne.alpha.registerId = SDF_GS_ALPHA_1;
+    packet->blendState.contextTwo.test.value = SDF_GS_SCENE_TEST;
+    packet->blendState.contextTwo.test.registerId = SDF_GS_TEST_2;
+    packet->blendState.contextTwo.alpha.value = SDF_GS_DEFAULT_ALPHA;
+    packet->blendState.contextTwo.alpha.registerId = SDF_GS_ALPHA_2;
+    sdfInitDrawPacket(&packet->drawDefaults);
 }
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", sdfRefreshSceneNodePackets);
@@ -894,11 +896,11 @@ typedef struct SdfSceneNode {
     SdfGraphObj *view; /* 0x8 */
     u8 padC[4];
     SdfGsPacketHeader header; /* 0x10 */
-    u64 draw[8];       /* 0x30 */
+    SdfGsDrawDefaultsRegisters drawDefaults;       /* 0x30 */
     SdfGsContextRegisters contextOne; /* 0x70 */
     SdfGsContextRegisters contextTwo; /* 0xB0 */
-    u64 limits[10];    /* 0xF0 */
-    u64 regs[8];       /* 0x140 */
+    SdfGsCenteredBoundsRegisters centeredBounds;    /* 0xF0 */
+    SdfGsSceneBlendRegisters blendState;       /* 0x140 */
     u64 framePacketWords[4]; /* 0x180 */
     SdfTexBuf texturePackets[2]; /* 0x1A0 */
 } SdfSceneNode;
@@ -916,16 +918,16 @@ void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view) {
     sdfInitializeDmaReferenceTag(&node->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
     node->view = view;
     node->link.patch = sdfRefreshSceneNodePackets;
-    sdfBuildCenteredViewBoundsPacket(node->limits, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
-    node->regs[0] = SDF_GS_SCENE_TEST;
-    node->regs[1] = SDF_GS_TEST_1;
-    node->regs[2] = SDF_GS_DEFAULT_ALPHA;
-    node->regs[3] = SDF_GS_ALPHA_1;
-    node->regs[4] = SDF_GS_SCENE_TEST;
-    node->regs[5] = SDF_GS_TEST_2;
-    node->regs[6] = SDF_GS_DEFAULT_ALPHA;
-    node->regs[7] = SDF_GS_ALPHA_2;
-    sdfInitDrawPacket(node->draw);
+    sdfBuildCenteredViewBoundsPacket(&node->centeredBounds, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
+    node->blendState.contextOne.test.value = SDF_GS_SCENE_TEST;
+    node->blendState.contextOne.test.registerId = SDF_GS_TEST_1;
+    node->blendState.contextOne.alpha.value = SDF_GS_DEFAULT_ALPHA;
+    node->blendState.contextOne.alpha.registerId = SDF_GS_ALPHA_1;
+    node->blendState.contextTwo.test.value = SDF_GS_SCENE_TEST;
+    node->blendState.contextTwo.test.registerId = SDF_GS_TEST_2;
+    node->blendState.contextTwo.alpha.value = SDF_GS_DEFAULT_ALPHA;
+    node->blendState.contextTwo.alpha.registerId = SDF_GS_ALPHA_2;
+    sdfInitDrawPacket(&node->drawDefaults);
 }
 
 /* Link the metadata node separately from the DMA payload one quadword later. */
@@ -1501,77 +1503,75 @@ void sdfQueueTexturedQuad(SdfListHead *list, s32 color, s32 primitive, s32 x0, s
 }
 
 /* Three vertices each carry UV and color plus a shared Z value. */
-void sdfWriteGouraudTexturedTrianglePacket(s32 address, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
+void sdfWriteGouraudTexturedTrianglePacket(SdfGsGouraudTexturedTrianglePayload *packet, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
                    s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2,
                    s32 u2, s32 v2, s32 color2, s32 depth) {
-    u64 *packet = (u64 *)address;
     u64 depthHigh = (u64)depth << 32;
 
-    packet[0] = 0xA400000000008001ULL;
-    packet[1] = 0x5135135130ULL;
-    packet[2] = (u32)(primitive | 0x11C);
-    packet[3] = (u0 & 0xFFFF) | (v0 << 16);
-    packet[4] = (u32)color0 | ((u64)0xFE00 << 46);
-    packet[5] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
-    packet[6] = (u1 & 0xFFFF) | (v1 << 16);
-    packet[7] = (u32)color1 | ((u64)0xFE00 << 46);
-    packet[8] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
-    packet[9] = (u2 & 0xFFFF) | (v2 << 16);
-    packet[10] = (u32)color2 | ((u64)0xFE00 << 46);
-    packet[11] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+    packet->gifTag = 0xA400000000008001ULL;
+    packet->gifRegisters = 0x5135135130ULL;
+    packet->primitive = (u32)(primitive | 0x11C);
+    packet->vertices[0].uv = (u0 & 0xFFFF) | (v0 << 16);
+    packet->vertices[0].rgbaq = (u32)color0 | ((u64)0xFE00 << 46);
+    packet->vertices[0].xyz2 = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet->vertices[1].uv = (u1 & 0xFFFF) | (v1 << 16);
+    packet->vertices[1].rgbaq = (u32)color1 | ((u64)0xFE00 << 46);
+    packet->vertices[1].xyz2 = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet->vertices[2].uv = (u2 & 0xFFFF) | (v2 << 16);
+    packet->vertices[2].rgbaq = (u32)color2 | ((u64)0xFE00 << 46);
+    packet->vertices[2].xyz2 = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
 void sdfQueueGouraudTexturedTriangle(s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
                    s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
                    s32 x2, s32 y2, s32 u2, s32 v2, s32 color2, s32 depth,
                    s32 (*alloc)(s32)) {
-    SdfPacket *packet;
+    SdfGsGouraudTexturedTrianglePacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    packet = (SdfPacket *)alloc(0x70);
-    packet->unk0 = 0x20000006;
-    packet->unk8 = (((u64)0x50000006 << 16) | 0x1000) << 16;
-    sdfWriteGouraudTexturedTrianglePacket((s32)&packet->unk10, primitive, x0, y0, u0, v0, color0, x1, y1, u1, v1, color1, x2, y2, u2, v2, color2, depth);
+    packet = (SdfGsGouraudTexturedTrianglePacket *)alloc(0x70);
+    packet->dmaTag = 0x20000006;
+    packet->vifCommands = (((u64)0x50000006 << 16) | 0x1000) << 16;
+    sdfWriteGouraudTexturedTrianglePacket(&packet->drawing, primitive, x0, y0, u0, v0, color0, x1, y1, u1, v1, color1, x2, y2, u2, v2, color2, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
 /* Pack four vertices with individual UV and color and a common depth. */
-void sdfWriteGouraudTexturedQuadPacket(s32 address, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
+void sdfWriteGouraudTexturedQuadPacket(SdfGsGouraudTexturedQuadPayload *packet, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
                    s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2, s32 u2,
                    s32 v2, s32 color2, s32 x3, s32 y3, s32 u3, s32 v3, s32 color3, s32 depth) {
-    u64 *packet = (u64 *)address;
     u64 depthHigh = (u64)depth << 32;
 
-    packet[0] = 0xE400000000008001ULL;
-    packet[1] = 0xF5135135135130ULL;
-    packet[2] = (u32)(primitive | 0x11C);
-    packet[3] = (u0 & 0xFFFF) | (v0 << 16);
-    packet[4] = (u32)color0 | ((u64)0xFE00 << 46);
-    packet[5] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
-    packet[6] = (u1 & 0xFFFF) | (v1 << 16);
-    packet[7] = (u32)color1 | ((u64)0xFE00 << 46);
-    packet[8] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
-    packet[9] = (u2 & 0xFFFF) | (v2 << 16);
-    packet[10] = (u32)color2 | ((u64)0xFE00 << 46);
-    packet[11] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
-    packet[12] = (u3 & 0xFFFF) | (v3 << 16);
-    packet[13] = (u32)color3 | ((u64)0xFE00 << 46);
-    packet[14] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
+    packet->gifTag = 0xE400000000008001ULL;
+    packet->gifRegisters = 0xF5135135135130ULL;
+    packet->primitive = (u32)(primitive | 0x11C);
+    packet->vertices[0].uv = (u0 & 0xFFFF) | (v0 << 16);
+    packet->vertices[0].rgbaq = (u32)color0 | ((u64)0xFE00 << 46);
+    packet->vertices[0].xyz2 = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet->vertices[1].uv = (u1 & 0xFFFF) | (v1 << 16);
+    packet->vertices[1].rgbaq = (u32)color1 | ((u64)0xFE00 << 46);
+    packet->vertices[1].xyz2 = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet->vertices[2].uv = (u2 & 0xFFFF) | (v2 << 16);
+    packet->vertices[2].rgbaq = (u32)color2 | ((u64)0xFE00 << 46);
+    packet->vertices[2].xyz2 = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+    packet->vertices[3].uv = (u3 & 0xFFFF) | (v3 << 16);
+    packet->vertices[3].rgbaq = (u32)color3 | ((u64)0xFE00 << 46);
+    packet->vertices[3].xyz2 = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
 void sdfQueueGouraudTexturedQuad(SdfListHead *list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
                    s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
                    s32 x2, s32 y2, s32 u2, s32 v2, s32 color2, s32 x3, s32 y3,
                    s32 u3, s32 v3, s32 color3, s32 depth, s32 (*alloc)(s32)) {
-    SdfPacket *packet;
+    SdfGsGouraudTexturedQuadPacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    packet = (SdfPacket *)alloc(0x90);
-    packet->unk0 = 0x20000008;
-    packet->unk8 = (((u64)0x50000008 << 16) | 0x1000) << 16;
-    sdfWriteGouraudTexturedQuadPacket((s32)&packet->unk10, primitive, x0, y0, u0, v0, color0, x1, y1, u1, v1, color1, x2, y2, u2, v2, color2, x3, y3, u3, v3, color3, depth);
+    packet = (SdfGsGouraudTexturedQuadPacket *)alloc(0x90);
+    packet->dmaTag = 0x20000008;
+    packet->vifCommands = (((u64)0x50000008 << 16) | 0x1000) << 16;
+    sdfWriteGouraudTexturedQuadPacket(&packet->drawing, primitive, x0, y0, u0, v0, color0, x1, y1, u1, v1, color1, x2, y2, u2, v2, color2, x3, y3, u3, v3, color3, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
