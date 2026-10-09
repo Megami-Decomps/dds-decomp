@@ -126,9 +126,6 @@ typedef union BattleEffectPayload {
 
 #endif
 
-/* Full battle-work layout for state users; unit/task-only users include btl.h. */
-#ifdef VERSION_DDS1
-
 /* Embedded debug-list cursor state; the row limit is independent of count. */
 typedef struct BtlDebugMenuCursor {
     u32 count;
@@ -137,6 +134,33 @@ typedef struct BtlDebugMenuCursor {
     u32 rows;
 } BtlDebugMenuCursor;
 typedef char BtlDebugMenuCursorExtent[(sizeof(BtlDebugMenuCursor) == 0x10) ? 1 : -1];
+
+/* Battle debug-menu work: a cleared word, the list cursors, the selected unit
+ * and three row tables. DDS1 embeds it at 0x6A4 and DDS2 at 0x728; indexed
+ * table accesses address the tables relative to this nested record. */
+typedef struct BtlDebugMenuWork {
+    s32 unk00;
+    BtlDebugMenuCursor actionMenu; /* 0x04: seven debug actions. */
+    BtlDebugMenuCursor modelMenu; /* 0x14: enemy/party model selection. */
+    u8 pad24[0x10];
+    BtlDebugMenuCursor motionMenu; /* 0x34 */
+    BtlDebugMenuCursor gunMenu; /* 0x44 */
+    u8 pad54[0x10];
+    BtlUnit *selectedUnit; /* 0x64 */
+#ifdef VERSION_DDS1
+    s32 table0[0x20]; /* 0x68 */
+    s32 table1[0x180]; /* 0xE8 */
+    s32 table2[0x20]; /* 0x6E8 */
+#endif
+#ifdef VERSION_DDS2
+    s32 table0[0x30]; /* 0x68 */
+    s32 table1[0x180]; /* 0x128 */
+    s32 table2[0x60]; /* 0x728 */
+#endif
+} BtlDebugMenuWork;
+
+/* Full battle-work layout for state users; unit/task-only users include btl.h. */
+#ifdef VERSION_DDS1
 
 /* Observed fields of the singleton battle work returned by func_001A17F0.
  * This is one object, not separate script/event/actor-update contexts. Holes
@@ -297,17 +321,7 @@ typedef struct BtlState {
     u8 pad670[0x24];
     BattleEffectState *effect; /* 0x694 */
     u8 pad698[0xC];
-    s32 unk_6A4;
-    BtlDebugMenuCursor debugActionMenu; /* 0x6A8: seven debug actions. */
-    BtlDebugMenuCursor debugModelMenu; /* 0x6B8: enemy/party model selection. */
-    u8 pad6C8[0x10];
-    BtlDebugMenuCursor debugMotionMenu; /* 0x6D8 */
-    BtlDebugMenuCursor debugGunMenu; /* 0x6E8 */
-    u8 pad6F8[0x10];
-    BtlUnit *debugSelectedUnit; /* 0x708 */
-    s32 table0[0x20]; /* 0x70C */
-    s32 table1[0x180]; /* 0x78C */
-    s32 table2[0x20]; /* 0xD8C */
+    BtlDebugMenuWork debug; /* 0x6A4 */
     s8 unk_E0C;
     u8 unk_E0D;
     s16 unk_E0E;
@@ -330,11 +344,11 @@ typedef char BtlHitResultOverrideOffset[((unsigned int)&((BtlState *)0)->hitResu
 typedef char BtlCommandSoundDelayOffset[((unsigned int)&((BtlState *)0)->commandSoundDelay == 0x624) ? 1 : -1];
 typedef char BtlPreActionHookOffset[((unsigned int)&((BtlState *)0)->preActionHook == 0x648) ? 1 : -1];
 typedef char BtlPostTargetHookOffset[((unsigned int)&((BtlState *)0)->postTargetHook == 0x64C) ? 1 : -1];
-typedef char BtlDebugActionMenuOffset[((unsigned int)&((BtlState *)0)->debugActionMenu == 0x6A8) ? 1 : -1];
-typedef char BtlDebugModelMenuOffset[((unsigned int)&((BtlState *)0)->debugModelMenu == 0x6B8) ? 1 : -1];
-typedef char BtlDebugMotionMenuOffset[((unsigned int)&((BtlState *)0)->debugMotionMenu == 0x6D8) ? 1 : -1];
-typedef char BtlDebugGunMenuOffset[((unsigned int)&((BtlState *)0)->debugGunMenu == 0x6E8) ? 1 : -1];
-typedef char BtlDebugSelectedUnitOffset[((unsigned int)&((BtlState *)0)->debugSelectedUnit == 0x708) ? 1 : -1];
+typedef char BtlDebugActionMenuOffset[((unsigned int)&((BtlState *)0)->debug.actionMenu == 0x6A8) ? 1 : -1];
+typedef char BtlDebugModelMenuOffset[((unsigned int)&((BtlState *)0)->debug.modelMenu == 0x6B8) ? 1 : -1];
+typedef char BtlDebugMotionMenuOffset[((unsigned int)&((BtlState *)0)->debug.motionMenu == 0x6D8) ? 1 : -1];
+typedef char BtlDebugGunMenuOffset[((unsigned int)&((BtlState *)0)->debug.gunMenu == 0x6E8) ? 1 : -1];
+typedef char BtlDebugSelectedUnitOffset[((unsigned int)&((BtlState *)0)->debug.selectedUnit == 0x708) ? 1 : -1];
 typedef char BtlSceneLightDds1Extent[(sizeof(BtlState) == 0xE10) ? 1 : -1];
 typedef char BtlSceneLightDds1Alignment[(__alignof__(BtlState) == 4) ? 1 : -1];
 #endif /* VERSION_DDS1 */
@@ -560,25 +574,7 @@ typedef struct BtlState {
     u32 tint71C;
     u8 pad720[4];
     s32 unk724;
-    s32 unk_728;
-    s32 unk_72C;
-    u8 pad730[8];
-    s32 unk_738;
-    s32 unk_73C;
-    u8 pad740[8];
-    s32 unk_748;
-    u8 pad74C[0x10];
-    s32 unk_75C;
-    u8 pad760[8];
-    s32 unk_768;
-    s32 unk_76C;
-    u8 pad770[8];
-    s32 unk_778;
-    u8 pad77C[0x10];
-    s32 unk_78C;
-    s32 table0[0x30]; /* 0x790 */
-    s32 table1[0x180]; /* 0x850 */
-    s32 table2[0x60]; /* 0xE50 */
+    BtlDebugMenuWork debug; /* 0x728 */
     s8 unk_E0C; /* 0xFD0: legacy opaque name, not a DDS2 offset */
     u8 unk_E0D; /* 0xFD1 */
     s16 unk_E0E; /* 0xFD2 */
@@ -589,6 +585,7 @@ typedef char BtlSceneLightOffset2[((unsigned int)&((BtlState *)0)->baselineAmbie
 typedef char BtlSceneLightOffset3[((unsigned int)&((BtlState *)0)->lightDirection == 0x40) ? 1 : -1];
 typedef char BtlSceneLightOffset4[((unsigned int)&((BtlState *)0)->lightColor == 0x50) ? 1 : -1];
 typedef char BtlSceneLightOffset5[((unsigned int)&((BtlState *)0)->ambientColor == 0x60) ? 1 : -1];
+typedef char BtlDebugMenuWorkOffset[((unsigned int)&((BtlState *)0)->debug == 0x728) ? 1 : -1];
 typedef char BtlSceneLightExtent[(sizeof(BtlState) == 0xFD4) ? 1 : -1];
 typedef char BtlSceneLightAlignment[(__alignof__(BtlState) == 4) ? 1 : -1];
 #endif /* VERSION_DDS2 */
