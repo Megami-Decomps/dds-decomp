@@ -42,6 +42,13 @@ typedef struct SdfMotionIndexedBinding {
     SdfAsset *target;
 } SdfMotionIndexedBinding;
 
+/* Slot weights update a model entry and retain its complete previous pair. */
+typedef struct SdfMotionSlotPairBinding {
+    SdfMotionKeyBinding keys;
+    SdfSlotEntry *current;
+    SdfSlotEntry previous;
+} SdfMotionSlotPairBinding;
+
 /* Color/word and scalar bindings capture one target word at +0x10. */
 typedef struct SdfMotionIndexedValueBinding {
     SdfMotionKeyBinding keys;
@@ -104,6 +111,13 @@ enum {
 typedef char SdfMotionBindingHead_size[(sizeof(SdfMotionBindingHead) == 0x08) ? 1 : -1];
 typedef char SdfMotionKeyInterval_size[(sizeof(SdfMotionKeyInterval) == 0x0C) ? 1 : -1];
 typedef char SdfMotionKeyBinding_size[(sizeof(SdfMotionKeyBinding) == 0x0C) ? 1 : -1];
+typedef char SdfMotionSlotPairBinding_size[
+    (sizeof(SdfMotionSlotPairBinding) == 0x20) ? 1 : -1];
+typedef char SdfMotionSlotPairBinding_current_at_0C[
+    ((u32)&((SdfMotionSlotPairBinding *)0)->current == 0x0C) ? 1 : -1];
+typedef char SdfMotionSlotPairBinding_previous_at_10[
+    ((u32)&((SdfMotionSlotPairBinding *)0)->previous == 0x10) ? 1 : -1];
+
 typedef char SdfMotionIndexedBinding_size[(sizeof(SdfMotionIndexedBinding) == 0x10) ? 1 : -1];
 typedef char SdfMotionIndexedValueBinding_size[
     (sizeof(SdfMotionIndexedValueBinding) == 0x14) ? 1 : -1];
