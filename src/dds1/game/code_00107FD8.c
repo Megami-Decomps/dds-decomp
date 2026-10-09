@@ -1443,7 +1443,6 @@ void evtPrintDeveloperConsoleMessage(const char *format, ...) {
 extern u16 D_003BA970;
 extern u16 D_003BA972;
 extern char D_003BA978[];
-extern void sdfCreatePacketA(SdfListHead *, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 
 s32 func_0010AC98(struct KwlnTask *task) {
     SdfGeneralHeapStats heapStats;

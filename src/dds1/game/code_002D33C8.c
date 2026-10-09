@@ -1562,16 +1562,16 @@ void sdfBuildFillPacket106(SdfGsTwoVertexPayload *packet, s32 color, s32 primiti
 
 
 void sdfCreatePacketA(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth, s32 (*alloc)(s32)) {
-    s32 buffer;
+    SdfGsTwoVertexPacket *packet;
 
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    buffer = alloc(0x40);
-    *(u64 *)buffer = 0x20000003ULL;
-    *(u64 *)(buffer + 8) = 0x5000000310000000ULL;
-    sdfBuildFillPacket106((SdfGsTwoVertexPayload *)(buffer + 0x10), color, primitive, left, top, right, bottom, depth);
-    sdfAppendPacket(list, buffer);
+    packet = (SdfGsTwoVertexPacket *)alloc(0x40);
+    packet->dmaTag = 0x20000003ULL;
+    packet->vifCommands = 0x5000000310000000ULL;
+    sdfBuildFillPacket106(&packet->drawing, color, primitive, left, top, right, bottom, depth);
+    sdfAppendPacket(list, (u32)packet);
 }
 
 void sdfBuildFillPacket101(SdfGsTwoVertexPayload *packet, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth) {
@@ -1589,16 +1589,16 @@ void sdfBuildFillPacket101(SdfGsTwoVertexPayload *packet, s32 color, s32 primiti
 
 
 void sdfAppendFillRectanglePacket(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth, s32 (*alloc)(s32)) {
-    s32 buffer;
+    SdfGsTwoVertexPacket *packet;
 
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    buffer = alloc(0x40);
-    *(u64 *)buffer = 0x20000003ULL;
-    *(u64 *)(buffer + 8) = 0x5000000310000000ULL;
-    sdfBuildFillPacket101((SdfGsTwoVertexPayload *)(buffer + 0x10), color, primitive, left, top, right, bottom, depth);
-    sdfAppendPacket(list, buffer);
+    packet = (SdfGsTwoVertexPacket *)alloc(0x40);
+    packet->dmaTag = 0x20000003ULL;
+    packet->vifCommands = 0x5000000310000000ULL;
+    sdfBuildFillPacket101(&packet->drawing, color, primitive, left, top, right, bottom, depth);
+    sdfAppendPacket(list, (u32)packet);
 }
 
 /* Close the rectangle by repeating its first GS XYZ vertex. */
