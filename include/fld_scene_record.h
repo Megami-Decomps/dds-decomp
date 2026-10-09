@@ -57,6 +57,7 @@ typedef char FldSceneRecord_pos_at_10[((u32)&((FldSceneRecord *)0)->pos == 0x10)
 
 extern FldSceneRecord *fldSceneRecords;
 extern s32 fldSceneRecordCount;
-extern s32 fldSceneRecordResource;
+struct SdfMemBlock;
+extern struct SdfMemBlock *fldSceneRecordResource;
 
 #endif /* FLD_SCENE_RECORD_H */
