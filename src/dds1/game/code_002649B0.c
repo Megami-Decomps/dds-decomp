@@ -20,7 +20,7 @@ s32 itfRunPanelMode1(KwlnTask *request) {
 
     mnuDrawItemPanelBackdrop(panel);
     func_00263B78(panel, 0);
-    return func_00285670(&panel->transition, &panel->transition.state, 1, request);
+    return menuRunPanel(panel, 1, request);
 }
 
 
@@ -31,7 +31,7 @@ s32 itfRunPanelMode2(KwlnTask *request) {
     BrsSkillPackageWork *panel = (BrsSkillPackageWork *)context;
 
     func_0024DC98(0);
-    return func_00285670(&panel->transition, &panel->transition.state, 2, request);
+    return menuRunPanel(panel, 2, request);
 }
 
 INCLUDE_ASM(const s32, "game/code_002649B0", func_00264B08);
