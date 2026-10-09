@@ -435,13 +435,7 @@ typedef struct EffectValueObject {
     f32 *source;
 } EffectValueObject;
 
-extern struct WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
-extern u16 dds3GetWorldValueCount(WorldValueIndices *object);
-extern u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
-extern u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
-extern u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 struct WorldIndexNode;
-extern void dds3DestroyWorldIndexNode(struct WorldIndexNode *node);
 extern s32 func_0010F9A8(f32 *, f32 *);
 void func_00113AF0(EffWorldNode *obj) {
     EffectObjectData *data = obj->data;

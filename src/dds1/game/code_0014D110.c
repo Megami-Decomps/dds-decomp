@@ -607,17 +607,11 @@ s32 fldCmdSetFadeAndSway(void) {
 
 extern void fldSetRoomModeFlag(s32, s32, s32, s32);
 
-extern u16 dds3GetWorldValueCount(WorldValueIndices *object);
 
-extern u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 
-extern WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 
-extern void dds3DestroyWorldIndexNode(WorldIndexNode *node);
 
-extern u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
 
-extern u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
 
 extern void dds3SetObjectPayloadWord8(EffWorldNode *object, u32 value);
 

@@ -41,13 +41,9 @@ extern u32 D_003BABD0;
 
 extern void *dds3GetWorldSecondaryObject(void);
 
-extern u16 dds3GetWorldValueCount(WorldValueIndices *object);
 
-extern u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
 
-extern u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 
-extern WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 
 extern u32 dds3GetObjectPayloadWord8(EffWorldNode *object);
 
@@ -205,9 +201,7 @@ extern u8 fldGetCampSceneControlMode(void);
 
 extern u32 D_0032E570[];
 
-extern u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
 
-extern void dds3DestroyWorldIndexNode(WorldIndexNode *node);
 
 extern u32 D_0032E570[];
 
