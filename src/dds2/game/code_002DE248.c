@@ -652,7 +652,7 @@ extern u8 *effAllocateActiveInstanceWork(u16, void *);
 
 extern u8 *effAllocateBlockWithModel(u16, void *);
 
-extern u32 effCreateModelResourceWithInlineData(u16, void *, void *, u32);
+extern struct EffModelResource *effCreateModelResourceWithInlineData(u16, void *, void *, u32);
 
 extern void fileQueueDestroy(s32);
 
@@ -6394,7 +6394,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002F4960);
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F5168);
 
 
-u32 effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary, u32 param) {
+EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary, u32 param) {
     u32 headerSize = 0x40;
     u32 size = effModelResourceOperations[kind].payloadSize;
     EffModelResource *effect = (EffModelResource *)sdfAllocSizeClassBlock(size + headerSize);
@@ -6413,13 +6413,13 @@ u32 effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary
         effect->childResource = effModelResourceOperations[kind].createResource(effect->source, effect->model);
         effModelResourceOperations[kind].initialize(effect);
     }
-    return (u32)effect;
+    return effect;
 }
 
 u32 effCreateModelResourceFromFile(u8 *work) {
     void *first = fileResolvePrimaryBuffer(work);
     void *second = fileResolveSecondaryBuffer((FileJobPayload *)work);
-    return effCreateModelResourceWithInlineData(((FileJob *)work)->option, first, second, ((FileJob *)work)->slots[1].size);
+    return (u32)effCreateModelResourceWithInlineData(((FileJob *)work)->option, first, second, ((FileJob *)work)->slots[1].size);
 }
 
 void effDestroyModelResource(EffModelResource *effect) {
@@ -6429,7 +6429,7 @@ void effDestroyModelResource(EffModelResource *effect) {
 }
 
 EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
-    EffModelResource *effect = (EffModelResource *)effCreateModelResourceWithInlineData(work->kind, work->source, 0, 0);
+    EffModelResource *effect = effCreateModelResourceWithInlineData(work->kind, work->source, 0, 0);
     s32 x = mdlGetContextResourceGroup(work->assetId);
     s32 y = mdlGetContextResourceId(work->assetId);
     MdlCtx *model = func_00232198(x, y);
