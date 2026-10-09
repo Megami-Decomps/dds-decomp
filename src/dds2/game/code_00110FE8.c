@@ -48,7 +48,7 @@ s32 dds3ContainsNodeInAnyObjectChain(EffWorldNode *object, EffWorldNode *value) 
 
 void dds3SetWorldObjectValue(EffWorldNode *object, u32 value) {
     if (object != NULL) {
-        *(u32 *)object->data = value;
+        ((EvtWorldTable *)object->data)->areaRoomKey = value;
     }
 }
 
@@ -56,7 +56,7 @@ s32 dds3GetWorldObjectValue(EffWorldNode *object) {
     if (object == NULL) {
         return -1;
     }
-    return *(u32 *)object->data;
+    return ((EvtWorldTable *)object->data)->areaRoomKey;
 }
 
 EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *object, s32 index, const u8 *name) {
