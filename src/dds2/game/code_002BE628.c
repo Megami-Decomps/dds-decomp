@@ -124,6 +124,7 @@ extern s32 func_002C6CE8(void);
 extern s8 D_003E7970[];
 extern u8 D_003E7978[];
 
+extern void func_002C6E20(s32 initialMotionIndex);
 extern void evtStageTestQueueMotionSegment(u32, f32, f32);
 extern void evtStageTestCreateModelEffect(s32);
 extern void evtStageTestUpdateCamera(void);
@@ -2852,7 +2853,21 @@ void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption)
 
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6CE8);
 
-INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6E20);
+void func_002C6E20(s32 initialMotionIndex) {
+    MdlCtx *model = evtStageTestState.model;
+    StageTestSlot *slot = &evtStageTestState.queue.slot[0];
+    s8 motionIndex;
+
+    if (initialMotionIndex < 0) {
+        motionIndex = evtStageTestState.entries[slot->entryIndex].motionIndex;
+    } else {
+        motionIndex = initialMotionIndex;
+    }
+    if (model != NULL && motionIndex < mdlGetNodeRefHalf(model, 0)) {
+        mdlAddEntryFlagged(model, 0, motionIndex);
+        model->first->frameStep = evtStageTestState.entries[slot->entryIndex].frame;
+    }
+}
 
 
 extern s32 D_00435DF0;
