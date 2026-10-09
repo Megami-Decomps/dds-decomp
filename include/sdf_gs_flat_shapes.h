@@ -59,6 +59,18 @@ typedef char SdfGsFlatQuadPayload_rgbaq_at_0x18[
 typedef char SdfGsFlatQuadPayload_xyz2_at_0x20[
     ((u32)&((SdfGsFlatQuadPayload *)0)->xyz2 == 0x20) ? 1 : -1];
 
+/* The allocation contains the DMA/VIF prefix and the entire quad GIF stream. */
+typedef struct SdfGsFlatQuadPacket {
+    u64 dmaTag;
+    u64 vifCommands;
+    SdfGsFlatQuadPayload drawing;
+} SdfGsFlatQuadPacket;
+
+typedef char SdfGsFlatQuadPacket_size_must_be_0x50[
+    (sizeof(SdfGsFlatQuadPacket) == 0x50) ? 1 : -1];
+typedef char SdfGsFlatQuadPacket_drawing_at_0x10[
+    ((u32)&((SdfGsFlatQuadPacket *)0)->drawing == 0x10) ? 1 : -1];
+
 void sdfBuildPacket104x4(SdfGsFlatQuadPayload *packet, s32 color,
     s32 primitive, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2,
     s32 x3, s32 y3, s32 depth);
