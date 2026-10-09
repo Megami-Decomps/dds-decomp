@@ -7446,8 +7446,6 @@ u32 effCreateBattleCameraJob(u8 *request) {
     return job;
 }
 
-extern void fileJobCopyCommandIntoSecondaryData(u32, u32, u32);
-
 FileJobPayload *effLoadFileJobPayload(EffFileJobRequest *request, u32 existingJob) {
     FileJobPayload *job;
     if (existingJob != 0) {
@@ -7461,7 +7459,7 @@ FileJobPayload *effLoadFileJobPayload(EffFileJobRequest *request, u32 existingJo
             fileJobSetPrimaryData(job, request->output, request->size, request->transferMode);
         }
         if (request->relatedResource != 0) {
-            fileJobCopyCommandIntoSecondaryData((u32)job, request->relatedResource, request->resourceMode);
+            fileJobCopyCommandIntoSecondaryData(job, (const char *)request->relatedResource, request->resourceMode);
         } else {
             u32 value = 0;
             fileJobSetSecondaryData(job, &value, 4, 4);
@@ -9034,7 +9032,8 @@ s32 effPollFileRecord(char *path, s32 slot) {
         fileQueueDetachSectorFollower(effFileQueue, effCurrentFileQueueEntry);
         type = ((EffFileQueryInfo *)record)->resourceMask;
         if (type != 8) {
-            fileJobCopyCommandIntoSecondaryData(effQueuedFileHandle, (u32)record, effClassifyResourceMask(type));
+            fileJobCopyCommandIntoSecondaryData((FileJobPayload *)effQueuedFileHandle,
+                                                (const char *)record, effClassifyResourceMask(type));
         } else {
             fileJobSetSecondaryData((FileJobPayload *)effQueuedFileHandle, record + 0x104, 4, 4);
         }
@@ -9120,7 +9119,8 @@ u32 fileLoadEffectSlotA(void) {
         job = fileCreateJob(3);
         fileJobSetPrimaryData(job, D_00383F18.start, D_00383F18.length,
                       D_00383F18.mode);
-        fileJobCopyCommandIntoSecondaryData((u32)job, fileInfo, effClassifyResourceMask(((EffFileQueryInfo *)fileInfo)->resourceMask));
+        fileJobCopyCommandIntoSecondaryData(job, (const char *)fileInfo,
+                      effClassifyResourceMask(((EffFileQueryInfo *)fileInfo)->resourceMask));
         entry = (u8 *)fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = (s32)entry;
         memcpy(D_003DF9A0, entry, 0x80);
@@ -9224,7 +9224,8 @@ u32 fileLoadEffectSlotB(void) {
         job = fileCreateJob(18);
         fileJobSetPrimaryData(job, D_0038C758.start, D_0038C758.length,
                       D_0038C758.mode);
-        fileJobCopyCommandIntoSecondaryData((u32)job, &fileInfo, effClassifyResourceMask(fileInfo.resourceMask));
+        fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
+                      effClassifyResourceMask(fileInfo.resourceMask));
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = (s32)entry;
         memcpy(D_003DF9A0, entry, 0x80);
@@ -9284,7 +9285,8 @@ u32 effLoadFileSlotF2(void) {
         job = fileCreateJob(0x14);
         fileJobSetPrimaryData(job, D_0038D470.start, D_0038D470.length,
                       D_0038D470.mode);
-        fileJobCopyCommandIntoSecondaryData((u32)job, &fileInfo, effClassifyResourceMask(fileInfo.resourceMask));
+        fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
+                      effClassifyResourceMask(fileInfo.resourceMask));
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = (s32)entry;
         memcpy(D_003DF9A0, entry, 0x80);
@@ -9324,7 +9326,8 @@ u32 effLoadMaterialFile(void) {
         job = fileCreateJob(0x16);
         fileJobSetPrimaryData(job, D_0038DC08.start, D_0038DC08.length,
                       D_0038DC08.mode);
-        fileJobCopyCommandIntoSecondaryData((u32)job, &fileInfo, effClassifyResourceMask(fileInfo.resourceMask));
+        fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
+                      effClassifyResourceMask(fileInfo.resourceMask));
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = (s32)entry;
         memcpy(D_003DF9A0, entry, 0x80);

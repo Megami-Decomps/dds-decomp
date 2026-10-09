@@ -4543,13 +4543,13 @@ void fileJobSetPrimaryData(FileJobPayload *job, const void *src, s32 size, u16 o
     }
 }
 
-void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, s32 commandId, u16 option) {
+void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, const char *commandPath, u16 option) {
     DevState *command;
     s32 size;
     struct SdfMemBlock *allocation;
     void *buffer;
 
-    command = sdfDevCreateCommandState((const char *)commandId);
+    command = sdfDevCreateCommandState(commandPath);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
         allocation = sdfAllocGeneralBlock(size);
@@ -4573,13 +4573,13 @@ void fileJobSetSecondaryData(FileJobPayload *job, const void *src, s32 size, u16
     }
 }
 
-void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, s32 commandId, u16 selector) {
+void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, const char *commandPath, u16 selector) {
     DevState *command;
     s32 size;
     struct SdfMemBlock *allocation;
     void *buffer;
 
-    command = sdfDevCreateCommandState((const char *)commandId);
+    command = sdfDevCreateCommandState(commandPath);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
         allocation = sdfAllocGeneralBlock(size);
