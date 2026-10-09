@@ -1,0 +1,52 @@
+{
+  "game_base": "9e573143fa0ea1e013781dc904138e7c68273990",
+  "diagnostic_base": "1bce3c8a32351951f632cd3bde7535dfea3aeccc",
+  "execution": "Local official Debian QEMU 10.0.13; pinned compiler and assembler, canonical flags and filename geometry; prefix-only uncommitted adapter",
+  "results": [
+    {
+      "candidate": "current",
+      "matched": 515,
+      "data_issues": 2,
+      "context_issues": 0,
+      "other_issues": 0,
+      "target": {
+        "checker_bytes": 5248,
+        "context_differs": false,
+        "differing_words": 570,
+        "full_object_bytes": 5248,
+        "status": "diff"
+      }
+    },
+    {
+      "candidate": "snapshot-join",
+      "matched": 515,
+      "data_issues": 2,
+      "context_issues": 0,
+      "other_issues": 0,
+      "target": {
+        "status": "diff",
+        "checker_bytes": 5240,
+        "differing_words": 573,
+        "full_object_bytes": 5240,
+        "context_differs": false
+      }
+    },
+    {
+      "candidate": "snapshot-local-tail",
+      "matched": 515,
+      "data_issues": 2,
+      "context_issues": 0,
+      "other_issues": 0,
+      "target": {
+        "status": "diff",
+        "checker_bytes": 5240,
+        "differing_words": 573,
+        "full_object_bytes": 5240,
+        "context_differs": false
+      }
+    }
+  ],
+  "local_tail_target_bytes_and_relocations_equal_to_join": true,
+  "full_retail_check": false,
+  "runtime_test": false
+}
