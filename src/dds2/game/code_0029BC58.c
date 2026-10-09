@@ -1,6 +1,7 @@
 #include "common.h"
 #include "mnu_result.h"
 
+#include "mnu.h"
 extern const char *D_003D62F0[6];
 extern char (*D_00435E48)[17];
 extern char (*D_00435E5C)[25];

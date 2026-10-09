@@ -191,7 +191,7 @@ SdfTex *sdfTexCreateFromFileHeader(SdfTextureFileHeader *header, s32 mode) {
             existing = existing->prev;
         }
     }
-    texture = sdfTexCreateWithAllocatedResources(header->width, header->height, header->pixelFormat, header->clutFormat, header->unk11, header->unk10);
+    texture = sdfTexCreateWithAllocatedResources(header->width, header->height, header->pixelFormat, header->maxMipLevel, header->clutFormat, header->paletteCount);
     texture->lodParameters = header->lodParameters;
     texture->unk1E = header->unk1A;
     texture->clampMode = header->clampMode;

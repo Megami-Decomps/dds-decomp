@@ -9,6 +9,7 @@
 struct MnuShootingWork;
 struct MnuModelNode;
 struct ModelInstance;
+struct MnuCallbackList;
 
 typedef struct MenuInputActionSnapshot {
     s8 verticalNegative;
@@ -149,7 +150,7 @@ typedef struct MenuWorkEntry {
     u8 unk38;
     u8 movementEffectScale;
     u16 elapsed;
-    u32 callback; /* Callback-list node address, not a direct function pointer. */
+    struct MnuCallbackList *callback; /* 0x3C: owned callback-list node, not a function pointer. */
     /* Retail 0x00323960 ORs the whole word with MNU_WORK_FINISHED (4).
      * 0x00323610..0x00323658 extracts bit 5 and increments/masks bits 6..13;
      * 0x0031A3F8..0x0031A404 extracts bit 5 and compares it with one. */

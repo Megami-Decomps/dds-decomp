@@ -11,6 +11,7 @@
 #include "sdf_texture_offset_list.h"
 #include "sdf_texture_file.h"
 #include "sdf_texture_queue.h"
+#include "sdf_stream_input_dma.h"
 
 extern s32 D_00439214;
 extern s32 iWakeupThread(s32 threadId);
@@ -1001,11 +1002,6 @@ void sdfAllocateStreamFrameBuffers(SdfStreamFrameNode *node) {
 }
 
 /* Each 16-byte DMA tag holds control/address bits and a zero reserved half. */
-typedef struct SdfStreamInputDmaTag {
-    u64 control;
-    u64 reserved;
-} SdfStreamInputDmaTag;
-
 void sdfBuildStreamInputDmaChain(SdfStreamFrameNode *node, u8 *source, s32 bytes) {
     s32 remaining = (bytes + 15) & ~15;
     SdfStreamInputDmaTag *tag;
@@ -1067,11 +1063,11 @@ void sdfStreamOpen(SdfStreamFrameNode *node, SoundFormat *format, s32 sourceAddr
     sdfDispatchNextStreamNode(0);
 }
 
-/* Store the callback/source token and allocate an eight-slot feed ring plus its leading mirror bytes. */
-void sdfSoundInitFormattedNode(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead readSource, u32 source) {
+/* Store the callback and movie context, then allocate the feed ring and leading mirror bytes. */
+void sdfSoundInitFormattedNode(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead readSource, MovObj *readContext) {
     sdfSoundInitNodeFromFormat(node, format);
     node->read = readSource;
-    node->source = source;
+    node->readContext = readContext;
     node->active = 1;
     node->scratchBuffer = (u8 *)sdfAllocateBlockBySizeThreshold(SDF_STREAM_SCRATCH_BYTES) + SDF_STREAM_PREFIX_BYTES;
 }
@@ -1089,11 +1085,11 @@ void sdfStreamInitializeFromHeader(SdfStreamFrameNode *node) {
     if (node->headerReady != 0) {
         return;
     }
-    if (node->read(node, node->source, SDF_STREAM_READ_QUERY, &readStatus, 0) < sizeof(header)) {
+    if (node->read(node, node->readContext, SDF_STREAM_READ_QUERY, &readStatus, 0) < sizeof(header)) {
         return;
     }
     node->headerReady = 1;
-    node->read(node, node->source, SDF_STREAM_READ_COPY, &header, sizeof(header));
+    node->read(node, node->readContext, SDF_STREAM_READ_COPY, &header, sizeof(header));
     node->width = header.width;
     node->height = header.height;
     node->cycleLength = header.cycleLength;
@@ -1197,13 +1193,13 @@ void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
             }
             destinationAddress += writeSlot << SDF_STREAM_SLOT_SHIFT;
             destinationAddress = (destinationAddress & SDF_EE_PHYSICAL_MASK) | SDF_EE_UNCACHED_BASE;
-            availableBytes = feed->read(feed, feed->source, SDF_STREAM_READ_QUERY, &endOfStream, 0);
+            availableBytes = feed->read(feed, feed->readContext, SDF_STREAM_READ_QUERY, &endOfStream, 0);
             if (availableBytes < SDF_STREAM_SLOT_BYTES) {
                 if (endOfStream == 0) {
                     return;
                 }
                 if (availableBytes > 0) {
-                    feed->read(feed, feed->source, SDF_STREAM_READ_COPY, (void *)destinationAddress, availableBytes);
+                    feed->read(feed, feed->readContext, SDF_STREAM_READ_COPY, (void *)destinationAddress, availableBytes);
                     filledSlots++;
                 }
                 feed->done = 1;
@@ -1213,7 +1209,7 @@ void sndFillStreamFeedRing(SdfStreamFrameNode *feed) {
                         feed->done = 1;
                     }
                 }
-                feed->read(feed, feed->source, SDF_STREAM_READ_COPY, (void *)destinationAddress, SDF_STREAM_SLOT_BYTES);
+                feed->read(feed, feed->readContext, SDF_STREAM_READ_COPY, (void *)destinationAddress, SDF_STREAM_SLOT_BYTES);
                 filledSlots++;
             }
             if (writeSlot == SDF_STREAM_MAX_FILLED) {
@@ -1479,7 +1475,7 @@ void sdfAdvanceStreamPlayback(s32 cadence) {
                         EIntr();
                     }
                 }
-                node->read(node, node->source, SDF_STREAM_READ_RESUME, NULL, 0);
+                node->read(node, node->readContext, SDF_STREAM_READ_RESUME, NULL, 0);
             }
         }
         node = node->next;
@@ -1508,8 +1504,8 @@ void sdfStreamCreateWithParams(SdfStreamFrameNode *node, SdfStreamParams *params
     sdfSoundInitAndAppendNode(node, &local, source, size, sdfTexGetPrimaryResourceWord(resource));
 }
 
-void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead read, u32 source, s32 resource) {
-    sdfSoundInitFormattedNode(node, format, read, source);
+void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, SoundFormat *format, SdfStreamRead read, MovObj *readContext, s32 resource) {
+    sdfSoundInitFormattedNode(node, format, read, readContext);
     node->resourceWord = resource;
     sdfSoundAppendNode(node);
 }

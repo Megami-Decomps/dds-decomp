@@ -49,7 +49,6 @@ extern char D_003BC7A0[];
 #define MNU_NO_SELECTION 0xffffffff
 #define MNU_PANEL_TEXTURE_COUNT 9
 #define MNU_POPUP_STATE_BYTES 0x4c
-#define MNU_POPUP_INSERT_BEFORE_TOP 0x20000
 #define MNU_POPUP_ENTRY_MARK_BITS 0x60000
 #define MNU_PARTY_SLOT_COUNT 5
 #define MNU_INPUT_PRIORITY_BIT 1
@@ -1087,7 +1086,7 @@ void mnuApplyPanelTransitionAction(s32 action, MenuPopupEntry *entry, MenuPopupS
                         }
                     }
                     state->entries[state->count++] = entry;
-                    if ((entry->flags & 0x20000) && state->count >= 2) {
+                    if ((entry->flags & MNU_POPUP_INSERT_BEFORE_TOP) && state->count >= 2) {
                         saved = state->entries[state->count - 1];
                         state->entries[state->count - 1] = state->entries[state->count - 2];
                         state->entries[state->count - 2] = saved;
@@ -1133,21 +1132,21 @@ u8 mnuIsPopupEntryValue(s32 stateAddress, s32 entryAddress) {
 }
 
 /* Bind the entry address and retain only the entry's low sixteen flag bits. */
-void mnuSetPopupEntry(s32 entrySlotAddress, s32 entryAddress) {
+void mnuSetPopupEntry(s32 *entrySlot, void *entry) {
     u16 retainedFlags;
 
-    retainedFlags = *(u16 *)entryAddress;
-    *(s32 *)entrySlotAddress = entryAddress;
-    *(s32 *)entryAddress = retainedFlags;
+    retainedFlags = *(u16 *)entry;
+    *entrySlot = (s32)entry;
+    *(s32 *)entry = retainedFlags;
 }
 
 /* Bind the entry with the native insert-before-top bit after preserving low flags. */
-void mnuSetPopupEntryFlagged(s32 entrySlotAddress, s32 entryAddress) {
+void mnuSetPopupEntryFlagged(s32 *entrySlot, void *entry) {
     u16 retainedFlags;
 
-    retainedFlags = *(u16 *)entryAddress;
-    *(s32 *)entrySlotAddress = entryAddress;
-    *(s32 *)entryAddress = retainedFlags | MNU_POPUP_INSERT_BEFORE_TOP;
+    retainedFlags = *(u16 *)entry;
+    *entrySlot = (s32)entry;
+    *(s32 *)entry = retainedFlags | MNU_POPUP_INSERT_BEFORE_TOP;
 }
 
 /* Bind the entry with both native marking bits after preserving low flags. */
@@ -1162,7 +1161,7 @@ void mnuAttachAndMarkMenuEntry(s32 entrySlotAddress, s32 entryAddress) {
 /* Bind the current popup entry only when its saved address is nonzero. */
 void mnuBindPresentMenuEntry(s32 stateAddress, u32 entrySlotAddress) {
     if (((MenuPopupState *)stateAddress)->entryAddress != 0) {
-        mnuSetPopupEntryFlagged(entrySlotAddress, ((MenuPopupState *)stateAddress)->entryAddress);
+        mnuSetPopupEntryFlagged((s32 *)(u32)entrySlotAddress, (void *)(u32)((MenuPopupState *)stateAddress)->entryAddress);
         return;
     }
 }

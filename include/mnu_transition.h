@@ -5,6 +5,9 @@
 
 typedef u32 (*MenuPopupCallback)();
 
+/* Insert a newly selected popup before the current top transition entry. */
+#define MNU_POPUP_INSERT_BEFORE_TOP 0x20000
+
 typedef struct MenuPopupEntry {
     u32 flags;
     MenuPopupCallback enter;

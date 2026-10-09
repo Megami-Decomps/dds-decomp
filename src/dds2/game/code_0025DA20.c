@@ -101,7 +101,6 @@ extern s32 D_003C99B8[];
 
 extern void evtViewerCleanupMessageWindow();
 
-extern void evtViewerDispatchFlagMode();
 
 extern KwlnTask *func_00101820(u32 priority);
 

@@ -1,6 +1,11 @@
 #ifndef SDF_MOVIE_STATE_H
 #define SDF_MOVIE_STATE_H
 
+#include "common.h"
+
+struct DevState;
+struct MovObj;
+
 /* Values stored in MovObj.state. State 6 is entered by the device-release
  * callback and observed by the owner while it waits for shutdown. */
 enum {
@@ -13,5 +18,10 @@ enum {
     SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK = 6,
     SDF_MOVIE_STATE_STOP_REQUESTED = 7
 };
+
+s32 sdfMovieHandleLinearDeviceEvent(struct DevState *deviceState, s32 operation,
+                                    void *data, s32 bytesRead, struct MovObj *movie);
+s32 sdfMovieHandlePacDeviceEvent(struct DevState *deviceState, s32 operation,
+                                 void *data, s32 bytesRead, struct MovObj *movie);
 
 #endif /* SDF_MOVIE_STATE_H */

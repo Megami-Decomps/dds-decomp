@@ -20,7 +20,10 @@
 #include "eff_event_sound.h"
 #include "eff_pcp_group_set.h"
 #include "eff_pcp_block_set.h"
+#include "eff_pcp_staggered.h"
+#include "eff_pcp_delayed_pairs.h"
 #include "eff_pcp_cross.h"
+#include "eff_pcp_charge.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
@@ -28,30 +31,6 @@
 extern u32 effMiscRand(void *state);
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
-
-
-
-
-/* Large charge-style effect work (allocation 0x1354). The vector at 0xAF0
- * is copied as a quadword; construction clears its first three words.
- * Resource handles occupy the tail. */
-typedef struct {
-    f32 samplePositions[25][7][4]; /* 0x000: seven points in each captured row */
-    u32 vectorWords[4];          /* 0xAF0 */
-    u32 animationFrames[25][7];  /* 0xB00 */
-    f32 sampleScales[25][7];     /* 0xDBC */
-    u32 sampleAges[25][7];       /* 0x1078 */
-    u32 color;         /* 0x1334: configurable colour */
-    f32 scale;         /* 0x1338: configurable scale */
-    u32 historyCount;       /* 0x133C cleared on init */
-    u32 updateCount;       /* 0x1340 cleared on init */
-    u32 baseColor;    /* 0x1344 initialised to grey 0x80808080 */
-    EffParamWork *secondaryHandle; /* 0x1348: parameter block 1 */
-    EffParamWork *primaryHandle;   /* 0x134C: parameter block 0 */
-    SdfMemBlock *allocationHandle; /* 0x1350: backing allocation */
-} EffPCPChargeWork;
-
-typedef char EffPCPChargeWork_size_must_be_0x1354[(sizeof(EffPCPChargeWork) == 0x1354) ? 1 : -1];
 
 
 /* Compact spawn-once work: cleared header words, grey colour, and two
@@ -263,32 +242,7 @@ extern void effPcpBuildConcentricBeamVertices(f32 value, struct EffPCPBeamWork *
 
 extern void func_00336798(f32 angle);
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 pad0C[4];
-    u32 color;       /* 0x10 sent to the paired object's colour callback */
-    f32 scale;
-    f32 offset[8];
-    EffParamWork *handle[16];
-    u32 delay[8];
-} EffPCPStaggered;
-
 extern void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index);
-
-/* Six delayed resource pairs share this 0x60-byte allocation throughout
-   creation, cloning, rerolling, update and release. */
-typedef struct {
-    u32 unk00;
-    u32 unk04;
-    u32 unk08;
-    u8 pad0C[4];
-    u32 color;
-    f32 unk14; /* Settable size input; not read by the observed update. */
-    EffParamWork *handle[12];
-    u32 delay[6];
-} EffPCPDelayedPairs;
 
 extern void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index);
 
@@ -741,8 +695,8 @@ void effPcpStaggerRerollSlot(EffPCPStaggered *work, s32 index) {
     effParamWorkCallback2(work->handle[index * 2 + 1], mtx);
     mdlAddEntryPlain(effParamWorkGetData(work->handle[index * 2]), 0, 0);
     mdlAddEntryPlain(effParamWorkGetData(work->handle[index * 2 + 1]), 0, 0);
-    work->offset[index] = effMiscRandUnitFloat(effDefaultRandomState) * 150.0f;
-    work->delay[index] = effMiscRand(effDefaultRandomState) % 10;
+    work->verticalOffset[index] = effMiscRandUnitFloat(effDefaultRandomState) * 150.0f;
+    work->remainingDelay[index] = effMiscRand(effDefaultRandomState) % 10;
 }
 
 
@@ -764,9 +718,9 @@ EffPCPStaggered *effPcpStaggerCreate(void *args) {
     } while (i < 8);
     work->color = 0x80808080;
     work->scale = 1.0f;
-    work->x = 0;
-    work->y = 0;
-    work->z = 0;
+    work->position[0] = 0;
+    work->position[1] = 0;
+    work->position[2] = 0;
     return work;
 }
 
@@ -796,9 +750,9 @@ EffPCPStaggered *effCreatePairedResourceWork(EffPCPStaggered *source) {
     } while (i < 8);
     work->color = 0x80808080;
     work->scale = 1.0f;
-    work->x = 0;
-    work->y = 0;
-    work->z = 0;
+    work->position[0] = 0;
+    work->position[1] = 0;
+    work->position[2] = 0;
     return work;
 }
 
@@ -808,14 +762,14 @@ void effPcpStaggerUpdate(EffPCPStaggered *work) {
     s32 i;
 
     for (i = 0; i < 8; i++) {
-        if (work->delay[i] != 0) {
-            work->delay[i]--;
+        if (work->remainingDelay[i] != 0) {
+            work->remainingDelay[i]--;
         } else {
             obj[0] = effParamWorkGetData(work->handle[i * 2]);
             obj[1] = effParamWorkGetData(work->handle[i * 2 + 1]);
-            pos[0] = work->x;
-            pos[2] = work->z;
-            pos[1] = (work->y - work->offset[i] + 100.0f) * work->scale;
+            pos[0] = work->position[0];
+            pos[2] = work->position[2];
+            pos[1] = (work->position[1] - work->verticalOffset[i] + 100.0f) * work->scale;
                         VU0_LOAD_VF(vf10, pos);
             mdlStorePrimaryVectorVU(obj[0]);
             effParamWorkCallback1(work->handle[i * 2], work->scale * 1.5f);
@@ -974,11 +928,11 @@ void effPcpDelayedPairsRerollSlot(EffPCPDelayedPairs *work, s32 index) {
 
     mdlAddEntryPlain(effParamWorkGetData(work->handle[index * 2]), 0, 0);
     mdlAddEntryPlain(effParamWorkGetData(work->handle[index * 2 + 1]), 0, index & 1);
-    work->delay[index] = effMiscRand(effDefaultRandomState) % 10;
+    work->remainingDelay[index] = effMiscRand(effDefaultRandomState) % 10;
 }
 
 
-EffPCPDelayedPairs *effCreateIndexedResourceWork(void *source) {
+EffPCPDelayedPairs *effPcpDelayedPairsCreate(void *source) {
     EffPCPDelayedPairs *work = sdfAllocSizeClassBlock(0x60);
     EffParamWork **handle = &work->handle[1];
     s32 i;
@@ -1012,7 +966,7 @@ void effPcpDelayedPairsRelease(EffPCPDelayedPairs *work) {
     sdfReleaseChipBlock(work);
 }
 
-EffPCPDelayedPairs *effCopyIndexedResourceWork(EffPCPDelayedPairs *source) {
+EffPCPDelayedPairs *effPcpDelayedPairsClone(EffPCPDelayedPairs *source) {
     EffParamWork **sourceHandle;
     EffParamWork **workHandle;
     s32 i;
@@ -1041,8 +995,8 @@ void effPcpDelayedPairsUpdate(EffPCPDelayedPairs *work) {
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        if (work->delay[i] != 0) {
-            work->delay[i]--;
+        if (work->remainingDelay[i] != 0) {
+            work->remainingDelay[i]--;
         } else {
             obj[0] = effParamWorkGetData(work->handle[i * 2]);
             obj[1] = effParamWorkGetData(work->handle[i * 2 + 1]);
@@ -1076,7 +1030,7 @@ void effPcpChargeInitTail(EffPCPChargeWork *work) {
     work->baseColor = 0x80808080;
 }
 
-EffPCPChargeWork *effCreateChargeWork(void *source) {
+EffPCPChargeWork *effPcpChargeCreateWork(void *source) {
     SdfMemBlock *resource = sdfAllocGeneralBlock(0x1354);
     EffPCPChargeWork *work = (void *)sdfResourceRetainAddress(resource);
     work->allocationHandle = resource;
@@ -1091,13 +1045,15 @@ EffPCPChargeWork *effCreateChargeWork(void *source) {
     return work;
 }
 
-void effPcpChargeReleaseResources(EffPCPChargeWork *work) {
+void effPcpChargeReleaseWork(EffPCPChargeWork *work) {
     effDispatchParameterDataAndFreeWork(work->primaryHandle);
     effDispatchParameterDataAndFreeWork(work->secondaryHandle);
     sdfReleaseResourceAllocation(work->allocationHandle);
 }
 
-EffPCPChargeWork *effCopyChargeResources(EffPCPChargeWork *source) {
+/* Duplicate the parameter owners into fresh history storage; sampled arrays
+ * are not copied from source. */
+EffPCPChargeWork *effPcpChargeCloneWork(EffPCPChargeWork *source) {
     SdfMemBlock *resource = sdfAllocGeneralBlock(0x1354);
     EffPCPChargeWork *work = (void *)sdfResourceRetainAddress(resource);
     EffParamWork *firstHandle = source->primaryHandle;
