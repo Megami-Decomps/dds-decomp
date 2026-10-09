@@ -393,8 +393,8 @@ EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count) {
     block = (u8 *)sdfResourceRetainAddress(handle);
     memset(block, 0, size);
     pool = (EffRecordPool *)(block + recordBytes);
-    pool->recordBase = (s32)block;
-    pool->auxRecordBase = (s32)(block + vertexCount * 16);
+    pool->recordBase = (u8 *)block;
+    pool->auxRecordBase = (u8 *)(block + vertexCount * 16);
     pool->color = EFF_NEUTRAL_COLOR;
     pool->drawMode = 2;
     pool->vertexCount = vertexCount;
@@ -483,12 +483,12 @@ void effDrawScaledRecordPool(EffRecordPool *work)
 
 /* Address the five-position record for a group; no index bounds check. */
 void *effGetIndexedEffectGroupRecord(EffRecordPool *group, s32 groupIndex) {
-    return (void *)(group->recordBase + groupIndex * EFF_FAN_POSITION_BYTES);
+    return group->recordBase + groupIndex * EFF_FAN_POSITION_BYTES;
 }
 
 /* Address the group's five packed color words. */
 void *effGetIndexedEffectGroupIndexEntry(EffRecordPool *group, s32 groupIndex) {
-    return (void *)(group->auxRecordBase + groupIndex * EFF_FAN_COLOR_BYTES);
+    return group->auxRecordBase + groupIndex * EFF_FAN_COLOR_BYTES;
 }
 
 /* Store the record pool's raw submission-control bits. */
@@ -530,8 +530,8 @@ EffRecordPool *effRecordPoolCreateTriple(s32 triangleCount) {
     block = (u32 *)sdfResourceRetainAddress(handle);
     memset(block, 0, size);
     pool = (EffRecordPool *)(block + (positionWordCount + colorWordCount));
-    pool->recordBase = (s32)block;
-    pool->auxRecordBase = (s32)(block + positionWordCount);
+    pool->recordBase = (u8 *)block;
+    pool->auxRecordBase = (u8 *)(block + positionWordCount);
     pool->color = EFF_NEUTRAL_COLOR;
     pool->drawMode = 2;
     pool->vertexCount = colorWordCount;
@@ -593,12 +593,12 @@ void effDrawTriangleRecordPool(EffRecordPool *pool)
 
 /* Address three quadword positions for one triangle. */
 void *effGetGroupRecordByIndex(EffRecordPool *group, s32 groupIndex) {
-    return (void *)(group->recordBase + groupIndex * EFF_TRIANGLE_POSITION_BYTES);
+    return group->recordBase + groupIndex * EFF_TRIANGLE_POSITION_BYTES;
 }
 
 /* Address three packed color words for one triangle. */
 void *effGetGroupIndexRecord(EffRecordPool *group, s32 groupIndex) {
-    return (void *)(group->auxRecordBase + groupIndex * EFF_TRIANGLE_COLOR_BYTES);
+    return group->auxRecordBase + groupIndex * EFF_TRIANGLE_COLOR_BYTES;
 }
 
 /* Allocate four positions and four colors per quad, followed by the header.
@@ -618,9 +618,9 @@ EffRecordPool *effRecordPoolCreate(s32 quadCount) {
     block = (u32 *)sdfResourceRetainAddress(handle);
     memset(block, 0, size);
     pool = (EffRecordPool *)(block + (positionWordCount + colorWordCount));
-    pool->recordBase = (s32)block;
+    pool->recordBase = (u8 *)block;
     pool->drawMode = 2;
-    pool->auxRecordBase = (s32)(block + positionWordCount);
+    pool->auxRecordBase = (u8 *)(block + positionWordCount);
     pool->vertexCount = colorWordCount;
     pool->buffer = handle;
     pool->scale = 1.0f;
@@ -681,12 +681,12 @@ void effDrawQuadRecordPool(EffRecordPool *pool)
 
 /* Address four quadword positions for one quad. */
 void *effGetRecordGroupElement(EffRecordPool *group, s32 groupIndex) {
-    return (void *)(group->recordBase + groupIndex * EFF_QUAD_POSITION_BYTES);
+    return group->recordBase + groupIndex * EFF_QUAD_POSITION_BYTES;
 }
 
 /* Address four packed color words for one quad. */
 void *effGetRecordGroupAuxEntry(EffRecordPool *group, s32 groupIndex) {
-    return (void *)(group->auxRecordBase + groupIndex * EFF_QUAD_COLOR_BYTES);
+    return group->auxRecordBase + groupIndex * EFF_QUAD_COLOR_BYTES;
 }
 
 /* Allocate five-vertex fan groups, then set the returned header's matrix. */
@@ -768,12 +768,12 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
 
 /* Address the five-position record for one fan group. */
 s32 effGetExtendedGroupElement(EffRecordPool *group, s32 groupIndex) {
-    return group->recordBase + groupIndex * EFF_FAN_POSITION_BYTES;
+    return (s32)(group->recordBase + groupIndex * EFF_FAN_POSITION_BYTES);
 }
 
 /* Address the five color words for one fan group. */
 s32 effGetExtendedGroupAuxEntry(EffRecordPool *group, s32 groupIndex) {
-    return group->auxRecordBase + groupIndex * EFF_FAN_COLOR_BYTES;
+    return (s32)(group->auxRecordBase + groupIndex * EFF_FAN_COLOR_BYTES);
 }
 
 /* Select the record pool's packet submission mode. */
