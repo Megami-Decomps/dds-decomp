@@ -1123,7 +1123,20 @@ void ptyClearSelectedSkillFlagsFromActiveEntries(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0011A118", func_0011D0D8);
+void func_0011D0D8(void) {
+    s32 slotIndex;
+
+    for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
+        DatPartyRecord *entry = &datGameState->party[slotIndex];
+
+        if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
+            if (entry->itemId == 0xF8) {
+                entry->itemId = 0;
+            }
+        }
+    }
+    datGameState->inventory.counts[0xF8] = 0;
+}
 
 /* Save occupied active entries to stock; clear the absent special-character slots. */
 extern void func_0011D130(void);
