@@ -602,7 +602,47 @@ s32 dspCaptureWindowSecondPanelValue(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0024CFB0", func_0024DC98);
+extern s8 itfPanelGetStatus(s32 index);
+extern s32 func_0019C9F0(s32 window, s32 first, s32 second);
+extern void itfMesCountClearBits(s32 window, s32 selectedBitIndex);
+extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
+
+/* Advance the singleton window through its active, gated and cleanup phases. */
+void func_0024DC98(s32 notify) {
+    s32 handle = dspWindowHandle;
+    if (handle < 0) {
+        return;
+    }
+    switch ((s8)dspWindowControlState) {
+    case 0:
+        return;
+    case DSP_WINDOW_CONTROL_ACTIVE:
+        if (itfPanelGetStatus(handle) < 0) {
+            dspWindowControlState = DSP_WINDOW_CONTROL_GATED;
+        }
+        return;
+    case DSP_WINDOW_CONTROL_GATED:
+        if (D_003BC410 >= 0) {
+            func_0019C9F0(handle, 3, 1);
+            itfMesCountClearBits(dspWindowHandle, evtMessageWindowOption);
+            itfMesBuildOptionList(dspWindowHandle, D_003BC410);
+            D_003BC410 = -1;
+        }
+        if (dspWindowStateGate != 0) {
+            return;
+        }
+        if (dspCaptureWindowSecondPanelValue() != 0) {
+            return;
+        }
+        dspWindowControlState = 3;
+        return;
+    case 3:
+        evtCleanupMessageWindow(notify);
+        return;
+    default:
+        return;
+    }
+}
 
 /* Request mode one from the existing message-window worker. */
 void func_0024DD78(void) {
