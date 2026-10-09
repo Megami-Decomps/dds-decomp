@@ -3621,7 +3621,6 @@
 0x00249EB0	evtViewerCountFlaggedUpdates	inferred	Increments the viewer update count when the viewer condition is active.
 0x0024A380	evtViewerUpdateTimedAction	inferred	Stops or updates gated action based on viewer position and time boundaries.
 0x0024A600	evtViewerAdvanceGlyphTick	inferred	Byte-identical DDS1 counterpart: Resets the viewer font glyph while its tick count is active and stops after thirty ticks.
-0x0024A670	evtViewerFindLatestMatchingGlyph	inferred	Returns latest kind-five glyph at/before position with matching channel and condition. [names_reviewed7.tsv]
 0x0024A9F0	evtViewerDispatchFlagMode	inferred	Dispatches mode zero or one according to bit zero of viewer flags.
 0x0024AA38	evtViewFindNextGlyph	inferred	nearest glyph after the advance position over type-2 nodes
 0x0024AAB8	evtViewFindPrevGlyph	inferred	nearest glyph before the advance position
@@ -7032,3 +7031,5 @@
 0x001742F0	effFlashOrbitArcUpdate	inferred	Advances shape and particle lifetimes, updates orbit-arc geometry and colors, and submits the record pool.
 0x001757F8	effFlashRadialStripSetParticleColors	inferred	Writes packed colors for paired radial-strip quad records using the supplied color multiplier.
 0x00233F58	mdlGetRecordPartIndex	inferred	returns the u16 MdlRecord part index at +0x0e, used for part-list selection
+0x0024A670	evtViewerFindLatestMatchingMotionKey	inferred	Selects the latest eligible kind-five motion key at or before a frame for a channel, requiring its indexed condition to pass.
+0x002496B0	evtViewerSyncModelMotionChannels	inferred	Applies the selected timeline key or baseline state to each of the four model motion channels, using a per-channel key cache.

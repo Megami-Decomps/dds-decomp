@@ -77,7 +77,7 @@ typedef struct EvtRuntimeGroup {
     s32 childCount;
     EvtRuntimeChild *children;
     EvtRuntimeChild *lastChild;
-    EvtRuntimeChild *cachedKey[4];
+    EvtRuntimeChild *motionKeyCache[4]; /* Last applied key for each model motion channel. */
     u8 pad6C[0x10];
     struct EvtRuntimeGroup *next;
     struct EvtRuntimeGroup *prev;
