@@ -128,7 +128,7 @@ extern s32 func_001277A8(s32 arg0);
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 
-extern void fldReleaseCameraModel(s32 arg0);
+extern void fldReleaseCameraModel(u32 enabled);
 
 extern void evtSetSolarOverlayFullyVisible(void);
 
@@ -207,11 +207,24 @@ typedef struct {
 
 extern FldEnt14 fldSparkObjectEntries[];
 
+/* Each DDS1 resource row owns sixteen 16-byte spark sequences. */
+typedef struct FldSparkSequence {
+    s32 count;
+    s8 slots[12];
+} FldSparkSequence;
+
 typedef struct {
     s16 unk0;
     s16 unk2;
-    u8 pad4[0x10C];
+    s32 entryCount;            /* 0x04 */
+    s32 duration;              /* 0x08 */
+    u8 pad0C[2];
+    s16 reservedModel;         /* 0x0E: model for reserved object slot 16. */
+    FldSparkSequence sequences[16]; /* 0x10 */
 } FldEnt110; /* 0x110 bytes */
+
+typedef char FldSparkSequenceSizeCheck[(sizeof(FldSparkSequence) == 0x10) ? 1 : -1];
+typedef char FldEnt110SizeCheck[(sizeof(FldEnt110) == 0x110) ? 1 : -1];
 
 extern FldEnt110 *D_003BAA48;
 
@@ -3647,7 +3660,8 @@ typedef struct FieldPair48 {
 
 extern FieldPair48 fldSparkSlots[];
 
-extern u32 effMiscRand();
+struct EffRandState;
+extern u32 effMiscRand(struct EffRandState *state);
 
 extern s16 D_0032E4B4[];
 
@@ -3691,7 +3705,7 @@ s32 fldSetSparkVectors(s32 index, const u128 *pos, const u128 *vel) {
 /* Complete 0x40-byte field spark controller, including the weather timer. */
 typedef struct FldSparkController {
     void *object;              /* 0x00 */
-    void *entry;               /* 0x04 */
+    FldEnt110 *entry;           /* 0x04 */
     s32 phase;                 /* 0x08 */
     s32 countdown;             /* 0x0C */
     s32 terminated;            /* 0x10 */
@@ -3703,8 +3717,8 @@ typedef struct FldSparkController {
     s32 dialogPhase;           /* 0x28 */
     s32 unk2C;                 /* 0x2C */
     s32 entryCount;            /* 0x30 */
-    s32 unk34;                 /* 0x34 */
-    s32 unk38;                 /* 0x38 */
+    s32 sequenceIndex;         /* 0x34 */
+    s32 sequenceRemaining;     /* 0x38 */
     s32 cursor;                /* 0x3C */
 } FldSparkController;
 
@@ -3794,7 +3808,75 @@ void fldUpdateSparkSlots(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001411F0", func_0014BDF8);
+void func_0014BDF8(void) {
+    FldSparkSequence *sequence;
+    s32 i;
+    s32 slot;
+    FldVec4 position __attribute__((aligned(16)));
+    f32 dx;
+    f32 dy;
+    f32 dz;
+
+    if (fldSparkControlState.sequenceRemaining == 0) {
+        i = fldSparkControlState.sequenceIndex;
+        sequence = &fldSparkControlState.entry->sequences[i];
+        fldSparkControlState.sequenceRemaining = sequence->count;
+        if (sequence->count == -1) {
+            fldSparkControlState.terminated = 1;
+            return;
+        }
+        if (sequence->count == 0) {
+            slot = sequence->slots[0];
+            func_0014BA50(slot, 1);
+            fldSparkSlots[slot].unk28 = 1;
+            fldSparkSlots[slot].active = 1;
+            fldSparkSlots[slot].unk2E = 0;
+            fldSparkControlState.sequenceRemaining = 1;
+            sndSetSequenceVolumePan(0x670015, 0x7F, 0x3F);
+        } else {
+            for (i = 0; i < sequence->count; i++) {
+                slot = sequence->slots[i];
+                func_0014BA50(slot, 0);
+                fldSparkSlots[slot].unk28 = 0;
+                fldSparkSlots[slot].active = 1;
+                fldSparkSlots[slot].unk2E = 0;
+            }
+            sndSetSequenceVolumePan(0x670014, 0x7F, 0x3F);
+        }
+        fldSparkControlState.sequenceIndex++;
+    }
+    for (i = 0; i < 64 && i < fldSparkControlState.entryCount; i++) {
+        switch (fldSparkSlots[i].active) {
+        case 0:
+            break;
+        case 1:
+            fldSparkSlots[i].unk2E++;
+            if (fldSparkSlots[i].objectSlot != -1 && fldSparkControlState.mode == 1 &&
+                fldSparkControlState.pulse != 0 && (u32)(fldSparkControlState.modeCountdown - 10) < 6) {
+                PCP_COPY_VECTOR(&position, fldSparkSlots[i].pos);
+                dx = fldAreaState.x - position.v[0];
+                dy = fldAreaState.y - position.v[1];
+                dz = fldAreaState.z - position.v[2];
+                if (fsqrtf(dx * dx + dy * dy + dz * dz) < 200.0f) {
+                    fldSetWeatherEffectPos(position.v[0], position.v[1], position.v[2]);
+                    fldAreaState.collectedCount++;
+                    fldAreaState.score += 0x32;
+                    fldSparkControlState.sequenceRemaining--;
+                    sndSetSequenceVolumePan(0x670013, 0x7F, 0x3F);
+                    fldReleaseCameraModel(3);
+                    fldSparkControlState.modeCountdown += 3;
+                    fldFreeSparkSlot(i);
+                    fldSparkSlots[i].unk28 = 0;
+                    fldSparkSlots[i].active = 0;
+                    fldSparkSlots[i].unk2E = effMiscRand(0) % 270 + 30;
+                    fldSparkControlState.pulse = 0;
+                }
+            }
+
+            break;
+        }
+    }
+}
 
 extern FldSparkController fldSparkControlState;
 
