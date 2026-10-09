@@ -136,9 +136,23 @@ void func_00258620(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cell, s32 su
     }
 }
 
-void func_0024E728(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
+void func_0024E728(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
+                   s32 placementIndex, s32 context, f32 scaleX, f32 scaleY);
 
-INCLUDE_ASM(const s32, "game/code_00258258", func_00258A70);
+void func_00258A70(s32 x, s32 y, s32 z, s32 alpha, u32 flags,
+                   f32 scaleX, f32 scaleY, s32 context) {
+    if (flags & 2) {
+        func_0024E728(x, y, z, alpha, 0x20, 0x33, context, scaleX, scaleY);
+        return;
+    }
+    if (flags & 4) {
+        func_0024E728(x, y, z, alpha, 0x20, 0x34, context, scaleX, scaleY);
+        return;
+    }
+    if (flags & 8) {
+        func_0024E728(x, y, z, alpha, 0x20, 0x35, context, scaleX, scaleY);
+    }
+}
 
 
 void func_00258AF0(MnuGridFeedbackState *state, u32 mode) {
