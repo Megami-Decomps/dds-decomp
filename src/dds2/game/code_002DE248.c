@@ -3547,7 +3547,7 @@ typedef struct EffectSlotNode54 {
     u32 index;             // 0x2C
     u32 handleBuffer;      // 0x30
     BillObj *billResource; // 0x34
-    u32 *jobs;             // 0x38
+    FileJobPayload **jobs;             // 0x38
     struct SdfMemBlock *jobAllocation;         // 0x3C
     u32 *queues;           // 0x40
     u32 queueBuffer;       // 0x44
@@ -3653,7 +3653,7 @@ void effDestroySurfaceNode(EffectSlotNode54 *node) {
     if (node->jobAllocation != 0) {
         count = ((FileSlotTable *)node->record)->count;
         for (i = 0; i < count; i++) {
-            fileJobDestroy((FileJobPayload *)node->jobs[i]);
+            fileJobDestroy(node->jobs[i]);
         }
         sdfReleaseResourceAllocation(node->jobAllocation);
     }
@@ -3726,7 +3726,7 @@ void func_002E7F60(EffectSlotNode54 *dst, u8 *work) {
         count = ((FileSlotTable *)src->record)->count;
         if (dst->jobAllocation != 0) {
             for (i = 0; i < count; i++) {
-                fileJobDestroy((FileJobPayload *)dst->jobs[i]);
+                fileJobDestroy(dst->jobs[i]);
             }
             sdfReleaseResourceAllocation(dst->jobAllocation);
             dst->jobs = 0;
@@ -3737,9 +3737,9 @@ void func_002E7F60(EffectSlotNode54 *dst, u8 *work) {
             return;
         }
         dst->jobAllocation = sdfAllocGeneralBlock(size);
-        dst->jobs = (u32 *)sdfResourceRetainAddress(dst->jobAllocation);
+        dst->jobs = (FileJobPayload **)sdfResourceRetainAddress(dst->jobAllocation);
         for (i = 0; i < count; i++) {
-            dst->jobs[i] = (u32)fileJobCreateChild((FileJobPayload *)src->jobs[0]);
+            dst->jobs[i] = fileJobCreateChild(src->jobs[0]);
         }
         break;
     case 6:
@@ -3857,7 +3857,7 @@ void effRebuildSurfaceJobs(EffectSlotNode54 *node, void *source) {
 
     if (node->jobAllocation != 0) {
         for (i = 0; i < count; i++) {
-            fileJobDestroy((FileJobPayload *)node->jobs[i]);
+            fileJobDestroy(node->jobs[i]);
         }
         sdfReleaseResourceAllocation(node->jobAllocation);
         node->jobs = 0;
@@ -3866,10 +3866,10 @@ void effRebuildSurfaceJobs(EffectSlotNode54 *node, void *source) {
     size = count * 4;
     if (size != 0) {
         node->jobAllocation = sdfAllocGeneralBlock(size);
-        node->jobs = (u32 *)sdfResourceRetainAddress(node->jobAllocation);
-        node->jobs[0] = (u32)fileJobCreateFromJob((FileJobPayload *)(u32)source);
+        node->jobs = (FileJobPayload **)sdfResourceRetainAddress(node->jobAllocation);
+        node->jobs[0] = fileJobCreateFromJob((FileJobPayload *)source);
         for (i = 1; i < count; i++) {
-            node->jobs[i] = (u32)fileJobCreateChild((FileJobPayload *)node->jobs[0]);
+            node->jobs[i] = fileJobCreateChild(node->jobs[0]);
         }
     }
 }
