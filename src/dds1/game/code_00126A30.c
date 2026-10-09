@@ -298,7 +298,6 @@ extern s32 fldTaskSlotCount;
 extern s16 D_003C9510[];
 extern u32 D_003BAE4C;
 extern s32 D_003BAE50;
-extern EffWorldNode *dds3FindObjectChainNodeByName();
 extern void fldClearMenuEntries();
 extern void fldDestroyTitleTask();
 extern void fldPlayPendingSounds();
@@ -6659,4 +6658,3 @@ INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE68);
 INCLUDE_SDATA(const s32, "game/code_00126A30", D_003BAE6C);
 
 INCLUDE_SDATA(const s32, "game/code_00126A30", fldFieldTaskHandle);
-
