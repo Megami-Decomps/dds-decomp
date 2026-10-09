@@ -46,4 +46,36 @@ void sdfBuildPacket10C(SdfGsGouraudTrianglePayload *packet, s32 primitive,
     s32 x0, s32 y0, s32 color0, s32 x1, s32 y1, s32 color1,
     s32 x2, s32 y2, s32 color2, s32 depth);
 
+/* PRIM followed by four independently colored vertices. */
+typedef struct SdfGsGouraudQuadPayload {
+    u64 gifTag;
+    u64 gifRegisters;
+    u64 primitive;
+    SdfGsGouraudVertex vertices[4];
+} SdfGsGouraudQuadPayload;
+
+typedef struct SdfGsGouraudQuadPacket {
+    u64 dmaTag;
+    u64 vifCommands;
+    SdfGsGouraudQuadPayload drawing;
+    u64 unwrittenTail; /* Allocation rounds the REGLIST payload up to a qword. */
+} SdfGsGouraudQuadPacket;
+
+typedef char SdfGsGouraudQuadPayload_size_must_be_0x58[
+    (sizeof(SdfGsGouraudQuadPayload) == 0x58) ? 1 : -1];
+typedef char SdfGsGouraudQuadPayload_primitive_at_0x10[
+    ((u32)&((SdfGsGouraudQuadPayload *)0)->primitive == 0x10) ? 1 : -1];
+typedef char SdfGsGouraudQuadPayload_vertices_at_0x18[
+    ((u32)&((SdfGsGouraudQuadPayload *)0)->vertices == 0x18) ? 1 : -1];
+typedef char SdfGsGouraudQuadPacket_size_must_be_0x70[
+    (sizeof(SdfGsGouraudQuadPacket) == 0x70) ? 1 : -1];
+typedef char SdfGsGouraudQuadPacket_drawing_at_0x10[
+    ((u32)&((SdfGsGouraudQuadPacket *)0)->drawing == 0x10) ? 1 : -1];
+typedef char SdfGsGouraudQuadPacket_unwrittenTail_at_0x68[
+    ((u32)&((SdfGsGouraudQuadPacket *)0)->unwrittenTail == 0x68) ? 1 : -1];
+
+void sdfWriteGouraudQuadPacket(SdfGsGouraudQuadPayload *packet, s32 primitive,
+    s32 x0, s32 y0, s32 color0, s32 x1, s32 y1, s32 color1,
+    s32 x2, s32 y2, s32 color2, s32 x3, s32 y3, s32 color3, s32 depth);
+
 #endif
