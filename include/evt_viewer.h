@@ -12,6 +12,14 @@ typedef union EvtViewParam {
     f32 f; s32 i; u32 u; u16 h[2]; s16 sh[2]; u8 b[4]; s8 sb[4];
 } EvtViewParam;
 
+/* Allocation-backed 0x20 payload used by type-0xB draw keys. */
+typedef struct EvtViewerDrawPayload {
+    f32 x, y, z, w;
+    s32 mode;
+    u8 unknown14[0xC];
+} EvtViewerDrawPayload;
+typedef char EvtViewerDrawPayload_size[(sizeof(EvtViewerDrawPayload) == 0x20) ? 1 : -1];
+
 /* Complete 0x38-byte key allocated by the viewer and linked on a group. */
 typedef struct EvtRuntimeChild {
     u16 frame;
