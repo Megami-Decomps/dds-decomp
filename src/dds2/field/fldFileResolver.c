@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_motion.h"
 #include "fld_resource_resolver.h"
 #include "fld.h"
 #include "dds3obj.h"
@@ -3630,7 +3631,7 @@ s32 func_001322D8(void) {
         }
         {
             Motion *const completionMotion = ((MdlCtx *)fldCameraModelObject)->first;
-            if (completionMotion->state == 5) {
+            if (completionMotion->state == SDF_MOTION_STATE_TERMINAL) {
                 mnuMarkTitleStreamResetPending();
                 mnuResetTitleStreamLocked();
                 fldAreaState.unk188 = 0;
@@ -3679,7 +3680,7 @@ s32 func_00132408(void) {
             model = (MdlCtx *)fldCameraModelObject;
         }
 
-        if (model->first->state == 5) {
+        if (model->first->state == SDF_MOTION_STATE_TERMINAL) {
             fldAreaState.unk190 = 0;
             fldSetSceneControlFlags(0x40);
         } else {

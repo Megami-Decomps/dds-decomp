@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
@@ -871,7 +872,7 @@ s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit) {
         return 1;
     }
     if (state == EVT_UNIT_MOTION_STATE_MOTION && unit->motionTicks > 0 &&
-        unit->owner->first->state == 5) {
+        unit->owner->first->state == SDF_MOTION_STATE_TERMINAL) {
         return 1;
     }
     return 0;

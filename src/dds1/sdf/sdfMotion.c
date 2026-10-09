@@ -4,6 +4,7 @@
 #include "ee_mmi.h"
 #include "sdf.h"
 #include "sdf_draw.h"
+#include "sdf_motion.h"
 #include "sdf_motion_bindings.h"
 
 typedef struct {
@@ -128,7 +129,7 @@ Motion *func_002DB230(SdfModel *model, MotionTable *table) {
         ((void **)motion->request->buffer)[i] =
             (void *)sdfDispatchAssetCommandWord(motion, command->command, command->argument);
     }
-    motion->state = 0;
+    motion->state = SDF_MOTION_STATE_UNINITIALIZED;
     motion->frameStep = 1.0f;
     return motion;
 }
@@ -189,12 +190,12 @@ void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 b
     }
 
     motion->loopEnabled = loopEnabled;
-    motion->state = 1;
+    motion->state = SDF_MOTION_STATE_INITIALIZED;
     motion->currentFrame = motion->blendStartFrame;
     entry = motion->motionTable->entries[motionIndex];
     if (entry == NULL) {
         motion->frameCount = 0;
-        motion->state = 5;
+        motion->state = SDF_MOTION_STATE_TERMINAL;
         return;
     }
 
@@ -207,8 +208,8 @@ void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 b
     }
 }
 /* Select a motion with no lead-in and no blend duration. */
-void sdfMotionInitializeAtZeroTime(void *a0, s32 a1, s32 a2) {
-    sdfMotionInitialize(a0, a1, a2, 0.0f, 0.0f);
+void sdfMotionInitializeAtZeroTime(Motion *motion, s32 motionIndex, s32 loopEnabled) {
+    sdfMotionInitialize(motion, motionIndex, loopEnabled, 0.0f, 0.0f);
 }
 
 
@@ -220,7 +221,7 @@ void sdfMotionSampleAtFrame(Motion *motion, f32 frame) {
     f32 weight;
     VObj *object;
 
-    motion->state = 4;
+    motion->state = SDF_MOTION_STATE_SAMPLING;
     duration = motion->blendDurationFrames;
     elapsed = frame - motion->blendStartFrame;
     motion->currentFrame = frame;
@@ -254,22 +255,22 @@ s32 sdfMotionUpdate(Motion *motion) {
 
     result = 0;
     switch (motion->state) {
-    case 0:
+    case SDF_MOTION_STATE_UNINITIALIZED:
     case 2:
     case 3:
-    case 5:
-    case 6:
+    case SDF_MOTION_STATE_TERMINAL:
+    case SDF_MOTION_STATE_SUSPENDED:
         break;
-    case 1:
+    case SDF_MOTION_STATE_INITIALIZED:
         sdfMotionSampleAtFrame(motion, motion->blendStartFrame);
         break;
-    case 4:
+    case SDF_MOTION_STATE_SAMPLING:
         frame = motion->currentFrame + motion->frameStep;
         frameCount = motion->frameCount;
         if (motion->loopEnabled == 0) {
             if (frameCount <= frame) {
                 sdfMotionSampleAtFrame(motion, frameCount);
-                motion->state = 5;
+                motion->state = SDF_MOTION_STATE_TERMINAL;
                 result = 1;
                 break;
             }
@@ -293,15 +294,15 @@ void sdfMotionSuspend(Motion *motion) {
     u8 previousState;
 
     previousState = motion->state;
-    if (previousState != 6) {
+    if (previousState != SDF_MOTION_STATE_SUSPENDED) {
         motion->previousState = previousState;
-        motion->state = 6;
+        motion->state = SDF_MOTION_STATE_SUSPENDED;
     }
 }
 
 /* Resume only a suspended motion, restoring the state saved by suspend. */
 void sdfMotionResume(Motion *motion) {
-    if (motion->state == 6) {
+    if (motion->state == SDF_MOTION_STATE_SUSPENDED) {
         motion->state = motion->previousState;
     }
 }
