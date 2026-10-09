@@ -307,6 +307,20 @@ typedef struct EffClassResourceOps {
 typedef char EffClassResourceOps_size_must_be_0x18[
     (sizeof(EffClassResourceOps) == 0x18) ? 1 : -1];
 
+/* Block-resource callbacks receive the owning class work, not the payload. */
+typedef struct EffBlockOps {
+    void (*initialize)(EffClassWork *); /* 0x00 */
+    u32 (*createResource)(); /* 0x04: preserve the existing generic result ABI */
+    void (*destroyResource)(EffClassWork *); /* 0x08 */
+    u32 (*cloneResource)(void *); /* 0x0C: preserve the existing generic result ABI */
+    void (*update)(EffClassWork *); /* 0x10 */
+    void (*draw)(EffClassWork *); /* 0x14 */
+    u32 payloadSize; /* 0x18 */
+} EffBlockOps;
+
+typedef char EffBlockOps_size_must_be_0x1C[
+    (sizeof(EffBlockOps) == 0x1C) ? 1 : -1];
+
 struct EffModelResource;
 struct EffSpanConfig;
 struct EffSpanTable;
@@ -330,7 +344,7 @@ extern EffClassOps effClassWorkOperations[];
 
 extern EffClassResourceOps effClassResourceWorkOperations[];
 
-extern EffResourceOps effBlockResourceOperations[];
+extern EffBlockOps effBlockResourceOperations[];
 
 extern EffResourceOps effModelBlockOperations[];
 
@@ -5249,7 +5263,7 @@ EffClassWork *effCreateBlockResourceFromFile(FileJobPayload *request) {
 }
 
 void effDestroyBlockResourceWork(EffClassWork *work) {
-    effBlockResourceOperations[work->kind].destroyResource();
+    effBlockResourceOperations[work->kind].destroyResource(work);
     sdfReleaseChipBlock(work);
 }
 
@@ -5263,7 +5277,7 @@ EffClassWork *effDuplicateActiveResourceB(EffClassWork *work) {
 }
 
 void effResetBlockResourceFrame(EffClassWork *work) {
-    effBlockResourceOperations[work->kind].initialize();
+    effBlockResourceOperations[work->kind].initialize(work);
     work->frame = 0;
 }
 
