@@ -5,6 +5,7 @@
 #include "gs_packet.h"
 #include "sdf.h"
 #include "mnu_list.h"
+#include "fld_map_resource.h"
 
 extern void sdfCounterTickCountdown(void);
 
@@ -117,15 +118,6 @@ extern s32 sdfCounterMeasureLabelWidth(u32);
 
 extern void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors,
                                         const char *text);
-
-typedef struct MapResource {
-    u32 image;
-    u32 handle;
-    u32 descriptor;
-    u32 unkC;
-} MapResource;
-
-extern MapResource fldLocalMapTextureResource;
 
 void sdfInitInnerVectors(void) {
     effObjSetInnerFirstVec(fldLocalMapCameraObject, &fldLocalMapFirstCameraVector);
@@ -657,7 +649,7 @@ void func_002C57F0(void) {
                   ((u32)(value * 128.0f) << 24) | 0x808080,
                   ((u32)(value * 128.0f) << 24) | 0x808080,
                   ((u32)(value * 128.0f) << 24) | 0x808080,
-                  (struct SdfTex *)fldLocalMapTextureResource.image);
+                  fldLocalMapTextureResource.texture);
     tick = timer->mapTimerSecondary;
     if (tick > 0) {
         tick = abs(tick);
@@ -675,7 +667,7 @@ void func_002C57F0(void) {
                   ((u32)(value * 128.0f) << 24) | 0x808080,
                   ((u32)(value * 128.0f) << 24) | 0x808080,
                   ((u32)(value * 128.0f) << 24) | 0x808080,
-                  (struct SdfTex *)fldLocalMapTextureResource.image);
+                  fldLocalMapTextureResource.texture);
 }
 
 
@@ -743,7 +735,7 @@ void sdfCounterDrawSelectedTimerFade(s32 unused, s32 x, f32 fade) {
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
-                  (struct SdfTex *)fldLocalMapTextureResource.image);
+                  fldLocalMapTextureResource.texture);
     evtSubmitPrimaryAlphaBlendMode(0);
 }
 
