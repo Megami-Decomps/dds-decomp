@@ -346,7 +346,7 @@ extern EffClassResourceOps effClassResourceWorkOperations[];
 
 extern EffBlockOps effBlockResourceOperations[];
 
-extern EffResourceOps effModelBlockOperations[];
+extern EffBlockOps effModelBlockOperations[];
 
 extern EffResourceOps effRuntimeResourceOperations[];
 
@@ -5808,7 +5808,7 @@ EffClassWork *effCreateModelBlockFromFile(FileJobPayload *request) {
 }
 
 void effDestroyModelBlockWork(EffClassWork *work) {
-    effModelBlockOperations[work->kind].destroyResource();
+    effModelBlockOperations[work->kind].destroyResource(work);
     sdfReleaseChipBlock(work);
 }
 
@@ -5822,7 +5822,7 @@ EffClassWork *effRecreateActiveByClass(EffClassWork *work) {
 }
 
 void effResetModelBlockFrame(EffClassWork *work) {
-    effModelBlockOperations[work->kind].initialize();
+    effModelBlockOperations[work->kind].initialize(work);
     work->frame = 0;
 }
 
