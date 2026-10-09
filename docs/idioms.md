@@ -5411,3 +5411,26 @@ copies, the 0x10C work allocation, and existing `u32` frame/count fields
 at work `+B0/+B4` remain unchanged. The updater bodies are still ASM;
 their native modes 1/2 omit local matrix initialization, so a future C
 body must not invent an identity-matrix fallback.
+
+## DDS2 spark scripts belong to their primary resource rows
+
+`func_00150800` finds a row through `fldFindResourceRecordIndex`, multiplies
+its index by `0xE0`, and stores that same `FieldResourceRecord *` at
+`fldSparkControlState +4`. Its signed halfwords at `+4/+8` supply the slot
+count and duration; `func_00151498` returns the signed parameter at `+6`.
+The collector addresses sixteen 12-byte sequences starting at row `+20`,
+each with a signed word count and eight signed-byte slot IDs. Complete
+`FieldResourceRecord` itself rather than introducing a second asset view.
+
+The DDS2 controller's actual payload ends at `+48` (size `0x4C`). Its
+inserted `+8` word and pickup/scheduled-sound bookkeeping differ from
+DDS1's `0x40` controller, so do not homogenize their offsets. In DDS2,
+`func_00150F20` uses signed countdown comparisons at `+1C`; the collection
+window separately interprets `countdown - 10` as unsigned before testing
+it against six. Field-area pickup count/score at `+106/+108` are cleared
+by the initializer and incremented by the collector. Existing field
+getters and controller clients use their primary members, not interior
+global aliases. The precise PRNG contract is
+`u32 effMiscRand(struct EffRandState *)`; null selects the default state
+in the real `00340AC8` provider.
+

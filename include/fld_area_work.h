@@ -75,7 +75,9 @@ typedef struct FldAreaWork {
     u8 padF8[8];
     s32 unk100;
     s16 transitionMode;          /* 0x104 */
-    u8 pad106[0xA];
+    u16 collectedCount;          /* 0x106: spark pickups. */
+    s32 score;                   /* 0x108: pickups add 50. */
+    u8 pad10C[4];
     u32 pendingSceneRequest;
     s32 deferredExit;
     s32 unk118;

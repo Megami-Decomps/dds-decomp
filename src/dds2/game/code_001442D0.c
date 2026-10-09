@@ -340,7 +340,6 @@ extern s32 dspStartEntry(s32 arg0);
 
 extern void fldResetPlayerSceneObjectState(void);
 
-extern void *D_00451B94[];
 
 extern void func_0035B6E0(const char *fmt, ...);
 
@@ -352,7 +351,6 @@ extern s32 mnuPositionedResourceActive[];
 
 extern s32 D_0043633C;
 
-extern s32 D_00451B9C[];
 
 extern void fldClearFloorFlag(s32, s32, s32);
 
@@ -461,9 +459,9 @@ typedef struct FieldPair48 {
 
 extern FieldPair48 fldSparkSlots[];
 
-extern u32 effMiscRand();
+struct EffRandState;
+extern u32 effMiscRand(struct EffRandState *state);
 
-extern s16 D_00389874[];
 
 typedef struct FldVec4 {
     f32 v[4];
@@ -477,17 +475,42 @@ extern void dds3ClearObjectFlags();
 
 extern FldVec4 D_00413DE8;
 
-extern s32 fldSparkControlState[];
+struct FieldResourceRecord;
+
+/* DDS2 retains the DDS1 controller's roles, with its inserted +8 word and
+ * the serialized-sequence/pickup bookkeeping that grows it to 0x4C. */
+typedef struct FldSparkController {
+    void *object;
+    struct FieldResourceRecord *entry;
+    s32 unk8;
+    s32 phase;
+    s32 countdown;
+    s32 terminated;
+    s32 mode;
+    s32 modeCountdown;
+    s32 pendingMode;
+    s32 frame;
+    s32 pulse;
+    s32 dialogPhase;
+    s32 unk30;
+    s32 entryCount;
+    s32 sequenceIndex;
+    s32 sequenceRemaining;
+    s32 cursor;
+    s32 pickupDelay;
+    s32 scheduledSounds;
+} FldSparkController;
+
+typedef char FldSparkControllerSizeCheck[(sizeof(FldSparkController) == 0x4C) ? 1 : -1];
+
+extern FldSparkController fldSparkControlState;
 
 extern void func_0014F5F0();
 
 extern s32 func_0014F980(s32, s32);
 
-extern s32 fldSparkControlState[];
 
-extern s32 fldSparkControlState[];
 
-extern s32 fldSparkControlState[];
 
 extern s32 dds3GetWorldObject(void);
 
@@ -3873,14 +3896,23 @@ void fldUpdateWeatherEffectNodes(void) {
     }
 }
 
-typedef struct {
+/* The 0xE0 resource row owns sixteen 12-byte signed-ID sequences at +0x20. */
+typedef struct FldSparkSequence {
+    s32 count;
+    s8 slots[8];
+} FldSparkSequence;
+
+typedef struct FieldResourceRecord {
     s16 category;
     s16 id;
-    s16 unk04;
-    u8 unk06[2];
-    s16 unk08;
-    u8 unk0A[0xD6];
+    s16 entryCount;
+    s16 unk06;
+    s16 duration;
+    u8 pad0A[0x16];
+    FldSparkSequence sequences[16];
 } FieldResourceRecord;
+
+typedef char FieldResourceRecordSizeCheck[(sizeof(FieldResourceRecord) == 0xE0) ? 1 : -1];
 
 extern FieldResourceRecord *D_00435E18;
 
@@ -3920,7 +3952,7 @@ void fldClearObjectEntryHandles(void) {
 void fldInitSparkTable(void) {
     s32 i;
 
-    if (D_00389874[0] == 0) {
+    if (fldAreaState.transitionMode == 0) {
         for (i = 0; i < 64; i++) {
             fldSparkSlots[i].hasVectors = 0;
             fldSparkSlots[i].active = 0;
@@ -3964,7 +3996,7 @@ s32 func_0014F980(s32 index, s32 reserved) {
     if (reserved == 0) {
         slot = -1;
         for (i = 0; i < 16; i++) {
-            candidate = (fldSparkControlState[16] + i) % 16;
+            candidate = (fldSparkControlState.cursor + i) % 16;
             if (fldSparkObjectEntries[candidate].unk4 == -1) {
                 slot = candidate;
                 break;
@@ -3976,7 +4008,7 @@ s32 func_0014F980(s32 index, s32 reserved) {
     if (slot < 0) {
         return 0;
     }
-    fldSparkControlState[16] = (slot + 1) % 16;
+    fldSparkControlState.cursor = (slot + 1) % 16;
     if (fldSparkSlots[index].hasVectors == 1) {
         PCP_COPY_VECTOR(&position, fldSparkSlots[index].pos);
         effObjSetInnerFirstVec((EffWorldNode *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].pos);
@@ -4015,7 +4047,7 @@ void fldUpdateSparkSlots(void) {
     s32 i;
 
     func_0014F5F0();
-    for (i = 0; i < 64 && i < fldSparkControlState[13]; i++) {
+    for (i = 0; i < 64 && i < fldSparkControlState.entryCount; i++) {
         if (fldSparkSlots[i].hasVectors != 0 && fldSparkSlots[i].active != 0) {
             func_0014F980(i, fldSparkSlots[i].unk28);
         }
@@ -4027,7 +4059,7 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_0014FD28);
 s32 fldIsNearSpark(f32 x, f32 y, f32 z) {
     s32 i;
 
-    for (i = 0; i < 64 && i < fldSparkControlState[13]; i++) {
+    for (i = 0; i < 64 && i < fldSparkControlState.entryCount; i++) {
         if (fldSparkSlots[i].active == 1 && fldSparkSlots[i].objectSlot != -1) {
             f32 dx = x - fldSparkSlots[i].pos[0];
             f32 dy = y - fldSparkSlots[i].pos[1];
@@ -4061,8 +4093,8 @@ void fldFinishEventFieldState(void) {
         fldStartSceneBgmAlternate();
         fldPreparePlayerSceneCameraTarget();
         work->transitionMode = 0;
-        fldSparkControlState[3] = 0;
-        fldSparkControlState[4] = 0;
+        fldSparkControlState.phase = 0;
+        fldSparkControlState.countdown = 0;
         evtSetSolarOverlayFullyVisible();
     }
 }
@@ -4077,18 +4109,16 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413E98);
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00150A60);
 
-extern s32 D_00451BBC[];
 
 s32 func_00150F10(void) {
-    return D_00451BBC[0];
+    return fldSparkControlState.dialogPhase;
 }
 
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00150F20);
 
-extern s32 D_00451B98[];
 
 void func_001512D8(void) {
-    D_00451B98[0] = -1;
+    fldSparkControlState.unk8 = -1;
 }
 
 
@@ -4105,7 +4135,7 @@ void fldResetEventSceneState(void) {
     fldPreparePlayerSceneCameraTarget();
     fldAreaState.deferredExit = 1;
     fldAreaState.transitionMode = 0;
-    D_00451B9C[0] = 0;
+    fldSparkControlState.phase = 0;
     fldAreaState.unk138 = 1;
 }
 
@@ -4121,7 +4151,7 @@ void fldResetAfterEvent(void) {
     fldStartSceneBgmAlternate();
     fldAreaState.deferredExit = 0;
     fldAreaState.transitionMode = 0;
-    D_00451B9C[0] = 0;
+    fldSparkControlState.phase = 0;
     fldAreaState.unk138 = 1;
     evtSetSolarOverlayFullyVisible();
 }
@@ -4148,7 +4178,7 @@ void fldFinishDeferredExit(void) {
 }
 
 s32 fldIsEventPhaseAtLeastTwo(void) {
-    if (D_00451B9C[0] < 2) {
+    if (fldSparkControlState.phase < 2) {
         return 0;
     }
     return 1;
@@ -4158,20 +4188,18 @@ void fldTickWeatherEffectNodes(void) {
     fldUpdateWeatherEffectNodes();
 }
 
-/* Reads the signed halfword at +6 of the current entry. The record's layout
- * and the meaning of this value are not established elsewhere in this unit. */
+/* The serialized resource row retains a signed parameter at +6. */
 s32 func_00151498(void) {
-    return *(s16 *)((u8 *)D_00451B94[0] + 6);
+    return fldSparkControlState.entry->unk06;
 }
 
 s32 func_001514A8(void) {
-    return D_00451B98[0];
+    return fldSparkControlState.unk8;
 }
 
-extern s16 D_00389876[];
 
 s16 func_001514B8(void) {
-    return D_00389876[0];
+    return fldAreaState.collectedCount;
 }
 
 typedef struct FieldGuidePoint {
