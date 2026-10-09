@@ -645,22 +645,10 @@ void mnuInitializeProfileProgress(u16 partyIndex, MnuProfileProgress *progress) 
 }
 
 /* Resource-task -> list -> selection chain used by the mantra display. */
-typedef struct MnuResourceSelectionNode {
-    u8 pad00[0x70];
-    u32 selectionAddress;
-} MnuResourceSelectionNode;
-
-typedef struct MnuResourceList {
-    u8 pad00[0x1C];
-    MnuResourceSelectionNode *selectionNode;
-    u8 pad20[0xC];
-    void (*drawCallback)();
-    s32 *drawValues;
-} MnuResourceList;
-
 typedef struct MnuResourceTask {
-    u8 pad00[0xC];
-    MnuResourceList *menuList;
+    struct SdfMemBlock *allocation;
+    u32 unk04[2];
+    struct MenuList *menuList;
 } MnuResourceTask;
 
 typedef struct MnuPartyRecord {
@@ -670,9 +658,12 @@ typedef struct MnuPartyRecord {
     u8 pad06[0x19E];
 } MnuPartyRecord;
 
-extern MnuResourceList *mnuCreateListState(s32, s32, s32);
 extern void func_00254C68();
 extern void *memset(void *, s32, u32);
+
+typedef char MnuResourceTask_size_must_be_0x10[(sizeof(MnuResourceTask) == 0x10) ? 1 : -1];
+typedef char MnuResourceTask_menuList_offset_must_be_0x0C[
+    ((u32)&((MnuResourceTask *)0)->menuList == 0x0C) ? 1 : -1];
 
 /* Build party selections in unit-ID order from the five present rows.
  * i honestly serves first as a row index, then as the remaining order-table counter. */
@@ -680,11 +671,11 @@ void mnuBuildMantraPartyList(MnuResourceTask *task) {
     u16 partyOrder[MNU_PARTY_ORDER_COUNT];
     s32 i = 0;
     u16 *orderCursor;
-    MnuResourceList *list = mnuCreateListState(0, 6, 0x1A);
+    struct MenuList *list = mnuCreateListState(0, 6, 0x1A);
 
     list->drawCallback = func_00254C68;
-    list->drawValues = sdfAllocSizeClassBlock(MNU_LIST_DRAW_VALUE_BYTES);
-    memset(list->drawValues, 0, MNU_LIST_DRAW_VALUE_BYTES);
+    list->context = sdfAllocSizeClassBlock(MNU_LIST_DRAW_VALUE_BYTES);
+    memset(list->context, 0, MNU_LIST_DRAW_VALUE_BYTES);
     memset(partyOrder, 0, sizeof(partyOrder));
     do {
         s32 recordOffset = i * sizeof(MnuPartyRecord) + MNU_GAME_PARTY_RECORD_OFFSET;
@@ -699,11 +690,12 @@ void mnuBuildMantraPartyList(MnuResourceTask *task) {
     i = MNU_PARTY_ORDER_COUNT - 1;
     do {
         if (*orderCursor != 0) {
-            MnuResourceSelectionNode *selectionNode =
-                (MnuResourceSelectionNode *)mnuListAppendNode((struct MenuList *)list, NULL);
+            struct MenuListNode *selectionNode = mnuListAppendNode(list, NULL);
             MnuProfileProgress *progress = sdfAllocSizeClassBlock(sizeof(MnuProfileProgress));
-            selectionNode->selectionAddress = (u32)progress;
-            mnuInitializeProfileProgress(*orderCursor - 1, progress);
+            u16 partySlot = *orderCursor;
+
+            selectionNode->unk70 = (u32)progress;
+            mnuInitializeProfileProgress(partySlot - 1, progress);
         }
         orderCursor++;
     } while (--i >= 0);
@@ -716,7 +708,7 @@ u32 mnuGetSelectedNodeValue(void) {
     MnuResourceTask *task;
 
     task = (MnuResourceTask *)sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
-    return task->menuList->selectionNode->selectionAddress;
+    return task->menuList->cursor->unk70;
 }
 
 /* Clear the list's two animation flags and request its default retreat. */
@@ -734,46 +726,32 @@ void mnuResetResourceAnimation(void) {
 }
 
 /* Allocate the four-word list task work, construct its party list and clear both remaining words. */
-u32 *mnuAllocateEmptyResourceListState(void) {
-    s32 allocationHandle = (u32)sdfAllocGeneralBlock(MNU_RESOURCE_LIST_WORK_BYTES);
-    u32 *taskWords = (u32 *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)allocationHandle);
+MnuResourceTask *mnuAllocateEmptyResourceListState(void) {
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(MNU_RESOURCE_LIST_WORK_BYTES);
+    MnuResourceTask *task = (MnuResourceTask *)sdfMemoryGetBlockAddress(allocation);
 
-    memset(taskWords, 0, MNU_RESOURCE_LIST_WORK_BYTES);
-    taskWords[0] = allocationHandle;
-    mnuBuildMantraPartyList((MnuResourceTask *)taskWords);
-    taskWords[1] = 0;
-    taskWords[2] = 0;
-    return taskWords;
+    memset(task, 0, MNU_RESOURCE_LIST_WORK_BYTES);
+    task->allocation = allocation;
+    mnuBuildMantraPartyList(task);
+    task->unk04[0] = 0;
+    task->unk04[1] = 0;
+    return task;
 }
 
-typedef struct MenuCleanupNode {
-    u8 pad00[0x58];
-    struct MenuCleanupNode *next;
-    u8 pad5C[0x14];
-    void *resource;
-} MenuCleanupNode;
-
-typedef struct MenuCleanupOwner {
-    u8 pad00[0x1C];
-    MenuCleanupNode *first;
-    u8 pad20[0x10];
-    void *resource;
-} MenuCleanupOwner;
-
 /* Tear down the linked resource nodes and release the task's allocation. */
-void mnuReleaseResourceTaskData(s32 unused, s32 *taskData) {
-    MenuCleanupOwner *listOwner = (MenuCleanupOwner *)taskData[3];
-    MenuCleanupNode *nodeCursor = listOwner->first;
+void mnuReleaseResourceTaskData(s32 unused, MnuResourceTask *task) {
+    struct MenuList *list = task->menuList;
+    struct MenuListNode *nodeCursor = list->cursor;
     MenuSceneMetadata *sceneMetadata = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
     while (nodeCursor != NULL) {
-        sdfReleaseChipBlock(nodeCursor->resource);
+        sdfReleaseChipBlock((void *)(u32)nodeCursor->unk70);
         nodeCursor = nodeCursor->next;
     }
-    sdfReleaseChipBlock(listOwner->resource);
-    mnuDestroyListState((struct MenuList *)listOwner);
+    sdfReleaseChipBlock(list->context);
+    mnuDestroyListState(list);
     mnuReleaseMenuVisualWorkResources(sceneMetadata->attachedEffect);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(taskData[0]));
+    sdfReleaseResourceAllocation(task->allocation);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0024E1C8", D_003AF758);
@@ -970,7 +948,7 @@ u8 *func_00250820(u16 profileId) {
 s32 func_002508D8(u16 profileId) {
     MnuResourceTask *task = (MnuResourceTask *)sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
     MnuProfileProgress *progress =
-        (MnuProfileProgress *)task->menuList->selectionNode->selectionAddress;
+        (MnuProfileProgress *)task->menuList->cursor->unk70;
     u8 *requiredProfiles = func_00250820(profileId);
 
     if (requiredProfiles == NULL) {
