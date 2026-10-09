@@ -151,7 +151,85 @@ INCLUDE_ASM(const s32, "game/code_00294730", func_00295400);
 
 INCLUDE_ASM(const s32, "game/code_00294730", func_002958B0);
 
-INCLUDE_ASM(const s32, "game/code_00294730", func_00295D38);
+/* Shop list draw context: row-fade countdown and mode (same 0x10-byte buffer as DDS1). */
+typedef struct MnuShopListContext {
+    s32 countdown;
+    s32 mode;
+    s32 unk08;
+    u16 extraOption;
+    s16 pendingSelection;
+} MnuShopListContext;
+
+extern s32 itfSetTextDrawLimit(s32);
+extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
+extern struct FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, struct FrFontGlyph *);
+extern char D_00437970[];
+
+/* Draw the row label, and draw its numeric value when the list enables it. */
+void func_00295D38(s32 x, s32 y, s32 z, struct MenuList *list,
+                   struct MenuListNode *node, s32 drawArg) {
+    MnuShopListContext *context = (MnuShopListContext *)list->context;
+    s32 row = node->index - list->head->index;
+    s32 rowOffset;
+    s32 mode = context->mode;
+    f32 fade = 0.0f;
+    u32 style = 0xA09DC300;
+    s32 selected = 0;
+    s32 value;
+    struct FrFontGlyph *glyph;
+    char text[16];
+
+    switch (mode) {
+    case 1:
+        fade = (f32)context->countdown / 15.0f;
+        break;
+    case 2:
+        fade = (f32)context->countdown / 15.0f;
+        fade = 1.0f - fade;
+        break;
+    }
+
+    if (node->flags48 & 1) {
+        style = 0xA09DC340;
+    } else {
+        struct MenuListNode *cursor = list->cursor;
+        s32 opacity = (s32)(fade * 64.0f + 64.0f);
+
+        if (cursor == node) {
+            style = 0xA09DC380;
+            selected = 1;
+        } else {
+            style |= opacity;
+        }
+    }
+
+    itfSetTextDrawLimit(0x13);
+    rowOffset = row * 22;
+    glyph = itfCreateConvertedTextGlyph(0x420, (rowOffset + 0x87) << 3, z,
+                                        style, (const u8 *)node->value, NULL);
+    if (selected) {
+        frFontSetChildChainFirstOption(glyph, 4);
+    }
+    frFontDrawGlyphChain(glyph, 1, drawArg);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+    itfSetTextDrawLimit(-1);
+
+    if ((list->id & 1) == 0) {
+        return;
+    }
+
+    if (list->cursor == node) {
+        style = (s32)(fade * 64.0f + 64.0f) | 0xA09DC300;
+    }
+    value = (s32)node->sortKeyPrimary;
+    func_0035C860(text, D_00437970, value);
+    glyph = func_0019F5E8(0xFF0, (rowOffset + 0x8A) << 3, z, style, text, NULL);
+    if (selected) {
+        frFontSetChildChainFirstOption(glyph, 4);
+    }
+    frFontDrawGlyphChain(glyph, 1, drawArg);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
+}
 
 
 /* Draw the child and its container only while the child is active. */
