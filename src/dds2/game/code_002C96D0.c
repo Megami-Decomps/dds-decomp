@@ -4843,7 +4843,7 @@ void func_002D4380(u32 unused, u32 job) {
 extern void camFollowOffsetVec();
 extern void camAimRotation();
 
-/* Per-frame update: refreshes the queue rotation when an aim flag (0x60) is set, then repositions and re-notifies every job whose start frame (job+0x80) has been reached; the frame counter only advances when effModelUpdateControlFlags bit 1 is clear. */
+/* Per-frame update: refreshes the queue rotation when an aim flag (0x60) is set, then repositions and re-notifies every job whose start frame (job+0x80) has been reached; the frame counter only advances when the effect-frame pause flag is clear. */
 void fileQueueUpdate(FileQueue *queue)
 {
     f32 pos[4];
