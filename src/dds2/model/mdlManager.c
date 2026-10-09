@@ -1,11 +1,10 @@
 #include "common.h"
+#include "file_request_api.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
 
 struct FileWork;
-extern u32 fileGetResourceHandle(struct FileWork *);
-extern u32 fileGetLoadedDataAddress(struct FileWork *);
 extern DevRequest *sndBuildResourceHandleListFromOffsets(const void *);
 extern void filePollEntryCleanup(struct FileWork *);
 
@@ -127,10 +126,10 @@ void mdlRecordLoadedSizeAndReleaseHandle(struct FileWork *resource, MdlLoadReque
     u32 handle;
     DevRequest *resourceList;
 
-    handle = fileGetLoadedDataAddress(resource);
+    handle = fileGetLoadedDataAddress((struct FileRequest *)resource);
     resourceList = sndBuildResourceHandleListFromOffsets((const void *)handle);
     destination->payload.resourceList = resourceList;
-    handle = fileGetResourceHandle(resource);
+    handle = fileGetResourceHandle((struct FileRequest *)resource);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));
     filePollEntryCleanup(resource);
 }

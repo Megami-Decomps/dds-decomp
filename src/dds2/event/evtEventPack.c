@@ -230,7 +230,6 @@ struct FileRequest;
 struct FileWork;
 struct FileCleanup;
 
-extern u32 fileGetResourceHandle(struct FileWork *);
 extern s32 filePollEntryCleanup(struct FileCleanup *);
 extern char D_004377E8[];
 
@@ -243,7 +242,7 @@ void evtCompleteEventPackScriptLoad(EvtPackLoadState *state) {
 
     if (state->pendingRequest != NULL) {
         if (fileIsRequestReadyInCurrentMode(state->pendingRequest) != 0) {
-            state->resourceAllocation = (struct SdfMemBlock *)(u32)fileGetResourceHandle(state->pendingRequest);
+            state->resourceAllocation = (struct SdfMemBlock *)(u32)fileGetResourceHandle((struct FileRequest *)state->pendingRequest);
             filePollEntryCleanup(state->pendingRequest);
             state->pendingRequest = NULL;
             header = (EvtPackHeader *)sdfResourceRetainAddress(state->resourceAllocation);

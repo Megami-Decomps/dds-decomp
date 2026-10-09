@@ -109,9 +109,6 @@ extern s32 fileAdvanceSlotScan(void);
 extern s32 (*fileMenuStateHandler)();
 extern s32 D_003BC814;
 
-extern u32 fileGetResourceHandle(u32);
-extern u32 fileGetLoadedDataAddress(u32);
-extern u32 fileGetResourceSize(u32);
 extern void filePollEntryCleanup(u32);
 extern s32 fileDrawMenuFrame(s32);
 
@@ -2687,9 +2684,9 @@ s32 fileRunMenuState(KwlnTask *task) {
     fileMenuStateHandler = cur;
     if (job != 0 && fileIsRequestReadyInCurrentMode((struct FileRequest *)job) != 0) {
         fileSaveIconRequest = 0;
-        D_003BD910 = fileGetResourceHandle(job);
-        D_003BD914 = fileGetLoadedDataAddress(job);
-        D_003BD918 = fileGetResourceSize(job);
+        D_003BD910 = fileGetResourceHandle((struct FileRequest *)(u32)job);
+        D_003BD914 = fileGetLoadedDataAddress((struct FileRequest *)(u32)job);
+        D_003BD918 = fileGetResourceSize((struct FileRequest *)(u32)job);
         filePollEntryCleanup(job);
     }
     return 0;
@@ -2782,7 +2779,7 @@ void fileReleaseMenuResources(void) {
         }
         if (fileSaveIconRequest != 0) {
             fileWaitReady((struct FileRequest *)fileSaveIconRequest);
-            D_003BD910 = fileGetResourceHandle(fileSaveIconRequest);
+            D_003BD910 = fileGetResourceHandle((struct FileRequest *)(u32)fileSaveIconRequest);
             filePollEntryCleanup(fileSaveIconRequest);
             fileSaveIconRequest = 0;
         }

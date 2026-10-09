@@ -5,6 +5,11 @@
 
 struct FileRequest;
 
+/* Loaded resource values remain 32-bit words; only the request owner is opaque. */
+u32 fileGetResourceHandle(struct FileRequest *request);
+u32 fileGetLoadedDataAddress(struct FileRequest *request);
+u32 fileGetResourceSize(struct FileRequest *request);
+
 #ifdef VERSION_DDS1
 struct FileRequest *fileAllocateDispatchRequest(const char *requestName, u32 flags, u32 dispatchValue,
                                                 u32 onComplete, u32 userData);
