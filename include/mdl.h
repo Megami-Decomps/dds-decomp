@@ -13,6 +13,7 @@ typedef struct MdlCtx MdlCtx;
 
 struct MdlPartEntry;
 struct MdlObj;
+struct MdlRecord;
 struct SdfMapPositionRecord;
 struct SdfItemListRef;
 struct SdfTex;
@@ -78,7 +79,7 @@ typedef struct BattleGroupNode {
     struct SdfMemBlock *requestAllocation;
     BattleGroupSlot slots[8];
     s32 resourceHandle;
-    void *partInfo;
+    struct MdlRecord *partInfo; /* Borrowed relative-linked record-list view. */
     DevRequest *partList;
     f32 unk_AC;
     f32 unk_B0;
@@ -90,7 +91,7 @@ typedef struct MdlLoadPayload {
     struct SdfMemBlock *requestAllocation;
     MotionTable *motionData;
     struct SdfMemBlock *motionResource;
-    void *partInfo;
+    struct MdlRecord *partInfo; /* Borrowed relative-linked record-list view. */
     s32 resourceHandle;
     DevRequest *partList;
 } MdlLoadPayload;
