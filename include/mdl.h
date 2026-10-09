@@ -73,7 +73,7 @@ typedef struct BattleGroupNode {
     MdlCtx *modelContext;
     DevRequest *resourceList;
     void *itemList;
-    s32 requestHandle;
+    struct SdfMemBlock *requestAllocation;
     BattleGroupSlot slots[8];
     s32 resourceHandle;
     void *partInfo;
@@ -85,7 +85,7 @@ typedef struct BattleGroupNode {
 typedef struct MdlLoadPayload {
     DevRequest *resourceList;
     void *itemList;
-    s32 requestHandle;
+    struct SdfMemBlock *requestAllocation;
     void *motionData;
     struct SdfMemBlock *motionResource;
     void *partInfo;
