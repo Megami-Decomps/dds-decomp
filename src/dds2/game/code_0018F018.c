@@ -37,7 +37,7 @@ EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *src) {
     memcpy(work, src, 0x2C);
     work->allocation = allocation;
     work->slots = (EffBlurScaleSlot *)(work + 1);
-    work->sourceHandle = (u32)effGetBillResourceTexture(3);
+    work->texture = effGetBillResourceTexture(3);
     slot = work->slots;
     while (i < count) {
         effBlurResetScaleSlot(work, slot);
@@ -73,7 +73,7 @@ extern u64 *effBuildDrawPacketWithFlags(u32 flags);
 extern void *billGetWorkTransformMatrix(void *packet);
 extern void effBlurBuildSamplingQuad();
 
-extern void effAppendBlurRenderState(void *, s32, u32);
+extern void effAppendBlurRenderState(void *, s32, SdfTex *);
 extern void effAppendBlurRectanglePackets(void *, EffBlurQuad *, u8);
 extern void effDrawBlurListWithFramePacket(void *);
 extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);
@@ -90,7 +90,7 @@ void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
     if (func_001200E0() == 0) {
         list = (void *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
-        effAppendBlurRenderState(list, work->params.blendControl, work->sourceHandle);
+        effAppendBlurRenderState(list, work->params.blendControl, work->texture);
         slot = work->slots;
         if (work->params.count > 0) {
             count = work->params.count;

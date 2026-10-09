@@ -3600,8 +3600,8 @@ s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
     return 0;
 }
 
-extern void evtSetDrawSurfaceIndex(u32);
 
+extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void evtSubmitPrimaryAlphaBlendMode(s32);

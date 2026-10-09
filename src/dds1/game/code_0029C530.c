@@ -487,13 +487,15 @@ typedef struct EffSurfaceParams {
     u32 word[7];
 } EffSurfaceParams;
 
+struct EffKindWork;
+
 /* Native kind operations include handle destruction and per-frame update;
  * zero-argument notifications retain the original unprototyped callback ABI. */
 typedef struct EffKindDesc {
     u32 (*create)(void *);   // 0x00
     void (*destroy)();       // 0x04: release the created handle
     void (*update)();        // 0x08: advance work through its kind callback
-    void (*initialize)(s32, s32); // 0x0C
+    void (*initialize)(struct EffKindWork *, SdfTex *); // 0x0C
     u32 payloadSize;         // 0x10: bytes copied after the work header
 } EffKindDesc; // 0x14
 
@@ -510,7 +512,7 @@ typedef struct EffKindWork {
     u32 handle;     // 0x24
     void *payload;  // 0x28
     u32 sourceKind; // 0x2C
-    u32 target;     // 0x30
+    SdfTex *target;     // 0x30
     u8 pad_0x34[0xC]; // 0x34
 } EffKindWork; // 0x40
 
@@ -875,15 +877,15 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     effDrawBlurFixedPointRectangle(out);
 }
 
-void effUpdateTarget(EffKindWork *work, u32 target) {
-    u32 previous = work->target;
+void effUpdateTarget(EffKindWork *work, SdfTex *target) {
+    SdfTex *previous = work->target;
     if (previous != 0 && previous != target) {
         if (work->sourceKind != 4) {
-            sdfTexReleaseReferenceViaHandler((SdfTex *)previous);
+            sdfTexReleaseReferenceViaHandler(previous);
         }
         work->target = target;
     }
-    ((EffBlurTemplate *)work->handle)->resourceWord = target;
+    ((EffBlurTemplate *)work->handle)->texture = target;
 }
 
 u32 effCreateFixedSlotBlurWorkFromFadeOutput(void *source) {
@@ -952,15 +954,15 @@ void effUpdateFadeMapA(EffKindWork *work) {
     effBlurStepScatterSlotsAndDraw(out);
 }
 
-void effTextureReferenceRelease(EffKindWork *work, u32 target) {
-    u32 previous = work->target;
+void effTextureReferenceRelease(EffKindWork *work, SdfTex *target) {
+    SdfTex *previous = work->target;
     if (previous != 0 && previous != target) {
         if (work->sourceKind != 4) {
-            sdfTexReleaseReferenceViaHandler((SdfTex *)previous);
+            sdfTexReleaseReferenceViaHandler(previous);
         }
         work->target = target;
     }
-    ((EffBlurScatterWork *)work->handle)->sourceHandle = target;
+    ((EffBlurScatterWork *)work->handle)->texture = target;
 }
 
 u32 effCreateVariableSlotBlurWorkFromFadeOutput(void *source) {
@@ -1029,15 +1031,15 @@ void effUpdateFadeMapB(EffKindWork *work) {
     effBlurStepScaleSlotsAndDraw(out);
 }
 
-void effReplaceKindLinkedTarget(EffKindWork *work, u32 target) {
-    u32 previous = work->target;
+void effReplaceKindLinkedTarget(EffKindWork *work, SdfTex *target) {
+    SdfTex *previous = work->target;
     if (previous != 0 && previous != target) {
         if (work->sourceKind != 4) {
-            sdfTexReleaseReferenceViaHandler((SdfTex *)previous);
+            sdfTexReleaseReferenceViaHandler(previous);
         }
         work->target = target;
     }
-    ((EffBlurScaleWork *)work->handle)->sourceHandle = target;
+    ((EffBlurScaleWork *)work->handle)->texture = target;
 }
 
 /* Draw a framebuffer fade using raw curve rates rather than percent-scaled rates.
@@ -1192,15 +1194,15 @@ void func_0029DBA8(EffKindWork *work) {
     effComputeBlurRectBounds(out);
 }
 
-void effReplaceLinkedKindWorkTarget(EffKindWork *work, u32 target) {
-    u32 previous = work->target;
+void effReplaceLinkedKindWorkTarget(EffKindWork *work, SdfTex *target) {
+    SdfTex *previous = work->target;
     if (previous != 0 && previous != target) {
         if (work->sourceKind != 4) {
-            sdfTexReleaseReferenceViaHandler((SdfTex *)previous);
+            sdfTexReleaseReferenceViaHandler(previous);
         }
         work->target = target;
     }
-    ((EffResourceRectWork *)work->handle)->sourceHandle = target;
+    ((EffResourceRectWork *)work->handle)->texture = target;
 }
 
 EffKindWork *effAllocateKindWork(u16 kind, u8 *source) {
@@ -1248,10 +1250,10 @@ EffKindWork *effCreateKindWorkFromFile(FileJob *work) {
             effect->sourceKind = kind;
             switch (kind) {
             case 1:
-                effect->target = (u32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(secondary));
+                effect->target = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(secondary));
                 break;
             case 4:
-                effect->target = (u32)effGetBillResourceTexture(secondary[0]);
+                effect->target = effGetBillResourceTexture(secondary[0]);
                 break;
             }
             D_0037E770[effect->kind].initialize(effect, effect->target);
@@ -1266,7 +1268,7 @@ void effReleaseLinkedTarget(EffKindWork *work) {
         D_0037E770[work->kind].destroy(handle);
     }
     if (work->target != 0 && work->sourceKind != 4) {
-        sdfTexReleaseReferenceViaHandler((SdfTex *)work->target);
+        sdfTexReleaseReferenceViaHandler(work->target);
     }
     sdfReleaseChipBlock(work);
 }
@@ -1342,10 +1344,10 @@ EffKindWork *effCreateKindWorkFromFileB(FileJob *work) {
             effect->sourceKind = kind;
             switch (kind) {
             case 1:
-                effect->target = (u32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(secondary));
+                effect->target = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(secondary));
                 break;
             case 4:
-                effect->target = (u32)effGetBillResourceTexture(secondary[0]);
+                effect->target = effGetBillResourceTexture(secondary[0]);
                 break;
             }
             D_0037E7E8[effect->kind].initialize(effect, effect->target);
@@ -1361,7 +1363,7 @@ void effReleaseAlternateKindWork(EffKindWork *work) {
         D_0037E7E8[work->kind].destroy(handle);
     }
     if (work->target != 0 && work->sourceKind != 4) {
-        sdfTexReleaseReferenceViaHandler((SdfTex *)work->target);
+        sdfTexReleaseReferenceViaHandler(work->target);
     }
     sdfReleaseChipBlock(work);
 }

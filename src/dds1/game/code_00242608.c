@@ -1517,6 +1517,7 @@ s32 mnuCampClampSceneCounter(s32 delta, ShopScene *scene) {
     return current;
 }
 
+
 INCLUDE_ASM(const s32, "game/code_00242608", func_00245208);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002453C8);
@@ -1524,9 +1525,9 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_002453C8);
 INCLUDE_ASM(const s32, "game/code_00242608", func_00245628);
 
 INCLUDE_ASM(const s32, "game/code_00242608", func_002457E8);
+extern char (*D_003BAA84)[25];
 
 extern u32 D_0036A260[][16];
-extern char (*D_003BAA84)[25];
 extern void func_0025ECD0();
 
 s32 mnuBuildCampItemList(ShopScene *scene) {

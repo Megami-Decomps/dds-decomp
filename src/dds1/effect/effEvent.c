@@ -611,13 +611,13 @@ EffBlurTemplate *effGetCh71Work(void) {
     return effBlurPixelWork;
 }
 
-void effSetCh71Id(u32 resourceWord) {
-    effBlurPixelWork->resourceWord = resourceWord;
+void effSetCh71Id(SdfTex *texture) {
+    effBlurPixelWork->texture = texture;
 }
 
 /* Select the same resource-table entry used by the filter-blur initializer. */
 void effInitCh71Id(void) {
-    effBlurPixelWork->resourceWord = (u32)effGetBillResourceTexture(EFF_EVENT_BLUR_RESOURCE_INDEX);
+    effBlurPixelWork->texture = effGetBillResourceTexture(EFF_EVENT_BLUR_RESOURCE_INDEX);
 }
 
 void effEnableFilterBlur(void) {
@@ -638,13 +638,13 @@ EffBlurScatterWork *effGetCh72Work(void) {
     return effFilterBlurWork;
 }
 
-void effSetCh72Id(u32 sourceHandle) {
-    effFilterBlurWork->sourceHandle = sourceHandle;
+void effSetCh72Id(SdfTex *sourceHandle) {
+    effFilterBlurWork->texture = sourceHandle;
 }
 
-/* Install the filter-blur resource-table word without changing its slots. */
+/* Install the filter-blur resource-table texture without changing its slots. */
 void effInitCh72Id(void) {
-    effFilterBlurWork->sourceHandle = (u32)effGetBillResourceTexture(EFF_EVENT_BLUR_RESOURCE_INDEX);
+    effFilterBlurWork->texture = effGetBillResourceTexture(EFF_EVENT_BLUR_RESOURCE_INDEX);
 }
 
 void effEnableStaggeredBlur(void) {
@@ -665,13 +665,13 @@ EffBlurScaleWork *effGetCh76Work(void) {
     return effStaggeredBlurWork;
 }
 
-void effSetCh76Id(u32 sourceHandle) {
-    effStaggeredBlurWork->sourceHandle = sourceHandle;
+void effSetCh76Id(SdfTex *sourceHandle) {
+    effStaggeredBlurWork->texture = sourceHandle;
 }
 
-/* Install the staggered-blur resource-table word without changing its slots. */
+/* Install the staggered-blur resource-table texture without changing its slots. */
 void effInitCh76Id(void) {
-    effStaggeredBlurWork->sourceHandle = (u32)effGetBillResourceTexture(EFF_EVENT_STAGGERED_RESOURCE_INDEX);
+    effStaggeredBlurWork->texture = effGetBillResourceTexture(EFF_EVENT_STAGGERED_RESOURCE_INDEX);
 }
 
 void effEnableFramebufferQuad(void) {
@@ -728,13 +728,13 @@ EffResourceRectWork *effGetCh75Work(void) {
     return effTexturedSquareWork;
 }
 
-void effSetCh75Id(u32 resourceWord) {
-    effTexturedSquareWork->sourceHandle = resourceWord;
+void effSetCh75Id(SdfTex *texture) {
+    effTexturedSquareWork->texture = texture;
 }
 
-/* Install the textured-square resource-table word while retaining its body. */
+/* Install the textured-square resource-table texture while retaining its body. */
 void effInitCh75Id(void) {
-    effTexturedSquareWork->sourceHandle = (u32)effGetBillResourceTexture(EFF_EVENT_SQUARE_RESOURCE_INDEX);
+    effTexturedSquareWork->texture = effGetBillResourceTexture(EFF_EVENT_SQUARE_RESOURCE_INDEX);
 }
 
 /* Clone the four default work templates; only the staggered slot count is overridden. */

@@ -17,13 +17,13 @@ void effBlurCopyParams(EffBlurScatterWork *dst, EffBlurScatterParams *src) {
 }
 
 /* Supply a source handle for the first blur variant. */
-void effBlurSetHandle(EffBlurScatterWork *work, u32 sourceHandle) {
-    work->sourceHandle = sourceHandle;
+void effBlurSetHandle(EffBlurScatterWork *work, struct SdfTex *sourceHandle) {
+    work->texture = sourceHandle;
 }
 
 /* Acquire the first variant's source handle from the effect manager. */
 void effBlurAcquireHandle(EffBlurScatterWork *work) {
-    work->sourceHandle = (u32)effGetBillResourceTexture(2);
+    work->texture = effGetBillResourceTexture(2);
 }
 
 void effBlurInitializeScatterSlot(EffBlurScatterWork *work, EffBlurScatterSlot *slot) {
@@ -64,7 +64,7 @@ EffBlurScatterWork *effBlurCreateScatterWork(EffBlurScatterParams *params)
     work->params = *params;
     work->allocation = allocation;
     work->slots = (EffBlurScatterSlot *)(work + 1);
-    work->sourceHandle = (u32)effGetBillResourceTexture(2);
+    work->texture = effGetBillResourceTexture(2);
     slot = work->slots;
     for (i = 0; i < 100; i++, slot++) {
         effBlurInitializeScatterSlot(work, slot);
@@ -81,7 +81,7 @@ void effBlurReleaseFirstResource(EffBlurScatterWork *work) {
 extern u32 func_0011E278(void);
 extern s32 sdfAllocPacketAligned(s32 size);
 struct SdfListHead;
-extern void effAppendBlurRenderState(void *list, s32 blendControl, u32 resource);
+extern void effAppendBlurRenderState(void *list, s32 blendControl, struct SdfTex *resource);
 extern void effAppendBlurRectanglePackets(void *list, EffBlurQuad *quad, u8 fixedPoint);
 extern void effDrawBlurListWithFramePacket(void *list);
 extern f32 sdfSinPoly(f32 angle);
@@ -97,7 +97,7 @@ void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work)
     if (func_0011E278() == 0) {
         list = (void *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
-        effAppendBlurRenderState(list, work->params.blendControl, work->sourceHandle);
+        effAppendBlurRenderState(list, work->params.blendControl, work->texture);
         slot = work->slots;
         if (work->params.count > 0) {
             count = work->params.count;
@@ -133,13 +133,13 @@ void effBlurCopyParamsKeepHeader(EffBlurScaleWork *dst, EffBlurScaleParams *src)
 }
 
 /* The scale variant has its own source-handle setter. */
-void effBlurSetSecondSetting(EffBlurScaleWork *work, u32 sourceHandle) {
-    work->sourceHandle = sourceHandle;
+void effBlurSetSecondSetting(EffBlurScaleWork *work, struct SdfTex *sourceHandle) {
+    work->texture = sourceHandle;
 }
 
 /* Both acquisition callbacks request selector 2; the second factory uses 3. */
 void effBlurAcquireSecondHandle(EffBlurScaleWork *work) {
-    work->sourceHandle = (u32)effGetBillResourceTexture(2);
+    work->texture = effGetBillResourceTexture(2);
 }
 
 /* Fixed-point edges: 16 units per x pixel and 8 per y pixel.

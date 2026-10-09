@@ -316,7 +316,7 @@ void effDrawBlurRectangle(EffBlurQuad *source)
 
 extern void func_0032DB30(s32 source, SdfDmaReferenceChainPacket *packet, s32 variant);
 
-void effAppendBlurRenderState(void *list, s32 blendControl, u32 resource)
+void effAppendBlurRenderState(void *list, s32 blendControl, SdfTex *resource)
 {
     SdfDmaReferenceChainPacket *framePacket;
     u64 *blendPacket;
@@ -337,7 +337,7 @@ void effAppendBlurRenderState(void *list, s32 blendControl, u32 resource)
     blendPacket[6] = 0x44;
     blendPacket[7] = 0x43;
     sdfAppendPacket(list, (u32)blendPacket);
-    sdfConsCreateDrawPacket(list, (SdfTex *)resource, 1);
+    sdfConsCreateDrawPacket(list, resource, 1);
 
     blendPacket = (u64 *)sdfAllocPacketAligned(0x40);
     blendPacket[0] = 3;
@@ -415,7 +415,7 @@ extern u32 func_001200E0(void);
 extern void effAppendBlurRenderState();
 
 /* Queue blend setup and both rectangle packets, then finish with the filter draw. */
-void effDrawBlurSource(BlurSource *source, s32 resource, u8 fixedPointCoordinates) {
+void effDrawBlurSource(BlurSource *source, SdfTex *resource, u8 fixedPointCoordinates) {
     void *list;
 
     if (func_001200E0() == 0) {
@@ -444,7 +444,7 @@ void effDrawBlurPixelRectangle(EffBlurTemplateBody *work) {
 EffBlurTemplate *effCloneBlurTemplate(EffBlurTemplateBody *src) {
     EffBlurTemplate *dst = sdfAllocSizeClassBlock(sizeof(EffBlurTemplate));
 
-    dst->resourceWord = (u32)effGetBillResourceTexture(2);
-    dst->body = *src;
+    dst->texture = effGetBillResourceTexture(2);
+    memcpy(&dst->body, src, sizeof(*src));
     return dst;
 }
