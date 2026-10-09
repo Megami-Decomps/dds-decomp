@@ -361,11 +361,6 @@ typedef struct EvtViewerDrawVector {
     f32 x, y, z, w;
     s32 mode;
 } EvtViewerDrawVector;
-typedef struct EvtViewerDrawPayload {
-    f32 x, y, z, w;
-    s32 mode;
-    u8 unknown14[0xC];
-} EvtViewerDrawPayload;
 
 extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
 extern void func_00242C30(EvtRuntime *, EvtRuntimeGroup *, s32, f32 (*)[4], f32 *, f32 *);
@@ -459,7 +454,7 @@ EvtRuntimeChild *func_0022B7A0(EvtRuntimeGroup *group, s32 frame, EvtRuntime *vi
         key->serializedValue = 0;
         break;
     case 11: {
-        EvtViewerDrawPayload *draw = sdfAllocSizeClassBlock(0x20);
+        EvtViewerDrawPayload *draw = sdfAllocSizeClassBlock(sizeof(*draw));
         draw->x = kwlnDrawVector.y;
         draw->mode = kwlnDrawVector.mode;
         key->payload = draw;

@@ -1690,7 +1690,7 @@ s32 func_0024D148(s32 unused0, s32 unused1, EvtRuntime *viewer) {
     EvtRuntimeChild *entry = evtEventViewerGetPendingNode(viewer);
     u128 *destination;
     u128 *source;
-    EvtViewerDrawVector *draw;
+    EvtViewerDrawPayload *draw;
 
     switch (viewer->frameGroup->type) {
     case 10:
