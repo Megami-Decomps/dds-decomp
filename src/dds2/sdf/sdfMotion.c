@@ -836,22 +836,23 @@ void sdfMotionCaptureSecondaryTextParams(SdfMotionIndexedTextBinding *binding) {
     binding->capture.snapshot = *textParams;
 }
 
-void *func_00335BE0(void *source, s32 unused, s32 options) {
-    void *motion;
+SdfMotionIndexedValueBinding *sdfMotionCreateSecondaryColorBinding(Motion *motion, s32 unused,
+                                                                    s32 options) {
+    SdfMotionIndexedValueBinding *binding;
 
-    motion = sdfAllocSizeClassBlock(0x14);
-    sdfMotionBindIndexedTrack(motion, source, D_0040B4C8, options);
-    return motion;
+    binding = sdfAllocSizeClassBlock(0x14);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_0040B4C8, options);
+    return binding;
 }
 
-void sdfMotionApplyInterpolatedKey(SdfMotionIndexedValueBinding *motion, f32 t1) {
+void sdfMotionApplySecondaryColorKey(SdfMotionIndexedValueBinding *motion, f32 t1) {
     u8 buffer[16];
     sdfFindMotionKeyInterval(motion, buffer, t1);
     func_00333460(motion->target, sdfMotionInterpolateKeyColor(buffer));
 }
 
 /* vu0 routine: blend the captured output colour toward the keyed colour by weight. */
-void func_00335C80(SdfMotionIndexedValueBinding *output, f32 t, f32 weight) {
+void sdfMotionBlendSecondaryColorKey(SdfMotionIndexedValueBinding *output, f32 t, f32 weight) {
     SdfMotionKeyInterval b;
     s32 key;
     s32 color;
@@ -862,7 +863,7 @@ void func_00335C80(SdfMotionIndexedValueBinding *output, f32 t, f32 weight) {
     func_00333460(output->target, color);
 }
 
-void sdfCopyMotionTargetValue(SdfMotionIndexedValueBinding *output) {
+void sdfMotionCaptureSecondaryColor(SdfMotionIndexedValueBinding *output) {
     output->capturedWord = output->target->secondaryColor;
 }
 

@@ -6529,7 +6529,10 @@
 0x002DCC18	sdfMotionApplySecondaryTextKeys	inferred	Interpolates five key values and applies them via the secondary-text updater. [names_reviewed6.tsv]
 0x002DCC68	sdfMotionBlendSecondaryTextKeys	inferred	Interpolates five keys, blends them with saved values, and updates secondary text. [names_reviewed6.tsv]
 0x002DCCE0	sdfMotionCaptureSecondaryTextParams	inferred	Copies the node's secondary text subparameter block into the command. [names_reviewed6.tsv]
-0x002DCD90	sdfMotionApplyInterpolatedKey	inferred	Samples motion keys at time and applies interpolated value to motion target. [names_reviewed6.tsv]
+0x002DCD30	sdfMotionCreateSecondaryColorBinding	inferred	Allocates a 0x14 indexed value binding for the secondary-color track, registered at D_00398248 row 4.
+0x002DCD90	sdfMotionApplySecondaryColorKey	inferred	Interpolates and applies the secondary-color key through the target asset setter; registered in D_00398318.
+0x002DCDD0	sdfMotionBlendSecondaryColorKey	inferred	Blends the captured secondary-color word with the interpolated key and applies it through the same setter.
+0x002DCE80	sdfMotionCaptureSecondaryColor	inferred	Captures target->secondaryColor as the base value used by the corresponding blend callback.
 0x002DCE90	sdfMotionCreateDirectTextKeyBinding	inferred	Allocates indexed track work preceding the direct text-key application handler. [names_reviewed6.tsv]
 0x002DCEF0	sdfMotionApplySelectedTextKey	inferred	Applies the selected key's first five-float block directly without interpolation. [names_reviewed6.tsv]
 0x002DCF28	sdfMotionApplySampleToTarget	inferred	Samples first key at provided time and applies that sample to target. [names_reviewed6.tsv]
