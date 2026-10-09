@@ -964,7 +964,7 @@ typedef struct MovieMenuEffectSlot {
 typedef struct PickEntry {
     s8 id;
     u8 unk1;
-    u8 unk2;
+    s8 unk2;
 } PickEntry;
 
 /* Paired bar with the randomly picked title-movie slots (0x94 bytes). */

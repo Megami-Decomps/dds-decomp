@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "sdf_motion.h"
 #include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
@@ -113,7 +114,6 @@ extern s32 btlGetRuntime(void);
 
 extern s32 btlCountTasksByKind(u16);
 
-extern void func_002C7CE8(void *);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 

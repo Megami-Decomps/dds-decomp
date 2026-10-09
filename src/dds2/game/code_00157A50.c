@@ -1,5 +1,6 @@
 #include "bill_object_api.h"
 #include "common.h"
+#include "btl_stage_task_cleanup.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "eff.h"
@@ -85,7 +86,6 @@ extern BillObj *effBillResourceOwners[];
 extern EffBillResourceInit D_003AA880[];
 extern char D_004142B0[];
 extern char D_004142C0[];
-extern void func_002C7CE8(EffBillResourceArchive *archive);
 extern void func_0035B6E0(const char *format, ...);
 
 void effInitializeBillResourceOwners(void) {

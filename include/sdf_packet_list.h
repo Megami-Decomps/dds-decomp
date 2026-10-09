@@ -5,6 +5,7 @@
 
 struct SdfListHead;
 struct SdfDmaNode;
+struct SdfPoolNode;
 
 struct SdfListHead *sdfAllocatePacketList(s32 (*allocator)(s32));
 struct SdfListHead *sdfCreateResetPacketList(void);
@@ -18,5 +19,8 @@ void sdfAppendCallPacket(struct SdfListHead *list, u32 packetAddress);
 void sdfAppendDmaTagToList(struct SdfListHead *list, u32 packetAddress);
 void sdfAppendDmaPrimary(struct SdfListHead *list, u32 source,
                          struct SdfDmaNode *node);
+void sdfAppendDmaSecondary(struct SdfListHead *list, u32 source,
+                           struct SdfDmaNode *node);
+struct SdfListHead *sdfFlushPoolNodes(struct SdfPoolNode *node);
 
 #endif /* SDF_PACKET_LIST_H */

@@ -379,7 +379,6 @@ void fileManDispatchDone(void) {
     SignalSema(work->sema);
 }
 
-extern s32 sdfPacFeedInput(PacState *state, void *input, s32 available);
 extern void fileManCancelRequest(struct FileNode *request);
 
 /* PAC completion linkage occupies the request's last four bytes. */
