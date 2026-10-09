@@ -28,8 +28,7 @@ void btlAppendEntry(struct BtlResourceEntryList *list, const char *name,
 struct BtlResourceDescriptor *
 btlCreateResourceDescriptor(struct BtlResourceEntryList *list);
 void btlDestroyResourceDescriptor(struct BtlResourceDescriptor *descriptor);
-s32 func_001FBA38(struct BtlResourceDescriptor *descriptor);
-s32 func_0020DAB8(struct BtlResourceDescriptor *descriptor);
+s32 btlUpdateAndDrawResourceBrowser(struct BtlResourceDescriptor *descriptor);
 s32 btlFormatSelectedResourceName(struct BtlResourceDescriptor *descriptor,
                                   char *output);
 s32 btlTrimResourceName(struct BtlResourceDescriptor *descriptor,

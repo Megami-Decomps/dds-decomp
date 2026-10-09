@@ -2968,12 +2968,17 @@
 0x0020D3A0	btlReadBattleResourceDirectoryEntry	inferred	reads pfs0 directory or built-in resource-name list into reader [names_R_FuncNames8.tsv]
 0x0020D448	btlScanDirectory	inferred	lists entries of a dir by extension filter bitmask (tmx,p2a,pb,ep,epl,tlp,f2)
 0x0020DA28	btlCreateResourceDescriptor	inferred	allocates the 0x48 BtlResourceDescriptor consumed by btlDestroyResourceDescriptor [names_M36_SmallSweep5.tsv]
+0x0020DAB8	btlUpdateAndDrawResourceBrowser	inferred	Handles browser navigation, updates the selected entry preview and submits the visible browser rows; returns the selection status.
 0x0020DFB0	btlSetResourceNameHeaderPair	inferred	Stores two argument words in resource-name record header at offsets 0 and 4. [names_R_FuncNames6.tsv]
 0x0020E300	btlCreateResourceNameRecord	inferred	Allocates and initializes 0x38-byte battle resource-name record then copies its name. [names_R_FuncNames6.tsv]
+0x0020E380	btlUpdateResourceNameEditor	inferred	Updates keyboard selection and editable text, handles completion or cancellation, and draws the name editor from its record state.
 0x0020E7A0	btlSetResourceNamePosition	inferred	Sets the name-editor and overwrite-prompt origin at record offsets zero and four.
+0x0020E7B0	btlGetResourceNameSelectionStatus	inferred	Returns the current name-entry selection result without modifying the record.
 0x0020E7B8	btlResourceRecordSetName	inferred	Twin of dds1 0x001FC738; Copies name into resource record and stores strlen as nameLength. [names_R_FuncNames3.tsv]
 0x0020E7F8	btlFormatResourceNameWithExtension	inferred	Formats resource name followed by its extension using the record's two name fields.
 0x0020E828	btlFormatResourceNameWithoutExtension	inferred	Formats the resource name without its extension.
+0x0020E850	btlSetResourceNameLengthLimit	inferred	Sets the maximum name length tested by the native character editor before appending.
+0x0020E858	btlPollResourceNameOverwrite	inferred	Formats the target path from directory, editable name and extension; returns permission after a file-existence check and optional overwrite prompt.
 0x0020EBD0	btlAiCheckStatusRollEligibility	inferred	confidence=high; src/dds2/game/code_0020E850.c:func_0020EBD0; Rejects the task flag gate or missing status bit; permits combined statuses and rolls a threshold for the isolated status. [names_qp9.tsv]
 0x0020F3B0	btlGetCommandEffectId	inferred	U0
 0x0020F9B0	effDecrementFirstCountdown	inferred	Byte-identical DDS1 counterpart: Decrements the first nonzero effect-child countdown at offset 0x318.
@@ -6944,7 +6949,3 @@
 0x00476480	sdfPadPorts	inferred	high confidence; src/dds2/game/code_00336B48.c sdfPadUpdatePorts(): sdfPadUpdatePort(&D_00476480[i]); Instruction-aligned data counterpart of DDS1 D_003F9B00 in the matched sdfPadUpdatePorts() twin. Two pad-port work records updated by the pad polling loop. [names_reviewed26.tsv]
 0x0047AA40	sndMidiTrackState	inferred	confidence=high; matched_users=src/dds2/game/code_00341650.c:func_00341958, src/dds2/game/code_00341FE8.c:func_00342168; Shared MIDI state contains initialized channels and track slots consulted during track-id queries. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x0047ABD0	sndTrackBalanceEntries	inferred	confidence=high; src/dds2/game/code_00341FE8.c:D_0047ABD0; type=SndTrackVolume[]; refs=sndGetNonnegativeEntryBalance,sndGetTrackSlotTable; Track-indexed records expose two byte values and their nonnegative difference as a balance query. [names_qp9.tsv]
-0x0020E858	btlPollResourceNameOverwrite	inferred	Formats the target path from directory, editable name and extension; returns permission after a file-existence check and optional overwrite prompt.
-0x0020E7B0	btlGetResourceNameSelectionStatus	inferred	Returns the current name-entry selection result without modifying the record.
-0x0020E850	btlSetResourceNameLengthLimit	inferred	Sets the maximum name length tested by the native character editor before appending.
-0x0020E380	btlUpdateResourceNameEditor	inferred	Updates keyboard selection and editable text, handles completion or cancellation, and draws the name editor from its record state.
