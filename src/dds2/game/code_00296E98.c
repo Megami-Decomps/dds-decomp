@@ -769,7 +769,16 @@ s32 func_002998D8(void) {
     return work->opacityReady;
 }
 
-INCLUDE_ASM(const s32, "game/code_00296E98", func_00299988);
+/* Seed one slot's level and profile progress animations. */
+void func_00299988(BrsSkillPackageWork *work, s32 slot, s32 level, u32 totalExp, s32 profileValue, s32 expGain,
+                   s32 profileGain) {
+    work->levelAnimation[slot].remaining = totalExp;
+    work->levelAnimation[slot].level = level;
+    work->profileAnimation[slot].remaining = profileValue;
+    work->profileAnimation[slot].level = level;
+    work->levelAnimation[slot].applied = expGain;
+    work->profileAnimation[slot].applied = profileGain;
+}
 
 s32 brsTaskIsFadeIdle(void) {
     if (kwlnFadeIsActive() != 0) {
