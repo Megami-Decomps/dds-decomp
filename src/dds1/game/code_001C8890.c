@@ -7417,6 +7417,7 @@ s32 btlCheckActorDistanceLimit(void) {
     return 1;
 }
 
+/* With a qualifying unit, the span query leaves its last muzzle point in VF10. */
 extern f32 func_001F66D8(s32, f32 *, f32 *);
 
 s32 btlIsEntryHeightWithinLimit(void) {
@@ -8392,7 +8393,161 @@ INCLUDE_ASM(const s32, "game/code_001C8890", func_001E0718);
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E0B68);
 
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001E0DA0);
+extern u32 effMiscRand(void *state);
+
+void func_001E0DA0(BtlLinkedCommand *command, BtlCamState *pose, s32 modeBits,
+f32 angle, f32 blend) {
+    f32 point[4];
+    f32 plane[4];
+    f32 firstPosition[4];
+    f32 lastPosition[4];
+    u8 mode = (u8)modeBits;
+    BtlState *runtime;
+    BtlUnit *unit;
+    BtlUnit *first;
+    BtlUnit *last;
+    u32 i = 0;
+    u32 count;
+    u32 groups = 0;
+    f32 totalReach;
+    f32 fov;
+    f32 length;
+    f32 clearance;
+    f32 distance;
+    f32 projected;
+
+    runtime = (BtlState *)btlGetRuntime();
+    count = btlGetIndexListCount(command->targetList);
+    for (; i < count; i++) {
+        groups |= ((BtlUnit *)btlGetIndexListEntry(command->targetList, i))->status.flags & 0x600;
+    }
+    btlClearAllUnitDefeatCandidates();
+    first = NULL;
+    btlFlagMatchingUnitsDefeatCandidate(groups & 0x600);
+    totalReach = 0.0f;
+    last = NULL;
+    for (unit = runtime->units; unit != NULL; unit = unit->next) {
+        s32 flags = unit->status.flags;
+        if (!(flags & 1)) {
+            continue;
+        }
+        if (flags & 0xC0) {
+            continue;
+        }
+        if (!(flags & groups)) {
+            continue;
+        }
+        btlUnitGetMuzzlePosVU(unit);
+        VU0_STORE_VF(vf10, point);
+        totalReach += unit->reach * unit->scale;
+        if (first == NULL) {
+            first = unit;
+            VU0_STORE_VF_UNCLOBBERED(vf10, firstPosition);
+            last = unit;
+            VU0_STORE_VF(vf10, lastPosition);
+        } else {
+            if (unit->status.flags & 0x200) {
+                f32 x = point[0];
+                if (x < firstPosition[0]) {
+                    first = unit;
+                    PCP_COPY_VECTOR_F32(firstPosition, point);
+                }
+                if (lastPosition[0] < x) {
+                    last = unit;
+                    PCP_COPY_VECTOR_F32(lastPosition, point);
+                }
+            } else {
+                f32 x = point[0];
+                if (firstPosition[0] < x) {
+                    first = unit;
+                    PCP_COPY_VECTOR_F32(firstPosition, point);
+                }
+                if (x < lastPosition[0]) {
+                    last = unit;
+                    PCP_COPY_VECTOR_F32(lastPosition, point);
+                }
+            }
+        }
+    }
+    if (first == NULL || last == NULL) {
+        func_001DF358(command, pose);
+        return;
+    }
+    if (mode == 3 || (mode == 1 && (effMiscRand(effSharedRandomState) & 1))) {
+        unit = first;
+        first = last;
+        last = unit;
+        VU0_LOAD_VF(vf10, firstPosition);
+        VU0_LOAD_VF(vf11, lastPosition);
+        VU0_STORE_VF(vf11, firstPosition);
+        VU0_STORE_VF(vf10, lastPosition);
+    }
+    fov = command->camera.fov;
+    pose->fov = fov;
+    projected = func_001F66D8(groups, NULL, NULL);
+    VU0_LOAD_VF(vf11, firstPosition);
+    VU0_LERP_VF10(blend);
+    VU0_STORE_VF(vf10, pose->position);
+    fov *= 2.0f / 3.0f;
+    if (totalReach <= projected) {
+        f32 firstReach = first->reach * first->scale;
+        f32 otherReach = last->reach * last->scale;
+        f32 firstHeight;
+        f32 otherHeight;
+        f32 height;
+        projected = otherReach < firstReach ? firstReach : otherReach;
+        firstHeight = first->height * first->scale;
+        otherHeight = last->height * last->scale;
+        height = otherHeight < firstHeight ? firstHeight : otherHeight;
+        height *= 0.5f;
+        clearance = height < projected ? projected : height;
+    } else {
+        clearance = projected + (totalReach - projected) * 0.2f;
+        pose->position[1] -= first->height * first->scale * 0.15f;
+    }
+    firstPosition[2] = pose->position[2];
+    PCP_COPY_VECTOR_F32(plane, firstPosition);
+    if (groups & 0x200) {
+        f32 radians = angle * 0.017453293f;
+        plane[2] += clearance;
+        projected = pose->position[0];
+        projected -= firstPosition[0];
+        projected = ffabsf(projected);
+        projected *= func_002FA148(radians);
+        plane[2] += projected;
+    } else {
+        f32 radians = angle * 0.017453293f;
+        plane[2] -= clearance;
+        projected = pose->position[0];
+        projected -= firstPosition[0];
+        projected = ffabsf(projected);
+        projected *= func_002FA148(radians);
+        plane[2] -= projected;
+    }
+    projected = btlProjectOnPlaneVU(pose->position, plane, firstPosition);
+    VU0_STORE_VF(vf10, point);
+    projected += clearance;
+    VU0_LOAD_VF(vf10, pose->position);
+    VU0_LOAD_VF(vf11, point);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LENGTH_VF10(distance);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, pose->direction);
+    distance += projected / func_002FA148(fov);
+    projected = btlProjectOnPlaneVU(plane, pose->position, lastPosition);
+    VU0_STORE_VF(vf10, point);
+    projected += clearance;
+    {
+        f32 secondDistance = projected / func_002FA148(fov);
+        VU0_LOAD_VF(vf10, point);
+        VU0_LOAD_VF(vf11, pose->position);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(length);
+        secondDistance -= length;
+        pose->distance = distance < secondDistance ? secondDistance : distance;
+    }
+    btlAdjustCameraDirectionForDefaultPlane(pose);
+}
 
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001E1288);
 
