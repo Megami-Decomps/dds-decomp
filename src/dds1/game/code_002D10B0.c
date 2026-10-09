@@ -622,19 +622,11 @@ s32 sdfFormatImageSize(u32 format, s32 width, s32 height) {
     return (transferBitsPerPixel * width * height) >> 7;
 }
 
-typedef struct SdfImageUploadPrefix {
-    struct SdfImageUploadPrefix *next;
-    void *chipMemory;
-    SdfMemBlock *allocation;
-    u8 releaseMode;
-    u8 pad0D[3];
-} SdfImageUploadPrefix;
 
-typedef char SdfImageUploadPrefix_size_must_be_0x10[(sizeof(SdfImageUploadPrefix) == 0x10) ? 1 : -1];
 
 void func_002D1D80(SdfImageUploadRequest *request) {
     SdfSemaObj *queue = &sdfTextureQueueWork;
-    SdfImageUploadPrefix *releaseEntry;
+    SdfTextureReleaseHead *releaseEntry;
     SdfTexPacketTail *oldTail;
     u64 *setup;
     u64 *packet;
@@ -665,7 +657,7 @@ void func_002D1D80(SdfImageUploadRequest *request) {
     qwordCount = sdfFormatImageSize(format, width, height);
     allocationBlocks = (qwordCount + 0x7FEF) / 0x7FF0;
     allocation = sdfAllocSizeClassBlock(allocationBlocks * 0x30 + 0x80);
-    releaseEntry = (SdfImageUploadPrefix *)allocation;
+    releaseEntry = (SdfTextureReleaseHead *)allocation;
     releaseEntry->next = NULL;
     releaseEntry->chipMemory = request->pixels;
     releaseEntry->allocation = request->allocation;
@@ -717,7 +709,7 @@ void func_002D1D80(SdfImageUploadRequest *request) {
     WaitSema(queue->semaphoreId);
 
     if (queue->releaseTail != NULL) {
-        ((SdfImageUploadPrefix *)queue->releaseTail)->next = releaseEntry;
+        ((SdfTextureReleaseHead *)queue->releaseTail)->next = releaseEntry;
     } else {
         queue->unk4 = releaseEntry;
     }
@@ -754,10 +746,10 @@ void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet) {
 
 void sdfTexQueueResourceRelease(s32 address) {
     SdfSemaObj *obj = &sdfTextureQueueWork;
-    SdfTexReleaseEntry *entry;
+    SdfTextureReleaseHead *entry;
 
     if (address != 0) {
-        entry = sdfAllocAndClearQuadwords(0xA0);
+        entry = sdfAllocAndClearQuadwords(sizeof(SdfTexReleaseEntry));
         if (sdfChipIsInRange(address) != 0) {
             entry->chipMemory = (void *)address;
             entry->releaseMode = SDF_TEX_RELEASE_CHIP_ADDRESS;
@@ -767,7 +759,7 @@ void sdfTexQueueResourceRelease(s32 address) {
         }
         WaitSema(obj->semaphoreId);
         if (obj->releaseTail != NULL) {
-            ((SdfTexReleaseEntry *)obj->releaseTail)->next = entry;
+            ((SdfTextureReleaseHead *)obj->releaseTail)->next = entry;
         } else {
             obj->unk4 = entry;
         }
@@ -798,12 +790,12 @@ extern u8 D_00398100[];
 
 void func_002D2168(void) {
     SdfSemaObj *work = &sdfTextureQueueWork;
-    SdfTexReleaseEntry *entry;
+    SdfTextureReleaseHead *entry;
     SdfTexPacketTail *packet;
     void *dmaPacket;
 
     WaitSema(work->semaphoreId);
-    entry = (SdfTexReleaseEntry *)work->unk4;
+    entry = (SdfTextureReleaseHead *)work->unk4;
     dmaPacket = work->unkC;
     packet = (SdfTexPacketTail *)work->packetTail;
     sdfResetSemaphoreState(work);
@@ -826,7 +818,7 @@ void func_002D2168(void) {
     }
 
     while (entry != NULL) {
-        SdfTexReleaseEntry *next = entry->next;
+        SdfTextureReleaseHead *next = entry->next;
 
         switch (entry->releaseMode) {
         case SDF_TEX_RELEASE_GENERAL_ALLOCATION:
