@@ -17,6 +17,7 @@
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
 #include "mdl.h"
+#include "mdl_resource_table.h"
 #include "evt_unit.h"
 #include "evt_event_pack.h"
 #include "evt_task.h"
@@ -394,22 +395,6 @@ extern void sdfMultiplyVuMatrixInPlace(void);
 extern Motion *mdlFindNodeById(MdlCtx *, s32);
 
 
-typedef struct MdlResourceSelection {
-    u16 pathTable;
-    u16 pathIndex;
-    u32 unk4;
-} MdlResourceSelection;
-
-typedef struct MdlResourcePath {
-    const char *unk0; /* Optional metadata path. */
-    const char *path;
-    const char *unk8; /* Optional additional payload path. */
-} MdlResourcePath;
-
-typedef struct MdlResourceTable {
-    void *entries;
-    s32 count;
-} MdlResourceTable;
 
 extern MdlResourceTable D_003C86B0[];
 extern MdlResourceTable D_003C6588[];
@@ -520,20 +505,20 @@ s32 mdlRequestAsset(s32 group, s32 id, s32 blocking) {
         request->options = 0x101;
         request->group = group;
         request->id = id;
-        if (path->unk8 != NULL) {
+        if (path->motionPath != NULL) {
             request->deferred = 1;
         }
-        if (path->unk0 != NULL) {
+        if (path->resourceListPath != NULL) {
             request->resourceListRequested = 1;
-            mdlBuildPrefixedString(pathBuffer, path->unk0);
+            mdlBuildPrefixedString(pathBuffer, path->resourceListPath);
             fileCreateCallbackRequest(pathBuffer, 0,
                                       (s32)mdlRecordLoadedSizeAndReleaseHandle, (s32)request);
         }
         request->itemsRequested = 1;
         mdlBuildPrefixedString(pathBuffer, path->path);
         fileCreateCallbackRequest(pathBuffer, 0, (s32)mdlFinishLoadCmd, (s32)request);
-        if (path->unk8 != NULL) {
-            mdlBuildPrefixedString(pathBuffer, path->unk8);
+        if (path->motionPath != NULL) {
+            mdlBuildPrefixedString(pathBuffer, path->motionPath);
             fileCreateCallbackRequest(pathBuffer, 0, (s32)mdlFinishLoadJob, (s32)request);
         }
     }

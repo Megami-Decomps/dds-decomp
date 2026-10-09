@@ -60,13 +60,13 @@ void uiDrawActiveSurfaceRegion(s32 object);
 f32 effMiscRandUnitFloat(s32 seed);
 u32 effMiscRand(s32 seed);
 
-extern u32 D_003BBDD0[];
+extern char D_003BBDD0[];
 
-void evtLoadSolarNoiseSprite(u32 *sprite) {
+void evtLoadSolarNoiseSprite(struct EffectSlotSet **sprite) {
     *sprite = effLoadIndexedResource(D_003BBDD0, "solarnoise.spr", 0);
 }
 
-void evtReleaseSolarNoiseSprite(u32 *sprite) {
+void evtReleaseSolarNoiseSprite(struct EffectSlotSet **sprite) {
     effDestroyResourceSlotSet(*sprite);
 }
 

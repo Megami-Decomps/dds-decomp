@@ -1118,3 +1118,4 @@ INCLUDE_SDATA(const s32, "game/code_003224C8", mnuRuntimeRecordPairCallback);
 INCLUDE_SDATA(const s32, "game/code_003224C8", D_004389B4);
 
 INCLUDE_SDATA(const s32, "game/code_003224C8", D_004389B8);
+

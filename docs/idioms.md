@@ -5434,3 +5434,50 @@ global aliases. The precise PRNG contract is
 `u32 effMiscRand(struct EffRandState *)`; null selects the default state
 in the real `00340AC8` provider.
 
+## DDS2 HP/MP command factors use the primary battle owners
+
+The two amount resolvers call `BtlState.commandAmountScaleHook` at `+708`
+with source, target, command ID and operation, and multiply its `f32` return.
+The solar factor is selected from two adjacent nine-float rows at battle
+parameter `+A98/+ABC`, covering the mirrored phase provider's `0..8` range;
+source flag `0x200` selects the first row. Native `LWC1` accesses also establish
+the independent parameter scalars at `+B64/+B90/+B94`. Complete the existing
+owners without changing their layouts or adding alternate raw views.
+
+Both retail callers of `btlGetClampedBattleTableValue` deliberately pass
+the source actor in the call delay slot, even though the 60-byte provider
+ignores it. Its index reads the low halfword of the existing `activeGroupCount`
+at `+47C` and clamps it to four. A natural `u16` local assigned from that
+primary word member still emits the native `LHU`; neither an interior cast
+nor a second count view is needed.
+
+## Solar sprite ownership and stalled view retirement
+
+`SolarOverlayWork.noiseSprite` is the `EffectSlotSet *` returned by
+`effLoadIndexedResource`, not an encoded numeric handle. The paired load/free
+helpers accept its output slot as `EffectSlotSet **`. Their `/itf/` base paths
+are character arrays in `.sdata`. The frame renderer also increments, tests
+and resets the signed word at overlay `+0x100` (state `+0xFC`), now
+`pulseFrame`; the state and whole-work extents remain `0x100` and `0x104`.
+
+The legacy solar layer/context projections still need retirement. Their
+`0xA0` layer width/height at `+0x0C/+0x10`, saved dimensions at `+0x7C/+0x80`,
+and context array at `+0x18` correspond to canonical `BdWork` and
+`EffectSlotSet`. A direct canonical rewrite retains the algorithm but changes
+26 of 95 and 24 of 99 words in the already-matched layer providers, beginning
+at `+4` with table/register allocation. Full-work versus resource-slot
+pointer formals do not close it; a three-word placement record also fails.
+Keep those projections as existing debt rather than publishing regressions
+or restoring byte-address arithmetic alongside the typed owners.
+
+
+## Model selection and filename tables
+
+`mdl_resource_table.h` owns both games' eight-byte selection records and
+twelve-byte filename triples. The viewer writes the selection suffix with
+two separate `sh` stores, so the formerly unused word is two halfwords.
+The triples hold resource-list, model and motion paths, not numeric handles;
+the model manager and viewer now share their types. The separate selection
+and path tables use the existing generic pointer/count descriptor.
+DDS2's slot setter takes three filename pointers: its battle callers pass
+the `.data` strings `human/pc001_00.PB` and `human/pc001_01.PB`.

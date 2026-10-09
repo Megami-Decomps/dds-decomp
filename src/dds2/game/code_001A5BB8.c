@@ -22,6 +22,7 @@
 #include "mnu_result.h"
 #include "dat_command.h"
 #include "sdf_sif_command.h"
+#include "mdl_resource_table.h"
 #include "kwln_task_lifecycle.h"
 
 extern s32 func_001ABB10(BtlUnit *, s32);
@@ -1730,13 +1731,12 @@ extern s32 itfMesCreateWindow(ItfMesSub *);
 
 extern void btlResetActorEntryState(void);
 
-extern s32 mdlSetViewerSlotResourceHandles(s32, s32, s32, s32, s32);
 
 extern char D_004366F8[];
 
-extern s32 D_003B4D90[];
+extern char D_003B4D90[];
 
-extern s32 D_003B4DA8[];
+extern char D_003B4DA8[];
 
 void func_001A9B80(void) {
     SdfMemBlock *allocation;
@@ -1795,10 +1795,10 @@ void func_001A9B80(void) {
     mdlFlagClear(0x82B);
 
     if (mdlFlagTest(0x290) == 0) {
-        mdlSetViewerSlotResourceHandles(0, 1, 0, (s32)D_003B4D90, 0);
+        mdlSetViewerSlotResourceHandles(0, 1, 0, D_003B4D90, 0);
         btlBossDebugPrintf(D_004366F8, D_003B4D90);
     } else {
-        mdlSetViewerSlotResourceHandles(0, 1, 0, (s32)D_003B4DA8, 0);
+        mdlSetViewerSlotResourceHandles(0, 1, 0, D_003B4DA8, 0);
         btlBossDebugPrintf(D_004366F8, D_003B4DA8);
     }
 }
@@ -3558,8 +3558,9 @@ f32 func_001AEC18(BtlUnit *unit) {
     return 1.0f;
 }
 
-f32 btlGetClampedBattleTableValue(void) {
-    u16 index = *(u16 *)(btlGetRuntime() + 0x47c);
+f32 btlGetClampedBattleTableValue(BtlUnit *source) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    u16 index = state->activeGroupCount;
     if (index > 4) {
         index = 4;
     }
