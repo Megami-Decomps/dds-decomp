@@ -212,7 +212,8 @@ extern void btlStartSkillEventTask(u32);
 
 extern s32 btlReleaseScriptResource(void);
 
-extern s32 btlFindModelEntry();
+struct BattleModelEntry;
+extern struct BattleModelEntry *btlFindModelEntry(s32 modelKind, s32 modelId);
 
 struct BattleScriptTaskData;
 
@@ -1312,15 +1313,12 @@ s8 btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
     return requestReady;
 }
 
-/* Return the matching cache entry's legacy 32-bit address, or zero. */
-s32 btlFindModelEntry(modelKind, modelId)
-s32 modelKind;
-s32 modelId;
-{
+/* Return the matching cache entry, or null. */
+BattleModelEntry *btlFindModelEntry(s32 modelKind, s32 modelId) {
     BattleModelEntry *cacheCursor = *(BattleModelEntry **)((u8 *)btlGetRuntime() + 0x264);
     while (cacheCursor != 0) {
         if (cacheCursor->kind == modelKind && cacheCursor->id == modelId) {
-            return (s32)cacheCursor;
+            return cacheCursor;
         }
         cacheCursor = cacheCursor->next;
     }
@@ -1337,7 +1335,7 @@ void func_0022CA48(void) {
 /* Reuse a cached kind/id pair or request its model pack and first reference. */
 void btlLoadModelPack(s32 modelKind, s32 modelId) {
     char resourcePath[128];
-    BattleModelEntry *cacheEntry = (BattleModelEntry *)btlFindModelEntry(modelKind, modelId);
+    BattleModelEntry *cacheEntry = btlFindModelEntry(modelKind, modelId);
 
     if (cacheEntry == 0) {
         cacheEntry = btlCreateModelEntry();
@@ -1361,11 +1359,11 @@ void btlLoadModelPack(s32 modelKind, s32 modelId) {
 
 /* Drop one reference from the matching kind/id cache entry, if it exists. */
 void btlReleaseFoundModelEntry(s32 modelKind, s32 modelId) {
-    s32 entryAddress;
+    BattleModelEntry *cacheEntry;
 
-    entryAddress = btlFindModelEntry(modelKind, modelId);
-    if (entryAddress != 0) {
-        btlReleaseModelEntry((BattleModelEntry *)entryAddress);
+    cacheEntry = btlFindModelEntry(modelKind, modelId);
+    if (cacheEntry != 0) {
+        btlReleaseModelEntry(cacheEntry);
         return;
     }
 }
@@ -1374,7 +1372,7 @@ INCLUDE_ASM(const s32, "game/code_0022AC10", func_0022CBA0);
 
 /* Return the sign-extended cache state, or zero when no entry exists. */
 s32 btlGetEntryState(s32 modelKind, s32 modelId) {
-    BattleModelEntry *cacheEntry = (BattleModelEntry *)btlFindModelEntry(modelKind, modelId);
+    BattleModelEntry *cacheEntry = btlFindModelEntry(modelKind, modelId);
     if (cacheEntry != 0) {
         return cacheEntry->state;
     }
@@ -1383,17 +1381,17 @@ s32 btlGetEntryState(s32 modelKind, s32 modelId) {
 
 /* Despite its public name, this only queries readiness; it releases nothing. */
 s32 btlReleaseEntryIfReady(s32 kind, s32 id) {
-    s32 entry = btlFindModelEntry(kind, id);
+    BattleModelEntry *entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
-        return btlIsModelPackEntryReady((BattleModelEntry *)entry);
+        return btlIsModelPackEntryReady(entry);
     }
-    return entry;
+    return 0;
 }
 
 extern void func_0022CBA0(s32, s32);
 
 s32 func_0022CD60(s32 kind, s32 id) {
-    s32 entry;
+    BattleModelEntry *entry;
 
     if (mdlRequestAsset(kind, id, 0) != 0 && mdlRequestAsset(kind, id, 0) != -1 &&
         sndFindListNodeForChannel(kind, id) != 0) {
@@ -1401,8 +1399,8 @@ s32 func_0022CD60(s32 kind, s32 id) {
     }
     entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
-        if (btlIsModelPackEntryReady((BattleModelEntry *)entry) != 0) {
-            if (((BattleModelEntry *)entry)->state == 0) {
+        if (btlIsModelPackEntryReady(entry) != 0) {
+            if (entry->state == 0) {
                 func_0022CBA0(kind, id);
             }
             return 1;
