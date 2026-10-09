@@ -1,4 +1,5 @@
 #include "bill_object_api.h"
+#include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
 #include "btl_effect_position.h"
@@ -104,7 +105,6 @@ extern s32 billGetWorkTransformMatrix(s32 packet);
 
 struct SdfListHead;
 struct SdfDmaNode;
-extern void sdfAppendPacket(struct SdfListHead *list, u32 packet);
 
 
 /* Per-frame draw state; DMA builders select packet ranges within each record. */

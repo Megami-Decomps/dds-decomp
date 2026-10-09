@@ -1,4 +1,5 @@
 #include "bill_object_api.h"
+#include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
@@ -44,7 +45,6 @@ extern void *memset(void *, s32, u32);
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
 extern void sdfComposeVuMatrixFromRegisters(void);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 func_0015FE20(EffResourceRenderState *);
 extern f32 D_00354C10[][4];
 extern u32 D_00354CD0[];

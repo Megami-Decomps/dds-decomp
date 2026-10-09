@@ -1,4 +1,5 @@
 #include "kwln.h"
+#include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
 #include "file_request_api.h"
@@ -8,7 +9,6 @@
 #include "sdf.h"
 #include "sdf_projection.h"
 #include "mdl.h"
-#include "file_request_api.h"
 
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -187,7 +187,6 @@ void mdlUpdateViewerSelectedModelFromPad(void);
 
 void mdlDrawViewerSelectionLabel(void);
 
-void sdfAppendPacket(SdfListHead *, u32);
 
 
 void sdfStreamCreateWithParams(SdfStreamFrameNode *, SdfStreamParams *, s32, s32, SdfTex *);
@@ -2532,8 +2531,6 @@ extern char D_003BBCD8[]; /* "fog=" */
 extern MdlFogParams kwlnDrawVector;
 extern s32 sdfPathExists(char *path);
 
-struct FileCleanup;
-extern s32 filePollEntryCleanup(struct FileCleanup *);
 extern s32 func_00301588();
 extern s32 memcmp(const void *, const void *, u32);
 
@@ -2566,7 +2563,7 @@ void mdlLoadViewerPresentationConfig(void) {
     resourceHandle = (s32)fileGetResourceHandle((struct FileRequest *)(u32)fileRequest);
     fileData = (char *)(u32)fileGetLoadedDataAddress((struct FileRequest *)(u32)fileRequest);
     fileSize = (s32)fileGetResourceSize((struct FileRequest *)(u32)fileRequest);
-    filePollEntryCleanup((struct FileCleanup *)(u32)fileRequest);
+    filePollEntryCleanup((struct FileRequest *)(u32)fileRequest);
     lineOffset = 0;
     while (lineOffset < fileSize) {
         nextLineOffset = lineOffset;
@@ -2625,7 +2622,7 @@ void func_0021E068(void) {
                         kwlnDrawVector.farB, kwlnDrawVector.color);
     request = fileQueueWindowSlotRequest(D_00367AF8, buffer, size);
     fileWaitReady(request);
-    filePollEntryCleanup((struct FileCleanup *)request);
+    filePollEntryCleanup((struct FileRequest *)request);
 }
 
 extern void func_00218E20(void);

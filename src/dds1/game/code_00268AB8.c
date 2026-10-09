@@ -601,7 +601,6 @@ extern u32 D_003D9168[];
 
 
 
-extern void filePollEntryCleanup(u32);
 
 
 extern void func_002F7628(u32 *);
@@ -618,7 +617,7 @@ s32 mnuCompleteTitleStreamFileLoad(u32 *destinationState) {
         s32 fileBytes = (s32)fileGetResourceSize((struct FileRequest *)(u32)D_003BD8D4);
         struct SdfMemBlock *allocation;
 
-        filePollEntryCleanup(D_003BD8D4);
+        filePollEntryCleanup((struct FileRequest *)(u32)D_003BD8D4);
         allocation = sdfAllocGeneralBlockHigh(fileBytes);
         mnuTitleStreamStatus[MNU_STREAM_DATA_ADDRESS_INDEX] = sdfMemoryGetBlockAddress(allocation);
         mnuTitleStreamStatus[MNU_STREAM_ALLOCATION_INDEX] = (u32)allocation;

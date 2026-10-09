@@ -2402,10 +2402,11 @@
 0x00195010	frFontCreateGlyphFromCode	inferred	Dequeues a child glyph, maps its encoded 16-bit code into a cached item, initializes metrics and returns the glyph pointer.
 0x00195160	frFontAppendTextToGlyphChain	inferred	Decodes an encoded text string into a glyph chain and optionally attaches it after the supplied prior glyph.
 0x00195360	frFontSetContextEncodedByte	inferred	doubles low byte and clamps to sentinel in context [names_reviewed5.tsv]
+0x001953A8	frFontSetSpacingAndMeasureGlyphs	inferred	Stores the signed spacing byte at glyph+1 and refreshes the cached child-chain advance.
 0x001953D8	frFontSetGlyphChainDimensions	inferred	propagates advance and height to child glyphs then measures chain [names_reviewed5.tsv]
-0x00195450	frFontSetContextPair	inferred	Assigns the two supplied words to context fields. [names_reviewed6.tsv]
-0x00195460	frFontStoreShiftedContextValue	inferred	Shifts provided word right by four before storing it on font context. [names_reviewed6.tsv]
-0x00195470	frFontSetChainFlag	inferred	sets byte flag on every glyph in chain
+0x00195450	frFontSetGlyphPosition	inferred	Stores the supplied x and y words at glyph+4 and glyph+8.
+0x00195460	frFontStoreShiftedRenderValue	inferred	Stores the supplied word shifted right four in the glyph render-value view at +0x14.
+0x00195470	frFontSetChildChainFirstOption	inferred	Walks parent previous links and each child next chain, assigning the child first-option byte at +0x14.
 0x00195520	frFontAddSharedGlyphFlags	inferred	ORs flags into shared font flag byte [names_reviewed5.tsv]
 0x00195530	frFontClearFlagBits	inferred	interface/frFont: clears mask bits from the shared font flag byte D_003BB174 and returns the previous value; setter is func_00195520 [names_L10_LiteSweep.tsv]
 0x00195548	frFontSetSharedRenderFlags	inferred	stores render flags used when drawing glyphs [names_reviewed5.tsv]
