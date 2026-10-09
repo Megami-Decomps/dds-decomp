@@ -5134,6 +5134,7 @@
 0x002E1098	billResetCellIndices	inferred	Clears 16-byte per-cell buffer and resets each 28-byte cell entry index to -1.
 0x002E1110	billCreateCellNode	inferred	vtable creator next to billResetCellIndices/func_002E11A0: 0x1C-byte entries, kind 1 [names_M84_AllocNode.tsv]
 0x002E11A0	billReleaseCellNode	inferred	Cell node destructor releases reference set and backing allocation. [names_reviewed21.tsv]
+0x002E11D0	billAdvanceCellInstances	inferred	Kind-2 active update advances cell instances using their typed configuration and entry array.
 0x002E1908	billUpdateCellDrawColorAndTransform	inferred	Blends cell draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002E1A70	billResetParticleIndices	inferred	Clears per-particle 16-byte data and resets each 44-byte particle entry index to -1; same source shape as billResetCellIndices.
 0x002E1AE8	billCreateParticleNode	inferred	vtable creator next to billResetParticleIndices/func_002E1B80: 0x2C-byte entries, kind 1 [names_M84_AllocNode.tsv]
@@ -5152,16 +5153,19 @@
 0x002E2F18	billCreateEmitterTransform	inferred	Allocates emitter transform buffer, attaches effect resource type 4 and initializes alternating rows.
 0x002E2F78	billCloneEmitterTransform	inferred	Allocates emitter transform buffer, clones source resource and initializes alternating rows.
 0x002E2FD8	billReleaseEmitterNode	inferred	Following emitter-row initializer, releases owned references and allocation. [names_reviewed21.tsv]
+0x002E3008	billAdvanceEmitterInstances	inferred	Advances active emitter instances for one frame.
 0x002E35F0	billUpdateEmitterDrawColorAndTransform	inferred	Blends emitter draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002E37D0	billAllocStripNode	inferred	allocator called by the strip create/clone pair: 0x28-byte entries + 0x10 header [names_M84_AllocNode.tsv]
 0x002E3830	billInitializeStripRows	inferred	Initializes alternating eight-float strip transform rows.
 0x002E38C0	billCreateStripTransform	inferred	Allocates strip transform entries, attaches resource type 3 and initializes row transforms.
 0x002E3920	billCloneStripTransform	inferred	Clones strip effect resource from source and initializes transform rows.
 0x002E3980	billReleaseStripNode	inferred	Following strip-row initializer, releases owned references and allocation. [names_reviewed21.tsv]
+0x002E39B0	billAdvanceStripInstances	inferred	Advances active strip instances for one frame.
 0x002E4070	billUpdateStripDrawColorAndTransform	inferred	Blends strip draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002E41D8	billResetTrailIndices	inferred	Clears effect output and resets index at every 44-byte trail record, same verified reset loop as particle effect.
 0x002E4250	billCreateTrailNode	inferred	vtable creator next to billResetTrailIndices/func_002E42F0: 0x2C-byte entries, kind 0, count re-read from config [names_M84_AllocNode.tsv]
 0x002E42F0	billReleaseTrailNode	inferred	Following trail-index initializer, releases owned references and allocation. [names_reviewed21.tsv]
+0x002E4320	billAdvanceTrailInstances	inferred	Advances active trail instances for one frame.
 0x002E4AC8	billUpdateTrailDrawColorAndTransform	inferred	Blends trail draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002E4C30	billResetQuadIndices	inferred	Clears effect output and resets index at every 32-byte record, same verified billboard reset loop.
 0x002E4CA8	billAllocQuadNode	inferred	allocator called by the quad create/clone pair: 0x20-byte entries + 0x10 header [names_M84_AllocNode.tsv]
@@ -5169,6 +5173,7 @@
 0x002E4D90	billCreateQuadTransform	inferred	Creates quad transform rows and resource type 4 from descriptor.
 0x002E4DF0	billCloneQuadTransform	inferred	Clones resource and initializes quad transform rows from owner descriptor.
 0x002E4E50	billReleaseQuadNode	inferred	Following quad-row initializer, releases owned references and allocation. [names_reviewed21.tsv]
+0x002E4E80	billAdvanceQuadInstances	inferred	Advances active quad instances for one frame.
 0x002E5540	billUpdateQuadDrawColorAndTransform	inferred	Blends quad draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002E56A8	effAllocateActiveInstanceWork	inferred	Allocates kind-sized resource instance work with default VU vectors, frame, color and copied source. [names_reviewed5.tsv]
 0x002E5760	effCreateResourceInstanceA	inferred	twin of effCreateResourceInstanceB/C: allocate block, table[kind].init(source, extra) -> +0x30, table[kind].fn(block)

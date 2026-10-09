@@ -301,11 +301,9 @@ extern void func_002DD968(f32 angle);
 extern void func_002DD8E8(f32 angle);
 extern void effPcpBuildConcentricRingPoints(void *work, f32 radius);
 
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *obj, s32 state);
 extern void mdlStorePrimaryVectorVU(void *obj);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
-extern u8 D_00325828[];
-extern void mdlBroadcastMasked(void *obj, u32 mask);
+extern struct SdfPoolNode *D_00325828[4];
 extern u32 func_001619E8(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(void *unit);
@@ -523,12 +521,12 @@ void effTwinEffectUpdate(EffPCPTwinWork *work) {
         effParamWorkCallback1(work->pair[i][0], work->scale * 1.5f);
         effParamWorkCallback1(work->pair[i][1], 1.75f);
         mdlBroadcastMasked(obj[1], work->color);
-        mdlProcessContextNodesAndTransforms(obj[0], (s32)D_00325828);
+        mdlProcessContextNodesAndTransforms(obj[0], D_00325828);
         sdfLoadMapRecordPositionVector(obj[0]->inner, 1);
         posp = &pos;
         VU0_STORE_VF_UNCLOBBERED(vf10, posp);
         mdlStorePrimaryVectorVU(obj[1]);
-        mdlProcessContextNodesAndTransforms(obj[1], (s32)D_00325828);
+        mdlProcessContextNodesAndTransforms(obj[1], D_00325828);
         if (work->frame > 0x18) {
             effParamWorkCallback0(work->shared[i], posp);
             effParamWorkInvokeCallback(work->shared[i]);
@@ -641,10 +639,10 @@ void effPcpStaggerUpdate(EffPCPStaggered *work) {
             effParamWorkCallback1(work->handle[i * 2], work->scale * 1.5f);
             effParamWorkCallback1(work->handle[i * 2 + 1], 1.5f);
             mdlBroadcastMasked(obj[1], work->color);
-            mdlProcessContextNodesAndTransforms(obj[0], (s32)D_00325828);
+            mdlProcessContextNodesAndTransforms(obj[0], D_00325828);
             sdfLoadMapRecordPositionVector(obj[0]->inner, 1);
             mdlStorePrimaryVectorVU(obj[1]);
-            mdlProcessContextNodesAndTransforms(obj[1], (s32)D_00325828);
+            mdlProcessContextNodesAndTransforms(obj[1], D_00325828);
         }
     }
 }
@@ -777,7 +775,7 @@ void effCrossEffectUpdate(EffPCPCrossWork *work) {
     VU0_LOAD_VF(vf10, work);
     mdlStorePrimaryVectorVU(anchor);
     effParamWorkCallback1(work->base, work->scale);
-    mdlProcessContextNodesAndTransforms(anchor, (s32)D_00325828);
+    mdlProcessContextNodesAndTransforms(anchor, D_00325828);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             if (work->state[i][j] != 0) {
@@ -788,7 +786,7 @@ void effCrossEffectUpdate(EffPCPCrossWork *work) {
             mdlBroadcastMasked(obj, work->color);
             sdfLoadMapRecordPositionVector(anchor->inner, i * 4 + j + 1);
             mdlStorePrimaryVectorVU(obj);
-            mdlProcessContextNodesAndTransforms(obj, (s32)D_00325828);
+            mdlProcessContextNodesAndTransforms(obj, D_00325828);
         }
     }
 }
@@ -888,11 +886,11 @@ void effPcpDelayedPairsUpdate(EffPCPDelayedPairs *work) {
             VU0_LOAD_VF_MEMORY(vf10, work);
             mdlStorePrimaryVectorVU(obj[0]);
             mdlBroadcastMasked(obj[1], work->color);
-            mdlProcessContextNodesAndTransforms(obj[0], (s32)D_00325828);
+            mdlProcessContextNodesAndTransforms(obj[0], D_00325828);
             sdfLoadMapRecordPositionVector(obj[0]->inner, 1);
             VU0_STORE_VF_UNCLOBBERED(vf10, &vec);
             mdlStorePrimaryVectorVU(obj[1]);
-            mdlProcessContextNodesAndTransforms(obj[1], (s32)D_00325828);
+            mdlProcessContextNodesAndTransforms(obj[1], D_00325828);
         }
     }
 }
@@ -979,7 +977,7 @@ void effPcpChargeUpdateAndDrawHistory(EffPCPChargeWork *work) {
     scale = work->scale * 1.5f;
     effParamWorkCallback1(work->secondaryHandle, scale);
     effParamWorkCallback0(work->secondaryHandle, work->vectorWords);
-    mdlProcessContextNodesAndTransforms(model, (s32)D_00325828);
+    mdlProcessContextNodesAndTransforms(model, D_00325828);
     captureRow = work->historyCount;
     if (captureRow < 25) {
         for (point = 0; point < 7; point++) {
@@ -1074,7 +1072,7 @@ void effPcpSpawnOnce(EffPCPSpawnOnceWork *work) {
     VU0_LOAD_VF_MEMORY(vf10, work);
     mdlStorePrimaryVectorVU(obj);
     effParamWorkCallback3(work->secondaryHandle, work->color);
-    mdlProcessContextNodesAndTransforms(obj, (s32)D_00325828);
+    mdlProcessContextNodesAndTransforms(obj, D_00325828);
     sdfLoadMapRecordPositionVector(obj->inner, 1);
     VU0_STORE_VF_TO_MEMORY(vf10, vec);
     effParamWorkCallback0(work->secondaryHandle, &vec);
@@ -6057,7 +6055,7 @@ void effPcpUpdateMapMotionEvents(EffPCPMapEventWork *work) {
         mdlStorePrimaryVectorVU(model);
         VU0_LOAD_VF(vf10, scale);
         mdlStoreTertiaryVectorVU(model);
-        mdlProcessContextNodesAndTransforms(model, (s32)D_00325828);
+        mdlProcessContextNodesAndTransforms(model, D_00325828);
         count = work->count;
         fadeIn = work->params.fadeIn;
         fadeOut = work->params.fadeOut;

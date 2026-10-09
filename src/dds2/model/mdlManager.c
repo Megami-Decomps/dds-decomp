@@ -51,7 +51,6 @@ extern BattleGroupNode *btlGroupNodeHeads[];
 
 extern BattleGroupIdEntry *btlGroupIdHeads[];
 
-extern void mdlDestroyContext(MdlCtx *);
 
 extern void mdlDestroyPartList(DevRequest *);
 
