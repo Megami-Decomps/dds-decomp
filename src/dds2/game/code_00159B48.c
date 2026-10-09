@@ -1358,7 +1358,160 @@ typedef struct EffBallisticEmitter {
 } EffBallisticEmitter;
 
 void func_0015C3C8(EffBallisticEmitter *effect, s32 index);
-INCLUDE_ASM(const s32, "game/code_00159B48", func_0015C3C8);
+/* Twelve authored ballistic launch directions, stored as four-float vectors. */
+extern f32 D_003AA9F0[12][4];
+
+/* Seed a ballistic packet; positions are emitter-relative and then offset by the origin. */
+void func_0015C3C8(EffBallisticEmitter *effect, s32 index) {
+    f32 position[4];
+    f32 direction[4];
+    EffPacket *packet = (EffPacket *)effect->head.buffer->records;
+    f32 gravity = effect->gravity / 100.0f;
+    f32 radius = effect->radius;
+    f32 cone = effect->cone;
+    f32 speed = effect->speed;
+    f32 jitter;
+    f32 angle, cosine, sine;
+    f32 decay;
+    s32 frame;
+
+    packet += index;
+    switch (effect->mode) {
+    case 0:
+        if (effect->randomDir) {
+            direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[1] = 0;
+            direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            VU0_LOAD_VF(vf10, direction);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, direction);
+            packet->pos[0] = direction[0] * radius;
+            packet->pos[1] = 0;
+            packet->pos[2] = direction[2] * radius;
+            VU0_LOAD_MATRIX(effect->head.matrix);
+            VU0_LOAD_VF(vf10, packet->pos);
+            VU0_APPLY_MATRIX(vf10, vf10);
+            VU0_STORE_VF(vf10, packet->pos);
+            packet->pos[0] += effect->head.origin[0];
+            packet->pos[1] += effect->head.origin[1];
+            packet->pos[2] += effect->head.origin[2];
+            direction[0] = (effMiscRandUnitFloat(effEmitterDelayRandomState) - 0.5f) * 2.0f * cone;
+            direction[1] = -(1.0f - cone);
+            direction[2] = (effMiscRandUnitFloat(effEmitterDelayRandomState) - 0.5f) * 2.0f * cone;
+            VU0_LOAD_VF(vf10, direction);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, direction);
+            jitter = effMiscRandUnitFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
+            packet->vel[0] = direction[0] * speed * jitter;
+            packet->vel[1] = direction[1] * speed * jitter;
+            packet->vel[2] = direction[2] * speed * jitter;
+            packet->f38 = (effMiscRandUnitFloat(effDefaultRandomState) * 0.5f + 0.5f) * gravity;
+        } else {
+            angle = (3.14159265f * 2.0f) / (u32)effect->head.packetCount * index;
+            cosine = sdfEvaluateCosineViaSinePhaseShift(angle);
+            sine = sdfSinPoly(angle);
+            packet->pos[0] = cosine * radius;
+            packet->pos[1] = 0;
+            packet->pos[2] = sine * radius;
+            VU0_LOAD_MATRIX(effect->head.matrix);
+            VU0_LOAD_VF(vf10, packet->pos);
+            VU0_APPLY_MATRIX(vf10, vf10);
+            VU0_STORE_VF(vf10, packet->pos);
+            packet->pos[0] += effect->head.origin[0];
+            packet->pos[1] += effect->head.origin[1];
+            packet->pos[2] += effect->head.origin[2];
+            packet->vel[0] = cosine * cone * speed;
+            packet->vel[1] = -speed * (1.0f - cone);
+            packet->vel[2] = sine * cone * speed;
+            packet->f38 = gravity;
+        }
+        break;
+    case 1:
+        if (effect->randomDir) {
+            packet->pos[0] = effect->head.origin[0];
+            packet->pos[1] = effect->head.origin[1];
+            packet->pos[2] = effect->head.origin[2];
+            direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[1] = -((effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f);
+            direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            VU0_LOAD_VF(vf10, direction);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, direction);
+            jitter = effMiscRandUnitFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
+            packet->vel[0] = direction[0] * speed * jitter;
+            packet->vel[1] = direction[1] * speed * jitter;
+            packet->vel[2] = direction[2] * speed * jitter;
+            packet->f38 = gravity;
+        } else {
+            packet->pos[0] = effect->head.origin[0];
+            packet->pos[1] = effect->head.origin[1];
+            packet->pos[2] = effect->head.origin[2];
+            EE_MMI_UNIT_MATRIX(effect->head.matrix);
+            packet->vel[0] = D_003AA9F0[index % 12][0] * speed;
+            packet->vel[1] = D_003AA9F0[index % 12][1] * speed;
+            packet->vel[2] = D_003AA9F0[index % 12][2] * speed;
+            packet->f38 = gravity;
+        }
+        break;
+    case 2:
+        if (effect->randomDir) {
+            decay = effect->decayPct / 100.0f + 1.0f;
+            EE_MMI_UNIT_MATRIX(effect->head.matrix);
+            direction[0] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[1] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            direction[2] = (effMiscRandUnitFloat(effDefaultRandomState) - 0.5f) * 2.0f;
+            VU0_LOAD_VF(vf10, direction);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, direction);
+            jitter = effMiscRandUnitFloat(effDefaultRandomState) * effect->jitter + (1.0f - effect->jitter);
+            direction[0] *= speed * jitter;
+            direction[1] *= speed * jitter;
+            direction[2] *= speed * jitter;
+            packet->vel[0] = -direction[0];
+            packet->vel[1] = -direction[1];
+            packet->vel[2] = -direction[2];
+            position[0] = effect->head.origin[0];
+            position[1] = effect->head.origin[1];
+            position[2] = effect->head.origin[2];
+            frame = 0;
+            /* Pre-integrate at least one step, even for a nonpositive lifetime. */
+            do {
+                position[0] += direction[0];
+                position[1] += direction[1];
+                position[2] += direction[2];
+                direction[0] *= decay;
+                direction[1] *= decay;
+                direction[2] *= decay;
+                direction[1] += gravity;
+                frame++;
+            } while (frame < effect->head.frameCount);
+            packet->pos[0] = position[0];
+            packet->pos[1] = position[1];
+            packet->pos[2] = position[2];
+            packet->f38 = -gravity;
+        }
+        break;
+    }
+    packet->age = -(effMiscRand(effEmitterDelayRandomState) % (effect->spread + 1));
+    packet->color = 0;
+    jitter = effect->head.speedJitter;
+    packet->speed = effect->head.speed * (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter));
+    jitter = effect->head.spinJitter;
+    if (jitter != 0) {
+        packet->spin = (effMiscRandUnitFloat(effDefaultRandomState) * jitter + (1.0f - jitter)) * (3.14159265f * 2.0f);
+    } else {
+        packet->spin = 0;
+    }
+    parDispatchKindInit(&effect->head.sub, index);
+}
+/* PARK (22/512 words, both titles): exact except a $20/$21 swap between the two PRE-hoisted
+ * HIGH pseudos (RNG state D_0034DF38/effDefaultRandomState vs effEmitterDelayRandomState). Refs/live are
+ * identical to retail (12/163*256 vs 10/138*256) -> global-alloc priority ties at 8; the tie
+ * falls back to pseudo order, which gcse pre_delete assigns in expression-hash bucket order.
+ * gcse hashes SYMBOL_REF by NAME characters (gcc 2.95 hash_expr_1), bucket = h % (max_cuid/2|1).
+ * Ours: max_cuid 421 -> 211 buckets: DF38 50, eff 91 -> DF38 first (wrong). Retail used the
+ * original symbol names. Levers: rename the placeholder RNG symbol (shared, ~20 units/title), or
+ * a source with max_cuid 400-407/434-439 (both titles) — no natural form found. */
 
 /* Scale velocity, add its stored vertical acceleration, and advance position.
  * Only mode zero transforms the displacement through the emitter matrix. */
