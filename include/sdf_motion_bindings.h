@@ -4,9 +4,21 @@
 #include "sdf.h"
 #include "sdf_draw.h"
 
+struct SdfMotionKeyTrack;
+
+/* Motion callbacks release storage, bind keys, sample, capture and blend. */
+typedef struct SdfMotionBindingDispatch {
+    void (*releaseStorage)(void *binding);
+    void (*bindKeyTrack)(void *binding, struct SdfMotionKeyTrack *track);
+    void (*sample)(void *binding, f32 frame);
+    void (*capturePrevious)(void *binding);
+    void (*blend)(void *binding, f32 frame, f32 weight);
+    u32 unk14;
+} SdfMotionBindingDispatch;
+
 /* Common dispatch/source prefix used by motion-owned bindings. */
 typedef struct SdfMotionBindingHead {
-    void *dispatch;
+    SdfMotionBindingDispatch *dispatch;
     void *source;
 } SdfMotionBindingHead;
 
@@ -29,7 +41,7 @@ typedef struct SdfMotionKeyTrack {
 } SdfMotionKeyTrack;
 
 typedef struct SdfMotionKeyBinding {
-    void *dispatch;
+    SdfMotionBindingDispatch *dispatch;
     Motion *motion;
     SdfMotionKeyTrack *track;
 } SdfMotionKeyBinding;
@@ -110,6 +122,15 @@ typedef struct SdfMotionKeyFlagBinding {
 enum {
     SDF_MOTION_KEY_SAMPLE_BYTE_ZERO = 0x0010
 };
+
+typedef char SdfMotionBindingDispatch_size[
+    (sizeof(SdfMotionBindingDispatch) == 0x18) ? 1 : -1];
+typedef char SdfMotionBindingDispatch_bind_at_04[
+    ((u32)&((SdfMotionBindingDispatch *)0)->bindKeyTrack == 0x04) ? 1 : -1];
+typedef char SdfMotionBindingDispatch_capture_at_0C[
+    ((u32)&((SdfMotionBindingDispatch *)0)->capturePrevious == 0x0C) ? 1 : -1];
+typedef char SdfMotionBindingDispatch_tail_at_14[
+    ((u32)&((SdfMotionBindingDispatch *)0)->unk14 == 0x14) ? 1 : -1];
 
 typedef char SdfMotionBindingHead_size[(sizeof(SdfMotionBindingHead) == 0x08) ? 1 : -1];
 typedef char SdfMotionKeyInterval_size[(sizeof(SdfMotionKeyInterval) == 0x0C) ? 1 : -1];

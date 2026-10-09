@@ -789,7 +789,7 @@ EvtUnit *evtCreateUnitTransitionWork(EffWorldNode *effObj, MdlCtx *owner) {
     work = sdfAllocSizeClassBlock(sizeof(EvtUnit));
     memset(work, 0, sizeof(EvtUnit));
     work->motionState = EVT_UNIT_MOTION_STATE_IDLE;
-    work->transitionSourceKind = 1;
+    work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE;
     work->unkB8 = 1.0f;
     work->effObj = effObj;
     work->owner = owner;
