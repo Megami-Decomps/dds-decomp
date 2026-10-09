@@ -81,4 +81,9 @@ void dds3SetWorldObjectDrawEnabled(EffWorldNode *object, s8 enabled);
 void dds3SetWorldObjectValue(EffWorldNode *object, u32 value);
 s32 dds3GetWorldObjectValue(EffWorldNode *object);
 
+/* Scene resource scripts are selected by name on a world node. The start
+ * result is the task-handle word returned by the script task creator. */
+s32 evtStartSceneResourceTask(EffWorldNode *worldNode, const char *taskName);
+void evtDestroyNamedTask(void *unusedContext, const char *taskName);
+
 #endif /* EVT_WORLD_H */
