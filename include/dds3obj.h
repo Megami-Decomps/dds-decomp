@@ -37,6 +37,10 @@ EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 inde
 EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, const u8 *name);
 EffWorldNode *dds3AppendWorldObjectNode(s32 kind);
 void dds3RemoveWorldObjectNode(EffWorldNode *node);
+EffWorldNode *dds3GetWorldCameraObject(EffWorldNode *world);
+EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *camera);
+EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *world);
+EffWorldNode *dds3SetWorldPlayerObject(EffWorldNode *world, EffWorldNode *player);
 
 /* Four-word object inner record (0x10); no direct C unit users yet. */
 typedef struct {
