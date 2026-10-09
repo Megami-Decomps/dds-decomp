@@ -71,6 +71,6 @@ jobs:
         run: python3 experiments/kib-camera-interpreter/trace.py
 
       - name: Prepare official user-mode debugger
-        if: steps.orig.outputs.available == 'true'
+        if: always() && steps.orig.outputs.available == 'true'
         timeout-minutes: 25
         run: python3 experiments/kib-camera-interpreter/prepare_qemu.py

@@ -135,9 +135,18 @@ def main():
                         target_relocations_equal=True, target_bytes=len(ordinary),
                         relocations=len(ordinary_relocs), source_snapshot_equal=True))
             role_report, watch = Path(temp) / "roles.json", Path(temp) / "watch.json"
-            d.run("source_role_lineage", [sys.executable, "tools/ee_gcc_role_lineage.py",
+            role_result = d.run("source_role_lineage", [sys.executable, "tools/ee_gcc_role_lineage.py",
                   str(probe), "--roles", str(Path(__file__).with_name("roles.json")),
-                  "--json", str(role_report), "--watch", str(watch)])
+                  "--json", str(role_report), "--watch", str(watch)], allowed=(0, 2))
+            if role_result.returncode:
+                prefixes = ("unrecognized executable RTL header", "no complete linked RTL inventory",
+                    "incomplete final RTL inventory", "empty or incomplete target RTL",
+                    "role ", "ambiguous or missing", "probe is not", "compiler hash",
+                    "function mismatch", "source snapshot", "explicit #line", "probe object",
+                    "missing required", "RTL artifact", "stale or incomplete", "target missing")
+                category = next((p for p in prefixes if role_result.stderr.startswith(p)), "unclassified")
+                d.emit(dict(scope="lineage_failure", category=category))
+                raise d.Failure("source_role_lineage", role_result.returncode)
             report = json.loads(role_report.read_text())
             d.emit(dict(scope="camera_source_roles", roles=[
                 dict(name=role["role"]["name"], seeds=len(role["seed_uids"]),

@@ -540,8 +540,34 @@ def inspect(repo):
                 "phase_read_after_callback": 1 in vm.phase_reads,
                 "second_peer_cleared": 1 in vm.clears,
             })
+    class StatusObserved(Exception):
+        pass
+
+    class StatusWidthVM(VM):
+        def read(self, address, width):
+            if address == PEERS[0] + 0x110:
+                need(width in (4, 8), "unexpected_status_width")
+                self.observed_status_width = width
+                raise StatusObserved()
+            return super().read(address, width)
+
+    widths = []
+    for entry_kind in (34, 35, 36, 37, 38):
+        getter_site = getters[0] if entry_kind in (37, 38) else getters[1]
+        vm = StatusWidthVM(words, read_native, calls, getter_site, clear_site,
+                           cursor, gp)
+        vm.put(SCRIPT, 4, val(entry_kind, "kind"))
+        try:
+            vm.run()
+        except StatusObserved:
+            widths.append(dict(entry_kind=entry_kind,
+                               first_peer_status_load_bytes=vm.observed_status_width))
+        else:
+            raise Blocked("status_load_not_reached")
+
     return {
         "status": "bounded_native_semantics_observed",
+        "native_status_widths": widths,
         "selftests": "passed", "static_calls": 52, "runtime_sites": 2,
         "fixtures": rows,
         "limits": "Synthetic two-peer paths only; no source-match claim.",
