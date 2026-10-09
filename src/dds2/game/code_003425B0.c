@@ -1321,7 +1321,7 @@ void sdfIpuDmaCompletionWorker(void) {
         }
         sceIpuStopDMA(&work->dma);
         if (work->dma.inputQwords == 0) {
-            work->unk11 = 0;
+            work->inputFeedEnabled = 0;
         }
         if (work->playbackPhase == SDF_STREAM_PLAYBACK_INITIAL) {
             work->playbackPhase = SDF_STREAM_PLAYBACK_FIRST_COMPLETION;
@@ -1361,7 +1361,7 @@ s32 sdfCompleteIpuInputFeedDma(void) {
     if (stream != NULL) {
         D_004391F4 = stream->playbackFrameIndex;
         D_00439208 = NULL;
-        if (stream->unk11 != 0 && stream->active == 1) {
+        if (stream->inputFeedEnabled != 0 && stream->active == 1) {
             if (stream->inputFeedDmaInFlight != 0) {
                 stream->inputFeedDmaInFlight = 0;
                 stream->firstSlot++;
