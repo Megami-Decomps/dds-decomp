@@ -519,7 +519,8 @@ SdfSubParam *sdfSubParamCreate(void) {
     SdfSubParam *subParameter;
 
     subParameter = sdfAllocSizeClassBlock(SDF_SUBPARAM_BYTES);
-    subParameter->packed.unk8 = (((u64)0x3F800000 << 16 | 0x3F80) << 16);
+    /* Packed defaults: center offsets (0, 0), basis scales (1, 1), rotation 0. */
+    subParameter->packed.unk8 = 0x3F8000003F800000ULL;
     subParameter->packed.unk0 = 0;
     subParameter->packed.unk10 = 0;
     return subParameter;
@@ -778,13 +779,13 @@ void sdfBuildSubParameterTransform(SdfDrawTransform *transform, const SdfSubPara
         return;
     }
 
-    angle = -param->scalar.values[4];
+    angle = -param->transformInputs.rotationInput;
     s = sdfSinPoly(angle);
     c = sdfEvaluateCosineViaSinePhaseShift(angle);
-    v0 = param->scalar.values[0];
-    v1 = param->scalar.values[1];
-    v2 = param->scalar.values[2];
-    v3 = param->scalar.values[3];
+    v0 = param->transformInputs.centerOffsetX;
+    v1 = param->transformInputs.centerOffsetY;
+    v2 = param->transformInputs.basisScaleX;
+    v3 = param->transformInputs.basisScaleY;
 
     m0 = c * v2;
     m1 = s * v3;

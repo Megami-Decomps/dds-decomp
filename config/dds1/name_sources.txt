@@ -3870,6 +3870,8 @@
 0x00224B28	evtCmdPrepareUnitMotionAndLogState	inferred	Prepares selected world unit motion and logs its shared state. [names_reviewed17.tsv]
 0x00224B98	evtOpAttachUnitToWorldObject	inferred	Finds script-selected event unit and attaches a secondary world object for given frames. [names_reviewed7.tsv]
 0x00224C08	evtGetShortestAngleDelta	inferred	Wraps two input degree values to one turn, chooses the signed shortest angular separation and returns destination minus source.
+0x00224CD8	evtOpTurnUnitRelativeToWorldNode	inferred	Reads unit and source keys plus frame count, uses the type-0x11 node vector to set a relative unit rotation, and retains the source key as pending actor state. Registered with 3 script arguments; body published in c0364cb81bd5e01154675df7876596a5c0beb46a.
+0x00224F48	evtOpRestoreUnitReferenceAngle	inferred	Uses the cached reference angle for the unit transition and clears the actor pending value. Registered with 2 script arguments; body published in c0364cb81bd5e01154675df7876596a5c0beb46a.
 0x002250D8	evtUnitClearFlagBit	inferred	clears bit 0 of the flag word at unit+0x8C
 0x00225120	evtUnitSetFlagBit	inferred	sets bit 0 of the flag word at unit+0x8C
 0x00225160	evtCommandFlagSelectedUnitStatus	inferred	src/dds1/game/code_00222AC0.c func_00225160: Reads script unit ID, resolves unit and applies status flags. [names_reviewed24.tsv]

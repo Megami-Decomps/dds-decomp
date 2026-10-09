@@ -228,7 +228,7 @@ void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item) {
 
     sdfDrawNodeSetFromItem(node, item);
     switch (item->commandSetupMode) {
-    case 0:
+    case SDF_ITEM_COMMAND_SETUP_INLINE_LISTS:
         for (pass = 0; pass != 2; pass++) {
             for (slot = 0; slot != 3; slot++) {
                 sdfDrawNodeBuildCommandList(node, item->commandData.inlineCommandLists[slot],
@@ -236,7 +236,7 @@ void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item) {
             }
         }
         break;
-    case 1:
+    case SDF_ITEM_COMMAND_SETUP_NULL_TERMINATED_LIST_TABLE:
         if (item->commandData.commandList.commandLists != NULL) {
             for (pass = 0; pass != 2; pass++) {
                 cursor = item->commandData.commandList.commandLists;

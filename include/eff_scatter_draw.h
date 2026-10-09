@@ -33,5 +33,6 @@ typedef char PcpScatterDrawAllocationOffsetCheck[
     ((u32)&((PcpScatterDraw *)0)->allocation == 0x78) ? 1 : -1];
 
 void effReleaseScatterObject(PcpScatterDraw *object);
+void effScatterStoreSourceTransformMatrix(PcpScatterDraw *draw, void *sourceMatrix);
 
 #endif

@@ -3,6 +3,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "kwln.h"
+#include "kwln_task_create.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "kwln_task_lifecycle.h"
@@ -84,7 +85,7 @@ s32 mnuSetFrameDivisor(void) {
 
 void mnuCreateMovieManagerTask(void) {
     sdfSoundInitIpuStream();
-    kwlnTaskCreate("movieMan", 0x385, 1, 0, mnuSetFrameDivisor, 0, 0);
+    kwlnTaskCreate("movieMan", 0x385, 1, 0, (TaskUpdate)mnuSetFrameDivisor, 0, 0);
 }
 
 u32 mnuScriptRequestMovieByIndex(void) {
@@ -288,7 +289,8 @@ s32 mnuMovieViewer(void) {
 
 void mnuCreateMovieViewerTask(void) {
     func_002702A0();
-    mnuMovieList.task = kwlnTaskCreate(mnuMovieViewerTaskName, 0x2b02, 1, 0, mnuMovieViewer, 0, 0);
+    mnuMovieList.task = kwlnTaskCreate(mnuMovieViewerTaskName, 0x2b02, 1, 0,
+                                       (TaskUpdate)mnuMovieViewer, 0, 0);
 }
 
 void mnuDestroyMovieViewerTask(void) {

@@ -2,11 +2,12 @@
 #define SDF_PACKET_SLOT_H
 
 #include "sdf_packet_list.h"
+#include "sdf_packet_patch.h"
 
 /* One 0x10-byte entry in the three-slot frame packet submission ring. */
 typedef struct SdfPacketSlot {
     struct SdfListHead *packetList;
-    void *callbackHead;
+    SdfPacketPatchLink *callbackHead;
     u8 slotUpdatePhase;
     u8 queuedBufferIndex;
     u8 bufferIndex;

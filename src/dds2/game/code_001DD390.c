@@ -7256,9 +7256,190 @@ INCLUDE_ASM(const s32, "game/code_001DD390", func_001F0968);
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001F0C80);
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001F1120);
+extern BtlUnit *btlFindFarthestUnit(u32, f32 *);
+extern BtlUnit *btlFindNearestUnit(u32, BtlUnit *);
+extern void btlFlagAllUnitsDefeatCandidate(void);
+extern f32 func_00353040(f32);
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001F1290);
+/* Frame the camera for a two-actor command: place the eye so the actor, the farthest
+   and the nearest actors fit the view, then store the resulting distance. */
+void func_001F1290(BtlLinkedCommand *action, BtlCamState *pose, BtlUnit *unit, s32 mode) {
+    f32 focus[4];
+    f32 eye[4];
+    f32 mirror[4];
+    f32 farMuzzle[4];
+    f32 fits[3];
+    f32 view[4];
+    f32 refReach;
+    BtlUnit *ref;
+    f32 offset;
+    f32 halfFov;
+    f32 nearFit;
+    f32 unitExtent;
+    f32 fit;
+    f32 ramp;
+    f32 shift;
+
+    /* Distance at which `ref` fits the view along the mirror direction. */
+    f32 func_001F1120(f32 heightScale) {
+        f32 tanHalf;
+        f32 distance;
+
+        refReach = ref->reach * ref->scale;
+        btlUnitGetMuzzlePosVU(ref);
+        VU0_SCALAR_OP_CLOBBER(focus[1] * heightScale, "vaddx.y vf10, vf0, vf2x");
+        VU0_STORE_VF(vf10, mirror);
+        VU0_LOAD_VF(vf11, focus);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LOAD_VF(vf11, view);
+        VU0_CROSS_XYZ(vf10, vf10, vf11);
+        VU0_CROSS_XYZ(vf10, vf10, vf11);
+        VU0_NORMALIZE_VF10();
+        VU0_MOVE_VF(vf12, vf10);
+        VU0_LOAD_VF(vf10, focus);
+        VU0_LOAD_VF(vf11, mirror);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_MOVE_VF(vf11, vf12);
+        VU0_DOT_XYZ(offset, vf10, vf11);
+        distance = ffabsf(offset);
+        tanHalf = func_00353228(halfFov);
+        distance = (distance + refReach / func_00353040(halfFov)) / tanHalf;
+        VU0_LOAD_VF(vf10, eye);
+        VU0_SCALAR_OP_CLOBBER(focus[1] * heightScale, "vaddx.y vf10, vf0, vf2x");
+        VU0_LOAD_VF(vf11, mirror);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LOAD_VF(vf11, view);
+        VU0_DOT_XYZ(offset, vf10, vf11);
+        return distance + ffabsf(offset);
+    }
+
+    btlGetRuntime();
+    btlFlagAllUnitsDefeatCandidate();
+    if (unit->status.flags & 0x200) {
+        f32 span[3];
+        f32 diameter;
+
+        pose->fov = action->camera.fov;
+        unitExtent = unit->reach * unit->scale;
+        btlUnitGetMuzzlePosVU(unit);
+        VU0_STORE_VF(vf10, focus);
+        func_00208000(0x200, &span[0], NULL);
+        focus[1] = -span[0];
+        fit = func_00208000(0x400, &span[1], &span[2]);
+        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
+        eye[0] = 0.0f;
+        ref = btlFindFarthestUnit(0x400, eye);
+        if (ref != NULL) {
+            btlUnitGetMuzzlePosVU(ref);
+            VU0_STORE_VF(vf10, farMuzzle);
+            fit = ffabsf(farMuzzle[0]) + ref->reach * ref->scale - eye[0];
+        }
+        if (span[1] < 620.0f) {
+            if (!(span[1] - span[2] < 250.0f)) {
+                eye[1] = -span[2] * 0.75f;
+            } else if (span[2] > 100.0f) {
+                eye[1] = -span[2] * 0.55f;
+            } else {
+                eye[1] = -span[2] * 0.45f;
+            }
+        } else {
+            eye[1] = -span[1] * 0.6f;
+        }
+        offset = focus[0] - eye[0];
+        halfFov = pose->fov * 1.3333333f * 0.5f;
+        if (unitExtent < ffabsf(offset)) {
+            ramp = (500.0f - fit) / 500.0f * 2.25f;
+            if (ramp < 0.0f) {
+                ramp = 0.0f;
+            }
+            if (fit <= 500.0f) {
+                shift = 0.0f;
+                if (mode == 0) {
+                    if (ramp >= 0.0f) {
+                        shift = 0.5f;
+                    }
+                } else if (ramp >= 0.0f) {
+                    shift = -1.75f;
+                }
+            } else {
+                shift = 0.0f;
+                if (mode != 0) {
+                    shift = -1.75f;
+                }
+            }
+            if (offset < 0.0f) {
+                eye[0] += fit * ramp;
+                focus[0] -= unitExtent * shift;
+            } else {
+                eye[0] -= fit * ramp;
+                focus[0] += unitExtent * shift;
+            }
+            VU0_LOAD_VF(vf10, eye);
+            VU0_STORE_VF(vf10, pose->position);
+            VU0_LOAD_VF(vf11, focus);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, pose->direction);
+            VU0_LOAD_VF(vf10, eye);
+            VU0_SCALAR_OP_CLOBBER(focus[1], "vaddx.y vf10, vf0, vf2x");
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, view);
+            VU0_LOAD_VF(vf10, eye);
+            VU0_SCALAR_OP_CLOBBER(-focus[0], "vaddx.x vf10, vf0, vf2x");
+            VU0_STORE_VF_UNCLOBBERED(vf10, mirror);
+            ref = btlFindFarthestUnit(0x400, mirror);
+            ref = ref != NULL ? ref : unit;
+            nearFit = func_001F1120(0.0f);
+        } else {
+            VU0_LOAD_VF(vf10, eye);
+            VU0_STORE_VF(vf10, pose->position);
+            VU0_LOAD_VF(vf11, focus);
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, pose->direction);
+            VU0_LOAD_VF(vf10, eye);
+            VU0_SCALAR_OP_CLOBBER(focus[1], "vaddx.y vf10, vf0, vf2x");
+            VU0_SUB(vf10, vf10, vf11);
+            VU0_NORMALIZE_VF10();
+            VU0_STORE_VF(vf10, view);
+            nearFit = fit * 1.2f / func_00353228(halfFov);
+        }
+        ref = btlFindFarthestUnit(0x200, focus);
+        if (ref != NULL) {
+            fits[0] = func_001F1120(1.0f);
+        } else {
+            fits[0] = 0.0f;
+        }
+        ref = btlFindNearestUnit(0x200, unit);
+        if (ref != NULL) {
+            fits[1] = func_001F1120(1.0f);
+        } else {
+            fits[1] = 0.0f;
+        }
+        VU0_LOAD_VF(vf10, eye);
+        VU0_LOAD_VF(vf11, focus);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(offset);
+        diameter = 2.0f * unitExtent;
+        if (span[0] < diameter) {
+            fits[2] = offset + diameter / func_00353228(halfFov);
+        } else {
+            fits[2] = offset + span[0] / func_00353228(halfFov);
+        }
+        offset = fits[0] > nearFit ? fits[0] : nearFit;
+        if (offset < fits[1]) {
+            offset = fits[1];
+        }
+        if (fits[2] > offset) {
+            offset = fits[2];
+        }
+        pose->distance = offset;
+        if (mode == 1) {
+            pose->distance = offset + 100.0f;
+        }
+    }
+}
 
 extern void func_001F0C80(BtlLinkedCommand *, BtlCamState *, BtlUnit *, s32);
 

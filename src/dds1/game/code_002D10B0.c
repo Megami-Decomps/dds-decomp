@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_image_upload.h"
 #include "ee_mmi.h"
 extern s32 iWakeupThread(s32 threadId);
 #include "sdf_chip.h"
@@ -24,24 +25,9 @@ enum {
 #define SDF_MIN_FILTER_SHIFT 6
 #define SDF_UPLOAD_CHIP_MAX_BYTES 0x400
 
-enum {
-    SDF_UPLOAD_BORROWED = 0,
-    SDF_UPLOAD_GENERAL_HEAP = 1,
-    SDF_UPLOAD_CHIP_HEAP = 2
-};
 
-typedef struct SdfImageUploadRequest {
-    void *pixels;
-    SdfMemBlock *allocation;
-    u8 allocationMode;
-    u8 format;
-    u16 bufferWidth;
-    u32 destination;
-    u16 x;
-    u16 y;
-    u16 width;
-    u16 height;
-} SdfImageUploadRequest;
+
+
 
 extern void func_002D1D80(SdfImageUploadRequest *);
 
@@ -638,7 +624,7 @@ s32 sdfFormatImageSize(u32 format, s32 width, s32 height) {
 
 typedef struct SdfImageUploadPrefix {
     struct SdfImageUploadPrefix *next;
-    s32 chipAddress;
+    void *chipMemory;
     SdfMemBlock *allocation;
     u8 releaseMode;
     u8 pad0D[3];
@@ -681,7 +667,7 @@ void func_002D1D80(SdfImageUploadRequest *request) {
     allocation = sdfAllocSizeClassBlock(allocationBlocks * 0x30 + 0x80);
     releaseEntry = (SdfImageUploadPrefix *)allocation;
     releaseEntry->next = NULL;
-    releaseEntry->chipAddress = (s32)request->pixels;
+    releaseEntry->chipMemory = request->pixels;
     releaseEntry->allocation = request->allocation;
     releaseEntry->releaseMode = request->allocationMode;
 
@@ -773,7 +759,7 @@ void sdfTexQueueResourceRelease(s32 address) {
     if (address != 0) {
         entry = sdfAllocAndClearQuadwords(0xA0);
         if (sdfChipIsInRange(address) != 0) {
-            entry->chipAddress = address;
+            entry->chipMemory = (void *)address;
             entry->releaseMode = SDF_TEX_RELEASE_CHIP_ADDRESS;
         } else {
             entry->releaseMode = SDF_TEX_RELEASE_GENERAL_ALLOCATION;
@@ -847,7 +833,7 @@ void func_002D2168(void) {
             sdfReleaseResourceAllocation(entry->allocation);
             break;
         case SDF_TEX_RELEASE_CHIP_ADDRESS:
-            sdfReleaseChipBlock((void *)entry->chipAddress);
+            sdfReleaseChipBlock(entry->chipMemory);
             break;
         }
         sdfReleaseChipBlock(entry);

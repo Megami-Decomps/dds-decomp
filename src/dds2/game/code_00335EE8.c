@@ -11,31 +11,7 @@ extern s32 (*D_0040B510[])(void *a0, s32 a1);
 extern u8 D_0040B518[];
 
 
-typedef struct MotionKey {
-    s32 id;
-    f32 value;
-} MotionKey;
 
-typedef struct MotionKeyPair {
-    MotionKey keys[2];
-} MotionKeyPair; /* 0x10 */
-
-/* Bound entries allocate 0x20 bytes. Sampling uses the header's source and
- * keyframe table; blending updates current, while the snapshot retains both
- * keys for the next transition's weighted merge. */
-typedef struct MotionKeyWork {
-    u32 unk00;
-    void *source;             /* 0x04: supplies duration and loop settings */
-    void *keyframes;          /* 0x08: times followed by fixed-stride key data */
-    MotionKeyPair *current;   /* 0x0C */
-    MotionKeyPair previous;   /* 0x10 */
-} MotionKeyWork; /* 0x20 */
-
-typedef struct MotionKeySample {
-    MotionKey *first;
-    MotionKey *second;
-    f32 weight;
-} MotionKeySample;
 
 void func_00335EE8(void) {
 }
@@ -44,23 +20,26 @@ s32 sdfDispatchMotionCommand(void *object, s32 command) {
     return D_0040B510[(u16)command](object, command);
 }
 
-/* Select a 16-byte entry from the source object's motion pointer table. */
-void sdfSelectMotionPointerEntry(s32 destination, s32 source, void *unused, s32 entryIndex) {
-    sdfSetMotionPointerPair();
-    ((MotionKeyWork *)destination)->current = (MotionKeyPair *)(*(s32 *)(*(s32 *)(*(s32 *)(source + 4) + 0x10) + 0xc) + entryIndex * 0x10);
+/* Bind the selected pair of model slot indices and weights. */
+void sdfSelectMotionPointerEntry(SdfMotionSlotPairBinding *destination,
+                                 Motion *motion, void *dispatch, s32 entryIndex) {
+    sdfSetMotionPointerPair((SdfMotionBindingHead *)&destination->keys,
+                            motion, dispatch);
+    destination->current = &((SdfSlotEntry *)motion->owner->slotPairs->buffer)[entryIndex];
 }
 
-s32 sdfAllocateBoundMotionPointerEntry(s32 source, s32 unused, s32 entryIndex) {
-    s32 entry = (s32)sdfAllocSizeClassBlock(0x20);
+SdfMotionSlotPairBinding *sdfAllocateBoundMotionPointerEntry(Motion *motion,
+                                                           s32 unused, s32 entryIndex) {
+    SdfMotionSlotPairBinding *entry = sdfAllocSizeClassBlock(sizeof(SdfMotionSlotPairBinding));
 
-    sdfSelectMotionPointerEntry(entry, source, D_0040B518, entryIndex);
+    sdfSelectMotionPointerEntry(entry, motion, D_0040B518, entryIndex);
     return entry;
 }
 
 /* Sample the supplied frame and interpolate, retaining separate keys when IDs differ. */
-void sdfBlendMotionKeys(MotionKeyWork *motion, f32 frame) {
-    MotionKeySample sample;
-    MotionKey *out;
+void sdfBlendMotionKeys(SdfMotionSlotPairBinding *motion, f32 frame) {
+    SdfMotionKeyInterval sample;
+    SdfSlotPair *out;
     s32 firstId;
     s32 secondId;
     f32 firstValue;
@@ -68,32 +47,31 @@ void sdfBlendMotionKeys(MotionKeyWork *motion, f32 frame) {
     f32 weight;
     f32 inverse;
 
-    sdfFindMotionKeyInterval((SdfMotionKeyBinding *)motion,
-                             (SdfMotionKeyInterval *)&sample, frame);
-    firstId = sample.first->id;
-    secondId = sample.second->id;
-    firstValue = sample.first->value;
-    secondValue = sample.second->value;
+    sdfFindMotionKeyInterval(&motion->keys, &sample, frame);
+    firstId = ((SdfSlotPair *)sample.firstKey)->index;
+    secondId = ((SdfSlotPair *)sample.secondKey)->index;
+    firstValue = ((SdfSlotPair *)sample.firstKey)->weight;
+    secondValue = ((SdfSlotPair *)sample.secondKey)->weight;
     weight = sample.weight;
     inverse = 1.0f - weight;
-    out = motion->current->keys;
+    out = motion->current->pair;
     if (firstId == secondId) {
-        out[0].id = firstId;
-        out[0].value = firstValue * inverse + secondValue * weight;
-        out[1].id = secondId;
-        out[1].value = 0;
+        out[0].index = firstId;
+        out[0].weight = firstValue * inverse + secondValue * weight;
+        out[1].index = secondId;
+        out[1].weight = 0;
     } else {
-        out[0].id = firstId;
-        out[0].value = firstValue * inverse;
-        out[1].id = secondId;
-        out[1].value = secondValue * weight;
+        out[0].index = firstId;
+        out[0].weight = firstValue * inverse;
+        out[1].index = secondId;
+        out[1].weight = secondValue * weight;
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_00335EE8", func_00336068);
 
 /* Preserve the complete current pair for the next weighted transition. */
-void sdfCopyPoseRecord(MotionKeyWork *motion) {
+void sdfCopyPoseRecord(SdfMotionSlotPairBinding *motion) {
     motion->previous = *motion->current;
 }
 

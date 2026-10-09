@@ -3493,6 +3493,8 @@
 0x0023F730	evtCmdSetWorldUnitStatePair	inferred	Writes two script parameters into the selected world unit state fields. [names_reviewed17.tsv]
 0x0023F788	evtCmdPrepareUnitMotionAndLogState	inferred	Prepares selected world unit motion and logs its shared state. [names_reviewed17.tsv]
 0x0023F7F8	evtOpAttachUnitToWorldObject	inferred	Finds script-selected event unit and attaches a secondary world object for given frames. [names_reviewed7.tsv]
+0x0023F938	evtOpTurnUnitRelativeToWorldNode	inferred	Reads unit and source keys plus frame count, uses the type-0x11 node vector to set a relative unit rotation, and retains the source key as pending actor state. Registered with 3 script arguments; body published in c0364cb81bd5e01154675df7876596a5c0beb46a.
+0x0023FBA8	evtOpRestoreUnitReferenceAngle	inferred	Uses the cached reference angle for the unit transition and clears the actor pending value. Registered with 2 script arguments; body published in c0364cb81bd5e01154675df7876596a5c0beb46a.
 0x0023FDC0	evtCommandFlagSelectedUnitStatus	inferred	src/dds2/game/code_0023D658.c func_0023FDC0: Reads script unit ID, resolves unit and applies status flags. Twin of DDS1 func_00225160. [names_reviewed24.tsv]
 0x0023FDF0	evtCommandBeginSelectedUnitTransition	inferred	src/dds2/game/code_0023D658.c func_0023FDF0: Reads script unit ID and transition parameter then configures resolved unit. Twin of DDS1 func_00225190. [names_reviewed24.tsv]
 0x0023FE68	evtOpSetUnitGradientColors	inferred	Packs two script-supplied RGB triplets and assigns them to selected unit. [names_reviewed7.tsv]

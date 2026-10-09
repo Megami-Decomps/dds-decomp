@@ -33,7 +33,7 @@ typedef char MenuScrollPanel_dds2_positions_check[
 typedef char MenuScrollPanel_dds2_handles_check[
     ((u32)&((MenuScrollPanel *)0)->handles == 0x3C) ? 1 : -1];
 
-MenuScrollPanel *mnuCreateScrollPanel(u32 owner);
+MenuScrollPanel *mnuCreateScrollPanel(struct EffectSlotSet *owner);
 void mnuDestroyScrollPanel(MenuScrollPanel *menu);
 void mnuReleaseScrollPanelAnimations(MenuScrollPanel *menu);
 void mnuConfigurePanelResource(MenuScrollPanel *menu, u32 model, u32 value,

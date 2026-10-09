@@ -185,10 +185,10 @@ s32 evtUnitStepScaledValue(EvtUnit *unit) {
         return 0;
     }
     switch (unit->transitionSourceKind) {
-    case 0:
-    case 1:
+    case EVT_UNIT_TRANSITION_SOURCE_COPIED_VECTOR:
+    case EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE:
         break;
-    case 2:
+    case EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE:
         t = evtGetValueScaleFactor((void *)unit->pathHandle);
         if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (t == 0.0f) {

@@ -12,10 +12,10 @@ typedef struct MnuSpriteResourceGroup {
     struct SdfList *tasks[10];      /* 0x04 */
     s32 activeCount;                /* 0x2C */
     s32 spawnCountdown;             /* 0x30 */
-    s32 owner;                      /* 0x34 */
+    s32 cueDuration;                /* 0x34: root lifetime in frames. */
     u8 pad38[0x0C];
     u8 variant;                     /* 0x44 */
-    u8 sprite;                      /* 0x45 */
+    u8 initialGenerations;          /* 0x45: root cue's child-generation count. */
     u8 pad46[2];
 } MnuSpriteResourceGroup;
 

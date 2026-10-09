@@ -4,11 +4,26 @@
 #include "sdf.h"
 #include "sdf_draw.h"
 
+struct SdfMotionKeyTrack;
+
+/* Motion callbacks release storage, bind keys, sample, capture and blend. */
+typedef struct SdfMotionBindingDispatch {
+    void (*releaseStorage)(void *binding);
+    void (*bindKeyTrack)(void *binding, struct SdfMotionKeyTrack *track);
+    void (*sample)(void *binding, f32 frame);
+    void (*capturePrevious)(void *binding);
+    void (*blend)(void *binding, f32 frame, f32 weight);
+    u32 unk14;
+} SdfMotionBindingDispatch;
+
 /* Common dispatch/source prefix used by motion-owned bindings. */
 typedef struct SdfMotionBindingHead {
-    void *dispatch;
+    SdfMotionBindingDispatch *dispatch;
     void *source;
 } SdfMotionBindingHead;
+
+void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, void *source,
+                             void *dispatch);
 
 typedef struct SdfMotionKeyInterval {
     f32 *firstKey;
@@ -26,7 +41,7 @@ typedef struct SdfMotionKeyTrack {
 } SdfMotionKeyTrack;
 
 typedef struct SdfMotionKeyBinding {
-    void *dispatch;
+    SdfMotionBindingDispatch *dispatch;
     Motion *motion;
     SdfMotionKeyTrack *track;
 } SdfMotionKeyBinding;
@@ -41,6 +56,13 @@ typedef struct SdfMotionIndexedBinding {
     SdfMotionKeyBinding keys;
     SdfAsset *target;
 } SdfMotionIndexedBinding;
+
+/* Slot weights update a model entry and retain its complete previous pair. */
+typedef struct SdfMotionSlotPairBinding {
+    SdfMotionKeyBinding keys;
+    SdfSlotEntry *current;
+    SdfSlotEntry previous;
+} SdfMotionSlotPairBinding;
 
 /* Color/word and scalar bindings capture one target word at +0x10. */
 typedef struct SdfMotionIndexedValueBinding {
@@ -101,9 +123,25 @@ enum {
     SDF_MOTION_KEY_SAMPLE_BYTE_ZERO = 0x0010
 };
 
+typedef char SdfMotionBindingDispatch_size[
+    (sizeof(SdfMotionBindingDispatch) == 0x18) ? 1 : -1];
+typedef char SdfMotionBindingDispatch_bind_at_04[
+    ((u32)&((SdfMotionBindingDispatch *)0)->bindKeyTrack == 0x04) ? 1 : -1];
+typedef char SdfMotionBindingDispatch_capture_at_0C[
+    ((u32)&((SdfMotionBindingDispatch *)0)->capturePrevious == 0x0C) ? 1 : -1];
+typedef char SdfMotionBindingDispatch_tail_at_14[
+    ((u32)&((SdfMotionBindingDispatch *)0)->unk14 == 0x14) ? 1 : -1];
+
 typedef char SdfMotionBindingHead_size[(sizeof(SdfMotionBindingHead) == 0x08) ? 1 : -1];
 typedef char SdfMotionKeyInterval_size[(sizeof(SdfMotionKeyInterval) == 0x0C) ? 1 : -1];
 typedef char SdfMotionKeyBinding_size[(sizeof(SdfMotionKeyBinding) == 0x0C) ? 1 : -1];
+typedef char SdfMotionSlotPairBinding_size[
+    (sizeof(SdfMotionSlotPairBinding) == 0x20) ? 1 : -1];
+typedef char SdfMotionSlotPairBinding_current_at_0C[
+    ((u32)&((SdfMotionSlotPairBinding *)0)->current == 0x0C) ? 1 : -1];
+typedef char SdfMotionSlotPairBinding_previous_at_10[
+    ((u32)&((SdfMotionSlotPairBinding *)0)->previous == 0x10) ? 1 : -1];
+
 typedef char SdfMotionIndexedBinding_size[(sizeof(SdfMotionIndexedBinding) == 0x10) ? 1 : -1];
 typedef char SdfMotionIndexedValueBinding_size[
     (sizeof(SdfMotionIndexedValueBinding) == 0x14) ? 1 : -1];

@@ -354,7 +354,13 @@ typedef struct MdlRecord {
             u16 partIndex;
         } part;
     } parameter;
-    u16 unk10;       /* 0x10 */
+    union {
+        u32 word10; /* 0x10: kind-four stream parameter */
+        struct {
+            u16 unk10;
+            u16 unk12;
+        } half;
+    } tail;
 } MdlRecord;
 
 
@@ -438,7 +444,7 @@ u16 func_002193E8(MdlRecord *record) {
 }
 
 u16 func_002193F0(MdlRecord *record) {
-    return record->unk10;
+    return record->tail.half.unk10;
 }
 
 extern char D_003ABA80[], D_003ABA90[], D_003ABAA0[], D_003ABAB0[], D_003ABAC0[], D_003ABAD0[];
@@ -814,21 +820,10 @@ void mdlCreateViewerEffectPart(MdlCtx *owner, MdlEffectRec *effectRecord, s32 su
     resourceItem->payload.part.track = effTrackPolyCreateWork(&effectParams);
 }
 
-/* Kind-four model record: two selectors and two 32-bit stream parameters. */
-typedef struct MdlStreamRecord {
-    s32 kind;
-    u32 size;
-    u16 selectorA; /* 0x08 */
-    u16 selectorB; /* 0x0A */
-    u32 value0C;
-    u32 value10;
-} MdlStreamRecord;
-
-void mdlLoadViewerStreamRecord(u32 owner, s32 record) {
-    func_00217310(owner, ((MdlStreamRecord *)record)->selectorA,
-                  ((MdlStreamRecord *)record)->selectorB,
-                  ((MdlStreamRecord *)record)->value0C,
-                  ((MdlStreamRecord *)record)->value10);
+void mdlLoadViewerStreamRecord(MdlCtx *owner, MdlRecord *record) {
+    func_00217310(owner, record->payload.stream.selectorA,
+                  record->payload.stream.selectorB,
+                  record->parameter.word, record->tail.word10);
 }
 
 
@@ -897,7 +892,7 @@ void mdlDispatchResourceEntry(MdlCtx *owner, MdlRecord *record, s32 subtype) {
         mdlCreateViewerEffectPart(owner, (MdlEffectRec *)record, subtype);
         return;
     case 4:
-        mdlLoadViewerStreamRecord((u32)owner, (s32)record);
+        mdlLoadViewerStreamRecord(owner, record);
         return;
     case 5:
         mdlClaimViewerObjectPart(owner, (MdlEntryRec *)record, subtype);
