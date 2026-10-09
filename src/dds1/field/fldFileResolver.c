@@ -254,7 +254,6 @@ extern s8 D_0032C9A0[];
 extern void fldReleaseSkyResources(void);
 extern void fldCreatePlayerObject(void);
 extern u8 *fldSelectCurrentActorOnNextFloor(void);
-extern s32 evtStartSceneResourceTask(EffWorldNode *, const char *);
 extern void func_00126A30(u32, u32, s32);
 
 extern s32 D_003BAE68;
@@ -373,7 +372,6 @@ extern s32 D_003BADF8;
 extern s32 D_003BADEC;
 extern u8 D_003BA734;
 extern ScrData *scrFindNamedProcessNode(char *name);
-extern void evtDestroyNamedTask(void *unusedContext, const char *taskName);
 extern u32 fldAreaCachedResource;
 extern struct FileRequest *fldAreaPackedArchive;
 extern u8 D_003BAC90[];

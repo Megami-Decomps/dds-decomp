@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_texture_queue.h"
 #include "sdf_image_upload.h"
+#include "sdf_thread.h"
 #include "ee_mmi.h"
 
 extern s32 iWakeupThread(s32 threadId);
@@ -312,7 +313,7 @@ void func_0032A440(s32 size) {
     thread = sdfCreateThread((s32)sdfRunGraphicsTransferWorker, (s32)D_004601D0, 0x8000, 0x44);
     D_00439138 = thread;
     _StartThread(thread, 0);
-    sdfStartTrackedThread(&D_00439130, (s32)sdfServiceGraphicsBuffers, (s32)D_0045F1D0,
+    sdfStartTrackedThread(&D_00439130, sdfServiceGraphicsBuffers, D_0045F1D0,
                           0x1000, 0x40, 0);
 }
 

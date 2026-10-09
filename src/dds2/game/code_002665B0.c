@@ -163,7 +163,6 @@ extern void func_002C16F0(s32, s32, s32, DatPartyRecord *, s32, s32, s32);
 
 extern void mnuTerminalSetTrack(s8, s8);
 
-extern void *mnuWalkNodeList(s32, struct MenuList *);
 
 
 extern const char D_00424F00[];
