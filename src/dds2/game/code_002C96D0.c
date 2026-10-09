@@ -4762,7 +4762,7 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
         for (entry = source->first; entry != NULL; entry = entry->next) {
             job = fileJobCreate();
 
-            if ((entry->flags & 1) == 0) {
+            if ((entry->flags & FILE_JOB_FLAG_SHARED_PAYLOAD) == 0) {
                 job->id = (u32)fileJobCreateFromJob((FileJobPayload *)entry->id);
             } else {
                 FileJob *parent = fileQueueFindById(source, entry->id);
@@ -4786,10 +4786,10 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
             do {
                 job = fileJobCreate();
 
-                if ((entry->flags & 1) == 0) {
+                if ((entry->flags & FILE_JOB_FLAG_SHARED_PAYLOAD) == 0) {
                     FileJobPayload *request = (FileJobPayload *)((u8 *)source + entry->id);
 
-                    if (entry->flags & 2) {
+                    if (entry->flags & FILE_JOB_FLAG_SECTOR_FOLLOWER) {
                         FileJobPayload *secondary = (FileJobPayload *)((u8 *)source + records[entry->sector].id);
 
                         request->secondary.size = secondary->secondary.size;
@@ -4886,7 +4886,7 @@ void fileQueueDestroy(FileQueue *queue) {
     FileJob *job = queue->first;
     while (job != NULL) {
         FileJob *next = job->next;
-        if ((job->flags & 1) == 0) {
+        if ((job->flags & FILE_JOB_FLAG_SHARED_PAYLOAD) == 0) {
             fileJobDestroy((FileJobPayload *)job->id);
         }
         fileDestroyJob(job);
@@ -5067,7 +5067,7 @@ FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *src) {
 
     memcpy(job, src, 0xC0);
     fileJobResetAndInitTransform(job);
-    job->flags |= 1;
+    job->flags |= FILE_JOB_FLAG_SHARED_PAYLOAD;
     job->id = src->id;
     fileQueueInsertAfter(queue, src, job);
     return job;
@@ -5082,7 +5082,7 @@ static inline void fileQueueRechainSectorFollowers(FileQueue *queue, FileJob *ow
     FileJob *next;
 
     leader->sector = 0;
-    leader->flags &= ~2;
+    leader->flags &= ~FILE_JOB_FLAG_SECTOR_FOLLOWER;
     fileQueueLinkJobToSectorLeader(queue, leader, leader);
     next = fileQueueFindBySector(queue, owner->id);
     while (next != NULL) {
@@ -5098,9 +5098,9 @@ void fileQueueLinkJobToSectorLeader(FileQueue *queue, FileJob *job, FileJob *ref
     u32 refIndex;
     u32 flags;
 
-    if (!(job->flags & 1)) {
+    if (!(job->flags & FILE_JOB_FLAG_SHARED_PAYLOAD)) {
         for (node = queue->first; node != NULL; node = node->next) {
-            if ((node->flags & 1) && node->id == job->id) {
+            if ((node->flags & FILE_JOB_FLAG_SHARED_PAYLOAD) && node->id == job->id) {
                 fileQueueLinkJobToSectorLeader(queue, node, ref);
             }
         }
@@ -5109,14 +5109,14 @@ void fileQueueLinkJobToSectorLeader(FileQueue *queue, FileJob *job, FileJob *ref
         return;
     }
     flags = job->flags;
-    if (!(flags & 1)) {
+    if (!(flags & FILE_JOB_FLAG_SHARED_PAYLOAD)) {
         fileJobFreeSecondaryBuffer((FileJobPayload *)job->id);
         source = (FileJobPayload *)ref->id;
         fileJobSetSecondaryData((FileJobPayload *)job->id, (void *)source->secondary.offset, source->secondary.size,
                                 source->primary.selector);
         flags = job->flags;
     }
-    job->flags = flags | 2;
+    job->flags = flags | FILE_JOB_FLAG_SECTOR_FOLLOWER;
     job->sector = ref->id;
     refIndex = fileFindQueuedJobIndex(queue, ref);
     if (fileFindQueuedJobIndex(queue, job) < refIndex) {
@@ -5132,8 +5132,8 @@ void fileQueueDetachSectorFollower(FileQueue *queue, FileJob *job) {
     u32 flags = job->flags;
     FileJob *first;
 
-    job->flags = flags & ~2;
-    if (!(flags & 1)) {
+    job->flags = flags & ~FILE_JOB_FLAG_SECTOR_FOLLOWER;
+    if (!(flags & FILE_JOB_FLAG_SHARED_PAYLOAD)) {
         first = fileQueueFindBySector(queue, job->id);
         if (first != NULL) {
             fileQueueRechainSectorFollowers(queue, job, first);
@@ -5146,19 +5146,19 @@ void fileQueueRemoveAndDestroyJob(FileQueue *queue, FileJob *job) {
     FileJob *first;
 
     fileQueueRemove(queue, job);
-    if (!(job->flags & 1)) {
+    if (!(job->flags & FILE_JOB_FLAG_SHARED_PAYLOAD)) {
         first = fileQueueFindFlaggedById(queue, job->id);
         while (first != NULL) {
             fileQueueRemoveAndDestroyJob(queue, first);
             first = fileQueueFindFlaggedById(queue, job->id);
         }
-        if (!(job->flags & 2)) {
+        if (!(job->flags & FILE_JOB_FLAG_SECTOR_FOLLOWER)) {
             first = fileQueueFindBySector(queue, job->id);
             if (first != NULL) {
                 fileQueueRechainSectorFollowers(queue, job, first);
             }
         }
-        if (!(job->flags & 1)) {
+        if (!(job->flags & FILE_JOB_FLAG_SHARED_PAYLOAD)) {
             fileJobDestroy((FileJobPayload *)job->id);
         }
     }
@@ -5204,8 +5204,8 @@ void func_002D50D8(FileQueue *queue, s32 slot) {
 
     for (job = queue->first; job != NULL; job = job->next) {
         record = *job;
-        if ((job->flags & 1) == 0) {
-            if ((job->flags & 2) == 0) {
+        if ((job->flags & FILE_JOB_FLAG_SHARED_PAYLOAD) == 0) {
+            if ((job->flags & FILE_JOB_FLAG_SECTOR_FOLLOWER) == 0) {
                 size = fileJobSerializedSize((FileJobPayload *)job->id);
             } else {
                 payload = *(FileJobPayload *)job->id;
@@ -5219,7 +5219,7 @@ void func_002D50D8(FileQueue *queue, s32 slot) {
             size = 0;
             record.id = fileFindQueuedJobIndex(queue, fileQueueFindById(queue, job->id));
         }
-        if (job->flags & 2) {
+        if (job->flags & FILE_JOB_FLAG_SECTOR_FOLLOWER) {
             record.sector = fileFindQueuedJobIndex(queue, fileQueueFindById(queue, job->sector));
         }
         record.next = NULL;
@@ -5233,10 +5233,10 @@ void func_002D50D8(FileQueue *queue, s32 slot) {
         s32 aligned;
         s32 padding;
 
-        if (job->flags & 1) {
+        if (job->flags & FILE_JOB_FLAG_SHARED_PAYLOAD) {
             continue;
         }
-        if ((job->flags & 2) == 0) {
+        if ((job->flags & FILE_JOB_FLAG_SECTOR_FOLLOWER) == 0) {
             size = fileJobSerializedSize((FileJobPayload *)job->id);
             func_002D3B48(fd, (FileJobPayload *)job->id);
         } else {
@@ -5309,8 +5309,8 @@ void func_002D55B0(FileQueue *queue, s32 slot) {
 
     for (job = queue->first; job != NULL; job = job->next) {
         record = *job;
-        if ((job->flags & 1) == 0) {
-            if ((job->flags & 2) == 0) {
+        if ((job->flags & FILE_JOB_FLAG_SHARED_PAYLOAD) == 0) {
+            if ((job->flags & FILE_JOB_FLAG_SECTOR_FOLLOWER) == 0) {
                 size = fileJobSerializedSize((FileJobPayload *)job->id);
             } else {
                 payload = *(FileJobPayload *)job->id;
@@ -5324,7 +5324,7 @@ void func_002D55B0(FileQueue *queue, s32 slot) {
             size = 0;
             record.id = fileFindQueuedJobIndex(queue, fileQueueFindById(queue, job->id));
         }
-        if (job->flags & 2) {
+        if (job->flags & FILE_JOB_FLAG_SECTOR_FOLLOWER) {
             record.sector = fileFindQueuedJobIndex(queue, fileQueueFindById(queue, job->sector));
         }
         record.next = NULL;
@@ -5338,10 +5338,10 @@ void func_002D55B0(FileQueue *queue, s32 slot) {
         s32 aligned;
         s32 padding;
 
-        if (job->flags & 1) {
+        if (job->flags & FILE_JOB_FLAG_SHARED_PAYLOAD) {
             continue;
         }
-        if ((job->flags & 2) == 0) {
+        if ((job->flags & FILE_JOB_FLAG_SECTOR_FOLLOWER) == 0) {
             size = fileJobSerializedSize((FileJobPayload *)job->id);
             func_002D3B48(fd, (FileJobPayload *)job->id);
         } else {
@@ -5392,12 +5392,12 @@ FileQueue *func_002D5AA8(s32 entry) {
     queue->transformWord = image->transformWord;
     for (i = 0, src = (FileJob *)((u8 *)image + image->entryOffset);
          i < image->count; i++, src++) {
-        if ((src->flags & 1) == 0) {
+        if ((src->flags & FILE_JOB_FLAG_SHARED_PAYLOAD) == 0) {
             copy = fileDuplicateAndAppendJob(queue, (FileJobPayload *)((u8 *)image + src->id));
         } else {
             copy = fileJobDuplicateAfter(queue, fileQueueGetAt(queue, src->id));
         }
-        if (src->flags & 2) {
+        if (src->flags & FILE_JOB_FLAG_SECTOR_FOLLOWER) {
             fileQueueLinkJobToSectorLeader(queue, copy, fileQueueGetAt(queue, src->sector));
         }
         fileJobCopyHeader(copy, src);
@@ -5422,7 +5422,7 @@ FileJob *fileQueueFindById(FileQueue *queue, u32 id) {
 FileJob *fileQueueFindFlaggedById(FileQueue *queue, u32 id) {
     FileJob *job = queue->first;
     while (job != NULL) {
-        if ((job->flags & 1) != 0 && job->id == id) {
+        if ((job->flags & FILE_JOB_FLAG_SHARED_PAYLOAD) != 0 && job->id == id) {
             return job;
         }
         job = job->next;
@@ -5433,7 +5433,8 @@ FileJob *fileQueueFindFlaggedById(FileQueue *queue, u32 id) {
 FileJob *fileQueueFindBySector(FileQueue *queue, u32 sector) {
     FileJob *job = queue->first;
     while (job != NULL) {
-        if ((job->flags & 3) == 2 && job->sector == sector) {
+        if ((job->flags & (FILE_JOB_FLAG_SHARED_PAYLOAD | FILE_JOB_FLAG_SECTOR_FOLLOWER)) ==
+            FILE_JOB_FLAG_SECTOR_FOLLOWER && job->sector == sector) {
             return job;
         }
         job = job->next;
