@@ -1505,21 +1505,21 @@ void evtDrawGroupPropertyTable(s32 list, s32 x, s32 y, s32 hidden, EvtRuntime *r
         switch (field) {
         case 0:
             sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
-                y + 0x80, 0xFEFFFF, style, D_004376F8, runtime->frameGroup->metadataValue));
+                y + 0x80, 0xFEFFFF, style, D_004376F8, runtime->frameGroup->metadata.value));
             break;
         case 1:
-            if (runtime->frameGroup->metadataByte1 < 3) {
+            if (runtime->frameGroup->metadata.extra1 < 3) {
                 sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
                     y + 0x80, 0xFEFFFF, style, D_004374D0,
-                    D_003C9890[runtime->frameGroup->metadataByte1]));
+                    D_003C9890[runtime->frameGroup->metadata.extra1]));
             } else {
                 sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
                     y + 0x80, 0xFEFFFF, style, D_004374D0,
-                    runtime->entryName[runtime->frameGroup->metadataByte2]));
+                    runtime->entryName[runtime->frameGroup->metadata.extra2]));
             }
             break;
         case 2:
-            if (runtime->frameGroup->metadataByte1 == 0) {
+            if (runtime->frameGroup->metadata.extra1 == 0) {
                 sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x + (offset * 12 << 4),
                     y + 0x80, 0xFEFFFF, style, D_00437700));
             } else {
@@ -2185,7 +2185,7 @@ s32 func_002560B0(s32 x, s32 y, EvtRuntime *runtime) {
             runtime->horizontalOffset -= 8;
         }
 
-        switch (group->metadataByte1) {
+        switch (group->metadata.extra1) {
         case 0:
             break;
         case 1: {
@@ -2208,7 +2208,7 @@ s32 func_002560B0(s32 x, s32 y, EvtRuntime *runtime) {
         }
 
         if (status == -1) {
-            switch (group->metadataByte1) {
+            switch (group->metadata.extra1) {
             case 0:
                 break;
             case 1: {
@@ -3770,16 +3770,6 @@ void evtEmitGroupTypeSeventeenPayloads(s32 output, EvtRuntime *runtime) {
     }
 }
 
-/* On-disk group header: two bytes followed by two little-endian halfwords. */
-typedef struct EvtGroupMetadata {
-    u8 type;
-    u8 flag;
-    u16 entry;
-    u16 value;
-    u8 extra1;
-    u8 extra2;
-} EvtGroupMetadata;
-
 void evtWriteGroupMetadata(s32 output, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
     EvtGroupMetadata record;
@@ -3787,9 +3777,9 @@ void evtWriteGroupMetadata(s32 output, EvtRuntime *runtime) {
         record.type = *(u8 *)&group->type;
         record.flag = group->metadataFlag;
         record.entry = (u16)group->entryHeader;
-        record.value = group->metadataValue;
-        record.extra1 = group->metadataByte1;
-        record.extra2 = group->metadataByte2;
+        record.value = group->metadata.value;
+        record.extra1 = group->metadata.extra1;
+        record.extra2 = group->metadata.extra2;
         func_002588A0(output, &record, 8);
     }
 }
@@ -3973,39 +3963,26 @@ s32 evtGetRowPayloadAddress(s32 group, s32 index) {
     return ((EvtRowTable *)group)->extendedRows + index * 0x2c + 0xc;
 }
 
-typedef struct EvtLinkSource {
-    u8 pad00[0x7C];
-    char *names; /* 0x7C: 0x20-byte entries */
-    u8 pad80[0x78];
-    s32 count;   /* 0xF8 */
-} EvtLinkSource;
-
-typedef struct EvtLink {
-    u8 pad00[6];
-    s8 type;  /* 0x06 */
-    s8 index; /* 0x07 */
-} EvtLink;
-
 extern s32 strcmp(const char *a, const char *b);
 
-void evtResolveLinkGroupIndex(EvtLinkSource *src, EvtRuntime *runtime, EvtLink *link) {
+void evtResolveLinkGroupIndex(PolyMovieWork *src, EvtRuntime *runtime, EvtGroupMetadata *link) {
     s32 i;
     EvtRuntimeGroup *group;
 
-    if (link->type != 3) {
-        link->index = 0;
+    if (link->extra1 != 3) {
+        link->extra2 = 0;
     } else {
-        for (i = 0; i < src->count; i++) {
+        for (i = 0; i < (s32)src->unk_F8; i++) {
             for (group = runtime->groups; group != NULL; group = group->next) {
-                if (strcmp(runtime->entryName[group->entryHeader], src->names + link->index * 32) == 0) {
-                    link->index = group->entryHeader;
+                if (strcmp(runtime->entryName[group->entryHeader], (char *)src->subEntry1Data + link->extra2 * 32) == 0) {
+                    link->extra2 = group->entryHeader;
                     return;
                 }
             }
         }
-        func_0035B6E0("not found linkslight obj index %s\n", src->names + link->index * 32);
-        link->type = 0;
-        link->index = 0;
+        func_0035B6E0("not found linkslight obj index %s\n", (char *)src->subEntry1Data + link->extra2 * 32);
+        link->extra1 = 0;
+        link->extra2 = 0;
     }
 }
 
