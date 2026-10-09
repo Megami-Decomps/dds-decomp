@@ -19,6 +19,7 @@ enum BtlResourceScanFlags {
 struct BtlResourceEntryList;
 struct BtlResourceDescriptor;
 
+s32 btlOpenPfsDebugDirectory(const char *directoryName);
 struct BtlResourceEntryList *btlScanDirectory(const char *path, s32 flags);
 void btlDestroyEntryList(struct BtlResourceEntryList *list);
 void btlAppendEntry(struct BtlResourceEntryList *list, const char *name,
