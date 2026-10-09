@@ -5766,19 +5766,19 @@ BtlRuntimeTask *sndCreateFileLoadTask(s32 value, s32 option, char *name) {
     return task;
 }
 
-s32 sndLoadDataFile(s32 *data) {
+s32 sndLoadDataFile(const SoundDataFileArgs *data) {
     char filename[0x70];
     if (sndIsCommandBusySigned()) {
         return 1;
     }
-    sndFormatResourceNameFromUnitMode((BtlUnit *)data[0], filename);
+    sndFormatResourceNameFromUnitMode(data->unit, filename);
     sdfSoundSendNamedCommand(filename, 0x34);
     return 1;
 }
 
 BtlRuntimeTask *sndCreateDataFileLoadTask(BtlUnit *unit) {
-    BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlRuntimeTask *task = btlAllocTask(sizeof(SoundDataFileArgs));
+    SoundDataFileArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = sndLoadDataFile;
@@ -5786,7 +5786,7 @@ BtlRuntimeTask *sndCreateDataFileLoadTask(BtlUnit *unit) {
     task->ownerId = unit->owner;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = unit;
+    args->unit = unit;
     return task;
 }
 

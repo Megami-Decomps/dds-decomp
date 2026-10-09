@@ -18,6 +18,7 @@ struct EffBattleEntryList;
 struct EffParamWork;
 struct SdfMemBlock;
 struct BtlUnit;
+struct BtlRuntimeTask;
 
 typedef struct SoundMixer {
     SoundBank banks[2];
@@ -129,6 +130,17 @@ void sndUnlinkVoice(BattleEffect *effect);
 void effReleaseBattleVoiceOwner(BattleEffect *effect);
 u32 effBattleGetCurrentFrame(BattleEffect *effect);
 void effBattleUpdateSelectedValue(BattleEffect *effect, u32 endFrame);
+
+/* The data-file task allocates four argument bytes for its borrowed unit. */
+typedef struct SoundDataFileArgs {
+    struct BtlUnit *unit;
+} SoundDataFileArgs;
+
+typedef char SoundDataFileArgs_size_must_be_4[
+    (sizeof(SoundDataFileArgs) == 4) ? 1 : -1];
+
+s32 sndLoadDataFile(const SoundDataFileArgs *data);
+struct BtlRuntimeTask *sndCreateDataFileLoadTask(struct BtlUnit *unit);
 
 void sndFormatResourceNameFromIndex(s32 index, char *output);
 void sndFormatResourceNameFromUnitMode(const struct BtlUnit *unit, char *output);
