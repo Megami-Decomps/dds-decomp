@@ -195,7 +195,6 @@ typedef struct BillStatePacket {
 
 extern u32 kwlnGetDrawBufferIndex(void);
 extern u8 kwlnFrameDrawPacketRecords[];
-extern void sdfAppendDmaTagToList(SdfListHead *list, u32 packet);
 extern void func_002D4C80(s32 source, u32 packet, s32 variant);
 extern SdfTexBuf *sdfTexGetOrInitializeSecondaryBuffer(SdfTex *texture);
 extern s32 sdfTexGetSecondaryBufferSize(SdfTex *texture);

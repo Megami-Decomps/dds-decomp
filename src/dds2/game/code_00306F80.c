@@ -47,7 +47,6 @@ extern u8 kwlnFrameDrawPacketRecords[];
 
 extern void func_0032DB30(const void *, void *, s32);
 
-extern void sdfAppendDmaTagToList(SdfListHead *, u32);
 
 typedef struct GridAngleTable {
     s32 divisor;      /* 0x00 */

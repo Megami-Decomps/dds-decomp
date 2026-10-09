@@ -239,7 +239,6 @@ INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022D420);
 INCLUDE_ASM(const s32, "game/code_0022CBA0", func_0022D528);
 
 
-extern EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *, s32, const u8 *);
 extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *);
 extern void evtSetUnitValueTransition(EvtUnit *, EffWorldNode *, s32);
 extern void evtEndUnitValueTransition(EvtUnit *, s32);

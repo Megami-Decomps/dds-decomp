@@ -5,9 +5,9 @@
 #include "dat_state.h"
 #include "eff.h"
 #include "eff_transform.h"
+#include "dds3obj.h"
 
 extern void *dds3GetWorldSecondaryObject(void);
-extern EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 index, const u8 *name);
 
 extern void mnuDrawTerminalBackdrop(s32);
 

@@ -1,4 +1,7 @@
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
+#include "sdf_packet_list.h"
+#include "kwln_sprite.h"
 #include "eff_event_setup.h"
 #include "sdf_resource.h"
 
@@ -540,7 +543,51 @@ void effSetWorkTextureResource(EffWork *work, const char *textureResource) {
     sdfReleaseResourceAllocation(loadedResource);
 }
 
-INCLUDE_ASM(const s32, "game/code_00194700", func_001956A8);
+/* Overlay record: screen position words, then the held texture at +0x3C. */
+typedef struct EffTextureOverlay {
+    s32 x;
+    s32 y;
+    u8 pad08[0x34];
+    SdfTex *texture;
+} EffTextureOverlay;
+
+extern SdfPoolNode D_003805A8;
+
+
+/* Queue the overlay's texture as a quad at its screen position. */
+void func_001956A8(EffTextureOverlay *overlay) {
+    SdfListHead *list;
+    s32 sprite;
+    KwlnSpriteVertex *vertex;
+    SdfTex *texture;
+
+    if (overlay->texture != 0) {
+        list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+        sdfInitPacketList(list);
+        sprite = sdfConsAllocateColumnPacket(1);
+        vertex = (KwlnSpriteVertex *)sdfConsMeasurePacketWithHeader(sprite);
+        vertex->a = 0x80;
+        vertex->b = 0x80;
+        vertex->g = 0x80;
+        vertex->r = 0x80;
+        texture = overlay->texture;
+        vertex->corner[1].u = texture->width << 4;
+        vertex->corner[1].v = texture->height << 4;
+        vertex->corner[0].u = 0;
+        vertex->corner[0].v = 0;
+        vertex->corner[1].flag = 0;
+        vertex->corner[0].flag = 0;
+        vertex->corner[0].x = 0x8000 - (overlay->x << 4);
+        vertex->corner[0].y = 0x8000 - ((overlay->y - 0xC4) << 3);
+        vertex->corner[0].mask = 0xFF0000;
+        vertex->corner[1].x = vertex->corner[0].x + 0x800;
+        vertex->corner[1].y = vertex->corner[0].y + 0x400;
+        vertex->corner[1].mask = 0xFF0000;
+        sdfConsCreateDrawPacket(list, texture, 0);
+        sdfAppendPacket(list, sprite);
+        D_003805A8.append((SdfListHead *)&D_003805A8, list);
+    }
+}
 
 
 void func_001957C0(void) {

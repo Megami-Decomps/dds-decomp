@@ -129,7 +129,6 @@ extern u8 D_00325860[];
 extern u8 D_00325870[];
 extern void sdfWaitAndSelectBuffer(void);
 extern void func_002D4240(SdfPoolNode *, s32);
-extern void sdfClearPacketChain(SdfPacketChain *);
 extern void func_00105150(s32);
 extern void sdfInitializeDrawPacketGroups(u8 *);
 
@@ -225,7 +224,6 @@ extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfConsBuildFrustumPacket(struct ConsFrustumPacket *, ConsFrustumParams *);
-extern void sdfAppendPacketChainNode(SdfPacketChain *, SdfLinkedPacketList *);
 typedef struct SdfMsg {
     s32 firstWord, work, thirdWord, fourthWord;
 } SdfMsg;

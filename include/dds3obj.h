@@ -33,6 +33,7 @@ typedef char ObjBase_size_must_be_0xB4[(sizeof(ObjBase) == 0xB4) ? 1 : -1];
 ObjBase *dds3CreateSlotResourceState(void *owner);
 ObjBase *dds3GetObjectOwnedHandle();
 EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *world, u32 key, s32 kind);
+EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 index, const u8 *name);
 EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, const u8 *name);
 
 /* Four-word object inner record (0x10); no direct C unit users yet. */
@@ -51,14 +52,23 @@ typedef struct {
 
 
 /* Doubly linked world index node (0x10); DDS1/2 basic/dds3WorldBasic.c. */
-typedef struct NodeB {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    struct NodeB *next;
-    struct NodeB *previous;
-} NodeB;
+typedef struct WorldIndexNode {
+    s16 headIndex;
+    s16 tailIndex;
+    s16 cursorIndex;
+    u16 entryCount;
+    struct WorldIndexNode *next;
+    struct WorldIndexNode *previous;
+} WorldIndexNode;
+
+typedef char WorldIndexNodeLayoutAssert[
+    (sizeof(WorldIndexNode) == 0x10 &&
+     (unsigned long)&((WorldIndexNode *)0)->headIndex == 0 &&
+     (unsigned long)&((WorldIndexNode *)0)->tailIndex == 2 &&
+     (unsigned long)&((WorldIndexNode *)0)->cursorIndex == 4 &&
+     (unsigned long)&((WorldIndexNode *)0)->entryCount == 6 &&
+     (unsigned long)&((WorldIndexNode *)0)->next == 8 &&
+     (unsigned long)&((WorldIndexNode *)0)->previous == 0xC) ? 1 : -1];
 
 /* Eight-byte entries link both allocated and free world value chains. */
 typedef struct WorldValueEntry {
@@ -83,8 +93,8 @@ typedef struct {
     s16 freeHeadIndex;                  /* 0x1A: -1 when the pool is exhausted */
     s16 freeTailIndex;                  /* 0x1C */
     u16 freeEntryCount;                 /* 0x1E */
-    NodeB *firstIndex;
-    NodeB *lastIndex;
+    WorldIndexNode *firstIndex;
+    WorldIndexNode *lastIndex;
 } WorldInfo;
 
 typedef char WorldInfo_size_must_be_0x28[(sizeof(WorldInfo) == 0x28) ? 1 : -1];

@@ -44,7 +44,7 @@ extern u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
 
 extern u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 
-extern NodeB *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
+extern WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 
 extern s32 sdfAllocPacketAligned(s32 size);
 
@@ -126,7 +126,7 @@ extern u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
 
 extern u8 dds3TestObjectFlags(void *object, s32 mask);
 
-extern void dds3DestroyWorldIndexNode(NodeB *node);
+extern void dds3DestroyWorldIndexNode(WorldIndexNode *node);
 
 extern void fldSubmitBackgroundResourcePacket(void);
 
@@ -650,7 +650,7 @@ enum {
  * The whole value chain is visited and destroyed before the scene override. */
 void fldSubmitVisibleWorldBackground(void) {
     s32 hasEligibleBackground = 0;
-    NodeB *objectChain;
+    WorldIndexNode *objectChain;
     EffWorldNode *worldObject;
 
     objectChain = dds3CopyWorldListToValueChain(dds3GetWorldSecondaryObject(), 5);

@@ -641,7 +641,6 @@ extern void effObjSetRoomNumber(EffWorldNode *, u32);
 extern void dds3SetSlotByKind(void *, void *);
 extern void func_00111F40(void *);
 extern void fldSetRecordValueById(s32, s32);
-extern EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *, s32, const u8 *);
 extern void dds3RegisterObjectInHandlerIndex(void *);
 
 void fldCreateResourceScriptObjects(void) {
@@ -1966,7 +1965,6 @@ extern s32 kwlnGetDrawBufferIndex(void);
 extern u8 kwlnFrameDrawPacketRecords[];
 extern void func_002D4C80(s32, u32, s32);
 extern void func_002D4CC8(s32, u32, s32);
-extern void sdfAppendDmaTagToList(SdfListHead *, u32);
 
 void fldSubmitPrimaryFramePacket(void) {
     s32 command = sdfAllocPacketAligned(0x20);

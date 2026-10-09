@@ -153,8 +153,6 @@ extern s32 sdfPendingQueueSlots[2];
 
 s32 sdfAllocPacketAligned(s32 size);
 
-void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, u32 *node);
-
 extern void sdfBuildFrameDepthScissorPacket(SdfPacket *, s32, s32, s32, s32, s32, s32, s32, s32);
 
 void sdfWriteImageTransferRegisters(SdfPacket *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,

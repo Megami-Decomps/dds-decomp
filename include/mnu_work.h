@@ -125,9 +125,10 @@ typedef struct MenuWorkEntry {
     s16 shortListIndex;
     s16 frameCounter; /* 0x30: frames shown of the current short record (func_003230A0) */
     s16 repeatCount;
-    u16 unk34;
+    u16 repeatTargetRecordIndex; /* 0x34: destination record selected after a type-0x12 repeat */
     s16 remaining;
-    u16 unk38;
+    u8 unk38;
+    u8 movementEffectScale;
     u16 elapsed;
     u32 callback; /* Callback-list node address, not a direct function pointer. */
     /* Retail 0x00323960 ORs the whole word with MNU_WORK_FINISHED (4).
@@ -195,9 +196,10 @@ typedef char MenuWorkLayoutAssert[(sizeof(MenuWorkControl)==4 && sizeof(MenuWork
     (unsigned long)&((MenuWorkEntry*)0)->shortListIndex==0x2E &&
     (unsigned long)&((MenuWorkEntry*)0)->frameCounter==0x30 &&
     (unsigned long)&((MenuWorkEntry*)0)->repeatCount==0x32 &&
-    (unsigned long)&((MenuWorkEntry*)0)->unk34==0x34 &&
+    (unsigned long)&((MenuWorkEntry*)0)->repeatTargetRecordIndex==0x34 &&
     (unsigned long)&((MenuWorkEntry*)0)->remaining==0x36 &&
     (unsigned long)&((MenuWorkEntry*)0)->unk38==0x38 &&
+    (unsigned long)&((MenuWorkEntry*)0)->movementEffectScale==0x39 &&
     (unsigned long)&((MenuWorkEntry*)0)->elapsed==0x3A &&
     (unsigned long)&((MenuWorkEntry*)0)->callback==0x3C &&
     (unsigned long)&((MenuWorkEntry*)0)->flags==0x40 &&
@@ -333,7 +335,7 @@ typedef char MenuRegistryTablePrefixLayoutAssert[
 typedef struct MenuRegistry {
     u8 pad00[4];
     u32 parameterIndex;
-    s16 unk08; /* 0x08: signed half-value threshold in func_00323748 */
+    s16 initialRemainingCount; /* 0x08: initial hit count used by the half-count latch */
     u8 pad0A[2];
     MenuRegistryTable *table;
     u8 pad10[8];
@@ -348,8 +350,8 @@ typedef char MenuResourceLayoutsAssert[
      (unsigned long)&((MenuResourceRecord*)0)->x==8 &&
      (unsigned long)&((MenuResourceRecord*)0)->progress==0x0C &&
      (unsigned long)&((MenuResourceRecord*)0)->angleDegrees==0x14 &&
-     (unsigned long)&((MenuRegistry*)0)->unk08==8 &&
-     sizeof(((MenuRegistry*)0)->unk08)==2 &&
+     (unsigned long)&((MenuRegistry*)0)->initialRemainingCount==8 &&
+     sizeof(((MenuRegistry*)0)->initialRemainingCount)==2 &&
      sizeof(MenuRegistryParameters)==0x30 &&
      (unsigned long)&((MenuRegistryParameters*)0)->hitOffsetX==0x24 &&
      sizeof(((MenuRegistryParameters*)0)->hitOffsetX)==2 &&

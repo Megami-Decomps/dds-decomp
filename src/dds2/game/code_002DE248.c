@@ -5817,13 +5817,13 @@ typedef struct EffAnimationState {
     f32 *positions;       // 0x00
     u32 textureHandle;    // 0x04
     u32 record;           // 0x08
-    u32 allocation;       // 0x0C
+    struct SdfMemBlock *allocation;       // 0x0C
 } EffAnimationState;
 
 void effInitializeAnimationPositions(u8 *work) {
-    u8 *resource = (u8 *)((EffClassWork *)work)->resource;
-    u8 *payload = (u8 *)((EffAnimationState *)resource)->record;
-    float *positions = ((EffAnimationState *)resource)->positions;
+    EffAnimationState *state = (EffAnimationState *)((EffClassWork *)work)->resource;
+    u8 *payload = (u8 *)state->record;
+    float *positions = state->positions;
     u32 count = ((FileSlotTable *)payload)->count;
     u32 i = 0;
 
@@ -5839,24 +5839,24 @@ u32 effClampSlotCount(u8 *p) {
     return effSlotCount(p, 200);
 }
 
-u32 *effCreateAnimationState(u32 unused, u32 count) {
-    u32 allocation = (u32)sdfAllocGeneralBlock(count * 8 + 0x10);
-    u32 *state = (u32 *)sdfResourceRetainAddress((struct SdfMemBlock *)(allocation));
+EffAnimationState *effCreateAnimationState(u32 unused, u32 count) {
+    struct SdfMemBlock *allocation = sdfAllocGeneralBlock(count * 8 + 0x10);
+    EffAnimationState *state = (EffAnimationState *)sdfResourceRetainAddress(allocation);
 
-    ((EffAnimationState *)state)->allocation = allocation;
-    ((EffAnimationState *)state)->positions = (f32 *)(state + 4);
-    ((EffAnimationState *)state)->record = 0;
-    ((EffAnimationState *)state)->textureHandle = effRetainScalyTextureReference();
+    state->allocation = allocation;
+    state->positions = (f32 *)(state + 1);
+    state->record = 0;
+    state->textureHandle = effRetainScalyTextureReference();
     return state;
 }
 
-u32 *effActivateAnimationState(s32 work) {
-    s32 owner = (s32)((EffClassWork *)work)->resource;
-    s32 resource = ((EffAnimationState *)owner)->record;
-    u32 *state = effCreateAnimationState((u32)((EffClassWork *)work)->payload, ((FileSlotTable *)resource)->count);
+EffAnimationState *effActivateAnimationState(s32 work) {
+    EffAnimationState *owner = (EffAnimationState *)((EffClassWork *)work)->resource;
+    s32 resource = owner->record;
+    EffAnimationState *state = effCreateAnimationState((u32)((EffClassWork *)work)->payload, ((FileSlotTable *)resource)->count);
 
-    resource = ((EffAnimationState *)owner)->record;
-    ((EffAnimationState *)state)->record = fileAllocateGridRecordSlots(((FileSlotTable *)resource)->type, ((FileSlotTable *)resource)->count,
+    resource = owner->record;
+    state->record = fileAllocateGridRecordSlots(((FileSlotTable *)resource)->type, ((FileSlotTable *)resource)->count,
                                ((FileSlotTable *)resource)->data1);
     return state;
 }
@@ -5866,43 +5866,43 @@ extern void fileReleaseGridRecordHandle(s32);
 extern void effReleaseScalyTextureReference(u32);
 
 void effReleaseAnimationFrameResources(u8 *work) {
-    u32 *state = (u32 *)((EffClassWork *)work)->resource;
+    EffAnimationState *state = (EffAnimationState *)((EffClassWork *)work)->resource;
 
-    effReleaseScalyTextureReference(((EffAnimationState *)state)->textureHandle);
-    if (((EffAnimationState *)state)->record != 0) {
-        fileReleaseGridRecordHandle(((EffAnimationState *)state)->record);
+    effReleaseScalyTextureReference(state->textureHandle);
+    if (state->record != 0) {
+        fileReleaseGridRecordHandle(state->record);
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffAnimationState *)state)->allocation));
+    sdfReleaseResourceAllocation(state->allocation);
 }
 
 void effSynchronizeFileTransform(u8 *work) {
-    u32 *record = (u32 *)((EffClassWork *)work)->resource;
+    EffAnimationState *state = (EffAnimationState *)((EffClassWork *)work)->resource;
 
-    if (((EffAnimationState *)record)->record != 0) {
-        mnuRecordSetVector(((EffAnimationState *)record)->record, work);
-        fileSetRecordSecondVector(((EffAnimationState *)record)->record, work + 0x10);
-        dds3DispatchIndexedCallback(((EffAnimationState *)record)->record, ((EffClassWork *)work)->scale);
-        fileAcquireRecord(((EffAnimationState *)record)->record);
+    if (state->record != 0) {
+        mnuRecordSetVector(state->record, work);
+        fileSetRecordSecondVector(state->record, work + 0x10);
+        dds3DispatchIndexedCallback(state->record, ((EffClassWork *)work)->scale);
+        fileAcquireRecord(state->record);
     }
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F2AE8);
 
-u32 *effCreatePrimarySlotAnimationState(u8 *work) {
+EffAnimationState *effCreatePrimarySlotAnimationState(u8 *work) {
     u8 *mapping = work + 0x3C;
     u32 count = effClampSlotCount(mapping);
-    u32 *state = effCreateAnimationState((u32)work, count);
+    EffAnimationState *state = effCreateAnimationState((u32)work, count);
 
-    ((EffAnimationState *)state)->record = fileAllocateGridRecordSlots(1, count, mapping);
+    state->record = fileAllocateGridRecordSlots(1, count, mapping);
     return state;
 }
 
-u32 *effCreateAlternateSlotAnimationState(u8 *work) {
+EffAnimationState *effCreateAlternateSlotAnimationState(u8 *work) {
     u8 *mapping = work + 0x3C;
     u32 count = effClampSlotCount(mapping);
-    u32 *state = effCreateAnimationState((u32)work, count);
+    EffAnimationState *state = effCreateAnimationState((u32)work, count);
 
-    ((EffAnimationState *)state)->record = fileAllocateGridRecordSlots(3, count, mapping);
+    state->record = fileAllocateGridRecordSlots(3, count, mapping);
     return state;
 }
 
@@ -6779,7 +6779,7 @@ void func_002F5EF0(u32 unusedResource) {
 /* Header common to the resource-instance constructors and callback dispatchers. */
 typedef struct EffActiveResource {
     f32 position[4];
-    u8 pad_10[0x10];
+    f32 orientation[4];  // 0x10: quaternion consumed by model callbacks
     f32 scale;           // 0x20
     u32 color;           // 0x24
     u32 frame;           // 0x28
@@ -7628,7 +7628,78 @@ void effReleaseOwnedModelContextWork(MdlCtx **handle) {
     sdfReleaseChipBlock(handle);
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002F8040);
+/* Native 0x40-byte payload copied for the model-resource callback table. */
+typedef struct EffModelCallbackConfig {
+    s32 duration;          /* 0x00: signed update-count threshold */
+    f32 frameStep;         /* 0x04 */
+    u8 selector;           /* 0x08 */
+    u8 pad09[0x37];
+} EffModelCallbackConfig;
+typedef char EffModelCallbackConfigSizeCheck[sizeof(EffModelCallbackConfig) == 0x40 ? 1 : -1];
+
+extern void mdlStorePrimaryVectorVU(MdlCtx *);
+extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
+extern void mdlStoreTertiaryVectorVU(MdlCtx *);
+extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
+extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
+
+void func_002F8040(EffActiveResource *resource)
+{
+    MdlCtx **modelHandle = (MdlCtx **)resource->resource;
+    EffModelCallbackConfig *config = (EffModelCallbackConfig *)resource->payload;
+    MdlCtx *model;
+    SdfModel *inner;
+    BtlUnit *unit;
+    s32 elapsedFrame;
+    s32 duration;
+    f32 matrix[4][4];
+    u128 quaternion;
+
+    VU0_LOAD_VF(vf10, resource->position);
+    mdlStorePrimaryVectorVU(*modelHandle);
+    VU0_LOAD_VF(vf10, resource->orientation);
+    mdlUpdateContextRotationBasisFromQuaternion(*modelHandle);
+    VU0_SET_ONES_XYZ(vf10);
+    VU0_SCALAR_OP(resource->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    mdlStoreTertiaryVectorVU(*modelHandle);
+
+    model = *modelHandle;
+    model->first->frameStep = config->frameStep;
+    mdlProcessContextNodesAndTransforms(model, D_00380828);
+    elapsedFrame = (s32)resource->frame;
+    duration = config->duration;
+    inner = (*modelHandle)->inner;
+
+    if (elapsedFrame < duration || duration == 0) {
+        unit = NULL;
+        switch (config->selector) {
+        case 0:
+        case 1:
+        case 3:
+        case 5:
+            unit = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
+            break;
+        case 2:
+        case 4:
+            unit = (BtlUnit *)effBTLFieldColorGetVariantSelector();
+            break;
+        case 6:
+            unit = (BtlUnit *)effBTLFieldColorGetOverrideSelector();
+            break;
+        case 7:
+            unit = (BtlUnit *)effBTLFieldColorGetFinalSelector();
+            break;
+        }
+
+        sdfLoadMapRecordLookAtBasis(inner, 0);
+        VU0_STORE_MATRIX_UNCLOBBERED(matrix);
+        sdfVuMatrixToQuaternion(matrix);
+        VU0_STORE_VF_UNCLOBBERED(vf10, &quaternion);
+        effObjSetInnerFirstVec(unit->effectObject, (u128 *)matrix[3]);
+        effObjSetInnerSecondVec(unit->effectObject, &quaternion);
+        unit->stateFlags |= 0x200000;
+    }
+}
 
 EffModelBindings *func_002F81A8(s32 *owner) {
     EffModelBindings *work = sdfAllocSizeClassBlock(sizeof(*work));

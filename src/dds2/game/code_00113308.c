@@ -439,18 +439,18 @@ typedef struct EffectValueObject {
     f32 *source;
 } EffectValueObject;
 
-struct NodeB;
-extern struct NodeB *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
+struct WorldIndexNode;
+extern struct WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 extern u16 dds3GetWorldValueCount(WorldValueIndices *object);
 extern u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
 extern u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
 extern u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
-extern void dds3DestroyWorldIndexNode(struct NodeB *node);
+extern void dds3DestroyWorldIndexNode(struct WorldIndexNode *node);
 extern s32 func_0010FBD0(f32 *, f32 *);
 void func_00113D18(EffWorldNode *object) {
     EffectObjectData *data = object->data;
     EffWorldNode *world = dds3GetWorldSecondaryObject();
-    struct NodeB *list;
+    struct WorldIndexNode *list;
     EffectValueObject *other;
     EffectValueData *otherData;
 

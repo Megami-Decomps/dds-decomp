@@ -134,9 +134,9 @@ void dds3DestroyWorldNode(EffWorldNode *worldNode) {
 /* Append a separate index node, then request initialCount entries from the shared
  * value pool. Only the upper-bound check occurs here: negative counts can still
  * produce a linked empty node when the growth helper rejects the request. */
-NodeB *dds3AppendWorldIndexNode(s32 initialCount) {
+WorldIndexNode *dds3AppendWorldIndexNode(s32 initialCount) {
     WorldInfo *worldInfo;
-    NodeB *indexNode;
+    WorldIndexNode *indexNode;
 
     if (dds3ActiveWorld == NULL) {
         return NULL;
@@ -151,10 +151,10 @@ NodeB *dds3AppendWorldIndexNode(s32 initialCount) {
     }
     indexNode->previous = NULL;
     indexNode->next = NULL;
-    indexNode->unk0 = DDS3_WORLD_INVALID_ENTRY_INDEX;
-    indexNode->unk2 = DDS3_WORLD_INVALID_ENTRY_INDEX;
-    indexNode->unk4 = DDS3_WORLD_INVALID_ENTRY_INDEX;
-    indexNode->unk6 = 0;
+    indexNode->headIndex = DDS3_WORLD_INVALID_ENTRY_INDEX;
+    indexNode->tailIndex = DDS3_WORLD_INVALID_ENTRY_INDEX;
+    indexNode->cursorIndex = DDS3_WORLD_INVALID_ENTRY_INDEX;
+    indexNode->entryCount = 0;
     if (worldInfo->lastIndex == NULL) {
         worldInfo->firstIndex = indexNode;
         worldInfo->lastIndex = indexNode;
@@ -169,7 +169,7 @@ NodeB *dds3AppendWorldIndexNode(s32 initialCount) {
 
 /* Return the node's value entries to the shared pool, unlink the index node,
  * then release its block. NULL node or missing active world is a no-op. */
-void dds3DestroyWorldIndexNode(NodeB *indexNode) {
+void dds3DestroyWorldIndexNode(WorldIndexNode *indexNode) {
     WorldInfo *worldInfo;
 
     if (indexNode == NULL) {

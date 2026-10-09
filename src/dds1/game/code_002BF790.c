@@ -649,7 +649,6 @@ extern s32 kwlnGetDrawBufferIndex(void);
 extern u8 kwlnFrameDrawPacketRecords[];
 extern void func_002D4C80(const void *, void *, s32);
 extern void func_002D4CC8(const void *, void *, s32);
-extern void sdfAppendDmaTagToList(SdfListHead *, u32);
 
 void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
