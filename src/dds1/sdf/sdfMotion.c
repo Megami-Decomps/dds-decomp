@@ -626,7 +626,7 @@ void *func_002DC3B8(void *a0, s32 a1, s32 a2) {
     return r;
 }
 
-void func_002DC418(SdfMotionIndexedValueBinding *a0, f32 t) {
+void sdfMotionApplyPrimaryWordSecondKey(SdfMotionIndexedValueBinding *a0, f32 t) {
     SdfMotionKeyInterval b;
 
     sdfFindMotionKeyInterval(a0, &b, t);
@@ -634,7 +634,7 @@ void func_002DC418(SdfMotionIndexedValueBinding *a0, f32 t) {
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
-void func_002DC458(SdfMotionIndexedValueBinding *a0, f32 t, f32 weight) {
+void sdfMotionBlendPrimaryWordSecondKey(SdfMotionIndexedValueBinding *a0, f32 t, f32 weight) {
     SdfMotionKeyInterval b;
     s32 key;
     s32 color;
