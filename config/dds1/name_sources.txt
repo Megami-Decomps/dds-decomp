@@ -5491,6 +5491,7 @@
 0x002A34D8	billUpdateQuadDrawColorAndTransform	inferred	Blends quad draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002A3640	effAllocateActiveInstanceWork	inferred	Allocates kind-sized resource instance work with default VU vectors, frame, color and copied source. [names_reviewed5.tsv]
 0x002A3798	effCreateFileResourceInstance	inferred	eff resolves primary/secondary file buffers by type at work+0x1C (1 or 4) then creates the resource via func_002A36F8
+0x002A37F8	effDestroyActiveInstanceWork	inferred	Destroys the active-instance child resource through its kind operations and frees the complete effect owner.
 0x002A3840	effCreateActiveResource	inferred	Byte-identical dds2 twin 0x002E58A8; DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described createActiveEffectResource behavior. [names_conflicts.tsv]
 0x002A3910	effResetActiveInstanceFrame	inferred	Calls the active-kind callback and clears its work frame. [names_reviewed5.tsv]
 0x002A3958	effAdvanceActiveInstanceFrame	inferred	When effects are enabled, calls the active kind callback and advances its frame counter. [names_reviewed5.tsv]
@@ -5654,6 +5655,7 @@
 0x002B0598	effAllocateBlockWithModel	inferred	Byte-identical dds2 twin 0x002F3988; DDS1 has the same unprefixed symbol; game/code_002DC138 uses eff for the already-described allocateEffectBlockWithModel behavior. [names_conflicts.tsv]
 0x002B0650	effCreateResourceInstanceC	inferred	eff twin of func_002ADF00 over table D_0037ED90 and allocateEffectBlockWithModel; one-argument createResource
 0x002B06E0	effResourceInstanceCreateFromFile	inferred	paired effect body: calls fileResolvePrimaryBuffer, effCreateResourceInstanceC [names_R_FuncNames7.tsv]
+0x002B0710	effDestroyModelBlockWork	inferred	Dispatches model-block resource destruction through its kind operations and frees the complete effect owner.
 0x002B0758	effRecreateActiveByClass	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002B07E8	effResetModelBlockFrame	inferred	Invokes model block's kind callback then zeroes its frame counter. [names_reviewed5.tsv]
 0x002B0830	effAdvanceDispatchCounter	inferred	eff effect resources and animation in game/code_0029A840.c

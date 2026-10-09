@@ -2502,7 +2502,7 @@ u8 *effCreateFileResourceInstance(u8 *work) {
 }
 
 
-void effDispatchDestroyOp(EffClassWork *obj) {
+void effDestroyActiveInstanceWork(EffClassWork *obj) {
 
     effActiveInstanceOperations[obj->kind].destroyResource(obj->resource);
     sdfReleaseChipBlock(obj);
@@ -6061,7 +6061,7 @@ void effResourceInstanceCreateFromFile(s32 work) {
     effCreateResourceInstanceC(((FileJob *)work)->option, source);
 }
 
-void effDispatchCleanupOp(EffClassWork *work) {
+void effDestroyModelBlockWork(EffClassWork *work) {
     D_003E9E60[work->kind].destroyResource();
     sdfReleaseChipBlock(work);
 }
@@ -12589,3 +12589,4 @@ INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438850);
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438858);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438860);
+
