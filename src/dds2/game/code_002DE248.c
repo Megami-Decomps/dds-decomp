@@ -2481,7 +2481,7 @@ EffClassWork *effAllocateActiveInstanceWork(u16 kind, void *source) {
 
 EffClassWork *effCreateResourceInstanceA(u16 kind, void *source, u32 extra) {
     EffClassWork *work = effAllocateActiveInstanceWork(kind, source);
-    work->resource = (u32)effActiveInstanceOperations[kind].createResource(source, extra);
+    work->resource = effActiveInstanceOperations[kind].createResource(source, extra);
     effActiveInstanceOperations[kind].initialize(work);
     return work;
 }
@@ -2519,7 +2519,7 @@ EffClassWork *effCreateActiveResource(EffClassWork *obj) {
         work = effAllocateActiveInstanceWork((u16)obj->kind, obj->payload);
         resource = effActiveInstanceOperations[obj->kind].cloneResource(obj);
         kind = obj->kind;
-        work->resource = (u32)resource;
+        work->resource = resource;
         effActiveInstanceOperations[kind].initialize(work);
     }
     return work;
@@ -3346,7 +3346,7 @@ EffClassWork *effCreateClassWork(u16 kind, void *source) {
     VU0_STORE_VF_UNCLOBBERED(vf0, effect);
     VU0_STORE_VF_UNCLOBBERED(vf0, effect + 0x10);
     memcpy(((EffClassWork *)effect)->payload, source, size);
-    ((EffClassWork *)effect)->resource = (u32)effClassWorkOperations[kind].createResource(source);
+    ((EffClassWork *)effect)->resource = effClassWorkOperations[kind].createResource(source);
     effClassWorkOperations[kind].initialize(effect);
     return (EffClassWork *)effect;
 }
@@ -4717,7 +4717,7 @@ EffClassWork *effCreateClassResourceWork(u16 kind, void *source) {
     VU0_STORE_VF_UNCLOBBERED($vf0, effect);
     VU0_STORE_VF_UNCLOBBERED($vf0, effect->vectors.orientation);
     memcpy(effect->payload, source, size);
-    effect->resource = (u32)effClassResourceWorkOperations[kind].createResource(source);
+    effect->resource = effClassResourceWorkOperations[kind].createResource(source);
     effClassResourceWorkOperations[kind].initialize(effect);
     return effect;
 }
@@ -5499,7 +5499,7 @@ extern EffClassWork *effAllocateBlock(u16, void *);
 
 EffClassWork *effCreateResourceInstanceB(u16 kind, void *source, u32 extra) {
     EffClassWork *work = effAllocateBlock(kind, source);
-    work->resource = (u32)effBlockResourceOperations[kind].createResource(source, extra);
+    work->resource = effBlockResourceOperations[kind].createResource(source, extra);
     effBlockResourceOperations[kind].initialize(work);
     return work;
 }
@@ -5530,7 +5530,7 @@ EffClassWork *effDuplicateActiveResourceB(EffClassWork *obj) {
     void *resource = effBlockResourceOperations[obj->kind].cloneResource(obj);
     s32 kind = obj->kind;
 
-    work->resource = (u32)resource;
+    work->resource = resource;
     effBlockResourceOperations[kind].initialize(work);
     return work;
 }
@@ -6042,7 +6042,7 @@ EffClassWork *effAllocateBlockWithModel(u16 kind, void *source) {
 
 EffClassWork *effCreateResourceInstanceC(u16 kind, void *source) {
     EffClassWork *work = effAllocateBlockWithModel(kind, source);
-    work->resource = (u32)effModelBlockOperations[kind].createResource(source);
+    work->resource = effModelBlockOperations[kind].createResource(source);
     effModelBlockOperations[kind].initialize(work);
     return work;
 }
@@ -6064,7 +6064,7 @@ EffClassWork *effRecreateActiveByClass(EffClassWork *obj) {
     void *resource = effModelBlockOperations[obj->kind].cloneResource(obj);
     s32 kind = obj->kind;
 
-    work->resource = (u32)resource;
+    work->resource = resource;
     effModelBlockOperations[kind].initialize(work);
     return work;
 }

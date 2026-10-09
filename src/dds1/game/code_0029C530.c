@@ -2395,7 +2395,7 @@ typedef char EffRingResource_size_must_be_0x04[(sizeof(EffRingResource) == 0x04)
 
 EffClassWork *effCreateResourceInstanceA(u16 kind, void *source, u32 option) {
     EffClassWork *effect = effAllocateActiveInstanceWork(kind, source);
-    effect->resource = effActiveInstanceOperations[kind].createResource(source, option);
+    effect->resource = (void *)effActiveInstanceOperations[kind].createResource(source, option);
     effActiveInstanceOperations[kind].initialize(effect);
     return effect;
 }
@@ -2415,7 +2415,7 @@ u8 *effCreateFileResourceInstance(u8 *work) {
 }
 
 void effDestroyActiveInstanceWork(EffClassWork *work) {
-    effActiveInstanceOperations[work->kind].destroyResource((void *)work->resource);
+    effActiveInstanceOperations[work->kind].destroyResource(work->resource);
     sdfReleaseChipBlock(work);
 }
 
@@ -2424,10 +2424,10 @@ EffClassWork *effCreateActiveResource(EffClassWork *work) {
     if (effActiveInstanceOperations[work->kind].cloneResource == NULL) {
         effect = effCreateResourceInstanceA(work->kind, work->payload, 0);
     } else {
-        u32 clonedResource;
+        void *clonedResource;
         s32 kind;
         effect = effAllocateActiveInstanceWork(work->kind, work->payload);
-        clonedResource = effActiveInstanceOperations[work->kind].cloneResource(work);
+        clonedResource = (void *)effActiveInstanceOperations[work->kind].cloneResource(work);
         /* Capture the clone's class before publishing its resource. */
         kind = work->kind;
         effect->resource = clonedResource;
@@ -3200,7 +3200,7 @@ EffClassWork *effCreateClassWork(u16 kind, void *source) {
     VU0_STORE_VF_UNCLOBBERED($vf0, effect);
     VU0_STORE_VF_UNCLOBBERED($vf0, effect + 0x10);
     memcpy(((EffClassWork *)effect)->payload, source, size);
-    ((EffClassWork *)effect)->resource = (u32)effClassWorkOperations[kind].createResource(source);
+    ((EffClassWork *)effect)->resource = effClassWorkOperations[kind].createResource(source);
     effClassWorkOperations[kind].initialize(effect);
     return (EffClassWork *)effect;
 }
@@ -3213,7 +3213,7 @@ EffClassWork *effCreateClassWorkFromFile(FileJobPayload *request) {
 }
 
 void effDestroyClassWork(EffClassWork *work) {
-    effClassWorkOperations[work->kind].destroyResource((void *)work->resource);
+    effClassWorkOperations[work->kind].destroyResource(work->resource);
     sdfReleaseChipBlock(work);
 }
 
@@ -4411,7 +4411,7 @@ EffClassWork *effCreateClassResourceWork(u16 kind, void *source) {
     VU0_STORE_VF_UNCLOBBERED($vf0, effect);
     VU0_STORE_VF_UNCLOBBERED($vf0, effect->vectors.orientation);
     memcpy(effect->payload, source, size);
-    effect->resource = (u32)effClassResourceWorkOperations[kind].createResource(source);
+    effect->resource = effClassResourceWorkOperations[kind].createResource(source);
     effClassResourceWorkOperations[kind].initialize(effect);
     return effect;
 }
@@ -5215,7 +5215,7 @@ extern EffClassWork *effAllocateBlock(u16, void *);
 
 EffClassWork *effCreateResourceInstanceB(u16 kind, void *source, u32 option) {
     EffClassWork *effect = effAllocateBlock(kind, source);
-    effect->resource = effBlockResourceOperations[kind].createResource(source, option);
+    effect->resource = (void *)effBlockResourceOperations[kind].createResource(source, option);
     effBlockResourceOperations[kind].initialize(effect);
     return effect;
 }
@@ -5241,7 +5241,7 @@ void effDestroyBlockResourceWork(EffClassWork *work) {
 
 EffClassWork *effDuplicateActiveResourceB(EffClassWork *work) {
     EffClassWork *effect = effAllocateBlock(work->kind, work->payload);
-    u32 active = effBlockResourceOperations[work->kind].cloneResource(work);
+    void *active = (void *)effBlockResourceOperations[work->kind].cloneResource(work);
     s32 kind = work->kind;
     effect->resource = active;
     effBlockResourceOperations[kind].initialize(effect);
@@ -5767,7 +5767,7 @@ extern EffClassWork *effAllocateBlockWithModel(u16, void *);
 
 EffClassWork *effCreateResourceInstanceC(u16 kind, void *source) {
     EffClassWork *effect = effAllocateBlockWithModel(kind, source);
-    effect->resource = effModelBlockOperations[kind].createResource(source);
+    effect->resource = (void *)effModelBlockOperations[kind].createResource(source);
     effModelBlockOperations[kind].initialize(effect);
     return effect;
 }
@@ -5786,7 +5786,7 @@ void effDestroyModelBlockWork(EffClassWork *work) {
 
 EffClassWork *effRecreateActiveByClass(EffClassWork *work) {
     EffClassWork *effect = effAllocateBlockWithModel(work->kind, work->payload);
-    u32 resource = effModelBlockOperations[work->kind].cloneResource(work);
+    void *resource = (void *)effModelBlockOperations[work->kind].cloneResource(work);
     s32 kind = work->kind;
     effect->resource = resource;
     effModelBlockOperations[kind].initialize(effect);

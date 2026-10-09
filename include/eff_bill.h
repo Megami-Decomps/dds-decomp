@@ -92,7 +92,7 @@ typedef char EffQuadReferenceOffsetCheck[((u32)&((EffQuadWork *)0)->reference ==
 typedef char EffQuadAssetOffsetCheck[((u32)&((EffQuadWork *)0)->assetHandle == 0xD0) ? 1 : -1];
 
 /* Class operations select the copied parameter format and own this 0x40-byte
- * header. The resource word is the class factory's returned handle/address. */
+ * header. Each resource kind owns the pointer returned by its factory. */
 typedef struct EffClassWork {
     union {
         u8 transform[0x20];
@@ -105,7 +105,7 @@ typedef struct EffClassWork {
     u32 color;
     u32 frame;
     s32 kind;
-    u32 resource;
+    void *resource;
     void *payload;
     u8 pad38[8];
 } EffClassWork;
@@ -565,6 +565,7 @@ typedef struct EffScaleRangeEntry {
 } EffScaleRangeEntry;
 
 typedef char EffClassWorkSizeCheck[(sizeof(EffClassWork) == 0x40) ? 1 : -1];
+typedef char EffClassWorkResourceOffsetCheck[((u32)&((EffClassWork *)0)->resource == 0x30) ? 1 : -1];
 typedef char EffClassWorkFrameOffsetCheck[((u32)&((EffClassWork *)0)->frame == 0x28) ? 1 : -1];
 typedef char EffBillTimedHeaderSizeCheck[(sizeof(EffBillTimedHeader) == 0x3C) ? 1 : -1];
 typedef char EffBillTimeOffsetCheck[((u32)&((EffBillTimedHeader *)0)->time == 0x34) ? 1 : -1];
