@@ -128,7 +128,7 @@ extern s32 func_001277A8(s32 arg0);
 
 extern void fldPreparePlayerSceneCameraTarget(void);
 
-extern void fldReleaseCameraModel(s32 arg0);
+extern void fldReleaseCameraModel(u32 enabled);
 
 extern void evtSetSolarOverlayFullyVisible(void);
 
@@ -207,11 +207,24 @@ typedef struct {
 
 extern FldEnt14 fldSparkObjectEntries[];
 
+/* Each DDS1 resource row owns sixteen 16-byte spark sequences. */
+typedef struct FldSparkSequence {
+    s32 count;
+    s8 slots[12];
+} FldSparkSequence;
+
 typedef struct {
     s16 unk0;
     s16 unk2;
-    u8 pad4[0x10C];
+    s32 entryCount;            /* 0x04 */
+    s32 duration;              /* 0x08 */
+    u8 pad0C[2];
+    s16 reservedModel;         /* 0x0E: model for reserved object slot 16. */
+    FldSparkSequence sequences[16]; /* 0x10 */
 } FldEnt110; /* 0x110 bytes */
+
+typedef char FldSparkSequenceSizeCheck[(sizeof(FldSparkSequence) == 0x10) ? 1 : -1];
+typedef char FldEnt110SizeCheck[(sizeof(FldEnt110) == 0x110) ? 1 : -1];
 
 extern FldEnt110 *D_003BAA48;
 
@@ -3613,7 +3626,7 @@ void *fldFindFieldEntryByKeyPair(s32 key0, s32 key1) {
 
 typedef struct FldSparkController {
     void *object;              /* 0x00 */
-    void *entry;               /* 0x04 */
+    FldEnt110 *entry;               /* 0x04 */
     s32 phase;                 /* 0x08 */
     s32 countdown;             /* 0x0C */
     s32 terminated;            /* 0x10 */
@@ -3625,8 +3638,8 @@ typedef struct FldSparkController {
     s32 dialogPhase;           /* 0x28 */
     s32 unk2C;                 /* 0x2C */
     s32 entryCount;            /* 0x30 */
-    s32 unk34;                 /* 0x34 */
-    s32 unk38;                 /* 0x38 */
+    s32 sequenceIndex;                 /* 0x34 */
+    s32 sequenceRemaining;                 /* 0x38 */
     s32 cursor;                /* 0x3C */
 } FldSparkController;
 
@@ -3715,7 +3728,8 @@ typedef struct FieldPair48 {
 
 extern FieldPair48 fldSparkSlots[];
 
-extern u32 effMiscRand();
+struct EffRandState;
+extern u32 effMiscRand(struct EffRandState *state);
 
 extern s16 D_0032E4B4[];
 
