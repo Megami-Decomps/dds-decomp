@@ -638,7 +638,7 @@ typedef struct EffPCPSprayWork {
 } EffPCPSprayWork; /* 0x98 */
 
 
-extern void mdlStorePrimaryVectorVU(void *obj);
+extern void mdlStorePrimaryVectorVU(MdlCtx *ctx);
 
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 
@@ -5119,8 +5119,8 @@ typedef struct EffPCPPulseBattle {
 extern const f32 D_00414610[4] __attribute__((aligned(16)));
 extern void func_00340DC8(f32 x, f32 y, f32 z);
 extern void effMiscQuatMultiplyVU(void);
-extern void mdlUpdateContextRotationBasisFromQuaternion(void *work);
-extern void mdlStoreTertiaryVectorVU(void *work);
+extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *ctx);
+extern void mdlStoreTertiaryVectorVU(MdlCtx *ctx);
 extern void sdfModelUpdateCurrentFrameTransforms(void *model);
 extern void func_003320E8(struct SdfPoolNode **, SdfModel *);
 
