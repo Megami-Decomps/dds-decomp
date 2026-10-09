@@ -244,7 +244,6 @@ const char D_0042D6C8[] __attribute__((aligned(8))) = "FileHandle Free... OK!! \
 
 /* The native wrapper tail-forwards the request through its legacy ABI. */
 extern void func_002C7CE8();
-extern void fileQueueNotifyAllJobsComplete(u8 *queue);
 extern s32 sndFindPackedTrackLoadStatus(s32 sound);
 extern void sndEnsureMidiBankResident(s32 sound);
 extern void effRequestResourceByMode(const char *prefix, const char *name,
@@ -434,7 +433,7 @@ s32 func_00317058(u8 *workBytes) {
                         struct FileQueue *clone =
                             fileCloneQueueEntries((struct FileQueue *)entry->dataCursor);
                         *queueSlot++ = clone;
-                        fileQueueNotifyAllJobsComplete((u8 *)clone);
+                        fileQueueNotifyAllJobsComplete(clone);
                         sdfReleaseResourceAllocation((SdfMemBlock *)entry->resourceHandle);
                     }
                     entry = entry->next;

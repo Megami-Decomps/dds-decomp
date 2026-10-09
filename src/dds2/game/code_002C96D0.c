@@ -4885,13 +4885,13 @@ FileQueue *fileQueueClone(FileQueue *source) {
     return queue;
 }
 
-void fileQueueNotifyAllJobsComplete(u8 *owner) {
-    u8 *job = (u8 *)((FileQueue *)owner)->first;
-    while (job != 0) {
-        fileJobNotifyComplete(((FileJob *)job)->id);
-        job = (u8 *)((FileJob *)job)->next;
+void fileQueueNotifyAllJobsComplete(FileQueue *queue) {
+    FileJob *job = queue->first;
+    while (job != NULL) {
+        fileJobNotifyComplete(job->id);
+        job = job->next;
     }
-    ((FileQueue *)owner)->updateFrame = 0;
+    queue->updateFrame = 0;
 }
 
 void fileQueueSetPosition(FileQueue *queue, const f32 vec[4])
