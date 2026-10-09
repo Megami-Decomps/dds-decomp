@@ -216,8 +216,8 @@ SdfTex *sdfTexAcquireResourceTexture(SdfTextureFileHeader *header) {
 }
 
 /* Build the texture and its packet with variant one. */
-SdfTex *sdfTexAcquireAlternateResourceTexture(void *resourceAddress) {
-    return sdfTexCreateFromFileHeader(resourceAddress, 1);
+SdfTex *sdfTexAcquireAlternateResourceTexture(SdfTextureFileHeader *header) {
+    return sdfTexCreateFromFileHeader(header, 1);
 }
 
 /* Build weighted-RGB intensity bytes from retained palette color data. */

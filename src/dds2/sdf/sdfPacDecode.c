@@ -65,7 +65,6 @@ void sdfPacFinalizeRelocatedPayload(PacState *state);
 
 
 
-SdfTex *sdfTexAcquireAlternateResourceTexture(void *resource);
 
 
 void func_003475A0(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer);
@@ -396,7 +395,7 @@ void sdfPacSkipResourceChunk(PacState *state) {
                 return;
             }
         }
-        resourceBuffer->result = (s32)sdfTexAcquireAlternateResourceTexture(resourceBuffer->cursor);
+        resourceBuffer->result = (s32)sdfTexAcquireAlternateResourceTexture((SdfTextureFileHeader *)resourceBuffer->cursor);
         state->onComplete(state);
     }
 }

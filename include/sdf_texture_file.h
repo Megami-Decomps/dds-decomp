@@ -63,5 +63,6 @@ struct SdfTex;
 
 /* Acquire a texture from a serialized texture-file header. */
 struct SdfTex *sdfTexAcquireResourceTexture(SdfTextureFileHeader *header);
+struct SdfTex *sdfTexAcquireAlternateResourceTexture(SdfTextureFileHeader *header);
 
 #endif /* SDF_TEXTURE_FILE_H */
