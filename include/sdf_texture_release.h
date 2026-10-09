@@ -10,23 +10,30 @@ enum {
     SDF_TEX_RELEASE_CHIP_ADDRESS = 2
 };
 
-/* Deferred texture release queue entry allocated as a 0xA0-byte chip block.
- * Only the first 0x0D bytes have known fields; the worker frees the complete
- * entry after releasing the selected resource. */
+/* Shared release metadata precedes both fixed nodes and variable upload packets. */
+typedef struct SdfTextureReleaseHead {
+    struct SdfTextureReleaseHead *next; /* 0x00 */
+    void *chipMemory;                   /* 0x04 */
+    struct SdfMemBlock *allocation;     /* 0x08 */
+    u8 releaseMode;                     /* 0x0C */
+    u8 reserved0D[3];
+} SdfTextureReleaseHead;
+
+/* Standalone deferred releases allocate 0xA0 bytes; upload packets use only
+ * the common prefix and retain their separately calculated allocation size. */
 typedef struct SdfTexReleaseEntry {
-    struct SdfTexReleaseEntry *next; /* 0x00 */
-    void *chipMemory;                 /* 0x04: used for chip-heap releases */
-    struct SdfMemBlock *allocation;  /* 0x08: used for general-heap releases */
-    u8 releaseMode;                  /* 0x0C */
-    u8 reserved0D[0x93];             /* 0x0D */
+    SdfTextureReleaseHead release;
+    u8 reserved10[0x90];
 } SdfTexReleaseEntry;
 
+typedef char SdfTextureReleaseHead_layout[
+    (sizeof(SdfTextureReleaseHead) == 0x10 &&
+     (u32)&((SdfTextureReleaseHead *)0)->next == 0x00 &&
+     (u32)&((SdfTextureReleaseHead *)0)->chipMemory == 0x04 &&
+     (u32)&((SdfTextureReleaseHead *)0)->allocation == 0x08 &&
+     (u32)&((SdfTextureReleaseHead *)0)->releaseMode == 0x0C) ? 1 : -1];
 typedef char SdfTexReleaseEntry_layout_must_match_native[
     (sizeof(SdfTexReleaseEntry) == 0xA0 &&
-     (u32)&((SdfTexReleaseEntry *)0)->next == 0x00 &&
-     (u32)&((SdfTexReleaseEntry *)0)->chipMemory == 0x04 &&
-     (u32)&((SdfTexReleaseEntry *)0)->allocation == 0x08 &&
-     (u32)&((SdfTexReleaseEntry *)0)->releaseMode == 0x0C)
-        ? 1 : -1];
+     (u32)&((SdfTexReleaseEntry *)0)->release == 0x00) ? 1 : -1];
 
 #endif /* SDF_TEXTURE_RELEASE_H */
