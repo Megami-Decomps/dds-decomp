@@ -1047,7 +1047,27 @@ void mnuReleaseCampSceneRegisteredIds(EvtRuntime *scene) {
     scene->registeredCount = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_0025F640);
+void func_0025F640(f32 parameter, const s32 *x, const s32 *y, s32 *outX, s32 *outY) {
+    f32 inverse = 1.0f - parameter;
+    f32 parameterSquared = parameter * parameter;
+    f32 inverseSquared = inverse * inverse;
+    f32 inverseCubed = inverseSquared * inverse;
+    f32 threeInverseSquared = inverseSquared * 3.0f;
+    f32 threeInverseParameterSquared = (inverse * 3.0f) * parameterSquared;
+    f32 xValue;
+    f32 yValue;
+
+    xValue = inverseCubed * (f32)x[0];
+    xValue += (threeInverseSquared * parameter) * (f32)x[1];
+    xValue += threeInverseParameterSquared * (f32)x[2];
+    xValue += (parameterSquared * parameter) * (f32)x[3];
+    yValue = inverseCubed * (f32)y[0];
+    yValue += (threeInverseSquared * parameter) * (f32)y[1];
+    yValue += threeInverseParameterSquared * (f32)y[2];
+    yValue += (parameterSquared * parameter) * (f32)y[3];
+    *outX = (s32)xValue;
+    *outY = (s32)yValue;
+}
 
 extern void func_0025F640(f32 parameter, const s32 *x, const s32 *y, s32 *outX, s32 *outY);
 
