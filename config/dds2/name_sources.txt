@@ -3499,6 +3499,7 @@
 0x0023FDC0	evtCommandFlagSelectedUnitStatus	inferred	src/dds2/game/code_0023D658.c func_0023FDC0: Reads script unit ID, resolves unit and applies status flags. Twin of DDS1 func_00225160. [names_reviewed24.tsv]
 0x0023FDF0	evtCommandBeginSelectedUnitTransition	inferred	src/dds2/game/code_0023D658.c func_0023FDF0: Reads script unit ID and transition parameter then configures resolved unit. Twin of DDS1 func_00225190. [names_reviewed24.tsv]
 0x0023FE68	evtOpSetUnitGradientColors	inferred	Packs two script-supplied RGB triplets and assigns them to selected unit. [names_reviewed7.tsv]
+0x0023FF90	evtOpSetModelLightDirection	inferred	Registered five-argument MODEL_LIGHT_DIR handler; reads the mode and direction vector, then sets normalized unit direction unless the vector is near zero.
 0x00240068	evtOpSetUnitPackedRgbColor	inferred	Packs three script-supplied color channels and assigns color to selected unit. [names_reviewed7.tsv]
 0x00240128	evtOpSetUnitPackedAlpha	inferred	Packs script-supplied alpha component and assigns it to selected unit. [names_reviewed7.tsv]
 0x002401C0	evtOpSetUnitValueTransitionTarget	inferred	Looks up event unit and target world object, then starts value transition. [names_reviewed7.tsv]

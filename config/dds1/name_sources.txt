@@ -3879,6 +3879,7 @@
 0x00225190	evtCommandBeginSelectedUnitTransition	inferred	src/dds1/game/code_00222AC0.c func_00225190: Reads script unit ID and transition parameter then configures resolved unit. [names_reviewed24.tsv]
 0x002251D8	evtUnitHasNoStatusFlags	inferred	Looks up an event unit by script argument and returns true only when evtTestUnitStatusFlags reports no active status bits.
 0x00225208	evtOpSetUnitGradientColors	inferred	Packs two script-supplied RGB triplets and assigns them to selected unit. [names_reviewed7.tsv]
+0x00225330	evtOpSetModelLightDirection	inferred	Registered five-argument MODEL_LIGHT_DIR handler; reads the mode and direction vector, then sets normalized unit direction unless the vector is near zero.
 0x00225408	evtOpSetUnitPackedRgbColor	inferred	Packs three script-supplied color channels and assigns color to selected unit. [names_reviewed7.tsv]
 0x002254C8	evtOpSetUnitPackedAlpha	inferred	Packs script-supplied alpha component and assigns it to selected unit. [names_reviewed7.tsv]
 0x00225560	evtOpSetUnitValueTransitionTarget	inferred	Looks up event unit and target world object, then starts value transition. [names_reviewed7.tsv]
