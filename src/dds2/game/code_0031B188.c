@@ -22,30 +22,6 @@ typedef struct SoundSlotPool {
 
 
 
-typedef struct ShortRecord {
-    u8 kind;
-    u8 pad01;
-    s16 parameters[3];
-} ShortRecord;
-
-typedef struct ShortRecordList {
-    s32 count;
-    ShortRecord *records;
-} ShortRecordList;
-
-typedef struct MenuRegistryRecord {
-    u8 pad00[4];
-    u16 firstCount;
-    u16 secondCount;
-    ShortRecordList *lists;
-    ShortRecordList *secondLists;
-} MenuRegistryRecord;
-
-
-extern u32 mnuResolveTaggedRegistryRecord(u32 taggedRecord);
-extern ShortRecord *func_003225C0(ShortRecordList *list);
-
-
 typedef struct FileQueue {
     f32 offset[4];
     f32 axis[4];
@@ -217,14 +193,14 @@ void func_0031B3C8(void) {
 
 s32 mnuApplyFrameKeyedModelMotion(MenuWorkEntry *work) {
     MenuRegistryRecord *registry;
-    ShortRecordList *list;
-    ShortRecord *record;
+    MenuShortRecordList *list;
+    MenuShortRecord *record;
     MnuModelNode *node;
     MdlCtx *model;
     s16 frame;
     s32 i;
 
-    registry = (MenuRegistryRecord *)mnuResolveTaggedRegistryRecord((u32)work);
+    registry = mnuResolveTaggedRegistryRecord(work);
     if (registry != NULL) {
         if (registry->secondLists != NULL) {
             for (i = 0, list = registry->secondLists;
