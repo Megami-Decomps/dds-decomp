@@ -1,4 +1,5 @@
 #include "common.h"
+#include "file_request_api.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
@@ -125,7 +126,6 @@ extern void *memcpy(void *dst, const void *src, u32 size);
 extern s32 itfMesCreateWindow(u8 *arg);
 extern void itfMesDestroyWindowIfPresent(s32 handle);
 extern void fileWaitIdle(void);
-extern s32 filePollEntryCleanup(void *arg);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
 extern void func_0035B6E0(const char *fmt, ...);

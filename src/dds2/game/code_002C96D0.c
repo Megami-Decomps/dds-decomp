@@ -409,7 +409,6 @@ extern s32 fileLoadMainBlobBegin(void);
 
 
 
-extern void filePollEntryCleanup(u32);
 
 extern s32 fileDrawMenuFrame(s32);
 
@@ -2628,7 +2627,7 @@ s32 fileRunMenuState(KwlnTask *task) {
         D_00439030 = fileGetResourceHandle((struct FileRequest *)(u32)job);
         D_00439034 = fileGetLoadedDataAddress((struct FileRequest *)(u32)job);
         D_00439038 = fileGetResourceSize((struct FileRequest *)(u32)job);
-        filePollEntryCleanup(job);
+        filePollEntryCleanup((struct FileRequest *)(u32)job);
     }
     return 0;
 }
@@ -2897,7 +2896,7 @@ void fileReleaseMenuResources(void) {
         if (fileSaveIconRequest != 0) {
             fileWaitReady((struct FileRequest *)fileSaveIconRequest);
             D_00439030 = fileGetResourceHandle((struct FileRequest *)(u32)fileSaveIconRequest);
-            filePollEntryCleanup(fileSaveIconRequest);
+            filePollEntryCleanup((struct FileRequest *)(u32)fileSaveIconRequest);
             fileSaveIconRequest = 0;
         }
         sdfReleaseMemorySlot((s32 *)&D_00439030);
