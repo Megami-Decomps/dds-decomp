@@ -476,7 +476,7 @@ typedef struct LoadObj {
     FileJobPayload **jobs; /* 0x38: child file-job payloads */
     struct SdfMemBlock *jobAllocation;          /* 0x3C */
     struct EffExpandedList *referenceHolder; /* 0x40 */
-    void *recordWork;     /* 0x44: created by fileAllocateGridRecordSlots */
+    FileSlotTable *recordWork; /* 0x44: created by fileAllocateGridRecordSlots */
     s16 unk48;          /* 0x48 */
     u16 unk4A;
 } LoadObj;
@@ -5102,7 +5102,7 @@ void effLoadObjectDestroy(LoadObj *obj) {
         billDispatchByKind(obj->deviceHandle);
     }
     if (obj->jobAllocation != 0) {
-        u32 count = ((FileSlotTable *)obj->recordWork)->count;
+        u32 count = obj->recordWork->count;
         u32 i;
         for (i = 0; i < count; i++) {
             fileJobDestroy(obj->jobs[i]);
@@ -5119,9 +5119,9 @@ void effLoadObjectDestroy(LoadObj *obj) {
 }
 
 LoadObj *fileLoadObjectCreateChild(LoadObj *owner) {
-    LoadObj *source = (LoadObj *)((FileSlotTable *)owner->recordWork)->data1;
+    LoadObj *source = (LoadObj *)owner->recordWork->data1;
     LoadObj *result = fileCreateGridLoaderRecord(source);
-    fileLoadObjectSetResource(result, ((FileSlotTable *)owner->recordWork)->type, source);
+    fileLoadObjectSetResource(result, owner->recordWork->type, source);
     fileCloneEffectSurfaceResources(result, owner);
     return result;
 }
@@ -5139,12 +5139,12 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
         dst->deviceHandle = billCloneObjectRetainingSharedData((struct BillObj *)src->deviceHandle);
         billMarkKindOneFlag((struct BillObj *)(dst->deviceHandle));
         if (dst->recordWork != NULL) {
-            FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)dst->recordWork)->data0;
+            FileKeyBlock *record = (FileKeyBlock *)dst->recordWork->data0;
             billSetBillboardMode(dst->deviceHandle, (s16)record->alphaTrack.surfaceIndex);
         }
         break;
     case 5: {
-        u32 count = ((FileSlotTable *)src->recordWork)->count;
+        u32 count = src->recordWork->count;
         s32 size;
         u32 i;
 
@@ -5195,7 +5195,7 @@ void fileLoadObjectOpenNamedDevice(LoadObj *obj, s32 resourceIndex) {
     handle = effCreateBillboardSharingIndexedResource(resourceIndex);
     obj->deviceHandle = handle;
     if (obj->recordWork != NULL) {
-        FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)obj->recordWork)->data0;
+        FileKeyBlock *record = (FileKeyBlock *)obj->recordWork->data0;
         billSetBillboardMode(handle, (s16)record->alphaTrack.surfaceIndex);
     }
 }
@@ -5208,7 +5208,7 @@ void fileLoadObjectOpenDevice(LoadObj *obj, void *name) {
     handle = billCreateIndexed(0, (u32)name);
     obj->deviceHandle = handle;
     if (obj->recordWork != NULL) {
-        FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)obj->recordWork)->data0;
+        FileKeyBlock *record = (FileKeyBlock *)obj->recordWork->data0;
         billSetBillboardMode(handle, (s16)record->alphaTrack.surfaceIndex);
     }
 }
@@ -5220,13 +5220,13 @@ void fileLoadObjectOpenAndStartDevice(LoadObj *obj, void *name) {
     obj->deviceHandle = billCreateIndexed(1, (u32)name);
     billMarkKindOneFlag((struct BillObj *)(obj->deviceHandle));
     if (obj->recordWork != NULL) {
-        FileKeyBlock *record = (FileKeyBlock *)((FileSlotTable *)obj->recordWork)->data0;
+        FileKeyBlock *record = (FileKeyBlock *)obj->recordWork->data0;
         billSetBillboardMode(obj->deviceHandle, (s16)record->alphaTrack.surfaceIndex);
     }
 }
 
 void fileReplaceEffectSurfaceJobs(LoadObj *obj, FileJobPayload *job) {
-    u32 count = ((FileSlotTable *)obj->recordWork)->count;
+    u32 count = obj->recordWork->count;
     u32 i;
     s32 size;
 
@@ -5261,14 +5261,14 @@ void fileReplaceReferenceHolder(LoadObj *obj, u32 resource) {
 
 void fileClearLoadObjectReferences(LoadObj *obj) {
     if (obj->recordWork != NULL) {
-        fileClearRecordReferences((FileSlotTable *)obj->recordWork);
+        fileClearRecordReferences(obj->recordWork);
         return;
     }
 }
 
 void fileAcquireLoadObjectRecord(LoadObj *obj) {
     if (obj->recordWork != NULL) {
-        fileAcquireRecord((s32)obj->recordWork);
+        fileAcquireRecord(obj->recordWork);
         return;
     }
 }

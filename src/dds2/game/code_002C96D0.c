@@ -83,7 +83,7 @@ typedef struct EffectSurfaceNode {
     void **queues;
     struct SdfMemBlock *queueAllocation;
     struct EffExpandedList *referenceHolder;
-    u32 active;
+    FileSlotTable *active;
     u16 unk50;
 } EffectSurfaceNode;
 
@@ -5622,14 +5622,14 @@ void fileDestroyEffectSurfaceAndChildren(EffectSurfaceNode *node) {
         billDispatchByKind(node->resource);
     }
     if (node->jobAllocation != 0) {
-        count = ((FileSlotTable *)node->active)->count;
+        count = node->active->count;
         for (i = 0; i < count; i++) {
             fileJobDestroy(node->jobs[i]);
         }
         sdfReleaseResourceAllocation(node->jobAllocation);
     }
     if (node->queueAllocation != 0) {
-        count = ((FileSlotTable *)node->active)->count;
+        count = node->active->count;
         for (i = 0; i < count; i++) {
             fileQueueDestroy(node->queues[i]);
         }
@@ -5639,16 +5639,16 @@ void fileDestroyEffectSurfaceAndChildren(EffectSurfaceNode *node) {
         effReleaseReferenceHolder(node->referenceHolder);
     }
     if (node->active != 0) {
-        fileReleaseGridRecordHandle((FileSlotTable *)node->active);
+        fileReleaseGridRecordHandle(node->active);
     }
     sdfReleaseChipBlock(node);
 }
 
 EffectSurfaceNode *fileLoadObjectCreateChild(EffectSurfaceNode *owner) {
-    FileKeyBlock *source = (FileKeyBlock *)((FileSlotTable *)owner->active)->data1;
+    FileKeyBlock *source = (FileKeyBlock *)owner->active->data1;
     EffectSurfaceNode *result = fileCreateGridLoaderRecord(source);
 
-    fileLoadObjectSetResource(result, ((FileSlotTable *)owner->active)->type, source);
+    fileLoadObjectSetResource(result, owner->active->type, source);
     fileCloneEffectSurfaceResources(result, owner);
     return result;
 }
@@ -5668,11 +5668,11 @@ void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *
         dst->resource = billCloneObjectRetainingSharedData(src->resource);
         billMarkKindOneFlag(dst->resource);
         if (dst->active != 0) {
-            billSetBillboardMode(dst->resource, (s16)((FileKeyBlock *)((FileSlotTable *)dst->active)->data0)->alphaTrack.surfaceIndex);
+            billSetBillboardMode(dst->resource, (s16)((FileKeyBlock *)dst->active->data0)->alphaTrack.surfaceIndex);
         }
         break;
     case 5:
-        count = ((FileSlotTable *)src->active)->count;
+        count = src->active->count;
         if (count == 0) {
             return;
         }
@@ -5695,7 +5695,7 @@ void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *
         }
         break;
     case 6:
-        count = ((FileSlotTable *)src->active)->count;
+        count = src->active->count;
         if (count == 0) {
             return;
         }
@@ -5729,9 +5729,9 @@ void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *
 
 void fileLoadObjectSetResource(EffectSurfaceNode *node, u32 entryId, void *resource) {
     if (node->active != 0) {
-        fileReleaseGridRecordHandle((FileSlotTable *)node->active);
+        fileReleaseGridRecordHandle(node->active);
     }
-    node->active = (u32)fileAllocateGridRecordSlots((u16)entryId, node->capacity, resource);
+    node->active = fileAllocateGridRecordSlots((u16)entryId, node->capacity, resource);
 }
 
 void fileLoadObjectOpenNamedDevice(EffectSurfaceNode *node, u32 resourceId) {
@@ -5742,7 +5742,7 @@ void fileLoadObjectOpenNamedDevice(EffectSurfaceNode *node, u32 resourceId) {
     resource = effCreateBillboardSharingIndexedResource(resourceId);
     node->resource = resource;
     if (node->active != 0) {
-        billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode(resource, (s16)((FileKeyBlock *)node->active->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -5754,7 +5754,7 @@ void fileLoadObjectOpenDevice(EffectSurfaceNode *node, u32 resourceId) {
     resource = billCreateIndexed(0, resourceId);
     node->resource = resource;
     if (node->active != 0) {
-        billSetBillboardMode(resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode(resource, (s16)((FileKeyBlock *)node->active->data0)->alphaTrack.surfaceIndex);
     }
 }
 
@@ -5767,12 +5767,12 @@ void fileLoadObjectOpenAndStartDevice(EffectSurfaceNode *node, u32 resourceId) {
     node->resource = resource;
     billMarkKindOneFlag(resource);
     if (node->active != 0) {
-        billSetBillboardMode(node->resource, (s16)((FileKeyBlock *)((FileSlotTable *)node->active)->data0)->alphaTrack.surfaceIndex);
+        billSetBillboardMode(node->resource, (s16)((FileKeyBlock *)node->active->data0)->alphaTrack.surfaceIndex);
     }
 }
 
 void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJobPayload *job) {
-    u32 count = ((FileSlotTable *)node->active)->count;
+    u32 count = node->active->count;
     u32 i;
     s32 size;
 
@@ -5796,7 +5796,7 @@ void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJobPayload *job) 
 }
 
 void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job) {
-    u32 count = ((FileSlotTable *)node->active)->count;
+    u32 count = node->active->count;
     u32 i;
     s32 size;
 
@@ -5828,7 +5828,7 @@ void fileReplaceReferenceHolder(EffectSurfaceNode *obj, u32 resource) {
 
 void fileClearLoadObjectReferences(EffectSurfaceNode *obj) {
     if (obj->active != 0) {
-        fileClearRecordReferences((FileSlotTable *)obj->active);
+        fileClearRecordReferences(obj->active);
         return;
     }
 }
@@ -5842,7 +5842,7 @@ extern void fileSetRecordSecondVector();
 /* Original-style implicit int; callers ignore its result. */
 fileAcquireLoadObjectRecord(EffectSurfaceNode *obj) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0 && obj->active != 0) {
-        fileAcquireRecord((FileSlotTable *)obj->active);
+        fileAcquireRecord(obj->active);
     }
 }
 
@@ -5867,7 +5867,7 @@ void fileSetRecordWordFour(s32 record, u32 value) {
 
 void fileSetLoadObjectScale(EffectSurfaceNode *obj, f32 scale) {
     obj->scale = scale;
-    dds3DispatchIndexedCallback((FileSlotTable *)obj->active);
+    dds3DispatchIndexedCallback(obj->active);
 }
 
 
