@@ -1560,7 +1560,6 @@ u8 fldGetCampSceneControlMode(void) {
 
 extern void *dds3GetWorldObject(void);
 
-extern void dds3SetWorldObjectDataValue(EffWorldNode *, s8);
 
 extern void kwlnFadeStartIn(s32);
 
@@ -1600,7 +1599,7 @@ s32 func_001273E8(void) {
     if (D_00435F7C > 0) {
         D_00435F7C--;
         if (D_00435F7C == 0) {
-            dds3SetWorldObjectDataValue(dds3GetWorldObject(), 0);
+            dds3SetWorldObjectDrawEnabled(dds3GetWorldObject(), 0);
             kwlnFadeStartIn(4);
             mnuCreateCampTasks();
         }
@@ -1616,7 +1615,7 @@ s32 func_001273E8(void) {
         } else {
             fldApplySkyLightSetToPlayerVU();
         }
-        dds3SetWorldObjectDataValue(dds3GetWorldObject(), 1);
+        dds3SetWorldObjectDrawEnabled(dds3GetWorldObject(), 1);
         fldSetSceneControlFlags(0x20);
         kwlnFadeStartOut(0);
         kwlnFadeStartIn(8);
@@ -1687,7 +1686,7 @@ s32 fldUpdateNextFloorTransition(void) {
         if (D_00435F80 > 0) {
             D_00435F80--;
             if (D_00435F80 == 0) {
-                dds3SetWorldObjectDataValue(dds3GetWorldObject(), 0);
+                dds3SetWorldObjectDrawEnabled(dds3GetWorldObject(), 0);
                 kwlnFadeStartIn(4);
                 func_00149A00();
             }
@@ -1922,7 +1921,7 @@ s32 func_001278D0(void) {
         if (fldTestSceneControlFlags(0x40) != 0) func_0013DDC0((EffWorldNode *)fldPlayerObject);
         break;
     case 5:
-        dds3SetWorldObjectDataValue(dds3GetWorldObject(), 0);
+        dds3SetWorldObjectDrawEnabled(dds3GetWorldObject(), 0);
         fldSetEncounterMode(fldAreaState.encounterMode);
         func_00154F18(0);
         fldStopCurrentBgm();

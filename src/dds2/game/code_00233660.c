@@ -2378,9 +2378,6 @@ void mdlUpdateViewerMarkEditorInput(void) {
 
 extern const char D_00421420[];
 extern const char D_004370F0[];
-extern void sdfQueueFlatTriangle(s32, s32, s32, s32, s32, s32, s32, s32,
-                                 s32, s32, s32 (*)(s32));
-
 void func_00237D08(void) {
     MdlViewState *state = &mdlViewerState;
     MdlCtx *resource;
@@ -2495,12 +2492,12 @@ void func_00237D08(void) {
         }
 
         if (scroll != 0) {
-            sdfQueueFlatTriangle(packetList, 0x8000A0C0, 0,
+            sdfQueueFlatTriangle((SdfListHead *)(u32)packetList, 0x8000A0C0, 0,
                                  0x8040, 0x7A30, 0x8000, 0x7A70,
                                  0x8080, 0x7A70, 0xFF0080, NULL);
         }
         if (record != NULL) {
-            sdfQueueFlatTriangle(packetList, 0x8000A0C0, 0,
+            sdfQueueFlatTriangle((SdfListHead *)(u32)packetList, 0x8000A0C0, 0,
                                  0x8000, 0x7C10, 0x8080, 0x7C10,
                                  0x8040, 0x7C50, 0xFF0080, NULL);
         }

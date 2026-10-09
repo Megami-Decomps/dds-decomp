@@ -38,4 +38,22 @@ void sdfAppendClosedRectanglePacket(
     SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right,
     s32 bottom, s32 depth, s32 (*allocatePacket)(s32));
 
+void sdfQueueFlatTriangle(
+    SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
+    s32 y1, s32 x2, s32 y2, s32 depth, s32 (*allocatePacket)(s32));
+void sdfBuildPacketE(
+    SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
+    s32 y1, s32 x2, s32 y2, s32 x3, s32 y3, s32 depth,
+    s32 (*allocatePacket)(s32));
+void sdfQueueTexturedQuad(
+    SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
+    s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2, s32 u2,
+    s32 v2, s32 x3, s32 y3, s32 u3, s32 v3, s32 depth,
+    s32 (*allocatePacket)(s32));
+void sdfQueueGouraudTexturedQuad(
+    SdfListHead *list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
+    s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2,
+    s32 u2, s32 v2, s32 color2, s32 x3, s32 y3, s32 u3, s32 v3, s32 color3,
+    s32 depth, s32 (*allocatePacket)(s32));
+
 #endif
