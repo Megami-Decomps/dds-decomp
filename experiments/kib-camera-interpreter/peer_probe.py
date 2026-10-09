@@ -287,8 +287,8 @@ class VM:
                 return
             need(self.f[ft] is not None, "unknown_float_used")
             y = bits_float(self.f[ft])
-            if fn in (50, 60, 62):
-                self.fcc = x == y if fn == 50 else x < y if fn == 60 else x <= y
+            if fn in (50, 52, 54, 60, 62):
+                self.fcc = x == y if fn == 50 else x < y if fn in (52, 60) else x <= y
                 return
             if fn == 0:
                 self.f[fd] = float_bits(x + y)
@@ -448,6 +448,15 @@ def selftest():
         assert exc.args[0] == "unmodeled_synthetic_memory"
     else:
         raise AssertionError("stale sibling subrange survived partial write")
+
+    # EE ordered comparison encodings, including unordered NaN inputs.
+    for fn in (52, 54, 60, 62):
+        for x, y, expected in ((1.0, 2.0, True), (2.0, 1.0, False),
+                               (float("nan"), 1.0, False)):
+            m = machine([(17 << 26) | (16 << 21) | (1 << 16) | fn])
+            m.f[0], m.f[1] = float_bits(x), float_bits(y)
+            m.data(BASE)
+            assert m.fcc == expected
 
 def inspect(repo):
     sys.path.insert(0, str(repo / "tools"))
