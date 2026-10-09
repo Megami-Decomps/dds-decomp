@@ -2040,8 +2040,8 @@ void func_0012BE18(s32 mode) {
 
 void fldSubmitGsLinesScaled(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2) {
     s32 coords[4];
-    s32 command;
-    s32 packet;
+    SdfListHead *command;
+    SdfDrawPacket *packet;
     u64 *dst;
     u64 lo;
     u64 hi;
@@ -2053,11 +2053,11 @@ void fldSubmitGsLinesScaled(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsW
     coords[1] = y0 * 16;
     coords[2] = x1 * 16;
     coords[3] = y1 * 16;
-    command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList((SdfListHead *)command);
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 2));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x49, 2, 0x41, 2);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 2));
+    sdfConsInitPacketHeader(packet, 0x49, 2, 0x41, 2);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | (0x8000LL << 24);
     pos = coords;
@@ -2070,15 +2070,15 @@ void fldSubmitGsLinesScaled(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsW
         pos += 2;
         dst += 2;
     }
-    sdfAppendPacket((SdfListHead *)command, packet);
+    sdfAppendPacket(command, (u32)packet);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 void fldSubmitGsLines(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2) {
     u32 coords[4];
-    s32 command;
-    s32 packet;
+    SdfListHead *command;
+    SdfDrawPacket *packet;
     u64 *dst;
     SdfPoolNode *descriptor;
     u32 *pos;
@@ -2090,11 +2090,11 @@ void fldSubmitGsLines(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, 
     coords[1] = y0;
     coords[2] = x1;
     coords[3] = y1;
-    command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList((SdfListHead *)command);
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 2));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x49, 2, 0x41, 2);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 2));
+    sdfConsInitPacketHeader(packet, 0x49, 2, 0x41, 2);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | (0x8000LL << 24);
     pos = coords;
@@ -2107,15 +2107,15 @@ void fldSubmitGsLines(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, 
         pos += 2;
         dst += 2;
     }
-    sdfAppendPacket((SdfListHead *)command, packet);
+    sdfAppendPacket(command, (u32)packet);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
     s32 coords[8];
-    s32 command;
-    s32 packet;
+    SdfListHead *command;
+    SdfDrawPacket *packet;
     u64 *dst;
     u64 lo;
     u64 hi;
@@ -2131,11 +2131,11 @@ void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1,
     coords[5] = (y + h) * 16;
     coords[6] = x * 16;
     coords[7] = (y + h) * 16;
-    command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList((SdfListHead *)command);
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4D, 2, 0x41, 4);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
+    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
     pos = coords;
@@ -2148,15 +2148,15 @@ void fldSubmitGsQuadTagged(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1,
         pos += 2;
         dst += 2;
     }
-    sdfAppendPacket((SdfListHead *)command, packet);
+    sdfAppendPacket(command, (u32)packet);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 void fldSubmitPackedRectangleGsPacket(s32 x, s32 y, s32 w, s32 h, u32 vertexTag, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
     s32 coords[8];
-    s32 command;
-    s32 packet;
+    SdfListHead *command;
+    SdfDrawPacket *packet;
     u64 *dst;
     u64 lo;
     u64 hi;
@@ -2173,11 +2173,11 @@ void fldSubmitPackedRectangleGsPacket(s32 x, s32 y, s32 w, s32 h, u32 vertexTag,
     coords[5] = (y + h) * 16;
     coords[6] = x * 16;
     coords[7] = (y + h) * 16;
-    command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList((SdfListHead *)command);
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4D, 2, 0x41, 4);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
+    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     tag = vertexTag;
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
@@ -2191,15 +2191,15 @@ void fldSubmitPackedRectangleGsPacket(s32 x, s32 y, s32 w, s32 h, u32 vertexTag,
         pos += 2;
         dst += 2;
     }
-    sdfAppendPacket((SdfListHead *)command, packet);
+    sdfAppendPacket(command, (u32)packet);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
     u32 coords[8];
-    s32 command;
-    s32 packet;
+    SdfListHead *command;
+    SdfDrawPacket *packet;
     u64 *dst;
     u64 lo;
     u64 hi;
@@ -2215,11 +2215,11 @@ void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u
     coords[5] = y1;
     coords[6] = x0;
     coords[7] = y1;
-    command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList((SdfListHead *)command);
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4D, 2, 0x41, 4);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
+    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
     pos = coords;
@@ -2232,9 +2232,9 @@ void fldSubmitGsRect(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u
         pos += 2;
         dst += 2;
     }
-    sdfAppendPacket((SdfListHead *)command, packet);
+    sdfAppendPacket(command, (u32)packet);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 void fldSubmitGsGradientTriangle(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2) {
@@ -2280,8 +2280,8 @@ void fldSubmitGsGradientTriangle(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2,
 
 void fldSubmitGsGradientQuad(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3) {
     s32 coords[8];
-    s32 command;
-    s32 packet;
+    SdfListHead *command;
+    SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
     s32 *pos;
@@ -2295,11 +2295,11 @@ void fldSubmitGsGradientQuad(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0,
     coords[5] = (y + h) * 16;
     coords[6] = (x + w) * 16;
     coords[7] = (y + h) * 16;
-    command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList((SdfListHead *)command);
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4C, 2, 0x41, 4);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
+    sdfConsInitPacketHeader(packet, 0x4C, 2, 0x41, 4);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     for (i = 0, pos = coords; i < 4; i++) {
         if (i == 0) {
             dst[0] = (u64)r0 | ((u64)g0 << 32);
@@ -2321,15 +2321,15 @@ void fldSubmitGsGradientQuad(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0,
         dst += 2;
         pos += 2;
     }
-    sdfAppendPacket((SdfListHead *)command, packet);
+    sdfAppendPacket(command, (u32)packet);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 void func_0012CB08(u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3, f32 x, f32 y, f32 w, f32 h) {
     s32 coords[8];
-    s32 command;
-    s32 packet;
+    SdfListHead *command;
+    SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
     s32 *pos;
@@ -2343,11 +2343,11 @@ void func_0012CB08(u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a
     coords[5] = (s32)((y + h) * 8.0f);
     coords[6] = (s32)(x * 16.0f);
     coords[7] = (s32)((y + h) * 8.0f);
-    command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList((SdfListHead *)command);
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4D, 2, 0x41, 4);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
+    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     for (i = 0, pos = coords; i < 4; i++) {
         if (i == 0) {
             dst[0] = (u64)r0 | ((u64)g0 << 32);
@@ -2369,15 +2369,15 @@ void func_0012CB08(u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a
         dst += 2;
         pos += 2;
     }
-    sdfAppendPacket((SdfListHead *)command, packet);
+    sdfAppendPacket(command, (u32)packet);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3, u32 vertexTag) {
     s32 coords[8];
-    s32 command;
-    s32 packet;
+    SdfListHead *command;
+    SdfDrawPacket *packet;
     u64 *dst;
     u64 lo;
     u64 hi;
@@ -2394,11 +2394,11 @@ void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsW
     coords[5] = (y + h) * 16;
     coords[6] = x * 16;
     coords[7] = (y + h) * 16;
-    command = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList((SdfListHead *)command);
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x4D, 2, 0x41, 4);
-    dst = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    command = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(command);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, 4));
+    sdfConsInitPacketHeader(packet, 0x4D, 2, 0x41, 4);
+    dst = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
     hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
     tag = vertexTag;
@@ -2412,9 +2412,9 @@ void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsW
         pos += 2;
         dst += 2;
     }
-    sdfAppendPacket((SdfListHead *)command, packet);
+    sdfAppendPacket(command, (u32)packet);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
-    descriptor->append(descriptor, (SdfListHead *)command);
+    descriptor->append(descriptor, command);
 }
 
 /* Model draw input: angle for the VU0 matrix and a geometry packet value. */

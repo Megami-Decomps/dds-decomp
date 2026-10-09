@@ -698,14 +698,14 @@ typedef struct GridPackedTriangleVertex {
 
 void itfDrawColoredTriangle(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 surfaceIndex)
 {
-    s32 packet;
+    SdfDrawPacket *packet;
     GridPackedTriangleVertex *vertices;
     SdfListHead *list;
     SdfPoolNode *surface;
 
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(6, 1));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x14B, 6, 0x515151, 1);
-    vertices = (GridPackedTriangleVertex *)sdfConsMeasurePacketWithHeader(packet);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(6, 1));
+    sdfConsInitPacketHeader(packet, 0x14B, 6, 0x515151, 1);
+    vertices = (GridPackedTriangleVertex *)sdfConsMeasurePacketWithHeader((s32)packet);
     itfGridUnpackColorChannels(vertices[0].channels, colors[0]);
     vertices[0].xy = (xs[0] + 0x7000) | ((u64)(ys[0] + 0x7900) << 32);
     vertices[0].depth = z;
@@ -717,7 +717,7 @@ void itfDrawColoredTriangle(const u32 *xs, const u32 *ys, u32 z, const u32 *colo
     vertices[2].depth = z;
     list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
     sdfInitPacketList(list);
-    sdfAppendPacket(list, packet);
+    sdfAppendPacket(list, (u32)packet);
     surface = &kwlnDrawSurfaces[surfaceIndex];
     surface->append(surface, list);
 }
@@ -744,15 +744,15 @@ void itfDrawColoredRectangle(u32 x, u32 y, u32 z, u32 width, u32 height, const u
     u32 left = x + 0x7000;
     u32 top = y + 0x7900;
     u64 topWord = (u64)top << 32;
-    s32 packet;
+    SdfDrawPacket *packet;
     GridPackedStripVertex *vertices;
     SdfListHead *list;
     SdfPoolNode *surface;
     u64 right, bottom;
 
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(8, 1));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x14C | (gsContext << 9), 8, 0x51515151, 1);
-    vertices = (GridPackedStripVertex *)sdfConsMeasurePacketWithHeader(packet);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(8, 1));
+    sdfConsInitPacketHeader(packet, 0x14C | (gsContext << 9), 8, 0x51515151, 1);
+    vertices = (GridPackedStripVertex *)sdfConsMeasurePacketWithHeader((s32)packet);
     itfGridUnpackColorChannels(vertices[0].channels, colors[0]);
     vertices[0].xy = (u64)left | topWord;
     vertices[0].depth = z;
@@ -769,7 +769,7 @@ void itfDrawColoredRectangle(u32 x, u32 y, u32 z, u32 width, u32 height, const u
     vertices[3].depth = z;
     list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
     sdfInitPacketList(list);
-    sdfAppendPacket(list, packet);
+    sdfAppendPacket(list, (u32)packet);
     surface = &kwlnDrawSurfaces[surfaceIndex];
     surface->append(surface, list);
 }
@@ -803,14 +803,14 @@ typedef struct GridPackedLineVertex {
 void itfDrawGradientLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
                   const u32 *colors, u32 surfaceIndex)
 {
-    s32 packet;
+    SdfDrawPacket *packet;
     GridPackedLineVertex *vertices;
     SdfListHead *list;
     SdfPoolNode *surface;
 
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(4, 1));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x149, 4, 0x5151, 1);
-    vertices = (GridPackedLineVertex *)sdfConsMeasurePacketWithHeader(packet);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(4, 1));
+    sdfConsInitPacketHeader(packet, 0x149, 4, 0x5151, 1);
+    vertices = (GridPackedLineVertex *)sdfConsMeasurePacketWithHeader((s32)packet);
     itfGridUnpackColorChannels(vertices[0].channels, colors[0]);
     vertices[0].xy = (x0 + 0x7000) | ((u64)(y0 + 0x7900) << 32);
     vertices[0].depth = z0;
@@ -819,7 +819,7 @@ void itfDrawGradientLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     vertices[1].depth = z1;
     list = (SdfListHead *)sdfAllocPacketAligned(sizeof(SdfListHead));
     sdfInitPacketList(list);
-    sdfAppendPacket(list, packet);
+    sdfAppendPacket(list, (u32)packet);
     surface = &kwlnDrawSurfaces[surfaceIndex];
     surface->append(surface, list);
 }

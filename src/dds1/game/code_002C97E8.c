@@ -427,7 +427,7 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 void func_002CAAC8(s32 *points, u32 tail, u32 *colors, s32 count,
                    s32 useFirstColor, s32 surfaceIndex) {
     SdfListHead *list = (SdfListHead *)sdfAllocPacketAligned(0x20);
-    s32 packet;
+    SdfDrawPacket *packet;
     u64 *vertex;
     SdfPoolNode *surface;
     u32 *selectedColors;
@@ -437,9 +437,9 @@ void func_002CAAC8(s32 *points, u32 tail, u32 *colors, s32 count,
     u32 color;
 
     sdfInitPacketList(list);
-    packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, count));
-    sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x14D, 2, 0x41, count);
-    vertex = (u64 *)sdfConsMeasurePacketWithHeader(packet);
+    packet = (SdfDrawPacket *)sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(2, count));
+    sdfConsInitPacketHeader(packet, 0x14D, 2, 0x41, count);
+    vertex = (u64 *)sdfConsMeasurePacketWithHeader((s32)packet);
     for (i = 0; i < count; i++) {
         if (useFirstColor & 1) {
             selectedColors = colors;
@@ -459,7 +459,7 @@ void func_002CAAC8(s32 *points, u32 tail, u32 *colors, s32 count,
         vertex[1] = tail;
         vertex += 2;
     }
-    sdfAppendPacket(list, packet);
+    sdfAppendPacket(list, (u32)packet);
     surface = &kwlnDrawSurfaces[surfaceIndex];
     surface->append(surface, list);
 }
