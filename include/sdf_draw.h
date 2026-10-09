@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+struct SdfChunkHeader;
+
 /* Three optional SDK light sources; each points to color and direction vec4.
  * The callee advances through three pointer words, not scalar slot metadata. */
 typedef f32 (*SdfLightSources[3])[4];
@@ -136,7 +138,7 @@ typedef struct SdfModel {
     u32 unk84;
     f32 unk88;
     f32 unk8C;
-    u32 chunkTable;
+    struct SdfChunkHeader *chunkTable; /* Borrowed from the model resource data. */
     /* Float scalar (DDS2 0x232074 / Nocturne 0x2B07D4), forwarded
      * as raw packet bits by DDS1 0x2D9530. */
     union {
@@ -148,6 +150,8 @@ typedef struct SdfModel {
 } SdfModel;
 
 typedef char SdfModel_size_must_be_0x9C[(sizeof(SdfModel) == 0x9C) ? 1 : -1];
+typedef char SdfModel_chunkTable_at_90[
+    ((u32)&((SdfModel *)0)->chunkTable == 0x90) ? 1 : -1];
 
 SdfDrawNode *sdfModelFindDrawNode(SdfModel *model, s32 id);
 void sdfProcessReferencedObjects(SdfModel *model, SdfObjectRefCommand *source);

@@ -208,7 +208,7 @@ SdfChunkHeader *sdfChunkFindById(SdfChunkHeader *chunk, s32 chunkId) {
 }
 
 SdfChunkHeader *sdfChunkFindByTag(SdfModel *model, s32 tag) {
-    return sdfChunkFindById((SdfChunkHeader *)model->chunkTable, tag);
+    return sdfChunkFindById(model->chunkTable, tag);
 }
 
 /* Names are followed by a four-byte-aligned ID word; missing chunks/names return -1. */
