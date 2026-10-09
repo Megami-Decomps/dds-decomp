@@ -318,7 +318,62 @@ void sdfSaveResetSnapshot(void) {
     D_00438EAC = datGameState->world.slotFlags;
 }
 
-INCLUDE_ASM(const s32, "game/code_001176A0", func_00118008);
+extern void mnuMarkEntryBlocked(s32);
+extern void mtrMantraEventBitPop(s32);
+extern void dds3ForEachFlagged(void);
+extern void ptyClearSelectedSkillFlagsFromActiveEntries(void);
+extern void func_0011D0D8(void);
+
+void func_00118008(void) {
+    DatMantraBitmap *mantra;
+    DatProfileBank *profiles;
+    DatPartyRecord *templates;
+    void *bytes;
+    DatGameState *state;
+    u32 i;
+
+    if (D_00435DB6) mdlFlagSet(0xBA0);
+    if (D_00435DB5) mdlFlagSet(0xB8F);
+    if (D_00435DC4) mdlFlagSet(0xC0E);
+    datGameState->header.unk0C = D_00435DB8;
+    memcpy(datGameState->battleFlags, D_0043E5B0, sizeof(datGameState->battleFlags));
+    datGameState->header.secondTick = D_00435DBC;
+    datGameState->header.unk20 = D_00435DC0;
+    datGameState->header.playTicks = datGameState->header.secondTick;
+    datGameState->header.unk24 = D_00385218[0];
+    datGameState->header.unk28 = D_00385218[1];
+    datGameState->header.unk2C = D_00385218[2];
+    mnuApplyCampResourceFlagEntries(D_00438E90);
+    sdfReleaseResourceAllocation(D_00438E90);
+
+    mantra = datGameState->mantraBits;
+    memcpy(mantra, (void *)sdfMemoryGetBlockAddress((SdfMemBlock *)D_00438E94), sizeof(datGameState->mantraBits));
+    sdfReleaseResourceAllocation((SdfMemBlock *)D_00438E94);
+    profiles = datGameState->profileBanks;
+    memcpy(profiles, (void *)sdfMemoryGetBlockAddress((SdfMemBlock *)D_00438E98), sizeof(datGameState->profileBanks));
+    sdfReleaseResourceAllocation((SdfMemBlock *)D_00438E98);
+    templates = datGameState->templates;
+    memcpy(templates, (void *)sdfMemoryGetBlockAddress((SdfMemBlock *)D_00438E9C), sizeof(datGameState->templates));
+    sdfReleaseResourceAllocation((SdfMemBlock *)D_00438E9C);
+    for (i = 0; i < 16; i++) datGameState->templates[i].level = 0;
+    state = datGameState;
+    bytes = (void *)sdfMemoryGetBlockAddress((SdfMemBlock *)D_00438EA0);
+    memcpy(&state->inventory.counts[0xC0], bytes, 0x40);
+    sdfReleaseResourceAllocation((SdfMemBlock *)D_00438EA0);
+    state = datGameState;
+    bytes = (void *)sdfMemoryGetBlockAddress((SdfMemBlock *)D_00438EA4);
+    memcpy(state->itemBlockedFlags, bytes, sizeof(state->itemBlockedFlags));
+    sdfReleaseResourceAllocation((SdfMemBlock *)D_00438EA4);
+    for (i = 0xC0; (s32)i < 0x100; i++) {
+        if (datGameState->inventory.counts[i] != 0) mnuMarkEntryBlocked(i);
+    }
+    mdlFlagSet(0x901);
+    mtrMantraEventBitPop(D_00438EA8);
+    dds3ForEachFlagged();
+    ptyClearSelectedSkillFlagsFromActiveEntries();
+    func_0011D0D8();
+    datGameState->world.slotFlags = D_00438EAC;
+}
 
 /* A full reset preserves the scene allocation and restores the saved runtime data. */
 void sdfResetGameRuntime(s32 fullReset) {
