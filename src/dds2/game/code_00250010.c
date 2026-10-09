@@ -989,7 +989,31 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *ctx) {
     return kwlnStepTwoListCursors(0, 1, count, 1, shown, 0, &ctx->entryFirst, 0, &ctx->entryCursor);
 }
 
-INCLUDE_ASM(const s32, "game/code_00250010", func_002521C8);
+extern const char *D_003C94C8[];
+extern s8 D_003C9520[];
+extern char D_00437518[];
+
+/* Header row of the frame list: one text cell per column of the selected group's table row. */
+s32 func_002521C8(SdfListHead *list, s32 x, s32 y, u8 *data) {
+    EvtRuntime *ctx = (EvtRuntime *)data;
+    s32 type = ctx->frameGroup->type;
+    s32 i;
+    s32 kind;
+
+    for (i = 0; i < D_003C9538[type].columns; i++) {
+        kind = D_003C9538[type].columnTypes[i];
+        if (kind == 0x15) {
+            ctx->frameTextFormat = D_00437518;
+            ctx->frameTextWidth = 0;
+            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_004374D0, D_00437518));
+            x += ctx->frameTextWidth * 0xC0;
+        } else {
+            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_004374D0, D_003C94C8[kind]));
+            x += D_003C9520[D_003C9538[type].columnTypes[i]] * 0xC0;
+        }
+    }
+    return 1;
+}
 
 extern char D_004375A8[]; /* "%4d" */
 extern char D_004375B0[]; /* " ---" */
@@ -3730,7 +3754,7 @@ typedef struct EvtPmdFilePrefix {
 typedef char EvtPmdFilePrefix_size_check[sizeof(EvtPmdFilePrefix) == 0x20 ? 1 : -1];
 
 /* Build the directory after assigning each payload its serialized index. */
-void func_00258CC8(s32 output, s32 mode, EvtRuntime *runtime) {
+void evtViewerWriteTrackDirectory(s32 output, s32 mode, EvtRuntime *runtime) {
     EvtPmdFilePrefix header;
     PmdEntry entry;
     s32 directoryCount = 0;
@@ -3985,7 +4009,7 @@ typedef struct EvtSerializedChild {
 
 /* Filter groups by mode and serialize each child body. Type-8 spans use the
  * next start or terminal range halfword, unless their body marker disables them. */
-void func_00259298(s32 output, s32 mode, EvtRuntime *runtime) {
+void evtViewerWriteChildRecords(s32 output, s32 mode, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
 
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -4199,13 +4223,13 @@ extern s32 func_0035C860(char *buffer, const char *format, ...);
 extern s32 func_00369B70(const char *path, s32 flags, ...);
 extern s32 func_00369DF8(s32 descriptor);
 extern s32 func_0036BCD0(const char *device, s32 flags);
-extern void func_00258CC8(s32 output, s32 format, EvtRuntime *runtime);
+extern void evtViewerWriteTrackDirectory(s32 output, s32 format, EvtRuntime *runtime);
 extern char D_004377C0[];
 extern char D_004377C8[];
 
 /* Save the runtime to its paired PM2/PM3 files. Mode zero uses the
  * viewer name; other modes use the selected event and cut identifiers. */
-s32 func_00259AE8(s32 mode, EvtRuntime *runtime) {
+s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
     char pm2Path[64];
     char pm3Path[64];
     s32 pm2;
@@ -4254,12 +4278,12 @@ s32 func_00259AE8(s32 mode, EvtRuntime *runtime) {
         return 0;
     }
 
-    func_00258CC8(pm2, 2, runtime);
+    evtViewerWriteTrackDirectory(pm2, 2, runtime);
     for (section = 0; section < 26; section++) {
         switch (section) {
         case 0: evtWriteRuntimeHeaderValues(pm2, runtime); break;
         case 1: evtWriteFixedSizeEntries(pm2, runtime); break;
-        case 4: func_00259298(pm2, 2, runtime); break;
+        case 4: evtViewerWriteChildRecords(pm2, 2, runtime); break;
         case 5: evtWriteGroupHeader(pm2, runtime); break;
         case 13: evtCopyRuntimeChildPayloadsToBuffer(pm2, runtime); break;
         case 14: evtEmitGroupTypeElevenPayloads(pm2, runtime); break;
@@ -4282,10 +4306,10 @@ s32 func_00259AE8(s32 mode, EvtRuntime *runtime) {
     }
     func_00369DF8(pm2);
     func_0036BCD0(D_004377C8, 0);
-    func_00258CC8(pm3, 3, runtime);
+    evtViewerWriteTrackDirectory(pm3, 3, runtime);
     for (section = 0; section < 26; section++) {
         if (section == 4) {
-            func_00259298(pm3, 3, runtime);
+            evtViewerWriteChildRecords(pm3, 3, runtime);
         }
     }
     func_00369DF8(pm3);

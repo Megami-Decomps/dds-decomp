@@ -3303,7 +3303,7 @@ extern void func_001B8838(BattleActorPanelWork *, s8);
 
 extern void btlUpdateActorSlotStates(u8 *, s8);
 
-extern void func_001B8BB0(BtlTask *, BattleActorPanelWork *, s32);
+extern void func_001B8BB0(BtlTask *, BattleActorPanelWork *, s8);
 
 void func_001B83D8(BtlTask *task, s8 mode, s8 value) {
     s32 count = 0;
@@ -3534,7 +3534,43 @@ void btlAdvancePendingSceneSlotStates(u8 *scene) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B8BB0);
+typedef struct UiSlotMatchRow {
+    u8 pad00[0x18];
+    s8 state;
+    u8 pad19;
+    u8 groupIndex; /* index of the matching primary group */
+} UiSlotMatchRow;
+
+void func_001B8BB0(BtlTask *unused, BattleActorPanelWork *work, s8 keepActive) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *node = battle->units;
+    UiSlotMatchRow *row;
+    s32 group;
+    s32 offset;
+    u8 slot;
+
+    for (; node != NULL; node = node->next) {
+        if (btlHasRequiredActorStatusBits(node) == 0) {
+            continue;
+        }
+        group = 0;
+        slot = node->lookupId;
+        if (battle->groupPrimary[0] != NULL) {
+            while (group < 20 && battle->groupPrimary[group] != NULL) {
+                if (battle->groupPrimary[group]->unit->identity == node->identity) {
+                    offset = slot * 0x290 + 0xE0;
+                    row = (UiSlotMatchRow *)((u8 *)work + offset);
+                    row->groupIndex = group;
+                    if (keepActive == 0 || row->state != 1) {
+                        row->state = 3;
+                    }
+                    break;
+                }
+                group++;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B8CB8);
 

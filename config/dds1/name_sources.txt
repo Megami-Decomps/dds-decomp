@@ -7393,5 +7393,8 @@
 0x0016C698	effFlashOrbitArcUpdate	inferred	Advances shape and particle lifetimes, updates orbit-arc geometry and colors, and submits the record pool.
 0x0016DBA0	effFlashRadialStripSetParticleColors	inferred	Writes packed colors for paired radial-strip quad records using the supplied color multiplier.
 0x002193E8	mdlGetRecordPartIndex	inferred	returns the u16 MdlRecord part index at +0x0e, used for part-list selection
-0x0022FA68	evtViewerFindLatestMatchingMotionKey	inferred	Selects the latest eligible kind-five motion key at or before a frame for a channel, requiring its indexed condition to pass.
 0x0022EB10	evtViewerSyncModelMotionChannels	inferred	Applies the selected timeline key or baseline state to each of the four model motion channels, using a per-channel key cache.
+0x0022FA68	evtViewerFindLatestMatchingMotionKey	inferred	Selects the latest eligible kind-five motion key at or before a frame for a channel, requiring its indexed condition to pass.
+0x0023D9D8	evtViewerWriteTrackDirectory	inferred	Writes the mode-selected PMD directory and payload offsets.
+0x0023DFA8	evtViewerWriteChildRecords	inferred	Writes serialized child records, filtering groups by PM2/PM3 mode and deriving type-8 spans.
+0x0023E7F8	evtViewerSaveTrackFiles	inferred	Opens, writes, and closes the paired PM2 and PM3 track files; returns success status.

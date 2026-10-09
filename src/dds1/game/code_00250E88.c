@@ -307,7 +307,7 @@ s32 mnuDisplayNextPendingMantra(s32 context) {
 extern void *memset(void *, s32, u32);
 
 /* Allocate and clear scene work before registering its grid and coordinates. */
-s32 mnuCreateSceneWork(void) {
+MenuSceneWork *mnuCreateSceneWork(void) {
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(MNU_SCENE_WORK_SIZE);
     u8 *sceneWork = (u8 *)sdfMemoryGetBlockAddress(allocation);
 
@@ -318,16 +318,15 @@ s32 mnuCreateSceneWork(void) {
     ((MenuSceneWork *)sceneWork)->phaseFrame = 0;
     ((MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY))->displayedCurrency = datGameState->header.currency;
     mnuCopySceneCoordinates((MenuSceneWork *)sceneWork);
-    return (s32)sceneWork;
+    return (MenuSceneWork *)sceneWork;
 }
 
 /* Retain the native metadata lookup, then release grid/list/allocation resources and reset projection state. */
-void mnuReleaseSceneContext(s32 unused, s32 sceneAddress) {
+void mnuReleaseSceneContext(s32 unused, MenuSceneWork *scene) {
     sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
-    sdfDestroyGridWork(((MenuSceneWork *)sceneAddress)->gridHandle);
-    mnuReleaseDisplayListNodes(
-        &((MenuSceneWork *)(u32)sceneAddress)->sceneTransitionList);
-    sdfReleaseResourceAllocation(((MenuSceneWork *)sceneAddress)->allocation);
+    sdfDestroyGridWork(scene->gridHandle);
+    mnuReleaseDisplayListNodes(&scene->sceneTransitionList);
+    sdfReleaseResourceAllocation(scene->allocation);
     mnuResetWorkFloats();
 }
 

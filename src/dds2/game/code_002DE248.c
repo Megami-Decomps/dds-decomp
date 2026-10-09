@@ -5032,7 +5032,72 @@ void effReleaseBillboardFramePointSets(EffClassWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002ED3D0);
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002EDB10);
+typedef struct EffPointSetCompactRow {
+    EffPointSet *set; /* 0x00 */
+    s32 key;          /* 0x04 */
+    u32 color;        /* 0x08 */
+} EffPointSetCompactRow;
+
+typedef struct EffPointSetCompactTable {
+    EffPointSetCompactRow *rows;
+} EffPointSetCompactTable;
+
+/* Per-frame update of a compact five-point-group class (rows without the radial phase). */
+void func_002EDB10(EffClassWork *work) {
+    EffBillTimedHeader *header = (EffBillTimedHeader *)work->payload;
+    EffPointSetCompactRow *row = ((EffPointSetCompactTable *)work->resource)->rows;
+    s32 frame = work->frame;
+    s32 time = header->time.duration;
+    s32 count;
+    s32 i;
+    f32 tint[4];
+    u128 mtx[4];
+    s32 color1[4];
+    s32 color2[4];
+    s32 rowColor[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (time < frame && time != 0) {
+        return;
+    }
+    count = header->count;
+    second = effSampleColorAlphaTracks(&header->colorTrack, &header->alphaTrack, frame, time);
+    color1[0] = work->color;
+    unit = 0x3C000000;
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    VU0_MOVE_VF(vf11, vf10);
+    color2[0] = second;
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, tint);
+    VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+    VU0_LOAD_VF(vf10, D_003E9100);
+    VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    VU0_LOAD_VF(vf10, work);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX(mtx);
+    for (i = 0; i < count; i++, row++) {
+        if (row->key > 0) {
+            EffPointSet *set = row->set;
+
+            rowColor[0] = row->color;
+            EE_MMI_RGBA_UNPACK(rowColor, 1.0f / 128.0f);
+            VU0_LOAD_VF(vf11, tint);
+            VU0_MUL(vf10, vf10, vf11);
+            EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+            blended[0] = packed;
+            set->color = blended[0];
+            set->type = ((u32 *)header)[10];
+            set->flag = ((u8 *)header)[0x5C];
+            effDrawFivePointGroups(set, mtx);
+        }
+    }
+}
 
 EffClassWork *effCreateClassResourceWork(u16 kind, void *source) {
     u32 headerSize = 0x40;
@@ -7405,7 +7470,71 @@ void effResetDefaultColorTables(void) {
     D_00437E94 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002F67D8);
+/* Payload of resource kind 2: two colours plus the position request that feeds the shared light vector. */
+typedef struct EffFieldColorConfig {
+    u32 firstColor;   /* 0x00 */
+    u32 secondColor;  /* 0x04 */
+    EffectVectorRequest direction; /* 0x08 */
+} EffFieldColorConfig;
+
+void func_002F67D8(EffActiveResource *work) {
+    EffectVectorRequest request;
+    EffFieldColorConfig *config;
+    u32 handle;
+    s32 color1[4];
+    s32 color2[4];
+
+    btlGetRuntime();
+    config = work->payload;
+    if (work->frame == 0) {
+        request.count = config->direction.count;
+        request.size = config->direction.size;
+        request.unk04 = config->direction.unk04;
+        handle = 0;
+        switch (config->direction.kind) {
+        case 0:
+        case 1:
+            handle = effBTLFieldColorGetOriginalSelector();
+            request.kind = 0;
+            break;
+        case 2:
+            handle = effBTLFieldColorGetVariantSelector();
+            request.kind = 0;
+            break;
+        case 3:
+            handle = effBTLFieldColorGetOriginalSelector();
+            request.kind = 1;
+            break;
+        case 4:
+            handle = effBTLFieldColorGetVariantSelector();
+            request.kind = 2;
+            break;
+        case 5:
+            PCP_COPY_VECTOR(D_004584B0, work);
+            break;
+        case 6:
+            handle = effBTLFieldColorGetOverrideSelector();
+            request.kind = 6;
+            break;
+        case 7:
+            handle = effBTLFieldColorGetFinalSelector();
+            request.kind = 7;
+            break;
+        }
+        if (handle != 0) {
+            effBattleMiscQueryPosition((void *)handle, &request, D_004584B0);
+        }
+        color1[0] = config->firstColor;
+        EE_MMI_RGBA_UNPACK(color1, 1.0f / 128.0f);
+        VU0_STORE_VF_UNCLOBBERED(vf10, D_00458460);
+        ((f32 *)D_00458460)[3] = 1.0f;
+        color2[0] = config->secondColor;
+        EE_MMI_RGBA_UNPACK(color2, 1.0f / 128.0f);
+        VU0_STORE_VF_UNCLOBBERED(vf10, D_004584A0);
+        ((f32 *)D_004584A0)[3] = 1.0f;
+        D_00437E94 = 1;
+    }
+}
 
 /* Copied payload plus the five effect/target slots released together. */
 typedef struct EffCopiedPayload {

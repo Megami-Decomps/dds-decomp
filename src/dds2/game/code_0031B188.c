@@ -305,8 +305,8 @@ extern void func_0031BC10(MnuEffectRecord *record, f32 xAngle, f32 yAngle, f32 z
 
 /* Position-step vectors are copied verbatim; a missing queue aborts the claim. */
 MnuEffectRecord *mnuClaimPositionedEffectRecord(MnuEffectList *list,
-                  MnuEffectPositionStep *step, s32 delay,
-                  f32 x, f32 y, f32 z, f32 scale) {
+                  f32 x, f32 y, f32 z,
+                  MnuEffectPositionStep *step, f32 scale, s32 delay) {
     f32 position[4];
     MnuEffectRecord *record;
     s32 index = 0;
@@ -368,7 +368,34 @@ MnuEffectRecord *mnuStartPositionedEffectRecord(MnuEffectList *list, s32 delay, 
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "game/code_0031B188", func_0031BA28);
+typedef struct MnuEffectBurstPreset {
+    f32 scale;
+    s16 spacing;
+    s16 count;
+    s16 jitterX;
+    s16 jitterY;
+} MnuEffectBurstPreset;
+
+extern MnuEffectBurstPreset D_0040AC50[];
+extern f32 effMiscRandUnitFloat(void *);
+
+/* Start a burst of positioned effect records with random offsets and a sound each. */
+s32 func_0031BA28(MnuEffectList *list, MnuEffectPositionStep *step, s32 baseDelay, s32 id, f32 x, f32 y, f32 z) {
+    s32 presetIndex = id - 0xA0;
+    MnuEffectBurstPreset *preset = &D_0040AC50[presetIndex];
+    f32 scale = preset->scale;
+    s32 delay;
+    s32 i;
+
+    for (i = 0; i < preset->count; i++) {
+        delay = i * preset->spacing + baseDelay;
+        mnuClaimPositionedEffectRecord(list,
+                                       x + preset->jitterX * (2.0f * effMiscRandUnitFloat(0) - 1.0f),
+                                       y + preset->jitterY * (2.0f * effMiscRandUnitFloat(0) - 1.0f), z, step, scale, delay);
+        dds3ClaimSoundSlot(0x01E00002, delay);
+    }
+    return 0;
+}
 
 void mnuClearNodeBroadcastFlag(u8 *node) {
     MnuEffectRecord *record = (MnuEffectRecord *)node;

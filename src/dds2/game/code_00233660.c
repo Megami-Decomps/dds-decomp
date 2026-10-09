@@ -819,7 +819,7 @@ typedef struct MdlPartRec {
 
 
 /* Bind each consecutive record ID to a newly created part when the chunk contains it. */
-s32 mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype, s32 type, void *(*createPart)(MdlPartEntry *)) {
+void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype, s32 type, void *(*createPart)(MdlPartEntry *)) {
     MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, partRecord->partIndex);
 
     if (partSlot != NULL) {
@@ -885,7 +885,7 @@ void mdlCreateViewerEffectPart(MdlCtx *owner, MdlEffectRec *effectRecord, s32 su
     resourceItem->payload.part.track = effTrackPolyCreateWork(&effectParams);
 }
 
-s32 mdlLoadViewerStreamRecord(MdlCtx *owner, MdlRecord *record) {
+void mdlLoadViewerStreamRecord(MdlCtx *owner, MdlRecord *record) {
     func_00231E28(owner, record->payload.stream.selectorA,
                   record->payload.stream.selectorB,
                   record->parameter.word, record->tail.word10);
@@ -904,7 +904,7 @@ typedef struct MdlEntryRec {
 extern SdfResource *sdfFindResourceById(s32 id);
 
 /* Claim an unused object only after its data resource resolves, retaining record flags and deferred-init parameters. */
-s32 mdlClaimViewerObjectPart(MdlCtx *owner, MdlEntryRec *entryRecord, s32 subtype) {
+void mdlClaimViewerObjectPart(MdlCtx *owner, MdlEntryRec *entryRecord, s32 subtype) {
     MdlPartEntry *partSlot = mdlFindViewerPartSlot(owner, entryRecord->index);
 
     if (partSlot != 0) {
@@ -944,9 +944,9 @@ void mdlCondInitEntry(MdlResourceItem *item) {
     }
 }
 
-extern s32 mdlBindViewerPartRecords(MdlCtx *object, MdlPartRec *record, s32 option, s32 type, void *(*advance)(MdlPartEntry *));
+extern void mdlBindViewerPartRecords(MdlCtx *object, MdlPartRec *record, s32 option, s32 type, void *(*advance)(MdlPartEntry *));
 
-extern s32 mdlClaimViewerObjectPart(MdlCtx *object, MdlEntryRec *record, s32 option);
+extern void mdlClaimViewerObjectPart(MdlCtx *object, MdlEntryRec *record, s32 option);
 
 /* Dispatch the five record kinds; resource application ignores any callee return value. */
 void mdlDispatchResourceEntry(MdlCtx *owner, MdlRecord *record, s32 subtype) {

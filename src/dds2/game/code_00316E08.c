@@ -866,8 +866,8 @@ void func_00319F48(void) {
     value = mnuEvaluateTimedValue(&D_0040ABF8);
     func_0031CAE8(position, (s32)D_0040ABF8.currentX + x, (s32)value + y - 32);
     lists = D_0043891C->effectWork->lists;
-    D_00438930 = mnuClaimPositionedEffectRecord(lists + 2, NULL, 0,
-                                               position[0], position[1], position[2], 0.5f);
+    D_00438930 = mnuClaimPositionedEffectRecord(lists + 2, position[0], position[1], position[2],
+                                               NULL, 0.5f, 0);
     mnuUpdateTimedEffectPosition();
 }
 

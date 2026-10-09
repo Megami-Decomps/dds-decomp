@@ -944,7 +944,31 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *work) {
     return kwlnStepTwoListCursors(0, 1, count, 1, shown, 0, &work->entryFirst, 0, &work->entryCursor);
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00237428);
+extern const char *D_003686F8[];
+extern s8 D_00368750[];
+extern char D_003BC0D0[];
+
+/* Header row of the frame list: one text cell per column of the selected group's table row. */
+s32 func_00237428(SdfListHead *list, s32 x, s32 y, u8 *data) {
+    EvtRuntime *ctx = (EvtRuntime *)data;
+    s32 type = ctx->frameGroup->type;
+    s32 i;
+    s32 kind;
+
+    for (i = 0; i < D_00368768[type].columns; i++) {
+        kind = D_00368768[type].columnTypes[i];
+        if (kind == 0x15) {
+            ctx->frameTextFormat = D_003BC0D0;
+            ctx->frameTextWidth = 0;
+            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC088, D_003BC0D0));
+            x += ctx->frameTextWidth * 0xC0;
+        } else {
+            sdfAppendPacket(list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, 0xE, D_003BC088, D_003686F8[kind]));
+            x += D_00368750[D_00368768[type].columnTypes[i]] * 0xC0;
+        }
+    }
+    return 1;
+}
 
 extern char D_003BC160[]; /* "%4d" */
 extern char D_003BC168[]; /* " ---" */
@@ -3605,7 +3629,7 @@ typedef struct EvtPmdFilePrefix {
 typedef char EvtPmdFilePrefix_size_check[sizeof(EvtPmdFilePrefix) == 0x20 ? 1 : -1];
 
 /* Build the directory after assigning each payload its serialized index. */
-void func_0023D9D8(s32 output, s32 mode, EvtRuntime *runtime) {
+void evtViewerWriteTrackDirectory(s32 output, s32 mode, EvtRuntime *runtime) {
     EvtPmdFilePrefix header;
     PmdEntry entry;
     s32 directoryCount = 0;
@@ -3864,7 +3888,7 @@ typedef struct EvtSerializedChild {
 
 /* Filter groups by mode and serialize each child body. Type-8 spans use the
  * next start or terminal range halfword, unless their body marker disables them. */
-void func_0023DFA8(s32 output, s32 mode, EvtRuntime *runtime) {
+void evtViewerWriteChildRecords(s32 output, s32 mode, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
 
     for (group = runtime->groups; group != NULL; group = group->next) {
@@ -4082,7 +4106,7 @@ extern void *sdfDevGetPathBuffer(void);
 extern char D_003BC350[];
 extern char D_003BC358[];
 
-s32 func_0023E7F8(s32 mode, EvtRuntime *runtime) {
+s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
     char pm2Path[64];
     char pm3Path[64];
     s32 pm2;
@@ -4131,12 +4155,12 @@ s32 func_0023E7F8(s32 mode, EvtRuntime *runtime) {
         return 0;
     }
 
-    func_0023D9D8(pm2, 2, runtime);
+    evtViewerWriteTrackDirectory(pm2, 2, runtime);
     for (section = 0; section < 26; section++) {
         switch (section) {
         case 0: evtWriteRuntimeHeaderValues(pm2, runtime); break;
         case 1: evtWriteFixedSizeEntries(pm2, runtime); break;
-        case 4: func_0023DFA8(pm2, 2, runtime); break;
+        case 4: evtViewerWriteChildRecords(pm2, 2, runtime); break;
         case 5: evtWriteGroupHeader(pm2, runtime); break;
         case 13: evtCopyRuntimeChildPayloadsToBuffer(pm2, runtime); break;
         case 14: evtEmitGroupTypeElevenPayloads(pm2, runtime); break;
@@ -4159,10 +4183,10 @@ s32 func_0023E7F8(s32 mode, EvtRuntime *runtime) {
     }
     func_0030EB78(pm2);
     func_00310A68(D_003BC358, 0);
-    func_0023D9D8(pm3, 3, runtime);
+    evtViewerWriteTrackDirectory(pm3, 3, runtime);
     for (section = 0; section < 26; section++) {
         if (section == 4) {
-            func_0023DFA8(pm3, 3, runtime);
+            evtViewerWriteChildRecords(pm3, 3, runtime);
         }
     }
     func_0030EB78(pm3);

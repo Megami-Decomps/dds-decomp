@@ -125,8 +125,8 @@ typedef char MnuEffectLayoutsAssert[
      sizeof(MnuEffectList)==8 &&
      sizeof(MnuEffectWork)==0x10)?1:-1];
 
-MnuEffectRecord *mnuClaimPositionedEffectRecord(MnuEffectList *,
-    MnuEffectPositionStep *, s32, f32, f32, f32, f32);
+MnuEffectRecord *mnuClaimPositionedEffectRecord(MnuEffectList *, f32, f32, f32,
+    MnuEffectPositionStep *, f32, s32);
 MnuEffectRecord *mnuStartPositionedEffectRecord(MnuEffectList *, s32, f32, f32, f32);
 
 /* DDS2 shooting task allocation, cleared as 0x1E0 bytes by its constructor. */
