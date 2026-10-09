@@ -846,7 +846,58 @@ s32 evtFormatPolygonMoviePaths(s32 event, s32 id, char *path1, char *path2, char
                          event / 10 * 10, event, event, id, event, id);
 }
 
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", func_0024FB48);
+extern s32 sdfPathExists(char *path);
+const char D_004232C0[] = "evtGetPolygonMovieWorkData2:0\n";
+const char D_004232E0[] = "evtGetPolygonMovieWorkData2:1\n";
+const char D_00423300[] = "eventedit: load pm3 file\n";
+const char D_00423320[] = "evtGetPolygonMovieWorkData2:2\n";
+const char D_00423340[] = "evtGetPolygonMovieWorkData3:3\n";
+
+/* Load or synthesize the three PMD resources for an event scene and bind them to a new work object. */
+PolyMovieWork *func_0024FB48(s32 eventId, s32 sceneId, s32 mode) {
+    char path1[0x40];
+    char path2[0x40];
+    char path3[0x40];
+    u32 address1;
+    u32 address2;
+    u32 address3;
+    SdfMemBlock *handle1;
+    SdfMemBlock *handle2;
+    SdfMemBlock *handle3;
+    PolyMovieWork *work;
+
+    evtFormatPolygonMoviePaths(eventId, sceneId, path1, path2, path3);
+    func_0035B6E0(D_004232C0);
+    handle1 = sdfReadNamedResource(path1, &address1, 0);
+    if (address1 == 0) {
+        return NULL;
+    }
+    func_0035B6E0(D_004232E0);
+    if (mode == 0) {
+        handle2 = sdfReadNamedResource(path2, &address2, 0);
+    } else {
+        handle2 = evtPolygonMovieCreateHeader((void **)&address2);
+    }
+    if (mode == 0 && sdfPathExists(path3) == 1) {
+        handle3 = sdfReadNamedResource(path3, &address3, 0);
+        func_0035B6E0(D_00423300);
+    } else {
+        handle3 = (SdfMemBlock *)func_0024F9B8((u8 **)&address3);
+    }
+    func_0035B6E0(D_00423320);
+    work = evtPolygonMovieAllocWork();
+    evtPolygonMovieInitWork(work, (PmdHeader *)address1, (PmdHeader *)address2, (PmdHeader *)address3);
+    if (work == NULL) {
+        return NULL;
+    }
+    func_0035B6E0(D_00423340);
+    work->mainResource.handle = handle1;
+    work->secondaryResource.handle = handle2;
+    work->tertiaryResource.handle = handle3;
+    work->eventId = eventId;
+    work->sceneId = sceneId;
+    return work;
+}
 
 
 extern u32 D_00435CBC;
