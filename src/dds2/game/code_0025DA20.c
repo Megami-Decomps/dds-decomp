@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dat_command.h"
 #include "fr_font.h"
 #include "fr_font_context.h"
 #include "sdf_packet_list.h"
@@ -165,7 +166,6 @@ extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, 
 extern s32 func_002C54B0(s32);
 extern s32 mnuIsBulletItemId(s32);
 extern s32 func_002C5498(s32);
-extern u8 *datItemSkillRecords;
 
 extern u8 D_003CDA88[];
 
@@ -1260,7 +1260,7 @@ s32 mnuCampHasEligibleOwnedItems(void) {
         if (datGameState->inventory.counts[i] == 0) {
             continue;
         }
-        if ((datItemSkillRecords[i * 8] & 3) != 0) {
+        if ((datItemSkillRecords[i].flags & 3) != 0) {
             result = 1;
             break;
         }
@@ -1571,11 +1571,6 @@ typedef struct ShopSourcePriceRow {
     ShopSourcePriceEntry entries[0x60];
 } ShopSourcePriceRow;
 
-typedef struct ShopItemPriceRecord {
-    u8 flags; /* Low two bits select fixed versus solar-phase price. */
-    u8 pad01[3];
-    s32 price;
-} ShopItemPriceRecord;
 
 typedef struct ShopProgressPrice {
     f32 percent;
@@ -1597,7 +1592,7 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
     rowIndex = (u8)mnuCampResolveFlagRowValue(source);
     itemId = D_003C9BC0[rowIndex].entries[index].itemId;
     if (halfPrice == 0) {
-        itemPrice = ((ShopItemPriceRecord *)datItemSkillRecords)[itemId].price;
+        itemPrice = datItemSkillRecords[itemId].price;
         rowPercent = D_003C9BC0[rowIndex].pricePercent;
         pricePercent = D_003C9BC0[rowIndex].entries[index].pricePercent;
         if (pricePercent == 0) {
@@ -1609,7 +1604,7 @@ s32 mnuCampGetSourceItemPrice(s32 index, s32 source, s32 halfPrice) {
             price = price * (s32)D_003CD0C4[progressStage].percent / 100;
         }
     } else {
-        price = (u32)((ShopItemPriceRecord *)datItemSkillRecords)[itemId].price >> 1;
+        price = (u32)datItemSkillRecords[itemId].price >> 1;
     }
     return price;
 }
