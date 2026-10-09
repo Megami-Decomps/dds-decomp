@@ -3,6 +3,19 @@
 
 #include "common.h"
 
+/* The two titles register these eight compact table rows at matching indices.
+ * These names describe registrations only; serialized kinds remain u16. */
+enum EffParamWorkKind {
+    EFF_PARAM_WORK_KIND_EFFECT_NODE = 0,
+    EFF_PARAM_WORK_KIND_ANIMATED_BILLBOARD = 1,
+    EFF_PARAM_WORK_KIND_CHILD_BILLBOARD = 2,
+    EFF_PARAM_WORK_KIND_VIEWER_CONTEXT = 3,
+    EFF_PARAM_WORK_KIND_EXTENDED_WORK = 4,
+    EFF_PARAM_WORK_KIND_BILLBOARD_UNIT_OBJECT = 5,
+    EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK = 6,
+    EFF_PARAM_WORK_KIND_FILE_QUEUE = 7
+};
+
 /* Compact effect owner: its halfword kind selects the opaque payload's operations. */
 typedef struct EffParamWork {
     u16 kind;
