@@ -41,11 +41,8 @@ enum {
 
 extern void *dds3GetWorldSecondaryObject(void);
 
-extern u32 dds3ReadIndexedWorldObjectWord(WorldValueIndices *object);
 
-extern u32 dds3AdvanceObjectValueCursor(WorldValueIndices *object);
 
-extern WorldIndexNode *dds3CopyWorldListToValueChain(EffWorldNode *object, s32 kind);
 
 extern s32 sdfAllocPacketAligned(s32 size);
 
@@ -121,11 +118,9 @@ extern void fldSetCameraMoveMode(s32 mode);
 
 extern void fldClearCameraMoveMode(void);
 
-extern u32 dds3ResetObjectValueCursor(WorldValueIndices *object);
 
 extern u8 dds3TestObjectFlags(void *object, s32 mask);
 
-extern void dds3DestroyWorldIndexNode(WorldIndexNode *node);
 
 extern void fldSubmitBackgroundResourcePacket(void);
 
