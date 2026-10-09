@@ -1317,7 +1317,8 @@ void func_001E0CE0(ActionStateLink *task, BattleIndexWork *work) {
     }
 }
 
-void btlFindSoundTaskByWorkValue(void) {
+/* The resolver supplies its result kind and press value to this no-op hook. */
+void btlFindSoundTaskByWorkValue(u32 kind, s32 press) {
 }
 
 /* Return the oldest matching handle, or zero; unstarted tasks may have handle 0. */
