@@ -106,7 +106,6 @@ extern s32 func_001AC750(s32, void *);
 
 extern s32 D_004367C0;
 
-extern char D_003B5D10[];
 
 extern char D_003B5B10[];
 
@@ -161,7 +160,6 @@ extern s8 D_0037F531[];
 extern SceneKindTable *D_00438F4C;
 extern void func_001C8518();
 extern void fldCollectAvailableRosterEntries(s32, s16 *);
-extern char *fldGetCachedSceneActorNameAndId(s32, s16 *);
 
 extern void func_001C92A0(s32, s32, s32, s32);
 extern void func_001C9EA0(s32);

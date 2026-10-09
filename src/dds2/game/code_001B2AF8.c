@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_roster_pair.h"
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
@@ -1611,7 +1612,7 @@ void btlReleaseAndClearChipBlock(void) {
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001B6CA8);
 
-void func_001B6FC0(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
+void func_001B6FC0(BtlUnit *unused, BattleMirroredSpriteRecord *records, s32 count) {
     if (count > 0) {
         BattleMirroredSpriteRecord *record = records;
         s32 remaining = count;
@@ -1652,7 +1653,7 @@ void func_001B6FC0(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
     }
 }
 
-void func_001B70B8(s32 unused, BattleMirroredSpriteRecord *records, s32 count) {
+void func_001B70B8(BtlUnit *unused, BattleMirroredSpriteRecord *records, s32 count) {
     BattlePanelColors colors = D_00415CE8;
     if (count > 0) {
         BattleMirroredSpriteRecord *record = records;
@@ -3010,9 +3011,15 @@ typedef struct BattlePhasePanelWork {
     s32 frames;
     s32 mode;
     s8 phase;
-    u8 pad09[0xF];
+    s8 secondaryPhase;
+    u8 pad0A[2];
+    s32 unk0C;
+    u8 unk10[8];
     s32 waitCounter; /* 0x18: delay before the first slide */
-    u8 pad1C[0x1C];
+    u8 pad1C[8];
+    s32 counter;
+    s32 angle;
+    u8 pad2C[0xC];
     BattleSelectionPosition current[8]; /* 0x38 */
     BattleSelectionPosition saved[8];   /* 0x78 */
     s32 fade[8][4];                    /* 0xB8 */
@@ -3484,17 +3491,16 @@ s32 func_001C0008(void) {
     return 1;
 }
 
-extern u8 D_003B5D10[];
 
 s32 func_001C0080(s32 arg0) {
     s32 count;
     s32 i;
 
     func_001B7A00();
-    count = func_001AC750(arg0, D_003B5D10);
+    count = func_001AC750(arg0, &D_003B5D10);
     if (count != 0) {
         for (i = 0; i < count; i++) {
-            if (func_001B7940(*(u16 *)(D_003B5D10 + 4 + i * 12), 2) == 0) {
+            if (func_001B7940(D_003B5D10.entries[i].skill, 2) == 0) {
                 return 1;
             }
         }
@@ -3507,25 +3513,19 @@ extern s32 btlGetTaskState6(void);
 
 INCLUDE_ASM(const s32, "game/code_001B2AF8", btlGetTaskState6);
 
-typedef struct FlagEntry {
-    u32 unk0;
-    u16 id;
-    u8 pad6[6];
-} FlagEntry;
 
-extern FlagEntry *fldGetCachedSceneActorNameAndId(s32, u16 *);
 
 extern s32 func_001B7940(s32, s32);
 
 s32 btlClearFlagEntries(void) {
     u16 count;
     KwlnTask *task = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
-    FlagEntry *entries;
+    BattleRosterTable *table;
     s32 i;
     if (task != 0) {
-        entries = fldGetCachedSceneActorNameAndId(kwlnTaskGetUserValue(task), &count);
+        table = fldGetCachedSceneActorNameAndId(kwlnTaskGetUserValue(task), &count);
         for (i = 0; i < count; i++) {
-            func_001B7940(entries[i].id, 0);
+            func_001B7940(table->entries[i].skill, 0);
         }
         return 1;
     }

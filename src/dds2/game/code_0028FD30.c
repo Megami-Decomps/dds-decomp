@@ -580,7 +580,7 @@ INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291338);
 
 /* Updated as a halfword here, and read as signed high-byte flags elsewhere. */
 typedef struct MenuPanelPositionRecord {
-    u16 id;
+    s16 id;
     union {
         u16 stateFlags;
         struct {
@@ -589,6 +589,11 @@ typedef struct MenuPanelPositionRecord {
         };
     };
 } MenuPanelPositionRecord;
+
+/* Preserve the flags while changing the four-bit panel status. */
+static inline s32 mnuPanelFlagsWithStatus(s32 flags, s32 status) {
+    return (flags & ~15) | status;
+}
 
 INCLUDE_ASM(const s32, "game/code_0028FD30", func_00291400);
 extern MenuPanelPositionRecord *func_00291400(s32 selector, u16 id);
@@ -656,7 +661,7 @@ void func_002917C0(MnuStatusResource *object, s32 selector, u16 id) {
                     mnuQueuePanelAnimationTransition(animation, 1, 10);
                     animation = mnuSpawnPanelSlotB(resource, (*neighbor)->selector.fields.index, 1, 50, 0, 0);
                     mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 128, 83, 0, 0);
-                    record->stateFlags = (record->stateFlags & 0xFFF0) | 1;
+                    record->stateFlags = mnuPanelFlagsWithStatus(record->stateFlags, 1);
                 }
             }
         }
@@ -888,7 +893,7 @@ void func_00292998(MnuStatusResource *object) {
     animation = mnuSpawnPanelSlotB(resource, 8, 1, 0, 0, 0);
     mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 0x80, 0x53, 0, 0);
     mnuQueuePanelAnimationTransition(animation, 8, 0);
-    record->stateFlags = (record->stateFlags & 0xfff0) | 1;
+    record->stateFlags = mnuPanelFlagsWithStatus(record->stateFlags, 1);
 }
 
 extern MantraNodePos *mnuGetMantraPanelPositionRecord(s16);

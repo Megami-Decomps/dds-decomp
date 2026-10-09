@@ -5516,3 +5516,49 @@ request `D_003BAFE8` is a `FileRequest *`, while `D_003BAFEC` and
 `D_003BAFF0` are the resource-handle and loaded-data words. Keeping that
 request typed removes the integer/pointer adapters in both controller paths.
 
+
+## Paired-actor command roster records
+
+DDS2 `func_001AC750` clears a halfword count and writes twelve-byte rows
+starting at `+4`: a skill ID and two actor pointers. `BattleRosterTable`
+describes that variable-length record without guessing its backing capacity.
+The shared record is in retail `.data`, so its extern retains that section
+rather than letting the four-byte flexible header imply GP-relative storage.
+The scene counter's scratch genuinely holds signed IDs or an unsigned count;
+its subsequent signed first-halfword read is preserved by the documented union.
+
+
+## Secondary phase work and mirrored-sprite actor arguments
+
+DDS2 `func_001BC8A8` shares the existing `0x138`-byte phase-panel allocation:
+the signed secondary phase is at `+9`, its counter at `+0x24`, and its
+integer angle at `+0x28`; the arrays still begin at `+0x38/+0x78/+0xB8`.
+The mirrored-sprite helpers `func_001B6FC0` and `func_001B70B8` do not read
+their first argument. Their sole retail caller passes the current `BtlUnit *`,
+not an integer ID, so retaining that pointer formal avoids false scalar calls.
+
+
+## Converted scene text retains its glyph pointer
+
+`itfCreateConvertedTextGlyph` returns `struct FrFontGlyph *` and accepts a
+glyph parent of that same type. DDS2's scene text helpers retain this pointer
+through draw and queue calls instead of transporting it through a scalar ID.
+The provider's existing definition and both whole-unit helper gates establish
+the contract; the local declaration does not change the call ABI.
+
+
+## Signed mantra IDs and promoted panel status
+
+DDS2 `MenuPanelPositionRecord` contains a signed ID and an unsigned state
+halfword. Both the reset `func_00291338` and lookup `func_00291400` read
+IDs with `lh`; the flags use `lhu`. The three banks each contain 37
+four-byte records. A supposed “unknown upper halfword after lhu” is not
+a missing owner: unsigned halfwords still promote to signed `int`.
+
+The low-nibble update `(flags & ~15) | status` recurs in the reset,
+`func_002917C0` and `func_00292998`. The common signed-word status builder
+preserves its promoted arithmetic before assignment back to the halfword;
+it also constructs the reset value from zero flags and status 2. The two
+existing C callers remain exact. The reset remains assembly: its truthful
+196-byte replay is eight words away, chiefly the mask/reset register swap.
+
