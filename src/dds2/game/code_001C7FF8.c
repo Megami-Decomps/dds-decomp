@@ -662,7 +662,7 @@ extern void btlSetTrackedTaskHandle(s32, s32);
 extern s32 dspCloseChannel(void);
 extern void evtCreateMessageWindowIfMissing(void *);
 extern s32 dspStartEntry(s32);
-extern void evtCopyEntryStringToActiveWindow(s32, void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 func_0035C860(char *, const char *, ...);
 extern void *memset(void *, s32, u32);
 extern s32 func_001C0630(KwlnTask *);

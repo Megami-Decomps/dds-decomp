@@ -11,7 +11,7 @@ extern void func_0029AA48(BrsSkillPackageWork *);
 extern void func_0029AC20(BrsSkillPackageWork *, s32);
 extern void func_0029B950(DatPartyRecord *, BrsSkillPackageWork *);
 extern u8 *D_00435E48;
-extern void evtCopyEntryStringToActiveWindow(s32 index, void *value);
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void *memset(void *destination, s32 value, u32 size);
 
 extern s32 evtStageTestUpdateCamera(void);

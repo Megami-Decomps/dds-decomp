@@ -42,7 +42,7 @@ extern u8 D_003CE498[];
 extern s32 D_00435E48;
 extern char D_00437840[];
 extern s32 D_003C9A20[];
-extern void evtCopyEntryStringToActiveWindow(s32, s32);
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 func_0035C860(char *, const char *, ...);
 extern void evtClearActiveFlag();
 extern void evtSetBoundedDisplayValue();
@@ -506,12 +506,12 @@ s32 evtGetRemainingSlotThreshold(u32 slotIndex) {
 
 s32 evtShowResultText(void) {
     char formattedText[0x40];
-    evtCopyEntryStringToActiveWindow(0, D_00435E48 + 0x11);
+    evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E48 + 0x11));
     func_0035C860(formattedText, D_00437840, datGameState->progressTotal);
-    evtCopyEntryStringToActiveWindow(1, (s32)formattedText);
-    evtCopyEntryStringToActiveWindow(2, D_003C9A20[datGameState->progressSlot]);
+    evtCopyEntryStringToActiveWindow(1, formattedText);
+    evtCopyEntryStringToActiveWindow(2, (const void *)(D_003C9A20[datGameState->progressSlot]));
     func_0035C860(formattedText, D_00437840, evtGetRemainingSlotThreshold(datGameState->progressSlot + 1));
-    evtCopyEntryStringToActiveWindow(3, (s32)formattedText);
+    evtCopyEntryStringToActiveWindow(3, formattedText);
     if (evtGetRemainingSlotThreshold(datGameState->progressSlot + 1) >= 0) {
         dspStartEntry(datGameState->progressSlot + 0x1a);
     } else {
@@ -755,7 +755,7 @@ s32 func_00263C38(KwlnTask *task) {
         }
     }
     func_0035C860(text, D_00437840, item->value * state->multiplier);
-    evtCopyEntryStringToActiveWindow(3, (s32)text);
+    evtCopyEntryStringToActiveWindow(3, text);
     dspSetActive(1);
     dspStartEntry(entry);
     evtSetMessageWindowOptionWhenOpen(0);
@@ -1072,12 +1072,12 @@ s32 evtAdvancePendingRewards(KwlnTask *callbackContext) {
                     return 0;
                 }
                 if (state->rewardKind == 0) {
-                    evtCopyEntryStringToActiveWindow(0, (s32)D_00435E5C[state->rewardValue]);
-                    evtCopyEntryStringToActiveWindow(1, (s32)D_00437848);
+                    evtCopyEntryStringToActiveWindow(0, D_00435E5C[state->rewardValue]);
+                    evtCopyEntryStringToActiveWindow(1, D_00437848);
                     dspStartEntry(0x2D);
                 } else {
                     func_0035C860(text, D_00437850, state->rewardValue);
-                    evtCopyEntryStringToActiveWindow(0, (s32)text);
+                    evtCopyEntryStringToActiveWindow(0, text);
                     dspStartEntry(0x2E);
                 }
                 state->remainingRewards--;
@@ -1182,10 +1182,10 @@ s32 evtTriggerProgressFlagGate(s32 unusedContext) {
 s32 evtShowSlotText(KwlnTask *task) {
     char formattedText[0x40];
     if (((MenuTerminalContext *)kwlnTaskGetUserValue(task))->advancedSlots > 0) {
-        evtCopyEntryStringToActiveWindow(0, D_00435E48 + 0x11);
+        evtCopyEntryStringToActiveWindow(0, (const void *)(D_00435E48 + 0x11));
         func_0035C860(formattedText, D_00437840, D_003CE148[datGameState->progressSlot * EVT_PROGRESS_RECORD_WORDS]);
-        evtCopyEntryStringToActiveWindow(1, (s32)formattedText);
-        evtCopyEntryStringToActiveWindow(2, D_003C9A20[datGameState->progressSlot]);
+        evtCopyEntryStringToActiveWindow(1, formattedText);
+        evtCopyEntryStringToActiveWindow(2, (const void *)(D_003C9A20[datGameState->progressSlot]));
         if (evtGetRemainingSlotThreshold(datGameState->progressSlot + 1) >= 0) {
             dspStartEntry(0x24);
         } else {

@@ -35,7 +35,7 @@ extern void mdlFlagClear();
 extern void func_0026C7F8();
 extern s32 mnuCampResolveProgressTierValue();
 extern void dspSetActive();
-extern void evtCopyEntryStringToActiveWindow(s32, s32);
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 dspStartEntry(s32);
 extern void datAddCurrencyClamped();
 extern void ptyAdjustItemQuantity();
@@ -60,10 +60,10 @@ s32 evtMenuPopulateSelectedSlotLabels(struct KwlnTask *task) {
             do {
                 s32 value = reward->value;
                 if ((reward++)->kind == 0) {
-                    evtCopyEntryStringToActiveWindow(i, (s32)D_00435E5C[value]);
+                    evtCopyEntryStringToActiveWindow(i, D_00435E5C[value]);
                 } else {
                     func_0035C860(text, D_00437850, value);
-                    evtCopyEntryStringToActiveWindow(i, (s32)text);
+                    evtCopyEntryStringToActiveWindow(i, text);
                 }
                 i++;
             } while (i < 3);
@@ -125,11 +125,11 @@ s32 func_00265408(KwlnTask *task) {
         choice = evtGetCapturedWindowPanelValue();
         rewardValue = D_003CE1A8[slotIndex].rewards[choice].value;
         if (D_003CE1A8[slotIndex].rewards[choice].kind == 0) {
-            evtCopyEntryStringToActiveWindow(0, (s32)D_00435E5C[rewardValue]);
+            evtCopyEntryStringToActiveWindow(0, D_00435E5C[rewardValue]);
             ptyAdjustItemQuantity(rewardValue, 1);
         } else {
             func_0035C860(text, D_00437850, rewardValue);
-            evtCopyEntryStringToActiveWindow(0, (s32)text);
+            evtCopyEntryStringToActiveWindow(0, text);
             datAddCurrencyClamped(rewardValue);
         }
         context->rewardGranted = 1;
@@ -221,7 +221,7 @@ void mnuAwardCampProgressCurrency(void) {
     s32 index = mnuCampResolveProgressTierValue();
     dspSetActive(1);
     func_0035C860(text, D_00437840, index);
-    evtCopyEntryStringToActiveWindow(0, (s32)text);
+    evtCopyEntryStringToActiveWindow(0, text);
     dspStartEntry(0x19);
     datAddCurrencyClamped(index);
     ptyAdjustItemQuantity(0x81, -datGameState->inventory.counts[0x81]);
