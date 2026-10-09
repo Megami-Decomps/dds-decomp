@@ -35,3 +35,4 @@ game/code_0026CD50  -fno-optimize-sibling-calls  # 3 jal+epilogue tails in 21 fu
 basic/dds3SceneBasic  -fno-optimize-sibling-calls  # 6 functions, 2 jal+epilogue tails, no sibling call; evtStartSceneResourceTask matches with its natural s32 result only with it (both titles)
 game/code_002053C0  -fno-optimize-sibling-calls  # 32 functions to the end of the old unit, 3 jal+epilogue tails, no sibling call; bounded by the sibling-calling function before 0x2053C0; func_00206090 matches only with it
 game/code_00111480  -fno-optimize-sibling-calls  # func_00111480 ends in a jal tail call only without sibling calls; the run has no j to a function
+game/code_00324F50  -fno-optimize-sibling-calls  # mnuRemoveLinkedResourceByHandle ends in a jal tail call only without sibling calls; only functions outside this run change under the option

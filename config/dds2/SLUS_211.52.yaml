@@ -266,6 +266,8 @@ segments:
       - [0x222500, c, game/code_00321500]
       - [0x2234C8, c, game/code_003224C8]
       - [0x225DF8, c, game/code_00324DF8]
+      - [0x225F50, c, game/code_00324F50]
+      - [0x227AE0, c, game/code_00326AE0]
       - [0x2293E0, c, game/code_003283E0]
       - [0x229778, c, game/code_00328778]
       - [0x229A60, c, sdf/sdfThread]  # Nocturne __FILE__
