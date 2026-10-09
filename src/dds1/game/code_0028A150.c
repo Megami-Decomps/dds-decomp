@@ -4080,15 +4080,15 @@ extern void func_00293AE0(s32 fd, FileJobPayload *job);
 extern s32 func_0030EB78(s32 fd);
 extern s32 func_00310A68(const char *path, s32 mode);
 
-void fileWriteToPfs(FileJobPayload *job, s32 slot) {
+void fileWriteToPfs(FileJobPayload *job, const char *filePath) {
     char path[0xD0];
     s32 fd;
 
     if (sdfPfsDebugMode != 0) {
-        func_003014F0(path, D_003BC928, slot);
+        func_003014F0(path, D_003BC928, filePath);
         fd = func_0030E8F0(path, 0x602, 0x1B6);
     } else {
-        func_003014F0(path, D_003BC930, sdfDevGetPathBuffer(), slot);
+        func_003014F0(path, D_003BC930, sdfDevGetPathBuffer(), filePath);
         fd = func_0030E8F0(path, 0x602);
     }
     func_00293AE0(fd, job);
