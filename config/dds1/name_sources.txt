@@ -3853,7 +3853,9 @@
 0x00223DF0	evtOpQueueWorldObjectPendingValue	inferred	Stores a pending value on the world object and resets its timer. [names_reviewed8.tsv]
 0x00223E58	evtOpClearWorldObjectPendingValue	inferred	Clears the pending value and arms the world object timer. [names_reviewed8.tsv]
 0x00223EB0	evtOpModelLodChg	evidence	strings "call: MODEL_LOD_CHG(int,int)" / "success: MODEL_LOD_CHG(int,int)"; sets root->lodIndex after sdfGetLodChunkValue bound check [names_M52_EvtEff.tsv]
+0x00223FB0	evtSetWorldUnitPosition	inferred	Looks up a kind-5 world node by ID and stores three position components with initialized W=0. Native registration takes four operands.
 0x00224048	evtOpSetWorldUnitRotationFromAngles	inferred	Converts supplied degree angles into the unit quaternion vector. [names_reviewed8.tsv]
+0x00224130	evtSetWorldUnitScale	inferred	Looks up a kind-5 world node by ID and stores three scale components with W=1. Native registration takes four operands.
 0x002241D0	evtOpDeprecatedModelMotion	inferred	Registered MODEL_MOTION script handler; resolves a unit, prepares motion state with mode 0, and logs that the command will be prohibited.
 0x00224268	evtOpSetUnitParams5	inferred	evt script opcode fetching 4 operands and forwarding to func_002223D8 (unit setup)
 0x00224308	evtOpSetUnitParams6	inferred	evt script opcode fetching 5 operands and forwarding to func_00222340
@@ -3927,9 +3929,9 @@
 0x00226E10	evtCommandAddFlaggedEffectUnitToWorld	inferred	Sets a status flag on explicitly selected effect unit before registering it with world. [names_reviewed6.tsv]
 0x00226FC0	evtCommandCreateWorldEffectObject	inferred	Creates a world object at origin with identity rotation and returns its world ID. [names_reviewed6.tsv]
 0x00227050	evtCommandDestroyEffectUnitById	inferred	src/dds1/event/evtCommand.c func_00227050: Reads script ID and destroys world kind 4 list node if found. [names_reviewed24.tsv]
-0x00227090	evtCommandSetEffectUnitFirstVector	inferred	Resolves unit by ID or implicit current unit; writes three float components to first vector. [names_reviewed6.tsv]
+0x00227090	evtCommandSetEffectUnitPosition	inferred	Sets three position components on a kind-4 effect unit, or the current player for a negative ID; leaves the initialized fourth component zero. Native registration takes four operands.
 0x00227138	evtCommandSetEffectUnitEulerRotation	inferred	readability/matching review (QP16)
-0x00227210	evtCommandSetEffectUnitSecondVector	inferred	Resolves unit by ID or implicit current unit; writes four floats to second vector. [names_reviewed6.tsv]
+0x00227210	evtCommandSetEffectUnitQuaternionRotation	inferred	Stores four quaternion components on a kind-4 effect unit, or the current player for a negative ID; preserves raw input without angle conversion. Native registration takes five operands.
 0x00227708	evtCommandEnableSolarAdvance	inferred	confidence=high; matched-C; src/dds1/event/evtCommand.c:709:func_00227708; Enables automatic solar-phase progression and reports script command completion.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00227728	evtCommandDisableSolarAdvance	inferred	confidence=high; matched-C; src/dds1/event/evtCommand.c:715:func_00227728; Disables automatic solar-phase progression and reports script command completion.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00227748	evtCommandReadMirroredSolarPhase	inferred	Places the mirrored solar phase in the script VM command result.
