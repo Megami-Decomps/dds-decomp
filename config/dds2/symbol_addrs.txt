@@ -3356,7 +3356,7 @@ mdlGetViewerRecordListCount = 0x00233E38; // type:func
 mdlFindViewerRecord = 0x00233E40; // type:func
 mdlGetFirstRecord = 0x00233EC0; // type:func
 mdlGetNextRecord = 0x00233ED8; // type:func
-mdlRecordMatchesId = 0x00233F48; // type:func
+mdlRecordHasKind = 0x00233F48; // type:func
 mdlGetRecordPartIndex = 0x00233F58; // type:func
 mdlEditMarkParametersWithPad = 0x00234448; // type:func
 mdlAddBillboardPart = 0x00234668; // type:func
@@ -6980,6 +6980,8 @@ sndTrackBalanceEntries = 0x0047ABD0;
 sdfGraphApplyModeDefaults = 0x00329CE0; // type:func
 sdfGraphResetDeviceForCurrentMode = 0x00329ED0; // type:func
 sdfGraphWakeDisplayThread = 0x00329F30; // type:func
+mdlGetSelectedRecord = 0x00237A70; // type:func
+
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskCreate = 0x00101458; // type:func  // dds1 0x00101570
 kwlnTaskDestroyWithHierarchyByName = 0x00101598; // type:func  // dds1 0x001016B0
@@ -10081,7 +10083,6 @@ func_00236E50 = 0x00236E50; // type:func
 func_00236E58 = 0x00236E58; // type:func
 func_00237088 = 0x00237088; // type:func
 func_002376F0 = 0x002376F0; // type:func
-func_00237A70 = 0x00237A70; // type:func
 func_00237D08 = 0x00237D08; // type:func
 func_00238BD8 = 0x00238BD8; // type:func
 func_00238D38 = 0x00238D38; // type:func
