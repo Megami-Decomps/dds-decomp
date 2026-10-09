@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl.h"
+#include "eff_pcp_beam.h"
 #include "sdf_asset_state.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
@@ -302,8 +303,6 @@ extern void effPcpBuildConcentricBeamVertices(f32 value, struct EffPCPBeamWork *
 extern void func_002DD688(f32 scale);
 extern void func_002DD968(f32 angle);
 extern void func_002DD8E8(f32 angle);
-extern void effPcpBuildConcentricRingPoints(void *work, f32 radius);
-
 extern void mdlStorePrimaryVectorVU(MdlCtx *ctx);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 extern struct SdfPoolNode *D_00325828[4];
@@ -4089,22 +4088,6 @@ void effPcpSetScaledThunderScale(EffPCPGrowWork *work, f32 val) {
     work->scale = val;
 }
 
-/* Both beam clones own this node. The color array, point array, two
-   transforms and release handles are parts of one SDK allocation. */
-typedef struct EffPCPBeamNode {
-    f32 matrix[4][4];
-    f32 localMatrix[4][4];
-    u128 position;
-    f32 scale;
-    u32 drawKind; /* Indexes the node draw-dispatch table, not a color. */
-    u32 color;
-    u32 vertexCount;
-    f32 *points;
-    u32 *colors;
-    SdfAsset *assetHandle;
-    SdfMemBlock *allocationHandle;
-} EffPCPBeamNode;
-
 /* Shared draw-request parameters are cleared before creating a beam. */
 typedef struct EffPCPBeamDrawParams {
     u16 unk00;
@@ -4148,37 +4131,7 @@ EffPCPBeamNode *effPcpBeamNodeCreate(u32 segments) {
 }
 
 
-/* The clone copies the 0x50-byte parameter prefix, then attaches a node whose
- * entries receive three colors from that prefix. */
-typedef struct EffPCPBeamParams {
-    f32 position[4];
-    s32 fadeInFrames;
-    s32 fadeOutFrames;
-    s32 holdFrames;
-    s32 vertexGrowthFrames;
-    u8 pad20[4];
-    s32 radiusGrowthFrames;
-    f32 unk28;
-    f32 endRadius;
-    u32 segments;          /* 0x30 */
-    u32 drawKind;          /* 0x34 */
-    f32 firstWidth;
-    u32 firstColor;        /* 0x3C */
-    f32 middleWidth;
-    u32 middleColor;       /* 0x44 */
-    f32 lastWidth;
-    u32 lastColor;         /* 0x4C */
-} EffPCPBeamParams;
-
-typedef struct EffPCPBeamWork {
-    EffPCPBeamParams params;
-    s32 frame;
-    u32 color;             /* 0x54 */
-    u32 vertexCount;       /* 0x58 */
-    EffPCPBeamNode *node;   /* 0x5C */
-} EffPCPBeamWork;
-typedef char EffPCPBeamParams_size_0x50[(sizeof(EffPCPBeamParams) == 0x50) ? 1 : -1];
-typedef char EffPCPBeamWork_size_0x60[(sizeof(EffPCPBeamWork) == 0x60) ? 1 : -1];
+/* Release the separately retained asset and vertex allocation before the node. */
 void effPcpReleaseNestedWork(EffPCPBeamNode *work) {
     sdfQueueAssetRelease(work->assetHandle);
     sdfReleaseResourceAllocation(work->allocationHandle);
@@ -4413,51 +4366,10 @@ void effRotateNested(EffPCPBeamWork *work, void *src) {
     VU0_STORE_MATRIX(work->node);
 }
 
-/* The ring geometry, angle preparation and timeline operate on the same
-   0x80-byte clone. Radius and rotation each have independent decay inputs. */
-/* The 0x5C-byte input prefix ends at lastColor; animation state follows it. */
-typedef struct EffPCPBeamLargeHead {
-    f32 pos[4];
-    f32 degreesA;
-    f32 degreesB;
-    f32 stepDegrees;
-    f32 rotationDecay;
-    u8 mode;
-    u8 pad21[3];
-    s32 duration;
-    s32 fadeIn;
-    s32 fadeOut;
-    f32 initialRadius;
-    f32 initialRadiusStep;
-    f32 radiusDecay;
-    u32 segments;
-    u32 drawKind;
-    f32 radiusStepA;
-    u32 firstColor;
-    f32 radiusStepB;
-    u32 middleColor;
-    f32 radiusStepC;
-    u32 lastColor;
-} EffPCPBeamLargeHead;
-
-typedef struct EffPCPBeamLargeWork {
-    EffPCPBeamLargeHead head;
-    s32 frame;
-    u32 color;
-    f32 rotationA;
-    f32 rotationB;
-    f32 rotationStep;
-    u8 pad70[4];
-    f32 radius;
-    f32 radiusStep;
-    EffPCPBeamNode *node;
-} EffPCPBeamLargeWork;
-
 extern void sdfInvertRigidVuTransform(void);
 
 /* Fill the node's point buffer with four concentric rings (radius, +stepA, +stepB, +stepC) of unit directions, rotated by the VU matrix. */
-void effPcpBuildConcentricRingPoints(void *obj, f32 radius) {
-    EffPCPBeamLargeWork *work = obj;
+void effPcpBuildConcentricRingPoints(EffPCPBeamLargeWork *work, f32 radius) {
     f32 dir[4];
     f32 rowA[4];
     f32 rowB[4];
@@ -4536,6 +4448,7 @@ void effPrepareAngles(EffPCPBeamLargeWork *work) {
 
 
 
+/* The clone copies the 0x5C-byte parameter prefix, then attaches its node. */
 u8 *effBeamEffectCloneLarge(src)
     EffPCPBeamLargeHead *src;
 {
