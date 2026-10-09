@@ -269,6 +269,20 @@ typedef struct EffResourceOps {
     u32 payloadSize;           /* 0x18 */
 } EffResourceOps;
 
+/* Active frame callbacks receive the parent; destruction receives its child. */
+typedef struct EffActiveInstanceOps {
+    void (*initialize)(EffClassWork *); /* 0x00 */
+    u32 (*createResource)(); /* 0x04 */
+    void (*destroyResource)(void *); /* 0x08 */
+    u32 (*cloneResource)(void *); /* 0x0C */
+    void (*update)(EffClassWork *); /* 0x10 */
+    void (*draw)(EffClassWork *); /* 0x14 */
+    u32 payloadSize; /* 0x18 */
+} EffActiveInstanceOps;
+
+typedef char EffActiveInstanceOpsSizeCheck[(sizeof(EffActiveInstanceOps) == 0x1C) ? 1 : -1];
+
+
 /* Native class operations: callbacks followed by the copied payload size.
  * Callback arity varies between creation and frame-notification paths. */
 typedef struct EffClassOps {
@@ -310,7 +324,7 @@ typedef struct EffModelResourceOps {
 typedef char EffModelResourceOps_size_must_be_0x18[
     (sizeof(EffModelResourceOps) == 0x18) ? 1 : -1];
 
-extern EffResourceOps effActiveInstanceOperations[];
+extern EffActiveInstanceOps effActiveInstanceOperations[];
 
 extern EffClassOps effClassWorkOperations[];
 
@@ -2437,7 +2451,7 @@ EffClassWork *effCreateActiveResource(EffClassWork *work) {
 }
 
 void effResetActiveInstanceFrame(EffClassWork *work) {
-    effActiveInstanceOperations[work->kind].initialize();
+    effActiveInstanceOperations[work->kind].initialize(work);
     work->frame = 0;
 }
 
