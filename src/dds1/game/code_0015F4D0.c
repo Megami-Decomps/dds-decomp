@@ -9,7 +9,6 @@
 #include "eff.h"
 
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendDmaPrimary(s32, u32, SdfDmaNode *);
 extern void *sdfConsAllocateColumnPacket(s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
 extern s32 kwlnGetDrawBufferIndex(void);
@@ -456,7 +455,7 @@ void func_001602F8(void) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
-        sdfAppendDmaPrimary((s32)list,
+        sdfAppendDmaPrimary(list,
             (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40),
             reference);
         texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
