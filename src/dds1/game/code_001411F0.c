@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "sdf_textured_rect.h"
 #include "sdf_motion.h"
 #include "mdl.h"
 #include "sdf_chip.h"
@@ -3639,8 +3640,6 @@ extern const s32 D_003A0928[10][2];
 extern void evtSetDrawSurfaceIndex(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
-extern void func_00108FA0(s32, s32, s32, s32, s32, s32, s32, s32,
-                         u32, u32, u32, u32, SdfTex *);
 
 void func_0014C210(void) {
     s32 digitOrigins[10][2];
