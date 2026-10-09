@@ -1532,7 +1532,64 @@ void fldSelectActorFromSceneIndexTables(s32 mode, s32 index) {
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00141898);
 
-INCLUDE_ASM(const s32, "game/code_00136EF8", func_00141B20);
+extern void fldInitializeLinkedSequence(FieldSequenceRecord *, s32, s32, const char *, s32, s32, const char *);
+
+/* Start the linked sequence of the first enabled waypoint actor that matches this field transition. */
+void func_00141B20(s32 mode, s32 index, FieldSequenceRecord *sequence) {
+    s32 field;
+    s32 motion;
+    s32 kind;
+    s32 i;
+    FldActorEntry *entry;
+
+    if (mode == 0) {
+        field = D_0038A3B8[index].unk0;
+        motion = 3;
+    } else {
+        motion = 4;
+        field = D_0038A480[index].unk0;
+    }
+    if (field == 0) {
+        return;
+    }
+    fldLoadActorWaypointTable(field);
+    for (i = 0; i < 0x100; i++) {
+        entry = &fldActorWaypointRows.actors[i];
+        if (entry->requiredFlag != 0 && !mdlFlagTest(entry->requiredFlag)) {
+            continue;
+        }
+        if (entry->kind != 7 || motion != entry->motion ||
+            index != entry->secondaryMotion || entry->variantMode != 0) {
+            continue;
+        }
+        fldAreaState.rowIdx = entry->unk45;
+        if (entry->flags54 != 0) {
+            D_00435F24 = entry->flags54;
+            strcpy((char *)D_00387D60, entry->taskName);
+            D_00435F28 = i + 1;
+        }
+        if (entry->variant != 0) {
+            field = entry->variant;
+        }
+        if (entry->warpEntry != 0) {
+            kind = entry->warpEntry;
+        } else {
+            kind = 1;
+        }
+        if (field != 0 && kind != 0) {
+            fldInitializeLinkedSequence(sequence, field, kind, entry->warpName,
+                                        entry->unk52, entry->linkKind, entry->linkName);
+            sequence->mode = 5;
+            if (fldAreaState.sequenceCode != entry->unk52 && entry->unk52 != 0) {
+                fldAreaState.sequenceCode = entry->unk52;
+            }
+            if (entry->unk53 != 0) {
+                fldAreaState.unk88 = entry->unk53 - 1;
+            }
+        }
+        return;
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_00136EF8", func_00141CF0);
 
