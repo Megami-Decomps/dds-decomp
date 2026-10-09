@@ -1336,7 +1336,7 @@ void sdfBuildPacket116(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s3
     packet[7] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
 }
 
-void sdfAppendTexturedLinePacket(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
+void sdfAppendTexturedLinePacket(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
                    s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 depth, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {
