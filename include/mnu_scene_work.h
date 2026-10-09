@@ -64,7 +64,7 @@ typedef struct MenuSceneWork {
     s16 scrollY; /* 0x5A6 */
     u8 pad5A8[4];
     s8 boundsFlags; /* 0x5AC */
-    u8 cursorMoving; /* 0x5AD */
+    s8 cursorMoving; /* 0x5AD */
     u8 pendingPhase13; /* 0x5AE: consumed when the phase-12 handoff completes */
     u8 pad5AF;
 } MenuSceneWork;
