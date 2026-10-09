@@ -6,6 +6,7 @@
 #include "sdf_pac_work.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
+#include "sdf_texture_offset_list.h"
 #include "file_request_api.h"
 
 extern u8 sdfViewMatrix[];
@@ -60,7 +61,6 @@ Motion *mdlFindNodeById(MdlCtx *ctx, s32 id);
 void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 searchId, s32 motionIndex, s32 loopEnabled,
                                      f32 blendLeadFrames, f32 blendDurationFrames);
 
-extern DevRequest *sndBuildResourceHandleListFromOffsets(const void *);
 extern void mdlSetResourceAmount(MdlCtx *ctx, MdlResourceItem *node, f32 amount);
 
 extern u32 mdlGroupJobSemaphore;
@@ -176,7 +176,7 @@ void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *resource, MdlLoadRe
     DevRequest *resourceList;
 
     handle = fileGetLoadedDataAddress(resource);
-    resourceList = sndBuildResourceHandleListFromOffsets((const void *)handle);
+    resourceList = sndBuildResourceHandleListFromOffsets((const SdfTextureOffsetListHeader *)(u32)handle);
     destination->payload.resourceList = resourceList;
     handle = fileGetResourceHandle(resource);
     sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(handle));

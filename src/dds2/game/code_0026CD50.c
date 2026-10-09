@@ -474,7 +474,11 @@ void prfSummarizeNonzeroEntryAttributes(s32 entryId, s32 *summary) {
 void func_0026DB20(void) {
 }
 
-INCLUDE_ASM(const s32, "game/code_0026CD50", func_0026DB28);
+extern void scrClearEntryFlag(DatPartyRecord *context, u16 entryId, u32 bit);
+
+void func_0026DB28(DatPartyRecord *context, u8 entry) {
+    scrClearEntryFlag(context, entry, 0xf);
+}
 
 INCLUDE_RODATA(const s32, "game/code_0026CD50", D_00425098);
 

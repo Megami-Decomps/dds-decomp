@@ -4,6 +4,7 @@
 #include "evt_world.h"
 #include "kwln_task_lifecycle.h"
 #include "kwln_task_state.h"
+#include "sdf_texture_offset_list.h"
 
 struct EvtScaledValue;
 extern void sdfSetFloatCounterDirection(u32 *destination, u32 value);
@@ -26,6 +27,8 @@ extern EffWorldNode *dds3AppendWorldNode(void);
 extern void dds3SetWorldSecondaryObject(void *);
 extern void dds3SetWorldObject(void *);
 extern void dds3SetWorldObjectValue(EffWorldNode *, u32);
+extern void dds3AttachConstructedResourceToWorldObject(EffWorldNode *, u32, u32, u32, u32,
+                                                       const SdfTextureOffsetListHeader *, u32);
 extern void fldFormatAreaDirectory(char *, s32, s32);
 extern void dds3AttachResourceHandleToWorldObject(void *, u32);
 extern void mdlSpawnViewerWorldObject(void);
@@ -96,7 +99,8 @@ s32 evtCreateWorldObjectForKey(s32 area, s32 room)
 }
 
 /* Build a field world object from the supplied resource parameters. */
-s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 arg2, s32 arg3, s32 arg4, s32 arg5)
+s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 arg2, s32 arg3,
+                                     const SdfTextureOffsetListHeader *textureOffsets, s32 arg5)
 {
     EffWorldNode *worldObject;
     char directory[0x40];
@@ -107,7 +111,7 @@ s32 evtCreateWorldObjectFromResource(s32 area, s32 room, s32 arg2, s32 arg3, s32
     dds3SetWorldObject(worldObject);
     dds3SetWorldObjectValue(worldObject, (area << 16) + room);
     fldFormatAreaDirectory(directory, area, room);
-    dds3AttachConstructedResourceToWorldObject(worldObject, area, room, arg2, arg3, arg4, arg5);
+    dds3AttachConstructedResourceToWorldObject(worldObject, area, room, arg2, arg3, textureOffsets, arg5);
     mdlSpawnViewerWorldObject();
     sdfSetViewFieldOfView(0.75398216f);
     dds3DrawSetIndexedWord((u32)D_00367DF0, 0);

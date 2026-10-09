@@ -11,6 +11,7 @@
 #include "dds3obj.h"
 #include "mdl.h"
 #include "file_request_api.h"
+#include "sdf_texture_offset_list.h"
 
 s32 evtTickPackLoad(KwlnTask *task);
 void evtReleaseEventPackResources(KwlnTask *task);
@@ -25,7 +26,8 @@ enum {
     EVT_PACK_LOAD_COMPLETE = 2
 };
 
-extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32, s32, s32);
+extern s32 evtCreateWorldObjectFromResource(s32, s32, s32, s32,
+                                            const SdfTextureOffsetListHeader *, s32);
 extern void fldSetRelocateOnRelease(u32);
 extern u32 kwlnDrawControlFlags;
 
@@ -89,7 +91,7 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
     s32 *baseData;
     s32 *type2Data;
     s32 *type3Data;
-    s32 *type4Data;
+    const SdfTextureOffsetListHeader *type4Data;
 
     data = evtGetEventPackLoadState(eventId);
     baseData = NULL;
@@ -110,7 +112,7 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
                     type3Data = (s32 *)(data->data + entry->dataOffset);
                     break;
                 case 4:
-                    type4Data = (s32 *)(data->data + entry->dataOffset);
+                    type4Data = (const SdfTextureOffsetListHeader *)(data->data + entry->dataOffset);
                     break;
                 }
             }
@@ -122,7 +124,7 @@ s32 evtTryCreateWorldObjectFromPackResourceSet(s32 eventId, s32 resourceId) {
     }
 
     if (baseData != NULL && type2Data != NULL && type3Data != NULL && type4Data != NULL) {
-        evtCreateWorldObjectFromResource(baseData[0], baseData[1], (s32)type2Data, (s32)type3Data, (s32)type4Data, 0);
+        evtCreateWorldObjectFromResource(baseData[0], baseData[1], (s32)type2Data, (s32)type3Data, type4Data, 0);
         fldSetRelocateOnRelease(1);
         kwlnDrawControlFlags |= 0x02000000;
         return 1;

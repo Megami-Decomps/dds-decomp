@@ -8,6 +8,7 @@
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
 #include "mdl_object_stream.h"
+#include "sdf_texture_offset_list.h"
 
 extern s32 D_00439214;
 extern s32 iWakeupThread(s32 threadId);
@@ -55,8 +56,6 @@ extern u32 sdfSoundCommandStatus;
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *);
 
-
-extern DevRequest *sndBuildResourceHandleListFromOffsets(const void *);
 
 extern u32 D_00438D0C;
 
@@ -124,12 +123,6 @@ extern SdfStreamFrameNode *sdfStreamNodeListHead;
 extern SdfStreamFrameNode *sdfStreamNodeListTail;
 
 extern s32 sceIpuSync(s32, s32);
-
-typedef struct SdfResourceList {
-    u8 pad00[0x10];
-    s32 count;        /* 0x10 */
-    s32 offsets[1];   /* 0x14: relative to the resource base */
-} SdfResourceList;
 
 extern s32 func_0036DE70(void);
 
@@ -709,36 +702,26 @@ INCLUDE_RODATA(const s32, "game/code_003425B0", sdfGsMemoryDumpHeader);
 INCLUDE_RODATA(const s32, "game/code_003425B0", sdfGsMemoryDumpRowFormat);
 
 void sndPrintMemoryInfo(void) {
-    s32 info[6];
-    sdfGetGeneralHeapStats(info);
+    SdfGeneralHeapStats info;
+    sdfGetGeneralHeapStats(&info);
     sdfPrintFormattedDevMessage(" <<< memory information >>>\n             total : 0x%06X\n        free total : 0x%06X\n     max free size : 0x%06X\n     min free size : 0x%06X\n      handle total : %d\n free handle count : %d\n\n",
-                    info[SDF_HEAP_STAT_TOTAL_BYTES], info[SDF_HEAP_STAT_FREE_BYTES],
-                    info[SDF_HEAP_STAT_LARGEST_FREE], info[SDF_HEAP_STAT_SMALLEST_FREE],
-                    info[SDF_HEAP_STAT_BLOCK_COUNT], info[SDF_HEAP_STAT_FREE_BLOCK_COUNT]);
+                    info.totalBytes, info.freeBytes,
+                    info.largestFreeBytes, info.smallestFreeBytes,
+                    info.blockCount, info.freeBlockCount);
 }
 
-typedef struct SdfChipStats {
-    u32 totalBytes;
-    u32 freeBytes;
-    u32 blockCount;
-    u32 emptyBlocks;
-    u32 partialBlocks;
-    u32 usedCells[7];
-} SdfChipStats;
-
-extern void sdfGetChipHeapStats(SdfChipStats *stats);
 extern char D_00438C08[];
 
 /* Print the chip heap totals and how many cells are in use per size class (1..16, 17..32, ...). */
 void sdfPrintChipHeapInfo(void) {
-    SdfChipStats stats;
+    SdfChipHeapStats stats;
     u32 limit = 16;
     s32 i = 0;
     u32 first;
     u32 *used;
 
     sdfGetChipHeapStats(&stats);
-    sdfPrintFormattedDevMessage(" <<< chip memory information >>>\n                 total : 0x%06X\n            free total : 0x%06X\n            page count : %d\n       free page count : %d\n fragmented page count : %d\n", stats.totalBytes, stats.freeBytes, stats.blockCount, stats.emptyBlocks, stats.partialBlocks);
+    sdfPrintFormattedDevMessage(" <<< chip memory information >>>\n                 total : 0x%06X\n            free total : 0x%06X\n            page count : %d\n       free page count : %d\n fragmented page count : %d\n", stats.totalBytes, stats.freeBytes, stats.blockCount, stats.emptyBlockCount, stats.partialBlockCount);
     sdfPrintFormattedDevMessage("\n several size alloc count...\n");
     first = 0;
     used = stats.usedCells;
@@ -790,17 +773,17 @@ SdfTex *sdfLoadNamedResourceAndReleaseLookupHandle(const char *name) {
 extern DevRequest *sdfCreateConfiguredBufferedResourceList(s32);
 extern void sdfAppendResourceListItem(DevRequest *, u32);
 
-DevRequest *sndBuildResourceHandleListFromOffsets(const void *resource) {
-    const SdfResourceList *list = resource;
+DevRequest *sndBuildResourceHandleListFromOffsets(const SdfTextureOffsetListHeader *resource) {
     s32 i = 0;
-    s32 count = list->count;
+    s32 count = resource->textureCount;
     DevRequest *handle = sdfCreateConfiguredBufferedResourceList(count);
     const s32 *entry;
     if (count != i) {
-        entry = list->offsets;
+        entry = (const s32 *)((const u8 *)resource + sizeof(*resource));
         do {
             i++;
-            sdfAppendResourceListItem(handle, (u32)sdfTexAcquireResourceTexture((u8 *)resource + *entry));
+            sdfAppendResourceListItem(handle, (u32)sdfTexAcquireResourceTexture(
+                (void *)((const u8 *)resource + *entry)));
             entry++;
         } while (i != count);
     }
@@ -813,7 +796,7 @@ DevRequest *sndLoadNamedOffsetResourceList(const char *name) {
     u32 info[4];
 
     buffer = sdfReadNamedResource(name, info, 0);
-    result = sndBuildResourceHandleListFromOffsets((const void *)info[0]);
+    result = sndBuildResourceHandleListFromOffsets((const SdfTextureOffsetListHeader *)(u32)info[0]);
     sdfReleaseResourceAllocation(buffer);
     return result;
 }

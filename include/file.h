@@ -62,6 +62,12 @@ FileJobPayload *fileDuplicateJob(FileJobPayload *request);
 FileJobPayload *fileJobCreateFromCommandState(const char *entry);
 FileJobPayload *fileCreateJob(u16 type);
 void fileJobDestroy(FileJobPayload *job);
+void fileJobNotifyComplete(FileJobPayload *job);
+void fileJobInvokeTypeCallback(FileJobPayload *job);
+void fileJobInvokePositionCallback(FileJobPayload *job, void *extra);
+void fileJobInvokeRotationCallback(FileJobPayload *job, void *extra);
+void fileJobInvokeScaleCallback(FileJobPayload *job, f32 scale);
+void fileDispatchJobTypeCallback(FileJobPayload *job, u32 color);
 void fileWriteToPfs(FileJobPayload *job, const char *filePath);
 void fileJobWriteSerializedPayload(s32 fd, FileJobPayload *job);
 void fileJobSetPrimaryData(FileJobPayload *job, const void *src, s32 size, u16 option);
@@ -76,6 +82,7 @@ void fileQueueSetPosition(struct FileQueue *queue, const f32 position[4]);
 void fileQueueSetRotation(struct FileQueue *queue, const f32 rotation[4]);
 void fileQueueSetScale(struct FileQueue *queue, f32 scale);
 void fileQueueUpdate(struct FileQueue *queue);
+void fileQueueNotifyAllJobsComplete(struct FileQueue *queue);
 
 /* Queue flags describe payload sharing and secondary-buffer links. */
 #define FILE_JOB_FLAG_SHARED_PAYLOAD 0x1
@@ -151,6 +158,7 @@ typedef char FileQueue_first_offset_must_be_0x8C[
 
 FileQueue *fileQueueCreate(void);
 void fileQueueSetColor(FileQueue *queue, u32 color);
+void fileQueueReadPosition(const FileQueue *queue, f32 position[4]);
 FileQueue *fileQueueCreateFromCommandState(const char *entry);
 void fileQueueCopyRotationFromSource(FileQueue *queue, f32 matrix[4][4]);
 void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath);
