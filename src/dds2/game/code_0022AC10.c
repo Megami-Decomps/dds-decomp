@@ -327,7 +327,6 @@ extern void func_0020D1C0(u8 *, u8 *, s32, s32, u32, u32);
 
 extern s32 sdfAllocPacketAligned(s32);
 
-extern void sdfInitPacketList(void *);
 
 
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);

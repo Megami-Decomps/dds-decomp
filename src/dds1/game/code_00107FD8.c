@@ -338,7 +338,6 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 
 extern s32 sdfAllocPacketAligned(s32);
 
-extern void sdfInitPacketList(SdfListHead *);
 
 typedef struct SdfDrawPacket SdfDrawPacket;
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);

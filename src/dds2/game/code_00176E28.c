@@ -62,7 +62,6 @@ extern SdfPoolNode *D_003B1378[];
 extern u32 D_003B1330[];
 extern SdfPoolNode D_00380248;
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(SdfListHead *);
 extern s32 func_00167A10(EffPacketParams *);
 extern EffRecordPool *effRecordPoolCreateFiveVertexGroups(u32 count);
 extern void func_001781F8(EffRecordPool *pool);

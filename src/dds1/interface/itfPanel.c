@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "itf.h"
 #include "sdf.h"
@@ -64,7 +65,6 @@ void itfPanelUpdateValuesAndNotify(UiSprite *panel, s32 firstValue, s32 secondVa
 
 
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(SdfListHead *);
 extern void itfAppendGsPanelStatePacket(SdfListHead *);
 extern void itfPanelDispatchHandler(UiSprite *, SdfListHead *);
 
