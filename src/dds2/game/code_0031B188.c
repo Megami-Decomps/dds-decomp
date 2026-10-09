@@ -65,8 +65,6 @@ void mnuCreateNodeModelEntry(MnuModelNode *, s32, s32, s32, f32, f32, f32);
 
 void mnuDeactivateModelNode(s32 nodeAddress);
 
-extern MdlCtx *func_00232198(s32 resourceGroup, s32 resourceId);
-
 extern u8 D_0040ABD0[];
 extern u8 D_0040ABC0[];
 extern u8 D_0040ABB0[];
@@ -662,7 +660,7 @@ void mnuRestoreActiveNodeModelDepth(MnuNodeList *list) {
 
 /* Create the resource-backed model; -1 omits flagged-entry setup and scalar saving. */
 void mnuCreateNodeModelEntry(MnuModelNode *node, s32 resourceGroup, s32 resourceId, s32 entryFlags, f32 x, f32 y, f32 z) {
-    MdlCtx *model = func_00232198(resourceGroup, resourceId);
+    MdlCtx *model = mdlCreateContextFromResourceKey(resourceGroup, resourceId);
     node->model = model;
     if (entryFlags != -1) {
         model->first->frameStep = z;

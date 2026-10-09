@@ -615,14 +615,6 @@ extern u8 D_00400250[];
 
 extern EffClassResourceOps effClassResourceWorkOperations[];
 
-extern MdlCtx *func_00232198(s32 group, s32 id);
-
-extern u16 mdlGetContextResourceGroup(MdlCtx *);
-
-extern u16 mdlGetContextResourceId(MdlCtx *);
-
-
-
 /* VU0 model helpers consume vf10 directly, as in the DDS1 counterpart. */
 struct SdfMemBlock;
 
@@ -6802,7 +6794,7 @@ EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
     EffModelResource *effect = effCreateModelResourceWithInlineData(work->kind, work->source, 0, 0);
     s32 x = mdlGetContextResourceGroup(work->assetId);
     s32 y = mdlGetContextResourceId(work->assetId);
-    MdlCtx *model = func_00232198(x, y);
+    MdlCtx *model = mdlCreateContextFromResourceKey(x, y);
 
     effect->model = model;
     effInitModelVUState(model);
@@ -8060,7 +8052,7 @@ MdlCtx **effCreateAndAttachModelFromResourceDescriptor(u8 *request) {
     MdlCtx **work = effAllocateModelObjectSlot((u32)owner);
     s32 a = mdlGetContextResourceGroup(*source);
     s32 b = mdlGetContextResourceId(*source);
-    MdlCtx *object = func_00232198(a, b);
+    MdlCtx *object = mdlCreateContextFromResourceKey(a, b);
     *work = object;
     effInitModelVUState(object);
     if ((*work)->first != NULL) {
@@ -8193,7 +8185,7 @@ EffModelBindings *effCreateModelEffectWorkFromPayload(u8 *request) {
     work->material = material;
     a = mdlGetContextResourceGroup(modelSource);
     b = mdlGetContextResourceId(source->model);
-    object = func_00232198(a, b);
+    object = mdlCreateContextFromResourceKey(a, b);
     work->model = object;
     effInitModelVUState(object);
     if (work->model->first != NULL) {
