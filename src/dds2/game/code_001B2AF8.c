@@ -168,7 +168,10 @@ typedef struct SndPad {
         struct {
             u8 pad20;
             s8 confirm;
-            u8 pad22[4];
+            s8 unk22;
+            s8 unk23;
+            s8 unk24;
+            s8 unk25;
             s8 prev;
             s8 next;
             u8 pad28[9];
@@ -3953,7 +3956,93 @@ void func_001C2450(void) {
     work->reserveEntries[work->selectedReserveIndex].presentation.presentationState = 2;
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C26E0);
+extern const BattleReservePositions D_00416800;
+extern void func_001C35F0(ActionStateLink *, s8, s8);
+extern void sndSetStationedSeVolume(u32);
+
+/* Per-frame update of the reserve actor panels: handle the selection input and slide the rows in or out. */
+s32 func_001C26E0(KwlnTask *task) {
+    BattleReservePositions positions = D_00416800;
+    BattleActorPanelWork *work = (BattleActorPanelWork *)kwlnTaskGetUserValue(task);
+    s32 count = work->reserveCount;
+    KwlnTask *commandTask = kwlnTaskGetTaskByName(btlCommandPanelTaskNameRef);
+    BattleSceneObject *command;
+    s32 i;
+
+    if (commandTask != NULL) {
+        command = (BattleSceneObject *)kwlnTaskGetUserValue(commandTask);
+        if (command->state == 6) {
+            if (D_0037F510.confirm < 0) {
+                work->partyRecordIndex = datGameState->partyOrder[work->selectedReserveIndex + work->activeCount];
+                sndSetStationedSeVolume(8);
+                command->state = 8;
+                command->commandData->phase = 9;
+            } else if (D_0037F510.unk23 < 0) {
+                btlSlotBankPromoteStates(work);
+                command->state = 7;
+                sndSetStationedSeVolume(0xA);
+                func_001C35F0(command->owner, 0, 0);
+            } else {
+                if (D_0037F510.unk25 & 2) {
+                    if (work->selectedReserveIndex != count - 1 || D_0037F510.unk25 < 0) {
+                        work->selectedReserveIndex++;
+                        if (work->selectedReserveIndex >= count) {
+                            work->selectedReserveIndex = 0;
+                        }
+                        sndSetStationedSeVolume(0);
+                        btlSlotBankPromoteStates(work);
+                        work->reserveEntries[work->selectedReserveIndex].presentation.presentationState = 2;
+                    }
+                } else if (D_0037F510.unk24 & 2) {
+                    if (work->selectedReserveIndex != 0 || D_0037F510.unk24 < 0) {
+                        work->selectedReserveIndex--;
+                        if (work->selectedReserveIndex < 0) {
+                            work->selectedReserveIndex = count - 1;
+                        }
+                        sndSetStationedSeVolume(0);
+                        btlSlotBankPromoteStates(work);
+                        work->reserveEntries[work->selectedReserveIndex].presentation.presentationState = 2;
+                    }
+                }
+            }
+        }
+        for (i = 0; i < count; i++) {
+            switch ((u32)command->state) {
+            case 6:
+            case 8:
+                work->reserveEntries[i].presentation.fade += 0x20;
+                work->reserveEntries[i].presentation.fade =
+                    work->reserveEntries[i].presentation.fade <= 0 ? 0 :
+                    work->reserveEntries[i].presentation.fade > 0x80 ? 0x80 : work->reserveEntries[i].presentation.fade;
+                work->reserveEntries[i].position[0]--;
+                work->reserveEntries[i].position[0] =
+                    work->reserveEntries[i].position[0] <= positions.entries[i][0] ? positions.entries[i][0] :
+                    work->reserveEntries[i].position[0] >= positions.entries[i][0] + 8 ? positions.entries[i][0] + 8 :
+                    work->reserveEntries[i].position[0];
+                break;
+            case 7:
+            case 9:
+                work->reserveEntries[i].presentation.fade -= 0x20;
+                work->reserveEntries[i].presentation.fade =
+                    work->reserveEntries[i].presentation.fade <= 0 ? 0 :
+                    work->reserveEntries[i].presentation.fade > 0x80 ? 0x80 : work->reserveEntries[i].presentation.fade;
+                btlSlotBankPromoteStates(work);
+                break;
+            }
+        }
+        if (command->state == 7 && work->reserveEntries[0].presentation.fade <= 0) {
+            return 0;
+        }
+        if (command->state == 9 && work->reserveEntries[0].presentation.fade <= 0) {
+            return 0;
+        }
+        if (command->state == 5) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 
 void btlSlotBankPromoteStates(BattleActorPanelWork *bank) {
     s32 i;
