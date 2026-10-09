@@ -1458,25 +1458,26 @@ void mnuRebuildListLastFromCursor(MenuList *list) {
 
 /* Reset the viewport/cursor to the first node; exactly one requests replay
  * toward the saved cursor, rather than treating every nonzero value as true. */
-void mnuResetNodeLinks(s32 *menu, s32 restoreCursor) {
-    s32 first;
-    s32 oldCursor;
-    menu[9] = 0;
-    first = menu[4];
-    oldCursor = menu[7];
-    menu[6] = first;
-    menu[7] = first;
+void mnuResetNodeLinks(MenuList *list, s32 restoreCursor) {
+    MenuListNode *first;
+    MenuListNode *oldCursor;
+
+    list->windowOffset = 0;
+    first = list->first;
+    oldCursor = list->cursor;
+    list->head = first;
+    list->cursor = first;
     if (restoreCursor == 1) {
-        s32 *node = (s32 *)first;
+        MenuListNode *node = first;
         if (node == NULL) {
             return;
         }
         do {
-            if ((s32)node == oldCursor) {
+            if (node == oldCursor) {
                 return;
             }
-            mnuAdvanceListCursorDefault(menu);
-            node = (s32 *)node[22];
+            mnuAdvanceListCursorDefault(list);
+            node = node->next;
         } while (node != NULL);
     }
 }
@@ -1596,7 +1597,7 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
     mnuLinkItemList(items, nodeCount);
     mnuRebuildListFirstFromCursor(menu);
     mnuRebuildListLastFromCursor(menu);
-    mnuResetNodeLinks((s32 *)menu, 0);
+    mnuResetNodeLinks(menu, 0);
     sdfReleaseResourceAllocation(allocation);
 }
 

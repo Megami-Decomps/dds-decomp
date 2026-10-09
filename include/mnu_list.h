@@ -73,6 +73,9 @@ struct MenuList {
     s32 scale;          /* 0x3C: 8.8 fixed-point default */
 };
 
+/* Reset the list viewport and optionally replay its saved cursor. */
+void mnuResetNodeLinks(struct MenuList *list, s32 restoreCursor);
+
 /* Select the indexed node and report whether the index exists. */
 s32 mnuSeekListNode(s32 index, struct MenuList *list);
 /* Height in native units: row step multiplied by the visible row count. */
