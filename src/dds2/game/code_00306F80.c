@@ -1027,7 +1027,84 @@ GridTextListItem *itfAppendGridTextItem(GridTextWidget *owner, const char *text,
     return item;
 }
 
-INCLUDE_ASM(const s32, "game/code_00306F80", itfRemoveSelectedGridTextItem);
+GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *widget) {
+    GridTextListItem *node;
+    GridTextListItem *cursor;
+    GridTextListItem *previous;
+    GridTextListItem *next;
+
+    if (widget->itemCount == 0) {
+        return NULL;
+    }
+    node = widget->selected;
+    if (node == NULL) {
+        return NULL;
+    }
+    cursor = node;
+    do {
+        if (node->index > 0) {
+            node->index--;
+        }
+        node = node->next;
+    } while (node != NULL);
+    node = cursor;
+    previous = node->previous;
+    next = node->next;
+    if (widget->tail->index - widget->firstVisible->index + 1 <= widget->rows) {
+        if (widget->firstVisible != widget->head) {
+            cursor = previous;
+            widget->firstVisible = widget->firstVisible->previous;
+            widget->selected = previous;
+        } else if (node == widget->firstVisible) {
+            if (next != NULL) {
+                widget->firstVisible = next;
+                cursor = next;
+                widget->selected = next;
+            } else {
+                cursor = previous;
+                widget->firstVisible = previous;
+                widget->selected = previous;
+                widget->cursorRow--;
+            }
+        } else if (next != NULL) {
+            widget->selected = next;
+            cursor = next;
+        } else {
+            cursor = previous;
+            widget->selected = previous;
+            widget->cursorRow--;
+        }
+    } else if (next != NULL) {
+        widget->selected = next;
+        cursor = next;
+    }
+    if (cursor == NULL) {
+        widget->firstVisible = NULL;
+        widget->head = NULL;
+        widget->tail = NULL;
+        widget->cursorRow = 0;
+    }
+    if (previous != NULL) {
+        previous->next = next;
+    }
+    if (next != NULL) {
+        next->previous = previous;
+    }
+    if (previous == NULL) {
+        widget->firstVisible = next;
+        widget->head = next;
+    }
+    if (next == NULL) {
+        widget->tail = previous;
+    }
+    sdfReleaseChipBlock(node->text);
+    if (node->parameter != NULL) {
+        sdfReleaseChipBlock(node->parameter);
+    }
+    sdfReleaseChipBlock(node);
+    widget->itemCount--;
+    return widget->selected;
+}
 
 /* Replace the owned text and grow the optional parent column to fit its byte length. */
 void itfReplaceGridTextAndExpandColumn(GridTextWidget *widget, GridTextListItem *item, const char *text) {
