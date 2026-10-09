@@ -19,7 +19,7 @@ typedef struct MenuScrollPanel {
     u32 color; /* 0x04 */
     u32 firstSprite; /* 0x08 */
     u32 secondSprite; /* 0x0C */
-    u8 pad10[4];
+    s32 animationFrame; /* 0x10: signed opening/closing progress, clamped to 0..181. */
     MenuGridSlot positions[3]; /* 0x14 */
     MenuGridSlot active; /* 0x2C */
     MenuGridSlot pending; /* 0x34 */

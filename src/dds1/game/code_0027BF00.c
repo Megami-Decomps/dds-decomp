@@ -1581,24 +1581,24 @@ void func_0027FCA0(MenuPageWindow *window, s32 index, s32 kind) {
     if (kind < 3) {
         if (kind > 0) {
             EffectSlotSet *firstIcon = effCreateResourceSlotSet(
-                (EffectSlotSet *)(u32)window->source, window->slot, 1);
-            s32 secondarySlot = window->unk18;
+                window->resources, window->slot, 1);
+            s32 secondarySlot = window->secondarySlot;
 
             slot->icon[0] = firstIcon;
-            slot->icon[1] = effCreateResourceSlotSet((EffectSlotSet *)(u32)window->unk14,
+            slot->icon[1] = effCreateResourceSlotSet(window->secondaryResource,
                                                       secondarySlot, 1);
         } else {
-            slot->icon[0] = effCreateResourceSlotSet((EffectSlotSet *)(u32)window->source,
+            slot->icon[0] = effCreateResourceSlotSet(window->resources,
                                                       window->slot, 1);
             slot->icon[1] = NULL;
         }
     } else {
-        slot->icon[0] = effCreateResourceSlotSet((EffectSlotSet *)(u32)window->source,
+        slot->icon[0] = effCreateResourceSlotSet(window->resources,
                                                   window->slot, 1);
         slot->icon[1] = NULL;
     }
-    slot->icon[2] = effCreateResourceSlotSet((EffectSlotSet *)(u32)window->unk1C,
-                                              window->unk20, 1);
+    slot->icon[2] = effCreateResourceSlotSet(window->alternateResource,
+                                              window->alternateSlot, 1);
 
     if (slot->frame[0] != NULL) {
         effDestroyResourceSlotSet(slot->frame[0]);
@@ -1673,12 +1673,12 @@ INCLUDE_ASM(const s32, "game/code_0027BF00", func_00280048);
 
 extern char D_003BC728[];
 
-void mnuFillPanelLists(MenuPageWindow *window, s32 *counts) {
+void mnuFillPanelLists(MenuPageWindow *window, PartyPanel *records) {
     s32 i = 0;
 
     window->lists[0] = mnuCreateListState(0, 1, 1);
     window->lists[1] = mnuCreateListState(0, 1, 1);
-    for (i = 0; i < counts[0] + counts[1]; i++) {
+    for (i = 0; i < records->unk0 + records->unk4; i++) {
         mnuListAppendNode(window->lists[0], D_003BC728);
         mnuListAppendNode(window->lists[1], D_003BC728);
     }
@@ -1689,9 +1689,9 @@ void mnuDestroyWindowOwnedLists(MenuPageWindow *window) {
     mnuDestroyListState(window->lists[1]);
 }
 
-void mnuRebuildScrollLists(MenuPageWindow *menu, s32 *counts) {
+void mnuRebuildScrollLists(MenuPageWindow *menu, PartyPanel *records) {
     mnuDestroyWindowOwnedLists(menu);
-    mnuFillPanelLists(menu, counts);
+    mnuFillPanelLists(menu, records);
 }
 
 extern void mnuClearPageSelection(MenuPageWindow *);
@@ -1713,7 +1713,7 @@ void mnuClearPageSelection(MenuPageWindow *window) {
     s32 selected = window->selected;
 
     if (selected >= 0) {
-        u32 bankAddress = (u32)&window->unk20;
+        u32 bankAddress = (u32)&window->alternateSlot;
 
         *(s32 *)(bankAddress + selected * (s32)sizeof(MenuPageSlot)
                  + (u32)&((MenuWindowResourceBank *)0)->slots[0].hp.opacity) = 0x100;
@@ -1940,15 +1940,15 @@ void mnuDrawPartyRowFrameVariant(s32 x, s32 y, s32 z, MenuPageWindow *menu,
 
     if (func_00280A90(menu, index) == 1 || force != 0) {
         if (*partyFlags & 2) {
-            func_002BF4E0(x + 0x150, y + 0xA8, z, alpha, 1, (EffectSlotSet *)(u32)menu->source, 11, context);
-            func_002BF4E0(x + 0x660, y + 0x110, z, alpha, 1, (EffectSlotSet *)(u32)menu->source, 16, context);
-            func_002BF4E0(x + 0x130, y + 0x250, z, alpha, 1, (EffectSlotSet *)(u32)menu->source, 20, context);
+            func_002BF4E0(x + 0x150, y + 0xA8, z, alpha, 1, menu->resources, 11, context);
+            func_002BF4E0(x + 0x660, y + 0x110, z, alpha, 1, menu->resources, 16, context);
+            func_002BF4E0(x + 0x130, y + 0x250, z, alpha, 1, menu->resources, 20, context);
         } else if (force == 0) {
-            func_002BF4E0(x + 0x1A0, y + 0x60, z, alpha, 1, (EffectSlotSet *)(u32)menu->source, 21, context);
+            func_002BF4E0(x + 0x1A0, y + 0x60, z, alpha, 1, menu->resources, 21, context);
             uiDrawSurfaceAtNearDepth(context);
-            func_002BF4E0(x + 0x1E0, y + 0x58, z, alpha, 1, (EffectSlotSet *)(u32)menu->source, 10, context);
+            func_002BF4E0(x + 0x1E0, y + 0x58, z, alpha, 1, menu->resources, 10, context);
         } else {
-            func_002BF4E0(x + 0x1C0, y + 0xE0, z, alpha, 1, (EffectSlotSet *)(u32)menu->source, 20, context);
+            func_002BF4E0(x + 0x1C0, y + 0xE0, z, alpha, 1, menu->resources, 20, context);
         }
     }
     uiDrawSurfaceAtNearDepth(context);

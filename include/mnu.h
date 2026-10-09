@@ -544,21 +544,12 @@ typedef struct MenuPageWindow {
     u32 flags;
     s32 transitionValue;
     PartyPanel *records;
-#ifdef VERSION_DDS2
     struct EffectSlotSet *resources; /* 0x0C: resolved base-resource handle */
     s32 slot;
     struct EffectSlotSet *secondaryResource;
     s32 secondarySlot;
     struct EffectSlotSet *alternateResource;
     s32 alternateSlot;
-#else
-    s32 source;
-    s32 slot;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-#endif
 #ifdef VERSION_DDS2
     /* One main resource bank, copied and consumed in two eight-entry halves. */
     struct EffectSlotSet *mainResources[16];
@@ -589,6 +580,7 @@ void mnuSetWindowResource(s32 index, MenuPageWindow *menu,
 
 void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth,
                              MenuPageWindow *window, s32 mode);
+void mnuRebuildScrollLists(MenuPageWindow *menu, PartyPanel *records);
 
 #ifdef VERSION_DDS2
 typedef char MenuPageWindow_size_must_be_0xA6A4[
@@ -618,6 +610,12 @@ void mnuSetPanelSlotValues(MenuPageWindow *, struct EffectSlotSet *);
 void mnuInitializeCampPanelResources(MenuPageWindow *, StaffSlots *, u32, PartyPanel *);
 void mnuReleaseSpriteTextures(u32 *objectWords);
 #else
+void mnuInitPageWindow(MenuPageWindow *window, PartyPanel *records,
+                       struct EffectSlotSet *resources, s32 slot,
+                       struct EffectSlotSet *secondaryResource, s32 secondarySlot,
+                       struct EffectSlotSet *alternateResource, s32 alternateSlot);
+void mnuFillPanelLists(MenuPageWindow *window, PartyPanel *records);
+
 typedef char MenuPageWindow_handlesA_offset_check[
     ((u32)&((MenuPageWindow *)0)->handlesA == 0x24) ? 1 : -1];
 typedef char MenuPageWindow_handlesA_extent_check[
