@@ -89,7 +89,100 @@ extern FldCameraSetting fldAppliedCameraSettings[];
 
 
 
-INCLUDE_ASM(const s32, "game/code_001360B8", func_001360B8);
+extern s32 D_00389780[];
+extern s32 D_004360E8;
+extern s32 D_00436168;
+extern s32 D_0043616C;
+extern void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA,
+                                       f32 blueA, f32 redB, f32 greenB, f32 blueB,
+                                       f32 x, f32 y, f32 z);
+
+/* Apply the selected scene-light set with the requested transition duration. */
+void func_001360B8(s32 index, s32 mode) {
+    FldLightSet *light;
+    f32 vec[4];
+    f32 dir[4];
+    s32 duration;
+    s32 defaultDuration;
+    s32 area;
+    s32 value;
+
+    if (D_00389780[0] < 200) {
+        if (D_004360E8 == 0 && D_00389780[0] < 40) {
+            mode = 0;
+        }
+        defaultDuration = 15;
+        duration = 0;
+        if (mode != 0) {
+            duration = defaultDuration;
+        }
+        if (mode >= 2) {
+            duration = mode;
+        }
+        if (D_00436168 != index) {
+            if (index == 0) {
+                index = D_00436128;
+            }
+            light = &((FldLightSet *)fldSkyLightSetBuffer)[index];
+            D_0043616C = D_00389988[11];
+            D_00389988[11] = index;
+            D_00436168 = index;
+            area = light->type;
+            D_00389988[13] = area;
+            D_00389988[14] = light->unk4;
+            value = light->unk8;
+            D_00389988[15] = value;
+            D_00389988[16] = light->unkC;
+            fldSetFadeTarget(area, value, duration);
+            fldSetSwayMode(D_00389988[16]);
+            vec[0] = light->unk2C * 0.00390625f;
+            vec[1] = light->unk30 * 0.00390625f;
+            vec[2] = light->unk34 * 0.00390625f;
+            vec[3] = 0;
+            kwlnSetDrawColorTarget(duration, vec);
+            evtSetDrawVectorTarget(duration, light->vectorX, light->vectorY, light->vectorZ, light->vectorW);
+            dir[0] = light->unk44;
+            dir[1] = light->unk48;
+            dir[2] = light->unk4C;
+            dir[3] = 0;
+            kwlnSetLightDirectionTarget(duration, 0, dir);
+            vec[0] = light->unk38;
+            vec[1] = light->unk3C;
+            vec[2] = light->unk40;
+            vec[3] = 0;
+            kwlnSetLightColorTarget(duration, 0, vec);
+            dir[0] = light->unk5C;
+            dir[1] = light->unk60;
+            dir[2] = light->unk64;
+            dir[3] = 0;
+            kwlnSetLightDirectionTarget(duration, 1, dir);
+            vec[0] = light->unk50;
+            vec[1] = light->unk54;
+            vec[2] = light->unk58;
+            vec[3] = 0;
+            kwlnSetLightColorTarget(duration, 1, vec);
+            dir[0] = light->unk74;
+            dir[1] = light->unk78;
+            dir[2] = light->unk7C;
+            dir[3] = 0;
+            kwlnSetLightDirectionTarget(duration, 2, dir);
+            vec[0] = light->unk68;
+            vec[1] = light->unk6C;
+            vec[2] = light->unk70;
+            vec[3] = 0;
+            kwlnSetLightColorTarget(duration, 2, vec);
+            vec[0] = light->unk80;
+            vec[1] = light->unk84;
+            vec[2] = light->unk88;
+            vec[3] = 1.0f;
+            kwlnSetBackgroundColorTarget(duration, vec);
+            fldSetPlayerAndPeerLighting(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
+                          light->unitColorB[0], light->unitColorB[1], light->unitColorB[2],
+                          light->unitLightDirection[0], light->unitLightDirection[1],
+                          light->unitLightDirection[2]);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_001360B8", fldSetDisplayState);
 
@@ -101,8 +194,6 @@ void fldInitializeDisplayPointerTable(void) {
     displayTable[1] = (u32)D_0038BB60;
 }
 
-extern s32 D_00389780[];
-extern s32 D_00436168;
 extern u32 fldPlayerObject;
 struct EffWorldNode;
 extern EvtUnit *evtUnitGetNestedValue(struct EffWorldNode *unit);
