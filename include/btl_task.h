@@ -32,8 +32,14 @@ typedef struct SceneAiWork {
     struct ActionStateLink *source; /* 0x14: nullable command actor retained by the task. */
 #endif
     /* The selection helper indexes a 3-by-3 target-mask table with this cursor. */
-    u16 cursorRow;          /* 0x18 */
-    u16 cursorColumn;       /* 0x1A */
+    /* 001C0724/001C0760 read the word; movement arms store each half. */
+    union {
+        struct {
+            u16 row;
+            u16 column;
+        } position;
+        u32 packed;
+    } cursor;              /* 0x18 */
     s8 animationPhase;       /* 0x1C */
     u8 pad1D[3];
     s32 panelFade[4];        /* 0x20: signed panel fades. */
@@ -48,6 +54,8 @@ typedef struct SceneAiWork {
     s32 rowStep[3];          /* 0x8C: bounded to 0..5 during row animation */
     s32 rowFade[3];          /* 0x98: initialized to 128 for each row */
 } SceneAiWork;
+typedef char SceneAiWork_size[(sizeof(SceneAiWork) == 0xA4) ? 1 : -1];
+typedef char SceneAiWork_cursor_offset[((unsigned long)&((SceneAiWork *)0)->cursor == 0x18) ? 1 : -1];
 
 typedef struct BtlUnit BtlUnit;
 

@@ -70,6 +70,10 @@ void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, const char *comman
 #define FILE_JOB_FLAG_SHARED_PAYLOAD 0x1
 #define FILE_JOB_FLAG_SECTOR_FOLLOWER 0x2
 
+/* Known update-policy bits; other bits remain uninterpreted. */
+#define FILE_JOB_UPDATE_FLAG_APPLY_QUEUE_SCALE 0x1
+#define FILE_JOB_UPDATE_FLAG_SKIP_FRAME_UPDATE 0x2
+
 /* Effect/file queue entries share this C0-byte record in both games. */
 typedef struct FileJob {
     u32 unk0;
@@ -86,8 +90,8 @@ typedef struct FileJob {
     u32 color;        /* 0x64 */
     u32 xformFlags;   /* 0x68 */
     u8 unk6C[0x14];
-    s32 unk80;
-    u32 scaleFlags;   /* 0x84 */
+    s32 startFrame;   /* 0x80: earliest queue frame eligible for updates */
+    u32 updateFlags;  /* 0x84 */
     u8 unk88[8];
     u32 id;
     u32 sector;

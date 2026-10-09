@@ -1544,7 +1544,7 @@ extern char D_003ADA98[]; /* "E%3d_%03d" */
 extern u16 D_003BBE78;
 extern u16 D_003BBE7A;
 extern s32 func_003014F0(char *buffer, const char *format, ...);
-extern void func_0023E7F8(s32 slot, EvtRuntime *viewer);
+extern s32 func_0023E7F8(s32 mode, EvtRuntime *runtime);
 extern void evtReloadEventViewer(s32 slot, EvtRuntime *viewer);
 
 /* Apply one of three viewer selection modes to the selected slots. */
@@ -2022,3 +2022,4 @@ INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF60);
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF68);
 
 INCLUDE_SDATA(const s32, "game/code_0022CBA0", D_003BBF70);
+

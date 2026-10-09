@@ -584,3 +584,4 @@ void evtEventViewerFreeBuffer(EvtRuntimeChild *node) {
 }
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_004224A8);
+

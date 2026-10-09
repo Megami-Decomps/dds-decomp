@@ -124,7 +124,9 @@ typedef struct SndPad {
     u8 pad24[2];
     s8 prev;
     s8 next;
+    u8 pad28[0x18]; /* The kernel snapshot contains four 16-byte input sets. */
 } SndPad;
+typedef char SndPad_size_must_be_0x40[(sizeof(SndPad) == 0x40) ? 1 : -1];
 
 extern SndPad D_00324510;
 
@@ -6776,8 +6778,8 @@ nextActor:
     }
     return work;
 selectTarget:
-    work->cursorRow = 2;
-    work->cursorColumn = 1;
+    work->cursor.position.row = 2;
+    work->cursor.position.column = 1;
     func_001C0650(0, work);
     btlClearIndexList(work->listB);
     btlAppendIndexListEntry(work->listB,

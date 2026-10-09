@@ -1503,7 +1503,7 @@ u8 *fldFindSceneSlotRecord(s32 index) {
     return entry;
 }
 
-s32 btlFadeStaleSceneSlots(void) {
+s32 btlFadeStaleSceneSlots(s32 lastFadeIndex) {
     u32 i = 0;
     s32 changed = 0;
     BattleSceneWork *work = (BattleSceneWork *)btlGetRuntime();

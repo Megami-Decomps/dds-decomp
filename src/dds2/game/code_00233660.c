@@ -1412,6 +1412,15 @@ void mdlAddPlainViewerEntryForSelectedNode(void) {
     mdlAddEntryPlainEx(state->resources[0], state->selectedNodeId, state->selectedEntryId, width, height);
 }
 
+extern u32 func_00232F08(void);
+extern u32 mdlGetTableWord(s32 tableIndex);
+extern void mdlDestroyContext(MdlCtx *resource);
+extern void func_00233938(void);
+extern void mdlFreeViewResources(void);
+extern u8 sdfPfsDebugMode;
+
+/* Step the viewer's selected row, then apply that row's pending resource or
+ * entry selection when the confirm buttons are pressed. */
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421120);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421130);
@@ -1448,15 +1457,6 @@ INCLUDE_RODATA(const s32, "game/code_00233660", D_00421238);
 
 INCLUDE_RODATA(const s32, "game/code_00233660", D_00421248);
 
-extern u32 func_00232F08(void);
-extern u32 mdlGetTableWord(s32 tableIndex);
-extern void mdlDestroyContext(MdlCtx *resource);
-extern void func_00233938(void);
-extern void mdlFreeViewResources(void);
-extern u8 sdfPfsDebugMode;
-
-/* Step the viewer's selected row, then apply that row's pending resource or
- * entry selection when the confirm buttons are pressed. */
 void func_00235970(void) {
     s32 pageStep;
     s32 motionIndex;

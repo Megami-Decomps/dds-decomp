@@ -142,7 +142,7 @@ void mdlReleaseDevSlots(MdlCtx *ctx) {
         while (nextSlot != NULL) {
             currentSlot = nextSlot;
             nextSlot = nextSlot->next;
-            sdfReleaseDevSlot(currentSlot->slot, 1, 1);
+            sdfReleaseDevSlot(currentSlot->model, 1, 1);
             sdfReleaseChipBlock(currentSlot);
         }
         sdfReleaseChipBlock(deviceList);

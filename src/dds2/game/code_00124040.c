@@ -340,7 +340,8 @@ extern void evtStartSceneResourceTask(u64, void *);
 
 extern void func_00150800(void);
 
-extern s32 D_00435F84, D_00435F74;
+extern s32 D_00435F84;
+extern EffBlurScatterWork *D_00435F74;
 
 extern char D_00412FD0[], D_00412FE0[];
 
@@ -1818,7 +1819,7 @@ s32 func_001278D0(void) {
             blur.y = 0;
             blur.positionSpread = 0x100;
             blur.size = 200;
-            D_00435F74 = (s32)effBlurCreateScatterWork(&blur);
+            D_00435F74 = effBlurCreateScatterWork(&blur);
         } else if (coordinateFlags & 0x80) {
             blur.count = 60;
             blur.delaySpread = 15;
@@ -1831,7 +1832,7 @@ s32 func_001278D0(void) {
             blur.y = 0;
             blur.positionSpread = 0x100;
             blur.size = 136;
-            D_00435F74 = (s32)effBlurCreateScatterWork(&blur);
+            D_00435F74 = effBlurCreateScatterWork(&blur);
         }
         kwlnFadeStartOut(0);
         fldPrepareSceneBgmArchive();
@@ -2025,7 +2026,7 @@ void fldReleaseCampSceneTasks(void) {
     evtSetSolarOverlayFullyTransparent();
     fldDestroyTask();
     if (D_00435F74 != 0) {
-        effBlurReleaseFirstResource((EffBlurScatterWork *)D_00435F74);
+        effBlurReleaseFirstResource(D_00435F74);
         D_00435F74 = 0;
     }
     mnuDestroyCampTasks();
@@ -2117,3 +2118,4 @@ s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter) {
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412FD0);
 
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412FE0);
+
