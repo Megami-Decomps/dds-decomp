@@ -19,6 +19,7 @@
 #include "btl_resource_name.h"
 #include "dat_command.h"
 #include "sce_io.h"
+#include "fpu.h"
 
 extern s32 func_0036B420(s32 directory);
 extern s32 func_0036B588(s32 directory, SceDirent *entry);
@@ -122,7 +123,8 @@ extern s32 D_00438F6C;
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
-extern void btlCmdSimpleB(s32, u16);
+extern void btlCmdSimpleB(s32, s32);
+extern void btlCmdSimpleI(s32, s32);
 
 extern void btlCmdSimpleA(s32, u16);
 
@@ -410,7 +412,7 @@ void btlUnitGetBodyPosVU(BtlUnit *unit) {
 
 void btlUnitGetEffectPosVU(BtlUnit *unit) {
     f32 pos[4];
-    if (!(unit->flags & 2)) {
+    if (!(unit->status.flags & 2)) {
         btlUnitGetMuzzlePosVU(unit);
         return;
     }
@@ -465,7 +467,7 @@ f32 btlGetMaxUnitTop(u32 mask) {
     f32 maxTopY = 0.0f;
     s32 needsFirstSample = 1;
     while (unit != NULL) {
-        if ((unit->flags & 1) && (unit->flags & mask)) {
+        if ((unit->status.flags & 1) && (unit->status.flags & mask)) {
             f32 topY = btlUnitGetTopY(unit);
             if (needsFirstSample) {
                 maxTopY = topY;
@@ -485,7 +487,7 @@ f32 btlGetMaxUnitReach(u32 mask) {
     f32 maxReach = 0.0f;
     s32 needsFirstSample = 1;
     while (unit != NULL) {
-        if ((unit->flags & 1) && (unit->flags & mask)) {
+        if ((unit->status.flags & 1) && (unit->status.flags & mask)) {
             f32 scaledReach = unit->reach * unit->scale;
             if (needsFirstSample) {
                 maxReach = scaledReach;
@@ -509,7 +511,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
     f32 position[4];
     f32 edgeZ;
     while (unit != NULL) {
-        if ((unit->flags & 1) && (unit->flags & mask)) {
+        if ((unit->status.flags & 1) && (unit->status.flags & mask)) {
             btlUnitGetMuzzlePosVU(unit);
             VU0_STORE_VF(vf10, position);;
             if (mask & 0x200) {
@@ -553,10 +555,10 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
     needsFirstSample = 1;
     nearestDistance = 0.0f;
     while (unit != NULL) {
-        if (unit->flags & 1) {
-            if (!(unit->flags & 0xC0)) {
+        if (unit->status.flags & 1) {
+            if (!(unit->status.flags & 0xC0)) {
                 if (target != unit) {
-                    if (unit->flags & mask) {
+                    if (unit->status.flags & mask) {
                         btlUnitGetMuzzlePosVU(unit);
                                         VU0_SCALAR_OP_CLOBBER(targetPos.f[1], "vaddx.y vf10, vf0, vf2x");
                         VU0_LOAD_VF(vf11, &targetPos);;
@@ -587,9 +589,9 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
     f32 farthestDistance = 0.0f;
     f32 distance;
     while (unit != NULL) {
-        if (unit->flags & 1) {
-            if (!(unit->flags & 0xC0)) {
-                if (unit->flags & mask) {
+        if (unit->status.flags & 1) {
+            if (!(unit->status.flags & 0xC0)) {
+                if (unit->status.flags & mask) {
                     btlUnitGetMuzzlePosVU(unit);
                     VU0_SCALAR_OP(point[1], "vaddx.y vf10, vf0, vf2x");
                     VU0_LOAD_VF(vf11, point);
@@ -636,7 +638,7 @@ BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *reference, BtlIndexList *list) {
             VU0_STORE_VF(vf10, &selectedPosition);
         } else {
             VU0_STORE_VF(vf10, &position);
-            if (reference->flags & 0x200) {
+            if (reference->status.flags & 0x200) {
                 if (position.f[0] < selectedPosition.f[0]) {
                     selected = unit;
                     PCP_COPY_VECTOR(&selectedPosition, &position);
@@ -675,7 +677,7 @@ void btlFlagMatchingUnitsDefeatCandidate(s32 mask) {
     unit = ((BtlState *)btlGetRuntime())->units;
     if (unit != NULL) {
         do {
-            if (unit->flags & mask) {
+            if (unit->status.flags & mask) {
                 btlFlagUnitDefeatCandidate(unit);
             }
             unit = unit->nextActor;
@@ -689,7 +691,7 @@ void btlClearMatchingUnitDefeatCandidates(s32 mask) {
     unit = ((BtlState *)btlGetRuntime())->units;
     if (unit != NULL) {
         do {
-            if (unit->flags & mask) {
+            if (unit->status.flags & mask) {
                 btlClearUnitDefeatCandidate(unit);
             }
             unit = unit->nextActor;
@@ -721,7 +723,8 @@ void btlClearActorUnitDefeatCandidates(BtlIndexList *list) {
     }
 }
 
-extern void btlApplyUnitMotionSelection(u8 *, u32, s32, f32);
+extern void btlRefreshUnitMotionSelection(BtlUnit *);
+extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 extern void btlSetUnitPosition(BtlUnit *, f32 *);
 extern void btlSetUnitRotation(BtlUnit *, s128 *);
 
@@ -736,13 +739,13 @@ void btlUpdateUnitActors(void) {
         btlSetUnitRotation(unit, (s128 *)unit->rotation);
         if ((btlIsActorModeAcceptedByBattleHook((s32)unit) == 0 && unit->effectState != 0) ||
             (unit->updateFlags & 2) != 0) {
-            btlRefreshUnitMotionSelection((s32)unit);
+            btlRefreshUnitMotionSelection(unit);
             unit->unkF8 = 0;
             unit->unkFA = 0;
-            btlApplyUnitMotionSelection((u8 *)unit, unit->effectIndex, unit->effectParameter, unit->effectScale);
+            btlApplyUnitMotionSelection(unit, unit->effectIndex, unit->effectParameter, unit->effectScale);
         }
-        unit->stateFlags &= ~0x8000;
-        unit->stateFlags &= ~0x200000;
+        unit->status.stateFlags &= ~0x8000;
+        unit->status.stateFlags &= ~0x200000;
         unit = unit->nextActor;
     }
     {
@@ -765,13 +768,13 @@ void func_00209078(void) {
     struct EvtUnit *effect;
 
     while (unit != NULL) {
-        if (unit->flags & 2) {
-            if (unit->stateFlags & 0x10) {
+        if (unit->status.flags & 2) {
+            if (unit->status.stateFlags & 0x10) {
                 effect = unit->ext;
                 evtSetUnitStatusFlags(effect);
                 VU0_LOAD_VF(vf10, unit->lightDirection);
                 evtSetUnitNormalizedDirection(effect, 0);
-                if ((*(u64 *)&unit->flags & 0x4E0) == 0x420) {
+                if ((btlUnitStatusPair(unit) & 0x4E0) == 0x420) {
                     if (btlGetEntryFlagsUnlessDisabled(&unit->partyRecord) & 0x200) {
                         evtSetUnitRgbTransition(unit->ext, 0, unit->baseColor);
                     }
@@ -795,7 +798,7 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
     unit = ((BtlState *)btlGetRuntime())->units;
     if (unit != NULL) {
         do {
-            unitFlags = unit->flags;
+            unitFlags = unit->status.flags;
             if (((unitFlags & mask) != 0) && ((unitFlags & 0x20) == 0)) {
                 activeCount += unitFlags & 1;
             }
@@ -824,7 +827,30 @@ s32 btlAimHorizontalDirectionVU(f32 *origin, f32 *targetPosition) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", btlAimHorizontalDirectionClampedVU);
+s32 btlAimHorizontalDirectionClampedVU(f32 *origin, f32 *targetPosition, f32 angle) {
+    f32 delta[4];
+    f32 sine;
+    f32 tangent;
+    f32 x;
+
+    delta[0] = targetPosition[0] - origin[0];
+    delta[2] = targetPosition[2] - origin[2];
+    if (delta[0] != 0.0f || delta[2] != 0.0f) {
+        sine = sdfSinPoly(angle);
+        tangent = sine / sdfEvaluateCosineViaSinePhaseShift(angle);
+        x = tangent * delta[2];
+        if (ffabsf(delta[0]) < ffabsf(x)) {
+            x = delta[0];
+        } else if (0.0f <= delta[0]) {
+            x = ffabsf(x);
+        } else {
+            x = -ffabsf(x);
+        }
+        func_00340DC8(0.0f, func_003532E8(x, delta[2]), 0.0f);
+        return 1;
+    }
+    return 0;
+}
 
 /* vu0 routine: vf10.xyz = normalize(e x (e x f)),
  * e = vertexB - vertexA, f = vertexC - vertexA.
@@ -2127,7 +2153,7 @@ u32 btlScriptReturnUnitHpRatioPercent(void) {
         sideMask = 0x400;
     }
     while (unit != NULL) {
-        if ((unit->flags & 1) && (unit->flags & sideMask) && !(unit->flags & 0x20) && unit->owner == lookupId) {
+        if ((unit->status.flags & 1) && (unit->status.flags & sideMask) && !(unit->status.flags & 0x20) && unit->owner == lookupId) {
             DatPartyRecord *unitStats = &unit->partyRecord;
             s32 currentHp = btlReadCurrentUnitHp(unitStats);
             s32 maximumHp = btlComputeSkillAdjustedMaxHp(unitStats);
@@ -2557,7 +2583,7 @@ void btlReleaseActiveUnitEffectsUnlessPaused(void) {
     if ((((BtlState *)state)->battleFlags & 0x40000000) == 0) {
         s32 actor = (s32)((BtlState *)state)->units;
         while (actor != 0) {
-            if ((((BtlUnit *)actor)->flags & 2) != 0) {
+            if ((((BtlUnit *)actor)->status.flags & 2) != 0) {
                 s32 effect = ((BtlUnit *)actor)->ext;
                 if (effect != 0) {
                     evtConfigureUnitTransition(effect, 0);

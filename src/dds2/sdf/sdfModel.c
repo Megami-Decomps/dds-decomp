@@ -32,9 +32,9 @@ extern void sdfFreeNodeLists(SdfDrawNode *node);
 extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *node);
 
 
-extern void func_003312A8(SdfDrawNode *node, u32 *commandList, s32 packetSelector, s32 alternateSelector, s32 listIndex);
+extern void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList, s32 packetSelector, s32 alternateSelector, s32 listIndex);
 
-extern void func_00331590(SdfDrawNode *node, SdfItem *item);
+extern void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
 
 extern void effMiscQuaternionToMatrixVU(void);
 extern void func_00340DC8(f32 x, f32 y, f32 z);
@@ -172,7 +172,7 @@ typedef struct {
     u32 secondVifCode;
 } SdfIndexedPayload;
 
-SdfIndexedPayload *func_00330DF0(SdfDrawNode *node, SdfIndexedCommand *command, void *packet, s32 frame) {
+SdfIndexedPayload *sdfModelBuildIndexedCommandPayload(SdfDrawNode *node, SdfIndexedCommand *command, void *packet, s32 frame) {
     u32 packed = command->assetIndexAndCount;
     u16 assetIndex = packed >> 16;
     u16 quadwordCount = packed;
@@ -192,7 +192,7 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", func_00330E60);
 INCLUDE_ASM(const s32, "sdf/sdfModel", func_00330FE0);
 
 /* Prepend a chip-allocated command node to one buffered draw list. */
-SdfCommandNode *func_00331238(SdfDrawNode *drawNode, s32 packetSelector, s32 listIndex) {
+SdfCommandNode *sdfDrawNodePrependCommandNode(SdfDrawNode *drawNode, s32 packetSelector, s32 listIndex) {
     SdfCommandNode *node = sdfAllocSizeClassBlock(sizeof(*node));
     SdfCommandNode **head = (SdfCommandNode **)((u32)listIndex * sizeof(*drawNode->lists) + (u32)drawNode +
                                                (u32)&((SdfDrawNode *)0)->lists);
@@ -206,7 +206,7 @@ SdfCommandNode *func_00331238(SdfDrawNode *drawNode, s32 packetSelector, s32 lis
     return node;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", func_003312A8);
+INCLUDE_ASM(const s32, "sdf/sdfModel", sdfDrawNodeBuildCommandList);
 
 /* Build the local rotation basis and append its translation as the fourth row. */
 void sdfDrawNodeBuildMatrix(SdfDrawNode *node) {
@@ -229,7 +229,7 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item) {
     node->boundsAddress = item->boundsAddress;
 }
 
-void func_00331590(SdfDrawNode *node, SdfItem *item) {
+void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item) {
     s32 pass;
     s32 slot;
     u32 *cursor;
@@ -240,7 +240,7 @@ void func_00331590(SdfDrawNode *node, SdfItem *item) {
     case 0:
         for (pass = 0; pass != 2; pass++) {
             for (slot = 0; slot != 3; slot++) {
-                func_003312A8(node, (u32 *)item->commandData.inlineCommandAddresses[slot],
+                sdfDrawNodeBuildCommandList(node, (u32 *)item->commandData.inlineCommandAddresses[slot],
                               slot, 0, pass);
             }
         }
@@ -250,7 +250,7 @@ void func_00331590(SdfDrawNode *node, SdfItem *item) {
             for (pass = 0; pass != 2; pass++) {
                 cursor = item->commandData.commandList.commandAddresses;
                 while ((commandAddress = *cursor++) != 0) {
-                    func_003312A8(node, (u32 *)commandAddress, 0, 1, pass);
+                    sdfDrawNodeBuildCommandList(node, (u32 *)commandAddress, 0, 1, pass);
                 }
             }
         }
@@ -267,7 +267,7 @@ void sdfModelResetAndInitNodes(SdfDrawNode *node, u32 *commandList, s32 packetSe
     sdfEnsureFreeRootWorkspace(node);
     sdfDrawNodeBuildMatrix(node);
     for (i = 0; i != 2; i++) {
-        func_003312A8(node, commandList, packetSelector, 0, i);
+        sdfDrawNodeBuildCommandList(node, commandList, packetSelector, 0, i);
     }
 }
 
@@ -305,7 +305,7 @@ SdfModel *sdfModelCreateWithItems(void *data, SdfItemListRef *listRef) {
 
     if (count != i) {
         do {
-            func_00331590(((SdfDrawNode **)model->list->buffer)[i], item);
+            sdfDrawNodeBuildFromItemAndCommands(((SdfDrawNode **)model->list->buffer)[i], item);
             item++;
             i++;
         } while (i != count);

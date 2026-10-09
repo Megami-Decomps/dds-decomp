@@ -296,7 +296,38 @@ void fldApplySkyLightSetToPlayerVU(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001360B8", func_00136718);
+extern u32 D_00435F1C;
+
+void func_00136718(void) {
+    FldLightSet *light = &((FldLightSet *)fldSkyLightSetBuffer)[D_00436128];
+    f32 dir[4];
+    EvtUnit *unit;
+    u32 colorA;
+    u32 colorB;
+    s32 red, green, blue;
+    s32 index;
+
+    unit = evtUnitGetNestedValue((struct EffWorldNode *)D_00435F1C);
+    index = 0;
+    evtSetUnitStatusFlags(unit);
+    red = light->unitColorA[0] * 128.0f;
+    green = light->unitColorA[1] * 128.0f;
+    blue = light->unitColorA[2] * 128.0f;
+    colorA = red | (blue << 16) | (green << 8) | 0x80000000;
+    red = light->unitColorB[0] * 128.0f;
+    green = light->unitColorB[1] * 128.0f;
+    blue = light->unitColorB[2] * 128.0f;
+    colorB = red | (blue << 16) | (green << 8) | 0x80000000;
+    evtInitializeUnitColorTransition(unit, 0, colorA, colorB);
+    dir[0] = light->unitLightDirection[0];
+    dir[1] = light->unitLightDirection[1];
+    dir[2] = light->unitLightDirection[2];
+    dir[3] = 0.0f;
+    VU0_LOAD_VF(vf10, dir);
+    evtSetUnitNormalizedDirection(unit, index);
+    VU0_LOAD_VF(vf10, dir);
+    evtSetUnitNormalizedDirection(unit, 0);
+}
 
 void fldApplyLightSetCurrent(void) {
     FldLightSet *light = &((FldLightSet *)D_004360F0)[D_00436128];

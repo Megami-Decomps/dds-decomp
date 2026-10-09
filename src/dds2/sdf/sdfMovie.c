@@ -17,7 +17,7 @@ s32 EIntr(void);
 extern s32 D_00438D08;
 
 /* Queue up to 0x4000 bytes into the linear ring; state 5 means insufficient room. */
-void func_00345E18(MovObj *movie) {
+void sdfMovieScheduleLinearStreamRead(MovObj *movie) {
     MovLinearStream *stream = movie->stream.linear;
     s32 remaining = movie->remainingBytes;
     s32 readSize;
@@ -80,7 +80,7 @@ s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *
         if (operation == SDF_DEV_EVENT_SIZE_REPLY) {
             movie->totalBytes = bytesRead;
             movie->remainingBytes = bytesRead;
-            func_00345E18(movie);
+            sdfMovieScheduleLinearStreamRead(movie);
         }
         break;
     case SDF_MOVIE_STATE_DATA_READ:
@@ -95,7 +95,7 @@ s32 sdfMovieHandleLinearDeviceEvent(DevState *deviceState, s32 operation, void *
                 movie->state = SDF_MOVIE_STATE_STOP_REQUESTED;
                 sdfDevQueueActiveOperation(deviceState);
             } else {
-                func_00345E18(movie);
+                sdfMovieScheduleLinearStreamRead(movie);
             }
         }
         break;
@@ -291,7 +291,7 @@ s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddres
             return 0;
         }
         if (movie->state == SDF_MOVIE_STATE_WAITING_FOR_BUFFER_SPACE) {
-            func_00345E18(movie);
+            sdfMovieScheduleLinearStreamRead(movie);
         }
         break;
     }

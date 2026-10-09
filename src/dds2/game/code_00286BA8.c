@@ -318,11 +318,47 @@ s32 mtrMantraEquipInit(void) {
     return 0;
 }
 
+extern DatPartyRecord *mnuGetSelectedNodeValue(MnuStatusResource *);
+extern u32 scrGetSelectedScriptEntryId(DatPartyRecord *);
+extern MantraNodePos *mnuGetMantraNodePositionRecord(s16);
+extern s32 mnuUpdateSelectedPanelSlot(MnuStatusResource *);
+/* Legacy calls forward the selected record to this no-op. */
+extern void func_0026DBB0();
+extern void func_00267C48(MenuProgressHost *);
+extern void evtFinishMessageWindowAndNotify(void);
+extern void func_00278EA8(struct MantraDrawPool *);
+extern void func_00279080(struct MantraDrawPool *);
+extern void func_002790F0(u32, u32, struct MantraDrawPool *);
+extern void mnuSpawnMantraIconAndSelectPanelEntry(struct MantraDrawPool *);
+
 INCLUDE_RODATA(const s32, "game/code_00286BA8", D_00426208);
 
 INCLUDE_RODATA(const s32, "game/code_00286BA8", D_00426218);
 
-INCLUDE_ASM(const s32, "game/code_00286BA8", func_00287AF8);
+void func_00287AF8(s32 key, s32 initResult) {
+    MnuStatusResource *resource = (MnuStatusResource *)sdfGetTaskValueByKey((struct TaskWork *)mnuMantraSelectionResource, -1);
+    MantraMenuWork *work = &resource->menu;
+
+    func_00267C48(resource->progressHost);
+    evtFinishMessageWindowAndNotify();
+    if (resource->flags.unk04) {
+        DatPartyRecord *selectedRecord;
+        MantraNodePos *position;
+        mnuUpdateSelectedPanelSlot(resource);
+        func_0026DBB0(mnuGetSelectedNodeValue(resource));
+        selectedRecord = mnuGetSelectedNodeValue(resource);
+        position = mnuGetMantraNodePositionRecord((s16)scrGetSelectedScriptEntryId(selectedRecord));
+        func_002790F0((s32)(((f32)position->x / 10.0f) * 40.0f),
+                      (s32)(((f32)position->y / 10.0f) * 39.0f),
+                      resource->menu.selectionController);
+        mnuSpawnMantraIconAndSelectPanelEntry(resource->menu.selectionController);
+        work->navigationState = 0x14;
+    } else {
+        func_00278EA8(resource->menu.selectionController);
+        func_00279080(resource->menu.selectionController);
+    }
+    evtPrintDeveloperConsoleMessage("mtrMantraEquipRelease\n");
+}
 
 typedef struct DspUnitName {
     u8 encodedText[17];

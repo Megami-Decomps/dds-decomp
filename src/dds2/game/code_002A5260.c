@@ -12,7 +12,6 @@
 #include "kwln_task_lifecycle.h"
 
 extern KwlnTask *kwlnTaskCreate();
-extern void sdfCancelAndReleasePacWork(void *);
 
 /* Title menu's selected page, sequence timers and draw-task state. */
 typedef struct MenuTitleState {
@@ -1330,7 +1329,7 @@ KwlnTask *mnuRequestMoviePlayback(const char *file, const SdfMovieDescriptor *pa
         D_00437AE4 = context->soundNode.audioMode;
         strcpy(D_00457DC8, file);
         context->soundNode.textureHead = 0;
-        sdfCancelAndReleasePacWork(context);
+        sdfCancelAndReleaseMovieStreamWork(context);
         D_00457DB0.source = D_00437AD8->word;
         D_00437AD0 = 0;
         return kwlnTaskCreate(D_0042A3B0, 0x2AFB, 0, 0, func_002A7DB0, 0, 0);
@@ -1351,7 +1350,7 @@ void mnuStopMovieDrawTask(void) {
     if (mnuMovieDrawTask == 0) {
         return;
     }
-    sdfCancelAndReleasePacWork(&mnuMovieDrawContext);
+    sdfCancelAndReleaseMovieStreamWork(&mnuMovieDrawContext);
     kwlnTaskDestroyWithHierarchy(mnuMovieDrawTask, 0);
     mnuMovieDrawTask = 0;
 }

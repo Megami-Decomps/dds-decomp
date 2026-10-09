@@ -3516,11 +3516,40 @@ removal, flag operations and vector calls, without integer transports.
 DDS2's actual flag providers take `(void *, u32)`; the node-removal
 provider takes `EffWorldNode *`.
 
-The existing `btlUnitStatusPair` inline is separate inherited type debt:
-it casts the address of the scalar `flags` member to `BtlUnitFlagPair *`.
-Do not extend that second view. Any new whole-pair consumer must instead
-use a genuinely embedded union with every scalar consumer migrated, or
-remain parked until that primary-owner closure is possible.
+## Primary actor status is a complete two-word record
+
+Both `BtlUnit` owners embed `BtlUnitStatus` at `+0x110`: signed `s32 flags`
+followed by unsigned `u32 stateFlags`. Scalar consumers use those primary
+members. `btlUnitStatusPair` observes the complete eight-byte record by
+ordinary `memcpy` into a local `u64`; it never widens a scalar subobject or
+casts its address to another record or union. This replaces the inherited
+`BtlUnitFlagPair *` second view and the former union-only recommendation.
+A complete-record copy is an alternative to a genuinely embedded union,
+not permission to introduce a cast-based union view.
+
+The record has size eight and alignment four; the actors retain their
+original alignment eight, sizes `0x348` / `0x368`, and every existing field
+offset. The low word stays signed. A scalar record write keeps the ordinary
+word alias behavior, while the compiler lowers the complete-record copy to
+the native `LD` observation. Do not replace the ordinary copy with an alias
+attribute, special builtin, memory barrier or per-file flag. Qualification
+requires complete owner, projection and provider/caller review, alias and
+layout checks, all affected whole units and both linked images.
+
+The stiffen-damage callbacks in both games explicitly borrow the actor for
+each status test and its selected position provider. Capture it immediately
+before that test, after any earlier random/provider calls. Only that test
+and its provider use the captured actor; later `task->unit` observations
+remain fresh after the provider. This expresses the native pre-provider
+reuse, not an extended snapshot lifetime or a synthetic callback barrier.
+
+DDS2's resource/sound queue is a separate nonactor link boundary. Its
+verbatim inherited `ActionUnit` declaration remains solely for link flags
+at `+0x0C` and an actor address at `+0x18`; the selected actor and actor child
+use `BtlUnit`. No actor-status access uses that private declaration. The
+canonical `ActionStateLink` union and its inherited callback/projection
+type debt are unchanged; primary actor-status closure does not claim
+ownership or callback-type closure for that separate allocation.
 
 ## System-effect flags and reference count
 
@@ -3529,7 +3558,7 @@ with `LD` (`001F1194`), then tests its low flag bits. Other effect callbacks
 access the same pair with `SH` flags and `SW` reference counts. Use the
 existing embedded `BtlEffectLinkState.packed` member; do not widen the
 scalar flags or introduce a second actor view. This genuine owner is
-distinct from the inherited `btlUnitStatusPair` cast debt above.
+distinct from the complete primary actor-status record above.
 
 
 ## GS graphics transfer-worker control
@@ -5051,9 +5080,10 @@ DDS1 arrangement body has matched.
 read the canonical two-byte command-selector table. The linked special
 actor callback (`0020D2E0`) passes `task->unit` without an address cast.
 Its signed selector-to-`u32` mapper conversion is a value boundary, not
-pointer transport. The legacy first input of `btlSelectedEntryHitsElement`
-remains an explicitly deferred address-word contract; its formal types
-and body are preserved until the existing preserve-types scope releases.
+pointer transport. Both actor inputs of `btlSelectedEntryHitsElement` now
+use `BtlUnit *`; its selector provider consumes the first actor and its
+status test consumes the second. Generic effect-dispatch words are decoded
+at their existing boundary rather than propagated through actor providers.
 
 ## Model afterimage slots own models and signed countdowns
 
@@ -5515,4 +5545,85 @@ resource is title-specific (`0x670010` versus `0x680010`). DDS1's retained
 request `D_003BAFE8` is a `FileRequest *`, while `D_003BAFEC` and
 `D_003BAFF0` are the resource-handle and loaded-data words. Keeping that
 request typed removes the integer/pointer adapters in both controller paths.
+
+
+## Paired-actor command roster records
+
+DDS2 `func_001AC750` clears a halfword count and writes twelve-byte rows
+starting at `+4`: a skill ID and two actor pointers. `BattleRosterTable`
+describes that variable-length record without guessing its backing capacity.
+The shared record is in retail `.data`, so its extern retains that section
+rather than letting the four-byte flexible header imply GP-relative storage.
+The scene counter's scratch genuinely holds signed IDs or an unsigned count;
+its subsequent signed first-halfword read is preserved by the documented union.
+
+
+## Secondary phase work and mirrored-sprite actor arguments
+
+DDS2 `func_001BC8A8` shares the existing `0x138`-byte phase-panel allocation:
+the signed secondary phase is at `+9`, its counter at `+0x24`, and its
+integer angle at `+0x28`; the arrays still begin at `+0x38/+0x78/+0xB8`.
+The mirrored-sprite helpers `func_001B6FC0` and `func_001B70B8` do not read
+their first argument. Their sole retail caller passes the current `BtlUnit *`,
+not an integer ID, so retaining that pointer formal avoids false scalar calls.
+
+
+## Converted scene text retains its glyph pointer
+
+`itfCreateConvertedTextGlyph` returns `struct FrFontGlyph *` and accepts a
+glyph parent of that same type. DDS2's scene text helpers retain this pointer
+through draw and queue calls instead of transporting it through a scalar ID.
+The provider's existing definition and both whole-unit helper gates establish
+the contract; the local declaration does not change the call ABI.
+
+
+## Signed mantra IDs and promoted panel status
+
+DDS2 `MenuPanelPositionRecord` contains a signed ID and an unsigned state
+halfword. Both the reset `func_00291338` and lookup `func_00291400` read
+IDs with `lh`; the flags use `lhu`. The three banks each contain 37
+four-byte records. A supposed “unknown upper halfword after lhu” is not
+a missing owner: unsigned halfwords still promote to signed `int`.
+
+The low-nibble update `(flags & ~15) | status` recurs in the reset,
+`func_002917C0` and `func_00292998`. The common signed-word status builder
+preserves its promoted arithmetic before assignment back to the halfword;
+it also constructs the reset value from zero flags and status 2. The two
+existing C callers remain exact. The reset remains assembly: its truthful
+196-byte replay is eight words away, chiefly the mask/reset register swap.
+
+
+## Scene actor-limit query's unused owner
+
+DDS2 `btlIsSceneActorCountWithinLimit` ignores its first argument, but both
+retail call sites (`0x1C8EC4`, `0x1C9ACC`) pass the unit at `owner->unit`
+in their delay slots. Its first formal is consequently `BtlUnit *`, not an
+integer ID. This local signature completion leaves the query's text unchanged.
+
+
+## Descriptor-bound effects retain their second vector pointer
+
+`effObjSpawnDescriptorBoundEffect` and `effObjCreateWithBoundBill` pass
+both vectors to `effObjCreateWithVectors` as pointers. The paired event
+viewer callers supply real four-float arrays; the named-resource wrapper
+already receives a pointer. Keeping the second vector typed through that
+chain removes the address-word conversions without changing instructions.
+DDS2 retains its existing K&R constructor definition.
+
+This closes the descriptor/bound-bill argument path only. The integer VM
+setter return debt remains unchanged, and does not license a false pointer
+return, a new object view, or a wrong-prototype target landing.
+
+
+## Synthesized polygon-movie headers return allocation handles
+
+The paired PMD2 `evtPolygonMovieCreateHeader` and PMD3
+`func_00234C18`/`func_0024F9B8` constructors return the `SdfMemBlock *`
+obtained from `sdfAllocGeneralBlock`; their output arguments separately
+receive the retained data address. Returning the handle directly retires
+the pointer-to-integer adapters without changing any constructor text.
+No existing C caller or shared declaration uses these four providers.
+The three-resource movie loaders remain assembly: natural grouped paths
+and these pointer contracts retain the two-word argument-setup delay-slot
+swap at `+0x80`/`+0x84`, so this closure earns no new matched-body credit.
 

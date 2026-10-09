@@ -13,7 +13,7 @@ UNIT = ROOT / "src/dds2/game/code_001DD390.c"
 OBJECT = ROOT / "build/dds2/src/dds2/game/code_001DD390.o"
 TARGET = "func_001FA480"
 ANCHOR = 'INCLUDE_ASM(const s32, "game/code_001DD390", func_001FA480);'
-BASE = "30681a229beca800475559744725bdf133363a54"
+BASE = "9e573143fa0ea1e013781dc904138e7c68273990"
 NAME = r"[A-Za-z_][A-Za-z0-9_]*"
 HEX = r"[0-9A-F]+"
 STAGE = "start"
@@ -144,9 +144,6 @@ def main():
     text = original.decode("utf-8")
     patch = Path(__file__).with_name("candidate.patch").read_text(encoding="utf-8")
     candidate = apply_source_patch(text, patch)
-    old_selector = "                        case 36:\n                        default:\n"
-    require(candidate.count(old_selector) == 1, "selector_context_changed")
-    candidate = candidate.replace(old_selector, "                        case 36:\n", 1)
     require(text.count(ANCHOR) == 1, "anchor_count")
     require(candidate != text and ANCHOR not in candidate, "candidate_input")
     emit(dict(scope="focused_unit_diagnostic", base=BASE,

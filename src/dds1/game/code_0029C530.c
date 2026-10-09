@@ -6445,37 +6445,37 @@ s32 effCollectModelEffectActors(BtlUnit **out, u32 kind) {
 
     switch (kind) {
     case 1:
-        if ((actor->flags & 2) && actor->ext != 0) {
+        if ((actor->status.flags & 2) && actor->ext != 0) {
             out[0] = actor;
             count = 1;
         }
         break;
     case 4:
-        mask = other->flags & 0x600;
+        mask = other->status.flags & 0x600;
         break;
     case 3:
-        mask = actor->flags & 0x600;
+        mask = actor->status.flags & 0x600;
         break;
     case 5:
         mask = 0x600;
         break;
     case 6:
         other = (BtlUnit *)effBTLFieldColorGetOverrideSelector();
-        if ((other->flags & 2) && other->ext != 0) {
+        if ((other->status.flags & 2) && other->ext != 0) {
             out[0] = other;
             count = 1;
         }
         break;
     case 7:
         other = (BtlUnit *)effBTLFieldColorGetFinalSelector();
-        if ((other->flags & 2) && other->ext != 0) {
+        if ((other->status.flags & 2) && other->ext != 0) {
             out[0] = other;
             count = 1;
         }
         break;
     case 0:
     case 2:
-        if ((other->flags & 2) && other->ext != 0) {
+        if ((other->status.flags & 2) && other->ext != 0) {
             out[0] = other;
             count = 1;
         }
@@ -6485,7 +6485,7 @@ s32 effCollectModelEffectActors(BtlUnit **out, u32 kind) {
         BtlUnit *link;
 
         for (link = battle->units; link != NULL; link = link->next) {
-            u32 flags = link->flags;
+            u32 flags = link->status.flags;
 
             if (flags & 1) {
                 if (flags & 2) {
@@ -6515,7 +6515,7 @@ void func_002B2938(u32 unusedResource) {
     }
     unit = state->units;
     while (unit != NULL) {
-        if (unit->flags & 2) {
+        if (unit->status.flags & 2) {
             EvtUnit *effect = unit->ext;
 
             if (effect != NULL) {
@@ -6650,7 +6650,7 @@ void func_002B2A48(EffActiveResource *work) {
     }
     if (frame == 0) {
         for (index = 0; index < count; index++) {
-            if (actors[index]->stateFlags & 0x10) {
+            if (actors[index]->status.stateFlags & 0x10) {
                 effect = actors[index]->ext;
                 evtSetUnitStatusFlags(effect);
                 if (config->colorFadeIn != -1 && config->colorFadeOut != -1) {
@@ -6658,7 +6658,7 @@ void func_002B2A48(EffActiveResource *work) {
                 }
                 if (config->directionFadeIn != -1 && config->directionFadeOut != -1) {
                     if (request.kind == 3) {
-                        if (actors[index]->stateFlags & 0x8000) {
+                        if (actors[index]->status.stateFlags & 0x8000) {
                             btlUnitGetEffectPosVU(actors[index]);
                         } else {
                             btlUnitGetMuzzlePosVU(actors[index]);
@@ -6670,7 +6670,7 @@ void func_002B2A48(EffActiveResource *work) {
                         effBattleMiscDirectionTo(actors[index], &request, direction);
                         VU0_LOAD_VF(vf10, direction);
                     } else {
-                        if (actors[index]->stateFlags & 0x8000) {
+                        if (actors[index]->status.stateFlags & 0x8000) {
                             btlUnitGetEffectPosVU(actors[index]);
                         } else {
                             btlUnitGetMuzzlePosVU(actors[index]);
@@ -6686,7 +6686,7 @@ void func_002B2A48(EffActiveResource *work) {
     }
     if (config->duration != 0 && frame == config->duration - config->colorFadeOut) {
         for (index = 0; index < count; index++) {
-            if (actors[index]->stateFlags & 0x10) {
+            if (actors[index]->status.stateFlags & 0x10) {
                 u32 firstColor;
                 u32 secondColor;
                 effect = actors[index]->ext;
@@ -6707,7 +6707,7 @@ void func_002B2A48(EffActiveResource *work) {
     }
     if (config->duration != 0 && frame == config->duration - config->directionFadeOut) {
         for (index = 0; index < count; index++) {
-            if (actors[index]->stateFlags & 0x10) {
+            if (actors[index]->status.stateFlags & 0x10) {
                 effect = actors[index]->ext;
                 VU0_LOAD_VF(vf10, actors[index]->lightDirection);
                 evtSetUnitNormalizedDirection(effect, config->directionFadeOut);
@@ -6728,7 +6728,7 @@ void effSyncLinkedActorChildParameter(void) {
     }
     effect = (u8 *)((BtlState *)state)->units;
     while (effect != NULL) {
-        if (((BtlUnit *)effect)->flags & 2) {
+        if (((BtlUnit *)effect)->status.flags & 2) {
             u8 *work = (u8 *)((BtlUnit *)effect)->ext;
             if (work != NULL) {
                 ((EvtUnit *)work)->color60 = ((BtlUnit *)effect)->baseColor;
@@ -6762,7 +6762,7 @@ void func_002B2F20(EffActiveResource *work) {
 
     if (frame == 0) {
         for (i = 0; i < count; i++) {
-            u32 flags = actors[i]->flags;
+            u32 flags = actors[i]->status.flags;
 
             if (flags & 2) {
                 if ((flags & 0xE0) == 0) {
@@ -6782,7 +6782,7 @@ void func_002B2F20(EffActiveResource *work) {
     }
     if (config->duration != 0 && frame == config->duration - config->fadeOut) {
         for (i = 0; i < count; i++) {
-            u32 flags = actors[i]->flags;
+            u32 flags = actors[i]->status.flags;
 
             if (flags & 2) {
                 if ((flags & 0xE0) == 0) {
@@ -6971,7 +6971,7 @@ void effApplyOverlaySpecs(u8 *work) {
     spec = ((EffActiveResource *)work)->payload;
     count = effCollectModelEffectActors(objects, ((EffAnimInfo *)spec)->actorSelection);
     for (i = 0; i < count; i++) {
-        u32 flags = ((BtlUnit *)objects[i])->flags;
+        u32 flags = ((BtlUnit *)objects[i])->status.flags;
         if (flags & 2) {
             if ((flags & 0x20) == 0) {
                 if ((((BtlUnit *)objects[i])->effectLink.flags & 0x10) == 0) {

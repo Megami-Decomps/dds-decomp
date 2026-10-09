@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_roster_pair.h"
 #include "dat_command.h"
 #include "fr_font.h"
 #include "sdf_chip.h"
@@ -24,7 +25,7 @@ extern s32 btlGetRuntime(void);
 
 
 extern u32 func_0019F5E8(s32, s32, s32, u32, char *, s32);
-extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
+extern struct FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, struct FrFontGlyph *);
 extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
 
 extern s32 kwlnTaskCreate(const char *, s32, s32, s32, TaskUpdate, TaskDestroy, s32);
@@ -133,13 +134,12 @@ extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 
 extern u32 func_001C82D8(s32, s8);
 
-extern u32 btlCountFlaggedSceneActors(void);
+extern s32 btlCountFlaggedSceneActors(void);
 
 extern s32 func_001AC750(s32, void *);
 
 extern s32 D_004367C0;
 
-extern char D_003B5D10[];
 
 extern u8 D_003B5B10[];
 
@@ -192,24 +192,24 @@ void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u32 color, char *text) {
 }
 
 void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
-    s32 handle;
+    struct FrFontGlyph *handle;
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_00435E64 + index * 17, 0);
-    frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)(u32)handle, 1);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
+    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     itfSetTextDrawLimit(-1);
 }
 
 void btlQueueIndexedTextWithinDrawLimit(s32 x, s32 y, s32 z, s32 w, u16 index) {
-    s32 handle;
+    struct FrFontGlyph *handle;
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_00435E5C + index * 25, 0);
-    frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)(u32)handle, 1);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
+    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     itfSetTextDrawLimit(-1);
 }
 
-s32 btlIsSceneActorCountWithinLimit(s32 unused, u32 limit) {
+s32 btlIsSceneActorCountWithinLimit(BtlUnit *unused, u32 limit) {
     btlGetRuntime();
     if (limit < btlCountFlaggedSceneActors()) {
         return 0;
@@ -226,28 +226,32 @@ extern u16 *func_001C8518(s32, s16 *, u16, u16, u16);
 
 extern void fldCollectAvailableRosterEntries(s32, s16 *);
 
-extern char *fldGetCachedSceneActorNameAndId(s32, s16 *);
 
 /* Advance the per-kind scene counter table: refresh the slot for the current
  * scene kind, then return its value (clamped to 4 unless noClamp is set). */
 u32 fldUpdateSceneKindCounter(s32 ctx, s8 kind, s8 noClamp) {
-    s16 buf[8];
+    /* This scratch is written as signed IDs or an unsigned roster count.
+     * The scene counter interprets its first halfword as signed (retail 1C8470). */
+    union {
+        s16 ids[8];
+        u16 count;
+    } buffer;
     u32 type = func_001C82D8(ctx, kind);
     if (type != 4) {
         D_004367C0 = 0;
     }
     switch (type) {
     case 0:
-        func_001C8518(ctx, buf, 0, 2, 3);
-        D_00438F4C->value[0] = buf[0] + 1;
+        func_001C8518(ctx, buffer.ids, 0, 2, 3);
+        D_00438F4C->value[0] = buffer.ids[0] + 1;
         break;
     case 4:
-        fldGetCachedSceneActorNameAndId(ctx, buf);
-        D_00438F4C->value[4] = buf[0];
+        fldGetCachedSceneActorNameAndId(ctx, &buffer.count);
+        D_00438F4C->value[4] = buffer.ids[0];
         break;
     case 2:
-        fldCollectAvailableRosterEntries(ctx, buf);
-        D_00438F4C->value[2] = buf[0];
+        fldCollectAvailableRosterEntries(ctx, buffer.ids);
+        D_00438F4C->value[2] = buffer.ids[0];
         break;
     case 3:
         D_00438F4C->value[3] = 3;
@@ -368,15 +372,16 @@ void fldCollectAvailableRosterEntries(s32 unused, s16 *count) {
     *count = found;
 }
 
-/* Cache the resolved entry ID while returning the shared name buffer. */
-char *fldGetCachedSceneActorNameAndId(s32 object, s16 *outId) {
-    s32 cachedId = D_004367C0;
-    if (cachedId == 0) {
-        cachedId = func_001AC750(*(s32 *)(*(s32 *)(object + 0x2C) + 0x18), D_003B5D10);
-        D_004367C0 = cachedId;
+/* Cache the roster count while returning the shared paired-actor record. */
+BattleRosterTable *fldGetCachedSceneActorNameAndId(s32 address, u16 *outCount) {
+    BattleSceneObject *object = (BattleSceneObject *)address;
+    s32 cachedCount = D_004367C0;
+    if (cachedCount == 0) {
+        cachedCount = func_001AC750((s32)object->owner->unit, &D_003B5D10);
+        D_004367C0 = cachedCount;
     }
-    *outId = cachedId;
-    return D_003B5D10;
+    *outCount = cachedCount;
+    return &D_003B5D10;
 }
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C8A80);
@@ -427,7 +432,7 @@ INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436868);
 void btlDrawRetreatCommandLabel(s32 unused) {
     u8 text[8] = "Retreat";
     s32 color;
-    s32 handle;
+    struct FrFontGlyph *handle;
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
 
     if (datBattleSceneRecords[scene->mode].unk00 != 0) {
@@ -437,8 +442,8 @@ void btlDrawRetreatCommandLabel(s32 unused) {
     }
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(0x1A0, 0xA60, 0xFF0010, color, text, 0);
-    frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)(u32)handle, 1);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
+    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     itfSetTextDrawLimit(-1);
 }
 
@@ -631,7 +636,7 @@ s32 func_001CA8D8(void) {
 
     if (actor != 0) {
         do {
-            if ((actor->flags & requiredFlags) == requiredFlags) {
+            if ((actor->status.flags & requiredFlags) == requiredFlags) {
                 for (i = 0; i < 8; i++) {
                     if ((u16)(actor->partyRecord.effectData[i] - 0xE0) < 0x20) {
                         return actor->partyRecord.effectData[i];
@@ -767,7 +772,7 @@ void func_001CAB60(ActionStateLink *task) {
         btlInitializeCommandPanelSlotTables();
         btlCreateMessageWindow();
         func_001BD6E8(object);
-        if ((task->unit->flags & 0x200) && !(scene->flags & 0x1000000)) {
+        if ((task->unit->status.flags & 0x200) && !(scene->flags & 0x1000000)) {
             switch (fldSelectSceneMode(task)) {
             case 1:
                 btlBossDebugPrintf("-----------------First Battle!!-------------------\n");

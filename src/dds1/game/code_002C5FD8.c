@@ -4,6 +4,7 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "fld_lmap_task.h"
+#include "fld_map_resource.h"
 
 struct SdfTex;
 extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
@@ -16,29 +17,11 @@ extern u32 D_003BD980;
 
 extern s32 sdfCounterGetDisplayValue(void);
 
-typedef struct MapResource {
-    u32 image;
-    u32 handle;
-    u32 descriptor;
-    u32 unkC;
-} MapResource;
-
-extern MapResource fldLocalMapNameTextures[10];
-
-extern MapResource fldLocalMapAuxTextureResource;
-
-extern MapResource fldLocalMapTextureResource;
-
-extern s32 fldLoadMapResource(const char *, MapResource *);
-
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void fldProjectPointToGridCell(s32 *, s32 *, f32, f32, f32);
 
 extern s32 func_003014F0(char *, const char *, ...);
-
-extern u32 fldReleaseMapResource(s32 *);
-
 
 extern struct SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
 
@@ -259,12 +242,12 @@ s32 fldReleaseLocalMapResources(void) {
     s32 i = 9;
     MapResource *item = fldLocalMapNameTextures;
     do {
-        fldReleaseMapResource((s32 *)item);
+        fldReleaseMapResource(&item->texture);
         item++;
         --i;
     } while (i >= 0);
-    fldReleaseMapResource((s32 *)&fldLocalMapAuxTextureResource);
-    fldReleaseMapResource((s32 *)&fldLocalMapTextureResource);
+    fldReleaseMapResource(&fldLocalMapAuxTextureResource.texture);
+    fldReleaseMapResource(&fldLocalMapTextureResource.texture);
     return 1;
 }
 
@@ -306,15 +289,15 @@ static inline void fldDrawLocalMapFrame(f32 slide, f32 alpha1, f32 alpha2, f32 a
     func_00108FA0((s32)(slide * 427.0f + rects[1][0] * (1.0f - slide)), rects[1][1], rects[1][2], rects[1][3],
                   rects[1][4], rects[1][5], rects[1][6], rects[1][7], ((s32)(alpha1 * 128.0f) << 24) | 0x808080,
                   ((s32)(alpha1 * 128.0f) << 24) | 0x808080, ((s32)(alpha1 * 128.0f) << 24) | 0x808080,
-                  ((s32)(alpha1 * 128.0f) << 24) | 0x808080, (struct SdfTex *)fldLocalMapTextureResource.image);
+                  ((s32)(alpha1 * 128.0f) << 24) | 0x808080, fldLocalMapTextureResource.texture);
     func_00108FA0(rects[2][0], rects[2][1], rects[2][2], rects[2][3], rects[2][4], rects[2][5], rects[2][6],
                   rects[2][7], ((s32)(alpha2 * 128.0f) << 24) | 0x808080, ((s32)(alpha2 * 128.0f) << 24) | 0x808080,
                   ((s32)(alpha2 * 128.0f) << 24) | 0x808080, ((s32)(alpha2 * 128.0f) << 24) | 0x808080,
-                  (struct SdfTex *)fldLocalMapTextureResource.image);
+                  fldLocalMapTextureResource.texture);
     func_00108FA0((s32)(slide * 353.0f + rects[3][0] * (1.0f - slide)), rects[3][1], rects[3][2], rects[3][3],
                   rects[3][4], rects[3][5], rects[3][6], rects[3][7], ((s32)(alpha3 * 128.0f) << 24) | 0x808080,
                   ((s32)(alpha3 * 128.0f) << 24) | 0x808080, ((s32)(alpha3 * 128.0f) << 24) | 0x808080,
-                  ((s32)(alpha3 * 128.0f) << 24) | 0x808080, (struct SdfTex *)fldLocalMapTextureResource.image);
+                  ((s32)(alpha3 * 128.0f) << 24) | 0x808080, fldLocalMapTextureResource.texture);
     evtSubmitPrimaryAlphaBlendMode(0);
 }
 
@@ -451,7 +434,7 @@ void fldDrawScaledAuxMapTexture(s32 x, s32 y, u32 colour, f32 scale) {
     func_00108FA0((s32)(x - scale * 16.0f), (s32)(y - scale * 12.0f),
                   (s32)(scale * 32.0f), (s32)(scale * 24.0f),
                   0, 0, 32, 32, colour, colour, colour, colour,
-                  (struct SdfTex *)fldLocalMapAuxTextureResource.image);
+                  fldLocalMapAuxTextureResource.texture);
 }
 
 /* Four corners use the same grey pulse colour. */
@@ -479,7 +462,7 @@ void fldDrawMapRequestHalo(s32 x, s32 y, s32 z, MapRequestState *state, MapReque
                   (s32)(scale * 32.0f), (s32)(scale * 32.0f), 0, 0, 32, 32,
                   MAP_GREY_COLOR(progress * 24.0f), MAP_GREY_COLOR(progress * 24.0f),
                   MAP_GREY_COLOR(progress * 24.0f), MAP_GREY_COLOR(progress * 24.0f),
-                  (struct SdfTex *)fldLocalMapAuxTextureResource.image);
+                  fldLocalMapAuxTextureResource.texture);
 }
 
 
@@ -506,7 +489,7 @@ void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *state, MapRequ
                   (s32)(scale * 32.0f), (s32)(scale * 24.0f), 0, 0, 32, 32,
                   MAP_GREY_COLOR(progress * 64.0f), MAP_GREY_COLOR(progress * 64.0f),
                   MAP_GREY_COLOR(progress * 64.0f), MAP_GREY_COLOR(progress * 64.0f),
-                  (struct SdfTex *)fldLocalMapAuxTextureResource.image);
+                  fldLocalMapAuxTextureResource.texture);
     evtSubmitPrimaryAlphaBlendMode(0);
 }
 
@@ -642,22 +625,22 @@ INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C7BB0);
 INCLUDE_ASM(const s32, "game/code_002C5FD8", func_002C7C58);
 
 s32 fldLoadMapResource(const char *name, MapResource *record) {
-    u32 handle = (u32)sdfReadNamedResource(name, &record->descriptor, 0);
-    u32 descriptor = record->descriptor;
-    record->handle = handle;
-    record->image = (u32)sdfTexAcquireResourceTexture((void *)descriptor);
-    if (record->handle != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)record->handle);
-        record->handle = 0;
-        record->descriptor = 0;
+    struct SdfMemBlock *allocation = sdfReadNamedResource(name, &record->resourceAddress, 0);
+    u32 resourceAddress = record->resourceAddress;
+    record->allocation = allocation;
+    record->texture = sdfTexAcquireResourceTexture((void *)resourceAddress);
+    if (record->allocation != 0) {
+        sdfQueueGeneralAllocationRelease(record->allocation);
+        record->allocation = 0;
+        record->resourceAddress = 0;
     }
     return 1;
 }
 
-u32 fldReleaseMapResource(s32 *image) {
-    if (*image != 0) {
-        sdfTexReleaseReferenceViaHandler((struct SdfTex *)*image);
-        *image = 0;
+u32 fldReleaseMapResource(struct SdfTex **texture) {
+    if (*texture != 0) {
+        sdfTexReleaseReferenceViaHandler(*texture);
+        *texture = 0;
     }
     return 1;
 }

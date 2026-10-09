@@ -3,6 +3,7 @@
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "fld_lmap_task.h"
+#include "fld_map_resource.h"
 
 struct SdfTex;
 extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
@@ -12,16 +13,6 @@ extern s32 D_004390A4;
 extern u32 D_0045C7A0[];
 
 extern u32 D_0045C7B0[];
-
-
-typedef struct MapResource {
-    u32 image;
-    u32 handle;
-    u32 descriptor;
-    u32 unkC;
-} MapResource;
-
-extern u32 fldReleaseMapResource(s32 *);
 
 
 extern struct SdfTex *sdfTexAcquireResourceTexture(void *resourceAddress);
@@ -305,22 +296,22 @@ INCLUDE_ASM(const s32, "game/code_0030E390", func_0030EF90);
 INCLUDE_ASM(const s32, "game/code_0030E390", func_0030F038);
 
 s32 fldLoadMapResource(const char *name, MapResource *record) {
-    u32 handle = (u32)sdfReadNamedResource(name, &record->descriptor, 0);
-    u32 descriptor = record->descriptor;
-    record->handle = handle;
-    record->image = (u32)sdfTexAcquireResourceTexture((void *)descriptor);
-    if (record->handle != 0) {
-        sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)record->handle);
-        record->handle = 0;
-        record->descriptor = 0;
+    struct SdfMemBlock *allocation = sdfReadNamedResource(name, &record->resourceAddress, 0);
+    u32 resourceAddress = record->resourceAddress;
+    record->allocation = allocation;
+    record->texture = sdfTexAcquireResourceTexture((void *)resourceAddress);
+    if (record->allocation != 0) {
+        sdfQueueGeneralAllocationRelease(record->allocation);
+        record->allocation = 0;
+        record->resourceAddress = 0;
     }
     return 1;
 }
 
-u32 fldReleaseMapResource(s32 *image) {
-    if (*image != 0) {
-        sdfTexReleaseReferenceViaHandler((struct SdfTex *)*image);
-        *image = 0;
+u32 fldReleaseMapResource(struct SdfTex **texture) {
+    if (*texture != 0) {
+        sdfTexReleaseReferenceViaHandler(*texture);
+        *texture = 0;
     }
     return 1;
 }

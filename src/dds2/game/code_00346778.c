@@ -75,10 +75,10 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
     owner->unk06 = descriptor->unk02;
     owner->unk0C = descriptor->unk08;
     owner->unk0E = descriptor->unk0A;
-    soundFormat[0] = descriptor->unk10;
-    soundFormat[1] = descriptor->unk11;
+    soundFormat[0] = descriptor->hasAudio;
+    soundFormat[1] = descriptor->stereo;
     soundFormat[2] = 0;
-    soundFormat[3] = descriptor->unk12;
+    soundFormat[3] = descriptor->playbackCadenceStep;
 
     if (!isPac) {
         stream = sdfAllocAndClearQuadwords(0x14);
@@ -128,7 +128,7 @@ extern void sdfDestroyStreamFrameNode(SdfStreamFrameNode *);
 extern void func_00342798(void);
 
 /* Wait for active work's release phase, free its owned buffers, then deactivate it. */
-void sdfCancelAndReleasePacWork(MovObj *job) {
+void sdfCancelAndReleaseMovieStreamWork(MovObj *job) {
     if (job->active != 0) {
         job->stopRequested = 1;
         /* Queue phase 5 as phase 7; phase 6 is the release gate below. */

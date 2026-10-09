@@ -43,7 +43,7 @@ void dds3DestroyObjectBase(void *arg);
 EffectObj *effObjCreateKindTwo(void *bill, void *vec, s32 extra);
 void billSetKind1Entry(void *arg);
 EffectObj *effObjCreateBillNode(void *bill, void *vec, s32 extra);
-EffectObj *effObjCreateWithBoundBill(void *bill, void *vec, s32 extra);
+EffectObj *effObjCreateWithBoundBill(void *bill, void *vec, void *secondVector);
 EffectObj *effObjCreateBillboardInWorld(void *bill, void *vec, s32 extra);
 EffectObj *func_001150F0();
 EffectObj *func_00115398(const char *name, void *firstVector, void *secondVector, f32 scale);
@@ -426,7 +426,7 @@ EffectObj *effObjCreateResourceKindZero(const char *path, void *firstVector, s32
 
 /* Bind the supplied bill through its node-instance vector copy, selecting state one.
    The object-base state word remains a separate native value of two. */
-EffectObj *effObjCreateWithBoundBill(void *bill, void *firstVector, s32 secondVectorAddress) {
+EffectObj *effObjCreateWithBoundBill(void *bill, void *firstVector, void *secondVector) {
     u8 copiedVector[EFF_OBJ_VECTOR_BYTES];
     EffectObj *obj;
     EffectDependencyState *data;
@@ -434,7 +434,7 @@ EffectObj *effObjCreateWithBoundBill(void *bill, void *firstVector, s32 secondVe
     EffWorldNode *worldNode;
 
     memset(copiedVector, 0, sizeof(copiedVector));
-    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, (void *)secondVectorAddress);
+    obj = effObjCreateWithVectors(dds3AdvanceWorldCounter(), firstVector, secondVector);
     if (obj == NULL) {
         return NULL;
     }
@@ -459,11 +459,11 @@ EffectObj *effObjCreateWithBoundBill(void *bill, void *firstVector, s32 secondVe
 }
 
 /* Create the descriptor-sourced node and return its bound world object. */
-EffectObj *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, s32 secondVectorAddress) {
+EffectObj *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector) {
     struct EffNode *bill;
 
     bill = effCreateNodeFromDescriptor(descriptor);
-    return effObjCreateWithBoundBill(bill, firstVector, secondVectorAddress);
+    return effObjCreateWithBoundBill(bill, firstVector, secondVector);
 }
 
 /* Load and bind the named resource, returning the created object. */
@@ -471,7 +471,7 @@ void *effObjSpawnLoadedResourceEffect(const char *resourceName, void *firstVecto
     struct EffNode *bill;
 
     bill = effLoadResourceNode(resourceName);
-    return effObjCreateWithBoundBill(bill, firstVector, (s32)(u32)secondVector);
+    return effObjCreateWithBoundBill(bill, firstVector, secondVector);
 }
 
 /* The world-bill entry uses the same state-one/node-instance initialization as binding. */
