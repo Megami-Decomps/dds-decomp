@@ -282,9 +282,9 @@ typedef struct MdlResourceSelection {
 } MdlResourceSelection;
 
 typedef struct MdlResourcePath {
-    u32 unk0;
+    char *resourceListPath;
     char *path;
-    u32 unk8;
+    char *motionPath;
 } MdlResourcePath;
 
 typedef struct MdlResourceTable {
@@ -451,9 +451,76 @@ char *mdlBuildPrefixedString(char *dst, const char *src) {
     return strcat(dst, src);
 }
 
-extern s32 mdlRequestAsset(s32 group, s32 id, s32 blocking);
+extern void *mdlRequestAsset(s32 group, s32 id, s32 blocking);
+extern char *func_00302240(const char *, s32);
+extern s32 func_003017A0(const char *, const char *);
+extern char D_003BBB68[];
+extern void sdfCreateSemaphoreFromOptions(void);
+extern s32 mdlRequestLoadWithCallback(s32, s32, s32, s32, void (*)(u32), u32);
 
-INCLUDE_ASM(const s32, "model/mdlManager", mdlRequestAsset);
+/* Resolve or schedule a grouped model asset; -1 denotes an existing request. */
+void *mdlRequestAsset(s32 group, s32 id, s32 blocking) {
+    char requestPath[0x80];
+    BattleGroupNode *entity;
+    MdlResourceSelection *selection;
+    MdlResourcePath *paths;
+    MdlLoadRequest *request;
+    char *extension;
+    s32 packedBundle;
+
+    WaitSema(mdlGroupJobSemaphore);
+    entity = btlFindGroupedEntity(group, id);
+    if (entity != NULL) {
+        SignalSema(mdlGroupJobSemaphore);
+        return entity;
+    }
+    if (btlGroupContainsId(group, id)) {
+        SignalSema(mdlGroupJobSemaphore);
+        if (blocking != 0) {
+            return mdlWaitGroupThenFind(group, id);
+        }
+        return (void *)-1;
+    }
+    selection = (MdlResourceSelection *)D_00367900[group].entries;
+    selection += id;
+    paths = &((MdlResourcePath *)D_00365858[selection->pathTable].entries)[selection->pathIndex];
+    packedBundle = 0;
+    extension = func_00302240(paths->path, '.');
+    if (extension != NULL) {
+        packedBundle = func_003017A0(extension, D_003BBB68) == 0;
+    }
+    btlAddGroupId(group, id);
+    SignalSema(mdlGroupJobSemaphore);
+    if (packedBundle != 0) {
+        mdlBuildPrefixedString(requestPath, paths->path);
+        mdlRequestLoadWithCallback(group, id, 0x101, (s32)requestPath,
+                                  (void (*)(u32))sdfCreateSemaphoreFromOptions, 0);
+    } else {
+        request = sdfAllocAndClearQuadwords(sizeof(*request));
+        request->options = 0x101;
+        request->group = group;
+        request->id = id;
+        if (paths->motionPath != NULL) {
+            request->deferred = 1;
+        }
+        if (paths->resourceListPath != NULL) {
+            request->resourceListRequested = 1;
+            mdlBuildPrefixedString(requestPath, paths->resourceListPath);
+            fileCreateCallbackRequest(requestPath, 0, (u32)mdlRecordLoadedSizeAndReleaseHandle, (u32)request);
+        }
+        request->itemsRequested = 1;
+        mdlBuildPrefixedString(requestPath, paths->path);
+        fileCreateCallbackRequest(requestPath, 0, (u32)mdlFinishLoadCmd, (u32)request);
+        if (paths->motionPath != NULL) {
+            mdlBuildPrefixedString(requestPath, paths->motionPath);
+            fileCreateCallbackRequest(requestPath, 0, (u32)mdlFinishLoadJob, (u32)request);
+        }
+    }
+    if (blocking != 0) {
+        return mdlWaitGroupThenFind(group, id);
+    }
+    return NULL;
+}
 
 /* The blocking SDK request returns its group in a native status/address word. */
 BattleGroupNode *func_00217298(u32 group, u32 id) {
