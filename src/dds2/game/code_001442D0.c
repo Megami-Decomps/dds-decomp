@@ -276,10 +276,10 @@ extern s32 fldPendingSoundCount;
 typedef struct {
     s32 flags;
     s32 soundId;
+    f32 radius;
     f32 x;
     f32 y;
     f32 z;
-    f32 w;
 } FldClear18; /* 0x18 bytes */
 
 extern FldClear18 fldPendingSounds[];
@@ -641,14 +641,14 @@ void fldResetPendingSounds(void) {
     do {
         remaining -= 1;
         entry->flags = 0;
-        entry->x = 0;
+        entry->radius = 0;
         entry->soundId = 0;
         entry += 1;
     } while (remaining >= 0);
     fldPendingSoundCount = 0;
 }
 
-void fldAppendPendingSoundForScene(s32 id, f32 x, f32 y, f32 z, f32 w) {
+void fldAppendPendingSoundForScene(s32 id, f32 radius, f32 x, f32 y, f32 z) {
     if (fldAreaState.area == 0x1A && mdlFlagTest(0x1F) != 0) {
         return;
     }
@@ -657,10 +657,10 @@ void fldAppendPendingSoundForScene(s32 id, f32 x, f32 y, f32 z, f32 w) {
     }
     fldPendingSounds[fldPendingSoundCount].flags = 0;
     fldPendingSounds[fldPendingSoundCount].soundId = id;
+    fldPendingSounds[fldPendingSoundCount].radius = radius;
     fldPendingSounds[fldPendingSoundCount].x = x;
     fldPendingSounds[fldPendingSoundCount].y = y;
     fldPendingSounds[fldPendingSoundCount].z = z;
-    fldPendingSounds[fldPendingSoundCount].w = w;
     fldPendingSoundCount++;
 }
 
