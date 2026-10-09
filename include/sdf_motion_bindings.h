@@ -1,6 +1,7 @@
 #ifndef SDF_MOTION_BINDINGS_H
 #define SDF_MOTION_BINDINGS_H
 
+#include "sdf.h"
 #include "sdf_draw.h"
 
 /* Common dispatch/source prefix used by motion-owned bindings. */
@@ -30,6 +31,46 @@ typedef struct SdfMotionKeyBinding {
     SdfMotionKeyTrack *track;
 } SdfMotionKeyBinding;
 
+void sdfMotionBindKeyTrack(SdfMotionKeyBinding *binding, SdfMotionKeyTrack *track);
+
+/* Indexed asset bindings share the key prefix and retain the selected asset. */
+typedef struct SdfMotionIndexedBinding {
+    SdfMotionKeyBinding keys;
+    SdfAsset *target;
+} SdfMotionIndexedBinding;
+
+/* Color/word and scalar bindings capture one target word at +0x10. */
+typedef struct SdfMotionIndexedValueBinding {
+    SdfMotionKeyBinding keys;
+    SdfAsset *target;
+    union {
+        u32 capturedWord;
+        f32 capturedFloat;
+    };
+} SdfMotionIndexedValueBinding;
+
+typedef struct __attribute__((packed)) SdfMotionTextParamPrefix {
+    s64 words[2];
+} SdfMotionTextParamPrefix;
+
+typedef struct SdfMotionTextParamSnapshot {
+    SdfMotionTextParamPrefix prefix;
+    s32 finalWord;
+} SdfMotionTextParamSnapshot;
+
+typedef union SdfMotionTextCapture {
+    f32 capturedValues[5];
+    SdfMotionTextParamSnapshot snapshot;
+    u8 unusedDirectTail[0x14];
+} SdfMotionTextCapture;
+
+/* Text blends snapshot 0x14 bytes; direct-key bindings leave this tail unused. */
+typedef struct SdfMotionIndexedTextBinding {
+    SdfMotionKeyBinding keys;
+    SdfAsset *target;
+    SdfMotionTextCapture capture;
+} SdfMotionIndexedTextBinding;
+
 typedef struct SdfMotionDrawBinding {
     SdfMotionKeyBinding keys;
     SdfDrawNode *node;
@@ -51,11 +92,28 @@ enum {
 typedef char SdfMotionBindingHead_size[(sizeof(SdfMotionBindingHead) == 0x08) ? 1 : -1];
 typedef char SdfMotionKeyInterval_size[(sizeof(SdfMotionKeyInterval) == 0x0C) ? 1 : -1];
 typedef char SdfMotionKeyBinding_size[(sizeof(SdfMotionKeyBinding) == 0x0C) ? 1 : -1];
+typedef char SdfMotionIndexedBinding_size[(sizeof(SdfMotionIndexedBinding) == 0x10) ? 1 : -1];
+typedef char SdfMotionIndexedValueBinding_size[
+    (sizeof(SdfMotionIndexedValueBinding) == 0x14) ? 1 : -1];
+typedef char SdfMotionTextParamSnapshot_size[
+    (sizeof(SdfMotionTextParamSnapshot) == 0x14) ? 1 : -1];
+typedef char SdfMotionIndexedTextBinding_size[
+    (sizeof(SdfMotionIndexedTextBinding) == 0x24) ? 1 : -1];
 typedef char SdfMotionDrawBinding_size[(sizeof(SdfMotionDrawBinding) == 0x20) ? 1 : -1];
 typedef char SdfMotionKeyFlagBinding_size[(sizeof(SdfMotionKeyFlagBinding) == 0x14) ? 1 : -1];
 
 typedef char SdfMotionKeyBinding_track_at_08[
     ((u32)&((SdfMotionKeyBinding *)0)->track == 0x08) ? 1 : -1];
+typedef char SdfMotionIndexedBinding_target_at_0C[
+    ((u32)&((SdfMotionIndexedBinding *)0)->target == 0x0C) ? 1 : -1];
+typedef char SdfMotionIndexedValueBinding_target_at_0C[
+    ((u32)&((SdfMotionIndexedValueBinding *)0)->target == 0x0C) ? 1 : -1];
+typedef char SdfMotionIndexedTextBinding_target_at_0C[
+    ((u32)&((SdfMotionIndexedTextBinding *)0)->target == 0x0C) ? 1 : -1];
+typedef char SdfMotionIndexedValueBinding_capture_at_10[
+    ((u32)&((SdfMotionIndexedValueBinding *)0)->capturedWord == 0x10) ? 1 : -1];
+typedef char SdfMotionIndexedTextBinding_capture_at_10[
+    ((u32)&((SdfMotionIndexedTextBinding *)0)->capture == 0x10) ? 1 : -1];
 typedef char SdfMotionDrawBinding_node_at_0C[
     ((u32)&((SdfMotionDrawBinding *)0)->node == 0x0C) ? 1 : -1];
 typedef char SdfMotionKeyFlagBinding_node_at_0C[
