@@ -21,7 +21,7 @@ typedef struct MtrSelectionState {
 } MtrSelectionState;
 
 typedef struct MtrSelectionFlags {
-    u32 unk00 : 1;
+    u32 titleEffectsReadyPendingDisplay : 1;
     u32 visible : 1;
     u32 fadeProgress : 1;
     u32 profileReady : 1;

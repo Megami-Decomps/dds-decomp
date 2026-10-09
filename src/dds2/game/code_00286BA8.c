@@ -264,12 +264,12 @@ s32 func_00287670(s32 mode) {
 
     switch (func_00288748(resource)) {
     case 1:
-        if (resource->flags.unk00 == 0) {
+        if (resource->flags.titleEffectsReadyPendingDisplay == 0) {
             if (mnuPollTitleEffectsReady(resource->progressHost) == 0) {
-                resource->flags.unk00 = 1;
+                resource->flags.titleEffectsReadyPendingDisplay = 1;
             }
         } else {
-            resource->flags.unk00 = 0;
+            resource->flags.titleEffectsReadyPendingDisplay = 0;
             resource->flags.visible = 1;
             mnuRebuildProfilePanelFromRenderSnapshot(resource);
         }
