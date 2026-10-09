@@ -823,7 +823,83 @@ void fldCreateResourceScriptObjects(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_00127388);
+#include "eff_object.h"
+#include "dds3_path.h"
+#include "fld_resource_resolver.h"
+
+extern s32 fldTestMapSlotValueFlag(s32, u32, s32);
+extern s32 fldTestRoomModeFlag(s32, u32, s32);
+extern s32 fldFindSearchId(const char *);
+extern void dds3EnsureSlotData(void *);
+extern void dds3SetSlotKey(EffWorldNode *, EffWorldNode *);
+extern void dds3ReplaceObjectResource(EffWorldNode *);
+extern Dds3PathCurveWork *dds3GetObjectResourceHandle(EffWorldNode *);
+extern void sdfSetFloatCounterDirection(u32 *, u32);
+extern void evtScaleSlotByClampedMultiplier(void *, f32);
+extern void dds3InvokeMoverUpdate(EffWorldNode *);
+extern void dds3SetObjectPayloadWord8(EffWorldNode *, u32);
+extern s32 func_003014F0(char *, const char *, ...);
+extern char D_0039FE08[], D_0039FE18[], D_0039FE28[];
+
+/* Restore the room's named objects and enable their retained path controllers. */
+void func_00127388(void) {
+    char modelName[16];
+    char collisionName[16];
+    char pathName[16];
+    void *world = dds3GetWorldSecondaryObject();
+    s32 index;
+
+    for (index = 1; index < 16; index++) {
+        if (fldTestMapSlotValueFlag(fldAreaState.area, fldAreaState.floor + 1, index)) {
+            s32 modelKey, collisionKey;
+            EffWorldNode *object;
+            EffWorldNode *path;
+            ObjBase *data;
+            EffWorldNode *slot;
+            Dds3SlotResource *resource;
+
+            func_003014F0(modelName, D_0039FE08, index);
+            func_003014F0(collisionName, D_0039FE18, index);
+            func_003014F0(pathName, D_0039FE28, index);
+            modelKey = fldFindSearchId(modelName);
+            collisionKey = fldFindSearchId(collisionName);
+            if (modelKey == -1) {
+                object = (EffWorldNode *)fldResolveWorldObjectByResourceId(collisionKey);
+            } else {
+                object = (EffWorldNode *)dds3FindWorldObjectNodeByKey(world, modelKey, 6);
+                if (object == NULL) {
+                    object = (EffWorldNode *)fldResolveWorldObjectByResourceId(collisionKey);
+                }
+            }
+            path = (EffWorldNode *)dds3FindIndexedObjectChainNodeByName(world, 0x10, (const u8 *)pathName);
+            data = effObjGetDataHandle(object);
+            slot = (EffWorldNode *)data->slots[1];
+            if (slot == NULL) {
+                dds3EnsureSlotData(object);
+                slot = (EffWorldNode *)data->slots[1];
+            }
+            resource = (Dds3SlotResource *)slot->data;
+            if (resource->sourceObject == 0) {
+                dds3SetSlotKey(slot, path);
+                dds3ReplaceObjectResource(slot);
+            }
+            sdfSetFloatCounterDirection((u32 *)dds3GetObjectResourceHandle(slot), 0);
+            evtScaleSlotByClampedMultiplier(object, 1.0f);
+            dds3InvokeMoverUpdate(slot);
+        }
+        if (fldTestRoomModeFlag(fldAreaState.area, fldAreaState.floor + 1, index)) {
+            s32 key;
+            EffWorldNode *object;
+
+            func_003014F0(modelName, D_0039FE08, index);
+            key = fldFindSearchId(modelName);
+            object = (EffWorldNode *)dds3FindWorldObjectNodeByKey(world, key, 6);
+            dds3SetObjectPayloadWord8(object, 2);
+        }
+    }
+}
+
+
 
 void fldLoadSceneRequestFiles(FldLoadRequest *request) {
     char directory[32];
@@ -1096,6 +1172,12 @@ struct SdfMemBlock *fldLoadCachedRoomKF2ResourceIfLocationMatches(void **destina
 }
 
 extern s32 mdlFlagTest(s32);
+
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_0039FE08);
+
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_0039FE18);
+
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_0039FE28);
 
 INCLUDE_RODATA(const s32, "field/fldFileResolver", D_0039FE38);
 
