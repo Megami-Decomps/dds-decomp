@@ -6377,10 +6377,10 @@ EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, v
     return effect;
 }
 
-u32 effCreateModelResourceFromFile(u8 *work) {
-    void *first = fileResolvePrimaryBuffer((FileJobPayload *)work);
-    void *second = fileResolveSecondaryBuffer((FileJobPayload *)work);
-    return (u32)effCreateModelResourceWithInlineData(((FileJob *)work)->option, first, second, ((FileJob *)work)->slots[1].size);
+u32 effCreateModelResourceFromFile(FileJobPayload *work) {
+    void *first = fileResolvePrimaryBuffer(work);
+    void *second = fileResolveSecondaryBuffer(work);
+    return (u32)effCreateModelResourceWithInlineData(work->option, first, second, work->secondary.size);
 }
 
 void effDestroyModelResource(EffModelResource *effect) {
