@@ -26,8 +26,13 @@ typedef struct FileSlotTable {
     u8 *unk1C;             /* 0x1C: per-type instance work */
     u8 *data0;             /* 0x20 */
     u8 *data1;             /* 0x24 */
-    u32 handle;            /* 0x28 */
+    struct SdfMemBlock *allocation; /* 0x28: owns the retained table storage */
 } FileSlotTable;
+
+FileSlotTable *fileAllocateGridRecordSlots(u16 type, u32 count, const void *configuration);
+void fileReleaseGridRecordHandle(FileSlotTable *record);
+void fileClearRecordReferences(FileSlotTable *record);
+void fileAcquireRecord(FileSlotTable *record);
 
 /* The track's +0x0C word is a real emitter random multiplier; the ordinary
  * curve sampler treats it as reserved. Both are members of the serialized
