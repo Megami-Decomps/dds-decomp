@@ -799,7 +799,7 @@ extern SdfPoolNode D_00325708;
 extern u8 D_00325860[];
 
 void func_00243BF0(EvtRuntime *scene) {
-    s32 surface;
+    SdfListHead *surface;
     SdfLinkedPacketList *context;
     s32 handle;
 
@@ -809,25 +809,25 @@ void func_00243BF0(EvtRuntime *scene) {
         scene->pendingWork = (s32)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
     }
     memset((void *)scene->pendingWork, 0x40, 0x70000);
-    surface = (s32)(u32)sdfAllocatePacketList(0);
+    surface = sdfAllocatePacketList(0);
     context = (SdfLinkedPacketList *)sdfAllocPacketAligned(0x10);
     sdfClearLinkedPacketList(context);
-    sdfCreatePatchableResourcePacket((SdfListHead *)surface, context, 0, 0, 0x200, 0xE0,
+    sdfCreatePatchableResourcePacket(surface, context, 0, 0, 0x200, 0xE0,
                                     scene->pendingWork, 0, 0, 0);
     sdfAppendPacketChainNode((SdfPacketChain *)D_00325860, context);
-    D_00325708.append(&D_00325708, (SdfListHead *)surface);
+    D_00325708.append(&D_00325708, surface);
 }
 
 void mnuShopSubmitDescriptor(EvtRuntime *scene) {
-    s32 drawPacket;
+    SdfListHead *drawPacket;
 
     if (scene->pendingWork != 0) {
-        drawPacket = (s32)(u32)sdfAllocatePacketList(0);
-        sdfCreateDescriptorPacket((SdfListHead *)drawPacket,
+        drawPacket = sdfAllocatePacketList(0);
+        sdfCreateDescriptorPacket(drawPacket,
                                   kwlnHeldTextureReference->primaryResource, 0, 0,
                                   CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT,
                                   scene->pendingWork, 0);
-        D_00325708.append(&D_00325708, (SdfListHead *)drawPacket);
+        D_00325708.append(&D_00325708, drawPacket);
     }
 }
 

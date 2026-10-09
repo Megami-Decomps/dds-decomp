@@ -2505,12 +2505,7 @@ s32 mdlRequestViewerExitOnce(void) {
     return 0;
 }
 
-typedef struct MdlDrawSurface {
-    u8 pad00[0x10];
-    void (*submit)(struct MdlDrawSurface *, s32);
-} MdlDrawSurface;
-
-extern MdlDrawSurface D_00380048;
+extern SdfPoolNode D_00380048; /* kwlnDrawSurfaces[40], a native interior symbol. */
 
 extern f32 D_003C8A00[][4];
 
@@ -2525,14 +2520,14 @@ extern u32 D_003C8990[];
 
 /* Submit the intermediate packet with an identity basis in phases 2 and 3. */
 void mdlSubmitViewerIntermediateDrawPacket(void) {
-    s32 packetList;
+    SdfListHead *packetList;
 
     if (mdlViewerState.taskPhase < 4) {
         if (mdlViewerState.taskPhase >= 2) {
-            packetList = (s32)sdfCreateResetPacketList();
+            packetList = sdfCreateResetPacketList();
             VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
-            sdfAppendPacket((SdfListHead *)packetList, (u32)func_00348188(D_003C8930, D_003C8990, 6, 0x80));
-            D_00380048.submit(&D_00380048, packetList);
+            sdfAppendPacket(packetList, (u32)func_00348188(D_003C8930, D_003C8990, 6, 0x80));
+            D_00380048.append(&D_00380048, packetList);
         }
     }
 }
@@ -2547,12 +2542,12 @@ extern s32 func_00343188(s32, s32);
 
 /* Submit the selected resource in phase 3; keep the native bitwise input/once-flag test. */
 void mdlSubmitViewerResourceDrawPacket(void) {
-    s32 packetList;
+    SdfListHead *packetList;
     s32 drawPacket;
     MdlCtx *resource;
 
     if (mdlViewerState.taskPhase == 3) {
-        packetList = (s32)sdfCreateResetPacketList();
+        packetList = sdfCreateResetPacketList();
         resource = mdlViewerState.resources[0];
         VU0_LOAD_MATRIX(resource->inner->matrix);
         drawPacket = (s32)func_00348188(D_003C89B0, D_003C89F0, 4, 0x80);
@@ -2560,8 +2555,8 @@ void mdlSubmitViewerResourceDrawPacket(void) {
             D_004370F8 = 1;
             func_00343188(drawPacket, 0x100);
         }
-        sdfAppendPacket((SdfListHead *)packetList, (u32)drawPacket);
-        D_00380048.submit(&D_00380048, packetList);
+        sdfAppendPacket(packetList, (u32)drawPacket);
+        D_00380048.append(&D_00380048, packetList);
     }
 }
 
@@ -2601,7 +2596,7 @@ void mdlDrawMapPositionRecords(MdlCtx *resource) {
 
     if (recordCount > 0) {
         s32 recordIndex = 0;
-        s32 packetList = (s32)sdfCreateResetPacketList();
+        SdfListHead *packetList = sdfCreateResetPacketList();
         SdfMapPositionRecord *recordCursor = (SdfMapPositionRecord *)(
             (SdfMapPositionChunkPrefix *)sdfChunkFindByTag(resource->inner, MDL_MAP_POSITION_TAG) + 1);
 
@@ -2611,9 +2606,9 @@ void mdlDrawMapPositionRecords(MdlCtx *resource) {
             recordIndex++;
             recordCursor++;
             sdfSetLookAtBasisFromRecord(resource->inner, currentRecord);
-            sdfAppendPacket((SdfListHead *)packetList, (u32)func_00348188(D_003C8A00, D_003C8A60, 6, 0x80));
+            sdfAppendPacket(packetList, (u32)func_00348188(D_003C8A00, D_003C8A60, 6, 0x80));
         } while (recordIndex != recordCount);
-        D_00380048.submit(&D_00380048, packetList);
+        D_00380048.append(&D_00380048, packetList);
     }
 }
 

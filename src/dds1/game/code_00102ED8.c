@@ -915,7 +915,7 @@ void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
     }
     sdfAppendLinkedPacketPayload(&D_00325870[bufferIndex].sceneList,
                                  &D_00325870[bufferIndex].linkedList,
-                                 (SdfPacketPatchLink *)&D_00325870[bufferIndex].scene);
+                                 &D_00325870[bufferIndex].scene.link);
     sdfConsBuildMatrixPacket(&D_00325870[bufferIndex].sceneMatrix,
                              &sdfSceneProjectionParameters, sdfViewMatrix);
     sdfAppendPacket(&D_00325870[bufferIndex].sceneList,
