@@ -2626,7 +2626,7 @@ extern void btlUpdatePanelTransitionGradients(BtlPanelTransitionWork *);
 
 struct FrFontGlyph;
 
-extern void frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
+extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
 
 s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
     BattlePanelColors colors = D_003A2A80;
@@ -4945,7 +4945,7 @@ void fldGetSceneDirectionStepOffset(s32 *outX, s32 *outY, s32 dir, s32 step) {
     *outY = offsets[dir][step][1];
 }
 
-void func_001BF8B0(SceneAiWork *work) {
+void func_001BF8B0(SceneAiWork *work, s32 mode) {
     s32 i;
     switch (work->animationPhase) {
     case 0:
