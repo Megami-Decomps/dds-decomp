@@ -4134,14 +4134,14 @@ void effResetIndexedInstanceFrames(u8 *work) {
 
     if (count != 0) {
         do {
-            effResetDispatchCounter(*(u8 **)entry);
+            effResetDispatchCounter(*(EffClassWork **)entry);
             entry += 4;
             index++;
         } while (index < count);
     }
 }
 
-extern u8 *effCreateClassResourceWork(u16, void *);
+extern EffClassWork *effCreateClassResourceWork(u16, void *);
 
 u8 *func_002A93A0(EffBillPointConfig *config) {
     u32 count = config->timed.count;
@@ -4166,8 +4166,8 @@ u8 *func_002A93A0(EffBillPointConfig *config) {
     step = 6.2831852f / (f32)count;
     position = step * ((effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f);
     for (index = 0; index < count; index++) {
-        u8 *resourceWork = effCreateClassResourceWork(1, &copy);
-        u8 **resourceSlot = (u8 **)((EffClassWork *)resourceWork)->resource;
+        EffClassWork *resourceWork = effCreateClassResourceWork(1, &copy);
+        u8 **resourceSlot = (u8 **)resourceWork->resource;
 
         *entries++ = (u32)resourceWork;
         *(f32 *)(*resourceSlot + 0xC) = position;
@@ -4188,7 +4188,7 @@ void effReleaseBillFrameEntries(u8 *work) {
 
     if (count != 0) {
         do {
-            effDestroyClassResourceWork(*(u8 **)entry);
+            effDestroyClassResourceWork(*(EffClassWork **)entry);
             entry += 4;
         } while (++index < count);
     }
@@ -4395,19 +4395,19 @@ INCLUDE_ASM(const s32, "game/code_0029C530", func_002A9DA8);
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002AA748);
 
-u8 *effCreateClassResourceWork(u16 kind, void *source) {
+EffClassWork *effCreateClassResourceWork(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = effClassResourceWorkOperations[kind].payloadSize;
-    u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
-    ((EffClassWork *)effect)->payload = effect + headerSize;
-    ((EffClassWork *)effect)->color = 0x80808080;
-    ((EffClassWork *)effect)->scale = 1.0f;
-    ((EffClassWork *)effect)->frame = 0;
-    ((EffClassWork *)effect)->kind = kind;
+    EffClassWork *effect = sdfAllocSizeClassBlock(size + headerSize);
+    effect->payload = (u8 *)effect + headerSize;
+    effect->color = 0x80808080;
+    effect->scale = 1.0f;
+    effect->frame = 0;
+    effect->kind = kind;
     VU0_STORE_VF_UNCLOBBERED($vf0, effect);
-    VU0_STORE_VF_UNCLOBBERED($vf0, effect + 0x10);
-    memcpy(((EffClassWork *)effect)->payload, source, size);
-    ((EffClassWork *)effect)->resource = effClassResourceWorkOperations[kind].createResource(source);
+    VU0_STORE_VF_UNCLOBBERED($vf0, effect->vectors.orientation);
+    memcpy(effect->payload, source, size);
+    effect->resource = effClassResourceWorkOperations[kind].createResource(source);
     effClassResourceWorkOperations[kind].initialize(effect);
     return effect;
 }
@@ -4424,8 +4424,8 @@ void effDestroyClassResourceWork(EffClassWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-void effPayloadPointerGet(EffClassWork *work) {
-    effCreateClassResourceWork(work->kind, work->payload);
+EffClassWork *effPayloadPointerGet(EffClassWork *work) {
+    return effCreateClassResourceWork((u16)work->kind, work->payload);
 }
 
 void effResetDispatchCounter(EffClassWork *work) {
