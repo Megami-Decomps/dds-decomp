@@ -34,10 +34,8 @@ extern u16 D_003BB044;
 
 
 
-extern void mdlBroadcastMasked(MdlCtx *, u32);
 
 
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 
 extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
@@ -46,7 +44,6 @@ extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
-extern void mdlDestroyContext(MdlCtx *);
 
 extern void mdlLoadViewerPackage(s32 arg0, u16 arg1, s32 arg2, void *arg3, u32 arg4);
 

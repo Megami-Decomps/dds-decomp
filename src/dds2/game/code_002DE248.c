@@ -392,7 +392,6 @@ extern void dds3DispatchIndexedCallback(s32, f32);
 
 extern struct SdfPoolNode *D_00380828[4];
 
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 
 typedef struct EffectObjectFlag {
     u32 state;
@@ -8577,7 +8576,6 @@ void effSetActiveSlotOpacity(s32 *work, f32 opacity) {
 
 
 extern void mdlSetResourceAmount(MdlCtx *, MdlResourceItem *, f32);
-extern void mdlSetAllResourceFrames(MdlCtx *, u32);
 
 typedef struct EffectBlob {
     u32 unk00;

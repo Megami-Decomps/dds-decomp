@@ -637,7 +637,6 @@ typedef struct EffPCPSprayWork {
     EffParamWork *handle[10];   /* 0x70 */
 } EffPCPSprayWork; /* 0x98 */
 
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 
 extern void mdlStorePrimaryVectorVU(void *obj);
 
@@ -645,7 +644,6 @@ extern s32 sdfLoadMapRecordPositionVector(SdfModel *model, s32 value);
 
 extern struct SdfPoolNode *D_00380828[4];
 
-extern void mdlBroadcastMasked(void *obj, u32 mask);
 
 
 

@@ -100,7 +100,6 @@ extern void func_00284108(s32, s32, s32, s32, s32, s32, s32 *);
 
 extern void evtStageTestCreateModelEffect(s32);
 extern void btlUpdateJobPositionFromModel(s32);
-extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 extern void mnuApplyModelCamera(MdlCtx *);
 extern void evtStageTestApplyEntryRotation(MdlCtx *);
 extern void evtStageTestUpdateCamera(void);
