@@ -156,7 +156,7 @@ typedef struct EffSurfaceEndpoints {
 
 
 typedef struct EffModelBindings {
-    u32 material;
+    EffClassWork *material;
     MdlCtx *model;
 } EffModelBindings;
 
@@ -7665,7 +7665,7 @@ EffModelBindings *effCreateMaterialAndModelEffectWork(s32 *owner, u32 kind, void
     MdlCtx *object;
     Motion *active;
 
-    work->material = (u32)effCreateClassResourceWork(4, owner);
+    work->material = effCreateClassResourceWork(4, owner);
     object = func_002DC1D0(source, settings);
     active = object->first;
     work->model = object;
@@ -7686,10 +7686,10 @@ EffModelBindings *effCreateModelEffectWorkFromPayload(u8 *request) {
     s32 a;
     s32 b;
     MdlCtx *object;
-    s32 material;
+    EffClassWork *material;
     MdlCtx *modelSource;
 
-    material = (s32)effPayloadPointerGet((EffClassWork *)source->material);
+    material = effPayloadPointerGet(source->material);
     modelSource = source->model;
     work->material = material;
     a = mdlGetContextResourceGroup(modelSource);
@@ -7714,7 +7714,7 @@ void effDestroyMaterialAndModelEffectWork(EffModelBindings *work) {
         effDestroyModelContext(work->model);
     }
     if (work->material != 0) {
-        effDestroyClassResourceWork((EffClassWork *)work->material);
+        effDestroyClassResourceWork(work->material);
     }
     sdfReleaseChipBlock(work);
 }
@@ -7739,7 +7739,7 @@ void effOrientClassResourceAlongTargetOffset(u8 *work) {
     sdfLoadMapRecordLookAtBasis(handle->model->inner, 0);
     VU0_STORE_VF_UNCLOBBERED(vf31, origin);
     effCopyClassResourcePosition((s128 *)handle->material, (s128 *)target);
-    state = ((EffClassWork *)handle->material)->payload;
+    state = handle->material->payload;
     VU0_LOAD_VF(vf10, target);
     VU0_LOAD_VF(vf11, origin);
     VU0_SUB(vf10, vf10, vf11);
@@ -7763,7 +7763,7 @@ void effOrientClassResourceAlongTargetOffset(u8 *work) {
     sdfVuMatrixToQuaternion((f32 (*)[4])mtx);
     VU0_STORE_VF_UNCLOBBERED(vf10, look);
     effCopyClassResourceOrientation((s128 *)handle->material, (s128 *)look);
-    effAdvanceClassResourceFrame((EffClassWork *)handle->material);
+    effAdvanceClassResourceFrame(handle->material);
 }
 
 extern void mdlStorePrimaryVectorVU(MdlCtx *);
@@ -7787,7 +7787,7 @@ void effApplyModelTransform(u8 *work) {
     modelContext->model->first->frameStep =
         ((EffAimConfig *)animation)->modelParameter;
     mdlProcessContextNodesAndTransforms(modelContext->model, D_00380828);
-    effDrawClassResourceWork((EffClassWork *)modelContext->material);
+    effDrawClassResourceWork(modelContext->material);
 }
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
