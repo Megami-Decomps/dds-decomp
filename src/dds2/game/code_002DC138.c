@@ -726,7 +726,7 @@ RefObj *effCreateSharedTextureReference(SdfTextureFileHeader *source) {
         paletteHeight = 2;
     }
 
-    paletteBytes = sdfFormatImageSize(source->unk11, paletteWidth, paletteHeight) << 4;
+    paletteBytes = sdfFormatImageSize(source->clutFormat, paletteWidth, paletteHeight) << 4;
     imageBytes = sdfFormatImageSize(source->pixelFormat, source->width, source->height) << 4;
     payloadBytes = imageBytes + paletteBytes;
     textureOffset = payloadBytes + 0x40;

@@ -16,12 +16,12 @@ typedef struct SdfTextureFileHeader {
     u32 byteCount;     /* 0x04 */
     u32 magic;         /* 0x08 */
     u8 pad0C[4];       /* 0x0C */
-    u8 unk10;          /* 0x10 */
-    u8 unk11;          /* 0x11 */
+    u8 paletteCount;   /* 0x10 */
+    u8 clutFormat;     /* 0x11 */
     s16 width;         /* 0x12 */
     s16 height;        /* 0x14 */
     u8 pixelFormat;    /* 0x16 */
-    u8 clutFormat;     /* 0x17 */
+    u8 maxMipLevel;    /* 0x17 */
     u16 lodParameters; /* 0x18 */
     u8 unk1A;          /* 0x1A */
     u8 clampMode;      /* 0x1B */
@@ -40,18 +40,18 @@ typedef char SdfTextureFileHeader_byte_count_offset_must_be_0x04[
     (SDF_TEXTURE_FILE_HEADER_OFFSET(byteCount) == 0x04) ? 1 : -1];
 typedef char SdfTextureFileHeader_magic_offset_must_be_0x08[
     (SDF_TEXTURE_FILE_HEADER_OFFSET(magic) == 0x08) ? 1 : -1];
-typedef char SdfTextureFileHeader_unk10_offset_must_be_0x10[
-    (SDF_TEXTURE_FILE_HEADER_OFFSET(unk10) == 0x10) ? 1 : -1];
-typedef char SdfTextureFileHeader_unk11_offset_must_be_0x11[
-    (SDF_TEXTURE_FILE_HEADER_OFFSET(unk11) == 0x11) ? 1 : -1];
+typedef char SdfTextureFileHeader_palette_count_offset_must_be_0x10[
+    (SDF_TEXTURE_FILE_HEADER_OFFSET(paletteCount) == 0x10) ? 1 : -1];
+typedef char SdfTextureFileHeader_clut_format_offset_must_be_0x11[
+    (SDF_TEXTURE_FILE_HEADER_OFFSET(clutFormat) == 0x11) ? 1 : -1];
 typedef char SdfTextureFileHeader_width_offset_must_be_0x12[
     (SDF_TEXTURE_FILE_HEADER_OFFSET(width) == 0x12) ? 1 : -1];
 typedef char SdfTextureFileHeader_height_offset_must_be_0x14[
     (SDF_TEXTURE_FILE_HEADER_OFFSET(height) == 0x14) ? 1 : -1];
 typedef char SdfTextureFileHeader_pixel_format_offset_must_be_0x16[
     (SDF_TEXTURE_FILE_HEADER_OFFSET(pixelFormat) == 0x16) ? 1 : -1];
-typedef char SdfTextureFileHeader_clut_format_offset_must_be_0x17[
-    (SDF_TEXTURE_FILE_HEADER_OFFSET(clutFormat) == 0x17) ? 1 : -1];
+typedef char SdfTextureFileHeader_max_mip_level_offset_must_be_0x17[
+    (SDF_TEXTURE_FILE_HEADER_OFFSET(maxMipLevel) == 0x17) ? 1 : -1];
 typedef char SdfTextureFileHeader_lod_parameters_offset_must_be_0x18[
     (SDF_TEXTURE_FILE_HEADER_OFFSET(lodParameters) == 0x18) ? 1 : -1];
 typedef char SdfTextureFileHeader_unk1A_offset_must_be_0x1A[
