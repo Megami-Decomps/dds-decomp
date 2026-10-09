@@ -703,7 +703,7 @@ void sdfMotionBlendPrimaryWordThirdKey(SdfMotionIndexedValueBinding *binding, f3
     sdfSetPrimaryStateWordThird(binding->target, color);
 }
 
-void func_00335678(SdfMotionIndexedValueBinding *binding) {
+void sdfMotionCapturePrimaryWordThird(SdfMotionIndexedValueBinding *binding) {
     binding->capturedWord = binding->target->unk20;
 }
 
@@ -733,7 +733,7 @@ void sdfMotionBlendPrimaryWordFourthKey(SdfMotionIndexedValueBinding *binding, f
     sdfSetPrimaryStateWordFourth(binding->target, color);
 }
 
-void sdfMotionCopyTrackValueToBinding(SdfMotionIndexedValueBinding *binding) {
+void sdfMotionCapturePrimaryWordFourth(SdfMotionIndexedValueBinding *binding) {
     binding->capturedWord = binding->target->unk28;
 }
 
