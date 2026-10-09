@@ -39,10 +39,6 @@ void itfMesCountClearBits(s32 window, s32 selectedBitIndex);
 
 void itfMesBlk24MoveTo(s32 window, s32 x, s32 y);
 
-void itfMesSetWindowHighFlags(s32 window, u32 mask);
-
-void itfMesClearWindowHighFlags(s32 window, u32 mask);
-
 void itfMesSetWindowPageAndRefresh(s32 window, s32 firstValue, s32 secondValue);
 
 void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
