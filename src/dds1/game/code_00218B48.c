@@ -820,11 +820,10 @@ void mdlCreateViewerEffectPart(MdlCtx *owner, MdlEffectRec *effectRecord, s32 su
     resourceItem->payload.part.track = effTrackPolyCreateWork(&effectParams);
 }
 
-void mdlLoadViewerStreamRecord(u32 owner, s32 record) {
-    MdlRecord *streamRecord = (MdlRecord *)record;
-    func_00217310(owner, streamRecord->payload.stream.selectorA,
-                  streamRecord->payload.stream.selectorB,
-                  streamRecord->parameter.word, streamRecord->tail.word10);
+void mdlLoadViewerStreamRecord(MdlCtx *owner, MdlRecord *record) {
+    func_00217310(owner, record->payload.stream.selectorA,
+                  record->payload.stream.selectorB,
+                  record->parameter.word, record->tail.word10);
 }
 
 
@@ -893,7 +892,7 @@ void mdlDispatchResourceEntry(MdlCtx *owner, MdlRecord *record, s32 subtype) {
         mdlCreateViewerEffectPart(owner, (MdlEffectRec *)record, subtype);
         return;
     case 4:
-        mdlLoadViewerStreamRecord((u32)owner, (s32)record);
+        mdlLoadViewerStreamRecord(owner, record);
         return;
     case 5:
         mdlClaimViewerObjectPart(owner, (MdlEntryRec *)record, subtype);
