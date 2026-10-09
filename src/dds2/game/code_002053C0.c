@@ -1003,7 +1003,90 @@ INCLUDE_ASM(const s32, "game/code_002053C0", func_00206EA8);
 
 INCLUDE_ASM(const s32, "game/code_002053C0", func_00207268);
 
-INCLUDE_ASM(const s32, "game/code_002053C0", func_00207438);
+extern f32 D_003E9110[4];
+
+/* Arrange the two marked three-slot groups around the battle origin. */
+void func_00207438(void) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *first[3];
+    BtlUnit *second[3];
+    f32 position[4];
+    f32 target[4];
+    f32 firstDirection[4];
+    f32 secondDirection[4];
+    f32 rotation[4];
+    BtlUnit *unit;
+    u32 slot;
+    f32 radius;
+
+    first[0] = first[1] = first[2] = NULL;
+    second[0] = second[1] = second[2] = NULL;
+    unit = state->units;
+    if (unit != NULL) {
+        BtlUnit **firstEntry = first;
+        BtlUnit **secondEntry = second;
+        do {
+            u32 flags = unit->flags;
+            if (flags & 1) {
+                if (flags & 0x200) {
+                    *firstEntry++ = unit;
+                }
+                if (flags & 0x400) {
+                    *secondEntry++ = unit;
+                }
+            }
+            unit = unit->nextActor;
+        } while (unit != NULL);
+    }
+    PCP_COPY_VECTOR(firstDirection, D_003E9130);
+    PCP_COPY_VECTOR(secondDirection, D_003E9130);
+    func_00336538(1.0471975f);
+    VU0_LOAD_VF(vf10, firstDirection);
+    VU0_ROTATE_VEC(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, firstDirection);
+    func_00336538(2.0943951f);
+
+    for (slot = 0; slot < 3; slot++) {
+        if (second[slot] != NULL) {
+            radius = second[slot]->unkBC * second[slot]->scale;
+            radius += 500.0f;
+            VU0_LOAD_VF(vf10, secondDirection);
+            VU0_SCALE_VF(vf10, radius);
+            VU0_LOAD_VF(vf11, D_003E9110);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            btlSetUnitPosition(second[slot], position);
+            if (btlAimHorizontalDirectionVU(position, D_003E9110)) {
+                VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+                btlSetUnitRotation(second[slot], (s128 *)rotation);
+            }
+        }
+        if (first[slot] != NULL) {
+            radius = first[slot]->unkBC * first[slot]->scale;
+            radius += 100.0f;
+            VU0_LOAD_VF(vf10, firstDirection);
+            VU0_MOVE_VF(vf11, vf10);
+            VU0_SCALE_VF(vf10, radius);
+            VU0_SCALE_VF(vf11, 200.0f);
+            VU0_ADD(vf11, vf11, vf10);
+            VU0_STORE_VF_UNCLOBBERED(vf11, target);
+            VU0_LOAD_VF(vf11, D_003E9110);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            btlSetUnitPosition(first[slot], position);
+            if (btlAimHorizontalDirectionVU(position, target)) {
+                VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+                btlSetUnitRotation(first[slot], (s128 *)rotation);
+            }
+        }
+        VU0_LOAD_VF(vf10, secondDirection);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf10, secondDirection);
+        VU0_LOAD_VF(vf10, firstDirection);
+        VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf10, firstDirection);
+    }
+}
 
 s32 btlMoveOtherUnitsForCategory(u32 *command) {
     s32 category = command[1];
