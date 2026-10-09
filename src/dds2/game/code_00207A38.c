@@ -2626,7 +2626,7 @@ void btlBossDebugPrintfN(s32 a, s32 b, s32 c, s32 d, ...) {
 void func_0020D1B0(s32 x, s32 y, s32 style, const char *text) {
 }
 
-void func_0020D1B8(void) {
+void func_0020D1B8(s32 x, s32 y, s32 width, s32 height) {
 }
 
 void func_0020D1C0(void) {
