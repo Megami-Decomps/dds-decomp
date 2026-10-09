@@ -4568,9 +4568,13 @@ DDS2 `00261B98` operates on `MenuTerminalContext`; its caller at
 pointer interface. Keep the conversion at this real task boundary,
 not a wrong integer prototype on the setup method.
 
-The existing eight-byte `ShopItemPriceRecord` owns a flags byte at
-zero (native `00261C6C` masks its low two bits) and price at four.
-Completing its padding removes the need for another item-record view.
+The shared eight-byte `DatItemSkillRecord` in `dat_command.h` owns flags
+at zero, the quantity-consumption flag byte at one, a command index at
+two, and the base price at four. Event, battle, roster and shop readers
+in both games use this owner directly rather than separate index,
+availability and price views. Byte one remains `unk01`: bit 2 causes
+the battle consumers to decrement item quantity, but the other bits
+are not yet identified.
 The body remains parked: `+154..15C` still has a three-store schedule
 rotation, which does not justify store-order search.
 
@@ -4892,3 +4896,45 @@ payload is the same configuration, not an integer argument or a second
 record view. The first argument remains the existing three-word buffer
 API. The two large preparation bodies remain assembly while their
 placement and scheduling differences are unresolved.
+
+## Kind-3 slot handlers own the complete mover payload
+
+DDS1's operation table `003299C0[3]` selects `00329A50`, whose constructor
+`00111400` allocates and clears sixteen bytes. `Dds3SlotResource` is that
+complete owner: transform target at `+0`, retained path work at `+4`,
+relative-transform callback at `+8`, and kind-16 source node at `+C`.
+The slot accessors in `00111610`/`00111838`, mover update, and destruction
+use the same payload, not separate resource/mover prefixes. The getter
+returns the retained path; the conditional attachment tests the source node.
+
+`dds3InvokeSlot1Handler` installs rather than invokes the callback. Mover
+update supplies `ObjectTransform *` and `EffWorldNode *`, and applies the
+relative transform only for result 1. The constant-zero callbacks
+`001243C0`/`001266D8` retain those unused family formals. Ring-entry addresses
+and room-name addresses still use the world node's existing encoded `value`
+word; generic slot APIs and the float-counter SDK word boundary are unchanged.
+
+## Packed command queries borrow the complete party record
+
+DDS2 `001176A0` uses `DatPartyRecord` for its HP-bracket and packed-status
+query/apply/raise helpers. HP/max-HP at `+6/+8`, MP/max-MP at `+A/+C`
+and status at `+E` belong to one record, not separate short party views.
+The affinity and skill providers already accept that same owner.
+
+The HP/MP mutators in `datCalc.c` really return `void`, but this caller TU
+keeps them unprototyped rather than publishing false `s32` declarations.
+Native `sdfApplyCommandResults` reloads HP into `v1` and branches on it at
+`+E0/+E4`; exposing the void prototype changes those two register operands.
+The inferred original implicit-int call boundary preserves the observed
+caller without inventing a provider result; neither call consumes a result.
+
+
+## Camera preset outputs are embedded pose records
+
+DDS2 `0021C5E0` and `00224598` initialize a `BtlCamState` and rotate its
+direction vector at `+0x10`. The output is not a second command-shaped
+`BtlEffect` view. Caller `00224DF0` deliberately supplies the command's
+leading `camera` member at offset zero, while its action/state/link fields
+belong to the complete `BtlLinkedCommand`. Boss preset selection at
+`0021C428` likewise borrows that command's link to its unit.
+

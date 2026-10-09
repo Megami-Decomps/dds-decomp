@@ -1271,7 +1271,6 @@ typedef struct {
     s32 soundIndex;
 } BattleVoiceWork;
 
-extern u8 *datItemSkillRecords;
 
 extern void ptyAdjustItemQuantity(s32, s32);
 
@@ -1279,7 +1278,7 @@ extern void btlSyncModelFlagFromEventThresholds(void);
 
 s32 btlPlayPermittedBattleVoice(BattleVoiceWork *work) {
     s32 index = work->soundIndex;
-    if (datItemSkillRecords[index * 8 + 1] & 4) {
+    if (datItemSkillRecords[index].unk01 & 4) {
         ptyAdjustItemQuantity(index, -1);
         switch (work->soundIndex) {
         case 0x53:

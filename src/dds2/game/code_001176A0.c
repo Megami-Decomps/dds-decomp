@@ -58,12 +58,6 @@ typedef struct EvtScaledValue {
 } EvtScaledValue;
 
 
-typedef struct SdfPackedValue {
-    u8 pad00[6];
-    u16 hp; /* 0x06 */
-    u8 pad08[6];
-    u16 flagsAndValue;
-} SdfPackedValue;
 
 #define SDF_PACKED_FLAG 0x8000
 #define SDF_PACKED_VALUE_MASK 0x7FFF
@@ -74,24 +68,11 @@ typedef struct SdfPackedValue {
 
 
 extern DatEnemyRecord *datEnemyRecords;
-/* Party-unit header: flags, record index into the enemy table (stride 76), hp / max hp. */
-typedef struct SdfPartyUnit {
-    u16 flags;          /* 0x00 */
-    u8 pad02[2];
-    u16 unitId;         /* 0x04 */
-    u16 hp;             /* 0x06 */
-    u16 maxHp;          /* 0x08 */
-    u8 pad0A[0xA];
-    u16 level;          /* 0x14 */
-    u8 pad16[6];
-    u16 hpBonus;        /* 0x1C */
-    u16 mpBonus;        /* 0x1E */
-} SdfPartyUnit;
 
 
 extern s32 datGetStatWithStatusOverride(DatPartyRecord *, s32 statIndex);
 
-extern u32 sdfRollActionHit(s32 channel, s32 arg1, SdfPackedValue *item);
+extern u32 sdfRollActionHit(s32 channel, s32 arg1, DatPartyRecord *item);
 
 extern void scrDestroyWorkTask(void);
 
@@ -493,7 +474,7 @@ s32 sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
 }
 
 
-f32 sdfGetHpBracketScale(SdfPartyUnit *unit) {
+f32 sdfGetHpBracketScale(DatPartyRecord *unit) {
     s32 hp = unit->hp;
     s32 band;
 
@@ -516,14 +497,14 @@ f32 sdfGetHpBracketScale(SdfPartyUnit *unit) {
 INCLUDE_ASM(const s32, "game/code_001176A0", func_00118D60);
 
 extern s32 datFlagToElementIndex(u32);
-extern s32 datGetEffectiveAffinity(struct DatUnitStatus *, s32);
-extern s32 datUnitHasSkill(SdfPackedValue *, s32);
+extern s32 datGetEffectiveAffinity(DatPartyRecord *, s32);
+extern s32 datUnitHasSkill(DatPartyRecord *, s32);
 extern u32 effMiscRandMod(void *state, u32 modulus);
 extern void func_0035B6E0(const char *fmt, ...);
 extern char D_00412B08[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
 /* Rolls whether the action hits: returns the surviving channel mask, or 0 on a miss. */
-u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
+u32 sdfRollActionHit(s32 index, s32 queryArg, DatPartyRecord *packed) {
     u16 list[16];
     u16 count;
     u16 bit;
@@ -550,8 +531,8 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
         (datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_ELEMENT_MASK ||
          datCommandRecords[index].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK)) {
         kind = datFlagToElementIndex(mask);
-        if (!((u32)datCommandRecords[index].unk30 == 4 && (packed->flagsAndValue & 0x7FFF) == 8)) {
-            if (datGetEffectiveAffinity((struct DatUnitStatus *)packed, kind) & 0x170000) {
+        if (!((u32)datCommandRecords[index].unk30 == 4 && (packed->status & 0x7FFF) == 8)) {
+            if (datGetEffectiveAffinity(packed, kind) & 0x170000) {
                 return 0;
             }
         }
@@ -575,7 +556,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
     }
     flag = mask & 1;
     if (flag) {
-        SdfPartyUnit *actor = (SdfPartyUnit *)packed;
+        DatPartyRecord *actor = packed;
 
         if (actor->hp * 100 / actor->maxHp >= 25) {
             mask &= 0xFFFE;
@@ -587,7 +568,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
         }
     }
     if (mask & 0x8000) {
-        if (packed->flagsAndValue & 0x1804) {
+        if (packed->status & 0x1804) {
             mask &= 0x7FFF;
         }
     }
@@ -604,7 +585,7 @@ u32 sdfRollActionHit(s32 index, s32 queryArg, SdfPackedValue *packed) {
     return hit ? mask : 0;
 }
 
-u32 sdfQueryChannelValue(s32 channel, s32 queryArg, SdfPackedValue *item) {
+u32 sdfQueryChannelValue(s32 channel, s32 queryArg, DatPartyRecord *item) {
     u32 result;
     u32 mode = datCommandRecords[channel].attribute.parts.kind;
 
@@ -613,32 +594,31 @@ u32 sdfQueryChannelValue(s32 channel, s32 queryArg, SdfPackedValue *item) {
         return 0;
     }
     result = sdfRollActionHit(channel, queryArg, item);
-    if (!((item->flagsAndValue & SDF_PACKED_VALUE_MASK) < result)) {
+    if (!((item->status & SDF_PACKED_VALUE_MASK) < result)) {
         result = 0;
     }
     return result;
 }
 
-u32 sdfQueryChannelBits(s32 channel, s32 queryArg, SdfPackedValue *item) {
+u32 sdfQueryChannelBits(s32 channel, s32 queryArg, DatPartyRecord *item) {
     u32 result;
 
     if (datCommandRecords[channel].attribute.parts.kind != DAT_COMMAND_ATTRIBUTE_KIND_FLAG_MASK) {
         return 0;
     }
     result = sdfRollActionHit(channel, queryArg, item);
-    if ((result & (item->flagsAndValue & SDF_PACKED_VALUE_MASK)) == 0) {
+    if ((result & (item->status & SDF_PACKED_VALUE_MASK)) == 0) {
         result = 0;
     }
     return result;
 }
 
-extern s32 func_00118D60(s32 channel, s32 queryArg, SdfPackedValue *item, u32 mode, u8 vital);
+extern s32 func_00118D60(s32 channel, s32 queryArg, DatPartyRecord *item, u32 mode, u8 vital);
 extern void datClearUnitStatusBits(void *item, s32 mask);
-extern s32 datAdjustCurrentHp(void *item, s32 delta);
-extern s32 datAdjustCurrentMp(void *item, s32 delta);
-void sdfRaisePackedChannelValue(SdfPackedValue *item, u32 value);
+/* HP/MP mutators deliberately have no prototypes in this TU; see docs/idioms.md. */
+void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 value);
 
-s32 sdfApplyCommandResults(s32 channel, s32 queryArg, SdfPackedValue *item) {
+s32 sdfApplyCommandResults(s32 channel, s32 queryArg, DatPartyRecord *item) {
     s32 hpDelta;
     s32 mpDelta;
     u32 value;
@@ -681,19 +661,19 @@ s32 sdfApplyCommandResults(s32 channel, s32 queryArg, SdfPackedValue *item) {
     return 1;
 }
 
-void sdfSetPackedValuePreservingFlag(SdfPackedValue *item, u16 value) {
-    item->flagsAndValue = (item->flagsAndValue & SDF_PACKED_FLAG) | (value & SDF_PACKED_VALUE_MASK);
+void sdfSetPackedValuePreservingFlag(DatPartyRecord *item, u16 value) {
+    item->status = (item->status & SDF_PACKED_FLAG) | (value & SDF_PACKED_VALUE_MASK);
 }
 
 extern void evtRandomizeEntryValue();
 
 /* Raise the packed value to `value` (never lower it); reaching 0x40, 0x80 or 0x400 re-randomizes the entry. */
-void sdfRaisePackedChannelValue(SdfPackedValue *item, u32 value) {
+void sdfRaisePackedChannelValue(DatPartyRecord *item, u32 value) {
     s32 channel;
 
-    if ((item->flagsAndValue & SDF_PACKED_VALUE_MASK) < value) {
-        item->flagsAndValue = (item->flagsAndValue & SDF_PACKED_FLAG) | (value & SDF_PACKED_VALUE_MASK);
-        channel = item->flagsAndValue & SDF_PACKED_VALUE_MASK;
+    if ((item->status & SDF_PACKED_VALUE_MASK) < value) {
+        item->status = (item->status & SDF_PACKED_FLAG) | (value & SDF_PACKED_VALUE_MASK);
+        channel = item->status & SDF_PACKED_VALUE_MASK;
         switch (channel) {
         case 0x40:
         case 0x80:
