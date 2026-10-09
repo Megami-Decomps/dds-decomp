@@ -69,7 +69,6 @@ extern u32 kwlnGetDrawBufferIndex(void);
 extern u32 func_001200E0(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern void sdfInitPacketList(void *);
-extern void sdfAppendDmaPrimary(void *, const void *, void *);
 extern void *effCreateSizedDrawPacket();
 extern u64 *effBuildDrawPacketWithFlags(u32 flags);
 extern void *billGetWorkTransformMatrix();
@@ -211,7 +210,7 @@ void effBlurDrawFramebufferQuad(EffBlurQuad *source)
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         tag = (void *)sdfAllocPacketAligned(0x20);
-        sdfAppendDmaPrimary(list, kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, tag);
+        sdfAppendDmaPrimary(list, (u32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, tag);
         samplingPacket = (u64 *)sdfAllocPacketAligned(0x30);
         samplingPacket[0] = 2;
         samplingPacket[1] = 0x5000000210000000ULL;
