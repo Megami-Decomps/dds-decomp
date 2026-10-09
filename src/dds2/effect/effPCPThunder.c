@@ -3032,7 +3032,6 @@ void effAppendFragmentHistoryPoints(EffFragmentResources *history, u128 *source)
 
 extern SdfPoolNode *D_003B1210[];
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(SdfListHead *);
 extern s32 func_00167A10(EffThunderDrawParams *);
 
 /* Render the two runs of a wrapped three-point history and its end cap. */

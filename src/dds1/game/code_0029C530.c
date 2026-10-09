@@ -61,7 +61,6 @@ static inline void effSubmitSurfacePacket(SdfPoolNode *surface, void *list) {
 }
 
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(void *);
 extern void *func_0015FE20(EffPacketParams *);
 extern u32 D_0037ECB0[];
 extern SdfPoolNode *D_0037ECF0[];
