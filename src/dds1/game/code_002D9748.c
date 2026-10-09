@@ -109,7 +109,6 @@ extern u64 sdfTexGetPrimaryTextureState(SdfTex *);
 extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
 extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 
-extern void sdfInitPacketList(void *);
 
 
 extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);

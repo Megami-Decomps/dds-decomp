@@ -104,7 +104,6 @@ extern u8 D_00355948[];
 extern u8 D_00355970[];
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(SdfListHead *);
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
 extern EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *params);

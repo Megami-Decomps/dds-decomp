@@ -102,7 +102,6 @@ typedef struct ParDrawCmd {
 
 extern s32 sdfAllocPacketAligned(s32);
 struct SdfListHead;
-extern void sdfInitPacketList(struct SdfListHead *);
 extern s32 func_0015FE20(ParDrawState *);
 
 
@@ -1628,7 +1627,7 @@ void parSubmitCellDrawPackets(ParDrawCmd *emitter, ParBlock *cmd) {
     s32 list = sdfAllocPacketAligned(0x20);
     ParDrawState state;
     s32 remaining;
-    sdfInitPacketList(list);
+    sdfInitPacketList((SdfListHead *)list);
     sdfConsAppendClearPacket((SdfListHead *)list, 0);
     remaining = cmd->count * 3;
     memset(&state, 0, sizeof(state));
