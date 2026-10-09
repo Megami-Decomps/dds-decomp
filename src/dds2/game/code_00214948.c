@@ -282,8 +282,6 @@ extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
 
 extern s32 btlIsActiveActor();
 
-extern void effObjSetInnerFirstVec();
-
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 
 extern void fldAppendTaskToGroup(void *);
@@ -1869,7 +1867,7 @@ void btlAttachActionEffectToUnit(BtlUnit *unit) {
     position[0] = 0.0f;
     position[1] = 10000.0f;
     position[2] = -10000.0f;
-    effObjSetInnerFirstVec(unit->effectObject, position);
+    effObjSetInnerFirstVec(unit->effectObject, (u128 *)position);
 }
 
 void btlCommitSelectedUnit(void) {
@@ -2114,7 +2112,7 @@ void btlResetActionEffectOnUnit(void) {
         vec[2] = -10000.0f;
         unit->status.flags &= ~8;
         unit->status.stateFlags |= 0x180;
-        effObjSetInnerFirstVec(unit->effectObject, vec);
+        effObjSetInnerFirstVec(unit->effectObject, (u128 *)vec);
     }
 }
 
@@ -6623,7 +6621,6 @@ extern void btlBindEffectUnitAndClearStateFlags(BtlUnit *);
 
 INCLUDE_ASM(const s32, "game/code_00214948", btlBindEffectUnitAndClearStateFlags);
 
-extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
 extern void effMiscQuatMultiplyVU(void);
 extern const s32 D_0041B4D0[];
 
@@ -6732,8 +6729,6 @@ extern void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *, s32, s32);
 extern void btlBeginEffectActorFadeOut(void);
 
 extern void func_001E3108(void *, f32 *);
-
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
 
 extern void func_00226AB0(BtlUnit *);
 
@@ -6848,4 +6843,3 @@ INCLUDE_SDATA(const s32, "game/code_00214948", D_00436CE0);
 INCLUDE_SDATA(const s32, "game/code_00214948", D_00436CE8);
 
 INCLUDE_SDATA(const s32, "game/code_00214948", D_00436CF0);
-

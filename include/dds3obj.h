@@ -47,6 +47,17 @@ EffWorldNode *dds3SetWorldCameraObject(EffWorldNode *world, EffWorldNode *camera
 EffWorldNode *dds3GetWorldPlayerObject(EffWorldNode *world);
 EffWorldNode *dds3SetWorldPlayerObject(EffWorldNode *world, EffWorldNode *player);
 
+/* Inner transform vector helpers; fetch results are returned in VU vf10. */
+void effObjSetInnerFirstVec(EffWorldNode *object, u128 *vector);
+void effObjSetInnerSecondVec(EffWorldNode *object, u128 *vector);
+void effObjSetInnerThirdVec(EffWorldNode *object, u128 *vector);
+void effObjFetchInnerFirstVec(EffWorldNode *object);
+void effObjFetchInnerSecondVecNorm(EffWorldNode *object);
+void effObjFetchInnerThirdVec(EffWorldNode *object);
+void effObjAddInnerFirstVec(EffWorldNode *object, u128 *vector);
+void effObjQuatMulInnerSecondVec(EffWorldNode *object, u128 *vector);
+void effObjMulInnerThirdVec(EffWorldNode *object, u128 *vector);
+
 /* Four-word object inner record (0x10); no direct C unit users yet. */
 typedef struct {
     u8 pad[4];

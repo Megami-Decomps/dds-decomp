@@ -634,9 +634,7 @@ void evtViewerApplyGlyphLodChannel(s32 position, EvtRuntime *viewer) {
     }
 }
 
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
-extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
-extern void effObjFetchInnerFirstVec(EffWorldNode *);
+
 extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 /* At an exact kind-7 key frame, attaches the indexed world object. Index -1

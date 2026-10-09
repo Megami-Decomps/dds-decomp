@@ -2464,8 +2464,6 @@ s32 btlIsUnitModelStateFive(BtlUnit *unit) {
     return unit->ext->owner->first->state == SDF_MOTION_STATE_TERMINAL;
 }
 
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
-
 void btlSetUnitPosition(BtlUnit *unit, f32 *vec) {
     f32 pos[4];
     if (!(unit->status.stateFlags & 0x80)) {
@@ -2598,8 +2596,6 @@ extern u8 D_004179E0[];
 
 extern void effMiscQuatMultiplyVU(void);
 
-extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
-
 void btlSetUnitRotation(BtlUnit *unit, s128 *quat) {
     f32 result[4];
     if (!(unit->status.stateFlags & 0x100)) {
@@ -2648,10 +2644,6 @@ extern void mdlReleaseInnerResourceHandle(MdlCtx *, s32, f32);
 void btlReleaseUnitModelColorResource(BtlUnit *unit, u32 value, f32 scalar) {
     mdlReleaseInnerResourceHandle(unit->ext->owner, (value & 0xFFFFFF) | 0x80000000, scalar);
 }
-
-extern void effObjFetchInnerFirstVec(EffWorldNode *);
-
-extern void effObjFetchInnerSecondVecNorm(EffWorldNode *);
 
 void btlRefreshUnitFxVectors(BtlUnit *unit) {
     if (!(unit->status.flags & 2)) {

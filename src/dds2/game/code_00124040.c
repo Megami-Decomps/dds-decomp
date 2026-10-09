@@ -1004,18 +1004,14 @@ extern u32 fldCameraModelObject;
 
 extern u32 fldSecondarySceneModelHandle;
 
-extern void effObjFetchInnerFirstVec(u32);
-
-extern void effObjFetchInnerSecondVecNorm(u32);
-
 void fldSnapshotAndReleasePlayerSceneObject(void) {
     FieldPlayerSceneWork *sceneWork;
     if (fldPlayerObject != 0) {
         if (dds3GetWorldSecondaryObject() != 0) {
             sceneWork = &D_0038A640;
-            effObjFetchInnerFirstVec(fldPlayerObject);
+            effObjFetchInnerFirstVec((EffWorldNode *)fldPlayerObject);
             VU0_STORE_VF(vf10, &sceneWork->position);
-            effObjFetchInnerSecondVecNorm(fldPlayerObject);
+            effObjFetchInnerSecondVecNorm((EffWorldNode *)fldPlayerObject);
             VU0_STORE_VF(vf10, &sceneWork->rotation);
         }
         fldPlayerObject = 0;
@@ -1063,7 +1059,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
     fldAreaState.unk90 = -1;
     fldAreaState.unk94 = -1;
     fldUpdateCameraTarget();
-    effObjFetchInnerFirstVec(fldPlayerObject);
+    effObjFetchInnerFirstVec((EffWorldNode *)fldPlayerObject);
     VU0_STORE_VF(vf10, position);
     position[1] += 10.0f;
     func_00139EC0(position);
@@ -1099,12 +1095,6 @@ void fldCreatePlayerObject(void) {
 }
 
 extern void effObjSetInnerFloat(u32, f32);
-
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
-
-extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
-
-extern void effObjSetInnerThirdVec(EffWorldNode *, u128 *);
 
 extern void effMiscAxisAngleToQuaternionVU(f32);
 

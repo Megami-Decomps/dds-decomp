@@ -3234,15 +3234,6 @@ s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
     return counter;
 }
 
-
-
-extern void effObjSetInnerFirstVec();
-
-extern void effObjSetInnerSecondVec();
-
-extern void effObjFetchInnerFirstVec();
-
-
 extern void effMiscQuatMultiplyVU(void);
 
 void mdlAttachWorldObjectToSourceVector(s32 targetId, s32 sourceId) {
@@ -3256,14 +3247,14 @@ void mdlAttachWorldObjectToSourceVector(s32 targetId, s32 sourceId) {
         source = dds3FindWorldObjectNodeByKey(dds3GetWorldSecondaryObject(), sourceId, 0x11);
         if (source != NULL) {
             base = source->data;
-            effObjSetInnerFirstVec(target, base);
+            effObjSetInnerFirstVec(target, (u128 *)base);
                         VU0_LOAD_VF(vf10, quaternion);
             effMiscAxisAngleToQuaternionVU(3.14159265f);
             base += 4;
                         VU0_LOAD_VF(vf11, base);
             effMiscQuatMultiplyVU();
                         VU0_STORE_VF(vf10, quaternion);
-            effObjSetInnerSecondVec(target, quaternion);
+            effObjSetInnerSecondVec(target, (u128 *)quaternion);
             effObjFetchInnerFirstVec(target);
             VU0_STORE_VF(vf10, target->inner->smoothedPosition);
         }
@@ -3417,4 +3408,3 @@ INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD98);
 INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBDA0);
 
 INCLUDE_SDATA(const s32, "game/code_00218B48", evtPendingEventSelection);
-
