@@ -19,23 +19,23 @@ void func_00145D48(s32 index, s32 alpha, f32 x, f32 y, f32 rotation) {
     f32 corner2[4] __attribute__((aligned(16)));
     f32 corner3[4] __attribute__((aligned(16)));
     f32 xOffset, yOffset;
-    u32 color;
+    s32 color;
     s32 packetList;
     SdfPoolNode *appendTarget;
     SdfPoolNode *drawSurface;
 
     if (index == 1) {
-        s32 pulseAlpha = (u32)(sdfSinPoly(D_00436284) * 64.0f);
-        pulseAlpha += 128;
-        pulseAlpha = pulseAlpha * alpha / 128;
+        color = (u32)(sdfSinPoly(D_00436284) * 64.0f);
+        color += 128;
+        color = color * alpha / 128;
         D_00436284 += 0.2f;
-        if (pulseAlpha < 0) {
-            pulseAlpha = 0;
+        if (color < 0) {
+            color = 0;
         }
-        if (pulseAlpha > 255) {
-            pulseAlpha = 255;
+        if (color > 255) {
+            color = 255;
         }
-        color = (u32)pulseAlpha << 24;
+        color = (u32)color << 24;
     } else {
         color = (u32)alpha << 24;
     }
