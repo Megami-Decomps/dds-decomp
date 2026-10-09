@@ -221,16 +221,17 @@ void sdfBuildResourceTransferPacket(SdfResourcePacket *packet, SdfDescriptorSour
     packet->tail[5] = 0;
 }
 
-void sdfCreateResourcePacket(SdfListHead *list, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
-                   s32 arg5, s32 arg6, s32 arg7, s32 arg_sp0, s32 (*alloc)(s32)) {
+void sdfCreateResourcePacket(SdfListHead *list, SdfTexResource *source, s32 sourceX,
+                   s32 sourceY, s32 width, s32 height, s32 arg6, s32 arg7,
+                   s32 arg8, s32 (*alloc)(s32)) {
     s32 buffer;
 
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
     buffer = alloc(0xf0);
-    sdfBuildResourceTransferPacket((SdfResourcePacket *)buffer, (SdfDescriptorSource *)arg1,
-        arg2, arg3, arg4, arg5, arg6, arg7, arg_sp0);
+    sdfBuildResourceTransferPacket((SdfResourcePacket *)buffer, (SdfDescriptorSource *)source,
+        sourceX, sourceY, width, height, arg6, arg7, arg8);
     sdfAppendPacketRange(list, buffer, buffer + 0xc0);
 }
 
@@ -299,15 +300,16 @@ void sdfBuildHostToLocalImagePacket(SdfDescriptorPacket *packet, SdfDescriptorSo
 }
 
 /* Allocate a descriptor packet, delegate its opaque options, and append its range. */
-void sdfCreateDescriptorPacket(SdfListHead *list, s32 descriptorAddress, s32 a, s32 b, s32 c, s32 d, s32 e,
-                   s32 (*allocatePacket)(s32)) {
+void sdfCreateDescriptorPacket(SdfListHead *list, SdfTexResource *source,
+                   s32 destinationX, s32 destinationY, s32 width, s32 height,
+                   s32 sourceAddress, s32 (*allocatePacket)(s32)) {
     s32 packetAddress;
     if (allocatePacket == NULL) {
         allocatePacket = sdfAllocPacketAligned;
     }
     packetAddress = allocatePacket(SDF_DESCRIPTOR_PACKET_BYTES);
-    sdfBuildHostToLocalImagePacket((SdfDescriptorPacket *)packetAddress, (SdfDescriptorSource *)descriptorAddress,
-                  a, b, c, d, e);
+    sdfBuildHostToLocalImagePacket((SdfDescriptorPacket *)packetAddress, (SdfDescriptorSource *)source,
+                  destinationX, destinationY, width, height, sourceAddress);
     sdfAppendPacketRange(list, packetAddress, packetAddress + SDF_DESCRIPTOR_PACKET_TAIL_OFFSET);
 }
 
