@@ -530,7 +530,6 @@ extern void fileQueueSetRotation(FileQueue *queue, void *rot);
 
 extern void fileQueueSetScale(FileQueue *queue, f32 scale);
 
-extern void func_002D49B8(FileQueue *queue, u32 color);
 
 extern FileJob *fileQueueFindById(FileQueue *queue, u32 id);
 extern s32 fileFindQueuedJobIndex(FileQueue *queue, FileJob *target);
@@ -4788,7 +4787,7 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
     fileQueueSetPosition(queue, &vec);
     fileQueueSetRotation(queue, &vec);
     fileQueueSetScale(queue, 1.0f);
-    func_002D49B8(queue, 0x80808080);
+    fileQueueSetColor(queue, 0x80808080);
     return queue;
 }
 
@@ -4887,7 +4886,7 @@ FileQueue *fileQueueClone(FileQueue *source) {
     fileQueueSetPosition(queue, &vec);
     fileQueueSetRotation(queue, &vec);
     fileQueueSetScale(queue, 1.0f);
-    func_002D49B8(queue, 0x80808080);
+    fileQueueSetColor(queue, 0x80808080);
     return queue;
 }
 
@@ -4988,7 +4987,7 @@ void fileQueueSetScale(FileQueue *queue, f32 scale)
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D49B8);
+INCLUDE_ASM(const s32, "game/code_002C96D0", fileQueueSetColor);
 
 void fileReadVector40(void *work, void *dst) {
     PCP_COPY_VECTOR(dst, ((FileQueue *)work)->position);

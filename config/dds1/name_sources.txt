@@ -5317,6 +5317,7 @@
 0x00294670	fileQueueSetPosition	inferred	queue->position = *vec, job positions = position + offset + rotated/scaled job offset [names_M68_VuRest.tsv]
 0x00294798	fileQueueSetRotation	inferred	queue->quat = *rot, offset = rotated axis, per-job quat multiply, then fileQueueSetPosition(queue, queue->position) [names_M68_VuRest.tsv]
 0x00294850	fileQueueSetScale	inferred	queue->scale = s, per-job scale (job flag 1 multiplies by queue scale*baseScale), scaled job offsets [names_M68_VuRest.tsv]
+0x00294938	fileQueueSetColor	inferred	Stores the packed queue color and modulates each queued job color before dispatching its color callback.
 0x00294A18	fileQueueCopyRotationFromSource	inferred	Extracts rotation vector from source and stores it on destination queue. [names_reviewed7.tsv]
 0x00294A50	fileAppendJob	inferred	file file requests and records in game/code_0028A0E0.c
 0x00294AA0	fileDuplicateAndAppendJob	inferred	file file requests and records in game/code_0028A0E0.c

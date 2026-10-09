@@ -146,6 +146,7 @@ typedef char FileQueue_first_offset_must_be_0x8C[
     ((u32)&((FileQueue *)0)->first == 0x8C) ? 1 : -1];
 
 FileQueue *fileQueueCreate(void);
+void fileQueueSetColor(FileQueue *queue, u32 color);
 FileQueue *fileQueueCreateFromCommandState(const char *entry);
 void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath);
 void fileQueueSaveImage(FileQueue *queue, const char *filePath);
