@@ -234,7 +234,6 @@ extern u32 fldCachedRoomResourceData, D_00435FF4, D_00435FF8, D_00435FFC;
 extern u32 fldCachedRoomResourceSize, D_00436004, D_00436008, D_0043600C;
 
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendDmaPrimary(s32, u32, SdfDmaNode *);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 
 extern SdfPoolNode kwlnDrawSurfaces[];
@@ -2158,7 +2157,7 @@ void func_0012D3E0(void) {
     packetList = (SdfListHead *)sdfAllocatePacketList(0);
     dmaPacket = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     drawBufferIndex = (s32)kwlnGetDrawBufferIndex();
-    sdfAppendDmaPrimary((s32)packetList,
+    sdfAppendDmaPrimary(packetList,
                         (u32)(kwlnFrameDrawPacketRecords + drawBufferIndex * 0x1F40),
                         dmaPacket);
 
@@ -2223,7 +2222,7 @@ void func_0012D5C0(s32 mode) {
     packetList = (SdfListHead *)sdfAllocatePacketList(0);
     dmaPacket = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     drawBufferIndex = (s32)kwlnGetDrawBufferIndex();
-    sdfAppendDmaPrimary((s32)packetList,
+    sdfAppendDmaPrimary(packetList,
                         (u32)(kwlnFrameDrawPacketRecords + drawBufferIndex * 0x1F40),
                         dmaPacket);
 
@@ -2293,7 +2292,7 @@ void func_0012D7E0(s32 alpha) {
     packetList = (SdfListHead *)sdfAllocatePacketList(0);
     dmaPacket = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     drawBufferIndex = (s32)kwlnGetDrawBufferIndex();
-    sdfAppendDmaPrimary((s32)packetList,
+    sdfAppendDmaPrimary(packetList,
                         (u32)(kwlnFrameDrawPacketRecords + drawBufferIndex * 0x1F40),
                         dmaPacket);
 
@@ -2712,7 +2711,7 @@ void func_0012E958(s32 alpha, s32 offset) {
     s32 quarter;
     SdfPoolNode *descriptor;
 
-    sdfAppendDmaPrimary((s32)list,
+    sdfAppendDmaPrimary(list,
         (u32)(kwlnFrameDrawPacketRecords + kwlnGetDrawBufferIndex() * 0x1F40), reference);
     texturePacket = (u64 *)sdfAllocPacketAligned(0x40);
     texturePacket[0] = 3;
