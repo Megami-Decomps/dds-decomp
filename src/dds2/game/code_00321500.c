@@ -25,17 +25,17 @@ extern u32 mnuWorkEntryPool;
 
 extern s32 mnuWorkEntryPoolCount;
 
-extern MenuRegistryParameters *D_004390E4;
+extern MenuRegistryParameters *mnuMenuRegistryParametersBase;
 
-extern u32 D_004390E8;
+extern u32 mnuMenuRegistryParametersSetupCount;
 
-extern MenuMovementRecord18 *D_004390DC;
+extern MenuMovementRecord18 *mnuMovementRecordTableBase;
 
-extern u32 D_004390E0;
+extern u32 mnuMovementRecordTableSetupCount;
 
-extern MenuRegistry *D_004390D0;
+extern MenuRegistry *mnuMenuRecordRegistryBase;
 
-extern u32 D_004390D4;
+extern u32 mnuMenuRecordRegistrySetupCount;
 
 extern void (*sdfTickCallback)(void);
 
@@ -390,33 +390,33 @@ u16 *func_003224C8(s32 index) {
 }
 
 void mnuBindMenuRecordRegistry(MenuRegistry *records, u32 count) {
-    D_004390D0 = records;
-    D_004390D4 = count;
+    mnuMenuRecordRegistryBase = records;
+    mnuMenuRecordRegistrySetupCount = count;
 }
 
 MenuRegistry *mnuGetMenuRecordRegistryEntry(u32 taggedIndex) {
     u16 index = taggedIndex;
-    return &D_004390D0[index];
+    return &mnuMenuRecordRegistryBase[index];
 }
 
-void func_00322510(MenuMovementRecord18 *records, u32 count) {
-    D_004390DC = records;
-    D_004390E0 = count;
+void mnuBindMovementRecordTable(MenuMovementRecord18 *records, u32 count) {
+    mnuMovementRecordTableBase = records;
+    mnuMovementRecordTableSetupCount = count;
 }
 
-MenuMovementRecord18 *func_00322520(u32 movementRecordIndex) {
+MenuMovementRecord18 *mnuGetMovementRecordByIndex(u32 movementRecordIndex) {
     u16 index = movementRecordIndex;
-    return &D_004390DC[index];
+    return &mnuMovementRecordTableBase[index];
 }
 
 void mnuBindMenuRegistryParameters(MenuRegistryParameters *records, u32 count) {
-    D_004390E4 = records;
-    D_004390E8 = count;
+    mnuMenuRegistryParametersBase = records;
+    mnuMenuRegistryParametersSetupCount = count;
 }
 
 MenuRegistryParameters *mnuGetMenuRegistryParametersByIndex(u32 parameterIndex) {
     u8 index = parameterIndex;
-    return &D_004390E4[index];
+    return &mnuMenuRegistryParametersBase[index];
 }
 
 MenuShortRecord *mnuFindFirstFixedKindShortRecord(MenuShortRecordList *list) {
@@ -795,7 +795,7 @@ MenuRuntimeRecord *func_00323988(MenuWorkEntry *work, struct MnuShootingWork *co
 
     switch (tag & MNU_WORK_TAG_CLASS_MASK) {
     case MNU_WORK_TAG_MOVEMENT_TABLE: {
-        MenuMovementRecord18 *fixed = func_00322520(tag);
+        MenuMovementRecord18 *fixed = mnuGetMovementRecordByIndex(tag);
         parameters = mnuGetMenuRegistryParametersByIndex(fixed->parameterTag);
         break;
     }
@@ -975,7 +975,7 @@ s32 func_00324070(MenuWorkEntry *input) {
 
         right = left + parameters->hitWidth;
         bottom = top + parameters->hitHeight;
-        inputRecord = func_00322520(input->tag);
+        inputRecord = mnuGetMovementRecordByIndex(input->tag);
         parameters = mnuGetMenuRegistryParametersByIndex(inputRecord->parameterTag);
         inputLeft = (s32)(input->x0 + (f32)parameters->hitOffsetX);
         inputTop = (s32)(input->y0 + (f32)parameters->hitOffsetY);
@@ -1206,7 +1206,7 @@ s32 func_00324840(void) {
     u32 kindMask = 0;
     s8 *input = (s8 *)D_0045C890;
     MenuProgressParameters *parameters = mnuGetResourceProgressParameters();
-    MenuMovementRecord18 *progress = func_00322520((u16)work->tag);
+    MenuMovementRecord18 *progress = mnuGetMovementRecordByIndex((u16)work->tag);
 
     if (work->inputCountdown > 0) {
         work->inputCountdown--;
