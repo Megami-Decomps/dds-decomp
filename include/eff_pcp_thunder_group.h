@@ -10,9 +10,9 @@ struct SoundMixer;
 typedef struct EffPcpThunderFragmentResources {
     u32 color;                              /* 0x00 */
     s32 surfaceIndex;                       /* 0x04 */
-    s32 count;                              /* 0x08: history point capacity */
+    s32 pointCapacity;                      /* 0x08: history point capacity */
     s32 activePointCount;                   /* 0x0C */
-    s32 position;                           /* 0x10: next history write */
+    s32 nextPointWriteIndex;                /* 0x10: first point of the next three-point sample */
     s32 subdivisions;                       /* 0x14: retained input value */
     u128 *points;                           /* 0x18 */
     u32 *colors;                            /* 0x1C */
@@ -62,6 +62,8 @@ typedef struct EffPcpThunderGroup {
 } EffPcpThunderGroup;
 
 typedef char EffPcpThunderFragmentResources_size[(sizeof(EffPcpThunderFragmentResources) == 0x30) ? 1 : -1];
+typedef char EffPcpThunderFragmentResources_pointCapacity_offset[((u32)&((EffPcpThunderFragmentResources *)0)->pointCapacity == 0x08) ? 1 : -1];
+typedef char EffPcpThunderFragmentResources_nextPointWriteIndex_offset[((u32)&((EffPcpThunderFragmentResources *)0)->nextPointWriteIndex == 0x10) ? 1 : -1];
 typedef char EffPcpThunderGroupParams_size[(sizeof(EffPcpThunderGroupParams) == 0x50) ? 1 : -1];
 typedef char EffPcpThunderGroupSlot_size[(sizeof(EffPcpThunderGroupSlot) == 0x80) ? 1 : -1];
 typedef char EffPcpThunderGroup_size[(sizeof(EffPcpThunderGroup) == 0x64) ? 1 : -1];
