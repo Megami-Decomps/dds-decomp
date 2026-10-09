@@ -7,11 +7,12 @@
 
 struct PacAlloc;
 struct SdfMemBlock;
+struct SdfTex;
 
-/* Complete 0x10-byte packet buffer: result is an opaque output word, while
+/* Complete 0x10-byte packet buffer: texture is the acquired output, while
  * resourceSlot owns the optional general-heap allocation descriptor. */
 typedef struct PacBuf {
-    s32 result;
+    struct SdfTex *texture;
     struct SdfMemBlock *resourceSlot;
     u8 *cursor;
     s32 remainingBytes;
