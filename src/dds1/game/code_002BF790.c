@@ -255,7 +255,90 @@ s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, 
     return 0x10000 / table->cycleDivisor;
 }
 
-INCLUDE_ASM(const s32, "game/code_002BF790", func_002BFE78);
+/* The FLUSH_01 status payload stores the signed IN, WAIT and OUT durations. */
+typedef struct GridFlushTable {
+    s32 inDuration;
+    s32 waitDuration;
+    s32 outDuration;
+} GridFlushTable;
+
+/* Shrink the grid bounds and apply the three-phase flush envelope to corner alpha. */
+s32 func_002BFE78(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
+    GridFlushTable *table;
+    s32 phases[3];
+    s32 deltas[2];
+    EffectSlotGeometry *geometry = &out->geometry;
+    s32 *dimensionOut;
+    s32 totalDuration;
+    s32 numerator;
+    s32 denominator;
+    u32 *sourceColor;
+    u32 *destColor;
+    s32 i = 0;
+
+    table = (GridFlushTable *)owner->source->status;
+    totalDuration = table->inDuration;
+    totalDuration += table->outDuration;
+    totalDuration += table->waitDuration;
+    deltas[0] = (rectangle->bounds.grid.quantizedBounds[2] - rectangle->bounds.grid.quantizedBounds[0]) << 4;
+    deltas[1] = (rectangle->bounds.grid.quantizedBounds[3] - rectangle->bounds.grid.quantizedBounds[1]) << 3;
+    dimensionOut = geometry->bounds;
+    {
+        s32 fractionalMask = 0xFFFF;
+
+        for (; i < 2; i++) {
+            s32 delta = deltas[i];
+            s32 magnitude = delta < 0 ? -delta : delta;
+            s32 product = magnitude * owner->value;
+            s32 negative = 0;
+            s32 scaled;
+
+            if (product < 0) {
+                negative++;
+            }
+            /* Signed fixed-point division rounds toward zero. */
+            scaled = (product + negative * fractionalMask) >> 16;
+            if (delta > 0) {
+                dimensionOut[i] = delta - scaled;
+            } else {
+                dimensionOut[i] = delta + scaled;
+            }
+        }
+    }
+
+    phases[0] = (table->inDuration << 16) / totalDuration;
+    phases[1] = (table->waitDuration << 16) / totalDuration;
+    phases[2] = (table->outDuration << 16) / totalDuration;
+
+    if (phases[1] + phases[2] < owner->value) {
+        numerator = phases[0] - (owner->value - (phases[1] + phases[2]));
+        denominator = phases[0];
+    } else if (phases[2] < owner->value) {
+        destColor = geometry->cornerColors;
+        sourceColor = rectangle->savedColors;
+        for (i = 3; i >= 0; i--, sourceColor++, destColor++) {
+            *destColor = *sourceColor;
+        }
+        return 0x10000 / totalDuration;
+    } else {
+        numerator = owner->value;
+        denominator = phases[2];
+    }
+
+    destColor = geometry->cornerColors;
+    sourceColor = rectangle->savedColors;
+    {
+        s32 colorMask = -0x100;
+
+        for (i = 3; i >= 0; i--, sourceColor++, destColor++) {
+            u32 color = *sourceColor;
+            s32 lowByte = *(u8 *)sourceColor;
+
+            *destColor = (color & colorMask) | (lowByte * numerator / denominator);
+        }
+    }
+    return 0x10000 / totalDuration;
+}
 
 s32 func_002C0038(BdWork *rectangle, BdWork *out, EffTimedState *owner) {
     GridAngleTable *table;

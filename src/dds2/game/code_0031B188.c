@@ -36,7 +36,6 @@ extern void func_003270C8(SdfMat4 *, f32);
 extern void func_003275C8(SdfMat4 *, f32);
 extern void sdfMat4Transpose(SdfMat4 *, SdfMat4 *);
 extern void sdfMatrixToQuaternion(f32 *, SdfMat4 *);
-extern void fileReadVector40(void *, void *);
 
 static inline void mnuSetBasisRow(f32 *row, f32 x, f32 y, f32 z, f32 w) {
     row[0] = x;
@@ -391,7 +390,7 @@ u32 mnuLoadNodeModelFromResource(u32 *owner, u32 resource) {
     u32 other;
     struct SdfMemBlock *data = sdfReadNamedResource((const char *)(u32)resource, &handle, &other);
     *owner = (u32)fileCloneQueueEntries((FileQueue *)handle);
-    fileQueueNotifyAllJobsComplete(*owner);
+    fileQueueNotifyAllJobsComplete((FileQueue *)*owner);
     sdfReleaseResourceAllocation(data);
     return *owner;
 }
@@ -405,7 +404,7 @@ void func_0031BC10(MnuEffectRecord *record, f32 xAngle, f32 yAngle, f32 zAngle) 
     SdfMat4 basis;
     f32 quaternion[4];
 
-    fileReadVector40(record->queue, position);
+    fileQueueReadPosition(record->queue, position);
     mnuSetBasisRow(vector, sdfViewTargetVector[0] - position[0],
                    sdfViewTargetVector[1] - position[1],
                    sdfViewTargetVector[2] - position[2], 0.0f);
@@ -458,7 +457,7 @@ void mnuUpdateEffectQueues(MnuEffectWork *work, s32 flags) {
                     record->delay--;
                 } else {
                     if ((record->flags >> 9) & 1) {
-                        fileReadVector40(record->queue, position);
+                        fileQueueReadPosition(record->queue, position);
                         position[0] += record->positionStep.x;
                         position[1] += record->positionStep.y;
                         position[2] += record->positionStep.z;
