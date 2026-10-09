@@ -1819,13 +1819,13 @@ s32 fldGetActiveSceneGroupValue(void) {
     return *(s32 *)fldGetSceneGroupResource(((BtlState *)scene)->slots[0].group);
 }
 
-/* Read one task word from the front group; an empty front slot returns zero. */
-s32 fldGetSceneGroupEntry(s32 entryIndex) {
+/* Return a task from the front group, or null when the front slot is empty. */
+ActionStateLink *fldGetSceneGroupEntry(s32 entryIndex) {
     u8 *scene = (u8 *)btlGetRuntime();
     if (((BtlState *)scene)->slots[0].group == 0) {
         return 0;
     }
-    return ((s32 *)fldGetSceneGroupResource(((BtlState *)scene)->slots[0].group))[entryIndex];
+    return fldGetSceneGroupResource(((BtlState *)scene)->slots[0].group)[entryIndex];
 }
 
 extern s32 func_001B2630();

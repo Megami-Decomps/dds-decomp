@@ -93,7 +93,7 @@ void sdfAssetCopyTextureState(SdfAsset *, SdfAssetEntry *);
 
 void sdfApplyAssetSecondaryEntry(SdfAsset *, SdfAssetEntry *);
 
-void func_0032C278(u32 asset, s32 arg, f32 value);
+void func_0032C278(SdfTex *texture, s32 arg, f32 value);
 
 void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
@@ -427,7 +427,7 @@ DevRequest *sdfResourceListClone(DevRequest *source) {
     return clone;
 }
 
-/* Apply the scalar update only to assets whose byte at 0x18 is nonzero. */
+/* Apply the palette update only to textures with a nonempty color lookup table. */
 void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 arg, f32 value) {
     s32 itemIndex;
     s32 itemCount;
@@ -437,10 +437,10 @@ void sdfUpdateActiveResourceListScalars(DevRequest *list, s32 arg, f32 value) {
     }
     itemCount = list->usedCount;
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-        SdfAsset *asset = ((SdfAsset **)list->buffer)[itemIndex];
+        SdfTex *texture = ((SdfTex **)list->buffer)[itemIndex];
 
-        if ((u8)asset->secondaryColor != 0) {
-            func_0032C278((u32)asset, arg, value);
+        if (texture->paletteCount != 0) {
+            func_0032C278(texture, arg, value);
         }
     }
 }

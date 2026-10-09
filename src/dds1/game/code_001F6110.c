@@ -47,7 +47,7 @@ enum {
 
 extern void btlClearUnitDefeatCandidate(BtlUnit *unit);
 
-extern void func_001F6E28(BtlIndexList *list, s32, s32);
+extern f32 func_001F6E28(BtlIndexList *list, f32 *maxTop, f32 *minTop);
 extern void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 
 extern s32 D_00360348[];

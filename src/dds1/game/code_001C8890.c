@@ -7204,7 +7204,7 @@ void btlDebugPrintWorldTransform(s32 arg0, u8 *arg1) {
     }
 }
 
-extern void func_001F6E28(BtlIndexList *, s32, s32);
+extern f32 func_001F6E28(BtlIndexList *, f32 *, f32 *);
 
 void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *action) {
     s128 vec[3];
