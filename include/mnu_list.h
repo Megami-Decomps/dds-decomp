@@ -116,4 +116,8 @@ struct MenuListNode *mnuRetreatListCursorDefault(struct MenuList *list);
 struct MenuListNode *mnuScrollListToEnd(struct MenuList *list);
 #endif
 
+/* Move the visible list window and return its unchanged cursor node. */
+struct MenuListNode *mnuAdvanceListWindowStart(struct MenuList *list);
+struct MenuListNode *mnuRetreatListWindowStart(struct MenuList *list);
+
 #endif
