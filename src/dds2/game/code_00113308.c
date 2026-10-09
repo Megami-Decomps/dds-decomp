@@ -84,8 +84,7 @@ f32 dds3ShortestAngleDelta(f32 fromDegrees, f32 toDegrees) {
     return toDegrees - fromDegrees;
 }
 
-extern void effObjFetchInnerFirstVec(EffWorldNode *);
-extern void effObjFetchInnerSecondVecNorm(EffWorldNode *);
+
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 extern f32 sdfAtan2(f32, f32);
 
@@ -104,7 +103,7 @@ void effObjStepFollowAngleTowardPosition(EffWorldNode *obj, const f32 *targetPos
     f32 angleDelta;
     f32 step;
 
-    effObjFetchInnerFirstVec(obj);
+    effObjFetchInnerPosition(obj);
     VU0_STORE_VF(vf10, position);
     if (position[0] == targetPosition[0] &&
         position[2] == targetPosition[2]) {
@@ -114,7 +113,7 @@ void effObjStepFollowAngleTowardPosition(EffWorldNode *obj, const f32 *targetPos
     heading = -(sdfAtan2(position[0] - targetPosition[0],
                          position[2] - targetPosition[2]) *
                 EFFECT_HEADING_DEGREES_PER_RADIAN_APPROX);
-    effObjFetchInnerSecondVecNorm(obj);
+    effObjFetchInnerRotationNormalized(obj);
     referenceAngle = effMiscComputeQuaternionRotatedReferenceAngle();
     referenceAngle *= EFFECT_HEADING_RADIANS_TO_DEGREES;
     targetAngle = dds3ShortestAngleDelta(referenceAngle, heading);
@@ -251,9 +250,7 @@ extern u8 dds3TestObjectFlags(void *object, u32 mask);
 extern u8 effObjTestNodeFlags(ObjectTransform *, u32);
 extern void effObjInnerVecInit(EffLocalNode *);
 extern s32 func_0023DA70(EffLocalNode *, EffWorldNode *);
-extern void effObjMulInnerThirdVec(EffWorldNode *, u128 *);
-extern void effObjQuatMulInnerSecondVec(EffWorldNode *, u128 *);
-extern void effObjAddInnerFirstVec(EffWorldNode *, u128 *);
+
 extern void effObjClearNodeFlags(ObjectTransform *, u32);
 extern f32 sdfSinPoly(f32);
 extern void mdlStoreTertiaryVectorVU(void *);
@@ -281,9 +278,9 @@ s32 effUpdateFollowModelTransform(EffWorldNode *obj) {
     if (data->transitionWork != 0) {
         effObjInnerVecInit(&node);
         if (func_0023DA70(&node, obj) != 0) {
-            effObjMulInnerThirdVec(obj, &node.vec60);
-            effObjQuatMulInnerSecondVec(obj, &node.vec50);
-            effObjAddInnerFirstVec(obj, &node.vec40);
+            effObjMultiplyInnerScale(obj, &node.vec60);
+            effObjMultiplyInnerRotation(obj, &node.vec50);
+            effObjAddInnerPosition(obj, &node.vec40);
         }
     }
     model = (void *)data->modelHolder->resourceHandle;
@@ -508,10 +505,6 @@ ObjBase *effObjGetDataHandle(EffWorldNode *object) {
 
 extern void dds3EnsureSlotData();
 
-extern void effObjSetInnerFirstVec();
-
-extern void effObjSetInnerSecondVec();
-
 /* Spawn a world object of kind 6 and seed its stored vector. */
 EffWorldNode *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
     f32 zero[4];
@@ -522,8 +515,8 @@ EffWorldNode *dds3SpawnInnerVecObj6(s32 a, f32 *vec, void *second) {
     obj = dds3AppendWorldObjectNode(6);
     obj->key = (u32)a;
     dds3EnsureSlotData(obj);
-    effObjSetInnerSecondVec(obj, second);
-    effObjSetInnerFirstVec(obj, zero);
+    effObjSetInnerRotation(obj, second);
+    effObjSetInnerPosition(obj, (u128 *)zero);
     effObjInnerVecBackup(obj->inner);
     ((EffectTransformData *)obj->data)->offset[0] = vec[0];
     ((EffectTransformData *)obj->data)->offset[1] = vec[1];
@@ -736,10 +729,10 @@ s32 func_00114150(EffWorldNode *object) {
     model = (SdfModel *)dds3GetObjectBaseResourceHandle(object);
     if (model != NULL) {
         effObjClearNodeFlags(object->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
-        effObjFetchInnerSecondVecNorm(object);
+        effObjFetchInnerRotationNormalized(object);
         VU0_STORE_VF(vf10, model->rotationQuaternion);
         dds3LoadOrBuildObjectMatrix(object);
-        effObjFetchInnerFirstVec(object);
+        effObjFetchInnerPosition(object);
         if (func_00143910(object->key, &coordinates[0], &coordinates[1], &coordinates[2]) != 0) {
             f32 x = coordinates[0];
             f32 y = coordinates[1];
@@ -894,4 +887,3 @@ s32 evtInitializeEffectObjectData(EffWorldNode *obj) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00113308", effObjOpacityPassEnabled);
-

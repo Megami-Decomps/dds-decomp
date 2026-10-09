@@ -30,10 +30,6 @@ extern s8 D_004388C1;
 extern void sdfQuatSlerp(f32 *, f32 *, f32 *, f32);
 extern void sdfQuaternionNormalize(f32 *);
 
-extern void effObjSetInnerFirstVec(s32, void *);
-
-extern void effObjSetInnerSecondVec(s32, void *);
-
 extern void sdfDrawScaledCenteredSlotImage(f32, f32, s32, s32, s32, s32, s32, s32, s32);
 
 extern void sdfCounterDestroyRuntime();
@@ -179,9 +175,9 @@ extern void func_00306CD0(s32, s32, s32, u32, s32, u32, s32, s32);
 
 
 void sdfInitInnerVectors(void) {
-    effObjSetInnerFirstVec(fldLocalMapCameraObject, &fldLocalMapFirstCameraVector);
-    effObjSetInnerSecondVec(fldLocalMapCameraObject, &fldLocalMapSecondCameraVector);
-    ((EffWorldNode *)fldLocalMapCameraObject)->ops->update(fldLocalMapCameraObject);
+    effObjSetInnerPosition((EffWorldNode *)fldLocalMapCameraObject, (u128 *)&fldLocalMapFirstCameraVector);
+    effObjSetInnerRotation((EffWorldNode *)fldLocalMapCameraObject, (u128 *)&fldLocalMapSecondCameraVector);
+    ((EffWorldNode *)fldLocalMapCameraObject)->ops->update((EffWorldNode *)fldLocalMapCameraObject);
 }
 
 INCLUDE_ASM(const s32, "game/code_0030B838", func_0030B880);

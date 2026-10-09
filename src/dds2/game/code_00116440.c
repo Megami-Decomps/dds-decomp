@@ -8,18 +8,14 @@
 
 extern s32 effObjInnerCreate(EffWorldNode *object);
 
-extern void effObjSetInnerFirstVec();
-
-extern void effObjSetInnerSecondVec();
-
 extern void effObjInnerVecBackup();
 
 EffWorldNode *dds3SpawnInnerVecObj8(s32 initialValue, void *firstVector, void *secondVector) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(8);
 
     obj->key = initialValue;
-    effObjSetInnerFirstVec(obj, firstVector);
-    effObjSetInnerSecondVec(obj, secondVector);
+    effObjSetInnerPosition(obj, firstVector);
+    effObjSetInnerRotation(obj, secondVector);
     effObjInnerVecBackup(obj->inner);
     return obj;
 }

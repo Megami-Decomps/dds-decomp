@@ -634,9 +634,7 @@ void evtViewerApplyGlyphLodChannel(s32 position, EvtRuntime *viewer) {
     }
 }
 
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
-extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
-extern void effObjFetchInnerFirstVec(EffWorldNode *);
+
 extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 /* At an exact kind-7 key frame, attaches the indexed world object. Index -1
@@ -664,11 +662,11 @@ void func_0022F038(s32 position, EvtRuntime *viewer) {
             }
             if (best == NULL) {
                 if (node->objectAttached == 1) {
-                    effObjSetInnerFirstVec(node->info,
+                    effObjSetInnerPosition(node->info,
                         (u128 *)node->savedFirstVector);
-                    effObjSetInnerSecondVec(node->info,
+                    effObjSetInnerRotation(node->info,
                         (u128 *)node->savedSecondVector);
-                    effObjFetchInnerFirstVec(node->info);
+                    effObjFetchInnerPosition(node->info);
                     VU0_STORE_VF(vf10, &node->info->inner->smoothedPosition);
                     node->objectAttached = 0;
                 }
@@ -676,11 +674,11 @@ void func_0022F038(s32 position, EvtRuntime *viewer) {
                 s16 channel = best->p0C.sh[0];
 
                 if (channel == -1) {
-                    effObjSetInnerFirstVec(node->info,
+                    effObjSetInnerPosition(node->info,
                         (u128 *)node->savedFirstVector);
-                    effObjSetInnerSecondVec(node->info,
+                    effObjSetInnerRotation(node->info,
                         (u128 *)node->savedSecondVector);
-                    effObjFetchInnerFirstVec(node->info);
+                    effObjFetchInnerPosition(node->info);
                     VU0_STORE_VF(vf10, &node->info->inner->smoothedPosition);
                     node->objectAttached = 0;
                 } else {

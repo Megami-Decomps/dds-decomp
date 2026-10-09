@@ -51,7 +51,9 @@ typedef struct BattleController {
     u16 variant;
     u8 pad_24E[2];
     s32 step;
-    u8 pad_254[0x1C];
+    u8 pad_254[6];
+    u16 spawnCount; /* 0x25A: enemies spawned so far */
+    u8 pad_25C[0x14];
     s32 adjustmentRecordIndex;
     s32 adjustmentGroupIndex;
     s32 adjustmentEntryIndex;
@@ -80,6 +82,8 @@ typedef struct BattleController {
     EffectSlotSet *resC;
     u8 pad_4B0[0x100];
     s32 (*sceneCallback)();
+    u8 pad_5B4[0xD4];
+    u32 (*enemyLimitOverride)(BtlUnit *, DatBattleSceneRecord *, u32); /* 0x688 */
 } BattleController;
 
 typedef struct EntryPair {
@@ -2351,7 +2355,44 @@ u32 btlIsActorHighStateFlagClear(s32 actor) {
     return (((s32)((BtlUnit *)actor)->status.flags >> 0x1a) ^ 1U) & 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A8CE0);
+/* Return 1 when the scene can still accept another active enemy: below the active cap and the cumulative spawn limit. */
+s32 func_001A8CE0(BtlUnit *requester) {
+    BattleController *controller = (BattleController *)btlGetRuntime();
+    u32 limit;
+    u32 active;
+    u32 spawnLimit;
+    BtlUnit *unit;
+
+    if (datBattleSceneRecords[controller->mode].maxActiveEnemies >= 6) {
+        return 0;
+    }
+    limit = 5;
+    if (datBattleSceneRecords[controller->mode].maxActiveEnemies != 0) {
+        limit = datBattleSceneRecords[controller->mode].maxActiveEnemies;
+    }
+    if (controller->enemyLimitOverride != 0) {
+        limit = controller->enemyLimitOverride(requester, &datBattleSceneRecords[controller->mode], limit);
+    }
+    active = 0;
+    for (unit = controller->actors; unit != 0; unit = unit->next) {
+        s32 flags = unit->status.flags;
+        if (flags & 1) {
+            if (flags & 0x400) {
+                active++;
+            }
+        }
+    }
+    if (active >= limit) {
+        return 0;
+    }
+    if (datBattleSceneRecords[controller->mode].maxEnemySpawns != 0) {
+        spawnLimit = datBattleSceneRecords[controller->mode].maxEnemySpawns;
+        if (controller->spawnCount >= spawnLimit) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 s32 func_001A8DD8(s32 object, s32 *choices) {
     u16 *ids = (u16 *)(object + 0x142);

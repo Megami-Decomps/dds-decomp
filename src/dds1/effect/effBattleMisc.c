@@ -17,7 +17,7 @@ extern void (*D_003528D8[])();
 extern void *dds3GetWorldObject(void);
 struct EffWorldNode;
 extern void dds3LoadCameraVectorVU(struct EffWorldNode *object);
-extern void effObjFetchInnerFirstVec(void *object);
+
 extern f32 D_00352890[];
 extern f32 D_003528A8[];
 extern void func_002DD688(f32 angle);
@@ -251,7 +251,7 @@ void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *para
         dir[0] = dir[1] = dir[2] = 750.0f;
         dds3LoadCameraVectorVU(camera);
         VU0_MOVE_VF(vf11, vf10);
-        effObjFetchInnerFirstVec(camera);
+        effObjFetchInnerPosition(camera);
         VU0_SUB(vf10, vf10, vf11);
         VU0_NORMALIZE_VF10();
         VU0_LOAD_VF(vf11, dir);

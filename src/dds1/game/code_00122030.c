@@ -104,10 +104,6 @@ extern u32 D_003BABE8;
 
 extern u32 fldCameraModelObject;
 
-extern void effObjFetchInnerFirstVec(u32);
-
-extern void effObjFetchInnerSecondVecNorm(u32);
-
 extern void fldSetPendingAreaAndFloor(u32, u32);
 
 extern s32 fldIsAreaResourceReady(void);
@@ -851,9 +847,9 @@ void fldReleasePlayerSceneResources(void) {
     if (fldPlayerObject != 0) {
         if (dds3GetWorldSecondaryObject() != 0) {
             sceneWork = &D_0032F1A0;
-            effObjFetchInnerFirstVec(fldPlayerObject);
+            effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
             VU0_STORE_VF(vf10, &sceneWork->position);
-            effObjFetchInnerSecondVecNorm(fldPlayerObject);
+            effObjFetchInnerRotationNormalized((EffWorldNode *)fldPlayerObject);
             VU0_STORE_VF(vf10, &sceneWork->rotation);
         }
         fldPlayerObject = 0;
@@ -906,7 +902,7 @@ void fldPreparePlayerSceneCameraTarget(void) {
     fldAreaState.unk90 = -1;
     fldAreaState.unk94 = -1;
     fldUpdateCameraTarget();
-    effObjFetchInnerFirstVec(fldPlayerObject);
+    effObjFetchInnerPosition((EffWorldNode *)fldPlayerObject);
     VU0_STORE_VF(vf10, position);
     position[1] += 10.0f;
     func_001372D0(position);
@@ -973,12 +969,6 @@ extern void effMiscAxisAngleToQuaternionVU(f32);
 
 extern void effMiscQuatMultiplyVU(void);
 
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
-
-extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
-
-extern void effObjSetInnerThirdVec(EffWorldNode *, u128 *);
-
 extern void effObjSetInnerFloat(EffWorldNode *, f32);
 
 
@@ -1040,9 +1030,9 @@ void func_00123FB8(u128 *transform) {
         PCP_COPY_VECTOR(inner->smoothedPosition, transform);
         PCP_COPY_VECTOR(inner->rotation, rotation);
     }
-    effObjSetInnerFirstVec(object, transform);
-    effObjSetInnerSecondVec((EffWorldNode *)fldPlayerObject, (u128 *)&quaternion);
-    effObjSetInnerThirdVec((EffWorldNode *)fldPlayerObject, (u128 *)&scale);
+    effObjSetInnerPosition(object, transform);
+    effObjSetInnerRotation((EffWorldNode *)fldPlayerObject, (u128 *)&quaternion);
+    effObjSetInnerScale((EffWorldNode *)fldPlayerObject, (u128 *)&scale);
     fldCameraModelObject = dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldPlayerObject);
     effObjSetInnerFloat((EffWorldNode *)fldPlayerObject, 90.0f);
     if (fldAreaState.unk118 == 0) {

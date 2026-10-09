@@ -187,12 +187,12 @@ INCLUDE_ASM(const s32, "game/code_00102DC8", func_00102E88);
 typedef struct KwlnNamedSlot {
     s32 kind;
     char name[32];
-    s32 unk24;
-    s32 unk28;
-    s32 unk2C;
-    s32 unk30;
+    void *unk24;
+    void *unk28;
+    void *unk2C;
+    void *unk30;
     s32 unk34;
-    s32 unk38;
+    void *unk38;
     s32 previous;
     s32 next;
 } KwlnNamedSlot;
@@ -240,7 +240,56 @@ s32 kwlnFindNamedSlot(const char *name) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00103108);
+extern char D_00411198[];
+extern s32 D_00435C24;
+extern s32 D_00435C28;
+extern s32 D_00435C2C;
+
+/* Unregister a named slot: stop its task, clear it and unlink it from the slot chain. */
+s32 func_00103108(const char *name) {
+    s32 slotIndex;
+
+    if (kwlnTaskGetTaskByName(D_00411198) == NULL) {
+        return 0;
+    }
+    slotIndex = kwlnFindNamedSlot(name);
+    if (slotIndex < 0) {
+        return 0;
+    }
+    if (D_0043D410[slotIndex].kind > 0) {
+        if (D_0043D410[slotIndex].kind < 3) {
+            if (kwlnTaskIsRegistered((KwlnTask *)D_0043D410[slotIndex].unk24) == 1) {
+                kwlnTaskDestroyWithHierarchy((KwlnTask *)D_0043D410[D_00435C2C].unk24, 1);
+            }
+        }
+    }
+    D_0043D410[slotIndex].kind = 0;
+    D_0043D410[slotIndex].name[0] = 0;
+    D_0043D410[slotIndex].unk24 = 0;
+    D_0043D410[slotIndex].unk28 = 0;
+    D_0043D410[slotIndex].unk2C = 0;
+    D_0043D410[slotIndex].unk30 = 0;
+    D_0043D410[slotIndex].unk34 = 0;
+    D_0043D410[slotIndex].unk38 = 0;
+    if (D_0043D410[slotIndex].previous < 0) {
+        D_00435C20 = D_0043D410[slotIndex].next;
+    } else {
+        D_0043D410[D_0043D410[slotIndex].previous].next = D_0043D410[slotIndex].next;
+    }
+    if (D_0043D410[slotIndex].next < 0) {
+        D_00435C24 = D_0043D410[slotIndex].previous;
+    } else {
+        D_0043D410[D_0043D410[slotIndex].next].previous = D_0043D410[slotIndex].previous;
+    }
+    D_0043D410[slotIndex].previous = -1;
+    D_0043D410[slotIndex].next = -1;
+    if (D_00435C2C == slotIndex) {
+        D_00435C2C = D_00435C20;
+    }
+    D_00435C28--;
+    return 1;
+}
+
 
 INCLUDE_ASM(const s32, "game/code_00102DC8", func_001032F0);
 
@@ -477,7 +526,33 @@ void kwlnPadResetMotorLevelsAndOutput(void) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", func_00104058);
+void func_00104058(void) {
+    s32 largeMotor = KWLN_PAD_LARGE_MOTOR;
+    u8 *levels = kwlnPadMotorLevels;
+    u8 *targets = D_00438D98;
+    u8 *largeLevel;
+    s32 motor;
+
+    for (motor = 0; motor < KWLN_PAD_MOTOR_COUNT; motor++) {
+        if (D_00438DA0[motor] != 0) {
+            D_00438DA0[motor]--;
+            if (D_00438DA0[motor] == 0) {
+                levels[motor] = 0;
+                if (motor == KWLN_PAD_SMALL_MOTOR) {
+                    sdfPadSetSmallMotor(0, 0);
+                } else {
+                    sdfPadSetLargeMotor(0, 0);
+                }
+            } else if (motor == largeMotor) {
+                largeLevel = levels + KWLN_PAD_LARGE_MOTOR;
+                if (*largeLevel != targets[KWLN_PAD_LARGE_MOTOR]) {
+                    kwlnPadStepLargeMotorLevel();
+                    sdfPadSetLargeMotor(0, *largeLevel);
+                }
+            }
+        }
+    }
+}
 
 u32 func_00104150(void) {
     return 0;

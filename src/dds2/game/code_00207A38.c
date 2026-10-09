@@ -1,5 +1,6 @@
 #include "kwln_sprite.h"
 #include "common.h"
+#include "dds3obj.h"
 #include "evt_unit.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -258,8 +259,6 @@ extern void btlGetUnitWorldPos(BtlUnit *, f32 *);
 
 extern void effMiscQuaternionToMatrixVU(void);
 
-extern void effObjFetchInnerFirstVec(struct EffWorldNode *);
-
 extern f32 btlUnitGetTopY(BtlUnit *);
 
 typedef union BtlVec4 {
@@ -416,7 +415,7 @@ void btlUnitGetEffectPosVU(BtlUnit *unit) {
         btlUnitGetMuzzlePosVU(unit);
         return;
     }
-    effObjFetchInnerFirstVec(unit->effectObject);
+    effObjFetchInnerPosition(unit->effectObject);
     VU0_STORE_VF(vf10, pos);
     VU0_LOAD_VF(vf10, unit->orientation);
     effMiscQuaternionToMatrixVU();

@@ -123,8 +123,6 @@ extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
-
 extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
 
 extern void btlSetUnitRotation(BtlUnit *, s128 *);
@@ -602,7 +600,7 @@ void btlMoveOtherUnitsAway(ActionStateLink *link) {
                 func_001E3108(other, pos);
                 pos[1] += 1000000.0f;
                 pos[0] = 0;
-                effObjSetInnerFirstVec(other->effectObject, (u128 *)pos);
+                effObjSetInnerPosition(other->effectObject, (u128 *)pos);
                 btlSetUnitPosition(other, pos);
             }
         }
@@ -959,7 +957,7 @@ void func_00206C18(ActionStateLink *link, BtlUnit *other) {
                     if ((btlUnitStatusPair(unit) & 0x102) == 0x102) {
                         PCP_COPY_VECTOR(pos, &D_003BE0A0);
                         pos[1] += 1000000.0f;
-                        effObjSetInnerFirstVec(unit->effectObject, (u128 *)pos);
+                        effObjSetInnerPosition(unit->effectObject, (u128 *)pos);
                     }
                 }
             }
@@ -1083,7 +1081,7 @@ void func_00206EA8(ActionStateLink *link, BtlUnit *other) {
                     if ((btlUnitStatusPair(unit) & 0x102) == 0x102) {
                         PCP_COPY_VECTOR(position, center);
                         position[1] += 1000000.0f;
-                        effObjSetInnerFirstVec(unit->effectObject, (u128 *)position);
+                        effObjSetInnerPosition(unit->effectObject, (u128 *)position);
                     }
                 }
             }

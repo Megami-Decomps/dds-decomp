@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3obj.h"
 #include "sdf_textured_rect.h"
 #include "sdf_chip.h"
 #include "eff_transform.h"
@@ -99,12 +100,6 @@ extern s8 D_003BD271;
 extern void sdfQuatSlerp(f32 *, f32 *, f32 *, f32);
 extern void sdfQuaternionNormalize(f32 *);
 
-extern void effObjSetInnerFirstVec(s32, void *);
-
-extern void effObjSetInnerSecondVec(s32, void *);
-
-
-
 extern void sdfCounterDestroyRuntime(SdfCounterRuntime *);
 
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
@@ -120,8 +115,8 @@ extern void evtPrepareSizedDrawResource(s32 width, s32 height, s32 colors,
                                         const char *text);
 
 void sdfInitInnerVectors(void) {
-    effObjSetInnerFirstVec(fldLocalMapCameraObject, &fldLocalMapFirstCameraVector);
-    effObjSetInnerSecondVec(fldLocalMapCameraObject, &fldLocalMapSecondCameraVector);
+    effObjSetInnerPosition((EffWorldNode *)fldLocalMapCameraObject, (u128 *)&fldLocalMapFirstCameraVector);
+    effObjSetInnerRotation((EffWorldNode *)fldLocalMapCameraObject, (u128 *)&fldLocalMapSecondCameraVector);
     ((EffWorldNode *)fldLocalMapCameraObject)->ops->update(fldLocalMapCameraObject);
 }
 
@@ -748,4 +743,3 @@ INCLUDE_SDATA(const s32, "game/code_002C3868", D_003BD270);
 INCLUDE_SDATA(const s32, "game/code_002C3868", D_003BD271);
 
 INCLUDE_SDATA(const s32, "game/code_002C3868", sdfActiveCounterRuntime);
-

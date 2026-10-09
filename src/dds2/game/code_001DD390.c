@@ -2464,8 +2464,6 @@ s32 btlIsUnitModelStateFive(BtlUnit *unit) {
     return unit->ext->owner->first->state == SDF_MOTION_STATE_TERMINAL;
 }
 
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
-
 void btlSetUnitPosition(BtlUnit *unit, f32 *vec) {
     f32 pos[4];
     if (!(unit->status.stateFlags & 0x80)) {
@@ -2477,7 +2475,7 @@ void btlSetUnitPosition(BtlUnit *unit, f32 *vec) {
         VU0_STORE_VF_UNCLOBBERED(vf10, pos);
         if (unit->status.flags & 2) {
             pos[2] += unit->positionZOffset;
-            effObjSetInnerFirstVec(unit->effectObject, (u128 *)pos);
+            effObjSetInnerPosition(unit->effectObject, (u128 *)pos);
         }
     }
 }
@@ -2598,8 +2596,6 @@ extern u8 D_004179E0[];
 
 extern void effMiscQuatMultiplyVU(void);
 
-extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
-
 void btlSetUnitRotation(BtlUnit *unit, s128 *quat) {
     f32 result[4];
     if (!(unit->status.stateFlags & 0x100)) {
@@ -2613,7 +2609,7 @@ void btlSetUnitRotation(BtlUnit *unit, s128 *quat) {
         effMiscQuatMultiplyVU();
         VU0_STORE_VF_UNCLOBBERED(vf10, result);
         if (unit->status.flags & 2) {
-            effObjSetInnerSecondVec(unit->effectObject, (u128 *)result);
+            effObjSetInnerRotation(unit->effectObject, (u128 *)result);
         }
     }
 }
@@ -2649,17 +2645,13 @@ void btlReleaseUnitModelColorResource(BtlUnit *unit, u32 value, f32 scalar) {
     mdlReleaseInnerResourceHandle(unit->ext->owner, (value & 0xFFFFFF) | 0x80000000, scalar);
 }
 
-extern void effObjFetchInnerFirstVec(EffWorldNode *);
-
-extern void effObjFetchInnerSecondVecNorm(EffWorldNode *);
-
 void btlRefreshUnitFxVectors(BtlUnit *unit) {
     if (!(unit->status.flags & 2)) {
         return;
     }
-    effObjFetchInnerFirstVec(unit->effectObject);
+    effObjFetchInnerPosition(unit->effectObject);
     mdlStorePrimaryVectorVU(unit->ext->owner);
-    effObjFetchInnerSecondVecNorm(unit->effectObject);
+    effObjFetchInnerRotationNormalized(unit->effectObject);
     mdlUpdateContextRotationBasisFromQuaternion(unit->ext->owner);
     sdfModelUpdateCurrentFrameTransforms(unit->ext->owner->inner);
 }
@@ -4043,7 +4035,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
         }
         actor = args->unit;
         if (btlUnitStatusPair(actor) & 0x808000000000) {
-            effObjFetchInnerFirstVec(actor->effectObject);
+            effObjFetchInnerPosition(actor->effectObject);
             VU0_STORE_VF(vf10, pos);
             pos[0] += scale;
         } else {
@@ -4051,18 +4043,18 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
             pos[0] += scale;
             pos[2] += args->unit->positionZOffset;
         }
-        effObjSetInnerFirstVec(args->unit->effectObject, (u128 *)pos);
+        effObjSetInnerPosition(args->unit->effectObject, (u128 *)pos);
         args->scale *= 0.85f;
     } else {
         BtlUnit *actor = args->unit;
         if (btlUnitStatusPair(actor) & 0x808000000000) {
-            effObjFetchInnerFirstVec(actor->effectObject);
+            effObjFetchInnerPosition(actor->effectObject);
             VU0_STORE_VF(vf10, pos);
         } else {
             func_001E3108(actor, pos);
             pos[2] += args->unit->positionZOffset;
         }
-        effObjSetInnerFirstVec(args->unit->effectObject, (u128 *)pos);
+        effObjSetInnerPosition(args->unit->effectObject, (u128 *)pos);
         return 1;
     }
     args->count += 1;
@@ -4149,14 +4141,14 @@ u32 func_001E6BF8(BtlPositionEffectArgs *task) {
         if (task->amount <= 0.01f) {
             func_001E3108((u8 *)task->unit, position);
             position[2] += task->unit->positionZOffset;
-            effObjSetInnerFirstVec(task->unit->effectObject, (u128 *)position);
+            effObjSetInnerPosition(task->unit->effectObject, (u128 *)position);
             return 1;
         }
     }
     func_001E3108((u8 *)task->unit, position);
     position[0] += offset;
     position[2] += task->unit->positionZOffset;
-    effObjSetInnerFirstVec(task->unit->effectObject, (u128 *)position);
+    effObjSetInnerPosition(task->unit->effectObject, (u128 *)position);
     task->tick++;
     return 0;
 }
@@ -5214,8 +5206,8 @@ void func_001E9410(void) {
     VU0_STORE_VF(vf10, position);
     camera = dds3GetWorldCameraObject(dds3GetWorldObject());
     if (camera != NULL) {
-        effObjSetInnerFirstVec(camera, (u128 *)position);
-        effObjSetInnerSecondVec(camera, (u128 *)D_003B6D80);
+        effObjSetInnerPosition(camera, (u128 *)position);
+        effObjSetInnerRotation(camera, (u128 *)D_003B6D80);
         data = camera->data;
         dds3SetCameraFieldOfView(camera, 0.6981317f);
         data->fovUpdatePending |= 1;

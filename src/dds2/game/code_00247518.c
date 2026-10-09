@@ -32,9 +32,7 @@ extern void *dds3GetWorldObject(void);
 extern f32 dds3GetCameraFieldOfView(EffWorldNode *camera);
 extern void sdfSetViewFieldOfView(f32);
 
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
-extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
-extern void effObjFetchInnerFirstVec(EffWorldNode *);
+
 extern void mdlAttachWorldObjectToSourceVector(s32, s32);
 
 extern s32 evtViewerHasUpdateFlag(s32);
@@ -779,11 +777,11 @@ void func_00249C40(s32 position, EvtRuntime *viewer) {
             }
             if (best == NULL) {
                 if (node->objectAttached == 1) {
-                    effObjSetInnerFirstVec(node->info,
+                    effObjSetInnerPosition(node->info,
                                            (u128 *)node->savedFirstVector);
-                    effObjSetInnerSecondVec(node->info,
+                    effObjSetInnerRotation(node->info,
                                             (u128 *)node->savedSecondVector);
-                    effObjFetchInnerFirstVec(node->info);
+                    effObjFetchInnerPosition(node->info);
                     VU0_STORE_VF(vf10, &node->info->inner->smoothedPosition);
                     node->objectAttached = 0;
                 }
@@ -791,11 +789,11 @@ void func_00249C40(s32 position, EvtRuntime *viewer) {
                 s16 channel = best->p0C.sh[0];
 
                 if (channel == -1) {
-                    effObjSetInnerFirstVec(node->info,
+                    effObjSetInnerPosition(node->info,
                                            (u128 *)node->savedFirstVector);
-                    effObjSetInnerSecondVec(node->info,
+                    effObjSetInnerRotation(node->info,
                                             (u128 *)node->savedSecondVector);
-                    effObjFetchInnerFirstVec(node->info);
+                    effObjFetchInnerPosition(node->info);
                     VU0_STORE_VF(vf10, &node->info->inner->smoothedPosition);
                     node->objectAttached = 0;
                 } else {

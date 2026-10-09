@@ -7966,8 +7966,7 @@ typedef char EffModelCallbackConfigSizeCheck[sizeof(EffModelCallbackConfig) == 0
 extern void mdlStorePrimaryVectorVU(MdlCtx *);
 extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 extern void mdlStoreTertiaryVectorVU(MdlCtx *);
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
-extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
+
 
 void func_002F8040(EffActiveResource *resource)
 {
@@ -8021,8 +8020,8 @@ void func_002F8040(EffActiveResource *resource)
         VU0_STORE_MATRIX_UNCLOBBERED(matrix);
         sdfVuMatrixToQuaternion(matrix);
         VU0_STORE_VF_UNCLOBBERED(vf10, &quaternion);
-        effObjSetInnerFirstVec(unit->effectObject, (u128 *)matrix[3]);
-        effObjSetInnerSecondVec(unit->effectObject, &quaternion);
+        effObjSetInnerPosition(unit->effectObject, (u128 *)matrix[3]);
+        effObjSetInnerRotation(unit->effectObject, &quaternion);
         unit->status.stateFlags |= 0x200000;
     }
 }
