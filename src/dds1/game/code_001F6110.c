@@ -2640,6 +2640,9 @@ extern SdfPoolNode kwlnDrawSurfaces[];
 extern void *func_0011D3E8(s32, s32, s32, s32, s32, u32, u32);
 extern SdfTex *effGetBillResourceTexture(s32);
 extern void func_001FC160(BtlResourceDescriptor *);
+s32 btlFormatSelectedResourceName(BtlResourceDescriptor *, char *);
+void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, s32);
+void btlReplaceResourceHandle(BtlResourceDescriptor *, s32);
 
 /* Update list selection and submit the visible browser rows to its surface. */
 s32 func_001FBA38(BtlResourceDescriptor *descriptor) {
