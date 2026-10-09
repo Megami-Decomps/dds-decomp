@@ -635,7 +635,7 @@ s32 func_003233E8(s32 context) {
             f32 currentX;
             f32 currentY;
             s32 currentYInteger;
-            u8 alpha;
+            u8 movementEffectScale;
 
             memset(vector, 0, sizeof(vector));
             /* Save X across advancement, then reuse the scalar for step length. */
@@ -653,12 +653,12 @@ s32 func_003233E8(s32 context) {
             vector[1] = currentY - previousY;
             value = sdfVectorLength(vector);
             if (value * 10.0f >= 255.0f) {
-                alpha = 255;
+                movementEffectScale = 255;
             } else {
-                alpha = (u8)((u8)value * 10.0f);
+                movementEffectScale = (u8)((u8)value * 10.0f);
             }
-            /* The high byte stores the movement alpha. */
-            ((u8 *)&entry->unk38)[1] = alpha;
+            /* Store the clamped movement step scale in the second byte. */
+            entry->movementEffectScale = movementEffectScale;
 
             if (entry->x0 < -50.0f || (f32)parameters->width + 50.0f < entry->x0 ||
                 (f32)currentYInteger < -200.0f ||
