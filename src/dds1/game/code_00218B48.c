@@ -39,10 +39,6 @@
 #define MDL_PAD_REPEAT_FLAG 2
 #define MDL_PART_SLOT_BYTES 0x10
 #define MDL_PART_VALUE_SIZE_THRESHOLD 0x11
-#define MDL_RESOURCE_BILLBOARD 0
-#define MDL_RESOURCE_EFFECT 1
-#define MDL_RESOURCE_TRACK_POLY 2
-#define MDL_RESOURCE_OBJECT 3
 #define MDL_MAP_POSITION_TAG 0x534F504D
 
 
@@ -1021,22 +1017,22 @@ void mdlDispatchViewerAnchorRecord(MdlCtx *owner, MdlResourceItem *anchorRecord)
     s32 resourceHandle;
 
     switch (anchorRecord->type) {
-    case 0:
+    case MDL_RESOURCE_BILLBOARD:
         mdlResolveAnchorPosition(model, anchorRecord, position);
         resourceHandle = anchorRecord->payload.part.handle;
         effCopyVector(resourceHandle, position);
         billInvokeCallback(resourceHandle);
         break;
-    case 1:
+    case MDL_RESOURCE_EFFECT:
         mdlResolveAnchorPosition(model, anchorRecord, position);
         resourceHandle = anchorRecord->payload.part.handle;
         effCopyVectorToNodeInstance((struct EffNode *)resourceHandle, position);
         effUpdateNode(resourceHandle);
         break;
-    case 2:
+    case MDL_RESOURCE_TRACK_POLY:
         effTrackPolyUpdate(anchorRecord->payload.part.track);
         break;
-    case 3:
+    case MDL_RESOURCE_OBJECT:
         mdlCondInitEntry((s32)anchorRecord);
         break;
     }
@@ -3346,4 +3342,3 @@ INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD98);
 INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBDA0);
 
 INCLUDE_SDATA(const s32, "game/code_00218B48", evtPendingEventSelection);
-
