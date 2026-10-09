@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_slot.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -86,14 +87,6 @@ typedef struct SdfDmaTag {
     u32 address;
     u64 vifCommands;
 } SdfDmaTag;
-
-typedef struct SdfPacketSlot {
-    SdfListHead *list;
-    u32 unk4;
-    u8 state;
-    u8 unk9;
-    u8 pad0A[6];
-} SdfPacketSlot;
 
 extern u32 func_002CF930(void);
 extern u32 sdfGetElapsedTimerTicks(u32);
@@ -989,18 +982,18 @@ void sdfQueueFramePackets(SdfListHead *list, SdfPacketChain *chain) {
         index = 0;
     }
     slot = &D_00398158[index];
-    slot->list = NULL;
-    slot->unk4 = 0;
-    slot->state = 0;
+    slot->packetList = NULL;
+    slot->callbackHead = NULL;
+    slot->slotUpdatePhase = 0;
     if (list != NULL && list->last != 0) {
-        slot->list = list;
+        slot->packetList = list;
         if (chain != NULL) {
-            slot->unk4 = chain->head->first;
-            if (slot->unk4 != 0) {
+            slot->callbackHead = (void *)(u32)chain->head->first;
+            if (slot->callbackHead != NULL) {
                 *(u32 *)chain->tail->last = 0;
             }
         }
-        slot->unk9 = sdfCurrentBufferIndex;
+        slot->queuedBufferIndex = sdfCurrentBufferIndex;
     }
     D_003BD338 = index;
     D_003BDA05 = 1;
@@ -1016,7 +1009,7 @@ void sdfSetNonnegativePacketIndex(s32 value) {
 
 void sdfResetPacketSlotState(void) {
     sdfPacketSlotIndex = 0;
-    D_00398158[0].list = NULL;
+    D_00398158[0].packetList = NULL;
     D_003BD338 = 0;
 }
 
@@ -1031,10 +1024,10 @@ void sdfWaitSlotReady(void) {
     for (;;) {
         while (D_003BD32D != 0) {
         }
-        if (table[D_003BD338].list == NULL) {
+        if (table[D_003BD338].packetList == NULL) {
             break;
         }
-        if (table[D_003BD338].state >= 2) {
+        if (table[D_003BD338].slotUpdatePhase >= 2) {
             break;
         }
         sdfSleepThreadCount(0);
