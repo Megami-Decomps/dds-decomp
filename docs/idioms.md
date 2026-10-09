@@ -4446,6 +4446,13 @@ decrements that same byte. The counter-display callback owns the byte at
 fields at `+318`/`+319`, not a second unit view. The number payload's
 `elapsedTicks` uses unsigned threshold tests at 5, 24 and 36 frames.
 
+The separate 0x2C counter payload also owns an unsigned `elapsedTicks`
+at +0x24 in both games. DDS2 `0020FA98` tests it with `sltiu` at
+`0020FBC8`/`0020FBD0` and uses the unsigned high-bit conversion path
+at `0020FBF0..0020FC00`; its constructor clears that same word.
+Correcting the private owner preserves the matched constructors, but
+does not close either counter callback's broad dispatch/allocator residual.
+
 The color-threshold getter takes `BtlUnit *` and reads `partyRecord.hp`
 and `partyRecord.maxHp` at `+126`/`+128`, as the already-C DDS1 getter
 does. Its remaining legacy integer-address callers convert only at that
