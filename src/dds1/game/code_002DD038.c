@@ -18,7 +18,7 @@ s32 sdfDispatchMotionCommand(void *object, s32 command) {
 
 /* Bind the selected pair of model slot indices and weights. */
 void sdfSelectMotionPointerEntry(SdfMotionSlotPairBinding *destination,
-                                 Motion *motion, void *dispatch, s32 entryIndex) {
+                                 Motion *motion, SdfMotionBindingDispatch *dispatch, s32 entryIndex) {
     sdfSetMotionPointerPair((SdfMotionBindingHead *)&destination->keys,
                             motion, dispatch);
     destination->current = &((SdfSlotEntry *)motion->owner->slotPairs->buffer)[entryIndex];
@@ -28,7 +28,7 @@ SdfMotionSlotPairBinding *sdfAllocateBoundMotionPointerEntry(Motion *motion,
                                                            s32 unused, s32 entryIndex) {
     SdfMotionSlotPairBinding *entry = sdfAllocSizeClassBlock(sizeof(SdfMotionSlotPairBinding));
 
-    sdfSelectMotionPointerEntry(entry, motion, D_00398368, entryIndex);
+    sdfSelectMotionPointerEntry(entry, motion, (SdfMotionBindingDispatch *)D_00398368, entryIndex);
     return entry;
 }
 
