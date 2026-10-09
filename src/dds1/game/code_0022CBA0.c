@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_motion.h"
 #include "itf_mes_window.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
@@ -462,10 +463,6 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
 
 extern Motion *mdlFindNodeById(MdlCtx *ctx, s32 id);
 extern u16 mdlGetNodeFrameCount(MdlCtx *ctx, s32 id);
-extern void sdfMotionInitialize(Motion *, s32, s32, f32, f32);
-extern void sdfMotionSampleAtFrame(Motion *, f32);
-extern void sdfMotionSuspend(Motion *);
-extern void sdfMotionResume(Motion *);
 extern EvtRuntimeChild *evtViewerFindLatestMatchingGlyph(EvtRuntimeGroup *, s32, s32);
 
 /* Synchronize four motion channels, retaining their last applied timeline key. */
@@ -963,9 +960,6 @@ typedef struct EvtViewerPlaybackData {
     ObjBase *object;
     void *counter;
 } EvtViewerPlaybackData;
-extern void sdfMotionSampleAtFrame(Motion *motion, f32 frame);
-extern void sdfMotionSuspend(Motion *motion);
-extern void sdfMotionResume(Motion *motion);
 extern void sdfFreezeFloatCounter(void *counter);
 extern void sdfUnfreezeFloatCounter(void *counter);
 extern s32 evtPolygonMovieScaleByProgress(void *movie, s32 mode, s32 start, s32 end);

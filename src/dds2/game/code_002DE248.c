@@ -6,6 +6,7 @@
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
+#include "sdf_motion.h"
 #include "dds3obj.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
@@ -325,7 +326,6 @@ extern void effDrawFourPointGroups(u8 *, void *);
 
 extern void func_002F1888(u8 *, void *);
 
-extern void sdfMotionSampleAtFrame(Motion *, f32);
 
 extern void kwlnPadStartMotor(s32, u8, s32);
 

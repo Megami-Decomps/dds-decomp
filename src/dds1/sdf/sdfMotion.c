@@ -68,8 +68,6 @@ Blk *sdfEnsureSecondaryTextSubParam(void *a0);
 void sdfCopySecondaryTextScalars(void *a0, void *a1);
 void sdfDestroyDevRequest(void *a0);
 void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, void *source, void *dispatch);
-void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 blendLeadFrames,
-                         f32 blendDurationFrames);
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
 void sdfFindMotionKeyInterval(void *bindingArg, void *intervalArg, f32 frame);
 s32 sdfMotionInterpolateKeyColor(SdfMotionKeyInterval *a0);
@@ -107,7 +105,7 @@ void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, void *source, void *
 }
 
 
-Motion *func_002DB230(SdfModel *model, MotionTable *table) {
+Motion *sdfCreateMotion(SdfModel *model, MotionTable *table) {
     Motion *motion;
     DevRequest *request;
     SdfMotionCommand *command;

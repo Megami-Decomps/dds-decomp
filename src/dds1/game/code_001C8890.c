@@ -446,7 +446,6 @@ extern void btlRefreshUnitMotionSelection(u8 *);
 extern void btlRefreshUnitEffectMotionAndEntry(u8 *);
 extern void mdlAddEntryFlagged(void *, s32, s32);
 extern void mdlAddEntryPlain(void *, s32, s32);
-extern void sdfMotionSampleAtFrame(Motion *, f32);
 extern void evtPrepareUnitMotionState(struct EvtUnit *, s32, s32, s32, s32);
 extern void evtStoreUnitMotionShortParameters(struct EvtUnit *, s32, s32);
 extern s32 btlGetSlotRateKind(u8 *, s32);
@@ -7210,7 +7209,6 @@ extern f32 D_00359EC0[];
 extern char D_003A3DD0[];
 extern s32 mdlGetNodeMotionIndex(MdlCtx *, s32);
 
-extern void sdfMotionSampleAtFrame(Motion *, f32);
 
 void btlResetCameraMotion(BtlLinkedCommand *action) {
     BtlState *work = (BtlState *)btlGetRuntime();

@@ -56,9 +56,6 @@ extern void *D_0040B4F8[];
 
 
 
-void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 blendLeadFrames,
-                         f32 blendDurationFrames);
-
 typedef struct {
     SdfMotionBindingHead pair;
     s32 unk8;
@@ -97,7 +94,7 @@ void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, void *source, void *
 
 s32 sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
 
-Motion *func_003340E0(SdfModel *model, MotionTable *table) {
+Motion *sdfCreateMotion(SdfModel *model, MotionTable *table) {
     Motion *motion;
     DevRequest *request;
     SdfMotionCommand *command;

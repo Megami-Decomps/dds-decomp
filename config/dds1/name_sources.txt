@@ -6471,6 +6471,7 @@
 0x002DB048	sdfCopyAssetParameterState	inferred	Copies asset state and any populated text subparameters. [names_reviewed8.tsv]
 0x002DB158	sdfCopyAssetListParameterState	inferred	Copies matching asset states across resource lists. [names_reviewed8.tsv]
 0x002DB1C8	sdfDispatchAssetCommandWord	inferred	Dispatches through the table selected by the high command halfword. [names_reviewed8.tsv]
+0x002DB230	sdfCreateMotion	inferred	Allocates and links the 0x34-byte Motion owner returned to paired model and object callers.
 0x002DB308	sdfDestroyMotion	inferred	unlinks the motion from its owner's list, invokes each request callback, destroys the dev request and frees the node [names_M68_VuRest.tsv]
 0x002DB3D0	sdfMotionInitialize	inferred	Selects a motion-table entry, initializes blend lead/duration and loop state, and dispatches its size-prefixed binding setup records; paired with DDS2 0x00334280.
 0x002DB518	sdfMotionInitializeAtZeroTime	inferred	Passes two zero time values to motion initializer; rest pose is not established. [names_reviewed6.tsv]

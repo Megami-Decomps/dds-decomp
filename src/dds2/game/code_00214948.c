@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "sdf_motion.h"
 #include "btl_task_condition.h"
 #include "sdf.h"
 #include "sdf_draw.h"
@@ -1526,7 +1527,6 @@ extern void evtPrepareUnitMotionState(EvtUnit *, s32, s32, s32, s32);
 
 extern void mdlAddEntryFlagged(MdlCtx *, s32, s32);
 
-extern void sdfMotionSampleAtFrame(Motion *, f32);
 
 /* These two three-ID resource families retain the saved motion for selectors 16/17. */
 void func_00218520(BtlUnit *unit, s32 selector, s32 firstParameter, s32 secondParameter, s32 mode, f32 frameStep) {
