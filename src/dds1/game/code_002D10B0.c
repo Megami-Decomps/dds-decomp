@@ -726,7 +726,7 @@ void func_002D1D80(SdfImageUploadRequest *request) {
 }
 
 
-void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet) {
+void sdfTexEnqueuePacketWithSemaphore(s32 address, SdfTextureDmaTail *packet) {
     SdfTextureQueue *obj = &sdfTextureQueueWork;
     SdfTextureDmaTail *last;
 

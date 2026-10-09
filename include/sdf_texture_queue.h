@@ -30,4 +30,7 @@ typedef char SdfTextureQueue_layout[
      (u32)&((SdfTextureQueue *)0)->dmaPacketHead == 0x0C &&
      (u32)&((SdfTextureQueue *)0)->packetTail == 0x10) ? 1 : -1];
 
+/* address is the DMA packet address; packetTail is its terminal tag. */
+void sdfTexEnqueuePacketWithSemaphore(s32 address, SdfTextureDmaTail *packetTail);
+
 #endif /* SDF_TEXTURE_QUEUE_H */

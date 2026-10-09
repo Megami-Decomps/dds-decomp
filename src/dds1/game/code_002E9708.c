@@ -10,6 +10,7 @@
 #include "mdl_object_stream.h"
 #include "sdf_texture_offset_list.h"
 #include "sdf_texture_file.h"
+#include "sdf_texture_queue.h"
 
 #define SDF_STREAM_NODE_BYTES 0x8C
 #define SDF_STREAM_SCRATCH_BYTES 0x10100
@@ -127,7 +128,6 @@ extern SdfStreamFrameNode *sdfStreamNodeListHead;
 
 extern SdfStreamFrameNode *sdfStreamNodeListTail;
 
-extern void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet);
 
 extern void sdfBuildStreamFrameTransferPackets(SdfStreamFrameNode *node);
 
@@ -1378,7 +1378,7 @@ s32 sdfSubmitBufferedPlayback(SdfStreamFrameNode *node) {
     if (*selectedBuffer == 0) {
         sdfBuildStreamFrameTransferPackets(node);
     }
-    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, (void *)(*selectedBuffer + node->transferPacketBytes - SDF_STREAM_QWORD_BYTES));
+    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, (SdfTextureDmaTail *)(*selectedBuffer + node->transferPacketBytes - SDF_STREAM_QWORD_BYTES));
     sdfAdvanceBufferedPlayback(node);
     return 1;
 }
