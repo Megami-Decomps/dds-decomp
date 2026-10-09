@@ -685,14 +685,14 @@ void *func_00335528(void *source, s32 unused, s32 options) {
     return motion;
 }
 
-void func_00335588(SdfMotionIndexedValueBinding *motion, f32 t1) {
+void sdfMotionApplyPrimaryWordThirdKey(SdfMotionIndexedValueBinding *motion, f32 t1) {
     u8 buffer[16];
     sdfFindMotionKeyInterval(motion, buffer, t1);
     sdfSetPrimaryStateWordThird(motion->target, sdfMotionInterpolateKeyColor(buffer));
 }
 
 /* vu0 routine: blend the captured binding colour toward the keyed colour by weight. */
-void func_003355C8(SdfMotionIndexedValueBinding *binding, f32 t, f32 weight) {
+void sdfMotionBlendPrimaryWordThirdKey(SdfMotionIndexedValueBinding *binding, f32 t, f32 weight) {
     SdfMotionKeyInterval b;
     s32 key;
     s32 color;
