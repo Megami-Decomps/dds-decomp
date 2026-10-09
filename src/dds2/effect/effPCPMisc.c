@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl.h"
+#include "eff_pcp_beam.h"
 #include "sdf_asset_state.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
@@ -18,6 +19,7 @@
 #include "eff_event.h"
 #include "eff_event_sound.h"
 #include "eff_pcp_group_set.h"
+#include "eff_pcp_cross.h"
 #include "mdl.h"
 #include "sdf_chunk.h"
 #include "pcp_vu0.h"
@@ -300,9 +302,6 @@ extern void effPcpBuildConcentricBeamVertices(f32 value, struct EffPCPBeamWork *
 
 extern void func_00336798(f32 angle);
 
-extern void effPcpBuildConcentricRingPoints(void *work, f32 radius);
-
-
 typedef struct {
     f32 x;
     f32 y;
@@ -432,19 +431,6 @@ extern void effTwinEffectRerollSlot(EffPCPTwinWork *work, s32 index);
 
 
 
-typedef struct EffPCPCrossWork {
-    u32 unk00;
-    u32 unk04;
-    u32 unk08;
-    u8 pad0C[4];
-    u32 color;        /* 0x10 */
-    f32 scale;        /* 0x14 */
-    EffParamWork *base; /* 0x18 parameter work for the anchor model */
-    EffParamWork *handle[4][3]; /* 0x1C */
-    u8 pad4C[0x60];
-    u32 state[4][3];  /* 0xAC */
-} EffPCPCrossWork; /* 0xDC */
-
 extern void func_003365B8(f32 angle);
 
 
@@ -525,92 +511,6 @@ extern void effPcpSpanSetHeadVector(void *dst, void *src);
 
 
 
-
-/* Both beam clones own this node. The color array, point array, two
-   transforms and release handles are parts of one SDK allocation. */
-typedef struct EffPCPBeamNode {
-    f32 matrix[4][4];
-    f32 localMatrix[4][4];
-    u128 position;
-    f32 scale;
-    u32 drawKind; /* Indexes the node draw-dispatch table, not a color. */
-    u32 color;
-    u32 vertexCount;
-    f32 *points;
-    u32 *colors;
-    SdfAsset *assetHandle;
-    SdfMemBlock *allocationHandle;
-} EffPCPBeamNode;
-
-typedef struct EffPCPBeamParams {
-    f32 position[4];
-    s32 fadeInFrames;
-    s32 fadeOutFrames;
-    s32 holdFrames;
-    s32 vertexGrowthFrames;
-    u8 pad20[4];
-    s32 radiusGrowthFrames;
-    f32 unk28;
-    f32 endRadius;
-    u32 segments;          /* 0x30 */
-    u32 drawKind;          /* 0x34 */
-    f32 firstWidth;
-    u32 firstColor;            /* 0x3C */
-    f32 middleWidth;
-    u32 middleColor;           /* 0x44 */
-    f32 lastWidth;
-    u32 lastColor;             /* 0x4C */
-} EffPCPBeamParams;
-
-typedef struct EffPCPBeamWork {
-    EffPCPBeamParams params;
-    s32 frame;
-    u32 color;                 /* 0x54 */
-    u32 vertexCount;       /* 0x58 */
-    EffPCPBeamNode *node;   /* 0x5C */
-} EffPCPBeamWork;
-typedef char EffPCPBeamParams_size_0x50[(sizeof(EffPCPBeamParams) == 0x50) ? 1 : -1];
-typedef char EffPCPBeamWork_size_0x60[(sizeof(EffPCPBeamWork) == 0x60) ? 1 : -1];
-
-/* The ring geometry, angle preparation and timeline operate on the same
-   0x80-byte clone. Radius and rotation each have independent decay inputs. */
-/* The 0x5C-byte input prefix ends at lastColor; animation state follows it. */
-typedef struct EffPCPBeamLargeHead {
-    f32 pos[4];
-    f32 degreesA;
-    f32 degreesB;
-    f32 stepDegrees;
-    f32 rotationDecay;
-    u8 mode;
-    u8 pad21[3];
-    s32 duration;
-    s32 fadeIn;
-    s32 fadeOut;
-    f32 initialRadius;
-    f32 initialRadiusStep;
-    f32 radiusDecay;
-    u32 segments;
-    u32 drawKind;
-    f32 radiusStepA;
-    u32 firstColor;
-    f32 radiusStepB;
-    u32 middleColor;
-    f32 radiusStepC;
-    u32 lastColor;
-} EffPCPBeamLargeHead;
-
-typedef struct EffPCPBeamLargeWork {
-    EffPCPBeamLargeHead head;
-    s32 frame;
-    u32 color;
-    f32 rotationA;
-    f32 rotationB;
-    f32 rotationStep;
-    u8 pad70[4];
-    f32 radius;
-    f32 radiusStep;
-    EffPCPBeamNode *node;
-} EffPCPBeamLargeWork;
 
 extern f32 effMiscRandUnitFloat(void *state);
 
@@ -1004,9 +904,9 @@ void effCrossArmSpawn(EffPCPCrossWork *work, u32 i, u32 j) {
 ;
     effParamWorkCallback2(work->handle[i][j], mtx);
     if ((j + 1) & 1) {
-        work->state[i][j] = 0;
+        work->remainingDelay[i][j] = 0;
     } else {
-        work->state[i][j] = 5;
+        work->remainingDelay[i][j] = 5;
     }
 }
 
@@ -1034,8 +934,6 @@ EffPCPCrossWork *effCrossEffectCreateFromTable(void *src) {
     work->unk08 = 0;
     return work;
 }
-
-/* Four groups of three handles, starting 0x10 bytes into a block at +0xC. */
 
 /* Destroys the cross effect: releases the main handle and all 12 group handles. */
 void effCrossEffectRelease(EffPCPCrossWork *work) {
@@ -1087,8 +985,8 @@ void effCrossEffectUpdate(EffPCPCrossWork *work) {
     mdlProcessContextNodesAndTransforms(anchor, D_00380828);
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
-            if (work->state[i][j] != 0) {
-                work->state[i][j]--;
+            if (work->remainingDelay[i][j] != 0) {
+                work->remainingDelay[i][j]--;
                 continue;
             }
             obj = effParamWorkGetData(work->handle[i][j]);
@@ -4595,8 +4493,7 @@ void effRotateNested(EffPCPBeamWork *work, void *src) {
 extern void sdfInvertRigidVuTransform(void);
 
 /* Fill the node's point buffer with four concentric rings (radius, +stepA, +stepB, +stepC) of unit directions, rotated by the VU matrix. */
-void effPcpBuildConcentricRingPoints(void *obj, f32 radius) {
-    EffPCPBeamLargeWork *work = obj;
+void effPcpBuildConcentricRingPoints(EffPCPBeamLargeWork *work, f32 radius) {
     f32 dir[4];
     f32 rowA[4];
     f32 rowB[4];
@@ -4672,6 +4569,8 @@ void effPrepareAngles(EffPCPBeamLargeWork *work) {
     work->frame = 0;
 }
 
+/* The ring geometry, angle preparation and timeline use the same 0x80-byte
+   clone, with separate radius and rotation decay inputs. */
 u8 *effBeamEffectCloneLarge(src)
     EffPCPBeamLargeHead *src;
 {
@@ -4852,7 +4751,7 @@ void effPcpGroupSetCreateFromTable(void *args) {
     effPcpGroupSetCreate(work, resources);
 }
 
-EffPCPGroupSet *effBlockSetCloneWithDuplicates(EffPCPGroupSet *work) {
+EffPCPGroupSet *effPcpGroupSetCloneWithDuplicates(EffPCPGroupSet *work) {
     EffPCPGroupSet *groupSet = effPcpGroupSetCreate(&work->head, 0);
     u32 groupIndex;
     u32 groupByteOffset;
@@ -4888,7 +4787,7 @@ EffPCPGroupSet *effBlockSetCloneWithDuplicates(EffPCPGroupSet *work) {
     return groupSet;
 }
 
-void effBlockSetRelease(EffPCPGroupSet *work) {
+void effPcpGroupSetRelease(EffPCPGroupSet *work) {
     u32 releaseIndex = 0;
     u32 releaseCount = work->head.count;
     EffPCPGroupEntry *fragmentEntryCursor = work->entries;

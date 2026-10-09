@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fpu.h"
 #include "itf_mes_window.h"
 #include "dds3obj.h"
 #include "evt_world.h"
@@ -1277,7 +1278,27 @@ u32 evtOpSetUnitGradientColors(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_0023D658", func_0023FF90);
+extern void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 index);
+const char D_00421A30[] = "WARNING: MODEL_LIGHT_DIR length zero\n";
+
+u32 func_0023FF90(void) {
+    f32 direction[4];
+    EvtUnit *unit;
+
+    memset(direction, 0, sizeof(direction));
+    unit = evtGetWorldUnitNestedValue(scrReadIntParameter(0));
+    direction[0] = bfWaitReadArgFloat(2);
+    direction[1] = bfWaitReadArgFloat(3);
+    direction[2] = bfWaitReadArgFloat(4);
+    if (ffabsf(direction[0]) <= 0.01f && ffabsf(direction[1]) <= 0.01f &&
+        ffabsf(direction[2]) <= 0.01f) {
+        evtPrintDeveloperConsoleMessage(D_00421A30);
+        return 1;
+    }
+    VU0_LOAD_VF(vf10, direction);
+    evtSetUnitNormalizedDirection(unit, scrReadIntParameter(1));
+    return 1;
+}
 
 
 u32 evtOpSetUnitPackedRgbColor(void) {

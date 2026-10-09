@@ -2050,10 +2050,10 @@
 0x001811C0	effPcpLinkedWorkSetFloat	inferred	sets the floating field at 0x90 in the work addressed through the 0x7C child handle
 0x001811D0	effPcpSetLinkedBeamColor	inferred	src/dds1/effect/effPCPMisc.c:func_001811D0; Writes the linked large-beam work color parameter; registered in the same color callback slot as named effect color setters. Registration: asm/dds1/data/data.data.s:65489: table record 0x00354370, color slot. [names_qp9.tsv]
 0x001811D8	effPcpCopyLinkedBeamMatrix	inferred	Copies VU0 matrix to linked nested beam work; twin 0x00188E30. [names_R_FuncNames5.tsv]
-0x00181208	effPcpGroupSetCreate	inferred	copies the 0x164 head, allocates entry records and four groups of duplicated param handles (caller func_00181490 / effBlockSetCloneWithDuplicates) [names_M97_PcpMisc.tsv]
+0x00181208	effPcpGroupSetCreate	inferred	copies the 0x164 head, allocates entry records and four groups of duplicated param handles (caller func_00181490 / effPcpGroupSetCloneWithDuplicates) [names_M97_PcpMisc.tsv]
 0x00181490	effPcpGroupSetCreateFromTable	inferred	fetches param blocks 0..4 from the table and calls func_00181208 [names_M97_PcpMisc.tsv]
-0x00181538	effBlockSetCloneWithDuplicates	inferred	copies block and duplicates enabled groups of handles [names_R_FuncNames.tsv]
-0x00181650	effBlockSetRelease	inferred	frees entry events, per-block handle list and both retained resources [names_reviewed2.tsv]
+0x00181538	effPcpGroupSetCloneWithDuplicates	inferred	Clones the group-set work and duplicates the enabled resource handles.
+0x00181650	effPcpGroupSetRelease	inferred	Releases entry events, the per-block handle list, and both retained resources.
 0x00181708	effPcpGroupSetInitEntry	inferred	randomises delay, jittered step and angle step of entry index [names_M97_PcpMisc.tsv]
 0x00181C60	effPcpCopyGroupSetVector	inferred	src/dds1/effect/effPCPMisc.c:func_00181C60; Copies one vector through VU0 for the group-set effect callback. Registration: asm/dds1/data/data.data.s:65406: table record 0x00354230, vector slot. [names_qp9.tsv]
 0x00181C70	effPcpSetGroupScale	inferred	Sets group scale shared by particle group work. [names_reviewed6.tsv]
