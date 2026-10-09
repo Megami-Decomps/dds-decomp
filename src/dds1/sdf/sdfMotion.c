@@ -460,7 +460,7 @@ SdfMotionDrawBinding *sdfMotionCreateInterpolatedQuaternionBinding(Motion *motio
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", sdfMotionApplyInterpolatedEulerRotation);
 
-INCLUDE_ASM(const s32, "sdf/sdfMotion", func_002DBD80);
+INCLUDE_ASM(const s32, "sdf/sdfMotion", sdfMotionBlendInterpolatedEulerRotation);
 
 SdfMotionDrawBinding *sdfMotionCreateScaleVectorBinding(Motion *motion, s32 a1, s32 nodeIndex) {
     SdfMotionDrawBinding *binding;
