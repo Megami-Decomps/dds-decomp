@@ -5246,7 +5246,7 @@
 0x002EDCF0	effCreateClassResourceWork	inferred	Allocates kind-sized work, copies payload and initializes class-specific resource and callback. [names_reviewed5.tsv]
 0x002EDDE0	effCreateClassResourceFromFile	inferred	Resolves the primary file buffer and creates the requested class resource work. [names_reviewed5.tsv]
 0x002EDE10	effDestroyClassResourceWork	inferred	Calls the indexed class cleanup callback and frees the work. [names_reviewed5.tsv]
-0x002EDE58	effPayloadPointerGet	inferred	body reads payload [names_R_FuncNames7.tsv]
+0x002EDE58	effCloneClassResourceWork	inferred	Native clone callback returns a new full class-resource work allocation by tail-calling effCreateClassResourceWork with the source kind low 16 bits (+0x2C) and copied payload (+0x34).
 0x002EDEC0	effAdvanceClassResourceFrame	inferred	Calls the indexed class callback and advances frame only while effects are enabled. [names_reviewed5.tsv]
 0x002EDF20	effDrawClassResourceWork	inferred	Invokes the indexed class draw callback on work. [names_reviewed5.tsv]
 0x002EDF58	effUpdateAndDrawClassResource	inferred	Advances class callback unless paused and draws the class resource. [names_reviewed5.tsv]
