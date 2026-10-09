@@ -159,7 +159,6 @@ typedef struct SdfDrawPacket SdfDrawPacket;
 
 extern s32 sdfAllocPacketAligned(s32);
 
-extern void sdfInitPacketList(SdfListHead *);
 
 
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
@@ -491,7 +490,6 @@ void func_00108E20(void) {
     }
 }
 
-extern s32 sdfCreateResetPacketList(void);
 extern void sdfQueueGouraudTexturedQuad(
     s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
     s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
@@ -507,7 +505,7 @@ void func_00108EC0(s32 x, s32 y, s32 width, s32 height,
     s32 left, top, right, bottom;
     s32 uLeft, vTop, uRight, vBottom;
 
-    list = (SdfListHead *)sdfCreateResetPacketList();
+    list = sdfCreateResetPacketList();
     sdfConsCreateDrawPacket(list, texture, 0);
     left = (x << 4) + 0x7000;
     top = (y << 3);
@@ -728,7 +726,6 @@ void evtSubmitViewParamPacket(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u,
     }
 }
 
-extern s32 sdfCreateResetPacketList(void);
 
 
 void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
@@ -736,7 +733,7 @@ void evtDrawPositionedSurfacePacket(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     void *list;
     void *packet;
     SdfPoolNode *surface;
-    list = (void *)sdfCreateResetPacketList();
+    list = sdfCreateResetPacketList();
     packet = (void *)sdfAllocPacketAligned(0x40);
     sdfBuildPrimaryAlphaBlendDmaPacket(packet);
     sdfAppendPacket(list, (u32)packet);

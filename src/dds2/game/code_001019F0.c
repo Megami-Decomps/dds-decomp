@@ -222,7 +222,6 @@ extern void func_00108318(void);
 extern void func_00126B70(void);
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
-extern s32 sdfCreateResetPacketList(void);
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfConsBuildFrustumPacket(struct ConsFrustumPacket *, ConsFrustumParams *);
 extern void sdfAppendPacketChainNode(SdfPacketChain *, SdfLinkedPacketList *);
@@ -263,7 +262,7 @@ s32 func_00101D30(void) {
             sceneNode = &kwlnDrawSurfaces[1];
             sceneNode->append((SdfListHead *)sceneNode,
                 (SdfListHead *)(D_00382430 - 0x190 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
-            sceneList = (SdfListHead *)sdfCreateResetPacketList();
+            sceneList = sdfCreateResetPacketList();
             sceneFrustum = (u64 *)sdfAllocPacketAligned(0x50);
             sdfConsBuildFrustumPacket((struct ConsFrustumPacket *)sceneFrustum, &D_0037F960);
             sdfAppendPacket(sceneList, (u32)sceneFrustum);
@@ -282,7 +281,7 @@ s32 func_00101D30(void) {
         sdfConsBuildMatrixPacket((struct ConsMatrixPacket *)(D_00382600 + bufferIndex * KWLN_FRAME_BUFFER_BYTES), &D_0037F980, D_00384790);
         overlayNode = &kwlnDrawSurfaces[85];
         overlayNode->append((SdfListHead *)overlayNode, (SdfListHead *)(D_00382600 - 0x20 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
-        overlayList = (SdfListHead *)sdfCreateResetPacketList();
+        overlayList = sdfCreateResetPacketList();
         overlayFrustum = (u64 *)sdfAllocPacketAligned(0x50);
         sdfConsBuildFrustumPacket((struct ConsFrustumPacket *)overlayFrustum, &D_0037FB30);
         sdfAppendPacket(overlayList, (u32)overlayFrustum);
@@ -315,7 +314,7 @@ s32 func_00101D30(void) {
         sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
         viewNode = &kwlnDrawSurfaces[7];
         viewNode->append((SdfListHead *)viewNode, (SdfListHead *)(D_003820F0 - 0x250 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
-        viewList = (SdfListHead *)sdfCreateResetPacketList();
+        viewList = sdfCreateResetPacketList();
         viewFrustum = (u64 *)sdfAllocPacketAligned(0x50);
         sdfConsBuildFrustumPacket((struct ConsFrustumPacket *)viewFrustum, &kwlnDrawVector);
         sdfAppendPacket(viewList, (u32)viewFrustum);
@@ -396,7 +395,6 @@ s32 func_00101D30(void) {
     return 0;
 }
 
-extern void sdfInitPacketList(void *);
 extern void sdfSubmitDrawPacketGroups(u8 *, u8 *);
 extern s32 *sdfConsAllocateColumnPacket(s32);
 extern KwlnSpriteVertex *sdfConsMeasurePacketWithHeader(s32 *);
@@ -453,7 +451,7 @@ s32 kwlnRenderFrame(void) {
     }
     if (kwlnDrawOverlayEnabled != 0 && func_001200E0() == 0) {
         packetList = (u64 *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES);
-        sdfInitPacketList(packetList);
+        sdfInitPacketList((SdfListHead *)packetList);
         sdfAppendDmaPrimary((SdfListHead *)packetList, (u32)(kwlnFrameDrawPacketRecords + bufferIndex * KWLN_FRAME_BUFFER_BYTES), (SdfDmaNode *)sdfAllocPacketAligned(KWLN_FRAME_PACKET_LIST_BYTES));
         texturePacket = (u64 *)sdfAllocPacketAligned(KWLN_FRAME_GS_PACKET_BYTES);
         texturePacket[0] = 3;

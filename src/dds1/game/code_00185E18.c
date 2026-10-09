@@ -122,7 +122,6 @@ extern void sdfAppendDmaTagToList(struct SdfListHead *list, u32 packet);
 
 extern s32 func_0011E278();
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
-extern void sdfInitPacketList(void *);
 
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
@@ -423,7 +422,6 @@ void effDrawBlurListWithFramePacket(void *list) {
 }
 
 extern s32 func_0011E278();
-extern void sdfInitPacketList();
 extern void effAppendBlurRenderState();
 
 /* Queue blend setup and both rectangle packets, then finish with the filter draw. */

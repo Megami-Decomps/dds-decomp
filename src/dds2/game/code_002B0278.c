@@ -2794,8 +2794,6 @@ void mnuDrawAndAdvanceCampSparks(MenuCampEffect *fx, s32 arg) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B7C10);
-
 typedef struct MenuBadgePlace {
     s32 slot;
     s32 x;
@@ -2806,6 +2804,52 @@ typedef struct MenuBadgeLayout {
     MenuBadgePlace place[2];
 } MenuBadgeLayout;
 
+typedef struct MenuCampBackdropLayout {
+    MenuBadgeLayout layer[2];
+} MenuCampBackdropLayout;
+
+extern MenuBadgePlace D_0042AE90;
+extern MenuCampBackdropLayout D_0042AEA0;
+extern void uiDrawActiveSurfaceWithTestMode(u32);
+extern void uiConfigureSurfaceAlphaState(s32);
+extern void uiDrawSurfaceAtNearDepth(u32);
+
+void func_002B7C10(MenuCampEffect *set, s32 surface) {
+    MenuBadgePlace strip = D_0042AE90;
+    u32 firstLayerBit = set->resources.packet.type & 1;
+    MenuCampBackdropLayout layout = D_0042AEA0;
+    s32 layer = firstLayerBit == 0;
+    u32 i;
+    u32 handle;
+    s32 x;
+    s32 y;
+
+    for (; layer >= 0; layer--) {
+        uiDrawActiveSurfaceWithTestMode(surface);
+        handle = set->resources.packet.items[strip.slot];
+        for (i = 0; i < 2; i++) {
+            u32 *rowY = &set->resources.rows.values[i][1];
+
+            y = (s32)*rowY;
+            x = (s32)rowY[-1];
+            for (; y < 0xE00; y += set->resources.rows.values[i][2]) {
+                itfDrawGridWithResolvedSlot(x, y + layer * 0x38, 0, 0x61,
+                    set->resources.packet.sheets[0], handle, surface);
+            }
+        }
+        uiConfigureSurfaceAlphaState(surface);
+        if (layer == 0) {
+            mnuDrawAndAdvanceCampSparks(set, surface);
+        }
+        for (i = 0; i < 2; i++) {
+            itfDrawGridWithResolvedSlot(layout.layer[layer].place[i].x,
+                layout.layer[layer].place[i].y, 0, 0,
+                set->resources.packet.sheets[0],
+                set->resources.packet.items[layout.layer[layer].place[i].slot], surface);
+        }
+    }
+    uiDrawSurfaceAtNearDepth(surface);
+}
 
 extern MenuBadgeLayout D_0042AED0;
 

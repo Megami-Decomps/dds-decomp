@@ -138,7 +138,6 @@ void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
 INCLUDE_ASM(const s32, "game/code_003325F8", func_003325F8);
 
-extern void sdfInitPacketList(void *);
 extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);
 extern void sdfBuildPrimaryTestBlendPacket(void *);
 extern void sdfBuildPrimaryAlphaAdditiveDmaPacket(void *);

@@ -1427,12 +1427,11 @@ void btlInitFadeColors(void) {
 
 extern SdfPoolNode D_00325708;
 
-extern s32 sdfCreateResetPacketList(void);
 
 extern void func_00212998(u32, u32, u32, u32, u32, s32);
 
 s32 btlUpdateFadeIn(void) {
-    u32 packets = sdfCreateResetPacketList();
+    u32 packets = (u32)sdfCreateResetPacketList();
     if ((btlRuntimeState.color18 & 0xFF000000) != 0x80000000) {
         btlRuntimeState.color18 += 0x10000000;
     }
@@ -1935,7 +1934,6 @@ s32 mnuDrawMenuFrameSizedToRows(u8 *x, u8 *y, s32 mode, BtlDebugMenuCursor *sele
     return btlDrawSelectableListRows(x, y, mode, selectionState, rowTexts);
 }
 
-extern void sdfInitPacketList(void *);
 
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 

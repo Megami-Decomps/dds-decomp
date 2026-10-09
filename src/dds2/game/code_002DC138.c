@@ -12,6 +12,7 @@
 #include "sdf_texture_file.h"
 #include "sdf_chunk.h"
 #include "eff_expanded_list.h"
+#include "eff_update_flags.h"
 
 typedef struct EffModelOwner {
     f32 scale;
@@ -86,7 +87,6 @@ extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 extern void effFloorModelListRemove(EffectObjectNode *);
 
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfInitPacketList(SdfListHead *list);
 extern u32 mdlGetBroadcastValue(MdlCtx *model);
 extern SdfPoolNode *D_00380788[13][4];
 extern u64 D_003E9640[];
@@ -393,10 +393,10 @@ void func_002DC808(EffModelOwner *owner) {
 void effMarkFloorModelForUpdate(EffModelOwner *p) {
     p->flags |= 1;
     if (!(p->flags & 4)) {
-        if (!(effModelUpdateControlFlags & 1)) {
+        if (!(effModelUpdateControlFlags & EFF_MODEL_UPDATE_DEFER_FLOOR_REFRESH)) {
             func_002DC808(p);
         }
-    } else if (effModelUpdateControlFlags & 1) {
+    } else if (effModelUpdateControlFlags & EFF_MODEL_UPDATE_DEFER_FLOOR_REFRESH) {
         p->flags |= 0x30;
     }
 }

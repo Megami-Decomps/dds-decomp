@@ -291,7 +291,6 @@ extern u8 D_003B4D28[];
 
 extern s32 sdfAllocPacketAligned(s32 size);
 
-extern void sdfInitPacketList(SdfListHead *list);
 
 extern void itfSendTablePacket(SdfListHead *list, s32 context, s32 mode);
 
@@ -1274,7 +1273,6 @@ typedef char ItfFovPanelWorkSizeCheck[sizeof(ItfFovPanelWork) == 0x10 ? 1 : -1];
 
 extern ItfFovPanelWork D_00452E70;
 extern s8 D_0037F543[];
-extern s32 sdfCreateResetPacketList(void);
 extern void *func_0011F250(s32, s32, s32, s32, s32, u32, u32);
 extern s32 itfStepFloatWithPad(f32 *, f32, f32, f32, f32);
 
@@ -1283,7 +1281,7 @@ s32 func_001A8938(void) {
     s32 list;
     f32 radiansToDegrees = 57.2957795f;
 
-    list = sdfCreateResetPacketList();
+    list = (s32)sdfCreateResetPacketList();
     sdfAppendPacket((SdfListHead *)list,
                     (u32)func_0011F250(0x8500, 0x79C0, 0xFEFFFF,
                                        0xA80, 0x120, 0x60000000, 0x40806020));
@@ -1395,7 +1393,6 @@ extern char D_00436678[];
 extern char D_00436680[];
 extern char D_00436688[];
 extern SdfPoolNode kwlnPositionedTextSurface;
-extern s32 sdfCreateResetPacketList(void);
 
 /* Draw the blur settings and handle selection, editing and cancellation. */
 s32 func_001A8BD0(void) {
@@ -1406,7 +1403,7 @@ s32 func_001A8BD0(void) {
     s16 previous;
     s32 highlight;
 
-    list = sdfCreateResetPacketList();
+    list = (s32)sdfCreateResetPacketList();
     sdfAppendPacket((SdfListHead *)list,
         (u32)func_0011F250(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
     sdfPktInit(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
@@ -1562,7 +1559,6 @@ u64 *btlCreateGsAlphaRegisterPacket(u64 owner, s32 alternative) {
 extern s32 D_00438F3C;
 extern UiQuadColor D_003B4D80;
 extern f32 sdfSinPoly(f32);
-extern s32 sdfCreateResetPacketList(void);
 extern u64 *func_001A9580(s32, s32, s32, s32, s32, u32, u32);
 
 void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
@@ -1582,7 +1578,7 @@ void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
         color |= *component << (i * 8);
     }
     color |= alpha << 24;
-    list = sdfCreateResetPacketList();
+    list = (s32)sdfCreateResetPacketList();
     sdfAppendPacket((SdfListHead *)list, (u32)btlCreateGsTestRegisterPacket(0x33001, 0));
     sdfAppendPacket((SdfListHead *)list, (u32)btlCreateGsAlphaRegisterPacket(6, 0));
     sdfAppendPacket((SdfListHead *)list, (u32)func_001A9580(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));

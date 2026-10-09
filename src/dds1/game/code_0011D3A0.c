@@ -171,10 +171,9 @@ void fldSetPacketArgumentPair(u32 *packet, u32 first, u32 second) {
     packet[5] = second;
 }
 
-s32 sdfCreateResetPacketList(void) {
-    s32 packet;
+struct SdfListHead *sdfCreateResetPacketList(void) {
+    struct SdfListHead *packet = (struct SdfListHead *)sdfAllocPacketAligned(0x20);
 
-    packet = sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packet);
     return packet;
 }
