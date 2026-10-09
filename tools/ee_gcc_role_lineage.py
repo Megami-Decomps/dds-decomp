@@ -82,8 +82,8 @@ def role_spans(source, spec):
     body = source[begin:end]
     names, result = set(), []
     for role in spec["roles"]:
-        if set(role) != {"name", "begin", "end"}:
-            raise ValueError("each role requires exactly name, begin, end")
+        if not {"name", "begin", "end"} <= set(role) or set(role) - {"name", "begin", "end", "call_bridge"}:
+            raise ValueError("role requires name/begin/end and optional call_bridge")
         name = role["name"]
         if not isinstance(name, str) or not name or name in names:
             raise ValueError("empty or duplicate role name")
@@ -93,13 +93,18 @@ def role_spans(source, spec):
             anchor = role[key]
             if not isinstance(anchor, str) or not anchor or body.count(anchor) != 1:
                 raise ValueError(f"ambiguous or missing {key} anchor for {name}")
-            offsets.append(begin + body.index(anchor))
+            # A leading newline can anchor indentation exactly without making
+            # the previous source line part of the selected role.
+            skip = len(anchor) - len(anchor.lstrip("\n"))
+            offsets.append(begin + body.index(anchor) + skip)
         if offsets[1] <= offsets[0]:
             raise ValueError("role end must follow begin: " + name)
         result.append({"name": name,
                        "first_line": source.count("\n", 0, offsets[0]) + 1,
                        "end_line_exclusive": source.count("\n", 0, offsets[1]) + 1,
-                       "begin": role["begin"], "end": role["end"]})
+                       "begin": role["begin"], "end": role["end"],
+                       "start_offset": offsets[0], "end_offset_exclusive": offsets[1],
+                       **({"call_bridge": role["call_bridge"]} if "call_bridge" in role else {})})
     if not result or len(result) > 16:
         raise ValueError("expected 1 to 16 roles")
     return result
@@ -110,6 +115,50 @@ def same_source(a, b):
     width = min(3, len(left), len(right))
     return width > 0 and left[-width:] == right[-width:]
 
+
+
+def direct_call_target(pattern):
+    match = re.search(r'\(call\s+\(mem(?:/[A-Za-z]+)*(?::[^\s()]+)?\s+'
+                      r'\(symbol_ref(?:/[A-Za-z]+)*(?::[^\s()]+)?\s+\(?'
+                      r'("(?:\\.|[^"\\])*")', pattern)
+    return json.loads(match.group(1)) if match else None
+
+
+def bridge_seeds(source, function, span, original):
+    bridge = span["call_bridge"]
+    if not isinstance(bridge, dict) or set(bridge) != {"begin", "end"}:
+        raise ValueError("call_bridge requires begin/end")
+    start, end = function_span(source, function)
+    masked = mask_c(source)
+    endpoints = []
+    evidence = {}
+    for boundary in ("begin", "end"):
+        selector = bridge[boundary]
+        if not isinstance(selector, dict) or set(selector) != {"symbol", "occurrence"}:
+            raise ValueError("call bridge endpoint requires symbol/occurrence")
+        symbol, occurrence = selector["symbol"], selector["occurrence"]
+        if not isinstance(symbol, str) or not re.fullmatch(r"[A-Za-z_]\w*", symbol):
+            raise ValueError("invalid source call symbol")
+        if type(occurrence) is not int or not 1 <= occurrence <= 256:
+            raise ValueError("call occurrence must be 1..256")
+        source_calls = list(re.finditer(r"\b" + re.escape(symbol) + r"\s*\(", masked[start:end]))
+        rtl_calls = [row for row in original.values()
+                     if row["kind"] == "call_insn" and direct_call_target(row["pattern"]) == symbol]
+        if len(source_calls) != len(rtl_calls) or occurrence > len(source_calls):
+            raise ValueError("source/RTL call census mismatch for " + symbol)
+        location = start + source_calls[occurrence - 1].start()
+        if not span["start_offset"] <= location < span["end_offset_exclusive"]:
+            raise ValueError("selected source call lies outside its exact C span")
+        row = rtl_calls[occurrence - 1]
+        endpoints.append(row)
+        evidence[boundary] = {"symbol": symbol, "occurrence": occurrence,
+                              "source_call_count": len(source_calls), "rtl_call_count": len(rtl_calls),
+                              "source_line": source.count("\n", 0, location) + 1, "uid": row["uid"]}
+    if endpoints[0]["order"] >= endpoints[1]["order"]:
+        raise ValueError("source call bridge does not delimit a forward RTL interval")
+    seeds = {uid for uid, row in original.items() if row["kind"] in EXECUTABLE
+             and endpoints[0]["order"] <= row["order"] <= endpoints[1]["order"]}
+    return seeds, evidence
 
 def parse_dump(text, function, stage=None):
     body = extract_dump_function(text, function)
@@ -276,17 +325,23 @@ def analyze(probe, spec, detail_limit=12, watch_limit=32):
     original = stages["00.rtl"]
     reports, all_seeds, watch_roles = [], set(), {}
     for span in spans:
-        seeds = {uid for uid, row in original.items()
-                 if row["kind"] in EXECUTABLE and row["source"]
-                 and same_source(row["source"]["file"], source_name)
-                 and span["first_line"] <= row["source"]["line"] < span["end_line_exclusive"]}
+        bridge_evidence = None
+        if "call_bridge" in span:
+            seeds, bridge_evidence = bridge_seeds(source, function, span, original)
+            origin = "reviewed_source_call_ordinal_bridge"
+        else:
+            seeds = {uid for uid, row in original.items()
+                     if row["kind"] in EXECUTABLE and row["source"]
+                     and same_source(row["source"]["file"], source_name)
+                     and span["first_line"] <= row["source"]["line"] < span["end_line_exclusive"]}
+            origin = "00.rtl_preceding_source_line_note"
         if not seeds or len(seeds) > 768:
             raise ValueError(f"role {span['name']} has {len(seeds)} source-linked UIDs; expected 1..768")
         all_seeds.update(seeds)
         transitions = role_transitions(stages, seeds, detail_limit)
         first = next((r for r in transitions
                       if r["change_count"] or r["surviving_uid_order_changed"]), None)
-        reports.append({"role": span, "origin": "00.rtl preceding source-line note",
+        reports.append({"role": span, "origin": origin, "bridge_evidence": bridge_evidence,
                         "seed_uids": sorted(seeds),
                         "first_observed_candidate_transformation": first["after_stage"] if first else None,
                         "transitions": transitions})
@@ -301,6 +356,7 @@ def analyze(probe, spec, detail_limit=12, watch_limit=32):
              "source_sha256": manifest["compiled_source_sha256"],
              "probe_manifest_sha256": digest((probe / "manifest.json").read_bytes()),
              "stage": "first_cse", "input_stage": "02.jump", "output_stage": "03.cse",
+             "role_origins": {row["role"]["name"]: row["origin"] for row in reports},
              "eligible_count": len(eligible), "omitted_count": len(eligible) - len(selected),
              "uids": [{"uid": uid, "roles": watch_roles[uid],
                        "source": original[uid]["source"],
@@ -317,6 +373,8 @@ def analyze(probe, spec, detail_limit=12, watch_limit=32):
                 "Multiple complete linked RTL inventories use the final inventory.",
                 "Scheduler commentary-only files do not establish a full RTL boundary.",
                 "Source-note anchors identify origin; optimized source notes are not lifetime proof.",
+                "Explicit call bridges bind reviewed C spans to matching direct-call ordinals in 00.rtl, after checking full symbol call counts on both sides.",
+                "A call bridge selects only the inclusive endpoint-call interval, not every instruction in the surrounding C span.",
                 "Same UID is tracked. A deleted UID has no inferred replacement.",
                 "New UIDs are not assigned a source role without separate data-flow evidence.",
                 "08.gcse and 20.greg are pass boundaries, not proof of a PRE or reload subroutine.",
