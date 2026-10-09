@@ -77,9 +77,29 @@ typedef char SoundLink_size_must_be_0x10[(sizeof(SoundLink) == 0x10) ? 1 : -1];
 typedef char SoundLink_commandEffectId_offset_must_be_0x0C[
     ((u32)&((SoundLink *)0)->commandEffectId == 0x0C) ? 1 : -1];
 
+/* Per-unit model-resource link, allocated at exactly 0x14 bytes. */
+typedef struct SoundResourceLink {
+    struct BtlUnit *owner; /* 0x00 */
+    BattleEffect *effectHandle; /* 0x04 */
+    SoundResourceNode *effect; /* 0x08 */
+    u32 opaque0C; /* 0x0C: retained for the title-specific link updater. */
+    u8 refreshRequested; /* 0x10 */
+    u8 pad11[3];
+} SoundResourceLink;
+
+typedef char SoundResourceLink_size_must_be_0x14[
+    (sizeof(SoundResourceLink) == 0x14) ? 1 : -1];
+typedef char SoundResourceLink_opaque0C_offset_must_be_0x0C[
+    ((u32)&((SoundResourceLink *)0)->opaque0C == 0x0C) ? 1 : -1];
+typedef char SoundResourceLink_refreshRequested_offset_must_be_0x10[
+    ((u32)&((SoundResourceLink *)0)->refreshRequested == 0x10) ? 1 : -1];
+
 SoundLink *sndAllocLink(struct BtlUnit *owner);
 void sndFreeLink(SoundLink *link);
 void btlUpdateUnitCommandEffect(SoundLink *link);
+SoundResourceLink *sndAllocResourceLink(struct BtlUnit *owner);
+void sndFreeResourceLink(SoundResourceLink *link);
+void btlMarkTaskReady(SoundResourceLink *link);
 
 /* Effect callbacks dereference these words as units, while the selector
  * provider stores their encoded keys (DDS1 001F1588 / DDS2 0020220C). */
@@ -162,7 +182,6 @@ typedef char Atrac3LoadTaskArgs_entryIndex_offset_must_be_8[
     ((u32)&((Atrac3LoadTaskArgs *)0)->entryIndex == 8) ? 1 : -1];
 
 struct ActiveSoundNode;
-struct SoundResourceLink;
 
 SoundMixer *sndMixerClone(SoundMixer *source);
 s32 sndReadSelectedMixerBankValue(SoundMixer *mixer, u16 kind);
@@ -175,7 +194,6 @@ s32 sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect);
 void btlExtendTaskFrameLimit(SoundResourceNode *effect, s32 frames);
 u32 sndGetResourceStatus(SoundResourceNode *effect);
 s32 sndHasResourceFlagsOneOrEight(struct ActiveSoundNode *node);
-struct SoundResourceLink *sndAllocResourceLink(struct BtlUnit *owner);
 struct BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *source, struct BtlUnit *owner, u64 resource);
 BattleEffect *func_00160958(SoundMixer *mixer, u16 kind, void *owner, s32 value);
 BattleEffect *func_00168548(SoundMixer *mixer, u16 kind, void *owner, s32 value);
