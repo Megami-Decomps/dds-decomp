@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "sdf_list_node.h"
+#include "sdf_gs_packet.h"
 
 /* Native battle-parameter blobs: DDS1 0xA6C bytes, DDS2 0xC14 bytes.
  * Level tables begin at level one; seven-entry scales use index three for zero. */
@@ -477,17 +478,34 @@ typedef struct SdfResEntry {
     u32 baseAddress; /* Shifted right six bits when patching a GS texture base. */
 } SdfResEntry;
 
-/* Two-slot packet builder and source/mode state (0x60); DDS1/2 game/code_002D33C8/0032C278.c. */
+/* Frame/depth builder state: one DMA/GIF header and two A+D register writes. */
 typedef struct SdfPacketBuilder {
     u8 pad00[4];
     void (*prepare)(struct SdfPacketBuilder *, s32 bufferIndex);
     u8 pad08[8];
-    SdfPacket packets[2];
+    SdfGsPacketHeader packetHeader;
+    SdfGsRegisterWrite frame;
+    SdfGsRegisterWrite zbuf;
     SdfGraphObj *source;
     u32 frameMask;
     s32 region;
     s32 mode;
 } SdfPacketBuilder;
+
+typedef char SdfPacketBuilder_size_must_be_0x60[
+    (sizeof(SdfPacketBuilder) == 0x60) ? 1 : -1];
+typedef char SdfPacketBuilder_header_at_0x10[
+    ((u32)&((SdfPacketBuilder *)0)->packetHeader == 0x10) ? 1 : -1];
+typedef char SdfPacketBuilder_frame_at_0x30[
+    ((u32)&((SdfPacketBuilder *)0)->frame == 0x30) ? 1 : -1];
+typedef char SdfPacketBuilder_zbuf_at_0x40[
+    ((u32)&((SdfPacketBuilder *)0)->zbuf == 0x40) ? 1 : -1];
+typedef char SdfPacketBuilder_source_at_0x50[
+    ((u32)&((SdfPacketBuilder *)0)->source == 0x50) ? 1 : -1];
+
+void sdfPrepareFrameDepthPacket(SdfPacketBuilder *packet, s32 bufferIndex);
+void sdfInitPacketBuilder(SdfPacketBuilder *packet, SdfGraphObj *source,
+    u32 frameMask, s32 region, s32 mode);
 
 /* Linked named resource (0x24); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct SdfResource {

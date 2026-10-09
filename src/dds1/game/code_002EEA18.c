@@ -424,14 +424,14 @@ void *func_002EF2E0(const f32 vertices[][4], const u32 *colors, s32 vertexCount,
     return sdfDrawClippedLinePairs(vertices, colors, vertexCount, primitiveFlags);
 }
 
-/* Initialize a zeroed TMX0 header; retain the caller-supplied flag bytes. */
-void sdfInitializeTmxImageHeader(SdfTextureFileHeader *header, s32 width, s32 height, s32 depth, s32 flagA, s32 flagB) {
+/* Initialize a zeroed TMX0 header with the caller's palette metadata. */
+void sdfInitializeTmxImageHeader(SdfTextureFileHeader *header, s32 width, s32 height, s32 depth, s32 paletteCount, s32 clutFormat) {
     memset(header, 0, sizeof(SdfTextureFileHeader));
-    header->unk11 = flagB;
+    header->clutFormat = clutFormat;
     header->width = width;
     header->height = height;
     header->pixelFormat = depth;
-    header->unk10 = flagA;
+    header->paletteCount = paletteCount;
     header->magic = SDF_TMX_MAGIC;
     header->unk00 = 2;
 }

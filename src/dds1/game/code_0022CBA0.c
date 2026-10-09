@@ -32,7 +32,6 @@ s32 evtViewerUpdateFrame(KwlnTask *task);
 void fldInitializeCameraColorResource(void);
 void func_00101A80(s32 arg0, s32 arg1);
 s32 evtCreateFrameVariableTask(void);
-void evtEventViewerReset(struct EvtRuntime *viewer);
 void *evtViewerScheduleFrameVariableTask(s32 arg0);
 extern void func_00232E20(PolyMovieWork *work);
 extern s32 mnuPollTitleStreamStateLocked(void);
@@ -1566,7 +1565,7 @@ s32 func_00232438(s32 unused0, s32 unused1, EvtRuntime *viewer) {
     EvtRuntimeChild *entry = evtEventViewerGetPendingNode(viewer);
     u128 *destination;
     u128 *source;
-    EvtViewerDrawVector *draw;
+    EvtViewerDrawPayload *draw;
 
     switch (viewer->frameGroup->type) {
     case 10:
@@ -1796,8 +1795,6 @@ extern void mnuStopMovieDrawTask();
 extern s32 sdfCheckPendingWorkWithInterrupts();
 extern void evtDestroySecondaryWorldNode();
 extern void kwlnTextureReleaseHeldReference();
-extern void evtEventViewerReleaseGroups();
-extern void evtEventViewerShutdown();
 extern void fldReleaseCameraColorEffect();
 extern void kwlnFadeSetMode();
 void evtViewerCleanupMessageWindow(EvtRuntime *viewer);

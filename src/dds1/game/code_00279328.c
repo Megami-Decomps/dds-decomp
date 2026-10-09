@@ -21,7 +21,6 @@ extern void func_00272668(s32, s32, s32, s32, s32, s32);
 extern s32 D_003BAA98;
 extern void func_00280048(s32);
 extern s32 mnuGetAbilityTargetCategory(u16);
-extern void mnuSetPopupEntry(s32 *, char *);
 extern char D_0037CC58[];
 extern void mnuPlayInputSound(s32, s32, u32 *);
 

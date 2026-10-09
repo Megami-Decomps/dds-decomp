@@ -1480,7 +1480,9 @@
 0x00180250	effPcpSetDelayedPairScale	inferred	Stores scale on delayed-pair particle work. [names_reviewed6.tsv]
 0x00180258	effPcpSetDelayedPairColor	inferred	Delayed pair work initializes offset 0x10 to packed gray and broadcasts it. [names_reviewed21.tsv]
 0x00180260	effPcpChargeInitTail	inferred	DDS1 func_00178608 twin; resets tail and gray color [names_R_FuncNames.tsv]
-0x00180318	effPcpChargeReleaseResources	inferred	DDS1 func_001786C0 twin; releases handles and backing allocation [names_R_FuncNames.tsv]
+0x00180278	effPcpChargeCreateWork	inferred	Paired charge-history constructor allocates work, creates both parameter handles, and initializes live state.
+0x00180318	effPcpChargeReleaseWork	inferred	Paired charge-history release frees both parameter handles and backing allocation.
+0x00180350	effPcpChargeCloneWork	inferred	Paired constructor duplicates parameter handles into fresh reset charge-history storage.
 0x001803E8	effPcpChargeUpdateAndDrawHistory	inferred	registered charge callback captures up to 25 rows of seven model positions, ages and scales active samples, and draws billboard history with saved animation frames
 0x00180748	effPcpCopyVectorAF0	inferred	PCP_COPY_VECTOR to work+0xAF0
 0x00180760	effPcpChargeSetScale	inferred	Sets the charge effect work scale parameter. [names_reviewed6.tsv]

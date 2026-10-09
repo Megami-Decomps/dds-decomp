@@ -1792,9 +1792,9 @@
 0x001785F8	effPcpSetDelayedPairScale	inferred	Stores scale on delayed-pair particle work. [names_reviewed6.tsv]
 0x00178600	effPcpSetDelayedPairColor	inferred	Delayed pair work initializes offset 0x10 to packed gray and broadcasts it. [names_reviewed21.tsv]
 0x00178608	effPcpChargeInitTail	inferred	resets charge tail fields and gray color [names_R_FuncNames.tsv]
-0x00178620	effCreateChargeWork	inferred	eff effect resources and animation in effect/effPCPMisc.c
-0x001786C0	effPcpChargeReleaseResources	inferred	releases both param handles and backing allocation [names_R_FuncNames.tsv]
-0x001786F8	effCopyChargeResources	inferred	eff effect resources and animation in effect/effPCPMisc.c
+0x00178620	effPcpChargeCreateWork	inferred	Allocates charge-history work, creates both parameter handles, and initializes live state.
+0x001786C0	effPcpChargeReleaseWork	inferred	Releases both retained parameter handles and the backing allocation.
+0x001786F8	effPcpChargeCloneWork	inferred	Allocates fresh history storage, duplicates only both parameter handles, and resets live state.
 0x00178790	effPcpChargeUpdateAndDrawHistory	inferred	registered charge callback captures up to 25 rows of seven model positions, ages and scales active samples, and draws billboard history with saved animation frames
 0x00178B08	effPcpChargeSetScale	inferred	Sets the charge effect work scale parameter. [names_reviewed6.tsv]
 0x00178B10	effPcpChargeSetColor	inferred	Sets the charge effect work packed color parameter. [names_reviewed6.tsv]
