@@ -60,8 +60,7 @@ typedef struct BrsFadeAnimation {
     s8 portraitReady;
     u8 pad15[7];
     u32 portraitOpacity;
-    s32 portraitX;
-    s32 portraitY;
+    s32 portraitPosition[2]; /* x, y */
 } BrsFadeAnimation;
 
 /* Both games use 0x68-byte progress rows, with different live field offsets. */
@@ -188,20 +187,22 @@ typedef struct BrsSkillPackageWork {
     s32 extentExhausted;
 #ifdef VERSION_DDS1
     MenuAssets assets;
-    s8 opacityReady;
-    u8 padD3D[7];
-    s32 teardownHandle;
-    u32 opacity;
-    s8 resultPhase;
-    s8 unkD4D;
-    u8 padD4E[0x2];
-    BrsSkillIconRow skillIconRows[5];
-    BrsFadeAnimation fadeAnimation[5];
-    u8 padE7C[0x78];
-    BrsProgressAnimation levelAnimation[5];
-    u8 pad10FC[0x138];
-    BrsProgressAnimation profileAnimation[5];
-    u8 pad143C[0x138];
+    struct {
+        s8 opacityReady;
+        u8 padD3D[7];
+        s32 teardownHandle;
+        u32 opacity;
+        s8 resultPhase;
+        s8 unkD4D;
+        u8 padD4E[0x2];
+        BrsSkillIconRow skillIconRows[5];
+        BrsFadeAnimation fadeAnimation[5];
+        u8 padE7C[0x78];
+        BrsProgressAnimation levelAnimation[5];
+        u8 pad10FC[0x138];
+        BrsProgressAnimation profileAnimation[5];
+        u8 pad143C[0x138];
+    };
 #else
     MenuCampEffect campEffect;
     s8 opacityReady;
@@ -241,10 +242,8 @@ typedef char BrsFadeAnimation_portraitReady_offset_check[
     ((u32)&((BrsFadeAnimation *)0)->portraitReady == 0x14) ? 1 : -1];
 typedef char BrsFadeAnimation_portraitOpacity_offset_check[
     ((u32)&((BrsFadeAnimation *)0)->portraitOpacity == 0x1C) ? 1 : -1];
-typedef char BrsFadeAnimation_portraitX_offset_check[
-    ((u32)&((BrsFadeAnimation *)0)->portraitX == 0x20) ? 1 : -1];
-typedef char BrsFadeAnimation_portraitY_offset_check[
-    ((u32)&((BrsFadeAnimation *)0)->portraitY == 0x24) ? 1 : -1];
+typedef char BrsFadeAnimation_portraitPosition_offset_check[
+    ((u32)&((BrsFadeAnimation *)0)->portraitPosition == 0x20) ? 1 : -1];
 typedef char BrsRewardRow_size_must_be_0x18[(sizeof(BrsRewardRow) == 0x18) ? 1 : -1];
 typedef char BrsRewardBatch_size_must_be_0x7C[(sizeof(BrsRewardBatch) == 0x7C) ? 1 : -1];
 typedef char BrsActiveProgressList_size_must_be_0xE0[(sizeof(BrsActiveProgressList) == 0xE0) ? 1 : -1];
