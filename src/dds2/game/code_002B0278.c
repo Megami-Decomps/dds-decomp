@@ -3289,9 +3289,9 @@ typedef struct MenuSpriteRef {
 
 
 void mnuSetGridSpriteSlot(MenuListNode *node, s32 row, s32 col, s32 x, s32 y, s32 sprite, s32 effect) {
-    node->sprites[row * 4 + col].sprite = sprite;
+    node->sprites[row * 4 + col].sprite = (EffectSlotSet *)(u32)sprite;
     node->sprites[row * 4 + col].effect = effect;
-    itfSetGridEntryQuantizedAndRefresh(sprite, effect, x, y, x, y);
+    itfSetGridEntryQuantizedAndRefresh((EffectSlotSet *)(u32)sprite, effect, x, y, x, y);
 }
 
 void *mnuWalkNodeList(s32 index, MenuList *list) {
@@ -3575,7 +3575,6 @@ void mnuCallInitWide(s32 x, s32 y, s32 depth, s32 menu, s32 drawArg);
 
 
 
-void mnuCreateListWithDefaults(MenuWindowContainer *menu, u32 first, u32 second, u32 third, u32 fourth);
 
 void mnuRemoveWindowListCursorNode(MenuWindowContainer *menu);
 

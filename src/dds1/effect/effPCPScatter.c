@@ -50,7 +50,6 @@
 extern void *effParamTableGetBlock(void *data, s32 index);
 
 
-extern void sdfQueueAssetRelease(u32 res);
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern void effPcpScatterResRelease(PcpScatterRes *res);
 extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
@@ -1051,7 +1050,6 @@ extern u32 D_00354A70[];
 extern u32 D_00354AC0[];
 extern SdfPoolNode *D_00354B80[];
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfSetAssetPrimaryTextureAddress(struct SdfAsset *, u32);
 extern s32 func_0015FE20(EffPacketParams *);
 
 /* Return the trailing control block after zeroing two record arrays.
@@ -1094,7 +1092,7 @@ void effPcpScatterReleasePoolResources(PcpScatterPool *work)
     if (work->sharedResource != NULL) {
         effPcpScatterResRelease(work->sharedResource);
     }
-    sdfQueueAssetRelease((u32)work->drawAsset);
+    sdfQueueAssetRelease(work->drawAsset);
     sdfReleaseResourceAllocation(work->allocation);
 }
 
@@ -1113,7 +1111,7 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
     VU0_LOAD_MATRIX(matrix);
     sdfConsAppendVuPacket(packet, 0);
     if (pool->sharedResource != NULL) {
-        sdfSetAssetPrimaryTextureAddress(pool->drawAsset, (u32)pool->sharedResource->textureHandle);
+        sdfSetAssetPrimaryTextureAddress(pool->drawAsset, pool->sharedResource->textureHandle);
         D_003D6580->texcoords = D_00354AC0;
     } else {
         D_003D6580->texcoords = NULL;
@@ -1138,7 +1136,7 @@ void effPcpScatterDrawPool(PcpScatterPool *pool) {
         sdfAppendPacket(packet, func_0015FE20(D_003D6580));
     }
     surface = D_00354B80[pool->unk10];
-    surface->append((SdfListHead *)surface, packet);
+    surface->append(surface, packet);
 }
 
 /* Acquire a new texture owner and store it in the pool. */

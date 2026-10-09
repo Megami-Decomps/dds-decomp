@@ -7,7 +7,6 @@
 #include "pcp_vu0.h"
 
 struct EvtScaledValue;
-extern Dds3PathCurveWork *dds3GetObjectResourceHandle(struct EffWorldNode *slot);
 extern u32 sdfGetFloatCounterDirection(u32 *handle);
 extern f32 evtGetValueScaleFactor(struct EvtScaledValue *handle);
 
@@ -176,7 +175,6 @@ s32 func_00220678(EvtUnit *unit) {
 }
 
 extern void evtScaleValueByMultiplier(void *value, f32 multiplier);
-extern void dds3InterpolatePathVectorVU(void *value);
 
 s32 evtUnitStepScaledValue(EvtUnit *unit) {
     f32 t;
@@ -207,7 +205,7 @@ s32 evtUnitStepScaledValue(EvtUnit *unit) {
             t = 1.0f;
         }
         evtScaleValueByMultiplier((void *)unit->pathHandle, t);
-        dds3InterpolatePathVectorVU((void *)unit->pathHandle);
+        dds3InterpolatePathVectorVU((Dds3PathCurveWork *)unit->pathHandle);
         VU0_STORE_VF($vf10, unit->targetVector);
         return 1;
     }

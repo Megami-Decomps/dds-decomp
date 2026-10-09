@@ -318,7 +318,7 @@ void effDrawBlurRectangle(EffBlurQuad *source)
         drawPacket = effCreateSizedDrawPacket(1, 0);
         effBuildBlurTransformedQuad(source, (BlurPacketQuad *)billGetWorkTransformMatrix((s32)drawPacket), 0);
         sdfAppendPacket(list, (u32)drawPacket);
-        D_003253E8.append((SdfListHead *)&D_003253E8, list);
+        D_003253E8.append(&D_003253E8, list);
     }
 }
 
@@ -416,7 +416,7 @@ void effDrawBlurListWithFramePacket(void *list) {
 
     func_002D4CC8(kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, packet, 1);
     sdfAppendDmaTagToList(list, (u32)packet);
-    D_003253E8.append((SdfListHead *)&D_003253E8, list);
+    D_003253E8.append(&D_003253E8, list);
 }
 
 extern s32 func_0011E278();

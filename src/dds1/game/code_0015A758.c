@@ -15,7 +15,6 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
-extern void sdfQueueAssetRelease(SdfAsset *asset);
 
 typedef struct ParListNode ParListNode;
 
@@ -568,8 +567,8 @@ void parPrependRecordListNode(ParListNode *node) {
 
 INCLUDE_ASM(const s32, "game/code_0015A758", func_0015B420);
 
-void func_0015B648(ParReleaseRecord *record) {
-    sdfSetAssetPrimaryTextureAddress(record->asset);
+void func_0015B648(ParReleaseRecord *record, SdfTex *texture) {
+    sdfSetAssetPrimaryTextureAddress(record->asset, texture);
 }
 
 void parControlInit(void) {

@@ -421,7 +421,52 @@ INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C92A0);
 
 INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C98E8);
 
-INCLUDE_ASM(const s32, "game/code_001C7FF8", func_001C9BE8);
+typedef struct ItemRowColors {
+    u32 values[4];
+} ItemRowColors;
+
+extern const ItemRowColors D_00416A00;
+extern char D_004368A0[];
+
+void func_001C9BE8(BattleSceneObject *object) {
+    char text[16];
+    ItemRowColors colors = D_00416A00;
+    s32 shown;
+    s32 total;
+    s32 index;
+    s32 selected;
+    s32 row = 0;
+    s32 y = 0x14C;
+    s32 color;
+    s32 countY;
+
+    shown = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->classIndex, 0);
+    total = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->classIndex, 1);
+    index = object->selections[2].cursor;
+    selected = object->selections[2].entry;
+    for (;;) {
+        if (row >= shown || index >= total) {
+            break;
+        }
+        color = selected == index ? 0x89FEFF80 : 0xA09DC380;
+        color = (color & ~0xFF) | btlLinkedSelectionTaskBuffer->rowFade[row];
+        btlQueueIndexedTextWithinDrawLimit(0x1A, y, 0xFF0010, color, D_003B5B10[index * 2]);
+        countY = y + 4;
+        colors.values[0] = color;
+        colors.values[1] = color;
+        colors.values[2] = color;
+        colors.values[3] = color;
+        func_00306C28(0x900, countY << 3, 0, colors.values, 0,
+                     btlResourceBlock->resA, 5, 0x53);
+        itfSetTextDrawLimit(0x13);
+        func_0035C860(text, D_004368A0, D_003B5B10[index * 2 + 1]);
+        fldSubmitSceneObjectAtCoordinates(0xA0, countY, color, text);
+        itfSetTextDrawLimit(-1);
+        row++;
+        index++;
+        y += 0x17;
+    }
+}
 
 INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436858);
 

@@ -1,3 +1,4 @@
+#include "sdf_gs_blend.h"
 #include "common.h"
 #include "sdf_asset_packets.h"
 #include "sdf_dma_tag.h"
@@ -69,13 +70,9 @@ extern u64 sdfTexGetPrimaryClampState(SdfTex *);
 
 
 
-extern void sdfBuildPrimaryAlphaBlendDmaPacket(void *);
 
-extern void sdfBuildPrimaryTestBlendPacket(void *);
 
-extern void sdfBuildPrimaryAlphaAdditiveDmaPacket(void *);
 
-extern void sdfBuildPrimaryAlphaSubtractiveDmaPacket(void *);
 
 void sdfResourceListReleaseAssets(DevRequest *list);
 void sdfCopyAssetParameterState(SdfAsset *, SdfAsset *);
@@ -102,8 +99,10 @@ extern void func_002D33C8(u32, s32, f32);
  * Each blend builder fills the 0x40-byte packet area after the list head. */
 typedef struct SdfDrawPacketGroup {
     SdfListHead list;
-    SdfDmaTagHeader header;
-    u8 pad30[0x30];
+    union {
+        SdfGsBlendPacket blend;
+        SdfDmaTagHeader dma;
+    } packet;
 } SdfDrawPacketGroup;
 
 typedef struct SdfDrawPacketGroups {
@@ -112,6 +111,13 @@ typedef struct SdfDrawPacketGroups {
     u64 unk1A0;
     u64 unk1A8;
 } SdfDrawPacketGroups;
+
+typedef char SdfDrawPacketGroup_size_must_be_0x60[
+    (sizeof(SdfDrawPacketGroup) == 0x60) ? 1 : -1];
+typedef char SdfDrawPacketGroup_packet_at_0x20[
+    ((u32)&((SdfDrawPacketGroup *)0)->packet == 0x20) ? 1 : -1];
+typedef char SdfDrawPacketGroups_size_must_be_0x1B0[
+    (sizeof(SdfDrawPacketGroups) == 0x1B0) ? 1 : -1];
 
 
 typedef struct SdfPacketOwner {
@@ -127,15 +133,15 @@ void sdfInitializeDrawPacketGroups(u8 *memory) {
     SdfDrawPacketGroup *packet = ctx->groups;
     s32 i;
 
-    sdfBuildPrimaryAlphaBlendDmaPacket(&ctx->groups[0].header);
-    sdfBuildPrimaryTestBlendPacket(&ctx->groups[1].header);
-    sdfBuildPrimaryAlphaAdditiveDmaPacket(&ctx->groups[2].header);
-    sdfBuildPrimaryAlphaSubtractiveDmaPacket(&ctx->groups[3].header);
+    sdfBuildPrimaryAlphaBlendDmaPacket(&ctx->groups[0].packet.blend);
+    sdfBuildPrimaryTestBlendPacket(&ctx->groups[1].packet.blend);
+    sdfBuildPrimaryAlphaAdditiveDmaPacket(&ctx->groups[2].packet.blend);
+    sdfBuildPrimaryAlphaSubtractiveDmaPacket(&ctx->groups[3].packet.blend);
     for (i = 0; i != 4; i++) {
         /* Replace only the first VIF word; preserve the builder's DIRECT word. */
-        packet->header.firstVifCode = 0x11000000;
+        packet->packet.dma.firstVifCode = 0x11000000;
         sdfInitPacketList(&packet->list);
-        sdfAppendPacket(&packet->list, (u32)&packet->header);
+        sdfAppendPacket(&packet->list, (u32)&packet->packet.blend);
         packet++;
     }
     sdfInitPacketList(&ctx->syncList);
@@ -509,8 +515,8 @@ void sdfSetPrimaryStateFloat(SdfAsset *asset, f32 value) {
 }
 
 /* Store the primary texture address as raw bits and dirty both draw entries. */
-void sdfSetAssetPrimaryTextureAddress(SdfAsset *param, u32 textureAddress) {
-    param->texture = (SdfTex *)textureAddress;
+void sdfSetAssetPrimaryTextureAddress(SdfAsset *param, SdfTex *texture) {
+    param->texture = texture;
     param->dirtyFlags |= SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
 
@@ -571,8 +577,8 @@ void sdfSetAssetSecondaryMode(SdfAsset *param, u32 packetMode) {
 }
 
 /* Store the secondary texture address and dirty both draw entries. */
-void sdfSetAssetSecondaryTextureAddress(SdfAsset *param, u32 textureAddress) {
-    param->secondaryTexture = (SdfTex *)textureAddress;
+void sdfSetAssetSecondaryTextureAddress(SdfAsset *param, SdfTex *texture) {
+    param->secondaryTexture = texture;
     param->dirtyFlags |= SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
 
@@ -662,7 +668,7 @@ u8 *sdfParseAssetParameterFlags(SdfAsset *asset, DevRequest *resourceLookup, u8 
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_TEXTURE_PRESENT) {
-        sdfSetAssetPrimaryTextureAddress(asset, ((u32 *)resourceLookup->buffer)[*(u16 *)parameterCursor]);
+        sdfSetAssetPrimaryTextureAddress(asset, (SdfTex *)((u32 *)resourceLookup->buffer)[*(u16 *)parameterCursor]);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_SCALARS_PRESENT) {
@@ -676,7 +682,7 @@ u8 *sdfParseAssetParameterFlags(SdfAsset *asset, DevRequest *resourceLookup, u8 
     if (parameterFlags & SDF_PARAM_SECONDARY_TEXTURE_STATE_PRESENT) {
         packedTextureMode = *(u32 *)parameterCursor;
         parameterCursor += SDF_PARAM_WORD_BYTES;
-        sdfSetAssetSecondaryTextureAddress(asset, ((u32 *)resourceLookup->buffer)[packedTextureMode & SDF_PARAM_TEXTURE_INDEX_MASK]);
+        sdfSetAssetSecondaryTextureAddress(asset, (SdfTex *)((u32 *)resourceLookup->buffer)[packedTextureMode & SDF_PARAM_TEXTURE_INDEX_MASK]);
         sdfSetAssetSecondaryMode(asset, packedTextureMode >> SDF_PARAM_PACKET_MODE_SHIFT);
     }
     if (parameterFlags & SDF_PARAM_SECONDARY_SCALARS_PRESENT) {

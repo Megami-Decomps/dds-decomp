@@ -548,7 +548,7 @@ INCLUDE_ASM(const s32, "game/code_00162348", func_00162E48);
 
 void parReleaseAssetRecord(ParReleaseRecord *record) {
     record->flags = 1;
-    sdfQueueAssetRelease((s32)record->asset);
+    sdfQueueAssetRelease(record->asset);
     sdfReleaseResourceAllocation(record->allocation);
 }
 
@@ -559,8 +559,8 @@ void parPrependRecordListNode(ParListNode *node) {
 
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163010);
 
-void func_00163238(ParReleaseRecord *record) {
-    sdfSetAssetPrimaryTextureAddress(record->asset);
+void func_00163238(ParReleaseRecord *record, SdfTex *texture) {
+    sdfSetAssetPrimaryTextureAddress(record->asset, texture);
 }
 
 /* Draw parameter block filled per strip by parDrawPendingCellSystems. */

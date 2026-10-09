@@ -389,15 +389,15 @@ void mnuDestroyPanelState(MenuPanelState *panel) {
     sdfReleaseChipBlock(panel);
 }
 
-void func_00282CA8(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
-                                    u32 index) {
+void mnuSetPanelFirstGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB,
+                               EffectSlotSet *resource, u32 index) {
     panel->firstValueA = valueA;
     panel->firstValueB = valueB;
     itfGridStorePosition(&panel->firstSlot, resource, index);
 }
 
-void func_00282CD0(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
-                                    u32 index) {
+void mnuSetPanelSecondGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB,
+                                EffectSlotSet *resource, u32 index) {
     panel->secondValueA = valueA;
     panel->secondValueB = valueB;
     itfGridStorePosition(&panel->secondSlot, resource, index);
@@ -408,15 +408,15 @@ void mnuInitializePanelResource(MenuPanelState *panel, EffectSlotSet *resource,
     panel->resourceHandle = mnuCreatePanelSpriteHandles(2, resource, target);
 }
 
-void func_00282D28(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
-                                    u32 index) {
+void mnuSetPanelThirdGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB,
+                               EffectSlotSet *resource, u32 index) {
     panel->thirdValueA = valueA;
     panel->thirdValueB = valueB;
     itfGridStorePosition(&panel->thirdSlot, resource, index);
 }
 
-void func_00282D50(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
-                                    u32 index, u32 additionalValue) {
+void mnuSetPanelFourthGridSlot(MenuPanelState *panel, u32 valueA, u32 valueB,
+                                EffectSlotSet *resource, u32 index, u32 additionalValue) {
     panel->fourthValueA = valueA;
     panel->fourthValueB = valueB;
     itfGridStorePosition(&panel->fourthSlot, resource, index);
@@ -2605,7 +2605,7 @@ void *evtBattleStageTestScreen(void) {
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_003BC7D0, D_003BC7D4));
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
     sdfAppendPacket(packetList, (u32)sdfCreateFormattedSifCommand(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
-    D_00325708.append((SdfListHead *)&D_00325708, packetList);
+    D_00325708.append(&D_00325708, packetList);
     if (D_00324510[0x21] < 0) {
         evtCreateWorldObjectForKey(D_003BC7D0, D_003BC7D4);
         return evtCreateBattleStageTestCamera;

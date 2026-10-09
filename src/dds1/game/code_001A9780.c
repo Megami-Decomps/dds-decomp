@@ -3021,7 +3021,68 @@ s32 btlAreLinkedSceneCountersAtThreshold(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001B7238);
+typedef struct BattleReservePositions {
+    s32 entries[4][2]; /* x, y */
+} BattleReservePositions;
+
+extern const BattleReservePositions D_003A2C70;
+extern const char *D_003BB3B4;
+extern s32 func_001B7F50(KwlnTask *);
+extern void btlReleaseTrackedTaskResource(void);
+
+/* Build the reserve actor panels: place one row per inactive party member and start the panel task. */
+void func_001B7238(void) {
+    s32 i;
+    BattleReservePositions positions = D_003A2C70;
+    BattleController *controller = (BattleController *)btlGetRuntime();
+    BattleActorPanelWork *work = (BattleActorPanelWork *)kwlnTaskGetUserValue(kwlnTaskGetTaskByName(D_003BB3B0));
+    struct SdfMemBlock *allocation;
+    void *memory;
+    KwlnTask *task;
+
+    work->reserveCount = 0;
+    work->selectedReserveIndex = 0;
+    memset(&work->reserveEntries[0], 0, sizeof(BattleActorPanelEntry));
+    memset(&work->reserveEntries[1], 0, sizeof(BattleActorPanelEntry));
+    memset(&work->reserveEntries[2], 0, sizeof(BattleActorPanelEntry));
+    memset(&work->reserveEntries[3], 0, sizeof(BattleActorPanelEntry));
+    for (i = 0; i < datGameState->partyCount; i++) {
+        if (datGameState->party[i].flags & 2) {
+            work->reserveCount++;
+        }
+    }
+    work->reserveCount = datGameState->partyCount - work->reserveCount;
+    work->activeCount = datGameState->partyCount - work->reserveCount;
+    for (i = 0; i < work->reserveCount; i++) {
+        work->reserveEntries[i].position[0] = positions.entries[i][0];
+        work->reserveEntries[i].position[1] = positions.entries[i][1];
+        work->reserveEntries[i].presentation.hpBarPulse.alpha = 0x80;
+        work->reserveEntries[i].presentation.mpBarPulse.alpha = 0x80;
+        work->reserveEntries[i].presentation.hpPulseFrame = 0;
+        work->reserveEntries[i].presentation.mpPulseFrame = 0;
+        work->reserveEntries[i].presentation.unk08[0] = 0;
+        work->reserveEntries[i].presentation.unk08[1] = 0xB4;
+        work->reserveEntries[i].presentation.highlightPhase[4] = 0x5A;
+        work->reserveEntries[i].presentation.highlightPhase[5] = 0xB4;
+        work->reserveEntries[i].presentation.highlightPhase[6] = 0;
+        work->reserveEntries[i].presentation.highlightPhase[7] = 0x5A;
+        work->reserveEntries[i].presentation.highlightPhase[0] = 0x5A;
+        work->reserveEntries[i].presentation.highlightPhase[1] = 0;
+        work->reserveEntries[i].presentation.highlightPhase[2] = 0xB4;
+        work->reserveEntries[i].presentation.highlightPhase[3] = 0x5A;
+        work->reserveEntries[i].presentation.hpState = 2;
+        work->reserveEntries[i].presentation.mpState = 2;
+    }
+    allocation = sdfAllocGeneralBlock(0x348);
+    memory = (void *)sdfResourceRetainAddress(allocation);
+    memset(memory, 0, 0x348);
+    work->reserveUnitAllocation = allocation;
+    task = kwlnTaskCreate(D_003BB3B4, 0x2B0E, 1, 1, func_001B7F50, (TaskDestroy)btlReleaseTrackedTaskResource, (u32)memory);
+    func_00101A80(controller->taskParent, task);
+    btlSetTrackedTaskHandle(8, (s32)task);
+    btlSlotBankPromoteStates(work);
+    work->reserveEntries[work->selectedReserveIndex].presentation.presentationState = 2;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001B74C8);
 
@@ -3634,7 +3695,7 @@ s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
         x2 * 0x10 + 0x7000, y2 * 8 + 0x7900, uFixed, vBottom, colors[2],
         x3 * 0x10 + 0x7000, y3 * 8 + 0x7900, uRight, vBottom, colors[3],
         0xFEFFD0, NULL);
-    D_003255A8.append((SdfListHead *)&D_003255A8, list);
+    D_003255A8.append(&D_003255A8, list);
     return 1;
 }
 

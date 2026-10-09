@@ -4,7 +4,15 @@
 #include "common.h"
 
 struct SdfAsset;
+struct SdfTex;
 union SdfSubParam;
+
+/* Queue an asset owner for the deferred SdfAsset release callback. */
+void sdfQueueAssetRelease(struct SdfAsset *asset);
+
+/* Store the primary or secondary texture owner and mark its draw state dirty. */
+void sdfSetAssetPrimaryTextureAddress(struct SdfAsset *asset, struct SdfTex *texture);
+void sdfSetAssetSecondaryTextureAddress(struct SdfAsset *asset, struct SdfTex *texture);
 
 /* Refresh one of the two draw entries and retain the other entry's dirty bits. */
 void sdfAssetApplyEntryChanges(struct SdfAsset *asset, s32 entryIndex);

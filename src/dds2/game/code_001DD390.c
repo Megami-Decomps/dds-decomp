@@ -2760,7 +2760,7 @@ void func_001E38F0(BtlUnit *unit, MdlCtx *model, SdfModel *overlay,
         packet[4] = 0x72801;
         packet[5] = 0x47;
         sdfAppendPacket(list, (u32)packet);
-        surfaces[i]->append((SdfListHead *)surfaces[i], list);
+        surfaces[i]->append(surfaces[i], list);
     }
     savedFlags = model->inner->unk1A;
     model->flags |= MDL_SKIP_ANCHORS;
@@ -2779,7 +2779,7 @@ void func_001E38F0(BtlUnit *unit, MdlCtx *model, SdfModel *overlay,
         packet[4] = 0x51801;
         packet[5] = 0x47;
         sdfAppendPacket(list, (u32)packet);
-        surfaces[i]->append((SdfListHead *)surfaces[i], list);
+        surfaces[i]->append(surfaces[i], list);
     }
     func_003325F8(overlay, model->inner);
     if (unit->status.flags & 2) {
@@ -2799,7 +2799,7 @@ void func_001E38F0(BtlUnit *unit, MdlCtx *model, SdfModel *overlay,
         packet[4] = D_003B6BB0[i];
         packet[5] = 0x47;
         sdfAppendPacket(list, (u32)packet);
-        surfaces[i]->append((SdfListHead *)surfaces[i], list);
+        surfaces[i]->append(surfaces[i], list);
     }
     mdlSetAllResourceFrames(model, frame);
     for (item = model->resourceItems; item != NULL; item = item->next) {
@@ -2883,7 +2883,7 @@ void func_001E3E20(BtlUnit *unit) {
     packet = (s32)(u32)sdfAllocatePacketList(0);
     sdfCreateResourcePacket((SdfListHead *)packet, D_0040B290.buffers[2],
                             0, 0, 0x200, 0xE0, unit->mirror->unk34C, 0, 0, 0);
-    D_003B6BE0[0]->append((SdfListHead *)D_003B6BE0[0], (SdfListHead *)packet);
+    D_003B6BE0[0]->append(D_003B6BE0[0], (SdfListHead *)packet);
     info = unit->ext->owner;
     if (unit->unk344 == 0) {
         unit->unk344 = (s32)sdfModelCreateWithItems(info->sub->resourceList, info->sub->itemList);
@@ -2900,7 +2900,7 @@ void func_001E3E20(BtlUnit *unit) {
     packet = (s32)(u32)sdfAllocatePacketList(0);
     sdfCreateDescriptorPacket((SdfListHead *)packet, D_0040B290.buffers[2],
                               0, 0, 0x200, 0xE0, unit->mirror->unk34C, 0);
-    D_003B6BF0[0]->append((SdfListHead *)D_003B6BF0[0], (SdfListHead *)packet);
+    D_003B6BF0[0]->append(D_003B6BF0[0], (SdfListHead *)packet);
     func_001E38F0(unit->mirror, info, (SdfModel *)unit->mirror->unk344, D_003B6BF0, unit->mirror->overlayColor);
 }
 
@@ -2921,7 +2921,89 @@ s32 btlFormatUnitBedName(BtlUnit *unit, char *name) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001E40F0);
+extern void effMiscQuaternionToMatrixVU(void);
+
+const char D_00417AE0[16] = "btl:warp[%p]\n";
+
+void func_001E40F0(BtlUnit *unit, BtlUnit *target, s32 index) {
+    f32 bodyPos[4] __attribute__((aligned(16)));
+    f32 muzzlePos[4] __attribute__((aligned(16)));
+    f32 world[4] __attribute__((aligned(16)));
+    BtlEffectResource *table;
+    f32 reach;
+    f32 margin;
+    f32 distance;
+    f32 scale;
+
+    if (index < 0) {
+        return;
+    }
+    if ((unit->status.stateFlags & 0x8000) != 0) {
+        return;
+    }
+    if ((unit->status.flags & 0x200) != 0) {
+        if (unit->partyRecord.unitId == 2 || unit->partyRecord.unitId == 8) {
+            return;
+        }
+    }
+    table = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+    if (table->nodes[index].triggerKind != 2) {
+        return;
+    }
+    scale = unit->scale;
+    reach = table->nodes[index].reachOffset;
+    reach *= scale;
+    margin = unit->reach;
+    margin *= scale;
+    if (reach <= scale * 100.0f || reach <= margin) {
+        return;
+    }
+    reach -= margin;
+    btlUnitGetBodyPosVU((u8 *)unit);
+    VU0_STORE_VF(vf10, bodyPos);
+    if (target != NULL) {
+        btlUnitGetMuzzlePosVU(target);
+        VU0_STORE_VF_UNCLOBBERED(vf10, muzzlePos);
+        muzzlePos[1] = bodyPos[1];
+        VU0_LOAD_VF(vf10, muzzlePos);
+        VU0_LOAD_VF(vf11, bodyPos);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_NORMALIZE_VF10();
+    } else {
+        VU0_LOAD_VF(vf10, unit->orientation);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, D_003E9130);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_LOAD_VF(vf11, bodyPos);
+    }
+    VU0_SCALAR_OP(reach, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, world);
+    VU0_LOAD_VF(vf10, unit->orientation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, unit->bodyOffset);
+    VU0_SCALAR_OP(unit->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_NEGATE_XYZ(vf10);
+    VU0_LOAD_VF(vf11, world);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF(vf10, world);
+    if ((unit->status.flags & 2) != 0) {
+        world[1] = 0;
+        if (sdfLoadMapRecordPositionVector(unit->ext->owner->inner, 0) == 0) {
+            effObjFetchInnerPosition(unit->effectObject);
+        }
+        VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
+        VU0_LOAD_VF(vf11, world);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_LENGTH_VF10(distance);
+        if (distance < 2.0f * (unit->unkBC * unit->scale)) {
+            effObjSetInnerPosition(unit->effectObject, (u128 *)world);
+            unit->status.stateFlags |= 0x8000;
+            btlBossDebugPrintf(D_00417AE0, unit);
+        }
+    }
+}
 
 void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit) {
     BtlState *work;
@@ -10443,7 +10525,42 @@ void sndAddSourceReferences(SoundEffectSourceArgs *args) {
     unit->effectLink.referenceCount = unit->effectLink.referenceCount + 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_00202958);
+s32 func_00202958(SoundEffectSourceArgs *args) {
+    BtlUnit *owner;
+    u32 flags;
+
+    btlGetRuntime();
+    owner = args->owner.unit;
+
+    if (args->effect == NULL) {
+        args->effect = func_00168548(args->source->resourceHandle, 0, owner, 0);
+        args->effect->flags |= 1;
+    }
+    if (args->frameCount < 12) {
+        args->effect->color = ((u32)((f32)args->frameCount * 128.0f / 12.0f) << 24) | 0x808080;
+    } else if (btlFindTaskByHandle(args->resource) == 0) {
+        if (args->fadeOutFrame != 12) {
+            args->effect->color = ((u32)((1.0f - (f32)args->fadeOutFrame / 12.0f) * 128.0f) << 24) | 0x808080;
+            args->fadeOutFrame++;
+        } else {
+            return 1;
+        }
+    } else {
+        args->effect->color = 0x80808080;
+    }
+    effBTLFieldColorSetSelectors((s32)owner, (u32)owner, 0, 0);
+    flags = owner->status.flags;
+    if (flags & 4) {
+        args->effect->flags |= 8;
+    } else {
+        args->effect->flags &= ~8;
+    }
+    if (flags & 2) {
+        func_00168978(args->effect);
+    }
+    args->frameCount++;
+    return 0;
+}
 
 void sndFinishEffectSourceTask(SoundEffectSourceArgs *args) {
     SoundResourceNode *effect;

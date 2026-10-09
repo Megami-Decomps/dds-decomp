@@ -1469,7 +1469,7 @@ s32 btlUpdateFadeIn(void) {
         btlRuntimeState.color18 += 0x10000000;
     }
     func_00212998(packets, btlRuntimeState.color14, btlRuntimeState.color1C, btlRuntimeState.color10, btlRuntimeState.color18, -0x100);
-    D_00325708.append((SdfListHead *)&D_00325708, (SdfListHead *)packets);
+    D_00325708.append(&D_00325708, (SdfListHead *)packets);
     if ((btlRuntimeState.color14 & 0xFF000000) > 0x08000000) {
         btlRuntimeState.color14 -= 0x08000000;
         btlRuntimeState.color1C -= 0x08000000;
@@ -1535,7 +1535,7 @@ void btlInitializeGraphicsRuntime(void) {
     sdfClearLinkedPacketList(context);
     sdfCreatePatchableResourcePacket(packetList, context, 0, 0, 0x200, 0xe0, (s32)runtime->request, 0, 0, 0);
     sdfAppendPacketChainNode((SdfPacketChain *)D_00325860, context);
-    D_00325708.append((SdfListHead *)&D_00325708, packetList);
+    D_00325708.append(&D_00325708, packetList);
 }
 
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
@@ -1543,7 +1543,7 @@ void btlSubmitFrameAndQueueRuntimeHandle(void) {
     SdfListHead *packetList = (SdfListHead *)sdfAllocatePacketList(0);
     sdfCreateDescriptorPacket(packetList, kwlnHeldTextureReference->primaryResource,
                               0, 0, 0x200, 0xe0, (s32)runtime->request, 0);
-    D_00325708.append((SdfListHead *)&D_00325708, packetList);
+    D_00325708.append(&D_00325708, packetList);
     sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)runtime->handle);
     runtime->handle = 0;
     runtime->request = 0;
@@ -1556,7 +1556,7 @@ void btlInitializeOverlayGraphics(void) {
     sdfClearLinkedPacketList(context);
     sdfCreateGraphBufferCopyPacket(packetList, context, kwlnHeldTextureReference->primaryResource, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfAppendPacketChainNode((SdfPacketChain *)D_00325860, context);
-    D_00325708.append((SdfListHead *)&D_00325708, packetList);
+    D_00325708.append(&D_00325708, packetList);
     btlRuntimeState.options |= 1;
 }
 
@@ -2009,7 +2009,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, BtlDebugMenuCursor *select
             rowY += MNU_LIST_FIXED_ROW_HEIGHT;
         }
     }
-    kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)indexPackets);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)indexPackets);
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, mode, selectionState, rowTexts);
 }
 

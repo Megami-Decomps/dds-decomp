@@ -313,7 +313,7 @@ void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 argument, s32 index,
     sdfPktInit(&packetHeader, x + 0x7000, y + 0x7900, argument, index);
     sdfAppendPacket(packetList, (u32)sdfFormatSifPacket(&packetHeader, command));
     drawSurface = &kwlnDrawSurfaces[surfaceIndex];
-    drawSurface->append((SdfListHead *)drawSurface, packetList);
+    drawSurface->append(drawSurface, packetList);
 }
 
 /* Build an untextured rectangle with a separate outline color. */
@@ -324,7 +324,7 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height,
     sdfInitPacketList(packetList);
     sdfAppendPacket(packetList, (u32)func_0011D3E8(x + 0x7000, y + 0x7900, z, width * 16, height * 8, fillColor, borderColor));
     drawSurface = &kwlnDrawSurfaces[surfaceIndex];
-    drawSurface->append((SdfListHead *)drawSurface, packetList);
+    drawSurface->append(drawSurface, packetList);
 }
 
 s32 fldLmapTaskUpdate(void) {

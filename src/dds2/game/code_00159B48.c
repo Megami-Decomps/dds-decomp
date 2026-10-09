@@ -527,7 +527,7 @@ u8 *billCloneUnitObject(EffInstance *source) {
 }
 
 void effDestroy(EffInstance *instance) {
-    sdfQueueAssetRelease((u32)instance->renderState);
+    sdfQueueAssetRelease((SdfAsset *)instance->renderState);
     billDispatchByKind(instance->billboard);
     sdfReleaseChipBlock(instance);
 }
@@ -684,7 +684,7 @@ void effSubmitGeneratedTexturePacket(SdfPoolNode *surface, EffGeneratedTextureDe
 
     sdfInitPacketList((SdfListHead *)packetAddress);
     effDrawGeneratedTextureQuad((SdfListHead *)packetAddress, source);
-    surface->append((SdfListHead *)surface, (SdfListHead *)packetAddress);
+    surface->append(surface, (SdfListHead *)packetAddress);
 }
 
 /* Caller-built composite draw description; 0x68 bytes. */
@@ -736,10 +736,10 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
     state->header.vifCommands = 0x5000000310000000ULL;
     state->header.gifTag = 0x1000000000008002ULL;
     state->header.gifRegisters = SDF_GIF_REGISTER_AD;
-    state->test.value = 0x51001;
-    state->test.registerId = SDF_GS_TEST_1;
-    state->alpha.value = SDF_GS_ALPHA_INTERPOLATE_SOURCE_ALPHA;
-    state->alpha.registerId = SDF_GS_ALPHA_1;
+    state->registers.test.value = 0x51001;
+    state->registers.test.registerId = SDF_GS_TEST_1;
+    state->registers.alpha.value = SDF_GS_ALPHA_INTERPOLATE_SOURCE_ALPHA;
+    state->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfAppendPacket(list, (u32)state);
 
     state = (SdfGsBlendPacket *)sdfAllocPacketAligned(0x40);
@@ -747,27 +747,27 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
     state->header.vifCommands = 0x5000000310000000ULL;
     state->header.gifTag = 0x1000000000008002ULL;
     state->header.gifRegisters = SDF_GIF_REGISTER_AD;
-    state->test.value = 0x51001;
-    state->test.registerId = SDF_GS_TEST_2;
+    state->registers.test.value = 0x51001;
+    state->registers.test.registerId = SDF_GS_TEST_2;
     switch (source->blendMode) {
     case 2:
-        state->alpha.value = SDF_GS_ALPHA_ADD_DESTINATION_ALPHA;
+        state->registers.alpha.value = SDF_GS_ALPHA_ADD_DESTINATION_ALPHA;
         restoreBlend = SDF_GS_ALPHA_ADD_SOURCE_ALPHA;
         break;
     case 3:
-        state->alpha.value = SDF_GS_ALPHA_SUBTRACT_DESTINATION_ALPHA;
+        state->registers.alpha.value = SDF_GS_ALPHA_SUBTRACT_DESTINATION_ALPHA;
         restoreBlend = SDF_GS_ALPHA_SUBTRACT_SOURCE_ALPHA;
         break;
     case 0:
     case 1:
-        state->alpha.value = SDF_GS_ALPHA_INTERPOLATE_DESTINATION_ALPHA;
+        state->registers.alpha.value = SDF_GS_ALPHA_INTERPOLATE_DESTINATION_ALPHA;
         restoreBlend = SDF_GS_ALPHA_INTERPOLATE_SOURCE_ALPHA;
         break;
     default:
         restoreBlend = 0;
         break;
     }
-    state->alpha.registerId = SDF_GS_ALPHA_2;
+    state->registers.alpha.registerId = SDF_GS_ALPHA_2;
     sdfAppendPacket(list, (u32)state);
 
     textureState = (SdfGsTexturePacket *)sdfAllocPacketAligned(0x50);
@@ -847,10 +847,10 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
     state->header.vifCommands = 0x5000000310000000ULL;
     state->header.gifTag = 0x1000000000008002ULL;
     state->header.gifRegisters = SDF_GIF_REGISTER_AD;
-    state->test.value = 0x71801;
-    state->test.registerId = SDF_GS_TEST_1;
-    state->alpha.value = restoreBlend;
-    state->alpha.registerId = SDF_GS_ALPHA_1;
+    state->registers.test.value = 0x71801;
+    state->registers.test.registerId = SDF_GS_TEST_1;
+    state->registers.alpha.value = restoreBlend;
+    state->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfAppendPacket(list, (u32)state);
 }
 
@@ -861,7 +861,7 @@ void effSubmitCompositeGsPacket(SdfPoolNode *surface, EffCompositeGsDescriptor *
 
     sdfInitPacketList((SdfListHead *)packetAddress);
     effDrawCompositeTextureQuad((SdfListHead *)packetAddress, source);
-    surface->append((SdfListHead *)surface, (SdfListHead *)packetAddress);
+    surface->append(surface, (SdfListHead *)packetAddress);
 }
 
 void func_0015B270(void) {

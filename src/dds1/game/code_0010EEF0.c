@@ -97,8 +97,8 @@ s32 dds3DrawWorldNodeDiagnosticTask(void *task) {
     spriteList = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(spriteList);
     kwlnDrawSpriteCell(spriteList, 0x24, 0x72, 0x23, width - 9);
-    D_00325708.append((SdfListHead *)&D_00325708, spriteList);
-    D_00325708.append((SdfListHead *)&D_00325708, list);
+    D_00325708.append(&D_00325708, spriteList);
+    D_00325708.append(&D_00325708, list);
     if (D_00324543[0] < 0) {
         return (s32)func_0022AF50;
     }

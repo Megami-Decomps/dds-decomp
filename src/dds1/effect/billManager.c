@@ -165,7 +165,7 @@ void billFlushPendingChildPackets(void) {
                 SdfListHead *value = node->pendingLists[i];
 
                 if (value != NULL) {
-                    D_0034E030[i]->append((SdfListHead *)D_0034E030[i], value);
+                    D_0034E030[i]->append(D_0034E030[i], value);
                     node->pendingLists[i] = 0;
                 }
             }
@@ -410,7 +410,7 @@ void billFlushPendingRenderPairs(void) {
             if (work->count != 0) {
                 func_00150EB0(node);
             }
-            D_00325228.append((SdfListHead *)&D_00325228, node->packetList);
+            D_00325228.append(&D_00325228, node->packetList);
             node->packetList = NULL;
             node = node->next;
         } while (node != NULL);
@@ -430,7 +430,7 @@ void billFlushPendingRenderPairs(void) {
     packet->alpha = 0x48;
     packet->alphaRegister = 0x42;
     sdfAppendPacket(list, (u32)packet);
-    D_00325228.append((SdfListHead *)&D_00325228, list);
+    D_00325228.append(&D_00325228, list);
     D_003BD7F8 = NULL;
 }
 

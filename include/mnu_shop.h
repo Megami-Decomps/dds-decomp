@@ -85,6 +85,9 @@ void mnuSetWindowOverlaySprite(MenuWindowContainer *menu,
 void mnuSetWindowEntryParameters(u32 first, MenuWindowContainer *menu,
                                  struct EffectSlotSet *spriteResource,
                                  u32 third, u32 fourth);
+void mnuCreateListWithDefaults(MenuWindowContainer *menu, u32 first,
+                               u32 second, u32 third,
+                               struct EffectSlotSet *spriteResource);
 
 typedef char MenuIconState_size_must_be_0x38[(sizeof(struct MenuIconState) == 0x38) ? 1 : -1];
 typedef char MenuWindowContainer_size_must_be_0x98[(sizeof(MenuWindowContainer) == 0x98) ? 1 : -1];
