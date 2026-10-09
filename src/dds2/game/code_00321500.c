@@ -671,7 +671,7 @@ s32 func_003233E8(s32 context) {
                               (s32)entry->x0, currentYInteger, entry->scale0);
             }
 
-            if (entry->flagsBits.unk5) {
+            if (entry->flagsBits.halfRemainingCountReached) {
                 entry->flagsBits.unk6++;
                 if (entry->flagsBits.unk6 >= 11) {
                     entry->flagsBits.unk6 = 0;
@@ -704,11 +704,11 @@ void func_00323748(MenuWorkEntry *entry, struct MnuShootingWork *context) {
     }
     if (entry->flagsBits.updated) {
         entry->flagsBits.updated = 0;
-        if (!entry->flagsBits.unk5) {
+        if (!entry->flagsBits.halfRemainingCountReached) {
             if ((entry->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_REGISTRY_TABLE) {
                 registry = mnuGetMenuRecordRegistryEntry(entry->tag);
                 if (entry->remaining <= (registry->unk08 >> 1)) {
-                    entry->flagsBits.unk5 = 1;
+                    entry->flagsBits.halfRemainingCountReached = 1;
                 }
             }
         }
@@ -1265,7 +1265,7 @@ s32 func_00324840(void) {
     {
         MenuWorkFlags flags;
         flags.word = work->flags;
-        if (flags.bits.unk5) {
+        if (flags.bits.halfRemainingCountReached) {
             MenuWorkFlags updated = flags;
             updated.bits.unk6++;
             work->flags = updated.word;
