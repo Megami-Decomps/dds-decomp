@@ -156,7 +156,7 @@ typedef struct EffSurfaceEndpoints {
 
 
 typedef struct EffModelBindings {
-    u32 material;
+    EffClassWork *material;
     MdlCtx *model;
 } EffModelBindings;
 
@@ -650,7 +650,7 @@ extern u128 kwlnDefaultColorVector[];
 
 extern s8 D_00437E94;
 
-extern u8 *effAllocateActiveInstanceWork(u16, void *);
+extern EffClassWork *effAllocateActiveInstanceWork(u16, void *);
 
 
 extern u8 *effAllocateBlockWithModel(u16, void *);
@@ -2465,7 +2465,7 @@ typedef struct EffClassWorkList {
     EffClassWork **entries;
 } EffClassWorkList;
 
-u8 *effAllocateActiveInstanceWork(u16 kind, void *source) {
+EffClassWork *effAllocateActiveInstanceWork(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = effActiveInstanceOperations[kind].payloadSize;
     u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
@@ -2477,19 +2477,14 @@ u8 *effAllocateActiveInstanceWork(u16 kind, void *source) {
     VU0_STORE_VF(vf0, effect);
     VU0_STORE_VF(vf0, effect + 0x10);
     memcpy(((EffClassWork *)effect)->payload, source, size);
-    return effect;
+    return (EffClassWork *)effect;
 }
 
-typedef struct EffInstance {
-    u8 pad_00[0x30];
-    void *resourceHandle;
-} EffInstance;
-
-u8 *effCreateResourceInstanceA(u16 kind, void *source, u32 extra) {
-    EffInstance *work = (EffInstance *)effAllocateActiveInstanceWork(kind, source);
-    work->resourceHandle = effActiveInstanceOperations[kind].createResource(source, extra);
+EffClassWork *effCreateResourceInstanceA(u16 kind, void *source, u32 extra) {
+    EffClassWork *work = effAllocateActiveInstanceWork(kind, source);
+    work->resource = (u32)effActiveInstanceOperations[kind].createResource(source, extra);
     effActiveInstanceOperations[kind].initialize(work);
-    return (u8 *)work;
+    return work;
 }
 
 u8 *effCreateFileResourceInstance(u8 *work) {
@@ -2503,7 +2498,7 @@ u8 *effCreateFileResourceInstance(u8 *work) {
         break;
     }
     source = fileResolvePrimaryBuffer(work);
-    return effCreateResourceInstanceA(((FileJob *)work)->option, source, (u32)secondary);
+    return (u8 *)effCreateResourceInstanceA(((FileJob *)work)->option, source, (u32)secondary);
 }
 
 
@@ -2513,24 +2508,22 @@ void effDispatchDestroyOp(u32 *obj) {
     sdfReleaseChipBlock(obj);
 }
 
-typedef struct EffActiveInstance {
-    u8 pad_00[0x2C];
-    s32 kind;
-    void *resource;
-    void *source;
-} EffActiveInstance;
-
-u8 *effCreateActiveResource(EffActiveInstance *obj) {
-    EffActiveInstance *work;
+EffClassWork *effCreateActiveResource(EffClassWork *obj) {
+    EffClassWork *work;
 
     if (effActiveInstanceOperations[obj->kind].cloneResource == NULL) {
-        work = (EffActiveInstance *)effCreateResourceInstanceA((u16)obj->kind, obj->source, 0);
+        work = effCreateResourceInstanceA((u16)obj->kind, obj->payload, 0);
     } else {
-        work = (EffActiveInstance *)effAllocateActiveInstanceWork((u16)obj->kind, obj->source);
-        work->resource = effActiveInstanceOperations[obj->kind].cloneResource(obj);
-        effActiveInstanceOperations[obj->kind].initialize(work);
+        void *resource;
+        s32 kind;
+
+        work = effAllocateActiveInstanceWork((u16)obj->kind, obj->payload);
+        resource = effActiveInstanceOperations[obj->kind].cloneResource(obj);
+        kind = obj->kind;
+        work->resource = (u32)resource;
+        effActiveInstanceOperations[kind].initialize(work);
     }
-    return (u8 *)work;
+    return work;
 }
 
 void effResetActiveInstanceFrame(EffClassWork *work) {
@@ -4374,7 +4367,7 @@ void effResetBillboardFrameDispatchCounters(s32 *work) {
     }
 }
 
-extern u8 *effCreateClassResourceWork(u16, void *);
+extern EffClassWork *effCreateClassResourceWork(u16, void *);
 extern void *memcpy(void *dst, const void *src, u32 size);
 
 u8 *func_002EB968(EffBillPointConfig *config) {
@@ -4400,8 +4393,8 @@ u8 *func_002EB968(EffBillPointConfig *config) {
     step = 6.2831852f / (f32)count;
     position = step * ((effMiscRandUnitFloat(effSharedRandomState) - 0.5f) * 2.0f);
     for (index = 0; index < count; index++) {
-        u8 *resourceWork = effCreateClassResourceWork(1, &copy);
-        u8 **resourceSlot = (u8 **)((EffClassWork *)resourceWork)->resource;
+        EffClassWork *resourceWork = effCreateClassResourceWork(1, &copy);
+        u8 **resourceSlot = (u8 **)resourceWork->resource;
 
         *entries++ = (u32)resourceWork;
         *(f32 *)(*resourceSlot + 0xC) = position;
@@ -4411,7 +4404,7 @@ u8 *func_002EB968(EffBillPointConfig *config) {
     return allocation;
 }
 
-extern void effDestroyClassResourceWork(s32);
+extern void effDestroyClassResourceWork(EffClassWork *);
 
 void effReleaseBillFrameEntries(u8 *work) {
     u32 *header = (u32 *)((EffClassWork *)work)->resource;
@@ -4420,7 +4413,7 @@ void effReleaseBillFrameEntries(u8 *work) {
     u32 i;
 
     for (i = 0; i < count; i++) {
-        effDestroyClassResourceWork(*entry++);
+        effDestroyClassResourceWork((EffClassWork *)*entry++);
     }
     sdfReleaseChipBlock(header);
 }
@@ -4718,19 +4711,19 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002ED3D0);
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002EDB10);
 
-u8 *effCreateClassResourceWork(u16 kind, void *source) {
+EffClassWork *effCreateClassResourceWork(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = effClassResourceWorkOperations[kind].payloadSize;
-    u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
-    ((EffClassWork *)effect)->payload = effect + headerSize;
-    ((EffClassWork *)effect)->color = 0x80808080;
-    ((EffClassWork *)effect)->scale = 1.0f;
-    ((EffClassWork *)effect)->frame = 0;
-    ((EffClassWork *)effect)->kind = kind;
+    EffClassWork *effect = sdfAllocSizeClassBlock(size + headerSize);
+    effect->payload = (u8 *)effect + headerSize;
+    effect->color = 0x80808080;
+    effect->scale = 1.0f;
+    effect->frame = 0;
+    effect->kind = kind;
     VU0_STORE_VF_UNCLOBBERED($vf0, effect);
-    VU0_STORE_VF_UNCLOBBERED($vf0, effect + 0x10);
-    memcpy(((EffClassWork *)effect)->payload, source, size);
-    ((EffClassWork *)effect)->resource = effClassResourceWorkOperations[kind].createResource(source);
+    VU0_STORE_VF_UNCLOBBERED($vf0, effect->vectors.orientation);
+    memcpy(effect->payload, source, size);
+    effect->resource = effClassResourceWorkOperations[kind].createResource(source);
     effClassResourceWorkOperations[kind].initialize(effect);
     return effect;
 }
@@ -4742,14 +4735,13 @@ void effCreateClassResourceFromFile(s32 request) {
     effCreateClassResourceWork(((FileJob *)request)->option, source);
 }
 
-void effDestroyClassResourceWork(s32 work) {
-    u32 *obj = (u32 *)work;
-    effClassResourceWorkOperations[obj[0x2C / 4]].destroyResource();
-    sdfReleaseChipBlock(obj);
+void effDestroyClassResourceWork(EffClassWork *work) {
+    effClassResourceWorkOperations[work->kind].destroyResource();
+    sdfReleaseChipBlock(work);
 }
 
-u32 effPayloadPointerGet(s32 work) {
-    return effCreateClassResourceWork(*(u16 *)(work + 0x2c), ((EffClassWork *)work)->payload);
+EffClassWork *effCloneClassResourceWork(EffClassWork *work) {
+    return effCreateClassResourceWork((u16)work->kind, work->payload);
 }
 
 void effResetDispatchCounter(EffClassWork *work) {
@@ -5494,31 +5486,31 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
     func_002F1888(out, mtx);
 }
 
-u8 *effAllocateBlock(u16 kind, void *source) {
+EffClassWork *effAllocateBlock(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = effBlockResourceOperations[kind].payloadSize;
-    u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
-    ((EffClassWork *)effect)->payload = effect + headerSize;
-    ((EffClassWork *)effect)->color = 0x80808080;
-    ((EffClassWork *)effect)->scale = 1.0f;
-    ((EffClassWork *)effect)->kind = kind;
-    ((EffClassWork *)effect)->frame = 0;
+    EffClassWork *effect = sdfAllocSizeClassBlock(size + headerSize);
+    effect->payload = (u8 *)effect + headerSize;
+    effect->color = 0x80808080;
+    effect->scale = 1.0f;
+    effect->kind = kind;
+    effect->frame = 0;
     VU0_STORE_VF(vf0, effect);
-    VU0_STORE_VF(vf0, effect + 0x10);
-    memcpy(((EffClassWork *)effect)->payload, source, size);
+    VU0_STORE_VF(vf0, (u8 *)effect + 0x10);
+    memcpy(effect->payload, source, size);
     return effect;
 }
 
-extern u8 *effAllocateBlock(u16, void *);
+extern EffClassWork *effAllocateBlock(u16, void *);
 
-u8 *effCreateResourceInstanceB(u16 kind, void *source, u32 extra) {
-    u8 *work = effAllocateBlock(kind, source);
-    ((EffClassWork *)work)->resource = (u32)effBlockResourceOperations[kind].createResource(source, extra);
+EffClassWork *effCreateResourceInstanceB(u16 kind, void *source, u32 extra) {
+    EffClassWork *work = effAllocateBlock(kind, source);
+    work->resource = (u32)effBlockResourceOperations[kind].createResource(source, extra);
     effBlockResourceOperations[kind].initialize(work);
     return work;
 }
 
-extern u8 *effCreateResourceInstanceB(u16, void *, u32);
+extern EffClassWork *effCreateResourceInstanceB(u16, void *, u32);
 
 u8 *effCreateFileResourceInstanceB(u8 *work) {
     u32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
@@ -5531,7 +5523,7 @@ u8 *effCreateFileResourceInstanceB(u8 *work) {
         break;
     }
     source = fileResolvePrimaryBuffer(work);
-    return effCreateResourceInstanceB(((FileJob *)work)->option, source, (u32)secondary);
+    return (u8 *)effCreateResourceInstanceB(((FileJob *)work)->option, source, (u32)secondary);
 }
 
 void effDestroyBlockResourceWork(u32 *obj) {
@@ -5539,10 +5531,13 @@ void effDestroyBlockResourceWork(u32 *obj) {
     sdfReleaseChipBlock(obj);
 }
 
-u8 *effDuplicateActiveResourceB(u8 *obj) {
-    u8 *work = effAllocateBlock(*(u16 *)(obj + 0x2C), ((EffClassWork *)obj)->payload);
-    *(void **)(work + 0x30) = effBlockResourceOperations[((EffClassWork *)obj)->kind].cloneResource(obj);
-    effBlockResourceOperations[((EffClassWork *)obj)->kind].initialize(work);
+EffClassWork *effDuplicateActiveResourceB(EffClassWork *obj) {
+    EffClassWork *work = effAllocateBlock((u16)obj->kind, obj->payload);
+    void *resource = effBlockResourceOperations[obj->kind].cloneResource(obj);
+    s32 kind = obj->kind;
+
+    work->resource = (u32)resource;
+    effBlockResourceOperations[kind].initialize(work);
     return work;
 }
 
@@ -7440,20 +7435,20 @@ u32 *effAllocateClassResourceSlot(u32 owner) {
 
 u32 *func_002F7A00(u32 owner) {
     u32 *work = effAllocateClassResourceSlot(owner);
-    *work = effCreateClassResourceWork(4, owner);
+    *work = (u32)effCreateClassResourceWork(4, (void *)owner);
     return work;
 }
 
 u32 *effCreatePayloadPointerWorkFromRequest(u8 *request) {
     u32 *source = (u32 *)((EffActiveResource *)request)->resource;
     u32 *work = effAllocateClassResourceSlot((u32)((EffActiveResource *)request)->payload);
-    *work = effPayloadPointerGet(*source);
+    *work = (u32)effCloneClassResourceWork((EffClassWork *)*source);
     return work;
 }
 
 void effReleaseOwnedClassResourceWork(u32 handle) {
     if (*(s32 *)handle != 0) {
-        effDestroyClassResourceWork(*(s32 *)handle);
+        effDestroyClassResourceWork((EffClassWork *)*(s32 *)handle);
     }
     sdfReleaseChipBlock((void *)handle);
 }
@@ -7650,7 +7645,7 @@ EffModelBindings *effCreateMaterialAndModelEffectWork(s32 *owner, u32 kind, void
     MdlCtx *object;
     Motion *active;
 
-    work->material = effCreateClassResourceWork(4, (u32)owner);
+    work->material = effCreateClassResourceWork(4, owner);
     object = func_002DC1D0(source, settings);
     active = object->first;
     work->model = object;
@@ -7671,10 +7666,10 @@ EffModelBindings *effCreateModelEffectWorkFromPayload(u8 *request) {
     s32 a;
     s32 b;
     MdlCtx *object;
-    s32 material;
+    EffClassWork *material;
     MdlCtx *modelSource;
 
-    material = effPayloadPointerGet(source->material);
+    material = effCloneClassResourceWork(source->material);
     modelSource = source->model;
     work->material = material;
     a = mdlGetContextResourceGroup(modelSource);
@@ -7692,7 +7687,7 @@ EffModelBindings *effCreateModelEffectWorkFromPayload(u8 *request) {
     return work;
 }
 
-extern void effDestroyClassResourceWork(s32);
+extern void effDestroyClassResourceWork(EffClassWork *);
 
 void effDestroyMaterialAndModelEffectWork(EffModelBindings *work) {
     if (work->model != NULL) {
@@ -7724,7 +7719,7 @@ void effOrientClassResourceAlongTargetOffset(u8 *work) {
     sdfLoadMapRecordLookAtBasis(handle->model->inner, 0);
     VU0_STORE_VF_UNCLOBBERED(vf31, origin);
     effCopyClassResourcePosition((s128 *)handle->material, (s128 *)target);
-    state = ((EffClassWork *)handle->material)->payload;
+    state = handle->material->payload;
     VU0_LOAD_VF(vf10, target);
     VU0_LOAD_VF(vf11, origin);
     VU0_SUB(vf10, vf10, vf11);
@@ -7748,7 +7743,7 @@ void effOrientClassResourceAlongTargetOffset(u8 *work) {
     sdfVuMatrixToQuaternion((f32 (*)[4])mtx);
     VU0_STORE_VF_UNCLOBBERED(vf10, look);
     effCopyClassResourceOrientation((s128 *)handle->material, (s128 *)look);
-    effAdvanceClassResourceFrame((EffClassWork *)handle->material);
+    effAdvanceClassResourceFrame(handle->material);
 }
 
 extern void mdlStorePrimaryVectorVU(MdlCtx *);
@@ -7772,7 +7767,7 @@ void effApplyModelTransform(u8 *work) {
     modelContext->model->first->frameStep =
         ((EffAimConfig *)animation)->modelParameter;
     mdlProcessContextNodesAndTransforms(modelContext->model, D_00380828);
-    effDrawClassResourceWork((EffClassWork *)modelContext->material);
+    effDrawClassResourceWork(modelContext->material);
 }
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);

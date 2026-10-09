@@ -5576,7 +5576,7 @@
 0x002AA928	effCreateClassResourceWork	inferred	Allocates kind-sized work, copies payload and initializes class-specific resource and callback. [names_reviewed5.tsv]
 0x002AAA18	effCreateClassResourceFromFile	inferred	Resolves the primary file buffer and creates the requested class resource work. [names_reviewed5.tsv]
 0x002AAA48	effDestroyClassResourceWork	inferred	Calls the indexed class cleanup callback and frees the work. [names_reviewed5.tsv]
-0x002AAA90	effPayloadPointerGet	inferred	paired effect body: forwards work to callback func_002AA928 [names_R_FuncNames7.tsv]
+0x002AAA90	effCloneClassResourceWork	inferred	Native clone callback returns a new full class-resource work allocation by tail-calling effCreateClassResourceWork with the source kind low 16 bits (+0x2C) and copied payload (+0x34).
 0x002AAAB0	effResetDispatchCounter	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002AAAF8	effAdvanceClassResourceFrame	inferred	Invokes the kind-specific callback and advances its frame counter. [names_reviewed5.tsv]
 0x002AAB48	effDrawClassResourceWork	inferred	Invokes the indexed class draw callback on work. [names_reviewed5.tsv]
