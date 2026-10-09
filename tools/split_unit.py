@@ -17,8 +17,10 @@ The .rodata/.lit4/.sdata rows are NOT touched: give a part the data its code
 references (`split_rodata.py <v> --section ...` computes it from the retail
 code); a part's own lit4/sdata is the bytes its C emits (`objdump -h` of its
 object), so put the boundary row where the previous part's emitted bytes end.
-A part with no INCLUDE_ASM left has no INCLUDE_RODATA step: write each string it
-uses as a literal in the C instead of `extern char D_X[]`.
+A part with no INCLUDE_ASM left can still own INCLUDE_RODATA leaves referenced
+through external declarations; include_rodata.py retains those leaves. Use a C
+literal or named constant only when its placement, sharing and padding match
+retail, rather than changing representation to hide a missing generated include.
 
 Only split on evidence (a proven TU boundary, a change of compiler options);
 record it in the commit and, for options, in config/<v>/cflags.txt. Check each

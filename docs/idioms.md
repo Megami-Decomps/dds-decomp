@@ -5,6 +5,27 @@ shows one of these shapes, write the C given here. None of them is a trick:
 all are ordinary source that the original compiler turns into exactly the
 retail code.
 
+For a rule not covered here, use the [investigation method](matching-investigation.md)
+to recover its missing source contract. For compiler-sensitive near-matches,
+start with the earliest changed pass in
+the [decision atlas](compiler-decision-atlas.md), then use the relevant idiom:
+
+| Retail/candidate difference | First evidence to inspect |
+| --- | --- |
+| Same FPU instructions, different motion around `abs.s` | [Helper versus builtin](#absolute-values-ffabsf-versus-builtin-fabsf), with the kernel exception |
+| Indexed field constants or row-base copies differ | [Nested record and array addressing](#indexed-field-offsets-expose-nested-records-and-coordinate-arrays), pass 00 |
+| A store/reload crosses another memory access | [Declared types](#declared-types-change-scheduling-dependencies-alias-sets-readonly) and [union access](#access-through-a-union-versus-its-actual-member-type) |
+| Constants stay inside a retail loop | [Loop entry](#loops-that-loopc-never-optimises-a-branch-from-outside-into-the-test), [phony loops](#leading-exits-can-make-loopc-report-a-loop-as-phony), or [cost thresholds](#an-optimised-loop-can-still-retain-invariant-constants), pass 09 |
+| Two independent instructions are exchanged | [Actual scheduler comparator](#use-the-actual-gcc-296-comparator), including sched1 register weight |
+| A branch next to a call changes annulment | Same-TU callee visibility under Small shape rules; confirm reorg liveness and independent ownership evidence |
+| Integer/FPU argument setup differs | [Mixed-class parameter order](#mixed-integer-and-floating-parameter-order), with all callers checked |
+| A saved-register pair is exchanged | [Allocation](#saved-register-homes-what-global-allocation-actually-sorts-by) and [GCSE context](#code-that-changes-with-unrelated-text-context) |
+
+An optimisation-disable probe can localise a cause; it does not justify a
+production flag. A matching toy or altered declaration is likewise a
+diagnostic, not proof of the game's source. Keep natural source and whole-unit
+and complete-build verification as the acceptance gate.
+
 ## Switches and jump tables
 
 gcc builds a jump table only when a switch has about 5 or more *distinct*
@@ -73,6 +94,22 @@ after two hazard nops that retail doesn't have. Use `fsqrtf()` from
 return fsqrtf(dx * dx + dy * dy + dz * dz);   /* func_00122BB0 */
 ```
 
+## Absolute values: `ffabsf` versus builtin `fabsf`
+
+An `abs.s` instruction alone does not distinguish the builtin from an asm
+helper. Their scheduling differs: the builtin is an ordinary FPU operation,
+while `ffabsf` in `include/fpu.h` has the same asm boundary as `fsqrtf`.
+Independent constant loads and argument moves can cross the builtin but stay
+after the helper in the matching game-code cases.
+
+Use the existing `ffabsf` helper when the surrounding instruction sequence
+supports it. DDS1 `func_00152560` and DDS2 `func_0015A150` are the paired
+reference; DDS1 `func_001726E8` is a larger transfer. This is a module
+convention, not a global replacement rule: `kwlnAdvanceShakeOffsets` in the
+kernel uses builtin `fabsf` and changes code under the helper. Check the whole
+unit and preserve the kernel exception. Do not introduce another asm spelling
+or replace an unrelated arithmetic expression just to constrain scheduling.
+
 ## Code that changes with unrelated text (CONTEXT)
 
 ee-gcc 2.96's CSE hashes the addresses of symbol-name strings, so the rest of
@@ -84,6 +121,19 @@ function's code differs there. Such a function doesn't match in the real
 build. Treat it like `DIFF`: try another natural formulation or park it.
 Editing a unit can make an existing function CONTEXT, so always check the
 whole unit.
+
+GCSE has a separate spelling-sensitive effect. Its expression table hashes a
+`SYMBOL_REF` by the symbol's name; table traversal can change PRE pseudo
+creation order and a later allocation tie. This is distinct from CSE's
+address-sensitive context effect. The paired `func_001547D8` /
+`func_0015C3C8` became exact with the recovered `effDefaultRandomState` name;
+the existing sibling generators also remained exact.
+
+Treat this as a reason to inspect the first changed GCSE expression, not to
+search identifier spellings. A rename needs independent semantic evidence,
+the normal `names.py` provenance, and checks of every user in both games.
+Fixing one caller while breaking its donor or sibling is not a valid result.
+Names alone cannot recover an unsupported lifetime or allocation role.
 
 ## Narrow status queries after dispatch
 
@@ -620,6 +670,65 @@ functions use trampolines and are a different case.
   `code_00126A30` (189 match), DDS2 `code_00136EF8` (65 match), and both
   `dds3WorldBasic` units (11 match each), all with 0 differ.
 
+### Indexed field offsets expose nested records and coordinate arrays
+
+For indexed accesses, a flat struct and an equivalent nested struct can have
+different address RTL even when every final field offset agrees. In this
+compiler, record field offsets are split into a byte offset and a bit
+remainder at `DECL_OFFSET_ALIGN`, normally 16 bytes. `get_inner_reference`
+collects the byte offsets into the variable address expression and the bit
+remainders into the eventual memory displacement. Each nested record level
+contributes its own split.
+
+For scalar fields at offsets `F` in ordinary records, the useful model is:
+
+```text
+address expression: base + variable offset + sum(F & ~15)
+memory displacement: sum(F & 15)
+```
+
+The sums cover scalar field offsets at each nesting level; array strides and
+index terms are additional address inputs. Thus a displacement of 16 or more
+can come from several nested remainders; it need not imply extra alignment.
+A constant array subscript accumulates into the address offset: with a
+variable index it joins that expression, while a fixed object may fold it
+into the symbol offset. It is not another scalar-field remainder.
+Later folding and CSE can obscure this split, especially for one isolated
+access, so compare pass-00 RTL for several related fields.
+
+Confirmed examples:
+
+- `EvtUnitVectorSlot` has `vec[12]` followed by scalar `auxX` and `auxY`.
+  At `0x38/0x3C`, the setters need an index addition of `0x30` and memory
+  displacements `8/12`. Treating those scalars as `vec[12]/vec[13]` changes
+  the symbol-address form. DDS1 `evtSetSlotVector` and DDS2 `func_0023E320`
+  match with the recovered distinction.
+- DDS2 `BtlState.debug` starts at `0x728`; its inner table starts at `0x128`.
+  The two remainders, `8 + 8`, explain a `0x10` displacement in
+  `func_0022F068`. An invented `aligned(32)` record contradicts the actual
+  allocation and layout guards.
+- `BattleActorPanelEntry.position[2]` and the nested presentation
+  `cursorOffset[2]` reproduce the separate x/y address copies in DDS1
+  `func_001B91F0` and DDS2 `func_001C43F8`. Two scalar members give different
+  address sharing despite identical byte offsets.
+
+Require the constructor, consumers, stride, extent and layout guards to agree
+before changing a shared record. Do not add padding, alignment attributes or
+biased pointer views merely to request an address shape. Check every actual
+header consumer, including the other title.
+
+The same address structure feeds loop.c's induction-variable grouping.
+DDS1 `func_001B7238` and DDS2 `func_001C2450` use two reduced pointers for the
+primary presentation channel and position/health fields. Nested channels,
+the channel's real two-word array, and a local `s32 entries[4][2]` preserve
+those groups; a cached row pointer or a two-scalar row collapses or splits
+them differently. Inspect the `09.loop` giv and `combined with` records
+before diagnosing a saved-register swap.
+
+One compiler layout hazard: an anonymous union inside an anonymous struct
+can lose the union's offset in this cc1. Verify actual member offsets with
+the project compiler; a host compiler's `offsetof` is not sufficient.
+
 ## Rodata order
 
 The build links the unit's `.rodata` at retail's address, in source order:
@@ -916,6 +1025,15 @@ retail does with lqc2/sqc2 are written the same way (`VU0_COPY_MATRIX` and
 its siblings in `include/pcp_vu0.h`). Values passed in vf registers across calls:
 `void f(void)` using the registers directly (`game/code_002E7C20.c`).
 
+The existing volatile VU0 asm boundary can also interrupt CSE's propagation
+of a constant-valued local. DDS2 `func_00136718` assigns `index = 0` after
+`evtUnitGetNestedValue`, then uses `index` in the first
+`evtSetUnitNormalizedDirection` call after `VU0_LOAD_VF`. That value remains a
+pseudo across the intervening work and receives a saved register; the second
+call explicitly passes literal `0` and uses `$zero` instead. Inspect the actual
+def/use and CSE dumps before generalising this case. It does not justify an
+invented local, a new asm barrier, or a `volatile` C object to pin a value.
+
 ## Inline asm: COP2 and MMI
 
 gcc 2.96 emits almost no MMI (`pextlb`, `ppach`, `pcpyld`, `pmaddw`, …), so
@@ -1114,6 +1232,23 @@ typed call passes `&command->camera`, not a second object-prefix view.
 return delay slot with the last `sq`. If retail has `sq; jr; nop` instead,
 the copy was not plain C: it was either an lqc2/sqc2 VU copy (see above) or
 hand-written.
+
+## Mixed integer and floating parameter order
+
+For the observed register-passed EE helpers, integer and floating parameters
+use separate register sequences. Moving an integer parameter across floating
+parameters can leave the callee's incoming registers unchanged, yet change
+the caller's argument expansion order and the instruction donated to `jal`.
+The callee alone therefore may not establish the order between the classes.
+
+`kwlnDrawSetC70FloatTriple` and `kwlnDrawSetD88FloatTriple` take
+`(f32 rotation, f32 scale, u32 blendControl)`. Their paired script-command
+callers are exact with that contract; putting `blendControl` first changes
+argument setup. Compare pass-00 call RTL, the provider and every caller,
+including stack-passed cases, before changing a prototype. Preserve each
+argument's semantic role and update definitions and declarations together.
+Do not enumerate signatures or assume this observation extends across an
+argument-register limit, varargs, or an unspecified declaration.
 
 ## Seven or more arguments
 
@@ -1513,6 +1648,45 @@ work(q, next, first); next = find(q, id); }` (DDS2 `func_002D4CF0`/`E60`/`F10`
 and DDS1 twins). A call in the loop condition blocks `duplicate_loop_exit_test`
 and gives a `b` onto the `find` call instead.
 
+### Leading exits can make loop.c report a loop as "phony"
+
+DDS2 `func_001C9BE8` has two independent bounds at the loop head:
+
+```c
+for (;;) {
+    if (row >= shown || index >= total) break;
+    /* Draw this row, then advance row, index and y. */
+}
+```
+
+This natural form keeps the retail constants and indexed addresses inside the
+loop. A combined `for (; row < shown && index < total; ...)` instead receives
+normal loop optimisation. Two consecutive leading `if (...) break` tests can
+produce the first form too, but the syntax alone is not sufficient evidence.
+
+The decisive diagnostic is `is phony` in `09.loop`: scan_loop did not find the
+expected loop label immediately after `NOTE_INSN_LOOP_BEG`. In the confirmed
+case, GCSE inserted work on the entry edge with a block-begin note between
+the loop-begin note and label. Other two-bound loops are ordinary loops and
+must not be forced into this class. If the dump has a normal loop, investigate
+its cost decisions instead.
+
+### An optimised loop can still retain invariant constants
+
+Missing hoists do not always mean loop.c skipped the loop. Its movable-value
+decision compares `threshold * savings * lifetime` with the loop's instruction
+count before strength reduction. Calls change the threshold; the relevant
+counts are RTL instructions, not the final assembly length. Related cost
+tests also decide whether a general induction variable is worth reducing.
+
+DDS1 `func_0014B688` is exact with direct
+`fldSparkObjectEntries[i].field` accesses. Their larger initial address RTL
+keeps constants in the loop while pointer induction variables are reduced.
+Caching and advancing an entry pointer shrinks that RTL and hoists the
+constants, as in its DDS2 counterpart. Compare the actual `savings`, movement
+and `not worth while` records in `09.loop`. Do not pad the loop with unused
+work to cross a threshold, or infer a per-file option from one missed hoist.
+
 ### Tail call kept as `jal` + epilogue: loop notes
 
 Any loop construct around the last call leaves NOTE_INSN_LOOP notes and the call
@@ -1524,6 +1698,15 @@ only for this is a lever and is not accepted (DDS2 `func_002A5F80`,
 `func_002A5890`, DDS1 `func_002C1548` match that way and stay INCLUDE_ASM).
 Other causes: varargs, struct return, converted return, address-taken locals,
 stack arguments, nested `return;`.
+
+At expansion time, a statement after the final call can also prevent a
+sibling call even if later passes delete that statement. DDS2
+`func_00286A58` has the release-and-clear form
+`evtReleaseMantraSelectionWork(work); work = NULL;` and retains `jal`.
+This is a compiler observation, not evidence that every unexplained forwarder
+cleared a local. Require a genuine source-level reset or recurring macro
+contract; adding `unused = 0`, an empty loop, or a local function pointer
+solely to block the sibling call is not acceptable.
 
 ### Per-TU `-fno-optimize-sibling-calls`: boundary evidence and its limits
 
@@ -1540,8 +1723,14 @@ compiles (DDS1 `func_0020A780` came out 232 instead of 224 bytes when
 `btlUnitBlocksElementQueryForGroup` was the first C function of its TU; any
 earlier C function cured it). If a proposed boundary fails only that way, the
 boundary is wrong: retail has a C function before the first one tested.
-A fully-C unit has no `INCLUDE_RODATA` step: a string a function names through
-`extern char D_X[]` is lost from the link; write the literal in the C.
+A fully-C unit can still own an `INCLUDE_RODATA` leaf used through an external
+declaration. `include_rodata.py` must retain those leaves even when no
+`INCLUDE_ASM` remains. A missing generated include for data verified to belong
+to the unit is an attribution/tooling issue; it does not establish a new source
+boundary. DDS2 `func_0031BA28` exposed this case.
+Compile an owned string as a literal or named constant only when its placement,
+sharing and padding agree with retail; do not change the representation just
+to hide a missing generated include.
 
 ### Saved-register order: global-alloc priority
 
@@ -1926,6 +2115,34 @@ loads or stores even when every instruction is right:
 Only fix types the data really has (rodata placement, a bitfield the code
 tests bit-by-bit). Adding views to steer alias sets is the lever above.
 
+### Access through a union versus its actual member type
+
+An access whose `COMPONENT_REF` chain passes through a union member receives
+alias set zero in this compiler. That conservative view can prevent PRE from
+merging loads and add memory dependencies in sched1/sched2. Accessing the
+same active payload through its actual struct type can give its fields their
+ordinary scalar alias sets.
+
+The DDS2 linked-effect callbacks provide a confirmed example:
+
+```c
+BattleLinkedEffectState *linked = &ctx->effect->linked;
+linked->actor = unit;
+```
+
+This uses the existing member's address with no cast or alternate layout.
+`btlBindEffectUnitAndClearStateFlags` and `func_00226C98` match with that
+payload access. A direct `ctx->effect->linked.actor` access has a different
+dependency graph. Check the active mode, allocation and other field users
+before taking such a pointer; the union remains the owner of heterogeneous
+payloads.
+
+Alias set zero does not force dependencies between all accesses: known
+disjoint locations can still be separated by address analysis. Conversely,
+an integer placeholder for a real pointer can manufacture a dependency even
+without any union. Recover the field's producer/consumer contract rather
+than adding raw cast views, unions, or `volatile` to request a schedule.
+
 ### Float constants never in a delay slot
 
 Neither ELF has `mtc1 $1,$fN` or `mtc1 $0,$fN` in a branch slot: `li.s` is a
@@ -2035,6 +2252,20 @@ or floating-point register class is not an additional comparator key. Consult
 the actual ready list and dependency edges before blaming the final UID tie.
 `tools/ee_gcc_probe.py --cflag=-fsched-verbose=5` exposes these in `17.sched`
 and `25.sched2`; `29.dbr` shows subsequent delay-slot donation.
+
+Register weight is read from the scheduler's input RTL: register outputs add
+one, `REG_DEAD`/`REG_UNUSED` notes subtract one. The printed dependency table
+does not contain that weight. Its fields alone cannot replay the comparator;
+`ee_gcc_schedules.py` deliberately calls that partial view a heuristic.
+Also distinguish logical input order from printed table order and account
+for interblock preferences before attributing a choice to a final tie.
+
+Basic-block boundaries matter even when final assembly has no branch there.
+Cross-jumping runs after sched2; genuine duplicated branch tails can be
+scheduled as separate blocks and merged afterwards. The paired
+`evtViewerPickNextHandler` is a reference for the resulting constant-address
+versus epilogue-load order. Recover actual control flow; do not insert an
+empty condition or identical-outcome branch solely to reset the scheduler.
 
 ### Two readonly-table controls
 
@@ -5371,6 +5602,17 @@ not separate padded prefix views. The named scene-task provider takes a
 world-node pointer and a task-name string and returns a signed task ID.
 Its two existing DDS1 field callers retain their exact bytes after that
 declaration is corrected; the room/task controller remains assembly.
+
+## Result icon ramps distinguish storage from conversion
+
+DDS1 `func_00267850` uses signed lower/upper clamps for
+`BrsProgressAnimation.iconColor`, `completionColor` and `auxiliaryColor` at
+`+40/+50/+54`. Their storage is `s32`; the constructor values alone do not
+establish unsigned storage. The sine-derived icon value still uses a `(u32)`
+conversion before assignment to that signed field, preserving the native
+conversion path. Storage signedness and expression conversion are separate
+contracts. Its two coordinate pairs at `+44/+58` are actual two-element
+arrays, with the complete `0x68` row and all shared-header users checked.
 
 ## Result EXP flash counters retain signed scalar storage
 

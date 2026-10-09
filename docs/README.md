@@ -10,6 +10,7 @@ quickstart.
 - [Toolchain](toolchain.md): original compiler and assembler evidence and runtime.
 - [Confirmed source idioms](idioms.md): source shapes verified against retail code.
 - [Compiler decision atlas](compiler-decision-atlas.md): mismatch diagnosis and stop rules.
+- [Investigating an unexplained near-match](matching-investigation.md): recover missing contracts and discover compiler rules.
 - [Compiler diagnostics](compiler-diagnostics.md): probes for compiler behavior.
 - [Unit names and ranges](tu-names.md): source-file names and unit boundaries.
 - [Persona 4 transfer](p4-transfer.md): cross-project function comparisons.
