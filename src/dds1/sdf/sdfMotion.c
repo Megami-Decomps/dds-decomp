@@ -51,7 +51,7 @@ typedef struct FuncTab {
     void (*w10)(void *a0, f32 t1, f32 t2);
 } FuncTab;
 
-s32 sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
+void *sdfDispatchAssetCommandWord(void *a0, s32 a1, s32 a2);
 void sdfDestroyDevRequest(void *a0);
 void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, void *source, void *dispatch);
 f32 sdfInterpolateMotionKeys(SdfMotionKeyInterval *interval);
@@ -110,7 +110,7 @@ Motion *sdfCreateMotion(SdfModel *model, MotionTable *table) {
          i < count;
          i++, command++) {
         ((void **)motion->request->buffer)[i] =
-            (void *)sdfDispatchAssetCommandWord(motion, command->command, command->argument);
+            sdfDispatchAssetCommandWord(motion, command->command, command->argument);
     }
     motion->state = SDF_MOTION_STATE_UNINITIALIZED;
     motion->frameStep = 1.0f;
