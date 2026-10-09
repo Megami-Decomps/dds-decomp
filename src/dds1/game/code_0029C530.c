@@ -1430,7 +1430,7 @@ void effSetBillboardMatrixComponent(EffBillboardWork *work, float value) {
 typedef struct EffFrameState {
     u8 *entries;        // 0x00
     u8 *asset;          // 0x04
-    u32 allocation;     // 0x08
+    struct SdfMemBlock *allocation; // 0x08: allocation descriptor
 } EffFrameState;
 
 /* Per-instance frame storage and transform rows, as accessed by reset/initialization. */
@@ -4809,7 +4809,7 @@ void effReleaseRingFadeTable(s32 work) {
 
     state = (s32)((EffClassWork *)work)->resource;
     effSharedAssetReferenceRelease((u32)((EffFrameState *)state)->asset);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)state)->allocation));
+    sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002ABDE0);
@@ -4979,7 +4979,7 @@ void effReleaseBillFadeTable(s32 work) {
 
     state = (s32)((EffClassWork *)work)->resource;
     effSharedAssetReferenceRelease((u32)((EffFrameState *)state)->asset);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)state)->allocation));
+    sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002ACA40);
@@ -5148,7 +5148,7 @@ void effReleaseCompactRingFadeTable(s32 work) {
 
     state = (s32)((EffClassWork *)work)->resource;
     effSharedAssetReferenceRelease((u32)((EffFrameState *)state)->asset);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)state)->allocation));
+    sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002AD6B8);
@@ -5477,7 +5477,7 @@ void effReleaseTextureAnimationWork(s32 work) {
 
     state = (s32)((EffClassWork *)work)->resource;
     effReleaseScalyStripResources((u32)((EffFrameState *)state)->asset);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)state)->allocation));
+    sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002AEC60);
@@ -5674,7 +5674,7 @@ void effReleaseBillboardFrameAsset(s32 work) {
 
     state = (s32)((EffClassWork *)work)->resource;
     effReleaseScalyStripResources((u32)((EffFrameState *)state)->asset);
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffFrameState *)state)->allocation));
+    sdfReleaseResourceAllocation(((EffFrameState *)state)->allocation);
 }
 
 
