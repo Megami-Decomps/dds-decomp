@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
 #include "kwln.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
@@ -58,8 +59,6 @@ extern MnuMovieList mnuMovieList;
 
 extern s32 func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 
-
-extern void sdfQueueFlatTriangle(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 
 extern s32 mnuMovieViewer();
 
@@ -197,10 +196,10 @@ void mnuDrawMovieList(void) {
         sdfAppendPacket(packets, (u32)sdfCreateFormattedSifCommand(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, D_003BC648, (i == selected) ? '>' : ' ', node->path));
     }
     if (mnuMovieList.top != 0) {
-        sdfQueueFlatTriangle((s32)packets, 0x8000A0C0, 0, 0x7900, 0x7978, 0x7840, 0x79A8, 0x79C0, 0x79A8, 0xFF0080, 0);
+        sdfQueueFlatTriangle(packets, 0x8000A0C0, 0, 0x7900, 0x7978, 0x7840, 0x79A8, 0x79C0, 0x79A8, 0xFF0080, 0);
     }
     if (node != NULL) {
-        sdfQueueFlatTriangle((s32)packets, 0x8000A0C0, 0, 0x7840, 0x7CD8, 0x79C0, 0x7CD8, 0x7900, 0x7D08, 0xFF0080, 0);
+        sdfQueueFlatTriangle(packets, 0x8000A0C0, 0, 0x7840, 0x7CD8, 0x79C0, 0x7CD8, 0x7900, 0x7D08, 0xFF0080, 0);
     }
 }
 

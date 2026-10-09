@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
 #include "fr_font_measure.h"
 #include "fr_font.h"
@@ -141,7 +142,7 @@ extern void *D_00358450[];
 
 extern s32 D_00358510[];
 
-extern s32 D_00359A78[];
+extern u32 D_00359A78[];
 
 extern s32 mdlFlagTest(s32);
 
@@ -2673,7 +2674,50 @@ void __udivdi3(u32 arg0, u32 arg1) {
     btlSumOrAverageActorAttribute(arg0, arg1, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001A95C8);
+extern void func_0011CE38();
+const char D_003A1CA8[] = "btl:preemptive=%d%%[ratio=%.2f]\n";
+
+s32 func_001A95C8(void) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    s32 chance;
+    f32 ratio;
+    u32 i;
+
+    if (state->battleFlags & 0x4000) {
+        if (state->requestMode == 2 || state->requestMode == 4) {
+            if (datBattleSceneRecords[state->battleMode].flags & 2) {
+                return 2;
+            }
+        }
+        return 1;
+    }
+    if (datBattleSceneRecords[state->battleMode].flags & 4) {
+        return 1;
+    }
+    if (datBattleSceneRecords[state->battleMode].flags & 2) {
+        return 2;
+    }
+    ratio = 1.0f;
+    chance = evtRunContext(0x16, 0, 0, 0, 0);
+    for (i = 0; i < 5; i++) {
+        if (datGameState->party[i].flags & 1) {
+            if (datGameState->party[i].flags & 2) {
+                if (btlCheckSpecialAbility(&datGameState->party[i], 0x22E)) {
+                    ratio *= datAbilityParameters[0x22E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
+                }
+            }
+        }
+    }
+    chance = (s32)((f32)chance * ratio);
+    if (chance < 60) {
+        chance = 60;
+    } else if (chance > 80) {
+        chance = 80;
+    }
+    btlBossDebugPrintf(D_003A1CA8, chance, ratio);
+    func_0011CE38(chance);
+    return btlRollAiBucket() < chance ? 1 : 2;
+}
 
 INCLUDE_ASM(const s32, "game/code_001A1960", func_001A9780);
 
@@ -3532,7 +3576,34 @@ void func_001ACDF0(void) {
     } while (-1 < temp_v1);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001ACE28);
+s32 func_001ACE28(s32 id, s32 operation) {
+    s32 selector;
+    s32 offset;
+    u32 word;
+    u32 bit;
+
+    id = (u16)id;
+    offset = id - 0x1AB;
+    selector = (s8)operation;
+    if (offset != 0) {
+        word = (u32)offset >> 5;
+        bit = offset & 0x1F;
+    } else {
+        word = 0;
+        bit = 0;
+    }
+    switch (selector) {
+    case 0:
+        D_00359A78[word] |= 1 << bit;
+        break;
+    case 1:
+        D_00359A78[word] &= ~(1 << bit);
+        break;
+    default:
+        return ((D_00359A78[word] & (1 << bit)) != 0);
+    }
+    return 1;
+}
 
 extern const char *D_003BB3A0;
 
@@ -5895,13 +5966,6 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001BC540);
 
 extern SdfPoolNode D_003255A8;
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfQueueGouraudTexturedQuad(
-    s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
-    s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
-    s32 x2, s32 y2, s32 u2, s32 v2, s32 color2,
-    s32 x3, s32 y3, s32 u3, s32 v3, s32 color3,
-    s32 depth, s32 (*allocate)(s32));
-
 /* Draw a textured command-panel quad with independently colored corners. */
 s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
                   s32 x2, s32 y2, s32 x3, s32 y3,
@@ -5920,7 +5984,7 @@ s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
     vFixed = v * 0x10;
     uRight = uFixed + width * 0x10;
     vBottom = vFixed + height * 0x10;
-    sdfQueueGouraudTexturedQuad((s32)list, 0x40,
+    sdfQueueGouraudTexturedQuad(list, 0x40,
         x0 * 0x10 + 0x7000, y0 * 8 + 0x7900, uFixed, vFixed, colors[0],
         x1 * 0x10 + 0x7000, y1 * 8 + 0x7900, uRight, vFixed, colors[1],
         x2 * 0x10 + 0x7000, y2 * 8 + 0x7900, uFixed, vBottom, colors[2],

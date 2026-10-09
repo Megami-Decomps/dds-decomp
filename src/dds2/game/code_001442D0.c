@@ -1,4 +1,5 @@
 #include "fld_area_work.h"
+#include "evt_world.h"
 #include "common.h"
 #include "sdf_dev_state.h"
 #include "kwln.h"
@@ -2177,7 +2178,6 @@ extern FldVec4 D_00413788[]; /* default camera up vectors (3 copies), the first 
 
 extern void fldApplySkyLightSetToPlayerVU(void);
 
-extern void dds3SetWorldObjectDataValue(s32, s32);
 
 extern s32 D_00436260;
 
@@ -2204,7 +2204,7 @@ void fldEnterSceneCamera(void) {
     fldApplySkyLightSetToPlayerVU();
     cam->sceneMode = 4;
     frFontSetSharedRenderFlags(0x54);
-    dds3SetWorldObjectDataValue(dds3GetWorldObject(), 1);
+    dds3SetWorldObjectDrawEnabled((EffWorldNode *)(u32)dds3GetWorldObject(), 1);
     D_00436268 = 0;
     D_00436248 = cam->floor;
     D_0043624C = cam->unkC0;

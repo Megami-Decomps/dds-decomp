@@ -76,4 +76,7 @@ typedef struct EvtWorldTable {
 } EvtWorldTable;
 
 
+/* Preserve the signed-byte drawing gate; only a missing payload is ignored. */
+void dds3SetWorldObjectDrawEnabled(EffWorldNode *object, s8 enabled);
+
 #endif /* EVT_WORLD_H */

@@ -242,7 +242,32 @@ s32 sdfNamedChunkFindId(SdfModel *model, const char *name) {
     return -1;
 }
 
-INCLUDE_ASM(const s32, "game/code_003325F8", func_00332AD8);
+extern const char D_0040B338[];
+
+const char *func_00332AD8(SdfModel *model, s32 nameId) {
+    SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_NAMED_IDS);
+    const u8 *name;
+    const u8 *end;
+    if (chunk == NULL) {
+        return D_0040B338;
+    }
+    name = (const u8 *)(chunk + 1);
+    end = (const u8 *)chunk + chunk->size;
+    do {
+        const u8 *cursor = name;
+        const s32 *id;
+        while (*cursor++ != 0) {
+        }
+        id = (const s32 *)(((u32)cursor + 3) & ~3U);
+        if (*id == nameId) {
+            return (const char *)name;
+        }
+        name = (const u8 *)(id + 1);
+        if (name >= end) {
+            return D_0040B338;
+        }
+    } while (1);
+}
 
 u32 sdfCountMapPositionRecords(SdfModel *model) {
     SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);

@@ -280,8 +280,6 @@ typedef struct BattleListEntry {
 extern s32 mdlRequestAsset(s32, s32, s32);
 
 
-extern void sdfBuildPacketE(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
 extern u64 btlStartTask(void *);
 
 extern s32 scrReadIntParameter(s32);
@@ -1435,9 +1433,6 @@ s32 func_0022CD60(s32 kind, s32 id) {
     return 0;
 }
 
-extern void sdfQueueTexturedQuad(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
-                                 s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
-
 void func_0022CE30(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
     s32 halfWidth;
     s32 halfHeight;
@@ -1463,7 +1458,7 @@ void func_0022CE30(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
     top = vertical[0] + 0x7900;
     right = horizontal[1] + 0x7000;
     bottom = vertical[1] + 0x7900;
-    sdfQueueTexturedQuad(list, color, primitive,
+    sdfQueueTexturedQuad((SdfListHead *)(u32)list, color, primitive,
                          left, top, 0, 0,
                          right, top, 0x2000, 0,
                          left, bottom, 0, 0xE00,
@@ -1472,7 +1467,7 @@ void func_0022CE30(s32 list, s32 primitive, s32 color, s32 depth, f32 scale) {
 }
 
 void btlBuildOverlayQuadPacket(s32 packet, s32 first, s32 second, s32 color) {
-    sdfBuildPacketE(packet, second, first, 0x7000, 0x7900, 0x9000, 0x7900, 0x7000,
+    sdfBuildPacketE((SdfListHead *)(u32)packet, second, first, 0x7000, 0x7900, 0x9000, 0x7900, 0x7000,
                   0x8700, 0x9000, 0x8700, color, 0);
 }
 

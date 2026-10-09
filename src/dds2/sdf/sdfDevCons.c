@@ -147,4 +147,27 @@ INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033D2D8);
 
 INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033D480);
 
-INCLUDE_ASM(const s32, "sdf/sdfDevCons", func_0033D568);
+typedef struct DevConsStackPackets {
+    u8 header[0x30];
+    u8 data[0x1000]; /* packet storage handed to the console buffer setup */
+    u8 trailer[0x10];
+} DevConsStackPackets;
+
+extern DevConsState *D_00438AB0;
+void func_0033D480(ConsBuf *arg0, void *arg1, s32 arg2);
+void func_0033D2D8(DevConsState *arg0, ConsBuf *arg1);
+
+/* Render every console in the global chain into a stack packet buffer and submit it. */
+void func_0033D568(void) {
+    DevConsStackPackets storage;
+    ConsBuf packetBuffers;
+    DevConsState *console;
+
+    if (D_00438AB0 != NULL) {
+        func_0033D480(&packetBuffers, storage.data, 0x1000);
+        for (console = D_00438AB0; console != NULL; console = console->unk4) {
+            func_0033D2D8(console, &packetBuffers);
+        }
+        sdfDevConsKickPacketDma(&packetBuffers);
+    }
+}
