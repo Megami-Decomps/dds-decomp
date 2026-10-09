@@ -2,6 +2,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "itf.h"
+#include "itf_panel_api.h"
 #include "sdf.h"
 
 #define ITF_PANEL_PACKET_LIST_BYTES 0x20

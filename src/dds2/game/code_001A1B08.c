@@ -4,6 +4,7 @@
 #include "itf_mes_window.h"
 #include "sdf.h"
 #include "itf_panel_draw.h"
+#include "itf_panel_api.h"
 
 #define ITF_PANEL_COLUMN_COUNT 4
 #define ITF_PANEL_ROW_COUNT 2
@@ -98,7 +99,6 @@ extern PanelHold itfHeldPanelCursor;
 
 extern PanelEntry itfWindowSlots[];
 
-extern void itfAdvancePanelLayoutAndNotify(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern void itfMesCleanupWindow(s32 window, s32 arg1);
 extern u32 scrGetWindow(void);
 extern void scrSetIntegerReturnValue(s32);

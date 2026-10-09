@@ -3,6 +3,7 @@
 #include "sdf_resource.h"
 #include "itf.h"
 #include "itf_mes_window.h"
+#include "itf_panel_api.h"
 #include "kwln.h"
 
 
@@ -118,10 +119,6 @@ extern void itfResetBattleFadeState();
 extern s32 func_00195ED8();
 
 extern UiSprite *func_00199828(s32 kind, u32 payload);
-
-extern void itfSetPanelLayoutAndNotify();
-
-extern void itfPanelUpdateValuesAndNotify();
 
 #define ITF_MES_MAGIC_MSG0 0x3047534d
 #define ITF_MES_MAGIC_MSG1 0x3147534d
