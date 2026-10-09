@@ -14,17 +14,7 @@ typedef struct {
     f32 unk8;
 } BlendArg;
 
-typedef struct VTab {
-    void (*invoke)(void);
-    void (*callback04)(void *, void *);
-    void (*sample)(void *, f32);
-    void (*callback0C)(void *);
-    void (*blend)(void *, f32, f32);
-} VTab;
 
-typedef struct VObj {
-    VTab *vtable;
-} VObj;
 
 
 typedef SdfMotionTextParamSnapshot Blk;
@@ -78,8 +68,9 @@ extern void *D_00398318[];
 extern void *D_00398330[];
 extern void *D_00398348[];
 
-void sdfInvokeMotionObjectCallback(VObj *object) {
-    object->vtable->invoke();
+/* Release the allocation retained by this motion binding. */
+void sdfInvokeMotionObjectCallback(SdfMotionBindingHead *object) {
+    object->dispatch->releaseStorage(object);
 }
 
 /* Install the binding's dispatch table and source without touching its payload. */
@@ -156,7 +147,7 @@ void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 b
     s32 i;
     MotionEntry *entry;
     u8 *bindingData;
-    VObj *object;
+    SdfMotionBindingHead *object;
 
     motion->motionIndex = motionIndex;
     if (blendDurationFrames > 0.0f) {
@@ -164,7 +155,7 @@ void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 b
         motion->blendStartFrame = -blendLeadFrames;
         for (i = 0; i < motion->request->usedCount; i++) {
             object = ((void **)motion->request->buffer)[i];
-            object->vtable->callback0C(object);
+            object->dispatch->capturePrevious(object);
         }
     } else {
         motion->blendDurationFrames = 0.0f;
@@ -185,7 +176,7 @@ void sdfMotionInitialize(Motion *motion, s32 motionIndex, s32 loopEnabled, f32 b
     bindingData = (u8 *)entry->bindingData;
     for (i = 0; i < motion->request->usedCount; i++) {
         object = ((void **)motion->request->buffer)[i];
-        object->vtable->callback04(object, bindingData);
+        object->dispatch->bindKeyTrack(object, (SdfMotionKeyTrack *)bindingData);
         bindingData += *(u32 *)bindingData;
     }
 }
@@ -201,7 +192,7 @@ void sdfMotionSampleAtFrame(Motion *motion, f32 frame) {
     f32 elapsed;
     f32 duration;
     f32 weight;
-    VObj *object;
+    SdfMotionBindingHead *object;
 
     motion->state = SDF_MOTION_STATE_SAMPLING;
     duration = motion->blendDurationFrames;
@@ -218,13 +209,13 @@ void sdfMotionSampleAtFrame(Motion *motion, f32 frame) {
         }
         for (i = 0; i < motion->request->usedCount; i++) {
             object = ((void **)motion->request->buffer)[i];
-            object->vtable->blend(object, frame, weight);
+            object->dispatch->blend(object, frame, weight);
         }
     } else {
         count = motion->request->usedCount;
         for (i = 0; i < count; i++) {
             object = ((void **)motion->request->buffer)[i];
-            object->vtable->sample(object, frame);
+            object->dispatch->sample(object, frame);
         }
     }
 }
