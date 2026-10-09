@@ -314,7 +314,7 @@ void func_0032A440(s32 size) {
 
     sceGsResetPath();
     D_004389D8 = 1;
-    func_00329CE0(graph, 1, 1);
+    sdfGraphApplyModeDefaults(graph, 1, 1);
     sdfGraphRecreateBuffers(graph);
     D_004389D9 = 0;
     sdfBufferSlotIndices[0] = sdfBufferSlotIndices[1] = -1;

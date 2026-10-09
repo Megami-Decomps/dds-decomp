@@ -7336,6 +7336,7 @@ sdfDevRpcBuffer = 0x003F9B90;
 sndMidiTrackState = 0x003FE0C0;
 sndTrackBalanceEntries = 0x003FE250;
 sdfIpuStreamThreadStack = 0x003FEB00;
+sdfGraphApplyModeDefaults = 0x002D0E30; // type:func
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
 kwlnTaskAdvanceStartDelays = 0x00100AE0; // type:func  // dds2 0x001009C8
@@ -9919,7 +9920,6 @@ func_002D00F8 = 0x002D00F8; // type:func
 func_002D0380 = 0x002D0380; // type:func
 func_002D0750 = 0x002D0750; // type:func
 func_002D0D70 = 0x002D0D70; // type:func
-func_002D0E30 = 0x002D0E30; // type:func
 func_002D1020 = 0x002D1020; // type:func
 func_002D1080 = 0x002D1080; // type:func
 func_002D1380 = 0x002D1380; // type:func

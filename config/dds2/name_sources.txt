@@ -6008,6 +6008,7 @@
 0x00329A00	sdfGetGeneralHeapStats	inferred	confidence=high; matched-C; src/dds2/game/code_00329600.c:136:func_00329A00; Peer-matched C proposal; M141; source=names_pending_main.tsv:131 [names_qp12_apply.tsv]
 0x00329AA8	sdfFindGeneralBlockContaining	inferred	confidence=high; matched-C; src/dds2/game/code_00329600.c:138:func_00329AA8; Returns the used general-heap block containing the supplied address in its half-open range, or NULL when the end marker is reached.; source=names_pending_main.tsv:130 [names_qp11.tsv]
 0x00329B18	sdfSendNamedResourceRequest	inferred	Allocates a request containing name length, name and payload for transfer. [names_reviewed21.tsv]
+0x00329CE0	sdfGraphApplyModeDefaults	inferred	Selects the display-mode row, initializes its dimensions and formats, and optionally clears the buffer pointers.
 0x00329D38	sdfGraphSetDisplayMode	inferred	Sets the global display mode and marks graphics state for refresh.
 0x00329D70	sdfGraphReleaseBuffers	inferred	Byte-identical dds1 twin 0x002D0EC0; Releases and clears three graph buffer pointers. [names_conflicts.tsv]
 0x00329DB8	sdfGraphRecreateBuffers	inferred	Byte-identical dds1 twin 0x002D0F08; Releases existing graph buffers and allocates three using dimensions and modes from the graph. [names_conflicts.tsv]
