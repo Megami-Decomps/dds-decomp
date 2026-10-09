@@ -52,7 +52,7 @@ typedef struct MenuProgressNode {
     u32 entryIndex; /* 0x60: party slot or command-list entry */
     u32 requiredAmount; /* 0x64 */
     u8 pad68[8];
-    s32 panel; /* 0x70: allocated panel resource */
+    void *panel; /* 0x70: allocated paired percentage-panel owner */
 } MenuProgressNode;
 
 typedef struct {
@@ -114,7 +114,7 @@ extern u8 mnuHasEffectResourceHandle(MenuResourceWork *);
 extern void mnuReleaseEffectResource(MenuResourceWork *);
 extern MenuResourceWork *mnuRequestEffectResource(const char *, const char *);
 
-extern s32 mnuCreateDualPercentPanel(DatPartyRecord *, s32);
+extern void *mnuCreateDualPercentPanel(DatPartyRecord *, s32);
 
 
 extern s32 mnuPercentOrHundred(u16, u16);
@@ -255,7 +255,7 @@ INCLUDE_ASM(const s32, "game/code_00248580", func_00248810);
 
 /* Allocate adjacent HP/MP percentage panels, preserving the native 0x54 stride.
  * The source is a party-vitals record; the context supplies the panel style. */
-s32 mnuCreateDualPercentPanel(DatPartyRecord *unit, s32 workAddress) {
+void *mnuCreateDualPercentPanel(DatPartyRecord *unit, s32 workAddress) {
     s32 panel = (s32)sdfAllocSizeClassBlock(MNU_PERCENT_PAIR_BYTES);
     mnuDrawPanelSequenceByRow(panel, 0, 0, 0x1e,
         mnuPercentOrHundred(unit->hp, unit->maxHp),
@@ -263,12 +263,13 @@ s32 mnuCreateDualPercentPanel(DatPartyRecord *unit, s32 workAddress) {
     mnuDrawPanelSequenceByRow(panel + MNU_PERCENT_PANEL_BYTES, 1, 0, 0x1e,
         mnuPercentOrHundred(unit->mp, unit->maxMp),
         *(s32 *)(workAddress + 0xe0));
-    return panel;
+    return (void *)panel;
 }
 
 /* Release both texture sets and the backing allocation for a nonzero panel pair. */
-void mnuReleaseDualPercentPanel(s32 panel) {
-    if (panel != 0) {
+void mnuReleaseDualPercentPanel(void *panelOwner) {
+    s32 panel = (s32)panelOwner;
+    if (panelOwner != NULL) {
         mnuReleaseSpriteTextures((s32 *)panel);
         mnuReleaseSpriteTextures((s32 *)((s32)panel + MNU_PERCENT_PANEL_BYTES));
         sdfReleaseChipBlock(panel);
