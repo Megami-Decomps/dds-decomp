@@ -76,8 +76,46 @@ typedef struct BattleQueryEffectState {
     u16 count;
 } BattleQueryEffectState;
 
+/* func_00229728 allocates 12 bytes for mode 779's guard result and
+ * eight bytes for mode 782's marked-scene/summon selection. */
+typedef struct BattleGuardState {
+    BtlUnit *unit;
+    BtlUnit *guard;
+    s8 guardHandled;
+    s8 enemyCommand;
+    s8 alternateTarget;
+    u8 pad0B;
+} BattleGuardState;
+
+typedef struct BattleSummonState {
+    s8 active;
+    u8 previousActive;
+    u8 actionFlag;
+    u8 pad03;
+    s32 selectedUnitId;
+} BattleSummonState;
+
+typedef char BattleGuardExtent[(sizeof(BattleGuardState) == 12) ? 1 : -1];
+typedef char BattleSummonExtent[(sizeof(BattleSummonState) == 8) ? 1 : -1];
+typedef char BattleGuardFlagOffset[((unsigned int)&((BattleGuardState *)0)->guardHandled == 8) ? 1 : -1];
+typedef char BattleSummonIdOffset[((unsigned int)&((BattleSummonState *)0)->selectedUnitId == 4) ? 1 : -1];
+
+/* Mode 789 allocates and clears 16 bytes in 00229728. Actor task creation
+ * owns word zero, Brahma scaling uses word one, and 00222100 consumes byte 8. */
+typedef struct BattleActionState {
+    BtlUnit *actor;
+    f32 scale;
+    s8 pending;
+    u8 pad09[7];
+} BattleActionState;
+typedef char BattleActionExtent[(sizeof(BattleActionState) == 16) ? 1 : -1];
+typedef char BattleActionPendingOffset[((unsigned int)&((BattleActionState *)0)->pending == 8) ? 1 : -1];
+
 typedef union BattleEffectPayload {
     BtlSelectCtrl selection;
+    BattleGuardState guard;
+    BattleSummonState summon;
+    BattleActionState action;
     BattleMarkedCommandState markedCommand;
     BattleLinkedEffectState linked;
     BattleEventResourceTriggerState eventTrigger;
