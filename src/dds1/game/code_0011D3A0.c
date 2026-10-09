@@ -1049,9 +1049,44 @@ s32 func_00121A58(s32 scene, s32 floor, f32 xOffset, f32 zOffset,
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FB18);
+void func_00121B88(s32 room, s32 stage, f32 x, f32 z, f32 unused) {
+    s32 neighbors[9][2] = {
+        {-1, -1}, {0, -1}, {1, -1},
+        {-1, 0}, {0, 0}, {1, 0},
+        {-1, 1}, {0, 1}, {1, 1}
+    };
+    f32 originX;
+    f32 originZ;
+    FieldStageCoordinate *record;
+    FldAreaWork *area;
+    s32 cellX;
+    s32 cellZ;
+    u32 stageIndex;
+    s32 i;
+    s32 neighborX;
+    s32 neighborZ;
+    s32 column;
+    s32 bit;
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00121B88);
+    fldGetSceneEntryPosition(room, &originX, &originZ);
+    area = &fldAreaState;
+    record = fldFindStageCoordinateRecord(area->area, stage);
+    if (record == NULL) {
+        return;
+    }
+    cellX = (s32)((x + originX) - record->originX) / record->cellSize;
+    cellZ = (s32)((z + originZ) - record->originZ) / record->cellSize;
+    stageIndex = fldFindStageCoordinateIndex(area->area, stage);
+    for (i = 0; i < 9; i++) {
+        neighborX = cellX + neighbors[i][0];
+        neighborZ = -(cellZ + neighbors[i][1]);
+        bit = neighborX % 8;
+        column = neighborX / 8;
+        if (column >= 0 && neighborZ >= 0 && column < record->cols && neighborZ < record->rows) {
+            datGameState->pad159D0[neighborZ * 10 + stageIndex * 800 + column] |= 1 << bit;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00121DE0);
 
