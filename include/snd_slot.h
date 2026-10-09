@@ -30,6 +30,7 @@ typedef char SoundSlotResourcesOffsetCheck[((u32)&((SoundSlotOwner *)0)->work.re
 typedef char SoundSlotPreviousOffsetCheck[((u32)&((SoundSlotOwner *)0)->prev == 0x100) ? 1 : -1];
 typedef char SoundSlotNextOffsetCheck[((u32)&((SoundSlotOwner *)0)->next == 0x104) ? 1 : -1];
 
+SoundSlotOwner *sndFindListNodeForChannel(s32 category, s32 id);
 void sndReleaseSlotOwner(SoundSlotOwner *owner);
 
 #endif
