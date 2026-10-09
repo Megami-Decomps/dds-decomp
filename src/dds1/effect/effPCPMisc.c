@@ -4203,7 +4203,6 @@ void effPcpReleaseNestedWork(EffPCPBeamNode *work) {
 extern u8 D_00355640[];
 extern SdfPoolNode *D_00355688[];
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfInitPacketList(SdfListHead *list);
 extern void sdfComposeVuMatrixFromRegisters(void);
 extern s32 func_0015FE20(EffPCPBeamDrawParams *params);
 

@@ -349,7 +349,6 @@ INCLUDE_ASM(const s32, "game/code_00242608", func_00242C30);
 extern s32 strcmp(const char *a, const char *b);
 
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfInitPacketList(SdfListHead *packet);
 extern void itfSendTablePacket(SdfListHead *packet, s32 table, s32 mode);
 extern void itfQueueTextureBoundQuadPacket(void *, void *, void *, s32, SdfTex *, s32, SdfListHead *);
 extern s32 D_00368BA8[4];

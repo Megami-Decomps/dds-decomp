@@ -1,5 +1,6 @@
 #include "bill_object_api.h"
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "eff_blur.h"
 
@@ -80,7 +81,6 @@ void effBlurReleaseFirstResource(EffBlurScatterWork *work) {
 extern u32 func_0011E278(void);
 extern s32 sdfAllocPacketAligned(s32 size);
 struct SdfListHead;
-extern void sdfInitPacketList(struct SdfListHead *list);
 extern void effAppendBlurRenderState(void *list, s32 blendControl, u32 resource);
 extern void effAppendBlurRectanglePackets(void *list, EffBlurQuad *quad, u8 fixedPoint);
 extern void effDrawBlurListWithFramePacket(void *list);

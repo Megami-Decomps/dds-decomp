@@ -141,7 +141,6 @@ extern f32 sdfSinPoly(f32);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern void btlActivateRuntime(s32 mode);
 extern void dds3SetWorldObjectDataValue(u64, s8);
-extern void sdfInitPacketList(SdfListHead *);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
