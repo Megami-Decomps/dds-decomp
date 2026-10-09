@@ -917,7 +917,8 @@ typedef struct MenuStaffContext {
     u8 pad100[4];
     MenuWindowContainer *skillWindow; /* 0x104: field-skill window; 002AAEA0 reads list->last. */
     MenuWindowContainer *activeWindow; /* 0x108 */
-    u8 pad10C[0xC];
+    MenuWindowContainer *resourceListWindow; /* 0x10C: third window made by mnuStaffInitResourceLists. */
+    u8 pad110[8];
     struct MenuScrollPanel *scrollPanel; /* 0x118: owned camp scroll panel */
     u8 pad11C[0x168];
     /* 002BD480 consumes the full page owner; its first list is at 0xA914. */
@@ -935,6 +936,9 @@ typedef struct MenuStaffContext {
     MenuFadeFields fade; /* 0xB10C: initialized by 002A9068; used by 002BAF50/002BB0E8. */
     u8 tail[0x10];        /* 0xB1D0: remaining opaque bytes of the 0xB1E0 allocation. */
 } MenuStaffContext;
+
+typedef char MenuStaffContext_resourceListWindow_offset[
+    ((u32)&((MenuStaffContext *)0)->resourceListWindow == 0x10C) ? 1 : -1];
 
 /* Five owned windows and their selection/transition state share one 0x54 allocation. */
 typedef struct MenuStaffChoices {
