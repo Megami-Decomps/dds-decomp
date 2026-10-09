@@ -3486,9 +3486,9 @@
 0x0023EA28	evtOpQueueWorldObjectPendingValue	inferred	Stores a pending value on the world object and resets its timer. [names_reviewed8.tsv]
 0x0023EA90	evtOpClearWorldObjectPendingValue	inferred	Clears the pending value and arms the world object timer. [names_reviewed8.tsv]
 0x0023EAE8	evtOpModelLodChg	inferred	DDS1 twin 0x00223EB0, MODEL_LOD_CHG strings [names_M52_EvtEff.tsv]
-0x0023EBE8	evtSetWorldUnitFirstVector	inferred	Loads three script float operands into a vector and calls effObjSetInnerFirstVec on the selected world unit.
+0x0023EBE8	evtSetWorldUnitPosition	inferred	Looks up a kind-5 world node by ID and stores three position components with initialized W=0. Native registration takes four operands.
 0x0023EC80	evtOpSetWorldUnitRotationFromAngles	inferred	Converts supplied degree angles into the unit quaternion vector. [names_reviewed8.tsv]
-0x0023ED68	evtSetWorldUnitThirdVector	inferred	Loads three script float operands with homogeneous w=1 and calls effObjSetInnerThirdVec on the selected world unit.
+0x0023ED68	evtSetWorldUnitScale	inferred	Looks up a kind-5 world node by ID and stores three scale components with W=1. Native registration takes four operands.
 0x0023EE08	evtOpDeprecatedModelMotion	inferred	Registered MODEL_MOTION script handler; resolves a unit, prepares motion state with mode 0, and logs that the command will be prohibited.
 0x0023EFF8	evtInvokeStoredWindowMotion	inferred	Invokes the motion slot stored for the current window callback. [names_reviewed8.tsv]
 0x0023F010	evtLipsExecFunction	inferred	DDS1 twin 0x002243D8 [names_M52_EvtEff.tsv]
@@ -3547,9 +3547,9 @@
 0x00241A70	evtCommandAddFlaggedEffectUnitToWorld	inferred	Sets a status flag on explicitly selected effect unit before registering it with world. [names_reviewed6.tsv]
 0x00241C20	evtCommandCreateWorldEffectObject	inferred	Creates a world object at origin with identity rotation and returns its world ID. [names_reviewed6.tsv]
 0x00241CB0	evtCommandDestroyEffectUnitById	inferred	src/dds2/event/evtCommand.c func_00241CB0: Reads script ID and destroys world kind 4 list node if found. Twin of DDS1 func_00227050. [names_reviewed24.tsv]
-0x00241CF0	evtCommandSetEffectUnitFirstVector	inferred	Resolves unit by ID or implicit current unit; writes three float components to first vector. [names_reviewed6.tsv]
+0x00241CF0	evtCommandSetEffectUnitPosition	inferred	Sets three position components on a kind-4 effect unit, or the current player for a negative ID; leaves the initialized fourth component zero. Native registration takes four operands.
 0x00241D98	evtCommandSetEffectUnitEulerRotation	inferred	readability/matching review (QP16)
-0x00241E70	evtCommandSetEffectUnitSecondVector	inferred	Resolves unit by ID or implicit current unit; writes four floats to second vector. [names_reviewed6.tsv]
+0x00241E70	evtCommandSetEffectUnitQuaternionRotation	inferred	Stores four quaternion components on a kind-4 effect unit, or the current player for a negative ID; preserves raw input without angle conversion. Native registration takes five operands.
 0x00242368	evtCommandEnableSolarAdvance	inferred	confidence=high; matched-C; src/dds2/event/evtCommand.c:680:func_00242368; Enables automatic solar-phase progression and reports script command completion.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00242388	evtCommandDisableSolarAdvance	inferred	confidence=high; matched-C; src/dds2/event/evtCommand.c:685:func_00242388; Disables automatic solar-phase progression and reports script command completion.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x002423A8	evtCommandReadMirroredSolarPhase	inferred	Byte-identical DDS1 counterpart: Places the mirrored solar phase in the script VM command result.
