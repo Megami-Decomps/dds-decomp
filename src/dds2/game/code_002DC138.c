@@ -507,7 +507,6 @@ void mdlMarkAndProcessObjectNodes(void) {
     } while (node != NULL);
 }
 
-typedef struct FileQueue FileQueue;
 
 typedef struct EffResourceConfig {
     u8 unknown00[0x34];
