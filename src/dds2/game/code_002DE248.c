@@ -155,9 +155,12 @@ typedef struct EffDrawableAsset {
 
 typedef struct EffDrawableAssetWork {
     u32 unk00;
-    s32 asset;
+    SdfAsset *asset;
     u32 state;
 } EffDrawableAssetWork;
+
+typedef char EffDrawableAssetWorkSizeCheck[(sizeof(EffDrawableAssetWork) == 0xC) ? 1 : -1];
+typedef char EffDrawableAssetWorkAssetOffsetCheck[((u32)&((EffDrawableAssetWork *)0)->asset == 4) ? 1 : -1];
 
 typedef struct EffMotionResourceConfig {
     u8 pad00[0x4C];
@@ -2486,18 +2489,18 @@ EffClassWork *effCreateResourceInstanceA(u16 kind, void *source, u32 extra) {
     return work;
 }
 
-u8 *effCreateFileResourceInstance(u8 *work) {
-    u32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
+EffClassWork *effCreateActiveInstanceFromFile(FileJobPayload *request) {
+    u32 *secondary = fileResolveSecondaryBuffer(request);
     void *source;
-    switch (((FileJob *)work)->slots[0].selector) {
+    switch (request->primary.selector) {
     case 1:
         break;
     case 4:
         secondary = NULL;
         break;
     }
-    source = fileResolvePrimaryBuffer((FileJobPayload *)work);
-    return (u8 *)effCreateResourceInstanceA(((FileJob *)work)->option, source, (u32)secondary);
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateResourceInstanceA(request->option, source, (u32)secondary);
 }
 
 
@@ -5506,18 +5509,18 @@ EffClassWork *effCreateResourceInstanceB(u16 kind, void *source, u32 extra) {
 
 extern EffClassWork *effCreateResourceInstanceB(u16, void *, u32);
 
-u8 *effCreateFileResourceInstanceB(u8 *work) {
-    u32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
+EffClassWork *effCreateBlockResourceFromFile(FileJobPayload *request) {
+    u32 *secondary = fileResolveSecondaryBuffer(request);
     void *source;
-    switch (((FileJob *)work)->slots[0].selector) {
+    switch (request->primary.selector) {
     case 1:
         break;
     case 4:
         secondary = NULL;
         break;
     }
-    source = fileResolvePrimaryBuffer((FileJobPayload *)work);
-    return (u8 *)effCreateResourceInstanceB(((FileJob *)work)->option, source, (u32)secondary);
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateResourceInstanceB(request->option, source, (u32)secondary);
 }
 
 void effDestroyBlockResourceWork(EffClassWork *obj) {
@@ -6047,11 +6050,11 @@ EffClassWork *effCreateResourceInstanceC(u16 kind, void *source) {
     return work;
 }
 
-void effResourceInstanceCreateFromFile(s32 work) {
+EffClassWork *effCreateModelBlockFromFile(FileJobPayload *request) {
     void *source;
 
-    source = fileResolvePrimaryBuffer((FileJobPayload *)work);
-    effCreateResourceInstanceC(((FileJob *)work)->option, source);
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateResourceInstanceC(request->option, source);
 }
 
 void effDestroyModelBlockWork(EffClassWork *work) {
@@ -6787,12 +6790,13 @@ typedef struct EffActiveResource {
         s32 signedIndex;
         u16 shortIndex;
     } kind;
-    u32 resource;        // 0x30
+    void *resource;      // 0x30; heterogeneous kind-specific resource pointer
     u8 pad_34[4];
     void *payload;       // 0x38
     u8 pad_3C[4];
 } EffActiveResource;
 typedef char EffActiveResourceSizeCheck[sizeof(EffActiveResource) == 0x40 ? 1 : -1];
+typedef char EffActiveResourceResourceOffsetCheck[((u32)&((EffActiveResource *)0)->resource == 0x30) ? 1 : -1];
 
 /* Entire 40-byte payload copied for resource kind 1. */
 typedef struct EffActorLightConfig {
@@ -7843,7 +7847,7 @@ EffDrawableAssetWork *effCreateDrawableAssetWithDefaultOpacity() {
     EffDrawableAsset *position;
     work->state = 0;
     position = (EffDrawableAsset *)sdfCreateAssetWithDrawEntries();
-    work->asset = (s32)position;
+    work->asset = (SdfAsset *)position;
     position->opacity = 1.0f;
     return work;
 }
@@ -7856,14 +7860,14 @@ EffDrawableAssetWork *effCloneDrawableAssetWork(EffActiveResource *owner) {
     return effCreateDrawableAssetWithDefaultOpacity(owner->payload);
 }
 
-void effReleaseQueuedDrawableAssetWork(u32 work) {
-    s32 resource;
+void effReleaseQueuedDrawableAssetWork(EffDrawableAssetWork *work) {
+    SdfAsset *resource;
 
-    resource = ((EffDrawableAssetWork *)work)->asset;
-    if (resource != 0) {
-        sdfQueueAssetRelease(resource);
+    resource = work->asset;
+    if (resource != NULL) {
+        sdfQueueAssetRelease((s32)resource);
     }
-    sdfReleaseChipBlock((void *)work);
+    sdfReleaseChipBlock(work);
 }
 
 void func_002F8640(void) {
@@ -8039,7 +8043,7 @@ EffActiveResource *effCreateResourceInstance(u16 kind, void *source, u16 seconda
 
     if (btlIsRuntimeAllocated() != 0) {
         if (effRuntimeResourceOperations[kind].createResource != NULL) {
-            effect->resource = (u32)effRuntimeResourceOperations[kind].createResource(source, secondaryKind, secondary, param);
+            effect->resource = effRuntimeResourceOperations[kind].createResource(source, secondaryKind, secondary, param);
         }
         if (effRuntimeResourceOperations[kind].initialize != NULL) {
             effRuntimeResourceOperations[kind].initialize(effect);
@@ -8071,10 +8075,10 @@ EffActiveResource *effDuplicateActiveResource(EffActiveResource *source) {
     if (effRuntimeResourceOperations[kind].cloneResource == NULL) {
         effect = effCreateResourceInstance(source->kind.shortIndex, source->payload, 0, 0, 0);
     } else {
-        u32 resource;
+        void *resource;
         u32 activeKind;
         effect = effAllocateResourcePayload(source->kind.shortIndex, source->payload);
-        resource = (u32)effRuntimeResourceOperations[source->kind.signedIndex].cloneResource(source);
+        resource = effRuntimeResourceOperations[source->kind.signedIndex].cloneResource(source);
         activeKind = source->kind.index;
         effect->resource = resource;
         if (effRuntimeResourceOperations[activeKind].initialize != NULL) {
