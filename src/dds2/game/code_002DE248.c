@@ -1,4 +1,5 @@
 #include "btl_motion_transform.h"
+#include "sdf_packet_list.h"
 #include "eff_bill.h"
 #include "itf_draw_grid.h"
 #include "eff_class_work_api.h"
@@ -74,7 +75,6 @@ static inline void effSubmitSurfacePacket(SdfPoolNode *surface, void *list) {
 
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(void *);
-extern void sdfAppendPacket(void *, void *);
 extern void *func_00167A10(EffPacketParams *);
 extern u32 D_003E9D80[];
 extern SdfPoolNode *D_003E9DC0[];
@@ -2851,7 +2851,7 @@ setTexture:
         packet->registerList = 0xE;
         packet->registerValue = 0x31801;
         packet->registerAddress = 0x47;
-        sdfAppendPacket(list, packet);
+        sdfAppendPacket(list, (u32)packet);
     }
 
     kind = track->kind;
@@ -2939,7 +2939,7 @@ setTexture:
         packet->registerList = 0xE;
         packet->registerValue = 0x51801;
         packet->registerAddress = 0x47;
-        sdfAppendPacket(list, packet);
+        sdfAppendPacket(list, (u32)packet);
     }
     effSubmitSurfacePacket(surface, list);
 }
@@ -3478,7 +3478,7 @@ void effDrawFourPointGroups(u8 *work, void *matrix) {
             packet->registerList = 0xE;
             packet->registerValue = 0x31801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, packet);
+            sdfAppendPacket(list, (u32)packet);
         }
         remaining = set->rows;
         D_004582E0[0].colors = (u32 *)set->tail;
@@ -3506,7 +3506,7 @@ void effDrawFourPointGroups(u8 *work, void *matrix) {
             packet->registerList = 0xE;
             packet->registerValue = 0x51801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, packet);
+            sdfAppendPacket(list, (u32)packet);
         }
         if (set->type < 5) {
             effSubmitSurfacePacket(D_003E9C28[set->type], list);
@@ -3523,7 +3523,7 @@ void effDrawFourPointGroups(u8 *work, void *matrix) {
             blendPacket->gifTag = ((u64)0x10000000 << 32) | 0x8001;
             blendPacket->registerList = 0xE;
             blendPacket->registerAddress = 0x42;
-            sdfAppendPacket(setup, blendPacket);
+            sdfAppendPacket(setup, (u32)blendPacket);
             effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], setup);
             blendPacket = (EffGsPacket *)sdfAllocPacketAligned(0x30);
             blendPacket->dmaTag = 2;
@@ -3539,7 +3539,7 @@ void effDrawFourPointGroups(u8 *work, void *matrix) {
                 break;
             }
             blendPacket->registerAddress = 0x42;
-            sdfAppendPacket(list, blendPacket);
+            sdfAppendPacket(list, (u32)blendPacket);
             effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], list);
         }
     }
@@ -4855,7 +4855,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerList = 0xE;
             packet->registerValue = 0x31801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, packet);
+            sdfAppendPacket(list, (u32)packet);
         }
         remaining = set->rows;
         D_004583A0[0].colors = (u32 *)set->tail;
@@ -4883,7 +4883,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerList = 0xE;
             packet->registerValue = 0x51801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, packet);
+            sdfAppendPacket(list, (u32)packet);
         }
         D_003E9DC0[set->type]->append((SdfListHead *)D_003E9DC0[set->type], list);
     }
@@ -6545,7 +6545,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerList = 0xE;
             packet->registerValue = 0x31801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, packet);
+            sdfAppendPacket(list, (u32)packet);
         }
         remaining = set->rows;
         D_00458430[0].colors = (u32 *)set->tail;
@@ -6573,7 +6573,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerList = 0xE;
             packet->registerValue = 0x51801;
             packet->registerAddress = 0x47;
-            sdfAppendPacket(list, packet);
+            sdfAppendPacket(list, (u32)packet);
         }
         D_003E9F38[set->type]->append((SdfListHead *)D_003E9F38[set->type], list);
     }
@@ -11856,7 +11856,7 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     packetList = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(packetList);
     sdfConsCreateDrawPacket(packetList, texture, 0);
-    sdfAppendPacket(packetList, packet);
+    sdfAppendPacket(packetList, (u32)packet);
     effSubmitSurfacePacket(&kwlnDrawSurfaces[surfaceId], packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
 }

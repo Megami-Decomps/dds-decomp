@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
 #include "kwln.h"
 #include "sdf.h"
@@ -66,7 +67,6 @@ extern s32 func_0035C860();
 
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
-extern void sdfAppendPacket(SdfListHead *, u32);
 
 extern void *func_0011F250(s32, s32, s32, s32, s32, s32, s32);
 

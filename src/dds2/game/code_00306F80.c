@@ -1,4 +1,5 @@
 #include "sdf_resource.h"
+#include "sdf_packet_list.h"
 #include "eff_resource_records.h"
 #include "itf.h"
 #include "fpu.h"
@@ -212,7 +213,6 @@ extern s32 sdfConsMeasurePacketWithHeader(s32 packet);
 extern s32 sdfAllocPacketAligned(s32);
 
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 
 /* Build the optional overlay and main packet, then dispatch their draw callback. */
 GridDrawWork *itfSubmitGridPacketsAndDraw(GridDrawWork *object, u8 *data, s32 kind) {

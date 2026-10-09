@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "eff_thunder_vector.h"
 #include "bill_object_api.h"
@@ -4205,7 +4206,6 @@ extern s32 sdfAllocPacketAligned(s32 size);
 extern void sdfInitPacketList(SdfListHead *list);
 extern void sdfComposeVuMatrixFromRegisters(void);
 extern s32 func_0015FE20(EffPCPBeamDrawParams *params);
-extern void sdfAppendPacket(SdfListHead *list, u32 packet);
 
 /* vu0 routine: compose the beam transform and submit batches of its vertices. */
 void effPcpDrawBeamGeometryNode(EffPCPBeamNode *node) {

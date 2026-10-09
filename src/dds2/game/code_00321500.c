@@ -261,12 +261,12 @@ MenuRuntimeRecord *func_00321C60(MenuRuntimeList *list, s32 x, s32 y, u8 kind,
     }
     record->state.kind = kind;
     record->state.directionDegrees = direction;
-    record->unk18 = 0.0f;
-    record->unk1C = 0.0f;
-    record->unk04 = x;
-    record->unk08 = y;
-    record->unk0C = offsetX * cos(angle + 1.5707963f) + offsetY * sin(angle + 1.5707963f);
-    record->unk10 = offsetY * cos(angle + 1.5707963f) - offsetX * sin(angle + 1.5707963f);
+    record->displacementX = 0.0f;
+    record->displacementY = 0.0f;
+    record->baseX = x;
+    record->baseY = y;
+    record->rotatedOffsetX = offsetX * cos(angle + 1.5707963f) + offsetY * sin(angle + 1.5707963f);
+    record->rotatedOffsetY = offsetY * cos(angle + 1.5707963f) - offsetX * sin(angle + 1.5707963f);
     record->angle = angle;
     record->speed = speed;
     record->remaining = remaining;
@@ -345,16 +345,16 @@ void mnuAdvanceMovingRuntimeRecords(MenuRuntimeList *list) {
         if (record->state.word & MNU_WORK_ACTIVE) {
             if ((record->state.kind & 0xF) >= 4) {
                 work = (MenuWorkEntry *)mnuGetActiveEffectWorkEntry();
-                record->unk04 = work->x0;
-                record->unk08 = mnuEvaluateTimedValue(work);
+                record->baseX = work->x0;
+                record->baseY = mnuEvaluateTimedValue(work);
             }
             pi = 3.1415926f;
             angle = record->state.directionDegrees * pi / 180.0f +
                     record->angle + 1.5707963f;
-            record->unk18 += record->speed * cos(angle);
-            record->unk1C -= record->speed * sin(angle);
-            x = record->unk18 + record->unk0C + record->unk04;
-            y = record->unk1C + record->unk10 + record->unk08;
+            record->displacementX += record->speed * cos(angle);
+            record->displacementY -= record->speed * sin(angle);
+            x = record->displacementX + record->rotatedOffsetX + record->baseX;
+            y = record->displacementY + record->rotatedOffsetY + record->baseY;
             if ((record->state.kind & 0xF) == 3) {
                 if (x < 0.0f) {
                     x = 0;
@@ -870,14 +870,14 @@ MenuRuntimeRecord *func_00323988(MenuWorkEntry *work, struct MnuShootingWork *co
         return NULL;
     }
     left = (s32)(work->x0 + (f32)parameters->hitOffsetX);
-    top = (s32)(work->y0 + (f32)parameters->unk26);
+    top = (s32)(work->y0 + (f32)parameters->hitOffsetY);
     right = left + parameters->hitWidth;
-    bottom = top + parameters->unk2A;
+    bottom = top + parameters->hitHeight;
     record = list->records;
     for (i = 0; i < list->capacity; i++, record++) {
         if (record->state.word & MNU_WORK_ACTIVE) {
-            s32 x = (s32)((record->unk0C + record->unk18) + record->unk04);
-            s32 y = (s32)((record->unk10 + record->unk1C) + record->unk08);
+            s32 x = (s32)((record->rotatedOffsetX + record->displacementX) + record->baseX);
+            s32 y = (s32)((record->rotatedOffsetY + record->displacementY) + record->baseY);
             s32 kind = record->state.kind & 0xF;
             s32 radiusX = D_0040B248[kind][0];
             s32 radiusY;
@@ -927,9 +927,9 @@ s32 func_00323DF0(MenuRuntimeList *list, struct MnuShootingWork *context) {
 
             if (parameters->hitWidth != 0) {
                 s32 left = entryX + parameters->hitOffsetX;
-                s32 top = entryY + parameters->unk26;
+                s32 top = entryY + parameters->hitOffsetY;
                 s32 right = left + parameters->hitWidth;
-                s32 bottom = top + parameters->unk2A;
+                s32 bottom = top + parameters->hitHeight;
                 MenuRuntimeRecord *record = list->records;
                 s32 recordCount = list->capacity;
                 s32 recordIndex = 0;
@@ -938,8 +938,8 @@ s32 func_00323DF0(MenuRuntimeList *list, struct MnuShootingWork *context) {
                     if (record->state.word & MNU_WORK_ACTIVE) {
                         s32 kind = record->state.kind & 0xF;
                         s32 radiusX = D_0040B248[kind][0];
-                        s32 centerX = (s32)((record->unk0C + record->unk18) + record->unk04);
-                        s32 centerY = (s32)((record->unk10 + record->unk1C) + record->unk08);
+                        s32 centerX = (s32)((record->rotatedOffsetX + record->displacementX) + record->baseX);
+                        s32 centerY = (s32)((record->rotatedOffsetY + record->displacementY) + record->baseY);
 
                         if (right >= centerX - radiusX && centerX + radiusX >= left) {
                             s32 radiusY = D_0040B248[kind][1];
@@ -1025,16 +1025,16 @@ s32 func_00324070(MenuWorkEntry *input) {
             continue;
         }
         left = entryX + parameters->hitOffsetX;
-        top = entryY + parameters->unk26;
+        top = entryY + parameters->hitOffsetY;
 
         right = left + parameters->hitWidth;
-        bottom = top + parameters->unk2A;
+        bottom = top + parameters->hitHeight;
         inputRecord = (MenuMovementRecord18 *)func_00322520(input->tag);
         parameters = func_00322550(inputRecord->parameterTag);
         inputLeft = (s32)(input->x0 + (f32)parameters->hitOffsetX);
-        inputTop = (s32)(input->y0 + (f32)parameters->unk26);
+        inputTop = (s32)(input->y0 + (f32)parameters->hitOffsetY);
         inputRight = inputLeft + parameters->hitWidth;
-        inputBottom = inputTop + parameters->unk2A;
+        inputBottom = inputTop + parameters->hitHeight;
 
         if (right < inputLeft || inputRight < left ||
             bottom < inputTop || inputBottom < top) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
@@ -117,7 +118,6 @@ extern SdfPoolNode *D_003B1520[];
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
 extern void sdfComposeVuMatrixFromRegisters(void);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 func_00167A10(ScatterRenderState *);
 struct SdfTextParam;
 extern void func_003332E8(struct SdfTextParam *, u32);

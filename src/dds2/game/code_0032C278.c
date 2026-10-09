@@ -159,7 +159,6 @@ extern s32 sdfPendingQueueSlots[2];
 
 s32 sdfAllocPacketAligned(s32 size);
 
-void sdfAppendPacketRange(SdfListHead *list, u32 packet, u32 end);
 void sdfAppendLinkedPacketNode(SdfLinkedPacketList *list, u32 *node);
 
 extern void sdfBuildFrameDepthScissorPacket(SdfPacket *, s32, s32, s32, s32, s32, s32, s32, s32);

@@ -66,10 +66,10 @@ void func_0031A288(MenuRuntimeRecord *record, MenuWorkEntry *entry, MnuShootingW
     case 0:
     case 5:
         parameters = func_00322550(registry->parameterIndex);
-        x = (s32)(record->unk0C + record->unk18 + record->unk04);
+        x = (s32)(record->rotatedOffsetX + record->displacementX + record->baseX);
         y = mnuEvaluateTimedValue(entry);
-        y += parameters->unk26;
-        y += parameters->unk2A;
+        y += parameters->hitOffsetY;
+        y += parameters->hitHeight;
         itfClaimCompactSlotWithPayload(x + originX, (s32)y + originY, work->tintWork);
         if (entry->flagsBits.finished) {
             if (work->completed == 0) {
