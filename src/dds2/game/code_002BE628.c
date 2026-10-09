@@ -102,7 +102,6 @@ extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 typedef struct MenuPanelItem MenuPanelItem;
 extern s32 D_00437C9C;
 extern s32 func_002B8E30();
-extern s32 mnuScrollListToEnd(struct MenuList *list);
 
 extern void func_002BE730();
 extern void func_002BED10(MenuQueuedCommand *entry);
@@ -1731,7 +1730,7 @@ s32 mnuMapPadMaskToFlags(s32 buttonMask) {
 
 void mnuHandleListPageJumpInput(s32 active, MenuWindowContainer *window, u32 *buttons) {
     s32 top = 0;
-    s32 bottom = 0;
+    struct MenuListNode *bottom = NULL;
     MenuList *list = window->list;
 
     if (active != 0) {

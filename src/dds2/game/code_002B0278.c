@@ -3407,9 +3407,9 @@ void mnuSelectLastListNode(MenuList *list) {
     mnuSeekListNode(list->count - 1, list);
 }
 
-s32 mnuAdvanceListWindowStart(MenuList *list) {
-    s32 previousCursor = (s32)list->cursor;
-    s32 last = (s32)list->last;
+MenuListNode *mnuAdvanceListWindowStart(MenuList *list) {
+    MenuListNode *previousCursor = list->cursor;
+    MenuListNode *last = list->last;
     MenuListNode *head = list->head;
 
     if (previousCursor == last) {
@@ -3425,26 +3425,26 @@ s32 mnuAdvanceListWindowStart(MenuList *list) {
 }
 
 /* Step the visible head back one node when a full window follows it. */
-s32 mnuRetreatListWindowStart(MenuList *list) {
+MenuListNode *mnuRetreatListWindowStart(MenuList *list) {
     MenuListNode *cursor = list->cursor;
     MenuListNode *head = list->head;
     MenuListNode *node;
     s32 i;
 
     if (cursor == list->first) {
-        return (s32)cursor;
+        return cursor;
     }
     node = head;
     for (i = 0; i < list->visibleCount; i++) {
         if (node == NULL) {
-            return (s32)cursor;
+            return cursor;
         }
         node = node->next;
     }
     head = head->prev;
     list->head = head;
     list->windowOffset++;
-    return (s32)cursor;
+    return cursor;
 }
 
 MenuListNode *mnuListAdvanceCursor(MenuList *list, s32 noScroll, s32 keepFade) {
@@ -3486,7 +3486,7 @@ MenuListNode *mnuListAdvanceCursor(MenuList *list, s32 noScroll, s32 keepFade) {
         list->windowOffset = offset + 1;
         if (list->windowOffset >= list->visibleCount - 1) {
             if (noScroll == 0) {
-                cursor = (MenuListNode *)mnuAdvanceListWindowStart(list);
+                cursor = mnuAdvanceListWindowStart(list);
                 last = list->last;
             } else if (cursor != last) {
                 cursor = cursor->prev;
@@ -3544,7 +3544,7 @@ MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade) {
         list->windowOffset = offset - 1;
         if (list->windowOffset <= 0) {
             if (noScroll == 0) {
-                cursor = (MenuListNode *)mnuRetreatListWindowStart(list);
+                cursor = mnuRetreatListWindowStart(list);
                 first = list->first;
             } else if (cursor != first) {
                 cursor = cursor->next;
@@ -3571,7 +3571,7 @@ MenuListNode *mnuRetreatListCursorDefault(MenuList *list) {
     return mnuListRetreatCursor(list, 0, 0);
 }
 
-s32 mnuScrollListToEnd(MenuList *list) {
+MenuListNode *mnuScrollListToEnd(MenuList *list) {
     s32 i;
 
     if (list->cursor == NULL) {
@@ -3586,7 +3586,7 @@ s32 mnuScrollListToEnd(MenuList *list) {
                 }
                 list->cursor = list->last;
                 list->windowOffset = list->visibleCount - 1;
-                return (s32)list->last;
+                return list->last;
             }
             break;
         }
@@ -3598,14 +3598,14 @@ s32 mnuScrollListToEnd(MenuList *list) {
     if (mnuListContainsFinalNode(list)) {
         list->windowOffset = list->visibleCount - 1;
         list->cursor = list->last;
-        return (s32)list->last;
+        return list->last;
     }
     if (list->cursor == list->head) {
         list->cursor = list->cursor->next;
         list->windowOffset = 1;
     }
     mnuUpdateListScrollFlags((u8 *)list);
-    return (s32)list->cursor;
+    return list->cursor;
 }
 
 INCLUDE_ASM(const s32, "game/code_002B0278", func_002B8E30);
