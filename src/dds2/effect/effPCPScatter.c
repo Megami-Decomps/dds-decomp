@@ -1399,7 +1399,6 @@ void effScatterRingUpdate(PcpScatterInstanceA *work, s32 index)
 
 extern u32 effMultiplyPackedColors(u32 colorA, u32 colorB);
 extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
-extern void effScatterStoreSourceTransformMatrix(void *draw, void *work);
 extern void effScatterDrawObject(PcpScatterDraw *object);
 /* Advance delayed particles and submit the ring drawable.
  * Age zero seeds geometry without writing color; expired particles clear color and freeze.
