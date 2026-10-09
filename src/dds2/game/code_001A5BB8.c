@@ -2485,9 +2485,9 @@ s32 func_001ABDE8(BtlUnit *base, BtlUnit *first, BtlUnit *second,
     return func_001ABB10(&snapshot, command);
 }
 
-s8 btlGetActorIndexedSignedValue(UiObject *object, s32 index) {
+s8 btlGetActorIndexedSignedValue(BtlUnit *object, s32 index) {
     if (index == 0 && (object->flags & 0x400) != 0) {
-        return datEnemyRecords[object->index].unk46;
+        return datEnemyRecords[object->partyRecord.unitId].unk46;
     }
     return datCommandSelectors[index].stat;
 }

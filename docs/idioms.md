@@ -5026,3 +5026,39 @@ without pointer-to-word transport casts. DDS2's additional rotation-mode
 input remains in its original forwarding position; this contract change
 does not replace either primitive's assembly body.
 
+
+## Packed triangle coordinate inputs are arrays, not coordinate scalars
+
+DDS2 `00308650` reads three signed coordinate words from each of its first
+two inputs and three packed color words from its fourth input. Keep the
+primitive's coordinate parameters typed, with one decode of each existing
+address word at `uiDrawUniformRgbRange`. Its caller still forwards eight
+inputs; the final three are unused by the primitive. The line and triangle
+packets share the same 0x20-byte channel/XY/depth record: the low X word is
+zero-extended, Y occupies the high word, and the hardware depth slot is a
+64-bit serialized field fed by the true 32-bit input. This contract closure
+does not imply that the assembly triangle body has matched.
+
+## Camera arrangement reads the mode/count both separately and together
+
+The DDS1 camera arrangement path (`001E3E58`) reads `+0x244` as a word
+equal to `0x10003`, while its loops read the mode halfword at `+0x244`
+and update the actor high-water halfword at `+0x246`. The canonical
+`BtlState` therefore exposes these genuine word/half uses in one union,
+as DDS2 already does at `+0x268`. Its `+0x608` hook receives the linked
+command, camera pose and mode and returns a handled predicate, matching
+the DDS2 `+0x640` hook. These owner declarations do not claim that the
+DDS1 arrangement body has matched.
+
+## Signed command selectors borrow the actor
+
+`btlGetActorIndexedSignedValue` (`001A2F00` / `001ABF00`) takes
+`BtlUnit *` and returns `s8`. Only selector zero on an actor with flag
+`0x400` reads the enemy record, using `partyRecord.unitId`; other inputs
+read the canonical two-byte command-selector table. The linked special
+actor callback (`0020D2E0`) passes `task->unit` without an address cast.
+Its signed selector-to-`u32` mapper conversion is a value boundary, not
+pointer transport. The legacy first input of `btlSelectedEntryHitsElement`
+remains an explicitly deferred address-word contract; its formal types
+and body are preserved until the existing preserve-types scope releases.
+

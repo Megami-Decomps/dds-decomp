@@ -184,8 +184,14 @@ typedef struct BtlState {
     u8 pad22C[0x10];
     struct SoundSlotOwner *soundSlotOwners; /* 0x23C: shared category/id motion-SE banks. */
     struct BattleModelEntry *modelEntries; /* 0x240 */
-    u16 cameraPresetMode; /* 0x244: selects the marked actor's camera preset. */
-    u16 cameraActorHighWater; /* 0x246: largest actor count arranged for a side. */
+    /* Retail also reads both halves to recognize one actor in preset mode 3. */
+    union {
+        struct {
+            u16 cameraPresetMode; /* 0x244 */
+            u16 cameraActorHighWater; /* 0x246 */
+        };
+        u32 cameraActorConfiguration; /* 0x244 */
+    };
     u16 turnPhase; /* 0x248 */
     u8 unk24A; /* Nonzero selects stream 2 when the scene has no override. */
     u8 pad24B[1];
@@ -268,7 +274,8 @@ typedef struct BtlState {
     u8 pad5E4[8];
     s32 (*serialOverride)(void); /* 0x5EC: -1 cancels a scripted follow-up encounter. */
     void (*updateCallback)(void); /* 0x5F0 */
-    u8 pad5F4[0x18];
+    u8 pad5F4[0x14];
+    s32 (*cameraArrangementHook)(BtlLinkedCommand *, BtlCamState *, s32); /* 0x608: mode-specific pose override. */
     s32 (*defeatCameraHook)(BtlLinkedCommand *, BtlCamState *, s32); /* 0x60C: linked-defeat camera override. */
     s32 (*cameraStateChangePredicate)(BtlLinkedCommand *); /* 0x610 */
     u8 pad614[8];

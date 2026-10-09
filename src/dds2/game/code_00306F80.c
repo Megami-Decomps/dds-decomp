@@ -645,10 +645,12 @@ void uiFillQuadColorWords(UiQuadWords *quad, u32 value) {
     quad->unk00[3] = value;
 }
 
+void func_00308650(const s32 *, const s32 *, u32, const u32 *, u32, u32, u32, u32);
+
 /* Draw a triangle with the same packed color at all three vertices. */
 void uiDrawUniformRgbRange(u32 xCoordinates, u32 yCoordinates, u32 z, u32 color, u32 surfaceIndex, u32 extraA, u32 extraB, u32 extraC) {
     u32 vertexColors[3] = {color, color, color};
-    func_00308650(xCoordinates, yCoordinates, z, vertexColors, surfaceIndex, extraA, extraB, extraC);
+    func_00308650((const s32 *)xCoordinates, (const s32 *)yCoordinates, z, vertexColors, surfaceIndex, extraA, extraB, extraC);
 }
 
 INCLUDE_ASM(const s32, "game/code_00306F80", func_00308650);
@@ -679,11 +681,12 @@ void uiDrawFrameEdges(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32
     uiDrawUniformColorLine(x, y + height, z, x + width + 0x10, y + height, z, color, context);
 }
 
-typedef struct GridPackedLineVertex {
+/* Lines and triangles use the same 0x20-byte packed color/XY/depth record. */
+typedef struct GridPackedVertex {
     u64 channels[2];
     u64 xy;
     u64 depth;
-} GridPackedLineVertex;
+} GridPackedVertex;
 
 void func_00308AF0(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
                    const u32 *colors, u32 surfaceIndex);
@@ -697,13 +700,13 @@ void func_00308AF0(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
                   const u32 *colors, u32 surfaceIndex)
 {
     s32 packet;
-    GridPackedLineVertex *vertices;
+    GridPackedVertex *vertices;
     SdfListHead *list;
     SdfPoolNode *surface;
 
     packet = sdfAllocPacketAligned(sdfConsCalculateDrawPacketSize(4, 1));
     sdfConsInitPacketHeader((SdfDrawPacket *)packet, 0x149, 4, 0x5151, 1);
-    vertices = (GridPackedLineVertex *)sdfConsMeasurePacketWithHeader(packet);
+    vertices = (GridPackedVertex *)sdfConsMeasurePacketWithHeader(packet);
     itfGridUnpackColorChannels(vertices[0].channels, colors[0]);
     vertices[0].xy = (x0 + 0x7000) | ((u64)(y0 + 0x7900) << 32);
     vertices[0].depth = z0;
