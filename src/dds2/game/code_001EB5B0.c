@@ -2939,37 +2939,21 @@ void btlAdvanceCommandCursor(BtlLinkedCommand *action, BtlCamState *state) {
     CURSOR->frame++;
 }
 
-typedef struct {
-    u8 pad[0x11C];
-    u8 category;
-} BattleActorLink;
+BtlUnit *btlFindActorLinkByCategory(BtlLinkedCommand *command, s32 category) {
+    BtlUnit *candidate = command->link->unit;
 
-typedef struct {
-    u8 pad[0x18];
-    BattleActorLink *primary;
-} BattleActorLinks;
-
-typedef struct {
-    u8 pad[0x114];
-    BattleActorLinks *links;
-    BattleActorLink *secondary;
-    BattleActorLink *tertiary;
-} BattleActorLinkOwner;
-
-BattleActorLink *btlFindActorLinkByCategory(BattleActorLinkOwner *actor, s32 category) {
-    BattleActorLink *candidate = actor->links->primary;
-    if (candidate->category == category) {
+    if (candidate->lookupId == category) {
         return candidate;
     }
-    candidate = actor->secondary;
-    if (candidate != NULL && candidate->category == category) {
+    candidate = command->linkedA;
+    if (candidate != NULL && candidate->lookupId == category) {
         return candidate;
     }
-    candidate = actor->tertiary;
-    if (candidate != NULL && candidate->category == category) {
+    candidate = command->linkedB;
+    if (candidate != NULL && candidate->lookupId == category) {
         return candidate;
     }
-    return actor->links->primary;
+    return command->link->unit;
 }
 
 INCLUDE_ASM(const s32, "game/code_001EB5B0", func_001F5320);
