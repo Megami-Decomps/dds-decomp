@@ -757,9 +757,9 @@ extern void mnuStopTitleVoicePlayback(void);
 extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
 extern char D_004224A8[];
 
+/* Apply one timeline key to its effect, audio, message, or fade channel. */
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_004224A8);
 
-/* Apply one timeline key to its effect, audio, message, or fade channel. */
 void func_00247858(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 position, s32 unused,
                    EvtRuntime *viewer) {
     s32 nibbles[2];
