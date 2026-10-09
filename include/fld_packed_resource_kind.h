@@ -1,0 +1,14 @@
+#ifndef FLD_PACKED_RESOURCE_KIND_H
+#define FLD_PACKED_RESOURCE_KIND_H
+
+/* The field-area loader interprets these serialized packet-header values. */
+typedef enum FldPackedResourceKind {
+    FLD_PACKED_RESOURCE_INFO_TABLE = 1,
+    FLD_PACKED_RESOURCE_NPC_PALETTE = 2,
+    FLD_PACKED_RESOURCE_SKY_BUFFER = 3,
+    FLD_PACKED_RESOURCE_ACTOR_WAYPOINT_TABLE = 4,
+    FLD_PACKED_RESOURCE_RETAINED_COPY = 5,
+    FLD_PACKED_RESOURCE_SCENE_RECORD_CHUNK = 6
+} FldPackedResourceKind;
+
+#endif /* FLD_PACKED_RESOURCE_KIND_H */
