@@ -7170,36 +7170,36 @@ u8 *effDuplicateActiveResource(u8 *source) {
     return effect;
 }
 
-void effClearCallbackFrame(u8 *work) {
+void effClearCallbackFrame(EffActiveResource *work) {
     if (btlIsRuntimeAllocated() != 0) {
-        void (*callback)(void *) = effRuntimeResourceOperations[((EffActiveResource *)work)->kind.signedIndex].initialize;
+        void (*callback)(void *) = effRuntimeResourceOperations[work->kind.signedIndex].initialize;
         if (callback != NULL) {
             callback(work);
         }
-        ((EffActiveResource *)work)->frame = 0;
+        work->frame = 0;
     }
 }
 
-void effDispatchIndexedCallback(u8 *work) {
+void effDispatchIndexedCallback(EffActiveResource *work) {
     if (btlIsRuntimeAllocated() != 0) {
-        void (*callback)(void *) = effRuntimeResourceOperations[((EffActiveResource *)work)->kind.signedIndex].update;
+        void (*callback)(void *) = effRuntimeResourceOperations[work->kind.signedIndex].update;
         if (callback != NULL) {
             callback(work);
         }
-        ((EffActiveResource *)work)->frame = (s32)((EffActiveResource *)work)->frame + 1;
+        work->frame = (s32)work->frame + 1;
     }
 }
 
-void effDispatchEnabledCallback(u8 *work) {
+void effDispatchEnabledCallback(EffActiveResource *work) {
     if (btlIsRuntimeAllocated() != 0) {
-        void (*callback)(void *) = effRuntimeResourceOperations[((EffActiveResource *)work)->kind.signedIndex].draw;
+        void (*callback)(void *) = effRuntimeResourceOperations[work->kind.signedIndex].draw;
         if (callback != NULL) {
             callback(work);
         }
     }
 }
 
-void effAdvanceActiveResourceCallbacks(u8 *work) {
+void effAdvanceActiveResourceCallbacks(EffActiveResource *work) {
     effDispatchIndexedCallback(work);
     effDispatchEnabledCallback(work);
 }

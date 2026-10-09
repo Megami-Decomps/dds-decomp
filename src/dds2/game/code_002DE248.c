@@ -8031,38 +8031,38 @@ u8 *effDuplicateActiveResource(u8 *source) {
     return effect;
 }
 
-void effClearCallbackFrame(u32 *obj) {
+void effClearCallbackFrame(EffActiveResource *obj) {
     if (btlIsRuntimeAllocated()) {
-        if (effRuntimeResourceOperations[obj[0x2C / 4]].initialize != NULL) {
-            effRuntimeResourceOperations[obj[0x2C / 4]].initialize(obj);
+        if (effRuntimeResourceOperations[obj->kind.index].initialize != NULL) {
+            effRuntimeResourceOperations[obj->kind.index].initialize(obj);
         }
-        obj[0x28 / 4] = 0;
+        obj->frame = 0;
     }
 }
 
-void effAdvanceCallbackFrame(u8 *work) {
+void effAdvanceCallbackFrame(EffActiveResource *work) {
     if (btlIsRuntimeAllocated() != 0 &&
         (effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        s32 kind = ((EffActiveResource *)work)->kind.signedIndex;
+        s32 kind = work->kind.signedIndex;
         EffResourceOps *entry = &effRuntimeResourceOperations[kind];
         void (*callback)(void *) = entry->update;
         if (callback != NULL) {
             callback(work);
         }
-        ((EffActiveResource *)work)->frame++;
+        work->frame++;
     }
 }
 
-void effDispatchEnabledCallback(u8 *work) {
+void effDispatchEnabledCallback(EffActiveResource *work) {
     if (btlIsRuntimeAllocated() != 0) {
-        void (*callback)(void *) = effRuntimeResourceOperations[((EffActiveResource *)work)->kind.signedIndex].draw;
+        void (*callback)(void *) = effRuntimeResourceOperations[work->kind.signedIndex].draw;
         if (callback != NULL) {
             callback(work);
         }
     }
 }
 
-void effAdvanceActiveResourceCallbacks(u8 *work) {
+void effAdvanceActiveResourceCallbacks(EffActiveResource *work) {
     effAdvanceCallbackFrame(work);
     effDispatchEnabledCallback(work);
 }
