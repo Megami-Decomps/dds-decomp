@@ -7,6 +7,7 @@
 #include "eff_object.h"
 #include "evt_unit.h"
 #include "eff.h"
+#include "eff_node.h"
 #include "eff_event.h"
 #include "eff_event_sound.h"
 #include "btl_sound.h"
@@ -794,7 +795,6 @@ void dds3RefreshStoredVec3(EffWorldNode *object) {
     destination->offset[2] = source->position[2];
 }
 
-extern void effDestroyNode(struct EffNode *);
 
 /* Release each dependency according to the active state, clearing ownership
  * before releasing the next dependency. State 4 only borrows its handle. */

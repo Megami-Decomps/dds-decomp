@@ -40,24 +40,6 @@ u32 func_0014FA28(void) {
     return 1;
 }
 
-/* Per-effect-type operations act on the instance returned by create. */
-typedef struct EffTypeOps {
-    s32 (*create)(s32, s32); /* 0x00 */
-    void (*update)(s32);     /* 0x04 */
-    void (*destroy)(s32);    /* 0x08 */
-    void (*fn0C)(s32);       /* 0x0C */
-    s32 (*fn10)();           /* 0x10: returns 1 when absent */
-    void (*fn14)(s32, const void *); /* 0x14: copy a supplied vector into the instance. */
-    void (*fn18)(s32, const void *); /* 0x18: apply a supplied transform matrix. */
-    void (*fn1C)(s32, u32);       /* 0x1C: opaque parameter word */
-    void (*fn20)();          /* 0x20 */
-    s32 (*fn24)();           /* 0x24: returns 1 when absent */
-    void (*fn28)();          /* 0x28 */
-    void (*fn2C)(s32);       /* 0x2C */
-} EffTypeOps;
-
-extern EffTypeOps effNodeTypeOperations[];
-
 EffNode *effCreateNode(u16 type, u16 arg, s32 param) {
     EffNode *node = (EffNode *)sdfAllocSizeClassBlock(0x10);
 
@@ -78,43 +60,43 @@ void effUpdateNode(EffNode *node) {
 }
 
 void effRestartNodeInstance(EffNode *node) {
-    effNodeTypeOperations[node->type].fn0C(node->instance);
+    effNodeTypeOperations[node->type].restart(node->instance);
 }
 
-void effApplyNodeScale(EffNode *node) {
-    effNodeTypeOperations[node->type].fn2C(node->instance);
+void effApplyNodeScale(EffNode *node, f32 factor) {
+    effNodeTypeOperations[node->type].applyScale(node->instance, factor);
 }
 
 s32 effInvokeNodeConditionOrAcceptDefault(EffNode *node) {
-    if (effNodeTypeOperations[node->type].fn10 == NULL) {
+    if (effNodeTypeOperations[node->type].queryCondition == NULL) {
         return 1;
     }
-    return effNodeTypeOperations[node->type].fn10(node->instance);
+    return effNodeTypeOperations[node->type].queryCondition(node->instance);
 }
 
 void effCopyVectorToNodeInstance(EffNode *node, const void *vector) {
-    effNodeTypeOperations[node->type].fn14(node->instance, vector);
+    effNodeTypeOperations[node->type].setVector(node->instance, vector);
 }
 
 void effApplyNodeTransformMatrix(EffNode *node, const void *matrix) {
-    effNodeTypeOperations[node->type].fn18(node->instance, matrix);
+    effNodeTypeOperations[node->type].setMatrix(node->instance, matrix);
 }
 
 void effSetNodeParameterValue(EffNode *node, u32 value) {
-    effNodeTypeOperations[node->type].fn1C(node->instance, value);
+    effNodeTypeOperations[node->type].setParameterWord(node->instance, value);
 }
 
 void effDispatchOptionalNodeFlag(EffNode *node, u8 flag) {
-    if (effNodeTypeOperations[node->type].fn20 != NULL) {
-        effNodeTypeOperations[node->type].fn20(node->instance, flag);
+    if (effNodeTypeOperations[node->type].dispatchOptionalFlag != NULL) {
+        effNodeTypeOperations[node->type].dispatchOptionalFlag(node->instance, flag);
     }
 }
 
 s32 effInvokeOptionalNodeInstanceCallback(EffNode *node) {
-    if (effNodeTypeOperations[node->type].fn24 == NULL) {
+    if (effNodeTypeOperations[node->type].queryOptional == NULL) {
         return 1;
     }
-    return effNodeTypeOperations[node->type].fn24(node->instance);
+    return effNodeTypeOperations[node->type].queryOptional(node->instance);
 }
 extern void func_003003F0(const char *fmt, ...);
 

@@ -537,13 +537,13 @@ void parUpdateAndDrawObject(ParObj *effect) {
     parSubmitKindDrawing(&effect->kindState);
 }
 
-/* Create another object of the same dispatch index; the existing call forwards
-   no explicit arguments and this interface does not return the new object. */
-void parCloneKind(ParObj *obj) {
+/* Create another object of the same dispatch index and return the new instance. */
+ParObj *parCloneKind(ParObj *obj) {
     ParObj *createdObject;
 
-    createdObject = parKindConstructorEntries[obj->dispatchIndex].func();
+    createdObject = parKindConstructorEntries[obj->dispatchIndex].func(obj);
     createdObject->dispatchIndex = obj->dispatchIndex;
+    return createdObject;
 }
 
 /* Reissue the callback, reload the native updater's repeat count, and arm restart. */

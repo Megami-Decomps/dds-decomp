@@ -169,10 +169,6 @@ s32 func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 
 void fldDrawPackedRgbEditor(void *, s32, s32, s32, u32, s32);
 
-void effApplyNodeScale(s32, float);
-
-
-
 s32 mdlBuildViewerRectanglePacket(s32, s32, s32, s32, s32);
 
 s32 mdlUpdateViewerCursor(s16 *, s32);
@@ -708,7 +704,7 @@ void mdlDestroyPartList(DevRequest *partList) {
                 billDispatchByKind((BillObj *)(u32)partEntry->object);
                 break;
             case MDL_PART_EFFECT:
-                effDestroyNode(partEntry->object);
+                effDestroyNode((EffNode *)(u32)partEntry->object);
                 break;
             case MDL_PART_OBJECT:
                 mdlObjDestroy((MdlObj *)partEntry->object);
@@ -949,7 +945,7 @@ void mdlDestroyResourceItem(MdlResourceItem *item) {
         billDispatchByKind((BillObj *)(u32)item->payload.part.handle);
         break;
     case MDL_RESOURCE_EFFECT:
-        effDestroyNode(item->payload.part.handle);
+        effDestroyNode((EffNode *)(u32)item->payload.part.handle);
         break;
     case MDL_RESOURCE_TRACK_POLY:
         effTrackPolyRelease(item->payload.part.track);
@@ -1009,7 +1005,6 @@ extern void effCopyVector(s32 handle, f32 *src);
 extern void billInvokeCallback(s32 handle);
 
 
-extern void effUpdateNode(s32 handle);
 
 
 /* Update anchored billboard/effect positions, tracked polygons, or deferred object initialization by type. */
@@ -1028,8 +1023,8 @@ void mdlDispatchViewerAnchorRecord(MdlCtx *owner, MdlResourceItem *anchorRecord)
     case MDL_RESOURCE_EFFECT:
         mdlResolveAnchorPosition(model, anchorRecord, position);
         resourceHandle = anchorRecord->payload.part.handle;
-        effCopyVectorToNodeInstance((struct EffNode *)resourceHandle, position);
-        effUpdateNode(resourceHandle);
+        effCopyVectorToNodeInstance((EffNode *)(u32)resourceHandle, position);
+        effUpdateNode((EffNode *)(u32)resourceHandle);
         break;
     case MDL_RESOURCE_TRACK_POLY:
         effTrackPolyUpdate(anchorRecord->payload.part.track);
@@ -1047,7 +1042,7 @@ void mdlSetResourceFrame(MdlCtx *owner, MdlResourceItem *item, s32 frame) {
         billSetChildParameter(item->payload.part.handle, frame);
         return;
     case MDL_RESOURCE_EFFECT:
-        effSetNodeParameterValue(item->payload.part.handle, frame);
+        effSetNodeParameterValue((EffNode *)(u32)item->payload.part.handle, frame);
         break;
     }
 }
@@ -1059,7 +1054,7 @@ void mdlSetResourceAmount(MdlCtx *owner, MdlResourceItem *item, float amount) {
         billSetChildScaleComponents((struct BillObj *)item->payload.part.handle, amount, amount);
         return;
     case MDL_RESOURCE_EFFECT:
-        effApplyNodeScale(item->payload.part.handle, amount);
+        effApplyNodeScale((EffNode *)(u32)item->payload.part.handle, amount);
         break;
     }
 }
