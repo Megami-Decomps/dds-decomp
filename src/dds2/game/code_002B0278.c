@@ -3575,7 +3575,6 @@ void mnuCallInitWide(s32 x, s32 y, s32 depth, s32 menu, s32 drawArg);
 
 
 
-void mnuCreateListWithDefaults(MenuWindowContainer *menu, u32 first, u32 second, u32 third, u32 fourth);
 
 void mnuRemoveWindowListCursorNode(MenuWindowContainer *menu);
 

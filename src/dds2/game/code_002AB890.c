@@ -36,7 +36,6 @@ void func_002AB8C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 
 extern char (*D_00435E5C)[25];
 extern void mnuSetWindowPanelBounds(MenuWindowContainer *, const void *, u32, u32, u32, u32);
-extern void mnuCreateListWithDefaults(MenuWindowContainer *, u32, u32, u32, u32);
 extern s32 mnuIsBulletItemId(s32);
 extern s32 func_002C54B0(s32);
 extern s32 func_002C5498(s32);
@@ -111,7 +110,7 @@ void func_002AB8F0(MenuStaffContext *owner) {
 
     resources->windows[0] = window;
     mnuInitializeBasicWindowLayout(window, owner->spriteArg2, 0xF);
-    mnuCreateListWithDefaults(resources->windows[0], 0, 0, 0, (u32)owner->spriteArg0);
+    mnuCreateListWithDefaults(resources->windows[0], 0, 0, 0, owner->spriteArg0);
 
     window = mnuCreateWindowContainer(0, 0x1C0, 0x10, 8, 0x16);
     mnuSetWindowFadeScale(window, 0x100);
@@ -130,7 +129,7 @@ void func_002AB8F0(MenuStaffContext *owner) {
 
     resources->windows[1] = window;
     mnuInitializeBasicWindowLayout(window, owner->spriteArg2, 0x13);
-    mnuCreateListWithDefaults(resources->windows[1], 0, 0, 0, (u32)owner->spriteArg0);
+    mnuCreateListWithDefaults(resources->windows[1], 0, 0, 0, owner->spriteArg0);
 }
 
 void mnuDestroyResourceOwnerWindowContainers(MenuStaffContext *object) {
@@ -178,7 +177,7 @@ void mnuCreateStaffBulletItemWindow(MenuStaffContext *owner) {
     } while (itemId < 0x100);
     resources->windows[2] = window;
     mnuInitializeBasicWindowLayout(window, owner->spriteArg2, 0x12);
-    mnuCreateListWithDefaults(resources->windows[2], 0, 0, 0, (u32)owner->spriteArg0);
+    mnuCreateListWithDefaults(resources->windows[2], 0, 0, 0, owner->spriteArg0);
 }
 
 void func_002ABEB0(MenuStaffContext *object) {
@@ -256,7 +255,7 @@ void mnuCreateOrderedStaffItemWindow(MenuStaffContext *owner) {
     frameResource = owner->spriteArg2;
     resources->windows[3] = window;
     mnuInitializeBasicWindowLayout(window, frameResource, 0x10);
-    mnuCreateListWithDefaults(resources->windows[3], 0, 0, 0, (u32)owner->spriteArg0);
+    mnuCreateListWithDefaults(resources->windows[3], 0, 0, 0, owner->spriteArg0);
 }
 
 void func_002AC660(MenuStaffContext *object) {
@@ -365,7 +364,7 @@ void mnuCreateOwnedCatalogItemWindow(MenuStaffContext *owner) {
     resources->windows[4] = window;
     mnuSetWindowContainerLayout(window, frameResource, 0x15, frameResource,
         0x410, 0x16, frameResource, 0x17, 0x3E0);
-    mnuCreateListWithDefaults(resources->windows[4], 0, 0, 0, (u32)owner->spriteArg0);
+    mnuCreateListWithDefaults(resources->windows[4], 0, 0, 0, owner->spriteArg0);
 }
 
 void func_002ACA98(MenuStaffContext *object) {
