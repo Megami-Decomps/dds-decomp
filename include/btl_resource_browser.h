@@ -4,6 +4,18 @@
 #include "common.h"
 #include "btl_resource_selection.h"
 
+/* Filters consumed by the directory scan; these are independent of entry categories. */
+enum BtlResourceScanFlags {
+    BTL_RESOURCE_SCAN_TMX = 0x01,
+    BTL_RESOURCE_SCAN_P2A = 0x02,
+    BTL_RESOURCE_SCAN_PB = 0x04,
+    BTL_RESOURCE_SCAN_GENERAL = 0x08,
+    BTL_RESOURCE_SCAN_EPL = 0x10,
+    BTL_RESOURCE_SCAN_EP = 0x20,
+    BTL_RESOURCE_SCAN_TLP = 0x40,
+    BTL_RESOURCE_SCAN_F2 = 0x80,
+};
+
 struct BtlResourceEntryList;
 struct BtlResourceDescriptor;
 
