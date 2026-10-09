@@ -6211,7 +6211,7 @@
 0x00334980	sdfMotionCreateDrawVectorBinding	inferred	Allocates motion work then binds a draw node using the vector handler table. [names_reviewed6.tsv]
 0x003349E0	sdfMotionBlendDrawVector	inferred	Interpolates two vector keys with VU0 and stores the result in the draw node. [names_reviewed6.tsv]
 0x00334A60	sdfMotionBlendDrawVectorWithCurrent	inferred	Blends vector keys, then blends with the current vector using the second weight. [names_reviewed6.tsv]
-0x00334B10	sdfCreateMotionDrawNode	inferred	confidence=high; src/dds2/sdf/sdfMotion.c:func_00334B10; Allocates a motion draw node and initializes it with the draw-node operation descriptor and supplied owner/argument. [names_qp9.tsv]
+0x00334B10	sdfMotionCreateInterpolatedQuaternionBinding	inferred	Allocates a draw binding whose callbacks interpolate three-angle keys, convert them to a quaternion, and update the node quaternion and matrix.
 0x00334D10	sdfMotionCreateScaleVectorBinding	inferred	Allocates motion work with handler table followed by the scale-vector interpolator. [names_reviewed6.tsv]
 0x00334D70	sdfMotionBlendScaleVector	inferred	Interpolates vec3 keys and writes the model scale-vector slot. [names_reviewed6.tsv]
 0x00334DF0	sdfMotionBlendScaleVectorWithCurrent	inferred	Interpolates vec3 keys then blends with the current vector into the scale slot. [names_reviewed6.tsv]
