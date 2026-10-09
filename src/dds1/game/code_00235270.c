@@ -860,7 +860,71 @@ void evtDrawSelectedEntryLabel(s32 list, EvtRuntimeGroup *selected, s32 x,
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00235270", func_00237130);
+void func_00237130(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
+    char names[33][30] = {
+        "STAGE",
+        "UNIT",
+        "CAMERA",
+        "D3P",
+        "MESSAGE",
+        "SE",
+        "FADE",
+        "QUAKE",
+        "BLUR",
+        "LIGHT",
+        "SLIGHT",
+        "SFOG",
+        "FF",
+        "BLUR2",
+        "MBLUR",
+        "DBLUR",
+        "FILTER",
+        "MFILTER",
+        "BED",
+        "BGM",
+        "MG1",
+        "MG2",
+        "FBOKASI",
+        "RBLUR",
+        "TMX",
+        "RAIN",
+        "EPL",
+        "HBLUR",
+        "PADACT",
+        "MOVIE",
+        "TIMEI",
+        "RENDERTEX",
+        "BISTA"
+    };
+    EvtRuntimeGroup *group;
+    s32 style;
+    s32 i;
+
+    if (ctx->entryCount == 0) {
+        return;
+    }
+    if (index < ctx->entryCount) {
+        group = ctx->groups;
+        for (i = 0; i < index; i++) {
+            group = group->next;
+        }
+        if (ctx->entryFirst + ctx->entryCursor == index) {
+            if (ctx->actionMode == 4) {
+                ctx->frameColumn = 0;
+                ctx->frameFirst = 0;
+                ctx->frameCursor = 0;
+                ctx->frameGroup = group;
+                style = 4;
+            } else {
+                style = 5;
+            }
+            evtDrawSelectedEntryLabel(list, group, x, y, ctx);
+        } else {
+            style = 0;
+        }
+        sdfAppendPacket((SdfListHead *)list, (u32)sdfCreateFormattedSifCommand(x, y, 0xFEFFFF, style, D_003BC088, names[group->type]));
+    }
+}
 
 s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *work) {
     u32 packets = (u32)sdfCreateResetPacketList();
