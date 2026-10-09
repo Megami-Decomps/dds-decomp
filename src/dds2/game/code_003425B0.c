@@ -963,7 +963,32 @@ void sdfAllocateStreamFrameBuffers(SdfStreamFrameNode *node) {
     node->frameBuffers[1] = sdfAllocateBlockBySizeThreshold(size);
 }
 
-INCLUDE_ASM(const s32, "game/code_003425B0", sdfBuildStreamInputDmaChain);
+/* Each 16-byte DMA tag holds control/address bits and a zero reserved half. */
+typedef struct SdfStreamInputDmaTag {
+    u64 control;
+    u64 reserved;
+} SdfStreamInputDmaTag;
+
+void sdfBuildStreamInputDmaChain(SdfStreamFrameNode *node, u8 *source, s32 bytes) {
+    s32 remaining = (bytes + 15) & ~15;
+    SdfStreamInputDmaTag *tag;
+    u32 address;
+
+    tag = sdfAllocateBlockBySizeThreshold(((remaining + 0xFFEFF) / 0xFFF00) * 16);
+    node->inputDmaChain = tag;
+    address = (u32)source & SDF_EE_PHYSICAL_MASK;
+    do {
+        s32 chunk = remaining > 0xFFF00 ? 0xFFF00 : remaining;
+        u32 id;
+        remaining -= chunk;
+        id = remaining != 0 ? 3 : 0;
+        tag->control = ((u16)(chunk >> 4) | (id << 28)) | ((u64)address << 32);
+        tag->reserved = 0;
+        address += chunk;
+        tag++;
+    } while (remaining > 0);
+    FlushCache(0);
+}
 
 INCLUDE_ASM(const s32, "game/code_003425B0", sdfBuildStreamFrameTransferPackets);
 
