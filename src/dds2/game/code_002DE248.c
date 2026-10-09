@@ -2545,12 +2545,12 @@ void effAdvanceActiveInstanceFrame(EffClassWork *work) {
     }
 }
 
-void effDispatchActiveInstanceDraw(s32 work) {
-    D_003E9950[((EffClassWork *)work)->kind].draw((void *)work);
+void effDispatchActiveInstanceDraw(EffClassWork *work) {
+    D_003E9950[work->kind].draw((void *)work);
 }
 
-void effUpdateAndDrawActiveInstance(u32 work) {
-    effAdvanceActiveInstanceFrame((EffClassWork *)work);
+void effUpdateAndDrawActiveInstance(EffClassWork *work) {
+    effAdvanceActiveInstanceFrame(work);
     effDispatchActiveInstanceDraw(work);
 }
 
@@ -3201,7 +3201,7 @@ void func_002E6B68(BillCellDrawWork *work) {
     } while (i < count);
 }
 
-extern void effRunClassPostFrame(s32);
+extern void effRunClassPostFrame(EffClassWork *);
 
 void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
     u8 *config = work->config;
@@ -3238,7 +3238,7 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
         dst->scale = work->scale;
         PCP_COPY_VECTOR(dst->transform, work);
         PCP_COPY_VECTOR(dst->transform + 0x10, work->transform);
-        effRunClassPostFrame((s32)dst);
+        effRunClassPostFrame(dst);
         *(u32 *)out = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
         ((EffBillOutput *)out)->mode = ((EffBillOutputHeader *)config)->outputMode;
         VU0_LOAD_VF(vf10, work->transform);
@@ -3387,12 +3387,12 @@ void effAdvanceClassFrame(EffClassWork *work) {
     }
 }
 
-void effRunClassPostFrame(s32 work) {
-    D_003E9B80[((EffClassWork *)work)->kind].draw((void *)work);
+void effRunClassPostFrame(EffClassWork *work) {
+    D_003E9B80[work->kind].draw((void *)work);
 }
 
-void effUpdateClassFrame(u32 work) {
-    effAdvanceClassFrame((EffClassWork *)work);
+void effUpdateClassFrame(EffClassWork *work) {
+    effAdvanceClassFrame(work);
     effRunClassPostFrame(work);
 }
 
@@ -4443,7 +4443,7 @@ extern void effCopyClassResourcePosition(void *, void *);
 extern void effCopyClassResourceOrientation(void *, void *);
 extern void effSetClassResourceMatrixComponent(EffClassWork *, f32);
 extern void effSetClassResourceColor(s32, u32);
-extern void effDrawClassResourceWork(s32);
+extern void effDrawClassResourceWork(EffClassWork *);
 
 /* vu0 routine: packed color blend and SDK vector copies. */
 void effUpdateRadialClassInstances(EffClassWork *work) {
@@ -4493,7 +4493,7 @@ void effUpdateRadialClassInstances(EffClassWork *work) {
         effCopyClassResourceOrientation(*entries, orientation);
         effSetClassResourceMatrixComponent(*entries, scale);
         effSetClassResourceColor((s32)*entries, color);
-        effDrawClassResourceWork((s32)*entries);
+        effDrawClassResourceWork((EffClassWork *)*entries);
     }
 }
 
@@ -4765,12 +4765,12 @@ void effAdvanceClassResourceFrame(EffClassWork *work) {
     }
 }
 
-void effDrawClassResourceWork(s32 work) {
-    D_003E9D00[((EffClassWork *)work)->kind].draw((void *)work);
+void effDrawClassResourceWork(EffClassWork *work) {
+    D_003E9D00[work->kind].draw((void *)work);
 }
 
-void effUpdateAndDrawClassResource(u32 work) {
-    effAdvanceClassResourceFrame((EffClassWork *)work);
+void effUpdateAndDrawClassResource(EffClassWork *work) {
+    effAdvanceClassResourceFrame(work);
     effDrawClassResourceWork(work);
 }
 
@@ -5558,12 +5558,12 @@ void effAdvanceBlockResourceFrame(EffClassWork *work) {
     }
 }
 
-void effDrawBlockResourceWork(s32 work) {
-    D_003E9DD8[((EffClassWork *)work)->kind].draw((void *)work);
+void effDrawBlockResourceWork(EffClassWork *work) {
+    D_003E9DD8[work->kind].draw((void *)work);
 }
 
-void effUpdateAndDrawBlockResource(u32 work) {
-    effAdvanceBlockResourceFrame((EffClassWork *)work);
+void effUpdateAndDrawBlockResource(EffClassWork *work) {
+    effAdvanceBlockResourceFrame(work);
     effDrawBlockResourceWork(work);
 }
 
@@ -7521,7 +7521,7 @@ void func_002F7AC8(u8 *work) {
 }
 
 void effDrawActiveClassResource(s32 owner) {
-    effDrawClassResourceWork(*(u32 *)((EffActiveResource *)owner)->resource);
+    effDrawClassResourceWork((EffClassWork *)*(u32 *)((EffActiveResource *)owner)->resource);
 }
 
 u32 *effAllocateSurfaceNodeSlot(u32 owner) {
@@ -7788,7 +7788,7 @@ void effApplyModelTransform(u8 *work) {
     modelContext->model->first->frameStep =
         ((EffAimConfig *)animation)->modelParameter;
     mdlProcessContextNodesAndTransforms(modelContext->model, D_00380828);
-    effDrawClassResourceWork(modelContext->material);
+    effDrawClassResourceWork((EffClassWork *)modelContext->material);
 }
 
 extern SdfAsset *sdfCreateAssetWithDrawEntries(void);
