@@ -8942,7 +8942,7 @@ void effApplySharedModelParameters(EffSharedEffectWork *work) {
     for (; i < 0xFF; i++, amount++) {
         record = sdfChunkFindRecordById(work->resource->model->inner, i);
         for (item = work->resource->model->resourceItems; item != NULL; item = item->next) {
-            if (item->payload.part.record == record) {
+            if (item->payload.part.mapPositionRecord == record) {
                 mdlSetResourceAmount(work->resource->model, item, *amount * scale);
                 break;
             }
