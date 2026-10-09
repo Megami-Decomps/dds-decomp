@@ -627,7 +627,693 @@ s32 func_001DDAD0(s32 unused, BattleIndexWork *state) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001DDB60);
+extern DatEnemyRecord *datEnemyRecords;
+extern void func_001B4AA0(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *);
+extern s32 func_001B1090(BtlUnit *, s32);
+struct BtlTargetResult;
+extern void btlDistributeRandomTargetHits(BtlUnit *, BtlIndexList *, struct BtlTargetResult *, s32);
+extern void btlSortActorMuzzleDirections(BtlUnit *, BtlIndexList *, s32);
+extern s8 btlGetActorIndexedSignedValue(BtlUnit *, s32);
+extern u32 btlEncodeActorIndexAsSelectionMask(u32);
+extern s32 func_001ABB10(BtlUnit *, s32);
+extern s32 func_001ABDE8(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
+extern s32 btlApplyCommandAbilityMultiplier(DatPartyRecord *, s32);
+extern s32 btlGetCombinedPartyCommandPower(DatPartyRecord *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
+extern s32 effOffsetIfOwnerFlagClear(BtlUnit *, s32);
+extern s32 func_001E2E58(BtlUnit *, s32);
+extern s32 btlSelectedEntryHitsElement(BtlUnit *, BtlUnit *, s32);
+extern s32 btlGetActionRecordLookupValue(s32);
+extern s32 func_001B17E8(BtlUnit *, BtlUnit *, s32);
+extern u8 func_001B0B30(BtlUnit *, s32);
+extern s32 func_001AF0B0(BtlUnit *, BtlUnit *, s32);
+extern u32 func_001B1350(BtlUnit *, BtlUnit *, s32, s32, u32);
+extern s32 btlQueryUnitChannelFlags(BtlUnit *, BtlUnit *, s32, s32, s32);
+extern s32 btlSelectActorAction(s32);
+extern s32 func_001B3B28(BtlUnit *);
+extern s32 btlCalculateHuntEpReward(BtlUnit *, BtlUnit *);
+extern u32 func_001B2380(BtlUnit *, BtlUnit *);
+extern s32 btlCalculateAbilityRecoveryAmount(BtlUnit *, BtlUnit *);
+extern u32 btlGetHuntPenaltyFlags(BtlUnit *, BtlUnit *);
+extern s32 func_001AF4A0(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
+extern s32 func_001AFF38(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
+extern f32 btlGetActionCategoryMultiplier(BtlUnit *, s32, s32);
+extern f32 btlGetActionCategoryGateAsFloat(s32, s32, s32);
+extern void btlFindSoundTaskByWorkValue(u32, s32);
+extern s32 btlRollAllFearChance(s32, BtlUnit *, u32, s32, u8);
+extern s32 btlRollFearChance(s32, BtlUnit *, s32, s32);
+extern s32 func_001B4600(BtlUnit *, s32);
+extern s32 btlRollActorEligibilityWithAbilityOverride(BtlUnit *);
+extern s32 btlCalculateEnemyExperienceReward(BtlUnit *, BtlUnit *);
+extern s32 btlGetEnemyMoney(BtlUnit *, BtlUnit *);
+extern u8 btlGetActorDisplayByteWithDefault(BtlUnit *, s32);
+extern s32 func_001B4918(BtlUnit *, BtlUnit *);
+extern void fldAppendSceneGroupHandle(ActionStateLink *);
+extern s16 btlGetCommandEffectId(ActionStateLink *, s32);
+extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
+extern void btlClearActorEntrySlot(BtlUnit *, s32);
+extern s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *, struct BtlTargetResult *);
+extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *, s32);
+extern s32 btlAdjustPointsForCombatFlags(s32, u32, u32, u32, s32);
+extern s32 btlGetCommandResultKindFromFlags(u32, u32, s32);
+
+/* Resolve each selected target into retained damage/status operands and the
+ * aggregate press-turn result. Reflection keeps the original selected target
+ * separate from the unit that actually receives the operands. */
+
+void func_001DDB60(ActionStateLink *action, BattleIndexWork *work) {
+    BtlUnit combinedUnit;
+    BtlState *runtime;
+    BtlUnit *source;
+    BtlUnit *target;
+    BtlUnit *recipient;
+    BtlOperandGroup *group;
+    s32 hpDelta;
+    s32 huntHpRecovery;
+    s32 huntMpRecovery;
+    s32 cumulativeHp;
+    s32 command;
+    u32 costError;
+    s32 helperResult;
+    s32 counterCommand;
+    s32 reflectedHp;
+    s32 targetIndex;
+    s32 hitIndex;
+    u32 targetCount;
+    u32 hitCount;
+    s32 maxHits;
+    u32 addedStatus;
+    u32 removedStatus;
+    u32 deferredStatus;
+    u32 operandFlags;
+    s32 press;
+    s32 emptyHits;
+    s32 fearCount;
+    u32 combinedKinds;
+    u32 combinedPress;
+    u32 element;
+    u32 elementMask;
+    s32 entryChangeMask;
+    u32 calculationFlags;
+    s32 entryChange;
+    s32 absorbed;
+    s32 randomTargets;
+    s32 fearPending;
+    s32 allFear;
+    s32 allEmpty;
+    s32 overrideMiss;
+    s32 reflectedSpecial;
+    s32 huntRecovered;
+    s32 forcePoints;
+    u32 kind;
+    f32 ratio;
+
+    btlBossDebugPrintf("btl:act[%p][%p][%p]\n", action->unit,
+                      action->indexWork.companionA, action->indexWork.companionB);
+    runtime = (BtlState *)btlGetRuntime();
+    action->flags &= ~2;
+    command = btlResolveActionOperand(action->unit, &work->phase);
+    if (command == -1) {
+        return;
+    }
+    reflectedHp = 0;
+    calculationFlags = 0;
+    if (work->phase == 4) {
+        calculationFlags = work->reference != -1;
+    }
+    if (datCommandSelectors[command].kind != 1) {
+        source = action->unit;
+    } else {
+        func_001B4AA0(&combinedUnit, action->unit, action->indexWork.companionA,
+                     action->indexWork.companionB);
+        source = &combinedUnit;
+    }
+    group = work->groups;
+    randomTargets = 0;
+    if (func_001B1090(action->unit, command)) {
+        randomTargets = 1;
+        btlDistributeRandomTargetHits(action->unit, work->indices, (struct BtlTargetResult *)group, command);
+    }
+    btlSortActorMuzzleDirections(action->unit, work->indices, command);
+    targetCount = btlGetIndexListCount(work->indices);
+    btlBossDebugPrintf("btl:skillID=%X\n", command);
+    element = btlGetActorIndexedSignedValue(source, command);
+    elementMask = btlEncodeActorIndexAsSelectionMask(element);
+    if (action->indexWork.phase != 4) {
+        if (datCommandSelectors[command].kind != 1) {
+            costError = func_001ABB10(source, command);
+        } else {
+            costError = func_001ABDE8(source, action->unit, action->indexWork.companionA,
+                                    action->indexWork.companionB, command);
+        }
+        if (costError == 0) {
+            if (datCommandSelectors[command].kind != 1) {
+                work->stageValue = btlApplyCommandAbilityMultiplier(&source->partyRecord, command);
+            } else {
+                work->stageValue = btlGetCombinedPartyCommandPower(&source->partyRecord,
+                    action->unit, action->indexWork.companionA, action->indexWork.companionB, command);
+            }
+            action->unit->status.stateFlags &= ~0x1000;
+            btlBossDebugPrintf("btl:cost=%d\n", work->stageValue);
+        } else {
+            btlBossDebugPrintf("btl:cost error[%d][hp=%d,mp=%d]\n", costError,
+                              source->partyRecord.hp, source->partyRecord.mp);
+            work->unk2D = 1;
+            switch (costError) {
+            case 1:
+                work->stage = 3;
+                work->parameter = effOffsetIfOwnerFlagClear(source, 0x14);
+                action->unit->status.stateFlags |= 0x1000;
+                break;
+            case 2:
+                work->stage = 3;
+                work->parameter = effOffsetIfOwnerFlagClear(source, 0x12);
+                action->unit->status.stateFlags |= 0x1000;
+                break;
+            case 3:
+                work->stage = 3;
+                work->parameter = effOffsetIfOwnerFlagClear(source, 0x80);
+                break;
+            }
+        }
+    }
+    helperResult = func_001E2E58(action->unit, ((BtlActionTableEntry *)datActionAnimationRecords)[command].kind);
+    if (datCommandRecords[command].unk2E != 0) {
+        counterCommand = command;
+        btlBossDebugPrintf("btl:counter=%d\n", command);
+    } else {
+        counterCommand = 0;
+    }
+    if (command == 0) {
+        work->unk20 = 8;
+    } else {
+        if (helperResult >= 21) {
+            work->unk20 = helperResult;
+        } else {
+            work->unk20 = 20;
+        }
+        work->unk20 -= 8;
+        btlBossDebugPrintf("btl:precede=%d\n", work->unk20);
+    }
+    combinedKinds = 0;
+    combinedPress = 0;
+    fearPending = 0;
+    allFear = 0;
+    overrideMiss = 0;
+    allEmpty = 1;
+    reflectedSpecial = 0;
+    huntRecovered = 0;
+    fearCount = 0;
+    forcePoints = 0;
+    for (targetIndex = 0; targetIndex < targetCount; targetIndex++, group++) {
+        huntHpRecovery = 0;
+        huntMpRecovery = 0;
+        deferredStatus = 0;
+        emptyHits = 0;
+        ratio = 1.0f;
+        operandFlags = 0;
+        absorbed = 0;
+        switch (element) {
+        case 1:
+            operandFlags = 8;
+            break;
+        case 0:
+            break;
+        case 6:
+            operandFlags = 0x100;
+        default:
+            operandFlags |= 4;
+            break;
+        }
+        target = btlGetIndexListEntry(work->indices, targetIndex);
+        btlBossDebugPrintf("btl:target=%p\n", target);
+        if (btlSelectedEntryHitsElement(source, target, command)) {
+            kind = btlGetActionRecordLookupValue(target->selectedEntryIndex);
+            group->targetSpecialHit = 1;
+            if (runtime->hitResultOverride != NULL) {
+                helperResult = runtime->hitResultOverride(source, target, command);
+                if (helperResult != 0) {
+                    kind = helperResult;
+                }
+            }
+        } else {
+            kind = func_001B17E8(source, target, command);
+            if (runtime->actionHitOverride != NULL) {
+                helperResult = runtime->actionHitOverride(source, target, command, kind);
+                if (helperResult != 0) {
+                    kind = helperResult;
+                    if (kind & 4) {
+                        overrideMiss = 1;
+                    }
+                }
+            }
+            group->targetSpecialHit = 0;
+        }
+        {
+            s32 initialReflection = kind == 0x20000;
+            hitCount = 1;
+            maxHits = 1;
+            if (!initialReflection) {
+                if (randomTargets) {
+                    hitCount = group->count;
+                } else {
+                    hitCount = func_001B0B30(source, command);
+                }
+                maxHits = datCommandRecords[command].rangeMax;
+            }
+        }
+        if (kind == 0x20000) {
+            recipient = action->unit;
+            if (datCommandRecords[command].hpType != 8 && datCommandRecords[command].hpType != 10) {
+                if (btlCheckSpecialAbility(&target->partyRecord, 0x238)) {
+                    ratio *= datAbilityParameters[0x18].value;
+                } else if (btlCheckSpecialAbility(&target->partyRecord, 0x237)) {
+                    ratio *= datAbilityParameters[0x17].value;
+                }
+            }
+            if (btlSelectedEntryHitsElement(action->unit, recipient, command)) {
+                kind = btlGetActionRecordLookupValue(recipient->selectedEntryIndex);
+                group->sourceSpecialHit = 1;
+            } else {
+                kind = func_001B17E8(action->unit, recipient, command);
+                group->sourceSpecialHit = 0;
+            }
+            if (datCommandRecords[command].flags & 2) {
+                kind = 4;
+            } else if (runtime->unk220 & 0x10) {
+                goto normalReflectedHit;
+            } else {
+                switch (kind) {
+                case 0x20000:
+                    kind = 0x10000;
+                    break;
+                case 2:
+                case 4:
+                normalReflectedHit:
+                    kind = 1;
+                    break;
+                }
+            }
+            if (runtime->reflectedHitOverride != NULL) {
+                s32 result = runtime->reflectedHitOverride(action->unit, recipient, command);
+                if (result != 0) {
+                    kind = result;
+                }
+            }
+            if (reflectedSpecial) {
+                kind = 4;
+                operandFlags |= 0x1000;
+            } else if (datCommandRecords[command].hpType == 8 || datCommandRecords[command].hpType == 10) {
+                reflectedSpecial = 1;
+            }
+            combinedKinds |= 0x20000;
+            group->reflected = 1;
+            calculationFlags |= 2;
+            if (element < 2) {
+                group->reflectionKind = 0;
+            } else {
+                group->reflectionKind = 1;
+            }
+            btlBossDebugPrintf("btl:HANSYA[%d]\n", group->reflectionKind);
+        } else {
+            group->sourceSpecialHit = 0;
+            recipient = target;
+            group->reflected = 0;
+        }
+        if (kind == 0x40000) {
+            if (btlCheckSpecialAbility(&recipient->partyRecord, 0x25B)) {
+                ratio *= datAbilityParameters[0x3B].value;
+            }
+            absorbed = 1;
+        }
+        press = 1;
+        if (!group->reflected) {
+            switch (kind) {
+            case 2:
+            case 4:
+            case 0x10000:
+            case 0x20000:
+            case 0x40000:
+                press = 1;
+                break;
+            default:
+                press = func_001AF0B0(source, recipient, command);
+                if (action->flags & 1) {
+                    if (press != 4) {
+                        press = 2;
+                    }
+                }
+                if (press == 4) {
+                    recipient->status.stateFlags |= 0x800000;
+                }
+                break;
+            }
+        }
+        addedStatus = func_001B1350(source, recipient, command, press, kind);
+        removedStatus = btlQueryUnitChannelFlags(source, recipient, command, press, kind);
+        if (group->reflected) {
+            addedStatus &= ~6;
+        }
+        if ((source->status.flags & 0x600) == (recipient->status.flags & 0x600)) {
+            addedStatus &= ~6;
+        }
+        if (action->pendingFlags & 0x40) {
+            addedStatus = 0;
+        }
+        if (addedStatus & ~removedStatus & 1) {
+            if (!(recipient->status.stateFlags & 8)) {
+                fearPending = 1;
+            } else {
+                addedStatus &= ~1;
+            }
+        }
+        if (datCommandRecords[command].unk30 == 10) {
+            work->flags = btlSelectActorAction((s32)target);
+            target->status.flags |= 0x4000000;
+        }
+        if (datCommandRecords[command].unk30 == 21) {
+            work->unk60 = func_001B3B28(target);
+            target->status.stateFlags |= 0x10000;
+        }
+        switch (datCommandRecords[command].unk30) {
+        case 12: operandFlags |= 0x10; break;
+        case 13: operandFlags |= 0x20; addedStatus = 0x4000; break;
+        case 14: operandFlags |= 0x40; break;
+        case 15: operandFlags |= 0x80; break;
+        case 16: operandFlags |= 0x2000; break;
+        case 17: operandFlags |= 0x4000; break;
+        case 18: operandFlags |= 0x8000; break;
+        case 22: operandFlags |= 0x10000; operandFlags |= 0x20000; break;
+        }
+        if (datCommandRecords[command].effectType == 2) {
+            if (kind == 1) {
+                operandFlags |= 1;
+                addedStatus = 0x4000;
+                work->unk50 += btlCalculateHuntEpReward(action->unit, recipient);
+                work->stage = 5;
+                work->parameter = effOffsetIfOwnerFlagClear(target, 0x9C);
+                if (!huntRecovered) {
+                    huntRecovered = 1;
+                    huntHpRecovery = func_001B2380(action->unit, target);
+                    huntMpRecovery = btlCalculateAbilityRecoveryAmount(action->unit, target);
+                }
+                switch (btlGetHuntPenaltyFlags(action->unit, target)) {
+                case 16: deferredStatus = 0x40; break;
+                case 8: deferredStatus = 0x80; break;
+                }
+            } else {
+                if (kind != 0x10000) {
+                    kind = 4;
+                }
+                if (datCommandRecords[command].targetType == 0) {
+                    work->stage = 5;
+                    work->parameter = effOffsetIfOwnerFlagClear(target, 0x9E);
+                }
+            }
+            recipient->status.flags |= 0x1000000;
+        }
+        if (kind == 2 && targetCount == 1 && work->stage == 0) {
+            work->stage = 1;
+            work->parameter = effOffsetIfOwnerFlagClear(target, 10);
+        }
+        group->kind = kind;
+        group->statusChanged = (addedStatus & ~removedStatus) != 0;
+        cumulativeHp = 0;
+        group->parameter = press;
+        group->inactive = 0;
+        if (addedStatus == 0x4000) {
+            group->inactive = 1;
+        }
+        if (!(kind & 0x50006) && !group->reflected) {
+            entryChangeMask = datCommandRecords[command].requirementBits;
+            entryChange = (u16)(s8)datCommandRecords[command].unk_2C;
+        } else {
+            entryChangeMask = 0;
+            entryChange = 0;
+        }
+        for (hitIndex = 0; hitIndex < hitCount; hitIndex++) {
+            s32 hpAttack;
+            s32 hpRestore;
+            s32 mpAttack;
+            s32 mpRestore;
+            s32 mpDelta;
+            f32 multiplier;
+
+            hpAttack = func_001AF4A0(source, recipient, command, maxHits, press, 1, calculationFlags);
+            hpRestore = func_001AF4A0(source, recipient, command, maxHits, press, 0, calculationFlags);
+            hpAttack = hpAttack * ratio;
+            mpAttack = func_001AFF38(source, recipient, command, maxHits, press, 1, calculationFlags);
+            mpRestore = func_001AFF38(source, recipient, command, maxHits, press, 0, calculationFlags);
+            group->entries[hitIndex].addedStatus = addedStatus;
+            group->entries[hitIndex].deferredStatus = deferredStatus;
+            group->entries[hitIndex].removedStatus = removedStatus;
+            if (kind == 0x40000) {
+                hpRestore = hpAttack;
+                hpAttack = -1;
+                mpRestore = mpAttack;
+                mpAttack = -1;
+            } else if (kind == 0x10000 || kind == 2 || kind == 4) {
+                hpAttack = -1;
+                mpAttack = -1;
+                hpRestore = -1;
+                mpRestore = -1;
+            }
+            if (hpAttack > 0) {
+                multiplier = btlGetActionCategoryMultiplier(source, (s32)recipient, command);
+            } else {
+                multiplier = 0.0f;
+            }
+            group->entries[hitIndex].hpRecovery = (s32)(hpAttack * multiplier);
+            group->entries[hitIndex].hpRecovery += huntHpRecovery;
+            if (mpAttack > 0) {
+                multiplier = btlGetActionCategoryGateAsFloat((s32)source, (s32)recipient, command);
+            } else {
+                multiplier = 0.0f;
+            }
+            group->entries[hitIndex].mpRecovery = (s32)(mpAttack * multiplier);
+            group->entries[hitIndex].mpRecovery += huntMpRecovery;
+            group->entries[hitIndex].entryChangeMask = entryChangeMask;
+            group->entries[hitIndex].entryChange = entryChange;
+            group->entries[hitIndex].entrySelection = counterCommand;
+            hpDelta = 0;
+            if (hpAttack * hpRestore <= 0) {
+                hpDelta = hpAttack > 0 ? -hpAttack : hpRestore;
+            }
+            if (mpAttack * mpRestore > 0) {
+                mpDelta = 0;
+            } else {
+                mpDelta = mpAttack > 0 ? -mpAttack : mpRestore;
+            }
+            group->entries[hitIndex].hpDelta = hpDelta;
+            group->entries[hitIndex].mpDelta = mpDelta;
+            cumulativeHp += hpDelta;
+            btlBossDebugPrintf("btl:[%d,%d]hp=%d,mp=%d,badD=%X,badR=%X[ratio=%.2f]\n",
+                targetIndex, hitIndex, hpDelta, mpDelta, addedStatus, removedStatus, ratio);
+            btlFindSoundTaskByWorkValue(kind, press);
+            if (group->reflected) {
+                reflectedHp += hpDelta;
+            }
+            group->entries[hitIndex].flags = operandFlags;
+            if ((source->status.flags & 0x400) && (target->status.flags & 0x200)) {
+                if (btlRollAllFearChance((s32)source, target, kind, press, group->targetSpecialHit)) {
+                    work->unk64 = 1;
+                    allFear = 1;
+                }
+            }
+            if (!allFear && !btlIsUnitDefeatTriggeredByValueDelta(recipient, cumulativeHp) &&
+                (source->status.flags & 0x200) && (recipient->status.flags & 0x400) &&
+                cumulativeHp < 0 && kind == 1 && !group->inactive && !group->reflected &&
+                !group->targetSpecialHit && !absorbed && addedStatus == 0 &&
+                !(datEnemyRecords[recipient->partyRecord.unitId].flags & 0x440)) {
+                if (btlRollFearChance((s32)source, recipient, 1, press)) {
+                    group->entries[hitIndex].addedStatus = 1;
+                    addedStatus = 1;
+                    fearPending = 1;
+                    fearCount++;
+                }
+            }
+            if (btlIsUnitDefeatTriggeredByValueDelta(recipient, cumulativeHp)) {
+                hitCount = hitIndex + 1;
+                if ((recipient->status.stateFlags & 0x20) ||
+                    (command == 0 && btlCheckSpecialAbility(&source->partyRecord, 0x26B) && recipient->partyRecord.hp >= 2)) {
+                    group->entries[hitIndex].hpDelta = -recipient->partyRecord.hp - (cumulativeHp - hpDelta) + 1;
+                } else {
+                    fearPending = 0;
+                    group->inactive = 1;
+                    allEmpty = 0;
+                }
+                break;
+            }
+            {
+                if (kind == 1 && func_001B4600(recipient, command)) {
+                    hitCount = hitIndex + 1;
+                    fearPending = 0;
+                    allEmpty = 0;
+                    group->entries[hitIndex].flags |= 2;
+                    group->inactive = 1;
+                    break;
+                }
+                if (!btlActionEntryIsEmpty(command, group, &group->entries[hitIndex])) {
+                    allEmpty = 0;
+                } else {
+                    emptyHits++;
+                }
+            }
+            if (kind == 4) {
+                group->entries[hitIndex].flags |= 0x800;
+            }
+        }
+        if (emptyHits == hitCount) {
+            press = 1;
+            btlBossDebugPrintf("btl:press miss\n");
+        }
+        if ((kind & 0x10002) && btlDoesEnabledStatusMatchCurrentId(&recipient->partyRecord, 0xDC)) {
+            forcePoints = 1;
+        }
+        combinedKinds |= kind;
+        combinedPress |= press;
+        if (group->inactive || (group->reflected && btlIsUnitDefeatTriggeredByValueDelta(recipient, reflectedHp))) {
+            if (!(recipient->partyRecord.status & 0x5800) &&
+                (btlUnitStatusPair(recipient) & 0x4000001200) == 0x1200 &&
+                btlRollActorEligibilityWithAbilityOverride(recipient)) {
+                recipient->status.stateFlags |= 0x40;
+            }
+        }
+        if (datCommandRecords[command].effectType != 2 && (datCommandRecords[command].flags & 0x20)) {
+            if (group->inactive && (recipient->status.flags & 0x400)) {
+                operandFlags |= 1;
+                group->entries[hitCount - 1].flags |= 1;
+                group->entries[hitCount - 1].addedStatus = 0x4000;
+                work->unk50 += btlCalculateHuntEpReward(action->unit, recipient);
+                work->stage = 5;
+                work->parameter = effOffsetIfOwnerFlagClear(target, 0x9C);
+                if (!huntRecovered) {
+                    huntRecovered = 1;
+                    group->entries[hitCount - 1].hpRecovery += func_001B2380(action->unit, target);
+                    group->entries[hitCount - 1].mpRecovery += btlCalculateAbilityRecoveryAmount(action->unit, target);
+                }
+                switch (btlGetHuntPenaltyFlags(action->unit, target)) {
+                case 16: group->entries[hitCount - 1].deferredStatus |= 0x40; break;
+                case 8: group->entries[hitCount - 1].deferredStatus |= 0x80; break;
+                }
+            }
+            recipient->status.flags |= 0x1000000;
+        }
+        if (group->inactive && (action->unit->status.flags & 0x200) && (recipient->status.flags & 0x400)) {
+            if (!(operandFlags & 1) && !(recipient->status.stateFlags & 2)) {
+                work->unk54 += btlCalculateEnemyExperienceReward(action->unit, recipient);
+                recipient->status.stateFlags |= 2;
+            }
+            if (!(recipient->status.stateFlags & 0x400)) {
+                work->unk58 += btlGetEnemyMoney(action->unit, recipient);
+                recipient->status.stateFlags |= 0x400;
+            }
+            runtime->unk292 += recipient->partyRecord.level;
+            runtime->unk290++;
+        }
+        work->groups[targetIndex].interval = btlGetActorDisplayByteWithDefault(source, command);
+        work->groups[targetIndex].count = hitCount;
+        if ((element < 2 || (element == 7 && datCommandRecords[command].effectType == 0)) &&
+            kind == 1 && !group->inactive && !group->reflected && !group->targetSpecialHit &&
+            !absorbed && !(action->pendingFlags & 0x40) && !(target->partyRecord.status & 0x290F) &&
+            !(addedStatus & 0x290F)) {
+            s32 counter = func_001B4918(target, action->unit);
+            if (counter > 0) {
+                s32 counterPhase;
+                ActionStateLink *reaction = btlFindUnitByActor(target);
+                fldAppendSceneGroupHandle(reaction);
+                if (counter >= 250) {
+                    goto normalCounterPhase;
+                }
+                counterPhase = counter < 248;
+                if (counterPhase) {
+                    goto normalCounterPhase;
+                }
+                counterPhase = 2;
+                goto counterPhaseSelected;
+            normalCounterPhase:
+                counterPhase = 1;
+            counterPhaseSelected:
+                reaction->indexWork.phase = counterPhase;
+                reaction->indexWork.skillId = counter;
+                btlAppendIndexListEntry(reaction->indexWork.indices, action->unit);
+                btlBossDebugPrintf("btl:counter[%p][%X]\n", target, counter);
+            }
+        }
+        if (press == 2) {
+            action->flags |= 2;
+        }
+        group->reactionCode = btlClassifyActionResult(recipient, kind, press, elementMask,
+                                                     hitCount, group->inactive, command);
+    }
+    if (fearPending && !allFear) {
+        work->wait = fearCount == 1 ? 0 : 2;
+    }
+    if (!allEmpty && work->stage == 0) {
+        s32 effect = btlGetCommandEffectId(action, command);
+        if (effect > 0) {
+            work->parameter = effect;
+            work->stage = 1;
+        }
+    }
+    if (runtime->actionEffectOverride != NULL) {
+        s32 effect = runtime->actionEffectOverride(action, command);
+        if (effect > 0) {
+            work->parameter = effect;
+            work->stage = 1;
+        }
+    }
+    if (datCommandRecords[command].effectType == 0 && !(calculationFlags & 1) &&
+        datCommandSelectors[command].kind != 1 && !(u8)(datCommandRecords[command].flags & 1)) {
+        if (btlActorEntryIsExpired(action->unit, 5)) {
+            btlClearActorEntrySlot(action->unit, 5);
+        }
+    }
+    if (datCommandRecords[command].effectType == 1 && !(calculationFlags & 1) &&
+        datCommandSelectors[command].kind != 1 && !(u8)(datCommandRecords[command].flags & 1)) {
+        if (btlActorEntryIsExpired(action->unit, 6)) {
+            btlClearActorEntrySlot(action->unit, 6);
+        }
+    }
+    if (btlCompareSkippedAndActiveTargetCounts(work->indices, (struct BtlTargetResult *)work->groups)) {
+        work->unk2E = 1;
+    }
+    work->slot = btlClassifyActionOperand(action->unit, (u8 *)work);
+    if (btlDoesEnabledStatusMatchCurrentId(&source->partyRecord, 0xEB)) {
+        combinedKinds &= ~2;
+        combinedKinds &= ~4;
+    }
+    if (btlDoesEnabledStatusMatchCurrentId(&source->partyRecord, 0xEC)) {
+        combinedKinds &= ~0x10000;
+    }
+    {
+        s32 points;
+        if (runtime->actionPointsOverride != NULL) {
+            points = runtime->actionPointsOverride(combinedKinds, combinedPress, command);
+        } else {
+            points = 100;
+        }
+        if ((u32)(command - 0x1AB) < 0x75) {
+            points *= btlGetSlotValueAdjustedForSpecialAbility(action->unit, command);
+        }
+        if (!work->unk2D) {
+            work->adjustedValue = btlAdjustPointsForCombatFlags((s32)source, combinedKinds, combinedPress, (u32)points, command);
+            work->resultKind = btlGetCommandResultKindFromFlags(combinedKinds, combinedPress, command);
+        } else {
+            if (overrideMiss) {
+                points += 100;
+            }
+            work->resultKind = 1;
+            work->adjustedValue = points;
+        }
+    }
+    if (forcePoints) {
+        work->adjustedValue = 4500;
+        work->resultKind = 1;
+    }
+    btlBossDebugPrintf("btl:press=%d[type=%d]\n", work->adjustedValue, (u8)work->resultKind);
+}
+
+
 
 /* Reset work status and group headers, preserving the retained payload and allocation. */
 void btlResetIndexWork(BattleIndexWork *work) {
@@ -1317,7 +2003,8 @@ void func_001E0CE0(ActionStateLink *task, BattleIndexWork *work) {
     }
 }
 
-void btlFindSoundTaskByWorkValue(void) {
+/* The resolver supplies its result kind and press value to this no-op hook. */
+void btlFindSoundTaskByWorkValue(u32 kind, s32 press) {
 }
 
 /* Return the oldest matching handle, or zero; unstarted tasks may have handle 0. */

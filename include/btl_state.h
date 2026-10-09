@@ -544,7 +544,9 @@ typedef struct BtlState {
     s32 (*handleActorCategoryCamera)(struct BtlLinkedCommand *, s32, s32); /* 0x668: same category camera override. */
     s32 (*unk66C)(BtlUnit *);
     s32 (*unk670)(struct BtlLinkedCommand *);
-    u8 pad674[0x10];
+    u8 pad674[8];
+    s32 (*actionHitOverride)(BtlUnit *, BtlUnit *, s32, s32); /* 0x67C */
+    s32 (*reflectedHitOverride)(BtlUnit *, BtlUnit *, s32); /* 0x680 */
     s32 (*unk684)(s32, s32);
     s32 (*unk688)(s32, s32);
     void (*preActionHook)(struct ActionStateLink *, s32, u64, u64, u64);
@@ -557,7 +559,11 @@ typedef struct BtlState {
     s32 (*cameraStateChangePredicate)(BtlLinkedCommand *); /* 0x6AC */
     s32 (*cameraUpdatePredicate)(BtlLinkedCommand *); /* 0x6B0: gates the active camera handler. */
     s32 (*unitLiftPredicate)(BtlUnit *); /* 0x6B4 */
-    u8 pad6B8[0x18];
+    u8 pad6B8[4];
+    s32 (*actionEffectOverride)(struct ActionStateLink *, s32); /* 0x6BC */
+    u8 pad6C0[8];
+    s32 (*actionPointsOverride)(u32, u32, s32); /* 0x6C8 */
+    u8 pad6CC[4];
     void (*actionResourceNameHook)(struct ActionStateLink *, s32, char *);
     u32 (*enemyLimitOverride)(BtlUnit *, DatBattleSceneRecord *, u32); /* 0x6D4: 001B325C overrides the unsigned scene limit. */
     u8 pad6D8[4];

@@ -339,13 +339,15 @@ s32 btlCalculateHuntEpReward(u8 *acquirer, u8 *enemy) {
     return ep;
 }
 
-u32 func_001A7ED8(void) {
+/* Hunt-recovery interface: actor and target are passed; this title returns no HP recovery. */
+u32 func_001A7ED8(BtlUnit *actor, BtlUnit *target) {
     return 0;
 }
 
 extern char D_003A1C10[]; /* "btl:hunt mp rec[%d]\n" */
 
-s32 btlCalculateAbilityRecoveryAmount(BtlUnit *actor) {
+/* Target is part of the hunt-recovery interface; this implementation uses only actor. */
+s32 btlCalculateAbilityRecoveryAmount(BtlUnit *actor, BtlUnit *target) {
     s32 recovery = 0;
     if (btlCheckSpecialAbility(&actor->partyRecord, 0x24E)) {
         recovery = (s32)(actor->partyRecord.maxMp * datAbilityParameters[0x24E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);
