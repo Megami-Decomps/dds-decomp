@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fr_font_measure.h"
 #include "fr_font.h"
 #include "eff_resource_slots.h"
 #include "sdf_resource.h"
@@ -820,7 +821,6 @@ void func_002A6018(void) {
 struct FrFontGlyph;
 /* This legacy call supplies an unused ninth word to the eight-word builder. */
 extern struct FrFontGlyph *frFontBuildColoredGlyphWithSharedFlags();
-extern u32 frFontMeasureLines(struct FrFontGlyph *);
 extern s32 frFontDrawGlyphWithSharedFlags(struct FrFontGlyph *, s8);
 void func_002A6030(s32 font, u32 color, const char *text, f32 x, f32 y) {
     s32 byteAlpha = color & 0xFF;
@@ -844,7 +844,7 @@ void func_002A6030(s32 font, u32 color, const char *text, f32 x, f32 y) {
     }
     frFontMeasureLines(glyph);
     frFontDrawGlyphWithSharedFlags(glyph, 1);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 

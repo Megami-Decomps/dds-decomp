@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "sdf_packet_list.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
@@ -23,7 +24,7 @@
 
 struct FrFontGlyph;
 extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
-extern s32 func_001958A0(struct FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern s32 mnuGetMatchingPartyEntryMask(DatPartyRecord *);
 extern void func_002BF4E0(s32, s32, s32, u32, s32, s32, s32, s32);
 extern s32 func_003014F0(char *, const char *, ...);
@@ -75,8 +76,8 @@ extern char D_003BC7A0[];
 #define EVT_STAGE_RESOURCE_TASK_KIND 6
 #define EVT_STAGE_USE_ENTRY_MOTION 0xffffffffffffffff
 
-extern void mdlAddEntryFlaggedEx(s32, s32, s32, f32, f32);
-extern void mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
+extern void mdlAddEntryFlaggedEx(MdlCtx *, s32, s32, f32, f32);
+extern void mdlAddEntryPlainEx(MdlCtx *, s32, s32, f32, f32);
 extern void evtStageTestQueueMotionSegment(s32, f32, f32);
 
 
@@ -97,9 +98,9 @@ extern void func_00284108(s32, s32, s32, s32, s32, s32, s32 *);
 
 extern void evtStageTestCreateModelEffect(s32);
 extern void btlUpdateJobPositionFromModel(s32);
-extern void mdlProcessContextNodesAndTransforms(s32, s32);
-extern void mnuApplyModelCamera(s32);
-extern void evtStageTestApplyEntryRotation(s32);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
+extern void mnuApplyModelCamera(MdlCtx *);
+extern void evtStageTestApplyEntryRotation(MdlCtx *);
 extern void evtStageTestUpdateCamera(void);
 extern s32 kwlnGetDrawBufferIndex(void);
 extern void sdfVuBuildLookAtBasis(void *, void *, void *);
@@ -122,7 +123,7 @@ extern s32 mdlRequestAsset(s32, s32, s32);
 extern void func_00285960(DatPartyRecord *entry, s32 arg1, u32 index, PartyPanel *panel);
 
 extern void func_002E7F20(f32, f32, f32);
-extern void mdlUpdateContextRotationBasisFromQuaternion(s32);
+extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 
 extern EffWorldNode *evtCreateWorldObjectAtTransform(f32 *, f32 *);
 extern char D_003BC7C8[];
@@ -199,7 +200,7 @@ typedef struct StageTestQueue {
 typedef struct StageTestState {
     s32 mode;                /* 0x00 */
     s32 assetRequest;        /* 0x04: result of mdlRequestAsset */
-    s32 model;               /* 0x08 */
+    MdlCtx *model;            /* 0x08 */
     s8 flag;                 /* 0x0C */
     StageTestEntry *entries; /* 0x10 */
     StageTestQueue queue;    /* 0x14: flags followed by the two selection slots */
@@ -649,7 +650,6 @@ void mnuCyclePairedEffectSetting(MenuEffectPair *pair) {
 }
 
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *, s32);
-extern void effInitializeSlotWork(s32, s32);
 
 /* Draw the paired effect at its current rate and initialize its alternate on demand. */
 void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,
@@ -675,7 +675,7 @@ void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,
         func_002BF4E0(x, y - 8, z, scale, 0, (s32)owner->leftGrid, 0, surface);
         itfGridLookupValueOrDefault(owner->leftGrid, 0);
         if (owner->leftGrid->workEntries[0].states[0].source == NULL) {
-            effInitializeSlotWork((s32)owner->rightGrid, 0);
+            effInitializeSlotWork(owner->rightGrid, 0);
             effConfigureIndexedSlotResource(owner->rightGrid, 0,
                                             owner->effects[1], 0, 0);
             owner->updateState = 1;
@@ -693,7 +693,7 @@ void func_00283EE0(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner,
                      y - 0x40, z, scale, 0, (s32)owner->rightGrid, 0, surface);
         itfGridLookupValueOrDefault(owner->rightGrid, 0);
         if (owner->rightGrid->workEntries[0].states[0].source == NULL) {
-            effInitializeSlotWork((s32)owner->leftGrid, 0);
+            effInitializeSlotWork(owner->leftGrid, 0);
             effConfigureIndexedSlotResource(owner->leftGrid, 0,
                                             owner->effects[0], 0, 0);
             owner->updateState = 0;
@@ -893,8 +893,8 @@ void mnuDrawPanelItemValue(s32 x, s32 y, s32 depth, s32 mode, MenuPanelItem *ite
     color = uiBlendColors(color, color & ~0xFF, opacity);
     func_003014F0(buffer, D_003BC7A0, value);
     glyph = (struct FrFontGlyph *)func_001978E8(x + 0x340, y + 0x28, depth, color, buffer, 0);
-    func_001958A0(glyph, 1, layer);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontDrawGlyphChain(glyph, 1, layer);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }
 
 
@@ -1940,7 +1940,7 @@ void evtStageTestSetModelScalingEnabled(s32 enabled) {
     }
 }
 
-u32 evtStageTestGetActiveModel(void) {
+MdlCtx *evtStageTestGetActiveModel(void) {
     return evtStageTestState.model;
 }
 
@@ -1955,8 +1955,8 @@ void evtStageTestSetEntryIndex(s32 encodedIndex, s32 motionIndex) {
     if (motionIndex < 0) {
         motionIndex = 0;
     }
-    if (evtStageTestState.model != 0 && motionIndex >= mdlGetNodeRefHalf((MdlCtx *)evtStageTestState.model, 0)) {
-        motionIndex = mdlGetNodeRefHalf((MdlCtx *)evtStageTestState.model, 0) - 1;
+    if (evtStageTestState.model != 0 && motionIndex >= mdlGetNodeRefHalf(evtStageTestState.model, 0)) {
+        motionIndex = mdlGetNodeRefHalf(evtStageTestState.model, 0) - 1;
     }
     evtStageTestState.entries[entryIndex].motionIndex = motionIndex;
     func_002878D8(-1);
@@ -2213,7 +2213,7 @@ s32 func_002877A8(void) {
             }
             if (ready != 0) {
                 if (evtStageTestState.mode != 1) {
-                    evtStageTestState.model = (s32)func_00217680(
+                    evtStageTestState.model = func_00217680(
                         slot->assetResource, slot->modelId);
                 }
                 if (mnuHasPendingBlockFlag(&evtStageTestState.queue.flags)) {
@@ -2237,10 +2237,10 @@ s32 func_002877A8(void) {
 INCLUDE_ASM(const s32, "game/code_00282850", func_002878D8);
 
 extern u8 *D_003BAA20;
-extern void mdlStoreTertiaryVectorVU(void *);
+extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 /* Store uniform model scale through vf10 and return it; useTable selects the model-record factor. */
-f32 mnuSetModelScaleVector(void *model, s32 useTable) {
+f32 mnuSetModelScaleVector(MdlCtx *model, s32 useTable) {
     f32 scale = 1.0f;
     f32 scaleVector[4];
 
@@ -2266,11 +2266,11 @@ void mnuResetWorkPair(void) {
     *(s32 *)(D_0037CE60 + 8) = 0;
 }
 
-extern void mdlStorePrimaryVectorVU(void *);
+extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
 /* Apply the active entry's model position and scale-dependent view depth.
  * Retain the post-call entry rereads and subtraction-based scaling expressions. */
-void mnuApplyModelCamera(s32 model) {
+void mnuApplyModelCamera(MdlCtx *model) {
     f32 position[4];
     StageTestEntry *stageEntry;
     f32 scale;
@@ -2281,11 +2281,11 @@ void mnuApplyModelCamera(s32 model) {
     position[0] = stageEntry->position[0];
     position[1] = stageEntry->position[1];
     if (evtStageTestState.flag != 1) {
-        mnuSetModelScaleVector((void *)model, 0);
+        mnuSetModelScaleVector(model, 0);
         position[2] = ((StageTestEntry *)(evtStageTestState.queue.slot[0].entryIndex * EVT_STAGE_ENTRY_BYTES + (s32)evtStageTestState.entries))->position[2];
         mnuResetWorkPair();
     } else {
-        scale = mnuSetModelScaleVector((void *)model, 1);
+        scale = mnuSetModelScaleVector(model, 1);
         stageEntry = (StageTestEntry *)(evtStageTestState.queue.slot[0].entryIndex * EVT_STAGE_ENTRY_BYTES + (s32)evtStageTestState.entries);
         position[0] -= stageEntry->position[0] - stageEntry->position[0] * scale;
         position[1] -= stageEntry->position[1] - stageEntry->position[1] * scale;
@@ -2297,7 +2297,7 @@ void mnuApplyModelCamera(s32 model) {
 }
 
 /* Convert the active entry's degree angles to radians and update the model rotation basis. */
-void evtStageTestApplyEntryRotation(s32 model) {
+void evtStageTestApplyEntryRotation(MdlCtx *model) {
     StageTestEntry *stageEntry = (StageTestEntry *)(evtStageTestState.queue.slot[0].entryIndex * EVT_STAGE_ENTRY_BYTES + (s32)evtStageTestState.entries);
 
     func_002E7F20(stageEntry->rotation[0] * 3.14159265f / 180.0f, stageEntry->rotation[1] * 3.14159265f / 180.0f,
@@ -2336,7 +2336,7 @@ void evtStageTestUpdateCamera(void)
     sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
 }
 
-s8 evtStageTestUpdate(s32 frame) {
+s8 evtStageTestUpdate(struct SdfPoolNode **surfaces) {
     s8 result = func_002877A8();
 
     if (result == 1) {
@@ -2354,7 +2354,7 @@ s8 evtStageTestUpdate(s32 frame) {
             if (evtStageTestState.effect != 0) {
                 btlUpdateJobPositionFromModel(evtStageTestState.effect);
             }
-            mdlProcessContextNodesAndTransforms(evtStageTestState.model, frame);
+            mdlProcessContextNodesAndTransforms(evtStageTestState.model, surfaces);
             evtStageTestAdvanceMotionQueue();
         }
     }
@@ -2442,20 +2442,20 @@ s32 evtStageTestHasPendingMotion(void) {
 void evtStageTestAdvanceMotionQueue(void) {
     StageTestSlot *activeSlot = evtStageTestState.queue.slot;
     s32 motionIndex;
-    s32 model;
+    MdlCtx *model;
 
     if (activeSlot->state != EVT_STAGE_MOTION_IDLE && activeSlot->state != EVT_STAGE_MOTION_FALLBACK_STARTED && (model = evtStageTestGetActiveModel()) != 0) {
         if (activeSlot->state == EVT_STAGE_MOTION_QUEUED) {
             motionIndex = activeSlot->motionIndex;
 
-            if (motionIndex < mdlGetNodeRefHalf((MdlCtx *)model, 0)) {
+            if (motionIndex < mdlGetNodeRefHalf(model, 0)) {
                 mdlAddEntryPlainEx(model, 0, motionIndex, (s32)activeSlot->blendLeadFrames, (s32)activeSlot->blendDurationFrames);
                 activeSlot->state = EVT_STAGE_MOTION_PLAYING;
             }
-        } else if (!(activeSlot->flags & EVT_STAGE_MOTION_SUPPRESS_FALLBACK) && (*(u8 *)(*(s32 *)(model + 0x1C) + 0x30) == 5 || activeSlot->state == EVT_STAGE_MOTION_FORCE_FALLBACK)) {
+        } else if (!(activeSlot->flags & EVT_STAGE_MOTION_SUPPRESS_FALLBACK) && (model->first->state == 5 || activeSlot->state == EVT_STAGE_MOTION_FORCE_FALLBACK)) {
             motionIndex = evtStageTestState.entries[activeSlot->entryIndex].motionIndex;
 
-            if (motionIndex < mdlGetNodeRefHalf((MdlCtx *)model, 0)) {
+            if (motionIndex < mdlGetNodeRefHalf(model, 0)) {
                 mdlAddEntryFlaggedEx(model, 0, motionIndex, (s32)activeSlot->blendLeadFrames, (s32)activeSlot->blendDurationFrames);
                 activeSlot->state = EVT_STAGE_MOTION_FALLBACK_STARTED;
             }
@@ -2526,7 +2526,6 @@ extern s32 D_003BC7D0;
 extern s32 D_003BC7D4;
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
 extern void evtCreateWorldObjectForKey(s32, s32);
 
@@ -2597,7 +2596,7 @@ s32 btlDestroyStageTask(taskWork)
         if (resource != 0) {
             sdfDevQueueReleaseState((DevState *)resource);
         }
-        func_002EDC50(taskWork->payload);
+        sdfPacReleasePacketQueueNodes(taskWork->payload);
         sdfReleaseChipBlock(taskWork->allocation);
         sdfReleaseChipBlock((void *)taskWork);
         return 0;

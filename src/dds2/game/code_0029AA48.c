@@ -24,8 +24,8 @@ extern void func_00306CD0(s32, s32, s32, u32, s32, s32, s32, s32);
 extern u32 uiBlendColors(u32, u32, s32);
 extern s32 func_0035C860(char *, const char *, ...);
 extern u32 func_0019F6C8(s32, s32, s32, u32, char *, s32);
-extern void frFontSetChainFlag(struct FrFontGlyph *, u8);
-extern s32 func_0019D550(struct FrFontGlyph *, s8, u32);
+extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
+extern s32 frFontDrawGlyphChain(struct FrFontGlyph *, s8, u32);
 extern u32 mnuKindIsSelectable(u32);
 extern char D_004379B0[];
 
@@ -52,9 +52,9 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
     color = uiBlendColors(0xA09DC380, 0xA09DC300, iconFade);
     func_0035C860(text, D_004379B0, delta);
     glyph = (struct FrFontGlyph *)func_0019F6C8(x, 0x8E8, 0, color, text, 0);
-    frFontSetChainFlag(glyph, 3);
-    func_0019D550(glyph, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontSetChildChainFirstOption(glyph, 3);
+    frFontDrawGlyphChain(glyph, 1, 0x53);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
     if (mnuKindIsSelectable(item->unitId) != 0) {
         if (context->iconFade < 0x100) {
             context->iconFade += 0x20;
@@ -69,8 +69,9 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
 
 extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 extern void func_002C10F0(s32, s32, s32, DatPartyRecord *, MenuSpriteState *, s32);
-extern s8 evtStageTestUpdate(s32);
-extern char D_00380788[];
+struct SdfPoolNode;
+extern s8 evtStageTestUpdate(struct SdfPoolNode **);
+extern struct SdfPoolNode *D_00380788[13][4];
 
 void func_0029AC20(BrsSkillPackageWork *context, s32 copyOptions) {
     DatPartyRecord *unit = context->selectedRewardRow->unit;
@@ -93,7 +94,7 @@ void func_0029AC20(BrsSkillPackageWork *context, s32 copyOptions) {
     mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, unit, context->panelHandle, 0, 0x53);
     func_002C10F0(0, 0, 0, unit, context->spriteHandle, 0x53);
     mnuDrawRemainingSelectionExtent(context);
-    evtStageTestUpdate((s32)D_00380788);
+    evtStageTestUpdate(D_00380788[0]);
 }
 
 s32 mnuAdvanceSkillPackageToItemPanel(KwlnTask *request) {

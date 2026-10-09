@@ -1,4 +1,6 @@
 #include "common.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "eff.h"
 #include "eff_param.h"
@@ -70,9 +72,6 @@ extern u32 D_00354A00[];
 extern SdfPoolNode D_00325248;
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u32);
-extern void sdfConsAppendVuPacket(s32, s32 (*)(s32));
-extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
 extern s32 func_0015FE20(EffPacketParams *);
 
 
@@ -401,8 +400,8 @@ void effDrawScaledRecordPool(EffRecordPool *work)
     matrix[13] = work->origin[1];
     matrix[14] = work->origin[2];
     VU0_LOAD_MATRIX(matrix);
-    sdfConsAppendVuPacket((s32)list, 0);
-    sdfConsAppendAssetPacket((s32)list, work->resource, 0);
+    sdfConsAppendVuPacket(list, 0);
+    sdfConsAppendAssetPacket(list, work->resource, 0);
     remaining = work->vertexCount;
     D_003D6550->colors = (u32 *)work->auxRecordBase;
     D_003D6550->positions = (u128 *)work->recordBase;
@@ -534,8 +533,8 @@ void effDrawTriangleRecordPool(EffRecordPool *pool)
     matrix[13] = pool->origin[1];
     matrix[14] = pool->origin[2];
     VU0_LOAD_MATRIX(matrix);
-    sdfConsAppendVuPacket((s32)packet, 0);
-    sdfConsAppendAssetPacket((s32)packet, pool->resource, 0);
+    sdfConsAppendVuPacket(packet, 0);
+    sdfConsAppendAssetPacket(packet, pool->resource, 0);
     remainingVertices = pool->vertexCount;
     D_003D6550->colors = (u32 *)pool->auxRecordBase;
     D_003D6550->positions = (u128 *)pool->recordBase;
@@ -622,8 +621,8 @@ void effDrawQuadRecordPool(EffRecordPool *pool)
     matrix[13] = pool->origin[1];
     matrix[14] = pool->origin[2];
     VU0_LOAD_MATRIX(matrix);
-    sdfConsAppendVuPacket((s32)packet, 0);
-    sdfConsAppendAssetPacket((s32)packet, pool->resource, 0);
+    sdfConsAppendVuPacket(packet, 0);
+    sdfConsAppendAssetPacket(packet, pool->resource, 0);
     remainingVertices = pool->vertexCount;
     D_003D6550->colors = (u32 *)pool->auxRecordBase;
     D_003D6550->positions = (u128 *)pool->recordBase;
@@ -686,8 +685,8 @@ void effDrawTransformedRecordPool(EffRecordPool *work)
     matrix[13] = work->origin[1];
     matrix[14] = work->origin[2];
     VU0_LOAD_MATRIX(matrix);
-    sdfConsAppendVuPacket((s32)list, 0);
-    sdfConsAppendAssetPacket((s32)list, work->resource, 0);
+    sdfConsAppendVuPacket(list, 0);
+    sdfConsAppendAssetPacket(list, work->resource, 0);
     remaining = work->vertexCount;
     D_003D6550->colors = (u32 *)work->auxRecordBase;
     D_003D6550->positions = (u128 *)work->recordBase;

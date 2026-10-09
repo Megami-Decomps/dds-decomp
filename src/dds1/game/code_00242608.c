@@ -1,4 +1,5 @@
 #include "fr_font.h"
+#include "fr_font_context.h"
 #include "kwln.h"
 #include "sdf_packet_list.h"
 #include "eff_resource_slots.h"
@@ -57,7 +58,7 @@
 extern void evtLoadResourcePair(const char *, u8 *);
 extern s32 evtCreateMessageWindowIfMissing(s32);
 extern s32 func_00244848();
-extern s32 D_003BC520;
+extern struct EffectSlotSet *D_003BC520;
 extern s32 itfMesGetWindowEntryItems(s32, s32);
 extern void mnuUnpackNibbleFields();
 
@@ -698,19 +699,17 @@ void func_00243A18(EvtRuntime *scene) {
 }
 
 extern s32 D_00368BD8[];
-extern s32 func_001951C8(s32 *resources, s32, s32, s32, s32);
-extern void frFontSetContextPair(s32 resource, s32 width, s32 height);
-
 void mnuCampInitFontResource(EvtRuntime *scene) {
     s32 fontHandle;
     scene->glyph = 0;
-    fontHandle = func_001951C8(D_00368BD8, 0, 0, 0, 0);
+    fontHandle = (s32)(u32)func_001951C8((const char *)D_00368BD8, 0, 0, 0, 0);
     scene->glyph = fontHandle;
-    frFontSetContextPair(fontHandle, CAMP_FONT_CONTEXT_WIDTH, CAMP_FONT_CONTEXT_HEIGHT);
+    frFontSetGlyphPosition((struct FrFontGlyph *)(u32)fontHandle,
+        CAMP_FONT_CONTEXT_WIDTH, CAMP_FONT_CONTEXT_HEIGHT);
 }
 
 void mnuCampLinkFontGlyph(EvtRuntime *scene) {
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)scene->glyph);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)scene->glyph);
     scene->glyph = 0;
 }
 
@@ -945,23 +944,26 @@ typedef struct ShopBatch {
 } ShopBatch;
 
 void mnuInitializeShopStatusBatches(ShopScene *scene) {
+    struct EffMappedResource *batchHandle;
     ShopBatch *batchObject;
     ShopBatchGraphics *batchGraphics;
     s32 *batchParameters;
     s32 initialParameter = CAMP_STATUS_INITIAL_PARAMETER;
     scene->batchState = 0;
-    batchObject = (ShopBatch *)effCreateStatusBatch(6);
+    batchHandle = effCreateStatusBatch(6);
+    batchObject = (ShopBatch *)batchHandle;
     batchGraphics = batchObject->graphics;
-    scene->batches[0] = (u8 *)batchObject;
+    scene->batches[0] = batchHandle;
     batchParameters = batchGraphics->params;
     batchParameters[0] = initialParameter;
     batchParameters[1] = 0;
     batchParameters[2] = 0;
     batchParameters[3] = 0;
     batchParameters[4] = 0;
-    batchObject = (ShopBatch *)effCreateStatusBatch(1);
+    batchHandle = effCreateStatusBatch(1);
+    batchObject = (ShopBatch *)batchHandle;
     batchGraphics = batchObject->graphics;
-    scene->batches[1] = (u8 *)batchObject;
+    scene->batches[1] = batchHandle;
     batchParameters = batchGraphics->params;
     batchParameters[0] = initialParameter;
     batchParameters[1] = 0;
@@ -969,11 +971,11 @@ void mnuInitializeShopStatusBatches(ShopScene *scene) {
 
 /* Destroy both batches and return the second destruction result. */
 s32 mnuShopReleaseSceneObjects(ShopScene *scene) {
-    s32 *batchCursor = (s32 *)scene->batches;
+    struct EffMappedResource **batchCursor = scene->batches;
     s32 destroyResult;
     u32 batchIndex;
     for (batchIndex = 0; batchIndex < CAMP_STATUS_BATCH_COUNT; batchIndex++) {
-        destroyResult = effDestroyPackedBatch((struct EffMappedResource *)(u32)*batchCursor++);
+        destroyResult = effDestroyPackedBatch(*batchCursor++);
     }
     return destroyResult;
 }
@@ -981,7 +983,7 @@ s32 mnuShopReleaseSceneObjects(ShopScene *scene) {
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF3D0);
 
 void mnuShopLoadSpriteAssets(ShopScene *scene) {
-    u32 *resource = &scene->spriteResource;
+    struct EffectSlotSet **resource = &scene->spriteResource;
     *resource = effLoadIndexedResource("/facility/spr/shop/", D_0036AA60[0], 0);
 }
 
@@ -989,7 +991,7 @@ INCLUDE_ASM(const s32, "game/code_00242608", mnuReleaseShopSceneSpriteResources)
 
 extern u8 *datItemSkillRecords;
 
-s32 mnuShopHasPendingFlag(void) {
+s32 mnuShopHasPendingFlag(ShopScene *unused) {
     u8 *flags = datGameState->inventory.counts;
     u8 *entry = datItemSkillRecords;
     s32 found = 0;
@@ -1015,7 +1017,7 @@ s32 mnuShopHasPendingFlag(void) {
 
 extern void func_0025E820();
 
-MenuWindowContainer *func_002443F8(const void *unused, s32 count, ShopScene *settings) {
+MenuWindowContainer *mnuCreateShopListWindow(const void *unused, s32 count, ShopScene *settings) {
     MenuWindowContainer *window;
     MnuShopListContext *buffer;
     s32 i;
@@ -1038,7 +1040,7 @@ MenuWindowContainer *func_002443F8(const void *unused, s32 count, ShopScene *set
 
 
 void func_002444D0(ShopScene *scene) {
-    scene->sprite = func_002443F8(D_00368C40, 3, scene);
+    scene->sprite = mnuCreateShopListWindow(D_00368C40, 3, scene);
 }
 
 typedef struct CampFlagRow {
@@ -1163,13 +1165,13 @@ s32 mnuCountActivePartyEntries(void) {
 }
 
 ShopScene *mnuShopCreateScene(void) {
-    s32 handle;
+    struct SdfMemBlock *allocation;
     ShopScene *obj;
 
-    handle = (u32)sdfAllocGeneralBlock(0xB4);
-    obj = (ShopScene *)sdfResourceRetainAddress((struct SdfMemBlock *)(handle));
+    allocation = sdfAllocGeneralBlock(0xB4);
+    obj = (ShopScene *)sdfResourceRetainAddress(allocation);
     memset(obj, 0, 0xB4);
-    obj->resourceHandle = handle;
+    obj->resourceHandle = allocation;
     mnuClearPanelTransitionState(&obj->transitionWork);
     mnuShopLoadSpriteAssets(obj);
     mnuInitializeShopStatusBatches(obj);
@@ -1194,7 +1196,7 @@ void mnuShopDestroyScene(KwlnTask *arg) {
         mnuDrainPanelTransitions(&scene->transitionWork, arg);
         dspCloseChannel();
         evtReleaseResourcePairHandle(scene->resourcePair);
-        sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(scene->resourceHandle));
+        sdfReleaseResourceAllocation(scene->resourceHandle);
         D_003BC39C = 2;
     }
 }
@@ -1545,17 +1547,17 @@ s32 func_00245A40(ShopScene *scene) {
 
 extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, s32, s32, s32, s32);
 
-extern void frFontSetChildColors(s32, u32);
+extern void frFontSetChildColors(struct FrFontGlyph *, u32);
 
-extern void func_001958A0(s32, s32, s32);
+extern void frFontDrawGlyphChain(s32, s32, s32);
 void mnuQueueCampTextGlyphWithChildColor(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5) {
     s32 handle;
 
     if (a1 != 0) {
         handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)a0, a1, a4);
-        frFontSetChildColors(handle, 0x80808040);
-        func_001958A0(handle, 0, a5);
-        frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
+        frFontSetChildColors((struct FrFontGlyph *)(u32)handle, 0x80808040);
+        frFontDrawGlyphChain(handle, 0, a5);
+        frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
     }
 }
 

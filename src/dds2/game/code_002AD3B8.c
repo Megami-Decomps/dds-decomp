@@ -23,7 +23,6 @@ extern void func_0026C900(void);
 extern void func_002AAE80(s32);
 extern void mnuCreateStaffImageSprite(s32);
 extern void func_002AAC98(s32, s32, s32, s32, s32, s32);
-extern void mnuDrawStaffGridLabelsForKind(s32, s32);
 extern u8 D_003E7050[];
 extern char D_003E7207[20];
 extern char D_003E7202[];
@@ -34,7 +33,6 @@ extern void func_002B2C88(s32, s32, s32, s32);
 extern void mnuClearPageSelectionHandles(MenuPageWindow *);
 extern void mnuClearEntries(MenuPageWindow *);
 extern void func_002C1B68(u32 *, u32);
-extern void mnuReleaseStaffMenuTextureHandles(s32);
 extern void func_002C2AA8(struct MenuPanelItem *, u32);
 extern char D_00437BD0[];
 extern char D_00437BD8[];
@@ -43,9 +41,9 @@ extern s32 func_002BDA50();
 extern s32 func_002BDA78();
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
-extern void frFontSetChainFlag(s32, s32);
+extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 typedef struct FrFontGlyph FrFontGlyph;
-extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern s32 evtGetIndexedEventRecordId(s32);
 extern s32 D_00435E5C;
 extern s32 D_00435E48;
@@ -78,8 +76,6 @@ extern void mnuDrawCampIconBackdropByKind(s32, s32);
 extern void func_002AAC70(u32, u32, u32, u32, u32, u32, u32);
 extern s32 D_00435E70;
 extern void func_002BB9C8(MenuSprites *, u32);
-extern void mnuReleaseStaffMenuResources(s32 *);
-extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32, s32, s32, s32);
 extern void mnuSetIndexedWindowPageSpriteFlags(s32, MenuPageWindow *, u32, u32);
 
 typedef struct MenuListNode MenuListNode;
@@ -99,7 +95,7 @@ s32 mnuStaffImageEnterA(KwlnTask *task) {
         mnuRefreshStaffWindowDescription(context, 0);
     } else {
         if (menu->secondListState == 0) {
-            func_00306CD0(0x390, 0x570, 0, object->fadeScale, 1, (struct EffectSlotSet *)((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
+            func_00306CD0(0x390, 0x570, 0, object->fadeScale, 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         }
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
@@ -333,7 +329,7 @@ s32 mnuStaffImageEnterD(KwlnTask *task) {
     if (object->list->count != 0) {
         mnuRefreshStaffWindowDescription(context, 1);
     } else {
-        func_00306CD0(0x390, 0x570, 0, object->fadeScale, 1, (struct EffectSlotSet *)((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
+        func_00306CD0(0x390, 0x570, 0, object->fadeScale, 1, ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         func_002AAC98(0, 0, 0, context, 1, 0x53);
     }
     mnuDrawStaffGridLabelsForKind(2, ((MenuStaffContext *)context)->group);
@@ -428,12 +424,15 @@ s32 mnuInitializeSelectedStaffPage(KwlnTask *task) {
     mnuSelectPage(window, index);
     mnuCreateStaffBulletItemWindow(context);
     mnuReleaseStaffMenuResources(&context->group);
-    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, 0, 0);
+    mnuSetWindowResource(index, window,
+                         context->group,
+                         context->spriteArg1,
+                         context->windowResource, 0, 0);
     mnuSetIndexedWindowPageSpriteFlags(index, (MenuPageWindow *)window, 1, 0);
-    context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, (struct EffectSlotSet *)context->spriteArg1, 0);
-    context->spriteHandle = mnuCreateSpriteState((struct EffectSlotSet *)context->spriteArg0,
-                                                 (struct EffectSlotSet *)context->spriteArg1,
-                                                 (struct EffectSlotSet *)context->group);
+    context->panelHandle = mnuCreatePanelGroup((s32)context->spriteArg0, context->spriteArg1, 0);
+    context->spriteHandle = mnuCreateSpriteState(context->spriteArg0,
+                                                 context->spriteArg1,
+                                                 context->group);
     context->partyWindow.flags |= 0x200;
     context->partyWindow.flags &= ~MNU_PAGE_WINDOW_SPRITE_MODE;
     func_002B2C88((s32)window, 1, 0, 0);
@@ -460,7 +459,7 @@ s32 mnuReleaseSelectedStaffPageResources(KwlnTask *task) {
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 0);
-    mnuReleaseStaffMenuTextureHandles((s32)&((MenuStaffContext *)context)->group);
+    mnuReleaseStaffMenuTextureHandles(&((MenuStaffContext *)context)->group);
     return 1;
 }
 
@@ -620,13 +619,13 @@ void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
     char captionText[16];
     s32 fontHandle;
 
-    itfDrawGridWithResolvedSlot(0x1C0, 0xA10, 0, 0, (struct EffectSlotSet *)(u32)((MenuStaffContext *)panel)->spriteArg2, 2, 0x53);
+    itfDrawGridWithResolvedSlot(0x1C0, 0xA10, 0, 0, ((MenuStaffContext *)panel)->spriteArg2, 2, 0x53);
     if (entryId != 0) {
         func_0035C860(captionText, D_00437BD0, datCommandRecords[evtGetIndexedEventRecordId(entryId)].hpPower);
         fontHandle = func_0019F5E8(0x620, 0xA20, 0, 0xA09DC380, (s32)captionText, 0);
-        frFontSetChainFlag(fontHandle, 4);
-        func_0019D550((FrFontGlyph *)fontHandle, 1, 0x53);
-        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)fontHandle);
+        frFontSetChildChainFirstOption((struct FrFontGlyph *)(u32)fontHandle, 4);
+        frFontDrawGlyphChain((FrFontGlyph *)fontHandle, 1, 0x53);
+        frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)fontHandle);
     }
 }
 
@@ -659,7 +658,7 @@ s32 mnuDrawStaffPartyValuePage(KwlnTask *task) {
         mnuDrawStaffCaption(selectedLabel, (u8 *)context);
     } else {
         func_00306CD0(0x390, 0x570, 0, window->fadeScale, 1,
-                     (struct EffectSlotSet *)((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
+                     ((MenuStaffContext *)context)->spriteArg2, 0x11, 0x53);
         func_002AAC98(1, 0, 0, context, 1, 0x53);
         mnuDrawStaffCaption(0, (u8 *)context);
     }
@@ -685,16 +684,20 @@ s32 mnuInitializeStaffPageWithSlotAsset(KwlnTask *task) {
     mnuSelectPage(window, index);
     mnuCreateOrderedStaffItemWindow(context);
     mnuReleaseStaffMenuResources(&context->group);
-    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, context->spriteArg0,
+    mnuSetWindowResource(index, window,
+                         context->group,
+                         context->spriteArg1,
+                         context->windowResource,
+                         context->spriteArg0,
                          context->spriteArg2);
     mnuSetIndexedWindowPageSpriteFlags(index, (MenuPageWindow *)window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {
         func_002BB9C8(slot->windowSprites, 1);
     }
-    context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, (struct EffectSlotSet *)context->spriteArg1, 0);
-    context->spriteHandle = mnuCreateSpriteState((struct EffectSlotSet *)context->spriteArg0,
-                                                 (struct EffectSlotSet *)context->spriteArg1,
-                                                 (struct EffectSlotSet *)context->group);
+    context->panelHandle = mnuCreatePanelGroup((s32)context->spriteArg0, context->spriteArg1, 0);
+    context->spriteHandle = mnuCreateSpriteState(context->spriteArg0,
+                                                 context->spriteArg1,
+                                                 context->group);
     context->partyWindow.flags |= 0x200;
     context->partyWindow.flags &= ~MNU_PAGE_WINDOW_SPRITE_MODE;
     func_002B2C88((s32)window, 1, 0, 0);
@@ -721,7 +724,7 @@ s32 mnuReleaseStaffSelectionPageResources(KwlnTask *task) {
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 0);
-    mnuReleaseStaffMenuTextureHandles((s32)&((MenuStaffContext *)context)->group);
+    mnuReleaseStaffMenuTextureHandles(&((MenuStaffContext *)context)->group);
     return 1;
 }
 
@@ -938,13 +941,13 @@ s32 func_002AF5E0(KwlnTask *task) {
         func_002AF2E0(0, 0, selectionId, context);
         if (owned != 0 && mdlFlagTest(0x990) != 0) {
             glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x2B0, 0xB80, 0, 0xA09DC340, slotsCaption, 0);
-            func_0019D550(glyph, 1, 0x53);
-            frFontQueueGlyphInSelectedSlot(glyph);
-            func_002BDAA8(0x770, 0xB98, 0x100, selectionId, context->spriteArg0, 0x2C);
+            frFontDrawGlyphChain(glyph, 1, 0x53);
+            frFontQueueGlyphForCurrentDrawBuffer(glyph);
+            func_002BDAA8(0x770, 0xB98, 0x100, selectionId, (s32)context->spriteArg0, 0x2C);
         }
     } else {
         func_00306CD0(0x390, 0x570, 0, menu->windows[3]->fadeScale, 1,
-                     (struct EffectSlotSet *)context->spriteArg2, 0x11, 0x53);
+                     context->spriteArg2, 0x11, 0x53);
         func_002AAC98(1, 0, 0, (s32)context, 1, 0x53);
         func_002AF2E0(0, 0, 0, context);
     }
@@ -970,16 +973,20 @@ s32 mnuInitializeStaffValuePage(KwlnTask *task) {
     mnuSelectPage(window, index);
     mnuCreateOwnedCatalogItemWindow(context);
     mnuReleaseStaffMenuResources(&context->group);
-    mnuSetWindowResource(index, window, context->group, context->spriteArg1, context->windowResource, context->spriteArg0,
+    mnuSetWindowResource(index, window,
+                         context->group,
+                         context->spriteArg1,
+                         context->windowResource,
+                         context->spriteArg0,
                          context->spriteArg2);
     mnuSetIndexedWindowPageSpriteFlags(index, (MenuPageWindow *)window, 0, 2);
     if (mdlFlagTest(0x990) != 0) {
         func_002BB9C8(slot->windowSprites, 1);
     }
-    context->panelHandle = mnuCreatePanelGroup(context->spriteArg0, (struct EffectSlotSet *)context->spriteArg1, context->spriteArg2);
-    context->spriteHandle = mnuCreateSpriteState((struct EffectSlotSet *)context->spriteArg0,
-                                                 (struct EffectSlotSet *)context->spriteArg1,
-                                                 (struct EffectSlotSet *)context->group);
+    context->panelHandle = mnuCreatePanelGroup((s32)context->spriteArg0, context->spriteArg1, (s32)context->spriteArg2);
+    context->spriteHandle = mnuCreateSpriteState(context->spriteArg0,
+                                                 context->spriteArg1,
+                                                 context->group);
     context->partyWindow.flags |= 0x200;
     context->partyWindow.flags &= ~MNU_PAGE_WINDOW_SPRITE_MODE;
     func_002B2C88((s32)window, 1, 0, 0);
@@ -1009,7 +1016,7 @@ s32 mnuReleaseStaffValuePageResources(KwlnTask *task) {
         ((MenuStaffContext *)context)->spriteHandle = 0;
     }
     func_002C1B68(&((MenuStaffContext *)context)->unkAA50, 0);
-    mnuReleaseStaffMenuTextureHandles((s32)&((MenuStaffContext *)context)->group);
+    mnuReleaseStaffMenuTextureHandles(&((MenuStaffContext *)context)->group);
     return 1;
 }
 

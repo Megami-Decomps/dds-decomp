@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "kwln.h"
 #include "pcp_vu0.h"
 #include "eff_transform.h"
@@ -45,7 +46,6 @@ u32 func_0010EF38(void) {
 INCLUDE_ASM(const s32, "game/code_0010EEF0", func_0010EF68);
 
 extern void *sdfCreateFormattedSifCommand(s32 x, s32 y, s32 flags, s32 mode, const char *format, ...);
-extern void sdfAppendPacket(void *list, void *packet);
 extern const char D_0039F5F8[]; /* "FLAG  : 0x%08X" */
 
 u32 dds3DrawObjectFlagDiagnostic(void *object, s32 x, s32 y, void *list) {
@@ -59,7 +59,7 @@ u32 dds3DrawObjectFlagDiagnostic(void *object, s32 x, s32 y, void *list) {
                                            0,
                                            D_0039F5F8,
                                            handle->flags);
-    sdfAppendPacket(list, command);
+    sdfAppendPacket(list, (u32)command);
     return 1;
 }
 

@@ -23,17 +23,6 @@ enum {
     PAC_STATE_ALLOCATE_HIGH = 2
 };
 
-/* Native decoder records shared with sdfPacDecode. */
-typedef struct PacHead {
-    u8 command;
-    u8 flags;
-    u8 pad2[2];
-    s32 payloadSize;
-    u8 pad8[4];
-    s32 decodedSize;
-    u8 payload[1];
-} PacHead;
-
 typedef struct PacAlloc {
     s32 entryCount;
     s32 entryIndex;
@@ -47,10 +36,6 @@ typedef struct PacBuf {
     u8 *cursor;
     s32 remainingBytes;
 } PacBuf;
-
-/* The built-in packet callback is referenced as an address in this unit. */
-extern u8 sdfPacDispatchPacket[];
-
 
 extern DevState *sdfDevCreateCallbackState(const char *path, void *callback, s32 context);
 extern s32 sdfCreateSemaphore(s32 initialCount, s32 maximumCount, s32 options);
@@ -188,22 +173,22 @@ void sdfPacInitializeDispatchPacket(PacState *packet, void *callbackAddress) {
     if (callbackAddress != NULL) {
         packet->packetCallback = (s32 (*)())callbackAddress;
     } else {
-        packet->packetCallback = (s32 (*)())sdfPacDispatchPacket;
+        packet->packetCallback = sdfPacDispatchPacket;
     }
 }
 
 /* Retain packet-owned payload memory rather than allocating a separate resource. */
-void func_002EDC30(PacState *state) {
+void sdfPacUsePacketPayloadMemory(PacState *state) {
     state->flags = state->flags | PAC_STATE_USE_PACKET_MEMORY;
 }
 
 /* Select the high-address allocator for packet payload resources. */
-void func_002EDC40(PacState *state) {
+void sdfPacUseHighAddressAllocator(PacState *state) {
     state->flags = state->flags | PAC_STATE_ALLOCATE_HIGH;
 }
 
 /* Advance the queue cursor before returning each node to the chip allocator. */
-void func_002EDC50(PacState *state) {
+void sdfPacReleasePacketQueueNodes(PacState *state) {
     PacWork *cursor = state->queueHead;
     PacWork *current = cursor;
 
@@ -215,7 +200,7 @@ void func_002EDC50(PacState *state) {
 }
 
 /* Mark the caller's phase byte finished. */
-void func_002EDC88(u8 *phaseByte) {
+void sdfPacMarkPhaseFinished(u8 *phaseByte) {
     *phaseByte = PAC_PHASE_FINISHED;
 }
 
@@ -228,7 +213,7 @@ void sdfPacAdvanceInput(PacState *state, s32 byteCount) {
 
 /* Align the stream, then report a packet header and its payload byte count to the callback. */
 void sdfPacAdvanceCallbackBoundary(PacState *state) {
-    PacHead *inputHeader;
+    SdfPacStreamPacketHeader *inputHeader;
     u32 alignmentOffset;
     u32 packetBytes;
     u32 headerBytes;
@@ -242,7 +227,7 @@ void sdfPacAdvanceCallbackBoundary(PacState *state) {
         state->pendingBytes = PAC_ALIGNMENT_BYTES - alignmentOffset;
         return;
     }
-    inputHeader = (PacHead *)state->inputCursor;
+    inputHeader = (SdfPacStreamPacketHeader *)state->inputCursor;
     /* Advance only the fixed header; retain its original address for the callback. */
     sdfPacAdvanceInput(state, PAC_HEADER_BYTES);
     packetBytes = inputHeader->payloadSize;
@@ -254,7 +239,7 @@ void sdfPacAdvanceCallbackBoundary(PacState *state) {
     packetCallback = state->packetCallback;
     callbackResult = packetCallback(state, 0, inputHeader, payloadBytes);
     if (callbackResult == PAC_CALLBACK_FINISHED) {
-        func_002EDC88(&state->phase);
+        sdfPacMarkPhaseFinished(&state->phase);
         return;
     }
     if (callbackResult == PAC_CALLBACK_ALIGN) {
@@ -276,7 +261,7 @@ void sdfDecodePacNodeAndAdvanceTail(PacState *state) {
 
     callbackResult = state->packetCallback(state, 1, state->queueTail->packet);
     if (callbackResult == PAC_CALLBACK_FINISHED) {
-        func_002EDC88(&state->phase);
+        sdfPacMarkPhaseFinished(&state->phase);
         return;
     }
     if (callbackResult == PAC_CALLBACK_DROP_TAIL) {

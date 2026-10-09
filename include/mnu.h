@@ -73,11 +73,13 @@ typedef struct CampEffectRows {
     u32 values[2][4];
 } CampEffectRows;
 
+struct EffectSlotSet;
+
 /* The backdrop packet's complete resource payload, also used by shop callbacks. */
 typedef struct MapPacket {
     u32 type;
     u32 value;
-    u32 sheets[1]; /* The resource destructor iterates this one-sheet bank. */
+    struct EffectSlotSet *sheets[1]; /* The resource destructor iterates this one-sheet bank. */
     u32 items[11];
     s32 count;
 } MapPacket;
@@ -89,7 +91,7 @@ typedef struct MenuEffectResources {
 } MenuEffectResources;
 
 #ifdef VERSION_DDS2
-void mnuSetCampEffectResourceHandles(u32 sheet,
+void mnuSetCampEffectResourceHandles(struct EffectSlotSet *sheet,
                                     struct EffMappedResource *animation,
                                     MenuEffectResources *resources);
 #endif
@@ -112,7 +114,7 @@ struct EffPayload;
 
 /* DDS1's complete two-layer backdrop asset set. */
 typedef struct MenuAssets {
-    u32 sprites[5];
+    struct EffectSlotSet *sprites[5];
     struct EffMappedResource *material;
     struct EffPayload *layerA;
     struct EffPayload *layerB;
@@ -120,19 +122,22 @@ typedef struct MenuAssets {
 
 typedef char MenuAssets_size_must_be_0x20[(sizeof(MenuAssets) == 0x20) ? 1 : -1];
 
-struct EffectSlotSet;
-
 /* Native staff sprite banks; DDS2 retains only two base resources. */
 typedef struct StaffSlots {
 #ifdef VERSION_DDS2
-    u32 baseResources[2];
+    struct EffectSlotSet *baseResources[2];
 #else
-    u32 baseResources[7];
+    struct EffectSlotSet *baseResources[7];
 #endif
     struct EffectSlotSet *pairResources[2];
     struct EffectSlotSet *mainResources[16];
     struct EffectSlotSet *extraResources[5];
 } StaffSlots;
+
+/* The two pair owners follow the title-specific base resource bank.
+ * resourceBase may belong to StaffSlots or a menu context resource region. */
+void mnuReleaseStaffMenuResources(void *resourceBase);
+void mnuReleaseStaffMenuTextureHandles(void *resourceBase);
 
 #ifdef VERSION_DDS2
 typedef char StaffSlots_size_must_be_0x64[(sizeof(StaffSlots) == 0x64) ? 1 : -1];
@@ -481,8 +486,7 @@ typedef struct MenuPageSlot {
     struct EffectSlotSet *frame[8]; /* 0xBC */
     struct MenuSprites *windowSprites; /* 0xDC */
     MenuIconBundle *iconBundle;
-    u32 unkE4;
-    u8 padE8[8];
+    struct EffectSlotSet *panelResourceHandles[3]; /* 0xE4 */
     MenuQueuedCommand commands[2]; /* 0xF0 and 0x1114 */
 } MenuPageSlot;
 
@@ -499,7 +503,14 @@ typedef char MenuPageSlot_hp_check[((u32)&((MenuPageSlot *)0)->hp == 0x1C) ? 1 :
 typedef char MenuPageSlot_mp_check[((u32)&((MenuPageSlot *)0)->mp == 0x6C) ? 1 : -1];
 typedef char MenuPageSlot_frame_check[((u32)&((MenuPageSlot *)0)->frame == 0xBC) ? 1 : -1];
 typedef char MenuPageSlot_sprites_check[((u32)&((MenuPageSlot *)0)->windowSprites == 0xDC) ? 1 : -1];
+typedef char MenuPageSlot_panel_handles_check[
+    ((u32)&((MenuPageSlot *)0)->panelResourceHandles == 0xE4) ? 1 : -1];
 typedef char MenuPageSlot_commands_check[((u32)&((MenuPageSlot *)0)->commands == 0xF0) ? 1 : -1];
+
+void mnuLoadPanelSectionResources(MenuPageSlot *slot,
+                                  struct EffectSlotSet *model,
+                                  u32 firstValue, u32 secondValue,
+                                  s32 thirdValue);
 
 #else
 typedef struct MenuPageSlot {
@@ -567,6 +578,13 @@ typedef struct MenuPageWindow {
 #ifdef VERSION_DDS2
 /* Marks the window-sprite mode toggled by page setup and entry resets. */
 #define MNU_PAGE_WINDOW_SPRITE_MODE 0x80
+
+void mnuSetWindowResource(s32 index, MenuPageWindow *menu,
+                          struct EffectSlotSet *mainResource,
+                          struct EffectSlotSet *itemResource,
+                          struct EffectSlotSet *iconResource,
+                          struct EffectSlotSet *cursorResource,
+                          struct EffectSlotSet *alternateResource);
 #endif
 
 void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth,
@@ -706,7 +724,7 @@ struct MenuIconSprites;
 
 /* Terminal/shop modes share this complete 0x38C-byte scene allocation. */
 typedef struct MenuTerminalContext {
-    s32 resourceHandle;
+    struct SdfMemBlock *resourceHandle;
     u8 pad04[4];
     s32 type;
     MenuPopupState transitionWork;
@@ -871,12 +889,12 @@ typedef struct MenuStaffContext {
     MenuPopupState transitionWork; /* +0x08: native saved-entry transition state */
     s32 popupState;       /* 0x54 */
     u8 pad58[8];
-    s32 group;            /* 0x60 */
-    s32 spriteArg0;       /* 0x64 */
-    s32 spriteArg1;       /* 0x68 */
-    s32 windowResource; /* Source resource for the window's fixed sprite slots. */
+    struct EffectSlotSet *group; /* 0x60: first base resource */
+    struct EffectSlotSet *spriteArg0; /* 0x64: second base resource */
+    struct EffectSlotSet *spriteArg1; /* 0x68: first paired resource */
+    struct EffectSlotSet *windowResource; /* 0x6C: second paired resource */
     u8 pad70[0x54];
-    s32 spriteArg2;       /* 0xC4 */
+    struct EffectSlotSet *spriteArg2; /* 0xC4: category sprite resource */
     u8 padC8[0x2C];
     struct MenuIconState *panelLayout; /* 0xF4: layout used by staff panel construction */
     struct MenuIconState *unkF8; /* 0xF8: second panel layout */
@@ -885,7 +903,7 @@ typedef struct MenuStaffContext {
     MenuWindowContainer *skillWindow; /* 0x104: field-skill window; 002AAEA0 reads list->last. */
     MenuWindowContainer *activeWindow; /* 0x108 */
     u8 pad10C[0xC];
-    s32 unk118;
+    struct MenuScrollPanel *scrollPanel; /* 0x118: owned camp scroll panel */
     u8 pad11C[0x168];
     /* 002BD480 consumes the full page owner; its first list is at 0xA914. */
     MenuPageWindow partyWindow; /* 0x284..0xA927 */

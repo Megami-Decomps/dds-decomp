@@ -1,5 +1,7 @@
 #include "sdf_chip.h"
 #include "file.h"
+#include "sdf_pac_state.h"
+#include "file_request_api.h"
 #include "sdf_dev_state.h"
 
 /* Intrusive list node threaded through +0x4. */
@@ -53,8 +55,7 @@ typedef struct FileCleanup {
 
 extern s32 btlDestroyStageTask(void *);
 extern void func_0035B6E0(const char *fmt, ...);
-extern void sdfPacInitializeDispatchPacket(void *, void *);
-extern void func_00346AE8(void *);
+extern void sdfPacUseHighAddressAllocator(void *);
 #define FILE_REQUEST_KIND_CALLBACK 0
 #define FILE_REQUEST_KIND_PAC 1
 #define FILE_REQUEST_KIND_VALUE_PAIR 2
@@ -69,8 +70,11 @@ extern void func_00346AE8(void *);
 
 /* PAC requests delegate cleanup. Other kinds remain pending until state six,
  * then release any device state, duplicated name and entry, returning zero.
- * A pending non-PAC entry returns one; entry is required. */
-s32 filePollEntryCleanup(FileCleanup *entry) {
+ * A pending non-PAC request returns one; request is required. */
+s32 filePollEntryCleanup(struct FileRequest *request) {
+    FileCleanup *entry;
+
+    entry = (FileCleanup *)request;
     if (entry->kind == FILE_REQUEST_KIND_PAC) {
         return btlDestroyStageTask(entry);
     }
@@ -177,23 +181,24 @@ void fileUnlinkNode(FileWork *list, FileNode *node) {
 /* Clear a PAC request, initialize its embedded dispatch packet and optionally
  * apply extra packet setup for any nonzero flags. Queue its copied name and
  * completion context as kind one, returning the allocated work. No failure guard. */
-void *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue, s32 onComplete, s32 userData) {
+struct FileRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue, s32 onComplete, s32 userData) {
     u8 *requestWork;
-    u8 *dispatchPacket;
+    PacState *dispatchPacket;
 
     func_0035B6E0("pac load %s\n", requestName);
     requestWork = sdfAllocAndClearQuadwords(FILE_PAC_REQUEST_BYTES);
-    dispatchPacket = requestWork + FILE_PAC_PACKET_OFFSET;
+    dispatchPacket = (PacState *)(requestWork + FILE_PAC_PACKET_OFFSET);
     sdfPacInitializeDispatchPacket(dispatchPacket, dispatchValue);
     if (flags != 0) {
-        func_00346AE8(dispatchPacket);
+        sdfPacUseHighAddressAllocator(dispatchPacket);
     }
-    fileManQueueNamedRequest(requestWork, FILE_REQUEST_KIND_PAC, requestName, onComplete, userData);
-    return requestWork;
+    fileManQueueNamedRequest(requestWork, FILE_REQUEST_KIND_PAC, requestName,
+                             (void *)onComplete, (void *)userData);
+    return (struct FileRequest *)requestWork;
 }
 
 /* Queue PAC work without extra packet setup or completion context. */
-void *fileQueuePlainDispatchRequest(const char *requestName) {
+struct FileRequest *fileQueuePlainDispatchRequest(const char *requestName) {
     return fileCreatePacLoadWork(requestName, 0, 0, 0, 0);
 }
 
@@ -207,38 +212,42 @@ void fileQueueFlaggedDispatchRequest(const char *requestName) {
 /* Clear kind-zero request work and narrow callbackMode into byte three.
  * callbackAddress is the queue callback; userData is its context, not another
  * callback. Keep the raw byte store and existing provider parameter types. */
-void *fileCreateCallbackRequest(const char *requestName, s32 callbackMode, s32 callbackAddress, s32 userData) {
+struct FileRequest *fileCreateCallbackRequest(const char *requestName, s32 callbackMode, s32 callbackAddress, s32 userData) {
     u8 *requestWork;
 
     func_0035B6E0("file load %s\n", requestName);
     requestWork = sdfAllocAndClearQuadwords(FILE_CALLBACK_REQUEST_BYTES);
     requestWork[3] = callbackMode;
-    fileManQueueNamedRequest(requestWork, FILE_REQUEST_KIND_CALLBACK, requestName, callbackAddress, userData);
-    return requestWork;
+    fileManQueueNamedRequest((FileQueueEntry *)requestWork, FILE_REQUEST_KIND_CALLBACK, requestName,
+                             (void *)callbackAddress, (void *)userData);
+    return (struct FileRequest *)requestWork;
 }
 
 /* Queue a callback-kind request with mode zero and no callback/context. */
-void *fileQueueDefaultCallbackRequest(const char *requestName) {
+struct FileRequest *fileQueueDefaultCallbackRequest(const char *requestName) {
     return fileCreateCallbackRequest(requestName, 0, 0, 0);
 }
 
 /* Queue a callback-kind request with mode one and no callback/context. */
-void fileQueueAlternateCallbackRequest(const char *requestName) {
-    fileCreateCallbackRequest(requestName, 1, 0, 0);
+struct FileRequest *fileQueueAlternateCallbackRequest(const char *requestName) {
+    return fileCreateCallbackRequest(requestName, 1, 0, 0);
 }
 
 /* Return the stored resource handle without changing ownership. work is required. */
-u32 fileGetResourceHandle(FileWork *work) {
+u32 fileGetResourceHandle(struct FileRequest *request) {
+    FileWork *work = (FileWork *)request;
     return work->resourceHandle;
 }
 
 /* Return the stored loaded-data address as its existing u32 representation. */
-u32 fileGetLoadedDataAddress(FileWork *work) {
+u32 fileGetLoadedDataAddress(struct FileRequest *request) {
+    FileWork *work = (FileWork *)request;
     return work->loadedDataAddress;
 }
 
 /* Return the recorded resource size; work is required. */
-u32 fileGetResourceSize(FileWork *work) {
+u32 fileGetResourceSize(struct FileRequest *request) {
+    FileWork *work = (FileWork *)request;
     return work->size;
 }
 
@@ -246,8 +255,6 @@ u32 fileGetResourceSize(FileWork *work) {
 u32 func_002C8120(FileWork *work) {
     return work->unk10;
 }
-
-extern s32 fileIsRequestReadyInCurrentMode(FileRequest *request);
 
 /* Kind one additionally requires readinessEnabled; other kinds only require
  * state six. The enable word is a gate, not the expected state value. */
@@ -275,18 +282,18 @@ s32 fileRequestIsReady(FileRequest *request) {
 
 /* Pump the device scheduler and file manager while the kind-specific readiness
  * predicate is zero. No timeout or NULL-request guard is introduced. */
-void fileWaitReady(u32 requestAddress) {
+void fileWaitReady(FileRequest *request) {
     s64 readyResult;
 
-    while (readyResult = fileIsRequestReadyInCurrentMode(requestAddress), readyResult == 0) {
+    while (readyResult = fileIsRequestReadyInCurrentMode(request), readyResult == 0) {
         sdfRestoreDeviceThreadPriority();
         fileManUpdate();
     }
 }
 
-/* Forward the existing request address to the readiness wait, without cleanup. */
-void func_002C81D0(u32 requestAddress) {
-    fileWaitReady(requestAddress);
+/* Forward the opaque request pointer to the readiness wait, without cleanup. */
+void func_002C81D0(FileRequest *request) {
+    fileWaitReady(request);
 }
 
 /* Pump updates while the queued head or unknown manager word is nonzero.
@@ -309,28 +316,22 @@ typedef struct FileWindowSlot {
     u8 pad2C[4];
 } FileWindowSlot; /* 0x30 */
 
-/* Create a kind-two request with two stored values and their copies.
- * requestNameAddress is passed to name duplication, not used as a numeric id;
- * callbackAddress/userDataAddress are completion fields, not window coordinates. */
-FileWindowSlot *fileWindowSlotCreate(s32 requestNameAddress, s32 firstValue, s32 secondValue, s32 callbackAddress, s32 userDataAddress) {
+/* Create a kind-two request with the caller's output buffer and byte count.
+ * The buffer address is stored in the existing value word at +0x24. */
+FileWindowSlot *fileWindowSlotCreate(const char *requestName, void *data, s32 size, s32 callbackAddress, s32 userDataAddress) {
     FileWindowSlot *requestSlot = sdfAllocAndClearQuadwords(FILE_VALUE_PAIR_REQUEST_BYTES);
 
-    requestSlot->firstValue = firstValue;
-    requestSlot->firstValueCopy = firstValue;
-    requestSlot->secondValue = secondValue;
-    requestSlot->secondValueCopy = secondValue;
-    fileManQueueNamedRequest(requestSlot, FILE_REQUEST_KIND_VALUE_PAIR, requestNameAddress, callbackAddress, userDataAddress);
+    requestSlot->firstValue = (s32)data;
+    requestSlot->firstValueCopy = (s32)data;
+    requestSlot->secondValue = size;
+    requestSlot->secondValueCopy = size;
+    fileManQueueNamedRequest(requestSlot, FILE_REQUEST_KIND_VALUE_PAIR, requestName, callbackAddress, userDataAddress);
     return requestSlot;
 }
 
-/* Queue the value-pair request without completion context. Preserve the
- * existing K&R parameter declarations and their signed integer representations. */
-void fileQueueWindowSlotRequest(requestNameAddress, firstValue, secondValue)
-s32 requestNameAddress;
-s32 firstValue;
-s32 secondValue;
-{
-    fileWindowSlotCreate(requestNameAddress, firstValue, secondValue, 0, 0);
+/* Queue the value-pair request and expose its opaque request handle. */
+struct FileRequest *fileQueueWindowSlotRequest(const char *requestName, void *data, s32 size) {
+    return (struct FileRequest *)fileWindowSlotCreate(requestName, data, size, 0, 0);
 }
 
 
@@ -368,5 +369,5 @@ void fileQueuePendingRequestInFreeSlot(FileRequest *request) {
     }
     SignalSema(work->sema);
     sdfDevQueueRead((DevState *)request->handle,
-                    (void *)(work->buffer + (slotIndex << FILE_READ_SLOT_SHIFT)), chunkBytes);
+                    work->buffer + (slotIndex << FILE_READ_SLOT_SHIFT), chunkBytes);
 }

@@ -42,26 +42,55 @@ typedef struct UiSprite {
 /* Retained parent/child glyph record shared by font and interface code (0x44). */
 typedef struct FrFontGlyph {
     union {
-        s16 h;
-        struct { s8 b0; s8 b1; } b;
-    } u0;
-    u16 unk2;
+        u16 glyphCode;
+        struct {
+            u8 encodedContextByte;
+            s8 spacing;
+        } byteRoles;
+    } glyphCodeOrContext;
+    /* Child draw count: setup clears it; nonzero-fade draws increment it, and
+     * the fade helper also uses it to select the jitter phase. */
+    u16 drawCount;
     s32 x;
     s32 y;
     s32 advance;
+    /* Parent glyphs store dimensions; render words also carry a fade byte. */
     union {
-        u32 word;
-        u16 half[2];
-        u8 byte[4];
-    } u10;
+        struct {
+            u16 cellAdvance;
+            u16 cellHeight;
+        } parentDimensions;
+        u32 renderWord;
+        struct {
+            u8 value;
+            u8 opaque[3];
+        } fadeByte;
+    } parentDimensionsOrRenderWord;
+    /* Rendering, glyph setup, and message shade paths use distinct byte views. */
     union {
-        u32 w;
-        u8 b[4];
-    } u14;
+        u32 renderValue;
+        struct {
+            u8 firstOption;
+            u8 fontIndex;
+            u8 secondOption;
+            u8 sharedFlags;
+        } setupBytes;
+        struct {
+            u8 green;
+            u8 red;
+            u8 blue;
+            u8 opaque;
+        } shadeColor;
+    } renderValueOrSetupOrShade;
+    /* Parent: child count. Font item: child cell dimensions. */
     union {
-        u32 w;
-        u8 b[4];
-    } unk18;
+        u32 childCount;
+        struct {
+            u8 cellWidth;
+            u8 cellHeight;
+            u8 opaque[2];
+        } cellDimensions;
+    } childCountOrCellDimensions;
     /* Parent: first child. Font item: retained glyph-cache record. */
     union {
         struct FrFontGlyph *firstChild;
@@ -96,13 +125,13 @@ typedef struct FrFontCtx {
     s32 x;
     s32 y;
     s32 z;
-    s8 channel0;
-    s8 channel1;
-    s8 channel2;
-    u8 channel3;
-    u8 *bytes;
+    s8 fontIndex;
+    s8 firstOption;
+    s8 secondOption;
+    u8 contextEncodedByte;
+    u8 *encodedText;
     FrFontGlyph *glyphChain;
-    s32 offset;
+    s32 encodedTextOffset;
     s8 pendingCreate;
     s8 pendingPosition;
     u8 pad1E[2];
@@ -121,14 +150,14 @@ typedef struct FrFontTextBank {
     FrFontTextIndex entries[1];
 } FrFontTextBank;
 
-FrFontGlyph *frFontAppendGlyphFromData(void *text, s8 fontIndex, s8 firstOption,
-    s8 secondOption, FrFontGlyph *previousGlyph);
 void frFontSetContextEncodedByte(FrFontGlyph *glyph, s32 inputValue);
 void frFontEnableContextMode(FrFontGlyph *glyph);
-void frFontSetFlagAndMeasureGlyphs(FrFontGlyph *glyph, s32 requestedFlag);
-void frFontSetContextPair(FrFontGlyph *glyph, u32 first, u32 second);
-void frFontStoreShiftedContextValue(FrFontGlyph *glyph, u32 unshiftedValue);
+void frFontSetSpacingAndMeasureGlyphs(FrFontGlyph *glyph, s32 spacing);
+void frFontSetGlyphPosition(FrFontGlyph *glyph, u32 x, u32 y);
+void frFontStoreShiftedRenderValue(FrFontGlyph *glyph, u32 unshiftedValue);
 void frFontSetChildColors(FrFontGlyph *parentGlyph, u32 colorWord);
+void frFontSetChildChainFirstOption(FrFontGlyph *glyph, u8 firstOption);
+void frFontSetGlyphChainDimensions(FrFontGlyph *glyph, s32 cellAdvance, s32 cellHeight);
 
 /* Message tables contain relocated encoded-text addresses. */
 typedef struct ItfMesTable {

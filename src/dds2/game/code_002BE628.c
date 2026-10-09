@@ -1,4 +1,5 @@
 #include "mnu_input.h"
+#include "sdf_packet_list.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "fpu.h"
@@ -13,6 +14,7 @@
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
+#include "mnu_shop.h"
 #include "mnu_list.h"
 #include "mnu_panel_state.h"
 #include "mnu_staff.h"
@@ -109,8 +111,6 @@ extern void ptyRecomputeMaxHpMp(DatPartyRecord *);
 
 extern s32 func_002C6CE8(void);
 
-extern void mnuReleaseResourceList(struct MenuIconState *list);
-
 
 
 
@@ -123,7 +123,7 @@ extern void evtStageTestQueueMotionSegment(u32, f32, f32);
 extern void evtStageTestCreateModelEffect(s32);
 extern void evtStageTestUpdateCamera(void);
 extern void btlUpdateJobPositionFromModel(s32);
-extern void mdlProcessContextNodesAndTransforms(s32, s32);
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
 extern u32 ptyGetSkillNibbleState(DatPartyRecord *, u16);
 
 extern void evtStageTestStop(void);
@@ -148,9 +148,9 @@ extern s8 D_003E792A[];
 
 
 
-extern void mdlAddEntryFlaggedEx(s32, s32, s32, f32, f32);
+extern void mdlAddEntryFlaggedEx(MdlCtx *, s32, s32, f32, f32);
 
-extern void mdlAddEntryPlainEx(s32, s32, s32, f32, f32);
+extern void mdlAddEntryPlainEx(MdlCtx *, s32, s32, f32, f32);
 
 extern void evtStageTestAdvanceMotionQueue(void);
 
@@ -208,7 +208,7 @@ typedef struct StageTestQueue {
 typedef struct StageTestState {
     s32 mode;                /* 0x00 */
     s32 assetRequest;        /* 0x04: result of mdlRequestAsset */
-    s32 model;               /* 0x08 */
+    MdlCtx *model;            /* 0x08 */
     s8 flag;                 /* 0x0C */
     StageTestEntry *entries; /* 0x10 */
     StageTestQueue queue;    /* 0x14: flags followed by the two selection slots */
@@ -226,7 +226,6 @@ extern char D_0042B610[];
 
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void kwlnDrawSpriteCell(void *, s32, s32, s32, s32);
 extern void evtCreateWorldObjectForKey(s32, s32);
 extern void itfGridSetQuantizedBounds(EffectSlotSet *, s32, s32, s32, s32, s32);
@@ -440,7 +439,7 @@ extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
 typedef struct FrFontGlyph FrFontGlyph;
 extern s32 func_0035C860(char *, const char *, ...);
 extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
-extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 u32 mnuGetPanelRatioColor(s32, s32, s32);
 void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
 
@@ -471,7 +470,7 @@ void func_002BFEA0(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     }
     iconX = x + positions[0];
     iconY = y + positions[1];
-    if (panel->unkE4 != 0 && (panel->flags & 0x40)) {
+    if (panel->panelResourceHandles[0] != 0 && (panel->flags & 0x40)) {
         func_002BE438(x, y, z, (struct MenuPageSpriteSlot *)panel,
                       panelIndex, 1, surface);
         return;
@@ -504,8 +503,8 @@ void func_002BFEA0(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     func_0035C860(text, D_00437C68, level);
     glyph = func_0019F5E8(labelX + 0x140, labelY - 8,
                                        z, textColor, text, 0);
-    func_0019D550(glyph, 1, surface);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontDrawGlyphChain(glyph, 1, surface);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
     if (panel->frame[7] == NULL) {
         func_00306CD0(x + framePositions[0], y + framePositions[1], z,
                       alpha, 1, panel->frame[6], 0, surface);
@@ -1060,7 +1059,7 @@ typedef struct FrFontGlyph FrFontGlyph;
 extern char D_00437C88[];
 extern s32 func_0035C860(char *, const char *, ...);
 extern FrFontGlyph *func_0019F5E8(s32, s32, s32, u32, char *, FrFontGlyph *);
-extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C22D0);
 
 extern void func_002C22D0(s32, s32, s32, u32, u32, s32, s32, MenuPageBar *, u32);
@@ -1199,7 +1198,7 @@ void mnuFreePanelItemWork(MenuPanelItem *item) {
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C2AE8);
 
 extern void func_002C2AE8(s32, s32, s32, u32, s32, MenuPanelItem *, u32);
-extern void frFontSetChainFlag(FrFontGlyph *, u8);
+extern void frFontSetChildChainFirstOption(FrFontGlyph *, u8);
 
 void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
                   MenuPanelItem *item, u32 flags) {
@@ -1246,9 +1245,9 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
     color = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
     func_0035C860(text, D_00437C88, value);
     glyph = func_0019F5E8(x + 0x2D0, y, depth, color, text, 0);
-    frFontSetChainFlag(glyph, fontFlags);
-    func_0019D550(glyph, 1, flags);
-    frFontQueueGlyphInSelectedSlot(glyph);
+    frFontSetChildChainFirstOption(glyph, fontFlags);
+    frFontDrawGlyphChain(glyph, 1, flags);
+    frFontQueueGlyphForCurrentDrawBuffer(glyph);
     item->phase += 24;
     if (item->phase > 512) {
         item->phase -= 512;
@@ -2458,7 +2457,7 @@ void evtStageTestSetModelScalingEnabled(s32 enabled) {
     }
 }
 
-u32 evtStageTestGetActiveModel(void) {
+MdlCtx *evtStageTestGetActiveModel(void) {
     return evtStageTestState.model;
 }
 
@@ -2474,8 +2473,8 @@ void evtStageTestSetEntryIndex(s32 encodedIndex, s32 motionIndex) {
     if (motionIndex < 0) {
         motionIndex = 0;
     }
-    if (evtStageTestState.model != 0 && motionIndex >= mdlGetNodeRefHalf((MdlCtx *)evtStageTestState.model, 0)) {
-        motionIndex = mdlGetNodeRefHalf((MdlCtx *)evtStageTestState.model, 0) - 1;
+    if (evtStageTestState.model != 0 && motionIndex >= mdlGetNodeRefHalf(evtStageTestState.model, 0)) {
+        motionIndex = mdlGetNodeRefHalf(evtStageTestState.model, 0) - 1;
     }
     evtStageTestState.entries[entryIndex].motionIndex = motionIndex;
     func_002C6E20(-1);
@@ -2726,10 +2725,10 @@ INCLUDE_ASM(const s32, "game/code_002BE628", func_002C6E20);
 
 
 extern s32 D_00435DF0;
-extern void mdlStoreTertiaryVectorVU(s32);
+extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 /* Store uniform model scale through vf10 and return it; useTable selects the model-record factor. */
-f32 mnuSetModelScaleVector(s32 model, s32 useTable) {
+f32 mnuSetModelScaleVector(MdlCtx *model, s32 useTable) {
     f32 scale = 1.0f;
     f32 scaleVector[4];
 
@@ -2767,11 +2766,11 @@ void mnuResetWorkPair(void) {
     ((MenuWorkPosition *)D_003E7940)->z = 0;
 }
 
-extern void mdlStorePrimaryVectorVU(s32);
+extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
 /* Apply the active entry's model position and scale-dependent view depth.
  * Retain the post-call entry rereads and subtraction-based scaling expressions. */
-void mnuApplyModelCamera(s32 model) {
+void mnuApplyModelCamera(MdlCtx *model) {
     f32 position[4];
     StageTestEntry *stageEntry;
     f32 scale;
@@ -2798,7 +2797,7 @@ void mnuApplyModelCamera(s32 model) {
 }
 
 /* Convert the active entry's degree angles to radians and update the model rotation basis. */
-void evtStageTestApplyEntryRotation(s32 model) {
+void evtStageTestApplyEntryRotation(MdlCtx *model) {
     StageTestEntry *stageEntry = (StageTestEntry *)(evtStageTestState.queue.slot[0].entryIndex * EVT_STAGE_ENTRY_BYTES + (s32)evtStageTestState.entries);
 
     func_00340DC8(stageEntry->rotation[0] * 3.14159265f / 180.0f, stageEntry->rotation[1] * 3.14159265f / 180.0f,
@@ -2838,7 +2837,7 @@ void evtStageTestUpdateCamera(void)
     sdfConsCacheTransformedNode(&sdfSceneProjectionParameters, sdfViewMatrix);
 }
 
-s8 evtStageTestUpdate(s32 frame) {
+s8 evtStageTestUpdate(struct SdfPoolNode **surfaces) {
     s8 result = func_002C6CE8();
 
     if (result == 1) {
@@ -2859,7 +2858,7 @@ s8 evtStageTestUpdate(s32 frame) {
                 if (evtStageTestState.effect != 0) {
                     btlUpdateJobPositionFromModel(evtStageTestState.effect);
                 }
-                mdlProcessContextNodesAndTransforms(evtStageTestState.model, frame);
+                mdlProcessContextNodesAndTransforms(evtStageTestState.model, surfaces);
                 evtStageTestAdvanceMotionQueue();
             }
         }
@@ -2948,20 +2947,20 @@ s32 evtStageTestHasPendingMotion(void) {
 void evtStageTestAdvanceMotionQueue(void) {
     StageTestSlot *activeSlot = evtStageTestState.queue.slot;
     s32 motionIndex;
-    s32 model;
+    MdlCtx *model;
 
     if (activeSlot->state != EVT_STAGE_MOTION_IDLE && activeSlot->state != EVT_STAGE_MOTION_FALLBACK_STARTED && (model = evtStageTestGetActiveModel()) != 0) {
         if (activeSlot->state == EVT_STAGE_MOTION_QUEUED) {
             motionIndex = activeSlot->motionIndex;
 
-            if (motionIndex < mdlGetNodeRefHalf((MdlCtx *)model, 0)) {
+            if (motionIndex < mdlGetNodeRefHalf(model, 0)) {
                 mdlAddEntryPlainEx(model, 0, motionIndex, (s32)activeSlot->blendLeadFrames, (s32)activeSlot->blendDurationFrames);
                 activeSlot->state = EVT_STAGE_MOTION_PLAYING;
             }
-        } else if (!(activeSlot->flags & EVT_STAGE_MOTION_SUPPRESS_FALLBACK) && (*(u8 *)(*(s32 *)(model + 0x1C) + 0x30) == 5 || activeSlot->state == EVT_STAGE_MOTION_FORCE_FALLBACK)) {
+        } else if (!(activeSlot->flags & EVT_STAGE_MOTION_SUPPRESS_FALLBACK) && (model->first->state == 5 || activeSlot->state == EVT_STAGE_MOTION_FORCE_FALLBACK)) {
             motionIndex = evtStageTestState.entries[activeSlot->entryIndex].motionIndex;
 
-            if (motionIndex < mdlGetNodeRefHalf((MdlCtx *)model, 0)) {
+            if (motionIndex < mdlGetNodeRefHalf(model, 0)) {
                 mdlAddEntryFlaggedEx(model, 0, motionIndex, (s32)activeSlot->blendLeadFrames, (s32)activeSlot->blendDurationFrames);
                 activeSlot->state = EVT_STAGE_MOTION_FALLBACK_STARTED;
             }
@@ -3095,7 +3094,7 @@ s32 btlDestroyStageTask(taskWork)
         if (resource != 0) {
             sdfDevQueueReleaseState((DevState *)resource);
         }
-        func_00346AF8(taskWork->payload);
+        sdfPacReleasePacketQueueNodes(taskWork->payload);
         sdfReleaseChipBlock(taskWork->allocation);
         sdfReleaseChipBlock((void *)taskWork);
         return 0;

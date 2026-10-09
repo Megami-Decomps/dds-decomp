@@ -9,6 +9,7 @@
 #include "sdf_resource.h"
 #include "dat_state.h"
 #include "mnu.h"
+#include "mnu_shop.h"
 #include "mnu_list.h"
 #include "mnu_staff.h"
 #include "mnu_scroll_panel.h"
@@ -20,7 +21,7 @@ extern s32 kwlnFadeIsActive(void);
 
 
 typedef struct FrFontGlyph FrFontGlyph;
-extern s32 func_0019D550(FrFontGlyph *, s8, u32);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern char mnuCampInputTaskName[]; /* "camp" */
 
 extern char mnuCampDrawTaskName[]; /* "camp_draw" */
@@ -138,7 +139,7 @@ void ptyResetPartyRecordsAndProfiles(void) {
     ptyRebuildAllProfiles();
 }
 
-extern u32 mnuCampResourceHandles[2];
+extern struct EffectSlotSet *mnuCampResourceHandles[2];
 
 extern u32 D_003E6848[];
 
@@ -165,7 +166,7 @@ extern char D_0042A950[];
 void mnuLoadCampResources(void) {
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
-        mnuCampResourceHandles[resourceIndex] = (u32)effLoadIndexedResource(
+        mnuCampResourceHandles[resourceIndex] = effLoadIndexedResource(
             (const char *)D_0042A950, (const char *)D_003E6848[resourceIndex * 2], MNU_STAFF_RETAIN_RESOURCE);
     }
 }
@@ -176,8 +177,8 @@ void mnuLoadCampResources(void) {
 void mnuSnapshotCampTextureHandles(u32 *destination) {
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
-        effResolveAndReleaseResource((struct EffectSlotSet *)mnuCampResourceHandles[resourceIndex]);
-        destination[resourceIndex] = mnuCampResourceHandles[resourceIndex];
+        effResolveAndReleaseResource(mnuCampResourceHandles[resourceIndex]);
+        destination[resourceIndex] = (u32)mnuCampResourceHandles[resourceIndex];
     }
 }
 
@@ -186,7 +187,8 @@ void mnuReleaseCampTextureHandlesAndClearOutput(u32 *destination) {
     s32 resourceCountdown = MNU_STAFF_BASE_RESOURCE_COUNT - 1;
     u32 byteOffset = 0;
     do {
-        effReleaseTextureHandlesAndResetSlots((struct EffectSlotSet *)*(u32 *)((u8 *)mnuCampResourceHandles + byteOffset));
+        effReleaseTextureHandlesAndResetSlots(
+            *(struct EffectSlotSet **)((u8 *)mnuCampResourceHandles + byteOffset));
         *(u32 *)((u8 *)destination + byteOffset) = 0;
         byteOffset += 4;
     } while (--resourceCountdown >= 0);
@@ -415,7 +417,7 @@ typedef struct CampVisualWork {
     EffMappedResource *motionResource; /* 0x0100 */
     u8 pad104[0xC];
     EffMappedResource *motion[2]; /* 0x0110 and 0x0114 */
-    MenuScrollPanel *modelHandle; /* 0x0118: retained scroll-panel allocation */
+    MenuScrollPanel *scrollPanel; /* 0x0118: retained scroll-panel allocation */
     u8 pad11C[0x16C];
     s32 backgroundOpacity;  /* 0x0288 */
     u8 pad28C[0xA7C0];
@@ -483,16 +485,16 @@ void movReleaseTitleEffects(u32 *resourceSlots) {
 
 void mnuInitializeCampPanelResources(MenuPageWindow *container, StaffSlots *resources,
                                      u32 unused, PartyPanel *records) {
-    /* Loader callbacks publish instance addresses through these u32 output slots. */
-    func_002BCD90(container, records, (struct EffectSlotSet *)resources->baseResources[0],
-                 1, (struct EffectSlotSet *)resources->baseResources[1], 0x2d,
-                 (struct EffectSlotSet *)resources->baseResources[1], 0x1d);
-    func_002BC498(container, resources->baseResources[1]);
+    /* Base resources are synchronous owners; queued sprite groups use the other arrays. */
+    func_002BCD90(container, records, resources->baseResources[0],
+                 1, resources->baseResources[1], 0x2d,
+                 resources->baseResources[1], 0x1d);
+    func_002BC498(container, (s32)resources->baseResources[1]);
     mnuCopyPrimaryWindowHandles(container, resources->mainResources);
     mnuCopySecondaryWindowHandles(container, resources->mainResources + 8);
     mnuRegisterResourceHandles(container, resources->extraResources);
     mnuReleaseAndRefreshWindowSlots(container);
-    mnuSetPanelSlotValues(container, (struct EffectSlotSet *)resources->baseResources[1]);
+    mnuSetPanelSlotValues(container, resources->baseResources[1]);
 }
 
 /* Snapshot base handles, then queue the main, extra and paired sprite groups.
@@ -501,7 +503,7 @@ void mnuAppendCampSpriteRequests(u32 *resourceList, StaffSlots *resourceSlots) {
     s32 resourceIndex;
     s32 tableColumn;
 
-    mnuSnapshotCampTextureHandles(resourceSlots->baseResources);
+    mnuSnapshotCampTextureHandles((u32 *)resourceSlots->baseResources);
     tableColumn = mnuGetValueRecordOwner(resourceList) == 1;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
         effAppendListEntry(resourceList, D_0042A950, D_003E6858[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32 *)&resourceSlots->mainResources[resourceIndex]);
@@ -522,7 +524,7 @@ void mnuReleaseTitleEffectSprites(StaffSlots *resourceSlots) {
     struct EffectSlotSet **extraCursor;
     struct EffectSlotSet **pairCursor;
 
-    mnuReleaseCampTextureHandlesAndClearOutput(resourceSlots->baseResources);
+    mnuReleaseCampTextureHandlesAndClearOutput((u32 *)resourceSlots->baseResources);
     mainCursor = resourceSlots->mainResources;
     for (resourceCountdown = MNU_STAFF_MAIN_RESOURCE_COUNT - 1; resourceCountdown >= 0; resourceCountdown--) {
         effDestroyResourceSlotSet((struct EffectSlotSet *)*mainCursor++);
@@ -594,7 +596,7 @@ typedef struct StaffResourceHeader {
     u8 pad00[0x64];
     s32 resourceSource;         /* 0x064 */
     u8 pad68[0x8C];
-    u32 baseHandles[3];        /* 0x0F4 */
+    struct MenuIconState *baseHandles[3]; /* 0x0F4 */
     s32 resourceOptions;        /* 0x100 */
     MenuWindowContainer *resourceLists[3];      /* 0x104 */
 } StaffResourceHeader;
@@ -665,7 +667,7 @@ MenuWindowContainer *mnuCreateStaffResourceListWindow(void *const *entries, s32 
         style = 7;
         break;
     }
-    mnuSetWindowEntryParameters(0, window, ((MenuStaffContext *)work)->spriteArg0, 0xC, style);
+    mnuSetWindowEntryParameters(0, window, (u32)((MenuStaffContext *)work)->spriteArg0, 0xC, style);
 
     index = 0;
     if (count > 0) {
@@ -712,9 +714,9 @@ void mnuStaffInitResourceLists(u8 *work) {
     MenuFadeFields *ctx = &((MenuStaffContext *)work)->fade;
     MenuWindowContainer *list;
 
-    ((StaffResourceHeader *)work)->baseHandles[0] = (u32)mnuCreatePanelIconState(0, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
-    ((StaffResourceHeader *)work)->baseHandles[1] = (u32)mnuCreatePanelIconState(1, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
-    ((StaffResourceHeader *)work)->baseHandles[2] = (u32)mnuCreatePanelIconState(3, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
+    ((StaffResourceHeader *)work)->baseHandles[0] = mnuCreatePanelIconState(0, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
+    ((StaffResourceHeader *)work)->baseHandles[1] = mnuCreatePanelIconState(1, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
+    ((StaffResourceHeader *)work)->baseHandles[2] = mnuCreatePanelIconState(3, ((StaffResourceHeader *)work)->resourceSource, ((StaffResourceHeader *)work)->resourceOptions);
     ((StaffResourceHeader *)work)->resourceLists[0] = mnuCreateStaffResourceListWindow(D_003E56D0, 8, 0x1C0, 0x10, work, D_003E6978);
     list = mnuCreateStaffResourceListWindow(D_003E56F0, 5, 0x1C0, 0x10, work, D_003E6998);
     ((StaffResourceHeader *)work)->resourceLists[1] = list;
@@ -726,8 +728,6 @@ void mnuStaffInitResourceLists(u8 *work) {
     mnuBeginWindowFadeTransition(((StaffResourceHeader *)work)->resourceLists[0], ctx);
 }
 
-
-extern void mnuReleaseResourceList(u32);
 
 /* Destroy the menu windows, then release their associated resource lists. */
 void mnuReleaseStaffSpriteAndResourceHandles(u8 *menuBytes) {
@@ -843,7 +843,7 @@ void mnuDestroyStaffMenuTask(KwlnTask *task) {
     }
     mnuDrainPanelTransitions((MenuPopupState *)(menuBytes + 8), task);
     mnuReleaseStaffSpriteAndResourceHandles(menuBytes);
-    mnuDestroyScrollPanel(((CampVisualWork *)menuBytes)->modelHandle);
+    mnuDestroyScrollPanel(((CampVisualWork *)menuBytes)->scrollPanel);
     mnuShutdownContext((MenuPageWindow *)(menuBytes + 0x284));
     dspCloseChannel();
     mnuDestroyEffectResources(menuBytes + 0x11c);
@@ -966,8 +966,8 @@ void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, s3
     /* Keep the RGB channels fixed while the opacity byte fades from 0x80 to zero. */
     object = func_0019F798((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
                            uiBlendColors(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);
-    func_0019D550((FrFontGlyph *)object, 1, layer);
-    frFontQueueGlyphInSelectedSlot((FrFontGlyph *)object);
+    frFontDrawGlyphChain((FrFontGlyph *)object, 1, layer);
+    frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)object);
     offset = visual->titleSlide;
     magnitude = offset;
     if (offset < 0) {
@@ -1002,8 +1002,8 @@ extern u8 *D_003E5710[];
 void mnuCreateStaffImageSprite(s32 imageIndex) {
     FrFontGlyph *sprite = (FrFontGlyph *)itfCreateConvertedTextGlyph(0x340, 0x148, 0, 0xa09dc35a,
                                       D_003E5710[imageIndex], 0);
-    func_0019D550(sprite, 1, 0x54);
-    frFontQueueGlyphInSelectedSlot(sprite);
+    frFontDrawGlyphChain(sprite, 1, 0x54);
+    frFontQueueGlyphForCurrentDrawBuffer(sprite);
 }
 
 typedef struct StaffGridLabelRow {
@@ -1017,7 +1017,7 @@ typedef char StaffGridLabelRow_gridIds_offset_check[
     ((u32)&((StaffGridLabelRow *)0)->gridIds == 0x2C) ? 1 : -1];
 extern const StaffGridLabelRow D_0042AA48[];
 
-void mnuDrawStaffGridLabelsForKind(s32 kind, u32 slot) {
+void mnuDrawStaffGridLabelsForKind(s32 kind, struct EffectSlotSet *resources) {
     StaffGridLabelRow rows[9];
     s32 i;
     s32 y = 0x1A1;
@@ -1026,21 +1026,20 @@ void mnuDrawStaffGridLabelsForKind(s32 kind, u32 slot) {
         if (rows[kind].x[i] != 0) {
             if (rows[kind].gridIds[i] == 0x1F) {
                 itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, (y - 2) << 3, 0, 1,
-                                           (struct EffectSlotSet *)(u32)slot, 0x1F, 0x53);
+                                           resources, 0x1F, 0x53);
             } else if (rows[kind].gridIds[i] == 8) {
                 itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, (y + 2) << 3, 0, 1,
-                                           (struct EffectSlotSet *)(u32)slot, 8, 0x53);
+                                           resources, 8, 0x53);
             } else {
                 itfDrawGridWithResolvedSlot(rows[kind].x[i] << 4, y << 3, 0, 1,
-                                           (struct EffectSlotSet *)(u32)slot, rows[kind].gridIds[i], 0x53);
+                                           resources, rows[kind].gridIds[i], 0x53);
             }
         }
     }
 }
 
 
-typedef struct TextStyleNode TextStyleNode;
-extern void frFontSetChildColors(TextStyleNode *, u32);
+extern void frFontSetChildColors(struct FrFontGlyph *, u32);
 extern s32 itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, s32, s32);
 
 typedef struct StaffFramePiece {
@@ -1095,9 +1094,9 @@ void func_002AA9D8(s32 kind, u32 labelIndex, u32 textTable, u32 context,
         }
         glyph = itfDrawBankTextWithLayoutFlags(textPosition[0], textPosition[1] + 0x918,
                                              0, labelIndex, textTable, textOption);
-        frFontSetChildColors((TextStyleNode *)glyph, 0xA09DC35A);
-        func_0019D550((FrFontGlyph *)glyph, 1, layer);
-        frFontQueueGlyphInSelectedSlot((FrFontGlyph *)glyph);
+        frFontSetChildColors((struct FrFontGlyph *)(u32)glyph, 0xA09DC35A);
+        frFontDrawGlyphChain((FrFontGlyph *)glyph, 1, layer);
+        frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)glyph);
     }
 }
 
@@ -1156,7 +1155,7 @@ void mnuDrawCampIconBackdropByKind(s32 kind, KwlnTask *task) {
         break;
     }
     if (mnuInitializeCampMenuWhenResourcesReady(task) != 0) {
-        func_002BB510(-0x10, -8, 0, visual->modelHandle, 0x53);
+        func_002BB510(-0x10, -8, 0, visual->scrollPanel, 0x53);
         mnuDrawPanelListDefault(0, 0, 0, (MenuPageWindow *)(work + 0x284), 0x53);
         mnuDrawCampTitleCurrencyAndFade(0, 0, 0, visual->titleContext, work, 0x53);
     }

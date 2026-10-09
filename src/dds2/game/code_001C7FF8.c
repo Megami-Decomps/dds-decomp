@@ -188,8 +188,8 @@ void fldSubmitSceneObjectAtCoordinates(s32 x, s32 y, u32 color, char *text) {
 
     itfSetTextDrawLimit(0x13);
     glyph = func_0019F5E8(x << 4, y << 3, 0, color, text, 0);
-    func_0019D550(glyph, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)glyph);
+    frFontDrawGlyphChain(glyph, 1, 0x53);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)glyph);
     itfSetTextDrawLimit(-1);
 }
 
@@ -198,7 +198,7 @@ void btlDrawIndexedBattleEntryGlyphs(s32 x, s32 y, s32 z, s32 w, u16 index) {
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_00435E64 + index * 17, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
     itfSetTextDrawLimit(-1);
 }
 
@@ -207,7 +207,7 @@ void btlQueueIndexedTextWithinDrawLimit(s32 x, s32 y, s32 z, s32 w, u16 index) {
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, D_00435E5C + index * 25, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
     itfSetTextDrawLimit(-1);
 }
 
@@ -372,7 +372,7 @@ void btlDrawRetreatCommandLabel(s32 unused) {
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(0x1A0, 0xA60, 0xFF0010, color, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
     itfSetTextDrawLimit(-1);
 }
 

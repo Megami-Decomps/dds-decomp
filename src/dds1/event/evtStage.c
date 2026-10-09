@@ -9,8 +9,8 @@ struct EvtScaledValue;
 extern void sdfSetFloatCounterDirection(u32 *destination, u32 value);
 
 
-extern void dds3SetSlotKey(void *, void *);
-extern void dds3ReplaceObjectResource(void *);
+extern void dds3SetSlotKey(EffWorldNode *, EffWorldNode *);
+extern void dds3ReplaceObjectResource(EffWorldNode *);
 
 void *dds3GetWorldSecondaryObject(void);
 extern void dds3DestroyWorldNode(EffWorldNode *worldNode);

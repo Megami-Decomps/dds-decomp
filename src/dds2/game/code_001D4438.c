@@ -267,10 +267,12 @@ extern void mdlAddEntryFlagged(void *, s32, s32);
 extern u8 effSharedRandomState[];
 extern void func_001EC5F0(BtlLinkedCommand *);
 extern void func_001EF030(void *, void *);
-extern void mdlProcessContextNodesAndTransforms(void *, void *);
+struct MdlCtx;
+struct SdfPoolNode;
+extern void mdlProcessContextNodesAndTransforms(struct MdlCtx *, struct SdfPoolNode **);
 extern void func_001E38F0(void *, void *, s32, u8 *, u32);
 extern void dds3ClearObjectFlags(s32, s32);
-extern u8 D_00380788[];
+extern struct SdfPoolNode *D_00380788[13][4];
 extern u8 D_003B6BD0[];
 
 extern void func_001EC868(BtlLinkedCommand *, BtlCamState *, f32);
@@ -647,7 +649,7 @@ extern s32 D_003BC0C0[];
 
 extern s32 D_003BC0C8[];
 
-extern void func_001F3E48(s32);
+extern void func_001F3E48(BtlLinkedCommand *);
 extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 
 extern void func_001FBAC0(BtlLinkedCommand *, BtlCamState *);
@@ -671,7 +673,6 @@ extern void sdfFreeMemoryFromEitherHeap(void *);
 
 extern s32 sndHasActiveFileLoad(void);
 
-extern s32 fileGetResourceSize(s32);
 
 extern void func_003422F8(s32, s32);
 
@@ -2103,7 +2104,7 @@ void func_001DC538(void) {
 
 extern s32 btlSumOtherTargetHitAmounts(u8 *);
 extern s32 btlComputeStatusPenaltyFifth(BtlUnit *);
-extern s32 btlIsUnitDefeatTriggeredByValueDelta(u8 *, s32);
+extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
 extern BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *, u32, u32, u32, f32);
 
@@ -2142,7 +2143,7 @@ void func_001DC540(void *data) {
                     effectTask->ownerId = btlAdvanceRuntimeSequenceCounter();
                     btlStartTask(effectTask);
                 }
-                if ((unit->flags & 0x200) != 0 && btlIsUnitDefeatTriggeredByValueDelta((u8 *)unit, spec.hpDelta) != 0) {
+                if ((unit->flags & 0x200) != 0 && btlIsUnitDefeatTriggeredByValueDelta(unit, spec.hpDelta) != 0) {
                     btlStartTask(btlCreateActorModelBlendTask(unit, 0, 11, 2, 1.0f));
                     btlStartTask(btlCreateHookedUnitSoundTask(unit, 11));
                 } else {
@@ -2165,7 +2166,7 @@ void func_001DC540(void *data) {
             effectTask->ownerId = btlAdvanceRuntimeSequenceCounter();
             btlStartTask(effectTask);
         }
-        if ((unit->flags & 0x200) != 0 && btlIsUnitDefeatTriggeredByValueDelta((u8 *)unit, spec.hpDelta) != 0) {
+        if ((unit->flags & 0x200) != 0 && btlIsUnitDefeatTriggeredByValueDelta(unit, spec.hpDelta) != 0) {
             btlStartTask(btlCreateActorModelBlendTask(unit, 0, 11, 2, 1.0f));
             btlStartTask(btlCreateHookedUnitSoundTask(unit, 11));
         } else {

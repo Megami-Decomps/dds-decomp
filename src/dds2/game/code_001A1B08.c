@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "sdf_packet_list.h"
 #include "itf.h"
 #include "sdf.h"
 #include "itf_panel_draw.h"
@@ -119,7 +120,6 @@ extern void func_001A09C0(PanelRect *rect, u32 *colors, u32 tail, s32 width, Sdf
 extern u32 D_003B4760[];
 extern s32 sdfAllocPacketAligned(s32);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 scrReadIntParameter(s32);
 extern s32 itfMesStartEntry(s32 window, s32 arg1, s32 arg2);
 extern u8 D_003B45E8[], D_003B4600[], D_003B4618[];
@@ -166,9 +166,95 @@ void itfPanelSetFourColumnVertices(PanelVert *vertices, s32 x0, s32 y0, s32 x1, 
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A1BB0);
+extern s32 D_003B44D8[4];
 
-INCLUDE_ASM(const s32, "game/code_001A1B08", func_001A1D20);
+/* Emit the outer frame grid, then the table-spaced top/bottom edge rows. */
+void func_001A1BB0(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+    s32 xs[ITF_PANEL_COLUMN_COUNT];
+    s32 ys[4];
+    s32 i;
+    s32 j;
+
+    xs[0] = x0 - 0x100;
+    xs[1] = x0 + ITF_PANEL_COLUMN_INSET;
+    xs[2] = x1 - ITF_PANEL_COLUMN_INSET;
+    xs[3] = x1 + 0x100;
+    ys[0] = y0 - 0x80;
+    ys[1] = y0 + 0x80;
+    ys[2] = y1 - 0x80;
+    ys[3] = y1 + 0x80;
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < ITF_PANEL_COLUMN_COUNT; j++) {
+            vertices->x = xs[j];
+            vertices->y = ys[i];
+            vertices++;
+        }
+    }
+    xs[0] = x0 - 0x100;
+    xs[1] = x0 + 0x400;
+    xs[2] = x1 - 0x400;
+    xs[3] = x1 + 0x100;
+    ys[0] = y0;
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < ITF_PANEL_COLUMN_COUNT; j++) {
+            vertices->x = xs[j];
+            vertices->y = ys[0] + D_003B44D8[i];
+            vertices++;
+        }
+    }
+    ys[0] = y1;
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < ITF_PANEL_COLUMN_COUNT; j++) {
+            vertices->x = xs[j];
+            vertices->y = ys[0] - D_003B44D8[i];
+            vertices++;
+        }
+    }
+}
+
+/* Emit the outer frame grid, then the close top/bottom edge rows. */
+void func_001A1D20(PanelVert *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+    s32 xs[ITF_PANEL_COLUMN_COUNT];
+    s32 ys[4];
+    s32 i;
+    s32 j;
+
+    xs[0] = x0 - 0x100;
+    xs[1] = x0 + ITF_PANEL_COLUMN_INSET;
+    xs[2] = x1 - ITF_PANEL_COLUMN_INSET;
+    xs[3] = x1 + 0x100;
+    ys[0] = y0 - 0x80;
+    ys[1] = y0 + 0x80;
+    ys[2] = y1 - 0x80;
+    ys[3] = y1 + 0x80;
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < ITF_PANEL_COLUMN_COUNT; j++) {
+            vertices->x = xs[j];
+            vertices->y = ys[i];
+            vertices++;
+        }
+    }
+    xs[0] = x0 - 0x100;
+    xs[1] = x0 + 0x400;
+    xs[2] = x1 - 0x400;
+    xs[3] = x1 + 0x100;
+    ys[0] = y0;
+    for (i = 0; i < ITF_PANEL_ROW_COUNT; i++) {
+        for (j = 0; j < ITF_PANEL_COLUMN_COUNT; j++) {
+            vertices->x = xs[j];
+            vertices->y = ys[0] + i * 8;
+            vertices++;
+        }
+    }
+    ys[0] = y1;
+    for (i = 0; i < ITF_PANEL_ROW_COUNT; i++) {
+        for (j = 0; j < ITF_PANEL_COLUMN_COUNT; j++) {
+            vertices->x = xs[j];
+            vertices->y = ys[0] - i * 8;
+            vertices++;
+        }
+    }
+}
 
 /* Write the rectangle corners in top-left, top-right, bottom-right, bottom-left order. */
 void itfPanelSetRectVerts(PanelVert *v, s32 x0, s32 y0, s32 x1, s32 y1) {

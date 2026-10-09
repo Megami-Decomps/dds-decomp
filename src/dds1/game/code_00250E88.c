@@ -496,9 +496,10 @@ extern void mnuDrawAnimatedCurrencyCounter(s32, s32, s32, s32, MenuSceneMetadata
 extern s32 func_00249998(void *, s32, s32);
 extern void evtStageTestSelectEntryWithoutInitialValue(u16, s32);
 extern void effUpdateAttached(s32, s32, s32, s32, s32);
-extern s32 evtStageTestUpdate(void *);
+struct SdfPoolNode;
+extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 extern s64 evtGetMessageWindowControlState(void);
-extern u8 D_00325818[];
+extern struct SdfPoolNode *D_00325818[4];
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 
 /* Update attached visuals and stage completion, then ramp the message-window shade over ten frames.

@@ -261,12 +261,12 @@ MenuRuntimeRecord *func_00321C60(MenuRuntimeList *list, s32 x, s32 y, u8 kind,
     }
     record->state.kind = kind;
     record->state.directionDegrees = direction;
-    record->unk18 = 0.0f;
-    record->unk1C = 0.0f;
-    record->unk04 = x;
-    record->unk08 = y;
-    record->unk0C = offsetX * cos(angle + 1.5707963f) + offsetY * sin(angle + 1.5707963f);
-    record->unk10 = offsetY * cos(angle + 1.5707963f) - offsetX * sin(angle + 1.5707963f);
+    record->displacementX = 0.0f;
+    record->displacementY = 0.0f;
+    record->baseX = x;
+    record->baseY = y;
+    record->rotatedOffsetX = offsetX * cos(angle + 1.5707963f) + offsetY * sin(angle + 1.5707963f);
+    record->rotatedOffsetY = offsetY * cos(angle + 1.5707963f) - offsetX * sin(angle + 1.5707963f);
     record->angle = angle;
     record->speed = speed;
     record->remaining = remaining;
@@ -345,16 +345,16 @@ void mnuAdvanceMovingRuntimeRecords(MenuRuntimeList *list) {
         if (record->state.word & MNU_WORK_ACTIVE) {
             if ((record->state.kind & 0xF) >= 4) {
                 work = (MenuWorkEntry *)mnuGetActiveEffectWorkEntry();
-                record->unk04 = work->x0;
-                record->unk08 = mnuEvaluateTimedValue(work);
+                record->baseX = work->x0;
+                record->baseY = mnuEvaluateTimedValue(work);
             }
             pi = 3.1415926f;
             angle = record->state.directionDegrees * pi / 180.0f +
                     record->angle + 1.5707963f;
-            record->unk18 += record->speed * cos(angle);
-            record->unk1C -= record->speed * sin(angle);
-            x = record->unk18 + record->unk0C + record->unk04;
-            y = record->unk1C + record->unk10 + record->unk08;
+            record->displacementX += record->speed * cos(angle);
+            record->displacementY -= record->speed * sin(angle);
+            x = record->displacementX + record->rotatedOffsetX + record->baseX;
+            y = record->displacementY + record->rotatedOffsetY + record->baseY;
             if ((record->state.kind & 0xF) == 3) {
                 if (x < 0.0f) {
                     x = 0;
@@ -575,14 +575,14 @@ f32 mnuEvaluateTimedValue(MenuWorkEntry *entry) {
     MenuRegistry *registry = mnuGetMenuRecordRegistryEntry(entry->tag);
     if ((registry->table->flags & 1) != 0) {
         u8 *progressState = mnuGetResourceProgressStepState();
-        MenuResourceRecord *resourceRecord = mnuGetResourceRecordByIndex(entry->unk08);
+        MenuResourceRecord *resourceRecord = mnuGetResourceRecordByIndex(entry->resourceRecordIndex);
         return entry->y0 +
             (f32)((s32)*(u16 *)(progressState + 2) - resourceRecord->progress);
     }
     return entry->y0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00322E18);
+INCLUDE_ASM(const s32, "game/code_00321500", mnuInitializeRegistryWorkEntry);
 
 void mnuDeactivateWorkEntry(MenuWorkEntry *entry) {
     entry->flags = entry->flags & 0xfffffffe;
@@ -870,14 +870,14 @@ MenuRuntimeRecord *func_00323988(MenuWorkEntry *work, struct MnuShootingWork *co
         return NULL;
     }
     left = (s32)(work->x0 + (f32)parameters->hitOffsetX);
-    top = (s32)(work->y0 + (f32)parameters->unk26);
+    top = (s32)(work->y0 + (f32)parameters->hitOffsetY);
     right = left + parameters->hitWidth;
-    bottom = top + parameters->unk2A;
+    bottom = top + parameters->hitHeight;
     record = list->records;
     for (i = 0; i < list->capacity; i++, record++) {
         if (record->state.word & MNU_WORK_ACTIVE) {
-            s32 x = (s32)((record->unk0C + record->unk18) + record->unk04);
-            s32 y = (s32)((record->unk10 + record->unk1C) + record->unk08);
+            s32 x = (s32)((record->rotatedOffsetX + record->displacementX) + record->baseX);
+            s32 y = (s32)((record->rotatedOffsetY + record->displacementY) + record->baseY);
             s32 kind = record->state.kind & 0xF;
             s32 radiusX = D_0040B248[kind][0];
             s32 radiusY;
@@ -927,9 +927,9 @@ s32 func_00323DF0(MenuRuntimeList *list, struct MnuShootingWork *context) {
 
             if (parameters->hitWidth != 0) {
                 s32 left = entryX + parameters->hitOffsetX;
-                s32 top = entryY + parameters->unk26;
+                s32 top = entryY + parameters->hitOffsetY;
                 s32 right = left + parameters->hitWidth;
-                s32 bottom = top + parameters->unk2A;
+                s32 bottom = top + parameters->hitHeight;
                 MenuRuntimeRecord *record = list->records;
                 s32 recordCount = list->capacity;
                 s32 recordIndex = 0;
@@ -938,8 +938,8 @@ s32 func_00323DF0(MenuRuntimeList *list, struct MnuShootingWork *context) {
                     if (record->state.word & MNU_WORK_ACTIVE) {
                         s32 kind = record->state.kind & 0xF;
                         s32 radiusX = D_0040B248[kind][0];
-                        s32 centerX = (s32)((record->unk0C + record->unk18) + record->unk04);
-                        s32 centerY = (s32)((record->unk10 + record->unk1C) + record->unk08);
+                        s32 centerX = (s32)((record->rotatedOffsetX + record->displacementX) + record->baseX);
+                        s32 centerY = (s32)((record->rotatedOffsetY + record->displacementY) + record->baseY);
 
                         if (right >= centerX - radiusX && centerX + radiusX >= left) {
                             s32 radiusY = D_0040B248[kind][1];
@@ -1025,16 +1025,16 @@ s32 func_00324070(MenuWorkEntry *input) {
             continue;
         }
         left = entryX + parameters->hitOffsetX;
-        top = entryY + parameters->unk26;
+        top = entryY + parameters->hitOffsetY;
 
         right = left + parameters->hitWidth;
-        bottom = top + parameters->unk2A;
+        bottom = top + parameters->hitHeight;
         inputRecord = (MenuMovementRecord18 *)func_00322520(input->tag);
         parameters = func_00322550(inputRecord->parameterTag);
         inputLeft = (s32)(input->x0 + (f32)parameters->hitOffsetX);
-        inputTop = (s32)(input->y0 + (f32)parameters->unk26);
+        inputTop = (s32)(input->y0 + (f32)parameters->hitOffsetY);
         inputRight = inputLeft + parameters->hitWidth;
-        inputBottom = inputTop + parameters->unk2A;
+        inputBottom = inputTop + parameters->hitHeight;
 
         if (right < inputLeft || inputRight < left ||
             bottom < inputTop || inputBottom < top) {
@@ -1062,9 +1062,11 @@ u32 mnuGetActiveEffectWorkEntry(void) {
     return mnuActiveEffectEntry;
 }
 
+s32 func_003242D0(MenuWorkEntry *entry, u32 mode);
+
 void mnuInitializeActiveEffectWorkEntry(u32 entry) {
     memset((void *)entry, 0, 0x48);
-    func_003242D0(entry, 0);
+    func_003242D0((MenuWorkEntry *)entry, 0);
     ((MenuWorkEntry *)entry)->flags |= 0x4010;
     ((MenuWorkEntry *)entry)->tag = 0x1000000;
     ((MenuWorkEntry *)entry)->remaining = 1;
@@ -1072,7 +1074,181 @@ void mnuInitializeActiveEffectWorkEntry(u32 entry) {
     mnuActiveEffectEntry = entry;
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_003242D0);
+s32 func_003242D0(MenuWorkEntry *entry, u32 mode) {
+    MenuStateRecord savedRecord;
+    MenuInitialTag tag;
+    MenuStateRecord *record;
+    MnuCallbackList *oldList;
+    SdfListNode *node;
+    u32 currentMode;
+    s32 haveSavedRecord = 0;
+
+    if (mode != 0) {
+        entry->flagsBits.mode = (mode - 1) & 0xF;
+    } else if (entry->flagsBits.mode == 4) {
+        return 0;
+    }
+
+    oldList = (MnuCallbackList *)entry->callback;
+    if (oldList != NULL) {
+        for (node = oldList->head; node != NULL; node = node->next) {
+            record = (MenuStateRecord *)node->value;
+            if (record->tag.flags == 0x44) {
+                memcpy(&savedRecord, record, sizeof(savedRecord));
+                haveSavedRecord = 1;
+                break;
+            }
+        }
+        dds3DestroyCallbackNodeAfterLastNotification(oldList);
+    }
+
+    entry->callback = mnuCreateReleaseCallbackNode();
+
+    tag.flags = 0x44;
+    tag.group = -80;
+    tag.duration = 60;
+    tag.index = 5;
+    record = mnuCreateNamedRecord(&tag);
+    if (haveSavedRecord) {
+        memcpy(record, &savedRecord, sizeof(*record));
+    } else {
+        record->flags.bits.completed = 1;
+        record->flags.bits.hasRange = 1;
+        record->flags.bits.direction = 1;
+        record->unk18 = 20;
+        record->offsetX = -20;
+        record->offsetY = -20;
+    }
+    func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+
+    currentMode = entry->flagsBits.mode;
+    if (currentMode < 5) {
+        switch (currentMode) {
+        case 0:
+            tag.flags = 0x40;
+            tag.group = -90;
+            tag.duration = 5;
+            tag.index = 20;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetY = 15;
+            record->offsetX = 0;
+            record->flags.bits.hasRange = 1;
+            record->flags.bits.direction = 2;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            entry->flagsBits.mode++;
+            break;
+        case 1:
+            tag.flags = 0x40;
+            tag.group = -90;
+            tag.duration = 5;
+            tag.index = 20;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetX = 20;
+            record->offsetY = 5;
+            record->flags.bits.hasRange = 1;
+            record->flags.bits.direction = 3;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+
+            tag.flags = 0x40;
+            tag.group = -90;
+            tag.duration = 5;
+            tag.index = 20;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetX = -20;
+            record->offsetY = 5;
+            record->flags.bits.direction = 4;
+            record->flags.bits.hasRange = 1;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            entry->flagsBits.mode++;
+            break;
+        case 2:
+            tag.flags = 0x40;
+            tag.group = -90;
+            tag.duration = 5;
+            tag.index = 20;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetY = 15;
+            record->offsetX = 0;
+            record->flags.bits.hasRange = 1;
+            record->flags.bits.direction = 2;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+
+            tag.flags = 0x45;
+            tag.group = -90;
+            tag.duration = 10;
+            tag.index = 40;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetX = 30;
+            record->offsetY = 5;
+            record->flags.bits.hasRange = 1;
+            record->flags.bits.direction = 3;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+
+            tag.flags = 0x45;
+            tag.group = -90;
+            tag.duration = 10;
+            tag.index = 40;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetX = -30;
+            record->offsetY = 5;
+            record->flags.bits.hasRange = 1;
+            record->flags.bits.direction = 4;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            entry->flagsBits.mode++;
+            break;
+        case 3:
+            tag.flags = 0x40;
+            tag.group = -90;
+            tag.duration = 5;
+            tag.index = 30;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetX = 20;
+            record->offsetY = 5;
+            record->flags.bits.hasRange = 1;
+            record->flags.bits.direction = 3;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+
+            tag.flags = 0x40;
+            tag.group = -90;
+            tag.duration = 5;
+            tag.index = 30;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetX = -20;
+            record->offsetY = 5;
+            record->flags.bits.direction = 4;
+            record->flags.bits.hasRange = 1;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+
+            tag.flags = 0x45;
+            tag.group = -90;
+            tag.duration = 7;
+            tag.index = 20;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetX = 40;
+            record->offsetY = 5;
+            record->flags.bits.hasRange = 1;
+            record->flags.bits.direction = 3;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+
+            tag.flags = 0x45;
+            tag.group = -90;
+            tag.duration = 7;
+            tag.index = 20;
+            record = mnuCreateNamedRecord(&tag);
+            record->offsetX = -40;
+            record->offsetY = 5;
+            record->flags.bits.hasRange = 1;
+            record->flags.bits.direction = 4;
+            func_00320CE0((MnuCallbackList *)entry->callback, 0, (u32)record);
+            entry->flagsBits.mode++;
+            break;
+        case 4:
+        default:
+            break;
+        }
+    }
+    return 1;
+}
 
 extern f32 sdfVec3Normalize(f32 *vector);
 extern void sdfVectorScale(f32 factor, f32 *vector);
@@ -1180,13 +1356,68 @@ void mnuInitializeEffectContext(MenuWorkEntry *context) {
                    (u32)mnuCreateNamedRecord(&initialTag));
 }
 
-INCLUDE_ASM(const s32, "game/code_00321500", func_00324B28);
+/* Update the active-effect entrance animation once per frame. */
+s32 func_00324B28(MenuWorkEntry *entry) {
+    extern s32 D_004389B4;
+    extern s32 D_004389B8;
+    s32 phase = D_004389B4;
+    s32 mode;
+    s32 result = 0;
+    MenuWorkFlags flags;
+    f32 positionY;
+
+    switch (phase) {
+    case 0:
+        flags.word = entry->flags;
+        entry->x0 = -200.0f;
+        D_004389B4 = 2;
+        mode = flags.bits.mode;
+        if (flags.bits.finished) {
+            if (mode >= 2) {
+                mode--;
+                func_003242D0(entry, mode);
+            }
+        }
+        entry->flags = ((mode & 0xF) << 15) | 0x4001;
+        D_004389B8 = 0;
+        break;
+    case 2:
+        if (++D_004389B8 >= 31) {
+            D_004389B4 = 3;
+            entry->x0 = 120.0f;
+            positionY = 400.0f;
+            entry->y0 = positionY;
+            D_004389B8 = 0;
+        }
+        break;
+    case 3:
+        positionY = entry->y0;
+        positionY -= 2.0f;
+        if (++D_004389B8 >= 31) {
+            phase = 1;
+        }
+        D_004389B4 = phase;
+        entry->y0 = positionY;
+        break;
+    case 1: {
+        u32 completionFlags = entry->flags;
+        D_004389B4 = 0;
+        entry->inputCountdown = 100;
+        entry->flags = completionFlags & ~0x4000u;
+        result = 1;
+        break;
+    }
+    default:
+        break;
+    }
+    return result;
+}
 
 
 MenuWorkEntry *mnuCreateAnimatedEffect(u32 context, f32 x, f32 y, f32 progress) {
     MenuWorkEntry *entry = mnuFindUnusedWorkEntry();
     if (entry != NULL) {
-        func_00322E18(entry, context, 0, (s32)x, (s32)y, progress);
+        mnuInitializeRegistryWorkEntry(entry, context, 0, (s32)x, (s32)y, progress);
         entry->flags |= 0x10;
     }
     return entry;

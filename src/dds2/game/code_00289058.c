@@ -577,7 +577,87 @@ s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src)
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028BB80);
 
-INCLUDE_ASM(const s32, "game/code_00289058", func_0028C8F8);
+extern void mnuSpawnMantraVariantIconAtPosition(u32, u32, struct MantraDrawPool *);
+
+/* Mantra grid input, including directional repeat and page/confirm buttons. */
+s32 func_0028C8F8(MnuStatusResource *object) {
+    MantraMenuWork *work = &object->menu;
+    s32 sound = 0;
+    s32 result = 0;
+    s32 directions = 0;
+    MantraNodePos *position;
+    s32 x;
+    s32 y;
+
+    if (D_0037F510[0x26] != 0) {
+        directions |= 1;
+    } else if (D_0037F510[0x27] != 0) {
+        directions |= 4;
+    }
+    if (D_0037F510[0x24] != 0) {
+        directions |= 8;
+    } else if (D_0037F510[0x25] != 0) {
+        directions |= 2;
+    }
+    if (D_0037F510[0x26] < 0 || D_0037F510[0x27] < 0 ||
+        D_0037F510[0x24] < 0 || D_0037F510[0x25] < 0) {
+        if (work->navigationState != 0) {
+            work->navigationState = 9;
+        }
+    }
+    if (work->navigationState > 0) {
+        work->navigationState--;
+        if (work->navigationState >= 8) {
+            work->navigationMask |= directions;
+        } else if (work->navigationState == 7) {
+            work->navigationMask |= directions;
+            work->drawFlags |= 0x4000000;
+        } else {
+            work->navigationMask = directions;
+            work->drawFlags &= ~0x4000000;
+        }
+    } else if (directions != 0) {
+        work->navigationMask = directions;
+        work->navigationState = 9;
+    } else {
+        work->navigationMask = 0;
+    }
+    if (((work->drawFlags >> 26) & 1) || D_0037F510[0x26] != 0 ||
+        D_0037F510[0x27] != 0 || D_0037F510[0x24] != 0 ||
+        D_0037F510[0x25] != 0) {
+        if (mnuNavigateMantraSelector(object, directions)) {
+            sound = 1;
+            position = work->defaultSelector;
+            x = position->x * 20 / 10.0f;
+            y = position->y * 20 / 10.0f;
+            mnuSpawnMantraVariantIconAtPosition(x, y, object->menu.selectionController);
+        }
+    }
+    if (D_0037F510[0x28] < 0) {
+        func_00289710(object);
+        sound = 4;
+    } else if (D_0037F510[0x2A] < 0) {
+        func_00289928(object);
+        sound = 4;
+    }
+    if (D_0037F510[0x23] < 0 || D_0037F510[0x20] < 0 ||
+        D_0037F510[0x21] < 0) {
+        sound = 3;
+        result = 1;
+    }
+    switch (sound) {
+    case 1:
+        sndSetSequenceVolumePan(0, 0x7F, 0x3F);
+        break;
+    case 3:
+        sndSetSequenceVolumePan(10, 0x7F, 0x3F);
+        break;
+    case 4:
+        sndSetSequenceVolumePan(4, 0x7F, 0x3F);
+        break;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028CBF8);
 
@@ -629,12 +709,12 @@ INCLUDE_ASM(const s32, "game/code_00289058", func_0028D2F8);
 INCLUDE_ASM(const s32, "game/code_00289058", func_0028D7C8);
 
 /* Retail sign-extends mode and selection to halfwords at this call (+0x38/+0x4C sll/sra pairs). */
-extern s32 func_0028D7C8(s32, u16, s16, s16);
+extern s32 func_0028D7C8(MnuStatusResource *, u16, s16, s16);
 
 /* Pick the neighbouring mantra node to move to. The edge mask from func_0028D7C8 is filtered against the
  * neighbours whose model flag state is compatible with the mode (mode 3 also accepts empty slots); edges 0 and 5
  * use paired masks, the side edges test the two adjacent neighbours. */
-MantraNodePos *func_0028DC08(s32 object, u16 nodeId, s32 mode, s32 selection) {
+MantraNodePos *func_0028DC08(MnuStatusResource *object, u16 nodeId, s32 mode, s32 selection) {
     MantraNodePos *record;
     MantraNodePos *neighbor;
     MantraNodePos **neighbors;
@@ -703,13 +783,13 @@ void mtrDrawRankPass(s32 object, u16 index) {
 
     evtPrintDeveloperConsoleMessage("DrawRank[%d]\n", modelFlagState);
     memset(nodes, 0, sizeof(nodes));
-    selected = func_0028D7C8(object, index, modelFlagState, 0);
+    selected = func_0028D7C8((MnuStatusResource *)object, index, modelFlagState, 0);
     record = (MantraNodePos *)mnuGetMantraNodePositionRecord(index);
     neighbors = record->neighbors;
     nextNode = nodes;
     for (; i < 6; i++, neighbors++) {
         if ((selected >> i) & 1) {
-            *nextNode++ = func_0028DC08(object, (*neighbors)->id, modelFlagState, 0);
+            *nextNode++ = func_0028DC08((MnuStatusResource *)object, (*neighbors)->id, modelFlagState, 0);
             hasNode = 1;
         }
     }
@@ -721,7 +801,7 @@ void mtrDrawRankPass(s32 object, u16 index) {
             cursor = nodes;
             for (i = 2; i >= 0; i--, cursor++) {
                 if (*cursor != NULL) {
-                    *cursor = func_0028DC08(object, (*cursor)->id, modelFlagState, rank);
+                    *cursor = func_0028DC08((MnuStatusResource *)object, (*cursor)->id, modelFlagState, rank);
                     hasNode = 1;
                 }
             }

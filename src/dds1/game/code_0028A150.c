@@ -1,5 +1,6 @@
 #include "common.h"
 #include "fr_font.h"
+#include "fr_font_context.h"
 #include "mc_poll.h"
 #include "mc_path_api.h"
 #include "bill_object_api.h"
@@ -20,6 +21,7 @@
 #include "mnu_list.h"
 #include "kwln_task_lifecycle.h"
 #include "eff_expanded_list.h"
+#include "file_request_api.h"
 typedef struct MenuResourceWork MenuResourceWork;
 struct SdfTex;
 struct MenuListNode;
@@ -72,8 +74,7 @@ extern s32 D_003BC87C;
 extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
 extern s32 dds3GetWorldObject();
 extern void dds3SetWorldObjectDataValue();
-extern void fileWaitReady();
-extern void sdfReleaseMemorySlot();
+
 extern u8 sdfViewTargetVector[];
 extern u8 sdfViewEyeVector[];
 extern u8 sdfViewUpVector[];
@@ -107,11 +108,7 @@ extern s32 fileAdvanceSlotScan(void);
 
 extern s32 (*fileMenuStateHandler)();
 extern s32 D_003BC814;
-extern s32 fileIsRequestReadyInCurrentMode(u32, void *);
-extern u32 fileGetResourceHandle(u32);
-extern u32 fileGetLoadedDataAddress(u32);
-extern u32 fileGetResourceSize(u32);
-extern void filePollEntryCleanup(u32);
+
 extern s32 fileDrawMenuFrame(s32);
 
 
@@ -274,8 +271,6 @@ extern u32 func_001978E8(s32, s32, s32, u32, char *, s32);
 
 extern u32 D_003BD8F0;
 
-extern u32 func_001951C8(u32, u32, u32, u32, u32);
-
 extern s32 D_003BC7FC;
 
 extern s8 fileMenuTaskAlive;
@@ -429,10 +424,6 @@ extern s32 fileBuildMainBlobAndWrite(void);
 
 /* 0x40-byte backing region; the browser uses the first ten slot states. */
 extern u32 fileSlotDisplayStates[16];
-
-extern void billDispatchByKind(void *handle);
-
-
 
 
 
@@ -607,18 +598,18 @@ u8 fileIsLoadedWithActiveFlow(s32 loaded) {
 void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     D_003BD8EC = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(D_003BD8EC, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)D_003BD8EC);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_003BD8EC);
 }
 
 void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, u32 font) {
     frFontAddSharedGlyphFlags(1);
-    D_003BD8F0 = func_001951C8(font, 0, 0, 0, 0);
+    D_003BD8F0 = (u32)func_001951C8((const char *)(u32)font, 0, 0, 0, 0);
     frFontClearFlagBits(1);
-    frFontSetFlagAndMeasureGlyphs(D_003BD8F0, 1);
-    frFontSetContextPair(D_003BD8F0, x << 4, y << 3);
-    frFontSetChildColors(D_003BD8F0, color);
-    func_001958A0(D_003BD8F0, 0, 0x56);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)D_003BD8F0);
+    frFontSetSpacingAndMeasureGlyphs((struct FrFontGlyph *)(u32)D_003BD8F0, 1);
+    frFontSetGlyphPosition((struct FrFontGlyph *)(u32)D_003BD8F0, x << 4, y << 3);
+    frFontSetChildColors((struct FrFontGlyph *)(u32)D_003BD8F0, color);
+    frFontDrawGlyphChain(D_003BD8F0, 0, 0x56);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)D_003BD8F0);
     frFontSetSharedRenderFlags(0x54);
 }
 
@@ -627,7 +618,7 @@ void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
 
     imageHandle = func_001978E8(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(imageHandle, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)imageHandle);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)imageHandle);
 }
 
 extern f32 fileSaveHighlightPhase;
@@ -1146,7 +1137,7 @@ s32 fileResolveAbortSlotFlow(void) {
 
 s32 fileLoadIconFileAndResetSelection(void) {
     D_003BD910 = 0;
-    fileSaveIconRequest = fileQueueDefaultCallbackRequest(D_003B2668);
+    fileSaveIconRequest = (u32)fileQueueDefaultCallbackRequest(D_003B2668);
     return fileResetSelection();
 }
 
@@ -1156,7 +1147,7 @@ s32 fileResetSlotSelection(void) {
 
 s32 fileLoadIconFileAndBeginSlotReset(void) {
     D_003BD910 = 0;
-    fileSaveIconRequest = fileQueueDefaultCallbackRequest(D_003B2668);
+    fileSaveIconRequest = (u32)fileQueueDefaultCallbackRequest(D_003B2668);
     return fileBeginSlotReset();
 }
 
@@ -2690,12 +2681,12 @@ s32 fileRunMenuState(KwlnTask *task) {
         cur = (s32 (*)())next;
     }
     fileMenuStateHandler = cur;
-    if (job != 0 && fileIsRequestReadyInCurrentMode(job, (void *)next) != 0) {
+    if (job != 0 && fileIsRequestReadyInCurrentMode((struct FileRequest *)job) != 0) {
         fileSaveIconRequest = 0;
-        D_003BD910 = fileGetResourceHandle(job);
-        D_003BD914 = fileGetLoadedDataAddress(job);
-        D_003BD918 = fileGetResourceSize(job);
-        filePollEntryCleanup(job);
+        D_003BD910 = fileGetResourceHandle((struct FileRequest *)(u32)job);
+        D_003BD914 = fileGetLoadedDataAddress((struct FileRequest *)(u32)job);
+        D_003BD918 = fileGetResourceSize((struct FileRequest *)(u32)job);
+        filePollEntryCleanup((struct FileRequest *)(u32)job);
     }
     return 0;
 }
@@ -2786,12 +2777,12 @@ void fileReleaseMenuResources(void) {
             dds3SetWorldObjectDataValue(world, 1);
         }
         if (fileSaveIconRequest != 0) {
-            fileWaitReady(fileSaveIconRequest);
-            D_003BD910 = fileGetResourceHandle(fileSaveIconRequest);
-            filePollEntryCleanup(fileSaveIconRequest);
+            fileWaitReady((struct FileRequest *)fileSaveIconRequest);
+            D_003BD910 = fileGetResourceHandle((struct FileRequest *)(u32)fileSaveIconRequest);
+            filePollEntryCleanup((struct FileRequest *)(u32)fileSaveIconRequest);
             fileSaveIconRequest = 0;
         }
-        sdfReleaseMemorySlot(&D_003BD910);
+        sdfReleaseMemorySlot((s32 *)&D_003BD910);
         kwlnTaskDestroyWithHierarchyByName(D_003B26C8, 1);
         func_001005B0();
     }

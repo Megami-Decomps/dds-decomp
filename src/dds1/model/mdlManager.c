@@ -2,8 +2,10 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
+#include "sdf_pac_work.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
+#include "file_request_api.h"
 
 extern u8 sdfViewMatrix[];
 extern u8 sdfProjectionMatrix[];
@@ -57,9 +59,6 @@ Motion *mdlFindNodeById(MdlCtx *ctx, s32 id);
 void mdlFindOrCreateMotionRecordNode(MdlCtx *ctx, s32 searchId, s32 motionIndex, s32 loopEnabled,
                                      f32 blendLeadFrames, f32 blendDurationFrames);
 
-struct FileWork;
-extern u32 fileGetLoadedDataAddress(struct FileWork *);
-extern u32 fileGetResourceHandle(struct FileWork *);
 extern DevRequest *sndBuildResourceHandleListFromOffsets(const void *);
 extern void mdlSetResourceAmount(MdlCtx *ctx, MdlResourceItem *node, f32 amount);
 
@@ -101,7 +100,7 @@ void mdlReleaseOwnerSlotResources(BattleGroupNode *owner, s32 index) {
         }
         if (owner->ownsResources != 0) {
             if (owner->slots[index].resourceHandle != 0) {
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(owner->slots[index].resourceHandle));
+                sdfReleaseResourceAllocation(owner->slots[index].resourceHandle);
             }
         }
         owner->slots[index].data = NULL;
@@ -116,7 +115,7 @@ void mdlApplyCommandToGroupedEntity(s32 group, s32 id, s32 index) {
     mdlReleaseOwnerSlotResources(entity, index);
 }
 
-void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 motionIndex, s32 index, s32 slotIndex, void *data, u32 resourceHandle) {
+void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 motionIndex, s32 index, s32 slotIndex, void *data, struct SdfMemBlock *resourceHandle) {
     BattleGroupNode *owner = btlFindGroupedEntity(group, id);
     BattleGroupSlot *slot;
 
@@ -171,7 +170,7 @@ void mdlExecuteAndFreeJob(MdlLoadRequest *request) {
     sdfReleaseChipBlock(request);
 }
 
-void mdlRecordLoadedSizeAndReleaseHandle(struct FileWork *resource, MdlLoadRequest *destination) {
+void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *resource, MdlLoadRequest *destination) {
     u32 handle;
     DevRequest *resourceList;
 
@@ -188,7 +187,7 @@ extern s32 sdfRelocatePackedResourcePayload();
 
 /* Retain the resource handle, relocate the loaded payload and retire the file
  * entry. Execute the group job now only when the command is not deferred. */
-void mdlFinishLoadCmd(struct FileWork *resource, MdlLoadRequest *request) {
+void mdlFinishLoadCmd(struct FileRequest *resource, MdlLoadRequest *request) {
     request->payload.requestHandle = fileGetResourceHandle(resource);
     request->payload.itemList = (void *)sdfRelocatePackedResourcePayload(fileGetLoadedDataAddress(resource));
     filePollEntryCleanup(resource);
@@ -202,8 +201,8 @@ extern s32 sdfRelocatePackedResourceWordsFromHeader();
 
 /* Retain the handle and relocated motion data, retire the file entry, then run
  * the group job. This callback completes the additional file request. */
-void mdlFinishLoadJob(struct FileWork *resource, MdlLoadRequest *request) {
-    request->payload.motionResource = fileGetResourceHandle(resource);
+void mdlFinishLoadJob(struct FileRequest *resource, MdlLoadRequest *request) {
+    request->payload.motionResource = (struct SdfMemBlock *)(u32)fileGetResourceHandle(resource);
     request->payload.motionData = (void *)sdfRelocatePackedResourceWordsFromHeader(fileGetLoadedDataAddress(resource));
     filePollEntryCleanup(resource);
     mdlExecuteAndFreeJob(request);
@@ -306,14 +305,15 @@ void mdlDestroyContext(MdlCtx *ctx) {
     sdfReleaseChipBlock(ctx);
 }
 
-extern void func_002174C0();
+struct SdfPoolNode;
+extern void func_002174C0(MdlCtx *, struct SdfPoolNode **);
 extern s32 sdfMotionUpdate(void *motion);
 extern void sdfModelUpdateCurrentFrameTransforms();
-extern void func_002D9238();
+extern void func_002D9238(struct SdfPoolNode **, SdfModel *);
 extern void mdlDispatchViewerAnchorRecord(MdlCtx *, MdlResourceItem *);
 
 /* Per-frame update: step the active slot nodes, refresh the transforms, dispatch anchor records. */
-void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, s32 arg) {
+void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, struct SdfPoolNode **surfaces) {
     Motion **slot = ctx->slots;
     SdfModel *inner;
     MdlResourceItem *rec;
@@ -332,7 +332,7 @@ void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, s32 arg) {
     }
     inner = ctx->inner;
     sdfModelUpdateCurrentFrameTransforms(inner);
-    func_002D9238(arg, inner);
+    func_002D9238(surfaces, inner);
     if (ctx->flags & MDL_SKIP_ANCHORS) {
         return;
     }
@@ -347,7 +347,7 @@ void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, s32 arg) {
     if (ctx->devList == NULL) {
         return;
     }
-    func_002174C0(ctx, arg);
+    func_002174C0(ctx, surfaces);
 }
 
 extern void sdfSetPrimaryIdentityMatrixVU(void *);
@@ -367,8 +367,8 @@ extern void sdfRotateVuMatrixAboutY(f32 angle);
 /* Blend the selected basis towards pitch/yaw (degrees), then update transforms
  * and anchors. For abs(pitch)<25, weight is abs(pitch)/25; otherwise one;
  * -1 skips basis blending. Slot motions/blending precede the skip flags.
- * updateArg is forwarded unchanged to the remaining update routines. */
-void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, f32 pitch, f32 yaw) {
+ * surfaces is forwarded unchanged to the remaining update routines. */
+void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, struct SdfPoolNode **surfaces, s32 entryIndex, f32 pitch, f32 yaw) {
     SdfModel *inner;
     SdfDrawNode *entry = NULL;
     f32 targetRows[4][4];
@@ -418,7 +418,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, 
     }
     inner = ctx->inner;
     sdfModelUpdateCurrentFrameTransforms(inner);
-    func_002D9238(updateArg, inner);
+    func_002D9238(surfaces, inner);
     if (ctx->flags & MDL_SKIP_ANCHORS) {
         return;
     }
@@ -433,7 +433,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, s32 updateArg, s32 entryIndex, 
     if (ctx->devList == NULL) {
         return;
     }
-    func_002174C0(ctx, updateArg);
+    func_002174C0(ctx, surfaces);
 }
 
 /* Enable each table entry. The signed table count governs iteration; entry
@@ -523,7 +523,7 @@ Motion *mdlFindNodeById(MdlCtx *ctx, s32 id) {
 
 /* Read the motion selector, widened to s32. Missing nodes return -1,
  * distinct from a present selector of 0xFFFF. */
-s32 mdlGetNodeField2C(MdlCtx *ctx, s32 searchId) {
+s32 mdlGetNodeMotionIndex(MdlCtx *ctx, s32 searchId) {
     Motion *matchedNode = mdlFindNodeById(ctx, searchId);
 
     if (matchedNode == NULL) {
@@ -533,7 +533,7 @@ s32 mdlGetNodeField2C(MdlCtx *ctx, s32 searchId) {
 }
 
 /* Read the selected motion's frame count; return zero for a missing node. */
-s32 mdlGetNodeField2E(MdlCtx *ctx, s32 searchId) {
+s32 mdlGetNodeFrameCount(MdlCtx *ctx, s32 searchId) {
     Motion *matchedNode = mdlFindNodeById(ctx, searchId);
 
     if (matchedNode == NULL) {
@@ -544,7 +544,7 @@ s32 mdlGetNodeField2E(MdlCtx *ctx, s32 searchId) {
 
 /* Numerically convert the stored float to s32, not a bit reinterpretation.
  * Return zero when the searched node is absent. */
-s32 mdlGetNodeInt1C(MdlCtx *ctx, s32 searchId) {
+s32 mdlGetNodeFrameAsInt(MdlCtx *ctx, s32 searchId) {
     Motion *matchedNode = mdlFindNodeById(ctx, searchId);
 
     if (matchedNode == NULL) {
@@ -819,14 +819,6 @@ void mdlCopyResourceBasename(s32 selectionListIndex, s32 selectionIndex, char *d
     destination[copyLength] = '\0';
 }
 
-typedef struct PacWork {
-    struct PacWork *next;
-    struct PacState *owner;
-    s32 resourceHandle;
-    u8 *dataCursor;
-    u8 packet[1];
-} PacWork;
-
 typedef struct PacHead {
     u8 command;
     u8 flags;
@@ -885,8 +877,6 @@ void mdlCompleteGroupedJobAndNotify(MdlLoadSlot *requestOwner, MdlDoneJob *compl
     }
 }
 
-extern void *fileAllocateDispatchRequest();
-extern void func_00288C50();
 extern void mdlCompleteGroupedJobAndNotify();
 
 #define MDL_DONE_JOB_BYTES 0x14
@@ -894,17 +884,18 @@ extern void mdlCompleteGroupedJobAndNotify();
 /* Allocate a completion job and dispatch the request. Group/id narrow to u16.
  * Without onComplete, run the existing no-callback completion path and clean up
  * here; otherwise the completion callback path owns cleanup. Always return zero.
- * Preserve the provider's existing short-arity/unprototyped calling convention. */
+ * Preserve the provider's word-valued completion and user-data parameters. */
 s32 mdlRequestLoadWithCallback(s32 group, s32 id, s32 jobArg, s32 requestHandle, void (*onComplete)(u32), u32 callbackArg) {
     MdlDoneJob *completionJob = sdfAllocAndClearQuadwords(MDL_DONE_JOB_BYTES);
-    void *requestSlot;
+    struct FileRequest *requestSlot;
 
     completionJob->group = group;
     completionJob->id = id;
     completionJob->arg = jobArg;
     completionJob->doneArg = callbackArg;
     completionJob->done = onComplete;
-    requestSlot = fileAllocateDispatchRequest(requestHandle, 0, 0, mdlCompleteGroupedJobAndNotify, completionJob);
+    requestSlot = fileAllocateDispatchRequest((const char *)requestHandle, 0, 0,
+                                              (u32)mdlCompleteGroupedJobAndNotify, (u32)completionJob);
     completionJob->owner = requestSlot;
     if (onComplete == NULL) {
         func_00288C50(requestSlot);

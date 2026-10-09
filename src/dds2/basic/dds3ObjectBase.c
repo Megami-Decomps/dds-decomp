@@ -8,12 +8,11 @@
 #include "mdl.h"
 
 extern void *dds3GetSlot(void *arg0, s32 index);
-struct ObjectWithResource;
-extern Dds3PathCurveWork *dds3GetObjectResourceHandle(struct ObjectWithResource *);
+extern Dds3PathCurveWork *dds3GetObjectResourceHandle(EffWorldNode *);
 
 void dds3EnsureWorldNodeInSlot(void *arg0, void *arg1);
 
-void dds3SetSlotValue(void *arg0, void *arg1);
+void dds3SetSlotValue(EffWorldNode *object, Dds3MoverUpdate update);
 
 s32 dds3SelectSlotForObjectKind(u8 arg);
 
@@ -21,11 +20,12 @@ void *dds3SetSlotByKind(ObjBase *object, ObjData *data);
 
 void *dds3ExchangeSlot(void *arg0, void *arg1, s32 index);
 
-extern void *dds3SpawnSlotRingObj3(void *arg);
+extern EffWorldNode *dds3SpawnSlotRingObj3(EffWorldNode *object);
 
-void dds3SetSlotKey(void *arg0, void *arg1);
+void dds3SetSlotKey(EffWorldNode *object, EffWorldNode *sourceObject);
 
-void dds3ReplaceObjectResource(void *arg0);
+void dds3ReplaceObjectResource(EffWorldNode *object);
+void dds3ReleaseObjectResource(EffWorldNode *object);
 
 
 void mdlDestroyContext(MdlCtx *model);
@@ -352,23 +352,14 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32 arg);
 extern void func_00108D80(void);
 extern void func_00108E20(void);
 extern void evtSubmitGradientRectAtDepth();
-extern void mdlProcessContextNodesAndTransforms(void *context, const void *state);
-extern s32 D_00380818[4];
-
-typedef struct ObjRenderContextInner {
-    u8 pad00[0x19];
-    u8 flags19;
-} ObjRenderContextInner;
-
-typedef struct ObjRenderContext {
-    u8 pad00[0x18];
-    ObjRenderContextInner *inner;
-} ObjRenderContext;
+struct SdfPoolNode;
+extern void mdlProcessContextNodesAndTransforms(MdlCtx *, struct SdfPoolNode **);
+extern struct SdfPoolNode *D_00380818[4];
 
 void func_00112328(void *object) {
     ObjBase *base;
-    ObjRenderContext *context;
-    ObjRenderContextInner *inner;
+    MdlCtx *context;
+    SdfModel *inner;
 
     base = dds3GetObjectOwnedHandle(object);
     evtSetDrawSurfaceIndex(0x4A);
@@ -384,11 +375,11 @@ void func_00112328(void *object) {
     evtSubmitPrimaryGsTest(1, 1, 0x80, 2, 0, 0, 1, 1);
     func_00108D80();
 
-    context = (ObjRenderContext *)base->resourceHandle;
+    context = (MdlCtx *)base->resourceHandle;
     inner = context->inner;
-    inner->flags19 |= 0x20;
+    inner->flags |= 0x20;
     mdlProcessContextNodesAndTransforms(context, D_00380818);
-    inner->flags19 &= ~0x20;
+    inner->flags &= ~0x20;
     dds3SetObjectFlags(object, 0x10000);
 
     evtSetDrawSurfaceIndex(0x4E);
@@ -417,21 +408,21 @@ void dds3EnsureSlotData(void *object) {
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001129C8);
 
-s32 dds3InvokeSlot1Handler(void *object, void *context) {
+s32 dds3InvokeSlot1Handler(void *object, Dds3MoverUpdate update) {
     void *handler;
 
     handler = dds3GetSlot(object, 1);
     if (handler == NULL) {
         return 0;
     }
-    dds3SetSlotValue(handler, context);
+    dds3SetSlotValue(handler, update);
     return 1;
 }
 
 /* Store the source object on the data-slot handler, then replace the supplied
  * object's curve work. The replacement call uses object, not handler;
  * unlike the conditional dispatcher, this path does not check for NULL. */
-void dds3RunSlot1Handlers(void *object, void *sourceObject) {
+void dds3RunSlot1Handlers(void *object, EffWorldNode *sourceObject) {
     void *handler;
 
     handler = dds3GetSlot(object, DDS3_OBJECT_DATA_SLOT);

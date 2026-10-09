@@ -1,13 +1,10 @@
 #include "common.h"
+#include "file_request_api.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
 #include "mdl.h"
 
-struct FileWork;
-extern u32 fileGetResourceHandle(struct FileWork *);
-extern u32 fileGetLoadedDataAddress(struct FileWork *);
 extern DevRequest *sndBuildResourceHandleListFromOffsets(const void *);
-extern void filePollEntryCleanup(struct FileWork *);
 
 extern u32 mdlGroupJobSemaphore;
 
@@ -55,7 +52,7 @@ void mdlReleaseOwnerSlotResources(BattleGroupNode *owner, s32 index) {
         }
         if (owner->ownsResources != 0) {
             if (owner->slots[index].resourceHandle != 0) {
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(owner->slots[index].resourceHandle));
+                sdfReleaseResourceAllocation(owner->slots[index].resourceHandle);
             }
         }
         owner->slots[index].data = NULL;
@@ -70,7 +67,7 @@ void mdlApplyCommandToGroupedEntity(s32 group, s32 id, s32 index) {
     mdlReleaseOwnerSlotResources(entity, index);
 }
 
-void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 motionIndex, s32 index, s32 slotIndex, void *data, u32 resourceHandle) {
+void mdlConfigureGroupedEntitySlot(s32 group, s32 id, u32 mode, s32 motionIndex, s32 index, s32 slotIndex, void *data, struct SdfMemBlock *resourceHandle) {
     BattleGroupNode *owner = btlFindGroupedEntity(group, id);
     BattleGroupSlot *slot;
 
@@ -123,7 +120,7 @@ void mdlExecuteAndFreeJob(MdlLoadRequest *request) {
     sdfReleaseChipBlock(request);
 }
 
-void mdlRecordLoadedSizeAndReleaseHandle(struct FileWork *resource, MdlLoadRequest *destination) {
+void mdlRecordLoadedSizeAndReleaseHandle(struct FileRequest *resource, MdlLoadRequest *destination) {
     u32 handle;
     DevRequest *resourceList;
 

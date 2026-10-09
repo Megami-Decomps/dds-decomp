@@ -5,6 +5,7 @@
 #include "mnu.h"
 #include "file.h"
 #include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
 
 #define BRS_RESULT_COUNTER_PAIR_COUNT 5
 #define BRS_RESULT_SETTLED_POLL_LIMIT 6
@@ -576,31 +577,27 @@ void mnuLoadTitleStreamFrameData(char *filePath, u32 *streamState) {
 }
 
 void mnuStoreTaskResult(char *audioPath) {
-    D_00438FEC = fileQueueDefaultCallbackRequest(audioPath);
+    D_00438FEC = (u32)fileQueueDefaultCallbackRequest(audioPath);
     mnuTitleStreamStatus[9] = 1;
 }
 
 extern u32 D_00454D58[];
-extern s32 fileIsRequestReadyInCurrentMode(u32);
-extern s32 fileGetResourceHandle(u32);
-extern u32 fileGetLoadedDataAddress(u32);
-extern s32 fileGetResourceSize(u32);
-extern void filePollEntryCleanup(u32);
+
 extern void func_003504A8(u32 *);
 
 /* Allocate in global status, but use the supplied state's copy destination
  * and frame counts. Keep those distinct accesses and the cleanup-before-copy
  * ordering; return 1 after a ready file is copied, otherwise its ready result. */
 s32 mnuCompleteTitleStreamFileLoad(u32 *destinationState) {
-    s32 ready = fileIsRequestReadyInCurrentMode(D_00438FEC);
+    s32 ready = fileIsRequestReadyInCurrentMode((struct FileRequest *)D_00438FEC);
 
     if (ready != 0) {
-        s32 resourceHandle = fileGetResourceHandle(D_00438FEC);
-        u32 fileDataAddress = fileGetLoadedDataAddress(D_00438FEC);
-        s32 fileBytes = fileGetResourceSize(D_00438FEC);
+        s32 resourceHandle = (s32)fileGetResourceHandle((struct FileRequest *)(u32)D_00438FEC);
+        u32 fileDataAddress = fileGetLoadedDataAddress((struct FileRequest *)(u32)D_00438FEC);
+        s32 fileBytes = (s32)fileGetResourceSize((struct FileRequest *)(u32)D_00438FEC);
         struct SdfMemBlock *allocation;
 
-        filePollEntryCleanup(D_00438FEC);
+        filePollEntryCleanup((struct FileRequest *)(u32)D_00438FEC);
         allocation = sdfAllocGeneralBlockHigh(fileBytes);
         mnuTitleStreamStatus[MNU_STREAM_DATA_ADDRESS_INDEX] = sdfMemoryGetBlockAddress(allocation);
         mnuTitleStreamStatus[MNU_STREAM_ALLOCATION_INDEX] = (u32)allocation;

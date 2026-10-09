@@ -1,9 +1,12 @@
 #include "common.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_append.h"
 #include "eff_thunder_vector.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "btl_sound.h"
 #include "eff.h"
+#include "eff_thunder_fragment.h"
 #include "eff_event.h"
 #include "eff_event_sound.h"
 #include "eff_pcp_flash.h"
@@ -12,9 +15,6 @@
 /* Packed effect parameter-set accessor shared with the effect constructors. */
 extern void *effParamTableGetBlock(void *data, s32 index);
 
-extern void parFillSymmetricCellColors(u32 param0, u32 param1, void *cells, u32 param3);
-extern void parDecreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
-extern void parIncreaseSymmetricCellAlpha(u32 param0, u32 param1, void *cells, u32 param3);
 extern u32 effMiscRand(void *state);
 extern f32 effMiscRandUnitFloat(void *state);
 extern u8 D_0034DF38[];
@@ -982,7 +982,7 @@ void func_00165110(EffThunderSparkWork *work) {
 
 /* Single- and dual-system variants share this allocation layout, but the
    single-system update counts frames where the dual variant keeps a system. */
-typedef struct {
+struct EffThunderFragmentWork {
     EffThunderFragmentParams head;
     EffThunderFrag *fragments; /* 0x54 */
     u32 color;               /* 0x58 */
@@ -992,7 +992,7 @@ typedef struct {
     } state;                 /* 0x5C */
     ParSystem *system;            /* 0x60 */
     SdfMemBlock *allocationHandle; /* 0x64 */
-} EffThunderFragmentWork; /* 0x68 */
+}; /* 0x68 */
 
 extern void effThunderRandomizeFrag(EffThunderFragmentWork *work, s32 index);
 
@@ -1040,24 +1040,24 @@ void effThunderSetFragmentColor(EffThunderFragmentWork *work, u32 color) {
     work->color = color;
 }
 
-/* Preserve the caller's word unchanged; its wider callback role is unknown. */
-u32 func_00165638(u32 value) {
-    return value;
+/* Borrow the leading parameters without transferring work ownership. */
+EffThunderFragmentParams *effThunderGetFragmentParameters(EffThunderFragmentWork *work) {
+    return &work->head;
 }
 
-/* Forward the system and its opaque fragment configuration through the native call. */
-void func_00165640(EffThunderFragmentWork *work) {
-    parDecreaseSymmetricCellAlpha((u32)work->system, work->head.arg40, (void *)work->head.arg48, work->head.arg50);
+/* Apply decreasing alpha along each fragment cell using the retained color words. */
+void effThunderApplyFragmentDecreasingAlphaRamp(EffThunderFragmentWork *work) {
+    parDecreaseSymmetricCellAlpha(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
 }
 
-/* Alternate native operation on the same system and opaque fragment configuration. */
-void func_00165668(EffThunderFragmentWork *work) {
-    parIncreaseSymmetricCellAlpha((u32)work->system, work->head.arg40, (void *)work->head.arg48, work->head.arg50);
+/* Apply increasing alpha along each fragment cell using the retained color words. */
+void effThunderApplyFragmentIncreasingAlphaRamp(EffThunderFragmentWork *work) {
+    parIncreaseSymmetricCellAlpha(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
 }
 
 /* Apply symmetric cell-color bands using the fragment configuration's native arguments. */
 void effThunderApplyFragmentColorBands(EffThunderFragmentWork *work) {
-    parFillSymmetricCellColors((u32)work->system, work->head.arg40, (void *)work->head.arg48, work->head.arg50);
+    parFillSymmetricCellColors(work->system, work->head.arg40, work->head.arg48, work->head.arg50);
 }
 
 
@@ -1920,13 +1920,13 @@ EffThunderGroup *effThunderChainGroupCreate(EffThunderGroupParams *src) {
     memset(group->handles, 0, sizeof(group->handles));
     group->head = *src;
     group->handles[0] = effThunderFragCreate(&group->head.params);
-    func_00165668(group->handles[0]);
+    effThunderApplyFragmentIncreasingAlphaRamp(group->handles[0]);
     for (i = 1; i < src->count - 2; i++) {
         group->handles[i] = effThunderFragCreate(&group->head.params);
         effThunderApplyFragmentColorBands(group->handles[i]);
     }
     group->handles[i] = effThunderFragCreate(&group->head.params);
-    func_00165640(group->handles[i]);
+    effThunderApplyFragmentDecreasingAlphaRamp(group->handles[i]);
     group->color = 0x80808080;
     return group;
 }
@@ -3035,9 +3035,6 @@ void effAppendFragmentHistoryPoints(EffFragmentResources *history, u128 *source)
 extern SdfPoolNode *D_003548E0[];
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfConsAppendClearPacket(s32, s32 (*)(s32));
-extern void sdfConsAppendAssetPacket(s32, void *, s32 (*)(s32));
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 func_0015FE20(EffThunderDrawParams *);
 
 /* Render the two runs of a wrapped three-point history and its end cap. */
@@ -3060,8 +3057,8 @@ void effThunderDrawHistoryAndEndCap(EffFragmentResources *history) {
     }
     list = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(list);
-    sdfConsAppendClearPacket((s32)list, 0);
-    sdfConsAppendAssetPacket((s32)list, history->resourceHandle, 0);
+    sdfConsAppendClearPacket(list, 0);
+    sdfConsAppendAssetPacket(list, history->resourceHandle, 0);
     recent = history->activePointCount;
     start[0] = history->position - recent;
     if (start[0] < 3) {

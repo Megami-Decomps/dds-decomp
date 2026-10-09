@@ -4,6 +4,7 @@
 
 struct MnuStatusResource;
 struct MantraDrawPool;
+struct SdfMemBlock;
 
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
@@ -86,7 +87,7 @@ extern u32 ptyGetProfileRecordValue(DatPartyRecord *, u16);
 
 /* Full selection work allocated by evtAllocateMantraSelectionWork. */
 typedef struct MantraLimitSlot {
-    u32 allocation;
+    struct SdfMemBlock *allocation;
     u32 capacity;
     u16 *values;
     u8 data[0x160];

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "bill_object_api.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
@@ -101,10 +102,7 @@ typedef struct EffTemplatePacketList {
     u32 packetCount; /* 0x20 */
     u32 packetTag; /* 0x24: cleared when cloning a template */
     u8 pad28[8];
-    u16 kind; /* 0x30: resource type */
-    u8 pad32[2];
-    u16 subrecordCount; /* 0x34: subrecords per packet */
-    u8 pad36[0x12];
+    ParKindState sub; /* 0x30: common kind owner and template entry count */
     u8 fade[0x4C]; /* 0x48 */
     f32 speedJitter; /* 0x94 */
     f32 spinJitter; /* 0x98 */
@@ -585,7 +583,6 @@ struct EffGeneratedTextureDescriptor {
 extern u64 sdfTexGetPrimarySamplingState(SdfTex *);
 extern u64 sdfTexGetPrimaryTextureState(SdfTex *);
 extern u64 sdfTexGetPrimaryClampState(SdfTex *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void sdfInitGeometryDmaPacket(u8 *, const f32 *);
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32);
 extern f32 sdfSinPoly(f32);
@@ -2416,7 +2413,7 @@ void func_0015F1C0(EffTemplatePacketList *effect) {
     s32 completedCount = 0;
     s32 repeatEnabled;
     EffPacket *packet = (EffPacket *)effect->buffer->records;
-    u32 subeffectKind = effect->kind;
+    u32 subeffectKind = effect->sub.kind;
     s32 lifetimeFrames;
     s32 packetCount;
     s32 index;
@@ -2425,7 +2422,7 @@ void func_0015F1C0(EffTemplatePacketList *effect) {
     f32 radius;
     f32 velocityScale;
 
-    parUpdateSharedScaleAndDelta((ParKindState *)&effect->kind);
+    parUpdateSharedScaleAndDelta(&effect->sub);
     lifetimeFrames = (s32)effect->packetTag;
     targetRadius = effect->targetRadius;
     radiusStep = (targetRadius - effect->recordScale) / lifetimeFrames;
@@ -2518,7 +2515,7 @@ void func_0015F1C0(EffTemplatePacketList *effect) {
             if (subeffectKind != 0) {
                 VU0_LOAD_VF(vf12, previousPosition);
                 VU0_LOAD_VF(vf10, packet->pos);
-                parDispatchKindUpdate((ParKindState *)&effect->kind, index, packet->color, packet->speed);
+                parDispatchKindUpdate(&effect->sub, index, packet->color, packet->speed);
             }
         }
         age++;
@@ -2526,7 +2523,7 @@ void func_0015F1C0(EffTemplatePacketList *effect) {
             if (repeatEnabled) {
                 age = EFF_PACKET_INITIAL_TAG;
             } else {
-                parDispatchKindInit((ParKindState *)&effect->kind, index);
+                parDispatchKindInit(&effect->sub, index);
                 completedCount++;
                 if (completedCount >= packetCount) {
                     effect->active = 0;
@@ -3119,21 +3116,21 @@ s32 effCloneTemplateWithPacketDescriptors(EffTemplatePacketList *source) {
     memcpy((void *)(copy + 0x150), (u8 *)source + source->templateSize, tailLen);
     func_0015B330(copy);
     perRecord = 0;
-    if (((EffTemplatePacketList *)copy)->kind != 0) {
+    if (((EffTemplatePacketList *)copy)->sub.kind != 0) {
         count = ((EffTemplatePacketList *)copy)->packetCount;
         /* All four supported resource kinds use the same subrecord count. */
-        switch (((EffTemplatePacketList *)copy)->kind) {
+        switch (((EffTemplatePacketList *)copy)->sub.kind) {
         case 1:
-            perRecord = ((EffTemplatePacketList *)copy)->subrecordCount;
+            perRecord = ((EffTemplatePacketList *)copy)->sub.templateEntryCount;
             break;
         case 2:
-            perRecord = ((EffTemplatePacketList *)copy)->subrecordCount;
+            perRecord = ((EffTemplatePacketList *)copy)->sub.templateEntryCount;
             break;
         case 3:
-            perRecord = ((EffTemplatePacketList *)copy)->subrecordCount;
+            perRecord = ((EffTemplatePacketList *)copy)->sub.templateEntryCount;
             break;
         case 4:
-            perRecord = ((EffTemplatePacketList *)copy)->subrecordCount;
+            perRecord = ((EffTemplatePacketList *)copy)->sub.templateEntryCount;
             break;
         }
         listBytes = count * 12;

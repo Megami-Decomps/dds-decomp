@@ -1,4 +1,6 @@
 #include "common.h"
+#include "sdf_packet_list.h"
+#include "fr_font_measure.h"
 #include "sdf_quaternion.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -15,13 +17,7 @@ extern s8 D_00324510[];
 extern FrFontGlyph *itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, FrFontGlyph *);
 
 extern s32 frFontDrawGlyphWithSharedFlags(FrFontGlyph *, s8);
-extern u32 frFontMeasureGlyphChain(FrFontGlyph *);
-
-extern s32 func_001958A0(FrFontGlyph *, s8, u32);
-
-extern FrFontGlyph *func_001951C8(void *, s8, s8, s8, FrFontGlyph *);
-
-extern void frFontSetChainFlag(FrFontGlyph *, u8);
+extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 
 extern FrFontGlyph *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
 
@@ -45,7 +41,7 @@ extern void fldNormalizedVectorCross(f32 *, f32 *, f32 *);
 
 extern void sdfVec3ScaleInPlace(f32, f32 *);
 
-extern void func_002CC5F0(u8 *);
+extern void func_002CC5F0(SdfGrid *);
 
 extern f32 sdfQuatDot(f32 *, f32 *);
 
@@ -332,14 +328,14 @@ void sdfRayPlaneHit(f32 *plane, f32 *rotation, f32 *out) {
 void sdfFontRegisterShort(s32 x, s32 y, u32 colors, const u8 *text) {
     FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     frFontDrawGlyphWithSharedFlags(handle, 1);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
 }
 
 s32 frFontMeasureAndQueueGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, s32 option) {
     FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, depth, colors, text, 0);
     s32 result = frFontMeasureGlyphChain(handle);
-    func_001958A0(handle, 1, option);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontDrawGlyphChain(handle, 1, option);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 
@@ -347,13 +343,13 @@ s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 first, u32 second, s8 
     FrFontGlyph *handle = func_001951C8(name, 0, type, 0, 0);
     s32 result = 0;
     frFontSetChildColors(handle, second);
-    frFontSetContextPair(handle, x << 4, y << 3);
-    frFontStoreShiftedContextValue(handle, first);
+    frFontSetGlyphPosition(handle, x << 4, y << 3);
+    frFontStoreShiftedRenderValue(handle, first);
     if (flag < 0) {
         result = frFontMeasureGlyphChain(handle);
     }
-    func_001958A0(handle, 1, option);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontDrawGlyphChain(handle, 1, option);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 
@@ -361,14 +357,14 @@ s32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, c
     FrFontGlyph *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, text, 0);
     s32 result;
 
-    frFontSetChainFlag(handle, flags);
+    frFontSetChildChainFirstOption(handle, flags);
     if (width >= 0) {
         result = 0;
     } else {
         result = frFontMeasureGlyphChain(handle);
     }
-    func_001958A0(handle, 1, color);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontDrawGlyphChain(handle, 1, color);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 
@@ -378,14 +374,14 @@ s32 itfDrawGlyphChainWithWidthQuery(s32 x, s32 y, s32 z, u32 w, u8 flags, char *
     FrFontGlyph *handle = func_00197A98(x << 4, y << 3, z, w, style, 0);
     s32 result;
 
-    frFontSetChainFlag(handle, flags);
+    frFontSetChildChainFirstOption(handle, flags);
     if (width >= 0) {
         result = 0;
     } else {
         result = frFontMeasureGlyphChain(handle);
     }
-    func_001958A0(handle, 1, color);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontDrawGlyphChain(handle, 1, color);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 
@@ -395,27 +391,27 @@ s32 frFontQueueFlaggedGlyphAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char
     FrFontGlyph *handle = func_001978E8(x << 4, y << 3, z, w, style, 0);
     s32 result;
 
-    frFontSetChainFlag(handle, flags);
+    frFontSetChildChainFirstOption(handle, flags);
     if (width >= 0) {
         result = 0;
     } else {
         result = frFontMeasureGlyphChain(handle);
     }
-    func_001958A0(handle, 1, color);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontDrawGlyphChain(handle, 1, color);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 
 s32 frFontDrawColoredGlyphChainAndMeasure(s32 x, s32 y, u32 first, u32 second, u8 opacity, u16 width, FrFontTextBank *name, u32 extra, s32 flag, s32 option) {
     FrFontGlyph *handle = itfDrawBankTextWithLayoutFlags(x << 4, y << 3, first, width, name, extra);
     s32 result = 0;
-    frFontSetChainFlag(handle, opacity);
+    frFontSetChildChainFirstOption(handle, opacity);
     frFontSetChildColors(handle, second);
     if (flag < 0) {
         result = frFontMeasureGlyphChain(handle);
     }
-    func_001958A0(handle, 1, option);
-    frFontQueueGlyphInSelectedSlot(handle);
+    frFontDrawGlyphChain(handle, 1, option);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     return result;
 }
 
@@ -426,7 +422,6 @@ extern void sdfInitPacketList(SdfListHead *);
 extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern SdfPoolNode kwlnDrawSurfaces[];
 
 /* Build an indexed RGBA/XYZ2 packet and submit it through the selected surface. */
@@ -1040,7 +1035,7 @@ SdfGridCell *sdfGridCursorUp(SdfGrid *grid) {
         return NULL;
     }
     grid->cursor = cell;
-    func_002CC5F0((u8 *)grid);
+    func_002CC5F0(grid);
     return cell;
 }
 
@@ -1053,7 +1048,7 @@ SdfGridCell *sdfGridCursorDown(SdfGrid *grid) {
     }
     cell += width;
     grid->cursor = cell;
-    func_002CC5F0((u8 *)grid);
+    func_002CC5F0(grid);
     return cell;
 }
 
@@ -1067,7 +1062,7 @@ SdfGridCell *sdfGridCursorLeft(SdfGrid *grid) {
         return NULL;
     }
     grid->cursor = cell;
-    func_002CC5F0((u8 *)grid);
+    func_002CC5F0(grid);
     return cell;
 }
 
@@ -1080,7 +1075,7 @@ SdfGridCell *sdfGridCursorRight(SdfGrid *grid) {
         return NULL;
     }
     grid->cursor = cell;
-    func_002CC5F0((u8 *)grid);
+    func_002CC5F0(grid);
     return cell;
 }
 
@@ -1094,7 +1089,7 @@ SdfGridCell *sdfGridSetCursorCell(SdfGrid *grid, u32 column, u32 row) {
         return result;
     }
     grid->cursor = sdfGridGetCell(grid, column, row);
-    func_002CC5F0((u8 *)grid);
+    func_002CC5F0(grid);
     return grid->cursor;
 }
 
@@ -1121,7 +1116,7 @@ SdfGridCell *sdfGridSelectFilledCell(SdfGrid *grid, u32 column, u32 row) {
         return NULL;
     }
     grid->cursor = cell;
-    func_002CC5F0((u8 *)grid);
+    func_002CC5F0(grid);
     return cell;
 }
 
@@ -1166,7 +1161,43 @@ void sdfGridReleaseAllCells(SdfGrid *grid) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002C97E8", func_002CC5F0);
+void func_002CC5F0(SdfGrid *grid) {
+    SdfGridCell *origin = grid->viewportOrigin;
+    SdfGridCell *cursor = grid->cursor;
+    u32 width = grid->width;
+    s32 column = origin->index % width;
+    s32 row = origin->index / width;
+    s32 cursorColumn = cursor->index % width;
+    s32 cursorRow = cursor->index / width;
+    s32 nextRow = row;
+    if (cursorColumn < column + grid->columnMargin) {
+        column -= (column + grid->columnMargin) - cursorColumn;
+        if (column < 0) {
+            column = 0;
+        }
+    } else {
+        if (cursorColumn >= (column + grid->visibleColumns) - grid->columnMargin) {
+            column = column + cursorColumn + (grid->columnMargin - (column + grid->visibleColumns)) + 1;
+            column = (u32)column > width - grid->visibleColumns ?
+                width - grid->visibleColumns : column;
+        }
+    }
+    if (cursorRow < row + grid->rowMargin) {
+        nextRow = row - ((row + grid->rowMargin) - cursorRow);
+        if (nextRow < 0) {
+            nextRow = 0;
+        }
+    } else {
+        if (cursorRow >= (row + grid->visibleRows) - grid->rowMargin) {
+            nextRow = row + cursorRow + (grid->rowMargin - (row + grid->visibleRows)) + 1;
+            if ((u32)nextRow >= grid->cellCount / width - grid->visibleRows) {
+                nextRow = grid->cellCount / width - grid->visibleRows;
+            }
+        }
+    }
+    grid->viewportOrigin = &grid->cells[nextRow * width + column];
+}
+
 
 float sdfMultiplyAddFloat(float addend, float multiplicand, float multiplier) {
     return addend + multiplicand * multiplier;

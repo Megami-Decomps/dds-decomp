@@ -69,7 +69,27 @@ void func_0031AE48(MnuShootingWork *object) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0031AD00", func_0031AEB8);
+extern void func_0031AF58(MnuShootingWork *object);
+extern void func_0031AF60(void);
+extern void mnuPauseEffectQueueFrameAdvance(void);
+extern u32 mnuResumeEffectQueueFrameAdvance(void);
+
+void func_0031AEB8(MnuShootingWork *object) {
+    object->unk70Bit0 ^= 1;
+    if (object->unk70Bit0) {
+        func_0031AF58(object);
+        mnuPauseEffectQueueFrameAdvance();
+        func_0031ADD8(object);
+        itfSetFadeMode((FadeEntry *)object->pad14C, 1, 8);
+        return;
+    }
+    if (!object->unk70Bit0) {
+        func_0031AF60();
+        mnuResumeEffectQueueFrameAdvance();
+        func_0031AE48(object);
+        itfSetFadeMode((FadeEntry *)object->pad14C, 0, 8);
+    }
+}
 
 
 void func_0031AF58(MnuShootingWork *object) {

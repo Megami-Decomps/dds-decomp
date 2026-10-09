@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
@@ -22,6 +23,7 @@
 #include "scr.h"
 #include "dat_state.h"
 #include "dat_command.h"
+#include "file_request_api.h"
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 #define BTL_LIST_FLAG_MASK 0x7FFF
@@ -283,7 +285,6 @@ typedef struct BattleListEntry {
 
 extern s32 mdlRequestAsset(s32, s32, s32);
 
-extern s32 fileRequestIsReady(void *);
 
 extern void sdfBuildPacketE(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -321,14 +322,13 @@ extern char D_0041B7A8[];
 extern char D_0041B7D0[];
 
 
-extern void func_0019D550(void *, s32, s32);
+extern void frFontDrawGlyphChain(void *, s32, s32);
 extern void func_0020D1C0(u8 *, u8 *, s32, s32, u32, u32);
 
-extern void *sdfAllocPacketAligned(s32);
+extern s32 sdfAllocPacketAligned(s32);
 
 extern void sdfInitPacketList(void *);
 
-extern void sdfAppendPacket(void *, s32);
 
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
@@ -1301,7 +1301,7 @@ s8 btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
     if (cacheEntry->packRequest == 0) {
         return 1;
     }
-    requestReady = fileRequestIsReady(cacheEntry->packRequest);
+    requestReady = fileRequestIsReady((struct FileRequest *)cacheEntry->packRequest);
     return requestReady;
 }
 
@@ -1406,7 +1406,6 @@ s32 func_0022CD60(s32 kind, s32 id) {
     return 0;
 }
 
-extern s32 sdfConsCreateDrawPacket(SdfListHead *, SdfTex *, s32);
 extern void sdfQueueTexturedQuad(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
                                  s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 
@@ -1937,8 +1936,8 @@ s32 mnuListMoveCursor(MenuList *menuList) {
 s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
     struct FrFontGlyph *textGlyph = func_0019F448(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
         MNU_LIST_NORMAL_COLOR, (const char *)(u32)text, NULL);
-    func_0019D550(textGlyph, 0, 0x60);
-    return frFontQueueGlyphInSelectedSlot(textGlyph);
+    frFontDrawGlyphChain(textGlyph, 0, 0x60);
+    return frFontQueueGlyphForCurrentDrawBuffer(textGlyph);
 }
 
 /* Draw the visible text interval, highlighting the selected absolute index.
@@ -1961,8 +1960,8 @@ s32 btlDrawSelectableListRows(u8 *x, u8 *y, s32 unusedMode, u8 *selectionState, 
             MNU_LIST_TEXT_DEPTH,
             itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
             (const char *)(u32)rowTexts[itemIndex], NULL);
-        func_0019D550(textGlyph, 0, 0x60);
-        frFontQueueGlyphInSelectedSlot(textGlyph);
+        frFontDrawGlyphChain(textGlyph, 0, 0x60);
+        frFontQueueGlyphForCurrentDrawBuffer(textGlyph);
         rowY += MNU_LIST_ROW_HEIGHT;
     }
 }
@@ -1985,7 +1984,7 @@ s32 mnuDrawSelectableMenuRows(u8 *x, u8 *y, s32 mode, u8 *selectionState, s32 *r
     u32 selectedIndex;
     s32 rowY;
     func_0020D1C0(x - MNU_LIST_FRAME_INSET, y - MNU_LIST_FRAME_INSET, mode, ((MenuList *)selectionState)->rows * MNU_LIST_ROW_HEIGHT + MNU_LIST_FRAME_INSET, 0x80806020, 0x30000000);
-    indexPackets = sdfAllocPacketAligned(0x20);
+    indexPackets = (void *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(indexPackets);
     firstIndex = ((MenuList *)selectionState)->top;
     visibleRowCount = ((MenuList *)selectionState)->rows;
@@ -2308,7 +2307,7 @@ void btlDestroyGroupNode(BattleGroupNode *groupNode) {
         sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)groupNode->requestHandle);
         for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
             if (groupNode->slots[slotIndex].resourceHandle != 0) {
-                sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(groupNode->slots[slotIndex].resourceHandle));
+                sdfReleaseResourceAllocation(groupNode->slots[slotIndex].resourceHandle);
             }
         }
     }

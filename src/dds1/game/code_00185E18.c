@@ -1,5 +1,7 @@
 #include "bill_object_api.h"
+#include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_texture_draw_packet.h"
 #include "btl_effect_position.h"
 #include "sdf.h"
 #include "sdf_chip.h"
@@ -103,7 +105,6 @@ extern s32 billGetWorkTransformMatrix(s32 packet);
 
 struct SdfListHead;
 struct SdfDmaNode;
-extern void sdfAppendPacket(struct SdfListHead *list, u32 packet);
 
 
 /* Per-frame draw state; DMA builders select packet ranges within each record. */
@@ -122,7 +123,6 @@ extern void sdfAppendDmaTagToList(struct SdfListHead *list, u32 packet);
 extern s32 func_0011E278();
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern void sdfInitPacketList(void *);
-extern void sdfAppendDmaPrimary(s32 list, u32 source, struct SdfDmaNode *node);
 
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
@@ -277,7 +277,7 @@ void effDrawBlurRectangle(EffBlurQuad *source)
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         tag = (void *)sdfAllocPacketAligned(0x20);
-        sdfAppendDmaPrimary((s32)list, (u32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, tag);
+        sdfAppendDmaPrimary(list, (u32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, tag);
         samplingPacket = (void *)sdfAllocPacketAligned(0x30);
         samplingPacket[0] = 2;
         samplingPacket[1] = 0x5000000210000000ULL;
@@ -326,7 +326,6 @@ void effDrawBlurRectangle(EffBlurQuad *source)
 }
 
 extern void func_002D4C80(s32 source, u32 packet, s32 variant);
-extern s32 sdfConsCreateDrawPacket(SdfListHead *list, SdfTex *texture, s32 context);
 
 void effAppendBlurRenderState(void *list, s32 blendControl, u32 resource)
 {
@@ -363,7 +362,7 @@ void effAppendBlurRenderState(void *list, s32 blendControl, u32 resource)
     sdfAppendPacket(list, (u32)blendPacket);
 
     tag = (void *)sdfAllocPacketAligned(0x20);
-    sdfAppendDmaPrimary((s32)list, (u32)&kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()], tag);
+    sdfAppendDmaPrimary(list, (u32)&kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()], tag);
 
     samplingPacket = (u64 *)sdfAllocPacketAligned(0x30);
     samplingPacket[0] = 2;

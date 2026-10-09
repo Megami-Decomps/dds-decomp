@@ -14,6 +14,14 @@ typedef struct MdlCtx MdlCtx;
 struct MdlPartEntry;
 struct EffTrackPolyWork;
 
+/* Known resource-item kinds; the owner stores this domain in a halfword. */
+typedef enum MdlResourceKind {
+    MDL_RESOURCE_BILLBOARD = 0,
+    MDL_RESOURCE_EFFECT = 1,
+    MDL_RESOURCE_TRACK_POLY = 2,
+    MDL_RESOURCE_OBJECT = 3
+} MdlResourceKind;
+
 typedef struct MdlObjectAttachment {
     MdlCtx *owner;
     s32 objectAddress;
@@ -26,7 +34,7 @@ typedef struct MdlObjectAttachment {
  * to MdlCtx's list at +0x14. The part and object payloads share that allocation. */
 typedef struct MdlResourceItem {
     struct MdlResourceItem *next;
-    u16 type;
+    u16 type; /* MdlResourceKind value, with native halfword storage. */
     s16 subtype;
     union {
         struct {
@@ -49,7 +57,7 @@ typedef struct BattleGroupSlot {
     s16 slot;
     s16 motionIndex;
     void *data;
-    s32 resourceHandle;
+    struct SdfMemBlock *resourceHandle;
 } BattleGroupSlot;
 
 /* Group owners allocate 0xB4 bytes and retain eight resource records. */
@@ -77,7 +85,7 @@ typedef struct MdlLoadPayload {
     void *itemList;
     s32 requestHandle;
     void *motionData;
-    s32 motionResource;
+    struct SdfMemBlock *motionResource;
     void *partInfo;
     s32 resourceHandle;
     DevRequest *partList;

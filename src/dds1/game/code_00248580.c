@@ -141,7 +141,7 @@ extern s32 func_001978E8(s32, s32, s32, s32, s32, s32);
 
 extern char mnuNumberSpriteFormat[];
 
-extern void func_001958A0(s32, s32, s32);
+extern void frFontDrawGlyphChain(s32, s32, s32);
 typedef struct EffectPair {
     s32 firstValue;
     s32 secondValue;
@@ -186,8 +186,8 @@ void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 value, 
         text = D_003482A8[slot].encodedText;
     }
     handle = itfCreateConvertedTextGlyph(gridX, gridY, depth, value, text, 0);
-    func_001958A0(handle, 1, MNU_TEXT_DRAW_PRIORITY);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)handle);
+    frFontDrawGlyphChain(handle, 1, MNU_TEXT_DRAW_PRIORITY);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
 }
 
 
@@ -240,8 +240,8 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
 
     func_003014F0(text, mnuNumberSpriteFormat, number);
     sprite = func_001978E8(x, y, layer, uiBlendColors(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), (s32)text, 0);
-    func_001958A0(sprite, 1, priority);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)sprite);
+    frFontDrawGlyphChain(sprite, 1, priority);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)sprite);
 }
 
 INCLUDE_RODATA(const s32, "game/code_00248580", D_003AF5A8);
@@ -613,7 +613,6 @@ extern void *memset(void *, s32, u32);
 
 extern struct EffectList *mnuAllocateValueRecord(u32);
 extern void mnuAppendCampSpriteRequests(struct EffectList *, StaffSlots *);
-extern void mnuReleaseStaffMenuTextureHandles(u32 *);
 extern void mnuReleaseStaffResourceGroups(StaffSlots *);
 extern void mnuClearEntries(MenuPageWindow *);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *);
@@ -635,7 +634,7 @@ MenuProgressHost *mnuCreateWorkBlock(void) {
 /* Release staff window/texture/resource work before the value record and allocation. */
 void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *work) {
     mnuShutdownContext(&work->partyWindow);
-    mnuReleaseStaffMenuTextureHandles(work->staffSlots.baseResources);
+    mnuReleaseStaffMenuTextureHandles(&work->staffSlots);
     mnuReleaseStaffResourceGroups(&work->staffSlots);
     effDestroyEffectList(work->titleEffectHandle);
     sdfReleaseResourceAllocation(work->allocation);
@@ -643,7 +642,6 @@ void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *work) {
 
 extern s32 mnuStaffSlotsAllFilled(struct EffectList *, StaffSlots *);
 
-extern void mnuReleaseStaffMenuResources(s32 *);
 
 extern void mnuInitializeStaffPageWindows(MenuPageWindow *, StaffSlots *, u32, PartyPanel *);
 
@@ -663,7 +661,7 @@ s32 mnuTickInitState(MenuProgressHost *work) {
     if (mnuStaffSlotsAllFilled(work->titleEffectHandle, group) == 0) {
         return 1;
     }
-    mnuReleaseStaffMenuResources(group->baseResources);
+    mnuReleaseStaffMenuResources(group);
     mnuInitializeStaffPageWindows(&work->partyWindow, group, 0, &work->partyPanel);
     work->loadState = 2;
     return 0;
@@ -680,10 +678,10 @@ void mnuSetupStaffMenuProfilePage(DatPartyRecord *source, MenuProgressHost *work
     mnuAttachPartyIconBundle(index, window, (u32)work->staffSlots.pairResources[0]);
     work->panelGroup = mnuCreatePanelGroup((s32)work->staffSlots.pairResources[0]);
     work->effectResource = mnuAllocateSimpleSprite(
-        (struct EffectSlotSet *)work->staffSlots.baseResources[5],
-        (struct EffectSlotSet *)work->staffSlots.baseResources[2],
-        (struct EffectSlotSet *)work->staffSlots.baseResources[3],
-        (struct EffectSlotSet *)work->staffSlots.baseResources[0],
+        work->staffSlots.baseResources[5],
+        work->staffSlots.baseResources[2],
+        work->staffSlots.baseResources[3],
+        work->staffSlots.baseResources[0],
         work->staffSlots.pairResources[0]);
     work->currentEffect = mnuCreateProfilePanel(source);
     mnuCacheProfilePanelGridPositions(work->currentEffect, (u32)work->staffSlots.pairResources[1], 5, 14, 15);
@@ -2002,8 +2000,8 @@ void mnuDrawTerminalAmountText(s32 fading, s32 context) {
         color = uiBlendColors(0xA09DC380, 0xA09DC300, scene->list->scale);
     }
     sprite = func_001979C8(0x1740, 0x210, 0, color, text, 0);
-    func_001958A0(sprite, 1, 0x53);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)(u32)sprite);
+    frFontDrawGlyphChain(sprite, 1, 0x53);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)sprite);
 }
 
 extern void mnuDrawTerminalAmountText(s32, s32);

@@ -1,4 +1,7 @@
+#include "fld_area_work.h"
+#include "sdf_packet_list.h"
 #include "common.h"
+#include "fr_font_measure.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
 #include "kwln.h"
@@ -262,7 +265,7 @@ extern AiSpecies *datEnemyAiRecords;
 extern s32 func_001B32F8(s32, s32 *);
 
 extern char D_00415840[]; /* "btl:endure=%d%%[ratio=%.2f]\n" */
-extern s32 fldAreaState[];
+
 extern u8 D_003B4EC8[];
 extern char D_004159A0[];
 
@@ -524,6 +527,8 @@ INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6078);
 void itfMesUpdatePanelFades(ItfMesState *panel);
 void btlUpdateFadeIndicator(ItfMesState *panel);
 
+void func_001A6528(ItfMesState *panel);
+
 void itfUpdateBattleDisplayAndFadeIndicator(ItfMesState *panel) {
     itfMesUpdatePanelFades(panel);
     func_001A6350(panel);
@@ -600,7 +605,78 @@ void itfMesUpdatePanelFades(ItfMesState *panel) {
 
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6350);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001A6528);
+extern void itfMesSetChildChainFlags(FrFontGlyph *glyph, u8 flagValue);
+extern s32 itfMesNthClearBit(s32 clearBitsToSkip, u32 mask);
+extern s32 sndSeqSelectPoll(ItfMesState *panel);
+extern void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy);
+
+void func_001A6528(ItfMesState *panel) {
+    ItfMesBlk40 *selection = &panel->blk40;
+    ItfMesEntryBlock *entry = &panel->entryBlock;
+    u32 flags = panel->flags;
+    s32 top;
+    s32 bottom;
+    s32 entryY;
+
+    switch (selection->unk10) {
+    case 1:
+        if (panel->unk12 == 3) {
+            selection->unk10 = 2;
+            panel->flags = (flags & ~0x38) | 0x18;
+            break;
+        }
+        entryY = entry->y;
+        bottom = entryY + entry->unk16 * (25 << 3);
+        top = selection->y - ((selection->rowCount * 25 - 25) << 3);
+        if (entryY == 0xAF8 && panel->blkA4.sprite != NULL) {
+            panel->blkA4.sprite->scrollSpan = ((bottom - top) / 64) * 64 + 64;
+        }
+        if (entry->glyphChain != NULL && top < bottom) {
+            itfMesShiftPanelVertically(panel, -64);
+            return;
+        }
+        if ((flags & 0xC00) != 0x400) {
+            if (entry->glyphChain != NULL) {
+                itfMesSetChildChainFlags(entry->glyphChain, 3);
+            }
+            selection->unk10 = 2;
+            panel->flags = (panel->flags & ~0x38) | 0x18;
+        }
+        break;
+    case 2:
+        if ((flags & 0x38) == 0x20 && sndSeqSelectPoll(panel) == 1) {
+            selection->glyphChain = itfMesTrimGlyphChainToRow(selection->glyphChain,
+                selection->selectedIndex, selection->rowCount);
+            if ((flags & 0xC00) == 0x800) {
+                panel->flags |= 0xC00;
+            }
+            selection->selectedIndex = itfMesNthClearBit(selection->selectedIndex, selection->panelValue);
+            selection->optionCount = 0;
+            btlSetFadePhaseAlphaTimer(&panel->fade, 1, 0x7F, 0);
+            panel->flags = (panel->flags & ~0x38) | 0x28;
+            selection->unk20 = 0x80;
+            selection->unk10 = 3;
+        }
+        break;
+    case 3:
+        selection->unk20 -= 16;
+        if (selection->unk20 <= 0) {
+            selection->unk20 = 0;
+            selection->unk10 = 4;
+            itfResetBattleFadeState(&panel->fade, 0);
+        }
+        itfMesRecolorNodeChildren(selection->glyphChain, selection->unk20);
+        return;
+    case 4:
+        if (entry->glyphChain != NULL && entry->y < 0xAF8) {
+            itfMesShiftPanelVertically(panel, 64);
+            return;
+        }
+        selection->unk10 = -1;
+        break;
+    }
+}
+
 
 void itfMesShiftPanelVertically(ItfMesState *panel, s32 dy) {
     ItfMesBlk14 *origin = &panel->blk14;
@@ -1201,7 +1277,6 @@ extern ItfFovPanelWork D_00452E70;
 extern s8 D_0037F543[];
 extern s32 sdfCreateResetPacketList(void);
 extern void *func_0011F250(s32, s32, s32, s32, s32, u32, u32);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 itfStepFloatWithPad(f32 *, f32, f32, f32, f32);
 
 s32 func_001A8938(void) {
@@ -1322,7 +1397,6 @@ extern char D_00436680[];
 extern char D_00436688[];
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 sdfCreateResetPacketList(void);
-extern void sdfAppendPacket(SdfListHead *, u32);
 
 /* Draw the blur settings and handle selection, editing and cancellation. */
 s32 func_001A8BD0(void) {
@@ -1490,7 +1564,6 @@ extern s32 D_00438F3C;
 extern UiQuadColor D_003B4D80;
 extern f32 sdfSinPoly(f32);
 extern s32 sdfCreateResetPacketList(void);
-extern void sdfAppendPacket(SdfListHead *list, u32 packetAddress);
 extern u64 *func_001A9580(s32, s32, s32, s32, s32, u32, u32);
 
 void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
@@ -2142,12 +2215,85 @@ BtlUnit *btlFindActiveActorByKind(s32 kind) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AAC50);
+extern void btlCopyUnitStats(BtlUnit *, DatPartyRecord *);
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001AB160);
+void func_001AAC50(BtlUnit *unit, u8 sourceIndex, u8 priority) {
+    DatPartyRecord saved;
+    s32 insertion = 0;
+    s32 i;
+
+    if (datGameState->party[0].flags & 2) {
+        do {
+            if ((u16)(datGameState->party[insertion].flags & 1) == 0) {
+                break;
+            }
+            if (priority < btlFindActiveActorByKind(insertion)->lookupId) {
+                break;
+            }
+            insertion++;
+            if (insertion >= 5) {
+                break;
+            }
+        } while (datGameState->party[insertion].flags & 2);
+    }
+
+    memcpy(&saved, &datGameState->party[sourceIndex], sizeof(saved));
+    for (i = sourceIndex; i < 4; i++) {
+        memcpy(&datGameState->party[i], &datGameState->party[i + 1], sizeof(saved));
+        if (datGameState->party[i + 1].flags & 2) {
+            btlFindActiveActorByKind(i + 1)->unk2E4 = i;
+        }
+    }
+
+    for (i = 4; i > insertion; i--) {
+        memcpy(&datGameState->party[i], &datGameState->party[i - 1], sizeof(saved));
+        if (datGameState->party[i - 1].flags & 2) {
+            btlFindActiveActorByKind(i - 1)->unk2E4 = i;
+        }
+    }
+
+    memcpy(&datGameState->party[i], &saved, sizeof(saved));
+    btlCopyUnitStats(unit, &saved);
+    unit->partyRecord.flags |= 2;
+    datGameState->party[i].flags |= 2;
+    unit->unk2E4 = i;
+    func_001AABD8();
+    btlBossDebugPrintf("btl:party in %d->%d[%d]\n", sourceIndex, i, saved.unitId);
+}
+
+void func_001AB160(BtlUnit *unit) {
+    DatPartyRecord saved;
+    DatGameState *scanState = datGameState;
+    s32 originalIndex;
+    s32 index;
+
+    originalIndex = unit->unk2E4;
+    memcpy(&saved, &datGameState->party[originalIndex], sizeof(saved));
+    index = originalIndex;
+    if (index < 4 && (u16)(scanState->party[index + 1].flags & 1)) {
+        do {
+            memcpy(&datGameState->party[index], &datGameState->party[index + 1], sizeof(saved));
+            if (datGameState->party[index + 1].flags & 2) {
+                btlFindActiveActorByKind(index + 1)->unk2E4 = index;
+            }
+            index++;
+            if (index >= 4) {
+                break;
+            }
+            scanState = datGameState;
+        } while ((u16)(scanState->party[index + 1].flags & 1));
+    }
+
+    memcpy(&datGameState->party[index], &saved, sizeof(saved));
+    unit->partyRecord.flags &= ~2;
+    datGameState->party[index].flags &= ~2;
+    unit->unk2E4 = 6;
+    func_001AABD8();
+    btlBossDebugPrintf("btl:party out %d->%d[%d]\n", originalIndex, index, saved.unitId);
+}
 
 extern const char D_00415130[];
-extern void btlCopyUnitStats(BtlUnit *, DatPartyRecord *);
+
 
 /* Swap the actor's roster entry, refresh its stats, and mark the active entry. */
 void func_001AB510(BtlUnit *actor, u8 targetIndex) {
@@ -4106,22 +4252,22 @@ s32 btlCalculateAbilityRecoveryAmount(BtlUnit *unit) {
     return recovery;
 }
 
-extern s32 btlHasEnemyRecordDefeatExemptionFlag();
+extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
 
-s32 btlIsUnitDefeatTriggeredByValueDelta(u8 *unit, s32 delta) {
-    if (btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)unit)->partyRecord) & 4) {
+s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *unit, s32 delta) {
+    if (btlGetEntryFlagsUnlessDisabled(&unit->partyRecord) & 4) {
         return 0;
     }
     if (btlHasEnemyRecordDefeatExemptionFlag(unit) != 0) {
         return 0;
     }
-    if ((((UiObject *)unit)->statusFlags & 0x7FFF) == 0x4000) {
+    if ((unit->partyRecord.status & 0x7FFF) == 0x4000) {
         return 1;
     }
-    if (!(*(u32 *)(btlGetRuntime() + 0x218) & 0x80)) {
+    if (!(((BtlState *)btlGetRuntime())->battleFlags & 0x80)) {
         return 0;
     }
-    return ((UiObject *)unit)->currentValue + delta < 1;
+    return unit->partyRecord.hp + delta < 1;
 }
 
 s32 btlIsCurrentValueBelowQuarterThreshold(UiObject *object) {
@@ -4140,7 +4286,7 @@ s32 btlBothSidesActive(BtlUnit *unit) {
     UiObject *actor;
     s32 a;
     s32 b;
-    if (btlIsUnitDefeatTriggeredByValueDelta((u8 *)unit, 0) != 0) {
+    if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0) != 0) {
         return 0;
     }
     if (unit->flags & 0x60) {
@@ -4796,11 +4942,11 @@ s32 btlRollActorEligibilityWithAbilityOverride(BtlUnit *unit) {
     return btlRollAiBucket() < 5;
 }
 
-s32 btlHasEnemyRecordDefeatExemptionFlag(UiObject *object) {
+s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *object) {
     if ((object->flags & 0x400) == 0) {
         return 0;
     }
-    return ((s32)datEnemyRecords[object->index].flags & 0x100) > 0;
+    return ((s32)datEnemyRecords[object->partyRecord.unitId].flags & 0x100) > 0;
 }
 
 extern s32 effMiscRand(void *);
@@ -4857,7 +5003,7 @@ s32 func_001B4918(BtlUnit *unit, BtlUnit *target) {
     s32 threshold;
     u32 i;
 
-    if (btlIsUnitDefeatTriggeredByValueDelta((u8 *)unit, 0) != 0) {
+    if (btlIsUnitDefeatTriggeredByValueDelta(unit, 0) != 0) {
         return -1;
     }
 
@@ -5060,9 +5206,9 @@ u32 func_001B5600(void) {
     }
     for (i = 0; i < 0x12; i++) {
         u8 area = D_003B4EC8[i * 2];
-        if (area == fldAreaState[4]) {
+        if (area == fldAreaState.area) {
             u8 zone = D_003B4EC8[i * 2 + 1];
-            if (zone == fldAreaState[5] + 1) {
+            if (zone == fldAreaState.floor + 1) {
                 btlBossDebugPrintf(D_004159A0, area, zone);
                 return 1;
             }
@@ -5516,14 +5662,16 @@ typedef struct BtlWorkRes {
     EffectSlotSet *resC;
 } BtlWorkRes;
 
-extern EffectSlotSet *func_00305148();
 
 void btlLoadResourceBlock(void) {
     BtlWorkRes *work = (BtlWorkRes *)btlGetRuntime();
     if (btlResourceBlockLoaded == 0) {
-        btlResourceBlock->resA = func_00305148(btlResourceBlock->nameA, 0);
-        btlResourceBlock->resB = func_00305148(btlResourceBlock->nameB, 0);
-        btlResourceBlock->resC = func_00305148(btlResourceBlock->nameC, 0);
+        btlResourceBlock->resA = effCreateResourceSlotSetFromAllocation(
+            (struct SdfMemBlock *)(u32)btlResourceBlock->nameA, 0);
+        btlResourceBlock->resB = effCreateResourceSlotSetFromAllocation(
+            (struct SdfMemBlock *)(u32)btlResourceBlock->nameB, 0);
+        btlResourceBlock->resC = effCreateResourceSlotSetFromAllocation(
+            (struct SdfMemBlock *)(u32)btlResourceBlock->nameC, 0);
         work->resA = btlResourceBlock->resA;
         work->resB = btlResourceBlock->resB;
         btlResourceBlockLoaded = 1;
@@ -6087,7 +6235,6 @@ extern void func_00101968(KwlnTask *, KwlnTask *);
 extern s32 btlUpdateSkillNamePanelTask(KwlnTask *);
 extern void btlFreeRegisteredTaskData(KwlnTask *);
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
-extern u32 frFontMeasureLines(struct FrFontGlyph *);
 typedef struct BtlPanelTransitionWork {
     KwlnTask *task;
     const u8 *text;
@@ -6132,7 +6279,7 @@ s32 func_001B8580(const u8 *text) {
     work->fadeLevels[3] = work->fadeLevels[1] = 0x10;
     glyph = itfCreateConvertedTextGlyph(0x1000, 0x200, 0xFF0000, 0x80808080, text, 0);
     work->width = frFontMeasureLines((struct FrFontGlyph *)glyph);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)glyph);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
     work->initial[0].x = work->width - work->width / 2 + 0x105;
     work->initial[0].y = 0x40;
     work->initial[1].x = 0x92 - work->width / 2;
@@ -6927,7 +7074,7 @@ s32 btlUpdateSkillNamePanelTask(KwlnTask *task) {
     glyph = itfCreateConvertedTextGlyph((0x100 - (width >> 1)) << 4, 0x220, 0xFF0000,
                                        work->fade | 0x80808000, work->text, 0);
     frFontDrawGlyphWithSharedFlags(glyph, 1);
-    frFontQueueGlyphInSelectedSlot((struct FrFontGlyph *)glyph);
+    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)glyph);
     colors.values[0] = work->fadeLevels[0] | 0x80808000;
     colors.values[1] = work->fadeLevels[2] | 0x80808000;
     colors.values[2] = work->fadeLevels[1] | 0x80808000;
