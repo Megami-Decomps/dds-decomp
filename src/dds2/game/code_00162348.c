@@ -560,7 +560,7 @@ void parPrependRecordListNode(ParListNode *node) {
 INCLUDE_ASM(const s32, "game/code_00162348", func_00163010);
 
 void func_00163238(ParReleaseRecord *record) {
-    func_003332E8(record->asset);
+    sdfSetAssetPrimaryTextureAddress(record->asset);
 }
 
 /* Draw parameter block filled per strip by parDrawPendingCellSystems. */

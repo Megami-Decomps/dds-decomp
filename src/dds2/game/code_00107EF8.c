@@ -600,7 +600,7 @@ INCLUDE_ASM(const s32, "game/code_00107EF8", func_00109538);
 
 extern u64 D_0037F5A0[]; /* index table; only the first 8 bytes are used */
 extern void *func_0033B050(SdfPrimitiveRequest *);
-extern void func_003332E8(struct SdfAsset *, u32);
+extern void sdfSetAssetPrimaryTextureAddress(struct SdfAsset *, u32);
 extern void sdfQueueAssetRelease(void *);
 
 /* Preserve the native 0,2,3,1 vertex/index order; W components are not initialized here. */
@@ -657,7 +657,7 @@ void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f
     SdfPoolNode *surface;
 
     asset = sdfCreateAssetWithDrawEntries();
-    func_003332E8(asset, bits);
+    sdfSetAssetPrimaryTextureAddress(asset, bits);
     list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(list);
     sdfConsAppendClearPacket(list, 0);
