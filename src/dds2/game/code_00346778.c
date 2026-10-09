@@ -75,10 +75,10 @@ void sdfMovieInitializeStreamWork(MovObj *owner, SdfMovieDescriptor *descriptor,
     owner->unk06 = descriptor->unk02;
     owner->unk0C = descriptor->unk08;
     owner->unk0E = descriptor->unk0A;
-    soundFormat[0] = descriptor->unk10;
-    soundFormat[1] = descriptor->unk11;
+    soundFormat[0] = descriptor->hasAudio;
+    soundFormat[1] = descriptor->stereo;
     soundFormat[2] = 0;
-    soundFormat[3] = descriptor->unk12;
+    soundFormat[3] = descriptor->playbackCadenceStep;
 
     if (!isPac) {
         stream = sdfAllocAndClearQuadwords(0x14);
