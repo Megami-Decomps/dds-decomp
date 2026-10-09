@@ -1145,7 +1145,35 @@ void func_001ED6C8(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from)
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001EB5B0", func_001ED9A0);
+void func_001ED9A0(BtlLinkedCommand *action, BtlCamState *pose) {
+    BtlUnit *user;
+    BtlUnit *target;
+    s32 frames;
+    s32 idle;
+    s32 eligible;
+
+    if (action->motionProgress == 0 && (s32)btlGetIndexListCount(action->targetList) < 2) {
+        user = action->link->unit;
+        target = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+        frames = func_001E2E58(user, user->unkEC);
+        frames = (s32)((f32)frames / btlGetActorStateScale(action->link));
+        if (action->state == frames && (target->status.flags & 0x200)) {
+            idle = btlHasIdleLinkedSlotKindTwo((u8 *)action);
+            eligible = btlHasEligibleLinkedEntryTypeTwo((u8 *)action);
+            if (idle == 0 && eligible == 0) {
+                return;
+            }
+            btlCopyMotionTransform(&action->frontCamera, pose);
+            btlCopyMotionTransform(&action->backCamera, pose);
+            action->backCamera.distance += idle != 0 ? 500.0f : 300.0f;
+            action->motionProgress = 1;
+            action->motionParameter = 10.0f;
+            action->flags = (action->flags & ~0x14) | 0x41;
+            action->state = 0;
+            btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
+        }
+    }
+}
 
 void btlSetupCameraPoseAimUnit(BtlLinkedCommand *action, BtlCamState *from, BtlCamState *to) {
     f32 quat[4];
