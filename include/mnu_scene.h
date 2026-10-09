@@ -49,7 +49,7 @@ typedef struct MenuSceneMetadata {
     u16 entryId;
     u8 pad02E[0x19E];
     DspParticleState sparkles; /* 0x1CC: shared timer and eight particles */
-    u8 pad238[4];
+    struct MnuSpriteResourceGroup *spriteResources; /* 0x238: drifting sprite cues */
     s32 displayedCurrency;
     s32 currencyFrame;
     u16 pendingProfileId;

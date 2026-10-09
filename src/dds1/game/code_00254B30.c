@@ -387,7 +387,25 @@ void func_00255B78(DspParticleState *state, s32 sprite, s32 surfaceIndex) {
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00254B30", func_00255D00);
+#include "sdf_task_work.h"
+
+extern TaskWork *mnuSceneResourceContext;
+extern void func_0025BDD0(struct MnuSpriteResourceGroup *resources);
+extern void func_0025BF18(s32 x, s32 y, s32 depth, s32 alpha,
+                          struct MnuSpriteResourceGroup *resources, s32 drawArg);
+
+/* Scroll the sprite cues opposite the scene cursor and draw them. */
+void func_00255D00(MenuSceneMetadata *scene, s32 alpha, s32 drawArg) {
+    MenuSceneWork *work = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
+
+    if (work != NULL) {
+        s32 x = 0.0f - (f32)work->cursorPosition.x / 775.0f * 256.0f;
+        s32 y = 0.0f - (f32)work->cursorPosition.y / 910.0f * 224.0f;
+
+        func_0025BDD0(scene->spriteResources);
+        func_0025BF18(x, y, 1, (f32)alpha * 0.15f, scene->spriteResources, drawArg);
+    }
+}
 
 void func_00255E08(MenuSceneMetadata *scene, s32 alpha, s32 context) {
     DspParticleState *sparkles;
