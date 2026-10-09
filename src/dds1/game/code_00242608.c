@@ -1774,7 +1774,78 @@ s32 evtSelectStateAction(KwlnTask *task) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00246220);
+/* Poll the dispatch slot, then process command phases and mapped input flags. */
+s32 func_00246220(KwlnTask *task) {
+    s32 dispatchResult;
+    s32 inputFlags;
+    s32 stateAddress;
+    s32 *dispatchSlot;
+    struct MenuList *linkedTask;
+    struct MenuListNode *cursorNode;
+    struct MenuList *callbackTask;
+    s32 inputConsumed = 0;
+
+    stateAddress = kwlnTaskGetUserValue(task);
+    inputFlags = mnuMapPadMaskToFlags(0x33);
+    dispatchSlot = &((ShopScene *)stateAddress)->dispatchState;
+    linkedTask = ((ShopScene *)stateAddress)->window->list;
+    cursorNode = linkedTask->cursor;
+    dispatchResult = menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_POLL, task);
+    if (dispatchResult == 0) {
+        switch (mnuTickExtendedCommandPhase((ShopScene *)stateAddress)) {
+        case -1:
+            break;
+        case 4:
+            mnuSetCommandPhase((ShopScene *)stateAddress, 6);
+            mnuStorePendingMenuCommandValue(linkedTask, 10);
+            break;
+        case 5:
+            mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AA68);
+            mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->sprite->list, 10);
+            break;
+        case 7:
+            mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AAF4);
+            break;
+        case 8:
+            mnuSetCommandPhase((ShopScene *)stateAddress, 6);
+            callbackTask = ((ShopScene *)stateAddress)->window->list;
+            callbackTask->drawCallback = func_0025ECD0;
+            mnuStorePendingMenuCommandValue(callbackTask, 0);
+            ((ShopScene *)stateAddress)->substate = 10;
+            break;
+        case 6:
+            evtInstallStateTableB((ShopScene *)stateAddress);
+            /* Continue into the common input handling after installing the table. */
+        default:
+            if (((ShopScene *)stateAddress)->dispatchState == 0) {
+                if (inputFlags & 1) {
+                    if ((cursorNode->flags48 & 1) == 0) {
+                        mnuSetCommandPhase((ShopScene *)stateAddress, 7);
+                    } else {
+                        if (func_00244FA0((ShopScene *)stateAddress) == -2) {
+                            ((ShopScene *)stateAddress)->menuMode = 1;
+                        }
+                        inputConsumed = 1;
+                    }
+                } else if (inputFlags & 2) {
+                    mnuSetCommandPhase((ShopScene *)stateAddress, 5);
+                    func_00260550(linkedTask, 4);
+                } else if ((inputFlags & 0x300000) == 0) {
+                    func_0027C788(((ShopScene *)stateAddress)->window);
+                } else if (inputFlags & 0x10) {
+                    mnuRetreatWindowListSelection(((ShopScene *)stateAddress)->window);
+                } else if (inputFlags & 0x20) {
+                    mnuAdvanceWindowListSelection(((ShopScene *)stateAddress)->window);
+                }
+            }
+            mnuPlayInputSound(0, inputConsumed ? 2 : inputFlags,
+                              &((ShopScene *)stateAddress)->window->list->stateFlags);
+            break;
+        }
+        return 0;
+    }
+    return dispatchResult;
+}
 
 s32 evtStageDispatchStart(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
