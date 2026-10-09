@@ -3745,6 +3745,23 @@ the old data include at that owner boundary; the routine copies the aggregate
 before selecting a row. The retail split's eight zero alignment bytes before
 the following jump table are not record fields or artificial C padding.
 
+## Texture-viewer switch-table alignment
+
+DDS1 `00104810` and DDS2 `00104700` display the canonical `SdfTex`
+dimensions, nine native pixel-format labels, `resourceKey`, and
+`battleTextureSlot`. The two format literals and 45-target switch table
+are owned solely by each function's assembly split; the label-pointer
+array remains a separate shared object.
+
+The retail table's terminal zero words are alignment, not extra cases.
+The natural C switch leaves an eight-byte alignment frontier in the unit
+comparator. Main's clean-clone full DDS1 build rejected it with 52 differing
+bytes, so the text-exact candidate is parked and production remains assembly.
+Do not manufacture cases, data objects, or padding to supply the bytes.
+A future landing needs corrected jump-table/rodata ownership and a passing
+full retail SHA-1, not instruction equality alone.
+
+
 
 ## Battle lift/settle task workspace
 
@@ -4835,3 +4852,43 @@ numeric/currency callers in `002665B0` now use that actual contract,
 with null previous chains and no integer-return reconstruction casts.
 The existing glyph typedef is declared before the first pointer import.
 
+
+## Battle effect payloads follow the mode's allocation
+
+DDS2 constructor `00229728` allocates and clears twelve bytes for mode
+779's guard state and eight bytes for mode 782's marked-scene/summon
+state. The former owns the temporary unit at `+0`, selected guard at
+`+4` and result bytes at `+8/+9/+A`; the latter owns the active byte and
+the full-word selected party ID at `+4`. They are distinct members of
+`BattleEffectPayload`, not prefix views of mode 786's larger linked
+effect record. Unit creation, cancellation and the marked-state getter
+consume their actual variant; destruction borrows `BtlUnit *`, not a
+scalar address word.
+
+Mode 789 instead allocates sixteen bytes: its actor is at `+0`, Brahma
+ratio at `+4`, and pending replacement byte at `+8`. Its registered actor
+creation/destruction, ratio methods and `00222100` use that variant rather
+than mode 786's linked-effect record. The replacement routine retains the
+script task while reusing one scheduler-task local for its dependent effect
+and sound, whose conditions freshly read the script handle before starting.
+
+## Template clones retain the common particle-kind owner
+
+The radius updater and template-clone helpers in DDS1 `00151F58` and
+DDS2 `00159B48` address the same 0x18-byte `ParKindState` at template
+offset `+0x30`. Its `+0x04` halfword is the template entry count:
+the clone reads it for each supported resource kind when sizing the
+per-particle subrecords. Embed this owner rather than casting the
+address of a standalone kind halfword to `ParKindState *`; the count
+remains at template offset `+0x34` and the template stays 0x180 bytes.
+
+
+## Quantized strip preparation retains its configuration pointer
+
+DDS1 `002AFE68` and DDS2 `002F3258` consume the existing
+`EffBillQuantizedConfig` as their second argument. Both the shared-texture
+and retained-frame constructors pass that owner directly; an owned class's
+payload is the same configuration, not an integer argument or a second
+record view. The first argument remains the existing three-word buffer
+API. The two large preparation bodies remain assembly while their
+placement and scheduling differences are unresolved.
