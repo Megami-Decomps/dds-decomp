@@ -13,6 +13,7 @@
 #include "sdf_projection.h"
 #include "mdl.h"
 #include "mdl_resource_entries.h"
+#include "mdl_track_poly_record.h"
 #include "mdl_resource_table.h"
 #include "file_request_api.h"
 
@@ -278,9 +279,8 @@ extern char D_004370C0[]; /* "%5.2f" */
 extern u8 sdfViewTargetVector[];
 
 
-extern void effCopyVector(s32 handle, f32 *src);
-
-extern void billInvokeCallback(s32 handle);
+extern void effCopyVector(void *dst, void *src);
+extern void billInvokeCallback(BillObj *billboard);
 
 
 
@@ -838,7 +838,7 @@ void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype
             if (chunkRecord != NULL) {
                 MdlResourceItem *resourceItem = mdlInsertResourceItem(owner, type, subtype);
 
-                resourceItem->payload.part.handle = (s32)(u32)createPart(partSlot);
+                resourceItem->payload.part.instance = createPart(partSlot);
                 resourceItem->payload.part.slot = partSlot;
                 resourceItem->payload.part.mapPositionRecord = chunkRecord;
                 resourceItem->payload.part.anchorScale = optionalAnchorScale;
@@ -847,40 +847,24 @@ void mdlBindViewerPartRecords(MdlCtx *owner, MdlPartRec *partRecord, s32 subtype
     }
 }
 
-typedef struct MdlEffectRec {
-    u8 pad00[8];
-    s32 effectId; /* 0x08 */
-    s32 param0C;  /* 0x0C */
-    u16 scaleX;   /* 0x10 */
-    u16 scaleY;   /* 0x12 */
-    u16 value14;  /* 0x14 */
-    u8 value16;   /* 0x16 */
-    u8 value17;   /* 0x17 */
-    s32 value18;  /* 0x18 */
-    s32 value1C;  /* 0x1C */
-    s32 value20;  /* 0x20 */
-    s32 value24;  /* 0x24 */
-} MdlEffectRec;
-
-
 /* Convert the effect record to native track parameters and retain its work pointer. */
-void mdlCreateViewerEffectPart(MdlCtx *owner, MdlEffectRec *effectRecord, s32 subtype) {
+void mdlCreateViewerEffectPart(MdlCtx *owner, MdlTrackPolyRecordView *record, s32 subtype) {
     MdlResourceItem *resourceItem;
     EffTrackPolyParams effectParams;
 
     effectParams.model = owner;
-    effectParams.idA = effectRecord->effectId;
-    effectParams.idB = effectRecord->param0C;
-    effectParams.startFrame = effectRecord->scaleX;
-    effectParams.endFrame = effectRecord->scaleY;
-    effectParams.sampleInterval = effectRecord->value14;
-    effectParams.historyLength = effectRecord->value16;
+    effectParams.idA = record->startPositionId;
+    effectParams.idB = record->endPositionId;
+    effectParams.startFrame = record->startFrame;
+    effectParams.endFrame = record->endFrame;
+    effectParams.sampleInterval = record->sampleInterval;
+    effectParams.historyLength = record->historyLength;
     effectParams.unk1C = 3;
-    effectParams.kind = effectRecord->value17;
-    effectParams.gradientColors[0] = effectRecord->value18;
-    effectParams.gradientColors[1] = effectRecord->value1C;
-    effectParams.gradientColors[2] = effectRecord->value20;
-    effectParams.gradientColors[3] = effectRecord->value24;
+    effectParams.kind = record->drawKind;
+    effectParams.gradientColors[0] = record->gradientColors[0];
+    effectParams.gradientColors[1] = record->gradientColors[1];
+    effectParams.gradientColors[2] = record->gradientColors[2];
+    effectParams.gradientColors[3] = record->gradientColors[3];
     resourceItem = mdlInsertResourceItem(owner, MDL_RESOURCE_TRACK_POLY, subtype);
     resourceItem->payload.part.track = effTrackPolyCreateWork(&effectParams);
 }
@@ -958,7 +942,7 @@ void mdlDispatchResourceEntry(MdlCtx *owner, MdlRecord *record, s32 subtype) {
         mdlBindViewerPartRecords(owner, (MdlPartRec *)record, subtype, MDL_RESOURCE_EFFECT, mdlAdvanceEffectPart);
         return;
     case MDL_VIEWER_RECORD_KIND_TRACK_POLY:
-        mdlCreateViewerEffectPart(owner, (MdlEffectRec *)record, subtype);
+        mdlCreateViewerEffectPart(owner, (MdlTrackPolyRecordView *)record, subtype);
         return;
     case MDL_VIEWER_RECORD_KIND_STREAM:
         mdlLoadViewerStreamRecord(owner, record);
@@ -985,10 +969,10 @@ void mdlApplyResourceEntries(MdlCtx *owner, s32 recordId, s32 subtype) {
 void mdlDestroyResourceItem(MdlResourceItem *item) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
-        billDispatchByKind((BillObj *)(u32)item->payload.part.handle);
+        billDispatchByKind((BillObj *)item->payload.part.instance);
         break;
     case MDL_RESOURCE_EFFECT:
-        effDestroyNode((EffNode *)(u32)item->payload.part.handle);
+        effDestroyNode((EffNode *)item->payload.part.instance);
         break;
     case MDL_RESOURCE_TRACK_POLY:
         effTrackPolyRelease(item->payload.part.track);
@@ -1037,20 +1021,20 @@ void mdlResolveAnchorPosition(SdfModel *model, MdlResourceItem *anchorRecord, f3
 void mdlDispatchViewerAnchorRecord(MdlCtx *owner, MdlResourceItem *anchorRecord) {
     SdfModel *model = owner->inner;
     f32 position[4];
-    s32 resourceHandle;
+    void *resourceInstance;
 
     switch (anchorRecord->type) {
     case MDL_RESOURCE_BILLBOARD:
         mdlResolveAnchorPosition(model, anchorRecord, position);
-        resourceHandle = anchorRecord->payload.part.handle;
-        effCopyVector(resourceHandle, position);
-        billInvokeCallback(resourceHandle);
+        resourceInstance = anchorRecord->payload.part.instance;
+        effCopyVector(resourceInstance, position);
+        billInvokeCallback((BillObj *)resourceInstance);
         break;
     case MDL_RESOURCE_EFFECT:
         mdlResolveAnchorPosition(model, anchorRecord, position);
-        resourceHandle = anchorRecord->payload.part.handle;
-        effCopyVectorToNodeInstance((EffNode *)(u32)resourceHandle, position);
-        effUpdateNode((EffNode *)(u32)resourceHandle);
+        resourceInstance = anchorRecord->payload.part.instance;
+        effCopyVectorToNodeInstance((EffNode *)resourceInstance, position);
+        effUpdateNode((EffNode *)resourceInstance);
         break;
     case MDL_RESOURCE_TRACK_POLY:
         effTrackPolyUpdate(anchorRecord->payload.part.track);
@@ -1065,10 +1049,10 @@ void mdlDispatchViewerAnchorRecord(MdlCtx *owner, MdlResourceItem *anchorRecord)
 void mdlSetResourceFrame(MdlCtx *owner, MdlResourceItem *item, s32 frame) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
-        billSetChildParameter(item->payload.part.handle, frame);
+        billSetChildParameter((BillObj *)item->payload.part.instance, frame);
         return;
     case MDL_RESOURCE_EFFECT:
-        effSetNodeParameterValue((EffNode *)(u32)item->payload.part.handle, frame);
+        effSetNodeParameterValue((EffNode *)item->payload.part.instance, frame);
         break;
     }
 }
@@ -1077,10 +1061,10 @@ void mdlSetResourceFrame(MdlCtx *owner, MdlResourceItem *item, s32 frame) {
 void mdlSetResourceAmount(MdlCtx *owner, MdlResourceItem *item, float amount) {
     switch (item->type) {
     case MDL_RESOURCE_BILLBOARD:
-        billSetChildScaleComponents((struct BillObj *)item->payload.part.handle, amount, amount);
+        billSetChildScaleComponents((struct BillObj *)item->payload.part.instance, amount, amount);
         return;
     case MDL_RESOURCE_EFFECT:
-        effApplyNodeScale((EffNode *)(u32)item->payload.part.handle, amount);
+        effApplyNodeScale((EffNode *)item->payload.part.instance, amount);
         break;
     }
 }

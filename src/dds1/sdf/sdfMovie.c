@@ -249,8 +249,7 @@ s32 sdfMovieHandlePacDeviceEvent(DevState *deviceState, s32 operation, void *dat
 }
 
 /* Sound/IPU source operations: report available bytes/EOF, copy data, or resume reads. */
-s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddress, s32 operation, void *data, s32 size) {
-    MovObj *movie = (MovObj *)movieAddress;
+s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, s32 operation, void *data, s32 size) {
     MovLinearStream *stream = movie->stream.linear;
 
     switch (operation) {
@@ -300,8 +299,7 @@ s32 sdfMovieLinearStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddres
 }
 
 /* Sound/IPU source operations for the movie-PAC ring; retain the native copy helper. */
-s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, u32 movieAddress, s32 operation, void *data, s32 size) {
-    MovObj *movie = (MovObj *)movieAddress;
+s32 sdfMoviePacStreamReadCallback(SdfStreamFrameNode *unused, MovObj *movie, s32 operation, void *data, s32 size) {
     void func_002ED740(void *destination, const void *source, u32 byteCount) {
         memcpy(destination, source, byteCount);
     }
