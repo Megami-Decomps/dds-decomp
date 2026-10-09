@@ -59,7 +59,7 @@ typedef struct StaffSparkleState {
 
 typedef struct {
     SdfMemBlock *handle;
-    u32 sprite;
+    struct EffectSlotSet *sprite; /* 0x04: loaded staff sprite slot-set owner */
     s32 state;
     s32 frame;
     s32 movieFrame; /* 0x10: staff movie fade-out frame count. */
@@ -1019,12 +1019,12 @@ void mnuFadeSetState(SlideBar *state, u32 mode) {
 extern void func_00306CD0(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 void mnuAdvanceSpriteSlideBar(SlideBar *bar) {
-    u32 sprite = mnuMovieWork->sprite;
+    EffectSlotSet *sprite = mnuMovieWork->sprite;
 
     if (bar->active == 0 && bar->pos == 0) {
         return;
     }
-    func_00306CD0(0, 0, 0, bar->pos / 2, 0, (EffectSlotSet *)sprite, 9, 0x53);
+    func_00306CD0(0, 0, 0, bar->pos / 2, 0, sprite, 9, 0x53);
     if (bar->active == 0) {
         bar->pos -= 8;
     } else {
@@ -1050,7 +1050,7 @@ struct EffRandState;
 extern u32 effMiscRand(struct EffRandState *);
 
 void func_002A6D68(StaffSparkleState *state) {
-    EffectSlotSet *sprite = (EffectSlotSet *)mnuMovieWork->sprite;
+    EffectSlotSet *sprite = mnuMovieWork->sprite;
     s32 i;
     s32 j;
     s32 age;
@@ -1090,7 +1090,7 @@ extern void uiDrawSurfaceAtNearDepth(u32 context);
 extern void func_002A6D68(StaffSparkleState *state);
 
 void func_002A6F88(StaffSparkleState *state) {
-    EffectSlotSet *sprites = (EffectSlotSet *)mnuMovieWork->sprite;
+    EffectSlotSet *sprites = mnuMovieWork->sprite;
     s32 lowerClip;
     s32 alpha;
     s32 phase;
@@ -1195,7 +1195,7 @@ void mnuTitleSetPaletteTransition(MnuTitlePaletteTransition *state, s32 mode) {
 }
 
 void mnuDrawAndAdvanceStaffImageBlend(MnuTitlePaletteTransition *state) {
-    void *sprite = (void *)mnuMovieWork->sprite;
+    EffectSlotSet *sprite = mnuMovieWork->sprite;
     s32 frame;
     s32 index;
     s32 alpha;
@@ -1243,7 +1243,7 @@ extern void uiDrawTexturedSurfaceAtFarDepth(u32);
 extern void uiDrawSurfaceAtNearDepth(u32);
 extern void func_00308F78(s32, u32);
 void func_002A75A8(StaffScrollTransition *state) {
-    EffectSlotSet *sprites = (EffectSlotSet *)mnuMovieWork->sprite;
+    EffectSlotSet *sprites = mnuMovieWork->sprite;
     s32 fade = state->opacity / 2;
 
     uiDrawTexturedSurfaceAtFarDepth(0x53);
@@ -1333,7 +1333,7 @@ void mnuFinishStaffMovieAndFreeState(void) {
 }
 
 void mnuReleaseMovieResourceAfterPendingWork(void) {
-    effDestroyResourceSlotSet((struct EffectSlotSet *)mnuMovieWork->sprite);
+    effDestroyResourceSlotSet(mnuMovieWork->sprite);
     while (sdfCheckPendingWorkWithInterrupts() != 0) {
     }
     func_003458E8(0);
