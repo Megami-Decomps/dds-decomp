@@ -5881,7 +5881,9 @@
 0x00321908	mnuFreeOptionalBlock	inferred	confidence=medium; matched-C; src/dds2/game/code_00321500.c:159:func_00321908; Releases the menu/resource heap block only when the pointer is nonzero; avoids asserting a specific record layout.; source=reviewed-prior-QP15 [names_qp15.tsv]
 0x00321928	mnuAdvanceTimedStateRecord	inferred	confidence=high; matched-C; src/dds2/game/code_00321500.c:184:func_00321928; Advances wait and busy counters, exits wait at its limit, and marks completion or re-enters waiting at the duration boundary according to the value-limit flag.; source=names_M143.tsv:22 [names_qp13.tsv]
 0x003219F0	mnuCanAdvanceIdleStateRecord	inferred	Accepts a record only while it is not busy and its optional value limit has not been reached. [names_reviewed15.tsv]
-0x00321EE8	mnuClearPackedMenuRecordBlock	inferred	Zeros the complete backing array of fixed-size menu records using its stored record count. [names_reviewed15.tsv]
+0x00321C60	mnuCreateRuntimeRecord	inferred	Acquires a runtime-record slot, initializes its fields, invokes the registered initialization callback and returns the record.
+0x00321EE8	mnuClearRuntimeRecordStorage	inferred	Clears only the capacity-sized runtime-record array; the list header, including activeCount, is unchanged.
+0x00321F18	mnuAcquireRuntimeRecordSlot	inferred	Selects the first inactive 0x24-byte record in a supplied runtime list, marks it active and increments activeCount; returns null when capacity is exhausted.
 0x00321F78	mnuDeactivateListRecord	inferred	Clears the record's low active bit and decrements the enclosing list's active-record count.
 0x00321F98	mnuAdvanceMovingRuntimeRecords	inferred	Fam-3
 0x00322438	dds3MeasureMenuRecord	inferred	Computes the 16-byte header plus both counted record-block lengths.
