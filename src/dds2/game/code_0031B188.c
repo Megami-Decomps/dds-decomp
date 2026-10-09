@@ -37,7 +37,6 @@ extern void func_003275C8(SdfMat4 *, f32);
 extern void sdfMat4Transpose(SdfMat4 *, SdfMat4 *);
 extern void sdfMatrixToQuaternion(f32 *, SdfMat4 *);
 extern void fileReadVector40(void *, void *);
-extern void fileQueueSetRotation(FileQueue *, void *);
 
 static inline void mnuSetBasisRow(f32 *row, f32 x, f32 y, f32 z, f32 w) {
     row[0] = x;
@@ -308,8 +307,6 @@ void func_0031B748(MnuEffectList *list, s32 resourceIndex, FileQueue **sources) 
     }
 }
 
-extern void fileQueueSetPosition(FileQueue *queue, void *vector);
-extern void fileQueueSetScale(FileQueue *queue, f32 scale);
 extern void func_0031BC10(MnuEffectRecord *record, f32 xAngle, f32 yAngle, f32 zAngle);
 
 /* Position-step vectors are copied verbatim; a missing queue aborts the claim. */
@@ -436,7 +433,6 @@ void func_0031BC10(MnuEffectRecord *record, f32 xAngle, f32 yAngle, f32 zAngle) 
     fileQueueSetRotation(record->queue, vector);
 }
 
-extern void fileQueueUpdate(FileQueue *queue);
 extern u32 D_0040AE10[];
 
 /* Advance active effect queues, honoring their delay and optional position step. */
