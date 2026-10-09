@@ -1273,7 +1273,6 @@ s32 mnuPollTaskState(void) {
     return 0;
 }
 
-extern void mnuSetPopupEntry(s32 *, void *);
 extern u8 D_0036AB48[];
 
 s32 mnuCampRunPanel0(KwlnTask *request) {
@@ -1655,7 +1654,6 @@ typedef struct {
 } MenuSelectionPair;
 
 extern s32 mnuTickExtendedCommandPhase(ShopScene *);
-extern void mnuSetPopupEntryFlagged(s32, s32);
 extern void func_00260550(struct MenuList *, u32);
 extern s32 mnuCampClampSceneCounter(s32, ShopScene *);
 extern void func_0027C788(MenuWindowContainer *);
@@ -1800,11 +1798,11 @@ s32 func_00246220(KwlnTask *task) {
             mnuStorePendingMenuCommandValue(linkedTask, 10);
             break;
         case 5:
-            mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AA68);
+            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AA68);
             mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->sprite->list, 10);
             break;
         case 7:
-            mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AAF4);
+            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AAF4);
             break;
         case 8:
             mnuSetCommandPhase((ShopScene *)stateAddress, 6);
@@ -1921,11 +1919,11 @@ s32 func_002465F8(KwlnTask *task) {
             mnuStorePendingMenuCommandValue(linkedTask, 10);
             break;
         case 5:
-            mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AA68);
+            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AA68);
             mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->sprite->list, 10);
             break;
         case 7:
-            mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AAF4);
+            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AAF4);
             break;
         case 8:
             mnuSetCommandPhase((ShopScene *)stateAddress, 6);
@@ -2037,11 +2035,11 @@ s32 func_002469F0(KwlnTask *task) {
             mnuStorePendingMenuCommandValue(linkedTask, 10);
             break;
         case 5:
-            mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AA68);
+            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AA68);
             mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->sprite->list, 10);
             break;
         case 7:
-            mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AAF4);
+            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AAF4);
             break;
         case 8:
             mnuSetCommandPhase((ShopScene *)stateAddress, 6);
@@ -2179,12 +2177,11 @@ s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
         break;
     case 10: {
         struct MenuList *primaryTask = ((ShopScene *)stateAddress)->sprite->list;
-        mnuSetPopupEntryFlagged((s32)dispatchSlot,
-            (s32)(D_0036AA84 + primaryTask->cursor->index * 0x1C));
+        mnuSetPopupEntryFlagged(dispatchSlot, (void *)(D_0036AA84 + primaryTask->cursor->index * 0x1C));
         break;
     }
     case 12:
-        mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AB10);
+        mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AB10);
         break;
     case 11:
     default:
@@ -2389,13 +2386,13 @@ s32 func_00247588(KwlnTask *task) {
         /* Operation two is the additional option; the baseline pair is one/three. */
         switch (selectedOperation) {
         case 2:
-            mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AAA0);
+            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AAA0);
             break;
         case 1:
-            mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AA84);
+            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AA84);
             break;
         case 3:
-            mnuSetPopupEntryFlagged((s32)dispatchSlot, (s32)D_0036AABC);
+            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AABC);
             break;
         }
     }
@@ -2488,7 +2485,7 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(KwlnTask *callbackContext) {
     result = menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_POLL, callbackContext);
     if (result == 0) {
         if ((*dispatchSlot == 0) && (result = evtGetMessageWindowControlState(), result == 0)) {
-            mnuSetPopupEntryFlagged((s32)dispatchSlot, ((ShopScene *)stateAddress)->stateTable);
+            mnuSetPopupEntryFlagged(dispatchSlot, (void *)(u32)(((ShopScene *)stateAddress)->stateTable));
         }
         result = 0;
     }

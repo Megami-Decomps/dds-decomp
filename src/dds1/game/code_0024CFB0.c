@@ -78,7 +78,6 @@ extern void dspSetActive();
 extern void itfPanelSetStatus(s32, s32);
 extern void itfPanelSetPairFirst(s32, s32);
 extern void itfMesStartEntry(s32, s32, s32);
-extern void mnuSetPopupEntryFlagged(s32 *, char *);
 extern char D_0036ACF8[];
 extern void itfMesDestroyWindowIfPresent(s32);
 extern s32 mdlFlagTest(s32);

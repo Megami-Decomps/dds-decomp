@@ -248,8 +248,6 @@ s32 mnuStaffFreeDisplayResources(KwlnTask *task) {
     return 1;
 }
 
-extern void mnuSetPopupEntry(s32, s32);
-extern void mnuSetPopupEntryFlagged(s32, s32);
 extern void func_0027C788(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
@@ -282,20 +280,20 @@ s32 func_002734C0(KwlnTask *callback) {
             switch (itemKind) {
             case 0:
                 resources->selection = 0;
-                mnuSetPopupEntry((s32)popup, (s32)D_0037C9C8);
+                mnuSetPopupEntry(popup, (void *)D_0037C9C8);
                 break;
             case 1:
-                mnuSetPopupEntry((s32)popup, (s32)D_0037C9E4);
+                mnuSetPopupEntry(popup, (void *)D_0037C9E4);
                 break;
             default:
-                mnuSetPopupEntry((s32)popup, (s32)D_0037CA00);
+                mnuSetPopupEntry(popup, (void *)D_0037CA00);
                 break;
             }
             mnuSeekListNode(0, resources->windows[0]->list);
             mnuSeekListNode(0, resources->windows[1]->list);
         }
         if (input & 2) {
-            mnuSetPopupEntryFlagged((s32)popup, (s32)D_0037C990);
+            mnuSetPopupEntryFlagged(popup, (void *)D_0037C990);
             mnuActivatePanelAndConfigureGridResources((MenuScrollPanel *)(u32)context->unk138,
                                                       (struct EffectSlotSet *)(u32)context->unk6C, 0, 1);
         }
@@ -421,7 +419,7 @@ s32 func_002738A0(KwlnTask *task) {
                     if (mnuGetAbilityTargetCategory((u16)evtGetIndexedEventRecordId(item)) == 0) {
                         mnuRefreshStaffItemSelection(item, (s32)context);
                     } else {
-                        mnuSetPopupEntry((s32)popup, (s32)D_0037CA1C);
+                        mnuSetPopupEntry(popup, (void *)D_0037CA1C);
                     }
                 } else {
                     input = 0x8000;
@@ -431,7 +429,7 @@ s32 func_002738A0(KwlnTask *task) {
             }
         }
         if (input & 2) {
-            mnuSetPopupEntry((s32)popup, (s32)D_0037C9AC);
+            mnuSetPopupEntry(popup, (void *)D_0037C9AC);
         }
         window = resources->windows[0];
         if (window != NULL) {

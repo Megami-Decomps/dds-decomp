@@ -10,7 +10,6 @@ extern s32 brsTaskIsUiUpdateAllowed(s32);
 extern void func_002650C0(void *);
 extern s32 brsPollResultCounterCompletion(void);
 extern void mnuClearTitleState(BrsSkillPackageWork *);
-extern void mnuSetPopupEntry(s32 *, void *);
 extern u8 D_00324530[];
 extern u8 D_0036D3EC[];
 
