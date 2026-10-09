@@ -1004,7 +1004,7 @@ s32 evtUnitApplyPathVectors(EvtUnit *unit) {
     VU0_STORE_VF($vf10, v);
     effObjSetInnerPosition(unit->effObj, (u128 *)v);
     if (unit->flags & 0x10) {
-        dds3PreparePathVectorPair((Dds3PathCurveWork *)unit->pathHandle);
+        dds3InterpolatePathQuaternionVU((Dds3PathCurveWork *)unit->pathHandle);
         VU0_MOVE_VF(vf11, vf10);
         sdfConvertEulerAnglesToQuaternionVU(0.0f, 3.14159265f, 0.0f);
         effMiscQuatMultiplyVU();
