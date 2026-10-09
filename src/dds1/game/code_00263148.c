@@ -343,7 +343,7 @@ void func_00263A00(BrsSkillPackageWork *scene) {
     u32 glyph;
     u32 color;
 
-    func_002BF4E0(0x9A0, 0x348, 0, fade, 1, scene->unitHandle, 8, 0x53);
+    func_002BF4E0(0x9A0, 0x348, 0, fade, 1, (u32)scene->unitResource, 8, 0x53);
     delta = scene->commitComplete != 0
                 ? 0
                 : scene->availableStatPoints - scene->assignedStatPoints;

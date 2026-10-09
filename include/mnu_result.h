@@ -155,12 +155,12 @@ typedef struct BrsSkillPackageWork {
     BrsRewardSummary rewards;
 #ifdef VERSION_DDS1
     u8 pad88[8];
-    s32 unitHandle;
+    struct EffectSlotSet *unitResource;
     u8 pad94[4];
     BrsRewardRow *selectedRewardRow;
 #else
     u8 pad8C[8];
-    s32 unitHandle;
+    struct EffectSlotSet *unitResource;
     u8 pad98[4];
     BrsRewardRow *selectedRewardRow;
 #endif
