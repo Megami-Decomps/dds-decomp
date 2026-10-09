@@ -491,6 +491,19 @@ typedef struct EffClassOps {
     u32 payloadSize;           /* 0x14 */
 } EffClassOps;
 
+/* Class-resource callbacks operate on the parent class-work owner. */
+typedef struct EffClassResourceOps {
+    void (*initialize)(EffClassWork *); /* 0x00 */
+    void *(*createResource)(EffBillPointConfig *); /* 0x04 */
+    void (*destroyResource)(EffClassWork *); /* 0x08 */
+    void (*update)(EffClassWork *); /* 0x0C */
+    void (*draw)(EffClassWork *); /* 0x10 */
+    u32 payloadSize; /* 0x14 */
+} EffClassResourceOps;
+
+typedef char EffClassResourceOps_size_must_be_0x18[
+    (sizeof(EffClassResourceOps) == 0x18) ? 1 : -1];
+
 struct EffModelResource;
 struct EffSpanConfig;
 struct EffSpanTable;
@@ -568,7 +581,7 @@ extern u8 D_00400150[];
 
 extern u8 D_00400250[];
 
-extern EffClassOps effClassResourceWorkOperations[];
+extern EffClassResourceOps effClassResourceWorkOperations[];
 
 extern MdlCtx *func_00232198(s32 group, s32 id);
 
@@ -4715,7 +4728,7 @@ EffClassWork *effCreateClassResourceFromFile(FileJobPayload *request) {
 }
 
 void effDestroyClassResourceWork(EffClassWork *work) {
-    effClassResourceWorkOperations[work->kind].destroyResource();
+    effClassResourceWorkOperations[work->kind].destroyResource(work);
     sdfReleaseChipBlock(work);
 }
 
@@ -4737,7 +4750,7 @@ void effAdvanceClassResourceFrame(EffClassWork *work) {
 }
 
 void effDrawClassResourceWork(EffClassWork *work) {
-    effClassResourceWorkOperations[work->kind].draw((void *)work);
+    effClassResourceWorkOperations[work->kind].draw(work);
 }
 
 void effUpdateAndDrawClassResource(EffClassWork *work) {
