@@ -147,7 +147,6 @@ extern void btlCreateRainEffect();
 extern s32 btlReleaseScriptResourceA();
 extern s32 btlReleaseScriptResource();
 extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
-extern s32 btlCreateSoundReleaseTask();
 extern s32 btlCreateWaitUnitListIdleTask();
 extern s32 btlCreateApplyToActiveActorsTask();
 extern s32 btlCreateFadeStateResetTask();
@@ -470,7 +469,6 @@ extern s32 sndFindPackedTrackLoadStatus(u32);
 struct SceneLightRestoreArgs;
 extern s64 func_00201520(struct SceneLightRestoreArgs *);
 
-extern s64 func_00201718(void);
 
 extern s32 sndPlaySkillSeTask(u32 *);
 
@@ -536,7 +534,6 @@ typedef struct SoundTransition {
     u16 queuedId;
 } SoundTransition;
 
-extern s32 btlQueueTintTransitionWhenEnabled(u32 *);
 
 extern u32 btlTintTransitionHoldCount;
 

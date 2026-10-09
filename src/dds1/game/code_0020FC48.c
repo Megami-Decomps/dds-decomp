@@ -154,7 +154,6 @@ extern s32 abs(s32);
 
 struct SoundTask;
 
-extern struct SoundTask *sndCreateReleaseTask(u32 *sound);
 
 extern struct BtlRuntimeTask *func_001F0920(u32 value);
 
@@ -218,7 +217,7 @@ void func_0020FC48(void) {
         battle->eventData = func_00160958((SoundMixer *)battle->eventRequest, 1,
                                           battle->eventUnit, 0);
         battle->eventActive = 3;
-        btlStartTask(sndCreateReleaseTask((u32 *)0xC));
+        btlStartTask(sndCreateReleaseTask(0xC));
         btlStartTask(func_001F0920(0xC));
         return;
 

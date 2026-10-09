@@ -159,7 +159,7 @@ extern s64 func_00201520(SceneLightRestoreArgs *);
 
 extern void evtInitializeUnitColorTransition(EvtUnit *, s32, u32, u32);
 
-extern s64 func_00201718(void);
+extern s64 func_00201718(const BtlTintReleaseArgs *args);
 
 extern s32 sndPlaySkillSeTask(u32 *);
 
@@ -211,7 +211,6 @@ typedef struct SoundTransition {
     u16 queuedId;
 } SoundTransition;
 
-extern s32 btlQueueTintTransitionWhenEnabled(u32 *);
 
 extern u32 btlTintTransitionHoldCount;
 
@@ -4354,32 +4353,30 @@ BtlRuntimeTask *btlCreateSoundUpdateTask(u32 value) {
     return task;
 }
 
-s32 btlQueueTintTransitionWhenEnabled(u32 *taskArgs) {
+s32 btlQueueTintTransitionWhenEnabled(const BtlTintAcquireArgs *args) {
     BtlState *work = (BtlState *)btlGetRuntime();
     if (!(work->battleFlags & 0x20000000)) {
-        btlQueueTintTransition(taskArgs[0], *(u16 *)(taskArgs + 1));
+        btlQueueTintTransition(args->color, (u16)args->frames);
     }
     btlTintTransitionHoldCount++;
     return 1;
 }
 
-BtlRuntimeTask *sndCreateAcquireTask(s32 value, s32 option) {
-    BtlRuntimeTask *task = btlAllocTask(8);
-    SoundTaskArgs *args;
+BtlRuntimeTask *sndCreateAcquireTask(s32 color, s32 frames) {
+    BtlRuntimeTask *task = btlAllocTask(sizeof(BtlTintAcquireArgs));
+    BtlTintAcquireArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 5;
     task->callback = btlQueueTintTransitionWhenEnabled;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->value = value;
-    args->option = option;
+    args->color = color;
+    args->frames = frames;
     return task;
 }
 
-s32 sndTickFadeCounter(soundId)
-    u16 *soundId;
-{
+s32 sndTickFadeCounter(const BtlTintReleaseArgs *args) {
     s32 context = btlGetRuntime();
 
     if (btlTintTransitionHoldCount == 0) {
@@ -4392,34 +4389,32 @@ s32 sndTickFadeCounter(soundId)
     if ((((BtlState *)context)->battleFlags & 0x20000000) != 0) {
         return 1;
     }
-    btlQueueTintTransitionToZero(*soundId);
+    btlQueueTintTransitionToZero((u16)args->frames);
     return 1;
 }
 
-extern s32 sndTickFadeCounter();
 
-BtlRuntimeTask *sndCreateReleaseTask(value)
-    u32 value;
+BtlRuntimeTask *sndCreateReleaseTask(u32 frames)
 {
-    BtlRuntimeTask *task = btlAllocTask(4);
-    SoundTaskArgs *args;
+    BtlRuntimeTask *task = btlAllocTask(sizeof(BtlTintReleaseArgs));
+    BtlTintReleaseArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 6;
     task->callback = sndTickFadeCounter;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->value = value;
+    args->frames = frames;
     return task;
 }
 
-s64 func_00201718(void) {
+s64 func_00201718(const BtlTintReleaseArgs *args) {
     btlTintTransitionHoldCount = 1;
-    return sndTickFadeCounter();
+    return sndTickFadeCounter(args);
 }
 
-BtlRuntimeTask *btlCreateSoundReleaseTask(void) {
-    BtlRuntimeTask *task = (BtlRuntimeTask *)sndCreateReleaseTask();
+BtlRuntimeTask *btlCreateSoundReleaseTask(u32 frames) {
+    BtlRuntimeTask *task = sndCreateReleaseTask(frames);
     task->taskId = 8;
     task->callback = func_00201718;
     return task;

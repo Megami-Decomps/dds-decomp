@@ -186,6 +186,29 @@ struct BtlRuntimeTask *sndCreateFileLoadTask(struct SoundLoadNode *node, u32 blo
 struct BtlRuntimeTask *sndCreateFileLoadTask(struct SoundFileNode *node, s32 frames, char *filename);
 #endif
 
+/* Both factories store full words; callbacks use the low 16 duration bits. */
+typedef struct BtlTintAcquireArgs {
+    u32 color;
+    u32 frames;
+} BtlTintAcquireArgs;
+
+typedef struct BtlTintReleaseArgs {
+    u32 frames;
+} BtlTintReleaseArgs;
+
+typedef char BtlTintAcquireArgs_size_must_be_8[sizeof(BtlTintAcquireArgs) == 8 ? 1 : -1];
+typedef char BtlTintReleaseArgs_size_must_be_4[sizeof(BtlTintReleaseArgs) == 4 ? 1 : -1];
+
+s32 btlQueueTintTransitionWhenEnabled(const BtlTintAcquireArgs *args);
+s32 sndTickFadeCounter(const BtlTintReleaseArgs *args);
+#ifdef VERSION_DDS1
+struct BtlRuntimeTask *sndCreateAcquireTask(u32 color, u32 frames);
+#else
+struct BtlRuntimeTask *sndCreateAcquireTask(s32 color, s32 frames);
+#endif
+struct BtlRuntimeTask *sndCreateReleaseTask(u32 frames);
+struct BtlRuntimeTask *btlCreateSoundReleaseTask(u32 frames);
+
 void sndFormatResourceNameFromIndex(s32 index, char *output);
 void sndFormatResourceNameFromUnitMode(const struct BtlUnit *unit, char *output);
 
