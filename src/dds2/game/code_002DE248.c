@@ -7981,7 +7981,7 @@ EffActiveResource *effAllocateResourcePayload(u16 kind, void *source) {
     return effect;
 }
 
-EffActiveResource *func_002F9608(u16 kind, void *source, u16 secondaryKind, void *secondary, u32 param) {
+EffActiveResource *effCreateResourceInstance(u16 kind, void *source, u16 secondaryKind, void *secondary, u32 param) {
     EffActiveResource *effect = effAllocateResourcePayload(kind, source);
 
     if (btlIsRuntimeAllocated() != 0) {
@@ -7998,7 +7998,7 @@ EffActiveResource *func_002F9608(u16 kind, void *source, u16 secondaryKind, void
 EffActiveResource *effCreateActiveResourceFromFile(FileJobPayload *source) {
     void *primary = fileResolvePrimaryBuffer(source);
     void *secondary = fileResolveSecondaryBuffer(source);
-    return func_002F9608(source->option, primary,
+    return effCreateResourceInstance(source->option, primary,
                          source->primary.selector, secondary, source->secondary.size);
 }
 
@@ -8016,7 +8016,7 @@ EffActiveResource *effDuplicateActiveResource(EffActiveResource *source) {
     u32 kind = source->kind.index;
 
     if (effRuntimeResourceOperations[kind].cloneResource == NULL) {
-        effect = func_002F9608(source->kind.shortIndex, source->payload, 0, 0, 0);
+        effect = effCreateResourceInstance(source->kind.shortIndex, source->payload, 0, 0, 0);
     } else {
         u32 resource;
         u32 activeKind;

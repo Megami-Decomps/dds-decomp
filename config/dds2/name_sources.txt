@@ -5387,6 +5387,7 @@
 0x002F9048	effBillboardMotionResourceCreate	inferred	body calls effCreateMotionResource, billCreateIndexed [names_R_FuncNames7.tsv]
 0x002F9118	effBillboardMotionResourceInitialize	inferred	body calls effCreateMotionResource, billSetBillboardMode [names_R_FuncNames7.tsv]
 0x002F9180	effDestroyBillboardAndOwnedAssetWork	inferred	Dispatches destruction of the billboard and queues its asset for release. [names_reviewed14.tsv]
+0x002F9608	effCreateResourceInstance	inferred	Paired with DDS1 at 0x002B43E0; allocates the runtime resource owner, creates its child resource, and initializes it.
 0x002F96D0	effCreateActiveResourceFromFile	inferred	Resolves primary and secondary file buffers and creates kind-selected active effect resource. [names_reviewed5.tsv]
 0x002F9780	effDuplicateActiveResource	inferred	Clones an active effect resource using its registered duplicate callback. [names_reviewed14.tsv]
 0x002F9860	effClearCallbackFrame	inferred	Invokes optional effect-kind callback when enabled and clears the work frame at +0x28.
