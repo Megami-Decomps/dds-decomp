@@ -684,9 +684,9 @@ u32 btlSnapshotResultRewards(BrsRewardSummary *rewards) {
         return 0;
     }
     runtime = (BtlState *)btlRuntime;
-    rewards->macca = *(u32 *)runtime->pad2C4;
+    rewards->macca = (u32)runtime->moneyTotal;
     rewards->totalExp = runtime->experienceEarned;
-    rewards->totalAp = *(s32 *)runtime->pad2D0;
+    rewards->totalAp = runtime->unk2D0;
     btlBossDebugPrintf(D_003A1698);
     btlBossDebugPrintf(D_003A16B8, rewards->macca);
     btlBossDebugPrintf(D_003A16C8, rewards->totalExp);

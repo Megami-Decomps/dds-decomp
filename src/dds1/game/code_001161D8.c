@@ -13,7 +13,7 @@ extern void effObjInnerVecBackup();
 
 /* Create an inner-vector object and snapshot its vector state after initialization. */
 EffWorldNode *dds3SpawnInnerVecObj8(s32 initialValue, void *firstVector, void *secondVector) {
-    EffWorldNode *obj = dds3AppendWorldObjectNode(8);
+    EffWorldNode *obj = dds3AppendWorldObjectNode(EFF_WORLD_KIND_RESOURCE_OWNER);
 
     obj->key = initialValue;
     effObjSetInnerPosition(obj, firstVector);

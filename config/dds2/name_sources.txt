@@ -3382,6 +3382,7 @@
 0x00234B48	mdlCreateViewerEffectPart	inferred	Copies effect record parameters into effect creation and adds resource item. [names_reviewed7.tsv]
 0x00234BF8	mdlLoadViewerStreamRecord	inferred	Passes two selectors and two stream values from record into owner stream loader. [names_reviewed7.tsv]
 0x00234C20	mdlClaimViewerObjectPart	inferred	Claims unused slot object, finds data ID and inserts resource item. [names_reviewed7.tsv]
+0x00234ED8	mdlRemoveResourcesForMotionSlot	inferred	Releases and unlinks all model resource items owned by the requested motion slot.
 0x00234F48	mdlResolveAnchorPosition	inferred	Finds model draw node and computes anchor position using matrix and scale. [names_reviewed7.tsv]
 0x00235000	mdlDispatchViewerAnchorRecord	inferred	Switches anchor record type to apply position, update effect or initialize linked object. [names_reviewed7.tsv]
 0x00235178	mdlBuildViewerRectanglePacket	inferred	Same fixed-color rectangle draw packet constructor used by the DDS1 viewer draw list. [names_reviewed18.tsv]

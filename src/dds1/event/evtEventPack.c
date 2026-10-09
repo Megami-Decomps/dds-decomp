@@ -147,7 +147,7 @@ s32 evtUpdateMotionSeTask(KwlnTask *task) {
     if (dds3GetWorldObject() == NULL) {
         return -1;
     }
-    node = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), params->modelKey, 5);
+    node = dds3FindWorldObjectNodeByKey(dds3GetWorldObject(), params->modelKey, EFF_WORLD_KIND_FOLLOW_MODEL);
     if (node == NULL) {
         return -1;
     }
