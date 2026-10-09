@@ -142,7 +142,7 @@ u32 dds3GetObjectIndexNode(void *object) {
 }
 
 /* Return the primary resource-handle word, whose interpretation depends on state. */
-u32 dds3GetObjectBaseResourceHandle(void *object) {
+u32 dds3GetObjectBaseResourceHandle(EffWorldNode *object) {
     return dds3GetObjectOwnedHandle(object)->resourceHandle;
 }
 

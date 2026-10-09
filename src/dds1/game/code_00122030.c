@@ -978,8 +978,6 @@ extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
 
 extern void effObjSetInnerThirdVec(EffWorldNode *, u128 *);
 
-extern u32 dds3GetObjectBaseResourceHandle(void *);
-
 extern void effObjSetInnerFloat(EffWorldNode *, f32);
 
 extern void mdlAddEntryFlagged(struct MdlCtx *, s32, s32);
@@ -1046,7 +1044,7 @@ void func_00123FB8(u128 *transform) {
     effObjSetInnerFirstVec(object, transform);
     effObjSetInnerSecondVec((EffWorldNode *)fldPlayerObject, (u128 *)&quaternion);
     effObjSetInnerThirdVec((EffWorldNode *)fldPlayerObject, (u128 *)&scale);
-    fldCameraModelObject = dds3GetObjectBaseResourceHandle((void *)fldPlayerObject);
+    fldCameraModelObject = dds3GetObjectBaseResourceHandle((EffWorldNode *)(u32)fldPlayerObject);
     effObjSetInnerFloat((EffWorldNode *)fldPlayerObject, 90.0f);
     if (fldAreaState.unk118 == 0) {
         mdlAddEntryFlagged((MdlCtx *)fldCameraModelObject, 0, 2);
