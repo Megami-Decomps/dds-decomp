@@ -5,11 +5,12 @@
 
 struct MovieListNode;
 struct SdfListHead;
+struct KwlnTask;
 
-/* Movie-viewer list state. task remains an address word used by the native
- * task lifecycle; the movie-list node and packet-list owners are external. */
+/* Movie-viewer list state; the task, movie-list node and packet-list owners
+ * are external. */
 typedef struct MnuMovieList {
-    u32 task;
+    struct KwlnTask *task;
     struct MovieListNode *head;
     s16 top;
     s16 cursor;
