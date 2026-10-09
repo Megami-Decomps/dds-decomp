@@ -181,7 +181,7 @@ typedef struct SdfStreamFrameNode {
     u8 playbackCadenceRemainder;
     u8 bufferIndex;
     u8 transferPacketIndex;
-    u8 unk1A;
+    u8 completedBufferCount; /* Completed output buffers waiting for playback submission. */
     u8 pad1B;
     s32 bufferSize;
     void *frameBuffers[2];
@@ -217,6 +217,8 @@ typedef char SdfStreamFrameNode_playbackPhase_offset_must_be_0x10[
     ((u32)&((SdfStreamFrameNode *)0)->playbackPhase == 0x10) ? 1 : -1];
 typedef char SdfStreamFrameNode_inputDmaStartPending_offset_must_be_0x12[
     ((u32)&((SdfStreamFrameNode *)0)->inputDmaStartPending == 0x12) ? 1 : -1];
+typedef char SdfStreamFrameNode_completedBufferCount_offset_must_be_0x1A[
+    ((u32)&((SdfStreamFrameNode *)0)->completedBufferCount == 0x1A) ? 1 : -1];
 typedef char SdfStreamFrameNode_playbackCadenceRemainder_offset_must_be_0x17[
     ((u32)&((SdfStreamFrameNode *)0)->playbackCadenceRemainder == 0x17) ? 1 : -1];
 typedef char SdfStreamFrameNode_inputFeedDmaInFlight_offset_must_be_0x64[
