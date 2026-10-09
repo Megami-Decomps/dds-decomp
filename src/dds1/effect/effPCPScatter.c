@@ -10,6 +10,7 @@
 #include "eff_param.h"
 #include "eff_pcp_scatter_radial.h"
 #include "eff_pcp_scatter_spin_ribbon.h"
+#include "eff_pcp_scatter_rings.h"
 #include "eff_scatter_draw.h"
 #include "fpu.h"
 #include "sdf_texture_file.h"
@@ -56,9 +57,6 @@ extern PcpScatterRes *effPcpScatterResAddRef(PcpScatterRes *res);
 
 extern void sdfComposeVuMatrixFromRegisters(void);
 
-typedef struct PcpScatterInstanceB PcpScatterInstanceB;
-typedef struct PcpScatterInstanceC PcpScatterInstanceC;
-typedef struct PcpScatterPlainInstance PcpScatterPlainInstance;
 
 /* Constructors also serve the legacy parameter-table dispatch surface. */
 extern PcpScatterSpinWork *effScatterCreateSpinWork();
@@ -98,106 +96,8 @@ extern PcpScatterRadialWork *effScatterCreateRadialWork(
 extern PcpScatterInstance *effPcpScatterCreateParticleInstance();
 extern void effShareScatterResource(PcpScatterDraw *object, PcpScatterDraw *source);
 
-typedef struct PcpScatterParticle PcpScatterParticle;
 
-/* The B constructor copies this 0x13C-byte block to instance +0x40;
-   ring setup and the fading update read fields from that same copy. */
-typedef struct PcpScatterParamsB {
-    f32 origin[4];
-    f32 matrix[16];
-    u32 unk50;
-    u8 loop;
-    u8 pad55[3];
-    s32 duration;
-    u32 particleCount;
-    u32 unk60;
-    u32 randomDelayRange;
-    s32 fadeIn;
-    s32 fadeRange;
-    f32 angleStepBase;
-    f32 angleStepJitter;
-    f32 riseStep;
-    f32 tiltScale;
-    f32 heightOffsetBase;
-    f32 heightOffsetJitter;
-    f32 initialRise;
-    f32 riseDecay;
-    u8 pad90[4];
-    f32 initialTiltSpeed;
-    f32 tiltDamping;
-    f32 radiusBase;
-    f32 radiusJitter;
-    f32 radiusStepBase;
-    f32 radiusStepJitter;
-    f32 radiusDamping;
-    s32 baseColor;
-    u32 uSpan; /* Horizontal UV extent. */
-    u32 vSpan; /* Vertical UV extent. */
-    u8 padBC[0x80];
-} PcpScatterParamsB;
 
-/* One 0x194-byte instance shared by creation, ring setup, update and teardown.
-   The particles pointer at 0x17C is the ring array, not another allocation. */
-struct PcpScatterInstanceB {
-    f32 matrix[16];
-    PcpScatterParamsB params;
-    PcpScatterParticle *particles;
-    f32 scale;
-    u32 color;
-    s32 age;
-    PcpScatterDraw *scatterObject;
-    SdfMemBlock *allocationHandle;
-};
-
-/* C adds staggered ring motion and two colour keys to the copied parameters.
-   Its 0x144-byte parameter block ends immediately before particles at 0x184. */
-typedef struct PcpScatterParamsC {
-    f32 origin[4];
-    f32 matrix[16];
-    u32 unk50;
-    u8 loop;
-    u8 pad55[3];
-    s32 duration;
-    u32 particleCount;
-    u32 unk60;
-    u32 randomDelayRange;
-    s32 fadeIn;
-    s32 fadeRange;
-    f32 angleStepBase;
-    f32 angleStepJitter;
-    f32 tiltScale;
-    f32 riseRange;
-    f32 radiusRamp;
-    f32 heightOffsetBase;
-    f32 heightOffsetJitter;
-    f32 initialRise;
-    f32 riseDecay;
-    u8 pad94[4];
-    f32 initialTiltSpeed;
-    f32 tiltDamping;
-    f32 radiusBase;
-    f32 radiusJitter;
-    f32 radiusStepBase;
-    f32 radiusStepJitter;
-    f32 radiusDamping;
-    s32 startColor;
-    s32 endColor;
-    u32 uSpan; /* Horizontal UV extent; this variant reverses the legacy names. */
-    u32 vSpan;
-    u8 padC4[0x80];
-} PcpScatterParamsC;
-
-/* One 0x19C-byte instance; ring setup, motion and colour update share particles. */
-struct PcpScatterInstanceC {
-    f32 matrix[16];
-    PcpScatterParamsC params;
-    PcpScatterParticle *particles;
-    f32 scale;
-    u32 color;
-    s32 age;
-    PcpScatterDraw *scatterObject;
-    SdfMemBlock *allocationHandle;
-};
 
 
 
@@ -1334,20 +1234,7 @@ typedef struct PcpScatterParams {
     u8 padB8[0x80];
 } PcpScatterParams;
 
-/* The 0x28-byte particle's age sits between its two orientation values and
-   ring motion state; both the lifecycle and vertex passes use this record. */
-struct PcpScatterParticle {
-    f32 orientationAngle;
-    f32 tiltAngle;
-    s32 age;
-    f32 rise;
-    f32 angle;
-    f32 tiltSpeed;
-    f32 angleStep;
-    f32 radius;
-    f32 radiusStep;
-    f32 heightOffset;
-};
+
 
 /* One 0x18C-byte owner shared by creation, geometry, setters and teardown. */
 struct PcpScatterInstance {
@@ -2225,59 +2112,7 @@ void effScatterComposeParticleMatrix(PcpScatterInstanceC *work, void *source)
     VU0_STORE_MATRIX(work);
 }
 
-/* The flat-ring variant copies 0xE8 bytes; its motion fields and lifetime
- * controls remain in the same parameter block used by the initializer. */
-typedef struct PcpScatterPlainParams {
-    f32 origin[4];
-    u32 unk10;
-    u8 loop;
-    u8 pad15[3];
-    s32 duration;
-    u32 particleCount;
-    u32 unk20;
-    u32 randomDelayRange;
-    s32 fadeIn;
-    s32 fadeRange;
-    f32 angleStepBase;
-    f32 angleStepJitter;
-    f32 heightBase;
-    f32 heightJitter;
-    f32 angularSpeed;
-    f32 angularDamping;
-    f32 radiusBase;
-    f32 radiusJitter;
-    f32 radialSpeed;
-    f32 radialDamping;
-    s32 radialDecayStart;
-    s32 baseColor;
-    u32 uSpan; /* Horizontal UV extent. */
-    u32 vSpan; /* Vertical UV extent. */
-    u8 pad68[0x80];
-} PcpScatterPlainParams;
 
-/* The flat particle has three rotation angles before its signed age;
- * it is not interchangeable with the other variants' 0x28-byte particle. */
-typedef struct PcpScatterPlainParticle {
-    f32 rot[3];
-    s32 age;
-    f32 angle;
-    f32 angularSpeed;
-    f32 angleStep;
-    f32 radius;
-    f32 radialSpeed;
-    f32 height;
-} PcpScatterPlainParticle;
-
-/* One 0x13C-byte owner shared by creation, flat-ring update and teardown. */
-struct PcpScatterPlainInstance {
-    f32 matrix[16];
-    PcpScatterPlainParams params;
-    PcpScatterPlainParticle *particles;
-    f32 scale;
-    u32 color;
-    PcpScatterDraw *scatterObject;
-    SdfMemBlock *allocationHandle;
-};
 
 /* Return flat-ring work with an identity source matrix and randomized negative ages.
  * Like the first ring variant, only the local delay modulus is normalized. */
