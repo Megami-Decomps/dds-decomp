@@ -3484,7 +3484,7 @@ void effDestroySurfaceNode(EffectSurfaceNode *node) {
         effReleaseReferenceHolder(node->resourceHolder);
     }
     if (node->record != 0) {
-        fileReleaseGridRecordHandle(node->record);
+        fileReleaseGridRecordHandle((FileSlotTable *)node->record);
     }
     sdfReleaseChipBlock(node);
 }
@@ -3590,13 +3590,12 @@ void effRebuildSurfaceHandles(EffectSurfaceNode *node, u16 kind, void *source) {
     }
 }
 
-extern u32 fileAllocateGridRecordSlots(u16, u32, void *);
 
 void effReplaceResourceRef(EffectSurfaceNode *node, u32 entryId, void *resource) {
     if (node->record != 0) {
-        fileReleaseGridRecordHandle(node->record);
+        fileReleaseGridRecordHandle((FileSlotTable *)node->record);
     }
-    node->record = fileAllocateGridRecordSlots((u16)entryId, node->handleCount, resource);
+    node->record = (u32)fileAllocateGridRecordSlots((u16)entryId, node->handleCount, resource);
 }
 
 
@@ -4598,7 +4597,7 @@ void effReleaseModelResources(EffectStripNode *work) {
         effReleaseResourceRefs(work->trackSet);
     }
     if (work->active != 0) {
-        fileReleaseGridRecordHandle(work->active);
+        fileReleaseGridRecordHandle((FileSlotTable *)work->active);
     }
     sdfReleaseChipBlock(work);
 }
@@ -4614,9 +4613,9 @@ EffectStripNode *effCloneStripResourceFromOwner(EffectStripNode *work) {
 
 void effReplaceFileResourceRef(EffectStripNode *node, u32 entryId, void *resource) {
     if (node->active != 0) {
-        fileReleaseGridRecordHandle(node->active);
+        fileReleaseGridRecordHandle((FileSlotTable *)node->active);
     }
-    node->active = fileAllocateGridRecordSlots((u16)entryId, node->percent, resource);
+    node->active = (u32)fileAllocateGridRecordSlots((u16)entryId, node->percent, resource);
 }
 
 void effClearStripRecordReferences(EffectStripNode *node) {
@@ -5575,7 +5574,7 @@ EffAnimationState *effActivateAnimationState(s32 work) {
     EffAnimationState *state = effCreateAnimationState((u32)((EffClassWork *)work)->payload, ((FileSlotTable *)resource)->count);
 
     resource = owner->record;
-    state->record = fileAllocateGridRecordSlots(((FileSlotTable *)resource)->type, ((FileSlotTable *)resource)->count,
+    state->record = (u32)fileAllocateGridRecordSlots(((FileSlotTable *)resource)->type, ((FileSlotTable *)resource)->count,
                                ((FileSlotTable *)resource)->data1);
     return state;
 }
@@ -5587,7 +5586,7 @@ void effReleaseAnimationFrameResources(u8 *work) {
 
     effReleaseScalyTextureReference(state->textureHandle);
     if (state->record != 0) {
-        fileReleaseGridRecordHandle(state->record);
+        fileReleaseGridRecordHandle((FileSlotTable *)state->record);
     }
     sdfReleaseResourceAllocation(state->allocation);
 }
@@ -5613,7 +5612,7 @@ EffAnimationState *effCreatePrimarySlotAnimationState(u8 *work) {
     u32 count = effClampSlotCount(mapping);
     EffAnimationState *state = effCreateAnimationState((u32)work, count);
 
-    state->record = fileAllocateGridRecordSlots(1, count, mapping);
+    state->record = (u32)fileAllocateGridRecordSlots(1, count, mapping);
     return state;
 }
 
@@ -5622,7 +5621,7 @@ EffAnimationState *effCreateAlternateSlotAnimationState(u8 *work) {
     u32 count = effClampSlotCount(mapping);
     EffAnimationState *state = effCreateAnimationState((u32)work, count);
 
-    state->record = fileAllocateGridRecordSlots(3, count, mapping);
+    state->record = (u32)fileAllocateGridRecordSlots(3, count, mapping);
     return state;
 }
 
