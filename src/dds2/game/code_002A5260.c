@@ -48,6 +48,15 @@ typedef struct {
     s32 spriteIndices[4]; /* 0x0C */
 } MnuTitlePaletteTransition;
 
+/* Staff roll backdrop: fade state and the sparkle list. */
+typedef struct StaffSparkleState {
+    u32 mode;   /* 0x00 */
+    s32 alpha;  /* 0x04 */
+    u32 count;  /* 0x08 */
+    s32 positions[8][2]; /* 0x0C: x, y */
+    s32 ages[8]; /* 0x4C */
+} StaffSparkleState;
+
 typedef struct {
     SdfMemBlock *handle;
     u32 sprite;
@@ -56,7 +65,7 @@ typedef struct {
     s32 movieFrame; /* 0x10: staff movie fade-out frame count. */
     s32 fadeFrame; /* 0x14: staff movie decoder-ready hold count. */
     SlideBar slideBar; /* 0x18 */
-    u32 backdropState[0x1B]; /* 0x20: opaque renderer state */
+    StaffSparkleState backdropState; /* 0x20 */
     MnuTitlePaletteTransition paletteTransition; /* 0x8C */
     StaffScrollTransition scrollTransition; /* 0xA8 */
     s32 scrollPaused; /* 0xBC: suppresses staff text and frame advancement. */
@@ -68,7 +77,7 @@ extern StaffTaskState *mnuMovieWork;
 /* Retail 0x003E4A7C is a scalar in non-small .data. */
 extern s32 D_003E4A7C __attribute__((section(".data")));
 extern u32 D_00437AB8;
-extern void func_002A6F88(u32 *);
+extern void func_002A6F88(StaffSparkleState *);
 
 extern s32 sdfCheckPendingWorkWithInterrupts(void);
 
@@ -1029,34 +1038,70 @@ void mnuAdvanceSpriteSlideBar(SlideBar *bar) {
     }
 }
 
-void mnuFadeSetStateOff(u32 *state, u32 mode) {
+void mnuFadeSetStateOff(StaffSparkleState *state, u32 mode) {
     switch (mode) {
-    case 2: state[1] = 0; mode = 0; break;
-    case 3: state[1] = 0; mode = 1; break;
+    case 2: state->alpha = 0; mode = 0; break;
+    case 3: state->alpha = 0; mode = 1; break;
     }
-    state[0] = mode;
+    state->mode = mode;
 }
 
-INCLUDE_ASM(const s32, "game/code_002A5260", func_002A6D68);
+struct EffRandState;
+extern u32 effMiscRand(struct EffRandState *);
+
+void func_002A6D68(StaffSparkleState *state) {
+    EffectSlotSet *sprite = (EffectSlotSet *)mnuMovieWork->sprite;
+    s32 i;
+    s32 j;
+    s32 age;
+
+    if (effMiscRand(0) % 60 == 0 && state->count < 8) {
+        s32 x = effMiscRand(0) % 60 - 100;
+        u32 y = effMiscRand(0) % 448;
+        state->positions[state->count][0] = x * 16;
+        state->positions[state->count][1] = y * 8;
+        state->ages[state->count] = 0;
+        state->count++;
+    }
+    for (i = 0; i < (s32)state->count; i++) {
+        age = state->ages[i];
+        if (age >= 0x100) {
+            age = 0x200 - age;
+        }
+        func_00306CD0(state->positions[i][0], state->positions[i][1], 0,
+                      state->alpha * age / 512, 0, sprite, 8, 0x53);
+    }
+    for (i = 0; i < (s32)state->count; i++) {
+        state->ages[i] += 2;
+        if (state->ages[i] >= 0x200) {
+            for (j = i; j < (s32)state->count - 1; j++) {
+                state->positions[j][0] = state->positions[j + 1][0];
+                state->positions[j][1] = state->positions[j + 1][1];
+                state->ages[j] = state->ages[j + 1];
+            }
+            state->count--;
+        }
+    }
+}
 
 extern void uiDrawActiveSurfaceWithTestMode(u32 context);
 extern void uiConfigureSurfaceAlphaState(s32 context);
 extern void uiDrawSurfaceAtNearDepth(u32 context);
-extern void func_002A6D68(u32 *state);
+extern void func_002A6D68(StaffSparkleState *state);
 
-void func_002A6F88(u32 *state) {
+void func_002A6F88(StaffSparkleState *state) {
     EffectSlotSet *sprites = (EffectSlotSet *)mnuMovieWork->sprite;
     s32 lowerClip;
     s32 alpha;
     s32 phase;
     s32 y;
 
-    if (state[0] == 0 && state[1] == 0) {
+    if (state->mode == 0 && state->alpha == 0) {
         return;
     }
 
     lowerClip = -sprites->workEntries[5].sourceHeight;
-    alpha = (s32)state[1] / 2;
+    alpha = state->alpha / 2;
     phase = (s32)((f32)mnuMovieWork->frame * 2.5f);
     phase %= 800;
 
@@ -1094,23 +1139,20 @@ void func_002A6F88(u32 *state) {
     func_002A6D68(state);
     uiDrawSurfaceAtNearDepth(0x53);
 
-    if (state[0] == 0) {
-        state[1] -= 8;
+    if (state->mode == 0) {
+        state->alpha -= 8;
     } else {
-        state[1] += 8;
+        state->alpha += 8;
     }
-    if ((s32)state[1] < 0) {
-        state[1] = 0;
+    if (state->alpha < 0) {
+        state->alpha = 0;
     }
-    if ((s32)state[1] > 0x200) {
-        state[1] = 0x200;
+    if (state->alpha > 0x200) {
+        state->alpha = 0x200;
     }
 }
 
 extern void func_002A7260(MnuTitlePaletteTransition *transition, s32 randomize);
-struct EffRandState;
-extern u32 effMiscRand(struct EffRandState *);
-
 void func_002A7260(MnuTitlePaletteTransition *transition, s32 randomize) {
     s32 skip = randomize != 0;
     u32 count;
@@ -1247,7 +1289,7 @@ s32 mnuUpdateStaffMoviePresentation(void) {
 
     if (mnuMovieWork->frame == 0) {
         mnuFadeSetState(&mnuMovieWork->slideBar, 2);
-        mnuFadeSetStateOff(mnuMovieWork->backdropState, 2);
+        mnuFadeSetStateOff(&mnuMovieWork->backdropState, 2);
         mnuTitleSetPaletteTransition(&mnuMovieWork->paletteTransition, 2);
         mnuFadeSetStateB(&mnuMovieWork->scrollTransition, 2);
     }
@@ -1255,11 +1297,11 @@ s32 mnuUpdateStaffMoviePresentation(void) {
     endSeconds = D_003E4A7C / 60;
     if (endSeconds + 5 < seconds) {
         mnuFadeSetState(&mnuMovieWork->slideBar, 0);
-        mnuFadeSetStateOff(mnuMovieWork->backdropState, 0);
+        mnuFadeSetStateOff(&mnuMovieWork->backdropState, 0);
         mnuTitleSetPaletteTransition(&mnuMovieWork->paletteTransition, 0);
         mnuFadeSetStateB(&mnuMovieWork->scrollTransition, 0);
     } else {
-        mnuFadeSetStateOff(mnuMovieWork->backdropState, 1);
+        mnuFadeSetStateOff(&mnuMovieWork->backdropState, 1);
         mnuTitleSetPaletteTransition(&mnuMovieWork->paletteTransition, 1);
         mnuFadeSetStateB(&mnuMovieWork->scrollTransition, 1);
     }
@@ -1269,7 +1311,7 @@ s32 mnuUpdateStaffMoviePresentation(void) {
         mnuFadeSetState(&mnuMovieWork->slideBar, 3);
     }
     mnuAdvanceSpriteSlideBar(&mnuMovieWork->slideBar);
-    func_002A6F88(mnuMovieWork->backdropState);
+    func_002A6F88(&mnuMovieWork->backdropState);
     mnuDrawAndAdvanceStaffImageBlend(&mnuMovieWork->paletteTransition);
     func_002A75A8(&mnuMovieWork->scrollTransition);
     func_002A6858();
