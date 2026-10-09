@@ -9,6 +9,7 @@
 
 struct BillObj;
 struct EffTrackSet;
+struct FileSlotTable;
 
 /* Lens-flare constructors copy 0x40 bytes into a 0x58-byte owner at +0x18
  * (DDS1 0029C620 / DDS2 002DE338). Draw callbacks read strength with LWC1,
@@ -45,7 +46,7 @@ typedef struct EffectStripNode {
     u8 copiedHeader[0x20];
     struct EffTrackSet *trackSet;
     struct BillObj *resource;
-    u32 active;
+    struct FileSlotTable *active;
     u16 count;
 } EffectStripNode;
 
