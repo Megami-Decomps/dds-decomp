@@ -4380,7 +4380,65 @@ void effFreeIndexedEntries(EffClassWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002A8A90);
 
-INCLUDE_ASM(const s32, "game/code_0029C530", func_002A9160);
+typedef struct Matrix4 Matrix4;
+void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix);
+
+/* Per-frame update of a five-point-group class: tint every active set and draw it under the class transform. */
+void func_002A9160(EffClassWork *work) {
+    EffBillTimedHeader *header = (EffBillTimedHeader *)work->payload;
+    EffPointSetRow *row = ((EffPointSetTable *)work->resource)->rows;
+    s32 frame = work->frame;
+    s32 time = header->time.duration;
+    s32 count;
+    s32 i;
+    f32 tint[4];
+    u128 mtx[4];
+    s32 color1[4];
+    s32 color2[4];
+    s32 rowColor[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (time < frame && time != 0) {
+        return;
+    }
+    count = header->count;
+    second = effSampleColorAlphaTracks(&header->colorTrack, &header->alphaTrack, frame, time);
+    color1[0] = work->color;
+    unit = 0x3C000000;
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    VU0_MOVE_VF(vf11, vf10);
+    color2[0] = second;
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, tint);
+    VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+    VU0_LOAD_VF(vf10, D_0037E0E0);
+    VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_MATRIX_ROWS(vf10);
+    VU0_LOAD_VF(vf10, work);
+    VU0_SET_W_ONE(vf10);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_STORE_MATRIX(mtx);
+    for (i = 0; i < count; i++, row++) {
+        if (row->key > 0) {
+            EffPointSet *set = row->set;
+
+            rowColor[0] = row->color;
+            EE_MMI_RGBA_UNPACK(rowColor, 1.0f / 128.0f);
+            VU0_LOAD_VF(vf11, tint);
+            VU0_MUL(vf10, vf10, vf11);
+            EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+            blended[0] = packed;
+            set->color = blended[0];
+            set->type = ((u32 *)header)[10];
+            set->flag = ((u8 *)header)[0x5C];
+            effDrawFivePointGroups(set, mtx);
+        }
+    }
+}
 
 extern void effResetDispatchCounter(EffClassWork *);
 
