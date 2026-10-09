@@ -636,8 +636,8 @@ SdfAsset *sdfCreateAssetWithDrawEntries(void) {
         entryWords[0x18 / 4] = 0x6005C005;
         entryWords[0x30 / 4] = 0;
         entryWords[0x34 / 4] = 0x640CC00A;
-        entryWords[0x98 / 4] = 0x400000C;
-        entryWords[0x9C / 4] = 0x14000000;
+        ((SdfAssetEntry *)entryWords)->vifItopCommand = 0x0400000C;
+        ((SdfAssetEntry *)entryWords)->vifMscalCommand = 0x14000000;
     }
     asset->scalarPairFirst = 0;
     asset->scalarPairSecond = 0;

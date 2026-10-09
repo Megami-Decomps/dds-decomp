@@ -570,8 +570,8 @@ typedef struct SdfAssetEntry {
     SdfGsTextureStateValues primaryTextureState; /* 0x38 */
     SdfGsTextureStateValues secondaryTextureState; /* 0x50 */
     SdfDrawTransform transforms[2]; /* 0x68 */
-    u32 unk98;             /* 0x98 */
-    u32 unk9C;             /* 0x9C */
+    u32 vifItopCommand;    /* 0x98: VIF ITOP with immediate 0xC */
+    u32 vifMscalCommand;   /* 0x9C: VIF MSCAL with microprogram index zero */
 } SdfAssetEntry;
 
 typedef char SdfAssetEntry_size_must_be_0xA0[
@@ -582,6 +582,10 @@ typedef char SdfAssetEntry_secondaryTextureState_offset_must_be_0x50[
     ((u32)&((SdfAssetEntry *)0)->secondaryTextureState == 0x50) ? 1 : -1];
 typedef char SdfAssetEntry_transforms_offset_must_be_0x68[
     ((u32)&((SdfAssetEntry *)0)->transforms == 0x68) ? 1 : -1];
+typedef char SdfAssetEntry_vifItopCommand_offset_must_be_0x98[
+    ((u32)&((SdfAssetEntry *)0)->vifItopCommand == 0x98) ? 1 : -1];
+typedef char SdfAssetEntry_vifMscalCommand_offset_must_be_0x9C[
+    ((u32)&((SdfAssetEntry *)0)->vifMscalCommand == 0x9C) ? 1 : -1];
 
 /* Linked thread registry entry (0x8); DDS1/2 sdfThread and thread-control units. */
 typedef struct SdfThreadNode {
