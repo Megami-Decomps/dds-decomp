@@ -7360,29 +7360,31 @@ void effReleaseParticleResources(u8 *work) {
     sdfReleaseChipBlock(work);
 }
 
+void effReplaceSharedResource(EffParticleShared *, EffParticleShared *);
+
 EffParticleShared *effCloneParticleSharedResource(EffParticleShared *source) {
     EffParticleShared *effect = func_002B4798(NULL);
     memcpy(effect->pad0C, source->pad0C, sizeof(effect->pad0C));
-    effReplaceSharedResource((u8 *)effect, (u8 *)source);
+    effReplaceSharedResource(effect, source);
     return effect;
 }
 
-void effReplaceSharedResource(u8 *work, u8 *source) {
+void effReplaceSharedResource(EffParticleShared *work, EffParticleShared *source) {
     BillObj *billboard;
-    if (((EffParticleShared *)source)->billHandle != 0) {
-        if (((EffParticleShared *)work)->billHandle != 0) {
-            billDispatchByKind(((EffParticleShared *)work)->billHandle);
+    if (source->billHandle != 0) {
+        if (work->billHandle != 0) {
+            billDispatchByKind(work->billHandle);
         }
         billboard = billCloneObjectRetainingSharedData(
-            ((EffParticleShared *)source)->billHandle);
-        ((EffParticleShared *)work)->billHandle = billboard;
+            source->billHandle);
+        work->billHandle = billboard;
         billMarkKindOneFlag(billboard);
         return;
     }
-    if (((EffParticleShared *)work)->reference != NULL) {
-        effReleaseReferenceHolder(((EffParticleShared *)work)->reference);
+    if (work->reference != NULL) {
+        effReleaseReferenceHolder(work->reference);
     }
-    ((EffParticleShared *)work)->reference = effReferenceObjectRetain(((EffParticleShared *)source)->reference);
+    work->reference = effReferenceObjectRetain(source->reference);
 }
 
 void effResetParticleStateWord(s32 work) {
