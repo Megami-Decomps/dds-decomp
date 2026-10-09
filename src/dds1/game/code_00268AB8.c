@@ -6,6 +6,7 @@
 #include "mnu_title_effect.h"
 #include "file.h"
 #include "file_request_api.h"
+#include "sdf_thread.h"
 
 /* The two title-audio states own the complete ten-word frame/decoder record. */
 typedef struct TitleAudioStreamState {
@@ -532,7 +533,7 @@ void mnuRunTitleStreamThread(void) {
 
 extern u32 mnuTitleStreamSemaphore;
 
-extern s32 mnuTitleStreamThread;
+extern struct SdfThreadNode mnuTitleStreamThread;
 
 extern u8 mnuTitleStreamThreadStack[];
 
