@@ -13,6 +13,7 @@
 #include "kwln.h"
 #include "scr.h"
 #include "sdf.h"
+#include "btl_resource_name.h"
 #include "dat_command.h"
 #include "sce_io.h"
 
@@ -2912,21 +2913,20 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, void *textureRe
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FC160);
 
-/* Allocate the native name record and copy the initial text at byte 0x1C.
- * Preserve the raw address ABI and the constructor's individual field writes. */
-s32 btlCreateResourceNameRecord(s32 nameAddress) {
-    s32 recordAddress;
+/* Allocate the native name record and copy the initial text at byte 0x1C. */
+struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension) {
+    struct BtlResourceNameRecord *record;
 
-    recordAddress = (s32)sdfAllocSizeClassBlock(BTL_RESOURCE_NAME_RECORD_BYTES);
-    ((BtlResourceNameRecord *)recordAddress)->word14 = 9;
-    ((BtlResourceNameRecord *)recordAddress)->word00 = 8;
-    ((BtlResourceNameRecord *)recordAddress)->word04 = 8;
-    ((BtlResourceNameRecord *)recordAddress)->word08 = 0;
-    ((BtlResourceNameRecord *)recordAddress)->nameLength = 0;
-    ((BtlResourceNameRecord *)recordAddress)->word0C = 0;
-    ((BtlResourceNameRecord *)recordAddress)->word18 = 0;
-    strcpy(recordAddress + 0x1c, nameAddress);
-    return recordAddress;
+    record = (struct BtlResourceNameRecord *)sdfAllocSizeClassBlock(BTL_RESOURCE_NAME_RECORD_BYTES);
+    record->word14 = 9;
+    record->word00 = 8;
+    record->word04 = 8;
+    record->word08 = 0;
+    record->nameLength = 0;
+    record->word0C = 0;
+    record->word18 = 0;
+    strcpy((char *)record + 0x1c, extension);
+    return record;
 }
 
 void func_001FC2E8(void *allocation) {
@@ -2935,31 +2935,31 @@ void func_001FC2E8(void *allocation) {
 
 INCLUDE_ASM(const s32, "game/code_001F6110", func_001FC300);
 
-void btlSetResourceNameHeaderPairAlternate(s32 recordAddress, s32 firstWord, s32 secondWord) {
-    ((BtlResourceNameRecord *)recordAddress)->word00 = firstWord;
-    ((BtlResourceNameRecord *)recordAddress)->word04 = secondWord;
+void btlSetResourceNameHeaderPairAlternate(struct BtlResourceNameRecord *record, s32 firstWord, s32 secondWord) {
+    record->word00 = firstWord;
+    record->word04 = secondWord;
 }
 
-u32 func_001FC730(s32 recordAddress) {
-    return ((BtlResourceNameRecord *)recordAddress)->word08;
+u32 func_001FC730(struct BtlResourceNameRecord *record) {
+    return record->word08;
 }
 
 /* Copy text at native byte 0x21 and record its length, unlike the constructor's 0x1C copy. */
-void btlResourceRecordSetName(char *recordBytes, char *text) {
-    strcpy(recordBytes + 0x21, text);
-    ((BtlResourceNameRecord *)recordBytes)->nameLength = strlen(text);
+void btlResourceRecordSetName(struct BtlResourceNameRecord *record, const char *name) {
+    strcpy((char *)record + 0x21, name);
+    record->nameLength = strlen(name);
 }
 
-void btlFormatResourceNameWithPrefix(s32 recordAddress, void *output) {
-    func_003014F0(output, D_003BB818, recordAddress + 0x21, recordAddress + 0x1c);
+void btlFormatResourceNameWithPrefix(struct BtlResourceNameRecord *record, char *output) {
+    func_003014F0(output, D_003BB818, (char *)record + 0x21, (char *)record + 0x1c);
 }
 
-void btlFormatResourceNameWithoutPrefix(s32 recordAddress, void *output) {
-    func_003014F0(output, D_003BB820, recordAddress + 0x21);
+void btlFormatResourceNameWithoutPrefix(struct BtlResourceNameRecord *record, char *output) {
+    func_003014F0(output, D_003BB820, (char *)record + 0x21);
 }
 
-void func_001FC7D0(s32 recordAddress, u32 value) {
-    ((BtlResourceNameRecord *)recordAddress)->word14 = value;
+void func_001FC7D0(struct BtlResourceNameRecord *record, u32 value) {
+    record->word14 = value;
 }
 
 INCLUDE_SDATA(const s32, "game/code_001F6110", D_003BB6B8);

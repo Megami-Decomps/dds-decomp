@@ -17,6 +17,7 @@ typedef struct EffQueueRecord {
     u8 pad68[8];
 } EffQueueRecord;
 
-extern void effUpdateResourceQueue(u32 *, void *, EffQueueRecord *);
+extern void effQueueResource(const char *extension, const char *resourceName);
+extern void effUpdateResourceQueue(u32 *, const char *extension, EffQueueRecord *);
 
 #endif /* EFF_QUEUE_H */

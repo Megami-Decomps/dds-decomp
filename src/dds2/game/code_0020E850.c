@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_resource_name.h"
 #include "sdf_chip.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
