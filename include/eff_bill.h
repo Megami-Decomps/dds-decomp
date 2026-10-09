@@ -79,7 +79,7 @@ typedef struct EffQuadWork {
     EffQuadParams source;
     struct BillObj *billHandle;
     struct EffExpandedList *reference; /* Kind-7 retained resource wrapper. */
-    u32 assetHandle;
+    SdfAsset *assetHandle;
 } EffQuadWork;
 
 typedef char EffQuadParamsSizeCheck[(sizeof(EffQuadParams) == 0x98) ? 1 : -1];

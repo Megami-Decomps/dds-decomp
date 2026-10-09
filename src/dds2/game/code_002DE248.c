@@ -4225,8 +4225,8 @@ EffQuadWork *effCreateQuadWork(FileJobPayload *job) {
     work->color = 0x80808080;
     work->billHandle = NULL;
     work->reference = NULL;
-    work->assetHandle = (u32)sdfCreateAssetWithDrawEntries();
-    func_003332D0((SdfAsset *)work->assetHandle, 1.0f);
+    work->assetHandle = sdfCreateAssetWithDrawEntries();
+    func_003332D0(work->assetHandle, 1.0f);
     memset(&D_00458370, 0, sizeof(EffPacketParams));
     D_00458370.primitive = 0x4000;
     D_00458370.parameters = D_003E9CC0;
@@ -4271,7 +4271,7 @@ void effReleaseRenderResources(EffQuadWork *work) {
         effReleaseReferenceHolder(work->reference);
     }
     if (work->assetHandle != 0) {
-        sdfQueueAssetRelease(work->assetHandle);
+        sdfQueueAssetRelease((s32)work->assetHandle);
     }
     sdfReleaseChipBlock(work);
 }
