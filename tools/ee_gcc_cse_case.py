@@ -97,7 +97,9 @@ def host_libraries(executable, env):
     return sorted(set(libraries))
 
 
-def make_case(repo, source, work, qemu, watch_path):
+def make_case(repo, source, work, qemu, watch_path, *, kind="cse"):
+    if kind not in ("cse", "delay"):
+        raise ValueError("unsupported observation kind")
     repo, source, work, qemu, watch_path = (
         p.resolve() for p in (repo, source, work, qemu, watch_path))
     if work.exists():
@@ -116,7 +118,11 @@ def make_case(repo, source, work, qemu, watch_path):
         raise ValueError("canonical filename lengths disagree")
     source_bytes = source.read_bytes()
     watch = json.loads(watch_path.read_text())
-    validate_watch(watch, watch.get("function"))
+    if kind == "delay":
+        from ee_gcc_delay_role_tracer import validate_watch as validate_delay_watch
+        validate_delay_watch(watch, watch.get("function"))
+    else:
+        validate_watch(watch, watch.get("function"))
     if watch.get("source_sha256") != digest(source_bytes):
         raise ValueError("watch does not describe this source")
     if digest(compiler.read_bytes()) != COMPILER:
@@ -160,6 +166,8 @@ def make_case(repo, source, work, qemu, watch_path):
                  "_ee_gcc_observer.py", "ee_gcc_qemu_loopback.py",
                  "ee_gcc_unix_capability.py"):
         add(Path(__file__).with_name(name))
+    if kind == "delay":
+        add(Path(__file__).with_name("ee_gcc_delay_role_tracer.py"))
     native_modules = set()
     for module in list(sys.modules.values()):
         for attribute in ("__file__", "__cached__"):
@@ -220,9 +228,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("repo", "source", "work", "qemu", "watch"):
         parser.add_argument("--" + name, required=True, type=Path)
+    parser.add_argument("--kind", choices=("cse", "delay"), default="cse")
     args = parser.parse_args()
     try:
-        count = make_case(args.repo, args.source, args.work, args.qemu, args.watch)
+        count = make_case(args.repo, args.source, args.work, args.qemu, args.watch, kind=args.kind)
     except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError) as error:
         parser.exit(2, str(error) + "\n")
     print(json.dumps({"prepared": True, "compiled": False, "transport": "unix-verified", "inputs": count}))

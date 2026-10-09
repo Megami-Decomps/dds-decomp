@@ -23,6 +23,7 @@ jobs:
         run: |
           python3 experiments/kib-camera-interpreter/peer_probe.py --selftest
           python3 tools/test_ee_gcc_role_lineage.py
+          python3 -m unittest discover -s tools -p test_ee_gcc_delay_role_tracer.py -v
           python3 -m unittest discover -s tools -p test_ee_gcc_unix_capability.py -v
 
       # The retail executables are not in this repository. CI reads them from a
@@ -83,7 +84,7 @@ jobs:
           DEBUGGER_READY: ${{ steps.debugger.outcome }}
         run: |
           if [ "$DEBUGGER_READY" = success ]; then
-            python3 experiments/kib-camera-interpreter/trace.py --qemu /tmp/dds-camera-qemu/qemu-i386
+            python3 experiments/kib-camera-interpreter/trace.py --mode delay --qemu /tmp/dds-camera-qemu/qemu-i386
           else
-            python3 experiments/kib-camera-interpreter/trace.py
+            python3 experiments/kib-camera-interpreter/trace.py --mode delay
           fi
