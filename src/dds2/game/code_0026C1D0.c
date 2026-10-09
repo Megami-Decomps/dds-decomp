@@ -232,8 +232,6 @@ s32 evtSetMessageWindowPageValue(s32 pageValue) {
     return 1;
 }
 
-extern void itfMesSetWindowHighFlags(s32, u32);
-
 extern void itfMesStartEntry(s32, s32, s32);
 
 extern void itfPanelSetPairFirst(s32, s32);
@@ -418,8 +416,6 @@ void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText) {
 s8 dspGetWindowStateGate(void) {
     return dspWindowStateGate;
 }
-
-extern void itfMesClearWindowHighFlags(s32, u32);
 
 extern void itfPanelSetStatus(s32, s32);
 
