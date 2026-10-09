@@ -1,0 +1,30 @@
+--- a/src/dds2/game/code_001DD390.c
++++ b/src/dds2/game/code_001DD390.c
+@@ -8606,7 +8606,6 @@
+     s32 random;
+     s32 i;
+     f32 distance;
+-    s16 signedIndex;
+     BtlUnit *unit;
+     BtlUnit *actor;
+     BtlUnit *target;
+@@ -9121,7 +9120,6 @@
+                     CURSOR->mode = 1;
+                 }
+                 random = btlNextScaledRandom(8);
+-                signedIndex = (s16)random;
+                 CURSOR->parameterIndex114 = 0;
+                 CURSOR->parameterIndex118 = 0;
+                 CURSOR->parameterIndex11C = 0;
+@@ -9130,9 +9128,9 @@
+                 CURSOR->parameterIndex128 = 0;
+                 CURSOR->parameterIndex12C = 0;
+                 CURSOR->endpointMode = 0;
+-                CURSOR->index = signedIndex;
++                CURSOR->index = random;
+                 CURSOR->frame = 0;
+-                func_001F5320(action, pose, 0, D_003BBD80[signedIndex]);
++                func_001F5320(action, pose, 0, D_003BBD80[(s16)random]);
+             }
+             done = 1;
+             break;

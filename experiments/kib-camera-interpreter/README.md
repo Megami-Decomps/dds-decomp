@@ -6,6 +6,7 @@ Active target: `func_001FA480`, native5256B. Current work follows grounded sourc
 - `historical-candidate.patch`: preserved historical5248B/600-difference baseline.
 - `STATUS-OWNER.md`: exact source correction and evidence.
 - `snapshot-join-body.c`, `snapshot-join.patch`, and `SNAPSHOT-LIFETIMES.md`: separately retained 5240-byte/573-difference candidate with explained native scalar-allocation recovery; the 570-difference standard diagnostic is unchanged.
+- `snapshot-random.delta.patch` and `RNG-USE-WIDTHS.md`: compose the snapshot join with separate raw-store and signed-table-index uses of the RNG result; still 5240 bytes/573 differences.
 - `diagnose.py`: complete owning-unit comparison, older-function preservation and source restoration. A nonmatch intentionally exits1.
 - `peer_probe.py`: bounded private-native semantics using synthetic inputs, aggregate output only.
 - `trace.py`, `roles.json`, and additive compiler tools: parity-gated source-role and CSE instrumentation under development.
