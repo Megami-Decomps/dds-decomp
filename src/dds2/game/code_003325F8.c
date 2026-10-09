@@ -599,7 +599,7 @@ void sdfSetAssetSecondaryColor(SdfAsset *param, u32 packedColor) {
 }
 
 /* Store the mode used by the secondary packet's mode and palette lookup. */
-void func_00333478(SdfAsset *param, u32 packetMode) {
+void sdfSetAssetSecondaryMode(SdfAsset *param, u32 packetMode) {
     param->secondaryMode = packetMode;
     param->dirtyFlags = param->dirtyFlags | SDF_ASSET_SECONDARY_STATE_DIRTY;
 }
@@ -712,7 +712,7 @@ u8 *sdfParseAssetParameterFlags(SdfAsset *asset, DevRequest *resourceLookup, u8 
         packedTextureMode = *(u32 *)parameterCursor;
         parameterCursor += SDF_PARAM_WORD_BYTES;
         func_00333490(param, ((u32 *)resourceLookup->buffer)[packedTextureMode & SDF_PARAM_TEXTURE_INDEX_MASK]);
-        func_00333478(asset, packedTextureMode >> SDF_PARAM_PACKET_MODE_SHIFT);
+        sdfSetAssetSecondaryMode(asset, packedTextureMode >> SDF_PARAM_PACKET_MODE_SHIFT);
     }
     if (parameterFlags & SDF_PARAM_SECONDARY_SCALARS_PRESENT) {
         sdfSetSecondaryTextScalars(asset, ((f32 *)parameterCursor)[0], ((f32 *)parameterCursor)[1], ((f32 *)parameterCursor)[2], ((f32 *)parameterCursor)[3], ((f32 *)parameterCursor)[4]);
