@@ -6228,6 +6228,8 @@
 0x00335210	sdfMotionBindIndexedTrack	inferred	Stores the source and handler pair then selects a track from its index array. [names_reviewed6.tsv]
 0x003352C8	sdfMotionApplyPrimaryWordSecondKey	inferred	Interpolates the indexed track color and stores it in the target asset's second primary-state word; table D_0040B420 uses this as its sample callback.
 0x00335308	sdfMotionBlendPrimaryWordSecondKey	inferred	Blends the captured target word with the indexed color and stores the second primary-state word; paired with the second-word apply callback.
+0x00335428	sdfMotionApplyPrimaryWordFirstKey	inferred	Interpolates the indexed track color and stores the target asset's first primary-state word; table D_0040B438 uses this as its sample callback.
+0x00335468	sdfMotionBlendPrimaryWordFirstKey	inferred	Blends the captured target word with the indexed color and stores the first primary-state word; paired with the first-word apply callback.
 0x003353B8	sdfCopyTrackStateToBinding	inferred	Copies the whole track word at offset 0x14 into the bound motion state's current word.
 0x00335518	sdfMotionReadBoundTrackInteger	inferred	Copies bound motion track integer into the command result field. [names_reviewed6.tsv]
 0x003357D8	sdfMotionCopyTrackValueToBinding	inferred	Copies a motion track current value into its binding. [names_reviewed12.tsv]
