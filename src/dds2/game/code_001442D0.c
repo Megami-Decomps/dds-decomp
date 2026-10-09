@@ -33,8 +33,7 @@ extern void dds3SetWorldNodeValue(EffWorldNode *node, u32 value);
 extern EffWorldNode *dds3GetWorldSecondaryObject(void);
 extern void func_00112058(EffWorldNode *node, s32 kind, s32 resource);
 extern void effObjSetInnerFloat(EffWorldNode *node, f32 value);
-extern void effObjSetInnerSecondVec(EffWorldNode *node, u128 *vector);
-extern void effObjSetInnerThirdVec(EffWorldNode *node, u128 *vector);
+
 extern void func_00136718(void);
 extern void func_001526B8(void);
 extern void func_00153FA0(void);
@@ -467,8 +466,6 @@ extern u32 effMiscRand(struct EffRandState *state);
 typedef struct FldVec4 {
     f32 v[4];
 } FldVec4;
-
-extern void effObjSetInnerFirstVec(EffWorldNode *node, u128 *vector);
 
 extern void dds3ClearObjectFlags();
 
@@ -2821,7 +2818,7 @@ void fldReleaseTextureSlots(void) {
 }
 
 extern u32 fldPlayerObject;
-extern void effObjFetchInnerSecondVecNorm(EffWorldNode *object);
+
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 extern void func_00336538(f32 angle);
 

@@ -3031,8 +3031,7 @@ extern f32 D_0038BAD0[];
 extern s32 D_004360B4;
 extern s32 D_004360B8;
 extern s32 D_003897C0[];
-extern void effObjFetchInnerFirstVec(EffWorldNode *);
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
+
 
 void func_0012F908(void) {
     union {
@@ -3067,7 +3066,7 @@ extern void dds3SetCameraVector(EffWorldNode *camera, u128 *worldEye);
 extern f32 fldGetNormalizedComplementaryAngle(f32 ax, f32 ay, f32 bx, f32 by);
 extern f32 effMiscComputeQuaternionRotatedReferenceAngle(void);
 extern void dds3LoadOrBuildObjectMatrix(EffWorldNode *object);
-extern void effObjFetchInnerSecondVecNorm(u32);
+
 void func_001300A0(void) {
     f32 nearPoint[4];
     f32 farPoint[4];
@@ -3075,7 +3074,7 @@ void func_001300A0(void) {
     EffWorldNode *node;
     f32 angle;
 
-    effObjFetchInnerSecondVecNorm(fldPlayerObject);
+    effObjFetchInnerSecondVecNorm((EffWorldNode *)fldPlayerObject);
     angle = effMiscComputeQuaternionRotatedReferenceAngle() * 180.0f / 3.14f;
     nearPoint[0] = fldLookAtNearPoint[0] + (fldAreaState.x - fldLookAtNearPoint[0]);
     nearPoint[1] = fldLookAtNearPoint[1] + ((fldAreaState.y + fldCameraFollowRows[fldAreaState.rowIdx].y) - fldLookAtNearPoint[1]);
@@ -3601,7 +3600,7 @@ void fldUpdateCameraTarget(void) {
             vec.f[0] = st->targetX;
             vec.f[1] = st->targetY;
             vec.f[2] = st->targetZ;
-            effObjSetInnerFirstVec(fldPlayerObject, vec.f);
+            effObjSetInnerFirstVec((EffWorldNode *)fldPlayerObject, (u128 *)vec.f);
             st->positionPending = 0;
             effObjFetchInnerFirstVec((EffWorldNode *)fldPlayerObject);
             VU0_STORE_VF(vf10, &vec);
@@ -4678,4 +4677,3 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0043615C);
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00436160);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00436164);
-

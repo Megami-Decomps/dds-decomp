@@ -7966,8 +7966,7 @@ typedef char EffModelCallbackConfigSizeCheck[sizeof(EffModelCallbackConfig) == 0
 extern void mdlStorePrimaryVectorVU(MdlCtx *);
 extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 extern void mdlStoreTertiaryVectorVU(MdlCtx *);
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
-extern void effObjSetInnerSecondVec(EffWorldNode *, u128 *);
+
 
 void func_002F8040(EffActiveResource *resource)
 {

@@ -123,8 +123,6 @@ extern void btlSetUnitRotation(BtlUnit *unit, s128 *rotation);
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
-extern void effObjSetInnerFirstVec(EffWorldNode *, u128 *);
-
 extern s32 btlAimHorizontalDirectionVU(f32 *, f32 *);
 
 extern void btlSetUnitRotation(BtlUnit *, s128 *);

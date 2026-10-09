@@ -93,8 +93,8 @@ void mnuRecreateMenuSelectionList(void) {
     }
 }
 
-u32 mnuDestroyMovieMenuSelectionList(void) {
-    return mnuDestroyListState(mnuMovieMenuState->selectionList);
+void mnuDestroyMovieMenuSelectionList(void) {
+    mnuDestroyListState(mnuMovieMenuState->selectionList);
 }
 
 u32 func_0026BED0(void) {

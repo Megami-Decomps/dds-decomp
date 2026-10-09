@@ -289,7 +289,7 @@ void effObjFetchInnerThirdVec(EffWorldNode *node) {
     VU0_LOAD_VF_MEMORY(vf10, p);
 }
 
-void effObjAddInnerFirstVec(EffWorldNode *node, void *vector) {
+void effObjAddInnerFirstVec(EffWorldNode *node, u128 *vector) {
     ObjectTransform *inner = node->inner;
     u8 *src = (u8 *)&inner->position;
     u8 *dst;
@@ -313,7 +313,7 @@ void effObjQuatMulInnerSecondVec(EffWorldNode *node, u128 *vector) {
     VU0_STORE_VF($vf10, &inner->rotation);
 }
 
-void effObjMulInnerThirdVec(EffWorldNode *node, void *vector) {
+void effObjMulInnerThirdVec(EffWorldNode *node, u128 *vector) {
     ObjectTransform *inner = node->inner;
     u8 *src = (u8 *)&inner->scale;
     u8 *dst;

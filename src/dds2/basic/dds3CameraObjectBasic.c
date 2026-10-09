@@ -95,8 +95,7 @@ ObjBase *dds3GetCameraHandle(EffWorldNode *camera) {
 
 
 extern void dds3EnsureSlotData(void *object);
-extern void effObjSetInnerFirstVec(EffWorldNode *obj, u128 *vec);
-extern void effObjSetInnerSecondVec(EffWorldNode *obj, u128 *vec);
+
 extern void effObjInnerVecBackup(ObjectTransform *inner);
 extern void dds3RebuildCameraBasis(EffWorldNode *obj);
 extern CameraVector D_00412878;

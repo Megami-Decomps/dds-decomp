@@ -1129,7 +1129,8 @@ u32 func_002A3AA0(void) {
     return 0;
 }
 
-void mnuRestartRuntimeAfterViewer(void) {
+/* The title-menu callback passes zero; the restart does not use it. */
+void mnuRestartRuntimeAfterViewer(s32 unused) {
     evtDestroySecondaryWorldNode();
     sdfDestroyRuntimeTask();
     sdfCreateRuntimeTask();
