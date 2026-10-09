@@ -69,6 +69,7 @@ extern s32 func_001ABB10(BtlUnit *, s32);
 extern s8 btlHistoryCounter;
 
 extern s32 func_00211EA8();
+extern void func_001B7718(ActionStateLink *);
 
 extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
 
@@ -231,7 +232,58 @@ extern s32 func_001ABF50(BtlUnit *, s32);
 
 extern u32 func_001B39E8(s32);
 
-INCLUDE_ASM(const s32, "game/code_00211360", func_00211360);
+extern AiSpecies D_003BEDD0[];
+
+s32 func_002119E0(s32 context, s32 species, u32 *selected, u32 requestedRow);
+
+void func_00211360(ActionStateLink *task, u32 mode) {
+    BtlAiScratchWork *work;
+    BtlUnit *unit;
+    s32 table;
+    s32 row;
+    s32 variant;
+    s32 index;
+    s32 species = 0;
+
+    switch (mode) {
+    case 0:
+        variant = (task->unit->status.flags & 0x200) ? 2 : 1;
+        table = 0;
+        break;
+    case 1:
+        variant = (task->unit->status.flags & 0x200) ? 2 : 1;
+        table = 1;
+        break;
+    case 2:
+        variant = 1;
+        table = 2;
+        break;
+    case 3:
+        variant = 1;
+        table = 3;
+        break;
+    case 4:
+    default:
+        variant = 1;
+        table = 4;
+        break;
+    }
+    datEnemyAiRecords[0] = D_003BEDD0[table];
+    work = sdfAllocAndClearQuadwords(0x10);
+    unit = task->unit;
+    btlActionScratchWork = work;
+    work->actor = task;
+    work->speciesId = unit->partyRecord.unitId;
+    func_002119E0((s32)unit, species, (u32 *)&row, variant);
+    index = btlPickWeightedAiSlot(unit, species, row);
+    func_00211EA8(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
+                  datEnemyAiRecords[species].slot[row * 5 + index].actionArg);
+    if (mode == 2) {
+        func_001B7718(task);
+    }
+    sdfReleaseChipBlock(btlActionScratchWork);
+}
+
 
 u32 func_002115B0(void) {
     return 1;
