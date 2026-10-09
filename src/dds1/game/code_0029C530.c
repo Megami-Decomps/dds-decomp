@@ -273,7 +273,7 @@ typedef struct EffResourceOps {
  * Callback arity varies between creation and frame-notification paths. */
 typedef struct EffClassOps {
     void (*initialize)();      /* 0x00 */
-    u32 (*createResource)();    /* 0x04 */
+    void *(*createResource)(); /* 0x04 */
     void (*destroyResource)(); /* 0x08 */
     void (*update)();          /* 0x0C */
     void (*draw)();            /* 0x10 */
@@ -3187,7 +3187,7 @@ EffClassWork *effCreateClassWork(u16 kind, void *source) {
     VU0_STORE_VF_UNCLOBBERED($vf0, effect);
     VU0_STORE_VF_UNCLOBBERED($vf0, effect + 0x10);
     memcpy(((EffClassWork *)effect)->payload, source, size);
-    ((EffClassWork *)effect)->resource = effClassWorkOperations[kind].createResource(source);
+    ((EffClassWork *)effect)->resource = (u32)effClassWorkOperations[kind].createResource(source);
     effClassWorkOperations[kind].initialize(effect);
     return (EffClassWork *)effect;
 }
@@ -4405,7 +4405,7 @@ EffClassWork *effCreateClassResourceWork(u16 kind, void *source) {
     VU0_STORE_VF_UNCLOBBERED($vf0, effect);
     VU0_STORE_VF_UNCLOBBERED($vf0, effect->vectors.orientation);
     memcpy(effect->payload, source, size);
-    effect->resource = effClassResourceWorkOperations[kind].createResource(source);
+    effect->resource = (u32)effClassResourceWorkOperations[kind].createResource(source);
     effClassResourceWorkOperations[kind].initialize(effect);
     return effect;
 }
