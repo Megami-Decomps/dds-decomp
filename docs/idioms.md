@@ -4938,3 +4938,21 @@ leading `camera` member at offset zero, while its action/state/link fields
 belong to the complete `BtlLinkedCommand`. Boss preset selection at
 `0021C428` likewise borrows that command's link to its unit.
 
+
+## Replacement-text sources are pointers, not slot identifiers
+
+`evtCopyEntryStringToActiveWindow` (`0024DD90` / `0026C918`) and
+`itfMesCopyStringToWindowTableSlot` (`0019C838` / `001A4858`) forward
+encoded byte/halfword text buffers through a `const void *` source.
+Their window and replacement-slot inputs remain numeric identifiers.
+The existing K&R copiers `0019D460` / `001A5480` already take a
+`const char *` source and use it in `strlen`/`memcpy`; keep their
+unprototyped declarations because the legacy one-argument bridges remain.
+Stored script/name-bank address words are decoded at their actual uses;
+do not retype the dual-use DDS1 `D_0032ACA8` flag/text bank as pointers.
+
+Pending Prism's profile-owner release, DDS1 `00250E88` and `00254B30`
+retain their old TU-local imports. The former still has two pointer-to-word
+text arguments. These two excluded consumers are explicit follow-up debt,
+not a completed all-caller migration.
+

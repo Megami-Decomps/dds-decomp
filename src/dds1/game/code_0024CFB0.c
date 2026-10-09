@@ -76,7 +76,7 @@ extern void func_0024DD78(void);
 extern void *dds3GetWorldSecondaryObject(void);
 extern s32 dds3GetWorldObjectValue(EffWorldNode *world);
 extern EffWorldNode *dds3FindIndexedObjectChainNodeByName(EffWorldNode *world, s32 index, const u8 *name);
-extern void evtCopyEntryStringToActiveWindow(s32, s32);
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern void dspSetActive();
 extern void itfMesSetWindowHighFlags(s32, s32);
 extern void itfMesClearWindowHighFlags(s32, s32);
@@ -139,9 +139,9 @@ s32 dspStartFlagEvent(s32 context) {
                 if (mdlFlagTest(mnuSceneFlagEventEntries[index].requiredFlag) != 0 && mdlFlagTest(mnuSceneFlagEventEntries[index].handledFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
-                    evtCopyEntryStringToActiveWindow(0, D_003BAA84 + mnuSceneFlagEventEntries[index].areaIndex * DSP_AREA_TEXT_BYTES);
-                    evtCopyEntryStringToActiveWindow(1, D_003BAA78 + mnuSceneFlagEventEntries[index].nameIndex * DSP_NAME_TEXT_BYTES);
-                    evtCopyEntryStringToActiveWindow(2, D_003BAA74 + mnuSceneFlagEventEntries[index].dialogIndex * DSP_DIALOG_TEXT_BYTES);
+                    evtCopyEntryStringToActiveWindow(0, (const void *)(D_003BAA84 + mnuSceneFlagEventEntries[index].areaIndex * DSP_AREA_TEXT_BYTES));
+                    evtCopyEntryStringToActiveWindow(1, (const void *)(D_003BAA78 + mnuSceneFlagEventEntries[index].nameIndex * DSP_NAME_TEXT_BYTES));
+                    evtCopyEntryStringToActiveWindow(2, (const void *)(D_003BAA74 + mnuSceneFlagEventEntries[index].dialogIndex * DSP_DIALOG_TEXT_BYTES));
                     dspStartEntry(DSP_FLAG_EVENT_SCENE_ENTRY);
                     mdlFlagSet(mnuSceneFlagEventEntries[index].handledFlag);
                     return 1;
@@ -153,7 +153,7 @@ s32 dspStartFlagEvent(s32 context) {
                     && mdlFlagTest(mnuPartyFlagEventEntries[slot->unitId].handledFlag) == 0) {
                     evtCloseDisplayChannelAndEnsureMessageWindow(context);
                     dspSetActive(1);
-                    evtCopyEntryStringToActiveWindow(0, D_003BAA70 + slot->unitId * DSP_DIALOG_TEXT_BYTES);
+                    evtCopyEntryStringToActiveWindow(0, (const void *)(D_003BAA70 + slot->unitId * DSP_DIALOG_TEXT_BYTES));
                     dspStartEntry(DSP_FLAG_EVENT_PARTY_ENTRY);
                     mdlFlagSet(mnuPartyFlagEventEntries[slot->unitId].handledFlag);
                     return 1;
@@ -610,8 +610,10 @@ void func_0024DD78(void) {
 }
 
 /* Copy a string address into a window table slot; neither argument is an item id. */
-void evtCopyEntryStringToActiveWindow(s32 slotIndex, s32 sourceAddress) {
-    itfMesCopyStringToWindowTableSlot(dspWindowHandle, slotIndex, sourceAddress);
+extern void itfMesCopyStringToWindowTableSlot(s32, u32, const void *);
+
+void evtCopyEntryStringToActiveWindow(s32 slotIndex, const void *sourceText) {
+    itfMesCopyStringToWindowTableSlot(dspWindowHandle, slotIndex, sourceText);
 }
 
 /* Return the gate byte independently of the singleton window's existence. */
