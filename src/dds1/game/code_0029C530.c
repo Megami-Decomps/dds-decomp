@@ -5744,26 +5744,26 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     func_002B0B70(out, mtx);
 }
 
-u8 *effAllocateBlockWithModel(u16 kind, void *source) {
+EffClassWork *effAllocateBlockWithModel(u16 kind, void *source) {
     u32 headerSize = 0x40;
     u32 size = D_0037ED90[kind].payloadSize;
-    u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
-    ((EffClassWork *)effect)->payload = effect + headerSize;
-    ((EffClassWork *)effect)->color = 0x80808080;
-    ((EffClassWork *)effect)->scale = 1.0f;
-    ((EffClassWork *)effect)->kind = kind;
-    ((EffClassWork *)effect)->frame = 0;
+    EffClassWork *effect = sdfAllocSizeClassBlock(size + headerSize);
+    effect->payload = (u8 *)effect + headerSize;
+    effect->color = 0x80808080;
+    effect->scale = 1.0f;
+    effect->kind = kind;
+    effect->frame = 0;
     VU0_STORE_VF($vf0, effect);
-    VU0_STORE_VF($vf0, effect + 0x10);
-    memcpy(((EffClassWork *)effect)->payload, source, size);
+    VU0_STORE_VF($vf0, effect->vectors.orientation);
+    memcpy(effect->payload, source, size);
     return effect;
 }
 
-extern u8 *effAllocateBlockWithModel(u16, void *);
+extern EffClassWork *effAllocateBlockWithModel(u16, void *);
 
-u8 *effCreateResourceInstanceC(u16 kind, void *source) {
-    u8 *effect = effAllocateBlockWithModel(kind, source);
-    ((EffClassWork *)effect)->resource = D_0037ED90[kind].createResource(source);
+EffClassWork *effCreateResourceInstanceC(u16 kind, void *source) {
+    EffClassWork *effect = effAllocateBlockWithModel(kind, source);
+    effect->resource = D_0037ED90[kind].createResource(source);
     D_0037ED90[kind].initialize(effect);
     return effect;
 }
@@ -5780,11 +5780,11 @@ void effDestroyModelBlockWork(EffClassWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-u8 *effRecreateActiveByClass(EffClassWork *work) {
-    u8 *effect = effAllocateBlockWithModel(work->kind, work->payload);
+EffClassWork *effRecreateActiveByClass(EffClassWork *work) {
+    EffClassWork *effect = effAllocateBlockWithModel(work->kind, work->payload);
     u32 resource = D_0037ED90[work->kind].cloneResource(work);
     s32 kind = work->kind;
-    ((EffClassWork *)effect)->resource = resource;
+    effect->resource = resource;
     D_0037ED90[kind].initialize(effect);
     return effect;
 }
