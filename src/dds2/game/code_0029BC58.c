@@ -6,7 +6,7 @@ extern char (*D_00435E48)[17];
 extern char (*D_00435E5C)[25];
 struct EffRandState;
 extern u32 effMiscRand(struct EffRandState *state);
-extern void evtCopyEntryStringToActiveWindow(s32, s32);
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 extern s32 mnuSelectEventFlagCode(void);
 extern s32 dspStartEntry(s32);
 extern void evtStageTestQueueMotion(s32, u32);
@@ -21,13 +21,13 @@ void func_0029BC58(BrsSkillPackageWork *work) {
     case 4: {
         rewardIndex = work->rewardIndex;
         work->statGains[rewardIndex]++;
-        evtCopyEntryStringToActiveWindow(1, (s32)D_003D62F0[rewardIndex]);
+        evtCopyEntryStringToActiveWindow(1, D_003D62F0[rewardIndex]);
     }
         /* Fall through to display the rewarded unit. */
     case 1:
     case 2:
     case 3:
-        evtCopyEntryStringToActiveWindow(0, (s32)D_00435E48[unit->unitId]);
+        evtCopyEntryStringToActiveWindow(0, D_00435E48[unit->unitId]);
         dspStartEntry(work->rewardMode + 25);
         break;
     case 5: {
@@ -35,8 +35,8 @@ void func_0029BC58(BrsSkillPackageWork *work) {
         rewardIndex = unit->unitId * 4 - 4;
         roll = effMiscRand(NULL) & 3;
 
-        evtCopyEntryStringToActiveWindow(0, (s32)D_00435E48[unit->unitId]);
-        evtCopyEntryStringToActiveWindow(1, (s32)D_00435E5C[work->earnedItem]);
+        evtCopyEntryStringToActiveWindow(0, D_00435E48[unit->unitId]);
+        evtCopyEntryStringToActiveWindow(1, D_00435E5C[work->earnedItem]);
         switch (mnuSelectEventFlagCode()) {
         case 1:
             dspStartEntry(rewardIndex + roll + 30);

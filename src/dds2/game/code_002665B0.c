@@ -1699,7 +1699,7 @@ extern void mnuSelectFirstListNode(s32);
 
 
 
-extern void evtCopyEntryStringToActiveWindow(s32, void *);
+extern void evtCopyEntryStringToActiveWindow(s32, const void *);
 
 extern void dspSetActive(s32);
 
