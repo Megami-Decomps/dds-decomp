@@ -142,7 +142,7 @@ extern void *D_00358450[];
 
 extern s32 D_00358510[];
 
-extern s32 D_00359A78[];
+extern u32 D_00359A78[];
 
 extern s32 mdlFlagTest(s32);
 
@@ -3533,7 +3533,34 @@ void func_001ACDF0(void) {
     } while (-1 < temp_v1);
 }
 
-INCLUDE_ASM(const s32, "game/code_001A1960", func_001ACE28);
+s32 func_001ACE28(s32 id, s32 operation) {
+    s32 selector;
+    s32 offset;
+    u32 word;
+    u32 bit;
+
+    id = (u16)id;
+    offset = id - 0x1AB;
+    selector = (s8)operation;
+    if (offset != 0) {
+        word = (u32)offset >> 5;
+        bit = offset & 0x1F;
+    } else {
+        word = 0;
+        bit = 0;
+    }
+    switch (selector) {
+    case 0:
+        D_00359A78[word] |= 1 << bit;
+        break;
+    case 1:
+        D_00359A78[word] &= ~(1 << bit);
+        break;
+    default:
+        return ((D_00359A78[word] & (1 << bit)) != 0);
+    }
+    return 1;
+}
 
 extern const char *D_003BB3A0;
 

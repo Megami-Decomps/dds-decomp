@@ -207,7 +207,7 @@ extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 
 extern s32 btlGetTrackedTaskHandle(s32);
 
-extern s32 D_003B6928[];
+extern u32 D_003B6928[];
 
 extern DatEnemyRecord *datEnemyRecords;
 
@@ -5857,7 +5857,34 @@ void func_001B7A00(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001B7A38);
+s32 func_001B7A38(s32 id, s32 operation) {
+    s32 selector;
+    s32 offset;
+    u32 word;
+    u32 bit;
+
+    id = (u16)id;
+    offset = id - 0x1AB;
+    selector = (s8)operation;
+    if (offset != 0) {
+        word = (u32)offset >> 5;
+        bit = offset & 0x1F;
+    } else {
+        word = 0;
+        bit = 0;
+    }
+    switch (selector) {
+    case 0:
+        D_003B6928[word] |= 1 << bit;
+        break;
+    case 1:
+        D_003B6928[word] &= ~(1 << bit);
+        break;
+    default:
+        return ((D_003B6928[word] & (1 << bit)) != 0);
+    }
+    return 1;
+}
 
 extern const char *D_004367B8;
 
