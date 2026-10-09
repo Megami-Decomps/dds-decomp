@@ -6214,6 +6214,14 @@ draw helpers and pool append. Decode the allocator's word only once;
 their separate GS packet locals and physical submission words retain
 their original address-word representation.
 
+`FldQuadState.packetList` at `+0x28` is the reset-list pointer, not a
+transport word. Its start/advance helpers receive the actual quad owner,
+and every local draw user forwards the stored pointer directly. Particle
+draw buckets likewise store CPU lists. Their draw receiver is the existing
+`SdfPoolNode`, whose `+0x10` callback is `append`; the unused `ParDrawCmd`
+prefix view is not a second owner. Physical payload addresses passed as
+the second `sdfAppendPacket` argument retain their word ABI.
+
 
 ## Battle panel corner clearing retains the retail redundant test
 

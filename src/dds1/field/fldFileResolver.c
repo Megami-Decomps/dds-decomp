@@ -2764,22 +2764,22 @@ typedef struct {
     s32 rowX;
     s32 rowY;
     s32 drawDepth;
-    s32 packetList;
+    SdfListHead *packetList;
 } FldQuadState; /* 0x2C bytes */
 
-void fldAdvanceQuadRow(s32 quadState) {
-    ((FldQuadState *)quadState)->rowY = ((FldQuadState *)quadState)->rowY + 0x60;
+void fldAdvanceQuadRow(FldQuadState *quad) {
+    quad->rowY = quad->rowY + 0x60;
 }
 
-void fldStartQuadPacketList(s32 quadState) {
+void fldStartQuadPacketList(FldQuadState *quad) {
     s32 packet;
-    u32 packetList;
+    SdfListHead *packetList;
 
-    packetList = (u32)sdfCreateResetPacketList();
-    ((FldQuadState *)quadState)->packetList = packetList;
+    packetList = sdfCreateResetPacketList();
+    quad->packetList = packetList;
     packet = sdfAllocPacketAligned(0x40);
     sdfBuildPrimaryAlphaBlendDmaPacket((SdfGsBlendPacket *)packet);
-    sdfAppendPacket((SdfListHead *)((FldQuadState *)quadState)->packetList, packet);
+    sdfAppendPacket(quad->packetList, packet);
 }
 
 extern SdfPoolNode D_00325708;
@@ -2810,12 +2810,12 @@ void func_0012B940(f32 x, f32 y, f32 z, s32 drawValue) {
     quad.baseY = 0x8440;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    fldStartQuadPacketList((s32)&quad);
+    fldStartQuadPacketList(&quad);
     sdfPktInit(&packet, (s32)screenX * 16, (s32)screenY * 16, quad.drawDepth, 1);
-    sdfAppendPacket((SdfListHead *)quad.packetList,
+    sdfAppendPacket(quad.packetList,
                     (u32)sdfFormatSifPacket(&packet, D_003BACE0, drawValue));
-    fldAdvanceQuadRow((s32)&quad);
-    D_00325708.append(&D_00325708, (SdfListHead *)quad.packetList);
+    fldAdvanceQuadRow(&quad);
+    D_00325708.append(&D_00325708, quad.packetList);
 }
 
 void fldDrawFloorQuad(s32 x, s32 y, const char *format) {
@@ -2832,11 +2832,11 @@ void fldDrawFloorQuad(s32 x, s32 y, const char *format) {
     quad.baseY = 0x7CC0;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7D;
-    fldStartQuadPacketList((s32)&quad);
+    fldStartQuadPacketList(&quad);
     sdfPktInit(&packet, quad.rowX + x, quad.rowY + y, quad.drawDepth, 0);
-    sdfAppendPacket((SdfListHead *)quad.packetList, (u32)sdfFormatSifPacket(&packet, format));
-    fldAdvanceQuadRow((s32)&quad);
-    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (SdfListHead *)quad.packetList);
+    sdfAppendPacket(quad.packetList, (u32)sdfFormatSifPacket(&packet, format));
+    fldAdvanceQuadRow(&quad);
+    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, quad.packetList);
 }
 
 void fldDrawFloorQuadA(s32 x, s32 y, s32 packetField, s32 drawValue) {
@@ -2853,11 +2853,11 @@ void fldDrawFloorQuadA(s32 x, s32 y, s32 packetField, s32 drawValue) {
     quad.baseY = 0x7CC0;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    fldStartQuadPacketList((s32)&quad);
+    fldStartQuadPacketList(&quad);
     sdfPktInit(&packet, quad.rowX + x, quad.rowY + y, quad.drawDepth, packetField);
-    sdfAppendPacket((SdfListHead *)quad.packetList, (u32)sdfFormatSifPacket(&packet, (const char *)drawValue));
-    fldAdvanceQuadRow((s32)&quad);
-    D_00325708.append(&D_00325708, (SdfListHead *)quad.packetList);
+    sdfAppendPacket(quad.packetList, (u32)sdfFormatSifPacket(&packet, (const char *)drawValue));
+    fldAdvanceQuadRow(&quad);
+    D_00325708.append(&D_00325708, quad.packetList);
 }
 
 void fldDrawMapQuadTiled(s32 x, s32 y, s32 drawValue) {
@@ -2874,11 +2874,11 @@ void fldDrawMapQuadTiled(s32 x, s32 y, s32 drawValue) {
     quad.baseY = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    fldStartQuadPacketList((s32)&quad);
+    fldStartQuadPacketList(&quad);
     sdfPktInit(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
-    sdfAppendPacket((SdfListHead *)quad.packetList, (u32)sdfFormatSifPacket(&packet, D_003BACE0, drawValue));
-    fldAdvanceQuadRow((s32)&quad);
-    D_00325708.append(&D_00325708, (SdfListHead *)quad.packetList);
+    sdfAppendPacket(quad.packetList, (u32)sdfFormatSifPacket(&packet, D_003BACE0, drawValue));
+    fldAdvanceQuadRow(&quad);
+    D_00325708.append(&D_00325708, quad.packetList);
 }
 
 void fldDrawMapQuadTiledAlt(s32 x, s32 y, s32 drawValue) {
@@ -2895,11 +2895,11 @@ void fldDrawMapQuadTiledAlt(s32 x, s32 y, s32 drawValue) {
     quad.baseY = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    fldStartQuadPacketList((s32)&quad);
+    fldStartQuadPacketList(&quad);
     sdfPktInit(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
-    sdfAppendPacket((SdfListHead *)quad.packetList, (u32)sdfFormatSifPacket(&packet, D_003BACE8, drawValue));
-    fldAdvanceQuadRow((s32)&quad);
-    D_00325708.append(&D_00325708, (SdfListHead *)quad.packetList);
+    sdfAppendPacket(quad.packetList, (u32)sdfFormatSifPacket(&packet, D_003BACE8, drawValue));
+    fldAdvanceQuadRow(&quad);
+    D_00325708.append(&D_00325708, quad.packetList);
 }
 
 void fldDrawMapQuad(s32 x, s32 y, s32 drawValue) {
@@ -2916,11 +2916,11 @@ void fldDrawMapQuad(s32 x, s32 y, s32 drawValue) {
     quad.baseY = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    fldStartQuadPacketList((s32)&quad);
+    fldStartQuadPacketList(&quad);
     sdfPktInit(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
-    sdfAppendPacket((SdfListHead *)quad.packetList, (u32)sdfFormatSifPacket(&packet, (const char *)drawValue));
-    fldAdvanceQuadRow((s32)&quad);
-    D_00325708.append(&D_00325708, (SdfListHead *)quad.packetList);
+    sdfAppendPacket(quad.packetList, (u32)sdfFormatSifPacket(&packet, (const char *)drawValue));
+    fldAdvanceQuadRow(&quad);
+    D_00325708.append(&D_00325708, quad.packetList);
 }
 
 void fldDrawMapQuadPacket(s32 x, s32 y, s32 packetField, s32 drawValue) {
@@ -2937,11 +2937,11 @@ void fldDrawMapQuadPacket(s32 x, s32 y, s32 packetField, s32 drawValue) {
     quad.baseY = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    fldStartQuadPacketList((s32)&quad);
+    fldStartQuadPacketList(&quad);
     sdfPktInit(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, packetField);
-    sdfAppendPacket((SdfListHead *)quad.packetList, (u32)sdfFormatSifPacket(&packet, (const char *)drawValue));
-    fldAdvanceQuadRow((s32)&quad);
-    D_00325708.append(&D_00325708, (SdfListHead *)quad.packetList);
+    sdfAppendPacket(quad.packetList, (u32)sdfFormatSifPacket(&packet, (const char *)drawValue));
+    fldAdvanceQuadRow(&quad);
+    D_00325708.append(&D_00325708, quad.packetList);
 }
 
 void fldDrawMapQuadScaled(s32 packetField, s32 drawValue, f32 x, f32 y) {
@@ -2958,11 +2958,11 @@ void fldDrawMapQuadScaled(s32 packetField, s32 drawValue, f32 x, f32 y) {
     quad.baseY = 0x7900;
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
-    fldStartQuadPacketList((s32)&quad);
+    fldStartQuadPacketList(&quad);
     sdfPktInit(&packet, quad.rowX + (s32)(x * 16.0f), quad.rowY + (s32)(y * 8.0f), quad.drawDepth, packetField);
-    sdfAppendPacket((SdfListHead *)quad.packetList, (u32)sdfFormatSifPacket(&packet, (const char *)drawValue));
-    fldAdvanceQuadRow((s32)&quad);
-    D_00325708.append(&D_00325708, (SdfListHead *)quad.packetList);
+    sdfAppendPacket(quad.packetList, (u32)sdfFormatSifPacket(&packet, (const char *)drawValue));
+    fldAdvanceQuadRow(&quad);
+    D_00325708.append(&D_00325708, quad.packetList);
 }
 
 void fldDrawFilledDisc(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
