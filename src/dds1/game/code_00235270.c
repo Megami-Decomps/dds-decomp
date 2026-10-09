@@ -3534,7 +3534,7 @@ void func_0023DFA8(s32 output, s32 mode, EvtRuntime *runtime) {
             s32 i;
             u16 value;
 
-            value = child->value04;
+            value = (u16)child->interpolationMode;
             record.groupType = group->type;
             record.start = child->frame;
             record.span = child->duration;
