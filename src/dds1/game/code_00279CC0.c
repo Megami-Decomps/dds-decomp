@@ -826,44 +826,44 @@ void mnuSelectLastListNode(MenuList *list) {
 }
 
 /* Advance the visible head when a prior window offset can be reduced. */
-s32 mnuAdvanceListWindowStart(MenuList *list) {
+MenuListNode *mnuAdvanceListWindowStart(MenuList *list) {
     MenuListNode *cursor = list->cursor;
     MenuListNode *last = list->last;
     MenuListNode *head = list->head;
 
     if (cursor == last) {
-        return (s32)cursor;
+        return cursor;
     }
     head = head->next;
     if (head == NULL) {
-        return (s32)cursor;
+        return cursor;
     }
     list->head = head;
     list->windowOffset--;
-    return (s32)cursor;
+    return cursor;
 }
 
 /* Step the visible head back one node when a full window follows it. */
-s32 mnuRetreatListWindowStart(MenuList *list) {
+MenuListNode *mnuRetreatListWindowStart(MenuList *list) {
     MenuListNode *cursor = list->cursor;
     MenuListNode *head = list->head;
     MenuListNode *node;
     s32 i;
 
     if (cursor == list->first) {
-        return (s32)cursor;
+        return cursor;
     }
     node = head;
     for (i = 0; i < list->visibleCount; i++) {
         if (node == NULL) {
-            return (s32)cursor;
+            return cursor;
         }
         node = node->next;
     }
     head = head->prev;
     list->head = head;
     list->windowOffset++;
-    return (s32)cursor;
+    return cursor;
 }
 
 MenuListNode *mnuListAdvanceCursor(MenuList *list, s32 noScroll, s32 keepFade) {
@@ -905,7 +905,7 @@ MenuListNode *mnuListAdvanceCursor(MenuList *list, s32 noScroll, s32 keepFade) {
         list->windowOffset = offset + 1;
         if (list->windowOffset >= list->visibleCount - 1) {
             if (noScroll == 0) {
-                cursor = (MenuListNode *)mnuAdvanceListWindowStart(list);
+                cursor = mnuAdvanceListWindowStart(list);
                 last = list->last;
             } else if (cursor != last) {
                 cursor = cursor->prev;
@@ -963,7 +963,7 @@ MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade) {
         list->windowOffset = offset - 1;
         if (list->windowOffset <= 0) {
             if (noScroll == 0) {
-                cursor = (MenuListNode *)mnuRetreatListWindowStart(list);
+                cursor = mnuRetreatListWindowStart(list);
                 first = list->first;
             } else if (cursor != first) {
                 cursor = cursor->next;

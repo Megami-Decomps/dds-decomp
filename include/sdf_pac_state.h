@@ -5,8 +5,23 @@
 #include "sdf_pac_packet.h"
 #include "sdf_pac_work.h"
 
-struct PacBuf;
 struct PacAlloc;
+struct SdfMemBlock;
+
+/* Complete 0x10-byte packet buffer: result is an opaque output word, while
+ * resourceSlot owns the optional general-heap allocation descriptor. */
+typedef struct PacBuf {
+    s32 result;
+    struct SdfMemBlock *resourceSlot;
+    u8 *cursor;
+    s32 remainingBytes;
+} PacBuf;
+
+typedef char PacBuf_size_must_be_0x10[(sizeof(PacBuf) == 0x10) ? 1 : -1];
+typedef char PacBuf_resourceSlot_offset_must_be_4[
+    ((u32)&((PacBuf *)0)->resourceSlot == 4) ? 1 : -1];
+typedef char PacBuf_remainingBytes_offset_must_be_C[
+    ((u32)&((PacBuf *)0)->remainingBytes == 0xC) ? 1 : -1];
 
 /* Complete 0x38-byte PAC decoder state shared by file and model loaders. */
 typedef struct PacState {
@@ -22,9 +37,9 @@ typedef struct PacState {
     u8 *outputCursor; /* 0x1C */
     s32 pendingBytes; /* 0x20 */
     u8 *decoder; /* 0x24: decoder work block, held as a byte pointer */
-    struct PacBuf *resourceBuffer; /* 0x28 */
+    PacBuf *resourceBuffer; /* 0x28 */
     union {
-        struct PacBuf *resource;
+        PacBuf *resource;
         struct PacAlloc *list;
     } slot; /* 0x2C */
     PacWork *queueHead; /* 0x30 */

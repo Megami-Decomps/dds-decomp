@@ -171,6 +171,21 @@ enum {
     SDF_DECODE_EXPAND_BYTES = 10
 };
 
+/* PAC command high bits choose the decoder operation; low five bits encode length.
+ * Values at or above 0xE0 are reserved except for the 0xFF end marker. */
+enum {
+    SDF_DECODE_COMMAND_CLASS_MASK = 0xE0,
+    SDF_DECODE_COMMAND_LENGTH_MASK = 0x1F,
+    SDF_DECODE_COMMAND_END_MARKER = 0xFF,
+    SDF_DECODE_COMMAND_RESERVED_MIN = 0xE0,
+    SDF_DECODE_COMMAND_COPY_LITERAL = 0x00,
+    SDF_DECODE_COMMAND_ZERO_FILL = 0x20,
+    SDF_DECODE_COMMAND_REPEAT_BYTE = 0x40,
+    SDF_DECODE_COMMAND_COPY_SHORT_BACKREFERENCE = 0x60,
+    SDF_DECODE_COMMAND_COPY_LONG_BACKREFERENCE = 0x80,
+    SDF_DECODE_COMMAND_EXPAND_BYTES = 0xA0
+};
+
 typedef struct SdfPacDecoder {
     u8 state;
     u8 command;
@@ -211,8 +226,8 @@ s32 func_00347988(SdfPacDecoder *decoder, u8 *input, s32 inputBytes) {
                     D_0047BC80[historyIndex] = input;
                     D_00439220 = (historyIndex + 1) & 0xF;
                     command = *input++;
-                    if (command >= 0xE0) {
-                        if (command == 0xFF) {
+                    if (command >= SDF_DECODE_COMMAND_RESERVED_MIN) {
+                        if (command == SDF_DECODE_COMMAND_END_MARKER) {
                             decoder->output = output;
                             decoder->input = input;
                             decoder->inputBytes = inputBytes;
@@ -220,8 +235,8 @@ s32 func_00347988(SdfPacDecoder *decoder, u8 *input, s32 inputBytes) {
                             return 1;
                         }
                     } else {
-                        decoder->command = command & 0xE0;
-                        commandBytes = command & 0x1F;
+                        decoder->command = command & SDF_DECODE_COMMAND_CLASS_MASK;
+                        commandBytes = command & SDF_DECODE_COMMAND_LENGTH_MASK;
                         if (commandBytes == 0) {
                             decoder->state = SDF_DECODE_READ_COUNT_LOW;
                         } else {
@@ -243,25 +258,25 @@ s32 func_00347988(SdfPacDecoder *decoder, u8 *input, s32 inputBytes) {
                     break;
                 case SDF_DECODE_DISPATCH:
                     switch (decoder->command) {
-                    case 0:
+                    case SDF_DECODE_COMMAND_COPY_LITERAL:
                         decoder->state = SDF_DECODE_COPY_LITERAL;
                         break;
-                    case 0x20:
+                    case SDF_DECODE_COMMAND_ZERO_FILL:
                         count = decoder->pendingBytes;
                         memset(output, 0, count);
                         output += count;
                         decoder->state = SDF_DECODE_READ_COMMAND;
                         break;
-                    case 0x40:
+                    case SDF_DECODE_COMMAND_REPEAT_BYTE:
                         decoder->state = SDF_DECODE_FILL_BYTE;
                         break;
-                    case 0x60:
+                    case SDF_DECODE_COMMAND_COPY_SHORT_BACKREFERENCE:
                         decoder->state = SDF_DECODE_COPY_SHORT_BACKREF;
                         break;
-                    case 0x80:
+                    case SDF_DECODE_COMMAND_COPY_LONG_BACKREFERENCE:
                         decoder->state = SDF_DECODE_READ_BACKREF_LOW;
                         break;
-                    case 0xA0:
+                    case SDF_DECODE_COMMAND_EXPAND_BYTES:
                         decoder->state = SDF_DECODE_EXPAND_BYTES;
                         break;
                     }
