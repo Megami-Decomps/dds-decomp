@@ -156,8 +156,8 @@ void effBillSetEntryValue(EffectDispatchState *effect, s32 index, u32 value) {
     effect->entries[index].value = value;
 }
 
-s32 billGetWorkTransformMatrix(EffectDispatchState *effect) {
-    return (s32)effect + 0x20;
+void *billGetWorkTransformMatrix(void *packet) {
+    return (u8 *)packet + 0x20;
 }
 
 void *effCreateSizedDrawPacket(s32 height, s32 flags) {
@@ -194,7 +194,7 @@ void effWriteGouraudTexturedQuadPacket(u64 *packet, s32 primitive,
     packet[14] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-void effAppendGouraudTexturedQuadPacket(s32 chain, s32 primitive,
+void effAppendGouraudTexturedQuadPacket(SdfListHead *chain, s32 primitive,
                  s32 x0, s32 y0, f32 s0, f32 t0, s32 color0,
                  s32 x1, s32 y1, f32 s1, f32 t1, s32 color1,
                  s32 x2, s32 y2, f32 s2, f32 t2, s32 color2,
@@ -206,7 +206,7 @@ void effAppendGouraudTexturedQuadPacket(s32 chain, s32 primitive,
     effWriteGouraudTexturedQuadPacket(packet + 2, primitive, x0, y0, s0, t0, color0,
                  x1, y1, s1, t1, color1, x2, y2, s2, t2, color2,
                  x3, y3, s3, t3, color3, depth);
-    sdfAppendPacket((SdfListHead *)chain, (u32)packet);
+    sdfAppendPacket(chain, (u32)packet);
 }
 
 void billWriteFloatTextureTrianglePacket(u64 *packet, s32 color, s32 primitive,
@@ -230,7 +230,7 @@ void billWriteFloatTextureTrianglePacket(u64 *packet, s32 color, s32 primitive,
     packet[9] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
-void effAppendTexturedTrianglePacket(s32 chain, s32 color, s32 primitive,
+void effAppendTexturedTrianglePacket(SdfListHead *chain, s32 color, s32 primitive,
                  s32 x0, s32 y0, f32 u0, f32 v0,
                  s32 x1, s32 y1, f32 u1, f32 v1,
                  s32 x2, s32 y2, f32 u2, f32 v2, s32 depth) {
@@ -240,7 +240,7 @@ void effAppendTexturedTrianglePacket(s32 chain, s32 color, s32 primitive,
     packet[1] = 0x5000000510000000ULL;
     billWriteFloatTextureTrianglePacket(packet + 2, color, primitive, x0, y0, u0, v0,
                  x1, y1, u1, v1, x2, y2, u2, v2, depth);
-    sdfAppendPacket((SdfListHead *)chain, (u32)packet);
+    sdfAppendPacket(chain, (u32)packet);
 }
 
 u64 *effBuildDrawPacketWithFlags(u32 flags) {

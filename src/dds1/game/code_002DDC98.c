@@ -1054,7 +1054,7 @@ void sdfConsInitDmaPacketHeader(DmaPacketHeader *packet, u32 sourceAddress, s32 
 extern u8 D_00324350[];
 
 /* Append the second fixed program block as a DMA reference packet. */
-void sdfConsAppendProgramReferencePacket(s32 packetList, DmaPacketHeader *packet) {
+void sdfConsAppendProgramReferencePacket(SdfListHead *packetList, DmaPacketHeader *packet) {
     packet->address = (u32)D_00320630 & SDF_DMA_ADDRESS_MASK;
     packet->quadwords = (D_00324350 - D_00320630) >> SDF_DMA_QWORD_SHIFT;
     packet->tag = 0;
@@ -1062,7 +1062,7 @@ void sdfConsAppendProgramReferencePacket(s32 packetList, DmaPacketHeader *packet
     packet->unused10 = 0;
     packet->unused18 = 0;
     packet->unused1C = 0;
-    sdfAppendReferencePacket((SdfListHead *)packetList, (u32)packet);
+    sdfAppendReferencePacket(packetList, (u32)packet);
 }
 
 

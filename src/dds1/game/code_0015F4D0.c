@@ -152,8 +152,8 @@ void effBillSetEntryValue(BillEntryOwner *owner, s32 index, u32 value) {
     owner->entries[index].value = value;
 }
 
-s32 billGetWorkTransformMatrix(s32 arg0) {
-    return arg0 + 0x20;
+void *billGetWorkTransformMatrix(void *packet) {
+    return (u8 *)packet + 0x20;
 }
 
 void *effCreateSizedDrawPacket(s32 height, s32 flags) {
@@ -191,7 +191,7 @@ void effWriteGouraudTexturedQuadPacket(u64 *packet, s32 primitive,
     packet[14] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
-void effAppendGouraudTexturedQuadPacket(s32 chain, s32 primitive,
+void effAppendGouraudTexturedQuadPacket(SdfListHead *chain, s32 primitive,
                  s32 x0, s32 y0, f32 s0, f32 t0, s32 color0,
                  s32 x1, s32 y1, f32 s1, f32 t1, s32 color1,
                  s32 x2, s32 y2, f32 s2, f32 t2, s32 color2,
@@ -203,7 +203,7 @@ void effAppendGouraudTexturedQuadPacket(s32 chain, s32 primitive,
     effWriteGouraudTexturedQuadPacket(packet + 2, primitive, x0, y0, s0, t0, color0,
                  x1, y1, s1, t1, color1, x2, y2, s2, t2, color2,
                  x3, y3, s3, t3, color3, depth);
-    sdfAppendPacket((SdfListHead *)chain, (u32)packet);
+    sdfAppendPacket(chain, (u32)packet);
 }
 
 void billWriteFloatTextureTrianglePacket(u64 *packet, s32 color, s32 primitive,

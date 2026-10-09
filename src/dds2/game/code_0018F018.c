@@ -70,7 +70,7 @@ extern u32 func_001200E0(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern void *effCreateSizedDrawPacket();
 extern u64 *effBuildDrawPacketWithFlags(u32 flags);
-extern void *billGetWorkTransformMatrix();
+extern void *billGetWorkTransformMatrix(void *packet);
 extern void effBlurBuildSamplingQuad();
 
 extern void effAppendBlurRenderState(void *, s32, u32);

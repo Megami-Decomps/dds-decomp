@@ -1630,9 +1630,9 @@ extern void func_002E96D8(s32);
 extern void func_00260670(s32 context);
 
 extern void func_0024DD78(void);
-extern u8 D_0036AA68[];
-extern u8 D_0036AA84[];
-extern u8 D_0036AAA0[];
+extern MenuPopupEntry D_0036AA68[];
+extern MenuPopupEntry D_0036AA84[];
+extern MenuPopupEntry D_0036AAA0[];
 extern u8 D_0036AABC[];
 
 extern s32 kwlnFadeIsActive(void);
@@ -1682,7 +1682,7 @@ s32 evtIsFadeDispatchIdle(void) {
 
 void evtInstallStateTable(ShopScene *state) {
     if (state->menuMode == 2) {
-        MNU_INSTALL_STATE_TABLE(state, D_0036AA68, D_0036AA68 + 0xC4);
+        MNU_INSTALL_STATE_TABLE(state, D_0036AA68, D_0036AA68 + 7);
     }
 }
 
@@ -1718,11 +1718,83 @@ s32 evtAdvancePhaseOne(KwlnTask *task) {
     return 1;
 }
 
+extern s32 mnuMapPadMaskToFlags(s32);
+extern s32 mnuStaffTickState(ShopScene *);
+extern MenuPopupEntry D_0036AAD8[];
+
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF418);
 
 INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF428);
 
-INCLUDE_ASM(const s32, "game/code_00242608", func_00245DE0);
+s32 func_00245DE0(KwlnTask *task) {
+    s32 allowed = 1;
+    ShopScene *state = (ShopScene *)kwlnTaskGetUserValue(task);
+    s32 input = mnuMapPadMaskToFlags(0x33);
+    struct MenuList *list = state->sprite->list;
+    s32 result;
+
+    result = menuRunPanel(state, EVT_DISPATCH_OPERATION_POLL, task);
+    if (result != 0) {
+        return result;
+    }
+    switch (mnuStaffTickState(state)) {
+    case -1:
+        return 0;
+    case 0:
+        mnuSetCommandPhase(state, 3);
+        mnuStorePendingMenuCommandValue(list, 10);
+        return 0;
+    case 1:
+        if (state->extraOption != 0) {
+            mnuSetPopupEntryFlagged(&state->dispatchState,
+                                   D_0036AA84 + state->sprite->list->cursor->index);
+        } else {
+            s32 index = state->sprite->list->cursor->index;
+            if (index + 1 >= 2) {
+                mnuSetPopupEntryFlagged(&state->dispatchState, D_0036AAA0 + index);
+            } else {
+                mnuSetPopupEntryFlagged(&state->dispatchState, D_0036AA84 + index);
+            }
+        }
+        return 0;
+    case 2:
+        mnuSetPopupEntryFlagged(&state->dispatchState, D_0036AAD8);
+        return 0;
+    case 3:
+        evtInstallStateTable(state);
+    default:
+        if (state->dispatchState == 0) {
+            if (input & 1) {
+                if (state->pendingSelection == 0) {
+                    if (state->extraOption != 0) {
+                        if (state->sprite->list->cursor->index == 2) {
+                            allowed = 0;
+                        }
+                    } else {
+                        allowed = state->sprite->list->cursor->index != 1;
+                    }
+                }
+                if (allowed != 0) {
+                    mnuSetCommandPhase(state, 1);
+                    func_00260550(list, 4);
+                } else {
+                    state->menuMode = 2;
+                }
+            } else if (input & 2) {
+                mnuSetCommandPhase(state, 2);
+                func_00260550(list, 4);
+            } else if (!(input & 0x300000)) {
+                func_0027C788(state->sprite);
+            } else if (input & 0x10) {
+                mnuRetreatWindowListSelection(state->sprite);
+            } else if (input & 0x20) {
+                mnuAdvanceWindowListSelection(state->sprite);
+            }
+        }
+        mnuPlayInputSound(0, input, &state->sprite->list->stateFlags);
+        return 0;
+    }
+}
 
 s32 evtPrimeDispatchStart(KwlnTask *callbackContext) {
     s32 stateAddress = kwlnTaskGetUserValue(callbackContext);
@@ -1740,7 +1812,7 @@ s32 evtSetupDispatchSync(KwlnTask *callbackContext) {
 
 void evtInstallStateTableB(ShopScene *state) {
     if (state->menuMode == 1) {
-        MNU_INSTALL_STATE_TABLE(state, D_0036AA84, D_0036AA84 + 0xA8);
+        MNU_INSTALL_STATE_TABLE(state, D_0036AA84, D_0036AA84 + 6);
     }
 }
 
@@ -1798,7 +1870,7 @@ s32 func_00246220(KwlnTask *task) {
             mnuStorePendingMenuCommandValue(linkedTask, 10);
             break;
         case 5:
-            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AA68);
+            mnuSetPopupEntryFlagged(dispatchSlot, D_0036AA68);
             mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->sprite->list, 10);
             break;
         case 7:
@@ -1861,7 +1933,7 @@ s32 evtSetupDispatchSyncB(KwlnTask *callbackContext) {
 
 void evtInstallStateTableC(ShopScene *state) {
     if (state->menuMode == 1) {
-        MNU_INSTALL_STATE_TABLE(state, D_0036AAA0, D_0036AAA0 + 0x8C);
+        MNU_INSTALL_STATE_TABLE(state, D_0036AAA0, D_0036AAA0 + 5);
     }
 }
 
@@ -1919,7 +1991,7 @@ s32 func_002465F8(KwlnTask *task) {
             mnuStorePendingMenuCommandValue(linkedTask, 10);
             break;
         case 5:
-            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AA68);
+            mnuSetPopupEntryFlagged(dispatchSlot, D_0036AA68);
             mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->sprite->list, 10);
             break;
         case 7:
@@ -2035,7 +2107,7 @@ s32 func_002469F0(KwlnTask *task) {
             mnuStorePendingMenuCommandValue(linkedTask, 10);
             break;
         case 5:
-            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AA68);
+            mnuSetPopupEntryFlagged(dispatchSlot, D_0036AA68);
             mnuStorePendingMenuCommandValue(((ShopScene *)stateAddress)->sprite->list, 10);
             break;
         case 7:
@@ -2177,7 +2249,7 @@ s32 evtPollQuantitySelection(KwlnTask *callbackContext) {
         break;
     case 10: {
         struct MenuList *primaryTask = ((ShopScene *)stateAddress)->sprite->list;
-        mnuSetPopupEntryFlagged(dispatchSlot, (void *)(D_0036AA84 + primaryTask->cursor->index * 0x1C));
+        mnuSetPopupEntryFlagged(dispatchSlot, D_0036AA84 + primaryTask->cursor->index);
         break;
     }
     case 12:
@@ -2386,10 +2458,10 @@ s32 func_00247588(KwlnTask *task) {
         /* Operation two is the additional option; the baseline pair is one/three. */
         switch (selectedOperation) {
         case 2:
-            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AAA0);
+            mnuSetPopupEntryFlagged(dispatchSlot, D_0036AAA0);
             break;
         case 1:
-            mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AA84);
+            mnuSetPopupEntryFlagged(dispatchSlot, D_0036AA84);
             break;
         case 3:
             mnuSetPopupEntryFlagged(dispatchSlot, (void *)D_0036AABC);
@@ -2454,7 +2526,7 @@ s32 evtPlayDispatchModeCue(KwlnTask *task) {
 }
 
 
-extern u8 D_0036AA68[];
+extern MenuPopupEntry D_0036AA68[];
 
 extern void mnuSetCommandPhase(ShopScene *, u32);
 

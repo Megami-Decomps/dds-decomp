@@ -1651,7 +1651,7 @@ void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
     s32 alpha;
     s32 i;
     u8 *component;
-    s32 list;
+    SdfListHead *list;
     SdfPoolNode *surface;
     f32 phase;
 
@@ -1663,12 +1663,12 @@ void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
         color |= *component << (i * 8);
     }
     color |= alpha << 24;
-    list = (s32)sdfCreateResetPacketList();
-    sdfAppendPacket((SdfListHead *)list, (u32)btlCreateGsTestRegisterPacket(0x33001, 0));
-    sdfAppendPacket((SdfListHead *)list, (u32)btlCreateGsAlphaRegisterPacket(6, 0));
-    sdfAppendPacket((SdfListHead *)list, (u32)func_001A9580(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
+    list = sdfCreateResetPacketList();
+    sdfAppendPacket(list, (u32)btlCreateGsTestRegisterPacket(0x33001, 0));
+    sdfAppendPacket(list, (u32)btlCreateGsAlphaRegisterPacket(6, 0));
+    sdfAppendPacket(list, (u32)func_001A9580(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
     surface = &kwlnDrawSurfaces[surfaceIndex];
-    surface->append(surface, (SdfListHead *)list);
+    surface->append(surface, list);
 }
 
 void btlResetRuntimeSequenceCounter(void) {
