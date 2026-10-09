@@ -7377,3 +7377,7 @@
 0x002ECF70	sdfMovieScheduleLinearStreamRead	inferred	Checks linear-ring capacity, reserves up to 0x4000 bytes, and queues the next asynchronous device read.
 0x002D86E0	sdfDrawNodeBuildFromItemAndCommands	inferred	Copies item transforms and initializes draw commands from inline or list command setup.
 0x002D7F40	sdfModelBuildIndexedCommandPayload	inferred	Builds the indexed asset command payload and returns the following payload record.
+0x0016BAC0	effFlashAccumulatingSetParticleColors	inferred	Writes packed colors for paired particle quad records using the supplied color multiplier.
+0x0016BBB0	effFlashAccumulatingBuildParticleQuads	inferred	Builds paired outer and inner particle quads and advances radius by radialStep.
+0x0016C698	effFlashOrbitArcUpdate	inferred	Advances shape and particle lifetimes, updates orbit-arc geometry and colors, and submits the record pool.
+0x0016DBA0	effFlashRadialStripSetParticleColors	inferred	Writes packed colors for paired radial-strip quad records using the supplied color multiplier.
