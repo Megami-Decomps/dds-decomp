@@ -7353,6 +7353,7 @@ evtSetWorldUnitPosition = 0x00223FB0; // type:func  // dds2 0x0023EBE8
 evtSetWorldUnitScale = 0x00224130; // type:func  // dds2 0x0023ED68
 evtCommandSetEffectUnitPosition = 0x00227090; // type:func
 evtCommandSetEffectUnitQuaternionRotation = 0x00227210; // type:func
+effResetFragmentHistory = 0x00169B70; // type:func  // dds2 0x001717C8
 
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskActivate = 0x00100A98; // type:func  // dds2 0x00100980
@@ -7469,7 +7470,6 @@ effParamWorkGetData = 0x00162970; // type:func  // dds2 0x0016A5A0
 effParamWorkGetId = 0x00162978; // type:func  // dds2 0x0016A5A8
 effParamWorkInvokeCallback = 0x00162A38; // type:func  // dds2 0x0016A668
 effReleaseEffectResources = 0x00169B40; // type:func  // dds2 0x00171798
-effInitializeColorState = 0x00169B70; // type:func  // dds2 0x001717C8
 effFlashUpdateStreak = 0x0016AD58; // type:func  // dds2 0x001729B0
 effReleaseRingResources = 0x0016F458; // type:func  // dds2 0x001770B0
 effSetRingColor = 0x0016F498; // type:func  // dds2 0x001770F0

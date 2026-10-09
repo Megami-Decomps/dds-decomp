@@ -2372,7 +2372,6 @@ void effReleaseGroupSlotsAndResources(EffPcpThunderGroup *group) {
 
 struct BtlUnit;
 struct RwV3d;
-struct EffectColorState;
 /* The event holder consumes the same packed 0x30-byte record as effEvent.c. */
 typedef struct {
     u8 bytes[0x30];
@@ -2384,7 +2383,7 @@ extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void btlUnitGetMuzzlePosVU(struct BtlUnit *);
 extern f32 sdfViewEyeVector[4], sdfViewTargetVector[4];
 extern void sdfBuildVuRotationFromAxisAngle(const struct RwV3d *, f32);
-extern void effInitializeColorState(struct EffectColorState *);
+extern void effResetFragmentHistory(EffPcpThunderFragmentResources *);
 extern void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *, u128 *);
 extern f32 sdfAtan2(f32, f32);
 extern void sdfConvertEulerAnglesToQuaternionVU(f32, f32, f32);
@@ -2692,7 +2691,7 @@ void func_001681C0(EffPcpThunderGroup *group) {
             slot->position[1] = point[1];
             slot->position[2] = point[2];
             slot->age = -(effMiscRand(effDefaultRandomState) % delayRange);
-            effInitializeColorState((struct EffectColorState *)slot->fragment);
+            effResetFragmentHistory(slot->fragment);
         } else if (slot->age++ >= 0) {
             if (slot->curve.t >= 1.0f && slot->curve.pointIndex >= 3) {
                 if (slot->fadeScale > fadeStep) {
@@ -2700,7 +2699,7 @@ void func_001681C0(EffPcpThunderGroup *group) {
                     slot->fragment->color = ((u32)(slot->fadeScale * 128.0f) << 24) | 0x808080;
                     slot->fragment->color = effMultiplyPackedColors(color, slot->fragment->color);
                 } else {
-                    effInitializeColorState((struct EffectColorState *)slot->fragment);
+                    effResetFragmentHistory(slot->fragment);
                 }
             } else {
                 previous[0] = slot->position[0];
@@ -2872,8 +2871,8 @@ EffPcpThunderFragmentResources *effCreateFragmentResources(s32 historyLength, s3
     storage += colorBytes;
     history->endColors = (u32 *)storage;
     history->surfaceIndex = 2;
-    history->count = count;
-    history->position = 3;
+    history->pointCapacity = count;
+    history->nextPointWriteIndex = 3;
     history->subdivisions = subdivisions;
     history->color = 0x80808080;
     history->allocation = allocation;
@@ -2893,24 +2892,16 @@ EffPcpThunderFragmentResources *effCreateFragmentResources(s32 historyLength, s3
     return history;
 }
 
-/* The packed color state is identical to the sequel's effect state layout. */
-typedef struct EffectColorState {
-    u32 color;    /* 0x00 */
-    u8 pad04[8];
-    u32 valueC;   /* 0x0C */
-    u32 mode;     /* 0x10 */
-} EffectColorState;
-
 void effReleaseEffectResources(EffPcpThunderFragmentResources *work) {
     sdfQueueAssetRelease(work->resourceHandle);
     sdfReleaseResourceAllocation(work->allocation);
 }
 
-/* Restore the neutral gray color and default effect mode before rendering. */
-void effInitializeColorState(EffectColorState *state) {
-    state->mode = 3;
-    state->color = 0x80808080;
-    state->valueC = 0;
+/* Reset the point ring and restore the fragment's neutral packed color. */
+void effResetFragmentHistory(EffPcpThunderFragmentResources *history) {
+    history->nextPointWriteIndex = 3;
+    history->color = 0x80808080;
+    history->activePointCount = 0;
 }
 
 
@@ -2918,7 +2909,7 @@ extern u32 effBlendColor(u32 colorA, u32 colorB, f32 t);
 
 void effInitializeFragmentHistoryColors(EffPcpThunderFragmentResources *history, u32 *gradientColors) {
     f32 t = 0.0f;
-    u32 count = history->count / 3;
+    u32 count = history->pointCapacity / 3;
     u32 alphaCount = count >> 1;
     f32 step = 1.0f / count;
     f32 alpha = 0.0f;
@@ -2948,7 +2939,7 @@ void effInitializeFragmentHistoryColors(EffPcpThunderFragmentResources *history,
 }
 
 void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *history, u128 *source) {
-    s32 position = history->position;
+    s32 position = history->nextPointWriteIndex;
     u128 *points = history->points;
     s32 count;
 
@@ -2956,13 +2947,13 @@ void effAppendFragmentHistoryPoints(EffPcpThunderFragmentResources *history, u12
     PCP_COPY_VECTOR(&points[position + 1], source + 1);
     PCP_COPY_VECTOR(&points[position + 2], source + 2);
     position += 3;
-    count = history->count;
-    history->position = position;
+    count = history->pointCapacity;
+    history->nextPointWriteIndex = position;
     if (position == count) {
         PCP_COPY_VECTOR(&points[0], source);
         PCP_COPY_VECTOR(&points[1], source + 1);
         PCP_COPY_VECTOR(&points[2], source + 2);
-        history->position = 3;
+        history->nextPointWriteIndex = 3;
     }
     if (history->activePointCount < count - 3) {
         history->activePointCount += 3;
@@ -2998,11 +2989,11 @@ void effThunderDrawHistoryAndEndCap(EffPcpThunderFragmentResources *history) {
     sdfConsAppendClearPacket(list, 0);
     sdfConsAppendAssetPacket(list, history->resourceHandle, 0);
     recent = history->activePointCount;
-    start[0] = history->position - recent;
+    start[0] = history->nextPointWriteIndex - recent;
     if (start[0] < 3) {
         wrapped = start[0] - 3;
         start[1] = 0;
-        start[0] = wrapped + history->count;
+        start[0] = wrapped + history->pointCapacity;
         length[0] = -wrapped;
         length[1] = recent - length[0] + 3;
     } else {
