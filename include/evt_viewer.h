@@ -179,10 +179,10 @@ typedef struct EvtRuntime {
     s16 unk23C6;
     s32 tableColumn;
     s32 cameraColorActive;
-    s32 ch71;
-    s32 ch72;
-    s32 ch76;
-    s32 ch75;
+    SdfTex *ch71;
+    SdfTex *ch72;
+    SdfTex *ch76;
+    SdfTex *ch75;
     s32 selectedEntry;
     s32 commandFirst;
     EvtCommandArgument commandSecond;

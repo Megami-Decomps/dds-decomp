@@ -43,10 +43,10 @@ extern void effInitCh71Id(void);
 extern void effInitCh72Id(void);
 extern void effInitCh75Id(void);
 extern void effInitCh76Id(void);
-extern void effSetCh71Id(u32 resourceWord);
-extern void effSetCh72Id(u32 sourceHandle);
-extern void effSetCh75Id(u32 resourceWord);
-extern void effSetCh76Id(u32 sourceHandle);
+extern void effSetCh71Id(SdfTex *texture);
+extern void effSetCh72Id(SdfTex *sourceHandle);
+extern void effSetCh75Id(SdfTex *texture);
+extern void effSetCh76Id(SdfTex *sourceHandle);
 extern void *mnuCampFindEntryByName(void *scene, const char *name);
 
 extern u32 mnuCampGetPrimaryOption(void *scene);
@@ -697,7 +697,7 @@ void func_0022F550(s32 frame, EvtRuntime *viewer) {
     while (track != NULL) {
         if ((u32)(track->type - 0xE) < 2 || track->type == 0x17 || track->type == 0x11) {
             EvtRuntimeChild *key = track->children;
-            s32 value = 0;
+            SdfTex *value = 0;
 
             while (key != NULL) {
                 if (track->type != 0x11 || evtViewerTestIndexedCondition(key->p14.sh[0]) != 0) {
@@ -707,7 +707,7 @@ void func_0022F550(s32 frame, EvtRuntime *viewer) {
                     if (key->p10.sh[0] != 0) {
                         value = 0;
                         if (key->p10.sh[0] != 1) {
-                            value = (s32)((EvtRuntimeGroup *)mnuCampFindEntryByName(
+                            value = ((EvtRuntimeGroup *)mnuCampFindEntryByName(
                                          viewer, (char *)viewer->entryName[key->p10.sh[0] - 2]))->texture;
                         }
                     }

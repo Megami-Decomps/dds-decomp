@@ -13,7 +13,36 @@ typedef struct MdlCtx MdlCtx;
 
 struct MdlPartEntry;
 struct MdlObj;
-struct MdlRecord;
+/* Relative-linked viewer records share packed payload and parameter words.
+ * Kinds 1/2 use the count and part-index halfwords at 0x0C/0x0E; kind 3
+ * reads the whole parameter word. Kind 4 reads both selector halfwords at 0x08/0x0A. */
+typedef struct MdlRecord {
+    s32 kind;       /* 0x00: 0xFFFF terminates the record chain */
+    s32 nextOffset; /* 0x04: relative byte offset to next record */
+    union {
+        u32 word;               /* 0x08 */
+        struct {
+            u16 selectorA;
+            u16 selectorB;
+        } stream;
+    } payload;
+    union {
+        u32 word;               /* 0x0C */
+        struct {
+            u16 count;
+            u16 partIndex;
+        } part;
+    } parameter;
+    union {
+        u32 word10; /* 0x10: kind-four stream parameter */
+        struct {
+            u16 unk10;
+            u16 unk12;
+        } half;
+    } tail;
+} MdlRecord;
+
+typedef char MdlRecord_size_must_be_0x14[(sizeof(MdlRecord) == 0x14) ? 1 : -1];
 struct SdfMapPositionRecord;
 struct SdfItemListRef;
 struct SdfTex;

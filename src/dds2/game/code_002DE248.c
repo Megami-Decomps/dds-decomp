@@ -265,13 +265,23 @@ extern float effMiscRandUnitFloat(void *);
 
 extern s32 func_002FF0B8(EffectStateSnapshot *, s32);
 
+typedef struct EffKindAssetHolder {
+    s32 kind;
+    s32 references;
+    SdfTex *resource;
+} EffKindAssetHolder;
+
+struct EffKindWork;
+
+extern EffKindAssetHolder *effRetainKindSecondaryAsset(EffKindAssetHolder *work);
+
 /* Native kind operations include handle destruction and per-frame update;
  * zero-argument notifications retain the original unprototyped callback ABI. */
 typedef struct EffKindDesc {
     u32 (*create)(void *);        // 0x00
     void (*destroy)();       // 0x04: release the created handle
     void (*update)();        // 0x08: advance work through its kind callback
-    void (*initialize)(s32, s32); // 0x0C
+    void (*initialize)(struct EffKindWork *, SdfTex *); // 0x0C
     u32 payloadSize;         // 0x10: bytes copied after the work header
 } EffKindDesc; // 0x14
 
@@ -287,7 +297,7 @@ typedef struct EffKindWork {
     u32 frame;       // 0x20, incremented by the kind callback dispatcher
     u32 handle;       // 0x24
     void *payload;    // 0x28
-    void *target;     // 0x2C
+    EffKindAssetHolder *target;     // 0x2C
 } EffKindWork; // 0x30
 
 /* Source payload's kind selects the initial rendering mode. */
@@ -1041,8 +1051,8 @@ void effUpdateProjectedBlurFadeRectangle(EffKindWork *work) {
     effDrawBlurFixedPointRectangle(out);
 }
 
-void effSetFadeMapParameter(EffKindWork *work, u32 value) {
-    ((EffBlurTemplate *)work->handle)->resourceWord = value;
+void effSetFadeMapParameter(EffKindWork *work, SdfTex *value) {
+    ((EffBlurTemplate *)work->handle)->texture = value;
 }
 
 u32 effCreateFixedSlotBlurWorkFromFadeOutput(void *source) {
@@ -1111,8 +1121,8 @@ void effUpdateFadeMapA(EffKindWork *work) {
     effBlurStepScatterSlotsAndDraw(out);
 }
 
-void effSetWideFadeMapParameter(EffKindWork *work, u32 value) {
-    ((EffBlurScatterWork *)work->handle)->sourceHandle = value;
+void effSetWideFadeMapParameter(EffKindWork *work, SdfTex *value) {
+    ((EffBlurScatterWork *)work->handle)->texture = value;
 }
 
 u32 effCreateVariableSlotBlurWorkFromFadeOutput(void *source) {
@@ -1181,8 +1191,8 @@ void effUpdateFadeMapB(EffKindWork *work) {
     effBlurStepScaleSlotsAndDraw(out);
 }
 
-void effSetFadeBlendParameter(EffKindWork *work, u32 value) {
-    ((EffBlurScaleWork *)work->handle)->sourceHandle = value;
+void effSetFadeBlendParameter(EffKindWork *work, SdfTex *value) {
+    ((EffBlurScaleWork *)work->handle)->texture = value;
 }
 
 /* Draw a framebuffer fade using raw curve rates rather than percent-scaled rates.
@@ -1339,8 +1349,8 @@ void func_002DFAB0(EffKindWork *work) {
     effResourceRectDrawGsCoords(out);
 }
 
-void func_002DFC78(EffKindWork *work, u32 value) {
-    ((EffResourceRectWork *)work->handle)->sourceHandle = value;
+void func_002DFC78(EffKindWork *work, SdfTex *value) {
+    ((EffResourceRectWork *)work->handle)->texture = value;
 }
 
 EffKindWork *effAllocateKindWork(u16 kind, u8 *source) {
@@ -1377,7 +1387,7 @@ EffKindWork *effAllocateKindWork(u16 kind, u8 *source) {
     return work;
 }
 
-extern s32 *effCreateResourceHolderFromSelectedKind(s32 *, u16);
+extern EffKindAssetHolder *effCreateResourceHolderFromSelectedKind(s32 *, u16);
 
 EffKindWork *func_002DFDB8(FileJob *work) {
     void *source = fileResolvePrimaryBuffer((FileJobPayload *)work);
@@ -1386,15 +1396,15 @@ EffKindWork *func_002DFDB8(FileJob *work) {
 
     if (secondary != NULL) {
         if (D_003E9810[effect->kind].initialize != NULL) {
-            s32 *child = effCreateResourceHolderFromSelectedKind(secondary, work->slots[0].selector);
+            EffKindAssetHolder *child = effCreateResourceHolderFromSelectedKind(secondary, work->slots[0].selector);
             effect->target = child;
-            D_003E9810[effect->kind].initialize((s32)effect, child[2]);
+            D_003E9810[effect->kind].initialize(effect, child->resource);
         }
     }
     return effect;
 }
 
-extern void effKindAssetReferenceRelease(s32 *);
+extern void effKindAssetReferenceRelease(EffKindAssetHolder *);
 
 void effReleaseKindWork(EffKindWork *work) {
     s32 object = work->handle;
@@ -1410,10 +1420,10 @@ void effReleaseKindWork(EffKindWork *work) {
 s32 effCloneKindWork(EffKindWork *source) {
     EffKindWork *copy = effAllocateKindWork((u16)source->kind, source->payload);
     if (source->target != NULL && D_003E9810[copy->kind].initialize != NULL) {
-        s32 *child = (s32 *)effRetainKindSecondaryAsset(source->target);
-        s32 parameter = child[2];
+        EffKindAssetHolder *child = effRetainKindSecondaryAsset(source->target);
+        SdfTex *parameter = child->resource;
         copy->target = child;
-        D_003E9810[copy->kind].initialize((s32)copy, parameter);
+        D_003E9810[copy->kind].initialize(copy, parameter);
     }
     return (s32)copy;
 }
@@ -1484,9 +1494,9 @@ EffKindWork *effCreateAlternateKindWorkFromFile(FileJob *work) {
 
     if (secondary != NULL) {
         if (D_003E98A0[effect->kind].initialize != NULL) {
-            s32 *child = effCreateResourceHolderFromSelectedKind(secondary, work->slots[0].selector);
+            EffKindAssetHolder *child = effCreateResourceHolderFromSelectedKind(secondary, work->slots[0].selector);
             effect->target = child;
-            D_003E98A0[effect->kind].initialize((s32)effect, child[2]);
+            D_003E98A0[effect->kind].initialize(effect, child->resource);
         }
     }
     return effect;
@@ -1509,10 +1519,10 @@ void effReleaseAlternateKindWork(EffKindWork *work) {
 s32 effCloneAlternateKindWork(EffKindWork *source) {
     EffKindWork *copy = effAllocateAlternateKindWork((u16)source->kind, source->payload);
     if (source->target != NULL && D_003E98A0[copy->kind].initialize != NULL) {
-        s32 *child = (s32 *)effRetainKindSecondaryAsset(source->target);
-        s32 parameter = child[2];
+        EffKindAssetHolder *child = effRetainKindSecondaryAsset(source->target);
+        SdfTex *parameter = child->resource;
         copy->target = child;
-        D_003E98A0[copy->kind].initialize((s32)copy, parameter);
+        D_003E98A0[copy->kind].initialize(copy, parameter);
     }
     return (s32)copy;
 }
@@ -1545,22 +1555,16 @@ void effSetAlternateKindScale(EffKindWork *object, f32 scale) {
 }
 
 
-typedef struct EffKindAssetHolder {
-    s32 kind;
-    s32 references;
-    s32 resource;
-} EffKindAssetHolder;
-
-s32 *effCreateResourceHolderFromSelectedKind(s32 *source, u16 kind) {
-    s32 *object = sdfAllocAndClearQuadwords(0xC);
-    object[0] = kind;
-    object[1] = 1;
+EffKindAssetHolder *effCreateResourceHolderFromSelectedKind(s32 *source, u16 kind) {
+    EffKindAssetHolder *object = sdfAllocAndClearQuadwords(0xC);
+    object->kind = kind;
+    object->references = 1;
     switch (kind) {
     case 1:
-        object[2] = (s32)sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(source));
+        object->resource = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(source));
         break;
     case 4:
-        object[2] = (s32)effGetBillResourceTexture(*source);
+        object->resource = effGetBillResourceTexture(*source);
         break;
     }
     return object;
@@ -1568,18 +1572,18 @@ s32 *effCreateResourceHolderFromSelectedKind(s32 *source, u16 kind) {
 
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 
-void effKindAssetReferenceRelease(s32 *object) {
-    object[1]--;
-    if (object[1] == 0) {
-        if (object[0] != 4) {
-            sdfTexReleaseReferenceViaHandler((SdfTex *)object[2]);
+void effKindAssetReferenceRelease(EffKindAssetHolder *object) {
+    object->references--;
+    if (object->references == 0) {
+        if (object->kind != 4) {
+            sdfTexReleaseReferenceViaHandler(object->resource);
         }
         sdfReleaseChipBlock(object);
     }
 }
 
-u32 effRetainKindSecondaryAsset(u32 work) {
-    ((EffKindAssetHolder *)work)->references = ((EffKindAssetHolder *)work)->references + 1;
+EffKindAssetHolder *effRetainKindSecondaryAsset(EffKindAssetHolder *work) {
+    work->references = work->references + 1;
     return work;
 }
 

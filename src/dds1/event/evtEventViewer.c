@@ -43,10 +43,10 @@ extern void effInitCh71Id(void);
 extern void effInitCh72Id(void);
 extern void effInitCh75Id(void);
 extern void effInitCh76Id(void);
-extern void effSetCh71Id(u32 resourceWord);
-extern void effSetCh72Id(u32 sourceHandle);
-extern void effSetCh75Id(u32 resourceWord);
-extern void effSetCh76Id(u32 sourceHandle);
+extern void effSetCh71Id(SdfTex *texture);
+extern void effSetCh72Id(SdfTex *sourceHandle);
+extern void effSetCh75Id(SdfTex *texture);
+extern void effSetCh76Id(SdfTex *sourceHandle);
 extern void *mnuCampFindEntryByName(void *scene, const char *name);
 
 extern u32 mnuCampGetPrimaryOption(void *scene);

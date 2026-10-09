@@ -11,7 +11,7 @@ extern void *effCreateSizedDrawPacket(s32 height, s32 flags);
 extern void *billGetWorkTransformMatrix(void *packet);
 extern SdfPoolNode D_003803C8;
 
-void effResourceQuadDraw(EffResourceRectDrawParams *params, u32 resource, u8 gsCoordinates) {
+void effResourceQuadDraw(EffResourceRectDrawParams *params, SdfTex *resource, u8 gsCoordinates) {
     SdfListHead *list;
     u64 *packet;
     void *drawPacket;
@@ -29,7 +29,7 @@ void effResourceQuadDraw(EffResourceRectDrawParams *params, u32 resource, u8 gsC
     packet[6] = params->blendControl;
     packet[7] = 67;
     sdfAppendPacket(list, (u32)packet);
-    sdfConsCreateDrawPacket(list, (SdfTex *)resource, 1);
+    sdfConsCreateDrawPacket(list, resource, 1);
     drawPacket = effCreateSizedDrawPacket(1, 0x200);
     quad = (BlurPacketQuad *)billGetWorkTransformMatrix(drawPacket);
     quad->color[0] = params->color[0];
@@ -80,8 +80,8 @@ void effResourceQuadDraw(EffResourceRectDrawParams *params, u32 resource, u8 gsC
 EffResourceRectWork *effCloneResourceTemplate(EffResourceRectParams *src) {
     EffResourceRectWork *dst = sdfAllocSizeClassBlock(sizeof(EffResourceRectWork));
 
-    dst->sourceHandle = (u32)effGetBillResourceTexture(0);
-    dst->params = *src;
+    dst->texture = effGetBillResourceTexture(0);
+    memcpy(&dst->params, src, sizeof(*src));
     return dst;
 }
 
@@ -100,7 +100,7 @@ void effResourceRectDrawPixels(EffResourceRectWork *work) {
     work->params.draw.bounds.top = y - extent;
     work->params.draw.bounds.right = x + extent;
     work->params.draw.bounds.bottom = y + extent;
-    effResourceQuadDraw(&work->params.draw, work->sourceHandle, 0);
+    effResourceQuadDraw(&work->params.draw, work->texture, 0);
 }
 
 /* Generate already-scaled GS coordinates; the renderer must not scale again. */
@@ -120,7 +120,7 @@ void effResourceRectDrawGsCoords(EffResourceRectWork *work) {
     work->params.draw.bounds.right = right;
     work->params.draw.bounds.top = y;
     work->params.draw.bounds.bottom = bottom;
-    effResourceQuadDraw(&work->params.draw, work->sourceHandle, 1);
+    effResourceQuadDraw(&work->params.draw, work->texture, 1);
 }
 
 typedef struct EffTrackPolyData EffTrackPolyData;

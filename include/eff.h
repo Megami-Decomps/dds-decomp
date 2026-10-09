@@ -182,7 +182,7 @@ typedef struct {
     EffResourceRectBounds bounds;
 } EffResourceRectDrawParams;
 
-/* Nine copied words; the selected source handle belongs to the owner. */
+/* Nine copied words; the selected source texture belongs to the owner. */
 typedef struct {
     s32 extent;
     s32 centerX;
@@ -192,7 +192,7 @@ typedef struct {
 
 typedef struct {
     EffResourceRectParams params;
-    u32 sourceHandle;
+    SdfTex *texture;
 } EffResourceRectWork; /* 0x28 */
 
 typedef char EffResourceRectDrawParams_size_must_be_0x18[(sizeof(EffResourceRectDrawParams) == 0x18) ? 1 : -1];

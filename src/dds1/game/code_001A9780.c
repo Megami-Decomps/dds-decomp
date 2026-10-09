@@ -4892,7 +4892,7 @@ INCLUDE_ASM(const s32, "game/code_001A9780", func_001BEB58);
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001BF040);
 
-extern void func_001B5CD8(void);
+extern s32 func_001B5CD8(void);
 
 extern void func_001B60E8(void);
 

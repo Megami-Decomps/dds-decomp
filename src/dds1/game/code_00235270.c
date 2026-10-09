@@ -5449,7 +5449,7 @@ void *evtFindTaskResourceEntryByKey(u32 taskId, s32 key) {
 }
 
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *);
-extern void effSetCh72Id(u32);
+extern void effSetCh72Id(SdfTex *);
 
 void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
     EvtPackLoadState *data = evtGetEventPackLoadState(taskId);
@@ -5462,7 +5462,7 @@ void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
             data->effect72 = 0;
         }
         texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(address));
-        effSetCh72Id((u32)texture);
+        effSetCh72Id(texture);
         data->effect72 = texture;
     }
 }

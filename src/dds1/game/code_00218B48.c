@@ -338,34 +338,6 @@ void mdlInitializeViewerResourceTable(void) {
 
 INCLUDE_ASM(const s32, "game/code_00218B48", func_00218E20);
 
-/* Relative-linked record prefix with kind-dependent packed payload words.
- * Kinds 1/2 use the count/part-index halfwords at 0x0C/0x0E; kind 3 reads
- * the whole parameter word. Kind 4 reads both selector halfwords at 0x08/0x0A. */
-typedef struct MdlRecord {
-    s32 kind;        /* 0x00: 0xFFFF terminates record traversal */
-    s32 nextOffset;  /* 0x04: relative byte offset to next record */
-    union {
-        u32 word;               /* 0x08 */
-        struct {
-            u16 selectorA;
-            u16 selectorB;
-        } stream;
-    } payload;
-    union {
-        u32 word;               /* 0x0C */
-        struct {
-            u16 count;
-            u16 partIndex;
-        } part;
-    } parameter;
-    union {
-        u32 word10; /* 0x10: kind-four stream parameter */
-        struct {
-            u16 unk10;
-            u16 unk12;
-        } half;
-    } tail;
-} MdlRecord;
 
 s32 mdlCountRecords(MdlRecord *listHeader);
 

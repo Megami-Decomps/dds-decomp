@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+struct SdfTex;
+
 /* Shared rectangle and sampling payload; color is packed or read by channel. */
 typedef struct EffBlurQuad {
     u32 color; /* Byte consumers read the packed word through u8 object access. */
@@ -18,7 +20,7 @@ typedef struct EffBlurQuad {
 } EffBlurQuad;
 
 /* The textured blur allocation stores this copied body followed by a
- * separately acquired resource word. */
+ * separately acquired source texture. */
 typedef struct EffBlurTemplateBody {
     s32 extent;
     EffBlurQuad source;
@@ -26,7 +28,7 @@ typedef struct EffBlurTemplateBody {
 
 typedef struct EffBlurTemplate {
     EffBlurTemplateBody body;
-    u32 resourceWord;
+    struct SdfTex *texture;
 } EffBlurTemplate;
 
 typedef char EffBlurQuadSizeCheck[sizeof(EffBlurQuad) == 0x28 ? 1 : -1];
@@ -35,7 +37,7 @@ typedef char EffBlurQuadEdgesOffsetCheck[((u32)&((EffBlurQuad *)0)->left == 0x18
 typedef char EffBlurTemplateBodySizeCheck[sizeof(EffBlurTemplateBody) == 0x2C ? 1 : -1];
 typedef char EffBlurTemplateSourceOffsetCheck[((u32)&((EffBlurTemplateBody *)0)->source == 0x04) ? 1 : -1];
 typedef char EffBlurTemplateSizeCheck[sizeof(EffBlurTemplate) == 0x30 ? 1 : -1];
-typedef char EffBlurTemplateResourceOffsetCheck[((u32)&((EffBlurTemplate *)0)->resourceWord == 0x2C) ? 1 : -1];
+typedef char EffBlurTemplateResourceOffsetCheck[((u32)&((EffBlurTemplate *)0)->texture == 0x2C) ? 1 : -1];
 
 /* One ST/XYZ2 pair in the packed draw payload. */
 typedef struct BlurPacketVertex {
@@ -76,7 +78,7 @@ typedef struct EffBlurScatterSlot {
 struct SdfMemBlock;
 typedef struct EffBlurScatterWork {
     EffBlurScatterParams params;
-    u32 sourceHandle;
+    struct SdfTex *texture;
     struct SdfMemBlock *allocation;
     EffBlurScatterSlot *slots;
 } EffBlurScatterWork;
@@ -110,7 +112,7 @@ typedef struct EffBlurScaleSlot {
 
 typedef struct EffBlurScaleWork {
     EffBlurScaleParams params;
-    u32 sourceHandle;
+    struct SdfTex *texture;
     struct SdfMemBlock *allocation;
     EffBlurScaleSlot *slots;
 } EffBlurScaleWork;
@@ -129,7 +131,7 @@ EffBlurScaleWork *effCloneBlurWorkWithSlots(EffBlurScaleParams *params);
 void effBlurReleaseSecondResource(EffBlurScaleWork *work);
 
 void effAppendBlurRectanglePackets(void *list, EffBlurQuad *source, u8 fixedPointCoordinates);
-void effDrawBlurSource(EffBlurQuad *source, s32 resource, u8 fixedPointCoordinates);
+void effDrawBlurSource(EffBlurQuad *source, struct SdfTex *resource, u8 fixedPointCoordinates);
 void effDrawBlurRectangle(EffBlurQuad *source);
 void effBlurDrawFramebufferQuad(EffBlurQuad *source);
 void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner);

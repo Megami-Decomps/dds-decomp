@@ -6254,6 +6254,11 @@ list wrappers nor their callers need an integer-to-pointer round trip.
 Keep encoded program addresses, DMA tag words, and allocator/range
 address-word interfaces unchanged.
 
+The camera FOV editors and mirrored-unit resource/descriptor submissions
+also keep factory results as `SdfListHead *` through the matching pool
+callback. Their float calculations, input predicates and model-creation
+control flow are independent of that software-list owner.
+
 The image-outline and textured-quad/triangle appenders likewise receive a
 `SdfListHead *`; the packet allocated inside each appender still becomes
 a hardware address word in the second `sdfAppendPacket` argument. The
@@ -6341,3 +6346,24 @@ the following jump table starts at `003AD0C0`. No flags or attributes change.
 
 Writing the source fields in pending/message/frame order emits the native
 loads and pending/frame/message stores without artificial temporaries.
+
+## Blur and rectangle sources retain CPU texture pointers
+
+`EffBlurTemplate`, `EffBlurScatterWork` and `EffBlurScaleWork` store the
+selected `SdfTex *` at `+0x2C`; `EffResourceRectWork` stores it at `+0x24`.
+The four viewer channel caches carry the same pointers selected from
+`EvtRuntimeGroup.texture`, not resource indices or DMA address words.
+DDS1 kind work retains a direct texture. DDS2 retains the existing
+three-word `EffKindAssetHolder` (`kind`, reference count, texture); its
+create/retain/release users share that primary owner rather than array views.
+The native kind tables contain exactly four non-null texture initializers
+per game, each receiving the kind-work pointer and its selected texture.
+
+The blur and rectangle constructors copy only their `0x2C`/`0x24` parameter
+prefix with `memcpy`, leaving the selected texture outside that copy.
+With the truthful pointer field, typed aggregate assignment changes the
+texture-store/copy scheduling from `+0x1C`; the byte-prefix copy preserves
+the native store-before-copy sequence. Do not restore an integer texture
+field to conceal that source-level distinction. Physical packet submission
+addresses and the allocator's genuine address-word interface stay unchanged.
+
