@@ -3195,13 +3195,13 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, void *textureRe
     descriptor->texture = sdfTexAcquireResourceTexture((SdfTextureFileHeader *)(textureResource));
 }
 
-extern s32 sdfConsAllocateColumnPacket(s32 arg0);
-extern void *sdfConsMeasurePacketWithHeader(s32 arg0);
+extern void *sdfConsAllocateColumnPacket(s32 arg0);
+extern s32 sdfConsMeasurePacketWithHeader(s32 arg0);
 
 /* Queue the descriptor's preview texture as a quad at its screen position. */
 void btlDrawResourcePreview(BtlResourceDescriptor *descriptor) {
     SdfListHead *list;
-    s32 sprite;
+    void *sprite;
     KwlnSpriteVertex *vertex;
     SdfTex *texture;
     SdfPoolNode *surface;
@@ -3210,7 +3210,7 @@ void btlDrawResourcePreview(BtlResourceDescriptor *descriptor) {
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         sprite = sdfConsAllocateColumnPacket(1);
-        vertex = (KwlnSpriteVertex *)sdfConsMeasurePacketWithHeader(sprite);
+        vertex = (KwlnSpriteVertex *)sdfConsMeasurePacketWithHeader((s32)sprite);
         vertex->a = 0x80;
         vertex->b = 0x80;
         vertex->g = 0x80;
@@ -3229,7 +3229,7 @@ void btlDrawResourcePreview(BtlResourceDescriptor *descriptor) {
         vertex->corner[1].y = vertex->corner[0].y + 0x400;
         vertex->corner[1].mask = 0xFF0000;
         sdfConsCreateDrawPacket(list, texture, 0);
-        sdfAppendPacket(list, sprite);
+        sdfAppendPacket(list, (u32)sprite);
         surface = &kwlnDrawSurfaces[descriptor->drawSurfaceIndex];
         surface->append(surface, list);
     }

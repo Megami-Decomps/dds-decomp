@@ -1673,8 +1673,8 @@ typedef struct FldSpriteVertex {
 } FldSpriteVertex;
 
 void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, SdfTex *texture) {
-    s32 handle = (s32)sdfConsAllocateColumnPacket(1);
-    FldSpriteVertex *vtx = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(handle);
+    void *handle = sdfConsAllocateColumnPacket(1);
+    FldSpriteVertex *vtx = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader((s32)handle);
     s32 ubase = u * 16;
     s32 xl = x * 16 + 0x7000;
     s32 vbase = v * 16;
@@ -1701,7 +1701,7 @@ void fldSubmitSpriteRect(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 v
     command = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(command);
     sdfConsCreateDrawPacket(command, texture, 0);
-    sdfAppendPacket(command, handle);
+    sdfAppendPacket(command, (u32)handle);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
     descriptor->append(descriptor, command);
 }
@@ -1736,8 +1736,8 @@ void func_00129178(s32 x, s32 y, s32 width, s32 height,
 }
 
 void fldSubmitSpriteRectFloat(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, SdfTex *texture) {
-    s32 handle = (s32)sdfConsAllocateColumnPacket(1);
-    FldSpriteVertex *vtx = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(handle);
+    void *handle = sdfConsAllocateColumnPacket(1);
+    FldSpriteVertex *vtx = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader((s32)handle);
     s32 r = color & 0xFF;
     s32 g = (color >> 8) & 0xFF;
     s32 b = (color >> 16) & 0xFF;
@@ -1768,7 +1768,7 @@ void fldSubmitSpriteRectFloat(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, 
     command = (SdfListHead *)sdfAllocPacketAligned(0x20);
     sdfInitPacketList(command);
     sdfConsCreateDrawPacket(command, texture, 0);
-    sdfAppendPacket(command, handle);
+    sdfAppendPacket(command, (u32)handle);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
     descriptor->append(descriptor, command);
 }
@@ -2452,7 +2452,7 @@ void func_0012AEB0(void) {
     SdfDmaNode *reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     u64 *texturePacket;
     u64 *blendPacket;
-    s32 sprite;
+    void *sprite;
     FldSpriteVertex *vertex;
     SdfPoolNode *surface;
 
@@ -2478,8 +2478,8 @@ void func_0012AEB0(void) {
     blendPacket[6] = 0x44;
     blendPacket[7] = 0x42;
     sdfAppendPacket(list, (u32)blendPacket);
-    sprite = (s32)sdfConsAllocateColumnPacket(1);
-    vertex = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(sprite);
+    sprite = sdfConsAllocateColumnPacket(1);
+    vertex = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader((s32)sprite);
     vertex->r = 0x80;
     vertex->g = 0x80;
     vertex->b = 0x80;
@@ -2496,7 +2496,7 @@ void func_0012AEB0(void) {
     vertex->corner[1].y = 0x8705;
     vertex->corner[1].mask = 0x3FFF;
     vertex->corner[1].flag = 0;
-    sdfAppendPacket(list, sprite);
+    sdfAppendPacket(list, (u32)sprite);
     surface = &kwlnDrawSurfaces[fldDisplayRow];
     surface->append(surface, list);
 }
@@ -2508,7 +2508,7 @@ void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
     SdfDmaNode *reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     u64 *texturePacket;
     u64 *blendPacket;
-    s32 sprite;
+    void *sprite;
     FldSpriteVertex *vertex;
     SdfPoolNode *surface;
 
@@ -2534,8 +2534,8 @@ void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
     blendPacket[6] = 0x8000000064ULL;
     blendPacket[7] = 0x42;
     sdfAppendPacket(list, (u32)blendPacket);
-    sprite = (s32)sdfConsAllocateColumnPacket(1);
-    vertex = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(sprite);
+    sprite = sdfConsAllocateColumnPacket(1);
+    vertex = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader((s32)sprite);
     if (mode == 0) {
         vertex->r = 0x81;
         vertex->g = 0x81;
@@ -2559,7 +2559,7 @@ void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
     vertex->corner[1].y = 0x86FB;
     vertex->corner[1].mask = 0;
     vertex->corner[1].flag = 0;
-    sdfAppendPacket(list, sprite);
+    sdfAppendPacket(list, (u32)sprite);
     surface = &kwlnDrawSurfaces[fldDisplayRow];
     surface->append(surface, list);
 }
@@ -2571,7 +2571,7 @@ void fldSubmitOverlayStateAndSprite(s32 alpha) {
     SdfDmaNode *reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     u64 *texturePacket;
     u64 *blendPacket;
-    s32 sprite;
+    void *sprite;
     FldSpriteVertex *vertex;
     SdfPoolNode *surface;
 
@@ -2597,8 +2597,8 @@ void fldSubmitOverlayStateAndSprite(s32 alpha) {
     blendPacket[6] = ((u64)(u32)alpha << 32) | 0x64;
     blendPacket[7] = 0x42;
     sdfAppendPacket(list, (u32)blendPacket);
-    sprite = (s32)sdfConsAllocateColumnPacket(1);
-    vertex = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(sprite);
+    sprite = sdfConsAllocateColumnPacket(1);
+    vertex = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader((s32)sprite);
     vertex->r = 0x80;
     vertex->g = 0x80;
     vertex->b = 0x80;
@@ -2615,7 +2615,7 @@ void fldSubmitOverlayStateAndSprite(s32 alpha) {
     vertex->corner[1].y = 0x86FB;
     vertex->corner[1].mask = 0;
     vertex->corner[1].flag = 0;
-    sdfAppendPacket(list, sprite);
+    sdfAppendPacket(list, (u32)sprite);
     surface = &kwlnDrawSurfaces[fldDisplayRow];
     surface->append(surface, list);
 }
@@ -3015,7 +3015,7 @@ void fldSubmitAreaOverlayQuads(s32 a1, s32 a2) {
     SdfDmaNode *reference = (SdfDmaNode *)sdfAllocPacketAligned(0x20);
     u64 *texturePacket;
     u64 *blendPacket;
-    s32 handle;
+    void *handle;
     FldSpriteVertex *vertex;
     s32 quarter;
     SdfPoolNode *descriptor;
@@ -3042,8 +3042,8 @@ void fldSubmitAreaOverlayQuads(s32 a1, s32 a2) {
     blendPacket[6] = 0x48;
     blendPacket[7] = 0x42;
     sdfAppendPacket(list, (u32)blendPacket);
-    handle = (s32)sdfConsAllocateColumnPacket(1);
-    vertex = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader(handle);
+    handle = sdfConsAllocateColumnPacket(1);
+    vertex = (FldSpriteVertex *)sdfConsMeasurePacketWithHeader((s32)handle);
     vertex->r = 0x80;
     vertex->g = 0x80;
     vertex->b = 0x80;
@@ -3065,7 +3065,7 @@ void fldSubmitAreaOverlayQuads(s32 a1, s32 a2) {
     vertex->corner[1].y = quarter + 0x8705;
     vertex->corner[1].mask = 0x3FFF;
     vertex->corner[1].flag = 0;
-    sdfAppendPacket(list, handle);
+    sdfAppendPacket(list, (u32)handle);
     descriptor = &kwlnDrawSurfaces[fldDisplayRow];
     descriptor->append(descriptor, list);
 }

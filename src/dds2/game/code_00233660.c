@@ -243,7 +243,7 @@ typedef struct MdlCtrlState {
     u8 editing;
     u8 blinkTick;
     s16 selection;
-    s32 packetList;
+    SdfListHead *packetList;
 } MdlCtrlState;
 
 extern MdlCtrlState mdlViewerControlState;
@@ -3120,7 +3120,7 @@ typedef struct MdlOptionState {
     u8 pad08[0x20];
     f32 value;
     f32 adjustment;
-    s32 packetList;
+    SdfListHead *packetList;
     u8 pad34[4];
 } MdlOptionState;
 
@@ -3163,7 +3163,7 @@ s32 func_00239C08(KwlnTask *task) {
     state->pad = pad;
     D_00453660.value = value;
     D_00453660.adjustment = adjustment;
-    D_00453660.packetList = (s32)sdfCreateResetPacketList();
+    D_00453660.packetList = sdfCreateResetPacketList();
     D_00453660.control.fields.blink++;
     if (D_00453660.control.fields.blink == 30) {
         D_00453660.control.fields.blink = 0;
@@ -3222,18 +3222,18 @@ s32 func_00239C08(KwlnTask *task) {
         }
     }
 
-    sdfAppendPacket((SdfListHead *)D_00453660.packetList,
+    sdfAppendPacket(D_00453660.packetList,
                     func_0011F250(0x84D0, 0x79A8, 0xFF007F, 0xA20, 0x270,
                                   0x60000000, 0x40806020));
     label = D_003C8B68;
     for (i = 0; i != 4; i++, label++) {
-        sdfAppendPacket((SdfListHead *)D_00453660.packetList,
+        sdfAppendPacket(D_00453660.packetList,
                         (u32)sdfCreateFormattedSifCommand(label->x, label->y,
                                                          0xFF0080, label->style,
                                                          label->format));
     }
     if (D_00453660.control.fields.active == 0 && D_00453660.control.fields.blink < 20) {
-        sdfAppendPacket((SdfListHead *)D_00453660.packetList,
+        sdfAppendPacket(D_00453660.packetList,
                         (u32)sdfCreateFormattedSifCommand(0x8500,
                                                          D_003C8B98[D_00453660.control.fields.cursor],
                                                          0xFF0080, 0, D_00437198));
@@ -3241,19 +3241,19 @@ s32 func_00239C08(KwlnTask *task) {
 
     /* Ignore the blink byte when testing the active mode and selected row. */
     valueStyle = (D_00453660.control.packed & 0xFFFF00FF) == 1 ? 6 : 0;
-    sdfAppendPacket((SdfListHead *)D_00453660.packetList,
+    sdfAppendPacket(D_00453660.packetList,
                     (u32)sdfCreateFormattedSifCommand(0x8B00, 0x7A80, 0xFF0080,
                                                      valueStyle, D_004371A0, D_00453660.value));
     adjustmentStyle = (D_00453660.control.packed & 0xFFFF00FF) == 0x10001 ? 6 : 0;
-    sdfAppendPacket((SdfListHead *)D_00453660.packetList,
+    sdfAppendPacket(D_00453660.packetList,
                     (u32)sdfCreateFormattedSifCommand(0x8B00, 0x7AE0, 0xFF0080,
                                                      adjustmentStyle, D_004371A8, D_00453660.adjustment));
     format = D_00438A34 == 0 ? D_004371B0 : D_004371B8;
-    sdfAppendPacket((SdfListHead *)D_00453660.packetList,
+    sdfAppendPacket(D_00453660.packetList,
                     (u32)sdfCreateFormattedSifCommand(0x8B00, 0x7BA0, 0xFF0080,
                                                      0, format));
     D_00380708.append(&D_00380708,
-                      (SdfListHead *)D_00453660.packetList);
+                      D_00453660.packetList);
     D_00438A48 = D_00453660.value;
     D_00438A4C = D_00453660.adjustment;
     return 0;

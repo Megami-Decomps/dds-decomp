@@ -133,7 +133,7 @@ typedef struct MdlCtrlState {
     MdlPadState *pad;
     u8 unk04;
     u8 pad05[3];
-    s32 unk08;
+    SdfListHead *packetList;
 } MdlCtrlState;
 
 extern MdlViewState mdlViewerState;
@@ -2939,7 +2939,7 @@ s32 func_0021E618(KwlnTask *task) {
 void mdlDrawViewerLabelWithPackedColor(s32 first, s32 second, s32 color, s32 variant) {
     s32 packedColor = color & 0xffffff;
 
-    fldDrawPackedRgbEditor((void *)(mdlViewerControlState.unk08), first, second,
+    fldDrawPackedRgbEditor(mdlViewerControlState.packetList, first, second,
                   (mdlViewerControlState.unk04 == 0) ? -1 : variant, packedColor | 0x80000000, 1);
 }
 
@@ -3057,7 +3057,7 @@ typedef struct MdlOptionState {
     u8 pad08[0x20];
     f32 value;
     f32 adjustment;
-    s32 packetList;
+    SdfListHead *packetList;
     u8 pad34[4];
 } MdlOptionState;
 
@@ -3099,7 +3099,7 @@ s32 func_0021F098(KwlnTask *task) {
     state->pad = pad;
     D_003D7B60.value = value;
     D_003D7B60.adjustment = adjustment;
-    D_003D7B60.packetList = (s32)sdfCreateResetPacketList();
+    D_003D7B60.packetList = sdfCreateResetPacketList();
     D_003D7B60.control.fields.blink++;
     if (D_003D7B60.control.fields.blink == 30) {
         D_003D7B60.control.fields.blink = 0;
@@ -3158,18 +3158,18 @@ s32 func_0021F098(KwlnTask *task) {
         }
     }
 
-    sdfAppendPacket((SdfListHead *)D_003D7B60.packetList,
+    sdfAppendPacket(D_003D7B60.packetList,
                     func_0011D3E8(0x84D0, 0x79A8, 0xFF007F, 0xA20, 0x270,
                                   0x60000000, 0x40806020));
     label = D_00367DB8;
     for (i = 0; i != 4; i++, label++) {
-        sdfAppendPacket((SdfListHead *)D_003D7B60.packetList,
+        sdfAppendPacket(D_003D7B60.packetList,
                         (u32)sdfCreateFormattedSifCommand(label->x, label->y,
                                                          0xFF0080, label->style,
                                                          label->format));
     }
     if (D_003D7B60.control.fields.active == 0 && D_003D7B60.control.fields.blink < 20) {
-        sdfAppendPacket((SdfListHead *)D_003D7B60.packetList,
+        sdfAppendPacket(D_003D7B60.packetList,
                         (u32)sdfCreateFormattedSifCommand(0x8500,
                                                          D_00367DE8[D_003D7B60.control.fields.cursor],
                                                          0xFF0080, 0, D_003BBD58));
@@ -3177,19 +3177,19 @@ s32 func_0021F098(KwlnTask *task) {
 
     /* Ignore the blink byte when testing the active mode and selected row. */
     valueStyle = (D_003D7B60.control.packed & 0xFFFF00FF) == 1 ? 6 : 0;
-    sdfAppendPacket((SdfListHead *)D_003D7B60.packetList,
+    sdfAppendPacket(D_003D7B60.packetList,
                     (u32)sdfCreateFormattedSifCommand(0x8B00, 0x7A80, 0xFF0080,
                                                      valueStyle, D_003BBD60, D_003D7B60.value));
     adjustmentStyle = (D_003D7B60.control.packed & 0xFFFF00FF) == 0x10001 ? 6 : 0;
-    sdfAppendPacket((SdfListHead *)D_003D7B60.packetList,
+    sdfAppendPacket(D_003D7B60.packetList,
                     (u32)sdfCreateFormattedSifCommand(0x8B00, 0x7AE0, 0xFF0080,
                                                      adjustmentStyle, D_003BBD68, D_003D7B60.adjustment));
     format = D_003BD344 == 0 ? D_003BBD70 : D_003BBD78;
-    sdfAppendPacket((SdfListHead *)D_003D7B60.packetList,
+    sdfAppendPacket(D_003D7B60.packetList,
                     (u32)sdfCreateFormattedSifCommand(0x8B00, 0x7BA0, 0xFF0080,
                                                      0, format));
     D_00325708.append(&D_00325708,
-                      (SdfListHead *)D_003D7B60.packetList);
+                      D_003D7B60.packetList);
     D_003BD358 = D_003D7B60.value;
     D_003BD35C = D_003D7B60.adjustment;
     return 0;
