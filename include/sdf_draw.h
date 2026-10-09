@@ -123,6 +123,7 @@ typedef char SdfDrawNode_workspace_at_30[
 #define SDF_MODEL_FIND_DRAW_NODE_BY_ID 0x01
 #define SDF_MODEL_USE_SCALAR_OVERRIDES 0x02
 #define SDF_MODEL_ALTERNATE_ITEM_SETUP 0x04
+#define SDF_MODEL_HAS_ANCHOR_RECORDS 0x10
 
 
 /* The buffered-transform constructor allocates and clears all 0x9C bytes. */

@@ -642,7 +642,7 @@ void mdlProcessContextNodesAndTransforms(MdlCtx *ctx, struct SdfPoolNode **surfa
         return;
     }
     if (ctx->flags & MDL_REQUIRE_ANCHOR_ENABLE) {
-        if ((inner->flags & 0x10) == 0) {
+        if ((inner->flags & SDF_MODEL_HAS_ANCHOR_RECORDS) == 0) {
             return;
         }
     }
@@ -663,7 +663,6 @@ extern void sdfRotateVuMatrixAboutY(f32 angle);
 #define MDL_NO_BLEND_ENTRY (-1)
 #define MDL_RADIANS_PER_DEGREE 0.017453293f
 #define MDL_FULL_BLEND_PITCH 25.0f
-#define MDL_ANCHOR_ENABLE_BIT 0x10
 #define MDL_ENTRY_ENABLED 1
 #define MDL_PRIMARY_MOTION_SLOT 0
 #define MDL_MOTION_LOOP_ENABLED 1
@@ -728,7 +727,7 @@ void mdlBlendEntryPitchYawAndUpdate(MdlCtx *ctx, struct SdfPoolNode **surfaces, 
         return;
     }
     if (ctx->flags & MDL_REQUIRE_ANCHOR_ENABLE) {
-        if ((inner->flags & MDL_ANCHOR_ENABLE_BIT) == 0) {
+        if ((inner->flags & SDF_MODEL_HAS_ANCHOR_RECORDS) == 0) {
             return;
         }
     }
