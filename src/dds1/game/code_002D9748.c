@@ -832,8 +832,8 @@ void func_002DAB80(u8 *out, SdfSubParam *param) {
     transform->m[5] = 0.5f - m1 * (v0 + 0.5f) - m3 * (0.5f - v1);
 }
 
-void sdfCopyAssetPrimarySubParameter(SdfAsset *asset, u8 *entry) {
-    func_002DAB80(entry + 0x68, asset->primarySubParam);
+void sdfCopyAssetPrimarySubParameter(SdfAsset *asset, SdfAssetEntry *entry) {
+    func_002DAB80((u8 *)&entry->transforms[0], asset->primarySubParam);
 }
 
 /* Copy color, unchecked mode/palette state and optional GS texture words,
@@ -870,7 +870,7 @@ void sdfAssetApplyEntryChanges(SdfAsset *asset, s32 entryIndex) {
         sdfAssetCopyTextureState(asset, drawEntry);
     }
     if (dirtyFlags & (SDF_ASSET_PRIMARY_SCALARS_BIT << entryIndex)) {
-        sdfCopyAssetPrimarySubParameter(asset, (u8 *)drawEntry);
+        sdfCopyAssetPrimarySubParameter(asset, drawEntry);
     }
     if (dirtyFlags & (SDF_ASSET_SECONDARY_STATE_BIT << entryIndex)) {
         sdfApplyAssetSecondaryEntry(asset, drawEntry);
@@ -893,7 +893,7 @@ void sdfApplyAssetEntryChangesWithForcedTexture(SdfAsset *asset, s32 entryIndex)
         sdfAssetCopyTextureState(asset, drawEntry);
     }
     if (dirtyFlags & (SDF_ASSET_PRIMARY_SCALARS_BIT << entryIndex)) {
-        sdfCopyAssetPrimarySubParameter(asset, (u8 *)drawEntry);
+        sdfCopyAssetPrimarySubParameter(asset, drawEntry);
     }
     if (dirtyFlags & (SDF_ASSET_SECONDARY_STATE_BIT << entryIndex)) {
         sdfApplyAssetSecondaryEntry(asset, drawEntry);
