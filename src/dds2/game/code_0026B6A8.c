@@ -258,7 +258,9 @@ s32 func_0026BD38(s32 index) {
     return index == 1 ? 4 : 6;
 }
 
-void mnuInitScrollingStripState(DspScrollingStripState *state, s32 layout, void *resource, s32 firstFrame, s32 layer) {
+void mnuInitScrollingStripState(DspScrollingStripState *state, s32 layout,
+                                EffectSlotSet *resource, s32 firstFrame,
+                                s32 layer) {
     s32 count;
     s32 i;
 
