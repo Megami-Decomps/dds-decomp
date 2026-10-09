@@ -41,9 +41,9 @@ typedef struct MdlResourceItem {
     s16 subtype;
     union {
         struct {
-            /* mdlCreateViewerEffectPart stores type-2 tracks; mdlBindViewerPartRecords stores other handles. */
+            /* Type 2 stores a track; other part kinds store their created instance. */
             union {
-                s32 handle;
+                void *instance;
                 struct EffTrackPolyWork *track;
             };
             struct MdlPartEntry *slot;

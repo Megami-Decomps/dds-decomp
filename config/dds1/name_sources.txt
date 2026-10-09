@@ -1784,9 +1784,9 @@
 0x00178270	effPcpSetCrossEffectScale	inferred	Stores scale on cross-arm particle work following cross update. [names_reviewed6.tsv]
 0x00178278	effPcpSetCrossEffectColor	inferred	Cross work explicitly names offset 0x10 color; update broadcasts it. [names_reviewed21.tsv]
 0x00178280	effPcpDelayedPairsRerollSlot	inferred	registers two handles and rolls slot countdown [names_R_FuncNames.tsv]
-0x00178320	effCreateIndexedResourceWork	inferred	eff effect resources and animation in effect/effPCPMisc.c
+0x00178320	effPcpDelayedPairsCreate	inferred	creates six paired parameter handles from an indexed table
 0x001783E8	effPcpDelayedPairsRelease	inferred	releases six handle pairs [names_R_FuncNames.tsv]
-0x00178448	effCopyIndexedResourceWork	inferred	eff effect resources and animation in effect/effPCPMisc.c
+0x00178448	effPcpDelayedPairsClone	inferred	duplicates six paired parameter handles and rerolls their delays
 0x00178500	effPcpDelayedPairsUpdate	inferred	6-slot countdown at 0x48; on expiry gets both handle objects, loads vf10 from the work and applies func_00217878 with D_00325828
 0x001785E8	effPcpCopyDelayedPairVector	inferred	Copies vector for delayed-pair effect beside its scale callback. [names_reviewed8.tsv]
 0x001785F8	effPcpSetDelayedPairScale	inferred	Stores scale on delayed-pair particle work. [names_reviewed6.tsv]

@@ -1,3 +1,4 @@
+#include "sdf_scene_packet.h"
 #include "sdf_gs_scene_state.h"
 #include "common.h"
 #include "sdf_chip.h"
@@ -871,20 +872,6 @@ typedef struct ConsMatrixPacket {
     u32 reservedB;
 } ConsMatrixPacket;
 
-typedef struct SdfSceneNode {
-    u8 pad00[4];
-    void (*handler)();
-    SdfGraphObj *view;
-    u8 pad0C[4];
-    SdfPacket header;
-    SdfGsDrawDefaultsRegisters drawDefaults;
-    SdfPacket contextOne[2];
-    SdfPacket contextTwo[2];
-    SdfGsCenteredBoundsRegisters centeredBounds;
-    SdfGsSceneBlendRegisters blendState;
-    u64 framePacketWords[4];
-    SdfTexBuf texturePackets[2];
-} SdfSceneNode;
 
 typedef struct KwlnFrameDrawBank {
     SdfListHead initialList;
@@ -901,7 +888,6 @@ typedef struct KwlnFrameDrawBank {
 } KwlnFrameDrawBank;
 
 typedef char KwlnFrameDrawBank_size_check[(sizeof(KwlnFrameDrawBank) == 0x1F40) ? 1 : -1];
-typedef char SdfSceneNode_size_check[(sizeof(SdfSceneNode) == 0x220) ? 1 : -1];
 typedef char ConsMatrixPacket_size_check[(sizeof(ConsMatrixPacket) == 0xD0) ? 1 : -1];
 typedef char DmaPacketHeader_size_check[(sizeof(DmaPacketHeader) == 0x20) ? 1 : -1];
 
@@ -915,7 +901,6 @@ extern u8 D_00329790[0x40];
 extern SdfLightSources D_00324B10;
 extern f32 D_00324B20[4];
 extern void sdfConsAppendProgramReferencePacket(s32, DmaPacketHeader *);
-extern void sdfInitSceneNode(SdfSceneNode *, SdfGraphObj *);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Initialize the selected frame bank's scene and overlay packet chains. */
@@ -969,20 +954,10 @@ void evtResetDisplayProjectionAndVectorState(void) {
     evtEnsureDrawVectorState();
 }
 
-/* Scene-draw packet built by sdfBuildTextureScenePacket (0x170 bytes). */
-typedef struct KwlnTextureScenePacket {
-    SdfPacket header;
-    SdfGsDrawDefaultsRegisters drawDefaults;
-    SdfPacket contextOne[2];
-    SdfPacket contextTwo[2];
-    SdfGsCenteredBoundsRegisters centeredBounds;
-    SdfGsSceneBlendRegisters blendState;
-} KwlnTextureScenePacket;
-
 /* One 0x1F40-byte draw bank of the held-texture render target. */
 typedef struct KwlnTextureBank {
     SdfListHead list;
-    KwlnTextureScenePacket scene;
+    SdfSceneDrawPacket scene;
     ConsMatrixPacket matrix;
     SdfLightingPacketStorage lighting;
     u8 pad[0x1F40 - 0x260 - sizeof(SdfLightingPacketStorage)];
@@ -997,7 +972,6 @@ extern u32 D_003980F0[];
 extern SdfLightSources D_00324940;
 extern f32 D_00324950[4];
 extern u8 D_00329750[0x40];
-extern void sdfBuildTextureScenePacket(KwlnTextureScenePacket *, SdfGraphObj *, s32);
 
 /* Rebuild the held-texture render target's view and both frame banks. */
 void func_00105370(void) {
