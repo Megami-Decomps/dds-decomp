@@ -873,7 +873,7 @@ void func_002DCDD0(SdfMotionIndexedValueBinding *a0, f32 t, f32 weight) {
 }
 
 void sdfCopyMotionTargetValue(SdfMotionIndexedValueBinding *a0) {
-    a0->capturedWord = a0->target->unk18;
+    a0->capturedWord = a0->target->secondaryColor;
 }
 
 void *sdfMotionCreateDirectTextKeyBinding(void *a0, s32 a1, s32 a2) {
