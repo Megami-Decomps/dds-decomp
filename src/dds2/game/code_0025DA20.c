@@ -1865,7 +1865,24 @@ s32 mnuCampCountRemainingUses(s32 mode, s32 id, MenuTerminalContext *record) {
 
 INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261198);
 
-INCLUDE_ASM(const s32, "game/code_0025DA20", func_00261290);
+s32 func_00261290(MenuTerminalContext *scene) {
+    CampWindowParams *item = &scene->window->list->cursor->camp;
+    s32 affordable;
+    s32 remaining;
+
+    affordable = datGameState->header.currency / item->price;
+    remaining = mnuCampCountRemainingUses(item->mode, item->id, scene);
+    if (affordable == 0) {
+        return -1;
+    }
+    if (remaining == 0) {
+        return -2;
+    }
+    if (affordable > remaining) {
+        affordable = remaining;
+    }
+    return affordable;
+}
 
 /* Mark rows unavailable when neither currency nor inventory capacity permits a use. */
 void mnuCampDisableUnavailableItemEntries(MenuTerminalContext *scene) {
