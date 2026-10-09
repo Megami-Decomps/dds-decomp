@@ -45,7 +45,7 @@ extern s32 mnuFinishStaffConfigPopup(s32);
 
 extern void func_00101968(s32, s32);
 
-extern void kwlnFadeOutStart(s8, s8, s8, s32);
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 extern s32 dds3AdminReadPreviousSignedSample(void);
 

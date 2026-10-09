@@ -137,8 +137,8 @@ void mnuTickScoreProgressState(MnuShootingWork *work) {
     }
 }
 
-extern void kwlnFadeOutStart(s8 red, s8 green, s8 blue, s32 duration);
-extern void kwlnFadeInStart(s8 red, s8 green, s8 blue, s32 duration);
+extern void kwlnFadeOutStart(s32 red, s32 green, s32 blue, s32 duration);
+extern void kwlnFadeInStart(s32 red, s32 green, s32 blue, s32 duration);
 
 
 extern void mnuAdvanceTitleStateUnderSemaphore(void);

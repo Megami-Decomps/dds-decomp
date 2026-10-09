@@ -103,7 +103,7 @@ extern s32 mnuAdvanceTitleStateUnderSemaphore(void);
 #include "fpu.h"
 struct MenuListNode;
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
-extern void kwlnFadeInStart(s8, s8, s8, s32);
+extern void kwlnFadeInStart(s32, s32, s32, s32);
 
 extern void *fileDuplicateJob(void *);
 
@@ -2701,7 +2701,7 @@ extern struct SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 extern void *sdfAllocateBlockBySizeThreshold(s32);
 extern s32 D_00437D80;
 extern void func_002CE738(void);
-extern void kwlnFadeOutStart(s8, s8, s8, s32);
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
 
 void func_002CE208(s32 mode) {
     FilePacRequest *request;
