@@ -432,7 +432,101 @@ s32 btlRollPassiveAbilityAction(BtlUnit *actor) {
 
 INCLUDE_ASM(const s32, "game/code_001A9780", func_001AA130);
 
-INCLUDE_ASM(const s32, "game/code_001A9780", func_001AA548);
+typedef struct BattleStartVoiceRow {
+    s32 flagId;       /* negative, or a model flag that must be set */
+    s8 voice[2][3][3]; /* [alternate][state][choice]; -1 marks an empty choice */
+    u8 pad16[2];
+} BattleStartVoiceRow;
+
+extern BattleStartVoiceRow D_003586A8[];
+extern u32 btlRollAiBucket(void);
+extern s32 btlReadCurrentUnitHp(DatPartyRecord *);
+extern u32 func_001A5C40(BtlUnit *, BtlUnit *, s32, s32, s32, s32, s32);
+
+extern char D_003A1DD8[]; /* "btl:start voice off[ESC_OFF]\n" */
+extern char D_003A1DF8[]; /* "btl:start voice off[SERIAL]\n" */
+extern char D_003A1E18[]; /* "btl:start voice off[RAND]\n" */
+extern char D_003A1E38[]; /* "btl:start voice off[UNIT NON]\n" */
+extern char D_003A1E58[]; /* "btl:start voice off[STATE=%X,ID=%X]\n" */
+extern char D_003A1E80[]; /* "btl:start voice on[VOICE=%X,STATE=%X,ID=%X]\n" */
+
+s8 func_001AA548(void) {
+    BtlState *state;
+    BtlUnit *candidates[4];
+    BtlUnit *unit;
+    BtlUnit *chosen;
+    s8 *voices;
+    u32 hp;
+    u32 damage;
+    s32 count;
+    s32 category;
+    u32 i;
+    s8 voice;
+
+    state = (BtlState *)btlGetRuntime();
+    if (datBattleSceneRecords[state->battleMode].unk00 != 0) {
+        btlBossDebugPrintf(D_003A1DD8);
+        return -1;
+    }
+    if ((state->battleFlags & 0x4000) || state->eventReady == 5) {
+        btlBossDebugPrintf(D_003A1DF8);
+        return -1;
+    }
+    if (btlRollAiBucket() >= 10) {
+        btlBossDebugPrintf(D_003A1E18);
+        return -1;
+    }
+    count = 0;
+    for (unit = state->units; unit != NULL; unit = unit->next) {
+        if (unit->status.flags & 1) {
+            if (unit->status.flags & 0x200) {
+                s32 flagId = D_003586A8[unit->partyRecord.unitId].flagId;
+                if (flagId < 0 || mdlFlagTest(flagId)) {
+                    candidates[count++] = unit;
+                }
+            }
+        }
+    }
+    if (count == 0) {
+        btlBossDebugPrintf(D_003A1E38);
+        return -1;
+    }
+    chosen = candidates[effMiscRandMod(0, count)];
+    category = 2;
+    hp = btlReadCurrentUnitHp(&chosen->partyRecord);
+    for (unit = state->units; unit != NULL; unit = unit->next) {
+        if (unit->status.flags & 1) {
+            if (unit->status.flags & 0x400) {
+                damage = func_001A5C40(unit, chosen, 0, 1, 1, 1, 0);
+                if (category == 2) {
+                    if (hp + hp * 10 / 100 < damage) {
+                        category = 0;
+                    } else if (damage * 2 < hp) {
+                        category = 1;
+                    }
+                }
+            }
+        }
+    }
+    if (chosen->status.flags & 0x1000) {
+        voices = D_003586A8[chosen->partyRecord.unitId].voice[1][category];
+    } else {
+        voices = D_003586A8[chosen->partyRecord.unitId].voice[0][category];
+    }
+    count = 0;
+    for (i = 0; i < 3; i++) {
+        if (voices[i] >= 0) {
+            count++;
+        }
+    }
+    if (count == 0) {
+        btlBossDebugPrintf(D_003A1E58, category, chosen->partyRecord.unitId);
+        return -1;
+    }
+    voice = voices[effMiscRandMod(0, count)];
+    btlBossDebugPrintf(D_003A1E80, voice, category, chosen->partyRecord.unitId);
+    return voice;
+}
 
 u32 func_001AA848(void) {
     btlGetRuntime();
@@ -634,6 +728,18 @@ extern u8 D_00359160[];
 extern void func_001B83D8(BtlTask *, s8, s8);
 
 extern void sndSetStationedSeVolume(u32);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1DD8);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1DF8);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1E18);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1E38);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1E58);
+
+INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1E80);
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1FA8);
 
