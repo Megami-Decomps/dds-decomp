@@ -413,7 +413,7 @@ void func_0024EDC0(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
     }
 }
 
-void func_0024EF68(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+void mnuDrawScaledFixedSpritePlacement(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                    s32 flags, s32 context, f32 scaleX, f32 scaleY) {
     {
         EffectSlotSet *resource = D_0036C698[

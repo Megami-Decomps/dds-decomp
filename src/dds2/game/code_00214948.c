@@ -704,7 +704,7 @@ typedef struct BtlIndexQuery {
 } BtlIndexQuery;
 
 /* Selects matching unit IDs, or preserves a preselected actor list. */
-s32 func_002162C0(s32 task, s32 mode) {
+s32 btlFilterTargetListByUnitId(s32 task, s32 mode) {
     u16 picked[12];
     BtlIndexQuery query;
     BtlIndexList *list = btlBuildActorIndexListAndCount(task, &query.matching, &query.count);
@@ -731,7 +731,7 @@ s32 func_002162C0(s32 task, s32 mode) {
 }
 
 /* Combines three AI predicate target rows before choosing an index-list entry. */
-s32 func_002163C8(s32 actor) {
+s32 btlSelectTargetsByAiPredicateKinds(s32 actor) {
     u16 flags[3][12];
     s32 kinds[3];
     s32 values[3]; /* Decoded payloads are retained but not consumed by this selector. */
@@ -1682,7 +1682,7 @@ extern void evtPrepareUnitMotionState(EvtUnit *, s32, s32, s32, s32);
 
 
 /* These two three-ID resource families retain the saved motion for selectors 16/17. */
-void func_00218520(BtlUnit *unit, s32 selector, s32 firstParameter, s32 secondParameter, s32 mode, f32 frameStep) {
+void btlPrepareUnitMotionWithSavedOverride(BtlUnit *unit, s32 selector, s32 firstParameter, s32 secondParameter, s32 mode, f32 frameStep) {
     if (unit->status.flags & 0x400) {
         if (selector < 18) {
             if (selector >= 16) {
@@ -2470,7 +2470,7 @@ s32 btlStartLinkedActionMotionPrimary(BtlLinkedCommand *command) {
     return 0;
 }
 
-s32 func_00219BD0(BtlLinkedCommand *command, s32 unusedGroup200, s32 unusedGroup400) {
+s32 btlSetupHariActionCameraPair(BtlLinkedCommand *command, s32 unusedGroup200, s32 unusedGroup400) {
     ActionStateLink *link = command->link;
 
     if (btlIsActorCategoryMarked((s32)command)) {
@@ -2873,7 +2873,7 @@ extern char D_00436CE0[];
 
 extern char D_00436CE8[];
 
-void func_0021A778(void) {
+void btlUpdateSpecialActorChunkFade(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit = battle->units;
 
@@ -3025,7 +3025,7 @@ extern void btlUpdateSpecialActorFormation(void);
 
 extern f32 D_003BF6B0[4];
 
-void func_0021B368(void) {
+void btlResetSpecialActionActorPresentation(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit = battle->units;
     f32 position[4] __attribute__((aligned(16)));
@@ -3074,7 +3074,7 @@ void func_0021B368(void) {
 }
 
 void func_0021B4A8(void) {
-    func_0021B368();
+    btlResetSpecialActionActorPresentation();
 }
 
 BtlUnit *btlGetReadyUnitForSpecies(s32 mode, u32 species) {
@@ -4205,7 +4205,7 @@ void func_00220368(void) {
 
 /* This command mode allocates exactly three state bytes. */
 
-void func_00220450(BtlUnit *unused, s32 *delta) {
+void btlToggleMarkedTaskActionState(BtlUnit *unused, s32 *delta) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BattleMarkedCommandState *state = &battle->effect->markedCommand;
     ActionStateLink *actor;
@@ -4346,7 +4346,7 @@ s32 btlGetHealthyAllyActionStatus(BtlUnit *unit) {
     return -1;
 }
 
-s32 func_00220810(BtlLinkedCommand *command) {
+s32 btlOffsetSpecialEnemyForCommand(BtlLinkedCommand *command) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     u32 actionCode = command->actionCode;
     BtlUnit *unit;
@@ -4684,7 +4684,7 @@ u32 btlTickLinkedDefeatCandidateAction(BtlLinkedCommand *unit) {
     return 0;
 }
 
-s32 func_00221158(ActionStateLink *link) {
+s32 btlQueryLinkedGroupResponse(ActionStateLink *link) {
     BattleEffectPayload *effect;
     BtlOperandGroup *group;
     BtlUnit *entry;
@@ -5015,7 +5015,7 @@ u32 btlGetSpecialActionGroupEntry(BtlUnit *unit, u32 group) {
 extern u8 D_003BF758[2][5];
 
 /* Forward special actor motion, retaining the linked actor's selected group and fresh model state. */
-void func_00221BC8(BtlUnit *unit, s32 selector, s32 firstParameter,
+void btlPrepareLinkedSpecialActionMotion(BtlUnit *unit, s32 selector, s32 firstParameter,
                   s32 secondParameter, s32 mode, f32 frameStep) {
     s32 group = selector;
     BattleActionState *state;
@@ -5547,7 +5547,7 @@ extern void func_001ECCB0(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 extern char D_0041ADA8[];
 
-s32 func_00222F18(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
+s32 btlSelectActionTransitionCamera(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
     s32 cameraKind;
 
     if (btlIsActorCategoryMarked((s32)command)) {
@@ -5887,7 +5887,7 @@ extern void func_001ECCB0(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 
 extern void func_001E3108(void *, f32 *);
 
-s32 func_002242F8(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
+s32 btlSelectLinkedActionCameraPose(BtlLinkedCommand *command, s8 modeA, s8 modeB) {
     BtlState *battle;
     BtlUnit *unit;
     s32 cameraKind;
@@ -6817,7 +6817,7 @@ void btlBindEffectUnitAndClearStateFlags(BtlUnit *unit) {
 extern void effMiscQuatMultiplyVU(void);
 extern const s32 D_0041B4D0[];
 
-void func_00226AB0(BtlUnit *source) {
+void btlRestoreLinkedEffectUnitPose(BtlUnit *source) {
     BattleEffectPayload *effect = ((BattleActionContext *)btlGetRuntime())->effect;
     BtlUnit *unit = effect->linked.actor;
     f32 position[4];
@@ -6989,7 +6989,7 @@ extern void btlBeginEffectActorFadeOut(void);
 
 extern void func_001E3108(void *, f32 *);
 
-extern void func_00226AB0(BtlUnit *);
+extern void btlRestoreLinkedEffectUnitPose(BtlUnit *);
 
 void btlUpdateLinkedEffectUnitTransforms(void) {
     BtlUnit *twin = NULL;
@@ -7068,7 +7068,7 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
             btlSetUnitRotation(twin, (s128 *)twin->rotation);
             btlInitializeEffectVectorsFromSourceRecords(twin, 1, 0x12F);
             twin->status.stateFlags |= 0x100;
-            func_00226AB0(twin);
+            btlRestoreLinkedEffectUnitPose(twin);
             twin->status.stateFlags |= 0x200;
             twin->bodyOffset[1] = -245.0f;
             twin->reach = 155.0f;

@@ -606,7 +606,7 @@ void func_0015E5D8(PolyBand *obj) {
     parPrependCellNode(obj->strip);
 }
 
-PolyArc *func_0015E760(PolyArc *source) {
+PolyArc *polyCreateArcRingNode(PolyArc *source) {
     s32 tailBytes = sizeof(PolyArc) - sizeof(PolyRingHead);
     s32 size = source->head.entryCount * sizeof(PolyArcRecord) + sizeof(PolyRingHead) + tailBytes;
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
@@ -797,7 +797,7 @@ void func_0015EC08(PolyArc *obj) {
 }
 
 /* Rotating-band counterpart of polyCreateExpandingRingBands: twenty-byte records follow the header. */
-PolyRotatingBand *func_0015ED90(PolyRingHead *templateHead) {
+PolyRotatingBand *polyCreateRotatingBand(PolyRingHead *templateHead) {
     u32 size = templateHead->entryCount * sizeof(PolyRotatingBandRecord) + sizeof(PolyRotatingBand);
     struct SdfMemBlock *allocation = sdfAllocGeneralBlock(size);
     PolyRotatingBand *band = (PolyRotatingBand *)sdfResourceRetainAddress(allocation);

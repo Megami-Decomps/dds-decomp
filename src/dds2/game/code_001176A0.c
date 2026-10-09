@@ -237,7 +237,7 @@ void evtResetWorldAndProfileRuntime(void) {
     ptyInitRuntime();
     func_00122B58(0);
     ptyClearProfileRecords();
-    func_0026CE90();
+    mtrLoadMantraNodePositions();
     ptyRebuildAllProfiles();
     evtUpdateFlaggedEntries();
     dds3ForEachEntry();

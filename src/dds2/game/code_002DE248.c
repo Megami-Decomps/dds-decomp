@@ -322,9 +322,12 @@ extern f32 D_0042BC10[4];
 
 extern u8 D_003E9100[];
 
-extern void func_002E5E88(u8 *, void *);
+struct Matrix4;
+extern void func_002E5E88(EffTrackSet *, struct Matrix4 *);
 
-extern void func_002F1888(u8 *, void *);
+struct EffRibbonWork;
+struct Matrix4;
+extern void func_002F1888(struct EffRibbonWork *, struct Matrix4 *);
 
 
 extern void kwlnPadStartMotor(s32, u8, s32);
@@ -1781,7 +1784,7 @@ void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002E5E88(out, mtx);
+    func_002E5E88((EffTrackSet *)out, (Matrix4 *)mtx);
 }
 
 void billResetCellIndices(u8 *owner) {
@@ -1861,7 +1864,7 @@ void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002E5E88(out, mtx);
+    func_002E5E88((EffTrackSet *)out, (Matrix4 *)mtx);
 }
 
 void billResetParticleIndices(u8 *owner) {
@@ -1941,7 +1944,7 @@ void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002E5E88(out, mtx);
+    func_002E5E88((EffTrackSet *)out, (Matrix4 *)mtx);
 }
 
 void effClearAnimatedFrames(u8 *owner) {
@@ -2070,7 +2073,7 @@ void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002E5E88(out, mtx);
+    func_002E5E88((EffTrackSet *)out, (Matrix4 *)mtx);
 }
 
 void billResetEmitterIndices(u8 *owner) {
@@ -2197,7 +2200,7 @@ void billUpdateEmitterDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002E5E88(out, mtx);
+    func_002E5E88((EffTrackSet *)out, (Matrix4 *)mtx);
 }
 
 void effClearStripFrames(u8 *owner) {
@@ -2324,7 +2327,7 @@ void billUpdateStripDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002E5E88(out, mtx);
+    func_002E5E88((EffTrackSet *)out, (Matrix4 *)mtx);
 }
 
 void billResetTrailIndices(u8 *owner) {
@@ -2403,7 +2406,7 @@ void billUpdateTrailDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002E5E88(out, mtx);
+    func_002E5E88((EffTrackSet *)out, (Matrix4 *)mtx);
 }
 
 void billResetQuadIndices(u8 *owner) {
@@ -2530,7 +2533,7 @@ void billUpdateQuadDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002E5E88(out, mtx);
+    func_002E5E88((EffTrackSet *)out, (Matrix4 *)mtx);
 }
 
 
@@ -2848,8 +2851,7 @@ extern u32 D_003E9B20[16];
 extern SdfTex *func_002DDD60(void *, RefObj *);
 struct SdfAsset;
 
-void func_002E5E88(u8 *work, void *matrix) {
-    EffTrackSet *track = (EffTrackSet *)work;
+void func_002E5E88(EffTrackSet *track, Matrix4 *matrix) {
     SdfPoolNode *surface;
     void *list;
     EffGsPacket *packet;
@@ -3405,7 +3407,7 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
         VU0_STORE_MATRIX(mtx);
-        func_002E5E88(out, mtx);
+        func_002E5E88((EffTrackSet *)out, (Matrix4 *)mtx);
     }
 }
 
@@ -5524,7 +5526,7 @@ void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002F1888(out, mtx);
+    func_002F1888((EffRibbonWork *)out, (Matrix4 *)mtx);
 }
 
 void effResetBillboardFrameInstanceCounters(u8 *p) {
@@ -5689,7 +5691,7 @@ void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002F1888(out, mtx);
+    func_002F1888((EffRibbonWork *)out, (Matrix4 *)mtx);
 }
 
 void effResetParticleBillFrameCounters(u8 *p) {
@@ -5853,7 +5855,7 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002F1888(out, mtx);
+    func_002F1888((EffRibbonWork *)out, (Matrix4 *)mtx);
 }
 
 EffClassWork *effAllocateBlock(u16 kind, void *source) {

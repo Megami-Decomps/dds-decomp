@@ -5916,3 +5916,15 @@ Use the canonical nested stream-frame fields and pool append callback
 when reconstructing it; an integer-address or second movie-record view
 is not its contract. The 512-byte packet body remains assembly.
 
+
+## Counter draw callbacks forward six ordinary arguments
+
+DDS1 counter dispatch at `002C4AD8..002C4AF0` deliberately sets
+`$4..$9`: x, y, z, the counter runtime, the channel, and the incoming
+draw context. The last value is saved from incoming `$8` and forwarded
+through `$9`; it is not a residual register. Use the existing six-formal
+`SdfCounterDrawFn` convention from DDS1 `code_002C5FD8` and DDS2
+`code_0030B838` in DDS1 `code_002C3868` too. Its label-plate provider
+receives a named `s32 drawContext` formal even though that provider does
+not consume it. This contract change leaves both its dispatcher and
+label-plate machine code unchanged.

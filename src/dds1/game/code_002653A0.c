@@ -26,7 +26,7 @@ extern struct { s32 v[6]; } D_0036D4B0;
 extern u32 uiBlendColors(u32, u32, s32);
 extern void itfDrawCountText(s32, s32, s32, s32, const BrsRewardSummary *, s32);
 extern void mnuQueueRightAlignedFormattedInfoText(s32, s32, s32, s32, const BrsRewardSummary *, s32);
-extern void func_002650C8(s32, s32, s32, u32, BrsRewardSummary *, u32, BrsSkillPackageWork *);
+extern void brsDrawRewardEntryRows(s32, s32, s32, u32, BrsRewardSummary *, u32, BrsSkillPackageWork *);
 
 void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *work) {
     BrsRewardSummary *res = &work->rewards;
@@ -35,14 +35,14 @@ void mnuTitleDrawFadeMenuEntries(BrsSkillPackageWork *work) {
 
     itfDrawCountText(D_0036D4B0.v[0], D_0036D4B0.v[1] + rowOffset, 0, color, res, 0x53);
     mnuQueueRightAlignedFormattedInfoText(D_0036D4B0.v[2], D_0036D4B0.v[3] + rowOffset, 0, color, res, 0x53);
-    func_002650C8(D_0036D4B0.v[4], D_0036D4B0.v[5] + rowOffset, 0, color, res, 0x53, work);
+    brsDrawRewardEntryRows(D_0036D4B0.v[4], D_0036D4B0.v[5] + rowOffset, 0, color, res, 0x53, work);
 }
 
 
 extern void itfUpdateFadeColor(BrsSkillPackageWork *);
 extern void mnuDrawTitleFadeSprites(BrsSkillPackageWork *);
 extern void brsStepAnimDecay(BrsSkillPackageWork *);
-extern void func_00266250(s32, s32, s32, s32, BrsActiveProgressList *, s32);
+extern void brsDrawActiveUnitProgressRows(s32, s32, s32, s32, BrsActiveProgressList *, s32);
 
 extern void func_00264B08();
 extern void func_00264D90();
@@ -54,7 +54,7 @@ void mnuRefreshPanelLayer(BrsSkillPackageWork *work) {
     mnuDrawTitleFadeSprites(work);
     func_00264B08(work);
     func_00264D90(work);
-    func_00266250(0x2C0, 0x3D8, 0, y, &work->partyProgress, 0x53);
+    brsDrawActiveUnitProgressRows(0x2C0, 0x3D8, 0, y, &work->partyProgress, 0x53);
     mnuTitleDrawFadeMenuEntries(work);
 }
 
@@ -429,7 +429,7 @@ extern void func_00266908(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *
 extern s32 brsPollResultCounterCompletion(void);
 extern void func_002E8DD0(u32 sound);
 
-void func_00266250(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressList *list, s32 context) {
+void brsDrawActiveUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressList *list, s32 context) {
     KwlnTask *task;
     BrsSkillPackageWork *work = NULL;
     DatPartyRecord *unit;
