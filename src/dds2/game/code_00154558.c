@@ -228,7 +228,6 @@ extern s32 D_003897C0[];
 
 extern void *dds3GetWorldSecondaryObject(void);
 
-extern EffWorldNode *dds3FindObjectChainNodeByName(u64 world, const char *name);
 
 extern void func_0035B6E0(const char *fmt, ...);
 
@@ -1817,4 +1816,3 @@ INCLUDE_SDATA(const s32, "game/code_00154558", fldRoomNameSentinel);
 INCLUDE_SDATA(const s32, "game/code_00154558", D_004363F0);
 
 INCLUDE_SDATA(const s32, "game/code_00154558", D_004363F8);
-

@@ -8630,7 +8630,37 @@ f32 btlGetUnitTargetDistance(BtlUnit *unit, u8 mode, f32 *target, f32 radius) {
     return result;
 }
 
-INCLUDE_ASM(const s32, "game/code_001DD390", func_001FDF18);
+f32 func_001FDF18(BtlUnit *first, BtlUnit *second, u8 firstMode, u8 secondMode, f32 *target, f32 radius) {
+    f32 pos[4];
+    f32 saved[4];
+    f32 result;
+
+    if (first != 0) {
+        if (second != 0) {
+            result = func_001F5780(second, secondMode, 1.0f, 1.0f);
+            btlUnitGetPosVU(second, secondMode);
+            VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+            result = btlGetUnitTargetDistance(first, firstMode, pos, result);
+            VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        } else {
+            result = func_001F5780(first, firstMode, 1.0f, 1.0f);
+            btlUnitGetPosVU(first, firstMode);
+            VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+        }
+    } else {
+        result = func_001F5780(second, secondMode, 1.0f, 1.0f);
+        btlUnitGetPosVU(second, secondMode);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+    }
+    if (target != 0) {
+        result = func_001FDD20(pos, result, radius, target);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pos);
+    }
+    VU0_LOAD_VF(vf10, pos);
+    VU0_STORE_VF_UNCLOBBERED(vf10, saved);
+    VU0_LOAD_VF(vf10, saved);
+    return result;
+}
 
 INCLUDE_ASM(const s32, "game/code_001DD390", func_001FE068);
 

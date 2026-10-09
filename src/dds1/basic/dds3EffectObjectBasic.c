@@ -98,7 +98,149 @@ void effObjReleaseObjectData(EffectObj *obj) {
     obj->data = NULL;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", func_001145C0);
+extern s32 billGetKindOneParameter(struct EffNode *bill);
+extern s32 effInvokeNodeConditionOrAcceptDefault(struct EffNode *node);
+extern void effEventCopyFileRecordHeader(void *destination, const void *source);
+extern void dds3RemoveWorldObjectNode(EffWorldNode *node);
+extern void *dds3GetWorldObject(void);
+extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *object, s32 index, EffWorldNode *value);
+extern void effObjClearNodeFlags(ObjectTransform *node, u32 flags);
+extern void effMiscQuaternionToMatrixVU(void);
+extern void effMiscNormalizeVU(void);
+extern void sdfMultiplyVuMatrixInPlace(void);
+
+/* Position and orientation vectors of a kind-0x11 owner's payload. */
+typedef struct EffOwnerVectors {
+    f32 position[4];
+    f32 rotation[4];
+} EffOwnerVectors;
+
+/* Refresh the world position and orientation from the owner link (or the object's own
+   inner transform), then forward them to the bound node according to the state. */
+s32 func_001145C0(EffectObj *obj) {
+    f32 matrix[16];
+    f32 position[4];
+    f32 rotation[4] = {0, 0, 0, 1.0f};
+    EffectDependencyState *data;
+    s32 moved = 0;
+    struct EffNode *node;
+    s32 result;
+
+    data = obj->data;
+    if ((data->flags & EFF_OBJ_FLAG_OWNER_LINK) != 0) {
+        if (dds3ContainsNodeInObjectChain(dds3GetWorldObject(), data->ownerKind, data->owner) != 0) {
+            if ((data->flags & EFF_OBJ_FLAG_OWNER_BILL_ENTRY) != 0) {
+                effObjForwardOwnerBillEntry(obj);
+            } else {
+                switch (data->ownerKind) {
+                case 4: case 5: case 6: case 7: case 8: case 9:
+                    VU0_LOAD_VF(vf10, ((EffWorldNode *)data->owner)->inner->rotation);
+                    VU0_STORE_VF(vf10, rotation);
+                    effMiscQuaternionToMatrixVU();
+                    break;
+                case EFF_OBJ_OWNER_KIND_EXTRA:
+                    VU0_LOAD_VF(vf10, ((EffOwnerVectors *)((EffWorldNode *)data->owner)->data)->rotation);
+                    VU0_STORE_VF(vf10, rotation);
+                    effMiscQuaternionToMatrixVU();
+                    break;
+                default:
+                    VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+                    break;
+                }
+            }
+            VU0_MOVE_MATRIX_TO_B();
+            VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+            VU0_LOAD_VF(vf10, &data->word10);
+            VU0_SET_W_ONE(vf10);
+            VU0_APPLY_MATRIX(vf31, vf10);
+            sdfMultiplyVuMatrixInPlace();
+            VU0_MOVE_VF(vf10, vf0);
+            VU0_APPLY_MATRIX(vf10, vf10);
+            if ((data->flags & EFF_OBJ_FLAG_OWNER_BILL_ENTRY) == 0) {
+                switch (data->ownerKind) {
+                case 4: case 5: case 6: case 7: case 8: case 9:
+                    VU0_LOAD_VF(vf11, ((EffWorldNode *)data->owner)->inner->position);
+                    VU0_ADD(vf10, vf10, vf11);
+                    break;
+                case EFF_OBJ_OWNER_KIND_EXTRA:
+                    VU0_LOAD_VF(vf11, ((EffOwnerVectors *)((EffWorldNode *)data->owner)->data)->position);
+                    VU0_ADD(vf10, vf10, vf11);
+                    break;
+                }
+            }
+            VU0_STORE_VF(vf10, position);
+            effObjInnerVecBackup(obj->inner);
+            VU0_STORE_VF(vf10, obj->inner->position);
+            moved = 1;
+            effObjClearNodeFlags(obj->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
+        } else {
+            dds3ResetWorldResourceState(obj);
+        }
+    } else {
+        effObjClearNodeFlags(obj->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
+        VU0_LOAD_VF(vf10, obj->inner->position);
+        VU0_SET_W_ONE(vf10);
+        VU0_STORE_VF(vf10, position);
+        effObjInnerVecBackup(obj->inner);
+        VU0_LOAD_VF(vf10, obj->inner->rotation);
+        effMiscNormalizeVU();
+        VU0_STORE_VF(vf10, rotation);
+        moved = 1;
+    }
+    switch (data->state) {
+    case EFF_OBJ_STATE_BOUND_BILL:
+        node = data->handle;
+        if (node != NULL && moved) {
+            effCopyVectorToNodeInstance(node, position);
+            VU0_LOAD_VF(vf10, rotation);
+            effMiscQuaternionToMatrixVU();
+            VU0_STORE_MATRIX(matrix);
+            effApplyNodeTransformMatrix(node, matrix);
+        }
+        result = effInvokeNodeConditionOrAcceptDefault(node);
+    expired:
+        if (result == 0) {
+            u32 flags = data->flags;
+
+            data->flags = flags & ~1;
+            if (flags & 2) {
+                dds3RemoveWorldObjectNode(obj);
+            }
+        }
+        return 1;
+    case 2:
+        node = data->handle;
+        if (node != NULL && moved) {
+            effCopyVector(node, position);
+        }
+        result = billGetKindOneParameter(node);
+        goto expired;
+    case EFF_OBJ_STATE_BILL_NODE:
+        if (data->handle != NULL && moved) {
+            effCopyVector(data->handle, position);
+        }
+        return 1;
+    case 4:
+        return 1;
+    case EFF_OBJ_STATE_EVENT_NODE: {
+        void *eventNode = data->node;
+
+        if (eventNode != NULL) {
+            if (moved) {
+                u8 *record = data->vector;
+
+                if (record != NULL) {
+                    PCP_COPY_VECTOR(record, position);
+                    PCP_COPY_VECTOR(record + 0x10, rotation);
+                    effEventCopyFileRecordHeader(eventNode, record);
+                }
+            }
+        }
+        return 1;
+    }
+    }
+    return 1;
+}
 
 struct BillObj;
 struct EffNode;

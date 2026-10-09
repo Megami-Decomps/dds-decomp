@@ -124,7 +124,6 @@ extern u8 D_003BAE78[];
 
 extern void *dds3GetWorldSecondaryObject(void);
 
-extern EffWorldNode *dds3FindObjectChainNodeByName(EffWorldNode *world, const u8 *name);
 
 extern void func_003003F0(const char *fmt, ...);
 
@@ -1266,4 +1265,3 @@ u32 fldCmdQueryCameraMoveTracking(void) {
 INCLUDE_SDATA(const s32, "game/code_0014D110", fldRoomNameSentinel);
 
 INCLUDE_SDATA(const s32, "game/code_0014D110", D_003BB000);
-
