@@ -8119,7 +8119,7 @@ s32 effCreateTwoDimensionalTask(void) {
 
 /* Resource-bank request shared with the DDS2 effect loader. */
 typedef struct EffResourceBankSlot {
-    u8 pad_00[0xC8];
+    char fullName[0xC8]; /* Formatted path or selected built-in name. */
     char name[0x34];  /* 0xC8 */
     s32 type;         /* 0xFC */
     s32 state;        /* 0x100 */
@@ -8368,7 +8368,7 @@ void effBattleResourceDescriptorRelease(void) {
 }
 
 typedef struct EffBankSelection {
-    u8 pad_00[0xC8];
+    char fullName[0xC8]; /* Formatted path or selected built-in name. */
     char name[0x34]; // 0xC8
     s32 label;       // 0xFC
     s32 state;       // 0x100: 1 once the selection is finished
@@ -8386,7 +8386,7 @@ void effPollResourceBankSlot(char *path, u32 slot, void *record) {
     }
     func_001FBA38(effResourceBankDescriptor);
     selection->state = func_001FBF48(effResourceBankDescriptor);
-    selection->label = btlFormatSelectedResourceName(effResourceBankDescriptor, selection);
+    selection->label = btlFormatSelectedResourceName(effResourceBankDescriptor, selection->fullName);
     selection->variant = btlGetResourcePathVariant(effResourceBankDescriptor);
     btlTrimResourceName(effResourceBankDescriptor, selection->name);
     if (selection->state == 1) {
@@ -8490,7 +8490,7 @@ void effReleaseResourceBankDescriptors(void) {
 }
 
 typedef struct EffectPollRecord {
-    u8 pad_00[0xC8];
+    char fullName[0xC8]; /* Formatted path or selected built-in name. */
     s32 type;   // 0xC8
     s32 state;  // 0xCC
     s32 value;  // 0xD0
@@ -8518,7 +8518,7 @@ void effPollResourceBank(s32 flags, void *out) {
     } else {
         func_001FBA38(effResourceBankDescriptor);
         record->state = func_001FBF48(effResourceBankDescriptor);
-        record->type = btlFormatSelectedResourceName(effResourceBankDescriptor, record);
+        record->type = btlFormatSelectedResourceName(effResourceBankDescriptor, record->fullName);
         record->value = btlGetResourcePathVariant(effResourceBankDescriptor);
         if (record->state == 1) {
             btlDestroyResourceDescriptor(effResourceBankDescriptor);
@@ -8891,7 +8891,7 @@ void func_002BB748(s32 work) {
 
 /* Poll record from the resource-bank queue; count is negated to find its entry. */
 typedef struct EffBankStatus {
-    u8 pad_00[0xC8];
+    char fullName[0xC8]; /* Formatted path or selected built-in name. */
     s32 type;         // 0xC8
     s32 state;        // 0xCC
     s32 count;        // 0xD0
