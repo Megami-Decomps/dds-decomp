@@ -19,6 +19,16 @@ typedef char SdfImageTransferRegisters_layout[
      (u32)&((SdfImageTransferRegisters *)0)->trxreg == 0x20 &&
      (u32)&((SdfImageTransferRegisters *)0)->trxdir == 0x30) ? 1 : -1];
 
+/* DMA/VIF and GIF header followed by the complete image-transfer register block. */
+typedef struct SdfImageTransferPacket {
+    SdfGsPacketHeader header;
+    SdfImageTransferRegisters transfer;
+} SdfImageTransferPacket;
+
+typedef char SdfImageTransferPacket_layout[
+    (sizeof(SdfImageTransferPacket) == 0x60 &&
+     (u32)&((SdfImageTransferPacket *)0)->transfer == 0x20) ? 1 : -1];
+
 /* Resource upload payload and its terminal primitive-reset tag (0xF0). */
 typedef struct SdfResourcePacket {
     u64 header[14];
@@ -69,8 +79,7 @@ typedef struct SdfGraphCopyPacket {
     SdfPacketPatchLink link;
     u32 resourceIndexXor; /* Selects the source resource for the queued buffer. */
     u32 unk0C;
-    SdfPacket drawHeader;
-    SdfImageTransferRegisters transfer;
+    SdfImageTransferPacket draw;
 } SdfGraphCopyPacket;
 
 typedef char SdfGraphCopyPacket_resourceIndexXor_at_8[
@@ -79,9 +88,9 @@ typedef char SdfGraphCopyPacket_resourceIndexXor_at_8[
 typedef char SdfGraphCopyPacket_size_must_be_0x70[
     (sizeof(SdfGraphCopyPacket) == 0x70) ? 1 : -1];
 typedef char SdfGraphCopyPacket_draw_header_offset_must_be_0x10[
-    ((u32)&((SdfGraphCopyPacket *)0)->drawHeader == 0x10) ? 1 : -1];
+    ((u32)&((SdfGraphCopyPacket *)0)->draw.header == 0x10) ? 1 : -1];
 typedef char SdfGraphCopyPacket_transfer_offset_must_be_0x30[
-    ((u32)&((SdfGraphCopyPacket *)0)->transfer == 0x30) ? 1 : -1];
+    ((u32)&((SdfGraphCopyPacket *)0)->draw.transfer == 0x30) ? 1 : -1];
 
 /* Metadata node followed by the resource-transfer payload (0x100). */
 typedef struct SdfPatchableResourcePacket {
