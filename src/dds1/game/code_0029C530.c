@@ -2402,7 +2402,7 @@ u8 *effCreateFileResourceInstance(u8 *work) {
     return (u8 *)effCreateResourceInstanceA(((FileJob *)work)->option, source, (u32)secondary);
 }
 
-void effDispatchDestroyOp(EffClassWork *work) {
+void effDestroyActiveInstanceWork(EffClassWork *work) {
     effActiveInstanceOperations[work->kind].destroyResource((void *)work->resource);
     sdfReleaseChipBlock(work);
 }
@@ -5775,7 +5775,7 @@ void effResourceInstanceCreateFromFile(s32 request) {
     effCreateResourceInstanceC(((FileJob *)request)->option, source);
 }
 
-void effDispatchCleanupOp(EffClassWork *work) {
+void effDestroyModelBlockWork(EffClassWork *work) {
     D_0037ED90[work->kind].destroyResource();
     sdfReleaseChipBlock(work);
 }
