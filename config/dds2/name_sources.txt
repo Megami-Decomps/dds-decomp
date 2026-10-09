@@ -2970,7 +2970,7 @@
 0x0020DA28	btlCreateResourceDescriptor	inferred	allocates the 0x48 BtlResourceDescriptor consumed by btlDestroyResourceDescriptor [names_M36_SmallSweep5.tsv]
 0x0020DFB0	btlSetResourceNameHeaderPair	inferred	Stores two argument words in resource-name record header at offsets 0 and 4. [names_R_FuncNames6.tsv]
 0x0020E300	btlCreateResourceNameRecord	inferred	Allocates and initializes 0x38-byte battle resource-name record then copies its name. [names_R_FuncNames6.tsv]
-0x0020E7A0	btlSetResourceNameHeaderPairAlternate	inferred	Second implementation of header setter stores two words at offsets zero and four; distinction not established. [names_R_FuncNames6.tsv]
+0x0020E7A0	btlSetResourceNamePosition	inferred	Sets the name-editor and overwrite-prompt origin at record offsets zero and four.
 0x0020E7B8	btlResourceRecordSetName	inferred	Twin of dds1 0x001FC738; Copies name into resource record and stores strlen as nameLength. [names_R_FuncNames3.tsv]
 0x0020E7F8	btlFormatResourceNameWithExtension	inferred	Formats resource name followed by its extension using the record's two name fields.
 0x0020E828	btlFormatResourceNameWithoutExtension	inferred	Formats the resource name without its extension.

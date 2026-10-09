@@ -9887,7 +9887,7 @@ void effInitializeResourceQueue(void) {
         func_0020E368(effFileQueueNameRecord);
     }
     effFileQueueNameRecord = btlCreateResourceNameRecord(D_004384E8);
-    btlSetResourceNameHeaderPairAlternate(effFileQueueNameRecord, 0xC2, 0xC8);
+    btlSetResourceNamePosition(effFileQueueNameRecord, 0xC2, 0xC8);
     btlSetResourceNameLengthLimit(effFileQueueNameRecord, 9);
     queueFile = fileQueueGetAt(effFileQueue, func_002FCA40());
     btlResourceRecordSetName(effFileQueueNameRecord, queueFile->name);
@@ -9918,7 +9918,7 @@ void effQueueResource(const char *extension, const char *resourceName) {
     if (queue == 0) {
         queue = btlCreateResourceNameRecord(extension);
         effQueuedResourceNameRecord = queue;
-        btlSetResourceNameHeaderPairAlternate(queue, 0xC2, 0xC8);
+        btlSetResourceNamePosition(queue, 0xC2, 0xC8);
     }
     btlResourceRecordSetName(effQueuedResourceNameRecord, resourceName);
 }
@@ -9928,7 +9928,7 @@ void effUpdateResourceQueue(const char *directoryPath, const char *extension, Ef
 
     if (effQueuedResourceNameRecord == 0) {
         effQueuedResourceNameRecord = btlCreateResourceNameRecord(extension);
-        btlSetResourceNameHeaderPairAlternate(effQueuedResourceNameRecord, 0xC2, 0xC8);
+        btlSetResourceNamePosition(effQueuedResourceNameRecord, 0xC2, 0xC8);
         return;
     }
     func_0020E380(effQueuedResourceNameRecord);
