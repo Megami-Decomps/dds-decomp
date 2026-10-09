@@ -4265,8 +4265,8 @@ s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *unit, s32 delta) {
     return unit->partyRecord.hp + delta < 1;
 }
 
-s32 btlIsCurrentValueBelowQuarterThreshold(UiObject *object) {
-    return object->currentValue * 100 / object->maximumValue < 26;
+s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *object) {
+    return object->partyRecord.hp * 100 / object->partyRecord.maxHp < 26;
 }
 
 s32 btlWouldUiValueFallBelowQuarter(BtlUnit *object, s32 delta) {
