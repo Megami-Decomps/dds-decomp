@@ -8,6 +8,7 @@
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
 #include "mdl_object_stream.h"
+#include "sdf_texture_offset_list.h"
 
 extern s32 D_00439214;
 extern s32 iWakeupThread(s32 threadId);
@@ -55,8 +56,6 @@ extern u32 sdfSoundCommandStatus;
 
 extern SdfTex *sdfTexAcquireResourceTexture(void *);
 
-
-extern DevRequest *sndBuildResourceHandleListFromOffsets(const void *);
 
 extern u32 D_00438D0C;
 
@@ -124,12 +123,6 @@ extern SdfStreamFrameNode *sdfStreamNodeListHead;
 extern SdfStreamFrameNode *sdfStreamNodeListTail;
 
 extern s32 sceIpuSync(s32, s32);
-
-typedef struct SdfResourceList {
-    u8 pad00[0x10];
-    s32 count;        /* 0x10 */
-    s32 offsets[1];   /* 0x14: relative to the resource base */
-} SdfResourceList;
 
 extern s32 func_0036DE70(void);
 
@@ -790,17 +783,17 @@ SdfTex *sdfLoadNamedResourceAndReleaseLookupHandle(const char *name) {
 extern DevRequest *sdfCreateConfiguredBufferedResourceList(s32);
 extern void sdfAppendResourceListItem(DevRequest *, u32);
 
-DevRequest *sndBuildResourceHandleListFromOffsets(const void *resource) {
-    const SdfResourceList *list = resource;
+DevRequest *sndBuildResourceHandleListFromOffsets(const SdfTextureOffsetListHeader *resource) {
     s32 i = 0;
-    s32 count = list->count;
+    s32 count = resource->textureCount;
     DevRequest *handle = sdfCreateConfiguredBufferedResourceList(count);
     const s32 *entry;
     if (count != i) {
-        entry = list->offsets;
+        entry = (const s32 *)((const u8 *)resource + sizeof(*resource));
         do {
             i++;
-            sdfAppendResourceListItem(handle, (u32)sdfTexAcquireResourceTexture((u8 *)resource + *entry));
+            sdfAppendResourceListItem(handle, (u32)sdfTexAcquireResourceTexture(
+                (void *)((const u8 *)resource + *entry)));
             entry++;
         } while (i != count);
     }
@@ -813,7 +806,7 @@ DevRequest *sndLoadNamedOffsetResourceList(const char *name) {
     u32 info[4];
 
     buffer = sdfReadNamedResource(name, info, 0);
-    result = sndBuildResourceHandleListFromOffsets((const void *)info[0]);
+    result = sndBuildResourceHandleListFromOffsets((const SdfTextureOffsetListHeader *)(u32)info[0]);
     sdfReleaseResourceAllocation(buffer);
     return result;
 }
