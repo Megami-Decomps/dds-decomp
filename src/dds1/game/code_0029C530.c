@@ -2197,21 +2197,21 @@ void billResetQuadIndices(u8 *work) {
     u8 *config = ((EffClassWork *)work)->payload;
     EffTrackSet *asset = ((EffBillFrameState *)state)->asset;
     s32 remaining = ((EffBillTimedHeader *)config)->count;
-    u8 *entry = ((EffBillFrameState *)state)->entries;
+    EffBillQuadEntry *entry = (EffBillQuadEntry *)((EffBillFrameState *)state)->entries;
 
     memset(asset->buffer, 0, asset->rows * 0x10);
     if (remaining > 0) {
         s32 i;
         for (i = remaining; i != 0; --i) {
-            *(s32 *)entry = -1;
-            entry += 0x20;
+            entry->timer = -1;
+            entry++;
         }
     }
 }
 
 u8 *billAllocQuadNode(u8 *config) {
     u32 headerSize = 0x10;
-    struct SdfMemBlock *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * 0x20 + headerSize);
+    struct SdfMemBlock *base = sdfAllocGeneralBlock(((EffBillTimedHeader *)config)->count * sizeof(EffBillQuadEntry) + headerSize);
     u8 *body = (u8 *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)base));
     u8 *node = body;
 

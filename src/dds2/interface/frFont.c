@@ -1097,3 +1097,4 @@ INCLUDE_SDATA(const s32, "interface/frFont", D_00436578);
 INCLUDE_SDATA(const s32, "interface/frFont", D_00436580);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_00436582);
+
