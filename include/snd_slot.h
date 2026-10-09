@@ -3,18 +3,30 @@
 
 #include "common.h"
 
+struct FileRequest;
+struct SdfMemBlock;
+
 /* Shared motion-SE cache, allocated as 0x108 bytes by DDS1 001F3E70 and
  * DDS2 00204B00. The work subobject follows the category/id key at +0x0C. */
 typedef struct SoundSlotWork {
     u32 refCount;
     s32 pendingSoundId;
     s32 pendingSlot;
-    s32 fileRequests[0x1D];
-    s32 resourceHandles[0x1D];
+    struct FileRequest *fileRequests[0x1D];
+    struct SdfMemBlock *resourceHandles[0x1D];
 } SoundSlotWork;
 
+/* SoundSlotOwner flag bits observed across file and packed-track loading. */
+typedef enum SoundSlotOwnerFlag {
+    SOUND_SLOT_FILE_LOAD_PENDING = 1,
+    SOUND_SLOT_FILES_READY = 2,
+    SOUND_SLOT_TRACK_LOAD_REQUESTED = 4,
+    SOUND_SLOT_TRACK_LOADING = 8,
+    SOUND_SLOT_TRACK_READY = 0x10
+} SoundSlotOwnerFlag;
+
 typedef struct SoundSlotOwner {
-    u32 flags; /* 1 files queued, 2 files ready; 4 track pending, 8 loading, 0x10 ready. */
+    u32 flags; /* SoundSlotOwnerFlag masks; other bits remain unclassified. */
     s32 category;
     s32 id;
     SoundSlotWork work;

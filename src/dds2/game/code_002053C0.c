@@ -253,8 +253,8 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
     return 0;
 }
 
-BtlRuntimeTask *sndCreateAtracEffectLoadTask(s32 value) {
-    BtlRuntimeTask *task = btlAllocTask(0xC);
+BtlRuntimeTask *sndCreateAtracEffectLoadTask(s32 entryIndex) {
+    BtlRuntimeTask *task = btlAllocTask(sizeof(Atrac3LoadTaskArgs));
     Atrac3LoadTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x5D;
@@ -262,7 +262,7 @@ BtlRuntimeTask *sndCreateAtracEffectLoadTask(s32 value) {
     task->callback = sndPollAtrac3SELoadTask;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = btlGetTaskArguments(task);
-    args->entryIndex = value;
+    args->entryIndex = entryIndex;
     args->state = 0;
     args->request = 0;
     return task;
@@ -329,19 +329,19 @@ void sndFinishEarringPlaybackTask(BtlDeadLoadArgs *taskArgs) {
     ((BtlState *)work)->earringPlaybackCount += 0xFFFF;
 }
 
-BtlRuntimeTask *sndCreateEarringPlaybackTask(BtlUnit *owner) {
-    BtlRuntimeTask *task = btlAllocTask(12);
+BtlRuntimeTask *sndCreateEarringPlaybackTask(BtlUnit *unit) {
+    BtlRuntimeTask *task = btlAllocTask(sizeof(BtlDeadLoadArgs));
     BtlDeadLoadArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x5E;
     task->flags &= ~BTL_TASK_FLAG_REGISTERED;
-    task->ownerId = owner->owner;
+    task->ownerId = unit->owner;
     task->onStart = sndStartDeadAtracLoad;
     task->callback = sndDeadAtracPlaybackTask;
     task->onFinish = sndFinishEarringPlaybackTask;
     args = btlGetTaskArguments(task);
-    args->unit = owner;
+    args->unit = unit;
     args->request = 0;
     args->resourceAllocation = 0;
     return task;

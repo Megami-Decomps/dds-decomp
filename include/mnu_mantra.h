@@ -21,7 +21,7 @@ typedef struct MtrSelectionState {
 } MtrSelectionState;
 
 typedef struct MtrSelectionFlags {
-    u32 unk00 : 1;
+    u32 titleEffectsReadyPendingDisplay : 1;
     u32 visible : 1;
     u32 fadeProgress : 1;
     u32 profileReady : 1;
@@ -183,8 +183,8 @@ typedef struct MnuStatusResource {
     struct SdfMemBlock *allocation;
     struct MenuList *list;
     u32 resourceSlots[12];
-    u32 resourceIdA;
-    u32 resourceIdB;
+    struct SdfMemBlock *resourceAllocationA;
+    struct SdfMemBlock *resourceAllocationB;
     struct ItfMesSub *messageWindow;
     struct ItfMesSub *messageDefinition;
     MenuProgressHost *progressHost;
@@ -206,6 +206,8 @@ typedef char MantraFlagResource_size[(sizeof(MantraFlagResource) == 0x16C) ? 1 :
 typedef char MnuStatusResourceMenuOffsetCheck[((u32)&((MnuStatusResource *)0)->menu == 0x240) ? 1 : -1];
 typedef char MnuStatusResourcePanelPoolOffsetCheck[((u32)&((MnuStatusResource *)0)->menu.resource == 0xBEC) ? 1 : -1];
 typedef char MnuStatusResourceSnapshotOffsetCheck[((u32)&((MnuStatusResource *)0)->snapshot == 0x54) ? 1 : -1];
+typedef char MnuStatusResourceResourceAllocationAOffsetCheck[((u32)&((MnuStatusResource *)0)->resourceAllocationA == 0x38) ? 1 : -1];
+typedef char MnuStatusResourceResourceAllocationBOffsetCheck[((u32)&((MnuStatusResource *)0)->resourceAllocationB == 0x3C) ? 1 : -1];
 typedef char MnuStatusResourceUnitEntriesOffsetCheck[((u32)&((MnuStatusResource *)0)->menu.unitEntries == 0xBB0) ? 1 : -1];
 
 typedef char MantraTutorialPartyOffsetCheck[((u32)&((MantraMenuWork *)0)->tutorialParty == 8) ? 1 : -1];

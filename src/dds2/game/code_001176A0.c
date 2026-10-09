@@ -258,16 +258,16 @@ extern s32 D_00435DC0;
 extern s8 D_00435DC4;
 extern s8 D_00435DC5;
 extern SdfMemBlock *D_00438E90;
-extern void *D_00438E94;
-extern void *D_00438E98;
-extern void *D_00438E9C;
-extern void *D_00438EA0;
-extern void *D_00438EA4;
-extern s32 D_00438EA8;
+extern SdfMemBlock *D_00438E94;
+extern SdfMemBlock *D_00438E98;
+extern SdfMemBlock *D_00438E9C;
+extern SdfMemBlock *D_00438EA0;
+extern SdfMemBlock *D_00438EA4;
+extern SdfMemBlock *D_00438EA8;
 extern u32 D_00438EAC;
 extern s32 mdlFlagTest(s32 flag);
 extern void func_0011D130(void);
-extern s32 mtrMantraEventBitPush(void);
+extern SdfMemBlock *mtrMantraEventBitPush(void);
 
 /* Snapshot the progress that survives a full runtime reset: the three carried flags, header words, battle flags,
  * mantra bitmaps, profile records, party templates, high item counts and blocked-item flags. */
@@ -299,27 +299,27 @@ void sdfSaveResetSnapshot(void) {
     D_00385218[2] = datGameState->header.unk2C;
     D_00438E90 = mnuCreateFlagEntries();
     D_00438E94 = sdfAllocGeneralBlock(sizeof(datGameState->mantraBits));
-    copy = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)D_00438E94);
+    copy = (void *)sdfMemoryGetBlockAddress(D_00438E94);
     memcpy(copy, datGameState->mantraBits, sizeof(datGameState->mantraBits));
     D_00438E98 = sdfAllocGeneralBlock(sizeof(datGameState->profileBanks));
-    copy = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)D_00438E98);
+    copy = (void *)sdfMemoryGetBlockAddress(D_00438E98);
     memcpy(copy, datGameState->profileBanks, sizeof(datGameState->profileBanks));
     func_0011D130();
     D_00438E9C = sdfAllocGeneralBlock(sizeof(datGameState->templates));
-    copy = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)D_00438E9C);
+    copy = (void *)sdfMemoryGetBlockAddress(D_00438E9C);
     memcpy(copy, datGameState->templates, sizeof(datGameState->templates));
     D_00438EA0 = sdfAllocGeneralBlock(0x40);
-    copy = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)D_00438EA0);
+    copy = (void *)sdfMemoryGetBlockAddress(D_00438EA0);
     memcpy(copy, &datGameState->inventory.counts[0xC0], 0x40);
     D_00438EA4 = sdfAllocGeneralBlock(sizeof(datGameState->itemBlockedFlags));
-    copy = (void *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)D_00438EA4);
+    copy = (void *)sdfMemoryGetBlockAddress(D_00438EA4);
     memcpy(copy, datGameState->itemBlockedFlags, sizeof(datGameState->itemBlockedFlags));
     D_00438EA8 = mtrMantraEventBitPush();
     D_00438EAC = datGameState->world.slotFlags;
 }
 
 extern void mnuMarkEntryBlocked(s32);
-extern void mtrMantraEventBitPop(s32);
+extern void mtrMantraEventBitPop(SdfMemBlock *);
 extern void dds3ForEachFlagged(void);
 extern void ptyClearSelectedSkillFlagsFromActiveEntries(void);
 extern void func_0011D0D8(void);
@@ -347,23 +347,23 @@ void func_00118008(void) {
     sdfReleaseResourceAllocation(D_00438E90);
 
     mantra = datGameState->mantraBits;
-    memcpy(mantra, (void *)sdfMemoryGetBlockAddress((SdfMemBlock *)D_00438E94), sizeof(datGameState->mantraBits));
-    sdfReleaseResourceAllocation((SdfMemBlock *)D_00438E94);
+    memcpy(mantra, (void *)sdfMemoryGetBlockAddress(D_00438E94), sizeof(datGameState->mantraBits));
+    sdfReleaseResourceAllocation(D_00438E94);
     profiles = datGameState->profileBanks;
-    memcpy(profiles, (void *)sdfMemoryGetBlockAddress((SdfMemBlock *)D_00438E98), sizeof(datGameState->profileBanks));
-    sdfReleaseResourceAllocation((SdfMemBlock *)D_00438E98);
+    memcpy(profiles, (void *)sdfMemoryGetBlockAddress(D_00438E98), sizeof(datGameState->profileBanks));
+    sdfReleaseResourceAllocation(D_00438E98);
     templates = datGameState->templates;
-    memcpy(templates, (void *)sdfMemoryGetBlockAddress((SdfMemBlock *)D_00438E9C), sizeof(datGameState->templates));
-    sdfReleaseResourceAllocation((SdfMemBlock *)D_00438E9C);
+    memcpy(templates, (void *)sdfMemoryGetBlockAddress(D_00438E9C), sizeof(datGameState->templates));
+    sdfReleaseResourceAllocation(D_00438E9C);
     for (i = 0; i < 16; i++) datGameState->templates[i].level = 0;
     state = datGameState;
-    bytes = (void *)sdfMemoryGetBlockAddress((SdfMemBlock *)D_00438EA0);
+    bytes = (void *)sdfMemoryGetBlockAddress(D_00438EA0);
     memcpy(&state->inventory.counts[0xC0], bytes, 0x40);
-    sdfReleaseResourceAllocation((SdfMemBlock *)D_00438EA0);
+    sdfReleaseResourceAllocation(D_00438EA0);
     state = datGameState;
-    bytes = (void *)sdfMemoryGetBlockAddress((SdfMemBlock *)D_00438EA4);
+    bytes = (void *)sdfMemoryGetBlockAddress(D_00438EA4);
     memcpy(state->itemBlockedFlags, bytes, sizeof(state->itemBlockedFlags));
-    sdfReleaseResourceAllocation((SdfMemBlock *)D_00438EA4);
+    sdfReleaseResourceAllocation(D_00438EA4);
     for (i = 0xC0; (s32)i < 0x100; i++) {
         if (datGameState->inventory.counts[i] != 0) mnuMarkEntryBlocked(i);
     }

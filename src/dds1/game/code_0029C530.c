@@ -3,6 +3,7 @@
 #include "btl_resource_browser.h"
 #include "sdf_packet_list.h"
 #include "eff_bill.h"
+#include "eff_ribbon_work.h"
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
 #include "common.h"
@@ -4955,23 +4956,6 @@ void func_002AB9C8(EffectStripNode *p, f32 v) {
     dds3DispatchIndexedCallback((u16 *)p->active, v);
 }
 
-typedef struct EffRibbonWork {
-    u32 count;      // 0x00
-    u32 field_04;   // 0x04
-    u32 color;      // 0x08
-    s32 rowStride;  // 0x0C
-    s32 repeat;     // 0x10
-    u8 field_14;    // 0x14
-    u8 pad_15[3];
-    RefObj *resource; // 0x18: null selects the globally shared wind texture
-    u32 *colors;    // 0x1C
-    u8 *positions;  // 0x20
-    u8 *uvs;        // 0x24
-    u8 *extra;      // 0x28
-    SdfAsset *handle; // 0x2C
-    struct SdfMemBlock *allocation; // 0x30
-} EffRibbonWork;
-
 void effResetBillTable(u8 *work) {
     u32 index = 0;
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
@@ -5081,23 +5065,19 @@ void effFillRingFadeGradient(u8 *node, EffBillEmitterCommon *config) {
     }
 }
 
-extern u32 effCreateRibbonWithSharedResource(u32, u32, u32);
-
 u8 *effCreateRingFadeTable(EffBillVortexConfig *config, u32 resource) {
     u8 *node = effAllocateRingFadeEntries(config);
 
-    ((EffFrameState *)node)->asset = (u8 *)effCreateRibbonWithSharedResource(config->common.header.timed.count, config->common.header.segments, resource);
+    ((EffFrameState *)node)->asset = (u8 *)effCreateRibbonWithSharedResource(config->common.header.timed.count, config->common.header.segments, (struct SdfTextureFileHeader *)(u32)resource);
     effFillRingFadeGradient(node, &config->common);
     return node;
 }
-
-extern u32 effCloneRibbonWithSharedResource(u32);
 
 u8 *effAssetPointerSet(u8 *work) {
     EffBillVortexConfig *config = ((EffClassWork *)work)->payload;
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *node = effAllocateRingFadeEntries(config);
-    ((EffFrameState *)node)->asset = (u8 *)effCloneRibbonWithSharedResource((u32)((EffFrameState *)state)->asset);
+    ((EffFrameState *)node)->asset = (u8 *)effCloneRibbonWithSharedResource((EffRibbonWork *)((EffFrameState *)state)->asset);
     effFillRingFadeGradient(node, &config->common);
     return node;
 }
@@ -5106,7 +5086,7 @@ void effReleaseRingFadeTable(s32 work) {
     EffFrameState *state;
 
     state = (EffFrameState *)((EffClassWork *)work)->resource;
-    effSharedAssetReferenceRelease((u32)state->asset);
+    effSharedAssetReferenceRelease((EffRibbonWork *)state->asset);
     sdfReleaseResourceAllocation(state->allocation);
 }
 
@@ -5119,7 +5099,7 @@ void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = config->common.header.timed.time.progress;
     u32 *list = ((BillCellDrawWork *)work)->instances;
-    u8 *out = (u8 *)list[1];
+    EffRibbonWork *out = (EffRibbonWork *)(u32)list[1];
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -5141,9 +5121,9 @@ void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->field_08 = blended[0];
-    ((EffBillOutput *)out)->color = config->common.header.timed.alphaTrack.surfaceIndex;
-    ((EffBillOutput *)out)->mode = config->common.drawMode;
+    out->color = blended[0];
+    out->surfaceIndex = config->common.header.timed.alphaTrack.surfaceIndex;
+    out->drawMode = config->common.drawMode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -5153,7 +5133,7 @@ void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002AE498((EffRibbonWork *)out, (Matrix4 *)mtx);
+    func_002AE498(out, (Matrix4 *)mtx);
 }
 
 void effResetBillboardFrameInstanceCounters(u8 *work) {
@@ -5258,7 +5238,7 @@ void effFillBillFadeGradient(u8 *node, EffBillEmitterCommon *config) {
 u8 *effCreateBillFadeTable(EffBillColumnConfig *config, u32 resource) {
     u8 *node = effAllocateBillFadeFrameEntries(config);
 
-    ((EffFrameState *)node)->asset = (u8 *)effCreateRibbonWithSharedResource(config->common.header.timed.count, config->common.header.segments, resource);
+    ((EffFrameState *)node)->asset = (u8 *)effCreateRibbonWithSharedResource(config->common.header.timed.count, config->common.header.segments, (struct SdfTextureFileHeader *)(u32)resource);
     effFillBillFadeGradient(node, &config->common);
     return node;
 }
@@ -5267,7 +5247,7 @@ u8 *effCloneBillFadeTable(u8 *work) {
     EffBillColumnConfig *config = ((EffClassWork *)work)->payload;
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *node = effAllocateBillFadeFrameEntries(config);
-    ((EffFrameState *)node)->asset = (u8 *)effCloneRibbonWithSharedResource((u32)((EffFrameState *)state)->asset);
+    ((EffFrameState *)node)->asset = (u8 *)effCloneRibbonWithSharedResource((EffRibbonWork *)((EffFrameState *)state)->asset);
     effFillBillFadeGradient(node, &config->common);
     return node;
 }
@@ -5276,7 +5256,7 @@ void effReleaseBillFadeTable(s32 work) {
     EffFrameState *state;
 
     state = (EffFrameState *)((EffClassWork *)work)->resource;
-    effSharedAssetReferenceRelease((u32)state->asset);
+    effSharedAssetReferenceRelease((EffRibbonWork *)state->asset);
     sdfReleaseResourceAllocation(state->allocation);
 }
 
@@ -5287,7 +5267,7 @@ void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
     u32 limit = work->frameLimit;
     u32 progress = config->common.header.timed.time.progress;
     u32 *list = work->instances;
-    u8 *out = (u8 *)list[1];
+    EffRibbonWork *out = (EffRibbonWork *)(u32)list[1];
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -5309,9 +5289,9 @@ void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->field_08 = blended[0];
-    ((EffBillOutput *)out)->color = config->common.header.timed.alphaTrack.surfaceIndex;
-    ((EffBillOutput *)out)->mode = config->common.drawMode;
+    out->color = blended[0];
+    out->surfaceIndex = config->common.header.timed.alphaTrack.surfaceIndex;
+    out->drawMode = config->common.drawMode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -5321,7 +5301,7 @@ void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002AE498((EffRibbonWork *)out, (Matrix4 *)mtx);
+    func_002AE498(out, (Matrix4 *)mtx);
 }
 
 void effResetParticleBillFrameCounters(u8 *work) {
@@ -5426,7 +5406,7 @@ void effFillCompactRingFadeGradient(u8 *node, EffBillEmitterCommon *config) {
 u8 *effCreateCompactRingFadeTable(EffBillSpiralConfig *config, u32 resource) {
     u8 *node = effAllocateCompactRingFadeEntries(config);
 
-    ((EffFrameState *)node)->asset = (u8 *)effCreateRibbonWithSharedResource(config->common.header.timed.count, config->common.header.segments, resource);
+    ((EffFrameState *)node)->asset = (u8 *)effCreateRibbonWithSharedResource(config->common.header.timed.count, config->common.header.segments, (struct SdfTextureFileHeader *)(u32)resource);
     effFillCompactRingFadeGradient(node, &config->common);
     return node;
 }
@@ -5436,7 +5416,7 @@ u8 *effCloneBillboardFrameAsset(u8 *work) {
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *node = effAllocateCompactRingFadeEntries(config);
 
-    ((EffFrameState *)node)->asset = (u8 *)effCloneRibbonWithSharedResource((u32)((EffFrameState *)state)->asset);
+    ((EffFrameState *)node)->asset = (u8 *)effCloneRibbonWithSharedResource((EffRibbonWork *)((EffFrameState *)state)->asset);
     effFillCompactRingFadeGradient(node, &config->common);
     return node;
 }
@@ -5445,7 +5425,7 @@ void effReleaseCompactRingFadeTable(s32 work) {
     EffFrameState *state;
 
     state = (EffFrameState *)((EffClassWork *)work)->resource;
-    effSharedAssetReferenceRelease((u32)state->asset);
+    effSharedAssetReferenceRelease((EffRibbonWork *)state->asset);
     sdfReleaseResourceAllocation(state->allocation);
 }
 
@@ -5456,7 +5436,7 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = config->common.header.timed.time.progress;
     u32 *list = ((BillCellDrawWork *)work)->instances;
-    u8 *out = (u8 *)list[1];
+    EffRibbonWork *out = (EffRibbonWork *)(u32)list[1];
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -5478,9 +5458,9 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->field_08 = blended[0];
-    ((EffBillOutput *)out)->color = config->common.header.timed.alphaTrack.surfaceIndex;
-    ((EffBillOutput *)out)->mode = config->common.drawMode;
+    out->color = blended[0];
+    out->surfaceIndex = config->common.header.timed.alphaTrack.surfaceIndex;
+    out->drawMode = config->common.drawMode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -5490,7 +5470,7 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002AE498((EffRibbonWork *)out, (Matrix4 *)mtx);
+    func_002AE498(out, (Matrix4 *)mtx);
 }
 
 EffClassWork *effAllocateBlock(u16 kind, void *source) {
@@ -5584,7 +5564,7 @@ void effSetBlockResourceMatrixComponent(EffClassWork *work, float value) {
 
 extern EffPacketParams D_003DCB00;
 
-u8 *effCreateRibbonWork(u32 count, u32 repeat) {
+EffRibbonWork *effCreateRibbonWork(u32 count, u32 repeat) {
     u32 rowStride = repeat * 4 + 4;
     u32 size = (rowStride * 0x1C + 4) * count;
     u32 cells = rowStride * count;
@@ -5599,14 +5579,14 @@ u8 *effCreateRibbonWork(u32 count, u32 repeat) {
     p += cells * 8;
     work->extra = p;
     p += cells * 4;
-    work->field_04 = 2;
+    work->surfaceIndex = 2;
     work->color = 0x80808080;
     work->rowStride = rowStride;
     work->repeat = repeat;
     work->allocation = allocation;
     work->colors = (u32 *)p;
     work->count = count;
-    work->field_14 = 0;
+    work->drawMode = 0;
     for (i = 0; i < count; i++) {
         ((u32 *)p)[i] = 0x80808080;
     }
@@ -5614,17 +5594,15 @@ u8 *effCreateRibbonWork(u32 count, u32 repeat) {
     sdfSetPrimaryStateFloat(work->handle, 1.0f);
     memset(&D_003DCB00, 0, sizeof(EffPacketParams));
     D_003DCB00.primitive = 0x4000;
-    return (u8 *)work;
+    return work;
 }
 
-extern u8 *effCreateRibbonWork(u32, u32);
-
-u32 effCreateRibbonWithSharedResource(u32 count, u32 repeat, u32 resource) {
-    u8 *node = effCreateRibbonWork(count, repeat);
+EffRibbonWork *effCreateRibbonWithSharedResource(u32 count, u32 repeat, struct SdfTextureFileHeader *resource) {
+    EffRibbonWork *node = effCreateRibbonWork(count, repeat);
 
     if (resource == 0) {
         s32 references = effSharedRibbonReferenceCount;
-        ((EffRibbonWork *)node)->resource = NULL;
+        node->resource = NULL;
         if (references == 0) {
             D_003BC990 = (u32)effCloneSharedReferenceWithValue((struct SdfTextureFileHeader *)effWindTextureHandle, 0x300);
             references = effSharedRibbonReferenceCount;
@@ -5632,13 +5610,13 @@ u32 effCreateRibbonWithSharedResource(u32 count, u32 repeat, u32 resource) {
         references++;
         effSharedRibbonReferenceCount = references;
     } else {
-        ((EffRibbonWork *)node)->resource = effCreateSharedTextureReference((struct SdfTextureFileHeader *)resource);
+        node->resource = effCreateSharedTextureReference(resource);
     }
-    return (u32)node;
+    return node;
 }
 
-void effSharedAssetReferenceRelease(s32 work) {
-    if (((EffRibbonWork *)work)->resource == NULL) {
+void effSharedAssetReferenceRelease(EffRibbonWork *work) {
+    if (work->resource == NULL) {
         effSharedRibbonReferenceCount = effSharedRibbonReferenceCount - 1;
         if (effSharedRibbonReferenceCount == 0) {
             effReleaseSharedReference((RefObj *)D_003BC990);
@@ -5646,23 +5624,23 @@ void effSharedAssetReferenceRelease(s32 work) {
         }
     }
     else {
-        effReleaseSharedReference(((EffRibbonWork *)work)->resource);
+        effReleaseSharedReference(work->resource);
     }
-    sdfQueueAssetRelease(((EffRibbonWork *)work)->handle);
-    sdfReleaseResourceAllocation(((EffRibbonWork *)work)->allocation);
+    sdfQueueAssetRelease(work->handle);
+    sdfReleaseResourceAllocation(work->allocation);
 }
 
-u32 effCloneRibbonWithSharedResource(u32 work) {
-    u8 *node = effCreateRibbonWork(((EffRibbonWork *)work)->count, ((EffRibbonWork *)work)->repeat);
-    RefObj *texture = ((EffRibbonWork *)work)->resource;
+EffRibbonWork *effCloneRibbonWithSharedResource(EffRibbonWork *source) {
+    EffRibbonWork *node = effCreateRibbonWork(source->count, source->repeat);
+    RefObj *texture = source->resource;
 
     if (texture != NULL) {
-        ((EffRibbonWork *)node)->resource = effRetainSharedReference(texture);
+        node->resource = effRetainSharedReference(texture);
     } else {
         effSharedRibbonReferenceCount++;
-        ((EffRibbonWork *)node)->resource = NULL;
+        node->resource = NULL;
     }
-    return (u32)node;
+    return node;
 }
 
 INCLUDE_ASM(const s32, "game/code_0029C530", func_002AE498);

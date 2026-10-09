@@ -154,13 +154,13 @@ void mtrAdvanceGridCellPropagation(MtrGrid *grid) {
 
 INCLUDE_RODATA(const s32, "game/code_00285CE8", D_00425DD8);
 
-s32 mtrMantraEventBitPush(void) {
+struct SdfMemBlock *mtrMantraEventBitPush(void) {
     s8 *data;
-    s32 handle;
+    struct SdfMemBlock *allocation;
     s32 i;
 
-    handle = (u32)sdfAllocGeneralBlock(0x76);
-    data = (s8 *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)handle);
+    allocation = sdfAllocGeneralBlock(0x76);
+    data = (s8 *)sdfMemoryGetBlockAddress(allocation);
     memset(data, 0, 0x76);
     for (i = 0; i < 0x70; i++) {
         if (mdlFlagTest(i + 0x920)) {
@@ -175,13 +175,13 @@ s32 mtrMantraEventBitPush(void) {
         data++;
     }
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitPush()]*****************\n");
-    return handle;
+    return allocation;
 }
 
 
-void mtrMantraEventBitPop(s32 arg) {
+void mtrMantraEventBitPop(struct SdfMemBlock *allocation) {
     s32 i;
-    s8 *data = (s8 *)sdfMemoryGetBlockAddress((struct SdfMemBlock *)(u32)arg);
+    s8 *data = (s8 *)sdfMemoryGetBlockAddress(allocation);
 
     for (i = 0; i < 0x70; i++) {
         if (*data != 0) {
@@ -199,7 +199,7 @@ void mtrMantraEventBitPop(s32 arg) {
         }
         data++;
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(arg));
+    sdfReleaseResourceAllocation(allocation);
     evtPrintDeveloperConsoleMessage("*****************[mtrMantraEventBitPop()]*****************\n");
 }
 
