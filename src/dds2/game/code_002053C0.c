@@ -927,7 +927,7 @@ void btlAlignTripleFormationWithTarget(ActionStateLink *link, BtlUnit *first, Bt
     }
 }
 
-void func_00206C10(void) {
+void func_00206C10(ActionStateLink *link, BtlUnit *first, BtlUnit *second) {
 }
 
 extern s128 D_003BE0A0;
@@ -1006,7 +1006,7 @@ INCLUDE_ASM(const s32, "game/code_002053C0", func_00207268);
 extern f32 D_003E9110[4];
 
 /* Arrange the two marked three-slot groups around the battle origin. */
-void func_00207438(void) {
+void func_00207438(ActionStateLink *link, BtlUnit *firstActor, BtlUnit *secondActor) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *first[3];
     BtlUnit *second[3];
@@ -1118,13 +1118,87 @@ BtlRuntimeTask *btlCreateMoveOtherUnitsTask(ActionStateLink *link, s32 option, s
     return task;
 }
 
-INCLUDE_ASM(const s32, "game/code_002053C0", func_002077C0);
+typedef struct {
+    u8 unknown00[2];
+    u16 kind;
+    u8 unknown04[4];
+} BtlTaskCategoryRow;
 
-extern s32 func_002077C0(u32 *);
+typedef char BtlTaskCategoryRow_size[(sizeof(BtlTaskCategoryRow) == 8) ? 1 : -1];
+
+extern BtlTaskCategoryRow *D_00435E34;
+extern void func_00206EA8(ActionStateLink *, BtlUnit *);
+
+/* The formation task allocates five words, independently of the sound work. */
+typedef struct BtlFormationTaskArgs {
+    ActionStateLink *actor;
+    BtlUnit *first;
+    BtlUnit *second;
+    u32 commandId;
+    u32 unknown10;
+} BtlFormationTaskArgs;
+
+typedef char BtlFormationTaskArgs_size[(sizeof(BtlFormationTaskArgs) == 0x14) ? 1 : -1];
+
+s32 func_002077C0(u32 *rawArgs) {
+    BtlFormationTaskArgs *args = (BtlFormationTaskArgs *)rawArgs;
+    BtlState *work = (BtlState *)btlGetRuntime();
+    u16 category;
+
+    if (args->first == NULL && args->second == NULL) {
+        return 1;
+    }
+    if (args->actor->unit->flags & 0x400) {
+        category = D_00435E34[args->commandId - 0x1AB].kind;
+        switch (category) {
+        case 7:
+            func_00206C10(args->actor, args->first, args->second);
+            break;
+        case 11:
+            func_00207438(args->actor, args->first, args->second);
+            break;
+        }
+        return 1;
+    }
+    category = D_00435E34[args->commandId - 0x1AB].kind;
+    switch (category) {
+    case 0:
+    case 5:
+    case 7:
+    case 10:
+        break;
+    case 1:
+        if ((work->commandRestrictFlags & 0x200) == 0) {
+            btlPlaceTripleFormationAroundCenter(args->actor, args->first, args->second);
+        }
+        break;
+    case 2:
+        if ((work->commandRestrictFlags & 0x200) == 0) {
+            btlPlaceTripleFormationAroundTarget(args->actor, args->first, args->second);
+        }
+        break;
+    case 3:
+        func_00206570(args->actor, args->first, args->second);
+        break;
+    case 4:
+        btlOrientFrontAndBackUnitsTowardTargets(args->actor, args->first, args->second);
+        break;
+    case 6:
+        btlAlignTripleFormationWithTarget(args->actor, args->first, args->second);
+        break;
+    case 8:
+        func_00206C18(args->actor, args->first);
+        break;
+    case 9:
+        func_00206EA8(args->actor, args->first);
+        break;
+    }
+    return 1;
+}
 
 BtlRuntimeTask *btlCreateSoundPlaybackTask(ActionStateLink *link, u32 soundId, u32 variant, u32 channel, u32 flags) {
     BtlRuntimeTask *task = btlAllocTask(20);
-    SoundTaskArgs *args;
+    BtlFormationTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = func_002077C0;
@@ -1133,12 +1207,11 @@ BtlRuntimeTask *btlCreateSoundPlaybackTask(ActionStateLink *link, u32 soundId, u
     task->ownerId = link->unit->owner;
     args = btlGetTaskArguments(task);
     args->actor = link;
-    args->option = soundId;
-    args->unk_08 = variant;
-    args->unk_0C = channel;
-    args->unk_10 = flags;
+    args->first = (BtlUnit *)soundId;
+    args->second = (BtlUnit *)variant;
+    args->commandId = channel;
+    args->unknown10 = flags;
     return task;
 }
 
 INCLUDE_RODATA(const s32, "game/code_002053C0", D_00419540);
-
