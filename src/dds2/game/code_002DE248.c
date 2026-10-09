@@ -3,6 +3,7 @@
 #include "btl_resource_browser.h"
 #include "sdf_packet_list.h"
 #include "eff_bill.h"
+#include "eff_ribbon_work.h"
 #include "itf_draw_grid.h"
 #include "eff_class_work_api.h"
 #include "eff_point_set.h"
@@ -325,9 +326,8 @@ extern u8 D_003E9100[];
 struct Matrix4;
 extern void func_002E5E88(EffTrackSet *, struct Matrix4 *);
 
-struct EffRibbonWork;
 struct Matrix4;
-extern void func_002F1888(struct EffRibbonWork *, struct Matrix4 *);
+extern void func_002F1888(EffRibbonWork *, struct Matrix4 *);
 
 
 extern void kwlnPadStartMotor(s32, u8, s32);
@@ -5344,23 +5344,6 @@ void func_002EEDA8(EffectStripNode *p, f32 value) {
     dds3DispatchIndexedCallback((s32)p->active, value);
 }
 
-typedef struct EffRibbonWork {
-    u32 count;          // 0x00
-    u32 field_04;       // 0x04
-    u32 color;          // 0x08
-    s32 rowStride;      // 0x0C
-    s32 repeat;         // 0x10
-    u8 field_14;        // 0x14
-    u8 pad_15[3];
-    RefObj *resource; // 0x18: null selects the globally shared wind texture
-    u32 *colors;        // 0x1C
-    u8 *positions;      // 0x20
-    u8 *uvs;            // 0x24
-    u8 *extra;          // 0x28
-    SdfAsset *handle;     // 0x2C
-    struct SdfMemBlock *allocation; // 0x30
-} EffRibbonWork;
-
 void effResetBillTable(u8 *p) {
     u8 *a = (u8 *)((EffClassWork *)p)->resource;
     u8 *b = ((EffClassWork *)p)->payload;
@@ -5492,7 +5475,7 @@ void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = config->common.header.timed.time.progress;
     u32 *list = ((BillCellDrawWork *)work)->instances;
-    u8 *out = (u8 *)list[1];
+    EffRibbonWork *out = (EffRibbonWork *)(u32)list[1];
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -5514,9 +5497,9 @@ void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->field_08 = blended[0];
-    ((EffBillOutput *)out)->color = config->common.header.timed.alphaTrack.surfaceIndex;
-    ((EffBillOutput *)out)->mode = config->common.drawMode;
+    out->color = blended[0];
+    out->surfaceIndex = config->common.header.timed.alphaTrack.surfaceIndex;
+    out->drawMode = config->common.drawMode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
@@ -5526,7 +5509,7 @@ void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002F1888((EffRibbonWork *)out, (Matrix4 *)mtx);
+    func_002F1888(out, (Matrix4 *)mtx);
 }
 
 void effResetBillboardFrameInstanceCounters(u8 *p) {
@@ -5657,7 +5640,7 @@ void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
     u32 limit = work->frameLimit;
     u32 progress = config->common.header.timed.time.progress;
     u32 *list = work->instances;
-    u8 *out = (u8 *)list[1];
+    EffRibbonWork *out = (EffRibbonWork *)(u32)list[1];
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -5679,9 +5662,9 @@ void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->field_08 = blended[0];
-    ((EffBillOutput *)out)->color = config->common.header.timed.alphaTrack.surfaceIndex;
-    ((EffBillOutput *)out)->mode = config->common.drawMode;
+    out->color = blended[0];
+    out->surfaceIndex = config->common.header.timed.alphaTrack.surfaceIndex;
+    out->drawMode = config->common.drawMode;
     VU0_LOAD_VF(vf10, work->transform);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
@@ -5691,7 +5674,7 @@ void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002F1888((EffRibbonWork *)out, (Matrix4 *)mtx);
+    func_002F1888(out, (Matrix4 *)mtx);
 }
 
 void effResetParticleBillFrameCounters(u8 *p) {
@@ -5821,7 +5804,7 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
     u32 limit = ((BillCellDrawWork *)work)->frameLimit;
     u32 progress = config->common.header.timed.time.progress;
     u32 *list = ((BillCellDrawWork *)work)->instances;
-    u8 *out = (u8 *)list[1];
+    EffRibbonWork *out = (EffRibbonWork *)(u32)list[1];
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -5843,9 +5826,9 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
     VU0_MUL(vf10, vf10, vf11);
         EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->field_08 = blended[0];
-    ((EffBillOutput *)out)->color = config->common.header.timed.alphaTrack.surfaceIndex;
-    ((EffBillOutput *)out)->mode = config->common.drawMode;
+    out->color = blended[0];
+    out->surfaceIndex = config->common.header.timed.alphaTrack.surfaceIndex;
+    out->drawMode = config->common.drawMode;
     VU0_LOAD_VF(vf10, work + 0x10);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_003E9100);
@@ -5855,7 +5838,7 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     VU0_STORE_MATRIX(mtx);
-    func_002F1888((EffRibbonWork *)out, (Matrix4 *)mtx);
+    func_002F1888(out, (Matrix4 *)mtx);
 }
 
 EffClassWork *effAllocateBlock(u16 kind, void *source) {
@@ -5973,14 +5956,14 @@ u8 *effCreateRibbonWork(u32 count, u32 repeat) {
     p += cells * 8;
     work->extra = p;
     p += cells * 4;
-    work->field_04 = 2;
+    work->surfaceIndex = 2;
     work->color = 0x80808080;
     work->rowStride = rowStride;
     work->repeat = repeat;
     work->allocation = allocation;
     work->colors = (u32 *)p;
     work->count = count;
-    work->field_14 = 0;
+    work->drawMode = 0;
     for (i = 0; i < count; i++) {
         ((u32 *)p)[i] = 0x80808080;
     }
@@ -13189,4 +13172,3 @@ INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438850);
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438858);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438860);
-
