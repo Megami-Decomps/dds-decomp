@@ -3,6 +3,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
+#include "evt_viewer_rows.h"
 
 #include "evt_world.h"
 #include "evt_picture.h"
@@ -4194,26 +4195,6 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
     func_00310A68(D_003BC358, 0);
     return 1;
 }
-
-/* PM2 row records borrow storage from the complete PolyMovieWork owner.
- * Format 4 has eight inline payload bytes; later rows have four reserved
- * bytes before their 32-byte payload. Neither record contains runtime links. */
-typedef struct EvtCompactRow {
-    u16 value;
-    u16 parameter;
-    u16 flags;
-    s16 variant;
-    u8 payload[8];
-} EvtCompactRow;
-
-typedef struct EvtExtendedRow {
-    u16 value;
-    u16 parameter;
-    u16 flags;
-    s16 variant;
-    u8 reserved08[4];
-    u8 payload[0x20];
-} EvtExtendedRow;
 
 u16 evtGetRowValue(PolyMovieWork *work, s32 row) {
     if (work->sub->kind == 4) {
