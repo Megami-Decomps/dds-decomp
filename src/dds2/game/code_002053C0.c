@@ -253,8 +253,8 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
     return 0;
 }
 
-BtlRuntimeTask *sndCreateAtracEffectLoadTask(s32 value) {
-    BtlRuntimeTask *task = btlAllocTask(0xC);
+BtlRuntimeTask *sndCreateAtracEffectLoadTask(s32 entryIndex) {
+    BtlRuntimeTask *task = btlAllocTask(sizeof(Atrac3LoadTaskArgs));
     Atrac3LoadTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x5D;
@@ -262,7 +262,7 @@ BtlRuntimeTask *sndCreateAtracEffectLoadTask(s32 value) {
     task->callback = sndPollAtrac3SELoadTask;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = btlGetTaskArguments(task);
-    args->entryIndex = value;
+    args->entryIndex = entryIndex;
     args->state = 0;
     args->request = 0;
     return task;
