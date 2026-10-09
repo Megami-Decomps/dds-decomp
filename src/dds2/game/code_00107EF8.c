@@ -688,7 +688,6 @@ void func_00109538(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s
 
 extern u64 D_0037F5A0[]; /* index table; only the first 8 bytes are used */
 extern void *func_0033B050(SdfPrimitiveRequest *);
-extern void sdfSetAssetPrimaryTextureAddress(struct SdfAsset *, u32);
 
 /* Preserve the native 0,2,3,1 vertex/index order; W components are not initialized here. */
 void evtSubmitQuadFromVertices(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2, f32 x3, f32 y3, f32 z3, u32 i0, u32 i1, u32 i2, u32 i3) {
@@ -744,7 +743,7 @@ void evtSubmitTexturedQuadFromVertices(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f
     SdfPoolNode *surface;
 
     asset = sdfCreateAssetWithDrawEntries();
-    sdfSetAssetPrimaryTextureAddress(asset, bits);
+    sdfSetAssetPrimaryTextureAddress(asset, (SdfTex *)bits);
     list = (void *)sdfAllocPacketAligned(EVT_PACKET_LIST_BYTES);
     sdfInitPacketList(list);
     sdfConsAppendClearPacket(list, 0);

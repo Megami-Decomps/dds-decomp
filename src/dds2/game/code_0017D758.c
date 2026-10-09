@@ -76,7 +76,6 @@ extern s32 func_00167A10(ScatterRenderState *);
 struct SdfAsset;
 extern f32 *effGetScatterWideBlock(PcpScatterDraw *, s32);
 extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *, s32);
-extern void sdfSetAssetPrimaryTextureAddress(struct SdfAsset *, u32);
 extern u32 effGetScatterEntry(PcpScatterDraw *, s32);
 
 void effScatterDrawObject(PcpScatterDraw *object) {
@@ -100,7 +99,7 @@ void effScatterDrawObject(PcpScatterDraw *object) {
     sdfComposeVuMatrixFromRegisters();
     sdfConsAppendVuPacket(packet, 0);
     if (object->sharedResource != NULL) {
-        sdfSetAssetPrimaryTextureAddress((struct SdfAsset *)object->asset, (u32)object->sharedResource->textureHandle);
+        sdfSetAssetPrimaryTextureAddress((struct SdfAsset *)object->asset, object->sharedResource->textureHandle);
     }
     sdfConsAppendAssetPacket(packet, (SdfAsset *)object->asset, 0);
     count = (s32)object->particleCount;

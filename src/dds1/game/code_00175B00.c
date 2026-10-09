@@ -79,7 +79,6 @@ extern s32 func_0015FE20(ScatterRenderState *);
 extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 index);
 extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);
 struct SdfAsset;
-extern void sdfSetAssetPrimaryTextureAddress(struct SdfAsset *, u32);
 
 /* Render scatter strips in batches of sixteen vertices, then submit the tail. */
 void effScatterDrawObject(PcpScatterDraw *object) {
@@ -104,7 +103,7 @@ void effScatterDrawObject(PcpScatterDraw *object) {
     sdfConsAppendVuPacket(packet, 0);
     if (object->sharedResource != NULL) {
         sdfSetAssetPrimaryTextureAddress((struct SdfAsset *)object->asset,
-                      (u32)object->sharedResource->textureHandle);
+                      object->sharedResource->textureHandle);
     }
     sdfConsAppendAssetPacket(packet, (SdfAsset *)object->asset, 0);
     count = (s32)object->particleCount;

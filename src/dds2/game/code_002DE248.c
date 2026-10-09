@@ -2864,7 +2864,6 @@ extern u32 D_003E9AD0[20];
 extern u32 D_003E9B20[16];
 extern SdfTex *func_002DDD60(void *, RefObj *);
 struct SdfAsset;
-extern void sdfSetAssetPrimaryTextureAddress(struct SdfAsset *, u32);
 
 void func_002E5E88(u8 *work, void *matrix) {
     EffTrackSet *track = (EffTrackSet *)work;
@@ -2913,7 +2912,7 @@ void func_002E5E88(u8 *work, void *matrix) {
             texture = func_002DDD60(surface, reference);
         }
 setTexture:
-        sdfSetAssetPrimaryTextureAddress((struct SdfAsset *)track->handle, (u32)texture);
+        sdfSetAssetPrimaryTextureAddress(track->handle, texture);
     }
     sdfConsAppendAssetPacket(list, track->handle, 0);
 
