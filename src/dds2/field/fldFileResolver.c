@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "fld_resource_resolver.h"
 #include "fld.h"
@@ -403,7 +404,6 @@ extern s32 fldEncProc(void);
 
 extern void btlUpdateRuntimeFadeState(void);
 
-extern void mdlSetNodeFrameStep(MdlCtx *, s32, f32);
 
 
 extern f32 fldSwayPhase;
@@ -426,9 +426,7 @@ extern s32 D_00389780[];
 
 extern s32 D_004360E8;
 
-extern void mdlSuspendAllContextMotions(MdlCtx *object);
 
-extern void mdlResumeAllContextMotions(MdlCtx *object);
 
 
 extern u32 D_0043612C;

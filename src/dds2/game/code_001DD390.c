@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -37,8 +38,6 @@
 #include "dat_command.h"
 
 extern void btlFlagMatchingUnitsDefeatCandidate(s32);
-
-extern s32 mdlGetNodeMotionIndex(MdlCtx *, s32);
 
 extern void effObjSetOpacityPassEnabled(u32 enabled);
 

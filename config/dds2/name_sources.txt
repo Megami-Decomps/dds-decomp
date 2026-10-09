@@ -3323,8 +3323,9 @@
 0x002324C0	mdlBlendEntryPitchYawAndUpdate	inferred	confidence=high; src/dds2/game/code_00231A80.c:func_002324C0; Blends an indexed entry basis toward degree-based pitch/yaw, advances child slots and conditionally updates model/draw resources. [names_qp9.tsv]
 0x002327C0	mdlFindOrCreateMotionRecordNode	inferred	Traverses nodes by search ID and creates a node if absent before recording its slot. [names_reviewed21.tsv]
 0x00232970	mdlGetNodeMotionIndex	inferred	Finds the named motion node; returns its unsigned motionIndex widened to s32, or -1 when absent.
-0x002329A0	mdlGetNodeFrameCount	inferred	Finds the named motion node; returns its frameCount, or zero when absent; preserves the existing title-specific result type.
+0x002329A0	mdlGetNodeFrameCount	inferred	Finds the named motion node; returns its unsigned 16-bit frameCount, or zero when absent.
 0x002329C8	mdlGetNodeFrameAsInt	inferred	Finds the named motion node; numerically converts its currentFrame to s32, or returns zero when absent.
+0x002329F8	mdlGetNodeMotionTerminalStatus	inferred	native state comparison returns 2 for missing motion and 1 or 0 for terminal or nonterminal
 0x00232A30	mdlGetNodeFrameStep	inferred	Reads Motion.frameStep at +0x20 or zero for a missing node; the motion updater adds it to currentFrame.
 0x00232A58	mdlSetNodeFrameStep	inferred	Writes Motion.frameStep at +0x20 when the searched node exists; the motion updater adds it to currentFrame.
 0x00232A88	mdlLoadPrimaryVectorVU	inferred	Loads the model inner vector at offset 0x50 into VU0 vf10.
