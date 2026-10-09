@@ -5,6 +5,14 @@
 
 struct EffPrimitiveCurve;
 
+/* Observed serialized path-curve kinds, distinct from runtime flags. */
+enum Dds3PathCurveKind {
+    DDS3_PATH_CURVE_POSITION = 0,
+    DDS3_PATH_CURVE_ROTATION = 2,
+    DDS3_PATH_CURVE_SCALAR = 4,
+    DDS3_PATH_CURVE_WORLD_TRANSFORM = 5
+};
+
 enum Dds3PathChannelFlags {
     DDS3_PATH_POSITION_CHANNEL = 1,
     DDS3_PATH_ROTATION_CHANNEL = 2,

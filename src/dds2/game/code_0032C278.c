@@ -1,3 +1,7 @@
+#include "sdf_gs_textured_shapes.h"
+#include "sdf_request.h"
+#include "sdf_gs_context.h"
+#include "sdf_gs_gouraud_shapes.h"
 #include "sdf_gs_header.h"
 #include "sdf_gs_geometry.h"
 #include "sdf_texture_flush.h"
@@ -18,6 +22,7 @@ extern s32 sdfDoubleBufferAllocation;
 #include "sdf_pending.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
+#include "sdf_gs_flat_shapes.h"
 #include "sdf_gs_packet.h"
 #include "sdf_draw.h"
 
@@ -133,7 +138,6 @@ extern s32 sdfPendingQueueSlots[2];
 
 s32 sdfAllocPacketAligned(s32 size);
 
-extern void sdfBuildFrameDepthScissorPacket(SdfPacket *, s32, s32, s32, s32, s32, s32, s32, s32);
 
 void sdfWriteImageTransferRegisters(SdfImageTransferRegisters *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
                   s64 destinationFormat, s64 destinationX, s64 destinationY,
@@ -146,17 +150,10 @@ void sdfDestroyObjectList(SdfModel *owner);
 
 
 
-extern void sdfDestroyDevRequest(DevRequest *request);
-extern void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
-extern void sdfDevBufferedRequestGrow(DevRequest *request);
-
-
-extern void sdfBuildQuadPacket(s32, s32, s32, s32, s32, s32, s32, s32);
 
 
 extern void sdfBuildPacket104x4(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern void sdfBuildPacket10C(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 INCLUDE_ASM(const s32, "game/code_0032C278", func_0032C278);
 
@@ -616,7 +613,38 @@ s32 sdfPrependIfMode1(SdfPoolNode *list, s32 mode, SdfListHead *packet) {
 
 extern void func_0032D0F0(SdfPoolNode *, s32);
 
-INCLUDE_ASM(const s32, "game/code_0032C278", func_0032D0F0);
+/* Initialise a run of pool nodes and chain each to the next; the last node ends the chain. */
+void func_0032D0F0(SdfPoolNode *nodes, s32 count) {
+    SdfPoolNode *node = nodes;
+    SdfPoolNode *next;
+    s32 remaining = count - 1;
+
+    node->append = sdfAppendPacketList;
+    node->prepend = sdfPrependIfMode1;
+    node->first = 0;
+    node->last = 0;
+    node->unkC = 0;
+    node->unk18 = 0;
+    if (remaining == 0) {
+        node->next = NULL;
+        return;
+    }
+link:
+    next = node + 1;
+    remaining--;
+    node->next = next;
+    node = next;
+    next->append = sdfAppendPacketList;
+    next->prepend = sdfPrependIfMode1;
+    next->first = 0;
+    next->last = 0;
+    next->unkC = 0;
+    next->unk18 = 0;
+    if (remaining != 0) {
+        goto link;
+    }
+    node->next = NULL;
+}
 
 /* Make a REF DMA node for the payload following the source tag. */
 SdfDmaNode *sdfCreateReferenceDmaNode(SdfDmaTag *sourceTag) {
@@ -764,20 +792,20 @@ void sdfInitializeDmaReferenceTag(SdfGsPacketHeader *header, s32 payloadQwords) 
 }
 
 /* Emit a GIF header, a REF tag with masked count/address, and the trailing NEXT tag. */
-void sdfBuildDmaReferenceChain(u64 *packet, u32 sourceAddress, s32 qwordCount) {
-    packet[0] = SDF_DMA_CNT_ONE_WORD;
-    packet[1] = SDF_VIF_DIRECT_ONE_FLUSHE;
-    packet[2] = (u64)qwordCount | SDF_GIF_PACKED_AD_BITS;
-    packet[3] = SDF_GIF_REGISTER_AD;
-    packet[4] = (u32)((qwordCount & SDF_DMA_QWC_MASK) | SDF_DMA_TAG_REF_WORD) | ((u64)(sourceAddress & SDF_DMA_ADDRESS_MASK) << 32);
-    packet[5] = SDF_VIF_DIRECT_ONE_NOP;
-    packet[6] = SDF_DMA_TAG_NEXT_WORD;
-    packet[7] = 0;
+void sdfBuildDmaReferenceChain(SdfDmaReferenceChainPacket *packet, u32 sourceAddress, s32 qwordCount) {
+    packet->header.dmaTag = SDF_DMA_CNT_ONE_WORD;
+    packet->header.vifCommands = SDF_VIF_DIRECT_ONE_FLUSHE;
+    packet->header.gifTag = (u64)qwordCount | SDF_GIF_PACKED_AD_BITS;
+    packet->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    packet->referenceTag = (u32)((qwordCount & SDF_DMA_QWC_MASK) | SDF_DMA_TAG_REF_WORD) | ((u64)(sourceAddress & SDF_DMA_ADDRESS_MASK) << 32);
+    packet->referenceVifCommands = SDF_VIF_DIRECT_ONE_NOP;
+    packet->nextTag = SDF_DMA_TAG_NEXT_WORD;
+    packet->zeroTailWord = 0;
 }
 
 /* Emit FRAME/ZBUF/XYOFFSET/SCISSOR A+D pairs for the selected GS context.
  * Register IDs are separate from their values; fieldOffset adds a half-pixel Y step. */
-void sdfBuildFrameDepthScissorPacket(SdfPacket *packet, s32 frameAddress, s32 width, s32 height,
+void sdfBuildFrameDepthScissorPacket(SdfGsContextRegisters *packet, s32 frameAddress, s32 width, s32 height,
                   s32 frameFormat, s32 depthAddress, s32 depthFormat,
                   s32 fieldOffset, s32 gsContext) {
     s64 frameRegisterId;
@@ -798,19 +826,19 @@ void sdfBuildFrameDepthScissorPacket(SdfPacket *packet, s32 frameAddress, s32 wi
         offsetRegisterId = SDF_GS_XYOFFSET_2;
         scissorRegisterId = SDF_GS_SCISSOR_2;
     }
-    packet[1].unk18 = scissorRegisterId;
+    packet->scissor.registerId = scissorRegisterId;
     yOffset = (SDF_GS_CENTER_BIAS - height) << 3;
     xOffset = (SDF_GS_CENTER_BIAS - width) << 3;
-    packet[0].unk0 = (s64)(frameFormat << 24) | (s64)(((width + 63) >> 6) << 16) | (s64)(frameAddress >> 11);
+    packet->frame.value = (s64)(frameFormat << 24) | (s64)(((width + 63) >> 6) << 16) | (s64)(frameAddress >> 11);
     if (fieldOffset != 0) {
         yOffset += SDF_GS_FIELD_OFFSET_STEP;
     }
-    packet[0].unk8 = frameRegisterId;
-    packet[0].unk10 = (s64)(depthFormat << 24) | (s64)(depthAddress >> 11);
-    packet[0].unk18 = depthRegisterId;
-    packet[1].unk8 = offsetRegisterId;
-    packet[1].unk10 = ((s64)(height - 1) << 48) | ((s64)(width - 1) << 16);
-    packet[1].unk0 = xOffset | ((s64)yOffset << 32);
+    packet->frame.registerId = frameRegisterId;
+    packet->zbuf.value = (s64)(depthFormat << 24) | (s64)(depthAddress >> 11);
+    packet->zbuf.registerId = depthRegisterId;
+    packet->xyoffset.registerId = offsetRegisterId;
+    packet->scissor.value = ((s64)(height - 1) << 48) | ((s64)(width - 1) << 16);
+    packet->xyoffset.value = xOffset | ((s64)yOffset << 32);
 }
 
 /* Encode centered viewport bounds in GS coordinate words; the last two arguments are unused. */
@@ -846,14 +874,14 @@ void sdfInitDrawPacket(u64 *packet) {
 void sdfBuildSceneDrawHeader(SdfPacket *packet, s32 frameAddress, s32 width, s32 height,
                            s32 frameFormat, s32 depthAddress, s32 depthFormat, s32 gsContext) {
     sdfInitializeDmaReferenceTag((SdfGsPacketHeader *)packet, SDF_SCENE_DRAW_PAYLOAD_QWORDS);
-    sdfBuildFrameDepthScissorPacket(packet + 1, frameAddress, width, height, frameFormat, depthAddress, depthFormat, 0, gsContext);
+    sdfBuildFrameDepthScissorPacket((SdfGsContextRegisters *)(packet + 1), frameAddress, width, height, frameFormat, depthAddress, depthFormat, 0, gsContext);
 }
 
 typedef struct SdfSceneDrawPacket {
     SdfGsPacketHeader header; /* 0x00 */
     u64 draw[8];         /* 0x20 */
-    SdfPacket contextOne[2]; /* 0x60 */
-    SdfPacket contextTwo[2]; /* 0xA0 */
+    SdfGsContextRegisters contextOne; /* 0x60 */
+    SdfGsContextRegisters contextTwo; /* 0xA0 */
     u64 limits[10];      /* 0xE0 */
     u64 regs[8];         /* 0x130 */
 } SdfSceneDrawPacket;
@@ -876,8 +904,8 @@ void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfGraphObj *view, s
     frameFormat = view->bufferFormat;
     height = view->height;
     depthFormat = view->auxiliaryFormat;
-    sdfBuildFrameDepthScissorPacket(packet->contextOne, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_00438A22, 0);
-    sdfBuildFrameDepthScissorPacket(packet->contextTwo, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_00438A22, 1);
+    sdfBuildFrameDepthScissorPacket(&packet->contextOne, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_00438A22, 0);
+    sdfBuildFrameDepthScissorPacket(&packet->contextTwo, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_00438A22, 1);
     sdfBuildCenteredViewBoundsPacket(packet->limits, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
     packet->regs[0] = SDF_GS_SCENE_TEST;
     packet->regs[1] = SDF_GS_TEST_1;
@@ -898,8 +926,8 @@ typedef struct SdfSceneNode {
     u8 padC[4];
     SdfGsPacketHeader header; /* 0x10 */
     u64 draw[8];       /* 0x30 */
-    SdfPacket contextOne[2]; /* 0x70 */
-    SdfPacket contextTwo[2]; /* 0xB0 */
+    SdfGsContextRegisters contextOne; /* 0x70 */
+    SdfGsContextRegisters contextTwo; /* 0xB0 */
     u64 limits[10];    /* 0xF0 */
     u64 regs[8];       /* 0x140 */
     u64 framePacketWords[4]; /* 0x180 */
@@ -939,18 +967,18 @@ void sdfAppendLinkedPacketPayload(SdfListHead *dmaList, SdfLinkedPacketList *lin
 
 void func_0032DB30(s32 source, u32 packet, s32 variant) {
     if (variant == 0) {
-        sdfBuildDmaReferenceChain(packet, source + 0x180, 1);
+        sdfBuildDmaReferenceChain((SdfDmaReferenceChainPacket *)packet, source + 0x180, 1);
         return;
     }
-    sdfBuildDmaReferenceChain(packet, source + 400, 1);
+    sdfBuildDmaReferenceChain((SdfDmaReferenceChainPacket *)packet, source + 400, 1);
 }
 
 void func_0032DB78(s32 source, u32 packet, s32 variant) {
     if (variant == 0) {
-        sdfBuildDmaReferenceChain(packet, source + 0x70, 1);
+        sdfBuildDmaReferenceChain((SdfDmaReferenceChainPacket *)packet, source + 0x70, 1);
         return;
     }
-    sdfBuildDmaReferenceChain(packet, source + 0xb0, 1);
+    sdfBuildDmaReferenceChain((SdfDmaReferenceChainPacket *)packet, source + 0xb0, 1);
 }
 
 void sdfAppendDmaPrimary(SdfListHead *list, u32 source, SdfDmaNode *node) {
@@ -1317,29 +1345,28 @@ void sdfAppendTexturedLinePacket(SdfListHead *list, s32 color, s32 primitive, s3
 }
 
 /* Pack three GS XYZ vertices with a common depth. */
-void sdfBuildTriPacket104(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 depth) {
-    u64 *packet = (u64 *)address;
+void sdfBuildTriPacket104(SdfGsFlatTrianglePayload *packet, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 depth) {
     u64 depthHigh = (u64)depth << 32;
 
-    packet[0] = 0x6400000000008001ULL;
-    packet[1] = 0xF55510;
-    packet[2] = (u32)(primitive | 0x104);
-    packet[3] = (u32)color | ((u64)0xFE00 << 46);
-    packet[4] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
-    packet[5] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
-    packet[6] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+    packet->gifTag = 0x6400000000008001ULL;
+    packet->gifRegisterList = 0xF55510;
+    packet->primitive = (u32)(primitive | 0x104);
+    packet->rgbaq = (u32)color | ((u64)0xFE00 << 46);
+    packet->xyz2[0] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet->xyz2[1] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet->xyz2[2] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
 void sdfQueueFlatTriangle(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
                    s32 y1, s32 x2, s32 y2, s32 depth, s32 (*alloc)(s32)) {
-    SdfPacket *packet;
+    SdfGsFlatTrianglePacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    packet = (SdfPacket *)alloc(0x50);
-    packet->unk0 = 0x20000004;
-    packet->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    sdfBuildTriPacket104((SdfPacket *)&packet->unk10, color, primitive, x0, y0, x1, y1, x2, y2, depth);
+    packet = (SdfGsFlatTrianglePacket *)alloc(0x50);
+    packet->dmaTag = 0x20000004;
+    packet->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
+    sdfBuildTriPacket104(&packet->drawing, color, primitive, x0, y0, x1, y1, x2, y2, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
@@ -1372,130 +1399,126 @@ void sdfQueueFlatQuad(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y
 }
 
 /* Emit three GS vertices, each with its own packed color and shared depth. */
-void sdfBuildPacket10C(s32 address, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1, s32 y1, s32 color1, s32 x2, s32 y2, s32 color2, s32 depth) {
-    u64 *packet = (u64 *)address;
+void sdfBuildPacket10C(SdfGsGouraudTrianglePayload *packet, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1, s32 y1, s32 color1, s32 x2, s32 y2, s32 color2, s32 depth) {
     u64 depthHigh = (u64)depth << 32;
 
-    packet[0] = 0x8400000000008001ULL;
-    packet[1] = 0xFFFFFFFFF5151510ULL;
-    packet[2] = (u32)(primitive | 0x10C);
-    packet[3] = (u32)color0 | ((u64)0xFE00 << 46);
-    packet[4] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
-    packet[5] = (u32)color1 | ((u64)0xFE00 << 46);
-    packet[6] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
-    packet[7] = (u32)color2 | ((u64)0xFE00 << 46);
-    packet[8] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+    packet->gifTag = 0x8400000000008001ULL;
+    packet->gifRegisters = 0xFFFFFFFFF5151510ULL;
+    packet->primitive = (u32)(primitive | 0x10C);
+    packet->vertices[0].rgbaq = (u32)color0 | ((u64)0xFE00 << 46);
+    packet->vertices[0].xyz2 = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet->vertices[1].rgbaq = (u32)color1 | ((u64)0xFE00 << 46);
+    packet->vertices[1].xyz2 = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet->vertices[2].rgbaq = (u32)color2 | ((u64)0xFE00 << 46);
+    packet->vertices[2].xyz2 = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
 void sdfBuildPacketF(s32 list, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1, s32 y1,
                    s32 color1, s32 x2, s32 y2, s32 color2, s32 depth, s32 (*alloc)(s32)) {
-    SdfPacket *packet;
+    SdfGsGouraudTrianglePacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    packet = (SdfPacket *)alloc(0x60);
-    packet->unk0 = 0x20000005;
-    packet->unk8 = (((u64)0x50000005 << 16) | 0x1000) << 16;
-    sdfBuildPacket10C((SdfPacket *)&packet->unk10, primitive, x0, y0, color0, x1, y1, color1, x2, y2, color2, depth);
+    packet = (SdfGsGouraudTrianglePacket *)alloc(0x60);
+    packet->dmaTag = 0x20000005;
+    packet->vifCommands = (((u64)0x50000005 << 16) | 0x1000) << 16;
+    sdfBuildPacket10C(&packet->drawing, primitive, x0, y0, color0, x1, y1, color1, x2, y2, color2, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
 /* Four vertices each carry their own color, with a common Z value. */
-void sdfWriteGouraudQuadPacket(s32 address, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1, s32 y1, s32 color1, s32 x2, s32 y2, s32 color2, s32 x3, s32 y3, s32 color3, s32 depth) {
-    u64 *packet = (u64 *)address;
+void sdfWriteGouraudQuadPacket(SdfGsGouraudQuadPayload *packet, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1, s32 y1, s32 color1, s32 x2, s32 y2, s32 color2, s32 x3, s32 y3, s32 color3, s32 depth) {
     u64 depthHigh = (u64)depth << 32;
 
-    packet[0] = 0xA400000000008001ULL;
-    packet[1] = 0xF515151510ULL;
-    packet[2] = (u32)(primitive | 0x10C);
-    packet[3] = (u32)color0 | ((u64)0xFE00 << 46);
-    packet[4] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
-    packet[5] = (u32)color1 | ((u64)0xFE00 << 46);
-    packet[6] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
-    packet[7] = (u32)color2 | ((u64)0xFE00 << 46);
-    packet[8] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
-    packet[9] = (u32)color3 | ((u64)0xFE00 << 46);
-    packet[10] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
+    packet->gifTag = 0xA400000000008001ULL;
+    packet->gifRegisters = 0xF515151510ULL;
+    packet->primitive = (u32)(primitive | 0x10C);
+    packet->vertices[0].rgbaq = (u32)color0 | ((u64)0xFE00 << 46);
+    packet->vertices[0].xyz2 = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet->vertices[1].rgbaq = (u32)color1 | ((u64)0xFE00 << 46);
+    packet->vertices[1].xyz2 = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet->vertices[2].rgbaq = (u32)color2 | ((u64)0xFE00 << 46);
+    packet->vertices[2].xyz2 = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+    packet->vertices[3].rgbaq = (u32)color3 | ((u64)0xFE00 << 46);
+    packet->vertices[3].xyz2 = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
 void sdfQueueGouraudQuad(s32 list, s32 primitive, s32 x0, s32 y0, s32 color0, s32 x1,
                    s32 y1, s32 color1, s32 x2, s32 y2, s32 color2, s32 x3,
                    s32 y3, s32 color3, s32 depth, s32 (*alloc)(s32)) {
-    SdfPacket *packet;
+    SdfGsGouraudQuadPacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    packet = (SdfPacket *)alloc(0x70);
-    packet->unk0 = 0x20000006;
-    packet->unk8 = (((u64)0x50000006 << 16) | 0x1000) << 16;
-    sdfWriteGouraudQuadPacket((s32)&packet->unk10, primitive, x0, y0, color0, x1, y1, color1, x2, y2, color2, x3, y3, color3, depth);
+    packet = (SdfGsGouraudQuadPacket *)alloc(0x70);
+    packet->dmaTag = 0x20000006;
+    packet->vifCommands = (((u64)0x50000006 << 16) | 0x1000) << 16;
+    sdfWriteGouraudQuadPacket(&packet->drawing, primitive, x0, y0, color0, x1, y1, color1, x2, y2, color2, x3, y3, color3, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
 /* Pack three UV/XYZ vertex pairs after the common primitive and color. */
-void sdfBuildPacket114(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2, s32 u2, s32 v2, s32 depth) {
-    u64 *packet = (u64 *)address;
+void sdfBuildPacket114(SdfGsTexturedTrianglePayload *packet, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2, s32 u2, s32 v2, s32 depth) {
     u64 depthHigh = (u64)depth << 32;
 
-    packet[0] = 0x8400000000008001ULL;
-    packet[1] = 0x53535310;
-    packet[2] = (u32)(primitive | 0x114);
-    packet[3] = (u32)color | ((u64)0xFE00 << 46);
-    packet[4] = (u0 & 0xFFFF) | (v0 << 16);
-    packet[5] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
-    packet[6] = (u1 & 0xFFFF) | (v1 << 16);
-    packet[7] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
-    packet[8] = (u2 & 0xFFFF) | (v2 << 16);
-    packet[9] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+    packet->gifTag = 0x8400000000008001ULL;
+    packet->gifRegisters = 0x53535310;
+    packet->primitive = (u32)(primitive | 0x114);
+    packet->rgbaq = (u32)color | ((u64)0xFE00 << 46);
+    packet->vertices[0].uv = (u0 & 0xFFFF) | (v0 << 16);
+    packet->vertices[0].xyz2 = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet->vertices[1].uv = (u1 & 0xFFFF) | (v1 << 16);
+    packet->vertices[1].xyz2 = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet->vertices[2].uv = (u2 & 0xFFFF) | (v2 << 16);
+    packet->vertices[2].xyz2 = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
 void sdfQueueTexturedTriangle(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
                    s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2,
                    s32 u2, s32 v2, s32 depth, s32 (*alloc)(s32)) {
-    SdfPacket *packet;
+    SdfGsTexturedTrianglePacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    packet = (SdfPacket *)alloc(0x60);
-    packet->unk0 = 0x20000005;
-    packet->unk8 = (((u64)0x50000005 << 16) | 0x1000) << 16;
-    sdfBuildPacket114((s32)&packet->unk10, color, primitive, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2, depth);
+    packet = (SdfGsTexturedTrianglePacket *)alloc(0x60);
+    packet->dmaTag = 0x20000005;
+    packet->vifCommands = (((u64)0x50000005 << 16) | 0x1000) << 16;
+    sdfBuildPacket114(&packet->drawing, color, primitive, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
 /* Pack four textured vertices with a common color and depth. */
-void sdfWriteTexturedQuadPacket(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
+void sdfWriteTexturedQuadPacket(SdfGsTexturedQuadPayload *packet, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
                    s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2, s32 u2, s32 v2,
                    s32 x3, s32 y3, s32 u3, s32 v3, s32 depth) {
-    u64 *packet = (u64 *)address;
     u64 depthHigh = (u64)depth << 32;
 
-    packet[0] = 0xA400000000008001ULL;
-    packet[1] = 0x5353535310ULL;
-    packet[2] = (u32)(primitive | 0x114);
-    packet[3] = (u32)color | ((u64)0xFE00 << 46);
-    packet[4] = (u0 & 0xFFFF) | (v0 << 16);
-    packet[5] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
-    packet[6] = (u1 & 0xFFFF) | (v1 << 16);
-    packet[7] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
-    packet[8] = (u2 & 0xFFFF) | (v2 << 16);
-    packet[9] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
-    packet[10] = (u3 & 0xFFFF) | (v3 << 16);
-    packet[11] = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
+    packet->gifTag = 0xA400000000008001ULL;
+    packet->gifRegisters = 0x5353535310ULL;
+    packet->primitive = (u32)(primitive | 0x114);
+    packet->rgbaq = (u32)color | ((u64)0xFE00 << 46);
+    packet->vertices[0].uv = (u0 & 0xFFFF) | (v0 << 16);
+    packet->vertices[0].xyz2 = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet->vertices[1].uv = (u1 & 0xFFFF) | (v1 << 16);
+    packet->vertices[1].xyz2 = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet->vertices[2].uv = (u2 & 0xFFFF) | (v2 << 16);
+    packet->vertices[2].xyz2 = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+    packet->vertices[3].uv = (u3 & 0xFFFF) | (v3 << 16);
+    packet->vertices[3].xyz2 = (u32)((x3 & 0xFFFF) | (y3 << 16)) | depthHigh;
 }
 
 void sdfQueueTexturedQuad(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
                    s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2,
                    s32 u2, s32 v2, s32 x3, s32 y3, s32 u3, s32 v3, s32 depth,
                    s32 (*alloc)(s32)) {
-    SdfPacket *packet;
+    SdfGsTexturedQuadPacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    packet = (SdfPacket *)alloc(0x70);
-    packet->unk0 = 0x20000006;
-    packet->unk8 = (((u64)0x50000006 << 16) | 0x1000) << 16;
-    sdfWriteTexturedQuadPacket((s32)&packet->unk10, color, primitive, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2, x3, y3, u3, v3, depth);
+    packet = (SdfGsTexturedQuadPacket *)alloc(0x70);
+    packet->dmaTag = 0x20000006;
+    packet->vifCommands = (((u64)0x50000006 << 16) | 0x1000) << 16;
+    sdfWriteTexturedQuadPacket(&packet->drawing, color, primitive, x0, y0, u0, v0, x1, y1, u1, v1, x2, y2, u2, v2, x3, y3, u3, v3, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
@@ -1624,32 +1647,31 @@ void sdfAppendFillRectanglePacket(SdfListHead *list, s32 color, s32 primitive, s
 }
 
 /* Close the rectangle by repeating its first GS XYZ vertex. */
-void sdfBuildQuadPacket(s32 address, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth) {
-    u64 *packet = (u64 *)address;
+void sdfBuildQuadPacket(SdfGsClosedRectanglePayload *packet, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth) {
     u64 depthHigh = (u64)depth << 32;
 
-    packet[0] = 0x8400000000008001ULL;
-    packet[1] = 0xFFFFFFFFF5555510ULL;
-    packet[2] = (u32)(primitive | 0x102);
-    packet[3] = (u32)color | ((u64)0xFE00 << 46);
-    packet[4] = (u32)((left & 0xFFFF) | (top << 16)) | depthHigh;
-    packet[5] = (u32)((right & 0xFFFF) | (top << 16)) | depthHigh;
-    packet[6] = (u32)((right & 0xFFFF) | (bottom << 16)) | depthHigh;
-    packet[7] = (u32)((left & 0xFFFF) | (bottom << 16)) | depthHigh;
-    packet[8] = (u32)((left & 0xFFFF) | (top << 16)) | depthHigh;
+    packet->gifTag = 0x8400000000008001ULL;
+    packet->gifRegisterList = 0xFFFFFFFFF5555510ULL;
+    packet->primitive = (u32)(primitive | 0x102);
+    packet->rgbaq = (u32)color | ((u64)0xFE00 << 46);
+    packet->xyz2[0] = (u32)((left & 0xFFFF) | (top << 16)) | depthHigh;
+    packet->xyz2[1] = (u32)((right & 0xFFFF) | (top << 16)) | depthHigh;
+    packet->xyz2[2] = (u32)((right & 0xFFFF) | (bottom << 16)) | depthHigh;
+    packet->xyz2[3] = (u32)((left & 0xFFFF) | (bottom << 16)) | depthHigh;
+    packet->xyz2[4] = (u32)((left & 0xFFFF) | (top << 16)) | depthHigh;
 }
 
 void sdfAppendClosedRectanglePacket(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth, s32 (*alloc)(s32)) {
-    s32 buffer;
+    SdfGsClosedRectanglePacket *packet;
 
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    buffer = alloc(0x60);
-    *(u64 *)buffer = 0x20000005ULL;
-    *(u64 *)(buffer + 8) = 0x5000000510000000ULL;
-    sdfBuildQuadPacket(buffer + 0x10, color, primitive, left, top, right, bottom, depth);
-    sdfAppendPacket(list, buffer);
+    packet = (SdfGsClosedRectanglePacket *)alloc(0x60);
+    packet->dmaTag = 0x20000005ULL;
+    packet->vifCommands = 0x5000000510000000ULL;
+    sdfBuildQuadPacket(&packet->drawing, color, primitive, left, top, right, bottom, depth);
+    sdfAppendPacket(list, (s32)packet);
 }
 
 extern SdfPendingRequest sdfObjectListReleaseQueue;

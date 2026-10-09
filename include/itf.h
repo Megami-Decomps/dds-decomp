@@ -40,8 +40,8 @@ typedef struct UiSprite {
     u8 pad3D[3];
 } UiSprite;
 
-/* Retained parent/child glyph record shared by font and interface code (0x44). */
-typedef struct FrFontGlyph {
+/* Font items use their own 0x2C-byte pool, separate from parent chains. */
+typedef struct FrFontChildGlyph {
     union {
         u16 glyphCode;
         struct {
@@ -51,6 +51,67 @@ typedef struct FrFontGlyph {
     } glyphCodeOrContext;
     /* Child draw count: setup clears it; nonzero-fade draws increment it, and
      * the fade helper also uses it to select the jitter phase. */
+    u16 drawCount;
+    s32 x;
+    s32 y;
+    s32 advance;
+    /* The same render-state word is also accessed by its low fade byte. */
+    union {
+        struct {
+            u16 cellAdvance;
+            u16 cellHeight;
+        } parentDimensions;
+        u32 renderWord;
+        struct {
+            u8 value;
+            u8 opaque[3];
+        } fadeByte;
+    } parentDimensionsOrRenderWord;
+    /* Rendering, glyph setup, and message shade paths use distinct byte views. */
+    union {
+        u32 renderValue;
+        struct {
+            u8 firstOption;
+            u8 fontIndex;
+            u8 secondOption;
+            u8 sharedFlags;
+        } setupBytes;
+        struct {
+            u8 green;
+            u8 red;
+            u8 blue;
+            u8 opaque;
+        } shadeColor;
+    } renderValueOrSetupOrShade;
+    struct {
+        u8 cellWidth;
+        u8 cellHeight;
+        u8 opaque[2];
+    } cellDimensions;
+    FrFontRecord *cachedItem;
+    FrFontRecord *sourceItem;
+    struct FrFontChildGlyph *previous;
+    struct FrFontChildGlyph *next;
+} FrFontChildGlyph;
+
+typedef char FrFontChildGlyph_size_must_be_0x2C[
+    sizeof(FrFontChildGlyph) == 0x2C ? 1 : -1];
+typedef char FrFontChildGlyph_owner_offsets[
+    ((u32)&((FrFontChildGlyph *)0)->cellDimensions == 0x18 &&
+     (u32)&((FrFontChildGlyph *)0)->cachedItem == 0x1C &&
+     (u32)&((FrFontChildGlyph *)0)->sourceItem == 0x20 &&
+     (u32)&((FrFontChildGlyph *)0)->next == 0x28) ? 1 : -1];
+
+/* Parent chain heads use the 0x44-byte glyph pool and own child-item links. */
+typedef struct FrFontGlyph {
+    union {
+        u16 glyphCode;
+        struct {
+            u8 encodedContextByte;
+            s8 spacing;
+        } byteRoles;
+    } glyphCodeOrContext;
+    /* Preserved by parent-chain initialization. */
     u16 drawCount;
     s32 x;
     s32 y;
@@ -83,25 +144,9 @@ typedef struct FrFontGlyph {
             u8 opaque;
         } shadeColor;
     } renderValueOrSetupOrShade;
-    /* Parent: child count. Font item: child cell dimensions. */
-    union {
-        u32 childCount;
-        struct {
-            u8 cellWidth;
-            u8 cellHeight;
-            u8 opaque[2];
-        } cellDimensions;
-    } childCountOrCellDimensions;
-    /* Parent: first child. Font item: retained glyph-cache record. */
-    union {
-        struct FrFontGlyph *firstChild;
-        FrFontRecord *cachedItem;
-    } link1C;
-    /* Parent/message: last child or shade. Font item: borrowed source. */
-    union {
-        struct FrFontGlyph *linkedGlyph;
-        FrFontRecord *sourceItem;
-    } link20;
+    u32 childCount;
+    FrFontChildGlyph *firstChild;
+    FrFontChildGlyph *lastChild;
     struct FrFontGlyph *previous;
     struct FrFontGlyph *next;
     struct FrFontGlyph *chainHead;
@@ -111,6 +156,14 @@ typedef struct FrFontGlyph {
     s32 remainingWaitFrames; /* F215 uses 0xFFFF for title-sound completion. */
     s32 contextModeEnabled;
 } FrFontGlyph;
+
+typedef char FrFontGlyph_size_must_be_0x44[
+    sizeof(FrFontGlyph) == 0x44 ? 1 : -1];
+typedef char FrFontGlyph_owner_offsets[
+    ((u32)&((FrFontGlyph *)0)->childCount == 0x18 &&
+     (u32)&((FrFontGlyph *)0)->firstChild == 0x1C &&
+     (u32)&((FrFontGlyph *)0)->lastChild == 0x20 &&
+     (u32)&((FrFontGlyph *)0)->chainHead == 0x2C) ? 1 : -1];
 
 /* Encoded message controls consumed by the glyph timing/lipsync state. */
 typedef enum ItfGlyphControlCode {
