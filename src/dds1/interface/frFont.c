@@ -215,7 +215,108 @@ u32 func_001949A8() {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", func_001949B0);
+/* Metric workspace also supplies the fields shared by pooled child glyphs. */
+typedef struct FrFontGlyphMeasureWork {
+    u16 code;
+    u8 pad02[2];
+    s32 x;
+    s32 y;
+    s32 advance;
+    u8 pad10[5];
+    u8 fontIndex;
+    u8 pad16;
+    u8 mode;
+    u8 cellWidth;
+    u8 cellHeight;
+    u8 pad1A[0x16];
+} FrFontGlyphMeasureWork;
+
+extern u16 frFontGetSlotCellWidth(s32 index);
+
+/* Fill cell dimensions, advance and horizontal bearing for one glyph. */
+void func_001949B0(void *opaqueWork, s32 glyphIndex) {
+    FrFontGlyphMeasureWork *work = opaqueWork;
+    s32 fontIndex;
+    s32 defaultSlot = 0;
+    s8 right;
+    s32 advance;
+    s32 leftOffset;
+    f32 scale;
+    FrFontEntry *entry;
+
+    {
+        fontIndex = work->fontIndex;
+        switch (fontIndex) {
+        case 0:
+        case 1:
+            defaultSlot = 1;
+            break;
+        }
+        entry = &frFontWork.entries[fontIndex];
+        work->cellWidth = frFontGetGlyphCellWidth(fontIndex);
+    }
+    work->cellHeight = frFontGetGlyphCellHeight(work->fontIndex);
+    work->advance = D_00356470[work->fontIndex];
+
+    if (defaultSlot != 0) {
+        scale = (f32)(work->cellWidth + 4) /
+                (f32)frFontGetSlotCellWidth(work->fontIndex);
+    } else {
+        scale = 1.0f;
+    }
+
+    if ((work->mode & 2) != 0 && defaultSlot == 0 && work->code < 0x80) {
+        work->advance >>= 1;
+        work->cellWidth >>= 1;
+    }
+
+    if (work->code == 0x20) {
+        if (work->fontIndex == 1) {
+            work->advance >>= 2;
+            return;
+        }
+        if (work->fontIndex == 0) {
+            work->advance >>= 2;
+            return;
+        }
+    }
+
+    if (entry->resourceHeader->hasExtra == 0) {
+        return;
+    }
+    if (work->code == 0x81CE) {
+        work->x = 0x10;
+        work->advance = 8;
+    }
+
+    glyphIndex = (s32)((u32)glyphIndex << 1);
+    if (glyphIndex >= entry->metricByteCount) {
+        return;
+    }
+    right = entry->flagBytes[glyphIndex + 1];
+    if (right == 0) {
+        return;
+    }
+    {
+        s32 left = entry->flagBytes[glyphIndex];
+        s32 codeIndex;
+        s32 code;
+
+        leftOffset = (s32)((u32)left << 4);
+        advance = right - left;
+        if (defaultSlot != 0) {
+            advance = (s32)((f32)advance + (scale + 2.0f));
+        }
+        codeIndex = glyphIndex >> 1;
+        code = codeIndex + 0x20;
+        if (code == 0x21 || code == 0x31) {
+            leftOffset -= 0x20;
+            advance += 4;
+        }
+        work->advance = advance;
+        work->x = -leftOffset;
+    }
+}
 
 /* Create a glyph wrapper for source and append it to an optional destination chain. */
 FrFontGlyph *frFontAppendGlyphReference(FrFontRecord *source, FrFontGlyph *destination) {
@@ -318,7 +419,6 @@ void *frFontCloneEntryResource(u8 fontIndex, s32 resourceOption) {
     return clonedResource;
 }
 
-extern u16 frFontGetSlotCellWidth(s32 index);
 extern u16 frFontGetSlotCellHeight(s32 index);
 
 /* Retain a cached table item, or create/upload a new one and cache it.
@@ -895,19 +995,6 @@ u32 frFontMeasureLines(FrFontGlyph *glyphChain) {
     }
     return totalAdvance;
 }
-
-typedef struct FrFontGlyphMeasureWork {
-    u16 code;
-    u8 pad02[0xA];
-    s32 advance;
-    u8 pad10[5];
-    u8 fontIndex;
-    u8 pad16;
-    u8 mode;
-    u8 cellWidth;
-    u8 cellHeight;
-    u8 pad1A[0x16];
-} FrFontGlyphMeasureWork;
 
 u32 frFontGetGlyphCellWidth(u8 fontIndex);
 u32 frFontGetGlyphCellHeight(u8 fontIndex);
