@@ -171,8 +171,6 @@ extern u32 fldDisplayRow;
 
 extern s32 fldBackgroundBuffer;
 
-extern void *sdfAllocateBlockBySizeThreshold(s32);
-
 extern u32 D_00436088;
 
 extern void *dds3GetWorldObject(void);
@@ -2580,7 +2578,7 @@ void fldAllocateBackgroundBuffer(void) {
 
 void fldReleaseBackgroundBuffer(void) {
     if (fldBackgroundBuffer != 0) {
-        sdfReleaseChipOrRetainedResource(fldBackgroundBuffer);
+        sdfReleaseChipOrRetainedResource((void *)(u32)fldBackgroundBuffer);
         fldBackgroundBuffer = 0;
     }
 }

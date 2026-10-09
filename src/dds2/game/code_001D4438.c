@@ -11,6 +11,7 @@
 #include "btl_state.h"
 #include "btl_ui.h"
 #include "pcp_vu0.h"
+#include "sdf_resource.h"
 
 
 extern s32 btlGetRuntime(void);
@@ -660,7 +661,6 @@ typedef struct SoundCursor {
 
 extern char D_00418C58[];
 
-extern void sdfFreeMemoryFromEitherHeap(void *);
 
 extern s32 sndHasActiveFileLoad(void);
 

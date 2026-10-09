@@ -182,8 +182,6 @@ extern u8 D_00380870[];
 
 extern SdfTex *kwlnHeldTextureReference;
 
-extern void sdfFreeMemoryFromEitherHeap(void *);
-
 extern s32 kwlnCreateHeldTextureBuffer(u16 width, u16 height, f32 value);
 
 extern s32 kwlnTextureSetReferenceFlagIfPresent(void);
@@ -2063,10 +2061,6 @@ extern char D_00436F58[];
 extern u8 sdfPfsDebugMode;
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
-
-extern void *sdfAllocateBlockBySizeThreshold(s32);
-
-extern void sdfFreeMemoryFromEitherHeap(void *);
 
 extern char *sdfDevGetPathBuffer(void);
 
