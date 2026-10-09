@@ -5592,3 +5592,38 @@ it also constructs the reset value from zero flags and status 2. The two
 existing C callers remain exact. The reset remains assembly: its truthful
 196-byte replay is eight words away, chiefly the mask/reset register swap.
 
+
+## Scene actor-limit query's unused owner
+
+DDS2 `btlIsSceneActorCountWithinLimit` ignores its first argument, but both
+retail call sites (`0x1C8EC4`, `0x1C9ACC`) pass the unit at `owner->unit`
+in their delay slots. Its first formal is consequently `BtlUnit *`, not an
+integer ID. This local signature completion leaves the query's text unchanged.
+
+
+## Descriptor-bound effects retain their second vector pointer
+
+`effObjSpawnDescriptorBoundEffect` and `effObjCreateWithBoundBill` pass
+both vectors to `effObjCreateWithVectors` as pointers. The paired event
+viewer callers supply real four-float arrays; the named-resource wrapper
+already receives a pointer. Keeping the second vector typed through that
+chain removes the address-word conversions without changing instructions.
+DDS2 retains its existing K&R constructor definition.
+
+This closes the descriptor/bound-bill argument path only. The integer VM
+setter return debt remains unchanged, and does not license a false pointer
+return, a new object view, or a wrong-prototype target landing.
+
+
+## Synthesized polygon-movie headers return allocation handles
+
+The paired PMD2 `evtPolygonMovieCreateHeader` and PMD3
+`func_00234C18`/`func_0024F9B8` constructors return the `SdfMemBlock *`
+obtained from `sdfAllocGeneralBlock`; their output arguments separately
+receive the retained data address. Returning the handle directly retires
+the pointer-to-integer adapters without changing any constructor text.
+No existing C caller or shared declaration uses these four providers.
+The three-resource movie loaders remain assembly: natural grouped paths
+and these pointer contracts retain the two-word argument-setup delay-slot
+swap at `+0x80`/`+0x84`, so this closure earns no new matched-body credit.
+

@@ -20,7 +20,7 @@ extern char D_004373B8[];
 
 /* Build the 0x20-byte PMD3 resource header, copy it into a fresh allocation and
  * hand the retained address back through `out`. */
-s32 func_0024F9B8(u8 **out) {
+SdfMemBlock *func_0024F9B8(u8 **out) {
     u8 buffer[0x20];
     s32 size = 0x20;
     SdfMemBlock *handle;
@@ -33,7 +33,7 @@ s32 func_0024F9B8(u8 **out) {
     address = (u8 *)sdfResourceRetainAddress(handle);
     memcpy(address, buffer, size);
     *out = address;
-    return (s32)handle;
+    return handle;
 }
 
 extern s32 func_0035C860(char *output, const char *format, ...);

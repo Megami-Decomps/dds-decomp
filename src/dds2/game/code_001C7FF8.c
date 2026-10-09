@@ -209,7 +209,7 @@ void btlQueueIndexedTextWithinDrawLimit(s32 x, s32 y, s32 z, s32 w, u16 index) {
     itfSetTextDrawLimit(-1);
 }
 
-s32 btlIsSceneActorCountWithinLimit(s32 unused, u32 limit) {
+s32 btlIsSceneActorCountWithinLimit(BtlUnit *unused, u32 limit) {
     btlGetRuntime();
     if (limit < btlCountFlaggedSceneActors()) {
         return 0;
@@ -432,7 +432,7 @@ INCLUDE_SDATA(const s32, "game/code_001C7FF8", D_00436868);
 void btlDrawRetreatCommandLabel(s32 unused) {
     u8 text[8] = "Retreat";
     s32 color;
-    s32 handle;
+    struct FrFontGlyph *handle;
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
 
     if (datBattleSceneRecords[scene->mode].unk00 != 0) {
@@ -442,8 +442,8 @@ void btlDrawRetreatCommandLabel(s32 unused) {
     }
     itfSetTextDrawLimit(0x13);
     handle = itfCreateConvertedTextGlyph(0x1A0, 0xA60, 0xFF0010, color, text, 0);
-    frFontDrawGlyphWithSharedFlags((struct FrFontGlyph *)(u32)handle, 1);
-    frFontQueueGlyphForCurrentDrawBuffer((struct FrFontGlyph *)(u32)handle);
+    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frFontQueueGlyphForCurrentDrawBuffer(handle);
     itfSetTextDrawLimit(-1);
 }
 
