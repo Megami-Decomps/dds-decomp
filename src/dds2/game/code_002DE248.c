@@ -6790,12 +6790,13 @@ typedef struct EffActiveResource {
         s32 signedIndex;
         u16 shortIndex;
     } kind;
-    u32 resource;        // 0x30
+    void *resource;      // 0x30; heterogeneous kind-specific resource pointer
     u8 pad_34[4];
     void *payload;       // 0x38
     u8 pad_3C[4];
 } EffActiveResource;
 typedef char EffActiveResourceSizeCheck[sizeof(EffActiveResource) == 0x40 ? 1 : -1];
+typedef char EffActiveResourceResourceOffsetCheck[((u32)&((EffActiveResource *)0)->resource == 0x30) ? 1 : -1];
 
 /* Entire 40-byte payload copied for resource kind 1. */
 typedef struct EffActorLightConfig {
@@ -8042,7 +8043,7 @@ EffActiveResource *effCreateResourceInstance(u16 kind, void *source, u16 seconda
 
     if (btlIsRuntimeAllocated() != 0) {
         if (effRuntimeResourceOperations[kind].createResource != NULL) {
-            effect->resource = (u32)effRuntimeResourceOperations[kind].createResource(source, secondaryKind, secondary, param);
+            effect->resource = effRuntimeResourceOperations[kind].createResource(source, secondaryKind, secondary, param);
         }
         if (effRuntimeResourceOperations[kind].initialize != NULL) {
             effRuntimeResourceOperations[kind].initialize(effect);
@@ -8074,10 +8075,10 @@ EffActiveResource *effDuplicateActiveResource(EffActiveResource *source) {
     if (effRuntimeResourceOperations[kind].cloneResource == NULL) {
         effect = effCreateResourceInstance(source->kind.shortIndex, source->payload, 0, 0, 0);
     } else {
-        u32 resource;
+        void *resource;
         u32 activeKind;
         effect = effAllocateResourcePayload(source->kind.shortIndex, source->payload);
-        resource = (u32)effRuntimeResourceOperations[source->kind.signedIndex].cloneResource(source);
+        resource = effRuntimeResourceOperations[source->kind.signedIndex].cloneResource(source);
         activeKind = source->kind.index;
         effect->resource = resource;
         if (effRuntimeResourceOperations[activeKind].initialize != NULL) {
