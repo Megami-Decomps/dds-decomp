@@ -525,42 +525,49 @@ void effReleaseSharedReference(RefObj *obj);
 
 RefObj *effRetainSharedReference(RefObj *obj);
 
-u32 effDuplicateSmallHeader(const void *source) {
-    u32 *buffer = (u32 *)sdfAllocSizeClassBlock(12);
-    *buffer = 0;
-    memcpy(buffer + 1, source, 8);
-    return (u32)buffer;
+typedef struct EffFadeHeaderWork {
+    s32 frame;
+    s32 payload[2];
+} EffFadeHeaderWork;
+
+typedef char EffFadeHeaderWorkSizeCheck[(sizeof(EffFadeHeaderWork) == 0x0C) ? 1 : -1];
+
+EffFadeHeaderWork *effDuplicateSmallHeader(const void *source) {
+    EffFadeHeaderWork *buffer = sdfAllocSizeClassBlock(sizeof(EffFadeHeaderWork));
+    buffer->frame = 0;
+    memcpy(buffer->payload, source, sizeof(buffer->payload));
+    return buffer;
 }
 
 void effCreateSmallHeaderFromFile(void *work) {
     void *resource;
 
-    resource = fileResolvePrimaryBuffer(work);
+    resource = fileResolvePrimaryBuffer((FileJobPayload *)work);
     effDuplicateSmallHeader(resource);
 }
 
-void effReleaseFadeHeaderAllocation(u32 allocation) {
+void effReleaseFadeHeaderAllocation(EffFadeHeaderWork *allocation) {
     kwlnCancelConfiguredFadeFrames();
-    sdfReleaseChipBlock((void *)allocation);
+    sdfReleaseChipBlock(allocation);
 }
 
-void effCloneSmallHeaderFromWork(s32 work) {
-    effDuplicateSmallHeader((const void *)(work + 4));
+void effCloneSmallHeaderFromWork(EffFadeHeaderWork *work) {
+    effDuplicateSmallHeader(work->payload);
 }
 
-void effFadeFrameReset(u32 *counter) {
-    *counter = 0;
+void effFadeFrameReset(EffFadeHeaderWork *counter) {
+    counter->frame = 0;
 }
 
-void effFadeFrameAdvance(s32 *counter) {
+void effFadeFrameAdvance(EffFadeHeaderWork *counter) {
     s32 frame;
 
-    frame = *counter;
+    frame = counter->frame;
     if (frame == 0) {
-        kwlnFadeSetupFrames(counter[1], counter[2]);
-        frame = *counter;
+        kwlnFadeSetupFrames(counter->payload[0], counter->payload[1]);
+        frame = counter->frame;
     }
-    *counter = frame + 1;
+    counter->frame = frame + 1;
 }
 
 EffFadeVectorWork *effCreateFadeVectorWork(source)

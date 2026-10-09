@@ -671,44 +671,49 @@ void effInitModelVUState(MdlCtx *model);
 
 RefObj *effRetainSharedReference(RefObj *obj);
 
-u32 *effDuplicateSmallHeader(src)
-    void *src;
-{
-    u32 *p = (u32 *)sdfAllocSizeClassBlock(0xc);
-    p[0] = 0;
-    memcpy(p + 1, src, 8);
-    return p;
+typedef struct EffFadeHeaderWork {
+    s32 frame;
+    s32 payload[2];
+} EffFadeHeaderWork;
+
+typedef char EffFadeHeaderWorkSizeCheck[(sizeof(EffFadeHeaderWork) == 0x0C) ? 1 : -1];
+
+EffFadeHeaderWork *effDuplicateSmallHeader(const void *source) {
+    EffFadeHeaderWork *buffer = sdfAllocSizeClassBlock(sizeof(EffFadeHeaderWork));
+    buffer->frame = 0;
+    memcpy(buffer->payload, source, sizeof(buffer->payload));
+    return buffer;
 }
 
 void effCreateSmallHeaderFromFile(void *work) {
-    u64 resource;
+    void *resource;
 
     resource = fileResolvePrimaryBuffer((FileJobPayload *)work);
     effDuplicateSmallHeader(resource);
 }
 
-void effReleaseFadeHeaderAllocation(u32 allocation) {
+void effReleaseFadeHeaderAllocation(EffFadeHeaderWork *allocation) {
     kwlnCancelConfiguredFadeFrames();
-    sdfReleaseChipBlock((void *)allocation);
+    sdfReleaseChipBlock(allocation);
 }
 
-void effCloneSmallHeaderFromWork(s32 work) {
-    effDuplicateSmallHeader(work + 4);
+void effCloneSmallHeaderFromWork(EffFadeHeaderWork *work) {
+    effDuplicateSmallHeader(work->payload);
 }
 
-void effFadeFrameReset(u32 *counter) {
-    *counter = 0;
+void effFadeFrameReset(EffFadeHeaderWork *counter) {
+    counter->frame = 0;
 }
 
-void effFadeFrameAdvance(s32 *counter) {
+void effFadeFrameAdvance(EffFadeHeaderWork *counter) {
     s32 frame;
 
-    frame = *counter;
+    frame = counter->frame;
     if (frame == 0) {
-        kwlnFadeSetupFrames(counter[1], counter[2]);
-        frame = *counter;
+        kwlnFadeSetupFrames(counter->payload[0], counter->payload[1]);
+        frame = counter->frame;
     }
-    *counter = frame + 1;
+    counter->frame = frame + 1;
 }
 
 EffFadeVectorWork *effCreateFadeVectorWork(source)
