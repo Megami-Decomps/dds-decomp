@@ -5501,6 +5501,7 @@
 0x002A16F0	effClearStripFrames	inferred	eff effect resources and animation in game/code_0029A840.c
 0x002A1768	billAllocStripNode	inferred	DDS2 twin func_002E37D0 [names_M84_AllocNode.tsv]
 0x002A1918	billReleaseStripNode	inferred	Following strip-row initializer, releases owned references and allocation. [names_reviewed21.tsv]
+0x002A1948	billAdvanceStripInstances	inferred	Advances active strip instances for one frame.
 0x002A2008	billUpdateStripDrawColorAndTransform	inferred	Blends strip draw colors and stores a quaternion-derived scaled transform matrix in output. [names_reviewed21.tsv]
 0x002A21E8	billCreateTrailNode	inferred	DDS2 twin func_002E4250: 0x2C-byte entries, kind 0, count re-read from config [names_M84_AllocNode.tsv]
 0x002A2288	billReleaseTrailNode	inferred	Following trail-index initializer, releases owned references and allocation. [names_reviewed21.tsv]
