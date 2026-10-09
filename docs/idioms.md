@@ -3516,11 +3516,40 @@ removal, flag operations and vector calls, without integer transports.
 DDS2's actual flag providers take `(void *, u32)`; the node-removal
 provider takes `EffWorldNode *`.
 
-The existing `btlUnitStatusPair` inline is separate inherited type debt:
-it casts the address of the scalar `flags` member to `BtlUnitFlagPair *`.
-Do not extend that second view. Any new whole-pair consumer must instead
-use a genuinely embedded union with every scalar consumer migrated, or
-remain parked until that primary-owner closure is possible.
+## Primary actor status is a complete two-word record
+
+Both `BtlUnit` owners embed `BtlUnitStatus` at `+0x110`: signed `s32 flags`
+followed by unsigned `u32 stateFlags`. Scalar consumers use those primary
+members. `btlUnitStatusPair` observes the complete eight-byte record by
+ordinary `memcpy` into a local `u64`; it never widens a scalar subobject or
+casts its address to another record or union. This replaces the inherited
+`BtlUnitFlagPair *` second view and the former union-only recommendation.
+A complete-record copy is an alternative to a genuinely embedded union,
+not permission to introduce a cast-based union view.
+
+The record has size eight and alignment four; the actors retain their
+original alignment eight, sizes `0x348` / `0x368`, and every existing field
+offset. The low word stays signed. A scalar record write keeps the ordinary
+word alias behavior, while the compiler lowers the complete-record copy to
+the native `LD` observation. Do not replace the ordinary copy with an alias
+attribute, special builtin, memory barrier or per-file flag. Qualification
+requires complete owner, projection and provider/caller review, alias and
+layout checks, all affected whole units and both linked images.
+
+The stiffen-damage callbacks in both games explicitly borrow the actor for
+each status test and its selected position provider. Capture it immediately
+before that test, after any earlier random/provider calls. Only that test
+and its provider use the captured actor; later `task->unit` observations
+remain fresh after the provider. This expresses the native pre-provider
+reuse, not an extended snapshot lifetime or a synthetic callback barrier.
+
+DDS2's resource/sound queue is a separate nonactor link boundary. Its
+verbatim inherited `ActionUnit` declaration remains solely for link flags
+at `+0x0C` and an actor address at `+0x18`; the selected actor and actor child
+use `BtlUnit`. No actor-status access uses that private declaration. The
+canonical `ActionStateLink` union and its inherited callback/projection
+type debt are unchanged; primary actor-status closure does not claim
+ownership or callback-type closure for that separate allocation.
 
 ## System-effect flags and reference count
 
@@ -3529,7 +3558,7 @@ with `LD` (`001F1194`), then tests its low flag bits. Other effect callbacks
 access the same pair with `SH` flags and `SW` reference counts. Use the
 existing embedded `BtlEffectLinkState.packed` member; do not widen the
 scalar flags or introduce a second actor view. This genuine owner is
-distinct from the inherited `btlUnitStatusPair` cast debt above.
+distinct from the complete primary actor-status record above.
 
 
 ## GS graphics transfer-worker control
@@ -5051,9 +5080,10 @@ DDS1 arrangement body has matched.
 read the canonical two-byte command-selector table. The linked special
 actor callback (`0020D2E0`) passes `task->unit` without an address cast.
 Its signed selector-to-`u32` mapper conversion is a value boundary, not
-pointer transport. The legacy first input of `btlSelectedEntryHitsElement`
-remains an explicitly deferred address-word contract; its formal types
-and body are preserved until the existing preserve-types scope releases.
+pointer transport. Both actor inputs of `btlSelectedEntryHitsElement` now
+use `BtlUnit *`; its selector provider consumes the first actor and its
+status test consumes the second. Generic effect-dispatch words are decoded
+at their existing boundary rather than propagated through actor providers.
 
 ## Model afterimage slots own models and signed countdowns
 

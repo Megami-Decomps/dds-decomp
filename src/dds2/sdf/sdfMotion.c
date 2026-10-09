@@ -57,14 +57,8 @@ extern void *D_0040B4F8[];
 
 
 
-typedef struct {
-    SdfMotionBindingHead pair;
-    s32 unk8;
-    s32 unkC;
-} TmpBuf;
 
 
-void sdfMotionBindDrawNode(void *tmp, void *src, void *tbl, s32 x);
 
 extern void *D_0040B380[];
 
@@ -414,20 +408,21 @@ s32 sdfDispatchMotionBySelector(void *object, s32 selector) {
     return D_0040B368[(u16)selector](object, selector);
 }
 
-void sdfMotionBindDrawNode(void *tmp, void *src, void *tbl, s32 x) {
+void sdfMotionBindDrawNode(SdfMotionDrawTargetBinding *binding, Motion *motion,
+                          void *dispatch, s32 nodeIndex) {
     SdfDrawNode *drawNode;
 
-    sdfSetMotionPointerPair(tmp, src, tbl);
-    drawNode = sdfModelFindDrawNode(((Motion *)src)->owner, x);
-    ((TmpBuf *)tmp)->unkC = (s32)drawNode;
+    sdfSetMotionPointerPair((SdfMotionBindingHead *)&binding->keys, motion, dispatch);
+    drawNode = sdfModelFindDrawNode(motion->owner, nodeIndex);
+    binding->node = drawNode;
 }
 
-void *sdfMotionCreateDrawVectorBinding(void *a0, s32 a1, s32 a2) {
-    void *r;
+SdfMotionDrawBinding *sdfMotionCreateDrawVectorBinding(Motion *motion, s32 a1, s32 nodeIndex) {
+    SdfMotionDrawBinding *binding;
 
-    r = sdfAllocSizeClassBlock(0x20);
-    sdfMotionBindDrawNode(r, a0, D_0040B380, a2);
-    return r;
+    binding = sdfAllocSizeClassBlock(0x20);
+    sdfMotionBindDrawNode((SdfMotionDrawTargetBinding *)binding, motion, D_0040B380, nodeIndex);
+    return binding;
 }
 
 /* vu0 routine: interpolate the sampled translation keys into the draw node. */
@@ -454,24 +449,24 @@ void sdfMotionBlendDrawVectorWithCurrent(SdfMotionDrawBinding *binding, f32 fram
     VU0_STORE_VF_UNCLOBBERED(vf10, binding->node->translation);
 }
 
-void *sdfCreateMotionDrawNode(void *a0, s32 a1, s32 a2) {
-    void *r;
+SdfMotionDrawBinding *sdfMotionCreateInterpolatedQuaternionBinding(Motion *motion, s32 a1, s32 nodeIndex) {
+    SdfMotionDrawBinding *binding;
 
-    r = sdfAllocSizeClassBlock(0x20);
-    sdfMotionBindDrawNode(r, a0, D_0040B398, a2);
-    return r;
+    binding = sdfAllocSizeClassBlock(0x20);
+    sdfMotionBindDrawNode((SdfMotionDrawTargetBinding *)binding, motion, D_0040B398, nodeIndex);
+    return binding;
 }
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334B70);
 
 INCLUDE_ASM(const s32, "sdf/sdfMotion", func_00334C30);
 
-void *sdfMotionCreateScaleVectorBinding(void *a0, s32 a1, s32 a2) {
-    void *r;
+SdfMotionDrawBinding *sdfMotionCreateScaleVectorBinding(Motion *motion, s32 a1, s32 nodeIndex) {
+    SdfMotionDrawBinding *binding;
 
-    r = sdfAllocSizeClassBlock(0x20);
-    sdfMotionBindDrawNode(r, a0, D_0040B3B0, a2);
-    return r;
+    binding = sdfAllocSizeClassBlock(0x20);
+    sdfMotionBindDrawNode((SdfMotionDrawTargetBinding *)binding, motion, D_0040B3B0, nodeIndex);
+    return binding;
 }
 
 /* vu0 routine: interpolate the sampled scale keys into the draw node. */
@@ -498,12 +493,12 @@ void sdfMotionBlendScaleVectorWithCurrent(SdfMotionDrawBinding *binding, f32 fra
     VU0_STORE_VF(vf10, binding->node->scale);
 }
 
-void *sdfMotionCreateQuaternionBinding(void *a0, s32 a1, s32 a2) {
-    void *r;
+SdfMotionDrawBinding *sdfMotionCreateQuaternionBinding(Motion *motion, s32 a1, s32 nodeIndex) {
+    SdfMotionDrawBinding *binding;
 
-    r = sdfAllocSizeClassBlock(0x20);
-    sdfMotionBindDrawNode(r, a0, D_0040B3C8, a2);
-    return r;
+    binding = sdfAllocSizeClassBlock(0x20);
+    sdfMotionBindDrawNode((SdfMotionDrawTargetBinding *)binding, motion, D_0040B3C8, nodeIndex);
+    return binding;
 }
 
 /* vu0 routine: nlerp sampled quaternion keys, then store the quaternion and matrix. */
@@ -553,12 +548,12 @@ void sdfMotionBlendKeyQuaternionWithBase(SdfMotionDrawBinding *binding, f32 fram
     VU0_STORE_VF_UNCLOBBERED(vf30, matrix[2]);
 }
 
-void *sdfMotionCreateKeyFlagBinding(void *a0, s32 a1, s32 a2) {
-    void *r;
+SdfMotionKeyFlagBinding *sdfMotionCreateKeyFlagBinding(Motion *motion, s32 a1, s32 nodeIndex) {
+    SdfMotionKeyFlagBinding *binding;
 
-    r = sdfAllocSizeClassBlock(0x14);
-    sdfMotionBindDrawNode(r, a0, D_0040B3E0, a2);
-    return r;
+    binding = sdfAllocSizeClassBlock(0x14);
+    sdfMotionBindDrawNode((SdfMotionDrawTargetBinding *)binding, motion, D_0040B3E0, nodeIndex);
+    return binding;
 }
 
 void sdfMotionUpdateKeyFlag(SdfMotionKeyFlagBinding *binding, f32 frame) {

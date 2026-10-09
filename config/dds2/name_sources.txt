@@ -3285,7 +3285,7 @@
 0x0022C948	btlIsModelPackEntryReady	inferred	Reports whether model request and optional file resource are ready. [names_reviewed8.tsv]
 0x0022CA60	btlLoadModelPack	inferred	unified with DDS1 twin (was btlStartModelPackLoad)
 0x0022CB68	btlReleaseFoundModelEntry	inferred	Releases the model entry found by the battle lookup. [names_reviewed8.tsv]
-0x0022CD30	btlReleaseEntryIfReady	inferred	unified with DDS1 twin (was btlPollModelEntryReady)
+0x0022CD30	btlIsModelEntryReady	inferred	Finds the model cache entry by kind/id and returns its readiness status; returns zero when absent.
 0x0022CF58	btlBuildOverlayQuadPacket	inferred	Builds a fixed-vertex overlay packet with supplied color. [names_reviewed8.tsv]
 0x0022CFB0	btlInitLightParams	inferred	Initializes four light parameter blocks D_0037FA50/FA90/FAD0/FB20 [names_M47_D2Game.tsv]
 0x0022DD18	btlInitFadeColors	inferred	Initializes runtime overlay color and initial alpha according to its state. [names_reviewed16.tsv]
@@ -6143,6 +6143,8 @@
 0x00330A88	sdfAppendBufferedRouteNode	inferred	Grows buffered request if needed and links a route node into its entries. [names_reviewed8.tsv]
 0x00330CE8	sdfModelWriteFixedPacket	inferred	Appends a packet with zero high half and a fixed 0x60000000 command.
 0x00330D00	sdfModelWriteIndexedAssetPacket	inferred	Selects the indexed asset in the nested chunk table and passes it with packet/frame parameters to func_00333950, which writes a 16-byte packet.
+0x00331238	sdfDrawNodePrependCommandNode	inferred	Allocates a command node and prepends it to the selected draw-node command list.
+0x003312A8	sdfDrawNodeBuildCommandList	inferred	Dispatches serialized command-list entries into packet and object-reference commands for a draw node.
 0x003314B0	sdfDrawNodeBuildMatrix	inferred	twin [names_M67_Named.tsv]
 0x00331500	sdfDrawNodeSetFromItem	inferred	twin [names_M67_Named.tsv]
 0x003316B0	sdfModelResetAndInitNodes	inferred	Frees node lists, resets root workspace and sets up two slots.
@@ -6211,7 +6213,7 @@
 0x00334980	sdfMotionCreateDrawVectorBinding	inferred	Allocates motion work then binds a draw node using the vector handler table. [names_reviewed6.tsv]
 0x003349E0	sdfMotionBlendDrawVector	inferred	Interpolates two vector keys with VU0 and stores the result in the draw node. [names_reviewed6.tsv]
 0x00334A60	sdfMotionBlendDrawVectorWithCurrent	inferred	Blends vector keys, then blends with the current vector using the second weight. [names_reviewed6.tsv]
-0x00334B10	sdfCreateMotionDrawNode	inferred	confidence=high; src/dds2/sdf/sdfMotion.c:func_00334B10; Allocates a motion draw node and initializes it with the draw-node operation descriptor and supplied owner/argument. [names_qp9.tsv]
+0x00334B10	sdfMotionCreateInterpolatedQuaternionBinding	inferred	Allocates a draw binding whose callbacks interpolate three-angle keys, convert them to a quaternion, and update the node quaternion and matrix.
 0x00334D10	sdfMotionCreateScaleVectorBinding	inferred	Allocates motion work with handler table followed by the scale-vector interpolator. [names_reviewed6.tsv]
 0x00334D70	sdfMotionBlendScaleVector	inferred	Interpolates vec3 keys and writes the model scale-vector slot. [names_reviewed6.tsv]
 0x00334DF0	sdfMotionBlendScaleVectorWithCurrent	inferred	Interpolates vec3 keys then blends with the current vector into the scale slot. [names_reviewed6.tsv]
@@ -6439,7 +6441,7 @@
 0x00346468	sdfMovieLinearStreamReadCallback	inferred	SdfStreamRead callback for linear movie buffer queries, copies, and refill requests.
 0x00346608	sdfMoviePacStreamReadCallback	inferred	SdfStreamRead callback for movie PAC buffer queries, copies, and refill requests.
 0x00346778	sdfMovieInitializeStreamWork	inferred	Selects and initializes the movie linear or PAC stream work.
-0x00346988	sdfCancelAndReleasePacWork	inferred	readability/matching review (QP16)
+0x00346988	sdfCancelAndReleaseMovieStreamWork	inferred	Releases a movie linear or PAC stream and its embedded sound node after device shutdown.
 0x00346A60	sdfPacCheckDecoderStatus	inferred	confidence=medium; matched-C; src/dds2/game/code_00346778.c:111:func_00346A60; Checks the decoder status pair: the first byte must be nonzero and the second zero; called by movie playback status polling without claiming exact flag meanings.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
 0x00346A80	sdfPacInitializeDispatchPacket	inferred	confidence=high; src/dds2/game/code_00346778.c:func_00346A80; Clears the PAC dispatch packet, sets status to minus one, and chooses a supplied dispatch callback or the default. [names_qp9.tsv]
 0x00346AD8	sdfPacUsePacketPayloadMemory	inferred	Native byte flags OR 1; decoder retains the packet payload instead of allocating a resource.
@@ -6994,3 +6996,6 @@
 0x003357D8	sdfMotionCapturePrimaryWordFourth	inferred	Captures the bound target word at offset 0x28 into the indexed binding.
 0x00333460	sdfSetAssetSecondaryColor	inferred	Stores the packed secondary color at SdfAsset +0x18 and marks secondary draw state dirty.
 0x00333478	sdfSetAssetSecondaryMode	inferred	Stores the secondary packet and palette mode at SdfAsset +0x34 and marks secondary draw state dirty.
+0x00345E18	sdfMovieScheduleLinearStreamRead	inferred	Checks linear-ring capacity, reserves up to 0x4000 bytes, and queues the next asynchronous device read.
+0x00331590	sdfDrawNodeBuildFromItemAndCommands	inferred	Copies item transforms and initializes draw commands from inline or list command setup.
+0x00330DF0	sdfModelBuildIndexedCommandPayload	inferred	Builds the indexed asset command payload and returns the following payload record.

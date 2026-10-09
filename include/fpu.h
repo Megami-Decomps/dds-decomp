@@ -17,4 +17,14 @@ static inline float fsqrtf(float x) {
     return r;
 }
 
+/*
+ * Absolute value with a single abs.s, the counterpart of fsqrtf. Most of the
+ * game code uses this form; the kwln kernel code uses the builtin fabsf.
+ */
+static inline float ffabsf(float x) {
+    float r;
+    __asm__(".set noreorder\n\tabs.s %0, %1\n\t.set reorder" : "=f"(r) : "f"(x));
+    return r;
+}
+
 #endif

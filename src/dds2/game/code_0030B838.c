@@ -13,6 +13,7 @@
 #include "evt_world.h"
 #include "mnu_list.h"
 #include "dds3obj.h"
+#include "fld_map_resource.h"
 
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 fldLocalMapCameraObject;
@@ -120,23 +121,6 @@ extern void sdfCounterTickPositionTransition(void);
 
 extern s32 func_0030BD10();
 
-typedef struct MapResource {
-    u32 image;
-    u32 handle;
-    u32 descriptor;
-    u32 unkC;
-} MapResource;
-
-extern MapResource fldLocalMapNameTextures[10];
-
-extern MapResource fldLocalMapAuxTextureResource;
-
-extern MapResource fldLocalMapTextureResource;
-
-extern u32 fldReleaseMapResource(s32 *);
-
-
-
 extern u8 D_00400BB0[];
 
 typedef struct {
@@ -192,9 +176,6 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern s32 D_00400DF0[][4];
 extern void func_00306CD0(s32, s32, s32, u32, s32, u32, s32, s32);
 #define SDF_SPRITE(index) (((EffectSlotSet *)sdfInstalledSpriteSlots[D_00400DF0[index][0]])->workEntries + D_00400DF0[index][1])
-
-
-extern s32 fldLoadMapResource(const char *, MapResource *);
 
 
 void sdfInitInnerVectors(void) {
@@ -771,7 +752,7 @@ void sdfCounterDrawSelectedTimerFade(s32 unused, s32 x, f32 fade) {
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
                   ((u32)(fade * 64.0f) << 24) | 0x808080,
-                  (struct SdfTex *)(u32)(fldLocalMapTextureResource.image));
+                  fldLocalMapTextureResource.texture);
     evtSubmitPrimaryAlphaBlendMode(0);
 }
 
@@ -981,12 +962,12 @@ s32 fldReleaseLocalMapResources(void) {
     s32 i = 9;
     MapResource *item = fldLocalMapNameTextures;
     do {
-        fldReleaseMapResource((s32 *)item);
+        fldReleaseMapResource(&item->texture);
         item++;
         --i;
     } while (i >= 0);
-    fldReleaseMapResource((s32 *)&fldLocalMapAuxTextureResource);
-    fldReleaseMapResource((s32 *)&fldLocalMapTextureResource);
+    fldReleaseMapResource(&fldLocalMapAuxTextureResource.texture);
+    fldReleaseMapResource(&fldLocalMapTextureResource.texture);
     return 1;
 }
 

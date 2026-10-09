@@ -9,6 +9,7 @@
 #include "eff.h"
 #include "eff_param.h"
 #include "eff_scatter_draw.h"
+#include "fpu.h"
 
 #define EFF_SCATTER_NEUTRAL_COLOR 0x80808080
 #define EFF_SCATTER_RGB_MASK 0xFFFFFF
@@ -1112,7 +1113,155 @@ void effScatterInitRibbonParticle(PcpScatterRibbonWork *work, s32 index)
     particle->unk24 = direction[2];
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPScatter", func_001726E8);
+/* Advance ribbon particles and build each six-vertex strip in the shared pool. */
+void func_001726E8(PcpScatterRibbonWork *work) {
+    f32 next[4];
+    f32 position[4];
+    f32 duplicatePosition[4];
+    f32 direction[4];
+    f32 normal[4];
+    f32 halfWidth[4];
+    f32 halfHeight[4];
+    f32 side[4];
+    s32 respawn;
+    s32 duplicates;
+    u32 i;
+    u32 count;
+    u32 fadeIn;
+    u32 fadeOut;
+    u32 color;
+    u32 baseColor;
+    u32 perGroup;
+    s32 duration;
+    s32 endAge;
+    s32 duplicateStart;
+    PcpScatterRibbonParticle *particle;
+
+    i = 0;
+    duration = work->params.duration;
+    endAge = work->params.fadeDuration + duration;
+    duplicates = work->duplicatedHandles != NULL;
+    count = work->params.particleCount;
+    VEC3_SPLAT(halfWidth, work->params.width * 0.5f);
+    VEC3_SPLAT(halfHeight, work->params.height * 0.5f);
+    particle = work->particles;
+    respawn = work->params.respawn;
+    fadeIn = work->params.fadeIn;
+    fadeOut = work->params.fadeOut;
+    duplicateStart = work->params.duplicateStartAge;
+    perGroup = work->params.particlesPerGroup;
+    baseColor = work->color;
+
+    for (; i < count; i++, particle++) {
+        s32 age = particle->age;
+        u128 *vertices = effPcpScatterGetRecordAddress(work->childWork, i);
+        u32 *colors = effPcpScatterGetAuxRecordAddress(work->childWork, i);
+        if (age == 0) {
+            effScatterInitRibbonParticle(work, i);
+        } else if (age > 0) {
+            f32 factor = 0.0f;
+            f32 angle;
+            f32 radius;
+            f32 height;
+            f32 heightStep;
+            f32 tiltStep;
+            u32 j;
+
+            if (age <= endAge) {
+                if (age < fadeIn && fadeIn != 0) {
+                    factor = (f32)age / fadeIn;
+                } else if (endAge - age <= fadeOut && fadeOut != 0) {
+                    factor = (f32)(endAge - age) / fadeOut;
+                } else {
+                    factor = 1.0f;
+                }
+            }
+            color = effBlendColor(baseColor & 0xFFFFFF, baseColor, factor);
+            radius = particle->radius;
+            height = particle->height;
+            heightStep = particle->heightStep;
+            angle = particle->tiltAngle - sdfAtan2Poly(halfWidth[0] / radius);
+            tiltStep = particle->tiltStep;
+            normal[0] = 0.0f;
+            normal[1] = 0.0f;
+            normal[2] = 1.0f;
+            position[0] = sdfSinPoly(angle) * radius;
+            position[1] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius + height;
+            position[2] = 0.0f;
+            VU0_LOAD_VF(vf10, position);
+            VU0_MOVE_VF(vf12, vf10);
+            for (j = 0; j < 3; j++, vertices++, colors++) {
+                height += heightStep;
+                colors[0] = color;
+                colors[3] = color;
+                angle += sdfAtan2Poly(halfWidth[0] / radius);
+                next[0] = sdfSinPoly(angle) * radius;
+                next[1] = sdfEvaluateCosineViaSinePhaseShift(angle) * radius + height;
+                next[2] = 0.0f;
+                VU0_LOAD_VF(vf10, next);
+                VU0_LOAD_VF(vf11, position);
+                VU0_SUB(vf10, vf10, vf11);
+                VU0_NORMALIZE_VF10();
+                VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+                VU0_LOAD_VF(vf11, halfWidth);
+                VU0_MUL(vf10, vf10, vf11);
+                VU0_ADD(vf10, vf10, vf12);
+                VU0_MOVE_VF(vf12, vf10);
+                VU0_STORE_VF_UNCLOBBERED(vf10, position);
+                VU0_LOAD_VF(vf10, normal);
+                VU0_LOAD_VF(vf11, halfHeight);
+                VU0_MUL(vf10, vf10, vf11);
+                VU0_STORE_VF_UNCLOBBERED(vf10, side);
+                VU0_LOAD_VF(vf10, position);
+                VU0_LOAD_VF(vf11, side);
+                VU0_ADD(vf10, vf10, vf11);
+                VU0_STORE_VF_UNCLOBBERED(vf10, vertices);
+                VU0_SUB(vf10, vf10, vf11);
+                VU0_SUB(vf10, vf10, vf11);
+                VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 3);
+                if (j == 1) {
+                    PCP_COPY_VECTOR(duplicatePosition, position);
+                }
+                PCP_COPY_VECTOR(position, next);
+            }
+            if (age < duration) {
+                f32 tiltLimit = particle->tiltHalfAngle * 0.5f;
+
+                particle->tiltAngle += tiltStep;
+                particle->height += heightStep;
+                if (ffabsf(particle->tiltAngle) > tiltLimit) {
+                    particle->tiltAngle -= tiltStep;
+                    particle->tiltStep = -particle->tiltStep;
+                }
+            }
+        } else {
+            colors[0] = 0;
+            colors[1] = 0;
+            colors[2] = 0;
+            colors[3] = 0;
+            colors[4] = 0;
+            colors[5] = 0;
+        }
+        if (respawn && age >= endAge) {
+            particle->age = -1;
+        }
+        if (duplicates && age >= duplicateStart && age >= 0 && i % perGroup == 0) {
+            u32 group = i / perGroup;
+            effParamWorkCallback3(work->duplicatedHandles[group], baseColor);
+            VU0_LOAD_VF(vf10, work->params.origin);
+            VU0_LOAD_VF(vf11, duplicatePosition);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF_UNCLOBBERED(vf10, duplicatePosition);
+            effParamWorkCallback0(work->duplicatedHandles[group], duplicatePosition);
+            effParamWorkInvokeCallback(work->duplicatedHandles[group]);
+        }
+        particle->age++;
+    }
+    work->childWork->origin[0] = work->params.origin[0];
+    work->childWork->origin[1] = work->params.origin[1];
+    work->childWork->origin[2] = work->params.origin[2];
+    effPcpScatterDrawPool(work->childWork);
+}
 
 /* Copy the ribbon variant's packed parameter vector without rebuilding components. */
 void effScatterCopyRibbonVector(void *destination, void *source) {
