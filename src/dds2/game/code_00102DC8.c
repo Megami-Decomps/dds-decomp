@@ -1,3 +1,4 @@
+#include "sdf_gs_scene_state.h"
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -906,7 +907,7 @@ typedef struct SdfSceneNode {
     u64 draw[8];
     SdfPacket contextOne[2];
     SdfPacket contextTwo[2];
-    u64 limits[10];
+    SdfGsCenteredBoundsRegisters centeredBounds;
     u64 regs[8];
     u64 framePacketWords[4];
     SdfTexBuf texturePackets[2];
@@ -941,7 +942,6 @@ extern SdfLightSources D_0037FB10;
 extern f32 D_0037FB20[4];
 extern void sdfConsAppendProgramReferencePacket(s32, DmaPacketHeader *);
 extern void sdfInitSceneNode(SdfSceneNode *, SdfGraphObj *);
-extern void sdfBuildCenteredViewBoundsPacket(u64 *, s32, s32, s32, s32);
 extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 
 /* Initialize the selected frame bank's program, scene and overlay packet chains. */
@@ -953,9 +953,9 @@ void func_00105070(s32 bufferIndex) {
     sdfClearLinkedPacketList(&D_00380870[bufferIndex].linkedList);
     sdfInitSceneNode(&D_00380870[bufferIndex].scene, &D_0040B290);
     /* Set the RGBAQ color word while retaining its floating-point Q word. */
-    *(u32 *)&D_00380870[bufferIndex].scene.limits[4] = D_00435CBC;
+    *(u32 *)&D_00380870[bufferIndex].scene.centeredBounds.rgbaq.value = D_00435CBC;
     if (kwlnDrawControlFlags & 0x10000000) {
-        sdfBuildCenteredViewBoundsPacket(D_00380870[bufferIndex].scene.limits, 0, 0,
+        sdfBuildCenteredViewBoundsPacket(&D_00380870[bufferIndex].scene.centeredBounds, 0, 0,
                                          D_0040B290.bufferFormat,
                                          D_0040B290.auxiliaryFormat);
         kwlnDrawControlFlags &= 0xEFFFFFFF;
@@ -1001,7 +1001,7 @@ typedef struct KwlnTextureScenePacket {
     u64 draw[8];
     SdfPacket contextOne[2];
     SdfPacket contextTwo[2];
-    u64 limits[10];
+    SdfGsCenteredBoundsRegisters centeredBounds;
     u64 regs[8];
 } KwlnTextureScenePacket;
 
@@ -1041,7 +1041,7 @@ void func_00105290(void) {
     for (i = 0; i != 2; i++) {
         sdfInitPacketList(&D_003822A0[i].list);
         sdfBuildTextureScenePacket(&D_003822A0[i].scene, &D_00384730, 0);
-        *(u32 *)&D_003822A0[i].scene.limits[4] = D_00435CD0;
+        *(u32 *)&D_003822A0[i].scene.centeredBounds.rgbaq.value = D_00435CD0;
         sdfAppendPacket(&D_003822A0[i].list, (u32)&D_003822A0[i].scene);
         sdfConsBuildMatrixPacket(&D_003822A0[i].matrix, &D_0037F7B0, D_00384750);
         sdfAppendPacket(&D_003822A0[i].list, (u32)&D_003822A0[i].matrix);

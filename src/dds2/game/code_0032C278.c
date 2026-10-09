@@ -1,4 +1,5 @@
 #include "sdf_gs_gouraud_textured.h"
+#include "sdf_gs_scene_state.h"
 #include "sdf_gs_textured_shapes.h"
 #include "sdf_request.h"
 #include "sdf_gs_context.h"
@@ -843,20 +844,20 @@ void sdfBuildFrameDepthScissorPacket(SdfGsContextRegisters *packet, s32 frameAdd
 }
 
 /* Encode centered viewport bounds in GS coordinate words; the last two arguments are unused. */
-void sdfBuildCenteredViewBoundsPacket(u64 *packet, s32 width, s32 height, s32 unused0, s32 unused1) {
+void sdfBuildCenteredViewBoundsPacket(SdfGsCenteredBoundsRegisters *packet, s32 width, s32 height, s32 unused0, s32 unused1) {
     u32 lowerBounds = ((SDF_GS_CENTER_BIAS - height) << 19) | ((SDF_GS_CENTER_BIAS - width) << 3);
     u32 upperBounds = ((height + SDF_GS_CENTER_BIAS) << 19) | ((width + SDF_GS_CENTER_BIAS) << 3);
 
-    packet[3] = SDF_GS_PRIM;
-    packet[7] = SDF_GS_XYZ2;
-    packet[0] = SDF_GS_CENTERED_VIEW_BOUNDS_TEST;
-    packet[1] = SDF_GS_TEST_1;
-    packet[2] = SDF_GS_PRIMITIVE_SPRITE;
-    packet[4] = (u64)0xFE00 << 46;
-    packet[5] = SDF_GS_RGBAQ;
-    packet[6] = lowerBounds;
-    packet[8] = upperBounds;
-    packet[9] = SDF_GS_XYZ2;
+    packet->primitive.registerId = SDF_GS_PRIM;
+    packet->xyz2[0].registerId = SDF_GS_XYZ2;
+    packet->test.value = SDF_GS_CENTERED_VIEW_BOUNDS_TEST;
+    packet->test.registerId = SDF_GS_TEST_1;
+    packet->primitive.value = SDF_GS_PRIMITIVE_SPRITE;
+    packet->rgbaq.value = (u64)0xFE00 << 46;
+    packet->rgbaq.registerId = SDF_GS_RGBAQ;
+    packet->xyz2[0].value = lowerBounds;
+    packet->xyz2[1].value = upperBounds;
+    packet->xyz2[1].registerId = SDF_GS_XYZ2;
 }
 
 /* Seed PRMODECONT, COLCLAMP, DTHE and TEXA drawing registers. */
@@ -883,7 +884,7 @@ typedef struct SdfSceneDrawPacket {
     u64 draw[8];         /* 0x20 */
     SdfGsContextRegisters contextOne; /* 0x60 */
     SdfGsContextRegisters contextTwo; /* 0xA0 */
-    u64 limits[10];      /* 0xE0 */
+    SdfGsCenteredBoundsRegisters centeredBounds;      /* 0xE0 */
     u64 regs[8];         /* 0x130 */
 } SdfSceneDrawPacket;
 
@@ -907,7 +908,7 @@ void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfGraphObj *view, s
     depthFormat = view->auxiliaryFormat;
     sdfBuildFrameDepthScissorPacket(&packet->contextOne, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_00438A22, 0);
     sdfBuildFrameDepthScissorPacket(&packet->contextTwo, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_00438A22, 1);
-    sdfBuildCenteredViewBoundsPacket(packet->limits, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
+    sdfBuildCenteredViewBoundsPacket(&packet->centeredBounds, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
     packet->regs[0] = SDF_GS_SCENE_TEST;
     packet->regs[1] = SDF_GS_TEST_1;
     packet->regs[2] = SDF_GS_DEFAULT_ALPHA;
@@ -929,7 +930,7 @@ typedef struct SdfSceneNode {
     u64 draw[8];       /* 0x30 */
     SdfGsContextRegisters contextOne; /* 0x70 */
     SdfGsContextRegisters contextTwo; /* 0xB0 */
-    u64 limits[10];    /* 0xF0 */
+    SdfGsCenteredBoundsRegisters centeredBounds;    /* 0xF0 */
     u64 regs[8];       /* 0x140 */
     u64 framePacketWords[4]; /* 0x180 */
     SdfTexBuf texturePackets[2]; /* 0x1A0 */
@@ -948,7 +949,7 @@ void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view) {
     sdfInitializeDmaReferenceTag(&node->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
     node->view = view;
     node->link.patch = sdfRefreshSceneNodePackets;
-    sdfBuildCenteredViewBoundsPacket(node->limits, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
+    sdfBuildCenteredViewBoundsPacket(&node->centeredBounds, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
     node->regs[0] = SDF_GS_SCENE_TEST;
     node->regs[1] = SDF_GS_TEST_1;
     node->regs[2] = SDF_GS_DEFAULT_ALPHA;
