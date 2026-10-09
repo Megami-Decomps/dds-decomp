@@ -606,8 +606,7 @@ s32 func_001A2DE8(BtlUnit *base, BtlUnit *first, BtlUnit *second,
     return btlGetCommandFailureReason(&snapshot, command);
 }
 
-s8 btlGetActorIndexedSignedValue(s32 object, s32 index) {
-    BtlUnit *unit = (BtlUnit *)object;
+s8 btlGetActorIndexedSignedValue(BtlUnit *unit, s32 index) {
     if (index == 0 && (unit->flags & 0x400) != 0) {
         return datEnemyRecords[unit->partyRecord.unitId].unk46;
     }

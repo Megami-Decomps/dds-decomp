@@ -195,7 +195,7 @@ done:
     return;
 }
 
-extern s8 btlGetActorIndexedSignedValue(s32, s32);
+extern s8 btlGetActorIndexedSignedValue(BtlUnit *, s32);
 extern s32 btlMapCommandToSkill(u32);
 extern s32 func_001F12E8(u32, u32, u8 *, u16);
 struct SoundTask;
@@ -221,7 +221,7 @@ void func_0020D2E0(BtlTask *task, s32 unusedCommand, BtlUnit *supplied,
 
     state = (BtlState *)btlGetRuntime();
     species = btlMapCommandToSkill(
-        (u32)btlGetActorIndexedSignedValue((s32)task->unit, task->indexWork.skillId));
+        (u32)btlGetActorIndexedSignedValue(task->unit, task->indexWork.skillId));
     if (species == -1) {
         return;
     }
