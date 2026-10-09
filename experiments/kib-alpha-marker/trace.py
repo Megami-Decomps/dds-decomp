@@ -19,6 +19,8 @@ def main():
         d.run("configure", [sys.executable, "configure.py", "dds2"])
         d.require(d.UNIT.read_bytes() == original, "configure_changed_source")
         d.UNIT.write_text(source.replace(d.ANCHOR, candidate, 1))
+        sizes = d.object_sizes("candidate_prepare")
+        d.require(sizes.get(d.TARGET) == 912, "candidate_size_changed")
         with tempfile.TemporaryDirectory(prefix="dds-alpha-trace-") as temp:
             private = Path(temp)
             probe = private / "probe"
@@ -44,7 +46,7 @@ def main():
                     "hard_conflicts", "pseudo_conflicts", "hard_preferences")
             metrics = ("references", "live_length", "single_block", "set_count",
                        "calls_crossed", "user_variable", "pointer",
-                       "hard_register_width", "allocation_priority")
+                       "hard_register_width", "allocation_priority", "preferred_class", "alternate_class")
             rows = []
             for row in functions[0]["pseudos"]:
                 if row["selected"] not in (4, 21, 16, 17, 18, 19):
