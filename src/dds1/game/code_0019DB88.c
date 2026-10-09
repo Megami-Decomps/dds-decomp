@@ -794,12 +794,12 @@ void func_0019F770(UiSprite *sprite) {
         {sprite->right, sprite->bottom},
         {sprite->left, sprite->bottom}
     };
-    s32 packet;
+    SdfListHead *list;
 
-    packet = sdfAllocPacketAligned(0x20);
-    sdfInitPacketList((SdfListHead *)packet);
-    itfEmitQuadListA(vertices, D_00358028, D_003BB230, D_003BB238, 5, 0xFFFFFF, (SdfListHead *)packet);
-    D_00325708.append(&D_00325708, (SdfListHead *)packet);
+    list = (SdfListHead *)sdfAllocPacketAligned(0x20);
+    sdfInitPacketList(list);
+    itfEmitQuadListA(vertices, D_00358028, D_003BB230, D_003BB238, 5, 0xFFFFFF, list);
+    D_00325708.append(&D_00325708, list);
 }
 
 void itfAdjustPanelBoundsWithPad(ItfMesBlkA4 *object, s32 mode) {

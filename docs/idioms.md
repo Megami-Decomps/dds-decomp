@@ -6207,6 +6207,13 @@ two `itfDrawPulsingTestOverlay` functions keep their reset-list result
 as that pointer through packet appends and the surface callback. These
 closures change no allocator, GS/DMA word, statement order, or callback.
 
+The short field GS-command/frame/vector submissions, generated/composite
+texture submissions, and UI sprite-outline submissions keep their
+`0x20`-byte software list as `SdfListHead *` through initialization,
+draw helpers and pool append. Decode the allocator's word only once;
+their separate GS packet locals and physical submission words retain
+their original address-word representation.
+
 
 ## Battle panel corner clearing retains the retail redundant test
 
