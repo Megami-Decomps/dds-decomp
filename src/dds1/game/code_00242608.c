@@ -19,6 +19,7 @@
 #include "evt_solar.h"
 #include "evt_task.h"
 #include "kwln_task_lifecycle.h"
+#include "sdf_chip.h"
 
 #define CAMP_TASK_NAME_BYTES 0x20
 #define CAMP_TASK_DATA_BYTES 0x48
@@ -79,7 +80,6 @@ extern char D_003AF418[]; /* "camp_draw" */
 extern char D_003AF428[]; /* "camp_update" */
 
 extern void evtFormatTaskName(s32 taskId, void *name);
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *memset(void *dst, s32 c, u32 n);
 extern KwlnTask *kwlnTaskCreate(const char *name, u32 priority, s32 startDelay, s32 destroyDelay, TaskUpdate update, TaskDestroy destroy, u32 userValue);
 extern f32 mnuShopSavedLastTransformVector[];

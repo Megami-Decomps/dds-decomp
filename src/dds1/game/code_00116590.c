@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "dds3obj.h"
 #include "eff_light.h"
 #include "eff_object.h"
@@ -12,7 +13,6 @@ struct EvtUnit;
 extern void evtSetUnitValueTransition(struct EvtUnit *unit, EffWorldNode *target, s32 duration);
 extern void evtEndUnitValueTransition(struct EvtUnit *unit, s32 duration);
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 
 u32 func_00116590(void) {

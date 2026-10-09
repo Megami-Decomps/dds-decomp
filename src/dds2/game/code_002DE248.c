@@ -365,7 +365,6 @@ extern u8 D_004386E8[];
 
 
 
-extern void *sdfAllocSizeClassBlock(s32);
 
 extern s32 effSharedRibbonReferenceCount;
 

@@ -1,6 +1,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "pcp_vu0.h"
@@ -22,7 +23,6 @@ typedef struct EffBillboardParams {
     s32 mode; /* 0x00: billboard mode for the new set */
 } EffBillboardParams;
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 typedef struct {
     u16 parameterCount;

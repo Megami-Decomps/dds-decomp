@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 
 #include "dds3obj.h"
 
@@ -8,7 +9,6 @@ void effObjNodeDestroy(EffWorldNode *node);
 
 EffWorldNode *dds3CreateWorldNodeForKind(u32 kind);
 
-void *sdfAllocSizeClassBlock(s32 arg);
 
 void dds3GrowWorldValueChain(WorldValueIndices *object, s32 count);
 

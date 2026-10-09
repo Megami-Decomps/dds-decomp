@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
@@ -65,7 +66,6 @@ extern u8 D_003BB818[];
 
 extern u8 sdfPfsDebugMode;
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern s32 sceDopen(char *);
 

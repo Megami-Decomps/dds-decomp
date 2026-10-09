@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "eff_thunder_vector.h"
@@ -57,7 +58,6 @@ typedef struct {
     EffParamWork *secondaryHandle; /* 0x18 parameter block 1 */
 } EffPCPSpawnOnceWork;
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfReleaseChipBlock();
 
 

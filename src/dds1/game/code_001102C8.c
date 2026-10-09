@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
 #include "evt_world.h"
@@ -81,7 +82,6 @@ s32 dds3VisitWorldObjectValues(WorldValueIndices *object, s32 (*callback)(u32)) 
     return 1;
 }
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfReleaseChipBlock(void *block);
 
 /* Allocate the object's data and 18 empty per-kind lists; return success. */

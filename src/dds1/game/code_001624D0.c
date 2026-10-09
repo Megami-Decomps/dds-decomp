@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "eff_param.h"
 #include "eff_thunder_vector.h"
 #include "par_cell_api.h"
@@ -55,7 +56,6 @@ extern struct SdfPoolNode *D_00325828[4];
 
 extern u16 D_003BB044;
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 extern void sdfReleaseChipBlock(void *p);
 

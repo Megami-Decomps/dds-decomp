@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "eff_thunder_vector.h"
@@ -188,7 +189,6 @@ typedef struct EffPCPSharedTrail {
 
 extern EffPCPSharedTrail *effPcpSharedTrailWork;
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 /* Constructor and aimed update share the 0x78-byte angular-sweep work.
    The update uses unsigned frame bounds; the initial sweep interval is

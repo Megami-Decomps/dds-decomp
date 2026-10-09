@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "eff_dependency.h"

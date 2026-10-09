@@ -9,7 +9,6 @@ extern void (*sdfTickCallback)(void);
 
 
 
-extern void *sdfAllocSizeClassBlock();
 
 typedef struct SdfHandlerNode {
     struct SdfHandlerNode *next;

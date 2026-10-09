@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "par_cell_api.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"

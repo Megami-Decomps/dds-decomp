@@ -1,5 +1,6 @@
 #include "bill_object_api.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "eff.h"
 #include "file_request_api.h"
@@ -20,7 +21,6 @@ typedef struct EffectHandler {
 } EffectHandler;
 
 extern EffectHandler D_003AA770[];
-extern void *sdfAllocSizeClassBlock(s32);
 
 void *effCloneSourceWithTypeHandler(EffectSource *source) {
     EffectSource *copy = (EffectSource *)sdfAllocSizeClassBlock(0x10);

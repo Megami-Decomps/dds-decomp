@@ -1,9 +1,9 @@
 #include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "eff.h"
+#include "sdf_chip.h"
 
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern s16 D_003D6670[];
 
 EffMagatuhiOwner *effCloneMagatuhiWithColorResource(const u32 *source) {

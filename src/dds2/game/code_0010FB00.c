@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
 #include "pcp_vu0.h"
@@ -95,7 +96,6 @@ u32 dds3GetWorldNodeValue(EffWorldNode *node) {
     return value;
 }
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 /* Allocate and clear the world node's 0x28-byte WorldInfo payload. The native
    callback stores the payload on the node before initializing its fields. */

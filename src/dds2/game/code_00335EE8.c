@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 
@@ -8,7 +9,6 @@ extern s32 (*D_0040B510[])(void *a0, s32 a1);
 
 extern u8 D_0040B518[];
 
-extern s32 sdfAllocSizeClassBlock(s32);
 
 typedef struct MotionKey {
     s32 id;
@@ -52,7 +52,7 @@ void sdfSelectMotionPointerEntry(s32 destination, s32 source, void *unused, s32 
 }
 
 s32 sdfAllocateBoundMotionPointerEntry(s32 source, s32 unused, s32 entryIndex) {
-    s32 entry = sdfAllocSizeClassBlock(0x20);
+    s32 entry = (s32)sdfAllocSizeClassBlock(0x20);
 
     sdfSelectMotionPointerEntry(entry, source, D_0040B518, entryIndex);
     return entry;

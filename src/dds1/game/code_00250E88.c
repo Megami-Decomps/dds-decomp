@@ -6,6 +6,7 @@
 #include "mnu_mantra_grid.h"
 #include "mnu_scene_work.h"
 #include "sdf_task_work.h"
+#include "sdf_chip.h"
 
 #define MNU_SCENE_WORK_SIZE 0x5B0
 #define MNU_SCENE_SHADE_FRAME_LIMIT 10
@@ -230,7 +231,6 @@ s32 func_00253018(SdfGrid *grid) {
 }
 
 extern s32 prfReqCheckWithFallback(ScrVmOperand *, u16);
-extern void *sdfAllocSizeClassBlock(s32);
 extern u16 prfGetRequiredProfileLevel(u16);
 extern u8 prfGetParamWord7b5(u16);
 extern s32 prfBuildRawSkillList(u16, PrfSkillList *);

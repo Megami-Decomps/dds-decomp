@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "file_request_api.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -120,7 +121,6 @@ extern EvtBlendA D_003C9470;
 extern void evtScaleValueByMultiplier(PolyMovieClip *clip, f32 multiplier);
 extern void sdfFreezeFloatCounter(PolyMovieClip *clip);
 extern void sdfUnfreezeFloatCounter(PolyMovieClip *clip);
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern void *memset(void *dst, s32 value, u32 size);
 extern void *memcpy(void *dst, const void *src, u32 size);
 extern s32 itfMesCreateWindow(u8 *arg);

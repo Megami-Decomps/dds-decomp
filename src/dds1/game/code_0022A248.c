@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "evt_viewer.h"
 #include "sdf.h"
@@ -366,7 +367,6 @@ typedef struct EvtViewerDrawPayload {
     u8 unknown14[0xC];
 } EvtViewerDrawPayload;
 
-extern void *sdfAllocSizeClassBlock(s32);
 extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
 extern void func_00242C30(EvtRuntime *, EvtRuntimeGroup *, s32, f32 (*)[4], f32 *, f32 *);
 extern void func_00242E70(EvtRuntime *, EvtRuntimeGroup *, s32, CampDisplayDefaults *);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "kwln_sprite.h"
 #include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
@@ -51,7 +52,6 @@ extern void dds3AdminSubmitModeRequest(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 func_003101B8(s32 directory);
 extern void func_003014F0();
 extern s32 sceDopen(void *arg0);
-extern void *sdfAllocSizeClassBlock(s32 arg0);
 extern void *sdfConsMeasurePacketWithHeader(s32 arg0);
 extern s32 sdfConsAllocateColumnPacket(s32 arg0);
 

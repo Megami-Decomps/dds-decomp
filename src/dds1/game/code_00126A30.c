@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
 #include "sdf_packet_builders.h"
@@ -269,7 +270,6 @@ extern f32 D_00330670[];
 extern u32 D_003308B0[];
 
 extern void *memset(void *s, s32 c, u32 n);
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern s32 fldDrawPendingTitleBannerWhenIdle(KwlnTask *task);
 extern s32 func_00213B50(void);
 extern s32 fldValueRecordCount;

@@ -354,7 +354,6 @@ extern void fileQueueInitTransform(void *queue);
 extern void sdfVuMatrixToQuaternion(f32 matrix[4][4]);
 
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 
 

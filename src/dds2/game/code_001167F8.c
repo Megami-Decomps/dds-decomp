@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "dds3obj.h"
 #include "eff_light.h"
 #include "eff_object.h"
@@ -15,7 +16,6 @@ extern void evtEndUnitValueTransition(struct EvtUnit *unit, s32 duration);
 
 extern void dds3EnsureSlotData();
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 u32 func_001167F8(void) {
     return 1;

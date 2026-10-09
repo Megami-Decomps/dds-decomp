@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
@@ -74,7 +75,6 @@ typedef struct SdfAllocWork {
 } SdfAllocWork;
 
 extern void sdfPacEnqueuePacket(SdfAllocWork *);
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern void sdfPacReadListAllocationCount();
 
 void sdfQueueAndResetPacketWork(SdfAllocWork *work) {

@@ -1,6 +1,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "eff_param.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
@@ -1055,7 +1056,6 @@ struct EffEventWork {
     void *actor;          /* Linked model/event owner; concrete identity is unknown. */
     BattleEffect *effect;
 };
-extern void *sdfAllocSizeClassBlock(s32 size);
 extern void func_00169168(BattleEffect *, f32);
 
 /* Allocate the compact record, copy its init prefix, then attach the new effect. */

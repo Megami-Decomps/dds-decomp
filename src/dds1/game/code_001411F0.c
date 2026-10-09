@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "evt_world.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "dds3obj.h"
 #include "sdf_dev_state.h"
 #include "sdf_resource.h"
@@ -183,7 +184,6 @@ extern void sndSetSequenceVolumePan(s32 arg0, s32 arg1, s32 arg2);
 
 extern void sndStartTrackDefault(s32 arg0);
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 
 extern s32 fldFieldTaskUpdate(void);

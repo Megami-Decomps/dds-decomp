@@ -8,6 +8,7 @@
 #include "mnu_sprite_resource.h"
 #include "sdf_grid.h"
 #include "mnu_scene_work.h"
+#include "sdf_chip.h"
 
 extern void sdfReleaseChipBlock(void *);
 /* Retail retains a jal and epilogue; default TU -O2 changes the shape. */
@@ -382,7 +383,6 @@ MnuSpriteResourceGroup *mnuCreateSpriteResource(s32 owner, u8 sprite, u8 variant
 
 extern char D_003AF9F0[];
 
-extern void *sdfAllocSizeClassBlock(s32);
 
 /* Spawn a cue at a random cell, or one hex step from its parent in the turned direction. */
 SpriteSpawnNode *func_0025B888(MnuSpriteResourceGroup *group, SpriteSpawnNode *parent, s8 turn) {

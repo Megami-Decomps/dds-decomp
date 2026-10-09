@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "eff_resource_slots.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -670,7 +671,6 @@ typedef struct MnuPartyRecord {
 } MnuPartyRecord;
 
 extern MnuResourceList *mnuCreateListState(s32, s32, s32);
-extern void *sdfAllocSizeClassBlock(s32);
 extern void func_00254C68();
 extern void *memset(void *, s32, u32);
 

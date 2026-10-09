@@ -13,6 +13,7 @@
 #include "eff.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
+#include "sdf_chip.h"
 
 #define MNU_PARTY_SLOT_COUNT 5
 #define MNU_PARTY_RECORD_BYTES 0x1C4
@@ -178,7 +179,6 @@ extern struct MenuList *mnuCreateListState();
 
 extern u8 D_00437870[];
 
-extern s32 sdfAllocSizeClassBlock(s32);
 
 extern s32 mnuPercentOrHundred(u16, u16);
 
@@ -403,7 +403,7 @@ INCLUDE_ASM(const s32, "game/code_002665B0", func_00266C08);
 /* Allocate adjacent HP/MP percentage panels, preserving the native 0x50 stride.
  * The source is a party-vitals record; the context supplies the retained camp texture. */
 s32 mnuCreateDualPercentPanel(DatPartyRecord *unit, MenuSlotState *host) {
-    s32 panel = sdfAllocSizeClassBlock(MNU_PERCENT_PAIR_BYTES);
+    s32 panel = (s32)sdfAllocSizeClassBlock(MNU_PERCENT_PAIR_BYTES);
     mnuDrawPanelSequenceByRow((MenuPageBar *)panel, 0, 0, 0x1e,
         mnuPercentOrHundred(unit->hp, unit->maxHp),
         (EffectSlotSet *)host->imageHandles[1]);

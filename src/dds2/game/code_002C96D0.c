@@ -432,7 +432,6 @@ extern s32 fileLoadStateChanged(void);
 
 extern void fileCacheSlotFlagsFromState(void);
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 
 extern void fileLoadObjectSetResource(EffectSurfaceNode *node, u32 entryId, void *resource);

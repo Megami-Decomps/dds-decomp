@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "bill_object_api.h"
 #include "sdf_resource.h"
@@ -13,7 +14,6 @@ extern void func_00158430(BillObj *, BillRenderPair *);
 
 
 
-void *sdfAllocSizeClassBlock(s32 size);
 
 BillData *billCreateAnimationDataFromResource(void *arg);
 

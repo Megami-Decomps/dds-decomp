@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "dds3obj.h"
 #include "sdf_model.h"
 #include "eff_transform.h"
@@ -73,7 +74,6 @@ Motion *evtAttachScriptToObject(EffWorldNode *object, SdfModel *owner) {
     return motion;
 }
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 s32 dds3AllocateObjectWork(EffWorldNode *obj) {
     obj->data = sdfAllocSizeClassBlock(0x18);

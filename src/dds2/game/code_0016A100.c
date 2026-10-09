@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "eff_param.h"
 #include "eff_thunder_vector.h"
 #include "par_cell_api.h"
@@ -40,7 +41,6 @@ typedef struct EffDispatchEntry {
 
 extern EffDispatchEntry effParamWorkFactories[];
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 
 extern u8 D_003B0180[];

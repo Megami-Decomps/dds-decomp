@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_model.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
@@ -29,7 +30,6 @@ typedef struct {
 extern void sdfFreeNodeLists(SdfDrawNode *node);
 
 extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *node);
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 
 extern void func_003312A8(SdfDrawNode *node, u32 *commandList, s32 packetSelector, s32 alternateSelector, s32 listIndex);

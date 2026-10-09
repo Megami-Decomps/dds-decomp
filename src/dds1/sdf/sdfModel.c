@@ -1,10 +1,10 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_model.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 
 extern void *sdfInitNodeHeaderFromWords(u32 *words, void *node, s32 wordIndex);
-extern void *sdfAllocSizeClassBlock(s32 arg0);
 extern void sdfInstallPoolNodeReleaseCallbacks(s32 arg0);
 extern void *memcpy(void *dst, const void *src, u32 n);
 extern void sdfFreeNodeLists(SdfDrawNode *node);

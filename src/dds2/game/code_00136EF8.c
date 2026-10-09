@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_dev_state.h"
 #include "kwln.h"
 #include "sdf_resource.h"
@@ -1985,7 +1986,6 @@ s32 func_00144028(void *task) {
     return 0;
 }
 
-extern void *sdfAllocSizeClassBlock(s32 size);
 
 void *fldInitializeTitleBannerTask(KwlnTask *task) {
     s16 *node = sdfAllocSizeClassBlock(8);

@@ -81,7 +81,6 @@ extern s32 sdfPendingQueueSlots[2];
 
 extern SdfResource *sdfResourceListHead;
 
-extern u32 sdfAllocSizeClassBlock(u32);
 
 extern SdfDmaNode *sdfCreateReferenceDmaNode(SdfDmaTag *sourceTag);
 

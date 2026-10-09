@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 
@@ -14,7 +15,6 @@ extern void (*D_003BD2DC)(s32);
 
 s32 func_00312C08(void);
 s32 EIntr(void);
-SdfMemBlock *sdfAllocSizeClassBlock(s32 size);
 
 /* Return the next descriptor unless it is the end marker; used blocks are not filtered. */
 SdfMemBlock *sdfMemoryNextBlock(SdfMemBlock *block) {
