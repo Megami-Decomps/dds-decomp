@@ -20,6 +20,7 @@ extern s32 sdfDoubleBufferAllocation;
 #include "sdf_pending.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
+#include "sdf_gs_flat_shapes.h"
 #include "sdf_gs_packet.h"
 #include "sdf_draw.h"
 
@@ -1346,29 +1347,28 @@ void sdfAppendTexturedLinePacket(SdfListHead *list, s32 color, s32 primitive, s3
 }
 
 /* Pack three GS XYZ vertices with a common depth. */
-void sdfBuildTriPacket104(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 depth) {
-    u64 *packet = (u64 *)address;
+void sdfBuildTriPacket104(SdfGsFlatTrianglePayload *packet, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 depth) {
     u64 depthHigh = (u64)depth << 32;
 
-    packet[0] = 0x6400000000008001ULL;
-    packet[1] = 0xF55510;
-    packet[2] = (u32)(primitive | 0x104);
-    packet[3] = (u32)color | ((u64)0xFE00 << 46);
-    packet[4] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
-    packet[5] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
-    packet[6] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
+    packet->gifTag = 0x6400000000008001ULL;
+    packet->gifRegisterList = 0xF55510;
+    packet->primitive = (u32)(primitive | 0x104);
+    packet->rgbaq = (u32)color | ((u64)0xFE00 << 46);
+    packet->xyz2[0] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | depthHigh;
+    packet->xyz2[1] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | depthHigh;
+    packet->xyz2[2] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
 void sdfQueueFlatTriangle(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 x1,
                    s32 y1, s32 x2, s32 y2, s32 depth, s32 (*alloc)(s32)) {
-    SdfPacket *packet;
+    SdfGsFlatTrianglePacket *packet;
     if (alloc == NULL) {
         alloc = sdfAllocPacketAligned;
     }
-    packet = (SdfPacket *)alloc(0x50);
-    packet->unk0 = 0x20000004;
-    packet->unk8 = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    sdfBuildTriPacket104((SdfPacket *)&packet->unk10, color, primitive, x0, y0, x1, y1, x2, y2, depth);
+    packet = (SdfGsFlatTrianglePacket *)alloc(0x50);
+    packet->dmaTag = 0x20000004;
+    packet->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
+    sdfBuildTriPacket104(&packet->drawing, color, primitive, x0, y0, x1, y1, x2, y2, depth);
     sdfAppendPacket(list, (s32)packet);
 }
 
