@@ -689,7 +689,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     mnuInitializeStaffPageWindows(&work->partyWindow, &work->staffSlots, 0, &work->partyPanel);
     panel = mnuCreatePanelGroup(work->staffSlots.pairResources[0]);
     work->panelHandle = panel;
-    mnuUpdateFiveListEntries(panel, (struct EffectSlotSet *)work->unitHandle);
+    mnuUpdateFiveListEntries(panel, work->unitResource);
     work->spriteHandle =
         mnuCreateSpriteState(work->staffSlots.baseResources[5],
                              work->staffSlots.baseResources[2],
@@ -701,7 +701,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
 void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
     MenuPageWindow *panelContext = &ctx->partyWindow;
 
-    effDestroyResourceSlotSet(ctx->unitHandle);
+    effDestroyResourceSlotSet(ctx->unitResource);
     mnuClearEntries(panelContext);
     mnuReleasePartyIconBundles(panelContext);
     mnuShutdownContext(panelContext);
@@ -717,7 +717,7 @@ extern char D_003AFA88[];
 extern char D_003AFA98[];
 extern void sndEnsureMidiBankResident(s32);
 extern void mnuAppendCampSpriteRequests(s32, StaffSlots *);
-extern void effRequestResourceByMode(char *, char *, s32, s32);
+extern void effRequestResourceByMode(char *, char *, s32, u32 *);
 extern void mnuRequestBaseAssets(MenuAssets *);
 extern void kwlnFadeInStart(s32, s32, s32, s32);
 
@@ -728,7 +728,8 @@ s32 mnuStaffInitPanel(BrsSkillPackageWork *work) {
     sndEnsureMidiBankResident(0x50000);
     mnuInitPartyPanelSlots(&work->partyPanel);
     mnuAppendCampSpriteRequests(work->fadeTarget, &work->staffSlots);
-    effRequestResourceByMode(D_003AFA88, D_003AFA98, 0, (s32)&work->unitHandle);
+    effRequestResourceByMode(D_003AFA88, D_003AFA98, 0,
+                             (u32 *)&work->unitResource);
     mnuRequestBaseAssets(&work->assets);
     work->setupState = 1;
     kwlnFadeInStart(0, 0, 0, 1);
@@ -755,7 +756,7 @@ s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
     if (func_002877A8() == 1) {
         return 1;
     }
-    if (ctx->unitHandle == 0) {
+    if (ctx->unitResource == NULL) {
         return 1;
     }
     if (mnuInitializeCampAssetSprites(&ctx->assets) == 0) {

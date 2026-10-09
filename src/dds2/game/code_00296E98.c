@@ -726,7 +726,7 @@ void brsOpenSkillPackagePanel(BrsSkillPackageWork *work) {
     mnuInitializeCampPanelResources(&work->partyWindow, &work->staffSlots, 0, &work->partyPanel);
     panel = mnuCreatePanelGroup(work->staffSlots.baseResources[1], work->staffSlots.pairResources[0], 0);
     work->panelHandle = panel;
-    mnuUpdateFiveListEntries(panel, (struct EffectSlotSet *)work->unitHandle);
+    mnuUpdateFiveListEntries(panel, work->unitResource);
     work->spriteHandle =
         mnuCreateSpriteState(work->staffSlots.baseResources[1],
                              work->staffSlots.pairResources[0],
@@ -744,7 +744,7 @@ extern void mnuResetWorkFloats(void);
 void brsCloseSkillPackagePanel(BrsSkillPackageWork *ctx) {
     MenuPageWindow *panelContext = &ctx->partyWindow;
 
-    effDestroyResourceSlotSet((struct EffectSlotSet *)ctx->unitHandle);
+    effDestroyResourceSlotSet(ctx->unitResource);
     mnuClearEntries(panelContext);
     mnuReleasePartyIconBundles(panelContext);
     mnuShutdownContext(panelContext);
@@ -763,7 +763,8 @@ s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *work) {
     sndEnsureMidiBankResident(0x50000);
     mnuInitPartyPanelSlots(&work->partyPanel);
     mnuAppendCampSpriteRequests(work->fadeTarget, &work->staffSlots);
-    effRequestResourceByMode(D_00428358, D_00428368, 0, (s32)&work->unitHandle);
+    effRequestResourceByMode(D_00428358, D_00428368, 0,
+                             (u32 *)&work->unitResource);
     mnuRequestEffectResources(&work->campEffect.resources);
     work->setupState = 1;
     kwlnFadeInStart(0, 0, 0, 1);
@@ -789,7 +790,7 @@ s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
     if (func_002C6CE8() == 1) {
         return 1;
     }
-    if (ctx->unitHandle == 0) {
+    if (ctx->unitResource == NULL) {
         return 1;
     }
     if (mnuBindCampEffectWhenLoaded(&ctx->campEffect) == 0) {
