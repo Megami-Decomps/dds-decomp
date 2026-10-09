@@ -2086,10 +2086,6 @@ extern u8 sdfPfsDebugMode;
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
-extern void *sdfAllocateBlockBySizeThreshold(s32);
-
-extern void sdfFreeMemoryFromEitherHeap(void *);
-
 extern char *sdfDevGetPathBuffer(void);
 
 extern s32 func_0030E8F0(const char *, s32, ...);

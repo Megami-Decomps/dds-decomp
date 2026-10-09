@@ -170,7 +170,6 @@ extern u8 (*D_00437D58)[32];
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *texture);
 extern s32 dds3GetWorldObject(void);
 
-extern void sdfFreeMemoryFromEitherHeap(void *);
 
 extern s32 D_00437D38;
 
@@ -2660,7 +2659,6 @@ struct SdfTex;
 extern void func_001004A0(void);
 extern void func_002C7CE8(void *);
 extern struct SdfTex *sdfTexAcquireResourceTexture(void *);
-extern void *sdfAllocateBlockBySizeThreshold(s32);
 extern s32 D_00437D80;
 extern void func_002CE738(void);
 extern void kwlnFadeOutStart(s32, s32, s32, s32);
