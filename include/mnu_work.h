@@ -90,6 +90,25 @@ typedef union MenuWorkControl {
     } bits;
 } MenuWorkControl;
 
+/* Runtime control values decoded from the first-list repeat directive. */
+#define MENU_REPEAT_LOOP_MODE_NONE                 0
+#define MENU_REPEAT_LOOP_MODE_RESTART_OR_ADVANCE   1
+#define MENU_REPEAT_LOOP_MODE_TARGET_CAPABLE      2
+
+/* The directive stores selector values 0..2; the control word stores 1..3. */
+#define MENU_REPEAT_SELECTOR_DECREMENT_COUNT                    0
+#define MENU_REPEAT_SELECTOR_REPEAT_COUNT_LT_REMAINING          1
+#define MENU_REPEAT_SELECTOR_REMAINING_LT_REPEAT_COUNT          2
+#define MENU_REPEAT_POLICY_DECREMENT_COUNT                      1
+#define MENU_REPEAT_POLICY_REPEAT_COUNT_LT_REMAINING            2
+#define MENU_REPEAT_POLICY_REMAINING_LT_REPEAT_COUNT            3
+
+/* Policies 2 and 3 store signed-halfword predicates, not a
+ * direction-independent action. In loop mode 1, true restarts the current
+ * list and false advances. In loop mode 2, true selects the target and false
+ * advances.
+ */
+
 typedef struct MenuWorkFlagBits {
     u32 active : 1;
     u32 updated : 1;
@@ -295,6 +314,15 @@ typedef struct MenuShortRecord {
     u8 pad01;
     s16 parameters[3];
 } MenuShortRecord;
+
+/* Row-start repeat directives; these bytes are separate from motion opcodes. */
+#define MENU_REPEAT_DIRECTIVE_KIND_REPEAT          0x11
+#define MENU_REPEAT_DIRECTIVE_KIND_REPEAT_TO_TARGET 0x12
+#define MENU_REPEAT_DIRECTIVE_KIND_MASK            0xF0
+#define MENU_REPEAT_DIRECTIVE_KIND_TAG             0x10
+
+/* Fixed-kind records are selected in both short-list access paths. */
+#define MENU_SHORT_RECORD_KIND_FIXED              0x40
 
 typedef struct MenuShortRecordList {
     s32 count;
