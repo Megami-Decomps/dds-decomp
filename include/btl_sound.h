@@ -64,6 +64,23 @@ typedef struct SoundResourceNode {
     struct SoundResourceNode *next;
 } SoundResourceNode;
 
+/* Per-unit command-effect link, allocated at exactly 0x10 bytes. */
+typedef struct SoundLink {
+    struct BtlUnit *owner; /* 0x00 */
+    BattleEffect *effectHandle; /* 0x04 */
+    SoundResourceNode *effect; /* 0x08 */
+    u16 commandEffectId; /* 0x0C: selected datCommandRecords entry's +0x2E value. */
+    u16 pad0E[1];
+} SoundLink;
+
+typedef char SoundLink_size_must_be_0x10[(sizeof(SoundLink) == 0x10) ? 1 : -1];
+typedef char SoundLink_commandEffectId_offset_must_be_0x0C[
+    ((u32)&((SoundLink *)0)->commandEffectId == 0x0C) ? 1 : -1];
+
+SoundLink *sndAllocLink(struct BtlUnit *owner);
+void sndFreeLink(SoundLink *link);
+void btlUpdateUnitCommandEffect(SoundLink *link);
+
 /* Effect callbacks dereference these words as units, while the selector
  * provider stores their encoded keys (DDS1 001F1588 / DDS2 0020220C). */
 typedef union ActorEffectOwner {
@@ -146,7 +163,6 @@ typedef char Atrac3LoadTaskArgs_entryIndex_offset_must_be_8[
 
 struct ActiveSoundNode;
 struct SoundResourceLink;
-struct SoundLink;
 
 SoundMixer *sndMixerClone(SoundMixer *source);
 s32 sndReadSelectedMixerBankValue(SoundMixer *mixer, u16 kind);
@@ -160,7 +176,6 @@ void btlExtendTaskFrameLimit(SoundResourceNode *effect, s32 frames);
 u32 sndGetResourceStatus(SoundResourceNode *effect);
 s32 sndHasResourceFlagsOneOrEight(struct ActiveSoundNode *node);
 struct SoundResourceLink *sndAllocResourceLink(struct BtlUnit *owner);
-struct SoundLink *sndAllocLink(struct BtlUnit *owner);
 struct BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *source, struct BtlUnit *owner, u64 resource);
 BattleEffect *func_00160958(SoundMixer *mixer, u16 kind, void *owner, s32 value);
 BattleEffect *func_00168548(SoundMixer *mixer, u16 kind, void *owner, s32 value);

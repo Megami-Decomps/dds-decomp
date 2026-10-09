@@ -87,13 +87,6 @@ typedef struct BtlActionTableEntry {
     u8 pad1E[2];
 } BtlActionTableEntry;
 
-typedef struct SoundLink {
-    BtlUnit *owner;
-    BattleEffect *effectHandle;
-    SoundResourceNode *effect;
-    u16 flags;
-} SoundLink;
-
 typedef struct SoundResourceLink {
     BtlUnit *owner;
     BattleEffect *effectHandle;
@@ -420,7 +413,6 @@ extern void func_002034A8(struct SoundResourceLink *);
 
 extern s32 btlGetSelectedUnitProperty(BtlUnit *);
 
-extern void btlUpdateUnitCommandEffect(struct SoundLink *);
 
 extern void *memset(void *, s32, u32);
 
@@ -428,7 +420,6 @@ extern void sndFreeResourceNode(struct SoundResourceNode *);
 
 extern void sndFreeResourceLink(struct SoundResourceLink *);
 
-extern void sndFreeLink(struct SoundLink *);
 
 extern void sndFreeListNode(struct ActiveSoundNode *);
 
@@ -5255,7 +5246,7 @@ SoundLink *sndAllocLink(BtlUnit *owner) {
     SoundLink *link = sdfAllocAndClearQuadwords(0x10);
     link->owner = owner;
     link->effectHandle = 0;
-    link->flags = 0;
+    link->commandEffectId = 0;
     link->effect = 0;
     return link;
 }
@@ -5288,7 +5279,7 @@ void btlUpdateUnitCommandEffect(SoundLink *link) {
             link->effect->referenceCount++;
             link->effectHandle->flags = (link->effectHandle->flags | 1) & ~6;
         }
-        link->flags = effectId;
+        link->commandEffectId = effectId;
     } else if (link->effectHandle != 0) {
         effReleaseBattleVoiceOwner(link->effectHandle);
         link->effect->referenceCount--;

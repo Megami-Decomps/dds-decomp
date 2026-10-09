@@ -122,13 +122,6 @@ typedef struct FxTask {
     BtlUnit *unit;
 } FxTask;
 
-typedef struct SoundLink {
-    BtlUnit *owner;
-    BattleEffect *effectHandle;
-    SoundResourceNode *effect;
-    u16 flags;
-} SoundLink;
-
 typedef struct SoundResourceLink {
     BtlUnit *owner;
     BattleEffect *effectHandle;
@@ -4490,8 +4483,6 @@ extern void func_002034A8(struct SoundResourceLink *);
 
 extern s32 btlGetSelectedUnitProperty(BtlUnit *);
 
-extern void btlUpdateUnitCommandEffect(struct SoundLink *);
-
 extern void btlDrawActorGroundDisc(BtlUnit *);
 
 void btlUpdateActorModelColorAndLinks(void) {
@@ -4590,8 +4581,6 @@ BtlUnit *btlCreateUnit(void) {
 extern void sndFreeResourceNode(struct SoundResourceNode *);
 
 extern void sndFreeResourceLink(struct SoundResourceLink *);
-
-extern void sndFreeLink(struct SoundLink *);
 
 extern void btlReleaseActorModelResources(BtlUnit *);
 
