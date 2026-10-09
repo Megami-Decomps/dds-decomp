@@ -4677,9 +4677,203 @@ void fileJobCopyHeader(FileJob *dst, FileJob *src) {
     memcpy(dst, src, 0x90);
 }
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_00295018);
+extern char D_0037E518[];
+extern s32 func_0030F190(s32 fd, void *data, s32 size);
+extern s32 fileQueueCountLinkedJobs(FileQueue *queue);
 
-INCLUDE_ASM(const s32, "game/code_0028A150", func_002954F0);
+/* Export a queue: the queue header, one relocated record per job, then each
+ * owning job's 16-byte-aligned payload. Child jobs store their parent's index. */
+void func_00295018(FileQueue *queue, s32 slot) {
+    char path[0xD0];
+    FileJobPayload payload;
+    FileQueue header;
+    FileJob record;
+    s32 fd;
+    s32 count;
+    s32 offset;
+    s32 size;
+    FileJob *job;
+
+    if (sdfPfsDebugMode != 0) {
+        func_003014F0(path, D_003BC928, slot);
+        fd = func_0030E8F0(path, 0x602, 0x1B6);
+    } else {
+        func_003014F0(path, D_003BC930, sdfDevGetPathBuffer(), slot);
+        fd = func_0030E8F0(path, 0x602);
+    }
+    header = *queue;
+    header.unk84 = 0;
+    size = sizeof(FileQueue);
+    header.entryOffset = size;
+    header.first = NULL;
+    count = fileQueueCountLinkedJobs(queue);
+    func_0030F190(fd, &header, sizeof(FileQueue));
+    offset = count * sizeof(FileJob) + sizeof(FileQueue);
+
+    for (job = queue->first; job != NULL; job = job->next) {
+        record = *job;
+        if ((job->flags & 1) == 0) {
+            if ((job->flags & 2) == 0) {
+                size = fileJobSerializedSize((FileJobPayload *)job->id);
+            } else {
+                payload = *(FileJobPayload *)job->id;
+                payload.secondary.offset = 0;
+                payload.secondary.size = 0;
+                payload.secondary.allocation = NULL;
+                size = fileJobSerializedSize(&payload);
+            }
+            record.id = offset;
+        } else {
+            size = 0;
+            record.id = fileFindQueuedJobIndex(queue, fileQueueFindById(queue, job->id));
+        }
+        if (job->flags & 2) {
+            record.sector = fileFindQueuedJobIndex(queue, fileQueueFindById(queue, job->sector));
+        }
+        record.next = NULL;
+        record.prev = NULL;
+        func_0030F190(fd, &record, sizeof(FileJob));
+        offset += (size & 0xF) != 0 ? ((size >> 4) + 1) << 4 : (size >> 4) << 4;
+    }
+
+    for (job = queue->first; job != NULL; job = job->next) {
+        s32 blocks;
+        s32 aligned;
+        s32 padding;
+
+        if (job->flags & 1) {
+            continue;
+        }
+        if ((job->flags & 2) == 0) {
+            size = fileJobSerializedSize((FileJobPayload *)job->id);
+            func_00293AE0(fd, (FileJobPayload *)job->id);
+        } else {
+            payload = *(FileJobPayload *)job->id;
+            payload.secondary.offset = 0;
+            payload.secondary.size = 0;
+            payload.secondary.allocation = NULL;
+            size = fileJobSerializedSize(&payload);
+            func_00293AE0(fd, &payload);
+        }
+        blocks = size >> 4;
+        if ((size & 0xF) != 0) {
+            aligned = (blocks + 1) << 4;
+        } else {
+            aligned = blocks << 4;
+        }
+        padding = aligned - size;
+        if (padding > 0) {
+            func_0030F190(fd, D_0037E518, padding);
+        }
+    }
+    func_0030EB78(fd);
+    func_00310A68(D_003BC938, 0);
+}
+
+/* Sixteen-byte preamble of a saved file queue. */
+typedef struct FileQueueImageHeader {
+    s32 version;
+    s32 unk4;
+    s32 unk8;
+    f32 unkC;
+} FileQueueImageHeader;
+
+extern char D_0037E528[];
+
+/* Save a queue image: the queue header, one relocated record per job, then each
+ * owning job's 16-byte-aligned payload. Child jobs store their parent's index. */
+void func_002954F0(FileQueue *queue, s32 slot) {
+    char path[0xD0];
+    FileJobPayload payload;
+    FileQueue header;
+    FileJob record;
+    FileQueueImageHeader image;
+    s32 fd;
+    s32 count;
+    s32 offset;
+    s32 size;
+    FileJob *job;
+
+    if (sdfPfsDebugMode != 0) {
+        func_003014F0(path, D_003BC928, slot);
+        fd = func_0030E8F0(path, 0x602, 0x1B6);
+    } else {
+        func_003014F0(path, D_003BC930, sdfDevGetPathBuffer(), slot);
+        fd = func_0030E8F0(path, 0x602);
+    }
+    image.version = 5;
+    image.unk4 = 0;
+    image.unkC = 1.03f;
+    func_0030F190(fd, &image, sizeof(image));
+
+    header = *queue;
+    header.unk84 = 0;
+    size = sizeof(FileQueue);
+    header.entryOffset = size;
+    header.first = NULL;
+    count = fileQueueCountLinkedJobs(queue);
+    func_0030F190(fd, &header, sizeof(FileQueue));
+    offset = count * sizeof(FileJob) + sizeof(FileQueue);
+
+    for (job = queue->first; job != NULL; job = job->next) {
+        record = *job;
+        if ((job->flags & 1) == 0) {
+            if ((job->flags & 2) == 0) {
+                size = fileJobSerializedSize((FileJobPayload *)job->id);
+            } else {
+                payload = *(FileJobPayload *)job->id;
+                payload.secondary.offset = 0;
+                payload.secondary.size = 0;
+                payload.secondary.allocation = NULL;
+                size = fileJobSerializedSize(&payload);
+            }
+            record.id = offset;
+        } else {
+            size = 0;
+            record.id = fileFindQueuedJobIndex(queue, fileQueueFindById(queue, job->id));
+        }
+        if (job->flags & 2) {
+            record.sector = fileFindQueuedJobIndex(queue, fileQueueFindById(queue, job->sector));
+        }
+        record.next = NULL;
+        record.prev = NULL;
+        func_0030F190(fd, &record, sizeof(FileJob));
+        offset += (size & 0xF) != 0 ? ((size >> 4) + 1) << 4 : (size >> 4) << 4;
+    }
+
+    for (job = queue->first; job != NULL; job = job->next) {
+        s32 blocks;
+        s32 aligned;
+        s32 padding;
+
+        if (job->flags & 1) {
+            continue;
+        }
+        if ((job->flags & 2) == 0) {
+            size = fileJobSerializedSize((FileJobPayload *)job->id);
+            func_00293AE0(fd, (FileJobPayload *)job->id);
+        } else {
+            payload = *(FileJobPayload *)job->id;
+            payload.secondary.offset = 0;
+            payload.secondary.size = 0;
+            payload.secondary.allocation = NULL;
+            size = fileJobSerializedSize(&payload);
+            func_00293AE0(fd, &payload);
+        }
+        blocks = size >> 4;
+        if ((size & 0xF) != 0) {
+            aligned = (blocks + 1) << 4;
+        } else {
+            aligned = blocks << 4;
+        }
+        padding = aligned - size;
+        if (padding > 0) {
+            func_0030F190(fd, D_0037E528, padding);
+        }
+    }
+    func_0030EB78(fd);
+    func_00310A68(D_003BC938, 0);
+}
 
 FileQueue *func_002959E8(s32 entry) {
     DevState *command = sdfDevCreateCommandState(entry);
