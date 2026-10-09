@@ -3233,7 +3233,7 @@ void btlSetResourceNameHeaderPairAlternate(struct BtlResourceNameRecord *record,
     record->word04 = secondWord;
 }
 
-u32 func_0020E7B0(struct BtlResourceNameRecord *record) {
+u32 btlGetResourceNameSelectionStatus(const struct BtlResourceNameRecord *record) {
     return record->selectionStatus;
 }
 
