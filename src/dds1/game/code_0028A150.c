@@ -154,8 +154,6 @@ extern FileRecordType D_0037E550[];
 
 extern void fileResetSlotStates(FileSlotTable *record);
 
-extern void *fileJobCreateFromCommandState();
-
 extern char D_003BC940[];
 
 extern char D_003B2688[]; /* "base.ico"; retail record includes padding */
@@ -4141,16 +4139,14 @@ FileJobPayload *fileDuplicateJob(FileJobPayload *request) {
 
 /* No return on the path where no command state exists: retail hands back
  * whatever v0 held. */
-void *fileJobCreateFromCommandState(entry)
-    s32 entry;
-{
+FileJobPayload *fileJobCreateFromCommandState(const char *entry) {
     DevState *command;
     s32 size;
     struct SdfMemBlock *allocation;
     void *buffer;
-    void *job;
+    FileJobPayload *job;
 
-    command = sdfDevCreateCommandState((const char *)entry);
+    command = sdfDevCreateCommandState(entry);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
         allocation = sdfAllocGeneralBlock(size);

@@ -4624,16 +4624,14 @@ FileJobPayload *fileDuplicateJob(FileJobPayload *request) {
 
 /* No return on the path where no command state exists: retail hands back
  * whatever v0 held. */
-void *fileJobCreateFromCommandState(entry)
-    s32 entry;
-{
+FileJobPayload *fileJobCreateFromCommandState(const char *entry) {
     DevState *command;
     s32 size;
     struct SdfMemBlock *allocation;
     void *buffer;
-    void *job;
+    FileJobPayload *job;
 
-    command = sdfDevCreateCommandState((const char *)entry);
+    command = sdfDevCreateCommandState(entry);
     if (command != 0) {
         size = sdfDevQueueControlAndWait(command);
         allocation = sdfAllocGeneralBlock(size);

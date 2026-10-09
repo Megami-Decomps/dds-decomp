@@ -7446,15 +7446,13 @@ u32 effCreateBattleCameraJob(u8 *request) {
     return job;
 }
 
-extern u32 fileJobCreateFromCommandState(u32);
-
 extern void fileJobCopyCommandIntoSecondaryData(u32, u32, u32);
 
 FileJobPayload *effLoadFileJobPayload(EffFileJobRequest *request, u32 existingJob) {
     FileJobPayload *job;
     if (existingJob != 0) {
         void *source;
-        job = (FileJobPayload *)fileJobCreateFromCommandState(existingJob);
+        job = fileJobCreateFromCommandState((const char *)existingJob);
         source = fileResolvePrimaryBuffer(job);
         memcpy(request->output, source, request->size);
     } else {
