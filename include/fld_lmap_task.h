@@ -42,12 +42,12 @@ MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 arg);
 void fldAdvanceMapRequest(MapRequestState *, u32, u32, u32);
 void fldSetMapRequestInterval(MapRequestState *, u16);
 
-struct FilePacRequest;
+struct FileRequest;
 
 /* The file loader retains this subrecord at task + 0x78 between updates. */
 typedef struct LmapLoadState {
-    void *file;
-    struct FilePacRequest *archive;
+    struct FileRequest *file;
+    struct FileRequest *archive;
     s16 phase;
     s16 entry;
     u32 unknown0C;
