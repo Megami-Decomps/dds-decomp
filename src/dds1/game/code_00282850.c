@@ -403,9 +403,9 @@ void func_00282CD0(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
     itfGridStorePosition(&panel->secondSlot, resource, index);
 }
 
-void mnuInitializePanelResource(MenuPanelState *panel, s32 resource, s32 target) {
-    panel->resourceHandle = mnuCreatePanelSpriteHandles(
-        2, (EffectSlotSet *)(u32)resource, (EffMappedResource *)(u32)target);
+void mnuInitializePanelResource(MenuPanelState *panel, EffectSlotSet *resource,
+                                EffMappedResource *target) {
+    panel->resourceHandle = mnuCreatePanelSpriteHandles(2, resource, target);
 }
 
 void func_00282D28(MenuPanelState *panel, u32 valueA, u32 valueB, u32 resource,
