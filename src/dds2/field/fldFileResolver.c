@@ -4224,21 +4224,6 @@ void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
     D_0038BB60.color[2] = blueB;
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_00135A68);
-
-void fldApplyPendingSceneValueWithSpeed(s32 speed) {
-    if (D_004360E8 == 0 && D_00389780[0] < 40) {
-        speed = 0;
-    }
-    if (D_00436158 != 0 && D_00436128 != D_00436158) {
-        if (D_00389898[0] == 0) {
-            D_003899B4[0] = D_00436158;
-        }
-        func_00135A68(D_00436158, speed);
-    }
-}
-
-/*BEGIN func_00135D80*/
 typedef struct {
     u8 type;
     u8 pad1[3];
@@ -4294,6 +4279,102 @@ extern u32 D_0043615C;
 extern f32 D_00436160;
 extern u32 D_00436164;
 
+void func_00135A68(u32 index, s32 mode) {
+    FldLightSet *light;
+    f32 vec[4];
+    f32 dir[4];
+    s32 duration;
+    s32 defaultDuration;
+    s32 area;
+    s32 value;
+
+    if (fldAreaState.area < 200) {
+        if (D_004360E8 == 0 && fldAreaState.area < 40) {
+            mode = 0;
+        }
+        defaultDuration = 15;
+        duration = 0;
+        if (mode != 0) {
+            duration = defaultDuration;
+        }
+        if (mode >= 2) {
+            duration = mode;
+        }
+        D_00436128 = index;
+        D_00436158 = index;
+        D_00436138 = 0;
+        if (fldAreaState.sceneCommand == 0) {
+            light = &((FldLightSet *)fldSkyLightSetBuffer)[index];
+            area = light->type;
+            D_00389988[13] = area;
+            D_00389988[14] = light->unk4;
+            value = light->fadeValue;
+            D_00389988[15] = value;
+            D_00389988[16] = light->swayMode;
+            fldSetFadeTarget(area, value, duration);
+            fldSetSwayMode(D_00389988[16]);
+            vec[0] = light->fixedVectorX * 0.00390625f;
+            vec[1] = light->fixedVectorY * 0.00390625f;
+            vec[2] = light->fixedVectorZ * 0.00390625f;
+            vec[3] = 0;
+            kwlnSetDrawColorTarget(duration, vec);
+            evtSetDrawVectorTarget(duration, light->unk1C, light->unk24, light->unk20, light->unk28);
+            dir[0] = light->lightDirectionAX;
+            dir[1] = light->lightDirectionAY;
+            dir[2] = light->lightDirectionAZ;
+            dir[3] = 0;
+            kwlnSetLightDirectionTarget(duration, 0, dir);
+            vec[0] = light->lightVectorAX;
+            vec[1] = light->lightVectorAY;
+            vec[2] = light->lightVectorAZ;
+            vec[3] = 0;
+            kwlnSetLightColorTarget(duration, 0, vec);
+            dir[0] = light->lightDirectionBX;
+            dir[1] = light->lightDirectionBY;
+            dir[2] = light->lightDirectionBZ;
+            dir[3] = 0;
+            kwlnSetLightDirectionTarget(duration, 1, dir);
+            vec[0] = light->lightVectorBX;
+            vec[1] = light->lightVectorBY;
+            vec[2] = light->lightVectorBZ;
+            vec[3] = 0;
+            kwlnSetLightColorTarget(duration, 1, vec);
+            dir[0] = light->lightDirectionCX;
+            dir[1] = light->lightDirectionCY;
+            dir[2] = light->lightDirectionCZ;
+            dir[3] = 0;
+            kwlnSetLightDirectionTarget(duration, 2, dir);
+            vec[0] = light->lightVectorCX;
+            vec[1] = light->lightVectorCY;
+            vec[2] = light->lightVectorCZ;
+            vec[3] = 0;
+            kwlnSetLightColorTarget(duration, 2, vec);
+            vec[0] = light->finalVectorX;
+            vec[1] = light->finalVectorY;
+            vec[2] = light->finalVectorZ;
+            vec[3] = 1.0f;
+            kwlnSetBackgroundColorTarget(duration, vec);
+            fldSetPlayerAndPeerLighting(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
+                          light->unitColorB[0], light->unitColorB[1], light->unitColorB[2],
+                          light->unitLightDirection[0], light->unitLightDirection[1],
+                          light->unitLightDirection[2]);
+        }
+    }
+}
+
+void fldApplyPendingSceneValueWithSpeed(s32 speed) {
+    if (D_004360E8 == 0 && D_00389780[0] < 40) {
+        speed = 0;
+    }
+    if (D_00436158 != 0 && D_00436128 != D_00436158) {
+        if (D_00389898[0] == 0) {
+            D_003899B4[0] = D_00436158;
+        }
+        func_00135A68(D_00436158, speed);
+    }
+}
+
+/*BEGIN func_00135D80*/
 void func_00135D80(s32 index, s32 mode) {
     FldLightSet *light;
     f32 vec[4];
