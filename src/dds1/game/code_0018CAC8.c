@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
 #include "eff_event_setup.h"
 #include "sdf_resource.h"
@@ -54,7 +55,6 @@ extern void *sdfAllocSizeClassBlock(s32 arg0);
 extern void sdfInitPacketList(s32 arg0);
 extern void *sdfConsMeasurePacketWithHeader(s32 arg0);
 extern s32 sdfConsAllocateColumnPacket(s32 arg0);
-extern void sdfAppendPacket(s32 arg0, s32 arg1);
 
 
 extern EffHandler32 D_00355730[];

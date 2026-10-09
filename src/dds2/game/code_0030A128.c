@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -286,7 +287,6 @@ void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
 extern SdfPoolNode kwlnDrawSurfaces[];
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void *func_0011F250();
 
 /* Build one positioned SIF command and submit it on the requested draw surface. */

@@ -1,4 +1,5 @@
 #include "fld_area_work.h"
+#include "sdf_packet_list.h"
 #include "common.h"
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
@@ -1276,7 +1277,6 @@ extern ItfFovPanelWork D_00452E70;
 extern s8 D_0037F543[];
 extern s32 sdfCreateResetPacketList(void);
 extern void *func_0011F250(s32, s32, s32, s32, s32, u32, u32);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern s32 itfStepFloatWithPad(f32 *, f32, f32, f32, f32);
 
 s32 func_001A8938(void) {
@@ -1397,7 +1397,6 @@ extern char D_00436680[];
 extern char D_00436688[];
 extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 sdfCreateResetPacketList(void);
-extern void sdfAppendPacket(SdfListHead *, u32);
 
 /* Draw the blur settings and handle selection, editing and cancellation. */
 s32 func_001A8BD0(void) {
@@ -1565,7 +1564,6 @@ extern s32 D_00438F3C;
 extern UiQuadColor D_003B4D80;
 extern f32 sdfSinPoly(f32);
 extern s32 sdfCreateResetPacketList(void);
-extern void sdfAppendPacket(SdfListHead *list, u32 packetAddress);
 extern u64 *func_001A9580(s32, s32, s32, s32, s32, u32, u32);
 
 void itfDrawPulsingTestOverlay(s32 surfaceIndex) {
