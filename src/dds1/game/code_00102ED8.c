@@ -1,3 +1,4 @@
+#include "sdf_scene_packet.h"
 #include "sdf_gs_scene_state.h"
 #include "common.h"
 #include "sdf_chip.h"
@@ -969,20 +970,10 @@ void evtResetDisplayProjectionAndVectorState(void) {
     evtEnsureDrawVectorState();
 }
 
-/* Scene-draw packet built by sdfBuildTextureScenePacket (0x170 bytes). */
-typedef struct KwlnTextureScenePacket {
-    SdfPacket header;
-    SdfGsDrawDefaultsRegisters drawDefaults;
-    SdfPacket contextOne[2];
-    SdfPacket contextTwo[2];
-    SdfGsCenteredBoundsRegisters centeredBounds;
-    SdfGsSceneBlendRegisters blendState;
-} KwlnTextureScenePacket;
-
 /* One 0x1F40-byte draw bank of the held-texture render target. */
 typedef struct KwlnTextureBank {
     SdfListHead list;
-    KwlnTextureScenePacket scene;
+    SdfSceneDrawPacket scene;
     ConsMatrixPacket matrix;
     SdfLightingPacketStorage lighting;
     u8 pad[0x1F40 - 0x260 - sizeof(SdfLightingPacketStorage)];
@@ -997,7 +988,6 @@ extern u32 D_003980F0[];
 extern SdfLightSources D_00324940;
 extern f32 D_00324950[4];
 extern u8 D_00329750[0x40];
-extern void sdfBuildTextureScenePacket(KwlnTextureScenePacket *, SdfGraphObj *, s32);
 
 /* Rebuild the held-texture render target's view and both frame banks. */
 void func_00105370(void) {
