@@ -299,7 +299,6 @@ void func_002357B8(s32 list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
 }
 
 extern SdfPoolNode kwlnPositionedTextSurface;
-extern s32 sdfCreateResetPacketList(void);
 typedef struct EvtPad {
     u8 pad00[0x20];
     s8 syncKey; /* 0x20 */
@@ -329,7 +328,7 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     f32 step;
 
-    list = sdfCreateResetPacketList();
+    list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 0x16, 9, 0, 1, (u8 *)ctx, evtAppendValueChangeDebugLabel, func_002357B8);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
     if (ctx->actionMode != 8) {
@@ -397,7 +396,7 @@ s32 evtUpdateValueChangeDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     s32 step;
 
-    list = sdfCreateResetPacketList();
+    list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 0x16, 9, 0, 1, (u8 *)ctx, evtDrawValueChangeNoticeRow, evtDrawValueChangeInstructionRow);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
     if (ctx->actionMode != 7) {
@@ -471,7 +470,7 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     s32 step;
 
-    list = sdfCreateResetPacketList();
+    list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 0x16, 0xB, 0, 1, (u8 *)ctx, mnuDrawFrameChangeLabel, evtViewerDrawFrameChangeRow);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
     if (ctx->actionMode != 6) {
@@ -576,7 +575,7 @@ extern void func_00237130();
 extern s32 kwlnStepTwoListCursors(s32, s32, s32, s32, s32, s32 *, s32 *, s32 *, s32 *);
 
 s32 mnuDrawInfoWindowA(s32 x, s32 y, EvtRuntime *work) {
-    u32 packets = sdfCreateResetPacketList();
+    u32 packets = (u32)sdfCreateResetPacketList();
     evtDrawMenuFrame(packets, x, y, 0xF, 0xB, 0, 0xB, (u8 *)work, 0, evtDrawProjectCommandRow);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)packets);
     if (work->actionMode != 1) {
@@ -615,7 +614,7 @@ void evtDrawSelectableTextRow(s32 list, s32 x, s32 y, s32 index, EvtRuntime *wor
 
 /* Draw a title-sized selection dialog; only action mode 2 advances its cursor. */
 s32 evtUpdateTextSelectionDialog(s32 x, s32 y, EvtRuntime *work) {
-    u32 packets = sdfCreateResetPacketList();
+    u32 packets = (u32)sdfCreateResetPacketList();
     s32 width = 10;
 
     if (work->title != 0) {
@@ -669,7 +668,7 @@ s32 func_00236828(s32 x, s32 y, EvtRuntime *ctx) {
     s32 length;
     s32 key;
 
-    list = sdfCreateResetPacketList();
+    list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 14, 6, 0, 4, (u8 *)ctx,
                      evtDrawInputValueRow, evtDrawKeyboardRow);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface,
@@ -763,7 +762,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 list;
     u32 num;
 
-    list = sdfCreateResetPacketList();
+    list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 0x12, 0xB, 0, 8, (u8 *)ctx, evtDrawEventFileNameRow, evtDrawEventCutSelectRow);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
     if (ctx->actionMode != 9) {
@@ -864,7 +863,7 @@ void evtDrawSelectedEntryLabel(s32 list, EvtRuntimeGroup *selected, s32 x,
 INCLUDE_ASM(const s32, "game/code_00235270", func_00237130);
 
 s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, EvtRuntime *work) {
-    u32 packets = sdfCreateResetPacketList();
+    u32 packets = (u32)sdfCreateResetPacketList();
     s32 count;
     s32 shown;
 
@@ -949,7 +948,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     if (D_00368768[group->type].columns == 0) {
         return -1;
     }
-    list = sdfCreateResetPacketList();
+    list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 28, 21, ctx->frameCursor,
                  group->childCount + 1, (u8 *)ctx, func_00237428, evtDrawFrameListRow);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
@@ -1027,7 +1026,7 @@ s32 func_00238A88(s32 x, s32 y, EvtRuntime *ctx) {
     s32 shown = 0x17;
     EffWorldNode *node;
 
-    list = sdfCreateResetPacketList();
+    list = (s32)sdfCreateResetPacketList();
     for (i = 0; i < 0x12; i++) {
         if (i != EVT_WORLD_SLOT_MOVIE) {
             for (node = ((EvtWorldTable *)dds3GetWorldObject()->data)->slots[i].head;
@@ -1084,7 +1083,7 @@ extern void evtViewerDrawPendingNodeRow();
 
 /* Draw the pending-node selector for group types 20/21; other types return -1. */
 s32 mnuDrawInfoWindowB(s32 x, s32 y, EvtRuntime *work) {
-    u32 packets = sdfCreateResetPacketList();
+    u32 packets = (u32)sdfCreateResetPacketList();
     s32 rows;
     switch (work->frameGroup->type) {
     case 20:
@@ -1202,7 +1201,7 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 delta;
     s32 handle;
 
-    list = sdfCreateResetPacketList();
+    list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 0x18, 0xA, 0, 1, (u8 *)ctx, mnuDrawMessageMenuLabel, evtDrawMessageDataRow);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
     if (ctx->actionMode != 0xD) {
@@ -1304,7 +1303,7 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
     s32 field;
     s32 delta;
 
-    list = sdfCreateResetPacketList();
+    list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame(list, x, y, 0x18, 0xA, 0, 1, (u8 *)ctx, mnuDrawCutFlagLabel, evtDrawComparisonValueRow);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
     if (ctx->actionMode != 0xE) {
@@ -1699,7 +1698,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
     s32 count;
     EvtMotionValue packed;
 
-    list = sdfCreateResetPacketList();
+    list = (s32)sdfCreateResetPacketList();
     model = (MdlCtx *)((EffectObjectData *)ctx->frameGroup->info->data)->modelHolder->resourceHandle;
     evtDrawMenuFrame(list, x, y, 0x14, 0xA, 0, 1, (u8 *)ctx, mnuDrawMotionChangeLabel, func_00239E30);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)list);
@@ -1834,7 +1833,7 @@ s32 func_0023A688(s32 x, s32 y, EvtRuntime *ctx) {
         }
     }
     count += 3;
-    packets = sdfCreateResetPacketList();
+    packets = (u32)sdfCreateResetPacketList();
     evtDrawMenuFrame(packets, x, y, 20, 15, ctx->groupFirst, count, (u8 *)ctx, NULL, evtDrawGroupListRow);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)packets);
     if (ctx->actionMode != 17) {
@@ -1926,7 +1925,7 @@ s32 func_0023B200(s32 x, s32 y, EvtRuntime *runtime) {
     s32 status = 0;
 
     group = runtime->frameGroup;
-    list = sdfCreateResetPacketList();
+    list = (s32)sdfCreateResetPacketList();
     evtDrawMenuFrame((u32)list, x + runtime->horizontalOffset + 0x60, y,
                      0xF, 6, 0, 1, (u8 *)runtime, NULL, func_0023B1F8);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface,
@@ -2125,7 +2124,7 @@ void evtDrawOptionalPromptText(s32 list, s32 x, s32 y, s32 kind, EvtRuntime *wor
 /* In mode 0x14, count down before checking input: zero expires, negative waits
  * indefinitely, and confirm takes precedence over cancel. */
 s32 mnuDrawTimedPrompt(s32 x, s32 y, EvtRuntime *work) {
-    u32 packets = sdfCreateResetPacketList();
+    u32 packets = (u32)sdfCreateResetPacketList();
     s32 count;
     evtDrawMenuFrame(packets, x, y, 0x19, 2, 0, 1, (u8 *)work, 0, evtDrawOptionalPromptText);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)packets);
@@ -2197,7 +2196,7 @@ s32 evtViewerDrawGroupWindow(s32 x, s32 y, EvtRuntime *ctx) {
         }
     }
     count += 2;
-    packets = sdfCreateResetPacketList();
+    packets = (u32)sdfCreateResetPacketList();
     evtDrawMenuFrame(packets, x, y, 20, 15, ctx->groupFirst, count, (u8 *)ctx, NULL, evtViewerDrawGroupRow);
     kwlnPositionedTextSurface.append((SdfListHead *)&kwlnPositionedTextSurface, (SdfListHead *)packets);
     if (ctx->actionMode != 21) {
@@ -2298,7 +2297,7 @@ s32 func_0023C248(EvtRuntime *runtime) {
     s32 color;
     s32 style;
 
-    packetList = sdfCreateResetPacketList();
+    packetList = (s32)sdfCreateResetPacketList();
     kwlnDrawSpriteCell((u32)packetList, 0x78, 0x138, 0xC, 9);
     key = evtEventViewerGetPendingNode(runtime);
 
@@ -2547,7 +2546,7 @@ s32 func_0023CA60(EvtRuntime *runtime) {
     s32 textY;
     s32 step;
 
-    packetList = sdfCreateResetPacketList();
+    packetList = (s32)sdfCreateResetPacketList();
     panelX = 0x138;
     kwlnDrawSpriteCell((u32)packetList, panelX, 0x30, 0xD, 0x10);
     key = evtEventViewerGetPendingNode(runtime)->payload;

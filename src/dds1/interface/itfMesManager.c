@@ -962,7 +962,6 @@ extern char D_003BB218[];
 extern char D_003BB220[];
 extern char D_003BB228[];
 extern SdfPoolNode kwlnPositionedTextSurface;
-extern s32 sdfCreateResetPacketList(void);
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 extern void kwlnDrawSpriteCell();
 extern ItfMesWindowRec *func_0019FA70(ItfMesWindowRec *window);
@@ -1047,7 +1046,7 @@ s32 itfMesRunPanelLayoutInspector(void) {
         }
     }
 
-    packetList = (SdfListHead *)sdfCreateResetPacketList();
+    packetList = sdfCreateResetPacketList();
     kwlnDrawSpriteCell(packetList, 0x10, 0x10, 0x1E, 9);
     menuItemFormat = D_003BB218;
     menuItemY = 0x7A00;
