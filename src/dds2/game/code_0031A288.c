@@ -28,7 +28,7 @@ void func_0031A288(MenuRuntimeRecord *record, MenuWorkEntry *entry, MnuShootingW
     origin = mnuGetResourceProgressParameters();
     originX = origin->x;
     originY = origin->y;
-    if ((entry->tag & 0xFFFF0000) == 0x01000000) {
+    if ((entry->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_MOVEMENT_TABLE) {
         if ((record->state.kind & 0xF) == 3) {
             if (func_003242D0(entry, 0) == 0) {
                 work->currentScore += 10000;
