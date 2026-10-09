@@ -6094,26 +6094,24 @@ u8 *effRecreateActiveByClass(u8 *obj) {
     return work;
 }
 
-void effResetModelBlockFrame(u8 *work) {
-    D_003E9E60[((EffClassWork *)work)->kind].initialize();
-    ((EffClassWork *)work)->frame = 0;
+void effResetModelBlockFrame(EffClassWork *work) {
+    D_003E9E60[work->kind].initialize();
+    work->frame = 0;
 }
 
-void effAdvanceModelBlockFrame(work)
-s32 *work;
-{
+void effAdvanceModelBlockFrame(EffClassWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        D_003E9E60[work[0x2C / 4]].update();
-        work[0x28 / 4]++;
+        D_003E9E60[work->kind].update();
+        work->frame++;
     }
 }
 
-void effDrawModelBlock(s32 work) {
-    D_003E9E60[((EffClassWork *)work)->kind].draw((void *)work);
+void effDrawModelBlock(EffClassWork *work) {
+    D_003E9E60[work->kind].draw((void *)work);
 }
 
-void effUpdateAndDrawModelBlock(u32 work) {
-    effAdvanceModelBlockFrame();
+void effUpdateAndDrawModelBlock(EffClassWork *work) {
+    effAdvanceModelBlockFrame(work);
     effDrawModelBlock(work);
 }
 
