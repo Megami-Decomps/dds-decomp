@@ -10,6 +10,7 @@
 #include "mdl_object_stream.h"
 #include "sdf_texture_offset_list.h"
 #include "sdf_texture_file.h"
+#include "sdf_texture_queue.h"
 
 extern s32 D_00439214;
 extern s32 iWakeupThread(s32 threadId);
@@ -1378,7 +1379,6 @@ void sdfAdvanceBufferedPlayback(SdfStreamFrameNode *node) {
     sdfDispatchNextStreamNode(0);
 }
 
-extern void sdfTexEnqueuePacketWithSemaphore(s32 address, void *packet);
 extern void sdfBuildStreamFrameTransferPackets(SdfStreamFrameNode *node);
 
 /* Return zero only when nothing is pending; otherwise call the zero-buffer handler if needed, queue and advance. */
@@ -1391,7 +1391,7 @@ s32 sdfSubmitBufferedPlayback(SdfStreamFrameNode *node) {
     if (*selectedBuffer == 0) {
         sdfBuildStreamFrameTransferPackets(node);
     }
-    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, (void *)(*selectedBuffer + node->transferPacketBytes - SDF_STREAM_QWORD_BYTES));
+    sdfTexEnqueuePacketWithSemaphore(*selectedBuffer, (SdfTextureDmaTail *)(*selectedBuffer + node->transferPacketBytes - SDF_STREAM_QWORD_BYTES));
     sdfAdvanceBufferedPlayback(node);
     return 1;
 }
