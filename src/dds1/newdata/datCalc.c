@@ -1258,7 +1258,20 @@ void dds3ForEachFlagged(void) {
     } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", ptySaveActiveUnitsToStock);
+/* Copy every occupied active-party record to its unit template slot. */
+void ptySaveActiveUnitsToStock(void) {
+    s32 slotIndex = 0;
+
+    do {
+        DatPartyRecord *entry = &datGameState->party[slotIndex];
+        u16 occupied = entry->flags & DAT_PARTY_FLAG_OCCUPIED;
+
+        if (occupied != 0) {
+            memcpy(&datGameState->templates[entry->unitId], entry, sizeof(DatPartyRecord));
+        }
+        slotIndex++;
+    } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
+}
 
 void evtRandomizeEntryValue(s32 entryAddress) {
     s32 randomOffset;

@@ -802,7 +802,24 @@ void func_00267B40(DatPartyRecord *entry, MenuProgressHost *host) {
     func_002B2C88((s32)window, 1, 1, 1);
 }
 
-INCLUDE_ASM(const s32, "game/code_002665B0", func_00267C48);
+void func_00267C48(MenuProgressHost *host) {
+    u32 index;
+
+    mnuClearEntries(&host->partyWindow);
+    mnuReleasePartyIconBundles(&host->partyWindow);
+    mnuDestroyPanelGroup(host->panelGroup);
+    mnuFreeSimpleSpriteWork(host->effectResource);
+    for (index = 0; index < 8; index++) {
+        if (effHasFirstTextureHandle(host->partyWindow.mainResources[index]) != 0) {
+            effReleaseTextureHandlesAndResetSlots(host->partyWindow.mainResources[index]);
+            effReleaseTextureHandlesAndResetSlots(host->partyWindow.mainResources[index + 8]);
+        }
+    }
+    for (index = 0; index < 5; index++) {
+        effReleaseTextureHandlesAndResetSlots(host->partyWindow.handlesC[index]);
+    }
+    mnuShutdownContext(&host->partyWindow);
+}
 
 /* Create/configure the profile-panel effect only when its retained handle is zero. */
 void mnuEnsureProfilePanelEffect(DatPartyRecord *selectionState, MenuProgressHost *host) {

@@ -1987,7 +1987,59 @@ u8 fldTestSceneControlFlags(u32 mask) {
     return (fldSceneControlFlags & mask) != 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00124040", func_001283B8);
+extern s32 fldProcDraw(KwlnTask *task);
+
+typedef struct FieldSceneCopyView {
+    u8 pad00[0x34];
+    u32 primaryState;    /* 0x34 */
+    u32 word38;
+    u32 word3C;
+    char name40[0x10];
+    u32 word50;
+    u32 word54;
+    u32 word58;
+    u32 word5C;
+    u16 half60;
+    u16 half62;
+    u32 word64;
+    u8 pad68[8];
+    char name70[0x10];
+    char name80[0x10];
+    u32 word90;
+} FieldSceneCopyView;
+
+extern s32 D_00435F84;
+extern char D_00412FD0[], D_00412FE0[];
+extern s32 fldProcDraw(KwlnTask *task);
+
+/* Start the field scene tasks; a zero mode copies the caller's sequence record into the scene work. */
+void func_001283B8(FieldSequenceRecord *record, u32 mode) {
+    FieldSequenceRecord *scene = (FieldSequenceRecord *)&D_0038A640;
+    FldSequenceController *controller = &fldSceneLifecycleFlags;
+
+    controller->stage = 0;
+    controller->flags = 0;
+    scene->unk_34 = mode;
+    if (mode == 0) {
+        scene->unk_3c = record->unk_3c;
+        scene->unk_38 = record->unk_38;
+        strcpy(scene->name, record->name);
+        scene->stage = record->stage;
+        scene->code = record->code;
+        scene->kind = record->kind;
+        scene->unk_62 = record->unk_62;
+        scene->enabled = record->enabled;
+        scene->mode = record->mode;
+        scene->link = record->link;
+        strcpy(scene->detail, record->detail);
+        strcpy(scene->note, record->note);
+        scene->options = record->options;
+    }
+    kwlnTaskCreate((s32)D_00412FD0, 0x3F7, 0, 0, (s32)func_001278D0, 0, 0);
+    kwlnTaskCreate((s32)D_00412FE0, 0x2B0A, 0, 0, (s32)fldProcDraw, 0, 0);
+    D_00435F84 = 1;
+    fldTestDrawCreate();
+}
 
 void fldReleaseCampSceneTasks(void) {
     if (D_00435F84 == 0) return;

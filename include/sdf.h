@@ -31,7 +31,7 @@ typedef struct SdfBattleParameters {
     SdfBattleMoneyRewardBand moneyRewardBands[10]; /* 0x924 */
     f32 rewardLevelScale[31 * 2]; /* 0x974: level difference and reward kind */
 #ifdef VERSION_DDS2
-    u8 padA6C[0x2C];
+    f32 gradeScale[11]; /* 0xA6C: grade -5..5, centre at 0xA80 */
     f32 solarScale[2][9]; /* 0xA98: row 0 for source flag 0x200, row 1 otherwise. */
     f32 partyEntryScaleA[7]; /* 0xAE0 */
     f32 enemyEntryScaleA[7]; /* 0xAFC */
@@ -169,7 +169,7 @@ typedef struct SdfStreamFrameNode {
     struct SdfStreamFrameNode *next;
     u8 active;
     u8 queued;
-    u8 unk0E;
+    u8 ipuCycleInitialized; /* First-use IPU setup has run for this playback cycle. */
     u8 drained;
     u8 playbackPhase;
     u8 inputFeedEnabled; /* Restart input feeding after DMA completion while input remains. */
@@ -215,6 +215,8 @@ typedef char SdfStreamFrameNode_dma_offset_must_be_0x68[
     ((u32)&((SdfStreamFrameNode *)0)->dma == 0x68) ? 1 : -1];
 typedef char SdfStreamFrameNode_playbackPhase_offset_must_be_0x10[
     ((u32)&((SdfStreamFrameNode *)0)->playbackPhase == 0x10) ? 1 : -1];
+typedef char SdfStreamFrameNode_ipuCycleInitialized_offset_must_be_0x0E[
+    ((u32)&((SdfStreamFrameNode *)0)->ipuCycleInitialized == 0x0E) ? 1 : -1];
 typedef char SdfStreamFrameNode_inputFeedEnabled_offset_must_be_0x11[
     ((u32)&((SdfStreamFrameNode *)0)->inputFeedEnabled == 0x11) ? 1 : -1];
 typedef char SdfStreamFrameNode_inputDmaStartPending_offset_must_be_0x12[

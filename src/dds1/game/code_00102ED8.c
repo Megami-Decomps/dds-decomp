@@ -456,7 +456,35 @@ void kwlnPadResetMotorLevelsAndOutput(void) {
     sdfDevConsSetEntryPair(0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "game/code_00102ED8", func_00104168);
+/* Tick both rumble countdowns; stop expired motors and refresh the active large motor. */
+void func_00104168(void) {
+    s32 largeMotor = KWLN_PAD_LARGE_MOTOR;
+    u8 *levels = kwlnPadMotorLevels;
+    u8 *targets = D_003BD698;
+    u8 *largeLevel;
+    s32 motor;
+
+    for (motor = 0; motor < KWLN_PAD_MOTOR_COUNT; motor++) {
+        if (D_003BD6A0[motor] != 0) {
+            /* The native countdown wraps as a 32-bit word, including negative durations. */
+            D_003BD6A0[motor] = (s32)((u32)D_003BD6A0[motor] - 1);
+            if (D_003BD6A0[motor] == 0) {
+                levels[motor] = 0;
+                if (motor == KWLN_PAD_SMALL_MOTOR) {
+                    sdfPadSetSmallMotor(0, 0);
+                } else {
+                    sdfPadSetLargeMotor(0, 0);
+                }
+            } else if (motor == largeMotor) {
+                largeLevel = levels + KWLN_PAD_LARGE_MOTOR;
+                if (*largeLevel != targets[KWLN_PAD_LARGE_MOTOR]) {
+                    kwlnPadStepLargeMotorLevel();
+                    sdfPadSetLargeMotor(0, *largeLevel);
+                }
+            }
+        }
+    }
+}
 
 u32 func_00104260(void) {
     return 0;

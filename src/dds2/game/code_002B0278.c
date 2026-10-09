@@ -218,14 +218,14 @@ typedef struct MenuContext {
     u8 pad00[8];
     MenuPopupState transitionWork; /* +0x08: native saved-entry transition state */
     s32 popupState[3];     /* 0x54: passed to the popup state handlers */
-    s32 displayHandle;     /* 0x60 */
+    struct EffectSlotSet *displayHandle;     /* 0x60 */
     s32 resourceHandle;    /* 0x64 */
     void *displayResource; /* 0x68 */
     s32 alternateResource; /* 0x6C: used when swapping the staff panel view */
     u8 pad70[0x40];
     s32 selectionResources[6];
     s32 labelHandle;       /* 0xC8 */
-    u32 panelModel;       /* 0xCC: model used by the panel resource slots */
+    struct EffectSlotSet *panelModel;       /* 0xCC: model used by the panel resource slots */
     u8 padD0[0x24];
     const void *partySelectionLayout; /* 0xF4: layout copied into the party window panel. */
     const void *skillCategoryLayout; /* 0xF8 */
@@ -949,7 +949,76 @@ extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void func_002C16F0(s32, s32, s32, DatPartyRecord *, s32, s32, s32);
 
 extern void func_002B2408(MenuContext *);
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B2408);
+extern void func_002B1EA8(MenuContext *, MenuPageBar *, MenuPageBar *, DatPartyRecord *, EffectSlotSet *, u32, u32, s32);
+
+/* Refresh the selected party member's effect pair and profile panel. */
+void func_002B2408(MenuContext *context) {
+    PartyMenuData *menu = (PartyMenuData *)context->party;
+    MenuList *list;
+    MenuListNode *node;
+    MenuProfilePanel *profilePanel;
+    DatPartyRecord *record;
+    EffectSlotSet *marker;
+    s32 selectionKey;
+    s32 statusIndex;
+    s32 found = 0;
+    u32 i;
+
+    node = menu->primaryWindow->list->cursor;
+    if (mnuIsFinalItemIndex(node->index, (s32)menu->primaryWindow->list)) {
+        selectionKey = menu->previousSelection;
+        mnuUpdateStaffFade(0, menu);
+    } else {
+        selectionKey = menu->primaryWindow->list->cursor->index;
+        menu->previousSelection = selectionKey;
+        mnuUpdateStaffFade(1, menu);
+    }
+
+    list = menu->primaryWindow->list;
+    node = list->first;
+    if (node != NULL) {
+        do {
+            if (node->index == selectionKey) {
+                if ((node->flags48 & 1) != 0) {
+                    found = 1;
+                }
+            }
+            node = node->next;
+        } while (node != NULL);
+    }
+
+    record = &menu->original[selectionKey];
+    statusIndex = mnuGetSelectionFromFlags(record);
+    if (statusIndex >= 0) {
+        marker = (EffectSlotSet *)context->selectionResources[statusIndex];
+    } else {
+        marker = NULL;
+    }
+    if (selectionKey < menu->selection) {
+        menu->panelSnapshots[selectionKey][0].holdEffectUpdate = 1;
+        menu->panelSnapshots[selectionKey][1].holdEffectUpdate = 1;
+        menu->panelSnapshots[selectionKey][0].activeEffect = context->partyWindow.slots[selectionKey].hp.activeEffect;
+        menu->panelSnapshots[selectionKey][1].activeEffect = context->partyWindow.slots[selectionKey].mp.activeEffect;
+    }
+    func_002B1EA8(context, &menu->panelSnapshots[selectionKey][0], &menu->panelSnapshots[selectionKey][1], record, marker,
+                  menu->fadeA, menu->fadeB, found);
+    profilePanel = mnuCreateProfilePanel(record);
+    if (menu->profileSaved != 0) {
+        profilePanel->phase = menu->profilePhase;
+        for (i = 0; i < 5; i++) {
+            profilePanel->randomOpacity[i] = menu->profileWords[i];
+        }
+    }
+    menu->profileSaved = 1;
+    profilePanel->opacity = menu->fadeA;
+    mnuSetGroupProperties(profilePanel, context->displayHandle, context->panelModel, 3, 4);
+    mnuDrawAndAdvanceProfilePanel(0x720, 0xC78, 0, profilePanel, 0x53);
+    menu->profilePhase = profilePanel->phase;
+    for (i = 0; i < 5; i++) {
+        menu->profileWords[i] = profilePanel->randomOpacity[i];
+    }
+    mnuFreeProfilePanelWork(profilePanel);
+}
 
 /* Update the final-row flag, draw the panel, and suppress its contents update
  * once the party transition has frozen it. */

@@ -1320,7 +1320,7 @@ void sdfIpuDmaCompletionWorker(void) {
         work->tickCount++;
         if (work->tickCount == work->cycleLength) {
             if (work->loopMode != 0) {
-                work->unk0E = 0;
+                work->ipuCycleInitialized = 0;
                 work->tickCount = 0;
                 work->unk65 = 0;
             } else {

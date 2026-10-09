@@ -2186,7 +2186,20 @@ void mnuBlendPanelSlots(s32 dst, s32 src, u32 amount) {
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_0027BF00", func_00281688);
+void func_00281688(s32 x, s32 y, s32 depth, MenuPageWindow *window, s32 index, EffectSlotSet **pair, s32 flag, s32 surface) {
+    s32 blendState = 1;
+    s32 alpha = window->transitionValue;
+    EffectSlotSet *resource;
+
+    if (func_00280A90(window, index) == blendState) {
+        mnuBlendPanelSlots((s32)pair[1], (s32)pair[0], window->fade);
+        resource = pair[1];
+    } else {
+        resource = pair[0];
+    }
+    func_002BF4E0(window->records->slots[index].unk8 != 5 ? x : x - 0xA0, y, depth,
+                  flag == 0 ? alpha : 0x100, 1, resource, 0, surface);
+}
 
 INCLUDE_ASM(const s32, "game/code_0027BF00", func_00281780);
 

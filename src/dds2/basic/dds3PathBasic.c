@@ -44,7 +44,7 @@ void dds3InterpolatePathVectorVU(Dds3PathCurveWork *path) {
     }
 }
 
-void dds3PreparePathVectorPair(Dds3PathCurveWork *arg) {
+void dds3InterpolatePathQuaternionVU(Dds3PathCurveWork *arg) {
     u32 idx;
     f32 frac;
     Dds3PathKeyframes *data;

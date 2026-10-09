@@ -40,7 +40,7 @@ s32 dds3UpdateMoverTransform(EffWorldNode *object)
             }
         }
         if (work->path->flags & DDS3_PATH_ROTATION_CHANNEL) {
-            dds3PreparePathVectorPair(work->path);
+            dds3InterpolatePathQuaternionVU(work->path);
             VU0_STORE_VF(vf10, pathVector);
             effObjSetInnerRotation(target, (u128 *)pathVector);
         }

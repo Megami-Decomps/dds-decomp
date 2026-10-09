@@ -3611,7 +3611,7 @@ void func_00259298(s32 output, s32 mode, EvtRuntime *runtime) {
             s32 i;
             u16 value;
 
-            value = (u16)child->interpolationMode;
+            value = (u16)child->serializedValue;
             record.groupType = group->type;
             record.start = child->frame;
             record.span = child->duration;
@@ -4113,8 +4113,8 @@ s32 func_0025A280(PolyMovieWork *work, EvtRuntime *runtime) {
                 mdlAddEntryPlainEx(evtGetWorldUnitNestedValue(objectId)->owner, 0, 0, 0.0f, 0.0f);
             }
             transform = group->info->inner;
-            PCP_COPY_VECTOR(group->savedFirstVector, transform->position);
-            PCP_COPY_VECTOR(group->savedSecondVector, transform->rotation);
+            PCP_COPY_VECTOR(group->savedPosition, transform->position);
+            PCP_COPY_VECTOR(group->savedRotation, transform->rotation);
         }
     }
     for (row = 0; row < (s32)work->unk_44; row++) {
@@ -4193,7 +4193,7 @@ s32 func_0025A280(PolyMovieWork *work, EvtRuntime *runtime) {
                     key = func_00246108(group, evtGetRowParameter((s32)work, row), runtime);
                     key->p08.b[0] = ((EvtViewParam *)evtGetRowPayloadAddress((s32)work, row))[0].b[0];
                     key->p0C.i = ((EvtViewParam *)evtGetRowPayloadAddress((s32)work, row))[1].i;
-                    key->interpolationMode = evtEventViewerAddName((char *)work->subEntry1Data +
+                    key->serializedValue = evtEventViewerAddName((char *)work->subEntry1Data +
                         evtGetRowVariant((s32)work, row) * 32, runtime);
                     if (key->p08.sb[0] == 7) {
                         nameIndex = ((EvtViewParam *)evtGetRowPayloadAddress((s32)work, row))[1].sh[0];
@@ -4227,7 +4227,7 @@ s32 func_0025A280(PolyMovieWork *work, EvtRuntime *runtime) {
                     key->p08.f = ((EvtViewParam *)evtGetRowPayloadAddress((s32)work, row))[0].f;
                     key->p0C.h[0] = ((EvtViewParam *)evtGetRowPayloadAddress((s32)work, row))[1].h[0];
                     key->p0C.h[1] = ((EvtViewParam *)evtGetRowPayloadAddress((s32)work, row))[1].h[1];
-                    key->interpolationMode = evtEventViewerAddName((char *)work->subEntry1Data +
+                    key->serializedValue = evtEventViewerAddName((char *)work->subEntry1Data +
                         evtGetRowVariant((s32)work, row) * 32, runtime);
                     dds3SetCameraFieldOfView(group->info, key->p08.f);
                 }
@@ -4330,7 +4330,7 @@ s32 func_0025A280(PolyMovieWork *work, EvtRuntime *runtime) {
                 } else {
                     key->duration = evtGetRowFlags((s32)work, row);
                 }
-                key->interpolationMode = evtGetRowVariant((s32)work, row);
+                key->serializedValue = evtGetRowVariant((s32)work, row);
                 if (work->sub->kind < 7) {
                     payload = key->payload;
                     memcpy(payload, work->subEntry13Data + evtGetRowFlags((s32)work, row) * 0x30, 0x30);
