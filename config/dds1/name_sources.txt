@@ -3332,6 +3332,7 @@
 0x001FC078	btlGetResourcePathVariant	inferred	Returns the second word of the descriptor's path record, the path variant at +0x04.
 0x001FC088	btlLoadAndReplaceResourceHandle	inferred	Loads a named temporary resource, replaces the descriptor's handle, then releases the temporary file buffer.
 0x001FC100	btlReplaceResourceHandle	inferred	Conditionally releases the old owned handle and replaces it with the handle loaded from the supplied resource name.
+0x001FC160	btlDrawResourcePreview	inferred	Paired native function builds and submits the resource preview panel from the descriptor texture.
 0x001FC300	btlUpdateResourceNameEditor	inferred	Updates keyboard selection and editable text, handles completion or cancellation, and draws the name editor from its record state.
 0x001FC720	btlSetResourceNamePosition	inferred	Sets the name-editor and overwrite-prompt origin at record offsets zero and four.
 0x001FC730	btlGetResourceNameSelectionStatus	inferred	Returns the current name-entry selection result without modifying the record.

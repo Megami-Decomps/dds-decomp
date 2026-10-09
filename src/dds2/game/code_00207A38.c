@@ -2940,7 +2940,6 @@ extern void *func_0011F250(s32, s32, s32, s32, s32, u32, u32);
 extern SdfTex *effGetBillResourceTexture(s32);
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *, char *);
 void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, const char *);
-extern void func_0020E1E0(BtlResourceDescriptor *);
 
 /* Update list selection and submit the visible browser rows to its surface. */
 s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
@@ -3062,7 +3061,7 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
                 descriptor->cachedEntry = selectedEntry;
             }
             if (descriptor->previewActive != 0) {
-                func_0020E1E0(descriptor);
+                btlDrawResourcePreview(descriptor);
             }
         }
     }
@@ -3192,7 +3191,7 @@ void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, void *textureRe
     descriptor->texture = sdfTexAcquireResourceTexture(textureResource);
 }
 
-INCLUDE_ASM(const s32, "game/code_00207A38", func_0020E1E0);
+INCLUDE_ASM(const s32, "game/code_00207A38", btlDrawResourcePreview);
 
 /* Allocate the native name record and initialize its header and extension. */
 struct BtlResourceNameRecord *btlCreateResourceNameRecord(const char *extension) {
