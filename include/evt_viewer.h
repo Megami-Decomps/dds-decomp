@@ -50,7 +50,7 @@ typedef struct EvtRuntimeGroup {
         struct { u8 metadataFlag; u8 pad05[3]; };
         s32 setterId;
     };
-    union { s32 word; u16 shortValue; } entryHeader;
+    s32 entryHeader; /* Signed runtime name-table index. */
     s32 argument0C;
     EffWorldNode *info;
     s32 argument14;
