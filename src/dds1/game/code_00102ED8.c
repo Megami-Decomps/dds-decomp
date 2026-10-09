@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
 #include "kwln.h"
 #include "sdf.h"
@@ -480,9 +481,6 @@ void kwlnDebugGraphSetEnabled(s8 mode) {
     }
 }
 
-extern void sdfAppendTexturedLinePacket(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 x1,
-                                        s32 y1, s32 u1, s32 v1, s32 depth, s32 (*alloc)(s32));
-
 /* Scale the longer preview side to at most 256 texels, preserving division
  * before coordinate scaling; UV endpoints at 1024 texels are reduced by one. */
 void kwlnDrawImageOutline(s32 packetList, SdfTex *image) {
@@ -509,7 +507,7 @@ void kwlnDrawImageOutline(s32 packetList, SdfTex *image) {
     if (height == KWLN_PREVIEW_WRAP_TEXELS) {
         height--;
     }
-    sdfAppendTexturedLinePacket(packetList, 0x80808080, 0, 0x7180, 0x7A60, 0, 0, drawWidth + 0x7180, drawHeight + 0x7A60,
+    sdfAppendTexturedLinePacket((SdfListHead *)packetList, 0x80808080, 0, 0x7180, 0x7A60, 0, 0, drawWidth + 0x7180, drawHeight + 0x7A60,
                                 width * 0x10, height * 0x10, KWLN_DIAG_DEPTH, 0);
 }
 
@@ -667,8 +665,6 @@ s32 (*kwlnTextureFindIncompleteResource(void))(void) {
     }
     return kwlnLoadDefaultResource;
 }
-
-extern void sdfAppendFillRectanglePacket(SdfListHead *, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 
 /* Draw one allocation-map block in address units, choosing color by mode.
  * Only the initial partial row forces a nonzero remainder to occupy one cell;

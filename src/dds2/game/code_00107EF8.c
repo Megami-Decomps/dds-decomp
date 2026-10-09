@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
 #include "fr_font.h"
@@ -1412,9 +1413,6 @@ void evtToggleDebugTimeGraphTask(s8 mode) {
 }
 
 extern u32 D_00435D4C;
-extern void sdfAppendFillRectanglePacket(SdfListHead *, s32, s32, s32, s32,
-                                         s32, s32, s32, s32 (*)(s32));
-
 /* Render an allocation span as partial rows and complete heap-map rows. */
 void sdfDrawHeapSpanOverlay(SdfListHead *packetList, s32 x, s32 y,
                    u32 heapBase, u32 address, s32 remainingBytes, u8 kind) {
