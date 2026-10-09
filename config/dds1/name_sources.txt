@@ -7360,3 +7360,4 @@
 0x002DC668	sdfMotionCapturePrimaryWordFirst	inferred	Captures the bound target word at offset 0x10 into the indexed binding.
 0x002DC7C8	sdfMotionCapturePrimaryWordThird	inferred	Captures the bound target word at offset 0x20 into the indexed binding.
 0x002DC928	sdfMotionCapturePrimaryWordFourth	inferred	Captures the bound target word at offset 0x28 into the indexed binding.
+0x002DA5B0	sdfSetAssetSecondaryColor	inferred	Stores the packed secondary color at SdfAsset +0x18 and marks secondary draw state dirty.
