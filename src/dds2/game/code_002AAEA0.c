@@ -219,7 +219,23 @@ s32 mnuPollCampFieldSkillAndPopup(KwlnTask *callback) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_002AAEA0", func_002AB448);
+s32 func_002AB448(KwlnTask *task) {
+    CampVisualWork *context = (CampVisualWork *)kwlnTaskGetUserValue(task);
+    s32 state;
+    s32 layer = 0x53;
+
+    func_002AAE80(task);
+    state = mnuInitializeCampMenuWhenResourcesReady(task);
+    if (state == 0) {
+        return state;
+    }
+    mnuCreateStaffImageSprite(0);
+    func_002AA9D8(0, context->skillFlagRoot->list->cursor->sortKeyPrimary, (u32)D_003E69B0, (u32)context,
+                  1, 0, (u32)D_003E6F18, 8, layer);
+    mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0, &context->transition, layer);
+    mnuDrawStaffGridLabelsForKind(0, (struct EffectSlotSet *)(u32)context->drawContext);
+    return menuSetHandler((void *)context, 1, (void *)task);
+}
 
 s32 mnuFinishFieldSkillPopup(KwlnTask *callback) {
     s32 context;
