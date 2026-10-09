@@ -20,6 +20,7 @@
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
 #include "mdl.h"
+#include "mdl_resource_entries.h"
 #include "mdl_asset_request.h"
 #include "mdl_resource_table.h"
 #include "evt_unit.h"
@@ -755,7 +756,6 @@ void mdlEnableAllEntries(MdlCtx *ctx) {
 
 extern Motion *motionOwnerCreateObjectForRecord(MdlCtx *, s32);
 extern void mdlRemoveResourceSubtype(MdlCtx *, s32);
-extern void mdlApplyResourceEntries(MdlCtx *, s32, s32);
 
 /* Select the first matching searchId, or create it, and make it current in its
  * signed slot index. Allocation success/slot bounds are assumed. Slot zero
