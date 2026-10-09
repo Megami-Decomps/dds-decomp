@@ -1054,7 +1054,36 @@ FieldStageCoordinate *fldFindStageCoordinateRecord(s32 x, s32 y) {
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00121A58);
+extern void fldGetSceneEntryPosition(s32 index, f32 *x, f32 *z);
+
+/* Convert a scene-relative offset to a signed bitmap byte, row and bit. */
+s32 func_00121A58(s32 scene, s32 floor, f32 xOffset, f32 zOffset,
+                  s32 *byteOut, s32 *rowOut, s32 *bitOut) {
+    f32 entryX;
+    f32 entryZ;
+    FieldStageCoordinate *record;
+    s32 cellX;
+    s32 row;
+    s32 byte;
+    s32 bit;
+
+    fldGetSceneEntryPosition(scene, &entryX, &entryZ);
+    record = fldFindStageCoordinateRecord(D_0032E3C0[0], floor);
+    if (record == NULL) {
+        return 0;
+    }
+    cellX = (s32)(xOffset + entryX - record->originX) / record->cellSize;
+    row = -((s32)(zOffset + entryZ - record->originZ) / record->cellSize);
+    bit = cellX % 8;
+    byte = cellX / 8;
+    *byteOut = byte;
+    *rowOut = row;
+    *bitOut = bit;
+    if (byte >= 0 && row >= 0 && byte < record->cols && row < record->rows) {
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_00121B88);
 
