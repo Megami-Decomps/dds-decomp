@@ -290,7 +290,7 @@ void mnuReleaseResourceGroupTextureHandles(u32 address) {
 extern u32 itfCreateConvertedTextGlyph(s32, s32, s32, u32, const u8 *, s32);
 typedef struct FrFontGlyph FrFontGlyph;
 extern u32 func_0019F6C8(s32, s32, s32, u32, char *, s32);
-extern void frFontSetChainFlag(FrFontGlyph *, u8);
+extern void frFontSetChildChainFirstOption(FrFontGlyph *, u8);
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern u32 mnuGetPanelRatioColor(s32, s32, s32);
 extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
@@ -458,7 +458,7 @@ void func_00267238(s32 x, s32 y, s32 unused, MenuList *list, MenuListNode *node,
     color = mnuBlendListNodeColorByFlags(color, node);
     color = uiBlendColors(color, color & ~0xFF, width);
     glyph = (FrFontGlyph *)itfCreateConvertedTextGlyph(x + 0xF0, y, 0, color, (const u8 *)node->title, 0);
-    frFontSetChainFlag(glyph, chainFlags);
+    frFontSetChildChainFirstOption(glyph, chainFlags);
     frFontDrawGlyphChain(glyph, 1, priority);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
 }

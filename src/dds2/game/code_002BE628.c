@@ -1198,7 +1198,7 @@ void mnuFreePanelItemWork(MenuPanelItem *item) {
 INCLUDE_ASM(const s32, "game/code_002BE628", func_002C2AE8);
 
 extern void func_002C2AE8(s32, s32, s32, u32, s32, MenuPanelItem *, u32);
-extern void frFontSetChainFlag(FrFontGlyph *, u8);
+extern void frFontSetChildChainFirstOption(FrFontGlyph *, u8);
 
 void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
                   MenuPanelItem *item, u32 flags) {
@@ -1245,7 +1245,7 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
     color = uiBlendColors(0xA09DC380, 0xA09DC300, fade);
     func_0035C860(text, D_00437C88, value);
     glyph = func_0019F5E8(x + 0x2D0, y, depth, color, text, 0);
-    frFontSetChainFlag(glyph, fontFlags);
+    frFontSetChildChainFirstOption(glyph, fontFlags);
     frFontDrawGlyphChain(glyph, 1, flags);
     frFontQueueGlyphForCurrentDrawBuffer(glyph);
     item->phase += 24;

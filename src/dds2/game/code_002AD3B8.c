@@ -41,7 +41,7 @@ extern s32 func_002BDA50();
 extern s32 func_002BDA78();
 extern s32 func_0035C860(char *, const char *, ...);
 extern s32 func_0019F5E8(s32, s32, s32, s32, s32, s32);
-extern void frFontSetChainFlag(struct FrFontGlyph *, u8);
+extern void frFontSetChildChainFirstOption(struct FrFontGlyph *, u8);
 typedef struct FrFontGlyph FrFontGlyph;
 extern s32 frFontDrawGlyphChain(FrFontGlyph *, s8, u32);
 extern s32 evtGetIndexedEventRecordId(s32);
@@ -623,7 +623,7 @@ void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
     if (entryId != 0) {
         func_0035C860(captionText, D_00437BD0, datCommandRecords[evtGetIndexedEventRecordId(entryId)].hpPower);
         fontHandle = func_0019F5E8(0x620, 0xA20, 0, 0xA09DC380, (s32)captionText, 0);
-        frFontSetChainFlag((struct FrFontGlyph *)(u32)fontHandle, 4);
+        frFontSetChildChainFirstOption((struct FrFontGlyph *)(u32)fontHandle, 4);
         frFontDrawGlyphChain((FrFontGlyph *)fontHandle, 1, 0x53);
         frFontQueueGlyphForCurrentDrawBuffer((FrFontGlyph *)fontHandle);
     }
