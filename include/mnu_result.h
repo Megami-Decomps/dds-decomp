@@ -116,8 +116,8 @@ typedef struct BrsProgressAnimation {
     u8 pad4D[3];
     u32 iconOpacity;
     u32 unk54;
-    s32 iconX; /* 0x58 */
-    s32 iconY; /* 0x5C */
+    s32 unk58; /* Initialized to 290; no reading role established. */
+    s32 unk5C; /* Initialized to 21; no reading role established. */
     s8 progressInitialized;
     u8 pad61[3];
     s32 previousProgress;
