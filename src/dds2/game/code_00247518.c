@@ -337,7 +337,7 @@ void func_00248B80(s32 time, EvtRuntime *viewer) {
                                 object == dds3FindIndexedObjectChainNodeByName(dds3GetWorldObject(),
                                     EVT_WORLD_SLOT_UNIT, viewer->entryName[key->p08.sh[0]])) {
                                 if (selectedTime < key->frame + node->metadataValue) {
-                                    selectedValue = node->transitionValue;
+                                    selectedValue = (s32)node->info;
                                     selectedTime = key->frame + node->metadataValue;
                                     selected = key;
                                 }
@@ -478,8 +478,8 @@ void func_00248D70(EvtRuntimeGroup *track, s32 time) {
             break;
         }
     }
-    evtPolygonMovieSetObjectMode(track->movie, objectMode, 0, 0);
-    evtPolygonMovieSetObjectMode(track->movie, unitMode, setFlags, clearFlags);
+    evtPolygonMovieSetObjectMode((struct PolyMovieObject *)track->info, objectMode, 0, 0);
+    evtPolygonMovieSetObjectMode((struct PolyMovieObject *)track->info, unitMode, setFlags, clearFlags);
 }
 
 INCLUDE_ASM(const s32, "game/code_00247518", func_00249088);
@@ -541,7 +541,7 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
                     do {
                         node = viewer->groups;
                         while (node != NULL) {
-                            if (node->handle != 0 && (void *)object == dds3GetSlot((EffWorldNode *)node->handle, 1)) {
+                            if (node->info != NULL && (void *)object == dds3GetSlot(node->info, 1)) {
                                 if (node->type == 2) {
                                     time = 0;
                                     if (node->childCount != 0) {
@@ -702,7 +702,7 @@ void evtViewerSyncWorldGroups(u32 position, EvtRuntime *viewer) {
         while (list != 0) {
             found = 0;
             for (node = viewer->groups; node != 0; node = node->next) {
-                if (node->handle == (u32)list) {
+                if (node->info == (EffWorldNode *)list) {
                     found = node;
                     break;
                 }
@@ -1097,7 +1097,7 @@ void func_0024A738(s32 mode, u32 frame, EvtRuntime *viewer) {
         track = viewer->groups;
         found = NULL;
         while (track != NULL) {
-            if (track->handle == (u32)object) {
+            if (track->info == object) {
                 found = track;
                 break;
             }

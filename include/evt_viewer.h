@@ -16,10 +16,7 @@ typedef union EvtViewParam {
 typedef struct EvtRuntimeChild {
     u16 frame;
     u16 duration; /* Also the consecutive index in type-0xB groups. */
-    union {
-        s32 interpolationMode;
-        struct { u16 value04; u16 reserved06; };
-    };
+    s32 interpolationMode;
     union {
         s8 parameterBytes[0x20];
         union {
@@ -53,14 +50,9 @@ typedef struct EvtRuntimeGroup {
         struct { u8 metadataFlag; u8 pad05[3]; };
         s32 setterId;
     };
-    union { s32 word; u16 shortValue; } entryHeader;
+    s32 entryHeader; /* Signed runtime name-table index. */
     s32 argument0C;
-    union {
-        EffWorldNode *info;
-        s32 transitionValue;
-        u32 handle;
-        struct PolyMovieObject *movie;
-    };
+    EffWorldNode *info;
     s32 argument14;
     u8 pad18[4];
     s16 metadataValue;
