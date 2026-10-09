@@ -397,12 +397,6 @@ extern u32 effFlashTextureHandles;
 
 extern u32 effModelUpdateControlFlags;
 
-extern void *fileResolvePrimaryBuffer();
-
-extern void *fileResolveSecondaryBuffer(FileJobPayload *);
-
-
-
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 
 extern void sdfBuildLightingPacket(void *, SdfLightSources, void *);
@@ -1294,7 +1288,7 @@ EffKindWork *effAllocateKindWork(u16 kind, u8 *source) {
 extern s32 *effCreateResourceHolderFromSelectedKind(s32 *, u16);
 
 EffKindWork *func_002DFDB8(FileJob *work) {
-    void *source = fileResolvePrimaryBuffer(work);
+    void *source = fileResolvePrimaryBuffer((FileJobPayload *)work);
     EffKindWork *effect = effAllocateKindWork(work->option, source);
     s32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
 
@@ -1392,7 +1386,7 @@ EffKindWork *effAllocateAlternateKindWork(u16 kind, u8 *source) {
 
 /* Create alternate-kind work from a primary file payload and a supported secondary asset. */
 EffKindWork *effCreateAlternateKindWorkFromFile(FileJob *work) {
-    void *source = fileResolvePrimaryBuffer(work);
+    void *source = fileResolvePrimaryBuffer((FileJobPayload *)work);
     EffKindWork *effect = effAllocateAlternateKindWork(work->option, source);
     s32 *secondary = fileResolveSecondaryBuffer((FileJobPayload *)work);
 
@@ -1525,7 +1519,7 @@ u8 *effCreateBillboardWork(u8 *source) {
     if (source == NULL) {
         return work;
     }
-    memcpy(work + 0x2C, fileResolvePrimaryBuffer(source),
+    memcpy(work + 0x2C, fileResolvePrimaryBuffer((FileJobPayload *)source),
            ((FileJob *)source)->slots[0].size);
     ((EffBillboardWork *)work)->billboard =
         billCreateIndexed(1, (u32)fileResolveSecondaryBuffer((FileJobPayload *)source));
@@ -2507,7 +2501,7 @@ u8 *effCreateFileResourceInstance(u8 *work) {
         secondary = NULL;
         break;
     }
-    source = fileResolvePrimaryBuffer(work);
+    source = fileResolvePrimaryBuffer((FileJobPayload *)work);
     return (u8 *)effCreateResourceInstanceA(((FileJob *)work)->option, source, (u32)secondary);
 }
 
@@ -4904,7 +4898,7 @@ EffectStripNode *effCreateStripNodeFromGrid(u8 *source) {
 extern void effReplaceFileResourceRef(EffectStripNode *, u32, void *);
 
 EffectStripNode *effFileResourceReferenceReplace(FileJob *work) {
-    u8 *primary = fileResolvePrimaryBuffer(work);
+    u8 *primary = fileResolvePrimaryBuffer((FileJobPayload *)work);
     u8 *source = primary + 0x20;
     EffectStripNode *node = effCreateStripNodeFromGrid(source);
 
@@ -5532,7 +5526,7 @@ u8 *effCreateFileResourceInstanceB(u8 *work) {
         secondary = NULL;
         break;
     }
-    source = fileResolvePrimaryBuffer(work);
+    source = fileResolvePrimaryBuffer((FileJobPayload *)work);
     return (u8 *)effCreateResourceInstanceB(((FileJob *)work)->option, source, (u32)secondary);
 }
 
@@ -6410,7 +6404,7 @@ EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, v
 }
 
 u32 effCreateModelResourceFromFile(u8 *work) {
-    void *first = fileResolvePrimaryBuffer(work);
+    void *first = fileResolvePrimaryBuffer((FileJobPayload *)work);
     void *second = fileResolveSecondaryBuffer((FileJobPayload *)work);
     return (u32)effCreateModelResourceWithInlineData(((FileJob *)work)->option, first, second, ((FileJob *)work)->slots[1].size);
 }
@@ -8776,7 +8770,7 @@ s32 effLoadFileJobPayload(EffFileJobRequest *descriptor, s32 source) {
     if (source != 0) {
         void *sourceBuffer;
         job = fileJobCreateFromCommandState(source);
-        sourceBuffer = fileResolvePrimaryBuffer((void *)job);
+        sourceBuffer = fileResolvePrimaryBuffer((FileJobPayload *)job);
         memcpy(descriptor->output, sourceBuffer, descriptor->size);
     } else {
         job = fileCreateJob(descriptor->fileKind);
@@ -10567,7 +10561,7 @@ u32 fileLoadEffectSlotA(void) {
         effQueuedFileHandle = ((FileJob *)entry)->id;
         resource = (u8 *)effFindAssetData(entry);
         strcpy(((FileJob *)entry)->name, ((EffFileJobRequest *)resource)->name);
-        fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
+        fileData = fileResolvePrimaryBuffer((FileJobPayload *)effQueuedFileHandle);
         memcpy(((EffFileJobRequest *)resource)->output, fileData,
                ((EffFileJobRequest *)resource)->size);
         D_004386BC = effQueueEffectFileJob(resource);
@@ -10688,7 +10682,7 @@ u32 effPollAndQueueCopiedFileResource(void) {
         effQueuedFileHandle = entry->id;
         resource = (EffFileJobRequest *)effFindAssetData(entry);
         strcpy(entry->name, resource->name);
-        fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
+        fileData = fileResolvePrimaryBuffer((FileJobPayload *)effQueuedFileHandle);
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
@@ -10746,7 +10740,7 @@ u32 effLoadFileSlotF2(void) {
         effQueuedFileHandle = entry->id;
         resource = (EffFileJobRequest *)effFindAssetData(entry);
         strcpy(entry->name, resource->name);
-        fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
+        fileData = fileResolvePrimaryBuffer((FileJobPayload *)effQueuedFileHandle);
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
@@ -10788,7 +10782,7 @@ u32 effLoadMaterialFile(void) {
         effQueuedFileHandle = entry->id;
         resource = (EffFileJobRequest *)effFindAssetData(entry);
         strcpy(entry->name, resource->name);
-        fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
+        fileData = fileResolvePrimaryBuffer((FileJobPayload *)effQueuedFileHandle);
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
@@ -10836,7 +10830,7 @@ u32 effPollAndQueueFileResourceWithUnitFloats(void) {
         effQueuedFileHandle = entry->id;
         resource = (EffFileJobRequest *)effFindAssetData(entry);
         strcpy(entry->name, resource->name);
-        fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
+        fileData = fileResolvePrimaryBuffer((FileJobPayload *)effQueuedFileHandle);
         memcpy(resource->output, fileData, resource->size);
         D_004386BC = effQueueEffectFileJob(resource);
         effQueuedFileObject = effFindAssetObject(entry);
