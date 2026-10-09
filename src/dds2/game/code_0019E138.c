@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
 #include "kwln.h"
@@ -42,7 +43,6 @@ extern s32 sdfConsCalculateDrawPacketSize(s32, s32);
 extern s32 sdfAllocPacketAligned(s32);
 extern void *sdfConsInitPacketHeader(SdfDrawPacket *, s32, s32, s64, s32);
 extern s32 sdfConsMeasurePacketWithHeader(s32);
-extern void sdfAppendPacket(SdfListHead *, u32);
 
 extern s32 D_00435E6C;
 extern s32 D_00435E70;

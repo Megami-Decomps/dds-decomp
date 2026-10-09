@@ -1277,7 +1277,6 @@ extern u32 effGetWindTextureHandle(void);
 extern void func_002D4C80(const void *, void *, s32);
 extern void func_002D4CC8(const void *, void *, s32);
 extern void sdfAppendDmaTagToList(s32, void *);
-extern void sdfAppendPacket(void *, s32);
 extern u32 btlMulColor(u32, u32);
 extern void func_00211D40(s32, s32, u32, s32, f32, f32, f32);
 

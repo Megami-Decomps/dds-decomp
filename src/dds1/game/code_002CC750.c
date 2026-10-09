@@ -1,4 +1,5 @@
 #include "dsp_name.h"
+#include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -1270,7 +1271,6 @@ void func_002CEC40(SdfFlagListWork *work) {
 extern SdfPoolNode *D_00398098[];
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void *func_002EF2B0(const f32 (*)[4], const u32 *, s32, u32);
 
 /* Copy vertex pairs, optionally add the view target, and submit the packet list.

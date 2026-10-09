@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "kwln_sprite.h"
 #include "dds3Admin.h"
 #include "sdf_linked_packet.h"
@@ -225,7 +226,6 @@ extern void sdfBuildLightingPacket(void *, SdfLightSources, f32 *);
 extern s32 sdfCreateResetPacketList(void);
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfConsBuildFrustumPacket(struct ConsFrustumPacket *, ConsFrustumParams *);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void sdfAppendPacketChainNode(SdfPacketChain *, SdfLinkedPacketList *);
 typedef struct SdfMsg {
     s32 firstWord, work, thirdWord, fourthWord;

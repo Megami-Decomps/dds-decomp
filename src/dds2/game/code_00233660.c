@@ -1,4 +1,5 @@
 #include "kwln.h"
+#include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
 #include "bill_object_api.h"
@@ -212,7 +213,6 @@ s32 mdlBuildViewerRectanglePacket(s32, s32, s32, s32, s32);
 
 extern s32 D_00453610[];
 
-void sdfAppendPacket(SdfListHead *, u32);
 
 extern f32 D_00453620[4] __attribute__((aligned(16)));
 

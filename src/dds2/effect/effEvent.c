@@ -1,4 +1,5 @@
 #include "bill_object_api.h"
+#include "sdf_packet_list.h"
 #include "common.h"
 #include "eff_param.h"
 #include "sdf_resource.h"
@@ -252,7 +253,6 @@ extern SdfPoolNode kwlnPositionedTextSurface;
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfInitPacketList(SdfListHead *);
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
-extern void sdfAppendPacket(SdfListHead *, u32);
 extern void *func_0011F250(s32, s32, s32, s32, s32, s32, s32);
 extern void sdfProjectVuVectorToScreen();
 

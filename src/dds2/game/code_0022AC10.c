@@ -329,7 +329,6 @@ extern s32 sdfAllocPacketAligned(s32);
 
 extern void sdfInitPacketList(void *);
 
-extern void sdfAppendPacket(void *, s32);
 
 extern void *sdfCreateFormattedSifCommand(s32, s32, s32, s32, const char *, ...);
 
