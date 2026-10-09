@@ -46,7 +46,6 @@ extern SdfTex *sdfTexAcquireResourceTexture(void *);
 extern s32 dds3AdminGetActiveMode(void);
 extern void dds3AdminSetControlFlag(void);
 extern void func_003003F0(const char *);
-extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 
 extern u32 itfFontTestScriptTask;
 extern u32 D_003BB18C;

@@ -5666,8 +5666,6 @@ extern u8 D_00436800;
 
 extern u8 btlResourceBlockLoaded;
 
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
-
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415B80);
 
 INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_00415BA0);

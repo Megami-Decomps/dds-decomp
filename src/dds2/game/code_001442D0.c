@@ -159,7 +159,6 @@ extern char D_00413F20[];
 
 extern void fldFormatAreaDirectory(char *, s32, s32);
 
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern SdfTex *D_0044F7F0[];
 extern void sdfTexReleaseReferenceViaHandler(SdfTex *);

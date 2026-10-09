@@ -38,7 +38,6 @@ extern s32 func_0026CD50(u32);
 
 extern s32 evtGetMessageWindowControlState(void);
 
-extern struct SdfMemBlock *sdfReadNamedResource(const char *name, u32 *outAddress, u32 *outSize);
 
 extern s32 dspWindowHandle;
 

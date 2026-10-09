@@ -59,7 +59,6 @@ extern u32 D_003BD61C;
 extern DevRequest *sndBuildResourceHandleListFromOffsets(const void *);
 extern SdfTex *sdfTexAcquireResourceTexture(void *);
 
-extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 
 extern u32 sdfSoundCommandStatus;
 
@@ -121,7 +120,6 @@ extern s32 D_003BDA9C;
 extern s32 D_003BDAA0;
 extern void func_002CF7B8(s32);
 extern s32 func_0030B5D0(s32);
-extern SdfMemBlock *sdfDevReadResourceWithExtraSpace(const char *, u32 *, u32 *, s32);
 
 extern DevRequest *sdfCreateConfiguredBufferedResourceList(u32);
 

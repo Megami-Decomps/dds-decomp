@@ -76,7 +76,6 @@ extern s32 sdfCreateMaskedCounterChannels(s32, s32);
 extern s32 func_0030B880(s32);
 extern void sdfInitializeMapCounterSelection(s32, s32);
 extern void func_0030E880(void);
-extern SdfMemBlock *sdfReadNamedResource(const char *, u32 *, u32 *);
 extern void evtCreateMessageWindowIfMissing(s32);
 extern void evtSetSolarOverlayFullyVisible(void);
 extern void fldApplyLightSetIndex(s32);
