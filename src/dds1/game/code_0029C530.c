@@ -5976,15 +5976,22 @@ typedef struct EffSpanConfig {
     u8 pad4C[4];
     SdfColorTrack referenceColorTrack;
     SdfAlphaTrack referenceAlphaTrack;
-    u8 pad84[4];
+    s32 referenceLifetime;
     u8 drawReferences;
-    u8 pad89[0x17];
+    u8 allowMultipleReferenceStarts;
+    u8 pad8A[2];
+    s32 geometryStartUpdateCount;
+    u32 referenceColorA;
+    u32 referenceColorB;
+    f32 positionScaleA;
+    f32 positionScaleB;
     f32 firstRand;
     f32 secondBase;
     f32 rangeRand;
-    u32 unkAC;
+    s32 referenceRampDuration;
     u32 perSpan;
-    u8 padB4[8];
+    f32 rotationAngularVelocity;
+    f32 rotationAngularAcceleration;
     u8 pointSetFlag;
 } EffSpanConfig;
 
@@ -6051,8 +6058,8 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
     }
     partialSpan = total % config->perSpan != 0;
     spans = partialSpan + total / config->perSpan;
-    if (config->unkAC == 0) {
-        config->unkAC = 1;
+    if (config->referenceRampDuration == 0) {
+        config->referenceRampDuration = 1;
     }
     allocation = sdfAllocGeneralBlock(sizeof(EffSpanTable) +
                  count * sizeof(EffSpanRecord) + count * spans * sizeof(EffSpanEntry));
