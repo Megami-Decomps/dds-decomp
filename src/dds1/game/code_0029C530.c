@@ -4424,7 +4424,7 @@ void effDestroyClassResourceWork(EffClassWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-EffClassWork *effPayloadPointerGet(EffClassWork *work) {
+EffClassWork *effCloneClassResourceWork(EffClassWork *work) {
     return effCreateClassResourceWork((u16)work->kind, work->payload);
 }
 

@@ -4747,7 +4747,7 @@ void effDestroyClassResourceWork(EffClassWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-EffClassWork *effPayloadPointerGet(EffClassWork *work) {
+EffClassWork *effCloneClassResourceWork(EffClassWork *work) {
     return effCreateClassResourceWork((u16)work->kind, work->payload);
 }
 
@@ -7462,7 +7462,7 @@ u32 *func_002F7A00(u32 owner) {
 u32 *effCreatePayloadPointerWorkFromRequest(u8 *request) {
     u32 *source = (u32 *)((EffActiveResource *)request)->resource;
     u32 *work = effAllocateClassResourceSlot((u32)((EffActiveResource *)request)->payload);
-    *work = (u32)effPayloadPointerGet((EffClassWork *)*source);
+    *work = (u32)effCloneClassResourceWork((EffClassWork *)*source);
     return work;
 }
 
@@ -7689,7 +7689,7 @@ EffModelBindings *effCreateModelEffectWorkFromPayload(u8 *request) {
     EffClassWork *material;
     MdlCtx *modelSource;
 
-    material = effPayloadPointerGet(source->material);
+    material = effCloneClassResourceWork(source->material);
     modelSource = source->model;
     work->material = material;
     a = mdlGetContextResourceGroup(modelSource);
