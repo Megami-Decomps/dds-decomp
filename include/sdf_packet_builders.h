@@ -34,6 +34,10 @@ void sdfAppendTexturedLinePacket(
 void sdfAppendFillRectanglePacket(
     SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right,
     s32 bottom, s32 depth, s32 (*allocatePacket)(s32));
+void sdfCreatePacketA(
+    SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right,
+    s32 bottom, s32 depth, s32 (*allocatePacket)(s32));
+
 void sdfAppendClosedRectanglePacket(
     SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right,
     s32 bottom, s32 depth, s32 (*allocatePacket)(s32));

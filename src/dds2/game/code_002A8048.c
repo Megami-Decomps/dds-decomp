@@ -52,7 +52,6 @@ extern u16 D_00438FF0;
 extern SdfPoolNode D_003805A8;
 extern SdfPoolNode D_00380708;
 extern char D_0042A428[];
-extern void sdfCreatePacketA(SdfListHead *, s32, s32, s32, s32, s32, s32, s32, s32 (*)(s32));
 
 extern s32 mnuMovieViewer(void);
 extern void mnuStartMovieDrawTaskForResource(const char *, SdfMovieDescriptor *);
