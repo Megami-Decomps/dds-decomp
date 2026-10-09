@@ -158,36 +158,36 @@ typedef struct BattleMirroredSpriteRecord {
 typedef struct BattleActorPanelPresentation {
     s16 fade;
     u8 pad02[2];
-    s8 presentationState;
-    s8 presentationValue;
-    u8 pad06[2];
-    s32 unk08; /* Reserve initializer clears this word. */
-    s32 unk0C; /* Reserve initializer sets this word to 180. */
-    s32 transitionGeometry[4];
-    u8 transitionFade[2];
-    u8 pad22[2];
-    s32 pulseDirection[2];
-    s32 pulseTimer[2];
-    s32 pulseOffsets[2][2];
-    s16 pulseLevel[2];
-    u32 highlightPhase[8];
-    u8 highlightLevel[8];
-    s8 transitionState;
-    s8 secondaryPresentationValue;
-    u8 pad72[0xA];
-    s32 secondaryGeometry[4];
-    u8 secondaryFade[2];
-    u8 pad8E[2];
-    s32 secondaryPulseDirection[2];
-    s32 secondaryPulseTimer[2];
-    s32 secondaryPulseOffsets[2][2];
-    s16 secondaryPulseLevel[2];
-    union {
-        u8 padB4[0x28];
-        struct {
-            u32 trianglePhase[8];
-            u8 triangleAlpha[8];
-        };
+    /* The primary (0x04) and secondary (0x70) channels share one 0x6C-byte
+     * layout; each is a nested record. */
+    struct {
+        s8 presentationState;
+        s8 presentationValue;
+        u8 pad06[2];
+        s32 unk08[2]; /* Reserve initializer sets 0 and 180. */
+        s32 transitionGeometry[4];
+        u8 transitionFade[2];
+        u8 pad22[2];
+        s32 pulseDirection[2];
+        s32 pulseTimer[2];
+        s32 pulseOffsets[2][2];
+        s16 pulseLevel[2];
+        u32 highlightPhase[8];
+        u8 highlightLevel[8];
+    };
+    struct {
+        s8 transitionState;
+        s8 secondaryPresentationValue;
+        u8 pad72[0xA];
+        s32 secondaryGeometry[4];
+        u8 secondaryFade[2];
+        u8 pad8E[2];
+        s32 secondaryPulseDirection[2];
+        s32 secondaryPulseTimer[2];
+        s32 secondaryPulseOffsets[2][2];
+        s16 secondaryPulseLevel[2];
+        u32 trianglePhase[8];
+        u8 triangleAlpha[8];
     };
     struct {
         s8 pendingSceneState;
