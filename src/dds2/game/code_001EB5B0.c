@@ -5947,7 +5947,7 @@ void sndLoadMotSeFiles(u32 *sound) {
 }
 
 /* Find the newest registered owner with both keys equal; return null if absent. */
-void *sndFindListNodeForChannel(s32 category, s32 id) {
+SoundSlotOwner *sndFindListNodeForChannel(s32 category, s32 id) {
     SoundSlotOwner *node = ((BtlState *)btlGetRuntime())->soundSlotOwners;
     while (node != 0) {
         if (node->category == category && node->id == id) {
