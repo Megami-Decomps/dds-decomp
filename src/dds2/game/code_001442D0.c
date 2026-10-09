@@ -4097,6 +4097,24 @@ void fldFinishEventFieldState(void) {
     }
 }
 
+struct EffectObj;
+extern struct FileRequest *D_004363A0;
+extern u32 D_004363A4;
+extern u32 D_004363A8;
+extern void func_0026C900(void);
+extern s32 evtGetMessageWindowControlState(void);
+extern s8 evtGetCapturedWindowPanelValue(void);
+extern void *func_00115500(void *, void *, void *);
+extern void effObjClearFlags(struct EffectObj *, u32);
+extern void effObjSetFlags(struct EffectObj *, u32);
+extern void effObjReplaceActiveEventNode(struct EffectObj *, u32);
+extern void func_002A2200(s32);
+extern s32 mnuPollTitleStreamStateLocked(void);
+extern void kwlnFadeInStart(s32, s32, s32, s32);
+extern void kwlnFadeOutStart(s32, s32, s32, s32);
+extern void func_00130FF0(u32, u32);
+extern void func_00150138(void);
+extern void mnuResetTitleStreamAfterFileIdle(void);
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413DE8);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413DF8);
@@ -4105,7 +4123,153 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413E48);
 
 INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413E98);
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00150A60);
+void func_00150A60(void) {
+    f32 position[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    f32 rotation[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    s32 choice;
+    void *node;
+
+    switch (fldSparkControlState.dialogPhase) {
+    case 12:
+        func_0026C900();
+        if (evtGetMessageWindowControlState() == 0) {
+            evtFinishMessageWindowAndNotify();
+            dspCloseChannel();
+            fldSparkControlState.dialogPhase = 11;
+            fldAreaState.transitionMode = 0;
+            evtSetSolarOverlayFullyVisible();
+        }
+        break;
+    case 1:
+        func_0026C900();
+        if (evtGetMessageWindowControlState() == 0) {
+            choice = evtGetCapturedWindowPanelValue();
+            if (choice == 0) {
+                evtFinishMessageWindowAndNotify();
+                dspCloseChannel();
+                fldSparkControlState.dialogPhase = 5;
+                fldSparkControlState.unk30 = 0;
+            } else if (choice == 1) {
+                evtFinishMessageWindowAndNotify();
+                dspCloseChannel();
+                fldSparkControlState.dialogPhase = 11;
+                fldAreaState.transitionMode = 0;
+                evtSetSolarOverlayFullyVisible();
+            } else {
+                evtFinishMessageWindowAndNotify();
+                dspCloseChannel();
+                fldSparkControlState.dialogPhase = 4;
+                fldSparkControlState.unk30 = 0;
+                evtCreateMessageWindowIfMissing(D_003A9EB0);
+                dspStartEntry(3);
+                evtStoreValueAndCaptureWindowPanelValue(2);
+                evtSetMessageWindowOptionWhenOpen(0);
+            }
+        }
+        break;
+    case 4:
+        func_0026C900();
+        if (evtGetMessageWindowControlState() == 0) {
+            evtFinishMessageWindowAndNotify();
+            dspCloseChannel();
+            fldSparkControlState.dialogPhase = 1;
+            fldSparkControlState.unk30 = 0;
+        }
+        break;
+    case 5:
+        dds3WorkClear();
+        fldReleaseCurrentBgm();
+        D_004363A0 = fileQueueDefaultCallbackRequest("/fld/f/bin/DVILIZE.BED");
+        fldSparkControlState.dialogPhase = 6;
+        fldSparkControlState.unk30 = 0;
+        break;
+    case 6:
+        if (fileIsRequestReadyInCurrentMode(D_004363A0) != 0) {
+            D_004363A8 = fileGetLoadedDataAddress(D_004363A0);
+            D_004363A4 = fileGetResourceHandle(D_004363A0);
+            position[0] = fldAreaState.x;
+            position[1] = fldAreaState.y;
+            position[2] = fldAreaState.z;
+            node = func_00115500((void *)D_004363A8, position, rotation);
+            fldSparkControlState.object = node;
+            effObjClearFlags(node, 1);
+            filePollEntryCleanup(D_004363A0);
+            fldAddCameraModelEntry(0xD);
+            D_003899E0[0] = 1;
+            fldResetArchiveLoadPhase();
+            fldSparkControlState.unk30 = 0;
+            fldSparkControlState.dialogPhase = 2;
+        }
+        break;
+    case 2:
+        if (fldSparkControlState.unk30 == 20) {
+            effObjSetFlags(fldSparkControlState.object, 1);
+            effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
+        }
+        fldSparkControlState.unk30++;
+        if (fldStepArchiveLoad() != 0) {
+            func_002A2200(0x12);
+            fldSparkControlState.dialogPhase = 3;
+        }
+        break;
+    case 3:
+        if (fldSparkControlState.unk30 == 20) {
+            effObjSetFlags(fldSparkControlState.object, 1);
+            effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
+        }
+        fldSparkControlState.unk30++;
+        if (mnuPollTitleStreamStateLocked() == 2) {
+            sndSetSequenceVolumePan(0x680010, 0x7F, 0x3F);
+            fldSparkControlState.dialogPhase = 8;
+        }
+        break;
+    case 8:
+        if (fldSparkControlState.unk30 == 46) {
+            kwlnFadeInStart(0xFF, 0xFF, 0xFF, 4);
+        }
+        if (fldSparkControlState.unk30 == 20) {
+            effObjSetFlags(fldSparkControlState.object, 1);
+            effObjReplaceActiveEventNode(fldSparkControlState.object, 0);
+        }
+        if (++fldSparkControlState.unk30 > 50) {
+            fldSparkControlState.unk30 = 0;
+            fldSparkControlState.dialogPhase = 9;
+        }
+        break;
+    case 9:
+        func_0014F5F0();
+        fldLoadWeatherEffects();
+        func_00125B10();
+        func_00130FF0(0x66, 0);
+        fldSparkControlState.unk30 = 0;
+        fldSparkControlState.dialogPhase = 10;
+        evtSetSolarOverlayFullyTransparent();
+        kwlnFadeOutStart(0xFF, 0xFF, 0xFF, 4);
+        break;
+    case 10:
+        func_00150138();
+        if (++fldSparkControlState.unk30 > 10) {
+            effObjClearFlags(fldSparkControlState.object, 1);
+            dds3RemoveWorldObjectNode(fldSparkControlState.object);
+            sdfQueueGeneralAllocationRelease((struct SdfMemBlock *)D_004363A4);
+            fldSparkControlState.unk30 = 0;
+            fldSparkControlState.dialogPhase = 7;
+            mnuResetTitleStreamAfterFileIdle();
+        }
+        break;
+    case 7:
+        func_00150138();
+        fldSparkControlState.dialogPhase = 0;
+        fldSparkControlState.phase = 1;
+        fldPreparePlayerSceneCameraTarget();
+        break;
+    case 11:
+        fldSparkControlState.phase = 1;
+        fldSparkControlState.dialogPhase = 0;
+        fldPreparePlayerSceneCameraTarget();
+        break;
+    }
+}
 
 
 s32 func_00150F10(void) {

@@ -5483,3 +5483,17 @@ DDS2's slot setter takes three filename pointers: its battle callers pass
 the `.data` strings `human/pc001_00.PB` and `human/pc001_01.PB`.
 DDS1's `func_00218BE8`, like DDS2's `func_00233700`, receives the allocated
 chip-cell pointer directly and forwards it to `sdfReleaseChipBlock`.
+
+## Scene AI sprite angles and scale-call boundaries
+
+`SceneAiWork.panelAngleDegrees[4]` owns the four floats at `+0x30`;
+the `0xA4` allocation and later members are unchanged in both games.
+The paired renderers copy one angle to `BdWork.geometry.angleDegrees`
+for each panel draw, then reset the resource angle to zero.
+
+The paired scene scale routines receive an `EffectSlotSet *`, slot index,
+two integer output pointers and an `f32` percentage. The first float
+argument is passed in `f12`; declaring that fifth formal as an integer
+loses the native ABI. The routines update the canonical sprite bounds
+and write the signed half-size adjustments to the two outputs.
+
