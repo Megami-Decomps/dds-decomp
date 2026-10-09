@@ -659,9 +659,9 @@ void func_0022F038(s32 position, EvtRuntime *viewer) {
             if (best == NULL) {
                 if (node->objectAttached == 1) {
                     effObjSetInnerPosition(node->info,
-                        (u128 *)node->savedFirstVector);
+                        (u128 *)node->savedPosition);
                     effObjSetInnerRotation(node->info,
-                        (u128 *)node->savedSecondVector);
+                        (u128 *)node->savedRotation);
                     effObjFetchInnerPosition(node->info);
                     VU0_STORE_VF(vf10, &node->info->inner->smoothedPosition);
                     node->objectAttached = 0;
@@ -671,9 +671,9 @@ void func_0022F038(s32 position, EvtRuntime *viewer) {
 
                 if (channel == -1) {
                     effObjSetInnerPosition(node->info,
-                        (u128 *)node->savedFirstVector);
+                        (u128 *)node->savedPosition);
                     effObjSetInnerRotation(node->info,
-                        (u128 *)node->savedSecondVector);
+                        (u128 *)node->savedRotation);
                     effObjFetchInnerPosition(node->info);
                     VU0_STORE_VF(vf10, &node->info->inner->smoothedPosition);
                     node->objectAttached = 0;

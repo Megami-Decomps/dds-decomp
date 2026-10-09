@@ -4058,8 +4058,8 @@ s32 func_0023EF90(PolyMovieWork *work, EvtRuntime *runtime) {
                 }
                 {
                     ObjectTransform *transform = group->info->inner;
-                    PCP_COPY_VECTOR(group->savedFirstVector, transform->position);
-                    PCP_COPY_VECTOR(group->savedSecondVector, transform->rotation);
+                    PCP_COPY_VECTOR(group->savedPosition, transform->position);
+                    PCP_COPY_VECTOR(group->savedRotation, transform->rotation);
                 }
             }
         }
