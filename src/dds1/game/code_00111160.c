@@ -19,7 +19,7 @@ EffWorldNode *evtSpawnActionObj2(s32 firstValue, s32 secondValue) {
     EffWorldNode *obj = dds3AppendWorldObjectNode(2);
 
     obj->key = firstValue;
-    obj->value = secondValue;
+    obj->value = (const char *)secondValue;
     return obj;
 }
 

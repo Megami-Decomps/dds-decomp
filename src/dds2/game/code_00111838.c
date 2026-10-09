@@ -32,7 +32,7 @@ EffWorldNode *dds3SpawnSlotRingObj3(EffWorldNode *owner) {
     resource->target = owner;
     slotIndex = dds3SlotRingCursor;
     object->key = sequence;
-    object->value = (u32)&dds3SlotRingEntries[slotIndex];
+    object->value = (const char *)&dds3SlotRingEntries[slotIndex];
     dds3SlotRingCursor = slotIndex + 1;
     dds3SlotRingCursor = dds3SlotRingCursor % DDS3_SLOT_RING_ENTRY_COUNT;
     return object;

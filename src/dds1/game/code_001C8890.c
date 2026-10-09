@@ -6915,7 +6915,7 @@ void func_001DC0E8(void) {
         data->fovUpdatePending |= 1;
     }
     camera = dds3CreateCameraObject(dds3AdvanceWorldCounter(), D_00359E80, D_00359E90);
-    camera->value = D_003BB660;
+    camera->value = (const char *)D_003BB660;
     effObjSetInnerFloat(camera, 10.0f);
     dds3EnsureSlotData(camera);
     func_001127A0(camera, 0);
