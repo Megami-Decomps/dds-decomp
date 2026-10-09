@@ -19,6 +19,6 @@ void itfMesSetWindowCallbackAddress(s32 window, void (*callback)(void));
 void itfMesFinishWindowAndClearStatus(s32 window);
 
 struct SdfTex;
-struct SdfTex *itfMesGetGlobalWindowValue(void);
+struct SdfTex *itfMesGetWindowTexture(void);
 
 #endif /* ITF_MES_WINDOW_H */

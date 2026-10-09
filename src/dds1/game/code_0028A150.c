@@ -600,7 +600,7 @@ void fileDrawPulsingSaveHighlight(void) {
     D_0037D4D0[3] = (s32)((wave + 1.0f) * 0.5f * 191.0f + 64.0f);
     func_00108FA0(0x1BE, 0x12C, 0x13, 0x1F, 1, 1, 0x13, 0x1F, (D_0037D4D0[3] << 24) | 0xAEC014,
                   (D_0037D4D0[3] << 24) | 0xAEC014, (D_0037D4D0[3] << 24) | 0xAEC014,
-                  (D_0037D4D0[3] << 24) | 0xAEC014, itfMesGetGlobalWindowValue());
+                  (D_0037D4D0[3] << 24) | 0xAEC014, itfMesGetWindowTexture());
 }
 
 extern void evtSetDrawSurfaceIndex(s32);
