@@ -345,14 +345,6 @@ void func_00318570(MnuShootingWork *work) {
 
 INCLUDE_ASM(const s32, "game/code_00316E08", func_00318660);
 
-typedef struct MenuRuntimeList {
-    MenuRuntimeRecord *records;
-    s32 capacity;
-    u32 activeCount;
-    u32 unk0C;
-} MenuRuntimeList;
-
-
 extern u32 mnuGetWorkEntryPool(void);
 extern void mnuVisitActiveWorkAndEffectEntry(s32 context);
 extern MenuRuntimeList *func_00321ED8(void);
@@ -376,13 +368,6 @@ extern void itfDispatchObjectFadeSequenceMode(MnuShootingWork *work);
 extern void func_0031B080(MnuShootingWork *work);
 extern MnuModelNode *D_00438928;
 extern struct SdfPoolNode *D_00380788[13][4];
-
-typedef char MenuRuntimeListLayoutAssert[
-    (sizeof(MenuRuntimeList) == 0x10 &&
-     (unsigned long)&((MenuRuntimeList *)0)->records == 0 &&
-     (unsigned long)&((MenuRuntimeList *)0)->capacity == 4 &&
-     (unsigned long)&((MenuRuntimeList *)0)->activeCount == 8 &&
-     (unsigned long)&((MenuRuntimeList *)0)->unk0C == 0xC) ? 1 : -1];
 
 s32 func_00318C00(MnuShootingWork *work) {
     MenuProgressParameters *origin = mnuGetResourceProgressParameters();

@@ -143,6 +143,14 @@ typedef struct MenuRuntimeRecord {
     s16 remaining;
 } MenuRuntimeRecord;
 
+/* Static owners for runtime-record arrays supplied by the menu setup path. */
+typedef struct MenuRuntimeList {
+    MenuRuntimeRecord *records;
+    s32 capacity;
+    u32 activeCount;
+    u32 unk0C;
+} MenuRuntimeList;
+
 typedef char MenuWorkLayoutAssert[(sizeof(MenuWorkControl)==4 && sizeof(MenuWorkFlags)==4 && sizeof(MenuWorkEntry)==0x48 &&
     (unsigned long)&((MenuWorkEntry*)0)->control==0 &&
     (unsigned long)&((MenuWorkEntry*)0)->tag==4 &&
@@ -184,6 +192,11 @@ typedef char MenuRuntimeLayoutAssert[(sizeof(MenuRuntimeRecord)==0x24 && sizeof(
     (unsigned long)&((MenuRuntimeRecord*)0)->displacementY==0x1C &&
     (unsigned long)&((MenuRuntimeRecord*)0)->speed==0x20 &&
     (unsigned long)&((MenuRuntimeRecord*)0)->remaining==0x22)?1:-1];
+typedef char MenuRuntimeListLayoutAssert[(sizeof(MenuRuntimeList)==0x10 &&
+    (unsigned long)&((MenuRuntimeList*)0)->records==0 &&
+    (unsigned long)&((MenuRuntimeList*)0)->capacity==4 &&
+    (unsigned long)&((MenuRuntimeList*)0)->activeCount==8 &&
+    (unsigned long)&((MenuRuntimeList*)0)->unk0C==0xC)?1:-1];
 
 typedef void (*MenuWorkCallback)(MenuWorkEntry *, struct MnuShootingWork *);
 typedef void (*MenuRuntimeCallback)(MenuRuntimeRecord *);
