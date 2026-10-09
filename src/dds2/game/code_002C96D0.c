@@ -4569,18 +4569,18 @@ void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, const char *comman
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", func_002D3B48);
 
-void fileWriteToPfs(s32 data, s32 slotIndex) {
+void fileWriteToPfs(FileJobPayload *job, const char *filePath) {
     char path[0xD0];
     s32 fd;
 
     if (sdfPfsDebugMode != 0) {
-        func_0035C860(path, D_00437E10, slotIndex);
+        func_0035C860(path, D_00437E10, filePath);
         fd = func_00369B70(path, 0x602, 0x1B6);
     } else {
-        func_0035C860(path, D_00437E18, sdfDevGetPathBuffer(), slotIndex);
+        func_0035C860(path, D_00437E18, sdfDevGetPathBuffer(), filePath);
         fd = func_00369B70(path, 0x602);
     }
-    func_002D3B48(fd, (FileJobPayload *)data);
+    func_002D3B48(fd, job);
     func_00369DF8(fd);
     func_0036BCD0(D_00437E20, 0);
 }

@@ -8862,7 +8862,6 @@ extern char D_004386D0[];
 
 extern char D_004386D8[];
 
-extern void fileWriteToPfs(u32, char *);
 
 extern s32 func_0035C860(char *, char *, ...);
 

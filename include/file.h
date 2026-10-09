@@ -62,6 +62,7 @@ FileJobPayload *fileDuplicateJob(FileJobPayload *request);
 FileJobPayload *fileJobCreateFromCommandState(const char *entry);
 FileJobPayload *fileCreateJob(u16 type);
 void fileJobDestroy(FileJobPayload *job);
+void fileWriteToPfs(FileJobPayload *job, const char *filePath);
 void fileJobSetPrimaryData(FileJobPayload *job, const void *src, s32 size, u16 option);
 void fileJobSetSecondaryData(FileJobPayload *job, const void *src, s32 size, u16 selector);
 void fileJobCopyCommandIntoPrimaryData(FileJobPayload *job, const char *commandPath, u16 option);
