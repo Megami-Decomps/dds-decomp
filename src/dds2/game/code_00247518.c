@@ -307,8 +307,7 @@ void func_00247DE0(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 unused2, s3
 INCLUDE_ASM(const s32, "game/code_00247518", func_00247EE0);
 INCLUDE_ASM(const s32, "game/code_00247518", func_00248000);
 
-extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *);
-extern void evtSetUnitValueTransition(EvtUnit *, EffWorldNode *, s32);
+
 extern void evtEndUnitValueTransition(EvtUnit *, s32);
 
 /* At time, selects each named unit's latest kind-9 transition key and starts,

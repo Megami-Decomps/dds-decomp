@@ -3951,10 +3951,9 @@ void fldBeginSelectedValueTransition(u32 value) {
 }
 
 extern char D_003A0138[];
-extern EvtUnit *evtUnitGetNestedValue(EffWorldNode *object);
-extern void evtSetUnitStatusFlags(EvtUnit *unit);
+
+
 extern void evtInitializeUnitColorTransition(EvtUnit *unit, s32 index, u32 colorA, u32 colorB);
-extern void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 index);
 
 /* Alternate the selected value at the requested rate, and apply live lighting edits. */
 void func_00132BD0(void) {

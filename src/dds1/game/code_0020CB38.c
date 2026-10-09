@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "evt_unit.h"
 #include "btl_task_condition.h"
 #include "btl_state.h"
 #include "btl_command.h"
@@ -128,7 +129,6 @@ typedef char BtlUnitScaleTransitionLayout[
      (u32)&((BtlUnitScaleTransition *)0)->range == 0x10) ? 1 : -1];
 
 extern f32 btlGetUnitModelValue1C(BtlUnit *);
-extern void evtSetUnitAlphaTransition(struct EvtUnit *, s32, u32);
 
 void func_0020D168(BtlUnit *unit) {
     BtlState *battle = (BtlState *)btlGetRuntime();

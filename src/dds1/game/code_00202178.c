@@ -2970,8 +2970,6 @@ void btlDestroyActiveMemberSlot(void) {
     }
 }
 
-extern void evtSetUnitAlphaTransition(EvtUnit *, s32, s32);
-
 void btlStepFocusAngle(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     u32 *slot;
