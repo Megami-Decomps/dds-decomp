@@ -7155,10 +7155,10 @@ EffActiveResource *effCreateResourceInstance(u16 kind, void *source, void *secon
     return effect;
 }
 
-EffActiveResource *effCreateActiveResourceFromFile(u8 *work) {
-    void *first = fileResolvePrimaryBuffer((FileJobPayload *)work);
-    void *second = fileResolveSecondaryBuffer((FileJobPayload *)work);
-    return effCreateResourceInstance(((FileJob *)work)->option, first, second, ((FileJob *)work)->slots[1].size);
+EffActiveResource *effCreateActiveResourceFromFile(FileJobPayload *request) {
+    void *first = fileResolvePrimaryBuffer(request);
+    void *second = fileResolveSecondaryBuffer(request);
+    return effCreateResourceInstance(request->option, first, second, request->secondary.size);
 }
 
 void effDestroyResourceInstance(EffActiveResource *work) {
