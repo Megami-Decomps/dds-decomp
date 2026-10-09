@@ -532,7 +532,6 @@ extern void fileQueueSetScale(FileQueue *queue, f32 scale);
 
 extern void func_002D49B8(FileQueue *queue, u32 color);
 
-extern void fileJobCopyHeader(FileJob *dst, FileJob *src);
 extern FileJob *fileQueueFindById(FileQueue *queue, u32 id);
 extern s32 fileFindQueuedJobIndex(FileQueue *queue, FileJob *target);
 
@@ -5051,7 +5050,6 @@ FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *src) {
 
 extern FileJob *fileQueueFindBySector(FileQueue *queue, u32 sector);
 extern FileJob *fileQueueFindFlaggedById(FileQueue *queue, u32 id);
-extern void fileQueueLinkJobToSectorLeader(FileQueue *queue, FileJob *job, FileJob *ref);
 
 /* Makes the first job chained to owner's sector the leader and rechains the rest to it. */
 static inline void fileQueueRechainSectorFollowers(FileQueue *queue, FileJob *owner, FileJob *leader) {

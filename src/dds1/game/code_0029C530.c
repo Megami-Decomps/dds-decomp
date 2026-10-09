@@ -7969,7 +7969,6 @@ u32 effReinitializeFileQueue(void) {
 extern u32 D_0038EB3C[];
 
 
-extern void fileQueueRemoveAndDestroyJob(FileQueue *queue, FileJob *job);
 
 u32 effResetFileQueueState(void) {
     fileQueueRemoveAndDestroyJob(effFileQueue, fileQueueGetAt(effFileQueue, func_002B5990()));
@@ -7982,9 +7981,7 @@ u32 effResetFileQueueState(void) {
 
 extern u32 D_0038EAD4[];
 
-extern FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *src);
 
-extern void fileJobCopyHeader(void *, void *);
 
 u32 effFinalizeQueuedFile(void) {
     s32 index = func_002B5990();
@@ -8916,9 +8913,7 @@ void func_002BB748(s32 work) {
     func_002BB188((s32)((BaObj *)work)->x0C + 0x60, ((EffMappingObject *)((BaObj *)work)->x0C)->value74 + 1);
 }
 
-extern void fileQueueDetachSectorFollower(FileQueue *queue, FileJob *job);
 
-extern void fileQueueLinkJobToSectorLeader(FileQueue *queue, FileJob *job, FileJob *leader);
 
 /* Poll record from the resource-bank queue; count is negated to find its entry. */
 typedef struct EffBankStatus {
