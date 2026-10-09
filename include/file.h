@@ -146,6 +146,11 @@ typedef char FileQueue_first_offset_must_be_0x8C[
 FileQueue *fileQueueCreate(void);
 FileQueue *fileQueueCreateFromCommandState(const char *entry);
 FileJob *fileQueueGetAt(FileQueue *queue, s32 index);
+FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *source);
+void fileJobCopyHeader(FileJob *destination, FileJob *source);
+void fileQueueRemoveAndDestroyJob(FileQueue *queue, FileJob *job);
+void fileQueueDetachSectorFollower(FileQueue *queue, FileJob *job);
+void fileQueueLinkJobToSectorLeader(FileQueue *queue, FileJob *job, FileJob *leader);
 
 /* One of the four device-read slots at FileManWork + 0x20. */
 typedef struct FileManSlot {

@@ -127,9 +127,6 @@ extern u32 D_003FF1C4[];
 
 extern u32 D_003FF294[];
 
-extern void fileQueueRemoveAndDestroyJob(FileQueue *, FileJob *);
-extern void fileQueueDetachSectorFollower(FileQueue *, FileJob *);
-extern void fileQueueLinkJobToSectorLeader(FileQueue *, FileJob *, FileJob *);
 
 extern EffectAssetLink *D_003FF128[24];
 
@@ -9423,8 +9420,6 @@ extern u32 D_003FFA78[];
 
 extern u32 D_003FF22C[11];
 
-extern FileJob *fileJobDuplicateAfter(FileQueue *queue, FileJob *source);
-extern void fileJobCopyHeader(FileJob *resource, FileJob *entry);
 
 u32 effResetFileQueueState(void) {
     fileQueueRemoveAndDestroyJob(effFileQueue, fileQueueGetAt(effFileQueue, func_002FCA40()));
