@@ -3776,10 +3776,10 @@ void func_001C1A68(BtlState *battle, BattleActorPanelWork *work) {
                     work->activeEntries[slot].presentation.fade += 0x20;
                     work->activeEntries[slot].presentation.fade = work->activeEntries[slot].presentation.fade <= 0 ? 0 :
                         work->activeEntries[slot].presentation.fade > 0x80 ? 0x80 : work->activeEntries[slot].presentation.fade;
-                    work->activeEntries[slot].baseX += 2;
+                    work->activeEntries[slot].basePosition[0] += 2;
                     limit = positions.entries[slot].x;
-                    work->activeEntries[slot].baseX = work->activeEntries[slot].baseX <= limit - 8 ? limit - 8 :
-                        work->activeEntries[slot].baseX < limit ? work->activeEntries[slot].baseX : limit;
+                    work->activeEntries[slot].basePosition[0] = work->activeEntries[slot].basePosition[0] <= limit - 8 ? limit - 8 :
+                        work->activeEntries[slot].basePosition[0] < limit ? work->activeEntries[slot].basePosition[0] : limit;
                     if (scene->state == 9) {
                         func_001C16B0(1);
                     }
@@ -3800,7 +3800,7 @@ void func_001C1A68(BtlState *battle, BattleActorPanelWork *work) {
                     work->activeEntries[slot].presentation.presentationState = 4;
                     work->activeEntries[slot].presentation.pendingSceneState = 5;
                     if (work->activeEntries[slot].presentation.fade <= 0) {
-                        work->activeEntries[slot].baseX = positions.entries[slot].x - 6;
+                        work->activeEntries[slot].basePosition[0] = positions.entries[slot].x - 6;
                     }
                     break;
                 }
