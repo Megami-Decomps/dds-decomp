@@ -6243,7 +6243,7 @@ typedef struct EffSpanTable {
     u32 count;
     u16 total;
     u8 pad0A[2];
-    u32 allocation;
+    struct SdfMemBlock *allocation;
 } EffSpanTable;
 
 typedef struct EffSpanConfig {
@@ -6314,7 +6314,7 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
     u32 count = sdfCountMapPositionRecords(model->inner);
     u32 spans;
     u32 partialSpan;
-    u8 *allocation;
+    struct SdfMemBlock *allocation;
     EffSpanTable *table;
     EffSpanRecord *record;
     EffSpanEntry *entries;
@@ -6336,10 +6336,10 @@ EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, MdlCtx *model) {
     if (config->unkAC == 0) {
         config->unkAC = 1;
     }
-    allocation = (u8 *)sdfAllocGeneralBlock(sizeof(EffSpanTable) +
+    allocation = sdfAllocGeneralBlock(sizeof(EffSpanTable) +
                  count * sizeof(EffSpanRecord) + count * spans * sizeof(EffSpanEntry));
-    table = (EffSpanTable *)sdfResourceRetainAddress((struct SdfMemBlock *)((u32)allocation));
-    table->allocation = (u32)allocation;
+    table = (EffSpanTable *)sdfResourceRetainAddress(allocation);
+    table->allocation = allocation;
     table->records = (EffSpanRecord *)(table + 1);
     entries = (EffSpanEntry *)(table->records + count);
     table->total = total;
@@ -6386,7 +6386,7 @@ void effReleaseParticleList(u32 *list) {
         }
         entry++;
     }
-    sdfReleaseResourceAllocation((struct SdfMemBlock *)(u32)(((EffSpanTable *)list)->allocation));
+    sdfReleaseResourceAllocation(((EffSpanTable *)list)->allocation);
 }
 
 INCLUDE_ASM(const s32, "game/code_002DE248", func_002F4960);
