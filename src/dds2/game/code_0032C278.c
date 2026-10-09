@@ -1,3 +1,4 @@
+#include "sdf_gs_geometry.h"
 #include "sdf_texture_flush.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
@@ -138,9 +139,7 @@ void sdfWriteImageTransferRegisters(SdfImageTransferRegisters *packet, u32 desti
                   u32 sourceBufferAddress, s32 sourceBufferWidth, s32 sourceFormat,
                   s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight, s32 transferDirection);
 
-extern void sdfBuildFillPacket106(s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern void sdfBuildFillPacket101(s32, s32, s32, s32, s32, s32, s32, s32);
 
 void sdfDestroyObjectList(SdfModel *owner);
 
@@ -1577,16 +1576,15 @@ void sdfQueueGouraudTexturedQuad(SdfListHead *list, s32 primitive, s32 x0, s32 y
 }
 
 /* Emit two packed GS XYZ vertices; the high word supplies their shared depth. */
-void sdfBuildFillPacket106(s32 address, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth) {
-    u64 *packet = (u64 *)address;
+void sdfBuildFillPacket106(SdfGsTwoVertexPayload *packet, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth) {
     u64 depthHigh = (u64)depth << 32;
 
-    packet[0] = 0x4400000000008001ULL;
-    packet[1] = 0x5510;
-    packet[2] = (u32)(primitive | 0x106);
-    packet[3] = (u32)color | ((u64)0xFE00 << 46);
-    packet[4] = (u32)((left & 0xFFFF) | (top << 16)) | depthHigh;
-    packet[5] = (u32)((right & 0xFFFF) | (bottom << 16)) | depthHigh;
+    packet->gifTag = 0x4400000000008001ULL;
+    packet->gifRegisters = 0x5510;
+    packet->primitive = (u32)(primitive | 0x106);
+    packet->rgbaq = (u32)color | ((u64)0xFE00 << 46);
+    packet->xyz2[0] = (u32)((left & 0xFFFF) | (top << 16)) | depthHigh;
+    packet->xyz2[1] = (u32)((right & 0xFFFF) | (bottom << 16)) | depthHigh;
 }
 
 void sdfCreatePacketA(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth, s32 (*alloc)(s32)) {
@@ -1598,20 +1596,19 @@ void sdfCreatePacketA(SdfListHead *list, s32 color, s32 primitive, s32 left, s32
     buffer = alloc(0x40);
     *(u64 *)buffer = 0x20000003ULL;
     *(u64 *)(buffer + 8) = 0x5000000310000000ULL;
-    sdfBuildFillPacket106(buffer + 0x10, color, primitive, left, top, right, bottom, depth);
+    sdfBuildFillPacket106((SdfGsTwoVertexPayload *)(buffer + 0x10), color, primitive, left, top, right, bottom, depth);
     sdfAppendPacket(list, buffer);
 }
 
-void sdfBuildFillPacket101(s32 address, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth) {
-    u64 *packet = (u64 *)address;
+void sdfBuildFillPacket101(SdfGsTwoVertexPayload *packet, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth) {
     u64 depthHigh = (u64)depth << 32;
 
-    packet[0] = 0x4400000000008001ULL;
-    packet[1] = 0x5510;
-    packet[2] = (u32)(primitive | 0x101);
-    packet[3] = (u32)color | ((u64)0xFE00 << 46);
-    packet[4] = (u32)((left & 0xFFFF) | (top << 16)) | depthHigh;
-    packet[5] = (u32)((right & 0xFFFF) | (bottom << 16)) | depthHigh;
+    packet->gifTag = 0x4400000000008001ULL;
+    packet->gifRegisters = 0x5510;
+    packet->primitive = (u32)(primitive | 0x101);
+    packet->rgbaq = (u32)color | ((u64)0xFE00 << 46);
+    packet->xyz2[0] = (u32)((left & 0xFFFF) | (top << 16)) | depthHigh;
+    packet->xyz2[1] = (u32)((right & 0xFFFF) | (bottom << 16)) | depthHigh;
 }
 
 void sdfAppendFillRectanglePacket(SdfListHead *list, s32 color, s32 primitive, s32 left, s32 top, s32 right, s32 bottom, s32 depth, s32 (*alloc)(s32)) {
@@ -1623,7 +1620,7 @@ void sdfAppendFillRectanglePacket(SdfListHead *list, s32 color, s32 primitive, s
     buffer = alloc(0x40);
     *(u64 *)buffer = 0x20000003ULL;
     *(u64 *)(buffer + 8) = 0x5000000310000000ULL;
-    sdfBuildFillPacket101(buffer + 0x10, color, primitive, left, top, right, bottom, depth);
+    sdfBuildFillPacket101((SdfGsTwoVertexPayload *)(buffer + 0x10), color, primitive, left, top, right, bottom, depth);
     sdfAppendPacket(list, buffer);
 }
 
