@@ -86,10 +86,6 @@ extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 extern void mdlStorePrimaryVectorVU(MdlCtx *);
 
 extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
-extern u16 mdlGetContextResourceGroup(MdlCtx *);
-extern u16 mdlGetContextResourceId(MdlCtx *);
-
-
 /* Initialize the VU transforms and the first node's float slot, if present. */
 void effInitModelVUState(MdlCtx *model) {
     VU0_MOVE_VF(vf10, vf0);
@@ -110,14 +106,12 @@ extern u16 D_003BC944;
 
 extern void mdlLoadViewerPackage(s32, u16, s32, void *, u32);
 
-extern MdlCtx *func_00217680(s32, s32);
-
 extern void effInitModelVUState(MdlCtx *);
 
 MdlCtx *effLoadViewerModelWithVUState(void *first, u32 second) {
     MdlCtx *model;
     mdlLoadViewerPackage(6, D_003BC944, 0x101, first, second);
-    model = func_00217680(6, D_003BC944);
+    model = mdlCreateContextFromResourceKey(6, D_003BC944);
     effInitModelVUState(model);
     D_003BC944++;
     return model;
@@ -174,7 +168,7 @@ void effRecreateModelFromSource(EffModelOwner *work, EffModelOwner *source) {
     if (owner->model != 0) {
         effDestroyModelContext(owner->model);
     }
-    model = func_00217680(mdlGetContextResourceGroup(original->model), mdlGetContextResourceId(original->model));
+    model = mdlCreateContextFromResourceKey(mdlGetContextResourceGroup(original->model), mdlGetContextResourceId(original->model));
     effInitModelVUState(model);
     VU0_SET_ONES_XYZ(vf10);
     VU0_SCALE_VF_MFC1(vf10, owner->scale);
@@ -575,7 +569,7 @@ void effCopyResourceOwner(EffResourceOwner *dst, EffResourceOwner *src) {
     if (dst->model != 0) {
         effDestroyModelContext(dst->model);
     }
-    dst->model = func_00217680(mdlGetContextResourceGroup(src->model), mdlGetContextResourceId(src->model));
+    dst->model = mdlCreateContextFromResourceKey(mdlGetContextResourceGroup(src->model), mdlGetContextResourceId(src->model));
     effInitModelVUState(dst->model);
     if (dst->model->first != NULL) {
         if (dst->plainEntry != 0) {

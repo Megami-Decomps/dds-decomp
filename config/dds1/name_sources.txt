@@ -3655,6 +3655,7 @@
 0x00217038	mdlBuildPrefixedString	inferred	copies 8-byte prefix from D_003BBB60 then strcat appends src
 0x002172B0	mdlUnlinkGroupEntry	inferred	Removes a model link from its doubly linked group, destroying an empty flagged group. [names_reviewed8.tsv]
 0x00217438	mdlReleaseDevSlots	inferred	frees device slot list at ctx+0x30 [names_M37_SmallSweep6.tsv]
+0x00217680	mdlCreateContextFromResourceKey	inferred	Creates and links a model context for the supplied group/id key, clones the grouped resource list, and initializes its model/resource entries.
 0x002177D0	mdlDestroyContext	inferred	releases nodes, resources, dev slots, link, then frees ctx [names_M37_SmallSweep6.tsv]
 0x00217878	mdlProcessContextNodesAndTransforms	inferred	confidence=high; src/dds1/model/mdlManager.c:func_00217878; Processes nonnull slot nodes, updates frame transforms, dispatches anchor records, and processes the development list under context flags. [names_qp9.tsv]
 0x002179A8	mdlBlendEntryPitchYawAndUpdate	inferred	confidence=high; src/dds1/model/mdlManager.c:func_002179A8; Blends an indexed entry basis toward degree-based pitch/yaw, advances child slots and conditionally updates model/draw resources. [names_qp9.tsv]

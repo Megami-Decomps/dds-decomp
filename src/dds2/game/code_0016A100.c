@@ -36,13 +36,6 @@ extern void mdlUpdateContextRotationBasisFromQuaternion(MdlCtx *);
 extern void mdlStoreTertiaryVectorVU(MdlCtx *);
 
 
-extern MdlCtx *func_00232198(s32, s32);
-
-extern u16 mdlGetContextResourceGroup(MdlCtx *);
-
-extern u16 mdlGetContextResourceId(MdlCtx *);
-
-
 extern u32 effBattleMiscGetTableEntry(s32 index);
 extern s32 btlGetRuntime(void);
 
@@ -359,7 +352,7 @@ void *effParamCreateViewerWork(s32 *package) {
         D_00436434++;
     }
     mdlLoadViewerPackage(EFF_VIEWER_RESOURCE_GROUP, D_00436434, EFF_VIEWER_LOAD_FLAGS, package + 4, package[0]);
-    work = func_00232198(EFF_VIEWER_RESOURCE_GROUP, D_00436434);
+    work = mdlCreateContextFromResourceKey(EFF_VIEWER_RESOURCE_GROUP, D_00436434);
     effParamInitWork(work);
     D_00436434++;
     return work;
@@ -382,7 +375,7 @@ void *effParamAssembleWork(void *source) {
 
     resourceGroup = mdlGetContextResourceGroup(source);
     resourceId = mdlGetContextResourceId(source);
-    work = func_00232198(resourceGroup, resourceId);
+    work = mdlCreateContextFromResourceKey(resourceGroup, resourceId);
     effParamInitWork(work);
     return work;
 }

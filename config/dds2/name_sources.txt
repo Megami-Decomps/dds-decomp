@@ -3333,6 +3333,7 @@
 0x00231AF8	mdlFinishLoadJob	inferred	same as mdlFinishLoadCmd with handle at +0x1C and size word at +0x18; always runs the job [names_M85_SplitCallers.tsv]
 0x00231B80	mdlRequestAsset	inferred	queues loads of the three asset files of a (group,id) pair under the file semaphore
 0x00231DC8	mdlUnlinkGroupEntry	inferred	Removes a model link from its doubly linked group, destroying an empty flagged group. [names_reviewed8.tsv]
+0x00232198	mdlCreateContextFromResourceKey	inferred	Creates and links a model context for the supplied group/id key, clones the grouped resource list, and initializes its model/resource entries.
 0x00232390	mdlProcessContextNodesAndTransforms	inferred	confidence=high; src/dds2/game/code_00231A80.c:func_00232390; Processes nonnull slot nodes, updates frame transforms, dispatches anchor records, and processes the development list under context flags. [names_qp9.tsv]
 0x002324C0	mdlBlendEntryPitchYawAndUpdate	inferred	confidence=high; src/dds2/game/code_00231A80.c:func_002324C0; Blends an indexed entry basis toward degree-based pitch/yaw, advances child slots and conditionally updates model/draw resources. [names_qp9.tsv]
 0x002327C0	mdlFindOrCreateMotionRecordNode	inferred	Traverses nodes by search ID and creates a node if absent before recording its slot. [names_reviewed21.tsv]
