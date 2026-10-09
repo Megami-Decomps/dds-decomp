@@ -3032,7 +3032,7 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
     u32 limit = work->frameLimit;
     u32 progress = ((EffBillTimedHeader *)config)->time.progress;
     u32 *list = work->instances;
-    u8 *out = (u8 *)list[0];
+    EffPointSet *out = (EffPointSet *)(u32)list[0];
     u128 mtx[4];
     s32 color1[4];
     s32 color2[4];
@@ -3054,10 +3054,10 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     EE_MMI_RGBA_PACK_F128(packed);
     blended[0] = packed;
-    ((EffBillOutput *)out)->color = blended[0];
+    out->color = blended[0];
     if ((packed & 0xFF000000) != 0) {
-        ((EffBillOutput *)out)->textureId = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
-        ((EffBillOutput *)out)->outputMode = ((EffBillOutputHeader *)config)->outputMode;
+        out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+        out->flag = ((EffBillOutputHeader *)config)->outputMode;
         VU0_LOAD_VF(vf10, work->transform);
         effMiscQuaternionToMatrixVU();
         VU0_LOAD_VF(vf10, D_0037E0E0);
@@ -3067,7 +3067,7 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
         VU0_STORE_MATRIX(mtx);
-        effDrawFourPointGroups((EffPointSet *)out, (Matrix4 *)mtx);
+        effDrawFourPointGroups(out, (Matrix4 *)mtx);
     }
 }
 
