@@ -124,6 +124,8 @@ extern SdfPoolNode *D_00354BF0[];
 extern s32 sdfAllocPacketAligned(s32);
 extern void sdfComposeVuMatrixFromRegisters(void);
 extern s32 func_0015FE20(ScatterRenderState *);
+extern f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 index);
+extern f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index);
 struct SdfTextParam;
 extern void func_002DA438(struct SdfTextParam *, u32);
 
@@ -158,8 +160,8 @@ void effScatterDrawObject(PcpScatterDraw *object) {
     for (index = 0; index < count; index++) {
         draw = &D_003D65B0;
         remaining = object->vectorsPerParticle;
-        draw->points = (f32 *)effGetScatterWideBlock(object, index);
-        draw->uv = (f32 *)effGetScatterNarrowBlock(object, index);
+        draw->points = effGetScatterWideBlock(object, index);
+        draw->uv = effGetScatterNarrowBlock(object, index);
         draw->colors = object->vertexColors;
         draw->color = effGetScatterEntry(object, index);
         draw->primitiveCount = 16;
@@ -200,13 +202,13 @@ void effShareScatterResource(PcpScatterDraw *object, PcpScatterDraw *source) {
 }
 
 /* Compute the address of a 16-byte-wide block within the stride. */
-s32 effGetScatterWideBlock(PcpScatterDraw *object, s32 index) {
-    return (s32)object->points + index * object->vectorsPerParticle * 0x10;
+f32 *effGetScatterWideBlock(PcpScatterDraw *object, s32 index) {
+    return object->points + index * object->vectorsPerParticle * 4;
 }
 
 /* Compute the address of an 8-byte-wide block within the stride. */
-s32 effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index) {
-    return (s32)object->uv + index * object->vectorsPerParticle * 8;
+f32 *effGetScatterNarrowBlock(PcpScatterDraw *object, s32 index) {
+    return object->uv + index * object->vectorsPerParticle * 2;
 }
 
 u32 effGetScatterEntry(PcpScatterDraw *object, s32 index) {
