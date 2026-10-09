@@ -217,7 +217,7 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item) {
     PCP_COPY_VECTOR(node->scale, &item->scale);
     node->translation[3] = 1.0f;
     sdfDrawNodeBuildMatrix(node);
-    node->boundsAddress = item->boundsAddress;
+    node->boundsCorners = item->boundsCorners;
 }
 
 void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item) {
