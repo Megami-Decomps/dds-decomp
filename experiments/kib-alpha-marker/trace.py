@@ -7,6 +7,116 @@ import sys
 import tempfile
 import diagnose as d
 
+
+sys.path.insert(0, str(d.ROOT / "tools"))
+import check_unit as cu
+from ee_gcc_delay_slots import NODE_HEADER, top_level_forms, balanced_form
+from collections import defaultdict
+import re
+
+def target_identity(obj):
+    listing = cu.run(str(cu.BIN / "mips-ps2-decompals-nm"), "-S", "--defined-only", str(obj))
+    found = []
+    for line in listing.splitlines():
+        parts = line.split()
+        if len(parts) == 4 and parts[2] in ("T", "t") and parts[3] == d.TARGET:
+            found.append((int(parts[0], 16), int(parts[1], 16)))
+    d.require(len(found) == 1, "parity_target_symbol")
+    start, size = found[0]
+    code = cu.text_section(obj)
+    d.require(size > 0 and size % 4 == 0 and start + size <= len(code),
+              "parity_target_bounds")
+    rels = {offset - start: value for offset, value in cu.relocations(obj)[".text"].items()
+            if start <= offset < start + size}
+    return code[start:start + size], rels
+
+REG = re.compile(r"\(reg(?:/[A-Za-z]+)?(?::[^\s()]+)?\s+(\d+)(?=[\s)])")
+INT = re.compile(r"\(const_int\s+(-?\d+)(?=[\s)])")
+
+def reg(expr):
+    match = REG.match(expr)
+    return int(match[1]) if match else None
+
+def op(expr):
+    match = re.match(r"\(([A-Za-z_]+)", expr)
+    return match[1] if match else None
+
+def children(expr):
+    pos = expr.find(" ")
+    return top_level_forms(expr[pos + 1:-1]) if pos >= 0 else []
+
+def alpha_anchors(path):
+    text = path.read_text()
+    d.require(re.findall(r"(?m)^;; Function (\S+)", text) == [d.TARGET], "rtl_scope")
+    rows, first_call = [], None
+    for position, form in enumerate(top_level_forms(text)):
+        node = NODE_HEADER.match(form)
+        if not node:
+            continue
+        if node[1] == "call_insn" and first_call is None:
+            first_call = position
+        for match in re.finditer(r"\(set\s+", form):
+            statement, _ = balanced_form(form, match.start())
+            parts = children(statement)
+            if len(parts) == 2 and reg(parts[0]) is not None:
+                rows.append(dict(position=position, dst=reg(parts[0]), rhs=parts[1]))
+    definitions = defaultdict(list)
+    for row in rows:
+        definitions[row["dst"]].append(row)
+    def literal(expr, seen=frozenset()):
+        match = INT.match(expr)
+        if match:
+            return int(match[1])
+        number = reg(expr)
+        if number is None or number in seen:
+            return None
+        defs = definitions[number]
+        return literal(defs[0]["rhs"], seen | {number}) if len(defs) == 1 else None
+    def copy_base(number):
+        seen = set()
+        while number is not None and number not in seen:
+            seen.add(number)
+            defs = definitions[number]
+            if len(defs) != 1:
+                break
+            source = reg(defs[0]["rhs"])
+            if source is None:
+                break
+            number = source
+        return number
+    incoming = {row["dst"] for row in rows
+                if row["dst"] >= 79 and reg(row["rhs"]) == 5
+                and first_call is not None and row["position"] < first_call}
+    alpha = next(iter(incoming)) if len(incoming) == 1 else None
+    colors = []
+    for row in rows:
+        if op(row["rhs"]) != "ior":
+            continue
+        operands = children(row["rhs"])
+        if len(operands) == 2:
+            for index in (0, 1):
+                if literal(operands[index]) == 0x808080:
+                    other = reg(operands[1-index])
+                    if other is not None:
+                        colors.append(other)
+    color = colors[0] if len(colors) == 1 else None
+    packed = []
+    for row in rows:
+        if color is None or row["dst"] != color or op(row["rhs"]) != "ashift":
+            continue
+        operands = children(row["rhs"])
+        if len(operands) == 2 and literal(operands[1]) == 24:
+            packed.append(reg(operands[0]))
+    pulse = None
+    if alpha is not None and len(packed) == 2 and None not in packed:
+        direct = [number for number in packed if copy_base(number) == 5]
+        other = [number for number in packed if copy_base(number) != 5]
+        if len(direct) == len(other) == 1:
+            pulse = other[0]
+    return dict(alpha_entry=alpha, color_before_rgb_or=color,
+                pulseAlpha_before_pack=pulse,
+                complete=None not in (alpha, color, pulse))
+
 def main():
     original = d.UNIT.read_bytes()
     blob = hashlib.sha1(b"blob " + str(len(original)).encode() + b"\0" + original).hexdigest()
@@ -27,6 +137,17 @@ def main():
             d.run("candidate_probe", [sys.executable, "tools/ee_gcc_probe.py",
                   str(d.UNIT.relative_to(d.ROOT)), "--version", "dds2",
                   "--function", d.TARGET, "--out-dir", str(probe), "--strict-assemble"])
+            ordinary, ordinary_relocs = target_identity(d.OBJECT)
+            observed, observed_relocs = target_identity(probe / "candidate.o")
+            bytes_equal = ordinary == observed
+            rels_equal = ordinary_relocs == observed_relocs
+            d.emit(dict(scope="candidate_probe_parity", target_bytes_equal=bytes_equal,
+                   target_relocations_equal=rels_equal, ordinary_bytes=len(ordinary),
+                   probe_bytes=len(observed), ordinary_relocations=len(ordinary_relocs),
+                   probe_relocations=len(observed_relocs)))
+            d.require(bytes_equal and rels_equal, "probe_codegen_changed")
+            anchors = alpha_anchors(probe / "functions" / d.TARGET / "00.rtl")
+            d.emit(dict(scope="candidate_source_anchors", **anchors))
             allocation_path = private / "allocations.json"
             d.run("candidate_allocations", [sys.executable, "tools/ee_gcc_allocations.py",
                   str(probe), "--function", d.TARGET, "--json", str(allocation_path)])
