@@ -1068,11 +1068,11 @@ u8 fldHasAreaResourceNameChanged(void) {
 }
 
 
-extern void fldSetNpcPalette();
-extern void fldUploadSkyBuffer();
-extern void fldCopyActorWaypointTable();
+extern void fldSetNpcPalette(void *source);
+extern void fldUploadSkyBuffer(void *source);
+extern void fldCopyActorWaypointTable(const void *source);
 extern void fldCopyInfoTable(const void *);
-extern void fldSetSceneRecordChunk(u32, u32);
+extern void fldSetSceneRecordChunk(u8 *chunk, s32 resourceHandle);
 extern void fldCacheMapLabelLengths();
 
 void fldLoadAreaPackedResources(void) {
@@ -1118,8 +1118,7 @@ void fldLoadAreaPackedResources(void) {
                     (struct SdfMemBlock *)(u32)work->resourceHandle);
                 break;
             case FLD_PACKED_RESOURCE_SCENE_RECORD_CHUNK:
-                fldSetSceneRecordChunk((s32)(u32)work->dataCursor,
-                                       work->resourceHandle);
+                fldSetSceneRecordChunk(work->dataCursor, work->resourceHandle);
                 break;
             }
         }
