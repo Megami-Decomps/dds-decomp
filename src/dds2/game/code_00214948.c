@@ -457,7 +457,7 @@ extern s32 btlFindCommandPartnersByAffinity(BtlUnit *, s32, BtlUnit **, BtlUnit 
 
 extern s32 func_00214C78(BtlUnit *, s32, BtlUnit **, BtlUnit **);
 
-extern s32 func_001ABDE8(BtlUnit *, BtlUnit *, BtlUnit *, s32, s32);
+extern s32 func_001ABDE8(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
 extern char D_00419C80[], D_00419CB0[], D_00419CD8[], D_00419D00[];
 

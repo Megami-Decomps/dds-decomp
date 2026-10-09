@@ -227,7 +227,7 @@ void billWriteFloatTextureTrianglePacket(u64 *packet, s32 color, s32 primitive,
     packet[9] = (u32)((x2 & 0xFFFF) | (y2 << 16)) | depthHigh;
 }
 
-void effAppendTexturedTrianglePacket(s32 chain, s32 color, s32 primitive,
+void effAppendTexturedTrianglePacket(SdfListHead *chain, s32 color, s32 primitive,
                  s32 x0, s32 y0, f32 u0, f32 v0,
                  s32 x1, s32 y1, f32 u1, f32 v1,
                  s32 x2, s32 y2, f32 u2, f32 v2, s32 depth) {
@@ -237,7 +237,7 @@ void effAppendTexturedTrianglePacket(s32 chain, s32 color, s32 primitive,
     packet[1] = 0x5000000510000000ULL;
     billWriteFloatTextureTrianglePacket(packet + 2, color, primitive, x0, y0, u0, v0,
                  x1, y1, u1, v1, x2, y2, u2, v2, depth);
-    sdfAppendPacket((SdfListHead *)chain, (u32)packet);
+    sdfAppendPacket(chain, (u32)packet);
 }
 
 u64 *effBuildDrawPacketWithFlags(u32 flags) {
