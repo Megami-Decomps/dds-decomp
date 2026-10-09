@@ -2,6 +2,10 @@
 #define MNU_WORK_H
 #include "common.h"
 
+#define MNU_WORK_TAG_CLASS_MASK 0xFFFF0000u
+#define MNU_WORK_TAG_MOVEMENT_TABLE 0x01000000u
+#define MNU_WORK_TAG_REGISTRY_TABLE 0x02010000u
+
 struct MnuShootingWork;
 struct MnuModelNode;
 struct ModelInstance;
@@ -86,7 +90,7 @@ typedef union MenuWorkFlags {
 /* Primary work pool: 100 records occupy the constructor's 0x1C20 allocation. */
 typedef struct MenuWorkEntry {
     MenuWorkControl control;
-    u32 tag;
+    u32 tag; /* High-half class; low-half table index where that class is recognized. */
     s32 resourceRecordIndex;
     union {
         struct MnuModelNode *modelNode;
@@ -214,6 +218,25 @@ typedef struct MenuResourceRecord {
     u8 unk16[6];
 } MenuResourceRecord;
 
+/* Entries in the separately bound 0x18-byte movement table. */
+typedef struct MenuMovementRecord18 {
+    union {
+        u8 pad00[0xA];
+        struct {
+            u8 pad00To04[4];
+            u32 parameterTag;
+            u8 pad08[2];
+            u16 movementScale;
+            u8 pad0C[0xC];
+        };
+    };
+} MenuMovementRecord18;
+
+typedef char MenuMovementRecordLayoutAssert[
+    (sizeof(MenuMovementRecord18) == 0x18 &&
+     (unsigned long)&((MenuMovementRecord18 *)0)->parameterTag == 4 &&
+     (unsigned long)&((MenuMovementRecord18 *)0)->movementScale == 0xA) ? 1 : -1];
+
 typedef struct MenuProgressParameters {
     u16 width;
     u16 height;
@@ -277,6 +300,12 @@ typedef char MenuResourceLayoutsAssert[
      (unsigned long)&((MenuRegistry*)0)->score==0x18 &&
      (unsigned long)&((MenuRegistry*)0)->progress==0x1A)?1:-1];
 
+typedef char MenuWorkTagClassValuesAssert[
+    ((MNU_WORK_TAG_CLASS_MASK & MNU_WORK_TAG_MOVEMENT_TABLE) == MNU_WORK_TAG_MOVEMENT_TABLE &&
+     (MNU_WORK_TAG_CLASS_MASK & MNU_WORK_TAG_REGISTRY_TABLE) == MNU_WORK_TAG_REGISTRY_TABLE &&
+     (MNU_WORK_TAG_MOVEMENT_TABLE & 0xFFFFu) == 0 &&
+     (MNU_WORK_TAG_REGISTRY_TABLE & 0xFFFFu) == 0) ? 1 : -1];
+
 void mnuBindResourceRecordTable(MenuResourceRecord *, s32);
 MenuResourceRecord *mnuGetResourceRecordByIndex(s32);
 MenuWorkEntry *mnuFindUnusedWorkEntry(void);
@@ -291,6 +320,9 @@ MenuRegistry *mnuGetMenuRecordRegistryEntry(u32);
 void mnuBindMenuRegistryParameters(MenuRegistryParameters *records, u32 count);
 /* The native selector uses the low byte; the stored count is not checked. */
 MenuRegistryParameters *mnuGetMenuRegistryParametersByIndex(u32 parameterIndex);
+void func_00322510(MenuMovementRecord18 *records, u32 count);
+/* The native getter narrows the u32 tag to a low-16-bit movement index. */
+MenuMovementRecord18 *func_00322520(u32 movementRecordIndex);
 
 void mnuSetWorkEntryStartCallback(MenuWorkCallback callback);
 void mnuSetWorkEntryFinishOrDeactivateCallback(MenuWorkCallback callback);
