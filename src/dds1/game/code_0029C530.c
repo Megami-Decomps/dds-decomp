@@ -4114,8 +4114,6 @@ EffPointSetTable *effCreateAlphaRampPointSetRows(EffBillPointConfig *src) {
     return table;
 }
 
-extern void effReleasePointSetAsset(s32);
-
 void effFreeIndexedEntries(u8 *work) {
     u32 index = 0;
     u32 count = ((EffBillTimedHeader *)((EffClassWork *)work)->payload)->count;
@@ -4124,7 +4122,7 @@ void effFreeIndexedEntries(u8 *work) {
 
     if (count != 0) {
         do {
-            effReleasePointSetAsset(*(s32 *)entry);
+            effReleasePointSetAsset((EffPointSet *)*(u32 *)entry);
             entry += 0x10;
             index++;
         } while (index < count);
@@ -4384,8 +4382,6 @@ EffScaleRange *effCreateRetainedPointSetColorRows(EffBillPointConfig *src) {
     return table;
 }
 
-extern void effReleasePointSetAsset(s32);
-
 void effReleaseBillPointEntries(u8 *work) {
     u8 *config = ((EffClassWork *)work)->payload;
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
@@ -4395,7 +4391,7 @@ void effReleaseBillPointEntries(u8 *work) {
 
     if (count != 0) {
         do {
-            effReleasePointSetAsset((s32)((EffScaleRangeEntry *)entry)->set);
+            effReleasePointSetAsset(((EffScaleRangeEntry *)entry)->set);
             entry += 0x30;
         } while (++index < count);
     }
@@ -4503,9 +4499,9 @@ EffPointSet *effCreatePointSet5(s32 count) {
 }
 
 /* Queue the draw asset for release and return the backing allocation. */
-void effReleasePointSetAsset(s32 work) {
-    sdfQueueAssetRelease(((EffPointSet *)work)->handle);
-    sdfReleaseResourceAllocation(((EffPointSet *)work)->allocation);
+void effReleasePointSetAsset(EffPointSet *set) {
+    sdfQueueAssetRelease(set->handle);
+    sdfReleaseResourceAllocation(set->allocation);
 }
 
 void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
