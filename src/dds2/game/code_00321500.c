@@ -11,15 +11,15 @@
 
 extern u32 mnuActiveEffectEntry;
 
-extern MenuRuntimePairCallback D_004389B0;
+extern MenuRuntimePairCallback mnuRuntimeRecordPairCallback;
 
-extern MenuRuntimeWorkCallback D_004389AC;
+extern MenuRuntimeWorkCallback mnuRuntimeWorkHitCallback;
 
-extern MenuWorkCallback D_004389A8;
+extern MenuWorkCallback mnuActiveWorkVisitorCallback;
 
-extern MenuWorkCallback D_004389A4;
+extern MenuWorkCallback mnuWorkEntryFinishOrDeactivateCallback;
 
-extern MenuWorkCallback D_004389A0;
+extern MenuWorkCallback mnuWorkEntryStartCallback;
 
 extern u32 mnuWorkEntryPool;
 
@@ -191,7 +191,7 @@ s32 mnuCanAdvanceIdleStateRecord(MenuStateRecord *record) {
 INCLUDE_ASM(const s32, "game/code_00321500", func_00321A30);
 
 extern MenuRuntimeRecord *mnuAcquireRuntimeRecordSlot(MenuRuntimeList *);
-extern MenuRuntimeCallback D_0043899C;
+extern MenuRuntimeCallback mnuRuntimeRecordInitializationCallback;
 extern f64 cos(f64);
 extern f64 sin(f64);
 
@@ -214,7 +214,7 @@ MenuRuntimeRecord *mnuCreateRuntimeRecord(MenuRuntimeList *list, s32 x, s32 y, u
     record->angle = angle;
     record->speed = speed;
     record->remaining = remaining;
-    D_0043899C(record);
+    mnuRuntimeRecordInitializationCallback(record);
     return record;
 }
 
@@ -693,17 +693,17 @@ void mnuVisitActiveWorkAndEffectEntry(s32 context) {
         MenuWorkEntry *entry = &((MenuWorkEntry *)mnuWorkEntryPool)[entryIndex];
 
         if (entry->flags & MNU_WORK_ACTIVE) {
-            D_004389A8(entry, (struct MnuShootingWork *)context);
+            mnuActiveWorkVisitorCallback(entry, (struct MnuShootingWork *)context);
         }
     }
-    D_004389A8((MenuWorkEntry *)mnuGetActiveEffectWorkEntry(), (struct MnuShootingWork *)context);
+    mnuActiveWorkVisitorCallback((MenuWorkEntry *)mnuGetActiveEffectWorkEntry(), (struct MnuShootingWork *)context);
 }
 
 void func_00323748(MenuWorkEntry *entry, struct MnuShootingWork *context) {
     MenuRegistry *registry;
 
     if (entry->flagsBits.pendingStart) {
-        D_004389A0(entry, context);
+        mnuWorkEntryStartCallback(entry, context);
         entry->flagsBits.pendingStart = 0;
     }
     if (entry->flagsBits.updated) {
@@ -720,13 +720,13 @@ void func_00323748(MenuWorkEntry *entry, struct MnuShootingWork *context) {
     if (entry->flagsBits.finished) {
         if ((entry->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_MOVEMENT_TABLE) {
             entry->flags |= 0x4000;
-            D_004389A4(entry, context);
+            mnuWorkEntryFinishOrDeactivateCallback(entry, context);
         } else {
             entry->flagsBits.pendingDeactivate = 1;
         }
     }
     if (entry->flagsBits.pendingDeactivate) {
-        D_004389A4(entry, context);
+        mnuWorkEntryFinishOrDeactivateCallback(entry, context);
         entry->flagsBits.finished = 0;
         mnuDeactivateWorkEntry(entry);
     }
@@ -750,23 +750,23 @@ void mnuVisitActiveRecords(s32 context) {
 }
 
 void mnuSetWorkEntryStartCallback(MenuWorkCallback callback) {
-    D_004389A0 = callback;
+    mnuWorkEntryStartCallback = callback;
 }
 
 void mnuSetWorkEntryFinishOrDeactivateCallback(MenuWorkCallback callback) {
-    D_004389A4 = callback;
+    mnuWorkEntryFinishOrDeactivateCallback = callback;
 }
 
 void mnuSetActiveWorkVisitor(MenuWorkCallback callback) {
-    D_004389A8 = callback;
+    mnuActiveWorkVisitorCallback = callback;
 }
 
 void mnuSetRuntimeWorkHitCallback(MenuRuntimeWorkCallback callback) {
-    D_004389AC = callback;
+    mnuRuntimeWorkHitCallback = callback;
 }
 
 void mnuSetRuntimeRecordPairCallback(MenuRuntimePairCallback callback) {
-    D_004389B0 = callback;
+    mnuRuntimeRecordPairCallback = callback;
 }
 
 /* Remaining is interpreted as signed 16-bit; updated/finished flags stay latched. */
@@ -836,11 +836,11 @@ MenuRuntimeRecord *func_00323988(MenuWorkEntry *work, struct MnuShootingWork *co
                 continue;
             }
             if ((work->tag & MNU_WORK_TAG_CLASS_MASK) == MNU_WORK_TAG_MOVEMENT_TABLE && kind == 3) {
-                D_004389AC(record, work, context);
+                mnuRuntimeWorkHitCallback(record, work, context);
                 return record;
             }
             if (work->inputCountdown == 0 && work->remaining != 0) {
-                D_004389AC(record, work, context);
+                mnuRuntimeWorkHitCallback(record, work, context);
                 return record;
             }
         }
@@ -914,7 +914,7 @@ s32 func_00323DF0(MenuRuntimeList *list, struct MnuShootingWork *context) {
                                 } else {
                                     status = mnuAdvanceWorkEntry(entry, advanceMode) != 0;
                                 }
-                                D_004389AC(record, entry, context);
+                                mnuRuntimeWorkHitCallback(record, entry, context);
                                 if (status != 0) {
                                     break;
                                 }
@@ -1386,15 +1386,15 @@ void mnuReleaseEffectPairAndNode(u32 node) {
     }
 }
 
-INCLUDE_SDATA(const s32, "game/code_00321500", D_004389A0);
+INCLUDE_SDATA(const s32, "game/code_00321500", mnuWorkEntryStartCallback);
 
-INCLUDE_SDATA(const s32, "game/code_00321500", D_004389A4);
+INCLUDE_SDATA(const s32, "game/code_00321500", mnuWorkEntryFinishOrDeactivateCallback);
 
-INCLUDE_SDATA(const s32, "game/code_00321500", D_004389A8);
+INCLUDE_SDATA(const s32, "game/code_00321500", mnuActiveWorkVisitorCallback);
 
-INCLUDE_SDATA(const s32, "game/code_00321500", D_004389AC);
+INCLUDE_SDATA(const s32, "game/code_00321500", mnuRuntimeWorkHitCallback);
 
-INCLUDE_SDATA(const s32, "game/code_00321500", D_004389B0);
+INCLUDE_SDATA(const s32, "game/code_00321500", mnuRuntimeRecordPairCallback);
 
 INCLUDE_SDATA(const s32, "game/code_00321500", D_004389B4);
 
