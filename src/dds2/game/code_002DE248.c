@@ -624,6 +624,7 @@ extern void sndLoadAndPlayStationedSe(u32);
 
 extern EffTrackSet *effCreateTrackSetWithSharedReferences(u32, u16, u32);
 extern void effReleaseResourceRefs(EffTrackSet *);
+extern EffTrackSet *effDuplicateResourceRefs(const EffTrackSet *);
 
 
 
@@ -1944,7 +1945,7 @@ u8 *billCloneAnimatedTransform(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *work = billAllocateAnimatedTransformEntries(descriptor);
 
-    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)source)->asset);
+    ((EffBillFrameState *)work)->asset = effDuplicateResourceRefs(((EffBillFrameState *)source)->asset);
     effInitializeAlternatingTransformRows(work, descriptor);
     return work;
 }
@@ -2071,7 +2072,7 @@ u8 *billCloneEmitterTransform(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *work = billAllocEmitterNode(descriptor);
 
-    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)source)->asset);
+    ((EffBillFrameState *)work)->asset = effDuplicateResourceRefs(((EffBillFrameState *)source)->asset);
     billInitializeEmitterRows(work, descriptor);
     return work;
 }
@@ -2198,7 +2199,7 @@ u8 *billCloneStripTransform(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *work = billAllocStripNode(descriptor);
 
-    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)source)->asset);
+    ((EffBillFrameState *)work)->asset = effDuplicateResourceRefs(((EffBillFrameState *)source)->asset);
     billInitializeStripRows(work, descriptor);
     return work;
 }
@@ -2404,7 +2405,7 @@ u8 *billCloneQuadTransform(u8 *owner) {
     u8 *source = (u8 *)((EffClassWork *)owner)->resource;
     u8 *work = billAllocQuadNode(descriptor);
 
-    ((EffBillFrameState *)work)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)source)->asset);
+    ((EffBillFrameState *)work)->asset = effDuplicateResourceRefs(((EffBillFrameState *)source)->asset);
     billInitializeQuadRows(work, descriptor);
     return work;
 }
@@ -2762,8 +2763,7 @@ void effReleaseResourceRefs(EffTrackSet *work) {
 }
 
 /* Copy a track set: same size and kind, retaining the source's shared reference (or counting one more user of the built-in one). */
-u32 effDuplicateResourceRefs(u32 source) {
-    EffTrackSet *original = (EffTrackSet *)source;
+EffTrackSet *effDuplicateResourceRefs(const EffTrackSet *original) {
     EffTrackSet *effect = effCreateTrackSet(original->count, original->kind);
 
     if (effect->columns != 0) {
@@ -2780,7 +2780,7 @@ u32 effDuplicateResourceRefs(u32 source) {
             }
         }
     }
-    return (u32)effect;
+    return effect;
 }
 
 extern SdfPoolNode *D_003E9B60[8];

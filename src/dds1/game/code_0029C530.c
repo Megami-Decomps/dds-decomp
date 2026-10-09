@@ -1793,7 +1793,7 @@ extern u8 *billAllocEmitterNode(u8 *);
 
 extern u8 *billAllocQuadNode(u8 *);
 
-extern u32 effDuplicateResourceRefs(u32);
+extern EffTrackSet *effDuplicateResourceRefs(const EffTrackSet *);
 
 extern void billInitializeEmitterRows(u8 *, u8 *);
 
@@ -1803,7 +1803,7 @@ u8 *billCloneAnimatedTransform(u8 *work) {
     u8 *config = ((EffClassWork *)work)->payload;
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *node = billAllocateAnimatedTransformEntries(config);
-    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)state)->asset);
+    ((EffBillFrameState *)node)->asset = effDuplicateResourceRefs(((EffBillFrameState *)state)->asset);
     effInitializeAlternatingTransformRows(node, config);
     return node;
 }
@@ -1929,7 +1929,7 @@ u8 *billCloneEmitterTransform(u8 *work) {
     u8 *config = ((EffClassWork *)work)->payload;
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *node = billAllocEmitterNode(config);
-    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)state)->asset);
+    ((EffBillFrameState *)node)->asset = effDuplicateResourceRefs(((EffBillFrameState *)state)->asset);
     billInitializeEmitterRows(node, config);
     return node;
 }
@@ -2058,7 +2058,7 @@ u8 *billCloneStripTransform(u8 *work) {
     u8 *config = ((EffClassWork *)work)->payload;
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *node = billAllocStripNode(config);
-    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)state)->asset);
+    ((EffBillFrameState *)node)->asset = effDuplicateResourceRefs(((EffBillFrameState *)state)->asset);
     billInitializeStripRows(node, config);
     return node;
 }
@@ -2265,7 +2265,7 @@ u8 *billCloneQuadTransform(u8 *work) {
     u8 *config = ((EffClassWork *)work)->payload;
     u8 *state = (u8 *)((EffClassWork *)work)->resource;
     u8 *node = billAllocQuadNode(config);
-    ((EffBillFrameState *)node)->asset = (EffTrackSet *)effDuplicateResourceRefs((u32)((EffBillFrameState *)state)->asset);
+    ((EffBillFrameState *)node)->asset = effDuplicateResourceRefs(((EffBillFrameState *)state)->asset);
     billInitializeQuadRows(node, config);
     return node;
 }
@@ -2591,8 +2591,7 @@ void effReleaseResourceRefs(EffTrackSet *refs) {
 }
 
 /* Copy a track set: same size and kind, retaining the source's shared reference (or counting one more user of the built-in one). */
-u32 effDuplicateResourceRefs(u32 source) {
-    EffTrackSet *original = (EffTrackSet *)source;
+EffTrackSet *effDuplicateResourceRefs(const EffTrackSet *original) {
     EffTrackSet *effect = effCreateTrackSet(original->count, original->kind);
 
     if (effect->columns != 0) {
@@ -2609,7 +2608,7 @@ u32 effDuplicateResourceRefs(u32 source) {
             }
         }
     }
-    return (u32)effect;
+    return effect;
 }
 
 extern SdfPoolNode *D_0037EAB0[8];
