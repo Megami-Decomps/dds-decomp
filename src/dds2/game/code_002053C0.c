@@ -111,7 +111,7 @@ extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 extern s32 btlGetSideIndexedActorStatusTable(s32, s32);
 
-extern void btlRepositionPartyAroundBattleCenter(void);
+extern s32 btlRepositionPartyAroundBattleCenter(void);
 
 extern void mnuReleaseSoundBufferLocked(void);
 
@@ -579,10 +579,10 @@ s32 func_00205CC8(s32 filter) {
     return 1;
 }
 
-void btlRepositionPartyAroundBattleCenter(void) {
+s32 btlRepositionPartyAroundBattleCenter(void) {
     s128 v;
     PCP_COPY_VECTOR(&v, btlGetRuntime());
-    func_002059F0((f32 *)&v);
+    return func_002059F0((f32 *)&v);
 }
 
 s32 func_00206090(void) {

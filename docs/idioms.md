@@ -5894,3 +5894,15 @@ directly; their local declarations must agree with those existing
 providers. This is not an SDK address-word storage boundary, so no
 pointer-to-`u32` round trip belongs at these calls.
 
+
+## Reposition wrappers forward the formation-change result
+
+`btlRepositionPartyAroundBattleCenter` (`001F53C0` in DDS1,
+`00206060` in DDS2) forwards the signed `0`/`1` result of the
+inner party-placement routine. Its C definition and local declarations
+must therefore return `s32`, even where a caller intentionally discards
+the result. DDS2 summon setup snapshots `$v0` at `001DB7D4`, in the
+following call's delay slot, and uses that snapshot to decide whether to
+start the command-sound tasks. This is the inner routine's real result,
+not a fabricated return or a fall-through register value.
+

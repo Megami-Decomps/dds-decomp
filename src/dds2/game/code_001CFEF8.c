@@ -104,7 +104,7 @@ extern void fldInitializeSceneGroups(void);
 
 extern s32 func_00206090();
 
-extern void btlRepositionPartyAroundBattleCenter();
+extern s32 btlRepositionPartyAroundBattleCenter(void);
 
 extern s32 func_001AC648();
 
