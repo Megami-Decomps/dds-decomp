@@ -45,8 +45,6 @@ void itfMesClearWindowHighFlags(s32 window, u32 mask);
 
 void itfMesSetWindowPageAndRefresh(s32 window, s32 firstValue, s32 secondValue);
 
-void itfMesFinishWindowAndClearStatus(s32 window);
-
 void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
 
 void itfMesResetWindow(s32 window);
@@ -919,8 +917,8 @@ void itfMesSetEntryLastColorChannel(s32 window, u8 channelValue) {
 }
 
 /* Store the optional callback address invoked without arguments during glyph building. */
-void itfMesSetWindowCallbackAddress(s32 window, u32 callbackAddress) {
-    itfWindowSlots[window].mes->callbackAddress = callbackAddress;
+void itfMesSetWindowCallbackAddress(s32 window, void (*callback)(void)) {
+    itfWindowSlots[window].mes->callbackAddress = (u32)callback;
 }
 
 /* Initialize the fixed window pool, load its texture and register the named

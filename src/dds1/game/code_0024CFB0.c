@@ -1,4 +1,5 @@
 #include "kwln_task_state.h"
+#include "itf_mes_window.h"
 #include "mnu.h"
 #include "mnu_list.h"
 #include "sdf_resource.h"

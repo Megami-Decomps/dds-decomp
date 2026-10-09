@@ -62,8 +62,6 @@ void itfMesSetWindowPageAndRefresh(s32 window, s32 firstValue, s32 secondValue);
 
 s32 func_001A4A10(s32 window, s32 first, s32 second);
 
-void itfMesFinishWindowAndClearStatus();
-
 void itfMesCleanupWindow(s32 window, s32 releasePrimaryBlock);
 
 void itfMesResetWindow(s32 window);
@@ -200,7 +198,7 @@ s32 itfMesFinishScriptWindowIfActive(void) {
 
 /* Mark each originally nonzero status pair with both bits, then clean/reset
  * content and clear the script panel bit. The status pairs are set, not cleared. */
-void itfMesFinishWindowAndClearStatus(s32 window, s32 unused1, s32 unused2) {
+void itfMesFinishWindowAndClearStatus(s32 window) {
     ItfMesState *mes = itfWindowSlots[window].mes;
     u32 previousFlags = mes->flags;
 
@@ -858,8 +856,8 @@ void itfMesSetEntryLastColorChannel(s32 window, u8 channelValue) {
 }
 
 /* Store the optional callback address invoked without arguments during glyph building. */
-void itfMesSetWindowCallbackAddress(s32 window, u32 callbackAddress) {
-    itfWindowSlots[window].mes->callbackAddress = callbackAddress;
+void itfMesSetWindowCallbackAddress(s32 window, void (*callback)(void)) {
+    itfWindowSlots[window].mes->callbackAddress = (u32)callback;
 }
 
 /* Initialize the fixed window pool, load its texture and register the named
