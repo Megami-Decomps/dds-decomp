@@ -78,7 +78,7 @@ typedef struct EffectSurfaceNode {
     u32 index;
     u32 pad_30;
     struct BillObj *resource;
-    void **jobs;
+    FileJobPayload **jobs;
     struct SdfMemBlock *jobAllocation;
     void **queues;
     struct SdfMemBlock *queueAllocation;
@@ -5512,7 +5512,7 @@ void fileCloneEffectSurfaceResources(EffectSurfaceNode *dst, EffectSurfaceNode *
             return;
         }
         dst->jobAllocation = sdfAllocGeneralBlock(size);
-        dst->jobs = (void *)sdfResourceRetainAddress(dst->jobAllocation);
+        dst->jobs = (FileJobPayload **)sdfResourceRetainAddress(dst->jobAllocation);
         for (i = 0; i < count; i++) {
             dst->jobs[i] = fileJobCreateChild(src->jobs[0]);
         }
@@ -5610,7 +5610,7 @@ void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJobPayload *job) 
     size = count * 4;
     if (size != 0) {
         node->jobAllocation = sdfAllocGeneralBlock(size);
-        node->jobs = (void *)sdfResourceRetainAddress(node->jobAllocation);
+        node->jobs = (FileJobPayload **)sdfResourceRetainAddress(node->jobAllocation);
         node->jobs[0] = fileJobCreateFromJob(job);
         for (i = 1; i < count; i++) {
             node->jobs[i] = fileJobCreateChild(node->jobs[0]);
