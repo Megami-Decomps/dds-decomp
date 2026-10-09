@@ -571,7 +571,7 @@ extern EffResourceOps effBlockResourceOperations[];
 
 extern EffResourceOps effModelBlockOperations[];
 
-extern EffResourceOps D_003EA018[];
+extern EffResourceOps effRuntimeResourceOperations[];
 
 
 extern EffClassOps effModelResourceOperations[];
@@ -7968,7 +7968,7 @@ INCLUDE_ASM(const s32, "game/code_002DE248", func_002F91D0);
 
 u8 *effAllocateResourcePayload(u16 kind, void *source) {
     u32 headerSize = 0x40;
-    u32 size = D_003EA018[kind].payloadSize;
+    u32 size = effRuntimeResourceOperations[kind].payloadSize;
     u8 *effect = sdfAllocSizeClassBlock(size + headerSize);
     ((EffActiveResource *)effect)->payload = effect + headerSize;
     ((EffActiveResource *)effect)->color = 0x80808080;
@@ -7985,11 +7985,11 @@ u8 *func_002F9608(u16 kind, void *source, u16 secondaryKind, void *secondary, u3
     u8 *effect = effAllocateResourcePayload(kind, source);
 
     if (btlIsRuntimeAllocated() != 0) {
-        if (D_003EA018[kind].createResource != NULL) {
-            ((EffActiveResource *)effect)->resource = (u32)D_003EA018[kind].createResource(source, secondaryKind, secondary, param);
+        if (effRuntimeResourceOperations[kind].createResource != NULL) {
+            ((EffActiveResource *)effect)->resource = (u32)effRuntimeResourceOperations[kind].createResource(source, secondaryKind, secondary, param);
         }
-        if (D_003EA018[kind].initialize != NULL) {
-            D_003EA018[kind].initialize(effect);
+        if (effRuntimeResourceOperations[kind].initialize != NULL) {
+            effRuntimeResourceOperations[kind].initialize(effect);
         }
     }
     return effect;
@@ -8004,8 +8004,8 @@ void effCreateActiveResourceFromFile(FileJobPayload *source) {
 
 void effDestroyResourceInstance(u32 *obj) {
     if (btlIsRuntimeAllocated()) {
-        if (D_003EA018[obj[0x2C / 4]].destroyResource != NULL) {
-            D_003EA018[obj[0x2C / 4]].destroyResource(obj[0x30 / 4]);
+        if (effRuntimeResourceOperations[obj[0x2C / 4]].destroyResource != NULL) {
+            effRuntimeResourceOperations[obj[0x2C / 4]].destroyResource(obj[0x30 / 4]);
         }
     }
     sdfReleaseChipBlock(obj);
@@ -8015,17 +8015,17 @@ u8 *effDuplicateActiveResource(u8 *source) {
     u8 *effect;
     u32 kind = ((EffActiveResource *)source)->kind.index;
 
-    if (D_003EA018[kind].cloneResource == NULL) {
+    if (effRuntimeResourceOperations[kind].cloneResource == NULL) {
         effect = func_002F9608(((EffActiveResource *)source)->kind.shortIndex, ((EffActiveResource *)source)->payload, 0, 0, 0);
     } else {
         u32 resource;
         u32 activeKind;
         effect = effAllocateResourcePayload(((EffActiveResource *)source)->kind.shortIndex, ((EffActiveResource *)source)->payload);
-        resource = (u32)D_003EA018[((EffActiveResource *)source)->kind.signedIndex].cloneResource(source);
+        resource = (u32)effRuntimeResourceOperations[((EffActiveResource *)source)->kind.signedIndex].cloneResource(source);
         activeKind = ((EffActiveResource *)source)->kind.index;
         ((EffActiveResource *)effect)->resource = resource;
-        if (D_003EA018[activeKind].initialize != NULL) {
-            D_003EA018[activeKind].initialize(effect);
+        if (effRuntimeResourceOperations[activeKind].initialize != NULL) {
+            effRuntimeResourceOperations[activeKind].initialize(effect);
         }
     }
     return effect;
@@ -8033,8 +8033,8 @@ u8 *effDuplicateActiveResource(u8 *source) {
 
 void effClearCallbackFrame(u32 *obj) {
     if (btlIsRuntimeAllocated()) {
-        if (D_003EA018[obj[0x2C / 4]].initialize != NULL) {
-            D_003EA018[obj[0x2C / 4]].initialize(obj);
+        if (effRuntimeResourceOperations[obj[0x2C / 4]].initialize != NULL) {
+            effRuntimeResourceOperations[obj[0x2C / 4]].initialize(obj);
         }
         obj[0x28 / 4] = 0;
     }
@@ -8044,7 +8044,7 @@ void effAdvanceCallbackFrame(u8 *work) {
     if (btlIsRuntimeAllocated() != 0 &&
         (effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
         s32 kind = ((EffActiveResource *)work)->kind.signedIndex;
-        EffResourceOps *entry = &D_003EA018[kind];
+        EffResourceOps *entry = &effRuntimeResourceOperations[kind];
         void (*callback)(void *) = entry->update;
         if (callback != NULL) {
             callback(work);
@@ -8055,7 +8055,7 @@ void effAdvanceCallbackFrame(u8 *work) {
 
 void effDispatchEnabledCallback(u8 *work) {
     if (btlIsRuntimeAllocated() != 0) {
-        void (*callback)(void *) = D_003EA018[((EffActiveResource *)work)->kind.signedIndex].draw;
+        void (*callback)(void *) = effRuntimeResourceOperations[((EffActiveResource *)work)->kind.signedIndex].draw;
         if (callback != NULL) {
             callback(work);
         }
