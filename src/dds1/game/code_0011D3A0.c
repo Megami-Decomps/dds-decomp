@@ -119,7 +119,21 @@ struct SdfListHead *sdfCreateResetPacketList(void) {
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011D3E8);
 
-INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011D570);
+void *func_0011D570(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags) {
+    u64 *packet = (u64 *)sdfAllocPacketAligned(0x50);
+
+    packet[0] = 4;
+    packet[1] = 0x5000000400000000ULL;
+    packet[2] = 0x5400000000008001ULL;
+    packet[3] = 0x51510;
+    packet[4] = flags | 0x109;
+    packet[5] = (u32)color0 | ((u64)0xFE00 << 46);
+    packet[6] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | ((u64)((u32)z0 >> 4) << 32);
+    packet[7] = (u32)color1 | ((u64)0xFE00 << 46);
+    packet[8] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | ((u64)((u32)z1 >> 4) << 32);
+    packet[9] = 0;
+    return packet;
+}
 
 INCLUDE_ASM(const s32, "game/code_0011D3A0", func_0011D6B0);
 
