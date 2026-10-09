@@ -4,7 +4,18 @@
 extern u32 uiBlendColors(u32, u32, s32);
 
 
-INCLUDE_ASM(const s32, "game/code_002665E0", func_002665E0);
+void func_002665E0(s32 a0, s32 a1, s32 a2, BrsSkillPackageWork *work, s32 a4, s32 a5, s32 index) {
+    s32 remaining = 0x100 - work->fadeProgress;
+
+    if (work->fadeAnimation[index].backgroundState == 0) {
+        u32 opacity = uiBlendColors(0x80808080, 0x80808000, remaining) & 0xFF;
+
+        work->fadeAnimation[index].backgroundOpacity = opacity;
+        if (work->fadeAnimation[index].backgroundOpacity >= 0x80) {
+            work->fadeAnimation[index].backgroundState = 1;
+        }
+    }
+}
 INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFBB0);
 
 INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFBC0);
