@@ -129,7 +129,7 @@ extern void sdfDestroyStreamFrameNode(SdfStreamFrameNode *);
 extern void func_002E98F0(void);
 
 /* Wait for active work's release phase, free its owned buffers, then deactivate it. */
-void sdfCancelAndReleasePacWork(MovObj *job) {
+void sdfCancelAndReleaseMovieStreamWork(MovObj *job) {
     if (job->active != 0) {
         job->stopRequested = 1;
         /* Queue phase 5 as phase 7; phase 6 is the release gate below. */

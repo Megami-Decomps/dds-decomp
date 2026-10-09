@@ -285,6 +285,7 @@ typedef char MovObj_stream_offset_must_be_0x1C[
     ((u32)&((MovObj *)0)->stream == 0x1C) ? 1 : -1];
 
 void sdfMovieInitializeStreamWork(MovObj *, SdfMovieDescriptor *, const char *);
+void sdfCancelAndReleaseMovieStreamWork(MovObj *);
 
 /* Graph target: two color buffers followed by the auxiliary/depth buffer (0x14). */
 typedef struct SdfGraphObj {
