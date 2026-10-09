@@ -5548,17 +5548,15 @@ u8 *effDuplicateActiveResourceB(u8 *obj) {
     return work;
 }
 
-void effResetBlockResourceFrame(u8 *work) {
-    D_003E9DD8[((EffClassWork *)work)->kind].initialize();
-    ((EffClassWork *)work)->frame = 0;
+void effResetBlockResourceFrame(EffClassWork *work) {
+    D_003E9DD8[work->kind].initialize();
+    work->frame = 0;
 }
 
-void effAdvanceBlockResourceFrame(work)
-s32 *work;
-{
+void effAdvanceBlockResourceFrame(EffClassWork *work) {
     if ((effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE) == 0) {
-        D_003E9DD8[work[0x2C / 4]].update();
-        work[0x28 / 4]++;
+        D_003E9DD8[work->kind].update();
+        work->frame++;
     }
 }
 
@@ -5567,7 +5565,7 @@ void effDrawBlockResourceWork(s32 work) {
 }
 
 void effUpdateAndDrawBlockResource(u32 work) {
-    effAdvanceBlockResourceFrame();
+    effAdvanceBlockResourceFrame((EffClassWork *)work);
     effDrawBlockResourceWork(work);
 }
 
