@@ -1791,7 +1791,59 @@ s32 mnuCloseItemSelectionState(KwlnTask *selection) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "game/code_002B0278", func_002B4E58);
+s32 func_002B4E58(KwlnTask *callback) {
+    MenuContext *context = (MenuContext *)kwlnTaskGetUserValue(callback);
+    SkillMenuRuntime *runtime = (SkillMenuRuntime *)context->party;
+    s32 inputFlags = mnuMapPadMaskToFlags(3);
+    s32 *popup = context->popupState;
+    s32 transition = func_002C4038(&context->transitionWork, popup, 0, callback);
+    MenuWindowContainer *categoryWindow;
+    s32 partyIndex;
+    DatPartyRecord *partyRecord;
+
+    if (transition != 0) {
+        return transition;
+    }
+
+    mnuStepPartyPanelListFromInput(4, &context->partyWindow);
+
+    if (inputFlags & 1) {
+        categoryWindow = context->imageHandle;
+        if (categoryWindow->list->cursor->index == 0) {
+            partyIndex = context->partyWindow.lists[0]->cursor->index;
+            partyRecord = &datGameState->party[partyIndex];
+            if (!(partyRecord->status & 0x10)) {
+                if (runtime->selectedWindow != NULL) {
+                    mnuDestroySelectedPartyWindow(callback);
+                }
+                if (runtime->selectedWindow == NULL) {
+                    ptySkillMenuBuildEquippedSlots(1, callback);
+                    mnuSeekFirstAvailableStaffListNode(callback);
+                }
+                mnuSetPopupEntry(popup, D_003E7758);
+            } else {
+                inputFlags = 0x8000;
+            }
+        } else {
+            mnuSetPopupEntry(popup, D_003E7790);
+        }
+    }
+
+    if (inputFlags & 2) {
+        mnuClearActionFlags(0, &context->partyWindow);
+        /* Both category paths select the same cancel entry in retail. */
+        if (context->imageHandle->list->cursor->index == 0) {
+            mnuSetPopupEntryFlagged(popup, D_003E7720);
+        } else {
+            mnuSetPopupEntryFlagged(popup, D_003E7720);
+        }
+        mnuConfigurePanelResource((MenuScrollPanel *)(u32)context->panelHandle,
+                                  context->displayHandle, 0, 1);
+    }
+
+    mnuPlayInputSound(0, inputFlags, 0);
+    return 0;
+}
 
 s32 mnuCampMenuDrawSlotLabel(KwlnTask *callback) {
     s32 context = kwlnTaskGetUserValue(callback);
