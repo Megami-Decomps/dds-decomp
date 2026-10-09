@@ -25,6 +25,12 @@ typedef struct EffRibbonWork {
     struct SdfMemBlock *allocation; /* 0x30 */
 } EffRibbonWork;
 
+EffRibbonWork *effCreateRibbonWork(u32 count, u32 repeat);
+EffRibbonWork *effCreateRibbonWithSharedResource(
+    u32 count, u32 repeat, struct SdfTextureFileHeader *resource);
+EffRibbonWork *effCloneRibbonWithSharedResource(EffRibbonWork *source);
+void effSharedAssetReferenceRelease(EffRibbonWork *work);
+
 typedef char EffRibbonWorkSizeCheck[(sizeof(EffRibbonWork) == 0x34) ? 1 : -1];
 typedef char EffRibbonWorkCountOffsetCheck[((u32)&((EffRibbonWork *)0)->count == 0x00) ? 1 : -1];
 typedef char EffRibbonWorkSurfaceIndexOffsetCheck[((u32)&((EffRibbonWork *)0)->surfaceIndex == 0x04) ? 1 : -1];
