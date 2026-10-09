@@ -87,7 +87,6 @@ extern s32 effComputeLightDirectionVU(MdlCtx *, SdfLightingPacketStorage *);
 extern void effFloorModelListRemove(EffectObjectNode *);
 
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfInitPacketList(SdfListHead *list);
 extern u32 mdlGetBroadcastValue(MdlCtx *model);
 extern SdfPoolNode *D_00380788[13][4];
 extern u64 D_003E9640[];

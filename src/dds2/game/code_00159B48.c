@@ -163,7 +163,6 @@ extern s32 effBillResourceOwners[];
 
 s32 sdfAllocPacketAligned(s32 size);
 
-void sdfInitPacketList(s32 packet);
 
 typedef struct EffGeneratedTextureDescriptor EffGeneratedTextureDescriptor;
 void effDrawGeneratedTextureQuad(SdfListHead *packet, EffGeneratedTextureDescriptor *source);
@@ -668,7 +667,7 @@ void effDrawGeneratedTextureQuad(SdfListHead *list, EffGeneratedTextureDescripto
 void effSubmitGeneratedTexturePacket(SdfPoolNode *surface, EffGeneratedTextureDescriptor *source) {
     s32 packetAddress = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
 
-    sdfInitPacketList(packetAddress);
+    sdfInitPacketList((SdfListHead *)packetAddress);
     effDrawGeneratedTextureQuad((SdfListHead *)packetAddress, source);
     surface->append((SdfListHead *)surface, (SdfListHead *)packetAddress);
 }
@@ -846,7 +845,7 @@ void effDrawCompositeTextureQuad(SdfListHead *list, EffCompositeGsDescriptor *so
 void effSubmitCompositeGsPacket(SdfPoolNode *surface, EffCompositeGsDescriptor *source) {
     s32 packetAddress = sdfAllocPacketAligned(EFF_PACKET_LIST_BYTES);
 
-    sdfInitPacketList(packetAddress);
+    sdfInitPacketList((SdfListHead *)packetAddress);
     effDrawCompositeTextureQuad((SdfListHead *)packetAddress, source);
     surface->append((SdfListHead *)surface, (SdfListHead *)packetAddress);
 }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
 #include "fr_font_measure.h"
 #include "fr_font.h"
@@ -5752,7 +5753,6 @@ INCLUDE_ASM(const s32, "game/code_001A1960", func_001BC540);
 
 extern SdfPoolNode D_003255A8;
 extern s32 sdfAllocPacketAligned(s32 size);
-extern void sdfInitPacketList(SdfListHead *list);
 extern void sdfQueueGouraudTexturedQuad(
     s32 list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0,
     s32 x1, s32 y1, s32 u1, s32 v1, s32 color1,
