@@ -322,14 +322,14 @@ u32 sdfGetLodChunkValue(SdfModel *model) {
 
 
 /* Store the override pair and select it instead of the shared defaults. */
-void sdfSetTextFloatPairOverride(SdfModel *model, f32 first, f32 second) {
+void sdfSetModelScalarOverrides(SdfModel *model, f32 first, f32 second) {
     model->scalarOverrideFirst = first;
     model->scalarOverrideSecond = second;
     model->flags = model->flags | SDF_MODEL_USE_SCALAR_OVERRIDES;
 }
 
 /* Clear only the pair-override selection bit. */
-void sdfClearTextFloatPairOverride(SdfModel *model) {
+void sdfClearModelScalarOverrides(SdfModel *model) {
     model->flags = model->flags & ~SDF_MODEL_USE_SCALAR_OVERRIDES;
 }
 

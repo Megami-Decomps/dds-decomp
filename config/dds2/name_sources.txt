@@ -6162,8 +6162,8 @@
 0x00332C30	sdfVuTransformMapRecordPosition	inferred	Transforms a map record position by its associated chunk matrix. [names_reviewed8.tsv]
 0x00332D08	sdfLoadMapRecordLookAtBasis	inferred	Resolves a map record by id and loads its look-at basis. [names_reviewed8.tsv]
 0x00332D48	sdfLoadMapRecordPositionVector	inferred	Resolves a map record by id and loads its transformed position. [names_reviewed8.tsv]
-0x00332DE8	sdfSetTextFloatPairOverride	inferred	Byte-identical dds1 twin 0x002D9F38; Sets two floating-point text parameters and enables their shared override flag. [names_conflicts.tsv]
-0x00332E00	sdfClearTextFloatPairOverride	inferred	Byte-identical dds1 twin 0x002D9F50; Clears only the flag enabling the floating-point text parameter pair override. [names_conflicts.tsv]
+0x00332DE8	sdfSetModelScalarOverrides	inferred	Stores both model scalar overrides and enables the model override flag; paired DDS1 implementation at 0x002D9F38.
+0x00332E00	sdfClearModelScalarOverrides	inferred	Clears the model scalar override selection flag without changing either stored value; paired DDS1 implementation at 0x002D9F50.
 0x00332E10	sdfGetFirstTextOverrideOrDefault	inferred	Byte-identical dds1 twin 0x002D9F60; Selects the first per-text override at offset 0x88 or the corresponding global default. [names_conflicts.tsv]
 0x00332E30	sdfGetSecondTextOverrideOrDefault	inferred	Byte-identical dds1 twin 0x002D9F80; Selects the second per-text override at offset 0x8C or the corresponding global default. [names_conflicts.tsv]
 0x00332E50	sdfSetForcedAssetTextureMode	inferred	confidence=high; matched-C; src/dds2/game/code_003325F8.c:345:func_00332E50; Stores global forced texture mode used by asset rendering.; twin=0x002D9FA0, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]

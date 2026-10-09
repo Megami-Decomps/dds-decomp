@@ -6435,8 +6435,8 @@
 0x002D9E98	sdfLoadMapRecordPositionVector	inferred	Resolves a map record by id and loads its transformed position. [names_reviewed8.tsv]
 0x002D9ED8	sdfGetUniqueChunkValue	inferred	Returns the first data word of the UNIQ chunk when it exists.
 0x002D9F08	sdfGetLodChunkValue	inferred	Returns the first data word of the LODC chunk when it exists.
-0x002D9F38	sdfSetTextFloatPairOverride	inferred	Sets two floating-point text parameters and enables their shared override flag.
-0x002D9F50	sdfClearTextFloatPairOverride	inferred	Clears only the flag enabling the floating-point text parameter pair override.
+0x002D9F38	sdfSetModelScalarOverrides	inferred	Stores both model scalar overrides and enables the model override flag.
+0x002D9F50	sdfClearModelScalarOverrides	inferred	Clears the model scalar override selection flag without changing either stored value.
 0x002D9F60	sdfGetFirstTextOverrideOrDefault	inferred	Selects the first per-text override at offset 0x88 or the corresponding global default.
 0x002D9F80	sdfGetSecondTextOverrideOrDefault	inferred	Selects the second per-text override at offset 0x8C or the corresponding global default.
 0x002D9FA0	sdfSetForcedAssetTextureMode	inferred	confidence=high; matched-C; src/dds1/game/code_002D9748.c:325:func_002D9FA0; Stores global forced texture mode used by asset rendering.; twin=0x00332E50, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
