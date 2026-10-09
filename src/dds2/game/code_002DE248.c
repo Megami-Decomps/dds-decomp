@@ -3643,12 +3643,6 @@ s32 effCreateSurfaceNodeFromFile(s32 *source) {
 
 extern void effReleaseSurfaceGridBuffers(s32);
 
-extern void fileJobDestroy(u32);
-
-extern u32 fileJobCreateFromJob(u32);
-
-extern u32 fileJobCreateChild(u32);
-
 void effDestroySurfaceNode(EffectSlotNode54 *node) {
     u32 i;
     u32 count;
@@ -3659,7 +3653,7 @@ void effDestroySurfaceNode(EffectSlotNode54 *node) {
     if (node->jobAllocation != 0) {
         count = ((FileSlotTable *)node->record)->count;
         for (i = 0; i < count; i++) {
-            fileJobDestroy(node->jobs[i]);
+            fileJobDestroy((FileJobPayload *)node->jobs[i]);
         }
         sdfReleaseResourceAllocation(node->jobAllocation);
     }
@@ -3732,7 +3726,7 @@ void func_002E7F60(EffectSlotNode54 *dst, u8 *work) {
         count = ((FileSlotTable *)src->record)->count;
         if (dst->jobAllocation != 0) {
             for (i = 0; i < count; i++) {
-                fileJobDestroy(dst->jobs[i]);
+                fileJobDestroy((FileJobPayload *)dst->jobs[i]);
             }
             sdfReleaseResourceAllocation(dst->jobAllocation);
             dst->jobs = 0;
@@ -3745,7 +3739,7 @@ void func_002E7F60(EffectSlotNode54 *dst, u8 *work) {
         dst->jobAllocation = sdfAllocGeneralBlock(size);
         dst->jobs = (u32 *)sdfResourceRetainAddress(dst->jobAllocation);
         for (i = 0; i < count; i++) {
-            dst->jobs[i] = fileJobCreateChild(src->jobs[0]);
+            dst->jobs[i] = (u32)fileJobCreateChild((FileJobPayload *)src->jobs[0]);
         }
         break;
     case 6:
@@ -3863,7 +3857,7 @@ void effRebuildSurfaceJobs(EffectSlotNode54 *node, void *source) {
 
     if (node->jobAllocation != 0) {
         for (i = 0; i < count; i++) {
-            fileJobDestroy(node->jobs[i]);
+            fileJobDestroy((FileJobPayload *)node->jobs[i]);
         }
         sdfReleaseResourceAllocation(node->jobAllocation);
         node->jobs = 0;
@@ -3873,9 +3867,9 @@ void effRebuildSurfaceJobs(EffectSlotNode54 *node, void *source) {
     if (size != 0) {
         node->jobAllocation = sdfAllocGeneralBlock(size);
         node->jobs = (u32 *)sdfResourceRetainAddress(node->jobAllocation);
-        node->jobs[0] = fileJobCreateFromJob((u32)source);
+        node->jobs[0] = (u32)fileJobCreateFromJob((FileJobPayload *)(u32)source);
         for (i = 1; i < count; i++) {
-            node->jobs[i] = fileJobCreateChild(node->jobs[0]);
+            node->jobs[i] = (u32)fileJobCreateChild((FileJobPayload *)node->jobs[0]);
         }
     }
 }
@@ -8804,10 +8798,10 @@ void effFileJobQueueRelease(u32 job) {
         effAuxiliaryFileQueue = 0;
     }
     if (effTemporaryFileJob != 0) {
-        fileJobDestroy(effTemporaryFileJob);
+        fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
         effTemporaryFileJob = 0;
     }
-    fileJobDestroy(job);
+    fileJobDestroy((FileJobPayload *)job);
 }
 
 extern char D_0042CF58[];
@@ -9356,7 +9350,7 @@ u32 effReinitializeFileQueue(void) {
         effAuxiliaryFileQueue = 0;
     }
     if (effTemporaryFileJob != 0) {
-        fileJobDestroy(effTemporaryFileJob);
+        fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
         effTemporaryFileJob = 0;
     }
     if (effFileQueue != 0) {
@@ -9822,7 +9816,7 @@ void effResetFileResources(void) {
         effAuxiliaryFileQueue = 0;
     }
     if (effTemporaryFileJob != 0) {
-        fileJobDestroy(effTemporaryFileJob);
+        fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
         effTemporaryFileJob = 0;
     }
 }
@@ -10569,7 +10563,7 @@ u32 fileLoadEffectSlotA(void) {
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)D_003FFA78;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
-            fileJobDestroy(effTemporaryFileJob);
+            fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
             effTemporaryFileJob = 0;
         }
         result = 0x800002;
@@ -10647,7 +10641,7 @@ u32 effQueueGeneratedFileJob(void) {
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = D_003FFA78;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
-            fileJobDestroy(effTemporaryFileJob);
+            fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
             effTemporaryFileJob = 0;
         }
         result = 0x800002;
@@ -10689,7 +10683,7 @@ u32 effPollAndQueueCopiedFileResource(void) {
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = D_003FFA78;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
-            fileJobDestroy(effTemporaryFileJob);
+            fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
             effTemporaryFileJob = 0;
         }
         result = 0x800002;
@@ -10747,7 +10741,7 @@ u32 effLoadFileSlotF2(void) {
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = D_003FFA78;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
-            fileJobDestroy(effTemporaryFileJob);
+            fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
             effTemporaryFileJob = 0;
         }
         result = 0x800002;
@@ -10789,7 +10783,7 @@ u32 effLoadMaterialFile(void) {
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = D_003FFA78;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
-            fileJobDestroy(effTemporaryFileJob);
+            fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
             effTemporaryFileJob = 0;
         }
         result = 0x800002;
@@ -10837,7 +10831,7 @@ u32 effPollAndQueueFileResourceWithUnitFloats(void) {
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = D_003FFA78;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
-            fileJobDestroy(effTemporaryFileJob);
+            fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
             effTemporaryFileJob = 0;
         }
         result = 0x800002;
