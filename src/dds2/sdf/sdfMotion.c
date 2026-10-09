@@ -800,12 +800,12 @@ void sdfMotionCapturePrimaryTextParams(SdfMotionIndexedTextBinding *binding) {
     binding->capture.snapshot = *textParams;
 }
 
-void *sdfMotionCreateSecondaryTextBinding(void *source, s32 unused, s32 options) {
-    void *motion;
+SdfMotionIndexedTextBinding *sdfMotionCreateSecondaryTextBinding(Motion *motion, s32 unused, s32 options) {
+    SdfMotionIndexedTextBinding *binding;
 
-    motion = sdfAllocSizeClassBlock(0x24);
-    sdfMotionBindIndexedTrack(motion, source, D_0040B4B0, options);
-    return motion;
+    binding = sdfAllocSizeClassBlock(0x24);
+    sdfMotionBindIndexedTrack((SdfMotionIndexedBinding *)binding, motion, D_0040B4B0, options);
+    return binding;
 }
 
 void sdfMotionApplySecondaryTextKeys(SdfMotionIndexedTextBinding *output, f32 t1) {
