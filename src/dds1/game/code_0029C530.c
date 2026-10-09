@@ -3204,8 +3204,8 @@ void effDestroyClassWork(EffClassWork *work) {
     sdfReleaseChipBlock(work);
 }
 
-void effCreateClassWorkFromRequest(EffClassWork *work) {
-    effCreateClassWork(work->kind, work->payload);
+EffClassWork *effCloneClassWork(EffClassWork *work) {
+    return effCreateClassWork(work->kind, work->payload);
 }
 
 void effInitializeClassFrame(EffClassWork *work) {
@@ -4125,15 +4125,15 @@ INCLUDE_ASM(const s32, "game/code_0029C530", func_002A9160);
 
 extern void effResetDispatchCounter(EffClassWork *);
 
-void effResetIndexedInstanceFrames(u8 *work) {
+void effResetRadialClassResourceFrames(EffClassWork *work) {
     u32 index = 0;
-    u32 count = ((EffBillTimedHeader *)((EffClassWork *)work)->payload)->count;
-    u8 *entry = ((EffFrameState *)((EffClassWork *)work)->resource)->entries;
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffClassWork **entry = ((EffClassWorkList *)work->resource)->entries;
 
     if (count != 0) {
         do {
-            effResetDispatchCounter(*(EffClassWork **)entry);
-            entry += 4;
+            effResetDispatchCounter(*entry);
+            entry++;
             index++;
         } while (index < count);
     }
@@ -4177,17 +4177,17 @@ EffClassWorkList *effCreateRadialClassResourceEntries(EffBillPointConfig *config
 
 extern void effDestroyClassResourceWork(EffClassWork *);
 
-void effReleaseBillFrameEntries(u8 *work) {
-    u8 *config = ((EffClassWork *)work)->payload;
-    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+void effDestroyRadialClassResourceEntries(EffClassWork *work) {
+    u8 *config = work->payload;
+    EffClassWorkList *state = (EffClassWorkList *)work->resource;
     u32 count = ((EffBillTimedHeader *)config)->count;
     u32 index = 0;
-    u8 *entry = *(u8 **)state;
+    EffClassWork **entry = state->entries;
 
     if (count != 0) {
         do {
-            effDestroyClassResourceWork(*(EffClassWork **)entry);
-            entry += 4;
+            effDestroyClassResourceWork(*entry);
+            entry++;
         } while (++index < count);
     }
     sdfReleaseChipBlock(state);
@@ -4195,15 +4195,15 @@ void effReleaseBillFrameEntries(u8 *work) {
 
 extern void effAdvanceClassResourceFrame(EffClassWork *);
 
-void effReleaseTrackEntriesA(u8 *work) {
+void effAdvanceRadialClassResourceFrames(EffClassWork *work) {
     u32 index = 0;
-    u32 count = ((EffBillTimedHeader *)((EffClassWork *)work)->payload)->count;
-    u8 *entry = *(u8 **)(u8 *)((EffClassWork *)work)->resource;
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffClassWork **entry = ((EffClassWorkList *)work->resource)->entries;
 
     if (count != 0) {
         do {
-            effAdvanceClassResourceFrame(*(s32 *)entry);
-            entry += 4;
+            effAdvanceClassResourceFrame(*entry);
+            entry++;
             index++;
         } while (index < count);
     }
