@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_packet_list.h"
+#include "sdf_packet_slot.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
@@ -14,14 +15,6 @@ extern s32 sdfDoubleBufferAllocation;
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
 #include "sdf_draw.h"
-
-typedef struct SdfPacketSlot {
-    SdfListHead *list;
-    u32 unk4;
-    u8 state;
-    u8 unk9;
-    u8 pad0A[6];
-} SdfPacketSlot;
 
 extern u32 func_003287E0(void);
 extern u32 sdfGetElapsedTimerTicks(u32);
@@ -1034,18 +1027,18 @@ void sdfQueueFramePackets(SdfListHead *list, SdfPacketChain *chain) {
         index = 0;
     }
     slot = &D_0040B308[index];
-    slot->list = NULL;
-    slot->unk4 = 0;
-    slot->state = 0;
+    slot->packetList = NULL;
+    slot->callbackHead = NULL;
+    slot->slotUpdatePhase = 0;
     if (list != NULL && list->last != 0) {
-        slot->list = list;
+        slot->packetList = list;
         if (chain != NULL) {
-            slot->unk4 = chain->head->first;
-            if (slot->unk4 != 0) {
+            slot->callbackHead = (void *)(u32)chain->head->first;
+            if (slot->callbackHead != NULL) {
                 *(u32 *)chain->tail->last = 0;
             }
         }
-        slot->unk9 = sdfCurrentBufferIndex;
+        slot->queuedBufferIndex = sdfCurrentBufferIndex;
     }
     D_00438A28 = index;
     D_00439165 = 1;
@@ -1061,7 +1054,7 @@ void sdfSetNonnegativePacketIndex(s32 value) {
 
 void sdfResetPacketSlotState(void) {
     sdfPacketSlotIndex = 0;
-    D_0040B308[0].list = NULL;
+    D_0040B308[0].packetList = NULL;
     D_00438A28 = 0;
 }
 
@@ -1074,10 +1067,10 @@ void sdfWaitSlotReady(void) {
         while (D_00438A1D != 0) {
         }
         entry = &D_0040B308[D_00438A28];
-        if (entry->list == NULL) {
+        if (entry->packetList == NULL) {
             return;
         }
-        if (entry->state >= 2) {
+        if (entry->slotUpdatePhase >= 2) {
             return;
         }
         sdfSleepThreadCount(0);
