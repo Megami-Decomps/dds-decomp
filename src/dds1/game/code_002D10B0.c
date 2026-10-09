@@ -1171,3 +1171,4 @@ INCLUDE_SDATA(const s32, "game/code_002D10B0", sdfBusyBufferIndex);
 INCLUDE_SDATA(const s32, "game/code_002D10B0", D_003BD304);
 
 INCLUDE_SDATA(const s32, "game/code_002D10B0", sdfResourceListHead);
+

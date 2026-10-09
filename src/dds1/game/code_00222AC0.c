@@ -1227,9 +1227,9 @@ u32 evtOpSetUnitGradientColors(void) {
     return 1;
 }
 
+extern void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 index);
 INCLUDE_RODATA(const s32, "game/code_00222AC0", D_003AC480);
 
-extern void evtSetUnitNormalizedDirection(EvtUnit *unit, s32 index);
 const char D_003AC4C0[] = "WARNING: MODEL_LIGHT_DIR length zero\n";
 
 u32 func_00225330(void) {
