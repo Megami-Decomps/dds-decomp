@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "itf_mes_window.h"
 #include "sdf_resource.h"
@@ -570,7 +571,6 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
 }
 
 extern Motion *mdlFindNodeById(MdlCtx *ctx, s32 id);
-extern u16 mdlGetNodeFrameCount(MdlCtx *ctx, s32 id);
 extern EvtRuntimeChild *evtViewerFindLatestMatchingGlyph(EvtRuntimeGroup *, s32, s32);
 
 void func_002496B0(s32 frame, EffWorldNode *object, EvtRuntimeGroup *track,

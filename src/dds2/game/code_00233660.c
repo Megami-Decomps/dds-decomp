@@ -2,6 +2,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "common.h"
+#include "mdl_motion_api.h"
 #include "sdf_motion.h"
 #include "sdf_texture_draw_packet.h"
 #include "bill_object_api.h"
@@ -136,7 +137,6 @@ extern char D_00421278[];
 
 
 
-extern s32 mdlGetNodeMotionIndex(MdlCtx *, s32);
 
 typedef struct MdlCountNode {
     u8 pad00[4];

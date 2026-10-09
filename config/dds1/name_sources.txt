@@ -3665,9 +3665,9 @@
 0x00217DF8	mdlAddEntryPlainEx	inferred	wraps func_00217CA8 with flag 0, passing float pair through
 0x00217E10	mdlFindNodeById	inferred	walks node list for s16 id at +0x28
 0x00217E58	mdlGetNodeMotionIndex	inferred	Finds the named motion node; returns its unsigned motionIndex widened to s32, or -1 when absent.
-0x00217E88	mdlGetNodeFrameCount	inferred	Finds the named motion node; returns its frameCount, or zero when absent; preserves the existing title-specific result type.
+0x00217E88	mdlGetNodeFrameCount	inferred	Finds the named motion node; returns its unsigned 16-bit frameCount, or zero when absent.
 0x00217EB0	mdlGetNodeFrameAsInt	inferred	Finds the named motion node; numerically converts its currentFrame to s32, or returns zero when absent.
-0x00217EE0	mdlCheckNodeByte30	inferred	finds node by id, returns 2 when missing else whether byte at +0x30 equals 5
+0x00217EE0	mdlGetNodeMotionTerminalStatus	inferred	native state comparison returns 2 for missing motion and 1 or 0 for terminal or nonterminal
 0x00217F18	mdlGetNodeFrameStep	inferred	Reads Motion.frameStep at +0x20 or zero for a missing node; the motion updater adds it to currentFrame.
 0x00217F40	mdlSetNodeFrameStep	inferred	Writes Motion.frameStep at +0x20 when the searched node exists; the motion updater adds it to currentFrame.
 0x00217FA0	mdlLoadRotationQuaternionVU	inferred	Loads SdfModel.rotationQuaternion at +0x60 into vf10; viewer and actor callers use it as the stored rotation quaternion.

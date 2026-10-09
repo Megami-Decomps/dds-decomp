@@ -1,5 +1,6 @@
 #include "common.h"
 #include "fpu.h"
+#include "mdl_motion_api.h"
 #include "itf_mes_window.h"
 #include "dds3obj.h"
 #include "evt_world.h"
@@ -118,7 +119,6 @@ extern void evtSetUnitAlphaTransition(EvtUnit *unit, s32 arg, u32 color);
 
 extern s32 evtIsUnitMotionIdleOrTimedMode(EvtUnit *unit);
 
-extern s32 mdlCheckNodeByte30(MdlCtx *arg0, s32 arg1);
 
 
 extern void evtPrepareUnitMotionState(EvtUnit *unit, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
@@ -898,7 +898,7 @@ u32 evtOpTestUnitMotionNodeFlag(void) {
     if (((unit->slotFlags[off] & 1) & 0xFF) == 0) {
         return ret;
     }
-    return mdlCheckNodeByte30(unit->owner, scrReadIntParameter(1)) != 0;
+    return mdlGetNodeMotionTerminalStatus(unit->owner, scrReadIntParameter(1)) != 0;
 }
 
 u32 evtCmdDestroySelectedWorldUnit(void) {
