@@ -233,7 +233,6 @@ extern u32 fldCachedRoomResourceData, D_00435FF4, D_00435FF8, D_00435FFC;
 
 extern u32 fldCachedRoomResourceSize, D_00436004, D_00436008, D_0043600C;
 
-extern void sdfInitPacketList(SdfListHead *);
 extern u32 sdfConsFinalizePacketHeader(u32, s32);
 
 extern SdfPoolNode kwlnDrawSurfaces[];

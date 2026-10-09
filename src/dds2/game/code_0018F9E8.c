@@ -6,7 +6,6 @@
 #include "eff_blur.h"
 #include "sdf_chip.h"
 
-extern void sdfInitPacketList(SdfListHead *list);
 extern s32 sdfAllocPacketAligned(s32 size);
 extern void *effCreateSizedDrawPacket(s32 height, s32 flags);
 struct EffectDispatchState;

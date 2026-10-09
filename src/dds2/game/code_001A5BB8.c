@@ -292,7 +292,6 @@ extern u8 D_003B4D28[];
 
 extern s32 sdfAllocPacketAligned(s32 size);
 
-extern void sdfInitPacketList(SdfListHead *list);
 
 extern void itfSendTablePacket(SdfListHead *list, s32 context, s32 mode);
 

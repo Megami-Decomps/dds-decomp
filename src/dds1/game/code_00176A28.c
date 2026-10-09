@@ -43,7 +43,6 @@ extern u32 sdfCreateAssetWithDrawEntries(void);
 extern void func_002DA420(u32 resource, f32 scale);
 extern void *memset(void *, s32, u32);
 extern s32 sdfAllocPacketAligned(s32);
-extern void sdfInitPacketList(SdfListHead *);
 extern void sdfComposeVuMatrixFromRegisters(void);
 extern s32 func_0015FE20(EffResourceRenderState *);
 extern f32 D_00354C10[][4];
