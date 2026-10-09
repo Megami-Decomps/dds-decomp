@@ -1399,7 +1399,42 @@ void func_00277DF0(s32 context) {
 
 INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuDrawEntry);
 
-INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuRefreshEntries);
+extern s32 ptyHasSkill(DatPartyRecord *unit, s32 skillId);
+extern s32 scrGetSecondaryScriptFlag(DatPartyRecord *unit, u16 code);
+
+/* Secondary script bits enable the category marker independently of learned skills. */
+void ptySkillMenuRefreshEntries(CampMenuContext *context) {
+    MenuWindowContainer **windows = ((SkillMenuRuntime *)context->menu)->skillWindows;
+    DatPartyRecord *owner = &datGameState->party[context->partyWindow.lists[0]->cursor->index];
+    s32 windowIndex;
+
+    for (windowIndex = 0; windowIndex < 4; windowIndex++) {
+        MenuWindowContainer *window = windows[windowIndex];
+        struct MenuListNode *node = window->list->first;
+        s32 hasSecondary = 0;
+
+        while (node != NULL) {
+            u32 id = node->sortKeyPrimary;
+            if (id != 0 && id != 0xFFFF) {
+                u16 code = id;
+                if (ptyHasSkill(owner, code)) {
+                    node->flags48 |= 1;
+                } else {
+                    node->flags48 &= ~1;
+                }
+                if (scrGetSecondaryScriptFlag(owner, code)) {
+                    hasSecondary = 1;
+                }
+            }
+            node = node->next;
+        }
+        if (hasSecondary != 0) {
+            window->list->categoryMarkerEnabled = 1;
+        } else {
+            window->list->categoryMarkerEnabled = 0;
+        }
+    }
+}
 
 typedef struct SkillInfo {
     u8 pad00[0x20];
