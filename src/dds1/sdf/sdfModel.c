@@ -10,7 +10,7 @@ extern void *memcpy(void *dst, const void *src, u32 n);
 extern void sdfFreeNodeLists(SdfDrawNode *node);
 extern void *sdfEnsureFreeRootWorkspace(SdfDrawNode *node);
 extern void sdfDrawNodeBuildCommandList(SdfDrawNode *node, u32 *commandList, s32 packetSelector, s32 alternateSelector, s32 listIndex);
-extern void func_002D86E0(SdfDrawNode *node, SdfItem *item);
+extern void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item);
 extern void sdfMultiplyVuMatrixInPlace(void);
 extern void sdfWriteVuLightingPacket(u32 arg0);
 extern vu8 sdfCurrentBufferIndex;
@@ -226,7 +226,7 @@ void sdfDrawNodeSetFromItem(SdfDrawNode *node, SdfItem *item) {
     node->boundsAddress = item->boundsAddress;
 }
 
-void func_002D86E0(SdfDrawNode *node, SdfItem *item) {
+void sdfDrawNodeBuildFromItemAndCommands(SdfDrawNode *node, SdfItem *item) {
     s32 pass;
     s32 slot;
     u32 *cursor;
@@ -301,7 +301,7 @@ SdfModel *sdfModelCreateWithItems(void *data, SdfItemListRef *listRef) {
 
     if (count != i) {
         do {
-            func_002D86E0(((SdfDrawNode **)model->list->buffer)[i], item);
+            sdfDrawNodeBuildFromItemAndCommands(((SdfDrawNode **)model->list->buffer)[i], item);
             item++;
             i++;
         } while (i != count);
