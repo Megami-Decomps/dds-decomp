@@ -444,8 +444,6 @@ extern void fileReplaceEffectSurfaceJobs(EffectSurfaceNode *node, FileJobPayload
 extern void fileReplaceEffectSurfaceQueues(EffectSurfaceNode *node, FileJob *job);
 extern void fileReplaceReferenceHolder(EffectSurfaceNode *node, u32 resource);
 
-extern FileJobPayload *fileCreateJob(u16 type);
-
 extern void fileJobFreePrimaryBuffer(FileJobPayload *job);
 extern void fileJobFreeSecondaryBuffer(FileJobPayload *job);
 
