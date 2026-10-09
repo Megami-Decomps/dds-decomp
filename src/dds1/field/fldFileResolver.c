@@ -4321,7 +4321,13 @@ void func_00133640(s32 index, s32 mode) {
 }
 /*END func_00133640*/
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldSetDisplayState);
+void fldSetDisplayState(u32 state) {
+    D_003BAD98 = state;
+    D_003BADC8 = 0;
+    D_0032E570[12] = 0;
+    D_0032E570[11] = state;
+    D_003BADD8 = 0;
+}
 
 void fldInitializeDisplayPointerTable(void) {
     u32 *displayPointers = D_00330738;

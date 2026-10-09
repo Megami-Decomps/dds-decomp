@@ -91,7 +91,16 @@ extern FldCameraSetting fldAppliedCameraSettings[];
 
 INCLUDE_ASM(const s32, "game/code_001360B8", func_001360B8);
 
-INCLUDE_ASM(const s32, "game/code_001360B8", fldSetDisplayState);
+extern u32 D_00436158;
+extern s32 D_00436168;
+
+void fldSetDisplayState(u32 state) {
+    D_00436128 = state;
+    D_00436158 = 0;
+    D_00389988[12] = 0;
+    D_00389988[11] = state;
+    D_00436168 = 0;
+}
 
 void fldInitializeDisplayPointerTable(void) {
     u32 *displayTable = D_0038BBD8;
