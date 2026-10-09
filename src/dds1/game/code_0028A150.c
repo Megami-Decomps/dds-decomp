@@ -478,7 +478,7 @@ typedef struct LoadObj {
     u32 selector;       /* 0x0C: secondary job buffer operation */
     u8 pad10[0x24];
     void *deviceHandle; /* 0x34 */
-    u32 unk38;          /* 0x38 */
+    FileJobPayload **jobs; /* 0x38: child file-job payloads */
     struct SdfMemBlock *jobAllocation;          /* 0x3C */
     struct EffExpandedList *referenceHolder; /* 0x40 */
     void *recordWork;     /* 0x44: created by fileAllocateGridRecordSlots */
@@ -4869,7 +4869,7 @@ LoadObj *fileLoadObjectCreate(void *owner) {
     obj->scale = 1.0f;
     obj->recordWork = NULL;
     obj->deviceHandle = NULL;
-    obj->unk38 = 0;
+    obj->jobs = 0;
     obj->jobAllocation = 0;
     obj->unk48 = 1;
     return obj;
@@ -4931,7 +4931,7 @@ void effLoadObjectDestroy(LoadObj *obj) {
         u32 count = ((FileSlotTable *)obj->recordWork)->count;
         u32 i;
         for (i = 0; i < count; i++) {
-            fileJobDestroy(((FileJobPayload **)obj->unk38)[i]);
+            fileJobDestroy(obj->jobs[i]);
         }
         sdfReleaseResourceAllocation(obj->jobAllocation);
     }
@@ -4979,10 +4979,10 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
         }
         if (dst->jobAllocation != 0) {
             for (i = 0; i < count; i++) {
-                fileJobDestroy(((FileJobPayload **)dst->unk38)[i]);
+                fileJobDestroy(dst->jobs[i]);
             }
             sdfReleaseResourceAllocation(dst->jobAllocation);
-            dst->unk38 = 0;
+            dst->jobs = 0;
             dst->jobAllocation = 0;
         }
         size = count * 4;
@@ -4990,9 +4990,9 @@ void fileCloneEffectSurfaceResources(LoadObj *dst, LoadObj *src) {
             return;
         }
         dst->jobAllocation = sdfAllocGeneralBlock(size);
-        dst->unk38 = sdfResourceRetainAddress(dst->jobAllocation);
+        dst->jobs = (FileJobPayload **)sdfResourceRetainAddress(dst->jobAllocation);
         for (i = 0; i < count; i++) {
-            ((FileJobPayload **)dst->unk38)[i] = fileJobCreateChild(*(FileJobPayload **)src->unk38);
+            dst->jobs[i] = fileJobCreateChild(src->jobs[0]);
         }
         break;
     }
@@ -5058,19 +5058,19 @@ void fileReplaceEffectSurfaceJobs(LoadObj *obj, FileJobPayload *job) {
 
     if (obj->jobAllocation != 0) {
         for (i = 0; i < count; i++) {
-            fileJobDestroy(((FileJobPayload **)obj->unk38)[i]);
+            fileJobDestroy(obj->jobs[i]);
         }
         sdfReleaseResourceAllocation(obj->jobAllocation);
-        obj->unk38 = 0;
+        obj->jobs = 0;
         obj->jobAllocation = 0;
     }
     size = count * 4;
     if (size != 0) {
         obj->jobAllocation = sdfAllocGeneralBlock(size);
-        obj->unk38 = sdfResourceRetainAddress(obj->jobAllocation);
-        *(FileJobPayload **)obj->unk38 = fileJobCreateFromJob(job);
+        obj->jobs = (FileJobPayload **)sdfResourceRetainAddress(obj->jobAllocation);
+        obj->jobs[0] = fileJobCreateFromJob(job);
         for (i = 1; i < count; i++) {
-            ((FileJobPayload **)obj->unk38)[i] = fileJobCreateChild(*(FileJobPayload **)obj->unk38);
+            obj->jobs[i] = fileJobCreateChild(obj->jobs[0]);
         }
     }
 }
