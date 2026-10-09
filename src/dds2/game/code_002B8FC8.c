@@ -757,7 +757,6 @@ MenuListNode *mnuListAdvanceCursor(MenuList *list, s32 noScroll, s32 keepFade);
 MenuListNode *mnuListRetreatCursor(MenuList *list, s32 noScroll, s32 keepFade);
 
 
-s32 mnuScrollListToEnd(MenuList *list);
 
 
 
