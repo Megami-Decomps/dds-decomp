@@ -5883,3 +5883,14 @@ at zero, rather than passing a command through an unprototyped call.
 This contract closure preserves all 253 existing C functions exactly;
 the 640-byte selector itself remains assembly (prior 34-word frontier).
 
+
+## Display text wrappers borrow the actual character buffer
+
+DDS1 `itfDrawGlyphChainWithWidthQuery` (`002CA8F0`) and
+`frFontQueueFlaggedGlyphAndMeasure` (`002CA988`) take their sixth argument
+as `char *` and forward it to the text-glyph constructor. The display
+callers in `code_00254B30` therefore pass their formatted `char` arrays
+directly; their local declarations must agree with those existing
+providers. This is not an SDK address-word storage boundary, so no
+pointer-to-`u32` round trip belongs at these calls.
+

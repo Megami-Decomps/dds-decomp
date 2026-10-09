@@ -869,7 +869,8 @@ typedef struct MnuStaffMovieWork {
     s32 scrollTicks;     /* 0x0C */
     u32 unk10;           /* 0x10 */
     u32 imageIndex;      /* 0x14 */
-    u8 pad18[8];
+    s32 fadeOutTicks;    /* 0x18: incremented for the staff image's fade-out */
+    s32 fadeInTicks;     /* 0x1C: negative values delay the fade-in */
 } MnuStaffMovieWork;
 
 typedef char MnuStaffMovieWork_size_must_be_0x20[(sizeof(MnuStaffMovieWork) == 0x20) ? 1 : -1];
