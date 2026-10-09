@@ -213,7 +213,6 @@ typedef struct EffPCPSpanWork {
 } EffPCPSpanWork;
 
 extern EffPCPSpanWork *effPcpSpanCreate(void *params, EffNodeDescriptor *handleParams);
-extern struct EffNode *effCreateNodeFromDescriptor(EffNodeDescriptor *descriptor);
 extern void effDestroyNode(struct EffNode *node);
 extern u32 effCloneSourceWithTypeHandler(u32 handle);
 extern void effBlurSecondInitSlots(EffBlurScaleWork *work);

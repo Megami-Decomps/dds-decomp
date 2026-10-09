@@ -14,6 +14,7 @@
 #include "pcp_vu0.h"
 #include "dat_state.h"
 #include "eff.h"
+#include "eff_node_descriptor.h"
 #include "kwln.h"
 #include "kwln_task_lifecycle.h"
 #include "file_request_api.h"
@@ -2705,12 +2706,10 @@ extern SdfTex *D_003BAF30, *D_003BAF34, *D_003BAF38;
 
 extern s32 D_003BD7F0, D_003BD7D8, D_003BD7E0, D_003BD7E8;
 
-extern s32 effCreateNodeFromDescriptor(s32);
-
 void fldInitializeMenuResources(void) {
     if (D_0032E3C0[0] < 200) {
-        D_003BAF4C = effCreateNodeFromDescriptor(D_003BAF48);
-        D_003BAF3C = effCreateNodeFromDescriptor(D_003BD7F0);
+        D_003BAF4C = (s32)effCreateNodeFromDescriptor((EffNodeDescriptor *)(u32)D_003BAF48);
+        D_003BAF3C = (s32)effCreateNodeFromDescriptor((EffNodeDescriptor *)(u32)D_003BD7F0);
         D_003BAF40 = 0;
         D_003BAF30 = sdfTexAcquireResourceTexture((void *)D_003BD7D8);
         D_003BAF34 = sdfTexAcquireResourceTexture((void *)D_003BD7E0);
@@ -2905,7 +2904,7 @@ void fldUpdateObjectActivation(void) {
                         effDestroyNode(D_003BAF58);
                         D_003BAF58 = 0;
                     }
-                    D_003BAF58 = effCreateNodeFromDescriptor(D_003BAF54);
+                    D_003BAF58 = (s32)effCreateNodeFromDescriptor((EffNodeDescriptor *)(u32)D_003BAF54);
                     effRestartNodeInstance(D_003BAF4C);
                     break;
                 case 1:
@@ -2913,7 +2912,7 @@ void fldUpdateObjectActivation(void) {
                         effDestroyNode(D_003BAF64);
                         D_003BAF64 = 0;
                     }
-                    D_003BAF64 = effCreateNodeFromDescriptor(D_003BAF60);
+                    D_003BAF64 = (s32)effCreateNodeFromDescriptor((EffNodeDescriptor *)(u32)D_003BAF60);
                     effRestartNodeInstance(D_003BAF4C);
                     break;
                 }

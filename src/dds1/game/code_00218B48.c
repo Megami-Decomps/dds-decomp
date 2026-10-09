@@ -18,6 +18,7 @@
 #include "sdf_chunk.h"
 #include "sdf_pac_state.h"
 #include "eff.h"
+#include "eff_node_descriptor.h"
 #include "sdf_sif_command.h"
 #include "eff_transform.h"
 #include "file.h"
@@ -168,8 +169,6 @@ s32 func_0011D3E8(s32, s32, s32, s32, s32, s32, s32);
 void fldDrawPackedRgbEditor(void *, s32, s32, s32, u32, s32);
 
 void effApplyNodeScale(s32, float);
-
-s32 effCreateNodeFromDescriptor(s32);
 
 
 
@@ -652,12 +651,12 @@ void mdlAddBillboardPart(DevRequest *partList, s32 descriptorIndex) {
 }
 
 /* Append a newly created effect to the next part-list slot. */
-void mdlAddEffectPart(DevRequest *partList, s32 descriptorIndex) {
+void mdlAddEffectPart(DevRequest *partList, EffNodeDescriptor *descriptor) {
     MdlPartEntry *partEntry = &((MdlPartEntry *)partList->buffer)[partList->usedCount];
 
     partEntry->kind = MDL_PART_EFFECT;
     partEntry->state = 0;
-    partEntry->object = effCreateNodeFromDescriptor(descriptorIndex);
+    partEntry->object = (s32)effCreateNodeFromDescriptor(descriptor);
     partList->usedCount += 1;
 }
 

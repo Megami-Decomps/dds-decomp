@@ -3,6 +3,7 @@
 #include "sdf_resource.h"
 #include "eff.h"
 #include "file_request_api.h"
+#include "eff_node_descriptor.h"
 
 struct SdfTex;
 extern void sdfTexReleaseReferenceViaHandler(struct SdfTex *texture);
@@ -30,14 +31,6 @@ void *effCloneSourceWithTypeHandler(EffectSource *source) {
     copy->argument = D_003AA770[source->type].handler(argument);
     return copy;
 }
-
-typedef struct EffNodeDescriptor {
-    u32 type;
-    u32 arg;
-    u32 pad08;
-    f32 version;
-    u8 payload[0];
-} EffNodeDescriptor;
 
 extern void func_0035B6E0(const char *format, ...);
 
