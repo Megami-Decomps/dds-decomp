@@ -87,11 +87,9 @@ typedef struct EffectStateSnapshot {
     s128 vectors[8];
 } EffectStateSnapshot;
 
-extern void fileJobCopyCommandIntoSecondaryData(u32, u32, u32);
-
 extern void effResetFileResourceManager(void);
 
-extern s32 effClassifyResourceMask(s32);
+extern u16 effClassifyResourceMask(s32);
 
 extern u32 D_004386BC;
 
@@ -8771,7 +8769,7 @@ FileJobPayload *effLoadFileJobPayload(EffFileJobRequest *descriptor, s32 source)
                           (s32)descriptor->size, descriptor->transferMode);
         }
         if (descriptor->relatedResource != 0) {
-            fileJobCopyCommandIntoSecondaryData((u32)job, descriptor->relatedResource,
+            fileJobCopyCommandIntoSecondaryData(job, (const char *)descriptor->relatedResource,
                           descriptor->resourceMode);
         } else {
             s32 zero = 0;
@@ -10447,7 +10445,8 @@ s32 effPollFileRecord(const char *resourceName, s32 mode) {
     } else if (((EffResourceBankSlot *)status)->state == 1) {
         fileQueueDetachSectorFollower(effFileQueue, effCurrentFileQueueEntry);
         if (((EffResourceBankSlot *)status)->type != 8) {
-            fileJobCopyCommandIntoSecondaryData(effQueuedFileHandle, status,
+            fileJobCopyCommandIntoSecondaryData((FileJobPayload *)effQueuedFileHandle,
+                           (const char *)status,
                            effClassifyResourceMask(((EffResourceBankSlot *)status)->type));
         } else {
             fileJobSetSecondaryData((FileJobPayload *)effQueuedFileHandle, status + 0x104, 4, 4);
@@ -10531,8 +10530,8 @@ extern EffFileJobRequest D_003F01D0;
 u32 fileLoadEffectSlotA(void) {
     u8 fileInfo[0x110];
     FileJobPayload *job;
-    u8 *entry;
-    u8 *resource;
+    FileJob *entry;
+    EffFileJobRequest *resource;
     void *fileData;
     s32 status;
     u32 result;
@@ -10546,18 +10545,18 @@ u32 fileLoadEffectSlotA(void) {
         job = fileCreateJob(3);
         fileJobSetPrimaryData(job, D_003F01D0.output, D_003F01D0.size,
                       D_003F01D0.transferMode);
-        fileJobCopyCommandIntoSecondaryData((u32)job, fileInfo, effClassifyResourceMask(((EffResourceBankSlot *)fileInfo)->type));
-        entry = (u8 *)fileAppendJob(effFileQueue, (u32)job);
+        fileJobCopyCommandIntoSecondaryData(job, (const char *)fileInfo,
+                      effClassifyResourceMask(((EffResourceBankSlot *)fileInfo)->type));
+        entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = (s32)entry;
         memcpy(D_0045C270, entry, 0x80);
-        effQueuedFileHandle = ((FileJob *)entry)->id;
-        resource = (u8 *)effFindAssetData(entry);
-        strcpy(((FileJob *)entry)->name, ((EffFileJobRequest *)resource)->name);
+        effQueuedFileHandle = entry->id;
+        resource = (EffFileJobRequest *)effFindAssetData((u8 *)entry);
+        strcpy(entry->name, resource->name);
         fileData = fileResolvePrimaryBuffer((FileJobPayload *)effQueuedFileHandle);
-        memcpy(((EffFileJobRequest *)resource)->output, fileData,
-               ((EffFileJobRequest *)resource)->size);
-        D_004386BC = effQueueEffectFileJob(resource);
-        effQueuedFileObject = effFindAssetObject(entry);
+        memcpy(resource->output, fileData, resource->size);
+        D_004386BC = effQueueEffectFileJob((u8 *)resource);
+        effQueuedFileObject = effFindAssetObject((u8 *)entry);
         ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)D_003FFA78;
         effResetFileResourceManager();
         if (effTemporaryFileJob != 0) {
@@ -10667,7 +10666,8 @@ u32 effPollAndQueueCopiedFileResource(void) {
         job = fileCreateJob(0x12);
         fileJobSetPrimaryData(job, D_003F9060.output, D_003F9060.size,
                       D_003F9060.transferMode);
-        fileJobCopyCommandIntoSecondaryData((u32)job, &fileInfo, effClassifyResourceMask(fileInfo.resourceMask));
+        fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
+                      effClassifyResourceMask(fileInfo.resourceMask));
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = (u32)entry;
         memcpy(D_0045C270, entry, 0x80);
@@ -10725,7 +10725,8 @@ u32 effLoadFileSlotF2(void) {
         job = fileCreateJob(0x14);
         fileJobSetPrimaryData(job, D_003FB948.output, D_003FB948.size,
                       D_003FB948.transferMode);
-        fileJobCopyCommandIntoSecondaryData((u32)job, &fileInfo, effClassifyResourceMask(fileInfo.resourceMask));
+        fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
+                      effClassifyResourceMask(fileInfo.resourceMask));
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = (u32)entry;
         memcpy(D_0045C270, entry, 0x80);
@@ -10767,7 +10768,8 @@ u32 effLoadMaterialFile(void) {
         job = fileCreateJob(0x16);
         fileJobSetPrimaryData(job, D_003FD988.output, D_003FD988.size,
                       D_003FD988.transferMode);
-        fileJobCopyCommandIntoSecondaryData((u32)job, &fileInfo, effClassifyResourceMask(fileInfo.resourceMask));
+        fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
+                      effClassifyResourceMask(fileInfo.resourceMask));
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = (u32)entry;
         memcpy(D_0045C270, entry, 0x80);
@@ -10815,7 +10817,8 @@ u32 effPollAndQueueFileResourceWithUnitFloats(void) {
         }
         fileJobSetPrimaryData(job, D_003FE040.output, D_003FE040.size,
                       D_003FE040.transferMode);
-        fileJobCopyCommandIntoSecondaryData((u32)job, &fileInfo, effClassifyResourceMask(fileInfo.resourceMask));
+        fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
+                      effClassifyResourceMask(fileInfo.resourceMask));
         entry = fileAppendJob(effFileQueue, (u32)job);
         effCurrentFileQueueEntry = (u32)entry;
         memcpy(D_0045C270, entry, 0x80);
@@ -10847,7 +10850,7 @@ void effResetFileResourceManager(void) {
     D_004387B0 = 0;
 }
 
-s32 effClassifyResourceMask(s32 mask) {
+u16 effClassifyResourceMask(s32 mask) {
     switch (mask) {
     case 1: return 1;
     case 2: return 2;
