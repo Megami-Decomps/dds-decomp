@@ -8,6 +8,7 @@
 #include "sdf_pending.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
+#include "sdf_gs_packet.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
@@ -39,30 +40,13 @@
 #define SDF_VIF_FLUSHE_WORD 0x10000000
 #define SDF_GIF_ONE_REGISTER_WORD 0x10000000
 #define SDF_GIF_EOP_BIT 0x8000
-#define SDF_GIF_REGISTER_AD 0xE
 #define SDF_DMA_CNT_ONE_WORD 0x10000001
 #define SDF_VIF_DIRECT_ONE_FLUSHE 0x5000000110000000ULL
 #define SDF_GIF_PACKED_AD_BITS 0x1000000000008000ULL
 #define SDF_VIF_DIRECT_ONE_NOP 0x5000000100000000ULL
-#define SDF_GS_FRAME_PRIMARY 0x4C
-#define SDF_GS_FRAME_SECONDARY 0x4D
-#define SDF_GS_ZBUF_PRIMARY 0x4E
-#define SDF_GS_ZBUF_SECONDARY 0x4F
-#define SDF_GS_XYOFFSET_PRIMARY 0x18
-#define SDF_GS_XYOFFSET_SECONDARY 0x19
-#define SDF_GS_SCISSOR_PRIMARY 0x40
-#define SDF_GS_SCISSOR_SECONDARY 0x41
 #define SDF_GS_CENTER_BIAS 0x1000
 #define SDF_GS_FIELD_OFFSET_STEP 8
-#define SDF_GS_PRMODECONT 0x1A
-#define SDF_GS_COLCLAMP 0x46
-#define SDF_GS_DTHE 0x45
-#define SDF_GS_TEXA 0x3B
 #define SDF_GS_DEFAULT_TEXA 0x4000000080ULL
-#define SDF_GS_TEST_PRIMARY 0x47
-#define SDF_GS_TEST_SECONDARY 0x48
-#define SDF_GS_ALPHA_PRIMARY 0x42
-#define SDF_GS_ALPHA_SECONDARY 0x43
 #define SDF_GS_DEFAULT_ALPHA 0x44
 #define SDF_GS_SCENE_TEST 0x517FB
 #define SDF_GS_ALPHA_TEST 0x717FB
@@ -776,15 +760,15 @@ void sdfBuildFrameDepthScissorPacket(SdfPacket *packet, s32 frameAddress, s32 wi
     s32 yOffset;
 
     if (gsContext == 0) {
-        frameRegisterId = SDF_GS_FRAME_PRIMARY;
-        depthRegisterId = SDF_GS_ZBUF_PRIMARY;
-        offsetRegisterId = SDF_GS_XYOFFSET_PRIMARY;
-        scissorRegisterId = SDF_GS_SCISSOR_PRIMARY;
+        frameRegisterId = SDF_GS_FRAME_1;
+        depthRegisterId = SDF_GS_ZBUF_1;
+        offsetRegisterId = SDF_GS_XYOFFSET_1;
+        scissorRegisterId = SDF_GS_SCISSOR_1;
     } else {
-        frameRegisterId = SDF_GS_FRAME_SECONDARY;
-        depthRegisterId = SDF_GS_ZBUF_SECONDARY;
-        offsetRegisterId = SDF_GS_XYOFFSET_SECONDARY;
-        scissorRegisterId = SDF_GS_SCISSOR_SECONDARY;
+        frameRegisterId = SDF_GS_FRAME_2;
+        depthRegisterId = SDF_GS_ZBUF_2;
+        offsetRegisterId = SDF_GS_XYOFFSET_2;
+        scissorRegisterId = SDF_GS_SCISSOR_2;
     }
     packet[1].unk18 = scissorRegisterId;
     yOffset = (SDF_GS_CENTER_BIAS - height) << 3;
@@ -809,7 +793,7 @@ void sdfBuildCenteredViewBoundsPacket(u64 *packet, s32 width, s32 height, s32 un
     packet[3] = SDF_GS_PRIM;
     packet[7] = SDF_GS_XYZ2;
     packet[0] = SDF_GS_BOUNDS_TEST;
-    packet[1] = SDF_GS_TEST_PRIMARY;
+    packet[1] = SDF_GS_TEST_1;
     packet[2] = SDF_GS_PRIM_SPRITE;
     packet[4] = (u64)0xFE00 << 46;
     packet[5] = SDF_GS_RGBAQ;
@@ -870,13 +854,13 @@ void sdfBuildTextureScenePacket(SdfSceneDrawPacket *packet, SdfGraphObj *view, s
     sdfBuildFrameDepthScissorPacket(packet->contextTwo, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_003BD332, 1);
     sdfBuildCenteredViewBoundsPacket(packet->limits, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
     packet->regs[0] = SDF_GS_SCENE_TEST;
-    packet->regs[1] = SDF_GS_TEST_PRIMARY;
+    packet->regs[1] = SDF_GS_TEST_1;
     packet->regs[2] = SDF_GS_DEFAULT_ALPHA;
-    packet->regs[3] = SDF_GS_ALPHA_PRIMARY;
+    packet->regs[3] = SDF_GS_ALPHA_1;
     packet->regs[4] = SDF_GS_SCENE_TEST;
-    packet->regs[5] = SDF_GS_TEST_SECONDARY;
+    packet->regs[5] = SDF_GS_TEST_2;
     packet->regs[6] = SDF_GS_DEFAULT_ALPHA;
-    packet->regs[7] = SDF_GS_ALPHA_SECONDARY;
+    packet->regs[7] = SDF_GS_ALPHA_2;
     sdfInitDrawPacket(packet->draw);
 }
 
@@ -908,13 +892,13 @@ void sdfInitSceneNode(SdfSceneNode *node, SdfGraphObj *view) {
     node->handler = sdfRefreshSceneNodePackets;
     sdfBuildCenteredViewBoundsPacket(node->limits, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
     node->regs[0] = SDF_GS_SCENE_TEST;
-    node->regs[1] = SDF_GS_TEST_PRIMARY;
+    node->regs[1] = SDF_GS_TEST_1;
     node->regs[2] = SDF_GS_DEFAULT_ALPHA;
-    node->regs[3] = SDF_GS_ALPHA_PRIMARY;
+    node->regs[3] = SDF_GS_ALPHA_1;
     node->regs[4] = SDF_GS_SCENE_TEST;
-    node->regs[5] = SDF_GS_TEST_SECONDARY;
+    node->regs[5] = SDF_GS_TEST_2;
     node->regs[6] = SDF_GS_DEFAULT_ALPHA;
-    node->regs[7] = SDF_GS_ALPHA_SECONDARY;
+    node->regs[7] = SDF_GS_ALPHA_2;
     sdfInitDrawPacket(node->draw);
 }
 
@@ -1059,17 +1043,17 @@ void sdfAppendInitializedPacket(s32 listAddress, void (*initialize)(s32), s32 pa
 /* Set primary-context TEST and ALPHA values; 0x44 is blend data, not a register ID. */
 void sdfInitPrimaryAlphaBlendRegisters(SdfPacket *packet) {
     packet->unk0 = SDF_GS_ALPHA_TEST;
-    packet->unk8 = SDF_GS_TEST_PRIMARY;
+    packet->unk8 = SDF_GS_TEST_1;
     packet->unk10 = SDF_GS_DEFAULT_ALPHA;
-    packet->unk18 = SDF_GS_ALPHA_PRIMARY;
+    packet->unk18 = SDF_GS_ALPHA_1;
 }
 
 /* Set the same TEST/ALPHA values for the secondary GS context. */
 void sdfInitSecondaryAlphaBlendRegisters(SdfPacket *packet) {
     packet->unk0 = SDF_GS_ALPHA_TEST;
-    packet->unk8 = SDF_GS_TEST_SECONDARY;
+    packet->unk8 = SDF_GS_TEST_2;
     packet->unk10 = SDF_GS_DEFAULT_ALPHA;
-    packet->unk18 = SDF_GS_ALPHA_SECONDARY;
+    packet->unk18 = SDF_GS_ALPHA_2;
 }
 
 /* Transfer a GIF tag and two primary-context A+D register writes with FLUSHE/DIRECT. */
@@ -1294,7 +1278,7 @@ void sdfBuildPacket116(s32 address, s32 color, s32 primitive, s32 x0, s32 y0, s3
 }
 
 
-void sdfAppendTexturedLinePacket(s32 list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
+void sdfAppendTexturedLinePacket(SdfListHead *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0,
                    s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 depth, s32 (*alloc)(s32)) {
     SdfPacket *packet;
     if (alloc == NULL) {

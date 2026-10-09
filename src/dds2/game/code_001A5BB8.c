@@ -101,7 +101,7 @@ extern const char *D_004367C8;
 
 extern const char *D_004367C4;
 
-extern u32 D_00438F4C;
+extern SceneKindTable *D_00438F4C;
 
 extern u32 D_00438F50;
 
@@ -7045,7 +7045,7 @@ INCLUDE_RODATA(const s32, "game/code_001A5BB8", D_004164C8);
 INCLUDE_ASM(const s32, "game/code_001A5BB8", func_001BD6E8);
 
 void btlReleaseBattleScratchBlocks(void) {
-    sdfReleaseChipBlock((void *)D_00438F4C);
+    sdfReleaseChipBlock(D_00438F4C);
     sdfReleaseChipBlock((void *)D_00438F50);
 }
 
