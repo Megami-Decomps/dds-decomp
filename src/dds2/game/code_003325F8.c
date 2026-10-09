@@ -105,8 +105,10 @@ INCLUDE_ASM(const s32, "game/code_003325F8", func_003325F8);
  * Each blend builder fills the 0x40-byte packet area after the list head. */
 typedef struct SdfDrawPacketGroup {
     SdfListHead list;
-    SdfDmaTagHeader header;
-    u8 pad30[0x30];
+    union {
+        SdfGsBlendPacket blend;
+        SdfDmaTagHeader dma;
+    } packet;
 } SdfDrawPacketGroup;
 
 typedef struct SdfDrawPacketGroups {
@@ -116,6 +118,13 @@ typedef struct SdfDrawPacketGroups {
     u64 unk1A8;
 } SdfDrawPacketGroups;
 
+typedef char SdfDrawPacketGroup_size_must_be_0x60[
+    (sizeof(SdfDrawPacketGroup) == 0x60) ? 1 : -1];
+typedef char SdfDrawPacketGroup_packet_at_0x20[
+    ((u32)&((SdfDrawPacketGroup *)0)->packet == 0x20) ? 1 : -1];
+typedef char SdfDrawPacketGroups_size_must_be_0x1B0[
+    (sizeof(SdfDrawPacketGroups) == 0x1B0) ? 1 : -1];
+
 
 /* Initialize one draw-group record in the kernel's byte-buffer storage. */
 void sdfInitializeDrawPacketGroups(u8 *memory) {
@@ -123,15 +132,15 @@ void sdfInitializeDrawPacketGroups(u8 *memory) {
     SdfDrawPacketGroup *packet = ctx->groups;
     s32 i;
 
-    sdfBuildPrimaryAlphaBlendDmaPacket((SdfGsBlendPacket *)&ctx->groups[0].header);
-    sdfBuildPrimaryTestBlendPacket((SdfGsBlendPacket *)&ctx->groups[1].header);
-    sdfBuildPrimaryAlphaAdditiveDmaPacket((SdfGsBlendPacket *)&ctx->groups[2].header);
-    sdfBuildPrimaryAlphaSubtractiveDmaPacket((SdfGsBlendPacket *)&ctx->groups[3].header);
+    sdfBuildPrimaryAlphaBlendDmaPacket(&ctx->groups[0].packet.blend);
+    sdfBuildPrimaryTestBlendPacket(&ctx->groups[1].packet.blend);
+    sdfBuildPrimaryAlphaAdditiveDmaPacket(&ctx->groups[2].packet.blend);
+    sdfBuildPrimaryAlphaSubtractiveDmaPacket(&ctx->groups[3].packet.blend);
     for (i = 0; i != 4; i++) {
         /* Replace only the first VIF word; preserve the builder's DIRECT word. */
-        packet->header.firstVifCode = 0x11000000;
+        packet->packet.dma.firstVifCode = 0x11000000;
         sdfInitPacketList(&packet->list);
-        sdfAppendPacket(&packet->list, (u32)&packet->header);
+        sdfAppendPacket(&packet->list, (u32)&packet->packet.blend);
         packet++;
     }
     sdfInitPacketList(&ctx->syncList);
