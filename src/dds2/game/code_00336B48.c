@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sdf_texture_draw_packet.h"
+#include "sdf_packet_append.h"
 #include "sdf_resource.h"
 #include "sdf_primitive.h"
 #include "sdf.h"
@@ -249,9 +250,9 @@ typedef struct DmaPacketHeader {
 
 extern u8 D_0040B730[];
 
-extern void sdfAppendReferencePacket(s32, void *);
+extern void sdfAppendReferencePacket(SdfListHead *, u32);
 
-extern void sdfAppendReferencePacket(s32, void *);
+extern void sdfAppendReferencePacket(SdfListHead *, u32);
 
 extern void func_0033AC10(void);
 extern void sdfInitializeObjectListRequest(void);
@@ -1115,7 +1116,7 @@ void sdfConsAppendProgramReferencePacket(s32 packetList, DmaPacketHeader *packet
     packet->unused10 = 0;
     packet->unused18 = 0;
     packet->unused1C = 0;
-    sdfAppendReferencePacket(packetList, packet);
+    sdfAppendReferencePacket((SdfListHead *)packetList, (u32)packet);
 }
 
 
@@ -1141,7 +1142,8 @@ void sdfInitializeResourceQueuesAndTextureWords(void) {
 }
 
 /* Append the fixed clear block; NULL allocatePacket selects the packet allocator. */
-void sdfConsAppendClearPacket(s32 packetList, s32 (*allocatePacket)(s32)) {
+void sdfConsAppendClearPacket(SdfListHead *packetList,
+                              s32 (*allocatePacket)(s32)) {
     u64 *referencePacket;
     if (allocatePacket == NULL) {
         allocatePacket = sdfAllocPacketAligned;
@@ -1150,7 +1152,7 @@ void sdfConsAppendClearPacket(s32 packetList, s32 (*allocatePacket)(s32)) {
     referencePacket[0] = ((u64)((u32)D_0040B730 & SDF_DMA_ADDRESS_MASK) << 32) | 0x30000008;
     referencePacket[1] = 0x6C07C000ULL << 32;
     *(u128 *)&referencePacket[2] = 0;
-    sdfAppendReferencePacket(packetList, referencePacket);
+    sdfAppendReferencePacket(packetList, (u32)referencePacket);
 }
 
 typedef struct VuLightingPacket {
@@ -1169,7 +1171,8 @@ void sdfWriteVuLightingPacket(VuLightingPacket *lightingPacket) {
 }
 
 /* Append inline matrix/lighting data using allocatePacket or the default allocator. */
-void sdfConsAppendVuPacket(s32 packetList, s32 (*allocatePacket)(s32)) {
+void sdfConsAppendVuPacket(SdfListHead *packetList,
+                           s32 (*allocatePacket)(s32)) {
     u64 *dmaPacket;
     if (allocatePacket == NULL) {
         allocatePacket = sdfAllocPacketAligned;
@@ -1178,11 +1181,12 @@ void sdfConsAppendVuPacket(s32 packetList, s32 (*allocatePacket)(s32)) {
     dmaPacket[0] = ((u64)((u32)(dmaPacket + 2) & SDF_DMA_ADDRESS_MASK) << 32) | 0x20000008;
     dmaPacket[1] = 0x6C07C000ULL << 32;
     sdfWriteVuLightingPacket((VuLightingPacket *)(dmaPacket + 2));
-    sdfAppendPacket((SdfListHead *)packetList, (u32)dmaPacket);
+    sdfAppendPacket(packetList, (u32)dmaPacket);
 }
 
 /* Apply current-buffer changes and append the asset reference; keep both index reads. */
-void sdfConsAppendAssetPacket(s32 packetList, void *asset, s32 (*allocatePacket)(s32)) {
+void sdfConsAppendAssetPacket(SdfListHead *packetList, void *asset,
+                              s32 (*allocatePacket)(s32)) {
     u64 *referencePacket;
     if (allocatePacket == NULL) {
         allocatePacket = sdfAllocPacketAligned;
@@ -1191,7 +1195,7 @@ void sdfConsAppendAssetPacket(s32 packetList, void *asset, s32 (*allocatePacket)
     referencePacket = (u64 *)allocatePacket(0x20);
     sdfInitNodeHeaderFromWords(asset, referencePacket, (s8)sdfCurrentBufferIndex);
     *(u128 *)&referencePacket[2] = 0;
-    sdfAppendReferencePacket(packetList, referencePacket);
+    sdfAppendReferencePacket(packetList, (u32)referencePacket);
 }
 
 extern f32 D_00438A48;
