@@ -14,15 +14,6 @@ D_00435D42 = 0x00435D42; // type:u16
 // Saved DebugTimeGrph task handle.
 kwlnDebugGraphTask = 0x00438DA8;
 // Names from tools/names.py (provenance: name_sources.txt)
-effObjSetInnerPosition = 0x0010F908; // type:func  // dds1 0x0010F6E0
-effObjSetInnerRotation = 0x0010F938; // type:func  // dds1 0x0010F710
-effObjSetInnerScale = 0x0010F968; // type:func  // dds1 0x0010F740
-effObjFetchInnerPosition = 0x0010F998; // type:func  // dds1 0x0010F770
-effObjFetchInnerRotationNormalized = 0x0010F9B0; // type:func  // dds1 0x0010F788
-effObjFetchInnerScale = 0x0010F9D0; // type:func  // dds1 0x0010F7A8
-effObjAddInnerPosition = 0x0010F9E8; // type:func  // dds1 0x0010F7C0
-effObjMultiplyInnerRotation = 0x0010FA20; // type:func  // dds1 0x0010F7F8
-effObjMultiplyInnerScale = 0x0010FA70; // type:func  // dds1 0x0010F848
 kwlnGetDrawBufferIndex = 0x00100400; // type:func
 kwlnTaskRemoveFromStateQueue = 0x001005C8; // type:func
 kwlnTaskInsertIntoOrderedStateQueue = 0x00100740; // type:func
@@ -3476,9 +3467,7 @@ evtOpClearWorldObjectStateFlags = 0x0023E9B8; // type:func
 evtOpQueueWorldObjectPendingValue = 0x0023EA28; // type:func
 evtOpClearWorldObjectPendingValue = 0x0023EA90; // type:func
 evtOpModelLodChg = 0x0023EAE8; // type:func
-evtSetWorldUnitFirstVector = 0x0023EBE8; // type:func
 evtOpSetWorldUnitRotationFromAngles = 0x0023EC80; // type:func
-evtSetWorldUnitThirdVector = 0x0023ED68; // type:func
 evtOpDeprecatedModelMotion = 0x0023EE08; // type:func
 evtInvokeStoredWindowMotion = 0x0023EFF8; // type:func
 evtLipsExecFunction = 0x0023F010; // type:func
@@ -3537,9 +3526,7 @@ evtCommandAddEffectUnitToWorld = 0x002419F8; // type:func
 evtCommandAddFlaggedEffectUnitToWorld = 0x00241A70; // type:func
 evtCommandCreateWorldEffectObject = 0x00241C20; // type:func
 evtCommandDestroyEffectUnitById = 0x00241CB0; // type:func
-evtCommandSetEffectUnitFirstVector = 0x00241CF0; // type:func
 evtCommandSetEffectUnitEulerRotation = 0x00241D98; // type:func
-evtCommandSetEffectUnitSecondVector = 0x00241E70; // type:func
 evtCommandEnableSolarAdvance = 0x00242368; // type:func
 evtCommandDisableSolarAdvance = 0x00242388; // type:func
 evtCommandReadMirroredSolarPhase = 0x002423A8; // type:func
@@ -6981,6 +6968,21 @@ sdfGraphApplyModeDefaults = 0x00329CE0; // type:func
 sdfGraphResetDeviceForCurrentMode = 0x00329ED0; // type:func
 sdfGraphWakeDisplayThread = 0x00329F30; // type:func
 mdlGetSelectedRecord = 0x00237A70; // type:func
+
+// Inner-transform helpers and script transform setters (inferred names).
+effObjSetInnerPosition = 0x0010F908; // type:func  // dds1 0x0010F6E0
+effObjSetInnerRotation = 0x0010F938; // type:func  // dds1 0x0010F710
+effObjSetInnerScale = 0x0010F968; // type:func  // dds1 0x0010F740
+effObjFetchInnerPosition = 0x0010F998; // type:func  // dds1 0x0010F770
+effObjFetchInnerRotationNormalized = 0x0010F9B0; // type:func  // dds1 0x0010F788
+effObjFetchInnerScale = 0x0010F9D0; // type:func  // dds1 0x0010F7A8
+effObjAddInnerPosition = 0x0010F9E8; // type:func  // dds1 0x0010F7C0
+effObjMultiplyInnerRotation = 0x0010FA20; // type:func  // dds1 0x0010F7F8
+effObjMultiplyInnerScale = 0x0010FA70; // type:func  // dds1 0x0010F848
+evtSetWorldUnitPosition = 0x0023EBE8; // type:func
+evtSetWorldUnitScale = 0x0023ED68; // type:func
+evtCommandSetEffectUnitPosition = 0x00241CF0; // type:func
+evtCommandSetEffectUnitQuaternionRotation = 0x00241E70; // type:func
 
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 kwlnTaskCreate = 0x00101458; // type:func  // dds1 0x00101570

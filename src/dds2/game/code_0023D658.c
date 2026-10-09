@@ -635,7 +635,7 @@ u32 evtOpModelLodChg(void) {
     return 1;
 }
 
-u32 evtSetWorldUnitFirstVector(void) {
+u32 evtSetWorldUnitPosition(void) {
     f32 vector[4];
     void *world;
     s32 id;
@@ -684,7 +684,7 @@ u32 evtOpSetWorldUnitRotationFromAngles(void) {
     return 1;
 }
 
-u32 evtSetWorldUnitThirdVector(void) {
+u32 evtSetWorldUnitScale(void) {
     f32 vector[4];
     void *world;
     s32 id;
