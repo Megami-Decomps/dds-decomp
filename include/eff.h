@@ -676,12 +676,21 @@ typedef struct PcpScatterPool {
     u32 color;
     s32 secondWordCount;
     f32 unk1C;
-    s32 recordBase;
-    s32 auxRecordBase;
+    u8 *recordBase;
+    u8 *auxRecordBase;
     SdfAsset *drawAsset;
     SdfMemBlock *allocation;
     PcpScatterRes *sharedResource;
 } PcpScatterPool; /* 0x34 */
+typedef char PcpScatterPool_size_must_be_0x34[(sizeof(PcpScatterPool) == 0x34) ? 1 : -1];
+typedef char PcpScatterPool_recordBase_offset_must_be_0x20[
+    ((u32)&((PcpScatterPool *)0)->recordBase == 0x20) ? 1 : -1];
+typedef char PcpScatterPool_auxRecordBase_offset_must_be_0x24[
+    ((u32)&((PcpScatterPool *)0)->auxRecordBase == 0x24) ? 1 : -1];
+typedef char PcpScatterPool_drawAsset_offset_must_be_0x28[
+    ((u32)&((PcpScatterPool *)0)->drawAsset == 0x28) ? 1 : -1];
+typedef char PcpScatterPool_allocation_offset_must_be_0x2C[
+    ((u32)&((PcpScatterPool *)0)->allocation == 0x2C) ? 1 : -1];
 
 
 
