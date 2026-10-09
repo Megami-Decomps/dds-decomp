@@ -539,11 +539,11 @@ EffFadeHeaderWork *effDuplicateSmallHeader(const void *source) {
     return buffer;
 }
 
-void effCreateSmallHeaderFromFile(void *work) {
+EffFadeHeaderWork *effCreateSmallHeaderFromFile(void *work) {
     void *resource;
 
     resource = fileResolvePrimaryBuffer((FileJobPayload *)work);
-    effDuplicateSmallHeader(resource);
+    return effDuplicateSmallHeader(resource);
 }
 
 void effReleaseFadeHeaderAllocation(EffFadeHeaderWork *allocation) {
@@ -551,8 +551,8 @@ void effReleaseFadeHeaderAllocation(EffFadeHeaderWork *allocation) {
     sdfReleaseChipBlock(allocation);
 }
 
-void effCloneSmallHeaderFromWork(EffFadeHeaderWork *work) {
-    effDuplicateSmallHeader(work->payload);
+EffFadeHeaderWork *effCloneSmallHeaderFromWork(EffFadeHeaderWork *work) {
+    return effDuplicateSmallHeader(work->payload);
 }
 
 void effFadeFrameReset(EffFadeHeaderWork *counter) {
@@ -680,11 +680,11 @@ EffSelectionHeaderWork *effDuplicatePayloadHeader(const void *source) {
     return buffer;
 }
 
-void effCreateSelectionHeaderFromFile(void *work) {
+EffSelectionHeaderWork *effCreateSelectionHeaderFromFile(void *work) {
     void *resource;
 
     resource = fileResolvePrimaryBuffer((FileJobPayload *)work);
-    effDuplicatePayloadHeader(resource);
+    return effDuplicatePayloadHeader(resource);
 }
 
 void effReleaseSelectionHeaderAllocation(EffSelectionHeaderWork *allocation) {
@@ -692,8 +692,8 @@ void effReleaseSelectionHeaderAllocation(EffSelectionHeaderWork *allocation) {
     sdfReleaseChipBlock(allocation);
 }
 
-void effCloneSelectionHeaderFromWork(EffSelectionHeaderWork *work) {
-    effDuplicatePayloadHeader(work->payload);
+EffSelectionHeaderWork *effCloneSelectionHeaderFromWork(EffSelectionHeaderWork *work) {
+    return effDuplicatePayloadHeader(work->payload);
 }
 
 void effSelectionFrameReset(EffSelectionHeaderWork *counter) {
