@@ -4865,7 +4865,100 @@ s32 fldClassifyPositionInZoneWithMargin(f32 *out, s32 mode, s32 count, f32 margi
     return inside;
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_00136A78);
+extern f32 D_00330750[3];
+extern s32 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
+
+void func_00136A78(f32 *input) {
+    f32 position[4];
+    f32 previous[4];
+    f32 savedPosition[4];
+    f32 savedPrevious[4];
+    f32 absoluteDelta[4];
+    f32 clearance;
+    FldValueRecord *record;
+    ObjectTransform *transform;
+    ObjectTransform *anchor;
+    f32 distance;
+    s32 relative;
+    s32 inside;
+    s32 index;
+    f32 margin;
+
+    previous[1] = D_00330750[1];
+    position[1] = input[1] - 35.0f;
+    position[0] = input[0];
+    position[2] = input[2];
+    previous[0] = D_00330750[0];
+    previous[2] = D_00330750[2];
+    absoluteDelta[0] = ffabsf(input[0] - D_00330750[0]);
+    absoluteDelta[2] = ffabsf(input[2] - D_00330750[2]);
+    margin = 45.0f;
+    for (index = 0; index < fldValueRecordCount; index++) {
+        if (!(((FldValueRecord *)fldValueRecords)[index].face->attributes & 0x80)) {
+            continue;
+        }
+        if (fldTestRoomSceneFlag(fldAreaState.area, fldAreaState.floor + 1,
+                                 ((FldValueRecord *)fldValueRecords)[index].sceneFlag)) {
+            continue;
+        }
+        if (((FldValueRecord *)fldValueRecords)[index].unkE0 > 0) {
+            if (fldTestMapSlotAuxiliaryFlag(fldAreaState.area, fldAreaState.floor + 1,
+                                            ((FldValueRecord *)fldValueRecords)[index].unkE0)) {
+                continue;
+            }
+        }
+        savedPosition[0] = position[0];
+        savedPosition[1] = position[1];
+        savedPosition[2] = position[2];
+        savedPrevious[0] = previous[0];
+        savedPrevious[1] = previous[1];
+        savedPrevious[2] = previous[2];
+        if (((FldValueRecord *)fldValueRecords)[index].value != 0) {
+            transform = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+            relative = 1;
+            position[0] -= transform->position[0];
+            position[1] -= transform->position[1];
+            position[2] -= transform->position[2];
+            previous[0] -= transform->position[0];
+            previous[1] -= transform->position[1];
+            previous[2] -= transform->position[2];
+        } else {
+            relative = 0;
+        }
+        distance = fldDotVector(position, ((FldValueRecord *)fldValueRecords)[index].normal);
+        distance -= ((FldValueRecord *)fldValueRecords)[index].planeConstant;
+        if (ffabsf(distance) < margin) {
+            record = &((FldValueRecord *)fldValueRecords)[index];
+            fldClassifyPositionInZoneWithMargin(&clearance, record->mode, record->count, 45.0f, position, record);
+            inside = clearance < 0.0f ? 0 : 1;
+            if (inside == 1) {
+                if (((FldValueRecord *)fldValueRecords)[index].value != 0) {
+                    if (fldAreaState.unk90 == -1 ||
+                        ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[fldAreaState.unk90].value)->key ==
+                            ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->key) {
+                        fldAreaState.unk90 = index;
+                    } else {
+                        fldAreaState.unk94 = index;
+                    }
+                    anchor = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+                    ((FldValueRecord *)fldValueRecords)[index].previousPosition[0] = anchor->position[0];
+                    ((FldValueRecord *)fldValueRecords)[index].previousPosition[1] = anchor->position[1];
+                    ((FldValueRecord *)fldValueRecords)[index].previousPosition[2] = anchor->position[2];
+                }
+            }
+        }
+        if (relative) {
+            transform = ((EffWorldNode *)((FldValueRecord *)fldValueRecords)[index].value)->inner;
+            position[0] += transform->position[0];
+            position[1] += transform->position[1];
+            position[2] += transform->position[2];
+            previous[0] += transform->position[0];
+            previous[1] += transform->position[1];
+            previous[2] += transform->position[2];
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_00136DA0);
 
