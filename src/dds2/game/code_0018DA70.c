@@ -114,7 +114,6 @@ extern void sdfAppendDmaTagToList(struct SdfListHead *list, u32 packet);
 extern u32 func_001200E0(void);
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern void sdfInitPacketList(void *);
-extern void sdfAppendDmaPrimary(s32 list, u32 source, struct SdfDmaNode *node);
 
 extern f32 sdfEvaluateCosineViaSinePhaseShift(f32 angle);
 extern f32 sdfSinPoly(f32 angle);
@@ -269,7 +268,7 @@ void effDrawBlurRectangle(EffBlurQuad *source)
         list = (SdfListHead *)sdfAllocPacketAligned(0x20);
         sdfInitPacketList(list);
         tag = (void *)sdfAllocPacketAligned(0x20);
-        sdfAppendDmaPrimary((s32)list, (u32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, tag);
+        sdfAppendDmaPrimary(list, (u32)kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()].dmaPacket, tag);
         samplingPacket = (void *)sdfAllocPacketAligned(0x30);
         samplingPacket[0] = 2;
         samplingPacket[1] = 0x5000000210000000ULL;
@@ -354,7 +353,7 @@ void effAppendBlurRenderState(void *list, s32 blendControl, u32 resource)
     sdfAppendPacket(list, (u32)blendPacket);
 
     tag = (void *)sdfAllocPacketAligned(0x20);
-    sdfAppendDmaPrimary((s32)list, (u32)&kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()], tag);
+    sdfAppendDmaPrimary(list, (u32)&kwlnFrameDrawPacketRecords[kwlnGetDrawBufferIndex()], tag);
 
     samplingPacket = (u64 *)sdfAllocPacketAligned(0x30);
     samplingPacket[0] = 2;
