@@ -18,7 +18,10 @@ def shape(word):
     if op == 0:
         return (op, word & 63)
     if op in (16, 17, 18):
-        return (op, (word >> 21) & 31, word & 63)
+        rs = (word >> 21) & 31
+        if rs == 8:
+            return (op, rs, (word >> 16) & 31)
+        return (op, rs, word & 63)
     if op == 1:
         return (op, (word >> 16) & 31)
     if op == 28:
