@@ -1,11 +1,10 @@
 #include "common.h"
 #include "dds3_path.h"
+#include "dds3obj.h"
 #include "eff_transform.h"
 #include "eff.h"
 
-extern u64 dds3GetWorldSecondaryObject(void);
-
-extern s32 dds3FindWorldObjectNodeByKey(u64, u64, u64);
+extern void *dds3GetWorldSecondaryObject(void);
 
 typedef struct {
     u8 pad00[0x10];
@@ -38,9 +37,9 @@ void dds3SetPathStateValue(PathObject *path, u32 value) {
     path->state->value = value;
 }
 
-u32 dds3GetPathStateValueById(u64 id) {
+u32 dds3GetPathStateValueById(u32 id) {
     PathObject *path;
-    u64 world;
+    EffWorldNode *world;
 
     world = dds3GetWorldSecondaryObject();
     path = (PathObject *)dds3FindWorldObjectNodeByKey(world, id, 6);

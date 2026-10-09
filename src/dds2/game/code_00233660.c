@@ -22,6 +22,7 @@
 #include "file.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_object_stream.h"
+#include "dds3obj.h"
 
 
 
@@ -3276,8 +3277,6 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
     return world;
 }
 
-extern EffWorldNode *dds3FindWorldObjectNodeByKey(void *world, s32 a, s32 b);
-
 extern void *dds3SetSlotByKind(s32 obj, void *slot);
 
 extern void dds3RegisterObjectInHandlerIndex(void *obj);
@@ -3306,8 +3305,6 @@ s32 mdlSpawnLinkedCameraSlotViewerObject(s32 slotKind, s32 resource) {
 }
 
 
-
-extern EffWorldNode *dds3FindWorldObjectNodeByKey(void *world, s32 id, s32 kind);
 
 extern void effObjSetInnerFirstVec(EffWorldNode *obj, void *vec);
 

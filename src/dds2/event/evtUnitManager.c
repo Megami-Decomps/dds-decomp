@@ -2,6 +2,7 @@
 #include "dds3_path.h"
 #include "evt_unit.h"
 #include "eff_transform.h"
+#include "dds3obj.h"
 #include "mdl.h"
 #include "sdf_draw.h"
 #include "pcp_vu0.h"
@@ -72,7 +73,6 @@ extern void mdlBroadcastMasked(MdlCtx *, u32);
 extern f32 D_00438A48, D_00438A4C;
 extern void *dds3GetWorldObject(void);
 extern s32 dds3ContainsNodeInObjectChain(EffWorldNode *, s32, EffWorldNode *);
-extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *, u32, s32);
 extern s32 sdfLoadMapRecordPositionVector(SdfModel *, s32);
 extern void mdlLoadPrimaryVectorVU(MdlCtx *);
 extern void func_00107D08(void);

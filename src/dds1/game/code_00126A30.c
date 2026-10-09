@@ -638,7 +638,6 @@ extern void dds3SetWorldNodeValue(struct EffWorldNode *node, u32 value);
 extern void effObjSetActiveId(EffWorldNode *, s32);
 extern s32 fldParseRoomNumberFromName(const char *);
 extern void effObjSetRoomNumber(EffWorldNode *, u32);
-extern void *dds3FindWorldObjectNodeByKey(void *, u32, s32);
 extern void dds3SetSlotByKind(void *, void *);
 extern void func_00111F40(void *);
 extern void fldSetRecordValueById(s32, s32);

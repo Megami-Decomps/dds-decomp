@@ -14,7 +14,6 @@ extern void dds3ReleaseObjectBaseResources(EffWorldNode *object);
 
 extern void *dds3GetWorldSecondaryObject(void);
 
-extern EffWorldNode *dds3FindWorldObjectNodeByKey(EffWorldNode *object, u32 key, s32 kind);
 extern ObjBase *dds3GetEffectObjectModelHolder(EffWorldNode *object);
 
 extern u32 effObjOpacityPassEnabled;
